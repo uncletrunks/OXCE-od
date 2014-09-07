@@ -26,7 +26,12 @@ namespace OpenXcom
  * type of armor.
  * @param type String defining the type.
  */
-Armor::Armor(const std::string &type) : _type(type), _spriteSheet(""), _spriteInv(""), _corpseGeo(""), _storeItem(""), _corpseBattle(), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0), _drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _deathFrames(3), _constantAnimation(false), _canHoldWeapon(false)
+Armor::Armor(const std::string &type) :
+	_type(type), _spriteSheet(""), _spriteInv(""), _corpseGeo(""), _storeItem(""), _corpseBattle(),
+	_frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
+	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0),
+	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false),
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -98,6 +103,29 @@ void Armor::load(const YAML::Node &node)
 	else
 	{
 		_canHoldWeapon = false;
+	}
+	if (_size != 1)
+	{
+		_fearImmune = 1;
+		_bleedImmune = 1;
+		_painImmune = 1;
+		_zombiImmune = 1;
+	}
+	if (node["fearImmune"])
+	{
+		_fearImmune = node["fearImmune"].as<bool>();
+	}
+	if (node["bleedImmune"])
+	{
+		_bleedImmune = node["bleedImmune"].as<bool>();
+	}
+	if (node["painImmune"])
+	{
+		_painImmune = node["painImmune"].as<bool>();
+	}
+	if (node["zombiImmune"] && _size == 1) //Big units are always immune, because game we don't have 2x2 unit zombie
+	{
+		_zombiImmune = node["zombiImmune"].as<bool>();
 	}
 }
 
@@ -227,7 +255,7 @@ int Armor::getSize() const
  * @param dt The damageType.
  * @return The damage modifier 0->1.
  */
-float Armor::getDamageModifier(ItemDamageType dt)
+float Armor::getDamageModifier(ItemDamageType dt) const
 {
 	return _damageModifier[(int)dt];
 }
@@ -235,7 +263,7 @@ float Armor::getDamageModifier(ItemDamageType dt)
 /** Gets the loftempSet.
  * @return The loftempsSet.
  */
-std::vector<int> Armor::getLoftempsSet() const
+const std::vector<int>& Armor::getLoftempsSet() const
 {
 	return _loftempsSet;
 }
@@ -244,7 +272,7 @@ std::vector<int> Armor::getLoftempsSet() const
   * Gets pointer to the armor's stats.
   * @return stats Pointer to the armor's stats.
   */
-UnitStats *Armor::getStats()
+const UnitStats *Armor::getStats() const
 {
 	return &_stats;
 }
@@ -253,7 +281,7 @@ UnitStats *Armor::getStats()
  * Gets the armor's weight.
  * @return the weight of the armor.
  */
-int Armor::getWeight()
+int Armor::getWeight() const
 {
 	return _weight;
 }
@@ -262,26 +290,68 @@ int Armor::getWeight()
  * Gets number of death frames.
  * @return number of death frames.
  */
-int Armor::getDeathFrames()
+int Armor::getDeathFrames() const
 {
 	return _deathFrames;
 }
 
-/*
+/**
  * Gets if armor uses constant animation.
  * @return if it uses constant animation
  */
-bool Armor::getConstantAnimation()
+bool Armor::getConstantAnimation() const
 {
 	return _constantAnimation;
 }
 
-/*
+/**
  * Gets if armor can hold weapon.
  * @return if it can hold weapon
  */
-bool Armor::getCanHoldWeapon()
+bool Armor::getCanHoldWeapon() const
 {
 	return _canHoldWeapon;
 }
+
+/**
+ * Gets how armor react to fear.
+ * @param def Default value.
+ * @return Can ignored fear?
+ */
+bool Armor::getFearImmune(bool def) const
+{
+	return _fearImmune != -1 ? _fearImmune : def;
+}
+
+/**
+ * Gets how armor react to bleeding.
+ * @param def Default value.
+ * @return Can ignore bleed?
+ */
+bool Armor::getBleedImmune(bool def) const
+{
+	return _bleedImmune != -1 ? _bleedImmune : def;
+}
+
+/**
+ * Gets how armor react to inflicted pain.
+ * @param def
+ * @return Can ignore pain?
+ */
+bool Armor::getPainImmune(bool def) const
+{
+	return _painImmune != -1 ? _painImmune : def;
+}
+
+/**
+ * Gets how armor react to zombification.
+ * @param def Default value.
+ * @return Can't be turn to zombie?
+ */
+bool Armor::getZombiImmune(bool def) const
+{
+	return _zombiImmune != -1 ? _zombiImmune : def;
+}
+
+
 }

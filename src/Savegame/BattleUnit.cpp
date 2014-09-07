@@ -979,7 +979,7 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 
 	if (power > 0)
 	{
-		if (_armor->getSize() == 1 || type->IgnorePainImmunity)
+		if (!_armor->getPainImmune() || type->IgnorePainImmunity)
 		{
 			// conventional weapons can cause additional stun damage
 			_stunlevel += int(RNG::generate(0, power) * type->ToStun);
@@ -2249,7 +2249,7 @@ int BattleUnit::getMoveSound() const
  */
 bool BattleUnit::isWoundable() const
 {
-	return (_type=="SOLDIER" || (Options::alienBleeding && _faction != FACTION_PLAYER && _armor->getSize() == 1));
+	return !_armor->getBleedImmune(!(_type=="SOLDIER" || (Options::alienBleeding && _faction != FACTION_PLAYER)));
 }
 /**
  * Get whether the unit is affected by morale loss.
@@ -2258,7 +2258,7 @@ bool BattleUnit::isWoundable() const
  */
 bool BattleUnit::isFearable() const
 {
-	return (_armor->getSize() == 1);
+	return !_armor->getFearImmune();
 }
 
 /**
