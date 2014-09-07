@@ -68,7 +68,7 @@ private:
 	bool _flatRate, _arcingShot;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
-	bool _skillApplied, _LOSRequired;
+	bool _skillApplied, _LOSRequired, _underwaterOnly;
 	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound;
 	float _strengthBonus, _psiBonus, _psiSkillBonus, _psiStrengthBonus;
 public:
@@ -220,6 +220,8 @@ public:
 	int getMeleeAnimation() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
+	/// Is this item restricted to use underwater?
+	bool isWaterOnly() const;
 	/// Get additional power form unit statistics
 	int getBonusPower(UnitStats* stats) const;
 };
