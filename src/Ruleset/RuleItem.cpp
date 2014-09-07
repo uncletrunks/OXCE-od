@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "Unit.h"
 #include "RuleItem.h"
 #include "RuleInventory.h"
 #include "../Engine/SurfaceSet.h"
@@ -28,14 +29,16 @@ namespace OpenXcom
  * Creates a blank ruleset for a certain type of item.
  * @param type String defining the type.
  */
-RuleItem::RuleItem(const std::string &type) : _type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
-											_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _compatibleAmmo(), _damageType(),
-											_accuracyAuto(0), _accuracySnap(0), _accuracyAimed(0), _tuAuto(0), _tuSnap(0), _tuAimed(0), _clipSize(0), _accuracyMelee(0), _tuMelee(0),
-											_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
-											_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
-											_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
-											_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0), _zombieUnit(""),
-											_strengthApplied(false), _skillApplied(true), _LOSRequired(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1)
+RuleItem::RuleItem(const std::string &type) :
+	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
+	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _compatibleAmmo(), _damageType(),
+	_accuracyAuto(0), _accuracySnap(0), _accuracyAimed(0), _tuAuto(0), _tuSnap(0), _tuAimed(0), _clipSize(0), _accuracyMelee(0), _tuMelee(0),
+	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
+	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
+	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
+	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0), _zombieUnit(""),
+	_skillApplied(true), _LOSRequired(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1),
+	_strengthBonus(0.0f), _psiBonus(0.0f), _psiSkillBonus(0.0f), _psiStrengthBonus(0.0f)
 {
 }
 
@@ -187,10 +190,21 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_autoShots = node["autoShots"].as<int>(_autoShots);
 	_shotgunPellets = node["shotgunPellets"].as<int>(_shotgunPellets);
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
-	_strengthApplied = node["strengthApplied"].as<bool>(_strengthApplied);
 	_skillApplied = node["skillApplied"].as<bool>(_skillApplied);
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
+
+	if (node["strengthApplied"].as<bool>(false))
+	{
+		_strengthBonus = 1.0f;
+	}
+	if (node["damageBonus"])
+	{
+		_strengthBonus = node["damageBonus"]["strength"].as<float>(_strengthBonus);
+		_psiBonus = node["damageBonus"]["psi"].as<float>(_psiBonus);
+		_psiSkillBonus = node["damageBonus"]["psiSkill"].as<float>(_psiSkillBonus);
+		_psiStrengthBonus = node["damageBonus"]["psiStrength"].as<float>(_psiStrengthBonus);
+	}
 	if (!_listOrder)
 	{
 		_listOrder = listOrder;
@@ -821,15 +835,6 @@ std::string RuleItem::getZombieUnit() const
 }
 
 /**
- * Is strength applied to the damage of this weapon?
- * @return If we should apply strength.
- */
-bool RuleItem::isStrengthApplied() const
-{
-	return _strengthApplied;
-}
-
-/**
  * Is skill applied to the accuracy of this weapon?
  * this only applies to melee weapons.
  * @return If we should apply skill.
@@ -883,4 +888,15 @@ int RuleItem::getMeleeAnimation() const
 {
 	return _meleeAnimation;
 }
+
+int RuleItem::getBonusPower(UnitStats* stats) const
+{
+	int power = 0;
+	power += stats->strength * _strengthBonus;
+	power += stats->psiSkill * stats->psiStrength * _psiBonus;
+	power += stats->psiSkill * _psiSkillBonus;
+	power += stats->psiStrength * _psiStrengthBonus;
+	return power;
+}
+
 }
