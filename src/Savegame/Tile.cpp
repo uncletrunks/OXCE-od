@@ -800,15 +800,8 @@ void Tile::prepareNewTurn(Ruleset *ruleset)
 			// no fire: must be smoke
 			else
 			{
-				// aliens don't breathe
-				if (_unit->getOriginalFaction() != FACTION_HOSTILE)
-				{
-					// try to knock this guy out.
-					if (_unit->getArmor()->getDamageModifier(DT_SMOKE) > 0.0 && _unit->getArmor()->getSize() == 1)
-					{
-						_unit->damage(Position(0,0,0), (_smoke / 4) + 1, ruleset->getDamageType(DT_SMOKE));
-					}
-				}
+				// try to knock this guy out.
+				_unit->damage(Position(0,0,0), (_smoke / 4) + 1, ruleset->getDamageType(DT_SMOKE));
 			}
 		}
 	}

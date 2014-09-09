@@ -3873,7 +3873,7 @@ armors:
       - 1.0
       - 1.2
       - 1.6
-      - 1.0
+      - 0.0
     loftempsSet: [ 2 ]
   - type: FLOATER_ARMOR0
     spriteSheet: FLOATER.PCK
@@ -3895,7 +3895,7 @@ armors:
       - 1.0
       - 1.2
       - 1.6
-      - 1.0
+      - 0.0
     loftempsSet: [ 3 ]
   - type: FLOATER_ARMOR1
     spriteSheet: FLOATER.PCK
@@ -3917,7 +3917,7 @@ armors:
       - 1.0
       - 1.2
       - 1.6
-      - 1.0
+      - 0.0
     loftempsSet: [ 3 ]
   - type: FLOATER_ARMOR2
     spriteSheet: FLOATER.PCK
@@ -3939,7 +3939,7 @@ armors:
       - 1.0
       - 1.2
       - 1.6
-      - 1.0
+      - 0.0
     loftempsSet: [ 3 ]
   - type: CYBERDISC_ARMOR
     spriteSheet: CYBER.PCK
@@ -4392,7 +4392,7 @@ armors:
       - 1.0
       - 1.2
       - 1.6
-      - 1.0
+      - 0.0
     loftempsSet: [ 3 ]
 soldiers:
   - type: XCOM
@@ -9520,7 +9520,7 @@ interfaces:
       - id: numAmmoRight
         color: 2
       - id: textTooltip
-        color: 128
+        color: -1
       - id: buttonReserveNone
         color: 67
       - id: buttonReserveSnap

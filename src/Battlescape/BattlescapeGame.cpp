@@ -993,6 +993,19 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, bool justChecking)
 		effectiveTuReserved = BA_AIMEDSHOT;
 	}
 	const int tuKneel = (_save->getKneelReserved() && !bu->isKneeled()  && bu->getType() == "SOLDIER") ? 4 : 0;
+	// no aimed shot available? revert to none.
+	if (bu->getActionTUs(effectiveTuReserved, slowestWeapon) == 0 && effectiveTuReserved == BA_AIMEDSHOT)
+	{
+		if (tuKneel > 0)
+		{
+			effectiveTuReserved = BA_NONE;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 	if ((effectiveTuReserved != BA_NONE || _save->getKneelReserved()) &&
 		tu + tuKneel + bu->getActionTUs(effectiveTuReserved, slowestWeapon) > bu->getTimeUnits() &&
 		(tuKneel + bu->getActionTUs(effectiveTuReserved, slowestWeapon) <= bu->getTimeUnits() || justChecking))
@@ -1009,7 +1022,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, bool justChecking)
 			}
 			else
 			{
-				switch (effectiveTuReserved)
+				switch (_save->getTUReserved())
 				{
 				case BA_SNAPSHOT: _parentState->warning("STR_TIME_UNITS_RESERVED_FOR_SNAP_SHOT"); break;
 				case BA_AUTOSHOT: _parentState->warning("STR_TIME_UNITS_RESERVED_FOR_AUTO_SHOT"); break;
