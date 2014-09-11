@@ -31,6 +31,7 @@
 #include "../Battlescape/BattlescapeGame.h"
 #include "../Battlescape/BattleAIState.h"
 #include "Soldier.h"
+#include "../Ruleset/Ruleset.h"
 #include "../Ruleset/Armor.h"
 #include "../Ruleset/Unit.h"
 #include "../Engine/RNG.h"
@@ -52,7 +53,7 @@ BattleUnit::BattleUnit(Soldier *soldier, UnitFaction faction) : _faction(faction
 																_verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
 																_dontReselect(false), _fire(0), _currentAIState(0), _visible(false), _cacheInvalid(true),
 																_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
-																_motionPoints(0), _kills(0), _hitByFire(false), _moraleRestored(0), _coverReserve(0), _charging(0),
+																_motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0),
 																_turnsSinceSpotted(255), _geoscapeSoldier(soldier), _unitRules(0), _rankInt(-1), _turretType(-1), _hidingForTurn(false)
 {
 	_name = soldier->getName(true);
@@ -124,7 +125,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 																						_toDirectionTurret(0),  _verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0),
 																						_fallPhase(0), _kneeled(false), _floating(false), _dontReselect(false), _fire(0), _currentAIState(0),
 																						_visible(false), _cacheInvalid(true), _expBravery(0), _expReactions(0), _expFiring(0),
-																						_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _kills(0), _hitByFire(false),
+																						_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0),
 																						_moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 																						_armor(armor), _geoscapeSoldier(0),  _unitRules(unit), _rankInt(-1),
 																						_turretType(-1), _hidingForTurn(false)
@@ -2761,6 +2762,53 @@ std::string BattleUnit::getMeleeWeapon()
 		return getItem("STR_LEFT_HAND")->getRules()->getType();
 	}
 	return _unitRules->getMeleeWeapon();
+}
+
+/**
+ * Set fire damage form environment.
+ * @param damage
+ */
+void BattleUnit::setEnviFire(int damage)
+{
+	if (_fireMaxHit < damage) _fireMaxHit = damage;
+}
+
+/**
+ * Set smoke damage form environment.
+ * @param damage
+ */
+void BattleUnit::setEnviSmoke(int damage)
+{
+	if (_smokeMaxHit < damage) _smokeMaxHit = damage;
+}
+
+/**
+ * Calculate smoke and fire damage form environment.
+ */
+void BattleUnit::calculateEnviDamage(Ruleset *ruleset)
+{
+	if (_fireMaxHit)
+	{
+		_hitByFire = true;
+		damage(Position(0, 0, 0), _fireMaxHit, ruleset->getDamageType(DT_IN));
+		// try to set the unit on fire.
+		if (RNG::percent(40 * getArmor()->getDamageModifier(DT_IN)))
+		{
+			int burnTime = RNG::generate(0, int(5 * getArmor()->getDamageModifier(DT_IN)));
+			if (getFire() < burnTime)
+			{
+				setFire(burnTime);
+			}
+		}
+	}
+
+	if (_smokeMaxHit)
+	{
+		damage(Position(0,0,0), _smokeMaxHit, ruleset->getDamageType(DT_SMOKE));
+	}
+
+	_fireMaxHit = 0;
+	_smokeMaxHit = 0;
 }
 
 }

@@ -88,6 +88,8 @@ private:
 	int _kills;
 	int _faceDirection; // used only during strafeing moves
 	bool _hitByFire;
+	int _fireMaxHit;
+	int _smokeMaxHit;
 	int _moraleRestored;
 	int _coverReserve;
 	BattleUnit *_charging;
@@ -435,7 +437,12 @@ public:
 	bool getFloorAbove();
 	/// Get the name of any melee weapon we may be carrying, or a built in one.
 	std::string getMeleeWeapon();
-
+	/// Set fire damage form environment.
+	void setEnviFire(int damage);
+	/// Set smoke damage form environment.
+	void setEnviSmoke(int damage);
+	/// Calculate smoke and fire damage form environment.
+	void calculateEnviDamage(Ruleset *ruleset);
 };
 
 }

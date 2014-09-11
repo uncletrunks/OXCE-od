@@ -28,7 +28,6 @@
 #include "BattleItem.h"
 #include "../Ruleset/RuleItem.h"
 #include "../Ruleset/Armor.h"
-#include "../Ruleset/Ruleset.h"
 #include "SerializationHelper.h"
 
 namespace OpenXcom
@@ -766,7 +765,7 @@ int Tile::getTopItemSprite()
  * average out any smoke added by the number of overlaps.
  * apply fire/smoke damage to units as applicable.
  */
-void Tile::prepareNewTurn(Ruleset *ruleset)
+void Tile::prepareNewTurn()
 {
 	// we've recieved new smoke in this turn, but we're not on fire, average out the smoke.
 	if ( _overlaps != 0 && _smoke != 0 && _fire == 0)
@@ -780,28 +779,14 @@ void Tile::prepareNewTurn(Ruleset *ruleset)
 		{
 			if (_fire)
 			{
-				// this is how we avoid hitting the same unit multiple times.
-				if (_unit->getArmor()->getSize() == 1 || !_unit->tookFireDamage())
-				{
-					_unit->toggleFireDamage();
-					// _smoke becomes our damage value
-					_unit->damage(Position(0, 0, 0), _smoke, ruleset->getDamageType(DT_IN));
-					// try to set the unit on fire.
-					if (RNG::percent(40 * _unit->getArmor()->getDamageModifier(DT_IN)))
-					{
-						int burnTime = RNG::generate(0, int(5 * _unit->getArmor()->getDamageModifier(DT_IN)));
-						if (_unit->getFire() < burnTime)
-						{
-							_unit->setFire(burnTime);
-						}
-					}
-				}
+				// _smoke becomes our damage value
+				_unit->setEnviFire(_smoke);
 			}
 			// no fire: must be smoke
 			else
 			{
 				// try to knock this guy out.
-				_unit->damage(Position(0,0,0), (_smoke / 4) + 1, ruleset->getDamageType(DT_SMOKE));
+				_unit->setEnviSmoke(_smoke / 4 + 1);
 			}
 		}
 	}
