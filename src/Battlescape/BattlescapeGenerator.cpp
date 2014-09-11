@@ -1770,7 +1770,6 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTe
  */
 void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int segment)
 {
-	int id = 0;
 	char value[24];
 	std::ostringstream filename;
 	filename << "ROUTES/" << mapblock->getName() << ".RMP";
@@ -1786,25 +1785,35 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 
 	while (mapFile.read((char*)&value, sizeof(value)))
 	{
-		if( (int)value[0] < mapblock->getSizeY() && (int)value[1] < mapblock->getSizeX() && (int)value[2] < _mapsize_z )
+		int pos_x = value[1];
+		int pos_y = value[0];
+		int pos_z = value[2];
+		if (pos_x < mapblock->getSizeX() && pos_y < mapblock->getSizeY() && pos_z < _mapsize_z )
 		{
-			Node *node = new Node(nodeOffset + id, Position(xoff + (int)value[1], yoff + (int)value[0], mapblock->getSizeZ() - 1 - (int)value[2]), segment, (int)value[19], (int)value[20], (int)value[21], (int)value[22], (int)value[23]);
+			Position pos = Position(xoff + pos_x, yoff + pos_y, mapblock->getSizeZ() - 1 - pos_z);
+			int type     = value[19];
+			int rank     = value[20];
+			int flags    = value[21];
+			int reserved = value[22];
+			int priority = value[23];
+			Node *node = new Node(_save->getNodes()->size(), pos, segment, type, rank, flags, reserved, priority);
 			for (int j = 0; j < 5; ++j)
 			{
 				int connectID = (int)((unsigned char)value[4 + j * 3]);
-				if (connectID != 255)
+				// don't touch special values
+				if (connectID <= 250)
 				{
 					connectID += nodeOffset;
 				}
+				// 255/-1 = unused, 254/-2 = north, 253/-3 = east, 252/-4 = south, 251/-5 = west
 				else
 				{
-					connectID = -1;
+					connectID -= 256;
 				}
 				node->getNodeLinks()->push_back(connectID);
 			}
 			_save->getNodes()->push_back(node);
 		}
-		id++;
 	}
 
 	if (!mapFile.eof())

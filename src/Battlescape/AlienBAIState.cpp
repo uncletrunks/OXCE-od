@@ -1991,7 +1991,11 @@ void AlienBAIState::selectMeleeOrRanged()
 	}
 
 	int meleeOdds = 10;
-	int dmg = meleeWeapon->getPower() * _aggroTarget->getArmor()->getDamageModifier(meleeWeapon->getDamageType()->ResistType);
+
+	int dmg = meleeWeapon->getPower();
+	dmg += meleeWeapon->getBonusPower(_unit->getStats());
+	dmg *= _aggroTarget->getArmor()->getDamageModifier(meleeWeapon->getDamageType()->ResistType);
+
 	if (dmg > 50)
 	{
 		meleeOdds += (dmg - 50) / 2;

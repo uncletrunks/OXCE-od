@@ -69,7 +69,7 @@ private:
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
 	bool _skillApplied, _LOSRequired, _underwaterOnly;
-	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound;
+	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType;
 	float _strengthBonus, _psiBonus, _psiSkillBonus, _psiStrengthBonus;
 public:
 	/// Creates a blank item ruleset.
@@ -224,6 +224,8 @@ public:
 	bool isWaterOnly() const;
 	/// Get additional power form unit statistics
 	int getBonusPower(UnitStats* stats) const;
+	/// Get the associated special type of this item.
+	int getSpecialType() const;
 };
 
 }
