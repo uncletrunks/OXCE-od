@@ -70,7 +70,7 @@ private:
 	std::string _zombieUnit;
 	bool _skillApplied, _LOSRequired, _underwaterOnly;
 	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType;
-	float _strengthBonus, _psiBonus, _psiSkillBonus, _psiStrengthBonus;
+	float _strengthBonus, _psiBonus, _psiSkillBonus, _psiStrengthBonus, _throwBonus;
 public:
 	/// Creates a blank item ruleset.
 	RuleItem(const std::string &type);

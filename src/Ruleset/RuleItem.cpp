@@ -38,7 +38,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0), _zombieUnit(""),
 	_skillApplied(true), _LOSRequired(false), _underwaterOnly(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1),
-	_strengthBonus(0.0f), _psiBonus(0.0f), _psiSkillBonus(0.0f), _psiStrengthBonus(0.0f)
+	_strengthBonus(0.0f), _psiBonus(0.0f), _psiSkillBonus(0.0f), _psiStrengthBonus(0.0f), _throwBonus(0.0f)
 {
 }
 
@@ -200,12 +200,13 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	{
 		_strengthBonus = 1.0f;
 	}
-	if (node["damageBonus"])
+	if (const YAML::Node &d = node["damageBonus"])
 	{
-		_strengthBonus = node["damageBonus"]["strength"].as<float>(_strengthBonus);
-		_psiBonus = node["damageBonus"]["psi"].as<float>(_psiBonus);
-		_psiSkillBonus = node["damageBonus"]["psiSkill"].as<float>(_psiSkillBonus);
-		_psiStrengthBonus = node["damageBonus"]["psiStrength"].as<float>(_psiStrengthBonus);
+		_strengthBonus = d["strength"].as<float>(_strengthBonus);
+		_psiBonus = d["psi"].as<float>(_psiBonus);
+		_psiSkillBonus = d["psiSkill"].as<float>(_psiSkillBonus);
+		_psiStrengthBonus = d["psiStrength"].as<float>(_psiStrengthBonus);
+		_throwBonus = d["throw"].as<float>(_throwBonus);
 	}
 
 	if (!_listOrder)
@@ -913,6 +914,7 @@ int RuleItem::getBonusPower(UnitStats* stats) const
 	power += stats->psiSkill * stats->psiStrength * _psiBonus;
 	power += stats->psiSkill * _psiSkillBonus;
 	power += stats->psiStrength * _psiStrengthBonus;
+	power += stats->throwing * _throwBonus;
 	return power;
 }
 
