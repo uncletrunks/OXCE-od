@@ -73,7 +73,10 @@ namespace OpenXcom
 /**
  * Creates a ruleset with blank sets of rules.
  */
-Ruleset::Ruleset() : _costSoldier(0), _costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0), _alienFuel(""), _startingTime(6, 1, 1, 1999, 12, 0, 0), _modIndex(0), _facilityListOrder(0), _craftListOrder(0), _itemListOrder(0), _researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0)
+Ruleset::Ruleset() :
+	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _costSoldier(0), _costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
+	_alienFuel(""), _startingTime(6, 1, 1, 1999, 12, 0, 0), _modIndex(0), _facilityListOrder(0), _craftListOrder(0), _itemListOrder(0),
+	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0)
 {
 	_globe = new RuleGlobe();
 
@@ -420,6 +423,8 @@ void Ruleset::loadFile(const std::string &filename)
 	{
 		_startingTime.load(doc["startingTime"]);
 	}
+	_maxViewDistance = doc["maxViewDistance"].as<int>(_maxViewDistance);
+	_maxDarknessToSeeUnits = doc["maxDarknessToSeeUnits"].as<int>(_maxDarknessToSeeUnits);
  	_costSoldier = doc["costSoldier"].as<int>(_costSoldier);
  	_costEngineer = doc["costEngineer"].as<int>(_costEngineer);
  	_costScientist = doc["costScientist"].as<int>(_costScientist);
