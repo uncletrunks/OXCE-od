@@ -22,15 +22,17 @@
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
+#include "RuleDamageType.h"
+#include "Unit.h"
 
 namespace OpenXcom
 {
 
-enum ItemDamageType { DT_NONE, DT_AP, DT_IN, DT_HE, DT_LASER, DT_PLASMA, DT_STUN, DT_MELEE, DT_ACID, DT_SMOKE };
 enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMITYGRENADE, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE, BT_PSIAMP, BT_FLARE, BT_CORPSE };
 
 class SurfaceSet;
 class Surface;
+class BattleUnit;
 
 /**
  * Represents a specific type of item.
@@ -49,7 +51,7 @@ private:
 	int _fireSound, _hitSound, _hitAnimation;
 	int _power;
 	std::vector<std::string> _compatibleAmmo;
-	ItemDamageType _damageType;
+	RuleDamageType _damageType;
 	int _accuracyAuto, _accuracySnap, _accuracyAimed, _tuAuto, _tuSnap, _tuAimed;
 	int _clipSize, _accuracyMelee, _tuMelee;
 	BattleType _battleType;
@@ -62,19 +64,20 @@ private:
 	int _armor;
 	int _turretType;
 	bool _recover, _liveAlien;
-	int _blastRadius, _attraction;
+	int _attraction;
 	bool _flatRate, _arcingShot;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
-	bool _strengthApplied, _skillApplied, _LOSRequired, _underwaterOnly;
+	bool _skillApplied, _LOSRequired, _underwaterOnly;
 	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType;
+	float _strengthBonus, _psiBonus, _psiSkillBonus, _psiStrengthBonus;
 public:
 	/// Creates a blank item ruleset.
 	RuleItem(const std::string &type);
 	/// Cleans up the item ruleset.
 	~RuleItem();
 	/// Loads item data from YAML.
-	void load(const YAML::Node& node, int modIndex, int listIndex);
+	void load(const YAML::Node& node, int modIndex, int listIndex, const std::vector<RuleDamageType*> &damageTypes);
 	/// Gets the item's type.
 	std::string getType() const;
 	/// Gets the item's name.
@@ -132,7 +135,7 @@ public:
 	/// Gets list of compatible ammo.
 	std::vector<std::string> *getCompatibleAmmo();
 	/// Gets the item's damage type.
-	ItemDamageType getDamageType() const;
+	const RuleDamageType *getDamageType() const;
 	/// Gets the item's type.
 	BattleType getBattleType() const;
 	/// Gets the item's inventory width.
@@ -205,8 +208,6 @@ public:
 	int getShotgunPellets() const;
 	/// Gets the weapon's zombie unit.
 	std::string getZombieUnit() const;
-	/// Is strength applied to the damage of this weapon?
-	bool isStrengthApplied() const;
 	/// Is skill applied to the accuracy of this weapon?
 	bool isSkillApplied() const;
 	/// What sound does this weapon make when you swing this at someone?
@@ -223,7 +224,8 @@ public:
 	const bool isWaterOnly() const;
 	/// Get the associated special type of this item.
 	const int getSpecialType() const;
-
+	/// Get additional power form unit statistics
+	int getBonusPower(UnitStats* stats) const;
 };
 
 }

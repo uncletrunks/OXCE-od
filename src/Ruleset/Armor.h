@@ -24,6 +24,7 @@
 #include <yaml-cpp/yaml.h>
 #include "MapData.h"
 #include "Unit.h"
+#include "RuleDamageType.h"
 
 namespace OpenXcom
 {
@@ -35,8 +36,6 @@ namespace OpenXcom
  */
 class Armor
 {
-public:	
-	static const int DAMAGE_TYPES = 10;
 private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem;
 	std::vector<std::string> _corpseBattle;
@@ -49,6 +48,7 @@ private:
 	int _deathFrames;
 	bool _constantAnimation;
 	bool _canHoldWeapon;
+	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -83,21 +83,29 @@ public:
 	/// Gets whether this is a normal or big unit.
 	int getSize() const;
 	/// Gets damage modifier.
-	float getDamageModifier(ItemDamageType dt);
+	float getDamageModifier(ItemDamageType dt) const;
 	/// Gets loftempSet
-	std::vector<int> getLoftempsSet() const;
+	const std::vector<int> &getLoftempsSet() const;
 	/// Gets the armor's stats.
-	UnitStats *getStats();
+	const UnitStats *getStats() const;
 	/// Gets the armor's weight.
-	int getWeight();
+	int getWeight() const;
 	/// Gets number of death frames.
-	int getDeathFrames();
+	int getDeathFrames() const;
 	/// Gets if armor uses constant animation.
-	bool getConstantAnimation();
+	bool getConstantAnimation() const;
 	/// Gets if armor can hold weapon.
-	bool getCanHoldWeapon();
+	bool getCanHoldWeapon() const;
 	/// Gets max view distance at dark in BattleScape.
 	int getVisibilityAtDark() const;
+	/// Gets how armor react to fear.
+	bool getFearImmune(bool def = false) const;
+	/// Gets how armor react to bleeding.
+	bool getBleedImmune(bool def = false) const;
+	/// Gets how armor react to inflicted pain.
+	bool getPainImmune(bool def = false) const;
+	/// Gets how armor react to zombification.
+	bool getZombiImmune(bool def = false) const;
 };
 
 }
