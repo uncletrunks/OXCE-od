@@ -104,6 +104,7 @@ protected:
 	std::vector<StatString*> _statStrings;
 	std::vector<RuleDamageType*> _damageTypes;
 	RuleGlobe *_globe;
+	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costSoldier, _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	std::string _alienFuel;
 	YAML::Node _startingBase;
@@ -190,6 +191,10 @@ public:
 	std::map<std::string, RuleInventory*> *getInventories();
 	/// Gets the ruleset for a specific inventory.
 	RuleInventory *getInventory(const std::string &id) const;
+	/// Gets max view distance in BattleScape.
+	inline int getMaxViewDistance() const {return _maxViewDistance;}
+	/// Gets threshold of darkness for LoS calculation.
+	inline int getMaxDarknessToSeeUnits() const {return _maxDarknessToSeeUnits;}
 	/// Get basic damage type
 	const RuleDamageType *getDamageType(ItemDamageType type) const;
 	/// Gets the cost of a soldier.
