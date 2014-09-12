@@ -3794,7 +3794,6 @@ armors:
     sideArmor: 8
     rearArmor: 5
     underArmor: 2
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0
@@ -3817,7 +3816,6 @@ armors:
     sideArmor: 40
     rearArmor: 30
     underArmor: 30
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0
@@ -3840,7 +3838,6 @@ armors:
     sideArmor: 80
     rearArmor: 70
     underArmor: 60
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0
@@ -3864,7 +3861,6 @@ armors:
     rearArmor: 80
     underArmor: 70
     movementType: 1
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0
@@ -4056,7 +4052,6 @@ armors:
     underArmor: 60
     drawingRoutine: 2
     size: 2
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0
@@ -4084,7 +4079,6 @@ armors:
     constantAnimation: true
     movementType: 1
     size: 2
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0
@@ -4106,7 +4100,6 @@ armors:
     rearArmor: 0
     underArmor: 0
     drawingRoutine: 4
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0
@@ -4128,7 +4121,6 @@ armors:
     rearArmor: 0
     underArmor: 0
     drawingRoutine: 4
-    visibilityAtDark: 9
     damageModifier:
       - 1.0
       - 1.0

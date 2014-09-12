@@ -29,7 +29,7 @@ namespace OpenXcom
 Armor::Armor(const std::string &type) :
 	_type(type), _spriteSheet(""), _spriteInv(""), _corpseGeo(""), _storeItem(""), _corpseBattle(),
 	_frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
-	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(20),
+	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false),
 	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1)
 {
