@@ -1,0 +1,89 @@
+# Makefile for: http://mxe.cc/
+# Get mxe from `git clone -b stable https://github.com/mxe/mxe.git`
+# Build mxe with packs: `make MXE_TARGETS='i686-w64-mingw32' gcc sdl sdl_gfx sdl_image sdl_mixer sdl_ttf boost glew glibmm`
+# Get yaml-cpp form `hg clone https://code.google.com/p/yaml-cpp/` (requare Mercurial)
+TARGET =
+
+# Directories and files
+PATH := ../../mxe/usr/bin:$(PATH)
+YAML_INC = ../../yaml-cpp/include/
+YAML_SRC = ../../yaml-cpp/src/
+OBJDIR = ../obj/
+BINDIR = ../bin/
+SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp $(YAML_SRC)*.cpp $(YAML_SRC)*/*.cpp)
+OBJRES = ../obj/OpenXcom_res.o
+OBJS = $(OBJRES) $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS)))
+RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/openxcomex.ico
+
+
+# Target-specific settings
+CXX = i686-w64-mingw32-gcc
+RC = i686-w64-mingw32-windres
+SDL_CONFIG = ../../mxe/usr/i686-w64-mingw32/bin/sdl-config
+SDL_INC = ../../mxe/usr/i686-w64-mingw32/include/SDL
+SDL_PKG = i686-w64-mingw32-pkg-config
+BIN = OpenXcomEx.exe
+
+# Compiler settings
+CXXFLAGS = -Wall -o3 -s `$(SDL_CONFIG) --cflags` $(addprefix -D,$(TARGET)) -I$(SDL_INC) -I$(YAML_INC) `$(SDL_PKG)  SDL_mixer --cflags `
+LDFLAGS = -s `$(SDL_CONFIG) --libs` -lopengl32 -lshlwapi -lSDLmain -lSDL_gfx -lSDL_mixer -lSDL_image -lstdc++ `$(SDL_PKG) SDL_mixer --libs` `$(SDL_PKG) SDL_image --libs`
+
+# Rules
+all: $(BINDIR)$(BIN)
+
+$(BINDIR)$(BIN): $(OBJS)
+	$(CXX) $(OBJS) $(LDFLAGS) -o $(BINDIR)$(BIN)
+
+$(OBJDIR)%.o:: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Basescape/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+$(OBJDIR)%.o:: Battlescape/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Engine/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Engine/Scalers/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Engine/Adlib/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Geoscape/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Interface/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Menu/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+$(OBJDIR)%.o:: Resource/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+$(OBJDIR)%.o:: Ruleset/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+$(OBJDIR)%.o:: Savegame/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+$(OBJDIR)%.o:: Ufopaedia/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: $(YAML_SRC)%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: $(YAML_SRC)contrib/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJRES):$(RES)
+	$(RC) -o $@ $<
+
+clean:
+	rm -f $(BINDIR)$(BIN) $(OBJDIR)*.o
+
+.PHONY: all clean
+
