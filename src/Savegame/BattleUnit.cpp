@@ -151,7 +151,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	_gender = GENDER_MALE;
 	_faceDirection = -1;
 	_stats += *_armor->getStats();	// armors may modify effective stats
-	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 20;
+	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? 20 : 9;
 	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDarkSq;
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids
