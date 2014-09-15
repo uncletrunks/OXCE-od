@@ -20,6 +20,7 @@
 #define OPENXCOM_CRAFTINFOSTATE_H
 
 #include "../Engine/State.h"
+#include "../Ruleset/RuleCraft.h"
 
 namespace OpenXcom
 {
@@ -39,20 +40,18 @@ class Craft;
 class CraftInfoState : public State
 {
 private:
-	static const int WeaponMax = 4;
-
 	Base *_base;
 	size_t _craftId;
 	Craft *_craft;
 	std::wstring _defaultName;
 	int _weaponNum;
 
-	TextButton *_btnOk, *_btnW[WeaponMax], *_btnCrew, *_btnEquip, *_btnArmor;
+	TextButton *_btnOk, *_btnW[RuleCraft::WeaponMax], *_btnCrew, *_btnEquip, *_btnArmor;
 	Window *_window;
 	TextEdit *_edtCraft;
 	Text *_txtDamage, *_txtFuel;
-	Text *_txtWName[WeaponMax], *_txtWAmmo[WeaponMax];
-	Surface *_sprite, *_weapon[WeaponMax], *_crew, *_equip;
+	Text *_txtWName[RuleCraft::WeaponMax], *_txtWAmmo[RuleCraft::WeaponMax];
+	Surface *_sprite, *_weapon[RuleCraft::WeaponMax], *_crew, *_equip;
 	/// Formats an amount of time.
 	std::wstring formatTime(int time);
 public:

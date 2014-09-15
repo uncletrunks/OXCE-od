@@ -34,7 +34,8 @@ RuleCraft::RuleCraft(const std::string &type) :
 	_sightRange(1696), _transferTime(0), _score(0), _battlescapeTerrainData(0),
 	_spacecraft(false), _listOrder(0), _maxItems(0)
 {
-
+	for (int i = 0; i < WeaponMax; ++ i)
+		_weaponTypes[i] = 0;
 }
 
 /**
@@ -86,7 +87,7 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 		RuleTerrain *rule = new RuleTerrain(terrain["name"].as<std::string>());
 		rule->load(terrain, ruleset);
 		_battlescapeTerrainData = rule;
-		
+
 		if (const YAML::Node &deployment = node["deployment"])
 		{
 			_deployment = deployment.as<std::vector<std::vector<int> > >(_deployment);
@@ -99,6 +100,12 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 		_listOrder = listOrder;
 	}
 	_maxItems = node["maxItems"].as<int>(_maxItems);
+
+	if (const YAML::Node &types = node["weaponTypes"])
+	{
+		for (int i = 0; i < types.size() &&  i < WeaponMax; ++i)
+			_weaponTypes[i] = types[i].as<int>();
+	}
 }
 
 /**
@@ -339,9 +346,18 @@ std::vector<std::vector<int> > &RuleCraft::getDeployment()
  * Gets the item limit for this craft.
  * @return the item limit.
  */
-const int RuleCraft::getMaxItems() const
+int RuleCraft::getMaxItems() const
 {
 	return _maxItems;
+}
+
+/**
+ * Test for possibility of usage of weapon type in weapon slot.
+ * @return the item limit.
+ */
+bool RuleCraft::isValidWeaponSlot(int slot, int weaponType) const
+{
+	return _weaponTypes[slot] == weaponType;
 }
 
 }

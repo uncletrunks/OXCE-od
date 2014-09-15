@@ -31,6 +31,7 @@
 #include "../Ruleset/Ruleset.h"
 #include "../Savegame/Craft.h"
 #include "../Savegame/CraftWeapon.h"
+#include "../Ruleset/RuleCraft.h"
 #include "../Ruleset/RuleCraftWeapon.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Savegame/Base.h"
@@ -109,7 +110,8 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 	for (std::vector<std::string>::const_iterator i = weapons.begin(); i != weapons.end(); ++i)
 	{
 		RuleCraftWeapon *w = _game->getRuleset()->getCraftWeapon(*i);
-		if (_base->getItems()->getItem(w->getLauncherItem()) > 0)
+		RuleCraft *c = _base->getCrafts()->at(_craft)->getRules();
+		if (_base->getItems()->getItem(w->getLauncherItem()) > 0 && c->isValidWeaponSlot(weapon, w->getWeaponType()))
 		{
 			_weapons.push_back(w);
 			std::wostringstream ss, ss2;

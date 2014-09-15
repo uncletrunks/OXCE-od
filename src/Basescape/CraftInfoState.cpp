@@ -63,8 +63,8 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 
 	_craft = _base->getCrafts()->at(_craftId);
 	_weaponNum = _craft->getRules()->getWeapons();
-	if(_weaponNum > WeaponMax)
-		_weaponNum = WeaponMax;
+	if(_weaponNum > RuleCraft::WeaponMax)
+		_weaponNum = RuleCraft::WeaponMax;
 
 	const int top = _weaponNum > 2 ? 42 : 64;
 	const int top_row = 41;
@@ -138,7 +138,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 
 	for(int i = 0; i < _weaponNum; ++i)
 	{
-		const wchar_t num[] = { L'1' + i, 0 };
+		const wchar_t num[] = { wchar_t(L'1' + i), 0 };
 		_btnW[i]->setColor(Palette::blockOffset(13)+10);
 		_btnW[i]->setText(num);
 		_btnW[i]->onMouseClick((ActionHandler)&CraftInfoState::btnWClick);

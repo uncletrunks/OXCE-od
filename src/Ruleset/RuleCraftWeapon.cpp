@@ -25,7 +25,10 @@ namespace OpenXcom
  * Creates a blank ruleset for a certain type of craft weapon.
  * @param type String defining the type.
  */
-	RuleCraftWeapon::RuleCraftWeapon(const std::string &type) : _type(type), _sprite(-1), _sound(-1), _damage(0), _range(0), _accuracy(0), _reloadCautious(0), _reloadStandard(0), _reloadAggressive(0), _ammoMax(0), _rearmRate(1), _projectileSpeed(0), _projectileType(CWPT_CANNON_ROUND)
+RuleCraftWeapon::RuleCraftWeapon(const std::string &type) :
+	_type(type), _sprite(-1), _sound(-1), _damage(0), _range(0), _accuracy(0),
+	_reloadCautious(0), _reloadStandard(0), _reloadAggressive(0), _ammoMax(0),
+	_rearmRate(1), _projectileSpeed(0), _weaponType(0), _projectileType(CWPT_CANNON_ROUND)
 {
 }
 
@@ -52,7 +55,7 @@ void RuleCraftWeapon::load(const YAML::Node &node, int modIndex)
 			_sprite += modIndex;
 	}
 	if (node["sound"])
-	{	
+	{
 		_sound = node["sound"].as<int>(_sound);
 		// 14 entries in GEO.CAT
 		if (_sound > 13)
@@ -70,6 +73,7 @@ void RuleCraftWeapon::load(const YAML::Node &node, int modIndex)
 	_projectileSpeed = node["projectileSpeed"].as<int>(_projectileSpeed);
 	_launcher = node["launcher"].as<std::string>(_launcher);
 	_clip = node["clip"].as<std::string>(_clip);
+	_weaponType = node["weaponType"].as<int>(_weaponType);
 }
 
 /**
@@ -217,6 +221,15 @@ CraftWeaponProjectileType RuleCraftWeapon::getProjectileType() const
 int RuleCraftWeapon::getProjectileSpeed() const
 {
 	return _projectileSpeed;
+}
+
+/**
+ * Gets weapon type used by craft slots.
+ * @return What type of slot is valid to equip this weapon.
+ */
+int RuleCraftWeapon::getWeaponType() const
+{
+	return _weaponType;
 }
 
 }

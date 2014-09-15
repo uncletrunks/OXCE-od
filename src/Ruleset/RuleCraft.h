@@ -37,11 +37,15 @@ class Ruleset;
  */
 class RuleCraft
 {
+public:
+	/// Maximum number of weapon on craft.
+	static const int WeaponMax = 4;
+
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
 	int _sprite;
-	int _fuelMax, _damageMax, _speedMax, _accel, _weapons, _soldiers, _vehicles, _costBuy, _costRent, _costSell;
+	int _fuelMax, _damageMax, _speedMax, _accel, _weapons, _weaponTypes[WeaponMax], _soldiers, _vehicles, _costBuy, _costRent, _costSell;
 	std::string _refuelItem;
 	int _repairRate, _refuelRate, _radarRange, _radarChance, _sightRange, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
@@ -105,7 +109,10 @@ public:
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.
 	std::vector<std::vector<int> > &getDeployment();
-	const int getMaxItems() const;
+	/// Gets maximum numbers of item that craft can carry.
+	int getMaxItems() const;
+	/// Test for possibility of usage of weapon type in weapon slot.
+	bool isValidWeaponSlot(int slot, int weaponType) const;
 };
 
 }

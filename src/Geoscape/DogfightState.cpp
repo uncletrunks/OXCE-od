@@ -247,8 +247,8 @@ DogfightState::DogfightState(Globe *globe, Craft *craft, Ufo *ufo) :
 	_craft->setInDogfight(true);
 	_timeScale = 50 + Options::dogfightSpeed;
 	_weaponNum = _craft->getRules()->getWeapons();
-	if(_weaponNum > WeaponMax)
-		_weaponNum = WeaponMax;
+	if(_weaponNum > RuleCraft::WeaponMax)
+		_weaponNum = RuleCraft::WeaponMax;
 
 	for(int i = 0; i < _weaponNum; ++i)
 		_weaponEnabled[i] = true;
@@ -504,7 +504,7 @@ DogfightState::DogfightState(Globe *globe, Craft *craft, Ufo *ufo) :
 	_moveTimer->onTimer((StateHandler)&DogfightState::move);
 	_moveTimer->start();
 
-	StateHandler fireCallback[WeaponMax] =
+	StateHandler fireCallback[RuleCraft::WeaponMax] =
 	{
 		(StateHandler)&DogfightState::fireWeapon1,
 		(StateHandler)&DogfightState::fireWeapon2,

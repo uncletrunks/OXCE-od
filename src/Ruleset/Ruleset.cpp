@@ -326,7 +326,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	for (YAML::const_iterator i = doc["regions"].begin(); i != doc["regions"].end(); ++i)
+	for (YAML::const_iterator i = doc["regions"].begin(); i != doc["regions"].end(); ++i)
 	{
 		RuleRegion *rule = loadRule(*i, &_regions, &_regionsIndex);
 		if (rule != 0)
@@ -334,7 +334,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	for (YAML::const_iterator i = doc["facilities"].begin(); i != doc["facilities"].end(); ++i)
+	for (YAML::const_iterator i = doc["facilities"].begin(); i != doc["facilities"].end(); ++i)
 	{
 		RuleBaseFacility *rule = loadRule(*i, &_facilities, &_facilitiesIndex);
 		if (rule != 0)
@@ -343,7 +343,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, _modIndex, _facilityListOrder);
 		}
 	}
- 	for (YAML::const_iterator i = doc["crafts"].begin(); i != doc["crafts"].end(); ++i)
+	for (YAML::const_iterator i = doc["crafts"].begin(); i != doc["crafts"].end(); ++i)
 	{
 		RuleCraft *rule = loadRule(*i, &_crafts, &_craftsIndex);
 		if (rule != 0)
@@ -352,7 +352,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, this, _modIndex, _craftListOrder);
 		}
 	}
- 	for (YAML::const_iterator i = doc["craftWeapons"].begin(); i != doc["craftWeapons"].end(); ++i)
+	for (YAML::const_iterator i = doc["craftWeapons"].begin(); i != doc["craftWeapons"].end(); ++i)
 	{
 		RuleCraftWeapon *rule = loadRule(*i, &_craftWeapons, &_craftWeaponsIndex);
 		if (rule != 0)
@@ -360,7 +360,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, _modIndex);
 		}
 	}
- 	for (YAML::const_iterator i = doc["items"].begin(); i != doc["items"].end(); ++i)
+	for (YAML::const_iterator i = doc["items"].begin(); i != doc["items"].end(); ++i)
 	{
 		RuleItem *rule = loadRule(*i, &_items, &_itemsIndex);
 		if (rule != 0)
@@ -369,7 +369,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, _modIndex, _itemListOrder, _damageTypes);
 		}
 	}
- 	for (YAML::const_iterator i = doc["ufos"].begin(); i != doc["ufos"].end(); ++i)
+	for (YAML::const_iterator i = doc["ufos"].begin(); i != doc["ufos"].end(); ++i)
 	{
 		RuleUfo *rule = loadRule(*i, &_ufos, &_ufosIndex);
 		if (rule != 0)
@@ -377,7 +377,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, this);
 		}
 	}
- 	for (YAML::const_iterator i = doc["invs"].begin(); i != doc["invs"].end(); ++i)
+	for (YAML::const_iterator i = doc["invs"].begin(); i != doc["invs"].end(); ++i)
 	{
 		RuleInventory *rule = loadRule(*i, &_invs, &_invsIndex, "id");
 		if (rule != 0)
@@ -386,7 +386,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, _invListOrder);
 		}
 	}
- 	for (YAML::const_iterator i = doc["terrains"].begin(); i != doc["terrains"].end(); ++i)
+	for (YAML::const_iterator i = doc["terrains"].begin(); i != doc["terrains"].end(); ++i)
 	{
 		RuleTerrain *rule = loadRule(*i, &_terrains, &_terrainIndex, "name");
 		if (rule != 0)
@@ -394,7 +394,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, this);
 		}
 	}
- 	for (YAML::const_iterator i = doc["armors"].begin(); i != doc["armors"].end(); ++i)
+	for (YAML::const_iterator i = doc["armors"].begin(); i != doc["armors"].end(); ++i)
 	{
 		Armor *rule = loadRule(*i, &_armors, &_armorsIndex);
 		if (rule != 0)
@@ -402,7 +402,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	for (YAML::const_iterator i = doc["soldiers"].begin(); i != doc["soldiers"].end(); ++i)
+	for (YAML::const_iterator i = doc["soldiers"].begin(); i != doc["soldiers"].end(); ++i)
 	{
 		RuleSoldier *rule = loadRule(*i, &_soldiers);
 		if (rule != 0)
@@ -410,7 +410,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	for (YAML::const_iterator i = doc["units"].begin(); i != doc["units"].end(); ++i)
+	for (YAML::const_iterator i = doc["units"].begin(); i != doc["units"].end(); ++i)
 	{
 		Unit *rule = loadRule(*i, &_units);
 		if (rule != 0)
@@ -418,7 +418,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, _modIndex);
 		}
 	}
- 	for (YAML::const_iterator i = doc["alienRaces"].begin(); i != doc["alienRaces"].end(); ++i)
+	for (YAML::const_iterator i = doc["alienRaces"].begin(); i != doc["alienRaces"].end(); ++i)
 	{
 		AlienRace *rule = loadRule(*i, &_alienRaces, &_aliensIndex, "id");
 		if (rule != 0)
@@ -426,7 +426,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	for (YAML::const_iterator i = doc["alienDeployments"].begin(); i != doc["alienDeployments"].end(); ++i)
+	for (YAML::const_iterator i = doc["alienDeployments"].begin(); i != doc["alienDeployments"].end(); ++i)
 	{
 		AlienDeployment *rule = loadRule(*i, &_alienDeployments, &_deploymentsIndex);
 		if (rule != 0)
@@ -434,7 +434,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	for (YAML::const_iterator i = doc["research"].begin(); i != doc["research"].end(); ++i)
+	for (YAML::const_iterator i = doc["research"].begin(); i != doc["research"].end(); ++i)
 	{
 		RuleResearch *rule = loadRule(*i, &_research, &_researchIndex, "name");
 		if (rule != 0)
@@ -443,7 +443,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, _researchListOrder);
 		}
 	}
- 	for (YAML::const_iterator i = doc["manufacture"].begin(); i != doc["manufacture"].end(); ++i)
+	for (YAML::const_iterator i = doc["manufacture"].begin(); i != doc["manufacture"].end(); ++i)
 	{
 		RuleManufacture *rule = loadRule(*i, &_manufacture, &_manufactureIndex, "name");
 		if (rule != 0)
@@ -452,7 +452,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i, _manufactureListOrder);
 		}
 	}
- 	for (YAML::const_iterator i = doc["ufopaedia"].begin(); i != doc["ufopaedia"].end(); ++i)
+	for (YAML::const_iterator i = doc["ufopaedia"].begin(); i != doc["ufopaedia"].end(); ++i)
 	{
 		if ((*i)["id"])
 		{
@@ -500,7 +500,7 @@ void Ruleset::loadFile(const std::string &filename)
 			}
 		}
 	}
- 	// Bases can't be copied, so for savegame purposes we store the node instead
+	// Bases can't be copied, so for savegame purposes we store the node instead
 	YAML::Node base = doc["startingBase"];
 	if (base)
 	{
@@ -515,13 +515,13 @@ void Ruleset::loadFile(const std::string &filename)
 	}
 	_maxViewDistance = doc["maxViewDistance"].as<int>(_maxViewDistance);
 	_maxDarknessToSeeUnits = doc["maxDarknessToSeeUnits"].as<int>(_maxDarknessToSeeUnits);
- 	_costSoldier = doc["costSoldier"].as<int>(_costSoldier);
- 	_costEngineer = doc["costEngineer"].as<int>(_costEngineer);
- 	_costScientist = doc["costScientist"].as<int>(_costScientist);
- 	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
- 	_initialFunding = doc["initialFunding"].as<int>(_initialFunding);
+	_costSoldier = doc["costSoldier"].as<int>(_costSoldier);
+	_costEngineer = doc["costEngineer"].as<int>(_costEngineer);
+	_costScientist = doc["costScientist"].as<int>(_costScientist);
+	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
+	_initialFunding = doc["initialFunding"].as<int>(_initialFunding);
 	_alienFuel = doc["alienFuel"].as<std::string>(_alienFuel);
- 	for (YAML::const_iterator i = doc["ufoTrajectories"].begin(); i != doc["ufoTrajectories"].end(); ++i)
+	for (YAML::const_iterator i = doc["ufoTrajectories"].begin(); i != doc["ufoTrajectories"].end(); ++i)
 	{
 		UfoTrajectory *rule = loadRule(*i, &_ufoTrajectories, 0, "id");
 		if (rule != 0)
@@ -529,7 +529,7 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	for (YAML::const_iterator i = doc["alienMissions"].begin(); i != doc["alienMissions"].end(); ++i)
+	for (YAML::const_iterator i = doc["alienMissions"].begin(); i != doc["alienMissions"].end(); ++i)
 	{
 		RuleAlienMission *rule = loadRule(*i, &_alienMissions, &_alienMissionsIndex);
 		if (rule != 0)
@@ -537,8 +537,8 @@ void Ruleset::loadFile(const std::string &filename)
 			rule->load(*i);
 		}
 	}
- 	_alienItemLevels = doc["alienItemLevels"].as< std::vector< std::vector<int> > >(_alienItemLevels);
- 	for (YAML::const_iterator i = doc["MCDPatches"].begin(); i != doc["MCDPatches"].end(); ++i)
+	_alienItemLevels = doc["alienItemLevels"].as< std::vector< std::vector<int> > >(_alienItemLevels);
+	for (YAML::const_iterator i = doc["MCDPatches"].begin(); i != doc["MCDPatches"].end(); ++i)
 	{
 		std::string type = (*i)["type"].as<std::string>();
 		if (_MCDPatches.find(type) != _MCDPatches.end())
@@ -553,7 +553,7 @@ void Ruleset::loadFile(const std::string &filename)
 			_MCDPatchesIndex.push_back(type);
 		}
 	}
- 	for (YAML::const_iterator i = doc["extraSprites"].begin(); i != doc["extraSprites"].end(); ++i)
+	for (YAML::const_iterator i = doc["extraSprites"].begin(); i != doc["extraSprites"].end(); ++i)
 	{
 		std::string type = (*i)["type"].as<std::string>();
 		std::auto_ptr<ExtraSprites> extraSprites(new ExtraSprites());
@@ -565,7 +565,7 @@ void Ruleset::loadFile(const std::string &filename)
 		_extraSprites.push_back(std::make_pair(type, extraSprites.release()));
 		_extraSpritesIndex.push_back(type);
 	}
- 	for (YAML::const_iterator i = doc["extraSounds"].begin(); i != doc["extraSounds"].end(); ++i)
+	for (YAML::const_iterator i = doc["extraSounds"].begin(); i != doc["extraSounds"].end(); ++i)
 	{
 		std::string type = (*i)["type"].as<std::string>();
 		std::auto_ptr<ExtraSounds> extraSounds(new ExtraSounds());
@@ -573,7 +573,7 @@ void Ruleset::loadFile(const std::string &filename)
 		_extraSounds.push_back(std::make_pair(type, extraSounds.release()));
 		_extraSoundsIndex.push_back(type);
 	}
- 	for (YAML::const_iterator i = doc["extraStrings"].begin(); i != doc["extraStrings"].end(); ++i)
+	for (YAML::const_iterator i = doc["extraStrings"].begin(); i != doc["extraStrings"].end(); ++i)
 	{
 		std::string type = (*i)["type"].as<std::string>();
 		if (_extraStrings.find(type) != _extraStrings.end())

@@ -20,6 +20,7 @@
 #define OPENXCOM_DOGFIGHTSTATE_H
 
 #include "../Engine/State.h"
+#include "../Ruleset/RuleCraft.h"
 #include <vector>
 #include <string>
 
@@ -45,20 +46,18 @@ class CraftWeaponProjectile;
 class DogfightState : public State
 {
 private:
-	static const int WeaponMax = 4;
-
-	Timer *_animTimer, *_moveTimer, *_wTimer[WeaponMax], *_ufoWtimer, *_ufoEscapeTimer, *_craftDamageAnimTimer;
-	Surface *_window, *_battle, *_range[WeaponMax], *_damage;
-	InteractiveSurface *_btnMinimize, *_preview, *_weapon[WeaponMax];
+	Timer *_animTimer, *_moveTimer, *_wTimer[RuleCraft::WeaponMax], *_ufoWtimer, *_ufoEscapeTimer, *_craftDamageAnimTimer;
+	Surface *_window, *_battle, *_range[RuleCraft::WeaponMax], *_damage;
+	InteractiveSurface *_btnMinimize, *_preview, *_weapon[RuleCraft::WeaponMax];
 	ImageButton *_btnStandoff, *_btnCautious, *_btnStandard, *_btnAggressive, *_btnDisengage, *_btnUfo;
 	ImageButton *_mode;
 	InteractiveSurface *_btnMinimizedIcon;
-	Text *_txtAmmo[WeaponMax], *_txtDistance, *_txtStatus, *_txtInterceptionNumber;
+	Text *_txtAmmo[RuleCraft::WeaponMax], *_txtDistance, *_txtStatus, *_txtInterceptionNumber;
 	Globe *_globe;
 	Craft *_craft;
 	Ufo *_ufo;
 	int _timeout, _currentDist, _targetDist, _ufoFireInterval;
-	bool _end, _destroyUfo, _destroyCraft, _ufoBreakingOff, _weaponEnabled[WeaponMax], _minimized, _endDogfight, _animatingHit;
+	bool _end, _destroyUfo, _destroyCraft, _ufoBreakingOff, _weaponEnabled[RuleCraft::WeaponMax], _minimized, _endDogfight, _animatingHit;
 	std::vector<CraftWeaponProjectile*> _projectiles;
 	static const int _ufoBlobs[8][13][13];
 	static const int _projectileBlobs[4][6][3];
