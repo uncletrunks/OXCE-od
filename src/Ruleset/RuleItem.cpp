@@ -137,8 +137,10 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	}
 	if (node["damageType"])
 	{
+		//compatibility hack for corpse explosion, that didn't have defined damage type
+		ItemDamageType type = node["blastRadius"].as<int>(0) > 0 ? DT_HE : DT_NONE;
 		//load predefined damage type
-		_damageType = *damageTypes.at(node["damageType"].as<int>(DT_NONE));
+		_damageType = *damageTypes.at(node["damageType"].as<int>(type));
 	}
 	_damageType.FixRadius = node["blastRadius"].as<int>(_damageType.FixRadius);
 	if (node["damageAlter"])
