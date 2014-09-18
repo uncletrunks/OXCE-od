@@ -28,7 +28,8 @@ namespace OpenXcom
 RuleCraftWeapon::RuleCraftWeapon(const std::string &type) :
 	_type(type), _sprite(-1), _sound(-1), _damage(0), _range(0), _accuracy(0),
 	_reloadCautious(0), _reloadStandard(0), _reloadAggressive(0), _ammoMax(0),
-	_rearmRate(1), _projectileSpeed(0), _weaponType(0), _projectileType(CWPT_CANNON_ROUND)
+	_rearmRate(1), _projectileSpeed(0), _weaponType(0), _projectileType(CWPT_CANNON_ROUND),
+	_stats()
 {
 }
 
@@ -46,6 +47,10 @@ RuleCraftWeapon::~RuleCraftWeapon()
  */
 void RuleCraftWeapon::load(const YAML::Node &node, int modIndex)
 {
+	if (node["stats"])
+	{
+		_stats.load(node["stats"]);
+	}
 	_type = node["type"].as<std::string>(_type);
 	if (node["sprite"])
 	{
@@ -230,6 +235,14 @@ int RuleCraftWeapon::getProjectileSpeed() const
 int RuleCraftWeapon::getWeaponType() const
 {
 	return _weaponType;
+}
+
+/**
+ * Gets bonus stats given by this weapon.
+ */
+const RuleCraftStats& RuleCraftWeapon::getBonusStats() const
+{
+	return _stats;
 }
 
 }

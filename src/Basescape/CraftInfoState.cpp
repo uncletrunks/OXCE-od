@@ -211,9 +211,9 @@ void CraftInfoState::init()
 
 	std::wostringstream ss2;
 	ss2 << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
-	if (_craft->getStatus() == "STR_REFUELLING" && _craft->getRules()->getMaxFuel() - _craft->getFuel() > 0)
+	if (_craft->getStatus() == "STR_REFUELLING" && _craft->getFuelMax() - _craft->getFuel() > 0)
 	{
-		int fuelHours = (int)ceil((double)(_craft->getRules()->getMaxFuel() - _craft->getFuel()) / _craft->getRules()->getRefuelRate() / 2.0);
+		int fuelHours = (int)ceil((double)(_craft->getFuelMax() - _craft->getFuel()) / _craft->getRules()->getRefuelRate() / 2.0);
 		ss2 << formatTime(fuelHours);
 	}
 	_txtFuel->setText(ss2.str());
@@ -268,12 +268,15 @@ void CraftInfoState::init()
 
 			_txtWName[i]->setText(tr(w1->getRules()->getType()));
 			std::wostringstream ss;
-			ss << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
-			ss << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
-			if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())
+			if (w1->getRules()->getAmmoMax())
 			{
-				int rearmHours = (int)ceil((double)(w1->getRules()->getAmmoMax() - w1->getAmmo()) / w1->getRules()->getRearmRate());
-				ss << formatTime(rearmHours);
+				ss << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
+				ss << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
+				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())
+				{
+					int rearmHours = (int)ceil((double)(w1->getRules()->getAmmoMax() - w1->getAmmo()) / w1->getRules()->getRearmRate());
+					ss << formatTime(rearmHours);
+				}
 			}
 			_txtWAmmo[i]->setText(ss.str());
 		}

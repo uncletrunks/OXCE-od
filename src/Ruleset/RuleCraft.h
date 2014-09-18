@@ -30,6 +30,52 @@ class RuleTerrain;
 class Ruleset;
 
 /**
+ * Battle statistic of craft type and bonus form craft weapons.
+ */
+struct RuleCraftStats
+{
+	int fuelMax, damageMax, speedMax, accel, radarRange, radarChance, sightRange;
+
+	RuleCraftStats() :
+		fuelMax(0), damageMax(0), speedMax(0), accel(0),
+		radarRange(0), radarChance(0), sightRange(0)
+	{
+
+	}
+	RuleCraftStats& operator+=(const RuleCraftStats& r)
+	{
+		fuelMax += r.fuelMax;
+		damageMax += r.damageMax;
+		speedMax += r.speedMax;
+		accel += r.accel;
+		radarRange += r.radarRange;
+		radarChance += r.radarChance;
+		sightRange += r.sightRange;
+		return *this;
+	}
+	RuleCraftStats& operator-=(const RuleCraftStats& r)
+	{
+		fuelMax -= r.fuelMax;
+		damageMax -= r.damageMax;
+		speedMax -= r.speedMax;
+		accel -= r.accel;
+		radarRange -= r.radarRange;
+		radarChance -= r.radarChance;
+		sightRange -= r.sightRange;
+		return *this;
+	}
+	RuleCraftStats operator-() const
+	{
+		RuleCraftStats s;
+		s -= *this;
+		return s;
+	}
+
+	/// Loads stats form YAML.
+	void load(const YAML::Node& node);
+};
+
+/**
  * Represents a specific type of craft.
  * Contains constant info about a craft like
  * costs, speed, capacities, consumptions, etc.
@@ -45,13 +91,14 @@ private:
 	std::string _type;
 	std::vector<std::string> _requires;
 	int _sprite;
-	int _fuelMax, _damageMax, _speedMax, _accel, _weapons, _weaponTypes[WeaponMax], _soldiers, _vehicles, _costBuy, _costRent, _costSell;
+	int _weapons, _weaponTypes[WeaponMax], _soldiers, _vehicles, _costBuy, _costRent, _costSell;
 	std::string _refuelItem;
-	int _repairRate, _refuelRate, _radarRange, _radarChance, _sightRange, _transferTime, _score;
+	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
 	bool _spacecraft;
 	int _listOrder, _maxItems;
 	std::vector<std::vector <int> > _deployment;
+	RuleCraftStats _stats;
 public:
 	/// Creates a blank craft ruleset.
 	RuleCraft(const std::string &type);
@@ -94,7 +141,7 @@ public:
 	/// Gets the craft's radar range.
 	int getRadarRange() const;
 	/// Gets the craft's radar chance.
-	inline int getRadarChance() const {return _radarChance;}
+	int getRadarChance() const;
 	/// Gets the craft's sight range.
 	int getSightRange() const;
 	/// Gets the craft's transfer time.
@@ -113,6 +160,8 @@ public:
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.
 	bool isValidWeaponSlot(int slot, int weaponType) const;
+	/// Get basic statistic of craft.
+	const RuleCraftStats& getStats() const;
 };
 
 }

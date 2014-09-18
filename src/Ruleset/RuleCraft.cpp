@@ -23,19 +23,39 @@ namespace OpenXcom
 {
 
 /**
+ * Loads the craft from a YAML file.
+ * @param node YAML node.
+ * @param ruleset Ruleset for the craft.
+ * @param modIndex A value that offsets the sounds and sprite values to avoid conflicts.
+ * @param listOrder The list weight for this craft.
+ */
+void RuleCraftStats::load(const YAML::Node &node)
+{
+	fuelMax = node["fuelMax"].as<int>(fuelMax);
+	damageMax = node["damageMax"].as<int>(damageMax);
+	speedMax = node["speedMax"].as<int>(speedMax);
+	accel = node["accel"].as<int>(accel);
+	radarRange = node["radarRange"].as<int>(radarRange);
+	radarChance = node["radarChance"].as<int>(radarChance);
+	sightRange = node["sightRange"].as<int>(sightRange);
+}
+
+/**
  * Creates a blank ruleset for a certain
  * type of craft.
  * @param type String defining the type.
  */
 RuleCraft::RuleCraft(const std::string &type) :
-    _type(type), _sprite(-1), _fuelMax(0), _damageMax(0), _speedMax(0), _accel(0),
-    _weapons(0), _soldiers(0), _vehicles(0), _costBuy(0), _costRent(0), _costSell(0),
-	_refuelItem(""), _repairRate(1), _refuelRate(1), _radarRange(672), _radarChance(100),
-	_sightRange(1696), _transferTime(0), _score(0), _battlescapeTerrainData(0),
-	_spacecraft(false), _listOrder(0), _maxItems(0)
+    _type(type), _sprite(-1), _weapons(0), _soldiers(0), _vehicles(0),
+    _costBuy(0), _costRent(0), _costSell(0), _refuelItem(""), _repairRate(1), _refuelRate(1),
+	_transferTime(0), _score(0), _battlescapeTerrainData(0),
+	_spacecraft(false), _listOrder(0), _maxItems(0), _stats()
 {
 	for (int i = 0; i < WeaponMax; ++ i)
 		_weaponTypes[i] = 0;
+	_stats.radarRange = 672;
+	_stats.radarChance = 100;
+	_stats.sightRange = 1696;
 }
 
 /**
@@ -64,10 +84,7 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 		if (_sprite > 4)
 			_sprite += modIndex;
 	}
-	_fuelMax = node["fuelMax"].as<int>(_fuelMax);
-	_damageMax = node["damageMax"].as<int>(_damageMax);
-	_speedMax = node["speedMax"].as<int>(_speedMax);
-	_accel = node["accel"].as<int>(_accel);
+	_stats.load(node);
 	_weapons = node["weapons"].as<int>(_weapons);
 	_soldiers = node["soldiers"].as<int>(_soldiers);
 	_vehicles = node["vehicles"].as<int>(_vehicles);
@@ -77,9 +94,6 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 	_refuelItem = node["refuelItem"].as<std::string>(_refuelItem);
 	_repairRate = node["repairRate"].as<int>(_repairRate);
 	_refuelRate = node["refuelRate"].as<int>(_refuelRate);
-	_radarRange = node["radarRange"].as<int>(_radarRange);
-	_radarChance = node["radarChance"].as<int>(_radarChance);
-	_sightRange = node["sightRange"].as<int>(_sightRange);
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_score = node["score"].as<int>(_score);
 	if (const YAML::Node &terrain = node["battlescapeTerrainData"])
@@ -144,7 +158,7 @@ int RuleCraft::getSprite() const
  */
 int RuleCraft::getMaxFuel() const
 {
-	return _fuelMax;
+	return _stats.fuelMax;
 }
 
 /**
@@ -154,7 +168,7 @@ int RuleCraft::getMaxFuel() const
  */
 int RuleCraft::getMaxDamage() const
 {
-	return _damageMax;
+	return _stats.damageMax;
 }
 
 /**
@@ -164,7 +178,7 @@ int RuleCraft::getMaxDamage() const
  */
 int RuleCraft::getMaxSpeed() const
 {
-	return _speedMax;
+	return _stats.speedMax;
 }
 
 /**
@@ -174,7 +188,7 @@ int RuleCraft::getMaxSpeed() const
  */
 int RuleCraft::getAcceleration() const
 {
-	return _accel;
+	return _stats.accel;
 }
 
 /**
@@ -273,7 +287,17 @@ int RuleCraft::getRefuelRate() const
  */
 int RuleCraft::getRadarRange() const
 {
-	return _radarRange;
+	return _stats.radarRange;
+}
+
+/**
+ * Gets the craft's radar chance
+ * for detecting UFOs.
+ * @return The chance in percentage.
+ */
+int RuleCraft::getRadarChance() const
+{
+	return _stats.radarChance;
 }
 
 /**
@@ -283,7 +307,7 @@ int RuleCraft::getRadarRange() const
  */
 int RuleCraft::getSightRange() const
 {
-	return _sightRange;
+	return _stats.sightRange;
 }
 
 /**
@@ -358,6 +382,15 @@ int RuleCraft::getMaxItems() const
 bool RuleCraft::isValidWeaponSlot(int slot, int weaponType) const
 {
 	return _weaponTypes[slot] == weaponType;
+}
+
+/**
+ * Gets basic statistic of craft.
+ * @return Basic stats of craft.
+ */
+const RuleCraftStats& RuleCraft::getStats() const
+{
+	return _stats;
 }
 
 }

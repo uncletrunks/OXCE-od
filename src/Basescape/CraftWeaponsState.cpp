@@ -46,7 +46,7 @@ namespace OpenXcom
  * @param craft ID of the selected craft.
  * @param weapon ID of the selected weapon.
  */
-CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : _base(base), _craft(craft), _weapon(weapon), _weapons()
+CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : _base(base), _craft(base->getCrafts()->at(craft)), _weapon(weapon), _weapons()
 {
 	_screen = false;
 
@@ -110,7 +110,7 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 	for (std::vector<std::string>::const_iterator i = weapons.begin(); i != weapons.end(); ++i)
 	{
 		RuleCraftWeapon *w = _game->getRuleset()->getCraftWeapon(*i);
-		RuleCraft *c = _base->getCrafts()->at(_craft)->getRules();
+		RuleCraft *c = _craft->getRules();
 		if (_base->getItems()->getItem(w->getLauncherItem()) > 0 && c->isValidWeaponSlot(weapon, w->getWeaponType()))
 		{
 			_weapons.push_back(w);
@@ -153,29 +153,28 @@ void CraftWeaponsState::btnCancelClick(Action *)
  */
 void CraftWeaponsState::lstWeaponsClick(Action *)
 {
-	CraftWeapon *current = _base->getCrafts()->at(_craft)->getWeapons()->at(_weapon);
+	CraftWeapon *current = _craft->getWeapons()->at(_weapon);
 	// Remove current weapon
 	if (current != 0)
 	{
 		_base->getItems()->addItem(current->getRules()->getLauncherItem());
 		_base->getItems()->addItem(current->getRules()->getClipItem(), current->getClipsLoaded(_game->getRuleset()));
+		_craft->addStats(-current->getRules()->getBonusStats());
 		delete current;
-		_base->getCrafts()->at(_craft)->getWeapons()->at(_weapon) = 0;
+		_craft->getWeapons()->at(_weapon) = 0;
 	}
 
 	// Equip new weapon
 	if (_weapons[_lstWeapons->getSelectedRow()] != 0)
 	{
 		CraftWeapon *sel = new CraftWeapon(_weapons[_lstWeapons->getSelectedRow()], 0);
+		_craft->addStats(sel->getRules()->getBonusStats());
 		sel->setRearming(true);
 		_base->getItems()->removeItem(sel->getRules()->getLauncherItem());
-		_base->getCrafts()->at(_craft)->getWeapons()->at(_weapon) = sel;
-		if (_base->getCrafts()->at(_craft)->getStatus() == "STR_READY")
-		{
-			_base->getCrafts()->at(_craft)->setStatus("STR_REARMING");
-		}
+		_craft->getWeapons()->at(_weapon) = sel;
 	}
 
+	_craft->checkup();
 	_game->popState();
 }
 

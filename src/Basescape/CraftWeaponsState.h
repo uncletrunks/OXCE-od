@@ -26,6 +26,7 @@ namespace OpenXcom
 {
 
 class Base;
+class Craft;
 class TextButton;
 class Window;
 class Text;
@@ -40,7 +41,8 @@ class CraftWeaponsState : public State
 {
 private:
 	Base *_base;
-	size_t _craft, _weapon;
+	Craft *_craft;
+	size_t _weapon;
 
 	TextButton *_btnCancel;
 	Window *_window;

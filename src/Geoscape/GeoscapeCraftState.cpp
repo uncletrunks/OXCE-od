@@ -217,7 +217,10 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	{
 		CraftWeapon *w1 = _craft->getWeapons()->at(0);
 		_txtW1Name->setText(tr("STR_WEAPON_ONE").arg(tr(w1->getRules()->getType())));
-		_txtW1Ammo->setText(tr("STR_ROUNDS_").arg(w1->getAmmo()));
+		if (w1->getRules()->getAmmoMax())
+			_txtW1Ammo->setText(tr("STR_ROUNDS_").arg(w1->getAmmo()));
+		else
+			_txtW1Ammo->setVisible(false);
 	}
 	else
 	{
@@ -235,7 +238,10 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	{
 		CraftWeapon *w2 = _craft->getWeapons()->at(1);
 		_txtW2Name->setText(tr("STR_WEAPON_TWO").arg(tr(w2->getRules()->getType())));
-		_txtW2Ammo->setText(tr("STR_ROUNDS_").arg(w2->getAmmo()));
+		if (w2->getRules()->getAmmoMax())
+			_txtW2Ammo->setText(tr("STR_ROUNDS_").arg(w2->getAmmo()));
+		else
+			_txtW2Ammo->setVisible(false);
 	}
 	else
 	{

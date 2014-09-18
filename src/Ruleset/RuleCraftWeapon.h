@@ -21,6 +21,7 @@
 
 #include <string>
 #include <yaml-cpp/yaml.h>
+#include "RuleCraft.h"
 #include "../Savegame/CraftWeaponProjectile.h"
 
 namespace OpenXcom
@@ -39,6 +40,7 @@ private:
 	int _sprite, _sound, _damage, _range, _accuracy, _reloadCautious, _reloadStandard, _reloadAggressive, _ammoMax, _rearmRate, _projectileSpeed, _weaponType;
 	CraftWeaponProjectileType _projectileType;
 	std::string _launcher, _clip;
+	RuleCraftStats _stats;
 public:
 	/// Creates a blank craft weapon ruleset.
 	RuleCraftWeapon(const std::string &type);
@@ -78,6 +80,8 @@ public:
 	int getProjectileSpeed() const;
 	/// Gets weapon type used by craft slots.
 	int getWeaponType() const;
+	/// Gets bonus stats given by this weapon.
+	const RuleCraftStats& getBonusStats() const;
 };
 
 }

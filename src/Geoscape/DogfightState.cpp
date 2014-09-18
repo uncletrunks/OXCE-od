@@ -419,7 +419,7 @@ DogfightState::DogfightState(Globe *globe, Craft *craft, Ufo *ufo) :
 	for (int i = 0; i < _weaponNum; ++i)
 	{
 		CraftWeapon *w = _craft->getWeapons()->at(i);
-		if (w == 0)
+		if (w == 0 || w->getRules()->getAmmoMax() == 0)
 			continue;
 
 		Surface *weapon = _weapon[i], *range = _range[i];
