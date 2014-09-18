@@ -365,10 +365,6 @@ void Map::drawTerrain(Surface *surface)
 			}
 		}
 	}
-	else
-	{
-		_smoothingEngaged = false;
-	}
 
 	// get corner map coordinates to give rough boundaries in which tiles to redraw are
 	_camera->convertScreenToMap(0, 0, &beginX, &dummy);
@@ -1489,7 +1485,7 @@ void Map::cacheUnit(BattleUnit *unit)
 	UnitSprite *unitSprite = new UnitSprite(unit->getStatus() == STATUS_AIMING ? _spriteWidth * 2: _spriteWidth, _spriteHeight, 0, 0, _save->getDepth() != 0);
 	unitSprite->setPalette(this->getPalette());
 	bool invalid, dummy;
-	int numOfParts = unit->getArmor()->getSize() == 1?1:unit->getArmor()->getSize()*2;
+	int numOfParts = unit->getArmor()->getSize() * unit->getArmor()->getSize();
 
 	unit->getCache(&invalid);
 	if (invalid)
@@ -1697,4 +1693,11 @@ const int Map::getSoundAngle(Position pos)
 	return 360 + (relativePosition.x / (double)(midPoint / 80.0));
 }
 
+/**
+ * Reset the camera smoothing bool.
+ */
+void Map::resetCameraSmoothing()
+{
+	_smoothingEngaged = false;
+}
 }
