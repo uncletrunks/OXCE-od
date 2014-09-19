@@ -435,7 +435,7 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 		int densityOfSmoke = 0;
 		Position voxelToTile(16, 16, 24);
 		Position trackTile(-1, -1, -1);
-		Tile *t;
+		Tile *t = 0;
 
 		for (int i = 0; i < visibleDistance; i++)
 		{
@@ -1010,29 +1010,39 @@ bool TileEngine::tryReactionSnap(BattleUnit *unit, BattleUnit *target)
 /**
  * Handling of hitting tile.
  * @param tile targeted tile.
+ * @param damage power of hit.
  * @param type damage type of hit.
  */
-void TileEngine::hitTile(Tile* tile, const RuleDamageType* type)
+void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
 {
-	if(type->ResistType == DT_SMOKE)
+	if (damage >= type->SmokeThreshold)
 	{
 		// smoke from explosions always stay 6 to 14 turns - power of a smoke grenade is 60
 		if (tile->getSmoke() < 10 && tile->getTerrainLevel() > -24)
 		{
 			tile->setFire(0);
-			tile->setSmoke(RNG::generate(7, 15));
+			if (damage >= type->SmokeThreshold * 2)
+				tile->setSmoke(RNG::generate(7, 15)); // for SmokeThreshold == 0
+			else
+				tile->setSmoke(RNG::generate(7, 15) * (damage - type->SmokeThreshold) / type->SmokeThreshold);
 		}
+		return;
 	}
-	if(type->ResistType == DT_IN)
+
+	if (damage >= type->FireThreshold)
 	{
 		if (!tile->isVoid())
 		{
 			if (tile->getFire() == 0 && (tile->getMapData(MapData::O_FLOOR) || tile->getMapData(MapData::O_OBJECT)))
 			{
-				tile->setFire(tile->getFuel() + 1);
+				if (damage >= type->FireThreshold * 2)
+					tile->setFire(tile->getFuel() + 1); // for FireThreshold == 0
+				else
+					tile->setFire(tile->getFuel() * (damage - type->FireThreshold) / type->FireThreshold + 1);
 				tile->setSmoke(std::max(1, std::min(15 - (tile->getFlammability() / 10), 12)));
 			}
 		}
+		return;
 	}
 }
 
@@ -1041,11 +1051,11 @@ void TileEngine::hitTile(Tile* tile, const RuleDamageType* type)
  * @param unit hitter.
  * @param target targeted unit.
  * @param relative angle of hit.
- * @param power power of hit.
+ * @param damage power of hit.
  * @param type damage type of hit.
  * @return Did unit survived hit?
  */
-bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& relative, int power, const RuleDamageType* type)
+bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& relative, int damage, const RuleDamageType* type)
 {
 	if(!target || !target->getHealth())
 	{
@@ -1053,7 +1063,7 @@ bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& r
 	}
 
 	const int wounds = target->getFatalWounds();
-	const int adjustedDamage = target->damage(relative, power, type);
+	const int adjustedDamage = target->damage(relative, damage, type);
 
 	// if it's going to bleed to death and it's not a player, give credit for the kill.
 	if (unit && target->getFaction() != FACTION_PLAYER && wounds < target->getFatalWounds())
@@ -1075,7 +1085,7 @@ bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& r
 		}
 	}
 
-	if (adjustedDamage && type->ResistType == DT_IN)
+	if (adjustedDamage >= type->FireThreshold)
 	{
 		float resistance = target->getArmor()->getDamageModifier(type->ResistType);
 		if (resistance > 0.0)
@@ -1104,30 +1114,30 @@ bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& r
 BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit)
 {
 	Tile *tile = _save->getTile(Position(center.x/16, center.y/16, center.z/24));
-	if(!tile)
+	if(!tile || power <= 0)
 	{
 		return 0;
 	}
 
 	BattleUnit *bu = tile->getUnit();
 	const int part = voxelCheck(center, unit);
+	const int damage = type->getRandomDamage(power);
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
-		const int rndPower = type->getRandomDamage(power) * type->ToTile;
-		hitTile(tile, type);
+		const int tileDmg = damage * type->ToTile;
+		hitTile(tile, damage, type);
 		if (part == V_OBJECT && _save->getMissionType() == "STR_BASE_DEFENSE")
 		{
-			if (rndPower >= tile->getMapData(MapData::O_OBJECT)->getArmor() && tile->getMapData(V_OBJECT)->isBaseModule())
+			if (tileDmg >= tile->getMapData(MapData::O_OBJECT)->getArmor() && tile->getMapData(V_OBJECT)->isBaseModule())
 			{
 				_save->getModuleMap()[(center.x/16)/10][(center.y/16)/10].second--;
 			}
 		}
-		if (tile->damage(part, rndPower))
+		if (tile->damage(part, tileDmg))
 			_save->setObjectiveDestroyed(true);
 	}
 	else if (part == V_UNIT)
 	{
-		const int rndPower = type->getRandomDamage(power);
 		int verticaloffset = 0;
 		if (!bu)
 		{
@@ -1149,7 +1159,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 			const Position target = bu->getPosition() * Position(16,16,24) + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
 			const Position relative = (center - target) - Position(0,0,verticaloffset);
 
-			hitUnit(unit, bu, relative, rndPower, type);
+			hitUnit(unit, bu, relative, damage, type);
 
 			if (bu->getOriginalFaction() == FACTION_HOSTILE &&
 				unit &&
@@ -1239,19 +1249,19 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 					}
 					if (ret.second)
 					{
-						const int rndPower = type->getRandomDamage(power_);
+						const int damage = type->getRandomDamage(power_);
 						BattleUnit *bu = dest->getUnit();
 
 						if (distance(dest->getPosition(), Position(centerX, centerY, centerZ)) < 2)
 						{
 							// ground zero effect is in effect
-							hitUnit(unit, bu, Position(0, 0, 0), rndPower, type);
+							hitUnit(unit, bu, Position(0, 0, 0), damage, type);
 						}
 						else
 						{
 							// directional damage relative to explosion position.
 							// units above the explosion will be hit in the legs, units lateral to or below will be hit in the torso
-							hitUnit(unit, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), rndPower, type);
+							hitUnit(unit, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type);
 						}
 
 						// Affect all items and units in inventory
@@ -1260,7 +1270,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 						{
 							if((*it)->getUnit())
 							{
-								if(hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), rndPower, type))
+								if(hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), damage, type))
 								{
 									continue;
 								}
@@ -1279,7 +1289,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 							_save->removeItem((*it));
 						}
 
-						hitTile(dest, type);
+						hitTile(dest, damage, type);
 					}
 				}
 

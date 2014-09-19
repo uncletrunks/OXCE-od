@@ -148,6 +148,7 @@ Ruleset::Ruleset() :
 	dmg->IgnoreDirection = true;
 	dmg->ArmorEffectiveness = 0.0f;
 	dmg->RadiusEffectiveness = 0.05f;
+	dmg->SmokeThreshold = 0;
 	dmg->ToHealth = 0.0f;
 	dmg->ToArmor = 0.0f;
 	dmg->ToWound = 0.0f;
@@ -163,6 +164,7 @@ Ruleset::Ruleset() :
 	dmg->IgnoreDirection = true;
 	dmg->ArmorEffectiveness = 0.0f;
 	dmg->RadiusEffectiveness = 0.03f;
+	dmg->FireThreshold = 0;
 	dmg->ToHealth = 1.0f;
 	dmg->ToArmor = 0.0f;
 	dmg->ToWound = 0.0f;

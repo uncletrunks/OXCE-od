@@ -40,16 +40,19 @@ struct BattleAction;
 class TileEngine
 {
 private:
+	SavedBattleGame *_save;
+	std::vector<Uint16> *_voxelData;
+	static const int heightFromCenter[11];
+	bool _personalLighting;
 	const int _maxViewDistance;        // 20 tiles by default
 	const int _maxViewDistanceSq;      // 20 * 20
 	const int _maxVoxelViewDistance;   // maxViewDistance * 16
 	const int _maxDarknessToSeeUnits;  // 9 by default
-	SavedBattleGame *_save;
-	std::vector<Uint16> *_voxelData;
-	static const int heightFromCenter[11];
+
+	/// Add light source.
 	void addLight(const Position &center, int power, int layer);
+	/// Calculate blockage amount.
 	int blockage(Tile *tile, const int part, ItemDamageType type, int direction = -1, bool checkingFromOrigin = false);
-	bool _personalLighting;
 	/// Get max view distance.
 	inline int getMaxViewDistance() const        {return _maxViewDistance;}
 	/// Get square of max view distance.
@@ -78,9 +81,9 @@ public:
 	/// Recalculates lighting of the battlescape for units.
 	void calculateUnitLighting();
 	/// Handles tile hit.
-	void hitTile(Tile *tile, const RuleDamageType* type);
+	void hitTile(Tile *tile, int damage, const RuleDamageType* type);
 	/// Handles unit hit.
-	bool hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int power, const RuleDamageType* type);
+	bool hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType* type);
 	/// Handles bullet/weapon hits.
 	BattleUnit *hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit);
 	/// Handles explosions.

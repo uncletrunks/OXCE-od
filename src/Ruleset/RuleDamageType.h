@@ -52,6 +52,10 @@ struct RuleDamageType
 	float ArmorEffectiveness;
 	/// Conversion form power to radius.
 	float RadiusEffectiveness;
+	/// Threshold of fire creation
+	int FireThreshold;
+	/// Threshold of smoke creation
+	int SmokeThreshold;
 
 	/// Conversion form power to unit damage.
 	float ToHealth;
