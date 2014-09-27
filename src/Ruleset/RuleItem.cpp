@@ -60,6 +60,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_type = node["type"].as<std::string>(_type);
 	_name = node["name"].as<std::string>(_name);
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
+	_requiresBuy = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuy);
 	_size = node["size"].as<double>(_size);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costSell = node["costSell"].as<int>(_costSell);
@@ -244,6 +245,16 @@ std::string RuleItem::getName() const
 const std::vector<std::string> &RuleItem::getRequirements() const
 {
 	return _requires;
+}
+
+/**
+ * Gets the list of research required to
+ * buy this item from market.
+ * @return The list of research IDs.
+ */
+const std::vector<std::string> &RuleItem::getBuyRequirements() const
+{
+	return _requiresBuy;
 }
 
 /**

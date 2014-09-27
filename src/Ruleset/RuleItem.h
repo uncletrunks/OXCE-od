@@ -45,6 +45,7 @@ class RuleItem
 private:
 	std::string _type, _name; // two types of objects can have the same name
 	std::vector<std::string> _requires;
+	std::vector<std::string> _requiresBuy;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
 	int _bigSprite, _floorSprite, _handSprite, _bulletSprite;
@@ -84,6 +85,8 @@ public:
 	std::string getName() const;
 	/// Gets the item's requirements.
 	const std::vector<std::string> &getRequirements() const;
+	/// Gets the item's buy requirements.
+	const std::vector<std::string> &getBuyRequirements() const;
 	/// Gets the item's size.
 	double getSize() const;
 	/// Gets the item's purchase cost.

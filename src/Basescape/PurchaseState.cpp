@@ -182,7 +182,7 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _crafts(), _items(), _qt
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
 		RuleItem *rule = _game->getRuleset()->getItem(*i);
-		if (rule->getBuyCost() != 0 && !isExcluded(*i))
+		if (rule->getBuyCost() != 0 && !isExcluded(*i) && _game->getSavedGame()->isResearched(rule->getBuyRequirements()))
 		{
 			_items.push_back(*i);
 			_qtys.push_back(0);
