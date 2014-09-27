@@ -30,7 +30,7 @@ namespace OpenXcom
 RuleUfo::RuleUfo(const std::string &type) :
 	_type(type), _size("STR_VERY_SMALL"), _sprite(-1),
 	_power(0), _range(0), _score(0), _reload(0), _breakOffTime(0),
-	_battlescapeTerrainData(0), _modSprite(""), _stats(), _statsRaceBonus()
+	_battlescapeTerrainData(0), _stats(), _statsRaceBonus()
 {
 	_stats.sightRange = 268;
 	_statsRaceBonus[""] = RuleCraftStats();

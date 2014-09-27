@@ -29,7 +29,7 @@ namespace OpenXcom
  */
 RuleCraft::RuleCraft(const std::string &type) :
     _type(type), _sprite(-1), _weapons(0), _soldiers(0), _vehicles(0),
-    _costBuy(0), _costRent(0), _costSell(0), _refuelItem(""), _repairRate(1), _refuelRate(1),
+    _costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(0), _score(0), _battlescapeTerrainData(0),
 	_spacecraft(false), _listOrder(0), _maxItems(0), _stats()
 {

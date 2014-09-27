@@ -265,7 +265,11 @@ bool TileEngine::calculateFOV(BattleUnit *unit)
 
 	if ((unit->getHeight() + unit->getFloatHeight() + -_save->getTile(unit->getPosition())->getTerrainLevel()) >= 24 + 4)
 	{
-		++pos.z;
+		Tile *tileAbove = _save->getTile(pos + Position(0,0,1));
+		if (tileAbove && tileAbove->hasNoFloor(0))
+		{
+			++pos.z;
+		}
 	}
 	for (int x = 0; x <= getMaxViewDistance(); ++x)
 	{
@@ -999,7 +1003,7 @@ bool TileEngine::tryReactionSnap(BattleUnit *unit, BattleUnit *target)
 		if (action.targeting && unit->spendTimeUnits(action.TU))
 		{
 			action.TU = 0;
-			_save->getBattleGame()->statePushBack(new UnitTurnBState(_save->getBattleGame(), action));
+			_save->getBattleGame()->statePushBack(new UnitTurnBState(_save->getBattleGame(), action, false));
 			_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
 			return true;
 		}
@@ -1057,7 +1061,7 @@ void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  */
 bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& relative, int damage, const RuleDamageType* type)
 {
-	if(!target || !target->getHealth())
+	if (!target || !target->getHealth())
 	{
 		return false;
 	}
@@ -1114,7 +1118,7 @@ bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& r
 BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit)
 {
 	Tile *tile = _save->getTile(Position(center.x/16, center.y/16, center.z/24));
-	if(!tile || power <= 0)
+	if (!tile || power <= 0)
 	{
 		return 0;
 	}
@@ -1268,9 +1272,9 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 						toRemove.clear();
 						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
 						{
-							if((*it)->getUnit())
+							if ((*it)->getUnit())
 							{
-								if(hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), damage, type))
+								if (hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), damage, type))
 								{
 									continue;
 								}
@@ -2880,7 +2884,7 @@ Position TileEngine::getOriginVoxel(BattleAction &action, Tile *tile)
 		{
 			offset = 16;
 		}
-		else if(action.weapon == action.weapon->getOwner()->getItem("STR_LEFT_HAND") && !action.weapon->getRules()->isTwoHanded())
+		else if (action.weapon == action.weapon->getOwner()->getItem("STR_LEFT_HAND") && !action.weapon->getRules()->isTwoHanded())
 		{
 			offset = 8;
 		}

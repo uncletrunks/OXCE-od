@@ -31,12 +31,12 @@ namespace OpenXcom
  */
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
-	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _compatibleAmmo(), _damageType(),
+	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _damageType(),
 	_accuracyAuto(0), _accuracySnap(0), _accuracyAimed(0), _tuAuto(0), _tuSnap(0), _tuAimed(0), _clipSize(0), _accuracyMelee(0), _tuMelee(0),
 	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
-	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0), _zombieUnit(""),
+	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_skillApplied(true), _LOSRequired(false), _underwaterOnly(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1),
 	_strengthBonus(0.0f), _psiBonus(0.0f), _psiSkillBonus(0.0f), _psiStrengthBonus(0.0f), _throwBonus(0.0f)
 {
@@ -550,7 +550,7 @@ void RuleItem::drawHandSprite(SurfaceSet *texture, Surface *surface) const
  * Gets the heal quantity of the item.
  * @return The new heal quantity.
  */
-int RuleItem::getHealQuantity () const
+int RuleItem::getHealQuantity() const
 {
 	return _heal;
 }
@@ -559,7 +559,7 @@ int RuleItem::getHealQuantity () const
  * Gets the pain killer quantity of the item.
  * @return The new pain killer quantity.
  */
-int RuleItem::getPainKillerQuantity () const
+int RuleItem::getPainKillerQuantity() const
 {
 	return _painKiller;
 }
@@ -568,7 +568,7 @@ int RuleItem::getPainKillerQuantity () const
  * Gets the stimulant quantity of the item.
  * @return The new stimulant quantity.
  */
-int RuleItem::getStimulantQuantity () const
+int RuleItem::getStimulantQuantity() const
 {
 	return _stimulant;
 }
@@ -577,7 +577,7 @@ int RuleItem::getStimulantQuantity () const
  * Gets the amount of fatal wound healed per usage.
  * @return The amount of fatal wound healed.
  */
-int RuleItem::getWoundRecovery () const
+int RuleItem::getWoundRecovery() const
 {
 	return _woundRecovery;
 }
@@ -586,7 +586,7 @@ int RuleItem::getWoundRecovery () const
  * Gets the amount of health added to a wounded soldier's health.
  * @return The amount of health to add.
  */
-int RuleItem::getHealthRecovery () const
+int RuleItem::getHealthRecovery() const
 {
 	return _healthRecovery;
 }
@@ -595,7 +595,7 @@ int RuleItem::getHealthRecovery () const
  * Gets the amount of energy added to a soldier's energy.
  * @return The amount of energy to add.
  */
-int RuleItem::getEnergyRecovery () const
+int RuleItem::getEnergyRecovery() const
 {
 	return _energyRecovery;
 }
@@ -604,7 +604,7 @@ int RuleItem::getEnergyRecovery () const
  * Gets the amount of stun removed from a soldier's stun level.
  * @return The amount of stun removed.
  */
-int RuleItem::getStunRecovery () const
+int RuleItem::getStunRecovery() const
 {
 	return _stunRecovery;
 }
@@ -630,7 +630,7 @@ int RuleItem::getExplosionRadius() const
 	if (_damageType.FixRadius == -1)
 	{
 		radius = _power * _damageType.RadiusEffectiveness;
-		if(_damageType.FireBlastCalc)
+		if (_damageType.FireBlastCalc)
 		{
 			radius += 1;
 		}

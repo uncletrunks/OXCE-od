@@ -219,7 +219,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		ai = unit->getCurrentAIState();
 	}
 	_AIActionCounter++;
-	if(_AIActionCounter == 1)
+	if (_AIActionCounter == 1)
 	{
 		_playedAggroSound = false;
 		unit->_hidingForTurn = false;
@@ -1113,17 +1113,17 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 		for (int i= 0; i < 4; i++)
 		{
 			ba.target = Position(unit->getPosition().x + RNG::generate(-5,5), unit->getPosition().y + RNG::generate(-5,5), unit->getPosition().z);
-			statePushBack(new UnitTurnBState(this, ba));
+			statePushBack(new UnitTurnBState(this, ba, false));
 		}
 		for (std::vector<BattleUnit*>::iterator j = unit->getVisibleUnits()->begin(); j != unit->getVisibleUnits()->end(); ++j)
 		{
 			ba.target = (*j)->getPosition();
-			statePushBack(new UnitTurnBState(this, ba));
+			statePushBack(new UnitTurnBState(this, ba, false));
 		}
 		if (_save->getTile(ba.target) != 0)
 		{
 			ba.weapon = unit->getMainHandWeapon();
-			if(ba.weapon && (_save->getDepth() != 0 || ba.weapon->getRules()->isWaterOnly() == false))
+			if (ba.weapon && (_save->getDepth() != 0 || ba.weapon->getRules()->isWaterOnly() == false))
 			{
 				if (ba.weapon->getRules()->getBattleType() == BT_FIREARM)
 				{
@@ -1505,7 +1505,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 		item->getUnit()->setPosition(p);
 	}
 
-	if(newItem)
+	if (newItem)
 	{
 		_save->getItems()->push_back(item);
 	}
@@ -1539,7 +1539,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
  * @param newType The type of unit to convert to.
  * @return Pointer to the new unit.
  */
-BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, std::string newType)
+BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &newType)
 {
 	getSave()->getBattleState()->showPsiButton(false);
 	// in case the unit was unconscious

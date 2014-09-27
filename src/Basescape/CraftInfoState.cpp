@@ -63,7 +63,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 
 	_craft = _base->getCrafts()->at(_craftId);
 	_weaponNum = _craft->getRules()->getWeapons();
-	if(_weaponNum > RuleCraft::WeaponMax)
+	if (_weaponNum > RuleCraft::WeaponMax)
 		_weaponNum = RuleCraft::WeaponMax;
 
 	const int top = _weaponNum > 2 ? 42 : 64;
@@ -332,7 +332,7 @@ void CraftInfoState::btnWClick(Action * act)
 {
 	for(int i = 0; i < _weaponNum; ++i)
 	{
-		if(act->getSender() == _btnW[i])
+		if (act->getSender() == _btnW[i])
 		{
 			_game->pushState(new CraftWeaponsState(_base, _craftId, i));
 			return;
