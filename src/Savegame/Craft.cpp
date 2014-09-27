@@ -517,11 +517,20 @@ std::vector<Vehicle*> *Craft::getVehicles()
  * Update stats of craft.
  * @param s
  */
-void Craft::addStats(const RuleCraftStats& s)
+void Craft::addCraftStats(const RuleCraftStats& s)
 {
 	setDamage(_damage + s.damageMax); //you need "fix" new damage capability first before use.
 	_stats += s;
 	setFuel(_fuel); //it will split some fuel if you have to much.
+}
+
+/**
+ * Gets all basic stats of craft.
+ * @return Stats of craft
+ */
+const RuleCraftStats& Craft::getCraftStats() const
+{
+	return _stats;
 }
 
 /**

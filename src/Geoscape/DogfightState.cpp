@@ -773,16 +773,16 @@ void DogfightState::move()
 
 	if(_minimized && _ufo->getSpeed() > _craft->getSpeed())
 	{
-		_craft->setSpeed(_craft->getRules()->getMaxSpeed());
+		_craft->setSpeed(_craft->getCraftStats().speedMax);
 		if(_ufo->getSpeed() > _craft->getSpeed())
 		{
 			_ufoBreakingOff = true;
 		}
 	}
 	// Check if UFO is not breaking off.
-	if(_ufo->getSpeed() == _ufo->getRules()->getMaxSpeed())
+	if(_ufo->getSpeed() == _ufo->getCraftStats().speedMax)
 	{
-		_craft->setSpeed(_craft->getRules()->getMaxSpeed());
+		_craft->setSpeed(_craft->getCraftStats().speedMax);
 		// Crappy craft is chasing UFO.
 		if(_ufo->getSpeed() > _craft->getSpeed())
 		{
@@ -849,10 +849,11 @@ void DogfightState::move()
 				if(((p->getPosition() >= _currentDist) || (p->getGlobalType() == CWPGT_BEAM && p->toBeRemoved())) && !_ufo->isCrashed() && !p->getMissed())
 				{
 					// UFO hit.
-					if (RNG::percent((p->getAccuracy() * (100 + 300 / (5 - _ufoSize)) + 100) / 200))
+					if (RNG::percent((p->getAccuracy() * (100 + 300 / (5 - _ufoSize)) + 100) / 200) - _ufo->getCraftStats().avoidBonus + _craft->getCraftStats().hitBonus)
 					{
-						// Formula delivered by Volutar
-						int damage = RNG::generate(p->getDamage() / 2, p->getDamage());
+						// Formula delivered by Volutar, altered by Extended version.
+						int power = p->getDamage() * (_craft->getCraftStats().powerBonus + 100) / 100;
+						int damage = std::max(0, RNG::generate(power / 2, power) - _ufo->getCraftStats().armor);
 						_ufo->setDamage(_ufo->getDamage() + damage);
 						if(_ufo->isCrashed())
 						{
@@ -901,10 +902,11 @@ void DogfightState::move()
 			{
 				if(p->getGlobalType() == CWPGT_MISSILE || (p->getGlobalType() == CWPGT_BEAM && p->toBeRemoved()))
 				{
-					if(RNG::percent(p->getAccuracy()))
+					if(RNG::percent(p->getAccuracy() - _craft->getCraftStats().avoidBonus + _ufo->getCraftStats().hitBonus))
 					{
-						// Formula delivered by Volutar
-						int damage = RNG::generate(0, _ufo->getRules()->getWeaponPower());
+						// Formula delivered by Volutar, altered by Extended version.
+						int power = p->getDamage() * (_ufo->getCraftStats().powerBonus + 100) / 100;
+						int damage = std::max(0, RNG::generate(0, power) - _craft->getCraftStats().armor);
 						if (damage)
 						{
 							_craft->setDamage(_craft->getDamage() + damage);
@@ -1479,7 +1481,7 @@ void DogfightState::ufoBreakOff()
 {
 	if(!_ufo->isCrashed() && !_ufo->isDestroyed() && !_craft->isDestroyed())
 	{
-		_ufo->setSpeed(_ufo->getRules()->getMaxSpeed());
+		_ufo->setSpeed(_ufo->getCraftStats().speedMax);
 		_ufoBreakingOff = true;
 	}
 }

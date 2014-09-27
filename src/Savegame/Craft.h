@@ -106,8 +106,10 @@ public:
 	ItemContainer *getItems();
 	/// Gets the craft's vehicles.
 	std::vector<Vehicle*> *getVehicles();
-	/// Update stats of craft.
-	void addStats(const RuleCraftStats& s);
+	/// Update the craft's stats.
+	void addCraftStats(const RuleCraftStats& s);
+	/// Gets the craft's stats.
+	const RuleCraftStats& getCraftStats() const;
 	/// Gets the craft's max amount of fuel.
 	int getFuelMax() const;
 	/// Gets the craft's amount of fuel.

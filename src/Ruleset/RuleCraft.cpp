@@ -23,24 +23,6 @@ namespace OpenXcom
 {
 
 /**
- * Loads the craft from a YAML file.
- * @param node YAML node.
- * @param ruleset Ruleset for the craft.
- * @param modIndex A value that offsets the sounds and sprite values to avoid conflicts.
- * @param listOrder The list weight for this craft.
- */
-void RuleCraftStats::load(const YAML::Node &node)
-{
-	fuelMax = node["fuelMax"].as<int>(fuelMax);
-	damageMax = node["damageMax"].as<int>(damageMax);
-	speedMax = node["speedMax"].as<int>(speedMax);
-	accel = node["accel"].as<int>(accel);
-	radarRange = node["radarRange"].as<int>(radarRange);
-	radarChance = node["radarChance"].as<int>(radarChance);
-	sightRange = node["sightRange"].as<int>(sightRange);
-}
-
-/**
  * Creates a blank ruleset for a certain
  * type of craft.
  * @param type String defining the type.

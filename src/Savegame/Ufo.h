@@ -19,15 +19,15 @@
 #ifndef OPENXCOM_UFO_H
 #define OPENXCOM_UFO_H
 
-#include "MovingTarget.h"
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include "CraftId.h"
+#include "MovingTarget.h"
+#include "../Ruleset/RuleUfo.h"
 
 namespace OpenXcom
 {
 
-class RuleUfo;
 class AlienMission;
 class UfoTrajectory;
 class SavedGame;
@@ -56,6 +56,7 @@ private:
 	size_t _trajectoryPoint;
 	bool _detected, _hyperDetected;
 	int _shootingAt, _hitFrame;
+	RuleCraftStats _stats;
 	/// Calculates a new speed vector to the destination.
 	void calculateSpeed();
 public:
@@ -153,7 +154,8 @@ public:
 	void setHitFrame(int frame);
 	/// Gets the UFO's hit frame.
 	int getHitFrame();
-
+	/// Gets the UFO's stats.
+	const RuleCraftStats& getCraftStats() const;
 };
 
 }

@@ -20,7 +20,9 @@
 #define OPENXCOM_RULEUFO_H
 
 #include <string>
+#include <map>
 #include <yaml-cpp/yaml.h>
+#include "RuleCraft.h"
 
 namespace OpenXcom
 {
@@ -39,9 +41,11 @@ class RuleUfo
 private:
 	std::string _type, _size;
 	int _sprite;
-	int _damageMax, _speedMax, _accel, _power, _range, _score, _reload, _breakOffTime, _sightRange;
+	int _power, _range, _score, _reload, _breakOffTime;
 	RuleTerrain *_battlescapeTerrainData;
 	std::string _modSprite;
+	RuleCraftStats _stats;
+	std::map<std::string, RuleCraftStats> _statsRaceBonus;
 public:
 	/// Creates a blank UFO ruleset.
 	RuleUfo(const std::string &type);
@@ -57,12 +61,6 @@ public:
 	int getRadius() const;
 	/// Gets the UFO's sprite.
 	int getSprite() const;
-	/// Gets the UFO's maximum damage.
-	int getMaxDamage() const;
-	/// Gets the UFO's maximum speed.
-	int getMaxSpeed() const;
-	/// Gets the UFO's acceleration.
-	int getAcceleration() const;
 	/// Gets the UFO's weapon power.
 	int getWeaponPower() const;
 	/// Gets the UFO's weapon range.
@@ -77,8 +75,10 @@ public:
 	int getBreakOffTime() const;
 	/// Gets the name of the surface that represents this UFO.
 	std::string getModSprite() const;
-	/// Gets the UFO's radar range.
-	int getSightRange() const;
+	/// Get basic statistic of UFO.
+	const RuleCraftStats& getStats() const;
+	/// Get race bonus of statistic of UFO.
+	const RuleCraftStats& getRaceBonus(const std::string& s) const;
 };
 
 }

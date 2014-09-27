@@ -34,14 +34,17 @@ class Ruleset;
  */
 struct RuleCraftStats
 {
-	int fuelMax, damageMax, speedMax, accel, radarRange, radarChance, sightRange;
+	int fuelMax, damageMax, speedMax, accel, radarRange, radarChance, sightRange, hitBonus, avoidBonus, powerBonus, armor;
 
+	/// Default constructor.
 	RuleCraftStats() :
 		fuelMax(0), damageMax(0), speedMax(0), accel(0),
-		radarRange(0), radarChance(0), sightRange(0)
+		radarRange(0), radarChance(0), sightRange(0),
+		hitBonus(0), avoidBonus(0), powerBonus(0), armor(0)
 	{
 
 	}
+	/// Add different stats.
 	RuleCraftStats& operator+=(const RuleCraftStats& r)
 	{
 		fuelMax += r.fuelMax;
@@ -51,8 +54,13 @@ struct RuleCraftStats
 		radarRange += r.radarRange;
 		radarChance += r.radarChance;
 		sightRange += r.sightRange;
+		hitBonus += r.hitBonus;
+		avoidBonus += r.avoidBonus;
+		powerBonus += r.powerBonus;
+		armor += r.armor;
 		return *this;
 	}
+	/// Subtract different stats.
 	RuleCraftStats& operator-=(const RuleCraftStats& r)
 	{
 		fuelMax -= r.fuelMax;
@@ -62,17 +70,34 @@ struct RuleCraftStats
 		radarRange -= r.radarRange;
 		radarChance -= r.radarChance;
 		sightRange -= r.sightRange;
+		hitBonus -= r.hitBonus;
+		avoidBonus -= r.avoidBonus;
+		powerBonus -= r.powerBonus;
+		armor -= r.armor;
 		return *this;
 	}
+	/// Gets negative values of stats.
 	RuleCraftStats operator-() const
 	{
 		RuleCraftStats s;
 		s -= *this;
 		return s;
 	}
-
 	/// Loads stats form YAML.
-	void load(const YAML::Node& node);
+	void load(const YAML::Node &node)
+	{
+		fuelMax = node["fuelMax"].as<int>(fuelMax);
+		damageMax = node["damageMax"].as<int>(damageMax);
+		speedMax = node["speedMax"].as<int>(speedMax);
+		accel = node["accel"].as<int>(accel);
+		radarRange = node["radarRange"].as<int>(radarRange);
+		radarChance = node["radarChance"].as<int>(radarChance);
+		sightRange = node["sightRange"].as<int>(sightRange);
+		hitBonus = node["hitBonus"].as<int>(hitBonus);
+		avoidBonus = node["avoidBonus"].as<int>(avoidBonus);
+		powerBonus = node["powerBonus"].as<int>(powerBonus);
+		armor = node["armor"].as<int>(armor);
+	}
 };
 
 /**

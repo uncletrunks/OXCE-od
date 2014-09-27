@@ -40,12 +40,14 @@ namespace OpenXcom
  * Initializes a UFO of the specified type.
  * @param rules Pointer to ruleset.
  */
-Ufo::Ufo(RuleUfo *rules)
-  : MovingTarget(), _rules(rules), _id(0), _crashId(0), _landId(0), _damage(0), _direction("STR_NORTH")
-  , _altitude("STR_HIGH_UC"), _status(FLYING), _secondsRemaining(0)
-  , _inBattlescape(false), _mission(0), _trajectory(0)
-  , _trajectoryPoint(0), _detected(false), _hyperDetected(false), _shootingAt(0), _hitFrame(0)
+Ufo::Ufo(RuleUfo *rules) : MovingTarget(),
+	_rules(rules), _id(0), _crashId(0), _landId(0), _damage(0), _direction("STR_NORTH"),
+	_altitude("STR_HIGH_UC"), _status(FLYING), _secondsRemaining(0),
+	_inBattlescape(false), _mission(0), _trajectory(0),
+	_trajectoryPoint(0), _detected(false), _hyperDetected(false),
+	_shootingAt(0), _hitFrame(0), _stats()
 {
+	_stats = rules->getStats();
 }
 
 /**
@@ -131,11 +133,11 @@ void Ufo::load(const YAML::Node &node, const Ruleset &ruleset, SavedGame &game)
 	}
 	else
 	{
-		if (_damage >= _rules->getMaxDamage())
+		if (_damage >= _stats.damageMax)
 		{
 			_status = DESTROYED;
 		}
-		else if (_damage >= _rules->getMaxDamage() / 2)
+		else if (_damage >= _stats.damageMax / 2)
 		{
 			_status = CRASHED;
 		}
@@ -158,6 +160,7 @@ void Ufo::load(const YAML::Node &node, const Ruleset &ruleset, SavedGame &game)
 			throw Exception("Unknown mission, save file is corrupt.");
 		}
 		_mission = *found;
+		_stats += _rules->getRaceBonus(_mission->getRace());
 
 		std::string tid = node["trajectory"].as<std::string>();
 		_trajectory = ruleset.getUfoTrajectory(tid);
@@ -310,11 +313,11 @@ void Ufo::setDamage(int damage)
 	{
 		_damage = 0;
 	}
-	if (_damage >= _rules->getMaxDamage())
+	if (_damage >= _stats.damageMax)
 	{
 		_status = DESTROYED;
 	}
-	else if (_damage >= _rules->getMaxDamage() / 2)
+	else if (_damage >= _stats.damageMax / 2)
 	{
 		_status = CRASHED;
 	}
@@ -402,7 +405,7 @@ void Ufo::setAltitude(const std::string &altitude)
  */
 bool Ufo::isCrashed() const
 {
-	return (_damage > _rules->getMaxDamage() / 2);
+	return (_damage > _stats.damageMax / 2);
 }
 
 /**
@@ -412,7 +415,7 @@ bool Ufo::isCrashed() const
  */
 bool Ufo::isDestroyed() const
 {
-	return (_damage >= _rules->getMaxDamage());
+	return (_damage >= _stats.damageMax);
 }
 
 /**
@@ -628,6 +631,7 @@ void Ufo::setMissionInfo(AlienMission *mission, const UfoTrajectory *trajectory)
 	_mission->increaseLiveUfos();
 	_trajectoryPoint = 0;
 	_trajectory = trajectory;
+	_stats += _rules->getRaceBonus(_mission->getRace());
 }
 
 /**
@@ -698,4 +702,10 @@ int Ufo::getHitFrame()
 {
 	return _hitFrame;
 }
+/// Gets the UFO's stats.
+const RuleCraftStats& Ufo::getCraftStats() const
+{
+	return _stats;
+}
+
 }

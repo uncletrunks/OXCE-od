@@ -159,7 +159,7 @@ void CraftWeaponsState::lstWeaponsClick(Action *)
 	{
 		_base->getItems()->addItem(current->getRules()->getLauncherItem());
 		_base->getItems()->addItem(current->getRules()->getClipItem(), current->getClipsLoaded(_game->getRuleset()));
-		_craft->addStats(-current->getRules()->getBonusStats());
+		_craft->addCraftStats(-current->getRules()->getBonusStats());
 		delete current;
 		_craft->getWeapons()->at(_weapon) = 0;
 	}
@@ -168,7 +168,7 @@ void CraftWeaponsState::lstWeaponsClick(Action *)
 	if (_weapons[_lstWeapons->getSelectedRow()] != 0)
 	{
 		CraftWeapon *sel = new CraftWeapon(_weapons[_lstWeapons->getSelectedRow()], 0);
-		_craft->addStats(sel->getRules()->getBonusStats());
+		_craft->addCraftStats(sel->getRules()->getBonusStats());
 		sel->setRearming(true);
 		_base->getItems()->removeItem(sel->getRules()->getLauncherItem());
 		_craft->getWeapons()->at(_weapon) = sel;
