@@ -239,6 +239,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		_psiStrengthBonus = d["psiStrength"].as<float>(_psiStrengthBonus);
 		_throwBonus = d["throw"].as<float>(_throwBonus);
 	}
+	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
 
 	if (!_listOrder)
 	{
