@@ -49,7 +49,7 @@ namespace OpenXcom
  * @param origin Position the projectile originates from.
  * @param targetVoxel Position the projectile is targeting.
  */
-Projectile::Projectile(ResourcePack *res, SavedBattleGame *save, BattleAction action, Position origin, Position targetVoxel, int bulletSprite) : _res(res), _save(save), _action(action), _origin(origin), _targetVoxel(targetVoxel), _position(0), _bulletSprite(bulletSprite), _reversed(false)
+Projectile::Projectile(ResourcePack *res, SavedBattleGame *save, BattleAction action, Position origin, Position targetVoxel, int bulletSprite) : _res(res), _save(save), _action(action), _origin(origin), _targetVoxel(targetVoxel), _position(0), _distance(0.0f), _bulletSprite(bulletSprite), _reversed(false)
 {
 	// this is the number of pixels the sprite will move between frames
 	_speed = Options::battleFireSpeed;
@@ -102,7 +102,8 @@ int Projectile::calculateTrajectory(double accuracy, Position originVoxel)
 {
 	Tile *targetTile = _save->getTile(_action.target);
 	BattleUnit *bu = _action.actor;
-	
+
+	_distance = 0.0f;
 	int test = _save->getTileEngine()->calculateLine(originVoxel, _targetVoxel, false, &_trajectory, bu);
 	if (test != V_EMPTY &&
 		!_trajectory.empty() &&
@@ -188,7 +189,7 @@ int Projectile::calculateTrajectory(double accuracy, Position originVoxel)
 int Projectile::calculateThrow(double accuracy)
 {
 	Tile *targetTile = _save->getTile(_action.target);
-		
+
 	Position originVoxel = _save->getTileEngine()->getOriginVoxel(_action, 0);
 	Position targetVoxel = _action.target * Position(16,16,24) + Position(8,8, (2 + -targetTile->getTerrainLevel()));
 
@@ -203,6 +204,7 @@ int Projectile::calculateThrow(double accuracy)
 		}
 	}
 
+	_distance = 0.0f;
 	double curvature = 0.0;
 	int retVal = V_OUTOFBOUNDS;
 	if (_save->getTileEngine()->validateThrow(_action, originVoxel, targetVoxel, &curvature, &retVal))
@@ -338,6 +340,12 @@ bool Projectile::move()
 			_position--;
 			return false;
 		}
+		else if (_position > 0)
+		{
+			Position p = _trajectory[_position] - _trajectory[_position - 1];
+			p *= p;
+			_distance += sqrt(float(p.x + p.y + p.z));
+		}
 	}
 	return true;
 }
@@ -396,6 +404,15 @@ Surface *Projectile::getSprite() const
  */
 void Projectile::skipTrajectory()
 {
+	if (_position > 0)
+	{
+		for (size_t i = _position; i < _trajectory.size(); ++i)
+		{
+			Position p = _trajectory[i] - _trajectory[i - 1];
+			p *= p;
+			_distance += sqrt(float(p.x + p.y + p.z));
+		}
+	}
 	_position = _trajectory.size() - 1;
 }
 
@@ -419,6 +436,15 @@ Position Projectile::getOrigin() const
 Position Projectile::getTarget() const
 {
 	return _action.target;
+}
+
+/**
+ * Gets distances that projectile have traveled until now.
+ * @return Returns traveled distance.
+ */
+float Projectile::getDistance() const
+{
+	return _distance;
 }
 
 bool Projectile::isReversed() const

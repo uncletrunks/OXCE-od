@@ -46,12 +46,13 @@ private:
 	Tile *_tile;
 	int _power;
 	int _radius;
+	int _range;
 	bool _areaOfEffect, _lowerWeapon, _pistolWhip, _hit;
 	/// Calculates the effects of the explosion.
 	void explode();
 public:
 	/// Creates a new ExplosionBState class.
-	ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, Tile *tile = 0, bool lowerWeapon = false);
+	ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, Tile *tile = 0, bool lowerWeapon = false, int range = 0);
 	/// Cleans up the ExplosionBState.
 	~ExplosionBState();
 	/// Initializes the state.

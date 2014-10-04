@@ -46,11 +46,11 @@ namespace OpenXcom
 /**
  * Sets up an ProjectileFlyBState.
  */
-ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action, Position origin) : BattleState(parent, action), _unit(0), _ammo(0), _projectileItem(0), _origin(origin), _originVoxel(-1,-1,-1), _projectileImpact(0), _initialized(false), _targetFloor(false)
+ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action, Position origin, int range) : BattleState(parent, action), _unit(0), _ammo(0), _projectileItem(0), _origin(origin), _originVoxel(-1,-1,-1), _projectileImpact(0), _range(range), _initialized(false), _targetFloor(false)
 {
 }
 
-ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _ammo(0), _projectileItem(0), _origin(action.actor->getPosition()), _originVoxel(-1,-1,-1), _projectileImpact(0), _initialized(false), _targetFloor(false)
+ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _ammo(0), _projectileItem(0), _origin(action.actor->getPosition()), _originVoxel(-1,-1,-1), _projectileImpact(0), _range(0), _initialized(false), _targetFloor(false)
 {
 }
 
@@ -502,14 +502,13 @@ void ProjectileFlyBState::think()
 				_action.waypoints.pop_front();
 				_action.target = _action.waypoints.front();
 				// launch the next projectile in the waypoint cascade
-				ProjectileFlyBState *nextWaypoint = new ProjectileFlyBState(_parent, _action, _origin);
+				ProjectileFlyBState *nextWaypoint = new ProjectileFlyBState(_parent, _action, _origin, _range + _parent->getMap()->getProjectile()->getDistance());
 				nextWaypoint->setOriginVoxel(_parent->getMap()->getProjectile()->getPosition(-1));
 				if (_origin == _action.target)
 				{
 					nextWaypoint->targetFloor();
 				}
 				_parent->statePushNext(nextWaypoint);
-
 			}
 			else
 			{
@@ -522,16 +521,23 @@ void ProjectileFlyBState::think()
 
 				if (_projectileImpact != V_OUTOFBOUNDS)
 				{
+					bool shotgun = _ammo && _ammo->getRules()->getShotgunPellets() != 0 && _ammo->getRules()->getDamageType()->isDirect();
 					int offset = 0;
 					// explosions impact not inside the voxel but two steps back (projectiles generally move 2 voxels at a time)
 					if (_ammo && _ammo->getRules()->getExplosionRadius() != 0 && _projectileImpact != V_UNIT)
 					{
 						offset = -2;
 					}
-					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(offset), _ammo, _action.actor, 0, (_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem())));
+
+					_parent->statePushFront(new ExplosionBState(
+						_parent, _parent->getMap()->getProjectile()->getPosition(offset),
+						_ammo, _action.actor, 0,
+						(_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem()),
+						shotgun ? 0 : _range + _parent->getMap()->getProjectile()->getDistance()
+					));
 
 					// special shotgun behaviour: trace extra projectile paths, and add bullet hits at their termination points.
-					if (_ammo && _ammo->getRules()->getShotgunPellets() != 0 && _ammo->getRules()->getDamageType()->isDirect())
+					if (shotgun)
 					{
 						int i = 1;
 						int bulletSprite = _ammo->getRules()->getBulletSprite();

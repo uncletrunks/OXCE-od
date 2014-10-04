@@ -51,6 +51,7 @@ private:
 	int _bigSprite, _floorSprite, _handSprite, _bulletSprite;
 	int _fireSound, _hitSound, _hitAnimation;
 	int _power;
+	float _powerRangeReduction;
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType;
 	int _accuracyAuto, _accuracySnap, _accuracyAimed, _tuAuto, _tuSnap, _tuAimed;
@@ -119,6 +120,8 @@ public:
 	int getHitAnimation() const;
 	/// Gets the item's power.
 	int getPower() const;
+	/// Gets amount of power drop per tile.
+	float getPowerRangeReduction() const;
 	/// Gets the item's snapshot accuracy.
 	int getAccuracySnap() const;
 	/// Gets the item's autoshot accuracy.

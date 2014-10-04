@@ -48,8 +48,9 @@ namespace OpenXcom
  * @param unit Unit involved in the explosion (eg unit throwing the grenade).
  * @param tile Tile the explosion is on.
  * @param lowerWeapon Whether the unit causing this explosion should now lower their weapon.
+ * @param range Distance between weapon and target.
  */
-ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, Tile *tile, bool lowerWeapon) : BattleState(parent), _unit(unit), _center(center), _item(item), _damageType(), _tile(tile), _power(0), _radius(6), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _pistolWhip(false), _hit(false)
+ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, Tile *tile, bool lowerWeapon, int range) : BattleState(parent), _unit(unit), _center(center), _item(item), _damageType(), _tile(tile), _power(0), _radius(6), _range(range), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _pistolWhip(false), _hit(false)
 {
 
 }
@@ -87,6 +88,7 @@ void ExplosionBState::init()
 		{
 			// since melee aliens don't use a conventional weapon type, we use their strength instead.
 			_power += _item->getRules()->getBonusPower(_unit->getStats());
+			_power -= _item->getRules()->getPowerRangeReduction() * _range;
 		}
 
 		_areaOfEffect = _item->getRules()->getBattleType() != BT_MELEE &&
@@ -119,7 +121,7 @@ void ExplosionBState::init()
 	Tile *t = _parent->getSave()->getTile(_center.toTile());
 	if (_areaOfEffect)
 	{
-		if (_power)
+		if (_power > 0)
 		{
 			int frame = ResourcePack::EXPLOSION_OFFSET;
 			if (_item)

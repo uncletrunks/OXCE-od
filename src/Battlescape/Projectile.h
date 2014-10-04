@@ -45,6 +45,7 @@ private:
 	Position _origin, _targetVoxel;
 	std::vector<Position> _trajectory;
 	size_t _position;
+	float _distance;
 	Surface *_sprite;
 	int _speed;
 	int _bulletSprite;
@@ -76,6 +77,8 @@ public:
 	Position getOrigin() const;
 	/// Gets the targetted tile for the projectile.
 	Position getTarget() const;
+	/// Gets the distance that projectile traveled.
+	float getDistance() const;
 	bool isReversed() const;
 };
 

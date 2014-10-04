@@ -2444,14 +2444,17 @@ int TileEngine::distanceSq(const Position &pos1, const Position &pos2, bool cons
  */
 bool TileEngine::psiAttack(BattleAction *action)
 {
+	RuleItem *item = action->weapon->getRules();
 	BattleUnit *victim = _save->getTile(action->target)->getUnit();
 	if (!victim)
 		return false;
-	double attackStrength = action->actor->getStats()->psiStrength * action->actor->getStats()->psiSkill / 50.0;
-	double defenseStrength = victim->getStats()->psiStrength
-		+ ((victim->getStats()->psiSkill > 0) ? 10.0 + victim->getStats()->psiSkill / 5.0 : 10.0);
-	double d = distance(action->actor->getPosition(), action->target);
-	attackStrength -= d;
+
+	float attackStrength = item->getPower() + item->getBonusPower(action->actor->getStats());
+	float defenseStrength = 10.0 + victim->getStats()->psiStrength + victim->getStats()->psiSkill / 5.0;
+
+	Position p = action->actor->getPosition().toVexel() - action->target.toVexel();
+	p *= p;
+	attackStrength -= sqrt(float(p.x + p.y + p.z)) * item->getPowerRangeReduction();
 	attackStrength += RNG::generate(0,55);
 
 	if (action->type == BA_MINDCONTROL)
