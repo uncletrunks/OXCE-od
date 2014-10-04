@@ -190,7 +190,7 @@ void ProjectileFlyBState::init()
 		_parent->popState();
 		return;
 	}
-	
+
 	if (_action.type == BA_LAUNCH || (Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && _parent->getSave()->getSide() == FACTION_PLAYER) || !_parent->getPanicHandled())
 	{
 		// target nothing, targets the middle of the tile
@@ -279,7 +279,7 @@ void ProjectileFlyBState::init()
 bool ProjectileFlyBState::createNewProjectile()
 {
 	++_action.autoShotCounter;
-	
+
 	int bulletSprite = -1;
 	if (_action.type != BA_THROW)
 	{
@@ -470,10 +470,7 @@ void ProjectileFlyBState::think()
 			if (_action.type == BA_THROW)
 			{
 				_parent->getMap()->resetCameraSmoothing();
-				Position pos = _parent->getMap()->getProjectile()->getPosition(-1);
-				pos.x /= 16;
-				pos.y /= 16;
-				pos.z /= 24;
+				Position pos = _parent->getMap()->getProjectile()->getPosition(-1).toTile();
 				if (pos.y > _parent->getSave()->getMapSizeY())
 				{
 					pos.y--;
@@ -607,9 +604,9 @@ void ProjectileFlyBState::cancel()
 	if (_parent->getMap()->getProjectile())
 	{
 		_parent->getMap()->getProjectile()->skipTrajectory();
-		Position p = _parent->getMap()->getProjectile()->getPosition();
-		if (!_parent->getMap()->getCamera()->isOnScreen(Position(p.x/16, p.y/16, p.z/24), false))
-			_parent->getMap()->getCamera()->centerOnPosition(Position(p.x/16, p.y/16, p.z/24));
+		Position p = _parent->getMap()->getProjectile()->getPosition().toTile();
+		if (!_parent->getMap()->getCamera()->isOnScreen(p, false))
+			_parent->getMap()->getCamera()->centerOnPosition(p);
 	}
 }
 
@@ -699,7 +696,7 @@ void ProjectileFlyBState::performMeleeAttack()
 	int height = target->getFloatHeight() + (target->getHeight() / 2);
 	Position voxel;
 	_parent->getSave()->getPathfinding()->directionToVector(_unit->getDirection(), &voxel);
-	voxel = _action.target * Position(16, 16, 24) + Position(8,8,height - _parent->getSave()->getTile(_action.target)->getTerrainLevel()) - voxel;
+	voxel = _action.target.toVexel() + Position(8,8,height - _parent->getSave()->getTile(_action.target)->getTerrainLevel()) - voxel;
 	// set the soldier in an aiming position
 	_unit->aim(true);
 	_unit->setCache(0);
@@ -721,4 +718,5 @@ void ProjectileFlyBState::performMeleeAttack()
 	_parent->getMap()->setCursorType(CT_NONE);
 	_parent->statePushNext(new ExplosionBState(_parent, voxel, _action.weapon, _action.actor, 0, true));
 }
+
 }

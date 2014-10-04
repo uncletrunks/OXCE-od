@@ -2469,7 +2469,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 		{
 			int moraleLoss = (110-_save->getTile(action->target)->getUnit()->getStats()->bravery);
 			if (moraleLoss > 0)
-			_save->getTile(action->target)->getUnit()->moraleChange(-moraleLoss);
+				_save->getTile(action->target)->getUnit()->moraleChange(-moraleLoss);
 		}
 		else// if (action->type == BA_MINDCONTROL)
 		{

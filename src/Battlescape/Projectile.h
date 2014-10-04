@@ -73,9 +73,9 @@ public:
 	/// Skips the bullet flight.
 	void skipTrajectory();
 	/// Gets the Position of origin for the projectile.
-	Position getOrigin();
+	Position getOrigin() const;
 	/// Gets the targetted tile for the projectile.
-	Position getTarget();
+	Position getTarget() const;
 	bool isReversed() const;
 };
 

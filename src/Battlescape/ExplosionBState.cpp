@@ -116,7 +116,7 @@ void ExplosionBState::init()
 		_areaOfEffect = true;
 	}
 
-	Tile *t = _parent->getSave()->getTile(Position(_center.x/16, _center.y/16, _center.z/24));
+	Tile *t = _parent->getSave()->getTile(_center.toTile());
 	if (_areaOfEffect)
 	{
 		if (_power)
@@ -232,7 +232,7 @@ void ExplosionBState::explode()
 	if (_hit)
 	{
 		save->getBattleGame()->getCurrentAction()->type = BA_NONE;
-		BattleUnit *targetUnit = save->getTile(_center / Position(16, 16, 24))->getUnit();
+		BattleUnit *targetUnit = save->getTile(_center.toTile())->getUnit();
 		if (_unit && !_unit->isOut())
 		{
 			_unit->aim(false);
@@ -308,7 +308,7 @@ void ExplosionBState::explode()
 	Tile *t = save->getTileEngine()->checkForTerrainExplosions();
 	if (t)
 	{
-		Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
+		Position p = t->getPosition().toVexel();
 		p += Position(8,8,0);
 		_parent->statePushFront(new ExplosionBState(_parent, p, 0, _unit, t));
 	}

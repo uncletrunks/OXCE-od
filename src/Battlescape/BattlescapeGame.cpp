@@ -376,9 +376,6 @@ bool BattlescapeGame::kneel(BattleUnit *bu)
  */
 void BattlescapeGame::endTurn()
 {
-
-	Position p;
-
 	_debugPlay = false;
 	_currentAction.type = BA_NONE;
 	getMap()->getWaypoints()->clear();
@@ -399,9 +396,7 @@ void BattlescapeGame::endTurn()
 		{
 			if ((*it)->getRules()->getBattleType() == BT_GRENADE && (*it)->getFuseTimer() == 0)  // it's a grenade to explode now
 			{
-				p.x = _save->getTiles()[i]->getPosition().x*16 + 8;
-				p.y = _save->getTiles()[i]->getPosition().y*16 + 8;
-				p.z = _save->getTiles()[i]->getPosition().z*24 - _save->getTiles()[i]->getTerrainLevel();
+				Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
 				statePushNext(new ExplosionBState(this, p, (*it), (*it)->getPreviousOwner()));
 				_save->removeItem((*it));
 				statePushBack(0);
@@ -414,7 +409,7 @@ void BattlescapeGame::endTurn()
 	Tile *t = _save->getTileEngine()->checkForTerrainExplosions();
 	if (t)
 	{
-		Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
+		Position p = t->getPosition().toVexel();
 		statePushNext(new ExplosionBState(this, p, 0, 0, t));
 		t = _save->getTileEngine()->checkForTerrainExplosions();
 		statePushBack(0);
@@ -1306,7 +1301,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				}
 				else
 				{
-						_parentState->warning("STR_NO_LINE_OF_FIRE");
+					_parentState->warning("STR_NO_LINE_OF_FIRE");
 				}
 				if (builtinpsi)
 				{
@@ -2059,10 +2054,7 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 						{
 							if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() == 0)
 							{
-								Position p;
-								p.x = t->getPosition().x*16 + 8;
-								p.y = t->getPosition().y*16 + 8;
-								p.z = t->getPosition().z*24 + t->getTerrainLevel();
+								Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
 								statePushNext(new ExplosionBState(this, p, (*i), (*i)->getPreviousOwner()));
 								getSave()->removeItem(*i);
 								unit->setCache(0);

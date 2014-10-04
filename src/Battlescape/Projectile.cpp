@@ -218,11 +218,7 @@ int Projectile::calculateThrow(double accuracy)
 			_trajectory.clear();
 			test = _save->getTileEngine()->calculateParabola(originVoxel, targetVoxel, true, &_trajectory, _action.actor, curvature, deltas);
 
-			Position endPoint = _trajectory.back();
-			endPoint.x /= 16;
-			endPoint.y /= 16;
-			endPoint.z /= 24;
-			Tile *endTile = _save->getTile(endPoint);
+			Tile *endTile = _save->getTile(_trajectory.back().toTile());
 			// check if the item would land on a tile with a blocking object
 			if (_action.type == BA_THROW
 				&& endTile
@@ -304,13 +300,13 @@ void Projectile::applyAccuracy(const Position& origin, Position *target, double 
 		deviation += 50;				// add extra spread to "miss" cloud
 	else
 		deviation += 10;				//accuracy of 109 or greater will become 1 (tightest spread)
-	
+
 	deviation = std::max(1, zShift * deviation / 200);	//range ratio
-		
+
 	target->x += RNG::generate(0, deviation) - deviation / 2;
 	target->y += RNG::generate(0, deviation) - deviation / 2;
 	target->z += RNG::generate(0, deviation / 2) / 2 - deviation / 8;
-	
+
 	if (extendLine)
 	{
 		double rotation, tilt;
@@ -407,11 +403,11 @@ void Projectile::skipTrajectory()
  * Gets the Position of origin for the projectile
  * @return origin as a tile position.
  */
-Position Projectile::getOrigin()
+Position Projectile::getOrigin() const
 {
 	// instead of using the actor's position, we'll use the voxel origin translated to a tile position
 	// this is a workaround for large units.
-	return _trajectory.front() / Position(16,16,24);
+	return _trajectory.front().toTile();
 }
 
 /**
@@ -420,7 +416,7 @@ Position Projectile::getOrigin()
  * but rather the targetted tile
  * @return target as a tile position.
  */
-Position Projectile::getTarget()
+Position Projectile::getTarget() const
 {
 	return _action.target;
 }
@@ -429,4 +425,5 @@ bool Projectile::isReversed() const
 {
 	return _reversed;
 }
+
 }

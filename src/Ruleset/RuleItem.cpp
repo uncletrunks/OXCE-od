@@ -136,6 +136,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		if (_meleeHitSound > 54)
 			_meleeHitSound += modIndex;
 	}
+
 	if (node["damageType"])
 	{
 		//compatibility hack for corpse explosion, that didn't have defined damage type
