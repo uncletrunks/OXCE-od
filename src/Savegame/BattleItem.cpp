@@ -336,6 +336,44 @@ bool BattleItem::occupiesSlot(int x, int y, BattleItem *item) const
 }
 
 /**
+ * Is item using alternative graphic.
+ * @return Return current floor sprite.
+ */
+bool BattleItem::isSpriteAlt() const
+{
+	switch (_rules->getBattleType())
+	{
+	case BT_NONE:
+	case BT_CORPSE:
+		return _unit && _unit->getStatus() != STATUS_DEAD;
+	case BT_FIREARM:
+		return _ammoItem != 0;
+	case BT_GRENADE:
+	case BT_PROXIMITYGRENADE:
+		return _fuseTimer != -1;
+	default:
+		return false;
+	}
+}
+/**
+ * Gets the item's floor sprite.
+ * @return Return current floor sprite.
+ */
+int BattleItem::getFloorSprite() const
+{
+	return isSpriteAlt() ? _rules->getFloorSpriteAlt() : _rules->getFloorSprite();
+}
+
+/**
+ * Gets the item's inventory sprite.
+ * @return Return current inventory sprite.
+ */
+int BattleItem::getBigSprite() const
+{
+	return isSpriteAlt() ? _rules->getBigSpriteAlt() : _rules->getBigSprite();
+}
+
+/**
  * Gets the item's ammo item.
  * @return The ammo item.
  */

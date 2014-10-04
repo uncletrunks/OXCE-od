@@ -58,7 +58,7 @@ Projectile::Projectile(ResourcePack *res, SavedBattleGame *save, BattleAction ac
 	{
 		if (_action.type == BA_THROW)
 		{
-			_sprite = _res->getSurfaceSet("FLOOROB.PCK")->getFrame(getItem()->getRules()->getFloorSprite());
+			_sprite = _res->getSurfaceSet("FLOOROB.PCK")->getFrame(getItem()->getFloorSprite());
 		}
 		else
 		{

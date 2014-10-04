@@ -230,7 +230,7 @@ void Inventory::drawItems()
 			if ((*i) == _selItem)
 				continue;
 
-			Surface *frame = texture->getFrame((*i)->getRules()->getBigSprite());
+			Surface *frame = texture->getFrame((*i)->getBigSprite());
 			if ((*i)->getSlot()->getType() == INV_SLOT)
 			{
 				frame->setX((*i)->getSlot()->getX() + (*i)->getSlotX() * RuleInventory::SLOT_W);
@@ -241,7 +241,7 @@ void Inventory::drawItems()
 				frame->setX((*i)->getSlot()->getX() + (RuleInventory::HAND_W - (*i)->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
 				frame->setY((*i)->getSlot()->getY() + (RuleInventory::HAND_H - (*i)->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
 			}
-			texture->getFrame((*i)->getRules()->getBigSprite())->blit(_items);
+			frame->blit(_items);
 
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
@@ -257,10 +257,10 @@ void Inventory::drawItems()
 			// note that you can make items invisible by setting their width or height to 0 (for example used with tank corpse items)
 			if ((*i) == _selItem || (*i)->getSlotX() < _groundOffset || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0)
 				continue;
-			Surface *frame = texture->getFrame((*i)->getRules()->getBigSprite());
+			Surface *frame = texture->getFrame((*i)->getBigSprite());
 			frame->setX((*i)->getSlot()->getX() + ((*i)->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
 			frame->setY((*i)->getSlot()->getY() + (*i)->getSlotY() * RuleInventory::SLOT_H);
-			texture->getFrame((*i)->getRules()->getBigSprite())->blit(_items);
+			frame->blit(_items);
 
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
@@ -421,7 +421,7 @@ void Inventory::setSelectedItem(BattleItem *item)
 		{
 			_stackLevel[_selItem->getSlotX()][_selItem->getSlotY()] -= 1;
 		}
-		_selItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _selection);
+		_selItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem->isSpriteAlt());
 	}
 	drawItems();
 }

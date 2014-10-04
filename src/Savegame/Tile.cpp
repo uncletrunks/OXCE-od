@@ -754,7 +754,7 @@ int Tile::getTopItemSprite()
 		if ((*i)->getRules()->getWeight() > biggestWeight)
 		{
 			biggestWeight = (*i)->getRules()->getWeight();
-			biggestItem = (*i)->getRules()->getFloorSprite();
+			biggestItem = (*i)->getFloorSprite();
 		}
 	}
 	return biggestItem;
