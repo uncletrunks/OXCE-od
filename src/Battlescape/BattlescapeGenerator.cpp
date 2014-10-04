@@ -1042,8 +1042,7 @@ bool BattlescapeGenerator::addItem(BattleItem *item, BattleUnit *unit, bool allo
 			}
 		}
 	}
-
-	// fixed weapon always placed into hands
+	// fixed weapon should be always placed in hand slots
 	if (item->getRules()->isFixed())
 	{
 		if (!rightWeapon || !leftWeapon)
@@ -1051,113 +1050,114 @@ bool BattlescapeGenerator::addItem(BattleItem *item, BattleUnit *unit, bool allo
 			item->moveToOwner(unit);
 			item->setSlot(!rightWeapon ? rightHand : leftHand);
 			placed = true;
+			_save->getItems()->push_back(item);
+			item->setXCOMProperty(unit->getFaction() == FACTION_PLAYER);
 		}
+		return placed;
 	}
-	else
-	{
-		bool keep = true;
-		switch (item->getRules()->getBattleType())
-		{
-		case BT_FIREARM:
-		case BT_MELEE:
-			if (item->getAmmoItem() || unit->getFaction() != FACTION_PLAYER || !unit->hasInventory())
-			{
-				loaded = true;
-			}
 
-			if (loaded && (unit->getGeoscapeSoldier() == 0 || _allowAutoLoadout))
+	bool keep = true;
+	switch (item->getRules()->getBattleType())
+	{
+	case BT_FIREARM:
+	case BT_MELEE:
+		if (item->getAmmoItem() || unit->getFaction() != FACTION_PLAYER || !unit->hasInventory())
+		{
+			loaded = true;
+		}
+
+		if (loaded && (unit->getGeoscapeSoldier() == 0 || _allowAutoLoadout))
+		{
+			if (!rightWeapon && unit->getStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
 			{
-				if (!rightWeapon && unit->getStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
-				{
-					item->moveToOwner(unit);
-					item->setSlot(rightHand);
-					placed = true;
-				}
-				if (!placed && !leftWeapon && unit->getFaction() != FACTION_PLAYER)
-				{
-					item->moveToOwner(unit);
-					item->setSlot(leftHand);
-					placed = true;
-				}
-			}
-			break;
-		case BT_AMMO:
-			// xcom weapons will already be loaded, aliens and tanks, however, get their ammo added afterwards.
-			// so let's try to load them here.
-			if (rightWeapon && (rightWeapon->getRules()->isFixed() || unit->getFaction() != FACTION_PLAYER) &&
-				!rightWeapon->getRules()->getCompatibleAmmo()->empty() &&
-				!rightWeapon->getAmmoItem() &&
-				rightWeapon->setAmmoItem(item) == 0)
-			{
+				item->moveToOwner(unit);
 				item->setSlot(rightHand);
 				placed = true;
-				break;
 			}
-			if (leftWeapon && (leftWeapon->getRules()->isFixed() || unit->getFaction() != FACTION_PLAYER) &&
-				!leftWeapon->getRules()->getCompatibleAmmo()->empty() &&
-				!leftWeapon->getAmmoItem() &&
-				leftWeapon->setAmmoItem(item))
+			if (!placed && !leftWeapon && (unit->getFaction() != FACTION_PLAYER || item->getRules()->isFixed()))
 			{
+				item->moveToOwner(unit);
 				item->setSlot(leftHand);
 				placed = true;
-				break;
 			}
-			// don't take ammo for weapons we don't have.
-			keep = (unit->getFaction() != FACTION_PLAYER);
-			if (rightWeapon)
+		}
+		break;
+	case BT_AMMO:
+		// xcom weapons will already be loaded, aliens and tanks, however, get their ammo added afterwards.
+		// so let's try to load them here.
+		if (rightWeapon && (rightWeapon->getRules()->isFixed() || unit->getFaction() != FACTION_PLAYER) &&
+			!rightWeapon->getRules()->getCompatibleAmmo()->empty() &&
+			!rightWeapon->getAmmoItem() &&
+			rightWeapon->setAmmoItem(item) == 0)
+		{
+			item->setSlot(rightHand);
+			placed = true;
+			break;
+		}
+		if (leftWeapon && (leftWeapon->getRules()->isFixed() || unit->getFaction() != FACTION_PLAYER) &&
+			!leftWeapon->getRules()->getCompatibleAmmo()->empty() &&
+			!leftWeapon->getAmmoItem() &&
+			leftWeapon->setAmmoItem(item) == 0)
+		{
+			item->setSlot(leftHand);
+			placed = true;
+			break;
+		}
+		// don't take ammo for weapons we don't have.
+		keep = (unit->getFaction() != FACTION_PLAYER);
+		if (rightWeapon)
+		{
+			for (std::vector<std::string>::iterator i = rightWeapon->getRules()->getCompatibleAmmo()->begin(); i != rightWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
 			{
-				for (std::vector<std::string>::iterator i = rightWeapon->getRules()->getCompatibleAmmo()->begin(); i != rightWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
+				if (*i == item->getRules()->getType())
 				{
-					if (*i == item->getRules()->getType())
-					{
-						keep = true;
-						break;
-					}
+					keep = true;
+					break;
 				}
 			}
-			if (leftWeapon)
+		}
+		if (leftWeapon)
+		{
+			for (std::vector<std::string>::iterator i = leftWeapon->getRules()->getCompatibleAmmo()->begin(); i != leftWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
 			{
-				for (std::vector<std::string>::iterator i = leftWeapon->getRules()->getCompatibleAmmo()->begin(); i != leftWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
+				if (*i == item->getRules()->getType())
 				{
-					if (*i == item->getRules()->getType())
-					{
-						keep = true;
-						break;
-					}
+					keep = true;
+					break;
 				}
 			}
-			if (!keep)
+		}
+		if (!keep)
+		{
+			break;
+		}
+	default:
+		if ((unit->getGeoscapeSoldier() == 0 || _allowAutoLoadout))
+		{
+			if (unit->getStats()->strength >= weight) // weight is always considered 0 for aliens
 			{
-				break;
-			}
-		default:
-			if ((unit->getGeoscapeSoldier() == 0 || _allowAutoLoadout))
-			{
-				if (unit->getStats()->strength >= weight) // weight is always considered 0 for aliens
+				for (std::vector<std::string>::const_iterator i = _game->getRuleset()->getInvsList().begin(); i != _game->getRuleset()->getInvsList().end() && !placed; ++i)
 				{
-					for (std::vector<std::string>::const_iterator i = _game->getRuleset()->getInvsList().begin(); i != _game->getRuleset()->getInvsList().end() && !placed; ++i)
+					RuleInventory *slot = _game->getRuleset()->getInventory(*i);
+					if (slot->getType() == INV_SLOT)
 					{
-						RuleInventory *slot = _game->getRuleset()->getInventory(*i);
-						if (slot->getType() == INV_SLOT)
+						for (std::vector<RuleSlot>::iterator j = slot->getSlots()->begin(); j != slot->getSlots()->end() && !placed; ++j)
 						{
-							for (std::vector<RuleSlot>::iterator j = slot->getSlots()->begin(); j != slot->getSlots()->end() && !placed; ++j)
+							if (!Inventory::overlapItems(unit, item, slot, j->x, j->y) && slot->fitItemInSlot(item->getRules(), j->x, j->y))
 							{
-								if (!Inventory::overlapItems(unit, item, slot, j->x, j->y) && slot->fitItemInSlot(item->getRules(), j->x, j->y))
-								{
-									item->moveToOwner(unit);
-									item->setSlot(slot);
-									item->setSlotX(j->x);
-									item->setSlotY(j->y);
-									placed = true;
-									break;
-								}
+								item->moveToOwner(unit);
+								item->setSlot(slot);
+								item->setSlotX(j->x);
+								item->setSlotY(j->y);
+								placed = true;
+								break;
 							}
 						}
 					}
 				}
 			}
-		break;
 		}
+	break;
 	}
 
 	if (placed)
