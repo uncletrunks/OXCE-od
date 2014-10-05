@@ -158,6 +158,8 @@ public:
 	void addLight(int light, int layer);
 	/// Get the shade amount.
 	int getShade() const;
+	/// Get the shade amount except 2th (dynamic) layer.
+	int getExternalShade() const;
 	/// Destroy a tile part.
 	bool destroy(int part);
 	/// Damage a tile part.
