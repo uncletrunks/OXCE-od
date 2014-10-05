@@ -436,6 +436,26 @@ int Tile::getShade() const
 }
 
 /**
+ * Gets the tile's shade amount 0-15. It returns the brightest of all light layers except 2th (dynamic) layer.
+ * Shade level is the inverse of light level. So a maximum amount of light (15) returns shade level 0.
+ * @return shade
+ */
+int Tile::getExternalShade() const
+{
+	int light = 0;
+	// 2th layer (dynamic) not taken into account
+	for (int layer = 0; layer < LIGHTLAYERS; layer++)
+	{
+		if (layer == 2) continue;
+
+		if (_light[layer] > light)
+			light = _light[layer];
+	}
+
+	return std::max(0, 15 - light);
+}
+
+/**
  * Destroy a part on this tile. We first remove the old object, then replace it with the destroyed one.
  * This is because the object type of the old and new one are not necessarily the same.
  * If the destroyed part is an explosive, set the tile's explosive value, which will trigger a chained explosion.
