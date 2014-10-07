@@ -28,10 +28,10 @@ namespace OpenXcom
  */
 RuleDamageType::RuleDamageType() :
 	FixRadius(0), RandomType(DRT_DEFAULT), ResistType(DT_AP), FireBlastCalc(false),
-	IgnoreDirection(false), IgnoreSelfDestruct(false), IgnorePainImmunity(false),
+	IgnoreDirection(false), IgnoreSelfDestruct(false), IgnorePainImmunity(false), IgnoreNormalMoraleLose(false),
 	ArmorEffectiveness(1.0f), RadiusEffectiveness(0.0f),
 	FireThreshold(1000), SmokeThreshold(1000),
-	ToHealth(1.0f), ToArmor(0.1f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f)
+	ToHealth(1.0f), ToArmor(0.1f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f)
 {
 
 }
@@ -92,6 +92,7 @@ void RuleDamageType::load(const YAML::Node& node)
 	IgnoreDirection = node["IgnoreDirection"].as<bool>(IgnoreDirection);
 	IgnoreSelfDestruct = node["IgnoreSelfDestruct"].as<bool>(IgnoreSelfDestruct);
 	IgnorePainImmunity = node["IgnorePainImmunity"].as<bool>(IgnorePainImmunity);
+	IgnoreNormalMoraleLose = node["IgnoreNormalMoraleLose"].as<bool>(IgnoreNormalMoraleLose);
 	ArmorEffectiveness = node["ArmorEffectiveness"].as<float>(ArmorEffectiveness);
 	RadiusEffectiveness = node["RadiusEffectiveness"].as<float>(RadiusEffectiveness);
 
@@ -104,6 +105,9 @@ void RuleDamageType::load(const YAML::Node& node)
 	ToItem = node["ToItem"].as<float>(ToItem);
 	ToTile = node["ToTile"].as<float>(ToTile);
 	ToStun = node["ToStun"].as<float>(ToStun);
+	ToEnergy = node["ToEnergy"].as<float>(ToEnergy);
+	ToTime = node["ToTime"].as<float>(ToTime);
+	ToMorale = node["ToMorale"].as<float>(ToMorale);
 }
 
 } //namespace OpenXcom

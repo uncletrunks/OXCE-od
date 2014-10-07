@@ -48,6 +48,8 @@ struct RuleDamageType
 	bool IgnoreSelfDestruct;
 	/// Damage type can do stun damage to big units.
 	bool IgnorePainImmunity;
+	/// Damage type don't cause morale lose form health damage.
+	bool IgnoreNormalMoraleLose;
 	/// How much of armor is ignored.
 	float ArmorEffectiveness;
 	/// Conversion form power to radius.
@@ -69,6 +71,12 @@ struct RuleDamageType
 	float ToTile;
 	/// Conversion form power to stun level.
 	float ToStun;
+	/// Conversion form power to energy lose.
+	float ToEnergy;
+	/// Conversion form power to time units lose.
+	float ToTime;
+	/// Conversion form power to morale lose.
+	float ToMorale;
 
 	/// Default constructor.
 	RuleDamageType();

@@ -887,6 +887,21 @@ int BattleUnit::getMorale() const
 }
 
 /**
+ * Helper function for setting value with max bound.
+ * @param value
+ * @param max
+ * @param diff
+ */
+static void setValueMax(int& value, int max, int diff)
+{
+	value += diff;
+	if (value < 0)
+		value = 0;
+	else if (value > max)
+		value = max;
+}
+
+/**
  * Do an amount of damage.
  * @param relative The relative position of which part of armor and/or bodypart is hit.
  * @param power The amount of damage to inflict.
@@ -992,16 +1007,11 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 			}
 		}
 
-		// health damage
-		_health -= int(power * type->ToHealth);
-		if (_health < 0)
-		{
-			_health = 0;
-		}
-		else if (_health > _stats.health)
-		{
-			_health = _stats.health;
-		}
+		moraleChange(-(110 - _stats.bravery) * power * type->ToMorale / 100);
+
+		setValueMax(_tu, _stats.tu, - power * type->ToTime);
+		setValueMax(_health, _stats.health, - power * type->ToHealth);
+		setValueMax(_energy, _stats.stamina, - power * type->ToEnergy);
 
 		// fatal wounds
 		if (isWoundable())
