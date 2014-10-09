@@ -32,7 +32,7 @@ namespace OpenXcom
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
 	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _damageType(),
-	_accuracyAuto(0), _accuracySnap(0), _accuracyAimed(0), _tuAuto(0), _tuSnap(0), _tuAimed(0), _clipSize(0), _accuracyMelee(0), _tuMelee(0),
+	_accuracyAuto(0), _accuracySnap(0), _accuracyAimed(0), _tuAuto(0), _tuSnap(0), _tuAimed(0), _clipSize(0), _accuracyMelee(0), _tuMelee(0), _tuPrime(50), _tuThrow(25),
 	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
@@ -182,6 +182,8 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_clipSize = node["clipSize"].as<int>(_clipSize);
 	_accuracyMelee = node["accuracyMelee"].as<int>(_accuracyMelee);
 	_tuMelee = node["tuMelee"].as<int>(_tuMelee);
+	_tuPrime = node["tuPrime"].as<int>(_tuPrime);
+	_tuThrow = node["tuThrow"].as<int>(_tuThrow);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
 	_waypoint = node["waypoint"].as<bool>(_waypoint);
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
@@ -532,6 +534,24 @@ int RuleItem::getTUAimed() const
 int RuleItem::getTUMelee() const
 {
 	return _tuMelee;
+}
+
+/**
+ * Gets the item's time unit percentage for prime grenade.
+ * @return The prime TU percentage.
+ */
+int RuleItem::getTUPrime() const
+{
+	return _tuPrime;
+}
+
+/**
+ * Gets the item's time unit percentage for throwing.
+ * @return The throw TU percentage.
+ */
+int RuleItem::getTUThrow() const
+{
+	return _tuThrow;
 }
 
 /**

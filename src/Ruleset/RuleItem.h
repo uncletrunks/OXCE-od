@@ -57,7 +57,7 @@ private:
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType;
 	int _accuracyAuto, _accuracySnap, _accuracyAimed, _tuAuto, _tuSnap, _tuAimed;
-	int _clipSize, _accuracyMelee, _tuMelee;
+	int _clipSize, _accuracyMelee, _tuMelee, _tuPrime, _tuThrow;
 	BattleType _battleType;
 	bool _twoHanded, _waypoint, _fixedWeapon;
 	int _invWidth, _invHeight;
@@ -144,6 +144,10 @@ public:
 	int getTUAimed() const;
 	/// Gets the item's melee TU cost.
 	int getTUMelee() const;
+	/// Gets the item's prime TU cost.
+	int getTUPrime() const;
+	/// Gets the item's throw TU cost.
+	int getTUThrow() const;
 	/// Gets list of compatible ammo.
 	std::vector<std::string> *getCompatibleAmmo();
 	/// Gets the item's damage type.

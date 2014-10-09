@@ -213,8 +213,9 @@ public:
 	/// The unit is out - either dead or unconscious.
 	bool isOut() const;
 	/// Get the number of time units a certain action takes.
-	int getActionTUs(BattleActionType actionType, BattleItem *item);
-	int getActionTUs(BattleActionType actionType, RuleItem *item);
+	int getActionTUs(BattleActionType actionType, BattleItem *item) const;
+	/// Get the number of time units a certain action takes.
+	int getActionTUs(BattleActionType actionType, RuleItem *item) const;
 	/// Spend time units if it can.
 	bool spendTimeUnits(int tu);
 	/// Spend energy if it can.
@@ -331,6 +332,8 @@ public:
 	std::wstring getName(Language *lang, bool debugAppendId = false) const;
 	/// Gets the unit's stats.
 	UnitStats *getStats();
+	/// Gets the unit's stats.
+	const UnitStats *getStats() const;
 	/// Get the unit's stand height.
 	int getStandHeight() const;
 	/// Get the unit's kneel height.

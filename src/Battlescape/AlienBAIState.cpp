@@ -1717,21 +1717,21 @@ void AlienBAIState::selectFireMethod()
 {
 	int distance = _save->getTileEngine()->distance(_unit->getPosition(), _attackAction->target);
 	_attackAction->type = BA_RETHINK;
-	int tuAuto = _attackAction->weapon->getRules()->getTUAuto();
-	int tuSnap = _attackAction->weapon->getRules()->getTUSnap();
-	int tuAimed = _attackAction->weapon->getRules()->getTUAimed();
+	int tuAuto = _unit->getActionTUs(BA_AUTOSHOT, _attackAction->weapon);
+	int tuSnap = _unit->getActionTUs(BA_SNAPSHOT, _attackAction->weapon);
+	int tuAimed = _unit->getActionTUs(BA_AIMEDSHOT, _attackAction->weapon);
 	int currentTU = _unit->getTimeUnits();
 
 	if (distance < 4)
 	{
-		if ( tuAuto && currentTU >= _unit->getActionTUs(BA_AUTOSHOT, _attackAction->weapon) )
+		if (tuAuto && currentTU >= tuAuto)
 		{
 			_attackAction->type = BA_AUTOSHOT;
 			return;
 		}
-		if ( !tuSnap || currentTU < _unit->getActionTUs(BA_SNAPSHOT, _attackAction->weapon) )
+		if (!tuSnap || currentTU < tuSnap)
 		{
-			if ( tuAimed && currentTU >= _unit->getActionTUs(BA_AIMEDSHOT, _attackAction->weapon) )
+			if (tuAimed && currentTU >= tuAimed)
 			{
 				_attackAction->type = BA_AIMEDSHOT;
 			}
@@ -1742,35 +1742,35 @@ void AlienBAIState::selectFireMethod()
 	}
 
 
-	if ( distance > 12 )
+	if (distance > 12)
 	{
-		if ( tuAimed && currentTU >= _unit->getActionTUs(BA_AIMEDSHOT, _attackAction->weapon) )
+		if (tuAimed && currentTU >= tuAimed)
 		{
 			_attackAction->type = BA_AIMEDSHOT;
 			return;
 		}
-		if ( distance < 20
+		if (distance < 20
 			&& tuSnap
-			&& currentTU >= _unit->getActionTUs(BA_SNAPSHOT, _attackAction->weapon) )
+			&& currentTU >= tuSnap)
 		{
 			_attackAction->type = BA_SNAPSHOT;
 			return;
 		}
 	}
 
-	if ( tuSnap && currentTU >= _unit->getActionTUs(BA_SNAPSHOT, _attackAction->weapon) )
+	if (tuSnap && currentTU >= tuSnap)
 	{
-			_attackAction->type = BA_SNAPSHOT;
-			return;
+		_attackAction->type = BA_SNAPSHOT;
+		return;
 	}
-	if ( tuAimed && currentTU >= _unit->getActionTUs(BA_AIMEDSHOT, _attackAction->weapon) )
+	if (tuAimed && currentTU >= tuAimed)
 	{
-			_attackAction->type = BA_AIMEDSHOT;
-			return;
+		_attackAction->type = BA_AIMEDSHOT;
+		return;
 	}
-	if ( tuAuto && currentTU >= _unit->getActionTUs(BA_AUTOSHOT, _attackAction->weapon) )
+	if (tuAuto && currentTU >= tuAuto)
 	{
-			_attackAction->type = BA_AUTOSHOT;
+		_attackAction->type = BA_AUTOSHOT;
 	}
 }
 
