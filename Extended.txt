@@ -1,0 +1,130 @@
+[b]Extended version of OpenXcom[/b]
+Mod version: 0.8
+OpenXcom version: Nightly 02/10/2014
+
+[b]New ruleset[/b]
+
+[code]
+items:
+  - type: STR_ITEM_TYPE #default config ...
+    tuThrow: 25 #cont of throwing item in %.
+    tuPrime: 50 #cost of priming granade in %.
+    damageBonus: #used by ammo and psi-amp.
+      strength: 0.1 #default value 1.0 if `strengthApplied: true`.
+      psi: 0.0 #bonus equal `psiSkill*psiStrength`. default value 0.02 if psi-amp.
+      psiSkill: 0.5
+      psiStrength: 1.0
+      throw: 1.0
+    powerRangeReduction: 0.0 #how much ammo lost power per tile, used by psi-amp too. default value 1 if psi-amp.
+    damageAlter: #all values have default values based on `damageType`, used by ammo and corpses.
+      FixRadius: 60 #aka `BlastRadius`.
+      RandomType: 1 #how roll damage range.
+      # 0-> default behavior based on damage type
+      # 1-> UFO [0% - 200%]
+      # 2-> TFTD [50% - 150%]
+      # 3-> Flat  [100% - 100%]
+      # 4-> Rng(5,10)
+      # 5-> 0
+      ResistType: 1 #what resist on unit use, and if is fire or smoke it spawn that, same values like `damageType`.
+      FireBlastCalc: false #fire had special way of calculating blast.
+      IgnoreDirection: true #damage ignore direction of hit, used by smoke and fire.
+      IgnoreSelfDestruct: true #do killing using this damage ignore self destruct of unit.
+      IgnorePainImmunity: true #some units don't get stun level form damage.
+      IgnoreNormalMoraleLose: false #do ignore normal morale lose form damage.
+      ArmorEffectiveness: 0.5 #how much armor is effective against this damage.
+      RadiusEffectiveness: 0.3 #how power translate to splash radius.
+      FireThreshold: 0 #how much damage is requare to spawn fire on unit (after armor and ToHealth) or tile.
+      SmokeThreshold: 100 #how much damage is requared to spawn smoke it tile.
+      ToHealth: 1.0 #how much damage is done to health, can be negative.
+      ToArmor: 0.25 #how much damage is done to armor.
+      ToWound: 0.1 #determine probability of wounds.
+      ToItem: 0.0 #how much power is apply to items.
+      ToTile: 0.0 #how much power is apply to ground.
+      ToStun: 0.25 #how much damage increase stun level.
+      ToEnergy: 0.0 #how much power is apply to energy lose.
+      ToTime: 0.0 #how much power is apply to time units lose.
+      ToMorale: 0.0 #how much power is apply to morale lose.
+    requiresBuy: #what tech is requare for item be visible in buy window.
+      - SOME_TECH
+      - SOME_TECH_MK2
+    bigSpriteAlt: 1 #like bigSprite but used when unconscious unit, loaded weapon or armed granade.
+    floorSpriteAlt: 1 #like floorSprite but used when unconscious unit, loaded weapon or armed granade.
+[/code]
+
+[code]
+armors:
+  - type: STR_ARMOR_TYPE #default config ...
+    fearImmune: false #default true for big units
+    bleedImmune: false #default true for big units
+    painImmune: false #default true for big units
+    zombiImmune: false #ignored by big units
+    visibilityAtDark: 9 #default 20 for aliens, 9 for humans
+    builtInWeapons: #same like for unit
+      - STR_SOME_WEAPON
+[/code]
+
+[code]
+crafts:
+  - type: STR_CRAFT_TYPE #default config ...
+    radarChance: 100 #how effective craft radar is, default 100
+    weapons: 4
+    weaponTypes: [0, 0, 0, 1] # slot 1 accept weapon with type 0, ... slot 4 accept weapon with type 1
+    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
+    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
+    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+    armor: 0 #amount of blocked damage per hit.
+[/code]
+
+[code]
+craftWeapons:
+  - type: STR_CRAFTWEAPON_TYPE #default config ...
+    weaponType: 1 #default value 0
+    stats: #stats that are add to crafts stats
+      fuelMax: 0
+      damageMax: 0
+      speedMax: 0
+      accel: 0
+      radarRange: 0
+      radarChance: 0
+      sightRange: 0
+      hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
+      avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
+      powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+      armor: 0 #amount of blocked damage per hit.
+[/code]
+
+[code]
+ufos:
+  - type: STR_UFO_TYPE #default config ...
+    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
+    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
+    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+    armor: 0 #amount of blocked damage per hit.
+    raceBonus: #bonus stats per race
+      STR_SECTOID: #name of race that bonus apply
+        damageMax: 0
+        speedMax: 0
+        accel: 0
+        sightRange: 0
+        hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
+        avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
+        powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+        armor: 0 #amount of blocked damage per hit.
+[/code]
+
+
+[b]Behavior change[/b]
+Hyper wave decoder can have less than 100% chance to detect aliens.
+Explosion don't remove unconscious unit if they can't kill them first.
+Craft weapon equip screen is bit rearranged.
+Fixed "weapons" like medickit are now equipped by unit.
+Psi-amp use 3d range not 2d.
+Psi-amp can use weapon power.
+Fixed ammo are added after weapons in armor and unit (armor items are before unit items).
+
+
+Current working branch:
+https://github.com/Yankes/OpenXcom/tree/OpenXcomExtended
+
+Download available on mod site (require latest nightly):
+http://www.openxcom.com/mod/openxcom-extended 
