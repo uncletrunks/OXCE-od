@@ -27,7 +27,7 @@ namespace OpenXcom
  * @param type String defining the type.
  */
 Armor::Armor(const std::string &type) :
-	_type(type), _spriteSheet(""), _corpseGeo(""), _storeItem(""), _corpseBattle(),
+	_type(type), _spriteSheet(""), _corpseGeo(""), _storeItem(""), _corpseBattle(), _builtInWeapons(),
 	_frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false),
@@ -65,6 +65,7 @@ void Armor::load(const YAML::Node &node)
 		_corpseBattle = node["corpseBattle"].as< std::vector<std::string> >();
 		_corpseGeo = _corpseBattle[0];
 	}
+	_builtInWeapons = node["builtInWeapons"].as<std::vector<std::string> >(_builtInWeapons);
 	_corpseGeo = node["corpseGeo"].as<std::string>(_corpseGeo);
 	_storeItem = node["storeItem"].as<std::string>(_storeItem);
 	_frontArmor = node["frontArmor"].as<int>(_frontArmor);
@@ -314,6 +315,18 @@ bool Armor::getCanHoldWeapon() const
 	return _canHoldWeapon;
 }
 
+/**
+ * What weapons does this armor have built in?
+ * this is a vector of strings representing any
+ * weapons that may be inherent to this armor.
+ * note: unlike "livingWeapon" this is used in ADDITION to
+ * any loadout or living weapon item that may be defined.
+ * @return list of weapons that are integral to this armor.
+ */
+const std::vector<std::string> &Armor::getBuiltInWeapons() const
+{
+	return _builtInWeapons;
+}
 /**
  * Gets max view distance at dark in BattleScape.
  * @return The distance to see at dark.

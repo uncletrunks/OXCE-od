@@ -19,6 +19,8 @@
 #ifndef OPENXCOM_BATTLESCAPEGENERATOR_H
 #define OPENXCOM_BATTLESCAPEGENERATOR_H
 
+#include <vector>
+
 namespace OpenXcom
 {
 
@@ -87,6 +89,8 @@ private:
 	void fuelPowerSources();
 	/// Possibly explodes ufo powersources.
 	void explodePowerSources();
+	/// Add buildIn weapon form list to unit.
+	void addBuildInWeapons(BattleUnit *unit, const std::vector<std::string> &fixed);
 	/// Deploys the XCOM units on the mission.
 	void deployXCOM();
 	/// Runs necessary checks before physically setting the position.

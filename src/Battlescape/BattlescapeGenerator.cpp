@@ -357,6 +357,39 @@ void BattlescapeGenerator::run()
 	_save->getTileEngine()->recalculateFOV();
 }
 
+void BattlescapeGenerator::addBuildInWeapons(BattleUnit *unit, const std::vector<std::string> &fixed)
+{
+	if (!fixed.empty())
+	{
+		std::vector<RuleItem*> ammo;
+		for (std::vector<std::string>::const_iterator j = fixed.begin(); j != fixed.end(); ++j)
+		{
+			RuleItem *ruleItem = _game->getRuleset()->getItem(*j);
+			if (ruleItem)
+			{
+				if (ruleItem->getBattleType() == BT_AMMO)
+				{
+					ammo.push_back(ruleItem);
+					continue;
+				}
+				BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
+				if (!addItem(item, unit))
+				{
+					delete item;
+				}
+			}
+		}
+		for (std::vector<RuleItem*>::const_iterator j = ammo.begin(); j != ammo.end(); ++j)
+		{
+			BattleItem *item = new BattleItem(*j, _save->getCurrentItemId());
+			if (!addItem(item, unit))
+			{
+				delete item;
+			}
+		}
+	}
+}
+
 /**
 * Deploys all the X-COM units and equipment based
 * on the Geoscape base / craft.
@@ -500,7 +533,7 @@ void BattlescapeGenerator::deployXCOM()
 			continue;
 		placeItemByLayout(*i);
 	}
-	
+
 
 	// auto-equip soldiers (only soldiers without layout)
 	for (int pass = 0; pass != 4; ++pass)
@@ -534,7 +567,7 @@ void BattlescapeGenerator::deployXCOM()
 				default:
 					break;
 				}
-				
+
 				if (add)
 				{
 					for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
@@ -591,21 +624,8 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getRuleset()->getArmor(rule->getArmor()), 0));
 	if (unit)
 	{
-		if (!rule->getBuiltInWeapons().empty())
-		{
-			for (std::vector<std::string>::const_iterator i = rule->getBuiltInWeapons().begin(); i != rule->getBuiltInWeapons().end(); ++i)
-			{
-				RuleItem *ruleItem = _game->getRuleset()->getItem(*i);
-				if (ruleItem)
-				{
-					BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
-					if (!addItem(item, unit))
-					{
-						delete item;
-					}
-				}
-			}
-		}
+		addBuildInWeapons(unit, rule->getBuiltInWeapons());
+
 		BattleItem *item = new BattleItem(_game->getRuleset()->getItem(vehicle), _save->getCurrentItemId());
 		if (!addItem(item, unit))
 		{
@@ -632,7 +652,8 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
  */
 BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 {
-//	unit->setId(_unitCount++);
+	// Built in weapons: the unit has this weapon regardless of loadout or what have you.
+	addBuildInWeapons(unit, unit->getArmor()->getBuiltInWeapons());
 
 	if (_craft == 0 || _save->getMissionType() == "STR_ALIEN_BASE_ASSAULT" || _save->getMissionType() == "STR_MARS_THE_FINAL_ASSAULT")
 	{
@@ -753,7 +774,7 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 		std::string alienName = race->getMember((*d).alienRank);
 
 		int quantity;
-		
+
 		if (_game->getSavedGame()->getDifficulty() < DIFF_VETERAN)
 			quantity = (*d).lowQty + RNG::generate(0, (*d).dQty); // beginner/experienced
 		else if (_game->getSavedGame()->getDifficulty() < DIFF_SUPERHUMAN)
@@ -772,21 +793,8 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 			if (unit)
 			{
 				// Built in weapons: the unit has this weapon regardless of loadout or what have you.
-				if (!rule->getBuiltInWeapons().empty())
-				{
-					for (std::vector<std::string>::const_iterator j = rule->getBuiltInWeapons().begin(); j != rule->getBuiltInWeapons().end(); ++j)
-					{
-						RuleItem *ruleItem = _game->getRuleset()->getItem(*j);
-						if (ruleItem)
-						{
-							BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
-							if (!addItem(item, unit))
-							{
-								delete item;
-							}
-						}
-					}
-				}
+				addBuildInWeapons(unit, unit->getArmor()->getBuiltInWeapons());
+				addBuildInWeapons(unit, rule->getBuiltInWeapons());
 
 				// terrorist alien's equipment is a special case - they are fitted with a weapon which is the alien's name with suffix _WEAPON
 				if (rule->isLivingWeapon())

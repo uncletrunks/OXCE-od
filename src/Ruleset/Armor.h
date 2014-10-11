@@ -39,6 +39,7 @@ class Armor
 private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem;
 	std::vector<std::string> _corpseBattle;
+	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
 	int _size, _weight, _visibilityAtDark;
@@ -96,6 +97,8 @@ public:
 	bool getConstantAnimation() const;
 	/// Gets if armor can hold weapon.
 	bool getCanHoldWeapon() const;
+	/// Gets buildin weapons of armor.
+	const std::vector<std::string> &getBuiltInWeapons() const;
 	/// Gets max view distance at dark in BattleScape.
 	int getVisibilityAtDark() const;
 	/// Gets how armor react to fear.
