@@ -1,7 +1,8 @@
 [b]Extended version of OpenXcom[/b]
-Mod version: 0.8
+[b]Mod version 0.8[/b]
 OpenXcom version: Nightly 02/10/2014
 
+[br/][br/]
 [i]New ruleset[/i]
 
 Example of usage:
@@ -113,8 +114,9 @@ ufos:
         armor: 0 #amount of blocked damage per hit.
 [/code]
 
-
+[br/][br/]
 [i]Behavior change[/i]
+
 Hyper wave decoder can have less than 100% chance to detect aliens.
 Explosion don't remove unconscious unit if they can't kill them first.
 Craft weapon equip screen is bit rearranged.
@@ -123,17 +125,21 @@ Psi-amp use 3d range not 2d.
 Psi-amp can use weapon power.
 Fixed ammo are added after weapons in armor and unit (armor items are before unit items).
 
-
+[br/][br/]
 [i]Links[/i]
-Current working branch:
-https://github.com/Yankes/OpenXcom/tree/OpenXcomExtended
 
-Download available on mod site (require latest nightly):
-http://www.openxcom.com/mod/openxcom-extended
+Current working branch:[br/]
+https://github.com/Yankes/OpenXcom/tree/OpenXcomExtended[br/]
+[br/]
+Download available on mod site (require latest nightly):[br/]
+http://www.openxcom.com/mod/openxcom-extended[br/]
+[br/]
+Forum thread:[br/]
+http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641[br/]
 
-Forum thread:
-http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641
-
+[br/]
+[br/]
 [i]Credits[/i]
-redv for couple commits
-SupSuper & WarBoy1982 & Daiky for OpenXcom :)
+
+redv for couple of commits.[br/]
+SupSuper & WarBoy1982 & Daiky for OpenXcom :)[br/]
