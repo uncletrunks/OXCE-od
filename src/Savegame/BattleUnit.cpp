@@ -1321,7 +1321,7 @@ void BattleUnit::clearVisibleTiles()
  */
 int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 {
-
+	const int modifier = getAccuracyModifier(item);
 	int weaponAcc = item->getRules()->getAccuracySnap();
 	if (actionType == BA_AIMEDSHOT || actionType == BA_LAUNCH)
 		weaponAcc = item->getRules()->getAccuracyAimed();
@@ -1331,9 +1331,9 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 	{
 		if (item->getRules()->isSkillApplied())
 		{
-			return (getStats()->melee * item->getRules()->getAccuracyMelee() / 100) * getAccuracyModifier(item) / 100;
+			return (getStats()->melee * item->getRules()->getAccuracyMelee() / 100) * modifier / 100;
 		}
-		return item->getRules()->getAccuracyMelee() * getAccuracyModifier(item) / 100;
+		return item->getRules()->getAccuracyMelee() * modifier / 100;
 	}
 
 	int result = getStats()->firing * weaponAcc / 100;
@@ -1352,7 +1352,7 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 		}
 	}
 
-	return result * getAccuracyModifier(item) / 100;
+	return result * modifier / 100;
 }
 
 /**

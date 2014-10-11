@@ -2,8 +2,9 @@
 Mod version: 0.8
 OpenXcom version: Nightly 02/10/2014
 
-[b]New ruleset[/b]
+[i]New ruleset[/i]
 
+Example of usage:
 [code]
 items:
   - type: STR_ITEM_TYPE #default config ...
@@ -54,66 +55,66 @@ items:
 [code]
 armors:
   - type: STR_ARMOR_TYPE #default config ...
-    fearImmune: false #default true for big units
-    bleedImmune: false #default true for big units
-    painImmune: false #default true for big units
-    zombiImmune: false #ignored by big units
-    visibilityAtDark: 9 #default 20 for aliens, 9 for humans
-    builtInWeapons: #same like for unit
+    fearImmune: false #default true for big units.
+    bleedImmune: false #default true for big units.
+    painImmune: false #default true for big units.
+    zombiImmune: false #ignored by big units.
+    visibilityAtDark: 9 #default 20 for aliens, 9 for humans.
+    builtInWeapons: #same like for unit.
       - STR_SOME_WEAPON
 [/code]
 
 [code]
 crafts:
   - type: STR_CRAFT_TYPE #default config ...
-    radarChance: 100 #how effective craft radar is, default 100
-    weapons: 4
-    weaponTypes: [0, 0, 0, 1] # slot 1 accept weapon with type 0, ... slot 4 accept weapon with type 1
-    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
-    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
-    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+    radarChance: 100 #how effective craft radar is, default 100.
+    weapons: 4 #weapon number increase to 4.
+    weaponTypes: [0, 0, 0, 1] # slot 1 accept weapon with type 0, ... slot 4 accept weapon with type 1.
+    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
+    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
+    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
     armor: 0 #amount of blocked damage per hit.
 [/code]
 
 [code]
 craftWeapons:
   - type: STR_CRAFTWEAPON_TYPE #default config ...
-    weaponType: 1 #default value 0
-    stats: #stats that are add to crafts stats
-      fuelMax: 0
-      damageMax: 0
-      speedMax: 0
-      accel: 0
-      radarRange: 0
-      radarChance: 0
-      sightRange: 0
-      hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
-      avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
-      powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+    weaponType: 1 #default value 0.
+    stats: #stats that are add to crafts stats.
+      fuelMax: 0 #additive bonus to craft stats.
+      damageMax: 0 #additive bonus to craft stats.
+      speedMax: 0 #additive bonus to craft stats.
+      accel: 0 #additive bonus to craft stats.
+      radarRange: 0 #additive bonus to craft stats.
+      radarChance: 0 #additive bonus to craft stats.
+      sightRange: 0 #additive bonus to craft stats.
+      hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
+      avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
+      powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
       armor: 0 #amount of blocked damage per hit.
 [/code]
 
 [code]
 ufos:
   - type: STR_UFO_TYPE #default config ...
-    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
-    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
-    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
+    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
+    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
     armor: 0 #amount of blocked damage per hit.
-    raceBonus: #bonus stats per race
-      STR_SECTOID: #name of race that bonus apply
-        damageMax: 0
-        speedMax: 0
-        accel: 0
-        sightRange: 0
-        hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100]
-        avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100]
-        powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100]
+    raceBonus: #bonus stats per race.
+      STR_SECTOID: #name of race that bonus apply.
+        damageMax: 0 #additive bonus to craft stats.
+        speedMax: 0 #additive bonus to craft stats.
+        accel: 0 #additive bonus to craft stats.
+        sightRange: 0 #additive bonus to craft stats.
+        hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
+        avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
+        powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
         armor: 0 #amount of blocked damage per hit.
 [/code]
 
 
-[b]Behavior change[/b]
+[i]Behavior change[/i]
 Hyper wave decoder can have less than 100% chance to detect aliens.
 Explosion don't remove unconscious unit if they can't kill them first.
 Craft weapon equip screen is bit rearranged.
@@ -123,8 +124,16 @@ Psi-amp can use weapon power.
 Fixed ammo are added after weapons in armor and unit (armor items are before unit items).
 
 
+[i]Links[/i]
 Current working branch:
 https://github.com/Yankes/OpenXcom/tree/OpenXcomExtended
 
 Download available on mod site (require latest nightly):
-http://www.openxcom.com/mod/openxcom-extended 
+http://www.openxcom.com/mod/openxcom-extended
+
+Forum thread:
+http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641
+
+[i]Credits[/i]
+redv for couple commits
+SupSuper & WarBoy1982 & Daiky for OpenXcom :)
