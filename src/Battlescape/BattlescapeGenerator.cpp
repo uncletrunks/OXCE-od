@@ -445,7 +445,7 @@ void BattlescapeGenerator::deployXCOM()
 		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
 			(_craft == 0 && (*i)->getWoundRecovery() == 0 && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 		{
-			BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, FACTION_PLAYER));
+			BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth()));
 			if (unit && !_save->getSelectedUnit())
 				_save->setSelectedUnit(unit);
 		}
@@ -621,7 +621,7 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 {
 	std::string vehicle = v->getRules()->getType();
 	Unit *rule = _game->getRuleset()->getUnit(vehicle);
-	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getRuleset()->getArmor(rule->getArmor()), 0));
+	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getRuleset()->getArmor(rule->getArmor()), 0, _save->getDepth()));
 	if (unit)
 	{
 		addBuildInWeapons(unit, rule->getBuiltInWeapons());
@@ -687,8 +687,15 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 		{
 			Position pos = Position((*i)[0] + (_craftX * 10), (*i)[1] + (_craftY * 10), (*i)[2] + _craftZ);
 			int dir = (*i)[3];
-
-			if (canPlaceXCOMUnit(_save->getTile(pos)))
+			bool canPlace = true;
+			for (int x = 0; x < unit->getArmor()->getSize(); ++x)
+			{
+				for (int y = 0; y < unit->getArmor()->getSize(); ++y)
+				{
+					canPlace = (canPlace && canPlaceXCOMUnit(_save->getTile(pos + Position(x,y,0))));
+				}
+			}
+			if (canPlace)
 			{
 				if (_save->setUnitPosition(unit, pos))
 				{
@@ -847,7 +854,7 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outside)
 {
 	int difficulty = (int)(_game->getSavedGame()->getDifficulty());
-	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), difficulty);
+	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), difficulty, _save->getDepth());
 	Node *node = 0;
 
 	/* following data is the order in which certain alien ranks spawn on certain node ranks */
@@ -885,8 +892,28 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
 	}
 	else
 	{
-		delete unit;
-		unit = 0;
+		// ASSASSINATION CHALLENGE SPECIAL: screw the player, just because we didn't find a node,
+		// doesn't mean we can't ruin Tornis's day: spawn as many aliens as possible.
+		if (_game->getSavedGame()->getDifficulty() >= DIFF_SUPERHUMAN && placeUnitNearFriend(unit))
+		{
+			unit->setAIState(new AlienBAIState(_game->getSavedGame()->getSavedBattle(), unit, 0));
+			unit->setRankInt(alienRank);
+			int dir = _save->getTileEngine()->faceWindow(unit->getPosition());
+			Position craft = _game->getSavedGame()->getSavedBattle()->getUnits()->at(0)->getPosition();
+			if (_save->getTileEngine()->distance(unit->getPosition(), craft) <= 20 && RNG::percent(20 * difficulty))
+				dir = unit->directionTo(craft);
+			if (dir != -1)
+				unit->setDirection(dir);
+			else
+				unit->setDirection(RNG::generate(0,7));
+
+			_save->getUnits()->push_back(unit);
+		}
+		else
+		{
+			delete unit;
+			unit = 0;
+		}
 	}
 
 	return unit;
@@ -899,7 +926,7 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
  */
 BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), 0);
+	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), 0, _save->getDepth());
 	Node *node = _save->getSpawnNode(0, unit);
 
 	if (node)
@@ -1925,7 +1952,7 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 		int pos_x = value[1];
 		int pos_y = value[0];
 		int pos_z = value[2];
-		if (pos_x < mapblock->getSizeX() && pos_y < mapblock->getSizeY() && pos_z < _mapsize_z )
+		if (pos_x < mapblock->getSizeX() && pos_y < mapblock->getSizeY() && pos_z < _mapsize_z)
 		{
 			Position pos = Position(xoff + pos_x, yoff + pos_y, mapblock->getSizeZ() - 1 - pos_z);
 			int type     = value[19];

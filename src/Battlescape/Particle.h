@@ -16,27 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_FMATH_H
-#define OPENXCOM_FMATH_H
+#ifndef OPENXCOM_PARTICLE_H
+#define OPENXCOM_PARTICLE_H
 
-#include <limits>
-#include <cmath>
+#include <SDL_types.h>
 
-template <class _Tx>
-inline bool AreSame(const _Tx& l, const _Tx& r) {
-  return std::fabs(l-r) <= std::numeric_limits<_Tx>::epsilon();
-}
-
-template <class _Tx>
-inline _Tx Round(const _Tx& x)
+namespace OpenXcom
 {
-	return x < static_cast<_Tx>(0) ? std::ceil(x - static_cast<_Tx>(0.5)) : std::floor(x + static_cast<_Tx>(0.5));
+
+class Particle
+{
+private:
+	float _xOffset, _yOffset, _density;
+	Uint8 _color, _opacity, _size;
+public:
+	/// Create a particle.
+	Particle(float xOffset, float yOffset, float density, Uint8 color, Uint8 opacity);
+	/// Destroy a particle.
+	~Particle();
+	/// Animate a particle.
+	bool animate();
+	/// Get the size value.
+	int getSize() { return _size; }
+	/// Get the color.
+	Uint8 getColor() { return _color; }
+	/// Get the opacity.
+	Uint8 getOpacity() {return _opacity / 5; }
+	/// Get the horizontal shift.
+	float getX() { return _xOffset; }
+	/// Get the vertical shift.
+	float getY() { return _yOffset; }
+};
+
 }
 
-template <class _Tx>
-inline _Tx Sqr(const _Tx& x)
-{
-	return x * x;
-}
 #endif
-

@@ -92,7 +92,7 @@ void Pathfinding::calculate(BattleUnit *unit, Position endPosition, BattleUnit *
 	bool sneak = Options::sneakyAI && unit->getFaction() == FACTION_HOSTILE;
 
 	Position startPosition = unit->getPosition();
-	_movementType = unit->getArmor()->getMovementType();
+	_movementType = unit->getMovementType();
 	if (target != 0 && maxTUCost == -1)  // pathfinding for missile
 	{
 		_movementType = MT_FLY;
@@ -434,6 +434,12 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 			if (_unit->getFaction() == FACTION_HOSTILE &&
 				destinationTile->getFire() > 0)
 				cost += 32; // try to find a better path, but don't exclude this path entirely.
+
+			// TFTD thing: tiles on fire are cost 2 TUs more for whatever reason.
+			if (_save->getDepth() > 0 && destinationTile->getFire() > 0)
+			{
+				cost += 2;
+			}
 
 			// Strafing costs +1 for forwards-ish or sidewards, propose +2 for backwards-ish directions
 			// Maybe if flying then it makes no difference?
@@ -821,7 +827,7 @@ bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const i
 	}
 	else
 	{
-		if (bu->getArmor()->getMovementType() == MT_FLY)
+		if (bu->getMovementType() == MT_FLY)
 		{
 			if ((direction == DIR_UP && destinationTile && !destinationTile->getMapData(MapData::O_FLOOR)) // flying up only possible when there is no roof
 				|| (direction == DIR_DOWN && destinationTile && startTile->hasNoFloor(belowStart)) // falling down only possible when there is no floor
@@ -1157,7 +1163,7 @@ void Pathfinding::setUnit(BattleUnit* unit)
 	_unit = unit;
 	if (unit != 0)
 	{
-		_movementType = unit->getArmor()->getMovementType();
+		_movementType = unit->getMovementType();
 	}
 	else
 	{

@@ -117,11 +117,12 @@ private:
 	int _breathFrame;
 	bool _breathing;
 	bool _floorAbove;
+	MovementType _movementType;
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
 	/// Creates a BattleUnit.
-	BattleUnit(Soldier *soldier, UnitFaction faction);
-	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff);
+	BattleUnit(Soldier *soldier, int depth);
+	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth);
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.
@@ -447,6 +448,9 @@ public:
 	void setEnviSmoke(int damage);
 	/// Calculate smoke and fire damage form environment.
 	void calculateEnviDamage(Ruleset *ruleset);
+	/// Use this function to check the unit's movement type.
+	MovementType getMovementType() const;
+
 };
 
 }

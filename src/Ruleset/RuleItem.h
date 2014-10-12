@@ -73,7 +73,7 @@ private:
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
 	bool _skillApplied, _LOSRequired, _underwaterOnly;
-	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType;
+	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	float _strengthBonus, _psiBonus, _psiSkillBonus, _psiStrengthBonus, _throwBonus;
 public:
 	/// Creates a blank item ruleset.
@@ -242,6 +242,13 @@ public:
 	int getBonusPower(UnitStats* stats) const;
 	/// Get the associated special type of this item.
 	int getSpecialType() const;
+	/// Get the color offset to use for the vapor trail.
+	int getVaporColor() const;
+	/// Gets the vapor cloud density.
+	int getVaporDensity() const;
+	/// Gets the vapor cloud probability.
+	int getVaporProbability() const;
+
 };
 
 }

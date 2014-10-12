@@ -29,6 +29,7 @@
 #include "../Ruleset/RuleItem.h"
 #include "../Ruleset/Armor.h"
 #include "SerializationHelper.h"
+#include "../Battlescape/Particle.h"
 
 namespace OpenXcom
 {
@@ -74,6 +75,11 @@ Tile::Tile(const Position& pos): _smoke(0), _fire(0), _explosive(0), _pos(pos), 
 Tile::~Tile()
 {
 	_inventory.clear();
+	for (std::list<Particle*>::iterator i = _particles.begin(); i != _particles.end(); ++i)
+	{
+		delete *i;
+	}
+	_particles.clear();
 }
 
 /**
@@ -276,7 +282,7 @@ bool Tile::isBigWall() const
 
 /**
  * If an object stand on this tile, this returns how high the unit is it standing.
- * @return the level in pixels
+ * @return the level in pixels (so negative values are higher)
  */
 int Tile::getTerrainLevel() const
 {
@@ -284,8 +290,9 @@ int Tile::getTerrainLevel() const
 
 	if (_objects[MapData::O_FLOOR])
 		level = _objects[MapData::O_FLOOR]->getTerrainLevel();
+	// whichever's higher, but not the sum.
 	if (_objects[MapData::O_OBJECT])
-		level += _objects[MapData::O_OBJECT]->getTerrainLevel();
+		level = std::min(_objects[MapData::O_OBJECT]->getTerrainLevel(), level);
 
 	return level;
 }
@@ -323,7 +330,7 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 
 	if (_objects[part]->isDoor())
 	{
-		if (unit && unit->getTimeUnits() < _objects[part]->getTUCost(unit->getArmor()->getMovementType()) + unit->getActionTUs(reserve, unit->getMainHandWeapon(false)))
+		if (unit && unit->getTimeUnits() < _objects[part]->getTUCost(unit->getMovementType()) + unit->getActionTUs(reserve, unit->getMainHandWeapon(false)))
 			return 4;
 		if (_unit && _unit != unit && _unit->getPosition() != getPosition())
 			return -1;
@@ -334,7 +341,7 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 	}
 	if (_objects[part]->isUFODoor() && _currentFrame[part] == 0) // ufo door part 0 - door is closed
 	{
-		if (unit &&	unit->getTimeUnits() < _objects[part]->getTUCost(unit->getArmor()->getMovementType()) + unit->getActionTUs(reserve, unit->getMainHandWeapon(false)))
+		if (unit &&	unit->getTimeUnits() < _objects[part]->getTUCost(unit->getMovementType()) + unit->getActionTUs(reserve, unit->getMainHandWeapon(false)))
 			return 4;
 		_currentFrame[part] = 1; // start opening door
 		return 1;
@@ -633,6 +640,18 @@ void Tile::animate()
 			_currentFrame[i] = newframe;
 		}
 	}
+	for (std::list<Particle*>::iterator i = _particles.begin(); i != _particles.end();)
+	{
+		if (!(*i)->animate())
+		{
+			delete *i;
+			i = _particles.erase(i);
+		}
+		else
+		{
+			++i;
+		}
+	}
 }
 
 /**
@@ -928,6 +947,24 @@ void Tile::setDangerous()
 bool Tile::getDangerous()
 {
 	return _danger;
+}
+
+/**
+ * adds a particle to this tile's internal storage buffer.
+ * @param particle the particle to add.
+ */
+void Tile::addParticle(Particle *particle)
+{
+	_particles.push_back(particle);
+}
+
+/**
+ * gets a pointer to this tile's particle array.
+ * @return a pointer to the internal array of particles.
+ */
+std::list<Particle *> *Tile::getParticleCloud()
+{
+	return &_particles;
 }
 
 }
