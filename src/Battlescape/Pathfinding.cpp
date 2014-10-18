@@ -581,7 +581,8 @@ bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarge
 	if (part == MapData::O_WESTWALL)
 	{
 		if (tile->getMapData(MapData::O_OBJECT) &&
-			tile->getMapData(MapData::O_OBJECT)->getBigWall() == BIGWALLWEST)
+			(tile->getMapData(MapData::O_OBJECT)->getBigWall() == BIGWALLWEST ||
+			tile->getMapData(MapData::O_OBJECT)->getBigWall() == BIGWALLWESTANDNORTH ))
 			return true; // blocking part
 		Tile *tileWest = _save->getTile(tile->getPosition() + Position(-1, 0, 0));
 		if (!tileWest) return true;	// do not look outside of map
@@ -593,7 +594,8 @@ bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarge
 	if (part == MapData::O_NORTHWALL)
 	{
 		if (tile->getMapData(MapData::O_OBJECT) &&
-			tile->getMapData(MapData::O_OBJECT)->getBigWall() == BIGWALLNORTH)
+			(tile->getMapData(MapData::O_OBJECT)->getBigWall() == BIGWALLNORTH ||
+			tile->getMapData(MapData::O_OBJECT)->getBigWall() == BIGWALLWESTANDNORTH ))
 			return true; // blocking part
 		Tile *tileNorth = _save->getTile(tile->getPosition() + Position(0, -1, 0));
 		if (!tileNorth) return true; // do not look outside of map
@@ -794,6 +796,35 @@ bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endP
 	if (_save->getTile(endPosition + Position(1, 0, 0)) && _save->getTile(endPosition + Position(1, 0, 0))->getTerrainLevel() == -16)
 	{
 		if (_save->getTile(endPosition + Position(2, 0, 0)) && _save->getTile(endPosition + Position(2, 0, 0))->getTerrainLevel() != -8)
+		{
+			return false;
+		}
+		if (startPosition == endPosition + Position(1, 0, 0) || startPosition == endPosition + Position(2, 0, 0) || startPosition == endPosition + Position(3, 0, 0))
+		{
+			return true;
+		}
+	}
+
+	//TFTD stairs 1 : endposition has to the south a terrainlevel -18 object (upper part of the stairs)
+	if (_save->getTile(endPosition + Position(0, 1, 0)) && _save->getTile(endPosition + Position(0, 1, 0))->getTerrainLevel() == -18)
+	{
+		// condition 2 : one position further to the south there has to be a terrainlevel -8 object (lower part of the stairs)
+		if (_save->getTile(endPosition + Position(0, 2, 0)) && _save->getTile(endPosition + Position(0, 2, 0))->getTerrainLevel() != -12)
+		{
+			return false;
+		}
+
+		// condition 3 : the start position has to be on either of the 3 tiles to the south of the endposition
+		if (startPosition == endPosition + Position(0, 1, 0) || startPosition == endPosition + Position(0, 2, 0) || startPosition == endPosition + Position(0, 3, 0))
+		{
+			return true;
+		}
+	}
+
+	// same for the east-west oriented stairs.
+	if (_save->getTile(endPosition + Position(1, 0, 0)) && _save->getTile(endPosition + Position(1, 0, 0))->getTerrainLevel() == -18)
+	{
+		if (_save->getTile(endPosition + Position(2, 0, 0)) && _save->getTile(endPosition + Position(2, 0, 0))->getTerrainLevel() != -12)
 		{
 			return false;
 		}
