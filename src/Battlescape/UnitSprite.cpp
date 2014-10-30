@@ -124,8 +124,24 @@ struct ColorFace
 	}
 };
 
-
+/**
+ * Helper function calculating out unit if over damaged.
+ * @param src Source surface with dying graphic.
+ * @param dest Destination surface.
+ * @param unit Dying unit.
+ * @return Value of fadeout.
+ */
+static inline void burnOut(Surface *src, Surface *dest, BattleUnit *unit)
+{
+	int burn = 0;
+	if (unit->isExploding())
+	{
+		burn = - 16 * unit->getHealth() * (unit->getFallingPhase() + 1) / unit->getArmor()->getDeathFrames() / unit->getStats()->health;
+	}
+	src->blitNShade(dest, 0, 0, burn);
 }
+
+} //namespace
 
 /**
  * Sets the animation frame for animated units.
@@ -271,7 +287,7 @@ void UnitSprite::drawRoutine0()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		torso->blit(this);
+		burnOut(torso, this, _unit);
 		if (_unit->getGeoscapeSoldier() && Options::battleHairBleach)
 		{
 			SoldierLook look = _unit->getGeoscapeSoldier()->getLook();
@@ -661,7 +677,7 @@ void UnitSprite::drawRoutine1()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		torso->blit(this);
+		burnOut(torso, this, _unit);
 		return;
 	}
 
@@ -911,7 +927,7 @@ void UnitSprite::drawRoutine4()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		s = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		s->blit(this);
+		burnOut(s, this, _unit);
 		return;
 	}
 	else if (_unit->getStatus() == STATUS_WALKING)
@@ -1062,7 +1078,7 @@ void UnitSprite::drawRoutine6()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		torso->blit(this);
+		burnOut(torso, this, _unit);
 		return;
 	}
 
@@ -1251,7 +1267,7 @@ void UnitSprite::drawRoutine7()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		torso->blit(this);
+		burnOut(torso, this, _unit);
 		return;
 	}
 
@@ -1343,7 +1359,7 @@ void UnitSprite::drawRoutine9()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
 
-	torso->blit(this);
+	burnOut(torso, this, _unit);
 }
 
 /**
@@ -1443,7 +1459,7 @@ void UnitSprite::drawRoutine12()
 	{
 		// biodrone death frames
 		s = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		s->blit(this);
+		burnOut(s, this, _unit);
 		return;
 	}
 
@@ -1468,7 +1484,7 @@ void UnitSprite::drawRoutine19()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		s = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		s->blit(this);
+		burnOut(s, this, _unit);
 		return;
 	}
 

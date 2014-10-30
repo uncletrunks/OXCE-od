@@ -28,7 +28,7 @@
 
 namespace OpenXcom
 {
-	
+
 enum ForcedTorso{ TORSO_USE_GENDER, TORSO_ALWAYS_MALE, TORSO_ALWAYS_FEMALE };
 /**
  * Represents a specific type of armor.

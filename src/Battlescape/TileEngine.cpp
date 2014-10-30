@@ -853,7 +853,7 @@ std::vector<BattleUnit *> TileEngine::getSpottingUnits(BattleUnit* unit)
 			// not dead/unconscious
 		if (!(*i)->isOut() &&
 			// not dying
-			(*i)->getHealth() != 0 &&
+			(*i)->getHealth() > 0 &&
 			// not about to pass out
 			(*i)->getStunlevel() < (*i)->getHealth() &&
 			// not a friend
@@ -1063,7 +1063,7 @@ void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  */
 bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& relative, int damage, const RuleDamageType* type)
 {
-	if (!target || !target->getHealth())
+	if (!target || target->getHealth() <= 0)
 	{
 		return false;
 	}
@@ -2550,7 +2550,7 @@ Tile *TileEngine::applyGravity(Tile *t)
 		}
 		if (unitpos != occupant->getPosition())
 		{
-			if (occupant->getHealth() != 0 && occupant->getStunlevel() < occupant->getHealth())
+			if (occupant->getHealth() > 0 && occupant->getStunlevel() < occupant->getHealth())
 			{
 				if (occupant->getMovementType() == MT_FLY)
 				{

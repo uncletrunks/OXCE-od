@@ -816,6 +816,14 @@ bool BattleUnit::isFloating() const
 }
 
 /**
+ * Is exploding? If unit get lot of damage it's don't leave corpse behind.
+ * @return true/false
+ */
+bool BattleUnit::isExploding() const
+{
+	return _health < _stats.health / 2;
+}
+/**
  * Aim. (shows the right hand sprite and weapon holding)
  * @param aiming true/false
  */
@@ -921,11 +929,11 @@ int BattleUnit::getMorale() const
  * @param max
  * @param diff
  */
-static void setValueMax(int& value, int max, int diff)
+static void setValueMax(int& value, int diff, int min, int max)
 {
 	value += diff;
-	if (value < 0)
-		value = 0;
+	if (value < min)
+		value = min;
 	else if (value > max)
 		value = max;
 }
@@ -942,7 +950,7 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
 
-	if (power <= 0 || !_health)
+	if (power <= 0 || _health <= 0)
 	{
 		return 0;
 	}
@@ -1038,9 +1046,9 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 
 		moraleChange(-(110 - _stats.bravery) * power * type->ToMorale / 100);
 
-		setValueMax(_tu, _stats.tu, - power * type->ToTime);
-		setValueMax(_health, _stats.health, - power * type->ToHealth);
-		setValueMax(_energy, _stats.stamina, - power * type->ToEnergy);
+		setValueMax(_tu, - power * type->ToTime, 0, _stats.tu);
+		setValueMax(_health, - power * type->ToHealth, - _stats.health, _stats.health);
+		setValueMax(_energy, - power * type->ToEnergy, 0, _stats.stamina);
 
 		// fatal wounds
 		if (isWoundable())
@@ -1120,7 +1128,7 @@ void BattleUnit::keepFalling()
 	if (_fallPhase == _armor->getDeathFrames())
 	{
 		_fallPhase--;
-		if (_health == 0)
+		if (_health <= 0)
 			_status = STATUS_DEAD;
 		else
 			_status = STATUS_UNCONSCIOUS;
@@ -1523,11 +1531,11 @@ void BattleUnit::prepareNewTurn()
 		_fire--;
 	}
 
-	if (_health < 0)
-		_health = 0;
+	if (_health < -_stats.health)
+		_health = -_stats.health;
 
 	// if unit is dead, AI state should be gone
-	if (_health == 0 && _currentAIState)
+	if (_health <= 0 && _currentAIState)
 	{
 		_currentAIState->exit();
 		delete _currentAIState;

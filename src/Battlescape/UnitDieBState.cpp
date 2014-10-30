@@ -50,7 +50,8 @@ namespace OpenXcom
  * @param damageType Type of damage that caused the death.
  * @param noSound Whether to disable the death sound.
  */
-UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const RuleDamageType* damageType, bool noSound) : BattleState(parent), _unit(unit), _damageType(damageType), _noSound(noSound)
+UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const RuleDamageType* damageType, bool noSound) : BattleState(parent),
+	_unit(unit), _damageType(damageType), _noSound(noSound), _overKill(false), _originalDir(0)
 {
 	// don't show the "fall to death" animation when a unit is blasted with explosives or he is already unconscious
 	if (!_damageType->isDirect() || _unit->getStatus() == STATUS_UNCONSCIOUS)
@@ -92,6 +93,8 @@ UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const Ru
             }
         }
     }
+
+	_overKill = unit->isExploding();
 }
 
 /**
@@ -155,6 +158,7 @@ void UnitDieBState::think()
 		{
 			_unit->setTurnsSinceSpotted(255);
 		}
+
 		if (!_unit->getSpawnUnit().empty())
 		{
 			// converts the dead zombie to a chryssalid
@@ -165,6 +169,7 @@ void UnitDieBState::think()
 		{
 			convertUnitToCorpse();
 		}
+
 		_parent->getTileEngine()->calculateUnitLighting();
 		_parent->popState();
 		if (_unit->getOriginalFaction() == FACTION_PLAYER && _unit->getSpawnUnit().empty() && _unit->getArmor()->getSize() == 1)
@@ -224,29 +229,34 @@ void UnitDieBState::convertUnitToCorpse()
 		_parent->getSave()->removeUnconsciousBodyItem(_unit);
 	}
 	int size = _unit->getArmor()->getSize();
-	BattleItem *itemToKeep = 0;
 	bool dropItems = !Options::weaponSelfDestruction || (_unit->getOriginalFaction() != FACTION_HOSTILE || _unit->getStatus() == STATUS_UNCONSCIOUS);
 	// move inventory from unit to the ground for non-large units
-	if (size == 1 && dropItems)
+	if (size == 1)
 	{
+		const int itemToKeepMax = 2;
+		int itemToKeepPos = 0;
+		BattleItem *itemToKeep[itemToKeepMax] = { };
 		for (std::vector<BattleItem*>::iterator i = _unit->getInventory()->begin(); i != _unit->getInventory()->end(); ++i)
 		{
-			_parent->dropItem(lastPosition, (*i));
 			if (!(*i)->getRules()->isFixed())
 			{
-				(*i)->setOwner(0);
+				if (dropItems)
+				{
+					_parent->dropItem(lastPosition, (*i));
+					(*i)->setOwner(0);
+				}
 			}
-			else
+			else if (itemToKeepPos < itemToKeepMax)
 			{
-				itemToKeep = *i;
+				itemToKeep[itemToKeepPos++] = *i;
 			}
 		}
-	}
-	_unit->getInventory()->clear();
+		_unit->getInventory()->clear();
 
-	if (itemToKeep != 0)
-	{
-		_unit->getInventory()->push_back(itemToKeep);
+		while (itemToKeepPos)
+		{
+			_unit->getInventory()->push_back(itemToKeep[--itemToKeepPos]);
+		}
 	}
 
 	// remove unit-tile link
@@ -254,19 +264,26 @@ void UnitDieBState::convertUnitToCorpse()
 
 	if (lastPosition == Position(-1,-1,-1)) // we're being carried
 	{
-		// replace the unconscious body item with a corpse in the carrying unit's inventory
-		for (std::vector<BattleItem*>::iterator it = _parent->getSave()->getItems()->begin(); it != _parent->getSave()->getItems()->end(); )
+		if (_overKill)
 		{
-			if ((*it)->getUnit() == _unit)
+			_parent->getSave()->removeUnconsciousBodyItem(_unit);
+		}
+		else
+		{
+			// replace the unconscious body item with a corpse in the carrying unit's inventory
+			for (std::vector<BattleItem*>::iterator it = _parent->getSave()->getItems()->begin(); it != _parent->getSave()->getItems()->end(); )
 			{
-				RuleItem *corpseRules = _parent->getRuleset()->getItem(_unit->getArmor()->getCorpseBattlescape()[0]); // we're in an inventory, so we must be a 1x1 unit
-				(*it)->convertToCorpse(corpseRules);
-				break;
+				if ((*it)->getUnit() == _unit)
+				{
+					RuleItem *corpseRules = _parent->getRuleset()->getItem(_unit->getArmor()->getCorpseBattlescape()[0]); // we're in an inventory, so we must be a 1x1 unit
+					(*it)->convertToCorpse(corpseRules);
+					break;
+				}
+				++it;
 			}
-			++it;
 		}
 	}
-	else
+	else if (!_overKill)
 	{
 		int i = 0;
 		for (int y = 0; y < size; y++)

@@ -185,6 +185,8 @@ public:
 	bool isKneeled() const;
 	/// Is floating?
 	bool isFloating() const;
+	/// Is exploding?
+	bool isExploding() const;
 	/// Aim.
 	void aim(bool aiming);
 	/// Get direction to a certain point

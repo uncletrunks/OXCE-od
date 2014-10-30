@@ -38,6 +38,7 @@ private:
 	BattleUnit *_unit;
 	const RuleDamageType *_damageType;
 	bool _noSound;
+	bool _overKill;
 	int _originalDir;
 public:
 	/// Creates a new UnitDieBState class
