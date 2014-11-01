@@ -99,7 +99,7 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 
 	if (const YAML::Node &types = node["weaponTypes"])
 	{
-		for (int i = 0; i < types.size() &&  i < WeaponMax; ++i)
+		for (int i = 0; (size_t)i < types.size() &&  i < WeaponMax; ++i)
 			_weaponTypes[i] = types[i].as<int>();
 	}
 }
