@@ -1,6 +1,6 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 0.8[/b]
-OpenXcom version: Nightly 12/10/2014
+[b]Mod version 0.9[/b]
+OpenXcom version: Nightly 27/10/2014
 
 [br/][br/]
 [i]New ruleset[/i]
