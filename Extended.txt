@@ -118,14 +118,14 @@ ufos:
 [br/][br/]
 [i]Behavior change[/i]
 
-Hyper wave decoder can have less than 100% chance to detect aliens.
-Explosion don't remove unconscious unit if they can't kill them first.
-Craft weapon equip screen is bit rearranged.
-Fixed "weapons" like medickit are now equipped by unit.
-Psi-amp use 3d range not 2d.
-Psi-amp can use weapon power.
-Fixed ammo are added after weapons in armor and unit (armor items are before unit items).
-Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.
+Hyper wave decoder can have less than 100% chance to detect aliens.[br/]
+Explosion don't remove unconscious unit if they can't kill them first.[br/]
+Craft weapon equip screen is bit rearranged.[br/]
+Fixed "weapons" like medickit are now equipped by unit.[br/]
+Psi-amp use 3d range not 2d.[br/]
+Psi-amp can use weapon power.[br/]
+Fixed ammo are added after weapons in armor and unit (armor items are before unit items).[br/]
+Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.[br/]
 
 [br/][br/]
 [i]Links[/i]
