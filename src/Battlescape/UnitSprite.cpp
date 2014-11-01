@@ -134,7 +134,7 @@ struct ColorFace
 static inline void burnOut(Surface *src, Surface *dest, BattleUnit *unit)
 {
 	int burn = 0;
-	if (unit->isExploding())
+	if (unit->getOverKillDamage())
 	{
 		burn = - 16 * unit->getHealth() * (unit->getFallingPhase() + 1) / unit->getArmor()->getDeathFrames() / unit->getStats()->health;
 	}

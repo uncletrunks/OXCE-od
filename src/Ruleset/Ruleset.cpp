@@ -92,6 +92,7 @@ Ruleset::Ruleset() :
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_NONE;
 	dmg->RandomType = DRT_NONE;
+	dmg->IgnoreOverKill = true;
 	dmg->ToHealth = 0.0f;
 	dmg->ToArmor = 0.0f;
 	dmg->ToWound = 0.0f;
@@ -102,6 +103,7 @@ Ruleset::Ruleset() :
 
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_AP;
+	dmg->IgnoreOverKill = true;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
@@ -118,6 +120,7 @@ Ruleset::Ruleset() :
 
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_MELEE;
+	dmg->IgnoreOverKill = true;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();

@@ -46,6 +46,8 @@ struct RuleDamageType
 	bool IgnoreDirection;
 	/// Damage type do not cause self destruct explosion.
 	bool IgnoreSelfDestruct;
+	/// Damage type do not move health to negative values.
+	bool IgnoreOverKill;
 	/// Damage type can do stun damage to big units.
 	bool IgnorePainImmunity;
 	/// Damage type don't cause morale lose form health damage.

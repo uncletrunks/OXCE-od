@@ -816,14 +816,6 @@ bool BattleUnit::isFloating() const
 }
 
 /**
- * Is exploding? If unit get lot of damage it's don't leave corpse behind.
- * @return true/false
- */
-bool BattleUnit::isExploding() const
-{
-	return _health < _stats.health / 2;
-}
-/**
  * Aim. (shows the right hand sprite and weapon holding)
  * @param aiming true/false
  */
@@ -921,6 +913,15 @@ int BattleUnit::getHealth() const
 int BattleUnit::getMorale() const
 {
 	return _morale;
+}
+
+/**
+ * Get overkill damage to unit.
+ * @return Damage over normal health.
+ */
+int BattleUnit::getOverKillDamage() const
+{
+	return std::max(-_health - _stats.health / 2, 0);
 }
 
 /**
@@ -1047,8 +1048,13 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 		moraleChange(-(110 - _stats.bravery) * power * type->ToMorale / 100);
 
 		setValueMax(_tu, - power * type->ToTime, 0, _stats.tu);
-		setValueMax(_health, - power * type->ToHealth, - _stats.health, _stats.health);
+		setValueMax(_health, - power * type->ToHealth, -4 * _stats.health, _stats.health);
 		setValueMax(_energy, - power * type->ToEnergy, 0, _stats.stamina);
+
+		if (_health < 0 && type->IgnoreOverKill)
+		{
+			_health = 0;
+		}
 
 		// fatal wounds
 		if (isWoundable())
@@ -1655,7 +1661,7 @@ void BattleUnit::think(BattleAction *action)
 void BattleUnit::setAIState(BattleAIState *aiState)
 {
 	if (_currentAIState)
-	{		
+	{
 		_currentAIState->exit();
 		delete _currentAIState;
 	}

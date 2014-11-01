@@ -1059,9 +1059,9 @@ void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  * @param relative angle of hit.
  * @param damage power of hit.
  * @param type damage type of hit.
- * @return Did unit survived hit?
+ * @return Did unit get hit?
  */
-bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& relative, int damage, const RuleDamageType* type)
+bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type)
 {
 	if (!target || target->getHealth() <= 0)
 	{
@@ -1108,7 +1108,7 @@ bool TileEngine::hitUnit(BattleUnit* unit, BattleUnit* target, const Position& r
 		}
 	}
 
-	return target->getHealth();
+	return true;
 }
 
 /**
@@ -1262,34 +1262,38 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 						const int damage = type->getRandomDamage(power_);
 						BattleUnit *bu = dest->getUnit();
 
-						if (distance(dest->getPosition(), Position(centerX, centerY, centerZ)) < 2)
-						{
-							// ground zero effect is in effect
-							hitUnit(unit, bu, Position(0, 0, 0), damage, type);
-						}
-						else
-						{
-							// directional damage relative to explosion position.
-							// units above the explosion will be hit in the legs, units lateral to or below will be hit in the torso
-							hitUnit(unit, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type);
-						}
-
-						// Affect all items and units in inventory
 						toRemove.clear();
-						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
+						if (bu)
 						{
-							if ((*it)->getUnit())
+							if (distance(dest->getPosition(), Position(centerX, centerY, centerZ)) < 2)
 							{
-								if (hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), damage, type))
+								// ground zero effect is in effect
+								hitUnit(unit, bu, Position(0, 0, 0), damage, type);
+							}
+							else
+							{
+								// directional damage relative to explosion position.
+								// units above the explosion will be hit in the legs, units lateral to or below will be hit in the torso
+								hitUnit(unit, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type);
+							}
+
+							// Affect all items and units in inventory
+							const int itemDamage = bu->getOverKillDamage();
+							if (itemDamage > 0)
+							{
+								for (std::vector<BattleItem*>::iterator it = bu->getInventory()->begin(); it != bu->getInventory()->end(); ++it)
 								{
-									continue;
-								}
-								else
-								{
-									(*it)->getUnit()->instaKill();
+									if (!hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type) && itemDamage * type->ToItem > (*it)->getRules()->getArmor())
+									{
+										toRemove.push_back(*it);
+									}
 								}
 							}
-							if (power_ * type->ToItem > (*it)->getRules()->getArmor())
+						}
+						// Affect all items and units on ground
+						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
+						{
+							if (!hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), damage, type) && damage * type->ToItem > (*it)->getRules()->getArmor())
 							{
 								toRemove.push_back(*it);
 							}

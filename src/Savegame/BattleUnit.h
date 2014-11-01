@@ -185,8 +185,6 @@ public:
 	bool isKneeled() const;
 	/// Is floating?
 	bool isFloating() const;
-	/// Is exploding?
-	bool isExploding() const;
 	/// Aim.
 	void aim(bool aiming);
 	/// Get direction to a certain point
@@ -199,6 +197,8 @@ public:
 	int getHealth() const;
 	/// Gets the unit's bravery.
 	int getMorale() const;
+	/// Get overkill damage to unit.
+	int getOverKillDamage() const;
 	/// Do damage to the unit.
 	int damage(const Position &relative, int power, const RuleDamageType *type);
 	/// Heal stun level of the unit.

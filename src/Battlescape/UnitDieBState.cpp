@@ -94,7 +94,7 @@ UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const Ru
         }
     }
 
-	_overKill = unit->isExploding();
+	_overKill = unit->getOverKillDamage();
 }
 
 /**
@@ -159,7 +159,7 @@ void UnitDieBState::think()
 			_unit->setTurnsSinceSpotted(255);
 		}
 
-		if (!_unit->getSpawnUnit().empty())
+		if (!_unit->getSpawnUnit().empty() && !_overKill)
 		{
 			// converts the dead zombie to a chryssalid
 			BattleUnit *newUnit = _parent->convertUnit(_unit, _unit->getSpawnUnit());
@@ -283,21 +283,24 @@ void UnitDieBState::convertUnitToCorpse()
 			}
 		}
 	}
-	else if (!_overKill)
+	else
 	{
 		int i = 0;
 		for (int y = 0; y < size; y++)
 		{
 			for (int x = 0; x < size; x++)
 			{
-				BattleItem *corpse = new BattleItem(_parent->getRuleset()->getItem(_unit->getArmor()->getCorpseBattlescape()[i]), _parent->getSave()->getCurrentItemId());
-				corpse->setUnit(_unit);
+				if (!_overKill)
+				{
+					BattleItem *corpse = new BattleItem(_parent->getRuleset()->getItem(_unit->getArmor()->getCorpseBattlescape()[i]), _parent->getSave()->getCurrentItemId());
+					corpse->setUnit(_unit);
+					_parent->dropItem(lastPosition + Position(x,y,0), corpse, true);
+					i++;
+				}
 				if (_parent->getSave()->getTile(lastPosition + Position(x,y,0))->getUnit() == _unit) // check in case unit was displaced by another unit
 				{
 					_parent->getSave()->getTile(lastPosition + Position(x,y,0))->setUnit(0);
 				}
-				_parent->dropItem(lastPosition + Position(x,y,0), corpse, true);
-				i++;
 			}
 		}
 	}

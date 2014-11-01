@@ -33,6 +33,7 @@ items:
       IgnoreSelfDestruct: true #do killing using this damage ignore self destruct of unit.
       IgnorePainImmunity: true #some units don't get stun level form damage.
       IgnoreNormalMoraleLose: false #do ignore normal morale lose form damage.
+      IgnoreOverKill: false #don't do overkill damage.
       ArmorEffectiveness: 0.5 #how much armor is effective against this damage.
       RadiusEffectiveness: 0.3 #how power translate to splash radius.
       FireThreshold: 0 #how much damage is requare to spawn fire on unit (after armor and ToHealth) or tile.
@@ -124,6 +125,7 @@ Fixed "weapons" like medickit are now equipped by unit.
 Psi-amp use 3d range not 2d.
 Psi-amp can use weapon power.
 Fixed ammo are added after weapons in armor and unit (armor items are before unit items).
+Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.
 
 [br/][br/]
 [i]Links[/i]

@@ -83,7 +83,7 @@ public:
 	/// Handles tile hit.
 	void hitTile(Tile *tile, int damage, const RuleDamageType* type);
 	/// Handles unit hit.
-	bool hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType* type);
+	bool hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type);
 	/// Handles bullet/weapon hits.
 	BattleUnit *hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit);
 	/// Handles explosions.
