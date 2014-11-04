@@ -930,7 +930,7 @@ int BattleUnit::getOverKillDamage() const
  * @param max
  * @param diff
  */
-static void setValueMax(int& value, int diff, int min, int max)
+static inline void setValueMax(int& value, int diff, int min, int max)
 {
 	value += diff;
 	if (value < min)

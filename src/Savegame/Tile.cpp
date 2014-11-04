@@ -800,6 +800,30 @@ int Tile::getTopItemSprite()
 }
 
 /**
+ * Apply environment damage to unit.
+ * @param unit affected unit.
+ * @param smoke amount of smoke.
+ * @param fire amount of file.
+ */
+static inline void applyEnvi(BattleUnit* unit, int smoke, int fire)
+{
+	if (unit)
+	{
+		if (fire)
+		{
+			// _smoke becomes our damage value
+			unit->setEnviFire(smoke);
+		}
+		// no fire: must be smoke
+		else
+		{
+			// try to knock this guy out.
+			unit->setEnviSmoke(smoke / 4 + 1);
+		}
+	}
+}
+
+/**
  * New turn preparations.
  * average out any smoke added by the number of overlaps.
  * apply fire/smoke damage to units as applicable.
@@ -814,19 +838,10 @@ void Tile::prepareNewTurn()
 	// if we still have smoke/fire
 	if (_smoke)
 	{
-		if (_unit && !_unit->isOut())
+		applyEnvi(_unit, _smoke, _fire);
+		for (std::vector<BattleItem*>::iterator i = _inventory.begin(); i != _inventory.end(); ++i)
 		{
-			if (_fire)
-			{
-				// _smoke becomes our damage value
-				_unit->setEnviFire(_smoke);
-			}
-			// no fire: must be smoke
-			else
-			{
-				// try to knock this guy out.
-				_unit->setEnviSmoke(_smoke / 4 + 1);
-			}
+			applyEnvi((*i)->getUnit(), _smoke, _fire);
 		}
 	}
 	_overlaps = 0;
