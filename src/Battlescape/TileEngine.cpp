@@ -1123,7 +1123,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
  */
 BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit)
 {
-	Tile *tile = _save->getTile(Position(center.x/16, center.y/16, center.z/24));
+	Tile *tile = _save->getTile(center.toTile());
 	if (!tile || power <= 0)
 	{
 		return 0;
@@ -1134,17 +1134,32 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 	const int damage = type->getRandomDamage(power);
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
-		const int tileDmg = damage * type->ToTile;
-		hitTile(tile, damage, type);
-		if (part == V_OBJECT && _save->getMissionType() == "STR_BASE_DEFENSE")
+		bool nothing = true;
+		if (part == V_FLOOR || part == V_OBJECT)
 		{
-			if (tileDmg >= tile->getMapData(MapData::O_OBJECT)->getArmor() && tile->getMapData(V_OBJECT)->isBaseModule())
+			for (std::vector<BattleItem*>::iterator i = tile->getInventory()->begin(); i != tile->getInventory()->end(); ++i)
 			{
-				_save->getModuleMap()[(center.x/16)/10][(center.y/16)/10].second--;
+				if (hitUnit(unit, (*i)->getUnit(), Position(0,0,0), damage, type))
+				{
+					nothing = false;
+					break;
+				}
 			}
 		}
-		if (tile->damage(part, tileDmg))
-			_save->setObjectiveDestroyed(true);
+		if (nothing)
+		{
+			const int tileDmg = damage * type->ToTile;
+			hitTile(tile, damage, type);
+			if (part == V_OBJECT && _save->getMissionType() == "STR_BASE_DEFENSE")
+			{
+				if (tileDmg >= tile->getMapData(MapData::O_OBJECT)->getArmor() && tile->getMapData(V_OBJECT)->isBaseModule())
+				{
+					_save->getModuleMap()[(center.x/16)/10][(center.y/16)/10].second--;
+				}
+			}
+			if (tile->damage(part, tileDmg))
+				_save->setObjectiveDestroyed(true);
+		}
 	}
 	else if (part == V_UNIT)
 	{
@@ -1152,7 +1167,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		if (!bu)
 		{
 			// it's possible we have a unit below the actual tile, when he stands on a stairs and sticks his head out to the next tile
-			Tile *below = _save->getTile(Position(center.x/16, center.y/16, (center.z/24)-1));
+			Tile *below = _save->getTile(center.toTile() - Position(0, 0, 1));
 			if (below)
 			{
 				BattleUnit *buBelow = below->getUnit();
@@ -1166,7 +1181,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		if (bu)
 		{
 			const int sz = bu->getArmor()->getSize() * 8;
-			const Position target = bu->getPosition() * Position(16,16,24) + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
+			const Position target = bu->getPosition().toVexel() + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
 			const Position relative = (center - target) - Position(0,0,verticaloffset);
 
 			hitUnit(unit, bu, relative, damage, type);
@@ -1185,7 +1200,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 	applyGravity(tile);
 	calculateSunShading(); // roofs could have been destroyed
 	calculateTerrainLighting(); // fires could have been started
-	calculateFOV(center / Position(16,16,24));
+	calculateFOV(center.toTile());
 	return bu;
 }
 
