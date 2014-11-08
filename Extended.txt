@@ -127,6 +127,7 @@ Psi-amp can use weapon power.[br/]
 Fixed ammo are added after weapons in armor and unit (armor items are before unit items).[br/]
 Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.[br/]
 Stuned units can be hited by bullets and fire.[/br]
+Big groups of aliens (20+) get less morale loses from casualties.[br/]
 
 [br/][br/]
 [i]Links[/i]

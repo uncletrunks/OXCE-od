@@ -1080,7 +1080,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 	if (type->IgnoreNormalMoraleLose == false)
 	{
 		const int bravery = (110 - target->getStats()->bravery) / 10;
-		const int modifier = target->getFaction() == FACTION_PLAYER ? _save->getMoraleModifier() : 100;
+		const int modifier = target->getFaction() == FACTION_PLAYER ? _save->getFactionMoraleModifier(true) : 100;
 		const int morale_loss = 100 * (adjustedDamage * bravery / 10) / modifier;
 
 		target->moraleChange(-morale_loss);

@@ -1567,19 +1567,46 @@ BattleUnit* SavedBattleGame::getHighestRankedXCom()
 }
 
 /**
- * Gets the morale modifier for
- * - either XCom based on the highest ranked, living XCom unit,
- * - or the unit passed to this function.
- * @param unit Unit.
- * @return The morale modifier.
+ * Gets morale modifier of unit.
+ * @param unit
+ * @return Morale modifier.
  */
-int SavedBattleGame::getMoraleModifier(BattleUnit* unit)
+int SavedBattleGame::getUnitMoraleModifier(BattleUnit* unit)
 {
 	int result = 100;
 
-	if (unit == 0)
+	if (unit->getOriginalFaction() == FACTION_PLAYER)
+	{
+		switch (unit->getRankInt())
+		{
+		case 5:
+			result += 25;
+		case 4:
+			result += 20;
+		case 3:
+			result += 10;
+		case 2:
+			result += 20;
+		default:
+			break;
+		}
+	}
+
+	return result;
+}
+
+/**
+ * Gets the morale modifier for XCom based on the highest ranked, living XCom unit,
+ * or Alien modifier based on they number.
+ * @param hostile modifier for player or hostile?
+ * @return The morale modifier.
+ */
+int SavedBattleGame::getFactionMoraleModifier(bool player)
+{
+	if (player)
 	{
 		BattleUnit *leader = getHighestRankedXCom();
+		int result = 100;
 		if (leader)
 		{
 			switch (leader->getRankInt())
@@ -1596,24 +1623,20 @@ int SavedBattleGame::getMoraleModifier(BattleUnit* unit)
 				break;
 			}
 		}
+		return result;
 	}
-	else if (unit->getFaction() == FACTION_PLAYER)
+	else
 	{
-		switch (unit->getRankInt())
+		int number = 0;
+		for (std::vector<BattleUnit*>::iterator j = _units.begin(); j != _units.end(); ++j)
 		{
-		case 5:
-			result += 25;
-		case 4:
-			result += 20;
-		case 3:
-			result += 10;
-		case 2:
-			result += 20;
-		default:
-			break;
+			if ((*j)->getOriginalFaction() == FACTION_HOSTILE && !(*j)->isOut())
+			{
+				++number;
+			}
 		}
+		return std::max(6 * number, 100);
 	}
-	return result;
 }
 
 /**
