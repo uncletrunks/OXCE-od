@@ -93,8 +93,8 @@ void ConfirmCydoniaState::btnYesClick(Action *)
 {
 	_game->popState();
 	_game->popState();
-	
-	SavedBattleGame *bgame = new SavedBattleGame();
+
+	SavedBattleGame *bgame = new SavedBattleGame(_game->getRuleset());
 	_game->getSavedGame()->setBattleGame(bgame);
 	bgame->setMissionType("STR_MARS_CYDONIA_LANDING");
 	BattlescapeGenerator bgen = BattlescapeGenerator(_game);

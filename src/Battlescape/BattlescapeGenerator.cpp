@@ -357,39 +357,6 @@ void BattlescapeGenerator::run()
 	_save->getTileEngine()->recalculateFOV();
 }
 
-void BattlescapeGenerator::addBuildInWeapons(BattleUnit *unit, const std::vector<std::string> &fixed)
-{
-	if (!fixed.empty())
-	{
-		std::vector<RuleItem*> ammo;
-		for (std::vector<std::string>::const_iterator j = fixed.begin(); j != fixed.end(); ++j)
-		{
-			RuleItem *ruleItem = _game->getRuleset()->getItem(*j);
-			if (ruleItem)
-			{
-				if (ruleItem->getBattleType() == BT_AMMO)
-				{
-					ammo.push_back(ruleItem);
-					continue;
-				}
-				BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
-				if (!addItem(item, unit))
-				{
-					delete item;
-				}
-			}
-		}
-		for (std::vector<RuleItem*>::const_iterator j = ammo.begin(); j != ammo.end(); ++j)
-		{
-			BattleItem *item = new BattleItem(*j, _save->getCurrentItemId());
-			if (!addItem(item, unit))
-			{
-				delete item;
-			}
-		}
-	}
-}
-
 /**
 * Deploys all the X-COM units and equipment based
 * on the Geoscape base / craft.
@@ -580,7 +547,7 @@ void BattlescapeGenerator::deployXCOM()
 						// if everyone else has had a chance to take a first.
 						bool allowSecondClip = (pass == 3);
 
-						if (addItem(*j, *i, allowSecondClip))
+						if (_save->addItem(*j, *i, allowSecondClip, _allowAutoLoadout))
 						{
 							j = _craftInventoryTile->getInventory()->erase(j);
 							add = false;
@@ -624,10 +591,8 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getRuleset()->getArmor(rule->getArmor()), 0, _save->getDepth()));
 	if (unit)
 	{
-		addBuildInWeapons(unit, rule->getBuiltInWeapons());
-
 		BattleItem *item = new BattleItem(_game->getRuleset()->getItem(vehicle), _save->getCurrentItemId());
-		if (!addItem(item, unit))
+		if (!_save->addItem(item, unit))
 		{
 			delete item;
 		}
@@ -635,7 +600,7 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 		{
 			std::string ammo = v->getRules()->getCompatibleAmmo()->front();
 			BattleItem *ammoItem = new BattleItem(_game->getRuleset()->getItem(ammo), _save->getCurrentItemId());
-			addItem(ammoItem, unit);
+			_save->addItem(ammoItem, unit);
 			ammoItem->setAmmoQuantity(v->getAmmo());
 		}
 		unit->setTurretType(v->getRules()->getTurretType());
@@ -652,9 +617,6 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
  */
 BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 {
-	// Built in weapons: the unit has this weapon regardless of loadout or what have you.
-	addBuildInWeapons(unit, unit->getArmor()->getBuiltInWeapons());
-
 	if (_craft == 0 || _save->getMissionType() == "STR_ALIEN_BASE_ASSAULT" || _save->getMissionType() == "STR_MARS_THE_FINAL_ASSAULT")
 	{
 		Node* node = _save->getSpawnNode(NR_XCOM, unit);
@@ -664,6 +626,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 			_craftInventoryTile = _save->getTile(node->getPosition());
 			unit->setDirection(RNG::generate(0,7));
 			_save->getUnits()->push_back(unit);
+			_save->initFixedItems(unit);
 			_save->getTileEngine()->calculateFOV(unit);
 			unit->deriveRank();
 			return unit;
@@ -675,6 +638,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				_craftInventoryTile = _save->getTile(unit->getPosition());
 				unit->setDirection(RNG::generate(0,7));
 				_save->getUnits()->push_back(unit);
+				_save->initFixedItems(unit);
 				_save->getTileEngine()->calculateFOV(unit);
 				unit->deriveRank();
 				return unit;
@@ -700,6 +664,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				if (_save->setUnitPosition(unit, pos))
 				{
 					_save->getUnits()->push_back(unit);
+					_save->initFixedItems(unit);
 					unit->setDirection(dir);
 					unit->deriveRank();
 					return unit;
@@ -716,6 +681,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				if (_save->setUnitPosition(unit, _save->getTiles()[i]->getPosition()))
 				{
 					_save->getUnits()->push_back(unit);
+					_save->initFixedItems(unit);
 					unit->deriveRank();
 					return unit;
 				}
@@ -796,41 +762,19 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 				outside = false;
 			Unit *rule = _game->getRuleset()->getUnit(alienName);
 			BattleUnit *unit = addAlien(rule, (*d).alienRank, outside);
-			int itemLevel = _game->getRuleset()->getAlienItemLevels().at(month).at(RNG::generate(0,9));
 			if (unit)
 			{
-				// Built in weapons: the unit has this weapon regardless of loadout or what have you.
-				addBuildInWeapons(unit, unit->getArmor()->getBuiltInWeapons());
-				addBuildInWeapons(unit, rule->getBuiltInWeapons());
-
-				// terrorist alien's equipment is a special case - they are fitted with a weapon which is the alien's name with suffix _WEAPON
-				if (rule->isLivingWeapon())
+				_save->initFixedItems(unit);
+				if (!rule->isLivingWeapon())
 				{
-					std::string terroristWeapon = rule->getRace().substr(4);
-					terroristWeapon += "_WEAPON";
-					RuleItem *ruleItem = _game->getRuleset()->getItem(terroristWeapon);
-					if (ruleItem)
-					{
-						BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
-						if (!addItem(item, unit))
-						{
-							delete item;
-						}
-						else
-						{
-							unit->setTurretType(item->getRules()->getTurretType());
-						}
-					}
-				}
-				else
-				{
-					for (std::vector<std::string>::iterator it = (*d).itemSets.at(itemLevel).items.begin(); it != (*d).itemSets.at(itemLevel).items.end(); ++it)
+					std::vector<std::string>& itemLevel = (*d).itemSets.at(_game->getRuleset()->getAlienItemLevels().at(month).at(RNG::generate(0,9))).items;
+					for (std::vector<std::string>::iterator it = itemLevel.begin(); it != itemLevel.end(); ++it)
 					{
 						RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
 						if (ruleItem)
 						{
 							BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
-							if (!addItem(item, unit))
+							if (!_save->addItem(item, unit))
 							{
 								delete item;
 							}
@@ -1023,185 +967,6 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item)
 		}
 	}
 	return false;
-}
-
-/**
- * Adds an item to an XCom soldier (auto-equip).
- * @param item Pointer to the Item.
- * @param unit Pointer to the Unit.
- * @param allowSecondClip allow the unit to take a second clip or not. (only applies to xcom soldiers, aliens are allowed regardless of this flag)
- * @return if the item was placed or not.
- */
-bool BattlescapeGenerator::addItem(BattleItem *item, BattleUnit *unit, bool allowSecondClip)
-{
-	RuleInventory *rightHand = _game->getRuleset()->getInventory("STR_RIGHT_HAND");
-	RuleInventory *leftHand = _game->getRuleset()->getInventory("STR_LEFT_HAND");
-	bool placed = false;
-	bool loaded = false;
-	BattleItem *rightWeapon = unit->getItem("STR_RIGHT_HAND");
-	BattleItem *leftWeapon = unit->getItem("STR_LEFT_HAND");
-	int weight = 0;
-
-	// tanks and aliens don't care about weight or multiple items,
-	// their loadouts are defined in the rulesets and more or less set in stone.
-	if (unit->getFaction() == FACTION_PLAYER && unit->hasInventory())
-	{
-		weight = unit->getCarriedWeight() + item->getRules()->getWeight();
-		if (item->getAmmoItem() && item->getAmmoItem() != item)
-		{
-			weight += item->getAmmoItem()->getRules()->getWeight();
-		}
-		// allow all weapons to be loaded by avoiding this check,
-		// they'll return false later anyway if the unit has something in his hand.
-		if (item->getRules()->getCompatibleAmmo()->empty())
-		{
-			int tally = 0;
-			for (std::vector<BattleItem*>::iterator i = unit->getInventory()->begin(); i != unit->getInventory()->end(); ++i)
-			{
-				if (item->getRules()->getType() == (*i)->getRules()->getType())
-				{
-					if (allowSecondClip && item->getRules()->getBattleType() == BT_AMMO)
-					{
-						tally++;
-						if (tally == 2)
-						{
-							return false;
-						}
-					}
-					else
-					{
-						// we already have one, thanks.
-						return false;
-					}
-				}
-			}
-		}
-	}
-	// fixed weapon should be always placed in hand slots
-	if (item->getRules()->isFixed())
-	{
-		if (!rightWeapon || !leftWeapon)
-		{
-			item->moveToOwner(unit);
-			item->setSlot(!rightWeapon ? rightHand : leftHand);
-			placed = true;
-			_save->getItems()->push_back(item);
-			item->setXCOMProperty(unit->getFaction() == FACTION_PLAYER);
-		}
-		return placed;
-	}
-
-	bool keep = true;
-	switch (item->getRules()->getBattleType())
-	{
-	case BT_FIREARM:
-	case BT_MELEE:
-		if (item->getAmmoItem() || unit->getFaction() != FACTION_PLAYER || !unit->hasInventory())
-		{
-			loaded = true;
-		}
-
-		if (loaded && (unit->getGeoscapeSoldier() == 0 || _allowAutoLoadout))
-		{
-			if (!rightWeapon && unit->getStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
-			{
-				item->moveToOwner(unit);
-				item->setSlot(rightHand);
-				placed = true;
-			}
-			if (!placed && !leftWeapon && (unit->getFaction() != FACTION_PLAYER || item->getRules()->isFixed()))
-			{
-				item->moveToOwner(unit);
-				item->setSlot(leftHand);
-				placed = true;
-			}
-		}
-		break;
-	case BT_AMMO:
-		// xcom weapons will already be loaded, aliens and tanks, however, get their ammo added afterwards.
-		// so let's try to load them here.
-		if (rightWeapon && (rightWeapon->getRules()->isFixed() || unit->getFaction() != FACTION_PLAYER) &&
-			!rightWeapon->getRules()->getCompatibleAmmo()->empty() &&
-			!rightWeapon->getAmmoItem() &&
-			rightWeapon->setAmmoItem(item) == 0)
-		{
-			item->setSlot(rightHand);
-			placed = true;
-			break;
-		}
-		if (leftWeapon && (leftWeapon->getRules()->isFixed() || unit->getFaction() != FACTION_PLAYER) &&
-			!leftWeapon->getRules()->getCompatibleAmmo()->empty() &&
-			!leftWeapon->getAmmoItem() &&
-			leftWeapon->setAmmoItem(item) == 0)
-		{
-			item->setSlot(leftHand);
-			placed = true;
-			break;
-		}
-		// don't take ammo for weapons we don't have.
-		keep = (unit->getFaction() != FACTION_PLAYER);
-		if (rightWeapon)
-		{
-			for (std::vector<std::string>::iterator i = rightWeapon->getRules()->getCompatibleAmmo()->begin(); i != rightWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
-			{
-				if (*i == item->getRules()->getType())
-				{
-					keep = true;
-					break;
-				}
-			}
-		}
-		if (leftWeapon)
-		{
-			for (std::vector<std::string>::iterator i = leftWeapon->getRules()->getCompatibleAmmo()->begin(); i != leftWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
-			{
-				if (*i == item->getRules()->getType())
-				{
-					keep = true;
-					break;
-				}
-			}
-		}
-		if (!keep)
-		{
-			break;
-		}
-	default:
-		if ((unit->getGeoscapeSoldier() == 0 || _allowAutoLoadout))
-		{
-			if (unit->getStats()->strength >= weight) // weight is always considered 0 for aliens
-			{
-				for (std::vector<std::string>::const_iterator i = _game->getRuleset()->getInvsList().begin(); i != _game->getRuleset()->getInvsList().end() && !placed; ++i)
-				{
-					RuleInventory *slot = _game->getRuleset()->getInventory(*i);
-					if (slot->getType() == INV_SLOT)
-					{
-						for (std::vector<RuleSlot>::iterator j = slot->getSlots()->begin(); j != slot->getSlots()->end() && !placed; ++j)
-						{
-							if (!Inventory::overlapItems(unit, item, slot, j->x, j->y) && slot->fitItemInSlot(item->getRules(), j->x, j->y))
-							{
-								item->moveToOwner(unit);
-								item->setSlot(slot);
-								item->setSlotX(j->x);
-								item->setSlotY(j->y);
-								placed = true;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-	break;
-	}
-
-	if (placed)
-	{
-		_save->getItems()->push_back(item);
-	}
-	item->setXCOMProperty(unit->getFaction() == FACTION_PLAYER);
-
-	return placed;
 }
 
 /**

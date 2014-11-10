@@ -2133,7 +2133,7 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 
 	if (base->getAvailableSoldiers(true) > 0 || !base->getVehicles()->empty())
 	{
-		SavedBattleGame *bgame = new SavedBattleGame();
+		SavedBattleGame *bgame = new SavedBattleGame(_game->getRuleset());
 		_game->getSavedGame()->setBattleGame(bgame);
 		bgame->setMissionType("STR_BASE_DEFENSE");
 		BattlescapeGenerator bgen = BattlescapeGenerator(_game);

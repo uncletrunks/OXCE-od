@@ -1575,21 +1575,18 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &ne
 	// remove unit-tile link
 	unit->setTile(0);
 
+	Unit* type = getRuleset()->getUnit(newType);
 	getSave()->getTile(unit->getPosition())->setUnit(0);
-	std::ostringstream newArmor;
-	newArmor << getRuleset()->getUnit(newType)->getArmor();
-	std::string terroristWeapon = getRuleset()->getUnit(newType)->getRace().substr(4);
-	terroristWeapon += "_WEAPON";
-	RuleItem *newItem = getRuleset()->getItem(terroristWeapon);
 	int difficulty = (int)(_parentState->getGame()->getSavedGame()->getDifficulty());
 
-	BattleUnit *newUnit = new BattleUnit(getRuleset()->getUnit(newType), FACTION_HOSTILE, _save->getUnits()->back()->getId() + 1, getRuleset()->getArmor(newArmor.str()), difficulty, getDepth());
+	BattleUnit *newUnit = new BattleUnit(type, FACTION_HOSTILE, _save->getUnits()->back()->getId() + 1, getRuleset()->getArmor(type->getArmor()), difficulty, getDepth());
 
 	if (!difficulty)
 	{
 		newUnit->halveArmor();
 	}
 
+	getSave()->initFixedItems(newUnit);
 	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
 	newUnit->setPosition(unit->getPosition());
 	newUnit->setDirection(3);
@@ -1598,10 +1595,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &ne
 	getSave()->getUnits()->push_back(newUnit);
 	getMap()->cacheUnit(newUnit);
 	newUnit->setAIState(new AlienBAIState(getSave(), newUnit, 0));
-	BattleItem *bi = new BattleItem(newItem, getSave()->getCurrentItemId());
-	bi->moveToOwner(newUnit);
-	bi->setSlot(getRuleset()->getInventory("STR_RIGHT_HAND"));
-	getSave()->getItems()->push_back(bi);
+
 	getTileEngine()->calculateFOV(newUnit->getPosition());
 	getTileEngine()->applyGravity(newUnit->getTile());
 	if (unit->getFaction() == FACTION_PLAYER)

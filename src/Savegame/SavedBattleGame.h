@@ -52,6 +52,7 @@ class SavedBattleGame
 {
 private:
 	BattlescapeState *_battleState;
+	Ruleset *_rule;
 	int _mapsize_x, _mapsize_y, _mapsize_z;
 	std::vector<MapDataSet*> _mapDataSets;
 	Tile **_tiles;
@@ -81,7 +82,7 @@ private:
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
 public:
 	/// Creates a new battle save, based on the current generic save.
-	SavedBattleGame();
+	SavedBattleGame(Ruleset *rule);
 	/// Cleans up the saved game.
 	~SavedBattleGame();
 	/// Loads a saved battle game from YAML.
@@ -179,6 +180,12 @@ public:
 	void resetUnitTiles();
 	/// Removes an item from the game.
 	void removeItem(BattleItem *item);
+	/// Adds an item to a unit and the game.
+	bool addItem(BattleItem *item, BattleUnit *unit, bool allowSecondClip = false, bool allowAutoLoadout = false, bool allowUnloadedWeapons = false);
+	/// Add buildIn weapon form list to unit.
+	void addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed);
+	/// Create all fixed items for new created unit.
+	void initFixedItems(BattleUnit *unit);
 	/// Sets whether the mission was aborted.
 	void setAborted(bool flag);
 	/// Checks if the mission was aborted.

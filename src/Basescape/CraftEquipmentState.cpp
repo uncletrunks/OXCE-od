@@ -622,7 +622,7 @@ void CraftEquipmentState::btnInventoryClick(Action *)
 	Craft *craft = _base->getCrafts()->at(_craft);
 	if (craft->getNumSoldiers() != 0)
 	{
-		SavedBattleGame *bgame = new SavedBattleGame();
+		SavedBattleGame *bgame = new SavedBattleGame(_game->getRuleset());
 		_game->getSavedGame()->setBattleGame(bgame);
 
 		BattlescapeGenerator bgen = BattlescapeGenerator(_game);

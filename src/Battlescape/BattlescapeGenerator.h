@@ -79,8 +79,6 @@ private:
 	BattleUnit *addCivilian(Unit *rules);
 	/// Places an item on a soldier based on equipment layout.
 	bool placeItemByLayout(BattleItem *item);
-	/// Adds an item to a unit and the game.
-	bool addItem(BattleItem *item, BattleUnit *unit, bool allowSecondClip = false);
 	/// Loads an XCom MAP file.
 	int loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false);
 	/// Loads an XCom RMP file.
@@ -89,8 +87,6 @@ private:
 	void fuelPowerSources();
 	/// Possibly explodes ufo powersources.
 	void explodePowerSources();
-	/// Add buildIn weapon form list to unit.
-	void addBuildInWeapons(BattleUnit *unit, const std::vector<std::string> &fixed);
 	/// Deploys the XCOM units on the mission.
 	void deployXCOM();
 	/// Runs necessary checks before physically setting the position.
