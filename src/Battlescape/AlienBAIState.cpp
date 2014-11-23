@@ -799,16 +799,16 @@ void AlienBAIState::setupEscape()
 
 	std::vector<Position> randomTileSearch = _save->getTileSearch();
 	RNG::shuffle(randomTileSearch);
-	
+
 	while (tries < 150 && !coverFound)
 	{
 		_escapeAction->target = _unit->getPosition(); // start looking in a direction away from the enemy
-					
+
 		if (!_save->getTile(_escapeAction->target))
 		{
 			_escapeAction->target = _unit->getPosition(); // cornered at the edge of the map perhaps? 
 		}
-		
+
 		score = 0;
 
 		if (tries == -1)
@@ -818,9 +818,9 @@ void AlienBAIState::setupEscape()
 			if (_save->getTile(_unit->lastCover) != 0)
 			{
 				_escapeAction->target = _unit->lastCover;
-			} 
+			}
 		}
-		else if (tries < 121) 
+		else if (tries < 121)
 		{
 			// looking for cover
 			_escapeAction->target.x += randomTileSearch[tries].x;
@@ -842,15 +842,14 @@ void AlienBAIState::setupEscape()
 		}
 		else
 		{
-			
-			if (tries == 121) 
-			{ 
-				if (_traceAI) 
+			if (tries == 121)
+			{
+				if (_traceAI)
 				{
 					Log(LOG_INFO) << "best score after systematic search was: " << bestTileScore; 
 				}
 			}
-						
+
 			score = BASE_DESPERATE_SUCCESS; // ruuuuuuun
 			_escapeAction->target = _unit->getPosition();
 			_escapeAction->target.x += RNG::generate(-10,10);
@@ -880,7 +879,7 @@ void AlienBAIState::setupEscape()
 			score += (distanceFromTarget - dist) * 10;
 		}
 		int spotters = 0;
-		if (!tile) 
+		if (!tile)
 		{
 			score = -100001; // no you can't quit the battlefield by running off the map. 
 		}
@@ -889,7 +888,7 @@ void AlienBAIState::setupEscape()
 			spotters = getSpottingUnits(_escapeAction->target);
 			if (std::find(_reachable.begin(), _reachable.end(), _save->getTileIndex(_escapeAction->target))  == _reachable.end())
 				continue; // just ignore unreachable tiles
-					
+
 			if (_spottingEnemies || spotters)
 			{
 				if (_spottingEnemies <= spotters)
@@ -948,8 +947,8 @@ void AlienBAIState::setupEscape()
 	{
 		_save->getTile(_escapeAction->target)->setMarkerColor(13);
 	}
-				
-	if (bestTileScore <= -100000) 
+
+	if (bestTileScore <= -100000)
 	{
 		if (_traceAI)
 		{
