@@ -27,7 +27,7 @@ namespace OpenXcom
  * Default constructor
  */
 RuleDamageType::RuleDamageType() :
-	FixRadius(0), RandomType(DRT_DEFAULT), ResistType(DT_AP), FireBlastCalc(false),
+	FixRadius(0), RandomType(DRT_DEFAULT), ResistType(DT_NONE), FireBlastCalc(false),
 	IgnoreDirection(false), IgnoreSelfDestruct(false), IgnorePainImmunity(false), IgnoreNormalMoraleLose(false), IgnoreOverKill(false),
 	ArmorEffectiveness(1.0f), RadiusEffectiveness(0.0f),
 	FireThreshold(1000), SmokeThreshold(1000),
@@ -48,6 +48,7 @@ int RuleDamageType::getRandomDamage(int power) const
 	{
 		switch (ResistType)
 		{
+		case DT_NONE: randType = DRT_NONE; break;
 		case DT_IN: randType = DRT_FIRE; break;
 		case DT_HE: randType = DRT_TFTD; break;
 		case DT_SMOKE: randType = DRT_NONE; break;

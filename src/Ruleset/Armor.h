@@ -38,7 +38,7 @@ enum ForcedTorso{ TORSO_USE_GENDER, TORSO_ALWAYS_MALE, TORSO_ALWAYS_FEMALE };
 class Armor
 {
 private:
-	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem;
+	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
 	std::vector<std::string> _corpseBattle;
 	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
@@ -79,6 +79,8 @@ public:
 	const std::vector<std::string> &getCorpseBattlescape() const;
 	/// Gets the stores item.
 	std::string getStoreItem() const;
+	/// Gets the special weapon type.
+	std::string getSpecialWeapon() const;
 	/// Gets the battlescape drawing routine ID.
 	int getDrawingRoutine() const;
 	/// DO NOT USE THIS FUNCTION OUTSIDE THE BATTLEUNIT CONSTRUCTOR OR I WILL HUNT YOU DOWN.
