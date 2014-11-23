@@ -119,7 +119,7 @@ private:
 	int _turretType;
 	int _breathFrame;
 	bool _breathing;
-	bool _floorAbove;
+	bool _hidingForTurn, _floorAbove, _respawn;
 	MovementType _movementType;
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
@@ -338,9 +338,9 @@ public:
 	/// Gets the unit's name.
 	std::wstring getName(Language *lang, bool debugAppendId = false) const;
 	/// Gets the unit's stats.
-	UnitStats *getStats();
+	UnitStats *getBaseStats();
 	/// Gets the unit's stats.
-	const UnitStats *getStats() const;
+	const UnitStats *getBaseStats() const;
 	/// Get the unit's stand height.
 	int getStandHeight() const;
 	/// Get the unit's kneel height.
@@ -365,8 +365,10 @@ public:
 	inline int getMaxViewDistanceAtDarkSq() const {return _maxViewDistanceAtDarkSq;}
 	/// Get the units's special ability.
 	int getSpecialAbility() const;
-	/// Set the units's special ability.
-	void setSpecialAbility(SpecialAbility specab);
+	/// Set the units's respawn flag.
+	void setRespawn(bool respawn);
+	/// Get the units's respawn flag.
+	bool getRespawn();
 	/// Get the units's rank string.
 	std::string getRankString() const;
 	/// Get the geoscape-soldier object.
@@ -413,8 +415,6 @@ public:
 	void invalidateCache();
 	/// Get alien/HWP unit.
 	Unit *getUnitRules() const { return _unitRules; }
-	/// scratch value for AI's left hand to tell its right hand what's up...
-	bool _hidingForTurn; // don't zone out and start patrolling again
 	Position lastCover;
 	/// get the vector of units we've seen this turn.
 	std::vector<BattleUnit *> &getUnitsSpottedThisTurn();
@@ -460,6 +460,11 @@ public:
 	void setSpecialWeapon(SavedBattleGame *save);
 	/// Get special weapon.
 	BattleItem *getSpecialWeapon() const;
+	/// Checks if this unit is in hiding for a turn.
+	bool isHiding() {return _hidingForTurn; };
+	/// Sets this unit is in hiding for a turn (or not).
+	void setHiding(bool hiding) { _hidingForTurn = hiding; };
+
 };
 
 }

@@ -49,7 +49,7 @@ Tile::SerializationKey Tile::serializationKey =
 * constructor
 * @param pos Position.
 */
-Tile::Tile(const Position& pos): _smoke(0), _fire(0), _explosive(0), _pos(pos), _unit(0), _animationOffset(0), _markerColor(0), _visible(false), _preview(-1), _TUMarker(-1), _overlaps(0), _danger(false)
+Tile::Tile(const Position& pos): _smoke(0), _fire(0), _explosive(0), _explosiveType(0), _pos(pos), _unit(0), _animationOffset(0), _markerColor(0), _visible(false), _preview(-1), _TUMarker(-1), _overlaps(0), _danger(false)
 {
 	for (int i = 0; i < 4; ++i)
 	{
@@ -108,6 +108,10 @@ void Tile::load(const YAML::Node &node)
 	{
 		_currentFrame[2] = 7;
 	}
+	if (_fire || _smoke)
+	{
+		_animationOffset = std::rand() % 4;
+	}
 }
 
 /**
@@ -135,6 +139,10 @@ void Tile::loadBinary(Uint8 *buffer, Tile::SerializationKey& serKey)
 	_discovered[2] = (boolFields & 4) ? true : false;
 	_currentFrame[1] = (boolFields & 8) ? 7 : 0;
 	_currentFrame[2] = (boolFields & 0x10) ? 7 : 0;
+	if (_fire || _smoke)
+	{
+		_animationOffset = std::rand() % 4;
+	}
 }
 
 
@@ -304,7 +312,7 @@ int Tile::getTerrainLevel() const
  */
 int Tile::getFootstepSound(Tile *tileBelow) const
 {
-	int sound = 0;
+	int sound = -1;
 
 	if (_objects[MapData::O_FLOOR])
 		sound = _objects[MapData::O_FLOOR]->getFootstepSound();
@@ -487,7 +495,7 @@ bool Tile::destroy(int part)
 		}
 		if (originalPart->getExplosive())
 		{
-			setExplosive(originalPart->getExplosive());
+			setExplosive(originalPart->getExplosive(), originalPart->getExplosiveType());
 		}
 	}
 	/* check if the floor on the lowest level is gone */
@@ -518,13 +526,15 @@ bool Tile::damage(int part, int power)
  * We do it this way, because the same tile can be visited multiple times by an "explosion ray".
  * The explosive power on the tile is some kind of moving MAXIMUM of the explosive rays that passes it.
  * @param power Power of the damage.
+ * @param damageType the damage type of the explosion (not the same as item damage types)
  * @param force Force damage.
  */
-void Tile::setExplosive(int power, bool force)
+void Tile::setExplosive(int power, int damageType, bool force)
 {
 	if (force || _explosive < power)
 	{
 		_explosive = power;
+		_explosiveType = damageType;
 	}
 }
 
@@ -535,6 +545,15 @@ void Tile::setExplosive(int power, bool force)
 int Tile::getExplosive() const
 {
 	return _explosive;
+}
+
+/**
+ * Get explosive on this tile.
+ * @return explosive
+ */
+int Tile::getExplosiveType() const
+{
+	return _explosiveType;
 }
 
 /*

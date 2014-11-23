@@ -485,6 +485,8 @@ void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z)
  */
 void SavedBattleGame::initUtilities(ResourcePack *res, Ruleset *rule)
 {
+	delete _pathfinding;
+	delete _tileEngine;
 	_pathfinding = new Pathfinding(this);
 	_tileEngine = new TileEngine(this, res->getVoxelData(), rule->getMaxViewDistance(), rule->getMaxDarknessToSeeUnits());
 }
@@ -1117,7 +1119,7 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 
 		if (loaded && (unit->getGeoscapeSoldier() == 0 || allowAutoLoadout))
 		{
-			if (!rightWeapon && unit->getStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
+			if (!rightWeapon && unit->getBaseStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
 			{
 				item->moveToOwner(unit);
 				item->setSlot(rightHand);
@@ -1183,7 +1185,7 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 	default:
 		if ((unit->getGeoscapeSoldier() == 0 || allowAutoLoadout))
 		{
-			if (unit->getStats()->strength >= weight) // weight is always considered 0 for aliens
+			if (unit->getBaseStats()->strength >= weight) // weight is always considered 0 for aliens
 			{
 				for (std::vector<std::string>::const_iterator i = _rule->getInvsList().begin(); i != _rule->getInvsList().end() && !placed; ++i)
 				{
@@ -1359,13 +1361,13 @@ Node *SavedBattleGame::getSpawnNode(int nodeRank, BattleUnit *unit)
 
 	for (std::vector<Node*>::iterator i = getNodes()->begin(); i != getNodes()->end(); ++i)
 	{
-		if ((*i)->getRank() == nodeRank										// ranks must match
+		if ((*i)->getRank() == nodeRank								// ranks must match
 			&& (!((*i)->getType() & Node::TYPE_SMALL) 
 				|| unit->getArmor()->getSize() == 1)				// the small unit bit is not set or the unit is small
 			&& (!((*i)->getType() & Node::TYPE_FLYING) 
-				|| unit->getMovementType() == MT_FLY)// the flying unit bit is not set or the unit can fly
-			&& (*i)->getPriority() > 0										// priority 0 is no spawnplace
-			&& setUnitPosition(unit, (*i)->getPosition(), true))		// check if not already occupied
+				|| unit->getMovementType() == MT_FLY)				// the flying unit bit is not set or the unit can fly
+			&& (*i)->getPriority() > 0								// priority 0 is no spawnplace
+			&& setUnitPosition(unit, (*i)->getPosition(), true))	// check if not already occupied
 		{
 			if ((*i)->getPriority() > highestPriority)
 			{

@@ -87,7 +87,7 @@ void ExplosionBState::init()
 		else
 		{
 			// since melee aliens don't use a conventional weapon type, we use their strength instead.
-			_power += _item->getRules()->getBonusPower(_unit->getStats());
+			_power += _item->getRules()->getBonusPower(_unit->getBaseStats());
 			_power -= _item->getRules()->getPowerRangeReduction() * _range;
 		}
 
@@ -97,13 +97,33 @@ void ExplosionBState::init()
 	}
 	else if (_tile)
 	{
+		ItemDamageType DT;
+		switch (_tile->getExplosiveType())
+		{
+		case 0:
+			DT = DT_HE;
+			break;
+		case 5:
+			DT = DT_IN;
+			break;
+		case 6:
+			DT = DT_STUN;
+			break;
+		default:
+			DT = DT_SMOKE;
+			break;
+		}
+//		if (DT != DT_HE)
+//		{
+//			_tile->setExplosive(0,0,true);
+//		}
 		_power = _tile->getExplosive();
-		_tile->setExplosive(0, true);
-		_damageType = _parent->getRuleset()->getDamageType(DT_HE);
+		_tile->setExplosive(0, 0, true);
+		_damageType = _parent->getRuleset()->getDamageType(DT);
 		_radius = _power /10;
 		_areaOfEffect = true;
 	}
-	else if (_unit && _unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH)
+	else if (_unit && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
 	{
 		RuleItem* corpse = _parent->getRuleset()->getItem(_unit->getArmor()->getCorpseGeoscape());
 		_power = corpse->getPower();
@@ -280,8 +300,28 @@ void ExplosionBState::explode()
 			&& victim->getOriginalFaction() != FACTION_HOSTILE)
 		{
 			// converts the victim to a zombie on death
-			victim->setSpecialAbility(SPECAB_RESPAWN);
+			victim->setRespawn(true);
 			victim->setSpawnUnit(_item->getRules()->getZombieUnit());
+//=======
+//			ItemDamageType type = _item->getRules()->getDamageType();
+//			if (_pistolWhip)
+//			{
+//				type = DT_STUN;
+//			}
+//			BattleUnit *victim = save->getTileEngine()->hit(_center, _power, type, _unit);
+//			// check if this unit turns others into zombies
+//			if (!_item->getRules()->getZombieUnit().empty()
+//				&& victim
+//				&& victim->getArmor()->getSize() == 1
+//				&& (victim->getGeoscapeSoldier() || victim->getUnitRules()->getRace() == "STR_CIVILIAN")
+//				&& victim->getSpawnUnit().empty()
+//				&& victim->getOriginalFaction() != FACTION_HOSTILE)
+//			{
+//				// converts the victim to a zombie on death
+//				victim->setRespawn(true);
+//				victim->setSpawnUnit(_item->getRules()->getZombieUnit());
+//			}
+//>>>>>>> supsuperorgin/master
 		}
 	}
 

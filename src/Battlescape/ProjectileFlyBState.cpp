@@ -554,7 +554,7 @@ void ProjectileFlyBState::think()
 						}
 					}
 					// if the unit burns floortiles, burn floortiles
-					if (_unit->getSpecialAbility() == SPECAB_BURNFLOOR)
+					if (_unit->getSpecialAbility() == SPECAB_BURNFLOOR || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
 					{
 						_parent->getSave()->getTile(_action.target)->ignite(15);
 					}
@@ -623,7 +623,7 @@ bool ProjectileFlyBState::validThrowRange(BattleAction *action, Position origin,
 	{
 		weight += action->weapon->getAmmoItem()->getRules()->getWeight();
 	}
-	double maxDistance = (getMaxThrowDistance(weight, action->actor->getStats()->strength, zd) + 8) / 16.0;
+	double maxDistance = (getMaxThrowDistance(weight, action->actor->getBaseStats()->strength, zd) + 8) / 16.0;
 	int xdiff = action->target.x - action->actor->getPosition().x;
 	int ydiff = action->target.y - action->actor->getPosition().y;
 	double realDistance = sqrt((double)(xdiff*xdiff)+(double)(ydiff*ydiff));
@@ -654,7 +654,7 @@ int ProjectileFlyBState::getMaxThrowDistance(int weight, int strength, int level
         if (curZ < 0 && dz < 0) //roll back
         {
             dz = std::max(dz, -1.0);
-            if (abs(dz)>1e-10) //rollback horizontal
+            if (std::abs(dz)>1e-10) //rollback horizontal
                 dist -= curZ / dz;
             break;
         }

@@ -468,6 +468,8 @@ set ( ruleset_src
   Ruleset/RuleInventory.cpp
   Ruleset/MapBlock.h
   Ruleset/MapBlock.cpp
+  Ruleset/MapScript.h
+  Ruleset/MapScript.cpp
   Ruleset/MCDPatch.h
   Ruleset/MCDPatch.cpp
   Ruleset/RuleBaseFacility.cpp

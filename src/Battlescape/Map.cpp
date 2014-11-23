@@ -95,7 +95,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	}
 	_res = _game->getResourcePack();
 	_save = _game->getSavedGame()->getSavedBattle();
-	if (_res->getLUTs()->size() > _save->getDepth())
+	if ((int)(_res->getLUTs()->size()) > _save->getDepth())
 	{
 		_transparencies = &_res->getLUTs()->at(_save->getDepth());
 	}
@@ -935,7 +935,7 @@ void Map::drawTerrain(Surface *surface)
 					{
 						int vaporX = screenPosition.x + (*i)->getX();
 						int vaporY = screenPosition.y + (*i)->getY();
-						if (_transparencies->size() >= ((*i)->getColor() + 1) * 1024)
+						if ((int)(_transparencies->size()) >= ((*i)->getColor() + 1) * 1024)
 						{
 							switch ((*i)->getSize())
 							{
@@ -1320,7 +1320,7 @@ void Map::animate(bool redraw)
 		_save->getTiles()[i]->animate();
 	}
 
-	// animate certain units (large flying units have a propultion animation)
+	// animate certain units (large flying units have a propulsion animation)
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
 		if (_save->getDepth() > 0 && !(*i)->getFloorAbove())
@@ -1448,7 +1448,7 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
 			// make sure this unit isn't obscured by the floor above him, otherwise it looks weird.
 			if (_camera->getViewLevel() > unit->getPosition().z)
 			{
-				for (int z = std::min(_camera->getViewLevel(), _save->getMapSizeZ()); z != unit->getPosition().z; --z)
+				for (int z = std::min(_camera->getViewLevel(), _save->getMapSizeZ() - 1); z != unit->getPosition().z; --z)
 				{
 					if (!_save->getTile(Position(unit->getPosition().x, unit->getPosition().y, z))->hasNoFloor(0))
 					{
@@ -1550,11 +1550,11 @@ void Map::cacheUnit(BattleUnit *unit)
 
 			BattleItem *rhandItem = unit->getItem("STR_RIGHT_HAND");
 			BattleItem *lhandItem = unit->getItem("STR_LEFT_HAND");
-			if (rhandItem)
+			if (rhandItem && !rhandItem->getRules()->isFixed())
 			{
 				unitSprite->setBattleItem(rhandItem);
 			}
-			if (lhandItem)
+			if (lhandItem && !lhandItem->getRules()->isFixed())
 			{
 				unitSprite->setBattleItem(lhandItem);
 			}
