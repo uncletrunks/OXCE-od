@@ -43,7 +43,7 @@ private:
 	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
-	int _size, _weight, _visibilityAtDark;
+	int _size, _weight, _visibilityAtDark, _regeneration;
 	float _damageModifier[DAMAGE_TYPES];
 	std::vector<int> _loftempsSet;
 	UnitStats _stats;
@@ -107,6 +107,8 @@ public:
 	const std::vector<std::string> &getBuiltInWeapons() const;
 	/// Gets max view distance at dark in BattleScape.
 	int getVisibilityAtDark() const;
+	/// How many health points unit grain per turn.
+	int getRegeneration() const;
 	/// Gets how armor react to fear.
 	bool getFearImmune(bool def = false) const;
 	/// Gets how armor react to bleeding.

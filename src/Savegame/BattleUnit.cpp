@@ -1536,18 +1536,22 @@ void BattleUnit::prepareNewTurn()
 			_energy = getBaseStats()->stamina;
 	}
 
+	int healthChange = 0;
+
 	// suffer from fatal wounds
-	_health -= getFatalWounds();
+	healthChange -= getFatalWounds();
+
+	// basic regeneration
+	healthChange += _armor->getRegeneration();
 
 	// suffer from fire
 	if (!_hitByFire && _fire > 0)
 	{
-		_health -= _armor->getDamageModifier(DT_IN) * RNG::generate(5, 10);
+		healthChange -= _armor->getDamageModifier(DT_IN) * RNG::generate(5, 10);
 		_fire--;
 	}
 
-	if (_health < -_stats.health)
-		_health = -_stats.health;
+	setValueMax(_health, healthChange, -4 * _stats.health, _stats.health);
 
 	// if unit is dead, AI state should be gone
 	if (_health <= 0 && _currentAIState)
@@ -2014,6 +2018,14 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = stats->health - _health;
 
+	if (_armor->getRegeneration() > 0)
+	{
+		healthLoss -= _armor->getRegeneration() * 20;
+	}
+	if (healthLoss < 0)
+	{
+		healthLoss = 0;
+	}
 	s->setWoundRecovery(RNG::generate((healthLoss*0.5),(healthLoss*1.5)));
 
 	if (_expBravery && stats->bravery < caps.bravery)

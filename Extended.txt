@@ -62,6 +62,7 @@ armors:
     painImmune: false #default true for big units.
     zombiImmune: false #ignored by big units.
     visibilityAtDark: 9 #default 20 for aliens, 9 for humans.
+    regeneration: 0 #number of health point regenerated evry turn, can be less than zero.
     specialWeapon: ALIEN_PSI_WEAPON #alien psi or meele attack.
     builtInWeapons: #same like for unit.
       - STR_SOME_WEAPON
@@ -130,6 +131,7 @@ Corpses, items and chryssalids are not spawn when unit is killed by heavy weapon
 Stuned units can be hited by bullets and fire.[/br]
 Big groups of aliens (20+) get less morale loses from casualties.[br/]
 Terror units can now spawn with any buildin weapon not only one defined by name.[br/]
+After battle, wounlded unit restore health equal to 20 times armor regeneration stat (if its greater than zero).[br/]
 
 [br/][br/]
 [i]Links[/i]
