@@ -543,7 +543,7 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 	}
 
 	_walkPhase++;
-	
+
 
 	if (_walkPhase == middle)
 	{
@@ -566,7 +566,7 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 			// Finish strafing move facing the correct way.
 			_direction = _faceDirection;
 			_faceDirection = -1;
-		} 
+		}
 
 		// motion points calculation for the motion scanner blips
 		if (_armor->getSize() > 1)
@@ -576,7 +576,7 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 		else
 		{
 			// sectoids actually have less motion points
-			// but instead of create yet another variable, 
+			// but instead of create yet another variable,
 			// I used the height of the unit instead (logical)
 			if (getStandHeight() > 16)
 				_motionPoints += 4;

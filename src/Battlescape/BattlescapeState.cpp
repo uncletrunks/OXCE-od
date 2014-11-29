@@ -184,11 +184,11 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	// Fix system colors
 	_game->getCursor()->setColor(Palette::blockOffset(9));
 	_game->getFpsCounter()->setColor(Palette::blockOffset(9));
-	
+
 	if (_game->getRuleset()->getInterface("battlescape")->getElement("pathfinding"))
 	{
 		Element *pathing = _game->getRuleset()->getInterface("battlescape")->getElement("pathfinding");
-		
+
 		Pathfinding::green = pathing->color;
 		Pathfinding::yellow = pathing->color2;
 		Pathfinding::red = pathing->border;
@@ -196,7 +196,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 
 	add(_map);
 	add(_icons);
-	
+
 	// Add in custom reserve buttons
 	Surface *icons = _game->getResourcePack()->getSurface("ICONS.PCK");
 	if (_game->getResourcePack()->getSurface("TFTDReserve"))
@@ -475,7 +475,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnReserveSnap->setGroup(&_reserve);
 	_btnReserveAimed->setGroup(&_reserve);
 	_btnReserveAuto->setGroup(&_reserve);
-	
+
 	// Set music
 	_game->getResourcePack()->playMusic("GMTACTIC");
 
@@ -761,7 +761,7 @@ void BattlescapeState::mapClick(Action *action)
 			return;
 		}
 	}
-	
+
 	// don't handle mouseclicks over the buttons (it overlaps with map surface)
 	if (_mouseOverIcons) return;
 
@@ -1928,7 +1928,7 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 					break;
 				}
 			}
-			
+
 			for (std::vector<AlienBase*>::iterator i = _game->getSavedGame()->getAlienBases()->begin();
 				i != _game->getSavedGame()->getAlienBases()->end(); ++i)
 			{

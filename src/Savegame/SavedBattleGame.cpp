@@ -949,7 +949,7 @@ void SavedBattleGame::resetUnitTiles()
 		}
 	}
 }
- 
+
 /**
  * Gives access to the "storage space" vector, for distribution of items in base defense missions.
  * @return Vector of storage positions.
@@ -1362,9 +1362,9 @@ Node *SavedBattleGame::getSpawnNode(int nodeRank, BattleUnit *unit)
 	for (std::vector<Node*>::iterator i = getNodes()->begin(); i != getNodes()->end(); ++i)
 	{
 		if ((*i)->getRank() == nodeRank								// ranks must match
-			&& (!((*i)->getType() & Node::TYPE_SMALL) 
+			&& (!((*i)->getType() & Node::TYPE_SMALL)
 				|| unit->getArmor()->getSize() == 1)				// the small unit bit is not set or the unit is small
-			&& (!((*i)->getType() & Node::TYPE_FLYING) 
+			&& (!((*i)->getType() & Node::TYPE_FLYING)
 				|| unit->getMovementType() == MT_FLY)				// the flying unit bit is not set or the unit can fly
 			&& (*i)->getPriority() > 0								// priority 0 is no spawnplace
 			&& setUnitPosition(unit, (*i)->getPosition(), true))	// check if not already occupied
@@ -1425,7 +1425,7 @@ Node *SavedBattleGame::getPatrolNode(bool scout, BattleUnit *unit, Node *fromNod
 			&& (!scout || n != fromNode)																// scouts push forward
 			&& n->getPosition().x > 0 && n->getPosition().y > 0)
 		{
-			if (!preferred 
+			if (!preferred
 				|| (preferred->getRank() == Node::nodeRank[unit->getRankInt()][0] && preferred->getFlags() < n->getFlags())
 				|| preferred->getFlags() < n->getFlags())
 			{
@@ -1697,7 +1697,7 @@ bool SavedBattleGame::setUnitPosition(BattleUnit *bu, const Position &position, 
 		{
 			Tile *t = getTile(position + Position(x,y,0));
 			Tile *tb = getTile(position + Position(x,y,-1));
-			if (t == 0 || 
+			if (t == 0 ||
 				(t->getUnit() != 0 && t->getUnit() != bu) ||
 				t->getTUCost(MapData::O_OBJECT, bu->getMovementType()) == 255 ||
 				(t->hasNoFloor(tb) && bu->getMovementType() != MT_FLY) ||

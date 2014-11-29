@@ -240,7 +240,7 @@ public:
 	/// Gets the list of external Strings.
 	std::map<std::string, ExtraStrings *> getExtraStrings() const;
 	/// Gets the list of StatStrings.
-    std::vector<StatString *> getStatStrings() const;    
+    std::vector<StatString *> getStatStrings() const;
 	/// Sorts all our lists according to their weight.
 	void sortLists();
 	/// Gets the research-requirements for Psi-Lab (it's a cache for psiStrengthEval)
@@ -259,7 +259,7 @@ public:
 	RuleGlobe *getGlobe() const;
 	/// Gets the list of selective files for insertion into our cat files.
 	const std::map<std::string, SoundDefinition *> *getSoundDefinitions() const;
-	/// Gets the list of transparency colors, 
+	/// Gets the list of transparency colors,
 	const std::vector<SDL_Color> *getTransparencies() const;
 	const std::vector<MapScript*> *getMapScript(std::string id) const;
 };

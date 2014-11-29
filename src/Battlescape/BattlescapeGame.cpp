@@ -1324,7 +1324,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 		{
 			_currentAction.target = pos;
 			getMap()->setCursorType(CT_NONE);
-			
+
 			if (Options::battleConfirmFireMode)
 			{
 				_currentAction.waypoints.clear();

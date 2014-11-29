@@ -939,7 +939,7 @@ regions:
         - [207, 207.125, -21.625, -21.5]
         - [177.75, 178.25, 17.5, 17.875]
         - [164.625, 164.75, 20.5, 20.75]
-      - 
+      -
         - [209.125, 209.625, -19.875, -19.375]
         - [207, 207.125, -21.625, -21.5]
       -
@@ -2282,7 +2282,7 @@ items:
     weight: 5
     bigSprite: 29
     floorSprite: 28
-    hitSound: 37    
+    hitSound: 37
     battleType: 8
     invWidth: 2
     invHeight: 2
@@ -5127,7 +5127,7 @@ units:
     deathSound: 8
     moveSound: 0
     intelligence: 5
-    aggression: 2  
+    aggression: 2
   - type: STR_SNAKEMAN_COMMANDER
     race: STR_SNAKEMAN
     rank: STR_LIVE_COMMANDER
@@ -6067,7 +6067,7 @@ alienDeployments:
           -
             []
           -
-            []            
+            []
       - alienRank: 7
         lowQty: 0
         highQty: 2
@@ -6948,7 +6948,7 @@ research:
     unlocks:
       - STR_CYDONIA_OR_BUST
     requires:
-      - STR_THE_MARTIAN_SOLUTION    
+      - STR_THE_MARTIAN_SOLUTION
     dependencies:
       - STR_SECTOID_COMMANDER
       - STR_SNAKEMAN_COMMANDER

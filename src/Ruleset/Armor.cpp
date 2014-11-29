@@ -351,6 +351,7 @@ const std::vector<std::string> &Armor::getBuiltInWeapons() const
 {
 	return _builtInWeapons;
 }
+
 /**
  * Gets max view distance at dark in BattleScape.
  * @return The distance to see at dark.
