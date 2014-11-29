@@ -237,7 +237,7 @@ public:
 	/// Resets the visibility of all tiles on the map.
 	void resetTiles();
 	/// get an 11x11 grid of positions (-10 to +10) to check.
-	const std::vector<Position> getTileSearch();
+	const std::vector<Position> &getTileSearch();
 	/// check if the AI has engaged cheat mode.
 	bool isCheating();
 	/// get the reserved fire mode.

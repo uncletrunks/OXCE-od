@@ -1963,7 +1963,7 @@ void SavedBattleGame::resetTiles()
 /**
  * @return the tilesearch vector for use in AI functions.
  */
-const std::vector<Position> SavedBattleGame::getTileSearch()
+const std::vector<Position> &SavedBattleGame::getTileSearch()
 {
 	return _tileSearch;
 }
