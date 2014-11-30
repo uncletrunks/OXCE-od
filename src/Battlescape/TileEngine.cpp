@@ -1086,7 +1086,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 		target->moraleChange(-morale_loss);
 	}
 
-	if (target->getSpecialAbility() == SPECAB_EXPLODEONDEATH && !target->isOut() && (target->getHealth() == 0 || target->getStunlevel() >= target->getHealth()))
+	if ((target->getSpecialAbility() == SPECAB_EXPLODEONDEATH || target->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !target->isOut() && (target->getHealth() == 0 || target->getStunlevel() >= target->getHealth()))
 	{
 		if (type->IgnoreSelfDestruct == false)
 		{
@@ -1158,7 +1158,9 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 				}
 			}
 			if (tile->damage(part, tileDmg))
-				_save->setObjectiveDestroyed(true);
+			{
+				_save->addDestroyedObjective();
+			}
 		}
 	}
 	else if (part == V_UNIT)
@@ -1185,29 +1187,6 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 			const Position relative = (center - target) - Position(0,0,verticaloffset);
 
 			hitUnit(unit, bu, relative, damage, type);
-//=======
-//			adjustedDamage = bu->damage(relative, rndPower, type);
-//
-//			// if it's going to bleed to death and it's not a player, give credit for the kill.
-//			if (unit && bu->getFaction() != FACTION_PLAYER && wounds < bu->getFatalWounds())
-//			{
-//				bu->killedBy(unit->getFaction());
-//			}
-//			const int bravery = (110 - bu->getBaseStats()->bravery) / 10;
-//			const int modifier = bu->getFaction() == FACTION_PLAYER ? _save->getMoraleModifier() : 100;
-//			const int morale_loss = 100 * (adjustedDamage * bravery / 10) / modifier;
-//
-//			bu->moraleChange(-morale_loss);
-//
-//			if ((bu->getSpecialAbility() == SPECAB_EXPLODEONDEATH || bu->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !bu->isOut() && (bu->getHealth() == 0 || bu->getStunlevel() >= bu->getHealth()))
-//			{
-//				if (type != DT_STUN && type != DT_HE)
-//				{
-//					Position p = Position(bu->getPosition().x * 16, bu->getPosition().y * 16, bu->getPosition().z * 24);
-//					_save->getBattleGame()->statePushNext(new ExplosionBState(_save->getBattleGame(), p, 0, bu, 0));
-//				}
-//			}
-//>>>>>>> supsuperorgin/master
 
 			if (bu->getOriginalFaction() == FACTION_HOSTILE &&
 				unit &&
@@ -1379,7 +1358,9 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 		for (std::map<Tile*, int>::iterator i = tilesAffected.begin(); i != tilesAffected.end(); ++i)
 		{
 			if (detonate(i->first, i->second))
-				_save->setObjectiveDestroyed(true);
+			{
+				_save->addDestroyedObjective();
+			}
 			applyGravity(i->first);
 			Tile *j = _save->getTile(i->first->getPosition() + Position(0,0,1));
 			if (j)

@@ -17,29 +17,30 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXCOM_ARTICLESTATETFTD_H
-#define OPENXCOM_ARTICLESTATETFTD_H
+#ifndef OPENXCOM_ARTICLESTATETFTDITEM_H
+#define OPENXCOM_ARTICLESTATETFTDITEM_H
 
-#include "ArticleState.h"
+#include "ArticleStateTFTD.h"
 
 namespace OpenXcom
 {
+	class TextList;
 	class Text;
 	class ArticleDefinitionTFTD;
 
-	/**
-	 * Every TFTD article has a title, text block and a background image, with little to no variation.
-	 */
-
-	class ArticleStateTFTD : public ArticleState
+	class ArticleStateTFTDItem : public ArticleStateTFTD
 	{
 	public:
-		ArticleStateTFTD(ArticleDefinitionTFTD *defs);
-		virtual ~ArticleStateTFTD();
+		ArticleStateTFTDItem(ArticleDefinitionTFTD *defs);
+		virtual ~ArticleStateTFTDItem();
 
 	protected:
-		Text *_txtTitle;
-		Text *_txtInfo;
+		TextList *_lstInfo;
+		Text *_txtShotType;
+		Text *_txtAccuracy;
+		Text *_txtTuCost;
+		Text *_txtAmmoType[3];
+		Text *_txtAmmoDamage[3];
 	};
 }
 

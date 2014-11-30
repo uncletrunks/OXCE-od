@@ -55,7 +55,7 @@ namespace OpenXcom
 SavedBattleGame::SavedBattleGame(Ruleset *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
 	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1),
-    _debugMode(false), _aborted(false), _itemId(0), _objectiveDestroyed(false), _unitsFalling(false),
+    _debugMode(false), _aborted(false), _itemId(0), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1)
 {
 	_tileSearch.resize(11*11);
@@ -307,9 +307,11 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 			 ++weaponi;
 		}
 	}
-	_objectiveDestroyed = node["objectiveDestroyed"].as<bool>(_objectiveDestroyed);
+	_objectivesDestroyed = node["objectivesDestroyed"].as<int>(_objectivesDestroyed);
+	_objectivesNeeded = node["objectivesNeeded"].as<int>(_objectivesNeeded);
 	_tuReserved = (BattleActionType)node["tuReserved"].as<int>(_tuReserved);
 	_kneelReserved = node["kneelReserved"].as<bool>(_kneelReserved);
+	_ambience = node["ambience"].as<int>(_ambience);
 }
 
 /**
@@ -355,9 +357,10 @@ void SavedBattleGame::loadMapResources(Game *game)
 YAML::Node SavedBattleGame::save() const
 {
 	YAML::Node node;
-	if (_objectiveDestroyed)
+	if (_objectivesNeeded)
 	{
-		node["objectiveDestroyed"] = _objectiveDestroyed;
+		node["objectivesDestroyed"] = _objectivesDestroyed;
+		node["objectivesNeeded"] = _objectivesNeeded;
 	}
 	node["width"] = _mapsize_x;
 	node["length"] = _mapsize_y;
@@ -427,7 +430,7 @@ YAML::Node SavedBattleGame::save() const
 	node["tuReserved"] = (int)_tuReserved;
     node["kneelReserved"] = _kneelReserved;
     node["depth"] = _depth;
-
+	node["ambience"] = _ambience;
 	return node;
 }
 
@@ -1317,12 +1320,19 @@ bool SavedBattleGame::isAborted() const
 
 /**
  * Sets whether the objective is destroyed.
- * @param flag True if the objective is destroyed.
  */
-void SavedBattleGame::setObjectiveDestroyed(bool flag)
+void SavedBattleGame::addToObjectiveCount()
 {
-	_objectiveDestroyed = flag;
-	if (flag && Options::battleAutoEnd)
+	_objectivesNeeded++;
+}
+
+/**
+ * Sets whether the objective is destroyed.
+ */
+void SavedBattleGame::addDestroyedObjective()
+{
+	_objectivesDestroyed++;
+	if (allObjectivesDestroyed() && Options::battleAutoEnd)
 	{
 		setSelectedUnit(0);
 		_battleState->getBattleGame()->cancelCurrentAction(true);
@@ -1331,12 +1341,12 @@ void SavedBattleGame::setObjectiveDestroyed(bool flag)
 }
 
 /**
- * Returns whether the objective is detroyed.
- * @return True if the objective is destroyed.
+ * Returns whether the objectives are detroyed.
+ * @return True if the objectives are destroyed.
  */
-bool SavedBattleGame::isObjectiveDestroyed()
+bool SavedBattleGame::allObjectivesDestroyed()
 {
-	return _objectiveDestroyed;
+	return (_objectivesNeeded > 0 && _objectivesDestroyed == _objectivesNeeded);
 }
 
 /**
@@ -1515,11 +1525,11 @@ void SavedBattleGame::prepareNewTurn()
 					{
 						if ((*i)->destroy(MapData::O_OBJECT))
 						{
-							_objectiveDestroyed = true;
+							addDestroyedObjective();
 						}
 						if ((*i)->destroy(MapData::O_FLOOR))
 						{
-							_objectiveDestroyed = true;
+							addDestroyedObjective();
 						}
 					}
 				}
@@ -1529,7 +1539,7 @@ void SavedBattleGame::prepareNewTurn()
 					{
 						if ((*i)->destroy(MapData::O_FLOOR))
 						{
-							_objectiveDestroyed = true;
+							addDestroyedObjective();
 						}
 					}
 				}

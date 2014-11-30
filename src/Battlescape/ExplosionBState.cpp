@@ -113,10 +113,6 @@ void ExplosionBState::init()
 			DT = DT_SMOKE;
 			break;
 		}
-//		if (DT != DT_HE)
-//		{
-//			_tile->setExplosive(0,0,true);
-//		}
 		_power = _tile->getExplosive();
 		_tile->setExplosive(0, 0, true);
 		_damageType = _parent->getRuleset()->getDamageType(DT);
@@ -302,26 +298,6 @@ void ExplosionBState::explode()
 			// converts the victim to a zombie on death
 			victim->setRespawn(true);
 			victim->setSpawnUnit(_item->getRules()->getZombieUnit());
-//=======
-//			ItemDamageType type = _item->getRules()->getDamageType();
-//			if (_pistolWhip)
-//			{
-//				type = DT_STUN;
-//			}
-//			BattleUnit *victim = save->getTileEngine()->hit(_center, _power, type, _unit);
-//			// check if this unit turns others into zombies
-//			if (!_item->getRules()->getZombieUnit().empty()
-//				&& victim
-//				&& victim->getArmor()->getSize() == 1
-//				&& (victim->getGeoscapeSoldier() || victim->getUnitRules()->getRace() == "STR_CIVILIAN")
-//				&& victim->getSpawnUnit().empty()
-//				&& victim->getOriginalFaction() != FACTION_HOSTILE)
-//			{
-//				// converts the victim to a zombie on death
-//				victim->setRespawn(true);
-//				victim->setSpawnUnit(_item->getRules()->getZombieUnit());
-//			}
-//>>>>>>> supsuperorgin/master
 		}
 	}
 

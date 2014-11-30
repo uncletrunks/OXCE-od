@@ -283,13 +283,8 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 			// special behaviour here: we add and remove the item all at once.
 			if (action.type == BA_HIT && action.weapon != unit->getMeleeWeapon())
 			{
-				ss.clear();
-				ss << L"Attack type=" << action.type << " target="<< action.target << " weapon=" << action.weapon->getRules()->getName().c_str();
-				_parentState->debug(ss.str());
 				action.weapon = unit->getMeleeWeapon();
 				action.TU = unit->getActionTUs(action.type, action.weapon);
-				statePushBack(new ProjectileFlyBState(this, action));
-				return;
 			}
 		}
 
@@ -445,7 +440,7 @@ void BattlescapeGame::endTurn()
 	// turn off MCed alien lighting.
 	_save->getTileEngine()->calculateUnitLighting();
 
-	if (_save->isObjectiveDestroyed())
+	if (_save->allObjectivesDestroyed())
 	{
 		_parentState->finishBattle(false,liveSoldiers);
 		return;
@@ -1539,6 +1534,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
  */
 BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &newType)
 {
+	bool visible = unit->getVisible();
 	getSave()->getBattleState()->showPsiButton(false);
 	// in case the unit was unconscious
 	getSave()->removeUnconsciousBodyItem(unit);
@@ -1584,10 +1580,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &ne
 
 	getTileEngine()->calculateFOV(newUnit->getPosition());
 	getTileEngine()->applyGravity(newUnit->getTile());
-	if (unit->getFaction() == FACTION_PLAYER)
-	{
-		newUnit->setVisible(true);
-	}
+	newUnit->setVisible(visible);
 	//newUnit->getCurrentAIState()->think();
 	return newUnit;
 
