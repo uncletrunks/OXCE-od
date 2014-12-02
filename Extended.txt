@@ -11,6 +11,8 @@ items:
   - type: STR_ITEM_TYPE #default config ...
     tuThrow: 25 #cont of throwing item in %.
     tuPrime: 50 #cost of priming granade in %.
+    tuLoad: 15 #cost of loading weapon.
+    tuUnload: 8 #cost of unloading weapon.
     damageBonus: #used by ammo and psi-amp.
       strength: 0.1 #default value 1.0 if `strengthApplied: true`.
       psi: 0.0 #bonus equal `psiSkill*psiStrength`. default value 0.02 if psi-amp.
@@ -132,6 +134,8 @@ Stuned units can be hited by bullets and fire.[/br]
 Big groups of aliens (20+) get less morale loses from casualties.[br/]
 Terror units can now spawn with any buildin weapon not only one defined by name.[br/]
 After battle, wounlded unit restore health equal to 20 times armor regeneration stat (if its greater than zero).[br/]
+While loading and unloading weapon you must pay cost of moving item to hand.
+You can unprime granade for half of prime tu cost.
 
 [br/][br/]
 [i]Links[/i]
