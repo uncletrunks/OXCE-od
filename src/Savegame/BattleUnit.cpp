@@ -2960,26 +2960,26 @@ static inline BattleItem *createItem(SavedBattleGame *save, BattleUnit *unit, Ru
 void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 {
 	const Ruleset *rule = save->getRuleset();
-	RuleItem * item;
+	RuleItem *item = 0;
 	int i = 0;
 
 	if (getUnitRules())
 	{
 		item = rule->getItem(getUnitRules()->getMeleeWeapon());
-		if (item)
+		if (item && i < SPEC_WEAPON_MAX)
 		{
 			_specWeapon[i++] = createItem(save, this, item);
 		}
 	}
 	item = rule->getItem(getArmor()->getSpecialWeapon());
-	if (item)
+	if (item && i < SPEC_WEAPON_MAX)
 	{
 		_specWeapon[i++] = createItem(save, this, item);
 	}
 	if (getBaseStats()->psiSkill > 0 && getFaction() == FACTION_HOSTILE)
 	{
 		item = rule->getItem("ALIEN_PSI_WEAPON");
-		if (item)
+		if (item && i < SPEC_WEAPON_MAX)
 		{
 			_specWeapon[i++] = createItem(save, this, item);
 		}
@@ -2993,7 +2993,11 @@ BattleItem *BattleUnit::getSpecialWeapon(BattleType type) const
 {
 	for (int i = 0; i < SPEC_WEAPON_MAX; ++i)
 	{
-		if (_specWeapon[i] && _specWeapon[i]->getRules()->getBattleType() == type)
+		if (!_specWeapon[i])
+		{
+			break;
+		}
+		if (_specWeapon[i]->getRules()->getBattleType() == type)
 		{
 			return _specWeapon[i];
 		}
