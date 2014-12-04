@@ -130,12 +130,12 @@ Psi-amp use 3d range not 2d.[br/]
 Psi-amp can use weapon power.[br/]
 Fixed ammo are added after weapons in armor and unit (armor items are before unit items).[br/]
 Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.[br/]
-Stuned units can be hited by bullets and fire.[/br]
+Stuned units can be hited by bullets and fire.[br/]
 Big groups of aliens (20+) get less morale loses from casualties.[br/]
 Terror units can now spawn with any buildin weapon not only one defined by name.[br/]
 After battle, wounlded unit restore health equal to 20 times armor regeneration stat (if its greater than zero).[br/]
-While loading and unloading weapon you must pay cost of moving item to hand.
-You can unprime granade for half of prime tu cost.
+While loading and unloading weapon you must pay cost of moving item to hand.[br/]
+You can unprime granade for half of prime tu cost.[br/]
 
 [br/][br/]
 [i]Links[/i]

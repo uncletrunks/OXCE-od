@@ -649,7 +649,7 @@ void AlienBAIState::setupAmbush()
 		{
 			_ambushAction->type = BA_WALK;
 			// i should really make a function for this
-			origin = (_ambushAction->target * Position(16,16,24)) + 
+			origin = (_ambushAction->target * Position(16,16,24)) +
 				// 4 because -2 is eyes and 2 below that is the rifle (or at least that's my understanding)
 				Position(8,8, _unit->getHeight() + _unit->getFloatHeight() - _save->getTile(_ambushAction->target)->getTerrainLevel() - 4);
 			Position currentPos = _aggroTarget->getPosition();
@@ -806,14 +806,14 @@ void AlienBAIState::setupEscape()
 
 		if (!_save->getTile(_escapeAction->target))
 		{
-			_escapeAction->target = _unit->getPosition(); // cornered at the edge of the map perhaps? 
+			_escapeAction->target = _unit->getPosition(); // cornered at the edge of the map perhaps?
 		}
 
 		score = 0;
 
 		if (tries == -1)
 		{
-			// you know, maybe we should just stay where we are and not risk reaction fire... 
+			// you know, maybe we should just stay where we are and not risk reaction fire...
 			// or maybe continue to wherever we were running to and not risk looking stupid
 			if (_save->getTile(_unit->lastCover) != 0)
 			{
@@ -826,7 +826,7 @@ void AlienBAIState::setupEscape()
 			_escapeAction->target.x += randomTileSearch[tries].x;
 			_escapeAction->target.y += randomTileSearch[tries].y;
 			score = BASE_SYSTEMATIC_SUCCESS;
-			if (_escapeAction->target == _unit->getPosition()) 
+			if (_escapeAction->target == _unit->getPosition())
 			{
 				if (unitsSpottingMe > 0)
 				{
@@ -846,7 +846,7 @@ void AlienBAIState::setupEscape()
 			{
 				if (_traceAI)
 				{
-					Log(LOG_INFO) << "best score after systematic search was: " << bestTileScore; 
+					Log(LOG_INFO) << "best score after systematic search was: " << bestTileScore;
 				}
 			}
 
@@ -859,7 +859,7 @@ void AlienBAIState::setupEscape()
 			{
 				_escapeAction->target.z = 0;
 			}
-			else if (_escapeAction->target.z >= _save->getMapSizeZ()) 
+			else if (_escapeAction->target.z >= _save->getMapSizeZ())
 			{
 				_escapeAction->target.z = _unit->getPosition().z;
 			}
@@ -881,7 +881,7 @@ void AlienBAIState::setupEscape()
 		int spotters = 0;
 		if (!tile)
 		{
-			score = -100001; // no you can't quit the battlefield by running off the map. 
+			score = -100001; // no you can't quit the battlefield by running off the map.
 		}
 		else
 		{
@@ -1432,7 +1432,7 @@ bool AlienBAIState::findFirePoint()
 			continue;
 		int score = 0;
 		// i should really make a function for this
-		Position origin = (pos * Position(16,16,24)) + 
+		Position origin = (pos * Position(16,16,24)) +
 			// 4 because -2 is eyes and 2 below that is the rifle (or at least that's my understanding)
 			Position(8,8, _unit->getHeight() + _unit->getFloatHeight() - tile->getTerrainLevel() - 4);
 
