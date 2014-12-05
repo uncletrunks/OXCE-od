@@ -142,7 +142,7 @@ void AlienBAIState::exit()
  */
 void AlienBAIState::think(BattleAction *action)
 {
- 	action->type = BA_RETHINK;
+	action->type = BA_RETHINK;
 	action->actor = _unit;
 	action->weapon = _unit->getMainHandWeapon();
 	_attackAction->diff = (int)(_save->getBattleState()->getGame()->getSavedGame()->getDifficulty());
@@ -153,7 +153,7 @@ void AlienBAIState::think(BattleAction *action)
 	_knownEnemies = countKnownTargets();
 	_visibleEnemies = selectNearestTarget();
 	_spottingEnemies = getSpottingUnits(_unit->getPosition());
-	_melee = (!_unit->getMeleeWeapon());
+	_melee = !_unit->getUtilityWeapon(BT_MELEE);
 	_rifle = false;
 	_blaster = false;
 	_reachable = _save->getPathfinding()->findReachable(_unit, _unit->getTimeUnits());
@@ -236,6 +236,7 @@ void AlienBAIState::think(BattleAction *action)
 		action->target = _psiAction->target;
 		action->number -= 1;
 		action->weapon = _psiAction->weapon;
+		action->updateTU();
 		return;
 	}
 	else
@@ -359,7 +360,7 @@ void AlienBAIState::think(BattleAction *action)
 		}
 		// if this is a firepoint action, set our facing.
 		action->finalFacing = _attackAction->finalFacing;
-		action->TU = _unit->getActionTUs(_attackAction->type, _attackAction->weapon);
+		action->updateTU();
 		// if this is a "find fire point" action, don't increment the AI counter.
 		if (action->type == BA_WALK && _rifle
 			// so long as we can take a shot afterwards.
@@ -512,7 +513,7 @@ void AlienBAIState::setupPatrol()
 						_patrolAction->target = Position(i, j, 1);
 						_patrolAction->weapon = _patrolAction->actor->getMainHandWeapon();
 						_patrolAction->type = BA_SNAPSHOT;
-						_patrolAction->TU = _patrolAction->actor->getActionTUs(_patrolAction->type, _patrolAction->weapon);
+						_patrolAction->updateTU();
 						return;
 					}
 				}
@@ -1645,7 +1646,7 @@ void AlienBAIState::wayPointAction()
 	if (_aggroTarget != 0)
 	{
 		_attackAction->type = BA_LAUNCH;
-		_attackAction->TU = _unit->getActionTUs(BA_LAUNCH, _attackAction->weapon);
+		_attackAction->updateTU();
 		if (_attackAction->TU > _unit->getTimeUnits())
 		{
 			_attackAction->type = BA_RETHINK;
@@ -1820,18 +1821,13 @@ void AlienBAIState::grenadeAction()
  */
 bool AlienBAIState::psiAction()
 {
-	BattleItem *item = _unit->getSpecialWeapon(BT_PSIAMP);
+	BattleItem *item = _unit->getUtilityWeapon(BT_PSIAMP);
 	if (!item)
 	{
 		return false;
 	}
-	RuleItem *psiWeaponRules = item->getRules();
-	int cost = psiWeaponRules->getTUUse();
-	if (!psiWeaponRules->getFlatRate())
-	{
-		cost = (int)floor(_unit->getBaseStats()->tu * cost / 100.0f);
-	}
-	bool LOSRequired = psiWeaponRules->isLOSRequired();
+	int cost = _unit->getActionTUs(BA_USE, item);
+	bool LOSRequired = item->getRules()->isLOSRequired();
 
 	_aggroTarget = 0;
 		// don't let mind controlled soldiers mind control other soldiers.
@@ -1936,7 +1932,7 @@ void AlienBAIState::meleeAttack()
 	if (_traceAI) { Log(LOG_INFO) << "Attack unit: " << _aggroTarget->getId(); }
 	_attackAction->target = _aggroTarget->getPosition();
 	_attackAction->type = BA_HIT;
-	_attackAction->weapon = _unit->getMeleeWeapon();
+	_attackAction->weapon = _unit->getUtilityWeapon(BT_MELEE);
 }
 
 /**
@@ -1984,7 +1980,7 @@ BattleActionType AlienBAIState::getReserveMode()
 void AlienBAIState::selectMeleeOrRanged()
 {
 	RuleItem *rangedWeapon = _unit->getMainHandWeapon()->getRules();
-	RuleItem *meleeWeapon = _unit->getMeleeWeapon() ? _unit->getMeleeWeapon()->getRules() : 0;
+	RuleItem *meleeWeapon = _unit->getUtilityWeapon(BT_MELEE) ? _unit->getUtilityWeapon(BT_MELEE)->getRules() : 0;
 
 	if (!meleeWeapon)
 	{

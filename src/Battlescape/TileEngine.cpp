@@ -978,7 +978,7 @@ bool TileEngine::tryReactionSnap(BattleUnit *unit, BattleUnit *target)
 		action.type = BA_HIT;
 	}
 	action.target = target->getPosition();
-	action.TU = unit->getActionTUs(action.type, action.weapon);
+	action.updateTU();
 
 	if (action.weapon->getAmmoItem() && action.weapon->getAmmoItem()->getAmmoQuantity() && unit->getTimeUnits() >= action.TU)
 	{

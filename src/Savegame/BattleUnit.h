@@ -448,8 +448,8 @@ public:
 	void setFloorAbove(bool floor);
 	/// Get the flag for "floor above me".
 	bool getFloorAbove();
-	/// Get any melee weapon we may be carrying, or a built in one.
-	BattleItem *getMeleeWeapon();
+	/// Get any utility weapon we may be carrying, or a built in one.
+	BattleItem *getUtilityWeapon(BattleType type);
 	/// Set fire damage form environment.
 	void setEnviFire(int damage);
 	/// Set smoke damage form environment.

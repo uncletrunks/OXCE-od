@@ -65,6 +65,14 @@ namespace OpenXcom
 bool BattlescapeGame::_debugPlay = false;
 
 /**
+ * Update value of TU
+ */
+void BattleAction::updateTU()
+{
+	TU = actor ? actor->getActionTUs(type, weapon) : 0;
+}
+
+/**
  * Initializes all the elements in the Battlescape screen.
  * @param save Pointer to the save game.
  * @param parentState Pointer to the parent battlescape state.
@@ -273,19 +281,9 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 
 	if (action.type == BA_SNAPSHOT || action.type == BA_AUTOSHOT || action.type == BA_AIMEDSHOT || action.type == BA_THROW || action.type == BA_HIT || action.type == BA_MINDCONTROL || action.type == BA_PANIC || action.type == BA_LAUNCH)
 	{
-		if (action.type == BA_MINDCONTROL || action.type == BA_PANIC)
-		{
-			action.TU = unit->getActionTUs(action.type, action.weapon);
-		}
-		else
+		if (action.type != BA_MINDCONTROL && action.type != BA_PANIC)
 		{
 			statePushBack(new UnitTurnBState(this, action));
-			// special behaviour here: we add and remove the item all at once.
-			if (action.type == BA_HIT && action.weapon != unit->getMeleeWeapon())
-			{
-				action.weapon = unit->getMeleeWeapon();
-				action.TU = unit->getActionTUs(action.type, action.weapon);
-			}
 		}
 
 		ss.clear();
@@ -1278,7 +1276,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 		{
 			if (_save->selectUnit(pos) && _save->selectUnit(pos)->getFaction() != _save->getSelectedUnit()->getFaction() && _save->selectUnit(pos)->getVisible())
 			{
-				_currentAction.TU = _currentAction.actor->getActionTUs(_currentAction.type, _currentAction.weapon);
+				_currentAction.updateTU();
 				_currentAction.target = pos;
 				if (!_currentAction.weapon->getRules()->isLOSRequired() ||
 					std::find(_currentAction.actor->getVisibleUnits()->begin(), _currentAction.actor->getVisibleUnits()->end(), _save->selectUnit(pos)) != _currentAction.actor->getVisibleUnits()->end())
@@ -1418,7 +1416,7 @@ void BattlescapeGame::psiButtonAction()
 	_currentAction.weapon = _save->getSelectedUnit()->getSpecialWeapon(BT_PSIAMP);
 	_currentAction.targeting = true;
 	_currentAction.type = BA_PANIC;
-	_currentAction.TU = 25;
+	_currentAction.updateTU();
 	setupCursor();
 }
 

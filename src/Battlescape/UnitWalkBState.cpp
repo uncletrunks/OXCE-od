@@ -492,8 +492,8 @@ void UnitWalkBState::postPathProcedures()
 				action.target = _unit->getCharging()->getPosition();
 				action.weapon = _unit->getMainHandWeapon();
 				action.type = BA_HIT;
-				action.TU = _unit->getActionTUs(action.type, action.weapon);
 				action.targeting = true;
+				action.updateTU();
 				_unit->setCharging(0);
 				_parent->statePushBack(new ProjectileFlyBState(_parent, action));
 			}

@@ -1186,7 +1186,22 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 			break;
 		}
 	default:
-		if ((unit->getGeoscapeSoldier() == 0 || allowAutoLoadout))
+		if (item->getRules()->getBattleType() == BT_PSIAMP && unit->getFaction() == FACTION_HOSTILE && unit->getBaseStats()->psiSkill > 0)
+		{
+			if (!rightWeapon)
+			{
+				item->moveToOwner(unit);
+				item->setSlot(rightHand);
+				placed = true;
+			}
+			if (!placed && !leftWeapon)
+			{
+				item->moveToOwner(unit);
+				item->setSlot(leftHand);
+				placed = true;
+			}
+		}
+		else if ((unit->getGeoscapeSoldier() == 0 || allowAutoLoadout))
 		{
 			if (unit->getBaseStats()->strength >= weight) // weight is always considered 0 for aliens
 			{

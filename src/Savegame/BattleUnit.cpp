@@ -2856,22 +2856,22 @@ bool BattleUnit::getFloorAbove()
 }
 
 /**
- * Get the name of any melee weapon we may be carrying, or a built in one.
+ * Get the name of any utility weapon we may be carrying, or a built in one.
  * @return the name .
  */
-BattleItem *BattleUnit::getMeleeWeapon()
+BattleItem *BattleUnit::getUtilityWeapon(BattleType type)
 {
 	BattleItem *meele = getItem("STR_RIGHT_HAND");
-	if (meele && meele->getRules()->getBattleType() == BT_MELEE)
+	if (meele && meele->getRules()->getBattleType() == type)
 	{
 		return meele;
 	}
 	meele = getItem("STR_LEFT_HAND");
-	if (meele && meele->getRules()->getBattleType() == BT_MELEE)
+	if (meele && meele->getRules()->getBattleType() == type)
 	{
 		return meele;
 	}
-	meele = getSpecialWeapon(BT_MELEE);
+	meele = getSpecialWeapon(type);
 	if (meele)
 	{
 		return meele;
