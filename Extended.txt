@@ -42,6 +42,7 @@ items:
       SmokeThreshold: 100 #how much damage is requared to spawn smoke it tile.
       ToHealth: 1.0 #how much damage is done to health, can be negative.
       ToArmor: 0.25 #how much damage is done to armor.
+      ToArmorPre: 0.0 #how much damage is done to armor before applying armor protection.
       ToWound: 0.1 #determine probability of wounds.
       ToItem: 0.0 #how much power is apply to items.
       ToTile: 0.0 #how much power is apply to ground.
@@ -136,6 +137,7 @@ Terror units can now spawn with any buildin weapon not only one defined by name.
 After battle, wounlded unit restore health equal to 20 times armor regeneration stat (if its greater than zero).[br/]
 While loading and unloading weapon you must pay cost of moving item to hand.[br/]
 You can unprime granade for half of prime tu cost.[br/]
+Support for Ufo2000 armor damage type.[br/]
 
 [br/][br/]
 [i]Links[/i]

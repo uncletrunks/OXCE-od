@@ -25,6 +25,7 @@
 #include "../Battlescape/BattlescapeGame.h"
 #include "../Ruleset/RuleItem.h"
 #include "../Ruleset/Unit.h"
+#include "../Ruleset/Armor.h"
 #include "../Ruleset/MapData.h"
 #include "Soldier.h"
 #include "BattleItem.h"
@@ -41,7 +42,6 @@ class Node;
 class Surface;
 class RuleInventory;
 class Soldier;
-class Armor;
 class SavedGame;
 class Language;
 class AlienBAIState;
@@ -49,7 +49,6 @@ class CivilianBAIState;
 
 enum UnitStatus {STATUS_STANDING, STATUS_WALKING, STATUS_FLYING, STATUS_TURNING, STATUS_AIMING, STATUS_COLLAPSING, STATUS_DEAD, STATUS_UNCONSCIOUS, STATUS_PANICKING, STATUS_BERSERK, STATUS_TIME_OUT};
 enum UnitFaction {FACTION_PLAYER, FACTION_HOSTILE, FACTION_NEUTRAL};
-enum UnitSide {SIDE_FRONT, SIDE_LEFT, SIDE_RIGHT, SIDE_REAR, SIDE_UNDER};
 enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LEFTARM, BODYPART_RIGHTLEG, BODYPART_LEFTLEG};
 
 

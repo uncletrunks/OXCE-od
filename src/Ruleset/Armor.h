@@ -29,7 +29,9 @@
 namespace OpenXcom
 {
 
-enum ForcedTorso{ TORSO_USE_GENDER, TORSO_ALWAYS_MALE, TORSO_ALWAYS_FEMALE };
+enum ForcedTorso { TORSO_USE_GENDER, TORSO_ALWAYS_MALE, TORSO_ALWAYS_FEMALE };
+enum UnitSide {SIDE_FRONT, SIDE_LEFT, SIDE_RIGHT, SIDE_REAR, SIDE_UNDER};
+
 /**
  * Represents a specific type of armor.
  * Not only soldier armor, but also alien armor - some alien races wear Soldier Armor, Leader Armor or Commander Armor
@@ -73,6 +75,8 @@ public:
 	int getRearArmor() const;
 	/// Gets the under armor level.
 	int getUnderArmor() const;
+	/// Gets the armor level of armor side.
+	int getArmor(UnitSide side) const;
 	/// Gets the Geoscape corpse item.
 	std::string getCorpseGeoscape() const;
 	/// Gets the Battlescape corpse item.

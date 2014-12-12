@@ -65,6 +65,8 @@ struct RuleDamageType
 	float ToHealth;
 	/// Conversion form power to unit armor damage.
 	float ToArmor;
+	/// Conversion form power to unit armor damage before applying armor protection.
+	float ToArmorPre;
 	/// Conversion form power to wound chance.
 	float ToWound;
 	/// Conversion form power to item damage.

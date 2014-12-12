@@ -1040,10 +1040,14 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 		}
 	}
 
+	int toArmorPre = power * type->ToArmorPre;
+
 	if (type->ArmorEffectiveness > 0.0f)
 	{
 		power -= getArmor(side) * type->ArmorEffectiveness;
 	}
+
+	setValueMax(_currentArmor[side], - toArmorPre, 0, _armor->getArmor(side));
 
 	if (power > 0)
 	{
@@ -1081,7 +1085,7 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 		// armor damage
 		if (type->ToArmor > 0.0f)
 		{
-			setArmor(getArmor(side) - int(power * type->ToArmor) - 1, side);
+			setValueMax(_currentArmor[side], - int(power * type->ToArmor) - 1, 0, _armor->getArmor(side));
 		}
 	}
 

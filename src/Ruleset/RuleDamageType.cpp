@@ -31,7 +31,7 @@ RuleDamageType::RuleDamageType() :
 	IgnoreDirection(false), IgnoreSelfDestruct(false), IgnorePainImmunity(false), IgnoreNormalMoraleLose(false), IgnoreOverKill(false),
 	ArmorEffectiveness(1.0f), RadiusEffectiveness(0.0f),
 	FireThreshold(1000), SmokeThreshold(1000),
-	ToHealth(1.0f), ToArmor(0.1f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f)
+	ToHealth(1.0f), ToArmor(0.1f), ToArmorPre(0.0f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f)
 {
 
 }
@@ -103,6 +103,7 @@ void RuleDamageType::load(const YAML::Node& node)
 
 	ToHealth = node["ToHealth"].as<float>(ToHealth);
 	ToArmor = node["ToArmor"].as<float>(ToArmor);
+	ToArmorPre = node["ToArmorPre"].as<float>(ToArmorPre);
 	ToWound = node["ToWound"].as<float>(ToWound);
 	ToItem = node["ToItem"].as<float>(ToItem);
 	ToTile = node["ToTile"].as<float>(ToTile);

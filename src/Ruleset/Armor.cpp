@@ -198,6 +198,24 @@ int Armor::getUnderArmor() const
 	return _underArmor;
 }
 
+/**
+ * Gets the armor level of part.
+ * @param side Part of armor.
+ * @return The armor level of part.
+ */
+int Armor::getArmor(UnitSide side) const
+{
+	switch (side)
+	{
+	case SIDE_FRONT:	return _frontArmor;
+	case SIDE_LEFT:		return _sideArmor;
+	case SIDE_RIGHT:	return _sideArmor;
+	case SIDE_REAR:		return _rearArmor;
+	case SIDE_UNDER:	return _underArmor;
+	default: return 0;
+	}
+}
+
 
 /**
  * Gets the corpse item used in the Geoscape.
