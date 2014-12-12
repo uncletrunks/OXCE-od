@@ -153,7 +153,7 @@ void AlienBAIState::think(BattleAction *action)
 	_knownEnemies = countKnownTargets();
 	_visibleEnemies = selectNearestTarget();
 	_spottingEnemies = getSpottingUnits(_unit->getPosition());
-	_melee = !_unit->getUtilityWeapon(BT_MELEE);
+	_melee = _unit->getUtilityWeapon(BT_MELEE);
 	_rifle = false;
 	_blaster = false;
 	_reachable = _save->getPathfinding()->findReachable(_unit, _unit->getTimeUnits());
@@ -2006,7 +2006,7 @@ void AlienBAIState::selectMeleeOrRanged()
 	}
 	if ( _visibleEnemies > 1 )
 	{
-		meleeOdds -= 5 * (_visibleEnemies - 1);
+		meleeOdds -= 20 * (_visibleEnemies - 1);
 	}
 
 	if (meleeOdds > 0 && _unit->getHealth() >= 2 * _unit->getBaseStats()->health / 3)

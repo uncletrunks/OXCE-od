@@ -22,6 +22,25 @@
 namespace YAML
 {
 	template<>
+	struct convert<OpenXcom::ItemSet>
+	{
+		static Node encode(const OpenXcom::ItemSet& rhs)
+		{
+			Node node;
+			node = rhs.items;
+			return node;
+		}
+
+		static bool decode(const Node& node, OpenXcom::ItemSet& rhs)
+		{
+			if (!node.IsSequence())
+				return false;
+
+			rhs.items = node.as< std::vector<std::string> >(rhs.items);
+			return true;
+		}
+	};
+	template<>
 	struct convert<OpenXcom::DeploymentData>
 	{
 		static Node encode(const OpenXcom::DeploymentData& rhs)
@@ -52,6 +71,33 @@ namespace YAML
 			return true;
 		}
 	};
+	template<>
+	struct convert<OpenXcom::BriefingData>
+	{
+		static Node encode(const OpenXcom::BriefingData& rhs)
+		{
+			Node node;
+			node["palette"] = rhs.palette;
+			node["textOffset"] = rhs.textOffset;
+			node["music"] = rhs.music;
+			node["background"] = rhs.background;
+			node["showCraft"] = rhs.showCraft;
+			node["showTarget"] = rhs.showTarget;
+			return node;
+		}
+		static bool decode(const Node& node, OpenXcom::BriefingData& rhs)
+		{
+			if (!node.IsMap())
+				return false;
+			rhs.palette = node["palette"].as<int>(rhs.palette);
+			rhs.textOffset = node["textOffset"].as<int>(rhs.textOffset);
+			rhs.music = node["music"].as<std::string>(rhs.music);
+			rhs.background = node["background"].as<std::string>(rhs.background);
+			rhs.showCraft = node["showCraft"].as<bool>(rhs.showCraft);
+			rhs.showTarget = node["showTarget"].as<bool>(rhs.showTarget);
+			return true;
+		}
+	};
 }
 
 namespace OpenXcom
@@ -62,7 +108,7 @@ namespace OpenXcom
  * type of deployment data.
  * @param type String defining the type.
  */
-AlienDeployment::AlienDeployment(const std::string &type) : _type(type), _width(0), _length(0), _height(0), _civilians(0), _shade(-1)
+AlienDeployment::AlienDeployment(const std::string &type) : _type(type), _width(0), _length(0), _height(0), _civilians(0), _shade(-1), _noRetreat(false), _finalDestination(false), _finalMission(false)
 {
 }
 
@@ -89,7 +135,11 @@ void AlienDeployment::load(const YAML::Node &node)
 	_shade = node["shade"].as<int>(_shade);
 	_nextStage = node["nextStage"].as<std::string>(_nextStage);
 	_race = node["race"].as<std::string>(_race);
+	_noRetreat = node["noRetreat"].as<bool>(_noRetreat);
+	_finalDestination = node["finalDestination"].as<bool>(_finalDestination);
+	_finalMission = node["finalMission"].as<bool>(_finalMission);
 	_script = node["script"].as<std::string>(_script);
+	_briefingData = node["briefing"].as<BriefingData>(_briefingData);
 }
 
 /**
@@ -177,4 +227,41 @@ std::string AlienDeployment::getScript() const
 {
 	return _script;
 }
+
+/**
+ * Gets if aborting this mission will fail the game.
+ * @return if aborting this mission will fail the game.
+ */
+const bool AlienDeployment::isNoRetreat() const
+{
+	return _noRetreat;
+}
+
+/**
+ * Gets if winning this mission completes the game.
+ * @return if winning this mission completes the game.
+ */
+const bool AlienDeployment::isFinalDestination() const
+{
+	return _finalDestination;
+}
+
+/**
+ * Gets if winning this mission completes the game.
+ * @return if winning this mission completes the game.
+ */
+const bool AlienDeployment::isFinalMission() const
+{
+	return _finalMission;
+}
+
+/**
+ * Gets the briefing data for this mission type.
+ * @return data for the briefing window to use.
+ */
+BriefingData AlienDeployment::getBriefingData() const
+{
+	return _briefingData;
+}
+
 }

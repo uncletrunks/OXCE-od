@@ -1534,7 +1534,7 @@ int TileEngine::verticalBlockage(Tile *startTile, Tile *endTile, ItemDamageType 
 			block += horizontalBlockage(startTile, _save->getTile(Position(x, y, z)), type, skipObject);
 			block += blockage(_save->getTile(Position(x, y, z)), MapData::O_FLOOR, type);
 			if (!skipObject)
-				block += blockage(_save->getTile(Position(x, y, z)), MapData::O_OBJECT, type);
+				block += blockage(_save->getTile(Position(x, y, z)), MapData::O_OBJECT, type, Pathfinding::DIR_DOWN);
 		}
 	}
 	else if (direction > 0) // up
@@ -1550,7 +1550,7 @@ int TileEngine::verticalBlockage(Tile *startTile, Tile *endTile, ItemDamageType 
 			block += horizontalBlockage(startTile, _save->getTile(Position(x, y, z)), type, skipObject);
 			block += blockage(_save->getTile(Position(x, y, z)), MapData::O_FLOOR, type);
 			if (!skipObject)
-				block += blockage(_save->getTile(Position(x, y, z)), MapData::O_OBJECT, type);
+				block += blockage(_save->getTile(Position(x, y, z)), MapData::O_OBJECT, type, Pathfinding::DIR_UP);
 		}
 	}
 
@@ -1769,14 +1769,16 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 			case 2: // east
 				if (wall == Pathfinding::BIGWALLNORTH ||
 					wall == Pathfinding::BIGWALLSOUTH ||
-					wall == Pathfinding::BIGWALLWEST)
+					wall == Pathfinding::BIGWALLWEST ||
+					wall == Pathfinding::BIGWALLWESTANDNORTH)
 				{
 					check = false;
 				}
 				break;
 			case 3: // south east
 				if (wall == Pathfinding::BIGWALLNORTH ||
-					wall == Pathfinding::BIGWALLWEST)
+					wall == Pathfinding::BIGWALLWEST ||
+					wall == Pathfinding::BIGWALLWESTANDNORTH)
 				{
 					check = false;
 				}
@@ -1784,7 +1786,8 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 			case 4: // south
 				if (wall == Pathfinding::BIGWALLWEST ||
 					wall == Pathfinding::BIGWALLEAST ||
-					wall == Pathfinding::BIGWALLNORTH)
+					wall == Pathfinding::BIGWALLNORTH ||
+					wall == Pathfinding::BIGWALLWESTANDNORTH)
 				{
 					check = false;
 				}
@@ -1822,6 +1825,18 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 				break;
 			default:
 				break;
+			}
+		}
+		else if (part == MapData::O_FLOOR &&
+					tile->getMapData(part)->getBlock(type) == 0)
+		{
+			if (type != DT_NONE)
+			{
+				blockage += tile->getMapData(part)->getArmor();
+			}
+			else if (!tile->getMapData(part)->isNoFloor())
+			{
+				return 256;
 			}
 		}
 

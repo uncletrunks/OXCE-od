@@ -1151,7 +1151,9 @@ void BattleUnit::keepFalling()
 	{
 		_fallPhase--;
 		if (_health <= 0)
+		{
 			_status = STATUS_DEAD;
+		}
 		else
 			_status = STATUS_UNCONSCIOUS;
 	}
@@ -2865,20 +2867,20 @@ bool BattleUnit::getFloorAbove()
  */
 BattleItem *BattleUnit::getUtilityWeapon(BattleType type)
 {
-	BattleItem *meele = getItem("STR_RIGHT_HAND");
-	if (meele && meele->getRules()->getBattleType() == type)
+	BattleItem *melee = getItem("STR_RIGHT_HAND");
+	if (melee && melee->getRules()->getBattleType() == type)
 	{
-		return meele;
+		return melee;
 	}
-	meele = getItem("STR_LEFT_HAND");
-	if (meele && meele->getRules()->getBattleType() == type)
+	melee = getItem("STR_LEFT_HAND");
+	if (melee && melee->getRules()->getBattleType() == type)
 	{
-		return meele;
+		return melee;
 	}
-	meele = getSpecialWeapon(type);
-	if (meele)
+	melee = getSpecialWeapon(type);
+	if (melee)
 	{
-		return meele;
+		return melee;
 	}
 	return 0;
 }

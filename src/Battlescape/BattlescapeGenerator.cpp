@@ -347,6 +347,11 @@ void BattlescapeGenerator::run()
 		size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() -1);
 		_terrain = _game->getRuleset()->getTerrain(ruleDeploy->getTerrains().at(pick));
 	}
+	// new battle menu will have set the depth already
+	if (_terrain->getMaxDepth() > 0 && _save->getDepth() == 0)
+	{
+		_save->setDepth(RNG::generate(_terrain->getMinDepth(), _terrain->getMaxDepth()));
+	}
 
 	if (ruleDeploy->getShade() != -1)
 	{
@@ -2352,9 +2357,12 @@ bool BattlescapeGenerator::removeBlocks(MapScript *command)
 		int y = (*z).second;
 		clearModule(x * 10, y * 10, _blocks[x][y]->getSizeX(), _blocks[x][y]->getSizeY());
 
-		for (int dx = x; dx != x + (_blocks[x][y]->getSizeX() / 10); ++dx)
+		int delx = (_blocks[x][y]->getSizeX() / 10);
+		int dely = (_blocks[x][y]->getSizeY() / 10);
+
+		for (int dx = x; dx != x + delx; ++dx)
 		{
-			for (int dy = y; dy != y + (_blocks[x][y]->getSizeY() / 10); ++dy)
+			for (int dy = y; dy != y + dely; ++dy)
 			{
 				_blocks[dx][dy] = 0;
 				_blocksToDo++;
