@@ -2507,7 +2507,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 	if (!victim)
 		return false;
 
-	float attackStrength = item->getPower() + item->getBonusPower(action->actor->getBaseStats());
+	float attackStrength = item->getAccuracyMultiplier(action->actor->getBaseStats());
 	float defenseStrength = 10.0 + victim->getBaseStats()->psiStrength + victim->getBaseStats()->psiSkill / 5.0;
 
 	Position p = action->actor->getPosition().toVexel() - action->target.toVexel();

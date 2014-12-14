@@ -25,6 +25,71 @@
 namespace OpenXcom
 {
 
+namespace
+{
+
+/**
+ * Data describing basic stat getter.
+ */
+struct BonusStatData
+{
+	std::string name;
+	BonusStatFunc func;
+};
+
+/**
+ * Function returning static value.
+ */
+template<int I>
+int statZero(UnitStats* stat)
+{
+	return I;
+}
+/**
+ * Getter for one basic stat of unit.
+ */
+template<int UnitStats::* field>
+int statOne(UnitStats* stat)
+{
+	return stat->*field;
+}
+
+/**
+ * Getter for multiply of two basic stat of unit.
+ */
+template<int UnitStats::* fieldA, int UnitStats::* fieldB>
+int statTwo(UnitStats* stat)
+{
+	return (stat->*fieldA) * (stat->*fieldB);
+}
+
+/**
+ * List of all possible getters of basic stats.
+ */
+BonusStatData statDataMap[] =
+{
+	{ "flatOne", &statZero<1> },
+	{ "flatHunderd", &statZero<100> },
+	{ "strength", &statOne<&UnitStats::strength> },
+	{ "psi", &statTwo<&UnitStats::psiSkill, &UnitStats::psiStrength> },
+	{ "psiSkill", &statOne<&UnitStats::psiSkill> },
+	{ "psiStrength", &statOne<&UnitStats::psiStrength> },
+	{ "throwing", &statOne<&UnitStats::throwing> },
+	{ "bravery", &statOne<&UnitStats::bravery> },
+	{ "firing", &statOne<&UnitStats::firing> },
+	{ "health", &statOne<&UnitStats::health> },
+	{ "tu", &statOne<&UnitStats::tu> },
+	{ "reactions", &statOne<&UnitStats::reactions> },
+	{ "stamina", &statOne<&UnitStats::stamina> },
+	{ "melee", &statOne<&UnitStats::melee> },
+	{ "strengthMelee", &statTwo<&UnitStats::strength, &UnitStats::melee> },
+	{ "strengthThrowing", &statTwo<&UnitStats::strength, &UnitStats::throwing> },
+	{ "firingReactions", &statTwo<&UnitStats::firing, &UnitStats::reactions> },
+};
+const int statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
+
+} //namespace
+
 /**
  * Creates a blank ruleset for a certain type of item.
  * @param type String defining the type.
@@ -37,8 +102,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
-	_skillApplied(true), _LOSRequired(false), _underwaterOnly(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
-	_strengthBonus(0.0f), _psiBonus(0.0f), _psiSkillBonus(0.0f), _psiStrengthBonus(0.0f), _throwBonus(0.0f)
+	_LOSRequired(false), _underwaterOnly(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
+	_accuracyMulti(1, std::make_pair(&statOne<&UnitStats::firing>, 1.0f)), _meleeMulti(1, std::make_pair(&statOne<&UnitStats::melee>, 1.0f))
 {
 }
 
@@ -220,7 +285,6 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_autoShots = node["autoShots"].as<int>(_autoShots);
 	_shotgunPellets = node["shotgunPellets"].as<int>(_shotgunPellets);
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
-	_skillApplied = node["skillApplied"].as<bool>(_skillApplied);
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
@@ -235,20 +299,59 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		if (_battleType == BT_PSIAMP)
 		{
 			_powerRangeReduction = 1;
-			_psiBonus = 0.02f;
+			_accuracyMulti.clear();
+			_accuracyMulti.push_back(std::make_pair(&statTwo<&UnitStats::psiSkill, &UnitStats::psiStrength>, 0.02f));
+		}
+	}
+	if (node["skillApplied"])
+	{
+		_meleeMulti.clear();
+		if (node["skillApplied"].as<int>(false))
+		{
+			_meleeMulti.push_back(std::make_pair(&statOne<&UnitStats::melee>, 1.0f));
+		}
+		else
+		{
+			_meleeMulti.push_back(std::make_pair(&statZero<100>, 1.0f));
 		}
 	}
 	if (node["strengthApplied"].as<bool>(false))
 	{
-		_strengthBonus = 1.0f;
+		_damageBonus.clear();
+		_damageBonus.push_back(std::make_pair(&statOne<&UnitStats::strength>, 1.0f));
 	}
 	if (const YAML::Node &d = node["damageBonus"])
 	{
-		_strengthBonus = d["strength"].as<float>(_strengthBonus);
-		_psiBonus = d["psi"].as<float>(_psiBonus);
-		_psiSkillBonus = d["psiSkill"].as<float>(_psiSkillBonus);
-		_psiStrengthBonus = d["psiStrength"].as<float>(_psiStrengthBonus);
-		_throwBonus = d["throw"].as<float>(_throwBonus);
+		_damageBonus.clear();
+		for (int i = 0; i < statDataMapSize; ++i)
+		{
+			if (const YAML::Node &dd = d[statDataMap[i].name])
+			{
+				_damageBonus.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
+			}
+		}
+	}
+	if (const YAML::Node &d = node["accuracyMultiplier"])
+	{
+		_accuracyMulti.clear();
+		for (int i = 0; i < statDataMapSize; ++i)
+		{
+			if (const YAML::Node &dd = d[statDataMap[i].name])
+			{
+				_accuracyMulti.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
+			}
+		}
+	}
+	if (const YAML::Node &d = node["meleeMultiplier"])
+	{
+		_meleeMulti.clear();
+		for (int i = 0; i < statDataMapSize; ++i)
+		{
+			if (const YAML::Node &dd = d[statDataMap[i].name])
+			{
+				_meleeMulti.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
+			}
+		}
 	}
 	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
 
@@ -955,16 +1058,6 @@ std::string RuleItem::getZombieUnit() const
 }
 
 /**
- * Is skill applied to the accuracy of this weapon?
- * this only applies to melee weapons.
- * @return If we should apply skill.
- */
-bool RuleItem::isSkillApplied() const
-{
-	return _skillApplied;
-}
-
-/**
  * What sound does this weapon make when you swing this at someone?
  * @return The weapon's melee attack sound.
  */
@@ -1023,14 +1116,37 @@ bool RuleItem::isWaterOnly() const
  * @param stats unit stats
  * @return bonus power.
  */
-int RuleItem::getBonusPower(UnitStats* stats) const
+int RuleItem::getPowerBonus(UnitStats* stats) const
 {
 	int power = 0;
-	power += stats->strength * _strengthBonus;
-	power += stats->psiSkill * stats->psiStrength * _psiBonus;
-	power += stats->psiSkill * _psiSkillBonus;
-	power += stats->psiStrength * _psiStrengthBonus;
-	power += stats->throwing * _throwBonus;
+	for (size_t i = 0; i < _damageBonus.size(); ++i)
+		power += _damageBonus[i].first(stats) * _damageBonus[i].second;
+	return power;
+}
+
+/**
+ * Compute multiplier of melee hit chance based on unit stats.
+ * @param stats unit stats
+ * @return multiplier.
+ */
+int RuleItem::getMeleeMultiplier(UnitStats* stats) const
+{
+	int power = 0;
+	for (size_t i = 0; i < _meleeMulti.size(); ++i)
+		power += _meleeMulti[i].first(stats) * _meleeMulti[i].second;
+	return power;
+}
+
+/**
+ * Compute multiplier of accuracy based on unit stats.
+ * @param stats unit stats
+ * @return multiplier.
+ */
+int RuleItem::getAccuracyMultiplier(UnitStats* stats) const
+{
+	int power = 0;
+	for (size_t i = 0; i < _accuracyMulti.size(); ++i)
+		power += _accuracyMulti[i].first(stats) * _accuracyMulti[i].second;
 	return power;
 }
 

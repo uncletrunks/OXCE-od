@@ -1,6 +1,6 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.1[/b]
-OpenXcom version: Nightly 02/12/2014
+[b]Mod version 1.2[/b]
+OpenXcom version: Nightly 12/12/2014
 
 [br/][br/]
 [i]New ruleset[/i]
@@ -13,12 +13,34 @@ items:
     tuPrime: 50 #cost of priming granade in %.
     tuLoad: 15 #cost of loading weapon.
     tuUnload: 8 #cost of unloading weapon.
-    damageBonus: #used by ammo and psi-amp.
-      strength: 0.1 #default value 1.0 if `strengthApplied: true`.
-      psi: 0.0 #bonus equal `psiSkill*psiStrength`. default value 0.02 if psi-amp.
+    damageBonus: #used by ammo.
+      #set `strength` to 1.0 if `strengthApplied: true`.
+      flatHunderd: 0.0 #const bonus equal 100.
+      strength: 0.1
+      psi: 0.0 #bonus equal `psiSkill*psiStrength`.
       psiSkill: 0.5
-      psiStrength: 1.0
-      throw: 1.0
+      psiStrength: 0.0
+      throwing: 0.0
+      bravery: 0.0
+      firing: 0.0
+      health: 0.3
+      tu: 0.0
+      reactions: 0.0
+      stamina: 0.0
+      melee: 0.0
+      strengthMelee: 0.0 #bonus equal `strength*melee`.
+      strengthThrowing: 0.0 #bonus equal `strength*throwing`.
+      firingReactions: 0.0 #bonus equal `firing*reaction`.
+    accuracyMultipler: #used by wapons and psi-amp.
+      #set `psi` to 0.02 if weapon is psi-amp
+      #...
+      #same stats like `damageBonus`.
+      #...
+    meleeMultipler: #used by melee wapons.
+      #set `melee` to 1.00 if `skillApplied: true`
+      #...
+      #same stats like `damageBonus`.
+      #...
     powerRangeReduction: 0.0 #how much ammo lost power per tile, used by psi-amp too. default value 1 if psi-amp.
     damageAlter: #all values have default values based on `damageType`, used by ammo and corpses.
       FixRadius: 60 #aka `BlastRadius`.

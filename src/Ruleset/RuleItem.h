@@ -33,6 +33,9 @@ enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMI
 class SurfaceSet;
 class Surface;
 class BattleUnit;
+class UnitStats;
+
+typedef int (*BonusStatFunc)(UnitStats*);
 
 /**
  * Represents a specific type of item.
@@ -72,9 +75,9 @@ private:
 	bool _flatRate, _arcingShot;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
-	bool _skillApplied, _LOSRequired, _underwaterOnly;
+	bool _LOSRequired, _underwaterOnly;
 	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
-	float _strengthBonus, _psiBonus, _psiSkillBonus, _psiStrengthBonus, _throwBonus;
+	std::vector<std::pair<BonusStatFunc, float> > _damageBonus, _accuracyMulti, _meleeMulti;
 public:
 	/// Creates a blank item ruleset.
 	RuleItem(const std::string &type);
@@ -126,6 +129,8 @@ public:
 	int getHitAnimation() const;
 	/// Gets the item's power.
 	int getPower() const;
+	/// Get additional power form unit statistics
+	int getPowerBonus(UnitStats* stats) const;
 	/// Gets amount of power drop per tile.
 	float getPowerRangeReduction() const;
 	/// Gets the item's snapshot accuracy.
@@ -136,6 +141,8 @@ public:
 	int getAccuracyAimed() const;
 	/// Gets the item's melee accuracy.
 	int getAccuracyMelee() const;
+	/// Get multiplier of accuracy form unit statistics
+	int getAccuracyMultiplier(UnitStats* stats) const;
 	/// Gets the item's snapshot TU cost.
 	int getTUSnap() const;
 	/// Gets the item's autoshot TU cost.
@@ -228,22 +235,20 @@ public:
 	int getShotgunPellets() const;
 	/// Gets the weapon's zombie unit.
 	std::string getZombieUnit() const;
-	/// Is skill applied to the accuracy of this weapon?
-	bool isSkillApplied() const;
 	/// What sound does this weapon make when you swing this at someone?
 	int getMeleeAttackSound() const;
 	/// What sound does this weapon make when you punch someone in the face with it?
 	int getMeleeHitSound() const;
 	/// Ok, so this isn't a melee type weapon but we're using it for melee... how much damage should it do?
 	int getMeleePower() const;
+	/// Get multiplier of melee hit chance form unit statistics
+	int getMeleeMultiplier(UnitStats* stats) const;
 	/// Get the melee animation starting frame (comes from hit.pck).
 	int getMeleeAnimation() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
 	/// Is this item restricted to use underwater?
 	bool isWaterOnly() const;
-	/// Get additional power form unit statistics
-	int getBonusPower(UnitStats* stats) const;
 	/// Get the associated special type of this item.
 	int getSpecialType() const;
 	/// Get the color offset to use for the vapor trail.

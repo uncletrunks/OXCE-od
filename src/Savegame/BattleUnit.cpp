@@ -1390,14 +1390,10 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 		weaponAcc = item->getRules()->getAccuracyAuto();
 	else if (actionType == BA_HIT || actionType == BA_STUN)
 	{
-		if (item->getRules()->isSkillApplied())
-		{
-			return (getBaseStats()->melee * item->getRules()->getAccuracyMelee() / 100) * modifier / 100;
-		}
-		return item->getRules()->getAccuracyMelee() * modifier / 100;
+		return (item->getRules()->getMeleeMultiplier(getBaseStats()) * item->getRules()->getAccuracyMelee() / 100) * modifier / 100;
 	}
 
-	int result = getBaseStats()->firing * weaponAcc / 100;
+	int result = item->getRules()->getAccuracyMultiplier(getBaseStats()) * weaponAcc / 100;
 
 	if (_kneeled)
 	{
