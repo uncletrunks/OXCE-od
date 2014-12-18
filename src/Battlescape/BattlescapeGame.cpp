@@ -279,9 +279,9 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		}
 	}
 
-	if (action.type == BA_SNAPSHOT || action.type == BA_AUTOSHOT || action.type == BA_AIMEDSHOT || action.type == BA_THROW || action.type == BA_HIT || action.type == BA_MINDCONTROL || action.type == BA_PANIC || action.type == BA_LAUNCH)
+	if (action.type == BA_SNAPSHOT || action.type == BA_AUTOSHOT || action.type == BA_AIMEDSHOT || action.type == BA_THROW || action.type == BA_HIT || action.type == BA_MINDCONTROL || action.type == BA_USE || action.type == BA_PANIC || action.type == BA_LAUNCH)
 	{
-		if (action.type != BA_MINDCONTROL && action.type != BA_PANIC)
+		if (action.type != BA_MINDCONTROL && action.type != BA_PANIC && action.type != BA_USE)
 		{
 			statePushBack(new UnitTurnBState(this, action));
 		}
@@ -291,17 +291,6 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		_parentState->debug(ss.str());
 
 		statePushBack(new ProjectileFlyBState(this, action));
-		if (action.type == BA_MINDCONTROL || action.type == BA_PANIC)
-		{
-			bool success = _save->getTileEngine()->psiAttack(&action);
-			if (success && action.type == BA_MINDCONTROL)
-			{
-				// show a little infobox with the name of the unit and "... is under alien control"
-				Game *game = _parentState->getGame();
-                BattleUnit *unit = _save->getTile(action.target)->getUnit();
-				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_IS_UNDER_ALIEN_CONTROL", unit->getGender()).arg(unit->getName(game->getLanguage()))));
-			}
-		}
 	}
 
 	if (action.type == BA_NONE)
@@ -1272,7 +1261,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				}
 			}
 		}
-		else if (_currentAction.type == BA_PANIC || _currentAction.type == BA_MINDCONTROL)
+		else if ((_currentAction.type == BA_PANIC || _currentAction.type == BA_MINDCONTROL || _currentAction.type == BA_USE) && _currentAction.weapon->getRules()->getBattleType() == BT_PSIAMP)
 		{
 			if (_save->selectUnit(pos) && _save->selectUnit(pos)->getFaction() != _save->getSelectedUnit()->getFaction() && _save->selectUnit(pos)->getVisible())
 			{
@@ -1286,19 +1275,6 @@ void BattlescapeGame::primaryAction(const Position &pos)
 					_parentState->getGame()->getCursor()->setVisible(false);
 					_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
 					statePushBack(new ProjectileFlyBState(this, _currentAction));
-					if (_currentAction.TU <= _currentAction.actor->getTimeUnits())
-					{
-						if (getTileEngine()->psiAttack(&_currentAction))
-						{
-							// show a little infobox if it's successful
-							Game *game = _parentState->getGame();
-							if (_currentAction.type == BA_PANIC)
-								game->pushState(new InfoboxState(game->getLanguage()->getString("STR_MORALE_ATTACK_SUCCESSFUL")));
-							else if (_currentAction.type == BA_MINDCONTROL)
-								game->pushState(new InfoboxState(game->getLanguage()->getString("STR_MIND_CONTROL_SUCCESSFUL")));
-							_parentState->updateSoldierInfo();
-						}
-					}
 				}
 				else
 				{
@@ -1420,6 +1396,34 @@ void BattlescapeGame::psiButtonAction()
 	setupCursor();
 }
 
+bool BattlescapeGame::psiAttack(BattleAction *action)
+{
+	if (getTileEngine()->psiAttack(action))
+	{
+		Game *game = getSave()->getBattleState()->getGame();
+		if (action->actor->getFaction() == FACTION_HOSTILE)
+		{
+			// show a little infobox with the name of the unit and "... is under alien control"
+			BattleUnit *unit = getSave()->getTile(action->target)->getUnit();
+			if (action->type == BA_MINDCONTROL)
+				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_IS_UNDER_ALIEN_CONTROL", unit->getGender()).arg(unit->getName(game->getLanguage()))));
+		}
+		else
+		{
+			// show a little infobox if it's successful
+			if (action->type == BA_PANIC)
+				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_MORALE_ATTACK_SUCCESSFUL")));
+			else if (action->type == BA_MINDCONTROL)
+				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_MIND_CONTROL_SUCCESSFUL")));
+			getSave()->getBattleState()->updateSoldierInfo();
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 /**
  * Moves a unit up or down.

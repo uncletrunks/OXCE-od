@@ -130,6 +130,10 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	{
 		addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id);
 		addItem(BA_PANIC, "STR_PANIC_UNIT", &id);
+		if (!weapon->getPsiAttackName().empty())
+		{
+			addItem(BA_USE, weapon->getPsiAttackName(), &id);
+		}
 	}
 	else if (weapon->getBattleType() == BT_MINDPROBE)
 	{

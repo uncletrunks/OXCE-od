@@ -176,8 +176,16 @@ void ProjectileFlyBState::init()
 	case BA_HIT:
 		performMeleeAttack();
 		return;
+	case BA_USE:
 	case BA_PANIC:
 	case BA_MINDCONTROL:
+		if (_parent->getTileEngine()->distance(_action.actor->getPosition(), _action.target) > weapon->getRules()->getMaxRange())
+		{
+			// out of range
+			_action.result = "STR_OUT_OF_RANGE";
+			_parent->popState();
+			return;
+		}
 		_parent->statePushFront(new ExplosionBState(_parent, Position((_action.target.x*16)+8,(_action.target.y*16)+8,(_action.target.z*24)+10), weapon, _action.actor));
 		return;
 	default:

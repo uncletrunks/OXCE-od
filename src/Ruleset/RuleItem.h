@@ -62,6 +62,7 @@ private:
 	int _accuracyAuto, _accuracySnap, _accuracyAimed, _tuAuto, _tuSnap, _tuAimed;
 	int _clipSize, _accuracyMelee, _tuMelee, _tuPrime, _tuThrow, _tuLoad, _tuUnload;
 	BattleType _battleType;
+	std::string _psiAttackName;
 	bool _twoHanded, _waypoint, _fixedWeapon;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
@@ -215,6 +216,8 @@ public:
 	int getExplosionSpeed() const;
 	/// How many auto shots does this weapon fire.
 	int getAutoShots() const;
+	/// Get name of psi attack for action menu.
+	std::string getPsiAttackName() const;
 	/// is this item a 2 handed weapon?
 	bool isRifle() const;
 	/// is this item a single handed weapon?

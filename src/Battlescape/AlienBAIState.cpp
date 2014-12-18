@@ -1837,7 +1837,7 @@ bool AlienBAIState::psiAction()
 		// and we didn't already do a psi action this round
 		&& !_didPsi)
 	{
-		int psiAttackStrength = _unit->getBaseStats()->psiSkill * _unit->getBaseStats()->psiStrength / 50;
+		int psiAttackStrength = item->getRules()->getAccuracyMultiplier(_unit->getBaseStats());
 		int chanceToAttack = 0;
 
 		for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
@@ -1850,9 +1850,15 @@ bool AlienBAIState::psiAction()
 				(!LOSRequired ||
 				std::find(_unit->getVisibleUnits()->begin(), _unit->getVisibleUnits()->end(), *i) != _unit->getVisibleUnits()->end()))
 			{
+				if (_save->getTileEngine()->distance((*i)->getPosition(), _unit->getPosition()) > item->getRules()->getMaxRange())
+				{
+					continue;
+				}
+				Position p = _unit->getPosition().toVexel() - (*i)->getPosition().toVexel();
+				p *= p;
 				int chanceToAttackMe = psiAttackStrength
 					+ (((*i)->getBaseStats()->psiSkill > 0) ? (*i)->getBaseStats()->psiSkill * -0.4 : 0)
-					- _save->getTileEngine()->distance((*i)->getPosition(), _unit->getPosition())
+					- sqrt(float(p.x + p.y + p.z)) * item->getRules()->getPowerRangeReduction()
 					- ((*i)->getBaseStats()->psiStrength)
 					+ RNG::generate(55, 105);
 
@@ -1883,6 +1889,16 @@ bool AlienBAIState::psiAction()
 			Log(LOG_INFO) << "making a psionic attack this turn";
 		}
 
+		if (chanceToAttack >= 60 && !item->getRules()->getPsiAttackName().empty())
+		{
+			if (RNG::percent(chanceToAttack - 60))
+			{
+				_psiAction->type = BA_USE;
+				_psiAction->target = _aggroTarget->getPosition();
+				_psiAction->weapon = item;
+				return true;
+			}
+		}
 		if (chanceToAttack >= 30)
 		{
 			int controlOdds = 40;

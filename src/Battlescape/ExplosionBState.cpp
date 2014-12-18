@@ -70,14 +70,17 @@ ExplosionBState::~ExplosionBState()
  */
 void ExplosionBState::init()
 {
+	BattleType type = BT_NONE;
+	BattleActionType action = BA_NONE;
 	if (_item)
 	{
+		type = _item->getRules()->getBattleType();
+		action = _parent->getCurrentAction()->type;
 		_power = _item->getRules()->getPower();
 		_damageType = _item->getRules()->getDamageType();
 		_radius = _item->getRules()->getExplosionRadius();
 		// getCurrentAction() only works for player actions: aliens cannot melee attack with rifle butts.
-		_pistolWhip = (_item->getRules()->getBattleType() != BT_MELEE &&
-			_parent->getCurrentAction()->type == BA_HIT);
+		_pistolWhip = (type != BT_MELEE && action == BA_HIT);
 		if (_pistolWhip)
 		{
 			_power = _item->getRules()->getMeleePower();
@@ -91,8 +94,17 @@ void ExplosionBState::init()
 			_power -= _item->getRules()->getPowerRangeReduction() * _range;
 		}
 
-		_areaOfEffect = _item->getRules()->getBattleType() != BT_MELEE &&
+		if (type == BT_PSIAMP)
+		{
+			if (!_parent->psiAttack(_parent->getCurrentAction()) || action != BA_USE)
+			{
+				_power = 0;
+			}
+		}
+
+		_areaOfEffect = type != BT_MELEE &&
 						_item->getRules()->getExplosionRadius() != 0 &&
+						(type != BT_PSIAMP || action == BA_USE) &&
 						!_pistolWhip;
 	}
 	else if (_tile)
@@ -182,8 +194,8 @@ void ExplosionBState::init()
 	// create a bullet hit
 	{
 		_parent->setStateInterval(std::max(1, ((BattlescapeState::DEFAULT_ANIM_SPEED/2) - (10 * _item->getRules()->getExplosionSpeed()))));
-		_hit = _pistolWhip || _item->getRules()->getBattleType() == BT_MELEE;
-		bool psi = _item->getRules()->getBattleType() == BT_PSIAMP;
+		_hit = _pistolWhip || type == BT_MELEE;
+		bool psi = type == BT_PSIAMP && action != BA_USE;
 		int anim = _item->getRules()->getHitAnimation();
 		int sound = _item->getRules()->getHitSound();
 		if (_hit || psi) // Play melee animation on hitting and psiing

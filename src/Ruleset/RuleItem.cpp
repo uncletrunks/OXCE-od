@@ -68,7 +68,6 @@ int statTwo(UnitStats* stat)
  */
 BonusStatData statDataMap[] =
 {
-	{ "flatOne", &statZero<1> },
 	{ "flatHunderd", &statZero<100> },
 	{ "strength", &statOne<&UnitStats::strength> },
 	{ "psi", &statTwo<&UnitStats::psiSkill, &UnitStats::psiStrength> },
@@ -238,6 +237,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	}
 
 	_power = node["power"].as<int>(_power);
+	_psiAttackName = node["psiAttackName"].as<std::string>(_psiAttackName);
 	_compatibleAmmo = node["compatibleAmmo"].as< std::vector<std::string> >(_compatibleAmmo);
 	_accuracyAuto = node["accuracyAuto"].as<int>(_accuracyAuto);
 	_accuracySnap = node["accuracySnap"].as<int>(_accuracySnap);
@@ -1019,6 +1019,15 @@ int RuleItem::getExplosionSpeed() const
 int RuleItem::getAutoShots() const
 {
 	return _autoShots;
+}
+
+/**
+ * Gets the name of psi attack for action popup list.
+ * @return String Id.
+ */
+std::string RuleItem::getPsiAttackName() const
+{
+	return _psiAttackName;
 }
 
 /**

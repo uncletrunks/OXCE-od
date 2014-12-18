@@ -75,6 +75,7 @@ items:
     requiresBuy: #what tech is requare for item be visible in buy window.
       - SOME_TECH
       - SOME_TECH_MK2
+    psiAttackName: STR_HIT_MELEE #string id of psi-amp attack name in popup menu. requare to enable special attack.
     bigSpriteAlt: 1 #like bigSprite but used when unconscious unit, loaded weapon or armed granade.
     floorSpriteAlt: 1 #like floorSprite but used when unconscious unit, loaded weapon or armed granade.
 [/code]
@@ -160,6 +161,8 @@ After battle, wounlded unit restore health equal to 20 times armor regeneration 
 While loading and unloading weapon you must pay cost of moving item to hand.[br/]
 You can unprime granade for half of prime tu cost.[br/]
 Support for Ufo2000 armor damage type.[br/]
+Psi-amp can now obey maximum weapon range.[br/]
+Psi-amp can now deal direct damage using special attack type in popup menu.[br/]
 
 [br/][br/]
 [i]Links[/i]
