@@ -72,6 +72,8 @@ public:
 	YAML::Node saveId() const;
 	/// Gets the UFO's ruleset.
 	const RuleUfo *getRules() const;
+	/// Sets the UFO's ruleset.
+	void changeRules(RuleUfo *rules);
 	/// Gets the UFO's ID.
 	int getId() const;
 	/// Sets the UFO's ID.

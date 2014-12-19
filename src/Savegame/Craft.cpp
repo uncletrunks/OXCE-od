@@ -63,7 +63,10 @@ Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	{
 		_weapons.push_back(0);
 	}
-	setBase(base);
+	if (base != 0)
+	{
+		setBase(base);
+	}
 }
 
 /**
