@@ -76,9 +76,7 @@
 #include "../Menu/LoadGameState.h"
 #include "../Menu/SaveGameState.h"
 #include "../Resource/ResourcePack.h"
-#include "../Ruleset/Ruleset.h"
 #include "../Ruleset/RuleItem.h"
-#include "../Ruleset/RuleInterface.h"
 #include "../Ruleset/AlienDeployment.h"
 #include "../Ruleset/Armor.h"
 #include "../Savegame/SavedGame.h"
@@ -180,10 +178,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 
 	// Set palette
 	_game->getSavedGame()->getSavedBattle()->setPaletteByDepth(this);
-
-	// Fix system colors
-	_game->getCursor()->setColor(Palette::blockOffset(9));
-	_game->getFpsCounter()->setColor(Palette::blockOffset(9));
 
 	if (_game->getRuleset()->getInterface("battlescape")->getElement("pathfinding"))
 	{
@@ -1963,8 +1957,6 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 				_game->pushState(new DebriefingState);
 			}
 		}
-		_game->getCursor()->setColor(Palette::blockOffset(15)+12);
-		_game->getFpsCounter()->setColor(Palette::blockOffset(15)+12);
 	}
 }
 

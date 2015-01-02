@@ -67,6 +67,8 @@ private:
 	int _x, _y, _minimizedIconX, _minimizedIconY;
 	int _weaponNum;
 
+	// craft min/max, radar min/max, damage min/max
+	int _color[6];
 	// Ends the dogfight.
 	void endDogfight();
 

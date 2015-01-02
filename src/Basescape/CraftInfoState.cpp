@@ -101,24 +101,24 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	_equip = new Surface(220, 18, 85, bottom + bottom_row);
 
 	// Set palette
-	setPalette("PAL_BASESCAPE", 3);
+	setPalette("PAL_BASESCAPE", _game->getRuleset()->getInterface("craftInfo")->getElement("palette")->color);
 
-	add(_window);
-	add(_btnOk);
+	add(_window, "window", "craftInfo");
+	add(_btnOk, "button", "craftInfo");
 	for(int i = 0; i < _weaponNum; ++i)
 	{
-		add(_btnW[i]);
+		add(_btnW[i], "button", "craftInfo");
 	}
-	add(_btnCrew);
-	add(_btnEquip);
-	add(_btnArmor);
-	add(_edtCraft);
-	add(_txtDamage);
-	add(_txtFuel);
+	add(_btnCrew, "button", "craftInfo");
+	add(_btnEquip, "button", "craftInfo");
+	add(_btnArmor, "button", "craftInfo");
+	add(_edtCraft, "text1", "craftInfo");
+	add(_txtDamage, "text1", "craftInfo");
+	add(_txtFuel, "text1", "craftInfo");
 	for(int i = 0; i < _weaponNum; ++i)
 	{
-		add(_txtWName[i]);
-		add(_txtWAmmo[i]);
+		add(_txtWName[i], "text2", "craftInfo");
+		add(_txtWAmmo[i], "text2", "craftInfo");
 		add(_weapon[i]);
 	}
 	add(_sprite);
@@ -128,10 +128,8 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setColor(Palette::blockOffset(13)+10);
 	_window->setBackground(_game->getResourcePack()->getSurface("BACK14.SCR"));
 
-	_btnOk->setColor(Palette::blockOffset(13)+10);
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftInfoState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftInfoState::btnOkClick, Options::keyCancel);
@@ -139,24 +137,19 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		const wchar_t num[] = { wchar_t(L'1' + i), 0 };
-		_btnW[i]->setColor(Palette::blockOffset(13)+10);
 		_btnW[i]->setText(num);
 		_btnW[i]->onMouseClick((ActionHandler)&CraftInfoState::btnWClick);
 	}
 
-	_btnCrew->setColor(Palette::blockOffset(13)+10);
 	_btnCrew->setText(tr("STR_CREW"));
 	_btnCrew->onMouseClick((ActionHandler)&CraftInfoState::btnCrewClick);
 
-	_btnEquip->setColor(Palette::blockOffset(13)+10);
 	_btnEquip->setText(tr("STR_EQUIPMENT_UC"));
 	_btnEquip->onMouseClick((ActionHandler)&CraftInfoState::btnEquipClick);
 
-	_btnArmor->setColor(Palette::blockOffset(13)+10);
 	_btnArmor->setText(tr("STR_ARMOR"));
 	_btnArmor->onMouseClick((ActionHandler)&CraftInfoState::btnArmorClick);
 
-	_edtCraft->setColor(Palette::blockOffset(13)+10);
 	_edtCraft->setBig();
 	_edtCraft->setAlign(ALIGN_CENTER);
 	_edtCraft->onChange((ActionHandler)&CraftInfoState::edtCraftChange);
@@ -169,11 +162,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 
 	for(int i =0; i < _weaponNum; ++i)
 	{
-		_txtWName[i]->setColor(Palette::blockOffset(13)+5);
 		_txtWName[i]->setWordWrap(true);
-
-		_txtWAmmo[i]->setColor(Palette::blockOffset(13)+10);
-		_txtWAmmo[i]->setSecondaryColor(Palette::blockOffset(13)+5);
 	}
 }
 
@@ -266,10 +255,12 @@ void CraftInfoState::init()
 			frame->setY(0);
 			frame->blit(_weapon[i]);
 
-			_txtWName[i]->setText(tr(w1->getRules()->getType()));
 			std::wostringstream ss;
+			ss << L'\x01' << tr(w1->getRules()->getType());
+			_txtWName[i]->setText(ss.str());
 			if (w1->getRules()->getAmmoMax())
 			{
+				ss.str(L"");
 				ss << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
 				ss << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
 				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())
