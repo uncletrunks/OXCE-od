@@ -16,42 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_CITY_H
-#define OPENXCOM_CITY_H
+#ifndef OPENXCOM_RULEVIDEO_H
+#define OPENXCOM_RULEVIDEO_H
 
-#include <string>
 #include <yaml-cpp/yaml.h>
+#include <vector>
+#include <string>
+#include <map>
 
 namespace OpenXcom
 {
-
-/**
- * Represents a city of the world.
- * Aliens target cities for certain missions.
- */
-class City
+class RuleVideo
 {
 private:
-	std::string _name;
-	double _lon, _lat;
-	size_t _zoomLevel;
+	std::string _id;
+	std::vector<std::string> _videos;
+	//std::vector<std::string> _slides;
 public:
-	/// Creates a new city at a certain position.
-	City(const std::string &name, double lon, double lat);
-	/// Cleans up the city.
-	~City();
-	/// Loads the city from YAML.
-	void load(const YAML::Node& node);
-	/// Gets the city's name.
-	std::string getName() const;
-	/// Gets the city's latitude.
-	double getLatitude() const;
-	/// Gets the city's longitude.
-	double getLongitude() const;
-	/// Gets the level of zoom that show city name.
-	size_t getZoomLevel() const;
+	RuleVideo(const std::string &type);
+	~RuleVideo();
+	void load(const YAML::Node &node);
+	const std::vector<std::string> * getVideos() const;
+
 };
 
 }
-
 #endif

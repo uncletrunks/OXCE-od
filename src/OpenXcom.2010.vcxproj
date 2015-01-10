@@ -303,7 +303,7 @@
     <ClCompile Include="Engine\CrossPlatform.cpp" />
     <ClCompile Include="Engine\Exception.cpp" />
     <ClCompile Include="Engine\FastLineClip.cpp" />
-    <ClCompile Include="Engine\Flc.cpp" />
+    <ClCompile Include="Engine\FlcPlayer.cpp" />
     <ClCompile Include="Engine\Font.cpp" />
     <ClCompile Include="Engine\Game.cpp" />
     <ClCompile Include="Engine\GMCat.cpp" />
@@ -440,6 +440,7 @@
     <ClCompile Include="Ruleset\AlienDeployment.cpp" />
     <ClCompile Include="Ruleset\AlienRace.cpp" />
     <ClCompile Include="Ruleset\RuleGlobe.cpp" />
+    <ClCompile Include="Ruleset\RuleVideo.cpp" />
     <ClCompile Include="Ruleset\SoundDefinition.cpp" />
     <ClCompile Include="Ruleset\StatString.cpp" />
     <ClCompile Include="Ruleset\StatStringCondition.cpp" />
@@ -614,7 +615,7 @@
     <ClInclude Include="Engine\DosFont.h" />
     <ClInclude Include="Engine\Exception.h" />
     <ClInclude Include="Engine\FastLineClip.h" />
-    <ClInclude Include="Engine\Flc.h" />
+    <ClInclude Include="Engine\FlcPlayer.h" />
     <ClInclude Include="Engine\Font.h" />
     <ClInclude Include="Engine\Game.h" />
     <ClInclude Include="Engine\GMCat.h" />
@@ -752,6 +753,7 @@
     <ClInclude Include="Ruleset\Polygon.h" />
     <ClInclude Include="Ruleset\Polyline.h" />
     <ClInclude Include="Ruleset\RuleGlobe.h" />
+    <ClInclude Include="Ruleset\RuleVideo.h" />
     <ClInclude Include="Ruleset\SoundDefinition.h" />
     <ClInclude Include="Ruleset\StatString.h" />
     <ClInclude Include="Ruleset\StatStringCondition.h" />

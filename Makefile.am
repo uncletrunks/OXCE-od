@@ -227,8 +227,8 @@ openxcom_SOURCES = \
 	src/Engine/Exception.h \
 	src/Engine/FastLineClip.cpp \
 	src/Engine/FastLineClip.h \
-	src/Engine/Flc.cpp \
-	src/Engine/Flc.h \
+	src/Engine/FlcPlayer.cpp \
+	src/Engine/FlcPlayer.h \
 	src/Engine/Font.cpp \
 	src/Engine/Font.h \
 	src/Engine/Game.cpp \
@@ -528,6 +528,8 @@ openxcom_SOURCES = \
 	src/Ruleset/RuleTerrain.h \
 	src/Ruleset/RuleUfo.cpp \
 	src/Ruleset/RuleUfo.h \
+	src/Ruleset/RuleVideo.cpp \
+	src/Ruleset/RuleVideo.h \
 	src/Ruleset/SoldierNamePool.cpp \
 	src/Ruleset/SoldierNamePool.h \
 	src/Ruleset/StatString.h \

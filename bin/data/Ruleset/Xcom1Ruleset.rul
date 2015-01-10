@@ -9323,6 +9323,10 @@ alienItemLevels:
   - [1, 1, 1, 2, 2, 2, 2, 2, 2, 2]
   - [1, 1, 2, 2, 2, 2, 2, 2, 2, 2]
   - [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+cutscenes:
+  - type: intro
+    videos:
+      - UFOINTRO/UFOINT.FLI
 MCDPatches:
 # pathFinding Hacks.
 # bigWall 1 = regular bigwall, no movement allowed.
@@ -10656,6 +10660,8 @@ interfaces:
       - id: text2
         color: 246   # purple
       - id: text3
+        color: 218   # blue
+      - id: textTooltip
         color: 218   # blue
       - id: baseView
         color: 213   # gold   (time remaining)

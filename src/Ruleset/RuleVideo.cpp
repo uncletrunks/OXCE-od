@@ -16,42 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_CITY_H
-#define OPENXCOM_CITY_H
-
-#include <string>
-#include <yaml-cpp/yaml.h>
+#include "RuleVideo.h"
 
 namespace OpenXcom
 {
 
-/**
- * Represents a city of the world.
- * Aliens target cities for certain missions.
- */
-class City
+RuleVideo::RuleVideo(const std::string &id) : _id(id)
 {
-private:
-	std::string _name;
-	double _lon, _lat;
-	size_t _zoomLevel;
-public:
-	/// Creates a new city at a certain position.
-	City(const std::string &name, double lon, double lat);
-	/// Cleans up the city.
-	~City();
-	/// Loads the city from YAML.
-	void load(const YAML::Node& node);
-	/// Gets the city's name.
-	std::string getName() const;
-	/// Gets the city's latitude.
-	double getLatitude() const;
-	/// Gets the city's longitude.
-	double getLongitude() const;
-	/// Gets the level of zoom that show city name.
-	size_t getZoomLevel() const;
-};
-
 }
 
-#endif
+RuleVideo::~RuleVideo()
+{
+}
+
+void RuleVideo::load(const YAML::Node &node)
+{
+	if(const YAML::Node &videos = node["videos"])
+	{
+		for(YAML::const_iterator i = videos.begin(); i != videos.end(); ++i)
+			_videos.push_back((*i).as<std::string>());
+	}
+
+	// Slides
+	/*if(const YAML::Node &slides = node["slides"])
+	{
+	for(YAML::const_iterator i = slides.begin(); i != slides.end(); ++i)
+			_slides.push_back(*i).as<std::string>());
+	}*/
+}
+
+const std::vector<std::string> * RuleVideo::getVideos() const
+{
+	return &_videos;
+}
+
+}

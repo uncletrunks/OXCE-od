@@ -471,7 +471,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnReserveAuto->setGroup(&_reserve);
 
 	// Set music
-	_game->getResourcePack()->playMusic("GMTACTIC");
+	_game->getResourcePack()->playMusic("GMTACTIC", true);
 
 	_animTimer = new Timer(DEFAULT_ANIM_SPEED, true);
 	_animTimer->onTimer((StateHandler)&BattlescapeState::animate);
@@ -2180,6 +2180,10 @@ void BattlescapeState::stopScrolling(Action *action)
 		SDL_WarpMouse(_xBeforeMouseScrolling, _yBeforeMouseScrolling);
 		action->setMouseAction(_xBeforeMouseScrolling, _yBeforeMouseScrolling, _map->getX(), _map->getY());
 		_battleGame->setupCursor();
+		if (_battleGame->getCurrentAction()->actor == 0 && (_save->getSide() == FACTION_PLAYER || _save->getDebugMode()))
+		{
+			getMap()->setCursorType(CT_NORMAL);
+		}
 	}
 	else
 	{

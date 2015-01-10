@@ -2743,7 +2743,7 @@ bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attack
 			}
 		}
 	}
-	
+
 	for (std::vector<BattleUnit*>::const_iterator i = potentialTargets.begin(); i != potentialTargets.end(); ++i)
 	{
 		// if there's actually something THERE, we'll chalk this up as a success.
@@ -2760,7 +2760,7 @@ bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attack
 			chosenTarget = *i;
 		}
 	}
-	
+
 	if (dest && chosenTarget)
 	{
 		*dest = chosenTarget->getPosition();
