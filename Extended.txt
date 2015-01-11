@@ -76,6 +76,7 @@ items:
       - SOME_TECH
       - SOME_TECH_MK2
     psiAttackName: STR_HIT_MELEE #string id of psi-amp attack name in popup menu. requare to enable special attack.
+    psiRequired: false #default based on wepon type, if `true` to use weapon you need have psi skill.
     bigSpriteAlt: 1 #like bigSprite but used when unconscious unit, loaded weapon or armed granade.
     floorSpriteAlt: 1 #like floorSprite but used when unconscious unit, loaded weapon or armed granade.
 [/code]

@@ -934,20 +934,25 @@ bool TileEngine::canMakeSnap(BattleUnit *unit, BattleUnit *target)
 {
 	BattleItem *weapon = unit->getMainHandWeapon();
 	// has a weapon
-	if (weapon &&
-		// has a melee weapon and is in melee range
-		((weapon->getRules()->getBattleType() == BT_MELEE &&
-		validMeleeRange(unit, target, unit->getDirection()) &&
-		unit->getActionTUs(BA_HIT, weapon) > 0 &&
-		unit->getTimeUnits() > unit->getActionTUs(BA_HIT, weapon)) ||
-		// has a gun capable of snap shot with ammo
-		(weapon->getRules()->getBattleType() != BT_MELEE &&
-		weapon->getAmmoItem() &&
-		unit->getActionTUs(BA_SNAPSHOT, weapon) > 0 &&
-		unit->getTimeUnits() > unit->getActionTUs(BA_SNAPSHOT, weapon))) &&
+	if (!weapon)
+	{
+		return false;
+	}
+	RuleItem *rule = weapon->getRules();
+	if ((!rule->isPsiRequired() || unit->getBaseStats()->psiSkill > 0) &&
+		(	// has a melee weapon and is in melee range
+			(rule->getBattleType() == BT_MELEE &&
+				validMeleeRange(unit, target, unit->getDirection()) &&
+				unit->getActionTUs(BA_HIT, weapon) > 0 &&
+				unit->getTimeUnits() > unit->getActionTUs(BA_HIT, weapon)) ||
+			// has a gun capable of snap shot with ammo
+			(rule->getBattleType() != BT_MELEE &&
+				weapon->getAmmoItem() &&
+				unit->getActionTUs(BA_SNAPSHOT, weapon) > 0 &&
+				unit->getTimeUnits() > unit->getActionTUs(BA_SNAPSHOT, weapon))) &&
 		(unit->getOriginalFaction() != FACTION_PLAYER ||
-		_save->getGeoscapeSave()->isResearched(weapon->getRules()->getRequirements())) &&
-		(_save->getDepth() != 0 || weapon->getRules()->isWaterOnly() == false))
+			_save->getGeoscapeSave()->isResearched(rule->getRequirements())) &&
+		(_save->getDepth() != 0 || rule->isWaterOnly() == false))
 	{
 		return true;
 	}

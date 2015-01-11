@@ -76,7 +76,7 @@ private:
 	bool _flatRate, _arcingShot;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
-	bool _LOSRequired, _underwaterOnly;
+	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	std::vector<std::pair<BonusStatFunc, float> > _damageBonus, _accuracyMulti, _meleeMulti;
 public:
@@ -252,6 +252,8 @@ public:
 	bool isLOSRequired() const;
 	/// Is this item restricted to use underwater?
 	bool isWaterOnly() const;
+	/// Is this item require unit with psi skill to use it?
+	bool isPsiRequired() const;
 	/// Get the associated special type of this item.
 	int getSpecialType() const;
 	/// Get the color offset to use for the vapor trail.

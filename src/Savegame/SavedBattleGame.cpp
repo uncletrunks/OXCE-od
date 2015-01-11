@@ -1110,6 +1110,12 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 		return placed;
 	}
 
+	// we equip item only if we have skill to use it.
+	if (unit->getBaseStats()->psiSkill <= 0 && item->getRules()->isPsiRequired())
+	{
+		return false;
+	}
+
 	bool keep = true;
 	switch (item->getRules()->getBattleType())
 	{
@@ -1186,7 +1192,7 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 			break;
 		}
 	default:
-		if (item->getRules()->getBattleType() == BT_PSIAMP && unit->getFaction() == FACTION_HOSTILE && unit->getBaseStats()->psiSkill > 0)
+		if (item->getRules()->getBattleType() == BT_PSIAMP && unit->getFaction() == FACTION_HOSTILE)
 		{
 			if (!rightWeapon)
 			{

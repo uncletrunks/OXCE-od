@@ -101,7 +101,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
-	_LOSRequired(false), _underwaterOnly(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
+	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_accuracyMulti(1, std::make_pair(&statOne<&UnitStats::firing>, 1.0f)), _meleeMulti(1, std::make_pair(&statOne<&UnitStats::melee>, 1.0f))
 {
 }
@@ -296,7 +296,8 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	if (node["battleType"])
 	{
 		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
-		if (_battleType == BT_PSIAMP)
+		_psiReqiured = _battleType == BT_PSIAMP;
+		if (_psiReqiured)
 		{
 			_powerRangeReduction = 1;
 			_accuracyMulti.clear();
@@ -354,6 +355,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		}
 	}
 	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
+	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
 
 	if (!_listOrder)
 	{
@@ -1120,6 +1122,14 @@ bool RuleItem::isWaterOnly() const
 	return _underwaterOnly;
 }
 
+/**
+ * Is psi skill is required to use this weapon.
+ * @return If psi skill is required.
+ */
+bool RuleItem::isPsiRequired() const
+{
+	return _psiReqiured;
+}
 /**
  * Compute power bonus based on unit stats.
  * @param stats unit stats
