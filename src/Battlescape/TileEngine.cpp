@@ -943,13 +943,11 @@ bool TileEngine::canMakeSnap(BattleUnit *unit, BattleUnit *target)
 		(	// has a melee weapon and is in melee range
 			(rule->getBattleType() == BT_MELEE &&
 				validMeleeRange(unit, target, unit->getDirection()) &&
-				unit->getActionTUs(BA_HIT, weapon) > 0 &&
-				unit->getTimeUnits() > unit->getActionTUs(BA_HIT, weapon)) ||
+				BattleActionCost(BA_HIT, unit, weapon).haveTU()) ||
 			// has a gun capable of snap shot with ammo
 			(rule->getBattleType() != BT_MELEE &&
 				weapon->getAmmoItem() &&
-				unit->getActionTUs(BA_SNAPSHOT, weapon) > 0 &&
-				unit->getTimeUnits() > unit->getActionTUs(BA_SNAPSHOT, weapon))) &&
+				BattleActionCost(BA_HIT, unit, weapon).haveTU())) &&
 		(unit->getOriginalFaction() != FACTION_PLAYER ||
 			_save->getGeoscapeSave()->isResearched(rule->getRequirements())) &&
 		(_save->getDepth() != 0 || rule->isWaterOnly() == false))
@@ -985,7 +983,7 @@ bool TileEngine::tryReactionSnap(BattleUnit *unit, BattleUnit *target)
 	action.target = target->getPosition();
 	action.updateTU();
 
-	if (action.weapon->getAmmoItem() && action.weapon->getAmmoItem()->getAmmoQuantity() && unit->getTimeUnits() >= action.TU)
+	if (action.weapon->getAmmoItem() && action.weapon->getAmmoItem()->getAmmoQuantity() && action.haveTU())
 	{
 		action.targeting = true;
 
@@ -1007,9 +1005,9 @@ bool TileEngine::tryReactionSnap(BattleUnit *unit, BattleUnit *target)
 			}
 		}
 
-		if (action.targeting && unit->spendTimeUnits(action.TU))
+		if (action.targeting && action.spendTU())
 		{
-			action.TU = 0;
+			action.clearTU();
 			_save->getBattleGame()->statePushBack(new UnitTurnBState(_save->getBattleGame(), action, false));
 			_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
 			return true;
@@ -1096,7 +1094,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 		if (type->IgnoreSelfDestruct == false)
 		{
 			Position p = Position(target->getPosition().x * 16, target->getPosition().y * 16, target->getPosition().z * 24);
-			_save->getBattleGame()->statePushNext(new ExplosionBState(_save->getBattleGame(), p, 0, target, 0));
+			_save->getBattleGame()->statePushNext(new ExplosionBState(_save->getBattleGame(), p, BA_NONE, 0, target, 0));
 		}
 	}
 
@@ -2007,7 +2005,7 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 
 	if (TUCost != 0)
 	{
-		if (_save->getBattleGame()->checkReservedTU(unit, TUCost))
+		if (_save->getBattleGame()->checkReservedTU(unit, TUCost, 0))
 		{
 			if (unit->spendTimeUnits(TUCost))
 			{

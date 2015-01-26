@@ -61,7 +61,7 @@ void UnitTurnBState::init()
 		_parent->popState();
 		return;
 	}
-	_action.TU = 0;
+	_action.clearTU();
 	if (_unit->getFaction() == FACTION_PLAYER)
 		_parent->setStateInterval(Options::battleXcomSpeed);
 	else
@@ -102,7 +102,7 @@ void UnitTurnBState::think()
 {
 	const int tu = _chargeTUs ? 1 : 0;
 
-	if (_chargeTUs && _unit->getFaction() == _parent->getSave()->getSide() && _parent->getPanicHandled() && !_action.targeting && !_parent->checkReservedTU(_unit, tu))
+	if (_chargeTUs && _unit->getFaction() == _parent->getSave()->getSide() && _parent->getPanicHandled() && !_action.targeting && !_parent->checkReservedTU(_unit, tu, 0))
 	{
 		_unit->abortTurn();
 		_parent->popState();

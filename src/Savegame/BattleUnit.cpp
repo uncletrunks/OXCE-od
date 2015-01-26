@@ -1265,16 +1265,14 @@ bool BattleUnit::spendTimeUnits(int tu)
 
 /**
  * Spend energy  if it can. Return false if it can't.
- * @param tu
+ * @param energy
  * @return flag if it could spend the time units or not.
  */
-bool BattleUnit::spendEnergy(int tu)
+bool BattleUnit::spendEnergy(int energy)
 {
-	int eu = tu / 2;
-
-	if (eu <= _energy)
+	if (energy <= _energy)
 	{
-		_energy -= eu;
+		_energy -= energy;
 		return true;
 	}
 	else
@@ -1901,10 +1899,10 @@ BattleItem *BattleUnit::getGrenadeFromBelt() const
 bool BattleUnit::checkAmmo()
 {
 	BattleItem *weapon = getItem("STR_RIGHT_HAND");
-	if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE || getTimeUnits() < 15)
+	if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE || getTimeUnits() < weapon->getRules()->getTULoad())
 	{
 		weapon = getItem("STR_LEFT_HAND");
-		if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE || getTimeUnits() < 15)
+		if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE || getTimeUnits() < weapon->getRules()->getTULoad())
 		{
 			return false;
 		}
@@ -1928,7 +1926,7 @@ bool BattleUnit::checkAmmo()
 
 	if (wrong) return false; // didn't find any compatible ammo in inventory
 
-	spendTimeUnits(15);
+	spendTimeUnits(weapon->getRules()->getTULoad());
 	weapon->setAmmoItem(ammo);
 	ammo->moveToOwner(0);
 

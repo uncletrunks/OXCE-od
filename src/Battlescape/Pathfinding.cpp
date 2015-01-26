@@ -144,7 +144,7 @@ void Pathfinding::calculate(BattleUnit *unit, Position endPosition, BattleUnit *
 						return;
 					if (x && y)
 					{
-						if ((checkTile->getMapData(MapData::O_NORTHWALL) && checkTile->getMapData(MapData::O_NORTHWALL)->isDoor()) || 
+						if ((checkTile->getMapData(MapData::O_NORTHWALL) && checkTile->getMapData(MapData::O_NORTHWALL)->isDoor()) ||
 							(checkTile->getMapData(MapData::O_WESTWALL) && checkTile->getMapData(MapData::O_WESTWALL)->isDoor()))
 							return;
 					}
@@ -391,7 +391,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 			// don't let tanks phase through doors.
 			if (x && y)
 			{
-				if ((destinationTile->getMapData(MapData::O_NORTHWALL) && destinationTile->getMapData(MapData::O_NORTHWALL)->isDoor()) || 
+				if ((destinationTile->getMapData(MapData::O_NORTHWALL) && destinationTile->getMapData(MapData::O_NORTHWALL)->isDoor()) ||
 					(destinationTile->getMapData(MapData::O_WESTWALL) && destinationTile->getMapData(MapData::O_WESTWALL)->isDoor()))
 				{
 					return 255;
@@ -611,7 +611,7 @@ bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarge
 			if (unit == _unit || unit == missileTarget || unit->isOut()) return false;
 			if (_unit && _unit->getFaction() == FACTION_PLAYER && unit->getVisible()) return true;		// player know all visible units
 			if (_unit && _unit->getFaction() == unit->getFaction()) return true;
-			if (_unit && _unit->getFaction() == FACTION_HOSTILE && 
+			if (_unit && _unit->getFaction() == FACTION_HOSTILE &&
 				std::find(_unit->getUnitsSpottedThisTurn().begin(), _unit->getUnitsSpottedThisTurn().end(), unit) != _unit->getUnitsSpottedThisTurn().end()) return true;
 		}
 		else if (tile->hasNoFloor(0) && _movementType != MT_FLY) // this whole section is devoted to making large units not take part in any kind of falling behaviour
@@ -919,7 +919,7 @@ bool Pathfinding::previewPath(bool bRemove)
 
 		tus -= tu;
 		total += tu;
-		bool reserve = _save->getBattleGame()->checkReservedTU(_unit, total, true);
+		bool reserve = _save->getBattleGame()->checkReservedTU(_unit, total, _unit->getEnergy() - energy, true);
 		pos = destination;
 		for (int x = size; x >= 0; x--)
 		{
@@ -1114,10 +1114,11 @@ bool Pathfinding::bresenhamPath(const Position& origin, const Position& target, 
  * @param tuMax The maximum cost of the path to each tile.
  * @return An array of reachable tiles, sorted in ascending order of cost. The first tile is the start location.
  */
-std::vector<int> Pathfinding::findReachable(BattleUnit *unit, int tuMax)
+std::vector<int> Pathfinding::findReachable(BattleUnit *unit, const BattleActionCost &cost)
 {
 	const Position &start = unit->getPosition();
-	int energyMax = unit->getEnergy();
+	int tuMax = unit->getTimeUnits() - cost.TU;
+	int energyMax = unit->getEnergy() - cost.Energy;
 	for (std::vector<PathfindingNode>::iterator it = _nodes.begin(); it != _nodes.end(); ++it)
 	{
 		it->reset();
@@ -1139,7 +1140,7 @@ std::vector<int> Pathfinding::findReachable(BattleUnit *unit, int tuMax)
 			int tuCost = getTUCost(currentPos, direction, &nextPos, unit, 0, false);
 			if (tuCost == 255) // Skip unreachable / blocked
 				continue;
-			if (currentNode->getTUCost(false) + tuCost > tuMax || 
+			if (currentNode->getTUCost(false) + tuCost > tuMax ||
 				(currentNode->getTUCost(false) + tuCost) / 2 > energyMax) // Run out of TUs/Energy
 				continue;
 			PathfindingNode *nextNode = getNode(nextPos);

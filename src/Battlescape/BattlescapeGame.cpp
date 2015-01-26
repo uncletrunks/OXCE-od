@@ -65,11 +65,77 @@ namespace OpenXcom
 bool BattlescapeGame::_debugPlay = false;
 
 /**
- * Update value of TU
+ * Update value of TU and Energy
  */
-void BattleAction::updateTU()
+void BattleActionCost::updateTU()
 {
 	TU = actor ? actor->getActionTUs(type, weapon) : 0;
+	Energy = 0;
+}
+
+/**
+ * Clean up action cost.
+ */
+void BattleActionCost::clearTU()
+{
+	TU = 0;
+	Energy = 0;
+}
+
+/**
+ * Test if action can by performed.
+ * @param message optional message with error condition.
+ * @return Unit have enough stats to perform action.
+ */
+bool BattleActionCost::haveTU(std::string *message)
+{
+	if (TU <= 0)
+	{
+		//no action, no message
+		return false;
+	}
+	if (actor->getTimeUnits() < TU)
+	{
+		if (message)
+		{
+			*message = "STR_NOT_ENOUGH_TIME_UNITS";
+		}
+		return false;
+	}
+	if (actor->getEnergy() < Energy)
+	{
+		if (message)
+		{
+			*message = "STR_NOT_ENOUGH_ENERGY";
+		}
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Spend cost of action if unit have enough stats.
+ * @param message optional message with error condition.
+ * @return Action was performed.
+ */
+bool BattleActionCost::spendTU(std::string *message)
+{
+	if (haveTU(message))
+	{
+		actor->spendTimeUnits(TU);
+		actor->spendEnergy(Energy);
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Refund unused cost. Call only after `spendTU` when you need rollback action.
+ */
+void BattleActionCost::rollbackTU()
+{
+	actor->setTimeUnits(actor->getTimeUnits() + TU);
+	actor->setEnergy(actor->getEnergy() + Energy);
 }
 
 /**
@@ -330,7 +396,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 bool BattlescapeGame::kneel(BattleUnit *bu)
 {
 	int tu = bu->isKneeled()?8:4;
-	if (bu->getType() == "SOLDIER" && !bu->isFloating() && ((!bu->isKneeled() && _save->getKneelReserved()) || checkReservedTU(bu, tu)))
+	if (bu->getType() == "SOLDIER" && !bu->isFloating() && ((!bu->isKneeled() && _save->getKneelReserved()) || checkReservedTU(bu, tu, 0)))
 	{
 		if (bu->spendTimeUnits(tu))
 		{
@@ -376,7 +442,7 @@ void BattlescapeGame::endTurn()
 			if ((*it)->getRules()->getBattleType() == BT_GRENADE && (*it)->getFuseTimer() == 0)  // it's a grenade to explode now
 			{
 				Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
-				statePushNext(new ExplosionBState(this, p, (*it), (*it)->getPreviousOwner()));
+				statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
 				_save->removeItem((*it));
 				statePushBack(0);
 				return;
@@ -389,7 +455,7 @@ void BattlescapeGame::endTurn()
 	if (t)
 	{
 		Position p = t->getPosition().toVexel();
-		statePushNext(new ExplosionBState(this, p, 0, 0, t));
+		statePushNext(new ExplosionBState(this, p, BA_NONE, 0, 0, t));
 		statePushBack(0);
 		return;
 	}
@@ -589,17 +655,18 @@ void BattlescapeGame::handleNonTargetAction()
 {
 	if (!_currentAction.targeting)
 	{
+		std::string error;
 		_currentAction.cameraPosition = Position(0,0,-1);
 		if (_currentAction.type == BA_PRIME && _currentAction.value > -1)
 		{
-			if (_currentAction.actor->spendTimeUnits(_currentAction.TU))
+			if (_currentAction.spendTU(&error))
 			{
 				_parentState->warning("STR_GRENADE_IS_ACTIVATED");
 				_currentAction.weapon->setFuseTimer(_currentAction.value);
 			}
 			else
 			{
-				_parentState->warning("STR_NOT_ENOUGH_TIME_UNITS");
+				_parentState->warning(error);
 			}
 		}
 		if (_currentAction.type == BA_USE || _currentAction.type == BA_LAUNCH)
@@ -620,14 +687,14 @@ void BattlescapeGame::handleNonTargetAction()
 			}
 			else
 			{
-				if (_currentAction.actor->spendTimeUnits(_currentAction.TU))
+				if (_currentAction.spendTU(&error))
 				{
 					statePushBack(new ProjectileFlyBState(this, _currentAction));
 					return;
 				}
 				else
 				{
-					_parentState->warning("STR_NOT_ENOUGH_TIME_UNITS");
+					_parentState->warning(error);
 				}
 			}
 		}
@@ -796,7 +863,7 @@ void BattlescapeGame::popState()
 			// the other actions' TUs (healing,scanning,..) are already take care of
 			if (action.targeting && _save->getSelectedUnit() && !actionFailed)
 			{
-				action.actor->spendTimeUnits(action.TU);
+				action.spendTU();
 			}
 			if (_save->getSide() == FACTION_PLAYER)
 			{
@@ -818,7 +885,7 @@ void BattlescapeGame::popState()
 		else
 		{
 			// spend TUs
-			action.actor->spendTimeUnits(action.TU);
+			action.spendTU();
 			if (_save->getSide() != FACTION_PLAYER && !_debugPlay)
 			{
 				// AI does three things per unit, before switching to the next, or it got killed before doing the second thing
@@ -922,15 +989,19 @@ void BattlescapeGame::setStateInterval(Uint32 interval)
 
 
 /**
- * Checks against reserved time units.
+ * Checks against reserved time units and energy units.
  * @param bu Pointer to the unit.
  * @param tu Number of time units to check.
+ * @param energy Number of energy units to check.
  * @param justChecking True to suppress error messages, false otherwise.
  * @return bool Whether or not we got enough time units.
  */
-bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, bool justChecking)
+bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool justChecking)
 {
-	BattleActionType effectiveTuReserved = _save->getTUReserved(); // avoid changing _tuReserved in this method
+	BattleActionCost cost;
+	cost.actor = bu;
+	cost.type = _save->getTUReserved(); // avoid changing _tuReserved in this method
+	cost.weapon = bu->getMainHandWeapon(false); // check TUs against slowest weapon if we have two weapons
 
 	if (_save->getSide() != bu->getFaction() || _save->getSide() == FACTION_NEUTRAL)
 	{
@@ -942,36 +1013,41 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, bool justChecking)
 		AlienBAIState *ai = dynamic_cast<AlienBAIState*>(bu->getCurrentAIState());
 		if (ai)
 		{
-			effectiveTuReserved = ai->getReserveMode();
+			cost.type = ai->getReserveMode();
 		}
-		switch (effectiveTuReserved)
+		cost.updateTU();
+		cost.Energy += energy;
+		cost.TU = tu; //override original
+		switch (cost.type)
 		{
-		case BA_SNAPSHOT: return tu + (bu->getBaseStats()->tu / 3) <= bu->getTimeUnits(); break; // 33%
-		case BA_AUTOSHOT: return tu + ((bu->getBaseStats()->tu / 5)*2) <= bu->getTimeUnits(); break; // 40%
-		case BA_AIMEDSHOT: return tu + (bu->getBaseStats()->tu / 2) <= bu->getTimeUnits(); break; // 50%
-		default: return tu <= bu->getTimeUnits(); break;
+		case BA_SNAPSHOT: cost.TU += (bu->getBaseStats()->tu / 3); break; // 33%
+		case BA_AUTOSHOT: cost.TU += ((bu->getBaseStats()->tu / 5)*2); break; // 40%
+		case BA_AIMEDSHOT: cost.TU += (bu->getBaseStats()->tu / 2); break; // 50%
+		default: break;
 		}
+		return cost.haveTU();
 	}
 
-	// check TUs against slowest weapon if we have two weapons
-	BattleItem *slowestWeapon = bu->getMainHandWeapon(false);
+	cost.updateTU();
 	// if the weapon has no autoshot, reserve TUs for snapshot
-	if (bu->getActionTUs(effectiveTuReserved, slowestWeapon) == 0 && effectiveTuReserved == BA_AUTOSHOT)
+	if (cost.TU == 0 && cost.type == BA_AUTOSHOT)
 	{
-		effectiveTuReserved = BA_SNAPSHOT;
+		cost.type = BA_SNAPSHOT;
+		cost.updateTU();
 	}
 	// likewise, if we don't have a snap shot available, try aimed.
-	if (bu->getActionTUs(effectiveTuReserved, slowestWeapon) == 0 && effectiveTuReserved == BA_SNAPSHOT)
+	if (cost.TU == 0 && cost.type == BA_SNAPSHOT)
 	{
-		effectiveTuReserved = BA_AIMEDSHOT;
+		cost.type = BA_AIMEDSHOT;
+		cost.updateTU();
 	}
 	const int tuKneel = (_save->getKneelReserved() && !bu->isKneeled()  && bu->getType() == "SOLDIER") ? 4 : 0;
 	// no aimed shot available? revert to none.
-	if (bu->getActionTUs(effectiveTuReserved, slowestWeapon) == 0 && effectiveTuReserved == BA_AIMEDSHOT)
+	if (cost.TU == 0 && cost.type == BA_AIMEDSHOT)
 	{
 		if (tuKneel > 0)
 		{
-			effectiveTuReserved = BA_NONE;
+			cost.type = BA_NONE;
 		}
 		else
 		{
@@ -979,15 +1055,24 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, bool justChecking)
 		}
 	}
 
-	if ((effectiveTuReserved != BA_NONE || _save->getKneelReserved()) &&
-		tu + tuKneel + bu->getActionTUs(effectiveTuReserved, slowestWeapon) > bu->getTimeUnits() &&
-		(tuKneel + bu->getActionTUs(effectiveTuReserved, slowestWeapon) <= bu->getTimeUnits() || justChecking))
+	cost.TU += tuKneel;
+
+	//current TU is less that required for reserved shoot, we can't reserved anything.
+	if (!cost.haveTU() && !justChecking)
+	{
+		return true;
+	}
+
+	cost.TU += tu;
+	cost.Energy += energy;
+
+	if ((cost.type != BA_NONE || _save->getKneelReserved()) && !cost.haveTU())
 	{
 		if (!justChecking)
 		{
 			if (tuKneel)
 			{
-				switch (effectiveTuReserved)
+				switch (cost.type)
 				{
 				case BA_NONE: _parentState->warning("STR_TIME_UNITS_RESERVED_FOR_KNEELING"); break;
 				default: _parentState->warning("STR_TIME_UNITS_RESERVED_FOR_KNEELING_AND_FIRING");
@@ -1244,7 +1329,8 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				if (!_currentAction.weapon->getRules()->isLOSRequired() ||
 					std::find(_currentAction.actor->getVisibleUnits()->begin(), _currentAction.actor->getVisibleUnits()->end(), _save->selectUnit(pos)) != _currentAction.actor->getVisibleUnits()->end())
 				{
-					if (_currentAction.actor->spendTimeUnits(_currentAction.TU))
+					std::string error;
+					if (_currentAction.spendTU(&error))
 					{
 						_parentState->getGame()->getResourcePack()->getSoundByDepth(_save->getDepth(), _currentAction.weapon->getRules()->getHitSound())->play(-1, getMap()->getSoundAngle(pos));
 						_parentState->getGame()->pushState (new UnitInfoState(_save->selectUnit(pos), _parentState, false, true));
@@ -1252,7 +1338,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 					}
 					else
 					{
-						_parentState->warning("STR_NOT_ENOUGH_TIME_UNITS");
+						_parentState->warning(error);
 					}
 				}
 				else
@@ -2047,7 +2133,7 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 							if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() == 0)
 							{
 								Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
-								statePushNext(new ExplosionBState(this, p, (*i), (*i)->getPreviousOwner()));
+								statePushNext(new ExplosionBState(this, p, BA_NONE, (*i), (*i)->getPreviousOwner()));
 								getSave()->removeItem(*i);
 								unit->setCache(0);
 								getMap()->cacheUnit(unit);

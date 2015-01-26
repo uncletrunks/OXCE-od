@@ -288,7 +288,7 @@ void UnitWalkBState::think()
 			{
 				tu = 0;
 			}
-			int energy = tu;
+			int energy = tu / 2;
 			if (_action.run)
 			{
 				tu *= 0.75;
@@ -311,7 +311,7 @@ void UnitWalkBState::think()
 				return;
 			}
 
-			if (energy / 2 > _unit->getEnergy())
+			if (energy > _unit->getEnergy())
 			{
 				if (_parent->getPanicHandled())
 				{
@@ -324,7 +324,7 @@ void UnitWalkBState::think()
 				return;
 			}
 
-			if (_parent->getPanicHandled() && _parent->checkReservedTU(_unit, tu) == false)
+			if (_parent->getPanicHandled() && _parent->checkReservedTU(_unit, tu, energy) == false)
 			{
 				_pf->abortPath();
 				_unit->setCache(0);
@@ -378,7 +378,7 @@ void UnitWalkBState::think()
 						(-belowDest->getTerrainLevel() + unitBelowMyWay->getFloatHeight() + unitBelowMyWay->getHeight())
 						>= 28)))  // 4+ voxels poking into the tile above, we don't kick people in the head here at XCom.
 					{
-						_action.TU = 0;
+						_action.clearTU();
 						_pf->abortPath();
 						_unit->setCache(0);
 						_parent->getMap()->cacheUnit(_unit);
@@ -474,7 +474,7 @@ void UnitWalkBState::cancel()
  */
 void UnitWalkBState::postPathProcedures()
 {
-	_action.TU = 0;
+	_action.clearTU();
 	if (_unit->getFaction() != FACTION_PLAYER)
 	{
 		int dir = _action.finalFacing;

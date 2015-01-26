@@ -220,7 +220,7 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 	if (btnID != -1)
 	{
 		_action->type = _actionMenu[btnID]->getAction();
-		_action->TU = _actionMenu[btnID]->getTUs();
+		_action->updateTU();
 		if (weapon->isWaterOnly() &&
 			_game->getSavedGame()->getSavedBattle()->getDepth() == 0 &&
 			_action->type != BA_THROW)
@@ -281,23 +281,22 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		else if (_action->type == BA_USE && weapon->getBattleType() == BT_SCANNER)
 		{
 			// spend TUs first, then show the scanner
-			if (_action->actor->spendTimeUnits (_action->TU))
+			if (_action->spendTU(&_action->result))
 			{
 				_game->popState();
 				_game->pushState (new ScannerState(_action));
 			}
 			else
 			{
-				_action->result = "STR_NOT_ENOUGH_TIME_UNITS";
 				_game->popState();
 			}
 		}
 		else if (_action->type == BA_LAUNCH)
 		{
 			// check beforehand if we have enough time units
-			if (_action->TU > _action->actor->getTimeUnits())
+			if (!_action->haveTU(&_action->result))
 			{
-				_action->result = "STR_NOT_ENOUGH_TIME_UNITS";
+				//nothing
 			}
 			else if (_action->weapon->getAmmoItem() ==0 || (_action->weapon->getAmmoItem() && _action->weapon->getAmmoItem()->getAmmoQuantity() == 0))
 			{

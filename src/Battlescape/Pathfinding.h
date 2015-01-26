@@ -30,6 +30,7 @@ namespace OpenXcom
 class SavedBattleGame;
 class Tile;
 class BattleUnit;
+struct BattleActionCost;
 
 /**
  * A utility class that calculates the shortest path between two points on the battlescape map.
@@ -100,7 +101,7 @@ public:
 	/// Sets _unit in order to abuse low-level pathfinding functions from outside the class.
 	void setUnit(BattleUnit *unit);
 	/// Gets all reachable tiles, based on cost.
-	std::vector<int> findReachable(BattleUnit *unit, int tuMax);
+	std::vector<int> findReachable(BattleUnit *unit, const BattleActionCost &cost);
 	/// Gets _totalTUCost; finds out whether we can hike somewhere in this turn or not.
 	int getTotalTUCost() const { return _totalTUCost; }
 	/// Gets the path preview setting.

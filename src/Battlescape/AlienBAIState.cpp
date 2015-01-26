@@ -21,6 +21,7 @@
 #include <climits>
 #include <algorithm>
 #include "AlienBAIState.h"
+#include "BattlescapeGame.h"
 #include "ProjectileFlyBState.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
@@ -156,7 +157,7 @@ void AlienBAIState::think(BattleAction *action)
 	_melee = _unit->getUtilityWeapon(BT_MELEE);
 	_rifle = false;
 	_blaster = false;
-	_reachable = _save->getPathfinding()->findReachable(_unit, _unit->getTimeUnits());
+	_reachable = _save->getPathfinding()->findReachable(_unit, BattleActionCost());
 	_wasHitBy.clear();
 
 	if (_unit->getCharging() && _unit->getCharging()->isOut())
@@ -196,18 +197,18 @@ void AlienBAIState::think(BattleAction *action)
 				if (!rule->isWaypoint())
 				{
 					_rifle = true;
-					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, _unit->getTimeUnits() - _unit->getActionTUs(BA_SNAPSHOT, action->weapon));
+					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_SNAPSHOT, _unit, action->weapon));
 				}
 				else
 				{
 					_blaster = true;
-					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, _unit->getTimeUnits() - _unit->getActionTUs(BA_AIMEDSHOT, action->weapon));
+					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_AIMEDSHOT, _unit, action->weapon));
 				}
 			}
 			else if (rule->getBattleType() == BT_MELEE)
 			{
 				_melee = true;
-				_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, _unit->getTimeUnits() - _unit->getActionTUs(BA_HIT, action->weapon));
+				_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_HIT, _unit, action->weapon));
 			}
 		}
 		else
@@ -364,7 +365,7 @@ void AlienBAIState::think(BattleAction *action)
 		// if this is a "find fire point" action, don't increment the AI counter.
 		if (action->type == BA_WALK && _rifle
 			// so long as we can take a shot afterwards.
-			&& _unit->getTimeUnits() > _unit->getActionTUs(BA_SNAPSHOT, action->weapon))
+			&& BattleActionCost(BA_SNAPSHOT, _unit, action->weapon).haveTU())
 		{
 			action->number -= 1;
 		}
@@ -427,7 +428,7 @@ bool AlienBAIState::getWasHitBy(int attacker) const
 void AlienBAIState::setupPatrol()
 {
 	Node *node;
-	_patrolAction->TU = 0;
+	_patrolAction->clearTU();
 	if (_toNode != 0 && _unit->getPosition() == _toNode->getPosition())
 	{
 		if (_traceAI)
@@ -1588,8 +1589,8 @@ void AlienBAIState::meleeAction()
 			return;
 		}
 	}
-	int attackCost = _unit->getActionTUs(BA_HIT, _unit->getMainHandWeapon());
-	int chargeReserve = _unit->getTimeUnits() - attackCost;
+	BattleActionCost attackCost(BA_HIT, _unit, _unit->getMainHandWeapon());
+	int chargeReserve = std::min(_unit->getTimeUnits() - attackCost.TU, 2 * (_unit->getEnergy() - attackCost.Energy));
 	int distance = (chargeReserve / 4) + 1;
 	_aggroTarget = 0;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
@@ -1647,7 +1648,7 @@ void AlienBAIState::wayPointAction()
 	{
 		_attackAction->type = BA_LAUNCH;
 		_attackAction->updateTU();
-		if (_attackAction->TU > _unit->getTimeUnits())
+		if (!_attackAction->haveTU())
 		{
 			_attackAction->type = BA_RETHINK;
 			return;
@@ -1718,21 +1719,21 @@ void AlienBAIState::selectFireMethod()
 {
 	int distance = _save->getTileEngine()->distance(_unit->getPosition(), _attackAction->target);
 	_attackAction->type = BA_RETHINK;
-	int tuAuto = _unit->getActionTUs(BA_AUTOSHOT, _attackAction->weapon);
-	int tuSnap = _unit->getActionTUs(BA_SNAPSHOT, _attackAction->weapon);
-	int tuAimed = _unit->getActionTUs(BA_AIMEDSHOT, _attackAction->weapon);
-	int currentTU = _unit->getTimeUnits();
+
+	BattleActionCost costAuto(BA_AUTOSHOT, _attackAction->actor, _attackAction->weapon);
+	BattleActionCost costSnap(BA_SNAPSHOT, _attackAction->actor, _attackAction->weapon);
+	BattleActionCost costAimed(BA_AIMEDSHOT, _attackAction->actor, _attackAction->weapon);
 
 	if (distance < 4)
 	{
-		if (tuAuto && currentTU >= tuAuto)
+		if (costAuto.haveTU())
 		{
 			_attackAction->type = BA_AUTOSHOT;
 			return;
 		}
-		if (!tuSnap || currentTU < tuSnap)
+		if (!costSnap.haveTU())
 		{
-			if (tuAimed && currentTU >= tuAimed)
+			if (costAimed.haveTU())
 			{
 				_attackAction->type = BA_AIMEDSHOT;
 			}
@@ -1745,31 +1746,29 @@ void AlienBAIState::selectFireMethod()
 
 	if (distance > 12)
 	{
-		if (tuAimed && currentTU >= tuAimed)
+		if (costAimed.haveTU())
 		{
 			_attackAction->type = BA_AIMEDSHOT;
 			return;
 		}
-		if (distance < 20
-			&& tuSnap
-			&& currentTU >= tuSnap)
+		if (distance < 20 && costSnap.haveTU())
 		{
 			_attackAction->type = BA_SNAPSHOT;
 			return;
 		}
 	}
 
-	if (tuSnap && currentTU >= tuSnap)
+	if (costSnap.haveTU())
 	{
 		_attackAction->type = BA_SNAPSHOT;
 		return;
 	}
-	if (tuAimed && currentTU >= tuAimed)
+	if (costAimed.haveTU())
 	{
 		_attackAction->type = BA_AIMEDSHOT;
 		return;
 	}
-	if (tuAuto && currentTU >= tuAuto)
+	if (costAuto.haveTU())
 	{
 		_attackAction->type = BA_AUTOSHOT;
 	}
@@ -1785,19 +1784,20 @@ void AlienBAIState::grenadeAction()
 	// distance must be more than X tiles, otherwise it's too dangerous to play with explosives
 	if (explosiveEfficacy(_aggroTarget->getPosition(), _unit, grenade->getRules()->getExplosionRadius(), _attackAction->diff, true))
 	{
-		int tu = 4; // 4TUs for picking up the grenade
-		tu += _unit->getActionTUs(BA_PRIME, grenade);
-		tu += _unit->getActionTUs(BA_THROW, grenade);
+		BattleAction action;
+		action.weapon = grenade;
+		action.target = _aggroTarget->getPosition();
+		action.type = BA_THROW;
+		action.actor = _unit;
+
+		action.updateTU();
+		action.TU += 4; // 4TUs for picking up the grenade
+		action.TU += _unit->getActionTUs(BA_PRIME, grenade);
 		// do we have enough TUs to prime and throw the grenade?
-		if (tu <= _unit->getTimeUnits())
+		if (action.haveTU())
 		{
-			BattleAction action;
-			action.weapon = grenade;
-			action.target = _aggroTarget->getPosition();
-			action.type = BA_THROW;
-			action.actor = _unit;
 			Position originVoxel = _save->getTileEngine()->getOriginVoxel(action, 0);
-			Position targetVoxel = action.target * Position (16,16,24) + Position (8,8, (2 + -_save->getTile(action.target)->getTerrainLevel()));
+			Position targetVoxel = action.target.toVexel() + Position (8,8, (2 + -_save->getTile(action.target)->getTerrainLevel()));
 			// are we within range?
 			if (_save->getTileEngine()->validateThrow(action, originVoxel, targetVoxel))
 			{
@@ -1826,14 +1826,16 @@ bool AlienBAIState::psiAction()
 	{
 		return false;
 	}
-	int cost = _unit->getActionTUs(BA_USE, item);
+	BattleActionCost cost(BA_USE, _unit, item);
+	cost.TU += _escapeTUs;
+	cost.Energy += _escapeTUs / 2;
 	bool LOSRequired = item->getRules()->isLOSRequired();
 
 	_aggroTarget = 0;
 		// don't let mind controlled soldiers mind control other soldiers.
 	if (_unit->getOriginalFaction() != FACTION_PLAYER
 		// and we have the required 25 TUs and can still make it to cover
-		&& _unit->getTimeUnits() > _escapeTUs + cost
+		&& cost.haveTU()
 		// and we didn't already do a psi action this round
 		&& !_didPsi)
 	{
@@ -2039,7 +2041,7 @@ void AlienBAIState::selectMeleeOrRanged()
 		if (RNG::percent(meleeOdds))
 		{
 			_rifle = false;
-			_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, _unit->getTimeUnits() - _unit->getActionTUs(BA_HIT, meleeWeapon));
+			_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_HIT, _unit, _unit->getUtilityWeapon(BT_MELEE)));
 			return;
 		}
 	}

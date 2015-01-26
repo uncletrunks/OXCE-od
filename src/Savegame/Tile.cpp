@@ -339,9 +339,14 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 {
 	if (!_objects[part]) return -1;
 
+	int tuCost = _objects[part]->getTUCost(unit->getMovementType());
+	BattleActionCost cost(reserve, unit, unit->getMainHandWeapon(false));
+	cost.TU += tuCost;
+	cost.Energy += tuCost / 2;
+
 	if (_objects[part]->isDoor())
 	{
-		if (unit && unit->getTimeUnits() < _objects[part]->getTUCost(unit->getMovementType()) + unit->getActionTUs(reserve, unit->getMainHandWeapon(false)))
+		if (unit && !cost.haveTU())
 			return 4;
 		if (_unit && _unit != unit && _unit->getPosition() != getPosition())
 			return -1;
@@ -352,7 +357,7 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 	}
 	if (_objects[part]->isUFODoor() && _currentFrame[part] == 0) // ufo door part 0 - door is closed
 	{
-		if (unit &&	unit->getTimeUnits() < _objects[part]->getTUCost(unit->getMovementType()) + unit->getActionTUs(reserve, unit->getMainHandWeapon(false)))
+		if (unit && !cost.haveTU())
 			return 4;
 		_currentFrame[part] = 1; // start opening door
 		return 1;

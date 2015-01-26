@@ -89,9 +89,8 @@ void ProjectileFlyBState::init()
 	if (_parent->getPanicHandled() &&
 		_action.type != BA_HIT &&
 		_action.type != BA_STUN &&
-		_action.actor->getTimeUnits() < _action.TU)
+		!_action.haveTU(&_action.result))
 	{
-		_action.result = "STR_NOT_ENOUGH_TIME_UNITS";
 		_parent->popState();
 		return;
 	}
@@ -116,7 +115,7 @@ void ProjectileFlyBState::init()
 			|| _parent->getSave()->getTile(_action.target)->getUnit()->isOut()
 			|| _parent->getSave()->getTile(_action.target)->getUnit() != _parent->getSave()->getSelectedUnit())
 		{
-			_unit->setTimeUnits(_unit->getTimeUnits() + _unit->getActionTUs(_action.type, _action.weapon));
+			_action.rollbackTU();
 			_parent->popState();
 			return;
 		}
@@ -186,7 +185,7 @@ void ProjectileFlyBState::init()
 			_parent->popState();
 			return;
 		}
-		_parent->statePushFront(new ExplosionBState(_parent, Position((_action.target.x*16)+8,(_action.target.y*16)+8,(_action.target.z*24)+10), weapon, _action.actor));
+		_parent->statePushFront(new ExplosionBState(_parent, _action.target.toVexel() + Position(8, 8, 10), _action.type, weapon, _action.actor));
 		return;
 	default:
 		_parent->popState();
@@ -196,7 +195,7 @@ void ProjectileFlyBState::init()
 	if (_action.type == BA_LAUNCH || (Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && _parent->getSave()->getSide() == FACTION_PLAYER) || !_parent->getPanicHandled())
 	{
 		// target nothing, targets the middle of the tile
-		_targetVoxel = Position(_action.target.x*16 + 8, _action.target.y*16 + 8, _action.target.z*24 + 12);
+		_targetVoxel = _action.target.toVexel() + Position(8, 8, 12);
 		if (_action.type == BA_LAUNCH)
 		{
 			if (_targetFloor)
@@ -314,7 +313,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			delete projectile;
 			_parent->getMap()->setProjectile(0);
 			_action.result = "STR_UNABLE_TO_THROW_HERE";
-			_action.TU = 0;
+			_action.clearTU();
 			_parent->popState();
 			return false;
 		}
@@ -478,7 +477,7 @@ void ProjectileFlyBState::think()
 				if (Options::battleInstantGrenade && item->getRules()->getBattleType() == BT_GRENADE && item->getFuseTimer() == 0)
 				{
 					// it's a hot grenade to explode immediately
-					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), item, _action.actor));
+					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action.type, item, _action.actor));
 				}
 				else
 				{
@@ -524,6 +523,7 @@ void ProjectileFlyBState::think()
 
 					_parent->statePushFront(new ExplosionBState(
 						_parent, _parent->getMap()->getProjectile()->getPosition(offset),
+						_action.type,
 						_ammo, _action.actor, 0,
 						(_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem()),
 						shotgun ? 0 : _range + _parent->getMap()->getProjectile()->getDistance()
@@ -710,7 +710,7 @@ void ProjectileFlyBState::performMeleeAttack()
 		_parent->getSave()->getTile(_action.target)->ignite(15);
 	}
 	_parent->getMap()->setCursorType(CT_NONE);
-	_parent->statePushNext(new ExplosionBState(_parent, voxel, _action.weapon, _action.actor, 0, true));
+	_parent->statePushNext(new ExplosionBState(_parent, voxel, _action.type, _action.weapon, _action.actor, 0, true));
 }
 
 }

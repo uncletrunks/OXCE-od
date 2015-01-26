@@ -50,7 +50,7 @@ namespace OpenXcom
  * @param lowerWeapon Whether the unit causing this explosion should now lower their weapon.
  * @param range Distance between weapon and target.
  */
-ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, Tile *tile, bool lowerWeapon, int range) : BattleState(parent), _unit(unit), _center(center), _item(item), _damageType(), _tile(tile), _power(0), _radius(6), _range(range), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _pistolWhip(false), _hit(false)
+ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleActionType action, BattleItem *item, BattleUnit *unit, Tile *tile, bool lowerWeapon, int range) : BattleState(parent), _action(action), _unit(unit), _center(center), _item(item), _damageType(), _tile(tile), _power(0), _radius(6), _range(range), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _pistolWhip(false), _hit(false)
 {
 
 }
@@ -71,11 +71,10 @@ ExplosionBState::~ExplosionBState()
 void ExplosionBState::init()
 {
 	BattleType type = BT_NONE;
-	BattleActionType action = BA_NONE;
+	BattleActionType action = _action;
 	if (_item)
 	{
 		type = _item->getRules()->getBattleType();
-		action = _parent->getCurrentAction()->type;
 		_power = _item->getRules()->getPower();
 		_damageType = _item->getRules()->getDamageType();
 		_radius = _item->getRules()->getExplosionRadius();
@@ -96,7 +95,12 @@ void ExplosionBState::init()
 
 		if (type == BT_PSIAMP)
 		{
-			if (!_parent->psiAttack(_parent->getCurrentAction()) || action != BA_USE)
+			BattleAction ba;
+			ba.type = _action;
+			ba.actor = _unit;
+			ba.target = _center.toTile();
+			ba.weapon = _item;
+			if (!_parent->psiAttack(&ba) || action != BA_USE)
 			{
 				_power = 0;
 			}
@@ -340,7 +344,7 @@ void ExplosionBState::explode()
 	{
 		Position p = t->getPosition().toVexel();
 		p += Position(8,8,0);
-		_parent->statePushFront(new ExplosionBState(_parent, p, 0, _unit, t));
+		_parent->statePushFront(new ExplosionBState(_parent, p, BA_NONE, 0, _unit, t));
 	}
 
 	if (_item && (_item->getRules()->getBattleType() == BT_GRENADE || _item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
