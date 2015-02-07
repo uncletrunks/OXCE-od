@@ -1,6 +1,6 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.2[/b]
-OpenXcom version: Nightly 12/12/2014
+[b]Mod version 1.3[/b]
+OpenXcom version: Nightly 10/01/2015
 
 [br/][br/]
 [i]New ruleset[/i]
@@ -9,10 +9,24 @@ Example of usage:
 [code]
 items:
   - type: STR_ITEM_TYPE #default config ...
-    tuThrow: 25 #cont of throwing item in %.
-    tuPrime: 50 #cost of priming granade in %.
-    tuLoad: 15 #cost of loading weapon.
-    tuUnload: 8 #cost of unloading weapon.
+    tuThrow: 25    #cont of throwing item in %.
+    tuPrime: 50    #cost of priming granade in %.
+    tuLoad: 15     #cost of loading weapon.
+    tuUnload: 8    #cost of unloading weapon.
+    tuMindControl: -1  #cost of using Psi-amp Mind Control attack, if -1 it use `tuUse` value.
+    tuPanic: -1        #cost of using Psi-amp Panic attack, if -1 it use `tuUse` value.
+    accuracyUse: 0         #bonus to accuracy of Psi-amp special attack.
+    accuracyMindControl: 0 #bonus to accuracy of Psi-amp Mind Control attack.
+    accuracyPanic: 0       #bonus to accuracy of Psi-amp Panic attack.
+    accuracyThrow: 0       #accuracy of throw.
+    energyAimed: 0       #energy cost of Aimed attack.
+    energyAuto: 0        #energy cost of Auto attack.
+    energySnap: 0        #energy cost of Snap attack.
+    energyMelee: 0       #energy cost of Melee attack.
+    energyUse: 0         #energy cost of item Use and Psi-amp special attack.
+    energyMindControl: 0 #energy cost of Psi-amp Mind Control attack, if -1 it use `energyUse` value.
+    energyPanic: 0       #energy cost of Psi-amp Panic attack, if -1 it use `energyUse` value.
+    energyThrow: 0       #energy cost of Throw.
     damageBonus: #used by ammo.
       #set `strength` to 1.0 if `strengthApplied: true`.
       flatHunderd: 0.0 #const bonus equal 100.
@@ -41,6 +55,11 @@ items:
       #...
       #same stats like `damageBonus`.
       #...
+    throwMultipler: #used by throw.
+      #set `throwing` to 1.00 for default
+      #...
+      #same stats like `damageBonus`.
+      #...
     powerRangeReduction: 0.0 #how much ammo lost power per tile, used by psi-amp too. default value 1 if psi-amp.
     damageAlter: #all values have default values based on `damageType`, used by ammo and corpses.
       FixRadius: 60 #aka `BlastRadius`.
@@ -51,27 +70,27 @@ items:
       # 3-> Flat  [100% - 100%]
       # 4-> Rng(5,10)
       # 5-> 0
-      ResistType: 1 #what resist on unit use, and if is fire or smoke it spawn that, same values like `damageType`.
-      FireBlastCalc: false #fire had special way of calculating blast.
-      IgnoreDirection: true #damage ignore direction of hit, used by smoke and fire.
+      ResistType: 1            #what resist on unit use, and if is fire or smoke it spawn that, same values like `damageType`.
+      FireBlastCalc: false     #fire had special way of calculating blast.
+      IgnoreDirection: true    #damage ignore direction of hit, used by smoke and fire.
       IgnoreSelfDestruct: true #do killing using this damage ignore self destruct of unit.
       IgnorePainImmunity: true #some units don't get stun level form damage.
       IgnoreNormalMoraleLose: false #do ignore normal morale lose form damage.
-      IgnoreOverKill: false #don't do overkill damage.
-      ArmorEffectiveness: 0.5 #how much armor is effective against this damage.
+      IgnoreOverKill: false    #don't do overkill damage.
+      ArmorEffectiveness: 0.5  #how much armor is effective against this damage.
       RadiusEffectiveness: 0.3 #how power translate to splash radius.
-      FireThreshold: 0 #how much damage is requare to spawn fire on unit (after armor and ToHealth) or tile.
-      SmokeThreshold: 100 #how much damage is requared to spawn smoke it tile.
-      ToHealth: 1.0 #how much damage is done to health, can be negative.
-      ToArmor: 0.25 #how much damage is done to armor.
-      ToArmorPre: 0.0 #how much damage is done to armor before applying armor protection.
-      ToWound: 0.1 #determine probability of wounds.
-      ToItem: 0.0 #how much power is apply to items.
-      ToTile: 0.0 #how much power is apply to ground.
-      ToStun: 0.25 #how much damage increase stun level.
-      ToEnergy: 0.0 #how much power is apply to energy lose.
-      ToTime: 0.0 #how much power is apply to time units lose.
-      ToMorale: 0.0 #how much power is apply to morale lose.
+      FireThreshold: 0         #how much damage is requare to spawn fire on unit (after armor and ToHealth) or tile.
+      SmokeThreshold: 100      #how much damage is requared to spawn smoke it tile.
+      ToHealth: 1.0    #how much damage is done to health, can be negative.
+      ToArmor: 0.25    #how much damage is done to armor.
+      ToArmorPre: 0.0  #how much damage is done to armor before applying armor protection.
+      ToWound: 0.1     #determine probability of wounds.
+      ToItem: 0.0      #how much power is apply to items.
+      ToTile: 0.0      #how much power is apply to ground.
+      ToStun: 0.25     #how much damage increase stun level.
+      ToEnergy: 0.0    #how much power is apply to energy lose.
+      ToTime: 0.0      #how much power is apply to time units lose.
+      ToMorale: 0.0    #how much power is apply to morale lose.
     requiresBuy: #what tech is requare for item be visible in buy window.
       - SOME_TECH
       - SOME_TECH_MK2
@@ -84,12 +103,12 @@ items:
 [code]
 armors:
   - type: STR_ARMOR_TYPE #default config ...
-    fearImmune: false #default true for big units.
-    bleedImmune: false #default true for big units.
-    painImmune: false #default true for big units.
-    zombiImmune: false #ignored by big units.
-    visibilityAtDark: 9 #default 20 for aliens, 9 for humans.
-    regeneration: 0 #number of health point regenerated evry turn, can be less than zero.
+    fearImmune: false    #default true for big units.
+    bleedImmune: false   #default true for big units.
+    painImmune: false    #default true for big units.
+    zombiImmune: false   #ignored by big units.
+    visibilityAtDark: 9  #default 20 for aliens, 9 for humans.
+    regeneration: 0      #number of health point regenerated evry turn, can be less than zero.
     specialWeapon: ALIEN_PSI_WEAPON #alien psi or meele attack.
     builtInWeapons: #same like for unit.
       - STR_SOME_WEAPON
@@ -112,36 +131,36 @@ craftWeapons:
   - type: STR_CRAFTWEAPON_TYPE #default config ...
     weaponType: 1 #default value 0.
     stats: #stats that are add to crafts stats.
-      fuelMax: 0 #additive bonus to craft stats.
-      damageMax: 0 #additive bonus to craft stats.
-      speedMax: 0 #additive bonus to craft stats.
-      accel: 0 #additive bonus to craft stats.
-      radarRange: 0 #additive bonus to craft stats.
+      fuelMax: 0     #additive bonus to craft stats.
+      damageMax: 0   #additive bonus to craft stats.
+      speedMax: 0    #additive bonus to craft stats.
+      accel: 0       #additive bonus to craft stats.
+      radarRange: 0  #additive bonus to craft stats.
       radarChance: 0 #additive bonus to craft stats.
-      sightRange: 0 #additive bonus to craft stats.
-      hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
-      avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
-      powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
-      armor: 0 #amount of blocked damage per hit.
+      sightRange: 0  #additive bonus to craft stats.
+      hitBonus: 0    #bonus percentage to all weapon hit chance. Range [0, 100].
+      avoidBonus: 0  #bonus percentage to craft avoid chance. Range [0, 100].
+      powerBonus: 0  #bonus percentage to all weapon damage. Range [0, 100].
+      armor: 0       #amount of blocked damage per hit.
 [/code]
 
 [code]
 ufos:
   - type: STR_UFO_TYPE #default config ...
-    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
+    hitBonus: 0   #bonus percentage to all weapon hit chance. Range [0, 100].
     avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
     powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
-    armor: 0 #amount of blocked damage per hit.
+    armor: 0      #amount of blocked damage per hit.
     raceBonus: #bonus stats per race.
       STR_SECTOID: #name of race that bonus apply.
-        damageMax: 0 #additive bonus to craft stats.
-        speedMax: 0 #additive bonus to craft stats.
-        accel: 0 #additive bonus to craft stats.
+        damageMax: 0  #additive bonus to craft stats.
+        speedMax: 0   #additive bonus to craft stats.
+        accel: 0      #additive bonus to craft stats.
         sightRange: 0 #additive bonus to craft stats.
-        hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
+        hitBonus: 0   #bonus percentage to all weapon hit chance. Range [0, 100].
         avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
         powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
-        armor: 0 #amount of blocked damage per hit.
+        armor: 0      #amount of blocked damage per hit.
 [/code]
 
 [br/][br/]
@@ -164,6 +183,11 @@ You can unprime granade for half of prime tu cost.[br/]
 Support for Ufo2000 armor damage type.[br/]
 Psi-amp can now obey maximum weapon range.[br/]
 Psi-amp can now deal direct damage using special attack type in popup menu.[br/]
+Throwing now require healthy arm to do it (if item is twohanded, then it require both).[br/]
+You can hit aliens in the head using any item you like, not only firearms stock.[br/]
+Items can now be un-throw able.[br/]
+Rewriten handling of alien psi attacks to handle new features of Psi-amp.[br/]
+
 
 [br/][br/]
 [i]Links[/i]

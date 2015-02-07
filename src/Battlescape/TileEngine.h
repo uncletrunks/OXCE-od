@@ -21,6 +21,7 @@
 
 #include <vector>
 #include "Position.h"
+#include "BattlescapeGame.h"
 #include "../Ruleset/RuleItem.h"
 #include <SDL.h>
 
@@ -31,7 +32,6 @@ class SavedBattleGame;
 class BattleUnit;
 class BattleItem;
 class Tile;
-struct BattleAction;
 
 /**
  * A utility class that modifies tile properties on a battlescape map. This includes lighting, destruction, smoke, fire, fog of war.
@@ -112,6 +112,8 @@ public:
 	int horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageType type, bool skipObject = false);
 	/// Checks the vertical blockage of a tile.
 	int verticalBlockage(Tile *startTile, Tile *endTile, ItemDamageType type, bool skipObject = false);
+	/// Calculate success rate of psi attack.
+	int psiAttackCalculate(BattleActionType type, BattleUnit *attacker, BattleUnit *victim, BattleItem *weapon);
 	/// Attempts a panic or mind control action.
 	bool psiAttack(BattleAction *action);
 	/// Applies gravity to anything that occupy this tile.

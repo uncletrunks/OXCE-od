@@ -87,6 +87,29 @@ BonusStatData statDataMap[] =
 };
 const int statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
 
+int statsModiferRead(const std::vector<std::pair<BonusStatFunc, float> >& mod, UnitStats* stats)
+{
+	int power = 0;
+	for (size_t i = 0; i < mod.size(); ++i)
+		power += mod[i].first(stats) * mod[i].second;
+	return power;
+}
+
+void statsModiferWrite(std::vector<std::pair<BonusStatFunc, float> >& mod, const YAML::Node &node)
+{
+	if (node)
+	{
+		mod.clear();
+		for (int i = 0; i < statDataMapSize; ++i)
+		{
+			if (const YAML::Node &dd = node[statDataMap[i].name])
+			{
+				mod.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
+			}
+		}
+	}
+}
+
 } //namespace
 
 /**
@@ -96,14 +119,19 @@ const int statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
 	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _damageType(),
-	_accuracyAuto(0), _accuracySnap(0), _accuracyAimed(0), _tuAuto(0), _tuSnap(0), _tuAimed(0), _clipSize(0), _accuracyMelee(0), _tuMelee(0), _tuPrime(50), _tuThrow(25), _tuLoad(15), _tuUnload(8),
+	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(0),
+	_tuAimed(0), _tuAuto(0), _tuSnap(0), _tuMelee(0), _tuUse(25), _tuMind(-1), _tuPanic(-1), _tuThrow(25),
+	_energyAimed(0), _energyAuto(-1), _energySnap(-1), _energyMelee(0), _energyUse(0), _energyMind(-1), _energyPanic(-1), _energyThrow(0),
+	_clipSize(0), _tuPrime(50), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
-	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
+	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
-	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
-	_accuracyMulti(1, std::make_pair(&statOne<&UnitStats::firing>, 1.0f)), _meleeMulti(1, std::make_pair(&statOne<&UnitStats::melee>, 1.0f))
+	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
 {
+	_accuracyMulti.push_back(std::make_pair(&statOne<&UnitStats::firing>, 1.0f));
+	_meleeMulti.push_back(std::make_pair(&statOne<&UnitStats::melee>, 1.0f));
+	_throwMulti.push_back(std::make_pair(&statOne<&UnitStats::throwing>, 1.0f));
 }
 
 /**
@@ -239,17 +267,36 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_power = node["power"].as<int>(_power);
 	_psiAttackName = node["psiAttackName"].as<std::string>(_psiAttackName);
 	_compatibleAmmo = node["compatibleAmmo"].as< std::vector<std::string> >(_compatibleAmmo);
+
+	_accuracyAimed = node["accuracyAimed"].as<int>(_accuracyAimed);
 	_accuracyAuto = node["accuracyAuto"].as<int>(_accuracyAuto);
 	_accuracySnap = node["accuracySnap"].as<int>(_accuracySnap);
-	_accuracyAimed = node["accuracyAimed"].as<int>(_accuracyAimed);
+	_accuracyMelee = node["accuracyMelee"].as<int>(_accuracyMelee);
+	_accuracyUse = node["accuracyUse"].as<int>(_accuracyUse);
+	_accuracyMind = node["accuracyMindControl"].as<int>(_accuracyMind);
+	_accuracyPanic = node["accuracyPanic"].as<int>(_accuracyPanic);
+	_accuracyThrow = node["accuracyThrow"].as<int>(_accuracyThrow);
+
+	_tuAimed = node["tuAimed"].as<int>(_tuAimed);
 	_tuAuto = node["tuAuto"].as<int>(_tuAuto);
 	_tuSnap = node["tuSnap"].as<int>(_tuSnap);
-	_tuAimed = node["tuAimed"].as<int>(_tuAimed);
-	_clipSize = node["clipSize"].as<int>(_clipSize);
-	_accuracyMelee = node["accuracyMelee"].as<int>(_accuracyMelee);
 	_tuMelee = node["tuMelee"].as<int>(_tuMelee);
-	_tuPrime = node["tuPrime"].as<int>(_tuPrime);
+	_tuUse = node["tuUse"].as<int>(_tuUse);
+	_tuMind = node["tuMindControl"].as<int>(_tuMind);
+	_tuPanic = node["tuPanic"].as<int>(_tuPanic);
 	_tuThrow = node["tuThrow"].as<int>(_tuThrow);
+
+	_energyAimed = node["energyAimed"].as<int>(_energyAimed);
+	_energyAuto = node["energyAuto"].as<int>(_energyAuto);
+	_energySnap = node["energySnap"].as<int>(_energySnap);
+	_energyMelee = node["energyMelee"].as<int>(_energyMelee);
+	_energyUse = node["energyUse"].as<int>(_energyUse);
+	_energyMind = node["energyMindControl"].as<int>(_energyMind);
+	_energyPanic = node["energyPanic"].as<int>(_energyPanic);
+	_energyThrow = node["energyThrow"].as<int>(_energyThrow);
+
+	_clipSize = node["clipSize"].as<int>(_clipSize);
+	_tuPrime = node["tuPrime"].as<int>(_tuPrime);
 	_tuLoad = node["tuLoad"].as<int>(_tuLoad);
 	_tuUnload = node["tuUnload"].as<int>(_tuUnload);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
@@ -264,7 +311,6 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_healthRecovery = node["healthRecovery"].as<int>(_healthRecovery);
 	_stunRecovery = node["stunRecovery"].as<int>(_stunRecovery);
 	_energyRecovery = node["energyRecovery"].as<int>(_energyRecovery);
-	_tuUse = node["tuUse"].as<int>(_tuUse);
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);
 	_armor = node["armor"].as<int>(_armor);
 	_turretType = node["turretType"].as<int>(_turretType);
@@ -321,39 +367,12 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		_damageBonus.clear();
 		_damageBonus.push_back(std::make_pair(&statOne<&UnitStats::strength>, 1.0f));
 	}
-	if (const YAML::Node &d = node["damageBonus"])
-	{
-		_damageBonus.clear();
-		for (int i = 0; i < statDataMapSize; ++i)
-		{
-			if (const YAML::Node &dd = d[statDataMap[i].name])
-			{
-				_damageBonus.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
-			}
-		}
-	}
-	if (const YAML::Node &d = node["accuracyMultiplier"])
-	{
-		_accuracyMulti.clear();
-		for (int i = 0; i < statDataMapSize; ++i)
-		{
-			if (const YAML::Node &dd = d[statDataMap[i].name])
-			{
-				_accuracyMulti.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
-			}
-		}
-	}
-	if (const YAML::Node &d = node["meleeMultiplier"])
-	{
-		_meleeMulti.clear();
-		for (int i = 0; i < statDataMapSize; ++i)
-		{
-			if (const YAML::Node &dd = d[statDataMap[i].name])
-			{
-				_meleeMulti.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
-			}
-		}
-	}
+
+	statsModiferWrite(_damageBonus, node["damageBonus"]);
+	statsModiferWrite(_accuracyMulti, node["accuracyMultiplier"]);
+	statsModiferWrite(_meleeMulti, node["meleeMultiplier"]);
+	statsModiferWrite(_throwMulti, node["throwMultiplier"]);
+
 	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
 
@@ -614,22 +633,24 @@ int RuleItem::getAccuracyMelee() const
 	return _accuracyMelee;
 }
 
-/**
- * Gets the item's time unit percentage for snapshots.
- * @return The snapshot TU percentage.
- */
-int RuleItem::getTUSnap() const
+int RuleItem::getAccuracyUse() const
 {
-	return _tuSnap;
+	return _accuracyUse;
 }
 
-/**
- * Gets the item's time unit percentage for autoshots.
- * @return The autoshot TU percentage.
- */
-int RuleItem::getTUAuto() const
+int RuleItem::getAccuracyMind() const
 {
-	return _tuAuto;
+	return _accuracyMind;
+}
+
+int RuleItem::getAccuracyPanic() const
+{
+	return _accuracyPanic;
+}
+
+int RuleItem::getAccuracyThrow() const
+{
+	return _accuracyThrow;
 }
 
 /**
@@ -642,6 +663,24 @@ int RuleItem::getTUAimed() const
 }
 
 /**
+ * Gets the item's time unit percentage for autoshots.
+ * @return The autoshot TU percentage.
+ */
+int RuleItem::getTUAuto() const
+{
+	return _tuAuto >= 0 ? _tuAuto : _tuAimed;
+}
+
+/**
+ * Gets the item's time unit percentage for snapshots.
+ * @return The snapshot TU percentage.
+ */
+int RuleItem::getTUSnap() const
+{
+	return _tuSnap >= 0 ? _tuSnap : _tuAimed;
+}
+
+/**
  * Gets the item's time unit percentage for melee attacks.
  * @return The melee TU percentage.
  */
@@ -651,12 +690,37 @@ int RuleItem::getTUMelee() const
 }
 
 /**
- * Gets the item's time unit percentage for prime grenade.
- * @return The prime TU percentage.
+ * Gets the number of Time Units needed to use this item.
+ * @return The number of Time Units needed to use this item.
  */
-int RuleItem::getTUPrime() const
+int RuleItem::getTUUse() const
 {
-	return _tuPrime;
+	if (_battleType != BT_PSIAMP || !_psiAttackName.empty())
+	{
+		return _tuUse;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+/**
+ * Gets the number of Time Units needed to use mind control action.
+ * @return The number of Time Units needed to mind control.
+ */
+int RuleItem::getTUMind() const
+{
+	return _tuMind >= 0 ? _tuMind : _tuUse;
+}
+
+/**
+ * Gets the number of Time Units needed to use panic action.
+ * @return The number of Time Units needed to panic.
+ */
+int RuleItem::getTUPanic() const
+{
+	return _tuPanic >= 0 ? _tuPanic : _tuUse;
 }
 
 /**
@@ -666,6 +730,94 @@ int RuleItem::getTUPrime() const
 int RuleItem::getTUThrow() const
 {
 	return _tuThrow;
+}
+
+/**
+ * Gets the item's energy cost for aimed shots.
+ * @return The aimed shot energy cost.
+ */
+int RuleItem::getEnergyAimed() const
+{
+	return _energyAimed;
+}
+
+/**
+ * Gets the item's energy cost for autoshots.
+ * @return The autoshot energy cost.
+ */
+int RuleItem::getEnergyAuto() const
+{
+	return _energyAuto >= 0 ? _energyAuto : _energyAimed;
+}
+
+/**
+ * Gets the item's energy cost for snapshots.
+ * @return The snapshot energy cost.
+ */
+int RuleItem::getEnergySnap() const
+{
+	return _energySnap >= 0 ? _energySnap : _energyAimed;
+}
+
+/**
+ * Gets the item's energy cost for melee attacks.
+ * @return The melee energy cost.
+ */
+int RuleItem::getEnergyMelee() const
+{
+	return _energyMelee;
+}
+
+/**
+ * Gets the number of energy cost needed to use this item.
+ * @return The number of energy cost needed to use this item.
+ */
+int RuleItem::getEnergyUse() const
+{
+	if (_battleType != BT_PSIAMP || !_psiAttackName.empty())
+	{
+		return _energyUse;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+/**
+ * Gets the number of energy cost needed to use mind control action.
+ * @return The number of energy cost needed to mind control.
+ */
+int RuleItem::getEnergyMind() const
+{
+	return _energyMind >= 0 ? _energyMind : _energyUse;
+}
+
+/**
+ * Gets the number of energy cost needed to use panic action.
+ * @return The number of energy cost needed to panic.
+ */
+int RuleItem::getEnergyPanic() const
+{
+	return _energyPanic >= 0 ? _energyPanic : _energyUse;
+}
+
+/**
+ * Gets the item's energy cost for throwing.
+ * @return The throw energy cost.
+ */
+int RuleItem::getEnergyThrow() const
+{
+	return _energyThrow;
+}
+
+/**
+ * Gets the item's time unit percentage for prime grenade.
+ * @return The prime TU percentage.
+ */
+int RuleItem::getTUPrime() const
+{
+	return _tuPrime;
 }
 
 /**
@@ -815,15 +967,6 @@ int RuleItem::getEnergyRecovery() const
 int RuleItem::getStunRecovery() const
 {
 	return _stunRecovery;
-}
-
-/**
- * Gets the number of Time Units needed to use this item.
- * @return The number of Time Units needed to use this item.
- */
-int RuleItem::getTUUse() const
-{
-	return _tuUse;
 }
 
 /**
@@ -1137,10 +1280,7 @@ bool RuleItem::isPsiRequired() const
  */
 int RuleItem::getPowerBonus(UnitStats* stats) const
 {
-	int power = 0;
-	for (size_t i = 0; i < _damageBonus.size(); ++i)
-		power += _damageBonus[i].first(stats) * _damageBonus[i].second;
-	return power;
+	return statsModiferRead(_damageBonus, stats);
 }
 
 /**
@@ -1150,10 +1290,7 @@ int RuleItem::getPowerBonus(UnitStats* stats) const
  */
 int RuleItem::getMeleeMultiplier(UnitStats* stats) const
 {
-	int power = 0;
-	for (size_t i = 0; i < _meleeMulti.size(); ++i)
-		power += _meleeMulti[i].first(stats) * _meleeMulti[i].second;
-	return power;
+	return statsModiferRead(_meleeMulti, stats);
 }
 
 /**
@@ -1163,12 +1300,18 @@ int RuleItem::getMeleeMultiplier(UnitStats* stats) const
  */
 int RuleItem::getAccuracyMultiplier(UnitStats* stats) const
 {
-	int power = 0;
-	for (size_t i = 0; i < _accuracyMulti.size(); ++i)
-		power += _accuracyMulti[i].first(stats) * _accuracyMulti[i].second;
-	return power;
+	return statsModiferRead(_accuracyMulti, stats);
 }
 
+/**
+ * Compute multiplier of throw accuracy based on unit stats.
+ * @param stats unit stats
+ * @return multiplier.
+ */
+int RuleItem::getThrowMultiplier(UnitStats* stats) const
+{
+	return statsModiferRead(_throwMulti, stats);
+}
 /**
  * Gets the associated special type of this item.
  * note that type 14 is the alien brain, and types

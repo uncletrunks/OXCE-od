@@ -1490,11 +1490,11 @@ bool AlienBAIState::findFirePoint()
  * @param grenade Is the explosion coming from a grenade?
  * @return True if it is worthwhile creating an explosion in the target position.
  */
-bool AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, int radius, int diff, bool grenade) const
+int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, int radius, int diff, bool grenade) const
 {
 	// i hate the player and i want him dead, but i don't want to piss him off.
 	if (_save->getTurn() < 3)
-		return false;
+		return 0;
 	if (diff == -1)
 	{
 		diff = (int)(_save->getBattleState()->getGame()->getSavedGame()->getDifficulty());
@@ -1570,9 +1570,23 @@ bool AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingU
 	// or we're halfway towards panicking while bleeding to death.
 	if (grenade && desperation < 6 && enemiesAffected < 2)
 	{
-		return false;
+		return 0;
 	}
-	return (efficacy > 0 || enemiesAffected >= 10);
+
+	if (enemiesAffected >= 10)
+	{
+		// Ignore loses if we can kill lot of enemies.
+		return enemiesAffected;
+	}
+	else if (efficacy > 0)
+	{
+		// We kill more enemies than allies.
+		return efficacy;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 /**
@@ -1826,21 +1840,36 @@ bool AlienBAIState::psiAction()
 	{
 		return false;
 	}
-	BattleActionCost cost(BA_USE, _unit, item);
-	cost.TU += _escapeTUs;
-	cost.Energy += _escapeTUs / 2;
+
+	const int costLength = 3;
+	BattleActionCost cost[costLength] =
+	{
+		BattleActionCost(BA_USE, _unit, item),
+		BattleActionCost(BA_PANIC, _unit, item),
+		BattleActionCost(BA_MINDCONTROL, _unit, item),
+	};
+	bool have = false;
+	for (int j = 0; j < costLength; ++j)
+	{
+		if (cost[j].TU > 0)
+		{
+			cost[j].TU += _escapeTUs;
+			cost[j].Energy += _escapeTUs / 2;
+			have |= cost[j].haveTU();
+		}
+	}
 	bool LOSRequired = item->getRules()->isLOSRequired();
 
 	_aggroTarget = 0;
 		// don't let mind controlled soldiers mind control other soldiers.
 	if (_unit->getOriginalFaction() != FACTION_PLAYER
 		// and we have the required 25 TUs and can still make it to cover
-		&& cost.haveTU()
+		&& have
 		// and we didn't already do a psi action this round
 		&& !_didPsi)
 	{
-		int psiAttackStrength = item->getRules()->getAccuracyMultiplier(_unit->getBaseStats());
-		int chanceToAttack = 0;
+		int weightToAttack = 0;
+		BattleActionType typeToAttack = BA_NONE;
 
 		for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 		{
@@ -1852,36 +1881,108 @@ bool AlienBAIState::psiAction()
 				(!LOSRequired ||
 				std::find(_unit->getVisibleUnits()->begin(), _unit->getVisibleUnits()->end(), *i) != _unit->getVisibleUnits()->end()))
 			{
-				if (_save->getTileEngine()->distance((*i)->getPosition(), _unit->getPosition()) > item->getRules()->getMaxRange())
+				BattleUnit *victim = (*i);
+				if (_save->getTileEngine()->distance(victim->getPosition(), _unit->getPosition()) > item->getRules()->getMaxRange())
 				{
 					continue;
 				}
-				Position p = _unit->getPosition().toVexel() - (*i)->getPosition().toVexel();
-				p *= p;
-				int chanceToAttackMe = psiAttackStrength
-					+ (((*i)->getBaseStats()->psiSkill > 0) ? (*i)->getBaseStats()->psiSkill * -0.4 : 0)
-					- sqrt(float(p.x + p.y + p.z)) * item->getRules()->getPowerRangeReduction()
-					- ((*i)->getBaseStats()->psiStrength)
-					+ RNG::generate(55, 105);
-
-				if (chanceToAttackMe > chanceToAttack)
+				for (int j = 0; j < costLength; ++j)
 				{
-					chanceToAttack = chanceToAttackMe;
-					_aggroTarget = *i;
+					// can't use this attack.
+					if (!cost[j].haveTU())
+					{
+						continue;
+					}
+
+					int weightToAttackMe = _save->getTileEngine()->psiAttackCalculate(cost[j].type, _unit, victim, item);
+
+					// low chance we hit this target.
+					if (weightToAttackMe < 0)
+					{
+						continue;
+					}
+
+					// different bonus per attack.
+					if (cost[j].type == BA_MINDCONTROL)
+					{
+						int controlOdds = 40;
+						int morale = victim->getMorale();
+						int bravery = (110 - victim->getBaseStats()->bravery) / 10;
+						if (bravery > 6)
+							controlOdds -= 15;
+						if (bravery < 4)
+							controlOdds += 15;
+						if (morale >= 40)
+						{
+							if (morale - 10 * bravery < 50)
+								controlOdds -= 15;
+						}
+						else
+						{
+							controlOdds += 15;
+						}
+						if (!morale)
+						{
+							controlOdds = 100;
+						}
+						if (RNG::percent(controlOdds))
+						{
+							weightToAttackMe += 60;
+						}
+						else
+						{
+							continue;
+						}
+					}
+					else if (cost[j].type == BA_USE)
+					{
+						if (RNG::percent(80 - _attackAction->diff * 10)) // Star gods have mercy on us.
+						{
+							continue;
+						}
+						int radius = item->getRules()->getExplosionRadius();
+						if (radius > 0)
+						{
+							int efficity = explosiveEfficacy(victim->getPosition(), _unit, radius, _attackAction->diff);
+							if (efficity)
+							{
+								weightToAttackMe += 2 * efficity * _intelligence; //bonus for boom boom.
+							}
+							else
+							{
+								continue;
+							}
+						}
+						else
+						{
+							weightToAttackMe += (item->getRules()->getPower() + item->getRules()->getPowerBonus(_unit->getBaseStats()));
+						}
+					}
+					else if (cost[j].type == BA_PANIC)
+					{
+						weightToAttackMe += 40;
+					}
+
+					if (weightToAttackMe > weightToAttack)
+					{
+						typeToAttack = cost[j].type;
+						weightToAttack = weightToAttackMe;
+						_aggroTarget = victim;
+					}
 				}
 			}
 		}
 
-		if (!_aggroTarget || !chanceToAttack) return false;
+		if (!_aggroTarget || !weightToAttack) return false;
 
 		if (_visibleEnemies && _attackAction->weapon && _attackAction->weapon->getAmmoItem())
 		{
-			if (_attackAction->weapon->getAmmoItem()->getRules()->getPower() >= chanceToAttack)
+			if (_attackAction->weapon->getAmmoItem()->getRules()->getPower() >= weightToAttack)
 			{
 				return false;
 			}
 		}
-		else if (RNG::generate(35, 155) >= chanceToAttack)
+		else if (RNG::generate(35, 155) >= weightToAttack)
 		{
 			return false;
 		}
@@ -1891,47 +1992,7 @@ bool AlienBAIState::psiAction()
 			Log(LOG_INFO) << "making a psionic attack this turn";
 		}
 
-		if (chanceToAttack >= 60 && !item->getRules()->getPsiAttackName().empty())
-		{
-			if (RNG::percent(chanceToAttack - 60))
-			{
-				_psiAction->type = BA_USE;
-				_psiAction->target = _aggroTarget->getPosition();
-				_psiAction->weapon = item;
-				return true;
-			}
-		}
-		if (chanceToAttack >= 30)
-		{
-			int controlOdds = 40;
-			int morale = _aggroTarget->getMorale();
-			int bravery = (110 - _aggroTarget->getBaseStats()->bravery) / 10;
-			if (bravery > 6)
-				controlOdds -= 15;
-			if (bravery < 4)
-				controlOdds += 15;
-			if (morale >= 40)
-			{
-				if (morale - 10 * bravery < 50)
-					controlOdds -= 15;
-			}
-			else
-			{
-				controlOdds += 15;
-			}
-			if (!morale)
-			{
-				controlOdds = 100;
-			}
-			if (RNG::percent(controlOdds))
-			{
-				_psiAction->type = BA_MINDCONTROL;
-				_psiAction->target = _aggroTarget->getPosition();
-				_psiAction->weapon = item;
-				return true;
-			}
-		}
-		_psiAction->type = BA_PANIC;
+		_psiAction->type = typeToAttack;
 		_psiAction->target = _aggroTarget->getPosition();
 		_psiAction->weapon = item;
 		return true;

@@ -999,7 +999,7 @@ bool TileEngine::tryReactionSnap(BattleUnit *unit, BattleUnit *target)
 			}
 
 			if (action.weapon->getAmmoItem()->getRules()->getExplosionRadius() &&
-				aggro->explosiveEfficacy(action.target, unit, action.weapon->getAmmoItem()->getRules()->getExplosionRadius(), -1) == false)
+				aggro->explosiveEfficacy(action.target, unit, action.weapon->getAmmoItem()->getRules()->getExplosionRadius(), -1) == 0)
 			{
 				action.targeting = false;
 			}
@@ -2498,6 +2498,22 @@ int TileEngine::distanceSq(const Position &pos1, const Position &pos2, bool cons
 	return sq;
 }
 
+int TileEngine::psiAttackCalculate(BattleActionType type, BattleUnit *attacker, BattleUnit *victim, BattleItem *weapon)
+{
+	if (!victim)
+		return 0;
+
+	float attackStrength = attacker->getPsiAccuracy(type, weapon);
+	float defenseStrength = 30.0 + victim->getBaseStats()->psiStrength + victim->getBaseStats()->psiSkill / 5.0;
+
+	Position p = attacker->getPosition().toVexel() - victim->getPosition().toVexel();
+	p *= p;
+	attackStrength -= sqrt(float(p.x + p.y + p.z)) * weapon->getRules()->getPowerRangeReduction();
+	attackStrength += RNG::generate(0,55);
+
+	return attackStrength - defenseStrength;
+}
+
 /**
  * Attempts a panic or mind control action.
  * @param action Pointer to an action.
@@ -2505,27 +2521,13 @@ int TileEngine::distanceSq(const Position &pos1, const Position &pos2, bool cons
  */
 bool TileEngine::psiAttack(BattleAction *action)
 {
-	RuleItem *item = action->weapon->getRules();
 	BattleUnit *victim = _save->getTile(action->target)->getUnit();
 	if (!victim)
 		return false;
 
-	float attackStrength = item->getAccuracyMultiplier(action->actor->getBaseStats());
-	float defenseStrength = 10.0 + victim->getBaseStats()->psiStrength + victim->getBaseStats()->psiSkill / 5.0;
-
-	Position p = action->actor->getPosition().toVexel() - action->target.toVexel();
-	p *= p;
-	attackStrength -= sqrt(float(p.x + p.y + p.z)) * item->getPowerRangeReduction();
-	attackStrength += RNG::generate(0,55);
-
-	if (action->type == BA_MINDCONTROL)
-	{
-		defenseStrength += 20;
-	}
-
 	action->actor->addPsiSkillExp();
 	if (Options::allowPsiStrengthImprovement) victim->addPsiStrengthExp();
-	if (attackStrength > defenseStrength)
+	if (psiAttackCalculate(action->type, action->actor, victim, action->weapon) > 0)
 	{
 		action->actor->addPsiSkillExp();
 		action->actor->addPsiSkillExp();

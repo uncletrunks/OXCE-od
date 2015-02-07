@@ -69,8 +69,15 @@ bool BattlescapeGame::_debugPlay = false;
  */
 void BattleActionCost::updateTU()
 {
-	TU = actor ? actor->getActionTUs(type, weapon) : 0;
-	Energy = 0;
+	if (actor)
+	{
+		TU = actor->getActionTUs(type, weapon);
+		Energy = actor->getActionEnergy(type, weapon);
+	}
+	else
+	{
+		clearTU();
+	}
 }
 
 /**
@@ -1475,11 +1482,23 @@ void BattlescapeGame::launchAction()
  */
 void BattlescapeGame::psiButtonAction()
 {
-	_currentAction.weapon = _save->getSelectedUnit()->getSpecialWeapon(BT_PSIAMP);
-	_currentAction.targeting = true;
-	_currentAction.type = BA_PANIC;
-	_currentAction.updateTU();
-	setupCursor();
+	BattleItem *item = _save->getSelectedUnit()->getSpecialWeapon(BT_PSIAMP);
+	_currentAction.type = BA_NONE;
+	if (item->getRules()->getTUPanic() > 0)
+	{
+		_currentAction.type = BA_PANIC;
+	}
+	else if (item->getRules()->getTUUse() > 0)
+	{
+		_currentAction.type = BA_USE;
+	}
+	if (_currentAction.type != BA_NONE)
+	{
+		_currentAction.targeting = true;
+		_currentAction.weapon = item;
+		_currentAction.updateTU();
+		setupCursor();
+	}
 }
 
 bool BattlescapeGame::psiAttack(BattleAction *action)

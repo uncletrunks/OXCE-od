@@ -224,6 +224,10 @@ public:
 	int getActionTUs(BattleActionType actionType, BattleItem *item) const;
 	/// Get the number of time units a certain action takes.
 	int getActionTUs(BattleActionType actionType, RuleItem *item) const;
+	/// Get the number of energy points a certain action takes.
+	int getActionEnergy(BattleActionType actionType, BattleItem *item) const;
+	/// Get the number of energy points a certain action takes.
+	int getActionEnergy(BattleActionType actionType, RuleItem *item) const;
 	/// Spend time units if it can.
 	bool spendTimeUnits(int tu);
 	/// Spend energy if it can.
@@ -242,12 +246,12 @@ public:
 	std::vector<Tile*> *getVisibleTiles();
 	/// Clear visible tiles.
 	void clearVisibleTiles();
+	/// Calculate psi attack accuracy.
+	int getPsiAccuracy(BattleActionType actionType, BattleItem *item);
 	/// Calculate firing accuracy.
 	int getFiringAccuracy(BattleActionType actionType, BattleItem *item);
 	/// Calculate accuracy modifier.
 	int getAccuracyModifier(BattleItem *item = 0);
-	/// Calculate throwing accuracy.
-	double getThrowingAccuracy();
 	/// Set armor value.
 	void setArmor(int armor, UnitSide side);
 	/// Get armor value.

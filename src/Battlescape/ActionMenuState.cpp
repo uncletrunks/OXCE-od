@@ -69,7 +69,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	RuleItem *weapon = _action->weapon->getRules();
 
 	// throwing (if not a fixed weapon)
-	if (!weapon->isFixed())
+	if (!weapon->isFixed() && weapon->getTUThrow() > 0)
 	{
 		addItem(BA_THROW, "STR_THROW", &id);
 	}
@@ -94,15 +94,15 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		}
 		else
 		{
-			if (weapon->getAccuracyAuto() != 0)
+			if (weapon->getTUAuto() > 0)
 			{
 				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id);
 			}
-			if (weapon->getAccuracySnap() != 0)
+			if (weapon->getTUSnap() > 0)
 			{
 				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id);
 			}
-			if (weapon->getAccuracyAimed() != 0)
+			if (weapon->getTUAimed() > 0)
 			{
 				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id);
 			}
@@ -122,8 +122,9 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 			addItem(BA_HIT, "STR_HIT_MELEE", &id);
 		}
 	}
+
 	// special items
-	else if (weapon->getBattleType() == BT_MEDIKIT)
+	if (weapon->getBattleType() == BT_MEDIKIT)
 	{
 		addItem(BA_USE, "STR_USE_MEDI_KIT", &id);
 	}
@@ -133,9 +134,15 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	}
 	else if (weapon->getBattleType() == BT_PSIAMP)
 	{
-		addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id);
-		addItem(BA_PANIC, "STR_PANIC_UNIT", &id);
-		if (!weapon->getPsiAttackName().empty())
+		if (weapon->getTUMind() > 0)
+		{
+			addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id);
+		}
+		if (weapon->getTUPanic() > 0)
+		{
+			addItem(BA_PANIC, "STR_PANIC_UNIT", &id);
+		}
+		if (weapon->getTUUse() > 0)
 		{
 			addItem(BA_USE, weapon->getPsiAttackName(), &id);
 		}
@@ -165,8 +172,6 @@ void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int 
 {
 	std::wstring s1, s2;
 	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon);
-	if (ba == BA_THROW)
-		acc = (int)(_action->actor->getThrowingAccuracy());
 	int tu = _action->actor->getActionTUs(ba, _action->weapon);
 
 	if (ba == BA_THROW || ba == BA_AIMEDSHOT || ba == BA_SNAPSHOT || ba == BA_AUTOSHOT || ba == BA_LAUNCH || ba == BA_HIT)

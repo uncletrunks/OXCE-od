@@ -59,15 +59,16 @@ private:
 	float _powerRangeReduction;
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType;
-	int _accuracyAuto, _accuracySnap, _accuracyAimed, _tuAuto, _tuSnap, _tuAimed;
-	int _clipSize, _accuracyMelee, _tuMelee, _tuPrime, _tuThrow, _tuLoad, _tuUnload;
+	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
+	int _tuAimed, _tuAuto, _tuSnap, _tuMelee, _tuUse, _tuMind, _tuPanic, _tuThrow;
+	int _energyAimed, _energyAuto, _energySnap, _energyMelee, _energyUse, _energyMind, _energyPanic, _energyThrow;
+	int _clipSize, _tuPrime, _tuLoad, _tuUnload;
 	BattleType _battleType;
 	std::string _psiAttackName;
 	bool _twoHanded, _waypoint, _fixedWeapon;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery;
-	int _tuUse;
 	int _recoveryPoints;
 	int _armor;
 	int _turretType;
@@ -78,7 +79,7 @@ private:
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
-	std::vector<std::pair<BonusStatFunc, float> > _damageBonus, _accuracyMulti, _meleeMulti;
+	std::vector<std::pair<BonusStatFunc, float> > _damageBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 public:
 	/// Creates a blank item ruleset.
 	RuleItem(const std::string &type);
@@ -132,34 +133,71 @@ public:
 	int getPower() const;
 	/// Get additional power form unit statistics
 	int getPowerBonus(UnitStats* stats) const;
-	/// Gets amount of power drop per tile.
+	/// Gets amount of power drop per voxel.
 	float getPowerRangeReduction() const;
-	/// Gets the item's snapshot accuracy.
-	int getAccuracySnap() const;
-	/// Gets the item's autoshot accuracy.
-	int getAccuracyAuto() const;
-	/// Gets the item's aimed shot accuracy.
-	int getAccuracyAimed() const;
-	/// Gets the item's melee accuracy.
-	int getAccuracyMelee() const;
 	/// Get multiplier of accuracy form unit statistics
 	int getAccuracyMultiplier(UnitStats* stats) const;
-	/// Gets the item's snapshot TU cost.
-	int getTUSnap() const;
-	/// Gets the item's autoshot TU cost.
-	int getTUAuto() const;
+	/// Get multiplier of throwing form unit statistics
+	int getThrowMultiplier(UnitStats* stats) const;
+
+	/// Gets the item's aimed shot accuracy.
+	int getAccuracyAimed() const;
+	/// Gets the item's autoshot accuracy.
+	int getAccuracyAuto() const;
+	/// Gets the item's snapshot accuracy.
+	int getAccuracySnap() const;
+	/// Gets the item's melee accuracy.
+	int getAccuracyMelee() const;
+	/// Gets the item's use accuracy.
+	int getAccuracyUse() const;
+	/// Gets the item's mind control accuracy.
+	int getAccuracyMind() const;
+	/// Gets the item's panic accuracy.
+	int getAccuracyPanic() const;
+	/// Gets the item's throw accuracy.
+	int getAccuracyThrow() const;
+
 	/// Gets the item's aimed shot TU cost.
 	int getTUAimed() const;
+	/// Gets the item's autoshot TU cost.
+	int getTUAuto() const;
+	/// Gets the item's snapshot TU cost.
+	int getTUSnap() const;
 	/// Gets the item's melee TU cost.
 	int getTUMelee() const;
-	/// Gets the item's prime TU cost.
-	int getTUPrime() const;
+	/// Gets the Time Unit use.
+	int getTUUse() const;
+	/// Gets the item's mind control TU cost.
+	int getTUMind() const;
+	/// Gets the item's panic TU cost.
+	int getTUPanic() const;
 	/// Gets the item's throw TU cost.
 	int getTUThrow() const;
+
+	/// Gets the item's aimed shot Energy cost.
+	int getEnergyAimed() const;
+	/// Gets the item's autoshot Energy cost.
+	int getEnergyAuto() const;
+	/// Gets the item's snapshot Energy cost.
+	int getEnergySnap() const;
+	/// Gets the item's melee Energy cost.
+	int getEnergyMelee() const;
+	/// Gets the Energy use.
+	int getEnergyUse() const;
+	/// Gets the item's mind control Energy cost.
+	int getEnergyMind() const;
+	/// Gets the item's panic Energy cost.
+	int getEnergyPanic() const;
+	/// Gets the item's throw Energy cost.
+	int getEnergyThrow() const;
+
+	/// Gets the item's prime TU cost.
+	int getTUPrime() const;
 	/// Gets the item's load TU cost.
 	int getTULoad() const;
 	/// Gets the item's unload TU cost.
 	int getTUUnload() const;
+
 	/// Gets list of compatible ammo.
 	std::vector<std::string> *getCompatibleAmmo();
 	/// Gets the item's damage type.
@@ -188,8 +226,6 @@ public:
 	int getEnergyRecovery() const;
 	/// Gets the medikit stun recovered per shot.
 	int getStunRecovery() const;
-	/// Gets the Time Unit use.
-	int getTUUse() const;
 	/// Gets the max explosion radius.
 	int getExplosionRadius() const;
 	/// Gets the recovery points score

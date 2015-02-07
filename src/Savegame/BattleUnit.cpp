@@ -1227,9 +1227,13 @@ int BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
 			cost = item->getTUAimed();
 			break;
 		case BA_USE:
-		case BA_MINDCONTROL:
-		case BA_PANIC:
 			cost = item->getTUUse();
+			break;
+		case BA_MINDCONTROL:
+			cost = item->getTUMind();
+			break;
+		case BA_PANIC:
+			cost = item->getTUPanic();
 			break;
 		default:
 			cost = 0;
@@ -1239,6 +1243,58 @@ int BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
 	if (!item->getFlatRate() || actionType == BA_THROW || actionType == BA_PRIME)
 	{
 		cost = (int)floor(getBaseStats()->tu * cost / 100.0f);
+	}
+
+	return cost;
+}
+
+int BattleUnit::getActionEnergy(BattleActionType actionType, BattleItem* item) const
+{
+	if (item == 0)
+	{
+		return 0;
+	}
+	return getActionEnergy(actionType, item->getRules());
+}
+
+int BattleUnit::getActionEnergy(BattleActionType actionType, RuleItem *item) const
+{
+	if (item == 0)
+	{
+		return 0;
+	}
+
+	int cost = 0;
+	switch (actionType)
+	{
+		case BA_THROW:
+			cost = item->getEnergyThrow();
+			break;
+		case BA_AUTOSHOT:
+			cost = item->getEnergyAuto();
+			break;
+		case BA_SNAPSHOT:
+			cost = item->getEnergySnap();
+			break;
+		case BA_STUN:
+		case BA_HIT:
+			cost = item->getEnergyMelee();
+			break;
+		case BA_LAUNCH:
+		case BA_AIMEDSHOT:
+			cost = item->getEnergyAimed();
+			break;
+		case BA_USE:
+			cost = item->getEnergyUse();
+			break;
+		case BA_MINDCONTROL:
+			cost = item->getEnergyMind();
+			break;
+		case BA_PANIC:
+			cost = item->getEnergyPanic();
+			break;
+		default:
+			cost = 0;
 	}
 
 	return cost;
@@ -1371,6 +1427,27 @@ void BattleUnit::clearVisibleTiles()
 	_visibleTiles.clear();
 }
 
+int BattleUnit::getPsiAccuracy(BattleActionType actionType, BattleItem *item)
+{
+	int psiAcc = 0;
+	if (actionType == BA_MINDCONTROL)
+	{
+		psiAcc = item->getRules()->getAccuracyMind();
+	}
+	else if (actionType == BA_PANIC)
+	{
+		psiAcc = item->getRules()->getAccuracyPanic();
+	}
+	else if (actionType == BA_USE)
+	{
+		psiAcc = item->getRules()->getAccuracyUse();
+	}
+
+	psiAcc += item->getRules()->getAccuracyMultiplier(getBaseStats());
+
+	return psiAcc;
+}
+
 /**
  * Calculate firing accuracy.
  * Formula = accuracyStat * weaponAccuracy * kneelingbonus(1.15) * one-handPenalty(0.8) * woundsPenalty(% health) * critWoundsPenalty (-10%/wound)
@@ -1381,14 +1458,26 @@ void BattleUnit::clearVisibleTiles()
 int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 {
 	const int modifier = getAccuracyModifier(item);
-	int weaponAcc = item->getRules()->getAccuracySnap();
-	if (actionType == BA_AIMEDSHOT || actionType == BA_LAUNCH)
+	int weaponAcc = 0;
+	if (actionType == BA_SNAPSHOT)
+	{
+		weaponAcc = item->getRules()->getAccuracySnap();
+	}
+	else if (actionType == BA_AIMEDSHOT || actionType == BA_LAUNCH)
+	{
 		weaponAcc = item->getRules()->getAccuracyAimed();
+	}
 	else if (actionType == BA_AUTOSHOT)
+	{
 		weaponAcc = item->getRules()->getAccuracyAuto();
+	}
 	else if (actionType == BA_HIT || actionType == BA_STUN)
 	{
 		return (item->getRules()->getMeleeMultiplier(getBaseStats()) * item->getRules()->getAccuracyMelee() / 100) * modifier / 100;
+	}
+	else if (actionType == BA_THROW)
+	{
+		return (getBaseStats()->throwing * item->getRules()->getAccuracyThrow() / 100) * modifier / 100;
 	}
 
 	int result = item->getRules()->getAccuracyMultiplier(getBaseStats()) * weaponAcc / 100;
@@ -1439,15 +1528,6 @@ int BattleUnit::getAccuracyModifier(BattleItem *item)
 		}
 	}
 	return std::max(10, 25 * _health / getBaseStats()->health + 75 + -10 * wounds);
-}
-
-/**
- * Calculate throwing accuracy.
- * @return throwing Accuracy
- */
-double BattleUnit::getThrowingAccuracy()
-{
-	return (double)(getBaseStats()->throwing * getAccuracyModifier()) / 100.0;
 }
 
 /**
