@@ -339,10 +339,14 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 {
 	if (!_objects[part]) return -1;
 
-	int tuCost = _objects[part]->getTUCost(unit->getMovementType());
-	BattleActionCost cost(reserve, unit, unit->getMainHandWeapon(false));
-	cost.TU += tuCost;
-	cost.Energy += tuCost / 2;
+	BattleActionCost cost;
+	if (unit)
+	{
+		int tuCost = _objects[part]->getTUCost(unit->getMovementType());
+		cost = BattleActionCost(reserve, unit, unit->getMainHandWeapon(false));
+		cost.TU += tuCost;
+		cost.Energy += tuCost / 2;
+	}
 
 	if (_objects[part]->isDoor())
 	{
