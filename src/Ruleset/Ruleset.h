@@ -67,6 +67,7 @@ class RuleGlobe;
 class SoundDefinition;
 class MapScript;
 class RuleVideo;
+class RuleMusic;
 
 /**
  * Set of rules and stats for a game.
@@ -108,6 +109,7 @@ protected:
 	std::map<std::string, ExtraStrings *> _extraStrings;
 	std::vector<StatString*> _statStrings;
 	std::vector<RuleDamageType*> _damageTypes;
+	std::map<std::string, RuleMusic *> _musics;
 	RuleGlobe *_globe;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costSoldier, _costEngineer, _costScientist, _timePersonnel, _initialFunding;
@@ -268,6 +270,7 @@ public:
 	const std::vector<MapScript*> *getMapScript(std::string id) const;
 	/// Gets the list videos for intro/outro etc.
 	const std::map<std::string, RuleVideo *> *getVideos() const;
+	const std::map<std::string, RuleMusic *> *getMusic() const;
 };
 
 }

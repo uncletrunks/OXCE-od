@@ -75,11 +75,12 @@ private:
 
 	typedef struct AudioBuffer
 	{
-		char *samples;
+		Sint16 *samples;
 		int sampleCount;
 		int sampleBufSize;
 		int currSamplePos;
 	}AudioBuffer;
+
 
 	typedef struct AudioData
 	{
@@ -149,6 +150,7 @@ public:
 	void delay(Uint32 milliseconds);
 	void setHeaderSpeed(int speed);
 	int getFrameCount();
+	bool wasSkipped();
 };
 
 }

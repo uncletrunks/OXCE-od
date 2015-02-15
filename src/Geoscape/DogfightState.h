@@ -46,7 +46,7 @@ class CraftWeaponProjectile;
 class DogfightState : public State
 {
 private:
-	Timer *_animTimer, *_moveTimer, *_wTimer[RuleCraft::WeaponMax], *_ufoWtimer, *_ufoEscapeTimer, *_craftDamageAnimTimer;
+	Timer *_craftDamageAnimTimer;
 	Surface *_window, *_battle, *_range[RuleCraft::WeaponMax], *_damage;
 	InteractiveSurface *_btnMinimize, *_preview, *_weapon[RuleCraft::WeaponMax];
 	ImageButton *_btnStandoff, *_btnCautious, *_btnStandard, *_btnAggressive, *_btnDisengage, *_btnUfo;
@@ -56,12 +56,11 @@ private:
 	Globe *_globe;
 	Craft *_craft;
 	Ufo *_ufo;
-	int _timeout, _currentDist, _targetDist, _ufoFireInterval;
+	int _timeout, _currentDist, _targetDist, _weaponFireInterval[RuleCraft::WeaponMax], _weaponFireCountdown[RuleCraft::WeaponMax];
 	bool _end, _destroyUfo, _destroyCraft, _ufoBreakingOff, _weaponEnabled[RuleCraft::WeaponMax], _minimized, _endDogfight, _animatingHit;
 	std::vector<CraftWeaponProjectile*> _projectiles;
 	static const int _ufoBlobs[8][13][13];
 	static const int _projectileBlobs[4][6][3];
-	int _timeScale;
 	int _ufoSize, _craftHeight, _currentCraftDamageColor, _interceptionNumber;
 	size_t _interceptionsCount;
 	int _x, _y, _minimizedIconX, _minimizedIconY;
@@ -82,7 +81,7 @@ public:
 	/// Animates the window.
 	void animate();
 	/// Moves the craft.
-	void move();
+	void update();
 	// Fires the weapons.
 	void fireWeapon(int i);
 	// Fires the first weapon.
@@ -117,8 +116,6 @@ public:
 	void btnUfoClick(Action *action);
 	/// Handler for clicking the Preview graphic.
 	void previewClick(Action *action);
-	/// Makes the UFO break off the interception... or at least tries to.
-	void ufoBreakOff();
 	/// Draws UFO.
 	void drawUfo();
 	/// Draws projectiles.

@@ -1049,7 +1049,7 @@ int AlienBAIState::selectNearestTarget()
 				bool valid = false;
 				if (_rifle || !_melee)
 				{
-					valid = _save->getTileEngine()->canTargetUnit(&origin, (*i)->getTile(), &target, _unit);
+					valid = true;
 				}
 				else
 				{

@@ -332,8 +332,8 @@ set ( geoscape_src
   Geoscape/PsiTrainingState.cpp
   Geoscape/AlienBaseState.h
   Geoscape/AlienBaseState.cpp
-  Geoscape/AlienTerrorState.h
-  Geoscape/AlienTerrorState.cpp
+  Geoscape/MissionDetectedState.h
+  Geoscape/MissionDetectedState.cpp
   Geoscape/NewPossibleManufactureState.h
   Geoscape/NewPossibleManufactureState.cpp
   Geoscape/VictoryState.h
@@ -526,6 +526,8 @@ set ( ruleset_src
   Ruleset/RuleGlobe.cpp
   Ruleset/RuleVideo.h
   Ruleset/RuleVideo.cpp
+  Ruleset/RuleMusic.h
+  Ruleset/RuleMusic.cpp
 )
 
 set ( savegame_src
@@ -579,8 +581,8 @@ set ( savegame_src
   Savegame/ResearchProject.cpp
   Savegame/Production.h
   Savegame/Production.cpp
-  Savegame/TerrorSite.h
-  Savegame/TerrorSite.cpp
+  Savegame/MissionSite.h
+  Savegame/MissionSite.cpp
   Savegame/Vehicle.h
   Savegame/Vehicle.cpp
   Savegame/EquipmentLayoutItem.h

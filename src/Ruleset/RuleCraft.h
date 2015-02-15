@@ -115,7 +115,7 @@ public:
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
-	int _sprite;
+	int _sprite, _marker;
 	int _weapons, _weaponTypes[WeaponMax], _soldiers, _vehicles, _costBuy, _costRent, _costSell;
 	std::string _refuelItem;
 	int _repairRate, _refuelRate, _transferTime, _score;
@@ -137,6 +137,8 @@ public:
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the craft's sprite.
 	int getSprite() const;
+	/// Gets the craft's globe marker.
+	int getMarker() const;
 	/// Gets the craft's maximum fuel.
 	int getMaxFuel() const;
 	/// Gets the craft's maximum damage.
@@ -181,7 +183,7 @@ public:
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.
 	std::vector<std::vector<int> > &getDeployment();
-	/// Gets maximum numbers of item that craft can carry.
+	/// Gets the item limit for this craft.
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.
 	bool isValidWeaponSlot(int slot, int weaponType) const;

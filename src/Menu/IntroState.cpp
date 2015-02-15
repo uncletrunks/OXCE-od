@@ -44,7 +44,8 @@ IntroState::IntroState(bool wasLetterBoxed) : _wasLetterBoxed(wasLetterBoxed)
 {
 	_oldMusic = Options::musicVolume;
 	_oldSound = Options::soundVolume;
-	Options::musicVolume = Options::soundVolume = std::max(_oldMusic, _oldSound);
+	//music volume is the main, and sound volume as a fallback
+	Options::musicVolume = Options::soundVolume = std::max(_oldMusic, _oldSound/8);
 	_game->setVolume(Options::soundVolume, Options::musicVolume, -1);
 
 	const Ruleset *rules = _game->getRuleset();
@@ -463,6 +464,10 @@ void IntroState::init()
 					_flcPlayer->init(videoFileName.c_str(), 0, _game, dx, dy);
 					_flcPlayer->play(false);
 					_flcPlayer->deInit();
+				}
+				if (_flcPlayer->wasSkipped())
+				{
+					break;
 				}
 			}
 			delete _flcPlayer;

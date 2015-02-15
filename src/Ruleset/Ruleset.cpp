@@ -48,6 +48,7 @@
 #include "ExtraStrings.h"
 #include "RuleInterface.h"
 #include "SoundDefinition.h"
+#include "RuleMusic.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Region.h"
 #include "../Savegame/Base.h"
@@ -313,6 +314,10 @@ Ruleset::~Ruleset()
 	{
 		delete i->second;
 	}
+	for (std::map<std::string, RuleMusic *>::const_iterator i = _musics.begin(); i != _musics.end(); ++i)
+	{
+		delete i->second;
+	}
 }
 
 /**
@@ -326,6 +331,8 @@ void Ruleset::load(const std::string &source)
 		loadFile(CrossPlatform::getDataFile("Ruleset/" + source + ".rul"));
 	else
 		loadFiles(dirname);
+
+	_modIndex += 1000;
 }
 
 /**
@@ -728,7 +735,7 @@ void Ruleset::loadFile(const std::string &filename)
 			_mapScripts[type].push_back(mapScript.release());
 		}
 	}
-	
+
 	// refresh _psiRequirements for psiStrengthEval
 	for (std::vector<std::string>::const_iterator i = _facilitiesIndex.begin(); i != _facilitiesIndex.end(); ++i)
 	{
@@ -740,11 +747,17 @@ void Ruleset::loadFile(const std::string &filename)
 		}
 	}
 
-	_modIndex += 1000;
-	
 	for (YAML::const_iterator i = doc["cutscenes"].begin(); i != doc["cutscenes"].end(); ++i)
 	{
 		RuleVideo *rule = loadRule(*i, &_videos);
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
+	for (YAML::const_iterator i = doc["musics"].begin(); i != doc["musics"].end(); ++i)
+	{
+		RuleMusic *rule = loadRule(*i, &_musics);
 		if (rule != 0)
 		{
 			rule->load(*i);
@@ -1715,6 +1728,11 @@ const std::vector<MapScript*> *Ruleset::getMapScript(std::string id) const
 const std::map<std::string, RuleVideo *> *Ruleset::getVideos() const
 {
 	return &_videos;
+}
+
+const std::map<std::string, RuleMusic *> *Ruleset::getMusic() const
+{
+	return &_musics;
 }
 
 }

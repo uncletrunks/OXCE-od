@@ -40,7 +40,7 @@ class RuleUfo
 {
 private:
 	std::string _type, _size;
-	int _sprite;
+	int _sprite, _marker;
 	int _power, _range, _score, _reload, _breakOffTime;
 	RuleTerrain *_battlescapeTerrainData;
 	std::string _modSprite;
@@ -61,6 +61,8 @@ public:
 	int getRadius() const;
 	/// Gets the UFO's sprite.
 	int getSprite() const;
+	/// Gets the UFO's globe marker.
+	int getMarker() const;
 	/// Gets the UFO's weapon power.
 	int getWeaponPower() const;
 	/// Gets the UFO's weapon range.

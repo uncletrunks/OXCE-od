@@ -28,7 +28,7 @@ namespace OpenXcom
  * @param type String defining the type.
  */
 RuleUfo::RuleUfo(const std::string &type) :
-	_type(type), _size("STR_VERY_SMALL"), _sprite(-1),
+	_type(type), _size("STR_VERY_SMALL"), _sprite(-1), _marker(-1),
 	_power(0), _range(0), _score(0), _reload(0), _breakOffTime(0),
 	_battlescapeTerrainData(0), _stats(), _statsRaceBonus()
 {
@@ -54,6 +54,7 @@ void RuleUfo::load(const YAML::Node &node, Ruleset *ruleset)
 	_type = node["type"].as<std::string>(_type);
 	_size = node["size"].as<std::string>(_size);
 	_sprite = node["sprite"].as<int>(_sprite);
+	_marker = node["marker"].as<int>(_marker);
 	_power = node["power"].as<int>(_power);
 	_range = node["range"].as<int>(_range);
 	_score = node["score"].as<int>(_score);
@@ -133,6 +134,15 @@ int RuleUfo::getRadius() const
 int RuleUfo::getSprite() const
 {
 	return _sprite;
+}
+
+/**
+ * Returns the globe marker for the UFO type.
+ * @return Marker sprite, -1 if none.
+ */
+int RuleUfo::getMarker() const
+{
+	return _marker;
 }
 
 /**

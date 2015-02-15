@@ -594,7 +594,7 @@ void ProjectileFlyBState::cancel()
 	{
 		_parent->getMap()->getProjectile()->skipTrajectory();
 		Position p = _parent->getMap()->getProjectile()->getPosition().toTile();
-		if (!_parent->getMap()->getCamera()->isOnScreen(p, false))
+		if (!_parent->getMap()->getCamera()->isOnScreen(p, false, 0, false))
 			_parent->getMap()->getCamera()->centerOnPosition(p);
 	}
 }
