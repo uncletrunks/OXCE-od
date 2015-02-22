@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 OpenXcom Developers.
+ * Copyright 2010-2015 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -1417,9 +1417,6 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 	tiles[3] = tiles[4] = tiles[5] = tiles[6] = tile;
 	tiles[7] = _save->getTile(Position(pos.x, pos.y-1, pos.z)); //north bigwall
 	tiles[8] = _save->getTile(Position(pos.x-1, pos.y, pos.z)); //west bigwall
-
-	// explosions create smoke which only stays 1 or 2 turns
-//	tile->setSmoke(std::max(1, std::min(tile->getSmoke() + RNG::generate(0,2), 15)));
 
 	int remainingPower, fireProof, fuel;
 	bool destroyed, bigwalldestroyed = true, skipnorthwest = false;

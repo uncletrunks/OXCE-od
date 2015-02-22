@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 OpenXcom Developers.
+ * Copyright 2010-2015 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -67,7 +67,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_standHeight = soldier->getRules()->getStandHeight();
 	_kneelHeight = soldier->getRules()->getKneelHeight();
 	_floatHeight = soldier->getRules()->getFloatHeight();
-	_deathSound = 0; // this one is hardcoded
+	_deathSound = -1; // this one is hardcoded
 	_aggroSound = -1;
 	_moveSound = -1;  // this one is hardcoded
 	_intelligence = 2;
@@ -1725,7 +1725,7 @@ bool BattleUnit::reselectAllowed() const
  */
 void BattleUnit::setFire(int fire)
 {
-	if (_specab == SPECAB_BURNFLOOR || _specab == SPECAB_BURN_AND_EXPLODE)
+	if (_specab != SPECAB_BURNFLOOR && _specab != SPECAB_BURN_AND_EXPLODE)
 		_fire = fire;
 }
 

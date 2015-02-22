@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 OpenXcom Developers.
+ * Copyright 2010-2015 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -51,7 +51,7 @@ namespace OpenXcom
  * @param noSound Whether to disable the death sound.
  */
 UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const RuleDamageType* damageType, bool noSound) : BattleState(parent),
-	_unit(unit), _damageType(damageType), _noSound(noSound), _overKill(false), _originalDir(0)
+	_unit(unit), _damageType(damageType), _noSound(noSound), _overKill(false)
 {
 	// don't show the "fall to death" animation when a unit is blasted with explosives or he is already unconscious
 	if (!_damageType->isDirect() || _unit->getStatus() == STATUS_UNCONSCIOUS)
@@ -70,8 +70,7 @@ UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const Ru
 			_parent->getMap()->setUnitDying(true);
 		}
 		_parent->setStateInterval(BattlescapeState::DEFAULT_ANIM_SPEED);
-		_originalDir = _unit->getDirection();
-		if (_originalDir != 3)
+		if (_unit->getDirection() != 3)
 		{
 			_parent->setStateInterval(BattlescapeState::DEFAULT_ANIM_SPEED / 3);
 		}
@@ -141,6 +140,13 @@ void UnitDieBState::think()
 		{
 			playDeathSound();
 		}
+		if (_unit->getRespawn())
+		{
+			while (_unit->getStatus() == STATUS_COLLAPSING)
+			{
+				_unit->keepFalling();
+			}
+		}
 	}
 
 	if (_unit->isOut())
@@ -163,7 +169,6 @@ void UnitDieBState::think()
 		{
 			// converts the dead zombie to a chryssalid
 			BattleUnit *newUnit = _parent->convertUnit(_unit, _unit->getSpawnUnit());
-			newUnit->lookAt(_originalDir);
 		}
 		else
 		{
@@ -311,7 +316,7 @@ void UnitDieBState::convertUnitToCorpse()
  */
 void UnitDieBState::playDeathSound()
 {
-	if (_unit->getType() == "SOLDIER" || _unit->getUnitRules()->getRace() == "STR_CIVILIAN")
+	if (_unit->getDeathSound() == -1)
 	{
 		if (_unit->getGender() == GENDER_MALE)
 		{

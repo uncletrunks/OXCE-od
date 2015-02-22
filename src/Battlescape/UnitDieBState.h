@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 OpenXcom Developers.
+ * Copyright 2010-2015 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -39,7 +39,6 @@ private:
 	const RuleDamageType *_damageType;
 	bool _noSound;
 	bool _overKill;
-	int _originalDir;
 public:
 	/// Creates a new UnitDieBState class
 	UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const RuleDamageType *damageType, bool noSound);
