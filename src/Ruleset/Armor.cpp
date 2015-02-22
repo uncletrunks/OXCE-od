@@ -30,7 +30,7 @@ Armor::Armor(const std::string &type) :
 	_type(type), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _regeneration(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _forcedTorso(TORSO_USE_GENDER),
-	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1)
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -132,6 +132,7 @@ void Armor::load(const YAML::Node &node)
 	{
 		_zombiImmune = node["zombiImmune"].as<bool>();
 	}
+	_overKill = node["overKill"].as<float>(_overKill);
 }
 
 /**
@@ -426,6 +427,15 @@ bool Armor::getPainImmune(bool def) const
 bool Armor::getZombiImmune(bool def) const
 {
 	return _zombiImmune != -1 ? _zombiImmune : def;
+}
+
+/**
+ * Gets how much negative hp is require to gib unit.
+ * @return Percent of require hp.
+ */
+float Armor::getOverKill() const
+{
+	return _overKill;
 }
 
 }

@@ -54,6 +54,7 @@ private:
 	bool _canHoldWeapon;
 	ForcedTorso _forcedTorso;
 	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
+	float _overKill;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -121,6 +122,8 @@ public:
 	bool getPainImmune(bool def = false) const;
 	/// Gets how armor react to zombification.
 	bool getZombiImmune(bool def = false) const;
+	/// Gets how much negative hp is require to gib unit.
+	float getOverKill() const;
 };
 
 }

@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.3b[/b]
+[b]Mod version 1.4[/b]
 OpenXcom version: Nightly 15/02/2015
 
 [br/][br/]
@@ -107,6 +107,7 @@ armors:
     bleedImmune: false   #default true for big units.
     painImmune: false    #default true for big units.
     zombiImmune: false   #ignored by big units.
+    overKill: 0.8        #when damage move hp to negative value greater than `overKill * maxHP` then corpse is destroyed, default value is 0.50 .
     visibilityAtDark: 9  #default 20 for aliens, 9 for humans.
     regeneration: 0      #number of health point regenerated evry turn, can be less than zero.
     specialWeapon: ALIEN_PSI_WEAPON #alien psi or meele attack.

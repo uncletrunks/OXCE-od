@@ -935,7 +935,7 @@ int BattleUnit::getMorale() const
  */
 int BattleUnit::getOverKillDamage() const
 {
-	return std::max(-_health - _stats.health / 2, 0);
+	return std::max(-_health - (int)(_stats.health * _armor->getOverKill()), 0);
 }
 
 /**
