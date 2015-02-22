@@ -1445,7 +1445,7 @@ int BattleUnit::getPsiAccuracy(BattleActionType actionType, BattleItem *item)
 		psiAcc = item->getRules()->getAccuracyUse();
 	}
 
-	psiAcc += item->getRules()->getAccuracyMultiplier(getBaseStats());
+	psiAcc += item->getRules()->getAccuracyMultiplier(this);
 
 	return psiAcc;
 }
@@ -1475,14 +1475,14 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 	}
 	else if (actionType == BA_HIT || actionType == BA_STUN)
 	{
-		return (item->getRules()->getMeleeMultiplier(getBaseStats()) * item->getRules()->getAccuracyMelee() / 100) * modifier / 100;
+		return (item->getRules()->getMeleeMultiplier(this) * item->getRules()->getAccuracyMelee() / 100) * modifier / 100;
 	}
 	else if (actionType == BA_THROW)
 	{
-		return (getBaseStats()->throwing * item->getRules()->getAccuracyThrow() / 100) * modifier / 100;
+		return (item->getRules()->getThrowMultiplier(this) * item->getRules()->getAccuracyThrow() / 100) * modifier / 100;
 	}
 
-	int result = item->getRules()->getAccuracyMultiplier(getBaseStats()) * weaponAcc / 100;
+	int result = item->getRules()->getAccuracyMultiplier(this) * weaponAcc / 100;
 
 	if (_kneeled)
 	{

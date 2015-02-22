@@ -1958,7 +1958,7 @@ bool AlienBAIState::psiAction()
 						}
 						else
 						{
-							weightToAttackMe += (item->getRules()->getPower() + item->getRules()->getPowerBonus(_unit->getBaseStats()));
+							weightToAttackMe += (item->getRules()->getPower() + item->getRules()->getPowerBonus(_unit));
 						}
 					}
 					else if (cost[j].type == BA_PANIC)
@@ -2079,7 +2079,7 @@ void AlienBAIState::selectMeleeOrRanged()
 	int meleeOdds = 10;
 
 	int dmg = meleeWeapon->getPower();
-	dmg += meleeWeapon->getPowerBonus(_unit->getBaseStats());
+	dmg += meleeWeapon->getPowerBonus(_unit);
 	dmg *= _aggroTarget->getArmor()->getDamageModifier(meleeWeapon->getDamageType()->ResistType);
 
 	if (dmg > 50)

@@ -33,9 +33,8 @@ enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMI
 class SurfaceSet;
 class Surface;
 class BattleUnit;
-class UnitStats;
 
-typedef int (*BonusStatFunc)(UnitStats*);
+typedef float (*BonusStatFunc)(const BattleUnit*);
 
 /**
  * Represents a specific type of item.
@@ -132,13 +131,13 @@ public:
 	/// Gets the item's power.
 	int getPower() const;
 	/// Get additional power form unit statistics
-	int getPowerBonus(UnitStats* stats) const;
+	int getPowerBonus(const BattleUnit *unit) const;
 	/// Gets amount of power drop per voxel.
 	float getPowerRangeReduction() const;
 	/// Get multiplier of accuracy form unit statistics
-	int getAccuracyMultiplier(UnitStats* stats) const;
+	int getAccuracyMultiplier(const BattleUnit *unit) const;
 	/// Get multiplier of throwing form unit statistics
-	int getThrowMultiplier(UnitStats* stats) const;
+	int getThrowMultiplier(const BattleUnit *unit) const;
 
 	/// Gets the item's aimed shot accuracy.
 	int getAccuracyAimed() const;
@@ -281,7 +280,7 @@ public:
 	/// Ok, so this isn't a melee type weapon but we're using it for melee... how much damage should it do?
 	int getMeleePower() const;
 	/// Get multiplier of melee hit chance form unit statistics
-	int getMeleeMultiplier(UnitStats* stats) const;
+	int getMeleeMultiplier(const BattleUnit *unit) const;
 	/// Get the melee animation starting frame (comes from hit.pck).
 	int getMeleeAnimation() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)

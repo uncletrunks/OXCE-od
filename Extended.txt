@@ -28,18 +28,22 @@ items:
     energyPanic: 0       #energy cost of Psi-amp Panic attack, if -1 it use `energyUse` value.
     energyThrow: 0       #energy cost of Throw.
     damageBonus: #used by ammo.
+      #each bonus can be writen as: `s: x`, `s: [x]`, `s: [x, y]` or `s: [x, y, z]`.
+      #where each value represents coefficient of polynomial `x * s + y * s^2 + z * s^3`.
+      #
       #set `strength` to 1.0 if `strengthApplied: true`.
       flatHunderd: 0.0 #const bonus equal 100.
+      flatOne: 0.0 #const bonus equal 1.
       strength: 0.1
       psi: 0.0 #bonus equal `psiSkill*psiStrength`.
       psiSkill: 0.5
       psiStrength: 0.0
       throwing: 0.0
       bravery: 0.0
-      firing: 0.0
-      health: 0.3
+      firing: [0.0, 0.0, 0.0]
+      health: [0.3]
       tu: 0.0
-      reactions: 0.0
+      reactions: [1, -0.002]
       stamina: 0.0
       melee: 0.0
       strengthMelee: 0.0 #bonus equal `strength*melee`.

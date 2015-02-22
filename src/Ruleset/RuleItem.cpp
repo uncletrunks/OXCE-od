@@ -19,8 +19,10 @@
 #include "Unit.h"
 #include "RuleItem.h"
 #include "RuleInventory.h"
+#include "../Savegame/BattleUnit.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -29,19 +31,10 @@ namespace
 {
 
 /**
- * Data describing basic stat getter.
- */
-struct BonusStatData
-{
-	std::string name;
-	BonusStatFunc func;
-};
-
-/**
  * Function returning static value.
  */
 template<int I>
-int statZero(UnitStats* stat)
+float stat(const BattleUnit *unit)
 {
 	return I;
 }
@@ -49,8 +42,9 @@ int statZero(UnitStats* stat)
  * Getter for one basic stat of unit.
  */
 template<int UnitStats::* field>
-int statOne(UnitStats* stat)
+float stat(const BattleUnit *unit)
 {
+	const UnitStats *stat = unit->getBaseStats();
 	return stat->*field;
 }
 
@@ -58,9 +52,85 @@ int statOne(UnitStats* stat)
  * Getter for multiply of two basic stat of unit.
  */
 template<int UnitStats::* fieldA, int UnitStats::* fieldB>
-int statTwo(UnitStats* stat)
+float stat(const BattleUnit *unit)
 {
+	const UnitStats *stat = unit->getBaseStats();
 	return (stat->*fieldA) * (stat->*fieldB);
+}
+
+template<BonusStatFunc func, int p>
+float power(const BattleUnit *unit)
+{
+	return std::pow(func(unit), p);
+}
+
+const size_t statDataFuncSize = 3;
+
+/**
+ * Data describing same functions but with different exponent.
+ */
+struct BonusStatDataFunc
+{
+	BonusStatFunc power[statDataFuncSize];
+};
+/**
+ * Data describing basic stat getter.
+ */
+struct BonusStatData
+{
+	std::string name;
+	BonusStatDataFunc func;
+};
+
+/**
+ * Helper function creating BonusStatData with proper functions.
+ */
+template<int Val>
+BonusStatDataFunc create()
+{
+	BonusStatDataFunc data =
+	{
+		{
+			&power< &stat<Val>, 1>,
+			&power< &stat<Val>, 2>,
+			&power< &stat<Val>, 3>,
+		}
+	};
+	return data;
+}
+
+/**
+ * Helper function creating BonusStatData with proper functions.
+ */
+template<int UnitStats::* fieldA>
+BonusStatDataFunc create()
+{
+	BonusStatDataFunc data =
+	{
+		{
+			&power< &stat<fieldA>, 1>,
+			&power< &stat<fieldA>, 2>,
+			&power< &stat<fieldA>, 3>,
+		}
+	};
+	return data;
+}
+
+/**
+ * Helper function creating BonusStatData with proper functions.
+ */
+template<int UnitStats::* fieldA, int UnitStats::* fieldB>
+BonusStatDataFunc create()
+{
+	BonusStatDataFunc data =
+	{
+		{
+			&power< &stat<fieldA, fieldB>, 1>,
+			&power< &stat<fieldA, fieldB>, 2>,
+			&power< &stat<fieldA, fieldB>, 3>,
+		}
+	};
+	return data;
 }
 
 /**
@@ -68,30 +138,31 @@ int statTwo(UnitStats* stat)
  */
 BonusStatData statDataMap[] =
 {
-	{ "flatHunderd", &statZero<100> },
-	{ "strength", &statOne<&UnitStats::strength> },
-	{ "psi", &statTwo<&UnitStats::psiSkill, &UnitStats::psiStrength> },
-	{ "psiSkill", &statOne<&UnitStats::psiSkill> },
-	{ "psiStrength", &statOne<&UnitStats::psiStrength> },
-	{ "throwing", &statOne<&UnitStats::throwing> },
-	{ "bravery", &statOne<&UnitStats::bravery> },
-	{ "firing", &statOne<&UnitStats::firing> },
-	{ "health", &statOne<&UnitStats::health> },
-	{ "tu", &statOne<&UnitStats::tu> },
-	{ "reactions", &statOne<&UnitStats::reactions> },
-	{ "stamina", &statOne<&UnitStats::stamina> },
-	{ "melee", &statOne<&UnitStats::melee> },
-	{ "strengthMelee", &statTwo<&UnitStats::strength, &UnitStats::melee> },
-	{ "strengthThrowing", &statTwo<&UnitStats::strength, &UnitStats::throwing> },
-	{ "firingReactions", &statTwo<&UnitStats::firing, &UnitStats::reactions> },
+	{ "flatOne", create<1>() },
+	{ "flatHunderd", create<100>() },
+	{ "strength", create<&UnitStats::strength>() },
+	{ "psi", create<&UnitStats::psiSkill, &UnitStats::psiStrength>() },
+	{ "psiSkill", create<&UnitStats::psiSkill>() },
+	{ "psiStrength", create<&UnitStats::psiStrength>() },
+	{ "throwing", create<&UnitStats::throwing>() },
+	{ "bravery", create<&UnitStats::bravery>() },
+	{ "firing", create<&UnitStats::firing>() },
+	{ "health", create<&UnitStats::health>() },
+	{ "tu", create<&UnitStats::tu>() },
+	{ "reactions", create<&UnitStats::reactions>() },
+	{ "stamina", create<&UnitStats::stamina>() },
+	{ "melee", create<&UnitStats::melee>() },
+	{ "strengthMelee", create<&UnitStats::strength, &UnitStats::melee>() },
+	{ "strengthThrowing", create<&UnitStats::strength, &UnitStats::throwing>() },
+	{ "firingReactions", create<&UnitStats::firing, &UnitStats::reactions>() },
 };
-const int statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
+const size_t statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
 
-int statsModiferRead(const std::vector<std::pair<BonusStatFunc, float> >& mod, UnitStats* stats)
+int statsModiferRead(const std::vector<std::pair<BonusStatFunc, float> >& mod, const BattleUnit *unit)
 {
-	int power = 0;
+	float power = 0;
 	for (size_t i = 0; i < mod.size(); ++i)
-		power += mod[i].first(stats) * mod[i].second;
+		power += mod[i].first(unit) * mod[i].second;
 	return power;
 }
 
@@ -100,11 +171,25 @@ void statsModiferWrite(std::vector<std::pair<BonusStatFunc, float> >& mod, const
 	if (node)
 	{
 		mod.clear();
-		for (int i = 0; i < statDataMapSize; ++i)
+		for (size_t i = 0; i < statDataMapSize; ++i)
 		{
 			if (const YAML::Node &dd = node[statDataMap[i].name])
 			{
-				mod.push_back(std::make_pair(statDataMap[i].func, dd.as<float>()));
+				if (dd.IsScalar())
+				{
+					mod.push_back(std::make_pair(statDataMap[i].func.power[0], dd.as<float>()));
+				}
+				else
+				{
+					for (size_t j = 0; j < statDataFuncSize && j < dd.size(); ++j)
+					{
+						float val = dd[j].as<float>();
+						if (!AreSame(val, 0.0f))
+						{
+							mod.push_back(std::make_pair(statDataMap[i].func.power[j], val));
+						}
+					}
+				}
 			}
 		}
 	}
@@ -129,9 +214,9 @@ RuleItem::RuleItem(const std::string &type) :
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
 {
-	_accuracyMulti.push_back(std::make_pair(&statOne<&UnitStats::firing>, 1.0f));
-	_meleeMulti.push_back(std::make_pair(&statOne<&UnitStats::melee>, 1.0f));
-	_throwMulti.push_back(std::make_pair(&statOne<&UnitStats::throwing>, 1.0f));
+	_accuracyMulti.push_back(std::make_pair(&stat<&UnitStats::firing>, 1.0f));
+	_meleeMulti.push_back(std::make_pair(&stat<&UnitStats::melee>, 1.0f));
+	_throwMulti.push_back(std::make_pair(&stat<&UnitStats::throwing>, 1.0f));
 }
 
 /**
@@ -347,7 +432,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		{
 			_powerRangeReduction = 1;
 			_accuracyMulti.clear();
-			_accuracyMulti.push_back(std::make_pair(&statTwo<&UnitStats::psiSkill, &UnitStats::psiStrength>, 0.02f));
+			_accuracyMulti.push_back(std::make_pair(&stat<&UnitStats::psiSkill, &UnitStats::psiStrength>, 0.02f));
 		}
 	}
 	if (node["skillApplied"])
@@ -355,17 +440,17 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		_meleeMulti.clear();
 		if (node["skillApplied"].as<int>(false))
 		{
-			_meleeMulti.push_back(std::make_pair(&statOne<&UnitStats::melee>, 1.0f));
+			_meleeMulti.push_back(std::make_pair(&stat<&UnitStats::melee>, 1.0f));
 		}
 		else
 		{
-			_meleeMulti.push_back(std::make_pair(&statZero<100>, 1.0f));
+			_meleeMulti.push_back(std::make_pair(&stat<100>, 1.0f));
 		}
 	}
 	if (node["strengthApplied"].as<bool>(false))
 	{
 		_damageBonus.clear();
-		_damageBonus.push_back(std::make_pair(&statOne<&UnitStats::strength>, 1.0f));
+		_damageBonus.push_back(std::make_pair(&stat<&UnitStats::strength>, 1.0f));
 	}
 
 	statsModiferWrite(_damageBonus, node["damageBonus"]);
@@ -1278,9 +1363,9 @@ bool RuleItem::isPsiRequired() const
  * @param stats unit stats
  * @return bonus power.
  */
-int RuleItem::getPowerBonus(UnitStats* stats) const
+int RuleItem::getPowerBonus(const BattleUnit *unit) const
 {
-	return statsModiferRead(_damageBonus, stats);
+	return statsModiferRead(_damageBonus, unit);
 }
 
 /**
@@ -1288,9 +1373,9 @@ int RuleItem::getPowerBonus(UnitStats* stats) const
  * @param stats unit stats
  * @return multiplier.
  */
-int RuleItem::getMeleeMultiplier(UnitStats* stats) const
+int RuleItem::getMeleeMultiplier(const BattleUnit *unit) const
 {
-	return statsModiferRead(_meleeMulti, stats);
+	return statsModiferRead(_meleeMulti, unit);
 }
 
 /**
@@ -1298,9 +1383,9 @@ int RuleItem::getMeleeMultiplier(UnitStats* stats) const
  * @param stats unit stats
  * @return multiplier.
  */
-int RuleItem::getAccuracyMultiplier(UnitStats* stats) const
+int RuleItem::getAccuracyMultiplier(const BattleUnit *unit) const
 {
-	return statsModiferRead(_accuracyMulti, stats);
+	return statsModiferRead(_accuracyMulti, unit);
 }
 
 /**
@@ -1308,9 +1393,9 @@ int RuleItem::getAccuracyMultiplier(UnitStats* stats) const
  * @param stats unit stats
  * @return multiplier.
  */
-int RuleItem::getThrowMultiplier(UnitStats* stats) const
+int RuleItem::getThrowMultiplier(const BattleUnit *unit) const
 {
-	return statsModiferRead(_throwMulti, stats);
+	return statsModiferRead(_throwMulti, unit);
 }
 /**
  * Gets the associated special type of this item.
