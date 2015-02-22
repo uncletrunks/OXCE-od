@@ -58,6 +58,47 @@ float stat(const BattleUnit *unit)
 	return (stat->*fieldA) * (stat->*fieldB);
 }
 
+float curretTimeUnits(const BattleUnit *unit)
+{
+	return unit->getTimeUnits();
+}
+
+float curretHealth(const BattleUnit *unit)
+{
+	return unit->getHealth();
+}
+
+float curretEnergy(const BattleUnit *unit)
+{
+	return unit->getEnergy();
+}
+
+float curretMorale(const BattleUnit *unit)
+{
+	return unit->getMorale();
+}
+
+
+float normalizedTimeUnits(const BattleUnit *unit)
+{
+	return 1.0 * unit->getTimeUnits()/ unit->getBaseStats()->tu;
+}
+
+float normalizedHealth(const BattleUnit *unit)
+{
+	return 1.0 * unit->getHealth() / unit->getBaseStats()->health;
+}
+
+float normalizedEnergy(const BattleUnit *unit)
+{
+	return 1.0 * unit->getEnergy() / unit->getBaseStats()->stamina;
+}
+
+float normalizedMorale(const BattleUnit *unit)
+{
+	return 1.0 * unit->getMorale() / 100;
+}
+
 template<BonusStatFunc func, int p>
 float power(const BattleUnit *unit)
 {
@@ -134,6 +175,23 @@ BonusStatDataFunc create()
 }
 
 /**
+ * Helper function creating BonusStatData with proper functions.
+ */
+template<BonusStatFunc func>
+BonusStatDataFunc create()
+{
+	BonusStatDataFunc data =
+	{
+		{
+			&power< func, 1>,
+			&power< func, 2>,
+			&power< func, 3>,
+		}
+	};
+	return data;
+}
+
+/**
  * List of all possible getters of basic stats.
  */
 BonusStatData statDataMap[] =
@@ -155,6 +213,16 @@ BonusStatData statDataMap[] =
 	{ "strengthMelee", create<&UnitStats::strength, &UnitStats::melee>() },
 	{ "strengthThrowing", create<&UnitStats::strength, &UnitStats::throwing>() },
 	{ "firingReactions", create<&UnitStats::firing, &UnitStats::reactions>() },
+
+	{ "healthCurrent", create<&curretHealth>() },
+	{ "tuCurrent", create<&curretTimeUnits>() },
+	{ "energyCurrent", create<&curretEnergy>() },
+	{ "moraleCurrent", create<&curretMorale>() },
+
+	{ "healthNormalized", create<&normalizedHealth>() },
+	{ "tuNormalized", create<&normalizedTimeUnits>() },
+	{ "energyNormalized", create<&normalizedEnergy>() },
+	{ "moraleNormalized", create<&normalizedMorale>() },
 };
 const size_t statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
 

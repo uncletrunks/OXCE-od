@@ -46,9 +46,17 @@ items:
       reactions: [1, -0.002]
       stamina: 0.0
       melee: 0.0
-      strengthMelee: 0.0 #bonus equal `strength*melee`.
-      strengthThrowing: 0.0 #bonus equal `strength*throwing`.
-      firingReactions: 0.0 #bonus equal `firing*reaction`.
+      strengthMelee: 0.0      #bonus equal `strength*melee`.
+      strengthThrowing: 0.0   #bonus equal `strength*throwing`.
+      firingReactions: 0.0    #bonus equal `firing*reaction`.
+      healthCurrent: 0.0      #curret value of hp
+      tuCurrent: 0.0          #curret value of tu
+      energyCurrent: 0.0      #curret value of energy
+      moraleCurrent: 0.0      #curret value of morale
+      healthNormalized: 0.0   #curret hp normalized to 1 (max hp give 1.0).
+      tuNormalized: 0.0       #curret tu normalized to 1 (max tu give 1.0).
+      energyNormalized: 0.0   #curret energy normalized to 1 (max energy give 1.0).
+      moraleNormalized: 0.0   #curret morale normalized to 1 (max morale give 1.0).
     accuracyMultipler: #used by wapons and psi-amp.
       #set `psi` to 0.02 if weapon is psi-amp
       #...
