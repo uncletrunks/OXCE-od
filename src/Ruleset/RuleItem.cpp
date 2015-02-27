@@ -126,57 +126,6 @@ struct BonusStatData
 /**
  * Helper function creating BonusStatData with proper functions.
  */
-template<int Val>
-BonusStatDataFunc create()
-{
-	BonusStatDataFunc data =
-	{
-		{
-			&power< &stat<Val>, 1>,
-			&power< &stat<Val>, 2>,
-			&power< &stat<Val>, 3>,
-		}
-	};
-	return data;
-}
-
-/**
- * Helper function creating BonusStatData with proper functions.
- */
-template<int UnitStats::* fieldA>
-BonusStatDataFunc create()
-{
-	BonusStatDataFunc data =
-	{
-		{
-			&power< &stat<fieldA>, 1>,
-			&power< &stat<fieldA>, 2>,
-			&power< &stat<fieldA>, 3>,
-		}
-	};
-	return data;
-}
-
-/**
- * Helper function creating BonusStatData with proper functions.
- */
-template<int UnitStats::* fieldA, int UnitStats::* fieldB>
-BonusStatDataFunc create()
-{
-	BonusStatDataFunc data =
-	{
-		{
-			&power< &stat<fieldA, fieldB>, 1>,
-			&power< &stat<fieldA, fieldB>, 2>,
-			&power< &stat<fieldA, fieldB>, 3>,
-		}
-	};
-	return data;
-}
-
-/**
- * Helper function creating BonusStatData with proper functions.
- */
 template<BonusStatFunc func>
 BonusStatDataFunc create()
 {
@@ -189,6 +138,33 @@ BonusStatDataFunc create()
 		}
 	};
 	return data;
+}
+
+/**
+ * Helper function creating BonusStatData with proper functions.
+ */
+template<int Val>
+BonusStatDataFunc create()
+{
+	return create<&stat<Val> >();
+}
+
+/**
+ * Helper function creating BonusStatData with proper functions.
+ */
+template<int UnitStats::* fieldA>
+BonusStatDataFunc create()
+{
+	return create<&stat<fieldA> >();
+}
+
+/**
+ * Helper function creating BonusStatData with proper functions.
+ */
+template<int UnitStats::* fieldA, int UnitStats::* fieldB>
+BonusStatDataFunc create()
+{
+	return create<&stat<fieldA, fieldB> >();
 }
 
 /**
