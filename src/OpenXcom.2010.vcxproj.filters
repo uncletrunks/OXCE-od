@@ -913,6 +913,9 @@
     <ClCompile Include="Geoscape\MissionDetectedState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
+    <ClCompile Include="Ruleset\Texture.cpp">
+      <Filter>Ruleset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1853,6 +1856,9 @@
     </ClInclude>
     <ClInclude Include="Geoscape\MissionDetectedState.h">
       <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Ruleset\Texture.h">
+      <Filter>Ruleset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.4[/b]
-OpenXcom version: Nightly 22/02/2015
+[b]Mod version 1.4a[/b]
+OpenXcom version: Nightly 04/03/2015
 
 [br/][br/]
 [i]New ruleset[/i]
@@ -210,6 +210,9 @@ https://github.com/Yankes/OpenXcom/tree/OpenXcomExtended[br/]
 [br/]
 Download available on mod site (require latest nightly):[br/]
 http://www.openxcom.com/mod/openxcom-extended[br/]
+[br/]
+Backup:[br/]
+https://www.mediafire.com/folder/w07p0ibc985kd/OXCE[br/]
 [br/]
 Forum thread:[br/]
 http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641[br/]

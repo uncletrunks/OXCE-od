@@ -1002,7 +1002,7 @@ void DogfightState::update()
 		if (_ufo->isCrashed())
 		{
 			AlienMission *mission = _ufo->getMission();
-			mission->ufoShotDown(*_ufo, *_game, *_globe);
+			mission->ufoShotDown(*_ufo);
 			// Check for retaliation trigger.
 			if (!RNG::percent(4 * (24 - (int)(_game->getSavedGame()->getDifficulty()))))
 			{
@@ -1020,7 +1020,7 @@ void DogfightState::update()
 					// TODO: If the base is removed, the mission is canceled.
 				}
 				// Difference from original: No retaliation until final UFO lands (Original: Is spawned).
-				if (!_game->getSavedGame()->getAlienMission(targetRegion, "STR_ALIEN_RETALIATION"))
+				if (!_game->getSavedGame()->findAlienMission(targetRegion, OBJECTIVE_RETALIATION))
 				{
 					const RuleAlienMission &rule = *_game->getRuleset()->getAlienMission("STR_ALIEN_RETALIATION");
 					AlienMission *mission = new AlienMission(rule);

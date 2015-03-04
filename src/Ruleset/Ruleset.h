@@ -25,6 +25,7 @@
 #include <yaml-cpp/yaml.h>
 #include "../Savegame/GameTime.h"
 #include "RuleDamageType.h"
+#include "../Ruleset/RuleAlienMission.h"
 #include <SDL.h>
 
 namespace OpenXcom
@@ -55,7 +56,6 @@ class AlienRace;
 class AlienDeployment;
 class UfoTrajectory;
 class RuleAlienMission;
-class City;
 class Base;
 class MCDPatch;
 class ExtraSprites;
@@ -227,10 +227,10 @@ public:
 	const UfoTrajectory *getUfoTrajectory(const std::string &id) const;
 	/// Gets the ruleset for a specific alien mission.
 	const RuleAlienMission *getAlienMission(const std::string &id) const;
+	/// Gets the ruleset for a random alien mission.
+	const RuleAlienMission *getRandomMission(MissionObjective objective, size_t monthsPassed) const;
 	/// Gets the list of all alien missions.
 	const std::vector<std::string> &getAlienMissionList() const;
-	/// Gets the city at the specified coordinates.
-	const City *locateCity(double lon, double lat) const;
 	/// Gets the alien item level table.
 	const std::vector<std::vector<int> > &getAlienItemLevels() const;
 	/// Gets the player starting base.

@@ -30,6 +30,7 @@
 #include "../Ruleset/Ruleset.h"
 #include "../Ruleset/RuleUfo.h"
 #include "../Ruleset/UfoTrajectory.h"
+#include "../Ruleset/RuleAlienMission.h"
 #include "SavedGame.h"
 #include "Waypoint.h"
 
@@ -548,7 +549,7 @@ void Ufo::think()
 
 /**
  * Gets the UFO's battlescape status.
- * @return bool
+ * @return Is the UFO currently in battle?
  */
 bool Ufo::isInBattlescape() const
 {
@@ -557,7 +558,7 @@ bool Ufo::isInBattlescape() const
 
 /**
  * Sets the UFO's battlescape status.
- * @param inbattle .
+ * @param inbattle True if it's in battle, False otherwise.
  */
 void Ufo::setInBattlescape(bool inbattle)
 {
@@ -628,7 +629,7 @@ int Ufo::getVisibility() const
  */
 const std::string &Ufo::getMissionType() const
 {
-	return _mission->getType();
+	return _mission->getRules().getType();
 }
 
 /**

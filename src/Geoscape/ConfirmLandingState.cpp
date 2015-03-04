@@ -41,6 +41,7 @@
 #include "../Engine/Exception.h"
 #include "../Engine/Options.h"
 #include "../Ruleset/RuleAlienMission.h"
+#include "../Ruleset/AlienDeployment.h"
 
 namespace OpenXcom
 {
@@ -52,7 +53,7 @@ namespace OpenXcom
  * @param texture Texture of the landing site.
  * @param shade Shade of the landing site.
  */
-ConfirmLandingState::ConfirmLandingState(Craft *craft, int texture, int shade) : _craft(craft), _texture(texture), _shade(shade)
+ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int shade) : _craft(craft), _texture(texture), _shade(shade)
 {
 	_screen = false;
 
@@ -146,7 +147,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 	}
 	else if (m != 0)
 	{
-		bgame->setMissionType(m->getRules()->getDeployment());
+		bgame->setMissionType(m->getDeployment()->getType());
 		bgen.setMissionSite(m);
 		bgen.setAlienRace(m->getAlienRace());
 	}
