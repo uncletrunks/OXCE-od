@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.4a[/b]
+[b]Mod version 1.5[/b]
 OpenXcom version: Nightly 04/03/2015
 
 [br/][br/]
@@ -176,6 +176,25 @@ ufos:
         armor: 0      #amount of blocked damage per hit.
 [/code]
 
+[code]
+facilities:
+  - type: STR_SOME_FACILITY
+    provideBaseFunc: [ A ] #List of custom IDs that this bulding provide for base.
+    requiresBaseFunc: [ ] #List of custom IDs that are require to build this building in base.
+[/code]
+
+[code]
+manufacture:
+  - type: STR_SOME_MANUFACTURE
+    requiresBaseFunc: [ A, C ] #List of custom IDs that are require to start production in base.
+[/code]
+
+[code]
+research:
+  - type: STR_SOME_RESEARCH
+    requiresBaseFunc: [ W, K ] #List of custom IDs that are require to start reserch in base.
+[/code]
+
 [br/][br/]
 [i]Behavior change[/i]
 
@@ -200,7 +219,7 @@ Throwing now require healthy arm to do it (if item is twohanded, then it require
 You can hit aliens in the head using any item you like, not only firearms stock.[br/]
 Items can now be un-throw able.[br/]
 Rewriten handling of alien psi attacks to handle new features of Psi-amp.[br/]
-
+Building, manufactures and reserch can now have special requirments for buildings available in base.[br/]
 
 [br/][br/]
 [i]Links[/i]

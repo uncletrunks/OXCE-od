@@ -28,6 +28,7 @@
 #include "../Interface/TextList.h"
 #include "../Ruleset/RuleBaseFacility.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Base.h"
 #include "PlaceFacilityState.h"
 
 namespace OpenXcom
@@ -93,10 +94,17 @@ BuildFacilitiesState::~BuildFacilitiesState()
  */
 void BuildFacilitiesState::PopulateBuildList()
 {
+	const std::set<std::string> &providedBaseFunc = _base->getProvidedBaseFunc();
+
 	const std::vector<std::string> &facilities = _game->getRuleset()->getBaseFacilitiesList();
 	for (std::vector<std::string>::const_iterator i = facilities.begin(); i != facilities.end(); ++i)
 	{
 		RuleBaseFacility *rule = _game->getRuleset()->getBaseFacility(*i);
+		const std::vector<std::string> &req = rule->getRequireBaseFunc();
+		if (!std::includes(providedBaseFunc.begin(), providedBaseFunc.end(), req.begin(), req.end()))
+		{
+			continue;
+		}
 		if (_game->getSavedGame()->isResearched(rule->getRequirements()) && !rule->isLift())
 			_facilities.push_back(rule);
 	}

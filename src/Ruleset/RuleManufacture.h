@@ -33,7 +33,7 @@ class RuleManufacture
 {
 private:
 	std::string _name, _category;
-	std::vector<std::string> _requires;
+	std::vector<std::string> _requires, _requiresBaseFunc;
 	int _space, _time, _cost;
 	std::map<std::string, int> _requiredItems, _producedItems;
 	int _listOrder;
@@ -48,6 +48,8 @@ public:
 	std::string getCategory() const;
 	/// Gets the manufacture's requirements.
 	const std::vector<std::string> &getRequirements() const;
+	/// Gets the base requirements.
+	const std::vector<std::string> &getRequireBaseFunc() const;
 	/// Gets the required workshop space.
 	int getRequiredSpace() const;
 	/// Gets the time required to manufacture one object.

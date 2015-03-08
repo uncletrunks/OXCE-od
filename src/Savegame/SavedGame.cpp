@@ -19,6 +19,7 @@
 #include "SavedGame.h"
 #include <fstream>
 #include <sstream>
+#include <set>
 #include <iomanip>
 #include <algorithm>
 #include <yaml-cpp/yaml.h>
@@ -43,6 +44,7 @@
 #include "ItemContainer.h"
 #include "Soldier.h"
 #include "Transfer.h"
+#include "../Ruleset/RuleResearch.h"
 #include "../Ruleset/RuleManufacture.h"
 #include "Production.h"
 #include "MissionSite.h"
@@ -50,6 +52,7 @@
 #include "AlienStrategy.h"
 #include "AlienMission.h"
 #include "../Ruleset/RuleRegion.h"
+#include "BaseFacility.h"
 
 namespace OpenXcom
 {
@@ -980,6 +983,7 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
 	const std::vector<const RuleResearch *> &discovered = getDiscoveredResearch();
 	const std::vector<std::string> &researchProjects = ruleset->getResearchList();
 	const std::vector<ResearchProject *> &baseResearchProjects = base->getResearch();
+	const std::set<std::string> &baseFunc = base->getProvidedBaseFunc();
 	std::vector<const RuleResearch *> unlocked;
 
 
@@ -1069,6 +1073,11 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
 			if (tally != research->getRequirements().size())
 				continue;
 		}
+		if (!std::includes(baseFunc.begin(), baseFunc.end(), research->getRequireBaseFunc().begin(), research->getRequireBaseFunc().end()))
+		{
+			continue;
+		}
+
 		projects.push_back (research);
 	}
 }
@@ -1083,6 +1092,7 @@ void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & produc
 {
 	const std::vector<std::string> &items = ruleset->getManufactureList();
 	const std::vector<Production *> &baseProductions = base->getProductions();
+	const std::set<std::string> &baseFunc = base->getProvidedBaseFunc();
 
 	for (std::vector<std::string>::const_iterator iter = items.begin();
 		iter != items.end();
@@ -1097,6 +1107,11 @@ void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & produc
 		{
 			continue;
 		}
+		if (!std::includes(baseFunc.begin(), baseFunc.end(), m->getRequireBaseFunc().begin(), m->getRequireBaseFunc().end()))
+		{
+			continue;
+		}
+
 		productions.push_back(m);
 	}
 }

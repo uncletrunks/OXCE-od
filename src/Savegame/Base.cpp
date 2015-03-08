@@ -1670,4 +1670,64 @@ void Base::cleanupDefenses(bool reclaimItems)
 	}
 }
 
+/**
+ * Return list of all provided functionality in base.
+ * @param skip Skip functions provide by this facility .
+ * @return List of custom IDs.
+ */
+std::set<std::string> Base::getProvidedBaseFunc(const BaseFacility *skip) const
+{
+	std::set<std::string> ret;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		if (*bf == skip)
+		{
+			continue;
+		}
+		if ((*bf)->getBuildTime() > 0)
+		{
+			continue;
+		}
+		const std::vector<std::string> &prov = (*bf)->getRules()->getProvidedBaseFunc();
+		ret.insert(prov.begin(), prov.end());
+	}
+
+	return ret;
+}
+
+/**
+ * Return list of all required functionality in base.
+ * @param skip Skip functions require by this facility.
+ * @return List of custom IDs.
+ */
+std::set<std::string> Base::getRequireBaseFunc(const BaseFacility *skip) const
+{
+	std::set<std::string> ret;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		if (*bf == skip)
+		{
+			continue;
+		}
+		const std::vector<std::string> &prov = (*bf)->getRules()->getRequireBaseFunc();
+		ret.insert(prov.begin(), prov.end());
+	}
+
+	for (std::vector<ResearchProject*>::const_iterator res = _research.begin(); res != _research.end(); ++res)
+	{
+		const std::vector<std::string> &req = (*res)->getRules()->getRequireBaseFunc();
+		ret.insert(req.begin(), req.end());
+	}
+
+	for (std::vector<Production*>::const_iterator prod = _productions.begin(); prod != _productions.end(); ++prod)
+	{
+		const std::vector<std::string> &req = (*prod)->getRules()->getRequireBaseFunc();
+		ret.insert(req.begin(), req.end());
+	}
+
+	return ret;
+}
+
 }

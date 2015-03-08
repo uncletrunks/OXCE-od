@@ -40,12 +40,14 @@ void RuleResearch::load(const YAML::Node &node, int listOrder)
 	_unlocks = node["unlocks"].as< std::vector<std::string> >(_unlocks);
 	_getOneFree = node["getOneFree"].as< std::vector<std::string> >(_getOneFree);
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
+	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
 	_needItem = node["needItem"].as<bool>(_needItem);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
 		_listOrder = listOrder;
 	}
+	std::sort(_requiresBaseFunc.begin(), _requiresBaseFunc.end());
 }
 
 /**
@@ -127,6 +129,15 @@ const std::string RuleResearch::getLookup() const
 const std::vector<std::string> & RuleResearch::getRequirements() const
 {
 	return _requires;
+}
+
+/**
+ * Gets the require base functions to start this ResearchProject.
+ * @return List of functions IDs
+ */
+const std::vector<std::string> &  RuleResearch::getRequireBaseFunc() const
+{
+	return _requiresBaseFunc;
 }
 
 /**

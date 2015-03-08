@@ -42,7 +42,7 @@ class RuleResearch
  private:
 	std::string _name, _lookup;
 	int _cost, _points;
-	std::vector<std::string> _dependencies, _unlocks, _getOneFree, _requires;
+	std::vector<std::string> _dependencies, _unlocks, _getOneFree, _requires, _requiresBaseFunc;
 	bool _needItem;
 	int _listOrder;
 public:
@@ -67,6 +67,8 @@ public:
 	const std::string getLookup() const;
 	/// Gets the requirements for this ResearchProject.
 	const std::vector<std::string> & getRequirements() const;
+	/// Gets the base requirements for this ResearchProject.
+	const std::vector<std::string> & getRequireBaseFunc() const;
 	/// Gets the list weight for this research item.
 	int getListOrder() const;
 };
