@@ -762,21 +762,37 @@ int RuleItem::getAccuracyMelee() const
 	return _accuracyMelee;
 }
 
+/**
+ * Gets the item's accuracy for use psi-amp.
+ * @return The psi-amp accuracy.
+ */
 int RuleItem::getAccuracyUse() const
 {
 	return _accuracyUse;
 }
 
+/**
+ * Gets the item's accuracy for mind control use.
+ * @return The mind control accuracy.
+ */
 int RuleItem::getAccuracyMind() const
 {
 	return _accuracyMind;
 }
 
+/**
+ * Gets the item's accuracy for panic use.
+ * @return The panic accuracy.
+ */
 int RuleItem::getAccuracyPanic() const
 {
 	return _accuracyPanic;
 }
 
+/**
+ * Gets the item's accuracy for throw.
+ * @return The throw accuracy.
+ */
 int RuleItem::getAccuracyThrow() const
 {
 	return _accuracyThrow;
@@ -1299,7 +1315,7 @@ int RuleItem::getAutoShots() const
  * Gets the name of psi attack for action popup list.
  * @return String Id.
  */
-std::string RuleItem::getPsiAttackName() const
+const std::string &RuleItem::getPsiAttackName() const
 {
 	return _psiAttackName;
 }
@@ -1335,7 +1351,7 @@ int RuleItem::getShotgunPellets() const
  * Gets the unit that the victim is morphed into when attacked.
  * @return The weapon's zombie unit.
  */
-std::string RuleItem::getZombieUnit() const
+const std::string &RuleItem::getZombieUnit() const
 {
 	return _zombieUnit;
 }

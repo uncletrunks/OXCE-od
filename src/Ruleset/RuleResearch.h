@@ -46,29 +46,29 @@ class RuleResearch
 	bool _needItem;
 	int _listOrder;
 public:
-	RuleResearch(const std::string & name);
+	RuleResearch(const std::string &name);
 	/// Loads the research from YAML.
 	void load(const YAML::Node& node, int listOrder);
 	/// Gets time needed to discover this ResearchProject.
 	int getCost() const;
 	/// Gets the research name.
-	const std::string & getName() const;
+	const std::string &getName() const;
 	/// Gets the research dependencies.
-	const std::vector<std::string> & getDependencies() const;
+	const std::vector<std::string> &getDependencies() const;
 	/// Checks if this ResearchProject needs a corresponding Item to be researched.
 	bool needItem() const;
 	/// Gets the list of ResearchProjects unlocked by this research.
-	const std::vector<std::string> & getUnlocked() const;
+	const std::vector<std::string> &getUnlocked() const;
 	/// Gets the points earned for discovering this ResearchProject.
 	int getPoints() const;
 	/// Gets the list of ResearchProjects granted at random for free by this research.
-	const std::vector<std::string> & getGetOneFree() const;
+	const std::vector<std::string> &getGetOneFree() const;
 	/// Gets what to look up in the ufopedia.
 	const std::string getLookup() const;
 	/// Gets the requirements for this ResearchProject.
-	const std::vector<std::string> & getRequirements() const;
+	const std::vector<std::string> &getRequirements() const;
 	/// Gets the base requirements for this ResearchProject.
-	const std::vector<std::string> & getRequireBaseFunc() const;
+	const std::vector<std::string> &getRequireBaseFunc() const;
 	/// Gets the list weight for this research item.
 	int getListOrder() const;
 };

@@ -252,7 +252,7 @@ public:
 	/// How many auto shots does this weapon fire.
 	int getAutoShots() const;
 	/// Get name of psi attack for action menu.
-	std::string getPsiAttackName() const;
+	const std::string &getPsiAttackName() const;
 	/// is this item a 2 handed weapon?
 	bool isRifle() const;
 	/// is this item a single handed weapon?
@@ -272,7 +272,7 @@ public:
 	/// Get the number of projectiles to trace.
 	int getShotgunPellets() const;
 	/// Gets the weapon's zombie unit.
-	std::string getZombieUnit() const;
+	const std::string &getZombieUnit() const;
 	/// What sound does this weapon make when you swing this at someone?
 	int getMeleeAttackSound() const;
 	/// What sound does this weapon make when you punch someone in the face with it?

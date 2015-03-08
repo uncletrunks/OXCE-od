@@ -43,9 +43,9 @@ public:
 	/// Loads the manufacture from YAML.
 	void load(const YAML::Node& node, int listOrder);
 	/// Gets the manufacture name.
-	std::string getName() const;
+	const std::string &getName() const;
 	/// Gets the manufacture category.
-	std::string getCategory() const;
+	const std::string &getCategory() const;
 	/// Gets the manufacture's requirements.
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the base requirements.
@@ -57,10 +57,10 @@ public:
 	/// Gets the cost of manufacturing one object.
 	int getManufactureCost() const;
 	/// Gets the list of items required to manufacture one object.
-	const std::map<std::string, int> & getRequiredItems() const;
+	const std::map<std::string, int> &getRequiredItems() const;
 	/// Gets the list of items produced by completing "one object" of this project.
 	/// by default: it contains only the "name" item with a value of 1.
-	const std::map<std::string, int> & getProducedItems() const;
+	const std::map<std::string, int> &getProducedItems() const;
 	/// Gets the list weight for this manufacture item.
 	int getListOrder() const;
 };
