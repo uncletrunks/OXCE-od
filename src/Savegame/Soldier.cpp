@@ -60,7 +60,7 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, const std::vector<SoldierName
 		_initialStats.melee = RNG::generate(minStats.melee, maxStats.melee);
 		_initialStats.psiSkill = minStats.psiSkill;
 
-		_currentStats = _initialStats;	
+		_currentStats = _initialStats;
 
 		if (!names->empty())
 		{

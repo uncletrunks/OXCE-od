@@ -428,7 +428,7 @@ void SavedGame::load(const std::string &filename, Ruleset *rule)
 		b->load(*i, this, false);
 		_bases.push_back(b);
 	}
-	
+
 	const YAML::Node &research = doc["poppedResearch"];
 	for (YAML::const_iterator it = research.begin(); it != research.end(); ++it)
 	{
@@ -977,10 +977,12 @@ const std::vector<const RuleResearch *> & SavedGame::getDiscoveredResearch() con
  */
 void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & projects, const Ruleset * ruleset, Base * base) const
 {
-	const std::vector<const RuleResearch *> & discovered(getDiscoveredResearch());
-	std::vector<std::string> researchProjects = ruleset->getResearchList();
-	const std::vector<ResearchProject *> & baseResearchProjects = base->getResearch();
+	const std::vector<const RuleResearch *> &discovered = getDiscoveredResearch();
+	const std::vector<std::string> &researchProjects = ruleset->getResearchList();
+	const std::vector<ResearchProject *> &baseResearchProjects = base->getResearch();
 	std::vector<const RuleResearch *> unlocked;
+
+
 	for (std::vector<const RuleResearch *>::const_iterator it = discovered.begin(); it != discovered.end(); ++it)
 	{
 		for (std::vector<std::string>::const_iterator itUnlocked = (*it)->getUnlocked().begin(); itUnlocked != (*it)->getUnlocked().end(); ++itUnlocked)
@@ -996,7 +998,7 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
 			continue;
 		}
 		std::vector<const RuleResearch *>::const_iterator itDiscovered = std::find(discovered.begin(), discovered.end(), research);
-		
+
 		bool liveAlien = ruleset->getUnit(research->getName()) != 0;
 
 		if (itDiscovered != discovered.end())
@@ -1022,7 +1024,7 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
 			{
 				std::vector<std::string>::const_iterator leaderCheck = std::find(research->getUnlocked().begin(), research->getUnlocked().end(), "STR_LEADER_PLUS");
 				std::vector<std::string>::const_iterator cmnderCheck = std::find(research->getUnlocked().begin(), research->getUnlocked().end(), "STR_COMMANDER_PLUS");
-				
+
 				bool leader ( leaderCheck != research->getUnlocked().end());
 				bool cmnder ( cmnderCheck != research->getUnlocked().end());
 
@@ -1080,7 +1082,7 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
 void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & productions, const Ruleset * ruleset, Base * base) const
 {
 	const std::vector<std::string> &items = ruleset->getManufactureList();
-	const std::vector<Production *> baseProductions (base->getProductions());
+	const std::vector<Production *> &baseProductions = base->getProductions();
 
 	for (std::vector<std::string>::const_iterator iter = items.begin();
 		iter != items.end();
@@ -1089,7 +1091,7 @@ void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & produc
 		RuleManufacture *m = ruleset->getManufacture(*iter);
 		if (!isResearched(m->getRequirements()))
 		{
-		 	continue;
+			continue;
 		}
 		if (std::find_if (baseProductions.begin(), baseProductions.end(), equalProduction(m)) != baseProductions.end())
 		{
@@ -1112,20 +1114,20 @@ bool SavedGame::isResearchAvailable (RuleResearch * r, const std::vector<const R
 	{
 		return false;
 	}
-	std::vector<std::string> deps = r->getDependencies();
-	const std::vector<const RuleResearch *> & discovered(getDiscoveredResearch());
+	const std::vector<std::string> &deps = r->getDependencies();
+	const std::vector<const RuleResearch *> &discovered = getDiscoveredResearch();
 	bool liveAlien = ruleset->getUnit(r->getName()) != 0;
 	if (_debug || std::find(unlocked.begin(), unlocked.end(), r) != unlocked.end())
 	{
 		return true;
 	}
 	else if (liveAlien)
-	{		
+	{
 		if (!r->getGetOneFree().empty())
 		{
 			std::vector<std::string>::const_iterator leaderCheck = std::find(r->getUnlocked().begin(), r->getUnlocked().end(), "STR_LEADER_PLUS");
 			std::vector<std::string>::const_iterator cmnderCheck = std::find(r->getUnlocked().begin(), r->getUnlocked().end(), "STR_COMMANDER_PLUS");
-				
+
 			bool leader ( leaderCheck != r->getUnlocked().end());
 			bool cmnder ( cmnderCheck != r->getUnlocked().end());
 
@@ -1573,7 +1575,7 @@ std::vector<int64_t> &SavedGame::getExpenditures()
 	return _expenditures;
 }
 /**
- * return if the player has been 
+ * return if the player has been
  * warned about poor performance.
  * @return true or false.
  */
@@ -1752,7 +1754,7 @@ void SavedGame::setLastSelectedArmor(const std::string &value)
 
 /**
  * Gets the the last selected armour
- * @return last used armor type string 
+ * @return last used armor type string
  */
 std::string SavedGame::getLastSelectedArmor()
 {
@@ -1778,5 +1780,5 @@ Craft *SavedGame::findCraftByUniqueId(const CraftId& craftId) const
 	return NULL;
 }
 
-    
+
 }

@@ -88,7 +88,7 @@ void RuleBaseFacility::load(const YAML::Node &node, int modIndex, int listOrder)
 			_fireSound += modIndex;
 	}
 	if (node["hitSound"])
-	{		
+	{
 		_hitSound = node["hitSound"].as<int>(_hitSound);
 		// GEO.CAT: 14 entries
 		if (_hitSound > 13)

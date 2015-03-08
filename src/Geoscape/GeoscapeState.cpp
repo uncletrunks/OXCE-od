@@ -382,7 +382,7 @@ GeoscapeState::~GeoscapeState()
 	delete _zoomOutEffectTimer;
 	delete _dogfightStartTimer;
 	delete _dogfightTimer;
-	
+
 	std::list<DogfightState*>::iterator it = _dogfights.begin();
 	for (; it != _dogfights.end();)
 	{
@@ -1551,7 +1551,7 @@ void GeoscapeState::time1Day()
 			{
 				for (std::vector<ResearchProject*>::const_iterator iter2 = (*j)->getResearch().begin(); iter2 != (*j)->getResearch().end(); ++iter2)
 				{
-					if ((*iter)->getRules()->getName() == (*iter2)->getRules()->getName() && 
+					if ((*iter)->getRules()->getName() == (*iter2)->getRules()->getName() &&
 						_game->getRuleset()->getUnit((*iter2)->getRules()->getName()) == 0)
 					{
 						(*j)->removeResearch(*iter2);
@@ -2183,7 +2183,7 @@ void GeoscapeState::setupLandMission()
 	for (int counter = 0; counter < 40 && !picked; ++counter)
 	{
 		region = _game->getRuleset()->getRegion(regions[RNG::generate(0, regions.size()-1)]);
-		if (region->getMissionZones().size() > missionRules.getSpawnZone() &&
+		if (region->getMissionZones().size() > (size_t)missionRules.getSpawnZone() &&
 			_game->getSavedGame()->findAlienMission(region->getType(), OBJECTIVE_SITE) == 0)
 		{
 			const MissionZone &zone = region->getMissionZones().at(missionRules.getSpawnZone());
@@ -2252,7 +2252,7 @@ void GeoscapeState::resize(int &dX, int &dY)
 		dY = 0;
 		return;
 	}
-	
+
 	Options::baseXResolution = std::max(Screen::ORIGINAL_WIDTH, Options::displayWidth / divisor);
 	Options::baseYResolution = std::max(Screen::ORIGINAL_HEIGHT, (int)(Options::displayHeight / pixelRatioY / divisor));
 
