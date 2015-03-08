@@ -248,7 +248,7 @@ void statsModiferWrite(std::vector<std::pair<BonusStatFunc, float> >& mod, const
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
 	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _damageType(),
-	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(0),
+	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_tuAimed(0), _tuAuto(0), _tuSnap(0), _tuMelee(0), _tuUse(25), _tuMind(-1), _tuPanic(-1), _tuThrow(25),
 	_energyAimed(0), _energyAuto(-1), _energySnap(-1), _energyMelee(0), _energyUse(0), _energyMind(-1), _energyPanic(-1), _energyThrow(0),
 	_clipSize(0), _tuPrime(50), _tuLoad(15), _tuUnload(8),
