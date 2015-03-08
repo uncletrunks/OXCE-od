@@ -222,6 +222,8 @@ You can hit aliens in the head using any item you like, not only firearms stock.
 Items can now be un-throw able.[br/]
 Rewriten handling of alien psi attacks to handle new features of Psi-amp.[br/]
 Building, manufactures and reserch can now have special requirments for buildings available in base.[br/]
+Throwing and hiting using twohand weapon have same penalty like shooting it.
+
 
 [br/][br/]
 [i]Links[/i]

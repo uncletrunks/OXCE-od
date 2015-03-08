@@ -1463,31 +1463,32 @@ int BattleUnit::getPsiAccuracy(BattleActionType actionType, BattleItem *item)
 int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 {
 	const int modifier = getAccuracyModifier(item);
-	int weaponAcc = 0;
+	int result = 0;
+	bool kneeled = _kneeled;
 	if (actionType == BA_SNAPSHOT)
 	{
-		weaponAcc = item->getRules()->getAccuracySnap();
+		result = item->getRules()->getAccuracyMultiplier(this) * item->getRules()->getAccuracySnap() / 100;
 	}
 	else if (actionType == BA_AIMEDSHOT || actionType == BA_LAUNCH)
 	{
-		weaponAcc = item->getRules()->getAccuracyAimed();
+		result = item->getRules()->getAccuracyMultiplier(this) * item->getRules()->getAccuracyAimed() / 100;
 	}
 	else if (actionType == BA_AUTOSHOT)
 	{
-		weaponAcc = item->getRules()->getAccuracyAuto();
+		result = item->getRules()->getAccuracyMultiplier(this) * item->getRules()->getAccuracyAuto() / 100;
 	}
 	else if (actionType == BA_HIT || actionType == BA_STUN)
 	{
-		return (item->getRules()->getMeleeMultiplier(this) * item->getRules()->getAccuracyMelee() / 100) * modifier / 100;
+		kneeled = false;
+		result = item->getRules()->getMeleeMultiplier(this) * item->getRules()->getAccuracyMelee() / 100;
 	}
 	else if (actionType == BA_THROW)
 	{
-		return (item->getRules()->getThrowMultiplier(this) * item->getRules()->getAccuracyThrow() / 100) * modifier / 100;
+		kneeled = false;
+		result = item->getRules()->getThrowMultiplier(this) * item->getRules()->getAccuracyThrow() / 100;
 	}
 
-	int result = item->getRules()->getAccuracyMultiplier(this) * weaponAcc / 100;
-
-	if (_kneeled)
+	if (kneeled)
 	{
 		result = result * 115 / 100;
 	}
