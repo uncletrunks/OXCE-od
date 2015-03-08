@@ -73,7 +73,7 @@ private:
 	int _turretType;
 	bool _recover, _liveAlien;
 	int _attraction;
-	bool _flatRate, _arcingShot;
+	bool _flatRate, _flatPrime, _flatThrow, _arcingShot;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
@@ -239,6 +239,10 @@ public:
 	bool isAlien() const;
 	/// Should we charge a flat rate?
 	bool getFlatRate() const;
+	/// Should we charge a flat rate of tuPrime?
+	bool getFlatPrime() const;
+	/// Should we charge a flat rate of tuThrow?
+	bool getFlatThrow() const;
 	/// Should this weapon arc?
 	bool getArcingShot() const;
 	/// How much do aliens want this thing?

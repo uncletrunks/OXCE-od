@@ -27,6 +27,8 @@ items:
     energyMindControl: 0 #energy cost of Psi-amp Mind Control attack, if -1 it use `energyUse` value.
     energyPanic: 0       #energy cost of Psi-amp Panic attack, if -1 it use `energyUse` value.
     energyThrow: 0       #energy cost of Throw.
+    flatPrime: false     #change how `tuPrime` behave (percent or flat value).
+    flatThrow: false     #change how `tuThrow` behave (percent or flat value).
     damageBonus: #used by ammo.
       #each bonus can be writen as: `s: x`, `s: [x]`, `s: [x, y]` or `s: [x, y, z]`.
       #where each value represents coefficient of polynomial `x * s + y * s^2 + z * s^3`.

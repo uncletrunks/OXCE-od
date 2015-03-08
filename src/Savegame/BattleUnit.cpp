@@ -1206,12 +1206,15 @@ int BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
 	}
 
 	int cost = 0;
+	bool flat = item->getFlatRate();
 	switch (actionType)
 	{
 		case BA_PRIME:
+			flat = item->getFlatPrime();
 			cost = item->getTUPrime();
 			break;
 		case BA_THROW:
+			flat = item->getFlatThrow();
 			cost = item->getTUThrow();
 			break;
 		case BA_AUTOSHOT:
@@ -1242,7 +1245,7 @@ int BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
 	}
 
 	// if it's a percentage, apply it to unit TUs
-	if (!item->getFlatRate() || actionType == BA_THROW || actionType == BA_PRIME)
+	if (!flat)
 	{
 		cost = (int)floor(getBaseStats()->tu * cost / 100.0f);
 	}

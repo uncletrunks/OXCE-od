@@ -254,7 +254,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_clipSize(0), _tuPrime(50), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _recoveryPoints(0), _armor(20), _turretType(-1),
-	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0),
+	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
 {
@@ -447,6 +447,8 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_liveAlien = node["liveAlien"].as<bool>(_liveAlien);
 	_attraction = node["attraction"].as<int>(_attraction);
 	_flatRate = node["flatRate"].as<bool>(_flatRate);
+	_flatPrime = node["flatPrime"].as<bool>(_flatPrime);
+	_flatThrow = node["flatThrow"].as<bool>(_flatThrow);
 	_arcingShot = node["arcingShot"].as<bool>(_arcingShot);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_maxRange = node["maxRange"].as<int>(_maxRange);
@@ -1201,6 +1203,24 @@ bool RuleItem::isAlien() const
 bool RuleItem::getFlatRate() const
 {
 	return _flatRate;
+}
+
+/**
+ * Returns whether this item charges a flat TU rate for tuPrime.
+ * @return True if this item charges a flat TU rate for tuPrime.
+ */
+bool RuleItem::getFlatPrime() const
+{
+	return _flatPrime;
+}
+
+/**
+ * Returns whether this item charges a flat TU rate for tuThrow.
+ * @return True if this item charges a flat TU rate for tuThrow.
+ */
+bool RuleItem::getFlatThrow() const
+{
+	return _flatThrow;
 }
 
 /**
