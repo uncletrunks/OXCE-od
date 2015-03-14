@@ -3,6 +3,34 @@
 OpenXcom version: Nightly 04/03/2015
 
 [br/][br/]
+[i]Behavior change[/i]
+
+Hyper wave decoder can have less than 100% chance to detect aliens.[br/]
+Explosion don't remove unconscious unit if they can't kill them first.[br/]
+Craft weapon equip screen is bit rearranged.[br/]
+Fixed "weapons" like medickit are now equipped by unit.[br/]
+Psi-amp use 3d range not 2d.[br/]
+Psi-amp can use weapon power.[br/]
+Fixed ammo are added after weapons in armor and unit (armor items are before unit items).[br/]
+Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.[br/]
+Stuned units can be hited by bullets and fire.[br/]
+Big groups of aliens (20+) get less morale loses from casualties.[br/]
+Terror units can now spawn with any buildin weapon not only one defined by name.[br/]
+After battle, wounlded unit restore health equal to 20 times armor regeneration stat (if its greater than zero).[br/]
+While loading and unloading weapon you must pay cost of moving item to hand.[br/]
+You can unprime granade for half of prime tu cost.[br/]
+Support for Ufo2000 armor damage type.[br/]
+Psi-amp can now obey maximum weapon range.[br/]
+Psi-amp can now deal direct damage using special attack type in popup menu.[br/]
+Throwing now require healthy arm to do it (if item is twohanded, then it require both).[br/]
+You can hit aliens in the head using any item you like, not only firearms stock.[br/]
+Items can now be un-throw able.[br/]
+Rewriten handling of alien psi attacks to handle new features of Psi-amp.[br/]
+Building, manufactures and reserch can now have special requirments for buildings available in base.[br/]
+Throwing and hiting using twohand weapon have same penalty like shooting it.
+
+
+[br/][br/]
 [i]New ruleset[/i]
 
 Example of usage:
@@ -196,34 +224,6 @@ research:
   - type: STR_SOME_RESEARCH
     requiresBaseFunc: [ W, K ] #List of custom IDs that are require to start reserch in base.
 [/code]
-
-[br/][br/]
-[i]Behavior change[/i]
-
-Hyper wave decoder can have less than 100% chance to detect aliens.[br/]
-Explosion don't remove unconscious unit if they can't kill them first.[br/]
-Craft weapon equip screen is bit rearranged.[br/]
-Fixed "weapons" like medickit are now equipped by unit.[br/]
-Psi-amp use 3d range not 2d.[br/]
-Psi-amp can use weapon power.[br/]
-Fixed ammo are added after weapons in armor and unit (armor items are before unit items).[br/]
-Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.[br/]
-Stuned units can be hited by bullets and fire.[br/]
-Big groups of aliens (20+) get less morale loses from casualties.[br/]
-Terror units can now spawn with any buildin weapon not only one defined by name.[br/]
-After battle, wounlded unit restore health equal to 20 times armor regeneration stat (if its greater than zero).[br/]
-While loading and unloading weapon you must pay cost of moving item to hand.[br/]
-You can unprime granade for half of prime tu cost.[br/]
-Support for Ufo2000 armor damage type.[br/]
-Psi-amp can now obey maximum weapon range.[br/]
-Psi-amp can now deal direct damage using special attack type in popup menu.[br/]
-Throwing now require healthy arm to do it (if item is twohanded, then it require both).[br/]
-You can hit aliens in the head using any item you like, not only firearms stock.[br/]
-Items can now be un-throw able.[br/]
-Rewriten handling of alien psi attacks to handle new features of Psi-amp.[br/]
-Building, manufactures and reserch can now have special requirments for buildings available in base.[br/]
-Throwing and hiting using twohand weapon have same penalty like shooting it.
-
 
 [br/][br/]
 [i]Links[/i]
