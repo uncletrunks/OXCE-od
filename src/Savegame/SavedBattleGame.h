@@ -78,6 +78,7 @@ private:
 	bool _kneelReserved;
 	std::vector< std::vector<std::pair<int, int> > > _baseModules;
 	int _depth, _ambience;
+	std::vector<BattleItem*> _recoverGuaranteed, _recoverConditional;
 	/// Selects a soldier.
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
 public:
@@ -272,6 +273,10 @@ public:
 	int getAmbientSound() const;
 	// gets ruleset.
 	const Ruleset *getRuleset() const;
+	/// gets the list of items we're guaranteed.
+	std::vector<BattleItem*> *getGuaranteedRecoveredItems();
+	/// gets the list of items we MIGHT get.
+	std::vector<BattleItem*> *getConditionalRecoveredItems();
 };
 
 }
