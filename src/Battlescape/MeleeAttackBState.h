@@ -16,47 +16,44 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_UNITDIEBSTATE_H
-#define OPENXCOM_UNITDIEBSTATE_H
+#ifndef OPENXCOM_MELEEATTACKBSTATE_H
+#define OPENXCOM_MELEEATTACKBSTATE_H
 
 #include "BattleState.h"
-#include "../Ruleset/RuleItem.h"
+#include "Position.h"
 
 namespace OpenXcom
 {
 
 class BattlescapeGame;
 class BattleUnit;
+class BattleItem;
+class Tile;
 
-/* Refactoring tip : UnitDieBState */
 /**
- * State for dying units.
+ * A Melee Attack state.
  */
-class UnitDieBState : public BattleState
+class MeleeAttackBState : public BattleState
 {
 private:
-	BattleUnit *_unit;
-	const RuleDamageType *_damageType;
-	bool _noSound;
-	int _extraFrame;
-	bool _overKill;
+	BattleUnit *_unit, *_target;
+	BattleItem *_weapon, *_ammo;
+	Position _voxel;
+	bool _initialized, _deathMessage;
 public:
-	/// Creates a new UnitDieBState class
-	UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const RuleDamageType *damageType, bool noSound);
-	/// Cleans up the UnitDieBState.
-	~UnitDieBState();
+	/// Creates a new MeleeAttackBState class
+	MeleeAttackBState(BattlescapeGame *parent, BattleAction action);
+	/// Cleans up the MeleeAttackBState.
+	~MeleeAttackBState();
 	/// Initializes the state.
 	void init();
-	/// Handles a cancels request.
-	void cancel();
 	/// Runs state functionality every cycle.
 	void think();
-	/// Gets the result of the state.
-	std::string getResult() const;
-	/// Converts a unit to a corpse.
-	void convertUnitToCorpse();
-	/// Plays the death sound.
-	void playDeathSound();
+	/// Performs a melee attack
+	void performMeleeAttack();
+	/// Determine if the attack hit, and if so, do stuff.
+	void resolveHit();
+
 };
 
 }

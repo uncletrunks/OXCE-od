@@ -86,7 +86,7 @@ public:
 	/// Handles unit hit.
 	bool hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type);
 	/// Handles bullet/weapon hits.
-	BattleUnit *hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit);
+	BattleUnit *hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit, bool rangeAtack = true);
 	/// Handles explosions.
 	void explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit = 0);
 	/// Checks if a destroyed tile starts an explosion.

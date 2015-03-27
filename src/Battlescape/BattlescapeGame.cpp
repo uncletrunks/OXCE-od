@@ -30,6 +30,8 @@
 #include "UnitTurnBState.h"
 #include "UnitWalkBState.h"
 #include "ProjectileFlyBState.h"
+#include "MeleeAttackBState.h"
+#include "PsiAttackBState.h"
 #include "ExplosionBState.h"
 #include "TileEngine.h"
 #include "UnitInfoState.h"
@@ -115,6 +117,29 @@ bool BattleActionCost::haveTU(std::string *message)
 		{
 			*message = "STR_NOT_ENOUGH_ENERGY";
 		}
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Test if action can be performed multiple times.
+ * @param i how many times do action.
+ * @return Unit have enough stats to perform actions.
+ */
+bool BattleActionCost::haveMultipleTU(int i)
+{
+	if (TU <= 0)
+	{
+		//no action, no message
+		return false;
+	}
+	if (actor->getTimeUnits() < TU * i)
+	{
+		return false;
+	}
+	if (actor->getEnergy() < Energy * i)
+	{
 		return false;
 	}
 	return true;
@@ -254,7 +279,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 	{
 		unit->dontReselect();
 	}
-	if (unit->getTimeUnits() <= 5 || _AIActionCounter >= 2 || !unit->reselectAllowed())
+	if (_AIActionCounter >= 2 || !unit->reselectAllowed())
 	{
 		if (_save->selectNextPlayerUnit(true, _AISecondMove) == 0)
 		{
@@ -354,16 +379,25 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 
 	if (action.type == BA_SNAPSHOT || action.type == BA_AUTOSHOT || action.type == BA_AIMEDSHOT || action.type == BA_THROW || action.type == BA_HIT || action.type == BA_MINDCONTROL || action.type == BA_USE || action.type == BA_PANIC || action.type == BA_LAUNCH)
 	{
-		if (action.type != BA_MINDCONTROL && action.type != BA_PANIC && action.type != BA_USE)
-		{
-			statePushBack(new UnitTurnBState(this, action));
-		}
-
 		ss.clear();
 		ss << L"Attack type=" << action.type << " target="<< action.target << " weapon=" << action.weapon->getRules()->getName().c_str();
 		_parentState->debug(ss.str());
-
-		statePushBack(new ProjectileFlyBState(this, action));
+		if (action.type == BA_MINDCONTROL || action.type == BA_PANIC || action.type == BA_USE)
+		{
+			statePushBack(new PsiAttackBState(this, action));
+		}
+		else
+		{
+			statePushBack(new UnitTurnBState(this, action));
+			if (action.type == BA_HIT)
+			{
+				statePushBack(new MeleeAttackBState(this, action));
+			}
+			else
+			{
+				statePushBack(new ProjectileFlyBState(this, action));
+			}
+		}
 	}
 
 	if (action.type == BA_NONE)
@@ -481,8 +515,8 @@ void BattlescapeGame::endTurn()
 	// if all units from either faction are killed - the mission is over.
 	int liveAliens = 0;
 	int liveSoldiers = 0;
-	// we'll tally them NOW, so that any infected units will... change
-	tallyUnits(liveAliens, liveSoldiers, true);
+
+	tallyUnits(liveAliens, liveSoldiers);
 
 	_save->endTurn();
 
@@ -694,10 +728,9 @@ void BattlescapeGame::handleNonTargetAction()
 			}
 			else
 			{
-				if (_currentAction.spendTU(&error))
+				if (_currentAction.haveTU(&error))
 				{
-					statePushBack(new ProjectileFlyBState(this, _currentAction));
-					return;
+					statePushBack(new MeleeAttackBState(this, _currentAction));
 				}
 				else
 				{
@@ -1367,7 +1400,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 					getMap()->setCursorType(CT_NONE);
 					_parentState->getGame()->getCursor()->setVisible(false);
 					_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
-					statePushBack(new ProjectileFlyBState(this, _currentAction));
+					statePushBack(new PsiAttackBState(this, _currentAction));
 				}
 				else
 				{
@@ -1648,11 +1681,6 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &ne
 
 	unit->instaKill();
 
-	if (Options::battleNotifyDeath && unit->getFaction() == FACTION_PLAYER && unit->getOriginalFaction() == FACTION_PLAYER)
-	{
-		_parentState->getGame()->pushState(new InfoboxState(_parentState->getGame()->getLanguage()->getString("STR_HAS_BEEN_KILLED", unit->getGender()).arg(unit->getName(_parentState->getGame()->getLanguage()))));
-	}
-
 	for (std::vector<BattleItem*>::iterator i = unit->getInventory()->begin(); i != unit->getInventory()->end(); ++i)
 	{
 		dropItem(unit->getPosition(), (*i));
@@ -1678,16 +1706,16 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &ne
 	getSave()->initFixedItems(newUnit);
 	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
 	newUnit->setPosition(unit->getPosition());
-	newUnit->setDirection(3);
+	newUnit->setDirection(unit->getDirection());
 	newUnit->setCache(0);
 	newUnit->setTimeUnits(0);
 	getSave()->getUnits()->push_back(newUnit);
-	getMap()->cacheUnit(newUnit);
 	newUnit->setAIState(new AlienBAIState(getSave(), newUnit, 0));
 
 	getTileEngine()->calculateFOV(newUnit->getPosition());
 	getTileEngine()->applyGravity(newUnit->getTile());
-	newUnit->setVisible(visible);
+	newUnit->dontReselect();
+	getMap()->cacheUnit(newUnit);
 	//newUnit->getCurrentAIState()->think();
 	return newUnit;
 
@@ -2064,23 +2092,10 @@ BattleActionType BattlescapeGame::getReservedAction()
  * @param &liveSoldiers The integer in which to store the live XCom tally.
  * @param convert Should we convert infected units?
  */
-void BattlescapeGame::tallyUnits(int &liveAliens, int &liveSoldiers, bool convert)
+void BattlescapeGame::tallyUnits(int &liveAliens, int &liveSoldiers)
 {
 	liveSoldiers = 0;
 	liveAliens = 0;
-
-	if (convert)
-	{
-		for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
-		{
-			if ((*j)->getHealth() > 0 && (*j)->getRespawn())
-			{
-				(*j)->setRespawn(false);
-				convertUnit((*j), (*j)->getSpawnUnit());
-				j = _save->getUnits()->begin();
-			}
-		}
-	}
 
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
@@ -2108,6 +2123,21 @@ void BattlescapeGame::tallyUnits(int &liveAliens, int &liveSoldiers, bool conver
 	}
 }
 
+bool BattlescapeGame::convertInfected()
+{
+	bool retVal = false;
+	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
+	{
+		if ((*j)->getHealth() > 0 && (*j)->getRespawn())
+		{
+			retVal = true;
+			(*j)->setRespawn(false);
+			convertUnit((*j), (*j)->getSpawnUnit());
+			j = _save->getUnits()->begin();
+		}
+	}
+	return retVal;
+}
 /**
  * Sets the kneel reservation setting.
  * @param reserved Should we reserve an extra 4 TUs to kneel?

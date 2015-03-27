@@ -51,7 +51,7 @@ namespace OpenXcom
  * @param noSound Whether to disable the death sound.
  */
 UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const RuleDamageType* damageType, bool noSound) : BattleState(parent),
-	_unit(unit), _damageType(damageType), _noSound(noSound), _overKill(false)
+	_unit(unit), _damageType(damageType), _noSound(noSound), _extraFrame(0), _overKill(false)
 {
 	// don't show the "fall to death" animation when a unit is blasted with explosives or he is already unconscious
 	if (!_damageType->isDirect() || _unit->getStatus() == STATUS_UNCONSCIOUS)
@@ -148,36 +148,12 @@ void UnitDieBState::think()
 			}
 		}
 	}
-
-	if (_unit->isOut())
+	if (_extraFrame == 2)
 	{
-		if (!_noSound && !_damageType->isDirect() && _unit->getStatus() != STATUS_UNCONSCIOUS)
-		{
-			playDeathSound();
-		}
-		if (_unit->getStatus() == STATUS_UNCONSCIOUS && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
-		{
-			_unit->instaKill();
-		}
 		_parent->getMap()->setUnitDying(false);
-		if (_unit->getTurnsSinceSpotted() < 255)
-		{
-			_unit->setTurnsSinceSpotted(255);
-		}
-
-		if (!_unit->getSpawnUnit().empty() && !_overKill)
-		{
-			// converts the dead zombie to a chryssalid
-			BattleUnit *newUnit = _parent->convertUnit(_unit, _unit->getSpawnUnit());
-		}
-		else
-		{
-			convertUnitToCorpse();
-		}
-
 		_parent->getTileEngine()->calculateUnitLighting();
 		_parent->popState();
-		if (_unit->getOriginalFaction() == FACTION_PLAYER && _unit->getSpawnUnit().empty() && _unit->getArmor()->getSize() == 1)
+		if (_unit->getOriginalFaction() == FACTION_PLAYER)
 		{
 			Game *game = _parent->getSave()->getBattleState()->getGame();
 			if (_unit->getStatus() == STATUS_DEAD)
@@ -188,7 +164,14 @@ void UnitDieBState::think()
 				}
 				else if (Options::battleNotifyDeath)
 				{
-					game->pushState(new InfoboxState(game->getLanguage()->getString("STR_HAS_BEEN_KILLED", _unit->getGender()).arg(_unit->getName(game->getLanguage()))));
+					if (_damageType->ResistType == DT_NONE && _unit->getSpawnUnit().empty())
+					{
+						game->pushState(new InfoboxOKState(game->getLanguage()->getString("STR_HAS_DIED_FROM_A_FATAL_WOUND", _unit->getGender()).arg(_unit->getName(game->getLanguage()))));
+					}
+					else if (Options::battleNotifyDeath)
+					{
+						game->pushState(new InfoboxState(game->getLanguage()->getString("STR_HAS_BEEN_KILLED", _unit->getGender()).arg(_unit->getName(game->getLanguage()))));
+					}
 				}
 			}
 			else
@@ -201,7 +184,7 @@ void UnitDieBState::think()
 		{
 			int liveAliens = 0;
 			int liveSoldiers = 0;
-			_parent->tallyUnits(liveAliens, liveSoldiers, false);
+			_parent->tallyUnits(liveAliens, liveSoldiers);
 
 			if (liveAliens == 0 || liveSoldiers == 0)
 			{
@@ -211,6 +194,36 @@ void UnitDieBState::think()
 			}
 		}
 	}
+	else if (_extraFrame == 1)
+	{
+		_extraFrame++;
+	}
+	else if (_unit->isOut())
+	{
+		_extraFrame = 1;
+		if (!_noSound && !_damageType->isDirect() && _unit->getStatus() != STATUS_UNCONSCIOUS)
+		{
+			playDeathSound();
+		}
+		if (_unit->getStatus() == STATUS_UNCONSCIOUS && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
+		{
+			_unit->instaKill();
+		}
+		if (_unit->getTurnsSinceSpotted() < 255)
+		{
+			_unit->setTurnsSinceSpotted(255);
+		}
+		if (!_unit->getSpawnUnit().empty() && !_overKill)
+		{
+			// converts the dead zombie to a chryssalid
+			BattleUnit *newUnit = _parent->convertUnit(_unit, _unit->getSpawnUnit());
+		}
+		else
+		{
+			convertUnitToCorpse();
+		}
+	}
+
 	_parent->getMap()->cacheUnit(_unit);
 }
 
@@ -226,21 +239,23 @@ void UnitDieBState::cancel()
  */
 void UnitDieBState::convertUnitToCorpse()
 {
-	_parent->getSave()->getBattleState()->showPsiButton(false);
 	Position lastPosition = _unit->getPosition();
+	int size = _unit->getArmor()->getSize();
+	bool dropItems = (size == 1 &&
+		(!Options::weaponSelfDestruction ||
+		(_unit->getOriginalFaction() != FACTION_HOSTILE || _unit->getStatus() == STATUS_UNCONSCIOUS)));
+
+	_parent->getSave()->getBattleState()->showPsiButton(false);
 	// remove the unconscious body item corresponding to this unit, and if it was being carried, keep track of what slot it was in
 	if (lastPosition != Position(-1,-1,-1))
 	{
 		_parent->getSave()->removeUnconsciousBodyItem(_unit);
 	}
-	int size = _unit->getArmor()->getSize();
-	bool dropItems = !Options::weaponSelfDestruction || (_unit->getOriginalFaction() != FACTION_HOSTILE || _unit->getStatus() == STATUS_UNCONSCIOUS);
-	// move inventory from unit to the ground for non-large units
-	if (size == 1)
+
+	// move inventory from unit to the ground
+	if (dropItems)
 	{
-		const int itemToKeepMax = 2;
-		int itemToKeepPos = 0;
-		BattleItem *itemToKeep[itemToKeepMax] = { };
+		std::vector<BattleItem*> itemsToKeep;
 		for (std::vector<BattleItem*>::iterator i = _unit->getInventory()->begin(); i != _unit->getInventory()->end(); ++i)
 		{
 			if (!(*i)->getRules()->isFixed())
@@ -251,16 +266,13 @@ void UnitDieBState::convertUnitToCorpse()
 					(*i)->setOwner(0);
 				}
 			}
-			else if (itemToKeepPos < itemToKeepMax)
-			{
-				itemToKeep[itemToKeepPos++] = *i;
-			}
 		}
+
 		_unit->getInventory()->clear();
 
-		while (itemToKeepPos)
+		for (std::vector<BattleItem*>::iterator i = itemsToKeep.begin(); i != itemsToKeep.end(); ++i)
 		{
-			_unit->getInventory()->push_back(itemToKeep[--itemToKeepPos]);
+			_unit->getInventory()->push_back(*i);
 		}
 	}
 

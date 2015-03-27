@@ -154,7 +154,7 @@ void AlienBAIState::think(BattleAction *action)
 	_knownEnemies = countKnownTargets();
 	_visibleEnemies = selectNearestTarget();
 	_spottingEnemies = getSpottingUnits(_unit->getPosition());
-	_melee = _unit->getUtilityWeapon(BT_MELEE);
+	_melee = _unit->getUtilityWeapon(BT_MELEE) != 0;
 	_rifle = false;
 	_blaster = false;
 	_reachable = _save->getPathfinding()->findReachable(_unit, BattleActionCost());
@@ -498,6 +498,8 @@ void AlienBAIState::setupPatrol()
 			// can i shoot an object?
 			if (_fromNode->isTarget() &&
 				_unit->getMainHandWeapon() &&
+				_unit->getMainHandWeapon()->getRules()->getAccuracySnap() &&
+				_unit->getMainHandWeapon()->getAmmoItem() &&
 				_unit->getMainHandWeapon()->getAmmoItem()->getRules()->getDamageType()->isDirect() &&
 				_save->getModuleMap()[_fromNode->getPosition().x / 10][_fromNode->getPosition().y / 10].second > 0)
 			{
@@ -1606,7 +1608,7 @@ void AlienBAIState::meleeAction()
 			return;
 		}
 	}
-	BattleActionCost attackCost(BA_HIT, _unit, _unit->getMainHandWeapon());
+	BattleActionCost attackCost(BA_HIT, _unit, _attackAction->weapon);
 	int chargeReserve = std::min(_unit->getTimeUnits() - attackCost.TU, 2 * (_unit->getEnergy() - attackCost.Energy));
 	int distance = (chargeReserve / 4) + 1;
 	_aggroTarget = 0;
@@ -2017,7 +2019,6 @@ void AlienBAIState::meleeAttack()
 	if (_traceAI) { Log(LOG_INFO) << "Attack unit: " << _aggroTarget->getId(); }
 	_attackAction->target = _aggroTarget->getPosition();
 	_attackAction->type = BA_HIT;
-	_attackAction->weapon = _unit->getUtilityWeapon(BT_MELEE);
 }
 
 /**
@@ -2064,8 +2065,9 @@ BattleActionType AlienBAIState::getReserveMode()
  */
 void AlienBAIState::selectMeleeOrRanged()
 {
+	BattleItem *melee = _unit->getUtilityWeapon(BT_MELEE);
 	RuleItem *rangedWeapon = _unit->getMainHandWeapon()->getRules();
-	RuleItem *meleeWeapon = _unit->getUtilityWeapon(BT_MELEE) ? _unit->getUtilityWeapon(BT_MELEE)->getRules() : 0;
+	RuleItem *meleeWeapon = melee ? melee->getRules() : 0;
 
 	if (!meleeWeapon)
 	{
@@ -2108,6 +2110,7 @@ void AlienBAIState::selectMeleeOrRanged()
 		if (RNG::percent(meleeOdds))
 		{
 			_rifle = false;
+			_attackAction->weapon = melee;
 			_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_HIT, _unit, _unit->getUtilityWeapon(BT_MELEE)));
 			return;
 		}
@@ -2166,6 +2169,11 @@ bool AlienBAIState::getNodeOfBestEfficacy(BattleAction *action)
 		}
 	}
 	return bestScore > 2;
+}
+
+BattleUnit* AlienBAIState::getTarget()
+{
+	return _aggroTarget;
 }
 
 }

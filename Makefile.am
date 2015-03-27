@@ -161,6 +161,8 @@ openxcom_SOURCES = \
 	src/Battlescape/MedikitState.h \
 	src/Battlescape/MedikitView.cpp \
 	src/Battlescape/MedikitView.h \
+	src/Battlescape/MeleeAttackBState.cpp \
+	src/Battlescape/MeleeAttackBState.h \
 	src/Battlescape/MiniMapState.cpp \
 	src/Battlescape/MiniMapState.h \
 	src/Battlescape/MiniMapView.cpp \
@@ -187,6 +189,8 @@ openxcom_SOURCES = \
 	src/Battlescape/Projectile.h \
 	src/Battlescape/PromotionsState.cpp \
 	src/Battlescape/PromotionsState.h \
+	src/Battlescape/PsiAttackBState.cpp \
+	src/Battlescape/PsiAttackBState.h \
 	src/Battlescape/ScannerState.cpp \
 	src/Battlescape/ScannerState.h \
 	src/Battlescape/ScannerView.cpp \

@@ -40,7 +40,7 @@ class Pathfinding;
 class Ruleset;
 class InfoboxOKState;
 
-enum BattleActionType { BA_NONE, BA_TURN, BA_WALK, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_STUN, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK };
+enum BattleActionType { BA_NONE, BA_TURN, BA_WALK, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK };
 
 struct BattleActionCost
 {
@@ -62,6 +62,8 @@ struct BattleActionCost
 	void clearTU();
 	/// Test if actor have enough TU to perform weapon action.
 	bool haveTU(std::string *message = 0);
+	/// Test if actor can perform weapon action multiple times.
+	bool haveMultipleTU(int i);
 	/// Spend TU when actor have enough TU.
 	bool spendTU(std::string *message = 0);
 	/// Refund TU cost if we encounter error.
@@ -205,7 +207,8 @@ public:
 	/// Returns the type of action that is reserved.
 	BattleActionType getReservedAction();
 	/// Tallies the living units, converting them if necessary.
-	void tallyUnits(int &liveAliens, int &liveSoldiers, bool convert);
+	void tallyUnits(int &liveAliens, int &liveSoldiers);
+	bool convertInfected();
 	/// Sets the kneel reservation setting.
 	void setKneelReserved(bool reserved);
 	/// Checks the kneel reservation setting.

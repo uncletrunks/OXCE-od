@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Armor.h"
+#include "../Savegame/Soldier.h"
 
 namespace OpenXcom
 {
@@ -29,7 +30,8 @@ namespace OpenXcom
 Armor::Armor(const std::string &type) :
 	_type(type), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _regeneration(0),
-	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _forcedTorso(TORSO_USE_GENDER),
+	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
+	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
 	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
@@ -53,6 +55,7 @@ void Armor::load(const YAML::Node &node)
 	_type = node["type"].as<std::string>(_type);
 	_spriteSheet = node["spriteSheet"].as<std::string>(_spriteSheet);
 	_spriteInv = node["spriteInv"].as<std::string>(_spriteInv);
+	_hasInventory = node["allowInv"].as<bool>(_hasInventory);
 	if (node["corpseItem"])
 	{
 		_corpseBattle.clear();
@@ -81,7 +84,7 @@ void Armor::load(const YAML::Node &node)
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
 	if (const YAML::Node &dmg = node["damageModifier"])
 	{
-		for (size_t i = 0; i < dmg.size() && i < DAMAGE_TYPES; ++i)
+		for (size_t i = 0; i < dmg.size() && i < (size_t)DAMAGE_TYPES; ++i)
 		{
 			_damageModifier[i] = dmg[i].as<float>();
 		}
@@ -133,6 +136,15 @@ void Armor::load(const YAML::Node &node)
 		_zombiImmune = node["zombiImmune"].as<bool>();
 	}
 	_overKill = node["overKill"].as<float>(_overKill);
+
+	_faceColorGroup = node["spriteFaceGroup"].as<int>(_faceColorGroup);
+	_hairColorGroup = node["spriteHairGroup"].as<int>(_hairColorGroup);
+	_rankColorGroup = node["spriteRankGroup"].as<int>(_rankColorGroup);
+	_utileColorGroup = node["spriteUtileGroup"].as<int>(_utileColorGroup);
+	_faceColor = node["spriteFaceColor"].as<std::vector<int> >(_faceColor);
+	_hairColor = node["spriteHairColor"].as<std::vector<int> >(_hairColor);
+	_rankColor = node["spriteRankColor"].as<std::vector<int> >(_rankColor);
+	_utileColor = node["spriteUtileColor"].as<std::vector<int> >(_utileColor);
 }
 
 /**
@@ -436,6 +448,115 @@ bool Armor::getZombiImmune(bool def) const
 float Armor::getOverKill() const
 {
 	return _overKill;
+}
+
+/**
+ * Gets hair base color group for replacement, if 0 then don't replace colors.
+ * @return Color group or 0.
+ */
+int Armor::getFaceColorGroup() const
+{
+	return _faceColorGroup;
+}
+
+/**
+ * Gets hair base color group for replacement, if 0 then don't replace colors.
+ * @return Color group or 0.
+ */
+int Armor::getHairColorGroup() const
+{
+	return _hairColorGroup;
+}
+
+/**
+ * Gets utile base color group for replacement, if 0 then don't replace colors.
+ * @return Color group or 0.
+ */
+int Armor::getUtileColorGroup() const
+{
+	return _utileColorGroup;
+}
+
+/**
+ * Gets rank base color group for replacement, if 0 then don't replace colors.
+ * @return Color group or 0.
+ */
+int Armor::getRankColorGroup() const
+{
+	return _rankColorGroup;
+}
+
+/**
+ * Gets new face colors for replacement, if 0 then don't replace colors.
+ * @return Color index or 0.
+ */
+int Armor::getFaceColor(int i) const
+{
+	if ((size_t)i < _faceColor.size())
+	{
+		return _faceColor[i];
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+/**
+ * Gets new hair colors for replacement, if 0 then don't replace colors.
+ * @return Color index or 0.
+ */
+int Armor::getHairColor(int i) const
+{
+	if ((size_t)i < _hairColor.size())
+	{
+		return _hairColor[i];
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+/**
+ * Gets new utile colors for replacement, if 0 then don't replace colors.
+ * @return Color index or 0.
+ */
+int Armor::getUtileColor(int i) const
+{
+	if ((size_t)i < _utileColor.size())
+	{
+		return _utileColor[i];
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+/**
+ * Gets new rank colors for replacement, if 0 then don't replace colors.
+ * @return Color index or 0.
+ */
+int Armor::getRankColor(int i) const
+{
+	if ((size_t)i < _rankColor.size())
+	{
+		return _rankColor[i];
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+/**
+ * Can this unit's inventory be accessed for any reason?
+ * @return if we can access the inventory.
+ */
+bool Armor::hasInventory() const
+{
+	return _hasInventory;
 }
 
 }

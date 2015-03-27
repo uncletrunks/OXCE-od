@@ -916,6 +916,12 @@
     <ClCompile Include="Ruleset\Texture.cpp">
       <Filter>Ruleset</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\MeleeAttackBState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\PsiAttackBState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1859,6 +1865,12 @@
     </ClInclude>
     <ClInclude Include="Ruleset\Texture.h">
       <Filter>Ruleset</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\MeleeAttackBState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\PsiAttackBState.h">
+      <Filter>Battlescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

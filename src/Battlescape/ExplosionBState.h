@@ -39,7 +39,6 @@ class RuleDamageType;
 class ExplosionBState : public BattleState
 {
 private:
-	BattleActionType _action;
 	BattleUnit *_unit;
 	Position _center;
 	BattleItem *_item;

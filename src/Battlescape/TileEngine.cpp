@@ -48,6 +48,7 @@
 #include "Pathfinding.h"
 #include "../Engine/Options.h"
 #include "ProjectileFlyBState.h"
+#include "MeleeAttackBState.h"
 #include "../Engine/Logger.h"
 #include "../fmath.h"
 
@@ -1028,9 +1029,14 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 
 		if (action.targeting && action.spendTU())
 		{
-			action.clearTU();
-			_save->getBattleGame()->statePushBack(new UnitTurnBState(_save->getBattleGame(), action, false));
-			_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
+			if (action.type == BA_HIT)
+			{
+				_save->getBattleGame()->statePushBack(new MeleeAttackBState(_save->getBattleGame(), action));
+			}
+			else
+			{
+				_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
+			}
 			return true;
 		}
 	}
@@ -1145,7 +1151,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
  * @param unit The unit that caused the explosion.
  * @return The Unit that got hit.
  */
-BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit)
+BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit, bool rangeAtack)
 {
 	Tile *tile = _save->getTile(center.toTile());
 	if (!tile || power <= 0)
@@ -1216,8 +1222,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 				unit &&
 				unit->getOriginalFaction() == FACTION_PLAYER &&
 				type->ResistType != DT_NONE &&
-				_save->getBattleGame()->getCurrentAction()->type != BA_HIT &&
-				_save->getBattleGame()->getCurrentAction()->type != BA_STUN)
+				rangeAtack)
 			{
 				unit->addFiringExp();
 			}
@@ -2533,6 +2538,7 @@ int TileEngine::psiAttackCalculate(BattleActionType type, BattleUnit *attacker, 
 }
 
 /**
+<<<<<<< HEAD
  * Attempts a panic or mind control action.
  * @param action Pointer to an action.
  * @return Whether it failed or succeeded.
@@ -2568,7 +2574,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 			{
 				int liveAliens = 0;
 				int liveSoldiers = 0;
-				_save->getBattleGame()->tallyUnits(liveAliens, liveSoldiers, false);
+				_save->getBattleGame()->tallyUnits(liveAliens, liveSoldiers);
 				if (liveAliens == 0 || liveSoldiers == 0)
 				{
 					_save->setSelectedUnit(0);
@@ -2590,6 +2596,8 @@ bool TileEngine::psiAttack(BattleAction *action)
 }
 
 /**
+=======
+>>>>>>> smaster
  * Applies gravity to a tile. Causes items and units to drop.
  * @param t Tile.
  * @return Tile where the items end up in eventually.

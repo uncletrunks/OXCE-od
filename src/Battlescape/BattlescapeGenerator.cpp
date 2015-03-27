@@ -690,7 +690,6 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 			_save->getUnits()->push_back(unit);
 			_save->initFixedItems(unit);
 			_save->getTileEngine()->calculateFOV(unit);
-			unit->deriveRank();
 			return unit;
 		}
 		else if (_save->getMissionType() != "STR_BASE_DEFENSE")
@@ -702,7 +701,6 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				_save->getUnits()->push_back(unit);
 				_save->initFixedItems(unit);
 				_save->getTileEngine()->calculateFOV(unit);
-				unit->deriveRank();
 				return unit;
 			}
 		}
@@ -728,7 +726,6 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 					_save->getUnits()->push_back(unit);
 					_save->initFixedItems(unit);
 					unit->setDirection(dir);
-					unit->deriveRank();
 					return unit;
 				}
 			}
@@ -744,7 +741,6 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				{
 					_save->getUnits()->push_back(unit);
 					_save->initFixedItems(unit);
-					unit->deriveRank();
 					return unit;
 				}
 			}

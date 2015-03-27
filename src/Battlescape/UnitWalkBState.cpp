@@ -18,7 +18,7 @@
  */
 
 #include "UnitWalkBState.h"
-#include "ProjectileFlyBState.h"
+#include "MeleeAttackBState.h"
 #include "TileEngine.h"
 #include "Pathfinding.h"
 #include "BattlescapeState.h"
@@ -187,7 +187,7 @@ void UnitWalkBState::think()
 			{
 				_unit->getTile()->ignite(1);
 				Position here = (_unit->getPosition() * Position(16,16,24)) + Position(8,8,-(_unit->getTile()->getTerrainLevel()));
-				_parent->getTileEngine()->hit(here, _unit->getBaseStats()->strength, _parent->getRuleset()->getDamageType(DT_IN), _unit);
+				_parent->getTileEngine()->hit(here, _unit->getBaseStats()->strength, _parent->getRuleset()->getDamageType(DT_IN), _unit, false);
 			}
 
 			// move our personal lighting with us
@@ -496,7 +496,7 @@ void UnitWalkBState::postPathProcedures()
 				action.targeting = true;
 				action.updateTU();
 				_unit->setCharging(0);
-				_parent->statePushBack(new ProjectileFlyBState(_parent, action));
+				_parent->statePushBack(new MeleeAttackBState(_parent, action));
 			}
 		}
 		else if (_unit->isHiding())
