@@ -25,7 +25,7 @@ SDL_PKG = i686-pc-mingw32-pkg-config
 BIN = OpenXcomEx.exe
 
 # Compiler settings
-CXXFLAGS = -Wall -o3 -s `$(SDL_CONFIG) --cflags` $(addprefix -D,$(TARGET)) -I$(SDL_INC) -I$(YAML_INC) `$(SDL_PKG)  SDL_mixer --cflags `
+CXXFLAGS = -Wall -O3 -s `$(SDL_CONFIG) --cflags` $(addprefix -D,$(TARGET)) -I$(SDL_INC) -I$(YAML_INC) `$(SDL_PKG)  SDL_mixer --cflags `
 LDFLAGS = -s `$(SDL_CONFIG) --libs` -lopengl32 -lshlwapi -lSDLmain -lSDL_gfx -lSDL_mixer -lSDL_image -lstdc++ `$(SDL_PKG) SDL_mixer --libs` `$(SDL_PKG) SDL_image --libs`
 
 # Rules
