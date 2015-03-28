@@ -20,16 +20,16 @@ PKG-CONFIG = /opt/mipsel-linux-uclibc/usr/bin/pkg-config
 BIN = openxcom.dge
 else
 PKG-CONFIG = pkg-config
-BIN = openxcom
+BIN = OpenXcomEx
 endif
 
 # Compiler settings
 ifeq ($(TARGET),OSX)
-CXXFLAGS ?= -O2
-CXXFLAGS += -Wall -Wextra
+CXXFLAGS ?= -O3
+CXXFLAGS += -Wall
 else
-CXXFLAGS ?= -O2
-CXXFLAGS += -Wall -Wextra -rdynamic
+CXXFLAGS ?= -O3
+CXXFLAGS += -Wall -rdynamic
 endif
 
 CXXFLAGS += $(addprefix -D,$(TARGET))
