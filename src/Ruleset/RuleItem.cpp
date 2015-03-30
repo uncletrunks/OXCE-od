@@ -19,6 +19,7 @@
 #include "Unit.h"
 #include "RuleItem.h"
 #include "RuleInventory.h"
+#include "Ruleset.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
@@ -253,7 +254,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_energyAimed(0), _energyAuto(-1), _energySnap(-1), _energyMelee(0), _energyUse(0), _energyMind(-1), _energyPanic(-1), _energyThrow(0),
 	_clipSize(0), _tuPrime(50), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
-	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _recoveryPoints(0), _armor(20), _turretType(-1),
+	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
@@ -443,6 +444,11 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);
 	_armor = node["armor"].as<int>(_armor);
 	_turretType = node["turretType"].as<int>(_turretType);
+	if (node["ai"])
+	{
+		const YAML::Node &nodeAI = node["ai"];
+		_aiUseDelay = nodeAI["useDelay"].as<int>(_aiUseDelay);
+	}
 	_recover = node["recover"].as<bool>(_recover);
 	_liveAlien = node["liveAlien"].as<bool>(_liveAlien);
 	_attraction = node["attraction"].as<int>(_attraction);
@@ -1185,6 +1191,45 @@ bool RuleItem::isRecoverable() const
 int RuleItem::getTurretType() const
 {
 	return _turretType;
+}
+
+/**
+ * Returns first turn when AI can use item.
+ * @param Pointer to the ruleset. 0 by default.
+ * @return First turn when AI can use item.
+ *	if ruleset == 0 returns only local defined aiUseDelay
+ *	else takes into account global define of aiUseDelay for this item
+ */
+int RuleItem::getAIUseDelay(Ruleset *ruleset) const
+{
+	if (ruleset == 0 || _aiUseDelay >= 0)
+		return _aiUseDelay;
+
+	switch (getBattleType())
+	{
+	case BT_FIREARM:
+		if (isWaypoint())
+		{
+			return ruleset->getAIUseDelayBlaster();
+		}
+		else
+		{
+			return ruleset->getAIUseDelayFirearm();
+		}
+
+	case BT_MELEE:
+		return ruleset->getAIUseDelayMelee();
+
+	case BT_GRENADE:
+	case BT_PROXIMITYGRENADE:
+		return ruleset->getAIUseDelayGrenade();
+
+	case BT_PSIAMP:
+		return ruleset->getAIUseDelayPsionic();
+
+	default:
+		return _aiUseDelay;
+	}
 }
 
 /**

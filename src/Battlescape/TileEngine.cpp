@@ -46,6 +46,7 @@
 #include "../Ruleset/Ruleset.h"
 #include "../Resource/ResourcePack.h"
 #include "Pathfinding.h"
+#include "../Engine/Game.h"
 #include "../Engine/Options.h"
 #include "ProjectileFlyBState.h"
 #include "MeleeAttackBState.h"
@@ -1001,6 +1002,14 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 	{
 		return false;
 	}
+
+	// check restrictions for aliens
+	if (unit->getFaction() == FACTION_HOSTILE &&
+		_save->getTurn() < action.weapon->getRules()->getAIUseDelay(_save->getBattleState()->getGame()->getRuleset()))
+	{
+		return false;
+	}
+
 	action.type = (BattleActionType)(attackType);
 	action.target = target->getPosition();
 	action.updateTU();
