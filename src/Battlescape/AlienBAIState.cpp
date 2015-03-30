@@ -51,7 +51,7 @@ namespace OpenXcom
  * @param node Pointer to the node the unit originates from.
  */
 AlienBAIState::AlienBAIState(SavedBattleGame *save, BattleUnit *unit, Node *node) : BattleAIState(save, unit), _aggroTarget(0), _knownEnemies(0), _visibleEnemies(0), _spottingEnemies(0),
-																				_escapeTUs(0), _ambushTUs(0), _reserveTUs(0), _rifle(false), _melee(false), _blaster(false),
+																				_escapeTUs(0), _ambushTUs(0), _reserveTUs(0), _rifle(false), _melee(false), _blaster(false), _grenade(false),
 																				_didPsi(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0)
 {
 	_traceAI = Options::traceAI;
@@ -186,10 +186,12 @@ void AlienBAIState::think(BattleAction *action)
 		Log(LOG_INFO) << "Currently using " << AIMode << " behaviour";
 	}
 
+	Ruleset *ruleset = _save->getBattleState()->getGame()->getRuleset();
 	if (action->weapon)
 	{
 		RuleItem *rule = action->weapon->getRules();
-		if (!rule->isWaterOnly() || _save->getDepth() != 0)
+		if (_save->getTurn() >= rule->getAIUseDelay(ruleset)
+			&& (!rule->isWaterOnly() || _save->getDepth() != 0))
 		{
 			if (rule->getBattleType() == BT_FIREARM)
 			{
@@ -216,6 +218,9 @@ void AlienBAIState::think(BattleAction *action)
 		}
 	}
 
+	BattleItem *grenade = _unit->getGrenadeFromBelt();
+	_grenade = grenade != 0 && _save->getTurn() >= grenade->getRules()->getAIUseDelay(ruleset);
+
 	if (_spottingEnemies && !_escapeTUs)
 	{
 		setupEscape();
@@ -229,7 +234,7 @@ void AlienBAIState::think(BattleAction *action)
 	setupAttack();
 	setupPatrol();
 
-	if (_psiAction->type != BA_NONE && !_didPsi)
+	if (_psiAction->type != BA_NONE && !_didPsi && _save->getTurn() >= ruleset->getAIUseDelayPsionic())
 	{
 		_didPsi = true;
 		action->type = _psiAction->type;
@@ -721,8 +726,7 @@ void AlienBAIState::setupAttack()
 		{
 			selectMeleeOrRanged();
 		}
-
-		if (_unit->getGrenadeFromBelt())
+		if (_grenade)
 		{
 			grenadeAction();
 		}
@@ -1496,9 +1500,6 @@ bool AlienBAIState::findFirePoint()
  */
 bool AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, int radius, int diff, bool grenade) const
 {
-	// i hate the player and i want him dead, but i don't want to piss him off.
-	if (_save->getTurn() < 3)
-		return false;
 	if (diff == -1)
 	{
 		diff = (int)(_save->getBattleState()->getGame()->getSavedGame()->getDifficulty());
@@ -2054,10 +2055,6 @@ void AlienBAIState::selectMeleeOrRanged()
  */
 bool AlienBAIState::getNodeOfBestEfficacy(BattleAction *action)
 {
-	// i hate the player and i want him dead, but i don't want to piss him off.
-	if (_save->getTurn() < 3)
-		return false;
-
 	int bestScore = 2;
 	Position originVoxel = _save->getTileEngine()->getSightOriginVoxel(_unit);
 	Position targetVoxel;

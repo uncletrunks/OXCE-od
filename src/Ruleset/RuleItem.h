@@ -29,6 +29,7 @@ namespace OpenXcom
 enum ItemDamageType { DT_NONE, DT_AP, DT_IN, DT_HE, DT_LASER, DT_PLASMA, DT_STUN, DT_MELEE, DT_ACID, DT_SMOKE };
 enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMITYGRENADE, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE, BT_PSIAMP, BT_FLARE, BT_CORPSE };
 
+class Ruleset;
 class SurfaceSet;
 class Surface;
 
@@ -61,6 +62,7 @@ private:
 	int _recoveryPoints;
 	int _armor;
 	int _turretType;
+	int _aiUseDelay;
 	bool _recover, _liveAlien;
 	int _blastRadius, _attraction;
 	bool _flatRate, _arcingShot;
@@ -169,6 +171,8 @@ public:
 	bool isRecoverable() const;
 	/// Gets the item's turret type.
 	int getTurretType() const;
+	/// Gets first turn when AI can use item.
+	int getAIUseDelay(Ruleset *ruleset = 0) const;
 	/// Checks if this a live alien.
 	bool isAlien() const;
 	/// Should we charge a flat rate?
