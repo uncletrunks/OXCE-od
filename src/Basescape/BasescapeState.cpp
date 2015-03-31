@@ -51,6 +51,7 @@
 #include "TransferBaseState.h"
 #include "CraftInfoState.h"
 #include "../Geoscape/AllocatePsiTrainingState.h"
+#include "../Geoscape/AllocateTrainingState.h"
 
 namespace OpenXcom
 {
@@ -407,6 +408,10 @@ void BasescapeState::viewRightClick(Action *)
 	else if (f->getRules()->getPsiLaboratories() > 0 && Options::anytimePsiTraining && _base->getAvailablePsiLabs() > 0)
 	{
 		_game->pushState(new AllocatePsiTrainingState(_base));
+	}
+	else if (f->getRules()->getTrainingFacilities() > 0 && Options::anytimePsiTraining && _base->getAvailableTraining() > 0)
+	{
+		_game->pushState(new AllocateTrainingState(_base));
 	}
 	else if (f->getRules()->getLaboratories() > 0)
 	{

@@ -24,6 +24,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/Options.h"
 #include "../Geoscape/AllocatePsiTrainingState.h"
+#include "../Geoscape/AllocateTrainingState.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -46,19 +47,39 @@ namespace OpenXcom
 SoldiersState::SoldiersState(Base *base) : _base(base)
 {
 	bool isPsiBtnVisible = Options::anytimePsiTraining && _base->getAvailablePsiLabs() > 0;
+	bool isTrnBtnVisible = Options::anytimePsiTraining && _base->getAvailableTraining() > 0;
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	if (isPsiBtnVisible)
 	{
+		if (isTrnBtnVisible)
+		{
+			_btnOk = new TextButton(70, 16, 242, 176);
+			_btnPsiTraining = new TextButton(70, 16, 164, 176);
+			_btnTraining = new TextButton(70, 16, 86, 176);
+			_btnMemorial = new TextButton(70, 16, 8, 176);
+		}
+		else
+		{
+			_btnOk = new TextButton(96, 16, 216, 176);
+			_btnPsiTraining = new TextButton(96, 16, 112, 176);
+			_btnTraining = new TextButton(96, 16, 112, 176);
+			_btnMemorial = new TextButton(96, 16, 8, 176);
+		}
+	}
+	else if (isTrnBtnVisible)
+	{
 		_btnOk = new TextButton(96, 16, 216, 176);
 		_btnPsiTraining = new TextButton(96, 16, 112, 176);
+		_btnTraining = new TextButton(96, 16, 112, 176);
 		_btnMemorial = new TextButton(96, 16, 8, 176);
 	}
 	else
 	{
 		_btnOk = new TextButton(148, 16, 164, 176);
 		_btnPsiTraining = new TextButton(148, 16, 164, 176);
+		_btnTraining = new TextButton(96, 16, 112, 176);
 		_btnMemorial = new TextButton(148, 16, 8, 176);
 	}
 	_txtTitle = new Text(310, 17, 5, 8);
@@ -73,6 +94,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base)
 	add(_window, "window", "soldierList");
 	add(_btnOk, "button", "soldierList");
 	add(_btnPsiTraining, "button", "soldierList");
+	add(_btnTraining, "button", "soldierList");
 	add(_btnMemorial, "button", "soldierList");
 	add(_txtTitle, "text1", "soldierList");
 	add(_txtName, "text2", "soldierList");
@@ -92,6 +114,10 @@ SoldiersState::SoldiersState(Base *base) : _base(base)
 	_btnPsiTraining->setText(tr("STR_PSIONIC_TRAINING"));
 	_btnPsiTraining->onMouseClick((ActionHandler)&SoldiersState::btnPsiTrainingClick);
 	_btnPsiTraining->setVisible(isPsiBtnVisible);
+
+	_btnTraining->setText(tr("STR_TRAINING"));
+	_btnTraining->onMouseClick((ActionHandler)&SoldiersState::btnTrainingClick);
+	_btnTraining->setVisible(isTrnBtnVisible);
 
 	_btnMemorial->setText(tr("STR_MEMORIAL"));
 	_btnMemorial->onMouseClick((ActionHandler)&SoldiersState::btnMemorialClick);
@@ -161,6 +187,15 @@ void SoldiersState::btnOkClick(Action *)
 void SoldiersState::btnPsiTrainingClick(Action *)
 {
 	_game->pushState(new AllocatePsiTrainingState(_base));
+}
+
+/**
+ * Opens the Psionic Training screen.
+ * @param action Pointer to an action.
+ */
+void SoldiersState::btnTrainingClick(Action *)
+{
+	_game->pushState(new AllocateTrainingState(_base));
 }
 
 /**

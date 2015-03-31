@@ -103,7 +103,7 @@ void State::add(Surface *surface, const std::string id, const std::string catego
 {
 	// Set palette
 	surface->setPalette(_palette);
-	
+
 	// this only works if we're dealing with a battlescape button
 	BattlescapeButton *bsbtn = dynamic_cast<BattlescapeButton*>(surface);
 

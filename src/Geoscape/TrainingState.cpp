@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2014 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,7 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sstream>
-#include "PsiTrainingState.h"
+#include "TrainingState.h"
 #include "../Engine/Game.h"
 #include "../Engine/Screen.h"
 #include "../Engine/Action.h"
@@ -30,8 +30,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
 #include "GeoscapeState.h"
-#include "AllocatePsiTrainingState.h"
-#include "TrainingState.h"
+#include "AllocateTrainingState.h"
 #include "../Engine/Options.h"
 
 namespace OpenXcom
@@ -41,7 +40,7 @@ namespace OpenXcom
  * Initializes all the elements in the Psi Training screen.
  * @param game Pointer to the core game.
  */
-PsiTrainingState::PsiTrainingState() : _training(false)
+TrainingState::TrainingState()
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -56,23 +55,24 @@ PsiTrainingState::PsiTrainingState() : _training(false)
 	add(_txtTitle, "text", "psiTraining");
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	_window->setBackground(_game->getResourcePack()->getSurface("BACK02.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
-	_btnOk->onMouseClick((ActionHandler)&PsiTrainingState::btnOkClick);
-	_btnOk->onKeyboardPress((ActionHandler)&PsiTrainingState::btnOkClick, Options::keyCancel);
+	_btnOk->onMouseClick((ActionHandler)&TrainingState::btnOkClick);
+	_btnOk->onKeyboardPress((ActionHandler)&TrainingState::btnOkClick, Options::keyCancel);
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setText(tr("STR_PSIONIC_TRAINING"));
+	_txtTitle->setText(tr("STR_PHYSICAL_TRAINING"));
 
 	int buttons = 0;
 	for (std::vector<Base*>::const_iterator b = _game->getSavedGame()->getBases()->begin(); b != _game->getSavedGame()->getBases()->end(); ++b)
 	{
-		if ((*b)->getAvailablePsiLabs())
+		if ((*b)->getAvailableTraining())
 		{
 			TextButton *btnBase = new TextButton(160, 14, 80, 40 + 16 * buttons);
-			btnBase->onMouseClick((ActionHandler)&PsiTrainingState::btnBaseXClick);
+			btnBase->setColor(Palette::blockOffset(15) + 6);
+			btnBase->onMouseClick((ActionHandler)&TrainingState::btnBaseXClick);
 			btnBase->setText((*b)->getName());
 			add(btnBase, "button1", "psiTraining");
 			_bases.push_back(*b);
@@ -83,7 +83,6 @@ PsiTrainingState::PsiTrainingState() : _training(false)
 				break;
 			}
 		}
-		_training = _training || (*b)->getAvailableTraining();
 	}
 
 	centerAllSurfaces();
@@ -91,7 +90,7 @@ PsiTrainingState::PsiTrainingState() : _training(false)
 /**
  *
  */
-PsiTrainingState::~PsiTrainingState()
+TrainingState::~TrainingState()
 {
 
 }
@@ -100,26 +99,22 @@ PsiTrainingState::~PsiTrainingState()
  * Returns to the previous screen.
  * @param action Pointer to an action.
  */
-void PsiTrainingState::btnOkClick(Action *)
+void TrainingState::btnOkClick(Action *)
 {
 	_game->popState();
-	if (_training)
-	{
-		_game->pushState(new TrainingState);
-	}
 }
 
 /**
  * Goes to the allocation screen for the corresponding base.
  * @param action Pointer to an action.
  */
-void PsiTrainingState::btnBaseXClick(Action *action)
+void TrainingState::btnBaseXClick(Action *action)
 {
 	for (size_t i = 0; i < _btnBases.size(); ++i)
 	{
 		if (action->getSender() == _btnBases[i])
 		{
-			_game->pushState(new AllocatePsiTrainingState(_bases.at(i)));
+			_game->pushState(new AllocateTrainingState(_bases.at(i)));
 			break;
 		}
 	}

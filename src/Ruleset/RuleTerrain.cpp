@@ -51,6 +51,7 @@ RuleTerrain::~RuleTerrain()
  */
 void RuleTerrain::load(const YAML::Node &node, Ruleset *ruleset)
 {
+	bool adding = node["addOnly"].as<bool>(false);
 	if (const YAML::Node &map = node["mapDataSets"])
 	{
 		_mapDataSets.clear();
@@ -61,7 +62,10 @@ void RuleTerrain::load(const YAML::Node &node, Ruleset *ruleset)
 	}
 	if (const YAML::Node &map = node["mapBlocks"])
 	{
-		_mapBlocks.clear();
+		if (!adding)
+		{
+			_mapBlocks.clear();
+		}
 		for (YAML::const_iterator i = map.begin(); i != map.end(); ++i)
 		{
 			MapBlock *mapBlock = new MapBlock((*i)["name"].as<std::string>());

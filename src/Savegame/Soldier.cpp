@@ -41,7 +41,7 @@ namespace OpenXcom
  * @param names List of name pools for soldier generation.
  * @param id Pointer to unique soldier id for soldier generation.
  */
-Soldier::Soldier(RuleSoldier *rules, Armor *armor, const std::vector<SoldierNamePool*> *names, int id) : _id(id), _improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0), _gender(GENDER_MALE), _look(LOOK_BLONDE), _missions(0), _kills(0), _recovery(0), _recentlyPromoted(false), _psiTraining(false), _armor(armor), _death(0)
+Soldier::Soldier(RuleSoldier *rules, Armor *armor, const std::vector<SoldierNamePool*> *names, int id) : _id(id), _improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0), _gender(GENDER_MALE), _look(LOOK_BLONDE), _missions(0), _kills(0), _recovery(0), _recentlyPromoted(false), _psiTraining(false), _training(false), _armor(armor), _death(0)
 {
 	if (names != 0)
 	{
@@ -114,6 +114,7 @@ void Soldier::load(const YAML::Node& node, const Ruleset *rule, SavedGame *save)
 	}
 	_armor = armor;
 	_psiTraining = node["psiTraining"].as<bool>(_psiTraining);
+	_training = node["training"].as<bool>(_training);
 	_improvement = node["improvement"].as<int>(_improvement);
 	_psiStrImprovement = node["psiStrImprovement"].as<int>(_psiStrImprovement);
 	if (const YAML::Node &layout = node["equipmentLayout"])
@@ -164,6 +165,8 @@ YAML::Node Soldier::save() const
 	node["armor"] = _armor->getType();
 	if (_psiTraining)
 		node["psiTraining"] = _psiTraining;
+	if (_training)
+		node["training"] = _training;
 	node["improvement"] = _improvement;
 	node["psiStrImprovement"] = _psiStrImprovement;
 	if (!_equipmentLayout.empty())
@@ -620,6 +623,46 @@ void Soldier::die(SoldierDeath *death)
 void Soldier::calcStatString(const std::vector<StatString *> &statStrings, bool psiStrengthEval)
 {
 	_statString = StatString::calcStatString(_currentStats, statStrings, psiStrengthEval);
+}
+
+/**
+ * Trains a soldier's Physical abilities
+ */
+void Soldier::trainPhys()
+{
+	// no P.T. for the wounded
+	if (_recovery == 0)
+	{
+		if(_currentStats.firing < _rules->getStatCaps().firing && RNG::generate(0, 100) > _currentStats.firing)
+			_currentStats.firing++;
+		if(_currentStats.health < _rules->getStatCaps().health && RNG::generate(0, 100) > _currentStats.health)
+			_currentStats.health++;
+		if(_currentStats.melee < _rules->getStatCaps().melee && RNG::generate(0, 100) > _currentStats.melee)
+			_currentStats.melee++;
+		if(_currentStats.throwing < _rules->getStatCaps().throwing && RNG::generate(0, 100) > _currentStats.throwing)
+			_currentStats.throwing++;
+		if(_currentStats.strength < _rules->getStatCaps().strength && RNG::generate(0, 100) > _currentStats.strength)
+			_currentStats.strength++;
+		if(_currentStats.tu < _rules->getStatCaps().tu && RNG::generate(0, 100) > _currentStats.tu)
+			_currentStats.tu++;
+		if(_currentStats.stamina < _rules->getStatCaps().stamina && RNG::generate(0, 100) > _currentStats.stamina)
+			_currentStats.stamina++;
+	}
+}
+/**
+ * returns whether or not the unit is in physical training
+ */
+bool Soldier::isInTraining()
+{
+	return _training;
+}
+
+/**
+ * changes whether or not the unit is in physical training
+ */
+void Soldier::setTraining(bool training)
+{
+	_training = training;
 }
 
 }

@@ -182,6 +182,10 @@ public:
 	int getAvailablePsiLabs() const;
 	/// Gets the base's total free psi lab space.
 	int getFreePsiLabs() const;
+	/// Gets the base's used training space.
+	int getUsedTraining() const;
+	/// Gets the base's total available training space.
+	int getAvailableTraining() const;
 	/// Gets the total amount of Containment Space
 	int getAvailableContainment() const;
 	/// Gets the total amount of used Containment Space

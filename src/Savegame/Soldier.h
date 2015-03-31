@@ -58,7 +58,7 @@ private:
 	SoldierGender _gender;
 	SoldierLook _look;
 	int _missions, _kills, _recovery;
-	bool _recentlyPromoted, _psiTraining;
+	bool _recentlyPromoted, _psiTraining, _training;
 	Armor *_armor;
 	std::vector<EquipmentLayoutItem*> _equipmentLayout;
 	SoldierDeath *_death;
@@ -142,6 +142,12 @@ public:
 	void die(SoldierDeath *death);
 	/// Calculate statString.
 	void calcStatString(const std::vector<StatString *> &statStrings, bool psiStrengthEval);
+	/// Trains a soldier's physical stats
+	void trainPhys();
+	/// Returns whether the unit is in training or not
+	bool isInTraining();
+	/// set the training status
+	void setTraining(bool training);
 };
 
 }

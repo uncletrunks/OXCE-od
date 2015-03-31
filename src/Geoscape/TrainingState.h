@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2014 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_PSITRAININGSTATE_H
-#define OPENXCOM_PSITRAININGSTATE_H
+#ifndef OPENXCOM_TRAININGSTATE_H
+#define OPENXCOM_TRAININGSTATE_H
 
 #include "../Engine/State.h"
 
@@ -32,7 +32,7 @@ class Base;
 /**
  * Screen shown monthly when the player has psi labs available.
  */
-class PsiTrainingState : public State
+class TrainingState : public State
 {
 private:
 	TextButton *_btnOk;
@@ -40,12 +40,11 @@ private:
 	Text *_txtTitle;
 	std::vector<TextButton*> _btnBases;
 	std::vector<Base*> _bases;
-	bool _training;
 public:
 	/// Creates the Psi Training state.
-	PsiTrainingState();
+	TrainingState();
 	/// Cleans up the Psi Training state.
-	~PsiTrainingState();
+	~TrainingState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking a Base button.

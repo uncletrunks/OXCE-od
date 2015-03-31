@@ -250,6 +250,7 @@ void TransferItemsState::completeTransfer()
 						 {
 							 (*s)->setPsiTraining();
 						 }
+						 (*s)->setTraining(false);
 						Transfer *t = new Transfer(time);
 						t->setSoldier(*s);
 						_baseTo->getTransfers()->push_back(t);

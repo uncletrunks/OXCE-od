@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.5a[/b]
+[b]Mod version 1.6[/b]
 OpenXcom version: Nightly 26/03/2015
 
 [br/][br/]
@@ -27,8 +27,10 @@ You can hit aliens in the head using any item you like, not only firearms stock.
 Items can now be un-throw able.[br/]
 Rewriten handling of alien psi attacks to handle new features of Psi-amp.[br/]
 Building, manufactures and reserch can now have special requirments for buildings available in base.[br/]
-Throwing and hiting using twohand weapon have same penalty like shooting it.
-
+Throwing and hiting using twohand weapon have same penalty like shooting it.[br/]
+[br/]
+1.6:[br/]
+You can train your solders basic skills.[br/]
 
 [br/][br/]
 [i]New ruleset[/i]
@@ -209,8 +211,9 @@ ufos:
 [code]
 facilities:
   - type: STR_SOME_FACILITY
-    provideBaseFunc: [ A ] #List of custom IDs that this bulding provide for base.
-    requiresBaseFunc: [ ] #List of custom IDs that are require to build this building in base.
+    provideBaseFunc: [ A ]  #List of custom IDs that this bulding provide for base.
+    requiresBaseFunc: [ ]   #List of custom IDs that are require to build this building in base.
+    trainingRooms: 0        #Number of solder that can be train in that building, require langue strings.
 [/code]
 
 [code]
@@ -223,6 +226,15 @@ manufacture:
 research:
   - type: STR_SOME_RESEARCH
     requiresBaseFunc: [ W, K ] #List of custom IDs that are require to start reserch in base.
+[/code]
+
+[code]
+extraStrings:
+  - type: en-US
+    strings:
+      STR_PHYSICAL_TRAINING: "Physical Training"     #required when using `trainingRooms` in `facilities`.
+      STR_TRAINING: "Training"                       #required when using `trainingRooms` in `facilities`.
+      STR_REMAINING_TRAINING_FACILITY_CAPACITY: "REMAINING TRAINING CAPACITY> {ALT}{0}" #required when using `trainingRooms` in `facilities`.
 [/code]
 
 [br/][br/]
@@ -244,5 +256,5 @@ http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641[br/]
 [br/]
 [i]Credits[/i]
 
-redv for couple of commits.[br/]
+redv & WarBoy1982 for couple of commits.[br/]
 SupSuper & WarBoy1982 & Daiky for OpenXcom :)[br/]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2014 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_PSITRAININGSTATE_H
-#define OPENXCOM_PSITRAININGSTATE_H
+#ifndef OPENXCOM_ALLOCATETRAININGSTATE_H
+#define OPENXCOM_ALLOCATETRAININGSTATE_H
 
 #include "../Engine/State.h"
 
@@ -28,28 +28,33 @@ class TextButton;
 class Window;
 class Text;
 class Base;
+class TextList;
+class Soldier;
 
 /**
- * Screen shown monthly when the player has psi labs available.
+ * Screen shown monthly to allow changing
+ * soldiers currently in psi training.
  */
-class PsiTrainingState : public State
+class AllocateTrainingState : public State
 {
 private:
 	TextButton *_btnOk;
 	Window *_window;
-	Text *_txtTitle;
-	std::vector<TextButton*> _btnBases;
-	std::vector<Base*> _bases;
-	bool _training;
+	Text *_txtTitle, *_txtTraining, *_txtName, *_txtRemaining;
+	TextList *_lstSoldiers;
+	std::vector<Soldier*> _soldiers;
+	size_t _sel;
+	int _space;
+	Base *_base;
 public:
 	/// Creates the Psi Training state.
-	PsiTrainingState();
+	AllocateTrainingState(Base *base);
 	/// Cleans up the Psi Training state.
-	~PsiTrainingState();
+	~AllocateTrainingState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
-	/// Handler for clicking a Base button.
-	void btnBaseXClick(Action *action);
+	/// Handler for clicking the Soldiers list.
+	void lstSoldiersClick(Action *action);
 };
 
 }

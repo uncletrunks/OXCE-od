@@ -1568,6 +1568,10 @@ void GeoscapeState::time1Day()
 			{
 				(*j)->heal();
 			}
+			if ((*j)->isInTraining())
+			{
+				(*j)->trainPhys();
+			}
 		}
 		// Handle psionic training
 		if ((*i)->getAvailablePsiLabs() > 0 && Options::anytimePsiTraining)
@@ -1645,7 +1649,6 @@ void GeoscapeState::time1Month()
 	}
 
 	// Handle Psi-Training and initiate a new retaliation mission, if applicable
-	bool psi = false;
 	for (std::vector<Base*>::const_iterator b = _game->getSavedGame()->getBases()->begin(); b != _game->getSavedGame()->getBases()->end(); ++b)
 	{
 		if (newRetaliation)
@@ -1685,7 +1688,6 @@ void GeoscapeState::time1Month()
 		}
 		if ((*b)->getAvailablePsiLabs() > 0 && !Options::anytimePsiTraining)
 		{
-			psi = true;
 			for (std::vector<Soldier*>::const_iterator s = (*b)->getSoldiers()->begin(); s != (*b)->getSoldiers()->end(); ++s)
 			{
 				if ((*s)->isInPsiTraining())
@@ -1700,7 +1702,7 @@ void GeoscapeState::time1Month()
 	// Handle funding
 	timerReset();
 	_game->getSavedGame()->monthlyFunding();
-	popup(new MonthlyReportState(psi, _globe));
+	popup(new MonthlyReportState(_globe));
 
 	// Handle Xcom Operatives discovering bases
 	if (!_game->getSavedGame()->getAlienBases()->empty() && RNG::percent(20))
