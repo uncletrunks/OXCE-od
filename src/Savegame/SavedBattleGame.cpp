@@ -344,6 +344,7 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 			_recoverGuaranteed.push_back(item);
 		}
 	}
+	_music = node["music"].as<std::string>(_music);
 }
 
 /**
@@ -471,6 +472,8 @@ YAML::Node SavedBattleGame::save() const
 	{
 		node["recoverConditional"].push_back((*i)->save());
 	}
+	node["music"] = _music;
+
 	return node;
 }
 
@@ -2208,4 +2211,21 @@ std::vector<BattleItem*> *SavedBattleGame::getConditionalRecoveredItems()
 	return &_recoverConditional;
 }
 
+/**
+ * Get the music track for the current battle.
+ * @return the name of the music track.
+ */
+std::string &SavedBattleGame::getMusic()
+{
+	return _music;
+}
+
+/**
+ * Set the music track for this battle.
+ * @param track the track name.
+ */
+void SavedBattleGame::setMusic(std::string track)
+{
+	_music = track;
+}
 }

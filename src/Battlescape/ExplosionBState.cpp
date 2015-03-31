@@ -204,13 +204,17 @@ void ExplosionBState::init()
 		{
 			anim = _item->getRules()->getMeleeAnimation();
 		}
-		if (type == BT_MELEE && !_pistolWhip)
+		if (_hit)
 		{
-			// melee weapon with ammo
-			BattleItem *ammo = _item->getAmmoItem();
-			if (ammo && ammo->getRules()->getMeleeAttackSound() != -1)
+			sound = _item->getRules()->getMeleeAttackSound();
+			if (!_pistolWhip)
 			{
-				sound = ammo->getRules()->getMeleeAttackSound();
+				// melee weapon with ammo
+				BattleItem *ammo = _item->getAmmoItem();
+				if (ammo && ammo->getRules()->getMeleeAttackSound() != -1)
+				{
+					sound = ammo->getRules()->getMeleeAttackSound();
+				}
 			}
 		}
 		Explosion *explosion = new Explosion(_center, anim, 0, false, (_hit || psi)); // Don't burn the tile
@@ -289,9 +293,19 @@ void ExplosionBState::explode()
 		{
 			_unit->addMeleeExp();
 		}
-		if (_item->getRules()->getMeleeHitSound() != -1)
+		int sound = _item->getRules()->getMeleeHitSound();
+		if (!_pistolWhip)
 		{
-			_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), _item->getRules()->getMeleeHitSound())->play(-1, _parent->getMap()->getSoundAngle(_action.target));
+			// melee weapon with ammo
+			BattleItem *ammo = _item->getAmmoItem();
+			if (ammo && ammo->getRules()->getMeleeHitSound() != -1)
+			{
+				sound = ammo->getRules()->getMeleeHitSound();
+			}
+		}
+		if (sound != -1)
+		{
+			_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), sound)->play(-1, _parent->getMap()->getSoundAngle(_action.target));
 		}
 	}
 	// after the animation is done, the real explosion/hit takes place

@@ -122,8 +122,7 @@ void MeleeAttackBState::init()
 	}
 
 	int height = _target->getFloatHeight() + (_target->getHeight() / 2) - _parent->getSave()->getTile(_action.target)->getTerrainLevel();
-	_parent->getSave()->getPathfinding()->directionToVector(_unit->getDirection(), &_voxel);
-	_voxel = _action.target.toVexel() + Position(8, 8, height) - _voxel;
+	_voxel = _action.target.toVexel() + Position(8, 8, height);
 
 	performMeleeAttack();
 }
@@ -207,8 +206,16 @@ void MeleeAttackBState::performMeleeAttack()
 	}
 	_parent->getMap()->setCursorType(CT_NONE);
 
+	// offset the damage voxel ever so slightly so that the target knows which side the attack came from
+	Position difference = _unit->getPosition() - _action.target;
+	// large units may cause it to offset too much, so we'll clamp the values.
+	difference.x = std::max(-1, std::min(1, difference.x));
+	difference.y = std::max(-1, std::min(1, difference.y));
+
+	Position damagePosition = _voxel + difference;
+
 	// make an explosion action
-	_parent->statePushFront(new ExplosionBState(_parent, _voxel, BA_HIT, _action.weapon, _action.actor, 0, true));
+	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, BA_HIT, _action.weapon, _action.actor, 0, true));
 }
 
 }
