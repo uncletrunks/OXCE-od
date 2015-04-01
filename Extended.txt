@@ -1,6 +1,6 @@
 [b]Extended version of OpenXcom[/b]
 [b]Mod version 1.6[/b]
-OpenXcom version: Nightly 26/03/2015
+OpenXcom version: Nightly 31/03/2015
 
 [br/][br/]
 [i]Behavior change[/i]
@@ -31,6 +31,7 @@ Throwing and hiting using twohand weapon have same penalty like shooting it.[br/
 [br/]
 1.6:[br/]
 You can train your solders basic skills.[br/]
+Aliens weapon types/weapons can have different turn restriction.[br/]
 
 [br/][br/]
 [i]New ruleset[/i]

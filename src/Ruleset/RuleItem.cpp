@@ -444,9 +444,8 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);
 	_armor = node["armor"].as<int>(_armor);
 	_turretType = node["turretType"].as<int>(_turretType);
-	if (node["ai"])
+	if (const YAML::Node &nodeAI = node["ai"])
 	{
-		const YAML::Node &nodeAI = node["ai"];
 		_aiUseDelay = nodeAI["useDelay"].as<int>(_aiUseDelay);
 	}
 	_recover = node["recover"].as<bool>(_recover);
