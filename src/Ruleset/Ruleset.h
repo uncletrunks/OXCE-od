@@ -113,6 +113,7 @@ protected:
 	RuleGlobe *_globe;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costSoldier, _costEngineer, _costScientist, _timePersonnel, _initialFunding;
+	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	std::string _alienFuel;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
@@ -213,6 +214,16 @@ public:
 	int getScientistCost() const;
 	/// Gets the transfer time of personnel.
 	int getPersonnelTime() const;
+	/// Gets first turn when AI can use Blaster launcher.
+	int getAIUseDelayBlaster() const  {return _aiUseDelayBlaster;}
+	/// Gets first turn when AI can use firearms.
+	int getAIUseDelayFirearm() const  {return _aiUseDelayFirearm;}
+	/// Gets first turn when AI can use grenades.
+	int getAIUseDelayGrenade() const  {return _aiUseDelayGrenade;}
+	/// Gets first turn when AI can use martial arts.
+	int getAIUseDelayMelee() const    {return _aiUseDelayMelee;}
+	/// Gets first turn when AI can use psionic abilities.
+	int getAIUseDelayPsionic() const  {return _aiUseDelayPsionic;}
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.
