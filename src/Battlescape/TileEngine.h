@@ -34,6 +34,7 @@ class BattleItem;
 class Tile;
 struct BattleAction;
 
+
 /**
  * A utility class that modifies tile properties on a battlescape map. This includes lighting, destruction, smoke, fire, fog of war.
  * Note that this function does not handle any sounds or animations.
@@ -62,6 +63,26 @@ private:
 	inline int getMaxVoxelViewDistance() const   {return _maxVoxelViewDistance;}
 	/// Get threshold of darkness for LoS calculation.
 	inline int getMaxDarknessToSeeUnits() const  {return _maxDarknessToSeeUnits;}
+
+	/**
+	 * Helper class storing reaction data
+	 */
+	struct ReactionScore
+	{
+		BattleUnit *unit;
+		int attackType;
+		double reactionScore;
+		double reactionReduction;
+	};
+
+	/// Checks validity of a snap shot to this position.
+	ReactionScore determineReactionType(BattleUnit *unit, BattleUnit *target);
+	/// Creates a vector of units that can spot this unit.
+	std::vector<ReactionScore> getSpottingUnits(BattleUnit* unit);
+	/// Given a vector of spotters, and a unit, picks the spotter with the highest reaction score.
+	ReactionScore *getReactor(std::vector<ReactionScore> &spotters, BattleUnit *unit);
+	/// Tries to perform a reaction snap shot to this location.
+	bool tryReaction(BattleUnit *unit, BattleUnit *target, int attackType);
 public:
 	/// Creates a new TileEngine class.
 	TileEngine(SavedBattleGame *save, std::vector<Uint16> *voxelData, int maxViewDistance, int maxDarknessToSeeUnits);
@@ -143,14 +164,6 @@ public:
 	bool validateThrow(BattleAction &action, Position originVoxel, Position targetVoxel, double *curve = 0, int *voxelType = 0);
 	/// Opens any doors this door is connected to.
 	void checkAdjacentDoors(Position pos, int part);
-	/// Creates a vector of units that can spot this unit.
-	std::vector<std::pair<BattleUnit *, int> > getSpottingUnits(BattleUnit* unit);
-	/// Given a vector of spotters, and a unit, picks the spotter with the highest reaction score.
-	BattleUnit* getReactor(std::vector<std::pair<BattleUnit *, int> > spotters, int &attackType, BattleUnit *unit);
-	/// Checks validity of a snap shot to this position.
-	int determineReactionType(BattleUnit *unit, BattleUnit *target);
-	/// Tries to perform a reaction snap shot to this location.
-	bool tryReaction(BattleUnit *unit, BattleUnit *target, int attackType);
 	/// Recalculates FOV of all units in-game.
 	void recalculateFOV();
 	/// Get direction to a certain point

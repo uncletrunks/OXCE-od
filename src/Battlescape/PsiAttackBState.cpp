@@ -85,15 +85,15 @@ void PsiAttackBState::init()
 		return;
 	}
 
-	if (!_action.haveTU(&_action.result)) // not enough time units
+	_target = _parent->getSave()->getTile(_action.target)->getUnit();
+
+	if (!_target) // invalid target
 	{
 		_parent->popState();
 		return;
 	}
 
-	_target = _parent->getSave()->getTile(_action.target)->getUnit();
-
-	if (!_target) // invalid target
+	if (!_action.spendTU(&_action.result)) // not enough time units
 	{
 		_parent->popState();
 		return;

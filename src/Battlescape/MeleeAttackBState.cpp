@@ -98,7 +98,6 @@ void MeleeAttackBState::init()
 			|| _parent->getSave()->getTile(_action.target)->getUnit()->isOut()
 			|| _parent->getSave()->getTile(_action.target)->getUnit() != _parent->getSave()->getSelectedUnit())
 		{
-			_action.rollbackTU();
 			_parent->popState();
 			return;
 		}
@@ -107,6 +106,13 @@ void MeleeAttackBState::init()
 		{
 			_unit->turn();
 		}
+	}
+
+	//spend TU
+	if (!_action.spendTU(&_action.result))
+	{
+		_parent->popState();
+		return;
 	}
 
 
@@ -147,16 +153,14 @@ void MeleeAttackBState::think()
 	}
 		// aliens
 	if (_unit->getFaction() != FACTION_PLAYER &&
-		// with enough TU for a second attack (*2 because they'll get charged for the initial attack when this state pops.)
-		_action.haveMultipleTU(2) &&
 		// whose target is still alive or at least conscious
 		_target && _target->getHealth() > 0 &&
 		_target->getHealth() > _target->getStunlevel() &&
 		// and we still have ammo to make the attack
-		_weapon->getAmmoItem())
-	{
+		_weapon->getAmmoItem() &&
 		// spend the TUs immediately
-		_action.spendTU();
+		_action.spendTU())
+	{
 		performMeleeAttack();
 	}
 	else

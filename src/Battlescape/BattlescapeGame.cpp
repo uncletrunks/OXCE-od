@@ -71,7 +71,7 @@ bool BattlescapeGame::_debugPlay = false;
  */
 void BattleActionCost::updateTU()
 {
-	if (actor)
+	if (actor && weapon)
 	{
 		TU = actor->getActionTUs(type, weapon);
 		Energy = actor->getActionEnergy(type, weapon);
@@ -899,12 +899,6 @@ void BattlescapeGame::popState()
 	{
 		if (action.actor->getFaction() == FACTION_PLAYER)
 		{
-			// spend TUs of "target triggered actions" (shooting, throwing) only
-			// the other actions' TUs (healing,scanning,..) are already take care of
-			if (action.targeting && _save->getSelectedUnit() && !actionFailed)
-			{
-				action.spendTU();
-			}
 			if (_save->getSide() == FACTION_PLAYER)
 			{
 				// after throwing the cursor returns to default cursor, after shooting it stays in targeting mode and the player can shoot again in the same mode (autoshot,snap,aimed)
@@ -924,8 +918,6 @@ void BattlescapeGame::popState()
 		}
 		else
 		{
-			// spend TUs
-			action.spendTU();
 			if (_save->getSide() != FACTION_PLAYER && !_debugPlay)
 			{
 				// AI does three things per unit, before switching to the next, or it got killed before doing the second thing
@@ -1243,12 +1235,9 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 				if (ba.weapon->getRules()->getBattleType() == BT_FIREARM)
 				{
 					ba.type = BA_SNAPSHOT;
-					int tu = ba.actor->getActionTUs(ba.type, ba.weapon);
+					// fire shots until unit runs out of TUs
 					for (int i= 0; i < 10; i++)
 					{
-						// fire shots until unit runs out of TUs
-						if (!ba.actor->spendTimeUnits(tu))
-							break;
 						statePushBack(new ProjectileFlyBState(this, ba));
 					}
 				}
@@ -1263,8 +1252,6 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 				}
 			}
 		}
-		// replace the TUs from shooting
-		unit->setTimeUnits(unit->getBaseStats()->tu);
 		ba.type = BA_NONE;
 		break;
 	default: break;

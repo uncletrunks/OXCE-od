@@ -86,8 +86,8 @@ void ProjectileFlyBState::init()
 		return;
 	}
 
-	if (_parent->getPanicHandled() &&
-		!_action.haveTU(&_action.result))
+	//test TU
+	if (!_action.haveTU(&_action.result))
 	{
 		_parent->popState();
 		return;
@@ -113,7 +113,6 @@ void ProjectileFlyBState::init()
 			|| _parent->getSave()->getTile(_action.target)->getUnit()->isOut()
 			|| _parent->getSave()->getTile(_action.target)->getUnit() != _parent->getSave()->getSelectedUnit())
 		{
-			_action.rollbackTU();
 			_parent->popState();
 			return;
 		}
@@ -245,8 +244,10 @@ void ProjectileFlyBState::init()
 			_targetVoxel = Position(_action.target.x*16 + 8, _action.target.y*16 + 8, _action.target.z*24 + 12);
 		}
 	}
+
 	if (createNewProjectile())
 	{
+		_action.spendTU();
 		_parent->getMap()->setCursorType(CT_NONE);
 		_parent->getMap()->getCamera()->stopMouseScrolling();
 	}

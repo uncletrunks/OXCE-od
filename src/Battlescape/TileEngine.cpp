@@ -808,7 +808,7 @@ bool TileEngine::checkReactionFire(BattleUnit *unit)
 		return false;
 	}
 
-	std::vector<std::pair<BattleUnit *, int> > spotters = getSpottingUnits(unit);
+	std::vector<ReactionScore> spotters = getSpottingUnits(unit);
 	bool result = false;
 
 	// not mind controlled, or controlled by the player
@@ -816,29 +816,30 @@ bool TileEngine::checkReactionFire(BattleUnit *unit)
 		|| unit->getFaction() != FACTION_HOSTILE)
 	{
 		// get the first man up to bat.
-		int attackType;
-		BattleUnit *reactor = getReactor(spotters, attackType, unit);
+		ReactionScore *reactor = getReactor(spotters, unit);
 		// start iterating through the possible reactors until the current unit is the one with the highest score.
-		while (reactor != unit)
+		while (reactor != 0)
 		{
-			if (!tryReaction(reactor, unit, attackType))
+			if (!tryReaction(reactor->unit, unit, reactor->attackType))
 			{
-				// can't make a reaction snapshot for whatever reason, boot this guy from the vector.
-				for (std::vector<std::pair<BattleUnit *, int> >::iterator i = spotters.begin(); i != spotters.end(); ++i)
+				for (std::vector<ReactionScore>::iterator i = spotters.begin(); i != spotters.end(); ++i)
 				{
-					if ((*i).first == reactor)
+					if (&(*i) == reactor)
 					{
 						spotters.erase(i);
+						reactor = 0;
 						break;
 					}
 				}
+				// can't make a reaction snapshot for whatever reason, boot this guy from the vector.
 				// avoid setting result to true, but carry on, just cause one unit can't react doesn't mean the rest of the units in the vector (if any) can't
-				reactor = getReactor(spotters, attackType, unit);
+				reactor = getReactor(spotters, unit);
 				continue;
 			}
 			// nice shot, kid. don't get cocky.
-			reactor = getReactor(spotters, attackType, unit);
 			result = true;
+			reactor->reactionScore -= reactor->reactionReduction;
+			reactor = getReactor(spotters, unit);
 		}
 	}
 	return result;
@@ -849,10 +850,11 @@ bool TileEngine::checkReactionFire(BattleUnit *unit)
  * @param unit The unit to check for spotters of.
  * @return A vector of units that can see this unit.
  */
-std::vector<std::pair<BattleUnit *, int> > TileEngine::getSpottingUnits(BattleUnit* unit)
+std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* unit)
 {
-	std::vector<std::pair<BattleUnit *, int> > spotters;
+	std::vector<TileEngine::ReactionScore> spotters;
 	Tile *tile = unit->getTile();
+	int threshold = unit->getReactionScore();
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
 			// not dead/unconscious
@@ -861,6 +863,8 @@ std::vector<std::pair<BattleUnit *, int> > TileEngine::getSpottingUnits(BattleUn
 			(*i)->getHealth() > 0 &&
 			// not about to pass out
 			(*i)->getStunlevel() < (*i)->getHealth() &&
+			// have any chances for reacting
+			(*i)->getReactionScore() >= threshold &&
 			// not a friend
 			(*i)->getFaction() != _save->getSide() &&
 			// closer than 20 tiles
@@ -886,10 +890,10 @@ std::vector<std::pair<BattleUnit *, int> > TileEngine::getSpottingUnits(BattleUn
 				// no reaction on civilian turn.
 				if (_save->getSide() != FACTION_NEUTRAL)
 				{
-					int attackType = determineReactionType(*i, unit);
-					if (attackType != BA_NONE)
+					ReactionScore rs = determineReactionType(*i, unit);
+					if (rs.attackType != BA_NONE)
 					{
-						spotters.push_back(std::make_pair(*i, attackType));
+						spotters.push_back(rs);
 					}
 				}
 			}
@@ -904,34 +908,28 @@ std::vector<std::pair<BattleUnit *, int> > TileEngine::getSpottingUnits(BattleUn
  * @param unit The unit to check scores against.
  * @return The unit with the highest reactions.
  */
-BattleUnit* TileEngine::getReactor(std::vector<std::pair<BattleUnit *, int> > spotters, int &attackType, BattleUnit *unit)
+TileEngine::ReactionScore *TileEngine::getReactor(std::vector<TileEngine::ReactionScore> &spotters, BattleUnit *unit)
 {
-	int bestScore = -1;
-	BattleUnit *bu = 0;
-	for (std::vector<std::pair<BattleUnit *, int> >::iterator i = spotters.begin(); i != spotters.end(); ++i)
+	ReactionScore *best = 0;
+	for (std::vector<ReactionScore>::iterator i = spotters.begin(); i != spotters.end(); ++i)
 	{
-		if (!(*i).first->isOut() &&
-		determineReactionType((*i).first, unit) != BA_NONE &&
-		(*i).first->getReactionScore() > bestScore)
+		if (!(*i).unit->isOut() && (!best || (*i).reactionScore > best->reactionScore))
 		{
-			bestScore = (*i).first->getReactionScore();
-			bu = (*i).first;
-			attackType = (*i).second;
+			best = &(*i);
 		}
 	}
-	if (unit->getReactionScore() <= bestScore)
+	if (best &&(unit->getReactionScore() <= best->reactionScore))
 	{
-		if (bu->getOriginalFaction() == FACTION_PLAYER)
+		if (best->unit->getOriginalFaction() == FACTION_PLAYER)
 		{
-			bu->addReactionExp();
+			best->unit->addReactionExp();
 		}
 	}
 	else
 	{
-		bu = unit;
-		attackType = BA_NONE;
+		best = 0;
 	}
-	return bu;
+	return best;
 }
 
 /**
@@ -940,8 +938,15 @@ BattleUnit* TileEngine::getReactor(std::vector<std::pair<BattleUnit *, int> > sp
  * @param target The unit to check sight TO.
  * @return True if the target is valid.
  */
-int TileEngine::determineReactionType(BattleUnit *unit, BattleUnit *target)
+TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, BattleUnit *target)
 {
+	ReactionScore reaction =
+	{
+		unit,
+		BA_NONE,
+		unit->getReactionScore(),
+		0,
+	};
 	// prioritize melee
 	BattleItem *meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
 	if (meleeWeapon &&
@@ -953,7 +958,9 @@ int TileEngine::determineReactionType(BattleUnit *unit, BattleUnit *target)
 			_save->getGeoscapeSave()->isResearched(meleeWeapon->getRules()->getRequirements())) &&
 		(_save->getDepth() != 0 || meleeWeapon->getRules()->isWaterOnly() == false))
 	{
-		return BA_HIT;
+		reaction.attackType = BA_HIT;
+		reaction.reactionReduction = 1.0 * BattleActionCost(BA_HIT, unit, meleeWeapon).TU * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
+		return reaction;
 	}
 
 	// has a weapon
@@ -972,11 +979,12 @@ int TileEngine::determineReactionType(BattleUnit *unit, BattleUnit *target)
 			_save->getGeoscapeSave()->isResearched(weapon->getRules()->getRequirements())) &&
 		(_save->getDepth() != 0 || weapon->getRules()->isWaterOnly() == false))
 	{
-		return BA_SNAPSHOT;
+		reaction.attackType = BA_SNAPSHOT;
+		reaction.reactionReduction = 1.0 * BattleActionCost(BA_SNAPSHOT, unit, weapon).TU * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
+		return reaction;
 	}
 
-
-	return BA_NONE;
+	return reaction;
 }
 
 /**
@@ -1036,7 +1044,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 			}
 		}
 
-		if (action.targeting && action.spendTU())
+		if (action.targeting)
 		{
 			if (action.type == BA_HIT)
 			{
