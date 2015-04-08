@@ -118,6 +118,7 @@ private:
 	int _sprite, _marker;
 	int _weapons, _weaponTypes[WeaponMax], _soldiers, _vehicles, _costBuy, _costRent, _costSell;
 	std::string _refuelItem;
+	std::string _weaponStrings[WeaponMax];
 	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
 	bool _spacecraft;
@@ -132,7 +133,7 @@ public:
 	/// Loads craft data from YAML.
 	void load(const YAML::Node& node, Ruleset *ruleset, int modIndex, int nextCraftIndex);
 	/// Gets the craft's type.
-	std::string getType() const;
+	const std::string &getType() const;
 	/// Gets the craft's requirements.
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the craft's sprite.
@@ -160,7 +161,7 @@ public:
 	/// Gets the craft's value.
 	int getSellCost() const;
 	/// Gets the craft's refuel item.
-	std::string getRefuelItem() const;
+	const std::string &getRefuelItem() const;
 	/// Gets the craft's repair rate.
 	int getRepairRate() const;
 	/// Gets the craft's refuel rate.
@@ -187,6 +188,8 @@ public:
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.
 	bool isValidWeaponSlot(int slot, int weaponType) const;
+	/// Get description string of weapon slot.
+	const std::string &getWeaponSlotString(int slot) const;
 	/// Get basic statistic of craft.
 	const RuleCraftStats& getStats() const;
 };

@@ -38,6 +38,8 @@ RuleCraft::RuleCraft(const std::string &type) :
 	_stats.radarRange = 672;
 	_stats.radarChance = 100;
 	_stats.sightRange = 1696;
+	_weaponStrings[0] = "STR_WEAPON_ONE";
+	_weaponStrings[1] = "STR_WEAPON_TWO";
 }
 
 /**
@@ -103,6 +105,11 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 		for (int i = 0; (size_t)i < types.size() &&  i < WeaponMax; ++i)
 			_weaponTypes[i] = types[i].as<int>();
 	}
+	if (const YAML::Node &str = node["weaponStrings"])
+	{
+		for (int i = 0; (size_t)i < str.size() &&  i < WeaponMax; ++i)
+			_weaponStrings[i] = str[i].as<std::string>();
+	}
 }
 
 /**
@@ -110,7 +117,7 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
  * this craft. Each craft type has a unique name.
  * @return The craft's name.
  */
-std::string RuleCraft::getType() const
+const std::string &RuleCraft::getType() const
 {
 	return _type;
 }
@@ -247,7 +254,7 @@ int RuleCraft::getSellCost() const
  * the craft is refuelling.
  * @return The item ID or "" if none.
  */
-std::string RuleCraft::getRefuelItem() const
+const std::string &RuleCraft::getRefuelItem() const
 {
 	return _refuelItem;
 }
@@ -369,13 +376,24 @@ int RuleCraft::getMaxItems() const
 
 /**
  * Test for possibility of usage of weapon type in weapon slot.
- * @return the item limit.
+ * @param slot value less than WeaponMax.
+ * @param weaponType weapon type of weapon that we try insert.
+ * @return True if can use.
  */
 bool RuleCraft::isValidWeaponSlot(int slot, int weaponType) const
 {
 	return _weaponTypes[slot] == weaponType;
 }
 
+/**
+ * Return string ID of weapon slot name for geoscape craft state.
+ * @param slot value less than WeaponMax.
+ * @return String ID for translation.
+ */
+const std::string &RuleCraft::getWeaponSlotString(int slot) const
+{
+	return _weaponStrings[slot];
+}
 /**
  * Gets basic statistic of craft.
  * @return Basic stats of craft.

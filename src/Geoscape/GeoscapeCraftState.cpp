@@ -51,27 +51,34 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 {
 	_screen = false;
 
+	_weaponNum = _craft->getRules()->getWeapons();
+	if (_weaponNum > RuleCraft::WeaponMax)
+		_weaponNum = RuleCraft::WeaponMax;
+
+	const int offset = 112;
+
 	// Create objects
-	_window = new Window(this, 240, 184, 8, 8, POPUP_BOTH);
-	_btnBase = new TextButton(192, 12, 32, 124);
-	_btnTarget = new TextButton(192, 12, 32, 140);
-	_btnPatrol = new TextButton(192, 12, 32, 156);
-	_btnCancel = new TextButton(192, 12, 32, 172);
+	_window = new Window(this, 240, 192, 4, 4, POPUP_BOTH);
 	_txtTitle = new Text(210, 17, 32, 20);
 	_txtStatus = new Text(210, 17, 32, 36);
 	_txtBase = new Text(210, 9, 32, 52);
 	_txtSpeed = new Text(210, 9, 32, 60);
 	_txtMaxSpeed = new Text(210, 9, 32, 68);
 	_txtAltitude = new Text(210, 9, 32, 76);
-	_txtFuel = new Text(130, 9, 32, 84);
-	_txtDamage = new Text(80, 9, 164, 84);
-	_txtW1Name = new Text(130, 9, 32, 92);
-	_txtW1Ammo = new Text(80, 9, 164, 92);
-	_txtW2Name = new Text(130, 9, 32, 100);
-	_txtW2Ammo = new Text(80, 9, 164, 100);
-	_txtRedirect = new Text(230, 17, 13, 108);
 	_txtSoldier = new Text(60, 9, 164, 68);
 	_txtHWP = new Text(80, 9, 164, 76);
+	_txtFuel = new Text(130, 9, 32, 84);
+	_txtDamage = new Text(80, 9, 164, 84);
+	for(int i = 0; i < _weaponNum; ++i)
+	{
+		_txtWeaponName[i] = new Text(130, 9, 32, 92 + 8*i);
+		_txtWeaponAmmo[i] = new Text(80, 9, 164, 92 + 8*i);
+	}
+	_txtRedirect = new Text(230, 17, 13, offset + 0);
+	_btnBase = new TextButton(192, 12, 32, offset + 16);
+	_btnTarget = new TextButton(192, 12, 32, offset + 32);
+	_btnPatrol = new TextButton(192, 12, 32, offset + 48);
+	_btnCancel = new TextButton(192, 12, 32, offset + 64);
 
 	// Set palette
 	setPalette("PAL_GEOSCAPE", _game->getRuleset()->getInterface("geoCraftScreens")->getElement("palette")->color);
@@ -89,10 +96,11 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	add(_txtAltitude, "text3", "geoCraftScreens");
 	add(_txtFuel, "text3", "geoCraftScreens");
 	add(_txtDamage, "text3", "geoCraftScreens");
-	add(_txtW1Name, "text3", "geoCraftScreens");
-	add(_txtW1Ammo, "text3", "geoCraftScreens");
-	add(_txtW2Name, "text3", "geoCraftScreens");
-	add(_txtW2Ammo, "text3", "geoCraftScreens");
+	for(int i = 0; i < _weaponNum; ++i)
+	{
+		add(_txtWeaponName[i], "text3", "geoCraftScreens");
+		add(_txtWeaponAmmo[i], "text3", "geoCraftScreens");
+	}
 	add(_txtRedirect, "text3", "geoCraftScreens");
 	add(_txtSoldier, "text3", "geoCraftScreens");
 	add(_txtHWP, "text3", "geoCraftScreens");
@@ -187,34 +195,30 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 
 	_txtDamage->setText(tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage())));
 
-	if (_craft->getRules()->getWeapons() > 0 && _craft->getWeapons()->at(0) != 0)
+	for(int i = 0; i < _weaponNum; ++i)
 	{
-		CraftWeapon *w1 = _craft->getWeapons()->at(0);
-		_txtW1Name->setText(tr("STR_WEAPON_ONE").arg(tr(w1->getRules()->getType())));
-		if (w1->getRules()->getAmmoMax())
-			_txtW1Ammo->setText(tr("STR_ROUNDS_").arg(w1->getAmmo()));
-		else
-			_txtW1Ammo->setVisible(false);
-	}
-	else
-	{
-		_txtW1Name->setText(tr("STR_WEAPON_ONE").arg(tr("STR_NONE_UC")));
-		_txtW1Ammo->setVisible(false);
-	}
+		const std::string &wName = _craft->getRules()->getWeaponSlotString(i);
+		if (wName.empty())
+		{
+			_txtWeaponName[i]->setVisible(false);
+			_txtWeaponAmmo[i]->setVisible(false);
+			continue;
+		}
 
-	if (_craft->getRules()->getWeapons() > 1 && _craft->getWeapons()->at(1) != 0)
-	{
-		CraftWeapon *w2 = _craft->getWeapons()->at(1);
-		_txtW2Name->setText(tr("STR_WEAPON_TWO").arg(tr(w2->getRules()->getType())));
-		if (w2->getRules()->getAmmoMax())
-			_txtW2Ammo->setText(tr("STR_ROUNDS_").arg(w2->getAmmo()));
+		CraftWeapon *w1 = _craft->getWeapons()->at(i);
+		if (w1 != 0)
+		{
+			_txtWeaponName[i]->setText(tr(wName).arg(tr(w1->getRules()->getType())));
+			if (w1->getRules()->getAmmoMax())
+				_txtWeaponAmmo[i]->setText(tr("STR_ROUNDS_").arg(w1->getAmmo()));
+			else
+				_txtWeaponAmmo[i]->setVisible(false);
+		}
 		else
-			_txtW2Ammo->setVisible(false);
-	}
-	else
-	{
-		_txtW2Name->setText(tr("STR_WEAPON_TWO").arg(tr("STR_NONE_UC")));
-		_txtW2Ammo->setVisible(false);
+		{
+			_txtWeaponName[i]->setText(tr(wName).arg(tr("STR_NONE_UC")));
+			_txtWeaponAmmo[i]->setVisible(false);
+		}
 	}
 
 	_txtRedirect->setBig();

@@ -166,6 +166,7 @@ crafts:
     radarChance: 100 #how effective craft radar is, default 100.
     weapons: 4 #weapon number increase to 4.
     weaponTypes: [0, 0, 0, 1] # slot 1 accept weapon with type 0, ... slot 4 accept weapon with type 1.
+    weaponStrings: [STR_WEAPON_ONE, STR_WEAPON_TWO, STR_WEAPON_THREE, STR_WEAPON_FOURTH] #string ID used by craft status.
     hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
     avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
     powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].

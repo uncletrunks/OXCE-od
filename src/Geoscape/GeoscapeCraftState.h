@@ -20,6 +20,7 @@
 #define OPENXCOM_GEOSCAPECRAFTSTATE_H
 
 #include "../Engine/State.h"
+#include "../Ruleset/RuleCraft.h"
 
 namespace OpenXcom
 {
@@ -44,7 +45,9 @@ private:
 
 	TextButton *_btnBase, *_btnTarget, *_btnPatrol, *_btnCancel;
 	Window *_window;
-	Text *_txtTitle, *_txtStatus, *_txtBase, *_txtSpeed, *_txtMaxSpeed, *_txtAltitude, *_txtFuel, *_txtDamage, *_txtW1Name, *_txtW1Ammo, *_txtW2Name, *_txtW2Ammo, *_txtRedirect, *_txtSoldier, *_txtHWP;
+	Text *_txtTitle, *_txtStatus, *_txtBase, *_txtSpeed, *_txtMaxSpeed, *_txtAltitude, *_txtFuel, *_txtDamage, *_txtWeaponName[RuleCraft::WeaponMax], *_txtWeaponAmmo[RuleCraft::WeaponMax], *_txtRedirect, *_txtSoldier, *_txtHWP;
+
+	int _weaponNum;
 public:
 	/// Creates the Geoscape Craft state.
 	GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *waypoint);
