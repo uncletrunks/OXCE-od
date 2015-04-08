@@ -5,33 +5,29 @@ OpenXcom version: Nightly 31/03/2015
 [br/][br/]
 [i]Behavior change[/i]
 
-Hyper wave decoder can have less than 100% chance to detect aliens.[br/]
-Explosion don't remove unconscious unit if they can't kill them first.[br/]
-Craft weapon equip screen is bit rearranged.[br/]
-Fixed "weapons" like medickit are now equipped by unit.[br/]
-Psi-amp use 3d range not 2d.[br/]
-Psi-amp can use weapon power.[br/]
+Hyper-Wave Decoder can have less than 100% chance to detect aliens.[br/]
+Explosions don't remove unconscious unit if they can't kill them first.[br/]
+Craft weapon equip screen is a bit rearranged.[br/]
+Fixed "weapons" like the Medikit are now equipped by unit.[br/]
+Psi-Amp use 3d range, not 2d.[br/]
+Psi-Amp can use weapon power.[br/]
 Fixed ammo are added after weapons in armor and unit (armor items are before unit items).[br/]
-Corpses, items and chryssalids are not spawn when unit is killed by heavy weapons.[br/]
-Stuned units can be hited by bullets and fire.[br/]
-Big groups of aliens (20+) get less morale loses from casualties.[br/]
-Terror units can now spawn with any buildin weapon not only one defined by name.[br/]
-After battle, wounlded unit restore health equal to 20 times armor regeneration stat (if its greater than zero).[br/]
-While loading and unloading weapon you must pay cost of moving item to hand.[br/]
-You can unprime granade for half of prime tu cost.[br/]
+Corpses, items and Chryssalids are not spawned when unit is killed by weapons with overkill.[br/]
+Stunned units can be hited by bullets and fire.[br/]
+Big groups of aliens (20+) get less morale losses from casualties.[br/]
+Terror units can now spawn with any built-in weapon, not only one defined by name.[br/]
+After battle, wounded units restore health equal to 20 times armor regeneration stat (if it's greater than zero).[br/]
+While loading and unloading weapons you must pay the cost of moving the item to hand.[br/]
+You can unprime granade for half of prime TUs cost.[br/]
 Support for Ufo2000 armor damage type.[br/]
-Psi-amp can now obey maximum weapon range.[br/]
-Psi-amp can now deal direct damage using special attack type in popup menu.[br/]
-Throwing now require healthy arm to do it (if item is twohanded, then it require both).[br/]
+Psi-Amp can now obey maximum weapon range.[br/]
+Psi-Amp can now deal direct damage using special attack type in popup menu.[br/]
+Throwing now requires a healthy arm to do it (if the item is two-handed, then it requires both).[br/]
 You can hit aliens in the head using any item you like, not only firearms stock.[br/]
-Items can now be un-throw able.[br/]
-Rewriten handling of alien psi attacks to handle new features of Psi-amp.[br/]
-Building, manufactures and reserch can now have special requirments for buildings available in base.[br/]
-Throwing and hiting using twohand weapon have same penalty like shooting it.[br/]
-[br/]
-1.6:[br/]
-You can train your solders basic skills.[br/]
-Aliens weapon types/weapons can have different turn restriction.[br/]
+Items can now be non-throwable.[br/]
+Rewriten handling of alien psi attacks to handle new features of Psi-Amp.[br/]
+Building, manufactures and research can now have special requirements for buildings available in base.[br/]
+Throwing and hitting using two-handed weapons have the same penalty as with shooting.[br/]
 
 [br/][br/]
 [i]New ruleset[/i]
@@ -40,32 +36,32 @@ Example of usage:
 [code]
 items:
   - type: STR_ITEM_TYPE #default config ...
-    tuThrow: 25    #cont of throwing item in %.
+    tuThrow: 25    #cost of throwing item in %.
     tuPrime: 50    #cost of priming granade in %.
     tuLoad: 15     #cost of loading weapon.
     tuUnload: 8    #cost of unloading weapon.
-    tuMindControl: -1  #cost of using Psi-amp Mind Control attack, if -1 it use `tuUse` value.
-    tuPanic: -1        #cost of using Psi-amp Panic attack, if -1 it use `tuUse` value.
-    accuracyUse: 0         #bonus to accuracy of Psi-amp special attack.
-    accuracyMindControl: 0 #bonus to accuracy of Psi-amp Mind Control attack.
-    accuracyPanic: 0       #bonus to accuracy of Psi-amp Panic attack.
+    tuMindControl: -1  #cost of using Psi-Amp Mind Control attack, if -1 it uses `tuUse` value.
+    tuPanic: -1        #cost of using Psi-Amp Panic attack, if -1 it uses `tuUse` value.
+    accuracyUse: 0         #bonus to accuracy of Psi-Amp special attack.
+    accuracyMindControl: 0 #bonus to accuracy of Psi-Amp Mind Control attack.
+    accuracyPanic: 0       #bonus to accuracy of Psi-Amp Panic attack.
     accuracyThrow: 0       #accuracy of throw.
     energyAimed: 0       #energy cost of Aimed attack.
     energyAuto: 0        #energy cost of Auto attack.
     energySnap: 0        #energy cost of Snap attack.
     energyMelee: 0       #energy cost of Melee attack.
-    energyUse: 0         #energy cost of item Use and Psi-amp special attack.
-    energyMindControl: 0 #energy cost of Psi-amp Mind Control attack, if -1 it use `energyUse` value.
-    energyPanic: 0       #energy cost of Psi-amp Panic attack, if -1 it use `energyUse` value.
+    energyUse: 0         #energy cost of item Use and Psi-Amp special attack.
+    energyMindControl: 0 #energy cost of Psi-Amp Mind Control attack, if -1 it use `energyUse` value.
+    energyPanic: 0       #energy cost of Psi-Amp Panic attack, if -1 it use `energyUse` value.
     energyThrow: 0       #energy cost of Throw.
-    flatPrime: false     #change how `tuPrime` behave (percent or flat value).
-    flatThrow: false     #change how `tuThrow` behave (percent or flat value).
+    flatPrime: false     #changes how `tuPrime` behaves (percent or flat value).
+    flatThrow: false     #changes how `tuThrow` behaves (percent or flat value).
     damageBonus: #used by ammo.
       #each bonus can be writen as: `s: x`, `s: [x]`, `s: [x, y]` or `s: [x, y, z]`.
       #where each value represents coefficient of polynomial `x * s + y * s^2 + z * s^3`.
       #
       #set `strength` to 1.0 if `strengthApplied: true`.
-      flatHunderd: 0.0 #const bonus equal 100.
+      flatHundred: 0.0 #const bonus equal 100.
       flatOne: 0.0 #const bonus equal 1.
       strength: 0.1
       psi: 0.0 #bonus equal `psiSkill*psiStrength`.
@@ -105,7 +101,7 @@ items:
       #...
       #same stats like `damageBonus`.
       #...
-    powerRangeReduction: 0.0 #how much ammo lost power per tile, used by psi-amp too. default value 1 if psi-amp.
+    powerRangeReduction: 0.0 #how much power a bullet loses per tile, used by Psi-Amp too. Default value 1 for the Psi-Amp.
     damageAlter: #all values have default values based on `damageType`, used by ammo and corpses.
       FixRadius: 60 #aka `BlastRadius`.
       RandomType: 1 #how roll damage range.
@@ -115,34 +111,34 @@ items:
       # 3-> Flat  [100% - 100%]
       # 4-> Rng(5,10)
       # 5-> 0
-      ResistType: 1            #what resist on unit use, and if is fire or smoke it spawn that, same values like `damageType`.
+      ResistType: 1            #what resistance is used by an affected unit, same values like `damageType`.
       FireBlastCalc: false     #fire had special way of calculating blast.
-      IgnoreDirection: true    #damage ignore direction of hit, used by smoke and fire.
-      IgnoreSelfDestruct: true #do killing using this damage ignore self destruct of unit.
-      IgnorePainImmunity: true #some units don't get stun level form damage.
-      IgnoreNormalMoraleLose: false #do ignore normal morale lose form damage.
-      IgnoreOverKill: false    #don't do overkill damage.
-      ArmorEffectiveness: 0.5  #how much armor is effective against this damage.
-      RadiusEffectiveness: 0.3 #how power translate to splash radius.
-      FireThreshold: 0         #how much damage is requare to spawn fire on unit (after armor and ToHealth) or tile.
-      SmokeThreshold: 100      #how much damage is requared to spawn smoke it tile.
+      IgnoreDirection: true    #damage ignores direction of hit, used by smoke and fire.
+      IgnoreSelfDestruct: true #killing using this damage prevents self-destruct by this unit.
+      IgnorePainImmunity: true #some units don't get stun level from damage.
+      IgnoreNormalMoraleLose: false #some units ignore normal morale loss from damage.
+      IgnoreOverKill: false    #disables overkill damage.
+      ArmorEffectiveness: 0.5  #how effective armor is against this damage.
+      RadiusEffectiveness: 0.3 #how power translates to splash radius.
+      FireThreshold: 0         #how much damage is required to spawn fire on unit (after armor and ToHealth) or tile.
+      SmokeThreshold: 100      #how much damage is required to spawn smoke on tile.
       ToHealth: 1.0    #how much damage is done to health, can be negative.
       ToArmor: 0.25    #how much damage is done to armor.
       ToArmorPre: 0.0  #how much damage is done to armor before applying armor protection.
       ToWound: 0.1     #determine probability of wounds.
-      ToItem: 0.0      #how much power is apply to items.
-      ToTile: 0.0      #how much power is apply to ground.
-      ToStun: 0.25     #how much damage increase stun level.
-      ToEnergy: 0.0    #how much power is apply to energy lose.
-      ToTime: 0.0      #how much power is apply to time units lose.
-      ToMorale: 0.0    #how much power is apply to morale lose.
-    requiresBuy: #what tech is requare for item be visible in buy window.
+      ToItem: 0.0      #how much power is applied to items.
+      ToTile: 0.0      #how much power is applied to the ground.
+      ToStun: 0.25     #how much damage increases stun level.
+      ToEnergy: 0.0    #how much power is applied to energy loss.
+      ToTime: 0.0      #how much power is applied to time units loss.
+      ToMorale: 0.0    #how much power is applied to morale loss.
+    requiresBuy: #what tech is required for the item to be visible in the Hire/Purchase screen.
       - SOME_TECH
       - SOME_TECH_MK2
-    psiAttackName: STR_HIT_MELEE #string id of psi-amp attack name in popup menu. requare to enable special attack.
-    psiRequired: false #default based on wepon type, if `true` to use weapon you need have psi skill.
-    bigSpriteAlt: 1 #like bigSprite but used when unconscious unit, loaded weapon or armed granade.
-    floorSpriteAlt: 1 #like floorSprite but used when unconscious unit, loaded weapon or armed granade.
+    psiAttackName: STR_HIT_MELEE #string id of psi-amp attack name in the pop-up menu. Required to enable special attack.
+    psiRequired: false   #default based on weapon type, if `true` you need Psi Skill to use the weapon.
+    bigSpriteAlt: 1      #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
+    floorSpriteAlt: 1    #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
 [/code]
 
 [code]
@@ -152,11 +148,11 @@ armors:
     bleedImmune: false   #default true for big units.
     painImmune: false    #default true for big units.
     zombiImmune: false   #ignored by big units.
-    overKill: 0.8        #when damage move hp to negative value greater than `overKill * maxHP` then corpse is destroyed, default value is 0.50 .
+    overKill: 0.8        #when damage drops HPs to negative value greater than `overKill * maxHP` then the corpse is destroyed, default value is 0.50.
     visibilityAtDark: 9  #default 20 for aliens, 9 for humans.
-    regeneration: 0      #number of health point regenerated evry turn, can be less than zero.
-    specialWeapon: ALIEN_PSI_WEAPON #alien psi or meele attack.
-    builtInWeapons: #same like for unit.
+    regeneration: 0      #number of HPs regenerated every turn, can be less than zero.
+    specialWeapon: ALIEN_PSI_WEAPON #alien psi or melee attack.
+    builtInWeapons: #same as for units.
       - STR_SOME_WEAPON
 [/code]
 
@@ -164,12 +160,12 @@ armors:
 crafts:
   - type: STR_CRAFT_TYPE #default config ...
     radarChance: 100 #how effective craft radar is, default 100.
-    weapons: 4 #weapon number increase to 4.
-    weaponTypes: [0, 0, 0, 1] # slot 1 accept weapon with type 0, ... slot 4 accept weapon with type 1.
-    weaponStrings: [STR_WEAPON_ONE, STR_WEAPON_TWO, STR_WEAPON_THREE, STR_WEAPON_FOURTH] #string ID used by craft status.
-    hitBonus: 0 #bonus percentage to all weapon hit chance. Range [0, 100].
-    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
-    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
+    weapons: 4 #weapon number increased to 4.
+    weaponTypes: [0, 0, 0, 1] # slot 1 accepts weapons with type 0, ... slot 4 accepts weapons with type 1.
+    weaponStrings: [STR_WEAPON_ONE, STR_WEAPON_TWO, STR_WEAPON_THREE, STR_WEAPON_FOURTH] #string ID used by geoscape craft status.
+    hitBonus: 0 #bonus percentage to all weapons hit chance. Range [0, 100].
+    avoidBonus: 0 #bonus percentage to craft dodge chance. Range [0, 100].
+    powerBonus: 0 #bonus percentage to all weapons damage. Range [0, 100].
     armor: 0 #amount of blocked damage per hit.
 [/code]
 
@@ -177,7 +173,7 @@ crafts:
 craftWeapons:
   - type: STR_CRAFTWEAPON_TYPE #default config ...
     weaponType: 1 #default value 0.
-    stats: #stats that are add to crafts stats.
+    stats: #added to craft's stats.
       fuelMax: 0     #additive bonus to craft stats.
       damageMax: 0   #additive bonus to craft stats.
       speedMax: 0    #additive bonus to craft stats.
@@ -185,18 +181,18 @@ craftWeapons:
       radarRange: 0  #additive bonus to craft stats.
       radarChance: 0 #additive bonus to craft stats.
       sightRange: 0  #additive bonus to craft stats.
-      hitBonus: 0    #bonus percentage to all weapon hit chance. Range [0, 100].
-      avoidBonus: 0  #bonus percentage to craft avoid chance. Range [0, 100].
-      powerBonus: 0  #bonus percentage to all weapon damage. Range [0, 100].
+      hitBonus: 0    #bonus percentage to all weapons hit chance. Range [0, 100].
+      avoidBonus: 0  #bonus percentage to craft dodge chance. Range [0, 100].
+      powerBonus: 0  #bonus percentage to all weapons damage. Range [0, 100].
       armor: 0       #amount of blocked damage per hit.
 [/code]
 
 [code]
 ufos:
   - type: STR_UFO_TYPE #default config ...
-    hitBonus: 0   #bonus percentage to all weapon hit chance. Range [0, 100].
-    avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
-    powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
+    hitBonus: 0   #bonus percentage to all weapons hit chance. Range [0, 100].
+    avoidBonus: 0 #bonus percentage to UFO dodge chance. Range [0, 100].
+    powerBonus: 0 #bonus percentage to all weapons damage. Range [0, 100].
     armor: 0      #amount of blocked damage per hit.
     raceBonus: #bonus stats per race.
       STR_SECTOID: #name of race that bonus apply.
@@ -227,7 +223,7 @@ manufacture:
 [code]
 research:
   - type: STR_SOME_RESEARCH
-    requiresBaseFunc: [ W, K ] #List of custom IDs that are require to start reserch in base.
+    requiresBaseFunc: [ W, K ] #List of custom IDs that are required to start this research in the base
 [/code]
 
 [code]
@@ -258,5 +254,6 @@ http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641[br/]
 [br/]
 [i]Credits[/i]
 
-redv & WarBoy1982 for couple of commits.[br/]
+redv & WarBoy1982 for a couple of commits.[br/]
+SolarusScorch for fixing language in readme.[br/]
 SupSuper & WarBoy1982 & Daiky for OpenXcom :)[br/]

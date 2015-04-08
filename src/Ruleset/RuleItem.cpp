@@ -174,7 +174,7 @@ BonusStatDataFunc create()
 BonusStatData statDataMap[] =
 {
 	{ "flatOne", create<1>() },
-	{ "flatHunderd", create<100>() },
+	{ "flatHundred", create<100>() },
 	{ "strength", create<&UnitStats::strength>() },
 	{ "psi", create<&UnitStats::psiSkill, &UnitStats::psiStrength>() },
 	{ "psiSkill", create<&UnitStats::psiSkill>() },

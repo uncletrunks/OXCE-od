@@ -353,7 +353,7 @@ bool RuleCraft::getSpacecraft() const
  */
 int RuleCraft::getListOrder() const
 {
-	 return _listOrder;
+	return _listOrder;
 }
 
 /**
