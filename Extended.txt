@@ -139,6 +139,8 @@ items:
     psiRequired: false   #default based on weapon type, if `true` you need Psi Skill to use the weapon.
     bigSpriteAlt: 1      #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
     floorSpriteAlt: 1    #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
+    ai:
+      useDelay: 3 #determine on what turn item can be used by aliens.
 [/code]
 
 [code]
@@ -224,6 +226,15 @@ manufacture:
 research:
   - type: STR_SOME_RESEARCH
     requiresBaseFunc: [ W, K ] #List of custom IDs that are required to start this research in the base
+[/code]
+
+[code]
+ai:
+  useDelayBlaster: 3
+  useDelayFirearm: 0
+  useDelayGrenade: 3
+  useDelayMelee: 0
+  useDelayPsionic: 0
 [/code]
 
 [code]
