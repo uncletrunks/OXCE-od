@@ -113,14 +113,17 @@ Ruleset::Ruleset() :
 
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_ACID;
+	dmg->IgnoreOverKill = true;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_LASER;
+	dmg->IgnoreOverKill = true;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_PLASMA;
+	dmg->IgnoreOverKill = true;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
@@ -131,6 +134,7 @@ Ruleset::Ruleset() :
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_STUN;
 	dmg->FixRadius = -1;
+	dmg->IgnoreOverKill = true;
 	dmg->IgnoreSelfDestruct = true;
 	dmg->IgnorePainImmunity = true;
 	dmg->RadiusEffectiveness = 0.05f;
@@ -145,6 +149,7 @@ Ruleset::Ruleset() :
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_HE;
 	dmg->FixRadius = -1;
+	dmg->IgnoreOverKill = true;
 	dmg->IgnoreSelfDestruct = true;
 	dmg->RadiusEffectiveness = 0.05f;
 	dmg->ToItem = 1.0f;
@@ -153,6 +158,7 @@ Ruleset::Ruleset() :
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_SMOKE;
 	dmg->FixRadius = -1;
+	dmg->IgnoreOverKill = true;
 	dmg->IgnoreDirection = true;
 	dmg->ArmorEffectiveness = 0.0f;
 	dmg->RadiusEffectiveness = 0.05f;
@@ -169,6 +175,7 @@ Ruleset::Ruleset() :
 	dmg->ResistType = DT_IN;
 	dmg->FixRadius = -1;
 	dmg->FireBlastCalc = true;
+	dmg->IgnoreOverKill = true;
 	dmg->IgnoreDirection = true;
 	dmg->ArmorEffectiveness = 0.0f;
 	dmg->RadiusEffectiveness = 0.03f;
