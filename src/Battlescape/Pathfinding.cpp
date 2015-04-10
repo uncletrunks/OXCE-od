@@ -1117,7 +1117,7 @@ bool Pathfinding::bresenhamPath(const Position& origin, const Position& target, 
 std::vector<int> Pathfinding::findReachable(BattleUnit *unit, const BattleActionCost &cost)
 {
 	const Position &start = unit->getPosition();
-	int tuMax = unit->getTimeUnits() - cost.TU;
+	int tuMax = unit->getTimeUnits() - cost.Time;
 	int energyMax = unit->getEnergy() - cost.Energy;
 	for (std::vector<PathfindingNode>::iterator it = _nodes.begin(); it != _nodes.end(); ++it)
 	{

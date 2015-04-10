@@ -362,7 +362,8 @@ void AlienBAIState::think(BattleAction *action)
 		action->weapon = _attackAction->weapon;
 		if (action->weapon && action->type == BA_THROW && action->weapon->getRules()->getBattleType() == BT_GRENADE)
 		{
-			_unit->spendTimeUnits(4 + _unit->getActionTUs(BA_PRIME, action->weapon));
+			_unit->spendCost(_unit->getActionTUs(BA_PRIME, action->weapon));
+			_unit->spendTimeUnits(4);
 		}
 		// if this is a firepoint action, set our facing.
 		action->finalFacing = _attackAction->finalFacing;
@@ -1610,7 +1611,7 @@ void AlienBAIState::meleeAction()
 		}
 	}
 	BattleActionCost attackCost(BA_HIT, _unit, _attackAction->weapon);
-	int chargeReserve = std::min(_unit->getTimeUnits() - attackCost.TU, 2 * (_unit->getEnergy() - attackCost.Energy));
+	int chargeReserve = std::min(_unit->getTimeUnits() - attackCost.Time, 2 * (_unit->getEnergy() - attackCost.Energy));
 	int distance = (chargeReserve / 4) + 1;
 	_aggroTarget = 0;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
@@ -1807,8 +1808,8 @@ void AlienBAIState::grenadeAction()
 	action.actor = _unit;
 
 	action.updateTU();
-	action.TU += 4; // 4TUs for picking up the grenade
-	action.TU += _unit->getActionTUs(BA_PRIME, grenade);
+	action.Time += 4; // 4TUs for picking up the grenade
+	action += _unit->getActionTUs(BA_PRIME, grenade);
 	// do we have enough TUs to prime and throw the grenade?
 	if (action.haveTU())
 	{
@@ -1860,9 +1861,9 @@ bool AlienBAIState::psiAction()
 	bool have = false;
 	for (int j = 0; j < costLength; ++j)
 	{
-		if (cost[j].TU > 0)
+		if (cost[j].Time > 0)
 		{
-			cost[j].TU += _escapeTUs;
+			cost[j].Time += _escapeTUs;
 			cost[j].Energy += _escapeTUs / 2;
 			have |= cost[j].haveTU();
 		}

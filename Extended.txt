@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.6[/b]
+[b]Mod version 1.7[/b]
 OpenXcom version: Nightly 31/03/2015
 
 [br/][br/]
@@ -33,6 +33,11 @@ Throwing and hitting using two-handed weapons have the same penalty as with shoo
 You can train your solders basic skills.[br/]
 Aliens weapon types/weapons can have different turn restriction.[br/]
 You can rename weapon slot names in geoscape craft info.[br/]
+[br/]
+1.7:[br/]
+Rewritten item use cost. Now is possible to spend HP, Morale or grain stun damage from using items.[br/]
+You can't use old `energy*` properties in item, they are removed and replaced by new one in `cost*`.[br/]
+
 
 [br/][br/]
 [i]New ruleset[/i]
@@ -51,14 +56,37 @@ items:
     accuracyMindControl: 0 #bonus to accuracy of Psi-Amp Mind Control attack.
     accuracyPanic: 0       #bonus to accuracy of Psi-Amp Panic attack.
     accuracyThrow: 0       #accuracy of throw.
-    energyAimed: 0       #energy cost of Aimed attack.
-    energyAuto: 0        #energy cost of Auto attack.
-    energySnap: 0        #energy cost of Snap attack.
-    energyMelee: 0       #energy cost of Melee attack.
-    energyUse: 0         #energy cost of item Use and Psi-Amp special attack.
-    energyMindControl: 0 #energy cost of Psi-Amp Mind Control attack, if -1 it use `energyUse` value.
-    energyPanic: 0       #energy cost of Psi-Amp Panic attack, if -1 it use `energyUse` value.
-    energyThrow: 0       #energy cost of Throw.
+    costAimed:
+      #cost of Aimed attack.
+      time: 2         #time units cost, can be in %. Alias of `tuAimed`.
+      energy: 0       #energy unit cost.
+      morale: 10      #morale points cost.
+      health: 1       #health points cost.
+      stun: 2         #stun damage applied by atack use.
+    costAuto:
+      #cost of Auto attack, if -1 it use `costAimed` value.
+      #same propertes like `costAimed`.
+    costSnap:
+      #cost of Snap attack, if -1 it use `costAimed` value.
+      #same propertes like `costAimed`.
+    costMelee:
+      #cost of Melee attack.
+      #same propertes like `costAimed`.
+    costUse:
+      #cost of item Use and Psi-Amp special attack.
+      #same propertes like `costAimed`.
+    costMindControl:
+      #cost of Psi-Amp Mind Control attack, if -1 it use `costUse` value.
+      #same propertes like `costAimed`.
+    costPanic:
+      #cost of Psi-Amp Panic attack, if -1 it use `costUse` value.
+      #same propertes like `costAimed`.
+    costThrow:
+      #cost of Throw.
+      #same propertes like `costAimed`.
+    costPrime:
+      #cost of Prime granade.
+      #same propertes like `costAimed`.
     flatPrime: false     #changes how `tuPrime` behaves (percent or flat value).
     flatThrow: false     #changes how `tuThrow` behaves (percent or flat value).
     damageBonus: #used by ammo.
@@ -246,9 +274,12 @@ ai:
 extraStrings:
   - type: en-US
     strings:
-      STR_PHYSICAL_TRAINING: "Physical Training"     #required when using `trainingRooms` in `facilities`.
-      STR_TRAINING: "Training"                       #required when using `trainingRooms` in `facilities`.
+      STR_PHYSICAL_TRAINING: "Physical Training"      #required when using `trainingRooms` in `facilities`.
+      STR_TRAINING: "Training"                        #required when using `trainingRooms` in `facilities`.
       STR_REMAINING_TRAINING_FACILITY_CAPACITY: "REMAINING TRAINING CAPACITY> {ALT}{0}" #required when using `trainingRooms` in `facilities`.
+      STR_NOT_ENOUGH_MORALE: "You lack discipline!"   #required when using item morale use cost.
+      STR_NOT_ENOUGH_HEALTH: "Not enough blood!"      #required when using item health use cost.
+      STR_NOT_ENOUGH_STUN: "Too much pain!"           #required when using item stun use cost.
 [/code]
 
 [br/][br/]

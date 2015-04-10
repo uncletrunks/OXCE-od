@@ -242,6 +242,29 @@ void statsModiferWrite(std::vector<std::pair<BonusStatFunc, float> >& mod, const
 
 } //namespace
 
+RuleItemUseCost RuleItemUseCost::getBackup(const RuleItemUseCost& b) const
+{
+	RuleItemUseCost n;
+	n.Time = Time >= 0 ? Time : b.Time;
+	n.Energy = Energy >= 0 ? Energy : b.Energy;
+	n.Morale = Morale >= 0 ? Morale : b.Morale;
+	n.Health = Health >= 0 ? Health : b.Health;
+	n.Stun = Stun >= 0 ? Stun : b.Stun;
+	return n;
+}
+void RuleItemUseCost::load(const YAML::Node& node, const std::string& name)
+{
+	Time = node["tu" + name].as<int>(Time);
+	if (const YAML::Node& cost = node["cost" + name])
+	{
+		Time = cost["time"].as<int>(Time);
+		Energy = cost["energy"].as<int>(Energy);
+		Morale = cost["morale"].as<int>(Morale);
+		Health = cost["health"].as<int>(Health);
+		Stun = cost["stun"].as<int>(Stun);
+	}
+}
+
 /**
  * Creates a blank ruleset for a certain type of item.
  * @param type String defining the type.
@@ -250,9 +273,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
 	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _damageType(),
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
-	_tuAimed(0), _tuAuto(0), _tuSnap(0), _tuMelee(0), _tuUse(25), _tuMind(-1), _tuPanic(-1), _tuThrow(25),
-	_energyAimed(0), _energyAuto(-1), _energySnap(-1), _energyMelee(0), _energyUse(0), _energyMind(-1), _energyPanic(-1), _energyThrow(0),
-	_clipSize(0), _tuPrime(50), _tuLoad(15), _tuUnload(8),
+	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
+	_clipSize(0), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
@@ -407,26 +429,17 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_accuracyPanic = node["accuracyPanic"].as<int>(_accuracyPanic);
 	_accuracyThrow = node["accuracyThrow"].as<int>(_accuracyThrow);
 
-	_tuAimed = node["tuAimed"].as<int>(_tuAimed);
-	_tuAuto = node["tuAuto"].as<int>(_tuAuto);
-	_tuSnap = node["tuSnap"].as<int>(_tuSnap);
-	_tuMelee = node["tuMelee"].as<int>(_tuMelee);
-	_tuUse = node["tuUse"].as<int>(_tuUse);
-	_tuMind = node["tuMindControl"].as<int>(_tuMind);
-	_tuPanic = node["tuPanic"].as<int>(_tuPanic);
-	_tuThrow = node["tuThrow"].as<int>(_tuThrow);
-
-	_energyAimed = node["energyAimed"].as<int>(_energyAimed);
-	_energyAuto = node["energyAuto"].as<int>(_energyAuto);
-	_energySnap = node["energySnap"].as<int>(_energySnap);
-	_energyMelee = node["energyMelee"].as<int>(_energyMelee);
-	_energyUse = node["energyUse"].as<int>(_energyUse);
-	_energyMind = node["energyMindControl"].as<int>(_energyMind);
-	_energyPanic = node["energyPanic"].as<int>(_energyPanic);
-	_energyThrow = node["energyThrow"].as<int>(_energyThrow);
+	_costAimed.load(node, "Aimed");
+	_costAuto.load(node, "Auto");
+	_costSnap.load(node, "Snap");
+	_costMelee.load(node, "Melee");
+	_costUse.load(node, "Use");
+	_costMind.load(node, "MindControl");
+	_costPanic.load(node, "Panic");
+	_costThrow.load(node, "Throw");
+	_costPrime.load(node, "Prime");
 
 	_clipSize = node["clipSize"].as<int>(_clipSize);
-	_tuPrime = node["tuPrime"].as<int>(_tuPrime);
 	_tuLoad = node["tuLoad"].as<int>(_tuLoad);
 	_tuUnload = node["tuUnload"].as<int>(_tuUnload);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
@@ -809,51 +822,51 @@ int RuleItem::getAccuracyThrow() const
  * Gets the item's time unit percentage for aimed shots.
  * @return The aimed shot TU percentage.
  */
-int RuleItem::getTUAimed() const
+RuleItemUseCost RuleItem::getCostAimed() const
 {
-	return _tuAimed;
+	return _costAimed;
 }
 
 /**
  * Gets the item's time unit percentage for autoshots.
  * @return The autoshot TU percentage.
  */
-int RuleItem::getTUAuto() const
+RuleItemUseCost RuleItem::getCostAuto() const
 {
-	return _tuAuto >= 0 ? _tuAuto : _tuAimed;
+	return _costAuto.getBackup(_costAimed);
 }
 
 /**
  * Gets the item's time unit percentage for snapshots.
  * @return The snapshot TU percentage.
  */
-int RuleItem::getTUSnap() const
+RuleItemUseCost RuleItem::getCostSnap() const
 {
-	return _tuSnap >= 0 ? _tuSnap : _tuAimed;
+	return _costSnap.getBackup(_costAimed);
 }
 
 /**
  * Gets the item's time unit percentage for melee attacks.
  * @return The melee TU percentage.
  */
-int RuleItem::getTUMelee() const
+RuleItemUseCost RuleItem::getCostMelee() const
 {
-	return _tuMelee;
+	return _costMelee;
 }
 
 /**
  * Gets the number of Time Units needed to use this item.
  * @return The number of Time Units needed to use this item.
  */
-int RuleItem::getTUUse() const
+RuleItemUseCost RuleItem::getCostUse() const
 {
 	if (_battleType != BT_PSIAMP || !_psiAttackName.empty())
 	{
-		return _tuUse;
+		return _costUse;
 	}
 	else
 	{
-		return 0;
+		return RuleItemUseCost();
 	}
 }
 
@@ -861,115 +874,36 @@ int RuleItem::getTUUse() const
  * Gets the number of Time Units needed to use mind control action.
  * @return The number of Time Units needed to mind control.
  */
-int RuleItem::getTUMind() const
+RuleItemUseCost RuleItem::getCostMind() const
 {
-	return _tuMind >= 0 ? _tuMind : _tuUse;
+	return _costMind.getBackup(_costUse);
 }
 
 /**
  * Gets the number of Time Units needed to use panic action.
  * @return The number of Time Units needed to panic.
  */
-int RuleItem::getTUPanic() const
+RuleItemUseCost RuleItem::getCostPanic() const
 {
-	return _tuPanic >= 0 ? _tuPanic : _tuUse;
+	return _costPanic.getBackup(_costUse);
 }
 
 /**
  * Gets the item's time unit percentage for throwing.
  * @return The throw TU percentage.
  */
-int RuleItem::getTUThrow() const
+RuleItemUseCost RuleItem::getCostThrow() const
 {
-	return _tuThrow;
-}
-
-/**
- * Gets the item's energy cost for aimed shots.
- * @return The aimed shot energy cost.
- */
-int RuleItem::getEnergyAimed() const
-{
-	return _energyAimed;
-}
-
-/**
- * Gets the item's energy cost for autoshots.
- * @return The autoshot energy cost.
- */
-int RuleItem::getEnergyAuto() const
-{
-	return _energyAuto >= 0 ? _energyAuto : _energyAimed;
-}
-
-/**
- * Gets the item's energy cost for snapshots.
- * @return The snapshot energy cost.
- */
-int RuleItem::getEnergySnap() const
-{
-	return _energySnap >= 0 ? _energySnap : _energyAimed;
-}
-
-/**
- * Gets the item's energy cost for melee attacks.
- * @return The melee energy cost.
- */
-int RuleItem::getEnergyMelee() const
-{
-	return _energyMelee;
-}
-
-/**
- * Gets the number of energy cost needed to use this item.
- * @return The number of energy cost needed to use this item.
- */
-int RuleItem::getEnergyUse() const
-{
-	if (_battleType != BT_PSIAMP || !_psiAttackName.empty())
-	{
-		return _energyUse;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-/**
- * Gets the number of energy cost needed to use mind control action.
- * @return The number of energy cost needed to mind control.
- */
-int RuleItem::getEnergyMind() const
-{
-	return _energyMind >= 0 ? _energyMind : _energyUse;
-}
-
-/**
- * Gets the number of energy cost needed to use panic action.
- * @return The number of energy cost needed to panic.
- */
-int RuleItem::getEnergyPanic() const
-{
-	return _energyPanic >= 0 ? _energyPanic : _energyUse;
-}
-
-/**
- * Gets the item's energy cost for throwing.
- * @return The throw energy cost.
- */
-int RuleItem::getEnergyThrow() const
-{
-	return _energyThrow;
+	return _costThrow;
 }
 
 /**
  * Gets the item's time unit percentage for prime grenade.
  * @return The prime TU percentage.
  */
-int RuleItem::getTUPrime() const
+RuleItemUseCost RuleItem::getCostPrime() const
 {
-	return _tuPrime;
+	return _costPrime;
 }
 
 /**

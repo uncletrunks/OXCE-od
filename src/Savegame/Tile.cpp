@@ -344,7 +344,7 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 	{
 		int tuCost = _objects[part]->getTUCost(unit->getMovementType());
 		cost = BattleActionCost(reserve, unit, unit->getMainHandWeapon(false));
-		cost.TU += tuCost;
+		cost.Time += tuCost;
 		cost.Energy += tuCost / 2;
 	}
 

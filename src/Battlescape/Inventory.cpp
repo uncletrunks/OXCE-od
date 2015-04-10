@@ -854,7 +854,7 @@ bool Inventory::unload()
 	int tuCost = 0;
 	if (grenade)
 	{
-		tuCost += _selUnit->getActionTUs(BA_PRIME, _selItem) / 2;
+		tuCost += _selUnit->getActionTUs(BA_PRIME, _selItem).Time / 2;
 	}
 	else
 	{

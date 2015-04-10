@@ -1282,7 +1282,7 @@ bool BattleUnit::isOut() const
  * @param item
  * @return TUs
  */
-int BattleUnit::getActionTUs(BattleActionType actionType, BattleItem *item) const
+RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, BattleItem *item) const
 {
 	if (item == 0)
 	{
@@ -1291,111 +1291,56 @@ int BattleUnit::getActionTUs(BattleActionType actionType, BattleItem *item) cons
 	return getActionTUs(actionType, item->getRules());
 }
 
-int BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
+RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
 {
-	if (item == 0)
+	RuleItemUseCost cost;
+	if (item != 0)
 	{
-		return 0;
-	}
+		bool flat = item->getFlatRate();
+		switch (actionType)
+		{
+			case BA_PRIME:
+				flat = item->getFlatPrime();
+				cost = item->getCostPrime();
+				break;
+			case BA_THROW:
+				flat = item->getFlatThrow();
+				cost = item->getCostThrow();
+				break;
+			case BA_AUTOSHOT:
+				cost = item->getCostAuto();
+				break;
+			case BA_SNAPSHOT:
+				cost = item->getCostSnap();
+				break;
+			case BA_HIT:
+				cost = item->getCostMelee();
+				break;
+			case BA_LAUNCH:
+			case BA_AIMEDSHOT:
+				cost = item->getCostAimed();
+				break;
+			case BA_USE:
+				cost = item->getCostUse();
+				break;
+			case BA_MINDCONTROL:
+				cost = item->getCostMind();
+				break;
+			case BA_PANIC:
+				cost = item->getCostPanic();
+				break;
+			default:
+				break;
+		}
 
-	int cost = 0;
-	bool flat = item->getFlatRate();
-	switch (actionType)
-	{
-		case BA_PRIME:
-			flat = item->getFlatPrime();
-			cost = item->getTUPrime();
-			break;
-		case BA_THROW:
-			flat = item->getFlatThrow();
-			cost = item->getTUThrow();
-			break;
-		case BA_AUTOSHOT:
-			cost = item->getTUAuto();
-			break;
-		case BA_SNAPSHOT:
-			cost = item->getTUSnap();
-			break;
-		case BA_HIT:
-			cost = item->getTUMelee();
-			break;
-		case BA_LAUNCH:
-		case BA_AIMEDSHOT:
-			cost = item->getTUAimed();
-			break;
-		case BA_USE:
-			cost = item->getTUUse();
-			break;
-		case BA_MINDCONTROL:
-			cost = item->getTUMind();
-			break;
-		case BA_PANIC:
-			cost = item->getTUPanic();
-			break;
-		default:
-			cost = 0;
+		// if it's a percentage, apply it to unit TUs
+		if (!flat && cost.Time)
+		{
+			cost.Time = std::max(1, (int)floor(getBaseStats()->tu * cost.Time / 100.0f));
+		}
 	}
-
-	// if it's a percentage, apply it to unit TUs
-	if (!flat)
-	{
-		cost = (int)floor(getBaseStats()->tu * cost / 100.0f);
-	}
-
 	return cost;
 }
-
-int BattleUnit::getActionEnergy(BattleActionType actionType, BattleItem* item) const
-{
-	if (item == 0)
-	{
-		return 0;
-	}
-	return getActionEnergy(actionType, item->getRules());
-}
-
-int BattleUnit::getActionEnergy(BattleActionType actionType, RuleItem *item) const
-{
-	if (item == 0)
-	{
-		return 0;
-	}
-
-	int cost = 0;
-	switch (actionType)
-	{
-		case BA_THROW:
-			cost = item->getEnergyThrow();
-			break;
-		case BA_AUTOSHOT:
-			cost = item->getEnergyAuto();
-			break;
-		case BA_SNAPSHOT:
-			cost = item->getEnergySnap();
-			break;
-		case BA_HIT:
-			cost = item->getEnergyMelee();
-			break;
-		case BA_LAUNCH:
-		case BA_AIMEDSHOT:
-			cost = item->getEnergyAimed();
-			break;
-		case BA_USE:
-			cost = item->getEnergyUse();
-			break;
-		case BA_MINDCONTROL:
-			cost = item->getEnergyMind();
-			break;
-		case BA_PANIC:
-			cost = item->getEnergyPanic();
-			break;
-		default:
-			cost = 0;
-	}
-
-	return cost;
-}
-
 
 /**
  * Spend time units if it can. Return false if it can't.
@@ -1431,6 +1376,19 @@ bool BattleUnit::spendEnergy(int energy)
 	{
 		return false;
 	}
+}
+
+/**
+ * Spend resources cost without checking.
+ * @param cost
+ */
+void BattleUnit::spendCost(const RuleItemUseCost& cost)
+{
+	_tu -= cost.Time;
+	_energy -= cost.Energy;
+	_morale -= cost.Morale;
+	_health -= cost.Health;
+	_stunlevel += cost.Stun;
 }
 
 /**
@@ -2036,8 +1994,8 @@ BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 		return 0;
 
 	// otherwise pick the one with the least snapshot TUs
-	int tuRightHand = getActionTUs(BA_SNAPSHOT, weaponRightHand);
-	int tuLeftHand = getActionTUs(BA_SNAPSHOT, weaponLeftHand);
+	int tuRightHand = getActionTUs(BA_SNAPSHOT, weaponRightHand).Time;
+	int tuLeftHand = getActionTUs(BA_SNAPSHOT, weaponLeftHand).Time;
 	BattleItem *weaponCurrentHand = getItem(getActiveHand());
 	// if only one weapon has snapshot, pick that one
 	if (tuLeftHand <= 0 && tuRightHand > 0)

@@ -20,6 +20,7 @@
 #define OPENXCOM_BATTLESCAPEGAME_H
 
 #include "Position.h"
+#include "../Ruleset/RuleItem.h"
 #include <SDL.h>
 #include <string>
 #include <list>
@@ -42,19 +43,17 @@ class InfoboxOKState;
 
 enum BattleActionType { BA_NONE, BA_TURN, BA_WALK, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK };
 
-struct BattleActionCost
+struct BattleActionCost : RuleItemUseCost
 {
 	BattleActionType type;
 	BattleUnit *actor;
 	BattleItem *weapon;
-	int TU;
-	int Energy;
 
 	//Default constructor.
-	BattleActionCost() : type(BA_NONE), actor(0), weapon(0), TU(0), Energy(0) { }
+	BattleActionCost() : type(BA_NONE), actor(0), weapon(0) { }
 
 	//Constructor with update.
-	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item), TU(0), Energy(0) { updateTU(); }
+	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item) { updateTU(); }
 
 	/// Update value of TU based of actor, weapon and type.
 	void updateTU();
@@ -62,12 +61,8 @@ struct BattleActionCost
 	void clearTU();
 	/// Test if actor have enough TU to perform weapon action.
 	bool haveTU(std::string *message = 0);
-	/// Test if actor can perform weapon action multiple times.
-	bool haveMultipleTU(int i);
 	/// Spend TU when actor have enough TU.
 	bool spendTU(std::string *message = 0);
-	/// Refund TU cost if we encounter error.
-	void rollbackTU();
 };
 
 struct BattleAction : BattleActionCost

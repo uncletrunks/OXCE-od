@@ -299,7 +299,7 @@ void CivilianBAIState::setupEscape()
 	const int FAST_PASS_THRESHOLD = 100; // a score that's good engouh to quit the while loop early; it's subjective, hand-tuned and may need tweaking
 
 	BattleActionCost reserve;
-	reserve.TU = _unit->getTimeUnits() / 2;
+	reserve.Time = _unit->getTimeUnits() / 2;
 	std::vector<int> reachable = _save->getPathfinding()->findReachable(_unit, reserve);
 	std::vector<Position> randomTileSearch = _save->getTileSearch();
 	RNG::shuffle(randomTileSearch);
@@ -410,7 +410,7 @@ void CivilianBAIState::setupEscape()
 		if (tile && score > bestTileScore)
 		{
 			// calculate TUs to tile; we could be getting this from findReachable() somehow but that would break something for sure...
-			_save->getPathfinding()->calculate(_unit, _escapeAction->target, 0, reserve.TU);
+			_save->getPathfinding()->calculate(_unit, _escapeAction->target, 0, reserve.Time);
 			if (_escapeAction->target == _unit->getPosition() || _save->getPathfinding()->getStartDirection() != -1)
 			{
 				bestTileScore = score;

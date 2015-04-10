@@ -100,9 +100,9 @@ namespace OpenXcom
 			_lstInfo->setBig();
 
 			int current_row = 0;
-			if (item->getTUAuto()>0)
+			if (item->getCostAuto().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getTUAuto());
+				std::wstring tu = Text::formatPercentage(item->getCostAuto().Time);
 				if (item->getFlatRate())
 				{
 					tu.erase(tu.end() - 1);
@@ -115,9 +115,9 @@ namespace OpenXcom
 				current_row++;
 			}
 
-			if (item->getTUSnap()>0)
+			if (item->getCostSnap().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getTUSnap());
+				std::wstring tu = Text::formatPercentage(item->getCostSnap().Time);
 				if (item->getFlatRate())
 				{
 					tu.erase(tu.end() - 1);
@@ -130,9 +130,9 @@ namespace OpenXcom
 				current_row++;
 			}
 
-			if (item->getTUAimed()>0)
+			if (item->getCostAimed().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getTUAimed());
+				std::wstring tu = Text::formatPercentage(item->getCostAimed().Time);
 				if (item->getFlatRate())
 				{
 					tu.erase(tu.end() - 1);

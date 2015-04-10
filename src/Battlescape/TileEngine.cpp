@@ -959,7 +959,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 		(_save->getDepth() != 0 || meleeWeapon->getRules()->isWaterOnly() == false))
 	{
 		reaction.attackType = BA_HIT;
-		reaction.reactionReduction = 1.0 * BattleActionCost(BA_HIT, unit, meleeWeapon).TU * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
+		reaction.reactionReduction = 1.0 * BattleActionCost(BA_HIT, unit, meleeWeapon).Time * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
 		return reaction;
 	}
 
@@ -980,7 +980,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 		(_save->getDepth() != 0 || weapon->getRules()->isWaterOnly() == false))
 	{
 		reaction.attackType = BA_SNAPSHOT;
-		reaction.reactionReduction = 1.0 * BattleActionCost(BA_SNAPSHOT, unit, weapon).TU * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
+		reaction.reactionReduction = 1.0 * BattleActionCost(BA_SNAPSHOT, unit, weapon).Time * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
 		return reaction;
 	}
 

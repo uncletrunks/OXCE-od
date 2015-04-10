@@ -73,8 +73,7 @@ void BattleActionCost::updateTU()
 {
 	if (actor && weapon)
 	{
-		TU = actor->getActionTUs(type, weapon);
-		Energy = actor->getActionEnergy(type, weapon);
+		*(RuleItemUseCost*)this = actor->getActionTUs(type, weapon);
 	}
 	else
 	{
@@ -87,8 +86,7 @@ void BattleActionCost::updateTU()
  */
 void BattleActionCost::clearTU()
 {
-	TU = 0;
-	Energy = 0;
+	*(RuleItemUseCost*)this = RuleItemUseCost();
 }
 
 /**
@@ -98,12 +96,12 @@ void BattleActionCost::clearTU()
  */
 bool BattleActionCost::haveTU(std::string *message)
 {
-	if (TU <= 0)
+	if (Time <= 0)
 	{
 		//no action, no message
 		return false;
 	}
-	if (actor->getTimeUnits() < TU)
+	if (actor->getTimeUnits() < Time)
 	{
 		if (message)
 		{
@@ -119,27 +117,28 @@ bool BattleActionCost::haveTU(std::string *message)
 		}
 		return false;
 	}
-	return true;
-}
-
-/**
- * Test if action can be performed multiple times.
- * @param i how many times do action.
- * @return Unit have enough stats to perform actions.
- */
-bool BattleActionCost::haveMultipleTU(int i)
-{
-	if (TU <= 0)
+	if (actor->getMorale() < Morale)
 	{
-		//no action, no message
+		if (message)
+		{
+			*message = "STR_NOT_ENOUGH_MORALE";
+		}
 		return false;
 	}
-	if (actor->getTimeUnits() < TU * i)
+	if (actor->getHealth() <= Health)
 	{
+		if (message)
+		{
+			*message = "STR_NOT_ENOUGH_HEALTH";
+		}
 		return false;
 	}
-	if (actor->getEnergy() < Energy * i)
+	if (actor->getHealth() - actor->getStunlevel() <= Stun + Health)
 	{
+		if (message)
+		{
+			*message = "STR_NOT_ENOUGH_STUN";
+		}
 		return false;
 	}
 	return true;
@@ -154,20 +153,10 @@ bool BattleActionCost::spendTU(std::string *message)
 {
 	if (haveTU(message))
 	{
-		actor->spendTimeUnits(TU);
-		actor->spendEnergy(Energy);
+		actor->spendCost(*this);
 		return true;
 	}
 	return false;
-}
-
-/**
- * Refund unused cost. Call only after `spendTU` when you need rollback action.
- */
-void BattleActionCost::rollbackTU()
-{
-	actor->setTimeUnits(actor->getTimeUnits() + TU);
-	actor->setEnergy(actor->getEnergy() + Energy);
 }
 
 /**
@@ -1049,12 +1038,12 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 		}
 		cost.updateTU();
 		cost.Energy += energy;
-		cost.TU = tu; //override original
+		cost.Time = tu; //override original
 		switch (cost.type)
 		{
-		case BA_SNAPSHOT: cost.TU += (bu->getBaseStats()->tu / 3); break; // 33%
-		case BA_AUTOSHOT: cost.TU += ((bu->getBaseStats()->tu / 5)*2); break; // 40%
-		case BA_AIMEDSHOT: cost.TU += (bu->getBaseStats()->tu / 2); break; // 50%
+		case BA_SNAPSHOT: cost.Time += (bu->getBaseStats()->tu / 3); break; // 33%
+		case BA_AUTOSHOT: cost.Time += ((bu->getBaseStats()->tu / 5)*2); break; // 40%
+		case BA_AIMEDSHOT: cost.Time += (bu->getBaseStats()->tu / 2); break; // 50%
 		default: break;
 		}
 		return cost.haveTU();
@@ -1062,20 +1051,20 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 
 	cost.updateTU();
 	// if the weapon has no autoshot, reserve TUs for snapshot
-	if (cost.TU == 0 && cost.type == BA_AUTOSHOT)
+	if (cost.Time == 0 && cost.type == BA_AUTOSHOT)
 	{
 		cost.type = BA_SNAPSHOT;
 		cost.updateTU();
 	}
 	// likewise, if we don't have a snap shot available, try aimed.
-	if (cost.TU == 0 && cost.type == BA_SNAPSHOT)
+	if (cost.Time == 0 && cost.type == BA_SNAPSHOT)
 	{
 		cost.type = BA_AIMEDSHOT;
 		cost.updateTU();
 	}
 	const int tuKneel = (_save->getKneelReserved() && !bu->isKneeled()  && bu->getType() == "SOLDIER") ? 4 : 0;
 	// no aimed shot available? revert to none.
-	if (cost.TU == 0 && cost.type == BA_AIMEDSHOT)
+	if (cost.Time == 0 && cost.type == BA_AIMEDSHOT)
 	{
 		if (tuKneel > 0)
 		{
@@ -1087,7 +1076,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 		}
 	}
 
-	cost.TU += tuKneel;
+	cost.Time += tuKneel;
 
 	//current TU is less that required for reserved shoot, we can't reserved anything.
 	if (!cost.haveTU() && !justChecking)
@@ -1095,7 +1084,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 		return true;
 	}
 
-	cost.TU += tu;
+	cost.Time += tu;
 	cost.Energy += energy;
 
 	if ((cost.type != BA_NONE || _save->getKneelReserved()) && !cost.haveTU())
@@ -1504,11 +1493,11 @@ void BattlescapeGame::psiButtonAction()
 {
 	BattleItem *item = _save->getSelectedUnit()->getSpecialWeapon(BT_PSIAMP);
 	_currentAction.type = BA_NONE;
-	if (item->getRules()->getTUPanic() > 0)
+	if (item->getRules()->getCostPanic().Time > 0)
 	{
 		_currentAction.type = BA_PANIC;
 	}
-	else if (item->getRules()->getTUUse() > 0)
+	else if (item->getRules()->getCostUse().Time > 0)
 	{
 		_currentAction.type = BA_USE;
 	}

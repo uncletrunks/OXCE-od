@@ -37,6 +37,41 @@ class BattleUnit;
 
 typedef float (*BonusStatFunc)(const BattleUnit*);
 
+struct RuleItemUseCost
+{
+	int Time;
+	int Energy;
+	int Morale;
+	int Health;
+	int Stun;
+
+	/// Default constructor.
+	RuleItemUseCost() : Time(0), Energy(0), Morale(0), Health(0), Stun(0)
+	{
+
+	}
+	/// Create new cost with one value for time units and another for rest.
+	RuleItemUseCost(int tu, int rest = 0) : Time(tu), Energy(rest), Morale(rest), Health(rest), Stun(rest)
+	{
+
+	}
+
+	/// Add cost.
+	RuleItemUseCost& operator+=(const RuleItemUseCost& cost)
+	{
+		Time += cost.Time;
+		Energy += cost.Energy;
+		Morale += cost.Morale;
+		Health += cost.Health;
+		Stun += cost.Stun;
+		return *this;
+	}
+	/// Get final value of cost.
+	RuleItemUseCost getBackup(const RuleItemUseCost& b) const;
+	/// Load values from yaml.
+	void load(const YAML::Node& node, const std::string& name);
+};
+
 /**
  * Represents a specific type of item.
  * Contains constant info about an item like
@@ -60,9 +95,8 @@ private:
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType;
 	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
-	int _tuAimed, _tuAuto, _tuSnap, _tuMelee, _tuUse, _tuMind, _tuPanic, _tuThrow;
-	int _energyAimed, _energyAuto, _energySnap, _energyMelee, _energyUse, _energyMind, _energyPanic, _energyThrow;
-	int _clipSize, _tuPrime, _tuLoad, _tuUnload;
+	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime;
+	int _clipSize, _tuLoad, _tuUnload;
 	BattleType _battleType;
 	std::string _psiAttackName;
 	bool _twoHanded, _waypoint, _fixedWeapon;
@@ -158,42 +192,25 @@ public:
 	/// Gets the item's throw accuracy.
 	int getAccuracyThrow() const;
 
-	/// Gets the item's aimed shot TU cost.
-	int getTUAimed() const;
-	/// Gets the item's autoshot TU cost.
-	int getTUAuto() const;
-	/// Gets the item's snapshot TU cost.
-	int getTUSnap() const;
-	/// Gets the item's melee TU cost.
-	int getTUMelee() const;
-	/// Gets the Time Unit use.
-	int getTUUse() const;
-	/// Gets the item's mind control TU cost.
-	int getTUMind() const;
-	/// Gets the item's panic TU cost.
-	int getTUPanic() const;
-	/// Gets the item's throw TU cost.
-	int getTUThrow() const;
+	/// Gets the item's aimed shot cost.
+	RuleItemUseCost getCostAimed() const;
+	/// Gets the item's autoshot cost.
+	RuleItemUseCost getCostAuto() const;
+	/// Gets the item's snapshot cost.
+	RuleItemUseCost getCostSnap() const;
+	/// Gets the item's melee cost.
+	RuleItemUseCost getCostMelee() const;
+	/// Gets the item's use cost.
+	RuleItemUseCost getCostUse() const;
+	/// Gets the item's mind control cost.
+	RuleItemUseCost getCostMind() const;
+	/// Gets the item's panic cost.
+	RuleItemUseCost getCostPanic() const;
+	/// Gets the item's throw cost.
+	RuleItemUseCost getCostThrow() const;
+	/// Gets the item's prime cost.
+	RuleItemUseCost getCostPrime() const;
 
-	/// Gets the item's aimed shot Energy cost.
-	int getEnergyAimed() const;
-	/// Gets the item's autoshot Energy cost.
-	int getEnergyAuto() const;
-	/// Gets the item's snapshot Energy cost.
-	int getEnergySnap() const;
-	/// Gets the item's melee Energy cost.
-	int getEnergyMelee() const;
-	/// Gets the Energy use.
-	int getEnergyUse() const;
-	/// Gets the item's mind control Energy cost.
-	int getEnergyMind() const;
-	/// Gets the item's panic Energy cost.
-	int getEnergyPanic() const;
-	/// Gets the item's throw Energy cost.
-	int getEnergyThrow() const;
-
-	/// Gets the item's prime TU cost.
-	int getTUPrime() const;
 	/// Gets the item's load TU cost.
 	int getTULoad() const;
 	/// Gets the item's unload TU cost.
