@@ -37,6 +37,8 @@ You can rename weapon slot names in geoscape craft info.[br/]
 1.7:[br/]
 Rewritten item use cost. Now is possible to spend HP, Morale or grain stun damage from using items.[br/]
 You can't use old `energy*` properties in item, they are removed and replaced by new one in `cost*`.[br/]
+Item have now range threshold unit they start calculating range power reduction.[br/]
+Damage type can now change default power change per tile in explosion.[br/]
 
 
 [br/][br/]
@@ -135,6 +137,7 @@ items:
       #same stats like `damageBonus`.
       #...
     powerRangeReduction: 0.0 #how much power a bullet loses per tile, used by Psi-Amp too. Default value 1 for the Psi-Amp.
+    powerRangeThreshold: 0.0 #how far in tiles bullet need fly to start appling `powerRangeReduction`.
     damageAlter: #all values have default values based on `damageType`, used by ammo and corpses.
       FixRadius: 60 #aka `BlastRadius`.
       RandomType: 1 #how roll damage range.
@@ -144,27 +147,28 @@ items:
       # 3-> Flat  [100% - 100%]
       # 4-> Rng(5,10)
       # 5-> 0
-      ResistType: 1            #what resistance is used by an affected unit, same values like `damageType`.
-      FireBlastCalc: false     #fire had special way of calculating blast.
-      IgnoreDirection: true    #damage ignores direction of hit, used by smoke and fire.
-      IgnoreSelfDestruct: true #killing using this damage prevents self-destruct by this unit.
-      IgnorePainImmunity: true #some units don't get stun level from damage.
+      ResistType: 1             #what resistance is used by an affected unit, same values like `damageType`.
+      FireBlastCalc: false      #fire had special way of calculating blast.
+      IgnoreDirection: true     #damage ignores direction of hit, used by smoke and fire.
+      IgnoreSelfDestruct: true  #killing using this damage prevents self-destruct by this unit.
+      IgnorePainImmunity: true  #some units don't get stun level from damage.
       IgnoreNormalMoraleLose: false #some units ignore normal morale loss from damage.
-      IgnoreOverKill: false    #disables overkill damage.
-      ArmorEffectiveness: 0.5  #how effective armor is against this damage.
-      RadiusEffectiveness: 0.3 #how power translates to splash radius.
-      FireThreshold: 0         #how much damage is required to spawn fire on unit (after armor and ToHealth) or tile.
-      SmokeThreshold: 100      #how much damage is required to spawn smoke on tile.
-      ToHealth: 1.0    #how much damage is done to health, can be negative.
-      ToArmor: 0.25    #how much damage is done to armor.
-      ToArmorPre: 0.0  #how much damage is done to armor before applying armor protection.
-      ToWound: 0.1     #determine probability of wounds.
-      ToItem: 0.0      #how much power is applied to items.
-      ToTile: 0.0      #how much power is applied to the ground.
-      ToStun: 0.25     #how much damage increases stun level.
-      ToEnergy: 0.0    #how much power is applied to energy loss.
-      ToTime: 0.0      #how much power is applied to time units loss.
-      ToMorale: 0.0    #how much power is applied to morale loss.
+      IgnoreOverKill: false     #disables overkill damage.
+      ArmorEffectiveness: 0.5   #how effective armor is against this damage.
+      RadiusEffectiveness: 0.3  #how power translates to splash radius.
+      RadiusReduction: 10.0     #how much explosion power is reduce per tile.
+      FireThreshold: 0          #how much damage is required to spawn fire on unit (after armor and ToHealth) or tile.
+      SmokeThreshold: 100       #how much damage is required to spawn smoke on tile.
+      ToHealth: 1.0     #how much damage is done to health, can be negative.
+      ToArmor: 0.25     #how much damage is done to armor.
+      ToArmorPre: 0.0   #how much damage is done to armor before applying armor protection.
+      ToWound: 0.1      #determine probability of wounds.
+      ToItem: 0.0       #how much power is applied to items.
+      ToTile: 0.0       #how much power is applied to the ground.
+      ToStun: 0.25      #how much damage increases stun level.
+      ToEnergy: 0.0     #how much power is applied to energy loss.
+      ToTime: 0.0       #how much power is applied to time units loss.
+      ToMorale: 0.0     #how much power is applied to morale loss.
     requiresBuy: #what tech is required for the item to be visible in the Hire/Purchase screen.
       - SOME_TECH
       - SOME_TECH_MK2

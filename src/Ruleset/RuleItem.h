@@ -92,6 +92,7 @@ private:
 	int _fireSound, _hitSound, _hitAnimation;
 	int _power;
 	float _powerRangeReduction;
+	float _powerRangeThreshold;
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType;
 	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
@@ -168,8 +169,8 @@ public:
 	int getPower() const;
 	/// Get additional power form unit statistics
 	int getPowerBonus(const BattleUnit *unit) const;
-	/// Gets amount of power drop per voxel.
-	float getPowerRangeReduction() const;
+	/// Gets amount of power dropped for range in voxels.
+	float getPowerRangeReduction(float range) const;
 	/// Get multiplier of accuracy form unit statistics
 	int getAccuracyMultiplier(const BattleUnit *unit) const;
 	/// Get multiplier of throwing form unit statistics

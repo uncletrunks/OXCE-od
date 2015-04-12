@@ -271,7 +271,7 @@ void RuleItemUseCost::load(const YAML::Node& node, const std::string& name)
  */
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
-	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _damageType(),
+	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _powerRangeThreshold(0), _damageType(),
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _tuLoad(15), _tuUnload(8),
@@ -523,6 +523,8 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	statsModiferWrite(_throwMulti, node["throwMultiplier"]);
 
 	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
+	_powerRangeThreshold = node["powerRangeThreshold"].as<float>(_powerRangeThreshold);
+
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
 
 	if (!_listOrder)
@@ -738,12 +740,13 @@ int RuleItem::getPower() const
 }
 
 /**
- * Gets amount of power drop per voxel.
- * @return Reduction per voxel.
+ * Gets amount of power dropped for range in voxels.
+ * @return Power reduction.
  */
-float RuleItem::getPowerRangeReduction() const
+float RuleItem::getPowerRangeReduction(float range) const
 {
-	return _powerRangeReduction * 0.0625f;
+	range -= _powerRangeThreshold / 0.0625f;
+	return (_powerRangeReduction * 0.0625f) * (range > 0 ? range : 0);
 }
 
 /**

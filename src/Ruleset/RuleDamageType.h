@@ -54,8 +54,10 @@ struct RuleDamageType
 	bool IgnoreOverKill;
 	/// How much of armor is ignored.
 	float ArmorEffectiveness;
-	/// Conversion form power to radius.
+	/// Conversion form power to max explosion radius.
 	float RadiusEffectiveness;
+	/// Reduction of explosion power per tile.
+	float RadiusReduction;
 	/// Threshold of fire creation
 	int FireThreshold;
 	/// Threshold of smoke creation

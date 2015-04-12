@@ -93,7 +93,7 @@ void ExplosionBState::init()
 		{
 			// since melee aliens don't use a conventional weapon type, we use their strength instead.
 			_power += _item->getRules()->getPowerBonus(_unit);
-			_power -= _item->getRules()->getPowerRangeReduction() * _range;
+			_power -= _item->getRules()->getPowerRangeReduction(_range);
 		}
 
 		if (type == BT_PSIAMP)

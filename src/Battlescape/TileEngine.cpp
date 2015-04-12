@@ -1285,13 +1285,13 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 	switch (exHeight)
 	{
 	case 1:
-		vertdec = 30;
+		vertdec = 3.0f * type->RadiusReduction;
 		break;
 	case 2:
-		vertdec = 10;
+		vertdec = 1.0f * type->RadiusReduction;
 		break;
 	case 3:
-		vertdec = 5;
+		vertdec = 0.5f * type->RadiusReduction;
 	}
 
 	for (int fi = -90; fi <= 90; fi += 5)
@@ -1382,7 +1382,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 				if (!dest) break; // out of map!
 
 				// blockage by terrain is deducted from the explosion power
-				power_ -= 10; // explosive damage decreases by 10 per tile
+				power_ -= type->RadiusReduction; // explosive damage decreases by 10 per tile
 				if (origin->getPosition().z != tileZ)
 					power_ -= vertdec; //3d explosion factor
 
@@ -1390,7 +1390,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 				{
 					int dir;
 					Pathfinding::vectorToDirection(origin->getPosition() - dest->getPosition(), dir);
-					if (dir != -1 && dir %2) power_ -= 5; // diagonal movement costs an extra 50% for fire.
+					if (dir != -1 && dir %2) power_ -= 0.5f * type->RadiusReduction; // diagonal movement costs an extra 50% for fire.
 				}
 				if (l>0.5) power_-= horizontalBlockage(origin, dest, type->ResistType, l<1.5) * 2;
 				if (l>0.5) power_-= verticalBlockage(origin, dest, type->ResistType, l<1.5) * 2;
@@ -2538,6 +2538,14 @@ int TileEngine::distanceSq(const Position &pos1, const Position &pos2, bool cons
 	return sq;
 }
 
+/**
+ * Calculate strength of psi attack based on range and victim.
+ * @param type Type of attack.
+ * @param attacker Unit attacking.
+ * @param victim Attacked unit.
+ * @param weapon Attack item.
+ * @return Value greater than zero mean successful attack.
+ */
 int TileEngine::psiAttackCalculate(BattleActionType type, BattleUnit *attacker, BattleUnit *victim, BattleItem *weapon)
 {
 	if (!victim)
@@ -2548,14 +2556,13 @@ int TileEngine::psiAttackCalculate(BattleActionType type, BattleUnit *attacker, 
 
 	Position p = attacker->getPosition().toVexel() - victim->getPosition().toVexel();
 	p *= p;
-	attackStrength -= sqrt(float(p.x + p.y + p.z)) * weapon->getRules()->getPowerRangeReduction();
+	attackStrength -= weapon->getRules()->getPowerRangeReduction(sqrt(float(p.x + p.y + p.z)));
 	attackStrength += RNG::generate(0,55);
 
 	return attackStrength - defenseStrength;
 }
 
 /**
-<<<<<<< HEAD
  * Attempts a panic or mind control action.
  * @param action Pointer to an action.
  * @return Whether it failed or succeeded.
@@ -2613,8 +2620,6 @@ bool TileEngine::psiAttack(BattleAction *action)
 }
 
 /**
-=======
->>>>>>> smaster
  * Applies gravity to a tile. Causes items and units to drop.
  * @param t Tile.
  * @return Tile where the items end up in eventually.
