@@ -28,6 +28,7 @@ namespace OpenXcom
 {
 
 const int STANDOFF_DIST = 560;
+enum ColorNames { CRAFT_MIN, CRAFT_MAX, RADAR_MIN, RADAR_MAX, DAMAGE_MIN, DAMAGE_MAX, BLOB_MIN, RANGE_METER, DISABLED_WEAPON, DISABLED_AMMO, DISABLED_RANGE };
 
 class ImageButton;
 class Text;
@@ -67,7 +68,7 @@ private:
 	int _weaponNum;
 
 	// craft min/max, radar min/max, damage min/max
-	int _color[6];
+	int _colors[11];
 	// Ends the dogfight.
 	void endDogfight();
 

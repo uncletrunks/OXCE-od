@@ -164,18 +164,17 @@ bool BattleActionCost::spendTU(std::string *message)
  * @param save Pointer to the save game.
  * @param parentState Pointer to the parent battlescape state.
  */
-BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playedAggroSound(false), _endTurnRequested(false)
+BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false), _endTurnRequested(false), _endTurnProcessed(false)
 {
-	_debugPlay = false;
-	_playerPanicHandled = true;
-	_AIActionCounter = 0;
-	_AISecondMove = false;
+	
 	_currentAction.actor = 0;
+	_currentAction.targeting = false;
+	_currentAction.type = BA_NONE;
+
+	_debugPlay = false;
 
 	checkForCasualties(0, 0, true);
 	cancelCurrentAction();
-	_currentAction.targeting = false;
-	_currentAction.type = BA_NONE;
 }
 
 
@@ -459,25 +458,28 @@ void BattlescapeGame::endTurn()
 	_currentAction.targeting = false;
 	_AISecondMove = false;
 
-	if (_save->getTileEngine()->closeUfoDoors() && ResourcePack::SLIDING_DOOR_CLOSE != -1)
+	if (!_endTurnProcessed)
 	{
-		getResourcePack()->getSoundByDepth(_save->getDepth(), ResourcePack::SLIDING_DOOR_CLOSE)->play(); // ufo door closed
-	}
-
-	// check for hot grenades on the ground
-	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
-	{
-		for (std::vector<BattleItem*>::iterator it = _save->getTiles()[i]->getInventory()->begin(); it != _save->getTiles()[i]->getInventory()->end(); )
+		if (_save->getTileEngine()->closeUfoDoors() && ResourcePack::SLIDING_DOOR_CLOSE != -1)
 		{
-			if ((*it)->getRules()->getBattleType() == BT_GRENADE && (*it)->getFuseTimer() == 0)  // it's a grenade to explode now
+			getResourcePack()->getSoundByDepth(_save->getDepth(), ResourcePack::SLIDING_DOOR_CLOSE)->play(); // ufo door closed
+		}
+
+		// check for hot grenades on the ground
+		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
+		{
+			for (std::vector<BattleItem*>::iterator it = _save->getTiles()[i]->getInventory()->begin(); it != _save->getTiles()[i]->getInventory()->end(); )
 			{
-				Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
-				statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
-				_save->removeItem((*it));
-				statePushBack(0);
-				return;
+				if ((*it)->getRules()->getBattleType() == BT_GRENADE && (*it)->getFuseTimer() == 0)  // it's a grenade to explode now
+				{
+					Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
+					statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
+					_save->removeItem((*it));
+					statePushBack(0);
+					return;
+				}
+				++it;
 			}
-			++it;
 		}
 	}
 	// check for terrain explosions
@@ -490,24 +492,33 @@ void BattlescapeGame::endTurn()
 		return;
 	}
 
-	if (_save->getSide() != FACTION_NEUTRAL)
+	if (!_endTurnProcessed)
 	{
-		for (std::vector<BattleItem*>::iterator it = _save->getItems()->begin(); it != _save->getItems()->end(); ++it)
+		if (_save->getSide() != FACTION_NEUTRAL)
 		{
-				if (((*it)->getRules()->getBattleType() == BT_GRENADE || (*it)->getRules()->getBattleType() == BT_PROXIMITYGRENADE) && (*it)->getFuseTimer() > 0)
-				{
-					(*it)->setFuseTimer((*it)->getFuseTimer() - 1);
-				}
+			for (std::vector<BattleItem*>::iterator it = _save->getItems()->begin(); it != _save->getItems()->end(); ++it)
+			{
+					if (((*it)->getRules()->getBattleType() == BT_GRENADE || (*it)->getRules()->getBattleType() == BT_PROXIMITYGRENADE) && (*it)->getFuseTimer() > 0)
+					{
+						(*it)->setFuseTimer((*it)->getFuseTimer() - 1);
+					}
+			}
+		}
+
+
+		_save->endTurn();
+		t = _save->getTileEngine()->checkForTerrainExplosions();
+		if (t)
+		{
+			Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
+			statePushNext(new ExplosionBState(this, p, BA_NONE, 0, 0, t));
+			statePushBack(0);
+			_endTurnProcessed = true;
+			return;
 		}
 	}
 
-	// if all units from either faction are killed - the mission is over.
-	int liveAliens = 0;
-	int liveSoldiers = 0;
-
-	tallyUnits(liveAliens, liveSoldiers);
-
-	_save->endTurn();
+	_endTurnProcessed = false;
 
 	if (_save->getSide() == FACTION_PLAYER)
 	{
@@ -522,6 +533,12 @@ void BattlescapeGame::endTurn()
 
 	// turn off MCed alien lighting.
 	_save->getTileEngine()->calculateUnitLighting();
+
+	// if all units from either faction are killed - the mission is over.
+	int liveAliens = 0;
+	int liveSoldiers = 0;
+
+	tallyUnits(liveAliens, liveSoldiers);
 
 	if (_save->allObjectivesDestroyed())
 	{

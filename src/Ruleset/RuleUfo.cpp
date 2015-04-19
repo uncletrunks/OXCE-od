@@ -60,7 +60,10 @@ void RuleUfo::load(const YAML::Node &node, Ruleset *ruleset)
 	_score = node["score"].as<int>(_score);
 	_reload = node["reload"].as<int>(_reload);
 	_breakOffTime = node["breakOffTime"].as<int>(_breakOffTime);
+
 	_stats.load(node);
+
+	_briefingString = node["briefingString"].as<std::string>(_briefingString);
 	if (const YAML::Node &terrain = node["battlescapeTerrainData"])
 	{
 		RuleTerrain *rule = new RuleTerrain(terrain["name"].as<std::string>());
@@ -220,6 +223,7 @@ const RuleCraftStats& RuleUfo::getStats() const
 	return _stats;
 }
 
+
 /**
  * Gets bonus statistic of UFO based on race.
  * @param s Race name.
@@ -232,6 +236,15 @@ const RuleCraftStats& RuleUfo::getRaceBonus(const std::string& s) const
 		return i->second;
 	else
 		return _statsRaceBonus.find("")->second;
+}
+
+/**
+ * Gets the UFO's custom briefing string
+ * @return The string name.
+ */
+std::string RuleUfo::getBriefingString() const
+{
+	return _briefingString;
 }
 
 }

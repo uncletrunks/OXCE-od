@@ -225,22 +225,33 @@ void BattlescapeGenerator::nextStage()
 	// this does not include items in your soldier's hands.
 	std::vector<BattleItem*> *takeHomeGuaranteed = _save->getGuaranteedRecoveredItems();
 	std::vector<BattleItem*> *takeHomeConditional = _save->getConditionalRecoveredItems();
+	std::vector<BattleItem*> takeToNextStage;
 	std::map<RuleItem*, int> guaranteedRounds, conditionalRounds;
 
 	for (std::vector<BattleItem*>::iterator j = _save->getItems()->begin(); j != _save->getItems()->end();)
 	{
-		Tile *tile = (*j)->getTile();
 		if (!(*j)->getOwner() || (*j)->getOwner()->getOriginalFaction() != FACTION_PLAYER)
 		{
-			(*j)->setTile(0);
-		}
-		if (tile)
-		{
+			Tile *tile = (*j)->getTile();
 			std::vector<BattleItem*> *toContainer = takeHomeConditional;
-			if (tile->getMapData(MapData::O_FLOOR)
-				&& tile->getMapData(MapData::O_FLOOR)->getSpecialType() == START_POINT)
+			if (tile)
 			{
-				toContainer = takeHomeGuaranteed;
+				tile->removeItem(*j);
+				if (tile->getMapData(MapData::O_FLOOR))
+				{
+					if (tile->getMapData(MapData::O_FLOOR)->getSpecialType() == START_POINT)
+					{
+						toContainer = takeHomeGuaranteed;
+					}
+					else if (tile->getMapData(MapData::O_FLOOR)->getSpecialType() == END_POINT
+					&& (*j)->getRules()->isRecoverable()
+					&& !(*j)->getUnit())
+					{
+						takeToNextStage.push_back(*j);
+						++j;
+						continue;
+					}
+				}
 			}
 			if ((*j)->getRules()->isRecoverable() && !(*j)->getXCOMProperty())
 			{
@@ -312,6 +323,13 @@ void BattlescapeGenerator::nextStage()
 		}
 	}
 
+	RuleInventory *ground = _game->getRuleset()->getInventory("STR_GROUND");
+
+	for (std::vector<BattleItem*>::iterator i = takeToNextStage.begin(); i != takeToNextStage.end(); ++i)
+	{
+		_craftInventoryTile->addItem(*i, ground);
+	}
+
 	_unitSequence = _save->getUnits()->back()->getId() + 1;
 
 	size_t unitCount = _save->getUnits()->size();
@@ -377,10 +395,18 @@ void BattlescapeGenerator::run()
 			_terrain = _game->getRuleset()->getTerrain(_worldTexture->getRandomTerrain(target));
 		}
 	}
+
 	// new battle menu will have set the depth already
-	if (_terrain->getMaxDepth() > 0 && _save->getDepth() == 0)
+	if (_save->getDepth() == 0)
 	{
-		_save->setDepth(RNG::generate(_terrain->getMinDepth(), _terrain->getMaxDepth()));
+		if (ruleDeploy->getMaxDepth() > 0)
+		{
+			_save->setDepth(RNG::generate(ruleDeploy->getMinDepth(), ruleDeploy->getMaxDepth()));
+		}
+		else if (_terrain->getMaxDepth() > 0)
+		{
+			_save->setDepth(RNG::generate(_terrain->getMinDepth(), _terrain->getMaxDepth()));
+		}
 	}
 
 	if (ruleDeploy->getShade() != -1)
@@ -864,13 +890,19 @@ void BattlescapeGenerator::deployAliens(AlienDeployment *deployment)
 				outside = false;
 			Unit *rule = _game->getRuleset()->getUnit(alienName);
 			BattleUnit *unit = addAlien(rule, (*d).alienRank, outside);
+			size_t itemLevel = (size_t)(_game->getRuleset()->getAlienItemLevels().at(month).at(RNG::generate(0,9)));
 			if (unit)
 			{
 				_save->initFixedItems(unit);
 				if (!rule->isLivingWeapon())
 				{
-					std::vector<std::string>& itemLevel = (*d).itemSets.at(_game->getRuleset()->getAlienItemLevels().at(month).at(RNG::generate(0,9))).items;
-					for (std::vector<std::string>::iterator it = itemLevel.begin(); it != itemLevel.end(); ++it)
+					if (itemLevel >= (*d).itemSets.size())
+					{
+						std::stringstream ss;
+						ss << "Unit generator encountered an error: not enough item sets defined, expected: " << itemLevel + 1 << " found: " << (*d).itemSets.size();
+						throw Exception(ss.str());
+					}
+					for (std::vector<std::string>::iterator it = (*d).itemSets.at(itemLevel).items.begin(); it != (*d).itemSets.at(itemLevel).items.end(); ++it)
 					{
 						RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
 						if (ruleItem)

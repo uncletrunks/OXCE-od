@@ -567,6 +567,9 @@ void Ruleset::loadFile(const std::string &filename)
 	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
 	_initialFunding = doc["initialFunding"].as<int>(_initialFunding);
 	_alienFuel = doc["alienFuel"].as<std::string>(_alienFuel);
+
+	_aiUseDelayGrenade = doc["turnAIUseGrenade"].as<int>(_aiUseDelayGrenade);
+	_aiUseDelayBlaster = doc["turnAIUseBlaster"].as<int>(_aiUseDelayBlaster);
 	if (const YAML::Node &nodeAI = doc["ai"])
 	{
 		_aiUseDelayBlaster = nodeAI["useDelayBlaster"].as<int>(_aiUseDelayBlaster);
@@ -575,6 +578,7 @@ void Ruleset::loadFile(const std::string &filename)
 		_aiUseDelayMelee   = nodeAI["useDelayMelee"].as<int>(_aiUseDelayMelee);
 		_aiUseDelayPsionic = nodeAI["useDelayPsionic"].as<int>(_aiUseDelayPsionic);
 	}
+
 	for (YAML::const_iterator i = doc["ufoTrajectories"].begin(); i != doc["ufoTrajectories"].end(); ++i)
 	{
 		UfoTrajectory *rule = loadRule(*i, &_ufoTrajectories, 0, "id");

@@ -17,7 +17,6 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "State.h"
-#include <climits>
 #include "InteractiveSurface.h"
 #include "Game.h"
 #include "Screen.h"
@@ -123,10 +122,8 @@ void State::add(Surface *surface, const std::string id, const std::string catego
 				surface->setX(parent->getX() + element->x);
 				surface->setY(parent->getY() + element->y);
 			}
-			if (bsbtn)
-			{
-				bsbtn->setTftdMode(element->TFTDMode);
-			}
+
+			surface->setTFTDMode(element->TFTDMode);
 
 			if (element->color != INT_MAX)
 			{
