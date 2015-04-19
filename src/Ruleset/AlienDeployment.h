@@ -82,7 +82,7 @@ public:
 	/// Gets the Alien Deployment's type.
 	std::string getType() const;
 	/// Gets a pointer to the data.
-	std::vector<DeploymentData>* getDeploymentData();
+	const std::vector<DeploymentData>* getDeploymentData() const;
 	/// Gets dimensions.
 	void getDimensions(int *width, int *length, int *height);
 	/// Gets civilians.

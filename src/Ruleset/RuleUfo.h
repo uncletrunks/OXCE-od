@@ -30,6 +30,27 @@ namespace OpenXcom
 class RuleTerrain;
 class Ruleset;
 
+struct RuleUfoStats : RuleCraftStats
+{
+	std::string craftCustomDeploy, missionCustomDeploy;
+
+	/// Add different stats.
+	RuleUfoStats& operator+=(const RuleUfoStats& r)
+	{
+		*(RuleCraftStats*)this += r;
+		if (!r.craftCustomDeploy.empty()) craftCustomDeploy = r.craftCustomDeploy;
+		if (!r.missionCustomDeploy.empty()) missionCustomDeploy = r.missionCustomDeploy;
+		return *this;
+	}
+	/// Loads stats form YAML.
+	void load(const YAML::Node &node)
+	{
+		(*(RuleCraftStats*)this).load(node);
+		craftCustomDeploy = node["craftCustomDeploy"].as<std::string>(craftCustomDeploy);
+		missionCustomDeploy = node["missionCustomDeploy"].as<std::string>(missionCustomDeploy);
+	}
+};
+
 /**
  * Represents a specific type of UFO.
  * Contains constant info about a UFO like
@@ -43,8 +64,8 @@ private:
 	int _sprite, _marker;
 	int _power, _range, _score, _reload, _breakOffTime;
 	RuleTerrain *_battlescapeTerrainData;
-	RuleCraftStats _stats;
-	std::map<std::string, RuleCraftStats> _statsRaceBonus;
+	RuleUfoStats _stats;
+	std::map<std::string, RuleUfoStats> _statsRaceBonus;
 	std::string _modSprite, _briefingString;
 public:
 	/// Creates a blank UFO ruleset.
@@ -54,9 +75,9 @@ public:
 	/// Loads UFO data from YAML.
 	void load(const YAML::Node& node, Ruleset *ruleset);
 	/// Gets the UFO's type.
-	std::string getType() const;
+	const std::string &getType() const;
 	/// Gets the UFO's size.
-	std::string getSize() const;
+	const std::string &getSize() const;
 	/// Gets the UFO's radius.
 	int getRadius() const;
 	/// Gets the UFO's sprite.
@@ -76,15 +97,15 @@ public:
 	/// Gets the UFO's escape time.
 	int getBreakOffTime() const;
 	/// Gets the name of the surface that represents this UFO.
-	std::string getModSprite() const;
+	const std::string &getModSprite() const;
 	/// Get basic statistic of UFO.
-	const RuleCraftStats& getStats() const;
+	const RuleUfoStats& getStats() const;
 	/// Get race bonus of statistic of UFO.
-	const RuleCraftStats& getRaceBonus(const std::string& s) const;
+	const RuleUfoStats& getRaceBonus(const std::string& s) const;
 	/// Gets the UFO's radar range.
 	int getSightRange() const;
 	/// gets the name of the briefing string.
-	std::string getBriefingString() const;
+	const std::string &getBriefingString() const;
 };
 
 }

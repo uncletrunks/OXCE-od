@@ -40,6 +40,7 @@ AlienRace::~AlienRace()
 void AlienRace::load(const YAML::Node &node)
 {
 	_id = node["id"].as<std::string>(_id);
+	_baseCustomDeploy = node["baseCustomDeploy"].as<std::string>(_baseCustomDeploy);
 	_members = node["members"].as< std::vector<std::string> >(_members);
 	_retaliation = node["retaliation"].as<bool>(_retaliation);
 }
@@ -49,9 +50,18 @@ void AlienRace::load(const YAML::Node &node)
  * this alien race. Each race has a unique name.
  * @return Race name.
  */
-std::string AlienRace::getId() const
+const std::string &AlienRace::getId() const
 {
 	return _id;
+}
+
+/**
+ * Returns optional weapon deploy for aliens in they base.
+ * @return Alien deployment id.
+ */
+const std::string &AlienRace::getBaseCustomDeploy() const
+{
+	return _baseCustomDeploy;
 }
 
 /**
@@ -59,7 +69,7 @@ std::string AlienRace::getId() const
  * @param id The member's id.
  * @return The member's name.
  */
-std::string AlienRace::getMember(int id) const
+const std::string &AlienRace::getMember(int id) const
 {
 	return _members[id];
 }

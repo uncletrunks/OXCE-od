@@ -56,7 +56,7 @@ private:
 	size_t _trajectoryPoint;
 	bool _detected, _hyperDetected, _processedIntercept;
 	int _shootingAt, _hitFrame, _fireCountdown, _escapeCountdown;
-	RuleCraftStats _stats;
+	RuleUfoStats _stats;
 	/// Calculates a new speed vector to the destination.
 	void calculateSpeed();
 public:
@@ -157,7 +157,7 @@ public:
 	/// Gets the UFO's hit frame.
 	int getHitFrame();
 	/// Gets the UFO's stats.
-	const RuleCraftStats& getCraftStats() const;
+	const RuleUfoStats& getCraftStats() const;
 	void setFireCountdown(int time);
 	int getFireCountdown();
 	void setEscapeCountdown(int time);

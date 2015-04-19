@@ -753,7 +753,7 @@ int Ufo::getHitFrame()
 }
 
 /// Gets the UFO's stats.
-const RuleCraftStats& Ufo::getCraftStats() const
+const RuleUfoStats& Ufo::getCraftStats() const
 {
 	return _stats;
 }

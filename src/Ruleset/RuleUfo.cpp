@@ -33,7 +33,7 @@ RuleUfo::RuleUfo(const std::string &type) :
 	_battlescapeTerrainData(0), _stats(), _statsRaceBonus()
 {
 	_stats.sightRange = 268;
-	_statsRaceBonus[""] = RuleCraftStats();
+	_statsRaceBonus[""] = RuleUfoStats();
 }
 
 /**
@@ -85,7 +85,7 @@ void RuleUfo::load(const YAML::Node &node, Ruleset *ruleset)
  * this UFO. Each UFO type has a unique name.
  * @return The Ufo's name.
  */
-std::string RuleUfo::getType() const
+const std::string &RuleUfo::getType() const
 {
 	return _type;
 }
@@ -94,7 +94,7 @@ std::string RuleUfo::getType() const
  * Gets the size of this type of UFO.
  * @return The Ufo's size.
  */
-std::string RuleUfo::getSize() const
+const std::string &RuleUfo::getSize() const
 {
 	return _size;
 }
@@ -209,7 +209,7 @@ int RuleUfo::getBreakOffTime() const
  * For user-defined UFOs, use a surface for the "preview" image.
  * @return The name of the surface that represents this UFO.
  */
-std::string RuleUfo::getModSprite() const
+const std::string &RuleUfo::getModSprite() const
 {
 	return _modSprite;
 }
@@ -218,7 +218,7 @@ std::string RuleUfo::getModSprite() const
  * Gets basic statistic of UFO.
  * @return Basic stats of UFO.
  */
-const RuleCraftStats& RuleUfo::getStats() const
+const RuleUfoStats& RuleUfo::getStats() const
 {
 	return _stats;
 }
@@ -229,9 +229,9 @@ const RuleCraftStats& RuleUfo::getStats() const
  * @param s Race name.
  * @return Bonus stats.
  */
-const RuleCraftStats& RuleUfo::getRaceBonus(const std::string& s) const
+const RuleUfoStats& RuleUfo::getRaceBonus(const std::string& s) const
 {
-	std::map<std::string, RuleCraftStats>::const_iterator i = _statsRaceBonus.find(s);
+	std::map<std::string, RuleUfoStats>::const_iterator i = _statsRaceBonus.find(s);
 	if (i != _statsRaceBonus.end())
 		return i->second;
 	else
@@ -242,7 +242,7 @@ const RuleCraftStats& RuleUfo::getRaceBonus(const std::string& s) const
  * Gets the UFO's custom briefing string
  * @return The string name.
  */
-std::string RuleUfo::getBriefingString() const
+const std::string &RuleUfo::getBriefingString() const
 {
 	return _briefingString;
 }

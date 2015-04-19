@@ -403,8 +403,9 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 			MissionArea area = regionRules.getMissionPoint(trajectory.getZone(curWaypoint), &ufo);
 			Texture *texture = rules.getGlobe()->getTexture(area.texture);
 			AlienDeployment *deployment = rules.getDeployment(texture->getDeployment());
-			
-			MissionSite *missionSite = new MissionSite(&_rule, deployment);
+			AlienDeployment *alienCustomDeploy = rules.getDeployment(ufo.getCraftStats().missionCustomDeploy);
+
+			MissionSite *missionSite = new MissionSite(&_rule, deployment, alienCustomDeploy);
 			missionSite->setLongitude(ufo.getLongitude());
 			missionSite->setLatitude(ufo.getLatitude());
 			missionSite->setId(game.getId(deployment->getMarkerName()));

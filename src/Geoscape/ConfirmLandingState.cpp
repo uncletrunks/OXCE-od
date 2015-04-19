@@ -42,6 +42,7 @@
 #include "../Engine/Options.h"
 #include "../Ruleset/RuleAlienMission.h"
 #include "../Ruleset/AlienDeployment.h"
+#include "../Ruleset/AlienRace.h"
 
 namespace OpenXcom
 {
@@ -143,12 +144,14 @@ void ConfirmLandingState::btnYesClick(Action *)
 		else
 			bgame->setMissionType("STR_UFO_GROUND_ASSAULT");
 		bgen.setUfo(u);
+		bgen.setAlienCustomDeploy(_game->getRuleset()->getDeployment(u->getCraftStats().craftCustomDeploy));
 		bgen.setAlienRace(u->getAlienRace());
 	}
 	else if (m != 0)
 	{
 		bgame->setMissionType(m->getDeployment()->getType());
 		bgen.setMissionSite(m);
+		bgen.setAlienCustomDeploy(m->getMissionCustomDeploy());
 		bgen.setAlienRace(m->getAlienRace());
 	}
 	else if (b != 0)
@@ -156,6 +159,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 		bgame->setMissionType("STR_ALIEN_BASE_ASSAULT");
 		bgen.setAlienBase(b);
 		bgen.setAlienRace(b->getAlienRace());
+		bgen.setAlienCustomDeploy(_game->getRuleset()->getDeployment(_game->getRuleset()->getAlienRace(b->getAlienRace())->getBaseCustomDeploy()));
 		bgen.setWorldTexture(0);
 	}
 	else

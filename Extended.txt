@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.7[/b]
+[b]Mod version 1.8[/b]
 OpenXcom version: Nightly 19/04/2015
 
 [br/][br/]
@@ -39,6 +39,9 @@ Rewritten item use cost. Now is possible to spend HP, Morale or grain stun damag
 You can't use old `energy*` properties in item, they are removed and replaced by new one in `cost*`.[br/]
 Item have now range threshold unit they start calculating range power reduction.[br/]
 Damage type can now change default power change per tile in explosion.[br/]
+[br/]
+1.8:[br/]
+Option for custom weapon deploy for alien missions and ufos.[br/]
 
 
 [br/][br/]
@@ -233,6 +236,8 @@ ufos:
     avoidBonus: 0 #bonus percentage to UFO dodge chance. Range [0, 100].
     powerBonus: 0 #bonus percentage to all weapons damage. Range [0, 100].
     armor: 0      #amount of blocked damage per hit.
+    craftCustomDeploy: STR_BATTLESHIP_1 #override craft default weapon deploy.
+    missionCustomDeploy: STR_TERROR_MISSION_2 #override mission defulat weapon deploy.
     raceBonus: #bonus stats per race.
       STR_SECTOID: #name of race that bonus apply.
         damageMax: 0  #additive bonus to craft stats.
@@ -243,6 +248,14 @@ ufos:
         avoidBonus: 0 #bonus percentage to craft avoid chance. Range [0, 100].
         powerBonus: 0 #bonus percentage to all weapon damage. Range [0, 100].
         armor: 0      #amount of blocked damage per hit.
+        craftCustomDeploy: STR_BATTLESHIP_3 #override craft default weapon deploy.
+        missionCustomDeploy: STR_TERROR_MISSION_2 #override mission defulat weapon deploy.
+[/code]
+
+[code]
+alienRaces:
+  - id: STR_SECTOID
+    baseCustomDeploy: STR_ALIEN_BASE_ASSAULT_2 #override alien base default weapon depoly.
 [/code]
 
 [code]

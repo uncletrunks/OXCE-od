@@ -36,6 +36,7 @@ class AlienRace
 {
 private:
 	std::string _id;
+	std::string _baseCustomDeploy;
 	std::vector<std::string> _members;
 	bool _retaliation;
 public:
@@ -46,9 +47,11 @@ public:
 	/// Loads alien race data from YAML.
 	void load(const YAML::Node& node);
 	/// Gets the alien race's id.
-	std::string getId() const;
+	const std::string &getId() const;
+	/// Gets the alien base weapon deploy.
+	const std::string &getBaseCustomDeploy() const;
 	/// Gets a certain member of this alien race family.
-	std::string getMember(int id) const;
+	const std::string &getMember(int id) const;
 	/// Gets if the race can retaliate.
 	bool canRetaliate() const;
 };

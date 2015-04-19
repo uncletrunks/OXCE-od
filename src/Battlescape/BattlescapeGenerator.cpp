@@ -63,6 +63,7 @@
 #include "CivilianBAIState.h"
 #include "AlienBAIState.h"
 #include "Pathfinding.h"
+#include "BattlescapeState.h"
 
 namespace OpenXcom
 {
@@ -71,8 +72,12 @@ namespace OpenXcom
  * Sets up a BattlescapeGenerator.
  * @param game pointer to Game object.
  */
-BattlescapeGenerator::BattlescapeGenerator(Game *game) : _game(game), _save(game->getSavedGame()->getSavedBattle()), _res(_game->getResourcePack()), _craft(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0),
-														 _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0), _unitSequence(0), _craftInventoryTile(0), _alienItemLevel(0), _baseInventory(false), _generateFuel(true), _craftDeployed(false), _craftZ(0)
+BattlescapeGenerator::BattlescapeGenerator(Game *game) :
+	_game(game), _save(game->getSavedGame()->getSavedBattle()), _res(_game->getResourcePack()),
+	_craft(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0),
+	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
+	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienItemLevel(0),
+	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _craftZ(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
 }
@@ -165,6 +170,15 @@ void BattlescapeGenerator::setAlienRace(const std::string &alienRace)
 void BattlescapeGenerator::setAlienItemlevel(int alienItemLevel)
 {
 	_alienItemLevel = alienItemLevel;
+}
+
+/**
+ * Set new weapon deploy for aliens that override weapon deploy data form mission type/ufo.
+ * @param alienCustomDeploy
+ */
+void BattlescapeGenerator::setAlienCustomDeploy(const AlienDeployment* alienCustomDeploy)
+{
+	_alienCustomDeploy = alienCustomDeploy;
 }
 
 /**
@@ -433,7 +447,7 @@ void BattlescapeGenerator::run()
 
 	size_t unitCount = _save->getUnits()->size();
 
-	deployAliens(ruleDeploy);
+	deployAliens(_alienCustomDeploy ? _alienCustomDeploy : ruleDeploy);
 
 	if (unitCount == _save->getUnits()->size())
 	{
@@ -837,7 +851,7 @@ bool BattlescapeGenerator::canPlaceXCOMUnit(Tile *tile)
  * @param race Pointer to the alien race.
  * @param deployment Pointer to the deployment rules.
  */
-void BattlescapeGenerator::deployAliens(AlienDeployment *deployment)
+void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 {
 	if (deployment->getRace() != "" && _alienRace == "")
 	{
@@ -868,7 +882,7 @@ void BattlescapeGenerator::deployAliens(AlienDeployment *deployment)
 	{
 		month = _alienItemLevel;
 	}
-	for (std::vector<DeploymentData>::iterator d = deployment->getDeploymentData()->begin(); d != deployment->getDeploymentData()->end(); ++d)
+	for (std::vector<DeploymentData>::const_iterator d = deployment->getDeploymentData()->begin(); d != deployment->getDeploymentData()->end(); ++d)
 	{
 		std::string alienName = race->getMember((*d).alienRank);
 
@@ -902,7 +916,7 @@ void BattlescapeGenerator::deployAliens(AlienDeployment *deployment)
 						ss << "Unit generator encountered an error: not enough item sets defined, expected: " << itemLevel + 1 << " found: " << (*d).itemSets.size();
 						throw Exception(ss.str());
 					}
-					for (std::vector<std::string>::iterator it = (*d).itemSets.at(itemLevel).items.begin(); it != (*d).itemSets.at(itemLevel).items.end(); ++it)
+					for (std::vector<std::string>::const_iterator it = (*d).itemSets.at(itemLevel).items.begin(); it != (*d).itemSets.at(itemLevel).items.end(); ++it)
 					{
 						RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
 						if (ruleItem)

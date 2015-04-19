@@ -67,6 +67,7 @@ private:
 	int _unitSequence;
 	Tile *_craftInventoryTile;
 	std::string _alienRace;
+	const AlienDeployment *_alienCustomDeploy;
 	int _alienItemLevel;
 	bool _allowAutoLoadout, _baseInventory, _generateFuel, _craftDeployed;
 	int _craftZ;
@@ -104,7 +105,7 @@ private:
 	/// Runs necessary checks before physically setting the position.
 	bool canPlaceXCOMUnit(Tile *tile);
 	/// Deploys the aliens, according to the alien deployment rules.
-	void deployAliens(AlienDeployment *deployment);
+	void deployAliens(const AlienDeployment *deployment);
 	/// Spawns civilians on a terror mission.
 	void deployCivilians(int max);
 	/// Finds a spot near a friend to spawn at.
@@ -148,6 +149,8 @@ public:
 	void setAlienRace(const std::string &alienRace);
 	/// Sets the alien item level.
 	void setAlienItemlevel(int alienItemLevel);
+	/// Sets the alien weapon deploy items.
+	void setAlienCustomDeploy(const AlienDeployment *alienCustomDeploy);
 	/// Sets the XCom base.
 	void setBase(Base *base);
 	/// Sets the mission site.

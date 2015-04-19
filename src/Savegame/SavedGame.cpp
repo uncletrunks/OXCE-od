@@ -411,7 +411,8 @@ void SavedGame::load(const std::string &filename, Ruleset *rule)
 	{
 		std::string type = (*i)["type"].as<std::string>();
 		std::string deployment = (*i)["deployment"].as<std::string>("STR_TERROR_MISSION");
-		MissionSite *m = new MissionSite(rule->getAlienMission(type), rule->getDeployment(deployment));
+		std::string alienWeaponDeploy = (*i)["missionCustomDeploy"].as<std::string>("");
+		MissionSite *m = new MissionSite(rule->getAlienMission(type), rule->getDeployment(deployment), rule->getDeployment(alienWeaponDeploy));
 		m->load(*i);
 		_missionSites.push_back(m);
 	}

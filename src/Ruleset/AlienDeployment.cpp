@@ -170,7 +170,7 @@ std::string AlienDeployment::getType() const
  * Gets a pointer to the data.
  * @return Pointer to the data.
  */
-std::vector<DeploymentData>* AlienDeployment::getDeploymentData()
+const std::vector<DeploymentData>* AlienDeployment::getDeploymentData() const
 {
 	return &_data;
 }

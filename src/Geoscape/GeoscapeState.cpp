@@ -2127,6 +2127,7 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 		bgame->setMissionType("STR_BASE_DEFENSE");
 		BattlescapeGenerator bgen = BattlescapeGenerator(_game);
 		bgen.setBase(base);
+		bgen.setAlienCustomDeploy(_game->getRuleset()->getDeployment(ufo->getCraftStats().missionCustomDeploy));
 		bgen.setAlienRace(ufo->getAlienRace());
 		bgen.run();
 		_pause = true;

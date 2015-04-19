@@ -68,7 +68,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0, POPUP_BOTH);
 	_txtTitle = new Text(320, 17, 0, 9);
-	
+
 	_txtMapOptions = new Text(148, 9, 8, 68);
 	_frameLeft = new Frame(148, 96, 8, 78);
 	_txtAlienOptions = new Text(148, 9, 164, 68);
@@ -80,7 +80,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	_txtCraft = new Text(100, 9, 8, 50);
 	_cbxCraft = new ComboBox(this, 106, 16, 98, 46);
 	_btnEquip = new TextButton(106, 16, 206, 46);
-	
+
 	_txtDarkness = new Text(120, 9, 22, 83);
 	_slrDarkness = new Slider(120, 16, 22, 93);
 
@@ -89,7 +89,7 @@ NewBattleState::NewBattleState() : _craft(0)
 
 	_txtDepth = new Text(120, 9, 22, 143);
 	_slrDepth = new Slider(120, 16, 22, 153);
-	
+
 	_txtDifficulty = new Text(120, 9, 178, 83);
 	_cbxDifficulty = new ComboBox(this, 120, 16, 178, 93);
 
@@ -98,7 +98,7 @@ NewBattleState::NewBattleState() : _craft(0)
 
 	_txtAlienTech = new Text(120, 9, 178, 143);
 	_slrAlienTech = new Slider(120, 16, 178, 153);
-	
+
 	_btnOk = new TextButton(100, 16, 8, 176);
 	_btnCancel = new TextButton(100, 16, 110, 176);
 	_btnRandom = new TextButton(100, 16, 212, 176);
@@ -116,7 +116,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	add(_txtMission, "text", "newBattleMenu");
 	add(_txtCraft, "text", "newBattleMenu");
 	add(_btnEquip, "button1", "newBattleMenu");
-	
+
 	add(_txtDarkness, "text", "newBattleMenu");
 	add(_slrDarkness, "button1", "newBattleMenu");
 	add(_txtDepth, "text", "newBattleMenu");
@@ -130,7 +130,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	add(_btnOk, "button2", "newBattleMenu");
 	add(_btnCancel, "button2", "newBattleMenu");
 	add(_btnRandom, "button2", "newBattleMenu");
-	
+
 	add(_cbxTerrain, "button1", "newBattleMenu");
 	add(_cbxAlienRace, "button1", "newBattleMenu");
 	add(_cbxDifficulty, "button1", "newBattleMenu");
@@ -159,7 +159,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	_txtCraft->setText(tr("STR_CRAFT"));
 
 	_txtDarkness->setText(tr("STR_MAP_DARKNESS"));
-	
+
 	_txtDepth->setText(tr("STR_MAP_DEPTH"));
 
 	_txtTerrain->setText(tr("STR_MAP_TERRAIN"));
@@ -167,7 +167,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	_txtDifficulty->setText(tr("STR_ALIEN_DIFFICULTY"));
 
 	_txtAlienRace->setText(tr("STR_ALIEN_RACE"));
-	
+
 	_txtAlienTech->setText(tr("STR_ALIEN_TECH_LEVEL"));
 
 	_missionTypes = _game->getRuleset()->getDeploymentsList();
@@ -187,7 +187,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	_cbxCraft->onChange((ActionHandler)&NewBattleState::cbxCraftChange);
 
 	_slrDarkness->setRange(0, 15);
-	
+
 	_slrDepth->setRange(1, 3);
 
 	_cbxTerrain->onChange((ActionHandler)&NewBattleState::cbxTerrainChange);
@@ -238,7 +238,7 @@ NewBattleState::NewBattleState() : _craft(0)
  */
 NewBattleState::~NewBattleState()
 {
-	
+
 }
 
 /**
