@@ -1,6 +1,6 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.8[/b]
-OpenXcom version: Nightly 19/04/2015[br/]
+[b]Mod version 1.8a[/b]
+OpenXcom version: Nightly 21/04/2015[br/]
 Commit: [commit/][br/]
 
 [br/][br/]

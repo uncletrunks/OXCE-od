@@ -288,7 +288,7 @@ DogfightState::DogfightState(Globe *globe, Craft *craft, Ufo *ufo) :
 	moveWindow();
 
 	// Set palette
-	setPalette("PAL_GEOSCAPE");
+	setInterface("dogfight");
 
 	add(_window);
 	add(_battle);
