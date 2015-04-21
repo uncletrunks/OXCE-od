@@ -325,7 +325,7 @@ void UnitWalkBState::think()
 				return;
 			}
 
-			if (_parent->getPanicHandled() && _parent->checkReservedTU(_unit, tu, energy) == false)
+			if (_parent->getPanicHandled() && !_falling && _parent->checkReservedTU(_unit, tu, energy) == false)
 			{
 				_pf->abortPath();
 				_unit->setCache(0);
