@@ -37,8 +37,10 @@ class AlienRace
 private:
 	std::string _id;
 	std::string _baseCustomDeploy;
+	std::string _retaliationMission;
 	std::vector<std::string> _members;
 	bool _retaliation;
+	int _retaliationAggression;
 public:
 	/// Creates a blank alien race ruleset.
 	AlienRace(const std::string &id);
@@ -52,6 +54,10 @@ public:
 	const std::string &getBaseCustomDeploy() const;
 	/// Gets a certain member of this alien race family.
 	const std::string &getMember(int id) const;
+	/// Gets what mission is created after destroying ufo.
+	const std::string &getRetaliationMission() const;
+	/// Gets how aggressive alien are to spawn retaliation mission after destroying ufo.
+	int getRetaliationAggression() const;
 	/// Gets if the race can retaliate.
 	bool canRetaliate() const;
 };

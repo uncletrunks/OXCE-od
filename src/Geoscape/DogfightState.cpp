@@ -36,6 +36,7 @@
 #include "../Ruleset/RuleCraftWeapon.h"
 #include "../Savegame/Ufo.h"
 #include "../Ruleset/RuleUfo.h"
+#include "../Ruleset/AlienRace.h"
 #include "../Engine/Music.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Sound.h"
@@ -1016,10 +1017,11 @@ void DogfightState::update()
 		// End dogfight if UFO is crashed or destroyed.
 		if (_ufo->isCrashed())
 		{
+			AlienRace *race = _game->getRuleset()->getAlienRace(_ufo->getAlienRace());
 			AlienMission *mission = _ufo->getMission();
 			mission->ufoShotDown(*_ufo);
 			// Check for retaliation trigger.
-			if (!RNG::percent(4 * (24 - (int)(_game->getSavedGame()->getDifficulty()))))
+			if (!RNG::percent(4 * (24 - (int)(_game->getSavedGame()->getDifficulty())) - race->getRetaliationAggression()))
 			{
 				// Spawn retaliation mission.
 				std::string targetRegion;
@@ -1037,13 +1039,16 @@ void DogfightState::update()
 				// Difference from original: No retaliation until final UFO lands (Original: Is spawned).
 				if (!_game->getSavedGame()->findAlienMission(targetRegion, OBJECTIVE_RETALIATION))
 				{
-					const RuleAlienMission &rule = *_game->getRuleset()->getAlienMission("STR_ALIEN_RETALIATION");
-					AlienMission *mission = new AlienMission(rule);
-					mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
-					mission->setRegion(targetRegion, *_game->getRuleset());
-					mission->setRace(_ufo->getAlienRace());
-					mission->start();
-					_game->getSavedGame()->getAlienMissions().push_back(mission);
+					const RuleAlienMission *rule = _game->getRuleset()->getAlienMission(race->getRetaliationMission());
+					if (rule)
+					{
+						AlienMission *mission = new AlienMission(*rule);
+						mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
+						mission->setRegion(targetRegion, *_game->getRuleset());
+						mission->setRace(_ufo->getAlienRace());
+						mission->start();
+						_game->getSavedGame()->getAlienMissions().push_back(mission);
+					}
 				}
 			}
 

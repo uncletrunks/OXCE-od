@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.8a[/b]
+[b]Mod version 1.9[/b]
 OpenXcom version: Nightly 21/04/2015[br/]
 Commit: [commit/][br/]
 
@@ -43,6 +43,9 @@ Damage type can now change default power change per tile in explosion.[br/]
 [br/]
 1.8:[br/]
 Option for custom weapon deploy for alien missions and ufos.[br/]
+[br/]
+1.9:[br/]
+Options for customizing retaliation mission after shooting dow ufo.[br/]
 
 
 [br/][br/]
@@ -256,7 +259,9 @@ ufos:
 [code]
 alienRaces:
   - id: STR_SECTOID
-    baseCustomDeploy: STR_ALIEN_BASE_ASSAULT_2 #override alien base default weapon depoly.
+    retaliationMission: STR_ALIEN_RETALIATION   #default mission spawn after destroing ufo.
+    retaliationAggression: 0                    #chance modiffer to spawn retaliation mission.
+    baseCustomDeploy: STR_ALIEN_BASE_ASSAULT_2  #override alien base default weapon depoly.
 [/code]
 
 [code]
