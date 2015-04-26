@@ -280,13 +280,23 @@ void ExplosionBState::explode()
 	// last minute adjustment: determine if we actually
 	if (_hit)
 	{
-		BattleUnit *targetUnit = save->getTile(_action.target)->getUnit();
 		if (_unit && !_unit->isOut())
 		{
 			_unit->aim(false);
 			_unit->setCache(0);
 		}
-		if (!RNG::percent(_unit->getFiringAccuracy(BA_HIT, _item)))
+		BattleUnit *targetUnit = save->getTile(_action.target)->getUnit();
+		if (!targetUnit && _action.target.z > 0)
+		{
+			targetUnit = save->getTile(_action.target - Position(0, 0, 1))->getUnit();
+		}
+
+		int hitChance = _unit->getFiringAccuracy(BA_HIT, _item);
+		if (targetUnit)
+		{
+			hitChance -= targetUnit->getArmor()->getMeleeDodge(targetUnit);
+		}
+		if (!RNG::percent(hitChance))
 		{
 			_parent->getMap()->cacheUnits();
 			_parent->popState();

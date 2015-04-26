@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
+#include "RuleStatBonus.h"
 #include "RuleDamageType.h"
 #include "Unit.h"
 
@@ -33,9 +34,6 @@ enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMI
 class Ruleset;
 class SurfaceSet;
 class Surface;
-class BattleUnit;
-
-typedef float (*BonusStatFunc)(const BattleUnit*);
 
 struct RuleItemUseCost
 {
@@ -115,7 +113,7 @@ private:
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
-	std::vector<std::pair<BonusStatFunc, float> > _damageBonus, _accuracyMulti, _meleeMulti, _throwMulti;
+	RuleStatBonus _damageBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 public:
 	/// Creates a blank item ruleset.
 	RuleItem(const std::string &type);

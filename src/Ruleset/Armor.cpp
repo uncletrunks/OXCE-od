@@ -36,6 +36,8 @@ Armor::Armor(const std::string &type) :
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
+
+	_psiDefence.setPsiDefense();
 }
 
 /**
@@ -136,6 +138,9 @@ void Armor::load(const YAML::Node &node)
 		_zombiImmune = node["zombiImmune"].as<bool>();
 	}
 	_overKill = node["overKill"].as<float>(_overKill);
+
+	_psiDefence.load(node["psiDefence"]);
+	_meleeDodge.load(node["meleeDodge"]);
 
 	_faceColorGroup = node["spriteFaceGroup"].as<int>(_faceColorGroup);
 	_hairColorGroup = node["spriteHairGroup"].as<int>(_hairColorGroup);
@@ -323,6 +328,22 @@ const std::vector<int>& Armor::getLoftempsSet() const
 const UnitStats *Armor::getStats() const
 {
 	return &_stats;
+}
+
+/**
+ * Gets unit psi defense.
+ */
+int Armor::getPsiDefence(const BattleUnit* unit) const
+{
+	return _psiDefence.getBonus(unit);
+}
+
+/**
+ * Gets unit melee dodge chance.
+ */
+int Armor::getMeleeDodge(const BattleUnit* unit) const
+{
+	return _meleeDodge.getBonus(unit);
 }
 
 /**

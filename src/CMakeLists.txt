@@ -460,6 +460,8 @@ set ( ruleset_src
   Ruleset/MapDataSet.cpp
   Ruleset/RuleSoldier.h
   Ruleset/RuleSoldier.cpp
+  Ruleset/RuleStatBonus.h
+  Ruleset/RuleStatBonus.cpp
   Ruleset/RuleRegion.cpp
   Ruleset/RuleRegion.h
   Ruleset/RuleItem.h

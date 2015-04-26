@@ -465,6 +465,7 @@
     <ClCompile Include="Ruleset\RuleResearch.cpp" />
     <ClCompile Include="Ruleset\Ruleset.cpp" />
     <ClCompile Include="Ruleset\RuleSoldier.cpp" />
+    <ClCompile Include="Ruleset\RuleStatBonus.cpp" />
     <ClCompile Include="Ruleset\RuleUfo.cpp" />
     <ClCompile Include="Ruleset\RuleTerrain.cpp" />
     <ClCompile Include="Ruleset\SoldierNamePool.cpp" />
@@ -785,6 +786,7 @@
     <ClInclude Include="Ruleset\RuleResearch.h" />
     <ClInclude Include="Ruleset\Ruleset.h" />
     <ClInclude Include="Ruleset\RuleSoldier.h" />
+    <ClInclude Include="Ruleset\RuleStatBonus.h" />
     <ClInclude Include="Ruleset\RuleUfo.h" />
     <ClInclude Include="Ruleset\RuleTerrain.h" />
     <ClInclude Include="Ruleset\SoldierNamePool.h" />

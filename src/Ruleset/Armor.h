@@ -24,6 +24,7 @@
 #include <yaml-cpp/yaml.h>
 #include "MapData.h"
 #include "Unit.h"
+#include "RuleStatBonus.h"
 #include "RuleDamageType.h"
 
 namespace OpenXcom
@@ -56,6 +57,7 @@ private:
 	std::vector<int> _faceColor, _hairColor, _utileColor, _rankColor;
 	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
 	float _overKill;
+	RuleStatBonus _psiDefence, _meleeDodge;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -99,6 +101,10 @@ public:
 	const std::vector<int> &getLoftempsSet() const;
 	/// Gets the armor's stats.
 	const UnitStats *getStats() const;
+	/// Gets unit psi defense.
+	int getPsiDefence(const BattleUnit* unit) const;
+	/// Gets unit melee dodge chance.
+	int getMeleeDodge(const BattleUnit* unit) const;
 	/// Gets the armor's weight.
 	int getWeight() const;
 	/// Gets number of death frames.

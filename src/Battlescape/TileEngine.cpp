@@ -2552,7 +2552,7 @@ int TileEngine::psiAttackCalculate(BattleActionType type, BattleUnit *attacker, 
 		return 0;
 
 	float attackStrength = attacker->getPsiAccuracy(type, weapon);
-	float defenseStrength = 30.0 + victim->getBaseStats()->psiStrength + victim->getBaseStats()->psiSkill / 5.0;
+	float defenseStrength = 30.0f + victim->getArmor()->getPsiDefence(victim);
 
 	Position p = attacker->getPosition().toVexel() - victim->getPosition().toVexel();
 	p *= p;

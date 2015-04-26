@@ -46,6 +46,7 @@ Option for custom weapon deploy for alien missions and ufos.[br/]
 [br/]
 1.9:[br/]
 Options for customizing retaliation mission after shooting dow ufo.[br/]
+Options for adding custom dodge chance or unit psi defence.[br/]
 
 
 [br/][br/]
@@ -200,6 +201,16 @@ armors:
     specialWeapon: ALIEN_PSI_WEAPON #alien psi or melee attack.
     builtInWeapons: #same as for units.
       - STR_SOME_WEAPON
+    psiDefence: #used when attacked by psi-amp.
+      #default is `psiStrength` to 1.0 and `psiSkill` to 0.2
+      #...
+      #same stats like `damageBonus` in `items`.
+      #...
+    meleeDodge: #used when attacked by melee hit.
+      #default is 0.0
+      #...
+      #same stats like `damageBonus` in `items`.
+      #...
 [/code]
 
 [code]
