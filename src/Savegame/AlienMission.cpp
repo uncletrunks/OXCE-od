@@ -407,30 +407,23 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 			ufo.setStatus(Ufo::DESTROYED);
 
 			MissionArea area = regionRules.getMissionPoint(trajectory.getZone(curWaypoint), &ufo);
-			Texture *texture = rules.getGlobe()->getTexture(area.texture);
-			AlienDeployment *deployment = rules.getDeployment(texture->getDeployment());
-			AlienDeployment *alienCustomDeploy = rules.getDeployment(ufo.getCraftStats().missionCustomDeploy);
 
-			MissionSite *missionSite = new MissionSite(&_rule, deployment, alienCustomDeploy);
-			missionSite->setLongitude(ufo.getLongitude());
-			missionSite->setLatitude(ufo.getLatitude());
-			missionSite->setId(game.getId(deployment->getMarkerName()));
-			missionSite->setSecondsRemaining(RNG::generate(deployment->getDurationMin(), deployment->getDurationMax()) * 3600);
-			missionSite->setAlienRace(_race);
-			missionSite->setTexture(area.texture);
-			missionSite->setCity(area.name);
-			game.getMissionSites()->push_back(missionSite);
-			for (std::vector<Target*>::iterator t = ufo.getFollowers()->begin(); t != ufo.getFollowers()->end();)
+			MissionSite *missionSite = spawnMissionSite(game, rules, area, ufo);
+			if (missionSite)
 			{
-				Craft* c = dynamic_cast<Craft*>(*t);
-				if (c && c->getNumSoldiers() != 0)
+				game.getMissionSites()->push_back(missionSite);
+				for (std::vector<Target*>::iterator t = ufo.getFollowers()->begin(); t != ufo.getFollowers()->end();)
 				{
-					c->setDestination(missionSite);
-					t = ufo.getFollowers()->begin();
-				}
-				else
-				{
-					++t;
+					Craft* c = dynamic_cast<Craft*>(*t);
+					if (c && c->getNumSoldiers() != 0)
+					{
+						c->setDestination(missionSite);
+						t = ufo.getFollowers()->begin();
+					}
+					else
+					{
+						++t;
+					}
 				}
 			}
 		}
@@ -690,4 +683,33 @@ std::pair<double, double> AlienMission::getLandPoint(const Globe &globe, const R
 
 }
 
+/**
+ * Attempt to spawn a Mission Site at a given location.
+ * @param game reference to the saved game.
+ * @param rules reference to the game rules.
+ * @param area the point on the globe at which to spawn this site.
+ * @param ufo ufo that spawn that mission.
+ * @return a pointer to the mission site.
+ */
+MissionSite *AlienMission::spawnMissionSite(SavedGame &game, const Ruleset &rules, const MissionArea &area, const Ufo &ufo)
+{
+	Texture *texture = rules.getGlobe()->getTexture(area.texture);
+	AlienDeployment *deployment = rules.getDeployment(texture->getRandomDeployment());
+	AlienDeployment *alienCustomDeploy = rules.getDeployment(ufo.getCraftStats().missionCustomDeploy);
+
+	if (deployment)
+	{
+		MissionSite *missionSite = new MissionSite(&_rule, deployment, alienCustomDeploy);
+		missionSite->setLongitude(area.lonMin);
+		missionSite->setLatitude(area.latMin);
+		missionSite->setId(game.getId(deployment->getMarkerName()));
+		missionSite->setSecondsRemaining(RNG::generate(deployment->getDurationMin(), deployment->getDurationMax()) * 3600);
+		missionSite->setAlienRace(_race);
+		missionSite->setTexture(area.texture);
+		missionSite->setCity(area.name);
+		missionSite->setSiteDepth(RNG::generate(deployment->getMinSiteDepth(), deployment->getMaxSiteDepth()));
+		return missionSite;
+	}
+	return 0;
+}
 }

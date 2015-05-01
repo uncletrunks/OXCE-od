@@ -31,7 +31,7 @@ RuleCraft::RuleCraft(const std::string &type) :
     _type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _vehicles(0),
     _costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(0), _score(0), _battlescapeTerrainData(0),
-	_spacecraft(false), _listOrder(0), _maxItems(0), _stats()
+	_spacecraft(false), _listOrder(0), _maxItems(0), _maxDepth(0), _stats()
 {
 	for (int i = 0; i < WeaponMax; ++ i)
 		_weaponTypes[i] = 0;
@@ -98,6 +98,7 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 	{
 		_listOrder = listOrder;
 	}
+	_maxDepth = node["maxDepth"].as<int>(_maxDepth);
 	_maxItems = node["maxItems"].as<int>(_maxItems);
 
 	if (const YAML::Node &types = node["weaponTypes"])
@@ -401,6 +402,15 @@ const std::string &RuleCraft::getWeaponSlotString(int slot) const
 const RuleCraftStats& RuleCraft::getStats() const
 {
 	return _stats;
+}
+
+/**
+ * Gets the maximum depth this craft can dive to.
+ * @return max depth.
+ */
+int RuleCraft::getMaxDepth() const
+{
+	return _maxDepth;
 }
 
 }
