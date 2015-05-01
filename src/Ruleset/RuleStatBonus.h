@@ -52,8 +52,14 @@ public:
 	void setStrength();
 	/// Set flat 100 bonus.
 	void setFlatHundred();
+	/// Set default for TU recovery.
+	void setTimeRecovery();
+	/// Set default for Energy recovery.
+	void setEnergyRecovery();
+	/// Set default for Stun recovery.
+	void setStunRecovery();
 	/// Get bonus based on unit stats.
-	float getBonus(const BattleUnit* unit) const;
+	int getBonus(const BattleUnit* unit) const;
 };
 
 }

@@ -1655,8 +1655,14 @@ void BattleUnit::prepareNewTurn()
 
 	_unitsSpottedThisTurn.clear();
 
+	// snapshot of current stats
+	int TURecovery = _armor->getTimeRecovery(this);
+	int ENRecovery = _armor->getEnergyRecovery(this);
+	int HPRecovery = _armor->getHealthRecovery(this);
+	int MRRecovery = _armor->getMoraleRecovery(this);
+	int STRecovery = _armor->getStunRegeneration(this);
+
 	// recover TUs
-	int TURecovery = getBaseStats()->tu;
 	float encumbrance = (float)getBaseStats()->strength / (float)getCarriedWeight();
 	if (encumbrance < 1)
 	{
@@ -1669,38 +1675,26 @@ void BattleUnit::prepareNewTurn()
 	// recover energy
 	if (!isOut())
 	{
-		int ENRecovery;
-		if (_geoscapeSoldier != 0)
-		{
-			ENRecovery = _geoscapeSoldier->getInitStats()->tu / 3;
-		}
-		else
-		{
-			ENRecovery = _unitRules->getEnergyRecovery();
-		}
 		// Each fatal wound to the body reduces the soldier's energy recovery by 10%.
 		ENRecovery -= (_energy * (_fatalWounds[BODYPART_TORSO] * 10))/100;
 		_energy += ENRecovery;
 		if (_energy > getBaseStats()->stamina)
 			_energy = getBaseStats()->stamina;
+		else if (_energy < 0)
+			_energy = 0;
 	}
 
-	int healthChange = 0;
-
-	// suffer from fatal wounds
-	healthChange -= getFatalWounds();
-
-	// basic regeneration
-	healthChange += _armor->getRegeneration();
+	// recover health, suffer from fatal wounds
+	HPRecovery -= getFatalWounds();
 
 	// suffer from fire
 	if (!_hitByFire && _fire > 0)
 	{
-		healthChange -= _armor->getDamageModifier(DT_IN) * RNG::generate(5, 10);
+		HPRecovery -= _armor->getDamageModifier(DT_IN) * RNG::generate(5, 10);
 		_fire--;
 	}
 
-	setValueMax(_health, healthChange, -4 * _stats.health, _stats.health);
+	setValueMax(_health, HPRecovery, -4 * _stats.health, _stats.health);
 
 	// if unit is dead, AI state should be gone
 	if (_health <= 0 && _currentAIState)
@@ -1711,12 +1705,15 @@ void BattleUnit::prepareNewTurn()
 	}
 
 	// recover stun 1pt/turn
-	if (_stunlevel > 0 &&
-		(_armor->getSize() == 1 || !isOut()))
-		healStun(1);
+	if (_armor->getSize() == 1 || !isOut())
+	{
+		healStun(STRecovery);
+	}
 
+	// recover morale
 	if (!isOut())
 	{
+		moraleChange(MRRecovery);
 		int chance = 100 - (2 * getMorale());
 		if (RNG::generate(1,100) <= chance)
 		{
@@ -2194,10 +2191,6 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = _stats.health - _health;
 
-	if (_armor->getRegeneration() > 0)
-	{
-		healthLoss -= _armor->getRegeneration() * 20;
-	}
 	if (healthLoss < 0)
 	{
 		healthLoss = 0;

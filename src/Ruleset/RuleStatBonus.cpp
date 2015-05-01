@@ -18,6 +18,7 @@
  */
 #include "Unit.h"
 #include "RuleStatBonus.h"
+#include "../Engine/RNG.h"
 #include "../Savegame/BattleUnit.h"
 #include "../fmath.h"
 
@@ -77,25 +78,56 @@ float curretMorale(const BattleUnit *unit)
 	return unit->getMorale();
 }
 
+float curretStun(const BattleUnit *unit)
+{
+	return unit->getStunlevel();
+}
+
 
 float normalizedTimeUnits(const BattleUnit *unit)
 {
-	return 1.0 * unit->getTimeUnits()/ unit->getBaseStats()->tu;
+	return 1.0f * unit->getTimeUnits()/ unit->getBaseStats()->tu;
 }
 
 float normalizedHealth(const BattleUnit *unit)
 {
-	return 1.0 * unit->getHealth() / unit->getBaseStats()->health;
+	return 1.0f * unit->getHealth() / unit->getBaseStats()->health;
 }
 
 float normalizedEnergy(const BattleUnit *unit)
 {
-	return 1.0 * unit->getEnergy() / unit->getBaseStats()->stamina;
+	return 1.0f * unit->getEnergy() / unit->getBaseStats()->stamina;
 }
 
 float normalizedMorale(const BattleUnit *unit)
 {
-	return 1.0 * unit->getMorale() / 100;
+	return 1.0f * unit->getMorale() / 100;
+}
+
+float normalizedStun(const BattleUnit *unit)
+{
+	int health = unit->getHealth();
+	if (health > 0)
+	{
+		return 1.0f * unit->getStunlevel() / health;
+	}
+	else
+	{
+		return 0.0f;
+	}
+}
+
+float basicEnergyRegeneration(const BattleUnit *unit)
+{
+	Soldier *solder = unit->getGeoscapeSoldier();
+	if (solder != 0)
+	{
+		return solder->getInitStats()->tu / 3;
+	}
+	else
+	{
+		return unit->getUnitRules()->getEnergyRecovery();
+	}
 }
 
 template<BonusStatFunc func, int p>
@@ -193,11 +225,15 @@ BonusStatData statDataMap[] =
 	{ "tuCurrent", create<&curretTimeUnits>() },
 	{ "energyCurrent", create<&curretEnergy>() },
 	{ "moraleCurrent", create<&curretMorale>() },
+	{ "stunCurrent", create<&curretStun>() },
 
 	{ "healthNormalized", create<&normalizedHealth>() },
 	{ "tuNormalized", create<&normalizedTimeUnits>() },
 	{ "energyNormalized", create<&normalizedEnergy>() },
 	{ "moraleNormalized", create<&normalizedMorale>() },
+	{ "stunNormalized", create<&normalizedStun>() },
+
+	{ "energyRegen", create<&basicEnergyRegeneration>() },
 };
 const size_t statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
 
@@ -308,14 +344,44 @@ void RuleStatBonus::setStrength()
 }
 
 /**
+ *  Set default for TU recovery.
+ */
+void RuleStatBonus::setTimeRecovery()
+{
+	_bonus.clear();
+	_bonus.push_back(std::make_pair(&stat1<&UnitStats::tu>, 1.0f));
+}
+
+/**
+ * Set default for Energy recovery.
+ */
+void RuleStatBonus::setEnergyRecovery()
+{
+	_bonus.clear();
+	_bonus.push_back(std::make_pair(&basicEnergyRegeneration, 1.0f));
+}
+
+/**
+ *  Set default for Stun recovery.
+ */
+void RuleStatBonus::setStunRecovery()
+{
+	_bonus.clear();
+	_bonus.push_back(std::make_pair(&stat0<1>, 1.0f));
+}
+
+/**
  * Calculate bonus based on unit stats.
  */
-float RuleStatBonus::getBonus(const BattleUnit* unit) const
+int RuleStatBonus::getBonus(const BattleUnit* unit) const
 {
 	float power = 0;
 	for (size_t i = 0; i < _bonus.size(); ++i)
 		power += _bonus[i].first(unit) * _bonus[i].second;
-	return power;
+	if (power >= 0)
+		return power + RNG::generateEx(100) * 0.01f; //Random round up.
+	else
+		return power - RNG::generateEx(100) * 0.01f; //Random round down.
 }
 
 } //namespace OpenXcom

@@ -17,7 +17,6 @@ Corpses, items and Chryssalids are not spawned when unit is killed by weapons wi
 Stunned units can be hited by bullets and fire.[br/]
 Big groups of aliens (20+) get less morale losses from casualties.[br/]
 Terror units can now spawn with any built-in weapon, not only one defined by name.[br/]
-After battle, wounded units restore health equal to 20 times armor regeneration stat (if it's greater than zero).[br/]
 While loading and unloading weapons you must pay the cost of moving the item to hand.[br/]
 You can unprime granade for half of prime TUs cost.[br/]
 Support for Ufo2000 armor damage type.[br/]
@@ -49,9 +48,13 @@ Options for customizing retaliation mission after shooting dow ufo.[br/]
 Options for adding custom dodge chance or unit psi defence.[br/]
 [br/]
 2.0:[br/]
-Breaking change Psi-Amp use now weapon dropoff and aimRange for attack chance.[br/]
+Breaking change: Psi-Amp use now weapon dropoff and aimRange for attack chance.[br/]
+Breaking change: Drop support for Regeneration stat in armor.[br/]
 Inventory screens can now have up to 128 backgrounds.[br/]
 Unit sprites recolors can now support up to 128 values.[br/]
+Option for custom change of TU, HP, Energy, Morale or Stun after next turn based on unit stats.[br/]
+New stat bonus based on stun level of unit.[br/]
+[br/]
 
 
 [br/][br/]
@@ -128,14 +131,16 @@ items:
       strengthMelee: 0.0      #bonus equal `strength*melee`.
       strengthThrowing: 0.0   #bonus equal `strength*throwing`.
       firingReactions: 0.0    #bonus equal `firing*reaction`.
-      healthCurrent: 0.0      #curret value of hp
-      tuCurrent: 0.0          #curret value of tu
-      energyCurrent: 0.0      #curret value of energy
-      moraleCurrent: 0.0      #curret value of morale
+      healthCurrent: 0.0      #curret value of hp.
+      tuCurrent: 0.0          #curret value of tu.
+      energyCurrent: 0.0      #curret value of energy.
+      moraleCurrent: 0.0      #curret value of morale.
+      stunCurrent: 0.0        #curret value of stun level.
       healthNormalized: 0.0   #curret hp normalized to 1 (max hp give 1.0).
       tuNormalized: 0.0       #curret tu normalized to 1 (max tu give 1.0).
       energyNormalized: 0.0   #curret energy normalized to 1 (max energy give 1.0).
       moraleNormalized: 0.0   #curret morale normalized to 1 (max morale give 1.0).
+      stunNormalized: 0.0     #curret stun level normalized to 1 (max stun compared to current health give 1.0).
     accuracyMultipler: #used by wapons and psi-amp.
       #set `psi` to 0.02 if weapon is psi-amp
       #...
@@ -204,20 +209,46 @@ armors:
     zombiImmune: false   #ignored by big units.
     overKill: 0.8        #when damage drops HPs to negative value greater than `overKill * maxHP` then the corpse is destroyed, default value is 0.50.
     visibilityAtDark: 9  #default 20 for aliens, 9 for humans.
-    regeneration: 0      #number of HPs regenerated every turn, can be less than zero.
     specialWeapon: ALIEN_PSI_WEAPON #alien psi or melee attack.
     builtInWeapons: #same as for units.
       - STR_SOME_WEAPON
     psiDefence: #used when attacked by psi-amp.
-      #default is `psiStrength` to 1.0 and `psiSkill` to 0.2
+      #default is `psiStrength` set to `1.0` and `psiSkill` set to `0.2`.
       #...
       #same stats like `damageBonus` in `items`.
       #...
     meleeDodge: #used when attacked by melee hit.
-      #default is 0.0
+      #default is `0.0`.
       #...
       #same stats like `damageBonus` in `items`.
       #...
+    recovery:
+      time: #amount of TU recovered each turn.
+        #default is `tu` set to `1.0`
+        #...
+        #same stats like `damageBonus` in `items`.
+        #...
+      energy: #amount of Energy recovered each turn.
+        #default is `energyRegen` set to `1.0`
+        #...
+        #same stats like `damageBonus` in `items`.
+        #...
+        energyRegen: 1.0 #special stat returning vanilia energy regen.
+      morale: #amount of Morale recovered each turn.
+        #default is `0.0`.
+        #...
+        #same stats like `damageBonus` in `items`.
+        #...
+      health: #amount of Health recovered each turn.
+        #default is `0.0`.
+        #...
+        #same stats like `damageBonus` in `items`.
+        #...
+      stun: #amount of Stun recovered each turn.
+        #default is `flatOne` set to `1.0`.
+        #...
+        #same stats like `damageBonus` in `items`.
+        #...
 [/code]
 
 [code]

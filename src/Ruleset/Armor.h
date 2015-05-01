@@ -58,6 +58,7 @@ private:
 	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
 	float _overKill;
 	RuleStatBonus _psiDefence, _meleeDodge;
+	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -105,6 +106,18 @@ public:
 	int getPsiDefence(const BattleUnit* unit) const;
 	/// Gets unit melee dodge chance.
 	int getMeleeDodge(const BattleUnit* unit) const;
+
+	/// Gets unit TU recovery.
+	int getTimeRecovery(const BattleUnit* unit) const;
+	/// Gets unit Energy recovery.
+	int getEnergyRecovery(const BattleUnit* unit) const;
+	/// Gets unit Morale recovery.
+	int getMoraleRecovery(const BattleUnit* unit) const;
+	/// Gets unit Health recovery.
+	int getHealthRecovery(const BattleUnit* unit) const;
+	/// Gets unit Stun recovery.
+	int getStunRegeneration(const BattleUnit* unit) const;
+
 	/// Gets the armor's weight.
 	int getWeight() const;
 	/// Gets number of death frames.
@@ -119,8 +132,6 @@ public:
 	const std::vector<std::string> &getBuiltInWeapons() const;
 	/// Gets max view distance at dark in BattleScape.
 	int getVisibilityAtDark() const;
-	/// How many health points unit grain per turn.
-	int getRegeneration() const;
 	/// Gets how armor react to fear.
 	bool getFearImmune(bool def = false) const;
 	/// Gets how armor react to bleeding.

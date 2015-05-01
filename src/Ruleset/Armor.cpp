@@ -38,6 +38,9 @@ Armor::Armor(const std::string &type) :
 		_damageModifier[i] = 1.0f;
 
 	_psiDefence.setPsiDefense();
+	_timeRecovery.setTimeRecovery();
+	_energyRecovery.setEnergyRecovery();
+	_stunRecovery.setStunRecovery();
 }
 
 /**
@@ -142,6 +145,14 @@ void Armor::load(const YAML::Node &node)
 	_psiDefence.load(node["psiDefence"]);
 	_meleeDodge.load(node["meleeDodge"]);
 
+	if (const YAML::Node &rec = node["recovery"])
+	{
+		_timeRecovery.load(rec["time"]);
+		_energyRecovery.load(rec["energy"]);
+		_moraleRecovery.load(rec["morale"]);
+		_healthRecovery.load(rec["health"]);
+		_stunRecovery.load(rec["stun"]);
+	}
 	_faceColorGroup = node["spriteFaceGroup"].as<int>(_faceColorGroup);
 	_hairColorGroup = node["spriteHairGroup"].as<int>(_hairColorGroup);
 	_rankColorGroup = node["spriteRankGroup"].as<int>(_rankColorGroup);
@@ -347,6 +358,46 @@ int Armor::getMeleeDodge(const BattleUnit* unit) const
 }
 
 /**
+ *  Gets unit TU recovery.
+ */
+int Armor::getTimeRecovery(const BattleUnit* unit) const
+{
+	return _timeRecovery.getBonus(unit);
+}
+
+/**
+ *  Gets unit Energy recovery.
+ */
+int Armor::getEnergyRecovery(const BattleUnit* unit) const
+{
+	return _energyRecovery.getBonus(unit);
+}
+
+/**
+ *  Gets unit Morale recovery.
+ */
+int Armor::getMoraleRecovery(const BattleUnit* unit) const
+{
+	return _moraleRecovery.getBonus(unit);
+}
+
+/**
+ *  Gets unit Health recovery.
+ */
+int Armor::getHealthRecovery(const BattleUnit* unit) const
+{
+	return _healthRecovery.getBonus(unit);
+}
+
+/**
+ *  Gets unit Stun recovery.
+ */
+int Armor::getStunRegeneration(const BattleUnit* unit) const
+{
+
+}
+
+/**
  * Gets the armor's weight.
  * @return the weight of the armor.
  */
@@ -411,15 +462,6 @@ const std::vector<std::string> &Armor::getBuiltInWeapons() const
 int Armor::getVisibilityAtDark() const
 {
 	return _visibilityAtDark;
-}
-
-/**
- * Get basic regeneration of unit in armor.
- * @return Number of hp change.
- */
-int Armor::getRegeneration() const
-{
-	return _regeneration;
 }
 
 /**
