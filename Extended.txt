@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 1.9[/b]
+[b]Mod version 2.0[/b]
 OpenXcom version: Nightly 21/04/2015[br/]
 Commit: [commit/][br/]
 
@@ -47,6 +47,9 @@ Option for custom weapon deploy for alien missions and ufos.[br/]
 1.9:[br/]
 Options for customizing retaliation mission after shooting dow ufo.[br/]
 Options for adding custom dodge chance or unit psi defence.[br/]
+[br/]
+2.0:[br/]
+Breaking change Psi-Amp use now weapon dropoff and aimRange for attack chance.[br/]
 
 
 [br/][br/]
@@ -56,6 +59,8 @@ Example of usage:
 [code]
 items:
   - type: STR_ITEM_TYPE #default config ...
+    dropoff: 1     #used by Psi-Amp too. Default for Psi-Amp is 1.
+    aimRange: 0    #used by Pis-Amp too. Default for Psi-Amp is 0.
     tuThrow: 25    #cost of throwing item in %.
     tuPrime: 50    #cost of priming granade in %.
     tuLoad: 15     #cost of loading weapon.
@@ -144,7 +149,7 @@ items:
       #...
       #same stats like `damageBonus`.
       #...
-    powerRangeReduction: 0.0 #how much power a bullet loses per tile, used by Psi-Amp too. Default value 1 for the Psi-Amp.
+    powerRangeReduction: 0.0 #how much power a bullet loses per tile, used by Psi-Amp damage too.
     powerRangeThreshold: 0.0 #how far in tiles bullet need fly to start appling `powerRangeReduction`.
     damageAlter: #all values have default values based on `damageType`, used by ammo and corpses.
       FixRadius: 60 #aka `BlastRadius`.

@@ -169,6 +169,8 @@ public:
 	int getPowerBonus(const BattleUnit *unit) const;
 	/// Gets amount of power dropped for range in voxels.
 	float getPowerRangeReduction(float range) const;
+	/// Gets amount of psi accuracy dropped for range in voxels.
+	float getPsiAccuracyRangeReduction(float range) const;
 	/// Get multiplier of accuracy form unit statistics
 	int getAccuracyMultiplier(const BattleUnit *unit) const;
 	/// Get multiplier of throwing form unit statistics

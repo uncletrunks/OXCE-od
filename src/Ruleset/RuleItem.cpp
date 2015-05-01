@@ -28,6 +28,9 @@
 namespace OpenXcom
 {
 
+const float VexelsToTiles = 0.0625f;
+const float TilesToVexels = 16.0f;
+
 RuleItemUseCost RuleItemUseCost::getBackup(const RuleItemUseCost& b) const
 {
 	RuleItemUseCost n;
@@ -201,6 +204,32 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	{
 		_damageType.load(node["damageAlter"]);
 	}
+	if (node["battleType"])
+	{
+		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
+		_psiReqiured = _battleType == BT_PSIAMP;
+		if (_psiReqiured)
+		{
+			_dropoff = 1;
+			_aimRange = 0;
+			_accuracyMulti.setPsiAttack();
+		}
+	}
+	if (node["skillApplied"])
+	{
+		if (node["skillApplied"].as<int>(false))
+		{
+			_meleeMulti.setMelee();
+		}
+		else
+		{
+			_meleeMulti.setFlatHundred();
+		}
+	}
+	if (node["strengthApplied"].as<bool>(false))
+	{
+		_damageBonus.setStrength();
+	}
 
 	_power = node["power"].as<int>(_power);
 	_psiAttackName = node["psiAttackName"].as<std::string>(_psiAttackName);
@@ -273,32 +302,6 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
-
-	if (node["battleType"])
-	{
-		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
-		_psiReqiured = _battleType == BT_PSIAMP;
-		if (_psiReqiured)
-		{
-			_powerRangeReduction = 1;
-			_accuracyMulti.setPsiAttack();
-		}
-	}
-	if (node["skillApplied"])
-	{
-		if (node["skillApplied"].as<int>(false))
-		{
-			_meleeMulti.setMelee();
-		}
-		else
-		{
-			_meleeMulti.setFlatHundred();
-		}
-	}
-	if (node["strengthApplied"].as<bool>(false))
-	{
-		_damageBonus.setStrength();
-	}
 
 	_damageBonus.load(node["damageBonus"]);
 	_accuracyMulti.load(node["accuracyMultiplier"]);
@@ -528,8 +531,19 @@ int RuleItem::getPower() const
  */
 float RuleItem::getPowerRangeReduction(float range) const
 {
-	range -= _powerRangeThreshold / 0.0625f;
-	return (_powerRangeReduction * 0.0625f) * (range > 0 ? range : 0);
+	range -= _powerRangeThreshold * TilesToVexels;
+	return (_powerRangeReduction * VexelsToTiles) * (range > 0 ? range : 0);
+}
+
+/**
+ * Get amount of psi accuracy dropped for range in voxels.
+ * @param range
+ * @return Psi accuracy reduction.
+ */
+float RuleItem::getPsiAccuracyRangeReduction(float range) const
+{
+	range -= _aimRange * TilesToVexels;
+	return (_dropoff * VexelsToTiles) * (range > 0 ? range : 0);
 }
 
 /**

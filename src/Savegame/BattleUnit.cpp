@@ -1481,6 +1481,12 @@ void BattleUnit::clearVisibleTiles()
 	_visibleTiles.clear();
 }
 
+/**
+ * Get accuracy of different types of psi attack.
+ * @param actionType Psi attack type.
+ * @param item Psi-Amp.
+ * @return Attack bonus.
+ */
 int BattleUnit::getPsiAccuracy(BattleActionType actionType, BattleItem *item)
 {
 	int psiAcc = 0;
