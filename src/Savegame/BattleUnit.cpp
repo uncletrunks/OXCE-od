@@ -132,7 +132,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 
 	deriveRank();
 
-	int look = soldier->getGender() + 2 * soldier->getLook();
+	int look = soldier->getGender() + 2 * soldier->getLook() + 8 * soldier->getLookVariant();
 	setRecolor(look, look, _rankInt);
 }
 
@@ -258,10 +258,10 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	}
 	else if (faction == FACTION_NEUTRAL)
 	{
-		generalRank = std::rand() % 8;
+		generalRank = RNG::seedless(0, 7);
 	}
 
-	setRecolor(std::rand() % 8, std::rand() % 8, generalRank);
+	setRecolor(RNG::seedless(0, 127), RNG::seedless(0, 127), generalRank);
 }
 
 

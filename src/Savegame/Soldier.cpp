@@ -41,7 +41,7 @@ namespace OpenXcom
  * @param names List of name pools for soldier generation.
  * @param id Pointer to unique soldier id for soldier generation.
  */
-Soldier::Soldier(RuleSoldier *rules, Armor *armor, const std::vector<SoldierNamePool*> *names, int id) : _id(id), _improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0), _gender(GENDER_MALE), _look(LOOK_BLONDE), _missions(0), _kills(0), _recovery(0), _recentlyPromoted(false), _psiTraining(false), _training(false), _armor(armor), _death(0)
+Soldier::Soldier(RuleSoldier *rules, Armor *armor, const std::vector<SoldierNamePool*> *names, int id) : _id(id), _improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0), _gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0), _recentlyPromoted(false), _psiTraining(false), _training(false), _armor(armor), _death(0)
 {
 	if (names != 0)
 	{
@@ -75,6 +75,7 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, const std::vector<SoldierName
 			_look = (SoldierLook)RNG::generate(0,3);
 		}
 	}
+	_lookVariant = RNG::seedless(0, 15);
 }
 
 /**
@@ -104,6 +105,7 @@ void Soldier::load(const YAML::Node& node, const Ruleset *rule, SavedGame *save)
 	_rank = (SoldierRank)node["rank"].as<int>();
 	_gender = (SoldierGender)node["gender"].as<int>();
 	_look = (SoldierLook)node["look"].as<int>();
+	_lookVariant = node["lookVariant"].as<int>(_lookVariant);
 	_missions = node["missions"].as<int>(_missions);
 	_kills = node["kills"].as<int>(_kills);
 	_recovery = node["recovery"].as<int>(_recovery);
@@ -158,6 +160,7 @@ YAML::Node Soldier::save() const
 	}
 	node["gender"] = (int)_gender;
 	node["look"] = (int)_look;
+	node["lookVariant"] = _lookVariant;
 	node["missions"] = _missions;
 	node["kills"] = _kills;
 	if (_recovery > 0)
@@ -352,6 +355,15 @@ SoldierGender Soldier::getGender() const
 SoldierLook Soldier::getLook() const
 {
 	return _look;
+}
+
+/**
+ * Returns the soldier's look sub type.
+ * @return Look.
+ */
+int Soldier::getLookVariant() const
+{
+	return _lookVariant;
 }
 
 /**

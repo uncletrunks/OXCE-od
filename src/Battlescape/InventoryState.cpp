@@ -326,25 +326,33 @@ void InventoryState::init()
 		texture->getFrame(20 + s->getRank())->setY(0);
 		texture->getFrame(20 + s->getRank())->blit(_btnRank);
 
-		std::string look = s->getArmor()->getSpriteInventory();
-		if (s->getGender() == GENDER_MALE)
-			look += "M";
-		else
-			look += "F";
-		if (s->getLook() == LOOK_BLONDE)
-			look += "0";
-		if (s->getLook() == LOOK_BROWNHAIR)
-			look += "1";
-		if (s->getLook() == LOOK_ORIENTAL)
-			look += "2";
-		if (s->getLook() == LOOK_AFRICAN)
-			look += "3";
-		look += ".SPK";
-		if (!CrossPlatform::fileExists(CrossPlatform::getDataFile("UFOGRAPH/" + look)) && !_game->getResourcePack()->getSurface(look))
+		const std::string look = s->getArmor()->getSpriteInventory();
+		const std::string gender = s->getGender() == GENDER_MALE ? "M" : "F";
+		std::stringstream ss;
+		Surface *surf = 0;
+
+		for (int i = 0; i <= 4; ++i)
 		{
-			look = s->getArmor()->getSpriteInventory() + ".SPK";
+			ss.str("");
+			ss << look;
+			ss << gender;
+			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
+			ss << ".SPK";
+			std::string debug = ss.str();
+			surf = _game->getResourcePack()->getSurface(ss.str());
+			if (surf)
+			{
+				break;
+			}
 		}
-		_game->getResourcePack()->getSurface(look)->blit(_soldier);
+		if (!surf)
+		{
+			ss.str("");
+			ss << look;
+			ss << ".SPK";
+			surf = _game->getResourcePack()->getSurface(ss.str());
+		}
+		surf->blit(_soldier);
 	}
 	else
 	{

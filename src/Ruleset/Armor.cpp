@@ -507,20 +507,40 @@ int Armor::getRankColorGroup() const
 	return _rankColorGroup;
 }
 
+namespace
+{
+
+/**
+ * Helper function finding value in vector with fallback if vector is shorter.
+ * @param vec Vector with values we try get.
+ * @param pos Position in vector that can be greater than size of vector.
+ * @return Value in vector.
+ */
+int findWithFallback(const std::vector<int> &vec, size_t pos)
+{
+	//if pos == 31 then we test for 31, 15, 7
+	//if pos == 36 then we test for 36, 4
+	//we stop on p < 8 for comatibility reasons.
+	for (int i = 0; i <= 4; ++i)
+	{
+		size_t p = (pos & (127 >> i));
+		if (p < vec.size())
+		{
+			return vec[p];
+		}
+	}
+	return 0;
+}
+
+} //namespace
+
 /**
  * Gets new face colors for replacement, if 0 then don't replace colors.
  * @return Color index or 0.
  */
 int Armor::getFaceColor(int i) const
 {
-	if ((size_t)i < _faceColor.size())
-	{
-		return _faceColor[i];
-	}
-	else
-	{
-		return 0;
-	}
+	return findWithFallback(_faceColor, i);
 }
 
 /**
@@ -529,14 +549,7 @@ int Armor::getFaceColor(int i) const
  */
 int Armor::getHairColor(int i) const
 {
-	if ((size_t)i < _hairColor.size())
-	{
-		return _hairColor[i];
-	}
-	else
-	{
-		return 0;
-	}
+	return findWithFallback(_hairColor, i);
 }
 
 /**
@@ -545,14 +558,7 @@ int Armor::getHairColor(int i) const
  */
 int Armor::getUtileColor(int i) const
 {
-	if ((size_t)i < _utileColor.size())
-	{
-		return _utileColor[i];
-	}
-	else
-	{
-		return 0;
-	}
+	return findWithFallback(_utileColor, i);
 }
 
 /**
@@ -561,14 +567,7 @@ int Armor::getUtileColor(int i) const
  */
 int Armor::getRankColor(int i) const
 {
-	if ((size_t)i < _rankColor.size())
-	{
-		return _rankColor[i];
-	}
-	else
-	{
-		return 0;
-	}
+	return findWithFallback(_rankColor, i);
 }
 
 /**

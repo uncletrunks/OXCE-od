@@ -50,6 +50,8 @@ Options for adding custom dodge chance or unit psi defence.[br/]
 [br/]
 2.0:[br/]
 Breaking change Psi-Amp use now weapon dropoff and aimRange for attack chance.[br/]
+Inventory screens can now have up to 128 backgrounds.[br/]
+Unit sprites recolors can now support up to 128 values.[br/]
 
 
 [br/][br/]

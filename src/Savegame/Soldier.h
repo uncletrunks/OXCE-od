@@ -57,6 +57,7 @@ private:
 	Craft *_craft;
 	SoldierGender _gender;
 	SoldierLook _look;
+	int _lookVariant;
 	int _missions, _kills, _recovery;
 	bool _recentlyPromoted, _psiTraining, _training;
 	Armor *_armor;
@@ -98,6 +99,8 @@ public:
 	SoldierGender getGender() const;
 	/// Gets the soldier's look.
 	SoldierLook getLook() const;
+	/// Gets the soldier's look sub type.
+	int getLookVariant() const;
 	/// Gets soldier rules.
 	RuleSoldier *getRules() const;
 	/// Gets the soldier's unique ID.
