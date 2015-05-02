@@ -161,7 +161,7 @@ void TileEngine::calculateTerrainLighting()
 
 		for (std::vector<BattleItem*>::iterator it = _save->getTiles()[i]->getInventory()->begin(); it != _save->getTiles()[i]->getInventory()->end(); ++it)
 		{
-			if ((*it)->getRules()->getBattleType() == BT_FLARE)
+			if ((*it)->getGlow())
 			{
 				addLight(_save->getTiles()[i]->getPosition(), (*it)->getRules()->getPower(), layer);
 			}

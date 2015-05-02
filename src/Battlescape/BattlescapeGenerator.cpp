@@ -1226,12 +1226,18 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTe
 		// if one of the mapBlocks has an items array defined, don't deploy fuel algorithmically
 		_generateFuel = mapblock->getItems()->empty();
 	}
+	std::map<std::string, std::pair<int, int> >::const_iterator primeEnd = mapblock->getItemsFuseTimers()->end();
 	for (std::map<std::string, std::vector<Position> >::const_iterator i = mapblock->getItems()->begin(); i != mapblock->getItems()->end(); ++i)
 	{
+		std::map<std::string, std::pair<int, int> >::const_iterator prime = mapblock->getItemsFuseTimers()->find((*i).first);
 		RuleItem *rule = _game->getRuleset()->getItem((*i).first);
 		for (std::vector<Position>::const_iterator j = (*i).second.begin(); j != (*i).second.end(); ++j)
 		{
 			BattleItem *item = new BattleItem(rule, _save->getCurrentItemId());
+			if (prime != primeEnd)
+			{
+				item->setFuseTimer(RNG::generate(prime->second.first, prime->second.second));
+			}
 			_save->getItems()->push_back(item);
 			_save->getTile((*j) + Position(xoff, yoff, 0))->addItem(item, _game->getRuleset()->getInventory("STR_GROUND"));
 		}

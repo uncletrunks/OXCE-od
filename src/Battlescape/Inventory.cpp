@@ -761,19 +761,22 @@ void Inventory::mouseClick(Action *action, State *state)
 						BattleItem *item = _selUnit->getItem(slot, x, y);
 						if (item != 0)
 						{
-							BattleType itemType = item->getRules()->getBattleType();
-							if (BT_GRENADE == itemType || BT_PROXIMITYGRENADE == itemType)
+							const BattleFuseType fuseType = item->getRules()->getFuseTimerType();
+							if (fuseType != BFT_NONE)
 							{
 								if (item->getFuseTimer() == -1)
 								{
 									// Prime that grenade!
-									if (BT_PROXIMITYGRENADE == itemType)
+									if (fuseType == BFT_SET)
+									{
+										_game->pushState(new PrimeGrenadeState(0, true, item));
+									}
+									else
 									{
 										_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_ACTIVATED"));
-										item->setFuseTimer(0);
+										item->setFuseTimer(item->getRules()->getFuseTimerDefault());
 										arrangeGround(false);
 									}
-									else _game->pushState(new PrimeGrenadeState(0, true, item));
 								}
 								else
 								{

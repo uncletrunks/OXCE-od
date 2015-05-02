@@ -280,7 +280,7 @@ bool ProjectileFlyBState::createNewProjectile()
 		{
 			if (_unit->getFaction() != FACTION_PLAYER && _projectileItem->getRules()->getBattleType() == BT_GRENADE)
 			{
-				_projectileItem->setFuseTimer(0);
+				_projectileItem->setFuseTimer(_projectileItem->getRules()->getFuseTimerDefault());
 			}
 			_projectileItem->moveToOwner(0);
 			_unit->setCache(0);
@@ -455,7 +455,7 @@ void ProjectileFlyBState::think()
 				BattleItem *item = _parent->getMap()->getProjectile()->getItem();
 				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
 
-				if (Options::battleInstantGrenade && item->getRules()->getBattleType() == BT_GRENADE && item->getFuseTimer() == 0)
+				if (item->getRules()->getBattleType() == BT_GRENADE && ((Options::battleInstantGrenade && item->getFuseTimer() == 0) || item->getRules()->getFuseTimerType() == BFT_INSTANT))
 				{
 					// it's a hot grenade to explode immediately
 					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action.type, item, _action.actor));

@@ -64,7 +64,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _tuLoad(15), _tuUnload(8),
-	_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
+	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
@@ -207,12 +207,28 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	if (node["battleType"])
 	{
 		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
-		_psiReqiured = _battleType == BT_PSIAMP;
-		if (_psiReqiured)
+		if (_battleType == BT_PSIAMP)
 		{
+			_psiReqiured = true;
 			_dropoff = 1;
 			_aimRange = 0;
 			_accuracyMulti.setPsiAttack();
+		}
+		else
+		{
+			_psiReqiured = false;
+		}
+		if (_battleType == BT_PROXIMITYGRENADE)
+		{
+			_fuseType = BFT_INSTANT;
+		}
+		else if (_battleType == BT_GRENADE)
+		{
+			_fuseType = BFT_SET;
+		}
+		else
+		{
+			_fuseType = BFT_NONE;
 		}
 	}
 	if (node["skillApplied"])
@@ -234,6 +250,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_power = node["power"].as<int>(_power);
 	_psiAttackName = node["psiAttackName"].as<std::string>(_psiAttackName);
 	_compatibleAmmo = node["compatibleAmmo"].as< std::vector<std::string> >(_compatibleAmmo);
+	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
 
 	_accuracyAimed = node["accuracyAimed"].as<int>(_accuracyAimed);
 	_accuracyAuto = node["accuracyAuto"].as<int>(_accuracyAuto);
@@ -749,6 +766,35 @@ const RuleDamageType *RuleItem::getDamageType() const
 BattleType RuleItem::getBattleType() const
 {
 	return _battleType;
+}
+
+/**
+ * Gets the item's fuse timer type.
+ * @return Fuse Timer Type.
+ */
+BattleFuseType RuleItem::getFuseTimerType() const
+{
+	return _fuseType;
+}
+
+/**
+ * Gets the item's default fuse timer.
+ * @return Time in turns.
+ */
+int RuleItem::getFuseTimerDefault() const
+{
+	if (_fuseType >= BFT_FIX_MIN && _fuseType < BFT_FIX_MAX)
+	{
+		return (int)_fuseType;
+	}
+	else if (_fuseType == BFT_SET || _fuseType == BFT_INSTANT)
+	{
+		return 0;
+	}
+	else
+	{
+		return -1; //can't prime
+	}
 }
 
 /**

@@ -582,4 +582,13 @@ void BattleItem::convertToCorpse(RuleItem *rules)
 	}
 }
 
+/**
+ * Check if item can glow in darkness.
+ * @return True if it glow.
+ */
+bool BattleItem::getGlow() const
+{
+	return _rules->getBattleType() == BT_FLARE && (_rules->getFuseTimerType() == BFT_NONE || _fuseTimer >= 0);
+}
+
 }

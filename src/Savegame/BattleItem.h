@@ -139,7 +139,8 @@ public:
 	void setTurnFlag(bool flag);
 	/// Sets the item's ruleset.
 	void convertToCorpse(RuleItem *rules);
-
+	/// Get if item can glow.
+	bool getGlow() const;
 };
 
 }

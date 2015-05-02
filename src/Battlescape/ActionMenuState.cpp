@@ -80,8 +80,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	}
 
 	// priming
-	if ((weapon->getBattleType() == BT_GRENADE || weapon->getBattleType() == BT_PROXIMITYGRENADE)
-		&& _action->weapon->getFuseTimer() == -1)
+	if (weapon->getFuseTimerDefault() >= 0 && _action->weapon->getFuseTimer() == -1)
 	{
 		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id);
 	}
@@ -235,14 +234,15 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		}
 		else if (_action->type == BA_PRIME)
 		{
-			if (weapon->getBattleType() == BT_PROXIMITYGRENADE)
+			const BattleFuseType fuseType = weapon->getFuseTimerType();
+			if (fuseType == BFT_SET)
 			{
-				_action->value = 0;
-				_game->popState();
+				_game->pushState(new PrimeGrenadeState(_action, false, 0));
 			}
 			else
 			{
-				_game->pushState(new PrimeGrenadeState(_action, false, 0));
+				_action->value = weapon->getFuseTimerDefault();
+				_game->popState();
 			}
 		}
 		else if (_action->type == BA_USE && weapon->getBattleType() == BT_MEDIKIT)

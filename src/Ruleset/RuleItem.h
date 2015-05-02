@@ -30,6 +30,7 @@ namespace OpenXcom
 {
 
 enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMITYGRENADE, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE, BT_PSIAMP, BT_FLARE, BT_CORPSE };
+enum BattleFuseType { BFT_NONE = -3, BFT_INSTANT = -2, BFT_SET = -1, BFT_FIX_MIN = 0, BFT_FIX_MAX = 24 };
 
 class Ruleset;
 class SurfaceSet;
@@ -97,6 +98,7 @@ private:
 	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime;
 	int _clipSize, _tuLoad, _tuUnload;
 	BattleType _battleType;
+	BattleFuseType _fuseType;
 	std::string _psiAttackName;
 	bool _twoHanded, _waypoint, _fixedWeapon;
 	int _invWidth, _invHeight;
@@ -223,6 +225,10 @@ public:
 	const RuleDamageType *getDamageType() const;
 	/// Gets the item's type.
 	BattleType getBattleType() const;
+	/// Gets the item's fuse type.
+	BattleFuseType getFuseTimerType() const;
+	/// Gets the item's default fuse value.
+	int getFuseTimerDefault() const;
 	/// Gets the item's inventory width.
 	int getInventoryWidth() const;
 	/// Gets the item's inventory height.

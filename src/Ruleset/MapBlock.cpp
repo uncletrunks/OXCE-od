@@ -80,6 +80,7 @@ void MapBlock::load(const YAML::Node &node)
 		}
 	}
 	_items = node["items"].as<std::map<std::string, std::vector<Position> > >(_items);
+	_itemsFuseTimer = node["fuseTimers"].as<std::map<std::string, std::pair<int, int> > >(_itemsFuseTimer);
 }
 
 /**
@@ -148,9 +149,18 @@ bool MapBlock::isFloorRevealed(int floor)
  * Gets the items and their positioning for any items associated with this block.
  * @return the items and their positions.
  */
-std::map<std::string, std::vector<Position> > *MapBlock::getItems()
+const std::map<std::string, std::vector<Position> > *MapBlock::getItems() const
 {
 	return &_items;
+}
+
+/**
+ * Gets the predefined fuse timers for items on this block.
+ * @return the fuse timers for items.
+ */
+const std::map<std::string, std::pair<int, int> > *MapBlock::getItemsFuseTimers() const
+{
+	return &_itemsFuseTimer;
 }
 
 }

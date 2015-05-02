@@ -166,7 +166,7 @@ bool BattleActionCost::spendTU(std::string *message)
  */
 BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false), _endTurnRequested(false), _endTurnProcessed(false)
 {
-	
+
 	_currentAction.actor = 0;
 	_currentAction.targeting = false;
 	_currentAction.type = BA_NONE;
@@ -465,12 +465,20 @@ void BattlescapeGame::endTurn()
 			getResourcePack()->getSoundByDepth(_save->getDepth(), ResourcePack::SLIDING_DOOR_CLOSE)->play(); // ufo door closed
 		}
 
+		// if all grenades explode we remove items that expire on that turn too.
+		std::vector<BattleItem*> forRemoval;
+
 		// check for hot grenades on the ground
 		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 		{
-			for (std::vector<BattleItem*>::iterator it = _save->getTiles()[i]->getInventory()->begin(); it != _save->getTiles()[i]->getInventory()->end(); )
+			for (std::vector<BattleItem*>::iterator it = _save->getTiles()[i]->getInventory()->begin(); it != _save->getTiles()[i]->getInventory()->end(); ++it)
 			{
-				if ((*it)->getRules()->getBattleType() == BT_GRENADE && (*it)->getFuseTimer() == 0)  // it's a grenade to explode now
+				if ((*it)->getFuseTimer() != 0 || (*it)->getRules()->getFuseTimerType() == BFT_INSTANT)
+				{
+					continue;
+				}
+
+				if ((*it)->getRules()->getBattleType() == BT_GRENADE)  // it's a grenade to explode now
 				{
 					Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
 					statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
@@ -478,8 +486,15 @@ void BattlescapeGame::endTurn()
 					statePushBack(0);
 					return;
 				}
-				++it;
+				else
+				{
+					forRemoval.push_back((*it));
+				}
 			}
+		}
+		for (std::vector<BattleItem*>::iterator it = forRemoval.begin(); it != forRemoval.end(); ++it)
+		{
+			_save->removeItem((*it));
 		}
 	}
 	// check for terrain explosions
@@ -498,7 +513,7 @@ void BattlescapeGame::endTurn()
 		{
 			for (std::vector<BattleItem*>::iterator it = _save->getItems()->begin(); it != _save->getItems()->end(); ++it)
 			{
-					if (((*it)->getRules()->getBattleType() == BT_GRENADE || (*it)->getRules()->getBattleType() == BT_PROXIMITYGRENADE) && (*it)->getFuseTimer() > 0)
+					if ((*it)->getFuseTimer() > 0)
 					{
 						(*it)->setFuseTimer((*it)->getFuseTimer() - 1);
 					}
@@ -1251,7 +1266,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 				{
 					if (ba.weapon->getFuseTimer() == -1)
 					{
-						ba.weapon->setFuseTimer(0);
+						ba.weapon->setFuseTimer(ba.weapon->getRules()->getFuseTimerDefault());
 					}
 					ba.type = BA_THROW;
 					statePushBack(new ProjectileFlyBState(this, ba));
@@ -1651,7 +1666,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 
 	getTileEngine()->applyGravity(_save->getTile(p));
 
-	if (item->getRules()->getBattleType() == BT_FLARE)
+	if (item->getGlow())
 	{
 		getTileEngine()->calculateTerrainLighting();
 		getTileEngine()->calculateFOV(position);

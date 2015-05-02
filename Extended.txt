@@ -54,6 +54,8 @@ Inventory screens can now have up to 128 backgrounds.[br/]
 Unit sprites recolors can now support up to 128 values.[br/]
 Option for custom change of TU, HP, Energy, Morale or Stun after next turn based on unit stats.[br/]
 New stat bonus based on stun level of unit.[br/]
+Option for changing fuse type in granades and flare.[br/]
+Option for pre-priming granades on map spawn.[br/]
 [br/]
 
 
@@ -66,16 +68,22 @@ items:
   - type: STR_ITEM_TYPE #default config ...
     dropoff: 1     #used by Psi-Amp too. Default for Psi-Amp is 1.
     aimRange: 0    #used by Pis-Amp too. Default for Psi-Amp is 0.
-    tuThrow: 25    #cost of throwing item in %.
-    tuPrime: 50    #cost of priming granade in %.
     tuLoad: 15     #cost of loading weapon.
     tuUnload: 8    #cost of unloading weapon.
-    tuMindControl: -1  #cost of using Psi-Amp Mind Control attack, if -1 it uses `tuUse` value.
-    tuPanic: -1        #cost of using Psi-Amp Panic attack, if -1 it uses `tuUse` value.
-    accuracyUse: 0         #bonus to accuracy of Psi-Amp special attack.
-    accuracyMindControl: 0 #bonus to accuracy of Psi-Amp Mind Control attack.
-    accuracyPanic: 0       #bonus to accuracy of Psi-Amp Panic attack.
-    accuracyThrow: 0       #accuracy of throw.
+    fuseTimerType: -2       #set how prime granade works.
+    # -3 -> no priming, flare alwasy work.
+    # -2 -> can prime, unlimited time. Granade explode only after throw. Flare work only after prime.
+    # -1 -> can prime, can set time. Granade explode after set time. Flare and Proxy disappere after set time.
+    #  0 -> can prime, set fixed time of 0 turns.
+    #  1 -> can prime, set fixed time of 1 turns.
+    #  2 -> can prime, set fixed time of 2 turns.
+    # ...
+    # 22 -> can prime, set fixed time of 22 turns.
+    # 23 -> can prime, set fixed time of 23 turns.
+    accuracyUse: 0          #bonus to accuracy of Psi-Amp special attack.
+    accuracyMindControl: 0  #bonus to accuracy of Psi-Amp Mind Control attack.
+    accuracyPanic: 0        #bonus to accuracy of Psi-Amp Panic attack.
+    accuracyThrow: 0        #accuracy of throw.
     costAimed:
       #cost of Aimed attack.
       time: 2         #time units cost, can be in %. Alias of `tuAimed`.
@@ -330,7 +338,16 @@ manufacture:
 [code]
 research:
   - type: STR_SOME_RESEARCH
-    requiresBaseFunc: [ W, K ] #List of custom IDs that are required to start this research in the base
+    requiresBaseFunc: [ W, K ] #List of custom IDs that are required to start this research in the base.
+[/code]
+
+[code]
+terrains:
+  - name: CULTA
+    mapBlocks:
+      - name: SOMETHING
+        fuseTimers:
+          STR_GRANADE: [6, 16]  #all items of that type will have set fuseTimer to random value in range [6, 16].
 [/code]
 
 [code]
