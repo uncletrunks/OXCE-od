@@ -2187,7 +2187,7 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 					{
 						for (std::vector<BattleItem*>::iterator i = t->getInventory()->begin(); i != t->getInventory()->end(); ++i)
 						{
-							if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() == 0)
+							if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() >= 0)
 							{
 								Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
 								statePushNext(new ExplosionBState(this, p, BA_NONE, (*i), (*i)->getPreviousOwner()));
