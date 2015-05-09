@@ -32,7 +32,7 @@ Armor::Armor(const std::string &type) :
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _regeneration(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
-	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f)
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -141,6 +141,7 @@ void Armor::load(const YAML::Node &node)
 		_zombiImmune = node["zombiImmune"].as<bool>();
 	}
 	_overKill = node["overKill"].as<float>(_overKill);
+	_meleeDodgeBackPenalty = node["meleeDodgeBackPenalty"].as<float>(_meleeDodgeBackPenalty);
 
 	_psiDefence.load(node["psiDefence"]);
 	_meleeDodge.load(node["meleeDodge"]);
@@ -355,6 +356,14 @@ int Armor::getPsiDefence(const BattleUnit* unit) const
 int Armor::getMeleeDodge(const BattleUnit* unit) const
 {
 	return _meleeDodge.getBonus(unit);
+}
+
+/**
+ * Gets unit dodge penalty if hit from behind.
+ */
+float Armor::getMeleeDodgeBackPenalty() const
+{
+	return _meleeDodgeBackPenalty;
 }
 
 /**

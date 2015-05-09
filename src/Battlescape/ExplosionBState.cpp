@@ -294,7 +294,12 @@ void ExplosionBState::explode()
 		int hitChance = _unit->getFiringAccuracy(BA_HIT, _item);
 		if (targetUnit)
 		{
-			hitChance -= targetUnit->getArmor()->getMeleeDodge(targetUnit);
+			int arc = save->getTileEngine()->getArcDirection(save->getTileEngine()->getDirectionTo(targetUnit->getPositionVexels(), _unit->getPositionVexels()), targetUnit->getDirection());
+			float penalty = 1.0f - arc * targetUnit->getArmor()->getMeleeDodgeBackPenalty() / 4.0f;
+			if (penalty > 0)
+			{
+				hitChance -= targetUnit->getArmor()->getMeleeDodge(targetUnit) * penalty;
+			}
 		}
 		if (!RNG::percent(hitChance))
 		{

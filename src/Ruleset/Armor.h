@@ -56,7 +56,7 @@ private:
 	int _faceColorGroup, _hairColorGroup, _utileColorGroup, _rankColorGroup;
 	std::vector<int> _faceColor, _hairColor, _utileColor, _rankColor;
 	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
-	float _overKill;
+	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
 public:
@@ -106,6 +106,8 @@ public:
 	int getPsiDefence(const BattleUnit* unit) const;
 	/// Gets unit melee dodge chance.
 	int getMeleeDodge(const BattleUnit* unit) const;
+	/// Gets unit dodge penalty if hit from behind.
+	float getMeleeDodgeBackPenalty() const;
 
 	/// Gets unit TU recovery.
 	int getTimeRecovery(const BattleUnit* unit) const;

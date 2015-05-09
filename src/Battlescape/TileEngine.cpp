@@ -2975,6 +2975,18 @@ int TileEngine::getDirectionTo(const Position &origin, const Position &target) c
 }
 
 /**
+ * Calculate arc between two unit directions.
+ * e.g. Arc of 7 and 3 is 4. Arc of 0 and 7 is 1.
+ * @param directionA Value of 0 to 7
+ * @param directionB Value of 0 to 7
+ * @return Value in range of 0 - 4
+ */
+int TileEngine::getArcDirection(int directionA, int directionB) const
+{
+	return std::abs((((directionA - directionB) + 12) % 8) - 4);
+}
+
+/**
  * Gets the origin voxel of a certain action.
  * @param action Battle action.
  * @param tile Pointer to the action tile.

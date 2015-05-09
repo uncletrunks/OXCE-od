@@ -56,6 +56,7 @@ Option for custom change of TU, HP, Energy, Morale or Stun after next turn based
 New stat bonus based on stun level of unit.[br/]
 Option for changing fuse type in granades and flare.[br/]
 Option for pre-priming granades on map spawn.[br/]
+Option for dodge chance based on direction of attack.[br/]
 [br/]
 
 
@@ -230,6 +231,7 @@ armors:
       #...
       #same stats like `damageBonus` in `items`.
       #...
+    meleeDodgeBackPenalty: 0.2 #how much dodge unit lost when hit from behind. Default `0.0`.
     recovery:
       time: #amount of TU recovered each turn.
         #default is `tu` set to `1.0`

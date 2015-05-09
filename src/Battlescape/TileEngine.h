@@ -168,6 +168,8 @@ public:
 	void recalculateFOV();
 	/// Get direction to a certain point
 	int getDirectionTo(const Position &origin, const Position &target) const;
+	/// Get arc between two direction.
+	int getArcDirection(int directionA, int directionB) const;
 	/// determine the origin voxel of a given action.
 	Position getOriginVoxel(BattleAction &action, Tile *tile);
 	/// mark a region of the map as "dangerous" for a turn.

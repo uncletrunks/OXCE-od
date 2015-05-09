@@ -146,6 +146,8 @@ public:
 	const Position& getPosition() const;
 	/// Gets the unit's position.
 	const Position& getLastPosition() const;
+	/// Gets the unit's position of center in vexels.
+	Position getPositionVexels() const;
 	/// Sets the unit's direction 0-7.
 	void setDirection(int direction);
 	/// Sets the unit's face direction (only used by strafing moves)

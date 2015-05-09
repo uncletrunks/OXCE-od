@@ -463,6 +463,17 @@ const Position& BattleUnit::getLastPosition() const
 }
 
 /**
+ * Gets position of unit center in vexels.
+ * @return position in vexels
+ */
+Position BattleUnit::getPositionVexels() const
+{
+	Position center = _pos.toVexel();
+	center += Position(8, 8, 0) * _armor->getSize();
+	return center;
+}
+
+/**
  * Gets the BattleUnit's destination.
  * @return destination
  */

@@ -1142,14 +1142,16 @@ bool AlienBAIState::selectRandomTarget()
 bool AlienBAIState::selectPointNearTarget(BattleUnit *target, int maxTUs) const
 {
 	int size = _unit->getArmor()->getSize();
-	int targetsize = target->getArmor()->getSize();
+	int sizeTarget = target->getArmor()->getSize();
+	int dirTarget = target->getDirection();
+	float dodgeChanceDiff = target->getArmor()->getMeleeDodge(target) * target->getArmor()->getMeleeDodgeBackPenalty() * _attackAction->diff / 160.0f;
 	bool returnValue = false;
-	unsigned int distance = 1000;
+	int distance = 1000;
 	for (int z = -1; z <= 1; ++z)
 	{
-		for (int x = -size; x <= targetsize; ++x)
+		for (int x = -size; x <= sizeTarget; ++x)
 		{
-			for (int y = -size; y <= targetsize; ++y)
+			for (int y = -size; y <= sizeTarget; ++y)
 			{
 				if (x || y) // skip the unit itself
 				{
@@ -1163,11 +1165,14 @@ bool AlienBAIState::selectPointNearTarget(BattleUnit *target, int maxTUs) const
 					if (valid && fitHere && !_save->getTile(checkPath)->getDangerous())
 					{
 						_save->getPathfinding()->calculate(_unit, checkPath, 0, maxTUs);
-						if (_save->getPathfinding()->getStartDirection() != -1 && _save->getPathfinding()->getPath().size() < distance)
+
+						//for 100% dodge diff and on 4th difficulty it will allow aliens to move 10 squares around to made attack form behind.
+						int distanceCurrent = _save->getPathfinding()->getPath().size() - dodgeChanceDiff * _save->getTileEngine()->getArcDirection(dir - 4, dirTarget);
+						if (_save->getPathfinding()->getStartDirection() != -1 && distanceCurrent < distance)
 						{
 							_attackAction->target = checkPath;
 							returnValue = true;
-							distance = _save->getPathfinding()->getPath().size();
+							distance = distanceCurrent;
 						}
 						_save->getPathfinding()->abortPath();
 					}
