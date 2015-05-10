@@ -103,7 +103,7 @@ private:
 	bool _twoHanded, _waypoint, _fixedWeapon;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
-	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery;
+	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery, _moraleRecovery, _painKillerRecovery;
 	int _recoveryPoints;
 	int _armor;
 	int _turretType;
@@ -251,6 +251,10 @@ public:
 	int getEnergyRecovery() const;
 	/// Gets the medikit stun recovered per shot.
 	int getStunRecovery() const;
+	/// Gets the medikit morale recovered per shot.
+	int getMoraleRecovery() const;
+	/// Gets the medikit morale recovered based on missing health.
+	float getPainKillerRecovery() const;
 	/// Gets the max explosion radius.
 	int getExplosionRadius() const;
 	/// Gets the recovery points score

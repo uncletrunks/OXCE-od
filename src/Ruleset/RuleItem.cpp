@@ -65,7 +65,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
-	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
+	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
@@ -279,6 +279,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
 	_invWidth = node["invWidth"].as<int>(_invWidth);
 	_invHeight = node["invHeight"].as<int>(_invHeight);
+
 	_painKiller = node["painKiller"].as<int>(_painKiller);
 	_heal = node["heal"].as<int>(_heal);
 	_stimulant = node["stimulant"].as<int>(_stimulant);
@@ -286,6 +287,9 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_healthRecovery = node["healthRecovery"].as<int>(_healthRecovery);
 	_stunRecovery = node["stunRecovery"].as<int>(_stunRecovery);
 	_energyRecovery = node["energyRecovery"].as<int>(_energyRecovery);
+	_moraleRecovery = node["moraleRecovery"].as<int>(_moraleRecovery);
+	_painKillerRecovery = node["painKillerRecovery"].as<float>(_painKillerRecovery);
+
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);
 	_armor = node["armor"].as<int>(_armor);
 	_turretType = node["turretType"].as<int>(_turretType);
@@ -899,6 +903,24 @@ int RuleItem::getEnergyRecovery() const
 int RuleItem::getStunRecovery() const
 {
 	return _stunRecovery;
+}
+
+/**
+ * Gets the amount of morale added to a solders's morale.
+ * @return The amount of morale to add.
+ */
+int RuleItem::getMoraleRecovery() const
+{
+	return _moraleRecovery;
+}
+
+/**
+ * Gets the medikit morale recovered based on missing health.
+ * @return The ratio of how much restore.
+ */
+float RuleItem::getPainKillerRecovery() const
+{
+	return _painKillerRecovery;
 }
 
 /**

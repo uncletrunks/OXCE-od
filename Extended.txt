@@ -57,6 +57,7 @@ New stat bonus based on stun level of unit.[br/]
 Option for changing fuse type in granades and flare.[br/]
 Option for pre-priming granades on map spawn.[br/]
 Option for dodge chance based on direction of attack.[br/]
+Oprion for bonus morale recovery when using medkit.[br/]
 [br/]
 
 
@@ -202,9 +203,11 @@ items:
       - SOME_TECH
       - SOME_TECH_MK2
     psiAttackName: STR_HIT_MELEE #string id of psi-amp attack name in the pop-up menu. Required to enable special attack.
-    psiRequired: false   #default based on weapon type, if `true` you need Psi Skill to use the weapon.
-    bigSpriteAlt: 1      #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
-    floorSpriteAlt: 1    #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
+    psiRequired: false    #default based on weapon type, if `true` you need Psi Skill to use the weapon.
+    moraleRecovery: 10    #amount of recovered morale by medkit. Defailt `0`.
+    painKillerRecovery: 0 #how much missing health convert to morale. Default `1.0`.
+    bigSpriteAlt: 1       #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
+    floorSpriteAlt: 1     #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
     ai:
       useDelay: 3 #determine on what turn item can be used by aliens.
 [/code]

@@ -287,7 +287,7 @@ void MedikitState::onPainKillerClick(Action *)
 	BattleActionCost cost(BA_USE, _unit, _item);
 	if (cost.spendTU(&_action->result))
 	{
-		_targetUnit->painKillers();
+		_targetUnit->painKillers(rule->getMoraleRecovery(), rule->getPainKillerRecovery());
 		_item->setPainKillerQuantity(--pk);
 		update();
 	}

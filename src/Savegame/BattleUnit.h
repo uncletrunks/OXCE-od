@@ -339,7 +339,7 @@ public:
 	/// Heal one fatal wound
 	void heal(int part, int woundAmount, int healthAmount);
 	/// Give pain killers to this unit
-	void painKillers();
+	void painKillers(int moraleAmount, float painKillersStrength);
 	/// Give stimulant to this unit
 	void stimulant (int energy, int stun);
 	/// Get motion points for the motion scanner.

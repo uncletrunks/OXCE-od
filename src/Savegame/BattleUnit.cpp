@@ -2348,23 +2348,25 @@ void BattleUnit::heal(int part, int woundAmount, int healthAmount)
 		return;
 	if (!_fatalWounds[part])
 		return;
-	_fatalWounds[part] -= woundAmount;
-	_health += healthAmount;
-	if (_health > getBaseStats()->health)
-		_health = getBaseStats()->health;
+
+	setValueMax(_fatalWounds[part], -woundAmount, 0, 100);
+	setValueMax(_health, healthAmount, 1, getBaseStats()->health); //Hippocratic Oath: First do no harm
 }
 
 /**
  * Restore soldier morale
+ * @param moraleAmount additional morale boost.
+ * @param painKillersStrength how much of damage convert to morale.
  */
-void BattleUnit::painKillers()
+void BattleUnit::painKillers(int moraleAmount, float painKillersStrength)
 {
-	int lostHealth = getBaseStats()->health - _health;
+	int lostHealth = (getBaseStats()->health - _health) * painKillersStrength;
 	if (lostHealth > _moraleRestored)
 	{
         _morale = std::min(100, (lostHealth - _moraleRestored + _morale));
 		_moraleRestored = lostHealth;
 	}
+	moraleChange(moraleAmount);
 }
 
 /**
