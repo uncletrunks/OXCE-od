@@ -21,6 +21,7 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Engine/CrossPlatform.h"
+#include "../Engine/FileMap.h"
 #include "../Resource/ResourcePack.h"
 #include "../Engine/Language.h"
 #include "../Engine/Screen.h"
