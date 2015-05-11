@@ -124,18 +124,26 @@ struct ColorReplace
 
 	static inline void loop(Uint8& dest, const Uint8& src, const Uint8& override, int burn)
 	{
-		const Uint8 shade = (src & ColorShade) + burn + (override & ColorShade);
-		if (shade > 26)
+		const Uint8 temp = (src & ColorShade) + override;
+		if (burn)
 		{
-			dest = 0;
-		}
-		else if (shade > 15)
-		{
-			dest = ColorShade;
+			const Uint8 shade = (temp & ColorShade) + burn;
+			if (shade > 26)
+			{
+				dest = 0;
+			}
+			else if (shade > 15)
+			{
+				dest = ColorShade;
+			}
+			else
+			{
+				dest = (temp & ColorGroup) + shade;
+			}
 		}
 		else
 		{
-			dest = (override & ColorGroup) + shade;
+			dest = temp;
 		}
 	}
 
