@@ -58,6 +58,7 @@ Option for changing fuse type in granades and flare.[br/]
 Option for pre-priming granades on map spawn.[br/]
 Option for dodge chance based on direction of attack.[br/]
 Oprion for bonus morale recovery when using medkit.[br/]
+Option for self heal using medikit.[br/]
 [br/]
 
 
@@ -206,6 +207,7 @@ items:
     psiRequired: false    #default based on weapon type, if `true` you need Psi Skill to use the weapon.
     moraleRecovery: 10    #amount of recovered morale by medkit. Defailt `0`.
     painKillerRecovery: 0 #how much missing health convert to morale. Default `1.0`.
+    allowSelfHeal: true   #can medikit target user.
     bigSpriteAlt: 1       #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
     floorSpriteAlt: 1     #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
     ai:

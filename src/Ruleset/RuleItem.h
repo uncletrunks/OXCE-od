@@ -100,7 +100,7 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _waypoint, _fixedWeapon;
+	bool _twoHanded, _waypoint, _fixedWeapon, _allowSelfHeal;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery, _moraleRecovery, _painKillerRecovery;
@@ -255,6 +255,8 @@ public:
 	int getMoraleRecovery() const;
 	/// Gets the medikit morale recovered based on missing health.
 	float getPainKillerRecovery() const;
+	/// Gets the medikit ability to self heal.
+	bool getAllowSelfHeal() const;
 	/// Gets the max explosion radius.
 	int getExplosionRadius() const;
 	/// Gets the recovery points score

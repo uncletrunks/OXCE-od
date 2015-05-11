@@ -247,8 +247,8 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		}
 		else if (_action->type == BA_USE && weapon->getBattleType() == BT_MEDIKIT)
 		{
-			BattleUnit *targetUnit = NULL;
-			std::vector<BattleUnit*> *const units (_game->getSavedGame()->getSavedBattle()->getUnits());
+			BattleUnit *targetUnit = 0;
+			const std::vector<BattleUnit*> *units = _game->getSavedGame()->getSavedBattle()->getUnits();
 			for (std::vector<BattleUnit*>::const_iterator i = units->begin(); i != units->end() && !targetUnit; ++i)
 			{
 				// we can heal a unit that is at the same position, unconscious and healable(=woundable)
@@ -271,6 +271,10 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 						targetUnit = tile->getUnit();
 					}
 				}
+			}
+			if (!targetUnit && weapon->getAllowSelfHeal())
+			{
+				targetUnit = _action->actor;
 			}
 			if (targetUnit)
 			{
