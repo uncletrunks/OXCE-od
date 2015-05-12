@@ -258,9 +258,9 @@ void CraftInfoState::init()
 			std::wostringstream ss;
 			ss << L'\x01' << tr(w1->getRules()->getType());
 			_txtWName[i]->setText(ss.str());
+			ss.str(L"");
 			if (w1->getRules()->getAmmoMax())
 			{
-				ss.str(L"");
 				ss << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
 				ss << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
 				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())

@@ -160,7 +160,6 @@ void CraftWeaponsState::lstWeaponsClick(Action *)
 	{
 		CraftWeapon *sel = new CraftWeapon(_weapons[_lstWeapons->getSelectedRow()], 0);
 		_craft->addCraftStats(sel->getRules()->getBonusStats());
-		sel->setRearming(true);
 		_base->getItems()->removeItem(sel->getRules()->getLauncherItem());
 		_craft->getWeapons()->at(_weapon) = sel;
 	}

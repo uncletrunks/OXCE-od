@@ -530,7 +530,13 @@ void Craft::addCraftStats(const RuleCraftStats& s)
 {
 	setDamage(_damage + s.damageMax); //you need "fix" new damage capability first before use.
 	_stats += s;
-	setFuel(_fuel); //it will split some fuel if you have to much.
+
+	int overflowFuel = _fuel - _stats.fuelMax;
+	if (overflowFuel > 0 && !_rules->getRefuelItem().empty())
+	{
+		_base->getItems()->addItem(_rules->getRefuelItem(), overflowFuel / _rules->getRefuelRate());
+	}
+	setFuel(_fuel);
 }
 
 /**
