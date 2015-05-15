@@ -403,7 +403,7 @@ int Armor::getHealthRecovery(const BattleUnit* unit) const
  */
 int Armor::getStunRegeneration(const BattleUnit* unit) const
 {
-
+	return _stunRecovery.getBonus(unit);
 }
 
 /**

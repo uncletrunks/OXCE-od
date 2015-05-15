@@ -124,9 +124,9 @@ public:
 	/// Loads item data from YAML.
 	void load(const YAML::Node& node, int modIndex, int listIndex, const std::vector<RuleDamageType*> &damageTypes);
 	/// Gets the item's type.
-	std::string getType() const;
+	const std::string &getType() const;
 	/// Gets the item's name.
-	std::string getName() const;
+	const std::string &getName() const;
 	/// Gets the item's requirements.
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the item's buy requirements.
