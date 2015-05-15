@@ -86,8 +86,8 @@ void ProjectileFlyBState::init()
 		return;
 	}
 
-	//test TU
-	if (!_action.haveTU(&_action.result))
+	//test TU only on first lunch waypoint or normal shoot
+	if (_range == 0 && !_action.haveTU(&_action.result))
 	{
 		_parent->popState();
 		return;
@@ -247,7 +247,7 @@ void ProjectileFlyBState::init()
 
 	if (createNewProjectile())
 	{
-		_action.spendTU();
+		if (_range == 0) _action.spendTU();
 		_parent->getMap()->setCursorType(CT_NONE);
 		_parent->getMap()->getCamera()->stopMouseScrolling();
 	}
