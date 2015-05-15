@@ -2074,39 +2074,56 @@ BattleItem *BattleUnit::getGrenadeFromBelt() const
  */
 bool BattleUnit::checkAmmo()
 {
-	BattleItem *weapon = getItem("STR_RIGHT_HAND");
-	if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE || getTimeUnits() < weapon->getRules()->getTULoad())
+	BattleItem *list[2] =
 	{
-		weapon = getItem("STR_LEFT_HAND");
-		if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE || getTimeUnits() < weapon->getRules()->getTULoad())
+		getItem("STR_RIGHT_HAND"),
+		getItem("STR_LEFT_HAND"),
+	};
+
+	for (int i = 0; i < 2; ++i)
+	{
+		BattleItem *weapon = list[i];
+		if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE)
 		{
-			return false;
+			continue;
 		}
-	}
-	// we have a non-melee weapon with no ammo and 15 or more TUs - we might need to look for ammo then
-	BattleItem *ammo = 0;
-	bool wrong = true;
-	for (std::vector<BattleItem*>::iterator i = getInventory()->begin(); i != getInventory()->end(); ++i)
-	{
-		ammo = (*i);
-		for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
+
+		// we have a non-melee weapon with no ammo and 15 or more TUs - we might need to look for ammo then
+		BattleItem *ammo = 0;
+		int tuCost = weapon->getRules()->getTULoad();
+		int tuMove = getTimeUnits() - tuCost;
+
+		if (tuMove < 0)
 		{
-			if ((*c) == ammo->getRules()->getType())
+			continue;
+		}
+
+		for (std::vector<BattleItem*>::iterator i = getInventory()->begin(); i != getInventory()->end(); ++i)
+		{
+			for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
 			{
-				wrong = false;
-				break;
+				if ((*c) == (*i)->getRules()->getType())
+				{
+					int tuTemp = (*i)->getSlot()->getType() != INV_HAND ? (*i)->getSlot()->getCost(weapon->getSlot()) : 0;
+					if (tuTemp < tuMove)
+					{
+						tuMove = tuTemp;
+						ammo = (*i);
+					}
+					continue;
+				}
 			}
 		}
-		if (!wrong) break;
+
+		if (spendTimeUnits(tuCost + tuMove))
+		{
+			weapon->setAmmoItem(ammo);
+			ammo->moveToOwner(0);
+
+			return true;
+		}
 	}
-
-	if (wrong) return false; // didn't find any compatible ammo in inventory
-
-	spendTimeUnits(weapon->getRules()->getTULoad());
-	weapon->setAmmoItem(ammo);
-	ammo->moveToOwner(0);
-
-	return true;
+	return false;
 }
 
 /**
