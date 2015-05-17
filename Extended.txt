@@ -152,17 +152,17 @@ items:
       energyNormalized: 0.0   #curret energy normalized to 1 (max energy give 1.0).
       moraleNormalized: 0.0   #curret morale normalized to 1 (max morale give 1.0).
       stunNormalized: 0.0     #curret stun level normalized to 1 (max stun compared to current health give 1.0).
-    accuracyMultipler: #used by wapons and psi-amp.
+    accuracyMultiplier: #used by wapons and psi-amp.
       #set `psi` to 0.02 if weapon is psi-amp
       #...
       #same stats like `damageBonus`.
       #...
-    meleeMultipler: #used by melee wapons.
+    meleeMultiplier: #used by melee wapons.
       #set `melee` to 1.00 if `skillApplied: true`
       #...
       #same stats like `damageBonus`.
       #...
-    throwMultipler: #used by throw.
+    throwMultiplier: #used by throw.
       #set `throwing` to 1.00 for default
       #...
       #same stats like `damageBonus`.
