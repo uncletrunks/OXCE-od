@@ -614,6 +614,7 @@ void Ruleset::loadFile(const std::string &filename, size_t spriteOffset)
 	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
 	_initialFunding = doc["initialFunding"].as<int>(_initialFunding);
 	_alienFuel = doc["alienFuel"].as<std::string>(_alienFuel);
+	_fontName = doc["fontName"].as<std::string>(_fontName);
 
 	_aiUseDelayGrenade = doc["turnAIUseGrenade"].as<int>(_aiUseDelayGrenade);
 	_aiUseDelayBlaster = doc["turnAIUseBlaster"].as<int>(_aiUseDelayBlaster);
@@ -1704,6 +1705,15 @@ Soldier *Ruleset::genSoldier(SavedGame *save) const
 const std::string Ruleset::getAlienFuel() const
 {
 	return _alienFuel;
+}
+
+/**
+ * Gets name of font collection.
+ * @return the name of YAML-file with font data
+ */
+const std::string Ruleset::getFontName() const
+{
+	return _fontName;
 }
 
 /**
