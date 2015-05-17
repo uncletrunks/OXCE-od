@@ -1682,7 +1682,6 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
  */
 BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, const std::string &newType)
 {
-	bool visible = unit->getVisible();
 	getSave()->getBattleState()->showPsiButton(false);
 	// in case the unit was unconscious
 	getSave()->removeUnconsciousBodyItem(unit);
