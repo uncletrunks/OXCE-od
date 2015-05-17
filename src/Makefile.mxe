@@ -1,11 +1,12 @@
 # Makefile for: http://mxe.cc/
-# Get mxe from `git clone -b stable https://github.com/mxe/mxe.git`
+# Get mxe from `git clone https://github.com/mxe/mxe.git`
 # Build mxe with packs: `make gcc sdl sdl_gfx sdl_image sdl_mixer boost glew`
 # Get yaml-cpp form `hg clone https://code.google.com/p/yaml-cpp/` (requare Mercurial)
 TARGET =
 
 # Directories and files
-PATH := ../../mxe/usr/bin:$(PATH)
+MXE_DIR = ../../mxe
+PATH := $(MXE_DIR)/usr/bin:$(PATH)
 YAML_INC = ../../yaml-cpp/include/
 YAML_SRC = ../../yaml-cpp/src/
 OBJDIR = ../obj/
@@ -17,11 +18,11 @@ RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/ope
 
 
 # Target-specific settings
-CXX = i686-pc-mingw32-gcc
-RC = i686-pc-mingw32-windres
-SDL_CONFIG = i686-pc-mingw32-sdl-config
-SDL_INC = ../../mxe/usr/i686-pc-mingw32/include/SDL
-SDL_PKG = i686-pc-mingw32-pkg-config
+CXX = i686-w64-mingw32.static-gcc
+RC = i686-w64-mingw32.static-windres
+SDL_CONFIG = i686-w64-mingw32.static-sdl-config
+SDL_INC = $(MXE_DIR)/usr/i686-w64-mingw32.static/include/SDL
+SDL_PKG = i686-w64-mingw32.static-pkg-config
 BIN = OpenXcomEx.exe
 
 # Compiler settings
