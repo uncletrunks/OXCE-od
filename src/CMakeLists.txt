@@ -338,6 +338,10 @@ set ( geoscape_src
   Geoscape/AllocatePsiTrainingState.cpp
   Geoscape/PsiTrainingState.h
   Geoscape/PsiTrainingState.cpp
+  Geoscape/AllocateTrainingState.h
+  Geoscape/AllocateTrainingState.cpp
+  Geoscape/TrainingState.h
+  Geoscape/TrainingState.cpp
   Geoscape/AlienBaseState.h
   Geoscape/AlienBaseState.cpp
   Geoscape/MissionDetectedState.h
