@@ -35,10 +35,10 @@
 #include "../Savegame/Region.h"
 #include "../Savegame/Country.h"
 #include "../Ruleset/RuleCountry.h"
-#include "DefeatState.h"
 #include "Globe.h"
 #include "../Savegame/AlienBase.h"
 #include "../Engine/Options.h"
+#include "../Menu/CutsceneState.h"
 #include "../Menu/SaveGameState.h"
 
 namespace OpenXcom
@@ -280,8 +280,7 @@ void MonthlyReportState::btnOkClick(Action *)
 	{
 		if (_txtFailure->getVisible())
 		{
-			_game->popState();
-			_game->pushState(new DefeatState);
+			_game->pushState(new CutsceneState("wingame"));
 		}
 		else
 		{

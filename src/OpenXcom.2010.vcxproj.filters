@@ -660,12 +660,6 @@
     <ClCompile Include="Geoscape\BaseDefenseState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
-    <ClCompile Include="Geoscape\VictoryState.cpp">
-      <Filter>Geoscape</Filter>
-    </ClCompile>
-    <ClCompile Include="Geoscape\DefeatState.cpp">
-      <Filter>Geoscape</Filter>
-    </ClCompile>
     <ClCompile Include="Menu\DeleteGameState.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
@@ -805,7 +799,13 @@
     <ClCompile Include="Menu\OptionsConfirmState.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
-    <ClCompile Include="Menu\IntroState.cpp">
+    <ClCompile Include="Menu\VideoState.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\CutsceneState.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\SlideshowState.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
     <ClCompile Include="Menu\ConfirmLoadState.cpp">
@@ -1599,12 +1599,6 @@
     <ClInclude Include="Geoscape\BaseDefenseState.h">
       <Filter>Geoscape</Filter>
     </ClInclude>
-    <ClInclude Include="Geoscape\VictoryState.h">
-      <Filter>Geoscape</Filter>
-    </ClInclude>
-    <ClInclude Include="Geoscape\DefeatState.h">
-      <Filter>Geoscape</Filter>
-    </ClInclude>
     <ClInclude Include="Menu\DeleteGameState.h">
       <Filter>Menu</Filter>
     </ClInclude>
@@ -1754,7 +1748,13 @@
     <ClInclude Include="Menu\OptionsConfirmState.h">
       <Filter>Menu</Filter>
     </ClInclude>
-    <ClInclude Include="Menu\IntroState.h">
+    <ClInclude Include="Menu\VideoState.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\CutsceneState.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\SlideshowState.h">
       <Filter>Menu</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Options.inc.h">
