@@ -2115,7 +2115,7 @@ bool BattleUnit::checkAmmo()
 			}
 		}
 
-		if (spendTimeUnits(tuCost + tuMove))
+		if (ammo && spendTimeUnits(tuCost + tuMove))
 		{
 			weapon->setAmmoItem(ammo);
 			ammo->moveToOwner(0);
