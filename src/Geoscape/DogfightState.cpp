@@ -486,7 +486,7 @@ DogfightState::DogfightState(Globe *globe, Craft *craft, Ufo *ufo) :
 
 	for (int i = 0; i < _weaponNum; ++i)
 	{
-		if (_craft->getWeapons()->at(0) == 0)
+		if (_craft->getWeapons()->at(i) == 0)
 		{
 			_weapon[i]->setVisible(false);
 			_range[i]->setVisible(false);

@@ -55,30 +55,31 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	if (_weaponNum > RuleCraft::WeaponMax)
 		_weaponNum = RuleCraft::WeaponMax;
 
-	const int offset = 112;
+	const int offset_upper = -8;
+	const int offset_lower = 120;
 
 	// Create objects
 	_window = new Window(this, 240, 192, 4, 4, POPUP_BOTH);
-	_txtTitle = new Text(210, 17, 32, 20);
-	_txtStatus = new Text(210, 17, 32, 36);
-	_txtBase = new Text(210, 9, 32, 52);
-	_txtSpeed = new Text(210, 9, 32, 60);
-	_txtMaxSpeed = new Text(210, 9, 32, 68);
-	_txtAltitude = new Text(210, 9, 32, 76);
-	_txtSoldier = new Text(60, 9, 164, 68);
-	_txtHWP = new Text(80, 9, 164, 76);
-	_txtFuel = new Text(130, 9, 32, 84);
-	_txtDamage = new Text(80, 9, 164, 84);
+	_txtTitle = new Text(210, 17, 32, offset_upper + 20);
+	_txtStatus = new Text(210, 17, 32, offset_upper + 36);
+	_txtBase = new Text(210, 9, 32, offset_upper + 52);
+	_txtSpeed = new Text(210, 9, 32, offset_upper + 60);
+	_txtMaxSpeed = new Text(210, 9, 32, offset_upper + 68);
+	_txtAltitude = new Text(210, 9, 32, offset_upper + 76);
+	_txtSoldier = new Text(60, 9, 164, offset_upper + 68);
+	_txtHWP = new Text(80, 9, 164, offset_upper + 76);
+	_txtFuel = new Text(130, 9, 32, offset_upper + 84);
+	_txtDamage = new Text(80, 9, 164, offset_upper + 84);
 	for(int i = 0; i < _weaponNum; ++i)
 	{
-		_txtWeaponName[i] = new Text(130, 9, 32, 92 + 8*i);
-		_txtWeaponAmmo[i] = new Text(80, 9, 164, 92 + 8*i);
+		_txtWeaponName[i] = new Text(130, 9, 32, offset_upper + 92 + 8*i);
+		_txtWeaponAmmo[i] = new Text(80, 9, 164, offset_upper + 92 + 8*i);
 	}
-	_txtRedirect = new Text(230, 17, 13, offset + 0);
-	_btnBase = new TextButton(192, 12, 32, offset + 16);
-	_btnTarget = new TextButton(192, 12, 32, offset + 32);
-	_btnPatrol = new TextButton(192, 12, 32, offset + 48);
-	_btnCancel = new TextButton(192, 12, 32, offset + 64);
+	_txtRedirect = new Text(230, 17, 13, offset_lower + 0);
+	_btnBase = new TextButton(192, 12, 32, offset_lower + 14);
+	_btnTarget = new TextButton(192, 12, 32, offset_lower + 28);
+	_btnPatrol = new TextButton(192, 12, 32, offset_lower + 42);
+	_btnCancel = new TextButton(192, 12, 32, offset_lower + 56);
 
 	// Set palette
 	setInterface("geoCraftScreens");
