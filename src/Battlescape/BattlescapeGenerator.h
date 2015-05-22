@@ -67,7 +67,7 @@ private:
 	int _unitSequence;
 	Tile *_craftInventoryTile;
 	std::string _alienRace;
-	const AlienDeployment *_alienCustomDeploy;
+	const AlienDeployment *_alienCustomDeploy, *_alienCustomMission;
 	int _alienItemLevel;
 	bool _allowAutoLoadout, _baseInventory, _generateFuel, _craftDeployed;
 	int _craftZ;
@@ -150,7 +150,7 @@ public:
 	/// Sets the alien item level.
 	void setAlienItemlevel(int alienItemLevel);
 	/// Sets the alien weapon deploy items.
-	void setAlienCustomDeploy(const AlienDeployment *alienCustomDeploy);
+	void setAlienCustomDeploy(const AlienDeployment *alienCustomDeploy = 0, const AlienDeployment* alienCustomBase = 0);
 	/// Sets the XCom base.
 	void setBase(Base *base);
 	/// Sets the mission site.

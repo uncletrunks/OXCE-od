@@ -62,6 +62,7 @@ Option for self heal using medikit.[br/]
 [br/]
 2.0:[br/]
 Craft can now have up to 4 different wepon type per slot.[br/]
+Oprion for overriding shape of alien base.[br/]
 [br/]
 
 
@@ -337,6 +338,7 @@ alienRaces:
     retaliationMission: STR_ALIEN_RETALIATION   #default mission spawn after destroing ufo.
     retaliationAggression: 0                    #chance modiffer to spawn retaliation mission.
     baseCustomDeploy: STR_ALIEN_BASE_ASSAULT_2  #override alien base default weapon depoly.
+    baseCustomMission: STR_MIB_BASE             #override alien base construction.
 [/code]
 
 [code]

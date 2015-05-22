@@ -76,7 +76,7 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_game(game), _save(game->getSavedGame()->getSavedBattle()), _res(_game->getResourcePack()),
 	_craft(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
-	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienItemLevel(0),
+	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0),
 	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _craftZ(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
@@ -176,9 +176,10 @@ void BattlescapeGenerator::setAlienItemlevel(int alienItemLevel)
  * Set new weapon deploy for aliens that override weapon deploy data form mission type/ufo.
  * @param alienCustomDeploy
  */
-void BattlescapeGenerator::setAlienCustomDeploy(const AlienDeployment* alienCustomDeploy)
+void BattlescapeGenerator::setAlienCustomDeploy(const AlienDeployment* alienCustomDeploy, const AlienDeployment* alienCustomMission)
 {
 	_alienCustomDeploy = alienCustomDeploy;
+	_alienCustomMission = alienCustomMission;
 }
 
 /**
@@ -277,7 +278,15 @@ void BattlescapeGenerator::nextStage()
 		++j;
 	}
 
-	AlienDeployment *ruleDeploy = _game->getRuleset()->getDeployment(_save->getMissionType());
+	_alienCustomDeploy = _game->getRuleset()->getDeployment(_save->getAlienCustomDeploy());
+	_alienCustomMission = _game->getRuleset()->getDeployment(_save->getAlienCustomMission());
+
+	if (_alienCustomDeploy) _alienCustomDeploy = _game->getRuleset()->getDeployment(_alienCustomDeploy->getNextStage());
+	if (_alienCustomMission) _alienCustomMission = _game->getRuleset()->getDeployment(_alienCustomMission->getNextStage());
+
+	_save->setAlienCustom(_alienCustomDeploy ? _alienCustomDeploy->getType() : "", _alienCustomMission ? _alienCustomMission->getType() : "");
+
+	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getRuleset()->getDeployment(_save->getMissionType());
 	ruleDeploy->getDimensions(&_mapsize_x, &_mapsize_y, &_mapsize_z);
 	size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() -1);
 	_terrain = _game->getRuleset()->getTerrain(ruleDeploy->getTerrains().at(pick));
@@ -367,7 +376,7 @@ void BattlescapeGenerator::nextStage()
 		}
 	}
 
-	deployAliens(ruleDeploy);
+	deployAliens(_alienCustomDeploy ? _alienCustomDeploy : ruleDeploy);
 
 	if (unitCount == _save->getUnits()->size())
 	{
@@ -389,7 +398,9 @@ void BattlescapeGenerator::nextStage()
  */
 void BattlescapeGenerator::run()
 {
-	AlienDeployment *ruleDeploy = _game->getRuleset()->getDeployment(_ufo?_ufo->getRules()->getType():_save->getMissionType());
+	_save->setAlienCustom(_alienCustomDeploy ? _alienCustomDeploy->getType() : "", _alienCustomMission ? _alienCustomMission->getType() : "");
+
+	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getRuleset()->getDeployment(_ufo?_ufo->getRules()->getType():_save->getMissionType());
 
 	ruleDeploy->getDimensions(&_mapsize_x, &_mapsize_y, &_mapsize_z);
 

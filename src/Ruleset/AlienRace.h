@@ -37,6 +37,7 @@ class AlienRace
 private:
 	std::string _id;
 	std::string _baseCustomDeploy;
+	std::string _baseCustomMission;
 	std::string _retaliationMission;
 	std::vector<std::string> _members;
 	bool _retaliation;
@@ -52,6 +53,8 @@ public:
 	const std::string &getId() const;
 	/// Gets the alien base weapon deploy.
 	const std::string &getBaseCustomDeploy() const;
+	/// Gets the alien base mission.
+	const std::string &getBaseCustomMission() const;
 	/// Gets a certain member of this alien race family.
 	const std::string &getMember(int id) const;
 	/// Gets what mission is created after destroying ufo.

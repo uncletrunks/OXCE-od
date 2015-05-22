@@ -62,7 +62,7 @@ private:
 	std::vector<BattleItem*> _items, _deleted;
 	Pathfinding *_pathfinding;
 	TileEngine *_tileEngine;
-	std::string _missionType;
+	std::string _missionType, _alienCustomDeploy, _alienCustomMission;
 	int _globalShade;
 	UnitFaction _side;
 	int _turn;
@@ -101,6 +101,12 @@ public:
 	void setMissionType(const std::string &missionType);
 	/// Gets the mission type.
 	const std::string &getMissionType() const;
+	/// Sets the custom alien data.
+	void setAlienCustom(const std::string &deploy, const std::string &mission);
+	/// Gets the custom alien deploy.
+	const std::string &getAlienCustomDeploy() const;
+	/// Gets the custom mission definition.
+	const std::string &getAlienCustomMission() const;
 	/// Sets the global shade.
 	void setGlobalShade(int shade);
 	/// Gets the global shade.

@@ -125,6 +125,8 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 	_mapsize_y = node["length"].as<int>(_mapsize_y);
 	_mapsize_z = node["height"].as<int>(_mapsize_z);
 	_missionType = node["missionType"].as<std::string>(_missionType);
+	_alienCustomDeploy = node["alienCustomDeploy"].as<std::string>(_alienCustomDeploy);
+	_alienCustomMission = node["alienCustomMission"].as<std::string>(_alienCustomMission);
 	_globalShade = node["globalshade"].as<int>(_globalShade);
 	_turn = node["turn"].as<int>(_turn);
 	_depth = node["depth"].as<int>(_depth);
@@ -553,6 +555,31 @@ void SavedBattleGame::setMissionType(const std::string &missionType)
 const std::string &SavedBattleGame::getMissionType() const
 {
 	return _missionType;
+}
+
+/**
+ *  Sets the custom alien data.
+ */
+void SavedBattleGame::setAlienCustom(const std::string &deploy, const std::string &mission)
+{
+	_alienCustomDeploy = deploy;
+	_alienCustomMission = mission;
+}
+
+/**
+ *  Gets the custom alien deploy.
+ */
+const std::string &SavedBattleGame::getAlienCustomDeploy() const
+{
+	return _alienCustomDeploy;
+}
+
+/**
+ *  Gets the custom mission definition
+ */
+const std::string &SavedBattleGame::getAlienCustomMission() const
+{
+	return _alienCustomMission;
 }
 
 /**

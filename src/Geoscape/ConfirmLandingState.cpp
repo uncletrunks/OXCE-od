@@ -156,10 +156,11 @@ void ConfirmLandingState::btnYesClick(Action *)
 	}
 	else if (b != 0)
 	{
+		AlienRace *race = _game->getRuleset()->getAlienRace(b->getAlienRace());
 		bgame->setMissionType("STR_ALIEN_BASE_ASSAULT");
 		bgen.setAlienBase(b);
 		bgen.setAlienRace(b->getAlienRace());
-		bgen.setAlienCustomDeploy(_game->getRuleset()->getDeployment(_game->getRuleset()->getAlienRace(b->getAlienRace())->getBaseCustomDeploy()));
+		bgen.setAlienCustomDeploy(_game->getRuleset()->getDeployment(race->getBaseCustomDeploy()), _game->getRuleset()->getDeployment(race->getBaseCustomMission()));
 		bgen.setWorldTexture(0);
 	}
 	else

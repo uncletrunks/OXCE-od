@@ -41,6 +41,7 @@ void AlienRace::load(const YAML::Node &node)
 {
 	_id = node["id"].as<std::string>(_id);
 	_baseCustomDeploy = node["baseCustomDeploy"].as<std::string>(_baseCustomDeploy);
+	_baseCustomMission = node["baseCustomMission"].as<std::string>(_baseCustomMission);
 	_retaliationMission = node["retaliationMission"].as<std::string>(_retaliationMission);
 	_members = node["members"].as< std::vector<std::string> >(_members);
 	_retaliation = node["retaliation"].as<bool>(_retaliation);
@@ -66,6 +67,14 @@ const std::string &AlienRace::getBaseCustomDeploy() const
 	return _baseCustomDeploy;
 }
 
+/**
+ * Returns custom alien base deploy.
+ * @return Alien deployment id.
+ */
+const std::string &AlienRace::getBaseCustomMission() const
+{
+	return _baseCustomMission;
+}
 /**
  * Gets a certain member of this alien race family.
  * @param id The member's id.
