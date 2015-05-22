@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 2.0b[/b]
+[b]Mod version 2.1[/b]
 OpenXcom version: Nightly 22/05/2015[br/]
 Commit: [commit/][br/]
 
@@ -59,6 +59,9 @@ Option for pre-priming granades on map spawn.[br/]
 Option for dodge chance based on direction of attack.[br/]
 Oprion for bonus morale recovery when using medkit.[br/]
 Option for self heal using medikit.[br/]
+[br/]
+2.0:[br/]
+Craft can now have up to 4 different wepon type per slot.[br/]
 [br/]
 
 
@@ -269,14 +272,22 @@ armors:
 [code]
 crafts:
   - type: STR_CRAFT_TYPE #default config ...
-    radarChance: 100 #how effective craft radar is, default 100.
-    weapons: 4 #weapon number increased to 4.
-    weaponTypes: [0, 0, 0, 1] # slot 1 accepts weapons with type 0, ... slot 4 accepts weapons with type 1.
-    weaponStrings: [STR_WEAPON_ONE, STR_WEAPON_TWO, STR_WEAPON_THREE, STR_WEAPON_FOURTH] #string ID used by geoscape craft status.
-    hitBonus: 0 #bonus percentage to all weapons hit chance. Range [0, 100].
-    avoidBonus: 0 #bonus percentage to craft dodge chance. Range [0, 100].
-    powerBonus: 0 #bonus percentage to all weapons damage. Range [0, 100].
-    armor: 0 #amount of blocked damage per hit.
+    radarChance: 100    #how effective craft radar is, default 100.
+    weapons: 4          #weapon number increased to 4.
+    weaponTypes:        #definition of allowed weapon types in craft. Max 4 different types per slot.
+      - 0               #slot 1 accepts weapons with type 0. This is default.
+      - 0               #slot 2 accepts weapons with type 0.
+      - [0, 4, 13]      #slot 3 accepts weapons with type 0, 4 and 13.
+      - 1               #slot 4 accepts weapons with type 1.
+    weaponStrings:      #string ID used by geoscape craft status.
+      - STR_WEAPON_ONE
+      - STR_WEAPON_TWO
+      - STR_WEAPON_THREE
+      - STR_WEAPON_FOURTH
+    hitBonus: 0         #bonus percentage to all weapons hit chance. Range [0, 100].
+    avoidBonus: 0       #bonus percentage to craft dodge chance. Range [0, 100].
+    powerBonus: 0       #bonus percentage to all weapons damage. Range [0, 100].
+    armor: 0            #amount of blocked damage per hit.
 [/code]
 
 [code]

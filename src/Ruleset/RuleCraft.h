@@ -109,14 +109,17 @@ struct RuleCraftStats
 class RuleCraft
 {
 public:
-	/// Maximum number of weapon on craft.
+	/// Maximum number of weapon slots on craft.
 	static const int WeaponMax = 4;
+	/// Maximum of diffrernt types in one weapon slot.
+	static const int WeaponTypeMax = 4;
 
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
 	int _sprite, _marker;
-	int _weapons, _weaponTypes[WeaponMax], _soldiers, _vehicles, _costBuy, _costRent, _costSell;
+	int _weapons, _soldiers, _vehicles, _costBuy, _costRent, _costSell;
+	char _weaponTypes[WeaponMax][WeaponTypeMax];
 	std::string _refuelItem;
 	std::string _weaponStrings[WeaponMax];
 	int _repairRate, _refuelRate, _transferTime, _score;

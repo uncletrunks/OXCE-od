@@ -18,6 +18,7 @@
  */
 #include "RuleCraft.h"
 #include "RuleTerrain.h"
+#include "../Engine/Exception.h"
 
 namespace OpenXcom
 {
@@ -34,7 +35,10 @@ RuleCraft::RuleCraft(const std::string &type) :
 	_spacecraft(false), _listOrder(0), _maxItems(0), _maxDepth(0), _stats()
 {
 	for (int i = 0; i < WeaponMax; ++ i)
-		_weaponTypes[i] = 0;
+	{
+		for (int j = 0; j < WeaponTypeMax; ++j)
+			_weaponTypes[i][j] = 0;
+	}
 	_stats.radarRange = 672;
 	_stats.radarChance = 100;
 	_stats.sightRange = 1696;
@@ -104,7 +108,25 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset, int modIndex, int
 	if (const YAML::Node &types = node["weaponTypes"])
 	{
 		for (int i = 0; (size_t)i < types.size() &&  i < WeaponMax; ++i)
-			_weaponTypes[i] = types[i].as<int>();
+		{
+			const YAML::Node t = types[i];
+			if (t.IsScalar())
+			{
+				for (int j = 0; j < WeaponTypeMax; ++j)
+					_weaponTypes[i][j] = t.as<int>();
+			}
+			else if (t.IsSequence() && t.size() > 0)
+			{
+				for (int j = 0; (size_t)j < t.size() && j < WeaponTypeMax; ++j)
+					_weaponTypes[i][j] = t[j].as<int>();
+				for (int j = t.size(); j < WeaponTypeMax; ++j)
+					_weaponTypes[i][j] = _weaponTypes[i][0];
+			}
+			else
+			{
+				throw Exception("Invalid weapon type in craft " + _type + ".");
+			}
+		}
 	}
 	if (const YAML::Node &str = node["weaponStrings"])
 	{
@@ -383,7 +405,12 @@ int RuleCraft::getMaxItems() const
  */
 bool RuleCraft::isValidWeaponSlot(int slot, int weaponType) const
 {
-	return _weaponTypes[slot] == weaponType;
+	for (int j = 0; j < WeaponTypeMax; ++j)
+	{
+		if (_weaponTypes[slot][j] == weaponType)
+			return true;
+	}
+	return false;
 }
 
 /**
