@@ -100,7 +100,7 @@ public:
 	/// Sets the mission type.
 	void setMissionType(const std::string &missionType);
 	/// Gets the mission type.
-	std::string getMissionType() const;
+	const std::string &getMissionType() const;
 	/// Sets the global shade.
 	void setGlobalShade(int shade);
 	/// Gets the global shade.
@@ -279,9 +279,9 @@ public:
 	/// gets the list of items we MIGHT get.
 	std::vector<BattleItem*> *getConditionalRecoveredItems();
 	/// Get the name of the music track.
-	std::string &getMusic();
+	const std::string &getMusic() const;
 	/// Set the name of the music track.
-	void setMusic(std::string track);
+	void setMusic(const std::string &track);
 };
 
 }

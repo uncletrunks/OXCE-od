@@ -550,7 +550,7 @@ void SavedBattleGame::setMissionType(const std::string &missionType)
  * Gets the mission type.
  * @return The mission type.
  */
-std::string SavedBattleGame::getMissionType() const
+const std::string &SavedBattleGame::getMissionType() const
 {
 	return _missionType;
 }
@@ -2215,7 +2215,7 @@ std::vector<BattleItem*> *SavedBattleGame::getConditionalRecoveredItems()
  * Get the music track for the current battle.
  * @return the name of the music track.
  */
-std::string &SavedBattleGame::getMusic()
+const std::string &SavedBattleGame::getMusic() const
 {
 	return _music;
 }
@@ -2224,7 +2224,7 @@ std::string &SavedBattleGame::getMusic()
  * Set the music track for this battle.
  * @param track the track name.
  */
-void SavedBattleGame::setMusic(std::string track)
+void SavedBattleGame::setMusic(const std::string &track)
 {
 	_music = track;
 }

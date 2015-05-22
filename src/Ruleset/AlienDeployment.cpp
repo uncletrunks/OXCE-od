@@ -191,7 +191,7 @@ const std::vector<DeploymentData>* AlienDeployment::getDeploymentData() const
  * @param length Length.
  * @param height Height.
  */
-void AlienDeployment::getDimensions(int *width, int *length, int *height)
+void AlienDeployment::getDimensions(int *width, int *length, int *height) const
 {
 	*width = _width;
 	*length = _length;
@@ -337,7 +337,7 @@ int AlienDeployment::getDurationMax() const
  * Gets The list of musics this deployment has to choose from.
  * @return The list of track names.
  */
-std::vector<std::string> &AlienDeployment::getMusic()
+const std::vector<std::string> &AlienDeployment::getMusic() const
 {
 	return _music;
 }
@@ -346,7 +346,7 @@ std::vector<std::string> &AlienDeployment::getMusic()
  * Gets The minimum depth for this deployment.
  * @return The minimum depth.
  */
-int AlienDeployment::getMinDepth()
+int AlienDeployment::getMinDepth() const
 {
 	return _minDepth;
 }
@@ -355,7 +355,7 @@ int AlienDeployment::getMinDepth()
  * Gets The maximum depth for this deployment.
  * @return The maximum depth.
  */
-int AlienDeployment::getMaxDepth()
+int AlienDeployment::getMaxDepth() const
 {
 	return _maxDepth;
 }
@@ -364,7 +364,7 @@ int AlienDeployment::getMaxDepth()
  * Gets The minimum depth for this deployment's mission site.
  * @return The minimum depth.
  */
-int AlienDeployment::getMinSiteDepth()
+int AlienDeployment::getMinSiteDepth() const
 {
 	return _minSiteDepth;
 }
@@ -373,7 +373,7 @@ int AlienDeployment::getMinSiteDepth()
  * Gets The maximum depth for this deployment's mission site.
  * @return The maximum depth.
  */
-int AlienDeployment::getMaxSiteDepth()
+int AlienDeployment::getMaxSiteDepth() const
 {
 	return _maxSiteDepth;
 }

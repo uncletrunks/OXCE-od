@@ -85,7 +85,7 @@ public:
 	/// Gets a pointer to the data.
 	const std::vector<DeploymentData>* getDeploymentData() const;
 	/// Gets dimensions.
-	void getDimensions(int *width, int *length, int *height);
+	void getDimensions(int *width, int *length, int *height) const;
 	/// Gets civilians.
 	int getCivilians() const;
 	/// Gets the terrain for battlescape generation.
@@ -117,15 +117,15 @@ public:
 	/// Gets the maximum duration for this mission.
 	int getDurationMax() const;
 	/// Gets the list of music to pick from.
-	std::vector<std::string> &getMusic();
+	const std::vector<std::string> &getMusic() const;
 	/// Gets the minimum depth.
-	int getMinDepth();
+	int getMinDepth() const;
 	/// Gets the maximum depth.
-	int getMaxDepth();
+	int getMaxDepth() const;
 	/// Gets the minimum site depth.
-	int getMinSiteDepth();
+	int getMinSiteDepth() const;
 	/// Gets the maximum site depth.
-	int getMaxSiteDepth();
+	int getMaxSiteDepth() const;
 };
 
 }
