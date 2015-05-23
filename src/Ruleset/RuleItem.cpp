@@ -63,7 +63,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _powerRangeThreshold(0), _damageType(),
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
-	_clipSize(0), _tuLoad(15), _tuUnload(8),
+	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _allowSelfHeal(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
@@ -272,6 +272,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_costPrime.load(node, "Prime");
 
 	_clipSize = node["clipSize"].as<int>(_clipSize);
+	_specialChance = node["specialChance"].as<int>(_specialChance);
 	_tuLoad = node["tuLoad"].as<int>(_tuLoad);
 	_tuUnload = node["tuUnload"].as<int>(_tuUnload);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
@@ -829,6 +830,14 @@ int RuleItem::getClipSize() const
 	return _clipSize;
 }
 
+/**
+ * Gets the chance of special effect like zombify or corpse explosion or mine triggering.
+ * @return Percent value.
+ */
+int RuleItem::getSpecialChance() const
+{
+	return _specialChance;
+}
 /**
  * Draws and centers the hand sprite on a surface
  * according to its dimensions.

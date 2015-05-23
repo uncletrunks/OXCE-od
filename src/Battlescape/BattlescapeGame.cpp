@@ -467,6 +467,7 @@ void BattlescapeGame::endTurn()
 
 		// if all grenades explode we remove items that expire on that turn too.
 		std::vector<BattleItem*> forRemoval;
+		bool exploded = false;
 
 		// check for hot grenades on the ground
 		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
@@ -480,11 +481,24 @@ void BattlescapeGame::endTurn()
 
 				if ((*it)->getRules()->getBattleType() == BT_GRENADE)  // it's a grenade to explode now
 				{
-					Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
-					statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
-					_save->removeItem((*it));
-					statePushBack(0);
-					return;
+					if (RNG::percent((*it)->getRules()->getSpecialChance()))
+					{
+						Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
+						statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
+						exploded = true;
+					}
+					else
+					{
+						//grenade fail to explode.
+						if ((*it)->getRules()->getFuseTimerType() == BFT_SET)
+						{
+							(*it)->setFuseTimer(1);
+						}
+						else
+						{
+							(*it)->setFuseTimer(-1);
+						}
+					}
 				}
 				else
 				{
@@ -495,6 +509,11 @@ void BattlescapeGame::endTurn()
 		for (std::vector<BattleItem*>::iterator it = forRemoval.begin(); it != forRemoval.end(); ++it)
 		{
 			_save->removeItem((*it));
+		}
+		if (exploded)
+		{
+			statePushBack(0);
+			return;
 		}
 	}
 	// check for terrain explosions
@@ -2172,36 +2191,33 @@ bool BattlescapeGame::getKneelReserved()
  */
 bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 {
-	int size = unit->getArmor()->getSize() - 1;
-	for (int x = size; x >= 0; x--)
+	bool exploded = false;
+	int size = unit->getArmor()->getSize() + 1;
+	for (int tx = -1; tx < size; tx++)
 	{
-		for (int y = size; y >= 0; y--)
+		for (int ty = -1; ty < size; ty++)
 		{
-			for (int tx = -1; tx < 2; tx++)
+			Tile *t = _save->getTile(unit->getPosition() + Position(tx,ty,0));
+			if (t)
 			{
-				for (int ty = -1; ty < 2; ty++)
+				for (std::vector<BattleItem*>::iterator i = t->getInventory()->begin(); i != t->getInventory()->end(); ++i)
 				{
-					Tile *t = _save->getTile(unit->getPosition() + Position(x,y,0) + Position(tx,ty,0));
-					if (t)
+					if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() >= 0 && RNG::percent((*i)->getRules()->getSpecialChance()))
 					{
-						for (std::vector<BattleItem*>::iterator i = t->getInventory()->begin(); i != t->getInventory()->end(); ++i)
-						{
-							if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() >= 0)
-							{
-								Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
-								statePushNext(new ExplosionBState(this, p, BA_NONE, (*i), (*i)->getPreviousOwner()));
-								getSave()->removeItem(*i);
-								unit->setCache(0);
-								getMap()->cacheUnit(unit);
-								return true;
-							}
-						}
+						Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
+						statePushNext(new ExplosionBState(this, p, BA_NONE, (*i), (*i)->getPreviousOwner()));
+						exploded = true;
 					}
 				}
 			}
 		}
 	}
-	return false;
+	if (exploded)
+	{
+		unit->setCache(0);
+		getMap()->cacheUnit(unit);
+	}
+	return exploded;
 }
 
 /**

@@ -96,7 +96,7 @@ private:
 	RuleDamageType _damageType;
 	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
 	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime;
-	int _clipSize, _tuLoad, _tuUnload;
+	int _clipSize, _specialChance, _tuLoad, _tuUnload;
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
@@ -235,6 +235,8 @@ public:
 	int getInventoryHeight() const;
 	/// Gets the ammo amount.
 	int getClipSize() const;
+	/// Gets the chance of special effect like zombify or corpse explosion or mine triggering.
+	int getSpecialChance() const;
 	/// Draws the item's hand sprite onto a surface.
 	void drawHandSprite(SurfaceSet *texture, Surface *surface, bool alt = false) const;
 	/// Gets the medikit heal quantity.

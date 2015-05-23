@@ -32,6 +32,7 @@
 #include "../Savegame/Tile.h"
 #include "../Resource/ResourcePack.h"
 #include "../Engine/Sound.h"
+#include "../Engine/RNG.h"
 #include "../Ruleset/Armor.h"
 #include "../Ruleset/RuleItem.h"
 #include "../Engine/Options.h"
@@ -455,7 +456,7 @@ void ProjectileFlyBState::think()
 				BattleItem *item = _parent->getMap()->getProjectile()->getItem();
 				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
 
-				if (item->getRules()->getBattleType() == BT_GRENADE && ((Options::battleInstantGrenade && item->getFuseTimer() == 0) || item->getRules()->getFuseTimerType() == BFT_INSTANT))
+				if (item->getRules()->getBattleType() == BT_GRENADE && RNG::percent(item->getRules()->getSpecialChance()) && ((Options::battleInstantGrenade && item->getFuseTimer() == 0) || item->getRules()->getFuseTimerType() == BFT_INSTANT))
 				{
 					// it's a hot grenade to explode immediately
 					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action.type, item, _action.actor));

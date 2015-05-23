@@ -137,9 +137,14 @@ void ExplosionBState::init()
 	{
 		RuleItem* corpse = _parent->getRuleset()->getItem(_unit->getArmor()->getCorpseGeoscape());
 		_power = corpse->getPower();
+		_power += corpse->getPowerBonus(_unit);
 		_damageType = corpse->getDamageType();
 		_radius = corpse->getExplosionRadius();
 		_areaOfEffect = true;
+		if (!RNG::percent(corpse->getSpecialChance()))
+		{
+			_power = 0;
+		}
 	}
 	else
 	{
@@ -345,6 +350,7 @@ void ExplosionBState::explode()
 		BattleUnit *victim = save->getTileEngine()->hit(_center, _power, _damageType, _unit, _action.type != BA_HIT);
 		// check if this unit turns others into zombies
 		if (!_item->getRules()->getZombieUnit().empty()
+			&& RNG::percent(_item->getRules()->getSpecialChance())
 			&& victim
 			&& victim->getArmor()->getZombiImmune() == false
 			&& victim->getSpawnUnit().empty()
