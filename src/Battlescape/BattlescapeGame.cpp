@@ -1275,6 +1275,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 				if (ba.weapon->getRules()->getBattleType() == BT_FIREARM)
 				{
 					ba.type = BA_SNAPSHOT;
+					ba.updateTU();
 					// fire shots until unit runs out of TUs
 					for (int i= 0; i < 10; i++)
 					{
