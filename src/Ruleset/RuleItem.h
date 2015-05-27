@@ -270,7 +270,7 @@ public:
 	/// Gets the item's turret type.
 	int getTurretType() const;
 	/// Gets first turn when AI can use item.
-	int getAIUseDelay(Ruleset *ruleset = 0) const;
+	int getAIUseDelay(const Ruleset *ruleset = 0) const;
 	/// Checks if this a live alien.
 	bool isAlien() const;
 	/// Should we charge a flat rate?

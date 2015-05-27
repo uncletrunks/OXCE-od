@@ -1020,7 +1020,7 @@ int RuleItem::getTurretType() const
  *	if ruleset == 0 returns only local defined aiUseDelay
  *	else takes into account global define of aiUseDelay for this item
  */
-int RuleItem::getAIUseDelay(Ruleset *ruleset) const
+int RuleItem::getAIUseDelay(const Ruleset *ruleset) const
 {
 	if (ruleset == 0 || _aiUseDelay >= 0)
 		return _aiUseDelay;

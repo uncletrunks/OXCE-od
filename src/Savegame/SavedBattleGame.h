@@ -174,6 +174,8 @@ public:
 	TileEngine *getTileEngine() const;
 	/// Gets the playing side.
 	UnitFaction getSide() const;
+	/// Can unit use that weapon?
+	bool canUseWeapon(const BattleItem *weapon, const BattleUnit *unit) const;
 	/// Gets the turn number.
 	int getTurn() const;
 	/// Ends the turn.

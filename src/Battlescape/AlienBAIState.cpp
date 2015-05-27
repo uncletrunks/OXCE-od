@@ -191,8 +191,7 @@ void AlienBAIState::think(BattleAction *action)
 	if (action->weapon)
 	{
 		RuleItem *rule = action->weapon->getRules();
-		if (_save->getTurn() >= rule->getAIUseDelay(ruleset)
-			&& (!rule->isWaterOnly() || _save->getDepth() != 0))
+		if (_save->canUseWeapon(action->weapon, _unit))
 		{
 			if (rule->getBattleType() == BT_FIREARM)
 			{

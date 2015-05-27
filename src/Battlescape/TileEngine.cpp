@@ -949,14 +949,10 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	};
 	// prioritize melee
 	BattleItem *meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
-	if (meleeWeapon &&
-		(!meleeWeapon->getRules()->isPsiRequired() || unit->getBaseStats()->psiSkill > 0) &&
+	if (_save->canUseWeapon(meleeWeapon, unit) &&
 		// has a melee weapon and is in melee range
 		validMeleeRange(unit, target, unit->getDirection()) &&
-		BattleActionCost(BA_HIT, unit, meleeWeapon).haveTU() &&
-		(unit->getOriginalFaction() != FACTION_PLAYER ||
-			_save->getGeoscapeSave()->isResearched(meleeWeapon->getRules()->getRequirements())) &&
-		(_save->getDepth() != 0 || meleeWeapon->getRules()->isWaterOnly() == false))
+		BattleActionCost(BA_HIT, unit, meleeWeapon).haveTU())
 	{
 		reaction.attackType = BA_HIT;
 		reaction.reactionReduction = 1.0 * BattleActionCost(BA_HIT, unit, meleeWeapon).Time * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
@@ -965,8 +961,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 
 	// has a weapon
 	BattleItem *weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
-	if (weapon &&
-		(!weapon->getRules()->isPsiRequired() || unit->getBaseStats()->psiSkill > 0) &&
+	if (_save->canUseWeapon(weapon, unit) &&
 		(	// has a melee weapon and is in melee range
 			(weapon->getRules()->getBattleType() == BT_MELEE &&
 				validMeleeRange(unit, target, unit->getDirection()) &&
@@ -974,10 +969,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 			// has a gun capable of snap shot with ammo
 			(weapon->getRules()->getBattleType() != BT_MELEE &&
 				weapon->getAmmoItem() &&
-				BattleActionCost(BA_SNAPSHOT, unit, weapon).haveTU())) &&
-		(unit->getOriginalFaction() != FACTION_PLAYER ||
-			_save->getGeoscapeSave()->isResearched(weapon->getRules()->getRequirements())) &&
-		(_save->getDepth() != 0 || weapon->getRules()->isWaterOnly() == false))
+				BattleActionCost(BA_SNAPSHOT, unit, weapon).haveTU())))
 	{
 		reaction.attackType = BA_SNAPSHOT;
 		reaction.reactionReduction = 1.0 * BattleActionCost(BA_SNAPSHOT, unit, weapon).Time * unit->getBaseStats()->reactions / unit->getBaseStats()->tu;
@@ -1006,14 +998,8 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 	{
 		action.weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
 	}
-	if (!action.weapon)
-	{
-		return false;
-	}
 
-	// check restrictions for aliens
-	if (unit->getFaction() == FACTION_HOSTILE &&
-		_save->getTurn() < action.weapon->getRules()->getAIUseDelay(_save->getBattleState()->getGame()->getRuleset()))
+	if (!_save->canUseWeapon(action.weapon, action.actor))
 	{
 		return false;
 	}

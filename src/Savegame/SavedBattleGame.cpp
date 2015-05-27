@@ -844,6 +844,37 @@ UnitFaction SavedBattleGame::getSide() const
 }
 
 /**
+ * Test if weapon is usable by unit.
+ * @param weapon
+ * @param unit
+ * @return Unit can shoot/use it.
+ */
+bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* unit) const
+{
+	if (!weapon || !unit) return false;
+
+	const RuleItem *rule = weapon->getRules();
+	volatile bool x = true;
+	if (unit->getOriginalFaction() == FACTION_HOSTILE && getTurn() < rule->getAIUseDelay(getRuleset()))
+	{
+		return false;
+	}
+	if (unit->getOriginalFaction() == FACTION_PLAYER && !_battleState->getGame()->getSavedGame()->isResearched(rule->getRequirements()))
+	{
+		return false;
+	}
+	if (rule->isPsiRequired() && unit->getBaseStats()->psiSkill <= 0)
+	{
+		return false;
+	}
+	if (getDepth() == 0 && rule->isWaterOnly())
+	{
+		return false;
+	}
+	return x;
+}
+
+/**
  * Gets the current turn number.
  * @return The current turn.
  */
