@@ -1,5 +1,8 @@
 #!/bin/bash
 commitID=$(git rev-parse HEAD)
+openXcomID=$(git merge-base HEAD supsuper/master)
+openXcomDate=$(date -d"$(git show -s --format=%ci $openXcomID)" +%d\\/%m\\/%Y)
+
 sed \
   -e 's/\[b\]//g' \
   -e 's/\[\/b\]//g' \
@@ -7,6 +10,8 @@ sed \
   -e 's/\[\/i\]//g' \
   -e 's/\[br\/\]//g' \
   -e 's/\[commit\/\]/'$commitID'/g' \
+  -e 's/\[commitOriginDate\/\]/'$openXcomDate'/g' \
+  -e 's/\[commitOrigin\/\]/'$openXcomID'/g' \
   ../Extended.txt > Readme.txt
 sed \
   -e 's/  /\&nbsp;\&nbsp;/g' \
@@ -19,6 +24,8 @@ sed \
   -e 's/\[\/code\]/<\/div>/g' \
   -e 's/\[br\/\]/<br \/>/g' \
   -e 's/\[commit\/\]/'$commitID'/g' \
+  -e 's/\[commitOriginDate\/\]/'$openXcomDate'/g' \
+  -e 's/\[commitOrigin\/\]/'$openXcomID'/g' \
   ../Extended.txt > OpenXcomExWeb.txt
 
 sed \
@@ -28,4 +35,6 @@ sed \
   -e 's/\[i\]/\[b\]/g' \
   -e 's/\[\/i\]/\[\/b\]/g' \
   -e 's/\[commit\/\]/'$commitID'/g' \
+  -e 's/\[commitOriginDate\/\]/'$openXcomDate'/g' \
+  -e 's/\[commitOrigin\/\]/'$openXcomID'/g' \
   ../Extended.txt > OpenXcomExForum.txt
