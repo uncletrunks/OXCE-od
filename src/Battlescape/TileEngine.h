@@ -138,6 +138,8 @@ public:
 	int psiAttackCalculate(BattleActionType type, BattleUnit *attacker, BattleUnit *victim, BattleItem *weapon);
 	/// Attempts a panic or mind control action.
 	bool psiAttack(BattleAction *action);
+	/// Attempts a melee attack action.
+	bool meleeAttack(BattleAction *action);
 	/// Applies gravity to anything that occupy this tile.
 	Tile *applyGravity(Tile *t);
 	/// Returns melee validity between two units.

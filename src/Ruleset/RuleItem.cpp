@@ -59,8 +59,14 @@ void RuleItemUseCost::load(const YAML::Node& node, const std::string& name)
  * @param type String defining the type.
  */
 RuleItem::RuleItem(const std::string &type) :
-	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _bigSprite(0), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
-	_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _powerRangeReduction(0), _powerRangeThreshold(0), _damageType(),
+	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
+	_bigSprite(0), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
+	_fireSound(-1),
+	_hitSound(-1), _hitAnimation(0), _hitMissSound(-1), _hitMissAnimation(-1),
+	_meleeSound(39), _meleeAnimation(0), _meleeMissSound(-1), _meleeMissAnimation(-1),
+	_meleeHitSound(-1),
+	_psiSound(-1), _psiAnimation(-1), _psiMissSound(-1), _psiMissAnimation(-1),
+	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0), _damageType(),
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
@@ -68,7 +74,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
 	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
-	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false), _meleeSound(39), _meleePower(0), _meleeAnimation(0), _meleeHitSound(-1), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
+	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
+	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
 {
 	_accuracyMulti.setFiring();
 	_meleeMulti.setMelee();
@@ -113,7 +120,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		if (_bigSpriteAlt > 56)
 			_bigSpriteAlt += modIndex;
 	}
-	else
+	else if (node["bigSprite"])
 	{
 		_bigSpriteAlt = _bigSprite;
 	}
@@ -131,7 +138,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		if (_floorSpriteAlt > 72)
 			_floorSpriteAlt += modIndex;
 	}
-	else
+	else if (node["floorSprite"])
 	{
 		_floorSpriteAlt = _floorSprite;
 	}
@@ -163,12 +170,40 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		if (_hitSound > 54)
 			_hitSound += modIndex;
 	}
+	if (node["hitMissSound"])
+	{
+		_hitMissSound = node["hitMissSound"].as<int>(_hitMissSound);
+		// BATTLE.CAT: 55 entries
+		if (_hitMissSound > 54)
+			_hitMissSound += modIndex;
+	}
 	if (node["meleeSound"])
 	{
 		_meleeSound = node["meleeSound"].as<int>(_meleeSound);
 		// BATTLE.CAT: 55 entries
 		if (_meleeSound > 54)
 			_meleeSound += modIndex;
+	}
+	if (node["meleeMissSound"])
+	{
+		_meleeMissSound = node["meleeMissSound"].as<int>(_meleeMissSound);
+		// BATTLE.CAT: 55 entries
+		if (_meleeMissSound > 54)
+			_meleeMissSound += modIndex;
+	}
+	if (node["psiSound"])
+	{
+		_psiSound = node["psiSound"].as<int>(_psiSound);
+		// BATTLE.CAT: 55 entries
+		if (_psiSound > 54)
+			_psiSound += modIndex;
+	}
+	if (node["psiMissSound"])
+	{
+		_psiMissSound = node["psiMissSound"].as<int>(_psiMissSound);
+		// BATTLE.CAT: 55 entries
+		if (_psiMissSound > 54)
+			_psiMissSound += modIndex;
 	}
 	if (node["hitAnimation"])
 	{
@@ -177,12 +212,40 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		if (_hitAnimation > 55)
 			_hitAnimation += modIndex;
 	}
+	if (node["hitMissAnimation"])
+	{
+		_hitMissAnimation = node["hitMissAnimation"].as<int>(_hitMissAnimation);
+		// SMOKE.PCK: 56 entries
+		if (_hitMissAnimation > 55)
+			_hitMissAnimation += modIndex;
+	}
 	if (node["meleeAnimation"])
 	{
 		_meleeAnimation = node["meleeAnimation"].as<int>(_meleeAnimation);
 		// HIT.PCK: 4 entries
 		if (_meleeAnimation > 3)
 			_meleeAnimation += modIndex;
+	}
+	if (node["meleeMissAnimation"])
+	{
+		_meleeMissAnimation = node["meleeMissAnimation"].as<int>(_meleeMissAnimation);
+		// HIT.PCK: 4 entries
+		if (_meleeMissAnimation > 3)
+			_meleeMissAnimation += modIndex;
+	}
+	if (node["psiAnimation"])
+	{
+		_psiAnimation = node["psiAnimation"].as<int>(_psiAnimation);
+		// HIT.PCK: 4 entries
+		if (_psiAnimation > 3)
+			_psiAnimation += modIndex;
+	}
+	if (node["psiMissAnimation"])
+	{
+		_psiMissAnimation = node["psiMissAnimation"].as<int>(_psiMissAnimation);
+		// HIT.PCK: 4 entries
+		if (_psiMissAnimation > 3)
+			_psiMissAnimation += modIndex;
 	}
 	if (node["meleeHitSound"])
 	{
@@ -537,6 +600,107 @@ int RuleItem::getHitSound() const
 int RuleItem::getHitAnimation() const
 {
 	return _hitAnimation;
+}
+
+/**
+ * Gets the item's miss sound.
+ * @return The miss sound id.
+ */
+int RuleItem::getHitMissSound() const
+{
+	return _hitMissSound;
+}
+
+/**
+ * Gets the item's miss animation.
+ * @return The miss animation id.
+ */
+int RuleItem::getHitMissAnimation() const
+{
+	return _hitMissAnimation;
+}
+
+
+/**
+ * What sound does this weapon make when you swing this at someone?
+ * @return The weapon's melee attack sound.
+ */
+int RuleItem::getMeleeSound() const
+{
+	return _meleeSound;
+}
+
+/**
+ * What is the starting frame offset in hit.pck to use for the animation?
+ * @return the starting frame offset in hit.pck to use for the animation.
+ */
+int RuleItem::getMeleeAnimation() const
+{
+	return _meleeAnimation;
+}
+
+/**
+ * What sound does this weapon make when you miss a swing?
+ * @return The weapon's melee attack miss sound.
+ */
+int RuleItem::getMeleeMissSound() const
+{
+	return _meleeMissSound;
+}
+
+/**
+ * What is the starting frame offset in hit.pck to use for the animation?
+ * @return the starting frame offset in hit.pck to use for the animation.
+ */
+int RuleItem::getMeleeMissAnimation() const
+{
+	return _meleeMissAnimation;
+}
+
+/**
+ * What sound does this weapon make when you punch someone in the face with it?
+ * @return The weapon's melee hit sound.
+ */
+int RuleItem::getMeleeHitSound() const
+{
+	return _meleeHitSound;
+}
+
+
+/**
+ * Gets the item's psi hit sound.
+ * @return The hit sound id.
+ */
+int RuleItem::getPsiSound() const
+{
+	return _psiSound;
+}
+
+/**
+ * What is the starting frame offset in hit.pck to use for the animation?
+ * @return the starting frame offset in hit.pck to use for the animation.
+ */
+int RuleItem::getPsiAnimation() const
+{
+	return _psiAnimation;
+}
+
+/**
+ * Gets the item's psi miss sound.
+ * @return The miss sound id.
+ */
+int RuleItem::getPsiMissSound() const
+{
+	return _psiMissSound;
+}
+
+/**
+ * What is the starting frame offset in hit.pck to use for the animation?
+ * @return the starting frame offset in hit.pck to use for the animation.
+ */
+int RuleItem::getPsiMissAnimation() const
+{
+	return _psiMissAnimation;
 }
 
 /**
@@ -1242,24 +1406,6 @@ const std::string &RuleItem::getZombieUnit() const
 }
 
 /**
- * What sound does this weapon make when you swing this at someone?
- * @return The weapon's melee attack sound.
- */
-int RuleItem::getMeleeAttackSound() const
-{
-	return _meleeSound;
-}
-
-/**
- * What sound does this weapon make when you punch someone in the face with it?
- * @return The weapon's melee hit sound.
- */
-int RuleItem::getMeleeHitSound() const
-{
-	return _meleeHitSound;
-}
-
-/**
  * How much damage does this weapon do when you punch someone in the face with it?
  * @return The weapon's melee power.
  */
@@ -1275,15 +1421,6 @@ int RuleItem::getMeleePower() const
 bool RuleItem::isLOSRequired() const
 {
 	return _LOSRequired;
-}
-
-/**
- * What is the starting frame offset in hit.pck to use for the animation?
- * @return the starting frame offset in hit.pck to use for the animation.
- */
-int RuleItem::getMeleeAnimation() const
-{
-	return _meleeAnimation;
 }
 
 /**

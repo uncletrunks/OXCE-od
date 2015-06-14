@@ -48,8 +48,11 @@ private:
 	int _radius;
 	int _range;
 	bool _areaOfEffect, _lowerWeapon, _pistolWhip, _hit;
+
 	/// Calculates the effects of the explosion.
 	void explode();
+	/// Set new value to reference if new value is not equal -1.
+	void optValue(int &oldValue, int newValue) const;
 public:
 	/// Creates a new ExplosionBState class.
 	ExplosionBState(BattlescapeGame *parent, Position center, BattleActionType type, BattleItem *item, BattleUnit *unit, Tile *tile = 0, bool lowerWeapon = false, int range = 0);

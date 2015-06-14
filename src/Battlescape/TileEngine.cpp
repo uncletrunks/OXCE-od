@@ -2567,9 +2567,9 @@ bool TileEngine::psiAttack(BattleAction *action)
 		action->actor->addPsiSkillExp();
 		if (action->type == BA_PANIC)
 		{
-			int moraleLoss = (110-_save->getTile(action->target)->getUnit()->getBaseStats()->bravery);
+			int moraleLoss = (110-victim->getBaseStats()->bravery);
 			if (moraleLoss > 0)
-				_save->getTile(action->target)->getUnit()->moraleChange(-moraleLoss);
+				victim->moraleChange(-moraleLoss);
 		}
 		else if (action->type == BA_MINDCONTROL)
 		{
@@ -2603,6 +2603,41 @@ bool TileEngine::psiAttack(BattleAction *action)
 		}
 		return false;
 	}
+}
+
+/**
+ *  Attempts a melee attack action.
+ * @param action Pointer to an action.
+ * @return Whether it failed or succeeded.
+ */
+bool TileEngine::meleeAttack(BattleAction *action)
+{
+	BattleUnit *targetUnit = _save->getTile(action->target)->getUnit();
+	if (!targetUnit && action->target.z > 0)
+	{
+		targetUnit = _save->getTile(action->target - Position(0, 0, 1))->getUnit();
+	}
+
+	int hitChance = action->actor->getFiringAccuracy(BA_HIT, action->weapon);
+	if (targetUnit)
+	{
+		int arc = _save->getTileEngine()->getArcDirection(_save->getTileEngine()->getDirectionTo(targetUnit->getPositionVexels(), action->actor->getPositionVexels()), targetUnit->getDirection());
+		float penalty = 1.0f - arc * targetUnit->getArmor()->getMeleeDodgeBackPenalty() / 4.0f;
+		if (penalty > 0)
+		{
+			hitChance -= targetUnit->getArmor()->getMeleeDodge(targetUnit) * penalty;
+		}
+	}
+	if (!RNG::percent(hitChance))
+	{
+		return false;
+	}
+	else if (targetUnit && targetUnit->getOriginalFaction() == FACTION_HOSTILE &&
+			action->actor->getOriginalFaction() == FACTION_PLAYER)
+	{
+		action->actor->addMeleeExp();
+	}
+	return true;
 }
 
 /**

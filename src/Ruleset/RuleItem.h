@@ -88,7 +88,11 @@ private:
 	int _bigSprite, _bigSpriteAlt;
 	int _floorSprite, _floorSpriteAlt;
 	int _handSprite, _bulletSprite;
-	int _fireSound, _hitSound, _hitAnimation;
+	int _fireSound;
+	int _hitSound, _hitAnimation, _hitMissSound, _hitMissAnimation;
+	int _meleeSound, _meleeAnimation, _meleeMissSound, _meleeMissAnimation;
+	int _meleeHitSound;
+	int _psiSound, _psiAnimation, _psiMissSound, _psiMissAnimation;
 	int _power;
 	float _powerRangeReduction;
 	float _powerRangeThreshold;
@@ -114,7 +118,7 @@ private:
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
-	int _meleeSound, _meleePower, _meleeAnimation, _meleeHitSound, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
+	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	RuleStatBonus _damageBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 public:
 	/// Creates a blank item ruleset.
@@ -161,10 +165,36 @@ public:
 	int getBulletSprite() const;
 	/// Gets the item's fire sound.
 	int getFireSound() const;
+
 	/// Gets the item's hit sound.
 	int getHitSound() const;
 	/// Gets the item's hit animation.
 	int getHitAnimation() const;
+	/// Gets the item's hit sound.
+	int getHitMissSound() const;
+	/// Gets the item's hit animation.
+	int getHitMissAnimation() const;
+
+	/// What sound does this weapon make when you swing this at someone?
+	int getMeleeSound() const;
+	/// Get the melee animation starting frame (comes from hit.pck).
+	int getMeleeAnimation() const;
+	/// What sound does this weapon make when you miss a swing?
+	int getMeleeMissSound() const;
+	/// Get the melee miss animation starting frame (comes from hit.pck).
+	int getMeleeMissAnimation() const;
+	/// What sound does this weapon make when you punch someone in the face with it?
+	int getMeleeHitSound() const;
+
+	/// Gets the item's psi hit sound.
+	int getPsiSound() const;
+	/// Get the psi animation starting frame (comes from hit.pck).
+	int getPsiAnimation() const;
+	/// Gets the item's psi miss sound.
+	int getPsiMissSound() const;
+	/// Get the psi miss animation starting frame (comes from hit.pck).
+	int getPsiMissAnimation() const;
+
 	/// Gets the item's power.
 	int getPower() const;
 	/// Get additional power form unit statistics
@@ -313,16 +343,10 @@ public:
 	int getShotgunPellets() const;
 	/// Gets the weapon's zombie unit.
 	const std::string &getZombieUnit() const;
-	/// What sound does this weapon make when you swing this at someone?
-	int getMeleeAttackSound() const;
-	/// What sound does this weapon make when you punch someone in the face with it?
-	int getMeleeHitSound() const;
 	/// Ok, so this isn't a melee type weapon but we're using it for melee... how much damage should it do?
 	int getMeleePower() const;
 	/// Get multiplier of melee hit chance form unit statistics
 	int getMeleeMultiplier(const BattleUnit *unit) const;
-	/// Get the melee animation starting frame (comes from hit.pck).
-	int getMeleeAnimation() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
 	/// Is this item restricted to use underwater?
