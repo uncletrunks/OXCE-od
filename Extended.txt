@@ -69,7 +69,7 @@ Moving can trigger all close proxy not only one.[br/]
 Corpse explosion now can have bonus based on unit stats.[br/]
 Grenades now can explode at once without destroying each others.[br/]
 [br/]
-2.1:[br/]
+2.2:[br/]
 Option for custom sound and animation for miss attack and psi weapons.[br/]
 [br/]
 
