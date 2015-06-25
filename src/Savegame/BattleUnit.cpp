@@ -1307,7 +1307,7 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *
 	RuleItemUseCost cost;
 	if (item != 0)
 	{
-		bool flat = item->getFlatRate();
+		RuleItemUseCost flat = item->getFlatUse();
 		switch (actionType)
 		{
 			case BA_PRIME:
@@ -1325,6 +1325,7 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *
 				cost = item->getCostSnap();
 				break;
 			case BA_HIT:
+				flat = item->getFlatMelee();
 				cost = item->getCostMelee();
 				break;
 			case BA_LAUNCH:
@@ -1345,9 +1346,29 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *
 		}
 
 		// if it's a percentage, apply it to unit TUs
-		if (!flat && cost.Time)
+		if (!flat.Time && cost.Time)
 		{
 			cost.Time = std::max(1, (int)floor(getBaseStats()->tu * cost.Time / 100.0f));
+		}
+		// if it's a percentage, apply it to unit Energy
+		if (!flat.Energy && cost.Energy)
+		{
+			cost.Energy = std::max(1, (int)floor(getBaseStats()->stamina * cost.Energy / 100.0f));
+		}
+		// if it's a percentage, apply it to unit Morale
+		if (!flat.Morale && cost.Morale)
+		{
+			cost.Morale = std::max(1, (int)floor((110 - getBaseStats()->bravery) * cost.Morale / 100.0f));
+		}
+		// if it's a percentage, apply it to unit Health
+		if (!flat.Health && cost.Health)
+		{
+			cost.Health = std::max(1, (int)floor(getBaseStats()->health * cost.Health / 100.0f));
+		}
+		// if it's a percentage, apply it to unit Health
+		if (!flat.Stun && cost.Stun)
+		{
+			cost.Stun = std::max(1, (int)floor(getBaseStats()->health * cost.Stun / 100.0f));
 		}
 	}
 	return cost;

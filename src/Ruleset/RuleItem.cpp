@@ -31,29 +31,6 @@ namespace OpenXcom
 const float VexelsToTiles = 0.0625f;
 const float TilesToVexels = 16.0f;
 
-RuleItemUseCost RuleItemUseCost::getBackup(const RuleItemUseCost& b) const
-{
-	RuleItemUseCost n;
-	n.Time = Time >= 0 ? Time : b.Time;
-	n.Energy = Energy >= 0 ? Energy : b.Energy;
-	n.Morale = Morale >= 0 ? Morale : b.Morale;
-	n.Health = Health >= 0 ? Health : b.Health;
-	n.Stun = Stun >= 0 ? Stun : b.Stun;
-	return n;
-}
-void RuleItemUseCost::load(const YAML::Node& node, const std::string& name)
-{
-	Time = node["tu" + name].as<int>(Time);
-	if (const YAML::Node& cost = node["cost" + name])
-	{
-		Time = cost["time"].as<int>(Time);
-		Energy = cost["energy"].as<int>(Energy);
-		Morale = cost["morale"].as<int>(Morale);
-		Health = cost["health"].as<int>(Health);
-		Stun = cost["stun"].as<int>(Stun);
-	}
-}
-
 /**
  * Creates a blank ruleset for a certain type of item.
  * @param type String defining the type.
@@ -72,7 +49,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _allowSelfHeal(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
-	_recover(true), _liveAlien(false), _attraction(0), _flatRate(false), _flatPrime(false), _flatThrow(false), _arcingShot(false), _listOrder(0),
+	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _arcingShot(false), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
@@ -87,6 +64,107 @@ RuleItem::RuleItem(const std::string &type) :
  */
 RuleItem::~RuleItem()
 {
+}
+
+/**
+ * Get optional value (not equal -1) or default one.
+ * @param a Optional cost value.
+ * @param b Default cost value.
+ * @return Final cost.
+ */
+RuleItemUseCost RuleItem::getDefault(const RuleItemUseCost& a, const RuleItemUseCost& b) const
+{
+	RuleItemUseCost n;
+	n.Time = a.Time >= 0 ? a.Time : b.Time;
+	n.Energy = a.Energy >= 0 ? a.Energy : b.Energy;
+	n.Morale = a.Morale >= 0 ? a.Morale : b.Morale;
+	n.Health = a.Health >= 0 ? a.Health : b.Health;
+	n.Stun = a.Stun >= 0 ? a.Stun : b.Stun;
+	return n;
+}
+
+/**
+ * Load nullable bool value and store it in int (with null as -1).
+ * @param a value to set.
+ * @param node YAML node.
+ */
+void RuleItem::loadBool(int& a, const YAML::Node& node) const
+{
+	if (node)
+	{
+		if (node.IsNull())
+		{
+			a = -1;
+		}
+		else
+		{
+			a = node.as<bool>();
+		}
+	}
+}
+
+/**
+ * Load nullable int (with null as -1).
+ * @param a value to set.
+ * @param node YAML node.
+ */
+void RuleItem::loadInt(int& a, const YAML::Node& node) const
+{
+	if (node)
+	{
+		if (node.IsNull())
+		{
+			a = -1;
+		}
+		else
+		{
+			a = node.as<int>();
+		}
+	}
+}
+
+/**
+ * Load item use cost type (flat or percent).
+ * @param a Item use type.
+ * @param node YAML node.
+ * @param name Name of action type.
+ */
+void RuleItem::loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const
+{
+	if (const YAML::Node& cost = node["flat" + name])
+	{
+		if (cost.IsScalar())
+		{
+			loadBool(a.Time, cost);
+		}
+		else
+		{
+			loadBool(a.Time, cost["time"]);
+			loadBool(a.Energy, cost["energy"]);
+			loadBool(a.Morale, cost["morale"]);
+			loadBool(a.Health, cost["health"]);
+			loadBool(a.Stun, cost["stun"]);
+		}
+	}
+}
+
+/**
+ * Load item use cost.
+ * @param a Item use cost.
+ * @param node YAML node.
+ * @param name Name of action type.
+ */
+void RuleItem::loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const
+{
+	loadInt(a.Time, node["tu" + name]);
+	if (const YAML::Node& cost = node["cost" + name])
+	{
+		loadInt(a.Time, cost["time"]);
+		loadInt(a.Energy, cost["energy"]);
+		loadInt(a.Morale, cost["morale"]);
+		loadInt(a.Health, cost["health"]);
+		loadInt(a.Stun, cost["stun"]);
+	}
 }
 
 /**
@@ -324,15 +402,21 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_accuracyPanic = node["accuracyPanic"].as<int>(_accuracyPanic);
 	_accuracyThrow = node["accuracyThrow"].as<int>(_accuracyThrow);
 
-	_costAimed.load(node, "Aimed");
-	_costAuto.load(node, "Auto");
-	_costSnap.load(node, "Snap");
-	_costMelee.load(node, "Melee");
-	_costUse.load(node, "Use");
-	_costMind.load(node, "MindControl");
-	_costPanic.load(node, "Panic");
-	_costThrow.load(node, "Throw");
-	_costPrime.load(node, "Prime");
+	loadCost(_costAimed, node, "Aimed");
+	loadCost(_costAuto, node, "Auto");
+	loadCost(_costSnap, node, "Snap");
+	loadCost(_costMelee, node, "Melee");
+	loadCost(_costUse, node, "Use");
+	loadCost(_costMind, node, "MindControl");
+	loadCost(_costPanic, node, "Panic");
+	loadCost(_costThrow, node, "Throw");
+	loadCost(_costPrime, node, "Prime");
+
+	loadBool(_flatUse.Time, node["flatRate"]);
+	loadPercent(_flatUse, node, "Use");
+	loadPercent(_flatMelee, node, "Melee");
+	loadPercent(_flatThrow, node, "Throw");
+	loadPercent(_flatPrime, node, "Prime");
 
 	_clipSize = node["clipSize"].as<int>(_clipSize);
 	_specialChance = node["specialChance"].as<int>(_specialChance);
@@ -365,9 +449,6 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_recover = node["recover"].as<bool>(_recover);
 	_liveAlien = node["liveAlien"].as<bool>(_liveAlien);
 	_attraction = node["attraction"].as<int>(_attraction);
-	_flatRate = node["flatRate"].as<bool>(_flatRate);
-	_flatPrime = node["flatPrime"].as<bool>(_flatPrime);
-	_flatThrow = node["flatThrow"].as<bool>(_flatThrow);
 	_arcingShot = node["arcingShot"].as<bool>(_arcingShot);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_maxRange = node["maxRange"].as<int>(_maxRange);
@@ -820,7 +901,7 @@ RuleItemUseCost RuleItem::getCostAimed() const
  */
 RuleItemUseCost RuleItem::getCostAuto() const
 {
-	return _costAuto.getBackup(_costAimed);
+	return getDefault(_costAuto, _costAimed);
 }
 
 /**
@@ -829,7 +910,7 @@ RuleItemUseCost RuleItem::getCostAuto() const
  */
 RuleItemUseCost RuleItem::getCostSnap() const
 {
-	return _costSnap.getBackup(_costAimed);
+	return getDefault(_costSnap, _costAimed);
 }
 
 /**
@@ -863,7 +944,7 @@ RuleItemUseCost RuleItem::getCostUse() const
  */
 RuleItemUseCost RuleItem::getCostMind() const
 {
-	return _costMind.getBackup(_costUse);
+	return getDefault(_costMind, _costUse);
 }
 
 /**
@@ -872,7 +953,7 @@ RuleItemUseCost RuleItem::getCostMind() const
  */
 RuleItemUseCost RuleItem::getCostPanic() const
 {
-	return _costPanic.getBackup(_costUse);
+	return getDefault(_costPanic, _costUse);
 }
 
 /**
@@ -1226,30 +1307,39 @@ bool RuleItem::isAlien() const
 }
 
 /**
- * Returns whether this item charges a flat TU rate.
- * @return True if this item charges a flat TU rate.
+ * Returns whether this item charges a flat rate of use and attack cost.
+ * @return True if this item charges a flat rate of use and attack cost.
  */
-bool RuleItem::getFlatRate() const
+RuleItemUseCost RuleItem::getFlatUse() const
 {
-	return _flatRate;
+	return _flatUse;
 }
 
 /**
- * Returns whether this item charges a flat TU rate for tuPrime.
- * @return True if this item charges a flat TU rate for tuPrime.
+ * Returns whether this item charges a flat rate for costThrow.
+ * @return True if this item charges a flat rate for costThrow.
  */
-bool RuleItem::getFlatPrime() const
+RuleItemUseCost RuleItem::getFlatMelee() const
 {
-	return _flatPrime;
+	return getDefault(_flatMelee, _flatUse);
 }
 
 /**
- * Returns whether this item charges a flat TU rate for tuThrow.
- * @return True if this item charges a flat TU rate for tuThrow.
+ * Returns whether this item charges a flat rate for costThrow.
+ * @return True if this item charges a flat rate for costThrow.
  */
-bool RuleItem::getFlatThrow() const
+RuleItemUseCost RuleItem::getFlatThrow() const
 {
 	return _flatThrow;
+}
+
+/**
+ * Returns whether this item charges a flat rate for costPrime.
+ * @return True if this item charges a flat rate for costPrime.
+ */
+RuleItemUseCost RuleItem::getFlatPrime() const
+{
+	return _flatPrime;
 }
 
 /**

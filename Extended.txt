@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 2.2[/b]
+[b]Mod version 2.3[/b]
 OpenXcom version: Nightly [commitOriginDate/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended commit: [commit/][br/]
@@ -72,6 +72,9 @@ Grenades now can explode at once without destroying each others.[br/]
 2.2:[br/]
 Option for custom sound and animation for miss attack and psi weapons.[br/]
 [br/]
+2.3:[br/]
+Option for defining percent of all action cost stats. Old use of `flatPrime` and `flatThrow` is deprecated.[br/]
+[br/]
 
 
 [br/][br/]
@@ -131,8 +134,23 @@ items:
     costPrime:
       #cost of Prime granade.
       #same propertes like `costAimed`.
-    flatPrime: false     #changes how `tuPrime` behaves (percent or flat value).
-    flatThrow: false     #changes how `tuThrow` behaves (percent or flat value).
+    flatUse:
+      #change how cost of all attacks and use work (flat or percent values).
+      time: true      #time units cost is flat or %. Alias of `flatRate`.
+      energy: true    #energy unit cost is flat or %. Default `true`.
+      morale: true    #morale cost is flat or reduced by bravery. Default `true`.
+      health: true    #health points cost is flat or %. Default `true`.
+      stun: false     #stun damage applied by atack is flat or % of max health. Default `true`.
+    flatMelee:
+      #optional for `costMelee` in range weapons.
+      #same propertes like `flatUse`.
+      #use of null (aka `~`) will cause fall back to `flatUse` values.
+    flatThrow:
+      #changes how `costThrow` behaves (flat or percent values).
+      #same propertes like `flatUse`.
+    flatPrime:
+      #changes how `costPrime` behaves (flat or percent values).
+      #same propertes like `flatUse`.
     damageBonus: #used by ammo.
       #each bonus can be writen as: `s: x`, `s: [x]`, `s: [x, y]` or `s: [x, y, z]`.
       #where each value represents coefficient of polynomial `x * s + y * s^2 + z * s^3`.

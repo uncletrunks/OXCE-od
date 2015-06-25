@@ -65,10 +65,6 @@ struct RuleItemUseCost
 		Stun += cost.Stun;
 		return *this;
 	}
-	/// Get final value of cost.
-	RuleItemUseCost getBackup(const RuleItemUseCost& b) const;
-	/// Load values from yaml.
-	void load(const YAML::Node& node, const std::string& name);
 };
 
 /**
@@ -114,12 +110,24 @@ private:
 	int _aiUseDelay;
 	bool _recover, _liveAlien;
 	int _attraction;
-	bool _flatRate, _flatPrime, _flatThrow, _arcingShot;
+	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime;
+	bool _arcingShot;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	RuleStatBonus _damageBonus, _accuracyMulti, _meleeMulti, _throwMulti;
+
+	/// Get final value of cost.
+	RuleItemUseCost getDefault(const RuleItemUseCost& a, const RuleItemUseCost& b) const;
+	/// Load bool as int from yaml.
+	void loadBool(int& a, const YAML::Node& node) const;
+	/// Load int from yaml.
+	void loadInt(int& a, const YAML::Node& node) const;
+	/// Load RuleItemUseCost from yaml.
+	void loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
+	/// Load RuleItemUseCost as bool from yaml.
+	void loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
 public:
 	/// Creates a blank item ruleset.
 	RuleItem(const std::string &type);
@@ -304,11 +312,13 @@ public:
 	/// Checks if this a live alien.
 	bool isAlien() const;
 	/// Should we charge a flat rate?
-	bool getFlatRate() const;
-	/// Should we charge a flat rate of tuPrime?
-	bool getFlatPrime() const;
-	/// Should we charge a flat rate of tuThrow?
-	bool getFlatThrow() const;
+	RuleItemUseCost getFlatUse() const;
+	/// Should we charge a flat rate of costMelee?
+	RuleItemUseCost getFlatMelee() const;
+	/// Should we charge a flat rate of costThrow?
+	RuleItemUseCost getFlatThrow() const;
+	/// Should we charge a flat rate of costPrime?
+	RuleItemUseCost getFlatPrime() const;
 	/// Should this weapon arc?
 	bool getArcingShot() const;
 	/// How much do aliens want this thing?
