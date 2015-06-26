@@ -28,6 +28,7 @@
 #include "BaseView.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/BaseFacility.h"
+#include "../Savegame/ItemContainer.h"
 #include "../Ruleset/RuleBaseFacility.h"
 #include "../Savegame/SavedGame.h"
 #include "../Menu/ErrorMessageState.h"
@@ -139,6 +140,17 @@ void PlaceFacilityState::viewClick(Action *)
 	}
 	else
 	{
+		const std::map<std::string, std::pair<int, int> > &itemCost = _rule->getBuildCostItems();
+		for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+		{
+			int needed = i->second.first - _base->getItems()->getItem(i->first);
+			if (needed > 0)
+			{
+				_game->popState();
+				_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_ITEMS").arg(tr(i->first)).arg(needed), _palette, _game->getRuleset()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getRuleset()->getInterface("placeFacility")->getElement("errorPalette")->color));
+				return;
+			}
+		}
 		BaseFacility *fac = new BaseFacility(_rule, _base);
 		fac->setX(_view->getGridX());
 		fac->setY(_view->getGridY());
@@ -150,6 +162,10 @@ void PlaceFacilityState::viewClick(Action *)
 			_view->reCalcQueuedBuildings();
 		}
 		_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _rule->getBuildCost());
+		for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+		{
+			_base->getItems()->removeItem(i->first, i->second.first);
+		}
 		_game->popState();
 	}
 }

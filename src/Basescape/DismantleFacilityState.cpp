@@ -27,6 +27,7 @@
 #include "../Interface/Text.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/BaseFacility.h"
+#include "../Savegame/ItemContainer.h"
 #include "../Basescape/BaseView.h"
 #include "../Ruleset/RuleBaseFacility.h"
 #include "../Savegame/SavedGame.h"
@@ -98,10 +99,23 @@ void DismantleFacilityState::btnOkClick(Action *)
 {
 	if (!_fac->getRules()->isLift())
 	{
+		const std::map<std::string, std::pair<int, int> > &itemCost = _fac->getRules()->getBuildCostItems();
+
 		// Give refund if this is an unstarted, queued build.
 		if (_fac->getBuildTime() > _fac->getRules()->getBuildTime())
 		{
 			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _fac->getRules()->getBuildCost());
+			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+			{
+				_base->getItems()->addItem(i->first, i->second.first);
+			}
+		}
+		else
+		{
+			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+			{
+				_base->getItems()->addItem(i->first, i->second.second);
+			}
 		}
 
 		for (std::vector<BaseFacility*>::iterator i = _base->getFacilities()->begin(); i != _base->getFacilities()->end(); ++i)

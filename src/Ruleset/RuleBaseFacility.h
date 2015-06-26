@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <yaml-cpp/yaml.h>
 
 namespace OpenXcom
@@ -40,6 +41,7 @@ private:
 	int _spriteShape, _spriteFacility;
 	bool _lift, _hyper, _mind, _grav;
 	int _size, _buildCost, _buildTime, _monthlyCost;
+	std::map<std::string, std::pair<int, int> > _buildCostItems;
 	int _storage, _personnel, _aliens, _crafts, _labs, _workshops, _psiLabs;
 	int _radarRange, _radarChance, _defense, _hitRatio, _fireSound, _hitSound;
 	std::string _mapName;
@@ -75,6 +77,8 @@ public:
 	bool isGravShield() const;
 	/// Gets the facility's construction cost.
 	int getBuildCost() const;
+	/// Gets the facility's construction cost in items, `first` is build cost, `second` is refund.
+	const std::map<std::string, std::pair<int, int> >& getBuildCostItems() const;
 	/// Gets the facility's construction time.
 	int getBuildTime() const;
 	/// Gets the facility's monthly cost.

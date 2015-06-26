@@ -74,6 +74,7 @@ Option for custom sound and animation for miss attack and psi weapons.[br/]
 [br/]
 2.3:[br/]
 Option for defining percent of all action cost stats. Old use of `flatPrime` and `flatThrow` is deprecated.[br/]
+Facilities can now require items to build.[br/]
 [br/]
 
 
@@ -379,6 +380,10 @@ alienRaces:
 [code]
 facilities:
   - type: STR_SOME_FACILITY
+    buildCostItems:
+      STR_ITEM:
+        build: 10           #how many items of type `STR_ITEM` are require to build.
+        refund: 6           #how many items are returned when facility is dismantled.
     provideBaseFunc: [ A ]  #List of custom IDs that this bulding provide for base.
     requiresBaseFunc: [ ]   #List of custom IDs that are require to build this building in base.
     trainingRooms: 0        #Number of solder that can be train in that building, require langue strings.
@@ -418,6 +423,7 @@ ai:
 extraStrings:
   - type: en-US
     strings:
+      STR_NOT_ENOUGH_ITEMS: "Lack of {0} {1} items"   #required when using `buildCostItems` in `facilities`. `{0}` is name of item, `{1}` is number of item we don't have.
       STR_PHYSICAL_TRAINING: "Physical Training"      #required when using `trainingRooms` in `facilities`.
       STR_TRAINING: "Training"                        #required when using `trainingRooms` in `facilities`.
       STR_REMAINING_TRAINING_FACILITY_CAPACITY: "REMAINING TRAINING CAPACITY> {ALT}{0}" #required when using `trainingRooms` in `facilities`.

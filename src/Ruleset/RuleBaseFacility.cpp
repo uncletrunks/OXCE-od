@@ -107,6 +107,26 @@ void RuleBaseFacility::load(const YAML::Node &node, int modIndex, int listOrder)
 	{
 		_listOrder = listOrder;
 	}
+	if (const YAML::Node &items = node["buildCostItems"])
+	{
+		for (YAML::const_iterator i = items.begin(); i != items.end(); ++i)
+		{
+			std::string id = i->first.as<std::string>();
+			std::pair<int, int> &cost = _buildCostItems[id];
+
+			cost.first = i->second["build"].as<int>(cost.first);
+			cost.second = i->second["refund"].as<int>(cost.second);
+
+			if (cost.first < cost.second)
+			{
+				cost.second = cost.first;
+			}
+			if (cost.first <= 0)
+			{
+				_buildCostItems.erase(id);
+			}
+		}
+	}
 }
 
 /**
@@ -225,6 +245,15 @@ bool RuleBaseFacility::isGravShield() const
 int RuleBaseFacility::getBuildCost() const
 {
 	return _buildCost;
+}
+
+/**
+ * Gets the amount of items that this facility require to build on a base or amount of items returned after dismantling.
+ * @return The building cost in items.
+ */
+const std::map<std::string, std::pair<int, int> >& RuleBaseFacility::getBuildCostItems() const
+{
+	return _buildCostItems;
 }
 
 /**
