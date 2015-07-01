@@ -49,7 +49,7 @@ class CivilianBAIState;
 
 enum UnitStatus {STATUS_STANDING, STATUS_WALKING, STATUS_FLYING, STATUS_TURNING, STATUS_AIMING, STATUS_COLLAPSING, STATUS_DEAD, STATUS_UNCONSCIOUS, STATUS_PANICKING, STATUS_BERSERK, STATUS_TIME_OUT};
 enum UnitFaction {FACTION_PLAYER, FACTION_HOSTILE, FACTION_NEUTRAL};
-enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LEFTARM, BODYPART_RIGHTLEG, BODYPART_LEFTLEG};
+enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LEFTARM, BODYPART_RIGHTLEG, BODYPART_LEFTLEG, BODYPART_MAX};
 
 
 /**
@@ -77,8 +77,8 @@ private:
 	std::vector<Tile *> _visibleTiles;
 	int _tu, _energy, _health, _morale, _stunlevel;
 	bool _kneeled, _floating, _dontReselect;
-	int _currentArmor[5];
-	int _fatalWounds[6];
+	int _currentArmor[SIDE_MAX];
+	int _fatalWounds[BODYPART_MAX];
 	int _fire;
 	std::vector<BattleItem*> _inventory;
 	BattleItem* _specWeapon[SPEC_WEAPON_MAX];

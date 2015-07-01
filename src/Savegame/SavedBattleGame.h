@@ -215,7 +215,7 @@ public:
 	/// Carries out new turn preparations.
 	void prepareNewTurn();
 	/// Revives unconscious units (healthcheck).
-	void reviveUnconsciousUnits();
+	void reviveUnconsciousUnits(bool noTU = false);
 	/// Removes the body item that corresponds to the unit.
 	void removeUnconsciousBodyItem(BattleUnit *bu);
 	/// Sets or tries to set a unit of a certain size on a certain position of the map.

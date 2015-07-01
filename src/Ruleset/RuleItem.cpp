@@ -438,6 +438,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_energyRecovery = node["energyRecovery"].as<int>(_energyRecovery);
 	_moraleRecovery = node["moraleRecovery"].as<int>(_moraleRecovery);
 	_painKillerRecovery = node["painKillerRecovery"].as<float>(_painKillerRecovery);
+	_medikitType = (BattleMediKitType)node["medikitType"].as<int>(_medikitType);
 
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);
 	_armor = node["armor"].as<int>(_armor);
@@ -1187,6 +1188,14 @@ bool RuleItem::getAllowSelfHeal() const
 	return _allowSelfHeal;
 }
 
+/**
+ * Gets the medikit type of how it operate.
+ * @return Type of medikit.
+ */
+BattleMediKitType RuleItem::getMediKitType() const
+{
+	return _medikitType;
+}
 /**
  * Returns the item's max explosion radius. Small explosions don't have a restriction.
  * Larger explosions are restricted using a formula, with a maximum of radius 10 no matter how large the explosion is.

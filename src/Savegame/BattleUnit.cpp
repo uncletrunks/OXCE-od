@@ -119,7 +119,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_currentArmor[SIDE_RIGHT] = _armor->getSideArmor();
 	_currentArmor[SIDE_REAR] = _armor->getRearArmor();
 	_currentArmor[SIDE_UNDER] = _armor->getUnderArmor();
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < BODYPART_MAX; ++i)
 		_fatalWounds[i] = 0;
 	for (int i = 0; i < 5; ++i)
 		_cache[i] = 0;
@@ -222,7 +222,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	_currentArmor[SIDE_RIGHT] = _armor->getSideArmor();
 	_currentArmor[SIDE_REAR] = _armor->getRearArmor();
 	_currentArmor[SIDE_UNDER] = _armor->getUnderArmor();
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < BODYPART_MAX; ++i)
 		_fatalWounds[i] = 0;
 	for (int i = 0; i < 5; ++i)
 		_cache[i] = 0;
@@ -294,9 +294,9 @@ void BattleUnit::load(const YAML::Node &node)
 	_morale = node["morale"].as<int>(_morale);
 	_kneeled = node["kneeled"].as<bool>(_kneeled);
 	_floating = node["floating"].as<bool>(_floating);
-	for (int i=0; i < 5; i++)
+	for (int i=0; i < SIDE_MAX; i++)
 		_currentArmor[i] = node["armor"][i].as<int>(_currentArmor[i]);
-	for (int i=0; i < 6; i++)
+	for (int i=0; i < BODYPART_MAX; i++)
 		_fatalWounds[i] = node["fatalWounds"][i].as<int>(_fatalWounds[i]);
 	_fire = node["fire"].as<int>(_fire);
 	_expBravery = node["expBravery"].as<int>(_expBravery);
@@ -355,8 +355,8 @@ YAML::Node BattleUnit::save() const
 	node["morale"] = _morale;
 	node["kneeled"] = _kneeled;
 	node["floating"] = _floating;
-	for (int i=0; i < 5; i++) node["armor"].push_back(_currentArmor[i]);
-	for (int i=0; i < 6; i++) node["fatalWounds"].push_back(_fatalWounds[i]);
+	for (int i=0; i < SIDE_MAX; i++) node["armor"].push_back(_currentArmor[i]);
+	for (int i=0; i < BODYPART_MAX; i++) node["fatalWounds"].push_back(_fatalWounds[i]);
 	node["fire"] = _fire;
 	node["expBravery"] = _expBravery;
 	node["expReactions"] = _expReactions;
@@ -1654,7 +1654,7 @@ int BattleUnit::getArmor(UnitSide side) const
 int BattleUnit::getFatalWounds() const
 {
 	int sum = 0;
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < BODYPART_MAX; ++i)
 		sum += _fatalWounds[i];
 	return sum;
 }

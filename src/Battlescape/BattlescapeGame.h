@@ -215,7 +215,11 @@ public:
 	/// Cleans up all the deleted states.
 	void cleanupDeleted();
 	/// Get the depth of the saved game.
-	const int getDepth() const;
+	int getDepth() const;
+	/// Play sound on battlefield (with direction).
+	void playSound(int sound, const Position &pos);
+	/// Play sound on battlefield.
+	void playSound(int sound);
 };
 
 }

@@ -1759,7 +1759,7 @@ void SavedBattleGame::prepareNewTurn()
  * all directions around the tile are searched for a free tile to place the unit in.
  * If no free tile is found the unit stays unconscious.
  */
-void SavedBattleGame::reviveUnconsciousUnits()
+void SavedBattleGame::reviveUnconsciousUnits(bool noTU)
 {
 	for (std::vector<BattleUnit*>::iterator i = getUnits()->begin(); i != getUnits()->end(); ++i)
 	{
@@ -1784,6 +1784,7 @@ void SavedBattleGame::reviveUnconsciousUnits()
 					(*i)->turn(false); // makes the unit stand up again
 					(*i)->kneel(false);
 					(*i)->setCache(0);
+					if (noTU) (*i)->setTimeUnits(0);
 					getTileEngine()->calculateFOV((*i));
 					getTileEngine()->calculateUnitLighting();
 					removeUnconsciousBodyItem((*i));

@@ -2641,6 +2641,52 @@ bool TileEngine::meleeAttack(BattleAction *action)
 }
 
 /**
+ * Try using medikit heal ability.
+ * @param action
+ * @param target
+ * @param bodyPart
+ */
+void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyPart)
+{
+	RuleItem *rule = action->weapon->getRules();
+
+	target->heal(bodyPart, rule->getWoundRecovery(), rule->getHealthRecovery());
+	action->weapon->setHealQuantity(action->weapon->getHealQuantity() - 1);
+
+	_save->getBattleGame()->playSound(action->weapon->getRules()->getHitSound());
+}
+
+/**
+ * Try using medikit stimulant ability.
+ * @param action
+ * @param target
+ */
+void TileEngine::medikitStimulant(BattleAction *action, BattleUnit *target)
+{
+	RuleItem *rule = action->weapon->getRules();
+
+	target->stimulant(rule->getEnergyRecovery(), rule->getStunRecovery());
+	action->weapon->setStimulantQuantity(action->weapon->getStimulantQuantity() - 1);
+
+	_save->getBattleGame()->playSound(action->weapon->getRules()->getHitSound());
+}
+
+/**
+ * Try using medikit pain killer ability.
+ * @param action
+ * @param target
+ */
+void TileEngine::medikitPainKiller(BattleAction *action, BattleUnit *target)
+{
+	RuleItem *rule = action->weapon->getRules();
+
+	target->painKillers(rule->getMoraleRecovery(), rule->getPainKillerRecovery());
+	action->weapon->setPainKillerQuantity(action->weapon->getPainKillerQuantity() - 1);
+
+	_save->getBattleGame()->playSound(action->weapon->getRules()->getHitSound());
+}
+
+/**
  * Applies gravity to a tile. Causes items and units to drop.
  * @param t Tile.
  * @return Tile where the items end up in eventually.

@@ -140,6 +140,12 @@ public:
 	bool psiAttack(BattleAction *action);
 	/// Attempts a melee attack action.
 	bool meleeAttack(BattleAction *action);
+	/// Try using medikit heal ability.
+	void medikitHeal(BattleAction *action, BattleUnit *target, int bodyPart);
+	/// Try using medikit stimulant ability.
+	void medikitStimulant(BattleAction *action, BattleUnit *target);
+	/// Try using medikit pain killer ability.
+	void medikitPainKiller(BattleAction *action, BattleUnit *target);
 	/// Applies gravity to anything that occupy this tile.
 	Tile *applyGravity(Tile *t);
 	/// Returns melee validity between two units.

@@ -248,6 +248,7 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		else if (_action->type == BA_USE && weapon->getBattleType() == BT_MEDIKIT)
 		{
 			BattleUnit *targetUnit = 0;
+			TileEngine *tileEngine = _game->getSavedGame()->getSavedBattle()->getTileEngine();
 			const std::vector<BattleUnit*> *units = _game->getSavedGame()->getSavedBattle()->getUnits();
 			for (std::vector<BattleUnit*>::const_iterator i = units->begin(); i != units->end() && !targetUnit; ++i)
 			{
@@ -259,13 +260,13 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			}
 			if (!targetUnit)
 			{
-				if (_game->getSavedGame()->getSavedBattle()->getTileEngine()->validMeleeRange(
+				if (tileEngine->validMeleeRange(
 					_action->actor->getPosition(),
 					_action->actor->getDirection(),
 					_action->actor,
 					0, &_action->target, false))
 				{
-					Tile * tile (_game->getSavedGame()->getSavedBattle()->getTile(_action->target));
+					Tile *tile = _game->getSavedGame()->getSavedBattle()->getTile(_action->target);
 					if (tile != 0 && tile->getUnit() && tile->getUnit()->isWoundable())
 					{
 						targetUnit = tile->getUnit();
@@ -279,7 +280,52 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			if (targetUnit)
 			{
 				_game->popState();
-				_game->pushState (new MedikitState(targetUnit, _action));
+				int type = weapon->getMediKitType();
+				if (type)
+				{
+					if ((type == BMT_HEAL && _action->weapon->getHealQuantity() > 0) ||
+						(type == BMT_STIMULANT && _action->weapon->getStimulantQuantity() > 0) ||
+						(type == BMT_PAINKILLER && _action->weapon->getPainKillerQuantity() > 0))
+					{
+						if (_action->spendTU(&_action->result))
+						{
+							switch (type)
+							{
+							case BMT_HEAL:
+								if (targetUnit->getFatalWounds())
+								{
+									for (int i = 0; i < BODYPART_MAX; ++i)
+									{
+										if (targetUnit->getFatalWound(i))
+										{
+											tileEngine->medikitHeal(_action, targetUnit, i);
+											break;
+										}
+									}
+								}
+								else
+								{
+									tileEngine->medikitHeal(_action, targetUnit, BODYPART_TORSO);
+								}
+								break;
+							case BMT_STIMULANT:
+								tileEngine->medikitStimulant(_action, targetUnit);
+								break;
+							case BMT_PAINKILLER:
+								tileEngine->medikitPainKiller(_action, targetUnit);
+								break;
+							}
+						}
+					}
+					else
+					{
+						_action->result = "STR_NO_USES_LEFT";
+					}
+				}
+				else
+				{
+					_game->pushState(new MedikitState(targetUnit, _action, tileEngine));
+				}
 			}
 			else
 			{

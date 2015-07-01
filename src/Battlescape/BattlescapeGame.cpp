@@ -757,7 +757,7 @@ void BattlescapeGame::handleNonTargetAction()
 				_parentState->warning(_currentAction.result);
 				_currentAction.result = "";
 			}
-			_save->reviveUnconsciousUnits();
+			_save->reviveUnconsciousUnits(true);
 		}
 		if (_currentAction.type == BA_HIT)
 		{
@@ -2237,9 +2237,32 @@ void BattlescapeGame::cleanupDeleted()
  * Gets the depth of the battlescape.
  * @return the depth of the battlescape.
  */
-const int BattlescapeGame::getDepth() const
+int BattlescapeGame::getDepth() const
 {
 	return _save->getDepth();
 }
+
+/**
+ * Play sound on battlefield (with direction).
+ */
+void BattlescapeGame::playSound(int sound, const Position &pos)
+{
+	if (sound != -1)
+	{
+		_parentState->getGame()->getResourcePack()->getSoundByDepth(_save->getDepth(), sound)->play(-1, _parentState->getMap()->getSoundAngle(pos));
+	}
+}
+
+/**
+ * Play sound on battlefield.
+ */
+void BattlescapeGame::playSound(int sound)
+{
+	if (sound != -1)
+	{
+		_parentState->getGame()->getResourcePack()->getSoundByDepth(_save->getDepth(), sound)->play();
+	}
+}
+
 
 }

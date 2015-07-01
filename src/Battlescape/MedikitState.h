@@ -29,6 +29,7 @@ class MedikitView;
 class Text;
 class BattleItem;
 class BattleUnit;
+class TileEngine;
 struct BattleAction;
 
 /**
@@ -40,9 +41,10 @@ class MedikitState : public State
 	MedikitView *_medikitView;
 	Text *_pkText, *_stimulantTxt,  *_healTxt, *_partTxt, *_woundTxt;
 	InteractiveSurface *_endButton, *_stimulantButton, *_pkButton, *_healButton;
-	BattleUnit *_targetUnit, *_unit;
+	BattleUnit *_targetUnit;
 	BattleItem *_item;
 	BattleAction *_action;
+	TileEngine *_tileEngine;
 	/// Handler for the end button.
 	void onEndClick(Action *action);
 	/// Handler for the heal button.
@@ -55,7 +57,7 @@ class MedikitState : public State
 	void update();
 public:
 	/// Creates the MedikitState.
-	MedikitState(BattleUnit *targetUnit, BattleAction *action);
+	MedikitState(BattleUnit *targetUnit, BattleAction *action, TileEngine *tile);
 	/// Handler for right-clicking anything.
 	void handle(Action *action);
 };

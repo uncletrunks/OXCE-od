@@ -75,6 +75,7 @@ Option for custom sound and animation for miss attack and psi weapons.[br/]
 2.3:[br/]
 Option for defining percent of all action cost stats. Old use of `flatPrime` and `flatThrow` is deprecated.[br/]
 Facilities can now require items to build.[br/]
+Medikit can now be used without UI and can use `hitSound`.[br/]
 [br/]
 
 
@@ -240,6 +241,7 @@ items:
     moraleRecovery: 10    #amount of recovered morale by medkit. Defailt `0`.
     painKillerRecovery: 0 #how much missing health convert to morale. Default `1.0`.
     allowSelfHeal: true   #can medikit target user.
+    medikitType: 0        #change how medikit wroks, `0` default with UI, `1` fast heal, `2` fast stimulant, `3` fast pain killer.
     bigSpriteAlt: 1       #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
     floorSpriteAlt: 1     #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
     hitMissSound: 0       #override `hitSound` when any psi attack was unsuccessful.
@@ -430,6 +432,7 @@ extraStrings:
       STR_NOT_ENOUGH_MORALE: "You lack discipline!"   #required when using item morale use cost.
       STR_NOT_ENOUGH_HEALTH: "Not enough blood!"      #required when using item health use cost.
       STR_NOT_ENOUGH_STUN: "Too much pain!"           #required when using item stun use cost.
+      STR_NO_USES_LEFT: "You can't use medi-kit"      #required when using `medikitType`.
 [/code]
 
 [br/][br/]

@@ -222,9 +222,9 @@ void ExplosionBState::init()
 			_parent->setStateInterval(BattlescapeState::DEFAULT_ANIM_SPEED/2);
 			// explosion sound
 			if (_power <= 80)
-				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::SMALL_EXPLOSION)->play();
+				_parent->playSound(ResourcePack::SMALL_EXPLOSION);
 			else
-				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::LARGE_EXPLOSION)->play();
+				_parent->playSound(ResourcePack::LARGE_EXPLOSION);
 
 			_parent->getMap()->getCamera()->centerOnPosition(t->getPosition(), false);
 		}
@@ -311,11 +311,8 @@ void ExplosionBState::init()
 		{
 			_parent->getMap()->getCamera()->centerOnPosition(t->getPosition(), false);
 		}
-		if (sound != -1)
-		{
-			// bullet hit sound
-			_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), sound)->play(-1, _parent->getMap()->getSoundAngle(_action.target));
-		}
+		// bullet hit sound
+		_parent->playSound(sound, _action.target);
 	}
 }
 
@@ -387,10 +384,7 @@ void ExplosionBState::explode()
 				optValue(sound, ammo->getRules()->getMeleeHitSound());
 			}
 		}
-		if (sound != -1)
-		{
-			_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), sound)->play(-1, _parent->getMap()->getSoundAngle(_action.target));
-		}
+		_parent->playSound(sound, _action.target);
 	}
 	// after the animation is done, the real explosion/hit takes place
 	if (_item)
@@ -433,6 +427,8 @@ void ExplosionBState::explode()
 
 	// now check for new casualties
 	_parent->checkForCasualties(_item, _unit, false, terrainExplosion);
+	// revive units if damage could give hp or reduce stun
+	_parent->getSave()->reviveUnconsciousUnits(true);
 
 	// if this explosion was caused by a unit shooting, now it's the time to put the gun down
 	if (_unit && !_unit->isOut() && _lowerWeapon)
