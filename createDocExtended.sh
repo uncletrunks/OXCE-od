@@ -12,6 +12,8 @@ sed \
   -e 's/\[commit\/\]/'$commitID'/g' \
   -e 's/\[commitOriginDate\/\]/'$openXcomDate'/g' \
   -e 's/\[commitOrigin\/\]/'$openXcomID'/g' \
+  -e 's/\[examples\]//g' \
+  -e 's/\[\/examples\]//g' \
   ../Extended.txt > Readme.txt
 sed \
   -e 's/  /\&nbsp;\&nbsp;/g' \
@@ -26,6 +28,8 @@ sed \
   -e 's/\[commit\/\]/'$commitID'/g' \
   -e 's/\[commitOriginDate\/\]/'$openXcomDate'/g' \
   -e 's/\[commitOrigin\/\]/'$openXcomID'/g' \
+  -e 's/\[examples\]//g' \
+  -e 's/\[\/examples\]//g' \
   ../Extended.txt > OpenXcomExWeb.txt
 
 sed \
@@ -37,4 +41,5 @@ sed \
   -e 's/\[commit\/\]/'$commitID'/g' \
   -e 's/\[commitOriginDate\/\]/'$openXcomDate'/g' \
   -e 's/\[commitOrigin\/\]/'$openXcomID'/g' \
+  -e '/\[examples\]/{$!{:re;N;s/\[\/examples\]//;ty;bre;:y;d;}}' \
   ../Extended.txt > OpenXcomExForum.txt

@@ -78,7 +78,7 @@ Facilities can now require items to build.[br/]
 Medikit can now be used without UI and can use `hitSound`.[br/]
 [br/]
 
-
+[examples]
 [br/][br/]
 [i]New ruleset[/i]
 
@@ -434,6 +434,7 @@ extraStrings:
       STR_NOT_ENOUGH_STUN: "Too much pain!"           #required when using item stun use cost.
       STR_NO_USES_LEFT: "You can't use medi-kit"      #required when using `medikitType`.
 [/code]
+[/examples]
 
 [br/][br/]
 [i]Links[/i]
