@@ -1085,12 +1085,37 @@ void SavedBattleGame::randomizeItemLocations(Tile *t)
 		}
 	}
 }
+
+/**
+ * Add item to delete list, usually when removing item form game or build in weapons
+ * @param item Item to delete after game end.
+ */
+void SavedBattleGame::deleteList(BattleItem* item)
+{
+	_deleted.push_back(item);
+}
+
 /**
  * Removes an item from the game. Eg. when ammo item is depleted.
  * @param item The Item to remove.
  */
 void SavedBattleGame::removeItem(BattleItem *item)
 {
+	bool find = false;
+	for (std::vector<BattleItem*>::iterator i = _items.begin(); i != _items.end(); ++i)
+	{
+		if (*i == item)
+		{
+			find = true;
+			_items.erase(i);
+			break;
+		}
+	}
+	if (!find)
+	{
+		return;
+	}
+
 	// due to strange design, the item has to be removed from the tile it is on too (if it is on a tile)
 	Tile *t = item->getTile();
 	BattleUnit *b = item->getOwner();
@@ -1117,30 +1142,7 @@ void SavedBattleGame::removeItem(BattleItem *item)
 		}
 	}
 
-	for (std::vector<BattleItem*>::iterator i = _items.begin(); i != _items.end(); ++i)
-	{
-		if (*i == item)
-		{
-			_items.erase(i);
-			break;
-		}
-	}
-
-	_deleted.push_back(item);
-	/*
-	for (int i = 0; i < _mapsize_x * _mapsize_y * _mapsize_z; ++i)
-	{
-		for (std::vector<BattleItem*>::iterator it = _tiles[i]->getInventory()->begin(); it != _tiles[i]->getInventory()->end(); )
-		{
-			if ((*it) == item)
-			{
-				it = _tiles[i]->getInventory()->erase(it);
-				return;
-			}
-			++it;
-		}
-	}
-	*/
+	deleteList(item);
 }
 
 /**

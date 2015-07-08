@@ -436,6 +436,12 @@ void ExplosionBState::explode()
 		_unit->aim(false);
 		_unit->setCache(0);
 	}
+
+	if (_item && (_item->getRules()->getBattleType() == BT_GRENADE || _item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
+	{
+		_parent->getSave()->removeItem(_item);
+	}
+
 	_parent->getMap()->cacheUnits();
 	_parent->popState();
 
@@ -446,18 +452,6 @@ void ExplosionBState::explode()
 		Position p = t->getPosition().toVexel();
 		p += Position(8,8,0);
 		_parent->statePushFront(new ExplosionBState(_parent, p, BA_NONE, 0, _unit, t));
-	}
-
-	if (_item && (_item->getRules()->getBattleType() == BT_GRENADE || _item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
-	{
-		for (std::vector<BattleItem*>::iterator j = _parent->getSave()->getItems()->begin(); j != _parent->getSave()->getItems()->end(); ++j)
-		{
-			if (_item->getId() == (*j)->getId())
-			{
-				_parent->getSave()->removeItem(_item);
-				break;
-			}
-		}
 	}
 }
 

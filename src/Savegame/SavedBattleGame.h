@@ -188,6 +188,8 @@ public:
 	void loadMapResources(Game *game);
 	/// Resets tiles units are standing on
 	void resetUnitTiles();
+	/// Add item to delete list.
+	void deleteList(BattleItem *item);
 	/// Removes an item from the game.
 	void removeItem(BattleItem *item);
 	/// Adds an item to a unit and the game.

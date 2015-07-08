@@ -3162,7 +3162,7 @@ static inline BattleItem *createItem(SavedBattleGame *save, BattleUnit *unit, Ru
 {
 	BattleItem *item = new BattleItem(rule, save->getCurrentItemId());
 	item->setOwner(unit);
-	save->removeItem(item); //item outside inventory, deleted when game is shutdown.
+	save->deleteList(item);
 	return item;
 }
 
