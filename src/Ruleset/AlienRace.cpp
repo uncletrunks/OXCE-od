@@ -25,7 +25,7 @@ namespace OpenXcom
  * Creates a blank alien race.
  * @param id String defining the id.
  */
-AlienRace::AlienRace(const std::string &id) : _id(id), _retaliationMission("STR_ALIEN_RETALIATION"), _retaliation(true), _retaliationAggression(0)
+AlienRace::AlienRace(const std::string &id) : _id(id), _retaliation(true), _retaliationAggression(0)
 {
 }
 

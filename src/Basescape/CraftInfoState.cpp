@@ -87,7 +87,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	{
 		const int x = i % 2 ? 204 : 46;
 		const int y = top + (i / 2) * top_row;
-		_txtWName[i] = new Text(75, 16, x, y);
+		_txtWName[i] = new Text(95, 16, x - 20, y);
 		_txtWAmmo[i] = new Text(75, 24, x, y + 16);
 	}
 	_sprite = new Surface(32, 40, 144, 56);

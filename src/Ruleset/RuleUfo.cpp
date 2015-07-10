@@ -63,7 +63,6 @@ void RuleUfo::load(const YAML::Node &node, Ruleset *ruleset)
 
 	_stats.load(node);
 
-	_briefingString = node["briefingString"].as<std::string>(_briefingString);
 	if (const YAML::Node &terrain = node["battlescapeTerrainData"])
 	{
 		RuleTerrain *rule = new RuleTerrain(terrain["name"].as<std::string>());
@@ -236,15 +235,6 @@ const RuleUfoStats& RuleUfo::getRaceBonus(const std::string& s) const
 		return i->second;
 	else
 		return _statsRaceBonus.find("")->second;
-}
-
-/**
- * Gets the UFO's custom briefing string
- * @return The string name.
- */
-const std::string &RuleUfo::getBriefingString() const
-{
-	return _briefingString;
 }
 
 }

@@ -517,7 +517,7 @@ DogfightState::DogfightState(Globe *globe, Craft *craft, Ufo *ufo) :
 		}
 	}
 
-	// Set UFO size - going to be moved to Ufo class to implement simultanous dogfights.
+	// Set UFO size - going to be moved to Ufo class to implement simultaneous dogfights.
 	std::string ufoSize = _ufo->getRules()->getSize();
 	if (ufoSize.compare("STR_VERY_SMALL") == 0)
 	{
@@ -1040,15 +1040,17 @@ void DogfightState::update()
 				if (!_game->getSavedGame()->findAlienMission(targetRegion, OBJECTIVE_RETALIATION))
 				{
 					const RuleAlienMission *rule = _game->getRuleset()->getAlienMission(race->getRetaliationMission());
-					if (rule)
+					if (!rule)
 					{
-						AlienMission *mission = new AlienMission(*rule);
-						mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
-						mission->setRegion(targetRegion, *_game->getRuleset());
-						mission->setRace(_ufo->getAlienRace());
-						mission->start();
-						_game->getSavedGame()->getAlienMissions().push_back(mission);
+						rule = _game->getRuleset()->getRandomMission(OBJECTIVE_RETALIATION, _game->getSavedGame()->getMonthsPassed());
 					}
+
+					AlienMission *mission = new AlienMission(*rule);
+					mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
+					mission->setRegion(targetRegion, *_game->getRuleset());
+					mission->setRace(_ufo->getAlienRace());
+					mission->start();
+					_game->getSavedGame()->getAlienMissions().push_back(mission);
 				}
 			}
 

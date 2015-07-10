@@ -63,6 +63,10 @@ private:
 	std::vector<ReequipStat> _missingItems;
 	std::map<RuleItem*, int> _rounds;
 	std::map<int, RecoveryItem*> _recoveryStats;
+	bool _noContainment, _manageContainment, _destroyBase;
+	int _limitsEnforced;
+	bool _positiveScore;
+
 	/// Adds to the debriefing stats.
 	void addStat(const std::string &name, int quantity, int score);
 	/// Prepares debriefing.
@@ -73,8 +77,6 @@ private:
 	void recoverAlien(BattleUnit *from, Base *base);
 	/// Reequips a craft after a mission.
 	void reequipCraft(Base *base, Craft *craft, bool vehicleItemsCanBeDestroyed);
-	bool _noContainment, _manageContainment, _destroyBase;
-	int _limitsEnforced;
 public:
 	/// Creates the Debriefing state.
 	DebriefingState();
@@ -82,6 +84,7 @@ public:
 	~DebriefingState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	void init();
 };
 
 }

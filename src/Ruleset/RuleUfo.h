@@ -66,7 +66,7 @@ private:
 	RuleTerrain *_battlescapeTerrainData;
 	RuleUfoStats _stats;
 	std::map<std::string, RuleUfoStats> _statsRaceBonus;
-	std::string _modSprite, _briefingString;
+	std::string _modSprite;
 public:
 	/// Creates a blank UFO ruleset.
 	RuleUfo(const std::string &type);
@@ -104,8 +104,6 @@ public:
 	const RuleUfoStats& getRaceBonus(const std::string& s) const;
 	/// Gets the UFO's radar range.
 	int getSightRange() const;
-	/// gets the name of the briefing string.
-	const std::string &getBriefingString() const;
 };
 
 }
