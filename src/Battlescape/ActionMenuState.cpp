@@ -280,7 +280,7 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			if (targetUnit)
 			{
 				_game->popState();
-				int type = weapon->getMediKitType();
+				BattleMediKitType type = weapon->getMediKitType();
 				if (type)
 				{
 					if ((type == BMT_HEAL && _action->weapon->getHealQuantity() > 0) ||
@@ -313,6 +313,8 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 								break;
 							case BMT_PAINKILLER:
 								tileEngine->medikitPainKiller(_action, targetUnit);
+								break;
+							case BMT_NORMAL:
 								break;
 							}
 						}
