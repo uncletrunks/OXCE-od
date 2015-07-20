@@ -741,8 +741,9 @@ void BattlescapeGame::handleNonTargetAction()
 		if (!_currentAction.result.empty())
 		{
 			_parentState->warning(_currentAction.result);
+			_currentAction.result = "";
 		}
-		if (_currentAction.type == BA_PRIME && _currentAction.value > -1)
+		else if (_currentAction.type == BA_PRIME && _currentAction.value > -1)
 		{
 			if (_currentAction.spendTU(&error))
 			{
@@ -754,30 +755,21 @@ void BattlescapeGame::handleNonTargetAction()
 				_parentState->warning(error);
 			}
 		}
-		if (_currentAction.type == BA_USE || _currentAction.type == BA_LAUNCH)
+		else if (_currentAction.type == BA_USE || _currentAction.type == BA_LAUNCH)
 		{
-			if (_currentAction.result.length() > 0)
-			{
-				_parentState->warning(_currentAction.result);
-				_currentAction.result = "";
-			}
 			_save->reviveUnconsciousUnits(true);
 		}
-		if (_currentAction.type == BA_HIT)
+		else if (_currentAction.type == BA_HIT)
 		{
-			if (_currentAction.result.empty())
+			if (_currentAction.haveTU(&error))
 			{
-				if (_currentAction.haveTU(&error))
-				{
-					statePushBack(new MeleeAttackBState(this, _currentAction));
-				}
-				else
-				{
-					_parentState->warning(error);
-				}
+				statePushBack(new MeleeAttackBState(this, _currentAction));
+			}
+			else
+			{
+				_parentState->warning(error);
 			}
 		}
-		_currentAction.result = "";
 		_currentAction.type = BA_NONE;
 		_parentState->updateSoldierInfo();
 	}
