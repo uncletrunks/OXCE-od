@@ -105,11 +105,11 @@ public:
 	/// Handles tile hit.
 	void hitTile(Tile *tile, int damage, const RuleDamageType* type);
 	/// Handles unit hit.
-	bool hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type);
+	bool hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack = true);
 	/// Handles bullet/weapon hits.
 	BattleUnit *hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit, bool rangeAtack = true);
 	/// Handles explosions.
-	void explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit = 0);
+	void explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit = 0, bool rangeAtack = true);
 	/// Checks if a destroyed tile starts an explosion.
 	Tile *checkForTerrainExplosions();
 	/// Unit opens door?

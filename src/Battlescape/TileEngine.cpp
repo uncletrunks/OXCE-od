@@ -1094,7 +1094,7 @@ void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  * @param type damage type of hit.
  * @return Did unit get hit?
  */
-bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type)
+bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack)
 {
 	if (!target || target->getHealth() <= 0)
 	{
@@ -1104,10 +1104,17 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 	const int wounds = target->getFatalWounds();
 	const int adjustedDamage = target->damage(relative, damage, type);
 
-	// if it's going to bleed to death and it's not a player, give credit for the kill.
-	if (unit && target->getFaction() != FACTION_PLAYER && wounds < target->getFatalWounds())
+	if (unit && target->getFaction() != FACTION_PLAYER)
 	{
-		target->killedBy(unit->getFaction());
+		// if it's going to bleed to death and it's not a player, give credit for the kill.
+		if (wounds < target->getFatalWounds())
+		{
+			target->killedBy(unit->getFaction());
+		}
+		if (rangeAtack && target->getOriginalFaction() == FACTION_HOSTILE)
+		{
+			unit->addFiringExp();
+		}
 	}
 
 	if (type->IgnoreNormalMoraleLose == false)
@@ -1172,7 +1179,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		{
 			for (std::vector<BattleItem*>::iterator i = tile->getInventory()->begin(); i != tile->getInventory()->end(); ++i)
 			{
-				if (hitUnit(unit, (*i)->getUnit(), Position(0,0,0), damage, type))
+				if (hitUnit(unit, (*i)->getUnit(), Position(0,0,0), damage, type, rangeAtack))
 				{
 					nothing = false;
 					break;
@@ -1219,16 +1226,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 			const Position target = bu->getPosition().toVexel() + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
 			const Position relative = (center - target) - Position(0,0,verticaloffset);
 
-			hitUnit(unit, bu, relative, damage, type);
-
-			if (bu->getOriginalFaction() == FACTION_HOSTILE &&
-				unit &&
-				unit->getOriginalFaction() == FACTION_PLAYER &&
-				type->ResistType != DT_NONE &&
-				rangeAtack)
-			{
-				unit->addFiringExp();
-			}
+			hitUnit(unit, bu, relative, damage, type, rangeAtack);
 		}
 	}
 	applyGravity(tile);
@@ -1250,7 +1248,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
  * @param maxRadius The maximum radius othe explosion.
  * @param unit The unit that caused the explosion.
  */
-void TileEngine::explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit)
+void TileEngine::explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, bool rangeAtack)
 {
 	double centerZ = center.z / 24 + 0.5;
 	double centerX = center.x / 16 + 0.5;
@@ -1317,13 +1315,13 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 							if (distance(dest->getPosition(), Position(centerX, centerY, centerZ)) < 2)
 							{
 								// ground zero effect is in effect
-								hitUnit(unit, bu, Position(0, 0, 0), damage, type);
+								hitUnit(unit, bu, Position(0, 0, 0), damage, type, rangeAtack);
 							}
 							else
 							{
 								// directional damage relative to explosion position.
 								// units above the explosion will be hit in the legs, units lateral to or below will be hit in the torso
-								hitUnit(unit, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type);
+								hitUnit(unit, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type, rangeAtack);
 							}
 
 							// Affect all items and units in inventory
@@ -1332,7 +1330,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 							{
 								for (std::vector<BattleItem*>::iterator it = bu->getInventory()->begin(); it != bu->getInventory()->end(); ++it)
 								{
-									if (!hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type) && itemDamage * type->ToItem > (*it)->getRules()->getArmor())
+									if (!hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && itemDamage * type->ToItem > (*it)->getRules()->getArmor())
 									{
 										toRemove.push_back(*it);
 									}

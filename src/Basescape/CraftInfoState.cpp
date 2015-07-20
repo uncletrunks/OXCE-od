@@ -87,14 +87,15 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	{
 		const int x = i % 2 ? 204 : 46;
 		const int y = top + (i / 2) * top_row;
-		_txtWName[i] = new Text(95, 16, x - 20, y);
+		const int d = i % 2 ? 20 : 0;
+		_txtWName[i] = new Text(95, 16, x - d, y);
 		_txtWAmmo[i] = new Text(75, 24, x, y + 16);
 	}
 	_sprite = new Surface(32, 40, 144, 56);
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		const int x = i % 2 ? 184 : 121;
-		const int y = top + (i / 2) * top_row;
+		const int y = top + 16 + (i / 2) * top_row;
 		_weapon[i] = new Surface(15, 17, x, y);
 	}
 	_crew = new Surface(220, 18, 85, bottom - 1);
