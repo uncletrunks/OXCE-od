@@ -1,7 +1,7 @@
 #!/bin/bash
 commitID=$(git rev-parse HEAD)
 openXcomID=$(git merge-base HEAD supsuper/master)
-openXcomDate=$(date -d"$(git show -s --format=%ci $openXcomID)" +%d\\/%m\\/%Y)
+openXcomDate=$(date -d"$(git show -s --format=%ci $openXcomID)" +%Y-%m-%d)
 
 sed \
   -e 's/\[b\]//g' \
