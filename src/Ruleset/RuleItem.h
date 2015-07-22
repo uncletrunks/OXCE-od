@@ -101,7 +101,7 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _waypoint, _fixedWeapon, _allowSelfHeal;
+	bool _twoHanded, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
@@ -171,6 +171,8 @@ public:
 	bool isWaypoint() const;
 	/// Gets if the item is fixed.
 	bool isFixed() const;
+	/// Do show fixed weapon on unit.
+	bool getFixedShow() const;
 	/// Gets the item's bullet sprite reference.
 	int getBulletSprite() const;
 	/// Gets the item's fire sound.

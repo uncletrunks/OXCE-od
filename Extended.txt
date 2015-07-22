@@ -80,6 +80,7 @@ Medikit can now be used without UI and can use `hitSound`.[br/]
 2.4:[br/]
 Option for defining bonus and damage type for melee in range weapons.[br/]
 Option for big explosion sound for each items.[br/]
+Option for showing fixed weapons on unit.[br/]
 [br/]
 
 [examples]
@@ -258,6 +259,7 @@ items:
     medikitType: 0        #change how medikit wroks, `0` default with UI, `1` fast heal, `2` fast stimulant, `3` fast pain killer.
     bigSpriteAlt: 1       #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
     floorSpriteAlt: 1     #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
+    fixedWeaponShow: true #if it's true then it will show fixed weapon on unit.
     hitMissSound: 0       #override `hitSound` when any psi attack was unsuccessful.
     meleeMissSound: 12    #override `meleeSound` when melee attack was unsuccessful.
     psiSound: 0           #override `hitSound` when used for MC or Panic attack.

@@ -103,7 +103,7 @@ void UnitSprite::setBattleUnit(BattleUnit *unit, int part)
  */
 void UnitSprite::setBattleItem(BattleItem *item)
 {
-	if (item)
+	if (item && (!item->getRules()->isFixed() || item->getRules()->getFixedShow()))
 	{
 		if (item->getSlot()->getId() == "STR_RIGHT_HAND")
 			_itemA = item;

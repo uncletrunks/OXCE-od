@@ -1568,11 +1568,11 @@ void Map::cacheUnit(BattleUnit *unit)
 
 			BattleItem *rhandItem = unit->getItem("STR_RIGHT_HAND");
 			BattleItem *lhandItem = unit->getItem("STR_LEFT_HAND");
-			if (rhandItem && !rhandItem->getRules()->isFixed())
+			if (rhandItem)
 			{
 				unitSprite->setBattleItem(rhandItem);
 			}
-			if (lhandItem && !lhandItem->getRules()->isFixed())
+			if (lhandItem)
 			{
 				unitSprite->setBattleItem(lhandItem);
 			}
