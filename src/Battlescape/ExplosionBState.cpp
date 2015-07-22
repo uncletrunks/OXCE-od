@@ -88,26 +88,31 @@ void ExplosionBState::init()
 {
 	BattleType type = BT_NONE;
 	BattleActionType action = _action.type;
+	RuleItem* itemRule = 0;
 	bool miss = false;
 	if (_item)
 	{
-		type = _item->getRules()->getBattleType();
-		_power = _item->getRules()->getPower();
-		_damageType = _item->getRules()->getDamageType();
-		_radius = _item->getRules()->getExplosionRadius();
+		itemRule = _item->getRules();
+		type = itemRule->getBattleType();
 
+		_power = 0;
 		_pistolWhip = (type != BT_MELEE && action == BA_HIT);
 		if (_pistolWhip)
 		{
-			_power = _item->getRules()->getMeleePower();
-			_damageType = _parent->getRuleset()->getDamageType(DT_MELEE);
+			_power += itemRule->getMeleePower();
+			_power += itemRule->getMeleeBonus(_unit);
+
 			_radius = 0;
+			_damageType = itemRule->getMeleeType();
 		}
 		else
 		{
-			// since melee aliens don't use a conventional weapon type, we use their strength instead.
-			_power += _item->getRules()->getPowerBonus(_unit);
-			_power -= _item->getRules()->getPowerRangeReduction(_range);
+			_power += itemRule->getPower();
+			_power += itemRule->getPowerBonus(_unit);
+			_power -= itemRule->getPowerRangeReduction(_range);
+
+			_radius = itemRule->getExplosionRadius();
+			_damageType = itemRule->getDamageType();
 		}
 
 		//testing if we hit target
@@ -140,7 +145,7 @@ void ExplosionBState::init()
 		}
 
 		_areaOfEffect = type != BT_MELEE &&
-						_item->getRules()->getExplosionRadius() != 0 &&
+						itemRule->getExplosionRadius() != 0 &&
 						(type != BT_PSIAMP || action == BA_USE) &&
 						!_pistolWhip && !miss;
 	}
@@ -196,7 +201,7 @@ void ExplosionBState::init()
 			int frame = ResourcePack::EXPLOSION_OFFSET;
 			if (_item)
 			{
-				frame = _item->getRules()->getHitAnimation();
+				frame = itemRule->getHitAnimation();
 			}
 			if (_parent->getDepth() > 0)
 			{
@@ -236,7 +241,7 @@ void ExplosionBState::init()
 	else
 	// create a bullet hit
 	{
-		_parent->setStateInterval(std::max(1, ((BattlescapeState::DEFAULT_ANIM_SPEED/2) - (10 * _item->getRules()->getExplosionSpeed()))));
+		_parent->setStateInterval(std::max(1, ((BattlescapeState::DEFAULT_ANIM_SPEED/2) - (10 * itemRule->getExplosionSpeed()))));
 		_hit = _pistolWhip || type == BT_MELEE;
 		bool psi = type == BT_PSIAMP && action != BA_USE;
 		int anim = -1;
@@ -247,18 +252,18 @@ void ExplosionBState::init()
 
 		if (_hit || psi)
 		{
-			anim = _item->getRules()->getMeleeAnimation();
+			anim = itemRule->getMeleeAnimation();
 			if (psi)
 			{
 				// psi attack sound is based weapon hit sound
-				sound = _item->getRules()->getHitSound();
+				sound = itemRule->getHitSound();
 
-				optValue(anim, _item->getRules()->getPsiAnimation());
-				optValue(sound, _item->getRules()->getPsiSound());
+				optValue(anim, itemRule->getPsiAnimation());
+				optValue(sound, itemRule->getPsiSound());
 			}
 			else
 			{
-				sound = _item->getRules()->getMeleeSound();
+				sound = itemRule->getMeleeSound();
 				if (ammo)
 				{
 					optValue(anim, ammo->getRules()->getMeleeAnimation());
@@ -268,26 +273,26 @@ void ExplosionBState::init()
 		}
 		else
 		{
-			anim = _item->getRules()->getHitAnimation();
-			sound = _item->getRules()->getHitSound();
+			anim = itemRule->getHitAnimation();
+			sound = itemRule->getHitSound();
 		}
 
 		if (miss)
 		{
 			if (_hit || psi)
 			{
-				optValue(anim, _item->getRules()->getMeleeMissAnimation());
+				optValue(anim, itemRule->getMeleeMissAnimation());
 				if (psi)
 				{
 					// psi attack sound is based weapon hit sound
-					optValue(sound, _item->getRules()->getHitMissSound());
+					optValue(sound, itemRule->getHitMissSound());
 
-					optValue(anim, _item->getRules()->getPsiMissAnimation());
-					optValue(sound, _item->getRules()->getPsiMissSound());
+					optValue(anim, itemRule->getPsiMissAnimation());
+					optValue(sound, itemRule->getPsiMissSound());
 				}
 				else
 				{
-					optValue(sound, _item->getRules()->getMeleeMissSound());
+					optValue(sound, itemRule->getMeleeMissSound());
 					if (ammo)
 					{
 						optValue(anim, ammo->getRules()->getMeleeMissAnimation());
@@ -297,8 +302,8 @@ void ExplosionBState::init()
 			}
 			else
 			{
-				optValue(anim, _item->getRules()->getHitMissAnimation());
-				optValue(sound, _item->getRules()->getHitMissSound());
+				optValue(anim, itemRule->getHitMissAnimation());
+				optValue(sound, itemRule->getHitMissSound());
 			}
 		}
 

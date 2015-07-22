@@ -43,7 +43,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_meleeSound(39), _meleeAnimation(0), _meleeMissSound(-1), _meleeMissAnimation(-1),
 	_meleeHitSound(-1),
 	_psiSound(-1), _psiAnimation(-1), _psiMissSound(-1), _psiMissAnimation(-1),
-	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0), _damageType(),
+	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0),
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
@@ -333,18 +333,6 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 			_meleeHitSound += modIndex;
 	}
 
-	if (node["damageType"])
-	{
-		//compatibility hack for corpse explosion, that didn't have defined damage type
-		ItemDamageType type = node["blastRadius"].as<int>(0) > 0 ? DT_HE : DT_NONE;
-		//load predefined damage type
-		_damageType = *damageTypes.at(node["damageType"].as<int>(type));
-	}
-	_damageType.FixRadius = node["blastRadius"].as<int>(_damageType.FixRadius);
-	if (node["damageAlter"])
-	{
-		_damageType.load(node["damageAlter"]);
-	}
 	if (node["battleType"])
 	{
 		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
@@ -371,7 +359,36 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		{
 			_fuseType = BFT_NONE;
 		}
+
+		if (_battleType == BT_CORPSE)
+		{
+			//compatibility hack for corpse explosion, that didn't have defined damage type
+			_damageType = *damageTypes.at(DT_HE);
+		}
+		_meleeType = *damageTypes.at(DT_MELEE);
 	}
+
+	if (const YAML::Node &type = node["damageType"])
+	{
+		//load predefined damage type
+		_damageType = *damageTypes.at(type.as<int>());
+	}
+	_damageType.FixRadius = node["blastRadius"].as<int>(_damageType.FixRadius);
+	if (const YAML::Node &alter = node["damageAlter"])
+	{
+		_damageType.load(alter);
+	}
+
+	if (const YAML::Node &type = node["meleeType"])
+	{
+		//load predefined damage type
+		_meleeType = *damageTypes.at(type.as<int>());
+	}
+	if (const YAML::Node &alter = node["meleeAlter"])
+	{
+		_meleeType.load(alter);
+	}
+
 	if (node["skillApplied"])
 	{
 		if (node["skillApplied"].as<int>(false))
@@ -472,6 +489,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
 
 	_damageBonus.load(node["damageBonus"]);
+	_meleeBonus.load(node["meleeBonus"]);
 	_accuracyMulti.load(node["accuracyMultiplier"]);
 	_meleeMulti.load(node["meleeMultiplier"]);
 	_throwMulti.load(node["throwMultiplier"]);
@@ -1012,6 +1030,15 @@ const RuleDamageType *RuleItem::getDamageType() const
 }
 
 /**
+ * Gets the item's melee damage type for range weapons.
+ * @return The damage type.
+ */
+const RuleDamageType *RuleItem::getMeleeType() const
+{
+	return &_meleeType;
+}
+
+/**
  * Gets the item's battlye type.
  * @return The battle type.
  */
@@ -1539,6 +1566,7 @@ bool RuleItem::isPsiRequired() const
 {
 	return _psiReqiured;
 }
+
 /**
  * Compute power bonus based on unit stats.
  * @param stats unit stats
@@ -1547,6 +1575,16 @@ bool RuleItem::isPsiRequired() const
 int RuleItem::getPowerBonus(const BattleUnit *unit) const
 {
 	return _damageBonus.getBonus(unit);
+}
+
+/**
+ * Compute power bonus based on unit stats.
+ * @param stats unit stats
+ * @return bonus power.
+ */
+int RuleItem::getMeleeBonus(const BattleUnit *unit) const
+{
+	return _meleeBonus.getBonus(unit);
 }
 
 /**

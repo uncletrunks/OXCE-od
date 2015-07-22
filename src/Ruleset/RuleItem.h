@@ -94,7 +94,7 @@ private:
 	float _powerRangeReduction;
 	float _powerRangeThreshold;
 	std::vector<std::string> _compatibleAmmo;
-	RuleDamageType _damageType;
+	RuleDamageType _damageType, _meleeType;
 	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
 	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime;
 	int _clipSize, _specialChance, _tuLoad, _tuUnload;
@@ -118,7 +118,7 @@ private:
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
-	RuleStatBonus _damageBonus, _accuracyMulti, _meleeMulti, _throwMulti;
+	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 
 	/// Get final value of cost.
 	RuleItemUseCost getDefault(const RuleItemUseCost& a, const RuleItemUseCost& b) const;
@@ -207,14 +207,20 @@ public:
 
 	/// Gets the item's power.
 	int getPower() const;
-	/// Get additional power form unit statistics
+	/// Get additional power from unit statistics
 	int getPowerBonus(const BattleUnit *unit) const;
+	/// Ok, so this isn't a melee type weapon but we're using it for melee... how much damage should it do?
+	int getMeleePower() const;
+	/// Get additional power for melee attack in range weapon from unit statistics.
+	int getMeleeBonus(const BattleUnit *unit) const;
 	/// Gets amount of power dropped for range in voxels.
 	float getPowerRangeReduction(float range) const;
 	/// Gets amount of psi accuracy dropped for range in voxels.
 	float getPsiAccuracyRangeReduction(float range) const;
 	/// Get multiplier of accuracy form unit statistics
 	int getAccuracyMultiplier(const BattleUnit *unit) const;
+	/// Get multiplier of melee hit chance form unit statistics
+	int getMeleeMultiplier(const BattleUnit *unit) const;
 	/// Get multiplier of throwing form unit statistics
 	int getThrowMultiplier(const BattleUnit *unit) const;
 
@@ -263,6 +269,8 @@ public:
 	std::vector<std::string> *getCompatibleAmmo();
 	/// Gets the item's damage type.
 	const RuleDamageType *getDamageType() const;
+	/// Gets the item's melee damage type for range weapons.
+	const RuleDamageType *getMeleeType() const;
 	/// Gets the item's type.
 	BattleType getBattleType() const;
 	/// Gets the item's fuse type.
@@ -357,10 +365,6 @@ public:
 	int getShotgunPellets() const;
 	/// Gets the weapon's zombie unit.
 	const std::string &getZombieUnit() const;
-	/// Ok, so this isn't a melee type weapon but we're using it for melee... how much damage should it do?
-	int getMeleePower() const;
-	/// Get multiplier of melee hit chance form unit statistics
-	int getMeleeMultiplier(const BattleUnit *unit) const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
 	/// Is this item restricted to use underwater?

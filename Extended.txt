@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 2.3b[/b]
+[b]Mod version 2.4[/b]
 OpenXcom version: Nightly [commitOriginDate/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended commit: [commit/][br/]
@@ -76,6 +76,9 @@ Option for custom sound and animation for miss attack and psi weapons.[br/]
 Option for defining percent of all action cost stats. Old use of `flatPrime` and `flatThrow` is deprecated.[br/]
 Facilities can now require items to build.[br/]
 Medikit can now be used without UI and can use `hitSound`.[br/]
+[br/]
+2.4:[br/]
+Option for defining bonus and damage type for melee in range weapons.[br/]
 [br/]
 
 [examples]
@@ -185,6 +188,10 @@ items:
       energyNormalized: 0.0   #curret energy normalized to 1 (max energy give 1.0).
       moraleNormalized: 0.0   #curret morale normalized to 1 (max morale give 1.0).
       stunNormalized: 0.0     #curret stun level normalized to 1 (max stun compared to current health give 1.0).
+    meleeDamage: #used my range weapons melee hit.
+      #...
+      #same stats like `damageBonus`.
+      #...
     accuracyMultiplier: #used by wapons and psi-amp.
       #set `psi` to 0.02 if weapon is psi-amp
       #...
@@ -233,6 +240,12 @@ items:
       ToEnergy: 0.0     #how much power is applied to energy loss.
       ToTime: 0.0       #how much power is applied to time units loss.
       ToMorale: 0.0     #how much power is applied to morale loss.
+    meleeType: 2        #work like `damageType` but for range weapon melee hit.
+    meleeAlter:         #work like `damageAlter` but for range weapon melee hit.
+      #set defaut values based on `meleeType`.
+      #...
+      #same stats like `damageAlter`.
+      #...
     requiresBuy: #what tech is required for the item to be visible in the Hire/Purchase screen.
       - SOME_TECH
       - SOME_TECH_MK2
