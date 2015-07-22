@@ -79,6 +79,7 @@ Medikit can now be used without UI and can use `hitSound`.[br/]
 [br/]
 2.4:[br/]
 Option for defining bonus and damage type for melee in range weapons.[br/]
+Option for big explosion sound for each items.[br/]
 [br/]
 
 [examples]
@@ -265,6 +266,7 @@ items:
     meleeMissAnimation: 0 #override `meleeMissAnimation` when melee, MC or Panic attack was unsuccessful. Use `HIT.PCK`.
     psiAnimation: 0       #override `meleeAnimation` when used for MC or Panic attack. Use `HIT.PCK`.
     psiMissAnimation: 0   #override `meleeMissAnimation` when MC or Panic attack was unsuccessful. Use `HIT.PCK`.
+    explosionHitSound: 2  #override default big explosion sound.
     ai:
       useDelay: 3 #determine on what turn item can be used by aliens.
 [/code]

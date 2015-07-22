@@ -41,7 +41,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_fireSound(-1),
 	_hitSound(-1), _hitAnimation(0), _hitMissSound(-1), _hitMissAnimation(-1),
 	_meleeSound(39), _meleeAnimation(0), _meleeMissSound(-1), _meleeMissAnimation(-1),
-	_meleeHitSound(-1),
+	_meleeHitSound(-1), _explosionHitSound(-1),
 	_psiSound(-1), _psiAnimation(-1), _psiMissSound(-1), _psiMissAnimation(-1),
 	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0),
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
@@ -331,6 +331,13 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		// BATTLE.CAT: 55 entries
 		if (_meleeHitSound > 54)
 			_meleeHitSound += modIndex;
+	}
+	if (node["explosionHitSound"])
+	{
+		_explosionHitSound = node["explosionHitSound"].as<int>(_explosionHitSound);
+		// BATTLE.CAT: 55 entries
+		if (_explosionHitSound > 54)
+			_explosionHitSound += modIndex;
 	}
 
 	if (node["battleType"])
@@ -766,6 +773,14 @@ int RuleItem::getMeleeHitSound() const
 	return _meleeHitSound;
 }
 
+/**
+ * What sound does explosion sound?
+ * @return The weapon's explosion sound.
+ */
+int RuleItem::getExplosionHitSound() const
+{
+	return _explosionHitSound;
+}
 
 /**
  * Gets the item's psi hit sound.

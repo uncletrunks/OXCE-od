@@ -88,7 +88,7 @@ private:
 	int _fireSound;
 	int _hitSound, _hitAnimation, _hitMissSound, _hitMissAnimation;
 	int _meleeSound, _meleeAnimation, _meleeMissSound, _meleeMissAnimation;
-	int _meleeHitSound;
+	int _meleeHitSound, _explosionHitSound;
 	int _psiSound, _psiAnimation, _psiMissSound, _psiMissAnimation;
 	int _power;
 	float _powerRangeReduction;
@@ -195,6 +195,8 @@ public:
 	int getMeleeMissAnimation() const;
 	/// What sound does this weapon make when you punch someone in the face with it?
 	int getMeleeHitSound() const;
+	/// What sound does explosion sound?
+	int getExplosionHitSound() const;
 
 	/// Gets the item's psi hit sound.
 	int getPsiSound() const;
