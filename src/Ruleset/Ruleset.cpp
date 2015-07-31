@@ -185,6 +185,7 @@ Ruleset::Ruleset() :
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_MELEE;
 	dmg->IgnoreOverKill = true;
+	dmg->IgnoreSelfDestruct = true;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
@@ -233,6 +234,7 @@ Ruleset::Ruleset() :
 	dmg->FireBlastCalc = true;
 	dmg->IgnoreOverKill = true;
 	dmg->IgnoreDirection = true;
+	dmg->IgnoreSelfDestruct = true;
 	dmg->ArmorEffectiveness = 0.0f;
 	dmg->RadiusEffectiveness = 0.03f;
 	dmg->FireThreshold = 0;
@@ -383,7 +385,7 @@ void Ruleset::loadModRulesets(const std::vector<std::string> &rulesetFiles, size
 
 	for (std::vector<std::string>::const_iterator i = rulesetFiles.begin(); i != rulesetFiles.end(); ++i)
 	{
-		Log(LOG_INFO) << "- " << *i;
+		Log(LOG_VERBOSE) << "- " << *i;
 		loadFile(*i, spriteOffset);
 	}
 }
@@ -622,7 +624,7 @@ void Ruleset::loadFile(const std::string &filename, size_t spriteOffset)
 	_costScientist = doc["costScientist"].as<int>(_costScientist);
 	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
 	_initialFunding = doc["initialFunding"].as<int>(_initialFunding);
-	_alienFuel = doc["alienFuel"].as<std::string>(_alienFuel);
+	_alienFuel = doc["alienFuel"].as<std::pair<std::string, int> >(_alienFuel);
 	_fontName = doc["fontName"].as<std::string>(_fontName);
 
 	_aiUseDelayGrenade = doc["turnAIUseGrenade"].as<int>(_aiUseDelayGrenade);
@@ -1736,9 +1738,18 @@ Soldier *Ruleset::genSoldier(SavedGame *save) const
  * Gets the name of the item to be used as alien fuel.
  * @return the name of the fuel.
  */
-const std::string Ruleset::getAlienFuel() const
+const std::string Ruleset::getAlienFuelName() const
 {
-	return _alienFuel;
+	return _alienFuel.first;
+}
+
+/**
+ * Gets the amount of alien fuel to recover.
+ * @return the amount to recover.
+ */
+const int Ruleset::getAlienFuelQuantity() const
+{
+	return _alienFuel.second;
 }
 
 /**
