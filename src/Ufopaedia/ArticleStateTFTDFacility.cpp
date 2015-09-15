@@ -24,7 +24,7 @@
 #include "ArticleStateTFTDFacility.h"
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
-#include "../Engine/Language.h"
+#include "../Engine/LocalizedText.h"
 #include "../Interface/TextList.h"
 
 namespace OpenXcom
@@ -38,7 +38,7 @@ namespace OpenXcom
 		add(_lstInfo);
 
 		_lstInfo->setColor(Palette::blockOffset(0)+2);
-		_lstInfo->setColumns(2, 100, 68);
+		_lstInfo->setColumns(2, 104, 46);
 		_lstInfo->setDot(true);
 
 		std::wostringstream ss;

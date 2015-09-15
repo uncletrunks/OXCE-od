@@ -35,7 +35,7 @@
 #include "../Savegame/Craft.h"
 #include "../Savegame/Node.h"
 #include "../Engine/Game.h"
-#include "../Engine/Language.h"
+#include "../Engine/LocalizedText.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/Options.h"
 #include "../Engine/RNG.h"
@@ -208,6 +208,7 @@ void BattlescapeGenerator::setMissionSite(MissionSite *mission)
  */
 void BattlescapeGenerator::nextStage()
 {
+	int aliensAlive = 0;
 	// kill all enemy units, or those not in endpoint area (if aborted)
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
@@ -217,6 +218,10 @@ void BattlescapeGenerator::nextStage()
 			&& !(*i)->isInExitArea(END_POINT))                                // and they're not on the exit
 			|| (*i)->getOriginalFaction() != FACTION_PLAYER))               // or they're not a soldier
 		{
+			if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
+			{
+				aliensAlive++;
+			}
 			(*i)->goToTimeOut();
 		}
 		if ((*i)->getTile())
@@ -236,42 +241,105 @@ void BattlescapeGenerator::nextStage()
 	// this does not include items in your soldier's hands.
 	std::vector<BattleItem*> *takeHomeGuaranteed = _save->getGuaranteedRecoveredItems();
 	std::vector<BattleItem*> *takeHomeConditional = _save->getConditionalRecoveredItems();
-	std::vector<BattleItem*> takeToNextStage;
-	std::map<RuleItem*, int> guaranteedRounds, conditionalRounds;
+	std::vector<BattleItem*> takeToNextStage, carryToNextStage, removeFromGame;
 
-	for (std::vector<BattleItem*>::iterator j = _save->getItems()->begin(); j != _save->getItems()->end();)
+	for (std::vector<BattleItem*>::iterator i = _save->getItems()->begin(); i != _save->getItems()->end(); ++i)
 	{
-		if (!(*j)->getOwner() || (*j)->getOwner()->getOriginalFaction() != FACTION_PLAYER)
+		// first off: don't process ammo loaded into weapons. at least not at this level. ammo will be handled simultaneously.
+		if (!(*i)->isAmmo())
 		{
-			Tile *tile = (*j)->getTile();
-			std::vector<BattleItem*> *toContainer = takeHomeConditional;
-			if (tile)
+			std::vector<BattleItem*> *toContainer = &removeFromGame;
+			// if it's recoverable, and it's not owned by someone
+			if ((*i)->getRules()->isRecoverable() && !(*i)->getOwner())
 			{
-				tile->removeItem(*j);
-				if (tile->getMapData(O_FLOOR))
+				// protocol 1: all defenders dead, recover all items.
+				if (aliensAlive == 0)
 				{
-					if (tile->getMapData(O_FLOOR)->getSpecialType() == START_POINT)
+					// any corpses or unconscious units get put in the skyranger, as well as any unresearched items
+					if ((*i)->getUnit() || !_game->getSavedGame()->isResearched((*i)->getRules()->getRequirements()))
 					{
 						toContainer = takeHomeGuaranteed;
 					}
-					else if (tile->getMapData(O_FLOOR)->getSpecialType() == END_POINT
-					&& (*j)->getRules()->isRecoverable()
-					&& !(*j)->getUnit())
+					// otherwise it comes with us to stage two
+					else
 					{
-						takeToNextStage.push_back(*j);
-						++j;
-						continue;
+						toContainer = &takeToNextStage;
+					}
+				}
+				// protocol 2: some of the aliens survived, meaning we ran to the exit zone.
+				// recover stuff depending on where it was at the end of the mission.
+				else
+				{
+					Tile *tile = (*i)->getTile();
+					if (tile)
+					{
+						// on a tile at least, so i'll give you the benefit of the doubt on this and give it a conditional recovery at this point
+						toContainer = takeHomeConditional;
+						if (tile->getMapData(O_FLOOR))
+						{
+							// in the skyranger? it goes home.
+							if (tile->getMapData(O_FLOOR)->getSpecialType() == START_POINT)
+							{
+								toContainer = takeHomeGuaranteed;
+							}
+							// on the exit grid? it goes to stage two.
+							else if (tile->getMapData(O_FLOOR)->getSpecialType() == END_POINT)
+							{
+								toContainer = &takeToNextStage;
+							}
+						}
 					}
 				}
 			}
-			if ((*j)->getRules()->isRecoverable() && !(*j)->getXCOMProperty())
+			// if a soldier is already holding it, let's let him keep it
+			if ((*i)->getOwner() && (*i)->getOwner()->getFaction() == FACTION_PLAYER)
 			{
-				toContainer->push_back(*j);
-				j = _save->getItems()->erase(j);
-				continue;
+				toContainer = &carryToNextStage;
+			}
+
+			// at this point, we know what happens with the item, so let's apply it to any ammo as well.
+			BattleItem *ammo = (*i)->getAmmoItem();
+			if (ammo && ammo != *i)
+			{
+				// break any tile links, because all the tiles are about to disappear.
+				ammo->setTile(0);
+				toContainer->push_back(ammo);
+			}
+			// and now the actual item itself.
+			(*i)->setTile(0);
+			toContainer->push_back(*i);
+		}
+	}
+
+	// anything in the "removeFromGame" vector will now be discarded - they're all dead to us now.
+	for (std::vector<BattleItem*>::iterator i = removeFromGame.begin(); i != removeFromGame.end();++i)
+	{
+		// fixed weapons, or anything that's otherwise "equipped" will need to be de-equipped
+		// from their owners to make sure we don't have any null pointers to worry about later
+		if ((*i)->getOwner())
+		{
+			for (std::vector<BattleItem*>::iterator j = (*i)->getOwner()->getInventory()->begin(); j != (*i)->getOwner()->getInventory()->end(); ++j)
+			{
+				if (*i == *j)
+				{
+					(*i)->getOwner()->getInventory()->erase(j);
+					break;
+				}
 			}
 		}
-		++j;
+		delete *i;
+	}
+
+	// empty the items vector
+	_save->getItems()->clear();
+
+	// rebuild it with only the items we want to keep active in battle for the next stage
+	// here we add all the items that our soldiers are carrying, and we'll add the items on the
+	// inventory tile after we've generated our map. everything else will either be in one of the
+	// recovery arrays, or deleted from existance at this point.
+	for (std::vector<BattleItem*>::iterator i = carryToNextStage.begin(); i != carryToNextStage.end();++i)
+	{
+		_save->getItems()->push_back(*i);
 	}
 
 	_alienCustomDeploy = _game->getRuleset()->getDeployment(_save->getAlienCustomDeploy());
@@ -301,7 +369,10 @@ void BattlescapeGenerator::nextStage()
 	{
 		throw Exception("Map generator encountered an error: " + _terrain->getScript() + " script not found.");
 	}
+
 	generateMap(script);
+
+	setupObjectives(ruleDeploy);
 
 	int highestSoldierID = 0;
 	bool selectedFirstSoldier = false;
@@ -350,6 +421,7 @@ void BattlescapeGenerator::nextStage()
 
 	for (std::vector<BattleItem*>::iterator i = takeToNextStage.begin(); i != takeToNextStage.end(); ++i)
 	{
+		_save->getItems()->push_back(*i);
 		_craftInventoryTile->addItem(*i, ground);
 	}
 
@@ -358,6 +430,8 @@ void BattlescapeGenerator::nextStage()
 	size_t unitCount = _save->getUnits()->size();
 
 	// Let's figure out what race we're up against.
+	_alienRace = ruleDeploy->getRace();
+
 	for (std::vector<MissionSite*>::iterator i = _game->getSavedGame()->getMissionSites()->begin();
 		_alienRace == "" && i != _game->getSavedGame()->getMissionSites()->end(); ++i)
 	{
@@ -452,7 +526,10 @@ void BattlescapeGenerator::run()
 	{
 		throw Exception("Map generator encountered an error: " + _terrain->getScript() + " script not found.");
 	}
+
 	generateMap(script);
+
+	setupObjectives(ruleDeploy);
 
 	deployXCOM();
 
@@ -864,7 +941,8 @@ bool BattlescapeGenerator::canPlaceXCOMUnit(Tile *tile)
  */
 void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 {
-	if (deployment->getRace() != "" && _alienRace == "")
+	// race defined by deployment if there is one.
+	if (deployment->getRace() != "" && _game->getSavedGame()->getMonthsPassed() > -1)
 	{
 		_alienRace = deployment->getRace();
 	}
@@ -958,7 +1036,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
  */
 BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outside)
 {
-	int difficulty = (int)(_game->getSavedGame()->getDifficulty());
+	int difficulty =_game->getSavedGame()->getDifficultyCoefficient();
 	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), difficulty, _save->getDepth());
 	Node *node = 0;
 
@@ -1515,6 +1593,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 {
 	// set our ambient sound
 	_save->setAmbientSound(_terrain->getAmbience());
+	_save->setAmbientVolume(_terrain->getAmbientVolume());
 
 	// set up our map generation vars
 	_dummy = new MapBlock("dummy");
@@ -1815,18 +1894,19 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 		}
 	}
 
-	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
+	delete _dummy;
+
+	// special hacks to fill in empty floors on level 0
+	for (int x = 0; x < _mapsize_x; ++x)
 	{
-		for (int j = 0; j != 4; ++j)
+		for (int y = 0; y < _mapsize_y; ++y)
 		{
-			if (_save->getTiles()[i]->getMapData(j) && _save->getTiles()[i]->getMapData(j)->getSpecialType() == MUST_DESTROY)
+			if (_save->getTile(Position(x, y, 0))->getMapData(O_FLOOR) == 0)
 			{
-				_save->addToObjectiveCount();
+				_save->getTile(Position(x, y, 0))->setMapData(MapDataSet::getScorchedEarthTile(), 1, 0, O_FLOOR);
 			}
 		}
 	}
-
-	delete _dummy;
 
 	attachNodeLinks();
 }
@@ -1912,6 +1992,7 @@ void BattlescapeGenerator::generateBaseMap()
 		}
 	}
 	_save->calculateModuleMap();
+
 }
 
 /**
@@ -2465,4 +2546,44 @@ void BattlescapeGenerator::setTerrain(RuleTerrain *terrain)
 	_terrain = terrain;
 }
 
+
+/**
+ * Sets up the objectives for the map.
+ * @param ruleDeploy the deployment data we're gleaning data from.
+ */
+void BattlescapeGenerator::setupObjectives(const AlienDeployment *ruleDeploy)
+{
+	int targetType = ruleDeploy->getObjectiveType();
+
+	if (targetType > -1)
+	{
+		int objectives = ruleDeploy->getObjectivesRequired();
+		int actualCount = 0;
+
+		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
+		{
+			for (int j = 0; j != 4; ++j)
+			{
+				if (_save->getTiles()[i]->getMapData(j) && _save->getTiles()[i]->getMapData(j)->getSpecialType() == targetType)
+				{
+					actualCount++;
+				}
+			}
+		}
+
+		if (actualCount > 0)
+		{
+			_save->setObjectiveType(targetType);
+
+			if (actualCount < objectives || objectives == 0)
+			{
+				_save->setObjectiveCount(actualCount);
+			}
+			else
+			{
+				_save->setObjectiveCount(objectives);
+			}
+		}
+	}
+}
 }

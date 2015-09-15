@@ -69,7 +69,7 @@ private:
 	bool _debugMode;
 	bool _aborted;
 	int _itemId;
-	int _objectivesDestroyed, _objectivesNeeded;
+	int _objectiveType, _objectivesDestroyed, _objectivesNeeded;
 	std::vector<BattleUnit*> _exposedUnits;
 	std::list<BattleUnit*> _fallingUnits;
 	bool _unitsFalling, _cheating;
@@ -78,6 +78,7 @@ private:
 	bool _kneelReserved;
 	std::vector< std::vector<std::pair<int, int> > > _baseModules;
 	int _depth, _ambience;
+	double _ambientVolume;
 	std::vector<BattleItem*> _recoverGuaranteed, _recoverConditional;
 	std::string _music;
 	/// Selects a soldier.
@@ -203,7 +204,7 @@ public:
 	/// Checks if the mission was aborted.
 	bool isAborted() const;
 	/// Sets how many objectives need to be destroyed.
-	void addToObjectiveCount();
+	void setObjectiveCount(int counter);
 	/// increments the objective counter.
 	void addDestroyedObjective();
 	/// Checks if all the objectives are destroyed.
@@ -292,6 +293,14 @@ public:
 	const std::string &getMusic() const;
 	/// Set the name of the music track.
 	void setMusic(const std::string &track);
+	/// Sets the objective type for this mission.
+	void setObjectiveType(int type);
+	/// Gets the objective type of this mission.
+	SpecialTileType getObjectiveType();
+	/// sets the ambient sound effect;
+	void setAmbientVolume(double volume);
+	/// gets the ambient sound effect;
+	double getAmbientVolume() const;
 };
 
 }

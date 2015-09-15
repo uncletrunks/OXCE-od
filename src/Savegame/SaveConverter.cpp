@@ -98,7 +98,7 @@ SaveConverter::SaveConverter(int save, Ruleset *rule) : _rule(rule)
 {
 	std::stringstream ssFolder, ssPath;
 	ssFolder << "GAME_" << save;
-	ssPath << Options::getUserFolder() << "/" << ssFolder.str();
+	ssPath << Options::getMasterUserFolder() << "/" << ssFolder.str();
 	_saveName = ssFolder.str();
 	_savePath = ssPath.str();
 	ssPath << "/SAVEINFO.DAT";
@@ -186,7 +186,7 @@ void SaveConverter::getList(Language *lang, SaveOriginal info[NUM_SAVES])
 
 		int id = i + 1;
 		std::stringstream ss;
-		ss << Options::getUserFolder() << "/GAME_" << id << "/SAVEINFO.DAT";
+		ss << Options::getMasterUserFolder() << "/GAME_" << id << "/SAVEINFO.DAT";
 		std::ifstream datFile(ss.str().c_str(), std::ios::in | std::ios::binary);
 		if (datFile)
 		{
@@ -326,11 +326,16 @@ void SaveConverter::loadDatIGlob()
 	_save->setTime(GameTime(weekday, day, month, _year, hour, minute, second));
 
 	int difficulty = load<int>(data + 0x3C);
+	// if the save was affected by the difficulty bug, this will have a garbage value
+	// tests show this value to be negative, and as a result, rather hilariously,
+	// the game will be reset to beginner.
+	// TODO: when we add the difficulty coefficient, account for TFTD's values here.
+	difficulty = std::min(4, std::max(0, difficulty));
 	_save->setDifficulty((GameDifficulty)difficulty);
 
 	// Fix up the months
 	int monthsPassed = month + (_year - _rule->getStartingTime().getYear()) * 12;
-	for (int i = 0; i < monthsPassed - 1; ++i)
+	for (int i = 0; i < monthsPassed; ++i)
 	{
 		_save->addMonth();
 	}

@@ -20,8 +20,7 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Resource/ResourcePack.h"
-#include "../Engine/Language.h"
-#include "../Engine/Palette.h"
+#include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -75,8 +74,8 @@ UfoDetectedState::UfoDetectedState(Ufo *ufo, GeoscapeState *state, bool detected
 	_txtUfo = new Text(207, 17, 28, 53);
 	_txtDetected = new Text(100, 9, 28, 69);
 	_txtHyperwave = new Text(214, 17, 21, 44);
-	_lstInfo = new TextList(207, 32, 28, 80);
-	_lstInfo2 = new TextList(207, 32, 28, 96);
+	_lstInfo = new TextList(217, 32, 28, 80);
+	_lstInfo2 = new TextList(217, 32, 28, 96);
 
 	if (hyperwave)
 	{
@@ -137,7 +136,7 @@ UfoDetectedState::UfoDetectedState(Ufo *ufo, GeoscapeState *state, bool detected
 	_txtUfo->setBig();
 	_txtUfo->setText(_ufo->getName(_game->getLanguage()));
 
-	_lstInfo->setColumns(2, 87, 120);
+	_lstInfo->setColumns(2, 77, 140);
 	_lstInfo->setDot(true);
 	std::wostringstream ss;
 	ss << L'\x01' << tr(_ufo->getRules()->getSize());
@@ -158,7 +157,7 @@ UfoDetectedState::UfoDetectedState(Ufo *ufo, GeoscapeState *state, bool detected
 	ss << L'\x01' << Text::formatNumber(_ufo->getSpeed());
 	_lstInfo->addRow(2, tr("STR_SPEED").c_str(), ss.str().c_str());
 
-	_lstInfo2->setColumns(2, 87, 120);
+	_lstInfo2->setColumns(2, 77, 140);
 	_lstInfo2->setDot(true);
 	ss.str(L"");
 	ss << L'\x01' << tr(_ufo->getRules()->getType());

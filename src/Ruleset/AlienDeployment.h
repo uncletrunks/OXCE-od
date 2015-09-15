@@ -71,8 +71,9 @@ private:
 	std::string _winCutscene, _loseCutscene;
 	std::string _alert;
 	BriefingData _briefingData;
-	std::string _markerName;
+	std::string _markerName, _objectivePopup, _objectiveCompleteText, _objectiveFailedText;
 	int _markerIcon, _durationMin, _durationMax, _minDepth, _maxDepth, _minSiteDepth, _maxSiteDepth;
+	int _objectiveType, _objectivesRequired, _objectiveCompleteScore, _objectiveFailedScore, _despawnPenalty, _points;
 public:
 	/// Creates a blank Alien Deployment ruleset.
 	AlienDeployment(const std::string &type);
@@ -126,6 +127,20 @@ public:
 	int getMinSiteDepth() const;
 	/// Gets the maximum site depth.
 	int getMaxSiteDepth() const;
+	/// Gets the target type for this mission.
+	int getObjectiveType() const;
+	/// Gets a fixed number of objectives requires (if any).
+	int getObjectivesRequired() const;
+	/// Gets the string to pop up when the mission objectives are complete.
+	const std::string &getObjectivePopup() const;
+	/// Fills out the objective complete info.
+	bool getObjectiveCompleteInfo(std::string &text, int &score);
+	/// Fills out the objective failed info.
+	bool getObjectiveFailedInfo(std::string &text, int &score);
+	/// Gets the score penalty XCom receives for ignoring this site.
+	const int getDespawnPenalty() const;
+	/// Gets the (half hourly) score penalty XCom receives for this site existing.
+	const int getPoints() const;
 };
 
 }

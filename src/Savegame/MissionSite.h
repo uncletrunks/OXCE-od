@@ -41,7 +41,7 @@ private:
 	int _id, _texture;
 	size_t _secondsRemaining;
 	std::string _race, _city;
-	bool _inBattlescape;
+	bool _inBattlescape, _detected;
 public:
 	/// Creates a mission site.
 	MissionSite(const RuleAlienMission *rules, const AlienDeployment *deployment, const AlienDeployment *alienWeaponDeploy = 0);
@@ -87,6 +87,10 @@ public:
 	std::string getCity() const;
 	/// Sets the mission site's city.
 	void setCity(const std::string &city);
+	/// Gets the mission site's detection state.
+	bool getDetected();
+	/// Sets the mission site's detection state.
+	void setDetected(bool detected);
 };
 
 }

@@ -18,7 +18,6 @@
  */
 #include "ListLoadOriginalState.h"
 #include <sstream>
-#include "../Engine/Logger.h"
 #include "../Savegame/SaveConverter.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -26,8 +25,7 @@
 #include "../Engine/Screen.h"
 #include "../Engine/Action.h"
 #include "../Resource/ResourcePack.h"
-#include "../Engine/Language.h"
-#include "../Engine/Palette.h"
+#include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -51,7 +49,7 @@ ListLoadOriginalState::ListLoadOriginalState()
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnNew = new TextButton(80, 16, 60, 172);
 	_btnCancel = new TextButton(80, 16, 180, 172);
-	_txtTitle = new Text(310, 17, 5, 8);
+	_txtTitle = new Text(310, 17, 5, 7);
 	_txtName = new Text(160, 9, 36, 24);
 	_txtTime = new Text(30, 9, 195, 24);
 	_txtDate = new Text(90, 9, 225, 24);

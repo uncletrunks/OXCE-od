@@ -41,6 +41,7 @@ private:
 	CraftWeaponProjectileType _projectileType;
 	std::string _launcher, _clip;
 	RuleCraftStats _stats;
+	bool _underwaterOnly;
 public:
 	/// Creates a blank craft weapon ruleset.
 	RuleCraftWeapon(const std::string &type);
@@ -82,6 +83,8 @@ public:
 	int getWeaponType() const;
 	/// Gets bonus stats given by this weapon.
 	const RuleCraftStats& getBonusStats() const;
+	/// Is this item restricted to use underwater?
+	bool isWaterOnly() const;
 };
 
 }

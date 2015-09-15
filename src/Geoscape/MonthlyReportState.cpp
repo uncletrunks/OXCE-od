@@ -22,8 +22,7 @@
 #include <cmath>
 #include "../Engine/Game.h"
 #include "../Resource/ResourcePack.h"
-#include "../Engine/Language.h"
-#include "../Engine/Palette.h"
+#include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -36,7 +35,6 @@
 #include "../Savegame/Country.h"
 #include "../Ruleset/RuleCountry.h"
 #include "Globe.h"
-#include "../Savegame/AlienBase.h"
 #include "../Engine/Options.h"
 #include "../Menu/CutsceneState.h"
 #include "../Menu/SaveGameState.h"
@@ -132,7 +130,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	case 12: m = "STR_DEC"; break;
 	default: m = "";
 	}
-	int difficulty_threshold = 100*((int)(_game->getSavedGame()->getDifficulty())-9);
+	int difficulty_threshold = 100*(_game->getSavedGame()->getDifficultyCoefficient()-9);
 
 	_txtMonth->setText(tr("STR_MONTH").arg(tr(m)).arg(year));
 

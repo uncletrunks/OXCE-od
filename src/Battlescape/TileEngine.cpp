@@ -21,12 +21,9 @@
 #include <cmath>
 #include <climits>
 #include <set>
-#include <functional>
 #include "TileEngine.h"
 #include <SDL.h>
-#include "BattleAIState.h"
 #include "AlienBAIState.h"
-#include "UnitTurnBState.h"
 #include "Map.h"
 #include "Camera.h"
 #include "../Savegame/SavedGame.h"
@@ -35,16 +32,12 @@
 #include "../Savegame/Tile.h"
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/BattleUnit.h"
-#include "../Savegame/Soldier.h"
 #include "../Engine/RNG.h"
 #include "BattlescapeState.h"
 #include "../Ruleset/MapDataSet.h"
 #include "../Ruleset/MapData.h"
 #include "../Ruleset/Unit.h"
-#include "../Ruleset/RuleSoldier.h"
 #include "../Ruleset/Armor.h"
-#include "../Ruleset/Ruleset.h"
-#include "../Resource/ResourcePack.h"
 #include "Pathfinding.h"
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
@@ -913,7 +906,7 @@ TileEngine::ReactionScore *TileEngine::getReactor(std::vector<TileEngine::Reacti
 	ReactionScore *best = 0;
 	for (std::vector<ReactionScore>::iterator i = spotters.begin(); i != spotters.end(); ++i)
 	{
-		if (!(*i).unit->isOut() && (!best || (*i).reactionScore > best->reactionScore))
+		if (!(*i).unit->isOut() && !(*i).unit->getRespawn() && (!best || (*i).reactionScore > best->reactionScore))
 		{
 			best = &(*i);
 		}
@@ -1197,7 +1190,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 					_save->getModuleMap()[(center.x/16)/10][(center.y/16)/10].second--;
 				}
 			}
-			if (tile->damage(part, tileDmg))
+			if (tile->damage(part, tileDmg, _save->getObjectiveType()))
 			{
 				_save->addDestroyedObjective();
 			}
@@ -1477,7 +1470,7 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 				currentpart2 = tiles[i]->getMapData(currentpart)->getDataset()->getObjects()->at(diemcd)->getObjectType();
 			else
 				currentpart2 = currentpart;
-			if (tiles[i]->destroy(currentpart))
+			if (tiles[i]->destroy(currentpart, _save->getObjectiveType()))
 				objective = true;
 			currentpart =  currentpart2;
 			if (tiles[i]->getMapData(currentpart)) // take new values
@@ -1906,8 +1899,6 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 	int TUCost = 0;
 	int size = unit->getArmor()->getSize();
 	int z = unit->getTile()->getTerrainLevel() < -12 ? 1 : 0; // if we're standing on stairs, check the tile above instead.
-	if (size > 1 && rClick)
-		return door;
 	if (dir == -1)
 	{
 		dir = unit->getDirection();

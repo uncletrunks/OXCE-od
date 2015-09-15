@@ -19,7 +19,6 @@
 #define _USE_MATH_DEFINES
 #include "Craft.h"
 #include <cmath>
-#include <sstream>
 #include "../Engine/Language.h"
 #include "../Engine/RNG.h"
 #include "../Ruleset/RuleCraft.h"

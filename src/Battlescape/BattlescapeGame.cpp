@@ -19,13 +19,11 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <sstream>
-#include <typeinfo>
 #include "BattlescapeGame.h"
 #include "BattlescapeState.h"
 #include "Map.h"
 #include "Camera.h"
 #include "NextTurnState.h"
-#include "AbortMissionState.h"
 #include "BattleState.h"
 #include "UnitTurnBState.h"
 #include "UnitWalkBState.h"
@@ -40,6 +38,7 @@
 #include "AlienBAIState.h"
 #include "CivilianBAIState.h"
 #include "Pathfinding.h"
+#include "../Ruleset/AlienDeployment.h"
 #include "../Engine/Game.h"
 #include "../Engine/Language.h"
 #include "../Engine/Sound.h"
@@ -574,7 +573,7 @@ void BattlescapeGame::endTurn()
 
 	tallyUnits(liveAliens, liveSoldiers);
 
-	if (_save->allObjectivesDestroyed())
+	if (_save->allObjectivesDestroyed() && _save->getObjectiveType() == MUST_DESTROY)
 	{
 		_parentState->finishBattle(false, liveSoldiers);
 		return;
@@ -616,6 +615,7 @@ void BattlescapeGame::checkForCasualties(BattleItem *murderweapon, BattleUnit *m
 {
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
+		if ((*j)->getStatus() == STATUS_IGNORE_ME) continue;
 		if ((*j)->getHealth() <= 0 && (*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING)
 		{
 			BattleUnit *victim = (*j);
@@ -729,6 +729,21 @@ void BattlescapeGame::showInfoBoxQueue()
 	_infoboxQueue.clear();
 }
 
+/**
+ * Sets up a mission complete notification.
+ */
+void BattlescapeGame::missionComplete()
+{
+	Game *game = _parentState->getGame();
+	if (game->getRuleset()->getDeployment(_save->getMissionType()))
+	{
+		std::string missionComplete = game->getRuleset()->getDeployment(_save->getMissionType())->getObjectivePopup();
+		if (missionComplete != "")
+		{
+			_infoboxQueue.push_back(new InfoboxOKState(game->getLanguage()->getString(missionComplete)));
+		}
+	}
+}
 /**
  * Handles the result of non target actions, like priming a grenade.
  */
@@ -2145,14 +2160,20 @@ void BattlescapeGame::tallyUnits(int &liveAliens, int &liveSoldiers)
 bool BattlescapeGame::convertInfected()
 {
 	bool retVal = false;
-	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
+	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if ((*j)->getHealth() > 0 && (*j)->getRespawn())
+		if ((*i)->getHealth() > 0 && (*i)->getHealth() >= (*i)->getStunlevel() && (*i)->getRespawn())
 		{
 			retVal = true;
-			(*j)->setRespawn(false);
-			convertUnit((*j), (*j)->getSpawnUnit());
-			j = _save->getUnits()->begin();
+			(*i)->setRespawn(false);
+			if (Options::battleNotifyDeath && (*i)->getFaction() == FACTION_PLAYER)
+			{
+				Game *game = _parentState->getGame();
+				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_HAS_BEEN_KILLED", (*i)->getGender()).arg((*i)->getName(game->getLanguage()))));
+			}
+
+			convertUnit((*i), (*i)->getSpawnUnit());
+			i = _save->getUnits()->begin();
 		}
 	}
 	return retVal;

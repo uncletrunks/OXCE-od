@@ -220,6 +220,8 @@ public:
 	void playSound(int sound, const Position &pos);
 	/// Play sound on battlefield.
 	void playSound(int sound);
+	/// Sets up a mission complete notification.
+	void missionComplete();
 };
 
 }

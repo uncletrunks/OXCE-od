@@ -30,7 +30,7 @@ namespace OpenXcom
  * @param rules Pointer to ruleset.
  * @param id The id of the item.
  */
-BattleItem::BattleItem(RuleItem *rules, int *id) : _id(*id), _rules(rules), _owner(0), _previousOwner(0), _unit(0), _tile(0), _inventorySlot(0), _inventoryX(0), _inventoryY(0), _ammoItem(0), _fuseTimer(-1), _ammoQuantity(0), _painKiller(0), _heal(0), _stimulant(0), _XCOMProperty(false), _droppedOnAlienTurn(false)
+BattleItem::BattleItem(RuleItem *rules, int *id) : _id(*id), _rules(rules), _owner(0), _previousOwner(0), _unit(0), _tile(0), _inventorySlot(0), _inventoryX(0), _inventoryY(0), _ammoItem(0), _fuseTimer(-1), _ammoQuantity(0), _painKiller(0), _heal(0), _stimulant(0), _XCOMProperty(false), _droppedOnAlienTurn(false), _isAmmo(false)
 {
 	(*id)++;
 	if (_rules)
@@ -415,6 +415,10 @@ int BattleItem::setAmmoItem(BattleItem *item)
 
 	if (item == 0)
 	{
+		if (_ammoItem)
+		{
+			_ammoItem->setIsAmmo(false);
+		}
 		_ammoItem = 0;
 		return 0;
 	}
@@ -427,6 +431,7 @@ int BattleItem::setAmmoItem(BattleItem *item)
 		if (*i == item->getRules()->getType())
 		{
 			_ammoItem = item;
+			item->setIsAmmo(true);
 			return 0;
 		}
 	}
@@ -589,6 +594,24 @@ void BattleItem::convertToCorpse(RuleItem *rules)
 bool BattleItem::getGlow() const
 {
 	return _rules->getBattleType() == BT_FLARE && (_rules->getFuseTimerType() == BFT_NONE || _fuseTimer >= 0);
+}
+
+/**
+ * Sets the flag on this item indicating whether or not it is a clip used in a weapon.
+ * @param ammo set the ammo flag to this.
+ */
+void BattleItem::setIsAmmo(bool ammo)
+{
+	_isAmmo = ammo;
+}
+
+/**
+ * Checks if this item is loaded into a weapon.
+ * @return if this is loaded into a weapon or not.
+ */
+bool BattleItem::isAmmo()
+{
+	return _isAmmo;
 }
 
 }

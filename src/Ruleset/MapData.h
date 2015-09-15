@@ -42,7 +42,7 @@ enum SpecialTileType{TILE=0,
 					END_POINT,
 					MUST_DESTROY};
 
-enum MovementType{ MT_WALK, MT_FLY, MT_SLIDE, MT_FLOAT};
+enum MovementType{ MT_WALK, MT_FLY, MT_SLIDE, MT_FLOAT, MT_SINK};
 enum VoxelType{ V_EMPTY = -1, V_FLOOR, V_WESTWALL, V_NORTHWALL, V_OBJECT, V_UNIT, V_OUTOFBOUNDS };
 enum MapDataType { O_FLOOR, O_WESTWALL, O_NORTHWALL, O_OBJECT };
 
@@ -93,10 +93,12 @@ public:
 	int getYOffset() const;
 	/// Sets the offset on the Y axis for drawing this object.
 	void setYOffset(int value);
-	/// Gets info about special tile types
-	SpecialTileType getSpecialType() const;
+	/// Set the type of tile.
+	void setObjectType(int type);
 	/// Get the type of tile.
 	int getObjectType() const;
+	/// Gets info about special tile types
+	SpecialTileType getSpecialType() const;
 	/// Sets a special tile type and object type.
 	void setSpecialType(int value, int otype);
 	/// Gets the TU cost to move over the object.

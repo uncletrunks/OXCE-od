@@ -20,8 +20,7 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Resource/ResourcePack.h"
-#include "../Engine/Language.h"
-#include "../Engine/Palette.h"
+#include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -29,6 +28,7 @@
 #include "../Interface/TextEdit.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Action.h"
+#include "../Engine/Palette.h"
 #include "../Savegame/Craft.h"
 #include "../Ruleset/RuleCraft.h"
 #include "../Savegame/CraftWeapon.h"
@@ -185,6 +185,7 @@ void CraftInfoState::init()
 
 	_edtCraft->setText(_craft->getName(_game->getLanguage()));
 
+	_sprite->clear();
 	SurfaceSet *texture = _game->getResourcePack()->getSurfaceSet("BASEBITS.PCK");
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->setX(0);
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->setY(0);
@@ -249,6 +250,7 @@ void CraftInfoState::init()
 	{
 		CraftWeapon *w1 = _craft->getWeapons()->at(i);
 
+		_weapon[i]->clear();
 		if (w1 != 0)
 		{
 			Surface *frame = texture->getFrame(w1->getRules()->getSprite() + 48);
@@ -274,7 +276,6 @@ void CraftInfoState::init()
 		}
 		else
 		{
-			_weapon[i]->clear();
 			_txtWName[i]->setText(L"");
 			_txtWAmmo[i]->setText(L"");
 		}

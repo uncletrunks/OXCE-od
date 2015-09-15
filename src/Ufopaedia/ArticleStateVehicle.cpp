@@ -17,12 +17,11 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Ufopaedia.h"
 #include "../Ruleset/ArticleDefinition.h"
 #include "ArticleStateVehicle.h"
 #include <sstream>
 #include "../Engine/Game.h"
-#include "../Engine/Language.h"
+#include "../Engine/LocalizedText.h"
 #include "../Engine/Palette.h"
 #include "../Engine/Surface.h"
 #include "../Resource/ResourcePack.h"
@@ -115,9 +114,17 @@ namespace OpenXcom
 			_lstStats->addRow(2, tr("STR_WEAPON_POWER").c_str(), ss8.str().c_str());
 
 			_lstStats->addRow(2, tr("STR_AMMUNITION").c_str(), tr(ammo->getName()).c_str());
-			
+
 			std::wostringstream ss9;
-			ss9 << ammo->getClipSize();
+			if (item->getClipSize() > 0)
+			{
+				ss9 << item->getClipSize();
+			}
+			else
+			{
+				ss9 << ammo->getClipSize();
+			}
+
 			_lstStats->addRow(2, tr("STR_ROUNDS").c_str(), ss9.str().c_str());
 			
 			_txtInfo->setY(138);

@@ -31,7 +31,6 @@
 #include "../Engine/Exception.h"
 #include "../Engine/Options.h"
 #include "../Engine/CrossPlatform.h"
-#include "../Engine/FileMap.h"
 #include "SavedBattleGame.h"
 #include "SerializationHelper.h"
 #include "GameTime.h"
@@ -191,35 +190,13 @@ std::vector<SaveInfo> SavedGame::getList(Language *lang, bool autoquick)
 {
 	std::vector<SaveInfo> info;
 	std::string curMaster = Options::getActiveMaster();
+	std::vector<std::string> saves = CrossPlatform::getFolderContents(Options::getMasterUserFolder(), "sav");
 
 	if (autoquick)
 	{
-		std::vector<std::string> saves = CrossPlatform::getFolderContents(Options::getUserFolder(), "asav");
-		for (std::vector<std::string>::iterator i = saves.begin(); i != saves.end(); ++i)
-		{
-			try
-			{
-				SaveInfo saveInfo = getSaveInfo(*i, lang);
-				if (!_isCurrentGameType(saveInfo, curMaster))
-				{
-					continue;
-				}
-				info.push_back(saveInfo);
-			}
-			catch (Exception &e)
-			{
-				Log(LOG_ERROR) << e.what();
-				continue;
-			}
-			catch (YAML::Exception &e)
-			{
-				Log(LOG_ERROR) << e.what();
-				continue;
-			}
-		}
+		std::vector<std::string> asaves = CrossPlatform::getFolderContents(Options::getMasterUserFolder(), "asav");
+		saves.insert(saves.begin(), asaves.begin(), asaves.end());
 	}
-
-	std::vector<std::string> saves = CrossPlatform::getFolderContents(Options::getUserFolder(), "sav");
 	for (std::vector<std::string>::iterator i = saves.begin(); i != saves.end(); ++i)
 	{
 		try
@@ -253,7 +230,7 @@ std::vector<SaveInfo> SavedGame::getList(Language *lang, bool autoquick)
  */
 SaveInfo SavedGame::getSaveInfo(const std::string &file, Language *lang)
 {
-	std::string fullname = Options::getUserFolder() + file;
+	std::string fullname = Options::getMasterUserFolder() + file;
 	YAML::Node doc = YAML::LoadFile(fullname);
 	SaveInfo save;
 
@@ -324,7 +301,7 @@ SaveInfo SavedGame::getSaveInfo(const std::string &file, Language *lang)
  */
 void SavedGame::load(const std::string &filename, Ruleset *rule)
 {
-	std::string s = Options::getUserFolder() + filename;
+	std::string s = Options::getMasterUserFolder() + filename;
 	std::vector<YAML::Node> file = YAML::LoadAllFromFile(s);
 	if (file.empty())
 	{
@@ -496,7 +473,7 @@ void SavedGame::load(const std::string &filename, Ruleset *rule)
  */
 void SavedGame::save(const std::string &filename) const
 {
-	std::string s = Options::getUserFolder() + filename;
+	std::string s = Options::getMasterUserFolder() + filename;
 	std::ofstream sav(s.c_str());
 	if (!sav)
 	{
@@ -632,6 +609,13 @@ GameDifficulty SavedGame::getDifficulty() const
 	return _difficulty;
 }
 
+int SavedGame::getDifficultyCoefficient() const
+{
+	if (_difficulty > 4)
+		return Ruleset::DIFFICULTY_COEFFICIENT[4];
+
+	return Ruleset::DIFFICULTY_COEFFICIENT[_difficulty];
+}
 /**
  * Changes the game's difficulty to a new level.
  * @param difficulty New difficulty.
