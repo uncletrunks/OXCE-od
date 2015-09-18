@@ -118,6 +118,8 @@ void Pathfinding::calculate(BattleUnit *unit, Position endPosition, BattleUnit *
 		endPosition.z--;
 		destinationTile = _save->getTile(endPosition);
 	}
+	// check if destination is not blocked
+	if (isBlocked(destinationTile, O_FLOOR, target) || isBlocked(destinationTile, O_OBJECT, target)) return;
 	int size = unit->getArmor()->getSize()-1;
 	if (size >= 1)
 	{
@@ -273,7 +275,17 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 			// this means the destination is probably outside the map
 			if (startTile == 0 || destinationTile == 0)
 				return 255;
-
+			if (!x && !y && _movementType != MT_FLY && canFallDown(startTile, size+1))
+			{
+				if (direction != DIR_DOWN)
+				{
+					return 255; //cannot walk on air
+				}
+				else
+				{
+					fellDown = true;
+				}
+			}
 			if (direction < DIR_UP && startTile->getTerrainLevel() > - 16)
 			{
 				// check if we can go this way
@@ -333,7 +345,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 				if (startTile->getTerrainLevel() - destinationTile->getTerrainLevel() > 8)
 					return 255;
 			}
-			else if (direction >= DIR_UP)
+			else if (direction >= DIR_UP && !fellDown)
 			{
 				// check if we can go up or down through gravlift or fly
 				if (validateUpDown(unit, startPosition + offset, direction))
@@ -351,13 +363,9 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 			{
 				numberOfPartsFalling++;
 
-				if (numberOfPartsFalling == (size+1)*(size+1))
+				if (numberOfPartsFalling == (size+1)*(size+1) && direction != DIR_DOWN)
 				{
-					*endPosition = startPosition + Position(0,0,-1);
-					destinationTile = _save->getTile(*endPosition + offset);
-					belowDestination = _save->getTile(*endPosition + Position(x,y,-1));
-					fellDown = true;
-					direction = DIR_DOWN;
+						return false;
 				}
 			}
 			startTile = _save->getTile(startTile->getPosition() + verticalOffset);

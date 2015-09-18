@@ -370,10 +370,9 @@ Ruleset::~Ruleset()
 	}
 	for (std::map<std::string, std::vector<MapScript*> >::iterator i = _mapScripts.begin(); i != _mapScripts.end(); ++i)
 	{
-		for (std::vector<MapScript*>::iterator j = (*i).second.begin(); j != (*i).second.end();)
+		for (std::vector<MapScript*>::iterator j = (*i).second.begin(); j != (*i).second.end(); ++j)
 		{
 			delete *j;
-			j = (*i).second.erase(j);
 		}
 	}
 	for (std::map<std::string, RuleVideo *>::const_iterator i = _videos.begin(); i != _videos.end(); ++i)
@@ -383,6 +382,18 @@ Ruleset::~Ruleset()
 	for (std::map<std::string, RuleMusic *>::const_iterator i = _musics.begin(); i != _musics.end(); ++i)
 	{
 		delete i->second;
+	}
+	for (std::map<std::string, RuleMissionScript*>::const_iterator i = _missionScripts.begin(); i != _missionScripts.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, SoundDefinition*>::const_iterator i = _soundDefs.begin(); i != _soundDefs.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::vector<StatString*>::const_iterator i = _statStrings.begin(); i != _statStrings.end(); ++i)
+	{
+		delete (*i);
 	}
 }
 
@@ -1559,7 +1570,7 @@ const GameTime &Ruleset::getStartingTime() const
  * @param id The ID of the MCDPatch we want.
  * @return The MCDPatch based on ID, or 0 if none defined.
  */
-MCDPatch *Ruleset::getMCDPatch(const std::string id) const
+MCDPatch *Ruleset::getMCDPatch(const std::string &id) const
 {
 	std::map<std::string, MCDPatch*>::const_iterator i = _MCDPatches.find(id);
 	if (_MCDPatches.end() != i) return i->second; else return 0;
@@ -1804,7 +1815,7 @@ Soldier *Ruleset::genSoldier(SavedGame *save) const
  * Gets the name of the item to be used as alien fuel.
  * @return the name of the fuel.
  */
-const std::string Ruleset::getAlienFuelName() const
+std::string Ruleset::getAlienFuelName() const
 {
 	return _alienFuel.first;
 }
@@ -1813,7 +1824,7 @@ const std::string Ruleset::getAlienFuelName() const
  * Gets the amount of alien fuel to recover.
  * @return the amount to recover.
  */
-const int Ruleset::getAlienFuelQuantity() const
+int Ruleset::getAlienFuelQuantity() const
 {
 	return _alienFuel.second;
 }
@@ -1822,7 +1833,7 @@ const int Ruleset::getAlienFuelQuantity() const
  * Gets name of font collection.
  * @return the name of YAML-file with font data
  */
-const std::string Ruleset::getFontName() const
+std::string Ruleset::getFontName() const
 {
 	return _fontName;
 }
@@ -1859,7 +1870,7 @@ const std::string Ruleset::getFontName() const
  * @param id the interface we want info on.
  * @return the interface.
  */
-RuleInterface *Ruleset::getInterface(const std::string id) const
+RuleInterface *Ruleset::getInterface(const std::string &id) const
 {
 	std::map<std::string, RuleInterface*>::const_iterator i = _interfaces.find(id);
 	if (_interfaces.end() != i) return i->second; else return 0;
@@ -1910,7 +1921,7 @@ RuleMissionScript *Ruleset::getMissionScript(const std::string &name) const
 	std::map<std::string, RuleMissionScript*>::const_iterator i = _missionScripts.find(name);
 	if (_missionScripts.end() != i) return i->second; else return 0;
 }
-const std::string Ruleset::getFinalResearch() const
+std::string Ruleset::getFinalResearch() const
 {
 	return _finalResearch;
 }

@@ -1216,97 +1216,49 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 		}
 	}
 
-	unit->abortTurn(); //makes the unit go to status STANDING :p
 
 	int flee = RNG::generate(0,100);
 	BattleAction ba;
 	ba.actor = unit;
-	switch (status)
+	if (status == STATUS_PANICKING && flee <= 50) // 1/2 chance to freeze and 1/2 chance try to flee, STATUS_BERSERK is handled in the panic state.
 	{
-	case STATUS_PANICKING: // 1/2 chance to freeze and 1/2 chance try to flee
-		if (flee <= 50)
+		BattleItem *item = unit->getItem("STR_RIGHT_HAND");
+		if (item)
 		{
-			BattleItem *item = unit->getItem("STR_RIGHT_HAND");
-			if (item)
-			{
-				dropItem(unit->getPosition(), item, false, true);
-			}
-			item = unit->getItem("STR_LEFT_HAND");
-			if (item)
-			{
-				dropItem(unit->getPosition(), item, false, true);
-			}
-			unit->setCache(0);
-			// let's try a few times to get a tile to run to.
-			for (int i= 0; i < 20; i++)
-			{
-				ba.target = Position(unit->getPosition().x + RNG::generate(-5,5), unit->getPosition().y + RNG::generate(-5,5), unit->getPosition().z);
-
-				if (i >= 10 && ba.target.z > 0) // if we've had more than our fair share of failures, try going down.
-				{
-					ba.target.z--;
-					if (i >= 15 && ba.target.z > 0) // still failing? try further down.
-					{
-						ba.target.z--;
-					}
-				}
-				if (_save->getTile(ba.target)) // sanity check the tile.
-				{
-					_save->getPathfinding()->calculate(ba.actor, ba.target);
-					if (_save->getPathfinding()->getStartDirection() != -1) // sanity check the path.
-					{
-						statePushBack(new UnitWalkBState(this, ba));
-						break;
-					}
-				}
-			}
+			dropItem(unit->getPosition(), item, false, true);
 		}
-		break;
-	case STATUS_BERSERK: // berserk - do some weird turning around and then aggro towards an enemy unit or shoot towards random place
-		ba.type = BA_TURN;
-		for (int i= 0; i < 4; i++)
+		item = unit->getItem("STR_LEFT_HAND");
+		if (item)
+		{
+			dropItem(unit->getPosition(), item, false, true);
+		}
+		unit->setCache(0);
+		// let's try a few times to get a tile to run to.
+		for (int i= 0; i < 20; i++)
 		{
 			ba.target = Position(unit->getPosition().x + RNG::generate(-5,5), unit->getPosition().y + RNG::generate(-5,5), unit->getPosition().z);
-			statePushBack(new UnitTurnBState(this, ba, false));
-		}
-		for (std::vector<BattleUnit*>::iterator j = unit->getVisibleUnits()->begin(); j != unit->getVisibleUnits()->end(); ++j)
-		{
-			ba.target = (*j)->getPosition();
-			statePushBack(new UnitTurnBState(this, ba, false));
-		}
-		if (_save->getTile(ba.target) != 0)
-		{
-			ba.weapon = unit->getMainHandWeapon();
-			if (_save->canUseWeapon(ba.weapon, ba.actor))
+
+			if (i >= 10 && ba.target.z > 0) // if we've had more than our fair share of failures, try going down.
 			{
-				if (ba.weapon->getRules()->getBattleType() == BT_FIREARM)
+				ba.target.z--;
+				if (i >= 15 && ba.target.z > 0) // still failing? try further down.
 				{
-					ba.type = BA_SNAPSHOT;
-					ba.updateTU();
-					// fire shots until unit runs out of TUs
-					for (int i= 0; i < 10; i++)
-					{
-						statePushBack(new ProjectileFlyBState(this, ba));
-					}
+					ba.target.z--;
 				}
-				else if (ba.weapon->getRules()->getBattleType() == BT_GRENADE)
+			}
+			if (_save->getTile(ba.target)) // sanity check the tile.
+			{
+				_save->getPathfinding()->calculate(ba.actor, ba.target);
+				if (_save->getPathfinding()->getStartDirection() != -1) // sanity check the path.
 				{
-					if (ba.weapon->getFuseTimer() == -1)
-					{
-						ba.weapon->setFuseTimer(ba.weapon->getRules()->getFuseTimerDefault());
-					}
-					ba.type = BA_THROW;
-					statePushBack(new ProjectileFlyBState(this, ba));
+					statePushBack(new UnitWalkBState(this, ba));
+					break;
 				}
 			}
 		}
-		ba.type = BA_NONE;
-		break;
-	default: break;
 	}
 	// Time units can only be reset after everything else occurs
 	statePushBack(new UnitPanicBState(this, ba.actor));
-	unit->moraleChange(+15);
 
 	return true;
 }
@@ -1550,6 +1502,8 @@ void BattlescapeGame::launchAction()
  */
 void BattlescapeGame::psiButtonAction()
 {
+	if (!_currentAction.waypoints.empty()) // in case waypoints were set with a blaster launcher, avoid accidental misclick
+		return;
 	BattleItem *item = _save->getSelectedUnit()->getSpecialWeapon(BT_PSIAMP);
 	_currentAction.type = BA_NONE;
 	if (item->getRules()->getCostPanic().Time > 0)
@@ -1987,7 +1941,6 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
  */
 int BattlescapeGame::takeItemFromGround(BattleItem* item, BattleAction *action)
 {
-	const int unhandledError = -1;
 	const int success = 0;
 	const int notEnoughTimeUnits = 1;
 	const int notEnoughSpace = 2;
@@ -2025,8 +1978,6 @@ int BattlescapeGame::takeItemFromGround(BattleItem* item, BattleAction *action)
 			}
 		}
 	}
-	// shouldn't ever end up here
-	return unhandledError;
 }
 
 

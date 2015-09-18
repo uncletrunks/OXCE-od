@@ -29,6 +29,7 @@
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
 #include "../Engine/Sound.h"
+#include "../Ruleset/Ruleset.h"
 
 namespace OpenXcom
 {
@@ -188,9 +189,11 @@ OptionsAudioState::OptionsAudioState(OptionsOrigin origin) : OptionsBaseState(or
 	_txtMusicFormat->setVisible(_origin == OPT_MENU);
 	_cbxMusicFormat->setVisible(_origin == OPT_MENU);
 	_txtCurrentMusic->setVisible(_origin == OPT_MENU);
-	_txtSoundFormat->setVisible(_origin == OPT_MENU);
-	_cbxSoundFormat->setVisible(_origin == OPT_MENU);
-	_txtCurrentSound->setVisible(_origin == OPT_MENU);
+
+	// These options only apply to UFO
+	_txtSoundFormat->setVisible(_origin == OPT_MENU && _game->getRuleset()->getSoundDefinitions()->empty());
+	_cbxSoundFormat->setVisible(_origin == OPT_MENU && _game->getRuleset()->getSoundDefinitions()->empty());
+	_txtCurrentSound->setVisible(_origin == OPT_MENU && _game->getRuleset()->getSoundDefinitions()->empty());
 }
 
 /**

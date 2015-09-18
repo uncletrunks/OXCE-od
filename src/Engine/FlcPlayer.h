@@ -25,7 +25,6 @@
 #define OPENXCOM_FLCPLAYER_H
 
 #include <SDL.h>
-#include <deque>
 
 namespace OpenXcom
 {
@@ -93,12 +92,6 @@ private:
 
 	AudioData _audioData;
 
-	Uint16 sampleRate;
-
-	SDL_AudioSpec _requestedAudioSpec;
-	SDL_AudioSpec _returnedAudioSpec;
-	SDL_sem *audioVideoSync;
-
 	Game *_game;
 
 	void readU16(Uint16 &dst, const Uint8 *const src);
@@ -130,8 +123,6 @@ private:
 	bool isEndOfFile(Uint8 *pos);
 
 	static void audioCallback(void *userData, Uint8 *stream, int len);
-	static void wakeAudioWaiter(SDL_sem *audioWaiter);
-	static void waitForNextAudioFrame(SDL_sem *audioWaiter);
 
 public:
 

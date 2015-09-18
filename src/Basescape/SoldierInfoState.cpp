@@ -38,6 +38,8 @@
 #include "SellState.h"
 #include "SoldierArmorState.h"
 #include "SackSoldierState.h"
+#include "../Ruleset/Ruleset.h"
+#include "../Ruleset/RuleInterface.h"
 
 namespace OpenXcom
 {
@@ -493,7 +495,7 @@ void SoldierInfoState::init()
  * Disables the soldier input.
  * @param action Pointer to an action.
  */
-void SoldierInfoState::edtSoldierPress(Action *action)
+void SoldierInfoState::edtSoldierPress(Action *)
 {
 	if (_base == 0)
 	{
@@ -505,7 +507,7 @@ void SoldierInfoState::edtSoldierPress(Action *action)
  * Changes the soldier's name.
  * @param action Pointer to an action.
  */
-void SoldierInfoState::edtSoldierChange(Action *action)
+void SoldierInfoState::edtSoldierChange(Action *)
 {
 	_soldier->setName(_edtSoldier->getText());
 }

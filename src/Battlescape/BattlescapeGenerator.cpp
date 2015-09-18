@@ -484,8 +484,15 @@ void BattlescapeGenerator::run()
 	{
 		if (_worldTexture == 0 || _worldTexture->getTerrain()->empty() || !ruleDeploy->getTerrains().empty())
 		{
-			size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() - 1);
-			_terrain = _game->getRuleset()->getTerrain(ruleDeploy->getTerrains().at(pick));
+			if (!ruleDeploy->getTerrains().empty())
+			{
+				size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() - 1);
+				_terrain = _game->getRuleset()->getTerrain(ruleDeploy->getTerrains().at(pick));
+			}
+			else // trouble: no texture and no deployment terrain, most likely scenario is a UFO landing on water: use the first available terrain
+			{
+				_terrain = _game->getRuleset()->getTerrain(_game->getRuleset()->getTerrainList().front());
+			}
 		}
 		else
 		{
@@ -1040,8 +1047,12 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
 	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), difficulty, _save->getDepth());
 	Node *node = 0;
 
+	// safety to avoid index out of bounds errors
+	if (alienRank > 7)
+		alienRank = 7;
 	/* following data is the order in which certain alien ranks spawn on certain node ranks */
 	/* note that they all can fall back to rank 0 nodes - which is scout (outside ufo) */
+
 
 	for (int i = 0; i < 7 && node == 0; ++i)
 	{

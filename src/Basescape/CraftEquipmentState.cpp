@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "CraftEquipmentState.h"
+#include <climits>
 #include <sstream>
 #include <algorithm>
 #include "../Engine/Screen.h"
@@ -42,6 +43,8 @@
 #include "../Battlescape/InventoryState.h"
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Ruleset/Ruleset.h"
+#include "../Ruleset/RuleInterface.h"
 
 namespace OpenXcom
 {

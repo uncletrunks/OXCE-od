@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "OptionsModsState.h"
+#include <climits>
 #include <algorithm>
 #include "../Engine/Game.h"
 #include "../Resource/ResourcePack.h"
@@ -24,6 +25,7 @@
 #include "../Interface/Window.h"
 #include "../Interface/TextList.h"
 #include "../Interface/Text.h"
+#include "../Interface/ComboBox.h"
 #include "../Engine/Options.h"
 #include "../Engine/Action.h"
 

@@ -26,7 +26,7 @@ namespace OpenXcom
  * RuleMissionScript: the rules for the alien mission progression.
  * Each script element is independant, and the saved game will probe the list of these each month to determine what's going to happen.
  */
-RuleMissionScript::RuleMissionScript(const std::string type) : _type(type), _firstMonth(0), _lastMonth(-1), _label(0), _executionOdds(100),
+RuleMissionScript::RuleMissionScript(const std::string &type) : _type(type), _firstMonth(0), _lastMonth(-1), _label(0), _executionOdds(100),
 															_targetBaseOdds(0), _minDifficulty(0), _maxRuns(-1), _avoidRepeats(0), _delay(0), 
 															_useTable(true), _siteType(false)
 {
@@ -37,20 +37,17 @@ RuleMissionScript::RuleMissionScript(const std::string type) : _type(type), _fir
  */
 RuleMissionScript::~RuleMissionScript()
 {
-	for (std::vector<std::pair<size_t, WeightedOptions*> >::iterator i = _missionWeights.begin(); i != _missionWeights.end();)
+	for (std::vector<std::pair<size_t, WeightedOptions*> >::iterator i = _missionWeights.begin(); i != _missionWeights.end(); ++i)
 	{
 		delete i->second;
-		i = _missionWeights.erase(i);
 	}
-	for (std::vector<std::pair<size_t, WeightedOptions*> >::iterator i = _raceWeights.begin(); i != _raceWeights.end();)
+	for (std::vector<std::pair<size_t, WeightedOptions*> >::iterator i = _raceWeights.begin(); i != _raceWeights.end(); ++i)
 	{
 		delete i->second;
-		i = _raceWeights.erase(i);
 	}
-	for (std::vector<std::pair<size_t, WeightedOptions*> >::iterator i = _regionWeights.begin(); i != _regionWeights.end();)
+	for (std::vector<std::pair<size_t, WeightedOptions*> >::iterator i = _regionWeights.begin(); i != _regionWeights.end(); ++i)
 	{
 		delete i->second;
-		i = _regionWeights.erase(i);
 	}
 }
 
@@ -111,7 +108,7 @@ void RuleMissionScript::load(const YAML::Node& node)
  * Gets the name of this command.
  * @return the name of the command.
  */
-const std::string RuleMissionScript::getType() const
+std::string RuleMissionScript::getType() const
 {
 	return _type;
 }
@@ -119,7 +116,7 @@ const std::string RuleMissionScript::getType() const
 /**
  * @return the first month this script should run.
  */
-const int RuleMissionScript::getFirstMonth() const
+int RuleMissionScript::getFirstMonth() const
 {
 	return _firstMonth;
 }
@@ -127,7 +124,7 @@ const int RuleMissionScript::getFirstMonth() const
 /**
  * @return the last month this script should run.
  */
-const int RuleMissionScript::getLastMonth() const
+int RuleMissionScript::getLastMonth() const
 {
 	return _lastMonth;
 }
@@ -135,7 +132,7 @@ const int RuleMissionScript::getLastMonth() const
 /**
  * @return the label this command uses for conditional tracking.
  */
-const int RuleMissionScript::getLabel() const
+int RuleMissionScript::getLabel() const
 {
 	return _label;
 }
@@ -143,7 +140,7 @@ const int RuleMissionScript::getLabel() const
 /**
  * @return the odds of this command's execution.
  */
-const int RuleMissionScript::getExecutionOdds() const
+int RuleMissionScript::getExecutionOdds() const
 {
 	return _executionOdds;
 }
@@ -151,7 +148,7 @@ const int RuleMissionScript::getExecutionOdds() const
 /**
  * @return the odds of this command targetting a base.
  */
-const int RuleMissionScript::getTargetBaseOdds() const
+int RuleMissionScript::getTargetBaseOdds() const
 {
 	return _targetBaseOdds;
 }
@@ -159,7 +156,7 @@ const int RuleMissionScript::getTargetBaseOdds() const
 /**
  * @return the minimum difficulty for this script to run.
  */
-const int RuleMissionScript::getMinDifficulty() const
+int RuleMissionScript::getMinDifficulty() const
 {
 	return _minDifficulty;
 }
@@ -167,7 +164,7 @@ const int RuleMissionScript::getMinDifficulty() const
 /**
  * @return the maximum runs for scripts tracking our varName.
  */
-const int RuleMissionScript::getMaxRuns() const
+int RuleMissionScript::getMaxRuns() const
 {
 	return _maxRuns;
 }
@@ -175,7 +172,7 @@ const int RuleMissionScript::getMaxRuns() const
 /**
  * @return the number of sites to avoid repeating missions against.
  */
-const int RuleMissionScript::getRepeatAvoidance() const
+int RuleMissionScript::getRepeatAvoidance() const
 {
 	return _avoidRepeats;
 }
@@ -183,7 +180,7 @@ const int RuleMissionScript::getRepeatAvoidance() const
 /**
  * @return the fixed delay on spawning the first wave (if any) to override whatever's written in the mission definition.
  */
-const int RuleMissionScript::getDelay() const
+int RuleMissionScript::getDelay() const
 {
 	return _delay;
 }
@@ -199,7 +196,7 @@ const std::vector<int> &RuleMissionScript::getConditionals() const
 /**
  * @return if this command uses a weighted distribution to pick a race.
  */
-const bool RuleMissionScript::hasRaceWeights() const
+bool RuleMissionScript::hasRaceWeights() const
 {
 	return !_raceWeights.empty();
 }
@@ -207,7 +204,7 @@ const bool RuleMissionScript::hasRaceWeights() const
 /**
  * @return if this command uses a weighted distribution to pick a mission.
  */
-const bool RuleMissionScript::hasMissionWeights() const
+bool RuleMissionScript::hasMissionWeights() const
 {
 	return !_missionWeights.empty();
 }
@@ -215,7 +212,7 @@ const bool RuleMissionScript::hasMissionWeights() const
 /**
  * @return if this command uses a weighted distribution to pick a region.
  */
-const bool RuleMissionScript::hasRegionWeights() const
+bool RuleMissionScript::hasRegionWeights() const
 {
 	return !_regionWeights.empty();
 }
@@ -231,7 +228,7 @@ const std::map<std::string, bool> &RuleMissionScript::getResearchTriggers() cons
 /**
  * @return if this command should remove the mission it generates from the strategy table.
  */
-const bool RuleMissionScript::getUseTable() const
+bool RuleMissionScript::getUseTable() const
 {
 	return _useTable;
 }
@@ -239,7 +236,7 @@ const bool RuleMissionScript::getUseTable() const
 /**
  * @return the name of the variable we want to use to track in the saved game.
  */
-const std::string RuleMissionScript::getVarName() const
+std::string RuleMissionScript::getVarName() const
 {
 	return _varName;
 }
@@ -247,7 +244,7 @@ const std::string RuleMissionScript::getVarName() const
 /**
  * @return a complete, unique list of all the mission types this command could possibly generate.
  */
-const std::set<std::string> RuleMissionScript::getAllMissionTypes() const
+std::set<std::string> RuleMissionScript::getAllMissionTypes() const
 {
 	std::set<std::string> types;
 	for (std::vector<std::pair<size_t, WeightedOptions*> >::const_iterator i = _missionWeights.begin(); i != _missionWeights.end(); ++i)
@@ -265,7 +262,7 @@ const std::set<std::string> RuleMissionScript::getAllMissionTypes() const
  * @param month the month for which we want info.
  * @return a list of the possible missions for the given month.
  */
-const std::vector<std::string> RuleMissionScript::getMissionTypes(const int month) const
+std::vector<std::string> RuleMissionScript::getMissionTypes(const int month) const
 {
 	std::vector<std::string> missions;
 	std::vector<std::pair<size_t, WeightedOptions*> >::const_reverse_iterator rw = _missionWeights.rbegin();
@@ -290,7 +287,7 @@ const std::vector<std::string> RuleMissionScript::getMissionTypes(const int mont
  * @param month the month for which we want info.
  * @return the list of regions we have to pick from this month.
  */
-const std::vector<std::string> RuleMissionScript::getRegions(const int month) const
+std::vector<std::string> RuleMissionScript::getRegions(const int month) const
 {
 	std::vector<std::string> regions;
 	std::vector<std::pair<size_t, WeightedOptions*> >::const_reverse_iterator rw = _regionWeights.rbegin();
@@ -317,7 +314,7 @@ const std::vector<std::string> RuleMissionScript::getRegions(const int month) co
  * @param type the type of thing we want to generate, region, mission or race.
  * @return The string id of the thing.
  */
-const std::string RuleMissionScript::generate(const size_t monthsPassed, const GenerationType type) const
+std::string RuleMissionScript::generate(const size_t monthsPassed, const GenerationType type) const
 {
 	std::vector<std::pair<size_t, WeightedOptions*> >::const_reverse_iterator rw;
 	if (type == GEN_RACE)
@@ -342,7 +339,7 @@ void RuleMissionScript::setSiteType(const bool siteType)
 /**
  * @return if this is a mission site type command or not.
  */
-const bool RuleMissionScript::getSiteType() const
+bool RuleMissionScript::getSiteType() const
 {
 	return _siteType;
 }

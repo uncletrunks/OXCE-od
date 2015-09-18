@@ -1691,71 +1691,57 @@ double BattleUnit::getReactionScore()
 	return score;
 }
 
-
 /**
- * Prepare for a new turn.
+ * Helper function preparing Time Units recovery at beginning of turn.
+ * @param tu New time units for this turn.
  */
-void BattleUnit::prepareNewTurn(bool fullProcess)
+void BattleUnit::prepareTimeUnits(int tu)
 {
-	if (_status == STATUS_IGNORE_ME)
-	{
-		return;
-	}
-
-	// revert to original faction
-	_faction = _originalFaction;
-
-	_unitsSpottedThisTurn.clear();
-
-	_dontReselect = false;
-	_motionPoints = 0;
-
-	// transition between stages, don't do damage or panic
-	if (!fullProcess)
-	{
-		return;
-	}
-
-	// snapshot of current stats
-	int TURecovery = _armor->getTimeRecovery(this);
-	int ENRecovery = _armor->getEnergyRecovery(this);
-	int HPRecovery = _armor->getHealthRecovery(this);
-	int MRRecovery = _armor->getMoraleRecovery(this);
-	int STRecovery = _armor->getStunRegeneration(this);
-
-	// recover TUs
 	float encumbrance = (float)getBaseStats()->strength / (float)getCarriedWeight();
 	if (encumbrance < 1)
 	{
-	  TURecovery = int(encumbrance * TURecovery);
+	  tu = int(encumbrance * tu);
 	}
 	// Each fatal wound to the left or right leg reduces the soldier's TUs by 10%.
-	TURecovery -= (TURecovery * (_fatalWounds[BODYPART_LEFTLEG]+_fatalWounds[BODYPART_RIGHTLEG] * 10))/100;
-	setTimeUnits(TURecovery);
+	tu -= (tu * (_fatalWounds[BODYPART_LEFTLEG]+_fatalWounds[BODYPART_RIGHTLEG] * 10))/100;
+	setTimeUnits(tu);
+}
 
-	// recover energy
+/**
+ * Helper function preparing Energy recovery at beginning of turn.
+ * @param energy Energy grain this turn.
+ */
+void BattleUnit::prepareEnergy(int energy)
+{
 	if (!isOut())
 	{
 		// Each fatal wound to the body reduces the soldier's energy recovery by 10%.
-		ENRecovery -= (_energy * (_fatalWounds[BODYPART_TORSO] * 10))/100;
-		_energy += ENRecovery;
+		energy -= (_energy * (_fatalWounds[BODYPART_TORSO] * 10))/100;
+		_energy += energy;
 		if (_energy > getBaseStats()->stamina)
 			_energy = getBaseStats()->stamina;
 		else if (_energy < 0)
 			_energy = 0;
 	}
+}
 
-	// recover health, suffer from fatal wounds
-	HPRecovery -= getFatalWounds();
+/**
+ * Helper function preparing Health recovery at beginning of turn.
+ * @param health Health grain this turn.
+ */
+void BattleUnit::prepareHealth(int health)
+{
+	// suffer from fatal wounds
+	health -= getFatalWounds();
 
 	// suffer from fire
 	if (!_hitByFire && _fire > 0)
 	{
-		HPRecovery -= _armor->getDamageModifier(DT_IN) * RNG::generate(5, 10);
+		health -= _armor->getDamageModifier(DT_IN) * RNG::generate(5, 10);
 		_fire--;
 	}
 
-	setValueMax(_health, HPRecovery, -4 * _stats.health, _stats.health);
+	setValueMax(_health, health, -4 * _stats.health, _stats.health);
 
 	// if unit is dead, AI state should be gone
 	if (_health <= 0 && _currentAIState)
@@ -1764,17 +1750,29 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 		delete _currentAIState;
 		_currentAIState = 0;
 	}
+}
 
-	// recover stun 1pt/turn
+/**
+ * Helper function preparing Stun recovery at beginning of turn.
+ * @param stun Stun damage reduction this turn.
+ */
+void BattleUnit::prepareStun(int stun)
+{
 	if (_armor->getSize() == 1 || !isOut())
 	{
-		healStun(STRecovery);
+		healStun(stun);
 	}
+}
 
-	// recover morale
+/**
+ * Helper function preparing Morale recovery at beginning of turn.
+ * @param morale Morale grain this turn.
+ */
+void BattleUnit::prepareMorale(int morale)
+{
 	if (!isOut())
 	{
-		moraleChange(MRRecovery);
+		moraleChange(morale);
 		int chance = 100 - (2 * getMorale());
 		if (RNG::generate(1,100) <= chance)
 		{
@@ -1789,7 +1787,50 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 				_expBravery++;
 		}
 	}
+}
+/**
+ * Prepare for a new turn.
+ */
+void BattleUnit::prepareNewTurn(bool fullProcess)
+{
+	if (_status == STATUS_IGNORE_ME)
+	{
+		return;
+	}
+
+	_unitsSpottedThisTurn.clear();
+
 	_hitByFire = false;
+	_dontReselect = false;
+	_motionPoints = 0;
+
+	// don't give it back its TUs or anything this round
+	// because it's no longer a unit of the team getting TUs back
+	if (_faction != _originalFaction)
+	{
+		_faction = _originalFaction;
+		return;
+	}
+
+	// transition between stages, don't do damage or panic
+	if (!fullProcess)
+	{
+		return;
+	}
+
+	// snapshot of current stats
+	int TURecovery = _armor->getTimeRecovery(this);
+	int ENRecovery = _armor->getEnergyRecovery(this);
+	int HPRecovery = _armor->getHealthRecovery(this);
+	int MRRecovery = _armor->getMoraleRecovery(this);
+	int STRecovery = _armor->getStunRegeneration(this);
+
+	// update stats
+	prepareTimeUnits(TURecovery);
+	prepareEnergy(ENRecovery);
+	prepareHealth(HPRecovery);
+	prepareStun(STRecovery);
+	prepareMorale(MRRecovery);
 }
 
 
@@ -3216,7 +3257,7 @@ void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 	{
 		_specWeapon[i++] = createItem(save, this, item);
 	}
-	if (getBaseStats()->psiSkill > 0 && getFaction() == FACTION_HOSTILE)
+	if (getBaseStats()->psiSkill > 0 && getOriginalFaction() == FACTION_HOSTILE)
 	{
 		item = rule->getItem("ALIEN_PSI_WEAPON");
 		if (item && i < SPEC_WEAPON_MAX)
@@ -3243,6 +3284,18 @@ BattleItem *BattleUnit::getSpecialWeapon(BattleType type) const
 		}
 	}
 	return 0;
+}
+
+/**
+ * Recovers a unit's TUs and energy, taking a number of factors into consideration.
+ */
+void BattleUnit::recoverTimeUnits()
+{
+	int TURecovery = _armor->getTimeRecovery(this);
+	int ENRecovery = _armor->getEnergyRecovery(this);
+
+	prepareTimeUnits(TURecovery);
+	prepareEnergy(ENRecovery);
 }
 
 }

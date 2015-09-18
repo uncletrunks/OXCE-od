@@ -38,6 +38,7 @@
 #include "../Engine/Options.h"
 #include "../Ruleset/AlienDeployment.h"
 #include "../Ruleset/AlienRace.h"
+#include "../Ruleset/Ruleset.h"
 
 namespace OpenXcom
 {

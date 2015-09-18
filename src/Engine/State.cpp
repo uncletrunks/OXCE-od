@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "State.h"
+#include <climits>
 #include "InteractiveSurface.h"
 #include "Game.h"
 #include "Screen.h"
@@ -36,6 +37,8 @@
 #include "../Interface/Cursor.h"
 #include "../Interface/FpsCounter.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Ruleset/Ruleset.h"
+#include "../Ruleset/RuleInterface.h"
 
 namespace OpenXcom
 {
@@ -539,7 +542,7 @@ void State::setPalette(const std::string &palette, int backpals)
  * Returns the state's 8bpp palette.
  * @return Pointer to the palette's colors.
  */
-SDL_Color *const State::getPalette()
+SDL_Color *State::getPalette()
 {
 	return _palette;
 }

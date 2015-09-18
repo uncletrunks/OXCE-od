@@ -32,6 +32,7 @@
 #include "../Ruleset/RuleCraftWeapon.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Savegame/Base.h"
+#include "../Ruleset/Ruleset.h"
 
 namespace OpenXcom
 {

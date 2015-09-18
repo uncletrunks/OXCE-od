@@ -141,8 +141,6 @@ public:
 	void setStateInterval(Uint32 interval);
 	/// Checks for casualties in battle.
 	void checkForCasualties(BattleItem *murderweapon, BattleUnit *murderer, bool hiddenExplosion = false, bool terrainExplosion = false);
-	/// Checks if a unit panics.
-	void checkForPanic(BattleUnit *unit);
 	/// Checks reserved tu and energy.
 	bool checkReservedTU(BattleUnit *bu, int tu, int energy, bool justChecking = false);
 	/// Handles unit AI.

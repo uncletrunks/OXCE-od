@@ -126,6 +126,16 @@ private:
 
 	/// Helper function initing recolor vector.
 	void setRecolor(int basicLook, int utileLook, int rankLook);
+	/// Helper function preparing Time Units recovery at beginning of turn.
+	void prepareTimeUnits(int tu);
+	/// Helper function preparing Energy recovery at beginning of turn.
+	void prepareEnergy(int energy);
+	/// Helper function preparing Health recovery at beginning of turn.
+	void prepareHealth(int helath);
+	/// Helper function preparing Stun recovery at beginning of turn.
+	void prepareStun(int strun);
+	/// Helper function preparing Morale recovery at beginning of turn.
+	void prepareMorale(int morale);
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
 	/// Creates a BattleUnit from solder.
@@ -477,7 +487,8 @@ public:
 	void setHiding(bool hiding) { _hidingForTurn = hiding; };
 	/// Puts the unit in the corner to think about what he's done.
 	void goToTimeOut();
-
+	/// Recovers the unit's time units and energy.
+	void recoverTimeUnits();
 };
 
 }

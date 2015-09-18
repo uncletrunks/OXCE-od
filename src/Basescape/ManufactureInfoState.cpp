@@ -32,6 +32,8 @@
 #include "../Savegame/Production.h"
 #include "../Engine/Timer.h"
 #include "../Menu/ErrorMessageState.h"
+#include "../Ruleset/Ruleset.h"
+#include "../Ruleset/RuleInterface.h"
 #include <limits>
 
 namespace OpenXcom
@@ -188,6 +190,17 @@ void ManufactureInfoState::buildUi()
 	_timerLessEngineer->onTimer((StateHandler)&ManufactureInfoState::onLessEngineer);
 	_timerMoreUnit->onTimer((StateHandler)&ManufactureInfoState::onMoreUnit);
 	_timerLessUnit->onTimer((StateHandler)&ManufactureInfoState::onLessUnit);
+}
+
+/**
+* Frees up memory that's not automatically cleaned on exit
+*/
+ManufactureInfoState::~ManufactureInfoState()
+{
+	delete _timerMoreEngineer;
+	delete _timerLessEngineer;
+	delete _timerMoreUnit;
+	delete _timerLessUnit;
 }
 
 /**

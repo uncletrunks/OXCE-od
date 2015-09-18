@@ -25,6 +25,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
+#include "../Engine/Action.h"
 #include "../Interface/ImageButton.h"
 #include "../Interface/Text.h"
 #include "../Engine/Timer.h"
@@ -37,7 +38,6 @@
 #include "../Savegame/Ufo.h"
 #include "../Ruleset/RuleUfo.h"
 #include "../Ruleset/AlienRace.h"
-#include "../Engine/Music.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Sound.h"
 #include "../Savegame/Base.h"
@@ -47,11 +47,9 @@
 #include "../Savegame/Region.h"
 #include "../Ruleset/RuleRegion.h"
 #include "../Savegame/AlienMission.h"
-#include "../Savegame/AlienStrategy.h"
-#include "../Engine/Options.h"
-#include "../Engine/Action.h"
-#include <cstdlib>
 #include "DogfightErrorState.h"
+#include "../Ruleset/Ruleset.h"
+#include "../Ruleset/RuleInterface.h"
 
 namespace OpenXcom
 {
@@ -590,7 +588,7 @@ void DogfightState::think()
 		update();
 		_craftDamageAnimTimer->think(this, 0);
 	}
-	if (_craft->getDestination() != _ufo || _ufo->getStatus() == Ufo::LANDED)
+	if (!_craft->isInDogfight() || _craft->getDestination() != _ufo || _ufo->getStatus() == Ufo::LANDED)
 	{
 		endDogfight();
 	}
@@ -742,7 +740,7 @@ void DogfightState::update()
 	// Check if craft is not low on fuel when window minimized, and
 	// Check if crafts destination hasn't been changed when window minimized.
 	Ufo* u = dynamic_cast<Ufo*>(_craft->getDestination());
-	if (u != _ufo || _craft->getLowFuel() || (_minimized && _ufo->isCrashed()))
+	if (u != _ufo || !_craft->isInDogfight() || _craft->getLowFuel() || (_minimized && _ufo->isCrashed()))
 	{
 		endDogfight();
 		return;

@@ -224,7 +224,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
  */
 Ufo *AlienMission::spawnUfo(const SavedGame &game, const Ruleset &ruleset, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory)
 {
-	RuleUfo &ufoRule = *ruleset.getUfo(wave.ufoType);
+	RuleUfo *ufoRule = ruleset.getUfo(wave.ufoType);
 	if (_rule.getObjective() == OBJECTIVE_RETALIATION)
 	{
 		const RuleRegion &regionRules = *ruleset.getRegion(_region);
@@ -260,13 +260,13 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Ruleset &ruleset, const
 	}
 	else if (_rule.getObjective() == OBJECTIVE_SUPPLY)
 	{
-		if (&ufoRule == 0 || (wave.objective && !_base))
+		if (ufoRule == 0 || (wave.objective && !_base))
 		{
 			// No base to supply!
 			return 0;
 		}
 		// Our destination is always an alien base.
-		Ufo *ufo = new Ufo(&ufoRule);
+		Ufo *ufo = new Ufo(ufoRule);
 		ufo->setMissionInfo(this, &trajectory);
 		const RuleRegion &regionRules = *ruleset.getRegion(_region);
 		std::pair<double, double> pos;
@@ -306,10 +306,10 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Ruleset &ruleset, const
 		ufo->setDestination(wp);
 		return ufo;
 	}
-	if (&ufoRule == 0)
+	if (ufoRule == 0)
 		return 0;
 	// Spawn according to sequence.
-	Ufo *ufo = new Ufo(&ufoRule);
+	Ufo *ufo = new Ufo(ufoRule);
 	ufo->setMissionInfo(this, &trajectory);
 	const RuleRegion &regionRules = *ruleset.getRegion(_region);
 	std::pair<double, double> pos = getWaypoint(trajectory, 0, globe, regionRules);
@@ -500,9 +500,8 @@ void AlienMission::ufoShotDown(Ufo &ufo)
  * It must set the game data in a way that the rest of the code understands what to do.
  * @param ufo The UFO that reached it's waypoint.
  * @param game The saved game information.
- * @param globe The earth globe, required to get access to land checks.
  */
-void AlienMission::ufoLifting(Ufo &ufo, SavedGame &game, const Globe &globe)
+void AlienMission::ufoLifting(Ufo &ufo, SavedGame &game)
 {
 	switch (ufo.getStatus())
 	{
@@ -664,13 +663,11 @@ void AlienMission::setRegion(const std::string &region, const Ruleset &rules)
  */
 std::pair<double, double> AlienMission::getWaypoint(const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region)
 {
-	/* LOOK MA! NO HANDS!
-	if (trajectory.getAltitude(nextWaypoint) == "STR_GROUND")
+	if (trajectory.getWaypointCount() > nextWaypoint + 1 && trajectory.getAltitude(nextWaypoint + 1) == "STR_GROUND")
 	{
 		return getLandPoint(globe, region, trajectory.getZone(nextWaypoint));
 	}
-	else
-	*/
+
 	int waveNumber = _nextWave - 1;
 	if (waveNumber < 0)
 	{

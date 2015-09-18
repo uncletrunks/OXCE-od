@@ -21,27 +21,21 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
-#include <ctime>
 #include <algorithm>
 #include <functional>
-#include <assert.h>
 #include "../Engine/RNG.h"
 #include "../Engine/Game.h"
 #include "../Engine/Action.h"
 #include "../Resource/ResourcePack.h"
 #include "../Engine/LocalizedText.h"
-#include "../Engine/Palette.h"
 #include "../Engine/Screen.h"
 #include "../Engine/Surface.h"
 #include "../Engine/Options.h"
 #include "Globe.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
-#include "../Interface/Cursor.h"
-#include "../Interface/FpsCounter.h"
 #include "../Engine/Timer.h"
 #include "../Savegame/GameTime.h"
-#include "../Engine/Music.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/BaseFacility.h"
@@ -112,6 +106,8 @@
 #include "../Ruleset/AlienDeployment.h"
 #include "../Savegame/CraftWeapon.h"
 #include "../Ruleset/RuleCraftWeapon.h"
+#include "../Ruleset/Ruleset.h"
+#include "../Ruleset/RuleInterface.h"
 
 namespace OpenXcom
 {
@@ -729,7 +725,7 @@ void GeoscapeState::time5Seconds()
 			{
 				AlienMission *mission = (*i)->getMission();
 				bool detected = (*i)->getDetected();
-				mission->ufoLifting(**i, *_game->getSavedGame(), *_globe);
+				mission->ufoLifting(**i, *_game->getSavedGame());
 				if (detected != (*i)->getDetected() && !(*i)->getFollowers()->empty())
 				{
 					popup(new UfoLostState((*i)->getName(_game->getLanguage())));
@@ -799,25 +795,39 @@ void GeoscapeState::time5Seconds()
 			if ((*j)->getDestination() != 0)
 			{
 				Ufo* u = dynamic_cast<Ufo*>((*j)->getDestination());
-				if (u != 0 && !u->getDetected())
+				if (u != 0)
 				{
-					if (u->getTrajectory().getID() == UfoTrajectory::RETALIATION_ASSAULT_RUN && (u->getStatus() == Ufo::LANDED || u->getStatus() == Ufo::DESTROYED))
+					if (!u->getDetected())
+					{
+						if (u->getTrajectory().getID() == UfoTrajectory::RETALIATION_ASSAULT_RUN && (u->getStatus() == Ufo::LANDED || u->getStatus() == Ufo::DESTROYED))
+						{
+							(*j)->returnToBase();
+						}
+						else
+						{
+							(*j)->setDestination(0);
+							Waypoint *w = new Waypoint();
+							w->setLongitude(u->getLongitude());
+							w->setLatitude(u->getLatitude());
+							w->setId(u->getId());
+							popup(new GeoscapeCraftState((*j), _globe, w));
+						}
+					}
+					if (u->getStatus() == Ufo::LANDED && (*j)->isInDogfight())
+					{
+						(*j)->setInDogfight(false);
+					}
+					else if (u->getStatus() == Ufo::DESTROYED)
 					{
 						(*j)->returnToBase();
 					}
-					else
-					{
-						(*j)->setDestination(0);
-						Waypoint *w = new Waypoint();
-						w->setLongitude(u->getLongitude());
-						w->setLatitude(u->getLatitude());
-						w->setId(u->getId());
-						popup(new GeoscapeCraftState((*j), _globe, w));
-					}
 				}
-				if (u != 0 && u->getStatus() == Ufo::DESTROYED)
+				else
 				{
-					(*j)->returnToBase();
+					if ((*j)->isInDogfight())
+					{
+						(*j)->setInDogfight(false);
+					}
 				}
 			}
 			if (!_zoomInEffectTimer->isRunning() && !_zoomOutEffectTimer->isRunning())

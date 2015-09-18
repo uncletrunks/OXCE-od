@@ -32,6 +32,7 @@
 #include "../Interface/ArrowButton.h"
 #include "../Engine/Timer.h"
 #include "../Engine/RNG.h"
+#include "../Ruleset/Ruleset.h"
 #include <limits>
 
 namespace OpenXcom
@@ -154,6 +155,15 @@ void ResearchInfoState::buildUi()
 		_btnOk->onKeyboardPress((ActionHandler)&ResearchInfoState::btnOkClick, Options::keyCancel);
 	}
 	_btnCancel->onMouseClick((ActionHandler)&ResearchInfoState::btnCancelClick);
+}
+
+/**
+* Frees up memory that's not automatically cleaned on exit
+*/
+ResearchInfoState::~ResearchInfoState()
+{
+	delete _timerLess;
+	delete _timerMore;
 }
 
 /**

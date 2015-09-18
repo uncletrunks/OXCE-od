@@ -32,6 +32,8 @@
 #include "GeoscapeState.h"
 #include "AllocateTrainingState.h"
 #include "../Engine/Options.h"
+#include "../Ruleset/Ruleset.h"
+#include "../Ruleset/RuleInterface.h"
 
 namespace OpenXcom
 {

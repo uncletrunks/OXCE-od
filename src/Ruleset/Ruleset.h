@@ -255,7 +255,7 @@ public:
 	/// Gets the game starting time.
 	const GameTime &getStartingTime() const;
 	/// Gets an MCDPatch.
-	MCDPatch *getMCDPatch(const std::string name) const;
+	MCDPatch *getMCDPatch(const std::string &name) const;
 	/// Gets the list of external Sprites.
 	std::vector<std::pair<std::string, ExtraSprites *> > getExtraSprites() const;
 	/// Gets the list of external Sounds.
@@ -273,15 +273,15 @@ public:
 	/// Generates a new soldier.
 	Soldier *genSoldier(SavedGame *save) const;
 	/// Gets the item to be used as fuel for ships.
-	const std::string getAlienFuelName() const;
+	std::string getAlienFuelName() const;
 	/// Gets the amount of alien fuel to recover
-	const int getAlienFuelQuantity() const;
+	int getAlienFuelQuantity() const;
 	/// Gets the font name.
-	const std::string getFontName() const;
+	std::string getFontName() const;
 	/// Gets the minimum radar's range.
 	int getMinRadarRange() const;
 	/// Gets information on an interface element.
-	RuleInterface *getInterface(const std::string id) const;
+	RuleInterface *getInterface(const std::string &id) const;
 	/// Gets the ruleset for the globe
 	RuleGlobe *getGlobe() const;
 	/// Gets the list of selective files for insertion into our cat files.
@@ -294,7 +294,7 @@ public:
 	const std::map<std::string, RuleMusic *> *getMusic() const;
 	const std::vector<std::string> *getMissionScriptList() const;
 	RuleMissionScript *getMissionScript(const std::string &name) const;
-	const std::string getFinalResearch() const;
+	std::string getFinalResearch() const;
 };
 
 }
