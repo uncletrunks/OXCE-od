@@ -20,7 +20,7 @@
 #define OPENXCOM_CRAFTINFOSTATE_H
 
 #include "../Engine/State.h"
-#include "../Ruleset/RuleCraft.h"
+#include "../Mod/RuleCraft.h"
 
 namespace OpenXcom
 {

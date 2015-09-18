@@ -20,10 +20,10 @@
 #include "TrainingState.h"
 #include "AllocateTrainingState.h"
 #include "../Engine/Game.h"
-#include "../Resource/ResourcePack.h"
+#include "../Mod/ResourcePack.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
-#include "../Ruleset/RuleInterface.h"
+#include "../Mod/RuleInterface.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -34,7 +34,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
-#include "../Ruleset/Ruleset.h"
+#include "../Mod/Ruleset.h"
 
 namespace OpenXcom
 {

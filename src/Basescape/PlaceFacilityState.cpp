@@ -18,7 +18,7 @@
  */
 #include "PlaceFacilityState.h"
 #include "../Engine/Game.h"
-#include "../Resource/ResourcePack.h"
+#include "../Mod/ResourcePack.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -27,12 +27,12 @@
 #include "../Savegame/Base.h"
 #include "../Savegame/BaseFacility.h"
 #include "../Savegame/ItemContainer.h"
-#include "../Ruleset/RuleBaseFacility.h"
+#include "../Mod/RuleBaseFacility.h"
 #include "../Savegame/SavedGame.h"
 #include "../Menu/ErrorMessageState.h"
 #include "../Engine/Options.h"
-#include "../Ruleset/Ruleset.h"
-#include "../Ruleset/RuleInterface.h"
+#include "../Mod/Ruleset.h"
+#include "../Mod/RuleInterface.h"
 #include <limits>
 
 namespace OpenXcom

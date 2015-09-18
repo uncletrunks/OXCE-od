@@ -20,7 +20,7 @@
 #define OPENXCOM_BATTLESCAPEGAME_H
 
 #include "Position.h"
-#include "../Ruleset/RuleItem.h"
+#include "../Mod/RuleItem.h"
 #include <SDL.h>
 #include <string>
 #include <list>

@@ -23,7 +23,7 @@
 #include <yaml-cpp/yaml.h>
 #include "CraftId.h"
 #include "MovingTarget.h"
-#include "../Ruleset/RuleUfo.h"
+#include "../Mod/RuleUfo.h"
 
 namespace OpenXcom
 {

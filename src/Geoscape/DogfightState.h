@@ -20,7 +20,7 @@
 #define OPENXCOM_DOGFIGHTSTATE_H
 
 #include "../Engine/State.h"
-#include "../Ruleset/RuleCraft.h"
+#include "../Mod/RuleCraft.h"
 #include <vector>
 #include <string>
 

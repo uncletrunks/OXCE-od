@@ -25,7 +25,7 @@
 #include <yaml-cpp/yaml.h>
 #include "../Savegame/GameTime.h"
 #include "RuleDamageType.h"
-#include "../Ruleset/RuleAlienMission.h"
+#include "RuleAlienMission.h"
 #include <SDL.h>
 
 namespace OpenXcom

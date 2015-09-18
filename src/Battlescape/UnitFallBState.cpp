@@ -26,8 +26,8 @@
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
 #include "../Engine/Options.h"
-#include "../Ruleset/Armor.h"
-#include "../Ruleset/Ruleset.h"
+#include "../Mod/Armor.h"
+#include "../Mod/Ruleset.h"
 
 namespace OpenXcom
 {

@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 #include "CraftId.h"
-#include "../Ruleset/RuleCraft.h"
+#include "../Mod/RuleCraft.h"
 
 namespace OpenXcom
 {

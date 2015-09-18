@@ -21,7 +21,7 @@
 #include <sstream>
 #include <cmath>
 #include "../Engine/Game.h"
-#include "../Resource/ResourcePack.h"
+#include "../Mod/ResourcePack.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -33,13 +33,13 @@
 #include "TrainingState.h"
 #include "../Savegame/Region.h"
 #include "../Savegame/Country.h"
-#include "../Ruleset/RuleCountry.h"
+#include "../Mod/RuleCountry.h"
 #include "Globe.h"
 #include "../Engine/Options.h"
 #include "../Menu/CutsceneState.h"
 #include "../Menu/SaveGameState.h"
-#include "../Ruleset/Ruleset.h"
-#include "../Ruleset/RuleInterface.h"
+#include "../Mod/Ruleset.h"
+#include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
 {

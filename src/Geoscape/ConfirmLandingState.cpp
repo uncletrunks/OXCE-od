@@ -19,7 +19,7 @@
 #include "ConfirmLandingState.h"
 #include <sstream>
 #include "../Engine/Game.h"
-#include "../Resource/ResourcePack.h"
+#include "../Mod/ResourcePack.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -36,9 +36,9 @@
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Options.h"
-#include "../Ruleset/AlienDeployment.h"
-#include "../Ruleset/AlienRace.h"
-#include "../Ruleset/Ruleset.h"
+#include "../Mod/AlienDeployment.h"
+#include "../Mod/AlienRace.h"
+#include "../Mod/Ruleset.h"
 
 namespace OpenXcom
 {
