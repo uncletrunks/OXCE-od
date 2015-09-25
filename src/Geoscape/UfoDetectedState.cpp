@@ -19,7 +19,7 @@
 #include "UfoDetectedState.h"
 #include <sstream>
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -106,7 +106,7 @@ UfoDetectedState::UfoDetectedState(Ufo *ufo, GeoscapeState *state, bool detected
 	add(_lstInfo2, "text", "UFOInfo");
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK15.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK15.SCR"));
 
 	centerAllSurfaces();
 

@@ -20,7 +20,6 @@
 #include "TrainingState.h"
 #include "AllocateTrainingState.h"
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
 #include "../Mod/RuleInterface.h"
@@ -34,7 +33,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -57,7 +56,7 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	_lstSoldiers = new TextList(290, 112, 8, 52);
 
 	// Set palette
-	setPalette("PAL_BASESCAPE", _game->getRuleset()->getInterface("allocatePsi")->getElement("palette")->color);
+	setPalette("PAL_BASESCAPE", _game->getMod()->getInterface("allocatePsi")->getElement("palette")->color);
 
 	add(_window, "window", "allocatePsi");
 	add(_btnOk, "button", "allocatePsi");
@@ -70,7 +69,7 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK02.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK02.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&AllocateTrainingState::btnOkClick);

@@ -21,7 +21,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleBaseFacility.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/BaseFacility.h"
@@ -41,7 +41,7 @@ namespace OpenXcom
  */
 SelectStartFacilityState::SelectStartFacilityState(Base *base, State *state, Globe *globe) : BuildFacilitiesState(base, state), _globe(globe)
 {
-	_facilities = _game->getRuleset()->getCustomBaseFacilities();
+	_facilities = _game->getMod()->getCustomBaseFacilities();
 
 	_btnOk->setText(tr("STR_RESET"));
 	_btnOk->onMouseClick((ActionHandler)&SelectStartFacilityState::btnOkClick);

@@ -21,7 +21,6 @@
 #include "../Engine/Game.h"
 #include "../Engine/Screen.h"
 #include "../Engine/Action.h"
-#include "../Mod/ResourcePack.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
 #include "../Interface/TextButton.h"
@@ -32,7 +31,7 @@
 #include "GeoscapeState.h"
 #include "AllocateTrainingState.h"
 #include "../Engine/Options.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
@@ -50,14 +49,14 @@ TrainingState::TrainingState()
 	_btnOk = new TextButton(160, 14, 80, 174);
 
 	// Set palette
-	setPalette("PAL_BASESCAPE", _game->getRuleset()->getInterface("psiTraining")->getElement("palette")->color);
+	setPalette("PAL_BASESCAPE", _game->getMod()->getInterface("psiTraining")->getElement("palette")->color);
 
 	add(_window, "window", "psiTraining");
 	add(_btnOk, "button2", "psiTraining");
 	add(_txtTitle, "text", "psiTraining");
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK02.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK02.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&TrainingState::btnOkClick);

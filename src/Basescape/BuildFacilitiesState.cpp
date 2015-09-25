@@ -18,7 +18,7 @@
  */
 #include "BuildFacilitiesState.h"
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
@@ -29,7 +29,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
 #include "PlaceFacilityState.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -61,7 +61,7 @@ BuildFacilitiesState::BuildFacilitiesState(Base *base, State *state) : _base(bas
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK05.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK05.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&BuildFacilitiesState::btnOkClick);
@@ -97,10 +97,10 @@ void BuildFacilitiesState::PopulateBuildList()
 {
 	const std::set<std::string> &providedBaseFunc = _base->getProvidedBaseFunc();
 
-	const std::vector<std::string> &facilities = _game->getRuleset()->getBaseFacilitiesList();
+	const std::vector<std::string> &facilities = _game->getMod()->getBaseFacilitiesList();
 	for (std::vector<std::string>::const_iterator i = facilities.begin(); i != facilities.end(); ++i)
 	{
-		RuleBaseFacility *rule = _game->getRuleset()->getBaseFacility(*i);
+		RuleBaseFacility *rule = _game->getMod()->getBaseFacility(*i);
 		const std::vector<std::string> &req = rule->getRequireBaseFunc();
 		if (!std::includes(providedBaseFunc.begin(), providedBaseFunc.end(), req.begin(), req.end()))
 		{

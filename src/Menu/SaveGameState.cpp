@@ -29,7 +29,7 @@
 #include "ErrorMessageState.h"
 #include "MainMenuState.h"
 #include "../Savegame/SavedGame.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
@@ -181,9 +181,9 @@ void SaveGameState::think()
 			std::wostringstream error;
 			error << tr("STR_SAVE_UNSUCCESSFUL") << L'\x02' << Language::fsToWstr(e.what());
 			if (_origin != OPT_BATTLESCAPE)
-				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getRuleset()->getInterface("errorMessages")->getElement("geoscapeColor")->color, "BACK01.SCR", _game->getRuleset()->getInterface("errorMessages")->getElement("geoscapePalette")->color));
+				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getMod()->getInterface("errorMessages")->getElement("geoscapeColor")->color, "BACK01.SCR", _game->getMod()->getInterface("errorMessages")->getElement("geoscapePalette")->color));
 			else
-				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getRuleset()->getInterface("errorMessages")->getElement("battlescapeColor")->color, "TAC00.SCR", _game->getRuleset()->getInterface("errorMessages")->getElement("battlescapePalette")->color));
+				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getMod()->getInterface("errorMessages")->getElement("battlescapeColor")->color, "TAC00.SCR", _game->getMod()->getInterface("errorMessages")->getElement("battlescapePalette")->color));
 		}
 		catch (YAML::Exception &e)
 		{
@@ -191,9 +191,9 @@ void SaveGameState::think()
 			std::wostringstream error;
 			error << tr("STR_SAVE_UNSUCCESSFUL") << L'\x02' << Language::fsToWstr(e.what());
 			if (_origin != OPT_BATTLESCAPE)
-				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getRuleset()->getInterface("errorMessages")->getElement("geoscapeColor")->color, "BACK01.SCR", _game->getRuleset()->getInterface("errorMessages")->getElement("geoscapePalette")->color));
+				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getMod()->getInterface("errorMessages")->getElement("geoscapeColor")->color, "BACK01.SCR", _game->getMod()->getInterface("errorMessages")->getElement("geoscapePalette")->color));
 			else
-				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getRuleset()->getInterface("errorMessages")->getElement("battlescapeColor")->color, "TAC00.SCR", _game->getRuleset()->getInterface("errorMessages")->getElement("battlescapePalette")->color));
+				_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getMod()->getInterface("errorMessages")->getElement("battlescapeColor")->color, "TAC00.SCR", _game->getMod()->getInterface("errorMessages")->getElement("battlescapePalette")->color));
 		}
 	}
 }

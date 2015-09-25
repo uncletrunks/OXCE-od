@@ -16,21 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_RULESET_H
-#define OPENXCOM_RULESET_H
+#ifndef OPENXCOM_MOD_H
+#define OPENXCOM_MOD_H
 
 #include <map>
 #include <vector>
 #include <string>
+#include <SDL.h>
 #include <yaml-cpp/yaml.h>
+#include "../Engine/Options.h"
 #include "../Savegame/GameTime.h"
 #include "RuleDamageType.h"
 #include "RuleAlienMission.h"
-#include <SDL.h>
 
 namespace OpenXcom
 {
 
+class Surface;
+class SurfaceSet;
+class Font;
+class Palette;
+class Music;
+class SoundSet;
+class Sound;
+class CatFile;
+class GMCatFile;
+class Music;
+class Palette;
 class SavedGame;
 class SoldierNamePool;
 class Soldier;
@@ -44,7 +56,6 @@ class RuleDamageType;
 class RuleUfo;
 class RuleTerrain;
 class MapDataSet;
-class ResourcePack;
 class RuleSoldier;
 class Unit;
 class Armor;
@@ -71,14 +82,25 @@ class RuleMusic;
 class RuleMissionScript;
 
 /**
- * Set of rules and stats for a game.
- * A ruleset holds all the constant info that never changes
- * throughout a game, like stats of all the in-game items,
- * countries, research tree, soldier names, starting base, etc.
+ * Contains all the game-specific static data that never changes
+ * throughout the game, like rulesets and resources.
  */
-class Ruleset
+class Mod
 {
-protected:
+private:
+	Music *_muteMusic;
+	Sound *_muteSound;
+	std::string _playingMusic;
+
+	std::map<std::string, Palette*> _palettes;
+	std::map<std::string, Font*> _fonts;
+	std::map<std::string, Surface*> _surfaces;
+	std::map<std::string, SurfaceSet*> _sets;
+	std::map<std::string, SoundSet*> _sounds;
+	std::map<std::string, Music*> _musics;
+	std::vector<Uint16> _voxelData;
+	std::vector<std::vector<Uint8> > _transparencyLUTs;
+
 	std::vector<std::string> _soldierNames;
 	std::vector<SoldierNamePool*> _names;
 	std::map<std::string, RuleCountry*> _countries;
@@ -112,7 +134,7 @@ protected:
 	std::map<std::string, ExtraStrings *> _extraStrings;
 	std::vector<StatString*> _statStrings;
 	std::vector<RuleDamageType*> _damageTypes;
-	std::map<std::string, RuleMusic *> _musics;
+	std::map<std::string, RuleMusic *> _musicDefs;
 	RuleGlobe *_globe;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costSoldier, _costEngineer, _costScientist, _timePersonnel, _initialFunding;
@@ -121,29 +143,113 @@ protected:
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
+
 	std::vector<std::string> _countriesIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemsIndex, _invsIndex, _ufosIndex;
 	std::vector<std::string> _aliensIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _extraSpritesIndex, _extraSoundsIndex, _extraStringsIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
 	int _facilityListOrder, _craftListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _ufopaediaListOrder, _invListOrder;
+	size_t _modOffset;
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
+
 	/// Loads a ruleset from a YAML file.
-	void loadFile(const std::string &filename, size_t spriteOffset);
+	void loadFile(const std::string &filename);
 	/// Loads a ruleset element.
 	template <typename T>
 	T *loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::vector<std::string> *index = 0, const std::string &key = "type");
+	/// Gets a random music. This is private to prevent access, use playMusic(name, true) instead.
+	Music *getRandomMusic(const std::string &name) const;
+	/// Gets a particular sound set. This is private to prevent access, use getSound(name, id) instead.
+	SoundSet *getSoundSet(const std::string &name) const;
+	/// Loads battlescape specific resources.
+	void loadBattlescapeResources();
+	/// Checks if an extension is a valid image file.
+	bool isImageFile(std::string extension) const;
+	/// Loads a specified music file.
+	Music *loadMusic(MusicFormat fmt, const std::string &file, int track, float volume, CatFile *adlibcat, CatFile *aintrocat, GMCatFile *gmcat) const;
+	/// Creates a transparency lookup table for a given palette.
+	void createTransparencyLUT(Palette *pal);
+	/// Loads a specified mod content.
+	void loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx);
+	/// Loads resources from vanilla.
+	void loadVanillaResources();
+	/// Loads resources from extra rulesets.
+	void loadExtraResources();
+	/// Applies mods to vanilla resources.
+	void modResources();
+	/// Sorts all our lists according to their weight.
+	void sortLists();
 public:
+	static int DOOR_OPEN;
+	static int SLIDING_DOOR_OPEN;
+	static int SLIDING_DOOR_CLOSE;
+	static int SMALL_EXPLOSION;
+	static int LARGE_EXPLOSION;
+	static int EXPLOSION_OFFSET;
+	static int SMOKE_OFFSET;
+	static int UNDERWATER_SMOKE_OFFSET;
+	static int ITEM_DROP;
+	static int ITEM_THROW;
+	static int ITEM_RELOAD;
+	static int WALK_OFFSET;
+	static int FLYING_SOUND;
+	static int MALE_SCREAM[3];
+	static int FEMALE_SCREAM[3];
+	static int BUTTON_PRESS;
+	static int WINDOW_POPUP[3];
+	static int UFO_FIRE;
+	static int UFO_HIT;
+	static int UFO_CRASH;
+	static int UFO_EXPLODE;
+	static int INTERCEPTOR_HIT;
+	static int INTERCEPTOR_EXPLODE;
+	static int GEOSCAPE_CURSOR;
+	static int BASESCAPE_CURSOR;
+	static int BATTLESCAPE_CURSOR;
+	static int UFOPAEDIA_CURSOR;
+	static int GRAPHS_CURSOR;
+	static std::string DEBRIEF_MUSIC_GOOD;
+	static std::string DEBRIEF_MUSIC_BAD;
 	static int DIFFICULTY_COEFFICIENT[5];
 	// reset all the statics in all classes to default values
 	static void resetGlobalStatics();
-	/// Creates a blank ruleset.
-	Ruleset();
-	/// Cleans up the ruleset.
-	~Ruleset();
-	/// Loads a list of rulesets from YAML files for the mod at the specified index.  The first
-	// mod loaded should be the master at index 0, then 1, and so on.
-	void loadModRulesets(const std::vector<std::string> &rulesetFiles, size_t modIdx);
+	/// Creates a blank mod.
+	Mod();
+	/// Cleans up the mod.
+	~Mod();
+
+	/// Gets a particular font.
+	Font *getFont(const std::string &name) const;
+	/// Gets a particular surface.
+	Surface *getSurface(const std::string &name) const;
+	/// Gets a particular surface set.
+	SurfaceSet *getSurfaceSet(const std::string &name) const;
+	/// Gets a particular music.
+	Music *getMusic(const std::string &name) const;
+	/// Plays a particular music.
+	void playMusic(const std::string &name, int id = 0);
+	/// Gets a particular sound.
+	Sound *getSound(const std::string &set, unsigned int sound) const;
+	/// Gets a particular palette.
+	Palette *getPalette(const std::string &name) const;
+	/// Sets a new palette.
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	/// Gets list of voxel data.
+	std::vector<Uint16> *getVoxelData();
+	/// Returns a specific sound from either the land or underwater sound set.
+	Sound *getSoundByDepth(unsigned int depth, unsigned int sound) const;
+	/// Gets list of LUT data.
+	const std::vector<std::vector<Uint8> > *getLUTs() const;
+	/// Gets the mod offset.
+	int getModOffset() const;
+	/// Gets the mod offset for a certain sprite.
+	int getSpriteOffset(int sprite, const std::string &set) const;
+	/// Gets the mod offset for a certain sound.
+	int getSoundOffset(int sound, const std::string &set) const;
+
+	/// Loads a list of mods.
+	void loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods);
 	/// Generates the starting saved game.
 	SavedGame *newSave() const;
 	/// Gets the pool list for soldier names.
@@ -263,9 +369,7 @@ public:
 	/// Gets the list of external Strings.
 	std::map<std::string, ExtraStrings *> getExtraStrings() const;
 	/// Gets the list of StatStrings.
-    std::vector<StatString *> getStatStrings() const;
-	/// Sorts all our lists according to their weight.
-	void sortLists();
+	std::vector<StatString *> getStatStrings() const;
 	/// Gets the research-requirements for Psi-Lab (it's a cache for psiStrengthEval)
 	std::vector<std::string> getPsiRequirements() const;
 	/// Returns the sorted list of inventories.

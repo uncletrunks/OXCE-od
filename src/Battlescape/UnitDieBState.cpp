@@ -26,8 +26,8 @@
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
-#include "../Mod/ResourcePack.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
+#include "../Mod/Mod.h"
 #include "../Engine/Sound.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Options.h"
@@ -203,7 +203,7 @@ void UnitDieBState::think()
 		{
 			playDeathSound();
 		}
-		if (_unit->getStatus() == STATUS_UNCONSCIOUS && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
+		if (_unit->getStatus() == STATUS_UNCONSCIOUS && _unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH)
 		{
 			_unit->instaKill();
 		}
@@ -214,7 +214,7 @@ void UnitDieBState::think()
 		if (!_unit->getSpawnUnit().empty() && !_overKill)
 		{
 			// converts the dead zombie to a chryssalid
-			_parent->convertUnit(_unit, _unit->getSpawnUnit());
+			_parent->convertUnit(_unit);
 		}
 		else
 		{
@@ -290,7 +290,7 @@ void UnitDieBState::convertUnitToCorpse()
 			{
 				if ((*it)->getUnit() == _unit)
 				{
-					RuleItem *corpseRules = _parent->getRuleset()->getItem(_unit->getArmor()->getCorpseBattlescape()[0]); // we're in an inventory, so we must be a 1x1 unit
+					RuleItem *corpseRules = _parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[0]); // we're in an inventory, so we must be a 1x1 unit
 					(*it)->convertToCorpse(corpseRules);
 					break;
 				}
@@ -307,7 +307,7 @@ void UnitDieBState::convertUnitToCorpse()
 			{
 				if (!_overKill)
 				{
-					BattleItem *corpse = new BattleItem(_parent->getRuleset()->getItem(_unit->getArmor()->getCorpseBattlescape()[i]), _parent->getSave()->getCurrentItemId());
+					BattleItem *corpse = new BattleItem(_parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[i]), _parent->getSave()->getCurrentItemId());
 					corpse->setUnit(_unit);
 					_parent->dropItem(lastPosition + Position(x,y,0), corpse, true);
 					i++;
@@ -330,16 +330,16 @@ void UnitDieBState::playDeathSound()
 	{
 		if (_unit->getGender() == GENDER_MALE)
 		{
-			_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::MALE_SCREAM[RNG::generate(0, 2)])->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
+			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::MALE_SCREAM[RNG::generate(0, 2)])->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 		}
 		else
 		{
-			_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::FEMALE_SCREAM[RNG::generate(0, 2)])->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
+			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::FEMALE_SCREAM[RNG::generate(0, 2)])->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 		}
 	}
 	else if (_unit->getDeathSound() >= 0)
 	{
-		_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), _unit->getDeathSound())->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
+		_parent->getMod()->getSoundByDepth(_parent->getDepth(), _unit->getDeathSound())->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 	}
 }
 

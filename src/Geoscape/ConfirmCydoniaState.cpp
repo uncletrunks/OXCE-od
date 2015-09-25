@@ -18,7 +18,7 @@
  */
 #include "ConfirmCydoniaState.h"
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -29,7 +29,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Engine/Options.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -55,7 +55,7 @@ ConfirmCydoniaState::ConfirmCydoniaState(Craft *craft) : _craft(craft)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK12.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK12.SCR"));
 
 	_btnYes->setText(tr("STR_YES"));
 	_btnYes->onMouseClick((ActionHandler)&ConfirmCydoniaState::btnYesClick);
@@ -87,12 +87,12 @@ void ConfirmCydoniaState::btnYesClick(Action *)
 	_game->popState();
 	_game->popState();
 
-	SavedBattleGame *bgame = new SavedBattleGame(_game->getRuleset());
+	SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 	_game->getSavedGame()->setBattleGame(bgame);
 	BattlescapeGenerator bgen = BattlescapeGenerator(_game);
-	for (std::vector<std::string>::const_iterator i = _game->getRuleset()->getDeploymentsList().begin(); i != _game->getRuleset()->getDeploymentsList().end(); ++i)
+	for (std::vector<std::string>::const_iterator i = _game->getMod()->getDeploymentsList().begin(); i != _game->getMod()->getDeploymentsList().end(); ++i)
 	{
-		AlienDeployment *deployment = _game->getRuleset()->getDeployment(*i);
+		AlienDeployment *deployment = _game->getMod()->getDeployment(*i);
 		if (deployment->isFinalDestination())
 		{
 			bgame->setMissionType(*i);

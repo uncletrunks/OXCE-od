@@ -474,7 +474,7 @@ public:
 	/// Set smoke damage form environment.
 	void setEnviSmoke(int damage);
 	/// Calculate smoke and fire damage form environment.
-	void calculateEnviDamage(Ruleset *ruleset);
+	void calculateEnviDamage(Mod *mod);
 	/// Use this function to check the unit's movement type.
 	MovementType getMovementType() const;
 	/// Create special weapon for unit.

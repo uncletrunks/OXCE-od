@@ -26,7 +26,7 @@
 #include "AlienMission.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Language.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleUfo.h"
 #include "../Mod/UfoTrajectory.h"
 #include "../Mod/RuleAlienMission.h"
@@ -101,10 +101,10 @@ private:
 /**
  * Loads the UFO from a YAML file.
  * @param node YAML node.
- * @param ruleset The game rules. Use to access the trajectory rules.
+ * @param mod The game mod. Use to access the trajectory rules.
  * @param game The game data. Used to find the UFO's mission.
  */
-void Ufo::load(const YAML::Node &node, const Ruleset &ruleset, SavedGame &game)
+void Ufo::load(const YAML::Node &node, const Mod &mod, SavedGame &game)
 {
 	MovingTarget::load(node);
 	_id = node["id"].as<int>(_id);
@@ -163,7 +163,7 @@ void Ufo::load(const YAML::Node &node, const Ruleset &ruleset, SavedGame &game)
 		_stats += _rules->getRaceBonus(_mission->getRace());
 
 		std::string tid = node["trajectory"].as<std::string>();
-		_trajectory = ruleset.getUfoTrajectory(tid);
+		_trajectory = mod.getUfoTrajectory(tid);
 		_trajectoryPoint = node["trajectoryPoint"].as<size_t>(_trajectoryPoint);
 	}
 	_fireCountdown = node["fireCountdown"].as<int>(_fireCountdown);

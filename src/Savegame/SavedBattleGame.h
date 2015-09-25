@@ -31,13 +31,12 @@ class Tile;
 class SavedGame;
 class MapDataSet;
 class Node;
-class Game;
 class BattlescapeState;
 class Position;
 class Pathfinding;
 class TileEngine;
 class BattleItem;
-class Ruleset;
+class Mod;
 class State;
 
 /**
@@ -49,7 +48,7 @@ class SavedBattleGame
 {
 private:
 	BattlescapeState *_battleState;
-	Ruleset *_rule;
+	Mod *_rule;
 	int _mapsize_x, _mapsize_y, _mapsize_z;
 	std::vector<MapDataSet*> _mapDataSets;
 	Tile **_tiles;
@@ -82,17 +81,17 @@ private:
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
 public:
 	/// Creates a new battle save, based on the current generic save.
-	SavedBattleGame(Ruleset *rule);
+	SavedBattleGame(Mod *rule);
 	/// Cleans up the saved game.
 	~SavedBattleGame();
 	/// Loads a saved battle game from YAML.
-	void load(const YAML::Node& node, Ruleset *rule, SavedGame* savedGame);
+	void load(const YAML::Node& node, Mod *mod, SavedGame* savedGame);
 	/// Saves a saved battle game to YAML.
 	YAML::Node save() const;
 	/// Sets the dimensions of the map and initializes it.
 	void initMap(int mapsize_x, int mapsize_y, int mapsize_z);
 	/// Initialises the pathfinding and tileengine.
-	void initUtilities(ResourcePack *res, Ruleset *rule);
+	void initUtilities(Mod *mod);
 	/// Gets the game's mapdatafiles.
 	std::vector<MapDataSet*> *getMapDataSets();
 	/// Sets the mission type.
@@ -183,7 +182,7 @@ public:
 	/// Gets debug mode.
 	bool getDebugMode() const;
 	/// Load map resources.
-	void loadMapResources(Game *game);
+	void loadMapResources(Mod *mod);
 	/// Resets tiles units are standing on
 	void resetUnitTiles();
 	/// Add item to delete list.
@@ -281,7 +280,7 @@ public:
 	/// gets the ambient sound effect;
 	int getAmbientSound() const;
 	// gets ruleset.
-	const Ruleset *getRuleset() const;
+	const Mod *getMod() const;
 	/// gets the list of items we're guaranteed.
 	std::vector<BattleItem*> *getGuaranteedRecoveredItems();
 	/// gets the list of items we MIGHT get.

@@ -27,7 +27,7 @@
 #include "../Savegame/Tile.h"
 #include "../Engine/Options.h"
 #include "../Mod/Armor.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -266,7 +266,7 @@ void UnitFallBState::think()
 				{
 					(*unit)->getTile()->ignite(1);
 					Position here = ((*unit)->getPosition() * Position(16,16,24)) + Position(8,8,-((*unit)->getTile()->getTerrainLevel()));
-					_parent->getTileEngine()->hit(here, (*unit)->getBaseStats()->strength, _parent->getRuleset()->getDamageType(DT_IN), (*unit), false);
+					_parent->getTileEngine()->hit(here, (*unit)->getBaseStats()->strength, _parent->getMod()->getDamageType(DT_IN), (*unit), false);
 				}
 				// move our personal lighting with us
 				_terrain->calculateUnitLighting();

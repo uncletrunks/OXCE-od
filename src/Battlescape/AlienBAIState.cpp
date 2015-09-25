@@ -35,7 +35,7 @@
 #include "../Engine/Logger.h"
 #include "../Engine/Game.h"
 #include "../Mod/Armor.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 
 namespace OpenXcom
@@ -184,7 +184,7 @@ void AlienBAIState::think(BattleAction *action)
 		Log(LOG_INFO) << "Currently using " << AIMode << " behaviour";
 	}
 
-	Ruleset *ruleset = _save->getBattleState()->getGame()->getRuleset();
+	Mod *mod = _save->getBattleState()->getGame()->getMod();
 	if (action->weapon)
 	{
 		RuleItem *rule = action->weapon->getRules();
@@ -216,7 +216,7 @@ void AlienBAIState::think(BattleAction *action)
 	}
 
 	BattleItem *grenade = _unit->getGrenadeFromBelt();
-	_grenade = grenade != 0 && _save->getTurn() >= grenade->getRules()->getAIUseDelay(ruleset);
+	_grenade = grenade != 0 && _save->getTurn() >= grenade->getRules()->getAIUseDelay(mod);
 
 	if (_spottingEnemies && !_escapeTUs)
 	{
@@ -231,7 +231,7 @@ void AlienBAIState::think(BattleAction *action)
 	setupAttack();
 	setupPatrol();
 
-	if (_psiAction->type != BA_NONE && !_didPsi && _save->getTurn() >= ruleset->getAIUseDelayPsionic())
+	if (_psiAction->type != BA_NONE && !_didPsi && _save->getTurn() >= _psiAction->weapon->getRules()->getAIUseDelay(mod))
 	{
 		_didPsi = true;
 		action->type = _psiAction->type;

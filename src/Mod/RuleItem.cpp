@@ -19,11 +19,11 @@
 #include "Unit.h"
 #include "RuleItem.h"
 #include "RuleInventory.h"
-#include "Ruleset.h"
+#include "RuleDamageType.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
-#include "../fmath.h"
+#include "Mod.h"
 
 namespace OpenXcom
 {
@@ -170,10 +170,10 @@ void RuleItem::loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::s
 /**
  * Loads the item from a YAML file.
  * @param node YAML node.
- * @param modIndex Offsets the sounds and sprite values to avoid conflicts.
+ * @param mod Mod for the item.
  * @param listOrder The list weight for this item.
  */
-void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const std::vector<RuleDamageType*> &damageTypes)
+void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 {
 	_type = node["type"].as<std::string>(_type);
 	_name = node["name"].as<std::string>(_name);
@@ -186,17 +186,11 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	_weight = node["weight"].as<int>(_weight);
 	if (node["bigSprite"])
 	{
-		_bigSprite = node["bigSprite"].as<int>(_bigSprite);
-		// BIGOBS.PCK: 57 entries
-		if (_bigSprite > 56)
-			_bigSprite += modIndex;
+		_bigSprite = mod->getSpriteOffset(node["bigSprite"].as<int>(_bigSprite), "BIGOBS.PCK");
 	}
 	if (node["bigSpriteAlt"])
 	{
-		_bigSpriteAlt = node["bigSpriteAlt"].as<int>(_bigSpriteAlt);
-		// BIGOBS.PCK: 57 entries
-		if (_bigSpriteAlt > 56)
-			_bigSpriteAlt += modIndex;
+		_bigSpriteAlt = mod->getSpriteOffset(node["bigSpriteAlt"].as<int>(_bigSpriteAlt), "BIGOBS.PCK");
 	}
 	else if (node["bigSprite"])
 	{
@@ -204,17 +198,11 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	}
 	if (node["floorSprite"])
 	{
-		_floorSprite = node["floorSprite"].as<int>(_floorSprite);
-		// FLOOROB.PCK: 73 entries
-		if (_floorSprite > 72)
-			_floorSprite += modIndex;
+		_floorSprite = mod->getSpriteOffset(node["floorSprite"].as<int>(_floorSprite), "FLOOROB.PCK");
 	}
 	if (node["floorSpriteAlt"])
 	{
-		_floorSpriteAlt = node["floorSpriteAlt"].as<int>(_floorSpriteAlt);
-		// FLOOROB.PCK: 73 entries
-		if (_floorSpriteAlt > 72)
-			_floorSpriteAlt += modIndex;
+		_floorSpriteAlt = mod->getSpriteOffset(node["floorSpriteAlt"].as<int>(_floorSpriteAlt), "FLOOROB.PCK");
 	}
 	else if (node["floorSprite"])
 	{
@@ -222,122 +210,74 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	}
 	if (node["handSprite"])
 	{
-		_handSprite = node["handSprite"].as<int>(_handSprite);
-		// HANDOBS.PCK: 128 entries
-		if (_handSprite > 127)
-			_handSprite += modIndex;
+		_handSprite = mod->getSpriteOffset(node["handSprite"].as<int>(_handSprite), "HANDOB.PCK");
 	}
 	if (node["bulletSprite"])
 	{
 		// Projectiles: 385 entries ((105*33) / (3*3)) (35 sprites per projectile(0-34), 11 projectiles (0-10))
 		_bulletSprite = node["bulletSprite"].as<int>(_bulletSprite) * 35;
 		if (_bulletSprite >= 385)
-			_bulletSprite += modIndex;
+			_bulletSprite += mod->getModOffset();
 	}
 	if (node["fireSound"])
 	{
-		_fireSound = node["fireSound"].as<int>(_fireSound);
-		// BATTLE.CAT: 55 entries
-		if (_fireSound > 54)
-			_fireSound += modIndex;
+		_fireSound = mod->getSoundOffset(node["fireSound"].as<int>(_fireSound), "BATTLE.CAT");
 	}
 	if (node["hitSound"])
 	{
-		_hitSound = node["hitSound"].as<int>(_hitSound);
-		// BATTLE.CAT: 55 entries
-		if (_hitSound > 54)
-			_hitSound += modIndex;
+		_hitSound = mod->getSoundOffset(node["hitSound"].as<int>(_hitSound), "BATTLE.CAT");
 	}
 	if (node["hitMissSound"])
 	{
-		_hitMissSound = node["hitMissSound"].as<int>(_hitMissSound);
-		// BATTLE.CAT: 55 entries
-		if (_hitMissSound > 54)
-			_hitMissSound += modIndex;
+		_hitMissSound = mod->getSoundOffset(node["hitMissSound"].as<int>(_hitMissSound), "BATTLE.CAT");
 	}
 	if (node["meleeSound"])
 	{
-		_meleeSound = node["meleeSound"].as<int>(_meleeSound);
-		// BATTLE.CAT: 55 entries
-		if (_meleeSound > 54)
-			_meleeSound += modIndex;
+		_meleeSound = mod->getSoundOffset(node["meleeSound"].as<int>(_meleeSound), "BATTLE.CAT");
 	}
 	if (node["meleeMissSound"])
 	{
-		_meleeMissSound = node["meleeMissSound"].as<int>(_meleeMissSound);
-		// BATTLE.CAT: 55 entries
-		if (_meleeMissSound > 54)
-			_meleeMissSound += modIndex;
+		_meleeMissSound = mod->getSoundOffset(node["meleeMissSound"].as<int>(_meleeMissSound), "BATTLE.CAT");
 	}
 	if (node["psiSound"])
 	{
-		_psiSound = node["psiSound"].as<int>(_psiSound);
-		// BATTLE.CAT: 55 entries
-		if (_psiSound > 54)
-			_psiSound += modIndex;
+		_psiSound = mod->getSoundOffset(node["psiSound"].as<int>(_psiSound), "BATTLE.CAT");
 	}
 	if (node["psiMissSound"])
 	{
-		_psiMissSound = node["psiMissSound"].as<int>(_psiMissSound);
-		// BATTLE.CAT: 55 entries
-		if (_psiMissSound > 54)
-			_psiMissSound += modIndex;
+		_psiMissSound = mod->getSoundOffset(node["psiMissSound"].as<int>(_psiMissSound), "BATTLE.CAT");
 	}
 	if (node["hitAnimation"])
 	{
-		_hitAnimation = node["hitAnimation"].as<int>(_hitAnimation);
-		// SMOKE.PCK: 56 entries
-		if (_hitAnimation > 55)
-			_hitAnimation += modIndex;
+		_hitAnimation = mod->getSpriteOffset(node["hitAnimation"].as<int>(_hitAnimation), "SMOKE.PCK");
 	}
 	if (node["hitMissAnimation"])
 	{
-		_hitMissAnimation = node["hitMissAnimation"].as<int>(_hitMissAnimation);
-		// SMOKE.PCK: 56 entries
-		if (_hitMissAnimation > 55)
-			_hitMissAnimation += modIndex;
+		_hitMissAnimation = mod->getSpriteOffset(node["hitMissAnimation"].as<int>(_hitMissAnimation), "SMOKE.PCK");
 	}
 	if (node["meleeAnimation"])
 	{
-		_meleeAnimation = node["meleeAnimation"].as<int>(_meleeAnimation);
-		// HIT.PCK: 4 entries
-		if (_meleeAnimation > 3)
-			_meleeAnimation += modIndex;
+		_meleeAnimation = mod->getSpriteOffset(node["meleeAnimation"].as<int>(_meleeAnimation), "HIT.PCK");
 	}
 	if (node["meleeMissAnimation"])
 	{
-		_meleeMissAnimation = node["meleeMissAnimation"].as<int>(_meleeMissAnimation);
-		// HIT.PCK: 4 entries
-		if (_meleeMissAnimation > 3)
-			_meleeMissAnimation += modIndex;
+		_meleeMissAnimation = mod->getSpriteOffset(node["meleeMissAnimation"].as<int>(_meleeMissAnimation), "HIT.PCK");
 	}
 	if (node["psiAnimation"])
 	{
-		_psiAnimation = node["psiAnimation"].as<int>(_psiAnimation);
-		// HIT.PCK: 4 entries
-		if (_psiAnimation > 3)
-			_psiAnimation += modIndex;
+		_psiAnimation = mod->getSpriteOffset(node["psiAnimation"].as<int>(_psiAnimation), "HIT.PCK");
 	}
 	if (node["psiMissAnimation"])
 	{
-		_psiMissAnimation = node["psiMissAnimation"].as<int>(_psiMissAnimation);
-		// HIT.PCK: 4 entries
-		if (_psiMissAnimation > 3)
-			_psiMissAnimation += modIndex;
+		_psiMissAnimation = mod->getSpriteOffset(node["psiMissAnimation"].as<int>(_psiMissAnimation), "HIT.PCK");
 	}
 	if (node["meleeHitSound"])
 	{
-		_meleeHitSound = node["meleeHitSound"].as<int>(_meleeHitSound);
-		// BATTLE.CAT: 55 entries
-		if (_meleeHitSound > 54)
-			_meleeHitSound += modIndex;
+		_meleeHitSound = mod->getSoundOffset(node["meleeHitSound"].as<int>(_meleeHitSound), "BATTLE.CAT");
 	}
 	if (node["explosionHitSound"])
 	{
-		_explosionHitSound = node["explosionHitSound"].as<int>(_explosionHitSound);
-		// BATTLE.CAT: 55 entries
-		if (_explosionHitSound > 54)
-			_explosionHitSound += modIndex;
+		_explosionHitSound = mod->getSoundOffset(node["explosionHitSound"].as<int>(_explosionHitSound), "BATTLE.CAT");
 	}
 
 	if (node["battleType"])
@@ -370,15 +310,15 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 		if (_battleType == BT_CORPSE)
 		{
 			//compatibility hack for corpse explosion, that didn't have defined damage type
-			_damageType = *damageTypes.at(DT_HE);
+			_damageType = *mod->getDamageType(DT_HE);
 		}
-		_meleeType = *damageTypes.at(DT_MELEE);
+		_meleeType = *mod->getDamageType(DT_MELEE);
 	}
 
 	if (const YAML::Node &type = node["damageType"])
 	{
 		//load predefined damage type
-		_damageType = *damageTypes.at(type.as<int>());
+		_damageType = *mod->getDamageType((ItemDamageType)type.as<int>());
 	}
 	_damageType.FixRadius = node["blastRadius"].as<int>(_damageType.FixRadius);
 	if (const YAML::Node &alter = node["damageAlter"])
@@ -389,7 +329,7 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder, const s
 	if (const YAML::Node &type = node["meleeType"])
 	{
 		//load predefined damage type
-		_meleeType = *damageTypes.at(type.as<int>());
+		_meleeType = *mod->getDamageType((ItemDamageType)type.as<int>());
 	}
 	if (const YAML::Node &alter = node["meleeAlter"])
 	{
@@ -1321,14 +1261,14 @@ int RuleItem::getTurretType() const
 
 /**
  * Returns first turn when AI can use item.
- * @param Pointer to the ruleset. 0 by default.
+ * @param Pointer to the mod. 0 by default.
  * @return First turn when AI can use item.
- *	if ruleset == 0 returns only local defined aiUseDelay
+ *	if mod == 0 returns only local defined aiUseDelay
  *	else takes into account global define of aiUseDelay for this item
  */
-int RuleItem::getAIUseDelay(const Ruleset *ruleset) const
+int RuleItem::getAIUseDelay(const Mod *mod) const
 {
-	if (ruleset == 0 || _aiUseDelay >= 0)
+	if (mod == 0 || _aiUseDelay >= 0)
 		return _aiUseDelay;
 
 	switch (getBattleType())
@@ -1336,22 +1276,22 @@ int RuleItem::getAIUseDelay(const Ruleset *ruleset) const
 	case BT_FIREARM:
 		if (isWaypoint())
 		{
-			return ruleset->getAIUseDelayBlaster();
+			return mod->getAIUseDelayBlaster();
 		}
 		else
 		{
-			return ruleset->getAIUseDelayFirearm();
+			return mod->getAIUseDelayFirearm();
 		}
 
 	case BT_MELEE:
-		return ruleset->getAIUseDelayMelee();
+		return mod->getAIUseDelayMelee();
 
 	case BT_GRENADE:
 	case BT_PROXIMITYGRENADE:
-		return ruleset->getAIUseDelayGrenade();
+		return mod->getAIUseDelayGrenade();
 
 	case BT_PSIAMP:
-		return ruleset->getAIUseDelayPsionic();
+		return mod->getAIUseDelayPsionic();
 
 	default:
 		return _aiUseDelay;

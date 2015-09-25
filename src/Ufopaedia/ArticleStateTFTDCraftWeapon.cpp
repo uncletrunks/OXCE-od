@@ -20,7 +20,7 @@
 #include "ArticleStateTFTD.h"
 #include "ArticleStateTFTDCraftWeapon.h"
 #include "../Mod/ArticleDefinition.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
@@ -32,7 +32,7 @@ namespace OpenXcom
 
 	ArticleStateTFTDCraftWeapon::ArticleStateTFTDCraftWeapon(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
-		RuleCraftWeapon *weapon = _game->getRuleset()->getCraftWeapon(defs->id);
+		RuleCraftWeapon *weapon = _game->getMod()->getCraftWeapon(defs->id);
 		
 		_lstInfo = new TextList(150, 50, 168, 126);
 		add(_lstInfo);

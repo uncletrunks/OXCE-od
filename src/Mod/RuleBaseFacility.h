@@ -27,6 +27,8 @@
 namespace OpenXcom
 {
 
+class Mod;
+
 /**
  * Represents a specific type of base facility.
  * Contains constant info about a facility like
@@ -52,7 +54,7 @@ public:
 	/// Cleans up the facility ruleset.
 	~RuleBaseFacility();
 	/// Loads the facility from YAML.
-	void load(const YAML::Node& node, int modIndex, int listOrder);
+	void load(const YAML::Node& node, Mod *mod, int listOrder);
 	/// Gets the facility's type.
 	std::string getType() const;
 	/// Gets the facility's requirements.

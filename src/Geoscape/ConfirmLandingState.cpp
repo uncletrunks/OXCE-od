@@ -19,7 +19,6 @@
 #include "ConfirmLandingState.h"
 #include <sstream>
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -38,7 +37,7 @@
 #include "../Engine/Options.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/AlienRace.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -73,7 +72,7 @@ ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int sha
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK15.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK15.SCR"));
 
 	_btnYes->setText(tr("STR_YES"));
 	_btnYes->onMouseClick((ActionHandler)&ConfirmLandingState::btnYesClick);
@@ -127,7 +126,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 	MissionSite* m = dynamic_cast<MissionSite*>(_craft->getDestination());
 	AlienBase* b = dynamic_cast<AlienBase*>(_craft->getDestination());
 
-	SavedBattleGame *bgame = new SavedBattleGame(_game->getRuleset());
+	SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 	_game->getSavedGame()->setBattleGame(bgame);
 	BattlescapeGenerator bgen(_game);
 	bgen.setWorldTexture(_texture);
@@ -140,7 +139,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 		else
 			bgame->setMissionType("STR_UFO_GROUND_ASSAULT");
 		bgen.setUfo(u);
-		bgen.setAlienCustomDeploy(_game->getRuleset()->getDeployment(u->getCraftStats().craftCustomDeploy));
+		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(u->getCraftStats().craftCustomDeploy));
 		bgen.setAlienRace(u->getAlienRace());
 	}
 	else if (m != 0)
@@ -152,11 +151,11 @@ void ConfirmLandingState::btnYesClick(Action *)
 	}
 	else if (b != 0)
 	{
-		AlienRace *race = _game->getRuleset()->getAlienRace(b->getAlienRace());
+		AlienRace *race = _game->getMod()->getAlienRace(b->getAlienRace());
 		bgame->setMissionType("STR_ALIEN_BASE_ASSAULT");
 		bgen.setAlienBase(b);
 		bgen.setAlienRace(b->getAlienRace());
-		bgen.setAlienCustomDeploy(_game->getRuleset()->getDeployment(race->getBaseCustomDeploy()), _game->getRuleset()->getDeployment(race->getBaseCustomMission()));
+		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(race->getBaseCustomDeploy()), _game->getMod()->getDeployment(race->getBaseCustomMission()));
 		bgen.setWorldTexture(0);
 	}
 	else

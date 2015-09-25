@@ -21,7 +21,7 @@
 #include <sstream>
 #include <cmath>
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -38,7 +38,7 @@
 #include "../Engine/Options.h"
 #include "../Menu/CutsceneState.h"
 #include "../Menu/SaveGameState.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
@@ -84,7 +84,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK13.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK13.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&MonthlyReportState::btnOkClick);
@@ -284,7 +284,7 @@ void MonthlyReportState::btnOkClick(Action *)
 		}
 		else
 		{
-			_window->setColor(_game->getRuleset()->getInterface("monthlyReport")->getElement("window")->color2);
+			_window->setColor(_game->getMod()->getInterface("monthlyReport")->getElement("window")->color2);
 			_txtTitle->setVisible(false);
 			_txtMonth->setVisible(false);
 			_txtRating->setVisible(false);
@@ -295,7 +295,7 @@ void MonthlyReportState::btnOkClick(Action *)
 			_btnOk->setVisible(false);
 			_btnBigOk->setVisible(true);
 			_txtFailure->setVisible(true);
-			_game->getResourcePack()->playMusic("GMLOSE");
+			_game->getMod()->playMusic("GMLOSE");
 		}
 	}
 }

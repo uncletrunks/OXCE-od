@@ -33,9 +33,9 @@ enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMI
 enum BattleFuseType { BFT_NONE = -3, BFT_INSTANT = -2, BFT_SET = -1, BFT_FIX_MIN = 0, BFT_FIX_MAX = 24 };
 enum BattleMediKitType { BMT_NORMAL = 0, BMT_HEAL = 1, BMT_STIMULANT = 2, BMT_PAINKILLER = 3 };
 
-class Ruleset;
 class SurfaceSet;
 class Surface;
+class Mod;
 
 struct RuleItemUseCost
 {
@@ -136,7 +136,7 @@ public:
 	/// Cleans up the item ruleset.
 	~RuleItem();
 	/// Loads item data from YAML.
-	void load(const YAML::Node& node, int modIndex, int listIndex, const std::vector<RuleDamageType*> &damageTypes);
+	void load(const YAML::Node& node, Mod *mod, int listIndex);
 	/// Gets the item's type.
 	const std::string &getType() const;
 	/// Gets the item's name.
@@ -324,7 +324,7 @@ public:
 	/// Gets the item's turret type.
 	int getTurretType() const;
 	/// Gets first turn when AI can use item.
-	int getAIUseDelay(const Ruleset *ruleset = 0) const;
+	int getAIUseDelay(const Mod *mod = 0) const;
 	/// Checks if this a live alien.
 	bool isAlien() const;
 	/// Should we charge a flat rate?

@@ -31,8 +31,7 @@
 #include "../Battlescape/BattlescapeGame.h"
 #include "../Battlescape/Position.h"
 #include "../Battlescape/Inventory.h"
-#include "../Mod/ResourcePack.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Engine/Game.h"
 #include "../Mod/RuleInventory.h"
@@ -49,7 +48,7 @@ namespace OpenXcom
 /**
  * Initializes a brand new battlescape saved game.
  */
-SavedBattleGame::SavedBattleGame(Ruleset *rule) :
+SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
 	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1),
     _debugMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
@@ -113,10 +112,10 @@ SavedBattleGame::~SavedBattleGame()
 /**
  * Loads the saved battle game from a YAML file.
  * @param node YAML node.
- * @param rule for the saved game.
+ * @param mod for the saved game.
  * @param savedGame Pointer to saved game.
  */
-void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* savedGame)
+void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGame)
 {
 	_mapsize_x = node["width"].as<int>(_mapsize_x);
 	_mapsize_y = node["length"].as<int>(_mapsize_y);
@@ -132,7 +131,7 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 	for (YAML::const_iterator i = node["mapdatasets"].begin(); i != node["mapdatasets"].end(); ++i)
 	{
 		std::string name = i->as<std::string>();
-		MapDataSet *mds = rule->getMapDataSet(name);
+		MapDataSet *mds = mod->getMapDataSet(name);
 		_mapDataSets.push_back(mds);
 	}
 
@@ -212,8 +211,8 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 			std::string type = (*i)["genUnitType"].as<std::string>();
 			std::string armor = (*i)["genUnitArmor"].as<std::string>();
 			// create a new Unit.
-			if(!rule->getUnit(type) || !rule->getArmor(armor)) continue;
-			unit = new BattleUnit(rule->getUnit(type), originalFaction, id, rule->getArmor(armor), savedGame->getDifficultyCoefficient(), _depth);
+			if(!mod->getUnit(type) || !mod->getArmor(armor)) continue;
+			unit = new BattleUnit(mod->getUnit(type), originalFaction, id, mod->getArmor(armor), savedGame->getDifficultyCoefficient(), _depth);
 		}
 		unit->load(*i);
 		unit->setSpecialWeapon(this);
@@ -256,13 +255,13 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 		{
 			std::string type = (*i)["type"].as<std::string>();
 			_itemId = (*i)["id"].as<int>(_itemId);
-			if (rule->getItem(type))
+			if (mod->getItem(type))
 			{
-				BattleItem *item = new BattleItem(rule->getItem(type), &_itemId);
+				BattleItem *item = new BattleItem(mod->getItem(type), &_itemId);
 				item->load(*i);
 				type = (*i)["inventoryslot"].as<std::string>();
 				if (type != "NULL")
-					item->setSlot(rule->getInventory(type));
+					item->setSlot(mod->getInventory(type));
 				int owner = (*i)["owner"].as<int>();
 				int prevOwner = (*i)["previousOwner"].as<int>(-1);
 				int unit = (*i)["unit"].as<int>();
@@ -292,7 +291,7 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 				{
 					Position pos = (*i)["position"].as<Position>();
 					if (pos.x != -1)
-						getTile(pos)->addItem(item, rule->getInventory("STR_GROUND"));
+						getTile(pos)->addItem(item, mod->getInventory("STR_GROUND"));
 				}
 				toContainer[pass]->push_back(item);
 			}
@@ -303,7 +302,7 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 	std::vector<BattleItem*>::iterator weaponi = _items.begin();
 	for (YAML::const_iterator i = node["items"].begin(); i != node["items"].end(); ++i)
 	{
-		if (rule->getItem((*i)["type"].as<std::string>()))
+		if (mod->getItem((*i)["type"].as<std::string>()))
 		{
 			int ammo = (*i)["ammoItem"].as<int>();
 			if (ammo != -1)
@@ -332,16 +331,16 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 
 /**
  * Loads the resources required by the map in the battle save.
- * @param game Pointer to the game.
+ * @param mod Pointer to the mod.
  */
-void SavedBattleGame::loadMapResources(Game *game)
+void SavedBattleGame::loadMapResources(Mod *mod)
 {
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
 		(*i)->loadData();
-		if (game->getRuleset()->getMCDPatch((*i)->getName()))
+		if (mod->getMCDPatch((*i)->getName()))
 		{
-			game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
+			mod->getMCDPatch((*i)->getName())->modifyData(*i);
 		}
 	}
 
@@ -359,7 +358,7 @@ void SavedBattleGame::loadMapResources(Game *game)
 		}
 	}
 
-	initUtilities(game->getResourcePack(), game->getRuleset());
+	initUtilities(mod);
 	getTileEngine()->calculateSunShading();
 	getTileEngine()->calculateTerrainLighting();
 	getTileEngine()->calculateUnitLighting();
@@ -511,15 +510,14 @@ void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z)
 
 /**
  * Initializes the map utilities.
- * @param res Pointer to resource pack.
- * @param rule Pointer to the ruleset.
+ * @param mod Pointer to mod.
  */
-void SavedBattleGame::initUtilities(ResourcePack *res, Ruleset *rule)
+void SavedBattleGame::initUtilities(Mod *mod)
 {
 	delete _pathfinding;
 	delete _tileEngine;
 	_pathfinding = new Pathfinding(this);
-	_tileEngine = new TileEngine(this, res->getVoxelData(), rule->getMaxViewDistance(), rule->getMaxDarknessToSeeUnits());
+	_tileEngine = new TileEngine(this, mod->getVoxelData(), mod->getMaxViewDistance(), mod->getMaxDarknessToSeeUnits());
 }
 
 /**
@@ -838,7 +836,7 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 
 	const RuleItem *rule = weapon->getRules();
 	volatile bool x = true;
-	if (unit->getOriginalFaction() == FACTION_HOSTILE && getTurn() < rule->getAIUseDelay(getRuleset()))
+	if (unit->getOriginalFaction() == FACTION_HOSTILE && getTurn() < rule->getAIUseDelay(getMod()))
 	{
 		return false;
 	}
@@ -1742,10 +1740,10 @@ void SavedBattleGame::prepareNewTurn()
 		getTileEngine()->calculateTerrainLighting();
 	}
 
-	Ruleset *ruleset = getBattleState()->getGame()->getRuleset();
+	Mod *mod = getBattleState()->getGame()->getMod();
 	for (std::vector<BattleUnit*>::iterator i = getUnits()->begin(); i != getUnits()->end(); ++i)
 	{
-		(*i)->calculateEnviDamage(ruleset);
+		(*i)->calculateEnviDamage(mod);
 	}
 
 	reviveUnconsciousUnits();
@@ -2262,7 +2260,7 @@ int SavedBattleGame::getAmbientSound() const
  * get ruleset.
  * @return the ruleset of game.
  */
-const Ruleset *SavedBattleGame::getRuleset() const
+const Mod *SavedBattleGame::getMod() const
 {
 	return _rule;
 }

@@ -124,7 +124,7 @@ void create()
 	_info.push_back(OptionInfo("captureMouse", (bool*)&captureMouse, false));
 	_info.push_back(OptionInfo("battleTooltips", &battleTooltips, true));
 	_info.push_back(OptionInfo("keepAspectRatio", &keepAspectRatio, true));
-	_info.push_back(OptionInfo("nonSquarePixelRatio", &nonSquarePixelRatio, false));	
+	_info.push_back(OptionInfo("nonSquarePixelRatio", &nonSquarePixelRatio, false));
 	_info.push_back(OptionInfo("cursorInBlackBandsInFullscreen", &cursorInBlackBandsInFullscreen, false));
 	_info.push_back(OptionInfo("cursorInBlackBandsInWindow", &cursorInBlackBandsInWindow, true));
 	_info.push_back(OptionInfo("cursorInBlackBandsInBorderlessWindow", &cursorInBlackBandsInBorderlessWindow, false));
@@ -175,7 +175,7 @@ void create()
 	_info.push_back(OptionInfo("canManufactureMoreItemsPerHour", &canManufactureMoreItemsPerHour, false, "STR_CANMANUFACTUREMOREITEMSPERHOUR", "STR_GEOSCAPE"));
 	_info.push_back(OptionInfo("spendResearchedItems", &spendResearchedItems, false, "STR_SPENDRESEARCHEDITEMS", "STR_GEOSCAPE"));
 	_info.push_back(OptionInfo("fieldPromotions", &fieldPromotions, false, "STR_FIELDPROMOTIONS", "STR_GEOSCAPE"));
-	
+
 	_info.push_back(OptionInfo("battleDragScrollInvert", &battleDragScrollInvert, false, "STR_DRAGSCROLLINVERT", "STR_BATTLESCAPE")); // true drags away from the cursor, false drags towards (like a grab)
 	_info.push_back(OptionInfo("sneakyAI", &sneakyAI, false, "STR_SNEAKYAI", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("battleUFOExtenderAccuracy", &battleUFOExtenderAccuracy, false, "STR_BATTLEUFOEXTENDERACCURACY", "STR_BATTLESCAPE"));
@@ -197,7 +197,7 @@ void create()
 	_info.push_back(OptionInfo("TFTDDamage", &TFTDDamage, false, "STR_TFTDDAMAGE", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("noAlienPanicMessages", &noAlienPanicMessages, false, "STR_NOALIENPANICMESSAGES", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("alienBleeding", &alienBleeding, false, "STR_ALIENBLEEDING", "STR_BATTLESCAPE"));
-	
+
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
 	_info.push_back(OptionInfo("keyCancel", &keyCancel, SDLK_ESCAPE, "STR_CANCEL", "STR_GENERAL"));
@@ -671,7 +671,7 @@ static void _loadMod(const ModInfo &modInfo, std::set<std::string> circDepCheck)
 		Log(LOG_WARNING) << "circular dependency found in master chain: " << modInfo.getId();
 		return;
 	}
-	
+
 	FileMap::load(modInfo.getId(), modInfo.getPath(), false);
 	for (std::vector<std::string>::const_iterator i = modInfo.getExternalResourceDirs().begin(); i != modInfo.getExternalResourceDirs().end(); ++i)
 	{
@@ -816,7 +816,7 @@ void userSplitMasters()
 			{
 				saves = CrossPlatform::getFolderContents(_userFolder, "sav");
 				std::vector<std::string> autosaves = CrossPlatform::getFolderContents(_userFolder, "asav");
-				saves.insert(saves.end(), autosaves.begin(), autosaves.end());				
+				saves.insert(saves.end(), autosaves.begin(), autosaves.end());
 			}
 			for (std::vector<std::string>::iterator j = saves.begin(); j != saves.end();)
 			{
@@ -1045,7 +1045,7 @@ void backupDisplay()
  * testing a new display setup.
  */
 void switchDisplay()
-{	
+{
 	std::swap(displayWidth, newDisplayWidth);
 	std::swap(displayHeight, newDisplayHeight);
 	std::swap(useOpenGL, newOpenGL);

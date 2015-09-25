@@ -28,7 +28,7 @@
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/Sound.h"
 #include "../Engine/RNG.h"
 #include "../Mod/RuleItem.h"
@@ -279,7 +279,7 @@ bool ProjectileFlyBState::createNewProjectile()
 	++_action.autoShotCounter;
 
 	// create a new projectile
-	Projectile *projectile = new Projectile(_parent->getResourcePack(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
+	Projectile *projectile = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
 
 	// add the projectile on the map
 	_parent->getMap()->setProjectile(projectile);
@@ -309,7 +309,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			_projectileItem->moveToOwner(0);
 			_unit->setCache(0);
 			_parent->getMap()->cacheUnit(_unit);
-			_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
+			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 			_unit->addThrowingExp();
 		}
 		else
@@ -335,11 +335,11 @@ bool ProjectileFlyBState::createNewProjectile()
 			// and we have a lift-off
 			if (_ammo->getRules()->getFireSound() != -1)
 			{
-				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), _ammo->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
+				_parent->getMod()->getSoundByDepth(_parent->getDepth(), _ammo->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 			}
 			else if (_action.weapon->getRules()->getFireSound() != -1)
 			{
-				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), _action.weapon->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
+				_parent->getMod()->getSoundByDepth(_parent->getDepth(), _action.weapon->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 			}
 			if (!_parent->getSave()->getDebugMode() && _action.type != BA_LAUNCH && _ammo->spendBullet() == false)
 			{
@@ -380,11 +380,11 @@ bool ProjectileFlyBState::createNewProjectile()
 			// and we have a lift-off
 			if (_ammo->getRules()->getFireSound() != -1)
 			{
-				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), _ammo->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(projectile->getOrigin()));
+				_parent->getMod()->getSoundByDepth(_parent->getDepth(), _ammo->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(projectile->getOrigin()));
 			}
 			else if (_action.weapon->getRules()->getFireSound() != -1)
 			{
-				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), _action.weapon->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(projectile->getOrigin()));
+				_parent->getMod()->getSoundByDepth(_parent->getDepth(), _action.weapon->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(projectile->getOrigin()));
 			}
 			if (!_parent->getSave()->getDebugMode() && _action.type != BA_LAUNCH && _ammo->spendBullet() == false)
 			{
@@ -484,7 +484,7 @@ void ProjectileFlyBState::think()
 					pos.x--;
 				}
 				BattleItem *item = _parent->getMap()->getProjectile()->getItem();
-				_parent->getResourcePack()->getSoundByDepth(_parent->getDepth(), ResourcePack::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
+				_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
 
 				if (item->getRules()->getBattleType() == BT_GRENADE && RNG::percent(item->getRules()->getSpecialChance()) && ((Options::battleInstantGrenade && item->getFuseTimer() == 0) || item->getRules()->getFuseTimerType() == BFT_INSTANT))
 				{
@@ -548,7 +548,7 @@ void ProjectileFlyBState::think()
 						while (i != _ammo->getRules()->getShotgunPellets())
 						{
 							// create a projectile
-							Projectile *proj = new Projectile(_parent->getResourcePack(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
+							Projectile *proj = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
 							// let it trace to the point where it hits
 							_projectileImpact = proj->calculateTrajectory(std::max(0.0, (_unit->getFiringAccuracy(_action.type, _action.weapon) / 100.0) - i * 5.0));
 							if (_projectileImpact != V_EMPTY)

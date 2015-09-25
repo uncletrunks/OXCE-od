@@ -31,7 +31,7 @@ namespace OpenXcom
 class AlienMission;
 class UfoTrajectory;
 class SavedGame;
-class Ruleset;
+class Mod;
 
 /**
  * Represents an alien UFO on the map.
@@ -65,7 +65,7 @@ public:
 	/// Cleans up the UFO.
 	~Ufo();
 	/// Loads the UFO from YAML.
-	void load(const YAML::Node& node, const Ruleset &ruleset, SavedGame &game);
+	void load(const YAML::Node& node, const Mod &ruleset, SavedGame &game);
 	/// Saves the UFO to YAML.
 	YAML::Node save(bool newBattle) const;
 	/// Saves the UFO's ID to YAML.

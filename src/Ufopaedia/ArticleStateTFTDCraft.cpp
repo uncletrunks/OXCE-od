@@ -18,7 +18,7 @@
  */
 
 #include "../Mod/ArticleDefinition.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleCraft.h"
 #include "ArticleStateTFTD.h"
 #include "ArticleStateTFTDCraft.h"
@@ -32,7 +32,7 @@ namespace OpenXcom
 
 	ArticleStateTFTDCraft::ArticleStateTFTDCraft(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
-		RuleCraft *craft = _game->getRuleset()->getCraft(defs->id);
+		RuleCraft *craft = _game->getMod()->getCraft(defs->id);
 		_txtStats = new Text(131, 56, 187, 116);
 		add(_txtStats);
 

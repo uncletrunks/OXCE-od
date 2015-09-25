@@ -19,7 +19,7 @@
 #include "CraftInfoState.h"
 #include <sstream>
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
@@ -129,7 +129,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK14.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK14.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftInfoState::btnOkClick);
@@ -186,7 +186,7 @@ void CraftInfoState::init()
 	_edtCraft->setText(_craft->getName(_game->getLanguage()));
 
 	_sprite->clear();
-	SurfaceSet *texture = _game->getResourcePack()->getSurfaceSet("BASEBITS.PCK");
+	SurfaceSet *texture = _game->getMod()->getSurfaceSet("BASEBITS.PCK");
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->setX(0);
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->setY(0);
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->blit(_sprite);

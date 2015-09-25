@@ -18,7 +18,7 @@
  */
 
 #include "../Mod/ArticleDefinition.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleUfo.h"
 #include "ArticleStateTFTD.h"
 #include "ArticleStateTFTDUso.h"
@@ -32,7 +32,7 @@ namespace OpenXcom
 
 	ArticleStateTFTDUso::ArticleStateTFTDUso(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
-		RuleUfo *ufo = _game->getRuleset()->getUfo(defs->id);
+		RuleUfo *ufo = _game->getMod()->getUfo(defs->id);
 
 		_lstInfo = new TextList(150, 50, 168, 142);
 		add(_lstInfo);

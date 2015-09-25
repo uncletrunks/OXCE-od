@@ -45,7 +45,7 @@
 #include "../Mod/RuleUfo.h"
 #include "../Mod/RuleCraft.h"
 #include "../Mod/RuleInventory.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/MapData.h"
 #include "../Mod/MCDPatch.h"
 #include "../Mod/Armor.h"
@@ -53,16 +53,13 @@
 #include "../Mod/AlienRace.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/RuleBaseFacility.h"
-#include "../Mod/RuleGlobe.h"
 #include "../Mod/Texture.h"
-#include "../Mod/XcomResourcePack.h"
 #include "../Savegame/Vehicle.h"
 #include "../Savegame/MissionSite.h"
 #include "../Savegame/AlienBase.h"
 #include "../Savegame/EquipmentLayoutItem.h"
 #include "CivilianBAIState.h"
 #include "AlienBAIState.h"
-#include "Pathfinding.h"
 #include "BattlescapeState.h"
 
 namespace OpenXcom
@@ -73,7 +70,7 @@ namespace OpenXcom
  * @param game pointer to Game object.
  */
 BattlescapeGenerator::BattlescapeGenerator(Game *game) :
-	_game(game), _save(game->getSavedGame()->getSavedBattle()), _res(_game->getResourcePack()),
+	_game(game), _save(game->getSavedGame()->getSavedBattle()), _mod(_game->getMod()),
 	_craft(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0),
@@ -108,7 +105,7 @@ void BattlescapeGenerator::init()
 	_blocksToDo = (_mapsize_x / 10) * (_mapsize_y / 10);
 	// creates the tile objects
 	_save->initMap(_mapsize_x, _mapsize_y, _mapsize_z);
-	_save->initUtilities(_res, _game->getRuleset());
+	_save->initUtilities(_mod);
 }
 /**
  * Sets the XCom craft involved in the battle.
@@ -342,24 +339,24 @@ void BattlescapeGenerator::nextStage()
 		_save->getItems()->push_back(*i);
 	}
 
-	_alienCustomDeploy = _game->getRuleset()->getDeployment(_save->getAlienCustomDeploy());
-	_alienCustomMission = _game->getRuleset()->getDeployment(_save->getAlienCustomMission());
+	_alienCustomDeploy = _game->getMod()->getDeployment(_save->getAlienCustomDeploy());
+	_alienCustomMission = _game->getMod()->getDeployment(_save->getAlienCustomMission());
 
-	if (_alienCustomDeploy) _alienCustomDeploy = _game->getRuleset()->getDeployment(_alienCustomDeploy->getNextStage());
-	if (_alienCustomMission) _alienCustomMission = _game->getRuleset()->getDeployment(_alienCustomMission->getNextStage());
+	if (_alienCustomDeploy) _alienCustomDeploy = _game->getMod()->getDeployment(_alienCustomDeploy->getNextStage());
+	if (_alienCustomMission) _alienCustomMission = _game->getMod()->getDeployment(_alienCustomMission->getNextStage());
 
 	_save->setAlienCustom(_alienCustomDeploy ? _alienCustomDeploy->getType() : "", _alienCustomMission ? _alienCustomMission->getType() : "");
 
-	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getRuleset()->getDeployment(_save->getMissionType());
+	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getMod()->getDeployment(_save->getMissionType());
 	ruleDeploy->getDimensions(&_mapsize_x, &_mapsize_y, &_mapsize_z);
 	size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() -1);
-	_terrain = _game->getRuleset()->getTerrain(ruleDeploy->getTerrains().at(pick));
+	_terrain = _game->getMod()->getTerrain(ruleDeploy->getTerrains().at(pick));
 	_worldShade = ruleDeploy->getShade();
 
-	const std::vector<MapScript*> *script = _game->getRuleset()->getMapScript(_terrain->getScript());
-	if (_game->getRuleset()->getMapScript(ruleDeploy->getScript()))
+	const std::vector<MapScript*> *script = _game->getMod()->getMapScript(_terrain->getScript());
+	if (_game->getMod()->getMapScript(ruleDeploy->getScript()))
 	{
-		script = _game->getRuleset()->getMapScript(ruleDeploy->getScript());
+		script = _game->getMod()->getMapScript(ruleDeploy->getScript());
 	}
 	else if (ruleDeploy->getScript() != "")
 	{
@@ -417,7 +414,7 @@ void BattlescapeGenerator::nextStage()
 	{
 		_save->selectNextPlayerUnit();
 	}
-	RuleInventory *ground = _game->getRuleset()->getInventory("STR_GROUND");
+	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND");
 
 	for (std::vector<BattleItem*>::iterator i = takeToNextStage.begin(); i != takeToNextStage.end(); ++i)
 	{
@@ -474,7 +471,7 @@ void BattlescapeGenerator::run()
 {
 	_save->setAlienCustom(_alienCustomDeploy ? _alienCustomDeploy->getType() : "", _alienCustomMission ? _alienCustomMission->getType() : "");
 
-	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getRuleset()->getDeployment(_ufo?_ufo->getRules()->getType():_save->getMissionType());
+	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getMod()->getDeployment(_ufo?_ufo->getRules()->getType():_save->getMissionType());
 
 	ruleDeploy->getDimensions(&_mapsize_x, &_mapsize_y, &_mapsize_z);
 
@@ -487,18 +484,18 @@ void BattlescapeGenerator::run()
 			if (!ruleDeploy->getTerrains().empty())
 			{
 				size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() - 1);
-				_terrain = _game->getRuleset()->getTerrain(ruleDeploy->getTerrains().at(pick));
+				_terrain = _game->getMod()->getTerrain(ruleDeploy->getTerrains().at(pick));
 			}
 			else // trouble: no texture and no deployment terrain, most likely scenario is a UFO landing on water: use the first available terrain
 			{
-				_terrain = _game->getRuleset()->getTerrain(_game->getRuleset()->getTerrainList().front());
+				_terrain = _game->getMod()->getTerrain(_game->getMod()->getTerrainList().front());
 			}
 		}
 		else
 		{
 			Target *target = _ufo;
 			if (_mission) target = _mission;
-			_terrain = _game->getRuleset()->getTerrain(_worldTexture->getRandomTerrain(target));
+			_terrain = _game->getMod()->getTerrain(_worldTexture->getRandomTerrain(target));
 		}
 	}
 
@@ -520,10 +517,10 @@ void BattlescapeGenerator::run()
 		_worldShade = ruleDeploy->getShade();
 	}
 
-	const std::vector<MapScript*> *script = _game->getRuleset()->getMapScript(_terrain->getScript());
-	if (_game->getRuleset()->getMapScript(ruleDeploy->getScript()))
+	const std::vector<MapScript*> *script = _game->getMod()->getMapScript(_terrain->getScript());
+	if (_game->getMod()->getMapScript(ruleDeploy->getScript()))
 	{
-		script = _game->getRuleset()->getMapScript(ruleDeploy->getScript());
+		script = _game->getMod()->getMapScript(ruleDeploy->getScript());
 	}
 	else if (ruleDeploy->getScript() != "")
 	{
@@ -585,7 +582,7 @@ void BattlescapeGenerator::run()
 */
 void BattlescapeGenerator::deployXCOM()
 {
-	RuleInventory *ground = _game->getRuleset()->getInventory("STR_GROUND");
+	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND");
 
 	if (_craft != 0)
 		_base = _craft->getBase();
@@ -665,7 +662,7 @@ void BattlescapeGenerator::deployXCOM()
 		{
 			for (int count = 0; count < i->second; count++)
 			{
-				_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()),	ground);
+				_craftInventoryTile->addItem(new BattleItem(_game->getMod()->getItem(i->first), _save->getCurrentItemId()),	ground);
 			}
 		}
 	}
@@ -678,12 +675,12 @@ void BattlescapeGenerator::deployXCOM()
 			for (std::map<std::string, int>::iterator i = _base->getItems()->getContents()->begin(); i != _base->getItems()->getContents()->end();)
 			{
 				// only put items in the battlescape that make sense (when the item got a sprite, it's probably ok)
-				RuleItem *rule = _game->getRuleset()->getItem(i->first);
+				RuleItem *rule = _game->getMod()->getItem(i->first);
 				if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE && !rule->isFixed() && _game->getSavedGame()->isResearched(rule->getRequirements()))
 				{
 					for (int count = 0; count < i->second; count++)
 					{
-						_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()), ground);
+						_craftInventoryTile->addItem(new BattleItem(_game->getMod()->getItem(i->first), _save->getCurrentItemId()), ground);
 					}
 					std::map<std::string, int>::iterator tmp = i;
 					++i;
@@ -704,7 +701,7 @@ void BattlescapeGenerator::deployXCOM()
 			{
 				for (int count = 0; count < i->second; count++)
 				{
-					_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()), ground);
+					_craftInventoryTile->addItem(new BattleItem(_game->getMod()->getItem(i->first), _save->getCurrentItemId()), ground);
 				}
 			}
 		}
@@ -816,11 +813,11 @@ void BattlescapeGenerator::deployXCOM()
 BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 {
 	std::string vehicle = v->getRules()->getType();
-	Unit *rule = _game->getRuleset()->getUnit(vehicle);
-	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getRuleset()->getArmor(rule->getArmor()), 0, _save->getDepth()));
+	Unit *rule = _game->getMod()->getUnit(vehicle);
+	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getMod()->getArmor(rule->getArmor()), 0, _save->getDepth()));
 	if (unit)
 	{
-		BattleItem *item = new BattleItem(_game->getRuleset()->getItem(vehicle), _save->getCurrentItemId());
+		BattleItem *item = new BattleItem(_game->getMod()->getItem(vehicle), _save->getCurrentItemId());
 		if (!_save->addItem(item, unit))
 		{
 			delete item;
@@ -828,7 +825,7 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 		if (!v->getRules()->getCompatibleAmmo()->empty())
 		{
 			std::string ammo = v->getRules()->getCompatibleAmmo()->front();
-			BattleItem *ammoItem = new BattleItem(_game->getRuleset()->getItem(ammo), _save->getCurrentItemId());
+			BattleItem *ammoItem = new BattleItem(_game->getMod()->getItem(ammo), _save->getCurrentItemId());
 			_save->addItem(ammoItem, unit);
 			ammoItem->setAmmoQuantity(v->getAmmo());
 		}
@@ -959,19 +956,19 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 		_alienRace = _alienRace + "_UNDERWATER";
 	}
 
-	if (_game->getRuleset()->getAlienRace(_alienRace) == 0)
+	if (_game->getMod()->getAlienRace(_alienRace) == 0)
 	{
 		throw Exception("Map generator encountered an error: Unknown race: " + _alienRace + " defined in deployment: " + deployment->getType());
 	}
 
-	AlienRace *race = _game->getRuleset()->getAlienRace(_alienRace);
+	AlienRace *race = _game->getMod()->getAlienRace(_alienRace);
 
 	int month;
 	if (_game->getSavedGame()->getMonthsPassed() != -1)
 	{
 		month =
-		((size_t) _game->getSavedGame()->getMonthsPassed()) > _game->getRuleset()->getAlienItemLevels().size() - 1 ?  // if
-		_game->getRuleset()->getAlienItemLevels().size() - 1 : // then
+		((size_t) _game->getSavedGame()->getMonthsPassed()) > _game->getMod()->getAlienItemLevels().size() - 1 ?  // if
+		_game->getMod()->getAlienItemLevels().size() - 1 : // then
 		_game->getSavedGame()->getMonthsPassed() ;  // else
 	}
 	else
@@ -998,9 +995,9 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 			bool outside = RNG::generate(0,99) < (*d).percentageOutsideUfo;
 			if (_ufo == 0)
 				outside = false;
-			Unit *rule = _game->getRuleset()->getUnit(alienName);
+			Unit *rule = _game->getMod()->getUnit(alienName);
 			BattleUnit *unit = addAlien(rule, (*d).alienRank, outside);
-			size_t itemLevel = (size_t)(_game->getRuleset()->getAlienItemLevels().at(month).at(RNG::generate(0,9)));
+			size_t itemLevel = (size_t)(_game->getMod()->getAlienItemLevels().at(month).at(RNG::generate(0,9)));
 			if (unit)
 			{
 				_save->initFixedItems(unit);
@@ -1016,7 +1013,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 					}
 					for (std::vector<std::string>::const_iterator it = (*d).itemSets.at(itemLevel).items.begin(); it != (*d).itemSets.at(itemLevel).items.end(); ++it)
 					{
-						RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
+						RuleItem *ruleItem = _game->getMod()->getItem((*it));
 						if (ruleItem)
 						{
 							BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
@@ -1044,7 +1041,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outside)
 {
 	int difficulty =_game->getSavedGame()->getDifficultyCoefficient();
-	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), difficulty, _save->getDepth());
+	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getMod()->getArmor(rules->getArmor()), difficulty, _save->getDepth());
 	Node *node = 0;
 
 	// safety to avoid index out of bounds errors
@@ -1120,7 +1117,7 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
  */
 BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), 0, _save->getDepth());
+	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _game->getMod()->getArmor(rules->getArmor()), 0, _save->getDepth());
 	Node *node = _save->getSpawnNode(0, unit);
 
 	if (node)
@@ -1155,11 +1152,11 @@ BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
  */
 bool BattlescapeGenerator::placeItemByLayout(BattleItem *item)
 {
-	RuleInventory *ground = _game->getRuleset()->getInventory("STR_GROUND");
+	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND");
 	if (item->getSlot() == ground)
 	{
 		bool loaded;
-		RuleInventory *righthand = _game->getRuleset()->getInventory("STR_RIGHT_HAND");
+		RuleInventory *righthand = _game->getMod()->getInventory("STR_RIGHT_HAND");
 
 		// find the first soldier with a matching layout-slot
 		for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
@@ -1201,7 +1198,7 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item)
 				if (loaded)
 				{
 					item->moveToOwner((*i));
-					item->setSlot(_game->getRuleset()->getInventory((*j)->getSlot()));
+					item->setSlot(_game->getMod()->getInventory((*j)->getSlot()));
 					item->setSlotX((*j)->getSlotX());
 					item->setSlotY((*j)->getSlotY());
 					if (Options::includePrimeStateInSavedLayout &&
@@ -1332,7 +1329,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTe
 	for (std::map<std::string, std::vector<Position> >::const_iterator i = mapblock->getItems()->begin(); i != mapblock->getItems()->end(); ++i)
 	{
 		std::map<std::string, std::pair<int, int> >::const_iterator prime = mapblock->getItemsFuseTimers()->find((*i).first);
-		RuleItem *rule = _game->getRuleset()->getItem((*i).first);
+		RuleItem *rule = _game->getMod()->getItem((*i).first);
 		for (std::vector<Position>::const_iterator j = (*i).second.begin(); j != (*i).second.end(); ++j)
 		{
 			BattleItem *item = new BattleItem(rule, _save->getCurrentItemId());
@@ -1341,7 +1338,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTe
 				item->setFuseTimer(RNG::generate(prime->second.first, prime->second.second));
 			}
 			_save->getItems()->push_back(item);
-			_save->getTile((*j) + Position(xoff, yoff, 0))->addItem(item, _game->getRuleset()->getInventory("STR_GROUND"));
+			_save->getTile((*j) + Position(xoff, yoff, 0))->addItem(item, _game->getMod()->getInventory("STR_GROUND"));
 		}
 	}
 	return sizez;
@@ -1421,9 +1418,9 @@ void BattlescapeGenerator::fuelPowerSources()
 		if (_save->getTiles()[i]->getMapData(O_OBJECT)
 			&& _save->getTiles()[i]->getMapData(O_OBJECT)->getSpecialType() == UFO_POWER_SOURCE)
 		{
-			BattleItem *alienFuel = new BattleItem(_game->getRuleset()->getItem(_game->getRuleset()->getAlienFuelName()), _save->getCurrentItemId());
+			BattleItem *alienFuel = new BattleItem(_game->getMod()->getItem(_game->getMod()->getAlienFuelName()), _save->getCurrentItemId());
 			_save->getItems()->push_back(alienFuel);
-			_save->getTiles()[i]->addItem(alienFuel, _game->getRuleset()->getInventory("STR_GROUND"));
+			_save->getTiles()[i]->addItem(alienFuel, _game->getMod()->getInventory("STR_GROUND"));
 		}
 	}
 }
@@ -1443,7 +1440,7 @@ void BattlescapeGenerator::explodePowerSources()
 			pos.x = _save->getTiles()[i]->getPosition().x*16;
 			pos.y = _save->getTiles()[i]->getPosition().y*16;
 			pos.z = (_save->getTiles()[i]->getPosition().z*24) +12;
-			_save->getTileEngine()->explode(pos, 180+RNG::generate(0,70), _save->getRuleset()->getDamageType(DT_HE), 10);
+			_save->getTileEngine()->explode(pos, 180+RNG::generate(0,70), _save->getMod()->getDamageType(DT_HE), 10);
 		}
 	}
 	Tile *t = _save->getTileEngine()->checkForTerrainExplosions();
@@ -1452,7 +1449,7 @@ void BattlescapeGenerator::explodePowerSources()
 		int power = t->getExplosive();
 		t->setExplosive(0, 0, true);
 		Position p = t->getPosition().toVexel() + Position(8,8,0);
-		_save->getTileEngine()->explode(p, power, _game->getRuleset()->getDamageType(DT_HE), power / 10);
+		_save->getTileEngine()->explode(p, power, _game->getMod()->getDamageType(DT_HE), power / 10);
 		t = _save->getTileEngine()->checkForTerrainExplosions();
 	}
 }
@@ -1476,7 +1473,7 @@ void BattlescapeGenerator::deployCivilians(int max)
 			for (int i = 0; i < number; ++i)
 			{
 				size_t pick = RNG::generate(0, _terrain->getCivilianTypes().size() -1);
-				addCivilian(_game->getRuleset()->getUnit(_terrain->getCivilianTypes().at(pick)));
+				addCivilian(_game->getMod()->getUnit(_terrain->getCivilianTypes().at(pick)));
 			}
 		}
 	}
@@ -1575,11 +1572,11 @@ void BattlescapeGenerator::loadWeapons()
 			bool loaded = false;
 			for (std::vector<BattleItem*>::iterator j = _craftInventoryTile->getInventory()->begin(); j != _craftInventoryTile->getInventory()->end() && !loaded; ++j)
 			{
-				if ((*j)->getSlot() == _game->getRuleset()->getInventory("STR_GROUND") && (*i)->setAmmoItem((*j)) == 0)
+				if ((*j)->getSlot() == _game->getMod()->getInventory("STR_GROUND") && (*i)->setAmmoItem((*j)) == 0)
 				{
 					_save->getItems()->push_back(*j);
 					(*j)->setXCOMProperty(true);
-					(*j)->setSlot(_game->getRuleset()->getInventory("STR_RIGHT_HAND"));
+					(*j)->setSlot(_game->getMod()->getInventory("STR_RIGHT_HAND"));
 					loaded = true;
 				}
 			}
@@ -1587,7 +1584,7 @@ void BattlescapeGenerator::loadWeapons()
 	}
 	for (std::vector<BattleItem*>::iterator i = _craftInventoryTile->getInventory()->begin(); i != _craftInventoryTile->getInventory()->end();)
 	{
-		if ((*i)->getSlot() != _game->getRuleset()->getInventory("STR_GROUND"))
+		if ((*i)->getSlot() != _game->getMod()->getInventory("STR_GROUND"))
 		{
 			i = _craftInventoryTile->getInventory()->erase(i);
 			continue;
@@ -1623,9 +1620,9 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 	for (std::vector<MapDataSet*>::iterator i = _terrain->getMapDataSets()->begin(); i != _terrain->getMapDataSets()->end(); ++i)
 	{
 		(*i)->loadData();
-		if (_game->getRuleset()->getMCDPatch((*i)->getName()))
+		if (_game->getMod()->getMCDPatch((*i)->getName()))
 		{
-			_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
+			_game->getMod()->getMCDPatch((*i)->getName())->modifyData(*i);
 		}
 		_save->getMapDataSets()->push_back(*i);
 		mapDataSetIDOffset++;
@@ -1850,9 +1847,9 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 		for (std::vector<MapDataSet*>::iterator i = _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
 			(*i)->loadData();
-			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
+			if (_game->getMod()->getMCDPatch((*i)->getName()))
 			{
-				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
+				_game->getMod()->getMCDPatch((*i)->getName())->modifyData(*i);
 			}
 			_save->getMapDataSets()->push_back(*i);
 			craftDataSetIDOffset++;
@@ -1875,9 +1872,9 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 		for (std::vector<MapDataSet*>::iterator i = _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
 			(*i)->loadData();
-			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
+			if (_game->getMod()->getMCDPatch((*i)->getName()))
 			{
-				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
+				_game->getMod()->getMCDPatch((*i)->getName())->modifyData(*i);
 			}
 			_save->getMapDataSets()->push_back(*i);
 		}

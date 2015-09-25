@@ -799,14 +799,14 @@
     <ClCompile Include="Battlescape\PsiAttackBState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
-    <ClCompile Include="Geoscape\DogfightErrorState.cpp">
+    <ClCompile Include="Geoscape\TrainingState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
-    <ClCompile Include="Mod\ResourcePack.cpp">
-      <Filter>Mod</Filter>
+    <ClCompile Include="Geoscape\AllocateTrainingState.cpp">
+      <Filter>Geoscape</Filter>
     </ClCompile>
-    <ClCompile Include="Mod\XcomResourcePack.cpp">
-      <Filter>Mod</Filter>
+    <ClCompile Include="Geoscape\DogfightErrorState.cpp">
+      <Filter>Geoscape</Filter>
     </ClCompile>
     <ClCompile Include="Mod\AlienDeployment.cpp">
       <Filter>Mod</Filter>
@@ -880,6 +880,9 @@
     <ClCompile Include="Mod\RuleItem.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="Mod\RuleDamageType.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
     <ClCompile Include="Mod\RuleManufacture.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
@@ -893,9 +896,6 @@
       <Filter>Mod</Filter>
     </ClCompile>
     <ClCompile Include="Mod\RuleResearch.cpp">
-      <Filter>Mod</Filter>
-    </ClCompile>
-    <ClCompile Include="Mod\Ruleset.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
     <ClCompile Include="Mod\RuleSoldier.cpp">
@@ -929,6 +929,9 @@
       <Filter>Mod</Filter>
     </ClCompile>
     <ClCompile Include="Mod\Unit.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\Mod.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1758,14 +1761,14 @@
     <ClInclude Include="Battlescape\PsiAttackBState.h">
       <Filter>Battlescape</Filter>
     </ClInclude>
-    <ClInclude Include="Geoscape\DogfightErrorState.h">
+    <ClInclude Include="Geoscape\TrainingState.h">
       <Filter>Geoscape</Filter>
     </ClInclude>
-    <ClInclude Include="Mod\ResourcePack.h">
-      <Filter>Mod</Filter>
+    <ClInclude Include="Geoscape\AllocateTrainingState.h">
+      <Filter>Geoscape</Filter>
     </ClInclude>
-    <ClInclude Include="Mod\XcomResourcePack.h">
-      <Filter>Mod</Filter>
+    <ClInclude Include="Geoscape\DogfightErrorState.h">
+      <Filter>Geoscape</Filter>
     </ClInclude>
     <ClInclude Include="Mod\AlienDeployment.h">
       <Filter>Mod</Filter>
@@ -1839,6 +1842,9 @@
     <ClInclude Include="Mod\RuleItem.h">
       <Filter>Mod</Filter>
     </ClInclude>
+    <ClInclude Include="Mod\RuleDamageType.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
     <ClInclude Include="Mod\RuleManufacture.h">
       <Filter>Mod</Filter>
     </ClInclude>
@@ -1852,9 +1858,6 @@
       <Filter>Mod</Filter>
     </ClInclude>
     <ClInclude Include="Mod\RuleResearch.h">
-      <Filter>Mod</Filter>
-    </ClInclude>
-    <ClInclude Include="Mod\Ruleset.h">
       <Filter>Mod</Filter>
     </ClInclude>
     <ClInclude Include="Mod\RuleSoldier.h">
@@ -1888,6 +1891,9 @@
       <Filter>Mod</Filter>
     </ClInclude>
     <ClInclude Include="Mod\Unit.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\Mod.h">
       <Filter>Mod</Filter>
     </ClInclude>
   </ItemGroup>

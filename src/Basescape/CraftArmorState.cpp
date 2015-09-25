@@ -18,7 +18,7 @@
  */
 #include "CraftArmorState.h"
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Engine/Action.h"
@@ -33,7 +33,7 @@
 #include "SoldierArmorState.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/ItemContainer.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
@@ -70,7 +70,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK14.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK14.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftArmorState::btnOkClick);
@@ -92,7 +92,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_lstSoldiers->setScrolling(true, 0);
 	_lstSoldiers->onMousePress((ActionHandler)&CraftArmorState::lstSoldiersClick);
 
-	Uint8 otherCraftColor = _game->getRuleset()->getInterface("craftArmor")->getElement("otherCraft")->color;
+	Uint8 otherCraftColor = _game->getMod()->getInterface("craftArmor")->getElement("otherCraft")->color;
 	int row = 0;
 	Craft *c = _base->getCrafts()->at(_craft);
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
@@ -165,7 +165,7 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 		{
 			SavedGame *save;
 			save = _game->getSavedGame();
-			Armor *a = _game->getRuleset()->getArmor(save->getLastSelectedArmor());
+			Armor *a = _game->getMod()->getArmor(save->getLastSelectedArmor());
 			if (save->getMonthsPassed() != -1)
 			{
 				if (_base->getItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == "STR_NONE")

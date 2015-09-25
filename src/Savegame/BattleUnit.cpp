@@ -25,17 +25,17 @@
 #include "../Engine/Language.h"
 #include "../Engine/Logger.h"
 #include "../Engine/Options.h"
+#include "../Engine/RNG.h"
 #include "../Battlescape/Pathfinding.h"
 #include "../Battlescape/BattlescapeGame.h"
 #include "../Battlescape/BattleAIState.h"
-#include "Soldier.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Unit.h"
-#include "../Engine/RNG.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleSoldier.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
+#include "Soldier.h"
 #include "Tile.h"
 #include "SavedGame.h"
 #include "SavedBattleGame.h"
@@ -1241,14 +1241,10 @@ int BattleUnit::getStunlevel() const
  */
 void BattleUnit::knockOut(BattlescapeGame *battle)
 {
-	if (getArmor()->getSize() > 1) // large units die
-	{
-		_health = 0;
-	}
-	else if (!_spawnUnit.empty())
+	if (!_spawnUnit.empty())
 	{
 		setRespawn(false);
-		BattleUnit *newUnit = battle->convertUnit(this, _spawnUnit);
+		BattleUnit *newUnit = battle->convertUnit(this);
 		newUnit->knockOut(battle);
 	}
 	else
@@ -3180,12 +3176,12 @@ void BattleUnit::setEnviSmoke(int damage)
 /**
  * Calculate smoke and fire damage form environment.
  */
-void BattleUnit::calculateEnviDamage(Ruleset *ruleset)
+void BattleUnit::calculateEnviDamage(Mod *mod)
 {
 	if (_fireMaxHit)
 	{
 		_hitByFire = true;
-		damage(Position(0, 0, 0), _fireMaxHit, ruleset->getDamageType(DT_IN));
+		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN));
 		// try to set the unit on fire.
 		if (RNG::percent(40 * getArmor()->getDamageModifier(DT_IN)))
 		{
@@ -3199,7 +3195,7 @@ void BattleUnit::calculateEnviDamage(Ruleset *ruleset)
 
 	if (_smokeMaxHit)
 	{
-		damage(Position(0,0,0), _smokeMaxHit, ruleset->getDamageType(DT_SMOKE));
+		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE));
 	}
 
 	_fireMaxHit = 0;
@@ -3240,26 +3236,26 @@ static inline BattleItem *createItem(SavedBattleGame *save, BattleUnit *unit, Ru
  */
 void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 {
-	const Ruleset *rule = save->getRuleset();
+	const Mod *mod = save->getMod();
 	RuleItem *item = 0;
 	int i = 0;
 
 	if (getUnitRules())
 	{
-		item = rule->getItem(getUnitRules()->getMeleeWeapon());
+		item = mod->getItem(getUnitRules()->getMeleeWeapon());
 		if (item && i < SPEC_WEAPON_MAX)
 		{
 			_specWeapon[i++] = createItem(save, this, item);
 		}
 	}
-	item = rule->getItem(getArmor()->getSpecialWeapon());
+	item = mod->getItem(getArmor()->getSpecialWeapon());
 	if (item && i < SPEC_WEAPON_MAX)
 	{
 		_specWeapon[i++] = createItem(save, this, item);
 	}
 	if (getBaseStats()->psiSkill > 0 && getOriginalFaction() == FACTION_HOSTILE)
 	{
-		item = rule->getItem("ALIEN_PSI_WEAPON");
+		item = mod->getItem("ALIEN_PSI_WEAPON");
 		if (item && i < SPEC_WEAPON_MAX)
 		{
 			_specWeapon[i++] = createItem(save, this, item);

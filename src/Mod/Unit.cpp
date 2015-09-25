@@ -18,6 +18,7 @@
  */
 #include "Unit.h"
 #include "../Engine/Exception.h"
+#include "Mod.h"
 
 namespace OpenXcom
 {
@@ -40,10 +41,10 @@ Unit::~Unit()
 
 /**
  * Loads the unit from a YAML file.
- * @param modIndex A value that offsets the sounds and sprite values to avoid conflicts.
  * @param node YAML node.
+ * @param mod Mod for the unit.
  */
-void Unit::load(const YAML::Node &node, int modIndex)
+void Unit::load(const YAML::Node &node, Mod *mod)
 {
 	_type = node["type"].as<std::string>(_type);
 	_race = node["race"].as<std::string>(_race);
@@ -71,24 +72,15 @@ void Unit::load(const YAML::Node &node, int modIndex)
 
 	if (node["deathSound"])
 	{
-		_deathSound = node["deathSound"].as<int>(_deathSound);
-		// BATTLE.CAT: 55 entries
-		if (_deathSound > 54)
-			_deathSound += modIndex;
+		_deathSound = mod->getSoundOffset(node["deathSound"].as<int>(_deathSound), "BATTLE.CAT");
 	}
 	if (node["aggroSound"])
 	{
-		_aggroSound = node["aggroSound"].as<int>(_aggroSound);
-		// BATTLE.CAT: 55 entries
-		if (_aggroSound > 54)
-			_aggroSound += modIndex;
+		_aggroSound = mod->getSoundOffset(node["aggroSound"].as<int>(_aggroSound), "BATTLE.CAT");
 	}
 	if (node["moveSound"])
 	{
-		_moveSound = node["moveSound"].as<int>(_moveSound);
-		// BATTLE.CAT: 55 entries
-		if (_moveSound > 54)
-			_moveSound += modIndex;
+		_moveSound = mod->getSoundOffset(node["moveSound"].as<int>(_moveSound), "BATTLE.CAT");
 	}
 }
 

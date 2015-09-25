@@ -19,7 +19,7 @@
 #include "CraftsState.h"
 #include <sstream>
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
@@ -33,7 +33,7 @@
 #include "CraftInfoState.h"
 #include "SellState.h"
 #include "../Savegame/SavedGame.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
@@ -75,7 +75,7 @@ CraftsState::CraftsState(Base *base) : _base(base)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK14.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK14.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftsState::btnOkClick);
@@ -141,7 +141,7 @@ void CraftsState::btnOkClick(Action *)
 	if (_game->getSavedGame()->getMonthsPassed() > -1 && Options::storageLimitsEnforced && _base->storesOverfull())
 	{
 		_game->pushState(new SellState(_base));
-		_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()).c_str(), _palette, _game->getRuleset()->getInterface("craftSelect")->getElement("errorMessage")->color, "BACK01.SCR", _game->getRuleset()->getInterface("craftSelect")->getElement("errorPalette")->color));
+		_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()).c_str(), _palette, _game->getMod()->getInterface("craftSelect")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("craftSelect")->getElement("errorPalette")->color));
 	}
 }
 

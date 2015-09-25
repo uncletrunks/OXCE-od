@@ -26,10 +26,10 @@
 namespace OpenXcom
 {
 class SavedBattleGame;
+class Mod;
 class Craft;
 class Ufo;
 class RuleTerrain;
-class ResourcePack;
 class BattleItem;
 class MapBlock;
 class Vehicle;
@@ -54,7 +54,7 @@ class BattlescapeGenerator
 private:
 	Game *_game;
 	SavedBattleGame *_save;
-	ResourcePack *_res;
+	Mod *_mod;
 	Craft *_craft;
 	Ufo *_ufo;
 	Base *_base;

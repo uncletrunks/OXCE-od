@@ -26,7 +26,7 @@
 #include "../Mod/SoldierNamePool.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Mod/Armor.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/StatString.h"
 #include "SavedGame.h"
 
@@ -92,10 +92,10 @@ Soldier::~Soldier()
 /**
  * Loads the soldier from a YAML file.
  * @param node YAML node.
- * @param rule Game ruleset.
+ * @param mod Game mod.
  * @param save Pointer to savegame.
  */
-void Soldier::load(const YAML::Node& node, const Ruleset *rule, SavedGame *save)
+void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 {
 	_id = node["id"].as<int>(_id);
 	_name = Language::utf8ToWstr(node["name"].as<std::string>());
@@ -108,10 +108,10 @@ void Soldier::load(const YAML::Node& node, const Ruleset *rule, SavedGame *save)
 	_missions = node["missions"].as<int>(_missions);
 	_kills = node["kills"].as<int>(_kills);
 	_recovery = node["recovery"].as<int>(_recovery);
-	Armor *armor = rule->getArmor(node["armor"].as<std::string>());
+	Armor *armor = mod->getArmor(node["armor"].as<std::string>());
 	if (armor == 0)
 	{
-		armor = rule->getArmor("STR_NONE_UC");
+		armor = mod->getArmor("STR_NONE_UC");
 	}
 	_armor = armor;
 	_psiTraining = node["psiTraining"].as<bool>(_psiTraining);
@@ -123,7 +123,7 @@ void Soldier::load(const YAML::Node& node, const Ruleset *rule, SavedGame *save)
 		for (YAML::const_iterator i = layout.begin(); i != layout.end(); ++i)
 		{
 			EquipmentLayoutItem *layoutItem = new EquipmentLayoutItem(*i);
-			if (rule->getInventory(layoutItem->getSlot()))
+			if (mod->getInventory(layoutItem->getSlot()))
 			{
 				_equipmentLayout.push_back(layoutItem);
 			}
@@ -138,7 +138,7 @@ void Soldier::load(const YAML::Node& node, const Ruleset *rule, SavedGame *save)
 		_death = new SoldierDeath();
 		_death->load(node["death"]);
 	}
-	calcStatString(rule->getStatStrings(), (Options::psiStrengthEval && save->isResearched(rule->getPsiRequirements())));
+	calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
 }
 
 /**

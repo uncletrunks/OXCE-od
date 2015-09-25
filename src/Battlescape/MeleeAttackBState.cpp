@@ -33,7 +33,7 @@
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
 #include "../Engine/Sound.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 
 namespace OpenXcom
@@ -116,7 +116,10 @@ void MeleeAttackBState::init()
 
 	AlienBAIState *ai = dynamic_cast<AlienBAIState*>(_unit->getCurrentAIState());
 
-	if (_unit->getFaction() != FACTION_PLAYER && _parent->_debugPlay == false && ai && ai->getTarget())
+	if (_unit->getFaction() == _parent->getSave()->getSide() &&
+		_unit->getFaction() != FACTION_PLAYER &&
+		_parent->_debugPlay == false &&
+		ai && ai->getTarget())
 	{
 		_target = ai->getTarget();
 	}
@@ -144,6 +147,8 @@ void MeleeAttackBState::think()
 	}
 		// aliens
 	if (_unit->getFaction() != FACTION_PLAYER &&
+		// not performing a reaction attack
+		_unit->getFaction() == _parent->getSave()->getSide() &&
 		// whose target is still alive or at least conscious
 		_target && _target->getHealth() > 0 &&
 		_target->getHealth() > _target->getStunlevel() &&
@@ -204,6 +209,7 @@ void MeleeAttackBState::performMeleeAttack()
 
 	// make an explosion action
 	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, BA_HIT, _action.weapon, _action.actor, 0, true));
+
 }
 
 }

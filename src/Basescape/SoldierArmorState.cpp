@@ -19,7 +19,7 @@
 #include "SoldierArmorState.h"
 #include <sstream>
 #include "../Engine/Game.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
@@ -31,7 +31,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -67,7 +67,7 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK14.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK14.SCR"));
 
 	_btnCancel->setText(tr("STR_CANCEL_UC"));
 	_btnCancel->onMouseClick((ActionHandler)&SoldierArmorState::btnCancelClick);
@@ -86,10 +86,10 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 	_lstArmor->setBackground(_window);
 	_lstArmor->setMargin(8);
 
-	const std::vector<std::string> &armors = _game->getRuleset()->getArmorsList();
+	const std::vector<std::string> &armors = _game->getMod()->getArmorsList();
 	for (std::vector<std::string>::const_iterator i = armors.begin(); i != armors.end(); ++i)
 	{
-		Armor *a = _game->getRuleset()->getArmor(*i);
+		Armor *a = _game->getMod()->getArmor(*i);
 		if (_base->getItems()->getItem(a->getStoreItem()) > 0)
 		{
 			_armors.push_back(a);

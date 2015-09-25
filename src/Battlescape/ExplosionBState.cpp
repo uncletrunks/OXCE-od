@@ -27,10 +27,10 @@
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Engine/Sound.h"
 #include "../Mod/RuleItem.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Engine/RNG.h"
 
@@ -166,13 +166,13 @@ void ExplosionBState::init()
 		}
 		_power = _tile->getExplosive();
 		_tile->setExplosive(0, 0, true);
-		_damageType = _parent->getRuleset()->getDamageType(DT);
+		_damageType = _parent->getMod()->getDamageType(DT);
 		_radius = _power /10;
 		_areaOfEffect = true;
 	}
 	else if (_unit && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
 	{
-		RuleItem* corpse = _parent->getRuleset()->getItem(_unit->getArmor()->getCorpseGeoscape());
+		RuleItem* corpse = _parent->getMod()->getItem(_unit->getArmor()->getCorpseGeoscape());
 		_power = corpse->getPower();
 		_power += corpse->getPowerBonus(_unit);
 		_damageType = corpse->getDamageType();
@@ -186,7 +186,7 @@ void ExplosionBState::init()
 	else
 	{
 		_power = 120;
-		_damageType = _parent->getRuleset()->getDamageType(DT_HE);
+		_damageType = _parent->getMod()->getDamageType(DT_HE);
 		_areaOfEffect = true;
 	}
 
@@ -195,7 +195,7 @@ void ExplosionBState::init()
 	{
 		if (_power > 0)
 		{
-			int frame = ResourcePack::EXPLOSION_OFFSET;
+			int frame = Mod::EXPLOSION_OFFSET;
 			if (_item)
 			{
 				frame = itemRule->getHitAnimation();
@@ -223,7 +223,7 @@ void ExplosionBState::init()
 			}
 			_parent->setStateInterval(BattlescapeState::DEFAULT_ANIM_SPEED/2);
 			// explosion sound
-			int sound = _power <= 80 ? ResourcePack::SMALL_EXPLOSION : ResourcePack::LARGE_EXPLOSION;
+			int sound = _power <= 80 ? Mod::SMALL_EXPLOSION : Mod::LARGE_EXPLOSION;
 			if (_item) optValue(sound, itemRule->getExplosionHitSound());
 			_parent->playSound(sound);
 

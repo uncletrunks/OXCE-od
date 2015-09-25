@@ -21,7 +21,7 @@
 #include "../fmath.h"
 #include "ArticleStateArmor.h"
 #include "../Mod/ArticleDefinition.h"
-#include "../Mod/Ruleset.h"
+#include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
@@ -29,7 +29,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/FileMap.h"
-#include "../Mod/ResourcePack.h"
+#include "../Mod/Mod.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
@@ -39,7 +39,7 @@ namespace OpenXcom
 
 	ArticleStateArmor::ArticleStateArmor(ArticleDefinitionArmor *defs) : ArticleState(defs->id), _row(0)
 	{
-		Armor *armor = _game->getRuleset()->getArmor(defs->id);
+		Armor *armor = _game->getMod()->getArmor(defs->id);
 
 		// add screen elements
 		_txtTitle = new Text(300, 17, 5, 24);
@@ -66,11 +66,11 @@ namespace OpenXcom
 
 		std::string look = armor->getSpriteInventory();
 		look += "M0.SPK";
-		if (!CrossPlatform::fileExists(FileMap::getFilePath("UFOGRAPH/" + look)) && !_game->getResourcePack()->getSurface(look))
+		if (!CrossPlatform::fileExists(FileMap::getFilePath("UFOGRAPH/" + look)) && !_game->getMod()->getSurface(look))
 		{
 			look = armor->getSpriteInventory() + ".SPK";
 		}
-		_game->getResourcePack()->getSurface(look)->blit(_image);
+		_game->getMod()->getSurface(look)->blit(_image);
 
 
 		_lstInfo = new TextList(150, 96, 150, 46);
