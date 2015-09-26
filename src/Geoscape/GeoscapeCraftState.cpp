@@ -186,7 +186,7 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	}
 	_txtSpeed->setText(tr("STR_SPEED_").arg(Text::formatNumber(speed)));
 
-	_txtMaxSpeed->setText(tr("STR_MAXIMUM_SPEED_UC").arg(Text::formatNumber(_craft->getRules()->getMaxSpeed())));
+	_txtMaxSpeed->setText(tr("STR_MAXIMUM_SPEED_UC").arg(Text::formatNumber(_craft->getCraftStats().speedMax)));
 
 	std::string altitude = _craft->getAltitude() == "STR_GROUND" ? "STR_GROUNDED" : _craft->getAltitude();
 	_txtAltitude->setText(tr("STR_ALTITUDE_").arg(tr(altitude)));

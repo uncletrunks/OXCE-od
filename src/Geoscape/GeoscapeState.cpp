@@ -1065,7 +1065,7 @@ void GeoscapeState::time10Minutes()
 
 				if ((*j)->getDestination() == 0)
 				{
-					double range = ((*j)->getRules()->getSightRange() * (1 / 60.0) * (M_PI / 180));
+					double range = ((*j)->getCraftStats().sightRange * (1 / 60.0) * (M_PI / 180));
 					for (std::vector<AlienBase*>::iterator b = _game->getSavedGame()->getAlienBases()->begin(); b != _game->getSavedGame()->getAlienBases()->end(); b++)
 					{
 						if ((*j)->getDistance(*b) <= range)

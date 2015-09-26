@@ -420,9 +420,9 @@ void Craft::setDestination(Target *dest)
 		_takeoff = 60;
 	}
 	if (dest == 0)
-		setSpeed(_rules->getMaxSpeed()/2);
+		setSpeed(_stats.speedMax/2);
 	else
-		setSpeed(_rules->getMaxSpeed());
+		setSpeed(_stats.speedMax);
 	MovingTarget::setDestination(dest);
 }
 
@@ -808,7 +808,7 @@ bool Craft::detect(Target *target) const
 		return true;
 
 	Ufo *u = dynamic_cast<Ufo*>(target);
-	int chance = _rules->getRadarChance() * (100 + u->getVisibility()) / 100;
+	int chance = _stats.radarChance * (100 + u->getVisibility()) / 100;
 	return RNG::percent(chance);
 }
 
@@ -820,7 +820,7 @@ bool Craft::detect(Target *target) const
  */
 bool Craft::insideRadarRange(Target *target) const
 {
-	double range = _rules->getRadarRange() * (1 / 60.0) * (M_PI / 180);
+	double range = _stats.radarRange * (1 / 60.0) * (M_PI / 180);
 	return (getDistance(target) <= range);
 }
 
@@ -943,7 +943,7 @@ void Craft::setInBattlescape(bool inbattle)
  */
 bool Craft::isDestroyed() const
 {
-	return (_damage >= _rules->getMaxDamage());
+	return (_damage >= _stats.damageMax);
 }
 
 /**

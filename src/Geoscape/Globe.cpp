@@ -1144,7 +1144,7 @@ void Globe::drawRadars()
 			if ((*j)->getStatus()!= "STR_OUT")
 				continue;
 			polarToCart(lon, lat, &x, &y);
-			range = (*j)->getRules()->getRadarRange();
+			range = (*j)->getCraftStats().radarRange;
 			range = range * (1 / 60.0) * (M_PI / 180);
 
 			if (range>0) drawGlobeCircle(lat,lon,range,24);
