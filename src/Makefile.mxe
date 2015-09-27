@@ -40,7 +40,7 @@ $(OBJDIR)%.o:: %.cpp
 
 $(OBJDIR)%.o:: Basescape/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
+
 $(OBJDIR)%.o:: Battlescape/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
@@ -61,16 +61,13 @@ $(OBJDIR)%.o:: Interface/%.cpp
 
 $(OBJDIR)%.o:: Menu/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
-$(OBJDIR)%.o:: Resource/%.cpp
+
+$(OBJDIR)%.o:: Mod/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
-$(OBJDIR)%.o:: Ruleset/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
+
 $(OBJDIR)%.o:: Savegame/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
+
 $(OBJDIR)%.o:: Ufopaedia/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
