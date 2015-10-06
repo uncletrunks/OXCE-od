@@ -102,14 +102,14 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 	{
 		RuleCraftWeapon *w = _game->getMod()->getCraftWeapon(*i);
 		RuleCraft *c = _craft->getRules();
-		if (_base->getItems()->getItem(w->getLauncherItem()) > 0 && c->isValidWeaponSlot(weapon, w->getWeaponType()))
+		if (_base->getStorageItems()->getItem(w->getLauncherItem()) > 0 && c->isValidWeaponSlot(weapon, w->getWeaponType()))
 		{
 			_weapons.push_back(w);
 			std::wostringstream ss, ss2;
-			ss << _base->getItems()->getItem(w->getLauncherItem());
+			ss << _base->getStorageItems()->getItem(w->getLauncherItem());
 			if (!w->getClipItem().empty())
 			{
-				ss2 << _base->getItems()->getItem(w->getClipItem());
+				ss2 << _base->getStorageItems()->getItem(w->getClipItem());
 			}
 			else
 			{
@@ -148,8 +148,8 @@ void CraftWeaponsState::lstWeaponsClick(Action *)
 	// Remove current weapon
 	if (current != 0)
 	{
-		_base->getItems()->addItem(current->getRules()->getLauncherItem());
-		_base->getItems()->addItem(current->getRules()->getClipItem(), current->getClipsLoaded(_game->getMod()));
+		_base->getStorageItems()->addItem(current->getRules()->getLauncherItem());
+		_base->getStorageItems()->addItem(current->getRules()->getClipItem(), current->getClipsLoaded(_game->getMod()));
 		_craft->addCraftStats(-current->getRules()->getBonusStats());
 		delete current;
 		_craft->getWeapons()->at(_weapon) = 0;
@@ -160,7 +160,7 @@ void CraftWeaponsState::lstWeaponsClick(Action *)
 	{
 		CraftWeapon *sel = new CraftWeapon(_weapons[_lstWeapons->getSelectedRow()], 0);
 		_craft->addCraftStats(sel->getRules()->getBonusStats());
-		_base->getItems()->removeItem(sel->getRules()->getLauncherItem());
+		_base->getStorageItems()->removeItem(sel->getRules()->getLauncherItem());
 		_craft->getWeapons()->at(_weapon) = sel;
 	}
 

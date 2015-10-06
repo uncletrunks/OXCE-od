@@ -295,14 +295,14 @@ void NewBattleState::load(const std::string &filename)
 				}
 
 				// Generate items
-				base->getItems()->getContents()->clear();
+				base->getStorageItems()->getContents()->clear();
 				const std::vector<std::string> &items = mod->getItemsList();
 				for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 				{
 					RuleItem *rule = _game->getMod()->getItem(*i);
 					if (rule->getBattleType() != BT_CORPSE && rule->isRecoverable())
 					{
-						base->getItems()->addItem(*i, 1);
+						base->getStorageItems()->addItem(*i, 1);
 					}
 				}
 
@@ -389,7 +389,7 @@ void NewBattleState::initSave()
 	base->getSoldiers()->clear();
 	for (std::vector<Craft*>::iterator i = base->getCrafts()->begin(); i != base->getCrafts()->end(); ++i) delete (*i);
 	base->getCrafts()->clear();
-	base->getItems()->getContents()->clear();
+	base->getStorageItems()->getContents()->clear();
 
 	_craft = new Craft(mod->getCraft(_crafts[_cbxCraft->getSelected()]), base, 1);
 	base->getCrafts()->push_back(_craft);
@@ -433,7 +433,7 @@ void NewBattleState::initSave()
 		RuleItem *rule = _game->getMod()->getItem(*i);
 		if (rule->getBattleType() != BT_CORPSE && rule->isRecoverable())
 		{
-			base->getItems()->addItem(*i, 1);
+			base->getStorageItems()->addItem(*i, 1);
 			if (rule->getBattleType() != BT_NONE && !rule->isFixed() && rule->getBigSprite() > -1)
 			{
 				_craft->getItems()->addItem(*i, 1);

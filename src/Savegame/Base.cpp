@@ -335,10 +335,11 @@ std::vector<Transfer*> *Base::getTransfers()
 }
 
 /**
- * Returns the list of items in the base.
+ * Returns the list of items in the base storage rooms.
+ * Does NOT return items assigned to craft or in transfer.
  * @return Pointer to the item list.
  */
-ItemContainer *Base::getItems()
+ItemContainer *Base::getStorageItems()
 {
 	return _items;
 }
@@ -662,7 +663,7 @@ double Base::getIgnoredStores()
 				if (*w != 0 && (*w)->isRearming())
 				{
 					std::string clip = (*w)->getRules()->getClipItem();
-					int available = getItems()->getItem(clip);
+					int available = getStorageItems()->getItem(clip);
 					if (!clip.empty() && available > 0)
 					{
 						int clipSize = _mod->getItem(clip)->getClipSize();

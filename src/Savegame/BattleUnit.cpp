@@ -3185,7 +3185,7 @@ void BattleUnit::calculateEnviDamage(Mod *mod)
 		// try to set the unit on fire.
 		if (RNG::percent(40 * getArmor()->getDamageModifier(DT_IN)))
 		{
-			int burnTime = RNG::generate(0, int(5 * getArmor()->getDamageModifier(DT_IN)));
+			int burnTime = RNG::generate(0, int(5.0f * getArmor()->getDamageModifier(DT_IN)));
 			if (getFire() < burnTime)
 			{
 				setFire(burnTime);

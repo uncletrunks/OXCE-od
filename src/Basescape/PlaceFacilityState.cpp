@@ -143,7 +143,7 @@ void PlaceFacilityState::viewClick(Action *)
 		const std::map<std::string, std::pair<int, int> > &itemCost = _rule->getBuildCostItems();
 		for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 		{
-			int needed = i->second.first - _base->getItems()->getItem(i->first);
+			int needed = i->second.first - _base->getStorageItems()->getItem(i->first);
 			if (needed > 0)
 			{
 				_game->popState();
@@ -164,7 +164,7 @@ void PlaceFacilityState::viewClick(Action *)
 		_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _rule->getBuildCost());
 		for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 		{
-			_base->getItems()->removeItem(i->first, i->second.first);
+			_base->getStorageItems()->removeItem(i->first, i->second.first);
 		}
 		_game->popState();
 	}

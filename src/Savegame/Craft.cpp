@@ -533,7 +533,7 @@ void Craft::addCraftStats(const RuleCraftStats& s)
 	int overflowFuel = _fuel - _stats.fuelMax;
 	if (overflowFuel > 0 && !_rules->getRefuelItem().empty())
 	{
-		_base->getItems()->addItem(_rules->getRefuelItem(), overflowFuel / _rules->getRefuelRate());
+		_base->getStorageItems()->addItem(_rules->getRefuelItem(), overflowFuel / _rules->getRefuelRate());
 	}
 	setFuel(_fuel);
 }
@@ -886,7 +886,7 @@ std::string Craft::rearm(Mod *mod)
 		if (*i != 0 && (*i)->isRearming())
 		{
 			std::string clip = (*i)->getRules()->getClipItem();
-			int available = _base->getItems()->getItem(clip);
+			int available = _base->getStorageItems()->getItem(clip);
 			if (clip.empty())
 			{
 				(*i)->rearm(0, 0);
@@ -901,7 +901,7 @@ std::string Craft::rearm(Mod *mod)
 					(*i)->setRearming(false);
 				}
 
-				_base->getItems()->removeItem(clip, used);
+				_base->getStorageItems()->removeItem(clip, used);
 			}
 			else
 			{

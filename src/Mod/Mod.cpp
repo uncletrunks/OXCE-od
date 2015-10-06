@@ -694,7 +694,7 @@ int Mod::getModOffset() const
 int Mod::getSpriteOffset(int sprite, const std::string& set) const
 {
 	SurfaceSet *ss = getSurfaceSet(set);
-	if (ss != 0 && sprite >= ss->getTotalFrames())
+	if (ss != 0 && sprite >= (int)ss->getTotalFrames())
 		return sprite + _modOffset;
 	else
 		return sprite;
@@ -709,7 +709,7 @@ int Mod::getSpriteOffset(int sprite, const std::string& set) const
 int Mod::getSoundOffset(int sound, const std::string& set) const
 {
 	SoundSet *ss = getSoundSet(set);
-	if (ss != 0 && sound >= ss->getTotalSounds())
+	if (ss != 0 && sound >= (int)ss->getTotalSounds())
 		return sound + _modOffset;
 	else
 		return sound;
@@ -2447,18 +2447,6 @@ void Mod::loadVanillaResources()
 		}
 	}
 
-	// Load fonts
-	YAML::Node doc = YAML::LoadFile(FileMap::getFilePath("Language/" + _fontName));
-	Log(LOG_INFO) << "Loading font... " << _fontName;
-	Font::setIndex(Language::utf8ToWstr(doc["chars"].as<std::string>()));
-	for (YAML::const_iterator i = doc["fonts"].begin(); i != doc["fonts"].end(); ++i)
-	{
-		std::string id = (*i)["id"].as<std::string>();
-		Font *font = new Font();
-		font->load(*i);
-		_fonts[id] = font;
-	}
-
 	// Load surfaces
 	{
 		std::ostringstream s;
@@ -2526,53 +2514,9 @@ void Mod::loadVanillaResources()
 
 	if (!Options::mute)
 	{
+		// Load sounds
 		const std::set<std::string> &soundFiles(FileMap::getVFolderContents("SOUND"));
 
-#ifndef __NO_MUSIC
-		// Load musics
-
-		// Check which music version is available
-		CatFile *adlibcat = 0, *aintrocat = 0;
-		GMCatFile *gmcat = 0;
-
-		for (std::set<std::string>::iterator i = soundFiles.begin(); i != soundFiles.end(); ++i)
-		{
-			if (0 == i->compare("adlib.cat"))
-			{
-				adlibcat = new CatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
-			}
-			else if (0 == i->compare("aintro.cat"))
-			{
-				aintrocat = new CatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
-			}
-			else if (0 == i->compare("gm.cat"))
-			{
-				gmcat = new GMCatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
-			}
-		}
-
-		// Try the preferred format first, otherwise use the default priority
-		MusicFormat priority[] = { Options::preferredMusic, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_MIDI };
-		for (std::map<std::string, RuleMusic *>::const_iterator i = _musicDefs.begin(); i != _musicDefs.end(); ++i)
-		{
-			Music *music = 0;
-			for (size_t j = 0; j < sizeof(priority) / sizeof(priority[0]) && music == 0; ++j)
-			{
-				music = loadMusic(priority[j], (*i).first, (*i).second->getCatPos(), (*i).second->getNormalization(), adlibcat, aintrocat, gmcat);
-			}
-			if (music)
-			{
-				_musics[(*i).first] = music;
-			}
-
-		}
-
-		delete gmcat;
-		delete adlibcat;
-		delete aintrocat;
-#endif
-
-		// Load sounds
 		if (_soundDefs.empty())
 		{
 			std::string catsId[] = { "GEO.CAT", "BATTLE.CAT" };
@@ -2868,7 +2812,7 @@ void Mod::loadBattlescapeResources()
 			}
 		}
 
-		//all TFDT armors
+		//all TFTD armors
 		name = "TDXCOM_?.PCK";
 		for (int j = 0; j < 3; ++j)
 		{
@@ -2961,6 +2905,66 @@ void Mod::loadBattlescapeResources()
  */
 void Mod::loadExtraResources()
 {
+	// Load fonts
+	YAML::Node doc = YAML::LoadFile(FileMap::getFilePath("Language/" + _fontName));
+	Log(LOG_INFO) << "Loading font... " << _fontName;
+	Font::setIndex(Language::utf8ToWstr(doc["chars"].as<std::string>()));
+	for (YAML::const_iterator i = doc["fonts"].begin(); i != doc["fonts"].end(); ++i)
+	{
+		std::string id = (*i)["id"].as<std::string>();
+		Font *font = new Font();
+		font->load(*i);
+		_fonts[id] = font;
+	}
+
+#ifndef __NO_MUSIC
+	// Load musics
+	if (!Options::mute)
+	{
+		const std::set<std::string> &soundFiles(FileMap::getVFolderContents("SOUND"));
+
+		// Check which music version is available
+		CatFile *adlibcat = 0, *aintrocat = 0;
+		GMCatFile *gmcat = 0;
+
+		for (std::set<std::string>::iterator i = soundFiles.begin(); i != soundFiles.end(); ++i)
+		{
+			if (0 == i->compare("adlib.cat"))
+			{
+				adlibcat = new CatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
+			}
+			else if (0 == i->compare("aintro.cat"))
+			{
+				aintrocat = new CatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
+			}
+			else if (0 == i->compare("gm.cat"))
+			{
+				gmcat = new GMCatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
+			}
+		}
+
+		// Try the preferred format first, otherwise use the default priority
+		MusicFormat priority[] = { Options::preferredMusic, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_MIDI };
+		for (std::map<std::string, RuleMusic *>::const_iterator i = _musicDefs.begin(); i != _musicDefs.end(); ++i)
+		{
+			Music *music = 0;
+			for (size_t j = 0; j < sizeof(priority) / sizeof(priority[0]) && music == 0; ++j)
+			{
+				music = loadMusic(priority[j], (*i).first, (*i).second->getCatPos(), (*i).second->getNormalization(), adlibcat, aintrocat, gmcat);
+			}
+			if (music)
+			{
+				_musics[(*i).first] = music;
+			}
+
+		}
+
+		delete gmcat;
+		delete adlibcat;
+		delete aintrocat;
+	}
+#endif
+
 	Log(LOG_INFO) << "Loading extra resources from ruleset...";
 	for (std::vector< std::pair<std::string, ExtraSprites *> >::const_iterator i = _extraSprites.begin(); i != _extraSprites.end(); ++i)
 	{

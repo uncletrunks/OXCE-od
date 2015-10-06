@@ -106,14 +106,14 @@ void DismantleFacilityState::btnOkClick(Action *)
 			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _fac->getRules()->getBuildCost());
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
-				_base->getItems()->addItem(i->first, i->second.first);
+				_base->getStorageItems()->addItem(i->first, i->second.first);
 			}
 		}
 		else
 		{
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
-				_base->getItems()->addItem(i->first, i->second.second);
+				_base->getStorageItems()->addItem(i->first, i->second.second);
 			}
 		}
 

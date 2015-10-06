@@ -1133,7 +1133,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 		float resistance = target->getArmor()->getDamageModifier(type->ResistType);
 		if (resistance > 0.0)
 		{
-			int burnTime = RNG::generate(0, int(5 * resistance));
+			int burnTime = RNG::generate(0, int(5.0f * resistance));
 			if (target->getFire() < burnTime)
 			{
 				target->setFire(burnTime); // catch fire and burn
