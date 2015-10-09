@@ -125,6 +125,8 @@ set ( battlescape_src
   Battlescape/Explosion.h
   Battlescape/InventoryState.cpp
   Battlescape/InventoryState.h
+  Battlescape/ItemSprite.cpp
+  Battlescape/ItemSprite.h
   Battlescape/UnitSprite.h
   Battlescape/UnitSprite.cpp
   Battlescape/BattleState.h
@@ -241,6 +243,9 @@ set ( engine_src
   Engine/SurfaceSet.h
   Engine/Screen.cpp
   Engine/Screen.h
+  Engine/Script.cpp
+  Engine/Script.h
+  Engine/ScriptBind.h
   Engine/Logger.h
   Engine/LocalizedText.cpp
   Engine/LocalizedText.h

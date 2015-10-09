@@ -26,6 +26,7 @@
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/Soldier.h"
 #include "../Mod/RuleInventory.h"
+#include "../Mod/Mod.h"
 #include "../Engine/ShaderDraw.h"
 #include "../Engine/ShaderMove.h"
 #include "../Engine/Options.h"
@@ -40,8 +41,18 @@ namespace OpenXcom
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-UnitSprite::UnitSprite(int width, int height, int x, int y, bool helmet) : Surface(width, height, x, y), _unit(0), _itemA(0), _itemB(0), _unitSurface(0), _itemSurfaceA(0), _itemSurfaceB(0), _part(0), _animationFrame(0), _drawingRoutine(0), _helmet(helmet), _color(0), _colorSize(0)
+UnitSprite::UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet) :
+	_unit(0), _itemA(0), _itemB(0),
+	_unitSurface(0),
+	_itemSurfaceA(mod->getSurfaceSet("HANDOB.PCK")), _itemSurfaceB(mod->getSurfaceSet("HANDOB2.PCK")),
+	_fireSurface(mod->getSurfaceSet("SMOKE.PCK")),
+	_dest(dest), _mod(mod),
+	_part(0), _animationFrame(frame), _drawingRoutine(0),
+	_helmet(helmet), _half(false), _color(0), _colorSize(0),
+	_x(0), _y(0), _shade(0),
+	_scriptWorkRef()
 {
+
 }
 
 /**
@@ -52,35 +63,149 @@ UnitSprite::~UnitSprite()
 
 }
 
-/**
- * Changes the surface sets for the UnitSprite to get resources for rendering.
- * @param unitSurface Pointer to the unit surface set.
- * @param itemSurfaceA Pointer to the item surface set.
- * @param itemSurfaceB Pointer to the item surface set.
- */
-void UnitSprite::setSurfaces(SurfaceSet *unitSurface, SurfaceSet *itemSurfaceA, SurfaceSet *itemSurfaceB)
+namespace
 {
-	_unitSurface = unitSurface;
-	_itemSurfaceA = itemSurfaceA;
-	_itemSurfaceB = itemSurfaceB;
-	_redraw = true;
+
+struct ColorReplace
+{
+	static inline void loop(Uint8& dest, const Uint8& src, const Uint8& override, int burn, int shade)
+	{
+		const Uint8 temp = (src & helper::ColorShade) + override;
+		if (burn)
+		{
+			const Uint8 tempBurn = (temp & helper::ColorShade) + burn;
+			if (tempBurn > 26)
+			{
+				//nothing
+			}
+			else if (tempBurn > 15)
+			{
+				helper::StandardShade::func(dest, helper::ColorShade, shade);
+			}
+			else
+			{
+				helper::StandardShade::func(dest, (temp & helper::ColorGroup) + tempBurn, shade);
+			}
+		}
+		else
+		{
+			helper::StandardShade::func(dest, temp, shade);
+		}
+	}
+
+	static inline void func(Uint8& dest, const Uint8& src, const std::pair<Uint8, Uint8> *color, int size, int burn, int shade)
+	{
+		if (src)
+		{
+			const int group = (src & helper::ColorGroup);
+			for (int i = 0; i < size; ++i)
+			{
+				if (group == color[i].first)
+				{
+					loop(dest, src, color[i].second, burn, shade);
+					return;
+				}
+			}
+			loop(dest, 0, src, burn, shade);
+		}
+	}
+};
+
+BattleItem *getIfVisible(BattleItem *item)
+{
+	if (item && (!item->getRules()->isFixed() || item->getRules()->getFixedShow()))
+	{
+		return item;
+	}
+	return 0;
+}
+
+} //namespace
+
+/**
+ * blit item sprite onto surface
+ * @param item item sprite, can be null
+ */
+void UnitSprite::blitItem(Surface* item)
+{
+	if (item)
+	{
+		item->blitNShade(_dest, _x + item->getX(), _y + item->getY(), _shade, _half);
+	}
 }
 
 /**
- * Links this sprite to a BattleUnit to get the data for rendering.
- * @param unit Pointer to the BattleUnit.
- * @param part The part number for large units.
+ * blit body sprite onto surface with optional recoloring
+ * @param body
  */
-void UnitSprite::setBattleUnit(BattleUnit *unit, int part)
+void UnitSprite::blitBody(Surface* body, int part)
 {
-	_unit = unit;
-	_drawingRoutine = _unit->getArmor()->getDrawingRoutine();
-	_redraw = true;
-	_part = part;
+	if(_scriptWorkRef.proc)
+	{
+		BattleUnit::ScriptFillCustom(&_scriptWorkRef, part, _animationFrame, _shade);
+		_scriptWorkRef.executeBlit(body, _dest,  _x + body->getX(), _y + body->getY(), _half);
+	}
+	else
+	{
+		int burn = 0;
+		int overkill = _unit->getOverKillDamage();
+		int maxHp = _unit->getBaseStats()->health;
+		if (overkill)
+		{
+			if (overkill > maxHp)
+			{
+				burn = 16 * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames();
+			}
+			else
+			{
+				burn = 16 * overkill * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames() / maxHp;
+			}
+		}
+		ShaderMove<Uint8> dest(_dest, 0, 0);
+		if (_half)
+		{
+			GraphSubset g = dest.getDomain();
+			g.beg_x = _x + body->getWidth() / 2;
+			dest.setDomain(g);
+		}
+		_dest->lock();
+		ShaderDraw<ColorReplace>(
+			dest,
+			ShaderSurface(body, _x + body->getX(), _y + body->getY()),
+			ShaderScalar(_color),
+			ShaderScalar(_colorSize),
+			ShaderScalar(burn),
+			ShaderScalar(_shade)
+		);
+		_dest->unlock();
+	}
+}
 
+/**
+ * Draws a unit, using the drawing rules of the unit.
+ * This function is called by Map, for each unit on the screen.
+ */
+void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool half)
+{
+	_x = x;
+	_y = y;
+
+	_unit = unit;
+	_part = part;
+	_shade = shade;
+	_half = half;
+
+	_itemA = getIfVisible(_unit->getItem("STR_RIGHT_HAND"));
+	_itemB = getIfVisible(_unit->getItem("STR_LEFT_HAND"));
+
+	_unitSurface = _mod->getSurfaceSet(_unit->getArmor()->getSpriteSheet());
+
+	BattleUnit::ScriptFill(&_scriptWorkRef, _unit);
+
+	_drawingRoutine = _unit->getArmor()->getDrawingRoutine();
 	if (Options::battleHairBleach)
 	{
-		_colorSize =_unit->getRecolor().size();
+		_colorSize = _unit->getRecolor().size();
 		if (_colorSize)
 		{
 			_color = &(_unit->getRecolor()[0]);
@@ -90,139 +215,40 @@ void UnitSprite::setBattleUnit(BattleUnit *unit, int part)
 			_color = 0;
 		}
 	}
-}
 
-/**
- * Links this sprite to a BattleItem to get the data for rendering.
- * @param item Pointer to the BattleItem.
- */
-void UnitSprite::setBattleItem(BattleItem *item)
-{
-	if (item && (!item->getRules()->isFixed() || item->getRules()->getFixedShow()))
-	{
-		if (item->getSlot()->getId() == "STR_RIGHT_HAND")
-			_itemA = item;
-		if (item->getSlot()->getId() == "STR_LEFT_HAND")
-			_itemB = item;
-	}
-	_redraw = true;
-}
-
-
-namespace
-{
-
-struct ColorReplace
-{
-	static const Uint8 ColorGroup = 15<<4;
-	static const Uint8 ColorShade = 15;
-
-	static inline void loop(Uint8& dest, const Uint8& src, const Uint8& override, int burn)
-	{
-		const Uint8 temp = (src & ColorShade) + override;
-		if (burn)
-		{
-			const Uint8 shade = (temp & ColorShade) + burn;
-			if (shade > 26)
-			{
-				dest = 0;
-			}
-			else if (shade > 15)
-			{
-				dest = ColorShade;
-			}
-			else
-			{
-				dest = (temp & ColorGroup) + shade;
-			}
-		}
-		else
-		{
-			dest = temp;
-		}
-	}
-
-	static inline void func(Uint8& dest, const Uint8& src, const std::pair<Uint8, Uint8> *color, int size, int burn)
-	{
-		if (src)
-		{
-			for (int i = 0; i < size; ++i)
-			{
-				if ((src & ColorGroup) == color[i].first)
-				{
-					loop(dest, src, color[i].second, burn);
-					return;
-				}
-			}
-			loop(dest, 0, src, burn);
-		}
-	}
-};
-
-} //namespace
-
-void UnitSprite::drawRecolored(Surface *src)
-{
-	int burn = 0;
-	int overkill = _unit->getOverKillDamage();
-	int maxHp = _unit->getBaseStats()->health;
-	if (overkill)
-	{
-		if (overkill > maxHp)
-		{
-			burn = 16 * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames();
-		}
-		else
-		{
-			burn = 16 * overkill * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames() / maxHp;
-		}
-	}
-	lock();
-	ShaderDraw<ColorReplace>(ShaderSurface(this), ShaderSurface(src), ShaderScalar(_color), ShaderScalar(_colorSize), ShaderScalar(burn));
-	unlock();
-}
-
-
-/**
- * Sets the animation frame for animated units.
- * @param frame Frame number.
- */
-void UnitSprite::setAnimationFrame(int frame)
-{
-	_animationFrame = frame;
-}
-/**
- * Draws a unit, using the drawing rules of the unit.
- * This function is called by Map, for each unit on the screen.
- */
-void UnitSprite::draw()
-{
-	Surface::draw();
 	// Array of drawing routines
-	void (UnitSprite::*routines[])() = {&UnitSprite::drawRoutine0,
-		                                &UnitSprite::drawRoutine1,
-										&UnitSprite::drawRoutine2,
-										&UnitSprite::drawRoutine3,
-										&UnitSprite::drawRoutine4,
-										&UnitSprite::drawRoutine5,
-										&UnitSprite::drawRoutine6,
-										&UnitSprite::drawRoutine7,
-										&UnitSprite::drawRoutine8,
-										&UnitSprite::drawRoutine9,
-										&UnitSprite::drawRoutine0,
-										&UnitSprite::drawRoutine11,
-										&UnitSprite::drawRoutine12,
-										&UnitSprite::drawRoutine0,
-										&UnitSprite::drawRoutine0,
-										&UnitSprite::drawRoutine0,
-										&UnitSprite::drawRoutine12,
-										&UnitSprite::drawRoutine4,
-										&UnitSprite::drawRoutine4,
-										&UnitSprite::drawRoutine19,
-										&UnitSprite::drawRoutine20,
-										&UnitSprite::drawRoutine21};
+	void (UnitSprite::*routines[])() =
+	{
+		&UnitSprite::drawRoutine0,
+		&UnitSprite::drawRoutine1,
+		&UnitSprite::drawRoutine2,
+		&UnitSprite::drawRoutine3,
+		&UnitSprite::drawRoutine4,
+		&UnitSprite::drawRoutine5,
+		&UnitSprite::drawRoutine6,
+		&UnitSprite::drawRoutine7,
+		&UnitSprite::drawRoutine8,
+		&UnitSprite::drawRoutine9,
+		&UnitSprite::drawRoutine0,
+		&UnitSprite::drawRoutine11,
+		&UnitSprite::drawRoutine12,
+		&UnitSprite::drawRoutine0,
+		&UnitSprite::drawRoutine0,
+		&UnitSprite::drawRoutine0,
+		&UnitSprite::drawRoutine12,
+		&UnitSprite::drawRoutine4,
+		&UnitSprite::drawRoutine4,
+		&UnitSprite::drawRoutine19,
+		&UnitSprite::drawRoutine20,
+		&UnitSprite::drawRoutine21,
+	};
 	// Call the matching routine
 	(this->*(routines[_drawingRoutine]))();
+	// draw fire
+	if (unit->getFire() > 0)
+	{
+		_fireSurface->getFrame(4 + (_animationFrame / 2) % 4)->blitNShade(_dest, _x, _y, 0);
+	}
 }
 
 /**
@@ -328,7 +354,8 @@ void UnitSprite::drawRoutine0()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		drawRecolored(torso);
+
+		blitBody(torso, BODYPART_COLLAPSING);
 		return;
 	}
 	if (_drawingRoutine == 0 || _helmet)
@@ -557,39 +584,39 @@ void UnitSprite::drawRoutine0()
 	// blit order depends on unit direction, and whether we are holding a 2 handed weapon.
 	switch (unitDir)
 	{
-	case 0: itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(rightArm); break;
-	case 1: drawRecolored(leftArm); drawRecolored(legs); itemB?itemB->blit(this):void(); drawRecolored(torso); itemA?itemA->blit(this):void(); drawRecolored(rightArm); break;
-	case 2: drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso); itemB?itemB->blit(this):void(); itemA?itemA->blit(this):void(); drawRecolored(rightArm); break;
+	case 0: blitItem(itemA); blitItem(itemB); blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 1: blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitItem(itemB); blitBody(torso, BODYPART_TORSO); blitItem(itemA); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 2: blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitItem(itemB); blitItem(itemA); blitBody(rightArm, BODYPART_RIGHTARM); break;
 	case 3:
 		if (_unit->getStatus() != STATUS_AIMING  && ((_itemA && _itemA->getRules()->isTwoHanded()) || (_itemB && _itemB->getRules()->isTwoHanded())))
 		{
-			drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(rightArm);
+			blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitItem(itemA); blitItem(itemB); blitBody(rightArm, BODYPART_RIGHTARM);
 		}
 		else
 		{
-			drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void();
+			blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB);
 		}
 		break;
-	case 4:	drawRecolored(legs); drawRecolored(rightArm); drawRecolored(torso); drawRecolored(leftArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void();	break;
+	case 4:	blitBody(legs, BODYPART_LEGS); blitBody(rightArm, BODYPART_RIGHTARM); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitItem(itemA); blitItem(itemB);	break;
 	case 5:
 		if (_unit->getStatus() != STATUS_AIMING  && ((_itemA && _itemA->getRules()->isTwoHanded()) || (_itemB && _itemB->getRules()->isTwoHanded())))
 		{
-			drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void();
+			blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitItem(itemA); blitItem(itemB);
 		}
 		else
 		{
-			drawRecolored(rightArm); drawRecolored(legs); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(torso); drawRecolored(leftArm);
+			blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitItem(itemA); blitItem(itemB); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM);
 		}
 		break;
-	case 6: drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); break;
+	case 6: blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); break;
 	case 7:
 		if (_unit->getStatus() != STATUS_AIMING  && ((_itemA && _itemA->getRules()->isTwoHanded()) || (_itemB && _itemB->getRules()->isTwoHanded())))
 		{
-			drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso);
+			blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO);
 		}
 		else
 		{
-			itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(leftArm); drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso);
+			blitItem(itemA); blitItem(itemB); blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO);
 		}
 		break;
 	}
@@ -632,7 +659,7 @@ void UnitSprite::drawRoutine1()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		drawRecolored(torso);
+		blitBody(torso, BODYPART_COLLAPSING);
 		return;
 	}
 
@@ -744,14 +771,14 @@ void UnitSprite::drawRoutine1()
 	// blit order depends on unit direction.
 	switch (unitDir)
 	{
-	case 0: itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(leftArm); drawRecolored(torso); drawRecolored(rightArm); break;
-	case 1: drawRecolored(leftArm); drawRecolored(torso); drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 2: drawRecolored(leftArm); drawRecolored(torso); drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void();  break;
-	case 3:	drawRecolored(torso); drawRecolored(leftArm); drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 4:	drawRecolored(torso); drawRecolored(leftArm); drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 5:	drawRecolored(rightArm); drawRecolored(torso); drawRecolored(leftArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 6: drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(torso); drawRecolored(leftArm); break;
-	case 7:	drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(leftArm); drawRecolored(torso); break;
+	case 0: blitItem(itemA); blitItem(itemB); blitBody(leftArm, BODYPART_LEFTARM); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 1: blitBody(leftArm, BODYPART_LEFTARM); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); break;
+	case 2: blitBody(leftArm, BODYPART_LEFTARM); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); break;
+	case 3:	blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); break;
+	case 4:	blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); break;
+	case 5:	blitBody(rightArm, BODYPART_RIGHTARM); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitItem(itemA); blitItem(itemB); break;
+	case 6: blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); break;
+	case 7:	blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); blitBody(leftArm, BODYPART_LEFTARM); blitBody(torso, BODYPART_TORSO); break;
 	}
 	torso->setX(0);
 	leftArm->setX(0);
@@ -784,13 +811,13 @@ void UnitSprite::drawRoutine2()
 	// draw the animated propulsion below the hwp
 	if (_part > 0 && hoverTank != 0)
 	{
-		s = _unitSurface->getFrame(104 + ((_part-1) * 8) + _animationFrame);
-		drawRecolored(s);
+		s = _unitSurface->getFrame(104 + ((_part-1) * 8) + _animationFrame % 8);
+		blitBody(s, 0);
 	}
 
 	// draw the tank itself
 	s = _unitSurface->getFrame(hoverTank + (_part * 8) + _unit->getDirection());
-	drawRecolored(s);
+	blitBody(s, 0);
 
 	// draw the turret, together with the last part
 	if (_part == 3 && turret != -1)
@@ -805,7 +832,7 @@ void UnitSprite::drawRoutine2()
 		}
 		s->setX(turretOffsetX);
 		s->setY(turretOffsetY);
-		drawRecolored(s);
+		blitBody(s, 0);
 	}
 
 }
@@ -826,13 +853,13 @@ void UnitSprite::drawRoutine3()
 	// draw the animated propulsion below the hwp
 	if (_part > 0)
 	{
-		s = _unitSurface->getFrame(32 + ((_part-1) * 8) + _animationFrame);
-		drawRecolored(s);
+		s = _unitSurface->getFrame(32 + ((_part-1) * 8) + _animationFrame % 8);
+		blitBody(s, 0);
 	}
 
 	s = _unitSurface->getFrame((_part * 8) + _unit->getDirection());
 
-	drawRecolored(s);
+	blitBody(s, 0);
 }
 
 /**
@@ -882,7 +909,7 @@ void UnitSprite::drawRoutine4()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		s = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		drawRecolored(s);
+		blitBody(s, BODYPART_COLLAPSING);
 		return;
 	}
 	else if (_unit->getStatus() == STATUS_WALKING)
@@ -914,15 +941,15 @@ void UnitSprite::drawRoutine4()
 		{
 			if (_itemA->getSlot()->getId() == "STR_RIGHT_HAND")
 			{
-			itemA = _itemSurfaceA->getFrame(_itemA->getRules()->getHandSprite() + unitDir);
-			itemA->setX(0);
-			itemA->setY(0);
+				itemA = _itemSurfaceA->getFrame(_itemA->getRules()->getHandSprite() + unitDir);
+				itemA->setX(0);
+				itemA->setY(0);
 			}
 			else
 			{
-			itemA = _itemSurfaceA->getFrame(_itemA->getRules()->getHandSprite() + unitDir);
-			itemA->setX(offX2[unitDir]);
-			itemA->setY(offY2[unitDir]);
+				itemA = _itemSurfaceA->getFrame(_itemA->getRules()->getHandSprite() + unitDir);
+				itemA->setX(offX2[unitDir]);
+				itemA->setY(offY2[unitDir]);
 			}
 		}
 	}
@@ -961,14 +988,14 @@ void UnitSprite::drawRoutine4()
 	}
 	switch (unitDir)
 	{
-	case 0: itemB?itemB->blit(this):void(); itemA?itemA->blit(this):void(); drawRecolored(s); break;
-	case 1: itemB?itemB->blit(this):void(); drawRecolored(s); itemA?itemA->blit(this):void(); break;
-	case 2: drawRecolored(s); itemB?itemB->blit(this):void(); itemA?itemA->blit(this):void(); break;
-	case 3: drawRecolored(s); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 4: drawRecolored(s); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 5: itemA?itemA->blit(this):void(); drawRecolored(s); itemB?itemB->blit(this):void(); break;
-	case 6: itemA?itemA->blit(this):void(); drawRecolored(s); itemB?itemB->blit(this):void(); break;
-	case 7: itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(s); break;
+	case 0: blitItem(itemB); blitItem(itemA); blitBody(s, BODYPART_TORSO); break;
+	case 1: blitItem(itemB); blitBody(s, BODYPART_TORSO); blitItem(itemA); break;
+	case 2: blitBody(s, BODYPART_TORSO); blitItem(itemB); blitItem(itemA); break;
+	case 3: blitBody(s, BODYPART_TORSO); blitItem(itemA); blitItem(itemB); break;
+	case 4: blitBody(s, BODYPART_TORSO); blitItem(itemA); blitItem(itemB); break;
+	case 5: blitItem(itemA); blitBody(s, BODYPART_TORSO); blitItem(itemB); break;
+	case 6: blitItem(itemA); blitBody(s, BODYPART_TORSO); blitItem(itemB); break;
+	case 7: blitItem(itemA); blitItem(itemB); blitBody(s, BODYPART_TORSO); break;
 	}
 	s->setX(0);
 	if (itemA)
@@ -999,7 +1026,7 @@ void UnitSprite::drawRoutine5()
 		s = _unitSurface->getFrame((_part * 8) + _unit->getDirection());
 	}
 
-	drawRecolored(s);
+	blitBody(s, 0);
 }
 
 /**
@@ -1033,7 +1060,7 @@ void UnitSprite::drawRoutine6()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		drawRecolored(torso);
+		blitBody(torso, BODYPART_COLLAPSING);
 		return;
 	}
 
@@ -1179,14 +1206,14 @@ void UnitSprite::drawRoutine6()
 	// blit order depends on unit direction.
 	switch (unitDir)
 	{
-	case 0: itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(rightArm); break;
-	case 1: drawRecolored(leftArm); drawRecolored(legs); itemB?itemB->blit(this):void(); drawRecolored(torso); itemA?itemA->blit(this):void(); drawRecolored(rightArm); break;
-	case 2: drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 3: drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); drawRecolored(rightArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void();	break;
-	case 4:	drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 5:	drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
-	case 6: drawRecolored(rightArm); drawRecolored(legs); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(torso); drawRecolored(leftArm); break;
-	case 7:	itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); drawRecolored(leftArm); drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); break;
+	case 0: blitItem(itemA); blitItem(itemB); blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 1: blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitItem(itemB); blitBody(torso, BODYPART_TORSO); blitItem(itemA); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 2: blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); break;
+	case 3: blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); blitItem(itemA); blitItem(itemB); break;
+	case 4:	blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitItem(itemA); blitItem(itemB); break;
+	case 5:	blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitItem(itemA); blitItem(itemB); break;
+	case 6: blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitItem(itemA); blitItem(itemB); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); break;
+	case 7:	blitItem(itemA); blitItem(itemB); blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); break;
 	}
 	torso->setX(0);
 	legs->setX(0);
@@ -1222,7 +1249,7 @@ void UnitSprite::drawRoutine7()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		drawRecolored(torso);
+		blitBody(torso, BODYPART_COLLAPSING);
 		return;
 	}
 
@@ -1254,14 +1281,14 @@ void UnitSprite::drawRoutine7()
 	// blit order depends on unit direction
 	switch (unitDir)
 	{
-	case 0: drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(rightArm); break;
-	case 1: drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(rightArm); break;
-	case 2: drawRecolored(leftArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(rightArm); break;
-	case 3: drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); drawRecolored(rightArm); break;
-	case 4: drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); break;
-	case 5: drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); break;
-	case 6: drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); drawRecolored(leftArm); break;
-	case 7: drawRecolored(leftArm); drawRecolored(rightArm); drawRecolored(legs); drawRecolored(torso); break;
+	case 0: blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 1: blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 2: blitBody(leftArm, BODYPART_LEFTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 3: blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); break;
+	case 4: blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); break;
+	case 5: blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); break;
+	case 6: blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); blitBody(leftArm, BODYPART_LEFTARM); break;
+	case 7: blitBody(leftArm, BODYPART_LEFTARM); blitBody(rightArm, BODYPART_RIGHTARM); blitBody(legs, BODYPART_LEGS); blitBody(torso, BODYPART_TORSO); break;
 	}
 }
 
@@ -1281,8 +1308,7 @@ void UnitSprite::drawRoutine8()
 		return;
 	}
 
-	legs = _unitSurface->getFrame(Body + Pulsate[_animationFrame]);
-	_redraw = true;
+	legs = _unitSurface->getFrame(Body + Pulsate[_animationFrame % 8]);
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 		legs = _unitSurface->getFrame(die + _unit->getFallingPhase());
@@ -1290,7 +1316,7 @@ void UnitSprite::drawRoutine8()
 	if (_unit->getStatus() == STATUS_AIMING)
 		legs = _unitSurface->getFrame(aim);
 
-	drawRecolored(legs);
+	blitBody(legs, 0);
 }
 
 /**
@@ -1308,13 +1334,12 @@ void UnitSprite::drawRoutine9()
 		return;
 	}
 
-	torso = _unitSurface->getFrame(Body + _animationFrame);
-	_redraw = true;
+	torso = _unitSurface->getFrame(Body + _animationFrame % 8);
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
 
-	drawRecolored(torso);
+	blitBody(torso, 0);
 }
 
 /**
@@ -1342,7 +1367,7 @@ void UnitSprite::drawRoutine11()
 
 	Surface *s = _unitSurface->getFrame(body + (_part * 4) + 16 * _unit->getDirection() + animFrame);
 	s->setY(4);
-	drawRecolored(s);
+	blitBody(s, 0);
 
 	int turret = _unit->getTurretType();
 	// draw the turret, overlapping all 4 parts
@@ -1354,7 +1379,7 @@ void UnitSprite::drawRoutine11()
 			s->setY(offTurretYBelow[_unit->getDirection()]);
 		else
 			s->setY(offTurretYAbove[_unit->getDirection()]);
-		drawRecolored(s);
+		blitBody(s, 0);
 	}
 
 }
@@ -1374,17 +1399,16 @@ void UnitSprite::drawRoutine12()
 
 	Surface *s = 0;
 	s = _unitSurface->getFrame((_part * 8) + _animationFrame);
-	_redraw = true;
 
 	if ( (_unit->getStatus() == STATUS_COLLAPSING) && (_drawingRoutine == 16) )
 	{
 		// biodrone death frames
 		s = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		drawRecolored(s);
+		blitBody(s, 0);
 		return;
 	}
 
-	drawRecolored(s);
+	blitBody(s, 0);
 }
 
 /**
@@ -1405,7 +1429,7 @@ void UnitSprite::drawRoutine19()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		s = _unitSurface->getFrame(die + _unit->getFallingPhase());
-		drawRecolored(s);
+		blitBody(s, 0);
 		return;
 	}
 
@@ -1418,7 +1442,7 @@ void UnitSprite::drawRoutine19()
 		s = _unitSurface->getFrame(stand + _unit->getDirection());
 	}
 
-	drawRecolored(s);
+	blitBody(s, 0);
 }
 
 /**
@@ -1443,7 +1467,7 @@ void UnitSprite::drawRoutine20()
 		s = _unitSurface->getFrame(5 * (_part + 4 * _unit->getDirection()));
 	}
 
-	drawRecolored(s);
+	blitBody(s, 0);
 }
 
 /**
@@ -1460,9 +1484,8 @@ void UnitSprite::drawRoutine21()
 	Surface *s = 0;
 
 	s = _unitSurface->getFrame((_part * 4) + (_unit->getDirection() * 16) + (_animationFrame % 4));
-	_redraw = true;
 
-	drawRecolored(s);
+	blitBody(s, 0);
 }
 
 /**
@@ -1494,4 +1517,4 @@ void UnitSprite::sortRifles()
 	}
 }
 
-}
+} //namespace OpenXcom

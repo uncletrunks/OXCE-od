@@ -111,8 +111,6 @@ void UnitTurnBState::think()
 		size_t unitSpotted = _unit->getUnitsSpottedThisTurn().size();
 		_unit->turn(_turret);
 		_parent->getTileEngine()->calculateFOV(_unit);
-		_unit->setCache(0);
-		_parent->getMap()->cacheUnit(_unit);
 		if (_chargeTUs && _unit->getFaction() == _parent->getSave()->getSide() && _parent->getPanicHandled() && _action.type == BA_NONE && _unit->getUnitsSpottedThisTurn().size() > unitSpotted)
 		{
 			_unit->abortTurn();

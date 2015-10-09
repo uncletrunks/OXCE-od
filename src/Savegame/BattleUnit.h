@@ -46,10 +46,14 @@ class SavedGame;
 class Language;
 class AlienBAIState;
 class CivilianBAIState;
+template<typename> class ScriptContainer;
+template<typename> class ScriptParser;
+class ScriptWorker;
 
 enum UnitStatus {STATUS_STANDING, STATUS_WALKING, STATUS_FLYING, STATUS_TURNING, STATUS_AIMING, STATUS_COLLAPSING, STATUS_DEAD, STATUS_UNCONSCIOUS, STATUS_PANICKING, STATUS_BERSERK, STATUS_IGNORE_ME};
 enum UnitFaction {FACTION_PLAYER, FACTION_HOSTILE, FACTION_NEUTRAL};
 enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LEFTARM, BODYPART_RIGHTLEG, BODYPART_LEFTLEG, BODYPART_MAX};
+enum UnitBodyPartEx {BODYPART_LEGS = BODYPART_MAX, BODYPART_COLLAPSING, BODYPART_ITEM};
 
 
 /**
@@ -84,8 +88,6 @@ private:
 	BattleItem* _specWeapon[SPEC_WEAPON_MAX];
 	BattleAIState *_currentAIState;
 	bool _visible;
-	Surface *_cache[5];
-	bool _cacheInvalid;
 	int _expBravery, _expReactions, _expFiring, _expThrowing, _expPsiSkill, _expPsiStrength, _expMelee;
 	int improveStat(int exp);
 	int _motionPoints;
@@ -123,6 +125,7 @@ private:
 	bool _hidingForTurn, _floorAbove, _respawn;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
+	bool _useScripts;
 
 	/// Helper function initing recolor vector.
 	void setRecolor(int basicLook, int utileLook, int rankLook);
@@ -138,6 +141,13 @@ private:
 	void prepareMorale(int morale);
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
+	/// Register all useful function used by script
+	static void ScriptRegister(ScriptParser<BattleUnit>* parser);
+	/// Init all required data in script using object data
+	static void ScriptFill(ScriptWorker* w, BattleUnit* unit);
+	/// Pass custom parameters to script
+	static void ScriptFillCustom(ScriptWorker* w, int body_part, int anim_frame, int shade);
+
 	/// Creates a BattleUnit from solder.
 	BattleUnit(Soldier *soldier, int depth);
 	/// Creates a BattleUnit from unit.
@@ -196,10 +206,6 @@ public:
 	SoldierGender getGender() const;
 	/// Gets the unit's faction.
 	UnitFaction getFaction() const;
-	/// Set the cached flag.
-	void setCache(Surface *cache, int part = 0);
-	/// If this unit is cached on the battlescape.
-	Surface *getCache(bool *invalid, int part = 0) const;
 	/// Gets unit sprite recolors values.
 	const std::vector<std::pair<Uint8, Uint8> > &getRecolor() const;
 	/// Kneel down.
@@ -355,7 +361,9 @@ public:
 	/// Get motion points for the motion scanner.
 	int getMotionPoints() const;
 	/// Gets the unit's armor.
-	Armor *getArmor() const;
+	Armor *getArmor();
+	/// Gets the unit's armor.
+	const Armor *getArmor() const;
 	/// Gets the unit's name.
 	std::wstring getName(Language *lang, bool debugAppendId = false) const;
 	/// Gets the unit's stats.
@@ -491,6 +499,6 @@ public:
 	void recoverTimeUnits();
 };
 
-}
+} //namespace OpenXcom
 
 #endif

@@ -371,12 +371,10 @@ void ExplosionBState::explode()
 		if (_unit && !_unit->isOut())
 		{
 			_unit->aim(false);
-			_unit->setCache(0);
 		}
 
 		if (_power <= 0)
 		{
-			_parent->getMap()->cacheUnits();
 			_parent->popState();
 			return;
 		}
@@ -443,7 +441,6 @@ void ExplosionBState::explode()
 	if (_unit && !_unit->isOut() && _lowerWeapon)
 	{
 		_unit->aim(false);
-		_unit->setCache(0);
 	}
 
 	if (_item && (_item->getRules()->getBattleType() == BT_GRENADE || _item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
@@ -451,7 +448,6 @@ void ExplosionBState::explode()
 		_parent->getSave()->removeItem(_item);
 	}
 
-	_parent->getMap()->cacheUnits();
 	_parent->popState();
 
 	// check for terrain explosions

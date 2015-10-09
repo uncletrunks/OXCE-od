@@ -307,8 +307,6 @@ bool ProjectileFlyBState::createNewProjectile()
 				_projectileItem->setFuseTimer(_projectileItem->getRules()->getFuseTimerDefault());
 			}
 			_projectileItem->moveToOwner(0);
-			_unit->setCache(0);
-			_parent->getMap()->cacheUnit(_unit);
 			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 			_unit->addThrowingExp();
 		}
@@ -330,8 +328,6 @@ bool ProjectileFlyBState::createNewProjectile()
 		{
 			// set the soldier in an aiming position
 			_unit->aim(true);
-			_unit->setCache(0);
-			_parent->getMap()->cacheUnit(_unit);
 			// and we have a lift-off
 			if (_ammo->getRules()->getFireSound() != -1)
 			{
@@ -375,8 +371,6 @@ bool ProjectileFlyBState::createNewProjectile()
 		{
 			// set the soldier in an aiming position
 			_unit->aim(true);
-			_unit->setCache(0);
-			_parent->getMap()->cacheUnit(_unit);
 			// and we have a lift-off
 			if (_ammo->getRules()->getFireSound() != -1)
 			{
@@ -585,8 +579,6 @@ void ProjectileFlyBState::think()
 				else if (_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem())
 				{
 					_unit->aim(false);
-					_unit->setCache(0);
-					_parent->getMap()->cacheUnits();
 				}
 			}
 

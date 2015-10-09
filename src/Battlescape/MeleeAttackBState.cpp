@@ -188,8 +188,6 @@ void MeleeAttackBState::performMeleeAttack()
 {
 	// set the soldier in an aiming position
 	_unit->aim(true);
-	_unit->setCache(0);
-	_parent->getMap()->cacheUnit(_unit);
 
 	// use up ammo if applicable
 	if (!_parent->getSave()->getDebugMode() && _weapon->getRules()->getBattleType() == BT_MELEE && _ammo && _ammo->spendBullet() == false)

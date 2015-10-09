@@ -26,12 +26,15 @@
 #include "Unit.h"
 #include "RuleStatBonus.h"
 #include "RuleDamageType.h"
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
 
 enum ForcedTorso { TORSO_USE_GENDER, TORSO_ALWAYS_MALE, TORSO_ALWAYS_FEMALE };
 enum UnitSide { SIDE_FRONT, SIDE_LEFT, SIDE_RIGHT, SIDE_REAR, SIDE_UNDER, SIDE_MAX };
+
+class BattleUnit;
 
 /**
  * Represents a specific type of armor.
@@ -59,13 +62,14 @@ private:
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
+	ScriptContainer<BattleUnit> *_recolorScript;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
 	/// Cleans up the armor ruleset.
 	~Armor();
 	/// Loads the armor data from YAML.
-	void load(const YAML::Node& node);
+	void load(const YAML::Node& node, const ScriptParser<BattleUnit>& parser);
 	/// Gets the armor's type.
 	std::string getType() const;
 	/// Gets the unit's sprite sheet.
@@ -162,6 +166,8 @@ public:
 	int getRankColor(int i) const;
 	/// can we access this unit's inventory?
 	bool hasInventory() const;
+	/// Gets script used to recolor unit.
+	ScriptContainer<BattleUnit> *getRecolorScript();
 };
 
 }

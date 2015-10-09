@@ -1082,12 +1082,39 @@ int RuleItem::getSpecialChance() const
  * @param texture Pointer to the surface set to get the sprite from.
  * @param surface Pointer to the surface to draw to.
  */
-void RuleItem::drawHandSprite(SurfaceSet *texture, Surface *surface, bool alt) const
+void RuleItem::drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem *item) const
 {
-	Surface *frame = texture->getFrame(alt ? this->getBigSpriteAlt() : this->getBigSprite());
-	frame->setX((RuleInventory::HAND_W - this->getInventoryWidth()) * RuleInventory::SLOT_W/2);
-	frame->setY((RuleInventory::HAND_H - this->getInventoryHeight()) * RuleInventory::SLOT_H/2);
-	frame->blit(surface);
+	Surface *frame = texture->getFrame(item ? item->getBigSprite() : this->getBigSprite());
+	if (item)
+	{
+		ScriptWorker scr;
+		BattleItem::ScriptFill(&scr, item, true, 0, 0);
+		scr.executeBlit(frame, surface, this->getHandSpriteOffX(), this->getHandSpriteOffY());
+	}
+	else
+	{
+		frame->setX(this->getHandSpriteOffX());
+		frame->setY(this->getHandSpriteOffY());
+		frame->blit(surface);
+	}
+}
+
+/**
+ * item's hand spite x offset
+ * @return x offset
+ */
+int RuleItem::getHandSpriteOffX() const
+{
+	return (RuleInventory::HAND_W - getInventoryWidth()) * RuleInventory::SLOT_W/2;
+}
+
+/**
+ * item's hand spite y offset
+ * @return y offset
+ */
+int RuleItem::getHandSpriteOffY() const
+{
+	return (RuleInventory::HAND_H - getInventoryHeight()) * RuleInventory::SLOT_H/2;
 }
 
 /**

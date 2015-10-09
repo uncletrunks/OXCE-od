@@ -62,6 +62,9 @@
     <ClCompile Include="Engine\Screen.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Script.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\Sound.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -271,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="Interface\FpsCounter.cpp">
       <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\ItemSprite.cpp">
+      <Filter>Battlescape</Filter>
     </ClCompile>
     <ClCompile Include="Battlescape\UnitSprite.cpp">
       <Filter>Battlescape</Filter>
@@ -1006,6 +1012,12 @@
     <ClInclude Include="Engine\Screen.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Script.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ScriptBind.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Sound.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -1212,6 +1224,9 @@
     </ClInclude>
     <ClInclude Include="Interface\FpsCounter.h">
       <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\ItemSprite.h">
+      <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Battlescape\UnitSprite.h">
       <Filter>Battlescape</Filter>

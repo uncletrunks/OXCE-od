@@ -33,6 +33,7 @@ enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMI
 enum BattleFuseType { BFT_NONE = -3, BFT_INSTANT = -2, BFT_SET = -1, BFT_FIX_MIN = 0, BFT_FIX_MAX = 24 };
 enum BattleMediKitType { BMT_NORMAL = 0, BMT_HEAL = 1, BMT_STIMULANT = 2, BMT_PAINKILLER = 3 };
 
+class BattleItem;
 class SurfaceSet;
 class Surface;
 class Mod;
@@ -290,7 +291,11 @@ public:
 	/// Gets the chance of special effect like zombify or corpse explosion or mine triggering.
 	int getSpecialChance() const;
 	/// Draws the item's hand sprite onto a surface.
-	void drawHandSprite(SurfaceSet *texture, Surface *surface, bool alt = false) const;
+	void drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem *item = 0) const;
+	/// item's hand spite x offset
+	int getHandSpriteOffX() const;
+	/// item's hand spite y offset
+	int getHandSpriteOffY() const;
 	/// Gets the medikit heal quantity.
 	int getHealQuantity() const;
 	/// Gets the medikit pain killer quantity.

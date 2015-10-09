@@ -431,7 +431,6 @@ bool BattlescapeGame::kneel(BattleUnit *bu)
 			bu->kneel(!bu->isKneeled());
 			// kneeling or standing up can reveal new terrain or units. I guess.
 			getTileEngine()->calculateFOV(bu);
-			getMap()->cacheUnits();
 			_parentState->updateSoldierInfo();
 			getTileEngine()->checkReactionFire(bu);
 			return true;
@@ -471,7 +470,7 @@ void BattlescapeGame::endTurn()
 		// check for hot grenades on the ground
 		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 		{
-			for (std::vector<BattleItem*>::iterator it = _save->getTiles()[i]->getInventory()->begin(); it != _save->getTiles()[i]->getInventory()->end(); ++it)
+			for (std::vector<BattleItem*>::iterator it = _save->getTile(i)->getInventory()->begin(); it != _save->getTile(i)->getInventory()->end(); ++it)
 			{
 				if ((*it)->getFuseTimer() != 0 || (*it)->getRules()->getFuseTimerType() == BFT_INSTANT)
 				{
@@ -482,7 +481,7 @@ void BattlescapeGame::endTurn()
 				{
 					if (RNG::percent((*it)->getRules()->getSpecialChance()))
 					{
-						Position p = _save->getTiles()[i]->getPosition().toVexel() + Position(8, 8, - _save->getTiles()[i]->getTerrainLevel());
+						Position p = _save->getTile(i)->getPosition().toVexel() + Position(8, 8, - _save->getTile(i)->getTerrainLevel());
 						statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
 						exploded = true;
 					}
@@ -970,11 +969,6 @@ void BattlescapeGame::popState()
 				// AI does three things per unit, before switching to the next, or it got killed before doing the second thing
 				if (_AIActionCounter > 2 || _save->getSelectedUnit() == 0 || _save->getSelectedUnit()->isOut())
 				{
-					if (_save->getSelectedUnit())
-					{
-						_save->getSelectedUnit()->setCache(0);
-						getMap()->cacheUnit(_save->getSelectedUnit());
-					}
 					_AIActionCounter = 0;
 					if (_states.empty() && _save->selectNextPlayerUnit(true) == 0)
 					{
@@ -1232,7 +1226,6 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 		{
 			dropItem(unit->getPosition(), item, false, true);
 		}
-		unit->setCache(0);
 		// let's try a few times to get a tile to run to.
 		for (int i= 0; i < 20; i++)
 		{
@@ -1696,7 +1689,6 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
 	newUnit->setPosition(unit->getPosition());
 	newUnit->setDirection(unit->getDirection());
-	newUnit->setCache(0);
 	newUnit->setTimeUnits(0);
 	getSave()->getUnits()->push_back(newUnit);
 	newUnit->setAIState(new AlienBAIState(getSave(), newUnit, 0));
@@ -1705,7 +1697,6 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	getTileEngine()->calculateFOV(newUnit->getPosition());
 	getTileEngine()->applyGravity(newUnit->getTile());
 	newUnit->dontReselect();
-	getMap()->cacheUnit(newUnit);
 	//newUnit->getCurrentAIState()->think();
 	return newUnit;
 
@@ -2170,11 +2161,6 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 				}
 			}
 		}
-	}
-	if (exploded)
-	{
-		unit->setCache(0);
-		getMap()->cacheUnit(unit);
 	}
 	return exploded;
 }

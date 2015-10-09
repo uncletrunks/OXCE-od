@@ -22,6 +22,7 @@
 #include <vector>
 #include <string>
 #include <yaml-cpp/yaml.h>
+#include "Tile.h"
 #include "BattleUnit.h"
 
 namespace OpenXcom
@@ -51,7 +52,7 @@ private:
 	Mod *_rule;
 	int _mapsize_x, _mapsize_y, _mapsize_z;
 	std::vector<MapDataSet*> _mapDataSets;
-	Tile **_tiles;
+	std::vector<Tile> _tiles;
 	BattleUnit *_selectedUnit, *_lastSelectedUnit;
 	std::vector<Node*> _nodes;
 	std::vector<BattleUnit*> _units;
@@ -108,8 +109,6 @@ public:
 	void setGlobalShade(int shade);
 	/// Gets the global shade.
 	int getGlobalShade() const;
-	/// Gets a pointer to the tiles, a tile is the smallest component of battlescape.
-	Tile **getTiles() const;
 	/// Gets a pointer to the list of nodes.
 	std::vector<Node*> *getNodes();
 	/// Gets a pointer to the list of items.
@@ -146,15 +145,24 @@ public:
 	 * @param pos Map position.
 	 * @return Pointer to the tile at that position.
 	 */
-	inline Tile *getTile(const Position& pos) const
+	inline Tile *getTile(const Position& pos)
 	{
 		if (pos.x < 0 || pos.y < 0 || pos.z < 0
 			|| pos.x >= _mapsize_x || pos.y >= _mapsize_y || pos.z >= _mapsize_z)
 			return 0;
 
-		return _tiles[getTileIndex(pos)];
+		return &_tiles[getTileIndex(pos)];
 	}
 
+	/*
+	 * Gets a pointer to the tiles, a tile is the smallest component of battlescape.
+	 * @param pos Index position, less than `getMapSizeXYZ()`.
+	 * @return Pointer to the tile at that index.
+	 */
+	Tile* getTile(int i)
+	{
+		return &_tiles[i];
+	}
 	/// Gets the currently selected unit.
 	BattleUnit *getSelectedUnit() const;
 	/// Sets the currently selected unit.

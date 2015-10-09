@@ -537,7 +537,7 @@ void Surface::copy(Surface *surface)
 	SDL_BlitSurface uses colour matching,
 	and is therefor unreliable as a means
 	to copy the contents of one surface to another
-	instead we have to do this manually 
+	instead we have to do this manually
 
 	SDL_Rect from;
 	from.x = getX() - surface->getX();
@@ -755,65 +755,6 @@ void Surface::unlock()
 }
 
 /**
- * help class used for Surface::blitNShade
- */
-struct ColorReplace
-{
-	/**
-	* Function used by ShaderDraw in Surface::blitNShade
-	* set shade and replace color in that surface
-	* @param dest destination pixel
-	* @param src source pixel
-	* @param shade value of shade of this surface
-	* @param newColor new color to set (it should be offseted by 4)
-	*/
-	static inline void func(Uint8& dest, const Uint8& src, const int& shade, const int& newColor, const int&)
-	{
-		if (src)
-		{
-			const int newShade = (src&15) + shade;
-			if (newShade > 15)
-				// so dark it would flip over to another color - make it black instead
-				dest = 15;
-			else
-				dest = newColor | newShade;
-		}
-	}
-
-};
-
-/**
- * help class used for Surface::blitNShade
- */
-struct StandardShade
-{
-	/**
-	* Function used by ShaderDraw in Surface::blitNShade
-	* set shade
-	* @param dest destination pixel
-	* @param src source pixel
-	* @param shade value of shade of this surface
-	* @param notused
-	* @param notused
-	*/
-	static inline void func(Uint8& dest, const Uint8& src, const int& shade, const int&, const int&)
-	{
-		if (src)
-		{
-			const int newShade = (src&15) + shade;
-			if (newShade > 15)
-				// so dark it would flip over to another color - make it black instead
-				dest = 15;
-			else
-				dest = (src&(15<<4)) | newShade;
-		}
-	}
-
-};
-
-
-
-/**
  * Specific blit function to blit battlescape terrain data in different shades in a fast way.
  * Notice there is no surface locking here - you have to make sure you lock the surface yourself
  * at the start of blitting and unlock it when done.
@@ -837,11 +778,10 @@ void Surface::blitNShade(Surface *surface, int x, int y, int off, bool half, int
 	{
 		--newBaseColor;
 		newBaseColor <<= 4;
-		ShaderDraw<ColorReplace>(ShaderSurface(surface), src, ShaderScalar(off), ShaderScalar(newBaseColor));
+		ShaderDraw<helper::ColorReplace>(ShaderSurface(surface), src, ShaderScalar(off), ShaderScalar(newBaseColor));
 	}
 	else
-		ShaderDraw<StandardShade>(ShaderSurface(surface), src, ShaderScalar(off));
-
+		ShaderDraw<helper::StandardShade>(ShaderSurface(surface), src, ShaderScalar(off));
 }
 
 /**
@@ -887,7 +827,7 @@ void Surface::resize(int width, int height)
 	int pitch = GetPitch(bpp, width);
 	void *alignedBuffer = NewAligned(bpp, width, height);
 	SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(alignedBuffer, width, height, bpp, pitch, 0, 0, 0, 0);
-	
+
 	if (surface == 0)
 	{
 		throw Exception(SDL_GetError());

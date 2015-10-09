@@ -31,7 +31,8 @@ Armor::Armor(const std::string &type) :
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _regeneration(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
-	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0)
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0),
+	_recolorScript(0)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -47,14 +48,14 @@ Armor::Armor(const std::string &type) :
  */
 Armor::~Armor()
 {
-
+	delete _recolorScript;
 }
 
 /**
  * Loads the armor from a YAML file.
  * @param node YAML node.
  */
-void Armor::load(const YAML::Node &node)
+void Armor::load(const YAML::Node &node, const ScriptParser<BattleUnit>& parser)
 {
 	_type = node["type"].as<std::string>(_type);
 	_spriteSheet = node["spriteSheet"].as<std::string>(_spriteSheet);
@@ -161,6 +162,14 @@ void Armor::load(const YAML::Node &node)
 	_hairColor = node["spriteHairColor"].as<std::vector<int> >(_hairColor);
 	_rankColor = node["spriteRankColor"].as<std::vector<int> >(_rankColor);
 	_utileColor = node["spriteUtileColor"].as<std::vector<int> >(_utileColor);
+
+	if(const YAML::Node &scr = node["recolorScript"])
+	{
+		std::string script;
+		script = scr.as<std::string>(script);
+		delete _recolorScript;
+		_recolorScript = parser.parse(script);
+	}
 }
 
 /**
@@ -627,6 +636,11 @@ int Armor::getRankColor(int i) const
 bool Armor::hasInventory() const
 {
 	return _hasInventory;
+}
+
+ScriptContainer<BattleUnit> *Armor::getRecolorScript()
+{
+	return _recolorScript;
 }
 
 }

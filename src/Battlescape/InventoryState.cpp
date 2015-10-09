@@ -305,7 +305,6 @@ void InventoryState::init()
 		}
 	}
 
-	unit->setCache(0);
 	_soldier->clear();
 	_btnRank->clear();
 

@@ -21,6 +21,9 @@
 #include "Tile.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
+#include "../Engine/Surface.h"
+#include "../Engine/SurfaceSet.h"
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
@@ -612,6 +615,21 @@ void BattleItem::setIsAmmo(bool ammo)
 bool BattleItem::isAmmo()
 {
 	return _isAmmo;
+}
+
+void BattleItem::ScriptFill(ScriptWorker* w, BattleItem* item, bool inventory, int anim_frame, int shade)
+{
+	w->proc = 0;
+	w->shade = shade;
+	if(item)
+	{
+		BattleUnit* itemUnit = item->getUnit();
+		if(itemUnit)
+		{
+			BattleUnit::ScriptFill(w, itemUnit);
+			BattleUnit::ScriptFillCustom(w, inventory ? BODYPART_ITEM : BODYPART_COLLAPSING, anim_frame, shade);
+		}
+	}
 }
 
 }

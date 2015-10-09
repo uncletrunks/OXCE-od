@@ -22,6 +22,8 @@
 #include <cmath>
 #include <sstream>
 #include "../Engine/Surface.h"
+#include "../Engine/Script.h"
+#include "../Engine/ScriptBind.h"
 #include "../Engine/Language.h"
 #include "../Engine/Logger.h"
 #include "../Engine/Options.h"
@@ -39,9 +41,33 @@
 #include "Tile.h"
 #include "SavedGame.h"
 #include "SavedBattleGame.h"
+#include "../Engine/ShaderDraw.h"
+#include "../Engine/ShaderMove.h"
+#include "../Engine/Options.h"
 
 namespace OpenXcom
 {
+
+/**
+ * Helper namespace for BattleUnit::recolorSprite
+ */
+namespace
+{
+
+struct ColorCopy
+{
+	static const Uint8 Face = 6;
+	static const Uint8 Hair = 9;
+	static inline void func(Uint8& dest, const Uint8& src, int, int, int)
+	{
+		if(src)
+		{
+			dest = src;
+		}
+	}
+};
+
+} //namespace
 
 /**
  * Initializes a BattleUnit from a Soldier
@@ -52,10 +78,11 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_faction(FACTION_PLAYER), _originalFaction(FACTION_PLAYER), _killedBy(FACTION_PLAYER), _id(0), _pos(Position()), _tile(0),
 	_lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0), _toDirectionTurret(0),
 	_verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
-	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false), _cacheInvalid(true),
+	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false),
 	_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
 	_motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0),
-	_turnsSinceSpotted(255), _geoscapeSoldier(soldier), _unitRules(0), _rankInt(-1), _turretType(-1), _hidingForTurn(false), _respawn(false)
+	_turnsSinceSpotted(255), _geoscapeSoldier(soldier), _unitRules(0), _rankInt(-1), _turretType(-1), _hidingForTurn(false), _respawn(false),
+	_useScripts(false)
 {
 	_name = soldier->getName(true);
 	_id = soldier->getId();
@@ -130,8 +157,6 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_currentArmor[SIDE_UNDER] = _armor->getUnderArmor();
 	for (int i = 0; i < BODYPART_MAX; ++i)
 		_fatalWounds[i] = 0;
-	for (int i = 0; i < 5; ++i)
-		_cache[i] = 0;
 	for (int i = 0; i < SPEC_WEAPON_MAX; ++i)
 		_specWeapon[i] = 0;
 
@@ -159,11 +184,11 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0),
 	_toDirectionTurret(0),  _verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0),
 	_fallPhase(0), _kneeled(false), _floating(false), _dontReselect(false), _fire(0), _currentAIState(0),
-	_visible(false), _cacheInvalid(true), _expBravery(0), _expReactions(0), _expFiring(0),
+	_visible(false), _expBravery(0), _expReactions(0), _expFiring(0),
 	_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0),
 	_moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_armor(armor), _geoscapeSoldier(0),  _unitRules(unit), _rankInt(-1),
-	_turretType(-1), _hidingForTurn(false), _respawn(false)
+	_turretType(-1), _hidingForTurn(false), _respawn(false), _useScripts(false)
 {
 	_type = unit->getType();
 	_rank = unit->getRank();
@@ -244,8 +269,6 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	_currentArmor[SIDE_UNDER] = _armor->getUnderArmor();
 	for (int i = 0; i < BODYPART_MAX; ++i)
 		_fatalWounds[i] = 0;
-	for (int i = 0; i < 5; ++i)
-		_cache[i] = 0;
 	for (int i = 0; i < SPEC_WEAPON_MAX; ++i)
 		_specWeapon[i] = 0;
 
@@ -290,9 +313,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
  */
 BattleUnit::~BattleUnit()
 {
-	for (int i = 0; i < 5; ++i)
-		if (_cache[i]) delete _cache[i];
-	delete _currentAIState;
+
 }
 
 /**
@@ -324,7 +345,6 @@ void BattleUnit::load(const YAML::Node &node)
 	_expFiring = node["expFiring"].as<int>(_expFiring);
 	_expThrowing = node["expThrowing"].as<int>(_expThrowing);
 	_expPsiSkill = node["expPsiSkill"].as<int>(_expPsiSkill);
-	_expPsiStrength = node["expPsiStrength"].as<int>(_expPsiStrength);
 	_expMelee = node["expMelee"].as<int>(_expMelee);
 	_turretType = node["turretType"].as<int>(_turretType);
 	_visible = node["visible"].as<bool>(_visible);
@@ -383,7 +403,6 @@ YAML::Node BattleUnit::save() const
 	node["expFiring"] = _expFiring;
 	node["expThrowing"] = _expThrowing;
 	node["expPsiSkill"] = _expPsiSkill;
-	node["expPsiStrength"] = _expPsiStrength;
 	node["expMelee"] = _expMelee;
 	node["turretType"] = _turretType;
 	node["visible"] = _visible;
@@ -442,6 +461,8 @@ void BattleUnit::setRecolor(int basicLook, int utileLook, int rankLook)
 			_recolor.push_back(std::make_pair(colors[i].first << 4, colors[i].second));
 		}
 	}
+
+	_useScripts = _armor->getRecolorScript() != 0;
 }
 
 /**
@@ -616,7 +637,6 @@ void BattleUnit::startWalking(int direction, const Position &destination, Tile *
 	_walkPhase = 0;
 	_destination = destination;
 	_lastPos = _pos;
-	_cacheInvalid = cache;
 	_kneeled = false;
 	if (_breathFrame >= 0)
 	{
@@ -663,7 +683,6 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 
 	_walkPhase++;
 
-
 	if (_walkPhase == middle)
 	{
 		// we assume we reached our destination tile
@@ -703,8 +722,6 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 				_motionPoints += 3;
 		}
 	}
-
-	_cacheInvalid = cache;
 }
 
 /**
@@ -838,8 +855,6 @@ void BattleUnit::turn(bool turret)
 		if (_direction > 7) _direction = 0;
 		if (_directionTurret < 0) _directionTurret = 7;
 		if (_directionTurret > 7) _directionTurret = 0;
-		if (_visible || _faction == FACTION_PLAYER)
-			_cacheInvalid = true;
 	}
 
 	if (turret)
@@ -884,38 +899,6 @@ UnitFaction BattleUnit::getFaction() const
 }
 
 /**
- * Sets the unit's cache flag.
- * @param cache Pointer to cache surface to use, NULL to redraw from scratch.
- * @param part Unit part to cache.
- */
-void BattleUnit::setCache(Surface *cache, int part)
-{
-	if (cache == 0)
-	{
-		_cacheInvalid = true;
-	}
-	else
-	{
-		_cache[part] = cache;
-		_cacheInvalid = false;
-	}
-}
-
-/**
- * Check if the unit is still cached in the Map cache.
- * When the unit changes it needs to be re-cached.
- * @param invalid Get if the cache is invalid.
- * @param part Unit part to check.
- * @return Pointer to cache surface used.
- */
-Surface *BattleUnit::getCache(bool *invalid, int part) const
-{
-	if (part < 0) part = 0;
-	*invalid = _cacheInvalid;
-	return _cache[part];
-}
-
-/**
  * Gets values used for recoloring sprites.
  * @param i what value choose.
  * @return Pairs of value, where first is color group to replace and second is new color group with shade.
@@ -932,7 +915,6 @@ const std::vector<std::pair<Uint8, Uint8> > &BattleUnit::getRecolor() const
 void BattleUnit::kneel(bool kneeled)
 {
 	_kneeled = kneeled;
-	_cacheInvalid = true;
 }
 
 /**
@@ -963,9 +945,6 @@ void BattleUnit::aim(bool aiming)
 		_status = STATUS_AIMING;
 	else
 		_status = STATUS_STANDING;
-
-	if (_visible || _faction == FACTION_PLAYER)
-		_cacheInvalid = true;
 }
 
 /**
@@ -1260,7 +1239,6 @@ void BattleUnit::startFalling()
 {
 	_status = STATUS_COLLAPSING;
 	_fallPhase = 0;
-	_cacheInvalid = true;
 }
 
 /**
@@ -1279,8 +1257,6 @@ void BattleUnit::keepFalling()
 		else
 			_status = STATUS_UNCONSCIOUS;
 	}
-
-	_cacheInvalid = true;
 }
 
 
@@ -2247,7 +2223,7 @@ void BattleUnit::addFiringExp()
 }
 
 /**
- * Adds one to the throwing exp counter.
+ * Adds one to the firing exp counter.
  */
 void BattleUnit::addThrowingExp()
 {
@@ -2255,7 +2231,7 @@ void BattleUnit::addThrowingExp()
 }
 
 /**
- * Adds one to the psi skill exp counter.
+ * Adds one to the firing exp counter.
  */
 void BattleUnit::addPsiSkillExp()
 {
@@ -2263,7 +2239,7 @@ void BattleUnit::addPsiSkillExp()
 }
 
 /**
- * Adds one to the psi strength exp counter.
+ * Adds one to the firing exp counter.
  */
 void BattleUnit::addPsiStrengthExp()
 {
@@ -2271,7 +2247,7 @@ void BattleUnit::addPsiStrengthExp()
 }
 
 /**
- * Adds one to the melee exp counter.
+ * Adds one to the firing exp counter.
  */
 void BattleUnit::addMeleeExp()
 {
@@ -2334,12 +2310,8 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 	{
 		stats->psiSkill += improveStat(_expPsiSkill);
 	}
-	if (_expPsiStrength && stats->psiStrength < caps.psiStrength)
-	{
-		stats->psiStrength += improveStat(_expPsiStrength);
-	}
 
-	if (_expBravery || _expReactions || _expFiring || _expPsiSkill || _expPsiStrength || _expMelee)
+	if (_expBravery || _expReactions || _expFiring || _expPsiSkill || _expMelee)
 	{
 		if (s->getRank() == RANK_ROOKIE)
 			s->promoteRank();
@@ -2453,6 +2425,7 @@ void BattleUnit::heal(int part, int woundAmount, int healthAmount)
 
 	setValueMax(_fatalWounds[part], -woundAmount, 0, 100);
 	setValueMax(_health, healthAmount, 1, getBaseStats()->health); //Hippocratic Oath: First do no harm
+
 }
 
 /**
@@ -2495,15 +2468,24 @@ int BattleUnit::getMotionPoints() const
 	return _motionPoints;
 }
 
+/**
+ * Gets the unit's armor.
+ * @return Pointer to armor.
+ */
+Armor *BattleUnit::getArmor()
+{
+	return _armor;
+}
 
 /**
  * Gets the unit's armor.
  * @return Pointer to armor.
  */
-Armor *BattleUnit::getArmor() const
+const Armor *BattleUnit::getArmor() const
 {
 	return _armor;
 }
+
 /**
  * Get unit's name.
  * An aliens name is the translation of it's race and rank.
@@ -2741,7 +2723,6 @@ std::string BattleUnit::getType() const
  */
 void BattleUnit::setActiveHand(const std::string &hand)
 {
-	if (_activeHand != hand) _cacheInvalid = true;
 	_activeHand = hand;
 }
 /**
@@ -2881,15 +2862,6 @@ int BattleUnit::getTurnsSinceSpotted() const
 UnitFaction BattleUnit::getOriginalFaction() const
 {
 	return _originalFaction;
-}
-
-/**
- * invalidate cache; call after copying object :(
- */
-void BattleUnit::invalidateCache()
-{
-	for (int i = 0; i < 5; ++i) { _cache[i] = 0; }
-	_cacheInvalid = true;
 }
 
 /**
@@ -3294,4 +3266,125 @@ void BattleUnit::recoverTimeUnits()
 	prepareEnergy(ENRecovery);
 }
 
+void BattleUnit::ScriptRegister(ScriptParser<BattleUnit>* parser)
+{
+	using namespace helper;
+	typedef BattleUnit BU;
+	typedef UnitStats US;
+	typedef Soldier S;
+	typedef Armor A;
+
+	typedef Bind<BU> bBU;
+	typedef BindFun<bBU, US, &BU::getBaseStats> bUS;
+	typedef BindFun<bBU, A, &BU::getArmor> bA;
+	typedef BindPtr<bBU, S, &BU::_geoscapeSoldier> bS;
+
+	parser->addCustom(0, "blit_part");
+	parser->addCustom(1, "anim_frame");
+	parser->addCustom(2, "shade");
+	parser->addConst("blit_torso", BODYPART_TORSO);
+	parser->addConst("blit_leftarm", BODYPART_LEFTARM);
+	parser->addConst("blit_rightarm", BODYPART_RIGHTARM);
+	parser->addConst("blit_legs", BODYPART_LEGS);
+	parser->addConst("blit_collapse", BODYPART_COLLAPSING);
+	parser->addConst("blit_inventory", BODYPART_ITEM);
+
+	parser->addFunction("health", &geter<bBU, &BU::_health>);
+	parser->addFunction("health_max", &geter<bUS, &US::health>);
+	parser->addFunction("energy", &geter<bBU, &BU::_energy>);
+	parser->addFunction("energy_max", &geter<bUS, &US::stamina>);
+	parser->addFunction("stun", &geter<bBU, &BU::_stunlevel>);
+	parser->addFunction("stun_max", &geter<bBU, &BU::_health>);
+	parser->addFunction("morale", &geter<bBU, &BU::_morale>);
+	parser->addConst("morale_max", 100);
+
+	parser->addFunction("stat_tu", &geter<bUS, &US::stamina>);
+	parser->addFunction("stat_stamina", &geter<bUS, &US::stamina>);
+	parser->addFunction("stat_health", &geter<bUS, &US::health>);
+	parser->addFunction("stat_bravery", &geter<bUS, &US::bravery>);
+	parser->addFunction("stat_reactions", &geter<bUS, &US::reactions>);
+	parser->addFunction("stat_firing", &geter<bUS, &US::firing>);
+	parser->addFunction("stat_throwing", &geter<bUS, &US::throwing>);
+	parser->addFunction("stat_strength", &geter<bUS, &US::strength>);
+	parser->addFunction("stat_psistrength", &geter<bUS, &US::psiStrength>);
+	parser->addFunction("stat_psiskill", &geter<bUS, &US::psiSkill>);
+	parser->addFunction("stat_melee", &geter<bUS, &US::melee>);
+
+	parser->addFunction("fatalwounds", &geter<bBU, &BU::getFatalWounds>);
+	parser->addFunction("fatalwounds_head", &geter<bBU, &BU::getFatalWound, BODYPART_HEAD>);
+	parser->addFunction("fatalwounds_torso", &geter<bBU, &BU::getFatalWound, BODYPART_TORSO>);
+	parser->addFunction("fatalwounds_leftarm", &geter<bBU, &BU::getFatalWound, BODYPART_LEFTARM>);
+	parser->addFunction("fatalwounds_rightarm", &geter<bBU, &BU::getFatalWound, BODYPART_RIGHTARM>);
+	parser->addFunction("fatalwounds_leftleg", &geter<bBU, &BU::getFatalWound, BODYPART_LEFTLEG>);
+	parser->addFunction("fatalwounds_rightleg", &geter<bBU, &BU::getFatalWound, BODYPART_RIGHTLEG>);
+
+	parser->addFunction("armor_front", &geter<bBU, UnitSide, &BU::getArmor, SIDE_FRONT>);
+	parser->addFunction("armor_left", &geter<bBU, UnitSide, &BU::getArmor, SIDE_LEFT>);
+	parser->addFunction("armor_right", &geter<bBU, UnitSide, &BU::getArmor, SIDE_RIGHT>);
+	parser->addFunction("armor_rear", &geter<bBU, UnitSide, &BU::getArmor, SIDE_REAR>);
+	parser->addFunction("armor_under", &geter<bBU, UnitSide, &BU::getArmor, SIDE_UNDER>);
+
+	parser->addFunction("unit_id", &geter<bBU, &BU::_id>);
+	parser->addFunction("unit_rank", &geter<bBU, &BU::_rankInt>);
+	parser->addFunction("unit_float", &geter_cast<bBU, bool, &BU::_floating>);
+	parser->addFunction("unit_kneel", &geter_cast<bBU, bool, &BU::_kneeled>);
+
+	parser->addConst("unit_rank_rookie", 0);
+	parser->addConst("unit_rank_squaddie", 1);
+	parser->addConst("unit_rank_sergeant", 2);
+	parser->addConst("unit_rank_captain", 3);
+	parser->addConst("unit_rank_colonel", 4);
+	parser->addConst("unit_rank_commander", 5);
+
+//	parser->addFunction("soldier_hair", &geter_cast<bBU, Uint8, &BU::_hairColor>);
+//	parser->addFunction("soldier_face", &geter_cast<bBU, Uint8, &BU::_faceColor>);
+	parser->addConst("color_hair", ColorCopy::Hair);
+	parser->addConst("color_face", ColorCopy::Face);
+
+	parser->addConst("color_null", 0);
+	parser->addConst("color_yellow", 1);
+	parser->addConst("color_red", 2);
+	parser->addConst("color_green0", 3);
+	parser->addConst("color_green1", 4);
+	parser->addConst("color_gray", 5);
+	parser->addConst("color_brown0", ColorCopy::Face);
+	parser->addConst("color_blue0", 7);
+	parser->addConst("color_blue1", 8);
+	parser->addConst("color_brown1", ColorCopy::Hair);
+	parser->addConst("color_brown2", 10);
+	parser->addConst("color_purple0", 11);
+	parser->addConst("color_purple1", 12);
+	parser->addConst("color_blue2", 13);
+	parser->addConst("color_silver", 14);
+	parser->addConst("color_special", 15);
+
+	parser->addFunction("soldier_look", &geter_cast<bS, SoldierLook, &S::getLook>);
+	parser->addConst("soldier_look_blonde", LOOK_BLONDE);
+	parser->addConst("soldier_look_brownhair", LOOK_BROWNHAIR);
+	parser->addConst("soldier_look_oriental", LOOK_ORIENTAL);
+	parser->addConst("soldier_look_african", LOOK_AFRICAN);
+
+	parser->addFunction("soldier_grender", &geter_cast<bS, SoldierGender, &S::getGender>);
+	parser->addConst("soldier_grender_male", GENDER_MALE);
+	parser->addConst("soldier_grender_female", GENDER_FEMALE);
 }
+
+void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit)
+{
+	w->proc = 0;
+	if(unit)
+	{
+		ScriptContainer<BattleUnit>* scr = unit->_armor->getRecolorScript();
+		if(scr) scr->update(w, unit);
+	}
+}
+
+void BattleUnit::ScriptFillCustom(ScriptWorker* w, int body_part, int anim_frame, int shade)
+{
+	w->regCustom[0] = body_part;
+	w->regCustom[1] = anim_frame;
+	w->regCustom[2] = shade;
+	w->shade = shade;
+}
+
+} //namespace OpenXcom
