@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 2.5[/b]
+[b]Mod version 3.0[/b]
 OpenXcom version: Nightly [commitOriginDate/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended commit: [commit/][br/]
