@@ -68,6 +68,7 @@ namespace
 ////////////////////////////////////////////////////////////
 //						arg definition
 ////////////////////////////////////////////////////////////
+#define MACRO_QUOTE(...) __VA_ARGS__
 #define MACRO_ARG_None(i)
 #define MACRO_ARG_Prog(i)	int& Prog ,
 #define MACRO_ARG_Test(i)	int& Test ,
@@ -88,12 +89,33 @@ namespace
 #define MACRO_SIZE_Const	1
 #define MACRO_SIZE_Label	1
 
-#define MACRO_ARG_OFFSET(i, A0, A1, A2, A3) ( \
-	(i > 0 ? MACRO_SIZE_##A0 : 0) + \
-	(i > 1 ? MACRO_SIZE_##A1 : 0) + \
-	(i > 2 ? MACRO_SIZE_##A2 : 0) + \
-	(i > 3 ? MACRO_SIZE_##A3 : 0) \
-)
+#define MACRO_ARG_LOOP_DEF None, None, None, None, None, None, None
+
+#define MACRO_ARG_LOOP_IMPL(LOOP, ALL, A0, A1, A2, A3, A4, A5, A6, A7, ...) \
+	LOOP(MACRO_QUOTE(ALL), 0, A0) \
+	LOOP(MACRO_QUOTE(ALL), 1, A1) \
+	LOOP(MACRO_QUOTE(ALL), 2, A2) \
+	LOOP(MACRO_QUOTE(ALL), 3, A3) \
+	LOOP(MACRO_QUOTE(ALL), 4, A4) \
+	LOOP(MACRO_QUOTE(ALL), 5, A5) \
+	LOOP(MACRO_QUOTE(ALL), 6, A6) \
+	LOOP(MACRO_QUOTE(ALL), 7, A7)
+#define MACRO_ARG_LOOP_EXPAND(LOOP, ...) MACRO_ARG_LOOP_IMPL(LOOP, MACRO_QUOTE(__VA_ARGS__), __VA_ARGS__)
+#define MACRO_ARG_LOOP(LOOP, ...) MACRO_ARG_LOOP_EXPAND(LOOP, __VA_ARGS__, MACRO_ARG_LOOP_DEF)
+
+
+#define MACRO_ARG_OFFSET_LOOP(POS_2, POS, ARG) (POS_2 > POS ? MACRO_SIZE_##ARG : 0) +
+#define MACRO_ARG_OFFSET_IMPL(LOOP, POS_2, A0, A1, A2, A3, A4, A5, A6, A7, ...) \
+	LOOP(POS_2, 0, A0) \
+	LOOP(POS_2, 1, A1) \
+	LOOP(POS_2, 2, A2) \
+	LOOP(POS_2, 3, A3) \
+	LOOP(POS_2, 4, A4) \
+	LOOP(POS_2, 5, A5) \
+	LOOP(POS_2, 6, A6) \
+	LOOP(POS_2, 7, A7)
+#define MACRO_ARG_OFFSET_EXPAND(LOOP, POS_2, ...) MACRO_ARG_OFFSET_IMPL(LOOP, POS_2, __VA_ARGS__)
+#define MACRO_ARG_OFFSET(POS_2, ...) ( MACRO_ARG_OFFSET_EXPAND(MACRO_ARG_OFFSET_LOOP, POS_2, __VA_ARGS__, MACRO_ARG_LOOP_DEF) + 0)
 
 enum ArgEnum
 {
@@ -205,57 +227,57 @@ inline bool wavegen_tri_h(int& reg, const int& period, const int& size, const in
  * @param IMPL macro function that access data. Take 6 args: Name, type of 4 proc args and definition of operation
  */
 #define MACRO_PROC_DEFINITION(IMPL) \
-	/*	Name,		Arg0,	Arg1, Arg2, Arg3,	Implementation,							End excecution */ \
-	IMPL(exit,		None,	None, None, None,	{										return true; }) \
+	/*	Name,		Implementation,										End excecution,			Arg0,	Arg1, Arg2, Arg3, */ \
+	IMPL(exit,		MACRO_QUOTE({										return true; }),		None) \
 	\
-	IMPL(ret,		Result, Data, None, None,	{				Result = Data1;			return true; }) \
-	IMPL(ret_gt,	Result, Data, Test, None,	{ if(Test > 0)	Result = Data1;			return Test > 0; }) \
-	IMPL(ret_lt,	Result, Data, Test, None,	{ if(Test < 0)	Result = Data1;			return Test < 0; }) \
-	IMPL(ret_eq,	Result, Data, Test, None,	{ if(Test == 0)	Result = Data1;			return Test == 0; }) \
-	IMPL(ret_neq,	Result, Data, Test, None,	{ if(Test != 0)	Result = Data1;			return Test != 0; }) \
+	IMPL(ret,		MACRO_QUOTE({				Result = Data1;			return true; }),		Result, Data) \
+	IMPL(ret_gt,	MACRO_QUOTE({ if(Test > 0)	Result = Data1;			return Test > 0; }),	Result, Data, Test) \
+	IMPL(ret_lt,	MACRO_QUOTE({ if(Test < 0)	Result = Data1;			return Test < 0; }),	Result, Data, Test) \
+	IMPL(ret_eq,	MACRO_QUOTE({ if(Test == 0)	Result = Data1;			return Test == 0; }),	Result, Data, Test) \
+	IMPL(ret_neq,	MACRO_QUOTE({ if(Test != 0)	Result = Data1;			return Test != 0; }),	Result, Data, Test) \
 	\
-	IMPL(skip,		Prog, Label, None, None,	{				Prog = Label1;			return false; }) \
-	IMPL(skip_gt,	Prog, Label, Test, None,	{ if(Test > 0)	Prog = Label1;			return false; }) \
-	IMPL(skip_lt,	Prog, Label, Test, None,	{ if(Test < 0)	Prog = Label1;			return false; }) \
-	IMPL(skip_eq,	Prog, Label, Test, None,	{ if(Test == 0)	Prog = Label1;			return false; }) \
-	IMPL(skip_neq,	Prog, Label, Test, None,	{ if(Test != 0)	Prog = Label1;			return false; }) \
+	IMPL(skip,		MACRO_QUOTE({				Prog = Label1;			return false; }),		Prog, Label) \
+	IMPL(skip_gt,	MACRO_QUOTE({ if(Test > 0)	Prog = Label1;			return false; }),		Prog, Label, Test) \
+	IMPL(skip_lt,	MACRO_QUOTE({ if(Test < 0)	Prog = Label1;			return false; }),		Prog, Label, Test) \
+	IMPL(skip_eq,	MACRO_QUOTE({ if(Test == 0)	Prog = Label1;			return false; }),		Prog, Label, Test) \
+	IMPL(skip_neq,	MACRO_QUOTE({ if(Test != 0)	Prog = Label1;			return false; }),		Prog, Label, Test) \
 	\
-	IMPL(set,		Reg, Data, None, None,		{				Reg0 = Data1;			return false; }) \
-	IMPL(set_gt,	Reg, Data, Test, None,		{ if(Test > 0)	Reg0 = Data1;			return false; }) \
-	IMPL(set_lt,	Reg, Data, Test, None,		{ if(Test < 0)	Reg0 = Data1;			return false; }) \
-	IMPL(set_eq,	Reg, Data, Test, None,		{ if(Test == 0)	Reg0 = Data1;			return false; }) \
-	IMPL(set_neq,	Reg, Data, Test, None,		{ if(Test != 0)	Reg0 = Data1;			return false; }) \
+	IMPL(set,		MACRO_QUOTE({				Reg0 = Data1;			return false; }),		Reg, Data) \
+	IMPL(set_gt,	MACRO_QUOTE({ if(Test > 0)	Reg0 = Data1;			return false; }),		Reg, Data, Test) \
+	IMPL(set_lt,	MACRO_QUOTE({ if(Test < 0)	Reg0 = Data1;			return false; }),		Reg, Data, Test) \
+	IMPL(set_eq,	MACRO_QUOTE({ if(Test == 0)	Reg0 = Data1;			return false; }),		Reg, Data, Test) \
+	IMPL(set_neq,	MACRO_QUOTE({ if(Test != 0)	Reg0 = Data1;			return false; }),		Reg, Data, Test) \
 	\
-	IMPL(test,		Test, Data, Data, None,		{ Test = Data1 - Data2;					return false; }) \
+	IMPL(test,		MACRO_QUOTE({ Test = Data1 - Data2;					return false; }),		Test, Data, Data) \
 	\
-	IMPL(swap,		Reg, Reg, None, None,		{ std::swap(Reg0, Reg1);				return false; }) \
-	IMPL(add,		Reg, Data, None, None,		{ Reg0 += Data1;						return false; }) \
-	IMPL(sub,		Reg, Data, None, None,		{ Reg0 -= Data1;						return false; }) \
-	IMPL(mul,		Reg, Data, None, None,		{ Reg0 *= Data1;						return false; }) \
+	IMPL(swap,		MACRO_QUOTE({ std::swap(Reg0, Reg1);				return false; }),		Reg, Reg) \
+	IMPL(add,		MACRO_QUOTE({ Reg0 += Data1;						return false; }),		Reg, Data) \
+	IMPL(sub,		MACRO_QUOTE({ Reg0 -= Data1;						return false; }),		Reg, Data) \
+	IMPL(mul,		MACRO_QUOTE({ Reg0 *= Data1;						return false; }),		Reg, Data) \
 	\
-	IMPL(muladd,	Reg, Data, Data, None,		{ Reg0 = Reg0 * Data1 + Data2;			return false; }) \
-	IMPL(muladdmod,	Reg, Data, Data, Data,		{ return mulAddMod_h(Reg0, Data1, Data2, Data3);		}) \
+	IMPL(muladd,	MACRO_QUOTE({ Reg0 = Reg0 * Data1 + Data2;			return false; }),		Reg, Data, Data) \
+	IMPL(muladdmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Data1, Data2, Data3);		}),		Reg, Data, Data, Data) \
 	\
-	IMPL(div,		Reg, Data, None, None,		{ if(Data1) Reg0 /= Data1;				return !Data1; }) \
-	IMPL(mod,		Reg, Data, None, None,		{ if(Data1) Reg0 %= Data1;				return !Data1; }) \
+	IMPL(div,		MACRO_QUOTE({ if(Data1) Reg0 /= Data1;				return !Data1; }),		Reg, Data) \
+	IMPL(mod,		MACRO_QUOTE({ if(Data1) Reg0 %= Data1;				return !Data1; }),		Reg, Data) \
 	\
-	IMPL(shl,		Reg, Data, None, None,		{ Reg0 <<= Data1;						return false; }) \
-	IMPL(shr,		Reg, Data, None, None,		{ Reg0 >>= Data1;						return false; }) \
+	IMPL(shl,		MACRO_QUOTE({ Reg0 <<= Data1;						return false; }),		Reg, Data) \
+	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;						return false; }),		Reg, Data) \
 	\
-	IMPL(abs,		Reg, None, None, None,		{ Reg0 = std::abs(Reg0);				return false; }) \
-	IMPL(min,		Reg, Data, None, None,		{ Reg0 = std::min(Reg0, Data1);			return false; }) \
-	IMPL(max,		Reg, Data, None, None,		{ Reg0 = std::max(Reg0, Data1);			return false; }) \
+	IMPL(abs,		MACRO_QUOTE({ Reg0 = std::abs(Reg0);				return false; }),		Reg) \
+	IMPL(min,		MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);			return false; }),		Reg, Data) \
+	IMPL(max,		MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);			return false; }),		Reg, Data) \
 	\
-	IMPL(wavegen_rect,	Reg, Data, Data, Data,	{ return wavegen_rect_h(Reg0, Data1, Data2, Data3);		}) \
-	IMPL(wavegen_saw,	Reg, Data, Data, Data,	{ return wavegen_saw_h(Reg0, Data1, Data2, Data3);		}) \
-	IMPL(wavegen_tri,	Reg, Data, Data, Data,	{ return wavegen_tri_h(Reg0, Data1, Data2, Data3);		}) \
+	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Data1, Data2, Data3);		}),	Reg, Data, Data, Data) \
+	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Data1, Data2, Data3);		}),	Reg, Data, Data, Data) \
+	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Data1, Data2, Data3);		}),	Reg, Data, Data, Data) \
 	\
-	IMPL(get_color,	Reg, Data, None, None,		{ Reg0 = Data1 >> 4;					return false; }) \
-	IMPL(set_color,	Reg, Data, None, None,		{ Reg0 = (Reg0 & 0xF) | (Data1 << 4);	return false; }) \
-	IMPL(get_shade,	Reg, Data, None, None,		{ Reg0 = Data1 & 0xF;					return false; }) \
-	IMPL(set_shade,	Reg, Data, None, None,		{ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF); return false; }) \
-	IMPL(add_shade,	Reg, Data, None, None,		{ addShade_h(Reg0, Data1);				return false; }) \
-	/* BEWARE OF COMMA IN "Implementation"! IT WILL BREAK CODE IF USED WITHOUT PARENTHESES */
+	IMPL(get_color,		MACRO_QUOTE({ Reg0 = Data1 >> 4;					return false; }),	Reg, Data) \
+	IMPL(set_color,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF) | (Data1 << 4);	return false; }),	Reg, Data) \
+	IMPL(get_shade,		MACRO_QUOTE({ Reg0 = Data1 & 0xF;					return false; }),	Reg, Data) \
+	IMPL(set_shade,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF); return false; }),	Reg, Data) \
+	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);				return false; }),	Reg, Data) \
+
 
 ////////////////////////////////////////////////////////////
 //					Proc_Enum definition
@@ -269,7 +291,7 @@ inline bool wavegen_tri_h(int& reg, const int& period, const int& size, const in
 /**
  * Macro used for creating ProcEnum from MACRO_PROC_DEFINITION
  */
-#define MACRO_CREATE_PROC_ENUM(NAME, A0, A1, A2, A3, Impl) \
+#define MACRO_CREATE_PROC_ENUM(NAME, Impl, ...) \
 	MACRO_PROC_ID(NAME),
 
 /**
@@ -292,15 +314,17 @@ enum ProcEnum
  */
 #define MACRO_FUNC_ID(id) Func##id
 
+#define MACRO_CREATE_FUNC_ARG_LOOP(REF, POS, ARG) MACRO_ARG_##ARG(POS)
 /**
  * Macro used for creating functions from MACRO_PROC_DEFINITION
  */
-#define MACRO_CREATE_FUNC(NAME, A0, A1, A2, A3, Impl) \
-	inline bool MACRO_FUNC_ID(NAME)(MACRO_ARG_##A0(0) MACRO_ARG_##A1(1) MACRO_ARG_##A2(2) MACRO_ARG_##A3(3) int Dummy) Impl
+#define MACRO_CREATE_FUNC(NAME, Impl, ...) \
+	inline bool MACRO_FUNC_ID(NAME)(MACRO_ARG_LOOP(MACRO_CREATE_FUNC_ARG_LOOP, __VA_ARGS__) int Dummy) Impl
 
 MACRO_PROC_DEFINITION(MACRO_CREATE_FUNC)
 
 #undef MACRO_CREATE_FUNC
+#undef MACRO_CREATE_FUNC_ARG_LOOP
 
 ////////////////////////////////////////////////////////////
 //					core loop function
@@ -336,19 +360,17 @@ inline Uint8 scriptExe(int in, ScriptWorker& data)
 	#define MACRO_OP_Const(i)	data.reg[MACRO_REG_CURR(i)] ,
 	#define MACRO_OP_Label(i)	data.reg[MACRO_REG_CURR(i)] ,
 
-	#define MACRO_OP_OFFSET(i, A0, A1, A2, A3) (MACRO_ARG_OFFSET(i, A0, A1, A2, A3) - MACRO_ARG_OFFSET(4, A0, A1, A2, A3))
+	#define MACRO_OP_OFFSET(i, ...) (MACRO_ARG_OFFSET(i, __VA_ARGS__) - MACRO_ARG_OFFSET(ScriptMaxArg, __VA_ARGS__))
 
+	#define MACRO_OP_ARG_LOOP(REF, POS, ARG) MACRO_OP_##ARG(MACRO_OP_OFFSET(POS, REF))
 	/**
 	 * Macro creating switch case from MACRO_PROC_DEFINITION
 	 */
-	#define MACRO_OP(NAME, A0, A1, A2, A3, Impl) \
+	#define MACRO_OP(NAME, Impl, ...) \
 		case MACRO_PROC_ID(NAME): \
-			curr += 1 + MACRO_ARG_OFFSET(4, A0, A1, A2, A3) ; \
+			curr += 1 + MACRO_ARG_OFFSET(ScriptMaxArg, __VA_ARGS__) ; \
 			if(MACRO_FUNC_ID(NAME)( \
-					MACRO_OP_##A0(MACRO_OP_OFFSET(0, A0, A1, A2, A3)) \
-					MACRO_OP_##A1(MACRO_OP_OFFSET(1, A0, A1, A2, A3)) \
-					MACRO_OP_##A2(MACRO_OP_OFFSET(2, A0, A1, A2, A3)) \
-					MACRO_OP_##A3(MACRO_OP_OFFSET(3, A0, A1, A2, A3)) \
+					MACRO_ARG_LOOP(MACRO_OP_ARG_LOOP, __VA_ARGS__) \
 					0)) \
 				return data.reg[RegIn]; \
 			continue;
@@ -377,6 +399,7 @@ inline Uint8 scriptExe(int in, ScriptWorker& data)
 
 	#undef MACRO_REG_CURR
 	#undef MACRO_OP_OFFSET
+	#undef MACRO_OP_ARG_LOOP
 	#undef MACRO_OP
 	//--------------------------------------------------
 }
@@ -900,24 +923,20 @@ ScriptParserBase::ScriptParserBase(const std::string& name) : _name(name), _proc
 	//--------------------------------------------------
 	//					op_data init
 	//--------------------------------------------------
-	#define MACRO_ALL_INIT(NAME, A0, A1, A2, A3, Impl) \
+	#define MACRO_ALL_INIT_ARG_LOOP_TYPES(REF, POS, ARG) Arg##ARG ,
+	#define MACRO_ALL_INIT_ARG_LOOP_OFFSET(REF, POS, ARG) MACRO_ARG_OFFSET(POS, REF) ,
+	#define MACRO_ALL_INIT(NAME, Impl, ...) \
 	{ \
 		ScriptParserData temp_var_##NAME = \
 		{ \
 			MACRO_PROC_ID(NAME), \
 			{ \
 				/* types */\
-				Arg##A0, \
-				Arg##A1, \
-				Arg##A2, \
-				Arg##A3, \
+				MACRO_ARG_LOOP(MACRO_ALL_INIT_ARG_LOOP_TYPES, __VA_ARGS__) \
 			}, \
 			{ \
 			/* args offsets */\
-				MACRO_ARG_OFFSET(0, A0, A1, A2, A3), \
-				MACRO_ARG_OFFSET(1, A0, A1, A2, A3), \
-				MACRO_ARG_OFFSET(2, A0, A1, A2, A3), \
-				MACRO_ARG_OFFSET(3, A0, A1, A2, A3), \
+				MACRO_ARG_LOOP(MACRO_ALL_INIT_ARG_LOOP_OFFSET, __VA_ARGS__) \
 			}, \
 		}; \
 		_procList[#NAME] = temp_var_##NAME; \
@@ -926,6 +945,8 @@ ScriptParserBase::ScriptParserBase(const std::string& name) : _name(name), _proc
 	MACRO_PROC_DEFINITION(MACRO_ALL_INIT)
 
 	#undef MACRO_ALL_INIT
+	#undef MACRO_ALL_INIT_ARG_LOOP_OFFSET
+	#undef MACRO_ALL_INIT_ARG_LOOP_TYPES
 }
 
 /**
@@ -1149,15 +1170,18 @@ void ScriptParserBase::logScriptMetadata() const
 		{
 			printOp = false;
 			Logger opLog;
-			#define MACRO_ALL_LOG(NAME, A0, A1, A2, A3, Impl) \
+			#define MACRO_ALL_LOG_ARG_LOOP(REF, POS, ARG) << std::setw(tabSize) << #ARG ","
+			#define MACRO_ALL_LOG(NAME, Impl, ...) \
 				opLog.get() \
 					<< "Op:    " << std::setw(tabSize*2) << #NAME \
-					<< "Args:  " << std::setw(tabSize) << #A0 "," << std::setw(tabSize) << #A1 "," << std::setw(tabSize) << #A2 "," << std::setw(tabSize + 5) << #A3 \
+					<< "Args:  " MACRO_ARG_LOOP(MACRO_ALL_LOG_ARG_LOOP, __VA_ARGS__) << "    " \
 					<< "Impl:  " #Impl "\n";
 
 			opLog.get() << "Available script operations:\n" << std::left;
 			MACRO_PROC_DEFINITION(MACRO_ALL_LOG)
+
 			#undef MACRO_ALL_LOG
+			#undef MACRO_ALL_LOG_ARG_LOOP
 		}
 
 		Logger refLog;

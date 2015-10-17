@@ -31,7 +31,7 @@ class Surface;
 class ScriptContainerBase;
 
 
-const int ScriptMaxArg = 4;
+const int ScriptMaxArg = 8;
 const int ScriptMaxRef = 64;
 const int ScriptMaxRefCustom = 4;
 
