@@ -65,57 +65,210 @@ namespace OpenXcom
 namespace
 {
 
+using FuncCommon = bool (*)(ScriptWorker &, const Uint8 *, int &);
+using FuncOffset = int (*)(int);
+
 ////////////////////////////////////////////////////////////
 //						arg definition
 ////////////////////////////////////////////////////////////
 #define MACRO_QUOTE(...) __VA_ARGS__
+
 #define MACRO_ARG_None(i)
-#define MACRO_ARG_Prog(i)	int& Prog ,
-#define MACRO_ARG_Test(i)	int& Test ,
-#define MACRO_ARG_Result(i)	int& Result ,
+#define MACRO_ARG_Prog(i)	, int& Prog
+#define MACRO_ARG_Test(i)	, int& Test
+#define MACRO_ARG_Result(i)	, int& Result
 
-#define MACRO_ARG_Reg(i)	int& Reg##i ,
-#define MACRO_ARG_Data(i)	const int& Data##i ,
-#define MACRO_ARG_Const(i)	const int& Const##i ,
-#define MACRO_ARG_Label(i)	const int& Label##i ,
+#define MACRO_ARG_Reg(i)	, int& Reg##i
+#define MACRO_ARG_Data(i)	, const int& Data##i
+#define MACRO_ARG_Const(i)	, const int& Const##i
+#define MACRO_ARG_Label(i)	, const int& Label##i
 
-#define MACRO_SIZE_None		0
-#define MACRO_SIZE_Prog		0
-#define MACRO_SIZE_Test		0
-#define MACRO_SIZE_Result	0
+#define MACRO_ARG_Func(i)	, FuncCommon Func##i
+#define MACRO_ARG_Raw(i)	, const Uint8* Raw##i
 
-#define MACRO_SIZE_Reg		1
-#define MACRO_SIZE_Data		1
-#define MACRO_SIZE_Const	1
-#define MACRO_SIZE_Label	1
+#define MACRO_ARG_LOOP_DEFAULT None, None, None, None, None, None, None
 
-#define MACRO_ARG_LOOP_DEF None, None, None, None, None, None, None
+#define MACRO_ARG_LOOP_IMPL(LOOP, NAME, A0, A1, A2, A3, A4, A5, A6, A7, ...) \
+	LOOP(NAME, 0, A0) \
+	LOOP(NAME, 1, A1) \
+	LOOP(NAME, 2, A2) \
+	LOOP(NAME, 3, A3) \
+	LOOP(NAME, 4, A4) \
+	LOOP(NAME, 5, A5) \
+	LOOP(NAME, 6, A6) \
+	LOOP(NAME, 7, A7)
+#define MACRO_ARG_LOOP_EXPAND(LOOP, NAME, ...) MACRO_ARG_LOOP_IMPL(LOOP, NAME, __VA_ARGS__)
+#define MACRO_ARG_LOOP(LOOP, NAME, ...) MACRO_ARG_LOOP_EXPAND(LOOP, NAME, __VA_ARGS__, MACRO_ARG_LOOP_DEFAULT)
 
-#define MACRO_ARG_LOOP_IMPL(LOOP, ALL, A0, A1, A2, A3, A4, A5, A6, A7, ...) \
-	LOOP(MACRO_QUOTE(ALL), 0, A0) \
-	LOOP(MACRO_QUOTE(ALL), 1, A1) \
-	LOOP(MACRO_QUOTE(ALL), 2, A2) \
-	LOOP(MACRO_QUOTE(ALL), 3, A3) \
-	LOOP(MACRO_QUOTE(ALL), 4, A4) \
-	LOOP(MACRO_QUOTE(ALL), 5, A5) \
-	LOOP(MACRO_QUOTE(ALL), 6, A6) \
-	LOOP(MACRO_QUOTE(ALL), 7, A7)
-#define MACRO_ARG_LOOP_EXPAND(LOOP, ...) MACRO_ARG_LOOP_IMPL(LOOP, MACRO_QUOTE(__VA_ARGS__), __VA_ARGS__)
-#define MACRO_ARG_LOOP(LOOP, ...) MACRO_ARG_LOOP_EXPAND(LOOP, __VA_ARGS__, MACRO_ARG_LOOP_DEF)
+#define MACRO_ARG_MAX_COUNT_LOOP(NAME, POS, ARG) +1
+static_assert((MACRO_ARG_LOOP(MACRO_ARG_MAX_COUNT_LOOP, , )) != (ScriptMaxArg - 1), "Arg marco length inconsistent with const length value!");
+#undef MACRO_ARG_MAX_COUNT_LOOP
+
+#define MACRO_COPY_4(Func, Pos) \
+	Func((Pos) + 0x0) \
+	Func((Pos) + 0x1) \
+	Func((Pos) + 0x2) \
+	Func((Pos) + 0x3)
+#define MACRO_COPY_16(Func, Pos) \
+	MACRO_COPY_4(Func, (Pos) + 0x00) \
+	MACRO_COPY_4(Func, (Pos) + 0x04) \
+	MACRO_COPY_4(Func, (Pos) + 0x08) \
+	MACRO_COPY_4(Func, (Pos) + 0x0C)
+#define MACRO_COPY_64(Func, Pos) \
+	MACRO_COPY_16(Func, (Pos) + 0x00) \
+	MACRO_COPY_16(Func, (Pos) + 0x10) \
+	MACRO_COPY_16(Func, (Pos) + 0x20) \
+	MACRO_COPY_16(Func, (Pos) + 0x30)
+#define MACRO_COPY_256(Func, Pos) \
+	MACRO_COPY_64(Func, (Pos) + 0x00) \
+	MACRO_COPY_64(Func, (Pos) + 0x40) \
+	MACRO_COPY_64(Func, (Pos) + 0x80) \
+	MACRO_COPY_64(Func, (Pos) + 0xC0)
+
+template<typename... Args>
+struct AddIndex;
+
+template<typename Arg, typename... Args>
+struct AddIndex<Arg, Args...>
+{
+	static constexpr size_t index = AddIndex<Args...>::index + 1;
+	static constexpr size_t size = Arg::size;
+	static constexpr size_t offset = AddIndex<Args...>::offset + size;
+
+	template<typename Func, typename... Rest>
+	static bool func(ScriptWorker &sw, const Uint8 *procArgs, int &curr, Rest&&... r)
+	{
+		return AddIndex<Args...>::template func<Func>(sw, procArgs, curr, r..., Arg::get(sw, procArgs - offset, curr));
+	}
+
+	static constexpr int backArgOffset(int i)
+	{
+		return i == index ? offset : AddIndex<Args...>::backArgOffset(i);
+	}
+};
+
+template<>
+struct AddIndex<>
+{
+	static constexpr size_t index = -1;
+	static constexpr size_t size = 0;
+	static constexpr size_t offset = 0;
+
+	template<typename Func, typename... Rest>
+	static bool func(ScriptWorker &sw, const Uint8 *procArgs, int &curr, Rest&&... r)
+	{
+		return Func::func(sw, r...);
+	}
+
+	static constexpr int backArgOffset(int i)
+	{
+		return 0;
+	}
+};
+
+template<typename... A>
+struct ArgList
+{
+	template<typename Func>
+	static bool func(ScriptWorker &sw, const Uint8 *proc, int &curr)
+	{
+		curr += sizeof(Uint8) + AddIndex<A...>::offset;
+		return AddIndex<A...>::template func<Func>(sw, proc + curr, curr);
+	}
+
+	static constexpr int offset(int i) { return AddIndex<A...>::backArgOffset(sizeof...(A)) - AddIndex<A...>::backArgOffset(sizeof...(A) - i); }
+};
+
+template<FuncCommon... F>
+struct FuncGroup
+{
+	static constexpr size_t size = sizeof...(F);
+	static constexpr FuncCommon tab[256] =
+	{
+		F...
+	};
+
+	template<FuncCommon... F2>
+	constexpr FuncGroup<F..., F2...> operator+(FuncGroup<F2...>) { return {}; }
+	constexpr FuncGroup<F...> operator+() { return {}; }
+};
+
+template<typename Func, typename... AL>
+struct ArgGroup
+{
+	static constexpr FuncGroup<AL::template func<Func>...> func = {};
+	static constexpr FuncOffset offsets[] =
+	{
+		AL::offset...
+	};
+};
 
 
-#define MACRO_ARG_OFFSET_LOOP(POS_2, POS, ARG) (POS_2 > POS ? MACRO_SIZE_##ARG : 0) +
-#define MACRO_ARG_OFFSET_IMPL(LOOP, POS_2, A0, A1, A2, A3, A4, A5, A6, A7, ...) \
-	LOOP(POS_2, 0, A0) \
-	LOOP(POS_2, 1, A1) \
-	LOOP(POS_2, 2, A2) \
-	LOOP(POS_2, 3, A3) \
-	LOOP(POS_2, 4, A4) \
-	LOOP(POS_2, 5, A5) \
-	LOOP(POS_2, 6, A6) \
-	LOOP(POS_2, 7, A7)
-#define MACRO_ARG_OFFSET_EXPAND(LOOP, POS_2, ...) MACRO_ARG_OFFSET_IMPL(LOOP, POS_2, __VA_ARGS__)
-#define MACRO_ARG_OFFSET(POS_2, ...) ( MACRO_ARG_OFFSET_EXPAND(MACRO_ARG_OFFSET_LOOP, POS_2, __VA_ARGS__, MACRO_ARG_LOOP_DEF) + 0)
+template<typename... AG>
+struct FlattenerImp;
+
+template<typename... AG>
+using Flattener = typename FlattenerImp<AG...>::type;
+
+
+template<typename Func, typename... AL1, typename... AL2, typename... AG>
+struct FlattenerImp<ArgGroup<Func, AL1...>, ArgGroup<Func, AL2...>, AG...>
+{
+	using type = Flattener<ArgGroup<Func, AL1..., AL2...>, AG...>;
+};
+
+template<typename AG>
+struct FlattenerImp<AG>
+{
+	using type = AG;
+};
+
+
+template<typename P, typename LL>
+struct TransformImp;
+
+template<typename P, typename LL>
+using Transform = typename TransformImp<P, LL>::type;
+
+
+template<typename P, typename... A>
+struct TransformImp<P, ArgList<A...>>
+{
+	using type = ArgList<P, A...>;
+};
+
+template<typename P, typename Func, typename... AL>
+struct TransformImp<P, ArgGroup<Func, AL...>>
+{
+	using type = ArgGroup<Func, Transform<P, AL>...>;
+};
+
+template<typename Func, typename... AL>
+struct TransformImp<ArgList<>, ArgGroup<Func, AL...>>
+{
+	using type = ArgGroup<Func, AL...>;
+};
+
+template<typename... PP, typename Func, typename... AL>
+struct TransformImp<ArgList<PP...>, ArgGroup<Func, AL...>>
+{
+	using type = Flattener<Transform<PP, ArgGroup<Func, AL...>>...>;
+};
+
+template<typename Func, typename... AL>
+struct TransformImp<ArgGroup<Func>, ArgGroup<Func, AL...>>
+{
+	using type = ArgGroup<Func, AL...>;
+};
+
+template<typename Func, typename AL1Head, typename... AL1Tail, typename... AL2>
+struct TransformImp<ArgGroup<Func, AL1Head, AL1Tail...>, ArgGroup<Func, AL2...>>
+{
+	using type = Transform<AL1Head, Transform<ArgGroup<Func, AL1Tail...>, ArgGroup<Func, AL2...>>>;
+};
+
+template<typename Func, typename... AL>
+using FuncArray = Transform<ArgGroup<Func, AL...>, ArgGroup<Func, ArgList<>>>;
 
 enum ArgEnum
 {
@@ -128,6 +281,86 @@ enum ArgEnum
 	ArgData,
 	ArgConst,
 	ArgLabel,
+
+	ArgFunc,
+	ArgRaw,
+};
+
+struct ArgProgDef
+{
+	static constexpr size_t size = 0;
+	static int& get(ScriptWorker &sw, const Uint8 *arg, int &curr)
+	{
+		return curr;
+	}
+	static bool set(std::vector<Uint8> &proc)
+	{
+		return true;
+	}
+};
+
+struct ArgRegDef
+{
+	static constexpr size_t size = sizeof(Uint8);
+	static int& get(ScriptWorker &sw, const Uint8 *arg, int &curr)
+	{
+		return sw.reg[*arg];
+	}
+	static bool set(std::vector<Uint8> &proc, Uint8 value)
+	{
+		proc.push_back(value);
+		return true;
+	}
+};
+
+template<int A>
+struct ArgRegFixDef
+{
+	static constexpr size_t size = 0;
+	static int& get(ScriptWorker &sw, const Uint8 *arg, int &curr)
+	{
+		return sw.reg[A];
+	}
+	static bool set(std::vector<Uint8> &proc)
+	{
+		return true;
+	}
+};
+
+template<typename T>
+struct ArgConstDef
+{
+	static constexpr size_t size = sizeof(T);
+	static const T& get(ScriptWorker &sw, const Uint8 *arg, int &curr)
+	{
+		return *reinterpret_cast<const T*>(arg);
+	}
+	static bool set(std::vector<Uint8> &proc, const T &value)
+	{
+		auto pos = proc.size();
+		proc.resize(pos + size, 0);
+		*reinterpret_cast<const T*>(&proc[pos]) = value;
+		return true;
+	}
+};
+
+template<int Size>
+struct ArgRawDef
+{
+	static constexpr size_t size = Size;
+	static const unsigned char* get(ScriptWorker &sw, const Uint8 *arg, int &curr)
+	{
+		return arg;
+	}
+	static bool set(std::vector<Uint8> &proc, const Uint8 (&value)[size])
+	{
+		auto pos = proc.size();
+		proc.resize(pos + size, 0);
+
+		memcpy(&proc[pos], value, size);
+
+		return true;
+	}
 };
 
 ////////////////////////////////////////////////////////////
@@ -137,13 +370,34 @@ enum RegEnum
 {
 	RegIn,
 	RegCond,
+
 	RegR0,
 	RegR1,
 	RegR2,
 	RegR3,
+
+	RegC0,
+	RegC1,
+	RegC2,
+	RegC3,
+	RegC4,
+	RegC5,
+
 	RegCustom,
 	RegEnumMax = RegCustom + ScriptMaxRefCustom,
 };
+
+using ArgNoneList = ArgList<>;
+using ArgProgList = ArgList<ArgProgDef>;
+using ArgTestList = ArgList<ArgRegFixDef<RegCond>>;
+using ArgResultList = ArgList<ArgRegFixDef<RegIn>>;
+
+using ArgRegList = ArgList<ArgRegDef>;
+using ArgDataList = ArgList<ArgRegDef, ArgConstDef<int>>;
+using ArgConstList = ArgList<ArgConstDef<int>>;
+using ArgLabelList = ArgList<ArgConstDef<int>>;
+using ArgFuncList = ArgList<ArgConstDef<FuncCommon>>;
+using ArgRawList = ArgList<ArgRawDef<0>,ArgRawDef<4>,ArgRawDef<8>,ArgRawDef<16>,ArgRawDef<32>,ArgRawDef<64>>;
 
 ////////////////////////////////////////////////////////////
 //						proc definition
@@ -222,12 +476,25 @@ inline bool wavegen_tri_h(int& reg, const int& period, const int& size, const in
 	}
 	return false;
 }
+
+template<typename... A>
+inline bool fillConst(ScriptWorker& Context, A... a)
+{
+	int array[] =
+	{
+		a...
+	};
+	memcpy(&Context.reg[RegC0], array, sizeof(int) * sizeof...(A));
+
+	return false;
+}
+
 /**
  * Main macro defining all available operation in script engine.
  * @param IMPL macro function that access data. Take 6 args: Name, type of 4 proc args and definition of operation
  */
 #define MACRO_PROC_DEFINITION(IMPL) \
-	/*	Name,		Implementation,										End excecution,			Arg0,	Arg1, Arg2, Arg3, */ \
+	/*	Name,		Implementation,										End excecution,			Arg0,	Arg1, Arg2, Arg3, ..., Arg7 */ \
 	IMPL(exit,		MACRO_QUOTE({										return true; }),		None) \
 	\
 	IMPL(ret,		MACRO_QUOTE({				Result = Data1;			return true; }),		Result, Data) \
@@ -277,7 +544,34 @@ inline bool wavegen_tri_h(int& reg, const int& period, const int& size, const in
 	IMPL(get_shade,		MACRO_QUOTE({ Reg0 = Data1 & 0xF;					return false; }),	Reg, Data) \
 	IMPL(set_shade,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF); return false; }),	Reg, Data) \
 	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);				return false; }),	Reg, Data) \
+	\
+	IMPL(_call,		MACRO_QUOTE({ return Func0(Context, Raw1, Prog);								}),	Func, Raw, Prog) \
 
+
+////////////////////////////////////////////////////////////
+//					function definition
+////////////////////////////////////////////////////////////
+
+/**
+ * Macro returning name of function
+ */
+#define MACRO_FUNC_ID(id) Func##id
+
+#define MACRO_CREATE_FUNC_ARG_LOOP(NAME, POS, ARG) MACRO_ARG_##ARG(POS)
+/**
+ * Macro used for creating functions from MACRO_PROC_DEFINITION
+ */
+#define MACRO_CREATE_FUNC(NAME, Impl, ...) \
+	struct MACRO_FUNC_ID(NAME) \
+	{ \
+		static bool func(ScriptWorker& Context MACRO_ARG_LOOP(MACRO_CREATE_FUNC_ARG_LOOP, NAME, __VA_ARGS__)) \
+			Impl \
+	};
+
+MACRO_PROC_DEFINITION(MACRO_CREATE_FUNC)
+
+#undef MACRO_CREATE_FUNC
+#undef MACRO_CREATE_FUNC_ARG_LOOP
 
 ////////////////////////////////////////////////////////////
 //					Proc_Enum definition
@@ -288,11 +582,13 @@ inline bool wavegen_tri_h(int& reg, const int& period, const int& size, const in
  */
 #define MACRO_PROC_ID(id) Proc##id
 
+#define MACRO_CREATE_PROC_ENUM_ARG_LOOP(NAME, POS, ARG) , Arg##ARG##List
 /**
  * Macro used for creating ProcEnum from MACRO_PROC_DEFINITION
  */
 #define MACRO_CREATE_PROC_ENUM(NAME, Impl, ...) \
-	MACRO_PROC_ID(NAME),
+	MACRO_PROC_ID(NAME), \
+	Proc##NAME##end = MACRO_PROC_ID(NAME) + FuncArray<MACRO_FUNC_ID(NAME) MACRO_ARG_LOOP(MACRO_CREATE_PROC_ENUM_ARG_LOOP, NAME, __VA_ARGS__)>::func.size - 1,
 
 /**
  * Enum storing id of all avaliable operations in script engine
@@ -304,27 +600,7 @@ enum ProcEnum
 };
 
 #undef MACRO_CREATE_PROC_ENUM
-
-////////////////////////////////////////////////////////////
-//					function definition
-////////////////////////////////////////////////////////////
-
-/**
- * Macro returning name of function
- */
-#define MACRO_FUNC_ID(id) Func##id
-
-#define MACRO_CREATE_FUNC_ARG_LOOP(REF, POS, ARG) MACRO_ARG_##ARG(POS)
-/**
- * Macro used for creating functions from MACRO_PROC_DEFINITION
- */
-#define MACRO_CREATE_FUNC(NAME, Impl, ...) \
-	inline bool MACRO_FUNC_ID(NAME)(MACRO_ARG_LOOP(MACRO_CREATE_FUNC_ARG_LOOP, __VA_ARGS__) int Dummy) Impl
-
-MACRO_PROC_DEFINITION(MACRO_CREATE_FUNC)
-
-#undef MACRO_CREATE_FUNC
-#undef MACRO_CREATE_FUNC_ARG_LOOP
+//#undef MACRO_CREATE_PROC_ENUM_ARG_LOOP
 
 ////////////////////////////////////////////////////////////
 //					core loop function
@@ -339,68 +615,36 @@ MACRO_PROC_DEFINITION(MACRO_CREATE_FUNC)
  * @param proc array storing operation of script
  * @return Result of executing script
  */
-inline Uint8 scriptExe(int in, ScriptWorker& data)
+inline Uint8 scriptExe(int in, ScriptWorker &data)
 {
 	memset(data.reg, 0, RegCustom*sizeof(int));
 	memcpy(data.reg + RegCustom, data.regCustom, ScriptMaxRefCustom*sizeof(int));
 	data.reg[RegIn] = in;
 	int curr = 0;
+	const Uint8 *const proc = data.proc;
 	//--------------------------------------------------
 	//			helper macros for this function
 	//--------------------------------------------------
-	#define MACRO_REG_CURR(i)	data.proc[curr + (i)]
-
-	#define MACRO_OP_None(i)
-	#define MACRO_OP_Prog(i)	curr ,
-	#define MACRO_OP_Test(i)	data.reg[RegCond] ,
-	#define MACRO_OP_Result(i)	data.reg[RegIn] ,
-
-	#define MACRO_OP_Reg(i)		data.reg[MACRO_REG_CURR(i)] ,
-	#define MACRO_OP_Data(i)	data.reg[MACRO_REG_CURR(i)] ,
-	#define MACRO_OP_Const(i)	data.reg[MACRO_REG_CURR(i)] ,
-	#define MACRO_OP_Label(i)	data.reg[MACRO_REG_CURR(i)] ,
-
-	#define MACRO_OP_OFFSET(i, ...) (MACRO_ARG_OFFSET(i, __VA_ARGS__) - MACRO_ARG_OFFSET(ScriptMaxArg, __VA_ARGS__))
-
-	#define MACRO_OP_ARG_LOOP(REF, POS, ARG) MACRO_OP_##ARG(MACRO_OP_OFFSET(POS, REF))
-	/**
-	 * Macro creating switch case from MACRO_PROC_DEFINITION
-	 */
-	#define MACRO_OP(NAME, Impl, ...) \
-		case MACRO_PROC_ID(NAME): \
-			curr += 1 + MACRO_ARG_OFFSET(ScriptMaxArg, __VA_ARGS__) ; \
-			if(MACRO_FUNC_ID(NAME)( \
-					MACRO_ARG_LOOP(MACRO_OP_ARG_LOOP, __VA_ARGS__) \
-					0)) \
-				return data.reg[RegIn]; \
-			continue;
+	#define MACRO_FUNC_ARRAY(NAME, Impl, ...) + FuncArray<MACRO_FUNC_ID(NAME) MACRO_ARG_LOOP(MACRO_CREATE_PROC_ENUM_ARG_LOOP, NAME, __VA_ARGS__)>::func
+	#define MACRO_FUNC_ARRAY_LOOP(POS) case (POS): if (func.tab[POS](data, proc, curr)) return data.reg[RegIn]; else continue;
 	//--------------------------------------------------
+
+	static constexpr auto func = MACRO_PROC_DEFINITION(MACRO_FUNC_ARRAY);
 
 	while(true)
 	{
-		switch(MACRO_REG_CURR(0))
+		switch(proc[curr])
 		{
-		MACRO_PROC_DEFINITION(MACRO_OP)
+		MACRO_COPY_256(MACRO_FUNC_ARRAY_LOOP, 0)
+//		MACRO_PROC_DEFINITION(MACRO_OP)
 		}
 	}
 
 	//--------------------------------------------------
 	//			removing helper macros
 	//--------------------------------------------------
-	#undef MACRO_OP_None
-	#undef MACRO_OP_Prog
-	#undef MACRO_OP_Test
-	#undef MACRO_OP_Result
-
-	#undef MACRO_OP_Reg
-	#undef MACRO_OP_Data
-	#undef MACRO_OP_Const
-	#undef MACRO_OP_Label
-
-	#undef MACRO_REG_CURR
-	#undef MACRO_OP_OFFSET
-	#undef MACRO_OP_ARG_LOOP
-	#undef MACRO_OP
+	#undef MACRO_FUNC_ARRAY_LOOP
+	#undef MACRO_FUNC_ARRAY
 	//--------------------------------------------------
 }
 
@@ -454,6 +698,8 @@ struct ParserHelper
 	const std::map<std::string, ScriptContainerData>& refList;
 	///temporary script data
 	std::map<std::string, ScriptContainerData> refListCurr;
+	///list of variables uses
+	std::vector<size_t> refVariableUses;
 
 	///index of used script data
 	Uint8 refIndexUsed;
@@ -474,6 +720,7 @@ struct ParserHelper
 		proc(proc), procRefData(procRefData),
 		procList(procList), refList(ref),
 		refListCurr(),
+		refVariableUses(),
 		refIndexUsed(RegEnumMax)
 	{
 
@@ -486,10 +733,34 @@ struct ParserHelper
 	{
 		procRefData.reserve(RegEnumMax + refListCurr.size());
 		procRefData.resize(RegEnumMax);
-		for(ref_ite i = refListCurr.begin(); i != refListCurr.end(); ++i)
+		for (ref_ite i = refListCurr.begin(); i != refListCurr.end(); ++i)
 			procRefData.push_back(i->second);
 
 		proc.push_back(MACRO_PROC_ID(exit));
+		for (size_t p : refVariableUses)
+		{
+			Uint8 index = proc[p];
+			for (ScriptContainerData& s : procRefData)
+			{
+				if (s.index == index)
+				{
+					memcpy(&proc[p], &s.value, sizeof(int));
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Function preparing place and position for intermediate value on proc vector.
+     * @param index index in refListCurr
+    */
+	void pushProcValue(Uint8 index)
+	{
+		refVariableUses.push_back(proc.size());
+		proc.push_back(index);
+		for (size_t k = 1; k < sizeof(int); ++k)
+			proc.push_back(0);
 	}
 
 	/**
@@ -862,7 +1133,7 @@ void ScriptContainerBase::updateBase(ScriptWorker* ref, const void* t, int (*cas
 			r = i->value;
 			break;
 		case ArgData:
-			r =  cast(t, i->envFunc);
+			r = cast(t, i->envFunc);
 			break;
 		}
 	}
@@ -923,24 +1194,21 @@ ScriptParserBase::ScriptParserBase(const std::string& name) : _name(name), _proc
 	//--------------------------------------------------
 	//					op_data init
 	//--------------------------------------------------
-	#define MACRO_ALL_INIT_ARG_LOOP_TYPES(REF, POS, ARG) Arg##ARG ,
-	#define MACRO_ALL_INIT_ARG_LOOP_OFFSET(REF, POS, ARG) MACRO_ARG_OFFSET(POS, REF) ,
+	#define MACRO_ALL_INIT_ARG_LOOP_TYPES(NAME, POS, ARG) Arg##ARG ,
+	#define MACRO_ALL_INIT_ARG_LOOP_OFFSET(NAME, POS, ARG) (Uint8)NAME(POS) ,
 	#define MACRO_ALL_INIT(NAME, Impl, ...) \
-	{ \
-		ScriptParserData temp_var_##NAME = \
+		_procList[#NAME] = \
 		{ \
 			MACRO_PROC_ID(NAME), \
 			{ \
 				/* types */\
-				MACRO_ARG_LOOP(MACRO_ALL_INIT_ARG_LOOP_TYPES, __VA_ARGS__) \
+				MACRO_ARG_LOOP(MACRO_ALL_INIT_ARG_LOOP_TYPES, NAME, __VA_ARGS__) \
 			}, \
 			{ \
 			/* args offsets */\
-				MACRO_ARG_LOOP(MACRO_ALL_INIT_ARG_LOOP_OFFSET, __VA_ARGS__) \
+				MACRO_ARG_LOOP(MACRO_ALL_INIT_ARG_LOOP_OFFSET, (FuncArray<MACRO_FUNC_ID(NAME) MACRO_ARG_LOOP(MACRO_CREATE_PROC_ENUM_ARG_LOOP, NAME, __VA_ARGS__)>::offsets[0]), __VA_ARGS__) \
 			}, \
-		}; \
-		_procList[#NAME] = temp_var_##NAME; \
-	}
+		};
 
 	MACRO_PROC_DEFINITION(MACRO_ALL_INIT)
 
@@ -1112,7 +1380,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 						Log(LOG_ERROR) << "invalid label argument '"<< arg_val <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
 						return false;
 					}
-					destScript->_proc.push_back(temp);
+					help.pushProcValue(temp);
 					break;
 
 				//arg that is data like "solder_gender", "hp" etc. can be const or reg too.
@@ -1132,7 +1400,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 						Log(LOG_ERROR) << "invalid const argument '"<< arg_val <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
 						return false;
 					}
-					destScript->_proc.push_back(temp);
+					help.pushProcValue(temp);
 					break;
 
 				//arg that is reg like "in", "r0"
@@ -1170,18 +1438,20 @@ void ScriptParserBase::logScriptMetadata() const
 		{
 			printOp = false;
 			Logger opLog;
-			#define MACRO_ALL_LOG_ARG_LOOP(REF, POS, ARG) << std::setw(tabSize) << #ARG ","
+			#define MACRO_STRCAT(A) #A
+			#define MACRO_ALL_LOG_ARG_LOOP(NAME, POS, ARG) << std::setw(std::string("None").compare(#ARG) ? tabSize : 0) << (std::string("None").compare(#ARG) ? #ARG "," : "")
 			#define MACRO_ALL_LOG(NAME, Impl, ...) \
-				opLog.get() \
+				if (#NAME[0] != '_') opLog.get() \
 					<< "Op:    " << std::setw(tabSize*2) << #NAME \
-					<< "Args:  " MACRO_ARG_LOOP(MACRO_ALL_LOG_ARG_LOOP, __VA_ARGS__) << "    " \
-					<< "Impl:  " #Impl "\n";
+					<< "Impl:  " << std::setw(tabSize*10) << MACRO_STRCAT(Impl) \
+					<< "Args:  " MACRO_ARG_LOOP(MACRO_ALL_LOG_ARG_LOOP, NAME, __VA_ARGS__) << FuncArray<MACRO_FUNC_ID(NAME) MACRO_ARG_LOOP(MACRO_CREATE_PROC_ENUM_ARG_LOOP, NAME, __VA_ARGS__)>::func.size << "\n";
 
 			opLog.get() << "Available script operations:\n" << std::left;
 			MACRO_PROC_DEFINITION(MACRO_ALL_LOG)
 
 			#undef MACRO_ALL_LOG
 			#undef MACRO_ALL_LOG_ARG_LOOP
+			#undef MACRO_STRCAT
 		}
 
 		Logger refLog;
