@@ -426,29 +426,29 @@ struct controler
 	 * if that type should not be used as `dest` dont implements this.
 	 * @return start drawing range
 	 */
-	inline const GraphSubset& get_range();
+	inline const GraphSubset& get_range() = delete;
 	/**
 	 * function used only when `SurfaceType` is used as source surface.
 	 * function reduce drawing range.
 	 * @param g modify drawing range
 	 */
-	inline void mod_range(GraphSubset& g);
+	inline void mod_range(GraphSubset& g) = delete;
 	/**
 	 * set final drawing range.
 	 * @param g drawing range
 	 */
-	inline void set_range(const GraphSubset& g);
+	inline void set_range(const GraphSubset& g) = delete;
 
-	inline void mod_y(int& begin, int& end);
-	inline void set_y(const int& begin, const int& end);
-	inline void inc_y();
+	inline void mod_y(int& begin, int& end) = delete;
+	inline void set_y(const int& begin, const int& end) = delete;
+	inline void inc_y() = delete;
 
 
-	inline void mod_x(int& begin, int& end);
-	inline void set_x(const int& begin, const int& end);
-	inline void inc_x();
+	inline void mod_x(int& begin, int& end) = delete;
+	inline void set_x(const int& begin, const int& end) = delete;
+	inline void inc_x() = delete;
 
-	inline int& get_ref();
+	inline int& get_ref() = delete;
 };
 
 /// implementation for scalars types aka `int`, `double`, `float`
