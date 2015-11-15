@@ -5,6 +5,10 @@ OpenXcom commit: [commitOrigin/][br/]
 Extended commit: [commit/][br/]
 
 [br/][br/]
+[i]Ubuntu required libs[/i]
+sudo apt-get install libsdl1.2debian libsdl-mixer1.2 libsdl-gfx1.2-4 libsdl-image1.2 libyaml-cpp0.5[br/]
+
+[br/][br/]
 [i]Behavior change[/i]
 
 Hyper-Wave Decoder can have less than 100% chance to detect aliens.[br/]
