@@ -96,7 +96,6 @@ void ExplosionBState::init()
 		_pistolWhip = (type != BT_MELEE && action == BA_HIT);
 		if (_pistolWhip)
 		{
-			_power += itemRule->getMeleePower();
 			_power += itemRule->getMeleeBonus(_unit);
 
 			_radius = 0;
@@ -104,11 +103,10 @@ void ExplosionBState::init()
 		}
 		else
 		{
-			_power += itemRule->getPower();
 			_power += itemRule->getPowerBonus(_unit);
 			_power -= itemRule->getPowerRangeReduction(_range);
 
-			_radius = itemRule->getExplosionRadius();
+			_radius = itemRule->getExplosionRadius(_unit);
 			_damageType = itemRule->getDamageType();
 		}
 
@@ -141,8 +139,7 @@ void ExplosionBState::init()
 			}
 		}
 
-		_areaOfEffect = type != BT_MELEE &&
-						itemRule->getExplosionRadius() != 0 &&
+		_areaOfEffect = type != BT_MELEE && _radius != 0 &&
 						(type != BT_PSIAMP || action == BA_USE) &&
 						!_pistolWhip && !miss;
 	}
@@ -173,10 +170,9 @@ void ExplosionBState::init()
 	else if (_unit && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
 	{
 		RuleItem* corpse = _parent->getMod()->getItem(_unit->getArmor()->getCorpseGeoscape());
-		_power = corpse->getPower();
-		_power += corpse->getPowerBonus(_unit);
+		_power = corpse->getPowerBonus(_unit);
 		_damageType = corpse->getDamageType();
-		_radius = corpse->getExplosionRadius();
+		_radius = corpse->getExplosionRadius(_unit);
 		_areaOfEffect = true;
 		if (!RNG::percent(corpse->getSpecialChance()))
 		{

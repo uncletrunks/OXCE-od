@@ -1191,15 +1191,16 @@ BattleMediKitType RuleItem::getMediKitType() const
 /**
  * Returns the item's max explosion radius. Small explosions don't have a restriction.
  * Larger explosions are restricted using a formula, with a maximum of radius 10 no matter how large the explosion is.
+ * @param stats unit stats
  * @return The radius.
  */
-int RuleItem::getExplosionRadius() const
+int RuleItem::getExplosionRadius(const BattleUnit *unit) const
 {
 	int radius = 0;
 
 	if (_damageType.FixRadius == -1)
 	{
-		radius = _power * _damageType.RadiusEffectiveness;
+		radius = getPowerBonus(unit) * _damageType.RadiusEffectiveness;
 		if (_damageType.FireBlastCalc)
 		{
 			radius += 1;
@@ -1208,6 +1209,10 @@ int RuleItem::getExplosionRadius() const
 		if (radius > 11)
 		{
 			radius = 11;
+		}
+		if (radius <= 0)
+		{
+			radius = 1;
 		}
 	}
 	else
@@ -1539,7 +1544,7 @@ bool RuleItem::isPsiRequired() const
  */
 int RuleItem::getPowerBonus(const BattleUnit *unit) const
 {
-	return _damageBonus.getBonus(unit);
+	return _power + _damageBonus.getBonus(unit);
 }
 
 /**
@@ -1549,7 +1554,7 @@ int RuleItem::getPowerBonus(const BattleUnit *unit) const
  */
 int RuleItem::getMeleeBonus(const BattleUnit *unit) const
 {
-	return _meleeBonus.getBonus(unit);
+	return _meleePower + _meleeBonus.getBonus(unit);
 }
 
 /**

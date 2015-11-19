@@ -496,7 +496,7 @@ void ProjectileFlyBState::think()
 					_parent->dropItem(pos, item);
 					if (_unit->getFaction() != FACTION_PLAYER && _projectileItem->getRules()->getBattleType() == BT_GRENADE)
 					{
-						_parent->getTileEngine()->setDangerZone(pos, item->getRules()->getExplosionRadius(), _action.actor);
+						_parent->getTileEngine()->setDangerZone(pos, item->getRules()->getExplosionRadius(_action.actor), _action.actor);
 					}
 				}
 			}
@@ -528,7 +528,7 @@ void ProjectileFlyBState::think()
 					bool shotgun = _ammo && _ammo->getRules()->getShotgunPellets() != 0 && _ammo->getRules()->getDamageType()->isDirect();
 					int offset = 0;
 					// explosions impact not inside the voxel but two steps back (projectiles generally move 2 voxels at a time)
-					if (_ammo && _ammo->getRules()->getExplosionRadius() != 0 && _projectileImpact != V_UNIT)
+					if (_ammo && _ammo->getRules()->getExplosionRadius(_action.actor) != 0 && _projectileImpact != V_UNIT)
 					{
 						offset = -2;
 					}
@@ -559,8 +559,9 @@ void ProjectileFlyBState::think()
 								if (_projectileImpact != V_OUTOFBOUNDS)
 								{
 									Explosion *explosion = new Explosion(proj->getPosition(1), _ammo->getRules()->getHitAnimation());
+									int power = _ammo->getRules()->getPowerBonus(_unit) - _ammo->getRules()->getPowerRangeReduction(proj->getDistance());
 									_parent->getMap()->getExplosions()->push_back(explosion);
-									_parent->getSave()->getTileEngine()->hit(proj->getPosition(1), _ammo->getRules()->getPower(), _ammo->getRules()->getDamageType(), 0);
+									_parent->getSave()->getTileEngine()->hit(proj->getPosition(1), power, _ammo->getRules()->getDamageType(), 0);
 								}
 							}
 							++i;

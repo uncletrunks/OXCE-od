@@ -314,7 +314,7 @@ public:
 	/// Gets the medikit use type.
 	BattleMediKitType getMediKitType() const;
 	/// Gets the max explosion radius.
-	int getExplosionRadius() const;
+	int getExplosionRadius(const BattleUnit *unit) const;
 	/// Gets the recovery points score
 	int getRecoveryPoints() const;
 	/// Gets the item's armor.
