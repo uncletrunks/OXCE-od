@@ -256,13 +256,14 @@ void UnitDieBState::convertUnitToCorpse()
 		std::vector<BattleItem*> itemsToKeep;
 		for (std::vector<BattleItem*>::iterator i = _unit->getInventory()->begin(); i != _unit->getInventory()->end(); ++i)
 		{
+			_parent->dropItem(lastPosition, (*i));
 			if (!(*i)->getRules()->isFixed())
 			{
-				if (dropItems)
-				{
-					_parent->dropItem(lastPosition, (*i));
-					(*i)->setOwner(0);
-				}
+				(*i)->setOwner(0);
+			}
+			else
+			{
+				itemsToKeep.push_back(*i);
 			}
 		}
 
