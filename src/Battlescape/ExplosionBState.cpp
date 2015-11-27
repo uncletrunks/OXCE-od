@@ -111,7 +111,7 @@ void ExplosionBState::init()
 		}
 
 		//testing if we hit target
-		if (type == BT_PSIAMP)
+		if (type == BT_PSIAMP && !_pistolWhip)
 		{
 			if (action != BA_USE)
 			{
@@ -235,7 +235,7 @@ void ExplosionBState::init()
 	{
 		_parent->setStateInterval(std::max(1, ((BattlescapeState::DEFAULT_ANIM_SPEED/2) - (10 * itemRule->getExplosionSpeed()))));
 		_hit = _pistolWhip || type == BT_MELEE;
-		bool psi = type == BT_PSIAMP && action != BA_USE;
+		bool psi = type == BT_PSIAMP && action != BA_USE && !_pistolWhip;
 		int anim = -1;
 		int sound = -1;
 
@@ -398,7 +398,7 @@ void ExplosionBState::explode()
 		}
 	}
 
-	bool range = !_hit || (_item && _item->getRules()->getBattleType() != BT_PSIAMP);
+	bool range = !(_hit || (_item && _item->getRules()->getBattleType() == BT_PSIAMP));
 
 	if (_areaOfEffect)
 	{

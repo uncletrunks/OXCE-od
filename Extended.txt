@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 2.5a[/b]
+[b]Mod version 2.5b[/b]
 OpenXcom version: Nightly [commitOriginDate/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended commit: [commit/][br/]
@@ -193,7 +193,7 @@ items:
       energyNormalized: 0.0   #curret energy normalized to 1 (max energy give 1.0).
       moraleNormalized: 0.0   #curret morale normalized to 1 (max morale give 1.0).
       stunNormalized: 0.0     #curret stun level normalized to 1 (max stun compared to current health give 1.0).
-    meleeDamage: #used my range weapons melee hit.
+    meleeBonus: #used by range weapons melee hit.
       #...
       #same stats like `damageBonus`.
       #...
