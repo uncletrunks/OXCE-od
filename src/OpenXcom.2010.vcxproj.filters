@@ -934,6 +934,9 @@
     <ClCompile Include="Mod\RuleStatBonus.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="Geoscape\TrainingState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1895,6 +1898,9 @@
     </ClInclude>
     <ClInclude Include="Mod\RuleStatBonus.h">
       <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\TrainingState.h">
+      <Filter>Geoscape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
