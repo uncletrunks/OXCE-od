@@ -799,12 +799,6 @@
     <ClCompile Include="Battlescape\PsiAttackBState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
-    <ClCompile Include="Geoscape\TrainingState.cpp">
-      <Filter>Geoscape</Filter>
-    </ClCompile>
-    <ClCompile Include="Geoscape\AllocateTrainingState.cpp">
-      <Filter>Geoscape</Filter>
-    </ClCompile>
     <ClCompile Include="Geoscape\DogfightErrorState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
@@ -880,9 +874,6 @@
     <ClCompile Include="Mod\RuleItem.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
-    <ClCompile Include="Mod\RuleDamageType.cpp">
-      <Filter>Mod</Filter>
-    </ClCompile>
     <ClCompile Include="Mod\RuleManufacture.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
@@ -932,6 +923,15 @@
       <Filter>Mod</Filter>
     </ClCompile>
     <ClCompile Include="Mod\Mod.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\AllocateTrainingState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\RuleDamageType.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\RuleStatBonus.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1761,12 +1761,6 @@
     <ClInclude Include="Battlescape\PsiAttackBState.h">
       <Filter>Battlescape</Filter>
     </ClInclude>
-    <ClInclude Include="Geoscape\TrainingState.h">
-      <Filter>Geoscape</Filter>
-    </ClInclude>
-    <ClInclude Include="Geoscape\AllocateTrainingState.h">
-      <Filter>Geoscape</Filter>
-    </ClInclude>
     <ClInclude Include="Geoscape\DogfightErrorState.h">
       <Filter>Geoscape</Filter>
     </ClInclude>
@@ -1842,9 +1836,6 @@
     <ClInclude Include="Mod\RuleItem.h">
       <Filter>Mod</Filter>
     </ClInclude>
-    <ClInclude Include="Mod\RuleDamageType.h">
-      <Filter>Mod</Filter>
-    </ClInclude>
     <ClInclude Include="Mod\RuleManufacture.h">
       <Filter>Mod</Filter>
     </ClInclude>
@@ -1894,6 +1885,15 @@
       <Filter>Mod</Filter>
     </ClInclude>
     <ClInclude Include="Mod\Mod.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\AllocateTrainingState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleDamageType.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleStatBonus.h">
       <Filter>Mod</Filter>
     </ClInclude>
   </ItemGroup>
