@@ -1220,6 +1220,8 @@ void Map::drawTerrain(Surface *surface)
 	{
 		// big explosions cause the screen to flash as bright as possible before any explosions are actually drawn.
 		// this causes everything to look like EGA for a single frame.
+		// Meridian: no frikin flashing!!
+		_flashScreen = false;
 		if (_flashScreen)
 		{
 			for (int x = 0, y = 0; x < surface->getWidth() && y < surface->getHeight();)
