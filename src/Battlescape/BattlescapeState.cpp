@@ -38,6 +38,7 @@
 #include "BriefingState.h"
 #include "../lodepng.h"
 #include "../fmath.h"
+#include "../Geoscape/GeoscapeState.h"
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
 #include "../Engine/LocalizedText.h"
@@ -326,8 +327,10 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnNextStop->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 	_btnNextStop->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
-	_btnShowLayers->onMouseClick((ActionHandler)&BattlescapeState::btnShowLayersClick);
-	_btnShowLayers->setTooltip("STR_MULTI_LEVEL_VIEW");
+	//_btnShowLayers->onMouseClick((ActionHandler)&BattlescapeState::btnShowLayersClick);
+	_btnShowLayers->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
+	//_btnShowLayers->setTooltip("STR_MULTI_LEVEL_VIEW");
+	_btnShowLayers->setTooltip("STR_UFOPAEDIA_UC");
 	_btnShowLayers->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 	_btnShowLayers->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
