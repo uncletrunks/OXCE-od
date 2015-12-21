@@ -93,13 +93,50 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0)
 	_txtTraining->setText(tr("STR_IN_TRAINING"));
 
 	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
+	_lstSoldiers->setArrowColumn(240, ARROW_VERTICAL);
 	_lstSoldiers->setColumns(4, 114, 80, 62, 30);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(2);
+	_lstSoldiers->onLeftArrowClick((ActionHandler)&AllocatePsiTrainingState::lstItemsLeftArrowClick);
+	_lstSoldiers->onRightArrowClick((ActionHandler)&AllocatePsiTrainingState::lstItemsRightArrowClick);
 	_lstSoldiers->onMouseClick((ActionHandler)&AllocatePsiTrainingState::lstSoldiersClick);
+}
+/**
+ *
+ */
+AllocatePsiTrainingState::~AllocatePsiTrainingState()
+{
+
+}
+
+/**
+ * Returns to the previous screen.
+ * @param action Pointer to an action.
+ */
+void AllocatePsiTrainingState::btnOkClick(Action *)
+{
+	_game->popState();
+}
+
+/**
+ * Updates the soldiers list
+ * after going to other screens.
+ */
+void AllocatePsiTrainingState::init()
+{
+	State::init();
+	initList(0);
+}
+
+/**
+ * Shows the soldiers in a list at specified offset/scroll.
+ */
+void AllocatePsiTrainingState::initList(size_t scrl)
+{
 	int row = 0;
-	for (std::vector<Soldier*>::const_iterator s = base->getSoldiers()->begin(); s != base->getSoldiers()->end(); ++s)
+	_lstSoldiers->clearList();
+	for (std::vector<Soldier*>::const_iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)
 	{
 		std::wostringstream ssStr;
 		std::wostringstream ssSkl;
@@ -133,22 +170,111 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0)
 		}
 		row++;
 	}
-}
-/**
- *
- */
-AllocatePsiTrainingState::~AllocatePsiTrainingState()
-{
-
+	if (scrl)
+		_lstSoldiers->scrollTo(scrl);
+	_lstSoldiers->draw();
 }
 
+
 /**
- * Returns to the previous screen.
+ * Reorders a soldier up.
  * @param action Pointer to an action.
  */
-void AllocatePsiTrainingState::btnOkClick(Action *)
+void AllocatePsiTrainingState::lstItemsLeftArrowClick(Action *action)
 {
-	_game->popState();
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	if (row > 0)
+	{
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierUp(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierUp(action, row, true);
+		}
+	}
+}
+
+/**
+ * Moves a soldier up on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the top?
+ */
+void AllocatePsiTrainingState::moveSoldierUp(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->begin(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row - 1);
+		_base->getSoldiers()->at(row - 1) = s;
+		if (row != _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() - static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollUp(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
+}
+
+/**
+ * Reorders a soldier down.
+ * @param action Pointer to an action.
+ */
+void AllocatePsiTrainingState::lstItemsRightArrowClick(Action *action)
+{
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	size_t numSoldiers = _base->getSoldiers()->size();
+	if (0 < numSoldiers && INT_MAX >= numSoldiers && row < numSoldiers - 1)
+	{
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierDown(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierDown(action, row, true);
+		}
+	}
+}
+
+/**
+ * Moves a soldier down on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the bottom?
+ */
+void AllocatePsiTrainingState::moveSoldierDown(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->end(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row + 1);
+		_base->getSoldiers()->at(row + 1) = s;
+		if (row != _lstSoldiers->getVisibleRows() - 1 + _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() + static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollDown(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
 }
 
 /**
@@ -157,6 +283,12 @@ void AllocatePsiTrainingState::btnOkClick(Action *)
  */
 void AllocatePsiTrainingState::lstSoldiersClick(Action *action)
 {
+	double mx = action->getAbsoluteXMouse();
+	if (mx >= _lstSoldiers->getArrowsLeftEdge() && mx < _lstSoldiers->getArrowsRightEdge())
+	{
+		return;
+	}
+
 	_sel = _lstSoldiers->getSelectedRow();
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
