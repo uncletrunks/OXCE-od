@@ -42,6 +42,8 @@ private:
 	Text *_txtTitle, *_txtName, *_txtRank, *_txtCraft;
 	TextList *_lstSoldiers;
 	Base *_base;
+	///initializes the display list based on the craft soldier's list and the position to display
+	void initList(size_t scrl);
 public:
 	/// Creates the Soldiers state.
 	SoldiersState(Base *base);
@@ -49,6 +51,14 @@ public:
 	~SoldiersState();
 	/// Updates the soldier names.
 	void init();
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsLeftArrowClick(Action *action);
+	/// Moves a soldier up.
+	void moveSoldierUp(Action *action, unsigned int row, bool max = false);
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsRightArrowClick(Action *action);
+	/// Moves a soldier down.
+	void moveSoldierDown(Action *action, unsigned int row, bool max = false);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Psi Training button.
