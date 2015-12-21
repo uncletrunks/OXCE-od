@@ -44,6 +44,8 @@ private:
 
 	Base *_base;
 	size_t _craft;
+	///initializes the display list based on the craft soldier's list and the position to display
+	void initList(size_t scrl);
 public:
 	/// Creates the Craft Armor state.
 	CraftArmorState(Base *base, size_t craft);
@@ -51,6 +53,14 @@ public:
 	~CraftArmorState();
 	/// Updates the soldier armors.
 	void init();
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsLeftArrowClick(Action *action);
+	/// Moves a soldier up.
+	void moveSoldierUp(Action *action, unsigned int row, bool max = false);
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsRightArrowClick(Action *action);
+	/// Moves a soldier down.
+	void moveSoldierDown(Action *action, unsigned int row, bool max = false);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Soldiers list.
