@@ -58,7 +58,7 @@ ItemSprite::~ItemSprite()
 }
 
 /**
- * Draws a unit, using the drawing rules of the unit.
+ * Draws a item, using the drawing rules of the unit.
  * This function is called by Map, for each unit on the screen.
  */
 void ItemSprite::draw(BattleItem* item, int x, int y, int shade, bool half)
