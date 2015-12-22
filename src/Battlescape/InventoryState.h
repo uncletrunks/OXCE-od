@@ -35,6 +35,7 @@ class SavedBattleGame;
 class BattlescapeState;
 class BattleUnit;
 class BattlescapeButton;
+class Base;
 
 /**
  * Screen which displays soldier's inventory.
@@ -52,10 +53,11 @@ private:
 	SavedBattleGame *_battleGame;
 	const bool _tu;
 	BattlescapeState *_parent;
+	Base *_base;
 	std::string _currentTooltip;
 public:
 	/// Creates the Inventory state.
-	InventoryState(bool tu, BattlescapeState *parent);
+	InventoryState(bool tu, BattlescapeState *parent, Base *base);
 	/// Cleans up the Inventory state.
 	~InventoryState();
 	/// Updates all soldier info.
@@ -64,6 +66,8 @@ public:
 	void updateStats();
 	/// Saves the soldiers' equipment-layout.
 	void saveEquipmentLayout();
+	/// Handler for clicking the Armor button.
+	void btnArmorClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Previous button.

@@ -18,6 +18,7 @@
  */
 #include "InventoryState.h"
 #include "Inventory.h"
+#include "../Basescape/SoldierArmorState.h"
 #include "../Geoscape/GeoscapeState.h"
 #include "../Engine/Game.h"
 #include "../Engine/FileMap.h"
@@ -35,7 +36,9 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Tile.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Savegame/Base.h"
 #include "../Savegame/BattleUnit.h"
+#include "../Savegame/Craft.h"
 #include "../Savegame/Soldier.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
@@ -60,7 +63,7 @@ static const int _applyTemplateBtnY  = 113;
  * @param tu Does Inventory use up Time Units?
  * @param parent Pointer to parent Battlescape.
  */
-InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _parent(parent)
+InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : _tu(tu), _parent(parent), _base(base)
 {
 	_battleGame = _game->getSavedGame()->getSavedBattle();
 
@@ -162,6 +165,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _pa
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnOkClick, Options::keyCancel);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnOkClick, Options::keyBattleInventory);
 	_btnOk->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
+	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnArmorClick, Options::keyBattleAbort);
 	_btnOk->setTooltip("STR_OK");
 	_btnOk->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnOk->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
@@ -442,6 +446,37 @@ void InventoryState::saveEquipmentLayout()
 				(*j)->getFuseTimer()
 			));
 		}
+	}
+}
+
+/**
+ * Opens the Armor Selection GUI
+ * @param action Pointer to an action.
+ */
+void InventoryState::btnArmorClick(Action *action)
+{
+	if (_base == 0)
+	{
+		// equipment just before mission or during the mission
+		return;
+	}
+
+	// equipment in the base
+	BattleUnit *unit = _battleGame->getSelectedUnit();
+	Soldier *s = unit->getGeoscapeSoldier();
+
+	if (!(s->getCraft() && s->getCraft()->getStatus() == "STR_OUT"))
+	{
+		size_t soldierIndex = 0;
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+		{
+			if ((*i)->getId() == s->getId())
+			{
+				soldierIndex = i - _base->getSoldiers()->begin();
+			}
+		}
+
+		_game->pushState(new SoldierArmorState(_base, soldierIndex));
 	}
 }
 

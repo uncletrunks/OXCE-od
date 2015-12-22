@@ -612,7 +612,7 @@ void CraftEquipmentState::btnInventoryClick(Action *)
 		bgen.runInventory(craft);
 
 		_game->getScreen()->clear();
-		_game->pushState(new InventoryState(false, 0));
+		_game->pushState(new InventoryState(false, 0, _base));
 	}
 }
 

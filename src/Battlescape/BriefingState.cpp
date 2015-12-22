@@ -190,7 +190,7 @@ void BriefingState::btnOkClick(Action *)
 		_game->pushState(bs);
 		_game->getSavedGame()->getSavedBattle()->setBattleState(bs);
 		_game->pushState(new NextTurnState(_game->getSavedGame()->getSavedBattle(), bs));
-		_game->pushState(new InventoryState(false, bs));
+		_game->pushState(new InventoryState(false, bs, 0));
 	}
 	else
 	{
