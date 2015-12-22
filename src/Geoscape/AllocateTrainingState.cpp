@@ -174,7 +174,7 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 			if (_base->getUsedTraining() < _base->getAvailableTraining())
 			{
 				_lstSoldiers->setCellText(_sel, 8, tr("STR_YES").c_str());
-				_lstSoldiers->setRowColor(_sel, Palette::blockOffset(13)+5);
+				_lstSoldiers->setRowColor(_sel, _lstSoldiers->getSecondaryColor());
 				_space--;
 				_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));
 				_base->getSoldiers()->at(_sel)->setTraining(true);
@@ -183,7 +183,7 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 		else
 		{
 			_lstSoldiers->setCellText(_sel, 8, tr("STR_NO").c_str());
-			_lstSoldiers->setRowColor(_sel, Palette::blockOffset(13));
+			_lstSoldiers->setRowColor(_sel, _lstSoldiers->getColor());
 			_space++;
 			_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));
 			_base->getSoldiers()->at(_sel)->setTraining(false);
