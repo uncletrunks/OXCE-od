@@ -54,13 +54,13 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	_txtTraining = new Text(48, 20, 270, 32);
 	_btnOk = new TextButton(160, 14, 80, 174);
 	_lstSoldiers = new TextList(290, 112, 8, 52);
-	_txtTu = new Text(18, 10, 124, 40);
-	_txtStamina = new Text(18, 10, 144, 40);
-	_txtHealth = new Text(18, 10, 164, 40);
-	_txtFiring = new Text(18, 10, 184, 40);
-	_txtThrowing = new Text(18, 10, 204, 40);
-	_txtMelee = new Text(18, 10, 224, 40);
-	_txtStrength = new Text(18, 10, 244, 40);
+	_txtTu = new Text(18, 10, 120, 40);
+	_txtStamina = new Text(18, 10, 138, 40);
+	_txtHealth = new Text(18, 10, 156, 40);
+	_txtFiring = new Text(18, 10, 174, 40);
+	_txtThrowing = new Text(18, 10, 192, 40);
+	_txtMelee = new Text(18, 10, 210, 40);
+	_txtStrength = new Text(18, 10, 228, 40);
 
 	// Set palette
 	setPalette("PAL_BASESCAPE", _game->getMod()->getInterface("allocatePsi")->getElement("palette")->color);
@@ -106,13 +106,51 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	_txtStrength->setText(tr("STR"));
 	_txtTraining->setText(tr("STR_IN_TRAINING"));
 
-	_lstSoldiers->setColumns(9, 114, 20, 20, 20, 20, 20, 20, 26, 40);
+	_lstSoldiers->setArrowColumn(238, ARROW_VERTICAL);
+	_lstSoldiers->setColumns(9, 110, 18, 18, 18, 18, 18, 18, 42, 40);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(2);
+	_lstSoldiers->onLeftArrowClick((ActionHandler)&AllocateTrainingState::lstItemsLeftArrowClick);
+	_lstSoldiers->onRightArrowClick((ActionHandler)&AllocateTrainingState::lstItemsRightArrowClick);
 	_lstSoldiers->onMouseClick((ActionHandler)&AllocateTrainingState::lstSoldiersClick);
+}
+
+/**
+ *
+ */
+AllocateTrainingState::~AllocateTrainingState()
+{
+
+}
+
+/**
+ * Returns to the previous screen.
+ * @param action Pointer to an action.
+ */
+void AllocateTrainingState::btnOkClick(Action *)
+{
+	_game->popState();
+}
+
+/**
+ * The soldier info could maybe change (armor? something else?)
+ * after going into other screens.
+ */
+void AllocateTrainingState::init()
+{
+	State::init();
+	initList(0);
+}
+
+/**
+ * Shows the soldiers in a list at specified offset/scroll.
+ */
+void AllocateTrainingState::initList(size_t scrl)
+{
 	int row = 0;
-	for (std::vector<Soldier*>::const_iterator s = base->getSoldiers()->begin(); s != base->getSoldiers()->end(); ++s)
+	_lstSoldiers->clearList();
+	for (std::vector<Soldier*>::const_iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)
 	{
 		std::wostringstream tu;
 		tu << (*s)->getCurrentStats()->tu;
@@ -141,23 +179,110 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 		}
 		row++;
 	}
+	if (scrl)
+		_lstSoldiers->scrollTo(scrl);
+	_lstSoldiers->draw();
 }
 
 /**
- *
- */
-AllocateTrainingState::~AllocateTrainingState()
-{
-
-}
-
-/**
- * Returns to the previous screen.
+ * Reorders a soldier up.
  * @param action Pointer to an action.
  */
-void AllocateTrainingState::btnOkClick(Action *)
+void AllocateTrainingState::lstItemsLeftArrowClick(Action *action)
 {
-	_game->popState();
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	if (row > 0)
+	{
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierUp(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierUp(action, row, true);
+		}
+	}
+}
+
+/**
+ * Moves a soldier up on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the top?
+ */
+void AllocateTrainingState::moveSoldierUp(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->begin(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row - 1);
+		_base->getSoldiers()->at(row - 1) = s;
+		if (row != _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() - static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollUp(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
+}
+
+/**
+ * Reorders a soldier down.
+ * @param action Pointer to an action.
+ */
+void AllocateTrainingState::lstItemsRightArrowClick(Action *action)
+{
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	size_t numSoldiers = _base->getSoldiers()->size();
+	if (0 < numSoldiers && INT_MAX >= numSoldiers && row < numSoldiers - 1)
+	{
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierDown(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierDown(action, row, true);
+		}
+	}
+}
+
+/**
+ * Moves a soldier down on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the bottom?
+ */
+void AllocateTrainingState::moveSoldierDown(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->end(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row + 1);
+		_base->getSoldiers()->at(row + 1) = s;
+		if (row != _lstSoldiers->getVisibleRows() - 1 + _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() + static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollDown(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
 }
 
 /**
@@ -166,6 +291,12 @@ void AllocateTrainingState::btnOkClick(Action *)
  */
 void AllocateTrainingState::lstSoldiersClick(Action *action)
 {
+	double mx = action->getAbsoluteXMouse();
+	if (mx >= _lstSoldiers->getArrowsLeftEdge() && mx < _lstSoldiers->getArrowsRightEdge())
+	{
+		return;
+	}
+
 	_sel = _lstSoldiers->getSelectedRow();
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
