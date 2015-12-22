@@ -131,12 +131,12 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 
 		if ((*s)->isInTraining())
 		{
-			_lstSoldiers->addRow(9, (*s)->getName().c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr("STR_YES").c_str());
+			_lstSoldiers->addRow(9, (*s)->getName(true).c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr("STR_YES").c_str());
 			_lstSoldiers->setRowColor(row, _lstSoldiers->getSecondaryColor());
 		}
 		else
 		{
-			_lstSoldiers->addRow(9, (*s)->getName().c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr("STR_NO").c_str());
+			_lstSoldiers->addRow(9, (*s)->getName(true).c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr("STR_NO").c_str());
 			_lstSoldiers->setRowColor(row, _lstSoldiers->getColor());
 		}
 		row++;
