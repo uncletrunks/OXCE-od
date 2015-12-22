@@ -54,6 +54,13 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	_txtTraining = new Text(48, 20, 270, 32);
 	_btnOk = new TextButton(160, 14, 80, 174);
 	_lstSoldiers = new TextList(290, 112, 8, 52);
+	_txtTu = new Text(18, 10, 124, 40);
+	_txtStamina = new Text(18, 10, 144, 40);
+	_txtHealth = new Text(18, 10, 164, 40);
+	_txtFiring = new Text(18, 10, 184, 40);
+	_txtThrowing = new Text(18, 10, 204, 40);
+	_txtMelee = new Text(18, 10, 224, 40);
+	_txtStrength = new Text(18, 10, 244, 40);
 
 	// Set palette
 	setPalette("PAL_BASESCAPE", _game->getMod()->getInterface("allocatePsi")->getElement("palette")->color);
@@ -65,6 +72,13 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	add(_txtRemaining, "text", "allocatePsi");
 	add(_txtTraining, "text", "allocatePsi");
 	add(_lstSoldiers, "list", "allocatePsi");
+	add(_txtTu, "text", "allocatePsi");
+	add(_txtStamina, "text", "allocatePsi");
+	add(_txtHealth, "text", "allocatePsi");
+	add(_txtFiring, "text", "allocatePsi");
+	add(_txtThrowing, "text", "allocatePsi");
+	add(_txtMelee, "text", "allocatePsi");
+	add(_txtStrength, "text", "allocatePsi");
 
 	centerAllSurfaces();
 
@@ -83,11 +97,16 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));
 
 	_txtName->setText(tr("STR_NAME"));
-
+	_txtTu->setText(tr("TU"));
+	_txtStamina->setText(tr("STA"));
+	_txtHealth->setText(tr("HP"));
+	_txtFiring->setText(tr("ACC"));
+	_txtThrowing->setText(tr("THR"));
+	_txtMelee->setText(tr("MEL"));
+	_txtStrength->setText(tr("STR"));
 	_txtTraining->setText(tr("STR_IN_TRAINING"));
 
-	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
-	_lstSoldiers->setColumns(2, 260, 40);
+	_lstSoldiers->setColumns(9, 114, 20, 20, 20, 20, 20, 20, 26, 40);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(2);
@@ -95,19 +114,35 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0)
 	int row = 0;
 	for (std::vector<Soldier*>::const_iterator s = base->getSoldiers()->begin(); s != base->getSoldiers()->end(); ++s)
 	{
+		std::wostringstream tu;
+		tu << (*s)->getCurrentStats()->tu;
+		std::wostringstream stamina;
+		stamina << (*s)->getCurrentStats()->stamina;
+		std::wostringstream health;
+		health << (*s)->getCurrentStats()->health;
+		std::wostringstream firing;
+		firing << (*s)->getCurrentStats()->firing;
+		std::wostringstream throwing;
+		throwing << (*s)->getCurrentStats()->throwing;
+		std::wostringstream melee;
+		melee << (*s)->getCurrentStats()->melee;
+		std::wostringstream strength;
+		strength << (*s)->getCurrentStats()->strength;
+
 		if ((*s)->isInTraining())
 		{
-			_lstSoldiers->addRow(2, (*s)->getName().c_str(), tr("STR_YES").c_str());
+			_lstSoldiers->addRow(9, (*s)->getName().c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr("STR_YES").c_str());
 			_lstSoldiers->setRowColor(row, _lstSoldiers->getSecondaryColor());
 		}
 		else
 		{
-			_lstSoldiers->addRow(2, (*s)->getName().c_str(), tr("STR_NO").c_str());
+			_lstSoldiers->addRow(9, (*s)->getName().c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr("STR_NO").c_str());
 			_lstSoldiers->setRowColor(row, _lstSoldiers->getColor());
 		}
 		row++;
 	}
 }
+
 /**
  *
  */
@@ -138,7 +173,7 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 		{
 			if (_base->getUsedTraining() < _base->getAvailableTraining())
 			{
-				_lstSoldiers->setCellText(_sel, 1, tr("STR_YES").c_str());
+				_lstSoldiers->setCellText(_sel, 8, tr("STR_YES").c_str());
 				_lstSoldiers->setRowColor(_sel, Palette::blockOffset(13)+5);
 				_space--;
 				_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));
@@ -147,7 +182,7 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 		}
 		else
 		{
-			_lstSoldiers->setCellText(_sel, 1, tr("STR_NO").c_str());
+			_lstSoldiers->setCellText(_sel, 8, tr("STR_NO").c_str());
 			_lstSoldiers->setRowColor(_sel, Palette::blockOffset(13));
 			_space++;
 			_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));

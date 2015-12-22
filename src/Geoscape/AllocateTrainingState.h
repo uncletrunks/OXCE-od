@@ -41,6 +41,7 @@ private:
 	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtTraining, *_txtName, *_txtRemaining;
+	Text *_txtTu, *_txtStamina, *_txtHealth, *_txtFiring, *_txtThrowing, *_txtMelee, *_txtStrength;
 	TextList *_lstSoldiers;
 	std::vector<Soldier*> _soldiers;
 	size_t _sel;
