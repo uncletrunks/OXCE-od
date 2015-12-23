@@ -1241,6 +1241,7 @@ bool BattlescapeState::playableUnitSelected()
  */
 void BattlescapeState::updateSoldierInfo()
 {
+	static Uint8 barHealthColor = _barHealth->getColor();
 	BattleUnit *battleUnit = _save->getSelectedUnit();
 
 	for (int i = 0; i < VISIBLE_MAX; ++i)
@@ -1296,6 +1297,7 @@ void BattlescapeState::updateSoldierInfo()
 	_barHealth->setMax(battleUnit->getBaseStats()->health);
 	_barHealth->setValue(battleUnit->getHealth());
 	_barHealth->setValue2(battleUnit->getStunlevel());
+	_barHealth->setColor(barHealthColor);
 	_numMorale->setValue(battleUnit->getMorale());
 	_barMorale->setMax(100);
 	_barMorale->setValue(battleUnit->getMorale());
@@ -1367,6 +1369,29 @@ void BattlescapeState::blinkVisibleUnitButtons()
 }
 
 /**
+ * Shifts the colors of the health bar when unit has fatal wounds.
+ */
+void BattlescapeState::blinkHealthBar()
+{
+	static Uint8 color = _barHealth->getColor(), maxcolor = color + 3, step = 0;
+
+	step ^= 1; // 1, 0, 1, 0, ...
+	BattleUnit *bu = _save->getSelectedUnit();
+	if (step == 0 || bu == 0 || !_barHealth->getVisible()) return;
+
+	if (++color > maxcolor) color = maxcolor - 3;
+
+	for (int i = 0; i < 6; i++)
+	{
+		if (bu->getFatalWound(i) > 0)
+		{
+			_barHealth->setColor(color);
+			break;
+		}
+	}
+}
+
+/**
  * Popups a context sensitive list of actions the user can choose from.
  * Some actions result in a change of gamestate.
  * @param item Item the user clicked on (righthand/lefthand)
@@ -1389,6 +1414,7 @@ void BattlescapeState::animate()
 	_map->animate(!_battleGame->isBusy());
 
 	blinkVisibleUnitButtons();
+	blinkHealthBar();
 }
 
 /**
