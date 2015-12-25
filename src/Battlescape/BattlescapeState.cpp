@@ -327,12 +327,13 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnNextStop->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 	_btnNextStop->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
-	//_btnShowLayers->onMouseClick((ActionHandler)&BattlescapeState::btnShowLayersClick);
-	_btnShowLayers->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
-	//_btnShowLayers->setTooltip("STR_MULTI_LEVEL_VIEW");
-	_btnShowLayers->setTooltip("STR_UFOPAEDIA_UC");
+	_btnShowLayers->onMouseClick((ActionHandler)&BattlescapeState::btnShowLayersClick);
+	//_btnShowLayers->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
+	_btnShowLayers->setTooltip("STR_MULTI_LEVEL_VIEW");
+	//_btnShowLayers->setTooltip("STR_UFOPAEDIA_UC");
 	_btnShowLayers->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 	_btnShowLayers->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
+	_btnShowLayers->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
 
 	_btnHelp->onMouseClick((ActionHandler)&BattlescapeState::btnHelpClick);
 	_btnHelp->onKeyboardPress((ActionHandler)&BattlescapeState::btnHelpClick, Options::keyBattleOptions);
