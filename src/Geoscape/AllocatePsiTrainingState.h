@@ -32,7 +32,6 @@ class Base;
 class TextList;
 class ComboBox;
 class Soldier;
-class Soldier;
 struct SortFunctor;
 
 /**

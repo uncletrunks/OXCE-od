@@ -29,7 +29,6 @@
 #include "../Savegame/Base.h"
 #include "../Interface/TextList.h"
 #include "../Savegame/Soldier.h"
-#include "../Savegame/SavedGame.h"
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
 #include "../Interface/ComboBox.h"
