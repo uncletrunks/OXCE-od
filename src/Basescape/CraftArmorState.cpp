@@ -21,6 +21,7 @@
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Interface/ComboBox.h"
 #include "../Engine/Action.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -28,6 +29,7 @@
 #include "../Interface/TextList.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Soldier.h"
+#include "../Savegame/SavedGame.h"
 #include "../Savegame/Craft.h"
 #include "../Mod/Armor.h"
 #include "SoldierArmorState.h"
@@ -35,6 +37,7 @@
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
+#include "SoldierSortUtil.h"
 
 namespace OpenXcom
 {
@@ -45,16 +48,17 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param craft ID of the selected craft.
  */
-CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft(craft)
+CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft(craft), _origSoldierOrder(*_base->getSoldiers())
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	_btnOk = new TextButton(288, 16, 16, 176);
+	_btnOk = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(300, 17, 16, 7);
 	_txtName = new Text(114, 9, 16, 32);
 	_txtCraft = new Text(76, 9, 130, 32);
 	_txtArmor = new Text(100, 9, 219, 32);
 	_lstSoldiers = new TextList(292, 128, 8, 40);
+	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
 
 	// Set palette
 	setInterface("craftArmor");
@@ -66,6 +70,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	add(_txtCraft, "text", "craftArmor");
 	add(_txtArmor, "text", "craftArmor");
 	add(_lstSoldiers, "list", "craftArmor");
+	add(_cbxSortBy, "button", "craftArmor");
 
 	centerAllSurfaces();
 
@@ -85,6 +90,38 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 
 	_txtArmor->setText(tr("STR_ARMOR"));
 
+	// populate sort options
+	std::vector<std::wstring> sortOptions;
+	sortOptions.push_back(tr("ORIGINAL ORDER"));
+	_sortFunctors.push_back(NULL);
+
+#define PUSH_IN(strId, functor) \
+	sortOptions.push_back(tr(strId)); \
+	_sortFunctors.push_back(new SortFunctor(_game, functor));
+
+	PUSH_IN("RANK", rankStat);
+	PUSH_IN("MISSIONS", missionsStat);
+	PUSH_IN("KILLS", killsStat);
+	PUSH_IN("WOUND RECOVERY", woundRecoveryStat);
+	PUSH_IN("STR_TIME_UNITS", tuStat);
+	PUSH_IN("STR_STAMINA", staminaStat);
+	PUSH_IN("STR_HEALTH", healthStat);
+	PUSH_IN("STR_BRAVERY", braveryStat);
+	PUSH_IN("STR_REACTIONS", reactionsStat);
+	PUSH_IN("STR_FIRING_ACCURACY", firingStat);
+	PUSH_IN("STR_THROWING_ACCURACY", throwingStat);
+	PUSH_IN("STR_MELEE_ACCURACY", meleeStat);
+	PUSH_IN("STR_STRENGTH", strengthStat);
+	PUSH_IN("STR_PSIONIC_STRENGTH", psiStrengthStat);
+	PUSH_IN("STR_PSIONIC_SKILL", psiSkillStat);
+
+#undef PUSH_IN
+
+	_cbxSortBy->setOptions(sortOptions);
+	_cbxSortBy->setSelected(0);
+	_cbxSortBy->onChange((ActionHandler)&CraftArmorState::cbxSortByChange);
+	_cbxSortBy->setText(tr("SORT BY..."));
+
 	_lstSoldiers->setArrowColumn(187, ARROW_VERTICAL);
 	_lstSoldiers->setColumns(3, 114, 89, 81);
 	_lstSoldiers->setSelectable(true);
@@ -97,10 +134,53 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 }
 
 /**
- *
+ * cleans up dynamic state
  */
 CraftArmorState::~CraftArmorState()
 {
+	for (std::vector<SortFunctor *>::iterator it = _sortFunctors.begin(); it != _sortFunctors.end(); ++it)
+	{
+		delete(*it);
+	}
+}
+
+/**
+ * Sorts the soldiers list by the selected criterion
+ * @param action Pointer to an action.
+ */
+void CraftArmorState::cbxSortByChange(Action *action)
+{
+	size_t selIdx = _cbxSortBy->getSelected();
+	if (selIdx == (size_t)-1)
+	{
+		return;
+	}
+
+	SortFunctor *compFunc = _sortFunctors[selIdx];
+	if (compFunc)
+	{
+		std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+	}
+	else
+	{
+		// restore original ordering, ignoring (of course) those
+		// soldiers that have been sacked since this state started
+		for (std::vector<Soldier *>::const_iterator it = _origSoldierOrder.begin();
+		it != _origSoldierOrder.end(); ++it)
+		{
+			std::vector<Soldier *>::iterator soldierIt =
+			std::find(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *it);
+			if (soldierIt != _base->getSoldiers()->end())
+			{
+				Soldier *s = *soldierIt;
+				_base->getSoldiers()->erase(soldierIt);
+				_base->getSoldiers()->insert(_base->getSoldiers()->end(), s);
+			}
+		}
+	}
+
+	size_t originalScrollPos = _lstSoldiers->getScroll();
+	initList(originalScrollPos);
 }
 
 /**
@@ -172,6 +252,8 @@ void CraftArmorState::lstItemsLeftArrowClick(Action *action)
 			moveSoldierUp(action, row, true);
 		}
 	}
+	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setSelected(-1);
 }
 
 /**
@@ -223,6 +305,8 @@ void CraftArmorState::lstItemsRightArrowClick(Action *action)
 			moveSoldierDown(action, row, true);
 		}
 	}
+	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setSelected(-1);
 }
 
 /**

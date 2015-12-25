@@ -20,6 +20,7 @@
 #define OPENXCOM_CRAFTARMORSTATE_H
 
 #include "../Engine/State.h"
+#include <vector>
 
 namespace OpenXcom
 {
@@ -28,7 +29,10 @@ class TextButton;
 class Window;
 class Text;
 class TextList;
+class ComboBox;
 class Base;
+class Soldier;
+struct SortFunctor;
 
 /**
  * Select Armor screen that lets the player
@@ -40,9 +44,12 @@ private:
 	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtName, *_txtCraft, *_txtArmor;
+	ComboBox *_cbxSortBy;
 	TextList *_lstSoldiers;
 
 	Base *_base;
+	std::vector<Soldier *> _origSoldierOrder;
+	std::vector<SortFunctor *> _sortFunctors;
 	size_t _craft;
 	///initializes the display list based on the craft soldier's list and the position to display
 	void initList(size_t scrl);
@@ -51,6 +58,8 @@ public:
 	CraftArmorState(Base *base, size_t craft);
 	/// Cleans up the Craft Armor state.
 	~CraftArmorState();
+	/// Handler for changing the sort by combobox.
+	void cbxSortByChange(Action *action);
 	/// Updates the soldier armors.
 	void init();
 	/// Handler for clicking the Soldiers reordering button.
