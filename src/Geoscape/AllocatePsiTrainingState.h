@@ -20,6 +20,7 @@
 #define OPENXCOM_ALLOCATEPSITRAININGSTATE_H
 
 #include "../Engine/State.h"
+#include <vector>
 
 namespace OpenXcom
 {
@@ -29,7 +30,10 @@ class Window;
 class Text;
 class Base;
 class TextList;
+class ComboBox;
 class Soldier;
+class Soldier;
+struct SortFunctor;
 
 /**
  * Screen shown monthly to allow changing
@@ -42,11 +46,14 @@ private:
 	Window *_window;
 	Text *_txtTitle, *_txtTraining, *_txtName, *_txtRemaining;
 	Text *_txtPsiStrength, *_txtPsiSkill;
+	ComboBox *_cbxSortBy;
 	TextList *_lstSoldiers;
 	std::vector<Soldier*> _soldiers;
 	size_t _sel;
 	int _labSpace;
 	Base *_base;
+	std::vector<Soldier *> _origSoldierOrder;
+	std::vector<SortFunctor *> _sortFunctors;
 	///initializes the display list based on the craft soldier's list and the position to display
 	void initList(size_t scrl);
 public:
@@ -54,6 +61,8 @@ public:
 	AllocatePsiTrainingState(Base *base);
 	/// Cleans up the Psi Training state.
 	~AllocatePsiTrainingState();
+	/// Handler for changing the sort by combobox.
+	void cbxSortByChange(Action *action);
 	/// Updates the soldier info.
 	void init();
 	/// Handler for clicking the Soldiers reordering button.
