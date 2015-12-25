@@ -45,13 +45,13 @@ private:
 	OptionsOrigin _origin;
 	TextButton *_btnOk, *_btnCancel;
 	Window *_window;
-	Text *_txtTitle, *_txtUsed, *_txtAvailable, *_txtItem, *_txtLiveAliens, *_txtDeadAliens, *_txtInterrogatedAliens;
+	Text *_txtTitle, *_txtUsed, *_txtAvailable, *_txtValueOfSales, *_txtItem, *_txtLiveAliens, *_txtDeadAliens, *_txtInterrogatedAliens;
 	TextList *_lstAliens;
 	Timer *_timerInc, *_timerDec;
 	std::vector<int> _qtys;
 	std::vector<std::string> _aliens;
 	size_t _sel;
-	int _aliensSold;
+	int _aliensSold, _total;
 	/// Gets selected quantity.
 	int getQuantity();
 public:

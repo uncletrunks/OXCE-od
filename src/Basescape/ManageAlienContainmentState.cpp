@@ -51,7 +51,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrigin origin) : _base(base), _origin(origin), _sel(0), _aliensSold(0)
+ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrigin origin) : _base(base), _origin(origin), _sel(0), _aliensSold(0), _total(0)
 {
 	bool overCrowded = Options::storageLimitsEnforced && _base->getFreeContainment() < 0;
 	std::vector<std::string> researchList;
@@ -71,6 +71,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 	_btnCancel = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
 	_txtAvailable =  new Text(190, 9, 10, 24);
+	_txtValueOfSales =  new Text(190, 9, 10, 32);
 	_txtUsed = new Text(110, 9, 136, 24);
 	_txtItem = new Text(120, 9, 10, 41);
 	_txtLiveAliens = new Text(54, 18, 153, 32);
@@ -86,6 +87,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 	add(_btnCancel, "button", "manageContainment");
 	add(_txtTitle, "text", "manageContainment");
 	add(_txtAvailable, "text", "manageContainment");
+	add(_txtValueOfSales, "text", "manageContainment");
 	add(_txtUsed, "text", "manageContainment");
 	add(_txtItem, "text", "manageContainment");
 	add(_txtLiveAliens, "text", "manageContainment");
@@ -134,8 +136,17 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 
 	_txtUsed->setText(tr("STR_SPACE_USED").arg( _base->getUsedContainment()));
 
+	if (Options::canSellLiveAliens)
+	{
+		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
+	}
+
 	_lstAliens->setArrowColumn(184, ARROW_HORIZONTAL);
-	_lstAliens->setColumns(4, 160, 64, 46, 46);
+	if (Options::canSellLiveAliens) {
+		_lstAliens->setColumns(5, 120, 40, 64, 46, 46);
+	} else {
+		_lstAliens->setColumns(5, 150, 10, 64, 46, 46);
+	}
 	_lstAliens->setSelectable(true);
 	_lstAliens->setBackground(_window);
 	_lstAliens->setMargin(2);
@@ -168,7 +179,15 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 			{
 				rqty = L"0";
 			}
-			_lstAliens->addRow(4, tr(*i).c_str(), ss.str().c_str(), L"0", rqty.c_str());
+
+			std::wstring formattedCost = L"";
+			if (Options::canSellLiveAliens)
+			{
+				int sellCost = _game->getMod()->getItem(*i)->getSellCost();
+				formattedCost = Text::formatFunding(sellCost / 1000).append(L"K");
+			}
+
+			_lstAliens->addRow(5, tr(*i).c_str(), formattedCost.c_str(), ss.str().c_str(), L"0", rqty.c_str());
 		}
 	}
 
@@ -176,7 +195,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 	{
 		_aliens.push_back(*i);
 		_qtys.push_back(0);
-		_lstAliens->addRow(4, tr(*i).c_str(), L"0", L"0", L"1");
+		_lstAliens->addRow(5, tr(*i).c_str(), Options::canSellLiveAliens ? L"-" : L"", L"0", L"0", L"1");
 		_lstAliens->setRowColor(_qtys.size() -1, _lstAliens->getSecondaryColor());
 	}
 	_timerInc = new Timer(250);
@@ -429,8 +448,8 @@ void ManageAlienContainmentState::updateStrings()
 	ss2 << _qtys[_sel];
 
 	_lstAliens->setRowColor(_sel, (qty == 0)? _lstAliens->getSecondaryColor() : _lstAliens->getColor());
-	_lstAliens->setCellText(_sel, 1, ss.str());
-	_lstAliens->setCellText(_sel, 2, ss2.str());
+	_lstAliens->setCellText(_sel, 2, ss.str());
+	_lstAliens->setCellText(_sel, 3, ss2.str());
 
 	int aliens = _base->getUsedContainment() - _aliensSold;
 	int spaces = _base->getAvailableContainment() - aliens;
@@ -440,6 +459,20 @@ void ManageAlienContainmentState::updateStrings()
 	}
 	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(spaces));
 	_txtUsed->setText(tr("STR_SPACE_USED").arg(aliens));
+
+	if (Options::canSellLiveAliens)
+	{
+		// we could probably keep track of _total with each change (only adding deltas), but I am lazy today
+		_total = 0;
+		for (size_t i = 0; i < _qtys.size(); ++i)
+		{
+			if (_qtys[i] > 0)
+			{
+				_total += _game->getMod()->getItem(_aliens[i])->getSellCost() * _qtys[i];
+			}
+		}
+		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
+	}
 }
 
 }
