@@ -20,6 +20,7 @@
 #define OPENXCOM_SOLDIERSSTATE_H
 
 #include "../Engine/State.h"
+#include <vector>
 
 namespace OpenXcom
 {
@@ -28,7 +29,10 @@ class TextButton;
 class Window;
 class Text;
 class TextList;
+class ComboBox;
 class Base;
+class Soldier;
+struct SortFunctor;
 
 /**
  * Soldiers screen that lets the player
@@ -40,8 +44,11 @@ private:
 	TextButton *_btnOk, *_btnPsiTraining, *_btnTraining, *_btnMemorial;
 	Window *_window;
 	Text *_txtTitle, *_txtName, *_txtRank, *_txtCraft;
+	ComboBox *_cbxSortBy;
 	TextList *_lstSoldiers;
 	Base *_base;
+	std::vector<Soldier *> _origSoldierOrder;
+	std::vector<SortFunctor *> _sortFunctors;
 	///initializes the display list based on the craft soldier's list and the position to display
 	void initList(size_t scrl);
 public:
@@ -49,6 +56,8 @@ public:
 	SoldiersState(Base *base);
 	/// Cleans up the Soldiers state.
 	~SoldiersState();
+	/// Handler for changing the sort by combobox.
+	void cbxSortByChange(Action *action);
 	/// Updates the soldier names.
 	void init();
 	/// Handler for clicking the Soldiers reordering button.
