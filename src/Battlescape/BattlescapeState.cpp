@@ -101,6 +101,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_map = new Map(_game, screenWidth, screenHeight, 0, 0, visibleMapHeight);
 
 	_numLayers = new NumberText(3, 5, x + 232, y + 6);
+	_txtKneelStatus = new Text(8, 8, x + 137, y + 15);
 	_rank = new Surface(26, 23, x + 107, y + 33);
 
 	// Create buttons
@@ -214,6 +215,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	add(_btnNextStop, "buttonNextStop", "battlescape", _icons);
 	add(_btnShowLayers, "buttonShowLayers", "battlescape", _icons);
 	add(_numLayers, "numLayers", "battlescape", _icons);
+	add(_txtKneelStatus, "txtKneelStatus", "battlescape", _icons);
 	add(_btnHelp, "buttonHelp", "battlescape", _icons);
 	add(_btnEndTurn, "buttonEndTurn", "battlescape", _icons);
 	add(_btnAbort, "buttonAbort", "battlescape", _icons);
@@ -260,6 +262,9 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 
 	_numLayers->setColor(Palette::blockOffset(1)-2);
 	_numLayers->setValue(1);
+
+	_txtKneelStatus->setColor(Palette::blockOffset(1)-2);
+	_txtKneelStatus->setText(L"");
 
 	_numAmmoLeft->setValue(999);
 
@@ -850,6 +855,19 @@ void BattlescapeState::btnShowMapClick(Action *)
 }
 
 /**
+ * Toggles the kneel button.
+ * @param unit Pointer to current unit.
+ */
+void BattlescapeState::toggleKneelButton(BattleUnit* unit)
+{
+	if ((unit) && (unit->isKneeled())) {
+		_txtKneelStatus->setText(L"*");
+	} else {
+		_txtKneelStatus->setText(L"");
+	}
+}
+
+/**
  * Toggles the current unit's kneel/standup status.
  * @param action Pointer to an action.
  */
@@ -861,6 +879,7 @@ void BattlescapeState::btnKneelClick(Action *)
 		if (bu)
 		{
 			_battleGame->kneel(bu);
+			toggleKneelButton(bu);
 		}
 
 		// update any path preview if unit kneels
@@ -1274,6 +1293,7 @@ void BattlescapeState::updateSoldierInfo()
 	{
 		_txtName->setText(L"");
 		showPsiButton(false);
+		toggleKneelButton(NULL);
 		return;
 	}
 
@@ -1302,6 +1322,8 @@ void BattlescapeState::updateSoldierInfo()
 	_numMorale->setValue(battleUnit->getMorale());
 	_barMorale->setMax(100);
 	_barMorale->setValue(battleUnit->getMorale());
+
+	toggleKneelButton(battleUnit);
 
 	BattleItem *leftHandItem = battleUnit->getItem("STR_LEFT_HAND");
 	_btnLeftHandItem->clear();

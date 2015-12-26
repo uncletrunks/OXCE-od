@@ -63,7 +63,7 @@ private:
 	NumberText *_numVisibleUnit[VISIBLE_MAX];
 	BattleUnit *_visibleUnit[VISIBLE_MAX];
 	WarningMessage *_warning;
-	Text *_txtName;
+	Text *_txtName, *_txtKneelStatus;
 	NumberText *_numTimeUnits, *_numEnergy, *_numHealth, *_numMorale, *_numLayers, *_numAmmoLeft, *_numAmmoRight;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
 	Timer *_animTimer, *_gameTimer;
@@ -87,6 +87,8 @@ private:
 	void blinkVisibleUnitButtons();
 	/// Shifts the colors of the health bar when unit has fatal wounds.
 	void blinkHealthBar();
+	/// Toggles kneel indicator
+	void toggleKneelButton(BattleUnit* unit);
 public:
 	/// Selects the next soldier.
 	void selectNextPlayerUnit(bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
