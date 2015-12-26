@@ -21,6 +21,7 @@
 
 #include "../Engine/State.h"
 #include <vector>
+#include "SoldierSortUtil.h"
 
 namespace OpenXcom
 {
@@ -53,7 +54,7 @@ private:
 	Uint8 _otherCraftColor;
 	std::vector<Soldier *> _origSoldierOrder;
 	std::vector<SortFunctor *> _sortFunctors;
-
+	getStatFn_t _dynGetter;
 	///initializes the display list based on the craft soldier's list and the position to display
 	void initList(size_t scrl);
 public:

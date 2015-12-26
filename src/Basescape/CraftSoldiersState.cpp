@@ -35,7 +35,6 @@
 #include "SoldierInfoState.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
-#include "SoldierSortUtil.h"
 
 namespace OpenXcom
 {
@@ -46,7 +45,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param craft ID of the selected craft.
  */
-CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base), _craft(craft), _otherCraftColor(0), _origSoldierOrder(*_base->getSoldiers())
+CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base), _craft(craft), _otherCraftColor(0), _origSoldierOrder(*_base->getSoldiers()), _dynGetter(NULL)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -54,7 +53,7 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
 	_txtTitle = new Text(300, 17, 16, 7);
 	_txtName = new Text(114, 9, 16, 32);
 	_txtRank = new Text(102, 9, 122, 32);
-	_txtCraft = new Text(84, 9, 224, 32);
+	_txtCraft = new Text(84, 9, 208, 32);
 	_txtAvailable = new Text(110, 9, 16, 24);
 	_txtUsed = new Text(110, 9, 122, 24);
 	_lstSoldiers = new TextList(288, 128, 8, 40);
@@ -127,8 +126,9 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
 	_cbxSortBy->onChange((ActionHandler)&CraftSoldiersState::cbxSortByChange);
 	_cbxSortBy->setText(tr("SORT BY..."));
 
-	_lstSoldiers->setArrowColumn(192, ARROW_VERTICAL);
-	_lstSoldiers->setColumns(3, 106, 102, 72);
+	_lstSoldiers->setArrowColumn(176, ARROW_VERTICAL);
+	_lstSoldiers->setColumns(4, 106, 86, 72, 16);
+	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(8);
@@ -168,6 +168,7 @@ void CraftSoldiersState::cbxSortByChange(Action *action)
 	}
 	else
 	{
+		_dynGetter = NULL;
 		// restore original ordering, ignoring (of course) those
 		// soldiers that have been sacked since this state started
 		for (std::vector<Soldier *>::const_iterator it = _origSoldierOrder.begin();
@@ -185,6 +186,10 @@ void CraftSoldiersState::cbxSortByChange(Action *action)
 	}
 
 	size_t originalScrollPos = _lstSoldiers->getScroll();
+	if (compFunc)
+	{
+		_dynGetter = compFunc->getGetter();
+	}
 	initList(originalScrollPos);
 }
 
@@ -207,7 +212,17 @@ void CraftSoldiersState::initList(size_t scrl)
 	Craft *c = _base->getCrafts()->at(_craft);
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
-		_lstSoldiers->addRow(3, (*i)->getName(true, 19).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str());
+		// call corresponding getter
+		int dynStat = 0;
+		std::wostringstream ss;
+		if (_dynGetter != NULL) {
+			dynStat = (*_dynGetter)(_game, *i);
+			ss << dynStat;
+		} else {
+			ss << L"";
+		}
+
+		_lstSoldiers->addRow(4, (*i)->getName(true, 19).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str(), ss.str().c_str());
 
 		Uint8 color;
 		if ((*i)->getCraft() == c)
