@@ -21,6 +21,10 @@ struct SortFunctor : public std::binary_function<Soldier *, Soldier *, bool>
 		bool ret = _getStatFn(_game, a) < _getStatFn(_game, b);
 		return ret;
 	}
+	getStatFn_t getGetter()
+	{
+		return _getStatFn;
+	}
 };
 
 #define GET_ATTRIB_STAT_FN(attrib) \

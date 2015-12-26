@@ -34,7 +34,6 @@
 #include "../Savegame/SavedGame.h"
 #include "SoldierInfoState.h"
 #include "SoldierMemorialState.h"
-#include "SoldierSortUtil.h"
 
 namespace OpenXcom
 {
@@ -85,8 +84,8 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_txtTitle = new Text(168, 17, 16, 8);
 	_cbxSortBy = new ComboBox(this, 120, 16, 192, 8, false);
 	_txtName = new Text(114, 9, 16, 32);
-	_txtRank = new Text(102, 9, 130, 32);
-	_txtCraft = new Text(82, 9, 222, 32);
+	_txtRank = new Text(102, 9, 128, 32);
+	_txtCraft = new Text(82, 9, 208, 32);
 	_lstSoldiers = new TextList(288, 128, 8, 40);
 
 	// Set palette
@@ -166,8 +165,9 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_cbxSortBy->onChange((ActionHandler)&SoldiersState::cbxSortByChange);
 	_cbxSortBy->setText(tr("SORT BY..."));
 
-	_lstSoldiers->setArrowColumn(190, ARROW_VERTICAL);
-	_lstSoldiers->setColumns(3, 114, 92, 74);
+	_lstSoldiers->setArrowColumn(176, ARROW_VERTICAL);
+	_lstSoldiers->setColumns(4, 112, 80, 72, 16);
+	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(8);
@@ -223,7 +223,12 @@ void SoldiersState::cbxSortByChange(Action *action)
 	}
 
 	size_t originalScrollPos = _lstSoldiers->getScroll();
-	initList(originalScrollPos);
+	if (compFunc) {
+		getStatFn_t dynGetter = compFunc->getGetter();
+		initList(originalScrollPos, dynGetter);
+	} else {
+		initList(originalScrollPos);
+	}
 }
 
 /**
@@ -239,13 +244,23 @@ void SoldiersState::init()
 /**
  * Shows the soldiers in a list at specified offset/scroll.
  */
-void SoldiersState::initList(size_t scrl)
+void SoldiersState::initList(size_t scrl, getStatFn_t dynGetter)
 {
 	unsigned int row = 0;
 	_lstSoldiers->clearList();
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
-		_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str());
+		// call corresponding getter
+		int dynStat = 0;
+		std::wostringstream ss;
+		if (dynGetter != NULL) {
+			dynStat = (*dynGetter)(_game, *i);
+			ss << dynStat;
+		} else {
+			ss << L"";
+		}
+
+		_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str(), ss.str().c_str());
 		if ((*i)->getCraft() == 0)
 		{
 			_lstSoldiers->setRowColor(row, _lstSoldiers->getSecondaryColor());
