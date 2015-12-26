@@ -56,7 +56,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_txtTitle = new Text(300, 17, 16, 7);
 	_txtName = new Text(114, 9, 16, 32);
 	_txtCraft = new Text(76, 9, 130, 32);
-	_txtArmor = new Text(100, 9, 219, 32);
+	_txtArmor = new Text(100, 9, 225, 32);
 	_lstSoldiers = new TextList(292, 128, 8, 40);
 	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
 
@@ -122,8 +122,8 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_cbxSortBy->onChange((ActionHandler)&CraftArmorState::cbxSortByChange);
 	_cbxSortBy->setText(tr("SORT BY..."));
 
-	_lstSoldiers->setArrowColumn(187, ARROW_VERTICAL);
-	_lstSoldiers->setColumns(3, 114, 89, 81);
+	_lstSoldiers->setArrowColumn(193, ARROW_VERTICAL);
+	_lstSoldiers->setColumns(3, 114, 95, 75);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(8);
