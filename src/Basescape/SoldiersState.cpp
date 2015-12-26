@@ -43,7 +43,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base->getSoldiers())
+SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base->getSoldiers()), _dynGetter(NULL)
 {
 	bool isPsiBtnVisible = Options::anytimePsiTraining && _base->getAvailablePsiLabs() > 0;
 	bool isTrnBtnVisible = Options::anytimePsiTraining && _base->getAvailableTraining() > 0;
@@ -206,6 +206,7 @@ void SoldiersState::cbxSortByChange(Action *action)
 	}
 	else
 	{
+		_dynGetter = NULL;
 		// restore original ordering, ignoring (of course) those
 		// soldiers that have been sacked since this state started
 		for (std::vector<Soldier *>::const_iterator it = _origSoldierOrder.begin();
@@ -223,12 +224,11 @@ void SoldiersState::cbxSortByChange(Action *action)
 	}
 
 	size_t originalScrollPos = _lstSoldiers->getScroll();
-	if (compFunc) {
-		getStatFn_t dynGetter = compFunc->getGetter();
-		initList(originalScrollPos, dynGetter);
-	} else {
-		initList(originalScrollPos);
+	if (compFunc)
+	{
+		_dynGetter = compFunc->getGetter();
 	}
+	initList(originalScrollPos);
 }
 
 /**
@@ -244,7 +244,7 @@ void SoldiersState::init()
 /**
  * Shows the soldiers in a list at specified offset/scroll.
  */
-void SoldiersState::initList(size_t scrl, getStatFn_t dynGetter)
+void SoldiersState::initList(size_t scrl)
 {
 	unsigned int row = 0;
 	_lstSoldiers->clearList();
@@ -253,8 +253,8 @@ void SoldiersState::initList(size_t scrl, getStatFn_t dynGetter)
 		// call corresponding getter
 		int dynStat = 0;
 		std::wostringstream ss;
-		if (dynGetter != NULL) {
-			dynStat = (*dynGetter)(_game, *i);
+		if (_dynGetter != NULL) {
+			dynStat = (*_dynGetter)(_game, *i);
 			ss << dynStat;
 		} else {
 			ss << L"";

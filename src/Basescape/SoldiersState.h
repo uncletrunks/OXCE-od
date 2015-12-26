@@ -50,8 +50,9 @@ private:
 	Base *_base;
 	std::vector<Soldier *> _origSoldierOrder;
 	std::vector<SortFunctor *> _sortFunctors;
+	getStatFn_t _dynGetter;
 	///initializes the display list based on the craft soldier's list and the position to display
-	void initList(size_t scrl, getStatFn_t dynGetter = NULL);
+	void initList(size_t scrl);
 public:
 	/// Creates the Soldiers state.
 	SoldiersState(Base *base);
