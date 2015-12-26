@@ -21,7 +21,15 @@ int OpenXcom::psiStrengthStat(Game *game, Soldier *s)
 	}
 	return 0;
 }
-GET_ATTRIB_STAT_FN(psiSkill)
+int OpenXcom::psiSkillStat(Game *game, Soldier *s)
+{
+	// when Options::anytimePsiTraining is turned on, psiSkill can actually have a negative value
+	if (s->getCurrentStats()->psiSkill > 0)
+	{
+		return s->getCurrentStats()->psiSkill;
+	}
+	return 0;
+}
 GET_ATTRIB_STAT_FN(melee)
 #undef GET_ATTRIB_STAT_FN
 #define GET_SOLDIER_STAT_FN(attrib, camelCaseAttrib) \
