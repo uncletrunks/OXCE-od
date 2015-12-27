@@ -30,9 +30,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
 #include "ManufactureStartState.h"
-#include "../Menu/ErrorMessageState.h"
 #include "../Mod/Mod.h"
-#include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
 {
@@ -146,18 +144,9 @@ void NewManufactureListState::lstProdClick(Action *)
 			break;
 		}
 	}
-	if (rule->getCategory() == "STR_CRAFT" && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
-	{
-		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
-	}
-	else if (rule->getRequiredSpace() > _base->getFreeWorkshops())
-	{
-		_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_WORK_SPACE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
-	}
-	else
-	{
-		_game->pushState(new ManufactureStartState(_base, rule));
-	}
+
+	// check and display error messages only further down the chain
+	_game->pushState(new ManufactureStartState(_base, rule));
 }
 
 /**
