@@ -212,6 +212,10 @@ public:
 	void btnZeroTUsClick(Action *action);
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
+	/// Handler for showing tooltip with extra information (used for medikit-type equipment)
+	void txtTooltipInExtra(Action *action, bool leftHand);
+	void txtTooltipInExtraLeftHand(Action *action);
+	void txtTooltipInExtraRightHand(Action *action);
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
 	/// Update the resolution settings, we just resized the window.

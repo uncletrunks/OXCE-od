@@ -385,13 +385,13 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick);
 	_btnLeftHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnLeftHandItemClick, Options::keyBattleUseLeftHand);
 	_btnLeftHandItem->setTooltip("STR_USE_LEFT_HAND");
-	_btnLeftHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
+	_btnLeftHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInExtraLeftHand);
 	_btnLeftHandItem->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick);
 	_btnRightHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnRightHandItemClick, Options::keyBattleUseRightHand);
 	_btnRightHandItem->setTooltip("STR_USE_RIGHT_HAND");
-	_btnRightHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
+	_btnRightHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInExtraRightHand);
 	_btnRightHandItem->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnReserveNone->onMouseClick((ActionHandler)&BattlescapeState::btnReserveClick);
@@ -2175,6 +2175,139 @@ void BattlescapeState::btnZeroTUsClick(Action *action)
 }
 
 /**
+* Shows a tooltip with extra information (used for medikit-type equipment).
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
+{
+	if (allowButtons() && Options::battleTooltips)
+	{
+		// no one selected... do normal tooltip
+		if(!playableUnitSelected())
+		{
+			_currentTooltip = action->getSender()->getTooltip();
+			_txtTooltip->setText(tr(_currentTooltip));
+			return;
+		}
+
+		BattleUnit *selectedUnit = _save->getSelectedUnit();
+		BattleItem *weapon;
+		if (leftHand)
+		{
+			weapon = selectedUnit->getItem("STR_LEFT_HAND");
+		}
+		else
+		{
+			weapon = selectedUnit->getItem("STR_RIGHT_HAND");
+		}
+
+		// no weapon selected... do normal tooltip
+		if(!weapon)
+		{
+			_currentTooltip = action->getSender()->getTooltip();
+			_txtTooltip->setText(tr(_currentTooltip));
+			return;
+		}
+
+		// find the target unit
+		if (weapon->getRules()->getBattleType() == BT_MEDIKIT)
+		{
+			BattleUnit *targetUnit = 0;
+			TileEngine *tileEngine = _game->getSavedGame()->getSavedBattle()->getTileEngine();
+			const std::vector<BattleUnit*> *units = _game->getSavedGame()->getSavedBattle()->getUnits();
+
+			// search for target on the ground
+			bool onGround = false;
+			for (std::vector<BattleUnit*>::const_iterator i = units->begin(); i != units->end() && !targetUnit; ++i)
+			{
+				// we can heal a unit that is at the same position, unconscious and healable(=woundable)
+				if ((*i)->getPosition() == selectedUnit->getPosition() && *i != selectedUnit && (*i)->getStatus() == STATUS_UNCONSCIOUS && (*i)->isWoundable())
+				{
+					targetUnit = *i;
+					onGround = true;
+				}
+			}
+
+			// search for target in front of the selected unit
+			if (!targetUnit)
+			{
+				Position dest;
+				if (tileEngine->validMeleeRange(
+					selectedUnit->getPosition(),
+					selectedUnit->getDirection(),
+					selectedUnit,
+					0, &dest, false))
+				{
+					Tile *tile = _game->getSavedGame()->getSavedBattle()->getTile(dest);
+					if (tile != 0 && tile->getUnit() && tile->getUnit()->isWoundable())
+					{
+						targetUnit = tile->getUnit();
+					}
+				}
+			}
+
+			_currentTooltip = action->getSender()->getTooltip();
+			std::wstring tooltipExtra = tr(_currentTooltip);
+
+			// target unit found
+			if (targetUnit)
+			{
+				if (targetUnit->getOriginalFaction() == FACTION_HOSTILE) {
+					_txtTooltip->setColor(Palette::blockOffset(2));
+					_txtTooltip->setText(tooltipExtra + L"; Target = ENEMY" + (onGround ? L" (on the ground)" : L""));
+				} else if (targetUnit->getOriginalFaction() == FACTION_NEUTRAL) {
+					_txtTooltip->setColor(Palette::blockOffset(6));
+					_txtTooltip->setText(tooltipExtra + L"; Target = NEUTRAL" + (onGround ? L" (on the ground)" : L""));
+				} else if (targetUnit->getOriginalFaction() == FACTION_PLAYER) {
+					_txtTooltip->setColor(Palette::blockOffset(4));
+					_txtTooltip->setText(tooltipExtra + L"; Target = FRIEND" + (onGround ? L" (on the ground)" : L""));
+				}
+			}
+			else
+			{
+				// target unit not found => selected unit is the target (if self-heal is possible)
+				if (weapon->getRules()->getAllowSelfHeal())
+				{
+					targetUnit = selectedUnit;
+					_txtTooltip->setColor(Palette::blockOffset(13));
+					_txtTooltip->setText(tooltipExtra + L"; Target = YOURSELF");
+				}
+				else
+				{
+					// cannot use the weapon (medi-kit) on anyone
+					_currentTooltip = action->getSender()->getTooltip();
+					_txtTooltip->setText(tr(_currentTooltip));
+				}
+			}
+		}
+		else 
+		{
+			// weapon is not of medi-kit battle type
+			_currentTooltip = action->getSender()->getTooltip();
+			_txtTooltip->setText(tr(_currentTooltip));
+		}
+	}
+}
+
+/**
+* Shows a tooltip with extra information (used for medikit-type equipment).
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInExtraLeftHand(Action *action)
+{
+	txtTooltipInExtra(action, true);
+}
+
+/**
+* Shows a tooltip with extra information (used for medikit-type equipment).
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInExtraRightHand(Action *action)
+{
+	txtTooltipInExtra(action, false);
+}
+
+/**
 * Shows a tooltip for the appropriate button.
 * @param action Pointer to an action.
 */
@@ -2193,6 +2326,9 @@ void BattlescapeState::txtTooltipIn(Action *action)
 */
 void BattlescapeState::txtTooltipOut(Action *action)
 {
+	// reset color
+	_txtTooltip->setColor(Palette::blockOffset(0));
+
 	if (allowButtons() && Options::battleTooltips)
 	{
 		if (_currentTooltip == action->getSender()->getTooltip())
