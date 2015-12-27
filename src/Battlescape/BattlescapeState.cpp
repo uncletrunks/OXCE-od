@@ -128,8 +128,14 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnZeroTUs = new BattlescapeButton(10, 23, x + 49, y + 33);
 	_btnLeftHandItem = new InteractiveSurface(32, 48, x + 8, y + 4);
 	_numAmmoLeft = new NumberText(30, 5, x + 8, y + 4);
+	_numMedikitLeft1 = new NumberText(30, 5, x + 9, y + 32);
+	_numMedikitLeft2 = new NumberText(30, 5, x + 9, y + 39);
+	_numMedikitLeft3 = new NumberText(30, 5, x + 9, y + 46);
 	_btnRightHandItem = new InteractiveSurface(32, 48, x + 280, y + 4);
 	_numAmmoRight = new NumberText(30, 5, x + 280, y + 4);
+	_numMedikitRight1 = new NumberText(30, 5, x + 281, y + 32);
+	_numMedikitRight2 = new NumberText(30, 5, x + 281, y + 39);
+	_numMedikitRight3 = new NumberText(30, 5, x + 281, y + 46);
 	const int visibleUnitX = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->x;
 	const int visibleUnitY = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->y;
 	for (int i = 0; i < VISIBLE_MAX; ++i)
@@ -237,8 +243,14 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	add(_btnZeroTUs, "buttonZeroTUs", "battlescape", _icons);
 	add(_btnLeftHandItem, "buttonLeftHand", "battlescape", _icons);
 	add(_numAmmoLeft, "numAmmoLeft", "battlescape", _icons);
+	add(_numMedikitLeft1, "numMedikitLeft1", "battlescape", _icons);
+	add(_numMedikitLeft2, "numMedikitLeft2", "battlescape", _icons);
+	add(_numMedikitLeft3, "numMedikitLeft3", "battlescape", _icons);
 	add(_btnRightHandItem, "buttonRightHand", "battlescape", _icons);
 	add(_numAmmoRight, "numAmmoRight", "battlescape", _icons);
+	add(_numMedikitRight1, "numMedikitRight1", "battlescape", _icons);
+	add(_numMedikitRight2, "numMedikitRight2", "battlescape", _icons);
+	add(_numMedikitRight3, "numMedikitRight3", "battlescape", _icons);
 	for (int i = 0; i < VISIBLE_MAX; ++i)
 	{
 		add(_btnVisibleUnit[i]);
@@ -267,8 +279,14 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_txtKneelStatus->setText(L"");
 
 	_numAmmoLeft->setValue(999);
+	_numMedikitLeft1->setValue(999);
+	_numMedikitLeft2->setValue(999);
+	_numMedikitLeft3->setValue(999);
 
 	_numAmmoRight->setValue(999);
+	_numMedikitRight1->setValue(999);
+	_numMedikitRight2->setValue(999);
+	_numMedikitRight3->setValue(999);
 
 	_icons->onMouseIn((ActionHandler)&BattlescapeState::mouseInIcons);
 	_icons->onMouseOut((ActionHandler)&BattlescapeState::mouseOutIcons);
@@ -1288,7 +1306,13 @@ void BattlescapeState::updateSoldierInfo()
 	_btnLeftHandItem->setVisible(playableUnit);
 	_btnRightHandItem->setVisible(playableUnit);
 	_numAmmoLeft->setVisible(playableUnit);
+	_numMedikitLeft1->setVisible(playableUnit);
+	_numMedikitLeft2->setVisible(playableUnit);
+	_numMedikitLeft3->setVisible(playableUnit);
 	_numAmmoRight->setVisible(playableUnit);
+	_numMedikitRight1->setVisible(playableUnit);
+	_numMedikitRight2->setVisible(playableUnit);
+	_numMedikitRight3->setVisible(playableUnit);
 	if (!playableUnit)
 	{
 		_txtName->setText(L"");
@@ -1328,6 +1352,9 @@ void BattlescapeState::updateSoldierInfo()
 	BattleItem *leftHandItem = battleUnit->getItem("STR_LEFT_HAND");
 	_btnLeftHandItem->clear();
 	_numAmmoLeft->setVisible(false);
+	_numMedikitLeft1->setVisible(false);
+	_numMedikitLeft2->setVisible(false);
+	_numMedikitLeft3->setVisible(false);
 	if (leftHandItem)
 	{
 		leftHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnLeftHandItem);
@@ -1339,10 +1366,22 @@ void BattlescapeState::updateSoldierInfo()
 			else
 				_numAmmoLeft->setValue(0);
 		}
+		if (leftHandItem->getRules()->getBattleType() == BT_MEDIKIT)
+		{
+			_numMedikitLeft1->setVisible(true);
+			_numMedikitLeft1->setValue(leftHandItem->getPainKillerQuantity());
+			_numMedikitLeft2->setVisible(true);
+			_numMedikitLeft2->setValue(leftHandItem->getStimulantQuantity());
+			_numMedikitLeft3->setVisible(true);
+			_numMedikitLeft3->setValue(leftHandItem->getHealQuantity());
+		}
 	}
 	BattleItem *rightHandItem = battleUnit->getItem("STR_RIGHT_HAND");
 	_btnRightHandItem->clear();
 	_numAmmoRight->setVisible(false);
+	_numMedikitRight1->setVisible(false);
+	_numMedikitRight2->setVisible(false);
+	_numMedikitRight3->setVisible(false);
 	if (rightHandItem)
 	{
 		rightHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnRightHandItem);
@@ -1353,6 +1392,15 @@ void BattlescapeState::updateSoldierInfo()
 				_numAmmoRight->setValue(rightHandItem->getAmmoItem()->getAmmoQuantity());
 			else
 				_numAmmoRight->setValue(0);
+		}
+		if (rightHandItem->getRules()->getBattleType() == BT_MEDIKIT)
+		{
+			_numMedikitRight1->setVisible(true);
+			_numMedikitRight1->setValue(rightHandItem->getPainKillerQuantity());
+			_numMedikitRight2->setVisible(true);
+			_numMedikitRight2->setValue(rightHandItem->getStimulantQuantity());
+			_numMedikitRight3->setVisible(true);
+			_numMedikitRight3->setValue(rightHandItem->getHealQuantity());
 		}
 	}
 
