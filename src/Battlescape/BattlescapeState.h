@@ -216,6 +216,8 @@ public:
 	void txtTooltipInExtra(Action *action, bool leftHand);
 	void txtTooltipInExtraLeftHand(Action *action);
 	void txtTooltipInExtraRightHand(Action *action);
+	/// Handler for showing tooltip with extra information (about current turn)
+	void txtTooltipInEndTurn(Action *action);
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
 	/// Update the resolution settings, we just resized the window.

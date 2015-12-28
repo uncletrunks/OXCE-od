@@ -367,7 +367,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnEndTurn->onMouseClick((ActionHandler)&BattlescapeState::btnEndTurnClick);
 	_btnEndTurn->onKeyboardPress((ActionHandler)&BattlescapeState::btnEndTurnClick, Options::keyBattleEndTurn);
 	_btnEndTurn->setTooltip("STR_END_TURN");
-	_btnEndTurn->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
+	_btnEndTurn->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInEndTurn);
 	_btnEndTurn->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnAbort->onMouseClick((ActionHandler)&BattlescapeState::btnAbortClick);
@@ -2305,6 +2305,24 @@ void BattlescapeState::txtTooltipInExtraLeftHand(Action *action)
 void BattlescapeState::txtTooltipInExtraRightHand(Action *action)
 {
 	txtTooltipInExtra(action, false);
+}
+
+/**
+* Shows a tooltip for the End Turn button.
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInEndTurn(Action *action)
+{
+	if (allowButtons() && Options::battleTooltips)
+	{
+		_currentTooltip = action->getSender()->getTooltip();
+
+		std::wostringstream ss;
+		ss << tr(_currentTooltip);
+		ss << L" ";
+		ss << _save->getTurn();
+		_txtTooltip->setText(ss.str().c_str());
+	}
 }
 
 /**
