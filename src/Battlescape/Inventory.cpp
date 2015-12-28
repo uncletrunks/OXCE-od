@@ -251,6 +251,7 @@ void Inventory::drawItems()
 		Surface *stackLayer = new Surface(getWidth(), getHeight(), 0, 0);
 		stackLayer->setPalette(getPalette());
 		// Ground items
+		int fatalWounds = 0;
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
 			Surface *frame = texture->getFrame((*i)->getRules()->getBigSprite());
@@ -266,6 +267,30 @@ void Inventory::drawItems()
 			if ((*i)->getFuseTimer() >= 0)
 			{
 				_grenadeIndicators.push_back(std::make_pair(frame->getX(), frame->getY()));
+			}
+
+			// fatal wounds
+			fatalWounds = 0;
+			if ((*i)->getUnit())
+			{
+				// don't show on dead units
+				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+				{
+					fatalWounds = (*i)->getUnit()->getFatalWounds();
+				}
+			}
+			if (fatalWounds > 0)
+			{
+				_stackNumber->setX(((*i)->getSlot()->getX() + (((*i)->getSlotX() + (*i)->getRules()->getInventoryWidth()) - _groundOffset) * RuleInventory::SLOT_W)-4);
+				if (fatalWounds > 9)
+				{
+					_stackNumber->setX(_stackNumber->getX()-4);
+				}
+				_stackNumber->setY(((*i)->getSlot()->getY() + ((*i)->getSlotY() + (*i)->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H)-6);
+				_stackNumber->setValue(fatalWounds);
+				_stackNumber->draw();
+				_stackNumber->setColor(32); // red
+				_stackNumber->blit(stackLayer);
 			}
 
 			// item stacking
