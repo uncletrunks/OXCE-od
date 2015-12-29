@@ -66,6 +66,7 @@ private:
 	Text *_txtName, *_txtKneelStatus;
 	NumberText *_numTimeUnits, *_numEnergy, *_numHealth, *_numMorale, *_numLayers, *_numAmmoLeft, *_numAmmoRight;
 	NumberText *_numMedikitLeft1, *_numMedikitLeft2, *_numMedikitLeft3, *_numMedikitRight1, *_numMedikitRight2, *_numMedikitRight3;
+	NumberText *_numTwoHandedIndicatorLeft, *_numTwoHandedIndicatorRight;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
 	Timer *_animTimer, *_gameTimer;
 	int _animFrame; // for grenade timers

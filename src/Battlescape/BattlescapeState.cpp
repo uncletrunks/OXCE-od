@@ -132,11 +132,13 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_numMedikitLeft1 = new NumberText(30, 5, x + 9, y + 32);
 	_numMedikitLeft2 = new NumberText(30, 5, x + 9, y + 39);
 	_numMedikitLeft3 = new NumberText(30, 5, x + 9, y + 46);
+	_numTwoHandedIndicatorLeft = new NumberText(10, 5, x + 36, y + 46);
 	_btnRightHandItem = new InteractiveSurface(32, 48, x + 280, y + 4);
 	_numAmmoRight = new NumberText(30, 5, x + 280, y + 4);
 	_numMedikitRight1 = new NumberText(30, 5, x + 281, y + 32);
 	_numMedikitRight2 = new NumberText(30, 5, x + 281, y + 39);
 	_numMedikitRight3 = new NumberText(30, 5, x + 281, y + 46);
+	_numTwoHandedIndicatorRight = new NumberText(10, 5, x + 308, y + 46);
 	const int visibleUnitX = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->x;
 	const int visibleUnitY = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->y;
 	for (int i = 0; i < VISIBLE_MAX; ++i)
@@ -247,11 +249,13 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	add(_numMedikitLeft1, "numMedikitLeft1", "battlescape", _icons);
 	add(_numMedikitLeft2, "numMedikitLeft2", "battlescape", _icons);
 	add(_numMedikitLeft3, "numMedikitLeft3", "battlescape", _icons);
+	add(_numTwoHandedIndicatorLeft, "numTwoHandedIndicatorLeft", "battlescape", _icons);
 	add(_btnRightHandItem, "buttonRightHand", "battlescape", _icons);
 	add(_numAmmoRight, "numAmmoRight", "battlescape", _icons);
 	add(_numMedikitRight1, "numMedikitRight1", "battlescape", _icons);
 	add(_numMedikitRight2, "numMedikitRight2", "battlescape", _icons);
 	add(_numMedikitRight3, "numMedikitRight3", "battlescape", _icons);
+	add(_numTwoHandedIndicatorRight, "numTwoHandedIndicatorRight", "battlescape", _icons);
 	for (int i = 0; i < VISIBLE_MAX; ++i)
 	{
 		add(_btnVisibleUnit[i]);
@@ -283,11 +287,13 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_numMedikitLeft1->setValue(999);
 	_numMedikitLeft2->setValue(999);
 	_numMedikitLeft3->setValue(999);
+	_numTwoHandedIndicatorLeft->setValue(2);
 
 	_numAmmoRight->setValue(999);
 	_numMedikitRight1->setValue(999);
 	_numMedikitRight2->setValue(999);
 	_numMedikitRight3->setValue(999);
+	_numTwoHandedIndicatorRight->setValue(2);
 
 	_icons->onMouseIn((ActionHandler)&BattlescapeState::mouseInIcons);
 	_icons->onMouseOut((ActionHandler)&BattlescapeState::mouseOutIcons);
@@ -1310,10 +1316,12 @@ void BattlescapeState::updateSoldierInfo()
 	_numMedikitLeft1->setVisible(playableUnit);
 	_numMedikitLeft2->setVisible(playableUnit);
 	_numMedikitLeft3->setVisible(playableUnit);
+	_numTwoHandedIndicatorLeft->setVisible(playableUnit);
 	_numAmmoRight->setVisible(playableUnit);
 	_numMedikitRight1->setVisible(playableUnit);
 	_numMedikitRight2->setVisible(playableUnit);
 	_numMedikitRight3->setVisible(playableUnit);
+	_numTwoHandedIndicatorRight->setVisible(playableUnit);
 	if (!playableUnit)
 	{
 		_txtName->setText(L"");
@@ -1356,6 +1364,7 @@ void BattlescapeState::updateSoldierInfo()
 	_numMedikitLeft1->setVisible(false);
 	_numMedikitLeft2->setVisible(false);
 	_numMedikitLeft3->setVisible(false);
+	_numTwoHandedIndicatorLeft->setVisible(false);
 	if (leftHandItem)
 	{
 		leftHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnLeftHandItem);
@@ -1367,6 +1376,7 @@ void BattlescapeState::updateSoldierInfo()
 			else
 				_numAmmoLeft->setValue(0);
 		}
+		_numTwoHandedIndicatorLeft->setVisible(leftHandItem->getRules()->isTwoHanded());
 		if (leftHandItem->getRules()->getBattleType() == BT_MEDIKIT)
 		{
 			_numMedikitLeft1->setVisible(true);
@@ -1392,6 +1402,7 @@ void BattlescapeState::updateSoldierInfo()
 	_numMedikitRight1->setVisible(false);
 	_numMedikitRight2->setVisible(false);
 	_numMedikitRight3->setVisible(false);
+	_numTwoHandedIndicatorRight->setVisible(false);
 	if (rightHandItem)
 	{
 		rightHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnRightHandItem);
@@ -1403,6 +1414,7 @@ void BattlescapeState::updateSoldierInfo()
 			else
 				_numAmmoRight->setValue(0);
 		}
+		_numTwoHandedIndicatorRight->setVisible(rightHandItem->getRules()->isTwoHanded());
 		if (rightHandItem->getRules()->getBattleType() == BT_MEDIKIT)
 		{
 			_numMedikitRight1->setVisible(true);
