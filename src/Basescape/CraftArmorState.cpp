@@ -80,6 +80,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftArmorState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftArmorState::btnOkClick, Options::keyCancel);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftArmorState::btnDeequipAllArmorClick, Options::keyInvClear);
 
 	_txtTitle->setBig();
 	_txtTitle->setText(tr("STR_SELECT_ARMOR"));
@@ -395,6 +396,32 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 				_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
 			}
 		}
+	}
+}
+
+/**
+ * De-equip armor from all soldiers located in the base (i.e. not out on a mission).
+ * @param action Pointer to an action.
+ */
+void CraftArmorState::btnDeequipAllArmorClick(Action *action)
+{
+	Armor *a = _game->getMod()->getArmor("STR_NONE_UC");
+	int row = 0;
+	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+	{
+		if (!((*i)->getCraft() && (*i)->getCraft()->getStatus() == "STR_OUT"))
+		{
+			// add +1 armor to stores
+			if ((*i)->getArmor()->getStoreItem() != "STR_NONE")
+			{
+				_base->getItems()->addItem((*i)->getArmor()->getStoreItem());
+			}
+
+			// assign no armor and update the list
+			(*i)->setArmor(a);
+			_lstSoldiers->setCellText(row, 2, tr(a->getType()));
+		}
+		row++;
 	}
 }
 

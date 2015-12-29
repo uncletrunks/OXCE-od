@@ -74,6 +74,8 @@ public:
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Soldiers list.
 	void lstSoldiersClick(Action *action);
+	/// Handler for clicking the De-equip All Armor button.
+	void btnDeequipAllArmorClick(Action *action);
 };
 
 }
