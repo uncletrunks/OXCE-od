@@ -247,7 +247,11 @@ std::wstring Soldier::getCraftString(Language *lang) const
 	std::wstring s;
 	if (_recovery > 0)
 	{
-		s = lang->getString("STR_WOUNDED");
+		std::wostringstream ss;
+		ss << lang->getString("STR_WOUNDED");
+		ss << L">";
+		ss << _recovery;
+		s = ss.str();
 	}
 	else if (_craft == 0)
 	{
