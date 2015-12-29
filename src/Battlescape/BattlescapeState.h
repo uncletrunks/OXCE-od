@@ -68,6 +68,7 @@ private:
 	NumberText *_numMedikitLeft1, *_numMedikitLeft2, *_numMedikitLeft3, *_numMedikitRight1, *_numMedikitRight2, *_numMedikitRight3;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
 	Timer *_animTimer, *_gameTimer;
+	int _animFrame; // for grenade timers
 	SavedBattleGame *_save;
 	Text *_txtDebug, *_txtTooltip;
 	std::vector<State*> _popups;
@@ -88,6 +89,8 @@ private:
 	void blinkVisibleUnitButtons();
 	/// Shifts the colors of the health bar when unit has fatal wounds.
 	void blinkHealthBar();
+	/// Show priming warnings on grenades.
+	void drawPrimers();
 	/// Toggles kneel indicator
 	void toggleKneelButton(BattleUnit* unit);
 public:

@@ -72,6 +72,7 @@
 #include "../Savegame/BattleItem.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleInventory.h"
 
 namespace OpenXcom
 {
@@ -80,7 +81,7 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0)
+BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _animFrame(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
 
@@ -1375,6 +1376,15 @@ void BattlescapeState::updateSoldierInfo()
 			_numMedikitLeft3->setVisible(true);
 			_numMedikitLeft3->setValue(leftHandItem->getHealQuantity());
 		}
+		// primed grenade indicator (static)
+		if (leftHandItem->getFuseTimer() >= 0)
+		{
+			// FIXME: remove after animated indicator works
+			Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+			tempSurface->setX((RuleInventory::HAND_W - leftHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+			tempSurface->setY((RuleInventory::HAND_H - leftHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+			tempSurface->blit(_btnLeftHandItem);
+		}
 	}
 	BattleItem *rightHandItem = battleUnit->getItem("STR_RIGHT_HAND");
 	_btnRightHandItem->clear();
@@ -1401,6 +1411,15 @@ void BattlescapeState::updateSoldierInfo()
 			_numMedikitRight2->setValue(rightHandItem->getStimulantQuantity());
 			_numMedikitRight3->setVisible(true);
 			_numMedikitRight3->setValue(rightHandItem->getHealQuantity());
+		}
+		// primed grenade indicator (static)
+		if (rightHandItem->getFuseTimer() >= 0)
+		{
+			// FIXME: remove after animated indicator works
+			Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+			tempSurface->setX((RuleInventory::HAND_W - rightHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+			tempSurface->setY((RuleInventory::HAND_H - rightHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+			tempSurface->blit(_btnRightHandItem);
 		}
 	}
 
@@ -1463,6 +1482,54 @@ void BattlescapeState::blinkHealthBar()
 }
 
 /**
+ * Shows primer warnings on all live grenades.
+ */
+void BattlescapeState::drawPrimers()
+{
+	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
+
+	if (_save->getSelectedUnit())
+	{
+		if (_animFrame == 8)
+		{
+			_animFrame = 0;
+		}
+
+		Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+
+		// left hand
+		BattleItem *leftHandItem = _save->getSelectedUnit()->getItem("STR_LEFT_HAND");
+		if (leftHandItem)
+		{
+			if (leftHandItem->getFuseTimer() >= 0)
+			{
+				tempSurface->setX((RuleInventory::HAND_W - leftHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+				tempSurface->setY((RuleInventory::HAND_H - leftHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+				tempSurface->blit(_btnLeftHandItem);
+				// FIXME: why doesn't this work?
+				//tempSurface->blitNShade(_btnLeftHandItem, 10, 10, Pulsate[_animFrame]);
+			}
+		}
+
+		// right hand
+		BattleItem *rightHandItem = _save->getSelectedUnit()->getItem("STR_RIGHT_HAND");
+		if (rightHandItem)
+		{
+			if (rightHandItem->getFuseTimer() >= 0)
+			{
+				tempSurface->setX((RuleInventory::HAND_W - rightHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+				tempSurface->setY((RuleInventory::HAND_H - rightHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+				tempSurface->blit(_btnRightHandItem);
+				// FIXME: animate
+				//tempSurface->blitNShade(_btnRightHandItem, 10, 10, Pulsate[_animFrame]);
+			}
+		}
+
+		_animFrame++;
+	}
+}
+
+/**
  * Popups a context sensitive list of actions the user can choose from.
  * Some actions result in a change of gamestate.
  * @param item Item the user clicked on (righthand/lefthand)
@@ -1486,6 +1553,8 @@ void BattlescapeState::animate()
 
 	blinkVisibleUnitButtons();
 	blinkHealthBar();
+	// FIXME: animated grenade indicator didn't work... switching to static for now
+	//drawPrimers();
 }
 
 /**
