@@ -83,6 +83,7 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftSoldiersState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftSoldiersState::btnOkClick, Options::keyCancel);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftSoldiersState::btnDeassignAllSoldiersClick, Options::keyInvClear);
 
 	_txtTitle->setBig();
 	Craft *c = _base->getCrafts()->at(_craft);
@@ -433,6 +434,37 @@ void CraftSoldiersState::lstSoldiersMousePress(Action *action)
 			moveSoldierDown(action, row);
 		}
 	}
+}
+
+/**
+ * De-assign all soldiers from all craft located in the base (i.e. not out on a mission).
+ * @param action Pointer to an action.
+ */
+void CraftSoldiersState::btnDeassignAllSoldiersClick(Action *action)
+{
+	Uint8 color = _lstSoldiers->getColor();
+
+	int row = 0;
+	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+	{
+		color = _lstSoldiers->getColor();
+		if ((*i)->getCraft() && (*i)->getCraft()->getStatus() != "STR_OUT")
+		{
+			(*i)->setCraft(0);
+			_lstSoldiers->setCellText(row, 2, tr("STR_NONE_UC"));
+		}
+		else if ((*i)->getCraft() && (*i)->getCraft()->getStatus() == "STR_OUT")
+		{
+			color = _otherCraftColor;
+		}
+		_lstSoldiers->setRowColor(row, color);
+
+		row++;
+	}
+
+	Craft *c = _base->getCrafts()->at(_craft);
+	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(c->getSpaceAvailable()));
+	_txtUsed->setText(tr("STR_SPACE_USED").arg(c->getSpaceUsed()));
 }
 
 }
