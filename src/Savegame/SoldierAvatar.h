@@ -18,6 +18,8 @@ private:
 	SoldierLook _look;
 	int _lookVariant;
 public:
+	/// Creates a new empty avatar.
+	SoldierAvatar();
 	/// Creates a new avatar.
 	SoldierAvatar(const std::string &avatarName, SoldierGender gender, SoldierLook look, int lookVariant);
 	/// Cleans up the avatar.

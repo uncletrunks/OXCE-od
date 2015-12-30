@@ -21,6 +21,7 @@
 
 #include <vector>
 #include "../Engine/State.h"
+#include "../Savegame/SoldierAvatar.h"
 
 namespace OpenXcom
 {
@@ -30,6 +31,7 @@ class TextButton;
 class Window;
 class Text;
 class TextList;
+class Soldier;
 class SoldierAvatar;
 
 /**
@@ -42,11 +44,15 @@ private:
 	Base *_base;
 	size_t _soldier;
 
-	TextButton *_btnCancel;
+	TextButton *_btnCancel, *_btnOk;
 	Window *_window;
-	Text *_txtTitle, *_txtType, *_txtQuantity;
+	Text *_txtTitle, *_txtType;
+	Surface *_soldierSurface;
 	TextList *_lstAvatar;
 	std::vector<SoldierAvatar> _avatars;
+	SoldierAvatar _origAvatar;
+	/// Creates the avatar preview
+	void initPreview(Soldier *s);
 public:
 	/// Creates the Soldier Avatar state.
 	SoldierAvatarState(Base *base, size_t soldier);
@@ -54,6 +60,8 @@ public:
 	~SoldierAvatarState();
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
+	/// Handler for clicking the OK button.
+	void btnOkClick(Action *action);
 	/// Handler for clicking the Avatar list.
 	void lstAvatarClick(Action *action);
 };

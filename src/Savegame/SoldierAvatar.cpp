@@ -4,6 +4,13 @@ namespace OpenXcom
 {
 
 /**
+ * Initializes a new empty soldier avatar.
+ */
+SoldierAvatar::SoldierAvatar()
+{
+}
+
+/**
  * Initializes a new soldier avatar.
  * @param avatarName ID of the avatar (for translation).
  * @param gender Soldier's gender.

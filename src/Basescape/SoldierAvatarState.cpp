@@ -28,10 +28,10 @@
 #include "../Interface/TextList.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Soldier.h"
-#include "../Savegame/SoldierAvatar.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/Mod.h"
+#include "../Mod/Armor.h"
 
 namespace OpenXcom
 {
@@ -47,21 +47,23 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 	_screen = false;
 
 	// Create objects
-	_window = new Window(this, 192, 120, 64, 40, POPUP_BOTH);
-	_btnCancel = new TextButton(140, 16, 90, 136);
-	_txtTitle = new Text(182, 16, 69, 48);
-	_txtType = new Text(90, 9, 80, 72);
-	_txtQuantity = new Text(70, 9, 190, 72);
-	_lstAvatar = new TextList(160, 40, 73, 88);
+	_window = new Window(this, 240, 160, 40, 24, POPUP_BOTH);
+	_soldierSurface = new Surface(320, 200, 0, 0);
+	_btnCancel = new TextButton(100, 16, 55, 160);
+	_btnOk = new TextButton(100, 16, 165, 160);
+	_txtTitle = new Text(182, 16, 69, 32);
+	_txtType = new Text(90, 9, 122, 58);
+	_lstAvatar = new TextList(132, 80, 115, 72);
 
 	// Set palette
 	setInterface("soldierArmor");
 
 	add(_window, "window", "soldierArmor");
+	add(_soldierSurface);
 	add(_btnCancel, "button", "soldierArmor");
+	add(_btnOk, "button", "soldierArmor");
 	add(_txtTitle, "text", "soldierArmor");
 	add(_txtType, "text", "soldierArmor");
-	add(_txtQuantity, "text", "soldierArmor");
 	add(_lstAvatar, "list", "soldierArmor");
 
 	centerAllSurfaces();
@@ -73,15 +75,20 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 	_btnCancel->onMouseClick((ActionHandler)&SoldierAvatarState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&SoldierAvatarState::btnCancelClick, Options::keyCancel);
 
+	_btnOk->setText(tr("STR_OK"));
+	_btnOk->onMouseClick((ActionHandler)&SoldierAvatarState::btnOkClick);
+	_btnOk->onKeyboardPress((ActionHandler)&SoldierAvatarState::btnOkClick, Options::keyOk);
+
 	Soldier *s = _base->getSoldiers()->at(_soldier);
+	_origAvatar = SoldierAvatar("original", s->getGender(), s->getLook(), s->getLookVariant());
+	initPreview(s);
+
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("SELECT AVATAR FOR\n{0}").arg(s->getName()));
 
 	_txtType->setText(tr("STR_TYPE"));
 
-	_txtQuantity->setText(tr("STR_QUANTITY_UC"));
-
-	_lstAvatar->setColumns(2, 132, 21);
+	_lstAvatar->setColumns(1, 125);
 	_lstAvatar->setSelectable(true);
 	_lstAvatar->setBackground(_window);
 	_lstAvatar->setMargin(8);
@@ -128,6 +135,45 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 }
 
 /**
+ * Shows the preview
+ * @param s Soldier.
+ */
+void SoldierAvatarState::initPreview(Soldier *s)
+{
+	_soldierSurface->clear();
+	if (s)
+	{
+		const std::string look = s->getArmor()->getSpriteInventory();
+		const std::string gender = s->getGender() == GENDER_MALE ? "M" : "F";
+		std::stringstream ss;
+		Surface *surf = 0;
+
+		for (int i = 0; i <= 4; ++i)
+		{
+			ss.str("");
+			ss << look;
+			ss << gender;
+			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
+			ss << ".SPK";
+			std::string debug = ss.str();
+			surf = _game->getMod()->getSurface(ss.str());
+			if (surf)
+			{
+				break;
+			}
+		}
+		if (!surf)
+		{
+			ss.str("");
+			ss << look;
+			ss << ".SPK";
+			surf = _game->getMod()->getSurface(ss.str());
+		}
+		surf->blit(_soldierSurface);
+	}
+}
+
+/**
  *
  */
 SoldierAvatarState::~SoldierAvatarState()
@@ -140,6 +186,22 @@ SoldierAvatarState::~SoldierAvatarState()
  * @param action Pointer to an action.
  */
 void SoldierAvatarState::btnCancelClick(Action *)
+{
+	Soldier *soldier = _base->getSoldiers()->at(_soldier);
+
+	// revert the avatar to original
+	soldier->setGender(_origAvatar.getGender());
+	soldier->setLook(_origAvatar.getLook());
+	soldier->setLookVariant(_origAvatar.getLookVariant());
+
+	_game->popState();
+}
+
+/**
+ * Changes the avatar on the soldier and returns to the previous screen.
+ * @param action Pointer to an action.
+ */
+void SoldierAvatarState::btnOkClick(Action *)
 {
 	_game->popState();
 }
@@ -157,7 +219,7 @@ void SoldierAvatarState::lstAvatarClick(Action *)
 	soldier->setLook(_avatars[_lstAvatar->getSelectedRow()].getLook());
 	soldier->setLookVariant(_avatars[_lstAvatar->getSelectedRow()].getLookVariant());
 
-	_game->popState();
+	initPreview(soldier);
 }
 
 }
