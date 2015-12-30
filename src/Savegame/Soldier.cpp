@@ -352,6 +352,15 @@ SoldierGender Soldier::getGender() const
 }
 
 /**
+ * Changes the soldier's gender (1/3 of avatar).
+ * @param gender Gender.
+ */
+void Soldier::setGender(SoldierGender gender)
+{
+	_gender = gender;
+}
+
+/**
  * Returns the soldier's look.
  * @return Look.
  */
@@ -361,12 +370,30 @@ SoldierLook Soldier::getLook() const
 }
 
 /**
+ * Changes the soldier's look (2/3 of avatar).
+ * @param look Look.
+ */
+void Soldier::setLook(SoldierLook look)
+{
+	_look = look;
+}
+
+/**
  * Returns the soldier's look sub type.
  * @return Look.
  */
 int Soldier::getLookVariant() const
 {
 	return _lookVariant;
+}
+
+/**
+ * Changes the soldier's look variant (3/3 of avatar).
+ * @param lookVariant Look sub type.
+ */
+void Soldier::setLookVariant(int lookVariant)
+{
+	_lookVariant = lookVariant;
 }
 
 /**

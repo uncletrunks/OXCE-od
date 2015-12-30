@@ -97,10 +97,16 @@ public:
 	int getKills() const;
 	/// Gets the soldier's gender.
 	SoldierGender getGender() const;
+	/// Sets the soldier's gender.
+	void setGender(SoldierGender gender);
 	/// Gets the soldier's look.
 	SoldierLook getLook() const;
+	/// Sets the soldier's look.
+	void setLook(SoldierLook look);
 	/// Gets the soldier's look sub type.
 	int getLookVariant() const;
+	/// Sets the soldier's look sub type.
+	void setLookVariant(int lookVariant);
 	/// Gets soldier rules.
 	RuleSoldier *getRules() const;
 	/// Gets the soldier's unique ID.

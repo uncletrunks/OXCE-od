@@ -68,6 +68,8 @@ public:
 	void saveEquipmentLayout();
 	/// Handler for clicking the Armor button.
 	void btnArmorClick(Action *action);
+	/// Handler for clicking the Avatar button.
+	void btnAvatarClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Previous button.
