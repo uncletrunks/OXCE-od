@@ -42,7 +42,8 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	_screen = false;
 
 	_window = new Window(this, 230, 140, 45, 30, POPUP_BOTH);
-	_btnOK = new TextButton(214, 16, 53, 146);
+	_btnOK = new TextButton(103, 16, 164, 146);
+	_btnMarkAllAsSeen = new TextButton(103, 16, 53, 146);
 	_txtTitle = new Text(214, 16, 53, 38);
 	_lstResearch = new TextList(198, 88, 53, 54);
 
@@ -51,6 +52,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 
 	add(_window, "window", "selectNewResearch");
 	add(_btnOK, "button", "selectNewResearch");
+	add(_btnMarkAllAsSeen, "button", "selectNewResearch");
 	add(_txtTitle, "text", "selectNewResearch");
 	add(_lstResearch, "list", "selectNewResearch");
 
@@ -62,6 +64,9 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	_btnOK->setText(tr("STR_OK"));
 	_btnOK->onMouseClick((ActionHandler)&NewResearchListState::btnOKClick);
 	_btnOK->onKeyboardPress((ActionHandler)&NewResearchListState::btnOKClick, Options::keyCancel);
+
+	_btnMarkAllAsSeen->setText(tr("MARK ALL AS SEEN"));
+	_btnMarkAllAsSeen->onMouseClick((ActionHandler)&NewResearchListState::btnMarkAllAsSeenClick);
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_NEW_RESEARCH_PROJECTS"));
@@ -80,7 +85,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 void NewResearchListState::init()
 {
 	State::init();
-	fillProjectList();
+	fillProjectList(false);
 }
 
 /**
@@ -102,25 +107,54 @@ void NewResearchListState::btnOKClick(Action *)
 }
 
 /**
+ * Marks all items as seen
+ * @param action Pointer to an action.
+ */
+void NewResearchListState::btnMarkAllAsSeenClick(Action *)
+{
+	fillProjectList(true);
+}
+
+/**
  * Fills the list with possible ResearchProjects.
  */
-void NewResearchListState::fillProjectList()
+void NewResearchListState::fillProjectList(bool markAllAsSeen)
 {
 	_projects.clear();
 	_lstResearch->clearList();
 	_game->getSavedGame()->getAvailableResearchProjects(_projects, _game->getMod() , _base);
 	std::vector<RuleResearch*>::iterator it = _projects.begin();
+	int row = 0;
+	bool hasUnseen = false;
 	while (it != _projects.end())
 	{
 		if ((*it)->getRequirements().empty())
 		{
 			_lstResearch->addRow(1, tr((*it)->getName()).c_str());
+			if (markAllAsSeen)
+			{
+				// remember all research items as seen
+				_game->getSavedGame()->addSeenResearch((*it));
+			}
+			else if (!_game->getSavedGame()->isResearchSeen((*it)->getName()))
+			{
+				// mark as unseen
+				_lstResearch->setCellColor(row, 0, 53); // light green
+				hasUnseen = true;
+			}
+			row++;
 			++it;
 		}
 		else
 		{
 			it = _projects.erase(it);
 		}
+	}
+	if (!hasUnseen)
+	{
+		_btnMarkAllAsSeen->setVisible(false);
+		_btnOK->setX(53);
+		_btnOK->setWidth(214);
 	}
 }
 

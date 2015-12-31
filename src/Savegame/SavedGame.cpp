@@ -435,6 +435,15 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		}
 	}
 
+	for (YAML::const_iterator it = doc["seenResearchItems"].begin(); it != doc["seenResearchItems"].end(); ++it)
+	{
+		std::string researchItem = it->as<std::string>();
+		if (mod->getResearch(researchItem))
+		{
+			_seenResearchItems.push_back(mod->getResearch(researchItem));
+		}
+	}
+
 	for (YAML::const_iterator i = doc["bases"].begin(); i != doc["bases"].end(); ++i)
 	{
 		Base *b = new Base(mod);
@@ -567,6 +576,10 @@ void SavedGame::save(const std::string &filename) const
 	for (std::vector<const RuleResearch *>::const_iterator i = _poppedResearch.begin(); i != _poppedResearch.end(); ++i)
 	{
 		node["poppedResearch"].push_back((*i)->getName());
+	}
+	for (std::vector<const RuleResearch *>::const_iterator i = _seenResearchItems.begin(); i != _seenResearchItems.end(); ++i)
+	{
+		node["seenResearchItems"].push_back((*i)->getName());
 	}
 	node["alienStrategy"] = _alienStrategy->save();
 	for (std::vector<Soldier*>::const_iterator i = _deadSoldiers.begin(); i != _deadSoldiers.end(); ++i)
@@ -944,6 +957,20 @@ void SavedGame::setBattleGame(SavedBattleGame *battleGame)
 }
 
 /**
+ * Add a ResearchProject to the list of already seen ResearchProject
+ * @param r The newly opened ResearchProject
+ * @param mod the game Mod
+ */
+void SavedGame::addSeenResearch (const RuleResearch * r)
+{
+	std::vector<const RuleResearch *>::const_iterator itSeen = std::find(_seenResearchItems.begin(), _seenResearchItems.end(), r);
+	if (itSeen == _seenResearchItems.end())
+	{
+		_seenResearchItems.push_back(r);
+	}
+}
+
+/**
  * Add a ResearchProject to the list of already discovered ResearchProject
  * @param r The newly found ResearchProject
  * @param mod the game Mod
@@ -1274,6 +1301,24 @@ void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & depen
 			dependables.push_back(m);
 		}
 	}
+}
+
+/**
+ * Returns if a certain research has been seen.
+ * @param research Research ID.
+ * @return Whether it's researched or not.
+ */
+bool SavedGame::isResearchSeen(const std::string &research) const
+{
+	if (research.empty() || _debug)
+		return true;
+	for (std::vector<const RuleResearch *>::const_iterator i = _seenResearchItems.begin(); i != _seenResearchItems.end(); ++i)
+	{
+		if ((*i)->getName() == research)
+			return true;
+	}
+
+	return false;
 }
 
 /**

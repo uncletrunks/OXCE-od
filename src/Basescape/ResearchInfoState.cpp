@@ -29,6 +29,7 @@
 #include "../Mod/RuleResearch.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Savegame/ResearchProject.h"
+#include "../Savegame/SavedGame.h"
 #include "../Interface/ArrowButton.h"
 #include "../Engine/Timer.h"
 #include "../Engine/RNG.h"
@@ -155,6 +156,12 @@ void ResearchInfoState::buildUi()
 		_btnOk->onKeyboardPress((ActionHandler)&ResearchInfoState::btnOkClick, Options::keyCancel);
 	}
 	_btnCancel->onMouseClick((ActionHandler)&ResearchInfoState::btnCancelClick);
+
+	if (_rule)
+	{
+		// remember this research item as seen
+		_game->getSavedGame()->addSeenResearch(_rule);
+	}
 }
 
 /**

@@ -39,7 +39,7 @@ class NewResearchListState : public State
 {
 private:
 	Base *_base;
-	TextButton *_btnOK;
+	TextButton *_btnOK, *_btnMarkAllAsSeen;
 	Window *_window;
 	Text *_txtTitle;
 	TextList *_lstResearch;
@@ -50,8 +50,10 @@ public:
 	NewResearchListState(Base *base);
 	/// Handler for clicking the OK button.
 	void btnOKClick(Action *action);
+	/// Handler for clicking the [Mark All As Seen] button.
+	void btnMarkAllAsSeenClick(Action *action);
 	/// Fills the ResearchProject list with possible ResearchProjects.
-	void fillProjectList();
+	void fillProjectList(bool markAllAsSeen);
 	/// Initializes the state.
 	void init();
 };
