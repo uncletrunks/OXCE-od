@@ -56,25 +56,28 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 	_lstAvatar = new TextList(132, 80, 115, 72);
 
 	// Set palette
-	setInterface("soldierArmor");
+	setPalette("PAL_BATTLESCAPE");
 
-	add(_window, "window", "soldierArmor");
+	add(_window, "messageWindowBorder", "battlescape");
 	add(_soldierSurface);
-	add(_btnCancel, "button", "soldierArmor");
-	add(_btnOk, "button", "soldierArmor");
-	add(_txtTitle, "text", "soldierArmor");
-	add(_txtType, "text", "soldierArmor");
-	add(_lstAvatar, "list", "soldierArmor");
+	add(_btnCancel, "messageWindowButtons", "battlescape");
+	add(_btnOk, "messageWindowButtons", "battlescape");
+	add(_txtTitle, "messageWindows", "battlescape");
+	add(_txtType, "messageWindows", "battlescape");
+	add(_lstAvatar, "optionLists", "battlescape");
 
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK14.SCR"));
+	_window->setHighContrast(true);
+	_window->setBackground(_game->getMod()->getSurface("TAC00.SCR"));
 
+	_btnCancel->setHighContrast(true);
 	_btnCancel->setText(tr("STR_CANCEL_UC"));
 	_btnCancel->onMouseClick((ActionHandler)&SoldierAvatarState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&SoldierAvatarState::btnCancelClick, Options::keyCancel);
 
+	_btnOk->setHighContrast(true);
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&SoldierAvatarState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&SoldierAvatarState::btnOkClick, Options::keyOk);
@@ -83,49 +86,52 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 	_origAvatar = SoldierAvatar("original", s->getGender(), s->getLook(), s->getLookVariant());
 	initPreview(s);
 
+	_txtTitle->setHighContrast(true);
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("SELECT AVATAR FOR\n{0}").arg(s->getName()));
 
+	_txtType->setHighContrast(true);
 	_txtType->setText(tr("STR_TYPE"));
 
+	_lstAvatar->setHighContrast(true);
 	_lstAvatar->setColumns(1, 125);
 	_lstAvatar->setSelectable(true);
 	_lstAvatar->setBackground(_window);
 	_lstAvatar->setMargin(8);
 
 	// FIXME: 32 hard-coded avatars from X-PirateZ 0.97b
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_01", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BLONDE, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_02", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_AFRICAN, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_03", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BLONDE, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_04", SoldierGender::GENDER_MALE, SoldierLook::LOOK_AFRICAN, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_05", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BROWNHAIR, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_06", SoldierGender::GENDER_MALE, SoldierLook::LOOK_ORIENTAL, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_07", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BROWNHAIR, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_08", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_ORIENTAL, 0));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_09", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_ORIENTAL, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_10", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BLONDE, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_11", SoldierGender::GENDER_MALE, SoldierLook::LOOK_AFRICAN, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_12", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BLONDE, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_13", SoldierGender::GENDER_MALE, SoldierLook::LOOK_ORIENTAL, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_14", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BROWNHAIR, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_15", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_AFRICAN, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_16", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BROWNHAIR, 1));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_17", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BLONDE, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_18", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_ORIENTAL, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_19", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BROWNHAIR, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_20", SoldierGender::GENDER_MALE, SoldierLook::LOOK_ORIENTAL, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_21", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BROWNHAIR, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_22", SoldierGender::GENDER_MALE, SoldierLook::LOOK_AFRICAN, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_23", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BLONDE, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_24", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_AFRICAN, 2));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_25", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_ORIENTAL, 3));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_26", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BLONDE, 3));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_27", SoldierGender::GENDER_MALE, SoldierLook::LOOK_ORIENTAL, 3));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_28", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BLONDE, 3));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_29", SoldierGender::GENDER_MALE, SoldierLook::LOOK_AFRICAN, 3));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_30", SoldierGender::GENDER_MALE, SoldierLook::LOOK_BROWNHAIR, 3));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_31", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_AFRICAN, 3));
-	_avatars.push_back(SoldierAvatar("STR_AVATAR_32", SoldierGender::GENDER_FEMALE, SoldierLook::LOOK_BROWNHAIR, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_01", GENDER_FEMALE, LOOK_BLONDE, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_02", GENDER_FEMALE, LOOK_AFRICAN, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_03", GENDER_MALE, LOOK_BLONDE, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_04", GENDER_MALE, LOOK_AFRICAN, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_05", GENDER_MALE, LOOK_BROWNHAIR, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_06", GENDER_MALE, LOOK_ORIENTAL, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_07", GENDER_FEMALE, LOOK_BROWNHAIR, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_08", GENDER_FEMALE, LOOK_ORIENTAL, 0));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_09", GENDER_FEMALE, LOOK_ORIENTAL, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_10", GENDER_FEMALE, LOOK_BLONDE, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_11", GENDER_MALE, LOOK_AFRICAN, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_12", GENDER_MALE, LOOK_BLONDE, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_13", GENDER_MALE, LOOK_ORIENTAL, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_14", GENDER_MALE, LOOK_BROWNHAIR, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_15", GENDER_FEMALE, LOOK_AFRICAN, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_16", GENDER_FEMALE, LOOK_BROWNHAIR, 1));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_17", GENDER_MALE, LOOK_BLONDE, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_18", GENDER_FEMALE, LOOK_ORIENTAL, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_19", GENDER_MALE, LOOK_BROWNHAIR, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_20", GENDER_MALE, LOOK_ORIENTAL, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_21", GENDER_FEMALE, LOOK_BROWNHAIR, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_22", GENDER_MALE, LOOK_AFRICAN, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_23", GENDER_FEMALE, LOOK_BLONDE, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_24", GENDER_FEMALE, LOOK_AFRICAN, 2));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_25", GENDER_FEMALE, LOOK_ORIENTAL, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_26", GENDER_FEMALE, LOOK_BLONDE, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_27", GENDER_MALE, LOOK_ORIENTAL, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_28", GENDER_MALE, LOOK_BLONDE, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_29", GENDER_MALE, LOOK_AFRICAN, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_30", GENDER_MALE, LOOK_BROWNHAIR, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_31", GENDER_FEMALE, LOOK_AFRICAN, 3));
+	_avatars.push_back(SoldierAvatar("STR_AVATAR_32", GENDER_FEMALE, LOOK_BROWNHAIR, 3));
 
 	for (std::vector<SoldierAvatar>::const_iterator i = _avatars.begin(); i != _avatars.end(); ++i)
 	{
