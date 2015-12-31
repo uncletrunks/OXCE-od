@@ -47,16 +47,18 @@ namespace OpenXcom
 		std::string _section;
 		Window *_window;
 		Text *_txtTitle;
-		TextButton *_btnOk;
+		TextButton *_btnOk, *_btnMarkAllAsSeen;
 		TextList *_lstSelection;
 		ArticleDefinitionList _article_list;
 
 		/// Handler for clicking the OK button
 		void btnOkClick(Action *action);
+		/// Handler for clicking the [Mark All As Seen] button.
+		void btnMarkAllAsSeenClick(Action * action);
 		/// Handler for clicking the selection list.
 		void lstSelectionClick(Action *action);
 		/// load available articles into the selection list
-		void loadSelectionList();
+		void loadSelectionList(bool markAllAsSeen);
 	};
 }
 

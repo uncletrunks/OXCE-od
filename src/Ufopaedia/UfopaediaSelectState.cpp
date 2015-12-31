@@ -28,6 +28,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 #include "../Mod/Mod.h"
+#include "../Savegame/SavedGame.h"
 
 namespace OpenXcom
 {
@@ -42,7 +43,8 @@ namespace OpenXcom
 		_txtTitle = new Text(224, 17, 48, 26);
 
 		// set buttons
-		_btnOk = new TextButton(224, 16, 48, 166);
+		_btnOk = new TextButton(108, 16, 164, 166);
+		_btnMarkAllAsSeen = new TextButton(108, 16, 48, 166);
 		_lstSelection = new TextList(224, 104, 40, 50);
 
 		// Set palette
@@ -51,6 +53,7 @@ namespace OpenXcom
 		add(_window, "window", "ufopaedia");
 		add(_txtTitle, "text", "ufopaedia");
 		add(_btnOk, "button2", "ufopaedia");
+		add(_btnMarkAllAsSeen, "button2", "ufopaedia");
 		add(_lstSelection, "list", "ufopaedia");
 
 		centerAllSurfaces();
@@ -65,14 +68,15 @@ namespace OpenXcom
 		_btnOk->onMouseClick((ActionHandler)&UfopaediaSelectState::btnOkClick);
 		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnOkClick,Options::keyCancel);
 
+		_btnMarkAllAsSeen->setText(tr("MARK ALL AS SEEN"));
+		_btnMarkAllAsSeen->onMouseClick((ActionHandler)&UfopaediaSelectState::btnMarkAllAsSeenClick);
+
 		_lstSelection->setColumns(1, 206);
 		_lstSelection->setSelectable(true);
 		_lstSelection->setBackground(_window);
 		_lstSelection->setMargin(18);
 		_lstSelection->setAlign(ALIGN_CENTER);
 		_lstSelection->onMouseClick((ActionHandler)&UfopaediaSelectState::lstSelectionClick);
-
-		loadSelectionList();
 	}
 
 	UfopaediaSelectState::~UfopaediaSelectState()
@@ -84,6 +88,7 @@ namespace OpenXcom
 	void UfopaediaSelectState::init()
 	{
 		State::init();
+		loadSelectionList(false);
 	}
 
 	/**
@@ -96,6 +101,15 @@ namespace OpenXcom
 	}
 
 	/**
+	 * Marks all items as seen
+	 * @param action Pointer to an action.
+	 */
+	void UfopaediaSelectState::btnMarkAllAsSeenClick(Action *)
+	{
+		loadSelectionList(true);
+	}
+
+	/**
 	 *
 	 * @param action Pointer to an action.
 	 */
@@ -104,15 +118,39 @@ namespace OpenXcom
 		Ufopaedia::openArticle(_game, _article_list[_lstSelection->getSelectedRow()]);
 	}
 
-	void UfopaediaSelectState::loadSelectionList()
+	void UfopaediaSelectState::loadSelectionList(bool markAllAsSeen)
 	{
 		ArticleDefinitionList::iterator it;
 
+		_lstSelection->clearList();
 		_article_list.clear();
 		Ufopaedia::list(_game->getSavedGame(), _game->getMod(), _section, _article_list);
+
+		int row = 0;
+		bool hasUnseen = false;
 		for (it = _article_list.begin(); it!=_article_list.end(); ++it)
 		{
 			_lstSelection->addRow(1, tr((*it)->title).c_str());
+
+			if (markAllAsSeen)
+			{
+				// remember all listed articles as seen
+				_game->getSavedGame()->addSeenUfopediaArticle((*it));
+			}
+			else if (!_game->getSavedGame()->isUfopediaArticleSeen((*it)->id))
+			{
+				// mark as unseen
+				_lstSelection->setCellColor(row, 0, 90); // light green
+				hasUnseen = true;
+			}
+			row++;
+		}
+
+		if (!hasUnseen)
+		{
+			_btnMarkAllAsSeen->setVisible(false);
+			_btnOk->setX(48);
+			_btnOk->setWidth(224);
 		}
 	}
 

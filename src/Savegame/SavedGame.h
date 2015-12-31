@@ -44,6 +44,7 @@ class RuleResearch;
 class ResearchProject;
 class Soldier;
 class RuleManufacture;
+class ArticleDefinition;
 class MissionSite;
 class AlienBase;
 class AlienStrategy;
@@ -111,6 +112,7 @@ private:
 	AlienStrategy *_alienStrategy;
 	SavedBattleGame *_battleGame;
 	std::vector<const RuleResearch*> _discovered;
+	std::vector<const ArticleDefinition*> _seenUfopediaItems;
 	std::vector<const RuleManufacture*> _seenManufactureItems;
 	std::vector<const RuleResearch*> _seenResearchItems;
 	std::vector<AlienMission*> _activeMissions;
@@ -202,6 +204,8 @@ public:
 	SavedBattleGame *getSavedBattle();
 	/// Sets the current battle game.
 	void setBattleGame(SavedBattleGame *battleGame);
+	/// Add a seen UFOpedia article
+	void addSeenUfopediaArticle(const ArticleDefinition *r);
 	/// Add a seen ManufactureProject
 	void addSeenManufacture(const RuleManufacture *r);
 	/// Add a seen ResearchProject
@@ -220,6 +224,8 @@ public:
 	void getDependableManufacture(std::vector<RuleManufacture*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Check whether a ResearchProject can be researched
 	bool isResearchAvailable(RuleResearch *r, const std::vector<const RuleResearch*> & unlocked, const Mod *mod) const;
+	/// Gets if an UFOpedia article has been seen already.
+	bool isUfopediaArticleSeen(const std::string &article) const;
 	/// Gets if a manufacture has been seen already.
 	bool isManufactureSeen(const std::string &manufacture) const;
 	/// Gets if a research has been seen already.
