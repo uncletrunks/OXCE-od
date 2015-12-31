@@ -29,6 +29,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/Surface.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/BattlescapeButton.h"
 #include "../Engine/Action.h"
 #include "../Engine/InteractiveSurface.h"
@@ -83,7 +84,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
 	_soldier = new Surface(320, 200, 0, 0);
-	_txtName = new Text(210, 17, 28, 6);
+	_txtName = new TextEdit(this, 210, 17, 28, 6);
 	_txtTus = new Text(40, 9, 245, 24);
 	_txtWeight = new Text(70, 9, 245, 24);
 	_txtFAcc = new Text(40, 9, 245, 32);
@@ -144,6 +145,8 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 
 	_txtName->setBig();
 	_txtName->setHighContrast(true);
+	_txtName->onChange((ActionHandler)&InventoryState::edtSoldierChange);
+	_txtName->onMousePress((ActionHandler)&InventoryState::edtSoldierPress);
 
 	_txtTus->setHighContrast(true);
 
@@ -367,6 +370,53 @@ void InventoryState::init()
 
 	updateStats();
 	_refreshMouse();
+}
+
+/**
+ * Disables the input, if not a soldier. Sets the name without a statstring otherwise.
+ * @param action Pointer to an action.
+ */
+void InventoryState::edtSoldierPress(Action *)
+{
+	// renaming available only in the base (not during mission)
+	if (_base == 0)
+	{
+		_txtName->setFocus(false);
+	}
+	else
+	{
+		BattleUnit *unit = _inv->getSelectedUnit();
+		if (unit != 0)
+		{
+			Soldier *s = unit->getGeoscapeSoldier();
+			if (s)
+			{
+				// set the soldier's name without a statstring
+				_txtName->setText(s->getName());
+			}
+			
+		}
+	}
+}
+
+/**
+ * Changes the soldier's name.
+ * @param action Pointer to an action.
+ */
+void InventoryState::edtSoldierChange(Action *)
+{
+	BattleUnit *unit = _inv->getSelectedUnit();
+	if (unit != 0)
+	{
+		Soldier *s = unit->getGeoscapeSoldier();
+		if (s)
+		{
+			// set the soldier's name
+			s->setName(_txtName->getText());
+			// also set the unit's name (with a statstring)
+			unit->setName(s->getName(true));
+		}
+	}
 }
 
 /**

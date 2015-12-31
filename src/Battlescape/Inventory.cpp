@@ -113,6 +113,15 @@ void Inventory::setTuMode(bool tu)
 }
 
 /**
+ * Returns the currently selected (i.e. displayed) unit.
+ * @return Pointer to selected unit, or 0 if none.
+ */
+BattleUnit *Inventory::getSelectedUnit() const
+{
+	return _selUnit;
+}
+
+/**
  * Changes the unit to display the inventory of.
  * @param unit Pointer to battle unit.
  */

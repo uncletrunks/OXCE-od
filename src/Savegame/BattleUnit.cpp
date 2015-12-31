@@ -2507,6 +2507,16 @@ Armor *BattleUnit::getArmor() const
 {
 	return _armor;
 }
+
+/**
+ * Set the unit's name.
+ * @param name Name
+ */
+void BattleUnit::setName(const std::wstring &name)
+{
+	_name = name;
+}
+
 /**
  * Get unit's name.
  * An aliens name is the translation of it's race and rank.

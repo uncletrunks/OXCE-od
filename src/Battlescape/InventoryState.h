@@ -29,6 +29,7 @@ namespace OpenXcom
 
 class Surface;
 class Text;
+class TextEdit;
 class InteractiveSurface;
 class Inventory;
 class SavedBattleGame;
@@ -44,7 +45,8 @@ class InventoryState : public State
 {
 private:
 	Surface *_bg, *_soldier;
-	Text *_txtName, *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFAcc, *_txtReact, *_txtPSkill, *_txtPStr;
+	Text *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFAcc, *_txtReact, *_txtPSkill, *_txtPStr;
+	TextEdit *_txtName;
 	BattlescapeButton *_btnOk, *_btnPrev, *_btnNext, *_btnUnload, *_btnGround, *_btnRank;
 	BattlescapeButton *_btnCreateTemplate, *_btnApplyTemplate;
 	Surface *_selAmmo;
@@ -62,6 +64,10 @@ public:
 	~InventoryState();
 	/// Updates all soldier info.
 	void init();
+	/// Handler for pressing on the Name edit.
+	void edtSoldierPress(Action *action);
+	/// Handler for changing text on the Name edit.
+	void edtSoldierChange(Action *action);
 	/// Updates the soldier info (Weight, TU).
 	void updateStats();
 	/// Saves the soldiers' equipment-layout.

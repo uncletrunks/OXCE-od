@@ -67,6 +67,8 @@ public:
 	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Sets the inventory's Time Unit mode.
 	void setTuMode(bool tu);
+	/// Gets the inventory's selected unit.
+	BattleUnit *getSelectedUnit() const;
 	/// Sets the inventory's selected unit.
 	void setSelectedUnit(BattleUnit *unit);
 	/// Draws the inventory.
