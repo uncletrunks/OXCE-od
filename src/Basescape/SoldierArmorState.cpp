@@ -42,7 +42,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param soldier ID of the selected soldier.
  */
-SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), _soldier(soldier)
+SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOrigin origin) : _base(base), _soldier(soldier), _origin(origin)
 {
 	_screen = false;
 
@@ -55,7 +55,14 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 	_lstArmor = new TextList(160, 40, 73, 88);
 
 	// Set palette
-	setInterface("soldierArmor");
+	if (_origin == SA_BATTLESCAPE)
+	{
+		setPalette("PAL_BATTLESCAPE");
+	}
+	else
+	{
+		setInterface("soldierArmor");
+	}
 
 	add(_window, "window", "soldierArmor");
 	add(_btnCancel, "button", "soldierArmor");
@@ -111,6 +118,12 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 		}
 	}
 	_lstArmor->onMouseClick((ActionHandler)&SoldierArmorState::lstArmorClick);
+
+	// switch to battlescape theme if called from inventory
+	if (_origin == SA_BATTLESCAPE)
+	{
+		applyBattlescapeTheme();
+	}
 }
 
 /**

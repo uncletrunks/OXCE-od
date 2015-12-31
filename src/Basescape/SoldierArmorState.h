@@ -25,6 +25,12 @@
 namespace OpenXcom
 {
 
+enum SoldierArmorOrigin
+{
+	SA_GEOSCAPE,
+	SA_BATTLESCAPE
+};
+
 class Base;
 class TextButton;
 class Window;
@@ -42,6 +48,7 @@ private:
 	Base *_base;
 	size_t _soldier;
 
+	SoldierArmorOrigin _origin;
 	TextButton *_btnCancel;
 	Window *_window;
 	Text *_txtTitle, *_txtType, *_txtQuantity;
@@ -49,7 +56,7 @@ private:
 	std::vector<Armor*> _armors;
 public:
 	/// Creates the Soldier Armor state.
-	SoldierArmorState(Base *base, size_t soldier);
+	SoldierArmorState(Base *base, size_t soldier, SoldierArmorOrigin origin);
 	/// Cleans up the Soldier Armor state.
 	~SoldierArmorState();
 	/// Handler for clicking the Cancel button.

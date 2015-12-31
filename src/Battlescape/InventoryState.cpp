@@ -478,7 +478,7 @@ void InventoryState::btnArmorClick(Action *action)
 			}
 		}
 
-		_game->pushState(new SoldierArmorState(_base, soldierIndex));
+		_game->pushState(new SoldierArmorState(_base, soldierIndex, SA_BATTLESCAPE));
 	}
 }
 
