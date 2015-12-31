@@ -39,7 +39,7 @@ class NewManufactureListState : public State
 {
 private:
 	Base *_base;
-	TextButton *_btnOk;
+	TextButton *_btnOk, *_btnMarkAllAsSeen;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtCategory;
 	TextList *_lstManufacture;
@@ -55,12 +55,14 @@ public:
 	void init();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action * action);
+	/// Handler for clicking the [Mark All As Seen] button.
+	void btnMarkAllAsSeenClick(Action * action);
 	/// Handler for clicking on the list.
 	void lstProdClick (Action * action);
 	/// Handler for changing the category filter
 	void cbxCategoryChange (Action * action);
 	/// Fills the list of possible productions.
-	void fillProductionList();
+	void fillProductionList(bool markAllAsSeen);
 };
 }
 #endif

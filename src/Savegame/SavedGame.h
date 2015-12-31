@@ -111,6 +111,7 @@ private:
 	AlienStrategy *_alienStrategy;
 	SavedBattleGame *_battleGame;
 	std::vector<const RuleResearch*> _discovered;
+	std::vector<const RuleManufacture*> _seenManufactureItems;
 	std::vector<const RuleResearch*> _seenResearchItems;
 	std::vector<AlienMission*> _activeMissions;
 	bool _debug, _warned;
@@ -201,6 +202,8 @@ public:
 	SavedBattleGame *getSavedBattle();
 	/// Sets the current battle game.
 	void setBattleGame(SavedBattleGame *battleGame);
+	/// Add a seen ManufactureProject
+	void addSeenManufacture(const RuleManufacture *r);
 	/// Add a seen ResearchProject
 	void addSeenResearch(const RuleResearch *r);
 	/// Add a finished ResearchProject
@@ -217,6 +220,8 @@ public:
 	void getDependableManufacture(std::vector<RuleManufacture*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Check whether a ResearchProject can be researched
 	bool isResearchAvailable(RuleResearch *r, const std::vector<const RuleResearch*> & unlocked, const Mod *mod) const;
+	/// Gets if a manufacture has been seen already.
+	bool isManufactureSeen(const std::string &manufacture) const;
 	/// Gets if a research has been seen already.
 	bool isResearchSeen(const std::string &research) const;
 	/// Gets if a research has been unlocked.

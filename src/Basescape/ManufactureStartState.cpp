@@ -142,6 +142,12 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 	_btnStart->onMouseClick((ActionHandler)&ManufactureStartState::btnStartClick);
 	_btnStart->onKeyboardPress((ActionHandler)&ManufactureStartState::btnStartClick, Options::keyOk);
 	_btnStart->setVisible(productionPossible);
+
+	if (_item)
+	{
+		// remember this manufacture item as seen
+		_game->getSavedGame()->addSeenManufacture(_item);
+	}
 }
 
 /**
