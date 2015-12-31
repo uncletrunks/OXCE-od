@@ -54,6 +54,9 @@ namespace OpenXcom
 		std::string type;
 		switch (dt)
 		{
+		case DT_NONE:
+			type = "STR_DAMAGE_NONE";
+			break;
 		case DT_AP:
 			type = "STR_DAMAGE_ARMOR_PIERCING";
 			break;
