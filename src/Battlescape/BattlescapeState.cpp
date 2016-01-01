@@ -81,7 +81,7 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _animFrame(0)
+BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _animFrame(0), _numberOfDirectlyVisibleUnits(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
 
@@ -1436,6 +1436,8 @@ void BattlescapeState::updateSoldierInfo()
 	}
 
 	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
+
+	// go through all units visible to the selected soldier (or other unit, e.g. mind-controlled enemy)
 	int j = 0;
 	for (std::vector<BattleUnit*>::iterator i = battleUnit->getVisibleUnits()->begin(); i != battleUnit->getVisibleUnits()->end() && j < VISIBLE_MAX; ++i)
 	{
@@ -1443,6 +1445,34 @@ void BattlescapeState::updateSoldierInfo()
 		_numVisibleUnit[j]->setVisible(true);
 		_visibleUnit[j] = (*i);
 		++j;
+	}
+
+	// remember where red indicators turn green
+	_numberOfDirectlyVisibleUnits = j;
+
+	// go through all units on the map
+	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+	{
+		// check if they are hostile and visible (by any friendly unit)
+		if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut() && (*i)->getVisible())
+		{
+			bool alreadyShown = false;
+			// check if they are not already shown (e.g. because we see them directly)
+			for (std::vector<BattleUnit*>::iterator k = battleUnit->getVisibleUnits()->begin(); k != battleUnit->getVisibleUnits()->end(); ++k)
+			{
+				if ((*i)->getId() == (*k)->getId())
+				{
+					alreadyShown = true;
+				}
+			}
+			if (!alreadyShown)
+			{
+				_btnVisibleUnit[j]->setVisible(true);
+				_numVisibleUnit[j]->setVisible(true);
+				_visibleUnit[j] = (*i);
+				++j;
+			}
+		}
 	}
 
 	showPsiButton(battleUnit->getSpecialWeapon(BT_PSIAMP) != 0);
@@ -1460,7 +1490,7 @@ void BattlescapeState::blinkVisibleUnitButtons()
 		if (_btnVisibleUnit[i]->getVisible() == true)
 		{
 			_btnVisibleUnit[i]->drawRect(0, 0, 15, 12, 15);
-			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, color);
+			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, color+(i < _numberOfDirectlyVisibleUnits ? 0 : 16));
 		}
 	}
 
