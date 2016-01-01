@@ -153,8 +153,14 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 	if (!hasUnseen)
 	{
 		_btnMarkAllAsSeen->setVisible(false);
-		_btnOK->setX(53);
-		_btnOK->setWidth(214);
+		_btnOK->setWidth(_btnOK->getX()+_btnOK->getWidth()-_btnMarkAllAsSeen->getX());
+		_btnOK->setX(_btnMarkAllAsSeen->getX());
+	}
+	else
+	{
+		_btnMarkAllAsSeen->setVisible(true);
+		_btnOK->setWidth(_btnMarkAllAsSeen->getWidth());
+		_btnOK->setX(_btnMarkAllAsSeen->getX()+_btnMarkAllAsSeen->getWidth()+8);
 	}
 }
 

@@ -209,15 +209,14 @@ void NewManufactureListState::fillProductionList(bool markAllAsSeen)
 	if (!hasUnseen)
 	{
 		_btnMarkAllAsSeen->setVisible(false);
-		_btnOk->setX(8);
-		_btnOk->setWidth(304);
+		_btnOk->setWidth(_btnOk->getX()+_btnOk->getWidth()-_btnMarkAllAsSeen->getX());
+		_btnOk->setX(_btnMarkAllAsSeen->getX());
 	}
 	else
 	{
-		// this is necessary (because unlike in research [mark all] button could only mark all items from a certain category)
 		_btnMarkAllAsSeen->setVisible(true);
-		_btnOk->setX(164);
-		_btnOk->setWidth(148);
+		_btnOk->setWidth(_btnMarkAllAsSeen->getWidth());
+		_btnOk->setX(_btnMarkAllAsSeen->getX()+_btnMarkAllAsSeen->getWidth()+8);
 	}
 }
 

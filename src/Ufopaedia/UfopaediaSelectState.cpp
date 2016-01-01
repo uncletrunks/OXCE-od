@@ -149,8 +149,14 @@ namespace OpenXcom
 		if (!hasUnseen)
 		{
 			_btnMarkAllAsSeen->setVisible(false);
-			_btnOk->setX(48);
-			_btnOk->setWidth(224);
+			_btnOk->setWidth(_btnOk->getX()+_btnOk->getWidth()-_btnMarkAllAsSeen->getX());
+			_btnOk->setX(_btnMarkAllAsSeen->getX());
+		}
+		else
+		{
+			_btnMarkAllAsSeen->setVisible(true);
+			_btnOk->setWidth(_btnMarkAllAsSeen->getWidth());
+			_btnOk->setX(_btnMarkAllAsSeen->getX()+_btnMarkAllAsSeen->getWidth()+8);
 		}
 	}
 
