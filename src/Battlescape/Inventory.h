@@ -74,7 +74,7 @@ public:
 	/// Draws the inventory.
 	void draw();
 	/// Draws the inventory grid.
-	void drawGrid();
+	void drawGrid(bool showTuCost = false);
 	/// Draws the inventory items.
 	void drawItems();
 	/// Gets the currently selected item.

@@ -144,10 +144,10 @@ void Inventory::draw()
 /**
  * Draws the inventory grid for item placement.
  */
-void Inventory::drawGrid()
+void Inventory::drawGrid(bool showTuCost)
 {
 	_grid->clear();
-	Text text = Text(80, 9, 0, 0);
+	Text text = Text(90, 9, 0, 0);
 	text.setPalette(_grid->getPalette());
 	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 
@@ -216,7 +216,23 @@ void Inventory::drawGrid()
 		// Draw label
 		text.setX(i->second->getX());
 		text.setY(i->second->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
-		text.setText(_game->getLanguage()->getString(i->second->getId()));
+		if (showTuCost && _selItem != 0)
+		{
+			// move a bit to the left for better readability
+			if (text.getX() >= 10)
+			{
+				text.setX(text.getX()-10);
+			}
+			std::wostringstream ss;
+			ss << _game->getLanguage()->getString(i->second->getId());
+			ss << L":";
+			ss << _selItem->getSlot()->getCost(i->second);
+			text.setText(ss.str().c_str());
+		}
+		else
+		{
+			text.setText(_game->getLanguage()->getString(i->second->getId()));
+		}
 		text.blit(_grid);
 	}
 }
@@ -456,6 +472,10 @@ void Inventory::setSelectedItem(BattleItem *item)
 			_stackLevel[_selItem->getSlotX()][_selItem->getSlotY()] -= 1;
 		}
 		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem->isSpriteAlt());
+	}
+	if (_tu)
+	{
+		drawGrid(true);
 	}
 	drawItems();
 }
