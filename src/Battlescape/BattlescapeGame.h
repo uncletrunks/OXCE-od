@@ -40,19 +40,19 @@ class Pathfinding;
 class Mod;
 class InfoboxOKState;
 
-enum BattleActionType { BA_NONE, BA_TURN, BA_WALK, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK };
+enum BattleActionType { BA_NONE, BA_TURN, BA_WALK, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK, BA_EXECUTE };
 
 struct BattleActionCost : RuleItemUseCost
 {
 	BattleActionType type;
 	BattleUnit *actor;
-	BattleItem *weapon;
+	BattleItem *weapon, *origWeapon;
 
 	//Default constructor.
-	BattleActionCost() : type(BA_NONE), actor(0), weapon(0) { }
+	BattleActionCost() : type(BA_NONE), actor(0), weapon(0), origWeapon(0) { }
 
 	//Constructor with update.
-	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item) { updateTU(); }
+	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item), origWeapon(0) { updateTU(); }
 
 	/// Update value of TU based of actor, weapon and type.
 	void updateTU();

@@ -1341,6 +1341,7 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *
 				cost = item->getCostSnap();
 				break;
 			case BA_HIT:
+			case BA_EXECUTE:
 				flat = item->getFlatMelee();
 				cost = item->getCostMelee();
 				break;
