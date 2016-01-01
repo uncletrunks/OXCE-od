@@ -213,6 +213,7 @@
     <ClCompile Include="Basescape\BasescapeState.cpp" />
     <ClCompile Include="Basescape\BaseView.cpp" />
     <ClCompile Include="Basescape\BuildFacilitiesState.cpp" />
+    <ClCompile Include="Basescape\ChangeHeadquartersState.cpp" />
     <ClCompile Include="Basescape\CraftArmorState.cpp" />
     <ClCompile Include="Basescape\CraftEquipmentState.cpp" />
     <ClCompile Include="Basescape\CraftInfoState.cpp" />
@@ -535,6 +536,7 @@
     <ClInclude Include="Basescape\BasescapeState.h" />
     <ClInclude Include="Basescape\BaseView.h" />
     <ClInclude Include="Basescape\BuildFacilitiesState.h" />
+    <ClInclude Include="Basescape\ChangeHeadquartersState.h" />
     <ClInclude Include="Basescape\CraftArmorState.h" />
     <ClInclude Include="Basescape\CraftEquipmentState.h" />
     <ClInclude Include="Basescape\CraftInfoState.h" />

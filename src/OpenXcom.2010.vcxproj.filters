@@ -946,6 +946,9 @@
     <ClCompile Include="Savegame\SoldierAvatar.cpp">
       <Filter>Savegame</Filter>
     </ClCompile>
+    <ClCompile Include="Basescape\ChangeHeadquartersState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1919,6 +1922,9 @@
     </ClInclude>
     <ClInclude Include="Savegame\SoldierAvatar.h">
       <Filter>Savegame</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\ChangeHeadquartersState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
