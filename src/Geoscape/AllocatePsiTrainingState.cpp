@@ -104,6 +104,7 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	sortOptions.push_back(tr(strId)); \
 	_sortFunctors.push_back(new SortFunctor(_game, functor));
 
+	PUSH_IN("ID", idStat);
 	PUSH_IN("RANK", rankStat);
 	PUSH_IN("MISSIONS", missionsStat);
 	PUSH_IN("KILLS", killsStat);
