@@ -143,6 +143,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_sortFunctors.push_back(new SortFunctor(_game, functor));
 
 	PUSH_IN("ID", idStat);
+	PUSH_IN("FIRST LETTER", nameStat);
 	PUSH_IN("RANK", rankStat);
 	PUSH_IN("MISSIONS", missionsStat);
 	PUSH_IN("KILLS", killsStat);

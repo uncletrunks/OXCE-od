@@ -35,6 +35,14 @@ GET_ATTRIB_STAT_FN(melee)
 #define GET_SOLDIER_STAT_FN(attrib, camelCaseAttrib) \
 	int OpenXcom::attrib##Stat(Game *game, Soldier *s) { return s->get##camelCaseAttrib(); }
 GET_SOLDIER_STAT_FN(id, Id)
+int OpenXcom::nameStat(Game *game, Soldier *s)
+{
+	if (s->getName().size() < 1)
+	{
+		return 0;
+	}
+	return s->getName().at(0);
+}
 GET_SOLDIER_STAT_FN(rank, Rank)
 GET_SOLDIER_STAT_FN(missions, Missions)
 GET_SOLDIER_STAT_FN(kills, Kills)
