@@ -140,6 +140,8 @@ public:
 	static const int MAX_SOLDIER_ID = 1000000;
 	/// Creates a BattleUnit from solder.
 	BattleUnit(Soldier *soldier, int depth);
+	/// Updates a BattleUnit from a Soldier (after a change of armor).
+	void updateArmorFromSoldier(Soldier *soldier, int depth);
 	/// Creates a BattleUnit from unit.
 	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth);
 	/// Cleans up the BattleUnit.

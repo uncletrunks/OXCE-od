@@ -65,7 +65,7 @@ static const int _applyTemplateBtnY  = 113;
  * @param tu Does Inventory use up Time Units?
  * @param parent Pointer to parent Battlescape.
  */
-InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : _tu(tu), _parent(parent), _base(base)
+InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : _tu(tu), _parent(parent), _base(base), _reloadUnit(false)
 {
 	_battleGame = _game->getSavedGame()->getSavedBattle();
 
@@ -326,6 +326,13 @@ void InventoryState::init()
 	Soldier *s = unit->getGeoscapeSoldier();
 	if (s)
 	{
+		// reload necessary after the change of armor
+		if (_reloadUnit)
+		{
+			unit->updateArmorFromSoldier(s, _battleGame->getDepth());
+			_reloadUnit = false;
+		}
+
 		SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
 		texture->getFrame(20 + s->getRank())->setX(0);
 		texture->getFrame(20 + s->getRank())->setY(0);
@@ -528,6 +535,7 @@ void InventoryState::btnArmorClick(Action *action)
 			}
 		}
 
+		_reloadUnit = true;
 		_game->pushState(new SoldierArmorState(_base, soldierIndex, SA_BATTLESCAPE));
 	}
 }

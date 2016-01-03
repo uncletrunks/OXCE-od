@@ -146,6 +146,38 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 }
 
 /**
+ * Updates a BattleUnit from a Soldier (after a change of armor)
+ * @param soldier Pointer to the Soldier.
+ * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
+ */
+void BattleUnit::updateArmorFromSoldier(Soldier *soldier, int depth)
+{
+	_stats = *soldier->getCurrentStats();
+	_armor = soldier->getArmor();
+
+	_movementType = _armor->getMovementType();
+	if (_movementType == MT_FLOAT) {
+		if (depth > 0) { _movementType = MT_FLY; } else { _movementType = MT_WALK; }
+	} else if (_movementType == MT_SINK) {
+		if (depth == 0) { _movementType = MT_FLY; } else { _movementType = MT_WALK; }
+	}
+
+	_stats += *_armor->getStats();	// armors may modify effective stats
+	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
+	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDarkSq;
+	_loftempsSet = _armor->getLoftempsSet();
+
+	_tu = _stats.tu;
+	_energy = _stats.stamina;
+	_health = _stats.health;
+	_currentArmor[SIDE_FRONT] = _armor->getFrontArmor();
+	_currentArmor[SIDE_LEFT] = _armor->getSideArmor();
+	_currentArmor[SIDE_RIGHT] = _armor->getSideArmor();
+	_currentArmor[SIDE_REAR] = _armor->getRearArmor();
+	_currentArmor[SIDE_UNDER] = _armor->getUnderArmor();
+}
+
+/**
  * Initializes a BattleUnit from a Unit (non-player) object.
  * @param unit Pointer to Unit object.
  * @param faction Which faction the units belongs to.

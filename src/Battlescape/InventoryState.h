@@ -57,6 +57,7 @@ private:
 	BattlescapeState *_parent;
 	Base *_base;
 	std::string _currentTooltip;
+	bool _reloadUnit;
 public:
 	/// Creates the Inventory state.
 	InventoryState(bool tu, BattlescapeState *parent, Base *base);
