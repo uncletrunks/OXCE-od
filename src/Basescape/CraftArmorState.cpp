@@ -48,7 +48,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param craft ID of the selected craft.
  */
-CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft(craft), _origSoldierOrder(*_base->getSoldiers())
+CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft(craft), _origSoldierOrder(*_base->getSoldiers()), _savedScrollPosition(0)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -182,8 +182,7 @@ void CraftArmorState::cbxSortByChange(Action *action)
 		}
 	}
 
-	size_t originalScrollPos = _lstSoldiers->getScroll();
-	initList(originalScrollPos);
+	initList(_lstSoldiers->getScroll());
 }
 
 /**
@@ -193,7 +192,7 @@ void CraftArmorState::cbxSortByChange(Action *action)
 void CraftArmorState::init()
 {
 	State::init();
-	initList(0);
+	initList(_savedScrollPosition);
 
 	int row = 0;
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
@@ -368,6 +367,7 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 	{
 		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 		{
+			_savedScrollPosition = _lstSoldiers->getScroll();
 			_game->pushState(new SoldierArmorState(_base, _lstSoldiers->getSelectedRow(), SA_GEOSCAPE));
 		}
 		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
