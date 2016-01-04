@@ -144,18 +144,10 @@ void Inventory::draw()
 /**
  * Draws the inventory grid for item placement.
  */
-void Inventory::drawGrid(bool showTuCost)
+void Inventory::drawGrid()
 {
 	_grid->clear();
-	Text text = Text(90, 9, 0, 0);
-	text.setPalette(_grid->getPalette());
-	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-
 	RuleInterface *rule = _game->getMod()->getInterface("inventory");
-
-	text.setColor(rule->getElement("textSlots")->color);
-	text.setHighContrast(true);
-
 	Uint8 color = rule->getElement("grid")->color;
 
 	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
@@ -212,17 +204,31 @@ void Inventory::drawGrid(bool showTuCost)
 				}
 			}
 		}
+	}
+	drawGridLabels();
+}
 
+/**
+ * Draws the inventory grid labels.
+ */
+void Inventory::drawGridLabels(bool showTuCost)
+{
+	Text text = Text(90, 9, 0, 0);
+	text.setPalette(_grid->getPalette());
+	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+
+	RuleInterface *rule = _game->getMod()->getInterface("inventory");
+
+	text.setColor(rule->getElement("textSlots")->color);
+	text.setHighContrast(true);
+
+	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
+	{
 		// Draw label
 		text.setX(i->second->getX());
 		text.setY(i->second->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
 		if (showTuCost && _selItem != 0)
 		{
-			// move a bit to the left for better readability
-			if (text.getX() >= 10)
-			{
-				text.setX(text.getX()-10);
-			}
 			std::wostringstream ss;
 			ss << _game->getLanguage()->getString(i->second->getId());
 			ss << L":";
@@ -473,11 +479,21 @@ void Inventory::setSelectedItem(BattleItem *item)
 		}
 		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem->isSpriteAlt());
 	}
+
+	// 1. first draw the grid
 	if (_tu)
 	{
-		drawGrid(true);
+		drawGrid();
 	}
+
+	// 2. then the items
 	drawItems();
+
+	// 3. lastly re-draw the grid labels (so that they are not obscured by the items)
+	if (_tu)
+	{
+		drawGridLabels(true);
+	}
 }
 
 /**
