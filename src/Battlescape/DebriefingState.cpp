@@ -84,7 +84,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(40, 12, 16, 180);
-	_btnStats = new TextButton(40, 12, 264, 180);
+	_btnStats = new TextButton(60, 12, 244, 180);
 	_txtTitle = new Text(300, 17, 16, 8);
 	_txtItem = new Text(180, 9, 16, 24);
 	_txtQuantity = new Text(60, 9, 200, 24);
@@ -109,7 +109,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_txtPsiStrength = new Text(18, 9, 268, 24); //268
 	_txtPsiSkill    = new Text(18, 9, 286, 24); //286..304 = 18
 
-	_lstSoldierStats = new TextList(288, 128, 16, 32);
+	_lstSoldierStats = new TextList(288, 144, 16, 32); // 18 rows
 
 	_txtTooltip = new Text(200, 9, 64, 180);
 
