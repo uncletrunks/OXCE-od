@@ -572,6 +572,12 @@ void InventoryState::btnCreateTemplateClick(Action *)
 	std::vector<BattleItem*> *unitInv = _battleGame->getSelectedUnit()->getInventory();
 	for (std::vector<BattleItem*>::iterator j = unitInv->begin(); j != unitInv->end(); ++j)
 	{
+		// skip fixed items
+		if ((*j)->getRules()->isFixed())
+		{
+			continue;
+		}
+
 		std::string ammo;
 		if ((*j)->needsAmmo() && (*j)->getAmmoItem())
 		{
@@ -603,9 +609,17 @@ static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile 
 	// clear unit's inventory (i.e. move everything to the ground)
 	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
 	{
-		(*i)->setOwner(NULL);
-		groundTile->addItem(*i, groundRuleInv);
-		i = unitInv->erase(i);
+		if ((*i)->getRules()->isFixed())
+		{
+			// do nothing, fixed items cannot be moved!
+			++i;
+		}
+		else
+		{
+			(*i)->setOwner(NULL);
+			groundTile->addItem(*i, groundRuleInv);
+			i = unitInv->erase(i);
+		}
 	}
 }
 
@@ -634,6 +648,22 @@ void InventoryState::btnApplyTemplateClick(Action *)
 	std::vector<EquipmentLayoutItem*>::iterator templateIt;
 	for (templateIt = _curInventoryTemplate.begin(); templateIt != _curInventoryTemplate.end(); ++templateIt)
 	{
+		// check if the slot is not occupied already (e.g. by a fixed weapon)
+		bool alreadyOccupied = false;
+		for (std::vector<BattleItem*>::iterator checkFixedIt = unitInv->begin(); checkFixedIt != unitInv->end(); ++checkFixedIt)
+		{
+			if ((*checkFixedIt)->getSlot()->getId() == (*templateIt)->getSlot())
+			{
+				alreadyOccupied = true;
+				break;
+			}
+		}
+		if (alreadyOccupied)
+		{
+			// if occupied, skip
+			continue;
+		}
+
 		// search for template item in ground inventory
 		std::vector<BattleItem*>::iterator groundItem;
 		const bool needsAmmo = !_game->getMod()->getItem((*templateIt)->getItemType())->getCompatibleAmmo()->empty();
