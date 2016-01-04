@@ -909,8 +909,11 @@ void DebriefingState::prepareDebriefing()
 				{ // so game is not aborted or aborted and unit is on exit area
 					UnitStats statIncrease;
 					bool hasImproved = (*j)->postMissionProcedures(save, statIncrease);
-					//if (hasImproved)
+					if ((*j)->getGeoscapeSoldier())
+					{
+						//if (hasImproved)
 						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease));
+					}
 					playerInExitArea++;
 					if (soldier != 0)
 					{
