@@ -51,7 +51,7 @@ private:
 	BattlescapeButton *_btnCreateTemplate, *_btnApplyTemplate;
 	Surface *_selAmmo;
 	Inventory *_inv;
-	std::vector<EquipmentLayoutItem*> _curInventoryTemplate;
+	std::vector<EquipmentLayoutItem*> _curInventoryTemplate, _tempInventoryTemplate;
 	SavedBattleGame *_battleGame;
 	const bool _tu;
 	BattlescapeState *_parent;
@@ -59,9 +59,9 @@ private:
 	std::string _currentTooltip;
 	bool _reloadUnit;
 	/// Helper method for Create Template button
-	void _createInventoryTemplate();
+	void _createInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
 	/// Helper method for Apply Template button
-	void _applyInventoryTemplate();
+	void _applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
 public:
 	/// Creates the Inventory state.
 	InventoryState(bool tu, BattlescapeState *parent, Base *base);

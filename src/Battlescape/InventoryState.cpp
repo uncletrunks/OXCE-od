@@ -258,6 +258,7 @@ static void _clearInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventory
 InventoryState::~InventoryState()
 {
 	_clearInventoryTemplate(_curInventoryTemplate);
+	_clearInventoryTemplate(_tempInventoryTemplate);
 
 	if (_battleGame->getTileEngine())
 	{
@@ -354,8 +355,8 @@ void InventoryState::init()
 			unit->updateArmorFromSoldier(s, _battleGame->getDepth());
 
 			// Step 1: remember the unit's equipment (excl. fixed items)
-			_clearInventoryTemplate(_curInventoryTemplate);
-			_createInventoryTemplate();
+			_clearInventoryTemplate(_tempInventoryTemplate);
+			_createInventoryTemplate(_tempInventoryTemplate);
 
 			// Step 2: drop all items (incl. fixed items!!)
 			std::vector<BattleItem*> *unitInv = unit->getInventory();
@@ -366,7 +367,7 @@ void InventoryState::init()
 			_battleGame->initFixedItems(unit);
 
 			// Step 4: re-equip original items (unless slots taken by fixed items)
-			_applyInventoryTemplate();
+			_applyInventoryTemplate(_tempInventoryTemplate);
 
 			// refresh ui
 			_inv->arrangeGround(false); // calls drawItems() too
@@ -727,7 +728,7 @@ void InventoryState::btnRankClick(Action *)
 	_game->pushState(new UnitInfoState(_battleGame->getSelectedUnit(), _parent, true, false));
 }
 
-void InventoryState::_createInventoryTemplate()
+void InventoryState::_createInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
 {
 	// copy inventory instead of just keeping a pointer to it.  that way
 	// create/apply can be used as an undo button for a single unit and will
@@ -751,7 +752,7 @@ void InventoryState::_createInventoryTemplate()
 			ammo = "NONE";
 		}
 
-		_curInventoryTemplate.push_back(new EquipmentLayoutItem(
+		inventoryTemplate.push_back(new EquipmentLayoutItem(
 				(*j)->getRules()->getType(),
 				(*j)->getSlot()->getId(),
 				(*j)->getSlotX(),
@@ -773,14 +774,14 @@ void InventoryState::btnCreateTemplateClick(Action *)
 	_clearInventoryTemplate(_curInventoryTemplate);
 
 	// create new template
-	_createInventoryTemplate();
+	_createInventoryTemplate(_curInventoryTemplate);
 
 	// give audio feedback
 	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
 	_refreshMouse();
 }
 
-void InventoryState::_applyInventoryTemplate()
+void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
 {
 	BattleUnit               *unit          = _battleGame->getSelectedUnit();
 	std::vector<BattleItem*> *unitInv       = unit->getInventory();
@@ -795,7 +796,7 @@ void InventoryState::_applyInventoryTemplate()
 	// message, but continue attempting to fulfill the template as best we can
 	bool itemMissing = false;
 	std::vector<EquipmentLayoutItem*>::iterator templateIt;
-	for (templateIt = _curInventoryTemplate.begin(); templateIt != _curInventoryTemplate.end(); ++templateIt)
+	for (templateIt = inventoryTemplate.begin(); templateIt != inventoryTemplate.end(); ++templateIt)
 	{
 		// search for template item in ground inventory
 		std::vector<BattleItem*>::iterator groundItem;
@@ -907,7 +908,7 @@ void InventoryState::btnApplyTemplateClick(Action *)
 		return;
 	}
 
-	_applyInventoryTemplate();
+	_applyInventoryTemplate(_curInventoryTemplate);
 
 	// refresh ui
 	_inv->arrangeGround(false);
