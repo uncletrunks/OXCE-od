@@ -278,6 +278,27 @@ InventoryState::~InventoryState()
 	}
 }
 
+static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile, bool forceDropFixedItems)
+{
+	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
+
+	// clear unit's inventory (i.e. move everything to the ground)
+	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
+	{
+		if ((*i)->getRules()->isFixed() && !forceDropFixedItems)
+		{
+			// do nothing, fixed items cannot be moved (individually)!
+			++i;
+		}
+		else
+		{
+			(*i)->setOwner(NULL);
+			groundTile->addItem(*i, groundRuleInv);
+			i = unitInv->erase(i);
+		}
+	}
+}
+
 /**
  * Updates all soldier stats when the soldier changes.
  */
@@ -329,7 +350,28 @@ void InventoryState::init()
 		// reload necessary after the change of armor
 		if (_reloadUnit)
 		{
+			// Step 0: update unit's armor
 			unit->updateArmorFromSoldier(s, _battleGame->getDepth());
+
+			// Step 1: remember the unit's equipment (excl. fixed items)
+			_clearInventoryTemplate(_curInventoryTemplate);
+			_createInventoryTemplate();
+
+			// Step 2: drop all items (incl. fixed items!!)
+			std::vector<BattleItem*> *unitInv = unit->getInventory();
+			Tile *groundTile = unit->getTile();
+			_clearInventory(_game, unitInv, groundTile, true);
+
+			// Step 3: equip fixed items // Note: the inventory must be *completely* empty before this step
+			_battleGame->initFixedItems(unit);
+
+			// Step 4: re-equip original items (unless slots taken by fixed items)
+			_applyInventoryTemplate();
+
+			// refresh ui
+			_inv->arrangeGround(false); // calls drawItems() too
+
+			// reload done
 			_reloadUnit = false;
 		}
 
@@ -685,17 +727,8 @@ void InventoryState::btnRankClick(Action *)
 	_game->pushState(new UnitInfoState(_battleGame->getSelectedUnit(), _parent, true, false));
 }
 
-void InventoryState::btnCreateTemplateClick(Action *)
+void InventoryState::_createInventoryTemplate()
 {
-	// don't accept clicks when moving items
-	if (_inv->getSelectedItem() != 0)
-	{
-		return;
-	}
-
-	// clear current template
-	_clearInventoryTemplate(_curInventoryTemplate);
-
 	// copy inventory instead of just keeping a pointer to it.  that way
 	// create/apply can be used as an undo button for a single unit and will
 	// also work as expected if inventory is modified after 'create' is clicked
@@ -726,50 +759,36 @@ void InventoryState::btnCreateTemplateClick(Action *)
 				ammo,
 				(*j)->getFuseTimer()));
 	}
+}
+
+void InventoryState::btnCreateTemplateClick(Action *)
+{
+	// don't accept clicks when moving items
+	if (_inv->getSelectedItem() != 0)
+	{
+		return;
+	}
+
+	// clear current template
+	_clearInventoryTemplate(_curInventoryTemplate);
+
+	// create new template
+	_createInventoryTemplate();
 
 	// give audio feedback
 	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
 	_refreshMouse();
 }
 
-static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile)
+void InventoryState::_applyInventoryTemplate()
 {
-	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
-
-	// clear unit's inventory (i.e. move everything to the ground)
-	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
-	{
-		if ((*i)->getRules()->isFixed())
-		{
-			// do nothing, fixed items cannot be moved!
-			++i;
-		}
-		else
-		{
-			(*i)->setOwner(NULL);
-			groundTile->addItem(*i, groundRuleInv);
-			i = unitInv->erase(i);
-		}
-	}
-}
-
-void InventoryState::btnApplyTemplateClick(Action *)
-{
-	// don't accept clicks when moving items
-	// it's ok if the template is empty -- it will just result in clearing the
-	// unit's inventory
-	if (_inv->getSelectedItem() != 0)
-	{
-		return;
-	}
-
 	BattleUnit               *unit          = _battleGame->getSelectedUnit();
 	std::vector<BattleItem*> *unitInv       = unit->getInventory();
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
 	RuleInventory            *groundRuleInv = _game->getMod()->getInventory("STR_GROUND");
 
-	_clearInventory(_game, unitInv, groundTile);
+	_clearInventory(_game, unitInv, groundTile, false);
 
 	// attempt to replicate inventory template by grabbing corresponding items
 	// from the ground.  if any item is not found on the ground, display warning
@@ -879,6 +898,19 @@ void InventoryState::btnApplyTemplateClick(Action *)
 	{
 		_inv->showWarning(tr("STR_NOT_ENOUGH_ITEMS_FOR_TEMPLATE"));
 	}
+}
+
+void InventoryState::btnApplyTemplateClick(Action *)
+{
+	// don't accept clicks when moving items
+	// it's ok if the template is empty -- it will just result in clearing the
+	// unit's inventory
+	if (_inv->getSelectedItem() != 0)
+	{
+		return;
+	}
+
+	_applyInventoryTemplate();
 
 	// refresh ui
 	_inv->arrangeGround(false);
@@ -912,7 +944,7 @@ void InventoryState::onClearInventory(Action *)
 	std::vector<BattleItem*> *unitInv    = unit->getInventory();
 	Tile                     *groundTile = unit->getTile();
 
-	_clearInventory(_game, unitInv, groundTile);
+	_clearInventory(_game, unitInv, groundTile, false);
 
 	// refresh ui
 	_inv->arrangeGround(false);

@@ -58,6 +58,10 @@ private:
 	Base *_base;
 	std::string _currentTooltip;
 	bool _reloadUnit;
+	/// Helper method for Create Template button
+	void _createInventoryTemplate();
+	/// Helper method for Apply Template button
+	void _applyInventoryTemplate();
 public:
 	/// Creates the Inventory state.
 	InventoryState(bool tu, BattlescapeState *parent, Base *base);
