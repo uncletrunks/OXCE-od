@@ -797,22 +797,6 @@ void InventoryState::_applyInventoryTemplate()
 	std::vector<EquipmentLayoutItem*>::iterator templateIt;
 	for (templateIt = _curInventoryTemplate.begin(); templateIt != _curInventoryTemplate.end(); ++templateIt)
 	{
-		// check if the slot is not occupied already (e.g. by a fixed weapon)
-		bool alreadyOccupied = false;
-		for (std::vector<BattleItem*>::iterator checkFixedIt = unitInv->begin(); checkFixedIt != unitInv->end(); ++checkFixedIt)
-		{
-			if ((*checkFixedIt)->getSlot()->getId() == (*templateIt)->getSlot())
-			{
-				alreadyOccupied = true;
-				break;
-			}
-		}
-		if (alreadyOccupied)
-		{
-			// if occupied, skip
-			continue;
-		}
-
 		// search for template item in ground inventory
 		std::vector<BattleItem*>::iterator groundItem;
 		const bool needsAmmo = !_game->getMod()->getItem((*templateIt)->getItemType())->getCompatibleAmmo()->empty();
@@ -851,15 +835,28 @@ void InventoryState::_applyInventoryTemplate()
 						continue;
 					}
 
-					// move matched item from ground to the appropriate inv slot
-					(*groundItem)->setOwner(unit);
-					(*groundItem)->setSlot(_game->getMod()->getInventory((*templateIt)->getSlot()));
-					(*groundItem)->setSlotX((*templateIt)->getSlotX());
-					(*groundItem)->setSlotY((*templateIt)->getSlotY());
-					(*groundItem)->setFuseTimer((*templateIt)->getFuseTimer());
-					unitInv->push_back(*groundItem);
-					groundInv->erase(groundItem);
-					found = true;
+					// check if the slot is not occupied already (e.g. by a fixed weapon)
+					if (!_inv->overlapItems(
+						unit,
+						*groundItem,
+						_game->getMod()->getInventory((*templateIt)->getSlot()),
+						(*templateIt)->getSlotX(),
+						(*templateIt)->getSlotY()))
+					{
+						// move matched item from ground to the appropriate inv slot
+						(*groundItem)->setOwner(unit);
+						(*groundItem)->setSlot(_game->getMod()->getInventory((*templateIt)->getSlot()));
+						(*groundItem)->setSlotX((*templateIt)->getSlotX());
+						(*groundItem)->setSlotY((*templateIt)->getSlotY());
+						(*groundItem)->setFuseTimer((*templateIt)->getFuseTimer());
+						unitInv->push_back(*groundItem);
+						groundInv->erase(groundItem);
+					}
+					else
+					{
+						// let the user know or not? probably not... should be obvious why
+					}
+					found = true; // found = true, even if not equiped
 					break;
 				}
 			}
