@@ -37,6 +37,19 @@ class Mod;
 class UnitSprite
 {
 private:
+	struct Part
+	{
+		Surface *src;
+		int offX;
+		int offY;
+
+		Part(Surface *s) : src{ s }, offX{ 0 }, offY{ 0 } { }
+		Part() : Part(nullptr) { }
+
+		Part& operator=(Surface *s) { src = s; }
+		explicit operator bool() { return src; }
+	};
+
 	BattleUnit *_unit;
 	BattleItem *_itemA, *_itemB;
 	SurfaceSet *_unitSurface, *_itemSurfaceA, *_itemSurfaceB, *_fireSurface;
@@ -83,12 +96,16 @@ private:
 	void drawRoutine20();
 	/// Drawing routine for xarquids.
 	void drawRoutine21();
-	/// sort two handed sprites out.
+	/// Sort two handed sprites out.
 	void sortRifles();
-	/// blit weapon sprite
-	void blitItem(Surface* item);
-	/// blit body sprite
-	void blitBody(Surface* body, int part);
+	/// Get graphic for unit part.
+	Part getUnitGraph(int index, int offset);
+	/// Get graphic for item part.
+	Part getItemGraph(int index, int offset);
+	/// Blit weapon sprite.
+	void blitItem(Part item);
+	/// Blit body sprite.
+	void blitBody(Part body, int part);
 public:
 	/// Creates a new UnitSprite at the specified position and size.
 	UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet);
