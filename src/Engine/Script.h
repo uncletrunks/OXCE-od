@@ -30,10 +30,106 @@ namespace OpenXcom
 class Surface;
 class ScriptContainerBase;
 
+class ParserHelper;
+struct SelectedToken;
+
+template<typename T>
+struct ArgSelector;
 
 const int ScriptMaxArg = 8;
-const int ScriptMaxRef = 64;
-const int ScriptMaxRefCustom = 4;
+const int ScriptMaxReg = 64;
+
+/**
+ * Script execution cunter
+ */
+enum class ProgPos : size_t
+{
+	Unknown = (size_t)-1,
+};
+
+inline ProgPos& operator+=(ProgPos& pos, int offset)
+{
+	pos = static_cast<ProgPos>(static_cast<size_t>(pos) + offset);
+}
+inline ProgPos& operator++(ProgPos& pos)
+{
+	pos += 1;
+	return pos;
+}
+inline ProgPos operator++(ProgPos& pos, int)
+{
+	ProgPos old = pos;
+	++pos;
+	return old;
+}
+
+/**
+ * Args types
+ */
+enum ArgEnum : Uint8
+{
+	ArgNone,
+	ArgProg,
+	ArgContext,
+
+	ArgReg,
+	ArgData,
+	ArgConst,
+	ArgLabel,
+
+	ArgRaw,
+	ArgCustom,
+};
+
+inline ArgEnum& operator++(ArgEnum& arg)
+{
+	arg = static_cast<ArgEnum>(static_cast<Uint8>(arg) + 1);
+	return arg;
+}
+inline ArgEnum operator++(ArgEnum& arg, int)
+{
+	ArgEnum old = arg;
+	++arg;
+	return old;
+}
+
+/**
+ * Avaiable regs
+ */
+enum RegEnum : Uint8
+{
+	RegIn,
+	RegCond,
+
+	RegR0,
+	RegR1,
+	RegR2,
+	RegR3,
+
+	RegCustom,
+};
+
+/**
+ * Return value from script operation.
+ */
+enum RetEnum : Uint8
+{
+	RetContinue = 0,
+	RetEnd = 1,
+	RetError = 2,
+};
+
+/**
+ * Helper class used for calling sequence of function from variadic templates.
+ */
+struct Dummy
+{
+	template<typename... ZZ>
+	Dummy(ZZ...)
+	{
+		//nothing
+	}
+};
 
 /**
  * Struct that cache state of script data and is place of script write temporary data
@@ -42,11 +138,10 @@ struct ScriptWorker
 {
 	const Uint8* proc;
 	int shade;
-	int reg[ScriptMaxRef];
-	int regCustom[ScriptMaxRefCustom];
+	int reg[ScriptMaxReg];
 
 	/// Default constructor
-	ScriptWorker() : proc(0), shade(0) //reg & regCustom not initialized
+	ScriptWorker() : proc(0), shade(0) //reg not initialized
 	{
 
 	}
@@ -55,18 +150,36 @@ struct ScriptWorker
 	void executeBlit(Surface* src, Surface* dest, int x, int y, bool half = false);
 };
 
+using FuncCommon = RetEnum (*)(ScriptWorker &, const Uint8 *, ProgPos &);
+
 /**
  * Struct used to store definition of used data by script
  */
 struct ScriptContainerData
 {
-	typedef void (*voidFunc)();
+	static ArgEnum RegisteImpl()
+	{
+		static ArgEnum curr = ArgCustom;
+		return curr++;
+	}
+	template<typename T>
+	static ArgEnum Register()
+	{
+		if (std::is_same<T, int>::value)
+		{
+			return ArgReg;
+		}
+		else
+		{
+			static ArgEnum curr = RegisteImpl();
+			return curr;
+		}
+	}
 
-	Uint8 type;
-	Uint8 index;
+	ArgEnum type;
+	int index;
 
 	int value;
-	voidFunc envFunc;
 };
 
 /**
@@ -76,36 +189,31 @@ class ScriptContainerBase
 {
 	friend class ScriptParserBase;
 	std::vector<Uint8> _proc;
-	std::vector<ScriptContainerData> _procRefData;
 
 protected:
 	/// Protected destructor
 	~ScriptContainerBase() { }
-	/// Common typeless part of updating data in script
-	void updateBase(ScriptWorker* ref, const void* t, int (*cast)(const void*, ScriptContainerData::voidFunc)) const;
+
+	void updateBase(ScriptWorker* ref) const
+	{
+		memset(&ref->reg, 0, ScriptMaxReg*sizeof(int));
+		ref->proc = this->_proc.data();
+	}
 };
 
 /**
  * Strong typed script
  */
-template<typename T>
+template<typename... Args>
 class ScriptContainer : public ScriptContainerBase
 {
 public:
-	typedef int (*typedFunc)(const T*);
-
-private:
-	/// Helper function using to hide type
-	static int cast(const void* v, ScriptContainerData::voidFunc f)
+	/// Update values in script
+	void update(ScriptWorker* ref, Args... args) const
 	{
-		return reinterpret_cast<typedFunc>(f)((const T*)v);
-	}
-
-public:
-	/// Update values in script form unit
-	void update(ScriptWorker* ref, const T* t) const
-	{
-		updateBase(ref, (const void*)t, &cast);
+		updateBase(ref);
+		int i = 0;
+		Dummy{ (ref->reg[RegCustom + i++] = (int)args, 0)... };
 	}
 };
 
@@ -114,9 +222,18 @@ public:
  */
 struct ScriptParserData
 {
-	Uint8 procId;
-	Uint8 argType[ScriptMaxArg];
-	Uint8 argOffset[ScriptMaxArg];
+	using argFunc = int (*)(ParserHelper& ph, const SelectedToken *begin, const SelectedToken *end);
+	using getFunc = FuncCommon (*)(int version);
+	using parserFunc = bool (*)(const ScriptParserData &spd, ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end);
+
+	parserFunc parser;
+	argFunc arg;
+	getFunc get;
+
+	bool operator()(ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end) const
+	{
+		return parser(*this, ph, begin, end);
+	}
 };
 
 /**
@@ -124,63 +241,83 @@ struct ScriptParserData
  */
 class ScriptParserBase
 {
+	Uint8 _regUsed;
 	std::string _name;
+	std::map<std::string, ArgEnum> _typeList;
 	std::map<std::string, ScriptParserData> _procList;
 	std::map<std::string, ScriptContainerData> _refList;
 
 protected:
-	/// Common typeless part of parsing string
-	bool parseBase(ScriptContainerBase* scr, const std::string& code) const;
-	/// Common typeless part of adding new function
-	void addFunctionBase(const std::string& s, ScriptContainerData::voidFunc f);
-	/// Show all builtin script informations
-	void logScriptMetadata() const;
 
-public:
 	/// Default constructor
 	ScriptParserBase(const std::string& name);
 
+	/// Common typeless part of parsing string
+	bool parseBase(ScriptContainerBase* scr, const std::string& code) const;
+	/// Show all builtin script informations
+	void logScriptMetadata() const;
+
+	/// Add name for standart reg
+	void addStandartReg(const std::string& s, RegEnum index);
 	/// Add name for custom parameter
-	void addCustom(int i, const std::string& s);
+	void addCustomReg(const std::string& s, ArgEnum type);
+	/// Add parsing fuction
+	void addParserBase(const std::string& s, ScriptParserData::argFunc arg, ScriptParserData::getFunc get);
+	/// Add new type impl
+	void addTypeBase(const std::string& s, ArgEnum type);
+public:
+
 	/// Add const value
 	void addConst(const std::string& s, int i);
+	// Add parsing function
+	template<typename T>
+	void addParser(const std::string& s)
+	{
+		addParserBase(s, &T::parse, &T::getDynamic);
+	}
+	/// Add new type
+	template<typename T>
+	void addType(const std::string& s)
+	{
+		addTypeBase(s, ScriptContainerData::Register<T>());
+	}
 };
 
 /**
  * Strong typed parser
  */
-template<typename T>
+template<typename T, typename... Args>
 class ScriptParser : public ScriptParserBase
 {
+	template<typename>
+	using S = const std::string&;
 public:
+	using Container = ScriptContainer<Args...>;
+
+
 	/// Default constructor
-	ScriptParser(const std::string& name) : ScriptParserBase(name)
+	ScriptParser(const std::string& name, S<Args>... argNames) : ScriptParserBase(name)
 	{
 		//ScriptParser require static function in T to initialize data!
 		T::ScriptRegister(this);
 
-		static bool printOp = true;
-		if (printOp)
-		{
-			printOp = false;
-			logScriptMetadata();
-		}
+		Dummy{ (addCustomReg(argNames, ScriptContainerData::Register<Args>()),0)... };
 	}
 
 	/// Prase string and return new script
-	ScriptContainer<T>* parse(const std::string& src_code) const
+	Container* parse(const std::string& src_code) const
 	{
-		ScriptContainer<T>* scr = new ScriptContainer<T>();
+		Container* scr = new Container();
 		if(parseBase(scr, src_code))
 			return scr;
 		delete scr;
 		return 0;
 	}
 
-	/// Add new function that will be avaliable in script
-	void addFunction(const std::string& s, typename ScriptContainer<T>::typedFunc f)
+	/// Print data to log
+	void LogInfo() const
 	{
-		addFunctionBase(s, reinterpret_cast<ScriptContainerData::voidFunc>(f));
+		static bool printOp = [this]{ logScriptMetadata(); return true; }();
 	}
 };
 

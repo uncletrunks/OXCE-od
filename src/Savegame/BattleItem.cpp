@@ -626,8 +626,7 @@ void BattleItem::ScriptFill(ScriptWorker* w, BattleItem* item, bool inventory, i
 		BattleUnit* itemUnit = item->getUnit();
 		if(itemUnit)
 		{
-			BattleUnit::ScriptFill(w, itemUnit);
-			BattleUnit::ScriptFillCustom(w, inventory ? BODYPART_ITEM : BODYPART_COLLAPSING, anim_frame, shade);
+			BattleUnit::ScriptFill(w, itemUnit, inventory ? BODYPART_ITEM : BODYPART_COLLAPSING, anim_frame, shade, 0);
 		}
 	}
 }

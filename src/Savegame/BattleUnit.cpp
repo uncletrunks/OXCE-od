@@ -49,27 +49,6 @@ namespace OpenXcom
 {
 
 /**
- * Helper namespace for BattleUnit::recolorSprite
- */
-namespace
-{
-
-struct ColorCopy
-{
-	static const Uint8 Face = 6;
-	static const Uint8 Hair = 9;
-	static inline void func(Uint8& dest, const Uint8& src, int, int, int)
-	{
-		if(src)
-		{
-			dest = src;
-		}
-	}
-};
-
-} //namespace
-
-/**
  * Initializes a BattleUnit from a Soldier
  * @param soldier Pointer to the Soldier.
  * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
@@ -3266,7 +3245,69 @@ void BattleUnit::recoverTimeUnits()
 	prepareEnergy(ENRecovery);
 }
 
-void BattleUnit::ScriptRegister(ScriptParser<BattleUnit>* parser)
+namespace
+{
+
+void getArmorScript(BattleUnit *bu, int &ret, int side)
+{
+	if (bu && 0 <= side && side < SIDE_MAX) ret = bu->getArmor((UnitSide)side);
+}
+void getGenderScript(BattleUnit *bu, int &ret)
+{
+	if (bu) ret = bu->getGender();
+}
+void getLookScript(BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		auto g = bu->getGeoscapeSoldier();
+		if (g)
+		{
+			ret = g->getLook();
+		}
+	}
+}
+void getLookVariantScript(BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		auto g = bu->getGeoscapeSoldier();
+		if (g)
+		{
+			ret = g->getLookVariant();
+		}
+	}
+}
+void getRecolorScript(BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		const auto& vec = bu->getRecolor();
+		const int g = ret & helper::ColorGroup;
+		const int s = ret & helper::ColorShade;
+		for(auto& p : vec)
+		{
+			if (g == p.first)
+			{
+				ret = s + p.second;
+			}
+		}
+	}
+}
+struct burnShadeScript
+{
+	static RetEnum func(int &curr, int burn, int shade)
+	{
+		Uint8 d = curr;
+		Uint8 s = curr;
+		helper::BurnShade::func(d, s, burn, shade);
+		curr = d;
+		return RetContinue;
+	}
+};
+
+} // namespace
+void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 {
 	using namespace helper;
 	typedef BattleUnit BU;
@@ -3274,14 +3315,10 @@ void BattleUnit::ScriptRegister(ScriptParser<BattleUnit>* parser)
 	typedef Soldier S;
 	typedef Armor A;
 
-	typedef Bind<BU> bBU;
-	typedef BindFun<bBU, US, &BU::getBaseStats> bUS;
-	typedef BindFun<bBU, A, &BU::getArmor> bA;
-	typedef BindPtr<bBU, S, &BU::_geoscapeSoldier> bS;
+	Bind<BattleUnit> bu = { parser, "BattleUnit" };
+	BindNested<BattleUnit, UnitStats, &BattleUnit::_stats> us = { bu };
 
-	parser->addCustom(0, "blit_part");
-	parser->addCustom(1, "anim_frame");
-	parser->addCustom(2, "shade");
+	parser->addParser<FuncGroup<burnShadeScript>>("add_burn_shade");
 	parser->addConst("blit_torso", BODYPART_TORSO);
 	parser->addConst("blit_leftarm", BODYPART_LEFTARM);
 	parser->addConst("blit_rightarm", BODYPART_RIGHTARM);
@@ -3289,102 +3326,110 @@ void BattleUnit::ScriptRegister(ScriptParser<BattleUnit>* parser)
 	parser->addConst("blit_collapse", BODYPART_COLLAPSING);
 	parser->addConst("blit_inventory", BODYPART_ITEM);
 
-	parser->addFunction("health", &geter<bBU, &BU::_health>);
-	parser->addFunction("health_max", &geter<bUS, &US::health>);
-	parser->addFunction("energy", &geter<bBU, &BU::_energy>);
-	parser->addFunction("energy_max", &geter<bUS, &US::stamina>);
-	parser->addFunction("stun", &geter<bBU, &BU::_stunlevel>);
-	parser->addFunction("stun_max", &geter<bBU, &BU::_health>);
-	parser->addFunction("morale", &geter<bBU, &BU::_morale>);
-	parser->addConst("morale_max", 100);
+	bu.add<&BU::_id>("getId");
+	bu.add<&BU::_rankInt>("getRank");
+	bu.add<&getGenderScript>("getGender");
+	bu.add<&getLookScript>("getLook");
+	bu.add<&getLookVariantScript>("getLookVariant");
+	bu.add<&getRecolorScript>("getRecolor");
+	bu.add<&BU::isFloating>("isFloating");
+	bu.add<&BU::isKneeled>("isKneeled");
 
-	parser->addFunction("stat_tu", &geter<bUS, &US::stamina>);
-	parser->addFunction("stat_stamina", &geter<bUS, &US::stamina>);
-	parser->addFunction("stat_health", &geter<bUS, &US::health>);
-	parser->addFunction("stat_bravery", &geter<bUS, &US::bravery>);
-	parser->addFunction("stat_reactions", &geter<bUS, &US::reactions>);
-	parser->addFunction("stat_firing", &geter<bUS, &US::firing>);
-	parser->addFunction("stat_throwing", &geter<bUS, &US::throwing>);
-	parser->addFunction("stat_strength", &geter<bUS, &US::strength>);
-	parser->addFunction("stat_psistrength", &geter<bUS, &US::psiStrength>);
-	parser->addFunction("stat_psiskill", &geter<bUS, &US::psiSkill>);
-	parser->addFunction("stat_melee", &geter<bUS, &US::melee>);
+	bu.add<&BU::_tu>("getTimeUnits");
+	us.add<&US::tu>("getTimeUnitsMax");
 
-	parser->addFunction("fatalwounds", &geter<bBU, &BU::getFatalWounds>);
-	parser->addFunction("fatalwounds_head", &geter<bBU, &BU::getFatalWound, BODYPART_HEAD>);
-	parser->addFunction("fatalwounds_torso", &geter<bBU, &BU::getFatalWound, BODYPART_TORSO>);
-	parser->addFunction("fatalwounds_leftarm", &geter<bBU, &BU::getFatalWound, BODYPART_LEFTARM>);
-	parser->addFunction("fatalwounds_rightarm", &geter<bBU, &BU::getFatalWound, BODYPART_RIGHTARM>);
-	parser->addFunction("fatalwounds_leftleg", &geter<bBU, &BU::getFatalWound, BODYPART_LEFTLEG>);
-	parser->addFunction("fatalwounds_rightleg", &geter<bBU, &BU::getFatalWound, BODYPART_RIGHTLEG>);
+	bu.add<&BU::_health>("getHealth");
+	us.add<&US::health>("getHealthMax");
 
-	parser->addFunction("armor_front", &geter<bBU, UnitSide, &BU::getArmor, SIDE_FRONT>);
-	parser->addFunction("armor_left", &geter<bBU, UnitSide, &BU::getArmor, SIDE_LEFT>);
-	parser->addFunction("armor_right", &geter<bBU, UnitSide, &BU::getArmor, SIDE_RIGHT>);
-	parser->addFunction("armor_rear", &geter<bBU, UnitSide, &BU::getArmor, SIDE_REAR>);
-	parser->addFunction("armor_under", &geter<bBU, UnitSide, &BU::getArmor, SIDE_UNDER>);
+	bu.add<&BU::_energy>("getEnergy");
+	us.add<&US::stamina>("getEnergyMax");
 
-	parser->addFunction("unit_id", &geter<bBU, &BU::_id>);
-	parser->addFunction("unit_rank", &geter<bBU, &BU::_rankInt>);
-	parser->addFunction("unit_float", &geter_cast<bBU, bool, &BU::_floating>);
-	parser->addFunction("unit_kneel", &geter_cast<bBU, bool, &BU::_kneeled>);
+	bu.add<&BU::_stunlevel>("getStun");
+	bu.add<&BU::_health>("getStunMax");
 
-	parser->addConst("unit_rank_rookie", 0);
-	parser->addConst("unit_rank_squaddie", 1);
-	parser->addConst("unit_rank_sergeant", 2);
-	parser->addConst("unit_rank_captain", 3);
-	parser->addConst("unit_rank_colonel", 4);
-	parser->addConst("unit_rank_commander", 5);
+	bu.add<&BU::_morale>("getMorale");
+	bu.add<100>("getMoraleMax");
 
-//	parser->addFunction("soldier_hair", &geter_cast<bBU, Uint8, &BU::_hairColor>);
-//	parser->addFunction("soldier_face", &geter_cast<bBU, Uint8, &BU::_faceColor>);
-	parser->addConst("color_hair", ColorCopy::Hair);
-	parser->addConst("color_face", ColorCopy::Face);
+	us.add<&US::tu>("Stats.getTimeUnits");
+	us.add<&US::stamina>("Stats.getStamina");
+	us.add<&US::health>("Stats.getHealth");
+	us.add<&US::bravery>("Stats.getBravery");
+	us.add<&US::reactions>("Stats.getReactions");
+	us.add<&US::firing>("Stats.getFiring");
+	us.add<&US::throwing>("Stats.getThrowing");
+	us.add<&US::strength>("Stats.getStrength");
+	us.add<&US::psiStrength>("Stats.getPsiStrength");
+	us.add<&US::psiSkill>("Stats.getPsiSkill");
+	us.add<&US::melee>("Stats.getMelee");
 
-	parser->addConst("color_null", 0);
-	parser->addConst("color_yellow", 1);
-	parser->addConst("color_red", 2);
-	parser->addConst("color_green0", 3);
-	parser->addConst("color_green1", 4);
-	parser->addConst("color_gray", 5);
-	parser->addConst("color_brown0", ColorCopy::Face);
-	parser->addConst("color_blue0", 7);
-	parser->addConst("color_blue1", 8);
-	parser->addConst("color_brown1", ColorCopy::Hair);
-	parser->addConst("color_brown2", 10);
-	parser->addConst("color_purple0", 11);
-	parser->addConst("color_purple1", 12);
-	parser->addConst("color_blue2", 13);
-	parser->addConst("color_silver", 14);
-	parser->addConst("color_special", 15);
+	bu.add<&BU::getFatalWounds>("getFatalwoundsTotal");
+	bu.add<&BU::getFatalWound>("getFatalwounds");
+	bu.add<&getArmorScript>("getArmor");
 
-	parser->addFunction("soldier_look", &geter_cast<bS, SoldierLook, &S::getLook>);
-	parser->addConst("soldier_look_blonde", LOOK_BLONDE);
-	parser->addConst("soldier_look_brownhair", LOOK_BROWNHAIR);
-	parser->addConst("soldier_look_oriental", LOOK_ORIENTAL);
-	parser->addConst("soldier_look_african", LOOK_AFRICAN);
+	parser->addConst("BODYPART_HEAD", BODYPART_HEAD);
+	parser->addConst("BODYPART_TORSO", BODYPART_TORSO);
+	parser->addConst("BODYPART_LEFTARM", BODYPART_LEFTARM);
+	parser->addConst("BODYPART_RIGHTARM", BODYPART_RIGHTARM);
+	parser->addConst("BODYPART_LEFTLEG", BODYPART_LEFTLEG);
+	parser->addConst("BODYPART_RIGHTLEG", BODYPART_RIGHTLEG);
 
-	parser->addFunction("soldier_grender", &geter_cast<bS, SoldierGender, &S::getGender>);
-	parser->addConst("soldier_grender_male", GENDER_MALE);
-	parser->addConst("soldier_grender_female", GENDER_FEMALE);
+	parser->addConst("SIDE_FRONT", SIDE_FRONT);
+	parser->addConst("SIDE_LEFT", SIDE_LEFT);
+	parser->addConst("SIDE_RIGHT", SIDE_RIGHT);
+	parser->addConst("SIDE_REAR", SIDE_REAR);
+	parser->addConst("SIDE_UNDER", SIDE_UNDER);
+
+	parser->addConst("UNIT_RANK_ROOKIE", 0);
+	parser->addConst("UNIT_RANK_SQUADDIE", 1);
+	parser->addConst("UNIT_RANK_SERGEANT", 2);
+	parser->addConst("UNIT_RANK_CAPTAIN", 3);
+	parser->addConst("UNIT_RANK_COLONEL", 4);
+	parser->addConst("UNIT_RANK_COMMANDER", 5);
+
+	parser->addConst("COLOR_X1_HAIR", 6);
+	parser->addConst("COLOR_X1_FACE", 9);
+
+	parser->addConst("COLOR_X1_NULL", 0);
+	parser->addConst("COLOR_X1_YELLOW", 1);
+	parser->addConst("COLOR_X1_RED", 2);
+	parser->addConst("COLOR_X1_GREEN0", 3);
+	parser->addConst("COLOR_X1_GREEN1", 4);
+	parser->addConst("COLOR_X1_GRAY", 5);
+	parser->addConst("COLOR_X1_BROWN0", 6);
+	parser->addConst("COLOR_X1_BLUE0", 7);
+	parser->addConst("COLOR_X1_BLUE1", 8);
+	parser->addConst("COLOR_X1_BROWN1", 9);
+	parser->addConst("COLOR_X1_BROWN2", 10);
+	parser->addConst("COLOR_X1_PURPLE0", 11);
+	parser->addConst("COLOR_X1_PURPLE1", 12);
+	parser->addConst("COLOR_X1_BLUE2", 13);
+	parser->addConst("COLOR_X1_SILVER", 14);
+	parser->addConst("COLOR_X1_SPECIAL", 15);
+
+
+	parser->addConst("LOOK_BLONDE", LOOK_BLONDE);
+	parser->addConst("LOOK_BROWNHAIR", LOOK_BROWNHAIR);
+	parser->addConst("LOOK_ORIENTAL", LOOK_ORIENTAL);
+	parser->addConst("LOOK_AFRICAN", LOOK_AFRICAN);
+
+	parser->addConst("GENDER_MALE", GENDER_MALE);
+	parser->addConst("GENDER_FEMALE", GENDER_FEMALE);
 }
 
-void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit)
+const Armor::RecolorParser BattleUnit::Parser("BattleUnit", "unit", "blit_part", "anim_frame", "shade", "burn");
+
+void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn)
 {
 	w->proc = 0;
 	if(unit)
 	{
-		ScriptContainer<BattleUnit>* scr = unit->_armor->getRecolorScript();
-		if(scr) scr->update(w, unit);
+		const Armor::RecolorParser::Container* scr = unit->_armor->getRecolorScript();
+		if(scr)
+		{
+			scr->update(w, unit, body_part, anim_frame, shade, burn);
+			w->shade = shade;
+		}
 	}
-}
-
-void BattleUnit::ScriptFillCustom(ScriptWorker* w, int body_part, int anim_frame, int shade)
-{
-	w->regCustom[0] = body_part;
-	w->regCustom[1] = anim_frame;
-	w->regCustom[2] = shade;
-	w->shade = shade;
 }
 
 } //namespace OpenXcom

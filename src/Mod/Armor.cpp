@@ -55,7 +55,7 @@ Armor::~Armor()
  * Loads the armor from a YAML file.
  * @param node YAML node.
  */
-void Armor::load(const YAML::Node &node, const ScriptParser<BattleUnit>& parser)
+void Armor::load(const YAML::Node &node, const RecolorParser& parser)
 {
 	_type = node["type"].as<std::string>(_type);
 	_spriteSheet = node["spriteSheet"].as<std::string>(_spriteSheet);
@@ -638,7 +638,7 @@ bool Armor::hasInventory() const
 	return _hasInventory;
 }
 
-ScriptContainer<BattleUnit> *Armor::getRecolorScript()
+const Armor::RecolorParser::Container *Armor::getRecolorScript()
 {
 	return _recolorScript;
 }

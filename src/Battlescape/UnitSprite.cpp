@@ -68,29 +68,10 @@ namespace
 
 struct ColorReplace
 {
-	static inline void loop(Uint8& dest, const Uint8& src, const Uint8& override, int burn, int shade)
+	static inline void loop(Uint8& dest, const Uint8& src, const Uint8& over, int burn, int shade)
 	{
-		const Uint8 temp = (src & helper::ColorShade) + override;
-		if (burn)
-		{
-			const Uint8 tempBurn = (temp & helper::ColorShade) + burn;
-			if (tempBurn > 26)
-			{
-				//nothing
-			}
-			else if (tempBurn > 15)
-			{
-				helper::StandardShade::func(dest, helper::ColorShade, shade);
-			}
-			else
-			{
-				helper::StandardShade::func(dest, (temp & helper::ColorGroup) + tempBurn, shade);
-			}
-		}
-		else
-		{
-			helper::StandardShade::func(dest, temp, shade);
-		}
+		const Uint8 temp = (src & helper::ColorShade) + over;
+		helper::BurnShade::func(dest, temp, burn, shade);
 	}
 
 	static inline void func(Uint8& dest, const Uint8& src, const std::pair<Uint8, Uint8> *color, int size, int burn, int shade)
@@ -140,27 +121,28 @@ void UnitSprite::blitItem(Surface* item)
  */
 void UnitSprite::blitBody(Surface* body, int part)
 {
+	int burn = 0;
+	int overkill = _unit->getOverKillDamage();
+	int maxHp = _unit->getBaseStats()->health;
+	if (overkill)
+	{
+		if (overkill > maxHp)
+		{
+			burn = 16 * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames();
+		}
+		else
+		{
+			burn = 16 * overkill * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames() / maxHp;
+		}
+	}
+	BattleUnit::ScriptFill(&_scriptWorkRef, _unit, part, _animationFrame, _shade, burn);
+	_dest->lock();
 	if(_scriptWorkRef.proc)
 	{
-		BattleUnit::ScriptFillCustom(&_scriptWorkRef, part, _animationFrame, _shade);
 		_scriptWorkRef.executeBlit(body, _dest,  _x + body->getX(), _y + body->getY(), _half);
 	}
 	else
 	{
-		int burn = 0;
-		int overkill = _unit->getOverKillDamage();
-		int maxHp = _unit->getBaseStats()->health;
-		if (overkill)
-		{
-			if (overkill > maxHp)
-			{
-				burn = 16 * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames();
-			}
-			else
-			{
-				burn = 16 * overkill * (_unit->getFallingPhase() + 1) / _unit->getArmor()->getDeathFrames() / maxHp;
-			}
-		}
 		ShaderMove<Uint8> dest(_dest, 0, 0);
 		if (_half)
 		{
@@ -168,7 +150,6 @@ void UnitSprite::blitBody(Surface* body, int part)
 			g.beg_x = _x + body->getWidth() / 2;
 			dest.setDomain(g);
 		}
-		_dest->lock();
 		ShaderDraw<ColorReplace>(
 			dest,
 			ShaderSurface(body, _x + body->getX(), _y + body->getY()),
@@ -177,8 +158,8 @@ void UnitSprite::blitBody(Surface* body, int part)
 			ShaderScalar(burn),
 			ShaderScalar(_shade)
 		);
-		_dest->unlock();
 	}
+	_dest->unlock();
 }
 
 /**
@@ -199,8 +180,6 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	_itemB = getIfVisible(_unit->getItem("STR_LEFT_HAND"));
 
 	_unitSurface = _mod->getSurfaceSet(_unit->getArmor()->getSpriteSheet());
-
-	BattleUnit::ScriptFill(&_scriptWorkRef, _unit);
 
 	_drawingRoutine = _unit->getArmor()->getDrawingRoutine();
 	if (Options::battleHairBleach)

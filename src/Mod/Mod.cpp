@@ -816,6 +816,8 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx)
  */
 void Mod::loadFile(const std::string &filename)
 {
+	BattleUnit::Parser.LogInfo();
+
 	YAML::Node doc = YAML::LoadFile(filename);
 
 	for (YAML::const_iterator i = doc["countries"].begin(); i != doc["countries"].end(); ++i)
@@ -895,13 +897,12 @@ void Mod::loadFile(const std::string &filename)
 		}
 	}
 
-	ScriptParser<BattleUnit> unitScript("Armor");
 	for (YAML::const_iterator i = doc["armors"].begin(); i != doc["armors"].end(); ++i)
 	{
 		Armor *rule = loadRule(*i, &_armors, &_armorsIndex);
 		if (rule != 0)
 		{
-			rule->load(*i, unitScript);
+			rule->load(*i, BattleUnit::Parser);
 		}
 	}
 	for (YAML::const_iterator i = doc["soldiers"].begin(); i != doc["soldiers"].end(); ++i)

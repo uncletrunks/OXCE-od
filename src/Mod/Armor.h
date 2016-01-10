@@ -43,6 +43,9 @@ class BattleUnit;
  */
 class Armor
 {
+public:
+	using RecolorParser = ScriptParser<BattleUnit, BattleUnit*, int, int, int, int>;
+
 private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
 	std::vector<std::string> _corpseBattle;
@@ -62,14 +65,14 @@ private:
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
-	ScriptContainer<BattleUnit> *_recolorScript;
+	RecolorParser::Container *_recolorScript;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
 	/// Cleans up the armor ruleset.
 	~Armor();
 	/// Loads the armor data from YAML.
-	void load(const YAML::Node& node, const ScriptParser<BattleUnit>& parser);
+	void load(const YAML::Node& node, const RecolorParser& parser);
 	/// Gets the armor's type.
 	std::string getType() const;
 	/// Gets the unit's sprite sheet.
@@ -167,7 +170,7 @@ public:
 	/// can we access this unit's inventory?
 	bool hasInventory() const;
 	/// Gets script used to recolor unit.
-	ScriptContainer<BattleUnit> *getRecolorScript();
+	const RecolorParser::Container *getRecolorScript();
 };
 
 }

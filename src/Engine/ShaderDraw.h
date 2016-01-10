@@ -193,6 +193,38 @@ struct StandardShade
 	}
 
 };
+/**
+ * helper class used for bliting dying unit with overkill
+ */
+struct BurnShade
+{
+	static inline void func(Uint8& dest, const Uint8& src, const int& burn, const int& shade)
+	{
+		if (src)
+		{
+			if (burn)
+			{
+				const Uint8 tempBurn = (src & ColorShade) + burn;
+				if (tempBurn > 26)
+				{
+					//nothing
+				}
+				else if (tempBurn > 15)
+				{
+					StandardShade::func(dest, ColorShade, shade);
+				}
+				else
+				{
+					StandardShade::func(dest, (src & ColorGroup) + tempBurn, shade);
+				}
+			}
+			else
+			{
+				StandardShade::func(dest, src, shade);
+			}
+		}
+	}
+};
 
 }//namespace helper
 
