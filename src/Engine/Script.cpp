@@ -164,11 +164,11 @@ static inline RetEnum call_func_h(ScriptWorker &c, FuncCommon func, const Uint8 
 	/*	Name,		Implementation,													End excecution,				Args */ \
 	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorker &)) \
 	\
-	IMPL(ret,		MACRO_QUOTE({							c.reg[RegIn] = Data0;	return RetEnd;						}),		(ScriptWorker &c, int Data0)) \
-	IMPL(ret_gt,	MACRO_QUOTE({ if (c.reg[RegCond] > 0)	{ c.reg[RegIn] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_lt,	MACRO_QUOTE({ if (c.reg[RegCond] < 0)	{ c.reg[RegIn] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_eq,	MACRO_QUOTE({ if (c.reg[RegCond] == 0)	{ c.reg[RegIn] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_neq,	MACRO_QUOTE({ if (c.reg[RegCond] != 0)	{ c.reg[RegIn] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret,		MACRO_QUOTE({							c.reg[RegI0] = Data0;	return RetEnd;						}),		(ScriptWorker &c, int Data0)) \
+	IMPL(ret_gt,	MACRO_QUOTE({ if (c.reg[RegCond] > 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret_lt,	MACRO_QUOTE({ if (c.reg[RegCond] < 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret_eq,	MACRO_QUOTE({ if (c.reg[RegCond] == 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret_neq,	MACRO_QUOTE({ if (c.reg[RegCond] != 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
 	\
 	IMPL(goto,		MACRO_QUOTE({							Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
 	IMPL(goto_gt,	MACRO_QUOTE({ if (c.reg[RegCond] > 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
@@ -280,13 +280,15 @@ enum ProcEnum : Uint8
 
 /**
  * Core function in script engine used to executing scripts
- * @param in arg that is visible in script under name "in"
+ * @param i0 arg that is visible in script under name "i0"
+ * @param i1 arg that is visible in script under name "i1"
  * @param proc array storing operation of script
  * @return Result of executing script
  */
-static inline Uint8 scriptExe(int in, ScriptWorker &data)
+static inline int scriptExe(int i0, int i1, ScriptWorker &data)
 {
-	data.reg[RegIn] = in;
+	data.reg[RegI0] = i0;
+	data.reg[RegI1] = i1;
 	ProgPos curr = {};
 	const Uint8 *const proc = data.proc;
 	//--------------------------------------------------
@@ -329,7 +331,7 @@ static inline Uint8 scriptExe(int in, ScriptWorker &data)
 	#undef MACRO_FUNC_ARRAY
 	//--------------------------------------------------
 
-	endLabel: return data.reg[RegIn];
+	endLabel: return data.reg[RegI0];
 	errorLabel: throw Exception("Invaild script operation!");
 }
 
@@ -350,7 +352,7 @@ struct ScriptReplace
 	{
 		if (src)
 		{
-			const int s = scriptExe(src, ref);
+			const int s = scriptExe(src, dest, ref);
 			if (s) dest = s;
 		}
 	}
@@ -361,11 +363,11 @@ struct ScriptReplace
 
 
 /**
- * Bliting one surface to another using script
- * @param src source surface
- * @param dest destination surface
- * @param x x offset of source surface
- * @param y y offset of source surface
+ * Bliting one surface to another using script.
+ * @param src source surface.
+ * @param dest destination surface.
+ * @param x x offset of source surface.
+ * @param y y offset of source surface.
  */
 void ScriptWorker::executeBlit(Surface* src, Surface* dest, int x, int y, bool half)
 {
@@ -381,6 +383,18 @@ void ScriptWorker::executeBlit(Surface* src, Surface* dest, int x, int y, bool h
 	else
 		ShaderDraw<helper::StandardShade>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(shade));
 }
+
+/**
+ * Execute script with two arguments.
+ * @param i0 arg that is visible in script under name "i0"
+ * @param i1 arg that is visible in script under name "i1"
+ * @return Result value from script.
+ */
+int ScriptWorker::execute(int i0, int i1)
+{
+	return scriptExe(i0, i1, *this);
+}
+
 ////////////////////////////////////////////////////////////
 //					ScriptParser class
 ////////////////////////////////////////////////////////////
@@ -569,7 +583,7 @@ static bool parseEnd(const ScriptParserData &spd, ParserHelper &ph, const Select
 /**
  * Default constructor
  */
-ScriptParserBase::ScriptParserBase(const std::string& name) : _regUsed{ RegCustom }, _name{ name }
+ScriptParserBase::ScriptParserBase(const std::string& name) : _regUsed{ RegMax }, _name{ name }
 {
 	//--------------------------------------------------
 	//					op_data init
@@ -585,7 +599,8 @@ ScriptParserBase::ScriptParserBase(const std::string& name) : _regUsed{ RegCusto
 	_procList["else"] = { &parseElse };
 	_procList["end"] = { &parseEnd };
 
-	addStandartReg("in", RegIn);
+	addStandartReg("i0", RegI0);
+	addStandartReg("i1", RegI1);
 	addStandartReg("r0", RegR0);
 	addStandartReg("r1", RegR1);
 	addStandartReg("r2", RegR2);
@@ -731,7 +746,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 			{
 				auto temp = op_str.substr(0, first_dot);
 				auto ref = help.getReferece(temp);
-				if (ref && ref->type >= ArgCustom)
+				if (ref && ref->type >= ArgMax)
 				{
 					for (auto& t : _typeList)
 					{

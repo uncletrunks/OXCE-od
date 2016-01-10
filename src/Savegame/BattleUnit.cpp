@@ -3250,11 +3250,21 @@ namespace
 
 void getArmorScript(BattleUnit *bu, int &ret, int side)
 {
-	if (bu && 0 <= side && side < SIDE_MAX) ret = bu->getArmor((UnitSide)side);
+	if (bu && 0 <= side && side < SIDE_MAX)
+	{
+		ret = bu->getArmor((UnitSide)side);
+		return;
+	}
+	ret = 0;
 }
 void getGenderScript(BattleUnit *bu, int &ret)
 {
-	if (bu) ret = bu->getGender();
+	if (bu)
+	{
+		ret = bu->getGender();
+		return;
+	}
+	ret = 0;
 }
 void getLookScript(BattleUnit *bu, int &ret)
 {
@@ -3264,8 +3274,10 @@ void getLookScript(BattleUnit *bu, int &ret)
 		if (g)
 		{
 			ret = g->getLook();
+			return;
 		}
 	}
+	ret = 0;
 }
 void getLookVariantScript(BattleUnit *bu, int &ret)
 {
@@ -3275,25 +3287,47 @@ void getLookVariantScript(BattleUnit *bu, int &ret)
 		if (g)
 		{
 			ret = g->getLookVariant();
+			return;
 		}
 	}
+	ret = 0;
 }
-void getRecolorScript(BattleUnit *bu, int &ret)
+void getRecolorScript(BattleUnit *bu, int &pixel)
 {
 	if (bu)
 	{
 		const auto& vec = bu->getRecolor();
-		const int g = ret & helper::ColorGroup;
-		const int s = ret & helper::ColorShade;
+		const int g = pixel & helper::ColorGroup;
+		const int s = pixel & helper::ColorShade;
 		for(auto& p : vec)
 		{
 			if (g == p.first)
 			{
-				ret = s + p.second;
+				pixel = s + p.second;
+				return;
 			}
 		}
 	}
 }
+void isWalkingScript(BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		ret = bu->getStatus() == STATUS_WALKING;
+		return;
+	}
+	ret = 0;
+}
+void isCollapsingScript(BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		ret = bu->getStatus() == STATUS_COLLAPSING;
+		return;
+	}
+	ret = 0;
+}
+
 struct burnShadeScript
 {
 	static RetEnum func(int &curr, int burn, int shade)
@@ -3334,6 +3368,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getRecolorScript>("getRecolor");
 	bu.add<&BU::isFloating>("isFloating");
 	bu.add<&BU::isKneeled>("isKneeled");
+	bu.add<&isWalkingScript>("isWalking");
+	bu.add<&isCollapsingScript>("isCollapsing");
 	bu.add<&BU::getDirection>("getDirection");
 	bu.add<&BU::getWalkingPhase>("getWalkingPhase");
 
@@ -3367,6 +3403,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BU::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BU::getFatalWound>("getFatalwounds");
 	bu.add<&getArmorScript>("getArmor");
+	bu.add<&BU::getOverKillDamage>("getOverKillDamage");
 
 	parser->addConst("BODYPART_HEAD", BODYPART_HEAD);
 	parser->addConst("BODYPART_TORSO", BODYPART_TORSO);

@@ -78,7 +78,7 @@ enum ArgEnum : Uint8
 	ArgLabel,
 
 	ArgRaw,
-	ArgCustom,
+	ArgMax,
 };
 
 inline ArgEnum& operator++(ArgEnum& arg)
@@ -98,7 +98,8 @@ inline ArgEnum operator++(ArgEnum& arg, int)
  */
 enum RegEnum : Uint8
 {
-	RegIn,
+	RegI0,
+	RegI1,
 	RegCond,
 
 	RegR0,
@@ -106,7 +107,7 @@ enum RegEnum : Uint8
 	RegR2,
 	RegR3,
 
-	RegCustom,
+	RegMax,
 };
 
 /**
@@ -148,6 +149,8 @@ struct ScriptWorker
 
 	/// Programmable bliting using script
 	void executeBlit(Surface* src, Surface* dest, int x, int y, bool half = false);
+	/// Call script with two arguments
+	int execute(int i0, int i1);
 };
 
 using FuncCommon = RetEnum (*)(ScriptWorker &, const Uint8 *, ProgPos &);
@@ -159,7 +162,7 @@ struct ScriptContainerData
 {
 	static ArgEnum RegisteImpl()
 	{
-		static ArgEnum curr = ArgCustom;
+		static ArgEnum curr = ArgMax;
 		return curr++;
 	}
 	template<typename T>
@@ -213,7 +216,7 @@ public:
 	{
 		updateBase(ref);
 		int i = 0;
-		Dummy{ (ref->reg[RegCustom + i++] = (int)args, 0)... };
+		Dummy{ (ref->reg[RegMax + i++] = (int)args, 0)... };
 	}
 };
 
