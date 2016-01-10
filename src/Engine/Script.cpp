@@ -723,7 +723,8 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 		std::string arg_str;
 		std::string label_str = label.toString();
 
-		if (_procList.find(op_str) == _procList.end())
+		auto op_curr = _procList.find(op_str);
+		if (op_curr == _procList.end())
 		{
 			auto first_dot = op_str.find('.');
 			if (first_dot != std::string::npos)
@@ -738,6 +739,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 						{
 							arg_str = std::move(temp);
 							op_str = t.first + op_str.substr(first_dot);
+							op_curr = _procList.find(op_str);
 							args[1] = args[0];
 							args[0] = { TokenSymbol, std::begin(arg_str), std::end(arg_str) };
 							break;
@@ -787,7 +789,6 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 				return false;
 			}
 
-			auto op_curr = _procList.find(op_str);
 			if (op_curr != _procList.end())
 			{
 				if (op_curr->second(help, args, args+i) == false)

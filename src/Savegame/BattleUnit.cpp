@@ -3334,6 +3334,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getRecolorScript>("getRecolor");
 	bu.add<&BU::isFloating>("isFloating");
 	bu.add<&BU::isKneeled>("isKneeled");
+	bu.add<&BU::getDirection>("getDirection");
+	bu.add<&BU::getWalkingPhase>("getWalkingPhase");
 
 	bu.add<&BU::_tu>("getTimeUnits");
 	us.add<&US::tu>("getTimeUnitsMax");
