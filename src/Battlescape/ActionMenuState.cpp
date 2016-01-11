@@ -21,6 +21,7 @@
 #include "../Engine/Options.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Action.h"
+#include "../Engine/Sound.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
 #include "../Mod/Mod.h"
@@ -447,6 +448,8 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 					_action->origWeapon->convertToCorpse(corpseRules);
 					// inform the player
 					_action->result = "STR_TARGET_WAS_EXECUTED";
+					// audio feedback
+					_game->getMod()->getSoundByDepth(_game->getSavedGame()->getSavedBattle()->getDepth(), _action->weapon->getRules()->getMeleeHitSound())->play();
 				}
 			}
 			_game->popState();
