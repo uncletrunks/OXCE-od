@@ -1376,7 +1376,7 @@ void BattlescapeState::updateSoldierInfo()
 			else
 				_numAmmoLeft->setValue(0);
 		}
-		_numTwoHandedIndicatorLeft->setVisible(leftHandItem->getRules()->isTwoHanded());
+		_numTwoHandedIndicatorLeft->setVisible(Options::twoHandedIndicator && leftHandItem->getRules()->isTwoHanded());
 		if (leftHandItem->getRules()->getBattleType() == BT_MEDIKIT)
 		{
 			_numMedikitLeft1->setVisible(true);
@@ -1414,7 +1414,7 @@ void BattlescapeState::updateSoldierInfo()
 			else
 				_numAmmoRight->setValue(0);
 		}
-		_numTwoHandedIndicatorRight->setVisible(rightHandItem->getRules()->isTwoHanded());
+		_numTwoHandedIndicatorRight->setVisible(Options::twoHandedIndicator && rightHandItem->getRules()->isTwoHanded());
 		if (rightHandItem->getRules()->getBattleType() == BT_MEDIKIT)
 		{
 			_numMedikitRight1->setVisible(true);
