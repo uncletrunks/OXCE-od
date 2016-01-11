@@ -83,7 +83,10 @@ void MiniMapView::draw()
 				t = _battleGame->getTile(p);
 				if (!t)
 				{
-					emptySpace->blitNShade(this, x, y, 0);
+					if (Options::minimapBorderIndicator)
+					{
+						emptySpace->blitNShade(this, x, y, 0);
+					}
 					px++;
 					continue;
 				}
