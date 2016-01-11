@@ -73,7 +73,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	}
 
 	// execute / break neck / cut throat / coup de grace
-	if ((_action->weapon->getUnit() && _action->weapon->getUnit()->getStatus() == STATUS_UNCONSCIOUS))
+	if (Options::executeUnconsciousEnemies && (_action->weapon->getUnit() && _action->weapon->getUnit()->getStatus() == STATUS_UNCONSCIOUS))
 	{
 		BattleItem *otherWeapon = 0;
 
