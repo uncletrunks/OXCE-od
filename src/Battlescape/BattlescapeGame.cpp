@@ -1450,6 +1450,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				_currentAction.run = true;
 				_currentAction.strafe = false;
 			}
+			_currentAction.ignoreSpottedEnemies = (SDL_GetModState() & KMOD_SHIFT) != 0;
 			_currentAction.target = pos;
 			_save->getPathfinding()->calculate(_currentAction.actor, _currentAction.target);
 			if (bPreviewed && !_save->getPathfinding()->previewPath() && _save->getPathfinding()->getStartDirection() != -1)
@@ -1479,6 +1480,7 @@ void BattlescapeGame::secondaryAction(const Position &pos)
 	_currentAction.target = pos;
 	_currentAction.actor = _save->getSelectedUnit();
 	_currentAction.strafe = Options::strafe && (SDL_GetModState() & KMOD_CTRL) != 0 && _save->getSelectedUnit()->getTurretType() > -1;
+	_currentAction.ignoreSpottedEnemies = (SDL_GetModState() & KMOD_SHIFT) != 0;
 	statePushBack(new UnitTurnBState(this, _currentAction));
 }
 
