@@ -1362,7 +1362,7 @@ void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & depen
  */
 bool SavedGame::isUfopediaArticleSeen(const std::string &article) const
 {
-	if (article.empty() || _debug)
+	if (article.empty())
 		return true;
 	for (std::vector<const ArticleDefinition *>::const_iterator i = _seenUfopediaItems.begin(); i != _seenUfopediaItems.end(); ++i)
 	{
@@ -1380,7 +1380,7 @@ bool SavedGame::isUfopediaArticleSeen(const std::string &article) const
  */
 bool SavedGame::isManufactureSeen(const std::string &manufacture) const
 {
-	if (manufacture.empty() || _debug)
+	if (manufacture.empty())
 		return true;
 	for (std::vector<const RuleManufacture *>::const_iterator i = _seenManufactureItems.begin(); i != _seenManufactureItems.end(); ++i)
 	{
@@ -1398,7 +1398,7 @@ bool SavedGame::isManufactureSeen(const std::string &manufacture) const
  */
 bool SavedGame::isResearchSeen(const std::string &research) const
 {
-	if (research.empty() || _debug)
+	if (research.empty())
 		return true;
 	for (std::vector<const RuleResearch *>::const_iterator i = _seenResearchItems.begin(); i != _seenResearchItems.end(); ++i)
 	{
