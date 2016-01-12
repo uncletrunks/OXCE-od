@@ -1107,7 +1107,25 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 		}
 		if (rangeAtack && target->getOriginalFaction() == FACTION_HOSTILE)
 		{
-			unit->addFiringExp();
+			// experience training
+			BattleItem *bi = unit->getItem(unit->getActiveHand());
+			if (bi == 0)
+			{
+				// do nothing, the damage was caused either by disposable "firing" weapon (Black Powder Bomb) or grenade; or something else?
+			}
+			else
+			{
+				if (bi != 0 && bi->getRules()->getArcingShot())
+				{
+					// e.g. combat bow
+					unit->addThrowingExp();
+				}
+				else
+				{
+					// e.g. fuso knives, x-bow, sniper rifle, rocket launcher, ...
+					unit->addFiringExp();
+				}
+			}
 		}
 	}
 
