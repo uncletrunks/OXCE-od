@@ -376,7 +376,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			_parent->getMap()->setProjectile(0);
 			if (_parent->getPanicHandled())
 			{
-				_action.result = "STR_NO_LINE_OF_FIRE";
+				_action.result = "STR_NO_TRAJECTORY";
 			}
 			_unit->abortTurn();
 			_parent->popState();
