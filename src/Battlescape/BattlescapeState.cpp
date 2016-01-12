@@ -885,10 +885,19 @@ void BattlescapeState::btnShowMapClick(Action *)
  */
 void BattlescapeState::toggleKneelButton(BattleUnit* unit)
 {
+	SurfaceSet *sprites = _game->getMod()->getSurfaceSet("KneelButton");
 	if ((unit) && (unit->isKneeled())) {
-		_txtKneelStatus->setText(L"*");
+		if (sprites == 0) {
+			_txtKneelStatus->setText(L"*");
+		} else {
+			sprites->getFrame(1)->blit(_btnKneel);
+		}
 	} else {
-		_txtKneelStatus->setText(L"");
+		if (sprites == 0) {
+			_txtKneelStatus->setText(L"");
+		} else {
+			sprites->getFrame(0)->blit(_btnKneel);
+		}
 	}
 }
 
