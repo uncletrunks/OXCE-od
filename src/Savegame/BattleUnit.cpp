@@ -3462,7 +3462,7 @@ void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, in
 	w->proc = 0;
 	if(unit)
 	{
-		const Armor::RecolorParser::Container* scr = unit->_armor->getRecolorScript();
+		auto *scr = unit->getArmor()->getRecolorScript();
 		if(scr)
 		{
 			scr->update(w, unit, body_part, anim_frame, shade, burn);

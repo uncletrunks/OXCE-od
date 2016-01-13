@@ -39,12 +39,12 @@ class UnitSprite
 private:
 	struct Part
 	{
+		int bodyPart;
 		Surface *src;
 		int offX;
 		int offY;
 
-		Part(Surface *s) : src{ s }, offX{ 0 }, offY{ 0 } { }
-		Part() : Part(nullptr) { }
+		Part(int body, Surface *s = nullptr) : src{ s }, bodyPart{ body }, offX{ 0 }, offY{ 0 } { }
 
 		Part& operator=(Surface *s) { src = s; }
 		explicit operator bool() { return src; }
@@ -52,14 +52,14 @@ private:
 
 	BattleUnit *_unit;
 	BattleItem *_itemA, *_itemB;
-	SurfaceSet *_unitSurface, *_itemSurfaceA, *_itemSurfaceB, *_fireSurface;
+	SurfaceSet *_unitSurface, *_itemSurface, *_fireSurface;
 	Surface *_dest;
 	Mod *_mod;
 	int _part, _animationFrame, _drawingRoutine;
 	bool _helmet, _half;
 	const std::pair<Uint8, Uint8> *_color;
 	int _colorSize;
-	int _x, _y, _shade;
+	int _x, _y, _shade, _burn;
 	ScriptWorker _scriptWorkRef;
 
 	/// Drawing routine for XCom soldiers in overalls, sectoids (routine 0),
@@ -99,13 +99,13 @@ private:
 	/// Sort two handed sprites out.
 	void sortRifles();
 	/// Get graphic for unit part.
-	Part getUnitGraph(int index, int offset);
+	void selectUnit(Part& p, int index, int offset);
 	/// Get graphic for item part.
-	Part getItemGraph(int index, int offset);
+	void selectItem(Part& p, BattleItem *item, int offset);
 	/// Blit weapon sprite.
-	void blitItem(Part item);
+	void blitItem(Part& item);
 	/// Blit body sprite.
-	void blitBody(Part body, int part);
+	void blitBody(Part& body);
 public:
 	/// Creates a new UnitSprite at the specified position and size.
 	UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet);

@@ -1123,7 +1123,7 @@ struct BindPropGet
 {
 	static RetEnum func(T* t, P& p)
 	{
-		if (t) p = t->*X;
+		if (t) p = t->*X; else p = P{};
 		return RetContinue;
 	}
 };
@@ -1141,7 +1141,7 @@ struct BindPropNestGet
 {
 	static RetEnum func(T* t, P& p)
 	{
-		if (t) p = (t->*X).*XX;
+		if (t) p = (t->*X).*XX; else p = P{};
 		return RetContinue;
 	}
 };
@@ -1160,7 +1160,7 @@ struct BindValue
 {
 	static RetEnum func(T* t, P& p)
 	{
-		if (t) p = I;
+		if (t) p = I; else p = P{};
 		return RetContinue;
 	}
 };
@@ -1183,7 +1183,7 @@ struct BindFunc<bool(T::*)(Args...), X>
 {
 	static RetEnum func(T* p, int& r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...);
+		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };
@@ -1193,7 +1193,7 @@ struct BindFunc<int(T::*)(Args...), X>
 {
 	static RetEnum func(T* p, int& r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...);
+		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };
@@ -1203,7 +1203,7 @@ struct BindFunc<bool(T::*)(Args...) const, X>
 {
 	static RetEnum func(T* p, int& r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...);
+		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };
@@ -1213,7 +1213,7 @@ struct BindFunc<int(T::*)(Args...) const, X>
 {
 	static RetEnum func(T* p, int& r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...);
+		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };

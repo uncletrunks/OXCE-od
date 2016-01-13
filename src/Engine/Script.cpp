@@ -92,9 +92,9 @@ static inline RetEnum mulAddMod_h(int& reg, const int& mul, const int& add, cons
 	if (mod)
 	{
 		reg = (a % mod + mod) % mod;
-		return RetError;
+		return RetContinue;
 	}
-	return RetContinue;
+	return RetError;
 }
 
 [[gnu::always_inline]]
@@ -195,8 +195,8 @@ static inline RetEnum call_func_h(ScriptWorker &c, FuncCommon func, const Uint8 
 	IMPL(offset,	MACRO_QUOTE({ Reg0 = Reg0 * Data1 + Data2;						return RetContinue; }),		(int &Reg0, int Data1, int Data2)) \
 	IMPL(offsetmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Data1, Data2, Data3);						}),		(int &Reg0, int Data1, int Data2, int Data3)) \
 	\
-	IMPL(div,		MACRO_QUOTE({ if (Data1) { Reg0 /= Data1; return RetError; }	return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(mod,		MACRO_QUOTE({ if (Data1) { Reg0 %= Data1; return RetError; }	return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(div,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 /= Data1;		return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(mod,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 %= Data1;		return RetContinue; }),		(int &Reg0, int Data1)) \
 	\
 	IMPL(shl,		MACRO_QUOTE({ Reg0 <<= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
 	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
@@ -289,7 +289,7 @@ static inline int scriptExe(int i0, int i1, ScriptWorker &data)
 {
 	data.reg[RegI0] = i0;
 	data.reg[RegI1] = i1;
-	ProgPos curr = {};
+	ProgPos curr = ProgPos::Start;
 	const Uint8 *const proc = data.proc;
 	//--------------------------------------------------
 	//			helper macros for this function
@@ -307,7 +307,10 @@ static inline int scriptExe(int i0, int i1, ScriptWorker &data)
 				if (ret == RetEnd) \
 					goto endLabel; \
 				else \
+				{ \
+					curr += - currType::offset - 1; \
 					goto errorLabel; \
+				} \
 			} \
 			else \
 				continue; \
@@ -331,8 +334,15 @@ static inline int scriptExe(int i0, int i1, ScriptWorker &data)
 	#undef MACRO_FUNC_ARRAY
 	//--------------------------------------------------
 
-	endLabel: return data.reg[RegI0];
-	errorLabel: throw Exception("Invaild script operation!");
+	endLabel:
+	return data.reg[RegI0];
+	errorLabel:
+	static int bugCount = 0;
+	if (++bugCount < 100)
+	{
+		Log(LOG_ERROR) << "Invaild script operation in "<< (int)proc[(int)curr] <<" at "<< (int)curr <<"\n";
+	}
+	return 0;
 }
 
 
@@ -686,8 +696,9 @@ void ScriptParserBase::addConst(const std::string& s, int i)
  * @param src_code string with script
  * @return true if string have valid script
  */
-bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::string& srcCode) const
+bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::string& parentName, const std::string& srcCode) const
 {
+	std::string err = "Parsing script for '" + parentName + "' enconter error: ";
 	ParserHelper help(
 		_regUsed,
 		destScript->_proc,
@@ -705,14 +716,14 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 		{
 			if (help.regIndexUsed > ScriptMaxReg)
 			{
-				Log(LOG_ERROR) << "script used to many references\n";
+				Log(LOG_ERROR) << err << "too many references\n";
 				return false;
 			}
 			for (auto i = help.refListCurr.begin(); i != help.refListCurr.end(); ++i)
 			{
 				if (i->second.type == ArgLabel && i->second.value == -1)
 				{
-					Log(LOG_ERROR) << "invalid use of label: '" << i->first << "' without declaration\n";
+					Log(LOG_ERROR) << err << "invalid use of label: '" << i->first << "' without declaration\n";
 					return false;
 				}
 			}
@@ -748,17 +759,14 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 				auto ref = help.getReferece(temp);
 				if (ref && ref->type >= ArgMax)
 				{
-					for (auto& t : _typeList)
+					auto& name = getTypeName(ref->type);
+					if (!name.empty())
 					{
-						if (t.second == ref->type)
-						{
-							arg_str = std::move(temp);
-							op_str = t.first + op_str.substr(first_dot);
-							op_curr = _procList.find(op_str);
-							args[1] = args[0];
-							args[0] = { TokenSymbol, std::begin(arg_str), std::end(arg_str) };
-							break;
-						}
+						arg_str = std::move(temp);
+						op_str = name + op_str.substr(first_dot);
+						op_curr = _procList.find(op_str);
+						args[1] = args[0];
+						args[0] = { TokenSymbol, std::begin(arg_str), std::end(arg_str) };
 					}
 				}
 			}
@@ -787,7 +795,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 					++curr;
 				line_end = curr;
 			}
-			Log(LOG_ERROR) << "invalid line: '" << std::string(line_begin, line_end) << "'\n";
+			Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'\n";
 			return false;
 		}
 		else
@@ -800,7 +808,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 
 			if (!label_str.empty() && !help.setLabel(label_str, help.getCurrPos()))
 			{
-				Log(LOG_ERROR) << "invalid label '"<< label_str <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
+				Log(LOG_ERROR) << err << "invalid label '"<< label_str <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
 				return false;
 			}
 
@@ -808,7 +816,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 			{
 				if (op_curr->second(help, args, args+i) == false)
 				{
-					Log(LOG_ERROR) << "invalid line: '" << std::string(line_begin, line_end) << "'\n";
+					Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'\n";
 					return false;
 				}
 
@@ -823,7 +831,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 					std::string var_name = args[j].toString();
 					if (args[j].type != TokenSymbol || help.addReg(var_name, type_curr->second) == false)
 					{
-						Log(LOG_ERROR) << "invalid variable name '"<< var_name <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
+						Log(LOG_ERROR) << err << "invalid variable name '"<< var_name <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
 						return false;
 					}
 				}
@@ -831,7 +839,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 				continue;
 			}
 
-			Log(LOG_ERROR) << "invalid operation name '"<< op_str <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
+			Log(LOG_ERROR) << err << "invalid operation name '"<< op_str <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
 			return false;
 		}
 	}
@@ -871,9 +879,25 @@ void ScriptParserBase::logScriptMetadata() const
 			if (ite->second.type == ArgConst)
 				refLog.get() << "Ref: " << std::setw(30) << ite->first << "Value: " << ite->second.value << "\n";
 			else
-				refLog.get() << "Ref: " << std::setw(30) << ite->first << "\n";
+				refLog.get() << "Ref: " << std::setw(30) << ite->first << "Type: " << getTypeName(ite->second.type) << "\n";
 		}
 	}
+}
+
+/**
+ * Get name of type
+ */
+const std::string& ScriptParserBase::getTypeName(ArgEnum type) const
+{
+	for (auto& t : _typeList)
+	{
+		if (t.second == type)
+		{
+			return t.first;
+		}
+	}
+	static std::string empty{};
+	return empty;
 }
 
 } //namespace OpenXcom

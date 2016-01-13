@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <memory>
 #include <SDL_stdinc.h>
 
 
@@ -45,6 +46,7 @@ const int ScriptMaxReg = 64;
 enum class ProgPos : size_t
 {
 	Unknown = (size_t)-1,
+	Start = 0,
 };
 
 inline ProgPos& operator+=(ProgPos& pos, int offset)
@@ -256,9 +258,11 @@ protected:
 	ScriptParserBase(const std::string& name);
 
 	/// Common typeless part of parsing string
-	bool parseBase(ScriptContainerBase* scr, const std::string& code) const;
+	bool parseBase(ScriptContainerBase* scr, const std::string& parentName, const std::string& code) const;
 	/// Show all builtin script informations
 	void logScriptMetadata() const;
+	/// Get name of type
+	const std::string& getTypeName(ArgEnum type) const;
 
 	/// Add name for standart reg
 	void addStandartReg(const std::string& s, RegEnum index);
@@ -308,13 +312,14 @@ public:
 	}
 
 	/// Prase string and return new script
-	Container* parse(const std::string& src_code) const
+	std::unique_ptr<Container> parse(const std::string& parentName, const std::string& srcCode) const
 	{
-		Container* scr = new Container();
-		if(parseBase(scr, src_code))
-			return scr;
-		delete scr;
-		return 0;
+		std::unique_ptr<Container> scr = std::unique_ptr<Container>{ new Container{} };
+		if (parseBase(scr.get(), parentName, srcCode))
+		{
+			return std::move(scr);
+		}
+		return {};
 	}
 
 	/// Print data to log

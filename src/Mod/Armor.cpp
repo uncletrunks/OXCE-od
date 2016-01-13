@@ -31,8 +31,7 @@ Armor::Armor(const std::string &type) :
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _regeneration(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
-	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0),
-	_recolorScript(0)
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -48,7 +47,7 @@ Armor::Armor(const std::string &type) :
  */
 Armor::~Armor()
 {
-	delete _recolorScript;
+
 }
 
 /**
@@ -165,10 +164,11 @@ void Armor::load(const YAML::Node &node, const RecolorParser& parser)
 
 	if(const YAML::Node &scr = node["recolorScript"])
 	{
-		std::string script;
-		script = scr.as<std::string>(script);
-		delete _recolorScript;
-		_recolorScript = parser.parse(script);
+		_recolorScript = parser.parse(_type, scr.as<std::string>());
+	}
+	if(const YAML::Node &scr = node["spriteScript"])
+	{
+		_spriteScript = parser.parse(_type, scr.as<std::string>());
 	}
 }
 
@@ -638,9 +638,22 @@ bool Armor::hasInventory() const
 	return _hasInventory;
 }
 
-const Armor::RecolorParser::Container *Armor::getRecolorScript()
+/**
+ * Get recoloring script.
+ * @return Script for recoloring.
+ */
+const Armor::RecolorParser::Container *Armor::getRecolorScript() const
 {
-	return _recolorScript;
+	return _recolorScript.get();
+}
+
+/**
+ * Get switch sprite script.
+ * @return Script for switching.
+ */
+const Armor::RecolorParser::Container *Armor::getSpriteScript() const
+{
+	return _spriteScript.get();
 }
 
 }
