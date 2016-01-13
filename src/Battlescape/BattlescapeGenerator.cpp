@@ -631,7 +631,7 @@ void BattlescapeGenerator::deployXCOM()
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
-			(_craft == 0 && (*i)->getWoundRecovery() == 0 && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
+			(_craft == 0 && ((*i)->getWoundRecovery() == 0 || Options::everyoneFightsNobodyQuits) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 		{
 			BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth()));
 			if (unit && !_save->getSelectedUnit())

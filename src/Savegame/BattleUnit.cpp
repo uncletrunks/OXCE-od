@@ -122,6 +122,22 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_energy = _stats.stamina;
 	_health = _stats.health;
 	_morale = 100;
+	if (Options::everyoneFightsNobodyQuits)
+	{
+		// wounded soldiers start with half the energy and lowered morale
+		if (soldier->getWoundRecovery() > 0)
+		{
+			_energy = _stats.stamina / 2;
+			_morale = 75;
+		}
+		// statistically worse than average
+		_health = _health - ((soldier->getWoundRecovery() * 3) / 2);
+		if (_health < 1)
+		{
+			// this is actually a punishment, strategically it is better to leave them behind :)
+			_health = 1;
+		}
+	}
 	_stunlevel = 0;
 	_currentArmor[SIDE_FRONT] = _armor->getFrontArmor();
 	_currentArmor[SIDE_LEFT] = _armor->getSideArmor();
