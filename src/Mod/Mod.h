@@ -139,6 +139,7 @@ private:
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costSoldier, _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
+	int _maxLookVariant;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
@@ -336,6 +337,8 @@ public:
 	int getAIUseDelayMelee() const    {return _aiUseDelayMelee;}
 	/// Gets first turn when AI can use psionic abilities.
 	int getAIUseDelayPsionic() const  {return _aiUseDelayPsionic;}
+	/// Gets maximum supported lookVariant (0-15)
+	int getMaxLookVariant() const  {return abs(_maxLookVariant) % 16;}
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.

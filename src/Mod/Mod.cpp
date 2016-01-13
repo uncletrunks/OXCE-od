@@ -1057,6 +1057,7 @@ void Mod::loadFile(const std::string &filename)
 		_aiUseDelayMelee   = nodeAI["useDelayMelee"].as<int>(_aiUseDelayMelee);
 		_aiUseDelayPsionic = nodeAI["useDelayPsionic"].as<int>(_aiUseDelayPsionic);
 	}
+	_maxLookVariant = doc["maxLookVariant"].as<int>(_maxLookVariant);
 
 	if (doc["difficultyCoefficient"])
 	{
