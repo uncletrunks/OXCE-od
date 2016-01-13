@@ -30,6 +30,7 @@ class TextButton;
 class Window;
 class Text;
 class TextList;
+class ComboBox;
 class Timer;
 class Base;
 
@@ -43,6 +44,7 @@ private:
 	TextButton *_btnOk, *_btnClear, *_btnInventory;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtStores, *_txtAvailable, *_txtUsed, *_txtCrew;
+	ComboBox *_cbxFilterBy;
 	TextList *_lstEquipment;
 	Timer *_timerLeft, *_timerRight;
 	size_t _sel, _craft;
@@ -52,11 +54,15 @@ private:
 	Uint8 _ammoColor;
 	/// Updates quantities of item.
 	void updateQuantity();
+	/// initializes the displayed list
+	void initList();
 public:
 	/// Creates the Craft Equipment state.
 	CraftEquipmentState(Base *base, size_t craft);
 	/// Cleans up the Craft Equipment state.
 	~CraftEquipmentState();
+	/// Handler for changing the filter by combobox.
+	void cbxFilterByChange(Action *action);
 	/// Resets state.
 	void init();
 	/// Runs the timers.
