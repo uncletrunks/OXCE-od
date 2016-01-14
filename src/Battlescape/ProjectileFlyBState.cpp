@@ -310,23 +310,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			_unit->setCache(0);
 			_parent->getMap()->cacheUnit(_unit);
 			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
-			// experience training
-			if (_projectileItem->getRules()->getBattleType() == BT_GRENADE)
-			{
-				if (_projectileItem->getFuseTimer() >= 0)
-				{
-					// e.g. primed frag grenade, primed smoke grenade
-					_unit->addThrowingExp();
-				}
-			}
-			else if (_projectileItem->getRules()->getBattleType() == BT_PROXIMITYGRENADE)
-			{
-				if (_projectileItem->getFuseTimer() >= 0)
-				{
-					// e.g. primed landmine
-					_unit->addThrowingExp();
-				}
-			}
+			_unit->addThrowingExp();
 		}
 		else
 		{
@@ -361,12 +345,6 @@ bool ProjectileFlyBState::createNewProjectile()
 			{
 				_parent->getSave()->removeItem(_ammo);
 				_action.weapon->setAmmoItem(0);
-			}
-			// experience training
-			if (_action.weapon->getRules()->getClipSize() == 1)
-			{
-				// e.g. fired (=not thrown) molotovs, black powder bombs, acid flasks, ...
-				_unit->addThrowingExp();
 			}
 		}
 		else
