@@ -26,13 +26,13 @@ namespace OpenXcom
 {
 
 class BattleUnit;
-
+typedef std::pair<float (*)(const BattleUnit*), float> RuleStatBonusData;
 /**
  * Helper class used for storing unit stat bonuses.
  */
 class RuleStatBonus
 {
-	std::vector<std::pair<float (*)(const BattleUnit*), float> > _bonus;
+	std::vector<RuleStatBonusData> _bonus;
 public:
 	/// Default constructor.
 	RuleStatBonus();

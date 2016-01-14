@@ -610,7 +610,7 @@ void BattlescapeGame::endTurn()
  * @param hiddenExplosion Set to true for the explosions of UFO Power sources at start of battlescape.
  * @param terrainExplosion Set to true for the explosions of terrain.
  */
-void BattlescapeGame::checkForCasualties(BattleItem *murderweapon, BattleUnit *murderer, bool hiddenExplosion, bool terrainExplosion)
+void BattlescapeGame::checkForCasualties(const RuleDamageType *murderweapon, BattleUnit *murderer, bool hiddenExplosion, bool terrainExplosion)
 {
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
@@ -679,7 +679,7 @@ void BattlescapeGame::checkForCasualties(BattleItem *murderweapon, BattleUnit *m
 			}
 			if (murderweapon)
 			{
-				statePushNext(new UnitDieBState(this, (*j), murderweapon->getRules()->getDamageType(), false));
+				statePushNext(new UnitDieBState(this, (*j), murderweapon, false));
 			}
 			else
 			{

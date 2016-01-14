@@ -285,7 +285,7 @@ void RuleStatBonus::load(const YAML::Node& node)
 void RuleStatBonus::setFiring()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat1<&UnitStats::firing>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::firing>, 1.0f));
 }
 
 /**
@@ -294,7 +294,7 @@ void RuleStatBonus::setFiring()
 void RuleStatBonus::setMelee()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat1<&UnitStats::melee>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::melee>, 1.0f));
 }
 
 /**
@@ -303,7 +303,7 @@ void RuleStatBonus::setMelee()
 void RuleStatBonus::setThrowing()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat1<&UnitStats::throwing>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::throwing>, 1.0f));
 }
 
 /**
@@ -312,7 +312,7 @@ void RuleStatBonus::setThrowing()
 void RuleStatBonus::setPsiAttack()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat2<&UnitStats::psiSkill, &UnitStats::psiStrength>, 0.02f));
+	_bonus.push_back(RuleStatBonusData(&stat2<&UnitStats::psiSkill, &UnitStats::psiStrength>, 0.02f));
 }
 
 /**
@@ -321,8 +321,8 @@ void RuleStatBonus::setPsiAttack()
 void RuleStatBonus::setPsiDefense()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat1<&UnitStats::psiStrength>, 1.0f));
-	_bonus.push_back(std::make_pair(&stat1<&UnitStats::psiSkill>, 0.2f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::psiStrength>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::psiSkill>, 0.2f));
 }
 
 /**
@@ -331,7 +331,7 @@ void RuleStatBonus::setPsiDefense()
 void RuleStatBonus::setFlatHundred()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat0<100>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat0<100>, 1.0f));
 }
 
 /**
@@ -340,7 +340,7 @@ void RuleStatBonus::setFlatHundred()
 void RuleStatBonus::setStrength()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat1<&UnitStats::strength>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::strength>, 1.0f));
 }
 
 /**
@@ -349,7 +349,7 @@ void RuleStatBonus::setStrength()
 void RuleStatBonus::setTimeRecovery()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat1<&UnitStats::tu>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::tu>, 1.0f));
 }
 
 /**
@@ -358,7 +358,7 @@ void RuleStatBonus::setTimeRecovery()
 void RuleStatBonus::setEnergyRecovery()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&basicEnergyRegeneration, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&basicEnergyRegeneration, 1.0f));
 }
 
 /**
@@ -367,7 +367,7 @@ void RuleStatBonus::setEnergyRecovery()
 void RuleStatBonus::setStunRecovery()
 {
 	_bonus.clear();
-	_bonus.push_back(std::make_pair(&stat0<1>, 1.0f));
+	_bonus.push_back(RuleStatBonusData(&stat0<1>, 1.0f));
 }
 
 /**

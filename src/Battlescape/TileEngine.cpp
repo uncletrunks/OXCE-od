@@ -1016,8 +1016,9 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 				unit->setAIState(aggro);
 			}
 
-			if (action.weapon->getAmmoItem()->getRules()->getExplosionRadius() &&
-				aggro->explosiveEfficacy(action.target, unit, action.weapon->getAmmoItem()->getRules()->getExplosionRadius(), -1) == 0)
+			int radius = action.weapon->getAmmoItem()->getRules()->getExplosionRadius(unit);
+			if (radius > 0 &&
+				aggro->explosiveEfficacy(action.target, unit, radius, -1) == 0)
 			{
 				action.targeting = false;
 			}

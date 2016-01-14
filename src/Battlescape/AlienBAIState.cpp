@@ -1727,8 +1727,8 @@ void AlienBAIState::wayPointAction()
 void AlienBAIState::projectileAction()
 {
 	_attackAction->target = _aggroTarget->getPosition();
-	if (!_attackAction->weapon->getAmmoItem()->getRules()->getExplosionRadius() ||
-		explosiveEfficacy(_aggroTarget->getPosition(), _unit, _attackAction->weapon->getAmmoItem()->getRules()->getExplosionRadius(), _attackAction->diff))
+	int radius = _attackAction->weapon->getAmmoItem()->getRules()->getExplosionRadius(_unit);
+	if (radius == 0 || explosiveEfficacy(_aggroTarget->getPosition(), _unit, radius, _attackAction->diff))
 	{
 		selectFireMethod();
 	}
@@ -1814,7 +1814,7 @@ void AlienBAIState::grenadeAction()
 	// do we have enough TUs to prime and throw the grenade?
 	if (action.haveTU())
 	{
-		if (explosiveEfficacy(_aggroTarget->getPosition(), _unit, grenade->getRules()->getExplosionRadius(), _attackAction->diff, true))
+		if (explosiveEfficacy(_aggroTarget->getPosition(), _unit, grenade->getRules()->getExplosionRadius(_unit), _attackAction->diff, true))
 		{
 			action.target = _aggroTarget->getPosition();
 		}
@@ -1951,7 +1951,7 @@ bool AlienBAIState::psiAction()
 						{
 							continue;
 						}
-						int radius = item->getRules()->getExplosionRadius();
+						int radius = item->getRules()->getExplosionRadius(_unit);
 						if (radius > 0)
 						{
 							int efficity = explosiveEfficacy(victim->getPosition(), _unit, radius, _attackAction->diff);
@@ -1966,7 +1966,7 @@ bool AlienBAIState::psiAction()
 						}
 						else
 						{
-							weightToAttackMe += (item->getRules()->getPower() + item->getRules()->getPowerBonus(_unit));
+							weightToAttackMe += item->getRules()->getPowerBonus(_unit);
 						}
 					}
 					else if (cost[j].type == BA_PANIC)
@@ -1988,7 +1988,7 @@ bool AlienBAIState::psiAction()
 
 		if (_visibleEnemies && _attackAction->weapon && _attackAction->weapon->getAmmoItem())
 		{
-			if (_attackAction->weapon->getAmmoItem()->getRules()->getPower() >= weightToAttack)
+			if (_attackAction->weapon->getAmmoItem()->getRules()->getPowerBonus(_attackAction->actor) >= weightToAttack)
 			{
 				return false;
 			}
@@ -2086,8 +2086,7 @@ void AlienBAIState::selectMeleeOrRanged()
 
 	int meleeOdds = 10;
 
-	int dmg = meleeWeapon->getPower();
-	dmg += meleeWeapon->getPowerBonus(_unit);
+	int dmg = meleeWeapon->getPowerBonus(_unit);
 	dmg *= _aggroTarget->getArmor()->getDamageModifier(meleeWeapon->getDamageType()->ResistType);
 
 	if (dmg > 50)
@@ -2134,14 +2133,14 @@ bool AlienBAIState::getNodeOfBestEfficacy(BattleAction *action)
 	for (std::vector<Node*>::const_iterator i = _save->getNodes()->begin(); i != _save->getNodes()->end(); ++i)
 	{
 		int dist = _save->getTileEngine()->distance((*i)->getPosition(), _unit->getPosition());
-		if (dist <= 20 && dist > action->weapon->getRules()->getExplosionRadius() &&
+		if (dist <= 20 && dist > action->weapon->getRules()->getExplosionRadius(_unit) &&
 			_save->getTileEngine()->canTargetTile(&originVoxel, _save->getTile((*i)->getPosition()), O_FLOOR, &targetVoxel, _unit))
 		{
 			int nodePoints = 0;
 			for (std::vector<BattleUnit*>::const_iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 			{
 				dist = _save->getTileEngine()->distance((*i)->getPosition(), (*j)->getPosition());
-				if (!(*j)->isOut() && dist < action->weapon->getRules()->getExplosionRadius())
+				if (!(*j)->isOut() && dist < action->weapon->getRules()->getExplosionRadius(_unit))
 				{
 					Position targetOriginVoxel = _save->getTileEngine()->getSightOriginVoxel(*j);
 					if (_save->getTileEngine()->canTargetTile(&targetOriginVoxel, _save->getTile((*i)->getPosition()), O_FLOOR, &targetVoxel, *j))

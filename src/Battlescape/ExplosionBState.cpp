@@ -96,7 +96,6 @@ void ExplosionBState::init()
 		_pistolWhip = (type != BT_MELEE && action == BA_HIT);
 		if (_pistolWhip)
 		{
-			_power += itemRule->getMeleePower();
 			_power += itemRule->getMeleeBonus(_unit);
 
 			_radius = 0;
@@ -104,16 +103,15 @@ void ExplosionBState::init()
 		}
 		else
 		{
-			_power += itemRule->getPower();
 			_power += itemRule->getPowerBonus(_unit);
 			_power -= itemRule->getPowerRangeReduction(_range);
 
-			_radius = itemRule->getExplosionRadius();
+			_radius = itemRule->getExplosionRadius(_unit);
 			_damageType = itemRule->getDamageType();
 		}
 
 		//testing if we hit target
-		if (type == BT_PSIAMP)
+		if (type == BT_PSIAMP && !_pistolWhip)
 		{
 			if (action != BA_USE)
 			{
@@ -141,8 +139,7 @@ void ExplosionBState::init()
 			}
 		}
 
-		_areaOfEffect = type != BT_MELEE &&
-						itemRule->getExplosionRadius() != 0 &&
+		_areaOfEffect = type != BT_MELEE && _radius != 0 &&
 						(type != BT_PSIAMP || action == BA_USE) &&
 						!_pistolWhip && !miss;
 	}
@@ -173,10 +170,9 @@ void ExplosionBState::init()
 	else if (_unit && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
 	{
 		RuleItem* corpse = _parent->getMod()->getItem(_unit->getArmor()->getCorpseGeoscape());
-		_power = corpse->getPower();
-		_power += corpse->getPowerBonus(_unit);
+		_power = corpse->getPowerBonus(_unit);
 		_damageType = corpse->getDamageType();
-		_radius = corpse->getExplosionRadius();
+		_radius = corpse->getExplosionRadius(_unit);
 		_areaOfEffect = true;
 		if (!RNG::percent(corpse->getSpecialChance()))
 		{
@@ -239,7 +235,7 @@ void ExplosionBState::init()
 	{
 		_parent->setStateInterval(std::max(1, ((BattlescapeState::DEFAULT_ANIM_SPEED/2) - (10 * itemRule->getExplosionSpeed()))));
 		_hit = _pistolWhip || type == BT_MELEE;
-		bool psi = type == BT_PSIAMP && action != BA_USE;
+		bool psi = type == BT_PSIAMP && action != BA_USE && !_pistolWhip;
 		int anim = -1;
 		int sound = -1;
 
@@ -400,7 +396,7 @@ void ExplosionBState::explode()
 		}
 	}
 
-	bool range = !_hit || (_item && _item->getRules()->getBattleType() != BT_PSIAMP);
+	bool range = !(_hit || (_item && _item->getRules()->getBattleType() == BT_PSIAMP));
 
 	if (_areaOfEffect)
 	{
@@ -433,7 +429,7 @@ void ExplosionBState::explode()
 	}
 
 	// now check for new casualties
-	_parent->checkForCasualties(_item, _unit, false, terrainExplosion);
+	_parent->checkForCasualties(_item ? _damageType : 0, _unit, false, terrainExplosion);
 	// revive units if damage could give hp or reduce stun
 	_parent->getSave()->reviveUnconsciousUnits(true);
 
