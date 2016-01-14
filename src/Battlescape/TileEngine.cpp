@@ -1122,26 +1122,8 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 				}
 				else
 				{
-					int maxRange = bi->getRules()->getMaxRange();
-					if (maxRange > 10)
-					{
-						// e.g. x-bow, sniper rifle, rocket launcher, ...
-						unit->addFiringExp();
-					}
-					else if (maxRange > 1)
-					{
-						// e.g. fuso knives, ...
-						unit->addThrowingExp();
-					}
-					else if (maxRange == 1)
-					{
-						// e.g. chainsaw, hammer, ...
-						unit->addMeleeExp();
-					}
-					else
-					{
-						// what is this? no training!
-					}
+					// e.g. fuso knives, x-bow, sniper rifle, rocket launcher, ...
+					unit->addFiringExp();
 				}
 			}
 		}
