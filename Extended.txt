@@ -1,7 +1,8 @@
 [b]Extended version of OpenXcom[/b]
 [b]Mod version 3.0[/b]
-OpenXcom version: Nightly [commitOriginDate/][br/]
+OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
+Extended date:   [date/][br/]
 Extended commit: [commit/][br/]
 
 [br/][br/]
@@ -90,7 +91,8 @@ Option for showing fixed weapons on unit.[br/]
 Update to nightly and bug fix.[br/]
 [br/]
 3.0:[br/]
-Scripting support in unit graphic.[br/]
+Scripting support in unit graphic (more info in game log with debug on).[br/]
+`bigSpriteAlt` and `floorSpriteAlt` is now obsolete, will be replaced by scripts in next version.[br/]
 [br/]
 
 [examples]
@@ -267,8 +269,6 @@ items:
     painKillerRecovery: 0 #how much missing health convert to morale. Default `1.0`.
     allowSelfHeal: true   #can medikit target user.
     medikitType: 0        #change how medikit wroks, `0` default with UI, `1` fast heal, `2` fast stimulant, `3` fast pain killer.
-    bigSpriteAlt: 1       #like bigSprite but used for unconscious units, loaded weapons or armed grenades.
-    floorSpriteAlt: 1     #like floorSprite but used for unconscious units, loaded weapons or armed grenades.
     fixedWeaponShow: true #if it's true then it will show fixed weapon on unit.
     hitMissSound: 0       #override `hitSound` when any psi attack was unsuccessful.
     meleeMissSound: 12    #override `meleeSound` when melee attack was unsuccessful.
@@ -333,6 +333,22 @@ armors:
         #...
         #same stats like `damageBonus` in `items`.
         #...
+    recolorScript: |
+      #recolor script call for each pixel.
+      #`i0` have value of unit pixel color.
+      #more info in "openxcom.log" with debug on.
+      #default imp:
+      unit.getRecolor i0;
+      add_burn_shade i0 burn shade;
+      ret i0;
+    spriteScript: |
+      #sprite select script call for each body part.
+      #`i0` have basic position of graphic in armor sheet.
+      #`i1` have offset to choose direction or leg move phase.
+      #more info in "openxcom.log" with debug on.
+      #default imp:
+      add i0 i1;
+      ret i0;
 [/code]
 
 [code]
