@@ -156,6 +156,19 @@ static inline RetEnum call_func_h(ScriptWorker &c, FuncCommon func, const Uint8 
 	return r;
 }
 
+[[gnu::always_inline]]
+static inline RetEnum debug_log_h(ProgPos &p, int i, int j)
+{
+	static constexpr int offset = 3; //+1 for op, and +2*1 for two reg args.
+	static int limit_count = 0;
+	if (++limit_count < 500)
+	{
+		Log(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p - offset) << " values: " << std::setw(8) << i << std::setw(8) << j;
+	}
+	return RetContinue;
+}
+
+
 /**
  * Main macro defining all available operation in script engine.
  * @param IMPL macro function that access data. Take 3 args: Name, definition of operation and delcaration of it's arguments.
@@ -215,7 +228,9 @@ static inline RetEnum call_func_h(ScriptWorker &c, FuncCommon func, const Uint8 
 	IMPL(set_shade,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF);			return RetContinue; }),		(int &Reg0, int Data1)) \
 	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
 	\
-	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8 *d, ScriptWorker &c, ProgPos &p))
+	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8 *d, ScriptWorker &c, ProgPos &p)) \
+	\
+	IMPL(debug_log,		MACRO_QUOTE({ return debug_log_h(p, Reg0, Reg1);								}),		(ProgPos &p, int &Reg0, int &Reg1)) \
 
 
 ////////////////////////////////////////////////////////////
@@ -340,7 +355,7 @@ static inline int scriptExe(int i0, int i1, ScriptWorker &data)
 	static int bugCount = 0;
 	if (++bugCount < 100)
 	{
-		Log(LOG_ERROR) << "Invaild script operation in "<< (int)proc[(int)curr] <<" at "<< (int)curr <<"\n";
+		Log(LOG_ERROR) << "Invaild script operation for OpId: " << std::hex << std::showbase << (int)proc[(int)curr] <<" at "<< (int)curr;
 	}
 	return 0;
 }
@@ -470,7 +485,7 @@ static bool parseConditionImpl(ParserHelper &ph, int nextPos, const SelectedToke
 
 	if (std::distance(begin, end) != 3)
 	{
-		Log(LOG_ERROR) << "invaild length of condition arguments\n";
+		Log(LOG_ERROR) << "invaild length of condition arguments";
 		return false;
 	}
 
@@ -508,7 +523,7 @@ static bool parseConditionImpl(ParserHelper &ph, int nextPos, const SelectedToke
 	}
 	if (i == OperatorSize)
 	{
-		Log(LOG_ERROR) << "unknown condition: '" + conditionType + "'\n";
+		Log(LOG_ERROR) << "unknown condition: '" + conditionType + "'";
 		return false;
 	}
 
@@ -547,7 +562,7 @@ static bool parseElse(const ScriptParserData &spd, ParserHelper &ph, const Selec
 {
 	if (ph.codeBlocks.empty() || ph.codeBlocks.back().type != BlockIf)
 	{
-		Log(LOG_ERROR) << "unexpected 'else'\n";
+		Log(LOG_ERROR) << "unexpected 'else'";
 		return false;
 	}
 
@@ -574,12 +589,12 @@ static bool parseEnd(const ScriptParserData &spd, ParserHelper &ph, const Select
 {
 	if (ph.codeBlocks.empty())
 	{
-		Log(LOG_ERROR) << "unexpected 'end'\n";
+		Log(LOG_ERROR) << "unexpected 'end'";
 		return false;
 	}
 	if (std::distance(begin, end) != 0)
 	{
-		Log(LOG_ERROR) << "unexpected symbols after 'end'\n";
+		Log(LOG_ERROR) << "unexpected symbols after 'end'";
 		return false;
 	}
 
@@ -638,7 +653,7 @@ void ScriptParserBase::addParserBase(const std::string& s, ScriptParserData::arg
 	}
 	else
 	{
-		throw Exception("Repeated function name: '" + s + "'\n");
+		throw Exception("Repeated function name: '" + s + "'");
 	}
 }
 
@@ -647,7 +662,7 @@ void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type)
 	auto pos = _refList.find(s);
 	if (pos != _refList.end() && pos->second.type != type)
 	{
-		throw Exception("Type name already used: '" + s + "'\n");
+		throw Exception("Type name already used: '" + s + "'");
 	}
 	_typeList[s] = type;
 }
@@ -668,14 +683,14 @@ void ScriptParserBase::addCustomReg(const std::string& s, ArgEnum type)
 	{
 		if (_refList.find(s) != _refList.end())
 		{
-			throw Exception("Name already used: '" + s + "'\n");
+			throw Exception("Name already used: '" + s + "'");
 		}
 		ScriptContainerData data = { type, _regUsed++ };
 		_refList.insert(std::make_pair(s, data));
 	}
 	else
 	{
-		throw Exception("Custom arg limit reach for: '" + s + "'\n");
+		throw Exception("Custom arg limit reach for: '" + s + "'");
 	}
 }
 
@@ -716,14 +731,14 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 		{
 			if (help.regIndexUsed > ScriptMaxReg)
 			{
-				Log(LOG_ERROR) << err << "too many references\n";
+				Log(LOG_ERROR) << err << "too many references";
 				return false;
 			}
 			for (auto i = help.refListCurr.begin(); i != help.refListCurr.end(); ++i)
 			{
 				if (i->second.type == ArgLabel && i->second.value == -1)
 				{
-					Log(LOG_ERROR) << err << "invalid use of label: '" << i->first << "' without declaration\n";
+					Log(LOG_ERROR) << err << "invalid use of label: '" << i->first << "' without declaration";
 					return false;
 				}
 			}
@@ -795,7 +810,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 					++curr;
 				line_end = curr;
 			}
-			Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'\n";
+			Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
 			return false;
 		}
 		else
@@ -808,7 +823,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 
 			if (!label_str.empty() && !help.setLabel(label_str, help.getCurrPos()))
 			{
-				Log(LOG_ERROR) << err << "invalid label '"<< label_str <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
+				Log(LOG_ERROR) << err << "invalid label '"<< label_str <<"' in line: '" << std::string(line_begin, line_end) << "'";
 				return false;
 			}
 
@@ -816,7 +831,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 			{
 				if (op_curr->second(help, args, args+i) == false)
 				{
-					Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'\n";
+					Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
 					return false;
 				}
 
@@ -831,7 +846,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 					std::string var_name = args[j].toString();
 					if (args[j].type != TokenSymbol || help.addReg(var_name, type_curr->second) == false)
 					{
-						Log(LOG_ERROR) << err << "invalid variable name '"<< var_name <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
+						Log(LOG_ERROR) << err << "invalid variable name '"<< var_name <<"' in line: '" << std::string(line_begin, line_end) << "'";
 						return false;
 					}
 				}
@@ -839,7 +854,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 				continue;
 			}
 
-			Log(LOG_ERROR) << err << "invalid operation name '"<< op_str <<"' in line: '" << std::string(line_begin, line_end) << "'\n";
+			Log(LOG_ERROR) << err << "invalid operation name '"<< op_str <<"' in line: '" << std::string(line_begin, line_end) << "'";
 			return false;
 		}
 	}
@@ -856,16 +871,19 @@ void ScriptParserBase::logScriptMetadata() const
 		static bool printOp = true;
 		if (printOp)
 		{
+			size_t offset = 0;
 			printOp = false;
 			Logger opLog;
 			#define MACRO_STRCAT(A) #A
 			#define MACRO_ALL_LOG(NAME, Impl, Args) \
-				if (#NAME[0] != '_') opLog.get() \
+				if (#NAME[0] != '_') opLog.get(LOG_DEBUG) \
 					<< "Op:    " << std::setw(tabSize*2) << #NAME \
+					<< "OpId:  " << std::setw(tabSize/2) << offset << "  + " <<  std::setw(tabSize) << FuncGroup<MACRO_FUNC_ID(NAME)>::ver() \
 					<< "Impl:  " << std::setw(tabSize*10) << MACRO_STRCAT(Impl) \
-					<< "Args:  " #Args << FuncGroup<MACRO_FUNC_ID(NAME)>::ver() << "\n";
+					<< "Args:  " #Args << "\n"; \
+				offset += FuncGroup<MACRO_FUNC_ID(NAME)>::ver();
 
-			opLog.get() << "Available script operations:\n" << std::left;
+			opLog.get(LOG_DEBUG) << "Available script operations:\n" << std::left << std::hex << std::showbase;
 			MACRO_PROC_DEFINITION(MACRO_ALL_LOG)
 
 			#undef MACRO_ALL_LOG
@@ -877,9 +895,9 @@ void ScriptParserBase::logScriptMetadata() const
 		for (auto ite = _refList.begin(); ite != _refList.end(); ++ite)
 		{
 			if (ite->second.type == ArgConst)
-				refLog.get() << "Ref: " << std::setw(30) << ite->first << "Value: " << ite->second.value << "\n";
+				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << ite->first << "Value: " << ite->second.value << "\n";
 			else
-				refLog.get() << "Ref: " << std::setw(30) << ite->first << "Type: " << getTypeName(ite->second.type) << "\n";
+				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << ite->first << "Type: " << getTypeName(ite->second.type) << "\n";
 		}
 	}
 }

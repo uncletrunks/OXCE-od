@@ -779,7 +779,7 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 		{
 			if (begin == end)
 			{
-				Log(LOG_ERROR) << "not enough args in operation\n";
+				Log(LOG_ERROR) << "Not enough args in operation";
 				return -1;
 			}
 			else
@@ -787,7 +787,7 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 				curr = T1::parse(ph, *begin);
 				if (curr < 0)
 				{
-					Log(LOG_ERROR) << "incorrect argument '"<< begin->toString() <<"' \n";
+					Log(LOG_ERROR) << "Incorrect argument '"<< begin->toString() <<"'";
 					return -1;
 				}
 			}
@@ -835,7 +835,7 @@ struct ArgColection<MaxSize>
 		}
 		else
 		{
-			Log(LOG_ERROR) << "too many args in operation\n";
+			Log(LOG_ERROR) << "Too many args in operation";
 			return -1;
 		}
 	}
