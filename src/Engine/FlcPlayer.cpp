@@ -24,6 +24,7 @@
 #include "FlcPlayer.h"
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 #include <SDL_mixer.h>
 #include <fstream>
 

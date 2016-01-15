@@ -19,6 +19,7 @@
 #define _USE_MATH_DEFINES
 #include "SaveConverter.h"
 #include "SaveConverterXcom1.h"
+#include <algorithm>
 #include <yaml-cpp/yaml.h>
 #include <SDL_endian.h>
 #include <cmath>

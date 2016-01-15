@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include "UnitFallBState.h"
 #include "TileEngine.h"
 #include "Pathfinding.h"

@@ -52,6 +52,7 @@ enum class ProgPos : size_t
 inline ProgPos& operator+=(ProgPos& pos, int offset)
 {
 	pos = static_cast<ProgPos>(static_cast<size_t>(pos) + offset);
+	return pos;
 }
 inline ProgPos& operator++(ProgPos& pos)
 {

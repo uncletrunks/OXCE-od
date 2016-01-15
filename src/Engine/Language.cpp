@@ -19,6 +19,7 @@
 
 #include "Language.h"
 #include <assert.h>
+#include <algorithm>
 #include <locale>
 #include <fstream>
 #include <cassert>

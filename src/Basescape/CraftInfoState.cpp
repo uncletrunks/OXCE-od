@@ -18,6 +18,7 @@
  */
 #include "CraftInfoState.h"
 #include <sstream>
+#include <math.h>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
