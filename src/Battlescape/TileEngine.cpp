@@ -1107,6 +1107,57 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 		return false;
 	}
 
+	if (weapon->getRules()->getExperienceTrainingMode() > ETM_DEFAULT)
+	{
+		// can train psi strength and psi skill only if psi skill is already > 0
+		if (weapon->getRules()->getExperienceTrainingMode() >= ETM_PSI_STRENGTH && weapon->getRules()->getExperienceTrainingMode() <= ETM_PSI_STRENGTH_OR_SKILL_2X)
+		{
+			// cannot use "unit->getBaseStats()->psiSkill", because armor can give +psiSkill bonus
+			if (unit->getGeoscapeSoldier() && unit->getGeoscapeSoldier()->getCurrentStats()->psiSkill <= 0)
+				return false;
+		}
+
+		switch (weapon->getRules()->getExperienceTrainingMode())
+		{
+		case ETM_MELEE_100: unit->addMeleeExp(); break;
+		case ETM_MELEE_50: if (RNG::percent(50)) { unit->addMeleeExp(); } break;
+		case ETM_MELEE_33: if (RNG::percent(33)) { unit->addMeleeExp(); } break;
+		case ETM_FIRING_100: unit->addFiringExp(); break;
+		case ETM_FIRING_50: if (RNG::percent(50)) { unit->addFiringExp(); } break;
+		case ETM_FIRING_33: if (RNG::percent(33)) { unit->addFiringExp(); } break;
+		case ETM_THROWING_100: unit->addThrowingExp(); break;
+		case ETM_THROWING_50: if (RNG::percent(50)) { unit->addThrowingExp(); } break;
+		case ETM_THROWING_33: if (RNG::percent(33)) { unit->addThrowingExp(); } break;
+		case ETM_FIRING_AND_THROWING: unit->addFiringExp(); unit->addThrowingExp(); break;
+		case ETM_FIRING_OR_THROWING: if (RNG::percent(50)) { unit->addFiringExp(); } else { unit->addThrowingExp(); } break;
+		case ETM_REACTIONS: unit->addReactionExp(); break;
+		case ETM_REACTIONS_AND_MELEE: unit->addReactionExp(); unit->addMeleeExp(); break;
+		case ETM_REACTIONS_AND_FIRING: unit->addReactionExp(); unit->addFiringExp(); break;
+		case ETM_REACTIONS_AND_THROWING: unit->addReactionExp(); unit->addThrowingExp(); break;
+		case ETM_REACTIONS_OR_MELEE: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addMeleeExp(); } break;
+		case ETM_REACTIONS_OR_FIRING: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addFiringExp(); } break;
+		case ETM_REACTIONS_OR_THROWING: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addThrowingExp(); } break;
+		case ETM_BRAVERY: unit->addBraveryExp(); break;
+		case ETM_BRAVERY_2X: unit->addBraveryExp(); unit->addBraveryExp(); break;
+		case ETM_BRAVERY_AND_REACTIONS: unit->addBraveryExp(); unit->addReactionExp(); break;
+		case ETM_BRAVERY_OR_REACTIONS: if (RNG::percent(50)) { unit->addBraveryExp(); } else { unit->addReactionExp(); } break;
+		case ETM_BRAVERY_OR_REACTIONS_2X: if (RNG::percent(50)) { unit->addBraveryExp(); unit->addBraveryExp(); } else { unit->addReactionExp(); unit->addReactionExp(); } break;
+		case ETM_PSI_STRENGTH: unit->addPsiStrengthExp(); break;
+		case ETM_PSI_STRENGTH_2X: unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); break;
+		case ETM_PSI_SKILL: unit->addPsiSkillExp(); break;
+		case ETM_PSI_SKILL_2X: unit->addPsiSkillExp(); unit->addPsiSkillExp(); break;
+		case ETM_PSI_STRENGTH_AND_SKILL: unit->addPsiStrengthExp(); unit->addPsiSkillExp(); break;
+		case ETM_PSI_STRENGTH_AND_SKILL_2X: unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); unit->addPsiSkillExp(); unit->addPsiSkillExp(); break;
+		case ETM_PSI_STRENGTH_OR_SKILL: if (RNG::percent(50)) { unit->addPsiStrengthExp(); } else { unit->addPsiSkillExp(); } break;
+		case ETM_PSI_STRENGTH_OR_SKILL_2X: if (RNG::percent(50)) { unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); } else { unit->addPsiSkillExp(); unit->addPsiSkillExp(); } break;
+		case ETM_NOTHING:
+		default:
+			return false;
+		}
+
+		return true;
+	}
+
 	// GRENADES AND PROXIES
 	if (weapon->getRules()->getBattleType() == BT_GRENADE || weapon->getRules()->getBattleType() == BT_PROXIMITYGRENADE)
 	{
