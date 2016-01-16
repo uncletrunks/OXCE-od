@@ -402,11 +402,11 @@ void ExplosionBState::explode()
 
 	if (_areaOfEffect)
 	{
-		save->getTileEngine()->explode(_center, _power, _damageType, _radius, _unit, range);
+		save->getTileEngine()->explode(_center, _power, _damageType, _radius, _unit, _item, range);
 	}
 	else
 	{
-		BattleUnit *victim = save->getTileEngine()->hit(_center, _power, _damageType, _unit, range);
+		BattleUnit *victim = save->getTileEngine()->hit(_center, _power, _damageType, _unit, _item, range);
 		// check if this unit turns others into zombies
 		if (!_item->getRules()->getZombieUnit().empty()
 			&& RNG::percent(_item->getRules()->getSpecialChance())

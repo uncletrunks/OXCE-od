@@ -2391,7 +2391,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff
 	}
 
 	bool hasImproved = false;
-	if (_expBravery || _expReactions || _expFiring || _expPsiSkill || _expPsiStrength || _expMelee)
+	if (_expBravery || _expReactions || _expFiring || _expPsiSkill || _expPsiStrength || _expMelee || _expThrowing)
 	{
 		hasImproved = true;
 		if (s->getRank() == RANK_ROOKIE)
