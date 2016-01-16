@@ -2192,7 +2192,7 @@ void BattleUnit::addFiringExp()
 }
 
 /**
- * Adds one to the firing exp counter.
+ * Adds one to the throwing exp counter.
  */
 void BattleUnit::addThrowingExp()
 {
@@ -2200,7 +2200,7 @@ void BattleUnit::addThrowingExp()
 }
 
 /**
- * Adds one to the firing exp counter.
+ * Adds one to the psi skill exp counter.
  */
 void BattleUnit::addPsiSkillExp()
 {
@@ -2208,7 +2208,7 @@ void BattleUnit::addPsiSkillExp()
 }
 
 /**
- * Adds one to the firing exp counter.
+ * Adds one to the psi strength exp counter.
  */
 void BattleUnit::addPsiStrengthExp()
 {
@@ -2216,7 +2216,7 @@ void BattleUnit::addPsiStrengthExp()
 }
 
 /**
- * Adds one to the firing exp counter.
+ * Adds one to the melee exp counter.
  */
 void BattleUnit::addMeleeExp()
 {
@@ -2280,8 +2280,10 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 		stats->psiSkill += improveStat(_expPsiSkill);
 	}
 
-	if (_expBravery || _expReactions || _expFiring || _expPsiSkill || _expMelee)
+	bool hasImproved = false;
+	if (_expBravery || _expReactions || _expFiring || _expPsiSkill || _expPsiStrength || _expMelee || _expThrowing)
 	{
+		hasImproved = true;
 		if (s->getRank() == RANK_ROOKIE)
 			s->promoteRank();
 		int v;
@@ -2293,12 +2295,9 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 		if (v > 0) stats->strength += RNG::generate(0, v/10 + 2);
 		v = caps.stamina - stats->stamina;
 		if (v > 0) stats->stamina += RNG::generate(0, v/10 + 2);
-		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return hasImproved;
 }
 
 /**
