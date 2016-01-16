@@ -49,7 +49,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1), _aiUseDelay(-1),
-	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _arcingShot(false), _listOrder(0),
+	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
@@ -416,6 +416,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_liveAlien = node["liveAlien"].as<bool>(_liveAlien);
 	_attraction = node["attraction"].as<int>(_attraction);
 	_arcingShot = node["arcingShot"].as<bool>(_arcingShot);
+	_experienceTrainingMode = (ExperienceTrainingMode)node["experienceTrainingMode"].as<int>(_experienceTrainingMode);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_maxRange = node["maxRange"].as<int>(_maxRange);
 	_aimRange = node["aimRange"].as<int>(_aimRange);
@@ -1355,6 +1356,15 @@ RuleItemUseCost RuleItem::getFlatPrime() const
 bool RuleItem::getArcingShot() const
 {
 	return _arcingShot;
+}
+
+/**
+ * Returns the experience training mode configured for this weapon.
+ * @return The mode ID.
+ */
+ExperienceTrainingMode RuleItem::getExperienceTrainingMode() const
+{
+	return _experienceTrainingMode;
 }
 
 /**

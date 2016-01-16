@@ -324,6 +324,8 @@ public:
 	int getHeight() const;
 	/// Gets the unit floating elevation.
 	int getFloatHeight() const;
+	/// Adds one to the bravery exp counter.
+	void addBraveryExp();
 	/// Adds one to the reaction exp counter.
 	void addReactionExp();
 	/// Adds one to the firing exp counter.

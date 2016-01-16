@@ -1829,7 +1829,7 @@ void BattleUnit::prepareMorale(int morale)
 			// successfully avoided panic
 			// increase bravery experience counter
 			if (chance > 1)
-				_expBravery++;
+				addBraveryExp();
 		}
 	}
 }
@@ -2277,6 +2277,14 @@ bool BattleUnit::isInExitArea(SpecialTileType stt) const
 int BattleUnit::getHeight() const
 {
 	return isKneeled()?getKneelHeight():getStandHeight();
+}
+
+/**
+ * Adds one to the bravery exp counter.
+ */
+void BattleUnit::addBraveryExp()
+{
+	_expBravery++;
 }
 
 /**
