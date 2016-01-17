@@ -1,7 +1,7 @@
 # Makefile for: http://mxe.cc/
 # Get mxe from `git clone https://github.com/mxe/mxe.git`
-# Build mxe with packs: `make gcc sdl sdl_gfx sdl_image sdl_mixer boost glew`
-# Get yaml-cpp form `hg clone https://code.google.com/p/yaml-cpp/` (requare Mercurial)
+# Build mxe with packs: `make gcc sdl sdl_gfx sdl_image sdl_mixer glew`
+# Get yaml-cpp form `git clone https://github.com/jbeder/yaml-cpp.git`
 TARGET =
 
 # Directories and files

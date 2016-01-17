@@ -65,8 +65,8 @@ private:
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
-	std::unique_ptr<RecolorParser::Container> _recolorScript;
-	std::unique_ptr<RecolorParser::Container> _spriteScript;
+	RecolorParser::Container _recolorScript;
+	RecolorParser::Container _spriteScript;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -171,9 +171,9 @@ public:
 	/// can we access this unit's inventory?
 	bool hasInventory() const;
 	/// Gets script used to recolor unit sprite.
-	const RecolorParser::Container *getRecolorScript() const;
+	const RecolorParser::Container &getRecolorScript() const;
 	/// Gets script used to switch body elements in unit sprite.
-	const RecolorParser::Container *getSpriteScript() const;
+	const RecolorParser::Container &getSpriteScript() const;
 };
 
 }

@@ -60,8 +60,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false),
 	_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
 	_motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0),
-	_turnsSinceSpotted(255), _geoscapeSoldier(soldier), _unitRules(0), _rankInt(-1), _turretType(-1), _hidingForTurn(false), _respawn(false),
-	_useScripts(false)
+	_turnsSinceSpotted(255), _geoscapeSoldier(soldier), _unitRules(0), _rankInt(-1), _turretType(-1), _hidingForTurn(false), _respawn(false)
 {
 	_name = soldier->getName(true);
 	_id = soldier->getId();
@@ -167,7 +166,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0),
 	_moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_armor(armor), _geoscapeSoldier(0),  _unitRules(unit), _rankInt(-1),
-	_turretType(-1), _hidingForTurn(false), _respawn(false), _useScripts(false)
+	_turretType(-1), _hidingForTurn(false), _respawn(false)
 {
 	_type = unit->getType();
 	_rank = unit->getRank();
@@ -440,8 +439,6 @@ void BattleUnit::setRecolor(int basicLook, int utileLook, int rankLook)
 			_recolor.push_back(std::make_pair(colors[i].first << 4, colors[i].second));
 		}
 	}
-
-	_useScripts = _armor->getRecolorScript() != 0;
 }
 
 /**
@@ -3346,8 +3343,6 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	using namespace helper;
 	typedef BattleUnit BU;
 	typedef UnitStats US;
-	typedef Soldier S;
-	typedef Armor A;
 
 	Bind<BattleUnit> bu = { parser, "BattleUnit" };
 	BindNested<BattleUnit, UnitStats, &BattleUnit::_stats> us = { bu };
@@ -3360,8 +3355,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	parser->addConst("blit_collapse", BODYPART_COLLAPSING);
 	parser->addConst("blit_inventory", BODYPART_ITEM);
 
-	bu.add<&BU::_id>("getId");
-	bu.add<&BU::_rankInt>("getRank");
+	bu.addField<&BU::_id>("getId");
+	bu.addField<&BU::_rankInt>("getRank");
 	bu.add<&getGenderScript>("getGender");
 	bu.add<&getLookScript>("getLook");
 	bu.add<&getLookVariantScript>("getLookVariant");
@@ -3373,32 +3368,32 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BU::getDirection>("getDirection");
 	bu.add<&BU::getWalkingPhase>("getWalkingPhase");
 
-	bu.add<&BU::_tu>("getTimeUnits");
-	us.add<&US::tu>("getTimeUnitsMax");
+	bu.addField<&BU::_tu>("getTimeUnits");
+	us.addField<&US::tu>("getTimeUnitsMax");
 
-	bu.add<&BU::_health>("getHealth");
-	us.add<&US::health>("getHealthMax");
+	bu.addField<&BU::_health>("getHealth");
+	us.addField<&US::health>("getHealthMax");
 
-	bu.add<&BU::_energy>("getEnergy");
-	us.add<&US::stamina>("getEnergyMax");
+	bu.addField<&BU::_energy>("getEnergy");
+	us.addField<&US::stamina>("getEnergyMax");
 
-	bu.add<&BU::_stunlevel>("getStun");
-	bu.add<&BU::_health>("getStunMax");
+	bu.addField<&BU::_stunlevel>("getStun");
+	bu.addField<&BU::_health>("getStunMax");
 
-	bu.add<&BU::_morale>("getMorale");
-	bu.add<100>("getMoraleMax");
+	bu.addField<&BU::_morale>("getMorale");
+	bu.addFake<100>("getMoraleMax");
 
-	us.add<&US::tu>("Stats.getTimeUnits");
-	us.add<&US::stamina>("Stats.getStamina");
-	us.add<&US::health>("Stats.getHealth");
-	us.add<&US::bravery>("Stats.getBravery");
-	us.add<&US::reactions>("Stats.getReactions");
-	us.add<&US::firing>("Stats.getFiring");
-	us.add<&US::throwing>("Stats.getThrowing");
-	us.add<&US::strength>("Stats.getStrength");
-	us.add<&US::psiStrength>("Stats.getPsiStrength");
-	us.add<&US::psiSkill>("Stats.getPsiSkill");
-	us.add<&US::melee>("Stats.getMelee");
+	us.addField<&US::tu>("Stats.getTimeUnits");
+	us.addField<&US::stamina>("Stats.getStamina");
+	us.addField<&US::health>("Stats.getHealth");
+	us.addField<&US::bravery>("Stats.getBravery");
+	us.addField<&US::reactions>("Stats.getReactions");
+	us.addField<&US::firing>("Stats.getFiring");
+	us.addField<&US::throwing>("Stats.getThrowing");
+	us.addField<&US::strength>("Stats.getStrength");
+	us.addField<&US::psiStrength>("Stats.getPsiStrength");
+	us.addField<&US::psiSkill>("Stats.getPsiSkill");
+	us.addField<&US::melee>("Stats.getMelee");
 
 	bu.add<&BU::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BU::getFatalWound>("getFatalwounds");
@@ -3462,12 +3457,9 @@ void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, in
 	w->proc = 0;
 	if(unit)
 	{
-		auto *scr = unit->getArmor()->getRecolorScript();
-		if(scr)
-		{
-			scr->update(w, unit, body_part, anim_frame, shade, burn);
-			w->shade = shade;
-		}
+		const auto &scr = unit->getArmor()->getRecolorScript();
+		scr.update(w, unit, body_part, anim_frame, shade, burn);
+		w->shade = shade;
 	}
 }
 

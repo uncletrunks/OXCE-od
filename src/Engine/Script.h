@@ -22,7 +22,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <memory>
 #include <SDL_stdinc.h>
 
 
@@ -38,7 +37,7 @@ template<typename T>
 struct ArgSelector;
 
 const int ScriptMaxArg = 8;
-const int ScriptMaxReg = 64;
+const int ScriptMaxReg = 256;
 
 /**
  * Script execution cunter
@@ -101,16 +100,16 @@ inline ArgEnum operator++(ArgEnum& arg, int)
  */
 enum RegEnum : Uint8
 {
-	RegI0,
-	RegI1,
-	RegCond,
+	RegI0 = 0*sizeof(int),
+	RegI1 = 1*sizeof(int),
+	RegCond = 2*sizeof(int),
 
-	RegR0,
-	RegR1,
-	RegR2,
-	RegR3,
+	RegR0 = 3*sizeof(int),
+	RegR1 = 4*sizeof(int),
+	RegR2 = 5*sizeof(int),
+	RegR3 = 6*sizeof(int),
 
-	RegMax,
+	RegMax = 7*sizeof(int),
 };
 
 /**
@@ -142,7 +141,7 @@ struct ScriptWorker
 {
 	const Uint8* proc;
 	int shade;
-	int reg[ScriptMaxReg];
+	Uint8 reg[ScriptMaxReg];
 
 	/// Default constructor
 	ScriptWorker() : proc(0), shade(0) //reg not initialized
@@ -154,6 +153,13 @@ struct ScriptWorker
 	void executeBlit(Surface* src, Surface* dest, int x, int y, bool half = false);
 	/// Call script with two arguments
 	int execute(int i0, int i1);
+
+	/// Get value for reg area
+	template<typename T>
+	T &ref(size_t offset)
+	{
+		return *reinterpret_cast<T*>(reg + offset);
+	}
 };
 
 using FuncCommon = RetEnum (*)(ScriptWorker &, const Uint8 *, ProgPos &);
@@ -202,8 +208,34 @@ protected:
 
 	void updateBase(ScriptWorker* ref) const
 	{
-		memset(&ref->reg, 0, ScriptMaxReg*sizeof(int));
-		ref->proc = this->_proc.data();
+		memset(&ref->reg, 0, ScriptMaxReg);
+		if (*this)
+		{
+			ref->proc = this->_proc.data();
+		}
+		else
+		{
+			ref->proc = 0;
+		}
+	}
+
+public:
+	/// constructor
+	ScriptContainerBase() = default;
+	/// copy constructor
+	ScriptContainerBase(const ScriptContainerBase&) = delete;
+	/// move constructor
+	ScriptContainerBase(ScriptContainerBase&&) = default;
+
+	/// copy
+	ScriptContainerBase &operator=(const ScriptContainerBase&) = delete;
+	/// move
+	ScriptContainerBase &operator=(ScriptContainerBase&&) = default;
+
+	/// Test if is any script there
+	explicit operator bool() const
+	{
+		return !_proc.empty();
 	}
 };
 
@@ -213,13 +245,26 @@ protected:
 template<typename... Args>
 class ScriptContainer : public ScriptContainerBase
 {
+	template<size_t offset, typename First, typename... Rest>
+	void setReg(ScriptWorker* ref, First f, Rest... t) const
+	{
+		ref->ref<First>(offset) = f;
+		setReg<offset + sizeof(First), Rest...>(ref, t...);
+	}
+	template<size_t offset>
+	void setReg(ScriptWorker* ref) const
+	{
+		//end loop
+	}
 public:
 	/// Update values in script
 	void update(ScriptWorker* ref, Args... args) const
 	{
 		updateBase(ref);
-		int i = 0;
-		Dummy{ (ref->reg[RegMax + i++] = (int)args, 0)... };
+		if (*this)
+		{
+			setReg<RegMax>(ref, args...);
+		}
 	}
 };
 
@@ -249,7 +294,7 @@ class ScriptParserBase
 {
 	Uint8 _regUsed;
 	std::string _name;
-	std::map<std::string, ArgEnum> _typeList;
+	std::map<std::string, std::pair<ArgEnum, size_t>> _typeList;
 	std::map<std::string, ScriptParserData> _procList;
 	std::map<std::string, ScriptContainerData> _refList;
 
@@ -268,11 +313,11 @@ protected:
 	/// Add name for standart reg
 	void addStandartReg(const std::string& s, RegEnum index);
 	/// Add name for custom parameter
-	void addCustomReg(const std::string& s, ArgEnum type);
+	void addCustomReg(const std::string& s, ArgEnum type, size_t size);
 	/// Add parsing fuction
 	void addParserBase(const std::string& s, ScriptParserData::argFunc arg, ScriptParserData::getFunc get);
 	/// Add new type impl
-	void addTypeBase(const std::string& s, ArgEnum type);
+	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
 public:
 
 	/// Add const value
@@ -287,7 +332,7 @@ public:
 	template<typename T>
 	void addType(const std::string& s)
 	{
-		addTypeBase(s, ScriptContainerData::Register<T>());
+		addTypeBase(s, ScriptContainerData::Register<T>(), sizeof(T));
 	}
 };
 
@@ -297,8 +342,24 @@ public:
 template<typename T, typename... Args>
 class ScriptParser : public ScriptParserBase
 {
-	template<typename>
-	using S = const std::string&;
+	template<typename Z>
+	struct S
+	{
+		S(const char *n) : name{ n } { }
+		S(const std::string& n) : name{ n.data() } { }
+
+		const char *name;
+	};
+	template<typename First, typename... Rest>
+	void addReg(S<First>& n, Rest&... t)
+	{
+		addCustomReg(n.name, ScriptContainerData::Register<First>(), sizeof(First));
+		addReg(t...);
+	}
+	void addReg()
+	{
+		//end loop
+	}
 public:
 	using Container = ScriptContainer<Args...>;
 
@@ -308,15 +369,14 @@ public:
 	{
 		//ScriptParser require static function in T to initialize data!
 		T::ScriptRegister(this);
-
-		Dummy{ (addCustomReg(argNames, ScriptContainerData::Register<Args>()),0)... };
+		addReg(argNames...);
 	}
 
 	/// Prase string and return new script
-	std::unique_ptr<Container> parse(const std::string& parentName, const std::string& srcCode) const
+	Container parse(const std::string& parentName, const std::string& srcCode) const
 	{
-		std::unique_ptr<Container> scr = std::unique_ptr<Container>{ new Container{} };
-		if (parseBase(scr.get(), parentName, srcCode))
+		auto scr = Container{};
+		if (parseBase(&scr, parentName, srcCode))
 		{
 			return std::move(scr);
 		}
@@ -327,6 +387,7 @@ public:
 	void LogInfo() const
 	{
 		static bool printOp = [this]{ logScriptMetadata(); return true; }();
+		(void)printOp;
 	}
 };
 

@@ -39,14 +39,14 @@ class UnitSprite
 private:
 	struct Part
 	{
-		int bodyPart;
 		Surface *src;
+		int bodyPart;
 		int offX;
 		int offY;
 
 		Part(int body, Surface *s = nullptr) : src{ s }, bodyPart{ body }, offX{ 0 }, offY{ 0 } { }
 
-		Part& operator=(Surface *s) { src = s; }
+		void operator=(Surface *s) { src = s; }
 		explicit operator bool() { return src; }
 	};
 

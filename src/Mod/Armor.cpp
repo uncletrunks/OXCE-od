@@ -642,18 +642,18 @@ bool Armor::hasInventory() const
  * Get recoloring script.
  * @return Script for recoloring.
  */
-const Armor::RecolorParser::Container *Armor::getRecolorScript() const
+const Armor::RecolorParser::Container &Armor::getRecolorScript() const
 {
-	return _recolorScript.get();
+	return _recolorScript;
 }
 
 /**
  * Get switch sprite script.
  * @return Script for switching.
  */
-const Armor::RecolorParser::Container *Armor::getSpriteScript() const
+const Armor::RecolorParser::Container &Armor::getSpriteScript() const
 {
-	return _spriteScript.get();
+	return _spriteScript;
 }
 
 }

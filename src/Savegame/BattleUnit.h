@@ -125,7 +125,6 @@ private:
 	bool _hidingForTurn, _floorAbove, _respawn;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
-	bool _useScripts;
 
 	/// Helper function initing recolor vector.
 	void setRecolor(int basicLook, int utileLook, int rankLook);

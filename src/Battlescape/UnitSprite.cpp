@@ -120,11 +120,11 @@ void UnitSprite::selectItem(Part& p, BattleItem *item, int dir)
  */
 void UnitSprite::selectUnit(Part& p, int index, int dir)
 {
-	auto *scr = _unit->getArmor()->getSpriteScript();
+	const auto &scr = _unit->getArmor()->getSpriteScript();
 	auto result = 0;
 	if(scr)
 	{
-		scr->update(&_scriptWorkRef, _unit, p.bodyPart, _animationFrame, _shade, _burn);
+		scr.update(&_scriptWorkRef, _unit, p.bodyPart, _animationFrame, _shade, _burn);
 		_scriptWorkRef.shade = _shade;
 		result = _scriptWorkRef.execute(index, dir);
 	}

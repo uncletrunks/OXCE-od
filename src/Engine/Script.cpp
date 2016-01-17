@@ -159,11 +159,15 @@ static inline RetEnum call_func_h(ScriptWorker &c, FuncCommon func, const Uint8 
 [[gnu::always_inline]]
 static inline RetEnum debug_log_h(ProgPos &p, int i, int j)
 {
-	static constexpr int offset = 3; //+1 for op, and +2*1 for two reg args.
-	static int limit_count = 0;
-	if (++limit_count < 500)
+	if (Options::debug)
 	{
-		Log(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p - offset) << " values: " << std::setw(8) << i << std::setw(8) << j;
+		static constexpr int offset = 3; //+1 for op, and +2*1 for two reg args.
+		static int limit_count = 0;
+		if (++limit_count < 500)
+		{
+			Logger log;
+			log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p - offset) << " values: " << std::setw(8) << i << std::setw(8) << j;
+		}
 	}
 	return RetContinue;
 }
@@ -177,25 +181,25 @@ static inline RetEnum debug_log_h(ProgPos &p, int i, int j)
 	/*	Name,		Implementation,													End excecution,				Args */ \
 	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorker &)) \
 	\
-	IMPL(ret,		MACRO_QUOTE({							c.reg[RegI0] = Data0;	return RetEnd;						}),		(ScriptWorker &c, int Data0)) \
-	IMPL(ret_gt,	MACRO_QUOTE({ if (c.reg[RegCond] > 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_lt,	MACRO_QUOTE({ if (c.reg[RegCond] < 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_eq,	MACRO_QUOTE({ if (c.reg[RegCond] == 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_neq,	MACRO_QUOTE({ if (c.reg[RegCond] != 0)	{ c.reg[RegI0] = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret,		MACRO_QUOTE({								c.ref<int>(RegI0) = Data0;	return RetEnd;						}),		(ScriptWorker &c, int Data0)) \
+	IMPL(ret_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
 	\
-	IMPL(goto,		MACRO_QUOTE({							Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_gt,	MACRO_QUOTE({ if (c.reg[RegCond] > 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_lt,	MACRO_QUOTE({ if (c.reg[RegCond] < 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_eq,	MACRO_QUOTE({ if (c.reg[RegCond] == 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_neq,	MACRO_QUOTE({ if (c.reg[RegCond] != 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
+	IMPL(goto,		MACRO_QUOTE({								Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
+	IMPL(goto_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
+	IMPL(goto_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
+	IMPL(goto_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
+	IMPL(goto_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
 	\
-	IMPL(set,		MACRO_QUOTE({							Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_gt,	MACRO_QUOTE({ if (c.reg[RegCond] > 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_lt,	MACRO_QUOTE({ if (c.reg[RegCond] < 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_eq,	MACRO_QUOTE({ if (c.reg[RegCond] == 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_neq,	MACRO_QUOTE({ if (c.reg[RegCond] != 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
+	IMPL(set,		MACRO_QUOTE({								Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
+	IMPL(set_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
+	IMPL(set_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
+	IMPL(set_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
+	IMPL(set_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
 	\
-	IMPL(test,		MACRO_QUOTE({ c.reg[RegCond] = Data0 - Data1;					return RetContinue; }),		(ScriptWorker &c, int Data0, int Data1)) \
+	IMPL(test,		MACRO_QUOTE({ c.ref<int>(RegCond) = Data0 - Data1;				return RetContinue; }),		(ScriptWorker &c, int Data0, int Data1)) \
 	IMPL(test_le,	MACRO_QUOTE({ Prog = (A <= B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos &Prog, int A, int B, const ProgPos &LabelTrue, const ProgPos &LabelFalse)) \
 	IMPL(test_eq,	MACRO_QUOTE({ Prog = (A == B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos &Prog, int A, int B, const ProgPos &LabelTrue, const ProgPos &LabelFalse)) \
 	\
@@ -230,7 +234,7 @@ static inline RetEnum debug_log_h(ProgPos &p, int i, int j)
 	\
 	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8 *d, ScriptWorker &c, ProgPos &p)) \
 	\
-	IMPL(debug_log,		MACRO_QUOTE({ return debug_log_h(p, Reg0, Reg1);								}),		(ProgPos &p, int &Reg0, int &Reg1)) \
+	IMPL(debug_log,		MACRO_QUOTE({ return debug_log_h(p, Data1, Data2);								}),		(ProgPos &p, int Data1, int Data2)) \
 
 
 ////////////////////////////////////////////////////////////
@@ -302,8 +306,8 @@ enum ProcEnum : Uint8
  */
 static inline int scriptExe(int i0, int i1, ScriptWorker &data)
 {
-	data.reg[RegI0] = i0;
-	data.reg[RegI1] = i1;
+	data.ref<int>(RegI0) = i0;
+	data.ref<int>(RegI1) = i1;
 	ProgPos curr = ProgPos::Start;
 	const Uint8 *const proc = data.proc;
 	//--------------------------------------------------
@@ -350,7 +354,7 @@ static inline int scriptExe(int i0, int i1, ScriptWorker &data)
 	//--------------------------------------------------
 
 	endLabel:
-	return data.reg[RegI0];
+	return data.ref<int>(RegI0);
 	errorLabel:
 	static int bugCount = 0;
 	if (++bugCount < 100)
@@ -510,7 +514,7 @@ static bool parseConditionImpl(ParserHelper &ph, int nextPos, const SelectedToke
 	};
 
 	bool equalFunc = false;
-	int i = 0;
+	size_t i = 0;
 	for (; i < OperatorSize; ++i)
 	{
 		if (conditionType.compare(opNames[i]) == 0)
@@ -601,6 +605,10 @@ static bool parseEnd(const ScriptParserData &spd, ParserHelper &ph, const Select
 	ParserHelper::Block block = ph.codeBlocks.back();
 	ph.codeBlocks.pop_back();
 
+	if (block.nextLabel != block.finalLabel)
+	{
+		ph.setLabel(block.nextLabel, ph.getCurrPos());
+	}
 	ph.setLabel(block.finalLabel, ph.getCurrPos());
 	return true;
 }
@@ -657,14 +665,14 @@ void ScriptParserBase::addParserBase(const std::string& s, ScriptParserData::arg
 	}
 }
 
-void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type)
+void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type, size_t size)
 {
 	auto pos = _refList.find(s);
 	if (pos != _refList.end() && pos->second.type != type)
 	{
 		throw Exception("Type name already used: '" + s + "'");
 	}
-	_typeList[s] = type;
+	_typeList[s] = std::make_pair(type, size);
 }
 
 void ScriptParserBase::addStandartReg(const std::string& s, RegEnum index)
@@ -677,15 +685,17 @@ void ScriptParserBase::addStandartReg(const std::string& s, RegEnum index)
  * @param i what custom param
  * @param s name for first custom parameter
  */
-void ScriptParserBase::addCustomReg(const std::string& s, ArgEnum type)
+void ScriptParserBase::addCustomReg(const std::string& s, ArgEnum type, size_t size)
 {
-	if (_regUsed < ScriptMaxReg)
+	if (_regUsed + size <= ScriptMaxReg)
 	{
 		if (_refList.find(s) != _refList.end())
 		{
 			throw Exception("Name already used: '" + s + "'");
 		}
-		ScriptContainerData data = { type, _regUsed++ };
+		ScriptContainerData data = { type, _regUsed };
+		volatile auto dummy = std::make_pair(s, data);
+		_regUsed += size;
 		_refList.insert(std::make_pair(s, data));
 	}
 	else
@@ -874,7 +884,7 @@ void ScriptParserBase::logScriptMetadata() const
 			size_t offset = 0;
 			printOp = false;
 			Logger opLog;
-			#define MACRO_STRCAT(A) #A
+			#define MACRO_STRCAT(...) #__VA_ARGS__
 			#define MACRO_ALL_LOG(NAME, Impl, Args) \
 				if (#NAME[0] != '_') opLog.get(LOG_DEBUG) \
 					<< "Op:    " << std::setw(tabSize*2) << #NAME \
@@ -891,7 +901,7 @@ void ScriptParserBase::logScriptMetadata() const
 		}
 
 		Logger refLog;
-		refLog.get() << "Script data for: " << _name << "\n" << std::left;
+		refLog.get(LOG_DEBUG) << "Script data for: " << _name << "\n" << std::left;
 		for (auto ite = _refList.begin(); ite != _refList.end(); ++ite)
 		{
 			if (ite->second.type == ArgConst)
@@ -909,7 +919,7 @@ const std::string& ScriptParserBase::getTypeName(ArgEnum type) const
 {
 	for (auto& t : _typeList)
 	{
-		if (t.second == type)
+		if (t.second.first == type)
 		{
 			return t.first;
 		}

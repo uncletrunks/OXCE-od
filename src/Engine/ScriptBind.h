@@ -383,8 +383,7 @@ struct ParserHelper
 	template<typename T>
 	bool addReg(const std::string& s)
 	{
-		addReg(s, ScriptContainerData::Register<T>());
-		return true;
+		return addReg(s, std::make_pair(ScriptContainerData::Register<T>(), sizeof(T)));
 	}
 
 	/**
@@ -393,18 +392,19 @@ struct ParserHelper
 	 * @param type type of reg
 	 * @return true if reg exists and is valid
 	 */
-	bool addReg(const std::string& s, ArgEnum type)
+	bool addReg(const std::string& s, std::pair<ArgEnum, size_t> type)
 	{
 		const ScriptContainerData* pos = getReferece(s);
 		if (pos != nullptr)
 		{
 			return false;
 		}
-		if (regIndexUsed > ScriptMaxReg)
+		if (regIndexUsed + type.second > ScriptMaxReg)
 		{
 			return false;
 		}
-		ScriptContainerData data = { type, regIndexUsed++, 0 };
+		ScriptContainerData data = { type.first, regIndexUsed, 0 };
+		regIndexUsed += type.second;
 		refListCurr.insert(std::make_pair(s, data));
 		return true;
 	}
@@ -882,7 +882,7 @@ struct ArgRegDef
 	static constexpr size_t size = sizeof(Uint8);
 	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
 	{
-		return sw.reg[*arg];
+		return sw.ref<int>(*arg);
 	}
 
 	static bool parse(ParserHelper &ph, const SelectedToken &t)
@@ -977,13 +977,12 @@ template<typename T>
 struct ArgCustomPointerDef
 {
 	using ponter = T*;
-	static_assert(sizeof(ponter) == sizeof(int), "Can't fit pointer in int");
 
 	using ReturnType = ponter&;
 	static constexpr size_t size = sizeof(Uint8);
 	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
 	{
-		return *reinterpret_cast<ponter*>(&sw.reg[*arg]);
+		return sw.ref<ponter>(*arg);
 	}
 
 	static bool parse(ParserHelper &ph, const SelectedToken &t)
@@ -1247,7 +1246,7 @@ struct Bind
 	}
 
 	template<int T::*X>
-	void add(const std::string& get, const std::string& set = "")
+	void addField(const std::string& get, const std::string& set = "")
 	{
 		parser->addParser<FuncGroup<helper::BindPropGet<T, int, X>>>(getName(get));
 		if (!set.empty())
@@ -1256,7 +1255,7 @@ struct Bind
 		}
 	}
 	template<int X>
-	void add(const std::string& get)
+	void addFake(const std::string& get)
 	{
 		parser->addParser<FuncGroup<helper::BindValue<T, int, X>>>(getName(get));
 	}
@@ -1290,7 +1289,7 @@ struct BindNested
 	}
 
 	template<int N::*XX>
-	void add(const std::string& get, const std::string& set = "")
+	void addField(const std::string& get, const std::string& set = "")
 	{
 		bind->parser->template addParser<FuncGroup<helper::BindPropNestGet<T, N, int, X, XX>>>(bind->getName(get));
 		if (!set.empty())
