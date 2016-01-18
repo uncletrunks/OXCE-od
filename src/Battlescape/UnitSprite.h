@@ -88,8 +88,10 @@ private:
 	void drawRoutine9();
 	/// Drawing routine for TFTD tanks.
 	void drawRoutine11();
-	/// Drawing routine for hallucinoids (routine 12) and biodrones (routine 15).
+	/// Drawing routine for hallucinoids.
 	void drawRoutine12();
+	/// Drawing routine for biodrones.
+	void drawRoutine16();
 	/// Drawing routine for tentaculats.
 	void drawRoutine19();
 	/// Drawing routine for triscenes.

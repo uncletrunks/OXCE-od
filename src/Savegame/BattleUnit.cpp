@@ -3366,6 +3366,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&isWalkingScript>("isWalking");
 	bu.add<&isCollapsingScript>("isCollapsing");
 	bu.add<&BU::getDirection>("getDirection");
+	bu.add<&BU::getTurretDirection>("getTurretDirection");
 	bu.add<&BU::getWalkingPhase>("getWalkingPhase");
 
 	bu.addField<&BU::_tu>("getTimeUnits");
@@ -3406,6 +3407,15 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	parser->addConst("BODYPART_RIGHTARM", BODYPART_RIGHTARM);
 	parser->addConst("BODYPART_LEFTLEG", BODYPART_LEFTLEG);
 	parser->addConst("BODYPART_RIGHTLEG", BODYPART_RIGHTLEG);
+	parser->addConst("BODYPART_BIG_TORSO_0", BODYPART_BIG_TORSO + 0);
+	parser->addConst("BODYPART_BIG_TORSO_1", BODYPART_BIG_TORSO + 1);
+	parser->addConst("BODYPART_BIG_TORSO_2", BODYPART_BIG_TORSO + 2);
+	parser->addConst("BODYPART_BIG_TORSO_3", BODYPART_BIG_TORSO + 3);
+	parser->addConst("BODYPART_BIG_PROPULSION_0", BODYPART_BIG_PROPULSION + 0);
+	parser->addConst("BODYPART_BIG_PROPULSION_1", BODYPART_BIG_PROPULSION + 1);
+	parser->addConst("BODYPART_BIG_PROPULSION_2", BODYPART_BIG_PROPULSION + 2);
+	parser->addConst("BODYPART_BIG_PROPULSION_3", BODYPART_BIG_PROPULSION + 3);
+	parser->addConst("BODYPART_BIG_TURRET", BODYPART_BIG_TURRET);
 
 	parser->addConst("SIDE_FRONT", SIDE_FRONT);
 	parser->addConst("SIDE_LEFT", SIDE_LEFT);
