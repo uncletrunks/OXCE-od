@@ -69,7 +69,7 @@ private:
 	std::string _currentTooltip;
 	Text *_txtTooltip;
 	std::vector<ReequipStat> _missingItems;
-	std::map<RuleItem*, int> _rounds;
+	std::map<RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal;
 	std::map<int, RecoveryItem*> _recoveryStats;
 	bool _positiveScore, _noContainment, _manageContainment, _destroyBase;
 	int _limitsEnforced;

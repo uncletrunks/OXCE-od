@@ -362,6 +362,9 @@ DebriefingState::~DebriefingState()
 	}
 	_recoveryStats.clear();
 	_rounds.clear();
+	_roundsPainKiller.clear();
+	_roundsStimulant.clear();
+	_roundsHeal.clear();
 }
 
 std::wstring DebriefingState::makeSoldierString(int stat)
@@ -1137,6 +1140,21 @@ void DebriefingState::prepareDebriefing()
 			base->getItems()->addItem(i->first->getType(), total_clips);
 	}
 
+	// calculate the "remaining medikit items" for each type based on the recovered "clips".
+	for (std::map<RuleItem*, int>::const_iterator i = _roundsPainKiller.begin(); i != _roundsPainKiller.end(); ++i)
+	{
+		int totalRecovered = INT_MAX;
+		if (i->first->getPainKillerQuantity() > 0)
+			totalRecovered = std::min(totalRecovered, i->second / i->first->getPainKillerQuantity());
+		if (i->first->getStimulantQuantity() > 0)
+			totalRecovered = std::min(totalRecovered, _roundsStimulant[i->first] / i->first->getStimulantQuantity());
+		if (i->first->getHealQuantity() > 0)
+			totalRecovered = std::min(totalRecovered, _roundsHeal[i->first] / i->first->getHealQuantity());
+
+		if (totalRecovered > 0)
+			base->getItems()->addItem(i->first->getType(), totalRecovered);
+	}
+
 	// recover all our goodies
 	if (playersSurvived > 0)
 	{
@@ -1373,6 +1391,20 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 				switch ((*it)->getRules()->getBattleType())
 				{
 					case BT_CORPSE:
+						break;
+					case BT_MEDIKIT:
+						if ((*it)->getRules()->isConsumable())
+						{
+							// Need to remember all three!
+							_roundsPainKiller[(*it)->getRules()] += (*it)->getPainKillerQuantity();
+							_roundsStimulant[(*it)->getRules()] += (*it)->getStimulantQuantity();
+							_roundsHeal[(*it)->getRules()] += (*it)->getHealQuantity();
+						}
+						else
+						{
+							// Vanilla behaviour (recover a full medikit).
+							base->getItems()->addItem((*it)->getRules()->getType(), 1);
+						}
 						break;
 					case BT_AMMO:
 						// It's a clip, count any rounds left.
