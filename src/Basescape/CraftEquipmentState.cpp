@@ -64,10 +64,9 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	//_btnOk = new TextButton((craftHasACrew || isNewBattle)? 148:288, 16, (craftHasACrew || isNewBattle)? 164:16, 176);
-	_btnOk = new TextButton(80, 16, 224, 176);
-	_btnClear = new TextButton(80, 16, 136, 176);
-	_btnInventory = new TextButton(80, 16, 136, 176);
+	_btnOk = new TextButton((craftHasACrew || isNewBattle)?30:140, 16, (craftHasACrew || isNewBattle)?274:164, 176);
+	_btnClear = new TextButton(102, 16, 164, 176);
+	_btnInventory = new TextButton(102, 16, 164, 176);
 	_txtTitle = new Text(300, 17, 16, 7);
 	_txtItem = new Text(144, 9, 16, 32);
 	_txtStores = new Text(150, 9, 160, 32);
@@ -75,7 +74,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_txtUsed = new Text(110, 9, 130, 24);
 	_txtCrew = new Text(71, 9, 244, 24);
 	_lstEquipment = new TextList(288, 128, 8, 40);
-	_cbxFilterBy = new ComboBox(this, (craftHasACrew || isNewBattle)? 112:210, 16, 16, 176, true);
+	_cbxFilterBy = new ComboBox(this, 140, 16, 16, 176, true);
 
 	// Set palette
 	setInterface("craftEquipment");
