@@ -213,6 +213,7 @@ void CraftEquipmentState::initList()
 
 	int row = 0;
 	bool isArcing = false;
+	bool isShortRange = false;
 	const std::vector<std::string> &items = _game->getMod()->getItemsList();
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
@@ -227,20 +228,21 @@ void CraftEquipmentState::initList()
 				if (rule->getBattleType() == BT_FIREARM)
 				{
 					isArcing = rule->getArcingShot();
+					isShortRange = rule->getMaxRange() > 0 && rule->getMaxRange() < 11;
 				}
 
 				if (selIdx > 1 && rule->isFixed()) { continue; }
 				if (selIdx == 2 && rule->getBattleType() != BT_MELEE) { continue; }
 
 				else if (selIdx == 3 && rule->getBattleType() != BT_FIREARM && rule->getBattleType() != BT_AMMO) { continue; }
-				else if (selIdx == 3 && (rule->getMaxRange() < 1 || rule->getMaxRange() > 10)) { continue; }
+				else if (selIdx == 3 && !isShortRange) { continue; }
 
 				else if (selIdx == 4 && rule->getBattleType() != BT_FIREARM && rule->getBattleType() != BT_AMMO) { continue; }
-				else if (selIdx == 4 && rule->getMaxRange() < 11) { continue; }
+				else if (selIdx == 4 && isShortRange) { continue; }
 				else if (selIdx == 4 && !isArcing) { continue; }
 
 				else if (selIdx == 5 && rule->getBattleType() != BT_FIREARM && rule->getBattleType() != BT_AMMO) { continue; }
-				else if (selIdx == 5 && rule->getMaxRange() < 11) { continue; }
+				else if (selIdx == 5 && isShortRange) { continue; }
 				else if (selIdx == 5 && isArcing) { continue; }
 
 				else if (selIdx == 6 && rule->getBattleType() != BT_GRENADE && rule->getBattleType() != BT_PROXIMITYGRENADE) { continue; }
