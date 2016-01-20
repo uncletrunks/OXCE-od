@@ -120,7 +120,7 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable;
+	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
@@ -187,6 +187,8 @@ public:
 	int getHandSprite() const;
 	/// Gets if the item is two-handed.
 	bool isTwoHanded() const;
+	/// Gets if the item can only be used by both hands.
+	bool isBlockingBothHands() const;
 	/// Gets if the item is a launcher.
 	bool isWaypoint() const;
 	/// Gets if the item is fixed.
