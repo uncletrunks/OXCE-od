@@ -235,6 +235,15 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			_action->result = "STR_UNDERWATER_EQUIPMENT";
 			_game->popState();
 		}
+		else if (_action->type != BA_THROW &&
+			_action->actor->getFaction() == FACTION_PLAYER &&
+			weapon->isBlockingBothHands() &&
+			_action->actor->getItem("STR_LEFT_HAND") != 0 &&
+			_action->actor->getItem("STR_RIGHT_HAND") != 0)
+		{
+			_action->result = "STR_MUST_USE_BOTH_HANDS";
+			_game->popState();
+		}
 		else if (_action->type == BA_PRIME)
 		{
 			const BattleFuseType fuseType = weapon->getFuseTimerType();
