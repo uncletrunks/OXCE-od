@@ -27,7 +27,7 @@ namespace OpenXcom
  * type of base facility.
  * @param type String defining the type.
  */
-RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0)
+RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0)
 {
 }
 
@@ -68,6 +68,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_grav = node["grav"].as<bool>(_grav);
 	_size = node["size"].as<int>(_size);
 	_buildCost = node["buildCost"].as<int>(_buildCost);
+	_refundValue = node["refundValue"].as<int>(_refundValue);
 	_buildTime = node["buildTime"].as<int>(_buildTime);
 	_monthlyCost = node["monthlyCost"].as<int>(_monthlyCost);
 	_storage = node["storage"].as<int>(_storage);
@@ -234,6 +235,16 @@ bool RuleBaseFacility::isGravShield() const
 int RuleBaseFacility::getBuildCost() const
 {
 	return _buildCost;
+}
+
+/**
+ * Gets the amount that is refunded when the facility
+ * is dismantled.
+ * @return The refund value.
+ */
+int RuleBaseFacility::getRefundValue() const
+{
+	return _refundValue;
 }
 
 /**
