@@ -100,9 +100,9 @@ void DismantleFacilityState::btnOkClick(Action *)
 	{
 		const std::map<std::string, std::pair<int, int> > &itemCost = _fac->getRules()->getBuildCostItems();
 
-		// Give refund if this is an unstarted, queued build.
 		if (_fac->getBuildTime() > _fac->getRules()->getBuildTime())
 		{
+			// Give full refund if this is an unstarted, queued build.
 			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _fac->getRules()->getBuildCost());
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
@@ -111,6 +111,8 @@ void DismantleFacilityState::btnOkClick(Action *)
 		}
 		else
 		{
+			// Give partial refund if this is a started build or a completed facility.
+			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _fac->getRules()->getRefundValue());
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
 				_base->getStorageItems()->addItem(i->first, i->second.second);
