@@ -901,7 +901,7 @@ struct ArgConstDef
 	static constexpr size_t size = sizeof(int);
 	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
 	{
-		return *reinterpret_cast<const int*>(arg);
+		return sw.const_val<int>(arg);
 	}
 
 	static bool parse(ParserHelper &ph, const SelectedToken &t)
@@ -924,7 +924,7 @@ struct ArgLabelDef
 	static constexpr size_t size = sizeof(ReturnType);
 	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
 	{
-		return *reinterpret_cast<const ProgPos*>(arg);
+		return sw.const_val<ProgPos>(arg);
 	}
 
 	static bool parse(ParserHelper &ph, const SelectedToken &t)
@@ -948,7 +948,7 @@ struct ArgFuncDef
 	static constexpr size_t size = sizeof(ReturnType);
 	static FuncCommon get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
 	{
-		return *reinterpret_cast<const FuncCommon*>(arg);
+		return sw.const_val<FuncCommon>(arg);
 	}
 
 	static bool parse(ParserHelper &ph, const SelectedToken &t)

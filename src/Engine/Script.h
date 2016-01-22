@@ -36,8 +36,8 @@ struct SelectedToken;
 template<typename T>
 struct ArgSelector;
 
-const int ScriptMaxArg = 8;
-const int ScriptMaxReg = 256;
+constexpr int ScriptMaxArg = 8;
+constexpr int ScriptMaxReg = 256;
 
 /**
  * Script execution cunter
@@ -141,7 +141,7 @@ struct ScriptWorker
 {
 	const Uint8* proc;
 	int shade;
-	Uint8 reg[ScriptMaxReg];
+	typename std::aligned_storage<ScriptMaxReg, alignof(void*)>::type reg;
 
 	/// Default constructor
 	ScriptWorker() : proc(0), shade(0) //reg not initialized
@@ -154,11 +154,17 @@ struct ScriptWorker
 	/// Call script with two arguments
 	int execute(int i0, int i1);
 
-	/// Get value for reg area
+	/// Get value from reg
 	template<typename T>
 	T &ref(size_t offset)
 	{
-		return *reinterpret_cast<T*>(reg + offset);
+		return *reinterpret_cast<T*>(reinterpret_cast<char*>(&reg) + offset);
+	}
+	/// Get value from proc vector
+	template<typename T>
+	const T &const_val(const Uint8 *ptr, size_t offset = 0)
+	{
+		return *reinterpret_cast<const T*>(ptr + offset);
 	}
 };
 
