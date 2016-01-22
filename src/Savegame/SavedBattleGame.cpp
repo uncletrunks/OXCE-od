@@ -816,7 +816,7 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 	if (!weapon || !unit) return false;
 
 	const RuleItem *rule = weapon->getRules();
-	volatile bool x = true;
+
 	if (unit->getOriginalFaction() == FACTION_HOSTILE && getTurn() < rule->getAIUseDelay(getMod()))
 	{
 		return false;
@@ -833,7 +833,7 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 	{
 		return false;
 	}
-	return x;
+	return true;
 }
 
 /**
