@@ -44,7 +44,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param rule Pointer to the facility ruleset to build.
  */
-PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule) : _base(base), _rule(rule)
+PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseFacility *origFac) : _base(base), _rule(rule), _origFac(origFac)
 {
 	_screen = false;
 
@@ -93,12 +93,12 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule) : _ba
 	_txtCost->setText(tr("STR_COST_UC"));
 
 	_numCost->setBig();
-	_numCost->setText(Text::formatFunding(_rule->getBuildCost()));
+	_numCost->setText(Text::formatFunding(_origFac != 0 ? 0 : _rule->getBuildCost()));
 
 	_txtTime->setText(tr("STR_CONSTRUCTION_TIME_UC"));
 
 	_numTime->setBig();
-	_numTime->setText(tr("STR_DAY", _rule->getBuildTime()));
+	_numTime->setText(tr("STR_DAY", _origFac != 0 ? 0 : _rule->getBuildTime()));
 
 	_txtMaintenance->setText(tr("STR_MAINTENANCE_UC"));
 
@@ -129,44 +129,74 @@ void PlaceFacilityState::btnCancelClick(Action *)
  */
 void PlaceFacilityState::viewClick(Action *)
 {
-	if (!_view->isPlaceable(_rule))
+	if (_origFac != 0)
 	{
-		_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
-	}
-	else if (_game->getSavedGame()->getFunds() < _rule->getBuildCost())
-	{
-		_game->popState();
-		_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_MONEY"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+		// EXPERIMENTAL!: just moving an existing facility
+		// FIXME: can lead to disconnected bases (easy to check, but would not be able to move the Access Lift)
+		// FIXME: queued facilities' build time is not recalculated (easy to do)
+		// FIXME: currently moving at no cost (probably should depend on difficulty...
+		//        ... fixed moving cost per tile? or dynamic based on size, type, distance, etc.?)
+		if (!_view->isPlaceable(_rule, _origFac))
+		{
+			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+		}
+		else
+		{
+			_origFac->setX(_view->getGridX());
+			_origFac->setY(_view->getGridY());
+			if (Options::allowBuildingQueue)
+			{
+				// first reset (maybe the moved facility is not queued anymore)
+				if (abs(_origFac->getBuildTime()) > _rule->getBuildTime()) _origFac->setBuildTime(_rule->getBuildTime());
+				// if it is still in the queue though, recalc
+				if (_origFac->getBuildTime() > 0 && _view->isQueuedBuilding(_rule)) _origFac->setBuildTime(std::numeric_limits<int>::max());
+				_view->reCalcQueuedBuildings();
+			}
+			_game->popState();
+		}
 	}
 	else
 	{
-		const std::map<std::string, std::pair<int, int> > &itemCost = _rule->getBuildCostItems();
-		for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+		// placing a brand new facility
+		if (!_view->isPlaceable(_rule))
 		{
-			int needed = i->second.first - _base->getItems()->getItem(i->first);
-			if (needed > 0)
+			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+		}
+		else if (_game->getSavedGame()->getFunds() < _rule->getBuildCost())
+		{
+			_game->popState();
+			_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_MONEY"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+		}
+		else
+		{
+			const std::map<std::string, std::pair<int, int> > &itemCost = _rule->getBuildCostItems();
+			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
-				_game->popState();
-				_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_ITEMS").arg(tr(i->first)).arg(needed), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
-				return;
+				int needed = i->second.first - _base->getItems()->getItem(i->first);
+				if (needed > 0)
+				{
+					_game->popState();
+					_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_ITEMS").arg(tr(i->first)).arg(needed), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+					return;
+				}
 			}
+			BaseFacility *fac = new BaseFacility(_rule, _base);
+			fac->setX(_view->getGridX());
+			fac->setY(_view->getGridY());
+			fac->setBuildTime(_rule->getBuildTime());
+			_base->getFacilities()->push_back(fac);
+			if (Options::allowBuildingQueue)
+			{
+				if (_view->isQueuedBuilding(_rule)) fac->setBuildTime(std::numeric_limits<int>::max());
+				_view->reCalcQueuedBuildings();
+			}
+			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _rule->getBuildCost());
+			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+			{
+				_base->getItems()->removeItem(i->first, i->second.first);
+			}
+			_game->popState();
 		}
-		BaseFacility *fac = new BaseFacility(_rule, _base);
-		fac->setX(_view->getGridX());
-		fac->setY(_view->getGridY());
-		fac->setBuildTime(_rule->getBuildTime());
-		_base->getFacilities()->push_back(fac);
-		if (Options::allowBuildingQueue)
-		{
-			if (_view->isQueuedBuilding(_rule)) fac->setBuildTime(std::numeric_limits<int>::max());
-			_view->reCalcQueuedBuildings();
-		}
-		_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _rule->getBuildCost());
-		for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
-		{
-			_base->getItems()->removeItem(i->first, i->second.first);
-		}
-		_game->popState();
 	}
 }
 

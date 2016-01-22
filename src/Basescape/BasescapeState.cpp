@@ -52,6 +52,7 @@
 #include "../Geoscape/AllocatePsiTrainingState.h"
 #include "../Geoscape/AllocateTrainingState.h"
 #include "../Mod/RuleInterface.h"
+#include "PlaceFacilityState.h"
 
 namespace OpenXcom
 {
@@ -354,19 +355,27 @@ void BasescapeState::viewLeftClick(Action *)
 	BaseFacility *fac = _view->getSelectedFacility();
 	if (fac != 0)
 	{
-		// Is facility in use?
-		if (fac->inUse())
+		if (SDL_GetModState() & KMOD_CTRL)
 		{
-			_game->pushState(new ErrorMessageState(tr("STR_FACILITY_IN_USE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
-		}
-		// Would base become disconnected?
-		else if (!_base->getDisconnectedFacilities(fac).empty())
-		{
-			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_DISMANTLE_FACILITY"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+			// Ctrl + left click on a completed facility allows moving it
+			_game->pushState(new PlaceFacilityState(_base, fac->getRules(), fac));
 		}
 		else
 		{
-			_game->pushState(new DismantleFacilityState(_base, _view, fac));
+			// Is facility in use?
+			if (fac->inUse())
+			{
+				_game->pushState(new ErrorMessageState(tr("STR_FACILITY_IN_USE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+			}
+			// Would base become disconnected?
+			else if (!_base->getDisconnectedFacilities(fac).empty())
+			{
+				_game->pushState(new ErrorMessageState(tr("STR_CANNOT_DISMANTLE_FACILITY"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+			}
+			else
+			{
+				_game->pushState(new DismantleFacilityState(_base, _view, fac));
+			}
 		}
 	}
 }
