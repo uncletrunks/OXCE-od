@@ -39,6 +39,10 @@ AlienRace::~AlienRace()
  */
 void AlienRace::load(const YAML::Node &node)
 {
+	if (const YAML::Node &parent = node["refNode"])
+	{
+		load(parent);
+	}
 	_id = node["id"].as<std::string>(_id);
 	_baseCustomDeploy = node["baseCustomDeploy"].as<std::string>(_baseCustomDeploy);
 	_baseCustomMission = node["baseCustomMission"].as<std::string>(_baseCustomMission);

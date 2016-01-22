@@ -56,6 +56,10 @@ Armor::~Armor()
  */
 void Armor::load(const YAML::Node &node, const RecolorParser& parser)
 {
+	if (const YAML::Node &parent = node["refNode"])
+	{
+		load(parent, parser);
+	}
 	_type = node["type"].as<std::string>(_type);
 	_spriteSheet = node["spriteSheet"].as<std::string>(_spriteSheet);
 	_spriteInv = node["spriteInv"].as<std::string>(_spriteInv);

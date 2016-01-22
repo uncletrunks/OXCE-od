@@ -47,6 +47,10 @@ RuleBaseFacility::~RuleBaseFacility()
  */
 void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 {
+	if (const YAML::Node &parent = node["refNode"])
+	{
+		load(parent, mod, listOrder);
+	}
 	_type = node["type"].as<std::string>(_type);
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);

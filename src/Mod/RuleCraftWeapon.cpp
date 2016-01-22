@@ -48,6 +48,10 @@ RuleCraftWeapon::~RuleCraftWeapon()
  */
 void RuleCraftWeapon::load(const YAML::Node &node, Mod *mod)
 {
+	if (const YAML::Node &parent = node["refNode"])
+	{
+		load(parent, mod);
+	}
 	if (node["stats"])
 	{
 		_stats.load(node["stats"]);

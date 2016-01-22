@@ -44,6 +44,10 @@ RuleSoldier::~RuleSoldier()
  */
 void RuleSoldier::load(const YAML::Node &node)
 {
+	if (const YAML::Node &parent = node["refNode"])
+	{
+		load(parent);
+	}
 	_type = node["type"].as<std::string>(_type);
 	_minStats.merge(node["minStats"].as<UnitStats>(_minStats));
 	_maxStats.merge(node["maxStats"].as<UnitStats>(_maxStats));
