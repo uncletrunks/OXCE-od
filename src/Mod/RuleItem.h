@@ -122,6 +122,7 @@ private:
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
 	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable;
+	std::string _defaultInventorySlot;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
@@ -196,6 +197,8 @@ public:
 	bool isFixed() const;
 	/// Do show fixed weapon on unit.
 	bool getFixedShow() const;
+	/// Get name of the default inventory slot.
+	const std::string &getDefaultInventorySlot() const;
 	/// Gets the item's bullet sprite reference.
 	int getBulletSprite() const;
 	/// Gets the item's fire sound.

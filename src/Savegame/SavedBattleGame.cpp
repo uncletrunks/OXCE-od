@@ -1161,10 +1161,26 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 			}
 		}
 	}
-	// fixed weapon should be always placed in hand slots
+
+	// place fixed weapon
 	if (item->getRules()->isFixed())
 	{
-		if (!rightWeapon || !leftWeapon)
+		// either in the default slot provided in the ruleset
+		if (!item->getRules()->getDefaultInventorySlot().empty())
+		{
+			RuleInventory *defaultSlot = _rule->getInventory(item->getRules()->getDefaultInventorySlot());
+			BattleItem *defaultSlotWeapon = unit->getItem(item->getRules()->getDefaultInventorySlot());
+			if (!defaultSlotWeapon)
+			{
+				item->moveToOwner(unit);
+				item->setSlot(defaultSlot);
+				placed = true;
+				_items.push_back(item);
+				item->setXCOMProperty(unit->getFaction() == FACTION_PLAYER);
+			}
+		}
+		// or in the left/right hand
+		if (!placed && (!rightWeapon || !leftWeapon))
 		{
 			item->moveToOwner(unit);
 			item->setSlot(!rightWeapon ? rightHand : leftHand);

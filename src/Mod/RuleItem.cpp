@@ -396,6 +396,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_waypoint = node["waypoint"].as<bool>(_waypoint);
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
 	_fixedWeaponShow = node["fixedWeaponShow"].as<bool>(_fixedWeaponShow);
+	_defaultInventorySlot = node["defaultInventorySlot"].as<std::string>(_defaultInventorySlot);
 	_allowSelfHeal = node["allowSelfHeal"].as<bool>(_allowSelfHeal);
 	_isConsumable = node["isConsumable"].as<bool>(_isConsumable);
 	_invWidth = node["invWidth"].as<int>(_invWidth);
@@ -639,6 +640,15 @@ bool RuleItem::isFixed() const
 bool RuleItem::getFixedShow() const
 {
 	return _fixedWeaponShow;
+}
+
+/**
+ * Gets the name of the default inventory slot.
+ * @return String Id.
+ */
+const std::string &RuleItem::getDefaultInventorySlot() const
+{
+	return _defaultInventorySlot;
 }
 
 /**
