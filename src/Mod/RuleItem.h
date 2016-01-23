@@ -110,7 +110,7 @@ private:
 	int _recoveryPoints;
 	int _armor;
 	int _turretType;
-	int _aiUseDelay;
+	int _aiUseDelay, _aiMeleeHitCount;
 	bool _recover, _liveAlien;
 	int _attraction;
 	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime;
@@ -330,6 +330,8 @@ public:
 	int getTurretType() const;
 	/// Gets first turn when AI can use item.
 	int getAIUseDelay(const Mod *mod = 0) const;
+	/// Gets how many melee hits AI should do.
+	int getAIMeleeHitCount() const;
 	/// Checks if this a live alien.
 	bool isAlien() const;
 	/// Should we charge a flat rate?

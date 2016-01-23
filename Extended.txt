@@ -94,6 +94,7 @@ Update to nightly and bug fix.[br/]
 Scripting support in unit graphic (more info in game log with debug on).[br/]
 `bigSpriteAlt` and `floorSpriteAlt` is now obsolete, will be replaced by scripts in next version.[br/]
 New property `refNode` used to shared values between items/solders/armors etc.[br/]
+Option for setting numbers of melee hits done by AI.[br/]
 [br/]
 
 [examples]
@@ -281,7 +282,8 @@ items:
     psiMissAnimation: 0   #override `meleeMissAnimation` when MC or Panic attack was unsuccessful. Use `HIT.PCK`.
     explosionHitSound: 2  #override default big explosion sound.
     ai:
-      useDelay: 3 #determine on what turn item can be used by aliens.
+      useDelay: 3       #determine on what turn item can be used by aliens.
+      meleeHitCount: 25 #number of hits that AI try to do.
 [/code]
 
 [code]

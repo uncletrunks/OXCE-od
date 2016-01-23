@@ -42,7 +42,7 @@ namespace OpenXcom
 /**
  * Sets up a MeleeAttackBState.
  */
-MeleeAttackBState::MeleeAttackBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _target(0), _weapon(0), _ammo(0), _initialized(false)
+MeleeAttackBState::MeleeAttackBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _target(0), _weapon(0), _ammo(0), _hitNumber(0), _initialized(false)
 {
 }
 
@@ -131,6 +131,10 @@ void MeleeAttackBState::init()
 	int height = _target->getFloatHeight() + (_target->getHeight() / 2) - _parent->getSave()->getTile(_action.target)->getTerrainLevel();
 	_voxel = _action.target.toVexel() + Position(8, 8, height);
 
+	if (_unit->getFaction() == FACTION_HOSTILE)
+	{
+		_hitNumber = _weapon->getRules()->getAIMeleeHitCount() - 1;
+	}
 	performMeleeAttack();
 }
 /**
@@ -145,8 +149,7 @@ void MeleeAttackBState::think()
 	{
 		_parent->getSave()->getTile(_action.target)->ignite(15);
 	}
-		// aliens
-	if (_unit->getFaction() != FACTION_PLAYER &&
+	if (_hitNumber > 0 &&
 		// not performing a reaction attack
 		_unit->getFaction() == _parent->getSave()->getSide() &&
 		// whose target is still alive or at least conscious
@@ -157,6 +160,7 @@ void MeleeAttackBState::think()
 		// spend the TUs immediately
 		_action.spendTU())
 	{
+		--_hitNumber;
 		performMeleeAttack();
 	}
 	else
