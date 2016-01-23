@@ -207,13 +207,20 @@ void ManufactureInfoState::initProfitInfo ()
 	{
 		int sellValue = 0;
 		if (item->getCategory() == "STR_CRAFT")
-	{
-		sellValue = _game->getMod()->getCraft(i->first)->getSellCost();
-	}
-	else
-	{
-		sellValue = _game->getMod()->getItem(i->first)->getSellCost();
-	}
+		{
+			if (_game->getMod()->getCraft(i->first) != 0)
+			{
+				sellValue = _game->getMod()->getCraft(i->first)->getSellCost();
+			}
+			else
+			{
+				sellValue = _game->getMod()->getItem(i->first)->getSellCost();
+			}
+		}
+		else
+		{
+			sellValue = _game->getMod()->getItem(i->first)->getSellCost();
+		}
 		_producedItemsValue += sellValue * i->second;
 	}
 }
