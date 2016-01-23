@@ -16,7 +16,7 @@ CXXFLAGS += -Wall -std=gnu++11
 
 CXXFLAGS += -I$(SRCS_YAML)include -I$(SRCS_BOOST) -I$(SRCS_SDL)
 
-LIBS = -lshlwapi -lws2_32 -lopengl32 -lglu32 -mwindows -lmingw32 -lpthread -static -static-libstdc++ -lwinmm -lSDL_gfx -lSDL_mixer -lSDLmain -lSDL_Image -lSDL.dll -lm -luser32 -lgdi32 -lwinmm -ldxguid
+LIBS = -lshlwapi -lws2_32 -lopengl32 -lglu32 -mwindows -lmingw32 -lpthread -static -static-libstdc++ -lwinmm -lSDL_gfx -lSDL_mixer -lSDLmain -lSDL_Image -lSDL.dll -lm -luser32 -lgdi32 -lwinmm -ldxguid -lDbgHelp
 
 # Rules
 all: $(BINDIR)$(BIN)
