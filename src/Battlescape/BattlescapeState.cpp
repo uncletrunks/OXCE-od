@@ -1078,7 +1078,7 @@ void BattlescapeState::btnEndTurnClick(Action *)
 	if (allowButtons())
 	{
 		_txtTooltip->setText(L"");
-		_battleGame->requestEndTurn();
+		_battleGame->requestEndTurn(false);
 	}
 }
 /**

@@ -188,7 +188,7 @@ void UnitDieBState::think()
 			{
 				_parent->getSave()->setSelectedUnit(0);
 				_parent->cancelCurrentAction(true);
-				_parent->requestEndTurn();
+				_parent->requestEndTurn(true);
 			}
 		}
 	}

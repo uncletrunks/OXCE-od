@@ -59,6 +59,7 @@
 #include "InfoboxOKState.h"
 #include "UnitFallBState.h"
 #include "../Engine/Logger.h"
+#include "ConfirmEndMissionState.h"
 
 namespace OpenXcom
 {
@@ -1583,13 +1584,41 @@ void BattlescapeGame::moveUpDown(BattleUnit *unit, int dir)
 /**
  * Requests the end of the turn (waits for explosions etc to really end the turn).
  */
-void BattlescapeGame::requestEndTurn()
+void BattlescapeGame::requestEndTurn(bool askForConfirmation)
 {
 	cancelCurrentAction();
-	if (!_endTurnRequested)
+
+	if (askForConfirmation)
 	{
-		_endTurnRequested = true;
-		statePushBack(0);
+		// check for fatal wounds
+		int soldiersWithFatalWounds = 0;
+		for (std::vector<BattleUnit*>::iterator it = _save->getUnits()->begin(); it != _save->getUnits()->end(); ++it)
+		{
+			if ((*it)->getOriginalFaction() == FACTION_PLAYER && (*it)->getStatus() != STATUS_DEAD && (*it)->getFatalWounds() > 0)
+				soldiersWithFatalWounds++;
+		}
+
+		if (soldiersWithFatalWounds > 0)
+		{
+			// confirm end of turn/mission
+			_parentState->getGame()->pushState(new ConfirmEndMissionState(_save, soldiersWithFatalWounds, this));
+		}
+		else
+		{
+			if (!_endTurnRequested)
+			{
+				_endTurnRequested = true;
+				statePushBack(0);
+			}
+		}
+	}
+	else
+	{
+		if (!_endTurnRequested)
+		{
+			_endTurnRequested = true;
+			statePushBack(0);
+		}
 	}
 }
 

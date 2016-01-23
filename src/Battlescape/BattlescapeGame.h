@@ -169,7 +169,7 @@ public:
 	/// Moves a unit up or down.
 	void moveUpDown(BattleUnit *unit, int dir);
 	/// Requests the end of the turn (wait for explosions etc to really end the turn).
-	void requestEndTurn();
+	void requestEndTurn(bool askForConfirmation);
 	/// Sets the TU reserved type.
 	void setTUReserved(BattleActionType tur);
 	/// Sets up the cursor taking into account the action.

@@ -2723,7 +2723,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 				{
 					_save->setSelectedUnit(0);
 					_save->getBattleGame()->cancelCurrentAction(true);
-					_save->getBattleGame()->requestEndTurn();
+					_save->getBattleGame()->requestEndTurn(true);
 				}
 			}
 		}
