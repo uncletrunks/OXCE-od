@@ -1234,6 +1234,12 @@ void GeoscapeState::time30Minutes()
 				if (item.empty())
 				{
 					(*j)->refuel();
+					// notification
+					if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->notifyWhenRefueled())
+					{
+						std::wstring msg = tr("STR_CRAFT_IS_READY").arg((*j)->getName(_game->getLanguage())).arg((*i)->getName());
+						popup(new CraftErrorState(this, msg));
+					}
 				}
 				else
 				{
@@ -1242,6 +1248,12 @@ void GeoscapeState::time30Minutes()
 						(*i)->getItems()->removeItem(item);
 						(*j)->refuel();
 						(*j)->setLowFuel(false);
+						// notification
+						if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->notifyWhenRefueled())
+						{
+							std::wstring msg = tr("STR_CRAFT_IS_READY").arg((*j)->getName(_game->getLanguage())).arg((*i)->getName());
+							popup(new CraftErrorState(this, msg));
+						}
 					}
 					else if (!(*j)->getLowFuel())
 					{
