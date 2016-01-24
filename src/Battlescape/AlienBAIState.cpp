@@ -188,7 +188,7 @@ void AlienBAIState::think(BattleAction *action)
 	if (action->weapon)
 	{
 		RuleItem *rule = action->weapon->getRules();
-		if (_save->canUseWeapon(action->weapon, _unit))
+		if (_save->canUseWeapon(action->weapon, _unit, false))
 		{
 			if (rule->getBattleType() == BT_FIREARM)
 			{

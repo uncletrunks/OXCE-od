@@ -942,7 +942,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	};
 	// prioritize melee
 	BattleItem *meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
-	if (_save->canUseWeapon(meleeWeapon, unit) &&
+	if (_save->canUseWeapon(meleeWeapon, unit, false) &&
 		// has a melee weapon and is in melee range
 		validMeleeRange(unit, target, unit->getDirection()) &&
 		BattleActionCost(BA_HIT, unit, meleeWeapon).haveTU())
@@ -954,7 +954,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 
 	// has a weapon
 	BattleItem *weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
-	if (_save->canUseWeapon(weapon, unit) &&
+	if (_save->canUseWeapon(weapon, unit, false) &&
 		(	// has a melee weapon and is in melee range
 			(weapon->getRules()->getBattleType() == BT_MELEE &&
 				validMeleeRange(unit, target, unit->getDirection()) &&
@@ -992,7 +992,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 		action.weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
 	}
 
-	if (!_save->canUseWeapon(action.weapon, action.actor))
+	if (!_save->canUseWeapon(action.weapon, action.actor, false))
 	{
 		return false;
 	}
