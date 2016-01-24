@@ -811,7 +811,7 @@ UnitFaction SavedBattleGame::getSide() const
  * @param unit
  * @return Unit can shoot/use it.
  */
-bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* unit) const
+bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* unit, bool isBerserking) const
 {
 	if (!weapon || !unit) return false;
 
@@ -830,6 +830,10 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 		return false;
 	}
 	if (getDepth() == 0 && rule->isWaterOnly())
+	{
+		return false;
+	}
+	if (rule->isBlockingBothHands() && unit->getOriginalFaction() == FACTION_PLAYER && !isBerserking && unit->getItem("STR_LEFT_HAND") != 0 && unit->getItem("STR_RIGHT_HAND") != 0)
 	{
 		return false;
 	}
