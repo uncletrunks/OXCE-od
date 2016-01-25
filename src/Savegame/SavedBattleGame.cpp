@@ -852,7 +852,7 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 	{
 		return false;
 	}
-	if (rule->isBlockingBothHands() && unit->getOriginalFaction() == FACTION_PLAYER && !isBerserking && unit->getItem("STR_LEFT_HAND") != 0 && unit->getItem("STR_RIGHT_HAND") != 0)
+	if (rule->isBlockingBothHands() && unit->getFaction() == FACTION_PLAYER && !isBerserking && unit->getItem("STR_LEFT_HAND") != 0 && unit->getItem("STR_RIGHT_HAND") != 0)
 	{
 		return false;
 	}
