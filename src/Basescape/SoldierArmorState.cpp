@@ -26,8 +26,11 @@
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextList.h"
+#include "../Menu/ErrorMessageState.h"
 #include "../Mod/Armor.h"
+#include "../Mod/RuleInterface.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Craft.h"
 #include "../Savegame/Soldier.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
@@ -137,21 +140,30 @@ void SoldierArmorState::btnCancelClick(Action *)
 void SoldierArmorState::lstArmorClick(Action *)
 {
 	Soldier *soldier = _base->getSoldiers()->at(_soldier);
-	if (_game->getSavedGame()->getMonthsPassed() != -1)
+	Armor *prev = soldier->getArmor();
+	Armor *next = _armors[_lstArmor->getSelectedRow()];
+	Craft *craft = soldier->getCraft();
+	if (craft != 0 && next->getSize() > prev->getSize())
 	{
-		if (soldier->getArmor()->getStoreItem() != "STR_NONE")
+		if (craft->getNumVehicles() >= craft->getRules()->getVehicles() || craft->getSpaceAvailable() < 3)
 		{
-			_base->getStorageItems()->addItem(soldier->getArmor()->getStoreItem());
-		}
-		if (_armors[_lstArmor->getSelectedRow()]->getStoreItem() != "STR_NONE")
-		{
-			_base->getStorageItems()->removeItem(_armors[_lstArmor->getSelectedRow()]->getStoreItem());
+			_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_CRAFT_SPACE"), _palette, _game->getMod()->getInterface("soldierInfo")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("soldierInfo")->getElement("errorPalette")->color));
+			return;
 		}
 	}
-	soldier->setArmor(_armors[_lstArmor->getSelectedRow()]);
-	SavedGame *_save;
-	_save = _game->getSavedGame();
-	_save->setLastSelectedArmor(_armors[_lstArmor->getSelectedRow()]->getType());
+	if (_game->getSavedGame()->getMonthsPassed() != -1)
+	{
+		if (prev->getStoreItem() != "STR_NONE")
+		{
+			_base->getStorageItems()->addItem(prev->getStoreItem());
+		}
+		if (next->getStoreItem() != "STR_NONE")
+		{
+			_base->getStorageItems()->removeItem(next->getStoreItem());
+		}
+	}
+	soldier->setArmor(next);
+	_game->getSavedGame()->setLastSelectedArmor(next->getType());
 
 	_game->popState();
 }

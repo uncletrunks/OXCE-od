@@ -1519,16 +1519,14 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 		if ((*facility)->getCraft())
 		{
 			// remove all soldiers
-			if ((*facility)->getCraft()->getNumSoldiers())
+			for (Soldier *s : _soldiers)
 			{
-				for (std::vector<Soldier*>::iterator i = _soldiers.begin(); i != _soldiers.end(); ++i)
+				if (s->getCraft() == (*facility)->getCraft())
 				{
-					if ((*i)->getCraft() == (*facility)->getCraft())
-					{
-						(*i)->setCraft(0);
-					}
+					s->setCraft(0);
 				}
 			}
+
 			// remove all items
 			while (!(*facility)->getCraft()->getItems()->getContents()->empty())
 			{

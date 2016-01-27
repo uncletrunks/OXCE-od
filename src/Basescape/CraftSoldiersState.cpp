@@ -27,11 +27,12 @@
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextList.h"
+#include "../Menu/ErrorMessageState.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Soldier.h"
 #include "../Savegame/Craft.h"
 #include "SoldierInfoState.h"
-#include "../Mod/Mod.h"
+#include "../Mod/Armor.h"
 #include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
@@ -289,11 +290,20 @@ void CraftSoldiersState::lstSoldiersClick(Action *action)
 		{
 			color = _otherCraftColor;
 		}
-		else if (c->getSpaceAvailable() > 0 && s->getWoundRecovery() == 0)
+		else if (s->getWoundRecovery() == 0)
 		{
-			s->setCraft(c);
-			_lstSoldiers->setCellText(row, 2, c->getName(_game->getLanguage()));
-			color = _lstSoldiers->getSecondaryColor();
+			auto space = c->getSpaceAvailable();
+			auto armorSize = s->getArmor()->getSize();
+			if (space >= s->getArmor()->getTotalSize() && (armorSize == 1 || (c->getNumVehicles() < c->getRules()->getVehicles())))
+			{
+				s->setCraft(c);
+				_lstSoldiers->setCellText(row, 2, c->getName(_game->getLanguage()));
+				color = _lstSoldiers->getSecondaryColor();
+			}
+			else if (armorSize == 2 && space > 0)
+			{
+				_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_CRAFT_SPACE"), _palette, _game->getMod()->getInterface("soldierInfo")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("soldierInfo")->getElement("errorPalette")->color));
+			}
 		}
 		_lstSoldiers->setRowColor(row, color);
 

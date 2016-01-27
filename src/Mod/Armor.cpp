@@ -328,6 +328,14 @@ int Armor::getSize() const
 }
 
 /**
+ * Gets the total size of the unit. Normally this is 1 for small or 4 for big.
+ * @return The unit's size.
+ */
+int Armor::getTotalSize() const
+{
+	return _size * _size;
+}
+/**
  * Gets the damage modifier for a certain damage type.
  * @param dt The damageType.
  * @return The damage modifier 0->1.

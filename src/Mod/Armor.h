@@ -104,6 +104,8 @@ public:
 	MovementType getMovementType() const;
 	/// Gets whether this is a normal or big unit.
 	int getSize() const;
+	/// Gets how big space armor ocupy in craft.
+	int getTotalSize() const;
 	/// Gets damage modifier.
 	float getDamageModifier(ItemDamageType dt) const;
 	/// Gets loftempSet

@@ -95,6 +95,7 @@ Scripting support in unit graphic (more info in game log with debug on).[br/]
 `bigSpriteAlt` and `floorSpriteAlt` is now obsolete, will be replaced by scripts in next version.[br/]
 New property `refNode` used to shared values between items/solders/armors etc.[br/]
 Option for setting numbers of melee hits done by AI.[br/]
+Control space usage of soldiers with 2x2 armors in crafts.[br/]
 [br/]
 
 [examples]
@@ -479,6 +480,7 @@ extraStrings:
       STR_NOT_ENOUGH_HEALTH: "Not enough blood!"      #required when using item health use cost.
       STR_NOT_ENOUGH_STUN: "Too much pain!"           #required when using item stun use cost.
       STR_NO_USES_LEFT: "You can't use medi-kit"      #required when using `medikitType`.
+      STR_NOT_ENOUGH_CRAFT_SPACE: "You can't fit it!" #required when you try change armor with 2x2 size and craft don't have space.
 [/code]
 [/examples]
 

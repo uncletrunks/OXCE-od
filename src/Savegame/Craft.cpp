@@ -34,6 +34,7 @@
 #include "MissionSite.h"
 #include "AlienBase.h"
 #include "Vehicle.h"
+#include "../Mod/Armor.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/AlienDeployment.h"
 
@@ -463,10 +464,10 @@ int Craft::getNumSoldiers() const
 
 	int total = 0;
 
-	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+	for (Soldier *s : *_base->getSoldiers())
 	{
-		if ((*i)->getCraft() == this)
-			total++;
+		if (s->getCraft() == this && s->getArmor()->getSize() == 1)
+			++total;
 	}
 
 	return total;
@@ -489,7 +490,14 @@ int Craft::getNumEquipment() const
  */
 int Craft::getNumVehicles() const
 {
-	return _vehicles.size();
+	int total = 0;
+
+	for (Soldier *s : *_base->getSoldiers())
+	{
+		if (s->getCraft() == this && s->getArmor()->getSize() == 2)
+			++total;
+	}
+	return _vehicles.size() + total;
 }
 
 /**
@@ -964,11 +972,18 @@ int Craft::getSpaceAvailable() const
 int Craft::getSpaceUsed() const
 {
 	int vehicleSpaceUsed = 0;
-	for (std::vector<Vehicle*>::const_iterator i = _vehicles.begin(); i != _vehicles.end(); ++i)
+	for (Vehicle* v : _vehicles)
 	{
-		vehicleSpaceUsed += (*i)->getSize();
+		vehicleSpaceUsed += v->getSize();
 	}
-	return getNumSoldiers() + vehicleSpaceUsed;
+	for (Soldier *s : *_base->getSoldiers())
+	{
+		if (s->getCraft() == this)
+		{
+			vehicleSpaceUsed += s->getArmor()->getTotalSize();
+		}
+	}
+	return vehicleSpaceUsed;
 }
 
 /**
