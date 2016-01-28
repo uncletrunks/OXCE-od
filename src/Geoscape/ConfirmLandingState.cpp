@@ -108,12 +108,12 @@ ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int sha
 		}
 		else if (_shade > _game->getMod()->getMaxDarknessToSeeUnits())
 		{
-			// night (9-15); note: 9 is configurable in the ruleset in OXCE
+			// night (10-15); note: this is configurable in the ruleset (in OXCE only)
 			sprites->getFrame(1)->blit(_sprite);
 		}
 		else
 		{
-			// dusk/dawn (1-8)
+			// dusk/dawn (1-9)
 			sprites->getFrame(2)->blit(_sprite);
 		}
 	}
