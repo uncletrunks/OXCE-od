@@ -22,6 +22,7 @@
 #include <cfloat>
 #include <cmath>
 #include <iomanip>
+#include <algorithm>
 #include "../fmath.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"

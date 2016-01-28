@@ -21,6 +21,7 @@
 #include <climits>
 #include <cfloat>
 #include <cmath>
+#include <algorithm>
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"

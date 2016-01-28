@@ -21,6 +21,7 @@
 #include <climits>
 #include <cmath>
 #include <iomanip>
+#include <algorithm>
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"

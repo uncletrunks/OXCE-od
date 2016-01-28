@@ -27,7 +27,7 @@ BIN = OpenXcomEx.exe
 
 # Compiler settings
 CXXFLAGS = -Wall -O3 -s -std=gnu++11 `$(SDL_CONFIG) --cflags` $(addprefix -D,$(TARGET)) -I$(SDL_INC) -I$(YAML_INC) `$(SDL_PKG)  SDL_mixer --cflags `
-LDFLAGS = -s `$(SDL_CONFIG) --libs` -lopengl32 -lshlwapi -lSDLmain -lSDL_gfx -lSDL_mixer -lSDL_image -lstdc++ `$(SDL_PKG) SDL_mixer --libs` `$(SDL_PKG) SDL_image --libs` -lDbgHelp
+LDFLAGS = -s `$(SDL_CONFIG) --libs` -lopengl32 -lshlwapi -lSDLmain -lSDL_gfx -lSDL_mixer -lSDL_image -lstdc++ `$(SDL_PKG) SDL_mixer --libs` `$(SDL_PKG) SDL_image --libs` -ldbghelp
 
 # Rules
 all: $(BINDIR)$(BIN)
