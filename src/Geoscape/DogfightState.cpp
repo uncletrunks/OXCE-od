@@ -834,7 +834,7 @@ void DogfightState::update()
 				if (((p->getPosition() >= _currentDist) || (p->getGlobalType() == CWPGT_BEAM && p->toBeRemoved())) && !_ufo->isCrashed() && !p->getMissed())
 				{
 					// UFO hit.
-					if (RNG::percent((p->getAccuracy() * (100 + 300 / (5 - _ufoSize)) + 100) / 200) - _ufo->getCraftStats().avoidBonus + _craft->getCraftStats().hitBonus)
+					if (RNG::percent(((p->getAccuracy() * (100 + 300 / (5 - _ufoSize)) + 100) / 200) - _ufo->getCraftStats().avoidBonus + _craft->getCraftStats().hitBonus))
 					{
 						// Formula delivered by Volutar, altered by Extended version.
 						int power = p->getDamage() * (_craft->getCraftStats().powerBonus + 100) / 100;
