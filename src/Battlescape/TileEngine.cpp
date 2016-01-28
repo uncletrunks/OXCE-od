@@ -1278,6 +1278,28 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 		}
 	}
 
+	// fire extinguisher
+	if (target && target->getFire())
+	{
+		if (clipOrWeapon)
+		{
+			// melee weapon, bullet or even a grenade...
+			if (clipOrWeapon->getRules()->isFireExtinguisher())
+			{
+				target->setFire(0);
+			}
+			// if the bullet is not a fire extinguisher, check the weapon itself
+			else if (unit && clipOrWeapon->getRules()->getBattleType() == BT_AMMO)
+			{
+				BattleItem *weapon = unit->getItem(unit->getActiveHand());
+				if (weapon && weapon->getRules()->isFireExtinguisher())
+				{
+					target->setFire(0);
+				}
+			}
+		}
+	}
+
 	return true;
 }
 

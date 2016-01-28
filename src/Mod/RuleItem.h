@@ -120,7 +120,7 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable;
+	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher;
 	std::string _defaultInventorySlot;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
@@ -338,6 +338,8 @@ public:
 	bool getAllowSelfHeal() const;
 	/// Is this (medikit-type) item consumable?
 	bool isConsumable() const;
+	/// Does this item extinguish fire?
+	bool isFireExtinguisher() const;
 	/// Gets the medikit use type.
 	BattleMediKitType getMediKitType() const;
 	/// Gets the max explosion radius.
