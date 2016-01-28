@@ -57,6 +57,7 @@
 #include "Production.h"
 #include "../Mod/Armor.h"
 #include "../Mod/UfoTrajectory.h"
+#include "../Mod/RuleSoldier.h"
 
 namespace OpenXcom
 {
@@ -1084,7 +1085,7 @@ void SaveConverter::loadDatSoldier()
 			node["look"] = (int)load<Uint8>(sdata + 0x43);
 			node["id"] = _save->getId("STR_SOLDIER");
 
-			Soldier *soldier = new Soldier(_mod->getSoldier("XCOM"), _mod->getArmor("STR_NONE_UC"));
+			Soldier *soldier = new Soldier(_mod->getSoldier(_mod->getSoldiersList().front()), 0);
 			soldier->load(node, _mod, _save);
 			if (base != 0xFFFF)
 			{

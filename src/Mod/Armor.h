@@ -38,14 +38,15 @@ class BattleUnit;
 
 /**
  * Represents a specific type of armor.
- * Not only soldier armor, but also alien armor - some alien races wear Soldier Armor, Leader Armor or Commander Armor
- * depending on their rank.
+ * Not only soldier armor, but also alien armor - some alien races wear
+ * Soldier Armor, Leader Armor or Commander Armor depending on their rank.
  */
 class Armor
 {
 public:
 	using RecolorParser = ScriptParser<BattleUnit, BattleUnit*, int, int, int, int>;
 
+	static const std::string NONE;
 private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
 	std::vector<std::string> _corpseBattle;
@@ -67,6 +68,7 @@ private:
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
 	RecolorParser::Container _recolorScript;
 	RecolorParser::Container _spriteScript;
+	std::vector<std::string> _units;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -170,12 +172,14 @@ public:
 	int getUtileColor(int i) const;
 	/// Get rank base color
 	int getRankColor(int i) const;
-	/// can we access this unit's inventory?
+	/// Can we access this unit's inventory?
 	bool hasInventory() const;
 	/// Gets script used to recolor unit sprite.
 	const RecolorParser::Container &getRecolorScript() const;
 	/// Gets script used to switch body elements in unit sprite.
 	const RecolorParser::Container &getSpriteScript() const;
+	/// Gets the armor's units.
+	const std::vector<std::string> &getUnits() const;
 };
 
 }

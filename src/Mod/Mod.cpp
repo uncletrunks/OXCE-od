@@ -104,8 +104,6 @@ int Mod::ITEM_THROW;
 int Mod::ITEM_RELOAD;
 int Mod::WALK_OFFSET;
 int Mod::FLYING_SOUND;
-int Mod::MALE_SCREAM[3];
-int Mod::FEMALE_SCREAM[3];
 int Mod::BUTTON_PRESS;
 int Mod::WINDOW_POPUP[3];
 int Mod::UFO_FIRE;
@@ -138,12 +136,6 @@ void Mod::resetGlobalStatics()
 	Mod::ITEM_RELOAD = 17;
 	Mod::WALK_OFFSET = 22;
 	Mod::FLYING_SOUND = 15;
-	Mod::MALE_SCREAM[0] = 41;
-	Mod::MALE_SCREAM[1] = 42;
-	Mod::MALE_SCREAM[2] = 43;
-	Mod::FEMALE_SCREAM[0] = 44;
-	Mod::FEMALE_SCREAM[1] = 45;
-	Mod::FEMALE_SCREAM[2] = 46;
 	Mod::BUTTON_PRESS = 0;
 	Mod::WINDOW_POPUP[0] = 1;
 	Mod::WINDOW_POPUP[1] = 2;
@@ -189,7 +181,7 @@ void Mod::resetGlobalStatics()
  * Creates an empty mod.
  */
 Mod::Mod() :
-	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _costSoldier(0), _costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
+	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_startingTime(6, 1, 1, 1999, 12, 0, 0), _facilityListOrder(0), _craftListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
@@ -330,10 +322,6 @@ Mod::~Mod()
 	for (std::map<std::string, SoundSet*>::iterator i = _sounds.begin(); i != _sounds.end(); ++i)
 	{
 		delete i->second;
-	}
-	for (std::vector<SoldierNamePool*>::iterator i = _names.begin(); i != _names.end(); ++i)
-	{
-		delete *i;
 	}
 	for (std::vector<RuleDamageType*>::iterator i = _damageTypes.begin(); i != _damageTypes.end(); ++i)
 	{
@@ -669,9 +657,9 @@ Sound *Mod::getSoundByDepth(unsigned int depth, unsigned int sound) const
 }
 
 /**
-* Returns the list of color LUTs in the mod.
-* @return Pointer to the list of LUTs.
-*/
+ * Returns the list of color LUTs in the mod.
+ * @return Pointer to the list of LUTs.
+ */
 const std::vector<std::vector<Uint8> > *Mod::getLUTs() const
 {
 	return &_transparencyLUTs;
@@ -702,11 +690,11 @@ int Mod::getSpriteOffset(int sprite, const std::string& set) const
 }
 
 /**
-* Returns the appropriate mod-based offset for a sound.
-* If the ID is bigger than the soundset contents, the mod offset is applied.
-* @param id Numeric ID of the sound.
-* @param resource Name of the soundset to lookup.
-*/
+ * Returns the appropriate mod-based offset for a sound.
+ * If the ID is bigger than the soundset contents, the mod offset is applied.
+ * @param id Numeric ID of the sound.
+ * @param resource Name of the soundset to lookup.
+ */
 int Mod::getSoundOffset(int sound, const std::string& set) const
 {
 	SoundSet *ss = getSoundSet(set);
@@ -728,7 +716,7 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 		{
 			loadMod(mods[i].second, i);
 		}
-		catch (YAML::Exception &e)
+		catch (Exception &e)
 		{
 			const std::string &modId = mods[i].first;
 			Log(LOG_WARNING) << "disabling mod with invalid ruleset: " << modId;
@@ -747,10 +735,10 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 			}
 			Options::save();
 
-			throw Exception("failed to load ruleset from mod '" +
+			throw Exception("failed to load '" +
 				Options::getModInfos().at(modId).getName() +
-				"' (" + std::string(e.what()) +
-				"); disabling mod for next startup");
+				"'; mod disabled for next startup\n" +
+				e.what());
 		}
 	}
 	sortLists();
@@ -771,7 +759,14 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx)
 	for (std::vector<std::string>::const_iterator i = rulesetFiles.begin(); i != rulesetFiles.end(); ++i)
 	{
 		Log(LOG_VERBOSE) << "- " << *i;
-		loadFile(*i);
+		try
+		{
+			loadFile(*i);
+		}
+		catch (YAML::Exception &e)
+		{
+			throw Exception((*i) + " (" + std::string(e.what()) + ")");
+		}
 	}
 
 	// these need to be validated, otherwise we're gonna get into some serious trouble down the line.
@@ -907,22 +902,10 @@ void Mod::loadFile(const std::string &filename)
 	}
 	for (YAML::const_iterator i = doc["soldiers"].begin(); i != doc["soldiers"].end(); ++i)
 	{
-		RuleSoldier *rule = loadRule(*i, &_soldiers);
+		RuleSoldier *rule = loadRule(*i, &_soldiers, &_soldiersIndex);
 		if (rule != 0)
 		{
-			rule->load(*i);
-		}
-		for (YAML::const_iterator j = (*i)["soldierNames"].begin(); j != (*i)["soldierNames"].end(); ++j)
-		{
-			std::string fileName = (*j).as<std::string>();
-			if (fileName == "delete")
-			{
-				_soldierNames.clear();
-			}
-			else
-			{
-				_soldierNames.push_back(fileName);
-			}
+			rule->load(*i, this);
 		}
 	}
 	for (YAML::const_iterator i = doc["units"].begin(); i != doc["units"].end(); ++i)
@@ -1043,7 +1026,6 @@ void Mod::loadFile(const std::string &filename)
 	}
 	_maxViewDistance = doc["maxViewDistance"].as<int>(_maxViewDistance);
 	_maxDarknessToSeeUnits = doc["maxDarknessToSeeUnits"].as<int>(_maxDarknessToSeeUnits);
-	_costSoldier = doc["costSoldier"].as<int>(_costSoldier);
 	_costEngineer = doc["costEngineer"].as<int>(_costEngineer);
 	_costScientist = doc["costScientist"].as<int>(_costScientist);
 	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
@@ -1181,22 +1163,6 @@ void Mod::loadFile(const std::string &filename)
 		Mod::ITEM_RELOAD = (*i)["itemReload"].as<int>(Mod::ITEM_RELOAD);
 		Mod::WALK_OFFSET = (*i)["walkOffset"].as<int>(Mod::WALK_OFFSET);
 		Mod::FLYING_SOUND = (*i)["flyingSound"].as<int>(Mod::FLYING_SOUND);
-		if ((*i)["maleScream"])
-		{
-			int k = 0;
-			for (YAML::const_iterator j = (*i)["maleScream"].begin(); j != (*i)["maleScream"].end() && k < 3; ++j, ++k)
-			{
-				Mod::MALE_SCREAM[k] = (*j).as<int>(Mod::MALE_SCREAM[k]);
-			}
-		}
-		if ((*i)["femaleScream"])
-		{
-			int k = 0;
-			for (YAML::const_iterator j = (*i)["femaleScream"].begin(); j != (*i)["femaleScream"].end() && k < 3; ++j, ++k)
-			{
-				Mod::FEMALE_SCREAM[k] = (*j).as<int>(Mod::FEMALE_SCREAM[k]);
-			}
-		}
 		Mod::BUTTON_PRESS = (*i)["buttonPress"].as<int>(Mod::BUTTON_PRESS);
 		if ((*i)["windowPopup"])
 		{
@@ -1436,15 +1402,6 @@ SavedGame *Mod::newSave() const
 }
 
 /**
- * Returns the list of soldier name pools.
- * @return Pointer to soldier name pool list.
- */
-const std::vector<SoldierNamePool*> &Mod::getPools() const
-{
-	return _names;
-}
-
-/**
  * Returns the rules for the specified country.
  * @param id Country type.
  * @return Rules for the country.
@@ -1594,16 +1551,6 @@ const std::vector<std::string> &Mod::getUfosList() const
 }
 
 /**
- * Returns the list of all terrains
- * provided by the mod.
- * @return List of terrains.
- */
-const std::vector<std::string> &Mod::getTerrainList() const
-{
-	return _terrainIndex;
-}
-
-/**
  * Returns the rules for the specified terrain.
  * @param name Terrain name.
  * @return Rules for the terrain.
@@ -1612,6 +1559,16 @@ RuleTerrain *Mod::getTerrain(const std::string &name) const
 {
 	std::map<std::string, RuleTerrain*>::const_iterator i = _terrains.find(name);
 	if (_terrains.end() != i) return i->second; else return 0;
+}
+
+/**
+ * Returns the list of all terrains
+ * provided by the mod.
+ * @return List of terrains.
+ */
+const std::vector<std::string> &Mod::getTerrainList() const
+{
+	return _terrainIndex;
 }
 
 /**
@@ -1643,6 +1600,16 @@ RuleSoldier *Mod::getSoldier(const std::string &name) const
 {
 	std::map<std::string, RuleSoldier*>::const_iterator i = _soldiers.find(name);
 	if (_soldiers.end() != i) return i->second; else return 0;
+}
+
+/**
+ * Returns the list of all soldiers
+ * provided by the mod.
+ * @return List of soldiers.
+ */
+const std::vector<std::string> &Mod::getSoldiersList() const
+{
+	return _soldiersIndex;
 }
 
 /**
@@ -1717,16 +1684,6 @@ Armor *Mod::getArmor(const std::string &name) const
 const std::vector<std::string> &Mod::getArmorsList() const
 {
 	return _armorsIndex;
-}
-
-/**
- * Returns the cost of an individual soldier
- * for purchase/maintenance.
- * @return Cost.
- */
-int Mod::getSoldierCost() const
-{
-	return _costSoldier;
 }
 
 /**
@@ -2121,13 +2078,6 @@ struct compareRule<ArticleDefinition> : public std::binary_function<const std::s
 };
 std::map<std::string, int> compareRule<ArticleDefinition>::_sections;
 
-static void addSoldierNamePool(std::vector<SoldierNamePool*> &names, const std::string &namFile)
-{
-	SoldierNamePool *pool = new SoldierNamePool();
-	pool->load(FileMap::getFilePath(namFile));
-	names.push_back(pool);
-}
-
 /**
  * Sorts all our lists according to their weight.
  */
@@ -2143,24 +2093,6 @@ void Mod::sortLists()
 	std::sort(_craftWeaponsIndex.begin(), _craftWeaponsIndex.end(), compareRule<RuleCraftWeapon>(this));
 	std::sort(_armorsIndex.begin(), _armorsIndex.end(), compareRule<Armor>(this));
 	std::sort(_ufopaediaIndex.begin(), _ufopaediaIndex.end(), compareRule<ArticleDefinition>(this));
-
-	for (std::vector<std::string>::iterator i = _soldierNames.begin(); i != _soldierNames.end(); ++i)
-	{
-		if (i->substr(i->length() - 1, 1) == "/")
-		{
-			// load all *.nam files in given directory
-			std::set<std::string> names = FileMap::filterFiles(FileMap::getVFolderContents(*i), "nam");
-			for (std::set<std::string>::iterator j = names.begin(); j != names.end(); ++j)
-			{
-				addSoldierNamePool(_names, *i + *j);
-			}
-		}
-		else
-		{
-			// load given file
-			addSoldierNamePool(_names, *i);
-		}
-	}
 }
 
 /**
@@ -2174,12 +2106,17 @@ std::vector<std::string> Mod::getPsiRequirements() const
 /**
  * Creates a new randomly-generated soldier.
  * @param save Saved game the soldier belongs to.
+ * @param type The soldier type to generate.
  * @return Newly generated soldier.
  */
-Soldier *Mod::genSoldier(SavedGame *save) const
+Soldier *Mod::genSoldier(SavedGame *save, std::string type) const
 {
 	Soldier *soldier = 0;
 	int newId = save->getId("STR_SOLDIER");
+	if (type.empty())
+	{
+		type = _soldiersIndex.front();
+	}
 
 	// Check for duplicates
 	// Original X-COM gives up after 10 tries so might as well do the same here
@@ -2187,7 +2124,7 @@ Soldier *Mod::genSoldier(SavedGame *save) const
 	for (int i = 0; i < 10 && duplicate; i++)
 	{
 		delete soldier;
-		soldier = new Soldier(getSoldier("XCOM"), getArmor("STR_NONE_UC"), &_names, newId);
+		soldier = new Soldier(getSoldier(type), getArmor(getSoldier(type)->getArmor()), newId);
 		duplicate = false;
 		for (std::vector<Base*>::iterator i = save->getBases()->begin(); i != save->getBases()->end() && !duplicate; ++i)
 		{

@@ -1363,8 +1363,8 @@ void UnitSprite::drawRoutine9()
 }
 
 /**
-* Drawing routine for tftd tanks.
-*/
+ * Drawing routine for tftd tanks.
+ */
 void UnitSprite::drawRoutine11()
 {
 	if (_unit->isOut())
@@ -1407,8 +1407,8 @@ void UnitSprite::drawRoutine11()
 }
 
 /**
-* Drawing routine for hallucinoids.
-*/
+ * Drawing routine for hallucinoids.
+ */
 void UnitSprite::drawRoutine12()
 {
 	Part s{ BODYPART_BIG_TORSO + _part };

@@ -47,8 +47,8 @@
 #include "../Mod/RuleRegion.h"
 #include "../Savegame/AlienMission.h"
 #include "DogfightErrorState.h"
-#include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
