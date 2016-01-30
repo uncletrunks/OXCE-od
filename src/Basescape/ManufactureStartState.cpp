@@ -24,7 +24,9 @@
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Menu/ErrorMessageState.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleInterface.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
@@ -97,9 +99,10 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 	_btnCancel->onKeyboardPress((ActionHandler)&ManufactureStartState::btnCancelClick, Options::keyCancel);
 
 	const std::map<std::string, int> & requiredItems (_item->getRequiredItems());
-	int availableWorkSpace = _base->getFreeWorkshops();
 	bool productionPossible = _game->getSavedGame()->getFunds() > _item->getManufactureCost();
-	productionPossible &= (availableWorkSpace > 0);
+	// check available workspace later
+	//int availableWorkSpace = _base->getFreeWorkshops();
+	//productionPossible &= (availableWorkSpace > 0);
 
 	_txtRequiredItemsTitle->setText(tr("STR_SPECIAL_MATERIALS_REQUIRED"));
 	_txtRequiredItemsTitle->setAlign(ALIGN_CENTER);
@@ -139,6 +142,12 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 	_btnStart->onMouseClick((ActionHandler)&ManufactureStartState::btnStartClick);
 	_btnStart->onKeyboardPress((ActionHandler)&ManufactureStartState::btnStartClick, Options::keyOk);
 	_btnStart->setVisible(productionPossible);
+
+	if (_item)
+	{
+		// remember this manufacture item as seen
+		_game->getSavedGame()->addSeenManufacture(_item);
+	}
 }
 
 /**
@@ -156,6 +165,17 @@ void ManufactureStartState::btnCancelClick(Action *)
  */
 void ManufactureStartState::btnStartClick(Action *)
 {
-	_game->pushState(new ManufactureInfoState(_base, _item));
+	if (_item->getCategory() == "STR_CRAFT" && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
+	{
+		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+	}
+	else if (_item->getRequiredSpace() > _base->getFreeWorkshops())
+	{
+		_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_WORK_SPACE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+	}
+	else
+	{
+		_game->pushState(new ManufactureInfoState(_base, _item));
+	}
 }
 }

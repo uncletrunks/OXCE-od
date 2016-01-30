@@ -940,7 +940,19 @@
     <ClCompile Include="Geoscape\TrainingState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
-    <ClCompile Include="Battlescape\ItemSprite.cpp">
+    <ClCompile Include="Basescape\SoldierSortUtil.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\SoldierAvatarState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Savegame\SoldierAvatar.cpp">
+      <Filter>Savegame</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\ChangeHeadquartersState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\ConfirmEndMissionState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1914,7 +1926,19 @@
     <ClInclude Include="Geoscape\TrainingState.h">
       <Filter>Geoscape</Filter>
     </ClInclude>
-    <ClInclude Include="Battlescape\ItemSprite.h">
+    <ClInclude Include="Basescape\SoldierSortUtil.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SoldierAvatarState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Savegame\SoldierAvatar.h">
+      <Filter>Savegame</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\ChangeHeadquartersState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\ConfirmEndMissionState.h">
       <Filter>Battlescape</Filter>
     </ClInclude>
   </ItemGroup>

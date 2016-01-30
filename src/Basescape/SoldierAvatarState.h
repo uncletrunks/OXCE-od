@@ -16,47 +16,56 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_NEWRESEARCHLISTSTATE_H
-#define OPENXCOM_NEWRESEARCHLISTSTATE_H
+#ifndef OPENXCOM_SOLDIERAVATARSTATE_H
+#define OPENXCOM_SOLDIERAVATARSTATE_H
 
-#include "../Engine/State.h"
 #include <vector>
+#include "../Engine/State.h"
+#include "../Savegame/SoldierAvatar.h"
 
 namespace OpenXcom
 {
 
+class Base;
 class TextButton;
 class Window;
 class Text;
 class TextList;
-class Base;
-class RuleResearch;
+class Soldier;
+class SoldierAvatar;
 
 /**
- * Window which displays possible research projects.
+ * Select Avatar window that allows changing
+ * of the soldier's avatar.
  */
-class NewResearchListState : public State
+class SoldierAvatarState : public State
 {
 private:
 	Base *_base;
-	TextButton *_btnOK, *_btnMarkAllAsSeen;
+	size_t _soldier;
+
+	TextButton *_btnCancel, *_btnOk;
 	Window *_window;
-	Text *_txtTitle;
-	TextList *_lstResearch;
-	void onSelectProject(Action *action);
-	std::vector<RuleResearch *> _projects;
+	Text *_txtTitle, *_txtType;
+	Surface *_soldierSurface;
+	TextList *_lstAvatar;
+	std::vector<SoldierAvatar> _avatars;
+	SoldierAvatar _origAvatar;
+	/// Creates the avatar preview
+	void initPreview(Soldier *s);
 public:
-	/// Creates the New research list state.
-	NewResearchListState(Base *base);
+	/// Creates the Soldier Avatar state.
+	SoldierAvatarState(Base *base, size_t soldier);
+	/// Cleans up the Soldier Avatar state.
+	~SoldierAvatarState();
+	/// Handler for clicking the Cancel button.
+	void btnCancelClick(Action *action);
 	/// Handler for clicking the OK button.
-	void btnOKClick(Action *action);
-	/// Handler for clicking the [Mark All As Seen] button.
-	void btnMarkAllAsSeenClick(Action *action);
-	/// Fills the ResearchProject list with possible ResearchProjects.
-	void fillProjectList(bool markAllAsSeen);
-	/// Initializes the state.
-	void init();
+	void btnOkClick(Action *action);
+	/// Handler for clicking the Avatar list.
+	void lstAvatarClick(Action *action);
 };
+
 }
 
 #endif

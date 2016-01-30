@@ -51,17 +51,29 @@ private:
 	std::vector<ToggleTextButton *> _btnRegions, _btnCountries, _btnFinances;
 	std::vector<GraphButInfo *>  _regionToggles, _countryToggles;
 	std::vector<bool> _financeToggles;
+	ToggleTextButton *_btn100, *_btn200, *_btn400, *_btn800, *_btn1600;
 	ToggleTextButton *_btnRegionTotal, *_btnCountryTotal;
 	std::vector<Surface *> _alienRegionLines, _alienCountryLines;
 	std::vector<Surface *> _xcomRegionLines, _xcomCountryLines;
 	std::vector<Surface *> _financeLines, _incomeLines;
 	bool _alien, _income, _country, _finance;
+	bool _is100Pressed, _is200Pressed, _is400Pressed, _is800Pressed, _is1600Pressed;
 	static const size_t GRAPH_MAX_BUTTONS=16;
 	//will be only between 0 and size()
 	size_t _butRegionsOffset, _butCountriesOffset;
 	//scroll and repaint buttons functions
 	void scrollButtons(std::vector<GraphButInfo *> &toggles, std::vector<ToggleTextButton *> &buttons, size_t &offset, int step);
 	void updateButton(GraphButInfo *from,ToggleTextButton *to);
+	/// Handler for clicking the 100 button.
+	void btnScale100Click(Action *action);
+	/// Handler for clicking the 200 button.
+	void btnScale200Click(Action *action);
+	/// Handler for clicking the 400 button.
+	void btnScale400Click(Action *action);
+	/// Handler for clicking the 800 button.
+	void btnScale800Click(Action *action);
+	/// Handler for clicking the 1600 button.
+	void btnScale1600Click(Action *action);
 public:
 	/// Creates the Graphs state.
 	GraphsState();

@@ -31,6 +31,9 @@
 #include "../Savegame/Soldier.h"
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
+#include "../Interface/ComboBox.h"
+#include "../Mod/Mod.h"
+#include "../Basescape/SoldierSortUtil.h"
 
 namespace OpenXcom
 {
@@ -40,9 +43,8 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to handle.
  */
-AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0)
+AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(base), _origSoldierOrder(*_base->getSoldiers())
 {
-	_base = base;
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_txtTitle = new Text(300, 17, 10, 8);
@@ -51,8 +53,9 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0)
 	_txtPsiStrength = new Text(80, 20, 124, 32);
 	_txtPsiSkill = new Text(80, 20, 188, 32);
 	_txtTraining = new Text(48, 20, 270, 32);
-	_btnOk = new TextButton(160, 14, 80, 174);
+	_btnOk = new TextButton(148, 16, 164, 176);
 	_lstSoldiers = new TextList(290, 112, 8, 52);
+	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
 
 	// Set palette
 	setInterface("allocatePsi");
@@ -66,6 +69,7 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0)
 	add(_txtPsiSkill, "text", "allocatePsi");
 	add(_txtTraining, "text", "allocatePsi");
 	add(_lstSoldiers, "list", "allocatePsi");
+	add(_cbxSortBy, "button", "allocatePsi");
 
 	centerAllSurfaces();
 
@@ -91,14 +95,127 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0)
 
 	_txtTraining->setText(tr("STR_IN_TRAINING"));
 
+	// populate sort options
+	std::vector<std::wstring> sortOptions;
+	sortOptions.push_back(tr("ORIGINAL ORDER"));
+	_sortFunctors.push_back(NULL);
+
+#define PUSH_IN(strId, functor) \
+	sortOptions.push_back(tr(strId)); \
+	_sortFunctors.push_back(new SortFunctor(_game, functor));
+
+	PUSH_IN("ID", idStat);
+	PUSH_IN("FIRST LETTER", nameStat);
+	PUSH_IN("RANK", rankStat);
+	PUSH_IN("MISSIONS", missionsStat);
+	PUSH_IN("KILLS", killsStat);
+	PUSH_IN("WOUND RECOVERY", woundRecoveryStat);
+	PUSH_IN("STR_TIME_UNITS", tuStat);
+	PUSH_IN("STR_STAMINA", staminaStat);
+	PUSH_IN("STR_HEALTH", healthStat);
+	PUSH_IN("STR_BRAVERY", braveryStat);
+	PUSH_IN("STR_REACTIONS", reactionsStat);
+	PUSH_IN("STR_FIRING_ACCURACY", firingStat);
+	PUSH_IN("STR_THROWING_ACCURACY", throwingStat);
+	PUSH_IN("STR_MELEE_ACCURACY", meleeStat);
+	PUSH_IN("STR_STRENGTH", strengthStat);
+	PUSH_IN("STR_PSIONIC_STRENGTH", psiStrengthStat);
+	PUSH_IN("STR_PSIONIC_SKILL", psiSkillStat);
+
+#undef PUSH_IN
+
+	_cbxSortBy->setOptions(sortOptions);
+	_cbxSortBy->setSelected(0);
+	_cbxSortBy->onChange((ActionHandler)&AllocatePsiTrainingState::cbxSortByChange);
+	_cbxSortBy->setText(tr("SORT BY..."));
+
 	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
+	_lstSoldiers->setArrowColumn(240, ARROW_VERTICAL);
 	_lstSoldiers->setColumns(4, 114, 80, 62, 30);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(2);
+	_lstSoldiers->onLeftArrowClick((ActionHandler)&AllocatePsiTrainingState::lstItemsLeftArrowClick);
+	_lstSoldiers->onRightArrowClick((ActionHandler)&AllocatePsiTrainingState::lstItemsRightArrowClick);
 	_lstSoldiers->onMouseClick((ActionHandler)&AllocatePsiTrainingState::lstSoldiersClick);
+}
+/**
+ * cleans up dynamic state
+ */
+AllocatePsiTrainingState::~AllocatePsiTrainingState()
+{
+	for (std::vector<SortFunctor *>::iterator it = _sortFunctors.begin(); it != _sortFunctors.end(); ++it)
+	{
+		delete(*it);
+	}
+}
+
+/**
+ * Sorts the soldiers list by the selected criterion
+ * @param action Pointer to an action.
+ */
+void AllocatePsiTrainingState::cbxSortByChange(Action *action)
+{
+	size_t selIdx = _cbxSortBy->getSelected();
+	if (selIdx == (size_t)-1)
+	{
+		return;
+	}
+
+	SortFunctor *compFunc = _sortFunctors[selIdx];
+	if (compFunc)
+	{
+		std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+	}
+	else
+	{
+		// restore original ordering, ignoring (of course) those
+		// soldiers that have been sacked since this state started
+		for (std::vector<Soldier *>::const_iterator it = _origSoldierOrder.begin();
+		it != _origSoldierOrder.end(); ++it)
+		{
+			std::vector<Soldier *>::iterator soldierIt =
+			std::find(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *it);
+			if (soldierIt != _base->getSoldiers()->end())
+			{
+				Soldier *s = *soldierIt;
+				_base->getSoldiers()->erase(soldierIt);
+				_base->getSoldiers()->insert(_base->getSoldiers()->end(), s);
+			}
+		}
+	}
+
+	size_t originalScrollPos = _lstSoldiers->getScroll();
+	initList(originalScrollPos);
+}
+
+/**
+ * Returns to the previous screen.
+ * @param action Pointer to an action.
+ */
+void AllocatePsiTrainingState::btnOkClick(Action *)
+{
+	_game->popState();
+}
+
+/**
+ * Updates the soldiers list
+ * after going to other screens.
+ */
+void AllocatePsiTrainingState::init()
+{
+	State::init();
+	initList(0);
+}
+
+/**
+ * Shows the soldiers in a list at specified offset/scroll.
+ */
+void AllocatePsiTrainingState::initList(size_t scrl)
+{
 	int row = 0;
-	for (std::vector<Soldier*>::const_iterator s = base->getSoldiers()->begin(); s != base->getSoldiers()->end(); ++s)
+	_lstSoldiers->clearList();
+	for (std::vector<Soldier*>::const_iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)
 	{
 		std::wostringstream ssStr;
 		std::wostringstream ssSkl;
@@ -132,22 +249,115 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0)
 		}
 		row++;
 	}
-}
-/**
- *
- */
-AllocatePsiTrainingState::~AllocatePsiTrainingState()
-{
-
+	if (scrl)
+		_lstSoldiers->scrollTo(scrl);
+	_lstSoldiers->draw();
 }
 
+
 /**
- * Returns to the previous screen.
+ * Reorders a soldier up.
  * @param action Pointer to an action.
  */
-void AllocatePsiTrainingState::btnOkClick(Action *)
+void AllocatePsiTrainingState::lstItemsLeftArrowClick(Action *action)
 {
-	_game->popState();
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	if (row > 0)
+	{
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierUp(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierUp(action, row, true);
+		}
+	}
+	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setSelected(-1);
+}
+
+/**
+ * Moves a soldier up on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the top?
+ */
+void AllocatePsiTrainingState::moveSoldierUp(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->begin(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row - 1);
+		_base->getSoldiers()->at(row - 1) = s;
+		if (row != _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() - static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollUp(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
+}
+
+/**
+ * Reorders a soldier down.
+ * @param action Pointer to an action.
+ */
+void AllocatePsiTrainingState::lstItemsRightArrowClick(Action *action)
+{
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	size_t numSoldiers = _base->getSoldiers()->size();
+	if (0 < numSoldiers && INT_MAX >= numSoldiers && row < numSoldiers - 1)
+	{
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierDown(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierDown(action, row, true);
+		}
+	}
+	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setSelected(-1);
+}
+
+/**
+ * Moves a soldier down on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the bottom?
+ */
+void AllocatePsiTrainingState::moveSoldierDown(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->end(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row + 1);
+		_base->getSoldiers()->at(row + 1) = s;
+		if (row != _lstSoldiers->getVisibleRows() - 1 + _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() + static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollDown(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
 }
 
 /**
@@ -156,6 +366,12 @@ void AllocatePsiTrainingState::btnOkClick(Action *)
  */
 void AllocatePsiTrainingState::lstSoldiersClick(Action *action)
 {
+	double mx = action->getAbsoluteXMouse();
+	if (mx >= _lstSoldiers->getArrowsLeftEdge() && mx < _lstSoldiers->getArrowsRightEdge())
+	{
+		return;
+	}
+
 	_sel = _lstSoldiers->getSelectedRow();
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{

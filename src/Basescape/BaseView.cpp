@@ -192,9 +192,10 @@ void BaseView::setSelectable(int size)
  * Returns if a certain facility can be successfully
  * placed on the currently selected square.
  * @param rule Facility type.
+ * @param facilityBeingMoved Selected facility.
  * @return True if placeable, False otherwise.
  */
-bool BaseView::isPlaceable(RuleBaseFacility *rule) const
+bool BaseView::isPlaceable(RuleBaseFacility *rule, BaseFacility *facilityBeingMoved) const
 {
 	// Check if square isn't occupied
 	for (int y = _gridY; y < _gridY + rule->getSize(); ++y)
@@ -207,7 +208,15 @@ bool BaseView::isPlaceable(RuleBaseFacility *rule) const
 			}
 			if (_facilities[x][y] != 0)
 			{
-				return false;
+				// when moving an existing facility, it should not block itself
+				if (facilityBeingMoved == 0)
+				{
+					return false;
+				}
+				else if (_facilities[x][y] != facilityBeingMoved)
+				{
+					return false;
+				}
 			}
 		}
 	}

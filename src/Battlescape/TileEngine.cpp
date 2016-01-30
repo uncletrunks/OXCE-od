@@ -942,7 +942,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	};
 	// prioritize melee
 	BattleItem *meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
-	if (_save->canUseWeapon(meleeWeapon, unit) &&
+	if (_save->canUseWeapon(meleeWeapon, unit, false) &&
 		// has a melee weapon and is in melee range
 		validMeleeRange(unit, target, unit->getDirection()) &&
 		BattleActionCost(BA_HIT, unit, meleeWeapon).haveTU())
@@ -954,7 +954,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 
 	// has a weapon
 	BattleItem *weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
-	if (_save->canUseWeapon(weapon, unit) &&
+	if (_save->canUseWeapon(weapon, unit, false) &&
 		(	// has a melee weapon and is in melee range
 			(weapon->getRules()->getBattleType() == BT_MELEE &&
 				validMeleeRange(unit, target, unit->getDirection()) &&
@@ -992,7 +992,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 		action.weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
 	}
 
-	if (!_save->canUseWeapon(action.weapon, action.actor))
+	if (!_save->canUseWeapon(action.weapon, action.actor, false))
 	{
 		return false;
 	}
@@ -1080,15 +1080,141 @@ void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
 }
 
 /**
+ * Handling of experience training.
+ * @param unit hitter.
+ * @param weapon weapon causing the damage.
+ * @param target targeted unit.
+ * @param rangeAtack is ranged attack or not?
+ * @return Was experience awarded or not?
+ */
+bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUnit *target, bool rangeAtack)
+{
+	if (!target)
+	{
+		return false;
+	}
+	else
+	{
+		// only enemies count, not friends or neutrals
+		if (target->getOriginalFaction() != FACTION_HOSTILE) return false;
+
+		// mind-controlled enemies don't count though!
+		if (target->getFaction() != FACTION_HOSTILE) return false;
+	}
+
+	if (!weapon)
+	{
+		return false;
+	}
+
+	if (weapon->getRules()->getExperienceTrainingMode() > ETM_DEFAULT)
+	{
+		// can train psi strength and psi skill only if psi skill is already > 0
+		if (weapon->getRules()->getExperienceTrainingMode() >= ETM_PSI_STRENGTH && weapon->getRules()->getExperienceTrainingMode() <= ETM_PSI_STRENGTH_OR_SKILL_2X)
+		{
+			// cannot use "unit->getBaseStats()->psiSkill", because armor can give +psiSkill bonus
+			if (unit->getGeoscapeSoldier() && unit->getGeoscapeSoldier()->getCurrentStats()->psiSkill <= 0)
+				return false;
+		}
+
+		switch (weapon->getRules()->getExperienceTrainingMode())
+		{
+		case ETM_MELEE_100: unit->addMeleeExp(); break;
+		case ETM_MELEE_50: if (RNG::percent(50)) { unit->addMeleeExp(); } break;
+		case ETM_MELEE_33: if (RNG::percent(33)) { unit->addMeleeExp(); } break;
+		case ETM_FIRING_100: unit->addFiringExp(); break;
+		case ETM_FIRING_50: if (RNG::percent(50)) { unit->addFiringExp(); } break;
+		case ETM_FIRING_33: if (RNG::percent(33)) { unit->addFiringExp(); } break;
+		case ETM_THROWING_100: unit->addThrowingExp(); break;
+		case ETM_THROWING_50: if (RNG::percent(50)) { unit->addThrowingExp(); } break;
+		case ETM_THROWING_33: if (RNG::percent(33)) { unit->addThrowingExp(); } break;
+		case ETM_FIRING_AND_THROWING: unit->addFiringExp(); unit->addThrowingExp(); break;
+		case ETM_FIRING_OR_THROWING: if (RNG::percent(50)) { unit->addFiringExp(); } else { unit->addThrowingExp(); } break;
+		case ETM_REACTIONS: unit->addReactionExp(); break;
+		case ETM_REACTIONS_AND_MELEE: unit->addReactionExp(); unit->addMeleeExp(); break;
+		case ETM_REACTIONS_AND_FIRING: unit->addReactionExp(); unit->addFiringExp(); break;
+		case ETM_REACTIONS_AND_THROWING: unit->addReactionExp(); unit->addThrowingExp(); break;
+		case ETM_REACTIONS_OR_MELEE: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addMeleeExp(); } break;
+		case ETM_REACTIONS_OR_FIRING: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addFiringExp(); } break;
+		case ETM_REACTIONS_OR_THROWING: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addThrowingExp(); } break;
+		case ETM_BRAVERY: unit->addBraveryExp(); break;
+		case ETM_BRAVERY_2X: unit->addBraveryExp(); unit->addBraveryExp(); break;
+		case ETM_BRAVERY_AND_REACTIONS: unit->addBraveryExp(); unit->addReactionExp(); break;
+		case ETM_BRAVERY_OR_REACTIONS: if (RNG::percent(50)) { unit->addBraveryExp(); } else { unit->addReactionExp(); } break;
+		case ETM_BRAVERY_OR_REACTIONS_2X: if (RNG::percent(50)) { unit->addBraveryExp(); unit->addBraveryExp(); } else { unit->addReactionExp(); unit->addReactionExp(); } break;
+		case ETM_PSI_STRENGTH: unit->addPsiStrengthExp(); break;
+		case ETM_PSI_STRENGTH_2X: unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); break;
+		case ETM_PSI_SKILL: unit->addPsiSkillExp(); break;
+		case ETM_PSI_SKILL_2X: unit->addPsiSkillExp(); unit->addPsiSkillExp(); break;
+		case ETM_PSI_STRENGTH_AND_SKILL: unit->addPsiStrengthExp(); unit->addPsiSkillExp(); break;
+		case ETM_PSI_STRENGTH_AND_SKILL_2X: unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); unit->addPsiSkillExp(); unit->addPsiSkillExp(); break;
+		case ETM_PSI_STRENGTH_OR_SKILL: if (RNG::percent(50)) { unit->addPsiStrengthExp(); } else { unit->addPsiSkillExp(); } break;
+		case ETM_PSI_STRENGTH_OR_SKILL_2X: if (RNG::percent(50)) { unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); } else { unit->addPsiSkillExp(); unit->addPsiSkillExp(); } break;
+		case ETM_NOTHING:
+		default:
+			return false;
+		}
+
+		return true;
+	}
+
+	// GRENADES AND PROXIES
+	if (weapon->getRules()->getBattleType() == BT_GRENADE || weapon->getRules()->getBattleType() == BT_PROXIMITYGRENADE)
+	{
+		unit->addThrowingExp(); // e.g. willie pete, acid grenade, stun grenade, HE grenade, smoke grenade, proxy grenade, ...
+	}
+	// MELEE
+	else if (weapon->getRules()->getBattleType() == BT_MELEE)
+	{
+		unit->addMeleeExp(); // e.g. cattle prod, cutlass, rope, ...
+	}
+	// FIREARMS and other
+	else
+	{
+		if (!rangeAtack)
+		{
+			unit->addMeleeExp(); // e.g. rifle/shotgun gun butt, ...
+		}
+		else if (weapon->getRules()->getArcingShot())
+		{
+			unit->addThrowingExp(); // e.g. flamethrower, javelins, combat bow, grenade launcher, molotov, black powder bomb, stick grenade, acid flask, apple, ...
+		}
+		else
+		{
+			int maxRange = weapon->getRules()->getMaxRange();
+			if (maxRange > 10)
+			{
+				unit->addFiringExp(); // e.g. panzerfaust, harpoon gun, shotgun, assault rifle, rocket launcher, small launcher, heavy cannon, blaster launcher, ...
+			}
+			else if (maxRange > 1)
+			{
+				unit->addThrowingExp(); // e.g. fuso knives, zapper, ...
+			}
+			else if (maxRange == 1)
+			{
+				unit->addMeleeExp(); // e.g. hammer, chainsaw, fusion torch, ...
+			}
+			else
+			{
+				return false; // what is this? no training!
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
  * Handling of hitting unit.
  * @param unit hitter.
+ * @param clipOrWeapon clip or weapon causing the damage.
  * @param target targeted unit.
  * @param relative angle of hit.
  * @param damage power of hit.
  * @param type damage type of hit.
  * @return Did unit get hit?
  */
-bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack)
+bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack)
 {
 	if (!target || target->getHealth() <= 0)
 	{
@@ -1105,9 +1231,19 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 		{
 			target->killedBy(unit->getFaction());
 		}
-		if (rangeAtack && target->getOriginalFaction() == FACTION_HOSTILE)
+	}
+
+	// single place for firing/throwing/melee experience training
+	if (unit && unit->getOriginalFaction() == FACTION_PLAYER)
+	{
+		if (clipOrWeapon && clipOrWeapon->getRules()->getBattleType() == BT_AMMO)
 		{
-			unit->addFiringExp();
+			// send the weapon info, not the ammo info
+			awardExperience(unit, unit->getItem(unit->getActiveHand()), target, rangeAtack);
+		}
+		else
+		{
+			awardExperience(unit, clipOrWeapon, target, rangeAtack);
 		}
 	}
 
@@ -1142,6 +1278,28 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
 		}
 	}
 
+	// fire extinguisher
+	if (target && target->getFire())
+	{
+		if (clipOrWeapon)
+		{
+			// melee weapon, bullet or even a grenade...
+			if (clipOrWeapon->getRules()->isFireExtinguisher())
+			{
+				target->setFire(0);
+			}
+			// if the bullet is not a fire extinguisher, check the weapon itself
+			else if (unit && clipOrWeapon->getRules()->getBattleType() == BT_AMMO)
+			{
+				BattleItem *weapon = unit->getItem(unit->getActiveHand());
+				if (weapon && weapon->getRules()->isFireExtinguisher())
+				{
+					target->setFire(0);
+				}
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -1153,9 +1311,10 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleUnit *target, const Position &r
  * @param power Power of the explosion.
  * @param type The damage type of the explosion.
  * @param unit The unit that caused the explosion.
+ * @param clipOrWeapon clip or weapon causing the damage.
  * @return The Unit that got hit.
  */
-BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit, bool rangeAtack)
+BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
 {
 	Tile *tile = _save->getTile(center.toTile());
 	if (!tile || power <= 0)
@@ -1173,7 +1332,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		{
 			for (std::vector<BattleItem*>::iterator i = tile->getInventory()->begin(); i != tile->getInventory()->end(); ++i)
 			{
-				if (hitUnit(unit, (*i)->getUnit(), Position(0,0,0), damage, type, rangeAtack))
+				if (hitUnit(unit, clipOrWeapon, (*i)->getUnit(), Position(0,0,0), damage, type, rangeAtack))
 				{
 					nothing = false;
 					break;
@@ -1220,7 +1379,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 			const Position target = bu->getPosition().toVexel() + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
 			const Position relative = (center - target) - Position(0,0,verticaloffset);
 
-			hitUnit(unit, bu, relative, damage, type, rangeAtack);
+			hitUnit(unit, clipOrWeapon, bu, relative, damage, type, rangeAtack);
 		}
 	}
 	applyGravity(tile);
@@ -1241,8 +1400,9 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
  * @param type The damage type of the explosion.
  * @param maxRadius The maximum radius othe explosion.
  * @param unit The unit that caused the explosion.
+ * @param clipOrWeapon The clip or weapon that caused the explosion.
  */
-void TileEngine::explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, bool rangeAtack)
+void TileEngine::explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
 {
 	double centerZ = center.z / 24 + 0.5;
 	double centerX = center.x / 16 + 0.5;
@@ -1309,13 +1469,13 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 							if (distance(dest->getPosition(), Position(centerX, centerY, centerZ)) < 2)
 							{
 								// ground zero effect is in effect
-								hitUnit(unit, bu, Position(0, 0, 0), damage, type, rangeAtack);
+								hitUnit(unit, clipOrWeapon, bu, Position(0, 0, 0), damage, type, rangeAtack);
 							}
 							else
 							{
 								// directional damage relative to explosion position.
 								// units above the explosion will be hit in the legs, units lateral to or below will be hit in the torso
-								hitUnit(unit, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type, rangeAtack);
+								hitUnit(unit, clipOrWeapon, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type, rangeAtack);
 							}
 
 							// Affect all items and units in inventory
@@ -1324,7 +1484,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 							{
 								for (std::vector<BattleItem*>::iterator it = bu->getInventory()->begin(); it != bu->getInventory()->end(); ++it)
 								{
-									if (!hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && itemDamage * type->ToItem > (*it)->getRules()->getArmor())
+									if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && itemDamage * type->ToItem > (*it)->getRules()->getArmor())
 									{
 										toRemove.push_back(*it);
 									}
@@ -1334,7 +1494,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 						// Affect all items and units on ground
 						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
 						{
-							if (!hitUnit(unit, (*it)->getUnit(), Position(0, 0, 0), damage, type) && damage * type->ToItem > (*it)->getRules()->getArmor())
+							if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), damage, type) && damage * type->ToItem > (*it)->getRules()->getArmor())
 							{
 								toRemove.push_back(*it);
 							}
@@ -2585,7 +2745,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 				{
 					_save->setSelectedUnit(0);
 					_save->getBattleGame()->cancelCurrentAction(true);
-					_save->getBattleGame()->requestEndTurn();
+					_save->getBattleGame()->requestEndTurn(true);
 				}
 			}
 		}
@@ -2627,11 +2787,6 @@ bool TileEngine::meleeAttack(BattleAction *action)
 	if (!RNG::percent(hitChance))
 	{
 		return false;
-	}
-	else if (targetUnit && targetUnit->getOriginalFaction() == FACTION_HOSTILE &&
-			action->actor->getOriginalFaction() == FACTION_PLAYER)
-	{
-		action->actor->addMeleeExp();
 	}
 	return true;
 }

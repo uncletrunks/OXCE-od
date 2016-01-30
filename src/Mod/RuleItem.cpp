@@ -47,10 +47,10 @@ RuleItem::RuleItem(const std::string &type) :
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
-	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _invWidth(1), _invHeight(1),
+	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _blockBothHands(false), _waypoint(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
-	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _arcingShot(false), _listOrder(0),
+	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
@@ -392,10 +392,14 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_tuLoad = node["tuLoad"].as<int>(_tuLoad);
 	_tuUnload = node["tuUnload"].as<int>(_tuUnload);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
+	_blockBothHands = node["blockBothHands"].as<bool>(_blockBothHands);
 	_waypoint = node["waypoint"].as<bool>(_waypoint);
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
 	_fixedWeaponShow = node["fixedWeaponShow"].as<bool>(_fixedWeaponShow);
+	_defaultInventorySlot = node["defaultInventorySlot"].as<std::string>(_defaultInventorySlot);
 	_allowSelfHeal = node["allowSelfHeal"].as<bool>(_allowSelfHeal);
+	_isConsumable = node["isConsumable"].as<bool>(_isConsumable);
+	_isFireExtinguisher = node["isFireExtinguisher"].as<bool>(_isFireExtinguisher);
 	_invWidth = node["invWidth"].as<int>(_invWidth);
 	_invHeight = node["invHeight"].as<int>(_invHeight);
 
@@ -422,6 +426,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_liveAlien = node["liveAlien"].as<bool>(_liveAlien);
 	_attraction = node["attraction"].as<int>(_attraction);
 	_arcingShot = node["arcingShot"].as<bool>(_arcingShot);
+	_experienceTrainingMode = (ExperienceTrainingMode)node["experienceTrainingMode"].as<int>(_experienceTrainingMode);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_maxRange = node["maxRange"].as<int>(_maxRange);
 	_aimRange = node["aimRange"].as<int>(_aimRange);
@@ -602,6 +607,15 @@ bool RuleItem::isTwoHanded() const
 }
 
 /**
+ * Returns whether this item must be used with both hands.
+ * @return True if requires both hands.
+ */
+bool RuleItem::isBlockingBothHands() const
+{
+	return _blockBothHands;
+}
+
+/**
  * Returns whether this item uses waypoints.
  * @return True if it uses waypoints.
  */
@@ -627,6 +641,15 @@ bool RuleItem::isFixed() const
 bool RuleItem::getFixedShow() const
 {
 	return _fixedWeaponShow;
+}
+
+/**
+ * Gets the name of the default inventory slot.
+ * @return String Id.
+ */
+const std::string &RuleItem::getDefaultInventorySlot() const
+{
+	return _defaultInventorySlot;
 }
 
 /**
@@ -1214,6 +1237,24 @@ bool RuleItem::getAllowSelfHeal() const
 }
 
 /**
+ * Is this (medikit-type) item consumable?
+ * @return True if the item is consumable.
+ */
+bool RuleItem::isConsumable() const
+{
+	return _isConsumable;
+}
+
+/**
+ * Does this item extinguish fire?
+ * @return True if the item extinguishes fire.
+ */
+bool RuleItem::isFireExtinguisher() const
+{
+	return _isFireExtinguisher;
+}
+
+/**
  * Gets the medikit type of how it operate.
  * @return Type of medikit.
  */
@@ -1397,6 +1438,15 @@ RuleItemUseCost RuleItem::getFlatPrime() const
 bool RuleItem::getArcingShot() const
 {
 	return _arcingShot;
+}
+
+/**
+ * Returns the experience training mode configured for this weapon.
+ * @return The mode ID.
+ */
+ExperienceTrainingMode RuleItem::getExperienceTrainingMode() const
+{
+	return _experienceTrainingMode;
 }
 
 /**

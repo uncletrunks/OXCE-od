@@ -308,7 +308,6 @@ bool ProjectileFlyBState::createNewProjectile()
 			}
 			_projectileItem->moveToOwner(0);
 			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
-			_unit->addThrowingExp();
 		}
 		else
 		{
@@ -350,7 +349,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			_parent->getMap()->setProjectile(0);
 			if (_parent->getPanicHandled())
 			{
-				_action.result = "STR_NO_LINE_OF_FIRE";
+				_action.result = "STR_NO_TRAJECTORY";
 			}
 			_unit->abortTurn();
 			_parent->popState();
@@ -555,7 +554,7 @@ void ProjectileFlyBState::think()
 									Explosion *explosion = new Explosion(proj->getPosition(1), _ammo->getRules()->getHitAnimation());
 									int power = _ammo->getRules()->getPowerBonus(_unit) - _ammo->getRules()->getPowerRangeReduction(proj->getDistance());
 									_parent->getMap()->getExplosions()->push_back(explosion);
-									_parent->getSave()->getTileEngine()->hit(proj->getPosition(1), power, _ammo->getRules()->getDamageType(), 0);
+									_parent->getSave()->getTileEngine()->hit(proj->getPosition(1), power, _ammo->getRules()->getDamageType(), 0, _action.weapon);
 								}
 							}
 							++i;

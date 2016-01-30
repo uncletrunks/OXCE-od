@@ -51,6 +51,7 @@ DismantleFacilityState::DismantleFacilityState(Base *base, BaseView *view, BaseF
 	_btnCancel = new TextButton(44, 16, 112, 115);
 	_txtTitle = new Text(142, 9, 25, 75);
 	_txtFacility = new Text(142, 9, 25, 85);
+	_txtRefundValue = new Text(142, 9, 25, 100);
 
 	// Set palette
 	setInterface("dismantleFacility");
@@ -60,6 +61,7 @@ DismantleFacilityState::DismantleFacilityState(Base *base, BaseView *view, BaseF
 	add(_btnCancel, "button", "dismantleFacility");
 	add(_txtTitle, "text", "dismantleFacility");
 	add(_txtFacility, "text", "dismantleFacility");
+	add(_txtRefundValue, "text", "dismantleFacility");
 
 	centerAllSurfaces();
 
@@ -79,6 +81,24 @@ DismantleFacilityState::DismantleFacilityState(Base *base, BaseView *view, BaseF
 
 	_txtFacility->setAlign(ALIGN_CENTER);
 	_txtFacility->setText(tr(_fac->getRules()->getType()));
+
+	int refundValue = 0;
+	if (_fac->getBuildTime() > _fac->getRules()->getBuildTime())
+	{
+		// if only queued... full refund (= build cost)
+		refundValue = _fac->getRules()->getBuildCost();
+	}
+	else
+	{
+		// if already building or already built... partial refund (by default 0, used in mods)
+		refundValue = _fac->getRules()->getRefundValue();
+	}
+
+	_txtRefundValue->setAlign(ALIGN_CENTER);
+	//_txtRefundValue->setColor(218); // # blue
+	_txtRefundValue->setSecondaryColor(208); // # white, FIXME: add to interface.rul as color2
+	_txtRefundValue->setText(tr("STR_REFUND_VALUE").arg(Text::formatFunding(refundValue)));
+	_txtRefundValue->setVisible(refundValue != 0);
 }
 
 /**
@@ -100,9 +120,9 @@ void DismantleFacilityState::btnOkClick(Action *)
 	{
 		const std::map<std::string, std::pair<int, int> > &itemCost = _fac->getRules()->getBuildCostItems();
 
-		// Give refund if this is an unstarted, queued build.
 		if (_fac->getBuildTime() > _fac->getRules()->getBuildTime())
 		{
+			// Give full refund if this is an unstarted, queued build.
 			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _fac->getRules()->getBuildCost());
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
@@ -111,6 +131,8 @@ void DismantleFacilityState::btnOkClick(Action *)
 		}
 		else
 		{
+			// Give partial refund if this is a started build or a completed facility.
+			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _fac->getRules()->getRefundValue());
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
 				_base->getStorageItems()->addItem(i->first, i->second.second);

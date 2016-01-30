@@ -25,6 +25,8 @@
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Mod/RuleItem.h"
+#include "../Mod/Mod.h"
+#include "../Savegame/SavedGame.h"
 
 namespace OpenXcom
 {
@@ -41,6 +43,9 @@ namespace OpenXcom
 		_btnOk = new TextButton(30, 14, 5, 5);
 		_btnPrev = new TextButton(30, 14, 40, 5);
 		_btnNext = new TextButton(30, 14, 75, 5);
+
+		// remember this article as seen
+		_game->getSavedGame()->addSeenUfopediaArticle(_game->getMod()->getUfopaediaArticle(_id));
 	}
 
 	/**
@@ -54,6 +59,9 @@ namespace OpenXcom
 		std::string type;
 		switch (dt)
 		{
+		case DT_NONE:
+			type = "STR_DAMAGE_NONE";
+			break;
 		case DT_AP:
 			type = "STR_DAMAGE_ARMOR_PIERCING";
 			break;

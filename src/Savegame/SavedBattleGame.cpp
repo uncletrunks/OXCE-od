@@ -811,7 +811,7 @@ UnitFaction SavedBattleGame::getSide() const
  * @param unit
  * @return Unit can shoot/use it.
  */
-bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* unit) const
+bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* unit, bool isBerserking) const
 {
 	if (!weapon || !unit) return false;
 
@@ -830,6 +830,10 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 		return false;
 	}
 	if (getDepth() == 0 && rule->isWaterOnly())
+	{
+		return false;
+	}
+	if (rule->isBlockingBothHands() && unit->getFaction() == FACTION_PLAYER && !isBerserking && unit->getItem("STR_LEFT_HAND") != 0 && unit->getItem("STR_RIGHT_HAND") != 0)
 	{
 		return false;
 	}
@@ -1161,10 +1165,26 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 			}
 		}
 	}
-	// fixed weapon should be always placed in hand slots
+
+	// place fixed weapon
 	if (item->getRules()->isFixed())
 	{
-		if (!rightWeapon || !leftWeapon)
+		// either in the default slot provided in the ruleset
+		if (!item->getRules()->getDefaultInventorySlot().empty())
+		{
+			RuleInventory *defaultSlot = _rule->getInventory(item->getRules()->getDefaultInventorySlot());
+			BattleItem *defaultSlotWeapon = unit->getItem(item->getRules()->getDefaultInventorySlot());
+			if (!defaultSlotWeapon)
+			{
+				item->moveToOwner(unit);
+				item->setSlot(defaultSlot);
+				placed = true;
+				_items.push_back(item);
+				item->setXCOMProperty(unit->getFaction() == FACTION_PLAYER);
+			}
+		}
+		// or in the left/right hand
+		if (!placed && (!rightWeapon || !leftWeapon))
 		{
 			item->moveToOwner(unit);
 			item->setSlot(!rightWeapon ? rightHand : leftHand);
@@ -1429,7 +1449,7 @@ void SavedBattleGame::addDestroyedObjective()
 				{
 					setSelectedUnit(0);
 					_battleState->getBattleGame()->cancelCurrentAction(true);
-					_battleState->getBattleGame()->requestEndTurn();
+					_battleState->getBattleGame()->requestEndTurn(false);
 				}
 			}
 			else

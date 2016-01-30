@@ -16,47 +16,45 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_NEWRESEARCHLISTSTATE_H
-#define OPENXCOM_NEWRESEARCHLISTSTATE_H
+#ifndef OPENXCOM_CONFIRMENDMISSION_H
+#define OPENXCOM_CONFIRMENDMISSION_H
 
 #include "../Engine/State.h"
-#include <vector>
 
 namespace OpenXcom
 {
 
-class TextButton;
 class Window;
 class Text;
-class TextList;
-class Base;
-class RuleResearch;
+class TextButton;
+class SavedBattleGame;
+class BattlescapeGame;
 
 /**
- * Window which displays possible research projects.
+ * Screen which asks for confirmation to end the mission.
+ * Note: only if auto-end battle option is enabled and if there are still soldiers with fatal wounds
  */
-class NewResearchListState : public State
+class ConfirmEndMissionState : public State
 {
 private:
-	Base *_base;
-	TextButton *_btnOK, *_btnMarkAllAsSeen;
 	Window *_window;
-	Text *_txtTitle;
-	TextList *_lstResearch;
-	void onSelectProject(Action *action);
-	std::vector<RuleResearch *> _projects;
+	Text *_txtTitle, *_txtWounded, *_txtConfirm;
+	TextButton *_btnOk, *_btnCancel;
+	SavedBattleGame *_battleGame;
+	BattlescapeGame *_parent;
+	int _wounded;
 public:
-	/// Creates the New research list state.
-	NewResearchListState(Base *base);
+	/// Creates the ConfirmEndMission state.
+	ConfirmEndMissionState(SavedBattleGame *battleGame, int wounded, BattlescapeGame *parent);
+	/// Cleans up the ConfirmEndMission state.
+	~ConfirmEndMissionState();
 	/// Handler for clicking the OK button.
-	void btnOKClick(Action *action);
-	/// Handler for clicking the [Mark All As Seen] button.
-	void btnMarkAllAsSeenClick(Action *action);
-	/// Fills the ResearchProject list with possible ResearchProjects.
-	void fillProjectList(bool markAllAsSeen);
-	/// Initializes the state.
-	void init();
+	void btnOkClick(Action *action);
+	/// Handler for clicking the Cancel button.
+	void btnCancelClick(Action *action);
+
 };
+
 }
 
 #endif

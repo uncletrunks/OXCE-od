@@ -30,8 +30,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
 #include "ManufactureStartState.h"
-#include "../Menu/ErrorMessageState.h"
-#include "../Mod/RuleInterface.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -46,7 +45,8 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
 	_screen = false;
 
 	_window = new Window(this, 320, 156, 0, 22, POPUP_BOTH);
-	_btnOk = new TextButton(304, 16, 8, 154);
+	_btnOk = new TextButton(148, 16, 164, 154);
+	_btnMarkAllAsSeen = new TextButton(148, 16, 8, 154);
 	_txtTitle = new Text(320, 17, 0, 30);
 	_txtItem = new Text(156, 9, 10, 62);
 	_txtCategory = new Text(130, 9, 166, 62);
@@ -58,6 +58,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
 
 	add(_window, "window", "selectNewManufacture");
 	add(_btnOk, "button", "selectNewManufacture");
+	add(_btnMarkAllAsSeen, "button", "selectNewManufacture");
 	add(_txtTitle, "text", "selectNewManufacture");
 	add(_txtItem, "text", "selectNewManufacture");
 	add(_txtCategory, "text", "selectNewManufacture");
@@ -85,6 +86,9 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewManufactureListState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&NewManufactureListState::btnOkClick, Options::keyCancel);
+
+	_btnMarkAllAsSeen->setText(tr("MARK ALL AS SEEN"));
+	_btnMarkAllAsSeen->onMouseClick((ActionHandler)&NewManufactureListState::btnMarkAllAsSeenClick);
 
 	_possibleProductions.clear();
 	_game->getSavedGame()->getAvailableProductions(_possibleProductions, _game->getMod(), _base);
@@ -118,7 +122,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
 void NewManufactureListState::init()
 {
 	State::init();
-	fillProductionList();
+	fillProductionList(false);
 }
 
 /**
@@ -128,6 +132,15 @@ void NewManufactureListState::init()
 void NewManufactureListState::btnOkClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+ * Marks all items as seen
+ * @param action Pointer to an action.
+ */
+void NewManufactureListState::btnMarkAllAsSeenClick(Action *)
+{
+	fillProductionList(true);
 }
 
 /**
@@ -145,18 +158,9 @@ void NewManufactureListState::lstProdClick(Action *)
 			break;
 		}
 	}
-	if (rule->getCategory() == "STR_CRAFT" && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
-	{
-		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
-	}
-	else if (rule->getRequiredSpace() > _base->getFreeWorkshops())
-	{
-		_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_WORK_SPACE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
-	}
-	else
-	{
-		_game->pushState(new ManufactureStartState(_base, rule));
-	}
+
+	// check and display error messages only further down the chain
+	_game->pushState(new ManufactureStartState(_base, rule));
 }
 
 /**
@@ -165,26 +169,54 @@ void NewManufactureListState::lstProdClick(Action *)
 
 void NewManufactureListState::cbxCategoryChange(Action *)
 {
-	fillProductionList();
+	fillProductionList(false);
 }
 
 /**
  * Fills the list of possible productions.
  */
-void NewManufactureListState::fillProductionList()
+void NewManufactureListState::fillProductionList(bool markAllAsSeen)
 {
 	_lstManufacture->clearList();
 	_possibleProductions.clear();
 	_game->getSavedGame()->getAvailableProductions(_possibleProductions, _game->getMod(), _base);
 	_displayedStrings.clear();
 
+	int row = 0;
+	bool hasUnseen = false;
 	for (std::vector<RuleManufacture *>::iterator it = _possibleProductions.begin(); it != _possibleProductions.end(); ++it)
 	{
 		if (((*it)->getCategory().c_str() == _catStrings[_cbxCategory->getSelected()]) || (_catStrings[_cbxCategory->getSelected()] == "STR_ALL_ITEMS"))
 		{
 			_lstManufacture->addRow(2, tr((*it)->getName()).c_str(), tr((*it)->getCategory()).c_str());
 			_displayedStrings.push_back((*it)->getName().c_str());
+
+			if (markAllAsSeen)
+			{
+				// remember all manufacture items as seen
+				_game->getSavedGame()->addSeenManufacture((*it));
+			}
+			else if (!_game->getSavedGame()->isManufactureSeen((*it)->getName()))
+			{
+				// mark as unseen
+				_lstManufacture->setCellColor(row, 0, 53); // light green
+				hasUnseen = true;
+			}
+			row++;
 		}
+	}
+
+	if (!hasUnseen)
+	{
+		_btnMarkAllAsSeen->setVisible(false);
+		_btnOk->setWidth(_btnOk->getX()+_btnOk->getWidth()-_btnMarkAllAsSeen->getX());
+		_btnOk->setX(_btnMarkAllAsSeen->getX());
+	}
+	else
+	{
+		_btnMarkAllAsSeen->setVisible(true);
+		_btnOk->setWidth(_btnMarkAllAsSeen->getWidth());
+		_btnOk->setX(_btnMarkAllAsSeen->getX()+_btnMarkAllAsSeen->getWidth()+8);
 	}
 }
 

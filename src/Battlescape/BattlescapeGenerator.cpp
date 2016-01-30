@@ -631,7 +631,7 @@ void BattlescapeGenerator::deployXCOM()
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
-			(_craft == 0 && (*i)->getWoundRecovery() == 0 && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
+			(_craft == 0 && ((*i)->getWoundRecovery() == 0 || Options::everyoneFightsNobodyQuits) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 		{
 			BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth()));
 			if (unit && !_save->getSelectedUnit())
@@ -1440,7 +1440,7 @@ void BattlescapeGenerator::explodePowerSources()
 			pos.x = _save->getTile(i)->getPosition().x*16;
 			pos.y = _save->getTile(i)->getPosition().y*16;
 			pos.z = (_save->getTile(i)->getPosition().z*24) +12;
-			_save->getTileEngine()->explode(pos, 180+RNG::generate(0,70), _save->getMod()->getDamageType(DT_HE), 10);
+			_save->getTileEngine()->explode(pos, 180+RNG::generate(0,70), _save->getMod()->getDamageType(DT_HE), 10, 0, 0);
 		}
 	}
 	Tile *t = _save->getTileEngine()->checkForTerrainExplosions();
@@ -1449,7 +1449,7 @@ void BattlescapeGenerator::explodePowerSources()
 		int power = t->getExplosive();
 		t->setExplosive(0, 0, true);
 		Position p = t->getPosition().toVexel() + Position(8,8,0);
-		_save->getTileEngine()->explode(p, power, _game->getMod()->getDamageType(DT_HE), power / 10);
+		_save->getTileEngine()->explode(p, power, _game->getMod()->getDamageType(DT_HE), power / 10, 0, 0);
 		t = _save->getTileEngine()->checkForTerrainExplosions();
 	}
 }

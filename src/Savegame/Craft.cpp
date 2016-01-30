@@ -842,6 +842,61 @@ void Craft::consumeFuel()
 }
 
 /**
+ * Returns how long in hours until the
+ * craft is repaired.
+ */
+unsigned int Craft::calcRepairTime()
+{
+	unsigned int repairTime = 0;
+
+	if (_damage > 0)
+	{
+		repairTime = (int)ceil((double)_damage / _rules->getRepairRate());
+	}
+	return repairTime;
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is refuelled (assumes fuel is available).
+ */
+unsigned int Craft::calcRefuelTime()
+{
+	unsigned int refuelTime = 0;
+
+	int needed = _rules->getMaxFuel() - _fuel;
+	if (needed > 0)
+	{
+		refuelTime = (int)ceil((double)(needed) / _rules->getRefuelRate() / 2.0);
+	}
+	return refuelTime;
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is re-armed (assumes ammo is available).
+ */
+unsigned int Craft::calcRearmTime()
+{
+	unsigned int rearmTime = 0;
+
+	for (int idx = 0; idx < _rules->getWeapons(); idx++)
+	{
+		CraftWeapon *w1 = _weapons.at(idx);
+		if (w1 != 0)
+		{
+			int needed = w1->getRules()->getAmmoMax() - w1->getAmmo();
+			if (needed > 0)
+			{
+				rearmTime += (int)ceil((double)(needed) / w1->getRules()->getRearmRate());
+			}
+		}
+	}
+
+	return rearmTime;
+}
+
+/**
  * Repairs the craft's damage every hour
  * while it's docked in the base.
  */

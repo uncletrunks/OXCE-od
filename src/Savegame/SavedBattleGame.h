@@ -180,7 +180,7 @@ public:
 	/// Gets the playing side.
 	UnitFaction getSide() const;
 	/// Can unit use that weapon?
-	bool canUseWeapon(const BattleItem *weapon, const BattleUnit *unit) const;
+	bool canUseWeapon(const BattleItem *weapon, const BattleUnit *unit, bool isBerserking) const;
 	/// Gets the turn number.
 	int getTurn() const;
 	/// Ends the turn.

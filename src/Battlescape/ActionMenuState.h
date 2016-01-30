@@ -38,7 +38,7 @@ private:
 	BattleAction *_action;
 	ActionMenuItem *_actionMenu[6];
 	/// Adds a new menu item for an action.
-	void addItem(BattleActionType ba, const std::string &name, int *id);
+	void addItem(BattleActionType ba, const std::string &name, int *id, BattleItem *secondaryWeapon = 0);
 public:
 	/// Creates the Action Menu state.
 	ActionMenuState(BattleAction *action, int x, int y);

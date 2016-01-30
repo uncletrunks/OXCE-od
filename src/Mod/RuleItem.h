@@ -32,6 +32,25 @@ namespace OpenXcom
 enum BattleType { BT_NONE, BT_FIREARM, BT_AMMO, BT_MELEE, BT_GRENADE, BT_PROXIMITYGRENADE, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE, BT_PSIAMP, BT_FLARE, BT_CORPSE };
 enum BattleFuseType { BFT_NONE = -3, BFT_INSTANT = -2, BFT_SET = -1, BFT_FIX_MIN = 0, BFT_FIX_MAX = 24 };
 enum BattleMediKitType { BMT_NORMAL = 0, BMT_HEAL = 1, BMT_STIMULANT = 2, BMT_PAINKILLER = 3 };
+enum ExperienceTrainingMode {
+	ETM_DEFAULT,
+	ETM_MELEE_100, ETM_MELEE_50, ETM_MELEE_33,
+	ETM_FIRING_100, ETM_FIRING_50, ETM_FIRING_33,
+	ETM_THROWING_100, ETM_THROWING_50, ETM_THROWING_33,
+	ETM_FIRING_AND_THROWING,
+	ETM_FIRING_OR_THROWING,
+	ETM_REACTIONS,
+	ETM_REACTIONS_AND_MELEE, ETM_REACTIONS_AND_FIRING, ETM_REACTIONS_AND_THROWING,
+	ETM_REACTIONS_OR_MELEE, ETM_REACTIONS_OR_FIRING, ETM_REACTIONS_OR_THROWING,
+	ETM_BRAVERY, ETM_BRAVERY_2X,
+	ETM_BRAVERY_AND_REACTIONS,
+	ETM_BRAVERY_OR_REACTIONS, ETM_BRAVERY_OR_REACTIONS_2X,
+	ETM_PSI_STRENGTH, ETM_PSI_STRENGTH_2X,
+	ETM_PSI_SKILL, ETM_PSI_SKILL_2X,
+	ETM_PSI_STRENGTH_AND_SKILL, ETM_PSI_STRENGTH_AND_SKILL_2X,
+	ETM_PSI_STRENGTH_OR_SKILL, ETM_PSI_STRENGTH_OR_SKILL_2X,
+	ETM_NOTHING
+};
 
 class BattleItem;
 class SurfaceSet;
@@ -102,7 +121,8 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal;
+	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher;
+	std::string _defaultInventorySlot;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
@@ -115,6 +135,7 @@ private:
 	int _attraction;
 	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime;
 	bool _arcingShot;
+	ExperienceTrainingMode _experienceTrainingMode;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
@@ -168,12 +189,16 @@ public:
 	int getHandSprite() const;
 	/// Gets if the item is two-handed.
 	bool isTwoHanded() const;
+	/// Gets if the item can only be used by both hands.
+	bool isBlockingBothHands() const;
 	/// Gets if the item is a launcher.
 	bool isWaypoint() const;
 	/// Gets if the item is fixed.
 	bool isFixed() const;
 	/// Do show fixed weapon on unit.
 	bool getFixedShow() const;
+	/// Get name of the default inventory slot.
+	const std::string &getDefaultInventorySlot() const;
 	/// Gets the item's bullet sprite reference.
 	int getBulletSprite() const;
 	/// Gets the item's fire sound.
@@ -316,6 +341,10 @@ public:
 	float getPainKillerRecovery() const;
 	/// Gets the medikit ability to self heal.
 	bool getAllowSelfHeal() const;
+	/// Is this (medikit-type) item consumable?
+	bool isConsumable() const;
+	/// Does this item extinguish fire?
+	bool isFireExtinguisher() const;
 	/// Gets the medikit use type.
 	BattleMediKitType getMediKitType() const;
 	/// Gets the max explosion radius.
@@ -344,6 +373,8 @@ public:
 	RuleItemUseCost getFlatPrime() const;
 	/// Should this weapon arc?
 	bool getArcingShot() const;
+	/// Which experience training mode to use for this weapon?
+	ExperienceTrainingMode getExperienceTrainingMode() const;
 	/// How much do aliens want this thing?
 	int getAttraction() const;
 	/// Get the list weight for this item.

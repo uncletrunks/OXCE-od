@@ -20,6 +20,7 @@
 #define OPENXCOM_ALLOCATETRAININGSTATE_H
 
 #include "../Engine/State.h"
+#include <vector>
 
 namespace OpenXcom
 {
@@ -29,7 +30,9 @@ class Window;
 class Text;
 class Base;
 class TextList;
+class ComboBox;
 class Soldier;
+struct SortFunctor;
 
 /**
  * Screen shown monthly to allow changing
@@ -41,16 +44,34 @@ private:
 	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtTraining, *_txtName, *_txtRemaining;
+	Text *_txtTu, *_txtStamina, *_txtHealth, *_txtFiring, *_txtThrowing, *_txtMelee, *_txtStrength;
+	ComboBox *_cbxSortBy;
 	TextList *_lstSoldiers;
 	std::vector<Soldier*> _soldiers;
 	size_t _sel;
 	int _space;
 	Base *_base;
+	std::vector<Soldier *> _origSoldierOrder;
+	std::vector<SortFunctor *> _sortFunctors;
+	///initializes the display list
+	void initList(size_t scrl);
 public:
 	/// Creates the Psi Training state.
 	AllocateTrainingState(Base *base);
 	/// Cleans up the Psi Training state.
 	~AllocateTrainingState();
+	/// Handler for changing the sort by combobox.
+	void cbxSortByChange(Action *action);
+	/// Updates the soldier info.
+	void init();
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsLeftArrowClick(Action *action);
+	/// Moves a soldier up.
+	void moveSoldierUp(Action *action, unsigned int row, bool max = false);
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsRightArrowClick(Action *action);
+	/// Moves a soldier down.
+	void moveSoldierDown(Action *action, unsigned int row, bool max = false);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Soldiers list.

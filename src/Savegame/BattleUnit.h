@@ -150,6 +150,8 @@ public:
 
 	/// Creates a BattleUnit from solder.
 	BattleUnit(Soldier *soldier, int depth);
+	/// Updates a BattleUnit from a Soldier (after a change of armor).
+	void updateArmorFromSoldier(Soldier *soldier, int depth);
 	/// Creates a BattleUnit from unit.
 	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth);
 	/// Cleans up the BattleUnit.
@@ -328,6 +330,8 @@ public:
 	int getHeight() const;
 	/// Gets the unit floating elevation.
 	int getFloatHeight() const;
+	/// Adds one to the bravery exp counter.
+	void addBraveryExp();
 	/// Adds one to the reaction exp counter.
 	void addReactionExp();
 	/// Adds one to the firing exp counter.
@@ -343,7 +347,7 @@ public:
 	/// Updates the stats of a Geoscape soldier.
 	void updateGeoscapeStats(Soldier *soldier);
 	/// Check if unit eligible for squaddie promotion.
-	bool postMissionProcedures(SavedGame *geoscape);
+	bool postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff);
 	/// Get the sprite index for the minimap
 	int getMiniMapSpriteIndex() const;
 	/// Set the turret type. -1 is no turret.
@@ -361,9 +365,9 @@ public:
 	/// Get motion points for the motion scanner.
 	int getMotionPoints() const;
 	/// Gets the unit's armor.
-	Armor *getArmor();
-	/// Gets the unit's armor.
-	const Armor *getArmor() const;
+	Armor *getArmor() const;
+	/// Sets the unit's name.
+	void setName(const std::wstring &name);
 	/// Gets the unit's name.
 	std::wstring getName(Language *lang, bool debugAppendId = false) const;
 	/// Gets the unit's stats.

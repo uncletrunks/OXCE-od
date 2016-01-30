@@ -505,23 +505,27 @@ void UnitInfoState::init()
 	_barReactions->setMax(_unit->getBaseStats()->reactions);
 	_barReactions->setValue(_unit->getBaseStats()->reactions);
 
+	// more info: http://ufopaedia.org/index.php?title=Accuracy_formula#Stat_Screen_Accuracy
+	int healthModifier = 75 + ((25 * _unit->getHealth()) / _unit->getBaseStats()->health);
+
 	ss.str(L"");
-	ss << (int)((_unit->getBaseStats()->firing * _unit->getHealth()) / _unit->getBaseStats()->health);
+	ss << (int)((_unit->getBaseStats()->firing * healthModifier) / 100);
 	_numFiring->setText(ss.str());
 	_barFiring->setMax(_unit->getBaseStats()->firing);
-	_barFiring->setValue((_unit->getBaseStats()->firing * _unit->getHealth()) / _unit->getBaseStats()->health);
+	_barFiring->setValue((_unit->getBaseStats()->firing * healthModifier) / 100);
 
 	ss.str(L"");
-	ss << (int)((_unit->getBaseStats()->throwing * _unit->getHealth()) / _unit->getBaseStats()->health);
+	ss << (int)((_unit->getBaseStats()->throwing * healthModifier) / 100);
 	_numThrowing->setText(ss.str());
 	_barThrowing->setMax(_unit->getBaseStats()->throwing);
-	_barThrowing->setValue((_unit->getBaseStats()->throwing * _unit->getHealth()) / _unit->getBaseStats()->health);
+	_barThrowing->setValue((_unit->getBaseStats()->throwing * healthModifier) / 100);
 
 	ss.str(L"");
-	ss << (int)((_unit->getBaseStats()->melee * _unit->getHealth()) / _unit->getBaseStats()->health);
+	ss << (int)((_unit->getBaseStats()->melee * healthModifier) / 100);
 	_numMelee->setText(ss.str());
 	_barMelee->setMax(_unit->getBaseStats()->melee);
-	_barMelee->setValue((_unit->getBaseStats()->melee * _unit->getHealth()) / _unit->getBaseStats()->health);
+	_barMelee->setValue((_unit->getBaseStats()->melee * healthModifier) / 100);
+	// end of healthModifier usage
 
 	ss.str(L"");
 	ss << _unit->getBaseStats()->strength;

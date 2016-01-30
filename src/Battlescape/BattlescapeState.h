@@ -62,11 +62,15 @@ private:
 	InteractiveSurface *_btnVisibleUnit[VISIBLE_MAX];
 	NumberText *_numVisibleUnit[VISIBLE_MAX];
 	BattleUnit *_visibleUnit[VISIBLE_MAX];
+	int _numberOfDirectlyVisibleUnits;
 	WarningMessage *_warning;
-	Text *_txtName;
+	Text *_txtName, *_txtKneelStatus;
 	NumberText *_numTimeUnits, *_numEnergy, *_numHealth, *_numMorale, *_numLayers, *_numAmmoLeft, *_numAmmoRight;
+	NumberText *_numMedikitLeft1, *_numMedikitLeft2, *_numMedikitLeft3, *_numMedikitRight1, *_numMedikitRight2, *_numMedikitRight3;
+	NumberText *_numTwoHandedIndicatorLeft, *_numTwoHandedIndicatorRight;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
 	Timer *_animTimer, *_gameTimer;
+	int _animFrame; // for grenade timers
 	SavedBattleGame *_save;
 	Text *_txtDebug, *_txtTooltip;
 	std::vector<State*> _popups;
@@ -87,6 +91,12 @@ private:
 	void blinkVisibleUnitButtons();
 	/// Draw hand item with ammo number
 	void drawItem(BattleItem *item, Surface *hand, NumberText *ammo);
+	/// Shifts the colors of the health bar when unit has fatal wounds.
+	void blinkHealthBar();
+	/// Show priming warnings on grenades.
+	void drawPrimers();
+	/// Toggles kneel indicator
+	void toggleKneelButton(BattleUnit* unit);
 public:
 	/// Selects the next soldier.
 	void selectNextPlayerUnit(bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
@@ -209,6 +219,12 @@ public:
 	void btnZeroTUsClick(Action *action);
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
+	/// Handler for showing tooltip with extra information (used for medikit-type equipment)
+	void txtTooltipInExtra(Action *action, bool leftHand);
+	void txtTooltipInExtraLeftHand(Action *action);
+	void txtTooltipInExtraRightHand(Action *action);
+	/// Handler for showing tooltip with extra information (about current turn)
+	void txtTooltipInEndTurn(Action *action);
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
 	/// Update the resolution settings, we just resized the window.

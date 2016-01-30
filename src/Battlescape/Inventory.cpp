@@ -114,6 +114,15 @@ void Inventory::setTuMode(bool tu)
 }
 
 /**
+ * Returns the currently selected (i.e. displayed) unit.
+ * @return Pointer to selected unit, or 0 if none.
+ */
+BattleUnit *Inventory::getSelectedUnit() const
+{
+	return _selUnit;
+}
+
+/**
  * Changes the unit to display the inventory of.
  * @param unit Pointer to battle unit.
  */
@@ -139,15 +148,7 @@ void Inventory::draw()
 void Inventory::drawGrid()
 {
 	_grid->clear();
-	Text text = Text(80, 9, 0, 0);
-	text.setPalette(_grid->getPalette());
-	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-
 	RuleInterface *rule = _game->getMod()->getInterface("inventory");
-
-	text.setColor(rule->getElement("textSlots")->color);
-	text.setHighContrast(true);
-
 	Uint8 color = rule->getElement("grid")->color;
 
 	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
@@ -204,11 +205,41 @@ void Inventory::drawGrid()
 				}
 			}
 		}
+	}
+	drawGridLabels();
+}
 
+/**
+ * Draws the inventory grid labels.
+ */
+void Inventory::drawGridLabels(bool showTuCost)
+{
+	Text text = Text(90, 9, 0, 0);
+	text.setPalette(_grid->getPalette());
+	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+
+	RuleInterface *rule = _game->getMod()->getInterface("inventory");
+
+	text.setColor(rule->getElement("textSlots")->color);
+	text.setHighContrast(true);
+
+	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
+	{
 		// Draw label
 		text.setX(i->second->getX());
 		text.setY(i->second->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
-		text.setText(_game->getLanguage()->getString(i->second->getId()));
+		if (showTuCost && _selItem != 0)
+		{
+			std::wostringstream ss;
+			ss << _game->getLanguage()->getString(i->second->getId());
+			ss << L":";
+			ss << _selItem->getSlot()->getCost(i->second);
+			text.setText(ss.str().c_str());
+		}
+		else
+		{
+			text.setText(_game->getLanguage()->getString(i->second->getId()));
+		}
 		text.blit(_grid);
 	}
 }
@@ -259,6 +290,7 @@ void Inventory::drawItems()
 		Surface stackLayer(getWidth(), getHeight(), 0, 0);
 		stackLayer.setPalette(getPalette());
 		// Ground items
+		int fatalWounds = 0;
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
 			Surface *frame = texture->getFrame((*i)->getBigSprite());
@@ -276,6 +308,30 @@ void Inventory::drawItems()
 			if ((*i)->getFuseTimer() >= 0)
 			{
 				_grenadeIndicators.push_back(std::make_pair(frame->getX(), frame->getY()));
+			}
+
+			// fatal wounds
+			fatalWounds = 0;
+			if ((*i)->getUnit())
+			{
+				// don't show on dead units
+				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+				{
+					fatalWounds = (*i)->getUnit()->getFatalWounds();
+				}
+			}
+			if (fatalWounds > 0)
+			{
+				_stackNumber->setX(((*i)->getSlot()->getX() + (((*i)->getSlotX() + (*i)->getRules()->getInventoryWidth()) - _groundOffset) * RuleInventory::SLOT_W)-4);
+				if (fatalWounds > 9)
+				{
+					_stackNumber->setX(_stackNumber->getX()-4);
+				}
+				_stackNumber->setY(((*i)->getSlot()->getY() + ((*i)->getSlotY() + (*i)->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H)-6);
+				_stackNumber->setValue(fatalWounds);
+				_stackNumber->draw();
+				_stackNumber->setColor(32); // red
+				_stackNumber->blit(stackLayer);
 			}
 
 			// item stacking
@@ -448,7 +504,21 @@ void Inventory::setSelectedItem(BattleItem *item)
 		}
 		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem);
 	}
+
+	// 1. first draw the grid
+	if (_tu)
+	{
+		drawGrid();
+	}
+
+	// 2. then the items
 	drawItems();
+
+	// 3. lastly re-draw the grid labels (so that they are not obscured by the items)
+	if (_tu)
+	{
+		drawGridLabels(true);
+	}
 }
 
 /**
@@ -554,6 +624,13 @@ void Inventory::mouseClick(Action *action, State *state)
 				{
 					if ((SDL_GetModState() & KMOD_CTRL))
 					{
+						// cannot move fixed items with Ctrl+click
+						if (item->getRules()->isFixed())
+						{
+							_warning->showMessage(_game->getLanguage()->getString("Fixed items cannot be moved!"));
+							return;
+						}
+
 						RuleInventory *newSlot = _game->getMod()->getInventory("STR_GROUND");
 						std::string warning = "STR_NOT_ENOUGH_SPACE";
 						bool placed = false;
