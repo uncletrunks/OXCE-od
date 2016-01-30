@@ -275,9 +275,6 @@
     <ClCompile Include="Interface\FpsCounter.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
-    <ClCompile Include="Battlescape\ItemSprite.cpp">
-      <Filter>Battlescape</Filter>
-    </ClCompile>
     <ClCompile Include="Battlescape\UnitSprite.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
@@ -943,6 +940,9 @@
     <ClCompile Include="Geoscape\TrainingState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\ItemSprite.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1227,9 +1227,6 @@
     </ClInclude>
     <ClInclude Include="Interface\FpsCounter.h">
       <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Battlescape\ItemSprite.h">
-      <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Battlescape\UnitSprite.h">
       <Filter>Battlescape</Filter>
@@ -1916,6 +1913,9 @@
     </ClInclude>
     <ClInclude Include="Geoscape\TrainingState.h">
       <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\ItemSprite.h">
+      <Filter>Battlescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
