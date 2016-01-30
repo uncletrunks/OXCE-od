@@ -955,6 +955,9 @@
     <ClCompile Include="Battlescape\ConfirmEndMissionState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\ItemSprite.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1939,6 +1942,9 @@
       <Filter>Basescape</Filter>
     </ClInclude>
     <ClInclude Include="Battlescape\ConfirmEndMissionState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\ItemSprite.h">
       <Filter>Battlescape</Filter>
     </ClInclude>
   </ItemGroup>

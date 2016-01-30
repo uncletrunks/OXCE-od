@@ -37,6 +37,7 @@
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/RuleInterface.h"
 #include "SoldierSortUtil.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -415,7 +416,7 @@ void CraftArmorState::btnDeequipAllArmorClick(Action *action)
 			// add +1 armor to stores
 			if ((*i)->getArmor()->getStoreItem() != "STR_NONE")
 			{
-				_base->getItems()->addItem((*i)->getArmor()->getStoreItem());
+				_base->getStorageItems()->addItem((*i)->getArmor()->getStoreItem());
 			}
 
 			// assign no armor and update the list

@@ -36,6 +36,7 @@
 #include "../Interface/ComboBox.h"
 #include "../Mod/Mod.h"
 #include "../Basescape/SoldierSortUtil.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

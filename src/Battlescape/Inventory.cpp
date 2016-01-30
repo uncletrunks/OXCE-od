@@ -331,7 +331,7 @@ void Inventory::drawItems()
 				_stackNumber->setValue(fatalWounds);
 				_stackNumber->draw();
 				_stackNumber->setColor(32); // red
-				_stackNumber->blit(stackLayer);
+				_stackNumber->blit(&stackLayer);
 			}
 
 			// item stacking

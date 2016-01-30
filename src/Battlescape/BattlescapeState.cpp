@@ -73,6 +73,7 @@
 #include "../Savegame/BattleItem.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleInventory.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

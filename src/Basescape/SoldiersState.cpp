@@ -34,6 +34,7 @@
 #include "../Savegame/SavedGame.h"
 #include "SoldierInfoState.h"
 #include "SoldierMemorialState.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

@@ -1151,7 +1151,7 @@ void DebriefingState::prepareDebriefing()
 			totalRecovered = std::min(totalRecovered, _roundsHeal[i->first] / i->first->getHealQuantity());
 
 		if (totalRecovered > 0)
-			base->getItems()->addItem(i->first->getType(), totalRecovered);
+			base->getStorageItems()->addItem(i->first->getType(), totalRecovered);
 	}
 
 	// recover all our goodies
@@ -1402,7 +1402,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						else
 						{
 							// Vanilla behaviour (recover a full medikit).
-							base->getItems()->addItem((*it)->getRules()->getType(), 1);
+							base->getStorageItems()->addItem((*it)->getRules()->getType(), 1);
 						}
 						break;
 					case BT_AMMO:

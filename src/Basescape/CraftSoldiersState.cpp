@@ -36,6 +36,7 @@
 #include "SoldierInfoState.h"
 #include "../Mod/Armor.h"
 #include "../Mod/RuleInterface.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
