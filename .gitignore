@@ -91,3 +91,4 @@ Dependencies/
 *.swp
 #Ignore NetBeans project directory
 nbproject/
+src/OpenXcom.2010.VC.opendb
