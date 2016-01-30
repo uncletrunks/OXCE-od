@@ -71,6 +71,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/BattleItem.h"
 #include "../Mod/RuleInterface.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

@@ -30,6 +30,7 @@
 #include "../Engine/Timer.h"
 #include "../Engine/Options.h"
 #include <limits>
+#include <algorithm>
 
 namespace OpenXcom
 {

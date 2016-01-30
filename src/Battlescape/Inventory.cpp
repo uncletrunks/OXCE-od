@@ -40,6 +40,7 @@
 #include "WarningMessage.h"
 #include "../Savegame/Tile.h"
 #include "PrimeGrenadeState.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

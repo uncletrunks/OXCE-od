@@ -34,6 +34,7 @@
 #include "../Menu/ErrorMessageState.h"
 #include "../Mod/RuleInterface.h"
 #include <limits>
+#include <algorithm>
 
 namespace OpenXcom
 {

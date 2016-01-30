@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <SDL_mixer.h>
 #include <fstream>
+#include <algorithm>
 
 #include "Logger.h"
 #include "Screen.h"

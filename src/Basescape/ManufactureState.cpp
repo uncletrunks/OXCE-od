@@ -32,6 +32,7 @@
 #include "../Savegame/Production.h"
 #include "NewManufactureListState.h"
 #include "ManufactureInfoState.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

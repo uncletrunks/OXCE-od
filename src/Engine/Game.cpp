@@ -37,6 +37,7 @@
 #include "CrossPlatform.h"
 #include "FileMap.h"
 #include "../Menu/TestState.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

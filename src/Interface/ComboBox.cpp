@@ -25,6 +25,7 @@
 #include "../Engine/Font.h"
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

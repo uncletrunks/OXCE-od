@@ -31,6 +31,7 @@
 #include "../Mod/Armor.h"
 #include "../Engine/Options.h"
 #include "../Engine/Screen.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

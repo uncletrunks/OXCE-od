@@ -29,6 +29,7 @@
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Engine/Options.h"
 #include <limits>
+#include <algorithm>
 
 namespace OpenXcom
 {
