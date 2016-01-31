@@ -285,6 +285,10 @@ void Inventory::drawItems()
 		int fatalWounds = 0;
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
+			// skip fixed items (they can appear on the ground when changing armors)
+			if ((*i)->getRules()->isFixed())
+				continue;
+
 			Surface *frame = texture->getFrame((*i)->getRules()->getBigSprite());
 			// note that you can make items invisible by setting their width or height to 0 (for example used with tank corpse items)
 			if ((*i) == _selItem || (*i)->getSlotX() < _groundOffset || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0 || !frame)
