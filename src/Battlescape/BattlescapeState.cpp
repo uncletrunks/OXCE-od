@@ -104,6 +104,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_numLayers = new NumberText(3, 5, x + 232, y + 6);
 	_txtKneelStatus = new Text(8, 8, x + 137, y + 15);
 	_rank = new Surface(26, 23, x + 107, y + 33);
+	_rankTiny = new Surface(7, 7, x + 264, y + 33);
 
 	// Create buttons
 	_btnUnitUp = new BattlescapeButton(32, 16, x + 48, y);
@@ -212,6 +213,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	}
 
 	add(_rank, "rank", "battlescape", _icons);
+	add(_rankTiny, "rank", "battlescape", _icons);
 	add(_btnUnitUp, "buttonUnitUp", "battlescape", _icons);
 	add(_btnUnitDown, "buttonUnitDown", "battlescape", _icons);
 	add(_btnMapUp, "buttonMapUp", "battlescape", _icons);
@@ -1308,6 +1310,7 @@ void BattlescapeState::updateSoldierInfo()
 
 	bool playableUnit = playableUnitSelected();
 	_rank->setVisible(playableUnit);
+	_rankTiny->setVisible(playableUnit);
 	_numTimeUnits->setVisible(playableUnit);
 	_barTimeUnits->setVisible(playableUnit);
 	_barTimeUnits->setVisible(playableUnit);
@@ -1344,8 +1347,68 @@ void BattlescapeState::updateSoldierInfo()
 	Soldier *soldier = battleUnit->getGeoscapeSoldier();
 	if (soldier != 0)
 	{
-		SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
-		texture->getFrame(20 + soldier->getRank())->blit(_rank);
+		// presence of custom background determines what should happen
+		Surface *customBg = _game->getMod()->getSurface("AvatarBackground");
+		if (customBg == 0)
+		{
+			// show rank (vanilla behaviour)
+			SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
+			texture->getFrame(20 + soldier->getRank())->blit(_rank);
+		}
+		else
+		{
+			// show tiny rank (modded)
+			SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks");
+			if (texture != 0)
+			{
+				texture->getFrame(soldier->getRank())->blit(_rankTiny);
+			}
+
+			// use custom background (modded)
+			customBg->blit(_rank);
+
+			// show avatar
+			const std::string look = _game->getMod()->getArmor("STR_NONE_UC")->getSpriteInventory();
+			//const std::string look = soldier->getArmor()->getSpriteInventory();
+			const std::string gender = soldier->getGender() == GENDER_MALE ? "M" : "F";
+			std::stringstream ss;
+			Surface *surf = 0;
+
+			for (int i = 0; i <= 4; ++i)
+			{
+				ss.str("");
+				ss << look;
+				ss << gender;
+				ss << (int)soldier->getLook() + (soldier->getLookVariant() & (15 >> i)) * 4;
+				ss << ".SPK";
+				surf = _game->getMod()->getSurface(ss.str());
+				if (surf)
+				{
+					break;
+				}
+			}
+			if (!surf)
+			{
+				ss.str("");
+				ss << look;
+				ss << ".SPK";
+				surf = _game->getMod()->getSurface(ss.str());
+			}
+
+			// crop
+			surf->getCrop()->x = 66;
+			surf->getCrop()->y = 42;
+			surf->getCrop()->w = 26;
+			surf->getCrop()->h = 23;
+
+			surf->blit(_rank);
+
+			// reset crop
+			surf->getCrop()->x = 0;
+			surf->getCrop()->y = 0;
+			surf->getCrop()->w = surf->getWidth();
+			surf->getCrop()->h = surf->getHeight();
+		}
 	}
 	else
 	{

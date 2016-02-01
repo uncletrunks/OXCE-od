@@ -49,7 +49,7 @@ class BattlescapeGame;
 class BattlescapeState : public State
 {
 private:
-	Surface *_rank;
+	Surface *_rank, *_rankTiny;
 	InteractiveSurface *_icons;
 	Map *_map;
 	BattlescapeButton *_btnUnitUp, *_btnUnitDown, *_btnMapUp, *_btnMapDown, *_btnShowMap, *_btnKneel;
