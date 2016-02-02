@@ -32,6 +32,7 @@
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/CraftWeapon.h"
+#include "../Mod/Armor.h"
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/SavedGame.h"
@@ -214,12 +215,33 @@ void CraftInfoState::init()
 		_crew->clear();
 		_equip->clear();
 
-		Surface *frame1 = texture->getFrame(38);
-		frame1->setY(0);
-		for (int i = 0, x = 0; i < _craft->getNumSoldiers(); ++i, x += 10)
+		SurfaceSet *customArmorPreviews = _game->getMod()->getSurfaceSet("CustomArmorPreviews");
+		if (customArmorPreviews == 0)
 		{
-			frame1->setX(x);
-			frame1->blit(_crew);
+			// vanilla
+			Surface *frame1 = texture->getFrame(38);
+			frame1->setY(0);
+			for (int i = 0, x = 0; i < _craft->getNumSoldiers(); ++i, x += 10)
+			{
+				frame1->setX(x);
+				frame1->blit(_crew);
+			}
+		}
+		else
+		{
+			// modded armor previews
+			int x = 0;
+			for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+			{
+				if ((*i)->getCraft() == _craft)
+				{
+					Surface *customFrame1 = customArmorPreviews->getFrame((*i)->getArmor()->getCustomArmorPreviewIndex());
+					customFrame1->setY(0);
+					customFrame1->setX(x);
+					customFrame1->blit(_crew);
+					x += 10;
+				}
+			}
 		}
 
 		Surface *frame2 = texture->getFrame(40);

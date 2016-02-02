@@ -59,6 +59,7 @@ private:
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
+	int _customArmorPreviewIndex;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -162,6 +163,8 @@ public:
 	int getRankColor(int i) const;
 	/// can we access this unit's inventory?
 	bool hasInventory() const;
+	/// Gets the index of the sprite in the CustomArmorPreview sprite set
+	int getCustomArmorPreviewIndex() const;
 };
 
 }
