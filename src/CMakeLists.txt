@@ -82,6 +82,12 @@ set ( basescape_src
   Basescape/SoldierMemorialState.h
   Basescape/ManageAlienContainmentState.h
   Basescape/ManageAlienContainmentState.cpp
+  Basescape/ChangeHeadquartersState.h
+  Basescape/ChangeHeadquartersState.cpp
+  Basescape/SoldierAvatarState.h
+  Basescape/SoldierAvatarState.cpp
+  Basescape/SoldierSortUtil.h
+  Basescape/SoldierSortUtil.cpp
 )
 
 set ( battlescape_src
@@ -187,6 +193,8 @@ set ( battlescape_src
   Battlescape/PathfindingOpenSet.h
   Battlescape/AliensCrashState.cpp
   Battlescape/AliensCrashState.h
+  Battlescape/ConfirmEndMissionState.cpp
+  Battlescape/ConfirmEndMissionState.h
 )
 
 set ( engine_src
@@ -612,6 +620,8 @@ set ( savegame_src
   Savegame/SaveConverter.cpp
   Savegame/SaveConverter.h
   Savegame/SaveConverterXcom1.h
+  Savegame/SoldierAvatar.cpp
+  Savegame/SoldierAvatar.h
 )
 
 set ( ufopedia_src
