@@ -284,7 +284,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
  */
 BattleUnit::~BattleUnit()
 {
-
+	delete _currentAIState;
 }
 
 /**
@@ -2278,6 +2278,10 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 	if (_expPsiSkill && stats->psiSkill < caps.psiSkill)
 	{
 		stats->psiSkill += improveStat(_expPsiSkill);
+	}
+	if (_expPsiStrength && stats->psiStrength < caps.psiStrength)
+	{
+		stats->psiStrength += improveStat(_expPsiStrength);
 	}
 
 	bool hasImproved = false;
