@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 2.9[/b]
+[b]Mod version 3.0[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -96,6 +96,9 @@ Scripting support in unit graphic (more info in game log with debug on).[br/]
 New property `refNode` used to shared values between items/solders/armors etc.[br/]
 Option for setting numbers of melee hits done by AI.[br/]
 Control space usage of soldiers with 2x2 armors in crafts.[br/]
+[br/]
+3.0:[br/]
+Backported game machanic changes from Meridian OXCE+.[br/]
 [br/]
 
 [examples]
@@ -272,6 +275,9 @@ items:
     painKillerRecovery: 0 #how much missing health convert to morale. Default `1.0`.
     allowSelfHeal: true   #can medikit target user.
     medikitType: 0        #change how medikit wroks, `0` default with UI, `1` fast heal, `2` fast stimulant, `3` fast pain killer.
+    isConsumable: false   #check if medikit is consumable.
+    defaultInventorySlot: ~ #where place fixed weapon.
+    blockBothHands: false #do item require both hands to use?
     fixedWeaponShow: true #if it's true then it will show fixed weapon on unit.
     hitMissSound: 0       #override `hitSound` when any psi attack was unsuccessful.
     meleeMissSound: 12    #override `meleeSound` when melee attack was unsuccessful.
@@ -503,6 +509,7 @@ http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641[br/]
 [br/]
 [i]Credits[/i]
 
+Meridian for OXCE+ :)[br/]
 redv & WarBoy1982 for a couple of commits.[br/]
 SolarusScorch for fixing language in readme.[br/]
 SupSuper & WarBoy1982 & Daiky for OpenXcom :)[br/]
