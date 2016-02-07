@@ -143,6 +143,8 @@ public:
 	bool psiAttack(BattleAction *action);
 	/// Attempts a melee attack action.
 	bool meleeAttack(BattleAction *action);
+	/// Remove the medikit from the game if consumable and empty.
+	void medikitRemoveIfEmpty(BattleAction *action);
 	/// Try using medikit heal ability.
 	void medikitHeal(BattleAction *action, BattleUnit *target, int bodyPart);
 	/// Try using medikit stimulant ability.
