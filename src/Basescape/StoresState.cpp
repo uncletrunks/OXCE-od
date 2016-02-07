@@ -18,22 +18,82 @@
  */
 #include "StoresState.h"
 #include <sstream>
+#include "../Engine/CrossPlatform.h"
 #include "../Engine/Game.h"
-#include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Interface/ArrowButton.h"
+#include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
+#include "../Interface/TextList.h"
 #include "../Interface/ToggleTextButton.h"
 #include "../Interface/Window.h"
-#include "../Interface/Text.h"
-#include "../Interface/TextList.h"
 #include "../Savegame/Base.h"
-#include "../Mod/RuleItem.h"
+#include "../Savegame/Craft.h"
+#include "../Savegame/CraftWeapon.h"
 #include "../Savegame/ItemContainer.h"
+#include "../Savegame/ResearchProject.h"
+#include "../Savegame/SavedGame.h"
+#include "../Savegame/Soldier.h"
+#include "../Savegame/Transfer.h"
+#include "../Savegame/Vehicle.h"
+#include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleCraftWeapon.h"
+#include "../Mod/RuleItem.h"
+#include "../Mod/RuleResearch.h"
 
 namespace OpenXcom
 {
+
+struct compareItemName : public std::binary_function<StoredItem&, StoredItem&, bool>
+{
+	bool _reverse;
+
+	compareItemName(bool reverse) : _reverse(reverse) {}
+
+	bool operator()(const StoredItem &a, const StoredItem &b) const
+	{
+		return CrossPlatform::naturalCompare(a.name, b.name);
+	}
+};
+
+struct compareItemQuantity : public std::binary_function<StoredItem&, StoredItem&, bool>
+{
+	bool _reverse;
+
+	compareItemQuantity(bool reverse) : _reverse(reverse) {}
+
+	bool operator()(const StoredItem &a, const StoredItem &b) const
+	{
+		return (a.quantity < b.quantity) || ((a.quantity == b.quantity) && CrossPlatform::naturalCompare(a.name, b.name));
+	}
+};
+
+struct compareItemSize : public std::binary_function<StoredItem&, StoredItem&, bool>
+{
+	bool _reverse;
+
+	compareItemSize(bool reverse) : _reverse(reverse) {}
+
+	bool operator()(const StoredItem &a, const StoredItem &b) const
+	{
+		return (a.size < b.size) || ((a.size == b.size) && CrossPlatform::naturalCompare(a.name, b.name));
+	}
+};
+
+struct compareItemSpaceUsed : public std::binary_function<StoredItem&, StoredItem&, bool>
+{
+	bool _reverse;
+
+	compareItemSpaceUsed(bool reverse) : _reverse(reverse) {}
+
+	bool operator()(const StoredItem &a, const StoredItem &b) const
+	{
+		return (a.spaceUsed < b.spaceUsed) || ((a.spaceUsed == b.spaceUsed) && CrossPlatform::naturalCompare(a.name, b.name));
+	}
+};
+
 
 /**
  * Initializes all the elements in the Stores window.
@@ -45,26 +105,34 @@ StoresState::StoresState(Base *base) : _base(base)
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(148, 16, 164, 176);
-	_btnSort = new ToggleTextButton(148, 16, 8, 176);
+	_btnGrandTotal = new ToggleTextButton(148, 16, 8, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
 	_txtItem = new Text(142, 9, 10, 32);
 	_txtQuantity = new Text(54, 9, 152, 32);
 	_txtSize = new Text(54, 9, 212, 32);
 	_txtSpaceUsed = new Text(54, 9, 248, 32);
 	_lstStores = new TextList(288, 128, 8, 40);
+	_sortName = new ArrowButton(ARROW_NONE, 11, 8, 10, 32);
+	_sortQuantity = new ArrowButton(ARROW_NONE, 11, 8, 152, 32);
+	_sortSize = new ArrowButton(ARROW_NONE, 11, 8, 212, 32);
+	_sortSpaceUsed = new ArrowButton(ARROW_NONE, 11, 8, 248, 32);
 
 	// Set palette
 	setInterface("storesInfo");
 
 	add(_window, "window", "storesInfo");
 	add(_btnOk, "button", "storesInfo");
-	add(_btnSort, "button", "storesInfo");
+	add(_btnGrandTotal, "button", "storesInfo");
 	add(_txtTitle, "text", "storesInfo");
 	add(_txtItem, "text", "storesInfo");
 	add(_txtQuantity, "text", "storesInfo");
 	add(_txtSize, "text", "storesInfo");
 	add(_txtSpaceUsed, "text", "storesInfo");
 	add(_lstStores, "list", "storesInfo");
+	add(_sortName, "text", "storesInfo");
+	add(_sortQuantity, "text", "storesInfo");
+	add(_sortSize, "text", "storesInfo");
+	add(_sortSpaceUsed, "text", "storesInfo");
 
 	centerAllSurfaces();
 
@@ -76,8 +144,8 @@ StoresState::StoresState(Base *base) : _base(base)
 	_btnOk->onKeyboardPress((ActionHandler)&StoresState::btnOkClick, Options::keyOk);
 	_btnOk->onKeyboardPress((ActionHandler)&StoresState::btnOkClick, Options::keyCancel);
 
-	_btnSort->setText(tr("SORT BY SPACE USED"));
-	_btnSort->onMouseClick((ActionHandler)&StoresState::btnSortClick);
+	_btnGrandTotal->setText(tr("STR_GRAND_TOTAL"));
+	_btnGrandTotal->onMouseClick((ActionHandler)&StoresState::btnGrandTotalClick);
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
@@ -94,58 +162,20 @@ StoresState::StoresState(Base *base) : _base(base)
 	_lstStores->setBackground(_window);
 	_lstStores->setMargin(2);
 
-	initList(false);
-}
+	_sortName->setX(_sortName->getX() + _txtItem->getTextWidth() + 4);
+	_sortName->onMouseClick((ActionHandler)&StoresState::sortNameClick);
 
-/**
- * Shows the items.
- */
-void StoresState::initList(bool sort)
-{
-	// clear everything
-	_lstStores->clearList();
-	_sortedList.clear();
+	_sortQuantity->setX(_sortQuantity->getX() + _txtQuantity->getTextWidth() + 4);
+	_sortQuantity->onMouseClick((ActionHandler)&StoresState::sortQuantityClick);
 
-	// find relevant items
-	const std::vector<std::string> &items = _game->getMod()->getItemsList();
-	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
-	{
-		int qty = _base->getItems()->getItem(*i);
-		if (qty > 0)
-		{
-			RuleItem *rule = _game->getMod()->getItem(*i);
-			_sortedList.push_back(StoredItem(*i, qty, rule->getSize(), qty * rule->getSize()));
-		}
-	}
+	_sortSize->setX(_sortSize->getX() + _txtSize->getTextWidth() + 4);
+	_sortSize->onMouseClick((ActionHandler)&StoresState::sortSizeClick);
 
-	if (sort)
-	{
-		// sort items
-		std::stable_sort(_sortedList.begin(), _sortedList.end());
+	_sortSpaceUsed->setX(_sortSpaceUsed->getX() + _txtSpaceUsed->getTextWidth() + 4);
+	_sortSpaceUsed->onMouseClick((ActionHandler)&StoresState::sortSpaceUsedClick);
 
-		// show items in reverse order (sorted descending by space used)
-		for (std::vector<StoredItem>::const_reverse_iterator j = _sortedList.rbegin(); j != _sortedList.rend(); ++j)
-		{
-				std::wostringstream ss, ss2, ss3;
-				ss << (*j).quantity;
-				ss2 << (*j).size;
-				ss3 << (*j).spaceUsed;
-				_lstStores->addRow(4, tr((*j).name).c_str(), ss.str().c_str(), ss2.str().c_str(), ss3.str().c_str());
-		}
-	}
-	else
-	{
-		// show in normal order (unsorted)
-		for (std::vector<StoredItem>::const_iterator j = _sortedList.begin(); j != _sortedList.end(); ++j)
-		{
-				std::wostringstream ss, ss2, ss3;
-				ss << (*j).quantity;
-				ss2 << (*j).size;
-				ss3 << (*j).spaceUsed;
-				_lstStores->addRow(4, tr((*j).name).c_str(), ss.str().c_str(), ss2.str().c_str(), ss3.str().c_str());
-		}
-	}
-
+	itemOrder = ITEM_SORT_NONE;
+	updateArrows();
 }
 
 /**
@@ -166,12 +196,333 @@ void StoresState::btnOkClick(Action *)
 }
 
 /**
- * Sorts the list by space used (descending)
+ * Reloads the item list.
+ */
+void StoresState::initList(bool grandTotal)
+{
+	// clear everything
+	_lstStores->clearList();
+	_itemList.clear();
+
+	// find relevant items
+	const std::vector<std::string> &items = _game->getMod()->getItemsList();
+	for (std::vector<std::string>::const_iterator item = items.begin(); item != items.end(); ++item)
+	{
+		int qty = 0;
+		if (!grandTotal)
+		{
+			// items in stores from this base only
+			qty += _base->getItems()->getItem(*item);
+		}
+		else
+		{
+			// items from all bases
+			for (std::vector<Base*>::iterator base = _game->getSavedGame()->getBases()->begin(); base != _game->getSavedGame()->getBases()->end(); ++base)
+			{
+				// 1. items in base stores
+				qty += (*base)->getItems()->getItem(*item);
+
+				// 2. items from craft
+				for (std::vector<Craft*>::iterator craft = (*base)->getCrafts()->begin(); craft != (*base)->getCrafts()->end(); ++craft)
+				{
+					// 2a. craft equipment
+					qty += (*craft)->getItems()->getItem(*item);
+
+					// 2b. craft weapons + ammo
+					for (std::vector<CraftWeapon*>::iterator craftWeapon = (*craft)->getWeapons()->begin(); craftWeapon != (*craft)->getWeapons()->end(); ++craftWeapon)
+					{
+						if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+						{
+							qty += 1;
+						}
+						else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
+						{
+							qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+						}
+					}
+
+					// 2c. craft vehicles + ammo
+					for (std::vector<Vehicle*>::iterator vehicle = (*craft)->getVehicles()->begin(); vehicle != (*craft)->getVehicles()->end(); ++vehicle)
+					{
+						if ((*vehicle)->getRules()->getType() == (*item))
+						{
+							qty += 1;
+						}
+						else if (!(*vehicle)->getRules()->getCompatibleAmmo()->empty())
+						{
+							if ((*vehicle)->getRules()->getCompatibleAmmo()->front() == (*item))
+							{
+								qty += (*vehicle)->getAmmo();
+							}
+						}
+					}
+				}
+
+				// 3. armor in use (worn by soldiers)
+				for (std::vector<Soldier*>::iterator soldier = (*base)->getSoldiers()->begin(); soldier != (*base)->getSoldiers()->end(); ++soldier)
+				{
+					if ((*soldier)->getArmor()->getStoreItem() == (*item))
+					{
+						qty += 1;
+					}
+				}
+
+				// 4. items/aliens in research
+				for (std::vector<ResearchProject *>::const_iterator research = (*base)->getResearch().begin(); research != (*base)->getResearch().end(); ++research)
+				{
+					if ((*research)->getRules()->needItem() && (*research)->getRules()->getName() == (*item))
+					{
+						if ((_game->getMod()->getUnit((*research)->getRules()->getName()) || Options::spendResearchedItems))
+						{
+							qty += 1;
+							break;
+						}
+					}
+				}
+
+				// 5. items in transfer
+				for (std::vector<Transfer*>::iterator transfer = (*base)->getTransfers()->begin(); transfer != (*base)->getTransfers()->end(); ++transfer)
+				{
+					Craft *craft2 = (*transfer)->getCraft();
+					if (craft2)
+					{
+						// 5a. craft equipment
+						qty += craft2->getItems()->getItem(*item);
+
+						// 5b. craft weapons + ammo
+						for (std::vector<CraftWeapon*>::iterator craftWeapon = craft2->getWeapons()->begin(); craftWeapon != craft2->getWeapons()->end(); ++craftWeapon)
+						{
+							if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+							{
+								qty += 1;
+							}
+							else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
+							{
+								qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+							}
+						}
+
+						// 5c. craft vehicles + ammo
+						for (std::vector<Vehicle*>::iterator vehicle = craft2->getVehicles()->begin(); vehicle != craft2->getVehicles()->end(); ++vehicle)
+						{
+							if ((*vehicle)->getRules()->getType() == (*item))
+							{
+								qty += 1;
+							}
+							else if (!(*vehicle)->getRules()->getCompatibleAmmo()->empty())
+							{
+								if ((*vehicle)->getRules()->getCompatibleAmmo()->front() == (*item))
+								{
+									qty += (*vehicle)->getAmmo();
+								}
+							}
+						}
+					}
+					else if ((*transfer)->getItems() == (*item))
+					{
+						// 5d. items in transfer
+						qty += (*transfer)->getQuantity();
+					}
+				}
+			}
+		}
+
+		if (qty > 0)
+		{
+			RuleItem *rule = _game->getMod()->getItem(*item);
+			_itemList.push_back(StoredItem(tr(*item), qty, rule->getSize(), qty * rule->getSize()));
+		}
+	}
+
+	sortList(itemOrder);
+}
+
+/**
+ * Refreshes the item list.
+ */
+void StoresState::init()
+{
+	State::init();
+
+	initList(false);
+}
+
+/**
+ * Includes items from all bases.
  * @param action Pointer to an action.
  */
-void StoresState::btnSortClick(Action *action)
+void StoresState::btnGrandTotalClick(Action *action)
 {
-	initList(_btnSort->getPressed());
+	initList(_btnGrandTotal->getPressed());
+}
+
+/**
+ * Updates the sorting arrows based
+ * on the current setting.
+ */
+void StoresState::updateArrows()
+{
+	_sortName->setShape(ARROW_NONE);
+	_sortQuantity->setShape(ARROW_NONE);
+	_sortSize->setShape(ARROW_NONE);
+	_sortSpaceUsed->setShape(ARROW_NONE);
+	switch (itemOrder)
+	{
+	case ITEM_SORT_NAME_ASC:
+		_sortName->setShape(ARROW_SMALL_UP);
+		break;
+	case ITEM_SORT_NAME_DESC:
+		_sortName->setShape(ARROW_SMALL_DOWN);
+		break;
+	case ITEM_SORT_QUANTITY_ASC:
+		_sortQuantity->setShape(ARROW_SMALL_UP);
+		break;
+	case ITEM_SORT_QUANTITY_DESC:
+		_sortQuantity->setShape(ARROW_SMALL_DOWN);
+		break;
+	case ITEM_SORT_SIZE_ASC:
+		_sortSize->setShape(ARROW_SMALL_UP);
+		break;
+	case ITEM_SORT_SIZE_DESC:
+		_sortSize->setShape(ARROW_SMALL_DOWN);
+		break;
+	case ITEM_SORT_SPACE_USED_ASC:
+		_sortSpaceUsed->setShape(ARROW_SMALL_UP);
+		break;
+	case ITEM_SORT_SPACE_USED_DESC:
+		_sortSpaceUsed->setShape(ARROW_SMALL_DOWN);
+		break;
+	}
+}
+
+/**
+ * Sorts the item list.
+ * @param sort Order to sort the items in.
+ */
+void StoresState::sortList(ItemSort sort)
+{
+	switch (sort)
+	{
+	case ITEM_SORT_NONE:
+		break;
+	case ITEM_SORT_NAME_ASC:
+		std::sort(_itemList.begin(), _itemList.end(), compareItemName(false));
+		break;
+	case ITEM_SORT_NAME_DESC:
+		std::sort(_itemList.rbegin(), _itemList.rend(), compareItemName(true));
+		break;
+	case ITEM_SORT_QUANTITY_ASC:
+		std::sort(_itemList.begin(), _itemList.end(), compareItemQuantity(false));
+		break;
+	case ITEM_SORT_QUANTITY_DESC:
+		std::sort(_itemList.rbegin(), _itemList.rend(), compareItemQuantity(true));
+		break;
+	case ITEM_SORT_SIZE_ASC:
+		std::sort(_itemList.begin(), _itemList.end(), compareItemSize(false));
+		break;
+	case ITEM_SORT_SIZE_DESC:
+		std::sort(_itemList.rbegin(), _itemList.rend(), compareItemSize(true));
+		break;
+	case ITEM_SORT_SPACE_USED_ASC:
+		std::sort(_itemList.begin(), _itemList.end(), compareItemSpaceUsed(false));
+		break;
+	case ITEM_SORT_SPACE_USED_DESC:
+		std::sort(_itemList.rbegin(), _itemList.rend(), compareItemSpaceUsed(true));
+		break;
+	}
+	updateList();
+}
+
+/**
+ * Updates the item list with the current list
+ * of available items.
+ */
+void StoresState::updateList()
+{
+	for (std::vector<StoredItem>::const_iterator j = _itemList.begin(); j != _itemList.end(); ++j)
+	{
+		std::wostringstream ss, ss2, ss3;
+		ss << (*j).quantity;
+		ss2 << (*j).size;
+		ss3 << (*j).spaceUsed;
+		_lstStores->addRow(4, (*j).name.c_str(), ss.str().c_str(), ss2.str().c_str(), ss3.str().c_str());
+	}
+}
+
+/**
+ * Sorts the items by name.
+ * @param action Pointer to an action.
+ */
+void StoresState::sortNameClick(Action *)
+{
+	if (itemOrder == ITEM_SORT_NAME_ASC)
+	{
+		itemOrder = ITEM_SORT_NAME_DESC;
+	}
+	else
+	{
+		itemOrder = ITEM_SORT_NAME_ASC;
+	}
+	updateArrows();
+	_lstStores->clearList();
+	sortList(itemOrder);
+}
+
+/**
+ * Sorts the items by quantity.
+ * @param action Pointer to an action.
+ */
+void StoresState::sortQuantityClick(Action *)
+{
+	if (itemOrder == ITEM_SORT_QUANTITY_ASC)
+	{
+		itemOrder = ITEM_SORT_QUANTITY_DESC;
+	}
+	else
+	{
+		itemOrder = ITEM_SORT_QUANTITY_ASC;
+	}
+	updateArrows();
+	_lstStores->clearList();
+	sortList(itemOrder);
+}
+
+/**
+ * Sorts the items by size.
+ * @param action Pointer to an action.
+ */
+void StoresState::sortSizeClick(Action *)
+{
+	if (itemOrder == ITEM_SORT_SIZE_ASC)
+	{
+		itemOrder = ITEM_SORT_SIZE_DESC;
+	}
+	else
+	{
+		itemOrder = ITEM_SORT_SIZE_ASC;
+	}
+	updateArrows();
+	_lstStores->clearList();
+	sortList(itemOrder);
+}
+
+/**
+ * Sorts the items by space used.
+ * @param action Pointer to an action.
+ */
+void StoresState::sortSpaceUsedClick(Action *)
+{
+	if (itemOrder == ITEM_SORT_SPACE_USED_ASC)
+	{
+		itemOrder = ITEM_SORT_SPACE_USED_DESC;
+	}
+	else
+	{
+		itemOrder = ITEM_SORT_SPACE_USED_ASC;
+	}
+	updateArrows();
+	_lstStores->clearList();
+	sortList(itemOrder);
 }
 
 }
