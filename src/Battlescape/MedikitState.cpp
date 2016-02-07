@@ -205,6 +205,7 @@ void MedikitState::onEndClick(Action *)
 		_game->getScreen()->resetDisplay(false);
 	}
 	_game->popState();
+	_tileEngine->medikitRemoveIfEmpty(_action);
 }
 
 /**
