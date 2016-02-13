@@ -278,17 +278,28 @@ InventoryState::~InventoryState()
 	}
 }
 
-static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile, bool forceDropFixedItems)
+static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile, bool deleteFixedItems)
 {
 	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
 
 	// clear unit's inventory (i.e. move everything to the ground)
 	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
 	{
-		if ((*i)->getRules()->isFixed() && !forceDropFixedItems)
+		if ((*i)->getRules()->isFixed())
 		{
-			// do nothing, fixed items cannot be moved (individually)!
-			++i;
+			if (deleteFixedItems)
+			{
+				// delete fixed items completely (e.g. when changing armor)
+				(*i)->setOwner(NULL);
+				BattleItem *item = *i;
+				i = unitInv->erase(i);
+				game->getSavedGame()->getSavedBattle()->removeItem(item);
+			}
+			else
+			{
+				// do nothing, fixed items cannot be moved (individually by the player)!
+				++i;
+			}
 		}
 		else
 		{
@@ -356,7 +367,7 @@ void InventoryState::init()
 			_clearInventoryTemplate(_tempInventoryTemplate);
 			_createInventoryTemplate(_tempInventoryTemplate);
 
-			// Step 2: drop all items (incl. fixed items!!)
+			// Step 2: drop all items (and delete fixed items!!)
 			std::vector<BattleItem*> *unitInv = unit->getInventory();
 			Tile *groundTile = unit->getTile();
 			_clearInventory(_game, unitInv, groundTile, true);

@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sstream>
+#include <climits>
 #include "PsiTrainingState.h"
 #include "AllocatePsiTrainingState.h"
 #include "../Engine/Game.h"

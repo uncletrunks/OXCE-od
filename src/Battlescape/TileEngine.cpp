@@ -2792,6 +2792,22 @@ bool TileEngine::meleeAttack(BattleAction *action)
 }
 
 /**
+ * Remove the medikit from the game if consumable and empty.
+ * @param action
+ */
+void TileEngine::medikitRemoveIfEmpty(BattleAction *action)
+{
+	// remove item if completely used up
+	if (action->weapon->getRules()->isConsumable())
+	{
+		if (action->weapon->getPainKillerQuantity() == 0 && action->weapon->getStimulantQuantity() == 0 && action->weapon->getHealQuantity() == 0)
+		{
+			_save->removeItem(action->weapon);
+		}
+	}
+}
+
+/**
  * Try using medikit heal ability.
  * @param action
  * @param target

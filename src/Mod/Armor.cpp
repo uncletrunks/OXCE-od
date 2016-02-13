@@ -33,7 +33,8 @@ Armor::Armor(const std::string &type) :
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _regeneration(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
-	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0)
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0),
+	_customArmorPreviewIndex(0)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -177,6 +178,7 @@ void Armor::load(const YAML::Node &node, const RecolorParser& parser)
 		_spriteScript = parser.parse(_type, scr.as<std::string>());
 	}
 	_units = node["units"].as< std::vector<std::string> >(_units);
+	_customArmorPreviewIndex = node["customArmorPreviewIndex"].as<int>(_customArmorPreviewIndex);
 }
 
 /**
@@ -679,6 +681,15 @@ const Armor::RecolorParser::Container &Armor::getSpriteScript() const
 const std::vector<std::string> &Armor::getUnits() const
 {
 	return _units;
+}
+
+/**
+ * Gets the index of the sprite in the CustomArmorPreview sprite set.
+ * @return Sprite index.
+ */
+int Armor::getCustomArmorPreviewIndex() const
+{
+	return _customArmorPreviewIndex;
 }
 
 }

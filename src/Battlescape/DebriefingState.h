@@ -65,11 +65,12 @@ private:
 	Text *_txtTitle, *_txtItem, *_txtQuantity, *_txtScore, *_txtRecovery, *_txtRating,
 	     *_txtSoldier, *_txtTU, *_txtStamina, *_txtHealth, *_txtBravery, *_txtReactions,
 	     *_txtFiring, *_txtThrowing, *_txtMelee, *_txtStrength, *_txtPsiStrength, *_txtPsiSkill;
-	TextList *_lstStats, *_lstRecovery, *_lstTotal, *_lstSoldierStats;
+	TextList *_lstStats, *_lstRecovery, *_lstTotal, *_lstSoldierStats, *_lstRecoveredItems;
 	std::string _currentTooltip;
 	Text *_txtTooltip;
 	std::vector<ReequipStat> _missingItems;
-	std::map<RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal;
+	std::map<RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal, _baseItemsBeforeRecovery;
+	Uint8 _ammoColor;
 	std::map<int, RecoveryItem*> _recoveryStats;
 	bool _positiveScore, _noContainment, _manageContainment, _destroyBase;
 	int _limitsEnforced;
@@ -83,9 +84,9 @@ private:
 	void recoverAlien(BattleUnit *from, Base *base);
 	/// Reequips a craft after a mission.
 	void reequipCraft(Base *base, Craft *craft, bool vehicleItemsCanBeDestroyed);
-	/// True when soldier stat improvements are shown rather than scores. Toggled with the corresponding button.
-	bool _showSoldierStats;
-	/// Sets the visibility according to the _showSoldierStats flag
+	/// 0 = score, 1 = stat improvement, 2 = recovered items
+	int _pageNumber;
+	/// Sets the visibility according to the _pageNumber
 	void applyVisibility();
 	/// Creates a string for the soldier stats table from a stat difference value
 	std::wstring makeSoldierString(int stat);

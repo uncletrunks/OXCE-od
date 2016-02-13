@@ -69,6 +69,7 @@ private:
 	RecolorParser::Container _recolorScript;
 	RecolorParser::Container _spriteScript;
 	std::vector<std::string> _units;
+	int _customArmorPreviewIndex;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -180,6 +181,8 @@ public:
 	const RecolorParser::Container &getSpriteScript() const;
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
+	/// Gets the index of the sprite in the CustomArmorPreview sprite set
+	int getCustomArmorPreviewIndex() const;
 };
 
 }
