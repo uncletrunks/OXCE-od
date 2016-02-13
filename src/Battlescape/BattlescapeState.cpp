@@ -104,7 +104,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_numLayers = new NumberText(3, 5, x + 232, y + 6);
 	_txtKneelStatus = new Text(8, 8, x + 137, y + 15);
 	_rank = new Surface(26, 23, x + 107, y + 33);
-	_rankTiny = new Surface(7, 7, x + 264, y + 33);
 
 	// Create buttons
 	_btnUnitUp = new BattlescapeButton(32, 16, x + 48, y);
@@ -155,7 +154,17 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnPsi->setVisible(false);
 
 	// Create soldier stats summary
-	_txtName = new Text(136, 10, x + 135, y + 32);
+	SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks");
+	if (texture != 0)
+	{
+		_rankTiny = new Surface(7, 7, x + 135, y + 33);
+		_txtName = new Text(128, 10, x + 143, y + 32);
+	}
+	else
+	{
+		_txtName = new Text(136, 10, x + 135, y + 32);
+		_rankTiny = new Surface(7, 7, x + 264, y + 33);
+	}
 
 	_numTimeUnits = new NumberText(15, 5, x + 136, y + 42);
 	_barTimeUnits = new Bar(102, 3, x + 170, y + 41);
