@@ -213,7 +213,7 @@ void StoresState::initList(bool grandTotal)
 		if (!grandTotal)
 		{
 			// items in stores from this base only
-			qty += _base->getItems()->getItem(*item);
+			qty += _base->getStorageItems()->getItem(*item);
 		}
 		else
 		{
@@ -221,7 +221,7 @@ void StoresState::initList(bool grandTotal)
 			for (std::vector<Base*>::iterator base = _game->getSavedGame()->getBases()->begin(); base != _game->getSavedGame()->getBases()->end(); ++base)
 			{
 				// 1. items in base stores
-				qty += (*base)->getItems()->getItem(*item);
+				qty += (*base)->getStorageItems()->getItem(*item);
 
 				// 2. items from craft
 				for (std::vector<Craft*>::iterator craft = (*base)->getCrafts()->begin(); craft != (*base)->getCrafts()->end(); ++craft)

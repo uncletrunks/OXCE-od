@@ -289,7 +289,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 		const std::vector<std::string> &items = _game->getMod()->getItemsList();
 		for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 		{
-			int qty = _base->getItems()->getItem(*i);
+			int qty = _base->getStorageItems()->getItem(*i);
 			if (qty > 0 && (Options::canSellLiveAliens || !_game->getMod()->getItem(*i)->isAlien()))
 			{
 				RuleItem *rule = _game->getMod()->getItem(*i);
@@ -800,7 +800,7 @@ void DebriefingState::prepareDebriefing()
 		const std::vector<std::string> &items = _game->getMod()->getItemsList();
 		for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 		{
-			int qty = _base->getItems()->getItem(*i);
+			int qty = _base->getStorageItems()->getItem(*i);
 			if (qty > 0 && (Options::canSellLiveAliens || !_game->getMod()->getItem(*i)->isAlien()))
 			{
 				_baseItemsBeforeRecovery[_game->getMod()->getItem(*i)] += qty;
