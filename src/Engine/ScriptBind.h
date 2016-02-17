@@ -87,18 +87,13 @@ struct ParserHelper
 	class ReservedPos
 	{
 		ProgPos _pos;
-		int _index;
-		ReservedPos(ProgPos pos, int index) : _pos{ pos }, _index{ index }
+		ReservedPos(ProgPos pos) : _pos{ pos }
 		{
 
 		}
 		ProgPos getPos()
 		{
 			return _pos;
-		}
-		int getIndex()
-		{
-			return _index;
 		}
 
 		friend class ParserHelper;
@@ -115,7 +110,7 @@ struct ParserHelper
 	///temporary script data
 	std::map<std::string, ScriptContainerData> refListCurr;
 	///list of variables uses
-	std::vector<ReservedPos<ProgPos>> refLabelsUses;
+	std::vector<std::pair<ReservedPos<ProgPos>, int>> refLabelsUses;
 	///list of variables uses
 	std::vector<ProgPos> refLabelsList;
 
@@ -159,7 +154,7 @@ struct ParserHelper
 		pushProc(0);
 		for (auto& p : refLabelsUses)
 		{
-			updateReserved<ProgPos>(p, refLabelsList[p.getIndex()]);
+			updateReserved<ProgPos>(p.first, refLabelsList[p.second]);
 		}
 	}
 
@@ -218,11 +213,11 @@ struct ParserHelper
 	 * Preparing place and position on proc vector for some value and return position of it.
 	 */
 	template<typename T>
-	ReservedPos<T> pushReserved(int index = -1)
+	ReservedPos<T> pushReserved()
 	{
 		auto curr = getCurrPos();
 		proc.insert(proc.end(), sizeof(T), 0);
-		return { curr, index };
+		return { curr };
 	}
 
 	/**
@@ -235,13 +230,23 @@ struct ParserHelper
 	}
 
 	/**
+	 * Push value on proc vector.
+	 * @param v Value to push.
+	 */
+	template<typename T>
+	void pushValue(const T& v)
+	{
+		updateReserved<T>(pushReserved<T>(), v);
+	}
+
+	/**
 	 * Pushing proc operation id on proc vector.
 	 */
 	ReservedPos<ProcOp> pushProc(Uint8 procId)
 	{
 		auto curr = getCurrPos();
 		proc.push_back(procId);
-		return { curr, -1 };
+		return { curr };
 	}
 
 	/**
@@ -255,7 +260,7 @@ struct ParserHelper
 	}
 
 	/**
-	 * Try pushing label arg on proc vector.
+	 * Try pushing label arg on proc vector. Can't use this to create loop back label.
 	 * @param s name of label.
 	 * @return true if label was succefuly added.
 	 */
@@ -273,9 +278,13 @@ struct ParserHelper
 		return true;
 	}
 
+	/**
+	 * Push label arg to proc vector.
+	 * @param index
+	 */
 	void pushLabel(int index)
 	{
-		refLabelsUses.push_back(pushReserved<ProgPos>(index));
+		refLabelsUses.push_back(std::make_pair(pushReserved<ProgPos>(), index));
 	}
 	/**
 	 * Create new label for proc vector.
