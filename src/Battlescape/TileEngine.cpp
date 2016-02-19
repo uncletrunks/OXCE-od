@@ -38,6 +38,7 @@
 #include "../Mod/MapData.h"
 #include "../Mod/Unit.h"
 #include "../Mod/Armor.h"
+#include "../Mod/Mod.h"
 #include "Pathfinding.h"
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
@@ -1088,7 +1089,7 @@ void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
 	if (damage >= type->SmokeThreshold)
 	{
 		// smoke from explosions always stay 6 to 14 turns - power of a smoke grenade is 60
-		if (tile->getSmoke() < 10 && tile->getTerrainLevel() > -24)
+		if (tile->getSmoke() < _save->getBattleGame()->getMod()->getTooMuchSmokeThreshold() && tile->getTerrainLevel() > -24)
 		{
 			tile->setFire(0);
 			if (damage >= type->SmokeThreshold * 2)
