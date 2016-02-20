@@ -58,14 +58,14 @@ enum TokenEnum
  */
 struct SelectedToken
 {
-	///type of this token
+	/// type of this token.
 	TokenEnum type;
-	///iterator pointing place of first character
+	/// iterator pointing place of first character.
 	ite begin;
-	///iterator pointing place past of last character
+	/// iterator pointing place past of last character.
 	ite end;
 
-	///custom value
+	/// custom value.
 	int tag;
 
 	std::string toString() const { return std::string(begin, end); }
@@ -101,25 +101,25 @@ struct ParserHelper
 
 	class ProcOp { };
 
-	///member pointer accessing script operations
+	/// member pointer accessing script operations.
 	std::vector<Uint8>& proc;
-	///all available operations for script
+	/// all available operations for script.
 	const std::map<std::string, ScriptParserData>& procList;
-	///all available data for script
+	/// all available data for script.
 	const std::map<std::string, ScriptContainerData>& refList;
-	///temporary script data
+	/// temporary script data.
 	std::map<std::string, ScriptContainerData> refListCurr;
-	///list of variables uses
+	/// list of variables uses.
 	std::vector<std::pair<ReservedPos<ProgPos>, int>> refLabelsUses;
-	///list of variables uses
+	/// list of variables uses.
 	std::vector<ProgPos> refLabelsList;
 
-	///index of used script registers
+	/// index of used script registers.
 	Uint8 regIndexUsed;
-	///negative index of used const values
+	/// negative index of used const values.
 	int constIndexUsed;
 
-	///Store position of blocks of code like "if" or "while"
+	/// Store position of blocks of code like "if" or "while".
 	std::vector<Block> codeBlocks;
 
 	/**
@@ -1129,7 +1129,7 @@ namespace helper
 template<typename T, typename P, P T::*X>
 struct BindPropGet
 {
-	static RetEnum func(T* t, P& p)
+	static RetEnum func(T *t, P &p)
 	{
 		if (t) p = t->*X; else p = P{};
 		return RetContinue;
@@ -1138,7 +1138,7 @@ struct BindPropGet
 template<typename T, typename P, P T::*X>
 struct BindPropSet
 {
-	static RetEnum func(T* t, P p)
+	static RetEnum func(T *t, P p)
 	{
 		if (t) t->*X = p;
 		return RetContinue;
@@ -1147,7 +1147,7 @@ struct BindPropSet
 template<typename T, typename N, typename P, N T::*X, P N::*XX>
 struct BindPropNestGet
 {
-	static RetEnum func(T* t, P& p)
+	static RetEnum func(T *t, P &p)
 	{
 		if (t) p = (t->*X).*XX; else p = P{};
 		return RetContinue;
@@ -1156,7 +1156,7 @@ struct BindPropNestGet
 template<typename T, typename N, typename P, N T::*X, P N::*XX>
 struct BindPropNestSet
 {
-	static RetEnum func(T* t, P p)
+	static RetEnum func(T *t, P p)
 	{
 		if (t) (t->*X).*XX = p;
 		return RetContinue;
@@ -1166,7 +1166,7 @@ struct BindPropNestSet
 template<typename T, typename P, P I>
 struct BindValue
 {
-	static RetEnum func(T* t, P& p)
+	static RetEnum func(T *t, P &p)
 	{
 		if (t) p = I; else p = P{};
 		return RetContinue;
@@ -1189,9 +1189,9 @@ struct BindFunc<void(*)(Args...), X>
 template<typename T, typename... Args, bool(T::*X)(Args...)>
 struct BindFunc<bool(T::*)(Args...), X>
 {
-	static RetEnum func(T* p, int& r, Args... a)
+	static RetEnum func(T *t, int &r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
+		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };
@@ -1199,9 +1199,9 @@ struct BindFunc<bool(T::*)(Args...), X>
 template<typename T, typename... Args, int(T::*X)(Args...)>
 struct BindFunc<int(T::*)(Args...), X>
 {
-	static RetEnum func(T* p, int& r, Args... a)
+	static RetEnum func(T *t, int &r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
+		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };
@@ -1209,9 +1209,9 @@ struct BindFunc<int(T::*)(Args...), X>
 template<typename T, typename... Args, bool(T::*X)(Args...) const>
 struct BindFunc<bool(T::*)(Args...) const, X>
 {
-	static RetEnum func(T* p, int& r, Args... a)
+	static RetEnum func(T *t, int &r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
+		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };
@@ -1219,9 +1219,9 @@ struct BindFunc<bool(T::*)(Args...) const, X>
 template<typename T, typename... Args, int(T::*X)(Args...) const>
 struct BindFunc<int(T::*)(Args...) const, X>
 {
-	static RetEnum func(T* p, int& r, Args... a)
+	static RetEnum func(T *t, int &r, Args... a)
 	{
-		if (p) r = (p->*X)(std::forward<Args>(a)...); else r = 0;
+		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
 	}
 };
@@ -1229,9 +1229,9 @@ struct BindFunc<int(T::*)(Args...) const, X>
 template<typename T, typename... Args, void(T::*X)(Args...)>
 struct BindFunc<void(T::*)(Args...), X>
 {
-	static RetEnum func(T* p, Args... a)
+	static RetEnum func(T *t, Args... a)
 	{
-		if (p) (p->*X)(std::forward<Args>(a)...);
+		if (t) (t->*X)(std::forward<Args>(a)...);
 		return RetContinue;
 	}
 };

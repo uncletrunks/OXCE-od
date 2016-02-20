@@ -53,7 +53,7 @@ private:
 	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
-	int _size, _weight, _visibilityAtDark, _regeneration;
+	int _size, _weight, _visibilityAtDark;
 	float _damageModifier[DAMAGE_TYPES];
 	std::vector<int> _loftempsSet;
 	UnitStats _stats;

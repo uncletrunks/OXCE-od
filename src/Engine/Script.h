@@ -40,7 +40,7 @@ constexpr int ScriptMaxArg = 8;
 constexpr int ScriptMaxReg = 256;
 
 /**
- * Script execution cunter
+ * Script execution cunter.
  */
 enum class ProgPos : size_t
 {
@@ -66,7 +66,7 @@ inline ProgPos operator++(ProgPos& pos, int)
 }
 
 /**
- * Args types
+ * Args types.
  */
 enum ArgEnum : Uint8
 {
@@ -96,7 +96,7 @@ inline ArgEnum operator++(ArgEnum& arg, int)
 }
 
 /**
- * Avaiable regs
+ * Avaiable regs.
  */
 enum RegEnum : Uint8
 {
@@ -123,19 +123,7 @@ enum RetEnum : Uint8
 };
 
 /**
- * Helper class used for calling sequence of function from variadic templates.
- */
-struct Dummy
-{
-	template<typename... ZZ>
-	Dummy(ZZ...)
-	{
-		//nothing
-	}
-};
-
-/**
- * Struct that cache state of script data and is place of script write temporary data
+ * Struct that cache state of script data and is place of script write temporary data.
  */
 struct ScriptWorker
 {
@@ -143,24 +131,24 @@ struct ScriptWorker
 	int shade;
 	typename std::aligned_storage<ScriptMaxReg, alignof(void*)>::type reg;
 
-	/// Default constructor
+	/// Default constructor.
 	ScriptWorker() : proc(0), shade(0) //reg not initialized
 	{
 
 	}
 
-	/// Programmable bliting using script
+	/// Programmable bliting using script.
 	void executeBlit(Surface* src, Surface* dest, int x, int y, bool half = false);
-	/// Call script with two arguments
+	/// Call script with two arguments.
 	int execute(int i0, int i1);
 
-	/// Get value from reg
+	/// Get value from reg.
 	template<typename T>
 	T &ref(size_t offset)
 	{
 		return *reinterpret_cast<T*>(reinterpret_cast<char*>(&reg) + offset);
 	}
-	/// Get value from proc vector
+	/// Get value from proc vector.
 	template<typename T>
 	const T &const_val(const Uint8 *ptr, size_t offset = 0)
 	{
@@ -171,7 +159,7 @@ struct ScriptWorker
 using FuncCommon = RetEnum (*)(ScriptWorker &, const Uint8 *, ProgPos &);
 
 /**
- * Struct used to store definition of used data by script
+ * Struct used to store definition of used data by script.
  */
 struct ScriptContainerData
 {
@@ -180,6 +168,8 @@ struct ScriptContainerData
 		static ArgEnum curr = ArgMax;
 		return curr++;
 	}
+
+	/// Register type to get run time value representing it.
 	template<typename T>
 	static ArgEnum Register()
 	{
@@ -201,7 +191,7 @@ struct ScriptContainerData
 };
 
 /**
- * Common base of script execution
+ * Common base of script execution.
  */
 class ScriptContainerBase
 {
@@ -209,7 +199,7 @@ class ScriptContainerBase
 	std::vector<Uint8> _proc;
 
 protected:
-	/// Protected destructor
+	/// Protected destructor.
 	~ScriptContainerBase() { }
 
 	void updateBase(ScriptWorker* ref) const
@@ -226,19 +216,19 @@ protected:
 	}
 
 public:
-	/// constructor
+	/// constructor.
 	ScriptContainerBase() = default;
-	/// copy constructor
+	/// copy constructor.
 	ScriptContainerBase(const ScriptContainerBase&) = delete;
-	/// move constructor
+	/// move constructor.
 	ScriptContainerBase(ScriptContainerBase&&) = default;
 
-	/// copy
+	/// copy.
 	ScriptContainerBase &operator=(const ScriptContainerBase&) = delete;
-	/// move
+	/// move.
 	ScriptContainerBase &operator=(ScriptContainerBase&&) = default;
 
-	/// Test if is any script there
+	/// Test if is any script there.
 	explicit operator bool() const
 	{
 		return !_proc.empty();
@@ -246,7 +236,7 @@ public:
 };
 
 /**
- * Strong typed script
+ * Strong typed script.
  */
 template<typename... Args>
 class ScriptContainer : public ScriptContainerBase
@@ -263,7 +253,7 @@ class ScriptContainer : public ScriptContainerBase
 		//end loop
 	}
 public:
-	/// Update values in script
+	/// Update values in script.
 	void update(ScriptWorker* ref, Args... args) const
 	{
 		updateBase(ref);
@@ -275,7 +265,7 @@ public:
 };
 
 /**
- * Struct storing avaliable operation to scripts
+ * Struct storing avaliable operation to scripts.
  */
 struct ScriptParserData
 {
@@ -294,7 +284,7 @@ struct ScriptParserData
 };
 
 /**
- * Common base of script parser
+ * Common base of script parser.
  */
 class ScriptParserBase
 {
@@ -306,29 +296,29 @@ class ScriptParserBase
 
 protected:
 
-	/// Default constructor
+	/// Default constructor.
 	ScriptParserBase(const std::string& name);
 
-	/// Common typeless part of parsing string
+	/// Common typeless part of parsing string.
 	bool parseBase(ScriptContainerBase* scr, const std::string& parentName, const std::string& code) const;
-	/// Show all builtin script informations
+	/// Show all builtin script informations.
 	void logScriptMetadata() const;
-	/// Get name of type
+	/// Get name of type.
 	const std::string& getTypeName(ArgEnum type) const;
 
-	/// Add name for standart reg
+	/// Add name for standart reg.
 	void addStandartReg(const std::string& s, RegEnum index);
-	/// Add name for custom parameter
+	/// Add name for custom parameter.
 	void addCustomReg(const std::string& s, ArgEnum type, size_t size);
-	/// Add parsing fuction
+	/// Add parsing fuction.
 	void addParserBase(const std::string& s, ScriptParserData::argFunc arg, ScriptParserData::getFunc get);
-	/// Add new type impl
+	/// Add new type impl.
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
 public:
 
-	/// Add const value
+	/// Add const value.
 	void addConst(const std::string& s, int i);
-	// Add parsing function
+	/// Add line parsing function.
 	template<typename T>
 	void addParser(const std::string& s)
 	{
@@ -343,7 +333,7 @@ public:
 };
 
 /**
- * Strong typed parser
+ * Strong typed parser.
  */
 template<typename T, typename... Args>
 class ScriptParser : public ScriptParserBase
@@ -356,6 +346,7 @@ class ScriptParser : public ScriptParserBase
 
 		const char *name;
 	};
+
 	template<typename First, typename... Rest>
 	void addReg(S<First>& n, Rest&... t)
 	{
@@ -370,7 +361,7 @@ public:
 	using Container = ScriptContainer<Args...>;
 
 
-	/// Default constructor
+	/// Default constructor.
 	ScriptParser(const std::string& name, S<Args>... argNames) : ScriptParserBase(name)
 	{
 		//ScriptParser require static function in T to initialize data!
@@ -378,7 +369,7 @@ public:
 		addReg(argNames...);
 	}
 
-	/// Prase string and return new script
+	/// Prase string and return new script.
 	Container parse(const std::string& parentName, const std::string& srcCode) const
 	{
 		auto scr = Container{};
@@ -389,7 +380,7 @@ public:
 		return {};
 	}
 
-	/// Print data to log
+	/// Print data to log.
 	void LogInfo() const
 	{
 		static bool printOp = [this]{ logScriptMetadata(); return true; }();

@@ -30,7 +30,7 @@ const std::string Armor::NONE = "STR_NONE";
  */
 Armor::Armor(const std::string &type) :
 	_type(type), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
-	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _regeneration(0),
+	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
 	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0)
@@ -90,7 +90,6 @@ void Armor::load(const YAML::Node &node, const RecolorParser& parser)
 	_size = node["size"].as<int>(_size);
 	_weight = node["weight"].as<int>(_weight);
 	_visibilityAtDark = node["visibilityAtDark"].as<int>(_visibilityAtDark);
-	_regeneration = node["regeneration"].as<int>(_regeneration);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
 	if (const YAML::Node &dmg = node["damageModifier"])
 	{
