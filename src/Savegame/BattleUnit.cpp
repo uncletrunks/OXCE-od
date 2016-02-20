@@ -1544,7 +1544,7 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 	if (item->getRules()->isTwoHanded())
 	{
 		// two handed weapon, means one hand should be empty
-		if (getItem("STR_RIGHT_HAND") != 0 && getItem("STR_LEFT_HAND") != 0)
+		if (getRightHandWeapon() != 0 && getLeftHandWeapon() != 0)
 		{
 			result = result * 80 / 100;
 		}
@@ -1571,7 +1571,7 @@ int BattleUnit::getAccuracyModifier(BattleItem *item)
 		}
 		else
 		{
-			if (getItem("STR_RIGHT_HAND") == item)
+			if (getRightHandWeapon() == item)
 			{
 				wounds += _fatalWounds[BODYPART_RIGHTARM];
 			}
@@ -2020,8 +2020,8 @@ BattleItem *BattleUnit::getItem(const std::string &slot, int x, int y) const
  */
 BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 {
-	BattleItem *weaponRightHand = getItem("STR_RIGHT_HAND");
-	BattleItem *weaponLeftHand = getItem("STR_LEFT_HAND");
+	BattleItem *weaponRightHand = getRightHandWeapon();
+	BattleItem *weaponLeftHand = getLeftHandWeapon();
 
 	// ignore weapons without ammo (rules out grenades)
 	if (!weaponRightHand || !weaponRightHand->getAmmoItem() || !weaponRightHand->getAmmoItem()->getAmmoQuantity())
@@ -2099,6 +2099,40 @@ BattleItem *BattleUnit::getGrenadeFromBelt() const
 }
 
 /**
+ * Gets the item from right hand.
+ * @return Item in right hand.
+ */
+BattleItem *BattleUnit::getRightHandWeapon() const
+{
+	for (auto i : _inventory)
+	{
+		auto slot = i->getSlot();
+		if (slot && slot->isRightHand())
+		{
+			return i;
+		}
+	}
+	return nullptr;
+}
+
+/**
+ *  Gets the item from left hand.
+ * @return Item in left hand.
+ */
+BattleItem *BattleUnit::getLeftHandWeapon() const
+{
+	for (auto i : _inventory)
+	{
+		auto slot = i->getSlot();
+		if (slot && slot->isLeftHand())
+		{
+			return i;
+		}
+	}
+	return nullptr;
+}
+
+/**
  * Check if we have ammo and reload if needed (used for AI).
  * @return Do we have ammo?
  */
@@ -2106,8 +2140,8 @@ bool BattleUnit::checkAmmo()
 {
 	BattleItem *list[2] =
 	{
-		getItem("STR_RIGHT_HAND"),
-		getItem("STR_LEFT_HAND"),
+		getRightHandWeapon(),
+		getLeftHandWeapon(),
 	};
 
 	for (int i = 0; i < 2; ++i)
@@ -2719,7 +2753,7 @@ void BattleUnit::setActiveHand(const std::string &hand)
 std::string BattleUnit::getActiveHand() const
 {
 	if (getItem(_activeHand)) return _activeHand;
-	if (getItem("STR_LEFT_HAND")) return "STR_LEFT_HAND";
+	if (getLeftHandWeapon()) return "STR_LEFT_HAND";
 	return "STR_RIGHT_HAND";
 }
 
@@ -3096,12 +3130,12 @@ bool BattleUnit::getFloorAbove()
  */
 BattleItem *BattleUnit::getUtilityWeapon(BattleType type)
 {
-	BattleItem *melee = getItem("STR_RIGHT_HAND");
+	BattleItem *melee = getRightHandWeapon();
 	if (melee && melee->getRules()->getBattleType() == type)
 	{
 		return melee;
 	}
-	melee = getItem("STR_LEFT_HAND");
+	melee = getLeftHandWeapon();
 	if (melee && melee->getRules()->getBattleType() == type)
 	{
 		return melee;

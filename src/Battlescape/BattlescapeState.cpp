@@ -1089,7 +1089,7 @@ void BattlescapeState::btnLeftHandItemClick(Action *)
 
 		_save->getSelectedUnit()->setActiveHand("STR_LEFT_HAND");
 		_map->draw();
-		BattleItem *leftHandItem = _save->getSelectedUnit()->getItem("STR_LEFT_HAND");
+		BattleItem *leftHandItem = _save->getSelectedUnit()->getLeftHandWeapon();
 		handleItemClick(leftHandItem);
 	}
 }
@@ -1115,7 +1115,7 @@ void BattlescapeState::btnRightHandItemClick(Action *)
 
 		_save->getSelectedUnit()->setActiveHand("STR_RIGHT_HAND");
 		_map->draw();
-		BattleItem *rightHandItem = _save->getSelectedUnit()->getItem("STR_RIGHT_HAND");
+		BattleItem *rightHandItem = _save->getSelectedUnit()->getRightHandWeapon();
 		handleItemClick(rightHandItem);
 	}
 }
@@ -1313,8 +1313,8 @@ void BattlescapeState::updateSoldierInfo()
 	_barMorale->setMax(100);
 	_barMorale->setValue(battleUnit->getMorale());
 
-	drawItem(battleUnit->getItem("STR_LEFT_HAND"), _btnLeftHandItem, _numAmmoLeft);
-	drawItem(battleUnit->getItem("STR_RIGHT_HAND"), _btnRightHandItem, _numAmmoRight);
+	drawItem(battleUnit->getLeftHandWeapon(), _btnLeftHandItem, _numAmmoLeft);
+	drawItem(battleUnit->getRightHandWeapon(), _btnRightHandItem, _numAmmoRight);
 
 	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
 	int j = 0;

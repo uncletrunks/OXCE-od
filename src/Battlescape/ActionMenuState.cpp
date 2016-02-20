@@ -238,8 +238,8 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		else if (_action->type != BA_THROW &&
 			_action->actor->getFaction() == FACTION_PLAYER &&
 			weapon->isBlockingBothHands() &&
-			_action->actor->getItem("STR_LEFT_HAND") != 0 &&
-			_action->actor->getItem("STR_RIGHT_HAND") != 0)
+			_action->actor->getLeftHandWeapon() != 0 &&
+			_action->actor->getRightHandWeapon() != 0)
 		{
 			_action->result = "STR_MUST_USE_BOTH_HANDS";
 			_game->popState();

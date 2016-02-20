@@ -716,9 +716,9 @@ void DebriefingState::prepareDebriefing()
 					{ // non soldier player = tank
 						base->getStorageItems()->addItem((*j)->getType());
 						RuleItem *tankRule = _game->getMod()->getItem((*j)->getType());
-						if ((*j)->getItem("STR_RIGHT_HAND"))
+						if ((*j)->getRightHandWeapon())
 						{
-							BattleItem *ammoItem = (*j)->getItem("STR_RIGHT_HAND")->getAmmoItem();
+							BattleItem *ammoItem = (*j)->getRightHandWeapon()->getAmmoItem();
 							if (!tankRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 							{
 								int total = ammoItem->getAmmoQuantity();
@@ -731,10 +731,10 @@ void DebriefingState::prepareDebriefing()
 								base->getStorageItems()->addItem(tankRule->getCompatibleAmmo()->front(), total);
 							}
 						}
-						if ((*j)->getItem("STR_LEFT_HAND"))
+						if ((*j)->getLeftHandWeapon())
 						{
-							RuleItem *secondaryRule = (*j)->getItem("STR_LEFT_HAND")->getRules();
-							BattleItem *ammoItem = (*j)->getItem("STR_LEFT_HAND")->getAmmoItem();
+							RuleItem *secondaryRule = (*j)->getLeftHandWeapon()->getRules();
+							BattleItem *ammoItem = (*j)->getLeftHandWeapon()->getAmmoItem();
 							if (!secondaryRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 							{
 								int total = ammoItem->getAmmoQuantity();

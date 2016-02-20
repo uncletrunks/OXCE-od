@@ -198,8 +198,8 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	_shade = shade;
 	_half = half;
 
-	_itemA = getIfVisible(_unit->getItem("STR_RIGHT_HAND"));
-	_itemB = getIfVisible(_unit->getItem("STR_LEFT_HAND"));
+	_itemA = getIfVisible(_unit->getRightHandWeapon());
+	_itemB = getIfVisible(_unit->getLeftHandWeapon());
 
 	_unitSurface = _mod->getSurfaceSet(_unit->getArmor()->getSpriteSheet());
 

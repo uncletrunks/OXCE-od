@@ -1215,12 +1215,12 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 	ba.actor = unit;
 	if (status == STATUS_PANICKING && flee <= 50) // 1/2 chance to freeze and 1/2 chance try to flee, STATUS_BERSERK is handled in the panic state.
 	{
-		BattleItem *item = unit->getItem("STR_RIGHT_HAND");
+		BattleItem *item = unit->getRightHandWeapon();
 		if (item)
 		{
 			dropItem(unit->getPosition(), item, false, true);
 		}
-		item = unit->getItem("STR_LEFT_HAND");
+		item = unit->getLeftHandWeapon();
 		if (item)
 		{
 			dropItem(unit->getPosition(), item, false, true);
@@ -1979,9 +1979,9 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 	{
 	case BT_AMMO:
 		// find equipped weapons that can be loaded with this ammo
-		if (action->actor->getItem("STR_RIGHT_HAND") && action->actor->getItem("STR_RIGHT_HAND")->getAmmoItem() == 0)
+		if (action->actor->getRightHandWeapon() && action->actor->getRightHandWeapon()->getAmmoItem() == 0)
 		{
-			if (action->actor->getItem("STR_RIGHT_HAND")->setAmmoItem(item) == 0)
+			if (action->actor->getRightHandWeapon()->setAmmoItem(item) == 0)
 			{
 				placed = true;
 			}
@@ -2017,7 +2017,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 		break;
 	case BT_FIREARM:
 	case BT_MELEE:
-		if (!action->actor->getItem("STR_RIGHT_HAND"))
+		if (!action->actor->getRightHandWeapon())
 		{
 			item->moveToOwner(action->actor);
 			item->setSlot(mod->getInventory("STR_RIGHT_HAND"));
@@ -2034,7 +2034,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 		}
 		break;
 	case BT_MINDPROBE:
-		if (!action->actor->getItem("STR_LEFT_HAND"))
+		if (!action->actor->getLeftHandWeapon())
 		{
 			item->moveToOwner(action->actor);
 			item->setSlot(mod->getInventory("STR_LEFT_HAND"));

@@ -833,7 +833,7 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 	{
 		return false;
 	}
-	if (rule->isBlockingBothHands() && unit->getFaction() == FACTION_PLAYER && !isBerserking && unit->getItem("STR_LEFT_HAND") != 0 && unit->getItem("STR_RIGHT_HAND") != 0)
+	if (rule->isBlockingBothHands() && unit->getFaction() == FACTION_PLAYER && !isBerserking && unit->getLeftHandWeapon() != 0 && unit->getRightHandWeapon() != 0)
 	{
 		return false;
 	}
@@ -1126,8 +1126,8 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 	RuleInventory *leftHand = _rule->getInventory("STR_LEFT_HAND");
 	bool placed = false;
 	bool loaded = false;
-	BattleItem *rightWeapon = unit->getItem("STR_RIGHT_HAND");
-	BattleItem *leftWeapon = unit->getItem("STR_LEFT_HAND");
+	BattleItem *rightWeapon = unit->getRightHandWeapon();
+	BattleItem *leftWeapon = unit->getLeftHandWeapon();
 	int weight = 0;
 
 	// tanks and aliens don't care about weight or multiple items,

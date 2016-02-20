@@ -50,6 +50,7 @@ private:
 	std::vector<RuleSlot> _slots;
 	std::map<std::string, int> _costs;
 	int _listOrder;
+	int _hand;
 public:
 	static const int SLOT_W = 16;
 	static const int SLOT_H = 16;
@@ -69,6 +70,10 @@ public:
 	int getY() const;
 	/// Gets the inventory type.
 	InventoryType getType() const;
+	/// Gets if this slot is right hand;
+	bool isRightHand() const;
+	/// Gets if this slot is left hand;
+	bool isLeftHand() const;
 	/// Gets all the slots in the inventory.
 	std::vector<struct RuleSlot> *getSlots();
 	/// Checks for a slot in a certain position.

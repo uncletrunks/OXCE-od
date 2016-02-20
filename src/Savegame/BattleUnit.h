@@ -320,6 +320,10 @@ public:
 	BattleItem *getMainHandWeapon(bool quickest = true) const;
 	/// Gets a grenade from the belt, if any.
 	BattleItem *getGrenadeFromBelt() const;
+	/// Gets the item from right hand.
+	BattleItem *getRightHandWeapon() const;
+	/// Gets the item from left hand.
+	BattleItem *getLeftHandWeapon() const;
 	/// Reloads righthand weapon if needed.
 	bool checkAmmo();
 	/// Check if this unit is in the exit area
