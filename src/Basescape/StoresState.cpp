@@ -232,13 +232,16 @@ void StoresState::initList(bool grandTotal)
 					// 2b. craft weapons + ammo
 					for (std::vector<CraftWeapon*>::iterator craftWeapon = (*craft)->getWeapons()->begin(); craftWeapon != (*craft)->getWeapons()->end(); ++craftWeapon)
 					{
-						if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+						if (*craftWeapon)
 						{
-							qty += 1;
-						}
-						else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
-						{
-							qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+							if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+							{
+								qty += 1;
+							}
+							else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
+							{
+								qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+							}
 						}
 					}
 
@@ -293,13 +296,16 @@ void StoresState::initList(bool grandTotal)
 						// 5b. craft weapons + ammo
 						for (std::vector<CraftWeapon*>::iterator craftWeapon = craft2->getWeapons()->begin(); craftWeapon != craft2->getWeapons()->end(); ++craftWeapon)
 						{
-							if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+							if (*craftWeapon)
 							{
-								qty += 1;
-							}
-							else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
-							{
-								qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+								if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+								{
+									qty += 1;
+								}
+								else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
+								{
+									qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+								}
 							}
 						}
 

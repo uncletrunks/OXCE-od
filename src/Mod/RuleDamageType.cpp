@@ -44,6 +44,12 @@ int RuleDamageType::getRandomDamage(int power) const
 {
 	int dmgRng = 0;
 	ItemDamageRandomType randType = RandomType;
+	if (randType == DRT_UFO_WITH_TWO_DICE)
+	{
+		int firstThrow = RNG::generate(0, power);
+		int secondThrow = RNG::generate(0, power);
+		return firstThrow + secondThrow;
+	}
 	if (randType == DRT_DEFAULT)
 	{
 		switch (ResistType)
