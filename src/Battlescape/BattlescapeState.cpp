@@ -1541,7 +1541,7 @@ void BattlescapeState::updateSoldierInfo()
 	_numberOfDirectlyVisibleUnits = j;
 
 	// go through all units on the map
-	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end() && j < VISIBLE_MAX; ++i)
 	{
 		// check if they are hostile and visible (by any friendly unit)
 		if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut() && (*i)->getVisible())
