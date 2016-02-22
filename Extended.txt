@@ -99,6 +99,7 @@ Control space usage of soldiers with 2x2 armors in crafts.[br/]
 [br/]
 3.0:[br/]
 Backported game machanic changes from Meridian OXCE+.[br/]
+Fix stun damage calculation and add random for random option for final stats change by damage.[br/]
 [br/]
 
 [examples]
@@ -260,6 +261,16 @@ items:
       ToEnergy: 0.0     #how much power is applied to energy loss.
       ToTime: 0.0       #how much power is applied to time units loss.
       ToMorale: 0.0     #how much power is applied to morale loss.
+      RandomHealth: false     #do calucaltion of final health change use random value.
+      RandomArmor: false      #do calculation of final armor change use random value.
+      RandomArmorPre: false   #do calculation of final armor change use random value.
+      RandomWound: false      #for `true` use original radom system giving `1` to `3` wounds, `false` will give linear value based on `ToWound`.
+      RandomItem: false       #do calculation of value that compare with item armor use random value.
+      RandomTile: false       #do calculation of value that compare with tile armor use random value.
+      RandomStun: false       #do calculation of final stun level change use random value.
+      RandomEnergy: false     #do calculation of final energy change use random value.
+      RandomTime: false       #do calculation of final time units change use random value.
+      RandomMorale: false     #do calculation of final moral change use random value.
     meleeType: 2        #work like `damageType` but for range weapon melee hit.
     meleeAlter:         #work like `damageAlter` but for range weapon melee hit.
       #set defaut values based on `meleeType`.

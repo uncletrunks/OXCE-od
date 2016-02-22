@@ -245,6 +245,7 @@ Mod::Mod() :
 	dmg->ToItem = 0.0f;
 	dmg->ToTile = 0.0f;
 	dmg->ToStun = 1.0f;
+	dmg->RandomStun = false;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();

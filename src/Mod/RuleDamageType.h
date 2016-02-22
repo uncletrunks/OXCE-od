@@ -84,6 +84,27 @@ struct RuleDamageType
 	/// Conversion form power to morale lose.
 	float ToMorale;
 
+	/// Damage type use random conversion to health damage.
+	bool RandomHealth;
+	///Damage type use random conversion armor damage.
+	bool RandomArmor;
+	/// Damage type use random conversion armor pre damage.
+	bool RandomArmorPre;
+	/// Damage type use random chance for wound number or linear.
+	bool RandomWound;
+	/// Damage type use random conversion item damage.
+	bool RandomItem;
+	/// Damage type use random conversion tile damage.
+	bool RandomTile;
+	/// Damage type use random conversion stun level.
+	bool RandomStun;
+	/// Damage type use random conversion energy lose.
+	bool RandomEnergy;
+	/// Damage type use random conversion time units lose.
+	bool RandomTime;
+	/// Damage type use random conversion morale lose.
+	bool RandomMorale;
+
 	/// Default constructor.
 	RuleDamageType();
 	/// Calculate random value of damage.
@@ -92,6 +113,27 @@ struct RuleDamageType
 	bool isDirect() const;
 	/// Loads item data from YAML.
 	void load(const YAML::Node& node);
+
+	/// Get damage value to health based on power.
+	int getHealthDamage(int power) const;
+	/// Get damage value to armor based on power.
+	int getArmorDamage(int power) const;
+	/// Get damage value to armor based on power before armor reduction.
+	int getArmorPreDamage(int power) const;
+	/// Get numbers of wound based on power.
+	int getWoundDamage(int power) const;
+	/// Get damage value to item based on power.
+	int getItemDamage(int power) const;
+	/// Get damage value to tile based on power.
+	int getTileDamage(int power) const;
+	/// Get stun level change based on power.
+	int getStunDamage(int power) const;
+	/// Get energy change based on power.
+	int getEnergyDamage(int power) const;
+	/// Get time units change based on power.
+	int getTimeDamage(int power) const;
+	/// Get morale change based on power.
+	int getMoraleDamage(int power) const;
 };
 
 } //namespace OpenXcom

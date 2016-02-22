@@ -1114,7 +1114,8 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 		}
 	}
 
-	int toArmorPre = power * type->ToArmorPre;
+	int toHealth = 0;
+	int toArmorPre = type->getArmorPreDamage(power);
 
 	if (type->ArmorEffectiveness > 0.0f)
 	{
@@ -1125,45 +1126,39 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 
 	if (power > 0)
 	{
+		// stun level change
 		if (!_armor->getPainImmune() || type->IgnorePainImmunity)
 		{
-			// conventional weapons can cause additional stun damage
-			_stunlevel += int(RNG::generate(0, power) * type->ToStun);
-			if (_stunlevel < 0)
-			{
-				_stunlevel = 0;
-			}
+			setValueMax(_stunlevel, type->getStunDamage(power), 0, 4 * _stats.health);
 		}
 
-		moraleChange(-(110 - _stats.bravery) * power * type->ToMorale / 100);
+		// morale change
+		moraleChange(-(110 - _stats.bravery) * type->getMoraleDamage(power) / 100);
 
-		setValueMax(_tu, - power * type->ToTime, 0, _stats.tu);
-		setValueMax(_health, - power * type->ToHealth, -4 * _stats.health, _stats.health);
-		setValueMax(_energy, - power * type->ToEnergy, 0, _stats.stamina);
+		// time units change
+		setValueMax(_tu, - type->getTimeDamage(power), 0, _stats.tu);
 
-		if (_health < 0 && type->IgnoreOverKill)
-		{
-			_health = 0;
-		}
+		// health change
+		int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
+		toHealth = type->getHealthDamage(power);
+		setValueMax(_health, - toHealth, overKillMinimum, _stats.health);
 
-		// fatal wounds
+		// energy change
+		setValueMax(_energy, - type->getEnergyDamage(power), 0, _stats.stamina);
+
+		// fatal wounds change
 		if (isWoundable())
 		{
-			if (RNG::generate(0, 10) < int(power * type->ToWound))
-			{
-				const int wound = RNG::generate(1,3);
-				_fatalWounds[bodypart] += wound;
-				moraleChange(-wound);
-			}
+			const int wound = type->getWoundDamage(power);
+			_fatalWounds[bodypart] += wound;
+			moraleChange(-wound);
 		}
-		// armor damage
-		if (type->ToArmor > 0.0f)
-		{
-			setValueMax(_currentArmor[side], - int(power * type->ToArmor) - 1, 0, _armor->getArmor(side));
-		}
+
+		// armor value change
+		setValueMax(_currentArmor[side], - type->getArmorDamage(power), 0, _armor->getArmor(side));
 	}
 
-	return power < 0 ? 0 : power * type->ToHealth;
+	return toHealth;
 }
 
 /**

@@ -31,7 +31,8 @@ RuleDamageType::RuleDamageType() :
 	IgnoreDirection(false), IgnoreSelfDestruct(false), IgnorePainImmunity(false), IgnoreNormalMoraleLose(false), IgnoreOverKill(false),
 	ArmorEffectiveness(1.0f), RadiusEffectiveness(0.0f), RadiusReduction(10.0f),
 	FireThreshold(1000), SmokeThreshold(1000),
-	ToHealth(1.0f), ToArmor(0.1f), ToArmorPre(0.0f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f)
+	ToHealth(1.0f), ToArmor(0.1f), ToArmorPre(0.0f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f),
+	RandomHealth(false), RandomArmor(false), RandomArmorPre(false), RandomWound(true), RandomItem(false), RandomTile(false), RandomStun(true), RandomEnergy(false), RandomTime(false), RandomMorale(false)
 {
 
 }
@@ -112,6 +113,138 @@ void RuleDamageType::load(const YAML::Node& node)
 	ToEnergy = node["ToEnergy"].as<float>(ToEnergy);
 	ToTime = node["ToTime"].as<float>(ToTime);
 	ToMorale = node["ToMorale"].as<float>(ToMorale);
+
+	RandomHealth = node["RandomHealth"].as<bool>(RandomHealth);
+	RandomArmor = node["RandomArmor"].as<bool>(RandomArmor);
+	RandomArmorPre = node["RandomArmorPre"].as<bool>(RandomArmorPre);
+	RandomWound = node["RandomWound"].as<bool>(RandomWound);
+	RandomItem = node["RandomItem"].as<bool>(RandomItem);
+	RandomTile = node["RandomTile"].as<bool>(RandomTile);
+	RandomStun = node["RandomStun"].as<bool>(RandomStun);
+	RandomEnergy = node["RandomEnergy"].as<bool>(RandomEnergy);
+	RandomTime = node["RandomTime"].as<bool>(RandomTime);
+	RandomMorale = node["RandomMorale"].as<bool>(RandomMorale);
+}
+
+namespace
+{
+/**
+ * Helper function for calculating damage from power.
+ * @param random
+ * @param multipler
+ * @param power
+ * @return Damage to somthing.
+ */
+int getDamageHelper(bool random, float multipler, int power)
+{
+	if (power > 0)
+	{
+		if (random)
+		{
+			return (int)std::round(RNG::generate(0, power) * multipler);
+		}
+		else
+		{
+			return (int)std::round(power * multipler);
+		}
+	}
+	return 0;
+}
+
+}
+
+/**
+ * Get damage value to health based on power.
+ */
+int RuleDamageType::getHealthDamage(int power) const
+{
+	return getDamageHelper(RandomHealth, ToHealth, power);
+}
+
+/**
+ * Get damage value to armor based on power.
+ */
+int RuleDamageType::getArmorDamage(int power) const
+{
+	return getDamageHelper(RandomArmor, ToArmor, power);
+}
+
+/**
+ * Get damage value to armor based on power before armor reduction.
+ */
+int RuleDamageType::getArmorPreDamage(int power) const
+{
+	return getDamageHelper(RandomArmorPre, ToArmorPre, power);
+}
+
+/**
+ * Get numbers of wound based on power.
+ */
+int RuleDamageType::getWoundDamage(int power) const
+{
+	if (power > 0)
+	{
+		if (RandomWound)
+		{
+			if (RNG::generate(0, 10) < int(power * ToWound))
+			{
+				return RNG::generate(1,3);
+			}
+		}
+		else
+		{
+			return (int)std::round(power * ToWound);
+		}
+	}
+	return 0;
+}
+
+/**
+ * Get damage value to item based on power.
+ */
+int RuleDamageType::getItemDamage(int power) const
+{
+	return getDamageHelper(RandomItem, ToItem, power);
+}
+
+/**
+ * Get damage value to tile based on power.
+ */
+int RuleDamageType::getTileDamage(int power) const
+{
+	return getDamageHelper(RandomTile, ToTile, power);
+}
+
+/**
+ * Get stun level change based on power.
+ */
+int RuleDamageType::getStunDamage(int power) const
+{
+	return getDamageHelper(RandomStun, ToStun, power);
+}
+
+/**
+ * Get energy change based on power.
+ */
+int RuleDamageType::getEnergyDamage(int power) const
+{
+	return getDamageHelper(RandomEnergy, ToEnergy, power);
+}
+
+/**
+ * Get time units change based on power.
+ */
+int RuleDamageType::getTimeDamage(int power) const
+{
+	return getDamageHelper(RandomTime, ToTime, power);
+}
+
+/**
+ * Get morale change based on power.
+ */
+int RuleDamageType::getMoraleDamage(int power) const
+{
+	return getDamageHelper(RandomMorale, ToMorale, power);
 }
 
 } //namespace OpenXcom

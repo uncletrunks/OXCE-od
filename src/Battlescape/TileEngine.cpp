@@ -1319,7 +1319,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		}
 		if (nothing)
 		{
-			const int tileDmg = damage * type->ToTile;
+			const int tileDmg = type->getTileDamage(damage);
 			hitTile(tile, damage, type);
 			if (part == V_OBJECT && _save->getMissionType() == "STR_BASE_DEFENSE")
 			{
@@ -1431,7 +1431,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 				{
 					ret = tilesAffected.insert(std::make_pair(dest, 0)); // check if we had this tile already affected
 
-					const int tileDmg = power_ * type->ToTile;
+					const int tileDmg = type->getTileDamage(power_);
 					if (tileDmg > ret.first->second)
 					{
 						ret.first->second = tileDmg;
@@ -1462,7 +1462,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 							{
 								for (std::vector<BattleItem*>::iterator it = bu->getInventory()->begin(); it != bu->getInventory()->end(); ++it)
 								{
-									if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && itemDamage * type->ToItem > (*it)->getRules()->getArmor())
+									if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && type->getItemDamage(itemDamage) > (*it)->getRules()->getArmor())
 									{
 										toRemove.push_back(*it);
 									}
@@ -1472,7 +1472,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 						// Affect all items and units on ground
 						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
 						{
-							if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), damage, type) && damage * type->ToItem > (*it)->getRules()->getArmor())
+							if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), damage, type) && type->getItemDamage(damage) > (*it)->getRules()->getArmor())
 							{
 								toRemove.push_back(*it);
 							}
