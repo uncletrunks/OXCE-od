@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "NewManufactureListState.h"
 #include "../Interface/Window.h"
 #include "../Interface/TextButton.h"
@@ -29,6 +30,7 @@
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
+#include "../Savegame/ItemContainer.h"
 #include "ManufactureStartState.h"
 #include "../Mod/Mod.h"
 
@@ -77,7 +79,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
 
 	_txtCategory->setText(tr("STR_CATEGORY"));
 
-	_lstManufacture->setColumns(2, 156, 130);
+	_lstManufacture->setColumns(3, 156, 120, 10);
 	_lstManufacture->setSelectable(true);
 	_lstManufacture->setBackground(_window);
 	_lstManufacture->setMargin(2);
@@ -182,13 +184,40 @@ void NewManufactureListState::fillProductionList(bool markAllAsSeen)
 	_game->getSavedGame()->getAvailableProductions(_possibleProductions, _game->getMod(), _base);
 	_displayedStrings.clear();
 
+	ItemContainer * itemContainer (_base->getItems());
 	int row = 0;
 	bool hasUnseen = false;
 	for (std::vector<RuleManufacture *>::iterator it = _possibleProductions.begin(); it != _possibleProductions.end(); ++it)
 	{
 		if (((*it)->getCategory().c_str() == _catStrings[_cbxCategory->getSelected()]) || (_catStrings[_cbxCategory->getSelected()] == "STR_ALL_ITEMS"))
 		{
-			_lstManufacture->addRow(2, tr((*it)->getName()).c_str(), tr((*it)->getCategory()).c_str());
+			// supplies calculation
+			int productionPossible = 10; // max
+			if ((*it)->getManufactureCost() > 0)
+			{
+				int byFunds = _game->getSavedGame()->getFunds() / (*it)->getManufactureCost();
+				productionPossible = std::min(productionPossible, byFunds);
+			}
+			const std::map<std::string, int> & requiredItems ((*it)->getRequiredItems());
+			for (std::map<std::string, int>::const_iterator iter = requiredItems.begin(); iter != requiredItems.end(); ++iter)
+			{
+				productionPossible = std::min(productionPossible, itemContainer->getItem(iter->first) / iter->second);
+			}
+			std::wostringstream ss;
+			if (productionPossible <= 0)
+			{
+				ss << L'-';
+			}
+			else if (productionPossible < 10)
+			{
+				ss << productionPossible;
+			}
+			else
+			{
+				ss << L'+';
+			}
+
+			_lstManufacture->addRow(3, tr((*it)->getName()).c_str(), tr((*it)->getCategory()).c_str(), ss.str().c_str());
 			_displayedStrings.push_back((*it)->getName().c_str());
 
 			if (markAllAsSeen)
