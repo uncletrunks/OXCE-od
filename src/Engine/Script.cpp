@@ -218,9 +218,10 @@ static inline RetEnum debug_log_h(ProgPos &p, int i, int j)
 	IMPL(shl,		MACRO_QUOTE({ Reg0 <<= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
 	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
 	\
-	IMPL(abs,		MACRO_QUOTE({ Reg0 = std::abs(Reg0);							return RetContinue; }),		(int &Reg0)) \
-	IMPL(min,		MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(max,		MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(abs,			MACRO_QUOTE({ Reg0 = std::abs(Reg0);							return RetContinue; }),		(int &Reg0)) \
+	IMPL(limit,			MACRO_QUOTE({ Reg0 = std::max(std::min(Reg0, Data2), Data1);	return RetContinue; }),		(int &Reg0, int Data1, int Data2)) \
+	IMPL(limit_upper,	MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(limit_lower,	MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
 	\
 	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Data1, Data2, Data3);					}),		(int &Reg0, int Data1, int Data2, int Data3)) \
 	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Data1, Data2, Data3);					}),		(int &Reg0, int Data1, int Data2, int Data3)) \
