@@ -72,7 +72,7 @@ private:
 	std::map<RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal, _baseItemsBeforeRecovery;
 	Uint8 _ammoColor;
 	std::map<int, RecoveryItem*> _recoveryStats;
-	bool _positiveScore, _noContainment, _manageContainment, _destroyBase;
+	bool _positiveScore, _noContainment, _manageContainment, _destroyBase, _isBaseDefense;
 	int _limitsEnforced;
 	/// Adds to the debriefing stats.
 	void addStat(const std::string &name, int quantity, int score);
