@@ -52,7 +52,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
-	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15)
+	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
+	_customItemPreviewIndex(0)
 {
 	_accuracyMulti.setFiring();
 	_meleeMulti.setMelee();
@@ -440,6 +441,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
+	_customItemPreviewIndex = node["customItemPreviewIndex"].as<int>(_customItemPreviewIndex);
 
 	_damageBonus.load(node["damageBonus"]);
 	_meleeBonus.load(node["meleeBonus"]);
@@ -1673,6 +1675,15 @@ int RuleItem::getVaporDensity() const
 int RuleItem::getVaporProbability() const
 {
 	return _vaporProbability;
+}
+
+/**
+ * Gets the index of the sprite in the CustomItemPreview sprite set.
+ * @return Sprite index.
+ */
+int RuleItem::getCustomItemPreviewIndex() const
+{
+	return _customItemPreviewIndex;
 }
 
 }
