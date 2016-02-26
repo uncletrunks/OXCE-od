@@ -37,6 +37,7 @@
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Vehicle.h"
 #include "CraftSoldiersState.h"
 #include "CraftWeaponsState.h"
 #include "CraftEquipmentState.h"
@@ -245,14 +246,32 @@ void CraftInfoState::init()
 			}
 		}
 
-		Surface *frame2 = texture->getFrame(40);
-		frame2->setY(0);
+		SurfaceSet *customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews");
 		int x = 0;
-		for (int i = 0; i < _craft->getNumVehicles(); ++i, x += 10)
+		if (customItemPreviews == 0)
 		{
-			frame2->setX(x);
-			frame2->blit(_equip);
+			// vanilla
+			Surface *frame2 = texture->getFrame(40);
+			frame2->setY(0);
+			for (int i = 0; i < _craft->getNumVehicles(); ++i, x += 10)
+			{
+				frame2->setX(x);
+				frame2->blit(_equip);
+			}
 		}
+		else
+		{
+			// modded HWP/auxiliary previews
+			for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
+			{
+				Surface *customFrame2 = customItemPreviews->getFrame((*i)->getRules()->getCustomItemPreviewIndex());
+				customFrame2->setY(0);
+				customFrame2->setX(x);
+				customFrame2->blit(_equip);
+				x += 10;
+			}
+		}
+
 		Surface *frame3 = texture->getFrame(39);
 		for (int i = 0; i < _craft->getNumEquipment(); i += 4, x += 10)
 		{

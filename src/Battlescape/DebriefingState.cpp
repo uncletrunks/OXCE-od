@@ -71,7 +71,7 @@ namespace OpenXcom
  * Initializes all the elements in the Debriefing screen.
  * @param game Pointer to the core game.
  */
-DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _noContainment(false), _manageContainment(false), _destroyBase(false), _pageNumber(0)
+DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _noContainment(false), _manageContainment(false), _destroyBase(false), _pageNumber(0), _isBaseDefense(false)
 {
 	Options::baseXResolution = Options::baseXGeoscape;
 	Options::baseYResolution = Options::baseYGeoscape;
@@ -464,7 +464,14 @@ void DebriefingState::applyVisibility()
 	}
 	else if (showStats)
 	{
-		_btnStats->setText(tr("LOOT"));
+		if (_isBaseDefense)
+		{
+			_btnStats->setText(tr("STR_SCORE"));
+		}
+		else
+		{
+			_btnStats->setText(tr("LOOT"));
+		}
 	}
 	else if (showItems)
 	{
@@ -512,6 +519,12 @@ void DebriefingState::txtTooltipOut(Action *action)
 void DebriefingState::btnStatsClick(Action *)
 {
 	_pageNumber = (_pageNumber + 1) % 3;
+	if (_isBaseDefense)
+	{
+		// FIXME: temporarily disable loot window for base defense
+		// can implement later, will need to remember stuff at the beginning of the mission already, and also save it in the save file
+		_pageNumber = _pageNumber % 2;
+	}
 	applyVisibility();
 }
 
@@ -753,6 +766,7 @@ void DebriefingState::prepareDebriefing()
 		{
 			base = (*i);
 			target = "STR_BASE";
+			_isBaseDefense = true;
 			base->setInBattlescape(false);
 			base->cleanupDefenses(false);
 			for (std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin(); k != _game->getSavedGame()->getRegions()->end(); ++k)
