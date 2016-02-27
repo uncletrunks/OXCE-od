@@ -184,7 +184,7 @@ void NewManufactureListState::fillProductionList(bool markAllAsSeen)
 	_game->getSavedGame()->getAvailableProductions(_possibleProductions, _game->getMod(), _base);
 	_displayedStrings.clear();
 
-	ItemContainer * itemContainer (_base->getItems());
+	ItemContainer * itemContainer (_base->getStorageItems());
 	int row = 0;
 	bool hasUnseen = false;
 	for (std::vector<RuleManufacture *>::iterator it = _possibleProductions.begin(); it != _possibleProductions.end(); ++it)
