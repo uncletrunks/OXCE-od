@@ -25,6 +25,7 @@
 #include "RuleStatBonus.h"
 #include "RuleDamageType.h"
 #include "Unit.h"
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
@@ -141,6 +142,7 @@ private:
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
+	ScriptValues<RuleItem> _scriptValues;
 
 	/// Get final value of cost.
 	RuleItemUseCost getDefault(const RuleItemUseCost& a, const RuleItemUseCost& b) const;
@@ -153,6 +155,11 @@ private:
 	/// Load RuleItemUseCost as bool from yaml.
 	void loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
 public:
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "RuleItem";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 	/// Creates a blank item ruleset.
 	RuleItem(const std::string &type);
 	/// Cleans up the item ruleset.

@@ -711,6 +711,7 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
  */
 void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods)
 {
+	ScriptValuesBase::unregisteAll();
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
 		try
@@ -816,6 +817,11 @@ void Mod::loadFile(const std::string &filename)
 
 	YAML::Node doc = YAML::LoadFile(filename);
 
+	if (const YAML::Node &node = doc["customValuesRegist"])
+	{
+		ScriptValues<Armor>::registerNames(node, "Armor");
+		ScriptValues<RuleItem>::registerNames(node, "RuleItem");
+	}
 	for (YAML::const_iterator i = doc["countries"].begin(); i != doc["countries"].end(); ++i)
 	{
 		RuleCountry *rule = loadRule(*i, &_countries, &_countriesIndex);

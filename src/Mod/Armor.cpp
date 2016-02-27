@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Armor.h"
+#include "../Engine/ScriptBind.h"
 
 namespace OpenXcom
 {
@@ -176,6 +177,7 @@ void Armor::load(const YAML::Node &node, const RecolorParser& parser)
 		_spriteScript = parser.parse(_type, scr.as<std::string>());
 	}
 	_units = node["units"].as< std::vector<std::string> >(_units);
+	_scriptValues.load(node["custom"]);
 }
 
 /**
@@ -678,6 +680,55 @@ const Armor::RecolorParser::Container &Armor::getSpriteScript() const
 const std::vector<std::string> &Armor::getUnits() const
 {
 	return _units;
+}
+
+namespace
+{
+
+void getArmorValueScript(Armor *ar, int &ret, int side)
+{
+	if (ar && 0 <= side && side < SIDE_MAX)
+	{
+		ret = ar->getArmor((UnitSide)side);
+		return;
+	}
+	ret = 0;
+}
+
+}
+
+/**
+ * Register Armor in script parser.
+ * @param parser Script parser.
+ */
+void Armor::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<Armor> ar = { parser };
+	BindNested<Armor, UnitStats, &Armor::_stats> us = { ar };
+
+	ar.addCustomConst("SIDE_FRONT", SIDE_FRONT);
+	ar.addCustomConst("SIDE_LEFT", SIDE_LEFT);
+	ar.addCustomConst("SIDE_RIGHT", SIDE_RIGHT);
+	ar.addCustomConst("SIDE_REAR", SIDE_REAR);
+	ar.addCustomConst("SIDE_UNDER", SIDE_UNDER);
+
+	ar.add<&Armor::getDrawingRoutine>("getDrawingRoutine");
+	ar.add<&Armor::getSize>("getSize");
+	ar.add<&getArmorValueScript>("getArmorValue");
+
+	ar.addScriptValue<&Armor::_scriptValues>();
+
+	us.addField<&UnitStats::tu>("getTimeUnits");
+	us.addField<&UnitStats::stamina>("getStamina");
+	us.addField<&UnitStats::health>("getHealth");
+	us.addField<&UnitStats::bravery>("getBravery");
+	us.addField<&UnitStats::reactions>("getReactions");
+	us.addField<&UnitStats::firing>("getFiring");
+	us.addField<&UnitStats::throwing>("getThrowing");
+	us.addField<&UnitStats::strength>("getStrength");
+	us.addField<&UnitStats::psiStrength>("getPsiStrength");
+	us.addField<&UnitStats::psiSkill>("getPsiSkill");
+	us.addField<&UnitStats::melee>("getMelee");
 }
 
 }

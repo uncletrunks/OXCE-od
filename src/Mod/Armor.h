@@ -44,7 +44,12 @@ class BattleUnit;
 class Armor
 {
 public:
-	using RecolorParser = ScriptParser<BattleUnit, BattleUnit*, int, int, int, int>;
+	using RecolorParser = ScriptParser<BattleUnit*, int, int, int, int>;
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "Armor";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
 
 	static const std::string NONE;
 private:
@@ -69,6 +74,7 @@ private:
 	RecolorParser::Container _recolorScript;
 	RecolorParser::Container _spriteScript;
 	std::vector<std::string> _units;
+	ScriptValues<Armor> _scriptValues;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);

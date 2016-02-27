@@ -47,7 +47,7 @@ class Language;
 class AlienBAIState;
 class CivilianBAIState;
 template<typename...> class ScriptContainer;
-template<typename, typename...> class ScriptParser;
+template<typename...> class ScriptParser;
 class ScriptWorker;
 
 enum UnitStatus {STATUS_STANDING, STATUS_WALKING, STATUS_FLYING, STATUS_TURNING, STATUS_AIMING, STATUS_COLLAPSING, STATUS_DEAD, STATUS_UNCONSCIOUS, STATUS_PANICKING, STATUS_BERSERK, STATUS_IGNORE_ME};
@@ -141,6 +141,8 @@ private:
 	void prepareMorale(int morale);
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "BattleUnit";
 	/// Register all useful function used by script.
 	static void ScriptRegister(ScriptParserBase* parser);
 	/// Init all required data in script using object data.

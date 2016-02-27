@@ -24,6 +24,7 @@
 #include "../Engine/Surface.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Script.h"
+#include "../Engine/ScriptBind.h"
 
 namespace OpenXcom
 {
@@ -615,6 +616,31 @@ void BattleItem::setIsAmmo(bool ammo)
 bool BattleItem::isAmmo() const
 {
 	return _isAmmo;
+}
+
+/**
+ * Register BattleItem in script parser.
+ * @param parser Script parser.
+ */
+void BattleItem::ScriptRegister(ScriptParserBase* parser)
+{
+	parser->registerPointerType<RuleItem>();
+
+	Bind<BattleItem> bi = { parser };
+
+	bi.add<RuleItem, &BattleItem::getRules>("getRuleItem");
+	bi.add<BattleUnit, &BattleItem::getUnit>("getBattleUnit");
+	bi.add<BattleItem, &BattleItem::getAmmoItem>("getAmmoItem");
+	bi.add<BattleUnit, &BattleItem::getPreviousOwner>("getPreviousOwner");
+	bi.add<BattleUnit, &BattleItem::getOwner>("getOwner");
+	bi.add<&BattleItem::getId>("getId");
+	bi.add<&BattleItem::getAmmoQuantity>("getAmmoQuantity");
+	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
+	bi.add<&BattleItem::getGlow>("getGlow");
+	bi.add<&BattleItem::getHealQuantity>("getHealQuantity");
+	bi.add<&BattleItem::getPainKillerQuantity>("getPainKillerQuantity");
+	bi.add<&BattleItem::getStimulantQuantity>("getStimulantQuantity");
+	bi.add<&BattleItem::isAmmo>("isAmmo");
 }
 
 void BattleItem::ScriptFill(ScriptWorker* w, BattleItem* item, bool inventory, int anim_frame, int shade)

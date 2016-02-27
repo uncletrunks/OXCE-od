@@ -20,9 +20,13 @@
 #define	OPENXCOM_SCRIPT_H
 
 #include <map>
+#include <limits>
 #include <vector>
 #include <string>
+#include <yaml-cpp/yaml.h>
 #include <SDL_stdinc.h>
+
+#include "Logger.h"
 
 
 namespace OpenXcom
@@ -30,7 +34,7 @@ namespace OpenXcom
 class Surface;
 class ScriptContainerBase;
 
-class ParserHelper;
+class ParserWriter;
 struct SelectedToken;
 
 template<typename T>
@@ -123,6 +127,20 @@ enum RetEnum : Uint8
 };
 
 /**
+ * Token type
+ */
+enum TokenEnum
+{
+	TokenNone,
+	TokenInvaild,
+	TokenColon,
+	TokenSemicolon,
+	TokenSymbol,
+	TokenNumber,
+	TokenBuildinLabel,
+};
+
+/**
  * Struct that cache state of script data and is place of script write temporary data.
  */
 struct ScriptWorker
@@ -163,7 +181,7 @@ using FuncCommon = RetEnum (*)(ScriptWorker &, const Uint8 *, ProgPos &);
  */
 struct ScriptContainerData
 {
-	static ArgEnum RegisteImpl()
+	static ArgEnum registeTypeImpl()
 	{
 		static ArgEnum curr = ArgMax;
 		return curr++;
@@ -171,7 +189,7 @@ struct ScriptContainerData
 
 	/// Register type to get run time value representing it.
 	template<typename T>
-	static ArgEnum Register()
+	static ArgEnum registerType()
 	{
 		if (std::is_same<T, int>::value)
 		{
@@ -179,7 +197,7 @@ struct ScriptContainerData
 		}
 		else
 		{
-			static ArgEnum curr = RegisteImpl();
+			static ArgEnum curr = registeTypeImpl();
 			return curr;
 		}
 	}
@@ -195,7 +213,7 @@ struct ScriptContainerData
  */
 class ScriptContainerBase
 {
-	friend class ScriptParserBase;
+	friend class ParserWriter;
 	std::vector<Uint8> _proc;
 
 protected:
@@ -216,6 +234,7 @@ protected:
 	}
 
 public:
+
 	/// constructor.
 	ScriptContainerBase() = default;
 	/// copy constructor.
@@ -264,22 +283,133 @@ public:
 	}
 };
 
+struct ScriptTypeData
+{
+	ArgEnum type;
+	size_t size;
+};
+
 /**
  * Struct storing avaliable operation to scripts.
  */
 struct ScriptParserData
 {
-	using argFunc = int (*)(ParserHelper& ph, const SelectedToken *begin, const SelectedToken *end);
+	using argFunc = int (*)(ParserWriter& ph, const SelectedToken *begin, const SelectedToken *end);
 	using getFunc = FuncCommon (*)(int version);
-	using parserFunc = bool (*)(const ScriptParserData &spd, ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end);
+	using parserFunc = bool (*)(const ScriptParserData &spd, ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end);
 
 	parserFunc parser;
 	argFunc arg;
 	getFunc get;
 
-	bool operator()(ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end) const
+	bool operator()(ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end) const
 	{
 		return parser(*this, ph, begin, end);
+	}
+};
+
+class ScriptRef
+{
+	using ptr = const char*;
+
+	/// pointer pointing place of first character.
+	ptr _begin;
+	/// pointer pointing place past of last character.
+	ptr _end;
+
+	static ptr dummy() { static char x = 0; return &x; }
+public:
+
+	/// Default constructor.
+	ScriptRef() : _begin{ dummy() }, _end{ dummy() }
+	{
+
+	}
+
+	/// Copy constructor.
+	ScriptRef(const ScriptRef&) = default;
+
+	/// Constructor from pointer.
+	explicit ScriptRef(ptr p) : _begin{ p }, _end{ p + strlen(p) }
+	{
+
+	}
+	/// Constructor from range of pointers.
+	ScriptRef(ptr b, ptr e) : _begin{b}, _end{e}
+	{
+
+	}
+
+	/// Extract new token from current object.
+	SelectedToken getNextToken(TokenEnum excepted = TokenNone);
+
+	/// Begining of string range.
+	ptr begin() const
+	{
+		return _begin;
+	}
+	/// End of string range.
+	ptr end() const
+	{
+		return _end;
+	}
+	/// Size of string range.
+	size_t size() const
+	{
+		return _end - _begin;
+	}
+
+	/// Find first orrucace of character in string range.
+	size_t find(char c) const
+	{
+		for (auto &curr : *this)
+		{
+			if (curr == c)
+			{
+				return &curr - _begin;
+			}
+		}
+		return std::string::npos;
+	}
+
+	/// Return sub range of current range.
+	ScriptRef substr(size_t p, size_t s = std::string::npos) const
+	{
+		auto b = _begin + p;
+		if (b > _end)
+		{
+			return ScriptRef{ };
+		}
+		else if (s == std::string::npos || b + s > _end)
+		{
+			return ScriptRef{ b, _end };
+		}
+		else
+		{
+			return ScriptRef{ b, b + s };
+		}
+	}
+
+	/// Create string based on current range.
+	std::string toString() const
+	{
+		return std::string(_begin, _end);
+	}
+
+	/// Equal operator.
+	bool operator==(const ScriptRef& s) const
+	{
+		return size() == s.size() && std::equal(_begin, _end, s._begin);
+	}
+	/// Less operator.
+	bool operator<(const ScriptRef& s) const
+	{
+		return std::lexicographical_compare(_begin, _end, s._begin, s._end);
+	}
+	/// Bool operator.
+	explicit operator bool() const
+	{
+		return _begin != _end;
 	}
 };
 
@@ -290,9 +420,10 @@ class ScriptParserBase
 {
 	Uint8 _regUsed;
 	std::string _name;
-	std::map<std::string, std::pair<ArgEnum, size_t>> _typeList;
-	std::map<std::string, ScriptParserData> _procList;
-	std::map<std::string, ScriptContainerData> _refList;
+	std::vector<std::vector<char>> _nameList;
+	std::vector<std::pair<ScriptRef, ScriptTypeData>> _typeList;
+	std::vector<std::pair<ScriptRef, ScriptParserData>> _procList;
+	std::vector<std::pair<ScriptRef, ScriptContainerData>> _refList;
 
 protected:
 
@@ -303,8 +434,11 @@ protected:
 	bool parseBase(ScriptContainerBase* scr, const std::string& parentName, const std::string& code) const;
 	/// Show all builtin script informations.
 	void logScriptMetadata() const;
-	/// Get name of type.
-	const std::string& getTypeName(ArgEnum type) const;
+
+	/// Test if name is free.
+	bool haveNameRef(const std::string& s) const;
+	/// Add new name that can be used in data lists.
+	ScriptRef addNameRef(const std::string& s);
 
 	/// Add name for standart reg.
 	void addStandartReg(const std::string& s, RegEnum index);
@@ -314,6 +448,14 @@ protected:
 	void addParserBase(const std::string& s, ScriptParserData::argFunc arg, ScriptParserData::getFunc get);
 	/// Add new type impl.
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
+	/// Add new type.
+	template<typename T>
+	void addType(const std::string& s)
+	{
+		addTypeBase(s, ScriptContainerData::registerType<T>(), sizeof(T));
+	}
+	/// Test if type was added impl.
+	bool haveTypeBase(ArgEnum type);
 public:
 
 	/// Add const value.
@@ -324,18 +466,37 @@ public:
 	{
 		addParserBase(s, &T::parse, &T::getDynamic);
 	}
-	/// Add new type
+	/// Test if type was already added.
 	template<typename T>
-	void addType(const std::string& s)
+	bool haveType()
 	{
-		addTypeBase(s, ScriptContainerData::Register<T>(), sizeof(T));
+		return haveTypeBase(ScriptContainerData::registerType<T>());
 	}
+	/// Regised type in parser.
+	template<typename P>
+	void registerPointerType()
+	{
+		if (!haveType<P*>())
+		{
+			addType<P*>(P::ScriptName);
+			P::ScriptRegister(this);
+		}
+	}
+
+	/// Get name of type.
+	ScriptRef getTypeName(ArgEnum type) const;
+	/// Get type data.
+	const ScriptTypeData *getType(ScriptRef name, ScriptRef postfix = {}) const;
+	/// Get function data.
+	const ScriptParserData *getProc(ScriptRef name, ScriptRef postfix = {}) const;
+	/// Get arguments data.
+	const ScriptContainerData *getRef(ScriptRef name, ScriptRef postfix = {}) const;
 };
 
 /**
  * Strong typed parser.
  */
-template<typename T, typename... Args>
+template<typename... Args>
 class ScriptParser : public ScriptParserBase
 {
 	template<typename Z>
@@ -348,14 +509,26 @@ class ScriptParser : public ScriptParserBase
 	};
 
 	template<typename First, typename... Rest>
-	void addReg(S<First>& n, Rest&... t)
+	void addRegImpl(S<First>& n, Rest&... t)
 	{
-		addCustomReg(n.name, ScriptContainerData::Register<First>(), sizeof(First));
-		addReg(t...);
+		addTypeImpl(n);
+		addCustomReg(n.name, ScriptContainerData::registerType<First>(), sizeof(First));
+		addRegImpl(t...);
 	}
-	void addReg()
+	void addRegImpl()
 	{
 		//end loop
+	}
+
+	template<typename First, typename = decltype(&First::ScriptRegister)>
+	void addTypeImpl(S<First*>& n)
+	{
+		registerPointerType<First>();
+	}
+	template<typename First>
+	void addTypeImpl(S<First>& n)
+	{
+		//nothing to do for rest
 	}
 public:
 	using Container = ScriptContainer<Args...>;
@@ -364,9 +537,7 @@ public:
 	/// Default constructor.
 	ScriptParser(const std::string& name, S<Args>... argNames) : ScriptParserBase(name)
 	{
-		//ScriptParser require static function in T to initialize data!
-		T::ScriptRegister(this);
-		addReg(argNames...);
+		addRegImpl(argNames...);
 	}
 
 	/// Prase string and return new script.
@@ -385,6 +556,190 @@ public:
 	{
 		static bool printOp = [this]{ logScriptMetadata(); return true; }();
 		(void)printOp;
+	}
+};
+
+
+/**
+ * Strong typed tag.
+ */
+template<typename T, typename I>
+struct ScriptTag
+{
+	static_assert(!std::numeric_limits<I>::is_signed, "Type should be unsigned");
+	static_assert(sizeof(I) <= sizeof(size_t), "Type need be less than size_t");
+
+	/// Index that identify value in ScriptValues.
+	I index;
+
+	/// Get value or max value if invalid.
+	constexpr size_t get() const { return *this ? static_cast<size_t>(index) : std::numeric_limits<size_t>::max(); }
+	/// Test if tag have valid value..
+	constexpr explicit operator bool() const { return this->index != invalid().index; }
+
+	/// Get run time value for type.
+	static ArgEnum type() { return ScriptContainerData::registerType<T*>(); }
+	/// Test if value can be used.
+	static constexpr bool isValid(size_t i) { return i < static_cast<size_t>(invalid().index); }
+	/// Fake constructor.
+	static constexpr ScriptTag make(size_t i) { return { static_cast<I>(i) }; }
+	/// Invaild tag.
+	static constexpr ScriptTag invalid() { return { std::numeric_limits<I>::max() }; }
+};
+
+/**
+ * Colection of values for script usage.
+ */
+class ScriptValuesBase
+{
+protected:
+
+	/// Vector with all avaiable values for script.
+	std::vector<int> values;
+
+	/// Get map that store all tag names for all types.
+	static std::map<ArgEnum, std::vector<std::string>> &getAll()
+	{
+		static std::map<ArgEnum, std::vector<std::string>> all;
+		return all;
+	}
+public:
+
+	/// Clean all tag names.
+	static void unregisteAll()
+	{
+		for (auto& n : getAll())
+		{
+			n.second.clear();
+		}
+	}
+};
+
+/**
+ * Strong typed colection of values for srcipt.
+ */
+template<typename T, typename I = Uint8>
+class ScriptValues : ScriptValuesBase
+{
+	static std::vector<std::string> &nameVector()
+	{
+		static std::vector<std::string> &name = getAll()[Tag::type()];
+		return name;
+	}
+public:
+	using Tag = ScriptTag<T, I>;
+
+	/// Get tag based on name for that type.
+	static Tag getTag(const std::string& s)
+	{
+		for (size_t i = 0; i < nameVector().size(); ++i)
+		{
+			auto &name = nameVector()[i];
+			if (name == s)
+			{
+				return Tag::make(i);
+			}
+		}
+		return Tag::invalid();
+	}
+	/// Add new tag name for that type.
+	static Tag addTag(const std::string& s)
+	{
+		auto tag = getTag(s);
+
+		if (!tag)
+		{
+			// test to prevent warp of index value
+			if (Tag::isValid(nameVector().size()))
+			{
+				nameVector().push_back(s);
+				return Tag::make(nameVector().size() - 1u);
+			}
+			return Tag::invalid();
+		}
+		else
+		{
+			return tag;
+		}
+	}
+	/// Regist avaiable tag names for that type.
+	static void registerNames(const YAML::Node &parent, const std::string &reference)
+	{
+		const YAML::Node &node = parent[reference];
+		if (node && node.IsMap())
+		{
+			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
+			{
+				auto type = i->second.as<std::string>();
+				auto name = i->first.as<std::string>();
+				if (type == "int")
+				{
+					auto tag = addTag(name);
+					if (!tag)
+					{
+						Log(LOG_ERROR) << "Script variable '" + name + "' exceeds limit of " << (int)tag.index << " avaiable variables in '" + reference + "'.";
+						return;
+					}
+				}
+				else
+				{
+					Log(LOG_ERROR) << "Invaild type def '" + type + "' for script variable '" + name + "' in '" + reference +"'.";
+				}
+			}
+		}
+	}
+
+	/// Load values from yaml file.
+	void load(const YAML::Node &node)
+	{
+		if (node && node.IsMap())
+		{
+			for (size_t i = 0; i < nameVector().size(); ++i)
+			{
+				if (const YAML::Node &n = node[nameVector()[i]])
+				{
+					set(Tag::make(i), n.as<int>());
+				}
+			}
+		}
+	}
+	/// Save values to yaml file.
+	YAML::Node save() const
+	{
+		YAML::Node node;
+		for (size_t i = 0; i < nameVector().size(); ++i)
+		{
+			if (int v = get(Tag::make(i)))
+			{
+				node[nameVector()[i]] = v;
+			}
+		}
+		return node;
+	}
+
+	/// Get value.
+	int get(Tag t) const
+	{
+		if (t)
+		{
+			if (t.index < values.size())
+			{
+				return values[t.get()];
+			}
+		}
+		return 0;
+	}
+	/// Set value.
+	void set(Tag t, int i)
+	{
+		if (t)
+		{
+			if (t.get() >= values.size())
+			{
+				values.resize(t.get() + 1u);
+			}
+			values[t.get()] = i;
+		}
 	}
 };
 

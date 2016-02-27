@@ -26,8 +26,6 @@
 namespace OpenXcom
 {
 
-typedef std::string::const_iterator ite;
-
 /**
  * Type of code block
  */
@@ -40,41 +38,53 @@ enum BlockEnum
 };
 
 /**
- * Token type
- */
-enum TokenEnum
-{
-	TokenNone,
-	TokenInvaild,
-	TokenColon,
-	TokenSemicolon,
-	TokenSymbol,
-	TokenNumber,
-	TokenBuildinLabel,
-};
-
-/**
  * Struct represents position of token in input string
  */
-struct SelectedToken
+class SelectedToken : public ScriptRef
 {
 	/// type of this token.
-	TokenEnum type;
-	/// iterator pointing place of first character.
-	ite begin;
-	/// iterator pointing place past of last character.
-	ite end;
-
+	TokenEnum _type;
 	/// custom value.
-	int tag;
+	int _tag;
 
-	std::string toString() const { return std::string(begin, end); }
+public:
+
+	/// Default constructor.
+	SelectedToken() : ScriptRef{ }, _type{ TokenNone }, _tag{ }
+	{
+
+	}
+
+	/// Constructor from range.
+	SelectedToken(TokenEnum type, ScriptRef range) : ScriptRef{ range }, _type{ type }, _tag{ }
+	{
+
+	}
+
+	/// Constructor from tag.
+	SelectedToken(TokenEnum type, int tag) : ScriptRef{ }, _type{ type }, _tag{ tag }
+	{
+
+	}
+
+	TokenEnum getType() const
+	{
+		return _type;
+	}
+	int getTag() const
+	{
+		return _tag;
+	}
+	void setTag(int i)
+	{
+		_tag = i;
+	}
 };
 
 /**
  * Helper structure used by ScriptParser::parse
  */
-struct ParserHelper
+struct ParserWriter
 {
 	struct Block
 	{
@@ -96,22 +106,20 @@ struct ParserHelper
 			return _pos;
 		}
 
-		friend class ParserHelper;
+		friend class ParserWriter;
 	};
 
 	class ProcOp { };
 
 	/// member pointer accessing script operations.
-	std::vector<Uint8>& proc;
-	/// all available operations for script.
-	const std::map<std::string, ScriptParserData>& procList;
+	ScriptContainerBase& container;
 	/// all available data for script.
-	const std::map<std::string, ScriptContainerData>& refList;
+	const ScriptParserBase& parser;
 	/// temporary script data.
-	std::map<std::string, ScriptContainerData> refListCurr;
-	/// list of variables uses.
+	std::map<ScriptRef, ScriptContainerData> refListCurr;
+	/// list of labels places of usage.
 	std::vector<std::pair<ReservedPos<ProgPos>, int>> refLabelsUses;
-	/// list of variables uses.
+	/// list of labels positions.
 	std::vector<ProgPos> refLabelsList;
 
 	/// index of used script registers.
@@ -130,13 +138,12 @@ struct ParserHelper
 	 * @param procList all available operations for script
 	 * @param ref all available data for script
 	 */
-	ParserHelper(
+	ParserWriter(
 			Uint8 regUsed,
-			std::vector<Uint8>& proc,
-			const std::map<std::string, ScriptParserData>& procList,
-			const std::map<std::string, ScriptContainerData>& ref):
-		proc(proc),
-		procList(procList), refList(ref),
+			ScriptContainerBase& c,
+			const ScriptParserBase& d) :
+		container(c),
+		parser(d),
 		refListCurr(),
 		refLabelsUses(),
 		refLabelsList(),
@@ -163,13 +170,17 @@ struct ParserHelper
 	 * @param s name of referece.
 	 * @return referece data.
 	 */
-	const ScriptContainerData* getReferece(const std::string& s) const
+	const ScriptContainerData* getReferece(const ScriptRef& s) const
 	{
 		auto pos = refListCurr.find(s);
 		if (pos == refListCurr.end())
 		{
-			pos = refList.find(s);
-			if (pos == refList.end())
+			auto ptr = parser.getRef(s);
+			if (ptr != nullptr)
+			{
+				return ptr;
+			}
+			else
 			{
 				return nullptr;
 			}
@@ -183,7 +194,7 @@ struct ParserHelper
 	 * @param data Data of reference.
 	 * @return pointer to new created reference.
 	 */
-	ScriptContainerData* addReferece(const std::string& s, const ScriptContainerData& data)
+	ScriptContainerData* addReferece(const ScriptRef& s, const ScriptContainerData& data)
 	{
 		return &refListCurr.insert(std::make_pair(s, data)).first->second;
 	}
@@ -194,7 +205,7 @@ struct ParserHelper
 	 */
 	ProgPos getCurrPos() const
 	{
-		return static_cast<ProgPos>(proc.size());
+		return static_cast<ProgPos>(container._proc.size());
 	}
 
 	/**
@@ -216,7 +227,7 @@ struct ParserHelper
 	ReservedPos<T> pushReserved()
 	{
 		auto curr = getCurrPos();
-		proc.insert(proc.end(), sizeof(T), 0);
+		container._proc.insert(container._proc.end(), sizeof(T), 0);
 		return { curr };
 	}
 
@@ -226,7 +237,7 @@ struct ParserHelper
 	template<typename T>
 	void updateReserved(ReservedPos<T> pos, T value)
 	{
-		memcpy(&proc[static_cast<size_t>(pos.getPos())], &value, sizeof(T));
+		memcpy(&container._proc[static_cast<size_t>(pos.getPos())], &value, sizeof(T));
 	}
 
 	/**
@@ -240,12 +251,21 @@ struct ParserHelper
 	}
 
 	/**
+	 * Push zeros to fill empty space.
+	 * @param s Size of empty space.
+	 */
+	void pushPadding(size_t s)
+	{
+		container._proc.insert(container._proc.end(), s, 0);
+	}
+
+	/**
 	 * Pushing proc operation id on proc vector.
 	 */
 	ReservedPos<ProcOp> pushProc(Uint8 procId)
 	{
 		auto curr = getCurrPos();
-		proc.push_back(procId);
+		container._proc.push_back(procId);
 		return { curr };
 	}
 
@@ -256,7 +276,7 @@ struct ParserHelper
 	 */
 	void updateProc(ReservedPos<ProcOp> pos, int procOffset)
 	{
-		proc[static_cast<size_t>(pos.getPos())] += procOffset;
+		container._proc[static_cast<size_t>(pos.getPos())] += procOffset;
 	}
 
 	/**
@@ -264,7 +284,7 @@ struct ParserHelper
 	 * @param s name of label.
 	 * @return true if label was succefuly added.
 	 */
-	bool pushLabelTry(const std::string& s)
+	bool pushLabelTry(const ScriptRef& s)
 	{
 		const ScriptContainerData* pos = getReferece(s);
 		if (pos == nullptr)
@@ -303,7 +323,7 @@ struct ParserHelper
 	 * @param offset set value where label is pointing
 	 * @return true if operation success
 	 */
-	bool setLabel(const std::string& s, ProgPos offset)
+	bool setLabel(const ScriptRef& s, ProgPos offset)
 	{
 		const ScriptContainerData* pos = getReferece(s);
 		if (pos == nullptr)
@@ -335,12 +355,12 @@ struct ParserHelper
 	 * @param s name of data
 	 * @return true if data exists and is valid
 	 */
-	bool pushDataTry(const std::string& s)
+	bool pushDataTry(const ScriptRef& s)
 	{
 		const ScriptContainerData* pos = getReferece(s);
 		if (pos && pos->type == ArgConst)
 		{
-			updateReserved<int>(pushReserved<int>(), pos->value);
+			pushValue<int>(pos->value);
 			return true;
 		}
 		return false;
@@ -351,19 +371,20 @@ struct ParserHelper
 	 * @param s name of const
 	 * @return true if const exists and is valid
 	 */
-	bool pushConstTry(const std::string& s)
+	bool pushConstTry(const ScriptRef& s)
 	{
+		auto str = s.toString();
 		int value = 0;
 		size_t offset = 0;
-		std::stringstream ss(s);
-		if (s[0] == '-' || s[0] == '+')
+		std::stringstream ss(str);
+		if (str[0] == '-' || str[0] == '+')
 			offset = 1;
-		if (s.size() > 2 + offset && s[offset] == '0' && (s[offset + 1] == 'x' || s[offset + 1] == 'X'))
+		if (str.size() > 2 + offset && str[offset] == '0' && (str[offset + 1] == 'x' || str[offset + 1] == 'X'))
 			ss >> std::hex;
 		if (!(ss >> value))
 			return false;
 
-		updateReserved<int>(pushReserved<int>(), value);
+		pushValue<int>(value);
 		return true;
 	}
 
@@ -373,12 +394,12 @@ struct ParserHelper
 	 * @return true if reg exists and is valid
 	 */
 	template<typename T>
-	bool pushRegTry(const std::string& s)
+	bool pushRegTry(const ScriptRef& s)
 	{
 		const ScriptContainerData* pos = getReferece(s);
-		if (pos && pos->type == ScriptContainerData::Register<T>())
+		if (pos && pos->type == ScriptContainerData::registerType<T>())
 		{
-			proc.push_back(pos->index);
+			pushValue<Uint8>(pos->index);
 			return true;
 		}
 		return false;
@@ -390,9 +411,9 @@ struct ParserHelper
 	 * @return true if reg exists and is valid
 	 */
 	template<typename T>
-	bool addReg(const std::string& s)
+	bool addReg(const ScriptRef& s)
 	{
-		return addReg(s, std::make_pair(ScriptContainerData::Register<T>(), sizeof(T)));
+		return addReg(s, std::make_pair(ScriptContainerData::registerType<T>(), sizeof(T)));
 	}
 
 	/**
@@ -401,202 +422,21 @@ struct ParserHelper
 	 * @param type type of reg
 	 * @return true if reg exists and is valid
 	 */
-	bool addReg(const std::string& s, std::pair<ArgEnum, size_t> type)
+	bool addReg(const ScriptRef& s, const ScriptTypeData& type)
 	{
 		const ScriptContainerData* pos = getReferece(s);
 		if (pos != nullptr)
 		{
 			return false;
 		}
-		if (regIndexUsed + type.second > ScriptMaxReg)
+		if (regIndexUsed + type.size > ScriptMaxReg)
 		{
 			return false;
 		}
-		ScriptContainerData data = { type.first, regIndexUsed, 0 };
-		regIndexUsed += type.second;
-		refListCurr.insert(std::make_pair(s, data));
+		ScriptContainerData data = { type.type, regIndexUsed, 0 };
+		regIndexUsed += type.size;
+		addReferece(s, data);
 		return true;
-	}
-
-	/**
-	 * Function finding next token in string
-	 * @param pos current position in string
-	 * @param end end of string
-	 * @return true if pos pointing on next token
-	 */
-	bool findToken(ite& pos, const ite& end) const
-	{
-		bool coment = false;
-		for(; pos != end; ++pos)
-		{
-			const char c = *pos;
-			if (coment)
-			{
-				if (c == '\n')
-				{
-					coment = false;
-				}
-				continue;
-			}
-			else if (isspace(c))
-			{
-				continue;
-			}
-			else if (c == '#')
-			{
-				coment = true;
-				continue;
-			}
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Function extracting token form string
-	 * @param pos current position in string
-	 * @param end end of string
-	 * @param excepted what token type we expecting now
-	 * @return extracted token
-	 */
-	SelectedToken getToken(ite& pos, const ite& end, TokenEnum excepted = TokenNone) const
-	{
-		//groups of different types of ASCII characters
-		const Uint8 none = 1;
-		const Uint8 spec = 2;
-		const Uint8 digit = 3;
-		const Uint8 charHex = 4;
-		const Uint8 charRest = 5;
-		const Uint8 digitSign = 6;
-
-		//array storing data about every ASCII character
-		static Uint8 charDecoder[256] = { 0 };
-		static bool init = true;
-		if (init)
-		{
-			init = false;
-			for(int i = 0; i < 256; ++i)
-			{
-				if (i == '#' || isspace(i))	charDecoder[i] = none;
-				if (i == ':' || i == ';')	charDecoder[i] = spec;
-
-				if (i == '+' || i == '-')	charDecoder[i] = digitSign;
-				if (i >= '0' && i <= '9')	charDecoder[i] = digit;
-				if (i >= 'A' && i <= 'F')	charDecoder[i] = charHex;
-				if (i >= 'a' && i <= 'f')	charDecoder[i] = charHex;
-
-				if (i >= 'G' && i <= 'Z')	charDecoder[i] = charRest;
-				if (i >= 'g' && i <= 'z')	charDecoder[i] = charRest;
-				if (i == '_' || i == '.')	charDecoder[i] = charRest;
-			}
-		}
-
-		SelectedToken token = { TokenNone, end, end };
-		if (!findToken(pos, end))
-			return token;
-
-		token.begin = pos;
-		bool hex = false;
-		int off = 0;
-
-		for (; pos != end; ++pos, ++off)
-		{
-			const Uint8 c = *pos;
-			const Uint8 decode = charDecoder[c];
-
-			//end of string
-			if (decode == none)
-			{
-				break;
-			}
-			else if (decode == spec)
-			{
-				if (c == ':')
-				{
-					//colon start new token, skip if we are in another one
-					if (token.type != TokenNone)
-						break;
-
-					++pos;
-					token.type = excepted == TokenColon ? TokenColon : TokenInvaild;
-					break;
-				}
-				else if (c == ';')
-				{
-					//semicolon start new token, skip if we are in another one
-					if (token.type != TokenNone)
-						break;
-					//semicolon wait for his turn, returning empty token
-					if (excepted != TokenSemicolon)
-						break;
-
-					++pos;
-					token.type = TokenSemicolon;
-					break;
-				}
-				else
-				{
-					token.type = TokenInvaild;
-					break;
-				}
-			}
-
-			switch (token.type)
-			{
-			//begin of string
-			case TokenNone:
-				switch(decode)
-				{
-				//start of number
-				case digitSign:
-					--off; //skipping +- sign
-				case digit:
-					hex = c == '0'; //expecting hex number
-					token.type = TokenNumber;
-					continue;
-
-				//start of symbol
-				case charHex:
-				case charRest:
-					token.type = TokenSymbol;
-					continue;
-				}
-				break;
-
-			//middle of number
-			case TokenNumber:
-				switch (decode)
-				{
-				case charRest:
-					if (off != 1) break;
-					if (c != 'x' && c != 'X') break; //X in "0x1"
-				case charHex:
-					if (!hex) break;
-				case digit:
-					if (off == 0) hex = c == '0'; //expecting hex number
-					continue;
-				}
-				break;
-
-			//middle of symbol
-			case TokenSymbol:
-				switch (decode)
-				{
-				case charRest:
-				case charHex:
-				case digit:
-					continue;
-				}
-				break;
-			default:
-				break;
-			}
-			//when decode == 0 or we find unexpected char we should end there
-			token.type = TokenInvaild;
-			break;
-		}
-		token.end = pos;
-		return token;
 	}
 }; //struct ParserHelper
 
@@ -721,7 +561,7 @@ struct Arg<Internal, A1, A2...> : public Arg<Internal, A2...>
 	using next::typeFunc;
 	static A1 typeFunc(tag);
 
-	static int parse(ParserHelper &ph, const SelectedToken &t)
+	static int parse(ParserWriter& ph, const SelectedToken& t)
 	{
 		if (A1::parse(ph, t))
 		{
@@ -746,7 +586,7 @@ struct Arg<Internal>
 	static constexpr int ver() = delete;
 	static void typeFunc() = delete;
 
-	static int parse(ParserHelper &ph, const SelectedToken &begin)
+	static int parse(ParserWriter& ph, const SelectedToken& begin)
 	{
 		return -1;
 	}
@@ -781,7 +621,7 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 	{
 		return MaxSize;
 	}
-	static int parse(ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end)
+	static int parse(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 	{
 		int curr = 0;
 		if (!T1::internal)
@@ -835,7 +675,7 @@ struct ArgColection<MaxSize>
 	{
 		return 0;
 	}
-	static int parse(ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end)
+	static int parse(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 	{
 		//we shoud have used all avaiable tokens.
 		if (begin == end)
@@ -859,12 +699,12 @@ struct ArgContextDef
 {
 	using ReturnType = ScriptWorker&;
 	static constexpr size_t size = 0;
-	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw;
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
 		return false;
 	}
@@ -874,12 +714,12 @@ struct ArgProgDef
 {
 	using ReturnType = ProgPos&;
 	static constexpr size_t size = 0;
-	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return curr;
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
 		return false;
 	}
@@ -889,16 +729,16 @@ struct ArgRegDef
 {
 	using ReturnType = int&;
 	static constexpr size_t size = sizeof(Uint8);
-	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.ref<int>(*arg);
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
-		if (t.type == TokenSymbol)
+		if (t.getType() == TokenSymbol)
 		{
-			return ph.pushRegTry<int>(t.toString());
+			return ph.pushRegTry<int>(t);
 		}
 		return false;
 	}
@@ -908,20 +748,20 @@ struct ArgConstDef
 {
 	using ReturnType = int;
 	static constexpr size_t size = sizeof(int);
-	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<int>(arg);
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
-		if (t.type == TokenNumber)
+		if (t.getType() == TokenNumber)
 		{
-			return ph.pushConstTry(t.toString());
+			return ph.pushConstTry(t);
 		}
-		else if (t.type == TokenSymbol)
+		else if (t.getType() == TokenSymbol)
 		{
-			return ph.pushDataTry(t.toString());
+			return ph.pushDataTry(t);
 		}
 		return false;
 	}
@@ -931,20 +771,20 @@ struct ArgLabelDef
 {
 	using ReturnType = ProgPos;
 	static constexpr size_t size = sizeof(ReturnType);
-	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<ProgPos>(arg);
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
-		if (t.type == TokenSymbol)
+		if (t.getType() == TokenSymbol)
 		{
-			return ph.pushLabelTry(t.toString());
+			return ph.pushLabelTry(t);
 		}
-		else if (t.type == TokenBuildinLabel)
+		else if (t.getType() == TokenBuildinLabel)
 		{
-			ph.pushLabel(t.tag);
+			ph.pushLabel(t.getTag());
 			return true;
 		}
 		return false;
@@ -955,12 +795,12 @@ struct ArgFuncDef
 {
 	using ReturnType = FuncCommon;
 	static constexpr size_t size = sizeof(ReturnType);
-	static FuncCommon get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static FuncCommon get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<FuncCommon>(arg);
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
 		return false;
 	}
@@ -971,12 +811,12 @@ struct ArgRawDef
 {
 	using ReturnType = const Uint8*;
 	static constexpr size_t size = Size;
-	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return arg;
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
 		return false;
 	}
@@ -989,16 +829,59 @@ struct ArgCustomPointerDef
 
 	using ReturnType = ponter&;
 	static constexpr size_t size = sizeof(Uint8);
-	static ReturnType get(ScriptWorker &sw, const Uint8 *arg, ProgPos &curr)
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.ref<ponter>(*arg);
 	}
 
-	static bool parse(ParserHelper &ph, const SelectedToken &t)
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
-		if (t.type == TokenSymbol)
+		if (t.getType() == TokenSymbol)
 		{
-			return ph.pushRegTry<ponter>(t.toString());
+			return ph.pushRegTry<ponter>(t);
+		}
+		return false;
+	}
+};
+struct ArgNullDef
+{
+	using ReturnType = nullptr_t;
+	static constexpr size_t size = 0;
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	{
+		return nullptr;
+	}
+
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	{
+		if (t.getType() == TokenSymbol)
+		{
+			return t == ScriptRef{ "null" };
+		}
+		return false;
+	}
+};
+
+template<typename T, typename I>
+struct ArgTagDef
+{
+	using ReturnType = ScriptTag<T, I>;
+	static constexpr size_t size = sizeof(ReturnType);
+	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	{
+		return sw.const_val<ScriptTag<T, I>>(arg);
+	}
+
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	{
+		if (t.getType() == TokenSymbol)
+		{
+			auto tag = ScriptValues<T, I>::getTag(t.toString());
+			if (tag)
+			{
+				ph.pushValue(tag);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -1039,7 +922,7 @@ struct ArgSelector<ProgPos&>
 };
 
 template<>
-struct ArgSelector<const ProgPos&>
+struct ArgSelector<ProgPos>
 {
 	using type = Arg<false, ArgLabelDef>;
 };
@@ -1059,7 +942,19 @@ struct ArgSelector<const Uint8*>
 template<typename T>
 struct ArgSelector<T*>
 {
+	using type = Arg<false, ArgCustomPointerDef<T>, ArgNullDef>;
+};
+
+template<typename T>
+struct ArgSelector<T*&>
+{
 	using type = Arg<false, ArgCustomPointerDef<T>>;
+};
+
+template<typename T, typename I>
+struct ArgSelector<ScriptTag<T, I>>
+{
+	using type = Arg<false, ArgTagDef<T, I>>;
 };
 
 template<typename T>
@@ -1092,14 +987,14 @@ struct FuncVer<Func, Ver, ListTag<Pos...>>
 
 	template<int CurrPos>
 	[[gnu::always_inline]]
-	static typename GetTypeAt<CurrPos>::ReturnType get(ScriptWorker &sw, const Uint8 *procArgs, ProgPos &curr)
+	static typename GetTypeAt<CurrPos>::ReturnType get(ScriptWorker& sw, const Uint8* procArgs, ProgPos& curr)
 	{
 		constexpr int offset = Args::offset(Ver, CurrPos);
 		return GetTypeAt<CurrPos>::get(sw, procArgs + offset, curr);
 	}
 
 	[[gnu::always_inline]]
-	static RetEnum func(ScriptWorker &sw, const Uint8 *procArgs, ProgPos &curr)
+	static RetEnum func(ScriptWorker& sw, const Uint8* procArgs, ProgPos& curr)
 	{
 		return Func::func(get<Pos>(sw, procArgs, curr)...);
 	}
@@ -1126,10 +1021,28 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 namespace helper
 {
 
+template<typename T>
+struct BindSet
+{
+	static RetEnum func(T*& t, T* r)
+	{
+		t = r;
+		return RetContinue;
+	}
+};
+template<typename T>
+struct BindEq
+{
+	static RetEnum func(ProgPos& Prog, T* t1, T* t2, ProgPos LabelTrue, ProgPos LabelFalse)
+	{
+		Prog = (t1 == t2) ? LabelTrue : LabelFalse;
+		return RetContinue;
+	}
+};
 template<typename T, typename P, P T::*X>
 struct BindPropGet
 {
-	static RetEnum func(T *t, P &p)
+	static RetEnum func(T* t, P& p)
 	{
 		if (t) p = t->*X; else p = P{};
 		return RetContinue;
@@ -1138,16 +1051,35 @@ struct BindPropGet
 template<typename T, typename P, P T::*X>
 struct BindPropSet
 {
-	static RetEnum func(T *t, P p)
+	static RetEnum func(T* t, P p)
 	{
 		if (t) t->*X = p;
 		return RetContinue;
 	}
 };
+template<typename T, ScriptValues<T> T::*X>
+struct BindScriptValueGet
+{
+	static RetEnum func(T* t, int& p, typename ScriptValues<T>::Tag st)
+	{
+		if (t) p = (t->*X).get(st); else p = int{};
+		return RetContinue;
+	}
+};
+template<typename T, ScriptValues<T> T::*X>
+struct BindScriptValueSet
+{
+	static RetEnum func(T* t, typename ScriptValues<T>::Tag st, int p)
+	{
+		if (t) (t->*X).set(st, p);
+		return RetContinue;
+	}
+};
+
 template<typename T, typename N, typename P, N T::*X, P N::*XX>
 struct BindPropNestGet
 {
-	static RetEnum func(T *t, P &p)
+	static RetEnum func(T* t, P& p)
 	{
 		if (t) p = (t->*X).*XX; else p = P{};
 		return RetContinue;
@@ -1156,7 +1088,7 @@ struct BindPropNestGet
 template<typename T, typename N, typename P, N T::*X, P N::*XX>
 struct BindPropNestSet
 {
-	static RetEnum func(T *t, P p)
+	static RetEnum func(T* t, P p)
 	{
 		if (t) (t->*X).*XX = p;
 		return RetContinue;
@@ -1166,7 +1098,7 @@ struct BindPropNestSet
 template<typename T, typename P, P I>
 struct BindValue
 {
-	static RetEnum func(T *t, P &p)
+	static RetEnum func(T* t, P& p)
 	{
 		if (t) p = I; else p = P{};
 		return RetContinue;
@@ -1189,7 +1121,7 @@ struct BindFunc<void(*)(Args...), X>
 template<typename T, typename... Args, bool(T::*X)(Args...)>
 struct BindFunc<bool(T::*)(Args...), X>
 {
-	static RetEnum func(T *t, int &r, Args... a)
+	static RetEnum func(T* t, int& r, Args... a)
 	{
 		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
@@ -1199,7 +1131,7 @@ struct BindFunc<bool(T::*)(Args...), X>
 template<typename T, typename... Args, int(T::*X)(Args...)>
 struct BindFunc<int(T::*)(Args...), X>
 {
-	static RetEnum func(T *t, int &r, Args... a)
+	static RetEnum func(T* t, int& r, Args... a)
 	{
 		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
@@ -1209,7 +1141,7 @@ struct BindFunc<int(T::*)(Args...), X>
 template<typename T, typename... Args, bool(T::*X)(Args...) const>
 struct BindFunc<bool(T::*)(Args...) const, X>
 {
-	static RetEnum func(T *t, int &r, Args... a)
+	static RetEnum func(T* t, int& r, Args... a)
 	{
 		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
@@ -1219,7 +1151,7 @@ struct BindFunc<bool(T::*)(Args...) const, X>
 template<typename T, typename... Args, int(T::*X)(Args...) const>
 struct BindFunc<int(T::*)(Args...) const, X>
 {
-	static RetEnum func(T *t, int &r, Args... a)
+	static RetEnum func(T* t, int& r, Args... a)
 	{
 		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
@@ -1229,9 +1161,29 @@ struct BindFunc<int(T::*)(Args...) const, X>
 template<typename T, typename... Args, void(T::*X)(Args...)>
 struct BindFunc<void(T::*)(Args...), X>
 {
-	static RetEnum func(T *t, Args... a)
+	static RetEnum func(T* t, Args... a)
 	{
 		if (t) (t->*X)(std::forward<Args>(a)...);
+		return RetContinue;
+	}
+};
+
+template<typename T, typename P, typename... Args, P *(T::*X)(Args...)>
+struct BindFunc<P *(T::*)(Args...), X>
+{
+	static RetEnum func(T* t, P*& p, Args... a)
+	{
+		if (t) p = (t->*X)(std::forward<Args>(a)...); else p = nullptr;
+		return RetContinue;
+	}
+};
+
+template<typename T, typename P, typename... Args, P *(T::*X)(Args...) const>
+struct BindFunc<P *(T::*)(Args...) const, X>
+{
+	static RetEnum func(T* t, P*& p, Args... a)
+	{
+		if (t) p = (t->*X)(std::forward<Args>(a)...); else p = nullptr;
 		return RetContinue;
 	}
 };
@@ -1241,49 +1193,69 @@ struct BindFunc<void(T::*)(Args...), X>
 template<typename T>
 struct Bind
 {
-	ScriptParserBase *parser;
-	std::string name;
+	ScriptParserBase* parser;
 
-	Bind(ScriptParserBase *p, const std::string& n) : parser{ p }, name{ n }
+	Bind(ScriptParserBase* p) : parser{ p }
 	{
-		parser->addType<T*>(n);
+		parser->addParser<FuncGroup<helper::BindSet<T>>>(getName("set"));
+		parser->addParser<FuncGroup<helper::BindEq<T>>>(getName("eq"));
 	}
 
 	std::string getName(const std::string& s)
 	{
-		return name + "." + s;
+		return std::string{ T::ScriptName } + "." + s;
+	}
+
+	template<typename X>
+	void addCustomFunc(const std::string& name)
+	{
+		parser->addParser<FuncGroup<X>>(name);
+	}
+	void addCustomConst(const std::string& name, int i)
+	{
+		parser->addConst(name, i);
 	}
 
 	template<int T::*X>
 	void addField(const std::string& get, const std::string& set = "")
 	{
-		parser->addParser<FuncGroup<helper::BindPropGet<T, int, X>>>(getName(get));
+		addCustomFunc<helper::BindPropGet<T, int, X>>(getName(get));
 		if (!set.empty())
 		{
-			parser->addParser<FuncGroup<helper::BindPropSet<T, int, X>>>(getName(set));
+			addCustomFunc<helper::BindPropSet<T, int, X>>(getName(set));
 		}
+	}
+	template<ScriptValues<T> T::*X>
+	void addScriptValue()
+	{
+		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getCustom"));
+		addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setCustom"));
 	}
 	template<int X>
 	void addFake(const std::string& get)
 	{
-		parser->addParser<FuncGroup<helper::BindValue<T, int, X>>>(getName(get));
+		addCustomFunc<helper::BindValue<T, int, X>>(getName(get));
 	}
 
-	#define MACRO_COPY_HELP_FUNC(Type) \
-		template<Type> \
+	#define MACRO_COPY_HELP_FUNC(Name, ...) \
+		template<__VA_ARGS__> \
 		void add(const std::string& func) \
 		{ \
-			parser->addParser<FuncGroup<helper::BindFunc<decltype(X), X>>>(getName(func)); \
+			addCustomFunc<helper::BindFunc<decltype(Name), Name>>(getName(func));\
 		}
 
-	MACRO_COPY_HELP_FUNC(bool (T::*X)() const)
-	MACRO_COPY_HELP_FUNC(int (T::*X)() const)
-	MACRO_COPY_HELP_FUNC(int (T::*X)())
-	MACRO_COPY_HELP_FUNC(int (T::*X)(int) const)
-	MACRO_COPY_HELP_FUNC(void (T::*X)(int))
-	MACRO_COPY_HELP_FUNC(void (*X)(T*, int))
-	MACRO_COPY_HELP_FUNC(void (*X)(T*, int&))
-	MACRO_COPY_HELP_FUNC(void (*X)(T*, int&, int))
+	MACRO_COPY_HELP_FUNC(X, bool (T::*X)() const)
+	MACRO_COPY_HELP_FUNC(X, int (T::*X)() const)
+	MACRO_COPY_HELP_FUNC(X, int (T::*X)())
+	MACRO_COPY_HELP_FUNC(X, int (T::*X)(int) const)
+
+	MACRO_COPY_HELP_FUNC(X, void (T::*X)(int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int))
+
+	MACRO_COPY_HELP_FUNC(X, typename P, P *(T::*X)())
+	MACRO_COPY_HELP_FUNC(X, typename P, P *(T::*X)() const)
 
 	#undef MACRO_COPY_HELP_FUNC
 };
@@ -1300,10 +1272,10 @@ struct BindNested
 	template<int N::*XX>
 	void addField(const std::string& get, const std::string& set = "")
 	{
-		bind->parser->template addParser<FuncGroup<helper::BindPropNestGet<T, N, int, X, XX>>>(bind->getName(get));
+		bind->template addCustomFunc<helper::BindPropNestGet<T, N, int, X, XX>>(bind->getName(get));
 		if (!set.empty())
 		{
-			bind->parser->template addParser<FuncGroup<helper::BindPropNestSet<T, N, int, X, XX>>>(bind->getName(get));
+			bind->template addCustomFunc<helper::BindPropNestSet<T, N, int, X, XX>>(bind->getName(get));
 		}
 	}
 };

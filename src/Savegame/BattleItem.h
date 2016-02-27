@@ -31,6 +31,7 @@ class Tile;
 class SurfaceSet;
 class Surface;
 class ScriptWorker;
+class ScriptParserBase;
 
 /**
  * Represents a single item in the battlescape.
@@ -54,6 +55,10 @@ private:
 	bool _XCOMProperty, _droppedOnAlienTurn, _isAmmo;
 public:
 
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "BattleItem";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
 	/// Init all required data in script using object data
 	static void ScriptFill(ScriptWorker* w, BattleItem* item, bool inventory, int anim_frame, int shade);
 

@@ -3285,7 +3285,7 @@ void BattleUnit::recoverTimeUnits()
 namespace
 {
 
-void getArmorScript(BattleUnit *bu, int &ret, int side)
+void getArmorValueScript(BattleUnit *bu, int &ret, int side)
 {
 	if (bu && 0 <= side && side < SIDE_MAX)
 	{
@@ -3346,6 +3346,29 @@ void getRecolorScript(BattleUnit *bu, int &pixel)
 		}
 	}
 }
+void getRightHandWeapon(BattleUnit *bu, BattleItem *&bi)
+{
+	if (bu)
+	{
+		bi = bu->getRightHandWeapon();
+	}
+	else
+	{
+		bi = nullptr;
+	}
+}
+void getLeftHandWeapon(BattleUnit *bu, BattleItem *&bi)
+{
+	if (bu)
+	{
+		bi = bu->getLeftHandWeapon();
+	}
+	else
+	{
+		bi = nullptr;
+	}
+}
+
 void isWalkingScript(BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -3378,126 +3401,127 @@ struct burnShadeScript
 };
 
 } // namespace
+
+/**
+ * Register BattleUnit in script parser.
+ * @param parser Script parser.
+ */
 void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 {
-	using namespace helper;
-	typedef BattleUnit BU;
-	typedef UnitStats US;
+	parser->registerPointerType<Armor>();
+	parser->registerPointerType<BattleItem>();
 
-	Bind<BattleUnit> bu = { parser, "BattleUnit" };
+	Bind<BattleUnit> bu = { parser };
 	BindNested<BattleUnit, UnitStats, &BattleUnit::_stats> us = { bu };
 
-	parser->addParser<FuncGroup<burnShadeScript>>("add_burn_shade");
-	parser->addConst("blit_torso", BODYPART_TORSO);
-	parser->addConst("blit_leftarm", BODYPART_LEFTARM);
-	parser->addConst("blit_rightarm", BODYPART_RIGHTARM);
-	parser->addConst("blit_legs", BODYPART_LEGS);
-	parser->addConst("blit_collapse", BODYPART_COLLAPSING);
-	parser->addConst("blit_inventory", BODYPART_ITEM);
+	bu.addCustomFunc<burnShadeScript>("add_burn_shade");
+	bu.addCustomConst("blit_torso", BODYPART_TORSO);
+	bu.addCustomConst("blit_leftarm", BODYPART_LEFTARM);
+	bu.addCustomConst("blit_rightarm", BODYPART_RIGHTARM);
+	bu.addCustomConst("blit_legs", BODYPART_LEGS);
+	bu.addCustomConst("blit_collapse", BODYPART_COLLAPSING);
+	bu.addCustomConst("blit_inventory", BODYPART_ITEM);
 
-	bu.addField<&BU::_id>("getId");
-	bu.addField<&BU::_rankInt>("getRank");
+	bu.addField<&BattleUnit::_id>("getId");
+	bu.addField<&BattleUnit::_rankInt>("getRank");
 	bu.add<&getGenderScript>("getGender");
 	bu.add<&getLookScript>("getLook");
 	bu.add<&getLookVariantScript>("getLookVariant");
 	bu.add<&getRecolorScript>("getRecolor");
-	bu.add<&BU::isFloating>("isFloating");
-	bu.add<&BU::isKneeled>("isKneeled");
+	bu.add<&BattleUnit::isFloating>("isFloating");
+	bu.add<&BattleUnit::isKneeled>("isKneeled");
 	bu.add<&isWalkingScript>("isWalking");
 	bu.add<&isCollapsingScript>("isCollapsing");
-	bu.add<&BU::getDirection>("getDirection");
-	bu.add<&BU::getTurretDirection>("getTurretDirection");
-	bu.add<&BU::getWalkingPhase>("getWalkingPhase");
+	bu.add<&BattleUnit::getDirection>("getDirection");
+	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
+	bu.add<&BattleUnit::getWalkingPhase>("getWalkingPhase");
 
-	bu.addField<&BU::_tu>("getTimeUnits");
-	us.addField<&US::tu>("getTimeUnitsMax");
+	bu.addField<&BattleUnit::_tu>("getTimeUnits");
+	us.addField<&UnitStats::tu>("getTimeUnitsMax");
 
-	bu.addField<&BU::_health>("getHealth");
-	us.addField<&US::health>("getHealthMax");
+	bu.addField<&BattleUnit::_health>("getHealth");
+	us.addField<&UnitStats::health>("getHealthMax");
 
-	bu.addField<&BU::_energy>("getEnergy");
-	us.addField<&US::stamina>("getEnergyMax");
+	bu.addField<&BattleUnit::_energy>("getEnergy");
+	us.addField<&UnitStats::stamina>("getEnergyMax");
 
-	bu.addField<&BU::_stunlevel>("getStun");
-	bu.addField<&BU::_health>("getStunMax");
+	bu.addField<&BattleUnit::_stunlevel>("getStun");
+	bu.addField<&BattleUnit::_health>("getStunMax");
 
-	bu.addField<&BU::_morale>("getMorale");
+	bu.addField<&BattleUnit::_morale>("getMorale");
 	bu.addFake<100>("getMoraleMax");
 
-	us.addField<&US::tu>("Stats.getTimeUnits");
-	us.addField<&US::stamina>("Stats.getStamina");
-	us.addField<&US::health>("Stats.getHealth");
-	us.addField<&US::bravery>("Stats.getBravery");
-	us.addField<&US::reactions>("Stats.getReactions");
-	us.addField<&US::firing>("Stats.getFiring");
-	us.addField<&US::throwing>("Stats.getThrowing");
-	us.addField<&US::strength>("Stats.getStrength");
-	us.addField<&US::psiStrength>("Stats.getPsiStrength");
-	us.addField<&US::psiSkill>("Stats.getPsiSkill");
-	us.addField<&US::melee>("Stats.getMelee");
+	us.addField<&UnitStats::tu>("Stats.getTimeUnits");
+	us.addField<&UnitStats::stamina>("Stats.getStamina");
+	us.addField<&UnitStats::health>("Stats.getHealth");
+	us.addField<&UnitStats::bravery>("Stats.getBravery");
+	us.addField<&UnitStats::reactions>("Stats.getReactions");
+	us.addField<&UnitStats::firing>("Stats.getFiring");
+	us.addField<&UnitStats::throwing>("Stats.getThrowing");
+	us.addField<&UnitStats::strength>("Stats.getStrength");
+	us.addField<&UnitStats::psiStrength>("Stats.getPsiStrength");
+	us.addField<&UnitStats::psiSkill>("Stats.getPsiSkill");
+	us.addField<&UnitStats::melee>("Stats.getMelee");
 
-	bu.add<&BU::getFatalWounds>("getFatalwoundsTotal");
-	bu.add<&BU::getFatalWound>("getFatalwounds");
-	bu.add<&getArmorScript>("getArmor");
-	bu.add<&BU::getOverKillDamage>("getOverKillDamage");
+	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
+	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
+	bu.add<&getArmorValueScript>("getArmorValue");
+	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
+	bu.add<Armor, &BattleUnit::getArmor>("getArmor");
+	bu.add<BattleItem, &BattleUnit::getRightHandWeapon>("getRightHandWeapon");
+	bu.add<BattleItem, &BattleUnit::getLeftHandWeapon>("getLeftHandWeapon");
 
-	parser->addConst("BODYPART_HEAD", BODYPART_HEAD);
-	parser->addConst("BODYPART_TORSO", BODYPART_TORSO);
-	parser->addConst("BODYPART_LEFTARM", BODYPART_LEFTARM);
-	parser->addConst("BODYPART_RIGHTARM", BODYPART_RIGHTARM);
-	parser->addConst("BODYPART_LEFTLEG", BODYPART_LEFTLEG);
-	parser->addConst("BODYPART_RIGHTLEG", BODYPART_RIGHTLEG);
-	parser->addConst("BODYPART_BIG_TORSO_0", BODYPART_BIG_TORSO + 0);
-	parser->addConst("BODYPART_BIG_TORSO_1", BODYPART_BIG_TORSO + 1);
-	parser->addConst("BODYPART_BIG_TORSO_2", BODYPART_BIG_TORSO + 2);
-	parser->addConst("BODYPART_BIG_TORSO_3", BODYPART_BIG_TORSO + 3);
-	parser->addConst("BODYPART_BIG_PROPULSION_0", BODYPART_BIG_PROPULSION + 0);
-	parser->addConst("BODYPART_BIG_PROPULSION_1", BODYPART_BIG_PROPULSION + 1);
-	parser->addConst("BODYPART_BIG_PROPULSION_2", BODYPART_BIG_PROPULSION + 2);
-	parser->addConst("BODYPART_BIG_PROPULSION_3", BODYPART_BIG_PROPULSION + 3);
-	parser->addConst("BODYPART_BIG_TURRET", BODYPART_BIG_TURRET);
+	bu.addCustomConst("BODYPART_HEAD", BODYPART_HEAD);
+	bu.addCustomConst("BODYPART_TORSO", BODYPART_TORSO);
+	bu.addCustomConst("BODYPART_LEFTARM", BODYPART_LEFTARM);
+	bu.addCustomConst("BODYPART_RIGHTARM", BODYPART_RIGHTARM);
+	bu.addCustomConst("BODYPART_LEFTLEG", BODYPART_LEFTLEG);
+	bu.addCustomConst("BODYPART_RIGHTLEG", BODYPART_RIGHTLEG);
+	bu.addCustomConst("BODYPART_BIG_TORSO_0", BODYPART_BIG_TORSO + 0);
+	bu.addCustomConst("BODYPART_BIG_TORSO_1", BODYPART_BIG_TORSO + 1);
+	bu.addCustomConst("BODYPART_BIG_TORSO_2", BODYPART_BIG_TORSO + 2);
+	bu.addCustomConst("BODYPART_BIG_TORSO_3", BODYPART_BIG_TORSO + 3);
+	bu.addCustomConst("BODYPART_BIG_PROPULSION_0", BODYPART_BIG_PROPULSION + 0);
+	bu.addCustomConst("BODYPART_BIG_PROPULSION_1", BODYPART_BIG_PROPULSION + 1);
+	bu.addCustomConst("BODYPART_BIG_PROPULSION_2", BODYPART_BIG_PROPULSION + 2);
+	bu.addCustomConst("BODYPART_BIG_PROPULSION_3", BODYPART_BIG_PROPULSION + 3);
+	bu.addCustomConst("BODYPART_BIG_TURRET", BODYPART_BIG_TURRET);
 
-	parser->addConst("SIDE_FRONT", SIDE_FRONT);
-	parser->addConst("SIDE_LEFT", SIDE_LEFT);
-	parser->addConst("SIDE_RIGHT", SIDE_RIGHT);
-	parser->addConst("SIDE_REAR", SIDE_REAR);
-	parser->addConst("SIDE_UNDER", SIDE_UNDER);
+	bu.addCustomConst("UNIT_RANK_ROOKIE", 0);
+	bu.addCustomConst("UNIT_RANK_SQUADDIE", 1);
+	bu.addCustomConst("UNIT_RANK_SERGEANT", 2);
+	bu.addCustomConst("UNIT_RANK_CAPTAIN", 3);
+	bu.addCustomConst("UNIT_RANK_COLONEL", 4);
+	bu.addCustomConst("UNIT_RANK_COMMANDER", 5);
 
-	parser->addConst("UNIT_RANK_ROOKIE", 0);
-	parser->addConst("UNIT_RANK_SQUADDIE", 1);
-	parser->addConst("UNIT_RANK_SERGEANT", 2);
-	parser->addConst("UNIT_RANK_CAPTAIN", 3);
-	parser->addConst("UNIT_RANK_COLONEL", 4);
-	parser->addConst("UNIT_RANK_COMMANDER", 5);
+	bu.addCustomConst("COLOR_X1_HAIR", 6);
+	bu.addCustomConst("COLOR_X1_FACE", 9);
 
-	parser->addConst("COLOR_X1_HAIR", 6);
-	parser->addConst("COLOR_X1_FACE", 9);
-
-	parser->addConst("COLOR_X1_NULL", 0);
-	parser->addConst("COLOR_X1_YELLOW", 1);
-	parser->addConst("COLOR_X1_RED", 2);
-	parser->addConst("COLOR_X1_GREEN0", 3);
-	parser->addConst("COLOR_X1_GREEN1", 4);
-	parser->addConst("COLOR_X1_GRAY", 5);
-	parser->addConst("COLOR_X1_BROWN0", 6);
-	parser->addConst("COLOR_X1_BLUE0", 7);
-	parser->addConst("COLOR_X1_BLUE1", 8);
-	parser->addConst("COLOR_X1_BROWN1", 9);
-	parser->addConst("COLOR_X1_BROWN2", 10);
-	parser->addConst("COLOR_X1_PURPLE0", 11);
-	parser->addConst("COLOR_X1_PURPLE1", 12);
-	parser->addConst("COLOR_X1_BLUE2", 13);
-	parser->addConst("COLOR_X1_SILVER", 14);
-	parser->addConst("COLOR_X1_SPECIAL", 15);
+	bu.addCustomConst("COLOR_X1_NULL", 0);
+	bu.addCustomConst("COLOR_X1_YELLOW", 1);
+	bu.addCustomConst("COLOR_X1_RED", 2);
+	bu.addCustomConst("COLOR_X1_GREEN0", 3);
+	bu.addCustomConst("COLOR_X1_GREEN1", 4);
+	bu.addCustomConst("COLOR_X1_GRAY", 5);
+	bu.addCustomConst("COLOR_X1_BROWN0", 6);
+	bu.addCustomConst("COLOR_X1_BLUE0", 7);
+	bu.addCustomConst("COLOR_X1_BLUE1", 8);
+	bu.addCustomConst("COLOR_X1_BROWN1", 9);
+	bu.addCustomConst("COLOR_X1_BROWN2", 10);
+	bu.addCustomConst("COLOR_X1_PURPLE0", 11);
+	bu.addCustomConst("COLOR_X1_PURPLE1", 12);
+	bu.addCustomConst("COLOR_X1_BLUE2", 13);
+	bu.addCustomConst("COLOR_X1_SILVER", 14);
+	bu.addCustomConst("COLOR_X1_SPECIAL", 15);
 
 
-	parser->addConst("LOOK_BLONDE", LOOK_BLONDE);
-	parser->addConst("LOOK_BROWNHAIR", LOOK_BROWNHAIR);
-	parser->addConst("LOOK_ORIENTAL", LOOK_ORIENTAL);
-	parser->addConst("LOOK_AFRICAN", LOOK_AFRICAN);
+	bu.addCustomConst("LOOK_BLONDE", LOOK_BLONDE);
+	bu.addCustomConst("LOOK_BROWNHAIR", LOOK_BROWNHAIR);
+	bu.addCustomConst("LOOK_ORIENTAL", LOOK_ORIENTAL);
+	bu.addCustomConst("LOOK_AFRICAN", LOOK_AFRICAN);
 
-	parser->addConst("GENDER_MALE", GENDER_MALE);
-	parser->addConst("GENDER_FEMALE", GENDER_FEMALE);
+	bu.addCustomConst("GENDER_MALE", GENDER_MALE);
+	bu.addCustomConst("GENDER_FEMALE", GENDER_FEMALE);
 }
 
 const Armor::RecolorParser BattleUnit::Parser("BattleUnit", "unit", "blit_part", "anim_frame", "shade", "burn");

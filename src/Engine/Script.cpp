@@ -20,6 +20,7 @@
 #include <sstream>
 #include <iomanip>
 #include <tuple>
+#include <algorithm>
 
 #include "Logger.h"
 #include "Options.h"
@@ -148,7 +149,7 @@ static inline RetEnum wavegen_tri_h(int& reg, const int& period, const int& size
 }
 
 [[gnu::always_inline]]
-static inline RetEnum call_func_h(ScriptWorker &c, FuncCommon func, const Uint8 *d, ProgPos &p)
+static inline RetEnum call_func_h(ScriptWorker& c, FuncCommon func, const Uint8* d, ProgPos& p)
 {
 	auto t = p;
 	auto r = func(c, d, t);
@@ -157,7 +158,7 @@ static inline RetEnum call_func_h(ScriptWorker &c, FuncCommon func, const Uint8 
 }
 
 [[gnu::always_inline]]
-static inline RetEnum debug_log_h(ProgPos &p, int i, int j)
+static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 {
 	if (Options::debug)
 	{
@@ -181,61 +182,61 @@ static inline RetEnum debug_log_h(ProgPos &p, int i, int j)
 	/*	Name,		Implementation,													End excecution,				Args */ \
 	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorker &)) \
 	\
-	IMPL(ret,		MACRO_QUOTE({								c.ref<int>(RegI0) = Data0;	return RetEnd;						}),		(ScriptWorker &c, int Data0)) \
-	IMPL(ret_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
-	IMPL(ret_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker &c, int Data0)) \
+	IMPL(ret,		MACRO_QUOTE({								c.ref<int>(RegI0) = Data0;	return RetEnd;						}),		(ScriptWorker& c, int Data0)) \
+	IMPL(ret_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
+	IMPL(ret_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
+	IMPL(ret_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
+	IMPL(ret_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
 	\
-	IMPL(goto,		MACRO_QUOTE({								Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
-	IMPL(goto_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker &c, ProgPos &Prog, const ProgPos &Label1)) \
+	IMPL(goto,		MACRO_QUOTE({								Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
+	IMPL(goto_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
+	IMPL(goto_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
+	IMPL(goto_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
+	IMPL(goto_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
 	\
-	IMPL(set,		MACRO_QUOTE({								Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
-	IMPL(set_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker &c, int &Reg0, int Data1)) \
+	IMPL(set,		MACRO_QUOTE({								Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
+	IMPL(set_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
+	IMPL(set_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
+	IMPL(set_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
+	IMPL(set_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
 	\
-	IMPL(test,		MACRO_QUOTE({ c.ref<int>(RegCond) = Data0 - Data1;				return RetContinue; }),		(ScriptWorker &c, int Data0, int Data1)) \
-	IMPL(test_le,	MACRO_QUOTE({ Prog = (A <= B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos &Prog, int A, int B, const ProgPos &LabelTrue, const ProgPos &LabelFalse)) \
-	IMPL(test_eq,	MACRO_QUOTE({ Prog = (A == B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos &Prog, int A, int B, const ProgPos &LabelTrue, const ProgPos &LabelFalse)) \
+	IMPL(test,		MACRO_QUOTE({ c.ref<int>(RegCond) = Data0 - Data1;				return RetContinue; }),		(ScriptWorker& c, int Data0, int Data1)) \
+	IMPL(test_le,	MACRO_QUOTE({ Prog = (A <= B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse)) \
+	IMPL(test_eq,	MACRO_QUOTE({ Prog = (A == B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse)) \
 	\
-	IMPL(swap,		MACRO_QUOTE({ std::swap(Reg0, Reg1);							return RetContinue; }),		(int &Reg0, int &Reg1)) \
-	IMPL(add,		MACRO_QUOTE({ Reg0 += Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(sub,		MACRO_QUOTE({ Reg0 -= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(mul,		MACRO_QUOTE({ Reg0 *= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(swap,		MACRO_QUOTE({ std::swap(Reg0, Reg1);							return RetContinue; }),		(int& Reg0, int& Reg1)) \
+	IMPL(add,		MACRO_QUOTE({ Reg0 += Data1;									return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(sub,		MACRO_QUOTE({ Reg0 -= Data1;									return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(mul,		MACRO_QUOTE({ Reg0 *= Data1;									return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(aggregate,	MACRO_QUOTE({ Reg0 = Reg0 + Data1 * Data2;						return RetContinue; }),		(int &Reg0, int Data1, int Data2)) \
-	IMPL(offset,	MACRO_QUOTE({ Reg0 = Reg0 * Data1 + Data2;						return RetContinue; }),		(int &Reg0, int Data1, int Data2)) \
-	IMPL(offsetmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Data1, Data2, Data3);						}),		(int &Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(aggregate,	MACRO_QUOTE({ Reg0 = Reg0 + Data1 * Data2;						return RetContinue; }),		(int& Reg0, int Data1, int Data2)) \
+	IMPL(offset,	MACRO_QUOTE({ Reg0 = Reg0 * Data1 + Data2;						return RetContinue; }),		(int& Reg0, int Data1, int Data2)) \
+	IMPL(offsetmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Data1, Data2, Data3);						}),		(int& Reg0, int Data1, int Data2, int Data3)) \
 	\
-	IMPL(div,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 /= Data1;		return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(mod,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 %= Data1;		return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(div,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 /= Data1;		return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(mod,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 %= Data1;		return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(shl,		MACRO_QUOTE({ Reg0 <<= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;									return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(shl,		MACRO_QUOTE({ Reg0 <<= Data1;									return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;									return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(abs,			MACRO_QUOTE({ Reg0 = std::abs(Reg0);							return RetContinue; }),		(int &Reg0)) \
-	IMPL(limit,			MACRO_QUOTE({ Reg0 = std::max(std::min(Reg0, Data2), Data1);	return RetContinue; }),		(int &Reg0, int Data1, int Data2)) \
-	IMPL(limit_upper,	MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(limit_lower,	MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(abs,			MACRO_QUOTE({ Reg0 = std::abs(Reg0);							return RetContinue; }),		(int& Reg0)) \
+	IMPL(limit,			MACRO_QUOTE({ Reg0 = std::max(std::min(Reg0, Data2), Data1);	return RetContinue; }),		(int& Reg0, int Data1, int Data2)) \
+	IMPL(limit_upper,	MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(limit_lower,	MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Data1, Data2, Data3);					}),		(int &Reg0, int Data1, int Data2, int Data3)) \
-	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Data1, Data2, Data3);					}),		(int &Reg0, int Data1, int Data2, int Data3)) \
-	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Data1, Data2, Data3);					}),		(int &Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
 	\
-	IMPL(get_color,		MACRO_QUOTE({ Reg0 = Data1 >> 4;							return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(set_color,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF) | (Data1 << 4);			return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(get_shade,		MACRO_QUOTE({ Reg0 = Data1 & 0xF;							return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(set_shade,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF);			return RetContinue; }),		(int &Reg0, int Data1)) \
-	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);						return RetContinue; }),		(int &Reg0, int Data1)) \
+	IMPL(get_color,		MACRO_QUOTE({ Reg0 = Data1 >> 4;							return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(set_color,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF) | (Data1 << 4);			return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(get_shade,		MACRO_QUOTE({ Reg0 = Data1 & 0xF;							return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(set_shade,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF);			return RetContinue; }),		(int& Reg0, int Data1)) \
+	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8 *d, ScriptWorker &c, ProgPos &p)) \
+	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8* d, ScriptWorker& c, ProgPos& p)) \
 	\
-	IMPL(debug_log,		MACRO_QUOTE({ return debug_log_h(p, Data1, Data2);								}),		(ProgPos &p, int Data1, int Data2)) \
+	IMPL(debug_log,		MACRO_QUOTE({ return debug_log_h(p, Data1, Data2);								}),		(ProgPos& p, int Data1, int Data2)) \
 
 
 ////////////////////////////////////////////////////////////
@@ -305,7 +306,7 @@ enum ProcEnum : Uint8
  * @param proc array storing operation of script
  * @return Result of executing script
  */
-static inline int scriptExe(int i0, int i1, ScriptWorker &data)
+static inline int scriptExe(int i0, int i1, ScriptWorker& data)
 {
 	data.ref<int>(RegI0) = i0;
 	data.ref<int>(RegI1) = i1;
@@ -430,7 +431,7 @@ int ScriptWorker::execute(int i0, int i1)
 ////////////////////////////////////////////////////////////
 
 template<Uint8 procId, typename FuncGroup>
-static bool parseLine(const ScriptParserData &spd, ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end)
+static bool parseLine(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 {
 	auto opPos = ph.pushProc(procId);
 	int ver = FuncGroup::parse(ph, begin, end);
@@ -445,7 +446,7 @@ static bool parseLine(const ScriptParserData &spd, ParserHelper &ph, const Selec
 	}
 }
 
-static inline bool parseCustomFunc(const ScriptParserData &spd, ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end)
+static inline bool parseCustomFunc(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 {
 	using argFunc = typename ArgSelector<FuncCommon>::type;
 	using argRaw = typename ArgSelector<const Uint8*>::type;
@@ -472,10 +473,10 @@ static inline bool parseCustomFunc(const ScriptParserData &spd, ParserHelper &ph
 	for (int i = 0; i < argRaw::ver(); ++i)
 	{
 		size_t off = argRaw::offset(i);
-		if (diff <= off)
+		if (off >= diff)
 		{
 			//aligin proc to fit fixed size.
-			ph.proc.insert(ph.proc.end(), off-diff, 0);
+			ph.pushPadding(off-diff);
 			ph.updateProc(opPos, i);
 			return true;
 		}
@@ -483,7 +484,7 @@ static inline bool parseCustomFunc(const ScriptParserData &spd, ParserHelper &ph
 	return false;
 }
 
-static bool parseConditionImpl(ParserHelper &ph, int nextPos, const SelectedToken *begin, const SelectedToken *end)
+static bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begin, const SelectedToken* end)
 {
 	constexpr size_t TempArgsSize = 4;
 	constexpr size_t OperatorSize = 6;
@@ -495,19 +496,16 @@ static bool parseConditionImpl(ParserHelper &ph, int nextPos, const SelectedToke
 	}
 
 	const auto currPos = ph.addLabel();
-	const auto dummy = std::string{};
-	const auto dummyIter = std::end(dummy);
 
-	const auto conditionType = begin[0].toString();
 	SelectedToken conditionArgs[TempArgsSize] =
 	{
 		begin[1],
 		begin[2],
-		{ TokenBuildinLabel, dummyIter, dummyIter, currPos, }, //success
-		{ TokenBuildinLabel, dummyIter, dummyIter, nextPos, }, //failure
+		{ TokenBuildinLabel, currPos, }, //success
+		{ TokenBuildinLabel, nextPos, }, //failure
 	};
 
-	const char *opNames[OperatorSize] =
+	const char* opNames[OperatorSize] =
 	{
 		"eq", "neq",
 		"le", "gt",
@@ -518,7 +516,7 @@ static bool parseConditionImpl(ParserHelper &ph, int nextPos, const SelectedToke
 	size_t i = 0;
 	for (; i < OperatorSize; ++i)
 	{
-		if (conditionType.compare(opNames[i]) == 0)
+		if (begin[0] == ScriptRef{ opNames[i] })
 		{
 			if (i < 2) equalFunc = true;
 			if (i & 1) std::swap(conditionArgs[2], conditionArgs[3]); //negate condition result
@@ -528,42 +526,83 @@ static bool parseConditionImpl(ParserHelper &ph, int nextPos, const SelectedToke
 	}
 	if (i == OperatorSize)
 	{
-		Log(LOG_ERROR) << "unknown condition: '" + conditionType + "'";
+		Log(LOG_ERROR) << "unknown condition: '" + begin[0].toString() + "'";
 		return false;
 	}
 
-	auto proc = ph.pushProc(equalFunc ? Proc_test_eq : Proc_test_le);
-	auto argType = 0;
-
-	if (equalFunc)
+	auto* argType0 = ph.getReferece(conditionArgs[0]);
+	auto* argType1 = ph.getReferece(conditionArgs[1]);
+	if (!argType0)
 	{
-		argType = FuncGroup<Func_test_eq>::parse(ph, std::begin(conditionArgs), std::end(conditionArgs));
+		Log(LOG_ERROR) << "invalid argument: '" + conditionArgs[0].toString() + "'";
+		return false;
+	}
+	if (!argType1)
+	{
+		Log(LOG_ERROR) << "invalid argument: '" + conditionArgs[1].toString() + "'";
+		return false;
+	}
+
+	// if any of arg is int then we use standart comparison
+	if (argType0->type == ArgReg || argType0->type == ArgConst || argType1->type == ArgReg || argType1->type == ArgConst)
+	{
+		auto proc = ph.pushProc(equalFunc ? Proc_test_eq : Proc_test_le);
+		auto argVer = 0;
+
+		if (equalFunc)
+		{
+			argVer = FuncGroup<Func_test_eq>::parse(ph, std::begin(conditionArgs), std::end(conditionArgs));
+		}
+		else
+		{
+			argVer = FuncGroup<Func_test_le>::parse(ph, std::begin(conditionArgs), std::end(conditionArgs));
+		}
+
+		if (argVer < 0)
+		{
+			return false;
+		}
+		ph.updateProc(proc, argVer);
+	}
+	else if (equalFunc && ((argType0->type != ArgNone) ? (argType0->type == argType1->type || argType1->type == ArgNone) : (argType1->type != ArgNone)))
+	{
+		const ScriptRef eq = ScriptRef{ ".eq" };
+		const ScriptParserData* proc = nullptr;
+		if (argType0->type != ArgNone)
+		{
+			proc = ph.parser.getProc(ph.parser.getTypeName(argType0->type), eq);
+		}
+		else if (argType1->type != ArgNone)
+		{
+			proc = ph.parser.getProc(ph.parser.getTypeName(argType1->type), eq);
+		}
+
+		if (!proc || (*proc)(ph, std::begin(conditionArgs), std::end(conditionArgs)) == false)
+		{
+			Log(LOG_ERROR) << "unsupported operator:  '" + begin[0].toString() + "'";
+			return false;
+		}
 	}
 	else
 	{
-		argType = FuncGroup<Func_test_le>::parse(ph, std::begin(conditionArgs), std::end(conditionArgs));
-	}
-
-	if (argType < 0)
-	{
+		Log(LOG_ERROR) << "incompatible arguments:  '" + conditionArgs[0].toString() + "' and '" + conditionArgs[1].toString() + "' for '" + begin[0].toString() + "' operator";
 		return false;
 	}
-	ph.updateProc(proc, argType);
 
 	ph.setLabel(currPos, ph.getCurrPos());
 
 	return true;
 }
 
-static bool parseIf(const ScriptParserData &spd, ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end)
+static bool parseIf(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 {
-	ParserHelper::Block block = { BlockIf, ph.addLabel(), ph.addLabel() };
+	ParserWriter::Block block = { BlockIf, ph.addLabel(), ph.addLabel() };
 	ph.codeBlocks.push_back(block);
 
 	return parseConditionImpl(ph, block.nextLabel, begin, end);
 }
 
-static bool parseElse(const ScriptParserData &spd, ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end)
+static bool parseElse(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 {
 	if (ph.codeBlocks.empty() || ph.codeBlocks.back().type != BlockIf)
 	{
@@ -571,7 +610,7 @@ static bool parseElse(const ScriptParserData &spd, ParserHelper &ph, const Selec
 		return false;
 	}
 
-	ParserHelper::Block &block = ph.codeBlocks.back();
+	ParserWriter::Block& block = ph.codeBlocks.back();
 
 	ph.pushProc(Proc_goto);
 	ph.pushLabel(block.finalLabel);
@@ -590,7 +629,7 @@ static bool parseElse(const ScriptParserData &spd, ParserHelper &ph, const Selec
 	}
 }
 
-static bool parseEnd(const ScriptParserData &spd, ParserHelper &ph, const SelectedToken *begin, const SelectedToken *end)
+static bool parseEnd(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 {
 	if (ph.codeBlocks.empty())
 	{
@@ -603,7 +642,7 @@ static bool parseEnd(const ScriptParserData &spd, ParserHelper &ph, const Select
 		return false;
 	}
 
-	ParserHelper::Block block = ph.codeBlocks.back();
+	ParserWriter::Block block = ph.codeBlocks.back();
 	ph.codeBlocks.pop_back();
 
 	if (block.nextLabel != block.finalLabel)
@@ -612,6 +651,243 @@ static bool parseEnd(const ScriptParserData &spd, ParserHelper &ph, const Select
 	}
 	ph.setLabel(block.finalLabel, ph.getCurrPos());
 	return true;
+}
+
+namespace
+{
+
+/**
+ * Add new value to sorted vector by name.
+ * @param vec Vector with data.
+ * @param name Name of new data.
+ * @param value Data to add.
+ */
+template<typename R>
+void addSortHelper(std::vector<std::pair<ScriptRef, R>>& vec, ScriptRef name, R value)
+{
+	vec.push_back(std::make_pair(name, value));
+	std::sort(vec.begin(), vec.end(), [](const std::pair<ScriptRef, R>& a, const std::pair<ScriptRef, R>& b) { return a.first < b.first; });
+}
+
+/**
+ * Helper function finding data by name (that can be merge from two parts).
+ * @param vec Vector with values.
+ * @param prefix First part of name.
+ * @param postfix Second part of name.
+ * @return Finded data or null.
+ */
+template<typename R>
+const R* findSortHelper(const std::vector<std::pair<ScriptRef, R>>& vec, ScriptRef prefix, ScriptRef postfix = {})
+{
+	if (postfix)
+	{
+		const auto size = prefix.size();
+		auto f = std::partition_point(vec.begin(), vec.end(),
+			[&](const std::pair<ScriptRef, R>& a)
+			{
+				const auto sub = a.first.substr(0, size);
+				if (sub < prefix)
+				{
+					return true;
+				}
+				else if (sub == prefix)
+				{
+					return a.first.substr(size) < postfix;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		);
+		if (f != vec.end() && f->first.substr(0, size) == prefix && f->first.substr(size) == postfix)
+		{
+			return &f->second;
+		}
+		return nullptr;
+	}
+	else
+	{
+		auto f = std::partition_point(vec.begin(), vec.end(), [&](const std::pair<ScriptRef, R>& a){ return a.first < prefix; });
+		if (f != vec.end() && f->first == prefix)
+		{
+			return &f->second;
+		}
+		return nullptr;
+	}
+}
+
+}
+
+/**
+ * Function extracting token form range
+ * @param excepted what token type we expecting now
+ * @return extracted token
+ */
+SelectedToken ScriptRef::getNextToken(TokenEnum excepted)
+{
+	//groups of different types of ASCII characters
+	const Uint8 none = 1;
+	const Uint8 spec = 2;
+	const Uint8 digit = 3;
+	const Uint8 charHex = 4;
+	const Uint8 charRest = 5;
+	const Uint8 digitSign = 6;
+
+	//array storing data about every ASCII character
+	static Uint8 charDecoder[256] = { 0 };
+	static bool init = true;
+	if (init)
+	{
+		init = false;
+		for(int i = 0; i < 256; ++i)
+		{
+			if (i == '#' || isspace(i))	charDecoder[i] = none;
+			if (i == ':' || i == ';')	charDecoder[i] = spec;
+
+			if (i == '+' || i == '-')	charDecoder[i] = digitSign;
+			if (i >= '0' && i <= '9')	charDecoder[i] = digit;
+			if (i >= 'A' && i <= 'F')	charDecoder[i] = charHex;
+			if (i >= 'a' && i <= 'f')	charDecoder[i] = charHex;
+
+			if (i >= 'G' && i <= 'Z')	charDecoder[i] = charRest;
+			if (i >= 'g' && i <= 'z')	charDecoder[i] = charRest;
+			if (i == '_' || i == '.')	charDecoder[i] = charRest;
+		}
+	}
+
+	//find first nowithe character.
+	bool coment = false;
+	for(; _begin != _end; ++_begin)
+	{
+		const char c = *_begin;
+		if (coment)
+		{
+			if (c == '\n')
+			{
+				coment = false;
+			}
+			continue;
+		}
+		else if (isspace(c))
+		{
+			continue;
+		}
+		else if (c == '#')
+		{
+			coment = true;
+			continue;
+		}
+		break;
+	}
+	if (_begin == _end)
+	{
+		return SelectedToken{ };
+	}
+
+	auto type = TokenNone;
+	auto begin = _begin;
+	bool hex = false;
+	int off = 0;
+
+	for (; _begin != _end; ++_begin, ++off)
+	{
+		const Uint8 c = *_begin;
+		const Uint8 decode = charDecoder[c];
+
+		//end of string
+		if (decode == none)
+		{
+			break;
+		}
+		else if (decode == spec)
+		{
+			if (c == ':')
+			{
+				//colon start new token, skip if we are in another one
+				if (type != TokenNone)
+					break;
+
+				++_begin;
+				type = excepted == TokenColon ? TokenColon : TokenInvaild;
+				break;
+			}
+			else if (c == ';')
+			{
+				//semicolon start new token, skip if we are in another one
+				if (type != TokenNone)
+					break;
+				//semicolon wait for his turn, returning empty token
+				if (excepted != TokenSemicolon)
+					break;
+
+				++_begin;
+				type = TokenSemicolon;
+				break;
+			}
+			else
+			{
+				type = TokenInvaild;
+				break;
+			}
+		}
+
+		switch (type)
+		{
+		//begin of string
+		case TokenNone:
+			switch(decode)
+			{
+			//start of number
+			case digitSign:
+				--off; //skipping +- sign
+			case digit:
+				hex = c == '0'; //expecting hex number
+				type = TokenNumber;
+				continue;
+
+			//start of symbol
+			case charHex:
+			case charRest:
+				type = TokenSymbol;
+				continue;
+			}
+			break;
+
+		//middle of number
+		case TokenNumber:
+			switch (decode)
+			{
+			case charRest:
+				if (off != 1) break;
+				if (c != 'x' && c != 'X') break; //X in "0x1"
+			case charHex:
+				if (!hex) break;
+			case digit:
+				if (off == 0) hex = c == '0'; //expecting hex number
+				continue;
+			}
+			break;
+
+		//middle of symbol
+		case TokenSymbol:
+			switch (decode)
+			{
+			case charRest:
+			case charHex:
+			case digit:
+				continue;
+			}
+			break;
+		default:
+			break;
+		}
+		//when decode == 0 or we find unexpected char we should end there
+		type = TokenInvaild;
+		break;
+	}
+	auto end = _begin;
+	return SelectedToken{ type, ScriptRef{ begin, end } };
 }
 
 /**
@@ -623,24 +899,57 @@ ScriptParserBase::ScriptParserBase(const std::string& name) : _regUsed{ RegMax }
 	//					op_data init
 	//--------------------------------------------------
 	#define MACRO_ALL_INIT(NAME, ...) \
-		_procList[#NAME] = { &parseLine<MACRO_PROC_ID(NAME), FuncGroup<MACRO_FUNC_ID(NAME)>> };
+		addSortHelper(_procList, addNameRef(#NAME), { &parseLine<MACRO_PROC_ID(NAME), FuncGroup<MACRO_FUNC_ID(NAME)>> });
 
 	MACRO_PROC_DEFINITION(MACRO_ALL_INIT)
 
 	#undef MACRO_ALL_INIT
 
-	_procList["if"] = { &parseIf };
-	_procList["else"] = { &parseElse };
-	_procList["end"] = { &parseEnd };
+	addSortHelper(_procList, addNameRef("if"), { &parseIf });
+	addSortHelper(_procList, addNameRef("else"), { &parseElse });
+	addSortHelper(_procList, addNameRef("end"), { &parseEnd });
 
-	addStandartReg("i0", RegI0);
-	addStandartReg("i1", RegI1);
-	addStandartReg("r0", RegR0);
-	addStandartReg("r1", RegR1);
-	addStandartReg("r2", RegR2);
-	addStandartReg("r3", RegR3);
+	addStandartReg("in0", RegI0);
+	addStandartReg("in1", RegI1);
+	addStandartReg("reg0", RegR0);
+	addStandartReg("reg1", RegR1);
+	addStandartReg("reg2", RegR2);
+	addStandartReg("reg3", RegR3);
 
 	addType<int>("int");
+
+	auto nullName = addNameRef("null");
+	addSortHelper(_typeList, nullName, { ArgNone, 0 });
+	addSortHelper(_refList, nullName, { ArgNone, 0, 0 });
+}
+
+bool ScriptParserBase::haveNameRef(const std::string& s) const
+{
+	auto ref = ScriptRef{ s.data(), s.data() + s.size() };
+	if (findSortHelper(_refList, ref) != nullptr)
+	{
+		return true;
+	}
+	if (findSortHelper(_procList, ref) != nullptr)
+	{
+		return true;
+	}
+	if (findSortHelper(_typeList, ref) != nullptr)
+	{
+		return true;
+	}
+	return false;
+}
+
+ScriptRef ScriptParserBase::addNameRef(const std::string& s)
+{
+	std::vector<char> refData;
+	refData.assign(s.begin(), s.end());
+	ScriptRef ref{ refData.data(), refData.data() + refData.size() };
+
+	//we need use char vector becasue its guarante that pointer in ref will not get invalidated when names list grown.
+	_nameList.push_back(std::move(refData));
+	return ref;
 }
 
 /**
@@ -650,36 +959,44 @@ ScriptParserBase::ScriptParserBase(const std::string& name) : _regUsed{ RegMax }
  */
 void ScriptParserBase::addParserBase(const std::string& s, ScriptParserData::argFunc arg, ScriptParserData::getFunc get)
 {
-	auto pos = _procList.find(s);
-	if (pos == _procList.end())
+	if (haveNameRef(s))
 	{
-		_procList[s] =
-		{
-			&parseCustomFunc,
-			arg,
-			get,
-		};
+		throw Exception("Function name '" + s + "' already used");
 	}
-	else
-	{
-		throw Exception("Repeated function name: '" + s + "'");
-	}
+
+	addSortHelper(_procList, addNameRef(s), { &parseCustomFunc, arg, get });
 }
 
 void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type, size_t size)
 {
-	auto pos = _refList.find(s);
-	if (pos != _refList.end() && pos->second.type != type)
+	if (haveNameRef(s))
 	{
-		throw Exception("Type name already used: '" + s + "'");
+		throw Exception("Type name '" + s + "' already used");
 	}
-	_typeList[s] = std::make_pair(type, size);
+
+	addSortHelper(_typeList, addNameRef(s), { type, size });
+}
+
+bool ScriptParserBase::haveTypeBase(ArgEnum type)
+{
+	for (auto& v : _typeList)
+	{
+		if (v.second.type == type)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void ScriptParserBase::addStandartReg(const std::string& s, RegEnum index)
 {
-	ScriptContainerData data = { ArgReg, index };
-	_refList.insert(std::make_pair(s, data));
+	if (haveNameRef(s))
+	{
+		throw Exception("Reg name '" + s + "' already used");
+	}
+
+	addSortHelper(_refList, addNameRef(s), { ArgReg, index, 0 });
 }
 /**
  * Set name for custom script param
@@ -690,14 +1007,14 @@ void ScriptParserBase::addCustomReg(const std::string& s, ArgEnum type, size_t s
 {
 	if (_regUsed + size <= ScriptMaxReg)
 	{
-		if (_refList.find(s) != _refList.end())
+		if (haveNameRef(s))
 		{
-			throw Exception("Name already used: '" + s + "'");
+			throw Exception("Reg name '" + s + "' already used");
 		}
-		ScriptContainerData data = { type, _regUsed };
-		volatile auto dummy = std::make_pair(s, data);
+
+		auto old = _regUsed;
 		_regUsed += size;
-		_refList.insert(std::make_pair(s, data));
+		addSortHelper(_refList, addNameRef(s), { type, old, 0 });
 	}
 	else
 	{
@@ -712,8 +1029,60 @@ void ScriptParserBase::addCustomReg(const std::string& s, ArgEnum type, size_t s
  */
 void ScriptParserBase::addConst(const std::string& s, int i)
 {
-	ScriptContainerData data = { ArgConst, 0, i };
-	_refList.insert(std::make_pair(s, data));
+	if (haveNameRef(s))
+	{
+		throw Exception("Const name '" + s + "' already used");
+	}
+
+	addSortHelper(_refList, addNameRef(s), { ArgConst, 0, i });
+}
+
+/**
+ * Get name of type
+ */
+ScriptRef ScriptParserBase::getTypeName(ArgEnum type) const
+{
+	for (auto& t : _typeList)
+	{
+		if (t.second.type == type)
+		{
+			return t.first;
+		}
+	}
+	return ScriptRef{ };
+}
+
+/**
+ * Get type data with name equal prefix + postfix.
+ * @param prefix Beginig of name.
+ * @param postfix End of name.
+ * @return Pointer to data or null if not find.
+ */
+const ScriptTypeData* ScriptParserBase::getType(ScriptRef prefix, ScriptRef postfix) const
+{
+	return findSortHelper(_typeList, prefix, postfix);
+}
+
+/**
+ * Get function data with name equal prefix + postfix.
+ * @param prefix Beginig of name.
+ * @param postfix End of name.
+ * @return Pointer to data or null if not find.
+ */
+const ScriptParserData* ScriptParserBase::getProc(ScriptRef prefix, ScriptRef postfix) const
+{
+	return findSortHelper(_procList, prefix, postfix);
+}
+
+/**
+ * Get arguments data with name equal prefix + postfix.
+ * @param prefix Beginig of name.
+ * @param postfix End of name.
+ * @return Pointer to data or null if not find.
+ */
+const ScriptContainerData* ScriptParserBase::getRef(ScriptRef prefix, ScriptRef postfix) const
+{
+	return findSortHelper(_refList, prefix, postfix);
 }
 
 /**
@@ -725,31 +1094,28 @@ void ScriptParserBase::addConst(const std::string& s, int i)
 bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::string& parentName, const std::string& srcCode) const
 {
 	std::string err = "Parsing script for '" + parentName + "' enconter error: ";
-	ParserHelper help(
+	ParserWriter help(
 		_regUsed,
-		destScript->_proc,
-		_procList,
-		_refList
+		*destScript,
+		*this
 	);
-	ite curr = srcCode.begin();
-	ite end = srcCode.end();
-	if (curr == end)
+
+	ScriptRef range = ScriptRef{ srcCode.data(), srcCode.data() + srcCode.size() };
+	if (!range)
+	{
 		return false;
+	}
 
 	while (true)
 	{
-		if (!help.findToken(curr, end))
+		SelectedToken op = range.getNextToken();
+		if (!op)
 		{
-			if (help.regIndexUsed > ScriptMaxReg)
-			{
-				Log(LOG_ERROR) << err << "too many references";
-				return false;
-			}
 			for (auto i = help.refListCurr.begin(); i != help.refListCurr.end(); ++i)
 			{
 				if (i->second.type == ArgLabel && i->second.value == -1)
 				{
-					Log(LOG_ERROR) << err << "invalid use of label: '" << i->first << "' without declaration";
+					Log(LOG_ERROR) << err << "invalid use of label: '" << i->first.toString() << "' without declaration";
 					return false;
 				}
 			}
@@ -757,107 +1123,105 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 			return true;
 		}
 
-		ite line_begin = curr;
-		ite line_end;
-		SelectedToken label = { TokenNone };
-
-		SelectedToken op = help.getToken(curr, end);
+		auto line_begin = op.begin();
+		SelectedToken label = { };
 		SelectedToken args[ScriptMaxArg];
-		args[0] = help.getToken(curr, end, TokenColon);
-		if (args[0].type == TokenColon)
+		args[0] = range.getNextToken(TokenColon);
+		if (args[0].getType() == TokenColon)
 		{
 			std::swap(op, label);
-			op = help.getToken(curr, end);
-			args[0] = help.getToken(curr, end);
+			op = range.getNextToken();
+			args[0] = range.getNextToken();
 		}
 
-		std::string op_str = op.toString();
-		std::string arg_str;
-		std::string label_str = label.toString();
-
-		auto op_curr = _procList.find(op_str);
-		if (op_curr == _procList.end())
+		// change form of "Reg.Function" to "Type.Function Reg".
+		auto op_curr = getProc(op);
+		if (!op_curr)
 		{
-			auto first_dot = op_str.find('.');
+			auto first_dot = op.find('.');
 			if (first_dot != std::string::npos)
 			{
-				auto temp = op_str.substr(0, first_dot);
+				auto temp = op.substr(0, first_dot);
 				auto ref = help.getReferece(temp);
 				if (ref && ref->type >= ArgMax)
 				{
-					auto& name = getTypeName(ref->type);
-					if (!name.empty())
+					auto name = getTypeName(ref->type);
+					if (name)
 					{
-						arg_str = std::move(temp);
-						op_str = name + op_str.substr(first_dot);
-						op_curr = _procList.find(op_str);
+						op_curr = getProc(name, op.substr(first_dot));
+						if (!op_curr)
+						{
+							Log(LOG_ERROR) << err << "invalid operation name '"<< op.toString() <<"'";
+							return false;
+						}
 						args[1] = args[0];
-						args[0] = { TokenSymbol, std::begin(arg_str), std::end(arg_str) };
+						args[0] = { TokenSymbol, temp };
 					}
 				}
 			}
 		}
-		for (int i = (arg_str.empty() ? 1 : 2); i < ScriptMaxArg; ++i)
-			args[i] = help.getToken(curr, end);
-		SelectedToken f = help.getToken(curr, end, TokenSemicolon);
+		for (int i = (args[1] ? 2 : 1); i < ScriptMaxArg; ++i)
+			args[i] = range.getNextToken();
+		SelectedToken f = range.getNextToken(TokenSemicolon);
 
-		line_end = curr;
 		//validation
 		bool valid = true;
-		valid &= label.type == TokenSymbol || label.type == TokenNone;
-		valid &= op.type == TokenSymbol;
+		valid &= label.getType() == TokenSymbol || label.getType() == TokenNone;
+		valid &= op.getType() == TokenSymbol;
 		for (int i = 0; i < ScriptMaxArg; ++i)
-			valid &= args[i].type == TokenSymbol || args[i].type == TokenNumber || args[i].type == TokenNone;
-		valid &= f.type == TokenSemicolon;
+			valid &= args[i].getType() == TokenSymbol || args[i].getType() == TokenNumber || args[i].getType() == TokenNone;
+		valid &= f.getType() == TokenSemicolon;
 
 		if (!valid)
 		{
-			if (f.type != TokenSemicolon)
+			auto line_end = range.begin();
+			if (f.getType() != TokenSemicolon)
 			{
-				//fixing `line_end` position
-				while(curr != end && *curr != ';')
-					++curr;
-				if (curr != end)
-					++curr;
-				line_end = curr;
+				// fixing `line_end` position.
+				while(line_end != range.end() && *line_end != ';')
+					++line_end;
+				if (line_end != range.end())
+					++line_end;
 			}
 			Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
 			return false;
 		}
 		else
 		{
+			ScriptRef line = ScriptRef{ line_begin, range.begin() };
 
-			//matching args form operation definition with args avaliable in string
+			// matching args form operation definition with args avaliable in string
 			int i = 0;
-			while (i < ScriptMaxArg && args[i].type != TokenNone)
+			while (i < ScriptMaxArg && args[i].getType() != TokenNone)
 				++i;
 
-			if (!label_str.empty() && !help.setLabel(label_str, help.getCurrPos()))
+			if (label && !help.setLabel(label, help.getCurrPos()))
 			{
-				Log(LOG_ERROR) << err << "invalid label '"<< label_str <<"' in line: '" << std::string(line_begin, line_end) << "'";
+				Log(LOG_ERROR) << err << "invalid label '"<< label.toString() <<"' in line: '" << line.toString() << "'";
 				return false;
 			}
 
-			if (op_curr != _procList.end())
+			// create normal operation.
+			if (op_curr)
 			{
-				if (op_curr->second(help, args, args+i) == false)
+				if ((*op_curr)(help, args, args+i) == false)
 				{
-					Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
+					Log(LOG_ERROR) << err << "invalid line: '" << line.toString() << "'";
 					return false;
 				}
 
 				continue;
 			}
 
-			auto type_curr = _typeList.find(op_str);
-			if (type_curr != _typeList.end())
+			// adding new custom variables of type selected type.
+			auto type_curr = getType(op);
+			if (type_curr)
 			{
 				for (int j = 0; j < i; ++j)
 				{
-					std::string var_name = args[j].toString();
-					if (args[j].type != TokenSymbol || help.addReg(var_name, type_curr->second) == false)
+					if (args[j].getType() != TokenSymbol || help.addReg(args[j], *type_curr) == false)
 					{
-						Log(LOG_ERROR) << err << "invalid variable name '"<< var_name <<"' in line: '" << std::string(line_begin, line_end) << "'";
+						Log(LOG_ERROR) << err << "invalid variable name '"<< args[j].toString() <<"' in line: '" << line.toString() << "'";
 						return false;
 					}
 				}
@@ -865,7 +1229,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 				continue;
 			}
 
-			Log(LOG_ERROR) << err << "invalid operation name '"<< op_str <<"' in line: '" << std::string(line_begin, line_end) << "'";
+			Log(LOG_ERROR) << err << "invalid line: '" << line.toString() << "'";
 			return false;
 		}
 	}
@@ -906,27 +1270,11 @@ void ScriptParserBase::logScriptMetadata() const
 		for (auto ite = _refList.begin(); ite != _refList.end(); ++ite)
 		{
 			if (ite->second.type == ArgConst)
-				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << ite->first << "Value: " << ite->second.value << "\n";
+				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << ite->first.toString() << "Value: " << ite->second.value << "\n";
 			else
-				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << ite->first << "Type: " << getTypeName(ite->second.type) << "\n";
+				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << ite->first.toString() << "Type: " << getTypeName(ite->second.type).toString() << "\n";
 		}
 	}
-}
-
-/**
- * Get name of type
- */
-const std::string& ScriptParserBase::getTypeName(ArgEnum type) const
-{
-	for (auto& t : _typeList)
-	{
-		if (t.second.first == type)
-		{
-			return t.first;
-		}
-	}
-	static std::string empty{};
-	return empty;
 }
 
 } //namespace OpenXcom

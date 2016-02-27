@@ -23,6 +23,7 @@
 #include "../Savegame/BattleUnit.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
+#include "../Engine/ScriptBind.h"
 #include "Mod.h"
 
 namespace OpenXcom
@@ -456,6 +457,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_powerRangeThreshold = node["powerRangeThreshold"].as<float>(_powerRangeThreshold);
 
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
+	_scriptValues.load(node["custom"]);
 
 	if (!_listOrder)
 	{
@@ -1705,6 +1707,58 @@ int RuleItem::getVaporDensity() const
 int RuleItem::getVaporProbability() const
 {
 	return _vaporProbability;
+}
+
+namespace
+{
+
+void getBattleTypeScript(RuleItem *ri, int &ret)
+{
+	if (ri)
+	{
+		ret = (int)ri->getBattleType();
+		return;
+	}
+	ret = (int)BT_NONE;
+}
+
+}
+
+/**
+ * Register RuleItem in script parser.
+ * @param parser Script parser.
+ */
+void RuleItem::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<RuleItem> ri = { parser };
+
+	ri.addCustomConst("BT_NONE", BT_NONE);
+	ri.addCustomConst("BT_FIREARM", BT_FIREARM);
+	ri.addCustomConst("BT_AMMO", BT_AMMO);
+	ri.addCustomConst("BT_MELEE", BT_MELEE);
+	ri.addCustomConst("BT_GRENADE", BT_GRENADE);
+	ri.addCustomConst("BT_PROXIMITYGRENADE", BT_PROXIMITYGRENADE);
+	ri.addCustomConst("BT_MEDIKIT", BT_MEDIKIT);
+	ri.addCustomConst("BT_SCANNER", BT_SCANNER);
+	ri.addCustomConst("BT_MINDPROBE", BT_MINDPROBE);
+	ri.addCustomConst("BT_PSIAMP", BT_PSIAMP);
+	ri.addCustomConst("BT_FLARE", BT_FLARE);
+	ri.addCustomConst("BT_CORPSE", BT_CORPSE);
+
+	ri.add<&RuleItem::getAccuracyAimed>("getAccuracyAimed");
+	ri.add<&RuleItem::getAccuracyAuto>("getAccuracyAuto");
+	ri.add<&RuleItem::getAccuracyMelee>("getAccuracyMelee");
+	ri.add<&RuleItem::getAccuracyMind>("getAccuracyMind");
+	ri.add<&RuleItem::getAccuracyPanic>("getAccuracyPanic");
+	ri.add<&RuleItem::getAccuracySnap>("getAccuracySnap");
+	ri.add<&RuleItem::getAccuracyThrow>("getAccuracyThrow");
+	ri.add<&RuleItem::getAccuracyUse>("getAccuracyUse");
+
+	ri.add<&RuleItem::getArmor>("getArmorValue");
+	ri.add<&RuleItem::getWeight>("getWeight");
+	ri.add<&getBattleTypeScript>("getBattleType");
+
+	ri.addScriptValue<&RuleItem::_scriptValues>();
 }
 
 }
