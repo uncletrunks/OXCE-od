@@ -253,6 +253,7 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
  */
 void Map::drawTerrain(Surface *surface)
 {
+	bool isShiftPressed = (SDL_GetModState() & KMOD_SHIFT) != 0;
 	int frameNumber = 0;
 	Surface *tmpSurface;
 	Tile *tile;
@@ -860,6 +861,12 @@ void Map::drawTerrain(Surface *surface)
 								{
 									tmpSurface->blitNShade(surface, screenPosition.x + offset.x, screenPosition.y + offset.y - 30, tileShade);
 								}
+							}
+							if (isShiftPressed)
+							{
+								// draw unit facing indicator
+								tmpSurface = _game->getMod()->getSurfaceSet("DETBLOB.DAT")->getFrame(7 + ((unit->getDirection() + 1) % 8) );
+								tmpSurface->blitNShade(surface, screenPosition.x + offset.x, screenPosition.y + offset.y, 0);
 							}
 						}
 					}
