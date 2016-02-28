@@ -269,6 +269,12 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 
 	if (btnID != -1)
 	{
+		// start new hit log
+		_game->getSavedGame()->getSavedBattle()->hitLog.str(L"");
+		_game->getSavedGame()->getSavedBattle()->hitLog.clear();
+		// log weapon
+		_game->getSavedGame()->getSavedBattle()->hitLog << "Weapon: " << tr(weapon->getType()) << "\n\n";
+
 		_action->type = _actionMenu[btnID]->getAction();
 		_action->updateTU();
 		if (_action->type != BA_THROW &&

@@ -32,6 +32,7 @@
 #include "Pathfinding.h"
 #include "BattlescapeGame.h"
 #include "WarningMessage.h"
+#include "InfoboxState.h"
 #include "DebriefingState.h"
 #include "MiniMapState.h"
 #include "BattlescapeGenerator.h"
@@ -1776,6 +1777,11 @@ inline void BattlescapeState::handle(Action *action)
 
 			if (action->getDetails()->type == SDL_KEYDOWN)
 			{
+				// "ctrl-h" - show hit log
+				if (action->getDetails()->key.keysym.sym == SDLK_h && (SDL_GetModState() & KMOD_CTRL) != 0)
+				{
+					_game->pushState(new InfoboxState(_save->hitLog.str()));
+				}
 				if (Options::debug)
 				{
 					// "ctrl-d" - enable debug mode
