@@ -1027,6 +1027,12 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 
 		if (action.targeting)
 		{
+			// start new hit log
+			_save->hitLog.str(L"");
+			_save->hitLog.clear();
+			// log weapon?
+			_save->hitLog << "Reaction fire...\n\n";
+
 			if (action.type == BA_HIT)
 			{
 				_save->getBattleGame()->statePushBack(new MeleeAttackBState(_save->getBattleGame(), action));
@@ -1221,6 +1227,9 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 	{
 		return false;
 	}
+
+	// hit log
+	_save->hitLog << "hit! ";
 
 	const int wounds = target->getFatalWounds();
 	const int adjustedDamage = target->damage(relative, damage, type);
@@ -2785,6 +2794,8 @@ bool TileEngine::meleeAttack(BattleAction *action)
 			hitChance -= targetUnit->getArmor()->getMeleeDodge(targetUnit) * penalty;
 		}
 	}
+	// hit log - new melee attack
+	_save->hitLog << "=> ";
 	if (!RNG::percent(hitChance))
 	{
 		return false;
