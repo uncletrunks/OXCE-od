@@ -866,12 +866,12 @@ void Map::drawTerrain(Surface *surface)
 							{
 								tmpSurface->blitNShade(surface, screenPosition.x + offset.x, screenPosition.y + offset.y - 30, tileShade);
 							}
-							if (isShiftPressed)
-							{
-								// draw unit facing indicator
-								tmpSurface = _game->getMod()->getSurfaceSet("DETBLOB.DAT")->getFrame(7 + ((unit->getDirection() + 1) % 8) );
-								tmpSurface->blitNShade(surface, screenPosition.x + offset.x, screenPosition.y + offset.y, 0);
-							}
+						}
+						if (isShiftPressed)
+						{
+							// draw unit facing indicator
+							tmpSurface = _game->getMod()->getSurfaceSet("DETBLOB.DAT")->getFrame(7 + ((unit->getDirection() + 1) % 8));
+							tmpSurface->blitNShade(surface, offset.x, offset.y, 0);
 						}
 					}
 					// if we can see through the floor, draw the soldier below it if it is on stairs
