@@ -3524,7 +3524,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addCustomConst("GENDER_FEMALE", GENDER_FEMALE);
 }
 
-const Armor::RecolorParser BattleUnit::Parser("BattleUnit", "unit", "blit_part", "anim_frame", "shade", "burn");
+const Armor::RecolorParser BattleUnit::Parser("BattleUnit", "curr_pixel", "prev_pixel", "unit", "blit_part", "anim_frame", "shade", "burn");
 
 void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn)
 {

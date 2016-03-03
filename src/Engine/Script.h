@@ -108,12 +108,7 @@ enum RegEnum : Uint8
 	RegI1 = 1*sizeof(int),
 	RegCond = 2*sizeof(int),
 
-	RegR0 = 3*sizeof(int),
-	RegR1 = 4*sizeof(int),
-	RegR2 = 5*sizeof(int),
-	RegR3 = 6*sizeof(int),
-
-	RegMax = 7*sizeof(int),
+	RegMax = 3*sizeof(int),
 };
 
 /**
@@ -428,7 +423,7 @@ class ScriptParserBase
 protected:
 
 	/// Default constructor.
-	ScriptParserBase(const std::string& name);
+	ScriptParserBase(const std::string& name, const std::string& firstArg, const std::string& secondArg);
 
 	/// Common typeless part of parsing string.
 	bool parseBase(ScriptContainerBase* scr, const std::string& parentName, const std::string& code) const;
@@ -535,7 +530,7 @@ public:
 
 
 	/// Default constructor.
-	ScriptParser(const std::string& name, S<Args>... argNames) : ScriptParserBase(name)
+	ScriptParser(const std::string& name, const std::string& firstArg, const std::string& secondArg,  S<Args>... argNames) : ScriptParserBase(name, firstArg, secondArg)
 	{
 		addRegImpl(argNames...);
 	}

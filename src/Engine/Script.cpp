@@ -893,7 +893,7 @@ SelectedToken ScriptRef::getNextToken(TokenEnum excepted)
 /**
  * Default constructor
  */
-ScriptParserBase::ScriptParserBase(const std::string& name) : _regUsed{ RegMax }, _name{ name }
+ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& firstArg, const std::string& secondArg) : _regUsed{ RegMax }, _name{ name }
 {
 	//--------------------------------------------------
 	//					op_data init
@@ -909,12 +909,14 @@ ScriptParserBase::ScriptParserBase(const std::string& name) : _regUsed{ RegMax }
 	addSortHelper(_procList, addNameRef("else"), { &parseElse });
 	addSortHelper(_procList, addNameRef("end"), { &parseEnd });
 
-	addStandartReg("in0", RegI0);
-	addStandartReg("in1", RegI1);
-	addStandartReg("reg0", RegR0);
-	addStandartReg("reg1", RegR1);
-	addStandartReg("reg2", RegR2);
-	addStandartReg("reg3", RegR3);
+	if (!firstArg.empty())
+	{
+		addStandartReg(firstArg, RegI0);
+	}
+	if (!secondArg.empty())
+	{
+		addStandartReg(secondArg, RegI1);
+	}
 
 	addType<int>("int");
 
