@@ -307,7 +307,7 @@ void Inventory::drawItems()
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
-				_grenadeIndicators.push_back(std::make_pair(frame->getX(), frame->getY()));
+				_grenadeIndicators.push_back(std::make_pair(x, y));
 			}
 
 			// fatal wounds
