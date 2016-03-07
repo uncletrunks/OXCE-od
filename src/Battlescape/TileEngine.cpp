@@ -1096,22 +1096,22 @@ void TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  */
 bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUnit *target, bool rangeAtack)
 {
+	if (!weapon)
+	{
+		return false;
+	}
+
 	if (!target)
 	{
 		return false;
 	}
-	else
+	else if (weapon->getRules()->getBattleType() != BT_MEDIKIT)
 	{
 		// only enemies count, not friends or neutrals
 		if (target->getOriginalFaction() != FACTION_HOSTILE) return false;
 
 		// mind-controlled enemies don't count though!
 		if (target->getFaction() != FACTION_HOSTILE) return false;
-	}
-
-	if (!weapon)
-	{
-		return false;
 	}
 
 	if (weapon->getRules()->getExperienceTrainingMode() > ETM_DEFAULT)
@@ -2828,6 +2828,12 @@ void TileEngine::medikitRemoveIfEmpty(BattleAction *action)
 void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyPart)
 {
 	RuleItem *rule = action->weapon->getRules();
+
+	if (target->getFatalWound(bodyPart))
+	{
+		// award experience only if healed body part has a fatal wound (to prevent abuse)
+		awardExperience(action->actor, action->weapon, target, false);
+	}
 
 	target->heal(bodyPart, rule->getWoundRecovery(), rule->getHealthRecovery());
 	action->weapon->setHealQuantity(action->weapon->getHealQuantity() - 1);
