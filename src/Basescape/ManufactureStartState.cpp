@@ -99,6 +99,7 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 	_btnCancel->onKeyboardPress((ActionHandler)&ManufactureStartState::btnCancelClick, Options::keyCancel);
 
 	const std::map<std::string, int> & requiredItems (_item->getRequiredItems());
+	const std::map<std::string, int> & producedItems (_item->getProducedItems());
 	bool productionPossible = _game->getSavedGame()->getFunds() > _item->getManufactureCost();
 	// check available workspace later
 	//int availableWorkSpace = _base->getFreeWorkshops();
@@ -121,9 +122,7 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 
 	ItemContainer * itemContainer (base->getStorageItems());
 	int row = 0;
-	for (std::map<std::string, int>::const_iterator iter = requiredItems.begin();
-		iter != requiredItems.end();
-		++iter)
+	for (std::map<std::string, int>::const_iterator iter = requiredItems.begin(); iter != requiredItems.end(); ++iter)
 	{
 		std::wostringstream s1, s2;
 		s1 << L'\x01' << iter->second;
@@ -132,11 +131,28 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 		_lstRequiredItems->addRow(3, tr(iter->first).c_str(), s1.str().c_str(), s2.str().c_str());
 		row++;
 	}
+	if (!producedItems.empty())
+	{
+		// separator line
+		_lstRequiredItems->addRow(1, tr("STR_UNITS_PRODUCED"));
+		_lstRequiredItems->setCellColor(row, 0, _lstRequiredItems->getSecondaryColor());
+		row++;
+
+		// produced items
+		for (std::map<std::string, int>::const_iterator iter = producedItems.begin(); iter != producedItems.end(); ++iter)
+		{
+			std::wostringstream s1;
+			s1 << L'\x01' << iter->second;
+			_lstRequiredItems->addRow(2, tr(iter->first).c_str(), s1.str().c_str());
+			row++;
+		}
+	}
+
 	_txtRequiredItemsTitle->setVisible(!requiredItems.empty());
 	_txtItemNameColumn->setVisible(!requiredItems.empty());
 	_txtUnitRequiredColumn->setVisible(!requiredItems.empty());
 	_txtUnitAvailableColumn->setVisible(!requiredItems.empty());
-	_lstRequiredItems->setVisible(!requiredItems.empty());
+	_lstRequiredItems->setVisible(!requiredItems.empty() || !producedItems.empty());
 
 	_btnStart->setText(tr("STR_START_PRODUCTION"));
 	_btnStart->onMouseClick((ActionHandler)&ManufactureStartState::btnStartClick);
