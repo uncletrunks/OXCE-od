@@ -26,7 +26,7 @@
 #include "Unit.h"
 #include "RuleStatBonus.h"
 #include "RuleDamageType.h"
-#include "../Engine/Script.h"
+#include "ModScript.h"
 
 namespace OpenXcom
 {
@@ -44,7 +44,6 @@ class BattleUnit;
 class Armor
 {
 public:
-	using RecolorParser = ScriptParser<BattleUnit*, int, int, int, int>;
 
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "Armor";
@@ -71,8 +70,8 @@ private:
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
-	RecolorParser::Container _recolorScript;
-	RecolorParser::Container _spriteScript;
+	ModScript::RecolorUnitParser::Container _recolorScript;
+	ModScript::SelectUnitParser::Container _spriteScript;
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
 public:
@@ -81,7 +80,7 @@ public:
 	/// Cleans up the armor ruleset.
 	~Armor();
 	/// Loads the armor data from YAML.
-	void load(const YAML::Node& node, const RecolorParser& parser);
+	void load(const YAML::Node& node, const ModScript& parsers);
 	/// Gets the armor's type.
 	std::string getType() const;
 	/// Gets the unit's sprite sheet.
@@ -181,9 +180,9 @@ public:
 	/// Can we access this unit's inventory?
 	bool hasInventory() const;
 	/// Gets script used to recolor unit sprite.
-	const RecolorParser::Container &getRecolorScript() const;
+	const ModScript::RecolorUnitParser::Container &getRecolorScript() const;
 	/// Gets script used to switch body elements in unit sprite.
-	const RecolorParser::Container &getSpriteScript() const;
+	const ModScript::SelectUnitParser::Container &getSpriteScript() const;
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
 };

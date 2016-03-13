@@ -53,11 +53,7 @@ Projectile::Projectile(Mod *mod, SavedBattleGame *save, BattleAction action, Pos
 	_speed = Options::battleFireSpeed;
 	if (_action.weapon)
 	{
-		if (_action.type == BA_THROW)
-		{
-			_sprite = _mod->getSurfaceSet("FLOOROB.PCK")->getFrame(getItem()->getFloorSprite());
-		}
-		else
+		if (_action.type != BA_THROW)
 		{
 			// try to get all the required info from the ammo, if present
 			if (ammo)
@@ -411,15 +407,6 @@ BattleItem *Projectile::getItem() const
 		return _action.weapon;
 	else
 		return 0;
-}
-
-/**
- * Gets the bullet sprite.
- * @return Pointer to Surface.
- */
-Surface *Projectile::getSprite() const
-{
-	return _sprite;
 }
 
 /**

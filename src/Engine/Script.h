@@ -69,34 +69,62 @@ inline ProgPos operator++(ProgPos& pos, int)
 	return old;
 }
 
+constexpr size_t ArgTypeReg = 0x1;
+constexpr size_t ArgTypePtr = 0x2;
+constexpr size_t ArgTypeEdit = 0x4;
+constexpr size_t ArgTypeSize = 0x8;
 /**
  * Args types.
  */
 enum ArgEnum : Uint8
 {
-	ArgNone,
-	ArgProg,
-	ArgContext,
+	ArgInvalid = ArgTypeSize * 0,
 
-	ArgReg,
-	ArgData,
-	ArgConst,
-	ArgLabel,
-
-	ArgRaw,
-	ArgMax,
+	ArgNull = ArgTypeSize * 1,
+	ArgInt = ArgTypeSize * 2,
+	ArgLabel = ArgTypeSize * 3,
+	ArgMax = ArgTypeSize * 4,
 };
 
-inline ArgEnum& operator++(ArgEnum& arg)
+constexpr ArgEnum ArgNext(ArgEnum arg)
 {
-	arg = static_cast<ArgEnum>(static_cast<Uint8>(arg) + 1);
-	return arg;
+	return static_cast<ArgEnum>(static_cast<Uint8>(arg) + ArgTypeSize);
 }
-inline ArgEnum operator++(ArgEnum& arg, int)
+
+/**
+ * Base version of argument type.
+ */
+constexpr ArgEnum ArgBase(ArgEnum arg)
 {
-	ArgEnum old = arg;
-	++arg;
-	return old;
+	return static_cast<ArgEnum>((static_cast<Uint8>(arg) | (ArgTypeSize - 1)) - ArgTypeSize + 1);
+}
+/**
+ * Specialized version of argument type.
+ */
+constexpr ArgEnum ArgSpec(ArgEnum arg, bool reg, bool ptr = false, bool edit = false)
+{
+	return static_cast<ArgEnum>(static_cast<Uint8>(arg) | (reg ? ArgTypeReg : 0x0) | (ptr ? ArgTypePtr : 0x0) | (edit ? ArgTypeEdit : 0x0));
+}
+/**
+ * Test if argumet type is register.
+ */
+constexpr bool ArgIsReg(ArgEnum arg)
+{
+	return static_cast<Uint8>(arg) & ArgTypeReg;
+}
+/**
+ * Test if argumet type is pointer.
+ */
+constexpr bool ArgIsPtr(ArgEnum arg)
+{
+	return static_cast<Uint8>(arg) & ArgTypePtr;
+}
+/**
+ * Test if argumet type is editable pointer.
+ */
+constexpr bool ArgIsEditable(ArgEnum arg)
+{
+	return static_cast<Uint8>(arg) & ArgTypeEdit;
 }
 
 /**
@@ -104,6 +132,7 @@ inline ArgEnum operator++(ArgEnum& arg, int)
  */
 enum RegEnum : Uint8
 {
+	RegInvaild = (Uint8)-1,
 	RegI0 = 0*sizeof(int),
 	RegI1 = 1*sizeof(int),
 	RegCond = 2*sizeof(int),
@@ -141,67 +170,39 @@ enum TokenEnum
 struct ScriptWorker
 {
 	const Uint8* proc;
-	int shade;
 	typename std::aligned_storage<ScriptMaxReg, alignof(void*)>::type reg;
 
 	/// Default constructor.
-	ScriptWorker() : proc(0), shade(0) //reg not initialized
+	ScriptWorker() : proc(nullptr) //reg not initialized
 	{
 
 	}
 
 	/// Programmable bliting using script.
-	void executeBlit(Surface* src, Surface* dest, int x, int y, bool half = false);
+	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half = false);
 	/// Call script with two arguments.
 	int execute(int i0, int i1);
+	/// Clear all worker data.
+	void clear()
+	{
+		proc = nullptr;
+	}
 
 	/// Get value from reg.
 	template<typename T>
-	T &ref(size_t offset)
+	T& ref(size_t offset)
 	{
-		return *reinterpret_cast<T*>(reinterpret_cast<char*>(&reg) + offset);
+		return *reinterpret_cast<typename std::decay<T>::type*>(reinterpret_cast<char*>(&reg) + offset);
 	}
 	/// Get value from proc vector.
 	template<typename T>
-	const T &const_val(const Uint8 *ptr, size_t offset = 0)
+	const T& const_val(const Uint8 *ptr, size_t offset = 0)
 	{
 		return *reinterpret_cast<const T*>(ptr + offset);
 	}
 };
 
 using FuncCommon = RetEnum (*)(ScriptWorker &, const Uint8 *, ProgPos &);
-
-/**
- * Struct used to store definition of used data by script.
- */
-struct ScriptContainerData
-{
-	static ArgEnum registeTypeImpl()
-	{
-		static ArgEnum curr = ArgMax;
-		return curr++;
-	}
-
-	/// Register type to get run time value representing it.
-	template<typename T>
-	static ArgEnum registerType()
-	{
-		if (std::is_same<T, int>::value)
-		{
-			return ArgReg;
-		}
-		else
-		{
-			static ArgEnum curr = registeTypeImpl();
-			return curr;
-		}
-	}
-
-	ArgEnum type;
-	int index;
-
-	int value;
-};
 
 /**
  * Common base of script execution.
@@ -229,7 +230,6 @@ protected:
 	}
 
 public:
-
 	/// constructor.
 	ScriptContainerBase() = default;
 	/// copy constructor.
@@ -252,7 +252,7 @@ public:
 /**
  * Strong typed script.
  */
-template<typename... Args>
+template<typename Parent, typename... Args>
 class ScriptContainer : public ScriptContainerBase
 {
 	template<size_t offset, typename First, typename... Rest>
@@ -266,6 +266,7 @@ class ScriptContainer : public ScriptContainerBase
 	{
 		//end loop
 	}
+
 public:
 	/// Update values in script.
 	void update(ScriptWorker* ref, Args... args) const
@@ -276,67 +277,43 @@ public:
 			setReg<RegMax>(ref, args...);
 		}
 	}
-};
 
-struct ScriptTypeData
-{
-	ArgEnum type;
-	size_t size;
-};
-
-/**
- * Struct storing avaliable operation to scripts.
- */
-struct ScriptParserData
-{
-	using argFunc = int (*)(ParserWriter& ph, const SelectedToken *begin, const SelectedToken *end);
-	using getFunc = FuncCommon (*)(int version);
-	using parserFunc = bool (*)(const ScriptParserData &spd, ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end);
-
-	parserFunc parser;
-	argFunc arg;
-	getFunc get;
-
-	bool operator()(ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end) const
+	/// Load data string form YAML.
+	void load(const std::string& type, const YAML::Node& node, const Parent& parent, const std::string& def = "")
 	{
-		return parser(*this, ph, begin, end);
+		if(node)
+		{
+			*this = parent.parse(type, node.as<std::string>());
+		}
+		if (!*this && !def.empty())
+		{
+			*this = parent.parse(type, def);
+		}
 	}
 };
 
-class ScriptRef
+template<typename T>
+class ScriptRange
 {
-	using ptr = const char*;
+protected:
+	using ptr = const T*;
 
-	/// pointer pointing place of first character.
+	/// Pointer pointing place of first elemet.
 	ptr _begin;
-	/// pointer pointing place past of last character.
+	/// pointer pointing place past of last elemet.
 	ptr _end;
 
-	static ptr dummy() { static char x = 0; return &x; }
 public:
-
-	/// Default constructor.
-	ScriptRef() : _begin{ dummy() }, _end{ dummy() }
+	/// Defualt constructor.
+	ScriptRange() : _begin{ nullptr }, _end{ nullptr }
 	{
 
 	}
-
-	/// Copy constructor.
-	ScriptRef(const ScriptRef&) = default;
-
-	/// Constructor from pointer.
-	explicit ScriptRef(ptr p) : _begin{ p }, _end{ p + strlen(p) }
+	/// Constructor.
+	ScriptRange(ptr b, ptr e) : _begin{ b }, _end{ e }
 	{
 
 	}
-	/// Constructor from range of pointers.
-	ScriptRef(ptr b, ptr e) : _begin{b}, _end{e}
-	{
-
-	}
-
-	/// Extract new token from current object.
-	SelectedToken getNextToken(TokenEnum excepted = TokenNone);
 
 	/// Begining of string range.
 	ptr begin() const
@@ -353,6 +330,40 @@ public:
 	{
 		return _end - _begin;
 	}
+	/// Bool operator.
+	explicit operator bool() const
+	{
+		return _begin != _end;
+	}
+};
+
+class ScriptRef : public ScriptRange<char>
+{
+	static ptr dummy() { return ""; }
+
+public:
+	/// Default constructor.
+	ScriptRef() : ScriptRange{ dummy(), dummy() }
+	{
+
+	}
+
+	/// Copy constructor.
+	ScriptRef(const ScriptRef&) = default;
+
+	/// Constructor from pointer.
+	explicit ScriptRef(ptr p) : ScriptRange{ p , p + strlen(p) }
+	{
+
+	}
+	/// Constructor from range of pointers.
+	ScriptRef(ptr b, ptr e) : ScriptRange{ b, e }
+	{
+
+	}
+
+	/// Extract new token from current object.
+	SelectedToken getNextToken(TokenEnum excepted = TokenNone);
 
 	/// Find first orrucace of character in string range.
 	size_t find(char c) const
@@ -388,23 +399,85 @@ public:
 	/// Create string based on current range.
 	std::string toString() const
 	{
-		return std::string(_begin, _end);
+		return *this ? std::string(_begin, _end) : std::string{ };
 	}
 
+	/// Compare two ranges.
+	static int compare(ScriptRef a, ScriptRef b)
+	{
+		const auto size_a = a.size();
+		const auto size_b = b.size();
+		if (size_a == size_b)
+		{
+			return memcmp(a._begin, b._begin, size_a);
+		}
+		else if (size_a < size_b)
+		{
+			return -1;
+		}
+		else
+		{
+			return 1;
+		}
+	}
 	/// Equal operator.
 	bool operator==(const ScriptRef& s) const
 	{
-		return size() == s.size() && std::equal(_begin, _end, s._begin);
+		return compare(*this, s) == 0;
 	}
 	/// Less operator.
 	bool operator<(const ScriptRef& s) const
 	{
-		return std::lexicographical_compare(_begin, _end, s._begin, s._end);
+		return compare(*this, s) < 0;
 	}
-	/// Bool operator.
+};
+
+/**
+ * Struct storing storing type data.
+ */
+struct ScriptTypeData
+{
+	ScriptRef name;
+	ArgEnum type;
+	size_t size;
+};
+
+/**
+ * Struct storing avaliable operation to scripts.
+ */
+struct ScriptParserData
+{
+	using argFunc = int (*)(ParserWriter& ph, const SelectedToken *begin, const SelectedToken *end);
+	using getFunc = FuncCommon (*)(int version);
+	using parserFunc = bool (*)(const ScriptParserData &spd, ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end);
+
+	ScriptRef name;
+	ArgEnum firstArgType;
+
+	parserFunc parser;
+	argFunc arg;
+	getFunc get;
+
+	bool operator()(ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end) const
+	{
+		return parser(*this, ph, begin, end);
+	}
+};
+
+/**
+ * Struct used to store definition of used data by script.
+ */
+struct ScriptContainerData
+{
+	ScriptRef name;
+	ArgEnum type;
+	RegEnum index;
+
+	int value;
+
 	explicit operator bool() const
 	{
-		return _begin != _end;
+		return name.size() > 0;
 	}
 };
 
@@ -416,11 +489,46 @@ class ScriptParserBase
 	Uint8 _regUsed;
 	std::string _name;
 	std::vector<std::vector<char>> _nameList;
-	std::vector<std::pair<ScriptRef, ScriptTypeData>> _typeList;
-	std::vector<std::pair<ScriptRef, ScriptParserData>> _procList;
-	std::vector<std::pair<ScriptRef, ScriptContainerData>> _refList;
+	std::vector<ScriptTypeData> _typeList;
+	std::vector<ScriptParserData> _procList;
+	std::vector<ScriptContainerData> _refList;
 
 protected:
+	static ArgEnum registeTypeImplNextValue()
+	{
+		static ArgEnum curr = ArgMax;
+		ArgEnum old = curr;
+		curr = ArgNext(curr);
+		return old;
+	}
+	template<typename T>
+	static ArgEnum registeTypeImpl()
+	{
+		if (std::is_same<T, int>::value)
+		{
+			return ArgInt;
+		}
+		else
+		{
+			static ArgEnum curr = registeTypeImplNextValue();
+			return curr;
+		}
+	}
+	template<typename T>
+	struct TypeInfoImpl
+	{
+		using t1 = typename std::decay<T>::type;
+		using t2 = typename std::remove_pointer<t1>::type;
+		using t3 = typename std::decay<t2>::type;
+
+		static constexpr bool isRef = std::is_reference<T>::value;
+		static constexpr bool isPtr = std::is_pointer<t1>::value;
+		static constexpr bool isEditable = isPtr && !std::is_const<t2>::value;
+
+		static constexpr size_t size = std::is_pod<t3>::value ? sizeof(t3) : 0;
+
+		static_assert(size || isPtr, "Type need to be POD to be used as reg or const value.");
+	};
 
 	/// Default constructor.
 	ScriptParserBase(const std::string& name, const std::string& firstArg, const std::string& secondArg);
@@ -438,34 +546,46 @@ protected:
 	/// Add name for standart reg.
 	void addStandartReg(const std::string& s, RegEnum index);
 	/// Add name for custom parameter.
-	void addCustomReg(const std::string& s, ArgEnum type, size_t size);
+	void addCustomReg(const std::string& s, ArgEnum type);
 	/// Add parsing fuction.
-	void addParserBase(const std::string& s, ScriptParserData::argFunc arg, ScriptParserData::getFunc get);
+	void addParserBase(const std::string& s, ArgEnum firstArgType, ScriptParserData::argFunc arg, ScriptParserData::getFunc get);
 	/// Add new type impl.
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
 	/// Add new type.
 	template<typename T>
 	void addType(const std::string& s)
 	{
-		addTypeBase(s, ScriptContainerData::registerType<T>(), sizeof(T));
+		using info = TypeInfoImpl<T>;
+		using t3 = typename info::t3;
+
+		addTypeBase(s, registeTypeImpl<t3>(), info::size);
 	}
 	/// Test if type was added impl.
 	bool haveTypeBase(ArgEnum type);
-public:
 
+public:
+	/// Register type to get run time value representing it.
+	template<typename T>
+	static ArgEnum registerType()
+	{
+		using info = TypeInfoImpl<T>;
+		using t3 = typename info::t3;
+
+		return ArgSpec(registeTypeImpl<t3>(), info::isRef, info::isPtr, info::isEditable);
+	}
 	/// Add const value.
 	void addConst(const std::string& s, int i);
 	/// Add line parsing function.
 	template<typename T>
 	void addParser(const std::string& s)
 	{
-		addParserBase(s, &T::parse, &T::getDynamic);
+		addParserBase(s, T::firstArgType(), &T::parse, &T::getDynamic);
 	}
 	/// Test if type was already added.
 	template<typename T>
 	bool haveType()
 	{
-		return haveTypeBase(ScriptContainerData::registerType<T>());
+		return haveTypeBase(registerType<T>());
 	}
 	/// Regised type in parser.
 	template<typename P>
@@ -481,11 +601,13 @@ public:
 	/// Get name of type.
 	ScriptRef getTypeName(ArgEnum type) const;
 	/// Get type data.
-	const ScriptTypeData *getType(ScriptRef name, ScriptRef postfix = {}) const;
+	const ScriptTypeData* getType(ArgEnum type) const;
+	/// Get type data.
+	const ScriptTypeData* getType(ScriptRef name, ScriptRef postfix = {}) const;
 	/// Get function data.
-	const ScriptParserData *getProc(ScriptRef name, ScriptRef postfix = {}) const;
+	ScriptRange<ScriptParserData> getProc(ScriptRef name, ScriptRef postfix = {}) const;
 	/// Get arguments data.
-	const ScriptContainerData *getRef(ScriptRef name, ScriptRef postfix = {}) const;
+	const ScriptContainerData* getRef(ScriptRef name, ScriptRef postfix = {}) const;
 };
 
 /**
@@ -507,7 +629,7 @@ class ScriptParser : public ScriptParserBase
 	void addRegImpl(S<First>& n, Rest&... t)
 	{
 		addTypeImpl(n);
-		addCustomReg(n.name, ScriptContainerData::registerType<First>(), sizeof(First));
+		addCustomReg(n.name, ScriptParserBase::registerType<First>());
 		addRegImpl(t...);
 	}
 	void addRegImpl()
@@ -520,14 +642,19 @@ class ScriptParser : public ScriptParserBase
 	{
 		registerPointerType<First>();
 	}
+	template<typename First, typename = decltype(&First::ScriptRegister)>
+	void addTypeImpl(S<const First*>& n)
+	{
+		registerPointerType<First>();
+	}
 	template<typename First>
 	void addTypeImpl(S<First>& n)
 	{
 		//nothing to do for rest
 	}
-public:
-	using Container = ScriptContainer<Args...>;
 
+public:
+	using Container = ScriptContainer<ScriptParser, Args...>;
 
 	/// Default constructor.
 	ScriptParser(const std::string& name, const std::string& firstArg, const std::string& secondArg,  S<Args>... argNames) : ScriptParserBase(name, firstArg, secondArg)
@@ -569,11 +696,11 @@ struct ScriptTag
 
 	/// Get value or max value if invalid.
 	constexpr size_t get() const { return *this ? static_cast<size_t>(index) : std::numeric_limits<size_t>::max(); }
-	/// Test if tag have valid value..
+	/// Test if tag have valid value.
 	constexpr explicit operator bool() const { return this->index != invalid().index; }
 
 	/// Get run time value for type.
-	static ArgEnum type() { return ScriptContainerData::registerType<T*>(); }
+	static ArgEnum type() { return ScriptParserBase::registerType<T*>(); }
 	/// Test if value can be used.
 	static constexpr bool isValid(size_t i) { return i < static_cast<size_t>(invalid().index); }
 	/// Fake constructor.

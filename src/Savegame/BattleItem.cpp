@@ -353,41 +353,69 @@ bool BattleItem::occupiesSlot(int x, int y, BattleItem *item) const
 }
 
 /**
- * Is item using alternative graphic.
- * @return Return current floor sprite.
- */
-bool BattleItem::isSpriteAlt() const
-{
-	switch (_rules->getBattleType())
-	{
-	case BT_NONE:
-	case BT_CORPSE:
-		return _unit && _unit->getStatus() != STATUS_DEAD;
-	case BT_FIREARM:
-		return _ammoItem != 0;
-	case BT_GRENADE:
-	case BT_PROXIMITYGRENADE:
-		return _fuseTimer != -1;
-	default:
-		return false;
-	}
-}
-/**
  * Gets the item's floor sprite.
  * @return Return current floor sprite.
  */
-int BattleItem::getFloorSprite() const
+Surface *BattleItem::getFloorSprite(SurfaceSet *set) const
 {
-	return isSpriteAlt() ? _rules->getFloorSpriteAlt() : _rules->getFloorSprite();
+	int i = _rules->getFloorSprite();
+	if (i != -1)
+	{
+		Surface *surf = set->getFrame(i);
+		//enforce compatibility with basic version
+		if (surf == nullptr)
+		{
+			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enoght frames");
+		}
+
+		ScriptWorker worker;
+		_rules->getSpriteScript().update(&worker, this, BODYPART_ITEM_FLOOR, 0, 0);
+		i = worker.execute(i, 0);
+
+		surf = set->getFrame(i);
+		if (surf == nullptr)
+		{
+			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enoght frames");
+		}
+		return surf;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 /**
  * Gets the item's inventory sprite.
  * @return Return current inventory sprite.
  */
-int BattleItem::getBigSprite() const
+Surface *BattleItem::getBigSprite(SurfaceSet *set) const
 {
-	return isSpriteAlt() ? _rules->getBigSpriteAlt() : _rules->getBigSprite();
+	int i = _rules->getBigSprite();
+	if (i != -1)
+	{
+		Surface *surf = set->getFrame(i);
+		//enforce compatibility with basic version
+		if (surf == nullptr)
+		{
+			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enoght frames");
+		}
+
+		ScriptWorker worker;
+		_rules->getSpriteScript().update(&worker, this, BODYPART_ITEM_INVENTORY, 0, 0);
+		i = worker.execute(i, 0);
+
+		surf = set->getFrame(i);
+		if (surf == nullptr)
+		{
+			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enoght frames");
+		}
+		return surf;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 /**
@@ -643,16 +671,52 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&BattleItem::isAmmo>("isAmmo");
 }
 
-void BattleItem::ScriptFill(ScriptWorker* w, BattleItem* item, bool inventory, int anim_frame, int shade)
+namespace
 {
-	w->proc = 0;
-	w->shade = shade;
+
+void commonImpl(BindBase& b)
+{
+	b.addCustomConst("blit_item_righthand", BODYPART_ITEM_RIGHTHAND);
+	b.addCustomConst("blit_item_lefthand", BODYPART_ITEM_LEFTHAND);
+	b.addCustomConst("blit_item_floor", BODYPART_ITEM_FLOOR);
+	b.addCustomConst("blit_item_big", BODYPART_ITEM_INVENTORY);
+}
+
+}
+
+/**
+ * Constructor of recolor script parser.
+ */
+ModScript::RecolorItemParser::RecolorItemParser() : ScriptParser{ "Item Pixel Recoloring", "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
+{
+	BindBase b { this };
+
+	commonImpl(b);
+}
+
+/**
+ * Constructor of select sprite script parser.
+ */
+ModScript::SelectItemParser::SelectItemParser() : ScriptParser{ "Item Sprite Select", "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
+{
+	BindBase b { this };
+
+	commonImpl(b);
+}
+
+void BattleItem::ScriptFill(ScriptWorker* w, BattleItem* item, int part, int anim_frame, int shade)
+{
+	w->clear();
 	if(item)
 	{
-		BattleUnit* itemUnit = item->getUnit();
-		if(itemUnit)
+		const auto &scr = item->getRules()->getRecolorScript();
+		if (scr)
 		{
-			BattleUnit::ScriptFill(w, itemUnit, inventory ? BODYPART_ITEM : BODYPART_COLLAPSING, anim_frame, shade, 0);
+			scr.update(w, item, part, anim_frame, shade);
+		}
+		else
+		{
+			BattleUnit::ScriptFill(w, item->getUnit(), part, anim_frame, shade, 0);
 		}
 	}
 }

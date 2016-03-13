@@ -18,6 +18,7 @@
  */
 #include "Armor.h"
 #include "../Engine/ScriptBind.h"
+#include "Mod.h"
 
 namespace OpenXcom
 {
@@ -57,11 +58,11 @@ Armor::~Armor()
  * Loads the armor from a YAML file.
  * @param node YAML node.
  */
-void Armor::load(const YAML::Node &node, const RecolorParser& parser)
+void Armor::load(const YAML::Node &node, const ModScript &parsers)
 {
 	if (const YAML::Node &parent = node["refNode"])
 	{
-		load(parent, parser);
+		load(parent, parsers);
 	}
 	_type = node["type"].as<std::string>(_type);
 	_spriteSheet = node["spriteSheet"].as<std::string>(_spriteSheet);
@@ -168,14 +169,10 @@ void Armor::load(const YAML::Node &node, const RecolorParser& parser)
 	_rankColor = node["spriteRankColor"].as<std::vector<int> >(_rankColor);
 	_utileColor = node["spriteUtileColor"].as<std::vector<int> >(_utileColor);
 
-	if(const YAML::Node &scr = node["recolorScript"])
-	{
-		_recolorScript = parser.parse(_type, scr.as<std::string>());
-	}
-	if(const YAML::Node &scr = node["spriteScript"])
-	{
-		_spriteScript = parser.parse(_type, scr.as<std::string>());
-	}
+	//small hack, we use script as defualt behavior to simplyfy code.
+	_recolorScript.load(_type, node["recolorScript"], parsers.recolorUnitSprite); //, "unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; ret new_pixel;"
+	_spriteScript.load(_type, node["spriteScript"], parsers.selectUnitSprite);
+
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node["custom"]);
 }
@@ -659,7 +656,7 @@ bool Armor::hasInventory() const
  * Get recoloring script.
  * @return Script for recoloring.
  */
-const Armor::RecolorParser::Container &Armor::getRecolorScript() const
+const ModScript::RecolorUnitParser::Container &Armor::getRecolorScript() const
 {
 	return _recolorScript;
 }
@@ -668,7 +665,7 @@ const Armor::RecolorParser::Container &Armor::getRecolorScript() const
  * Get switch sprite script.
  * @return Script for switching.
  */
-const Armor::RecolorParser::Container &Armor::getSpriteScript() const
+const ModScript::SelectUnitParser::Container &Armor::getSpriteScript() const
 {
 	return _spriteScript;
 }

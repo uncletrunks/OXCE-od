@@ -29,6 +29,7 @@
 #include "../Mod/Mod.h"
 #include "../Engine/ShaderDraw.h"
 #include "../Engine/ShaderMove.h"
+#include "../Engine/Exception.h"
 #include "../Engine/Options.h"
 
 namespace OpenXcom
@@ -48,7 +49,7 @@ UnitSprite::UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet) :
 	_fireSurface(mod->getSurfaceSet("SMOKE.PCK")),
 	_dest(dest), _mod(mod),
 	_part(0), _animationFrame(frame), _drawingRoutine(0),
-	_helmet(helmet), _half(false), _color(0), _colorSize(0),
+	_helmet(helmet), _half(false),
 	_x(0), _y(0), _shade(0), _burn(0),
 	_scriptWorkRef()
 {
@@ -65,32 +66,6 @@ UnitSprite::~UnitSprite()
 
 namespace
 {
-
-struct ColorReplace
-{
-	static inline void loop(Uint8& dest, const Uint8& src, const Uint8& over, int burn, int shade)
-	{
-		const Uint8 temp = (src & helper::ColorShade) + over;
-		helper::BurnShade::func(dest, temp, burn, shade);
-	}
-
-	static inline void func(Uint8& dest, const Uint8& src, const std::pair<Uint8, Uint8> *color, int size, int burn, int shade)
-	{
-		if (src)
-		{
-			const int group = (src & helper::ColorGroup);
-			for (int i = 0; i < size; ++i)
-			{
-				if (group == color[i].first)
-				{
-					loop(dest, src, color[i].second, burn, shade);
-					return;
-				}
-			}
-			loop(dest, 0, src, burn, shade);
-		}
-	}
-};
 
 BattleItem *getIfVisible(BattleItem *item)
 {
@@ -111,6 +86,12 @@ BattleItem *getIfVisible(BattleItem *item)
 void UnitSprite::selectItem(Part& p, BattleItem *item, int dir)
 {
 	p.src = _itemSurface->getFrame(item->getRules()->getHandSprite() + dir);
+
+	//enforce compatibility with basic version
+	if (!p.src)
+	{
+		throw Exception("Invlid surface set 'HANDOB.PCK' for item '" + item->getRules()->getName() + "': not enoght frames");
+	}
 }
 
 /**
@@ -120,12 +101,18 @@ void UnitSprite::selectItem(Part& p, BattleItem *item, int dir)
  */
 void UnitSprite::selectUnit(Part& p, int index, int dir)
 {
-	const auto &scr = _unit->getArmor()->getSpriteScript();
+	const auto* armor = _unit->getArmor();
+
+	//enforce compatibility with basic version
+	if (_unitSurface->getTotalFrames() <= (size_t)(index + dir))
+	{
+		throw Exception("Invlid surface set '" + armor->getSpriteSheet() + "' for armor '" + armor->getType() + "': not enoght frames");
+	}
+	const auto &scr = armor->getSpriteScript();
 	auto result = 0;
 	if(scr)
 	{
-		scr.update(&_scriptWorkRef, _unit, p.bodyPart, _animationFrame, _shade, _burn);
-		_scriptWorkRef.shade = _shade;
+		scr.update(&_scriptWorkRef, _unit, p.bodyPart, _animationFrame, _shade);
 		result = _scriptWorkRef.execute(index, dir);
 	}
 	else
@@ -141,10 +128,17 @@ void UnitSprite::selectUnit(Part& p, int index, int dir)
  */
 void UnitSprite::blitItem(Part& item)
 {
-	if (item.src)
+	if (!item.src)
 	{
-		item.src->blitNShade(_dest, _x + item.offX, _y + item.offY, _shade, _half);
+		return;
 	}
+	BattleItem::ScriptFill(&_scriptWorkRef, (item.bodyPart == BODYPART_ITEM_RIGHTHAND ? _itemA : _itemB), item.bodyPart, _animationFrame, _shade);
+
+	_dest->lock();
+
+	_scriptWorkRef.executeBlit(item.src, _dest,  _x + item.offX, _y + item.offY, _shade, _half);
+
+	_dest->unlock();
 }
 
 /**
@@ -158,29 +152,11 @@ void UnitSprite::blitBody(Part& body)
 		return;
 	}
 	BattleUnit::ScriptFill(&_scriptWorkRef, _unit, body.bodyPart, _animationFrame, _shade, _burn);
+
 	_dest->lock();
-	if(_scriptWorkRef.proc)
-	{
-		_scriptWorkRef.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _half);
-	}
-	else
-	{
-		ShaderMove<Uint8> dest(_dest, 0, 0);
-		if (_half)
-		{
-			GraphSubset g = dest.getDomain();
-			g.beg_x = _x + body.src->getWidth() / 2;
-			dest.setDomain(g);
-		}
-		ShaderDraw<ColorReplace>(
-			dest,
-			ShaderSurface(body.src, _x + body.offX, _y + body.offY),
-			ShaderScalar(_color),
-			ShaderScalar(_colorSize),
-			ShaderScalar(_burn),
-			ShaderScalar(_shade)
-		);
-	}
+
+	_scriptWorkRef.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _half);
+
 	_dest->unlock();
 }
 
@@ -204,18 +180,6 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	_unitSurface = _mod->getSurfaceSet(_unit->getArmor()->getSpriteSheet());
 
 	_drawingRoutine = _unit->getArmor()->getDrawingRoutine();
-	if (Options::battleHairBleach)
-	{
-		_colorSize = _unit->getRecolor().size();
-		if (_colorSize)
-		{
-			_color = &(_unit->getRecolor()[0]);
-		}
-		else
-		{
-			_color = 0;
-		}
-	}
 
 	_burn = 0;
 	int overkill = _unit->getOverKillDamage();
@@ -276,7 +240,7 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
  */
 void UnitSprite::drawRoutine0()
 {
-	Part torso{ BODYPART_TORSO }, legs{ BODYPART_LEGS }, leftArm{ BODYPART_LEFTARM }, rightArm{ BODYPART_RIGHTARM }, itemA { 0 }, itemB { 0 };
+	Part torso{ BODYPART_TORSO }, legs{ BODYPART_LEGS }, leftArm{ BODYPART_LEFTARM }, rightArm{ BODYPART_RIGHTARM }, itemA { BODYPART_ITEM_RIGHTHAND }, itemB { BODYPART_ITEM_LEFTHAND };
 	// magic numbers
 	const int legsStand = 16, legsKneel = 24;
 	int maleTorso, femaleTorso, die, rarm1H, larm2H, rarm2H, rarmShoot, legsFloat, torsoHandsWeaponY = 0;
@@ -644,7 +608,7 @@ void UnitSprite::drawRoutine0()
  */
 void UnitSprite::drawRoutine1()
 {
-	Part torso{ BODYPART_TORSO }, leftArm{ BODYPART_LEFTARM }, rightArm{ BODYPART_RIGHTARM }, itemA{ 0 }, itemB{ 0 };
+	Part torso{ BODYPART_TORSO }, leftArm{ BODYPART_LEFTARM }, rightArm{ BODYPART_RIGHTARM }, itemA{ BODYPART_ITEM_RIGHTHAND }, itemB{ BODYPART_ITEM_LEFTHAND };
 	// magic numbers
 	const int stand = 16, walk = 24, die = 64;
 	const int larm = 8, rarm = 0, larm2H = 67, rarm2H = 75, rarmShoot = 83, rarm1H= 91; // note that arms are switched vs "normal" sheets
@@ -804,7 +768,7 @@ void UnitSprite::drawRoutine2()
 	const int offX[8] = { -2, -7, -5, 0, 5, 7, 2, 0 }; // hovertank offsets
 	const int offy[8] = { -1, -3, -4, -5, -4, -3, -1, -1 }; // hovertank offsets
 
-	Part s{ BODYPART_BIG_TORSO + _part };
+	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	const int hoverTank = _unit->getMovementType() == MT_FLY ? 32 : 0;
 	const int turret = _unit->getTurretType();
@@ -814,14 +778,14 @@ void UnitSprite::drawRoutine2()
 	{
 		if (_part > 0)
 		{
-			Part p{ BODYPART_BIG_PROPULSION + _part };
+			Part p{ BODYPART_LARGE_PROPULSION + _part };
 			selectUnit(p, 104 + ((_part-1) * 8), _animationFrame % 8);
 			blitBody(p);
 		}
 		else
 		{
 			// draw nothing, can be override by script
-			Part p{ BODYPART_BIG_PROPULSION + _part };
+			Part p{ BODYPART_LARGE_PROPULSION + _part };
 			selectUnit(p, -8, _animationFrame % 8);
 			blitBody(p);
 		}
@@ -834,7 +798,7 @@ void UnitSprite::drawRoutine2()
 	// draw the turret, together with the last part
 	if (_part == 3 && turret != -1)
 	{
-		Part t{ BODYPART_BIG_TURRET };
+		Part t{ BODYPART_LARGE_TURRET };
 		selectUnit(t, 64 + (turret * 8), _unit->getTurretDirection());
 		int turretOffsetX = 0;
 		int turretOffsetY = -4;
@@ -861,19 +825,19 @@ void UnitSprite::drawRoutine3()
 		return;
 	}
 
-	Part s{ BODYPART_BIG_TORSO + _part };
+	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	// draw the animated propulsion below the hwp
 	if (_part > 0)
 	{
-		Part p{ BODYPART_BIG_PROPULSION + _part };
+		Part p{ BODYPART_LARGE_PROPULSION + _part };
 		selectUnit(p, 32 + ((_part-1) * 8), _animationFrame % 8);
 		blitBody(p);
 	}
 	else
 	{
 		// draw nothing, can be override by script
-		Part p{ BODYPART_BIG_PROPULSION + _part };
+		Part p{ BODYPART_LARGE_PROPULSION + _part };
 		selectUnit(p, -8, _animationFrame % 8);
 		blitBody(p);
 	}
@@ -896,7 +860,7 @@ void UnitSprite::drawRoutine4()
 		return;
 	}
 
-	Part s{ BODYPART_TORSO }, itemA{ 0 }, itemB{ 0 };
+	Part s{ BODYPART_TORSO }, itemA{ BODYPART_ITEM_RIGHTHAND }, itemB{ BODYPART_ITEM_LEFTHAND };
 	int stand = 0, walk = 8, die = 72;
 	const int offX[8] = { 8, 10, 7, 4, -9, -11, -7, -3 }; // for the weapons
 	const int offY[8] = { -6, -3, 0, 2, 0, -4, -7, -9 }; // for the weapons
@@ -1032,7 +996,7 @@ void UnitSprite::drawRoutine5()
 		return;
 	}
 
-	Part s{ BODYPART_BIG_TORSO + _part };
+	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	if (_unit->getStatus() == STATUS_WALKING)
 	{
@@ -1051,7 +1015,7 @@ void UnitSprite::drawRoutine5()
  */
 void UnitSprite::drawRoutine6()
 {
-	Part torso{ BODYPART_TORSO }, legs{ BODYPART_LEGS }, leftArm{ BODYPART_LEFTARM }, rightArm{ BODYPART_RIGHTARM }, itemA { 0 }, itemB { 0 };
+	Part torso{ BODYPART_TORSO }, legs{ BODYPART_LEGS }, leftArm{ BODYPART_LEFTARM }, rightArm{ BODYPART_RIGHTARM }, itemA{ BODYPART_ITEM_RIGHTHAND }, itemB{ BODYPART_ITEM_LEFTHAND };
 	// magic numbers
 	const int Torso = 24, legsStand = 16, die = 96;
 	const int larmStand = 0, rarmStand = 8, rarm1H = 99, larm2H = 107, rarm2H = 115, rarmShoot = 123;
@@ -1385,7 +1349,7 @@ void UnitSprite::drawRoutine11()
 		animFrame = _animationFrame % 4;
 	}
 
-	Part s{ BODYPART_BIG_TORSO + _part };
+	Part s{ BODYPART_LARGE_TORSO + _part };
 	selectUnit(s, body + (_part * 4), 16 * _unit->getDirection() + animFrame);
 	s.offY = (4);
 	blitBody(s);
@@ -1394,7 +1358,7 @@ void UnitSprite::drawRoutine11()
 	// draw the turret, overlapping all 4 parts
 	if ((_part == 3 || _part == 0) && turret != -1 && !_unit->getFloorAbove())
 	{
-		Part t{ BODYPART_BIG_TURRET };
+		Part t{ BODYPART_LARGE_TURRET };
 		selectUnit(t, 256 + (turret * 8), _unit->getTurretDirection());
 		t.offX = (offTurretX[_unit->getDirection()]);
 		if (_part == 3)
@@ -1411,7 +1375,7 @@ void UnitSprite::drawRoutine11()
  */
 void UnitSprite::drawRoutine12()
 {
-	Part s{ BODYPART_BIG_TORSO + _part };
+	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	if (_unit->isOut())
 	{
@@ -1498,7 +1462,7 @@ void UnitSprite::drawRoutine20()
 		return;
 	}
 
-	Part s{ BODYPART_BIG_TORSO + _part };
+	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	if (_unit->getStatus() == STATUS_WALKING)
 	{
@@ -1523,7 +1487,7 @@ void UnitSprite::drawRoutine21()
 		return;
 	}
 
-	Part s{ BODYPART_BIG_TORSO + _part };
+	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	selectUnit(s, (_part * 4), (_unit->getDirection() * 16) + (_animationFrame % 4));
 

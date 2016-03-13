@@ -747,8 +747,6 @@ void Map::drawTerrain(Surface *surface)
 						BattleItem* item = _projectile->getItem();
 						if (item)
 						{
-							tmpSurface = _projectile->getSprite();
-
 							Position voxelPos = _projectile->getPosition();
 							// draw shadow on the floor
 							voxelPos.z = _save->getTileEngine()->castedShade(voxelPos);
@@ -760,7 +758,11 @@ void Map::drawTerrain(Surface *surface)
 								_save->getTileEngine()->isVoxelVisible(voxelPos))
 							{
 								_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-								tmpSurface->blitNShade(surface, bulletPositionScreen.x - 16, bulletPositionScreen.y - 26, 16);
+
+								itemSprite.drawShadow(item,
+									bulletPositionScreen.x - 16,
+									bulletPositionScreen.y - 26
+								);
 							}
 
 							voxelPos = _projectile->getPosition();
@@ -863,7 +865,7 @@ void Map::drawTerrain(Surface *surface)
 							offset.y += (22 - unit->getHeight());
 							if (tmpSurface)
 							{
-								tmpSurface->blitNShade(surface, screenPosition.x + offset.x, screenPosition.y + offset.y - 30, tileShade);
+								tmpSurface->blitNShade(surface, offset.x, offset.y - 30, tileShade);
 							}
 						}
 					}

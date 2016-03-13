@@ -57,8 +57,6 @@ private:
 	Mod *_mod;
 	int _part, _animationFrame, _drawingRoutine;
 	bool _helmet, _half;
-	const std::pair<Uint8, Uint8> *_color;
-	int _colorSize;
 	int _x, _y, _shade, _burn;
 	ScriptWorker _scriptWorkRef;
 

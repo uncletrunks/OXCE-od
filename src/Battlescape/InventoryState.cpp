@@ -330,7 +330,6 @@ void InventoryState::init()
 			ss << gender;
 			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
 			ss << ".SPK";
-			std::string debug = ss.str();
 			surf = _game->getMod()->getSurface(ss.str());
 			if (surf)
 			{

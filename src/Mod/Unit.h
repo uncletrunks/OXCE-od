@@ -44,6 +44,7 @@ public:
 };
 
 class Mod;
+class ModScript;
 
 /**
  * Represents the static data for a unit that is generated on the battlescape, this includes: HWPs, aliens and civilians.

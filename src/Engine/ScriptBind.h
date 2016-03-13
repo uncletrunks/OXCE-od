@@ -116,7 +116,7 @@ struct ParserWriter
 	/// all available data for script.
 	const ScriptParserBase& parser;
 	/// temporary script data.
-	std::map<ScriptRef, ScriptContainerData> refListCurr;
+	std::vector<ScriptContainerData> refListCurr;
 	/// list of labels places of usage.
 	std::vector<std::pair<ReservedPos<ProgPos>, int>> refLabelsUses;
 	/// list of labels positions.
@@ -130,95 +130,27 @@ struct ParserWriter
 	/// Store position of blocks of code like "if" or "while".
 	std::vector<Block> codeBlocks;
 
-	/**
-	 * Constructor
-	 * @param scr parsed script
-	 * @param proc member pointer accessing script operations
-	 * @param procRefData member pointer accessing script data
-	 * @param procList all available operations for script
-	 * @param ref all available data for script
-	 */
+	/// Constructor.
 	ParserWriter(
 			Uint8 regUsed,
 			ScriptContainerBase& c,
-			const ScriptParserBase& d) :
-		container(c),
-		parser(d),
-		refListCurr(),
-		refLabelsUses(),
-		refLabelsList(),
-		regIndexUsed(regUsed),
-		constIndexUsed(-1)
-	{
+			const ScriptParserBase& d);
 
-	}
+	/// Finall fixes of data.
+	void relese();
 
-	/**
-	 * Function finalizing parsing of script
-	 */
-	void relese()
-	{
-		pushProc(0);
-		for (auto& p : refLabelsUses)
-		{
-			updateReserved<ProgPos>(p.first, refLabelsList[p.second]);
-		}
-	}
+	/// Get referece based on name.
+	ScriptContainerData getReferece(const ScriptRef& s) const;
 
-	/**
-	 * Returns reference based on name.
-	 * @param s name of referece.
-	 * @return referece data.
-	 */
-	const ScriptContainerData* getReferece(const ScriptRef& s) const
-	{
-		auto pos = refListCurr.find(s);
-		if (pos == refListCurr.end())
-		{
-			auto ptr = parser.getRef(s);
-			if (ptr != nullptr)
-			{
-				return ptr;
-			}
-			else
-			{
-				return nullptr;
-			}
-		}
-		return &pos->second;
-	}
+	/// Add referece based.
+	ScriptContainerData addReferece(const ScriptContainerData& data);
 
-	/**
-	 * Add new referece.
-	 * @param s Name of referece.
-	 * @param data Data of reference.
-	 * @return pointer to new created reference.
-	 */
-	ScriptContainerData* addReferece(const ScriptRef& s, const ScriptContainerData& data)
-	{
-		return &refListCurr.insert(std::make_pair(s, data)).first->second;
-	}
+	/// Get current position in proc vector.
+	ProgPos getCurrPos() const;
 
-	/**
-	 * Get current position in proc vector.
-	 * @return Position in proc vector.
-	 */
-	ProgPos getCurrPos() const
-	{
-		return static_cast<ProgPos>(container._proc.size());
-	}
+	/// Get distance betwean two positions in proc vector.
+	size_t getDiffPos(ProgPos begin, ProgPos end) const;
 
-	/**
-	 * Get distance betwean two positions in proc vector.
-	 */
-	size_t getDiffPos(ProgPos begin, ProgPos end) const
-	{
-		if (begin > end)
-		{
-			throw Exception("Invaild ProgPos distance");
-		}
-		return static_cast<size_t>(end) - static_cast<size_t>(begin);
-	}
 
 	/**
 	 * Preparing place and position on proc vector for some value and return position of it.
@@ -250,195 +182,56 @@ struct ParserWriter
 		updateReserved<T>(pushReserved<T>(), v);
 	}
 
-	/**
-	 * Push zeros to fill empty space.
-	 * @param s Size of empty space.
-	 */
-	void pushPadding(size_t s)
-	{
-		container._proc.insert(container._proc.end(), s, 0);
-	}
 
-	/**
-	 * Pushing proc operation id on proc vector.
-	 */
-	ReservedPos<ProcOp> pushProc(Uint8 procId)
-	{
-		auto curr = getCurrPos();
-		container._proc.push_back(procId);
-		return { curr };
-	}
+	/// Push zeros to fill empty space.
+	void pushPadding(size_t s);
 
-	/**
-	 * Updating previosoly added proc operation id.
-	 * @param pos Position of operation.
-	 * @param procOffset Offset value.
-	 */
-	void updateProc(ReservedPos<ProcOp> pos, int procOffset)
-	{
-		container._proc[static_cast<size_t>(pos.getPos())] += procOffset;
-	}
+	/// Pushing proc operation id on proc vector.
+	ReservedPos<ProcOp> pushProc(Uint8 procId);
 
-	/**
-	 * Try pushing label arg on proc vector. Can't use this to create loop back label.
-	 * @param s name of label.
-	 * @return true if label was succefuly added.
-	 */
-	bool pushLabelTry(const ScriptRef& s)
-	{
-		const ScriptContainerData* pos = getReferece(s);
-		if (pos == nullptr)
-		{
-			pos = addReferece(s, { ArgLabel, -1, addLabel() });
-		}
-		if (pos->type != ArgLabel && refLabelsList[pos->value] != ProgPos::Unknown)
-			return false;
+	/// Updating previosoly added proc operation id.
+	void updateProc(ReservedPos<ProcOp> pos, int procOffset);
 
-		pushLabel(pos->value);
-		return true;
-	}
+	/// Try pushing label arg on proc vector. Can't use this to create loop back label.
+	bool pushLabelTry(const ScriptRef& s);
 
-	/**
-	 * Push label arg to proc vector.
-	 * @param index
-	 */
-	void pushLabel(int index)
-	{
-		refLabelsUses.push_back(std::make_pair(pushReserved<ProgPos>(), index));
-	}
-	/**
-	 * Create new label for proc vector.
-	 * @return index of new label.
-	 */
-	int addLabel()
-	{
-		int pos = refLabelsList.size();
-		refLabelsList.push_back(ProgPos::Unknown);
-		return pos;
-	}
+	/// Push label arg to proc vector.
+	void pushLabel(int index);
+	/// Create new label for proc vector.
+	int addLabel();
 
-	/**
-	 * Setting offset of label on proc vector.
-	 * @param s name of label
-	 * @param offset set value where label is pointing
-	 * @return true if operation success
-	 */
-	bool setLabel(const ScriptRef& s, ProgPos offset)
-	{
-		const ScriptContainerData* pos = getReferece(s);
-		if (pos == nullptr)
-		{
-			pos = addReferece(s, { ArgLabel, -1, addLabel() });
-		}
-		if (pos->type != ArgLabel || refLabelsList[pos->value] != ProgPos::Unknown)
-			return false;
+	/// Setting offset of label on proc vector.
+	bool setLabel(const ScriptRef& s, ProgPos offset);
 
-		return setLabel(pos->value, offset);
-	}
+	/// Setting offset of label on proc vector.
+	bool setLabel(int index, ProgPos offset);
 
-	/**
-	 * Setting offset of label on proc vector.
-	 * @param index index of label.
-	 * @param offset set value where label is pointing
-	 * @return true if operation success
-	 */
-	bool setLabel(int index, ProgPos offset)
-	{
-		if (refLabelsList[index] != ProgPos::Unknown)
-			return false;
-		refLabelsList[index] = offset;
-		return true;
-	}
+	/// Try pushing data arg on proc vector.
+	bool pushDataTry(const ScriptRef& s);
 
-	/**
-	 * Try pushing data arg on proc vector.
-	 * @param s name of data
-	 * @return true if data exists and is valid
-	 */
-	bool pushDataTry(const ScriptRef& s)
-	{
-		const ScriptContainerData* pos = getReferece(s);
-		if (pos && pos->type == ArgConst)
-		{
-			pushValue<int>(pos->value);
-			return true;
-		}
-		return false;
-	}
+	/// Try pushing const arg on proc vector.
+	bool pushConstTry(const ScriptRef& s);
 
-	/**
-	 * Try pushing const arg on proc vector.
-	 * @param s name of const
-	 * @return true if const exists and is valid
-	 */
-	bool pushConstTry(const ScriptRef& s)
-	{
-		auto str = s.toString();
-		int value = 0;
-		size_t offset = 0;
-		std::stringstream ss(str);
-		if (str[0] == '-' || str[0] == '+')
-			offset = 1;
-		if (str.size() > 2 + offset && str[offset] == '0' && (str[offset + 1] == 'x' || str[offset + 1] == 'X'))
-			ss >> std::hex;
-		if (!(ss >> value))
-			return false;
-
-		pushValue<int>(value);
-		return true;
-	}
-
-	/**
-	 * Try pushing reg arg on proc vector.
-	 * @param s name of reg
-	 * @return true if reg exists and is valid
-	 */
+	/// Try pushing reg arg on proc vector.
 	template<typename T>
 	bool pushRegTry(const ScriptRef& s)
 	{
-		const ScriptContainerData* pos = getReferece(s);
-		if (pos && pos->type == ScriptContainerData::registerType<T>())
-		{
-			pushValue<Uint8>(pos->index);
-			return true;
-		}
-		return false;
+		return pushRegTry(s, ScriptParserBase::registerType<T>());
 	}
 
-	/**
-	 * Add new reg arg.
-	 * @param s name of reg
-	 * @return true if reg exists and is valid
-	 */
+	/// Try pushing reg arg on proc vector.
+	bool pushRegTry(const ScriptRef& s, ArgEnum type);
+
+	/// Add new reg arg.
 	template<typename T>
 	bool addReg(const ScriptRef& s)
 	{
-		return addReg(s, std::make_pair(ScriptContainerData::registerType<T>(), sizeof(T)));
+		return addReg(s, ScriptParserBase::registerType<T>());
 	}
 
-	/**
-	 * Add new reg arg.
-	 * @param s name of reg
-	 * @param type type of reg
-	 * @return true if reg exists and is valid
-	 */
-	bool addReg(const ScriptRef& s, const ScriptTypeData& type)
-	{
-		const ScriptContainerData* pos = getReferece(s);
-		if (pos != nullptr)
-		{
-			return false;
-		}
-		if (regIndexUsed + type.size > ScriptMaxReg)
-		{
-			return false;
-		}
-		ScriptContainerData data = { type.type, regIndexUsed, 0 };
-		regIndexUsed += type.size;
-		addReferece(s, data);
-		return true;
-	}
-}; //struct ParserHelper
+	/// Add new reg arg.
+	bool addReg(const ScriptRef& s, ArgEnum type);
+}; //struct ParserWriter
 
 ////////////////////////////////////////////////////////////
 //				Mata helper classes
@@ -572,6 +365,10 @@ struct Arg<Internal, A1, A2...> : public Arg<Internal, A2...>
 			return next::parse(ph, t);
 		}
 	}
+	static ArgEnum firstArgType()
+	{
+		return tag::value != 0 ? ArgInvalid : A1::type();
+	}
 };
 
 template<bool Internal>
@@ -589,6 +386,10 @@ struct Arg<Internal>
 	static int parse(ParserWriter& ph, const SelectedToken& begin)
 	{
 		return -1;
+	}
+	static ArgEnum firstArgType()
+	{
+		return ArgInvalid;
 	}
 };
 
@@ -649,6 +450,10 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 		}
 		return lower * T1::ver() + curr;
 	}
+	static ArgEnum firstArgType()
+	{
+		return !T1::internal ? T1::firstArgType() : next::firstArgType();
+	}
 
 	using next::typeFunc;
 	static T1 typeFunc(tag);
@@ -688,6 +493,10 @@ struct ArgColection<MaxSize>
 			return -1;
 		}
 	}
+	static ArgEnum firstArgType()
+	{
+		return ArgInvalid;
+	}
 	static void typeFunc() = delete;
 };
 
@@ -708,6 +517,11 @@ struct ArgContextDef
 	{
 		return false;
 	}
+
+	static ArgEnum type()
+	{
+		return ArgInvalid;
+	}
 };
 
 struct ArgProgDef
@@ -723,24 +537,35 @@ struct ArgProgDef
 	{
 		return false;
 	}
+
+	static ArgEnum type()
+	{
+		return ArgInvalid;
+	}
 };
 
+template<typename T>
 struct ArgRegDef
 {
-	using ReturnType = int&;
+	using ReturnType = T&;
 	static constexpr size_t size = sizeof(Uint8);
 	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
-		return sw.ref<int>(*arg);
+		return sw.ref<ReturnType>(*arg);
 	}
 
 	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
 		if (t.getType() == TokenSymbol)
 		{
-			return ph.pushRegTry<int>(t);
+			return ph.pushRegTry<ReturnType>(t);
 		}
 		return false;
+	}
+
+	static ArgEnum type()
+	{
+		return ScriptParserBase::registerType<ReturnType>();
 	}
 };
 
@@ -764,6 +589,11 @@ struct ArgConstDef
 			return ph.pushDataTry(t);
 		}
 		return false;
+	}
+
+	static ArgEnum type()
+	{
+		return ArgInvalid;
 	}
 };
 
@@ -789,6 +619,11 @@ struct ArgLabelDef
 		}
 		return false;
 	}
+
+	static ArgEnum type()
+	{
+		return ArgLabel;
+	}
 };
 
 struct ArgFuncDef
@@ -803,6 +638,11 @@ struct ArgFuncDef
 	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
 		return false;
+	}
+
+	static ArgEnum type()
+	{
+		return ArgInvalid;
 	}
 };
 
@@ -820,29 +660,13 @@ struct ArgRawDef
 	{
 		return false;
 	}
-};
 
-template<typename T>
-struct ArgCustomPointerDef
-{
-	using ponter = T*;
-
-	using ReturnType = ponter&;
-	static constexpr size_t size = sizeof(Uint8);
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ArgEnum type()
 	{
-		return sw.ref<ponter>(*arg);
-	}
-
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
-	{
-		if (t.getType() == TokenSymbol)
-		{
-			return ph.pushRegTry<ponter>(t);
-		}
-		return false;
+		return ArgInvalid;
 	}
 };
+
 struct ArgNullDef
 {
 	using ReturnType = nullptr_t;
@@ -859,6 +683,11 @@ struct ArgNullDef
 			return t == ScriptRef{ "null" };
 		}
 		return false;
+	}
+
+	static ArgEnum type()
+	{
+		return ArgNull;
 	}
 };
 
@@ -885,6 +714,11 @@ struct ArgTagDef
 		}
 		return false;
 	}
+
+	static ArgEnum type()
+	{
+		return ArgInvalid;
+	}
 };
 
 ////////////////////////////////////////////////////////////
@@ -900,19 +734,19 @@ struct ArgSelector<ScriptWorker&>
 template<>
 struct ArgSelector<int&>
 {
-	using type = Arg<false, ArgRegDef>;
+	using type = Arg<false, ArgRegDef<int>>;
 };
 
 template<>
 struct ArgSelector<int>
 {
-	using type = Arg<false, ArgConstDef, ArgRegDef>;
+	using type = Arg<false, ArgConstDef, ArgRegDef<int>>;
 };
 
 template<>
 struct ArgSelector<const int&>
 {
-	using type = Arg<false, ArgConstDef, ArgRegDef>;
+	using type = Arg<false, ArgConstDef, ArgRegDef<int>>;
 };
 
 template<>
@@ -942,13 +776,25 @@ struct ArgSelector<const Uint8*>
 template<typename T>
 struct ArgSelector<T*>
 {
-	using type = Arg<false, ArgCustomPointerDef<T>, ArgNullDef>;
+	using type = Arg<false, ArgRegDef<T*>, ArgNullDef>;
 };
 
 template<typename T>
 struct ArgSelector<T*&>
 {
-	using type = Arg<false, ArgCustomPointerDef<T>>;
+	using type = Arg<false, ArgRegDef<T*>>;
+};
+
+template<typename T>
+struct ArgSelector<const T*>
+{
+	using type = Arg<false, ArgRegDef<const T*>, ArgRegDef<T*>, ArgNullDef>;
+};
+
+template<typename T>
+struct ArgSelector<const T*&>
+{
+	using type = Arg<false, ArgRegDef<const T*>>;
 };
 
 template<typename T, typename I>
@@ -1010,6 +856,7 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 	using GetArgs<Func>::ver;
 	using GetArgs<Func>::arg;
 	using GetArgs<Func>::parse;
+	using GetArgs<Func>::firstArgType;
 
 	static constexpr FuncCommon getDynamic(int i) { return FuncList::getDynamic(i); }
 };
@@ -1033,7 +880,7 @@ struct BindSet
 template<typename T>
 struct BindEq
 {
-	static RetEnum func(ProgPos& Prog, T* t1, T* t2, ProgPos LabelTrue, ProgPos LabelFalse)
+	static RetEnum func(ProgPos& Prog, const T* t1, const T* t2, ProgPos LabelTrue, ProgPos LabelFalse)
 	{
 		Prog = (t1 == t2) ? LabelTrue : LabelFalse;
 		return RetContinue;
@@ -1042,7 +889,7 @@ struct BindEq
 template<typename T, typename P, P T::*X>
 struct BindPropGet
 {
-	static RetEnum func(T* t, P& p)
+	static RetEnum func(const T* t, P& p)
 	{
 		if (t) p = t->*X; else p = P{};
 		return RetContinue;
@@ -1060,7 +907,7 @@ struct BindPropSet
 template<typename T, ScriptValues<T> T::*X>
 struct BindScriptValueGet
 {
-	static RetEnum func(T* t, int& p, typename ScriptValues<T>::Tag st)
+	static RetEnum func(const T* t, int& p, typename ScriptValues<T>::Tag st)
 	{
 		if (t) p = (t->*X).get(st); else p = int{};
 		return RetContinue;
@@ -1079,7 +926,7 @@ struct BindScriptValueSet
 template<typename T, typename N, typename P, N T::*X, P N::*XX>
 struct BindPropNestGet
 {
-	static RetEnum func(T* t, P& p)
+	static RetEnum func(const T* t, P& p)
 	{
 		if (t) p = (t->*X).*XX; else p = P{};
 		return RetContinue;
@@ -1141,7 +988,7 @@ struct BindFunc<int(T::*)(Args...), X>
 template<typename T, typename... Args, bool(T::*X)(Args...) const>
 struct BindFunc<bool(T::*)(Args...) const, X>
 {
-	static RetEnum func(T* t, int& r, Args... a)
+	static RetEnum func(const T* t, int& r, Args... a)
 	{
 		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
@@ -1151,7 +998,7 @@ struct BindFunc<bool(T::*)(Args...) const, X>
 template<typename T, typename... Args, int(T::*X)(Args...) const>
 struct BindFunc<int(T::*)(Args...) const, X>
 {
-	static RetEnum func(T* t, int& r, Args... a)
+	static RetEnum func(const T* t, int& r, Args... a)
 	{
 		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = 0;
 		return RetContinue;
@@ -1181,7 +1028,7 @@ struct BindFunc<P *(T::*)(Args...), X>
 template<typename T, typename P, typename... Args, P *(T::*X)(Args...) const>
 struct BindFunc<P *(T::*)(Args...) const, X>
 {
-	static RetEnum func(T* t, P*& p, Args... a)
+	static RetEnum func(const T* t, P*& p, Args... a)
 	{
 		if (t) p = (t->*X)(std::forward<Args>(a)...); else p = nullptr;
 		return RetContinue;
@@ -1190,20 +1037,12 @@ struct BindFunc<P *(T::*)(Args...) const, X>
 
 } //namespace helper
 
-template<typename T>
-struct Bind
+struct BindBase
 {
 	ScriptParserBase* parser;
-
-	Bind(ScriptParserBase* p) : parser{ p }
+	BindBase(ScriptParserBase* p) : parser{ p }
 	{
-		parser->addParser<FuncGroup<helper::BindSet<T>>>(getName("set"));
-		parser->addParser<FuncGroup<helper::BindEq<T>>>(getName("eq"));
-	}
 
-	std::string getName(const std::string& s)
-	{
-		return std::string{ T::ScriptName } + "." + s;
 	}
 
 	template<typename X>
@@ -1214,6 +1053,23 @@ struct Bind
 	void addCustomConst(const std::string& name, int i)
 	{
 		parser->addConst(name, i);
+	}
+};
+
+template<typename T>
+struct Bind : BindBase
+{
+
+	Bind(ScriptParserBase* p) : BindBase{ p }
+	{
+		parser->addParser<FuncGroup<helper::BindSet<T>>>(getName("setRef"));
+		parser->addParser<FuncGroup<helper::BindSet<const T>>>(getName("setRef"));
+		parser->addParser<FuncGroup<helper::BindEq<T>>>(getName("eq"));
+	}
+
+	std::string getName(const std::string& s)
+	{
+		return std::string{ T::ScriptName } + "." + s;
 	}
 
 	template<int T::*X>
@@ -1245,6 +1101,7 @@ struct Bind
 		}
 
 	MACRO_COPY_HELP_FUNC(X, bool (T::*X)() const)
+
 	MACRO_COPY_HELP_FUNC(X, int (T::*X)() const)
 	MACRO_COPY_HELP_FUNC(X, int (T::*X)())
 	MACRO_COPY_HELP_FUNC(X, int (T::*X)(int) const)
@@ -1253,6 +1110,10 @@ struct Bind
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int))
+
+	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int))
 
 	MACRO_COPY_HELP_FUNC(X, typename P, P *(T::*X)())
 	MACRO_COPY_HELP_FUNC(X, typename P, P *(T::*X)() const)

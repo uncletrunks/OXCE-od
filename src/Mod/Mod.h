@@ -79,6 +79,7 @@ class MapScript;
 class RuleVideo;
 class RuleMusic;
 class RuleMissionScript;
+class ModScript;
 
 /**
  * Contains all the game-specific static data that never changes
@@ -151,7 +152,7 @@ private:
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
 
 	/// Loads a ruleset from a YAML file.
-	void loadFile(const std::string &filename);
+	void loadFile(const std::string &filename, const ModScript &parsers);
 	/// Loads a ruleset element.
 	template <typename T>
 	T *loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::vector<std::string> *index = 0, const std::string &key = "type");
@@ -168,7 +169,7 @@ private:
 	/// Creates a transparency lookup table for a given palette.
 	void createTransparencyLUT(Palette *pal);
 	/// Loads a specified mod content.
-	void loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx);
+	void loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, const ModScript &parsers);
 	/// Loads resources from vanilla.
 	void loadVanillaResources();
 	/// Loads resources from extra rulesets.

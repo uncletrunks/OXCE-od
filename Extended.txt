@@ -356,20 +356,20 @@ armors:
         #...
     recolorScript: |
       #recolor script call for each pixel.
-      #`i0` have value of unit pixel color.
+      #`new_pixel` have value of unit pixel color.
       #more info in "openxcom.log" with debug on.
       #default imp:
-      unit.getRecolor i0;
-      add_burn_shade i0 burn shade;
-      ret i0;
+      unit.getRecolor new_pixel;
+      add_burn_shade new_pixel burn shade;
+      ret new_pixel;
     spriteScript: |
       #sprite select script call for each body part.
-      #`i0` have basic position of graphic in armor sheet.
-      #`i1` have offset to choose direction or leg move phase.
+      #`sprite_index` have basic position of graphic in armor sheet.
+      #`sprite_offset` have offset to choose direction or leg move phase.
       #more info in "openxcom.log" with debug on.
       #default imp:
-      add i0 i1;
-      ret i0;
+      add sprite_index sprite_offset;
+      ret sprite_index;
 [/code]
 
 [code]

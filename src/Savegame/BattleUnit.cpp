@@ -3285,7 +3285,7 @@ void BattleUnit::recoverTimeUnits()
 namespace
 {
 
-void getArmorValueScript(BattleUnit *bu, int &ret, int side)
+void getArmorValueScript(const BattleUnit *bu, int &ret, int side)
 {
 	if (bu && 0 <= side && side < SIDE_MAX)
 	{
@@ -3294,7 +3294,7 @@ void getArmorValueScript(BattleUnit *bu, int &ret, int side)
 	}
 	ret = 0;
 }
-void getGenderScript(BattleUnit *bu, int &ret)
+void getGenderScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
@@ -3303,7 +3303,7 @@ void getGenderScript(BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
-void getLookScript(BattleUnit *bu, int &ret)
+void getLookScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
@@ -3316,7 +3316,7 @@ void getLookScript(BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
-void getLookVariantScript(BattleUnit *bu, int &ret)
+void getLookVariantScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
@@ -3329,7 +3329,7 @@ void getLookVariantScript(BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
-void getRecolorScript(BattleUnit *bu, int &pixel)
+void getRecolorScript(const BattleUnit *bu, int &pixel)
 {
 	if (bu)
 	{
@@ -3346,7 +3346,7 @@ void getRecolorScript(BattleUnit *bu, int &pixel)
 		}
 	}
 }
-void getRightHandWeapon(BattleUnit *bu, BattleItem *&bi)
+void getRightHandWeapon(const BattleUnit *bu, const BattleItem *&bi)
 {
 	if (bu)
 	{
@@ -3357,7 +3357,7 @@ void getRightHandWeapon(BattleUnit *bu, BattleItem *&bi)
 		bi = nullptr;
 	}
 }
-void getLeftHandWeapon(BattleUnit *bu, BattleItem *&bi)
+void getLeftHandWeapon(const BattleUnit *bu, const BattleItem *&bi)
 {
 	if (bu)
 	{
@@ -3369,7 +3369,7 @@ void getLeftHandWeapon(BattleUnit *bu, BattleItem *&bi)
 	}
 }
 
-void isWalkingScript(BattleUnit *bu, int &ret)
+void isWalkingScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
@@ -3378,7 +3378,7 @@ void isWalkingScript(BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
-void isCollapsingScript(BattleUnit *bu, int &ret)
+void isCollapsingScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
@@ -3413,14 +3413,6 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 	Bind<BattleUnit> bu = { parser };
 	BindNested<BattleUnit, UnitStats, &BattleUnit::_stats> us = { bu };
-
-	bu.addCustomFunc<burnShadeScript>("add_burn_shade");
-	bu.addCustomConst("blit_torso", BODYPART_TORSO);
-	bu.addCustomConst("blit_leftarm", BODYPART_LEFTARM);
-	bu.addCustomConst("blit_rightarm", BODYPART_RIGHTARM);
-	bu.addCustomConst("blit_legs", BODYPART_LEGS);
-	bu.addCustomConst("blit_collapse", BODYPART_COLLAPSING);
-	bu.addCustomConst("blit_inventory", BODYPART_ITEM);
 
 	bu.addField<&BattleUnit::_id>("getId");
 	bu.addField<&BattleUnit::_rankInt>("getRank");
@@ -3477,15 +3469,6 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addCustomConst("BODYPART_RIGHTARM", BODYPART_RIGHTARM);
 	bu.addCustomConst("BODYPART_LEFTLEG", BODYPART_LEFTLEG);
 	bu.addCustomConst("BODYPART_RIGHTLEG", BODYPART_RIGHTLEG);
-	bu.addCustomConst("BODYPART_BIG_TORSO_0", BODYPART_BIG_TORSO + 0);
-	bu.addCustomConst("BODYPART_BIG_TORSO_1", BODYPART_BIG_TORSO + 1);
-	bu.addCustomConst("BODYPART_BIG_TORSO_2", BODYPART_BIG_TORSO + 2);
-	bu.addCustomConst("BODYPART_BIG_TORSO_3", BODYPART_BIG_TORSO + 3);
-	bu.addCustomConst("BODYPART_BIG_PROPULSION_0", BODYPART_BIG_PROPULSION + 0);
-	bu.addCustomConst("BODYPART_BIG_PROPULSION_1", BODYPART_BIG_PROPULSION + 1);
-	bu.addCustomConst("BODYPART_BIG_PROPULSION_2", BODYPART_BIG_PROPULSION + 2);
-	bu.addCustomConst("BODYPART_BIG_PROPULSION_3", BODYPART_BIG_PROPULSION + 3);
-	bu.addCustomConst("BODYPART_BIG_TURRET", BODYPART_BIG_TURRET);
 
 	bu.addCustomConst("UNIT_RANK_ROOKIE", 0);
 	bu.addCustomConst("UNIT_RANK_SQUADDIE", 1);
@@ -3524,16 +3507,67 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addCustomConst("GENDER_FEMALE", GENDER_FEMALE);
 }
 
-const Armor::RecolorParser BattleUnit::Parser("BattleUnit", "curr_pixel", "prev_pixel", "unit", "blit_part", "anim_frame", "shade", "burn");
+namespace
+{
 
+void commonImpl(BindBase& b)
+{
+	b.addCustomConst("blit_torso", BODYPART_TORSO);
+	b.addCustomConst("blit_leftarm", BODYPART_LEFTARM);
+	b.addCustomConst("blit_rightarm", BODYPART_RIGHTARM);
+	b.addCustomConst("blit_legs", BODYPART_LEGS);
+	b.addCustomConst("blit_collapse", BODYPART_COLLAPSING);
+
+	b.addCustomConst("blit_item_righthand", BODYPART_ITEM_RIGHTHAND);
+	b.addCustomConst("blit_item_lefthand", BODYPART_ITEM_LEFTHAND);
+	b.addCustomConst("blit_item_floor", BODYPART_ITEM_FLOOR);
+	b.addCustomConst("blit_item_big", BODYPART_ITEM_INVENTORY);
+
+	b.addCustomConst("blit_large_torso_0", BODYPART_LARGE_TORSO + 0);
+	b.addCustomConst("blit_large_torso_1", BODYPART_LARGE_TORSO + 1);
+	b.addCustomConst("blit_large_torso_2", BODYPART_LARGE_TORSO + 2);
+	b.addCustomConst("blit_large_torso_3", BODYPART_LARGE_TORSO + 3);
+	b.addCustomConst("blit_large_propulsion_0", BODYPART_LARGE_PROPULSION + 0);
+	b.addCustomConst("blit_large_propulsion_1", BODYPART_LARGE_PROPULSION + 1);
+	b.addCustomConst("blit_large_propulsion_2", BODYPART_LARGE_PROPULSION + 2);
+	b.addCustomConst("blit_large_propulsion_3", BODYPART_LARGE_PROPULSION + 3);
+	b.addCustomConst("blit_large_turret", BODYPART_LARGE_TURRET);
+}
+
+}
+
+/**
+ * Constructor of recolor script parser.
+ */
+ModScript::RecolorUnitParser::RecolorUnitParser() : ScriptParser{ "Unit Pixel Recoloring", "new_pixel", "old_pixel", "unit", "blit_part", "anim_frame", "shade", "burn" }
+{
+	BindBase b { this };
+
+	b.addCustomFunc<burnShadeScript>("add_burn_shade");
+
+	commonImpl(b);
+}
+
+/**
+ * Constructor of select sprite script parser.
+ */
+ModScript::SelectUnitParser::SelectUnitParser() : ScriptParser{ "Unit Sprite Select", "sprite_index", "sprite_offset", "unit", "blit_part", "anim_frame", "shade" }
+{
+	BindBase b { this };
+
+	commonImpl(b);
+}
+
+/**
+ * Fill script data.
+ */
 void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn)
 {
-	w->proc = 0;
+	w->clear();
 	if(unit)
 	{
 		const auto &scr = unit->getArmor()->getRecolorScript();
 		scr.update(w, unit, body_part, anim_frame, shade, burn);
-		w->shade = shade;
 	}
 }
 

@@ -46,14 +46,14 @@ class SavedGame;
 class Language;
 class AlienBAIState;
 class CivilianBAIState;
-template<typename...> class ScriptContainer;
+template<typename, typename...> class ScriptContainer;
 template<typename...> class ScriptParser;
 class ScriptWorker;
 
 enum UnitStatus {STATUS_STANDING, STATUS_WALKING, STATUS_FLYING, STATUS_TURNING, STATUS_AIMING, STATUS_COLLAPSING, STATUS_DEAD, STATUS_UNCONSCIOUS, STATUS_PANICKING, STATUS_BERSERK, STATUS_IGNORE_ME};
 enum UnitFaction {FACTION_PLAYER, FACTION_HOSTILE, FACTION_NEUTRAL};
 enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LEFTARM, BODYPART_RIGHTLEG, BODYPART_LEFTLEG, BODYPART_MAX};
-enum UnitBodyPartEx {BODYPART_LEGS = BODYPART_MAX, BODYPART_COLLAPSING, BODYPART_ITEM, BODYPART_BIG_TORSO, BODYPART_BIG_PROPULSION = BODYPART_BIG_TORSO + 4, BODYPART_BIG_TURRET = BODYPART_BIG_PROPULSION + 4};
+enum UnitBodyPartEx {BODYPART_LEGS = BODYPART_MAX, BODYPART_COLLAPSING, BODYPART_ITEM_RIGHTHAND, BODYPART_ITEM_LEFTHAND, BODYPART_ITEM_FLOOR, BODYPART_ITEM_INVENTORY, BODYPART_LARGE_TORSO, BODYPART_LARGE_PROPULSION = BODYPART_LARGE_TORSO + 4, BODYPART_LARGE_TURRET = BODYPART_LARGE_PROPULSION + 4};
 
 
 /**
@@ -147,8 +147,6 @@ public:
 	static void ScriptRegister(ScriptParserBase* parser);
 	/// Init all required data in script using object data.
 	static void ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn);
-	/// Global unit scriptr parser.
-	static const Armor::RecolorParser Parser;
 
 	/// Creates a BattleUnit from solder.
 	BattleUnit(Soldier *soldier, int depth);

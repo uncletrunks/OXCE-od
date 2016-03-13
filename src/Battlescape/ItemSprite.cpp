@@ -58,16 +58,28 @@ ItemSprite::~ItemSprite()
 }
 
 /**
- * Draws a item, using the drawing rules of the unit.
- * This function is called by Map, for each unit on the screen.
+ * Draws a item, using the drawing rules of the item or unit if it's corpse.
+ * This function is called by Map, for each item on the screen.
  */
 void ItemSprite::draw(BattleItem* item, int x, int y, int shade, bool half)
 {
-	int sprite = item->getFloorSprite();
-	if (sprite != -1)
+	Surface* sprite = item->getFloorSprite(_itemSurface);
+	if (sprite)
 	{
-		BattleItem::ScriptFill(&_scriptWorkRef, item, false, _animationFrame, shade);
-		_scriptWorkRef.executeBlit(_itemSurface->getFrame(sprite), _dest, x, y, half);
+		BattleItem::ScriptFill(&_scriptWorkRef, item, BODYPART_ITEM_FLOOR, _animationFrame, shade);
+		_scriptWorkRef.executeBlit(sprite, _dest, x, y, half);
+	}
+}
+
+/**
+ * Draws shadow of item.
+ */
+void ItemSprite::drawShadow(BattleItem* item, int x, int y, bool half)
+{
+	Surface* sprite = item->getFloorSprite(_itemSurface);
+	if (sprite)
+	{
+		sprite->blitNShade(_dest, x, y, 16, half);
 	}
 }
 

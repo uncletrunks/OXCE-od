@@ -25,7 +25,7 @@
 #include "RuleStatBonus.h"
 #include "RuleDamageType.h"
 #include "Unit.h"
-#include "../Engine/Script.h"
+#include "ModScript.h"
 
 namespace OpenXcom
 {
@@ -103,8 +103,8 @@ private:
 	std::vector<std::string> _requiresBuy;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
-	int _bigSprite, _bigSpriteAlt;
-	int _floorSprite, _floorSpriteAlt;
+	int _bigSprite;
+	int _floorSprite;
 	int _handSprite, _bulletSprite;
 	int _fireSound;
 	int _hitSound, _hitAnimation, _hitMissSound, _hitMissAnimation;
@@ -142,6 +142,8 @@ private:
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
+	ModScript::RecolorItemParser::Container _recolorScript;
+	ModScript::SelectItemParser::Container _spriteScript;
 	ScriptValues<RuleItem> _scriptValues;
 
 	/// Get final value of cost.
@@ -165,7 +167,7 @@ public:
 	/// Cleans up the item ruleset.
 	~RuleItem();
 	/// Loads item data from YAML.
-	void load(const YAML::Node& node, Mod *mod, int listIndex);
+	void load(const YAML::Node& node, Mod *mod, int listIndex, const ModScript& parsers);
 	/// Gets the item's type.
 	const std::string &getType() const;
 	/// Gets the item's name.
@@ -186,12 +188,8 @@ public:
 	int getWeight() const;
 	/// Gets the item's reference in BIGOBS.PCK for use in inventory.
 	int getBigSprite() const;
-	/// Gets the item's alternative reference in BIGOBS.PCK for use in inventory.
-	int getBigSpriteAlt() const;
 	/// Gets the item's reference in FLOOROB.PCK for use in battlescape.
 	int getFloorSprite() const;
-	/// Gets the item's alternative reference in FLOOROB.PCK for use in battlescape.
-	int getFloorSpriteAlt() const;
 	/// Gets the item's reference in HANDOB.PCK for use in inventory.
 	int getHandSprite() const;
 	/// Gets if the item is two-handed.
@@ -427,6 +425,10 @@ public:
 	/// Gets the vapor cloud probability.
 	int getVaporProbability() const;
 
+	/// Gets script used to recolor item sprite.
+	const ModScript::RecolorItemParser::Container &getRecolorScript() const;
+	/// Gets script used to switch sprite of item.
+	const ModScript::SelectItemParser::Container &getSpriteScript() const;
 };
 
 }

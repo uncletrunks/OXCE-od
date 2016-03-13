@@ -46,7 +46,6 @@ private:
 	std::vector<Position> _trajectory;
 	size_t _position;
 	float _distance;
-	Surface *_sprite;
 	int _speed;
 	int _bulletSprite;
 	bool _reversed;
@@ -70,8 +69,6 @@ public:
 	int getParticle(int i) const;
 	/// Gets the item.
 	BattleItem *getItem() const;
-	/// Gets the sprite.
-	Surface *getSprite() const;
 	/// Skips the bullet flight.
 	void skipTrajectory();
 	/// Gets the Position of origin for the projectile.

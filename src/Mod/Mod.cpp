@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Mod.h"
+#include "ModScript.h"
 #include <algorithm>
 #include <sstream>
 #include <climits>
@@ -712,11 +713,12 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
 void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods)
 {
 	ScriptValuesBase::unregisteAll();
+	ModScript parser;
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
 		try
 		{
-			loadMod(mods[i].second, i);
+			loadMod(mods[i].second, i, parser);
 		}
 		catch (Exception &e)
 		{
@@ -753,8 +755,9 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
  * mod loaded should be the master at index 0, then 1, and so on.
  * @param rulesetFiles List of rulesets to load.
  * @param modIdx Mod index number.
+ * @param parsers Object with all avaiable parser.
  */
-void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx)
+void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, const ModScript &parsers)
 {
 	_modOffset = 1000 * modIdx;
 
@@ -763,7 +766,7 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx)
 		Log(LOG_VERBOSE) << "- " << *i;
 		try
 		{
-			loadFile(*i);
+			loadFile(*i, parsers);
 		}
 		catch (YAML::Exception &e)
 		{
@@ -810,10 +813,10 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx)
  * Loads a ruleset's contents from a YAML file.
  * Rules that match pre-existing rules overwrite them.
  * @param filename YAML filename.
+ * @param parsers Object with all avaiable parser.
  */
-void Mod::loadFile(const std::string &filename)
+void Mod::loadFile(const std::string &filename, const ModScript &parsers)
 {
-	BattleUnit::Parser.LogInfo();
 
 	YAML::Node doc = YAML::LoadFile(filename);
 
@@ -870,7 +873,7 @@ void Mod::loadFile(const std::string &filename)
 		if (rule != 0)
 		{
 			_itemListOrder += 100;
-			rule->load(*i, this, _itemListOrder);
+			rule->load(*i, this, _itemListOrder, parsers);
 		}
 	}
 	for (YAML::const_iterator i = doc["ufos"].begin(); i != doc["ufos"].end(); ++i)
@@ -904,7 +907,7 @@ void Mod::loadFile(const std::string &filename)
 		Armor *rule = loadRule(*i, &_armors, &_armorsIndex);
 		if (rule != 0)
 		{
-			rule->load(*i, BattleUnit::Parser);
+			rule->load(*i, parsers);
 		}
 	}
 	for (YAML::const_iterator i = doc["soldiers"].begin(); i != doc["soldiers"].end(); ++i)

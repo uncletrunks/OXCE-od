@@ -231,7 +231,7 @@ void Inventory::drawItems()
 				continue;
 
 			int x, y;
-			Surface *frame = texture->getFrame((*i)->getBigSprite());
+			Surface *frame = (*i)->getBigSprite(texture);
 			if ((*i)->getSlot()->getType() == INV_SLOT)
 			{
 				x = ((*i)->getSlot()->getX() + (*i)->getSlotX() * RuleInventory::SLOT_W);
@@ -246,13 +246,13 @@ void Inventory::drawItems()
 			{
 				continue;
 			}
-			BattleItem::ScriptFill(&scr, *i, true, 0, 0);
-			scr.executeBlit(frame, _items, x, y);
+			BattleItem::ScriptFill(&scr, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			scr.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
-				_grenadeIndicators.push_back(std::make_pair(frame->getX(), frame->getY()));
+				_grenadeIndicators.push_back(std::make_pair(x, y));
 			}
 		}
 		Surface stackLayer(getWidth(), getHeight(), 0, 0);
@@ -260,7 +260,7 @@ void Inventory::drawItems()
 		// Ground items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
-			Surface *frame = texture->getFrame((*i)->getBigSprite());
+			Surface *frame = (*i)->getBigSprite(texture);
 			// note that you can make items invisible by setting their width or height to 0 (for example used with tank corpse items)
 			if ((*i) == _selItem || (*i)->getSlotX() < _groundOffset || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0 || !frame)
 				continue;
@@ -268,13 +268,13 @@ void Inventory::drawItems()
 			int x, y;
 			x = ((*i)->getSlot()->getX() + ((*i)->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
 			y = ((*i)->getSlot()->getY() + (*i)->getSlotY() * RuleInventory::SLOT_H);
-			BattleItem::ScriptFill(&scr, *i, true, 0, 0);
-			scr.executeBlit(frame, _items, x, y);
+			BattleItem::ScriptFill(&scr, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			scr.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
-				_grenadeIndicators.push_back(std::make_pair(frame->getX(), frame->getY()));
+				_grenadeIndicators.push_back(std::make_pair(x, y));
 			}
 
 			// item stacking

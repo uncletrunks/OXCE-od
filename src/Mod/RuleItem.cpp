@@ -38,7 +38,7 @@ const float TilesToVexels = 16.0f;
  */
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
-	_bigSprite(-1), _bigSpriteAlt(0), _floorSprite(-1), _floorSpriteAlt(-1), _handSprite(120), _bulletSprite(-1),
+	_bigSprite(-1), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
 	_fireSound(-1),
 	_hitSound(-1), _hitAnimation(0), _hitMissSound(-1), _hitMissAnimation(-1),
 	_meleeSound(39), _meleeAnimation(0), _meleeMissSound(-1), _meleeMissAnimation(-1),
@@ -175,11 +175,11 @@ void RuleItem::loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::s
  * @param mod Mod for the item.
  * @param listOrder The list weight for this item.
  */
-void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
+void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModScript& parsers)
 {
 	if (const YAML::Node &parent = node["refNode"])
 	{
-		load(parent, mod, listOrder);
+		load(parent, mod, listOrder, parsers);
 	}
 	_type = node["type"].as<std::string>(_type);
 	_name = node["name"].as<std::string>(_name);
@@ -194,25 +194,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	{
 		_bigSprite = mod->getSpriteOffset(node["bigSprite"].as<int>(_bigSprite), "BIGOBS.PCK");
 	}
-	if (node["bigSpriteAlt"])
-	{
-		_bigSpriteAlt = mod->getSpriteOffset(node["bigSpriteAlt"].as<int>(_bigSpriteAlt), "BIGOBS.PCK");
-	}
-	else if (node["bigSprite"])
-	{
-		_bigSpriteAlt = _bigSprite;
-	}
 	if (node["floorSprite"])
 	{
 		_floorSprite = mod->getSpriteOffset(node["floorSprite"].as<int>(_floorSprite), "FLOOROB.PCK");
-	}
-	if (node["floorSpriteAlt"])
-	{
-		_floorSpriteAlt = mod->getSpriteOffset(node["floorSpriteAlt"].as<int>(_floorSpriteAlt), "FLOOROB.PCK");
-	}
-	else if (node["floorSprite"])
-	{
-		_floorSpriteAlt = _floorSprite;
 	}
 	if (node["handSprite"])
 	{
@@ -459,6 +443,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
 	_scriptValues.load(node["custom"]);
 
+	_recolorScript.load(_type, node["recolorScript"], parsers.recolorItemSprite);
+	_spriteScript.load(_type, node["spriteScript"], parsers.selectItemSprite);
+
 	if (!_listOrder)
 	{
 		_listOrder = listOrder;
@@ -563,30 +550,12 @@ int RuleItem::getBigSprite() const
 }
 
 /**
- * Gets the alternative reference in BIGOBS.PCK for use in inventory.
- * @return The sprite reference.
- */
-int RuleItem::getBigSpriteAlt() const
-{
-	return _bigSpriteAlt;
-}
-
-/**
  * Gets the reference in FLOOROB.PCK for use in battlescape.
  * @return The sprite reference.
  */
 int RuleItem::getFloorSprite() const
 {
 	return _floorSprite;
-}
-
-/**
- * Gets the alternative reference in FLOOROB.PCK for use in battlescape.
- * @return The sprite reference.
- */
-int RuleItem::getFloorSpriteAlt() const
-{
-	return _floorSpriteAlt;
 }
 
 /**
@@ -1114,15 +1083,17 @@ int RuleItem::getSpecialChance() const
  */
 void RuleItem::drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem *item) const
 {
-	Surface *frame = texture->getFrame(item ? item->getBigSprite() : this->getBigSprite());
+	Surface *frame = nullptr;
 	if (item)
 	{
+		frame = item->getBigSprite(texture);
 		ScriptWorker scr;
-		BattleItem::ScriptFill(&scr, item, true, 0, 0);
-		scr.executeBlit(frame, surface, this->getHandSpriteOffX(), this->getHandSpriteOffY());
+		BattleItem::ScriptFill(&scr, item, BODYPART_ITEM_INVENTORY, 0, 0);
+		scr.executeBlit(frame, surface, this->getHandSpriteOffX(), this->getHandSpriteOffY(), 0);
 	}
 	else
 	{
+		frame = texture->getFrame(this->getBigSprite());
 		frame->setX(this->getHandSpriteOffX());
 		frame->setY(this->getHandSpriteOffY());
 		frame->blit(surface);
@@ -1709,6 +1680,24 @@ int RuleItem::getVaporProbability() const
 	return _vaporProbability;
 }
 
+/**
+ * Get recoloring script.
+ * @return Script for recoloring.
+ */
+const ModScript::RecolorItemParser::Container &RuleItem::getRecolorScript() const
+{
+	return _recolorScript;
+}
+
+/**
+ * Get switch sprite script.
+ * @return Script for switching.
+ */
+const ModScript::SelectItemParser::Container &RuleItem::getSpriteScript() const
+{
+	return _spriteScript;
+}
+
 namespace
 {
 
@@ -1723,6 +1712,7 @@ void getBattleTypeScript(RuleItem *ri, int &ret)
 }
 
 }
+
 
 /**
  * Register RuleItem in script parser.
