@@ -136,7 +136,7 @@ private:
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
-	int _maxLookVariant, _tooMuchSmokeThreshold;
+	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
@@ -336,6 +336,8 @@ public:
 	int getMaxLookVariant() const  {return abs(_maxLookVariant) % 16;}
 	/// Gets the threshold for too much smoke (vanilla default = 10).
 	int getTooMuchSmokeThreshold() const  {return _tooMuchSmokeThreshold;}
+	/// Gets the custom physical training factor in percent (default = 100).
+	int getCustomTrainingFactor() const { return _customTrainingFactor; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.

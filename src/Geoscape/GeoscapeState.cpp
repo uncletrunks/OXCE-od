@@ -1656,7 +1656,7 @@ void GeoscapeState::time1Day()
 			}
 			if ((*j)->isInTraining())
 			{
-				(*j)->trainPhys();
+				(*j)->trainPhys(_game->getMod()->getCustomTrainingFactor());
 			}
 		}
 		// Handle psionic training
