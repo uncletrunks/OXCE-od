@@ -1427,8 +1427,8 @@ void BattlescapeState::updateSoldierInfo()
 			}
 
 			// crop
-			surf->getCrop()->x = 66;
-			surf->getCrop()->y = 42;
+			surf->getCrop()->x = soldier->getRules()->getAvatarOffsetX();
+			surf->getCrop()->y = soldier->getRules()->getAvatarOffsetY();
 			surf->getCrop()->w = 26;
 			surf->getCrop()->h = 23;
 

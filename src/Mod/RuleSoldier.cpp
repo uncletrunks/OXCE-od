@@ -29,7 +29,7 @@ namespace OpenXcom
  * type of soldier.
  * @param type String defining the type.
  */
-RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0), _standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50)
+RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0), _standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(66), _avatarOffsetY(42)
 {
 }
 
@@ -65,6 +65,8 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 	_statCaps.merge(node["statCaps"].as<UnitStats>(_statCaps));
 	_armor = node["armor"].as<std::string>(_armor);
 	_armorForAvatar = node["armorForAvatar"].as<std::string>(_armorForAvatar);
+	_avatarOffsetX = node["avatarOffsetX"].as<int>(_avatarOffsetX);
+	_avatarOffsetY = node["avatarOffsetY"].as<int>(_avatarOffsetY);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costSalary = node["costSalary"].as<int>(_costSalary);
 	_standHeight = node["standHeight"].as<int>(_standHeight);
@@ -249,6 +251,24 @@ std::string RuleSoldier::getArmor() const
 std::string RuleSoldier::getArmorForAvatar() const
 {
 	return _armorForAvatar;
+}
+
+/**
+* Gets the avatar's X offset.
+* @return The X offset.
+*/
+int RuleSoldier::getAvatarOffsetX() const
+{
+	return _avatarOffsetX;
+}
+
+/**
+* Gets the avatar's Y offset.
+* @return The Y offset.
+*/
+int RuleSoldier::getAvatarOffsetY() const
+{
+	return _avatarOffsetY;
 }
 
 /**

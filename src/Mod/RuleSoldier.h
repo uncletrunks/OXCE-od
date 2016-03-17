@@ -45,6 +45,7 @@ private:
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
+	int _avatarOffsetX, _avatarOffsetY;
 
 	void addSoldierNamePool(const std::string &namFile);
 public:
@@ -78,6 +79,10 @@ public:
 	std::string getArmor() const;
 	/// Gets the armor for avatar display.
 	std::string getArmorForAvatar() const;
+	/// Gets the X offset used for avatar.
+	int getAvatarOffsetX() const;
+	/// Gets the Y offset used for avatar.
+	int getAvatarOffsetY() const;
 	/// Gets the female appearance ratio.
 	int getFemaleFrequency() const;
 	/// Gets the soldier's male death sounds.
