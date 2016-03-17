@@ -74,6 +74,7 @@
 #include "../Savegame/BattleItem.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleInventory.h"
+#include "../Mod/RuleSoldier.h"
 #include <algorithm>
 
 namespace OpenXcom
@@ -1395,8 +1396,11 @@ void BattlescapeState::updateSoldierInfo()
 			customBg->blit(_rank);
 
 			// show avatar
-			const std::string look = _game->getMod()->getArmor("STR_NONE_UC")->getSpriteInventory();
-			//const std::string look = soldier->getArmor()->getSpriteInventory();
+			std::string look = soldier->getArmor()->getSpriteInventory();
+			if (!soldier->getRules()->getArmorForAvatar().empty())
+			{
+				look = _game->getMod()->getArmor(soldier->getRules()->getArmorForAvatar())->getSpriteInventory();
+			}
 			const std::string gender = soldier->getGender() == GENDER_MALE ? "M" : "F";
 			std::stringstream ss;
 			Surface *surf = 0;

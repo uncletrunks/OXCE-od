@@ -64,6 +64,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 	_maxStats.merge(node["maxStats"].as<UnitStats>(_maxStats));
 	_statCaps.merge(node["statCaps"].as<UnitStats>(_statCaps));
 	_armor = node["armor"].as<std::string>(_armor);
+	_armorForAvatar = node["armorForAvatar"].as<std::string>(_armorForAvatar);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costSalary = node["costSalary"].as<int>(_costSalary);
 	_standHeight = node["standHeight"].as<int>(_standHeight);
@@ -239,6 +240,15 @@ int RuleSoldier::getFloatHeight() const
 std::string RuleSoldier::getArmor() const
 {
 	return _armor;
+}
+
+/**
+* Gets the armor for avatar.
+* @return The armor name.
+*/
+std::string RuleSoldier::getArmorForAvatar() const
+{
+	return _armorForAvatar;
 }
 
 /**
