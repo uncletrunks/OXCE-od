@@ -1072,6 +1072,11 @@ struct Bind : BindBase
 		return std::string{ T::ScriptName } + "." + s;
 	}
 
+	template<typename X>
+	void addFunc(const std::string& name)
+	{
+		addCustomFunc<X>(getName(name));
+	}
 	template<int T::*X>
 	void addField(const std::string& get, const std::string& set = "")
 	{
@@ -1115,8 +1120,8 @@ struct Bind : BindBase
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int))
 
-	MACRO_COPY_HELP_FUNC(X, typename P, P *(T::*X)())
-	MACRO_COPY_HELP_FUNC(X, typename P, P *(T::*X)() const)
+	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)())
+	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)() const)
 
 	#undef MACRO_COPY_HELP_FUNC
 };

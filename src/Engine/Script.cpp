@@ -1778,10 +1778,33 @@ void ScriptParserBase::logScriptMetadata() const
 		refLog.get(LOG_DEBUG) << "Script data for: " << _name << "\n" << std::left;
 		for (auto& r : _refList)
 		{
-			if (r.type == ArgSpec(ArgInt, false))
-				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << r.name.toString() << "Value: " << r.value << "\n";
+			std::string kind = "";
+			if (ArgIsReg(r.type))
+			{
+				if (ArgIsPtr(r.type))
+				{
+					if (ArgIsEditable(r.type))
+					{
+						kind = "ref:";
+					}
+					else
+					{
+						kind = "cref:";
+					}
+				}
+				else
+				{
+					kind = "var:";
+				}
+			}
 			else
-				refLog.get(LOG_DEBUG) << "Ref: " << std::setw(30) << r.name.toString() << "Type: " << getTypeName(r.type).toString() << "\n";
+			{
+				kind = "const:";
+			}
+			if (r.type == ArgSpec(ArgInt, false))
+				refLog.get(LOG_DEBUG) << "Name: " << std::setw(30) << r.name.toString() << std::setw(7) << kind << r.value << "\n";
+			else
+				refLog.get(LOG_DEBUG) << "Name: " << std::setw(30) << r.name.toString() << std::setw(7) << kind << getTypeName(r.type).toString() << "\n";
 		}
 	}
 }

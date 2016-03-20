@@ -3346,28 +3346,67 @@ void getRecolorScript(const BattleUnit *bu, int &pixel)
 		}
 	}
 }
-void getRightHandWeapon(const BattleUnit *bu, const BattleItem *&bi)
+
+struct getRightHandWeaponScript
 {
-	if (bu)
+	static RetEnum func(BattleUnit *&bu, BattleItem *&bi)
 	{
-		bi = bu->getRightHandWeapon();
+		if (bu)
+		{
+			bi = bu->getRightHandWeapon();
+		}
+		else
+		{
+			bi = nullptr;
+		}
+		return RetContinue;
 	}
-	else
-	{
-		bi = nullptr;
-	}
-}
-void getLeftHandWeapon(const BattleUnit *bu, const BattleItem *&bi)
+};
+struct getRightHandWeaponConstScript
 {
-	if (bu)
+	static RetEnum func(const BattleUnit *&bu, const BattleItem *&bi)
 	{
-		bi = bu->getLeftHandWeapon();
+		if (bu)
+		{
+			bi = bu->getRightHandWeapon();
+		}
+		else
+		{
+			bi = nullptr;
+		}
+		return RetContinue;
 	}
-	else
+};
+struct getLeftHandWeaponScript
+{
+	static RetEnum func(BattleUnit *&bu, BattleItem *&bi)
 	{
-		bi = nullptr;
+		if (bu)
+		{
+			bi = bu->getLeftHandWeapon();
+		}
+		else
+		{
+			bi = nullptr;
+		}
+		return RetContinue;
 	}
-}
+};
+struct getLeftHandWeaponConstScript
+{
+	static RetEnum func(const BattleUnit *&bu, const BattleItem *&bi)
+	{
+		if (bu)
+		{
+			bi = bu->getLeftHandWeapon();
+		}
+		else
+		{
+			bi = nullptr;
+		}
+		return RetContinue;
+	}
+};
 
 void isWalkingScript(const BattleUnit *bu, int &ret)
 {
@@ -3460,8 +3499,10 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getArmorValueScript>("getArmorValue");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
 	bu.add<Armor, &BattleUnit::getArmor>("getArmor");
-	bu.add<BattleItem, &BattleUnit::getRightHandWeapon>("getRightHandWeapon");
-	bu.add<BattleItem, &BattleUnit::getLeftHandWeapon>("getLeftHandWeapon");
+	bu.addFunc<getRightHandWeaponScript>("getRightHandWeapon");
+	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
+	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
+	bu.addFunc<getLeftHandWeaponConstScript>("getLeftHandWeapon");
 
 	bu.addCustomConst("BODYPART_HEAD", BODYPART_HEAD);
 	bu.addCustomConst("BODYPART_TORSO", BODYPART_TORSO);
