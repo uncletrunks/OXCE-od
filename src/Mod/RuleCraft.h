@@ -124,7 +124,7 @@ private:
 	std::string _weaponStrings[WeaponMax];
 	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
-	bool _spacecraft, _notifyWhenRefueled;
+	bool _spacecraft, _notifyWhenRefueled, _autoPatrol;
 	int _listOrder, _maxItems, _maxDepth;
 	std::vector<std::vector <int> > _deployment;
 	RuleCraftStats _stats;
@@ -185,6 +185,8 @@ public:
 	bool getSpacecraft() const;
 	/// Should notification be displayed when the craft is refueled?
 	bool notifyWhenRefueled() const;
+	/// Does this craft support auto patrol?
+	bool canAutoPatrol() const;
 	/// Gets the list weight for this craft.
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.

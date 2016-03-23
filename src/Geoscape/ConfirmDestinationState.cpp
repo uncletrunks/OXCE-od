@@ -106,6 +106,11 @@ void ConfirmDestinationState::btnOkClick(Action *)
 		_game->getSavedGame()->getWaypoints()->push_back(w);
 	}
 	_craft->setDestination(_target);
+	if (_craft->getRules()->canAutoPatrol())
+	{
+		// cancel auto-patrol
+		_craft->setIsAutoPatrolling(false);
+	}
 	_craft->setStatus("STR_OUT");
 	if (_craft->getInterceptionOrder() == 0)
 	{

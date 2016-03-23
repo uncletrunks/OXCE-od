@@ -55,6 +55,8 @@ private:
 	bool _lowFuel, _mission, _inBattlescape, _inDogfight;
 	std::wstring _name;
 	RuleCraftStats _stats;
+	bool _isAutoPatrolling;
+	double _lonAuto, _latAuto;
 public:
 	/// Creates a craft of the specified type.
 	Craft(RuleCraft *rules, Base *base, int id = 0);
@@ -92,6 +94,18 @@ public:
 	std::string getAltitude() const;
 	/// Sets the craft's destination.
 	void setDestination(Target *dest);
+	/// Gets whether the craft is on auto patrol.
+	bool getIsAutoPatrolling() const;
+	/// Sets whether the craft is on auto patrol.
+	void setIsAutoPatrolling(bool isAuto);
+	/// Gets the auto patrol longitude.
+	double getLongitudeAuto() const;
+	/// Sets the auto patrol longitude.
+	void setLongitudeAuto(double lon);
+	/// Gets the auto patrol latitude.
+	double getLatitudeAuto() const;
+	/// Sets the auto patrol latitude.
+	void setLatitudeAuto(double lat);
 	/// Gets the craft's amount of weapons.
 	int getNumWeapons() const;
 	/// Gets the craft's amount of soldiers.

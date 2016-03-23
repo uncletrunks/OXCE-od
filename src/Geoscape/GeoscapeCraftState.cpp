@@ -116,7 +116,7 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	_btnTarget->setText(tr("STR_SELECT_NEW_TARGET"));
 	_btnTarget->onMouseClick((ActionHandler)&GeoscapeCraftState::btnTargetClick);
 
-	_btnPatrol->setText(tr("STR_PATROL"));
+	_btnPatrol->setText(_craft->getRules()->canAutoPatrol() ? tr("STR_AUTO_PATROL") : tr("STR_PATROL"));
 	_btnPatrol->onMouseClick((ActionHandler)&GeoscapeCraftState::btnPatrolClick);
 
 	_btnCancel->setText(tr("STR_CANCEL_UC"));
@@ -272,6 +272,11 @@ void GeoscapeCraftState::btnBaseClick(Action *)
 	_game->popState();
 	_craft->returnToBase();
 	delete _waypoint;
+	if (_craft->getRules()->canAutoPatrol())
+	{
+		// cancel auto-patrol
+		_craft->setIsAutoPatrolling(false);
+	}
 }
 
 /**
@@ -294,6 +299,13 @@ void GeoscapeCraftState::btnPatrolClick(Action *)
 	_game->popState();
 	_craft->setDestination(0);
 	delete _waypoint;
+	if (_craft->getRules()->canAutoPatrol())
+	{
+		// start auto-patrol
+		_craft->setLatitudeAuto(_craft->getLatitude());
+		_craft->setLongitudeAuto(_craft->getLongitude());
+		_craft->setIsAutoPatrolling(true);
+	}
 }
 
 /**

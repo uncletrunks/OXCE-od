@@ -37,6 +37,7 @@
 #include "../Mod/Armor.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/AlienDeployment.h"
+#include "SerializationHelper.h"
 
 namespace OpenXcom
 {
@@ -52,7 +53,8 @@ Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	_rules(rules), _base(base), _id(0), _fuel(0), _damage(0),
 	_interceptionOrder(0), _takeoff(0), _weapons(),
 	_status("STR_READY"), _lowFuel(false), _mission(false),
-	_inBattlescape(false), _inDogfight(false), _stats()
+	_inBattlescape(false), _inDogfight(false), _stats(),
+	_isAutoPatrolling(false), _lonAuto(0.0), _latAuto(0.0)
 {
 	_stats = rules->getStats();
 	_items = new ItemContainer();
@@ -209,6 +211,9 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	}
 	_takeoff = node["takeoff"].as<int>(_takeoff);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
+	_isAutoPatrolling = node["isAutoPatrolling"].as<bool>(_isAutoPatrolling);
+	_lonAuto = node["lonAuto"].as<double>(_lonAuto);
+	_latAuto = node["latAuto"].as<double>(_latAuto);
 	if (_inBattlescape)
 		setSpeed(0);
 }
@@ -255,6 +260,10 @@ YAML::Node Craft::save() const
 		node["takeoff"] = _takeoff;
 	if (!_name.empty())
 		node["name"] = Language::wstrToUtf8(_name);
+	if (_isAutoPatrolling)
+		node["isAutoPatrolling"] = _isAutoPatrolling;
+	node["lonAuto"] = serializeDouble(_lonAuto);
+	node["latAuto"] = serializeDouble(_latAuto);
 	return node;
 }
 
@@ -425,6 +434,36 @@ void Craft::setDestination(Target *dest)
 	else
 		setSpeed(_stats.speedMax);
 	MovingTarget::setDestination(dest);
+}
+
+bool Craft::getIsAutoPatrolling() const
+{
+	return _isAutoPatrolling;
+}
+
+void Craft::setIsAutoPatrolling(bool isAuto)
+{
+	_isAutoPatrolling = isAuto;
+}
+
+double Craft::getLongitudeAuto() const
+{
+	return _lonAuto;
+}
+
+void Craft::setLongitudeAuto(double lon)
+{
+	_lonAuto = lon;
+}
+
+double Craft::getLatitudeAuto() const
+{
+	return _latAuto;
+}
+
+void Craft::setLatitudeAuto(double lat)
+{
+	_latAuto = lat;
 }
 
 /**

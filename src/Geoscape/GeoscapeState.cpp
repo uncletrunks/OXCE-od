@@ -912,7 +912,10 @@ void GeoscapeState::time5Seconds()
 				}
 				else if (w != 0)
 				{
-					popup(new CraftPatrolState((*j), _globe));
+					if (!(*j)->getIsAutoPatrolling())
+					{
+						popup(new CraftPatrolState((*j), _globe));
+					}
 					(*j)->setDestination(0);
 				}
 				else if (m != 0)
@@ -1059,7 +1062,10 @@ void GeoscapeState::time10Minutes()
 				{
 					(*j)->setLowFuel(true);
 					(*j)->returnToBase();
-					popup(new LowFuelState((*j), this));
+					if (!(*j)->getIsAutoPatrolling())
+					{
+						popup(new LowFuelState((*j), this));
+					}
 				}
 
 				if ((*j)->getDestination() == 0)
@@ -1239,6 +1245,23 @@ void GeoscapeState::time30Minutes()
 						std::wstring msg = tr("STR_CRAFT_IS_READY").arg((*j)->getName(_game->getLanguage())).arg((*i)->getName());
 						popup(new CraftErrorState(this, msg));
 					}
+					// auto-patrol
+					if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->canAutoPatrol())
+					{
+						if ((*j)->getIsAutoPatrolling())
+						{
+							Waypoint *w = new Waypoint();
+							w->setLongitude((*j)->getLongitudeAuto());
+							w->setLatitude((*j)->getLatitudeAuto());
+							if (w != 0 && w->getId() == 0)
+							{
+								w->setId(_game->getSavedGame()->getId("STR_WAYPOINT"));
+								_game->getSavedGame()->getWaypoints()->push_back(w);
+							}
+							(*j)->setDestination(w);
+							(*j)->setStatus("STR_OUT");
+						}
+					}
 				}
 				else
 				{
@@ -1252,6 +1275,23 @@ void GeoscapeState::time30Minutes()
 						{
 							std::wstring msg = tr("STR_CRAFT_IS_READY").arg((*j)->getName(_game->getLanguage())).arg((*i)->getName());
 							popup(new CraftErrorState(this, msg));
+						}
+						// auto-patrol
+						if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->canAutoPatrol())
+						{
+							if ((*j)->getIsAutoPatrolling())
+							{
+								Waypoint *w = new Waypoint();
+								w->setLongitude((*j)->getLongitudeAuto());
+								w->setLatitude((*j)->getLatitudeAuto());
+								if (w != 0 && w->getId() == 0)
+								{
+									w->setId(_game->getSavedGame()->getId("STR_WAYPOINT"));
+									_game->getSavedGame()->getWaypoints()->push_back(w);
+								}
+								(*j)->setDestination(w);
+								(*j)->setStatus("STR_OUT");
+							}
 						}
 					}
 					else if (!(*j)->getLowFuel())
