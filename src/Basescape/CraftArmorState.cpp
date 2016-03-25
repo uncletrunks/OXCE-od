@@ -37,6 +37,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleSoldier.h"
 #include "SoldierSortUtil.h"
 #include <algorithm>
 
@@ -376,6 +377,16 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 			SavedGame *save;
 			save = _game->getSavedGame();
 			Armor *a = _game->getMod()->getArmor(save->getLastSelectedArmor());
+
+			// this armor doesn't exist... abort (Note: can happen only if modders remove STR_NONE_UC armor)
+			if (a == 0)
+				return;
+
+			// this unit type cannot wear this armor type... abort
+			if (!a->getUnits().empty() &&
+				std::find(a->getUnits().begin(), a->getUnits().end(), s->getRules()->getType()) == a->getUnits().end())
+				return;
+
 			if (save->getMonthsPassed() != -1)
 			{
 				if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
@@ -408,19 +419,19 @@ void CraftArmorState::lstSoldiersClick(Action *action)
  */
 void CraftArmorState::btnDeequipAllArmorClick(Action *action)
 {
-	Armor *a = _game->getMod()->getArmor("STR_NONE_UC");
 	int row = 0;
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if (!((*i)->getCraft() && (*i)->getCraft()->getStatus() == "STR_OUT"))
 		{
 			// add +1 armor to stores
-			if ((*i)->getArmor()->getStoreItem() != "STR_NONE")
+			if ((*i)->getArmor()->getStoreItem() != Armor::NONE)
 			{
 				_base->getStorageItems()->addItem((*i)->getArmor()->getStoreItem());
 			}
 
-			// assign no armor and update the list
+			// assign default armor and update the list
+			Armor *a = _game->getMod()->getArmor((*i)->getRules()->getArmor());
 			(*i)->setArmor(a);
 			_lstSoldiers->setCellText(row, 2, tr(a->getType()));
 		}
