@@ -426,14 +426,30 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	// friendlies are always seen
 	if (currentUnit->getFaction() == tile->getUnit()->getFaction()) return true;
 
-	// aliens can see in the dark at least 20 tiles, xcom can see at a distance of 9 (MaxViewDistanceAtDark) or less, further if there's enough light.
-	if ((getMaxViewDistanceSq() > currentUnit->getMaxViewDistanceAtDarkSq() &&
-		distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > currentUnit->getMaxViewDistanceAtDarkSq() &&
-		tile->getExternalShade() > getMaxDarknessToSeeUnits() &&
-		tile->getUnit()->getFire() == 0) ||
-		distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > getMaxViewDistanceSq())
+	// if beyond global max. range, nobody can see anyone
+	if (distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > getMaxViewDistanceSq())
 	{
 		return false;
+	}
+
+	// during dark aliens can see 20 tiles, xcom can see 9 by default... unless overridden by armor
+	if (tile->getExternalShade() > getMaxDarknessToSeeUnits())
+	{
+		if (getMaxViewDistanceSq() > currentUnit->getMaxViewDistanceAtDarkSq() &&
+			distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > currentUnit->getMaxViewDistanceAtDarkSq() &&
+			tile->getUnit()->getFire() == 0)
+		{
+			return false;
+		}
+	}
+	// during day (or if enough other light) both see 20 tiles ... unless overridden by armor
+	else
+	{
+		if (getMaxViewDistanceSq() > currentUnit->getMaxViewDistanceAtDaySq() &&
+			distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > currentUnit->getMaxViewDistanceAtDaySq())
+		{
+			return false;
+		}
 	}
 
 	Position originVoxel = getSightOriginVoxel(currentUnit);

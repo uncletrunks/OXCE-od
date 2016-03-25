@@ -103,6 +103,8 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDarkSq;
+	_maxViewDistanceAtDaySq = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : 20;
+	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDaySq;
 	_loftempsSet = _armor->getLoftempsSet();
 	_gender = soldier->getGender();
 	_faceDirection = -1;
@@ -213,6 +215,8 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? 20 : 9;
 	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDarkSq;
+	_maxViewDistanceAtDaySq = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : 20;
+	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDaySq;
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids
 	if (armor->getDrawingRoutine() == 14)
