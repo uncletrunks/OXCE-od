@@ -112,7 +112,7 @@ private:
 	int _standHeight, _kneelHeight, _floatHeight;
 	std::vector<int> _deathSound;
 	int _value, _aggroSound, _moveSound;
-	int _intelligence, _aggression, _maxViewDistanceAtDarkSq;
+	int _intelligence, _aggression, _maxViewDistanceAtDarkSq, _maxViewDistanceAtDaySq;
 	SpecialAbility _specab;
 	Armor *_armor;
 	SoldierGender _gender;
@@ -396,6 +396,8 @@ public:
 	int getAggression() const;
 	/// Get square of maximum view distance at dark.
 	inline int getMaxViewDistanceAtDarkSq() const {return _maxViewDistanceAtDarkSq;}
+	/// Get square of maximum view distance at day.
+	inline int getMaxViewDistanceAtDaySq() const { return _maxViewDistanceAtDaySq; }
 	/// Get the units's special ability.
 	int getSpecialAbility() const;
 	/// Set the units's respawn flag.
