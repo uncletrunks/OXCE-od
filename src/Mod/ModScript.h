@@ -54,10 +54,15 @@ class BattleItem;
 
 struct ModScript
 {
-	ModScript()
+	template<typename T>
+	struct Warper : T
 	{
-		recolorUnitSprite.LogInfo();
-	}
+		Warper() : T{ }
+		{
+			this->logScriptMetadata();
+		}
+	};
+
 	struct RecolorUnitParser : ScriptParser<const BattleUnit*, int, int, int, int>
 	{
 		RecolorUnitParser();
@@ -76,11 +81,11 @@ struct ModScript
 		SelectItemParser();
 	};
 
-	RecolorUnitParser recolorUnitSprite;
-	SelectUnitParser selectUnitSprite;
+	Warper<RecolorUnitParser> recolorUnitSprite;
+	Warper<SelectUnitParser> selectUnitSprite;
 
-	RecolorItemParser recolorItemSprite;
-	SelectItemParser selectItemSprite;
+	Warper<RecolorItemParser> recolorItemSprite;
+	Warper<SelectItemParser> selectItemSprite;
 };
 
 }

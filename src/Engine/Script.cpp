@@ -466,7 +466,7 @@ bool callOverloadProc(ParserWriter& ph, ScriptContainerData firstArg, const Scri
 	}
 	for (auto& p : proc)
 	{
-		if (p.firstArgType == ArgInvalid)
+		if (p.firstArgType == ArgAny)
 		{
 			return p(ph, begin, end);
 		}
@@ -720,6 +720,12 @@ bool parseEnd(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken
 
 bool parseDeclImpl(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end, bool ptr, bool edit)
 {
+	if (ph.codeBlocks.size() > 0)
+	{
+		Log(LOG_ERROR) << "can't define variables in code blocks";
+		return false;
+	}
+
 	// adding new custom variables of type selected type.
 	auto type_curr = ph.parser.getType(*begin);
 	if (type_curr)
@@ -1355,18 +1361,18 @@ ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& f
 	//					op_data init
 	//--------------------------------------------------
 	#define MACRO_ALL_INIT(NAME, ...) \
-		addSortHelper(_procList, { addNameRef(#NAME), FuncGroup<MACRO_FUNC_ID(NAME)>::firstArgType(), &parseBuildinProc<MACRO_PROC_ID(NAME), FuncGroup<MACRO_FUNC_ID(NAME)>> });
+		addSortHelper(_procList, { addNameRef(#NAME), FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType(), &parseBuildinProc<MACRO_PROC_ID(NAME), FuncGroup<MACRO_FUNC_ID(NAME)>> });
 
 	MACRO_PROC_DEFINITION(MACRO_ALL_INIT)
 
 	#undef MACRO_ALL_INIT
 
-	addSortHelper(_procList, { addNameRef("if"), ArgInvalid, &parseIf });
-	addSortHelper(_procList, { addNameRef("else"), ArgInvalid, &parseElse });
-	addSortHelper(_procList, { addNameRef("end"), ArgInvalid, &parseEnd });
-	addSortHelper(_procList, { addNameRef("var"), ArgInvalid, &parseVar });
-	addSortHelper(_procList, { addNameRef("ref"), ArgInvalid, &parseRef });
-	addSortHelper(_procList, { addNameRef("cref"), ArgInvalid, &parseCref });
+	addSortHelper(_procList, { addNameRef("if"), ArgAny, &parseIf });
+	addSortHelper(_procList, { addNameRef("else"), ArgAny, &parseElse });
+	addSortHelper(_procList, { addNameRef("end"), ArgAny, &parseEnd });
+	addSortHelper(_procList, { addNameRef("var"), ArgAny, &parseVar });
+	addSortHelper(_procList, { addNameRef("ref"), ArgAny, &parseRef });
+	addSortHelper(_procList, { addNameRef("cref"), ArgAny, &parseCref });
 
 	if (!firstArg.empty())
 	{
@@ -1379,7 +1385,10 @@ ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& f
 
 	addType<int>("int");
 
+	auto labelName = addNameRef("label");
 	auto nullName = addNameRef("null");
+
+	addSortHelper(_typeList, { labelName, ArgLabel, 0 });
 	addSortHelper(_typeList, { nullName, ArgNull, 0 });
 	addSortHelper(_refList, { nullName, ArgNull, RegInvaild, 0 });
 }
@@ -1424,7 +1433,7 @@ ScriptRef ScriptParserBase::addNameRef(const std::string& s)
  * @param s function name
  * @param parser parsing fu
  */
-void ScriptParserBase::addParserBase(const std::string& s, ArgEnum firstArgType, ScriptParserData::argFunc arg, ScriptParserData::getFunc get)
+void ScriptParserBase::addParserBase(const std::string& s, ArgEnum firstArgType, ScriptParserData::argFunc arg, ScriptParserData::getFunc get, ScriptParserData::displayFunc display)
 {
 	if (haveNameRef(s))
 	{
@@ -1442,7 +1451,7 @@ void ScriptParserBase::addParserBase(const std::string& s, ArgEnum firstArgType,
 		}
 	}
 
-	addSortHelper(_procList, { addNameRef(s), firstArgType, &parseCustomProc, arg, get });
+	addSortHelper(_procList, { addNameRef(s), firstArgType, &parseCustomProc, arg, get, display });
 }
 
 void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type, size_t size)
@@ -1751,6 +1760,36 @@ void ScriptParserBase::logScriptMetadata() const
 {
 	if (Options::debug)
 	{
+		auto varType = [](ArgEnum type) -> std::string
+		{
+			if (ArgIsReg(type))
+			{
+				if (ArgIsPtr(type))
+				{
+					if (ArgIsEditable(type))
+					{
+						return "ref";
+					}
+					else
+					{
+						return "cref";
+					}
+				}
+				else
+				{
+					return "var";
+				}
+			}
+			else
+			{
+				return "const";
+			}
+		};
+		auto argType = [&](ArgEnum type) -> std::string
+		{
+			return getTypeName(type).toString();
+		};
+
 		const int tabSize = 8;
 		static bool printOp = true;
 		if (printOp)
@@ -1764,10 +1803,10 @@ void ScriptParserBase::logScriptMetadata() const
 					<< "Op:    " << std::setw(tabSize*2) << #NAME \
 					<< "OpId:  " << std::setw(tabSize/2) << offset << "  + " <<  std::setw(tabSize) << FuncGroup<MACRO_FUNC_ID(NAME)>::ver() \
 					<< "Impl:  " << std::setw(tabSize*10) << MACRO_STRCAT(Impl) \
-					<< "Args:  " #Args << "\n"; \
+					<< "Args:  " << FuncGroup<MACRO_FUNC_ID(NAME)>::displayArgs(this) << "\n"; \
 				offset += FuncGroup<MACRO_FUNC_ID(NAME)>::ver();
 
-			opLog.get(LOG_DEBUG) << "Available script operations:\n" << std::left << std::hex << std::showbase;
+			opLog.get(LOG_DEBUG) << "Available buildin script operations:\n" << std::left << std::hex << std::showbase;
 			MACRO_PROC_DEFINITION(MACRO_ALL_LOG)
 
 			#undef MACRO_ALL_LOG
@@ -1775,36 +1814,52 @@ void ScriptParserBase::logScriptMetadata() const
 		}
 
 		Logger refLog;
-		refLog.get(LOG_DEBUG) << "Script data for: " << _name << "\n" << std::left;
-		for (auto& r : _refList)
-		{
-			std::string kind = "";
-			if (ArgIsReg(r.type))
+		refLog.get(LOG_DEBUG) << "Script info for: " << _name << "\n" << std::left;
+		refLog.get(LOG_DEBUG) << "\n";
+		refLog.get(LOG_DEBUG) << "Script data:\n";
+		auto temp = _refList;
+		std::sort(temp.begin(), temp.end(),
+			[](const ScriptContainerData& a, const ScriptContainerData& b)
 			{
-				if (ArgIsPtr(r.type))
-				{
-					if (ArgIsEditable(r.type))
-					{
-						kind = "ref:";
-					}
-					else
-					{
-						kind = "cref:";
-					}
-				}
-				else
-				{
-					kind = "var:";
-				}
+				return std::lexicographical_compare(a.name.begin(), a.name.end(), b.name.begin(), b.name.end());
 			}
-			else
+		);
+		for (auto& r : temp)
+		{
+			if (!ArgIsReg(r.type) && Logger::reportingLevel() != LOG_VERBOSE)
 			{
-				kind = "const:";
+				continue;
 			}
 			if (r.type == ArgSpec(ArgInt, false))
-				refLog.get(LOG_DEBUG) << "Name: " << std::setw(30) << r.name.toString() << std::setw(7) << kind << r.value << "\n";
+			{
+				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(7) << varType(r.type) << r.value << "\n";
+			}
 			else
-				refLog.get(LOG_DEBUG) << "Name: " << std::setw(30) << r.name.toString() << std::setw(7) << kind << getTypeName(r.type).toString() << "\n";
+				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(7) << varType(r.type) << argType(r.type) << "\n";
+		}
+		if (Logger::reportingLevel() != LOG_VERBOSE)
+		{
+			refLog.get(LOG_DEBUG) << "To see const values and custom operations use 'verboseLogging'\n";
+		}
+		else
+		{
+			auto temp = _procList;
+			std::sort(temp.begin(), temp.end(),
+				[](const ScriptParserData& a, const ScriptParserData& b)
+				{
+					return std::lexicographical_compare(a.name.begin(), a.name.end(), b.name.begin(), b.name.end());
+				}
+			);
+
+			refLog.get(LOG_DEBUG) << "\n";
+			refLog.get(LOG_DEBUG) << "Script operations:\n";
+			for (auto& p : temp)
+			{
+				if (p.arg != nullptr)
+				{
+					refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << p.name.toString() << "Args: " << p.display(this) << "\n";
+				}
+			}
 		}
 	}
 }

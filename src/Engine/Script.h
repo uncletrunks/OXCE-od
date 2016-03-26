@@ -32,6 +32,7 @@
 namespace OpenXcom
 {
 class Surface;
+class ScriptParserBase;
 class ScriptContainerBase;
 
 class ParserWriter;
@@ -79,6 +80,7 @@ constexpr size_t ArgTypeSize = 0x8;
 enum ArgEnum : Uint8
 {
 	ArgInvalid = ArgTypeSize * 0,
+	ArgAny = ArgTypeSize * 0 + 1,
 
 	ArgNull = ArgTypeSize * 1,
 	ArgInt = ArgTypeSize * 2,
@@ -339,11 +341,9 @@ public:
 
 class ScriptRef : public ScriptRange<char>
 {
-	static ptr dummy() { return ""; }
-
 public:
 	/// Default constructor.
-	ScriptRef() : ScriptRange{ dummy(), dummy() }
+	ScriptRef() : ScriptRange{ }
 	{
 
 	}
@@ -447,9 +447,10 @@ struct ScriptTypeData
  */
 struct ScriptParserData
 {
-	using argFunc = int (*)(ParserWriter& ph, const SelectedToken *begin, const SelectedToken *end);
+	using argFunc = int (*)(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
 	using getFunc = FuncCommon (*)(int version);
-	using parserFunc = bool (*)(const ScriptParserData &spd, ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end);
+	using parserFunc = bool (*)(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using displayFunc = std::string (*)(const ScriptParserBase* spb);
 
 	ScriptRef name;
 	ArgEnum firstArgType;
@@ -457,8 +458,9 @@ struct ScriptParserData
 	parserFunc parser;
 	argFunc arg;
 	getFunc get;
+	displayFunc display;
 
-	bool operator()(ParserWriter &ph, const SelectedToken *begin, const SelectedToken *end) const
+	bool operator()(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end) const
 	{
 		return parser(*this, ph, begin, end);
 	}
@@ -535,8 +537,6 @@ protected:
 
 	/// Common typeless part of parsing string.
 	bool parseBase(ScriptContainerBase* scr, const std::string& parentName, const std::string& code) const;
-	/// Show all builtin script informations.
-	void logScriptMetadata() const;
 
 	/// Test if name is free.
 	bool haveNameRef(const std::string& s) const;
@@ -548,25 +548,16 @@ protected:
 	/// Add name for custom parameter.
 	void addCustomReg(const std::string& s, ArgEnum type);
 	/// Add parsing fuction.
-	void addParserBase(const std::string& s, ArgEnum firstArgType, ScriptParserData::argFunc arg, ScriptParserData::getFunc get);
+	void addParserBase(const std::string& s, ArgEnum firstArgType, ScriptParserData::argFunc arg, ScriptParserData::getFunc get, ScriptParserData::displayFunc display);
 	/// Add new type impl.
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
-	/// Add new type.
-	template<typename T>
-	void addType(const std::string& s)
-	{
-		using info = TypeInfoImpl<T>;
-		using t3 = typename info::t3;
-
-		addTypeBase(s, registeTypeImpl<t3>(), info::size);
-	}
 	/// Test if type was added impl.
 	bool haveTypeBase(ArgEnum type);
 
 public:
 	/// Register type to get run time value representing it.
 	template<typename T>
-	static ArgEnum registerType()
+	static ArgEnum getArgType()
 	{
 		using info = TypeInfoImpl<T>;
 		using t3 = typename info::t3;
@@ -579,13 +570,22 @@ public:
 	template<typename T>
 	void addParser(const std::string& s)
 	{
-		addParserBase(s, T::firstArgType(), &T::parse, &T::getDynamic);
+		addParserBase(s, T::overloadType(), &T::parse, &T::getDynamic, &T::displayArgs);
 	}
 	/// Test if type was already added.
 	template<typename T>
 	bool haveType()
 	{
-		return haveTypeBase(registerType<T>());
+		return haveTypeBase(getArgType<T>());
+	}
+	/// Add new type.
+	template<typename T>
+	void addType(const std::string& s)
+	{
+		using info = TypeInfoImpl<T>;
+		using t3 = typename info::t3;
+
+		addTypeBase(s, registeTypeImpl<t3>(), info::size);
 	}
 	/// Regised type in parser.
 	template<typename P>
@@ -597,6 +597,9 @@ public:
 			P::ScriptRegister(this);
 		}
 	}
+
+	/// Show all script informations.
+	void logScriptMetadata() const;
 
 	/// Get name of type.
 	ScriptRef getTypeName(ArgEnum type) const;
@@ -629,7 +632,7 @@ class ScriptParser : public ScriptParserBase
 	void addRegImpl(S<First>& n, Rest&... t)
 	{
 		addTypeImpl(n);
-		addCustomReg(n.name, ScriptParserBase::registerType<First>());
+		addCustomReg(n.name, ScriptParserBase::getArgType<First>());
 		addRegImpl(t...);
 	}
 	void addRegImpl()
@@ -672,13 +675,6 @@ public:
 		}
 		return {};
 	}
-
-	/// Print data to log.
-	void LogInfo() const
-	{
-		static bool printOp = [this]{ logScriptMetadata(); return true; }();
-		(void)printOp;
-	}
 };
 
 
@@ -700,7 +696,7 @@ struct ScriptTag
 	constexpr explicit operator bool() const { return this->index != invalid().index; }
 
 	/// Get run time value for type.
-	static ArgEnum type() { return ScriptParserBase::registerType<T*>(); }
+	static ArgEnum type() { return ScriptParserBase::getArgType<T*>(); }
 	/// Test if value can be used.
 	static constexpr bool isValid(size_t i) { return i < static_cast<size_t>(invalid().index); }
 	/// Fake constructor.

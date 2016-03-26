@@ -216,7 +216,7 @@ struct ParserWriter
 	template<typename T>
 	bool pushRegTry(const ScriptRef& s)
 	{
-		return pushRegTry(s, ScriptParserBase::registerType<T>());
+		return pushRegTry(s, ScriptParserBase::getArgType<T>());
 	}
 
 	/// Try pushing reg arg on proc vector.
@@ -226,7 +226,7 @@ struct ParserWriter
 	template<typename T>
 	bool addReg(const ScriptRef& s)
 	{
-		return addReg(s, ScriptParserBase::registerType<T>());
+		return addReg(s, ScriptParserBase::getArgType<T>());
 	}
 
 	/// Add new reg arg.
@@ -365,9 +365,14 @@ struct Arg<Internal, A1, A2...> : public Arg<Internal, A2...>
 			return next::parse(ph, t);
 		}
 	}
-	static ArgEnum firstArgType()
+	static ScriptRange<ArgEnum> argTypes()
 	{
-		return tag::value != 0 ? ArgInvalid : A1::type();
+		const static ArgEnum types[ver()] = { A1::type(), A2::type()... };
+		return { std::begin(types), std::end(types) };
+	}
+	static ArgEnum overloadType()
+	{
+		return tag::value != 0 || !ArgIsReg(A1::type()) ? ArgAny : A1::type();
 	}
 };
 
@@ -387,9 +392,13 @@ struct Arg<Internal>
 	{
 		return -1;
 	}
-	static ArgEnum firstArgType()
+	static ScriptRange<ArgEnum> argTypes()
 	{
-		return ArgInvalid;
+		return { };
+	}
+	static ArgEnum overloadType()
+	{
+		return ArgAny;
 	}
 };
 
@@ -450,9 +459,52 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 		}
 		return lower * T1::ver() + curr;
 	}
-	static ArgEnum firstArgType()
+	static std::string displayArgs(const ScriptParserBase* spb)
 	{
-		return !T1::internal ? T1::firstArgType() : next::firstArgType();
+		std::string curr = "";
+
+		if (!T1::internal)
+		{
+			ScriptRange<ArgEnum> args = T1::argTypes();
+			if (args)
+			{
+				curr += " [";
+				auto type = *args.begin();
+				if (args.size() == 1)
+				{
+					if (ArgIsReg(type))
+					{
+						if (ArgIsPtr(type))
+						{
+							if (ArgIsEditable(type))
+							{
+								curr += "ref ";
+							}
+							else
+							{
+								curr += "cref ";
+							}
+						}
+						else
+						{
+							curr += "var ";
+						}
+					}
+				}
+				curr += spb->getTypeName(type).toString();
+				curr += "]";
+			}
+			if (curr == " []")
+			{
+				curr = "";
+			}
+		}
+		curr += next::displayArgs(spb);
+		return curr;
+	}
+	static ArgEnum overloadType()
+	{
+		return !T1::internal ? T1::overloadType() : next::overloadType();
 	}
 
 	using next::typeFunc;
@@ -493,9 +545,13 @@ struct ArgColection<MaxSize>
 			return -1;
 		}
 	}
-	static ArgEnum firstArgType()
+	static std::string displayArgs(const ScriptParserBase* spb)
 	{
-		return ArgInvalid;
+		return "";
+	}
+	static ArgEnum overloadType()
+	{
+		return ArgAny;
 	}
 	static void typeFunc() = delete;
 };
@@ -565,7 +621,7 @@ struct ArgRegDef
 
 	static ArgEnum type()
 	{
-		return ScriptParserBase::registerType<ReturnType>();
+		return ScriptParserBase::getArgType<ReturnType>();
 	}
 };
 
@@ -575,7 +631,7 @@ struct ArgConstDef
 	static constexpr size_t size = sizeof(int);
 	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
-		return sw.const_val<int>(arg);
+		return sw.const_val<ReturnType>(arg);
 	}
 
 	static bool parse(ParserWriter& ph, const SelectedToken& t)
@@ -593,7 +649,7 @@ struct ArgConstDef
 
 	static ArgEnum type()
 	{
-		return ArgInvalid;
+		return ScriptParserBase::getArgType<ReturnType>();
 	}
 };
 
@@ -698,7 +754,7 @@ struct ArgTagDef
 	static constexpr size_t size = sizeof(ReturnType);
 	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
-		return sw.const_val<ScriptTag<T, I>>(arg);
+		return sw.const_val<ReturnType>(arg);
 	}
 
 	static bool parse(ParserWriter& ph, const SelectedToken& t)
@@ -717,7 +773,7 @@ struct ArgTagDef
 
 	static ArgEnum type()
 	{
-		return ArgInvalid;
+		return ScriptParserBase::getArgType<ReturnType>();
 	}
 };
 
@@ -764,7 +820,7 @@ struct ArgSelector<ProgPos>
 template<>
 struct ArgSelector<FuncCommon>
 {
-	using type = Arg<false, ArgFuncDef>;
+	using type = Arg<true, ArgFuncDef>;
 };
 
 template<>
@@ -856,7 +912,8 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 	using GetArgs<Func>::ver;
 	using GetArgs<Func>::arg;
 	using GetArgs<Func>::parse;
-	using GetArgs<Func>::firstArgType;
+	using GetArgs<Func>::displayArgs;
+	using GetArgs<Func>::overloadType;
 
 	static constexpr FuncCommon getDynamic(int i) { return FuncList::getDynamic(i); }
 };
@@ -1091,6 +1148,10 @@ struct Bind : BindBase
 	{
 		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getCustom"));
 		addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setCustom"));
+		if (!parser->haveType<typename ScriptValues<T>::Tag>())
+		{
+			parser->addType<typename ScriptValues<T>::Tag>(getName("Tag"));
+		}
 	}
 	template<int X>
 	void addFake(const std::string& get)
