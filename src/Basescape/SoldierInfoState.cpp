@@ -73,6 +73,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
 	_rank = new Surface(26, 23, 4, 4);
+	_flag = new Surface(40, 20, 275, 6);
 	_btnPrev = new TextButton(28, 14, 0, 33);
 	_btnOk = new TextButton(48, 14, 30, 33);
 	_btnNext = new TextButton(28, 14, 80, 33);
@@ -148,6 +149,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 
 	add(_bg);
 	add(_rank);
+	add(_flag);
 	add(_btnOk, "button", "soldierInfo");
 	add(_btnPrev, "button", "soldierInfo");
 	add(_btnNext, "button", "soldierInfo");
@@ -332,6 +334,17 @@ void SoldierInfoState::init()
 	texture->getFrame(_soldier->getRankSprite())->setX(0);
 	texture->getFrame(_soldier->getRankSprite())->setY(0);
 	texture->getFrame(_soldier->getRankSprite())->blit(_rank);
+
+	std::ostringstream flagId;
+	flagId << "Flag";
+	flagId << _soldier->getNationality();
+	Surface *flagTexture = _game->getMod()->getSurface(flagId.str().c_str());
+	_flag->clear();
+	if (flagTexture != 0)
+	{
+		flagTexture->setX(_flag->getWidth()-flagTexture->getWidth()); // align right
+		flagTexture->blit(_flag);
+	}
 
 	std::wostringstream ss;
 	ss << withArmor.tu;

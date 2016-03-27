@@ -50,6 +50,7 @@ class Soldier
 {
 private:
 	std::wstring _name;
+	int _nationality;
 	int _id, _improvement, _psiStrImprovement;
 	RuleSoldier *_rules;
 	UnitStats _initialStats, _currentStats;
@@ -77,6 +78,10 @@ public:
 	std::wstring getName(bool statstring = false, unsigned int maxLength = 20) const;
 	/// Sets the soldier's name.
 	void setName(const std::wstring &name);
+	/// Gets the soldier's nationality.
+	int getNationality() const;
+	/// Sets the soldier's nationality.
+	void setNationality(int nationality);
 	/// Gets the soldier's craft.
 	Craft *getCraft() const;
 	/// Sets the soldier's craft.

@@ -45,7 +45,7 @@ private:
 	Soldier *_soldier;
 	std::vector<Soldier*> *_list;
 
-	Surface *_bg, *_rank;
+	Surface *_bg, *_rank, *_flag;
 	TextButton *_btnOk, *_btnPrev, *_btnNext, *_btnArmor, *_btnSack;
 	Text *_txtRank, *_txtMissions, *_txtKills, *_txtCraft, *_txtRecovery, *_txtPsionic;
 	TextEdit *_edtSoldier;
