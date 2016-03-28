@@ -958,6 +958,9 @@
     <ClCompile Include="Battlescape\ItemSprite.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Geoscape\UfoTrackerState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1946,6 +1949,9 @@
     </ClInclude>
     <ClInclude Include="Battlescape\ItemSprite.h">
       <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\UfoTrackerState.h">
+      <Filter>Geoscape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

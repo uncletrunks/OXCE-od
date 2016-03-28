@@ -365,6 +365,8 @@ set ( geoscape_src
   Geoscape/ResearchRequiredState.cpp
   Geoscape/DogfightErrorState.cpp
   Geoscape/DogfightErrorState.h
+  Geoscape/UfoTrackerState.h
+  Geoscape/UfoTrackerState.cpp
 )
 
 set ( interface_src

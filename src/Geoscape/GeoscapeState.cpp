@@ -50,6 +50,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/SoldierDeath.h"
 #include "../Menu/PauseState.h"
+#include "UfoTrackerState.h"
 #include "InterceptState.h"
 #include "../Basescape/BasescapeState.h"
 #include "../Basescape/SellState.h"
@@ -234,6 +235,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_btnIntercept->setText(tr("STR_INTERCEPT"));
 	_btnIntercept->onMouseClick((ActionHandler)&GeoscapeState::btnInterceptClick);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnInterceptClick, Options::keyGeoIntercept);
+	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfoTrackerClick, SDLK_t);
 	_btnIntercept->setGeoscapeButton(true);
 
 	_btnBases->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
@@ -1870,6 +1872,15 @@ void GeoscapeState::globeClick(Action *action)
 void GeoscapeState::btnInterceptClick(Action *)
 {
 	_game->pushState(new InterceptState(_globe));
+}
+
+/**
+* Opens the UFO Tracker window.
+* @param action Pointer to an action.
+*/
+void GeoscapeState::btnUfoTrackerClick(Action *)
+{
+	_game->pushState(new UfoTrackerState(this, _globe));
 }
 
 /**
