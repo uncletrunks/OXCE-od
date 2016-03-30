@@ -136,6 +136,7 @@ void AlienDeployment::load(const YAML::Node &node)
 		load(parent);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_startingCondition = node["startingCondition"].as<std::string>(_startingCondition);
 	_data = node["data"].as< std::vector<DeploymentData> >(_data);
 	_width = node["width"].as<int>(_width);
 	_length = node["length"].as<int>(_length);
@@ -199,6 +200,15 @@ void AlienDeployment::load(const YAML::Node &node)
 std::string AlienDeployment::getType() const
 {
 	return _type;
+}
+
+/**
+* Returns the starting condition name for this mission.
+* @return String ID for starting condition.
+*/
+std::string AlienDeployment::getStartingCondition() const
+{
+	return _startingCondition;
 }
 
 /**

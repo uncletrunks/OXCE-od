@@ -62,6 +62,7 @@ class AlienDeployment
 {
 private:
 	std::string _type;
+	std::string _startingCondition;
 	std::vector<DeploymentData> _data;
 	int _width, _length, _height, _civilians;
 	std::vector<std::string> _terrains, _music;
@@ -83,6 +84,8 @@ public:
 	void load(const YAML::Node& node);
 	/// Gets the Alien Deployment's type.
 	std::string getType() const;
+	/// Gets the Alien Deployment's starting condition.
+	std::string getStartingCondition() const;
 	/// Gets a pointer to the data.
 	const std::vector<DeploymentData>* getDeploymentData() const;
 	/// Gets dimensions.

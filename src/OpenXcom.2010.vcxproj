@@ -436,6 +436,7 @@
     <ClCompile Include="Menu\TestState.cpp" />
     <ClCompile Include="Menu\VideoState.cpp" />
     <ClCompile Include="Mod\RuleDamageType.cpp" />
+    <ClCompile Include="Mod\RuleStartingCondition.cpp" />
     <ClCompile Include="Mod\RuleStatBonus.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -772,6 +773,7 @@
     <ClInclude Include="Menu\TestState.h" />
     <ClInclude Include="Menu\VideoState.h" />
     <ClInclude Include="Mod\RuleDamageType.h" />
+    <ClInclude Include="Mod\RuleStartingCondition.h" />
     <ClInclude Include="Mod\RuleStatBonus.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />

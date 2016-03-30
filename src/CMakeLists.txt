@@ -556,7 +556,8 @@ set ( mod_src
   Mod/RuleMusic.cpp
   Mod/Texture.h
   Mod/Texture.cpp
-
+  Mod/RuleStartingCondition.h
+  Mod/RuleStartingCondition.cpp
 )
 
 set ( savegame_src

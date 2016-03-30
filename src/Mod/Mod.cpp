@@ -60,6 +60,7 @@
 #include "RuleSoldier.h"
 #include "Unit.h"
 #include "AlienRace.h"
+#include "RuleStartingCondition.h"
 #include "AlienDeployment.h"
 #include "Armor.h"
 #include "ArticleDefinition.h"
@@ -373,6 +374,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, AlienRace*>::iterator i = _alienRaces.begin(); i != _alienRaces.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleStartingCondition*>::iterator i = _startingConditions.begin(); i != _startingConditions.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -920,6 +925,14 @@ void Mod::loadFile(const std::string &filename)
 	for (YAML::const_iterator i = doc["alienRaces"].begin(); i != doc["alienRaces"].end(); ++i)
 	{
 		AlienRace *rule = loadRule(*i, &_alienRaces, &_aliensIndex, "id");
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
+	for (YAML::const_iterator i = doc["startingConditions"].begin(); i != doc["startingConditions"].end(); ++i)
+	{
+		RuleStartingCondition *rule = loadRule(*i, &_startingConditions, &_startingConditionsIndex);
 		if (rule != 0)
 		{
 			rule->load(*i);
@@ -1646,6 +1659,27 @@ AlienRace *Mod::getAlienRace(const std::string &name) const
 const std::vector<std::string> &Mod::getAlienRacesList() const
 {
 	return _aliensIndex;
+}
+
+/**
+* Returns the info about a specific starting condition.
+* @param name Starting condition name.
+* @return Rules for the starting condition.
+*/
+RuleStartingCondition *Mod::getStartingCondition(const std::string &name) const
+{
+	std::map<std::string, RuleStartingCondition*>::const_iterator i = _startingConditions.find(name);
+	if (_startingConditions.end() != i) return i->second; else return 0;
+}
+
+/**
+* Returns the list of all starting conditions
+* provided by the mod.
+* @return List of starting conditions.
+*/
+const std::vector<std::string> &Mod::getStartingConditionsList() const
+{
+	return _startingConditionsIndex;
 }
 
 /**
