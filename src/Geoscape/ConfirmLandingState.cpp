@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "CraftErrorState.h"
 #include "ConfirmLandingState.h"
 #include <sstream>
 #include "../Engine/Game.h"
@@ -35,6 +36,7 @@
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Options.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/AlienRace.h"
 #include "../Mod/Mod.h"
@@ -116,11 +118,53 @@ void ConfirmLandingState::init()
 }
 
 /**
+* Checks the starting condition.
+*/
+bool ConfirmLandingState::checkStartingCondition()
+{
+	Ufo* u = dynamic_cast<Ufo*>(_craft->getDestination());
+	MissionSite* m = dynamic_cast<MissionSite*>(_craft->getDestination());
+	AlienBase* b = dynamic_cast<AlienBase*>(_craft->getDestination());
+
+	AlienDeployment *ruleDeploy = 0;
+	if (u != 0)
+	{
+		ruleDeploy = _game->getMod()->getDeployment(u->getRules()->getType());
+	}
+	else if (m != 0)
+	{
+		ruleDeploy = _game->getMod()->getDeployment(m->getDeployment()->getType());
+	}
+	else if (b != 0)
+	{
+		AlienRace *race = _game->getMod()->getAlienRace(b->getAlienRace());
+		ruleDeploy = _game->getMod()->getDeployment(race->getBaseCustomMission());
+		if (!ruleDeploy) ruleDeploy = _game->getMod()->getDeployment("STR_ALIEN_BASE_ASSAULT");
+	}
+	else
+	{
+		// irrelevant for this check
+		return true;
+	}
+
+	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	return rule == 0 || rule->isCraftAllowed(_craft->getRules()->getType());
+}
+
+/**
  * Enters the mission.
  * @param action Pointer to an action.
  */
 void ConfirmLandingState::btnYesClick(Action *)
 {
+	if (!checkStartingCondition())
+	{
+		_craft->returnToBase();
+		_game->popState();
+		_game->pushState(new CraftErrorState(0, tr("STR_STARTING_CONDITION_CRAFT")));
+		return;
+	}
+
 	_game->popState();
 	Ufo* u = dynamic_cast<Ufo*>(_craft->getDestination());
 	MissionSite* m = dynamic_cast<MissionSite*>(_craft->getDestination());

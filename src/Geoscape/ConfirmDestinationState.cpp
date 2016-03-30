@@ -16,9 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "CraftErrorState.h"
 #include "ConfirmDestinationState.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/AlienRace.h"
+#include "../Mod/RuleStartingCondition.h"
+#include "../Mod/AlienDeployment.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -28,6 +32,9 @@
 #include "../Savegame/Target.h"
 #include "../Savegame/Waypoint.h"
 #include "../Savegame/Base.h"
+#include "../Savegame/Ufo.h"
+#include "../Savegame/MissionSite.h"
+#include "../Savegame/AlienBase.h"
 #include "../Engine/Options.h"
 
 namespace OpenXcom
@@ -94,11 +101,53 @@ ConfirmDestinationState::~ConfirmDestinationState()
 }
 
 /**
+* Checks the starting condition.
+*/
+bool ConfirmDestinationState::checkStartingCondition()
+{
+	Ufo* u = dynamic_cast<Ufo*>(_target);
+	MissionSite* m = dynamic_cast<MissionSite*>(_target);
+	AlienBase* b = dynamic_cast<AlienBase*>(_target);
+
+	AlienDeployment *ruleDeploy = 0;
+	if (u != 0)
+	{
+		ruleDeploy = _game->getMod()->getDeployment(u->getRules()->getType());
+	}
+	else if (m != 0)
+	{
+		ruleDeploy = _game->getMod()->getDeployment(m->getDeployment()->getType());
+	}
+	else if (b != 0)
+	{
+		AlienRace *race = _game->getMod()->getAlienRace(b->getAlienRace());
+		ruleDeploy = _game->getMod()->getDeployment(race->getBaseCustomMission());
+		if (!ruleDeploy) ruleDeploy = _game->getMod()->getDeployment("STR_ALIEN_BASE_ASSAULT");
+	}
+	else
+	{
+		// for example just a waypoint
+		return true;
+	}
+
+	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	return rule == 0 || rule->isCraftAllowed(_craft->getRules()->getType());
+}
+
+/**
  * Confirms the selected target for the craft.
  * @param action Pointer to an action.
  */
 void ConfirmDestinationState::btnOkClick(Action *)
 {
+	if (!checkStartingCondition())
+	{
+		_game->popState();
+		_game->popState();
+		_game->pushState(new CraftErrorState(0, tr("STR_STARTING_CONDITION_CRAFT")));
+		return;
+	}
+
 	Waypoint *w = dynamic_cast<Waypoint*>(_target);
 	if (w != 0 && w->getId() == 0)
 	{

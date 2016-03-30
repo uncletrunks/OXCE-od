@@ -63,6 +63,7 @@ class RuleInventory;
 class RuleResearch;
 class RuleManufacture;
 class AlienRace;
+class RuleStartingCondition;
 class AlienDeployment;
 class UfoTrajectory;
 class RuleAlienMission;
@@ -114,6 +115,7 @@ private:
 	std::map<std::string, RuleSoldier*> _soldiers;
 	std::map<std::string, Unit*> _units;
 	std::map<std::string, AlienRace*> _alienRaces;
+	std::map<std::string, RuleStartingCondition*> _startingConditions;
 	std::map<std::string, AlienDeployment*> _alienDeployments;
 	std::map<std::string, Armor*> _armors;
 	std::map<std::string, ArticleDefinition*> _ufopaediaArticles;
@@ -145,7 +147,7 @@ private:
 	GameTime _startingTime;
 
 	std::vector<std::string> _countriesIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemsIndex, _invsIndex, _ufosIndex;
-	std::vector<std::string> _soldiersIndex, _aliensIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
+	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _extraSpritesIndex, _extraSoundsIndex, _extraStringsIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
@@ -307,6 +309,10 @@ public:
 	AlienRace *getAlienRace(const std::string &name) const;
 	/// Gets the available alien races.
 	const std::vector<std::string> &getAlienRacesList() const;
+	/// Gets a starting condition.
+	RuleStartingCondition *getStartingCondition(const std::string &name) const;
+	/// Gets the available starting conditions.
+	const std::vector<std::string> &getStartingConditionsList() const;
 	/// Gets deployment rules.
 	AlienDeployment *getDeployment(const std::string &name) const;
 	/// Gets the available alien deployments.
