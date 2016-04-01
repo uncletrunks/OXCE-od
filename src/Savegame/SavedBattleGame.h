@@ -59,7 +59,7 @@ private:
 	std::vector<BattleItem*> _items, _deleted;
 	Pathfinding *_pathfinding;
 	TileEngine *_tileEngine;
-	std::string _missionType, _alienCustomDeploy, _alienCustomMission;
+	std::string _missionType, _alienCustomDeploy, _alienCustomMission, _startingConditionType;
 	int _globalShade;
 	UnitFaction _side;
 	int _turn;
@@ -101,6 +101,10 @@ public:
 	void setMissionType(const std::string &missionType);
 	/// Gets the mission type.
 	const std::string &getMissionType() const;
+	/// Sets the starting condition type.
+	void setStartingConditionType(const std::string &startingConditionType);
+	/// Gets the starting condition type.
+	const std::string &getStartingConditionType() const;
 	/// Sets the custom alien data.
 	void setAlienCustom(const std::string &deploy, const std::string &mission);
 	/// Gets the custom alien deploy.

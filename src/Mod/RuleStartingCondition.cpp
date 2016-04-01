@@ -115,4 +115,23 @@ std::string RuleStartingCondition::getArmorTransformation(const std::string &arm
 	return std::string();
 }
 
+/**
+* Checks if the item type is allowed.
+* @param itemType Item type name.
+* @return True if allowed, false otherwise.
+*/
+bool RuleStartingCondition::isItemAllowed(const std::string &itemType) const
+{
+	return _allowedItems.empty() || (std::find(_allowedItems.begin(), _allowedItems.end(), itemType) != _allowedItems.end());
+}
+
+/**
+* Returns all the default items.
+* @return List of items.
+*/
+const std::map<std::string, int> *RuleStartingCondition::getDefaultItems() const
+{
+	return &_defaultItems;
+}
+
 }

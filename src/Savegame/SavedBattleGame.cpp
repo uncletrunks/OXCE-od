@@ -115,6 +115,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_mapsize_y = node["length"].as<int>(_mapsize_y);
 	_mapsize_z = node["height"].as<int>(_mapsize_z);
 	_missionType = node["missionType"].as<std::string>(_missionType);
+	_startingConditionType = node["startingConditionType"].as<std::string>(_startingConditionType);
 	_alienCustomDeploy = node["alienCustomDeploy"].as<std::string>(_alienCustomDeploy);
 	_alienCustomMission = node["alienCustomMission"].as<std::string>(_alienCustomMission);
 	_globalShade = node["globalshade"].as<int>(_globalShade);
@@ -376,6 +377,7 @@ YAML::Node SavedBattleGame::save() const
 	node["length"] = _mapsize_y;
 	node["height"] = _mapsize_z;
 	node["missionType"] = _missionType;
+	node["startingConditionType"] = _startingConditionType;
 	node["globalshade"] = _globalShade;
 	node["turn"] = _turn;
 	node["selectedUnit"] = (_selectedUnit?_selectedUnit->getId():-1);
@@ -517,6 +519,24 @@ void SavedBattleGame::setMissionType(const std::string &missionType)
 const std::string &SavedBattleGame::getMissionType() const
 {
 	return _missionType;
+}
+
+/**
+ * Sets the starting condition type.
+ * @param startingConditionType The starting condition type.
+ */
+void SavedBattleGame::setStartingConditionType(const std::string &startingConditionType)
+{
+	_startingConditionType = startingConditionType;
+}
+
+/**
+ * Gets the starting condition type.
+ * @return The starting condition type.
+ */
+const std::string &SavedBattleGame::getStartingConditionType() const
+{
+	return _startingConditionType;
 }
 
 /**

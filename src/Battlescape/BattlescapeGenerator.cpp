@@ -579,12 +579,13 @@ void BattlescapeGenerator::run()
 }
 
 /**
- * Deploys all the X-COM units and equipment based
- * on the Geoscape base / craft.
- * @param inventoryTile The tile to place all the extra equipment on.
+ * Deploys all the X-COM units and equipment based on the Geoscape base / craft.
  */
 void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondition)
 {
+	// we will need this during debriefing for some cleanup
+	_save->setStartingConditionType(startingCondition != 0 ? startingCondition->getType() : "");
+
 	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND");
 
 	if (_craft != 0)
@@ -682,9 +683,29 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 		// add items that are in the craft
 		for (std::map<std::string, int>::iterator i = _craft->getItems()->getContents()->begin(); i != _craft->getItems()->getContents()->end(); ++i)
 		{
-			for (int count = 0; count < i->second; count++)
+			if (startingCondition != 0 && !startingCondition->isItemAllowed(i->first))
 			{
-				_craftInventoryTile->addItem(new BattleItem(_game->getMod()->getItem(i->first), _save->getCurrentItemId()),	ground);
+				// send disabled items back to base
+				_base->getStorageItems()->addItem(i->first, i->second);
+			}
+			else
+			{
+				for (int count = 0; count < i->second; count++)
+				{
+					_craftInventoryTile->addItem(new BattleItem(_game->getMod()->getItem(i->first), _save->getCurrentItemId()), ground);
+				}
+			}
+		}
+		// add automagically spawned items
+		if (startingCondition != 0)
+		{
+			const std::map<std::string, int> *defaultItems = startingCondition->getDefaultItems();
+			for (std::map<std::string, int>::const_iterator i = defaultItems->begin(); i != defaultItems->end(); ++i)
+			{
+				for (int count = 0; count < i->second; count++)
+				{
+					_craftInventoryTile->addItem(new BattleItem(_game->getMod()->getItem(i->first), _save->getCurrentItemId()), ground);
+				}
 			}
 		}
 	}
