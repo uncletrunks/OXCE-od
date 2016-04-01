@@ -676,6 +676,18 @@ void DebriefingState::prepareDebriefing()
 						if ((*i) == soldier)
 						{
 							(*j)->updateGeoscapeStats(*i);
+							// starting conditions: recover armor backup
+							if ((*i)->getReplacedArmor())
+							{
+								if ((*i)->getReplacedArmor()->getStoreItem() != Armor::NONE)
+								{
+									_base->getStorageItems()->addItem((*i)->getReplacedArmor()->getStoreItem());
+								}
+								(*i)->setReplacedArmor(0);
+							}
+							// transformed armor doesn't get recovered
+							(*i)->setTransformedArmor(0);
+
 							SoldierDeath *death = new SoldierDeath();
 							death->setTime(*save->getTime());
 							(*i)->die(death);
@@ -759,6 +771,18 @@ void DebriefingState::prepareDebriefing()
 							if ((*i) == soldier)
 							{
 								(*j)->updateGeoscapeStats(*i);
+								// starting conditions: recover armor backup
+								if ((*i)->getReplacedArmor())
+								{
+									if ((*i)->getReplacedArmor()->getStoreItem() != Armor::NONE)
+									{
+										_base->getStorageItems()->addItem((*i)->getReplacedArmor()->getStoreItem());
+									}
+									(*i)->setReplacedArmor(0);
+								}
+								// transformed armor doesn't get recovered
+								(*i)->setTransformedArmor(0);
+
 								SoldierDeath *death = new SoldierDeath();
 								death->setTime(*save->getTime());
 								(*i)->die(death);
@@ -1030,6 +1054,24 @@ void DebriefingState::prepareDebriefing()
 			}
 		}
 	}
+
+	// clean up remaining armor backups
+	// Note: KIA and MIA soldiers have been handled already, only survivors can have non-empty values
+	for (std::vector<Soldier*>::iterator i = base->getSoldiers()->begin(); i != base->getSoldiers()->end(); ++i)
+	{
+		if ((*i)->getReplacedArmor())
+		{
+			(*i)->setArmor((*i)->getReplacedArmor());
+		}
+		else if ((*i)->getTransformedArmor())
+		{
+			(*i)->setArmor((*i)->getTransformedArmor());
+
+		}
+		(*i)->setReplacedArmor(0);
+		(*i)->setTransformedArmor(0);
+	}
+
 }
 
 /**

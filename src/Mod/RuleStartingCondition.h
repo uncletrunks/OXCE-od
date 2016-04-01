@@ -26,8 +26,6 @@
 namespace OpenXcom
 {
 
-class Craft;
-
 /**
  * Represents a specific Starting Condition.
  */
@@ -36,9 +34,9 @@ class RuleStartingCondition
 private:
 	std::string _type;
 	std::map<std::string, std::string> _armorTransformations;
-	std::string _defaultArmor;
-	std::vector<std::string> _allowedArmors;
+	std::map<std::string, std::string> _defaultArmor;
 	std::map<std::string, int> _defaultItems;
+	std::vector<std::string> _allowedArmors;
 	std::vector<std::string> _allowedItems;
 	std::vector<std::string> _allowedCraft;
 public:
@@ -50,8 +48,12 @@ public:
 	void load(const YAML::Node& node);
 	/// Gets the Starting Conditions's type.
 	std::string getType() const;
-	/// Checks if the craft type is allowed
+	/// Checks if the craft type is allowed.
 	bool isCraftAllowed(const std::string &craftType) const;
+	/// Gets the replacement armor.
+	std::string getArmorReplacement(const std::string &soldierType, const std::string &armorType) const;
+	/// Gets the transformed armor.
+	std::string getArmorTransformation(const std::string &armorType) const;
 };
 
 }

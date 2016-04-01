@@ -39,7 +39,12 @@ namespace OpenXcom
  * @param armor Soldier armor.
  * @param id Unique soldier id for soldier generation.
  */
-Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) : _id(id), _improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0), _gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0), _recentlyPromoted(false), _psiTraining(false), _training(false), _armor(armor), _death(0)
+Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
+	_id(id),
+	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
+	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0),
+	_recentlyPromoted(false), _psiTraining(false), _training(false),
+	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0)
 {
 	if (id != 0)
 	{
@@ -114,6 +119,10 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 		armor = mod->getArmor(mod->getSoldier(mod->getSoldiersList().front())->getArmor());
 	}
 	_armor = armor;
+	if (node["replacedArmor"])
+		_replacedArmor = mod->getArmor(node["replacedArmor"].as<std::string>());;
+	if (node["transformedArmor"])
+		_transformedArmor = mod->getArmor(node["transformedArmor"].as<std::string>());;
 	_psiTraining = node["psiTraining"].as<bool>(_psiTraining);
 	_training = node["training"].as<bool>(_training);
 	_improvement = node["improvement"].as<int>(_improvement);
@@ -166,6 +175,10 @@ YAML::Node Soldier::save() const
 	if (_recovery > 0)
 		node["recovery"] = _recovery;
 	node["armor"] = _armor->getType();
+	if (_replacedArmor != 0)
+		node["replacedArmor"] = _replacedArmor->getType();
+	if (_transformedArmor != 0)
+		node["transformedArmor"] = _transformedArmor->getType();
 	if (_psiTraining)
 		node["psiTraining"] = _psiTraining;
 	if (_training)
@@ -444,6 +457,42 @@ Armor *Soldier::getArmor() const
 void Soldier::setArmor(Armor *armor)
 {
 	_armor = armor;
+}
+
+/**
+* Gets the soldier's original armor (before replacement).
+* @return Pointer to armor data.
+*/
+Armor *Soldier::getReplacedArmor() const
+{
+	return _replacedArmor;
+}
+
+/**
+* Backs up the soldier's original armor (before replacement).
+* @param armor Pointer to armor data.
+*/
+void Soldier::setReplacedArmor(Armor *armor)
+{
+	_replacedArmor = armor;
+}
+
+/**
+* Gets the soldier's original armor (before transformation).
+* @return Pointer to armor data.
+*/
+Armor *Soldier::getTransformedArmor() const
+{
+	return _transformedArmor;
+}
+
+/**
+* Backs up the soldier's original armor (before transformation).
+* @param armor Pointer to armor data.
+*/
+void Soldier::setTransformedArmor(Armor *armor)
+{
+	_transformedArmor = armor;
 }
 
 /**
