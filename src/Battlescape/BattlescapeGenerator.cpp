@@ -51,6 +51,8 @@
 #include "../Mod/Armor.h"
 #include "../Mod/Unit.h"
 #include "../Mod/AlienRace.h"
+#include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/RuleBaseFacility.h"
 #include "../Mod/Texture.h"
@@ -535,7 +537,8 @@ void BattlescapeGenerator::run()
 
 	setupObjectives(ruleDeploy);
 
-	deployXCOM();
+	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	deployXCOM(startingCondition);
 
 	size_t unitCount = _save->getUnits()->size();
 
@@ -580,7 +583,7 @@ void BattlescapeGenerator::run()
  * on the Geoscape base / craft.
  * @param inventoryTile The tile to place all the extra equipment on.
  */
-void BattlescapeGenerator::deployXCOM()
+void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondition)
 {
 	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND");
 
@@ -633,6 +636,25 @@ void BattlescapeGenerator::deployXCOM()
 		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
 			(_craft == 0 && ((*i)->getWoundRecovery() == 0 || Options::everyoneFightsNobodyQuits) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 		{
+			// starting conditions - armor transformation or replacement
+			if (startingCondition != 0)
+			{
+				std::string transformedArmor = startingCondition->getArmorTransformation((*i)->getArmor()->getType());
+				if (!transformedArmor.empty())
+				{
+					(*i)->setTransformedArmor((*i)->getArmor());
+					(*i)->setArmor(_game->getMod()->getArmor(transformedArmor));
+				}
+				else
+				{
+					std::string replacedArmor = startingCondition->getArmorReplacement((*i)->getRules()->getType(), (*i)->getArmor()->getType());
+					if (!replacedArmor.empty())
+					{
+						(*i)->setReplacedArmor((*i)->getArmor());
+						(*i)->setArmor(_game->getMod()->getArmor(replacedArmor));
+					}
+				}
+			}
 			BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth()));
 			if (unit && !_save->getSelectedUnit())
 				_save->setSelectedUnit(unit);
@@ -1551,7 +1573,7 @@ void BattlescapeGenerator::runInventory(Craft *craft)
 
 	// ok now generate the battleitems for inventory
 	setCraft(craft);
-	deployXCOM();
+	deployXCOM(0);
 	delete data;
 	delete set;
 }

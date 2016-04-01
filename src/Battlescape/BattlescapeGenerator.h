@@ -37,6 +37,7 @@ class Tile;
 class RuleItem;
 class Unit;
 class AlienRace;
+class RuleStartingCondition;
 class AlienDeployment;
 class Game;
 class Base;
@@ -102,7 +103,7 @@ private:
 	/// Possibly explodes ufo powersources.
 	void explodePowerSources();
 	/// Deploys the XCOM units on the mission.
-	void deployXCOM();
+	void deployXCOM(const RuleStartingCondition *startingCondition);
 	/// Runs necessary checks before physically setting the position.
 	bool canPlaceXCOMUnit(Tile *tile);
 	/// Deploys the aliens, according to the alien deployment rules.

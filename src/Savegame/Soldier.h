@@ -62,6 +62,8 @@ private:
 	int _missions, _kills, _recovery;
 	bool _recentlyPromoted, _psiTraining, _training;
 	Armor *_armor;
+	Armor *_replacedArmor;
+	Armor *_transformedArmor;
 	std::vector<EquipmentLayoutItem*> _equipmentLayout;
 	SoldierDeath *_death;
 	std::wstring _statString;
@@ -130,6 +132,14 @@ public:
 	Armor *getArmor() const;
 	/// Sets the soldier armor.
 	void setArmor(Armor *armor);
+	/// Gets the soldier's original armor (before replacement).
+	Armor *getReplacedArmor() const;
+	/// Backs up the soldier's original armor (before replacement).
+	void setReplacedArmor(Armor *armor);
+	/// Gets the soldier's original armor (before transformation).
+	Armor *getTransformedArmor() const;
+	/// Backs up the soldier's original armor (before transformation).
+	void setTransformedArmor(Armor *armor);
 	/// Gets the soldier's wound recovery time.
 	int getWoundRecovery() const;
 	/// Sets the soldier's wound recovery time.

@@ -48,7 +48,13 @@ void RuleStartingCondition::load(const YAML::Node &node)
 		load(parent);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_armorTransformations = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformations);
+	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::string> >(_defaultArmor);
+	_defaultItems = node["defaultItems"].as< std::map<std::string, int> >(_defaultItems);
+	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
+	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
+
 }
 
 /**
@@ -61,13 +67,52 @@ std::string RuleStartingCondition::getType() const
 }
 
 /**
-* Gets bonus statistic of UFO based on race.
-* @param s Race name.
-* @return Bonus stats.
+* Checks if the craft type is allowed.
+* @param craftType Craft type name.
+* @return True if allowed, false otherwise.
 */
 bool RuleStartingCondition::isCraftAllowed(const std::string &craftType) const
 {
 	return _allowedCraft.empty() || (std::find(_allowedCraft.begin(), _allowedCraft.end(), craftType) != _allowedCraft.end());
+}
+
+/**
+* Gets the replacement armor.
+* @param soldierType Soldier type name.
+* @param armorType Existing/old armor type name.
+* @return Replacement armor type name (or empty string if no replacement is needed).
+*/
+std::string RuleStartingCondition::getArmorReplacement(const std::string &soldierType, const std::string &armorType) const
+{
+	if (!_allowedArmors.empty() && (std::find(_allowedArmors.begin(), _allowedArmors.end(), armorType) == _allowedArmors.end()))
+	{
+		std::map<std::string, std::string>::const_iterator j = _defaultArmor.find(soldierType);
+		if (j != _defaultArmor.end())
+		{
+			return j->second;
+		}
+	}
+
+	return std::string();
+}
+
+/**
+* Gets the transformed armor.
+* @param armorType Existing/old armor type name.
+* @return Transformed armor type name (or empty string if there is no transformation).
+*/
+std::string RuleStartingCondition::getArmorTransformation(const std::string &armorType) const
+{
+	if (!_armorTransformations.empty())
+	{
+		std::map<std::string, std::string>::const_iterator i = _armorTransformations.find(armorType);
+		if (i != _armorTransformations.end())
+		{
+			return i->second;
+		}
+	}
+
+	return std::string();
 }
 
 }
