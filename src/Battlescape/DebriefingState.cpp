@@ -59,6 +59,7 @@
 #include "../Engine/Screen.h"
 #include "../Basescape/SellState.h"
 #include "../Menu/SaveGameState.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/RuleInterface.h"
 
@@ -1070,6 +1071,17 @@ void DebriefingState::prepareDebriefing()
 		}
 		(*i)->setReplacedArmor(0);
 		(*i)->setTransformedArmor(0);
+	}
+
+	// clean up automagically spawned items
+	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(battle->getStartingConditionType());
+	if (startingCondition != 0)
+	{
+		const std::map<std::string, int> *defaultItems = startingCondition->getDefaultItems();
+		for (std::map<std::string, int>::const_iterator i = defaultItems->begin(); i != defaultItems->end(); ++i)
+		{
+			base->getStorageItems()->removeItem(i->first, i->second);
+		}
 	}
 
 }

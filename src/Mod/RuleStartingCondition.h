@@ -54,6 +54,10 @@ public:
 	std::string getArmorReplacement(const std::string &soldierType, const std::string &armorType) const;
 	/// Gets the transformed armor.
 	std::string getArmorTransformation(const std::string &armorType) const;
+	/// Checks if the item type is allowed.
+	bool isItemAllowed(const std::string &itemType) const;
+	/// Gets the default items.
+	const std::map<std::string, int> *getDefaultItems() const;
 };
 
 }
