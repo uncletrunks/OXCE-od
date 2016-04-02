@@ -67,7 +67,7 @@ void ItemSprite::draw(BattleItem* item, int x, int y, int shade, bool half)
 	if (sprite)
 	{
 		BattleItem::ScriptFill(&_scriptWorkRef, item, BODYPART_ITEM_FLOOR, _animationFrame, shade);
-		_scriptWorkRef.executeBlit(sprite, _dest, x, y, half);
+		_scriptWorkRef.executeBlit(sprite, _dest, x, y, shade, half);
 	}
 }
 
