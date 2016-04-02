@@ -149,11 +149,11 @@ public:
 	static const Armor::RecolorParser Parser;
 
 	/// Creates a BattleUnit from solder.
-	BattleUnit(Soldier *soldier, int depth);
+	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);
 	/// Updates a BattleUnit from a Soldier (after a change of armor).
-	void updateArmorFromSoldier(Soldier *soldier, int depth);
+	void updateArmorFromSoldier(Soldier *soldier, int depth, int maxViewDistance);
 	/// Creates a BattleUnit from unit.
-	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth);
+	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth, int maxViewDistance);
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.
