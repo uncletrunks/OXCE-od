@@ -143,6 +143,7 @@ private:
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
+	std::map<int, std::string> _missionRatings, _monthlyRatings;
 
 	std::vector<std::string> _countriesIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemsIndex, _invsIndex, _ufosIndex;
 	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
@@ -407,6 +408,8 @@ public:
 	const std::vector<std::string> *getMissionScriptList() const;
 	RuleMissionScript *getMissionScript(const std::string &name) const;
 	std::string getFinalResearch() const;
+	const std::map<int, std::string> *getMissionRatings() const;
+	const std::map<int, std::string> *getMonthlyRatings() const;
 };
 
 }

@@ -385,6 +385,22 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	{
 		rating = tr("STR_RATING_EXCELLENT");
 	}
+
+	if (!_game->getMod()->getMissionRatings()->empty())
+	{
+		rating = L"";
+		int temp = INT_MIN;
+		const std::map<int, std::string> *missionRatings = _game->getMod()->getMissionRatings();
+		for (std::map<int, std::string>::const_iterator i = missionRatings->begin(); i != missionRatings->end(); ++i)
+		{
+			if (i->first > temp && i->first <= total)
+			{
+				temp = i->first;
+				rating = tr(i->second);
+			}
+		}
+	}
+
 	_txtRating->setText(tr("STR_RATING").arg(rating));
 	_positiveScore = (total > 0);
 }
