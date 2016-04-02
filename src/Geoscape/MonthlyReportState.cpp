@@ -18,6 +18,7 @@
  */
 #define _USE_MATH_DEFINES
 #include "MonthlyReportState.h"
+#include <climits>
 #include <sstream>
 #include <cmath>
 #include "../Engine/Game.h"
@@ -152,6 +153,21 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	if (_ratingTotal > 500)
 	{
 		rating = tr("STR_RATING_EXCELLENT");
+	}
+
+	if (!_game->getMod()->getMonthlyRatings()->empty())
+	{
+		rating = L"";
+		int temp = INT_MIN;
+		const std::map<int, std::string> *monthlyRatings = _game->getMod()->getMonthlyRatings();
+		for (std::map<int, std::string>::const_iterator i = monthlyRatings->begin(); i != monthlyRatings->end(); ++i)
+		{
+			if (i->first > temp && i->first <= _ratingTotal)
+			{
+				temp = i->first;
+				rating = tr(i->second);
+			}
+		}
 	}
 
 	_txtRating->setText(tr("STR_MONTHLY_RATING").arg(_ratingTotal).arg(rating));

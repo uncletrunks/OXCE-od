@@ -1095,6 +1095,8 @@ void Mod::loadFile(const std::string &filename, const ModScript &parsers)
 	}
 	_tooMuchSmokeThreshold = doc["tooMuchSmokeThreshold"].as<int>(_tooMuchSmokeThreshold);
 	_customTrainingFactor = doc["customTrainingFactor"].as<int>(_customTrainingFactor);
+	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
+	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 
 	if (doc["difficultyCoefficient"])
 	{
@@ -2337,6 +2339,15 @@ RuleMissionScript *Mod::getMissionScript(const std::string &name) const
 std::string Mod::getFinalResearch() const
 {
 	return _finalResearch;
+}
+
+const std::map<int, std::string> *Mod::getMissionRatings() const
+{
+	return &_missionRatings;
+}
+const std::map<int, std::string> *Mod::getMonthlyRatings() const
+{
+	return &_monthlyRatings;
 }
 
 namespace
