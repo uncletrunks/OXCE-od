@@ -1444,6 +1444,7 @@ void BattlescapeState::updateSoldierInfo()
 	else
 	{
 		_rank->clear();
+		_rankTiny->clear();
 	}
 	_numTimeUnits->setValue(battleUnit->getTimeUnits());
 	_barTimeUnits->setMax(battleUnit->getBaseStats()->tu);
