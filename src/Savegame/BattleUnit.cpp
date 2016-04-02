@@ -53,7 +53,7 @@ namespace OpenXcom
  * @param soldier Pointer to the Soldier.
  * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
  */
-BattleUnit::BattleUnit(Soldier *soldier, int depth) :
+BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_faction(FACTION_PLAYER), _originalFaction(FACTION_PLAYER), _killedBy(FACTION_PLAYER), _id(0), _pos(Position()), _tile(0),
 	_lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0), _toDirectionTurret(0),
 	_verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
@@ -103,7 +103,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDarkSq;
-	_maxViewDistanceAtDaySq = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : 20;
+	_maxViewDistanceAtDaySq = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
 	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDaySq;
 	_loftempsSet = _armor->getLoftempsSet();
 	_gender = soldier->getGender();
@@ -159,7 +159,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth) :
  * @param diff difficulty level (for stat adjustment).
  * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
  */
-BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth) :
+BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth, int maxViewDistance) :
 	_faction(faction), _originalFaction(faction), _killedBy(faction), _id(id), _pos(Position()),
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0),
 	_toDirectionTurret(0),  _verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0),
@@ -213,9 +213,9 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, in
 	}
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
-	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? 20 : 9;
+	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? maxViewDistance : 9;
 	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDarkSq;
-	_maxViewDistanceAtDaySq = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : 20;
+	_maxViewDistanceAtDaySq = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
 	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDaySq;
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids

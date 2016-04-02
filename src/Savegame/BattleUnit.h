@@ -149,9 +149,9 @@ public:
 	static void ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn);
 
 	/// Creates a BattleUnit from solder.
-	BattleUnit(Soldier *soldier, int depth);
+	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);
 	/// Creates a BattleUnit from unit.
-	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth);
+	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth, int maxViewDistance);
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.

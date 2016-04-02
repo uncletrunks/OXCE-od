@@ -1686,7 +1686,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	getSave()->getTile(unit->getPosition())->setUnit(0);
 	int difficulty = (int)(_parentState->getGame()->getSavedGame()->getDifficulty());
 
-	BattleUnit *newUnit = new BattleUnit(type, FACTION_HOSTILE, _save->getUnits()->back()->getId() + 1, getMod()->getArmor(type->getArmor()), difficulty, getDepth());
+	BattleUnit *newUnit = new BattleUnit(type, FACTION_HOSTILE, _save->getUnits()->back()->getId() + 1, getMod()->getArmor(type->getArmor()), difficulty, getDepth(), getMod()->getMaxViewDistance());
 
 	if (!difficulty)
 	{
