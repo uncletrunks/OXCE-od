@@ -270,7 +270,10 @@ void UnitFallBState::think()
 				_terrain->calculateUnitLighting();
 				_terrain->calculateFOV(*unit);
 				_parent->checkForProximityGrenades(*unit);
-				if (_parent->getTileEngine()->checkReactionFire(*unit))
+				BattleAction fall;
+				fall.type = BA_WALK;
+				fall.actor = *unit;
+				if (_parent->getTileEngine()->checkReactionFire(*unit, fall))
 					_parent->getPathfinding()->abortPath();
 				unit = _parent->getSave()->getFallingUnits()->erase(unit);
 			}

@@ -72,6 +72,11 @@ struct ModScript
 		SelectUnitParser();
 	};
 
+	struct ReactionUnitParser : ScriptParser<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*>
+	{
+		ReactionUnitParser();
+	};
+
 	struct RecolorItemParser : ScriptParser<const BattleItem*, int, int, int>
 	{
 		RecolorItemParser();
@@ -83,6 +88,8 @@ struct ModScript
 
 	Warper<RecolorUnitParser> recolorUnitSprite;
 	Warper<SelectUnitParser> selectUnitSprite;
+
+	Warper<ReactionUnitParser> reactionUnit;
 
 	Warper<RecolorItemParser> recolorItemSprite;
 	Warper<SelectItemParser> selectItemSprite;

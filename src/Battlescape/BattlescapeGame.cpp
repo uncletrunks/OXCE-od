@@ -422,16 +422,20 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
  */
 bool BattlescapeGame::kneel(BattleUnit *bu)
 {
-	int tu = bu->isKneeled()?8:4;
+	int tu = bu->isKneeled() ? 8 : 4;
 	if (bu->getType() == "SOLDIER" && !bu->isFloating() && ((!bu->isKneeled() && _save->getKneelReserved()) || checkReservedTU(bu, tu, 0)))
 	{
-		if (bu->spendTimeUnits(tu))
+		BattleAction kneel;
+		kneel.type = BA_KNEEL;
+		kneel.actor = bu;
+		kneel.Time = tu;
+		if (kneel.spendTU())
 		{
 			bu->kneel(!bu->isKneeled());
 			// kneeling or standing up can reveal new terrain or units. I guess.
 			getTileEngine()->calculateFOV(bu);
 			_parentState->updateSoldierInfo();
-			getTileEngine()->checkReactionFire(bu);
+			getTileEngine()->checkReactionFire(bu, kneel);
 			return true;
 		}
 		else
@@ -1119,7 +1123,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 	{
 		if (tuKneel > 0)
 		{
-			cost.type = BA_NONE;
+			cost.type = BA_KNEEL;
 		}
 		else
 		{
@@ -1146,7 +1150,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 			{
 				switch (cost.type)
 				{
-				case BA_NONE: _parentState->warning("STR_TIME_UNITS_RESERVED_FOR_KNEELING"); break;
+				case BA_KNEEL: _parentState->warning("STR_TIME_UNITS_RESERVED_FOR_KNEELING"); break;
 				default: _parentState->warning("STR_TIME_UNITS_RESERVED_FOR_KNEELING_AND_FIRING");
 				}
 			}

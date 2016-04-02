@@ -214,7 +214,7 @@ void UnitWalkBState::think()
 			// check for reaction fire
 			if (!_falling)
 			{
-				if (_terrain->checkReactionFire(_unit))
+				if (_terrain->checkReactionFire(_unit, _action))
 				{
 					// unit got fired upon - stop walking
 					_pf->abortPath();

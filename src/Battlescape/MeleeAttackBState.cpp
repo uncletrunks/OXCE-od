@@ -42,7 +42,7 @@ namespace OpenXcom
 /**
  * Sets up a MeleeAttackBState.
  */
-MeleeAttackBState::MeleeAttackBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _target(0), _weapon(0), _ammo(0), _hitNumber(0), _initialized(false)
+MeleeAttackBState::MeleeAttackBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _target(0), _weapon(0), _ammo(0), _hitNumber(0), _initialized(false), _reaction(false)
 {
 }
 
@@ -143,6 +143,14 @@ void MeleeAttackBState::init()
 void MeleeAttackBState::think()
 {
 	_parent->getSave()->getBattleState()->clearMouseScrollingState();
+	if (_reaction && !_parent->getSave()->getUnitsFalling())
+	{
+		_reaction = false;
+		if (_parent->getTileEngine()->checkReactionFire(_unit, _action))
+		{
+			return;
+		}
+	}
 
 	// if the unit burns floortiles, burn floortiles
 	if (_unit->getSpecialAbility() == SPECAB_BURNFLOOR || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
@@ -170,11 +178,6 @@ void MeleeAttackBState::think()
 			_parent->getMap()->getCamera()->setMapOffset(_action.cameraPosition);
 			_parent->getMap()->invalidate();
 		}
-//		melee doesn't trigger a reaction, remove comments to enable.
-//		if (!_parent->getSave()->getUnitsFalling())
-//		{
-//			_parent->getTileEngine()->checkReactionFire(_unit);
-//		}
 
 		if (_parent->getSave()->getSide() == FACTION_PLAYER || _parent->getSave()->getDebugMode())
 		{
@@ -212,6 +215,8 @@ void MeleeAttackBState::performMeleeAttack()
 	// make an explosion action
 	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, BA_HIT, _action.weapon, _action.actor, 0, true));
 
+
+	_reaction = true;
 }
 
 }

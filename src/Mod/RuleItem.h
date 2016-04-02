@@ -144,6 +144,7 @@ private:
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 	ModScript::RecolorItemParser::Container _recolorScript;
 	ModScript::SelectItemParser::Container _spriteScript;
+	ModScript::ReactionUnitParser::Container _reacActionScript;
 	ScriptValues<RuleItem> _scriptValues;
 
 	/// Get final value of cost.
@@ -429,6 +430,8 @@ public:
 	const ModScript::RecolorItemParser::Container &getRecolorScript() const;
 	/// Gets script used to switch sprite of item.
 	const ModScript::SelectItemParser::Container &getSpriteScript() const;
+	/// Gets script used calculate reaction to item action.
+	const ModScript::ReactionUnitParser::Container &getReacActionScript() const;
 };
 
 }

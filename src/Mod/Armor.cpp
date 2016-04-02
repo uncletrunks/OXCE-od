@@ -173,6 +173,9 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_recolorScript.load(_type, node["recolorScript"], parsers.recolorUnitSprite); //, "unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; ret new_pixel;"
 	_spriteScript.load(_type, node["spriteScript"], parsers.selectUnitSprite);
 
+	_reacActionScript.load(_type, node["reactionSourceScript"], parsers.reactionUnit);
+	_reacReactionScript.load(_type, node["reactionDestScript"], parsers.reactionUnit);
+
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node["custom"]);
 }
@@ -670,6 +673,23 @@ const ModScript::SelectUnitParser::Container &Armor::getSpriteScript() const
 	return _spriteScript;
 }
 
+/**
+ * Get script that caclualte reaction based on unit that do action.
+ * @return Script that calculate reaction.
+ */
+const ModScript::ReactionUnitParser::Container &Armor::getReacActionScript() const
+{
+	return _reacActionScript;
+}
+
+/**
+ * Get script that caclualte reaction based on unit that see action.
+ * @return Script that calculate reaction.
+ */
+const ModScript::ReactionUnitParser::Container &Armor::getReacReactionScript() const
+{
+	return _reacReactionScript;
+}
 /**
 * Gets the list of units this armor applies to.
 * @return The list of unit IDs (empty = applies to all).

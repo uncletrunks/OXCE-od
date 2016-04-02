@@ -3346,6 +3346,19 @@ void getRecolorScript(const BattleUnit *bu, int &pixel)
 		}
 	}
 }
+void getTileShade(const BattleUnit *bu, int &shade)
+{
+	if (bu)
+	{
+		auto tile = bu->getTile();
+		if (tile)
+		{
+			shade = tile->getShade();
+			return;
+		}
+	}
+	shade = 0;
+}
 
 struct getRightHandWeaponScript
 {
@@ -3504,6 +3517,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
 	bu.addFunc<getLeftHandWeaponConstScript>("getLeftHandWeapon");
 
+	bu.add<&getTileShade>("getTileShade");
+
 	bu.addCustomConst("BODYPART_HEAD", BODYPART_HEAD);
 	bu.addCustomConst("BODYPART_TORSO", BODYPART_TORSO);
 	bu.addCustomConst("BODYPART_LEFTARM", BODYPART_LEFTARM);
@@ -3597,6 +3612,21 @@ ModScript::SelectUnitParser::SelectUnitParser() : ScriptParser{ "Unit Sprite Sel
 	BindBase b { this };
 
 	commonImpl(b);
+}
+
+/**
+ * Constructor of reaction chance script parser.
+ */
+ModScript::ReactionUnitParser::ReactionUnitParser() : ScriptParser{ "Unit Reaction Chance", "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
+{
+	BindBase b { this };
+
+	b.addCustomConst("action_aimshoot", BA_AIMEDSHOT);
+	b.addCustomConst("action_autoshoot", BA_AUTOSHOT);
+	b.addCustomConst("action_snapshot", BA_SNAPSHOT);
+	b.addCustomConst("action_walk", BA_WALK);
+	b.addCustomConst("action_hit", BA_HIT);
+	b.addCustomConst("action_throw", BA_THROW);
 }
 
 /**

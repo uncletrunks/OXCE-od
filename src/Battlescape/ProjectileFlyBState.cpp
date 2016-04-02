@@ -440,7 +440,7 @@ void ProjectileFlyBState::think()
 			}
 			if (!_parent->getSave()->getUnitsFalling() && _parent->getPanicHandled())
 			{
-				_parent->getTileEngine()->checkReactionFire(_unit);
+				_parent->getTileEngine()->checkReactionFire(_unit, _action);
 			}
 			if (!_unit->isOut())
 			{

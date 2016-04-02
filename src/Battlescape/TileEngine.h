@@ -33,6 +33,7 @@ class BattleUnit;
 class BattleItem;
 class Tile;
 struct BattleAction;
+enum BattleActionType : Uint8;
 
 
 /**
@@ -70,7 +71,7 @@ private:
 	struct ReactionScore
 	{
 		BattleUnit *unit;
-		int attackType;
+		BattleActionType attackType;
 		double reactionScore;
 		double reactionReduction;
 	};
@@ -82,7 +83,7 @@ private:
 	/// Given a vector of spotters, and a unit, picks the spotter with the highest reaction score.
 	ReactionScore *getReactor(std::vector<ReactionScore> &spotters, BattleUnit *unit);
 	/// Tries to perform a reaction snap shot to this location.
-	bool tryReaction(BattleUnit *unit, BattleUnit *target, int attackType);
+	bool tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionType attackType, const BattleAction &originalAction);
 public:
 	/// Creates a new TileEngine class.
 	TileEngine(SavedBattleGame *save, std::vector<Uint16> *voxelData, int maxViewDistance, int maxDarknessToSeeUnits);
@@ -97,7 +98,7 @@ public:
 	/// Calculates the field of view within range of a certain position.
 	void calculateFOV(const Position &position);
 	/// Checks reaction fire.
-	bool checkReactionFire(BattleUnit *unit);
+	bool checkReactionFire(BattleUnit *unit, const BattleAction &originalAction);
 	/// Recalculates lighting of the battlescape for terrain.
 	void calculateTerrainLighting();
 	/// Recalculates lighting of the battlescape for units.

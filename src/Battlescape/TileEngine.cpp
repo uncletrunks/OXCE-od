@@ -793,7 +793,7 @@ void TileEngine::calculateFOV(const Position &position)
  * @param unit The unit to check reaction fire upon.
  * @return True if reaction fire took place.
  */
-bool TileEngine::checkReactionFire(BattleUnit *unit)
+bool TileEngine::checkReactionFire(BattleUnit *unit, const BattleAction &originalAction)
 {
 	// reaction fire only triggered when the actioning unit is of the currently playing side, and is still on the map (alive)
 	if (unit->getFaction() != _save->getSide() || unit->getTile() == 0)
@@ -813,7 +813,7 @@ bool TileEngine::checkReactionFire(BattleUnit *unit)
 		// start iterating through the possible reactors until the current unit is the one with the highest score.
 		while (reactor != 0)
 		{
-			if (!tryReaction(reactor->unit, unit, reactor->attackType))
+			if (!tryReaction(reactor->unit, unit, reactor->attackType, originalAction))
 			{
 				for (std::vector<ReactionScore>::iterator i = spotters.begin(); i != spotters.end(); ++i)
 				{
@@ -978,7 +978,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
  * @param target The unit to check sight TO.
  * @return True if the action should (theoretically) succeed.
  */
-bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackType)
+bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionType attackType, const BattleAction &originalAction)
 {
 	BattleAction action;
 	action.cameraPosition = _save->getBattleState()->getMap()->getCamera()->getMapOffset();
@@ -997,7 +997,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 		return false;
 	}
 
-	action.type = (BattleActionType)(attackType);
+	action.type = attackType;
 	action.target = target->getPosition();
 	action.updateTU();
 
@@ -1026,13 +1026,33 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, int attackTyp
 
 		if (action.targeting)
 		{
-			if (action.type == BA_HIT)
+			int reactionChance = 100;
+			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
+			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
+			ScriptWorker worker;
+
+			if (originalAction.weapon)
 			{
-				_save->getBattleGame()->statePushBack(new MeleeAttackBState(_save->getBattleGame(), action));
+				originalAction.weapon->getRules()->getReacActionScript().update(&worker, target, unit, originalAction.weapon, originalAction.type, origTarg);
+				reactionChance = worker.execute(reactionChance, dist);
 			}
-			else
+
+			target->getArmor()->getReacActionScript().update(&worker, target, unit, originalAction.weapon, originalAction.type, origTarg);
+			reactionChance = worker.execute(reactionChance, dist);
+
+			unit->getArmor()->getReacReactionScript().update(&worker, target, unit, originalAction.weapon, originalAction.type, origTarg);
+			reactionChance = worker.execute(reactionChance, dist);
+
+			if (RNG::percent(reactionChance))
 			{
-				_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
+				if (action.type == BA_HIT)
+				{
+					_save->getBattleGame()->statePushBack(new MeleeAttackBState(_save->getBattleGame(), action));
+				}
+				else
+				{
+					_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
+				}
 			}
 			return true;
 		}

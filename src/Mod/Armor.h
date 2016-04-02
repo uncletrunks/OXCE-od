@@ -72,6 +72,8 @@ private:
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
 	ModScript::RecolorUnitParser::Container _recolorScript;
 	ModScript::SelectUnitParser::Container _spriteScript;
+	ModScript::ReactionUnitParser::Container _reacActionScript, _reacReactionScript;
+
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
 public:
@@ -183,6 +185,10 @@ public:
 	const ModScript::RecolorUnitParser::Container &getRecolorScript() const;
 	/// Gets script used to switch body elements in unit sprite.
 	const ModScript::SelectUnitParser::Container &getSpriteScript() const;
+	/// Gets script used to calculate reaction chance.
+	const ModScript::ReactionUnitParser::Container &getReacActionScript() const;
+	/// Gets script used to calculate reaction chance.
+	const ModScript::ReactionUnitParser::Container &getReacReactionScript() const;
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
 };

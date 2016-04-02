@@ -446,6 +446,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_recolorScript.load(_type, node["recolorScript"], parsers.recolorItemSprite);
 	_spriteScript.load(_type, node["spriteScript"], parsers.selectItemSprite);
 
+	_reacActionScript.load(_type, node["reactionSourceScript"], parsers.reactionUnit, "if eq action action_hit; set reaction_chance 0; end;");
+
 	if (!_listOrder)
 	{
 		_listOrder = listOrder;
@@ -1696,6 +1698,14 @@ const ModScript::RecolorItemParser::Container &RuleItem::getRecolorScript() cons
 const ModScript::SelectItemParser::Container &RuleItem::getSpriteScript() const
 {
 	return _spriteScript;
+}
+/**
+ * Get script that caclualte reaction based on item that is used for action.
+ * @return Script that calculate reaction.
+ */
+const ModScript::ReactionUnitParser::Container &RuleItem::getReacActionScript() const
+{
+	return _reacActionScript;
 }
 
 namespace
