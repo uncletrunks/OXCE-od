@@ -170,7 +170,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_utileColor = node["spriteUtileColor"].as<std::vector<int> >(_utileColor);
 
 	//small hack, we use script as defualt behavior to simplyfy code.
-	_recolorScript.load(_type, node["recolorScript"], parsers.recolorUnitSprite); //, "unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; ret new_pixel;"
+	_recolorScript.load(_type, node["recolorScript"], parsers.recolorUnitSprite, "unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; ret new_pixel;");
 	_spriteScript.load(_type, node["spriteScript"], parsers.selectUnitSprite);
 
 	_reacActionScript.load(_type, node["reactionSourceScript"], parsers.reactionUnit);
