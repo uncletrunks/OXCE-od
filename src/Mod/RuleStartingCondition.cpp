@@ -52,6 +52,7 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::string> >(_defaultArmor);
 	_defaultItems = node["defaultItems"].as< std::map<std::string, int> >(_defaultItems);
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
+	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
 
@@ -113,6 +114,16 @@ std::string RuleStartingCondition::getArmorTransformation(const std::string &arm
 	}
 
 	return std::string();
+}
+
+/**
+* Checks if the vehicle type is allowed.
+* @param vehicleType Vehicle type name.
+* @return True if allowed, false otherwise.
+*/
+bool RuleStartingCondition::isVehicleAllowed(const std::string &vehicleType) const
+{
+	return _allowedVehicles.empty() || (std::find(_allowedVehicles.begin(), _allowedVehicles.end(), vehicleType) != _allowedVehicles.end());
 }
 
 /**
