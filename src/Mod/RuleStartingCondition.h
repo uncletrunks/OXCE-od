@@ -37,6 +37,7 @@ private:
 	std::map<std::string, std::string> _defaultArmor;
 	std::map<std::string, int> _defaultItems;
 	std::vector<std::string> _allowedArmors;
+	std::vector<std::string> _allowedVehicles;
 	std::vector<std::string> _allowedItems;
 	std::vector<std::string> _allowedCraft;
 public:
@@ -54,6 +55,8 @@ public:
 	std::string getArmorReplacement(const std::string &soldierType, const std::string &armorType) const;
 	/// Gets the transformed armor.
 	std::string getArmorTransformation(const std::string &armorType) const;
+	/// Checks if the vehicle type is allowed.
+	bool isVehicleAllowed(const std::string &vehicleType) const;
 	/// Checks if the item type is allowed.
 	bool isItemAllowed(const std::string &itemType) const;
 	/// Gets the default items.

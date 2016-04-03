@@ -599,9 +599,23 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 		{
 			for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
 			{
-				BattleUnit *unit = addXCOMVehicle(*i);
-				if (unit && !_save->getSelectedUnit())
-					_save->setSelectedUnit(unit);
+				if (startingCondition != 0 && !startingCondition->isVehicleAllowed((*i)->getRules()->getType()))
+				{
+					// send disabled vehicles back to base
+					_base->getStorageItems()->addItem((*i)->getRules()->getType(), 1);
+					// ammo too, if necessary
+					if (!(*i)->getRules()->getCompatibleAmmo()->empty())
+					{
+						RuleItem *ammo = _game->getMod()->getItem((*i)->getRules()->getCompatibleAmmo()->front());
+						_base->getStorageItems()->addItem(ammo->getType(), (*i)->getAmmo());
+					}
+				}
+				else
+				{
+					BattleUnit *unit = addXCOMVehicle(*i);
+					if (unit && !_save->getSelectedUnit())
+						_save->setSelectedUnit(unit);
+				}
 			}
 		}
 		else if (_base != 0)
