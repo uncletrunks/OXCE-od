@@ -58,7 +58,7 @@ static const int _applyTemplateBtnY  = 113;
  * @param tu Does Inventory use up Time Units?
  * @param parent Pointer to parent Battlescape.
  */
-InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _parent(parent)
+InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _lightUpdated(false), _parent(parent)
 {
 	_battleGame = _game->getSavedGame()->getSavedBattle();
 
@@ -212,7 +212,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _pa
 	}
 	else
 	{
-		_updateTemplateButtons(true);
+		updateTemplateButtons(true);
 	}
 
 	_inv->draw();
@@ -355,7 +355,7 @@ void InventoryState::init()
 	}
 
 	updateStats();
-	_refreshMouse();
+	refreshMouse();
 }
 
 /**
@@ -475,6 +475,7 @@ void InventoryState::btnOkClick(Action *)
 			(*j)->prepareNewTurn();
 		}
 	}
+	updateLighting();
 }
 
 /**
@@ -598,7 +599,7 @@ void InventoryState::btnCreateTemplateClick(Action *)
 
 	// give audio feedback
 	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
-	_refreshMouse();
+	refreshMouse();
 }
 
 static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile)
@@ -752,13 +753,13 @@ void InventoryState::btnApplyTemplateClick(Action *)
 	// refresh ui
 	_inv->arrangeGround(false);
 	updateStats();
-	_refreshMouse();
+	refreshMouse();
 
 	// give audio feedback
 	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
 }
 
-void InventoryState::_refreshMouse()
+void InventoryState::refreshMouse()
 {
 	// send a mouse motion event to refresh any hover actions
 	int x, y;
@@ -786,7 +787,7 @@ void InventoryState::onClearInventory(Action *)
 	// refresh ui
 	_inv->arrangeGround(false);
 	updateStats();
-	_refreshMouse();
+	refreshMouse();
 
 	// give audio feedback
 	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
@@ -796,9 +797,26 @@ void InventoryState::onClearInventory(Action *)
  * Updates item info.
  * @param action Pointer to an action.
  */
-void InventoryState::invClick(Action *)
+void InventoryState::invClick(Action *act)
 {
 	updateStats();
+	if (_tu && act->isMouseRightClick())
+	{
+		updateLighting();
+	}
+}
+
+/**
+ * Update lighting in case of unit pick torch/electroflare to hands.
+ */
+void InventoryState::updateLighting()
+{
+	if (!_lightUpdated)
+	{
+		_lightUpdated = true;
+		_battleGame->getTileEngine()->calculateUnitLighting();
+		_battleGame->getTileEngine()->calculateTerrainLighting();
+	}
 }
 
 /**
@@ -846,12 +864,12 @@ void InventoryState::invMouseOver(Action *)
 			r.h -= 2;
 			_selAmmo->drawRect(&r, Palette::blockOffset(0)+15);
 			item->getAmmoItem()->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selAmmo);
-			_updateTemplateButtons(false);
+			updateTemplateButtons(false);
 		}
 		else
 		{
 			_selAmmo->clear();
-			_updateTemplateButtons(!_tu);
+			updateTemplateButtons(!_tu);
 		}
 		if (item->getAmmoQuantity() != 0 && item->needsAmmo())
 		{
@@ -871,7 +889,7 @@ void InventoryState::invMouseOver(Action *)
 		}
 		_txtAmmo->setText(L"");
 		_selAmmo->clear();
-		_updateTemplateButtons(!_tu);
+		updateTemplateButtons(!_tu);
 	}
 }
 
@@ -884,7 +902,7 @@ void InventoryState::invMouseOut(Action *)
 	_txtItem->setText(L"");
 	_txtAmmo->setText(L"");
 	_selAmmo->clear();
-	_updateTemplateButtons(!_tu);
+	updateTemplateButtons(!_tu);
 }
 
 /**
@@ -940,7 +958,7 @@ void InventoryState::txtTooltipOut(Action *action)
 	}
 }
 
-void InventoryState::_updateTemplateButtons(bool isVisible)
+void InventoryState::updateTemplateButtons(bool isVisible)
 {
 	if (isVisible)
 	{

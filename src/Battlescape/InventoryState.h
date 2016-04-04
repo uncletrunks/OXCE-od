@@ -51,6 +51,7 @@ private:
 	std::vector<EquipmentLayoutItem*> _curInventoryTemplate;
 	SavedBattleGame *_battleGame;
 	const bool _tu;
+	bool _lightUpdated;
 	BattlescapeState *_parent;
 	std::string _currentTooltip;
 public:
@@ -96,10 +97,12 @@ public:
 	void txtTooltipOut(Action *action);
 
 private:
-	/// Update the visibility and icons for the template buttons
-	void _updateTemplateButtons(bool isVisible);
-	/// Refresh the hover status of the mouse
-	void _refreshMouse();
+	/// Update the visibility and icons for the template buttons.
+	void updateTemplateButtons(bool isVisible);
+	/// Refresh the hover status of the mouse.
+	void refreshMouse();
+	/// Update lighting.
+	void updateLighting();
 };
 
 }

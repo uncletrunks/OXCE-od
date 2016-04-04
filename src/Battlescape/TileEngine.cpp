@@ -134,32 +134,38 @@ void TileEngine::calculateTerrainLighting()
 	// add lighting of terrain
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 	{
+		auto tile = _save->getTile(i);
+		auto currLight = 0;
+
 		// only floors and objects can light up
-		if (_save->getTile(i)->getMapData(O_FLOOR)
-			&& _save->getTile(i)->getMapData(O_FLOOR)->getLightSource())
+		if (tile->getMapData(O_FLOOR)
+			&& tile->getMapData(O_FLOOR)->getLightSource())
 		{
-			addLight(_save->getTile(i)->getPosition(), _save->getTile(i)->getMapData(O_FLOOR)->getLightSource(), layer);
+			currLight = std::max(currLight, tile->getMapData(O_FLOOR)->getLightSource());
 		}
-		if (_save->getTile(i)->getMapData(O_OBJECT)
-			&& _save->getTile(i)->getMapData(O_OBJECT)->getLightSource())
+		if (tile->getMapData(O_OBJECT)
+			&& tile->getMapData(O_OBJECT)->getLightSource())
 		{
-			addLight(_save->getTile(i)->getPosition(), _save->getTile(i)->getMapData(O_OBJECT)->getLightSource(), layer);
+			currLight = std::max(currLight, tile->getMapData(O_OBJECT)->getLightSource());
 		}
 
 		// fires
-		if (_save->getTile(i)->getFire())
+		if (tile->getFire())
 		{
-			addLight(_save->getTile(i)->getPosition(), fireLightPower, layer);
+			currLight = std::max(currLight, fireLightPower);
 		}
 
-		for (std::vector<BattleItem*>::iterator it = _save->getTile(i)->getInventory()->begin(); it != _save->getTile(i)->getInventory()->end(); ++it)
+		for (BattleItem *it : *tile->getInventory())
 		{
-			if ((*it)->getGlow())
+			if (it->getGlow())
 			{
-				addLight(_save->getTile(i)->getPosition(), (*it)->getRules()->getPower(), layer);
+				auto owner = it->getPreviousOwner();
+				auto rule = it->getRules();
+				currLight = std::max(currLight, owner ? rule->getPowerBonus(owner) : rule->getPower());
 			}
 		}
 
+		addLight(tile->getPosition(), currLight, layer);
 	}
 
 }
@@ -179,18 +185,28 @@ void TileEngine::calculateUnitLighting()
 		_save->getTile(i)->resetLight(layer);
 	}
 
-	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+	for (BattleUnit *unit : *_save->getUnits())
 	{
+		auto currLight = 0;
 		// add lighting of soldiers
-		if (_personalLighting && (*i)->getFaction() == FACTION_PLAYER && !(*i)->isOut())
+		if (_personalLighting && unit->getFaction() == FACTION_PLAYER && !unit->isOut())
 		{
-			addLight((*i)->getPosition(), personalLightPower, layer);
+			currLight = std::max(currLight, personalLightPower);
+		}
+		BattleItem *handWeapons[] = { unit->getLeftHandWeapon(), unit->getRightHandWeapon() };
+		for (BattleItem *w : handWeapons)
+		{
+			if (w && w->getGlow())
+			{
+				currLight = std::max(currLight, w->getRules()->getPowerBonus(unit));
+			}
 		}
 		// add lighting of units on fire
-		if ((*i)->getFire())
+		if (unit->getFire())
 		{
-			addLight((*i)->getPosition(), fireLightPower, layer);
+			currLight = std::max(currLight, fireLightPower);
 		}
+		addLight(unit->getPosition(), currLight, layer);
 	}
 }
 
@@ -209,7 +225,8 @@ void TileEngine::addLight(const Position &center, int power, int layer)
 		{
 			for (int z = 0; z < _save->getMapSizeZ(); z++)
 			{
-				int distance = (int)Round(sqrt(float(x*x + y*y)));
+				int diff = z - layer;
+				int distance = (int)Round(sqrt(float(x*x + y*y + diff*diff)));
 
 				if (_save->getTile(Position(center.x + x,center.y + y, z)))
 					_save->getTile(Position(center.x + x,center.y + y, z))->addLight(power - distance, layer);

@@ -766,6 +766,10 @@ void BattlescapeGame::handleNonTargetAction()
 			{
 				_parentState->warning("STR_GRENADE_IS_ACTIVATED");
 				_currentAction.weapon->setFuseTimer(_currentAction.value);
+				if (_currentAction.weapon->getGlow())
+				{
+					_save->getTileEngine()->calculateUnitLighting();
+				}
 			}
 			else
 			{
@@ -1645,6 +1649,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 
 	if (item->getGlow())
 	{
+		getTileEngine()->calculateUnitLighting();
 		getTileEngine()->calculateTerrainLighting();
 		getTileEngine()->calculateFOV(position);
 	}
@@ -1771,6 +1776,11 @@ void BattlescapeGame::findItem(BattleAction *action)
 					{
 						// try to load our weapon
 						action->actor->checkAmmo();
+					}
+					if (targetItem->getGlow())
+					{
+						_save->getTileEngine()->calculateTerrainLighting();
+						_save->getTileEngine()->calculateUnitLighting();
 					}
 				}
 			}

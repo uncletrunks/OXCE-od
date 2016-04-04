@@ -307,6 +307,10 @@ bool ProjectileFlyBState::createNewProjectile()
 				_projectileItem->setFuseTimer(_projectileItem->getRules()->getFuseTimerDefault());
 			}
 			_projectileItem->moveToOwner(0);
+			if (_projectileItem->getGlow())
+			{
+				_parent->getTileEngine()->calculateUnitLighting();
+			}
 			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 		}
 		else
