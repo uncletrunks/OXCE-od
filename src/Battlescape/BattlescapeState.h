@@ -59,9 +59,9 @@ private:
 	BattlescapeButton *_btnReserveNone, *_btnReserveSnap, *_btnReserveAimed, *_btnReserveAuto, *_btnReserveKneel, *_btnZeroTUs;
 	InteractiveSurface *_btnLeftHandItem, *_btnRightHandItem;
 	static const int VISIBLE_MAX = 10;
-	InteractiveSurface *_btnVisibleUnit[VISIBLE_MAX];
-	NumberText *_numVisibleUnit[VISIBLE_MAX];
-	BattleUnit *_visibleUnit[VISIBLE_MAX];
+	InteractiveSurface *_btnVisibleUnit[VISIBLE_MAX], *_btnWoundedUnit[VISIBLE_MAX];
+	NumberText *_numVisibleUnit[VISIBLE_MAX], *_numWoundedUnit[VISIBLE_MAX];
+	BattleUnit *_visibleUnit[VISIBLE_MAX], *_woundedUnit[VISIBLE_MAX];
 	int _numberOfDirectlyVisibleUnits;
 	WarningMessage *_warning;
 	Text *_txtName, *_txtKneelStatus;
@@ -157,6 +157,8 @@ public:
 	void btnRightHandItemClick(Action *action);
 	/// Handler for clicking a visible unit button.
 	void btnVisibleUnitClick(Action *action);
+	/// Handler for clicking a wounded unit button.
+	void btnWoundedUnitClick(Action *action);
 	/// Handler for clicking the launch rocket button.
 	void btnLaunchClick(Action *action);
 	/// Handler for clicking the use psi button.
