@@ -652,26 +652,6 @@ void ClearAlienBase::operator()(AlienMission *am) const
 	}
 }
 
-static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile)
-{
-	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
-
-	// clear unit's inventory (i.e. move everything to the ground)
-	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
-	{
-		if ((*i)->getRules()->isFixed())
-		{
-				++i;
-		}
-		else
-		{
-			(*i)->setOwner(NULL);
-			groundTile->addItem(*i, groundRuleInv);
-			i = unitInv->erase(i);
-		}
-	}
-}
-
 /**
  * Prepares debriefing: gathers Aliens, Corpses, Artefacts, UFO Components.
  * Adds the items to the craft.
@@ -1066,7 +1046,6 @@ void DebriefingState::prepareDebriefing()
 					}
 					else
 					{ // non soldier player = tank
-						_clearInventory(_game, (*j)->getInventory(), (*j)->getTile());
 						base->getStorageItems()->addItem((*j)->getType());
 						RuleItem *tankRule = _game->getMod()->getItem((*j)->getType());
 						if ((*j)->getItem("STR_RIGHT_HAND"))
