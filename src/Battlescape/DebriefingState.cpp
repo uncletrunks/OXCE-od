@@ -1014,6 +1014,17 @@ void DebriefingState::prepareDebriefing()
 				else
 				{ // non soldier player = tank
 					addStat("STR_TANKS_DESTROYED", 1, -value);
+
+					if (Options::addVehiclesToMemorial)
+					{
+						SoldierDeath *death = new SoldierDeath();
+						death->setTime(*save->getTime());
+						Soldier *dummySoldier = _game->getMod()->genSoldier(save);
+						dummySoldier->setName(tr((*j)->getType()));
+						dummySoldier->setBothStats((*j)->getBaseStats());
+						dummySoldier->die(death);
+						save->getDeadSoldiers()->push_back(dummySoldier);
+					}
 				}
 			}
 			else if (oldFaction == FACTION_NEUTRAL)
@@ -1112,6 +1123,19 @@ void DebriefingState::prepareDebriefing()
 								base->getSoldiers()->erase(i);
 								break;
 							}
+						}
+					}
+					else
+					{
+						if (Options::addVehiclesToMemorial)
+						{
+							SoldierDeath *death = new SoldierDeath();
+							death->setTime(*save->getTime());
+							Soldier *dummySoldier = _game->getMod()->genSoldier(save);
+							dummySoldier->setName(tr((*j)->getType()));
+							dummySoldier->setBothStats((*j)->getBaseStats());
+							dummySoldier->die(death);
+							save->getDeadSoldiers()->push_back(dummySoldier);
 						}
 					}
 				}

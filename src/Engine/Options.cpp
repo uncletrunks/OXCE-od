@@ -201,6 +201,7 @@ void create()
 	_info.push_back(OptionInfo("twoHandedIndicator", &twoHandedIndicator, true, "STR_TWO_HANDED_INDICATOR", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("minimapBorderIndicator", &minimapBorderIndicator, true, "STR_MINIMAP_BORDER_INDICATOR", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("everyoneFightsNobodyQuits", &everyoneFightsNobodyQuits, false, "STR_EVERYONE_FIGHTS_NOBODY_QUITS", "STR_BATTLESCAPE"));
+	_info.push_back(OptionInfo("addVehiclesToMemorial", &addVehiclesToMemorial, false, "STR_ADD_VEHICLES_TO_MEMORIAL", "STR_BATTLESCAPE"));
 
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));

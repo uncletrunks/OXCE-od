@@ -481,6 +481,23 @@ UnitStats *Soldier::getCurrentStats()
 	return &_currentStats;
 }
 
+void Soldier::setBothStats(UnitStats *stats)
+{
+	_currentStats.tu = stats->tu;
+	_currentStats.stamina = stats->stamina;
+	_currentStats.health = stats->health;
+	_currentStats.bravery = stats->bravery;
+	_currentStats.reactions = stats->reactions;
+	_currentStats.firing = stats->firing;
+	_currentStats.throwing = stats->throwing;
+	_currentStats.melee = stats->melee;
+	_currentStats.strength = stats->strength;
+	_currentStats.psiStrength = stats->psiStrength;
+	_currentStats.psiSkill = stats->psiSkill;
+
+	_initialStats = _currentStats;
+}
+
 /**
  * Returns the unit's promotion status and resets it.
  * @return True if recently promoted, False otherwise.

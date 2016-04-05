@@ -126,6 +126,8 @@ public:
 	UnitStats *getInitStats();
 	/// Get pointer to current stats.
 	UnitStats *getCurrentStats();
+	/// Set initial and current stats.
+	void setBothStats(UnitStats *stats);
 	/// Get whether the unit was recently promoted.
 	bool isPromoted();
 	/// Gets the soldier armor.
