@@ -1244,11 +1244,23 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 		return false;
 	}
 
-	// hit log
-	_save->hitLog << "hit! ";
-
 	const int wounds = target->getFatalWounds();
 	const int adjustedDamage = target->damage(relative, damage, type);
+
+	// hit log
+	const int damagePercent = (adjustedDamage * 100) / target->getBaseStats()->health;
+	if (damagePercent <= 0)
+	{
+		_save->hitLog << "0 ";
+	}
+	else if (damagePercent <= 20)
+	{
+		_save->hitLog << "hit ";
+	}
+	else
+	{
+		_save->hitLog << "hit! ";
+	}
 
 	if (unit && target->getFaction() != FACTION_PLAYER)
 	{

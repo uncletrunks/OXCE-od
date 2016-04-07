@@ -269,11 +269,7 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 
 	if (btnID != -1)
 	{
-		// start new hit log
-		_game->getSavedGame()->getSavedBattle()->hitLog.str(L"");
-		_game->getSavedGame()->getSavedBattle()->hitLog.clear();
-		// log weapon
-		_game->getSavedGame()->getSavedBattle()->hitLog << "Weapon: " << tr(weapon->getType()) << "\n\n";
+		bool newHitLog = false;
 
 		_action->type = _actionMenu[btnID]->getAction();
 		_action->updateTU();
@@ -434,6 +430,7 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			else
 			{
 				_action->targeting = true;
+				newHitLog = true;
 			}
 			_game->popState();
 		}
@@ -451,6 +448,10 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 				0, &_action->target))
 			{
 				_action->result = "STR_THERE_IS_NO_ONE_THERE";
+			}
+			else
+			{
+				newHitLog = true;
 			}
 			_game->popState();
 		}
@@ -476,7 +477,17 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		else
 		{
 			_action->targeting = true;
+			newHitLog = true;
 			_game->popState();
+		}
+
+		if (newHitLog)
+		{
+			// start new hit log
+			_game->getSavedGame()->getSavedBattle()->hitLog.str(L"");
+			_game->getSavedGame()->getSavedBattle()->hitLog.clear();
+			// log weapon
+			_game->getSavedGame()->getSavedBattle()->hitLog << "Weapon: " << tr(weapon->getType()) << "\n\n";
 		}
 	}
 }
