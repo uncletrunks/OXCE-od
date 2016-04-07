@@ -1602,16 +1602,19 @@ void BattlescapeState::updateSoldierInfo()
 
 	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
 
-	// go through all wounded units under player's control (incl. unconscious)
-	int j2 = 0;
-	for (std::vector<BattleUnit*>::iterator i2 = _battleGame->getSave()->getUnits()->begin(); i2 != _battleGame->getSave()->getUnits()->end() && j2 < VISIBLE_MAX; ++i2)
+	if (Options::bleedingIndicator)
 	{
-		if ((*i2)->getFaction() == FACTION_PLAYER && (*i2)->getStatus() != STATUS_DEAD && (*i2)->getFatalWounds() > 0)
+		// go through all wounded units under player's control (incl. unconscious)
+		int j2 = 0;
+		for (std::vector<BattleUnit*>::iterator i2 = _battleGame->getSave()->getUnits()->begin(); i2 != _battleGame->getSave()->getUnits()->end() && j2 < VISIBLE_MAX; ++i2)
 		{
-			_btnWoundedUnit[j2]->setVisible(true);
-			_numWoundedUnit[j2]->setVisible(true);
-			_woundedUnit[j2] = (*i2);
-			++j2;
+			if ((*i2)->getFaction() == FACTION_PLAYER && (*i2)->getStatus() != STATUS_DEAD && (*i2)->getFatalWounds() > 0)
+			{
+				_btnWoundedUnit[j2]->setVisible(true);
+				_numWoundedUnit[j2]->setVisible(true);
+				_woundedUnit[j2] = (*i2);
+				++j2;
+			}
 		}
 	}
 

@@ -40,7 +40,8 @@ OPT SDLKey keyBattleLeft, keyBattleRight, keyBattleUp, keyBattleDown, keyBattleL
 	keyBattleCenterEnemy9, keyBattleCenterEnemy10, keyBattleVoxelView, keyBattleZeroTUs, keyInvCreateTemplate, keyInvApplyTemplate, keyInvClear;
 
 // Extra options (Meridian's build)
-OPT bool executeUnconsciousEnemies, twoHandedIndicator, minimapBorderIndicator, everyoneFightsNobodyQuits, addVehiclesToMemorial;
+OPT bool executeUnconsciousEnemies, twoHandedIndicator, minimapBorderIndicator, everyoneFightsNobodyQuits;
+OPT bool addVehiclesToMemorial, bleedingIndicator;
 
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter;
