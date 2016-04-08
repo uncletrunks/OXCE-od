@@ -141,6 +141,7 @@ private:
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _tooMuchSmokeThreshold, _customTrainingFactor;
+	int _chanceToStopRetaliation;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
@@ -358,6 +359,8 @@ public:
 	int getTooMuchSmokeThreshold() const  {return _tooMuchSmokeThreshold;}
 	/// Gets the custom physical training factor in percent (default = 100).
 	int getCustomTrainingFactor() const { return _customTrainingFactor; }
+	/// Gets the chance to stop retaliation after unsuccessful xcom base attack (default = 0).
+	int getChanceToStopRetaliation() const { return _chanceToStopRetaliation; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.

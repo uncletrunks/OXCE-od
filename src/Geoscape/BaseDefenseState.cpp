@@ -23,7 +23,10 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
+#include "../Savegame/Region.h"
+#include "../Mod/RuleRegion.h"
 #include "../Savegame/BaseFacility.h"
 #include "../Mod/RuleBaseFacility.h"
 #include "../Savegame/Ufo.h"
@@ -227,6 +230,48 @@ void BaseDefenseState::btnOkClick(Action *)
 	else
 	{
 		_base->cleanupDefenses(true);
+
+		// aliens are not stupid and should stop trying eventually
+		if (RNG::percent(_game->getMod()->getChanceToStopRetaliation()))
+		{
+			// unmark base...
+			_base->setRetaliationTarget(false);
+
+			// ... and also remove the retaliation mission completely
+			std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin();
+			for (; k != _game->getSavedGame()->getRegions()->end(); ++k)
+			{
+				if ((*k)->getRules()->insideRegion((_base)->getLongitude(), (_base)->getLatitude()))
+				{
+					break;
+				}
+			}
+
+			AlienMission* am = _game->getSavedGame()->findAlienMission((*k)->getRules()->getType(), OBJECTIVE_RETALIATION);
+			for (std::vector<Ufo*>::iterator i = _game->getSavedGame()->getUfos()->begin(); i != _game->getSavedGame()->getUfos()->end();)
+			{
+				if ((*i)->getMission() == am)
+				{
+					delete *i;
+					i = _game->getSavedGame()->getUfos()->erase(i);
+				}
+				else
+				{
+					++i;
+				}
+			}
+
+			for (std::vector<AlienMission*>::iterator i = _game->getSavedGame()->getAlienMissions().begin();
+			i != _game->getSavedGame()->getAlienMissions().end(); ++i)
+			{
+				if ((AlienMission*)(*i) == am)
+				{
+					delete (*i);
+					_game->getSavedGame()->getAlienMissions().erase(i);
+					break;
+				}
+			}
+		}
 	}
 }
 }
