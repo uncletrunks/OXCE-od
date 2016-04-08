@@ -155,7 +155,7 @@ void UnitSprite::blitBody(Part& body)
 
 	_dest->lock();
 
-	_scriptWorkRef.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _half);
+	_scriptWorkRef.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _shade, _half);
 
 	_dest->unlock();
 }
