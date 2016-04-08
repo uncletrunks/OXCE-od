@@ -446,7 +446,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_recolorScript.load(_type, node["recolorScript"], parsers.recolorItemSprite);
 	_spriteScript.load(_type, node["spriteScript"], parsers.selectItemSprite);
 
-	_reacActionScript.load(_type, node["reactionSourceScript"], parsers.reactionUnit, "if eq action action_hit; set reaction_chance 0; end;");
+	_reacActionScript.load(_type, node["reactionSourceScript"], parsers.reactionUnit);
 
 	if (!_listOrder)
 	{

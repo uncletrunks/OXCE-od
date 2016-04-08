@@ -1043,7 +1043,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 
 		if (action.targeting)
 		{
-			int reactionChance = 100;
+			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 			ScriptWorker worker;
