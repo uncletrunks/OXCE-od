@@ -1542,8 +1542,13 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 			{
 				if ((*it)->getRules()->getBattleType() == BT_CORPSE && (*it)->getUnit()->getStatus() == STATUS_DEAD)
 				{
-					addStat("STR_ALIEN_CORPSES_RECOVERED", 1, (*it)->getUnit()->getValue());
-					base->getStorageItems()->addItem((*it)->getUnit()->getArmor()->getCorpseGeoscape(), 1);
+					std::string corpseItem = (*it)->getUnit()->getArmor()->getCorpseGeoscape();
+					RuleItem *rule = _game->getMod()->getItem(corpseItem);
+					if (rule->isRecoverable())
+					{
+						addStat("STR_ALIEN_CORPSES_RECOVERED", 1, (*it)->getUnit()->getValue());
+						base->getStorageItems()->addItem(corpseItem, 1);
+					}
 				}
 				else if ((*it)->getRules()->getBattleType() == BT_CORPSE)
 				{
@@ -1639,10 +1644,14 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	if (base->getAvailableContainment() == 0)
 	{
 		_noContainment = true;
-		addStat("STR_ALIEN_CORPSES_RECOVERED", 1, from->getValue());
 
 		std::string corpseItem = from->getArmor()->getCorpseGeoscape();
-		base->getStorageItems()->addItem(corpseItem, 1);
+		RuleItem *rule = _game->getMod()->getItem(corpseItem);
+		if (rule->isRecoverable())
+		{
+			addStat("STR_ALIEN_CORPSES_RECOVERED", 1, from->getValue());
+			base->getStorageItems()->addItem(corpseItem, 1);
+		}
 	}
 	else
 	{
