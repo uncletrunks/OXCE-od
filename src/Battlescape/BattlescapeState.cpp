@@ -84,10 +84,9 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _animFrame(0), _numberOfDirectlyVisibleUnits(0)
+BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _animFrame(0), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
-	std::fill_n(_woundedUnit, 10, (BattleUnit*)(0));
 
 	const int screenWidth = Options::baseXResolution;
 	const int screenHeight = Options::baseYResolution;
@@ -145,17 +144,12 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_numTwoHandedIndicatorRight = new NumberText(10, 5, x + 308, y + 46);
 	const int visibleUnitX = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->x;
 	const int visibleUnitY = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->y;
-	const int woundedUnitX = 320 - visibleUnitX - 15;
-	const int woundedUnitY = visibleUnitY - 7;
 	for (int i = 0; i < VISIBLE_MAX; ++i)
 	{
 		_btnVisibleUnit[i] = new InteractiveSurface(15, 12, x + visibleUnitX, y + visibleUnitY - (i * 13));
 		_numVisibleUnit[i] = new NumberText(15, 12, _btnVisibleUnit[i]->getX() + 6 , _btnVisibleUnit[i]->getY() + 4);
-		_btnWoundedUnit[i] = new InteractiveSurface(15, 12, x + woundedUnitX, y + woundedUnitY - (i * 13));
-		_numWoundedUnit[i] = new NumberText(15, 12, _btnWoundedUnit[i]->getX() + 6, _btnWoundedUnit[i]->getY() + 4);
 	}
 	_numVisibleUnit[9]->setX(_numVisibleUnit[9]->getX() - 2); // center number 10
-	_numWoundedUnit[9]->setX(_numWoundedUnit[9]->getX() - 2); // center number 10
 	_warning = new WarningMessage(224, 24, x + 48, y + 32);
 	_btnLaunch = new BattlescapeButton(32, 24, screenWidth - 32, 0); // we need screenWidth, because that is independent of the black bars on the screen
 	_btnLaunch->setVisible(false);
@@ -280,8 +274,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	{
 		add(_btnVisibleUnit[i]);
 		add(_numVisibleUnit[i]);
-		add(_btnWoundedUnit[i]);
-		add(_numWoundedUnit[i]);
 	}
 	add(_warning, "warning", "battlescape", _icons);
 	add(_txtDebug);
@@ -488,18 +480,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 		_btnVisibleUnit[i]->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 		_numVisibleUnit[i]->setColor(color);
 		_numVisibleUnit[i]->setValue(i+1);
-	}
-	for (int i = 0; i < VISIBLE_MAX; ++i)
-	{
-		std::ostringstream tooltip;
-		_btnWoundedUnit[i]->onMouseClick((ActionHandler)&BattlescapeState::btnWoundedUnitClick);
-		//_btnWoundedUnit[i]->onKeyboardPress((ActionHandler)&BattlescapeState::btnWoundedUnitClick, buttons[i]);
-		tooltip << "STR_CENTER_ON_WOUNDED_UNIT_" << (i + 1);
-		_btnWoundedUnit[i]->setTooltip(tooltip.str());
-		_btnWoundedUnit[i]->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
-		_btnWoundedUnit[i]->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
-		_numWoundedUnit[i]->setColor(color);
-		_numWoundedUnit[i]->setValue(i + 1);
 	}
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
@@ -1238,31 +1218,6 @@ void BattlescapeState::btnVisibleUnitClick(Action *action)
 }
 
 /**
-* Centers on the unit corresponding to this button.
-* @param action Pointer to an action.
-*/
-void BattlescapeState::btnWoundedUnitClick(Action *action)
-{
-	int btnID = -1;
-
-	// got to find out which button was pressed
-	for (int i = 0; i < VISIBLE_MAX && btnID == -1; ++i)
-	{
-		if (action->getSender() == _btnWoundedUnit[i])
-		{
-			btnID = i;
-		}
-	}
-
-	if (btnID != -1)
-	{
-		_map->getCamera()->centerOnPosition(_woundedUnit[btnID]->getPosition());
-	}
-
-	action->getDetails()->type = SDL_NOEVENT; // consume the event
-}
-
-/**
  * Launches the blaster bomb.
  * @param action Pointer to an action.
  */
@@ -1379,9 +1334,6 @@ void BattlescapeState::updateSoldierInfo()
 		_btnVisibleUnit[i]->setVisible(false);
 		_numVisibleUnit[i]->setVisible(false);
 		_visibleUnit[i] = 0;
-		_btnWoundedUnit[i]->setVisible(false);
-		_numWoundedUnit[i]->setVisible(false);
-		_woundedUnit[i] = 0;
 	}
 
 	bool playableUnit = playableUnitSelected();
@@ -1602,22 +1554,6 @@ void BattlescapeState::updateSoldierInfo()
 
 	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
 
-	if (Options::bleedingIndicator)
-	{
-		// go through all wounded units under player's control (incl. unconscious)
-		int j2 = 0;
-		for (std::vector<BattleUnit*>::iterator i2 = _battleGame->getSave()->getUnits()->begin(); i2 != _battleGame->getSave()->getUnits()->end() && j2 < VISIBLE_MAX; ++i2)
-		{
-			if ((*i2)->getFaction() == FACTION_PLAYER && (*i2)->getStatus() != STATUS_DEAD && (*i2)->getFatalWounds() > 0)
-			{
-				_btnWoundedUnit[j2]->setVisible(true);
-				_numWoundedUnit[j2]->setVisible(true);
-				_woundedUnit[j2] = (*i2);
-				++j2;
-			}
-		}
-	}
-
 	// go through all units visible to the selected soldier (or other unit, e.g. mind-controlled enemy)
 	int j = 0;
 	for (std::vector<BattleUnit*>::iterator i = battleUnit->getVisibleUnits()->begin(); i != battleUnit->getVisibleUnits()->end() && j < VISIBLE_MAX; ++i)
@@ -1656,6 +1592,24 @@ void BattlescapeState::updateSoldierInfo()
 		}
 	}
 
+	// remember where green indicators turn blue
+	_numberOfEnemiesTotal = j;
+
+	if (Options::bleedingIndicator)
+	{
+		// go through all wounded units under player's control (incl. unconscious)
+		for (std::vector<BattleUnit*>::iterator i = _battleGame->getSave()->getUnits()->begin(); i != _battleGame->getSave()->getUnits()->end() && j < VISIBLE_MAX; ++i)
+		{
+			if ((*i)->getFaction() == FACTION_PLAYER && (*i)->getStatus() != STATUS_DEAD && (*i)->getFatalWounds() > 0)
+			{
+				_btnVisibleUnit[j]->setVisible(true);
+				_numVisibleUnit[j]->setVisible(true);
+				_visibleUnit[j] = (*i);
+				++j;
+			}
+		}
+	}
+
 	showPsiButton(battleUnit->getSpecialWeapon(BT_PSIAMP) != 0);
 }
 
@@ -1671,12 +1625,7 @@ void BattlescapeState::blinkVisibleUnitButtons()
 		if (_btnVisibleUnit[i]->getVisible() == true)
 		{
 			_btnVisibleUnit[i]->drawRect(0, 0, 15, 12, 15);
-			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, i < _numberOfDirectlyVisibleUnits ? color : 54);
-		}
-		if (_btnWoundedUnit[i]->getVisible() == true)
-		{
-			_btnWoundedUnit[i]->drawRect(0, 0, 15, 12, 15);
-			_btnWoundedUnit[i]->drawRect(1, 1, 13, 10, 134); // light blue?
+			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, i < _numberOfDirectlyVisibleUnits ? color : i < _numberOfEnemiesTotal ? 54 : 134);
 		}
 	}
 
