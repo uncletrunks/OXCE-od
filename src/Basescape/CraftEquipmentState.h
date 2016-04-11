@@ -21,6 +21,7 @@
 
 #include "../Engine/State.h"
 #include <vector>
+#include <map>
 #include <string>
 
 namespace OpenXcom

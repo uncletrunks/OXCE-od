@@ -548,6 +548,8 @@ set ( mod_src
   Mod/Texture.cpp
   Mod/RuleStartingCondition.h
   Mod/RuleStartingCondition.cpp
+  Mod/RuleItemCategory.h
+  Mod/RuleItemCategory.cpp
 )
 
 set ( savegame_src

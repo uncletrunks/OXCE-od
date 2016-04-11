@@ -25,6 +25,7 @@
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
 #include "Mod.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -186,6 +187,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_name = node["name"].as<std::string>(_name);
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
 	_requiresBuy = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuy);
+	_categories = node["categories"].as< std::vector<std::string> >(_categories);
 	_size = node["size"].as<double>(_size);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costSell = node["costSell"].as<int>(_costSell);
@@ -494,6 +496,26 @@ const std::vector<std::string> &RuleItem::getRequirements() const
 const std::vector<std::string> &RuleItem::getBuyRequirements() const
 {
 	return _requiresBuy;
+}
+
+/**
+* Gets the list of categories
+* this item belongs to.
+* @return The list of category IDs.
+*/
+const std::vector<std::string> &RuleItem::getCategories() const
+{
+	return _categories;
+}
+
+/**
+* Checks if the item belongs to a category.
+* @param category Category name.
+* @return True if item belongs to the category, False otherwise.
+*/
+bool RuleItem::belongsToCategory(const std::string &category) const
+{
+	return std::find(_categories.begin(), _categories.end(), category) != _categories.end();
 }
 
 /**

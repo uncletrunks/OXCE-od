@@ -949,6 +949,9 @@
     <ClCompile Include="Mod\RuleStartingCondition.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="Mod\RuleItemCategory.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1927,6 +1930,9 @@
       <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Mod\RuleStartingCondition.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleItemCategory.h">
       <Filter>Mod</Filter>
     </ClInclude>
   </ItemGroup>

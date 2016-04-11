@@ -50,6 +50,7 @@ class RuleRegion;
 class RuleBaseFacility;
 class RuleCraft;
 class RuleCraftWeapon;
+class RuleItemCategory;
 class RuleItem;
 class RuleDamageType;
 class RuleUfo;
@@ -108,6 +109,7 @@ private:
 	std::map<std::string, RuleBaseFacility*> _facilities;
 	std::map<std::string, RuleCraft*> _crafts;
 	std::map<std::string, RuleCraftWeapon*> _craftWeapons;
+	std::map<std::string, RuleItemCategory*> _itemCategories;
 	std::map<std::string, RuleItem*> _items;
 	std::map<std::string, RuleUfo*> _ufos;
 	std::map<std::string, RuleTerrain*> _terrains;
@@ -149,12 +151,12 @@ private:
 	GameTime _startingTime;
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
 
-	std::vector<std::string> _countriesIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemsIndex, _invsIndex, _ufosIndex;
+	std::vector<std::string> _countriesIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
 	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _extraSpritesIndex, _extraSoundsIndex, _extraStringsIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
-	int _facilityListOrder, _craftListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _ufopaediaListOrder, _invListOrder;
+	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _ufopaediaListOrder, _invListOrder;
 	size_t _modOffset;
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
 	size_t _surfaceOffsetBigobs = 0;
@@ -289,6 +291,10 @@ public:
 	RuleCraftWeapon *getCraftWeapon(const std::string &id) const;
 	/// Gets the available craft weapons.
 	const std::vector<std::string> &getCraftWeaponsList() const;
+	/// Gets the ruleset for an item category type.
+	RuleItemCategory *getItemCategory(const std::string &id) const;
+	/// Gets the available item categories.
+	const std::vector<std::string> &getItemCategoriesList() const;
 	/// Gets the ruleset for an item type.
 	RuleItem *getItem(const std::string &id) const;
 	/// Gets the available items.
