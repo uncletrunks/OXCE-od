@@ -53,6 +53,7 @@
 #include "RuleBaseFacility.h"
 #include "RuleCraft.h"
 #include "RuleCraftWeapon.h"
+#include "RuleItemCategory.h"
 #include "RuleItem.h"
 #include "RuleUfo.h"
 #include "RuleTerrain.h"
@@ -185,7 +186,7 @@ Mod::Mod() :
 	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_maxLookVariant(1), _tooMuchSmokeThreshold(10), _customTrainingFactor(100), _chanceToStopRetaliation(0),
-	_startingTime(6, 1, 1, 1999, 12, 0, 0), _facilityListOrder(0), _craftListOrder(0), _itemListOrder(0),
+	_startingTime(6, 1, 1, 1999, 12, 0, 0), _facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
 {
 	_muteMusic = new Music();
@@ -346,6 +347,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, RuleCraftWeapon*>::iterator i = _craftWeapons.begin(); i != _craftWeapons.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleItemCategory*>::iterator i = _itemCategories.begin(); i != _itemCategories.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -861,6 +866,15 @@ void Mod::loadFile(const std::string &filename)
 		if (rule != 0)
 		{
 			rule->load(*i, this);
+		}
+	}
+	for (YAML::const_iterator i = doc["itemCategories"].begin(); i != doc["itemCategories"].end(); ++i)
+	{
+		RuleItemCategory *rule = loadRule(*i, &_itemCategories, &_itemCategoriesIndex);
+		if (rule != 0)
+		{
+			_itemCategoryListOrder += 100;
+			rule->load(*i, this, _itemCategoryListOrder);
 		}
 	}
 	for (YAML::const_iterator i = doc["items"].begin(); i != doc["items"].end(); ++i)
@@ -1527,6 +1541,27 @@ const std::vector<std::string> &Mod::getCraftWeaponsList() const
 }
 
 /**
+* Returns the rules for the specified item category.
+* @param id Item category type.
+* @return Rules for the item category, or 0 when the item category is not found.
+*/
+RuleItemCategory *Mod::getItemCategory(const std::string &id) const
+{
+	std::map<std::string, RuleItemCategory*>::const_iterator i = _itemCategories.find(id);
+	if (_itemCategories.end() != i) return i->second; else return 0;
+}
+
+/**
+* Returns the list of all item categories
+* provided by the mod.
+* @return List of item categories.
+*/
+const std::vector<std::string> &Mod::getItemCategoriesList() const
+{
+	return _itemCategoriesIndex;
+}
+
+/**
  * Returns the rules for the specified item.
  * @param id Item type.
  * @return Rules for the item, or 0 when the item is not found.
@@ -2124,6 +2159,7 @@ std::map<std::string, int> compareRule<ArticleDefinition>::_sections;
  */
 void Mod::sortLists()
 {
+	std::sort(_itemCategoriesIndex.begin(), _itemCategoriesIndex.end(), compareRule<RuleItemCategory>(this, (compareRule<RuleItemCategory>::RuleLookup)&Mod::getItemCategory));
 	std::sort(_itemsIndex.begin(), _itemsIndex.end(), compareRule<RuleItem>(this, (compareRule<RuleItem>::RuleLookup)&Mod::getItem));
 	std::sort(_craftsIndex.begin(), _craftsIndex.end(), compareRule<RuleCraft>(this, (compareRule<RuleCraft>::RuleLookup)&Mod::getCraft));
 	std::sort(_facilitiesIndex.begin(), _facilitiesIndex.end(), compareRule<RuleBaseFacility>(this, (compareRule<RuleBaseFacility>::RuleLookup)&Mod::getBaseFacility));

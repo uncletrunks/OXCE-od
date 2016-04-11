@@ -128,18 +128,46 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_txtCrew->setText(ss3.str());
 
 	// populate sort options
-	std::vector<std::wstring> sortOptions;
-	sortOptions.push_back(tr("ALL")); // 0
-	sortOptions.push_back(tr("AUXILIARY")); // 1
-	sortOptions.push_back(tr("MELEE")); // 2
-	sortOptions.push_back(tr("SHORT RANGE")); // 3
-	sortOptions.push_back(tr("LONG RANGE (ARC)")); // 4
-	sortOptions.push_back(tr("LONG RANGE (LINE)")); // 5
-	sortOptions.push_back(tr("GRENADES")); // 6
-	sortOptions.push_back(tr("EQUIPMENT")); // 7
-	sortOptions.push_back(tr("OTHER")); // 8
+	_categoryStrings.push_back("STR_ALL");
+	_categoryStrings.push_back("STR_EQUIPPED");
+	bool hasUnassigned = false;
+	const std::vector<std::string> &items = _game->getMod()->getItemsList();
+	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
+	{
+		RuleItem *rule = _game->getMod()->getItem(*i);
+		int cQty = rule->isFixed() ? c->getVehicleCount(*i) : c->getItems()->getItem(*i);
 
-	_cbxFilterBy->setOptions(sortOptions);
+		if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE &&
+			_game->getSavedGame()->isResearched(rule->getRequirements()) &&
+			(_base->getStorageItems()->getItem(*i) > 0 || cQty > 0))
+		{
+			if (rule->getCategories().empty())
+			{
+				hasUnassigned = true;
+			}
+			else
+			{
+				for (std::vector<std::string>::const_iterator j = rule->getCategories().begin(); j != rule->getCategories().end(); ++j)
+				{
+					_usedCategoryStrings[(*j)] = true;
+				}
+			}
+		}
+	}
+	const std::vector<std::string> &itemCategories = _game->getMod()->getItemCategoriesList();
+	for (std::vector<std::string>::const_iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
+	{
+		if (_usedCategoryStrings[(*i)])
+		{
+			_categoryStrings.push_back((*i));
+		}
+	}
+	if (hasUnassigned)
+	{
+		_categoryStrings.push_back("STR_UNASSIGNED");
+	}
+
+	_cbxFilterBy->setOptions(_categoryStrings);
 	_cbxFilterBy->setSelected(0);
 	_cbxFilterBy->onChange((ActionHandler)&CraftEquipmentState::cbxFilterByChange);
 
@@ -204,6 +232,7 @@ void CraftEquipmentState::initList()
 	{
 		return;
 	}
+	const std::string selectedCategory = _categoryStrings[selIdx];
 
 	Craft *c = _base->getCrafts()->at(_craft);
 
@@ -212,44 +241,10 @@ void CraftEquipmentState::initList()
 	_lstEquipment->clearList();
 
 	int row = 0;
-	bool isArcing = false;
-	bool isShortRange = false;
 	const std::vector<std::string> &items = _game->getMod()->getItemsList();
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
 		RuleItem *rule = _game->getMod()->getItem(*i);
-
-		// filtering
-		if (selIdx > 0)
-		{
-			if (selIdx == 1 && !rule->isFixed()) { continue; }
-			else {
-				// remember arcing flag, if this is a firearm (we will need it to correctly categorize ammo later)
-				if (rule->getBattleType() == BT_FIREARM)
-				{
-					isArcing = rule->getArcingShot();
-					isShortRange = rule->getMaxRange() > 0 && rule->getMaxRange() < 11;
-				}
-
-				if (selIdx > 1 && rule->isFixed()) { continue; }
-				if (selIdx == 2 && rule->getBattleType() != BT_MELEE) { continue; }
-
-				else if (selIdx == 3 && rule->getBattleType() != BT_FIREARM && rule->getBattleType() != BT_AMMO) { continue; }
-				else if (selIdx == 3 && !isShortRange) { continue; }
-
-				else if (selIdx == 4 && rule->getBattleType() != BT_FIREARM && rule->getBattleType() != BT_AMMO) { continue; }
-				else if (selIdx == 4 && isShortRange) { continue; }
-				else if (selIdx == 4 && !isArcing) { continue; }
-
-				else if (selIdx == 5 && rule->getBattleType() != BT_FIREARM && rule->getBattleType() != BT_AMMO) { continue; }
-				else if (selIdx == 5 && isShortRange) { continue; }
-				else if (selIdx == 5 && isArcing) { continue; }
-
-				else if (selIdx == 6 && rule->getBattleType() != BT_GRENADE && rule->getBattleType() != BT_PROXIMITYGRENADE) { continue; }
-				else if (selIdx == 7 && rule->getBattleType() != BT_MEDIKIT && rule->getBattleType() != BT_SCANNER && rule->getBattleType() != BT_MINDPROBE && rule->getBattleType() != BT_PSIAMP && rule->getType() != "STR_ELECTRO_FLARE") { continue; }
-				else if (selIdx == 8 && (rule->getBattleType() < BT_FLARE || rule->getType() == "STR_ELECTRO_FLARE")) { continue; }
-			}
-		}
 
 		int cQty = 0;
 		if (rule->isFixed())
@@ -261,6 +256,30 @@ void CraftEquipmentState::initList()
 			cQty = c->getItems()->getItem(*i);
 			_totalItems += cQty;
 		}
+
+		// filter by category
+		if (selectedCategory != "STR_ALL")
+		{
+			if (selectedCategory == "STR_UNASSIGNED")
+			{
+				if (!rule->getCategories().empty())
+				{
+					continue;
+				}
+			}
+			else if (selectedCategory == "STR_EQUIPPED")
+			{
+				if (!(cQty > 0))
+				{
+					continue;
+				}
+			}
+			else if (!rule->belongsToCategory(selectedCategory))
+			{
+				continue;
+			}
+		}
+
 		if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE &&
 			_game->getSavedGame()->isResearched(rule->getRequirements()) &&
 			(_base->getStorageItems()->getItem(*i) > 0 || cQty > 0))

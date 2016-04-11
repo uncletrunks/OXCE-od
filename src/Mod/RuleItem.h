@@ -100,6 +100,7 @@ private:
 	std::string _type, _name; // two types of objects can have the same name
 	std::vector<std::string> _requires;
 	std::vector<std::string> _requiresBuy;
+	std::vector<std::string> _categories;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
 	int _bigSprite, _bigSpriteAlt;
@@ -168,6 +169,10 @@ public:
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the item's buy requirements.
 	const std::vector<std::string> &getBuyRequirements() const;
+	/// Gets the item's categories.
+	const std::vector<std::string> &getCategories() const;
+	/// Checks if the item belongs to a category.
+	bool belongsToCategory(const std::string &category) const;
 	/// Gets the item's size.
 	double getSize() const;
 	/// Gets the item's purchase cost.
