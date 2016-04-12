@@ -35,7 +35,7 @@ namespace OpenXcom
  * @param state Pointer to the Geoscape state.
  * @param msg Error message.
  */
-CraftErrorState::CraftErrorState(GeoscapeState *state, const std::wstring &msg) : _state(state)
+CraftErrorState::CraftErrorState(GeoscapeState *state, const std::wstring &msg, bool enableHotkeys) : _state(state)
 {
 	_screen = false;
 
@@ -60,15 +60,18 @@ CraftErrorState::CraftErrorState(GeoscapeState *state, const std::wstring &msg) 
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftErrorState::btnOkClick);
-	_btnOk->onKeyboardPress((ActionHandler)&CraftErrorState::btnOkClick, Options::keyCancel);
-	if (!_state)
+	if (enableHotkeys)
 	{
-		_btnOk->onKeyboardPress((ActionHandler)&CraftErrorState::btnOkClick, Options::keyOk);
+		_btnOk->onKeyboardPress((ActionHandler)&CraftErrorState::btnOkClick, Options::keyCancel);
+		if (!_state)
+		{
+			_btnOk->onKeyboardPress((ActionHandler)&CraftErrorState::btnOkClick, Options::keyOk);
+		}
 	}
 
 	_btnOk5Secs->setText(tr("STR_OK_5_SECONDS"));
 	_btnOk5Secs->onMouseClick((ActionHandler)&CraftErrorState::btnOk5SecsClick);
-	if (_state)
+	if (enableHotkeys && _state)
 	{
 		_btnOk5Secs->onKeyboardPress((ActionHandler)&CraftErrorState::btnOk5SecsClick, Options::keyOk);
 	}

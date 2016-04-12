@@ -1750,6 +1750,29 @@ void GeoscapeState::time1Day()
 			popup(new SaveGameState(OPT_GEOSCAPE, SAVE_AUTO_GEOSCAPE, _palette));
 		}
 	}
+
+	// pay attention to your maintenance player!
+	if (_game->getSavedGame()->getTime()->isLastDayOfMonth())
+	{
+		int funds = _game->getSavedGame()->getFunds();
+		int income = _game->getSavedGame()->getCountryFunding();
+		int maintenance = _game->getSavedGame()->getBaseMaintenance();
+		int projection = funds + income - maintenance;
+		if (projection < 0)
+		{
+			projection = std::abs(projection);
+			projection = ((projection / 100000) + 1) * 100000; // round up to 100k
+			std::wstring msg = tr("STR_ECONOMY_WARNING")
+				.arg(Text::formatFunding(funds))
+				.arg(Text::formatFunding(income))
+				.arg(Text::formatFunding(maintenance))
+				.arg(Text::formatFunding(projection));
+			if (msg != L"STR_ECONOMY_WARNING")
+			{
+				popup(new CraftErrorState(this, msg, false));
+			}
+		}
+	}
 }
 
 /**
