@@ -1052,7 +1052,8 @@ void Mod::loadFile(const std::string &filename)
 	{
 		_startingTime.load(doc["startingTime"]);
 	}
-	_maxViewDistance = doc["maxViewDistance"].as<int>(_maxViewDistance);
+	// sorry, 20 is really the most we can do without affecting performance :(
+	//_maxViewDistance = doc["maxViewDistance"].as<int>(_maxViewDistance);
 	_maxDarknessToSeeUnits = doc["maxDarknessToSeeUnits"].as<int>(_maxDarknessToSeeUnits);
 	_costEngineer = doc["costEngineer"].as<int>(_costEngineer);
 	_costScientist = doc["costScientist"].as<int>(_costScientist);
