@@ -89,7 +89,6 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_underArmor = node["underArmor"].as<int>(_underArmor);
 	_drawingRoutine = node["drawingRoutine"].as<int>(_drawingRoutine);
 	_movementType = (MovementType)node["movementType"].as<int>(_movementType);
-	_size = node["size"].as<int>(_size);
 	_weight = node["weight"].as<int>(_weight);
 	_visibilityAtDark = node["visibilityAtDark"].as<int>(_visibilityAtDark);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
@@ -123,12 +122,16 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	{
 		_canHoldWeapon = false;
 	}
-	if (_size != 1)
+	if (const YAML::Node &size = node["size"])
 	{
-		_fearImmune = 1;
-		_bleedImmune = 1;
-		_painImmune = 1;
-		_zombiImmune = 1;
+		_size = size.as<int>(_size);
+		if (_size != 1)
+		{
+			_fearImmune = 1;
+			_bleedImmune = 1;
+			_painImmune = 1;
+			_zombiImmune = 1;
+		}
 	}
 	if (node["fearImmune"])
 	{
