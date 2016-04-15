@@ -26,6 +26,7 @@
 #include "../Mod/RuleResearch.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../Engine/Options.h"
+#include "../Savegame/SavedGame.h"
 
 namespace OpenXcom
 {
@@ -75,9 +76,15 @@ ResearchCompleteState::ResearchCompleteState(const RuleResearch * research, cons
 	_txtResearch->setAlign(ALIGN_CENTER);
 	_txtResearch->setBig();
 	_txtResearch->setWordWrap(true);
-	if (research)
+	if (_research)
 	{
-		_txtResearch->setText(tr(research->getName()));
+		_txtResearch->setText(tr(_research->getName()));
+
+		std::string name = _research->getLookup().empty() ? _research->getName() : _research->getLookup();
+		if (_game->getSavedGame()->isResearched(name))
+		{
+			_research = 0;
+		}
 	}
 }
 
