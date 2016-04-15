@@ -1625,6 +1625,12 @@ void GeoscapeState::time1Day()
 					}
 				}
 			}
+			const RuleResearch * newResearch = research;
+			std::string name = research->getLookup().empty() ? research->getName() : research->getLookup();
+			if (_game->getSavedGame()->isResearched(name))
+			{
+				newResearch = 0;
+			}
 			_game->getSavedGame()->addFinishedResearch(research, _game->getMod());
 			if (!research->getLookup().empty())
 			{
@@ -1638,16 +1644,16 @@ void GeoscapeState::time1Day()
 			{
 				popup(new CutsceneState(bonus->getCutscene()));
 			}
-			popup(new ResearchCompleteState(research, bonus));
+			popup(new ResearchCompleteState(newResearch, bonus));
 			std::vector<RuleResearch *> newPossibleResearch;
 			_game->getSavedGame()->getDependableResearch (newPossibleResearch, (*iter)->getRules(), _game->getMod(), *i);
 			std::vector<RuleManufacture *> newPossibleManufacture;
 			_game->getSavedGame()->getDependableManufacture (newPossibleManufacture, (*iter)->getRules(), _game->getMod(), *i);
 			timerReset();
 			// check for possible researching weapon before clip
-			if (research)
+			if (newResearch)
 			{
-				RuleItem *item = _game->getMod()->getItem(research->getName());
+				RuleItem *item = _game->getMod()->getItem(newResearch->getName());
 				if (item && item->getBattleType() == BT_FIREARM && !item->getCompatibleAmmo()->empty())
 				{
 					RuleManufacture *man = _game->getMod()->getManufacture(item->getType());
