@@ -41,7 +41,7 @@ class ResearchCompleteState : public State
 	const RuleResearch * _research, * _bonus;
 public:
 	/// Creates the EndResearch state.
-	ResearchCompleteState(const RuleResearch * research, const RuleResearch * bonus);
+	ResearchCompleteState(const RuleResearch *newResearch, const RuleResearch *bonus, const RuleResearch *research);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Report button.
