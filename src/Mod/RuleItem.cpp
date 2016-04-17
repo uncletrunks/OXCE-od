@@ -443,10 +443,10 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
 	_scriptValues.load(node["custom"]);
 
-	_recolorScript.load(_type, node["recolorScript"], parsers.recolorItemSprite);
-	_spriteScript.load(_type, node["spriteScript"], parsers.selectItemSprite);
+	_recolorScript.load(_type, node, parsers.recolorItemSprite);
+	_spriteScript.load(_type, node, parsers.selectItemSprite);
 
-	_reacActionScript.load(_type, node["reactionSourceScript"], parsers.reactionUnit);
+	_reacActionScript.load(_type, node, parsers.reactionWeaponAction);
 
 	if (!_listOrder)
 	{

@@ -49,50 +49,66 @@ class Base;
 class MapScript;
 class RuleVideo;
 
+class Mod;
 class BattleUnit;
 class BattleItem;
 
-struct ModScript
+class ModScript
 {
+	friend class Mod;
+
+	Mod* _mod;
+	std::map<std::string, ScriptParserBase*> _names;
+
 	template<typename T>
 	struct Warper : T
 	{
-		Warper() : T{ }
+		Warper(const std::string& name, Mod* mod, std::map<std::string, ScriptParserBase*>& names) : T{ name, mod }
 		{
 			this->logScriptMetadata();
+			names.insert(std::make_pair(this->getName(), this));
 		}
 	};
 
+	ModScript(Mod* mod) : _mod{ mod }
+	{
+
+	}
+public:
+
+
 	struct RecolorUnitParser : ScriptParser<const BattleUnit*, int, int, int, int>
 	{
-		RecolorUnitParser();
+		RecolorUnitParser(const std::string& name,  Mod* mod);
 	};
 	struct SelectUnitParser : ScriptParser<const BattleUnit*, int, int, int>
 	{
-		SelectUnitParser();
+		SelectUnitParser(const std::string& name,  Mod* mod);
 	};
 
 	struct ReactionUnitParser : ScriptParser<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*>
 	{
-		ReactionUnitParser();
+		ReactionUnitParser(const std::string& name,  Mod* mod);
 	};
 
 	struct RecolorItemParser : ScriptParser<const BattleItem*, int, int, int>
 	{
-		RecolorItemParser();
+		RecolorItemParser(const std::string& name,  Mod* mod);
 	};
 	struct SelectItemParser : ScriptParser<const BattleItem*, int, int, int>
 	{
-		SelectItemParser();
+		SelectItemParser(const std::string& name,  Mod* mod);
 	};
 
-	Warper<RecolorUnitParser> recolorUnitSprite;
-	Warper<SelectUnitParser> selectUnitSprite;
+	Warper<RecolorUnitParser> recolorUnitSprite = { "recolorUnitSprite", _mod, _names };
+	Warper<SelectUnitParser> selectUnitSprite = { "selectUnitSprite", _mod, _names };
 
-	Warper<ReactionUnitParser> reactionUnit;
+	Warper<ReactionUnitParser> reactionWeaponAction = { "reactionWeaponAction", _mod, _names };
+	Warper<ReactionUnitParser> reactionUnitAction = { "reactionUnitAction", _mod, _names };
+	Warper<ReactionUnitParser> reactionUnitReaction = { "reactionUnitReaction", _mod, _names };
 
-	Warper<RecolorItemParser> recolorItemSprite;
-	Warper<SelectItemParser> selectItemSprite;
+	Warper<RecolorItemParser> recolorItemSprite = { "recolorItemSprite", _mod, _names };
+	Warper<SelectItemParser> selectItemSprite = { "selectItemSprite", _mod, _names };
 };
 
 }

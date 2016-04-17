@@ -100,6 +100,7 @@ Control space usage of soldiers with 2x2 armors in crafts.[br/]
 3.0:[br/]
 Backported game machanic changes from Meridian OXCE+.[br/]
 Fix stun damage calculation and add random for random option for final stats change by damage.[br/]
+Refactored script handling.[br/]
 Script support in reaction atack chance calculations.[br/]
 Some light handling improvments.[br/]
 New recolr and replace script graphic option for items.[br/]
@@ -302,9 +303,10 @@ items:
     psiAnimation: 0       #override `meleeAnimation` when used for MC or Panic attack. Use `HIT.PCK`.
     psiMissAnimation: 0   #override `meleeMissAnimation` when MC or Panic attack was unsuccessful. Use `HIT.PCK`.
     explosionHitSound: 2  #override default big explosion sound.
-    recolorScript: ~      #script that handle recoloring of item pixels.
-    spriteScript: ~       #script that handle selecting graphic for item.
-    reactionSourceScript: ~ #script that handle reacion to shoot, throw or melee from that weapon.
+    scripts:
+      recolorItemSprite: ~      #script that handle recoloring of item pixels.
+      selectItemSprite: ~       #script that handle selecting graphic for item.
+      reactionWeaponAction: ~   #script that handle reacion to shoot, throw or melee from that weapon.
     ai:
       useDelay: 3       #determine on what turn item can be used by aliens.
       meleeHitCount: 25 #number of hits that AI try to do.
@@ -360,24 +362,11 @@ armors:
         #...
         #same stats like `damageBonus` in `items`.
         #...
-    recolorScript: |
-      #recolor script call for each pixel.
-      #`new_pixel` have value of unit pixel color.
-      #more info in "openxcom.log" with debug on.
-      #default imp:
-      unit.getRecolor new_pixel;
-      add_burn_shade new_pixel burn shade;
-      ret new_pixel;
-    spriteScript: |
-      #sprite select script call for each body part.
-      #`sprite_index` have basic position of graphic in armor sheet.
-      #`sprite_offset` have offset to choose direction or leg move phase.
-      #more info in "openxcom.log" with debug on.
-      #default imp:
-      add sprite_index sprite_offset;
-      ret sprite_index;
-    reactionSourceScript: ~ #script used for handling reaction for unit performing action.
-    reactionDestScript: ~   #script used for handling reaction for unit reacting.
+    scripts:
+      recolorUnitSprite: ~    #recolor script call for each pixel.
+      selectUnitSprite: ~     #sprite select script call for each body part.
+      reactionUnitAction: ~   #script used for handling reaction for unit performing action.
+      reactionUnitReaction: ~ #script used for handling reaction for unit reacting.
 [/code]
 
 [code]

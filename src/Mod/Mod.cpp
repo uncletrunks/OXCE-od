@@ -713,7 +713,7 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
 void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods)
 {
 	ScriptValuesBase::unregisteAll();
-	ModScript parser;
+	ModScript parser{ this };
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
 		try

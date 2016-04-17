@@ -281,15 +281,18 @@ public:
 	}
 
 	/// Load data string form YAML.
-	void load(const std::string& type, const YAML::Node& node, const Parent& parent, const std::string& def = "")
+	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
 	{
-		if(node)
+		if(const YAML::Node& scripts = node["scripts"])
 		{
-			*this = parent.parse(type, node.as<std::string>());
+			if (const YAML::Node& curr = scripts[parent.getName()])
+			{
+				*this = parent.parse(type, curr.as<std::string>());
+			}
 		}
-		if (!*this && !def.empty())
+		if (!*this && !parent.getDefault().empty())
 		{
-			*this = parent.parse(type, def);
+			*this = parent.parse(type, parent.getDefault());
 		}
 	}
 };
@@ -490,6 +493,7 @@ class ScriptParserBase
 {
 	Uint8 _regUsed;
 	std::string _name;
+	std::string _defaultScript;
 	std::vector<std::vector<char>> _nameList;
 	std::vector<ScriptTypeData> _typeList;
 	std::vector<ScriptParserData> _procList;
@@ -553,6 +557,8 @@ protected:
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
 	/// Test if type was added impl.
 	bool haveTypeBase(ArgEnum type);
+	/// Set defulat script for type.
+	void setDefault(const std::string& s) { _defaultScript = s; }
 
 public:
 	/// Register type to get run time value representing it.
@@ -600,6 +606,11 @@ public:
 
 	/// Show all script informations.
 	void logScriptMetadata() const;
+
+	/// Get name of script.
+	const std::string& getName() const { return _name; }
+	/// Get defulat script.
+	const std::string& getDefault() const { return _defaultScript; }
 
 	/// Get name of type.
 	ScriptRef getTypeName(ArgEnum type) const;

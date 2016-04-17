@@ -687,21 +687,25 @@ void commonImpl(BindBase& b)
 /**
  * Constructor of recolor script parser.
  */
-ModScript::RecolorItemParser::RecolorItemParser() : ScriptParser{ "Item Pixel Recoloring", "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
+ModScript::RecolorItemParser::RecolorItemParser(const std::string& name,  Mod* mod) : ScriptParser{ name, "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
 	commonImpl(b);
+
+	setDefault("add_shade new_pixel shade; ret new_pixel;");
 }
 
 /**
  * Constructor of select sprite script parser.
  */
-ModScript::SelectItemParser::SelectItemParser() : ScriptParser{ "Item Sprite Select", "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
+ModScript::SelectItemParser::SelectItemParser(const std::string& name,  Mod* mod) : ScriptParser{ name, "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
 	commonImpl(b);
+
+	setDefault("add sprite_index sprite_offset; ret sprite_index;");
 }
 
 void BattleItem::ScriptFill(ScriptWorker* w, BattleItem* item, int part, int anim_frame, int shade)

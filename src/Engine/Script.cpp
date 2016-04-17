@@ -1816,6 +1816,12 @@ void ScriptParserBase::logScriptMetadata() const
 		Logger refLog;
 		refLog.get(LOG_DEBUG) << "Script info for: " << _name << "\n" << std::left;
 		refLog.get(LOG_DEBUG) << "\n";
+		if (!_defaultScript.empty())
+		{
+			refLog.get(LOG_DEBUG) << "Script defualt implementation:\n";
+			refLog.get(LOG_DEBUG) << _defaultScript << "\n";
+			refLog.get(LOG_DEBUG) << "\n";
+		}
 		refLog.get(LOG_DEBUG) << "Script data:\n";
 		auto temp = _refList;
 		std::sort(temp.begin(), temp.end(),
