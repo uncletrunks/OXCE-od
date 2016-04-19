@@ -34,7 +34,8 @@ class Mod;
 class RuleItemCategory
 {
 private:
-	std::string _type;
+	std::string _type, _replaceBy;
+	bool _hidden;
 	int _listOrder;
 public:
 	/// Creates a blank item category ruleset.
@@ -45,6 +46,10 @@ public:
 	void load(const YAML::Node& node, Mod *mod, int listIndex);
 	/// Gets the item category type.
 	const std::string &getType() const;
+	/// Gets the item category type, which should be used instead of this one.
+	const std::string &getReplaceBy() const;
+	/// Indicates whether the category is hidden or visible.
+	bool isHidden() const;
 	/// Get the list weight for this item category.
 	int getListOrder() const;
 

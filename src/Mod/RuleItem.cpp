@@ -171,6 +171,18 @@ void RuleItem::loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::s
 }
 
 /**
+* Updates item categories based on replacement rules.
+* @param replacementRules The list replacement rules.
+*/
+void RuleItem::updateCategories(std::map<std::string, std::string> *replacementRules)
+{
+	for (auto it = replacementRules->begin(); it != replacementRules->end(); ++it)
+	{
+		std::replace(_categories.begin(), _categories.end(), it->first, it->second);
+	}
+}
+
+/**
  * Loads the item from a YAML file.
  * @param node YAML node.
  * @param mod Mod for the item.

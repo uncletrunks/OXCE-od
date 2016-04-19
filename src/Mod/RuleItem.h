@@ -159,6 +159,8 @@ public:
 	RuleItem(const std::string &type);
 	/// Cleans up the item ruleset.
 	~RuleItem();
+	/// Updates item categories based on replacement rules.
+	void updateCategories(std::map<std::string, std::string> *replacementRules);
 	/// Loads item data from YAML.
 	void load(const YAML::Node& node, Mod *mod, int listIndex);
 	/// Gets the item's type.

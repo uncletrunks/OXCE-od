@@ -37,6 +37,7 @@
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/ItemContainer.h"
+#include "../Mod/RuleItemCategory.h"
 #include "../Mod/RuleItem.h"
 #include "../Savegame/Vehicle.h"
 #include "../Savegame/SavedGame.h"
@@ -159,7 +160,10 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	{
 		if (_usedCategoryStrings[(*i)])
 		{
-			_categoryStrings.push_back((*i));
+			if (!_game->getMod()->getItemCategory((*i))->isHidden())
+			{
+				_categoryStrings.push_back((*i));
+			}
 		}
 	}
 	if (hasUnassigned)
