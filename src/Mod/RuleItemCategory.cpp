@@ -26,7 +26,7 @@ namespace OpenXcom
  * Creates a blank ruleset for a certain item category.
  * @param type String defining the item category.
  */
-RuleItemCategory::RuleItemCategory(const std::string &type) : _type(type), _listOrder(0)
+RuleItemCategory::RuleItemCategory(const std::string &type) : _type(type), _hidden(false), _listOrder(0)
 {
 }
 
@@ -50,6 +50,8 @@ void RuleItemCategory::load(const YAML::Node &node, Mod *mod, int listOrder)
 		load(parent, mod, listOrder);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_replaceBy = node["replaceBy"].as<std::string>(_replaceBy);
+	_hidden = node["hidden"].as<bool>(_hidden);
 
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 
@@ -66,6 +68,24 @@ void RuleItemCategory::load(const YAML::Node &node, Mod *mod, int listOrder)
 const std::string &RuleItemCategory::getType() const
 {
 	return _type;
+}
+
+/**
+* Gets the item category type, which should be used instead of this one.
+* @return The replacement category's type.
+*/
+const std::string &RuleItemCategory::getReplaceBy() const
+{
+	return _replaceBy;
+}
+
+/**
+* Indicates whether the category is hidden or visible.
+* @return True if hidden, false if visible.
+*/
+bool RuleItemCategory::isHidden() const
+{
+	return _hidden;
 }
 
 /**

@@ -782,6 +782,21 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 				e.what());
 		}
 	}
+
+	// post-processing item categories
+	std::map<std::string, std::string> replacementRules;
+	for (auto i = _itemCategories.begin(); i != _itemCategories.end(); ++i)
+	{
+		if (!i->second->getReplaceBy().empty())
+		{
+			replacementRules[i->first] = i->second->getReplaceBy();
+		}
+	}
+	for (auto j = _items.begin(); j != _items.end(); ++j)
+	{
+		j->second->updateCategories(&replacementRules);
+	}
+
 	sortLists();
 	loadExtraResources();
 	modResources();

@@ -36,6 +36,7 @@
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/ItemContainer.h"
+#include "../Mod/RuleItemCategory.h"
 #include "../Mod/RuleItem.h"
 #include "../Savegame/Vehicle.h"
 #include "../Savegame/SavedGame.h"
