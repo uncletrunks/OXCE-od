@@ -69,8 +69,8 @@ namespace OpenXcom
 
 		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
 
-		// SHOT STATS TABLE (for firearms only)
-		if (item->getBattleType() == BT_FIREARM)
+		// SHOT STATS TABLE (for firearms and melee only)
+		if (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE)
 		{
 			_txtShotType = new Text(100, 17, 8, 66);
 			add(_txtShotType);
@@ -96,7 +96,10 @@ namespace OpenXcom
 			_lstInfo->setColor(Palette::blockOffset(15)+4); // color for %-data!
 			_lstInfo->setColumns(3, 100, 52, 52);
 			_lstInfo->setBig();
+		}
 
+		if (item->getBattleType() == BT_FIREARM)
+		{
 			int current_row = 0;
 			if (item->getCostAuto().Time>0)
 			{
@@ -145,6 +148,25 @@ namespace OpenXcom
 
 			// text_info is BELOW the info table
 			_txtInfo = new Text((ammo_data->size()<3 ? 300 : 180), 56, 8, 138);
+		}
+		else if (item->getBattleType() == BT_MELEE)
+		{
+			if (item->getCostMelee().Time > 0)
+			{
+				std::wstring tu = Text::formatPercentage(item->getCostMelee().Time);
+				if (item->getFlatMelee().Time)
+				{
+					tu.erase(tu.end() - 1);
+				}
+				_lstInfo->addRow(3,
+					tr("STR_SHOT_TYPE_MELEE").c_str(),
+					Text::formatPercentage(item->getAccuracyMelee()).c_str(),
+					tu.c_str());
+				_lstInfo->setCellColor(0, 0, Palette::blockOffset(14) + 15);
+			}
+
+			// text_info is BELOW the info table (with 1 row only)
+			_txtInfo = new Text(300, 88, 8, 106);
 		}
 		else
 		{
