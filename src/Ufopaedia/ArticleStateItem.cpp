@@ -41,6 +41,7 @@ namespace OpenXcom
 
 		// add screen elements
 		_txtTitle = new Text(148, 32, 5, 24);
+		_txtWeight = new Text(88, 8, 104, 55);
 
 		// Set palette
 		setPalette("PAL_BATTLEPEDIA");
@@ -49,6 +50,7 @@ namespace OpenXcom
 
 		// add other elements
 		add(_txtTitle);
+		add(_txtWeight);
 
 		// Set up objects
 		_game->getMod()->getSurface("BACK08.SCR")->blit(_bg);
@@ -61,6 +63,9 @@ namespace OpenXcom
 		_txtTitle->setWordWrap(true);
 		_txtTitle->setText(tr(defs->title));
 
+		_txtWeight->setColor(Palette::blockOffset(14) + 15);
+		_txtWeight->setAlign(ALIGN_RIGHT);
+
 		// IMAGE
 		_image = new Surface(32, 48, 157, 5);
 		add(_image);
@@ -68,6 +73,14 @@ namespace OpenXcom
 		item->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _image);
 
 		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
+
+		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(item->getWeight());
+		if (!ammo_data->empty())
+		{
+			RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[0]);
+			weightLabel = tr("STR_WEIGHT_PEDIA2").arg(item->getWeight()).arg(item->getWeight() + ammo_rule->getWeight());
+		}
+		_txtWeight->setText(weightLabel);
 
 		// SHOT STATS TABLE (for firearms and melee only)
 		if (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE)
