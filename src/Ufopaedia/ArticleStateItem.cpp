@@ -146,8 +146,13 @@ namespace OpenXcom
 				current_row++;
 			}
 
-			// text_info is BELOW the info table
-			_txtInfo = new Text((ammo_data->size()<3 ? 300 : 180), 56, 8, 138);
+			// text_info is BELOW the info table (table can have 0-3 rows)
+			int shift = (3 - current_row) * 16;
+			if (ammo_data->size() == 2 && current_row <= 1)
+			{
+				shift -= (2 - current_row) * 16;
+			}
+			_txtInfo = new Text((ammo_data->size()<3 ? 300 : 180), 56 + shift, 8, 138 - shift);
 		}
 		else if (item->getBattleType() == BT_MELEE)
 		{
