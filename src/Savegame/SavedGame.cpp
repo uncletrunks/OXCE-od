@@ -543,7 +543,7 @@ void SavedGame::save(const std::string &filename) const
 			{
 				curMasterId = i->first;
 			}
-			if (!modInfo.getMaster().empty() && modInfo.getMaster() != curMasterId)
+			else if (!modInfo.getMaster().empty() && modInfo.getMaster() != curMasterId)
 			{
 				continue;
 			}
