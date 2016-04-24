@@ -1584,17 +1584,6 @@ void GeoscapeState::time1Day()
 			(*i)->removeResearch(*iter);
 			RuleResearch * bonus = 0;
 			const RuleResearch * research = (*iter)->getRules();
-			// If "researched" the live alien, his body sent to the stores.
-			if (Options::spendResearchedItems && research->needItem() && _game->getMod()->getUnit(research->getName()))
-			{
-				(*i)->getStorageItems()->addItem(
-					_game->getMod()->getArmor(
-						_game->getMod()->getUnit(
-							research->getName()
-						)->getArmor()
-					)->getCorpseGeoscape()
-				);
-			}
 			if (!(*iter)->getRules()->getGetOneFree().empty())
 			{
 				std::vector<std::string> possibilities;
