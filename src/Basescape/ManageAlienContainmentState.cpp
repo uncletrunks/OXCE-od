@@ -257,7 +257,7 @@ void ManageAlienContainmentState::btnOkClick(Action *)
 
 	if (Options::storageLimitsEnforced && _base->storesOverfull())
 	{
-		_game->pushState(new SellState(_base, _origin));
+		_game->pushState(new SellState(_base, 0, _origin));
 		if (_origin == OPT_BATTLESCAPE)
 			_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()).c_str(), _palette, _game->getMod()->getInterface("manageContainment")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("manageContainment")->getElement("errorPalette")->color));
 		else

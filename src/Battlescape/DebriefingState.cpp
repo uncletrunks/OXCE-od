@@ -72,7 +72,7 @@ namespace OpenXcom
  * Initializes all the elements in the Debriefing screen.
  * @param game Pointer to the core game.
  */
-DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _noContainment(false), _manageContainment(false), _destroyBase(false), _pageNumber(0), _isBaseDefense(false)
+DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _noContainment(false), _manageContainment(false), _destroyBase(false), _pageNumber(0), _isBaseDefense(false), _showSellButton(true)
 {
 	Options::baseXResolution = Options::baseXGeoscape;
 	Options::baseYResolution = Options::baseYGeoscape;
@@ -86,6 +86,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(40, 12, 16, 180);
 	_btnStats = new TextButton(60, 12, 244, 180);
+	_btnSell = new TextButton(60, 12, 176, 180);
 	_txtTitle = new Text(300, 17, 16, 8);
 	_txtItem = new Text(180, 9, 16, 24);
 	_txtQuantity = new Text(60, 9, 200, 24);
@@ -127,6 +128,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	add(_window, "window", "debriefing");
 	add(_btnOk, "button", "debriefing");
 	add(_btnStats, "button", "debriefing");
+	add(_btnSell, "button", "debriefing");
 	add(_txtTitle, "heading", "debriefing");
 	add(_txtItem, "text", "debriefing");
 	add(_txtQuantity, "text", "debriefing");
@@ -165,6 +167,9 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_btnOk->onKeyboardPress((ActionHandler)&DebriefingState::btnOkClick, Options::keyCancel);
 
 	_btnStats->onMouseClick((ActionHandler)&DebriefingState::btnStatsClick);
+
+	_btnSell->setText(tr("STR_SELL"));
+	_btnSell->onMouseClick((ActionHandler)&DebriefingState::btnSellClick);
 
 	_txtTitle->setBig();
 
@@ -295,6 +300,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 			{
 				RuleItem *rule = _game->getMod()->getItem(*i);
 				qty -= _baseItemsBeforeRecovery[rule];
+				_recoveredItems[rule] = qty;
 				if (qty > 0)
 				{
 					std::wostringstream ss;
@@ -428,6 +434,7 @@ DebriefingState::~DebriefingState()
 	_roundsStimulant.clear();
 	_roundsHeal.clear();
 	_baseItemsBeforeRecovery.clear();
+	_recoveredItems.clear();
 }
 
 std::wstring DebriefingState::makeSoldierString(int stat)
@@ -475,9 +482,10 @@ void DebriefingState::applyVisibility()
 	_lstRecoveredItems->setVisible(showItems);
 
 	// Set text on toggle button accordingly
+	_btnSell->setVisible(showItems && _showSellButton);
 	if (showScore)
 	{
-		_btnStats->setText(tr("STATS"));
+		_btnStats->setText(tr("STR_STATS"));
 	}
 	else if (showStats)
 	{
@@ -487,7 +495,7 @@ void DebriefingState::applyVisibility()
 		}
 		else
 		{
-			_btnStats->setText(tr("LOOT"));
+			_btnStats->setText(tr("STR_LOOT"));
 		}
 	}
 	else if (showItems)
@@ -546,6 +554,15 @@ void DebriefingState::btnStatsClick(Action *)
 }
 
 /**
+* Opens the Sell/Sack UI (for recovered items ONLY).
+* @param action Pointer to an action.
+*/
+void DebriefingState::btnSellClick(Action *)
+{
+	_game->pushState(new SellState(_base, this, OPT_BATTLESCAPE));
+}
+
+/**
  * Returns to the previous screen.
  * @param action Pointer to an action.
  */
@@ -589,7 +606,7 @@ void DebriefingState::btnOkClick(Action *)
 			}
 			if (!_manageContainment && Options::storageLimitsEnforced && _base->storesOverfull())
 			{
-				_game->pushState(new SellState(_base, OPT_BATTLESCAPE));
+				_game->pushState(new SellState(_base, 0, OPT_BATTLESCAPE));
 				_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()).c_str(), _palette, _game->getMod()->getInterface("debriefing")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("debriefing")->getElement("errorPalette")->color));
 			}
 		}
@@ -784,6 +801,7 @@ void DebriefingState::prepareDebriefing()
 			base = (*i);
 			target = "STR_BASE";
 			_isBaseDefense = true;
+			_showSellButton = false;
 			base->setInBattlescape(false);
 			base->cleanupDefenses(false);
 			for (std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin(); k != _game->getSavedGame()->getRegions()->end(); ++k)
@@ -1670,6 +1688,25 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		base->getStorageItems()->addItem(type, 1);
 		_manageContainment = base->getAvailableContainment() - (base->getUsedContainment() * _limitsEnforced) < 0;
 	}
+}
+
+/**
+* Gets the number of recovered items of certain type.
+* @param rule Type of item.
+*/
+int DebriefingState::getRecoveredItemCount(RuleItem *rule)
+{
+	return _recoveredItems[rule];
+}
+
+/**
+* Sets the visibility of the SELL button.
+* @param showSellButton New value.
+*/
+void DebriefingState::setShowSellButton(bool showSellButton)
+{
+	_showSellButton = showSellButton;
+	_btnSell->setVisible(_showSellButton);
 }
 
 }

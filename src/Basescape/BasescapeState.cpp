@@ -325,7 +325,7 @@ void BasescapeState::btnPurchaseClick(Action *)
  */
 void BasescapeState::btnSellClick(Action *)
 {
-	_game->pushState(new SellState(_base));
+	_game->pushState(new SellState(_base, 0));
 }
 
 /**
@@ -409,7 +409,7 @@ void BasescapeState::viewRightClick(Action *)
 	}
 	else if (f->getRules()->getStorage() > 0)
 	{
-		_game->pushState(new SellState(_base));
+		_game->pushState(new SellState(_base, 0));
 	}
 	else if (f->getRules()->getPersonnel() > 0)
 	{

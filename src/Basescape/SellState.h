@@ -36,6 +36,7 @@ class TextList;
 class ComboBox;
 class Timer;
 class Base;
+class DebriefingState;
 
 /**
  * Sell/Sack screen that lets the player sell
@@ -45,6 +46,7 @@ class SellState : public State
 {
 private:
 	Base *_base;
+	DebriefingState *_debriefingState;
 	TextButton *_btnOk, *_btnCancel;
 	Window *_window;
 	Text *_txtTitle, *_txtSales, *_txtFunds, *_txtQuantity, *_txtSell, *_txtValue, *_txtSpaceUsed;
@@ -66,7 +68,7 @@ private:
 	TransferRow &getRow() { return _items[_rows[_sel]]; }
 public:
 	/// Creates the Sell state.
-	SellState(Base *base, OptionsOrigin origin = OPT_GEOSCAPE);
+	SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin = OPT_GEOSCAPE);
 	/// Cleans up the Sell state.
 	~SellState();
 	/// Runs the timers.

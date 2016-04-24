@@ -60,7 +60,7 @@ private:
 	Base *_base;
 	std::vector<DebriefingStat*> _stats;
 	std::vector<SoldierStatsEntry> _soldierStats;
-	TextButton *_btnOk, *_btnStats;
+	TextButton *_btnOk, *_btnStats, *_btnSell;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtQuantity, *_txtScore, *_txtRecovery, *_txtRating,
 	     *_txtSoldier, *_txtTU, *_txtStamina, *_txtHealth, *_txtBravery, *_txtReactions,
@@ -69,10 +69,10 @@ private:
 	std::string _currentTooltip;
 	Text *_txtTooltip;
 	std::vector<ReequipStat> _missingItems;
-	std::map<RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal, _baseItemsBeforeRecovery;
+	std::map<RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal, _baseItemsBeforeRecovery, _recoveredItems;
 	Uint8 _ammoColor;
 	std::map<int, RecoveryItem*> _recoveryStats;
-	bool _positiveScore, _noContainment, _manageContainment, _destroyBase, _isBaseDefense;
+	bool _positiveScore, _noContainment, _manageContainment, _destroyBase, _isBaseDefense, _showSellButton;
 	int _limitsEnforced;
 	/// Adds to the debriefing stats.
 	void addStat(const std::string &name, int quantity, int score);
@@ -100,10 +100,16 @@ public:
 	void init();
 	/// Handler for clicking the STATS button.
 	void btnStatsClick(Action *action);
+	/// Handler for clicking the SELL button.
+	void btnSellClick(Action *action);
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
+	// Gets the number of recovered items of certain type.
+	int getRecoveredItemCount(RuleItem *rule);
+	// Sets the visibility of the SELL button.
+	void setShowSellButton(bool showSellButton);
 };
 
 }
