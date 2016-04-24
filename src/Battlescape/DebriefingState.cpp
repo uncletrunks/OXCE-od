@@ -34,6 +34,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleRegion.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Mod/Armor.h"
 #include "../Savegame/AlienBase.h"
 #include "../Savegame/AlienMission.h"
@@ -1020,6 +1021,8 @@ void DebriefingState::prepareDebriefing()
 							}
 							// transformed armor doesn't get recovered
 							(*i)->setTransformedArmor(0);
+							// soldiers are buried in the default armor (...nicer stats in memorial)
+							(*i)->setArmor(_game->getMod()->getArmor((*i)->getRules()->getArmor()));
 
 							SoldierDeath *death = new SoldierDeath();
 							death->setTime(*save->getTime());
@@ -1134,6 +1137,8 @@ void DebriefingState::prepareDebriefing()
 								}
 								// transformed armor doesn't get recovered
 								(*i)->setTransformedArmor(0);
+								// soldiers are buried in the default armor (...nicer stats in memorial)
+								(*i)->setArmor(_game->getMod()->getArmor((*i)->getRules()->getArmor()));
 
 								SoldierDeath *death = new SoldierDeath();
 								death->setTime(*save->getTime());
