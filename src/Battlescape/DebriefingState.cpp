@@ -57,6 +57,7 @@
 #include "../Menu/MainMenuState.h"
 #include "../Interface/Cursor.h"
 #include "../Engine/Options.h"
+#include "../Engine/RNG.h"
 #include "../Basescape/ManageAlienContainmentState.h"
 #include "../Engine/Screen.h"
 #include "../Basescape/SellState.h"
@@ -1311,7 +1312,15 @@ void DebriefingState::prepareDebriefing()
 	// calculate the clips for each type based on the recovered rounds.
 	for (std::map<RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
 	{
-		int total_clips = i->second / i->first->getClipSize();
+		int total_clips = 0;
+		if (Options::statisticalBulletConservation)
+		{
+			total_clips = (i->second + RNG::generate(0, (i->first->getClipSize() - 1))) / i->first->getClipSize();
+		}
+		else
+		{
+			total_clips = i->second / i->first->getClipSize();
+		}
 		if (total_clips > 0)
 			base->getStorageItems()->addItem(i->first->getType(), total_clips);
 	}
