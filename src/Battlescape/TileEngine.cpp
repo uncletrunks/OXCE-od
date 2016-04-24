@@ -1245,10 +1245,13 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 	}
 
 	const int wounds = target->getFatalWounds();
+	const int stunLevelOrig = target->getStunlevel();
 	const int adjustedDamage = target->damage(relative, damage, type);
+	// lethal + stun
+	const int totalDamage = adjustedDamage + (target->getStunlevel() - stunLevelOrig);
 
 	// hit log
-	const int damagePercent = (adjustedDamage * 100) / target->getBaseStats()->health;
+	const int damagePercent = (totalDamage * 100) / target->getBaseStats()->health;
 	if (damagePercent <= 0)
 	{
 		_save->hitLog << "0 ";
