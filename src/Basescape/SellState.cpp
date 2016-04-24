@@ -240,6 +240,7 @@ SellState::SellState(Base *base, OptionsOrigin origin) : _base(base), _sel(0), _
 
 	_cbxCategory->setOptions(_cats);
 	_cbxCategory->onChange((ActionHandler)&SellState::cbxCategoryChange);
+	_cbxCategory->onKeyboardPress((ActionHandler)&SellState::btnSellAllClick, Options::keyInvClear);
 
 	updateList();
 
@@ -510,6 +511,21 @@ void SellState::btnOkClick(Action *)
 void SellState::btnCancelClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+* Increase all items to max, i.e. sell everything.
+* @param action Pointer to an action.
+*/
+void SellState::btnSellAllClick(Action *)
+{
+	size_t backup = _sel;
+	for (size_t i = 0; i < _lstItems->getRows(); ++i)
+	{
+		_sel = i;
+		changeByValue(INT_MAX, 1);
+	}
+	_sel = backup;
 }
 
 /**

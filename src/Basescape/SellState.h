@@ -77,6 +77,8 @@ public:
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
+	/// Handler for pressing the "Sell all" hotkey.
+	void btnSellAllClick(Action *action);
 	/// Handler for pressing an Increase arrow in the list.
 	void lstItemsLeftArrowPress(Action *action);
 	/// Handler for releasing an Increase arrow in the list.
