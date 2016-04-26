@@ -69,7 +69,21 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// throwing (if not a fixed weapon)
 	if (!weapon->isFixed() && weapon->getCostThrow().Time > 0)
 	{
-		addItem(BA_THROW, "STR_THROW", &id);
+		addItem(BA_THROW, "STR_THROW", &id, SDLK_5);
+	}
+
+	if (weapon->getCostMelee().Time > 0)
+	{
+		// stun rod
+		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
+		{
+			addItem(BA_HIT, "STR_STUN", &id, SDLK_4);
+		}
+		else
+		// melee weapon
+		{
+			addItem(BA_HIT, "STR_HIT_MELEE", &id, SDLK_4);
+		}
 	}
 
 	// execute / break neck / cut throat / coup de grace
@@ -107,7 +121,8 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 
 		if (otherWeapon != 0)
 		{
-			addItem(BA_EXECUTE, "STR_CUT_THROAT", &id, otherWeapon);
+			addItem(BA_EXECUTE, "STR_CUT_THROAT", &id, SDLK_1, otherWeapon);
+			return; // hotkey safety!
 		}
 	}
 
@@ -119,73 +134,60 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// priming
 	if (weapon->getFuseTimerDefault() >= 0 && _action->weapon->getFuseTimer() == -1)
 	{
-		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id);
+		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id, SDLK_1);
+		return; // hotkey safety!
 	}
 
 	if (weapon->getBattleType() == BT_FIREARM)
 	{
 		if (weapon->isWaypoint() || (_action->weapon->getAmmoItem() && _action->weapon->getAmmoItem()->getRules()->isWaypoint()))
 		{
-			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id);
+			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id, SDLK_1);
 		}
 		else
 		{
 			if (weapon->getCostAuto().Time > 0)
 			{
-				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id);
+				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id, SDLK_3);
 			}
 			if (weapon->getCostSnap().Time > 0)
 			{
-				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id);
+				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id, SDLK_2);
 			}
 			if (weapon->getCostAimed().Time > 0)
 			{
-				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id);
+				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id, SDLK_1);
 			}
-		}
-	}
-
-	if (weapon->getCostMelee().Time > 0)
-	{
-		// stun rod
-		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
-		{
-			addItem(BA_HIT, "STR_STUN", &id);
-		}
-		else
-		// melee weapon
-		{
-			addItem(BA_HIT, "STR_HIT_MELEE", &id);
 		}
 	}
 
 	// special items
 	if (weapon->getBattleType() == BT_MEDIKIT)
 	{
-		addItem(BA_USE, "STR_USE_MEDI_KIT", &id);
+		addItem(BA_USE, "STR_USE_MEDI_KIT", &id, SDLK_1);
 	}
 	else if (weapon->getBattleType() == BT_SCANNER)
 	{
-		addItem(BA_USE, "STR_USE_SCANNER", &id);
+		addItem(BA_USE, "STR_USE_SCANNER", &id, SDLK_1);
 	}
 	else if (weapon->getBattleType() == BT_PSIAMP)
 	{
 		if (weapon->getCostMind().Time > 0)
 		{
-			addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id);
+			addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id, SDLK_3);
 		}
 		if (weapon->getCostPanic().Time > 0)
 		{
-			addItem(BA_PANIC, "STR_PANIC_UNIT", &id);
+			addItem(BA_PANIC, "STR_PANIC_UNIT", &id, SDLK_2);
 		}
 		if (weapon->getCostUse().Time > 0)
 		{
-			addItem(BA_USE, weapon->getPsiAttackName(), &id);
+			addItem(BA_USE, weapon->getPsiAttackName(), &id, SDLK_1);
 		}
 	}
 	else if (weapon->getBattleType() == BT_MINDPROBE)
 	{
-		addItem(BA_USE, "STR_USE_MIND_PROBE", &id);
+		addItem(BA_USE, "STR_USE_MIND_PROBE", &id, SDLK_1);
 	}
 
 }
@@ -204,7 +206,7 @@ ActionMenuState::~ActionMenuState()
  * @param name Action description.
  * @param id Pointer to the new item ID.
  */
-void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id, BattleItem *secondaryWeapon)
+void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id, SDLKey key, BattleItem *secondaryWeapon)
 {
 	std::wstring s1, s2;
 	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon);
@@ -224,6 +226,7 @@ void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int 
 	s2 = tr("STR_TIME_UNITS_SHORT").arg(tu);
 	_actionMenu[*id]->setAction(ba, tr(name), s1, s2, tu);
 	_actionMenu[*id]->setVisible(true);
+	_actionMenu[*id]->onKeyboardPress((ActionHandler)&ActionMenuState::btnActionMenuItemClick, key);
 	(*id)++;
 }
 
