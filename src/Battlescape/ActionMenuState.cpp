@@ -69,7 +69,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// throwing (if not a fixed weapon)
 	if (!weapon->isFixed() && weapon->getCostThrow().Time > 0)
 	{
-		addItem(BA_THROW, "STR_THROW", &id, SDLK_5);
+		addItem(BA_THROW, "STR_THROW", &id, Options::keyBattleActionItem5);
 	}
 
 	if (weapon->getCostMelee().Time > 0)
@@ -77,12 +77,12 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		// stun rod
 		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
 		{
-			addItem(BA_HIT, "STR_STUN", &id, SDLK_4);
+			addItem(BA_HIT, "STR_STUN", &id, Options::keyBattleActionItem4);
 		}
 		else
 		// melee weapon
 		{
-			addItem(BA_HIT, "STR_HIT_MELEE", &id, SDLK_4);
+			addItem(BA_HIT, "STR_HIT_MELEE", &id, Options::keyBattleActionItem4);
 		}
 	}
 
@@ -121,7 +121,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 
 		if (otherWeapon != 0)
 		{
-			addItem(BA_EXECUTE, "STR_CUT_THROAT", &id, SDLK_1, otherWeapon);
+			addItem(BA_EXECUTE, "STR_CUT_THROAT", &id, Options::keyBattleActionItem1, otherWeapon);
 			return; // hotkey safety!
 		}
 	}
@@ -134,7 +134,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// priming
 	if (weapon->getFuseTimerDefault() >= 0 && _action->weapon->getFuseTimer() == -1)
 	{
-		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id, SDLK_1);
+		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id, Options::keyBattleActionItem1);
 		return; // hotkey safety!
 	}
 
@@ -142,21 +142,21 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	{
 		if (weapon->isWaypoint() || (_action->weapon->getAmmoItem() && _action->weapon->getAmmoItem()->getRules()->isWaypoint()))
 		{
-			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id, SDLK_1);
+			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id, Options::keyBattleActionItem1);
 		}
 		else
 		{
 			if (weapon->getCostAuto().Time > 0)
 			{
-				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id, SDLK_3);
+				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id, Options::keyBattleActionItem3);
 			}
 			if (weapon->getCostSnap().Time > 0)
 			{
-				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id, SDLK_2);
+				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id, Options::keyBattleActionItem2);
 			}
 			if (weapon->getCostAimed().Time > 0)
 			{
-				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id, SDLK_1);
+				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id, Options::keyBattleActionItem1);
 			}
 		}
 	}
@@ -164,30 +164,30 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// special items
 	if (weapon->getBattleType() == BT_MEDIKIT)
 	{
-		addItem(BA_USE, "STR_USE_MEDI_KIT", &id, SDLK_1);
+		addItem(BA_USE, "STR_USE_MEDI_KIT", &id, Options::keyBattleActionItem1);
 	}
 	else if (weapon->getBattleType() == BT_SCANNER)
 	{
-		addItem(BA_USE, "STR_USE_SCANNER", &id, SDLK_1);
+		addItem(BA_USE, "STR_USE_SCANNER", &id, Options::keyBattleActionItem1);
 	}
 	else if (weapon->getBattleType() == BT_PSIAMP)
 	{
 		if (weapon->getCostMind().Time > 0)
 		{
-			addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id, SDLK_3);
+			addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id, Options::keyBattleActionItem3);
 		}
 		if (weapon->getCostPanic().Time > 0)
 		{
-			addItem(BA_PANIC, "STR_PANIC_UNIT", &id, SDLK_2);
+			addItem(BA_PANIC, "STR_PANIC_UNIT", &id, Options::keyBattleActionItem2);
 		}
 		if (weapon->getCostUse().Time > 0)
 		{
-			addItem(BA_USE, weapon->getPsiAttackName(), &id, SDLK_1);
+			addItem(BA_USE, weapon->getPsiAttackName(), &id, Options::keyBattleActionItem1);
 		}
 	}
 	else if (weapon->getBattleType() == BT_MINDPROBE)
 	{
-		addItem(BA_USE, "STR_USE_MIND_PROBE", &id, SDLK_1);
+		addItem(BA_USE, "STR_USE_MIND_PROBE", &id, Options::keyBattleActionItem1);
 	}
 
 }
