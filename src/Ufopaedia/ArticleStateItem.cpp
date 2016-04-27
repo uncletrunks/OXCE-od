@@ -74,13 +74,14 @@ namespace OpenXcom
 
 		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
 
-		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(item->getWeight());
+		int weight = item->getWeight();
+		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);
 		if (!ammo_data->empty())
 		{
 			RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[0]);
-			weightLabel = tr("STR_WEIGHT_PEDIA2").arg(item->getWeight()).arg(item->getWeight() + ammo_rule->getWeight());
+			weightLabel = tr("STR_WEIGHT_PEDIA2").arg(weight).arg(weight + ammo_rule->getWeight());
 		}
-		_txtWeight->setText(weightLabel);
+		_txtWeight->setText(weight > 0 ? weightLabel : L"");
 
 		// SHOT STATS TABLE (for firearms and melee only)
 		if (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE)
