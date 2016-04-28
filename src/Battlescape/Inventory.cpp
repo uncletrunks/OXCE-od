@@ -41,6 +41,7 @@
 #include "../Savegame/Tile.h"
 #include "PrimeGrenadeState.h"
 #include <algorithm>
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -904,6 +905,28 @@ void Inventory::mouseClick(Action *action, State *state)
 			}
 			// Return item to original position
 			setSelectedItem(0);
+		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+	{
+		if (_selUnit == 0)
+			return;
+
+		int x = (int)floor(action->getAbsoluteXMouse()) - getX(),
+			y = (int)floor(action->getAbsoluteYMouse()) - getY();
+		RuleInventory *slot = getSlotInPosition(&x, &y);
+		if (slot != 0)
+		{
+			if (slot->getType() == INV_GROUND)
+			{
+				x += _groundOffset;
+			}
+			BattleItem *item = _selUnit->getItem(slot, x, y);
+			if (item != 0)
+			{
+				std::string articleId = item->getRules()->getType();
+				Ufopaedia::openArticle(_game, articleId);
+			}
 		}
 	}
 	InteractiveSurface::mouseClick(action, state);
