@@ -86,7 +86,7 @@ private:
 	std::string _currentTooltip;
 	Position _cursorPosition;
 	/// Popups a context sensitive list of actions the user can choose from.
-	void handleItemClick(BattleItem *item);
+	void handleItemClick(BattleItem *item, bool rightClick);
 	/// Shifts the red colors of the visible unit buttons backgrounds.
 	void blinkVisibleUnitButtons();
 	/// Draw hand item with ammo number
