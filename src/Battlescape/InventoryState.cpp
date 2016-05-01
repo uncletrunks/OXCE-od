@@ -304,6 +304,7 @@ static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile 
 		else
 		{
 			(*i)->setOwner(NULL);
+			(*i)->setFuseTimer(-1); // unprime explosives before dropping them
 			groundTile->addItem(*i, groundRuleInv);
 			i = unitInv->erase(i);
 		}
