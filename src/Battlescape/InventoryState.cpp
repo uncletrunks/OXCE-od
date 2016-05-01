@@ -348,6 +348,14 @@ void InventoryState::init()
 	else
 	{
 		Surface *armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory());
+		if (!armorSurface)
+		{
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + ".SPK");
+		}
+		if (!armorSurface)
+		{
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + "M0.SPK");
+		}
 		if (armorSurface)
 		{
 			armorSurface->blit(_soldier);
