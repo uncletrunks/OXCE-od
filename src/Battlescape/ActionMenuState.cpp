@@ -72,20 +72,6 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		addItem(BA_THROW, "STR_THROW", &id, Options::keyBattleActionItem5);
 	}
 
-	if (weapon->getCostMelee().Time > 0)
-	{
-		// stun rod
-		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
-		{
-			addItem(BA_HIT, "STR_STUN", &id, Options::keyBattleActionItem4);
-		}
-		else
-		// melee weapon
-		{
-			addItem(BA_HIT, "STR_HIT_MELEE", &id, Options::keyBattleActionItem4);
-		}
-	}
-
 	// execute / break neck / cut throat / coup de grace
 	if (Options::executeUnconsciousEnemies && (_action->weapon->getUnit() && _action->weapon->getUnit()->getStatus() == STATUS_UNCONSCIOUS))
 	{
@@ -158,6 +144,20 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 			{
 				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id, Options::keyBattleActionItem1);
 			}
+		}
+	}
+
+	if (weapon->getCostMelee().Time > 0)
+	{
+		// stun rod
+		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
+		{
+			addItem(BA_HIT, "STR_STUN", &id, Options::keyBattleActionItem4);
+		}
+		else
+			// melee weapon
+		{
+			addItem(BA_HIT, "STR_HIT_MELEE", &id, Options::keyBattleActionItem4);
 		}
 	}
 
