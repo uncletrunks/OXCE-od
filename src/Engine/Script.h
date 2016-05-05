@@ -70,27 +70,50 @@ inline ProgPos operator++(ProgPos& pos, int)
 	return old;
 }
 
-constexpr size_t ArgTypeReg = 0x1;
-constexpr size_t ArgTypePtr = 0x2;
-constexpr size_t ArgTypeEdit = 0x4;
-constexpr size_t ArgTypeSize = 0x8;
+/**
+ * Args special types.
+ */
+enum ArgSpecEnum : Uint8
+{
+	ArgSpecNone = 0x0,
+	ArgSpecReg = 0x1,
+	ArgSpecVar = 0x3,
+	ArgSpecPtr = 0x4,
+	ArgSpecPtrE = 0xC,
+	ArgSpecSize = 0x10,
+};
+constexpr ArgSpecEnum operator|(ArgSpecEnum a, ArgSpecEnum b)
+{
+	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) | static_cast<Uint8>(b));
+}
+constexpr ArgSpecEnum operator&(ArgSpecEnum a, ArgSpecEnum b)
+{
+	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) & static_cast<Uint8>(b));
+}
+constexpr ArgSpecEnum operator^(ArgSpecEnum a, ArgSpecEnum b)
+{
+	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) ^ static_cast<Uint8>(b));
+}
 /**
  * Args types.
  */
 enum ArgEnum : Uint8
 {
-	ArgInvalid = ArgTypeSize * 0,
-	ArgAny = ArgTypeSize * 0 + 1,
+	ArgInvalid = ArgSpecSize * 0,
+	ArgAny = ArgSpecSize * 0 + 1,
 
-	ArgNull = ArgTypeSize * 1,
-	ArgInt = ArgTypeSize * 2,
-	ArgLabel = ArgTypeSize * 3,
-	ArgMax = ArgTypeSize * 4,
+	ArgNull = ArgSpecSize * 1,
+	ArgInt = ArgSpecSize * 2,
+	ArgLabel = ArgSpecSize * 3,
+	ArgMax = ArgSpecSize * 4,
 };
 
+/**
+ * Next avaiable value for arg type.
+ */
 constexpr ArgEnum ArgNext(ArgEnum arg)
 {
-	return static_cast<ArgEnum>(static_cast<Uint8>(arg) + ArgTypeSize);
+	return static_cast<ArgEnum>(static_cast<Uint8>(arg) + static_cast<Uint8>(ArgSpecSize));
 }
 
 /**
@@ -98,35 +121,75 @@ constexpr ArgEnum ArgNext(ArgEnum arg)
  */
 constexpr ArgEnum ArgBase(ArgEnum arg)
 {
-	return static_cast<ArgEnum>((static_cast<Uint8>(arg) | (ArgTypeSize - 1)) - ArgTypeSize + 1);
+	return static_cast<ArgEnum>((static_cast<Uint8>(arg) & ~(static_cast<Uint8>(ArgSpecSize) - 1)));
 }
 /**
  * Specialized version of argument type.
  */
-constexpr ArgEnum ArgSpec(ArgEnum arg, bool reg, bool ptr = false, bool edit = false)
+constexpr ArgEnum ArgSpec(ArgEnum arg, ArgSpecEnum spec)
 {
-	return static_cast<ArgEnum>(static_cast<Uint8>(arg) | (reg ? ArgTypeReg : 0x0) | (ptr ? ArgTypePtr : 0x0) | (edit ? ArgTypeEdit : 0x0));
+	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) | static_cast<Uint8>(spec)) : arg;
+}
+/**
+ * Specialized version of argument type.
+ */
+constexpr ArgEnum ArgRemove(ArgEnum arg, ArgSpecEnum spec)
+{
+	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) & ~static_cast<Uint8>(spec)) : arg;
+}
+/**
+ * Test if argument is normal type or special.
+ * @param arg
+ * @return True if type is normal.
+ */
+constexpr bool ArgIsNormal(ArgEnum arg)
+{
+	return ArgBase(arg) != ArgInvalid;
 }
 /**
  * Test if argumet type is register.
  */
 constexpr bool ArgIsReg(ArgEnum arg)
 {
-	return static_cast<Uint8>(arg) & ArgTypeReg;
+	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecReg)) == static_cast<Uint8>(ArgSpecReg);
+}
+/**
+ * Test if argumet type is register.
+ */
+constexpr bool ArgIsVar(ArgEnum arg)
+{
+	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecVar)) == static_cast<Uint8>(ArgSpecVar);
 }
 /**
  * Test if argumet type is pointer.
  */
 constexpr bool ArgIsPtr(ArgEnum arg)
 {
-	return static_cast<Uint8>(arg) & ArgTypePtr;
+	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecPtr)) == static_cast<Uint8>(ArgSpecPtr);
 }
 /**
  * Test if argumet type is editable pointer.
  */
-constexpr bool ArgIsEditable(ArgEnum arg)
+constexpr bool ArgIsPtrE(ArgEnum arg)
 {
-	return static_cast<Uint8>(arg) & ArgTypeEdit;
+	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecPtrE)) == static_cast<Uint8>(ArgSpecPtrE);
+}
+/**
+ * Compatibility betwean operation argument type and reg type. Greater numbers mean bigger comatibility.
+ * @param argType Type of operation argument.
+ * @param regType Type of reg we try pass to operation.
+ * @return Zero if incompatible, 255 if both types are same.
+ */
+constexpr int ArgCompatible(ArgEnum argType, ArgEnum regType)
+{
+	return
+		argType == ArgInvalid ? 0 :
+		argType == ArgAny ? 1 :
+		ArgIsVar(argType) && argType != regType ? 0 :
+		ArgBase(argType) != ArgBase(regType) ? 0 :
+		ArgIsReg(argType) != ArgIsReg(regType) ? 0 :
+		ArgIsPtr(argType) != ArgIsPtr(regType) ? 0 :
+			255 - (ArgIsPtrE(argType) != ArgIsPtrE(regType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(regType) ? 64 : 0);
 }
 
 /**
@@ -446,30 +509,6 @@ struct ScriptTypeData
 };
 
 /**
- * Struct storing avaliable operation to scripts.
- */
-struct ScriptParserData
-{
-	using argFunc = int (*)(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
-	using getFunc = FuncCommon (*)(int version);
-	using parserFunc = bool (*)(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
-	using displayFunc = std::string (*)(const ScriptParserBase* spb);
-
-	ScriptRef name;
-	ArgEnum firstArgType;
-
-	parserFunc parser;
-	argFunc arg;
-	getFunc get;
-	displayFunc display;
-
-	bool operator()(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end) const
-	{
-		return parser(*this, ph, begin, end);
-	}
-};
-
-/**
  * Struct used to store definition of used data by script.
  */
 struct ScriptContainerData
@@ -483,6 +522,31 @@ struct ScriptContainerData
 	explicit operator bool() const
 	{
 		return name.size() > 0;
+	}
+};
+
+/**
+ * Struct storing avaliable operation to scripts.
+ */
+struct ScriptParserData
+{
+	using argFunc = int (*)(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using getFunc = FuncCommon (*)(int version);
+	using parserFunc = bool (*)(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using overloadFunc = int (*)(const ScriptParserData& spd, const ScriptContainerData* begin, const ScriptContainerData* end);
+
+	ScriptRef name;
+
+	overloadFunc overload;
+	ScriptRange<ScriptRange<ArgEnum>> overloadArg;
+
+	parserFunc parser;
+	argFunc parserArg;
+	getFunc parserGet;
+
+	bool operator()(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end) const
+	{
+		return parser(*this, ph, begin, end);
 	}
 };
 
@@ -550,9 +614,9 @@ protected:
 	/// Add name for standart reg.
 	void addStandartReg(const std::string& s, RegEnum index);
 	/// Add name for custom parameter.
-	void addCustomReg(const std::string& s, ArgEnum type);
+	void addScriptArg(const std::string& s, ArgEnum type);
 	/// Add parsing fuction.
-	void addParserBase(const std::string& s, ArgEnum firstArgType, ScriptParserData::argFunc arg, ScriptParserData::getFunc get, ScriptParserData::displayFunc display);
+	void addParserBase(const std::string& s, ScriptParserData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptParserData::parserFunc parser, ScriptParserData::argFunc parserArg, ScriptParserData::getFunc parserGet);
 	/// Add new type impl.
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
 	/// Test if type was added impl.
@@ -568,7 +632,13 @@ public:
 		using info = TypeInfoImpl<T>;
 		using t3 = typename info::t3;
 
-		return ArgSpec(registeTypeImpl<t3>(), info::isRef, info::isPtr, info::isEditable);
+		auto spec = ArgSpecNone;
+
+		if (info::isRef) spec = spec | ArgSpecVar;
+		if (info::isPtr) spec = spec | ArgSpecPtr;
+		if (info::isEditable) spec = spec | ArgSpecPtrE;
+
+		return ArgSpec(registeTypeImpl<t3>(), spec);
 	}
 	/// Add const value.
 	void addConst(const std::string& s, int i);
@@ -576,7 +646,7 @@ public:
 	template<typename T>
 	void addParser(const std::string& s)
 	{
-		addParserBase(s, T::overloadType(), &T::parse, &T::getDynamic, &T::displayArgs);
+		addParserBase(s, nullptr, T::overloadType(), nullptr, &T::parse, &T::getDynamic);
 	}
 	/// Test if type was already added.
 	template<typename T>
@@ -614,6 +684,8 @@ public:
 
 	/// Get name of type.
 	ScriptRef getTypeName(ArgEnum type) const;
+	/// Get full name of type.
+	std::string getTypePrefix(ArgEnum type) const;
 	/// Get type data.
 	const ScriptTypeData* getType(ArgEnum type) const;
 	/// Get type data.
@@ -643,7 +715,7 @@ class ScriptParser : public ScriptParserBase
 	void addRegImpl(S<First>& n, Rest&... t)
 	{
 		addTypeImpl(n);
-		addCustomReg(n.name, ScriptParserBase::getArgType<First>());
+		addScriptArg(n.name, ScriptParserBase::getArgType<First>());
 		addRegImpl(t...);
 	}
 	void addRegImpl()

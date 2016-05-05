@@ -331,15 +331,13 @@ struct SumList : SumListIndexImpl<sizeof...(V), V...>
 //						Arg class
 ////////////////////////////////////////////////////////////
 
-template<bool Internal, typename... A>
+template<typename... A>
 struct Arg;
 
-template<bool Internal, typename A1, typename... A2>
-struct Arg<Internal, A1, A2...> : public Arg<Internal, A2...>
+template<typename A1, typename... A2>
+struct Arg<A1, A2...> : public Arg<A2...>
 {
-	static constexpr bool internal = Internal;
-
-	using next = Arg<Internal, A2...>;
+	using next = Arg<A2...>;
 	using tag = PosTag<sizeof...(A2)>;
 
 	static constexpr int offset(int i)
@@ -354,9 +352,9 @@ struct Arg<Internal, A1, A2...> : public Arg<Internal, A2...>
 	using next::typeFunc;
 	static A1 typeFunc(tag);
 
-	static int parse(ParserWriter& ph, const SelectedToken& t)
+	static int parse(ParserWriter& ph, const SelectedToken* t)
 	{
-		if (A1::parse(ph, t))
+		if (A1::parse(ph, *t))
 		{
 			return tag::value;
 		}
@@ -365,22 +363,35 @@ struct Arg<Internal, A1, A2...> : public Arg<Internal, A2...>
 			return next::parse(ph, t);
 		}
 	}
+	static int parse(ParserWriter& ph, const SelectedToken** begin, const SelectedToken* end)
+	{
+		if (*begin == end)
+		{
+			Log(LOG_ERROR) << "Not enough args in operation";
+			return -1;
+		}
+		else
+		{
+			int curr = parse(ph, *begin);
+			if (curr < 0)
+			{
+				Log(LOG_ERROR) << "Incorrect argument '"<< (*begin)->toString() <<"'";
+				return -1;
+			}
+			++*begin;
+			return curr;
+		}
+	}
 	static ScriptRange<ArgEnum> argTypes()
 	{
 		const static ArgEnum types[ver()] = { A1::type(), A2::type()... };
 		return { std::begin(types), std::end(types) };
 	}
-	static ArgEnum overloadType()
-	{
-		return tag::value != 0 || !ArgIsReg(A1::type()) ? ArgAny : A1::type();
-	}
 };
 
-template<bool Internal>
-struct Arg<Internal>
+template<>
+struct Arg<>
 {
-	static constexpr bool internal = Internal;
-
 	static constexpr int offset(int i)
 	{
 		return 0;
@@ -388,7 +399,7 @@ struct Arg<Internal>
 	static constexpr int ver() = delete;
 	static void typeFunc() = delete;
 
-	static int parse(ParserWriter& ph, const SelectedToken& begin)
+	static int parse(ParserWriter& ph, const SelectedToken* begin)
 	{
 		return -1;
 	}
@@ -396,9 +407,31 @@ struct Arg<Internal>
 	{
 		return { };
 	}
-	static ArgEnum overloadType()
+};
+
+template<typename T>
+struct ArgInternal
+{
+	using tag = PosTag<0>;
+
+	static constexpr int offset(int i)
 	{
-		return ArgAny;
+		return 0;
+	}
+	static constexpr int ver()
+	{
+		return 1;
+	};
+
+	static T typeFunc(tag);
+
+	static int parse(ParserWriter& ph, const SelectedToken** begin, const SelectedToken* end)
+	{
+		return 0;
+	}
+	static ScriptRange<ArgEnum> argTypes()
+	{
+		return { };
 	}
 };
 
@@ -433,24 +466,10 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 	}
 	static int parse(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 	{
-		int curr = 0;
-		if (!T1::internal)
+		int curr = T1::parse(ph, &begin, end);
+		if (curr < 0)
 		{
-			if (begin == end)
-			{
-				Log(LOG_ERROR) << "Not enough args in operation";
-				return -1;
-			}
-			else
-			{
-				curr = T1::parse(ph, *begin);
-				if (curr < 0)
-				{
-					Log(LOG_ERROR) << "Incorrect argument '"<< begin->toString() <<"'";
-					return -1;
-				}
-			}
-			++begin;
+			return -1;
 		}
 		int lower = next::parse(ph, begin, end);
 		if (lower < 0)
@@ -459,52 +478,14 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 		}
 		return lower * T1::ver() + curr;
 	}
-	static std::string displayArgs(const ScriptParserBase* spb)
+	static ScriptRange<ScriptRange<ArgEnum>> overloadType()
 	{
-		std::string curr = "";
-
-		if (!T1::internal)
+		const static ScriptRange<ArgEnum> types[MaxSize] =
 		{
-			ScriptRange<ArgEnum> args = T1::argTypes();
-			if (args)
-			{
-				curr += " [";
-				auto type = *args.begin();
-				if (args.size() == 1)
-				{
-					if (ArgIsReg(type))
-					{
-						if (ArgIsPtr(type))
-						{
-							if (ArgIsEditable(type))
-							{
-								curr += "ref ";
-							}
-							else
-							{
-								curr += "cref ";
-							}
-						}
-						else
-						{
-							curr += "var ";
-						}
-					}
-				}
-				curr += spb->getTypeName(type).toString();
-				curr += "]";
-			}
-			if (curr == " []")
-			{
-				curr = "";
-			}
-		}
-		curr += next::displayArgs(spb);
-		return curr;
-	}
-	static ArgEnum overloadType()
-	{
-		return !T1::internal ? T1::overloadType() : next::overloadType();
+			T1::argTypes(),
+			T2::argTypes()...,
+		};
+		return { std::begin(types), std::end(types) };
 	}
 
 	using next::typeFunc;
@@ -545,13 +526,9 @@ struct ArgColection<MaxSize>
 			return -1;
 		}
 	}
-	static std::string displayArgs(const ScriptParserBase* spb)
+	static ScriptRange<ScriptRange<ArgEnum>> overloadType()
 	{
-		return "";
-	}
-	static ArgEnum overloadType()
-	{
-		return ArgAny;
+		return { };
 	}
 	static void typeFunc() = delete;
 };
@@ -560,7 +537,7 @@ struct ArgColection<MaxSize>
 //						Arguments impl
 ////////////////////////////////////////////////////////////
 
-struct ArgContextDef
+struct ArgContextDef : ArgInternal<ArgContextDef>
 {
 	using ReturnType = ScriptWorker&;
 	static constexpr size_t size = 0;
@@ -568,19 +545,9 @@ struct ArgContextDef
 	{
 		return sw;
 	}
-
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
-	{
-		return false;
-	}
-
-	static ArgEnum type()
-	{
-		return ArgInvalid;
-	}
 };
 
-struct ArgProgDef
+struct ArgProgDef : ArgInternal<ArgProgDef>
 {
 	using ReturnType = ProgPos&;
 	static constexpr size_t size = 0;
@@ -588,22 +555,12 @@ struct ArgProgDef
 	{
 		return curr;
 	}
-
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
-	{
-		return false;
-	}
-
-	static ArgEnum type()
-	{
-		return ArgInvalid;
-	}
 };
 
 template<typename T>
 struct ArgRegDef
 {
-	using ReturnType = T&;
+	using ReturnType = T;
 	static constexpr size_t size = sizeof(Uint8);
 	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
@@ -621,7 +578,7 @@ struct ArgRegDef
 
 	static ArgEnum type()
 	{
-		return ScriptParserBase::getArgType<ReturnType>();
+		return ArgSpec(ScriptParserBase::getArgType<ReturnType>(), ArgSpecReg);
 	}
 };
 
@@ -784,79 +741,79 @@ struct ArgTagDef
 template<>
 struct ArgSelector<ScriptWorker&>
 {
-	using type = Arg<true, ArgContextDef>;
+	using type = ArgContextDef;
 };
 
 template<>
 struct ArgSelector<int&>
 {
-	using type = Arg<false, ArgRegDef<int>>;
+	using type = Arg<ArgRegDef<int&>>;
 };
 
 template<>
 struct ArgSelector<int>
 {
-	using type = Arg<false, ArgConstDef, ArgRegDef<int>>;
+	using type = Arg<ArgConstDef, ArgRegDef<int>>;
 };
 
 template<>
 struct ArgSelector<const int&>
 {
-	using type = Arg<false, ArgConstDef, ArgRegDef<int>>;
+	using type = Arg<ArgConstDef, ArgRegDef<int>>;
 };
 
 template<>
 struct ArgSelector<ProgPos&>
 {
-	using type = Arg<true, ArgProgDef>;
+	using type = ArgProgDef;
 };
 
 template<>
 struct ArgSelector<ProgPos>
 {
-	using type = Arg<false, ArgLabelDef>;
+	using type = Arg<ArgLabelDef>;
 };
 
 template<>
 struct ArgSelector<FuncCommon>
 {
-	using type = Arg<true, ArgFuncDef>;
+	using type = Arg<ArgFuncDef>;
 };
 
 template<>
 struct ArgSelector<const Uint8*>
 {
-	using type = Arg<true, ArgRawDef<64>, ArgRawDef<32>, ArgRawDef<16>, ArgRawDef<8>, ArgRawDef<4>, ArgRawDef<0>>;
+	using type = Arg<ArgRawDef<64>, ArgRawDef<32>, ArgRawDef<16>, ArgRawDef<8>, ArgRawDef<4>, ArgRawDef<0>>;
 };
 
 template<typename T>
 struct ArgSelector<T*>
 {
-	using type = Arg<false, ArgRegDef<T*>, ArgNullDef>;
+	using type = Arg<ArgRegDef<T*>, ArgNullDef>;
 };
 
 template<typename T>
 struct ArgSelector<T*&>
 {
-	using type = Arg<false, ArgRegDef<T*>>;
+	using type = Arg<ArgRegDef<T*&>>;
 };
 
 template<typename T>
 struct ArgSelector<const T*>
 {
-	using type = Arg<false, ArgRegDef<const T*>, ArgRegDef<T*>, ArgNullDef>;
+	using type = Arg<ArgRegDef<const T*>, ArgNullDef>;
 };
 
 template<typename T>
 struct ArgSelector<const T*&>
 {
-	using type = Arg<false, ArgRegDef<const T*>>;
+	using type = Arg<ArgRegDef<const T*&>>;
 };
 
 template<typename T, typename I>
 struct ArgSelector<ScriptTag<T, I>>
 {
-	using type = Arg<false, ArgTagDef<T, I>>;
+	using type = Arg<ArgTagDef<T, I>>;
 };
 
 template<typename T>
@@ -912,7 +869,6 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 	using GetArgs<Func>::ver;
 	using GetArgs<Func>::arg;
 	using GetArgs<Func>::parse;
-	using GetArgs<Func>::displayArgs;
 	using GetArgs<Func>::overloadType;
 
 	static constexpr FuncCommon getDynamic(int i) { return FuncList::getDynamic(i); }

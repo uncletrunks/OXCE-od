@@ -3362,7 +3362,7 @@ void getTileShade(const BattleUnit *bu, int &shade)
 
 struct getRightHandWeaponScript
 {
-	static RetEnum func(BattleUnit *&bu, BattleItem *&bi)
+	static RetEnum func(BattleUnit *bu, BattleItem *&bi)
 	{
 		if (bu)
 		{
@@ -3377,7 +3377,7 @@ struct getRightHandWeaponScript
 };
 struct getRightHandWeaponConstScript
 {
-	static RetEnum func(const BattleUnit *&bu, const BattleItem *&bi)
+	static RetEnum func(const BattleUnit *bu, const BattleItem *&bi)
 	{
 		if (bu)
 		{
@@ -3392,7 +3392,7 @@ struct getRightHandWeaponConstScript
 };
 struct getLeftHandWeaponScript
 {
-	static RetEnum func(BattleUnit *&bu, BattleItem *&bi)
+	static RetEnum func(BattleUnit *bu, BattleItem *&bi)
 	{
 		if (bu)
 		{
@@ -3407,7 +3407,7 @@ struct getLeftHandWeaponScript
 };
 struct getLeftHandWeaponConstScript
 {
-	static RetEnum func(const BattleUnit *&bu, const BattleItem *&bi)
+	static RetEnum func(const BattleUnit *bu, const BattleItem *&bi)
 	{
 		if (bu)
 		{
