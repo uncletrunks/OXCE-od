@@ -127,6 +127,7 @@ private:
 	bool _spacecraft, _notifyWhenRefueled, _autoPatrol;
 	int _listOrder, _maxItems, _maxDepth;
 	std::vector<std::vector <int> > _deployment;
+	std::vector<int> _craftInventoryTile;
 	RuleCraftStats _stats;
 public:
 	/// Creates a blank craft ruleset.
@@ -191,6 +192,8 @@ public:
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.
 	std::vector<std::vector<int> > &getDeployment();
+	/// Gets the craft inventory tile position.
+	std::vector<int> &getCraftInventoryTile();
 	/// Gets the item limit for this craft.
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.

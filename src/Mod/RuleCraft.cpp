@@ -100,6 +100,11 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 		{
 			_deployment = deployment.as<std::vector<std::vector<int> > >(_deployment);
 		}
+
+		if (const YAML::Node &craftInventoryTile = node["craftInventoryTile"])
+		{
+			_craftInventoryTile = craftInventoryTile.as<std::vector<int> >(_craftInventoryTile);
+		}
 	}
 	_spacecraft = node["spacecraft"].as<bool>(_spacecraft);
 	_notifyWhenRefueled = node["notifyWhenRefueled"].as<bool>(_notifyWhenRefueled);
@@ -411,6 +416,15 @@ int RuleCraft::getListOrder() const
 std::vector<std::vector<int> > &RuleCraft::getDeployment()
 {
 	return _deployment;
+}
+
+/**
+* Gets the craft inventory tile position.
+* @return The tile position.
+*/
+std::vector<int> &RuleCraft::getCraftInventoryTile()
+{
+	return _craftInventoryTile;
 }
 
 /**

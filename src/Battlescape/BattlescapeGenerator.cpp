@@ -930,6 +930,17 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 	}
 	else if (_craft && !_craft->getRules()->getDeployment().empty() && !_baseInventory)
 	{
+		if (_craftInventoryTile == 0)
+		{
+			// Craft inventory tile position defined in the ruleset
+			std::vector<int> coords = _craft->getRules()->getCraftInventoryTile();
+			if (coords.size() >= 3)
+			{
+				Position craftInventoryTilePosition = Position(coords[0] + (_craftPos.x * 10), coords[1] + (_craftPos.y * 10), coords[2] + _craftZ);
+				canPlaceXCOMUnit(_save->getTile(craftInventoryTilePosition));
+			}
+		}
+
 		for (std::vector<std::vector<int> >::const_iterator i = _craft->getRules()->getDeployment().begin(); i != _craft->getRules()->getDeployment().end(); ++i)
 		{
 			Position pos = Position((*i)[0] + (_craftPos.x * 10), (*i)[1] + (_craftPos.y * 10), (*i)[2] + _craftZ);
