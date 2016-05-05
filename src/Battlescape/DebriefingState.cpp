@@ -1082,20 +1082,20 @@ void DebriefingState::prepareDebriefing()
 					else
 					{ // non soldier player = tank
 						base->getStorageItems()->addItem((*j)->getType());
-						RuleItem *tankRule = _game->getMod()->getItem((*j)->getType());
 						if ((*j)->getItem("STR_RIGHT_HAND"))
 						{
+							RuleItem *primaryRule = (*j)->getItem("STR_RIGHT_HAND")->getRules();
 							BattleItem *ammoItem = (*j)->getItem("STR_RIGHT_HAND")->getAmmoItem();
-							if (!tankRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
+							if (!primaryRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 							{
 								int total = ammoItem->getAmmoQuantity();
 
-								if (tankRule->getClipSize()) // meaning this tank can store multiple clips
+								if (primaryRule->getClipSize()) // meaning this tank can store multiple clips
 								{
 									total /= ammoItem->getRules()->getClipSize();
 								}
 
-								base->getStorageItems()->addItem(tankRule->getCompatibleAmmo()->front(), total);
+								base->getStorageItems()->addItem(primaryRule->getCompatibleAmmo()->front(), total);
 							}
 						}
 						if ((*j)->getItem("STR_LEFT_HAND"))
