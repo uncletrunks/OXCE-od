@@ -233,9 +233,13 @@ struct ParserWriter
 	bool addReg(const ScriptRef& s, ArgEnum type);
 }; //struct ParserWriter
 
+
 ////////////////////////////////////////////////////////////
 //				Mata helper classes
 ////////////////////////////////////////////////////////////
+
+namespace helper
+{
 
 template<int I>
 struct PosTag
@@ -881,11 +885,8 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 };
 
 ////////////////////////////////////////////////////////////
-//						Bind class
+//					Bind helper classes
 ////////////////////////////////////////////////////////////
-
-namespace helper
-{
 
 template<typename T>
 struct BindSet
@@ -1056,6 +1057,10 @@ struct BindFunc<P *(T::*)(Args...) const, X>
 
 } //namespace helper
 
+////////////////////////////////////////////////////////////
+//						Bind class
+////////////////////////////////////////////////////////////
+
 struct BindBase
 {
 	ScriptParserBase* parser;
@@ -1067,7 +1072,7 @@ struct BindBase
 	template<typename X>
 	void addCustomFunc(const std::string& name)
 	{
-		parser->addParser<FuncGroup<X>>(name);
+		parser->addParser<helper::FuncGroup<X>>(name);
 	}
 	void addCustomConst(const std::string& name, int i)
 	{
@@ -1081,9 +1086,9 @@ struct Bind : BindBase
 
 	Bind(ScriptParserBase* p) : BindBase{ p }
 	{
-		parser->addParser<FuncGroup<helper::BindSet<T>>>("set");
-		parser->addParser<FuncGroup<helper::BindSet<const T>>>("set");
-		parser->addParser<FuncGroup<helper::BindEq<T>>>("test_eq");
+		parser->addParser<helper::FuncGroup<helper::BindSet<T>>>("set");
+		parser->addParser<helper::FuncGroup<helper::BindSet<const T>>>("set");
+		parser->addParser<helper::FuncGroup<helper::BindEq<T>>>("test_eq");
 	}
 
 	std::string getName(const std::string& s)

@@ -38,8 +38,13 @@ class ScriptContainerBase;
 class ParserWriter;
 struct SelectedToken;
 
+namespace helper
+{
+
 template<typename T>
 struct ArgSelector;
+
+}
 
 constexpr int ScriptMaxArg = 8;
 constexpr int ScriptMaxReg = 256;
@@ -100,7 +105,6 @@ constexpr ArgSpecEnum operator^(ArgSpecEnum a, ArgSpecEnum b)
 enum ArgEnum : Uint8
 {
 	ArgInvalid = ArgSpecSize * 0,
-	ArgAny = ArgSpecSize * 0 + 1,
 
 	ArgNull = ArgSpecSize * 1,
 	ArgInt = ArgSpecSize * 2,

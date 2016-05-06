@@ -293,7 +293,7 @@ struct Func_test_eq_null
  */
 #define MACRO_CREATE_PROC_ENUM(NAME, ...) \
 	MACRO_PROC_ID(NAME), \
-	Proc_##NAME##_end = MACRO_PROC_ID(NAME) + FuncGroup<MACRO_FUNC_ID(NAME)>::ver() - 1,
+	Proc_##NAME##_end = MACRO_PROC_ID(NAME) + helper::FuncGroup<MACRO_FUNC_ID(NAME)>::ver() - 1,
 
 /**
  * Enum storing id of all avaliable operations in script engine
@@ -326,11 +326,11 @@ static inline int scriptExe(int i0, int i1, ScriptWorker& data)
 	//--------------------------------------------------
 	//			helper macros for this function
 	//--------------------------------------------------
-	#define MACRO_FUNC_ARRAY(NAME, ...) + FuncGroup<MACRO_FUNC_ID(NAME)>::FuncList{}
+	#define MACRO_FUNC_ARRAY(NAME, ...) + helper::FuncGroup<MACRO_FUNC_ID(NAME)>::FuncList{}
 	#define MACRO_FUNC_ARRAY_LOOP(POS) \
 		case (POS): \
 		{ \
-			using currType = GetType<func, POS>; \
+			using currType = helper::GetType<func, POS>; \
 			const auto p = proc + (int)curr; \
 			curr += currType::offset; \
 			const auto ret = currType::func(data, p, curr); \
@@ -479,18 +479,16 @@ std::string displayOverloadProc(const ScriptParserBase* spb, const ScriptRange<S
 	{
 		if (p)
 		{
-			std::string curr = "";
-			curr += " [";
 			auto type = *p.begin();
-			if (p.size() == 1)
-			{
-				curr += spb->getTypePrefix(type);
-				curr += " ";
-			}
-			curr += spb->getTypeName(type).toString();
-			curr += "]";
-			result += curr;
+			result += "[";
+			result += spb->getTypePrefix(type);
+			result += spb->getTypeName(type).toString();
+			result += "] ";
 		}
+	}
+	if (!result.empty())
+	{
+		result.pop_back();
 	}
 	return result;
 }
@@ -624,11 +622,11 @@ bool parseBuildinProc(const ScriptParserData& spd, ParserWriter& ph, const Selec
  */
 bool parseCustomProc(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 {
-	using argFunc = typename ArgSelector<FuncCommon>::type;
-	using argRaw = typename ArgSelector<const Uint8*>::type;
-	static_assert(FuncGroup<Func_call>::ver() == argRaw::ver(), "Invalid size");
-	static_assert(std::is_same<GetType<FuncGroup<Func_call>, 0>, argFunc>::value, "Invalid first argument");
-	static_assert(std::is_same<GetType<FuncGroup<Func_call>, 1>, argRaw>::value, "Invalid second argument");
+	using argFunc = typename helper::ArgSelector<FuncCommon>::type;
+	using argRaw = typename helper::ArgSelector<const Uint8*>::type;
+	static_assert(helper::FuncGroup<Func_call>::ver() == argRaw::ver(), "Invalid size");
+	static_assert(std::is_same<helper::GetType<helper::FuncGroup<Func_call>, 0>, argFunc>::value, "Invalid first argument");
+	static_assert(std::is_same<helper::GetType<helper::FuncGroup<Func_call>, 1>, argRaw>::value, "Invalid second argument");
 
 	auto opPos = ph.pushProc(Proc_call);
 
@@ -1436,7 +1434,7 @@ ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& f
 	//					op_data init
 	//--------------------------------------------------
 	#define MACRO_ALL_INIT(NAME, ...) \
-		addParserBase(#NAME, nullptr, FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType(), &parseBuildinProc<MACRO_PROC_ID(NAME), FuncGroup<MACRO_FUNC_ID(NAME)>>, nullptr, nullptr);
+		addParserBase(#NAME, nullptr, helper::FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType(), &parseBuildinProc<MACRO_PROC_ID(NAME), helper::FuncGroup<MACRO_FUNC_ID(NAME)>>, nullptr, nullptr);
 
 	MACRO_PROC_DEFINITION(MACRO_ALL_INIT)
 
@@ -1449,7 +1447,7 @@ ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& f
 	addParserBase("ptr", &overloadBuildinProc, {}, &parsePtr, nullptr, nullptr);
 	addParserBase("ptre", &overloadBuildinProc, {}, &parsePtrE, nullptr, nullptr);
 
-	addParser<FuncGroup<Func_test_eq_null>>("test_eq");
+	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq");
 
 	if (!firstArg.empty())
 	{
@@ -1656,25 +1654,17 @@ std::string ScriptParserBase::getTypePrefix(ArgEnum type) const
 	std::string prefix;
 	if (ArgIsVar(type))
 	{
-		prefix = "var";
-	}
-	else if (!ArgIsPtr(type))
-	{
-		prefix = "const";
+		prefix = "var ";
 	}
 	if (ArgIsPtr(type))
 	{
-		if (!prefix.empty())
-		{
-			prefix += " ";
-		}
 		if (ArgIsPtrE(type))
 		{
-			prefix += "ptre";
+			prefix += "ptre ";
 		}
 		else
 		{
-			prefix += "ptr";
+			prefix += "ptr ";
 		}
 	}
 	return prefix;
@@ -1889,12 +1879,12 @@ void ScriptParserBase::logScriptMetadata() const
 			Logger opLog;
 			#define MACRO_STRCAT(...) #__VA_ARGS__
 			#define MACRO_ALL_LOG(NAME, Impl, Args) \
-				if (validOverloadProc(FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType())) opLog.get(LOG_DEBUG) \
+				if (validOverloadProc(helper::FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType())) opLog.get(LOG_DEBUG) \
 					<< "Op:    " << std::setw(tabSize*2) << #NAME \
-					<< "OpId:  " << std::setw(tabSize/2) << offset << "  + " <<  std::setw(tabSize) << FuncGroup<MACRO_FUNC_ID(NAME)>::ver() \
+					<< "OpId:  " << std::setw(tabSize/2) << offset << "  + " <<  std::setw(tabSize) << helper::FuncGroup<MACRO_FUNC_ID(NAME)>::ver() \
 					<< "Impl:  " << std::setw(tabSize*10) << MACRO_STRCAT(Impl) \
-					<< "Args:  " << displayOverloadProc(this, FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType()) << "\n"; \
-				offset += FuncGroup<MACRO_FUNC_ID(NAME)>::ver();
+					<< "Args:  " << displayOverloadProc(this, helper::FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType()) << "\n"; \
+				offset += helper::FuncGroup<MACRO_FUNC_ID(NAME)>::ver();
 
 			opLog.get(LOG_DEBUG) << "Available buildin script operations:\n" << std::left << std::hex << std::showbase;
 			MACRO_PROC_DEFINITION(MACRO_ALL_LOG)
@@ -1926,12 +1916,12 @@ void ScriptParserBase::logScriptMetadata() const
 			{
 				continue;
 			}
-			if (ArgBase(r.type) == ArgInt && !ArgIsVar(r.type))
+			if (ArgBase(r.type) == ArgInt && !ArgIsReg(r.type))
 			{
-				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(10) << getTypePrefix(r.type) << argType(r.type) << r.value << "\n";
+				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(9) << getTypePrefix(r.type) << " " << std::setw(9) << argType(r.type) << " " << r.value << "\n";
 			}
 			else
-				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(10) << getTypePrefix(r.type) << argType(r.type) << "\n";
+				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(9) << getTypePrefix(r.type) << " " << std::setw(9) << argType(r.type) << "\n";
 		}
 		if (Logger::reportingLevel() != LOG_VERBOSE)
 		{
