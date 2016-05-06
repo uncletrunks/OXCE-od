@@ -898,6 +898,15 @@ struct BindSet
 	}
 };
 template<typename T>
+struct BindSwap
+{
+	static RetEnum func(T*& t, T*& r)
+	{
+		std::swap(t, r);
+		return RetContinue;
+	}
+};
+template<typename T>
 struct BindEq
 {
 	static RetEnum func(ProgPos& Prog, const T* t1, const T* t2, ProgPos LabelTrue, ProgPos LabelFalse)
@@ -1088,6 +1097,8 @@ struct Bind : BindBase
 	{
 		parser->addParser<helper::FuncGroup<helper::BindSet<T>>>("set");
 		parser->addParser<helper::FuncGroup<helper::BindSet<const T>>>("set");
+		parser->addParser<helper::FuncGroup<helper::BindSet<T>>>("swap");
+		parser->addParser<helper::FuncGroup<helper::BindSet<const T>>>("swap");
 		parser->addParser<helper::FuncGroup<helper::BindEq<T>>>("test_eq");
 	}
 

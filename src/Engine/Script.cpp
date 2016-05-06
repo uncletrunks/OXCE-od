@@ -182,25 +182,12 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	/*	Name,		Implementation,													End excecution,				Args */ \
 	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorker &)) \
 	\
-	IMPL(ret,		MACRO_QUOTE({								c.ref<int>(RegI0) = Data0;	return RetEnd;						}),		(ScriptWorker& c, int Data0)) \
-	IMPL(ret_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
-	IMPL(ret_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
-	IMPL(ret_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
-	IMPL(ret_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	{ c.ref<int>(RegI0) = Data0; return RetEnd; } return RetContinue; }),	(ScriptWorker& c, int Data0)) \
+	IMPL(return,	MACRO_QUOTE({ c.ref<int>(RegI0) = Data0;						return RetEnd;		}),		(ScriptWorker& c, int Data0)) \
 	\
-	IMPL(goto,		MACRO_QUOTE({								Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
-	IMPL(goto_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
-	IMPL(goto_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
-	IMPL(goto_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
-	IMPL(goto_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Prog = Label1;			return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
+	IMPL(goto,		MACRO_QUOTE({ Prog = Label1;									return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
 	\
-	IMPL(set,		MACRO_QUOTE({								Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
-	IMPL(set_gt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) > 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
-	IMPL(set_lt,	MACRO_QUOTE({ if (c.ref<int>(RegCond) < 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
-	IMPL(set_eq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) == 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
-	IMPL(set_neq,	MACRO_QUOTE({ if (c.ref<int>(RegCond) != 0)	Reg0 = Data1;			return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
+	IMPL(set,		MACRO_QUOTE({ Reg0 = Data1;										return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
 	\
-	IMPL(test,		MACRO_QUOTE({ c.ref<int>(RegCond) = Data0 - Data1;				return RetContinue; }),		(ScriptWorker& c, int Data0, int Data1)) \
 	IMPL(test_le,	MACRO_QUOTE({ Prog = (A <= B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse)) \
 	IMPL(test_eq,	MACRO_QUOTE({ Prog = (A == B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse)) \
 	\

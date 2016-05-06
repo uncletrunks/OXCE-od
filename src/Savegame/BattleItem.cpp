@@ -693,7 +693,7 @@ ModScript::RecolorItemParser::RecolorItemParser(const std::string& name,  Mod* m
 
 	commonImpl(b);
 
-	setDefault("add_shade new_pixel shade; ret new_pixel;");
+	setDefault("add_shade new_pixel shade; return new_pixel;");
 }
 
 /**
@@ -705,7 +705,7 @@ ModScript::SelectItemParser::SelectItemParser(const std::string& name,  Mod* mod
 
 	commonImpl(b);
 
-	setDefault("add sprite_index sprite_offset; ret sprite_index;");
+	setDefault("add sprite_index sprite_offset; return sprite_index;");
 }
 
 void BattleItem::ScriptFill(ScriptWorker* w, BattleItem* item, int part, int anim_frame, int shade)

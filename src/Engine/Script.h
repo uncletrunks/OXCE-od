@@ -201,11 +201,11 @@ constexpr int ArgCompatible(ArgEnum argType, ArgEnum regType, size_t overloadSiz
 enum RegEnum : Uint8
 {
 	RegInvaild = (Uint8)-1,
+
 	RegI0 = 0*sizeof(int),
 	RegI1 = 1*sizeof(int),
-	RegCond = 2*sizeof(int),
 
-	RegMax = 3*sizeof(int),
+	RegMax = 2*sizeof(int),
 };
 
 /**

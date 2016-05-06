@@ -3603,7 +3603,7 @@ ModScript::RecolorUnitParser::RecolorUnitParser(const std::string& name,  Mod* m
 
 	commonImpl(b);
 
-	setDefault("unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; ret new_pixel;");
+	setDefault("unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; return new_pixel;");
 }
 
 /**
@@ -3615,7 +3615,7 @@ ModScript::SelectUnitParser::SelectUnitParser(const std::string& name,  Mod* mod
 
 	commonImpl(b);
 
-	setDefault("add sprite_index sprite_offset; ret sprite_index;");
+	setDefault("add sprite_index sprite_offset; return sprite_index;");
 }
 
 /**
