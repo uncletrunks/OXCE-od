@@ -501,7 +501,7 @@ int overloadInvalidProc(const ScriptParserData& spd, const ScriptContainerData* 
 }
 
 /**
- * Verfify arguments.
+ * Verify arguments.
  */
 int overloadCustomProc(const ScriptParserData& spd, const ScriptContainerData* begin, const ScriptContainerData* end)
 {
@@ -513,21 +513,18 @@ int overloadCustomProc(const ScriptParserData& spd, const ScriptContainerData* b
 		{
 			return 0;
 		}
-		if (currOver)
+		const auto size = currOver.size();
+		if (size)
 		{
-			int oneArgTempScore = 0;
-			if (!*curr)
+			if (*curr)
 			{
-				oneArgTempScore = 1;
-			}
-			else
-			{
+				int oneArgTempScore = 0;
 				for (auto& o : currOver)
 				{
-					oneArgTempScore = std::max(oneArgTempScore, ArgCompatible(o, curr->type));
+					oneArgTempScore = std::max(oneArgTempScore, ArgCompatible(o, curr->type, size - 1));
 				}
+				tempSorce = std::min(tempSorce, oneArgTempScore);
 			}
-			tempSorce = std::min(tempSorce, oneArgTempScore);
 			++curr;
 		}
 	}
@@ -564,7 +561,7 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptParserData>& pro
 		{
 			if (tempSorce == bestSorce)
 			{
-				return false;
+				bestValue = nullptr;
 			}
 			else if (tempSorce > bestSorce)
 			{
@@ -575,11 +572,19 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptParserData>& pro
 	}
 	if (bestSorce)
 	{
-		return (*bestValue)(ph, begin, end);
+		if (bestValue)
+		{
+			return (*bestValue)(ph, begin, end);
+		}
+		else
+		{
+			Log(LOG_ERROR) << "conflicting overloads for operator '" + proc.begin()->name.toString() + "'";
+			return false;
+		}
 	}
 	else
 	{
-		Log(LOG_ERROR) << "can't match argument for operator '" + proc.begin()->name.toString() + "'";
+		Log(LOG_ERROR) << "can't match overload for operator '" + proc.begin()->name.toString() + "'";
 		return false;
 	}
 }
@@ -1423,7 +1428,7 @@ bool ParserWriter::pushRegTry(const ScriptRef& s, ArgEnum type)
 {
 	ScriptContainerData pos = getReferece(s);
 	type = ArgSpec(type, ArgSpecReg);
-	if (pos && ArgCompatible(type, pos.type) && pos.index != RegInvaild)
+	if (pos && ArgCompatible(type, pos.type, 0) && pos.index != RegInvaild)
 	{
 		pushValue<Uint8>(pos.index);
 		return true;

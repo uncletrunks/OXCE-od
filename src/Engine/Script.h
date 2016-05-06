@@ -180,16 +180,15 @@ constexpr bool ArgIsPtrE(ArgEnum arg)
  * @param regType Type of reg we try pass to operation.
  * @return Zero if incompatible, 255 if both types are same.
  */
-constexpr int ArgCompatible(ArgEnum argType, ArgEnum regType)
+constexpr int ArgCompatible(ArgEnum argType, ArgEnum regType, size_t overloadSize)
 {
 	return
 		argType == ArgInvalid ? 0 :
-		argType == ArgAny ? 1 :
 		ArgIsVar(argType) && argType != regType ? 0 :
 		ArgBase(argType) != ArgBase(regType) ? 0 :
 		ArgIsReg(argType) != ArgIsReg(regType) ? 0 :
 		ArgIsPtr(argType) != ArgIsPtr(regType) ? 0 :
-			255 - (ArgIsPtrE(argType) != ArgIsPtrE(regType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(regType) ? 64 : 0);
+			255 - (ArgIsPtrE(argType) != ArgIsPtrE(regType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(regType) ? 64 : 0) - (overloadSize > 8 ? 8 : overloadSize);
 }
 
 /**
