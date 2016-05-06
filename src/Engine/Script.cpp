@@ -694,9 +694,7 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 		return false;
 	}
 
-	const ScriptRef eq = ScriptRef{ equalFunc ? "test_eq" : "test_le" };
-	ScriptRange<ScriptParserData> proc = ph.parser.getProc(eq);
-
+	const auto proc = ph.parser.getProc(ScriptRef{ equalFunc ? "test_eq" : "test_le" });
 	if (callOverloadProc(ph, proc, std::begin(conditionArgs), std::end(conditionArgs)) == false)
 	{
 		Log(LOG_ERROR) << "unsupported operator: '" + begin[0].toString() + "'";
@@ -776,7 +774,10 @@ bool parseEnd(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken
 	return true;
 }
 
-bool parseDeclImpl(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end, ArgSpecEnum subType)
+/**
+ * Parser of `var` operation that define local variables.
+ */
+bool parseVar(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
 {
 	if (ph.codeBlocks.size() > 0)
 	{
@@ -784,70 +785,52 @@ bool parseDeclImpl(ParserWriter& ph, const SelectedToken* begin, const SelectedT
 		return false;
 	}
 
-	// adding new custom variables of type selected type.
-	auto type_curr = ph.parser.getType(*begin);
-	if (type_curr)
+	auto spec = ArgSpecVar;
+	if (begin != end)
 	{
-		if (type_curr->size == 0 && !(subType & ArgSpecPtr))
+		if (*begin == ScriptRef{ "ptr" })
 		{
-			Log(LOG_ERROR) << "can't create variable of type '"<< begin->toString() <<"'";
-			return false;
+			spec = spec | ArgSpecPtr;
+			++begin;
 		}
-		++begin;
-		for (; begin!= end; ++begin)
+		else if (*begin == ScriptRef{ "ptre" })
 		{
-			if (begin->getType() != TokenSymbol || begin->find('.') != std::string::npos || ph.addReg(*begin, ArgSpec(type_curr->type, subType)) == false)
-			{
-				Log(LOG_ERROR) << "invalid variable name '"<< begin->toString() <<"'";
-				return false;
-			}
+			spec = spec | ArgSpecPtrE;
+			++begin;
 		}
-		return true;
 	}
-
-	return false;
-}
-
-/**
- * Parser of `var` operation that define local variables.
- */
-bool parseVar(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
-{
-	if (std::distance(begin, end) < 2)
+	auto size = std::distance(begin, end);
+	if (size < 2 || 3 < size)
 	{
 		Log(LOG_ERROR) << "invaild length of 'var' definition";
 		return false;
 	}
 
-	return parseDeclImpl(ph, begin, end, ArgSpecVar);
-}
-
-/**
- * Parser of `cref` operation that define local const reference.
- */
-bool parsePtr(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
-{
-	if (std::distance(begin, end) < 2)
+	// adding new custom variables of type selected type.
+	auto type_curr = ph.parser.getType(*begin);
+	if (type_curr)
 	{
-		Log(LOG_ERROR) << "invaild length of 'ptr' definition";
-		return false;
+		if (type_curr->size == 0 && !(spec & ArgSpecPtr))
+		{
+			Log(LOG_ERROR) << "can't create variable of type '" << begin->toString() << "'";
+			return false;
+		}
+
+		++begin;
+		if (begin->getType() != TokenSymbol || begin->find('.') != std::string::npos || ph.addReg(*begin, ArgSpec(type_curr->type, spec)) == false)
+		{
+			Log(LOG_ERROR) << "invalid variable name '" << begin->toString() << "'";
+			return false;
+		}
+		if (size == 3)
+		{
+			const auto proc = ph.parser.getProc(ScriptRef{ "set" });
+			return callOverloadProc(ph, proc, begin, end);
+		}
+		return true;
 	}
 
-	return parseDeclImpl(ph, begin, end, ArgSpecPtr | ArgSpecVar);
-}
-
-/**
- * Parser of `ref` operation that define local reference.
- */
-bool parsePtrE(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
-{
-	if (std::distance(begin, end) < 2)
-	{
-		Log(LOG_ERROR) << "invaild length of 'ptre' definition";
-		return false;
-	}
-
-	return parseDeclImpl(ph, begin, end, ArgSpecPtrE | ArgSpecVar);
+	return false;
 }
 
 /**
@@ -1431,8 +1414,6 @@ ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& f
 	addParserBase("else", &overloadBuildinProc, {}, &parseElse, nullptr, nullptr);
 	addParserBase("end", &overloadBuildinProc, {}, &parseEnd, nullptr, nullptr);
 	addParserBase("var", &overloadBuildinProc,{}, &parseVar, nullptr, nullptr);
-	addParserBase("ptr", &overloadBuildinProc, {}, &parsePtr, nullptr, nullptr);
-	addParserBase("ptre", &overloadBuildinProc, {}, &parsePtrE, nullptr, nullptr);
 
 	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq");
 
