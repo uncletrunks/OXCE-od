@@ -266,6 +266,17 @@ MACRO_PROC_DEFINITION(MACRO_CREATE_FUNC)
 
 #undef MACRO_CREATE_FUNC
 
+
+struct Func_test_eq_null
+{
+	[[gnu::always_inline]]
+	static RetEnum func (ProgPos& Prog, std::nullptr_t, std::nullptr_t, ProgPos LabelTrue, ProgPos)
+	{
+		Prog = LabelTrue;
+		return RetContinue;
+	}
+};
+
 } //namespace
 
 ////////////////////////////////////////////////////////////
@@ -698,65 +709,12 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 		return false;
 	}
 
-	auto argType0 = ph.getReferece(conditionArgs[0]);
-	auto argType1 = ph.getReferece(conditionArgs[1]);
-	if (!argType0.name)
-	{
-		Log(LOG_ERROR) << "invalid argument: '" + conditionArgs[0].toString() + "'";
-		return false;
-	}
-	if (!argType1.name)
-	{
-		Log(LOG_ERROR) << "invalid argument: '" + conditionArgs[1].toString() + "'";
-		return false;
-	}
+	const ScriptRef eq = ScriptRef{ equalFunc ? "test_eq" : "test_le" };
+	ScriptRange<ScriptParserData> proc = ph.parser.getProc(eq);
 
-	ArgEnum base0 = ArgBase(argType0.type);
-	ArgEnum base1 = ArgBase(argType1.type);
-
-	// if any of arg is int then we use standart comparison
-	if (base0 == ArgInt || base1 == ArgInt)
+	if (callOverloadProc(ph, proc, std::begin(conditionArgs), std::end(conditionArgs)) == false)
 	{
-		auto proc = ph.pushProc(equalFunc ? Proc_test_eq : Proc_test_le);
-		auto argVer = 0;
-
-		if (equalFunc)
-		{
-			argVer = FuncGroup<Func_test_eq>::parse(ph, std::begin(conditionArgs), std::end(conditionArgs));
-		}
-		else
-		{
-			argVer = FuncGroup<Func_test_le>::parse(ph, std::begin(conditionArgs), std::end(conditionArgs));
-		}
-
-		if (argVer < 0)
-		{
-			return false;
-		}
-		ph.updateProc(proc, argVer);
-	}
-	else if (equalFunc && ((base0 != ArgNull) ? (base0 == base1 || base1 == ArgNull) : (base1 != ArgNull)))
-	{
-		const ScriptRef eq = ScriptRef{ ".eq" };
-		ScriptRange<ScriptParserData> proc;
-		if (base0 != ArgNull)
-		{
-			proc = ph.parser.getProc(ph.parser.getTypeName(base0), eq);
-		}
-		else if (base1 != ArgNull)
-		{
-			proc = ph.parser.getProc(ph.parser.getTypeName(base1), eq);
-		}
-
-		if (callOverloadProc(ph, proc, std::begin(conditionArgs), std::end(conditionArgs)) == false)
-		{
-			Log(LOG_ERROR) << "unsupported operator: '" + begin[0].toString() + "'";
-			return false;
-		}
-	}
-	else
-	{
-		Log(LOG_ERROR) << "incompatible arguments: '" + conditionArgs[0].toString() + "' and '" + conditionArgs[1].toString() + "' for '" + begin[0].toString() + "' operator";
+		Log(LOG_ERROR) << "unsupported operator: '" + begin[0].toString() + "'";
 		return false;
 	}
 
@@ -1490,6 +1448,8 @@ ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& f
 	addParserBase("var", &overloadBuildinProc,{}, &parseVar, nullptr, nullptr);
 	addParserBase("ptr", &overloadBuildinProc, {}, &parsePtr, nullptr, nullptr);
 	addParserBase("ptre", &overloadBuildinProc, {}, &parsePtrE, nullptr, nullptr);
+
+	addParser<FuncGroup<Func_test_eq_null>>("test_eq");
 
 	if (!firstArg.empty())
 	{

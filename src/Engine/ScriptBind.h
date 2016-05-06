@@ -810,6 +810,12 @@ struct ArgSelector<const T*&>
 	using type = Arg<ArgRegDef<const T*&>>;
 };
 
+template<>
+struct ArgSelector<std::nullptr_t>
+{
+	using type = Arg<ArgNullDef>;
+};
+
 template<typename T, typename I>
 struct ArgSelector<ScriptTag<T, I>>
 {
@@ -1075,9 +1081,9 @@ struct Bind : BindBase
 
 	Bind(ScriptParserBase* p) : BindBase{ p }
 	{
-		parser->addParser<FuncGroup<helper::BindSet<T>>>(getName("setRef"));
-		parser->addParser<FuncGroup<helper::BindSet<const T>>>(getName("setRef"));
-		parser->addParser<FuncGroup<helper::BindEq<T>>>(getName("eq"));
+		parser->addParser<FuncGroup<helper::BindSet<T>>>("set");
+		parser->addParser<FuncGroup<helper::BindSet<const T>>>("set");
+		parser->addParser<FuncGroup<helper::BindEq<T>>>("test_eq");
 	}
 
 	std::string getName(const std::string& s)

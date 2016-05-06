@@ -577,6 +577,10 @@ protected:
 		{
 			return ArgInt;
 		}
+		else if (std::is_same<T, std::nullptr_t>::value)
+		{
+			return ArgNull;
+		}
 		else
 		{
 			static ArgEnum curr = registeTypeImplNextValue();
