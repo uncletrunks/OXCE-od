@@ -49,6 +49,7 @@
 #include "DogfightErrorState.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/Mod.h"
+#include "../Engine/Logger.h"
 
 namespace OpenXcom
 {
@@ -1033,6 +1034,8 @@ void DogfightState::update()
 				retaliationOdds = 0;
 			}
 
+			Log(LOG_INFO) << "retaliationOdds = " << retaliationOdds;
+			Log(LOG_INFO) << "Calling RNG... ";
 			if (RNG::percent(retaliationOdds))
 			{
 				// Spawn retaliation mission.
