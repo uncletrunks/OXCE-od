@@ -1027,6 +1027,11 @@ void DogfightState::update()
 			{
 				retaliationOdds = 100 - (4 * (24 - _game->getSavedGame()->getDifficultyCoefficient()) - race->getRetaliationAggression());
 			}
+			// Have mercy on beginners
+			if (_game->getSavedGame()->getMonthsPassed() < Mod::DIFFICULTY_BASED_RETAL_DELAY[_game->getSavedGame()->getDifficulty()])
+			{
+				retaliationOdds = 0;
+			}
 
 			if (RNG::percent(retaliationOdds))
 			{
