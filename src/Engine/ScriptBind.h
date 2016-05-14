@@ -116,7 +116,7 @@ struct ParserWriter
 	/// all available data for script.
 	const ScriptParserBase& parser;
 	/// temporary script data.
-	std::vector<ScriptContainerData> refListCurr;
+	std::vector<ScriptRefData> refListCurr;
 	/// list of labels places of usage.
 	std::vector<std::pair<ReservedPos<ProgPos>, int>> refLabelsUses;
 	/// list of labels positions.
@@ -140,51 +140,35 @@ struct ParserWriter
 	void relese();
 
 	/// Get referece based on name.
-	ScriptContainerData getReferece(const ScriptRef& s) const;
-
+	ScriptRefData getReferece(const ScriptRef& s) const;
 	/// Add referece based.
-	ScriptContainerData addReferece(const ScriptContainerData& data);
+	ScriptRefData addReferece(const ScriptRefData& data);
 
 	/// Get current position in proc vector.
 	ProgPos getCurrPos() const;
-
 	/// Get distance betwean two positions in proc vector.
 	size_t getDiffPos(ProgPos begin, ProgPos end) const;
 
+	/// Push zeros to fill empty space.
+	ProgPos push(size_t s);
+	/// Update space on proc vector.
+	void update(ProgPos pos, void* data, size_t s);
 
-	/**
-	 * Preparing place and position on proc vector for some value and return position of it.
-	 */
+	/// Preparing place and position on proc vector for some value and return position of it.
 	template<typename T>
 	ReservedPos<T> pushReserved()
 	{
-		auto curr = getCurrPos();
-		container._proc.insert(container._proc.end(), sizeof(T), 0);
-		return { curr };
+		return { ParserWriter::push(sizeof(T)) };
 	}
-
-	/**
-	 * Setting previosly prepared place with value.
-	 */
+	/// Setting previosly prepared place with value.
 	template<typename T>
 	void updateReserved(ReservedPos<T> pos, T value)
 	{
-		memcpy(&container._proc[static_cast<size_t>(pos.getPos())], &value, sizeof(T));
+		update(pos.getPos(), &value, sizeof(T));
 	}
 
-	/**
-	 * Push value on proc vector.
-	 * @param v Value to push.
-	 */
-	template<typename T>
-	void pushValue(const T& v)
-	{
-		updateReserved<T>(pushReserved<T>(), v);
-	}
-
-
-	/// Push zeros to fill empty space.
-	void pushPadding(size_t s);
+	/// Push custom value on proc vector.
+	void pushValue(ScriptValueData v);
 
 	/// Pushing proc operation id on proc vector.
 	ReservedPos<ProcOp> pushProc(Uint8 procId);
@@ -197,6 +181,7 @@ struct ParserWriter
 
 	/// Push label arg to proc vector.
 	void pushLabel(int index);
+
 	/// Create new label for proc vector.
 	int addLabel();
 
@@ -206,11 +191,18 @@ struct ParserWriter
 	/// Setting offset of label on proc vector.
 	bool setLabel(int index, ProgPos offset);
 
-	/// Try pushing data arg on proc vector.
-	bool pushDataTry(const ScriptRef& s);
-
 	/// Try pushing const arg on proc vector.
-	bool pushConstTry(const ScriptRef& s);
+	bool pushNumberTry(const ScriptRef& s);
+
+	/// Try pushing reg arg on proc vector.
+	template<typename T>
+	bool pushConstTry(const ScriptRef& s)
+	{
+		return pushConstTry(s, ScriptParserBase::getArgType<T>());
+	}
+
+	/// Try pushing data arg on proc vector.
+	bool pushConstTry(const ScriptRef& s, ArgEnum type);
 
 	/// Try pushing reg arg on proc vector.
 	template<typename T>
@@ -585,11 +577,11 @@ struct ArgRegDef
 		return ArgSpec(ScriptParserBase::getArgType<ReturnType>(), ArgSpecReg);
 	}
 };
-
-struct ArgConstDef
+template<typename T>
+struct ArgValueDef
 {
-	using ReturnType = int;
-	static constexpr size_t size = sizeof(int);
+	using ReturnType = T;
+	static constexpr size_t size = sizeof(T);
 	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<ReturnType>(arg);
@@ -597,13 +589,9 @@ struct ArgConstDef
 
 	static bool parse(ParserWriter& ph, const SelectedToken& t)
 	{
-		if (t.getType() == TokenNumber)
+		if (t.getType() == TokenSymbol)
 		{
-			return ph.pushConstTry(t);
-		}
-		else if (t.getType() == TokenSymbol)
-		{
-			return ph.pushDataTry(t);
+			return ph.pushConstTry<ReturnType>(t);
 		}
 		return false;
 	}
@@ -611,6 +599,21 @@ struct ArgConstDef
 	static ArgEnum type()
 	{
 		return ScriptParserBase::getArgType<ReturnType>();
+	}
+};
+
+struct ArgConstDef : ArgValueDef<int>
+{
+	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	{
+		if (t.getType() == TokenNumber)
+		{
+			return ph.pushNumberTry(t);
+		}
+		else
+		{
+			return ArgValueDef<int>::parse(ph, t);
+		}
 	}
 };
 
@@ -793,7 +796,7 @@ struct ArgSelector<const Uint8*>
 template<typename T>
 struct ArgSelector<T*>
 {
-	using type = Arg<ArgRegDef<T*>, ArgNullDef>;
+	using type = Arg<ArgRegDef<T*>, ArgValueDef<T*>, ArgNullDef>;
 };
 
 template<typename T>
@@ -805,7 +808,7 @@ struct ArgSelector<T*&>
 template<typename T>
 struct ArgSelector<const T*>
 {
-	using type = Arg<ArgRegDef<const T*>, ArgNullDef>;
+	using type = Arg<ArgRegDef<const T*>, ArgValueDef<const T*>, ArgNullDef>;
 };
 
 template<typename T>
@@ -1086,6 +1089,11 @@ struct BindBase
 	void addCustomConst(const std::string& name, int i)
 	{
 		parser->addConst(name, i);
+	}
+	template<typename T>
+	void addCustomPtr(const std::string& name, T* p)
+	{
+		parser->addConst(name, p);
 	}
 };
 

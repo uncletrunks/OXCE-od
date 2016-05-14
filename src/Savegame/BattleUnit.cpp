@@ -3595,7 +3595,7 @@ void commonImpl(BindBase& b)
 /**
  * Constructor of recolor script parser.
  */
-ModScript::RecolorUnitParser::RecolorUnitParser(const std::string& name,  Mod* mod) : ScriptParser{ name, "new_pixel", "old_pixel", "unit", "blit_part", "anim_frame", "shade", "burn" }
+ModScript::RecolorUnitParser::RecolorUnitParser(const std::string& name, Mod* mod) : ScriptParser{ name, "new_pixel", "old_pixel", "unit", "blit_part", "anim_frame", "shade", "burn" }
 {
 	BindBase b { this };
 
@@ -3609,7 +3609,7 @@ ModScript::RecolorUnitParser::RecolorUnitParser(const std::string& name,  Mod* m
 /**
  * Constructor of select sprite script parser.
  */
-ModScript::SelectUnitParser::SelectUnitParser(const std::string& name,  Mod* mod) : ScriptParser{ name, "sprite_index", "sprite_offset", "unit", "blit_part", "anim_frame", "shade" }
+ModScript::SelectUnitParser::SelectUnitParser(const std::string& name, Mod* mod) : ScriptParser{ name, "sprite_index", "sprite_offset", "unit", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
@@ -3621,7 +3621,7 @@ ModScript::SelectUnitParser::SelectUnitParser(const std::string& name,  Mod* mod
 /**
  * Constructor of reaction chance script parser.
  */
-ModScript::ReactionUnitParser::ReactionUnitParser(const std::string& name,  Mod* mod) : ScriptParser{ name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
+ModScript::ReactionUnitParser::ReactionUnitParser(const std::string& name, Mod* mod) : ScriptParser{ name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
 {
 	BindBase b { this };
 

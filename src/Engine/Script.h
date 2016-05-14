@@ -27,6 +27,7 @@
 #include <SDL_stdinc.h>
 
 #include "Logger.h"
+#include "Exception.h"
 
 
 namespace OpenXcom
@@ -512,15 +513,33 @@ struct ScriptTypeData
 };
 
 /**
- * Struct used to store definition of used data by script.
+ * Struct storing value used by string.
  */
-struct ScriptContainerData
+struct ScriptValueData
+{
+	typename std::aligned_storage<sizeof(void*), alignof(void*)>::type data;
+	ArgEnum type = ArgInvalid;
+	Uint8 size = 0;
+
+	template<typename T>
+	inline ScriptValueData(const T& t);
+	inline ScriptValueData() { }
+
+	template<typename T>
+	inline ScriptValueData& operator=(const T& t);
+
+	template<typename T>
+	inline const T& getValue() const;
+};
+
+/**
+ * Struct used to store named definition used by script.
+ */
+struct ScriptRefData
 {
 	ScriptRef name;
 	ArgEnum type;
-	RegEnum index;
-
-	int value;
+	ScriptValueData value;
 
 	explicit operator bool() const
 	{
@@ -531,12 +550,12 @@ struct ScriptContainerData
 /**
  * Struct storing avaliable operation to scripts.
  */
-struct ScriptParserData
+struct ScriptProcData
 {
 	using argFunc = int (*)(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
 	using getFunc = FuncCommon (*)(int version);
-	using parserFunc = bool (*)(const ScriptParserData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
-	using overloadFunc = int (*)(const ScriptParserData& spd, const ScriptContainerData* begin, const ScriptContainerData* end);
+	using parserFunc = bool (*)(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using overloadFunc = int (*)(const ScriptProcData& spd, const ScriptRefData* begin, const ScriptRefData* end);
 
 	ScriptRef name;
 
@@ -563,8 +582,8 @@ class ScriptParserBase
 	std::string _defaultScript;
 	std::vector<std::vector<char>> _nameList;
 	std::vector<ScriptTypeData> _typeList;
-	std::vector<ScriptParserData> _procList;
-	std::vector<ScriptContainerData> _refList;
+	std::vector<ScriptProcData> _procList;
+	std::vector<ScriptRefData> _refList;
 
 protected:
 	static ArgEnum registeTypeImplNextValue()
@@ -609,6 +628,8 @@ protected:
 
 	/// Default constructor.
 	ScriptParserBase(const std::string& name, const std::string& firstArg, const std::string& secondArg);
+	/// Destructor.
+	~ScriptParserBase();
 
 	/// Common typeless part of parsing string.
 	bool parseBase(ScriptContainerBase* scr, const std::string& parentName, const std::string& code) const;
@@ -623,7 +644,7 @@ protected:
 	/// Add name for custom parameter.
 	void addScriptArg(const std::string& s, ArgEnum type);
 	/// Add parsing fuction.
-	void addParserBase(const std::string& s, ScriptParserData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptParserData::parserFunc parser, ScriptParserData::argFunc parserArg, ScriptParserData::getFunc parserGet);
+	void addParserBase(const std::string& s, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc parserArg, ScriptProcData::getFunc parserGet);
 	/// Add new type impl.
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
 	/// Test if type was added impl.
@@ -648,7 +669,7 @@ public:
 		return ArgSpec(registeTypeImpl<t3>(), spec);
 	}
 	/// Add const value.
-	void addConst(const std::string& s, int i);
+	void addConst(const std::string& s, ScriptValueData i);
 	/// Add line parsing function.
 	template<typename T>
 	void addParser(const std::string& s)
@@ -698,10 +719,39 @@ public:
 	/// Get type data.
 	const ScriptTypeData* getType(ScriptRef name, ScriptRef postfix = {}) const;
 	/// Get function data.
-	ScriptRange<ScriptParserData> getProc(ScriptRef name, ScriptRef postfix = {}) const;
+	ScriptRange<ScriptProcData> getProc(ScriptRef name, ScriptRef postfix = {}) const;
 	/// Get arguments data.
-	const ScriptContainerData* getRef(ScriptRef name, ScriptRef postfix = {}) const;
+	const ScriptRefData* getRef(ScriptRef name, ScriptRef postfix = {}) const;
 };
+
+template<typename T>
+inline ScriptValueData::ScriptValueData(const T& t)
+{
+	static_assert(sizeof(T) <= sizeof(data) || sizeof(T) > 255, "Value have too big size!");
+	type = ScriptParserBase::getArgType<T>();
+	size = sizeof(T);
+	memcpy(&data, &t, size);
+}
+
+template<typename T>
+inline ScriptValueData& ScriptValueData::operator=(const T& t)
+{
+	static_assert(sizeof(T) <= sizeof(data) || sizeof(T) > 255, "Value have too big size!");
+	type = ScriptParserBase::getArgType<T>();
+	size = sizeof(T);
+	memcpy(&data, &t, size);
+	return *this;
+}
+
+template<typename T>
+inline const T& ScriptValueData::getValue() const
+{
+	if (type != ScriptParserBase::getArgType<T>())
+	{
+		throw Exception("Invalid cast of value");
+	}
+	return *reinterpret_cast<const T*>(&data);
+}
 
 /**
  * Strong typed parser.
