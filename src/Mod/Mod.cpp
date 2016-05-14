@@ -122,6 +122,7 @@ int Mod::GRAPHS_CURSOR;
 std::string Mod::DEBRIEF_MUSIC_GOOD;
 std::string Mod::DEBRIEF_MUSIC_BAD;
 int Mod::DIFFICULTY_COEFFICIENT[5];
+int Mod::DIFFICULTY_BASED_RETAL_DELAY[5];
 
 void Mod::resetGlobalStatics()
 {
@@ -177,6 +178,12 @@ void Mod::resetGlobalStatics()
 	DIFFICULTY_COEFFICIENT[2] = 2;
 	DIFFICULTY_COEFFICIENT[3] = 3;
 	DIFFICULTY_COEFFICIENT[4] = 4;
+
+	DIFFICULTY_BASED_RETAL_DELAY[0] = 0;
+	DIFFICULTY_BASED_RETAL_DELAY[1] = 0;
+	DIFFICULTY_BASED_RETAL_DELAY[2] = 0;
+	DIFFICULTY_BASED_RETAL_DELAY[3] = 0;
+	DIFFICULTY_BASED_RETAL_DELAY[4] = 0;
 }
 
 /**
@@ -1099,6 +1106,15 @@ void Mod::loadFile(const std::string &filename)
 		for (YAML::const_iterator i = doc["difficultyCoefficient"].begin(); i != doc["difficultyCoefficient"].end() && num < 5; ++i)
 		{
 			DIFFICULTY_COEFFICIENT[num] = (*i).as<int>(DIFFICULTY_COEFFICIENT[num]);
+			++num;
+		}
+	}
+	if (doc["difficultyBasedRetaliationDelay"])
+	{
+		size_t num = 0;
+		for (YAML::const_iterator i = doc["difficultyBasedRetaliationDelay"].begin(); i != doc["difficultyBasedRetaliationDelay"].end() && num < 5; ++i)
+		{
+			DIFFICULTY_BASED_RETAL_DELAY[num] = (*i).as<int>(DIFFICULTY_BASED_RETAL_DELAY[num]);
 			++num;
 		}
 	}
