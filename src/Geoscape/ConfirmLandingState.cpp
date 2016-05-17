@@ -170,6 +170,12 @@ bool ConfirmLandingState::checkStartingCondition()
 		return true;
 	}
 
+	if (ruleDeploy == 0)
+	{
+		// just in case
+		return true;
+	}
+
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
 	return rule == 0 || rule->isCraftAllowed(_craft->getRules()->getType());
 }
