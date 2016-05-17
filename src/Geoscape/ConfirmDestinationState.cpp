@@ -130,6 +130,12 @@ bool ConfirmDestinationState::checkStartingCondition()
 		return true;
 	}
 
+	if (ruleDeploy == 0)
+	{
+		// e.g. UFOs without alien deployment :(
+		return true;
+	}
+
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
 	return rule == 0 || rule->isCraftAllowed(_craft->getRules()->getType());
 }
