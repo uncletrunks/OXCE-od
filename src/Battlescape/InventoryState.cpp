@@ -86,10 +86,10 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	_txtName = new TextEdit(this, 210, 17, 28, 6);
 	_txtTus = new Text(40, 9, 245, 24);
 	_txtWeight = new Text(70, 9, 245, 24);
-	_txtFAcc = new Text(40, 9, 245, 32);
-	_txtReact = new Text(40, 9, 245, 40);
-	_txtPSkill = new Text(40, 9, 245, 48);
-	_txtPStr = new Text(40, 9, 245, 56);
+	_txtFiringAcc = new Text(70, 9, 245, 32);
+	_txtThrowingAcc = new Text(70, 9, 245, 40);
+	_txtMeleeAcc = new Text(70, 9, 245, 48);
+	_txtPsi = new Text(70, 9, 245, 56);
 	_txtItem = new Text(160, 9, 128, 140);
 	_txtAmmo = new Text(66, 24, 254, 64);
 	_btnOk = new BattlescapeButton(35, 22, 237, 1);
@@ -115,10 +115,10 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	add(_txtName, "textName", "inventory", _bg);
 	add(_txtTus, "textTUs", "inventory", _bg);
 	add(_txtWeight, "textWeight", "inventory", _bg);
-	add(_txtFAcc, "textFiring", "inventory", _bg);
-	add(_txtReact, "textReaction", "inventory", _bg);
-	add(_txtPSkill, "textPsiSkill", "inventory", _bg);
-	add(_txtPStr, "textPsiStrength", "inventory", _bg);
+	add(_txtFiringAcc, "textFiring", "inventory", _bg);
+	add(_txtThrowingAcc, "textFiring", "inventory", _bg);
+	add(_txtMeleeAcc, "textFiring", "inventory", _bg);
+	add(_txtPsi, "textFiring", "inventory", _bg);
 	add(_txtItem, "textItem", "inventory", _bg);
 	add(_txtAmmo, "textAmmo", "inventory", _bg);
 	add(_btnOk, "buttonOK", "inventory", _bg);
@@ -151,13 +151,13 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 
 	_txtWeight->setHighContrast(true);
 
-	_txtFAcc->setHighContrast(true);
+	_txtFiringAcc->setHighContrast(true);
 
-	_txtReact->setHighContrast(true);
+	_txtThrowingAcc->setHighContrast(true);
 
-	_txtPSkill->setHighContrast(true);
+	_txtMeleeAcc->setHighContrast(true);
 
-	_txtPStr->setHighContrast(true);
+	_txtPsi->setHighContrast(true);
 
 	_txtItem->setHighContrast(true);
 
@@ -235,10 +235,10 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 
 	_txtTus->setVisible(_tu);
 	_txtWeight->setVisible(Options::showMoreStatsInInventoryView);
-	_txtFAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
-	_txtReact->setVisible(Options::showMoreStatsInInventoryView && !_tu);
-	_txtPSkill->setVisible(Options::showMoreStatsInInventoryView && !_tu);
-	_txtPStr->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtFiringAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtThrowingAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtMeleeAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtPsi->setVisible(Options::showMoreStatsInInventoryView && !_tu);
 }
 
 static void _clearInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
@@ -507,26 +507,21 @@ void InventoryState::updateStats()
 		_txtWeight->setSecondaryColor(_game->getMod()->getInterface("inventory")->getElement("weight")->color);
 	}
 
-	_txtFAcc->setText(tr("STR_ACCURACY_SHORT").arg((int)(unit->getBaseStats()->firing * unit->getHealth()) / unit->getBaseStats()->health));
+	_txtFiringAcc->setText(tr("STR_FIRING_SHORT").arg(unit->getBaseStats()->firing));
 
-	_txtReact->setText(tr("STR_REACTIONS_SHORT").arg(unit->getBaseStats()->reactions));
+	_txtThrowingAcc->setText(tr("STR_THROWING_SHORT").arg(unit->getBaseStats()->throwing));
 
-	if (unit->getBaseStats()->psiSkill > 0)
-	{
-		_txtPSkill->setText(tr("STR_PSIONIC_SKILL_SHORT").arg(unit->getBaseStats()->psiSkill));
-	}
-	else
-	{
-		_txtPSkill->setText(L"");
-	}
+	_txtMeleeAcc->setText(tr("STR_MELEE_SHORT").arg(unit->getBaseStats()->melee));
 
 	if (unit->getBaseStats()->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 	{
-		_txtPStr->setText(tr("STR_PSIONIC_STRENGTH_SHORT").arg(unit->getBaseStats()->psiStrength));
+		_txtPsi->setText(tr("STR_PSI_SHORT")
+			.arg(unit->getBaseStats()->psiStrength)
+			.arg(unit->getBaseStats()->psiSkill > 0 ? unit->getBaseStats()->psiSkill : 0));
 	}
 	else
 	{
-		_txtPStr->setText(L"");
+		_txtPsi->setText(L"");
 	}
 }
 
