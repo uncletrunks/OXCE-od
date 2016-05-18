@@ -44,6 +44,8 @@ OPT SDLKey keyBattleLeft, keyBattleRight, keyBattleUp, keyBattleDown, keyBattleL
 OPT bool executeUnconsciousEnemies, twoHandedIndicator, minimapBorderIndicator, everyoneFightsNobodyQuits;
 OPT bool addVehiclesToMemorial, bleedingIndicator, statisticalBulletConservation;
 
+OPT bool showItemNameAndWeightInInventory;
+
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter;
 OPT int newDisplayWidth, newDisplayHeight, newBattlescapeScale, newGeoscapeScale;

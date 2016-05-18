@@ -994,21 +994,41 @@ void InventoryState::invMouseOver(Action *)
 	BattleItem *item = _inv->getMouseOverItem();
 	if (item != 0)
 	{
+		std::wstring itemName;
 		if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 		{
-			_txtItem->setText(item->getUnit()->getName(_game->getLanguage()));
+			itemName = item->getUnit()->getName(_game->getLanguage());
 		}
 		else
 		{
 			if (_game->getSavedGame()->isResearched(item->getRules()->getRequirements()))
 			{
-				_txtItem->setText(tr(item->getRules()->getName()));
+				itemName = tr(item->getRules()->getName());
 			}
 			else
 			{
-				_txtItem->setText(tr("STR_ALIEN_ARTIFACT"));
+				itemName = tr("STR_ALIEN_ARTIFACT");
 			}
 		}
+		if (Options::showItemNameAndWeightInInventory)
+		{
+			int weight = item->getRules()->getWeight();
+			if (item->getAmmoItem() != item && item->getAmmoItem())
+			{
+				weight += item->getAmmoItem()->getRules()->getWeight();
+			}
+			std::wostringstream ss;
+			ss << itemName;
+			ss << L" [";
+			ss << weight;
+			ss << L"]";
+			_txtItem->setText(ss.str().c_str());
+		}
+		else
+		{
+			_txtItem->setText(itemName);
+		}
+
 		std::wstring s;
 		if (item->getAmmoItem() != 0 && item->needsAmmo())
 		{

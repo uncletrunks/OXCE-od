@@ -204,6 +204,7 @@ void create()
 	_info.push_back(OptionInfo("addVehiclesToMemorial", &addVehiclesToMemorial, false, "STR_ADD_VEHICLES_TO_MEMORIAL", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("bleedingIndicator", &bleedingIndicator, false, "STR_BLEEDING_INDICATOR", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_BATTLESCAPE"));
+	_info.push_back(OptionInfo("showItemNameAndWeightInInventory", &showItemNameAndWeightInInventory, false));
 
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
