@@ -245,7 +245,9 @@ void OptionsControlsState::lstControlsKeyPress(Action *action)
 	if (_selected != -1)
 	{
 		SDLKey key = action->getDetails()->key.keysym.sym;
-		if (key != 0)
+		if (key != 0 &&
+			key != SDLK_LSHIFT && key != SDLK_LALT && key != SDLK_LCTRL &&
+			key != SDLK_RSHIFT && key != SDLK_RALT && key != SDLK_RCTRL)
 		{
 			*_selKey->asKey() = key;
 			std::wstring name = Language::utf8ToWstr(ucWords(SDL_GetKeyName(*_selKey->asKey())));

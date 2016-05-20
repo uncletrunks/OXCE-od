@@ -95,6 +95,11 @@ void OptionInfo::load(const YAML::Node &node) const
 		break;
 	case OPTION_KEY:
 		*(_ref.k) = (SDLKey)node[_id].as<int>(_def.k);
+		if (*(_ref.k) == SDLK_LSHIFT || *(_ref.k) == SDLK_LALT || *(_ref.k) == SDLK_LCTRL ||
+			*(_ref.k) == SDLK_RSHIFT || *(_ref.k) == SDLK_RALT || *(_ref.k) == SDLK_RCTRL)
+		{
+			*(_ref.k) = SDLK_UNKNOWN;
+		}
 		break;
 	case OPTION_STRING:
 		*(_ref.s) = node[_id].as<std::string>(_def.s);
