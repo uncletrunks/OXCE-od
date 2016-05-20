@@ -3460,6 +3460,7 @@ struct burnShadeScript
  */
 void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 {
+	parser->registerPointerType<Mod>();
 	parser->registerPointerType<Armor>();
 	parser->registerPointerType<BattleItem>();
 
@@ -3566,8 +3567,10 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 namespace
 {
 
-void commonImpl(BindBase& b)
+void commonImpl(BindBase& b, Mod* mod)
 {
+	b.addCustomPtr<const Mod>("rules", mod);
+
 	b.addCustomConst("blit_torso", BODYPART_TORSO);
 	b.addCustomConst("blit_leftarm", BODYPART_LEFTARM);
 	b.addCustomConst("blit_rightarm", BODYPART_RIGHTARM);
@@ -3601,7 +3604,7 @@ ModScript::RecolorUnitParser::RecolorUnitParser(const std::string& name, Mod* mo
 
 	b.addCustomFunc<burnShadeScript>("add_burn_shade");
 
-	commonImpl(b);
+	commonImpl(b, mod);
 
 	setDefault("unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; return new_pixel;");
 }
@@ -3613,7 +3616,7 @@ ModScript::SelectUnitParser::SelectUnitParser(const std::string& name, Mod* mod)
 {
 	BindBase b { this };
 
-	commonImpl(b);
+	commonImpl(b, mod);
 
 	setDefault("add sprite_index sprite_offset; return sprite_index;");
 }
@@ -3624,6 +3627,8 @@ ModScript::SelectUnitParser::SelectUnitParser(const std::string& name, Mod* mod)
 ModScript::ReactionUnitParser::ReactionUnitParser(const std::string& name, Mod* mod) : ScriptParser{ name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
 {
 	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
 
 	b.addCustomConst("action_aimshoot", BA_AIMEDSHOT);
 	b.addCustomConst("action_autoshoot", BA_AUTOSHOT);

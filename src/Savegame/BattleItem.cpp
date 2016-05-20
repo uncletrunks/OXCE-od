@@ -19,6 +19,7 @@
 #include "BattleItem.h"
 #include "BattleUnit.h"
 #include "Tile.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
 #include "../Engine/Surface.h"
@@ -652,6 +653,7 @@ bool BattleItem::isAmmo() const
  */
 void BattleItem::ScriptRegister(ScriptParserBase* parser)
 {
+	parser->registerPointerType<Mod>();
 	parser->registerPointerType<RuleItem>();
 
 	Bind<BattleItem> bi = { parser };
@@ -674,8 +676,10 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 namespace
 {
 
-void commonImpl(BindBase& b)
+void commonImpl(BindBase& b, Mod* mod)
 {
+	b.addCustomPtr<const Mod>("rules", mod);
+
 	b.addCustomConst("blit_item_righthand", BODYPART_ITEM_RIGHTHAND);
 	b.addCustomConst("blit_item_lefthand", BODYPART_ITEM_LEFTHAND);
 	b.addCustomConst("blit_item_floor", BODYPART_ITEM_FLOOR);
@@ -687,11 +691,11 @@ void commonImpl(BindBase& b)
 /**
  * Constructor of recolor script parser.
  */
-ModScript::RecolorItemParser::RecolorItemParser(const std::string& name,  Mod* mod) : ScriptParser{ name, "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
+ModScript::RecolorItemParser::RecolorItemParser(const std::string& name, Mod* mod) : ScriptParser{ name, "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
-	commonImpl(b);
+	commonImpl(b, mod);
 
 	setDefault("add_shade new_pixel shade; return new_pixel;");
 }
@@ -699,11 +703,11 @@ ModScript::RecolorItemParser::RecolorItemParser(const std::string& name,  Mod* m
 /**
  * Constructor of select sprite script parser.
  */
-ModScript::SelectItemParser::SelectItemParser(const std::string& name,  Mod* mod) : ScriptParser{ name, "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
+ModScript::SelectItemParser::SelectItemParser(const std::string& name, Mod* mod) : ScriptParser{ name, "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
-	commonImpl(b);
+	commonImpl(b, mod);
 
 	setDefault("add sprite_index sprite_offset; return sprite_index;");
 }

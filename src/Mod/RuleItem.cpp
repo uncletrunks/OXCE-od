@@ -1730,6 +1730,8 @@ void getBattleTypeScript(RuleItem *ri, int &ret)
  */
 void RuleItem::ScriptRegister(ScriptParserBase* parser)
 {
+	parser->registerPointerType<Mod>();
+
 	Bind<RuleItem> ri = { parser };
 
 	ri.addCustomConst("BT_NONE", BT_NONE);
@@ -1757,6 +1759,10 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::getArmor>("getArmorValue");
 	ri.add<&RuleItem::getWeight>("getWeight");
 	ri.add<&getBattleTypeScript>("getBattleType");
+	ri.add<&RuleItem::isWaypoint>("isWaypoint");
+	ri.add<&RuleItem::isWaterOnly>("isWaterOnly");
+	ri.add<&RuleItem::isTwoHanded>("isTwoHanded");
+	ri.add<&RuleItem::isBlockingBothHands>("isBlockingBothHands");
 
 	ri.addScriptValue<&RuleItem::_scriptValues>();
 }

@@ -80,6 +80,7 @@ class RuleVideo;
 class RuleMusic;
 class RuleMissionScript;
 class ModScript;
+class ScriptParserBase;
 
 /**
  * Contains all the game-specific static data that never changes
@@ -150,6 +151,13 @@ private:
 	int _facilityListOrder, _craftListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _ufopaediaListOrder, _invListOrder;
 	size_t _modOffset;
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
+	size_t _surfaceOffsetBigobs = 0;
+	size_t _surfaceOffsetFloorob = 0;
+	size_t _surfaceOffsetSmoke = 0;
+	size_t _surfaceOffsetHit = 0;
+	size_t _surfaceOffsetBasebits = 0;
+	size_t _soundOffsetBattle = 0;
+	size_t _soundOffsetGeo = 0;
 
 	/// Loads a ruleset from a YAML file.
 	void loadFile(const std::string &filename, const ModScript &parsers);
@@ -210,6 +218,12 @@ public:
 	static int DIFFICULTY_COEFFICIENT[5];
 	// reset all the statics in all classes to default values
 	static void resetGlobalStatics();
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "RuleMod";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 	/// Creates a blank mod.
 	Mod();
 	/// Cleans up the mod.

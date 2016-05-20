@@ -40,6 +40,7 @@
 #include "../Engine/ShaderMove.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Logger.h"
+#include "../Engine/ScriptBind.h"
 #include "SoundDefinition.h"
 #include "ExtraSprites.h"
 #include "ExtraSounds.h"
@@ -714,8 +715,25 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 {
 	ScriptValuesBase::unregisteAll();
 	ModScript parser{ this };
+	for (auto p : parser._names)
+	{
+		p.second->addConst("RuleList.master", (int)0);
+		p.second->addConst("RuleList.current", (int)0);
+	}
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
+		auto name = "RuleList." + mods[i].first;
+		for (auto p : parser._names)
+		{
+			p.second->addConst(name, (int)i);
+		}
+	}
+	for (size_t i = 0; mods.size() > i; ++i)
+	{
+		for (auto p : parser._names)
+		{
+			p.second->updateConst("RuleList.current", (int)i);
+		}
 		try
 		{
 			loadMod(mods[i].second, i, parser);
@@ -806,6 +824,14 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, c
 	if (modIdx == 0)
 	{
 		loadVanillaResources();
+		_surfaceOffsetBasebits = getSurfaceSet("BASEBITS.PCK")->getTotalFrames();
+		_surfaceOffsetBigobs = getSurfaceSet("BIGOBS.PCK")->getTotalFrames();
+		_surfaceOffsetFloorob = getSurfaceSet("FLOOROB.PCK")->getTotalFrames();
+		_surfaceOffsetHit = getSurfaceSet("HIT.PCK")->getTotalFrames();
+		_surfaceOffsetSmoke = getSurfaceSet("SMOKE.PCK")->getTotalFrames();
+
+		_soundOffsetBattle = getSoundSet("BATTLE.CAT")->getTotalSounds();
+		_soundOffsetGeo = getSoundSet("GEO.CAT")->getTotalSounds();
 	}
 }
 
@@ -3403,6 +3429,37 @@ void Mod::createTransparencyLUT(Palette *pal)
 		}
 	}
 	_transparencyLUTs.push_back(lookUpTable);
+}
+
+namespace
+{
+
+template<size_t Mod::*f>
+void offset(const Mod *m, int &base, int modId)
+{
+	int baseMax = (m->*f);
+	if (base >= baseMax)
+	{
+		base += modId * 1000;
+	}
+}
+
+}
+
+/**
+ * Register all useful function used by script.
+ */
+void Mod::ScriptRegister(ScriptParserBase *parser)
+{
+	Bind<Mod> mod = { parser };
+
+	mod.add<&offset<&Mod::_soundOffsetBattle>>("getSoundOffsetBattle");
+	mod.add<&offset<&Mod::_soundOffsetGeo>>("getSoundOffsetGeo");
+	mod.add<&offset<&Mod::_surfaceOffsetBasebits>>("getSpriteOffsetBasebits");
+	mod.add<&offset<&Mod::_surfaceOffsetBigobs>>("getSpriteOffsetBigobs");
+	mod.add<&offset<&Mod::_surfaceOffsetFloorob>>("getSpriteOffsetFloorob");
+	mod.add<&offset<&Mod::_surfaceOffsetHit>>("getSpriteOffsetHit");
+	mod.add<&offset<&Mod::_surfaceOffsetSmoke>>("getSpriteOffsetSmoke");
 }
 
 }
