@@ -670,6 +670,8 @@ public:
 	}
 	/// Add const value.
 	void addConst(const std::string& s, ScriptValueData i);
+	/// Update const value.
+	void updateConst(const std::string& s, ScriptValueData i);
 	/// Add line parsing function.
 	template<typename T>
 	void addParser(const std::string& s)

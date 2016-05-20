@@ -570,17 +570,25 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc,
 	{
 		if (bestValue)
 		{
-			return (*bestValue)(ph, begin, end);
+			if ((*bestValue)(ph, begin, end) == false)
+			{
+				Log(LOG_ERROR) << "Error in maching arguments for operator '" + proc.begin()->name.toString() + "'";
+				return false;
+			}
+			else
+			{
+				return true;
+			}
 		}
 		else
 		{
-			Log(LOG_ERROR) << "conflicting overloads for operator '" + proc.begin()->name.toString() + "'";
+			Log(LOG_ERROR) << "Conflicting overloads for operator '" + proc.begin()->name.toString() + "'";
 			return false;
 		}
 	}
 	else
 	{
-		Log(LOG_ERROR) << "can't match overload for operator '" + proc.begin()->name.toString() + "'";
+		Log(LOG_ERROR) << "Can't match overload for operator '" + proc.begin()->name.toString() + "'";
 		return false;
 	}
 }
@@ -848,14 +856,14 @@ void addSortHelper(std::vector<R>& vec, R value)
 
 /**
  * Get bound of value, upper od lower based on template parameter.
- * @param begin begin iterator of range.
- * @param end end iterator of range.
+ * @param begin begin of sorted range.
+ * @param end end of sorted range.
  * @param prefix First part of name.
  * @param postfix Second part of name.
  * @return Finded iterator or end iterator.
  */
-template<typename R, bool upper>
-typename std::vector<R>::const_iterator boundSortHelper(typename std::vector<R>::const_iterator begin, typename std::vector<R>::const_iterator end, ScriptRef prefix, ScriptRef postfix = {})
+template<bool upper, typename R>
+R* boundSortHelper(R* begin, R* end, ScriptRef prefix, ScriptRef postfix = {})
 {
 	constexpr int limit = upper ? 1 : 0;
 	if (postfix)
@@ -890,16 +898,17 @@ typename std::vector<R>::const_iterator boundSortHelper(typename std::vector<R>:
 
 /**
  * Helper function finding data by name (that can be merge from two parts).
- * @param vec Vector with values.
+ * @param begin begin of sorted range.
+ * @param end end of sorted range.
  * @param prefix First part of name.
  * @param postfix Second part of name.
  * @return Finded data or null.
  */
 template<typename R>
-const R* findSortHelper(const std::vector<R>& vec, ScriptRef prefix, ScriptRef postfix = {})
+R* findSortHelper(R* begin, R* end, ScriptRef prefix, ScriptRef postfix = {})
 {
-	auto f = boundSortHelper<R, false>(vec.begin(), vec.end(), prefix, postfix);
-	if (f != vec.end())
+	auto f = boundSortHelper<false>(begin, end, prefix, postfix);
+	if (f != end)
 	{
 		if (postfix)
 		{
@@ -918,6 +927,32 @@ const R* findSortHelper(const std::vector<R>& vec, ScriptRef prefix, ScriptRef p
 		}
 	}
 	return nullptr;
+}
+
+/**
+ * Helper function finding data by name (that can be merge from two parts).
+ * @param vec Vector with values.
+ * @param prefix First part of name.
+ * @param postfix Second part of name.
+ * @return Finded data or null.
+ */
+template<typename R>
+const R* findSortHelper(const std::vector<R>& vec, ScriptRef prefix, ScriptRef postfix = {})
+{
+	return findSortHelper(vec.data(), vec.data() + vec.size(), prefix, postfix);
+}
+
+/**
+ * Helper function finding data by name (that can be merge from two parts).
+ * @param vec Vector with values.
+ * @param prefix First part of name.
+ * @param postfix Second part of name.
+ * @return Finded data or null.
+ */
+template<typename R>
+R* findSortHelper(std::vector<R>& vec, ScriptRef prefix, ScriptRef postfix = {})
+{
+	return findSortHelper(vec.data(), vec.data() + vec.size(), prefix, postfix);
 }
 
 /**
@@ -1627,6 +1662,24 @@ void ScriptParserBase::addConst(const std::string& s, ScriptValueData i)
 }
 
 /**
+ * Update const value in script.
+ * @param s name for const.
+ * @param i new value.
+ */
+void ScriptParserBase::updateConst(const std::string& s, ScriptValueData i)
+{
+	ScriptRefData* f = findSortHelper(_refList, ScriptRef{ s.data(), s.data() + s.size() });
+	if (!f)
+	{
+		throw Exception("Unknown const with name '" + s + "' to update");
+	}
+	if (f->type != i.type)
+	{
+		throw Exception("Incompatible const with name '" + s + "' to update");
+	}
+	f->value = i;
+}
+/**
  * Get name of type
  * @param type Type id.
  */
@@ -1705,19 +1758,12 @@ const ScriptTypeData* ScriptParserBase::getType(ScriptRef prefix, ScriptRef post
  */
 ScriptRange<ScriptProcData> ScriptParserBase::getProc(ScriptRef prefix, ScriptRef postfix) const
 {
-	auto lower = _procList.begin();
-	auto upper = _procList.end();
-	lower = boundSortHelper<ScriptProcData, false>(lower, upper, prefix, postfix);
-	upper = boundSortHelper<ScriptProcData, true>(lower, upper, prefix, postfix);
+	auto lower = _procList.data();
+	auto upper = _procList.data() + _procList.size();
+	lower = boundSortHelper<false>(lower, upper, prefix, postfix);
+	upper = boundSortHelper<true>(lower, upper, prefix, postfix);
 
-	if (lower != _procList.end())
-	{
-		return { &*lower, &*lower + std::distance(lower, upper) };
-	}
-	else
-	{
-		return { };
-	}
+	return { lower, upper };
 }
 
 /**
@@ -1850,7 +1896,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 			// create normal proc call
 			if (callOverloadProc(help, op_curr, args, args+i) == false)
 			{
-				Log(LOG_ERROR) << err << "invalid line: '" << line.toString() << "'";
+				Log(LOG_ERROR) << err << "invalid operation in line: '" << line.toString() << "'";
 				return false;
 			}
 		}

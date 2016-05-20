@@ -371,7 +371,14 @@ struct Arg<A1, A2...> : public Arg<A2...>
 			int curr = parse(ph, *begin);
 			if (curr < 0)
 			{
-				Log(LOG_ERROR) << "Incorrect argument '"<< (*begin)->toString() <<"'";
+				if (ph.getReferece(**begin))
+				{
+					Log(LOG_ERROR) << "Incorrect type of argument '"<< (*begin)->toString() <<"'";
+				}
+				else
+				{
+					Log(LOG_ERROR) << "Unknown argument '"<< (*begin)->toString() <<"'";
+				}
 				return -1;
 			}
 			++*begin;
