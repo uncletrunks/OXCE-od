@@ -697,7 +697,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 		// add items that are in the craft
 		for (std::map<std::string, int>::iterator i = _craft->getItems()->getContents()->begin(); i != _craft->getItems()->getContents()->end(); ++i)
 		{
-			if (startingCondition != 0 && !startingCondition->isItemAllowed(i->first))
+			if (startingCondition != 0 && !startingCondition->isItemAllowed(i->first, _game->getMod()))
 			{
 				// send disabled items back to base
 				_base->getStorageItems()->addItem(i->first, i->second);

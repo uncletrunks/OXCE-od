@@ -17,6 +17,8 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "RuleStartingCondition.h"
+#include "RuleItem.h"
+#include "../Mod/Mod.h"
 #include <algorithm>
 
 namespace OpenXcom
@@ -54,6 +56,7 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
+	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
 
 }
@@ -131,9 +134,40 @@ bool RuleStartingCondition::isVehicleAllowed(const std::string &vehicleType) con
 * @param itemType Item type name.
 * @return True if allowed, false otherwise.
 */
-bool RuleStartingCondition::isItemAllowed(const std::string &itemType) const
+bool RuleStartingCondition::isItemAllowed(const std::string &itemType, Mod *mod) const
 {
-	return _allowedItems.empty() || (std::find(_allowedItems.begin(), _allowedItems.end(), itemType) != _allowedItems.end());
+	if (_allowedItems.empty() && _allowedItemCategories.empty())
+	{
+		return true; // if nothing is specified, everything is allowed
+	}
+	else if (std::find(_allowedItems.begin(), _allowedItems.end(), itemType) != _allowedItems.end())
+	{
+		return true; // item is explicitly allowed
+	}
+	else
+	{
+		if (_allowedItemCategories.empty())
+			return false; // no categories are allowed, stop looking
+
+		RuleItem *item = mod->getItem(itemType);
+		if (item)
+		{
+			std::vector<std::string> itemCategories = item->getCategories();
+			if (!itemCategories.empty())
+			{
+				// check all categories of the item
+				for (std::vector<std::string>::iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
+				{
+					if (std::find(_allowedItemCategories.begin(), _allowedItemCategories.end(), (*i)) != _allowedItemCategories.end())
+					{
+						return true; // found a category that is allowed
+					}
+				}
+			}
+		}
+	}
+
+	return false; // if everything fails, item is not allowed
 }
 
 /**
