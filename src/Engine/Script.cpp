@@ -1957,7 +1957,7 @@ void ScriptParserBase::logScriptMetadata() const
 		);
 		for (auto& r : temp)
 		{
-			if (!ArgIsReg(r.type) && Logger::reportingLevel() != LOG_VERBOSE)
+			if (!ArgIsReg(r.type) && !ArgIsPtr(r.type) && Logger::reportingLevel() != LOG_VERBOSE)
 			{
 				continue;
 			}
@@ -1966,7 +1966,9 @@ void ScriptParserBase::logScriptMetadata() const
 				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(9) << getTypePrefix(r.type) << " " << std::setw(9) << argType(r.type) << " " << r.value.getValue<int>() << "\n";
 			}
 			else
+			{
 				refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << r.name.toString() << std::setw(9) << getTypePrefix(r.type) << " " << std::setw(9) << argType(r.type) << "\n";
+			}
 		}
 		if (Logger::reportingLevel() != LOG_VERBOSE)
 		{
