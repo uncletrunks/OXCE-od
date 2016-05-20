@@ -1554,7 +1554,7 @@ int BattleUnit::getPsiAccuracy(BattleActionType actionType, BattleItem *item)
  * @param item
  * @return firing Accuracy
  */
-int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
+int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item, Mod *mod)
 {
 	const int modifier = getAccuracyModifier(item);
 	int result = 0;
@@ -1584,7 +1584,7 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 
 	if (kneeled)
 	{
-		result = result * 115 / 100;
+		result = result * item->getRules()->getKneelBonus(mod) / 100;
 	}
 
 	if (item->getRules()->isTwoHanded())
@@ -1592,7 +1592,7 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item)
 		// two handed weapon, means one hand should be empty
 		if (getRightHandWeapon() != 0 && getLeftHandWeapon() != 0)
 		{
-			result = result * 80 / 100;
+			result = result * item->getRules()->getOneHandedPenalty(mod) / 100;
 		}
 	}
 

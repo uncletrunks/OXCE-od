@@ -166,7 +166,7 @@ ActionMenuState::~ActionMenuState()
 void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id)
 {
 	std::wstring s1, s2;
-	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon);
+	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon, _game->getMod());
 	int tu = _action->actor->getActionTUs(ba, _action->weapon).Time;
 
 	if (ba == BA_THROW || ba == BA_AIMEDSHOT || ba == BA_SNAPSHOT || ba == BA_AUTOSHOT || ba == BA_LAUNCH || ba == BA_HIT)

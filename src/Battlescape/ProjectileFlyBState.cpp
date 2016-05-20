@@ -299,7 +299,7 @@ bool ProjectileFlyBState::createNewProjectile()
 
 	if (_action.type == BA_THROW)
 	{
-		_projectileImpact = projectile->calculateThrow(_unit->getFiringAccuracy(_action.type, _action.weapon) / accuracyDivider);
+		_projectileImpact = projectile->calculateThrow(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider);
 		if (_projectileImpact == V_FLOOR || _projectileImpact == V_UNIT || _projectileImpact == V_OBJECT)
 		{
 			if (_unit->getFaction() != FACTION_PLAYER && _projectileItem->getRules()->getBattleType() == BT_GRENADE)
@@ -327,7 +327,7 @@ bool ProjectileFlyBState::createNewProjectile()
 	}
 	else if (_action.weapon->getRules()->getArcingShot()) // special code for the "spit" trajectory
 	{
-		_projectileImpact = projectile->calculateThrow(_unit->getFiringAccuracy(_action.type, _action.weapon) / accuracyDivider);
+		_projectileImpact = projectile->calculateThrow(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider);
 		if (_projectileImpact != V_EMPTY && _projectileImpact != V_OUTOFBOUNDS)
 		{
 			// set the soldier in an aiming position
@@ -365,11 +365,11 @@ bool ProjectileFlyBState::createNewProjectile()
 	{
 		if (_originVoxel != Position(-1,-1,-1))
 		{
-			_projectileImpact = projectile->calculateTrajectory(_unit->getFiringAccuracy(_action.type, _action.weapon) / accuracyDivider, _originVoxel);
+			_projectileImpact = projectile->calculateTrajectory(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider, _originVoxel);
 		}
 		else
 		{
-			_projectileImpact = projectile->calculateTrajectory(_unit->getFiringAccuracy(_action.type, _action.weapon) / accuracyDivider);
+			_projectileImpact = projectile->calculateTrajectory(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider);
 		}
 		if (_projectileImpact != V_EMPTY || _action.type == BA_LAUNCH)
 		{
@@ -548,7 +548,7 @@ void ProjectileFlyBState::think()
 							// create a projectile
 							Projectile *proj = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
 							// let it trace to the point where it hits
-							_projectileImpact = proj->calculateTrajectory(std::max(0.0, (_unit->getFiringAccuracy(_action.type, _action.weapon) / 100.0) - i * 5.0));
+							_projectileImpact = proj->calculateTrajectory(std::max(0.0, (_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / 100.0) - i * 5.0));
 							if (_projectileImpact != V_EMPTY)
 							{
 								// as above: skip the shot to the end of it's path

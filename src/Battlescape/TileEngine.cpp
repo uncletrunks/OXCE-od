@@ -3046,7 +3046,7 @@ bool TileEngine::meleeAttack(BattleAction *action)
 		targetUnit = _save->getTile(action->target - Position(0, 0, 1))->getUnit();
 	}
 
-	int hitChance = action->actor->getFiringAccuracy(BA_HIT, action->weapon);
+	int hitChance = action->actor->getFiringAccuracy(BA_HIT, action->weapon, _save->getBattleGame()->getMod());
 	if (targetUnit)
 	{
 		int arc = _save->getTileEngine()->getArcDirection(_save->getTileEngine()->getDirectionTo(targetUnit->getPositionVexels(), action->actor->getPositionVexels()), targetUnit->getDirection());
