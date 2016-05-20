@@ -25,6 +25,7 @@
 
 namespace OpenXcom
 {
+class Mod;
 
 /**
  * Represents a specific Starting Condition.
@@ -39,6 +40,7 @@ private:
 	std::vector<std::string> _allowedArmors;
 	std::vector<std::string> _allowedVehicles;
 	std::vector<std::string> _allowedItems;
+	std::vector<std::string> _allowedItemCategories;
 	std::vector<std::string> _allowedCraft;
 public:
 	/// Creates a blank Starting Conditions ruleset.
@@ -58,7 +60,7 @@ public:
 	/// Checks if the vehicle type is allowed.
 	bool isVehicleAllowed(const std::string &vehicleType) const;
 	/// Checks if the item type is allowed.
-	bool isItemAllowed(const std::string &itemType) const;
+	bool isItemAllowed(const std::string &itemType, Mod *mod) const;
 	/// Gets the default items.
 	const std::map<std::string, int> *getDefaultItems() const;
 };
