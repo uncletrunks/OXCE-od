@@ -281,7 +281,7 @@ public:
 	/// Calculate psi attack accuracy.
 	int getPsiAccuracy(BattleActionType actionType, BattleItem *item);
 	/// Calculate firing accuracy.
-	int getFiringAccuracy(BattleActionType actionType, BattleItem *item);
+	int getFiringAccuracy(BattleActionType actionType, BattleItem *item, Mod *mod);
 	/// Calculate accuracy modifier.
 	int getAccuracyModifier(BattleItem *item = 0);
 	/// Set armor value.

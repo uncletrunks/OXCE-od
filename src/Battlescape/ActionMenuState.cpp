@@ -209,7 +209,7 @@ ActionMenuState::~ActionMenuState()
 void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id, SDLKey key, BattleItem *secondaryWeapon)
 {
 	std::wstring s1, s2;
-	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon);
+	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon, _game->getMod());
 	if (secondaryWeapon != 0)
 	{
 		// for display only, this action will never miss anyway (alien is unconscious, how could you miss?)

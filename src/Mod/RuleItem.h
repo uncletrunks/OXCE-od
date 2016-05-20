@@ -142,6 +142,7 @@ private:
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	int _customItemPreviewIndex;
+	int _kneelBonus, _oneHandedPenalty;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 
 	/// Get final value of cost.
@@ -431,6 +432,10 @@ public:
 	int getVaporProbability() const;
 	/// Gets the index of the sprite in the CustomItemPreview sprite set
 	int getCustomItemPreviewIndex() const;
+	/// Gets the kneel bonus.
+	int getKneelBonus(Mod *mod) const;
+	/// Gets the one-handed penalty.
+	int getOneHandedPenalty(Mod *mod) const;
 
 };
 

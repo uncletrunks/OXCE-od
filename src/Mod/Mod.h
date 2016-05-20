@@ -142,6 +142,7 @@ private:
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor;
 	int _chanceToStopRetaliation;
+	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
@@ -355,6 +356,10 @@ public:
 	int getCustomTrainingFactor() const { return _customTrainingFactor; }
 	/// Gets the chance to stop retaliation after unsuccessful xcom base attack (default = 0).
 	int getChanceToStopRetaliation() const { return _chanceToStopRetaliation; }
+	/// Gets the global kneel bonus (default = 115).
+	int getKneelBonusGlobal() const { return _kneelBonusGlobal; }
+	/// Gets the global one-handed penalty (default = 80).
+	int getOneHandedPenaltyGlobal() const { return _oneHandedPenaltyGlobal; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.

@@ -55,7 +55,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
-	_customItemPreviewIndex(0)
+	_customItemPreviewIndex(0),
+	_kneelBonus(-1), _oneHandedPenalty(-1)
 {
 	_accuracyMulti.setFiring();
 	_meleeMulti.setMelee();
@@ -462,6 +463,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
 	_customItemPreviewIndex = node["customItemPreviewIndex"].as<int>(_customItemPreviewIndex);
+	_kneelBonus = node["kneelBonus"].as<int>(_kneelBonus);
+	_oneHandedPenalty = node["oneHandedPenalty"].as<int>(_oneHandedPenalty);
 
 	_damageBonus.load(node["damageBonus"]);
 	_meleeBonus.load(node["meleeBonus"]);
@@ -1760,6 +1763,24 @@ int RuleItem::getVaporProbability() const
 int RuleItem::getCustomItemPreviewIndex() const
 {
 	return _customItemPreviewIndex;
+}
+
+/**
+* Gets the kneel bonus (15% bonus is encoded as 100+15 = 115).
+* @return Kneel bonus.
+*/
+int RuleItem::getKneelBonus(Mod *mod) const
+{
+	return _kneelBonus != -1 ? _kneelBonus : mod->getKneelBonusGlobal();
+}
+
+/**
+* Gets the one-handed penalty (20% penalty is encoded as 100-20 = 80).
+* @return One-handed penalty.
+*/
+int RuleItem::getOneHandedPenalty(Mod *mod) const
+{
+	return _oneHandedPenalty != -1 ? _oneHandedPenalty : mod->getOneHandedPenaltyGlobal();
 }
 
 }
