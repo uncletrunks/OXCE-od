@@ -197,14 +197,16 @@ void create()
 	_info.push_back(OptionInfo("TFTDDamage", &TFTDDamage, false, "STR_TFTDDAMAGE", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("noAlienPanicMessages", &noAlienPanicMessages, false, "STR_NOALIENPANICMESSAGES", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("alienBleeding", &alienBleeding, false, "STR_ALIENBLEEDING", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("executeUnconsciousEnemies", &executeUnconsciousEnemies, true, "STR_COUP_DE_GRACE", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("twoHandedIndicator", &twoHandedIndicator, true, "STR_TWO_HANDED_INDICATOR", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("minimapBorderIndicator", &minimapBorderIndicator, true, "STR_MINIMAP_BORDER_INDICATOR", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("everyoneFightsNobodyQuits", &everyoneFightsNobodyQuits, false, "STR_EVERYONE_FIGHTS_NOBODY_QUITS", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("addVehiclesToMemorial", &addVehiclesToMemorial, false, "STR_ADD_VEHICLES_TO_MEMORIAL", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("bleedingIndicator", &bleedingIndicator, false, "STR_BLEEDING_INDICATOR", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("showItemNameAndWeightInInventory", &showItemNameAndWeightInInventory, false));
+
+	// OXCE+
+	_info.push_back(OptionInfo("executeUnconsciousEnemies", &executeUnconsciousEnemies, true, "STR_COUP_DE_GRACE", "STR_OXCE"));
+	_info.push_back(OptionInfo("twoHandedIndicator", &twoHandedIndicator, true, "STR_TWO_HANDED_INDICATOR", "STR_OXCE"));
+	_info.push_back(OptionInfo("minimapBorderIndicator", &minimapBorderIndicator, true, "STR_MINIMAP_BORDER_INDICATOR", "STR_OXCE"));
+	_info.push_back(OptionInfo("everyoneFightsNobodyQuits", &everyoneFightsNobodyQuits, false, "STR_EVERYONE_FIGHTS_NOBODY_QUITS", "STR_OXCE"));
+	_info.push_back(OptionInfo("addVehiclesToMemorial", &addVehiclesToMemorial, false, "STR_ADD_VEHICLES_TO_MEMORIAL", "STR_OXCE"));
+	_info.push_back(OptionInfo("bleedingIndicator", &bleedingIndicator, false, "STR_BLEEDING_INDICATOR", "STR_OXCE"));
+	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_OXCE"));
+	_info.push_back(OptionInfo("showItemNameAndWeightInInventory", &showItemNameAndWeightInInventory, false, "STR_SHOW_ITEM_WEIGHT_IN_INVENTORY", "STR_OXCE"));
 
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
@@ -282,11 +284,13 @@ void create()
 	_info.push_back(OptionInfo("keyInvCreateTemplate", &keyInvCreateTemplate, SDLK_c, "STR_CREATE_INVENTORY_TEMPLATE", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("keyInvApplyTemplate", &keyInvApplyTemplate, SDLK_v, "STR_APPLY_INVENTORY_TEMPLATE", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("keyInvClear", &keyInvClear, SDLK_x, "STR_CLEAR_INVENTORY", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("keyBattleActionItem1", &keyBattleActionItem1, SDLK_1, "STR_ACTION_ITEM_1", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("keyBattleActionItem2", &keyBattleActionItem2, SDLK_2, "STR_ACTION_ITEM_2", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("keyBattleActionItem3", &keyBattleActionItem3, SDLK_3, "STR_ACTION_ITEM_3", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("keyBattleActionItem4", &keyBattleActionItem4, SDLK_4, "STR_ACTION_ITEM_4", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("keyBattleActionItem5", &keyBattleActionItem5, SDLK_5, "STR_ACTION_ITEM_5", "STR_BATTLESCAPE"));
+
+	// OXCE+
+	_info.push_back(OptionInfo("keyBattleActionItem1", &keyBattleActionItem1, SDLK_1, "STR_ACTION_ITEM_1", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBattleActionItem2", &keyBattleActionItem2, SDLK_2, "STR_ACTION_ITEM_2", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBattleActionItem3", &keyBattleActionItem3, SDLK_3, "STR_ACTION_ITEM_3", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBattleActionItem4", &keyBattleActionItem4, SDLK_4, "STR_ACTION_ITEM_4", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBattleActionItem5", &keyBattleActionItem5, SDLK_5, "STR_ACTION_ITEM_5", "STR_OXCE"));
 
 #ifdef __MORPHOS__
 	_info.push_back(OptionInfo("FPS", &FPS, 15));
