@@ -640,24 +640,24 @@ void Soldier::calcStatString(const std::vector<StatString *> &statStrings, bool 
 /**
  * Trains a soldier's Physical abilities
  */
-void Soldier::trainPhys()
+void Soldier::trainPhys(int customTrainingFactor)
 {
 	// no P.T. for the wounded
 	if (_recovery == 0)
 	{
-		if(_currentStats.firing < _rules->getStatCaps().firing && RNG::generate(0, 100) > _currentStats.firing)
+		if(_currentStats.firing < _rules->getStatCaps().firing && RNG::generate(0, 100) > _currentStats.firing && RNG::percent(customTrainingFactor))
 			_currentStats.firing++;
-		if(_currentStats.health < _rules->getStatCaps().health && RNG::generate(0, 100) > _currentStats.health)
+		if(_currentStats.health < _rules->getStatCaps().health && RNG::generate(0, 100) > _currentStats.health && RNG::percent(customTrainingFactor))
 			_currentStats.health++;
-		if(_currentStats.melee < _rules->getStatCaps().melee && RNG::generate(0, 100) > _currentStats.melee)
+		if(_currentStats.melee < _rules->getStatCaps().melee && RNG::generate(0, 100) > _currentStats.melee && RNG::percent(customTrainingFactor))
 			_currentStats.melee++;
-		if(_currentStats.throwing < _rules->getStatCaps().throwing && RNG::generate(0, 100) > _currentStats.throwing)
+		if(_currentStats.throwing < _rules->getStatCaps().throwing && RNG::generate(0, 100) > _currentStats.throwing && RNG::percent(customTrainingFactor))
 			_currentStats.throwing++;
-		if(_currentStats.strength < _rules->getStatCaps().strength && RNG::generate(0, 100) > _currentStats.strength)
+		if(_currentStats.strength < _rules->getStatCaps().strength && RNG::generate(0, 100) > _currentStats.strength && RNG::percent(customTrainingFactor))
 			_currentStats.strength++;
-		if(_currentStats.tu < _rules->getStatCaps().tu && RNG::generate(0, 100) > _currentStats.tu)
+		if(_currentStats.tu < _rules->getStatCaps().tu && RNG::generate(0, 100) > _currentStats.tu && RNG::percent(customTrainingFactor))
 			_currentStats.tu++;
-		if(_currentStats.stamina < _rules->getStatCaps().stamina && RNG::generate(0, 100) > _currentStats.stamina)
+		if(_currentStats.stamina < _rules->getStatCaps().stamina && RNG::generate(0, 100) > _currentStats.stamina && RNG::percent(customTrainingFactor))
 			_currentStats.stamina++;
 	}
 }
