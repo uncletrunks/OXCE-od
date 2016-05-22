@@ -150,6 +150,8 @@ public:
 	void convertToCorpse(RuleItem *rules);
 	/// Get if item can glow.
 	bool getGlow() const;
+	/// Gets range of glow in tiles.
+	int getGlowRange() const;
 	/// Sets a flag on the item indicating if this is a clip in a weapon or not.
 	void setIsAmmo(bool ammo);
 	/// Checks a flag on the item to see if it's a clip in a weapon or not.

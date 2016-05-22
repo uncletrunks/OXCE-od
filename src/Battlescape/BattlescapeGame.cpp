@@ -769,6 +769,7 @@ void BattlescapeGame::handleNonTargetAction()
 				if (_currentAction.weapon->getGlow())
 				{
 					_save->getTileEngine()->calculateUnitLighting();
+					_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getGlowRange(), false);
 				}
 			}
 			else
@@ -1651,7 +1652,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 	{
 		getTileEngine()->calculateUnitLighting();
 		getTileEngine()->calculateTerrainLighting();
-		getTileEngine()->calculateFOV(position, getMod()->getMaxViewDistance(), false); //could be faster if we figure out the exact size of the new glow
+		getTileEngine()->calculateFOV(position, item->getGlowRange(), false);
 	}
 
 }
@@ -1781,6 +1782,7 @@ void BattlescapeGame::findItem(BattleAction *action)
 					{
 						_save->getTileEngine()->calculateTerrainLighting();
 						_save->getTileEngine()->calculateUnitLighting();
+						_save->getTileEngine()->calculateFOV(action->actor->getPosition(), targetItem->getGlowRange(), false);
 					}
 				}
 			}

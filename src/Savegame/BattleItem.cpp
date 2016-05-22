@@ -630,6 +630,16 @@ bool BattleItem::getGlow() const
 }
 
 /**
+ * Gets range of glow in tiles.
+ * @return Range.
+ */
+int BattleItem::getGlowRange() const
+{
+	auto owner = _unit ? _unit : _previousOwner;
+	return owner ? _rules->getPowerBonus(owner) : _rules->getPower();
+}
+
+/**
  * Sets the flag on this item indicating whether or not it is a clip used in a weapon.
  * @param ammo set the ammo flag to this.
  */

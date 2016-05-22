@@ -175,9 +175,7 @@ void TileEngine::calculateTerrainLighting()
 		{
 			if (it->getGlow())
 			{
-				auto owner = it->getPreviousOwner();
-				auto rule = it->getRules();
-				currLight = std::max(currLight, owner ? rule->getPowerBonus(owner) : rule->getPower());
+				currLight = std::max(currLight, it->getGlowRange());
 			}
 		}
 
@@ -214,7 +212,7 @@ void TileEngine::calculateUnitLighting()
 		{
 			if (w && w->getGlow())
 			{
-				currLight = std::max(currLight, w->getRules()->getPowerBonus(unit));
+				currLight = std::max(currLight, w->getGlowRange());
 			}
 		}
 		// add lighting of units on fire
