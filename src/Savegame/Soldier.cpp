@@ -40,7 +40,7 @@ namespace OpenXcom
  * @param id Unique soldier id for soldier generation.
  */
 Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
-	_id(id),
+	_id(id), _nationality(0),
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
 	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0),
 	_recentlyPromoted(false), _psiTraining(false), _training(false),
@@ -68,9 +68,9 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 		const std::vector<SoldierNamePool*> &names = rules->getNames();
 		if (!names.empty())
 		{
-			size_t nationality = RNG::generate(0, names.size() - 1);
-			_name = names.at(nationality)->genName(&_gender, rules->getFemaleFrequency());
-			_look = (SoldierLook)names.at(nationality)->genLook(4); // Once we add the ability to mod in extra looks, this will need to reference the ruleset for the maximum amount of looks.
+			_nationality = RNG::generate(0, names.size() - 1);
+			_name = names.at(_nationality)->genName(&_gender, rules->getFemaleFrequency());
+			_look = (SoldierLook)names.at(_nationality)->genLook(4); // Once we add the ability to mod in extra looks, this will need to reference the ruleset for the maximum amount of looks.
 		}
 		else
 		{
@@ -104,6 +104,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 {
 	_id = node["id"].as<int>(_id);
 	_name = Language::utf8ToWstr(node["name"].as<std::string>());
+	_nationality = node["nationality"].as<int>(_nationality);
 	_initialStats = node["initialStats"].as<UnitStats>(_initialStats);
 	_currentStats = node["currentStats"].as<UnitStats>(_currentStats);
 	_rank = (SoldierRank)node["rank"].as<int>();
@@ -160,6 +161,7 @@ YAML::Node Soldier::save() const
 	node["type"] = _rules->getType();
 	node["id"] = _id;
 	node["name"] = Language::wstrToUtf8(_name);
+	node["nationality"] = _nationality;
 	node["initialStats"] = _initialStats;
 	node["currentStats"] = _currentStats;
 	node["rank"] = (int)_rank;
@@ -229,6 +231,24 @@ std::wstring Soldier::getName(bool statstring, unsigned int maxLength) const
 void Soldier::setName(const std::wstring &name)
 {
 	_name = name;
+}
+
+/**
+* Returns the soldier's nationality.
+* @return Nationality ID.
+*/
+int Soldier::getNationality() const
+{
+	return _nationality;
+}
+
+/**
+* Changes the soldier's nationality.
+* @param nationality Nationality ID.
+*/
+void Soldier::setNationality(int nationality)
+{
+	_nationality = nationality;
 }
 
 /**
@@ -362,6 +382,15 @@ SoldierGender Soldier::getGender() const
 }
 
 /**
+ * Changes the soldier's gender (1/3 of avatar).
+ * @param gender Gender.
+ */
+void Soldier::setGender(SoldierGender gender)
+{
+	_gender = gender;
+}
+
+/**
  * Returns the soldier's look.
  * @return Look.
  */
@@ -371,12 +400,30 @@ SoldierLook Soldier::getLook() const
 }
 
 /**
+ * Changes the soldier's look (2/3 of avatar).
+ * @param look Look.
+ */
+void Soldier::setLook(SoldierLook look)
+{
+	_look = look;
+}
+
+/**
  * Returns the soldier's look sub type.
  * @return Look.
  */
 int Soldier::getLookVariant() const
 {
 	return _lookVariant;
+}
+
+/**
+ * Changes the soldier's look variant (3/3 of avatar).
+ * @param lookVariant Look sub type.
+ */
+void Soldier::setLookVariant(int lookVariant)
+{
+	_lookVariant = lookVariant;
 }
 
 /**

@@ -50,7 +50,7 @@ class Soldier
 {
 private:
 	std::wstring _name;
-	int _id, _improvement, _psiStrImprovement;
+	int _id, _nationality, _improvement, _psiStrImprovement;
 	RuleSoldier *_rules;
 	UnitStats _initialStats, _currentStats;
 	SoldierRank _rank;
@@ -79,6 +79,10 @@ public:
 	std::wstring getName(bool statstring = false, unsigned int maxLength = 20) const;
 	/// Sets the soldier's name.
 	void setName(const std::wstring &name);
+	/// Gets the soldier's nationality.
+	int getNationality() const;
+	/// Sets the soldier's nationality.
+	void setNationality(int nationality);
 	/// Gets the soldier's craft.
 	Craft *getCraft() const;
 	/// Sets the soldier's craft.
@@ -99,10 +103,16 @@ public:
 	int getKills() const;
 	/// Gets the soldier's gender.
 	SoldierGender getGender() const;
+	/// Sets the soldier's gender.
+	void setGender(SoldierGender gender);
 	/// Gets the soldier's look.
 	SoldierLook getLook() const;
+	/// Sets the soldier's look.
+	void setLook(SoldierLook look);
 	/// Gets the soldier's look sub type.
 	int getLookVariant() const;
+	/// Sets the soldier's look sub type.
+	void setLookVariant(int lookVariant);
 	/// Gets soldier rules.
 	RuleSoldier *getRules() const;
 	/// Gets the soldier's unique ID.
