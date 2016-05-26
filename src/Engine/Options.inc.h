@@ -45,6 +45,7 @@ OPT bool executeUnconsciousEnemies, twoHandedIndicator, minimapBorderIndicator, 
 OPT bool addVehiclesToMemorial, bleedingIndicator, statisticalBulletConservation;
 
 OPT bool showItemNameAndWeightInInventory;
+OPT bool showGunMeleeOnTop;
 
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter;

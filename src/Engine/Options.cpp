@@ -207,6 +207,7 @@ void create()
 	_info.push_back(OptionInfo("bleedingIndicator", &bleedingIndicator, false, "STR_BLEEDING_INDICATOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_OXCE"));
 	_info.push_back(OptionInfo("showItemNameAndWeightInInventory", &showItemNameAndWeightInInventory, false, "STR_SHOW_ITEM_WEIGHT_IN_INVENTORY", "STR_OXCE"));
+	_info.push_back(OptionInfo("showGunMeleeOnTop", &showGunMeleeOnTop, true, "STR_SHOW_GUN_MELEE_ON_TOP", "STR_OXCE"));
 
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
