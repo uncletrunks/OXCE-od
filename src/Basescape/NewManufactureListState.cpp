@@ -42,30 +42,32 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
+NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _showRequirements(false), _detailClicked(false)
 {
 	_screen = false;
 
 	_window = new Window(this, 320, 156, 0, 22, POPUP_BOTH);
 	_btnOk = new TextButton(148, 16, 164, 154);
-	_btnMarkAllAsSeen = new TextButton(148, 16, 8, 154);
 	_txtTitle = new Text(320, 17, 0, 30);
 	_txtItem = new Text(156, 9, 10, 62);
 	_txtCategory = new Text(130, 9, 166, 62);
 	_lstManufacture = new TextList(288, 80, 8, 70);
+	_cbxFilter = new ComboBox(this, 146, 16, 10, 46);
 	_cbxCategory = new ComboBox(this, 146, 16, 166, 46);
+	_cbxActions = new ComboBox(this, 148, 16, 8, 154, true);
 
 	// Set palette
 	setInterface("selectNewManufacture");
 
 	add(_window, "window", "selectNewManufacture");
 	add(_btnOk, "button", "selectNewManufacture");
-	add(_btnMarkAllAsSeen, "button", "selectNewManufacture");
 	add(_txtTitle, "text", "selectNewManufacture");
 	add(_txtItem, "text", "selectNewManufacture");
 	add(_txtCategory, "text", "selectNewManufacture");
 	add(_lstManufacture, "list", "selectNewManufacture");
+	add(_cbxFilter, "catBox", "selectNewManufacture");
 	add(_cbxCategory, "catBox", "selectNewManufacture");
+	add(_cbxActions, "button", "selectNewManufacture");
 
 	centerAllSurfaces();
 
@@ -83,39 +85,34 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
 	_lstManufacture->setSelectable(true);
 	_lstManufacture->setBackground(_window);
 	_lstManufacture->setMargin(2);
-	_lstManufacture->onMouseClick((ActionHandler)&NewManufactureListState::lstProdClick);
+	_lstManufacture->onMouseClick((ActionHandler)&NewManufactureListState::lstProdClickLeft, SDL_BUTTON_LEFT);
+	_lstManufacture->onMouseClick((ActionHandler)&NewManufactureListState::lstProdClickRight, SDL_BUTTON_RIGHT);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewManufactureListState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&NewManufactureListState::btnOkClick, Options::keyCancel);
 
-	_btnMarkAllAsSeen->setText(tr("MARK ALL AS SEEN"));
-	_btnMarkAllAsSeen->onMouseClick((ActionHandler)&NewManufactureListState::btnMarkAllAsSeenClick);
+	std::vector<std::string> filterOptions;
+	filterOptions.push_back("STR_FILTER_DEFAULT");
+	filterOptions.push_back("STR_FILTER_DEFAULT_SUPPLIES_OK");
+	filterOptions.push_back("STR_FILTER_DEFAULT_NO_SUPPLIES");
+	filterOptions.push_back("STR_FILTER_NEW");
+	filterOptions.push_back("STR_FILTER_HIDDEN");
+	filterOptions.push_back("STR_FILTER_FACILITY_REQUIRED");
+	_cbxFilter->setOptions(filterOptions);
+	_cbxFilter->onChange((ActionHandler)&NewManufactureListState::cbxFilterChange);
 
-	_possibleProductions.clear();
-	_game->getSavedGame()->getAvailableProductions(_possibleProductions, _game->getMod(), _base);
 	_catStrings.push_back("STR_ALL_ITEMS");
-
-	for (std::vector<RuleManufacture *>::iterator it = _possibleProductions.begin(); it != _possibleProductions.end(); ++it)
-	{
-		bool addCategory = true;
-		for (size_t x = 0; x < _catStrings.size(); ++x)
-		{
-			if ((*it)->getCategory().c_str() == _catStrings[x])
-			{
-				addCategory = false;
-				break;
-			}
-		}
-		if (addCategory)
-		{
-			_catStrings.push_back((*it)->getCategory().c_str());
-		}
-	}
-
 	_cbxCategory->setOptions(_catStrings);
-	_cbxCategory->onChange((ActionHandler)&NewManufactureListState::cbxCategoryChange);
 
+	std::vector<std::string> actionOptions;
+	actionOptions.push_back("STR_MARK_ALL_AS_NEW");
+	actionOptions.push_back("STR_MARK_ALL_AS_NORMAL");
+	actionOptions.push_back("STR_MARK_ALL_AS_HIDDEN");
+	_cbxActions->setOptions(actionOptions);
+	_cbxActions->onChange((ActionHandler)&NewManufactureListState::cbxActionsChange);
+	_cbxActions->setSelected(-1);
+	_cbxActions->setText(tr("STR_MARK_ALL_AS"));
 }
 
 /**
@@ -124,7 +121,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base)
 void NewManufactureListState::init()
 {
 	State::init();
-	fillProductionList(false);
+	fillProductionList(!_detailClicked);
 }
 
 /**
@@ -137,20 +134,40 @@ void NewManufactureListState::btnOkClick(Action *)
 }
 
 /**
- * Marks all items as seen
+ * Marks all items as new/normal/hidden.
  * @param action Pointer to an action.
  */
-void NewManufactureListState::btnMarkAllAsSeenClick(Action *)
+void NewManufactureListState::cbxActionsChange(Action *)
 {
-	fillProductionList(true);
+	int newState = _cbxActions->getSelected();
+	_cbxActions->setSelected(-1);
+	_cbxActions->setText(tr("STR_MARK_ALL_AS"));
+
+	ManufacturingFilterType basicFilter = (ManufacturingFilterType)(_cbxFilter->getSelected());
+	if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
+		return;
+
+	if (newState >= 0)
+	{
+		for (std::vector<std::string>::const_iterator i = _displayedStrings.begin(); i != _displayedStrings.end(); ++i)
+		{
+			_game->getSavedGame()->setManufactureRuleStatus((*i), newState);
+		}
+
+		fillProductionList(false);
+	}
 }
 
 /**
  * Opens the Production settings screen.
  * @param action A pointer to an Action.
  */
-void NewManufactureListState::lstProdClick(Action *)
+void NewManufactureListState::lstProdClickLeft(Action *)
 {
+	ManufacturingFilterType basicFilter = (ManufacturingFilterType)(_cbxFilter->getSelected());
+	if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
+		return;
+
 	RuleManufacture *rule = 0;
 	for (std::vector<RuleManufacture *>::iterator it = _possibleProductions.begin(); it != _possibleProductions.end(); ++it)
 	{
@@ -162,7 +179,84 @@ void NewManufactureListState::lstProdClick(Action *)
 	}
 
 	// check and display error messages only further down the chain
+	_detailClicked = true;
 	_game->pushState(new ManufactureStartState(_base, rule));
+}
+
+/**
+* Changes the status (new -> normal -> hidden -> new).
+* @param action A pointer to an Action.
+*/
+void NewManufactureListState::lstProdClickRight(Action *)
+{
+	ManufacturingFilterType basicFilter = (ManufacturingFilterType)(_cbxFilter->getSelected());
+	if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
+	{
+		// display either category or requirements
+		_showRequirements = !_showRequirements;
+		const std::set<std::string> &baseFunc = _base->getProvidedBaseFunc();
+
+		for (int row = 0; row < _lstManufacture->getRows(); ++row)
+		{
+			RuleManufacture *info = _game->getMod()->getManufacture(_displayedStrings[row]);
+			if (info)
+			{
+				if (_showRequirements)
+				{
+					std::wostringstream ss;
+					int count = 0;
+					for (std::vector<std::string>::const_iterator iter = info->getRequireBaseFunc().begin(); iter != info->getRequireBaseFunc().end(); ++iter)
+					{
+						if (baseFunc.find(*iter) != baseFunc.end())
+						{
+							continue;
+						}
+						if (count > 0)
+						{
+							ss << ", ";
+						}
+						ss << tr(*iter);
+						count++;
+					}
+					_lstManufacture->setCellText(row, 1, ss.str().c_str());
+				}
+				else
+				{
+					_lstManufacture->setCellText(row, 1, tr(info->getCategory()));
+				}
+			}
+		}
+	}
+	else
+	{
+		// change status
+		const std::string rule = _displayedStrings[_lstManufacture->getSelectedRow()];
+		int oldState = _game->getSavedGame()->getManufactureRuleStatus(rule);
+		int newState = (oldState + 1) % RuleManufacture::MANU_STATUSES;
+		_game->getSavedGame()->setManufactureRuleStatus(rule, newState);
+
+		if (newState == RuleManufacture::MANU_STATUS_HIDDEN)
+		{
+			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 246); // purple
+		}
+		else if (newState == RuleManufacture::MANU_STATUS_NEW)
+		{
+			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 218); // light blue
+		}
+		else
+		{
+			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 208); // white
+		}
+	}
+}
+
+/**
+* Updates the production list to match the basic filter
+*/
+
+void NewManufactureListState::cbxFilterChange(Action *)
+{
+	fillProductionList(true);
 }
 
 /**
@@ -177,11 +271,21 @@ void NewManufactureListState::cbxCategoryChange(Action *)
 /**
  * Fills the list of possible productions.
  */
-void NewManufactureListState::fillProductionList(bool markAllAsSeen)
+void NewManufactureListState::fillProductionList(bool refreshCategories)
 {
+	if (refreshCategories)
+	{
+		_cbxCategory->onChange(0);
+		_cbxCategory->setSelected(0);
+	}
+
+	_showRequirements = false;
+	_detailClicked = false;
+
 	_lstManufacture->clearList();
 	_possibleProductions.clear();
-	_game->getSavedGame()->getAvailableProductions(_possibleProductions, _game->getMod(), _base);
+	ManufacturingFilterType basicFilter = (ManufacturingFilterType)(_cbxFilter->getSelected());
+	_game->getSavedGame()->getAvailableProductions(_possibleProductions, _game->getMod(), _base, basicFilter);
 	_displayedStrings.clear();
 
 	ItemContainer * itemContainer (_base->getStorageItems());
@@ -191,6 +295,9 @@ void NewManufactureListState::fillProductionList(bool markAllAsSeen)
 	{
 		if (((*it)->getCategory().c_str() == _catStrings[_cbxCategory->getSelected()]) || (_catStrings[_cbxCategory->getSelected()] == "STR_ALL_ITEMS"))
 		{
+			bool isNew = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_NEW;
+			bool isHidden = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_HIDDEN;
+
 			// supplies calculation
 			int productionPossible = 10; // max
 			if ((*it)->getManufactureCost() > 0)
@@ -206,46 +313,89 @@ void NewManufactureListState::fillProductionList(bool markAllAsSeen)
 			std::wostringstream ss;
 			if (productionPossible <= 0)
 			{
+				if (basicFilter == MANU_FILTER_DEFAULT_SUPPLIES_OK)
+					continue;
 				ss << L'-';
-			}
-			else if (productionPossible < 10)
-			{
-				ss << productionPossible;
 			}
 			else
 			{
-				ss << L'+';
+				if (basicFilter == MANU_FILTER_DEFAULT_NO_SUPPLIES)
+					continue;
+				if (productionPossible < 10)
+				{
+					ss << productionPossible;
+				}
+				else
+				{
+					ss << L'+';
+				}
 			}
+			if (basicFilter == MANU_FILTER_DEFAULT && isHidden)
+				continue;
+			if (basicFilter == MANU_FILTER_DEFAULT_SUPPLIES_OK && isHidden)
+				continue;
+			if (basicFilter == MANU_FILTER_DEFAULT_NO_SUPPLIES && isHidden)
+				continue;
+			if (basicFilter == MANU_FILTER_NEW && !isNew)
+				continue;
+			if (basicFilter == MANU_FILTER_HIDDEN && !isHidden)
+				continue;
 
 			_lstManufacture->addRow(3, tr((*it)->getName()).c_str(), tr((*it)->getCategory()).c_str(), ss.str().c_str());
 			_displayedStrings.push_back((*it)->getName().c_str());
 
-			if (markAllAsSeen)
+			// colors
+			if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
 			{
-				// remember all manufacture items as seen
-				_game->getSavedGame()->addSeenManufacture((*it));
+				_lstManufacture->setRowColor(row, 213); // yellow
 			}
-			else if (!_game->getSavedGame()->isManufactureSeen((*it)->getName()))
+			else
 			{
-				// mark as unseen
-				_lstManufacture->setCellColor(row, 0, 53); // light green
-				hasUnseen = true;
+				if (isHidden)
+				{
+					_lstManufacture->setRowColor(row, 246); // purple
+				}
+				else if (isNew)
+				{
+					_lstManufacture->setRowColor(row, 218); // light blue
+					hasUnseen = true;
+				}
 			}
 			row++;
 		}
 	}
 
-	if (!hasUnseen)
+	std::wstring label = tr("STR_MARK_ALL_AS");
+	_cbxActions->setText((hasUnseen ? L"* " : L"") + label);
+
+	if (refreshCategories)
 	{
-		_btnMarkAllAsSeen->setVisible(false);
-		_btnOk->setWidth(_btnOk->getX()+_btnOk->getWidth()-_btnMarkAllAsSeen->getX());
-		_btnOk->setX(_btnMarkAllAsSeen->getX());
-	}
-	else
-	{
-		_btnMarkAllAsSeen->setVisible(true);
-		_btnOk->setWidth(_btnMarkAllAsSeen->getWidth());
-		_btnOk->setX(_btnMarkAllAsSeen->getX()+_btnMarkAllAsSeen->getWidth()+8);
+		_catStrings.clear();
+		_catStrings.push_back("STR_ALL_ITEMS");
+
+		for (int r = 0; r < _lstManufacture->getRows(); ++r)
+		{
+			RuleManufacture *info = _game->getMod()->getManufacture(_displayedStrings[r]);
+			if (info)
+			{
+				bool addCategory = true;
+				for (size_t x = 0; x < _catStrings.size(); ++x)
+				{
+					if (info->getCategory().c_str() == _catStrings[x])
+					{
+						addCategory = false;
+						break;
+					}
+				}
+				if (addCategory)
+				{
+					_catStrings.push_back(info->getCategory().c_str());
+				}
+			}
+		}
+
+		_cbxCategory->setOptions(_catStrings);
+		_cbxCategory->onChange((ActionHandler)&NewManufactureListState::cbxCategoryChange);
 	}
 }
 

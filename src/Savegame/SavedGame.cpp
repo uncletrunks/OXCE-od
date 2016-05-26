@@ -446,14 +446,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		}
 	}
 
-	for (YAML::const_iterator it = doc["seenManufactureItems"].begin(); it != doc["seenManufactureItems"].end(); ++it)
-	{
-		std::string manufactureItem = it->as<std::string>();
-		if (mod->getManufacture(manufactureItem))
-		{
-			_seenManufactureItems.push_back(mod->getManufacture(manufactureItem));
-		}
-	}
+	_manufactureRuleStatus = doc["manufactureRuleStatus"].as< std::map<std::string, int> >(_manufactureRuleStatus);
 
 	for (YAML::const_iterator it = doc["seenResearchItems"].begin(); it != doc["seenResearchItems"].end(); ++it)
 	{
@@ -605,10 +598,7 @@ void SavedGame::save(const std::string &filename) const
 	{
 		node["seenUfopediaItems"].push_back((*i)->id);
 	}
-	for (std::vector<const RuleManufacture *>::const_iterator i = _seenManufactureItems.begin(); i != _seenManufactureItems.end(); ++i)
-	{
-		node["seenManufactureItems"].push_back((*i)->getName());
-	}
+	node["manufactureRuleStatus"] = _manufactureRuleStatus;
 	for (std::vector<const RuleResearch *>::const_iterator i = _seenResearchItems.begin(); i != _seenResearchItems.end(); ++i)
 	{
 		node["seenResearchItems"].push_back((*i)->getName());
@@ -1002,16 +992,13 @@ void SavedGame::addSeenUfopediaArticle (const ArticleDefinition * r)
 }
 
 /**
- * Add a ManufactureProject to the list of already seen ManufactureProject
- * @param r The newly opened ManufactureProject
+ * Sets the status of a manufacture rule
+ * @param manufactureRule The rule ID
+ * @param newStatus Status to be set
  */
-void SavedGame::addSeenManufacture (const RuleManufacture * r)
+void SavedGame::setManufactureRuleStatus(const std::string &manufactureRule, int newStatus)
 {
-	std::vector<const RuleManufacture *>::const_iterator itSeen = std::find(_seenManufactureItems.begin(), _seenManufactureItems.end(), r);
-	if (itSeen == _seenManufactureItems.end())
-	{
-		_seenManufactureItems.push_back(r);
-	}
+	_manufactureRuleStatus[manufactureRule] = newStatus;
 }
 
 /**
@@ -1198,7 +1185,7 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
  * @param mod the Game Mod
  * @param base a pointer to a Base
  */
-void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & productions, const Mod * mod, Base * base) const
+void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & productions, const Mod * mod, Base * base, ManufacturingFilterType filter) const
 {
 	const std::vector<std::string> &items = mod->getManufactureList();
 	const std::vector<Production *> &baseProductions = base->getProductions();
@@ -1219,7 +1206,13 @@ void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & produc
 		}
 		if (!std::includes(baseFunc.begin(), baseFunc.end(), m->getRequireBaseFunc().begin(), m->getRequireBaseFunc().end()))
 		{
-			continue;
+			if (filter != MANU_FILTER_FACILITY_REQUIRED)
+				continue;
+		}
+		else
+		{
+			if (filter == MANU_FILTER_FACILITY_REQUIRED)
+				continue;
 		}
 
 		productions.push_back(m);
@@ -1379,21 +1372,13 @@ bool SavedGame::isUfopediaArticleSeen(const std::string &article) const
 }
 
 /**
- * Returns if a certain manufacture has been seen.
- * @param manufacture Manufacture ID.
- * @return Whether it's seen or not.
+ * Gets the status of a manufacture rule.
+ * @param manufacture Manufacture rule ID.
+ * @return Status (0=new, 1=normal, 2=hidden).
  */
-bool SavedGame::isManufactureSeen(const std::string &manufacture) const
+int SavedGame::getManufactureRuleStatus(const std::string &manufactureRule)
 {
-	if (manufacture.empty())
-		return true;
-	for (std::vector<const RuleManufacture *>::const_iterator i = _seenManufactureItems.begin(); i != _seenManufactureItems.end(); ++i)
-	{
-		if ((*i)->getName() == manufacture)
-			return true;
-	}
-
-	return false;
+	return _manufactureRuleStatus[manufactureRule];
 }
 
 /**

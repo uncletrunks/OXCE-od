@@ -39,11 +39,14 @@ class NewManufactureListState : public State
 {
 private:
 	Base *_base;
-	TextButton *_btnOk, *_btnMarkAllAsSeen;
+	bool _showRequirements, _detailClicked;
+	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtCategory;
 	TextList *_lstManufacture;
 	ComboBox *_cbxCategory;
+	ComboBox *_cbxFilter;
+	ComboBox *_cbxActions;
 	std::vector<RuleManufacture *> _possibleProductions;
 	std::vector<std::string> _catStrings;
 	std::vector<std::string> _displayedStrings;
@@ -55,14 +58,18 @@ public:
 	void init();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action * action);
-	/// Handler for clicking the [Mark All As Seen] button.
-	void btnMarkAllAsSeenClick(Action * action);
+	/// Handler for clicking the [Mark All As ...] button.
+	void cbxActionsChange(Action * action);
 	/// Handler for clicking on the list.
-	void lstProdClick (Action * action);
+	void lstProdClickLeft (Action * action);
+	/// Handler for clicking on the list.
+	void lstProdClickRight(Action * action);
 	/// Handler for changing the category filter
 	void cbxCategoryChange (Action * action);
+	/// Handler for changing the basic filter
+	void cbxFilterChange(Action * action);
 	/// Fills the list of possible productions.
-	void fillProductionList(bool markAllAsSeen);
+	void fillProductionList(bool refreshCategories);
 };
 }
 #endif

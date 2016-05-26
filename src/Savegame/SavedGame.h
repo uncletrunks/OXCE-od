@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include "CraftId.h"
 #include "../Mod/RuleAlienMission.h"
+#include "../Mod/RuleManufacture.h"
 
 namespace OpenXcom
 {
@@ -113,7 +114,7 @@ private:
 	SavedBattleGame *_battleGame;
 	std::vector<const RuleResearch*> _discovered;
 	std::vector<const ArticleDefinition*> _seenUfopediaItems;
-	std::vector<const RuleManufacture*> _seenManufactureItems;
+	std::map<std::string, int> _manufactureRuleStatus;
 	std::vector<const RuleResearch*> _seenResearchItems;
 	std::vector<AlienMission*> _activeMissions;
 	bool _debug, _warned;
@@ -206,8 +207,8 @@ public:
 	void setBattleGame(SavedBattleGame *battleGame);
 	/// Add a seen UFOpedia article
 	void addSeenUfopediaArticle(const ArticleDefinition *r);
-	/// Add a seen ManufactureProject
-	void addSeenManufacture(const RuleManufacture *r);
+	/// Sets the status of a manufacture rule
+	void setManufactureRuleStatus(const std::string &manufactureRule, int newStatus);
 	/// Add a seen ResearchProject
 	void addSeenResearch(const RuleResearch *r);
 	/// Add a finished ResearchProject
@@ -217,7 +218,7 @@ public:
 	/// Get the list of ResearchProject which can be researched in a Base
 	void getAvailableResearchProjects(std::vector<RuleResearch*> & projects, const Mod *mod, Base *base) const;
 	/// Get the list of Productions which can be manufactured in a Base
-	void getAvailableProductions(std::vector<RuleManufacture*> & productions, const Mod *mod, Base *base) const;
+	void getAvailableProductions(std::vector<RuleManufacture*> & productions, const Mod *mod, Base *base, ManufacturingFilterType filter = MANU_FILTER_DEFAULT) const;
 	/// Get the list of newly available research projects once a research has been completed.
 	void getDependableResearch(std::vector<RuleResearch*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Get the list of newly available manufacture projects once a research has been completed.
@@ -226,8 +227,8 @@ public:
 	bool isResearchAvailable(RuleResearch *r, const std::vector<const RuleResearch*> & unlocked, const Mod *mod) const;
 	/// Gets if an UFOpedia article has been seen already.
 	bool isUfopediaArticleSeen(const std::string &article) const;
-	/// Gets if a manufacture has been seen already.
-	bool isManufactureSeen(const std::string &manufacture) const;
+	/// Gets the status of a manufacture rule.
+	int getManufactureRuleStatus(const std::string &manufactureRule);
 	/// Gets if a research has been seen already.
 	bool isResearchSeen(const std::string &research) const;
 	/// Gets if a research has been unlocked.

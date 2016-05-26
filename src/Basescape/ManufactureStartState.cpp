@@ -161,8 +161,11 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 
 	if (_item)
 	{
-		// remember this manufacture item as seen
-		_game->getSavedGame()->addSeenManufacture(_item);
+		// mark new as normal
+		if (_game->getSavedGame()->getManufactureRuleStatus(_item->getName()) == RuleManufacture::MANU_STATUS_NEW)
+		{
+			_game->getSavedGame()->setManufactureRuleStatus(_item->getName(), RuleManufacture::MANU_STATUS_NORMAL);
+		}
 	}
 }
 
