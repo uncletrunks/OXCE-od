@@ -58,7 +58,7 @@ private:
 	Craft *_craft;
 	Ufo *_ufo;
 	int _timeout, _currentDist, _targetDist, _weaponFireInterval[RuleCraft::WeaponMax], _weaponFireCountdown[RuleCraft::WeaponMax];
-	bool _end, _destroyUfo, _destroyCraft, _ufoBreakingOff, _weaponEnabled[RuleCraft::WeaponMax], _minimized, _endDogfight, _animatingHit;
+	bool _end, _endUfoHandled, _endCraftHandled, _ufoBreakingOff, _destroyUfo, _destroyCraft, _weaponEnabled[RuleCraft::WeaponMax], _minimized, _endDogfight, _animatingHit;
 	std::vector<CraftWeaponProjectile*> _projectiles;
 	static const int _ufoBlobs[8][13][13];
 	static const int _projectileBlobs[4][6][3];
