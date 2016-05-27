@@ -111,9 +111,26 @@ New recolr and replace script graphic option for items.[br/]
 [i]New ruleset[/i]
 
 Example of usage:
+
+[code]
+itemCategories:             #from OXCE+
+startingConditions:         #from OXCE+
+tooMuchSmokeThreshold:      #from OXCE+
+customTrainingFactor: 100   #change whow fast solders train.
+chanceToStopRetaliation: 0  #chance to stop retaliation.
+kneelBonusGlobal: 120       #default kneel weapon accuracy bonus in prercent.
+oneHandedPenaltyGlobal: 80  #default two hand weapon accuracy penalty in percent.
+missionRatings:             #from OXCE+
+monthlyRatings:             #from OXCE+
+difficultyBasedRetaliationDelay: #from OXCE+
+[/code]
+
 [code]
 items:
   - type: STR_ITEM_TYPE #default config ...
+    categories: ~           #from OXCE+
+    kneelBonus: -1          #kneel weapon accuracy bonus in prercent.
+    oneHandedPenalty: -1    #two hand weapon accuracy penalty in percent.
     dropoff: 1     #used by Psi-Amp too. Default for Psi-Amp is 1.
     aimRange: 0    #used by Pis-Amp too. Default for Psi-Amp is 0.
     tuLoad: 15     #cost of loading weapon.
@@ -320,6 +337,7 @@ armors:
     painImmune: false    #default true for big units.
     zombiImmune: false   #ignored by big units.
     overKill: 0.8        #when damage drops HPs to negative value greater than `overKill * maxHP` then the corpse is destroyed, default value is 0.50.
+    visibilityAtDay: 20  #default 20 for all.
     visibilityAtDark: 9  #default 20 for aliens, 9 for humans.
     specialWeapon: ALIEN_PSI_WEAPON #alien psi or melee attack.
     builtInWeapons: #same as for units.
@@ -441,6 +459,33 @@ alienRaces:
 [/code]
 
 [code]
+alienDeployments:
+  - id: STR_SOMETHING
+    startingCondition:      #from OXCE+
+[/code]
+
+[code]
+itemCategories:             #from OXCE+
+  - type:
+    replaceBy:
+    hidden:
+    listOrder:
+[/code]
+
+[code]
+startingConditions:         #from OXCE+
+  - type:
+    armorTransformations:
+    defaultArmor:
+    defaultItems:
+    allowedArmors:
+    allowedVehicles:
+    allowedItems:
+    allowedItemCategories:
+    allowedCraft:
+[/code]
+
+[code]
 facilities:
   - type: STR_SOME_FACILITY
     buildCostItems:
@@ -450,6 +495,7 @@ facilities:
     provideBaseFunc: [ A ]  #List of custom IDs that this bulding provide for base.
     requiresBaseFunc: [ ]   #List of custom IDs that are require to build this building in base.
     trainingRooms: 0        #Number of solder that can be train in that building, require langue strings.
+    refundValue: 0          #how much mony is returned when facility is dismantled.
 [/code]
 
 [code]
@@ -518,6 +564,7 @@ http://openxcom.org/forum/index.php?topic=2915.msg31641#msg31641[br/]
 [i]Credits[/i]
 
 Meridian for OXCE+ :)[br/]
+stiansel for FOV speedup.[br/]
 redv & WarBoy1982 for a couple of commits.[br/]
 SolarusScorch for fixing language in readme.[br/]
 SupSuper & WarBoy1982 & Daiky for OpenXcom :)[br/]
