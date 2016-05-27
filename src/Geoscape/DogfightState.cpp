@@ -236,7 +236,7 @@ const int DogfightState::_projectileBlobs[4][6][3] =
 DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	_state(state), _craft(craft), _ufo(ufo),
 	_timeout(50), _currentDist(640), _targetDist(560),
-	_end(false), _destroyUfo(false), _destroyCraft(false),
+	_end(false), _endUfoHandled(false), _endCraftHandled(false), _destroyUfo(false), _destroyCraft(false),
 	_ufoBreakingOff(false), _minimized(false), _endDogfight(false), _animatingHit(false),
 	_ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0), _interceptionNumber(0), _interceptionsCount(0),
 	_x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0)
@@ -1002,67 +1002,81 @@ void DogfightState::update()
 		finalRun = true;
 	}
 
-	// End dogfight if craft is destroyed.
 	if (!_end)
 	{
-		if (_craft->isDestroyed())
+		if (_endCraftHandled)
 		{
+			finalRun = true;
+		}
+		else if (_craft->isDestroyed())
+		{
+			// End dogfight if craft is destroyed.
 			setStatus("STR_INTERCEPTOR_DESTROYED");
 			_timeout += 30;
 			_game->getMod()->getSound("GEO.CAT", Mod::INTERCEPTOR_EXPLODE)->play();
 			finalRun = true;
 			_destroyCraft = true;
+			_endCraftHandled = true;
 			_ufo->setShootingAt(0);
 		}
 
-		// End dogfight if UFO is crashed or destroyed.
-		if (_ufo->isCrashed())
+		if (_endUfoHandled)
 		{
-			AlienRace *race = _game->getMod()->getAlienRace(_ufo->getAlienRace());
-			AlienMission *mission = _ufo->getMission();
-			mission->ufoShotDown(*_ufo);
-			// Check for retaliation trigger.
-			int retaliationOdds = mission->getRules().getRetaliationOdds();
-			if (retaliationOdds == -1)
-			{
-				retaliationOdds = 100 - (4 * (24 - _game->getSavedGame()->getDifficultyCoefficient()) - race->getRetaliationAggression());
-			}
-			// Have mercy on beginners
-			if (_game->getSavedGame()->getMonthsPassed() < Mod::DIFFICULTY_BASED_RETAL_DELAY[_game->getSavedGame()->getDifficulty()])
-			{
-				retaliationOdds = 0;
-			}
+			finalRun = true;
+		}
+		else if (_ufo->isCrashed())
+		{
+			// End dogfight if UFO is crashed or destroyed.
+			_endUfoHandled = true;
 
-			if (RNG::percent(retaliationOdds))
+			if (_ufo->getShotDownByCraftId() == _craft->getUniqueId())
 			{
-				// Spawn retaliation mission.
-				std::string targetRegion;
-				if (RNG::percent(50 - 6 * _game->getSavedGame()->getDifficultyCoefficient()))
+				AlienRace *race = _game->getMod()->getAlienRace(_ufo->getAlienRace());
+				AlienMission *mission = _ufo->getMission();
+				mission->ufoShotDown(*_ufo);
+				// Check for retaliation trigger.
+				int retaliationOdds = mission->getRules().getRetaliationOdds();
+				if (retaliationOdds == -1)
 				{
-					// Attack on UFO's mission region
-					targetRegion = _ufo->getMission()->getRegion();
+					retaliationOdds = 100 - (4 * (24 - _game->getSavedGame()->getDifficultyCoefficient()) - race->getRetaliationAggression());
 				}
-				else
+				// Have mercy on beginners
+				if (_game->getSavedGame()->getMonthsPassed() < Mod::DIFFICULTY_BASED_RETAL_DELAY[_game->getSavedGame()->getDifficulty()])
 				{
-					// Try to find and attack the originating base.
-					targetRegion = _game->getSavedGame()->locateRegion(*_craft->getBase())->getRules()->getType();
-					// TODO: If the base is removed, the mission is canceled.
+					retaliationOdds = 0;
 				}
-				// Difference from original: No retaliation until final UFO lands (Original: Is spawned).
-				if (!_game->getSavedGame()->findAlienMission(targetRegion, OBJECTIVE_RETALIATION))
+
+				if (RNG::percent(retaliationOdds))
 				{
-					const RuleAlienMission *rule = _game->getMod()->getAlienMission(race->getRetaliationMission());
-					if (!rule)
+					// Spawn retaliation mission.
+					std::string targetRegion;
+					if (RNG::percent(50 - 6 * _game->getSavedGame()->getDifficultyCoefficient()))
 					{
-						rule = _game->getMod()->getRandomMission(OBJECTIVE_RETALIATION, _game->getSavedGame()->getMonthsPassed());
+						// Attack on UFO's mission region
+						targetRegion = _ufo->getMission()->getRegion();
 					}
+					else
+					{
+						// Try to find and attack the originating base.
+						targetRegion = _game->getSavedGame()->locateRegion(*_craft->getBase())->getRules()->getType();
+						// TODO: If the base is removed, the mission is canceled.
+					}
+					// Difference from original: No retaliation until final UFO lands (Original: Is spawned).
+					if (!_game->getSavedGame()->findAlienMission(targetRegion, OBJECTIVE_RETALIATION))
+					{
+						const RuleAlienMission *rule = _game->getMod()->getAlienMission(race->getRetaliationMission());
+						if (!rule)
+						{
+							rule = _game->getMod()->getRandomMission(OBJECTIVE_RETALIATION, _game->getSavedGame()->getMonthsPassed());
+						}
 
-					AlienMission *mission = new AlienMission(*rule);
-					mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
-					mission->setRegion(targetRegion, *_game->getMod());
-					mission->setRace(_ufo->getAlienRace());
-					mission->start(mission->getRules().getWave(0).spawnTimer); // fixed delay for first scout
-					_game->getSavedGame()->getAlienMissions().push_back(mission);
+						AlienMission *mission = new AlienMission(*rule);
+						mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
+						mission->setRegion(targetRegion, *_game->getMod());
+						mission->setRace(_ufo->getAlienRace());
+						mission->start(mission->getRules().getWave(0).spawnTimer); // fixed delay for first scout
+						_game->getSavedGame()->getAlienMissions().push_back(mission);
+					}
 				}
 			}
 
