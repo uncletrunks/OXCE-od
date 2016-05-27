@@ -24,6 +24,7 @@
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/AlienMission.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Region.h"
 #include "../Mod/RuleRegion.h"
