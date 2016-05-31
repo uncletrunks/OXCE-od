@@ -318,7 +318,7 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 		return false;
 
 	Position posSelf = unit->getPosition();
-	if (eventRadius == 0 || eventPos == Position(-1, -1, -1) || distanceSq(posSelf, eventPos) <= eventRadius * eventRadius)
+	if (eventRadius == 0 || eventPos == Position(-1, -1, -1) || distanceSq(posSelf, eventPos, false) <= eventRadius * eventRadius)
 	{
 		//Asked to do a full check. Or the event is overlapping our tile. Better check everything.
 		selfWithinEventRadius = true;
@@ -426,7 +426,7 @@ void TileEngine::calculateTilesInFOV(BattleUnit *unit, const Position eventPos, 
 		return;
 	}
 	Position posSelf = unit->getPosition();
-	if (eventPos == Position(-1,-1,-1) || eventPos == unit->getPosition() || distanceSq(posSelf, eventPos) <= eventRadius * eventRadius)
+	if (eventPos == Position(-1,-1,-1) || eventPos == unit->getPosition() || distanceSq(posSelf, eventPos, false) <= eventRadius * eventRadius)
 	{
 		//Asked to do a full check. Or unit within event. Should update all.
 		unit->clearVisibleTiles();
@@ -440,7 +440,7 @@ void TileEngine::calculateTilesInFOV(BattleUnit *unit, const Position eventPos, 
 	}
 
 	//Only recalculate bresenham lines to tiles that are at the event or further away.
-	const int distanceSqrMin = skipNarrowArcTest ? 0 : std::max(distanceSq(posSelf, eventPos) - eventRadius*eventRadius, 0);
+	const int distanceSqrMin = skipNarrowArcTest ? 0 : std::max(distanceSq(posSelf, eventPos, false) - eventRadius * eventRadius, 0);
 
 	//Variables for finding the tiles to test based on the view direction.
 	Position posTest;
