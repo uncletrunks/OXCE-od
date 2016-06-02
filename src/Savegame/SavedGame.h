@@ -115,7 +115,7 @@ private:
 	std::vector<const RuleResearch*> _discovered;
 	std::vector<const ArticleDefinition*> _seenUfopediaItems;
 	std::map<std::string, int> _manufactureRuleStatus;
-	std::vector<const RuleResearch*> _seenResearchItems;
+	std::map<std::string, int> _researchRuleStatus;
 	std::vector<AlienMission*> _activeMissions;
 	bool _debug, _warned;
 	int _monthsPassed;
@@ -209,8 +209,8 @@ public:
 	void addSeenUfopediaArticle(const ArticleDefinition *r);
 	/// Sets the status of a manufacture rule
 	void setManufactureRuleStatus(const std::string &manufactureRule, int newStatus);
-	/// Add a seen ResearchProject
-	void addSeenResearch(const RuleResearch *r);
+	/// Sets the status of a research rule
+	void setResearchRuleStatus(const std::string &researchRule, int newStatus);
 	/// Add a finished ResearchProject
 	void addFinishedResearch(const RuleResearch *r, const Mod *mod = 0, bool score = true);
 	/// Get the list of already discovered research projects
@@ -229,8 +229,8 @@ public:
 	bool isUfopediaArticleSeen(const std::string &article) const;
 	/// Gets the status of a manufacture rule.
 	int getManufactureRuleStatus(const std::string &manufactureRule);
-	/// Gets if a research has been seen already.
-	bool isResearchSeen(const std::string &research) const;
+	/// Gets the status of a research rule.
+	int getResearchRuleStatus(const std::string &researchRule);
 	/// Gets if a research has been unlocked.
 	bool isResearched(const std::string &research) const;
 	/// Gets if a list of research has been unlocked.

@@ -22,6 +22,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
+#include "../Interface/ToggleTextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextList.h"
@@ -43,7 +44,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 
 	_window = new Window(this, 230, 140, 45, 30, POPUP_BOTH);
 	_btnOK = new TextButton(103, 16, 164, 146);
-	_btnMarkAllAsSeen = new TextButton(103, 16, 53, 146);
+	_btnShowOnlyNew = new ToggleTextButton(103, 16, 53, 146);
 	_txtTitle = new Text(214, 16, 53, 38);
 	_lstResearch = new TextList(198, 88, 53, 54);
 
@@ -52,7 +53,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 
 	add(_window, "window", "selectNewResearch");
 	add(_btnOK, "button", "selectNewResearch");
-	add(_btnMarkAllAsSeen, "button", "selectNewResearch");
+	add(_btnShowOnlyNew, "button", "selectNewResearch");
 	add(_txtTitle, "text", "selectNewResearch");
 	add(_lstResearch, "list", "selectNewResearch");
 
@@ -64,9 +65,10 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	_btnOK->setText(tr("STR_OK"));
 	_btnOK->onMouseClick((ActionHandler)&NewResearchListState::btnOKClick);
 	_btnOK->onKeyboardPress((ActionHandler)&NewResearchListState::btnOKClick, Options::keyCancel);
+	_btnOK->onKeyboardPress((ActionHandler)&NewResearchListState::btnMarkAllAsSeenClick, Options::keyInvClear);
 
-	_btnMarkAllAsSeen->setText(tr("MARK ALL AS SEEN"));
-	_btnMarkAllAsSeen->onMouseClick((ActionHandler)&NewResearchListState::btnMarkAllAsSeenClick);
+	_btnShowOnlyNew->setText(tr("STR_SHOW_ONLY_NEW"));
+	_btnShowOnlyNew->onMouseClick((ActionHandler)&NewResearchListState::btnShowOnlyNewClick);
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_NEW_RESEARCH_PROJECTS"));
@@ -76,7 +78,8 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	_lstResearch->setBackground(_window);
 	_lstResearch->setMargin(8);
 	_lstResearch->setAlign(ALIGN_CENTER);
-	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onSelectProject);
+	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onSelectProject, SDL_BUTTON_LEFT);
+	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onToggleProjectStatus, SDL_BUTTON_RIGHT);
 }
 
 /**
@@ -98,12 +101,43 @@ void NewResearchListState::onSelectProject(Action *)
 }
 
 /**
+* Selects the RuleResearch to work on.
+* @param action Pointer to an action.
+*/
+void NewResearchListState::onToggleProjectStatus(Action *)
+{
+	// change status
+	const std::string rule = _projects[_lstResearch->getSelectedRow()]->getName();
+	int oldState = _game->getSavedGame()->getResearchRuleStatus(rule);
+	int newState = 1 - oldState;
+	_game->getSavedGame()->setResearchRuleStatus(rule, newState);
+
+	if (newState == RuleResearch::RESEARCH_STATUS_NEW)
+	{
+		_lstResearch->setRowColor(_lstResearch->getSelectedRow(), 241); // pink
+	}
+	else
+	{
+		_lstResearch->setRowColor(_lstResearch->getSelectedRow(), 208); // white
+	}
+}
+
+/**
  * Returns to the previous screen.
  * @param action Pointer to an action.
  */
 void NewResearchListState::btnOKClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+* Filter to display only new items.
+* @param action Pointer to an action.
+*/
+void NewResearchListState::btnShowOnlyNewClick(Action *)
+{
+	fillProjectList(false);
 }
 
 /**
@@ -128,18 +162,25 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 	bool hasUnseen = false;
 	while (it != _projects.end())
 	{
+		if (_btnShowOnlyNew->getPressed())
+		{
+			if (_game->getSavedGame()->getResearchRuleStatus((*it)->getName()) != RuleResearch::RESEARCH_STATUS_NEW)
+			{
+				it = _projects.erase(it);
+				continue;
+			}
+		}
 		if ((*it)->getRequirements().empty())
 		{
 			_lstResearch->addRow(1, tr((*it)->getName()).c_str());
 			if (markAllAsSeen)
 			{
-				// remember all research items as seen
-				_game->getSavedGame()->addSeenResearch((*it));
+				// mark all (new) research items as normal
+				_game->getSavedGame()->setResearchRuleStatus((*it)->getName(), RuleResearch::RESEARCH_STATUS_NORMAL);
 			}
-			else if (!_game->getSavedGame()->isResearchSeen((*it)->getName()))
+			else if (_game->getSavedGame()->getResearchRuleStatus((*it)->getName()) == RuleResearch::RESEARCH_STATUS_NEW)
 			{
-				// mark as unseen
-				_lstResearch->setCellColor(row, 0, 53); // light green
+				_lstResearch->setRowColor(row, 241); // pink
 				hasUnseen = true;
 			}
 			row++;
@@ -150,18 +191,9 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 			it = _projects.erase(it);
 		}
 	}
-	if (!hasUnseen)
-	{
-		_btnMarkAllAsSeen->setVisible(false);
-		_btnOK->setWidth(_btnOK->getX()+_btnOK->getWidth()-_btnMarkAllAsSeen->getX());
-		_btnOK->setX(_btnMarkAllAsSeen->getX());
-	}
-	else
-	{
-		_btnMarkAllAsSeen->setVisible(true);
-		_btnOK->setWidth(_btnMarkAllAsSeen->getWidth());
-		_btnOK->setX(_btnMarkAllAsSeen->getX()+_btnMarkAllAsSeen->getWidth()+8);
-	}
+
+	std::wstring label = tr("STR_SHOW_ONLY_NEW");
+	_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
 }
 
 }

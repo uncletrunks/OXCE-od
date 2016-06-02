@@ -46,6 +46,8 @@ class RuleResearch
 	bool _needItem;
 	int _listOrder;
 public:
+	static const int RESEARCH_STATUS_NEW = 0;
+	static const int RESEARCH_STATUS_NORMAL = 1;
 	RuleResearch(const std::string &name);
 	/// Loads the research from YAML.
 	void load(const YAML::Node& node, int listOrder);

@@ -447,15 +447,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 	}
 
 	_manufactureRuleStatus = doc["manufactureRuleStatus"].as< std::map<std::string, int> >(_manufactureRuleStatus);
-
-	for (YAML::const_iterator it = doc["seenResearchItems"].begin(); it != doc["seenResearchItems"].end(); ++it)
-	{
-		std::string researchItem = it->as<std::string>();
-		if (mod->getResearch(researchItem))
-		{
-			_seenResearchItems.push_back(mod->getResearch(researchItem));
-		}
-	}
+	_researchRuleStatus = doc["researchRuleStatus"].as< std::map<std::string, int> >(_researchRuleStatus);
 
 	for (YAML::const_iterator i = doc["bases"].begin(); i != doc["bases"].end(); ++i)
 	{
@@ -599,10 +591,7 @@ void SavedGame::save(const std::string &filename) const
 		node["seenUfopediaItems"].push_back((*i)->id);
 	}
 	node["manufactureRuleStatus"] = _manufactureRuleStatus;
-	for (std::vector<const RuleResearch *>::const_iterator i = _seenResearchItems.begin(); i != _seenResearchItems.end(); ++i)
-	{
-		node["seenResearchItems"].push_back((*i)->getName());
-	}
+	node["researchRuleStatus"] = _researchRuleStatus;
 	node["alienStrategy"] = _alienStrategy->save();
 	for (std::vector<Soldier*>::const_iterator i = _deadSoldiers.begin(); i != _deadSoldiers.end(); ++i)
 	{
@@ -1002,16 +991,13 @@ void SavedGame::setManufactureRuleStatus(const std::string &manufactureRule, int
 }
 
 /**
- * Add a ResearchProject to the list of already seen ResearchProject
- * @param r The newly opened ResearchProject
- */
-void SavedGame::addSeenResearch (const RuleResearch * r)
+* Sets the status of a research rule
+* @param researchRule The rule ID
+* @param newStatus Status to be set
+*/
+void SavedGame::setResearchRuleStatus(const std::string &researchRule, int newStatus)
 {
-	std::vector<const RuleResearch *>::const_iterator itSeen = std::find(_seenResearchItems.begin(), _seenResearchItems.end(), r);
-	if (itSeen == _seenResearchItems.end())
-	{
-		_seenResearchItems.push_back(r);
-	}
+	_researchRuleStatus[researchRule] = newStatus;
 }
 
 /**
@@ -1382,21 +1368,13 @@ int SavedGame::getManufactureRuleStatus(const std::string &manufactureRule)
 }
 
 /**
- * Returns if a certain research has been seen.
- * @param research Research ID.
- * @return Whether it's seen or not.
- */
-bool SavedGame::isResearchSeen(const std::string &research) const
+* Gets the status of a research rule.
+* @param researchRule Research rule ID.
+* @return Status (0=new, 1=normal).
+*/
+int SavedGame::getResearchRuleStatus(const std::string &researchRule)
 {
-	if (research.empty())
-		return true;
-	for (std::vector<const RuleResearch *>::const_iterator i = _seenResearchItems.begin(); i != _seenResearchItems.end(); ++i)
-	{
-		if ((*i)->getName() == research)
-			return true;
-	}
-
-	return false;
+	return _researchRuleStatus[researchRule];
 }
 
 /**

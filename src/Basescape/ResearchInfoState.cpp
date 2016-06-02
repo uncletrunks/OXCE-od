@@ -158,8 +158,11 @@ void ResearchInfoState::buildUi()
 
 	if (_rule)
 	{
-		// remember this research item as seen
-		_game->getSavedGame()->addSeenResearch(_rule);
+		// mark new as normal
+		if (_game->getSavedGame()->getResearchRuleStatus(_rule->getName()) == RuleResearch::RESEARCH_STATUS_NEW)
+		{
+			_game->getSavedGame()->setResearchRuleStatus(_rule->getName(), RuleResearch::RESEARCH_STATUS_NORMAL);
+		}
 	}
 }
 

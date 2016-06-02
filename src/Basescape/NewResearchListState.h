@@ -26,6 +26,7 @@ namespace OpenXcom
 {
 
 class TextButton;
+class ToggleTextButton;
 class Window;
 class Text;
 class TextList;
@@ -39,17 +40,21 @@ class NewResearchListState : public State
 {
 private:
 	Base *_base;
-	TextButton *_btnOK, *_btnMarkAllAsSeen;
+	TextButton *_btnOK;
+	ToggleTextButton *_btnShowOnlyNew;
 	Window *_window;
 	Text *_txtTitle;
 	TextList *_lstResearch;
 	void onSelectProject(Action *action);
+	void onToggleProjectStatus(Action *action);
 	std::vector<RuleResearch *> _projects;
 public:
 	/// Creates the New research list state.
 	NewResearchListState(Base *base);
 	/// Handler for clicking the OK button.
 	void btnOKClick(Action *action);
+	/// Handler for clicking the [Show Only New] button.
+	void btnShowOnlyNewClick(Action *action);
 	/// Handler for clicking the [Mark All As Seen] button.
 	void btnMarkAllAsSeenClick(Action *action);
 	/// Fills the ResearchProject list with possible ResearchProjects.
