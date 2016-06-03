@@ -208,6 +208,7 @@ void create()
 	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_OXCE"));
 	_info.push_back(OptionInfo("showItemNameAndWeightInInventory", &showItemNameAndWeightInInventory, false, "STR_SHOW_ITEM_WEIGHT_IN_INVENTORY", "STR_OXCE"));
 	_info.push_back(OptionInfo("showGunMeleeOnTop", &showGunMeleeOnTop, true, "STR_SHOW_GUN_MELEE_ON_TOP", "STR_OXCE"));
+	_info.push_back(OptionInfo("showQuickSearch", &showQuickSearch, true, "STR_SHOW_QUICK_SEARCH", "STR_OXCE"));
 
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
@@ -292,6 +293,7 @@ void create()
 	_info.push_back(OptionInfo("keyBattleActionItem3", &keyBattleActionItem3, SDLK_3, "STR_ACTION_ITEM_3", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyBattleActionItem4", &keyBattleActionItem4, SDLK_4, "STR_ACTION_ITEM_4", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyBattleActionItem5", &keyBattleActionItem5, SDLK_5, "STR_ACTION_ITEM_5", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyToggleQuickSearch", &keyToggleQuickSearch, SDLK_q, "STR_TOGGLE_QUICK_SEARCH", "STR_OXCE"));
 
 #ifdef __MORPHOS__
 	_info.push_back(OptionInfo("FPS", &FPS, 15));
