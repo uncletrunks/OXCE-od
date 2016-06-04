@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "../Savegame/SavedGame.h"
 
 namespace OpenXcom
 {
@@ -65,6 +66,8 @@ private:
 	std::map<int, RecoveryItem*> _recoveryStats;
 	bool _positiveScore, _noContainment, _manageContainment, _destroyBase;
 	int _limitsEnforced;
+	MissionStatistics *_missionStatistics;
+	std::vector<Soldier*> _soldiersCommended, _deadSoldiersCommended;
 	/// Adds to the debriefing stats.
 	void addStat(const std::string &name, int quantity, int score);
 	/// Prepares debriefing.

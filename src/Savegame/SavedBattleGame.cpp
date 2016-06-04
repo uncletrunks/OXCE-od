@@ -194,7 +194,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	{
 		UnitFaction faction = (UnitFaction)(*i)["faction"].as<int>();
 		UnitFaction originalFaction = (UnitFaction)(*i)["originalFaction"].as<int>(faction);
-		int id = (*i)["soldierId"].as<int>();
+		int id = (*i)["id"].as<int>();
 		BattleUnit *unit;
 		if (id < BattleUnit::MAX_SOLDIER_ID) // Unit is linked to a geoscape soldier
 		{
@@ -207,7 +207,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			std::string armor = (*i)["genUnitArmor"].as<std::string>();
 			// create a new Unit.
 			if(!mod->getUnit(type) || !mod->getArmor(armor)) continue;
-			unit = new BattleUnit(mod->getUnit(type), originalFaction, id, mod->getArmor(armor), savedGame->getDifficultyCoefficient(), _depth, mod->getMaxViewDistance());
+			unit = new BattleUnit(mod->getUnit(type), originalFaction, id, mod->getArmor(armor), mod->getStatAdjustment(savedGame->getDifficulty()), _depth, mod->getMaxViewDistance());
 		}
 		unit->load(*i);
 		unit->setSpecialWeapon(this);
@@ -2188,6 +2188,7 @@ std::vector< std::vector<std::pair<int, int> > > &SavedBattleGame::getModuleMap(
 {
 	return _baseModules;
 }
+
 /**
  * calculate the number of map modules remaining by counting the map objects
  * on the top floor who have the baseModule flag set. we store this data in the grid
@@ -2253,7 +2254,7 @@ void SavedBattleGame::setPaletteByDepth(State *state)
 	}
 	else
 	{
-		std::stringstream ss;
+		std::ostringstream ss;
 		ss << "PAL_BATTLESCAPE_" << _depth;
 		state->setPalette(ss.str());
 	}

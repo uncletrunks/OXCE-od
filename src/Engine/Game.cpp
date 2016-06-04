@@ -369,6 +369,7 @@ double Game::volumeExponent(int volume)
 {
 	return (exp(log(Game::VOLUME_GRADIENT + 1.0) * volume / (double)SDL_MIX_MAXVOLUME) -1.0 ) / Game::VOLUME_GRADIENT;
 }
+
 /**
  * Returns the display screen used by the game.
  * @return Pointer to the screen.
@@ -453,8 +454,15 @@ void Game::loadLanguage(const std::string &filename)
 {
 	std::ostringstream ss;
 	ss << "/Language/" << filename << ".yml";
-
-	_lang->load(CrossPlatform::searchDataFile("common" + ss.str()));
+	std::string path = CrossPlatform::searchDataFile("common" + ss.str());
+	try
+	{
+		_lang->load(path);
+	}
+	catch (YAML::Exception &e)
+	{
+		throw Exception(path + ": " + std::string(e.what()));
+	}
 
 	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)
 	{

@@ -23,12 +23,12 @@
 #include "Craft.h"
 #include "EquipmentLayoutItem.h"
 #include "SoldierDeath.h"
+#include "SoldierDiary.h"
 #include "../Mod/SoldierNamePool.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
 #include "../Mod/StatString.h"
-#include "SavedGame.h"
 
 namespace OpenXcom
 {
@@ -44,7 +44,7 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
 	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0),
 	_recentlyPromoted(false), _psiTraining(false), _training(false),
-	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0)
+	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary())
 {
 	if (id != 0)
 	{
@@ -92,6 +92,7 @@ Soldier::~Soldier()
 		delete *i;
 	}
 	delete _death;
+	delete _diary;
 }
 
 /**
@@ -148,6 +149,11 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 		_death = new SoldierDeath();
 		_death->load(node["death"]);
 	}
+	if (node["diary"])
+	{
+		_diary = new SoldierDiary();
+		_diary->load(node["diary"]);
+	}	
 	calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
 }
 
@@ -196,6 +202,11 @@ YAML::Node Soldier::save() const
 	{
 		node["death"] = _death->save();
 	}
+	if (!_diary->getMissionIdList().empty() || !_diary->getSoldierCommendations()->empty())
+	{
+	node["diary"] = _diary->save();
+	}
+
 	return node;
 }
 
@@ -724,6 +735,16 @@ void Soldier::die(SoldierDeath *death)
 }
 
 /**
+ * Returns the soldier's diary.
+ * @return Diary.
+ */
+SoldierDiary *Soldier::getDiary()
+{
+	return _diary;
+}
+
+/**
+ * Calculates the soldier's statString
  * Calculates the soldier's statString.
  * @param statStrings List of statString rules.
  * @param psiStrengthEval Are psi stats available?

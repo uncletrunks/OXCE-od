@@ -21,7 +21,7 @@
 
 #include <string>
 #include <yaml-cpp/yaml.h>
-#include "CraftId.h"
+#include "Craft.h"
 #include "MovingTarget.h"
 #include "../Mod/RuleUfo.h"
 

@@ -85,6 +85,7 @@ PsiTrainingState::PsiTrainingState() : _training(false)
 
 	centerAllSurfaces();
 }
+
 /**
  *
  */

@@ -181,11 +181,9 @@ void UnitWalkBState::think()
 				Position voxelHere = (posHere * Position(16,16,24)) + Position(8,8,-(_unit->getTile()->getTerrainLevel()));
 				_parent->getTileEngine()->hit(voxelHere, _unit->getBaseStats()->strength, _parent->getMod()->getDamageType(DT_IN), _unit, 0, false);
 
-				if (_unit->getPosition() != posHere) // ie: we burned a hole in the floor and fell through it
+				if (_unit->getStatus() != STATUS_STANDING) // ie: we burned a hole in the floor and fell through it
 				{
-					_action.clearTU();
 					_pf->abortPath();
-					_parent->popState();
 					return;
 				}
 			}

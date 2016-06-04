@@ -39,6 +39,7 @@ class TileEngine;
 class Pathfinding;
 class Mod;
 class InfoboxOKState;
+class SoldierDiary;
 
 enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK };
 
@@ -139,7 +140,7 @@ public:
 	/// Sets state think interval.
 	void setStateInterval(Uint32 interval);
 	/// Checks for casualties in battle.
-	void checkForCasualties(const RuleDamageType *murderweapon, BattleUnit *murderer, bool hiddenExplosion = false, bool terrainExplosion = false);
+	void checkForCasualties(const RuleDamageType *damageType, const BattleItem *murderweapon, BattleUnit *murderer, bool hiddenExplosion = false, bool terrainExplosion = false);
 	/// Checks reserved tu and energy.
 	bool checkReservedTU(BattleUnit *bu, int tu, int energy, bool justChecking = false);
 	/// Handles unit AI.

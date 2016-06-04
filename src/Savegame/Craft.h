@@ -20,14 +20,17 @@
 #define OPENXCOM_CRAFT_H
 
 #include "MovingTarget.h"
+#include <utility>
 #include <vector>
 #include <string>
-#include "CraftId.h"
 #include "../Mod/RuleCraft.h"
 
 namespace OpenXcom
 {
 
+typedef std::pair<std::string, int> CraftId;
+
+class RuleCraft;
 class Base;
 class Soldier;
 class CraftWeapon;

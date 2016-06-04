@@ -27,6 +27,7 @@
 #include "../Engine/Options.h"
 #include "../Savegame/GameTime.h"
 #include "RuleDamageType.h"
+#include "Unit.h"
 #include "RuleAlienMission.h"
 
 namespace OpenXcom
@@ -73,9 +74,11 @@ class MCDPatch;
 class ExtraSprites;
 class ExtraSounds;
 class ExtraStrings;
+class RuleCommendations;
 class StatString;
 class RuleInterface;
 class RuleGlobe;
+class RuleConverter;
 class SoundDefinition;
 class MapScript;
 class RuleVideo;
@@ -83,6 +86,7 @@ class RuleMusic;
 class RuleMissionScript;
 class ModScript;
 class ScriptParserBase;
+struct StatAdjustment;
 
 /**
  * Contains all the game-specific static data that never changes
@@ -131,6 +135,7 @@ private:
 	std::map<std::string, RuleVideo *>_videos;
 	std::map<std::string, MCDPatch *> _MCDPatches;
 	std::map<std::string, std::vector<MapScript *> > _mapScripts;
+	std::map<std::string, RuleCommendations *> _commendations;
 	std::map<std::string, RuleMissionScript*> _missionScripts;
 	std::vector<std::pair<std::string, ExtraSprites *> > _extraSprites;
 	std::vector<std::pair<std::string, ExtraSounds *> > _extraSounds;
@@ -139,6 +144,7 @@ private:
 	std::vector<RuleDamageType*> _damageTypes;
 	std::map<std::string, RuleMusic *> _musicDefs;
 	RuleGlobe *_globe;
+	RuleConverter *_converter;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
@@ -150,9 +156,10 @@ private:
 	YAML::Node _startingBase;
 	GameTime _startingTime;
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
+	StatAdjustment _statAdjustment[5];
 
 	std::vector<std::string> _countriesIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
-	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
+	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _ufopaediaCatIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _extraSpritesIndex, _extraSoundsIndex, _extraStringsIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
@@ -171,7 +178,10 @@ private:
 	void loadFile(const std::string &filename, const ModScript &parsers);
 	/// Loads a ruleset element.
 	template <typename T>
-	T *loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::vector<std::string> *index = 0, const std::string &key = "type");
+	T *loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::vector<std::string> *index = 0, const std::string &key = "type") const;
+	/// Gets a ruleset element.
+	template <typename T>
+	T *getRule(const std::string &id, const std::string &name, const std::map<std::string, T*> &map) const;
 	/// Gets a random music. This is private to prevent access, use playMusic(name, true) instead.
 	Music *getRandomMusic(const std::string &name) const;
 	/// Gets a particular sound set. This is private to prevent access, use getSound(name, id) instead.
@@ -221,6 +231,9 @@ public:
 	static int BATTLESCAPE_CURSOR;
 	static int UFOPAEDIA_CURSOR;
 	static int GRAPHS_CURSOR;
+	static int DAMAGE_RANGE;
+	static int EXPLOSIVE_DAMAGE_RANGE;
+	static int FIRE_DAMAGE_RANGE[2];
 	static std::string DEBRIEF_MUSIC_GOOD;
 	static std::string DEBRIEF_MUSIC_BAD;
 	static int DIFFICULTY_COEFFICIENT[5];
@@ -313,6 +326,8 @@ public:
 	RuleSoldier *getSoldier(const std::string &name) const;
 	/// Gets the available soldiers.
 	const std::vector<std::string> &getSoldiersList() const;
+	/// Gets commendation rules.
+	std::map<std::string, RuleCommendations *> getCommendation() const;
 	/// Gets generated unit rules.
 	Unit *getUnit(const std::string &name) const;
 	/// Gets alien race rules.
@@ -335,6 +350,8 @@ public:
 	ArticleDefinition *getUfopaediaArticle(const std::string &name) const;
 	/// Gets the available articles.
 	const std::vector<std::string> &getUfopaediaList() const;
+	/// Gets the available article categories.
+	const std::vector<std::string> &getUfopaediaCategoryList() const;
 	/// Gets the inventory list.
 	std::map<std::string, RuleInventory*> *getInventories();
 	/// Gets the ruleset for a specific inventory.
@@ -423,8 +440,10 @@ public:
 	int getMinRadarRange() const;
 	/// Gets information on an interface element.
 	RuleInterface *getInterface(const std::string &id) const;
-	/// Gets the ruleset for the globe
+	/// Gets the ruleset for the globe.
 	RuleGlobe *getGlobe() const;
+	/// Gets the ruleset for the converter.
+	RuleConverter *getConverter() const;
 	/// Gets the list of selective files for insertion into our cat files.
 	const std::map<std::string, SoundDefinition *> *getSoundDefinitions() const;
 	/// Gets the list of transparency colors,
@@ -438,6 +457,7 @@ public:
 	std::string getFinalResearch() const;
 	const std::map<int, std::string> *getMissionRatings() const;
 	const std::map<int, std::string> *getMonthlyRatings() const;
+	StatAdjustment *getStatAdjustment(int difficulty);
 };
 
 }

@@ -1523,10 +1523,6 @@ int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUn
 		efficacy -= 4;
 	}
 
-	// we don't want to ruin our own base, but we do want to ruin XCom's day.
-	if (_save->getMissionType() == "STR_ALIEN_BASE_ASSAULT") efficacy -= 3;
-	else if (_save->getMissionType() == "STR_BASE_DEFENSE" || _save->getMissionType() == "STR_TERROR_MISSION") efficacy += 3;
-
 	// allow difficulty to have its influence
 	efficacy += diff/2;
 
@@ -1603,6 +1599,12 @@ int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUn
  */
 void AlienBAIState::meleeAction()
 {
+	BattleActionCost attackCost(BA_HIT, _unit, _unit->getUtilityWeapon(BT_MELEE));
+	if (attackCost.haveTU())
+	{
+		// cannot make a melee attack - consider some other behaviour, like running away, or standing motionless.
+		return;
+	}
 	if (_aggroTarget != 0 && !_aggroTarget->isOut())
 	{
 		if (_save->getTileEngine()->validMeleeRange(_unit, _aggroTarget, _save->getTileEngine()->getDirectionTo(_unit->getPosition(), _aggroTarget->getPosition())))
@@ -1611,7 +1613,6 @@ void AlienBAIState::meleeAction()
 			return;
 		}
 	}
-	BattleActionCost attackCost(BA_HIT, _unit, _attackAction->weapon);
 	int chargeReserve = std::min(_unit->getTimeUnits() - attackCost.Time, 2 * (_unit->getEnergy() - attackCost.Energy));
 	int distance = (chargeReserve / 4) + 1;
 	_aggroTarget = 0;
@@ -1652,6 +1653,12 @@ void AlienBAIState::meleeAction()
  */
 void AlienBAIState::wayPointAction()
 {
+	BattleActionCost attackCost(BA_LAUNCH, _unit, _unit->getMainHandWeapon());
+	if (attackCost.haveTU())
+	{
+		// cannot make a launcher attack - consider some other behaviour, like running away, or standing motionless.
+		return;
+	}
 	_aggroTarget = 0;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end() && _aggroTarget == 0; ++i)
 	{

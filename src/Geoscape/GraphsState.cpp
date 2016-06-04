@@ -66,7 +66,7 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0)
 	_btnIncome = new InteractiveSurface(32, 24, 224, 0);
 	_btnFinance = new InteractiveSurface(32, 24, 256, 0);
 	_btnGeoscape = new InteractiveSurface(32, 24, 288, 0);
-	_txtTitle = new Text(220, 16, 100, 28);
+	_txtTitle = new Text(230, 16, 90, 28);
 	_txtFactor = new Text(38, 11, 96, 28);
 	_txtMonths = new TextList(205, 8, 115, 183);
 	_txtYears = new TextList(200, 8, 121, 191);
@@ -477,19 +477,26 @@ void GraphsState::btnFinanceClick(Action *)
  */
 void GraphsState::btnRegionListClick(Action * action)
 {
-	size_t number = (action->getSender()->getY()-_game->getScreen()->getDY())/11;
-	ToggleTextButton *button = 0;
+	size_t number = 0;
+	ToggleTextButton *button = dynamic_cast<ToggleTextButton*>(action->getSender());
 
-	if ((_regionToggles.size() <= GRAPH_MAX_BUTTONS + 1 && number == _regionToggles.size()-1)||(_regionToggles.size() > GRAPH_MAX_BUTTONS + 1 && number == GRAPH_MAX_BUTTONS))
+	if (button == _btnRegionTotal)
 	{
-		button = _btnRegionTotal;
+		number = _btnRegions.size();
 	}
 	else
 	{
-		button = _btnRegions.at(number);
+		for (size_t i = 0; i < _btnRegions.size(); ++i)
+		{
+			if (button == _btnRegions[i])
+			{
+				number = i;
+				break;
+			}
+		}
 	}
 
-	_regionToggles.at(number+_butRegionsOffset)->_pushed = button->getPressed();
+	_regionToggles.at(number + _butRegionsOffset)->_pushed = button->getPressed();
 
 	drawLines();
 }
@@ -500,19 +507,26 @@ void GraphsState::btnRegionListClick(Action * action)
  */
 void GraphsState::btnCountryListClick(Action * action)
 {
-	size_t number = (action->getSender()->getY()-_game->getScreen()->getDY())/11;
-	ToggleTextButton *button = 0;
+	size_t number = 0;
+	ToggleTextButton *button = dynamic_cast<ToggleTextButton*>(action->getSender());
 
-	if ((_countryToggles.size() <= GRAPH_MAX_BUTTONS + 1 && number == _countryToggles.size()-1)||(_countryToggles.size() > GRAPH_MAX_BUTTONS + 1 && number == GRAPH_MAX_BUTTONS))
+	if (button == _btnCountryTotal)
 	{
-		button = _btnCountryTotal;
+		number = _btnCountries.size();
 	}
 	else
 	{
-		button = _btnCountries.at(number);
+		for (size_t i = 0; i < _btnCountries.size(); ++i)
+		{
+			if (button == _btnCountries[i])
+			{
+				number = i;
+				break;
+			}
+		}
 	}
 
-	_countryToggles.at(number+_butCountriesOffset)->_pushed = button->getPressed();
+	_countryToggles.at(number + _butCountriesOffset)->_pushed = button->getPressed();
 
 	drawLines();
 }
@@ -523,8 +537,17 @@ void GraphsState::btnCountryListClick(Action * action)
  */
 void GraphsState::btnFinanceListClick(Action *action)
 {
-	size_t number = (action->getSender()->getY()-_game->getScreen()->getDY())/11;
-	ToggleTextButton *button = _btnFinances.at(number);
+	size_t number = 0;
+	ToggleTextButton *button = dynamic_cast<ToggleTextButton*>(action->getSender());
+
+	for (size_t i = 0; i < _btnFinances.size(); ++i)
+	{
+		if (button == _btnFinances[i])
+		{
+			number = i;
+			break;
+		}
+	}
 
 	_financeLines.at(number)->setVisible(!_financeToggles.at(number));
 	_financeToggles.at(number) = button->getPressed();

@@ -87,6 +87,8 @@ private:
 	void blinkVisibleUnitButtons();
 	/// Draw hand item with ammo number
 	void drawItem(BattleItem *item, Surface *hand, NumberText *ammo);
+	/// Shifts the colors of the health bar when unit has fatal wounds.
+	void blinkHealthBar();
 public:
 	/// Selects the next soldier.
 	void selectNextPlayerUnit(bool checkReselect = false, bool setReselect = false, bool checkInventory = false);

@@ -50,12 +50,13 @@ class CivilianBAIState;
 template<typename, typename...> class ScriptContainer;
 template<typename...> class ScriptParser;
 class ScriptWorker;
+struct BattleUnitStatistics;
+struct StatAdjustment;
 
 enum UnitStatus {STATUS_STANDING, STATUS_WALKING, STATUS_FLYING, STATUS_TURNING, STATUS_AIMING, STATUS_COLLAPSING, STATUS_DEAD, STATUS_UNCONSCIOUS, STATUS_PANICKING, STATUS_BERSERK, STATUS_IGNORE_ME};
 enum UnitFaction {FACTION_PLAYER, FACTION_HOSTILE, FACTION_NEUTRAL};
 enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LEFTARM, BODYPART_RIGHTLEG, BODYPART_LEFTLEG, BODYPART_MAX};
 enum UnitBodyPartEx {BODYPART_LEGS = BODYPART_MAX, BODYPART_COLLAPSING, BODYPART_ITEM_RIGHTHAND, BODYPART_ITEM_LEFTHAND, BODYPART_ITEM_FLOOR, BODYPART_ITEM_INVENTORY, BODYPART_LARGE_TORSO, BODYPART_LARGE_PROPULSION = BODYPART_LARGE_TORSO + 4, BODYPART_LARGE_TURRET = BODYPART_LARGE_PROPULSION + 4};
-
 
 /**
  * Represents a moving unit in the battlescape, player controlled or AI controlled
@@ -83,7 +84,7 @@ private:
 	std::unordered_set<Tile *> _visibleTilesLookup;
 	int _tu, _energy, _health, _morale, _stunlevel;
 	bool _kneeled, _floating, _dontReselect;
-	int _currentArmor[SIDE_MAX];
+	int _currentArmor[SIDE_MAX], _maxArmor[SIDE_MAX];
 	int _fatalWounds[BODYPART_MAX];
 	int _fire;
 	std::vector<BattleItem*> _inventory;
@@ -104,6 +105,11 @@ private:
 	int _turnsSinceSpotted;
 	std::string _spawnUnit;
 	std::string _activeHand;
+    BattleUnitStatistics* _statistics;
+	int _murdererId;	// used to credit the murderer with the kills that this unit got by blowing up on death
+    UnitSide _fatalShotSide;
+    UnitBodyPart _fatalShotBodyPart;
+    std::string _murdererWeapon, _murdererWeaponAmmo;
 
 	// static data
 	std::string _type;
@@ -153,7 +159,7 @@ public:
 	/// Creates a BattleUnit from solder.
 	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);
 	/// Creates a BattleUnit from unit.
-	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, int diff, int depth, int maxViewDistance);
+	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance);
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.
@@ -286,6 +292,8 @@ public:
 	void setArmor(int armor, UnitSide side);
 	/// Get armor value.
 	int getArmor(UnitSide side) const;
+	/// Get max armor value.
+	int getMaxArmor(UnitSide side) const;
 	/// Get total number of fatal wounds.
 	int getFatalWounds() const;
 	/// Get the current reaction score.
@@ -438,8 +446,6 @@ public:
 	int getAggroSound() const;
 	/// Sets the unit's energy level.
 	void setEnergy(int energy);
-	/// Halve the unit's armor values.
-	void halveArmor();
 	/// Get the faction that killed this unit.
 	UnitFaction killedBy() const;
 	/// Set the faction that killed this unit.
@@ -472,7 +478,7 @@ public:
 	/// this function checks if a tile is visible, using maths.
 	bool checkViewSector(Position pos, bool useTurretDirection = false) const;
 	/// adjust this unit's stats according to difficulty.
-	void adjustStats(const int diff);
+	void adjustStats(const StatAdjustment &adjustment);
 	/// did this unit already take fire damage this turn? (used to avoid damaging large units multiple times.)
 	bool tookFireDamage() const;
 	/// switch the state of the fire damage tracker.
@@ -513,6 +519,26 @@ public:
 	void goToTimeOut();
 	/// Recovers the unit's time units and energy.
 	void recoverTimeUnits();
+    /// Get the unit's mission statistics.
+    BattleUnitStatistics* getStatistics();
+	/// Set the unit murderer's id.
+	void setMurdererId(int id);
+	/// Get the unit murderer's id.
+	int getMurdererId() const;
+    /// Set information on the unit's fatal shot.
+    void setFatalShotInfo(UnitSide side, UnitBodyPart bodypart);
+    /// Get information on the unit's fatal shot's side.
+    UnitSide getFatalShotSide() const;
+    /// Get information on the unit's fatal shot's body part.
+    UnitBodyPart getFatalShotBodyPart() const;
+    /// Get the unit murderer's weapon.
+    std::string getMurdererWeapon() const;
+    /// Set the unit murderer's weapon.
+    void setMurdererWeapon(std::string weapon);
+       /// Get the unit murderer's weapon's ammo.
+    std::string getMurdererWeaponAmmo() const;
+    /// Set the unit murderer's weapon's ammo.
+    void setMurdererWeaponAmmo(std::string weaponAmmo);
 };
 
 } //namespace OpenXcom

@@ -19,6 +19,7 @@
 #include "RuleDamageType.h"
 #include "../Engine/Options.h"
 #include "../Engine/RNG.h"
+#include "Mod.h"
 
 namespace OpenXcom
 {
@@ -51,7 +52,8 @@ int RuleDamageType::getRandomDamage(int power) const
 		int secondThrow = RNG::generate(0, power);
 		return firstThrow + secondThrow;
 	}
-	if (randType == DRT_DEFAULT)
+	const bool def = randType == DRT_DEFAULT;
+	if (def)
 	{
 		switch (ResistType)
 		{
@@ -59,16 +61,16 @@ int RuleDamageType::getRandomDamage(int power) const
 		case DT_IN: randType = DRT_FIRE; break;
 		case DT_HE: randType = DRT_TFTD; break;
 		case DT_SMOKE: randType = DRT_NONE; break;
-		default: randType = Options::TFTDDamage ? DRT_TFTD : DRT_UFO; break;
+		default: randType = DRT_UFO; break;
 		}
 	}
 
 	switch (randType)
 	{
-	case DRT_UFO: dmgRng = 100; break;
-	case DRT_TFTD: dmgRng = 50; break;
+	case DRT_UFO: dmgRng = (def ? Mod::DAMAGE_RANGE : 100); break;
+	case DRT_TFTD: dmgRng = (def ? Mod::EXPLOSIVE_DAMAGE_RANGE : 50); break;
 	case DRT_FLAT: dmgRng = 0; break;
-	case DRT_FIRE: return RNG::generate(5, 10);
+	case DRT_FIRE: return RNG::generate(Mod::FIRE_DAMAGE_RANGE[0], Mod::FIRE_DAMAGE_RANGE[1]);
 	case DRT_NONE: return 0;
 	default: return 0;
 	}

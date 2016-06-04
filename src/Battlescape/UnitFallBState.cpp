@@ -244,7 +244,7 @@ void UnitFallBState::think()
 						ub = unitsToMove.erase(ub);
 					}
 				}
-				_parent->checkForCasualties(0,*unit);
+				_parent->checkForCasualties(nullptr, nullptr, *unit);
 			}
 		}
 		// we are just standing around, we are done falling.

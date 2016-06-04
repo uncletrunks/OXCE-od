@@ -89,7 +89,7 @@ void create()
 	_info.push_back(OptionInfo("useXBRZFilter", &useXBRZFilter, false));
 	_info.push_back(OptionInfo("useOpenGL", &useOpenGL, false));
 	_info.push_back(OptionInfo("checkOpenGLErrors", &checkOpenGLErrors, false));
-	_info.push_back(OptionInfo("useOpenGLShader", &useOpenGLShader, "Shaders/Openxcom.OpenGL.shader"));
+	_info.push_back(OptionInfo("useOpenGLShader", &useOpenGLShader, "Shaders/Raw.OpenGL.shader"));
 	_info.push_back(OptionInfo("vSyncForOpenGL", &vSyncForOpenGL, true));
 	_info.push_back(OptionInfo("useOpenGLSmoothing", &useOpenGLSmoothing, true));
 	_info.push_back(OptionInfo("debug", &debug, false));
@@ -124,7 +124,7 @@ void create()
 	_info.push_back(OptionInfo("captureMouse", (bool*)&captureMouse, false));
 	_info.push_back(OptionInfo("battleTooltips", &battleTooltips, true));
 	_info.push_back(OptionInfo("keepAspectRatio", &keepAspectRatio, true));
-	_info.push_back(OptionInfo("nonSquarePixelRatio", &nonSquarePixelRatio, false));
+	_info.push_back(OptionInfo("nonSquarePixelRatio", &nonSquarePixelRatio, false));	
 	_info.push_back(OptionInfo("cursorInBlackBandsInFullscreen", &cursorInBlackBandsInFullscreen, false));
 	_info.push_back(OptionInfo("cursorInBlackBandsInWindow", &cursorInBlackBandsInWindow, true));
 	_info.push_back(OptionInfo("cursorInBlackBandsInBorderlessWindow", &cursorInBlackBandsInBorderlessWindow, false));
@@ -175,7 +175,7 @@ void create()
 	_info.push_back(OptionInfo("canManufactureMoreItemsPerHour", &canManufactureMoreItemsPerHour, false, "STR_CANMANUFACTUREMOREITEMSPERHOUR", "STR_GEOSCAPE"));
 	_info.push_back(OptionInfo("spendResearchedItems", &spendResearchedItems, false, "STR_SPENDRESEARCHEDITEMS", "STR_GEOSCAPE"));
 	_info.push_back(OptionInfo("fieldPromotions", &fieldPromotions, false, "STR_FIELDPROMOTIONS", "STR_GEOSCAPE"));
-
+	
 	_info.push_back(OptionInfo("battleDragScrollInvert", &battleDragScrollInvert, false, "STR_DRAGSCROLLINVERT", "STR_BATTLESCAPE")); // true drags away from the cursor, false drags towards (like a grab)
 	_info.push_back(OptionInfo("sneakyAI", &sneakyAI, false, "STR_SNEAKYAI", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("battleUFOExtenderAccuracy", &battleUFOExtenderAccuracy, false, "STR_BATTLEUFOEXTENDERACCURACY", "STR_BATTLESCAPE"));
@@ -194,10 +194,9 @@ void create()
 	_info.push_back(OptionInfo("strafe", &strafe, false, "STR_STRAFE", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("forceFire", &forceFire, true, "STR_FORCE_FIRE", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("skipNextTurnScreen", &skipNextTurnScreen, false, "STR_SKIPNEXTTURNSCREEN", "STR_BATTLESCAPE"));
-	_info.push_back(OptionInfo("TFTDDamage", &TFTDDamage, false, "STR_TFTDDAMAGE", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("noAlienPanicMessages", &noAlienPanicMessages, false, "STR_NOALIENPANICMESSAGES", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("alienBleeding", &alienBleeding, false, "STR_ALIENBLEEDING", "STR_BATTLESCAPE"));
-
+	
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
 	_info.push_back(OptionInfo("keyCancel", &keyCancel, SDLK_ESCAPE, "STR_CANCEL", "STR_GENERAL"));
@@ -276,8 +275,8 @@ void create()
 	_info.push_back(OptionInfo("keyInvClear", &keyInvClear, SDLK_x, "STR_CLEAR_INVENTORY", "STR_BATTLESCAPE"));
 
 #ifdef __MORPHOS__
-	_info.push_back(OptionInfo("FPS", &FPS, 15));
-	_info.push_back(OptionInfo("FPS_INACTIVE", &FPSInactive, 15));
+	_info.push_back(OptionInfo("FPS", &FPS, 15, "STR_FPS_LIMIT", "STR_GENERAL"));
+	_info.push_back(OptionInfo("FPSInactive", &FPSInactive, 15, "STR_FPS_INACTIVE_LIMIT", "STR_GENERAL"));
 #else
 	_info.push_back(OptionInfo("FPS", &FPS, 60, "STR_FPS_LIMIT", "STR_GENERAL"));
 	_info.push_back(OptionInfo("FPSInactive", &FPSInactive, 30, "STR_FPS_INACTIVE_LIMIT", "STR_GENERAL"));
@@ -306,13 +305,11 @@ static bool _ufoIsInstalled()
 
 static bool _tftdIsInstalled()
 {
-	// ensure both the resource data and the mod data is in place
 	return _gameIsInstalled("TFTD");
 }
 
 static void _setDefaultMods()
 {
-	// try to find xcom1
 	bool haveUfo = _ufoIsInstalled();
 	if (haveUfo)
 	{
@@ -460,7 +457,7 @@ static void _scanMods(const std::string &modsDir)
 		std::string metadataPath = modPath + "/metadata.yml";
 		if (!CrossPlatform::fileExists(metadataPath))
 		{
-			Log(LOG_WARNING) << metadataPath << " not found; using default values for mod: " << *i;
+			Log(LOG_VERBOSE) << metadataPath << " not found; using default values for mod: " << *i;
 		}
 		else
 		{
@@ -530,6 +527,14 @@ bool init(int argc, char *argv[])
 	Log(LOG_INFO) << "Config folder is: " << _configFolder;
 	Log(LOG_INFO) << "Options loaded successfully.";
 
+	// pick up stuff in common
+	FileMap::load("common", CrossPlatform::searchDataFolder("common"), true);
+
+	return true;
+}
+
+void updateMods()
+{
 	std::string modPath = CrossPlatform::searchDataFolder("standard");
 	Log(LOG_INFO) << "Scanning standard mods in '" << modPath << "'...";
 	_scanMods(modPath);
@@ -542,8 +547,8 @@ bool init(int argc, char *argv[])
 	{
 		std::map<std::string, ModInfo>::const_iterator modIt = _modInfos.find(i->first);
 		if (_modInfos.end() == modIt
-		 || (i->first == "xcom1" && !_ufoIsInstalled())
-		 || (i->first == "xcom2" && !_tftdIsInstalled()))
+			|| (i->first == "xcom1" && !_ufoIsInstalled())
+			|| (i->first == "xcom2" && !_tftdIsInstalled()))
 		{
 			Log(LOG_INFO) << "removing references to missing mod: " << i->first;
 			i = mods.erase(i);
@@ -621,6 +626,7 @@ bool init(int argc, char *argv[])
 		if (inactiveMaster.empty())
 		{
 			Log(LOG_ERROR) << "no mod masters available";
+			throw Exception("No X-COM installations found");
 		}
 		else
 		{
@@ -631,8 +637,6 @@ bool init(int argc, char *argv[])
 
 	mapResources();
 	userSplitMasters();
-
-	return true;
 }
 
 std::string getActiveMaster()
@@ -669,7 +673,7 @@ static void _loadMod(const ModInfo &modInfo, std::set<std::string> circDepCheck)
 		Log(LOG_WARNING) << "circular dependency found in master chain: " << modInfo.getId();
 		return;
 	}
-
+	
 	FileMap::load(modInfo.getId(), modInfo.getPath(), false);
 	for (std::vector<std::string>::const_iterator i = modInfo.getExternalResourceDirs().begin(); i != modInfo.getExternalResourceDirs().end(); ++i)
 	{
@@ -691,8 +695,16 @@ static void _loadMod(const ModInfo &modInfo, std::set<std::string> circDepCheck)
 	{
 		// add self to circDepCheck so we can avoid circular dependencies
 		circDepCheck.insert(modInfo.getId());
-		const ModInfo &masterInfo = _modInfos.find(modInfo.getMaster())->second;
-		_loadMod(masterInfo, circDepCheck);
+		std::map<std::string, ModInfo>::const_iterator it = _modInfos.find(modInfo.getMaster());
+		if (it != _modInfos.end())
+		{
+			const ModInfo &masterInfo = it->second;
+			_loadMod(masterInfo, circDepCheck);
+		}
+		else
+		{
+			throw Exception(modInfo.getId() + " mod requires " + modInfo.getMaster() + " master");
+		}
 	}
 }
 
@@ -814,7 +826,7 @@ void userSplitMasters()
 			{
 				saves = CrossPlatform::getFolderContents(_userFolder, "sav");
 				std::vector<std::string> autosaves = CrossPlatform::getFolderContents(_userFolder, "asav");
-				saves.insert(saves.end(), autosaves.begin(), autosaves.end());
+				saves.insert(saves.end(), autosaves.begin(), autosaves.end());				
 			}
 			for (std::vector<std::string>::iterator j = saves.begin(); j != saves.end();)
 			{
@@ -901,7 +913,7 @@ void load(const std::string &filename)
 			_setDefaultMods();
 		}
 	}
-	catch (YAML::Exception e)
+	catch (YAML::Exception &e)
 	{
 		Log(LOG_WARNING) << e.what();
 	}
@@ -943,7 +955,7 @@ void save(const std::string &filename)
 
 		sav << out.c_str();
 	}
-	catch (YAML::Exception e)
+	catch (YAML::Exception &e)
 	{
 		Log(LOG_WARNING) << e.what();
 	}
@@ -1041,7 +1053,7 @@ void backupDisplay()
  * testing a new display setup.
  */
 void switchDisplay()
-{
+{	
 	std::swap(displayWidth, newDisplayWidth);
 	std::swap(displayHeight, newDisplayHeight);
 	std::swap(useOpenGL, newOpenGL);

@@ -32,11 +32,13 @@
 #include "../Savegame/Tile.h"
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/BattleUnit.h"
+#include "../Savegame/BattleUnitStatistics.h"
 #include "../Engine/RNG.h"
 #include "BattlescapeState.h"
 #include "../Mod/MapDataSet.h"
 #include "../Mod/MapData.h"
 #include "../Mod/Unit.h"
+#include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
 #include "Pathfinding.h"
@@ -44,7 +46,6 @@
 #include "../Engine/Options.h"
 #include "ProjectileFlyBState.h"
 #include "MeleeAttackBState.h"
-#include "../Engine/Logger.h"
 #include "../fmath.h"
 
 namespace OpenXcom
@@ -699,7 +700,7 @@ int TileEngine::checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit
 	int relX = floor(((float)relPos.y)*normal+0.5);
 	int relY = floor(((float)-relPos.x)*normal+0.5);
 
-	int sliceTargets[10]={0,0, relX,relY, -relX,-relY};
+	int sliceTargets[] = {0,0, relX,relY, -relX,-relY};
 
 	if (!otherUnit->isOut())
 	{
@@ -718,7 +719,7 @@ int TileEngine::checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit
 	{
 		++total;
 		scanVoxel.z=targetMinHeight+i;
-		for (int j = 0; j < 2; ++j)
+		for (int j = 0; j < 3; ++j)
 		{
 			scanVoxel.x=targetVoxel.x + sliceTargets[j*2];
 			scanVoxel.y=targetVoxel.y + sliceTargets[j*2+1];
@@ -784,7 +785,7 @@ bool TileEngine::canTargetUnit(Position *originVoxel, Tile *tile, Position *scan
 	int relX = floor(((float)relPos.y)*normal+0.5);
 	int relY = floor(((float)-relPos.x)*normal+0.5);
 
-	int sliceTargets[10]={0,0, relX,relY, -relX,-relY, relY,-relX, -relY,relX};
+	int sliceTargets[] = {0,0, relX,relY, -relX,-relY, relY,-relX, -relY,relX};
 
 	if (!potentialUnit->isOut())
 	{
@@ -945,6 +946,7 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 
 	if (minZ > maxZ) minZ = maxZ;
 	int rangeZ = maxZ - minZ;
+	if (rangeZ>10) rangeZ = 10; //as above, clamping height range to prevent buffer overflow
 	int centerZ = (maxZ + minZ)/2;
 
 	for (int j = 0; j <= rangeZ; ++j)
@@ -2993,14 +2995,39 @@ bool TileEngine::psiAttack(BattleAction *action)
 	{
 		action->actor->addPsiSkillExp();
 		action->actor->addPsiSkillExp();
+
+		BattleUnitKills killStat;
+		killStat.setUnitStats(victim);
+		killStat.setTurn(_save->getTurn(), _save->getSide());
+		killStat.weapon = action->weapon->getRules()->getName();
+		killStat.weaponAmmo = action->weapon->getRules()->getName();
+		killStat.faction = victim->getFaction();
+		killStat.mission = _save->getGeoscapeSave()->getMissionStatistics()->size();
+		killStat.id = victim->getId();
+
 		if (action->type == BA_PANIC)
 		{
 			int moraleLoss = (110-victim->getBaseStats()->bravery);
 			if (moraleLoss > 0)
 				victim->moraleChange(-moraleLoss);
+
+			// Award Panic battle unit kill
+			if (!action->actor->getStatistics()->duplicateEntry(STATUS_PANICKING, victim->getId()))
+			{
+				killStat.status = STATUS_PANICKING;
+				action->actor->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
+				victim->setMurdererId(action->actor->getId());
+			}
 		}
 		else if (action->type == BA_MINDCONTROL)
 		{
+			// Award MC battle unit kill
+			if (!action->actor->getStatistics()->duplicateEntry(STATUS_TURNING, victim->getId()))
+			{
+				killStat.status = STATUS_TURNING;
+				action->actor->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
+				victim->setMurdererId(action->actor->getId());
+			}
 			victim->convertToFaction(action->actor->getFaction());
 			calculateFOV(victim->getPosition()); //happens fairly rarely, so do a full recalc for units in range to handle the potential unit visible cache issues.
 			calculateUnitLighting();

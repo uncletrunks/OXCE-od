@@ -428,7 +428,7 @@ void ExplosionBState::explode()
 	}
 
 	// now check for new casualties
-	_parent->checkForCasualties(_item ? _damageType : 0, _unit, false, terrainExplosion);
+	_parent->checkForCasualties(_item ? _damageType : 0, _item, _unit, false, terrainExplosion);
 	// revive units if damage could give hp or reduce stun
 	_parent->getSave()->reviveUnconsciousUnits(true);
 

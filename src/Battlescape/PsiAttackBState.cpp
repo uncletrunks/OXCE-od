@@ -24,6 +24,7 @@
 #include "InfoboxState.h"
 #include "Map.h"
 #include "Camera.h"
+#include "../Savegame/SavedGame.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
 #include "../Engine/Game.h"
@@ -31,6 +32,7 @@
 #include "../Engine/Language.h"
 #include "../Engine/Sound.h"
 #include "../Mod/Mod.h"
+#include "../Savegame/BattleUnitStatistics.h"
 
 namespace OpenXcom
 {

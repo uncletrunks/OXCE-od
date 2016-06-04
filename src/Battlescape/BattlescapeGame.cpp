@@ -58,6 +58,7 @@
 #include "InfoboxOKState.h"
 #include "UnitFallBState.h"
 #include "../Engine/Logger.h"
+#include "../Savegame/BattleUnitStatistics.h"
 
 namespace OpenXcom
 {
@@ -171,7 +172,7 @@ BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parent
 
 	_debugPlay = false;
 
-	checkForCasualties(0, 0, true);
+	checkForCasualties(nullptr, nullptr, nullptr, true);
 	cancelCurrentAction();
 }
 
@@ -296,11 +297,11 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 	unit->setVisible(false); //Possible TODO: check nr of player unit observers, then hide the unit if noone can see it. Should then be able to skip the next FOV call.
 
 	_save->getTileEngine()->calculateFOV(unit->getPosition(), 1, false); // might need this populate _visibleUnit for a newly-created alien.
-        // it might also help chryssalids realize they've zombified someone and need to move on
+		// it might also help chryssalids realize they've zombified someone and need to move on
 		// it should also hide units when they've killed the guy spotting them
-        // it's also for good luck
+		// it's also for good luck
 
-    BattleAIState *ai = unit->getCurrentAIState();
+	BattleAIState *ai = unit->getCurrentAIState();
 	if (!ai)
 	{
 		// for some reason the unit had no AI routine assigned..
@@ -321,7 +322,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 
 	BattleAction action;
 	action.actor = unit;
-    action.number = _AIActionCounter;
+	action.number = _AIActionCounter;
 	unit->think(&action);
 
 	if (action.type == BA_RETHINK)
@@ -330,7 +331,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		unit->think(&action);
 	}
 
-    _AIActionCounter = action.number;
+	_AIActionCounter = action.number;
 
 	if (!unit->getMainHandWeapon() || !unit->getMainHandWeapon()->getAmmoItem())
 	{
@@ -366,7 +367,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 	if (action.type == BA_SNAPSHOT || action.type == BA_AUTOSHOT || action.type == BA_AIMEDSHOT || action.type == BA_THROW || action.type == BA_HIT || action.type == BA_MINDCONTROL || action.type == BA_USE || action.type == BA_PANIC || action.type == BA_LAUNCH)
 	{
 		ss.clear();
-		ss << L"Attack type=" << action.type << " target="<< action.target << " weapon=" << action.weapon->getRules()->getName().c_str();
+		ss << L"Attack type=" << action.type << " target="<< action.target << " weapon=" << Language::utf8ToWstr(action.weapon->getRules()->getName());
 		_parentState->debug(ss.str());
 		if (action.type == BA_MINDCONTROL || action.type == BA_PANIC || action.type == BA_USE)
 		{
@@ -564,7 +565,7 @@ void BattlescapeGame::endTurn()
 		getMap()->setCursorType(CT_NONE);
 	}
 
-	checkForCasualties(0, 0, false, false);
+	checkForCasualties(nullptr, nullptr, nullptr, false, false);
 
 	// turn off MCed alien lighting.
 	_save->getTileEngine()->calculateUnitLighting();
@@ -613,17 +614,133 @@ void BattlescapeGame::endTurn()
  * @param hiddenExplosion Set to true for the explosions of UFO Power sources at start of battlescape.
  * @param terrainExplosion Set to true for the explosions of terrain.
  */
-void BattlescapeGame::checkForCasualties(const RuleDamageType *murderweapon, BattleUnit *murderer, bool hiddenExplosion, bool terrainExplosion)
+void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const BattleItem *murderweapon, BattleUnit *murderer, bool hiddenExplosion, bool terrainExplosion)
 {
+	// If the victim was killed by the murderer's death explosion, fetch who killed the murderer and make HIM the murderer!
+	if (murderer && !murderer->getGeoscapeSoldier() && murderer->getUnitRules()->getSpecialAbility() == SPECAB_EXPLODEONDEATH && murderer->getStatus() == STATUS_DEAD && murderer->getMurdererId() != 0)
+	{
+		for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+		{
+			if ((*i)->getId() == murderer->getMurdererId())
+			{
+				murderer = (*i);
+			}
+		}
+	}
+
+	// Fetch the murder weapon
+	std::string tempWeapon = "STR_WEAPON_UNKNOWN", tempAmmo = "STR_WEAPON_UNKNOWN";
+	if (murderer)
+	{
+		if (murderweapon)
+		{
+			tempAmmo = murderweapon->getRules()->getName();
+			tempWeapon = tempAmmo;
+		}
+
+		BattleItem *weapon = murderer->getItem("STR_RIGHT_HAND");
+		if (weapon)
+		{
+			for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
+			{
+				if ((*c) == tempAmmo)
+				{
+					tempWeapon = weapon->getRules()->getName();
+				}
+			}
+		}
+		weapon = murderer->getItem("STR_LEFT_HAND");
+		if (weapon)
+		{
+			for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
+			{
+				if ((*c) == tempAmmo)
+				{
+					tempWeapon = weapon->getRules()->getName();
+				}
+			}
+		}
+	}
+
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
 		if ((*j)->getStatus() == STATUS_IGNORE_ME) continue;
-		if ((*j)->getHealth() <= 0 && (*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING)
-		{
-			BattleUnit *victim = (*j);
+		BattleUnit *victim = (*j);
 
-			if (murderer)
+		BattleUnitKills killStat;
+		killStat.mission = _parentState->getGame()->getSavedGame()->getMissionStatistics()->size();
+		killStat.setTurn(_save->getTurn(), _save->getSide());
+		killStat.setUnitStats(victim);
+		killStat.faction = victim->getFaction();
+		killStat.side = victim->getFatalShotSide();
+		killStat.bodypart = victim->getFatalShotBodyPart();
+		killStat.id = victim->getId();
+		killStat.weapon = tempWeapon;
+		killStat.weaponAmmo = tempAmmo;
+
+		// Determine murder type
+		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
+		{
+			if ((*j)->getHealth() == 0)
 			{
+				killStat.status = STATUS_DEAD;
+			}
+			else if ((*j)->getStunlevel() >= (*j)->getHealth() && (*j)->getStatus() != STATUS_UNCONSCIOUS)
+		{
+				killStat.status = STATUS_UNCONSCIOUS;
+			}
+		}
+
+			// Assume that, in absence of a murderer and an explosion, the laster unit to hit the victim is the murderer.
+            // Possible causes of death: bleed out, fire.
+		// Possible causes of unconciousness: wounds, smoke.
+		// Assumption : The last person to hit the victim is the murderer.
+			if (!murderer && !terrainExplosion)
+			{
+				for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+				{
+					if ((*i)->getId() == victim->getMurdererId())
+					{
+						murderer = (*i);
+					killStat.weapon = victim->getMurdererWeapon();
+					killStat.weaponAmmo = victim->getMurdererWeaponAmmo();
+						break;
+					}
+				}
+			}
+
+		if (murderer && killStat.status != STATUS_IGNORE_ME)
+			{
+				if (murderer->getFaction() == FACTION_PLAYER && murderer->getOriginalFaction() != FACTION_PLAYER)
+				{
+					// This must be a mind controlled unit. Find out who mind controlled him and award the kill to that unit.
+				for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+					{
+					if ((*i)->getId() == murderer->getMurdererId() && (*i)->getGeoscapeSoldier())
+						{
+						(*i)->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
+							if (victim->getFaction() == FACTION_HOSTILE)
+							{
+							(*i)->getStatistics()->slaveKills++;
+							}
+						victim->setMurdererId((*i)->getId());
+							break;
+						}
+					}
+				}
+			else if (!murderer->getStatistics()->duplicateEntry(killStat.status, victim->getId()))
+				{
+				murderer->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
+					victim->setMurdererId(murderer->getId());
+				}
+		}
+
+		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
+		{
+			if ((*j)->getHealth() == 0)
+			{
+				if (murderer)
+				{
 				murderer->addKillCount();
 				victim->killedBy(murderer->getFaction());
 				int modifier = murderer->getFaction() == FACTION_PLAYER ? _save->getFactionMoraleModifier(true) : 100;
@@ -682,7 +799,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *murderweapon, Bat
 			}
 			if (murderweapon)
 			{
-				statePushNext(new UnitDieBState(this, (*j), murderweapon, false));
+				statePushNext(new UnitDieBState(this, (*j), damageType, false));
 			}
 			else
 			{
@@ -705,12 +822,30 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *murderweapon, Bat
 					}
 				}
 			}
-		}
-		else if ((*j)->getStunlevel() >= (*j)->getHealth() && (*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_UNCONSCIOUS && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
-		{
+				// one of our own died, record the murderer instead of the victim
+				if (victim->getGeoscapeSoldier())
+				{
+					victim->getStatistics()->KIA = true;
+					BattleUnitKills *deathStat = new BattleUnitKills(killStat);
+					if (murderer)
+					{
+						deathStat->setUnitStats(murderer);
+						deathStat->faction = murderer->getFaction();
+					}
+					_parentState->getGame()->getSavedGame()->killSoldier(victim->getGeoscapeSoldier(), deathStat);
+				}
+			}
+			else if ((*j)->getStunlevel() >= (*j)->getHealth() && (*j)->getStatus() != STATUS_UNCONSCIOUS)
+			{
+			if (victim->getGeoscapeSoldier())
+			{
+				victim->getStatistics()->wasUnconcious = true;
+			}
 			statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), true)); // no damage type used there
 		}
 	}
+	}
+
 	BattleUnit *bu = _save->getSelectedUnit();
 	if (_save->getSide() == FACTION_PLAYER)
 	{
@@ -746,6 +881,7 @@ void BattlescapeGame::missionComplete()
 		}
 	}
 }
+
 /**
  * Handles the result of non target actions, like priming a grenade.
  */
@@ -1059,6 +1195,7 @@ bool BattlescapeGame::noActionsPending(BattleUnit *bu)
 
 	return true;
 }
+
 /**
  * Sets the timer interval for think() calls of the state.
  * @param interval An interval in ms.
@@ -1316,6 +1453,7 @@ bool BattlescapeGame::cancelCurrentAction(bool bForce)
 
 	return false;
 }
+
 /**
  * Gets a pointer to access action members directly.
  * @return Pointer to action.
@@ -1524,6 +1662,9 @@ void BattlescapeGame::psiButtonAction()
 	}
 }
 
+/**
+ * Handler for the psi atack action.
+ */
 bool BattlescapeGame::psiAttack(BattleAction *action)
 {
 	if (getTileEngine()->psiAttack(action))
@@ -1552,6 +1693,7 @@ bool BattlescapeGame::psiAttack(BattleAction *action)
 		return false;
 	}
 }
+
 
 /**
  * Moves a unit up or down.
@@ -1685,14 +1827,14 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 
 	Unit* type = getMod()->getUnit(unit->getSpawnUnit());
 	getSave()->getTile(unit->getPosition())->setUnit(0);
-	int difficulty = (int)(_parentState->getGame()->getSavedGame()->getDifficulty());
 
-	BattleUnit *newUnit = new BattleUnit(type, FACTION_HOSTILE, _save->getUnits()->back()->getId() + 1, getMod()->getArmor(type->getArmor()), difficulty, getDepth(), getMod()->getMaxViewDistance());
-
-	if (!difficulty)
-	{
-		newUnit->halveArmor();
-	}
+	BattleUnit *newUnit = new BattleUnit(type,
+		FACTION_HOSTILE,
+		_save->getUnits()->back()->getId() + 1,
+		getMod()->getArmor(type->getArmor()),
+		getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
+		getDepth(),
+		getMod()->getMaxViewDistance());
 
 	getSave()->initFixedItems(newUnit);
 	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
@@ -1719,6 +1861,7 @@ Map *BattlescapeGame::getMap()
 {
 	return _parentState->getMap();
 }
+
 /**
  * Gets the save.
  * @return save.
@@ -1727,6 +1870,7 @@ SavedBattleGame *BattlescapeGame::getSave()
 {
 	return _save;
 }
+
 /**
  * Gets the tilengine.
  * @return tilengine.
@@ -1735,6 +1879,7 @@ TileEngine *BattlescapeGame::getTileEngine()
 {
 	return _save->getTileEngine();
 }
+
 /**
  * Gets the pathfinding.
  * @return pathfinding.
@@ -1743,6 +1888,7 @@ Pathfinding *BattlescapeGame::getPathfinding()
 {
 	return _save->getPathfinding();
 }
+
 /**
  * Gets the mod.
  * @return mod.
@@ -2129,6 +2275,7 @@ bool BattlescapeGame::convertInfected()
 	}
 	return retVal;
 }
+
 /**
  * Sets the kneel reservation setting.
  * @param reserved Should we reserve an extra 4 TUs to kneel?
