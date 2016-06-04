@@ -28,6 +28,7 @@ class Base;
 class TextButton;
 class Window;
 class Text;
+class TextEdit;
 class TextList;
 class RuleManufacture;
 class ComboBox;
@@ -41,6 +42,7 @@ private:
 	Base *_base;
 	bool _showRequirements, _detailClicked;
 	TextButton *_btnOk;
+	TextEdit *_btnQuickSearch;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtCategory;
 	TextList *_lstManufacture;
@@ -58,6 +60,9 @@ public:
 	void init();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action * action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Handler for clicking the [Mark All As ...] button.
 	void cbxActionsChange(Action * action);
 	/// Handler for clicking on the list.

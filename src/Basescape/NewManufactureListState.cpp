@@ -21,6 +21,7 @@
 #include "../Interface/Window.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Interface/ComboBox.h"
 #include "../Engine/Game.h"
@@ -47,6 +48,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	_screen = false;
 
 	_window = new Window(this, 320, 156, 0, 22, POPUP_BOTH);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 35);
 	_btnOk = new TextButton(148, 16, 164, 154);
 	_txtTitle = new Text(320, 17, 0, 30);
 	_txtItem = new Text(156, 9, 10, 62);
@@ -60,6 +62,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	setInterface("selectNewManufacture");
 
 	add(_window, "window", "selectNewManufacture");
+	add(_btnQuickSearch, "button", "selectNewManufacture");
 	add(_btnOk, "button", "selectNewManufacture");
 	add(_txtTitle, "text", "selectNewManufacture");
 	add(_txtItem, "text", "selectNewManufacture");
@@ -113,6 +116,12 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	_cbxActions->onChange((ActionHandler)&NewManufactureListState::cbxActionsChange);
 	_cbxActions->setSelected(-1);
 	_cbxActions->setText(tr("STR_MARK_ALL_AS"));
+
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&NewManufactureListState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&NewManufactureListState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 }
 
 /**
@@ -269,10 +278,41 @@ void NewManufactureListState::cbxCategoryChange(Action *)
 }
 
 /**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void NewManufactureListState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void NewManufactureListState::btnQuickSearchApply(Action *)
+{
+	fillProductionList(false);
+}
+
+/**
  * Fills the list of possible productions.
  */
 void NewManufactureListState::fillProductionList(bool refreshCategories)
 {
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
 	if (refreshCategories)
 	{
 		_cbxCategory->onChange(0);
@@ -295,6 +335,17 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 	{
 		if (((*it)->getCategory().c_str() == _catStrings[_cbxCategory->getSelected()]) || (_catStrings[_cbxCategory->getSelected()] == "STR_ALL_ITEMS"))
 		{
+			// quick search
+			if (searchString != L"")
+			{
+				std::wstring projectName = tr((*it)->getName());
+				for (auto & c : projectName) c = towupper(c);
+				if (projectName.find(searchString) == std::string::npos)
+				{
+					continue;
+				}
+			}
+
 			bool isNew = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_NEW;
 			bool isHidden = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_HIDDEN;
 
