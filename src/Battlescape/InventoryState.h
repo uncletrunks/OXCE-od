@@ -47,6 +47,7 @@ private:
 	Surface *_bg, *_soldier;
 	Text *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFiringAcc, *_txtThrowingAcc, *_txtMeleeAcc, *_txtPsi;
 	TextEdit *_txtName;
+	TextEdit *_btnQuickSearch;
 	BattlescapeButton *_btnOk, *_btnPrev, *_btnNext, *_btnUnload, *_btnGround, *_btnRank;
 	BattlescapeButton *_btnCreateTemplate, *_btnApplyTemplate;
 	Surface *_selAmmo;
@@ -83,6 +84,9 @@ public:
 	void btnAvatarClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Handler for clicking the Previous button.
 	void btnPrevClick(Action *action);
 	/// Handler for clicking the Next button.

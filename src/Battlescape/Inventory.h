@@ -52,6 +52,7 @@ private:
 	std::map<int, std::map<int, int> > _stackLevel;
 	std::vector<std::pair<int, int> > _grenadeIndicators;
 	NumberText *_stackNumber;
+	std::wstring _searchString;
 	Timer *_animTimer;
 	int _depth;
 	/// Moves an item to a specified slot.
@@ -83,6 +84,8 @@ public:
 	BattleItem *getSelectedItem() const;
 	/// Sets the currently selected item.
 	void setSelectedItem(BattleItem *item);
+	/// Sets the search string.
+	void setSearchString(const std::wstring &searchString);
 	/// Gets the mouse over item.
 	BattleItem *getMouseOverItem() const;
 	/// Sets the mouse over item.

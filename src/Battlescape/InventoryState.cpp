@@ -102,6 +102,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	_btnApplyTemplate = new BattlescapeButton(32, 22, _templateBtnX, _applyTemplateBtnY);
 	_selAmmo = new Surface(RuleInventory::HAND_W * RuleInventory::SLOT_W, RuleInventory::HAND_H * RuleInventory::SLOT_H, 272, 88);
 	_inv = new Inventory(_game, 320, 200, 0, 0, _parent == 0);
+	_btnQuickSearch = new TextEdit(this, 40, 9, 244, 140);
 
 	// Set palette
 	setPalette("PAL_BATTLESCAPE");
@@ -112,6 +113,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	_game->getMod()->getSurface("TAC01.SCR")->blit(_bg);
 
 	add(_soldier);
+	add(_btnQuickSearch, "textItem", "inventory");
 	add(_txtName, "textName", "inventory", _bg);
 	add(_txtTus, "textTUs", "inventory", _bg);
 	add(_txtWeight, "textWeight", "inventory", _bg);
@@ -214,6 +216,12 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	_btnApplyTemplate->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnApplyTemplate->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
 
+	_btnQuickSearch->setHighContrast(true);
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&InventoryState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&InventoryState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 
 	// only use copy/paste buttons in setup (i.e. non-tu) mode
 	if (_tu)
@@ -721,6 +729,34 @@ void InventoryState::btnUnloadClick(Action *)
 		updateStats();
 		_game->getMod()->getSoundByDepth(0, Mod::ITEM_DROP)->play();
 	}
+}
+
+/**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnQuickSearchApply(Action *)
+{
+	_inv->setSearchString(_btnQuickSearch->getText());
 }
 
 /**

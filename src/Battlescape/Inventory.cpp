@@ -524,6 +524,17 @@ void Inventory::setSelectedItem(BattleItem *item)
 }
 
 /**
+* Changes the item currently grabbed by the player.
+* @param item Pointer to selected item, or NULL if none.
+*/
+void Inventory::setSearchString(const std::wstring &searchString)
+{
+	_searchString = searchString;
+	for (auto & c : _searchString) c = towupper(c);
+	arrangeGround(true);
+}
+
+/**
  * Returns the item currently under mouse cursor.
  * @return Pointer to selected item, or 0 if none.
  */
@@ -1095,6 +1106,17 @@ void Inventory::arrangeGround(bool alterOffset)
 		// Now for each item type, find the most topleft position that is not occupied and will fit.
 		for (std::vector<BattleItem*>::iterator i = itemListOrder.begin(); i != itemListOrder.end(); ++i)
 		{
+			// quick search
+			if (_searchString != L"")
+			{
+				std::wstring projectName = _game->getLanguage()->getString((*i)->getRules()->getType());
+				for (auto & c : projectName) c = towupper(c);
+				if (projectName.find(_searchString) == std::string::npos)
+				{
+					continue;
+				}
+			}
+
 			// Fetch the list of item stacks for this item type. Then place each stack.
 			std::unordered_map<std::string, std::vector< std::vector<BattleItem*> > >::iterator iterItemList = typeItemLists.find((*i)->getRules()->getType());
 			for (std::vector< std::vector<BattleItem*> >::iterator itemStack = iterItemList->second.begin(); itemStack != iterItemList->second.end(); itemStack++)
