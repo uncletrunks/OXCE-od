@@ -29,6 +29,7 @@ class TextButton;
 class ToggleTextButton;
 class Window;
 class Text;
+class TextEdit;
 class TextList;
 class Base;
 class RuleResearch;
@@ -42,6 +43,7 @@ private:
 	Base *_base;
 	TextButton *_btnOK;
 	ToggleTextButton *_btnShowOnlyNew;
+	TextEdit *_btnQuickSearch;
 	Window *_window;
 	Text *_txtTitle;
 	TextList *_lstResearch;
@@ -53,6 +55,9 @@ public:
 	NewResearchListState(Base *base);
 	/// Handler for clicking the OK button.
 	void btnOKClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Handler for clicking the [Show Only New] button.
 	void btnShowOnlyNewClick(Action *action);
 	/// Handler for clicking the [Mark All As Seen] button.

@@ -25,6 +25,7 @@
 #include "../Interface/ToggleTextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
@@ -43,6 +44,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	_screen = false;
 
 	_window = new Window(this, 230, 140, 45, 30, POPUP_BOTH);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 53, 38);
 	_btnOK = new TextButton(103, 16, 164, 146);
 	_btnShowOnlyNew = new ToggleTextButton(103, 16, 53, 146);
 	_txtTitle = new Text(214, 16, 53, 38);
@@ -52,6 +54,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	setInterface("selectNewResearch");
 
 	add(_window, "window", "selectNewResearch");
+	add(_btnQuickSearch, "button", "selectNewResearch");
 	add(_btnOK, "button", "selectNewResearch");
 	add(_btnShowOnlyNew, "button", "selectNewResearch");
 	add(_txtTitle, "text", "selectNewResearch");
@@ -80,6 +83,12 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	_lstResearch->setAlign(ALIGN_CENTER);
 	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onSelectProject, SDL_BUTTON_LEFT);
 	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onToggleProjectStatus, SDL_BUTTON_RIGHT);
+
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&NewResearchListState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOK->onKeyboardRelease((ActionHandler)&NewResearchListState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 }
 
 /**
@@ -132,6 +141,34 @@ void NewResearchListState::btnOKClick(Action *)
 }
 
 /**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void NewResearchListState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void NewResearchListState::btnQuickSearchApply(Action *)
+{
+	fillProjectList(false);
+}
+
+/**
 * Filter to display only new items.
 * @param action Pointer to an action.
 */
@@ -154,6 +191,9 @@ void NewResearchListState::btnMarkAllAsSeenClick(Action *)
  */
 void NewResearchListState::fillProjectList(bool markAllAsSeen)
 {
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
 	_projects.clear();
 	_lstResearch->clearList();
 	_game->getSavedGame()->getAvailableResearchProjects(_projects, _game->getMod() , _base);
@@ -162,6 +202,7 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 	bool hasUnseen = false;
 	while (it != _projects.end())
 	{
+		// filter
 		if (_btnShowOnlyNew->getPressed())
 		{
 			if (_game->getSavedGame()->getResearchRuleStatus((*it)->getName()) != RuleResearch::RESEARCH_STATUS_NEW)
@@ -170,6 +211,19 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 				continue;
 			}
 		}
+
+		// quick search
+		if (searchString != L"")
+		{
+			std::wstring projectName = tr((*it)->getName());
+			for (auto & c : projectName) c = towupper(c);
+			if (projectName.find(searchString) == std::string::npos)
+			{
+				it = _projects.erase(it);
+				continue;
+			}
+		}	
+
 		if ((*it)->getRequirements().empty())
 		{
 			_lstResearch->addRow(1, tr((*it)->getName()).c_str());
