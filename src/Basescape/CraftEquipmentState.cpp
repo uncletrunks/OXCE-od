@@ -31,6 +31,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Mod/Armor.h"
 #include "../Savegame/Base.h"
@@ -64,6 +65,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 264, 12);
 	_btnOk = new TextButton((craftHasACrew || isNewBattle)?30:140, 16, (craftHasACrew || isNewBattle)?274:164, 176);
 	_btnClear = new TextButton(102, 16, 164, 176);
 	_btnInventory = new TextButton(102, 16, 164, 176);
@@ -82,6 +84,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_ammoColor = _game->getMod()->getInterface("craftEquipment")->getElement("ammoColor")->color;
 
 	add(_window, "window", "craftEquipment");
+	add(_btnQuickSearch, "button", "craftEquipment");
 	add(_btnOk, "button", "craftEquipment");
 	add(_btnClear, "button", "craftEquipment");
 	add(_btnInventory, "button", "craftEquipment");
@@ -188,6 +191,12 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_lstEquipment->onRightArrowClick((ActionHandler)&CraftEquipmentState::lstEquipmentRightArrowClick);
 	_lstEquipment->onMousePress((ActionHandler)&CraftEquipmentState::lstEquipmentMousePress);
 
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&CraftEquipmentState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&CraftEquipmentState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
+
 	_timerLeft = new Timer(250);
 	_timerLeft->onTimer((StateHandler)&CraftEquipmentState::moveLeft);
 	_timerRight = new Timer(250);
@@ -226,11 +235,43 @@ void CraftEquipmentState::init()
 
 	initList();
 }
+
+/**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void CraftEquipmentState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void CraftEquipmentState::btnQuickSearchApply(Action *)
+{
+	initList();
+}
+
 /**
  * Shows the equipment in a list filtered by selected criterion.
  */
 void CraftEquipmentState::initList()
 {
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
 	size_t selIdx = _cbxFilterBy->getSelected();
 	if (selIdx == (size_t)-1)
 	{
@@ -279,6 +320,17 @@ void CraftEquipmentState::initList()
 				}
 			}
 			else if (!rule->belongsToCategory(selectedCategory))
+			{
+				continue;
+			}
+		}
+
+		// quick search
+		if (searchString != L"")
+		{
+			std::wstring projectName = tr((*i));
+			for (auto & c : projectName) c = towupper(c);
+			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;
 			}

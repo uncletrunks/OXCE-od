@@ -30,6 +30,7 @@ namespace OpenXcom
 class TextButton;
 class Window;
 class Text;
+class TextEdit;
 class TextList;
 class ComboBox;
 class Timer;
@@ -43,6 +44,7 @@ class CraftEquipmentState : public State
 {
 private:
 	TextButton *_btnOk, *_btnClear, *_btnInventory;
+	TextEdit *_btnQuickSearch;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtStores, *_txtAvailable, *_txtUsed, *_txtCrew;
 	std::vector<std::string> _categoryStrings;
@@ -72,6 +74,9 @@ public:
 	void think();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Handler for pressing a Move Left arrow in the list.
 	void lstEquipmentLeftArrowPress(Action *action);
 	/// Handler for releasing a Move Left arrow in the list.
