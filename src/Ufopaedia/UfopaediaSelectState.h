@@ -30,6 +30,7 @@ namespace OpenXcom
 	class Action;
 	class Window;
 	class Text;
+	class TextEdit;
 	class TextButton;
 	class TextList;
 
@@ -46,6 +47,7 @@ namespace OpenXcom
 	protected:
 		std::string _section;
 		Window *_window;
+		TextEdit *_btnQuickSearch;
 		Text *_txtTitle;
 		TextButton *_btnOk, *_btnMarkAllAsSeen;
 		TextList *_lstSelection;
@@ -53,6 +55,9 @@ namespace OpenXcom
 
 		/// Handler for clicking the OK button
 		void btnOkClick(Action *action);
+		/// Handlers for Quick Search.
+		void btnQuickSearchToggle(Action *action);
+		void btnQuickSearchApply(Action *action);
 		/// Handler for clicking the [Mark All As Seen] button.
 		void btnMarkAllAsSeenClick(Action * action);
 		/// Handler for clicking the selection list.
