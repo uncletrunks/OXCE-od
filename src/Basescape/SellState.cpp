@@ -29,6 +29,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Interface/ComboBox.h"
 #include "../Savegame/BaseFacility.h"
@@ -63,6 +64,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 13);
 	_btnOk = new TextButton(overfull? 288:148, 16, overfull? 16:8, 176);
 	_btnCancel = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
@@ -81,6 +83,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_ammoColor = _game->getMod()->getInterface("sellMenu")->getElement("ammoColor")->color;
 
 	add(_window, "window", "sellMenu");
+	add(_btnQuickSearch, "button", "sellMenu");
 	add(_btnOk, "button", "sellMenu");
 	add(_btnCancel, "button", "sellMenu");
 	add(_txtTitle, "text", "sellMenu");
@@ -247,6 +250,13 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_cbxCategory->onChange((ActionHandler)&SellState::cbxCategoryChange);
 	_cbxCategory->onKeyboardPress((ActionHandler)&SellState::btnSellAllClick, Options::keyInvClear);
 
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&SellState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	// OK button is not always visible, so bind it here
+	_cbxCategory->onKeyboardRelease((ActionHandler)&SellState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
+
 	updateList();
 
 	_timerInc = new Timer(250);
@@ -315,19 +325,63 @@ std::string SellState::getCategory(int sel) const
 }
 
 /**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void SellState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void SellState::btnQuickSearchApply(Action *)
+{
+	updateList();
+}
+
+/**
  * Filters the current list of items.
  */
 void SellState::updateList()
 {
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
 	_lstItems->clearList();
 	_rows.clear();
 	for (size_t i = 0; i < _items.size(); ++i)
 	{
+		// filter
 		std::string cat = _cats[_cbxCategory->getSelected()];
 		if (cat != "STR_ALL_ITEMS" && cat != getCategory(i))
 		{
 			continue;
 		}
+
+		// quick search
+		if (searchString != L"")
+		{
+			std::wstring projectName = _items[i].name;
+			for (auto & c : projectName) c = towupper(c);
+			if (projectName.find(searchString) == std::string::npos)
+			{
+				continue;
+			}
+		}
+
 		std::wstring name = _items[i].name;
 		bool ammo = false;
 		if (_items[i].type == TRANSFER_ITEM)
