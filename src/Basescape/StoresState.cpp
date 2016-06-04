@@ -24,6 +24,7 @@
 #include "../Engine/Options.h"
 #include "../Interface/ArrowButton.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 #include "../Interface/ToggleTextButton.h"
@@ -105,6 +106,7 @@ StoresState::StoresState(Base *base) : _base(base)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 20);
 	_btnOk = new TextButton(148, 16, 164, 176);
 	_btnGrandTotal = new ToggleTextButton(148, 16, 8, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
@@ -122,6 +124,7 @@ StoresState::StoresState(Base *base) : _base(base)
 	setInterface("storesInfo");
 
 	add(_window, "window", "storesInfo");
+	add(_btnQuickSearch, "button", "storesInfo");
 	add(_btnOk, "button", "storesInfo");
 	add(_btnGrandTotal, "button", "storesInfo");
 	add(_txtTitle, "text", "storesInfo");
@@ -177,6 +180,12 @@ StoresState::StoresState(Base *base) : _base(base)
 
 	itemOrder = ITEM_SORT_NONE;
 	updateArrows();
+
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&StoresState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&StoresState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 }
 
 /**
@@ -197,10 +206,41 @@ void StoresState::btnOkClick(Action *)
 }
 
 /**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void StoresState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void StoresState::btnQuickSearchApply(Action *)
+{
+	initList(_btnGrandTotal->getPressed());
+}
+
+/**
  * Reloads the item list.
  */
 void StoresState::initList(bool grandTotal)
 {
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
 	// clear everything
 	_lstStores->clearList();
 	_itemList.clear();
@@ -209,6 +249,17 @@ void StoresState::initList(bool grandTotal)
 	const std::vector<std::string> &items = _game->getMod()->getItemsList();
 	for (std::vector<std::string>::const_iterator item = items.begin(); item != items.end(); ++item)
 	{
+		// quick search
+		if (searchString != L"")
+		{
+			std::wstring projectName = tr((*item));
+			for (auto & c : projectName) c = towupper(c);
+			if (projectName.find(searchString) == std::string::npos)
+			{
+				continue;
+			}
+		}
+
 		int qty = 0;
 		if (!grandTotal)
 		{

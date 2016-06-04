@@ -30,6 +30,7 @@ class TextButton;
 class ToggleTextButton;
 class Window;
 class Text;
+class TextEdit;
 class TextList;
 class ArrowButton;
 
@@ -69,6 +70,7 @@ private:
 	Base *_base;
 
 	TextButton *_btnOk;
+	TextEdit *_btnQuickSearch;
 	ToggleTextButton *_btnGrandTotal;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtQuantity, *_txtSize, *_txtSpaceUsed;
@@ -86,6 +88,9 @@ public:
 	~StoresState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Handler for clicking the Grand Total button.
 	void btnGrandTotalClick(Action *action);
 	/// Sets up the item list.
