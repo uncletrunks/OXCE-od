@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
+#include <climits>
 #include "DebriefingState.h"
 #include "CannotReequipState.h"
 #include "../Engine/Game.h"
