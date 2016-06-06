@@ -124,7 +124,7 @@ namespace OpenXcom
 	 */
 	void UfopaediaSelectState::lstSelectionClick(Action *)
 	{
-		Ufopaedia::openArticle(_game, _article_list[_lstSelection->getSelectedRow()]);
+		Ufopaedia::openArticle(_game, _filtered_article_list[_lstSelection->getSelectedRow()]);
 	}
 
 	/**
@@ -165,6 +165,7 @@ namespace OpenXcom
 		_lstSelection->clearList();
 		_article_list.clear();
 		Ufopaedia::list(_game->getSavedGame(), _game->getMod(), _section, _article_list);
+		_filtered_article_list.clear();
 
 		int row = 0;
 		bool hasUnseen = false;
@@ -181,6 +182,7 @@ namespace OpenXcom
 				}
 			}
 
+			_filtered_article_list.push_back((*it));
 			_lstSelection->addRow(1, tr((*it)->title).c_str());
 
 			if (markAllAsSeen)

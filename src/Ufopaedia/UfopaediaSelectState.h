@@ -51,7 +51,7 @@ namespace OpenXcom
 		Text *_txtTitle;
 		TextButton *_btnOk, *_btnMarkAllAsSeen;
 		TextList *_lstSelection;
-		ArticleDefinitionList _article_list;
+		ArticleDefinitionList _article_list, _filtered_article_list;
 
 		/// Handler for clicking the OK button
 		void btnOkClick(Action *action);
