@@ -41,7 +41,6 @@ private:
 	Mod *_mod;
 	int _animationFrame;
 	Surface *_dest;
-	ScriptWorker _scriptWorkRef;
 
 public:
 	/// Creates a new ItemSprite at the specified position and size.

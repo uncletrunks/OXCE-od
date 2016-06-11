@@ -219,7 +219,7 @@ void Inventory::drawGrid()
  */
 void Inventory::drawItems()
 {
-	ScriptWorker scr;
+	ScriptWorkerBlit work;
 	_items->clear();
 	_grenadeIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
@@ -248,8 +248,8 @@ void Inventory::drawItems()
 			{
 				continue;
 			}
-			BattleItem::ScriptFill(&scr, *i, BODYPART_ITEM_INVENTORY, 0, 0);
-			scr.executeBlit(frame, _items, x, y, 0);
+			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			work.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
@@ -270,8 +270,8 @@ void Inventory::drawItems()
 			int x, y;
 			x = ((*i)->getSlot()->getX() + ((*i)->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
 			y = ((*i)->getSlot()->getY() + (*i)->getSlotY() * RuleInventory::SLOT_H);
-			BattleItem::ScriptFill(&scr, *i, BODYPART_ITEM_INVENTORY, 0, 0);
-			scr.executeBlit(frame, _items, x, y, 0);
+			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			work.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
@@ -1010,7 +1010,7 @@ void Inventory::arrangeGround(bool alterOffset)
 						{
 							(*j)->setSlotX(x);
 							(*j)->setSlotY(y);
-							
+
 							// only increase the stack level if the item is actually visible.
 							if ((*j)->getRules()->getInventoryWidth())
 							{

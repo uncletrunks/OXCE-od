@@ -298,7 +298,7 @@ struct SumListIndexImpl<MaxSize>
 		static constexpr int offset = 0;
 
 		[[gnu::always_inline]]
-		static RetEnum func(ScriptWorker &, const Uint8 *, ProgPos &)
+		static RetEnum func(ScriptWorkerBase &, const Uint8 *, ProgPos &)
 		{
 			return RetError;
 		}
@@ -542,9 +542,9 @@ struct ArgColection<MaxSize>
 
 struct ArgContextDef : ArgInternal<ArgContextDef>
 {
-	using ReturnType = ScriptWorker&;
+	using ReturnType = ScriptWorkerBase&;
 	static constexpr size_t size = 0;
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw;
 	}
@@ -554,7 +554,7 @@ struct ArgProgDef : ArgInternal<ArgProgDef>
 {
 	using ReturnType = ProgPos&;
 	static constexpr size_t size = 0;
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return curr;
 	}
@@ -565,7 +565,7 @@ struct ArgRegDef
 {
 	using ReturnType = T;
 	static constexpr size_t size = sizeof(Uint8);
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.ref<ReturnType>(*arg);
 	}
@@ -589,7 +589,7 @@ struct ArgValueDef
 {
 	using ReturnType = T;
 	static constexpr size_t size = sizeof(T);
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<ReturnType>(arg);
 	}
@@ -628,7 +628,7 @@ struct ArgLabelDef
 {
 	using ReturnType = ProgPos;
 	static constexpr size_t size = sizeof(ReturnType);
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<ProgPos>(arg);
 	}
@@ -657,7 +657,7 @@ struct ArgFuncDef
 {
 	using ReturnType = FuncCommon;
 	static constexpr size_t size = sizeof(ReturnType);
-	static FuncCommon get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static FuncCommon get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<FuncCommon>(arg);
 	}
@@ -678,7 +678,7 @@ struct ArgRawDef
 {
 	using ReturnType = const Uint8*;
 	static constexpr size_t size = Size;
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return arg;
 	}
@@ -698,7 +698,7 @@ struct ArgNullDef
 {
 	using ReturnType = nullptr_t;
 	static constexpr size_t size = 0;
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return nullptr;
 	}
@@ -723,7 +723,7 @@ struct ArgTagDef
 {
 	using ReturnType = ScriptTag<T, I>;
 	static constexpr size_t size = sizeof(ReturnType);
-	static ReturnType get(ScriptWorker& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
 		return sw.const_val<ReturnType>(arg);
 	}
@@ -753,7 +753,7 @@ struct ArgTagDef
 ////////////////////////////////////////////////////////////
 
 template<>
-struct ArgSelector<ScriptWorker&>
+struct ArgSelector<ScriptWorkerBase&>
 {
 	using type = ArgContextDef;
 };
@@ -866,14 +866,14 @@ struct FuncVer<Func, Ver, ListTag<Pos...>>
 
 	template<int CurrPos>
 	[[gnu::always_inline]]
-	static typename GetTypeAt<CurrPos>::ReturnType get(ScriptWorker& sw, const Uint8* procArgs, ProgPos& curr)
+	static typename GetTypeAt<CurrPos>::ReturnType get(ScriptWorkerBase& sw, const Uint8* procArgs, ProgPos& curr)
 	{
 		constexpr int offset = Args::offset(Ver, CurrPos);
 		return GetTypeAt<CurrPos>::get(sw, procArgs + offset, curr);
 	}
 
 	[[gnu::always_inline]]
-	static RetEnum func(ScriptWorker& sw, const Uint8* procArgs, ProgPos& curr)
+	static RetEnum func(ScriptWorkerBase& sw, const Uint8* procArgs, ProgPos& curr)
 	{
 		return Func::func(get<Pos>(sw, procArgs, curr)...);
 	}

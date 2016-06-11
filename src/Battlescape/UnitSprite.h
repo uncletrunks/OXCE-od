@@ -58,7 +58,6 @@ private:
 	int _part, _animationFrame, _drawingRoutine;
 	bool _helmet, _half;
 	int _x, _y, _shade, _burn;
-	ScriptWorker _scriptWorkRef;
 
 	/// Drawing routine for XCom soldiers in overalls, sectoids (routine 0),
 	/// mutons (routine 10),

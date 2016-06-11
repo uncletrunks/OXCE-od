@@ -44,7 +44,7 @@ namespace OpenXcom
 ItemSprite::ItemSprite(Surface* dest, Mod* mod, int frame) :
 	_itemSurface(mod->getSurfaceSet("FLOOROB.PCK")), _mod(mod),
 	_animationFrame(frame),
-	_dest(dest), _scriptWorkRef()
+	_dest(dest)
 {
 
 }
@@ -66,8 +66,9 @@ void ItemSprite::draw(BattleItem* item, int x, int y, int shade, bool half)
 	Surface* sprite = item->getFloorSprite(_itemSurface);
 	if (sprite)
 	{
-		BattleItem::ScriptFill(&_scriptWorkRef, item, BODYPART_ITEM_FLOOR, _animationFrame, shade);
-		_scriptWorkRef.executeBlit(sprite, _dest, x, y, shade, half);
+		ScriptWorkerBlit work;
+		BattleItem::ScriptFill(&work, item, BODYPART_ITEM_FLOOR, _animationFrame, shade);
+		work.executeBlit(sprite, _dest, x, y, shade, half);
 	}
 }
 

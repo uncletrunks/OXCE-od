@@ -149,7 +149,7 @@ static inline RetEnum wavegen_tri_h(int& reg, const int& period, const int& size
 }
 
 [[gnu::always_inline]]
-static inline RetEnum call_func_h(ScriptWorker& c, FuncCommon func, const Uint8* d, ProgPos& p)
+static inline RetEnum call_func_h(ScriptWorkerBase& c, FuncCommon func, const Uint8* d, ProgPos& p)
 {
 	auto t = p;
 	auto r = func(c, d, t);
@@ -180,13 +180,13 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
  */
 #define MACRO_PROC_DEFINITION(IMPL) \
 	/*	Name,		Implementation,													End excecution,				Args */ \
-	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorker &)) \
+	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorkerBase &)) \
 	\
-	IMPL(return,	MACRO_QUOTE({ c.ref<int>(RegI0) = Data0;						return RetEnd;		}),		(ScriptWorker& c, int Data0)) \
+	IMPL(return,	MACRO_QUOTE({ c.ref<int>(RegI0) = Data0;						return RetEnd;		}),		(ScriptWorkerBase& c, int Data0)) \
 	\
-	IMPL(goto,		MACRO_QUOTE({ Prog = Label1;									return RetContinue; }),		(ScriptWorker& c, ProgPos& Prog, ProgPos Label1)) \
+	IMPL(goto,		MACRO_QUOTE({ Prog = Label1;									return RetContinue; }),		(ScriptWorkerBase& c, ProgPos& Prog, ProgPos Label1)) \
 	\
-	IMPL(set,		MACRO_QUOTE({ Reg0 = Data1;										return RetContinue; }),		(ScriptWorker& c, int& Reg0, int Data1)) \
+	IMPL(set,		MACRO_QUOTE({ Reg0 = Data1;										return RetContinue; }),		(ScriptWorkerBase& c, int& Reg0, int Data1)) \
 	\
 	IMPL(test_le,	MACRO_QUOTE({ Prog = (A <= B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse)) \
 	IMPL(test_eq,	MACRO_QUOTE({ Prog = (A == B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse)) \
@@ -221,7 +221,7 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	IMPL(set_shade,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF);			return RetContinue; }),		(int& Reg0, int Data1)) \
 	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8* d, ScriptWorker& c, ProgPos& p)) \
+	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8* d, ScriptWorkerBase& c, ProgPos& p)) \
 	\
 	IMPL(debug_log,		MACRO_QUOTE({ return debug_log_h(p, Data1, Data2);								}),		(ProgPos& p, int Data1, int Data2)) \
 
@@ -304,12 +304,11 @@ enum ProcEnum : Uint8
  * @param proc array storing operation of script
  * @return Result of executing script
  */
-static inline int scriptExe(int i0, int i1, ScriptWorker& data)
+static inline int scriptExe(int i0, int i1, ScriptWorkerBase& data, const Uint8* proc)
 {
 	data.ref<int>(RegI0) = i0;
 	data.ref<int>(RegI1) = i1;
 	ProgPos curr = ProgPos::Start;
-	const Uint8 *const proc = data.proc;
 	//--------------------------------------------------
 	//			helper macros for this function
 	//--------------------------------------------------
@@ -377,11 +376,11 @@ namespace
  */
 struct ScriptReplace
 {
-	static inline void func(Uint8& dest, const Uint8& src, ScriptWorker& ref)
+	static inline void func(Uint8& dest, const Uint8& src, ScriptWorkerBase& ref, const Uint8* proc)
 	{
 		if (src)
 		{
-			const int s = scriptExe(src, dest, ref);
+			const int s = scriptExe(src, dest, ref, proc);
 			if (s) dest = s;
 		}
 	}
@@ -398,7 +397,7 @@ struct ScriptReplace
  * @param x x offset of source surface.
  * @param y y offset of source surface.
  */
-void ScriptWorker::executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half)
+void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half)
 {
 	ShaderMove<Uint8> srcShader(src, x, y);
 	if (half)
@@ -407,8 +406,8 @@ void ScriptWorker::executeBlit(Surface* src, Surface* dest, int x, int y, int sh
 		g.beg_x = g.end_x/2;
 		srcShader.setDomain(g);
 	}
-	if (proc)
-		ShaderDraw<ScriptReplace>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(*this));
+	if (_proc)
+		ShaderDraw<ScriptReplace>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(*this), ShaderScalar(_proc));
 	else
 		ShaderDraw<helper::StandardShade>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(shade));
 }
@@ -419,11 +418,11 @@ void ScriptWorker::executeBlit(Surface* src, Surface* dest, int x, int y, int sh
  * @param i1 arg that is visible in script under name "i1"
  * @return Result value from script.
  */
-int ScriptWorker::execute(int i0, int i1)
+int ScriptWorkerBase::executeBase(const Uint8* proc, int i0, int i1)
 {
 	if (proc)
 	{
-		return scriptExe(i0, i1, *this);
+		return scriptExe(i0, i1, *this, proc);
 	}
 	else
 	{

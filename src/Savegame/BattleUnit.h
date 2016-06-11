@@ -49,7 +49,7 @@ class AlienBAIState;
 class CivilianBAIState;
 template<typename, typename...> class ScriptContainer;
 template<typename...> class ScriptParser;
-class ScriptWorker;
+class ScriptWorkerBlit;
 struct BattleUnitStatistics;
 struct StatAdjustment;
 
@@ -154,7 +154,7 @@ public:
 	/// Register all useful function used by script.
 	static void ScriptRegister(ScriptParserBase* parser);
 	/// Init all required data in script using object data.
-	static void ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn);
+	static void ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn);
 
 	/// Creates a BattleUnit from solder.
 	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);

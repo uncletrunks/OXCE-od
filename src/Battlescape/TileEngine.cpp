@@ -1254,19 +1254,16 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
-			ScriptWorker worker;
 
+			ModScript::ReactionUnitParser::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg };
 			if (originalAction.weapon)
 			{
-				originalAction.weapon->getRules()->getReacActionScript().update(&worker, target, unit, originalAction.weapon, originalAction.type, origTarg);
-				reactionChance = worker.execute(reactionChance, dist);
+				reactionChance = worker.execute(originalAction.weapon->getRules()->getReacActionScript(), reactionChance, dist);
 			}
 
-			target->getArmor()->getReacActionScript().update(&worker, target, unit, originalAction.weapon, originalAction.type, origTarg);
-			reactionChance = worker.execute(reactionChance, dist);
+			reactionChance = worker.execute(target->getArmor()->getReacActionScript(), reactionChance, dist);
 
-			unit->getArmor()->getReacReactionScript().update(&worker, target, unit, originalAction.weapon, originalAction.type, origTarg);
-			reactionChance = worker.execute(reactionChance, dist);
+			reactionChance = worker.execute(unit->getArmor()->getReacReactionScript(), reactionChance, dist);
 
 			if (RNG::percent(reactionChance))
 			{

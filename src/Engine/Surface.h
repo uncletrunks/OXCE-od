@@ -27,7 +27,7 @@ namespace OpenXcom
 
 class Font;
 class Language;
-class ScriptWorker;
+class ScriptWorkerBase;
 
 /**
  * Element that is blit (rendered) onto the screen.

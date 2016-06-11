@@ -50,8 +50,7 @@ UnitSprite::UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet) :
 	_dest(dest), _mod(mod),
 	_part(0), _animationFrame(frame), _drawingRoutine(0),
 	_helmet(helmet), _half(false),
-	_x(0), _y(0), _shade(0), _burn(0),
-	_scriptWorkRef()
+	_x(0), _y(0), _shade(0), _burn(0)
 {
 
 }
@@ -112,8 +111,8 @@ void UnitSprite::selectUnit(Part& p, int index, int dir)
 	auto result = 0;
 	if(scr)
 	{
-		scr.update(&_scriptWorkRef, _unit, p.bodyPart, _animationFrame, _shade);
-		result = _scriptWorkRef.execute(index, dir);
+		ModScript::SelectUnitParser::Worker work{ _unit, p.bodyPart, _animationFrame, _shade };
+		result = work.execute(scr, index, dir);
 	}
 	else
 	{
@@ -132,11 +131,12 @@ void UnitSprite::blitItem(Part& item)
 	{
 		return;
 	}
-	BattleItem::ScriptFill(&_scriptWorkRef, (item.bodyPart == BODYPART_ITEM_RIGHTHAND ? _itemA : _itemB), item.bodyPart, _animationFrame, _shade);
+	ScriptWorkerBlit work;
+	BattleItem::ScriptFill(&work, (item.bodyPart == BODYPART_ITEM_RIGHTHAND ? _itemA : _itemB), item.bodyPart, _animationFrame, _shade);
 
 	_dest->lock();
 
-	_scriptWorkRef.executeBlit(item.src, _dest,  _x + item.offX, _y + item.offY, _shade, _half);
+	work.executeBlit(item.src, _dest,  _x + item.offX, _y + item.offY, _shade, _half);
 
 	_dest->unlock();
 }
@@ -151,11 +151,12 @@ void UnitSprite::blitBody(Part& body)
 	{
 		return;
 	}
-	BattleUnit::ScriptFill(&_scriptWorkRef, _unit, body.bodyPart, _animationFrame, _shade, _burn);
+	ScriptWorkerBlit work;
+	BattleUnit::ScriptFill(&work, _unit, body.bodyPart, _animationFrame, _shade, _burn);
 
 	_dest->lock();
 
-	_scriptWorkRef.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _shade, _half);
+	work.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _shade, _half);
 
 	_dest->unlock();
 }

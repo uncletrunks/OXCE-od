@@ -1126,7 +1126,7 @@ void RuleItem::drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem 
 	if (item)
 	{
 		frame = item->getBigSprite(texture);
-		ScriptWorker scr;
+		ScriptWorkerBlit scr;
 		BattleItem::ScriptFill(&scr, item, BODYPART_ITEM_INVENTORY, 0, 0);
 		scr.executeBlit(frame, surface, this->getHandSpriteOffX(), this->getHandSpriteOffY(), 0);
 	}

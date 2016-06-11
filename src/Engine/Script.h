@@ -38,6 +38,9 @@ class ScriptContainerBase;
 
 class ParserWriter;
 struct SelectedToken;
+class ScriptWorkerBase;
+class ScriptWorkerBlit;
+template<typename...> class ScriptWorker;
 
 namespace helper
 {
@@ -48,7 +51,7 @@ struct ArgSelector;
 }
 
 constexpr int ScriptMaxArg = 8;
-constexpr int ScriptMaxReg = 256;
+constexpr int ScriptMaxReg = 64*sizeof(void*);
 
 /**
  * Script execution cunter.
@@ -233,28 +236,144 @@ enum TokenEnum
 	TokenBuildinLabel,
 };
 
+using FuncCommon = RetEnum (*)(ScriptWorkerBase &, const Uint8 *, ProgPos &);
+
 /**
- * Struct that cache state of script data and is place of script write temporary data.
+ * Common base of script execution.
  */
-struct ScriptWorker
+class ScriptContainerBase
 {
-	const Uint8* proc;
-	typename std::aligned_storage<ScriptMaxReg, alignof(void*)>::type reg;
+	friend class ParserWriter;
+	std::vector<Uint8> _proc;
 
-	/// Default constructor.
-	ScriptWorker() : proc(nullptr) //reg not initialized
+protected:
+	/// Protected destructor.
+	~ScriptContainerBase() { }
+
+public:
+	/// Constructor.
+	ScriptContainerBase() = default;
+	/// Copy constructor.
+	ScriptContainerBase(const ScriptContainerBase&) = delete;
+	/// Move constructor.
+	ScriptContainerBase(ScriptContainerBase&&) = default;
+
+	/// Copy.
+	ScriptContainerBase &operator=(const ScriptContainerBase&) = delete;
+	/// Move.
+	ScriptContainerBase &operator=(ScriptContainerBase&&) = default;
+
+	/// Test if is any script there.
+	explicit operator bool() const
 	{
-
+		return !_proc.empty();
 	}
 
-	/// Programmable bliting using script.
-	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half = false);
-	/// Call script with two arguments.
-	int execute(int i0, int i1);
-	/// Clear all worker data.
-	void clear()
+	/// Get pointer to proc data.
+	const Uint8* data() const
 	{
-		proc = nullptr;
+		return *this ? _proc.data() : nullptr;
+	}
+};
+
+/**
+ * Strong typed script.
+ */
+template<typename Parent, typename... Args>
+class ScriptContainer : public ScriptContainerBase
+{
+public:
+	/// Load data string form YAML.
+	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
+	{
+		if(const YAML::Node& scripts = node["scripts"])
+		{
+			if (const YAML::Node& curr = scripts[parent.getName()])
+			{
+				*this = parent.parse(type, curr.as<std::string>());
+			}
+		}
+		if (!*this && !parent.getDefault().empty())
+		{
+			*this = parent.parse(type, parent.getDefault());
+		}
+	}
+};
+
+/**
+ * Global version of strong typed script.
+ */
+template<typename Parent, typename... Args>
+class ScriptContainerEvents
+{
+	using Contanier = ScriptContainer<Parent, Args...>;
+	Contanier _current;
+	Contanier* _events;
+
+public:
+	/// Load data string form YAML.
+	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
+	{
+		_current.load(type, node, parent);
+		_events = parent.getEvents();
+	}
+
+	/// Test if is any script there.
+	explicit operator bool() const
+	{
+		return true;
+	}
+
+	/// Get pointer to proc data.
+	const Uint8* data() const
+	{
+		return _current.data();
+	}
+	/// Get pointer to proc data.
+	const Contanier* dataEvents() const
+	{
+		return _events;
+	}
+};
+
+template<int size>
+using ScriptRawMemory = typename std::aligned_storage<size, alignof(void*)>::type;
+
+/**
+ * Class that cache state of script data and is place of script write temporary data.
+ */
+class ScriptWorkerBase
+{
+	ScriptRawMemory<ScriptMaxReg> reg;
+
+	template<size_t offset, typename First, typename... Rest>
+	void setReg(First f, Rest... t)
+	{
+		ref<First>(offset) = f;
+		setReg<offset + sizeof(First), Rest...>(t...);
+	}
+	template<size_t offset>
+	void setReg()
+	{
+		//end loop
+	}
+
+protected:
+	/// Update values in script.
+	template<typename... Args>
+	void updateBase(Args... args)
+	{
+		memset(&reg, 0, ScriptMaxReg);
+		setReg<RegMax>(args...);
+	}
+	/// Call script with two arguments.
+	int executeBase(const Uint8* proc, int i0, int i1);
+
+public:
+	/// Default constructor.
+	ScriptWorkerBase() //reg not initialized
+	{
+
 	}
 
 	/// Get value from reg.
@@ -271,96 +390,86 @@ struct ScriptWorker
 	}
 };
 
-using FuncCommon = RetEnum (*)(ScriptWorker &, const Uint8 *, ProgPos &);
-
-/**
- * Common base of script execution.
- */
-class ScriptContainerBase
+template<typename... Args>
+class ScriptWorker : public ScriptWorkerBase
 {
-	friend class ParserWriter;
-	std::vector<Uint8> _proc;
+public:
 
-protected:
-	/// Protected destructor.
-	~ScriptContainerBase() { }
-
-	void updateBase(ScriptWorker* ref) const
+	/// Default constructor.
+	ScriptWorker(Args... args) : ScriptWorkerBase()
 	{
-		memset(&ref->reg, 0, ScriptMaxReg);
-		if (*this)
-		{
-			ref->proc = this->_proc.data();
-		}
-		else
-		{
-			ref->proc = 0;
-		}
+		updateBase(args...);
 	}
 
-public:
-	/// constructor.
-	ScriptContainerBase() = default;
-	/// copy constructor.
-	ScriptContainerBase(const ScriptContainerBase&) = delete;
-	/// move constructor.
-	ScriptContainerBase(ScriptContainerBase&&) = default;
-
-	/// copy.
-	ScriptContainerBase &operator=(const ScriptContainerBase&) = delete;
-	/// move.
-	ScriptContainerBase &operator=(ScriptContainerBase&&) = default;
-
-	/// Test if is any script there.
-	explicit operator bool() const
+	/// Execute standard script.
+	template<typename Parent>
+	int execute(const ScriptContainer<Parent, Args...>& c, int i0, int i1)
 	{
-		return !_proc.empty();
+		return executeBase(c.data(), i0, i1);
+	}
+
+	/// Execute standard script with global events.
+	template<typename Parent>
+	int execute(const ScriptContainerEvents<Parent, Args...>& c, int i0, int i1)
+	{
+		auto ptr = c.dataEvents();
+		if (ptr)
+		{
+			while (*ptr)
+			{
+				i0 = execute(*ptr, i0, i1);
+				++ptr;
+			}
+			++ptr;
+		}
+		i0 = executeBase(c.data(), i0, i1);
+		if (ptr)
+		{
+			while (*ptr)
+			{
+				i0 = execute(*ptr, i0, i1);
+				++ptr;
+			}
+			++ptr;
+		}
+		return i0;
 	}
 };
 
-/**
- * Strong typed script.
- */
-template<typename Parent, typename... Args>
-class ScriptContainer : public ScriptContainerBase
+class ScriptWorkerBlit : public ScriptWorkerBase
 {
-	template<size_t offset, typename First, typename... Rest>
-	void setReg(ScriptWorker* ref, First f, Rest... t) const
-	{
-		ref->ref<First>(offset) = f;
-		setReg<offset + sizeof(First), Rest...>(ref, t...);
-	}
-	template<size_t offset>
-	void setReg(ScriptWorker* ref) const
-	{
-		//end loop
-	}
-
+	/// Current script set in worker.
+	const Uint8* _proc;
 public:
-	/// Update values in script.
-	void update(ScriptWorker* ref, Args... args) const
+
+	/// Default constructor.
+	ScriptWorkerBlit() : ScriptWorkerBase(), _proc(nullptr)
 	{
-		updateBase(ref);
-		if (*this)
+
+	}
+
+	/// Update data from container script.
+	template<typename Parent, typename... Args>
+	void update(const ScriptContainer<Parent, Args...>& c, typename std::decay<Args>::type... args)
+	{
+		if (c)
 		{
-			setReg<RegMax>(ref, args...);
+			_proc = c.data();
+			updateBase(args...);
+		}
+		else
+		{
+			clear();
 		}
 	}
 
-	/// Load data string form YAML.
-	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
+	/// Programmable bliting using script.
+	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half = false);
+
+	/// Clear all worker data.
+	void clear()
 	{
-		if(const YAML::Node& scripts = node["scripts"])
-		{
-			if (const YAML::Node& curr = scripts[parent.getName()])
-			{
-				*this = parent.parse(type, curr.as<std::string>());
-			}
-		}
-		if (!*this && !parent.getDefault().empty())
-		{
-			*this = parent.parse(type, parent.getDefault());
-		}
+		_proc = nullptr;
 	}
 };
 
@@ -517,7 +626,7 @@ struct ScriptTypeData
  */
 struct ScriptValueData
 {
-	typename std::aligned_storage<sizeof(void*), alignof(void*)>::type data;
+	ScriptRawMemory<sizeof(void*)> data;
 	ArgEnum type = ArgInvalid;
 	Uint8 size = 0;
 
@@ -800,9 +909,10 @@ class ScriptParser : public ScriptParserBase
 
 public:
 	using Container = ScriptContainer<ScriptParser, Args...>;
+	using Worker = ScriptWorker<Args...>;
 
 	/// Default constructor.
-	ScriptParser(const std::string& name, const std::string& firstArg, const std::string& secondArg,  S<Args>... argNames) : ScriptParserBase(name, firstArg, secondArg)
+	ScriptParser(const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserBase(name, firstArg, secondArg)
 	{
 		addRegImpl(argNames...);
 	}
@@ -853,7 +963,6 @@ struct ScriptTag
 class ScriptValuesBase
 {
 protected:
-
 	/// Vector with all avaiable values for script.
 	std::vector<int> values;
 
@@ -863,8 +972,8 @@ protected:
 		static std::map<ArgEnum, std::vector<std::string>> all;
 		return all;
 	}
-public:
 
+public:
 	/// Clean all tag names.
 	static void unregisteAll()
 	{
@@ -886,6 +995,7 @@ class ScriptValues : ScriptValuesBase
 		static std::vector<std::string> &name = getAll()[Tag::type()];
 		return name;
 	}
+
 public:
 	using Tag = ScriptTag<T, I>;
 

@@ -3840,15 +3840,14 @@ ModScript::ReactionUnitParser::ReactionUnitParser(const std::string& name, Mod* 
 }
 
 /**
- * Fill script data.
+ * Init all required data in script using object data.
  */
-void BattleUnit::ScriptFill(ScriptWorker* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn)
+void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn)
 {
 	w->clear();
 	if(unit)
 	{
-		const auto &scr = unit->getArmor()->getRecolorScript();
-		scr.update(w, unit, body_part, anim_frame, shade, burn);
+		w->update(unit->getArmor()->getRecolorScript(), unit, body_part, anim_frame, shade, burn);
 	}
 }
 
