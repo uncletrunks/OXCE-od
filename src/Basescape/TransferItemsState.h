@@ -31,6 +31,7 @@ namespace OpenXcom
 class TextButton;
 class Window;
 class Text;
+class TextEdit;
 class TextList;
 class ComboBox;
 class Timer;
@@ -45,6 +46,7 @@ class TransferItemsState : public State
 private:
 	Base *_baseFrom, *_baseTo;
 	TextButton *_btnOk, *_btnCancel;
+	TextEdit *_btnQuickSearch;
 	Window *_window;
 	Text *_txtTitle, *_txtQuantity, *_txtAmountTransfer, *_txtAmountDestination;
 	ComboBox *_cbxCategory;
@@ -76,6 +78,9 @@ public:
 	void updateList();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Completes the transfer between bases.
 	void completeTransfer();
 	/// Handler for clicking the Cancel button.
