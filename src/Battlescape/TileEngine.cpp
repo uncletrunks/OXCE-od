@@ -1276,7 +1276,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 					_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
 				}
 			}
-			return true;
+			return reactionChance > 0;
 		}
 	}
 	return false;
