@@ -1449,11 +1449,11 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 }
 
 ////////////////////////////////////////////////////////////
-//					ScriptParser class
+//				ScriptParserBase class
 ////////////////////////////////////////////////////////////
 
 /**
- * Default constructor
+ * Constructor
  */
 ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& firstArg, const std::string& secondArg) : _regUsed{ RegMax }, _name{ name }
 {
@@ -1782,12 +1782,13 @@ const ScriptRefData* ScriptParserBase::getRef(ScriptRef prefix, ScriptRef postfi
  * @param src_code string with script
  * @return true if string have valid script
  */
-bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::string& parentName, const std::string& srcCode) const
+bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::string& parentName, const std::string& srcCode) const
 {
+	ScriptContainerBase tempScript;
 	std::string err = "Error in parsing script '" + _name + "' for '" + parentName + "': ";
 	ParserWriter help(
 		_regUsed,
-		*destScript,
+		tempScript,
 		*this
 	);
 
@@ -1811,6 +1812,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 				}
 			}
 			help.relese();
+			destScript = std::move(tempScript);
 			return true;
 		}
 
@@ -1903,9 +1905,35 @@ bool ScriptParserBase::parseBase(ScriptContainerBase* destScript, const std::str
 }
 
 /**
+ * Prase string and return new script.
+ */
+void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::string& type, const YAML::Node& node) const
+{
+	if(const YAML::Node& scripts = node["scripts"])
+	{
+		if (const YAML::Node& curr = scripts[getName()])
+		{
+			parseBase(container, type, curr.as<std::string>());
+		}
+	}
+	if (!container && !getDefault().empty())
+	{
+		parseBase(container, type, getDefault());
+	}
+}
+
+/**
+ * Load global data from YAML.
+ */
+void ScriptParserBase::load(const YAML::Node& node)
+{
+
+}
+
+/**
  * Print all metadata
  */
-void ScriptParserBase::logScriptMetadata() const
+void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 {
 	if (Options::debug)
 	{
@@ -1940,6 +1968,11 @@ void ScriptParserBase::logScriptMetadata() const
 		Logger refLog;
 		refLog.get(LOG_DEBUG) << "Script info for: " << _name << "\n" << std::left;
 		refLog.get(LOG_DEBUG) << "\n";
+		if (haveEvents)
+		{
+			refLog.get(LOG_DEBUG) << "Have global events\n";
+			refLog.get(LOG_DEBUG) << "\n";
+		}
 		if (!_defaultScript.empty())
 		{
 			refLog.get(LOG_DEBUG) << "Script defualt implementation:\n";
@@ -1993,6 +2026,155 @@ void ScriptParserBase::logScriptMetadata() const
 				}
 			}
 		}
+	}
+}
+
+////////////////////////////////////////////////////////////
+//				ScriptParserEventsBase class
+////////////////////////////////////////////////////////////
+
+/**
+ * Constructor.
+ */
+ScriptParserEventsBase::ScriptParserEventsBase(const std::string& name, const std::string& firstArg, const std::string& secondArg) : ScriptParserBase(name, firstArg, secondArg)
+{
+	_events.reserve(EventsMax);
+	_eventsData.push_back({ 0, {} });
+	_eventsData.push_back({ OffsetMax, {} });
+}
+
+/**
+ *  Prase string and return new script.
+ */
+void ScriptParserEventsBase::parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::Node& node) const
+{
+	ScriptParserBase::parseNode(container._current, type, node);
+	container._events = getEvents();
+}
+
+/**
+ * Load global data from YAML.
+ */
+void ScriptParserEventsBase::load(const YAML::Node& node)
+{
+	ScriptParserBase::load(node);
+	if(const YAML::Node& scripts = node["scripts"])
+	{
+		if (const YAML::Node& curr = scripts[getName()])
+		{
+			for (const YAML::Node& i : curr)
+			{
+				EventData data = EventData{};
+				data.offset = i["offset"].as<double>(0) * OffsetScale;
+				ScriptContainerBase scp;
+				if (parseBase(scp, "Global Event Script", i["code"].as<std::string>("")))
+				{
+					data.script = std::move(scp);
+					_eventsData.push_back(std::move(data));
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Get pointer to events.
+ */
+const ScriptContainerBase* ScriptParserEventsBase::getEvents() const
+{
+	return _events.data();
+}
+
+/**
+ * Relese event data.
+ */
+std::vector<ScriptContainerBase> ScriptParserEventsBase::releseEvents()
+{
+	std::sort(std::begin(_eventsData), std::end(_eventsData), [](const EventData& a, const EventData& b) { return a.offset < b.offset; });
+	for (auto& e : _eventsData)
+	{
+		if (_events.size() < EventsMax)
+		{
+			_events.push_back(std::move(e.script));
+		}
+	}
+	return std::move(_events);
+}
+
+////////////////////////////////////////////////////////////
+//					ScriptGlobal class
+////////////////////////////////////////////////////////////
+
+/**
+ * Store parser.
+ */
+void ScriptGlobal::pushParser(ScriptParserBase* parser)
+{
+	parser->logScriptMetadata(false);
+	_names.insert(std::make_pair(parser->getName(), parser));
+}
+
+/**
+ * Store parser with events.
+ */
+void ScriptGlobal::pushParser(ScriptParserEventsBase* parser)
+{
+	parser->logScriptMetadata(true);
+	_names.insert(std::make_pair(parser->getName(), parser));
+	_eventsParsers.push_back(parser);
+}
+
+/**
+ * Add new const value.
+ */
+void ScriptGlobal::addConst(const std::string& name, ScriptValueData i)
+{
+	for (auto p : _names)
+	{
+		p.second->addConst(name, i);
+	}
+}
+
+/**
+ * Update const value.
+ */
+void ScriptGlobal::updateConst(const std::string& name, ScriptValueData i)
+{
+	for (auto p : _names)
+	{
+		p.second->updateConst(name, i);
+	}
+}
+
+/**
+ * Prepare for loading data.
+ */
+void ScriptGlobal::beginLoad()
+{
+
+}
+
+/**
+ * Finishing loading data.
+ */
+void ScriptGlobal::endLoad()
+{
+	for (auto& p : _eventsParsers)
+	{
+		_events.push_back(p->releseEvents());
+	}
+	_names.clear();
+	_eventsParsers.clear();
+}
+
+/**
+ * Load global data from YAML.
+ */
+void ScriptGlobal::load(const YAML::Node& node)
+{
+	for (auto p : _names)
+	{
+		p.second->load(node);
 	}
 }
 

@@ -86,6 +86,7 @@ class RuleMusic;
 class RuleMissionScript;
 class ModScript;
 class ScriptParserBase;
+class ScriptGlobal;
 struct StatAdjustment;
 
 /**
@@ -143,8 +144,10 @@ private:
 	std::vector<StatString*> _statStrings;
 	std::vector<RuleDamageType*> _damageTypes;
 	std::map<std::string, RuleMusic *> _musicDefs;
+
 	RuleGlobe *_globe;
 	RuleConverter *_converter;
+	ScriptGlobal *_scriptGlobal;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
@@ -175,7 +178,7 @@ private:
 	size_t _soundOffsetGeo = 0;
 
 	/// Loads a ruleset from a YAML file.
-	void loadFile(const std::string &filename, const ModScript &parsers);
+	void loadFile(const std::string &filename, ModScript &parsers);
 	/// Loads a ruleset element.
 	template <typename T>
 	T *loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::vector<std::string> *index = 0, const std::string &key = "type") const;
@@ -195,7 +198,7 @@ private:
 	/// Creates a transparency lookup table for a given palette.
 	void createTransparencyLUT(Palette *pal);
 	/// Loads a specified mod content.
-	void loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, const ModScript &parsers);
+	void loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, ModScript &parsers);
 	/// Loads resources from vanilla.
 	void loadVanillaResources();
 	/// Loads resources from extra rulesets.

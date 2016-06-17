@@ -33,8 +33,11 @@
 namespace OpenXcom
 {
 class Surface;
+class ScriptGlobal;
 class ScriptParserBase;
+class ScriptParserEventsBase;
 class ScriptContainerBase;
+class ScriptContainerEventsBase;
 
 class ParserWriter;
 struct SelectedToken;
@@ -246,10 +249,6 @@ class ScriptContainerBase
 	friend class ParserWriter;
 	std::vector<Uint8> _proc;
 
-protected:
-	/// Protected destructor.
-	~ScriptContainerBase() { }
-
 public:
 	/// Constructor.
 	ScriptContainerBase() = default;
@@ -257,6 +256,9 @@ public:
 	ScriptContainerBase(const ScriptContainerBase&) = delete;
 	/// Move constructor.
 	ScriptContainerBase(ScriptContainerBase&&) = default;
+
+	/// Destructor.
+	~ScriptContainerBase() = default;
 
 	/// Copy.
 	ScriptContainerBase &operator=(const ScriptContainerBase&) = delete;
@@ -283,41 +285,23 @@ template<typename Parent, typename... Args>
 class ScriptContainer : public ScriptContainerBase
 {
 public:
-	/// Load data string form YAML.
+	/// Load data string from YAML.
 	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
 	{
-		if(const YAML::Node& scripts = node["scripts"])
-		{
-			if (const YAML::Node& curr = scripts[parent.getName()])
-			{
-				*this = parent.parse(type, curr.as<std::string>());
-			}
-		}
-		if (!*this && !parent.getDefault().empty())
-		{
-			*this = parent.parse(type, parent.getDefault());
-		}
+		parent.parseNode(*this, type, node);
 	}
 };
 
 /**
- * Global version of strong typed script.
+ * Common base of typed script with events.
  */
-template<typename Parent, typename... Args>
-class ScriptContainerEvents
+class ScriptContainerEventsBase
 {
-	using Contanier = ScriptContainer<Parent, Args...>;
-	Contanier _current;
-	Contanier* _events;
+	friend class ScriptParserEventsBase;
+	ScriptContainerBase _current;
+	const ScriptContainerBase* _events;
 
 public:
-	/// Load data string form YAML.
-	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
-	{
-		_current.load(type, node, parent);
-		_events = parent.getEvents();
-	}
-
 	/// Test if is any script there.
 	explicit operator bool() const
 	{
@@ -330,14 +314,30 @@ public:
 		return _current.data();
 	}
 	/// Get pointer to proc data.
-	const Contanier* dataEvents() const
+	const ScriptContainerBase* dataEvents() const
 	{
 		return _events;
 	}
 };
 
+/**
+ * Strong typed script with events.
+ */
+template<typename Parent, typename... Args>
+class ScriptContainerEvents : public ScriptContainerEventsBase
+{
+public:
+	/// Load data string form YAML.
+	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
+	{
+		parent.parseNode(*this, type, node);
+	}
+};
+
 template<int size>
 using ScriptRawMemory = typename std::aligned_storage<size, alignof(void*)>::type;
+
+
 
 /**
  * Class that cache state of script data and is place of script write temporary data.
@@ -417,7 +417,7 @@ public:
 		{
 			while (*ptr)
 			{
-				i0 = execute(*ptr, i0, i1);
+				i0 = executeBase(ptr->data(), i0, i1);
 				++ptr;
 			}
 			++ptr;
@@ -427,10 +427,9 @@ public:
 		{
 			while (*ptr)
 			{
-				i0 = execute(*ptr, i0, i1);
+				i0 = executeBase(ptr->data(), i0, i1);
 				++ptr;
 			}
-			++ptr;
 		}
 		return i0;
 	}
@@ -695,6 +694,43 @@ class ScriptParserBase
 	std::vector<ScriptRefData> _refList;
 
 protected:
+	template<typename Z>
+	struct S
+	{
+		S(const char *n) : name{ n } { }
+		S(const std::string& n) : name{ n.data() } { }
+
+		const char *name;
+	};
+
+	template<typename First, typename... Rest>
+	void addRegImpl(S<First>& n, Rest&... t)
+	{
+		addTypeImpl(n);
+		addScriptArg(n.name, ScriptParserBase::getArgType<First>());
+		addRegImpl(t...);
+	}
+	void addRegImpl()
+	{
+		//end loop
+	}
+
+	template<typename First, typename = decltype(&First::ScriptRegister)>
+	void addTypeImpl(S<First*>& n)
+	{
+		registerPointerType<First>();
+	}
+	template<typename First, typename = decltype(&First::ScriptRegister)>
+	void addTypeImpl(S<const First*>& n)
+	{
+		registerPointerType<First>();
+	}
+	template<typename First>
+	void addTypeImpl(S<First>& n)
+	{
+		//nothing to do for rest
+	}
+
 	static ArgEnum registeTypeImplNextValue()
 	{
 		static ArgEnum curr = ArgMax;
@@ -741,7 +777,10 @@ protected:
 	~ScriptParserBase();
 
 	/// Common typeless part of parsing string.
-	bool parseBase(ScriptContainerBase* scr, const std::string& parentName, const std::string& code) const;
+	bool parseBase(ScriptContainerBase& scr, const std::string& parentName, const std::string& code) const;
+
+	/// Prase string and return new script.
+	void parseNode(ScriptContainerBase& container, const std::string& type, const YAML::Node& node) const;
 
 	/// Test if name is free.
 	bool haveNameRef(const std::string& s) const;
@@ -813,8 +852,11 @@ public:
 		}
 	}
 
+	/// Load global data from YAML.
+	virtual void load(const YAML::Node& node);
+
 	/// Show all script informations.
-	void logScriptMetadata() const;
+	void logScriptMetadata(bool haveEvents) const;
 
 	/// Get name of script.
 	const std::string& getName() const { return _name; }
@@ -870,65 +912,99 @@ inline const T& ScriptValueData::getValue() const
 template<typename... Args>
 class ScriptParser : public ScriptParserBase
 {
-	template<typename Z>
-	struct S
-	{
-		S(const char *n) : name{ n } { }
-		S(const std::string& n) : name{ n.data() } { }
-
-		const char *name;
-	};
-
-	template<typename First, typename... Rest>
-	void addRegImpl(S<First>& n, Rest&... t)
-	{
-		addTypeImpl(n);
-		addScriptArg(n.name, ScriptParserBase::getArgType<First>());
-		addRegImpl(t...);
-	}
-	void addRegImpl()
-	{
-		//end loop
-	}
-
-	template<typename First, typename = decltype(&First::ScriptRegister)>
-	void addTypeImpl(S<First*>& n)
-	{
-		registerPointerType<First>();
-	}
-	template<typename First, typename = decltype(&First::ScriptRegister)>
-	void addTypeImpl(S<const First*>& n)
-	{
-		registerPointerType<First>();
-	}
-	template<typename First>
-	void addTypeImpl(S<First>& n)
-	{
-		//nothing to do for rest
-	}
-
 public:
 	using Container = ScriptContainer<ScriptParser, Args...>;
 	using Worker = ScriptWorker<Args...>;
+	friend Container;
 
-	/// Default constructor.
+	/// Constructor.
 	ScriptParser(const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserBase(name, firstArg, secondArg)
 	{
 		addRegImpl(argNames...);
 	}
+};
 
-	/// Prase string and return new script.
-	Container parse(const std::string& parentName, const std::string& srcCode) const
+/**
+ * Common base for strong typed event parser.
+ */
+class ScriptParserEventsBase : public ScriptParserBase
+{
+	constexpr static size_t EventsMax = 64;
+	constexpr static size_t OffsetScale = 100;
+	constexpr static size_t OffsetMax = 100 * OffsetScale;
+
+	struct EventData
 	{
-		auto scr = Container{};
-		if (parseBase(&scr, parentName, srcCode))
-		{
-			return std::move(scr);
-		}
-		return {};
+		int offset;
+		ScriptContainerBase script;
+	};
+
+	/// Final list of events.
+	std::vector<ScriptContainerBase> _events;
+	/// Meta data of events.
+	std::vector<EventData> _eventsData;
+
+protected:
+	/// Prase string and return new script.
+	void parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::Node& node) const;
+
+public:
+	/// Constructor.
+	ScriptParserEventsBase(const std::string& name, const std::string& firstArg, const std::string& secondArg);
+
+	/// Load global data from YAML.
+	virtual void load(const YAML::Node& node) override;
+	/// Get pointer to events.
+	const ScriptContainerBase* getEvents() const;
+	/// Relese event data.
+	std::vector<ScriptContainerBase> releseEvents();
+};
+
+/**
+ * Strong typed event parser.
+ */
+template<typename... Args>
+class ScriptParserEvents : public ScriptParserEventsBase
+{
+public:
+	using Container = ScriptContainerEvents<ScriptParserEvents, Args...>;
+	using Worker = ScriptWorker<Args...>;
+	friend Container;
+
+	/// Constructor.
+	ScriptParserEvents(const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserEventsBase(name, firstArg, secondArg)
+	{
+		addRegImpl(argNames...);
 	}
 };
 
+/**
+ * Global data shared by all scripts.
+ */
+class ScriptGlobal
+{
+	std::vector<std::vector<ScriptContainerBase>> _events;
+	std::map<std::string, ScriptParserBase*> _names;
+	std::vector<ScriptParserEventsBase*> _eventsParsers;
+
+public:
+	/// Store parser.
+	void pushParser(ScriptParserBase* parser);
+	/// Store parser.
+	void pushParser(ScriptParserEventsBase* parser);
+	/// Add new const value.
+	void addConst(const std::string& name, ScriptValueData i);
+	/// Update const value.
+	void updateConst(const std::string& name, ScriptValueData i);
+
+	/// Prepare for loading data.
+	void beginLoad();
+	/// Finishing loading data.
+	void endLoad();
+
+	/// Load global data from YAML.
+	void load(const YAML::Node& node);
+};
 
 /**
  * Strong typed tag.

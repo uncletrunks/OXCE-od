@@ -3825,7 +3825,7 @@ ModScript::SelectUnitParser::SelectUnitParser(const std::string& name, Mod* mod)
 /**
  * Constructor of reaction chance script parser.
  */
-ModScript::ReactionUnitParser::ReactionUnitParser(const std::string& name, Mod* mod) : ScriptParser{ name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
+ModScript::ReactionUnitParser::ReactionUnitParser(const std::string& name, Mod* mod) : ScriptParserEvents{ name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
 {
 	BindBase b { this };
 

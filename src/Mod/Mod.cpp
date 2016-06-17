@@ -211,6 +211,7 @@ Mod::Mod() :
 	_muteMusic = new Music();
 	_muteSound = new Sound();
 	_globe = new RuleGlobe();
+	_scriptGlobal = new ScriptGlobal();
 
 	//load base damage types
 	RuleDamageType *dmg;
@@ -332,6 +333,7 @@ Mod::~Mod()
 	delete _muteSound;
 	delete _globe;
 	delete _converter;
+	delete _scriptGlobal;
 	for (std::map<std::string, Font*>::iterator i = _fonts.begin(); i != _fonts.end(); ++i)
 	{
 		delete i->second;
@@ -796,26 +798,19 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
 void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods)
 {
 	ScriptValuesBase::unregisteAll();
-	ModScript parser{ this };
-	for (auto p : parser._names)
-	{
-		p.second->addConst("RuleList.master", (int)0);
-		p.second->addConst("RuleList.current", (int)0);
-	}
+	ModScript parser{ _scriptGlobal, this };
+
+	_scriptGlobal->beginLoad();
+	_scriptGlobal->addConst("RuleList.master", (int)0);
+	_scriptGlobal->addConst("RuleList.current", (int)0);
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
 		auto name = "RuleList." + mods[i].first;
-		for (auto p : parser._names)
-		{
-			p.second->addConst(name, (int)i);
-		}
+		_scriptGlobal->addConst(name, (int)i);
 	}
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
-		for (auto p : parser._names)
-		{
-			p.second->updateConst("RuleList.current", (int)i);
-		}
+		_scriptGlobal->updateConst("RuleList.current", (int)i);
 		try
 		{
 			loadMod(mods[i].second, i, parser);
@@ -845,7 +840,7 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 				e.what());
 		}
 	}
-
+	_scriptGlobal->endLoad();
 	// post-processing item categories
 	std::map<std::string, std::string> replacementRules;
 	for (auto i = _itemCategories.begin(); i != _itemCategories.end(); ++i)
@@ -872,7 +867,7 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
  * @param modIdx Mod index number.
  * @param parsers Object with all avaiable parser.
  */
-void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, const ModScript &parsers)
+void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, ModScript &parsers)
 {
 	_modOffset = 1000 * modIdx;
 
@@ -958,15 +953,18 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, c
  * @param filename YAML filename.
  * @param parsers Object with all avaiable parser.
  */
-void Mod::loadFile(const std::string &filename, const ModScript &parsers)
+void Mod::loadFile(const std::string &filename, ModScript &parsers)
 {
-
 	YAML::Node doc = YAML::LoadFile(filename);
 
-	if (const YAML::Node &node = doc["customValuesRegist"])
+	if (const YAML::Node &extended = doc["extended"])
 	{
-		ScriptValues<Armor>::registerNames(node, "Armor");
-		ScriptValues<RuleItem>::registerNames(node, "RuleItem");
+		if (const YAML::Node &t = extended["tags"])
+		{
+			ScriptValues<Armor>::registerNames(t, Armor::ScriptName);
+			ScriptValues<RuleItem>::registerNames(t, RuleItem::ScriptName);
+		}
+		_scriptGlobal->load(extended);
 	}
 	for (YAML::const_iterator i = doc["countries"].begin(); i != doc["countries"].end(); ++i)
 	{
