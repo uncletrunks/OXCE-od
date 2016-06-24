@@ -46,7 +46,7 @@ class Armor
 public:
 
 	/// Name of class used in script.
-	static constexpr const char *ScriptName = "Armor";
+	static constexpr const char *ScriptName = "RuleArmor";
 	/// Register all useful function used by script.
 	static void ScriptRegister(ScriptParserBase* parser);
 

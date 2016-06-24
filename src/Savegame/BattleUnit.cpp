@@ -3495,6 +3495,15 @@ void getArmorValueScript(const BattleUnit *bu, int &ret, int side)
 	}
 	ret = 0;
 }
+void getArmorMaxScript(const BattleUnit *bu, int &ret, int side)
+{
+	if (bu && 0 <= side && side < SIDE_MAX)
+	{
+		ret = bu->getMaxArmor((UnitSide)side);
+		return;
+	}
+	ret = 0;
+}
 void getGenderScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -3697,6 +3706,9 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addField<&BattleUnit::_morale>("getMorale");
 	bu.addFake<100>("getMoraleMax");
 
+	bu.add<&getArmorValueScript>("getArmor");
+	bu.add<&getArmorMaxScript>("getArmorMax");
+
 	us.addField<&UnitStats::tu>("Stats.getTimeUnits");
 	us.addField<&UnitStats::stamina>("Stats.getStamina");
 	us.addField<&UnitStats::health>("Stats.getHealth");
@@ -3711,9 +3723,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
-	bu.add<&getArmorValueScript>("getArmorValue");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
-	bu.add<Armor, &BattleUnit::getArmor>("getArmor");
+	bu.add<const Armor, &BattleUnit::getArmor>("getRuleArmor");
 	bu.addFunc<getRightHandWeaponScript>("getRightHandWeapon");
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
