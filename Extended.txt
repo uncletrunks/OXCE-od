@@ -104,6 +104,8 @@ Refactored script handling.[br/]
 Script support in reaction atack chance calculations.[br/]
 Some light handling improvments.[br/]
 New recolr and replace script graphic option for items.[br/]
+Option for global events shared by scripts.[br/]
+Custom tags that have user defined values.[br/]
 [br/]
 
 [examples]
@@ -320,6 +322,8 @@ items:
     psiAnimation: 0       #override `meleeAnimation` when used for MC or Panic attack. Use `HIT.PCK`.
     psiMissAnimation: 0   #override `meleeMissAnimation` when MC or Panic attack was unsuccessful. Use `HIT.PCK`.
     explosionHitSound: 2  #override default big explosion sound.
+    tags:
+      SOME_CUSTOM_TAG: 4  #user defined values used by script.
     scripts:
       recolorItemSprite: ~      #script that handle recoloring of item pixels.
       selectItemSprite: ~       #script that handle selecting graphic for item.
@@ -380,6 +384,8 @@ armors:
         #...
         #same stats like `damageBonus` in `items`.
         #...
+    tags:
+      IS_THIS_NINJA: 1        #user defined values used by script.
     scripts:
       recolorUnitSprite: ~    #recolor script call for each pixel.
       selectUnitSprite: ~     #sprite select script call for each body part.
@@ -526,6 +532,21 @@ ai:
   useDelayGrenade: 3
   useDelayMelee: 0
   useDelayPsionic: 0
+[/code]
+
+[code]
+extended:
+  tags:                     #definitions of user defined values used by script.
+    RuleItem:               #used by `items` nodes.
+      SOME_CUSTOM_TAG: int
+    RuleArmor:              #used by `armors` nodes.
+      IS_THIS_NINJA: int
+  scripts:
+    reactionUnitAction:     #name of script that have enabled global events.
+      - offset: 1.2         #order in witch each global event is run.
+        code: |             #script that will be called by event.
+          #some code
+          return 100;
 [/code]
 
 [code]
