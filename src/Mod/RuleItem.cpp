@@ -1801,7 +1801,7 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::isTwoHanded>("isTwoHanded");
 	ri.add<&RuleItem::isBlockingBothHands>("isBlockingBothHands");
 
-	ri.addScriptValue<&RuleItem::_scriptValues>();
+	ri.addScriptValue<&RuleItem::_scriptValues>(false);
 }
 
 /**

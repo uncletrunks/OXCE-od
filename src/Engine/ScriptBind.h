@@ -1137,12 +1137,15 @@ struct Bind : BindBase
 		}
 	}
 	template<ScriptValues<T> T::*X>
-	void addScriptValue()
+	void addScriptValue(bool canEdit = true)
 	{
 		using Tag = typename ScriptValues<T>::Tag;
 		parser->getGlobal()->addTagType<Tag>();
 		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getTag"));
-		addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"));
+		if (canEdit)
+		{
+			addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"));
+		}
 		if (!parser->haveType<Tag>())
 		{
 			parser->addType<Tag>(getName("Tag"));

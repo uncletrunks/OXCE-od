@@ -744,9 +744,6 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 
 	ar.add<&Armor::getDrawingRoutine>("getDrawingRoutine");
 	ar.add<&Armor::getSize>("getSize");
-	ar.add<&getArmorValueScript>("getArmorValue");
-
-	ar.addScriptValue<&Armor::_scriptValues>();
 
 	us.addField<&UnitStats::tu>("getTimeUnits");
 	us.addField<&UnitStats::stamina>("getStamina");
@@ -759,6 +756,9 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 	us.addField<&UnitStats::psiStrength>("getPsiStrength");
 	us.addField<&UnitStats::psiSkill>("getPsiSkill");
 	us.addField<&UnitStats::melee>("getMelee");
+	ar.add<&getArmorValueScript>("getArmor");
+
+	ar.addScriptValue<&Armor::_scriptValues>(false);
 }
 
 }
