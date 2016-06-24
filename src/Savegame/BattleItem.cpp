@@ -700,7 +700,7 @@ void commonImpl(BindBase& b, Mod* mod)
 /**
  * Constructor of recolor script parser.
  */
-ModScript::RecolorItemParser::RecolorItemParser(const std::string& name, Mod* mod) : ScriptParser{ name, "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
+ModScript::RecolorItemParser::RecolorItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
@@ -712,7 +712,7 @@ ModScript::RecolorItemParser::RecolorItemParser(const std::string& name, Mod* mo
 /**
  * Constructor of select sprite script parser.
  */
-ModScript::SelectItemParser::SelectItemParser(const std::string& name, Mod* mod) : ScriptParser{ name, "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
+ModScript::SelectItemParser::SelectItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 

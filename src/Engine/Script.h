@@ -33,6 +33,7 @@
 namespace OpenXcom
 {
 class Surface;
+
 class ScriptGlobal;
 class ScriptParserBase;
 class ScriptParserEventsBase;
@@ -40,7 +41,7 @@ class ScriptContainerBase;
 class ScriptContainerEventsBase;
 
 class ParserWriter;
-struct SelectedToken;
+class SelectedToken;
 class ScriptWorkerBase;
 class ScriptWorkerBlit;
 template<typename...> class ScriptWorker;
@@ -394,7 +395,6 @@ template<typename... Args>
 class ScriptWorker : public ScriptWorkerBase
 {
 public:
-
 	/// Default constructor.
 	ScriptWorker(Args... args) : ScriptWorkerBase()
 	{
@@ -439,8 +439,8 @@ class ScriptWorkerBlit : public ScriptWorkerBase
 {
 	/// Current script set in worker.
 	const Uint8* _proc;
-public:
 
+public:
 	/// Default constructor.
 	ScriptWorkerBlit() : ScriptWorkerBase(), _proc(nullptr)
 	{
@@ -559,12 +559,14 @@ public:
 	/// Return sub range of current range.
 	ScriptRef substr(size_t p, size_t s = std::string::npos) const
 	{
-		auto b = _begin + p;
-		if (b > _end)
+		const size_t totalSize = _end - _begin;
+		if (p >= totalSize)
 		{
 			return ScriptRef{ };
 		}
-		else if (s == std::string::npos || b + s > _end)
+
+		const auto b = _begin + p;
+		if (s > totalSize - p)
 		{
 			return ScriptRef{ b, _end };
 		}
@@ -578,6 +580,12 @@ public:
 	std::string toString() const
 	{
 		return *this ? std::string(_begin, _end) : std::string{ };
+	}
+
+	/// Create temporary ref based on script.
+	static ScriptRef tempFrom(const std::string& s)
+	{
+		return { s.data(), s.data() + s.size() };
 	}
 
 	/// Compare two ranges.
@@ -685,10 +693,11 @@ struct ScriptProcData
  */
 class ScriptParserBase
 {
+	ScriptGlobal* _shared;
 	Uint8 _regUsed;
 	std::string _name;
 	std::string _defaultScript;
-	std::vector<std::vector<char>> _nameList;
+	std::vector<std::vector<char>> _strings;
 	std::vector<ScriptTypeData> _typeList;
 	std::vector<ScriptProcData> _procList;
 	std::vector<ScriptRefData> _refList;
@@ -772,7 +781,7 @@ protected:
 	};
 
 	/// Default constructor.
-	ScriptParserBase(const std::string& name, const std::string& firstArg, const std::string& secondArg);
+	ScriptParserBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg);
 	/// Destructor.
 	~ScriptParserBase();
 
@@ -875,6 +884,10 @@ public:
 	ScriptRange<ScriptProcData> getProc(ScriptRef name, ScriptRef postfix = {}) const;
 	/// Get arguments data.
 	const ScriptRefData* getRef(ScriptRef name, ScriptRef postfix = {}) const;
+	/// Get script shared data.
+	ScriptGlobal* getGlobal() { return _shared; }
+	/// Get script shared data.
+	const ScriptGlobal* getGlobal() const { return _shared; }
 };
 
 template<typename T>
@@ -918,7 +931,7 @@ public:
 	friend Container;
 
 	/// Constructor.
-	ScriptParser(const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserBase(name, firstArg, secondArg)
+	ScriptParser(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserBase(shared, name, firstArg, secondArg)
 	{
 		addRegImpl(argNames...);
 	}
@@ -950,7 +963,7 @@ protected:
 
 public:
 	/// Constructor.
-	ScriptParserEventsBase(const std::string& name, const std::string& firstArg, const std::string& secondArg);
+	ScriptParserEventsBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg);
 
 	/// Load global data from YAML.
 	virtual void load(const YAML::Node& node) override;
@@ -972,38 +985,10 @@ public:
 	friend Container;
 
 	/// Constructor.
-	ScriptParserEvents(const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserEventsBase(name, firstArg, secondArg)
+	ScriptParserEvents(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserEventsBase(shared, name, firstArg, secondArg)
 	{
 		addRegImpl(argNames...);
 	}
-};
-
-/**
- * Global data shared by all scripts.
- */
-class ScriptGlobal
-{
-	std::vector<std::vector<ScriptContainerBase>> _events;
-	std::map<std::string, ScriptParserBase*> _names;
-	std::vector<ScriptParserEventsBase*> _eventsParsers;
-
-public:
-	/// Store parser.
-	void pushParser(ScriptParserBase* parser);
-	/// Store parser.
-	void pushParser(ScriptParserEventsBase* parser);
-	/// Add new const value.
-	void addConst(const std::string& name, ScriptValueData i);
-	/// Update const value.
-	void updateConst(const std::string& name, ScriptValueData i);
-
-	/// Prepare for loading data.
-	void beginLoad();
-	/// Finishing loading data.
-	void endLoad();
-
-	/// Load global data from YAML.
-	void load(const YAML::Node& node);
 };
 
 /**
@@ -1015,22 +1000,104 @@ struct ScriptTag
 	static_assert(!std::numeric_limits<I>::is_signed, "Type should be unsigned");
 	static_assert(sizeof(I) <= sizeof(size_t), "Type need be less than size_t");
 
+	using Parent = T;
+
 	/// Index that identify value in ScriptValues.
 	I index;
 
-	/// Get value or max value if invalid.
-	constexpr size_t get() const { return *this ? static_cast<size_t>(index) : std::numeric_limits<size_t>::max(); }
+	/// Get value.
+	constexpr size_t get() const { return static_cast<size_t>(index); }
 	/// Test if tag have valid value.
-	constexpr explicit operator bool() const { return this->index != invalid().index; }
+	constexpr explicit operator bool() const { return this->index; }
 
 	/// Get run time value for type.
 	static ArgEnum type() { return ScriptParserBase::getArgType<T*>(); }
 	/// Test if value can be used.
-	static constexpr bool isValid(size_t i) { return i < static_cast<size_t>(invalid().index); }
+	static constexpr bool isValid(size_t i) { return i && i <= limit(); }
 	/// Fake constructor.
 	static constexpr ScriptTag make(size_t i) { return { static_cast<I>(i) }; }
-	/// Invaild tag.
-	static constexpr ScriptTag invalid() { return { std::numeric_limits<I>::max() }; }
+	/// Max supprted value.
+	static constexpr size_t limit() { return static_cast<size_t>(std::numeric_limits<I>::max()); }
+};
+
+/**
+ * Global data shared by all scripts.
+ */
+class ScriptGlobal
+{
+	friend class ScriptValuesBase;
+
+	struct TagData
+	{
+		ScriptRef name;
+		size_t limit;
+		std::vector<ScriptRef> values;
+	};
+
+	std::vector<std::vector<char>> _strings;
+	std::vector<std::vector<ScriptContainerBase>> _events;
+	std::map<std::string, ScriptParserBase*> _parserNames;
+	std::vector<ScriptParserEventsBase*> _parserEvents;
+	std::map<ArgEnum, TagData> _tagNames;
+
+	/// Get tag value.
+	size_t getTag(ArgEnum type, ScriptRef s) const;
+	/// Get name of tag value.
+	ScriptRef getTagName(ArgEnum type, size_t i) const;
+	/// Add new tag name.
+	size_t addTag(ArgEnum type, ScriptRef s);
+	/// Add new name ref.
+	ScriptRef addNameRef(const std::string& s);
+
+public:
+	/// Store parser.
+	void pushParser(ScriptParserBase* parser);
+	/// Store parser.
+	void pushParser(ScriptParserEventsBase* parser);
+
+	/// Add new const value.
+	void addConst(const std::string& name, ScriptValueData i);
+	/// Update const value.
+	void updateConst(const std::string& name, ScriptValueData i);
+
+	/// Get tag based on it name.
+	template<typename Tag>
+	Tag getTag(ScriptRef s) const
+	{
+		return Tag::make(getTag(Tag::type(), s));
+	}
+	/// Get tag based on it name.
+	template<typename Tag>
+	Tag getTag(const std::string& s) const
+	{
+		return getTag<Tag>(ScriptRef::tempFrom(s));
+	}
+	/// Get tag name based on it value.
+	template<typename Tag>
+	ScriptRef getTagName(Tag tag)
+	{
+		return getTagName(Tag::type(), tag.get());
+	}
+	/// Add new tag name.
+	template<typename Tag>
+	Tag addTag(const std::string& s)
+	{
+		return Tag::make(addTag(Tag::type(), addNameRef(s)));
+	}
+	/// Add new type of tag.
+	template<typename Tag>
+	void addTagType()
+	{
+		_tagNames.insert(std::make_pair(Tag::type(), TagData{ ScriptRef{ Tag::Parent::ScriptName }, Tag::limit(), std::vector<ScriptRef>{} }));
+	}
+
+	/// Prepare for loading data.
+	void beginLoad();
+	/// Finishing loading data.
+	void endLoad();
+
+	/// Load global data from YAML.
+	void load(const YAML::Node& node);
 };
 
 /**
@@ -1038,26 +1105,18 @@ struct ScriptTag
  */
 class ScriptValuesBase
 {
-protected:
 	/// Vector with all avaiable values for script.
 	std::vector<int> values;
 
-	/// Get map that store all tag names for all types.
-	static std::map<ArgEnum, std::vector<std::string>> &getAll()
-	{
-		static std::map<ArgEnum, std::vector<std::string>> all;
-		return all;
-	}
-
-public:
-	/// Clean all tag names.
-	static void unregisteAll()
-	{
-		for (auto& n : getAll())
-		{
-			n.second.clear();
-		}
-	}
+protected:
+	/// Set value.
+	void setBase(size_t t, int i);
+	/// Get value.
+	int getBase(size_t t) const;
+	/// Load values from yaml file.
+	void loadBase(const YAML::Node &node, const ScriptGlobal* shared, ArgEnum type);
+	/// Save values to yaml file.
+	void saveBase(YAML::Node &node, const ScriptGlobal* shared, ArgEnum type) const;
 };
 
 /**
@@ -1066,126 +1125,29 @@ public:
 template<typename T, typename I = Uint8>
 class ScriptValues : ScriptValuesBase
 {
-	static std::vector<std::string> &nameVector()
-	{
-		static std::vector<std::string> &name = getAll()[Tag::type()];
-		return name;
-	}
-
 public:
 	using Tag = ScriptTag<T, I>;
 
-	/// Get tag based on name for that type.
-	static Tag getTag(const std::string& s)
-	{
-		for (size_t i = 0; i < nameVector().size(); ++i)
-		{
-			auto &name = nameVector()[i];
-			if (name == s)
-			{
-				return Tag::make(i);
-			}
-		}
-		return Tag::invalid();
-	}
-	/// Add new tag name for that type.
-	static Tag addTag(const std::string& s)
-	{
-		auto tag = getTag(s);
-
-		if (!tag)
-		{
-			// test to prevent warp of index value
-			if (Tag::isValid(nameVector().size()))
-			{
-				nameVector().push_back(s);
-				return Tag::make(nameVector().size() - 1u);
-			}
-			return Tag::invalid();
-		}
-		else
-		{
-			return tag;
-		}
-	}
-	/// Regist avaiable tag names for that type.
-	static void registerNames(const YAML::Node &parent, const std::string &reference)
-	{
-		const YAML::Node &node = parent[reference];
-		if (node && node.IsMap())
-		{
-			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
-			{
-				auto type = i->second.as<std::string>();
-				auto name = i->first.as<std::string>();
-				if (type == "int")
-				{
-					auto tag = addTag(name);
-					if (!tag)
-					{
-						Log(LOG_ERROR) << "Script variable '" + name + "' exceeds limit of " << (int)tag.index << " avaiable variables in '" + reference + "'.";
-						return;
-					}
-				}
-				else
-				{
-					Log(LOG_ERROR) << "Invaild type def '" + type + "' for script variable '" + name + "' in '" + reference +"'.";
-				}
-			}
-		}
-	}
-
 	/// Load values from yaml file.
-	void load(const YAML::Node &node)
+	void load(const YAML::Node &node, const ScriptGlobal* shared)
 	{
-		if (node && node.IsMap())
-		{
-			for (size_t i = 0; i < nameVector().size(); ++i)
-			{
-				if (const YAML::Node &n = node[nameVector()[i]])
-				{
-					set(Tag::make(i), n.as<int>());
-				}
-			}
-		}
+		loadBase(node, shared, Tag::type());
 	}
 	/// Save values to yaml file.
-	YAML::Node save() const
+	void save(YAML::Node &node, const ScriptGlobal* shared) const
 	{
-		YAML::Node node;
-		for (size_t i = 0; i < nameVector().size(); ++i)
-		{
-			if (int v = get(Tag::make(i)))
-			{
-				node[nameVector()[i]] = v;
-			}
-		}
-		return node;
+		saveBase(node, shared, Tag::type());;
 	}
 
 	/// Get value.
 	int get(Tag t) const
 	{
-		if (t)
-		{
-			if (t.index < values.size())
-			{
-				return values[t.get()];
-			}
-		}
-		return 0;
+		return getBase(t.get());
 	}
 	/// Set value.
 	void set(Tag t, int i)
 	{
-		if (t)
-		{
-			if (t.get() >= values.size())
-			{
-				values.resize(t.get() + 1u);
-			}
-			values[t.get()] = i;
-		}
+		return setBase(t.get(), i);
 	}
 };
 

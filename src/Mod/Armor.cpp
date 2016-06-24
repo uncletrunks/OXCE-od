@@ -181,7 +181,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_reacReactionScript.load(_type, node, parsers.reactionUnitReaction);
 
 	_units = node["units"].as< std::vector<std::string> >(_units);
-	_scriptValues.load(node["custom"]);
+	_scriptValues.load(node, parsers.getShared());
 }
 
 /**

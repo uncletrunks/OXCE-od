@@ -732,7 +732,7 @@ struct ArgTagDef
 	{
 		if (t.getType() == TokenSymbol)
 		{
-			auto tag = ScriptValues<T, I>::getTag(t.toString());
+			auto tag = ph.parser.getGlobal()->getTag<ScriptTag<T, I>>(t);
 			if (tag)
 			{
 				ph.pushValue(tag);
@@ -1139,11 +1139,13 @@ struct Bind : BindBase
 	template<ScriptValues<T> T::*X>
 	void addScriptValue()
 	{
-		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getCustom"));
-		addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setCustom"));
-		if (!parser->haveType<typename ScriptValues<T>::Tag>())
+		using Tag = typename ScriptValues<T>::Tag;
+		parser->getGlobal()->addTagType<Tag>();
+		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getTag"));
+		addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"));
+		if (!parser->haveType<Tag>())
 		{
-			parser->addType<typename ScriptValues<T>::Tag>(getName("Tag"));
+			parser->addType<Tag>(getName("Tag"));
 		}
 	}
 	template<int X>

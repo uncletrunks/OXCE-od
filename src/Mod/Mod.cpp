@@ -797,7 +797,6 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
  */
 void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods)
 {
-	ScriptValuesBase::unregisteAll();
 	ModScript parser{ _scriptGlobal, this };
 
 	_scriptGlobal->beginLoad();
@@ -959,11 +958,6 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 
 	if (const YAML::Node &extended = doc["extended"])
 	{
-		if (const YAML::Node &t = extended["tags"])
-		{
-			ScriptValues<Armor>::registerNames(t, Armor::ScriptName);
-			ScriptValues<RuleItem>::registerNames(t, RuleItem::ScriptName);
-		}
 		_scriptGlobal->load(extended);
 	}
 	for (YAML::const_iterator i = doc["countries"].begin(); i != doc["countries"].end(); ++i)

@@ -63,7 +63,7 @@ class ModScript
 	template<typename T>
 	struct Warper : T
 	{
-		Warper(const std::string& name, Mod* mod, ScriptGlobal* shared) : T{ name, mod }
+		Warper(const std::string& name, Mod* mod, ScriptGlobal* shared) : T{ shared, name, mod }
 		{
 			shared->pushParser(this);
 		}
@@ -75,28 +75,32 @@ class ModScript
 	}
 public:
 
+	const ScriptGlobal* getShared() const
+	{
+		return _shared;
+	}
 
 	struct RecolorUnitParser : ScriptParser<const BattleUnit*, int, int, int, int>
 	{
-		RecolorUnitParser(const std::string& name, Mod* mod);
+		RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 	struct SelectUnitParser : ScriptParser<const BattleUnit*, int, int, int>
 	{
-		SelectUnitParser(const std::string& name, Mod* mod);
+		SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
 	struct ReactionUnitParser : ScriptParserEvents<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*>
 	{
-		ReactionUnitParser(const std::string& name, Mod* mod);
+		ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
 	struct RecolorItemParser : ScriptParser<const BattleItem*, int, int, int>
 	{
-		RecolorItemParser(const std::string& name, Mod* mod);
+		RecolorItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 	struct SelectItemParser : ScriptParser<const BattleItem*, int, int, int>
 	{
-		SelectItemParser(const std::string& name, Mod* mod);
+		SelectItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
 	Warper<RecolorUnitParser> recolorUnitSprite = { "recolorUnitSprite", _mod, _shared };

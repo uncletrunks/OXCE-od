@@ -973,6 +973,23 @@ size_t getRegSize(const ScriptParserBase& parser, ArgEnum type)
 	}
 }
 
+/**
+ * Add new string to colection and return reference to it.
+ * @param list List where strings are stored.
+ * @param s New string to add.
+ * @return Reference to strored string.
+ */
+ScriptRef addString(std::vector<std::vector<char>>& list, const std::string& s)
+{
+	std::vector<char> refData;
+	refData.assign(s.begin(), s.end());
+	ScriptRef ref{ refData.data(), refData.data() + refData.size() };
+
+	//we need use char vector becasue its guarante that pointer in ref will not get invalidated when names list grown.
+	list.push_back(std::move(refData));
+	return ref;
+}
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -1455,7 +1472,7 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 /**
  * Constructor
  */
-ScriptParserBase::ScriptParserBase(const std::string& name, const std::string& firstArg, const std::string& secondArg) : _regUsed{ RegMax }, _name{ name }
+ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg) : _shared{ shared }, _regUsed{ RegMax }, _name{ name }
 {
 	//--------------------------------------------------
 	//					op_data init
@@ -1527,13 +1544,7 @@ bool ScriptParserBase::haveNameRef(const std::string& s) const
  */
 ScriptRef ScriptParserBase::addNameRef(const std::string& s)
 {
-	std::vector<char> refData;
-	refData.assign(s.begin(), s.end());
-	ScriptRef ref{ refData.data(), refData.data() + refData.size() };
-
-	//we need use char vector becasue its guarante that pointer in ref will not get invalidated when names list grown.
-	_nameList.push_back(std::move(refData));
-	return ref;
+	return addString(_strings, s);
 }
 
 /**
@@ -2036,7 +2047,7 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 /**
  * Constructor.
  */
-ScriptParserEventsBase::ScriptParserEventsBase(const std::string& name, const std::string& firstArg, const std::string& secondArg) : ScriptParserBase(name, firstArg, secondArg)
+ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg) : ScriptParserBase(shared, name, firstArg, secondArg)
 {
 	_events.reserve(EventsMax);
 	_eventsData.push_back({ 0, {} });
@@ -2102,8 +2113,145 @@ std::vector<ScriptContainerBase> ScriptParserEventsBase::releseEvents()
 }
 
 ////////////////////////////////////////////////////////////
+//					ScriptValuesBase class
+////////////////////////////////////////////////////////////
+
+/**
+ * Set value.
+ */
+void ScriptValuesBase::setBase(size_t t, int i)
+{
+	if (t)
+	{
+		if (t > values.size())
+		{
+			values.resize(t);
+		}
+		values[t - 1u] = i;
+	}
+}
+
+/**
+ * Get value.
+ */
+int ScriptValuesBase::getBase(size_t t) const
+{
+	if (t && t <= values.size())
+	{
+		return values[t - 1u];
+	}
+	return 0;
+}
+
+/**
+ * Load values from yaml file.
+ */
+void ScriptValuesBase::loadBase(const YAML::Node &node, const ScriptGlobal* shared, ArgEnum type)
+{
+	if (const YAML::Node& tags = node["tags"])
+	{
+		if (tags.IsMap())
+		{
+			for (const std::pair<YAML::Node, YAML::Node>& pair : tags)
+			{
+				size_t i = shared->getTag(type, ScriptRef::tempFrom("Tag." + pair.first.as<std::string>()));
+				if (i)
+				{
+					setBase(i, pair.second.as<int>());
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Save values to yaml file.
+ */
+void ScriptValuesBase::saveBase(YAML::Node &node, const ScriptGlobal* shared, ArgEnum type) const
+{
+	YAML::Node tags;
+	for (size_t i = 1; i <= values.size(); ++i)
+	{
+		if (int v = getBase(i))
+		{
+			auto name = shared->getTagName(type, i);
+			tags[name.substr(name.find('.') + 1u).toString()] = v;
+		}
+	}
+	node["tags"] = tags;
+}
+
+////////////////////////////////////////////////////////////
 //					ScriptGlobal class
 ////////////////////////////////////////////////////////////
+
+/**
+ * Get tag value.
+ */
+size_t ScriptGlobal::getTag(ArgEnum type, ScriptRef s) const
+{
+	auto data = _tagNames.find(type);
+	if (data != _tagNames.end())
+	{
+		for (size_t i = 0; i < data->second.values.size(); ++i)
+		{
+			auto &name = data->second.values[i];
+			if (name == s)
+			{
+				return i + 1;
+			}
+		}
+	}
+	return 0;
+}
+
+/**
+ * Get name of tag value.
+ */
+ScriptRef ScriptGlobal::getTagName(ArgEnum type, size_t i) const
+{
+	auto data = _tagNames.find(type);
+	if (data != _tagNames.end())
+	{
+		if (i && i <= data->second.values.size())
+		{
+			return data->second.values[i - 1];
+		}
+	}
+	return {};
+}
+
+/**
+ * Add new tag name.
+ */
+size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s)
+{
+	auto& data = _tagNames[type];
+	auto tag = getTag(type, s);
+
+	if (tag == 0)
+	{
+		// test to prevent warp of index value
+		if (data.values.size() < data.limit)
+		{
+			data.values.push_back(s);
+			return data.values.size();
+		}
+		return 0;
+	}
+	else
+	{
+		return tag;
+	}
+}
+
+/**
+ * Strore new name reference for future use.
+ */
+ScriptRef ScriptGlobal::addNameRef(const std::string& s)
+{
+	return addString(_strings, s);
+}
 
 /**
  * Store parser.
@@ -2111,7 +2259,7 @@ std::vector<ScriptContainerBase> ScriptParserEventsBase::releseEvents()
 void ScriptGlobal::pushParser(ScriptParserBase* parser)
 {
 	parser->logScriptMetadata(false);
-	_names.insert(std::make_pair(parser->getName(), parser));
+	_parserNames.insert(std::make_pair(parser->getName(), parser));
 }
 
 /**
@@ -2120,8 +2268,8 @@ void ScriptGlobal::pushParser(ScriptParserBase* parser)
 void ScriptGlobal::pushParser(ScriptParserEventsBase* parser)
 {
 	parser->logScriptMetadata(true);
-	_names.insert(std::make_pair(parser->getName(), parser));
-	_eventsParsers.push_back(parser);
+	_parserNames.insert(std::make_pair(parser->getName(), parser));
+	_parserEvents.push_back(parser);
 }
 
 /**
@@ -2129,7 +2277,7 @@ void ScriptGlobal::pushParser(ScriptParserEventsBase* parser)
  */
 void ScriptGlobal::addConst(const std::string& name, ScriptValueData i)
 {
-	for (auto p : _names)
+	for (auto p : _parserNames)
 	{
 		p.second->addConst(name, i);
 	}
@@ -2140,7 +2288,7 @@ void ScriptGlobal::addConst(const std::string& name, ScriptValueData i)
  */
 void ScriptGlobal::updateConst(const std::string& name, ScriptValueData i)
 {
-	for (auto p : _names)
+	for (auto p : _parserNames)
 	{
 		p.second->updateConst(name, i);
 	}
@@ -2159,12 +2307,12 @@ void ScriptGlobal::beginLoad()
  */
 void ScriptGlobal::endLoad()
 {
-	for (auto& p : _eventsParsers)
+	for (auto& p : _parserEvents)
 	{
 		_events.push_back(p->releseEvents());
 	}
-	_names.clear();
-	_eventsParsers.clear();
+	_parserNames.clear();
+	_parserEvents.clear();
 }
 
 /**
@@ -2172,7 +2320,42 @@ void ScriptGlobal::endLoad()
  */
 void ScriptGlobal::load(const YAML::Node& node)
 {
-	for (auto p : _names)
+	if (const YAML::Node& t = node["tags"])
+	{
+		for (auto& p : _tagNames)
+		{
+			const auto nodeName = p.second.name.toString();
+			const YAML::Node &tags = t[nodeName];
+			if (tags && tags.IsMap())
+			{
+				for (const std::pair<YAML::Node, YAML::Node>& i : tags)
+				{
+					auto type = i.second.as<std::string>();
+					auto name = i.first.as<std::string>();
+					if (type == "int")
+					{
+						auto namePrefix = "Tag." + name;
+						auto tag = getTag(p.first, ScriptRef::tempFrom(namePrefix));
+						if (tag)
+						{
+							continue;
+						}
+						tag = addTag(p.first, addNameRef(namePrefix));
+						if (!tag)
+						{
+							Log(LOG_ERROR) << "Script variable '" + name + "' exceeds limit of " << (int)p.second.limit << " avaiable variables in '" + nodeName + "'.";
+							continue;
+						}
+					}
+					else
+					{
+						Log(LOG_ERROR) << "Invaild type def '" + type + "' for script variable '" + name + "' in '" + nodeName +"'.";
+					}
+				}
+			}
+		}
+	}
+	for (auto& p : _parserNames)
 	{
 		p.second->load(node);
 	}

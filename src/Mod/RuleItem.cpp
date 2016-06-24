@@ -458,7 +458,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_powerRangeThreshold = node["powerRangeThreshold"].as<float>(_powerRangeThreshold);
 
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
-	_scriptValues.load(node["custom"]);
+	_scriptValues.load(node, parsers.getShared());
 
 	_recolorScript.load(_type, node, parsers.recolorItemSprite);
 	_spriteScript.load(_type, node, parsers.selectItemSprite);
