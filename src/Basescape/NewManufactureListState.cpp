@@ -34,6 +34,7 @@
 #include "../Savegame/ItemContainer.h"
 #include "ManufactureStartState.h"
 #include "../Mod/Mod.h"
+#include "TechTreeViewerState.h"
 
 namespace OpenXcom
 {
@@ -90,6 +91,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	_lstManufacture->setMargin(2);
 	_lstManufacture->onMouseClick((ActionHandler)&NewManufactureListState::lstProdClickLeft, SDL_BUTTON_LEFT);
 	_lstManufacture->onMouseClick((ActionHandler)&NewManufactureListState::lstProdClickRight, SDL_BUTTON_RIGHT);
+	_lstManufacture->onMouseClick((ActionHandler)&NewManufactureListState::lstProdClickMiddle, SDL_BUTTON_MIDDLE);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewManufactureListState::btnOkClick);
@@ -257,6 +259,16 @@ void NewManufactureListState::lstProdClickRight(Action *)
 			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 208); // white
 		}
 	}
+}
+
+/**
+* Opens the TechTreeViewer for the corresponding topic.
+* @param action Pointer to an action.
+*/
+void NewManufactureListState::lstProdClickMiddle(Action *)
+{
+	const RuleManufacture *selectedTopic = _game->getMod()->getManufacture(_displayedStrings[_lstManufacture->getSelectedRow()]);
+	_game->pushState(new TechTreeViewerState(0, selectedTopic));
 }
 
 /**

@@ -49,6 +49,7 @@ private:
 	TextList *_lstResearch;
 	void onSelectProject(Action *action);
 	void onToggleProjectStatus(Action *action);
+	void onOpenTechTreeViewer(Action *action);
 	std::vector<RuleResearch *> _projects;
 public:
 	/// Creates the New research list state.

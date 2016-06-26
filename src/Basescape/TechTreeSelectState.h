@@ -16,49 +16,50 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_MANUFACTURESTATE_H
-#define OPENXCOM_MANUFACTURESTATE_H
+#ifndef OPENXCOM_TECHTREESELECTSTATE
+#define OPENXCOM_TECHTREESELECTSTATE
 
 #include "../Engine/State.h"
 
 namespace OpenXcom
 {
 
-class TextButton;
+class TechTreeViewerState;
 class Window;
 class Text;
+class TextButton;
+class TextEdit;
 class TextList;
-class Base;
 
 /**
- * Manufacture screen that lets the player manage
- * all the manufacturing operations of a base.
+ * Window which allows selecting a topic for the Tech Tree Viewer.
  */
-class ManufactureState : public State
+class TechTreeSelectState : public State
 {
 private:
-	Base *_base;
-	TextButton *_btnNew, *_btnOk;
+	TechTreeViewerState *_parent;
+	TextButton *_btnOk;
+	TextEdit *_btnQuickSearch;
 	Window *_window;
-	Text *_txtTitle, *_txtAvailable, *_txtAllocated, *_txtSpace, *_txtFunds, *_txtItem, *_txtEngineers, *_txtProduced, *_txtCost, *_txtTimeLeft;
-	TextList *_lstManufacture;	
-	void lstManufactureClickLeft(Action * action);
-	void lstManufactureClickMiddle(Action * action);
+	Text *_txtTitle;
+	TextList *_lstTopics;
+	std::vector<std::string> _availableTopics;
+	int _firstManufacturingTopicIndex;
+	void initLists();
+	void onSelectTopic(Action *action);
 public:
-	/// Creates the Manufacture state.
-	ManufactureState(Base *base);
-	/// Cleans up the Manufacture state.
-	~ManufactureState();
+	/// Creates the TechTreeSelect state.
+	TechTreeSelectState(TechTreeViewerState *parent);
+	/// Cleans up the TechTreeSelect state
+	~TechTreeSelectState();
+	/// Initializes the state.
+	void init();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
-	/// Updates the production list.
-	void init();
-	/// Handler for the New Production button.
-	void btnNewProductionClick(Action * action);
-	/// Fills the list of base productions.
-	void fillProductionList();
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 };
-
 }
 
 #endif

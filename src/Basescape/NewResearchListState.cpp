@@ -31,6 +31,7 @@
 #include "../Savegame/Base.h"
 #include "../Mod/RuleResearch.h"
 #include "ResearchInfoState.h"
+#include "TechTreeViewerState.h"
 
 namespace OpenXcom
 {
@@ -83,6 +84,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 	_lstResearch->setAlign(ALIGN_CENTER);
 	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onSelectProject, SDL_BUTTON_LEFT);
 	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onToggleProjectStatus, SDL_BUTTON_RIGHT);
+	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onOpenTechTreeViewer, SDL_BUTTON_MIDDLE);
 
 	_btnQuickSearch->setText(L""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&NewResearchListState::btnQuickSearchApply);
@@ -129,6 +131,16 @@ void NewResearchListState::onToggleProjectStatus(Action *)
 	{
 		_lstResearch->setRowColor(_lstResearch->getSelectedRow(), 208); // white
 	}
+}
+
+/**
+* Opens the TechTreeViewer for the corresponding topic.
+* @param action Pointer to an action.
+*/
+void NewResearchListState::onOpenTechTreeViewer(Action *)
+{
+	const RuleResearch *selectedTopic = _projects[_lstResearch->getSelectedRow()];
+	_game->pushState(new TechTreeViewerState(selectedTopic, 0));
 }
 
 /**

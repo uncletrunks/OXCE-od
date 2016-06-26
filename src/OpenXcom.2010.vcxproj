@@ -250,6 +250,8 @@
     <ClCompile Include="Basescape\SoldierSortUtil.cpp" />
     <ClCompile Include="Basescape\SoldiersState.cpp" />
     <ClCompile Include="Basescape\StoresState.cpp" />
+    <ClCompile Include="Basescape\TechTreeSelectState.cpp" />
+    <ClCompile Include="Basescape\TechTreeViewerState.cpp" />
     <ClCompile Include="Basescape\TransferBaseState.cpp" />
     <ClCompile Include="Basescape\TransferConfirmState.cpp" />
     <ClCompile Include="Basescape\TransferItemsState.cpp" />
@@ -579,6 +581,8 @@
     <ClInclude Include="Basescape\SoldierSortUtil.h" />
     <ClInclude Include="Basescape\SoldiersState.h" />
     <ClInclude Include="Basescape\StoresState.h" />
+    <ClInclude Include="Basescape\TechTreeSelectState.h" />
+    <ClInclude Include="Basescape\TechTreeViewerState.h" />
     <ClInclude Include="Basescape\TransferBaseState.h" />
     <ClInclude Include="Basescape\TransferConfirmState.h" />
     <ClInclude Include="Basescape\TransferItemsState.h" />

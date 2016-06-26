@@ -88,6 +88,10 @@ set ( basescape_src
   Basescape/SoldierAvatarState.cpp
   Basescape/SoldierSortUtil.h
   Basescape/SoldierSortUtil.cpp
+  Basescape/TechTreeViewerState.h
+  Basescape/TechTreeViewerState.cpp
+  Basescape/TechTreeSelectState.h
+  Basescape/TechTreeSelectState.cpp
 )
 
 set ( battlescape_src

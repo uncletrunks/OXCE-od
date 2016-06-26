@@ -65,10 +65,10 @@ public:
 	void btnQuickSearchApply(Action *action);
 	/// Handler for clicking the [Mark All As ...] button.
 	void cbxActionsChange(Action * action);
-	/// Handler for clicking on the list.
+	/// Handlers for clicking on the list.
 	void lstProdClickLeft (Action * action);
-	/// Handler for clicking on the list.
 	void lstProdClickRight(Action * action);
+	void lstProdClickMiddle(Action * action);
 	/// Handler for changing the category filter
 	void cbxCategoryChange (Action * action);
 	/// Handler for changing the basic filter

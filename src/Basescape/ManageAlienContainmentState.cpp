@@ -40,6 +40,7 @@
 #include "../Menu/ErrorMessageState.h"
 #include "SellState.h"
 #include "../Mod/RuleInterface.h"
+#include "TechTreeViewerState.h"
 
 namespace OpenXcom
 {
@@ -375,6 +376,14 @@ void ManageAlienContainmentState::lstItemsMousePress(Action *action)
 			action->getAbsoluteXMouse() <= _lstAliens->getArrowsRightEdge())
 		{
 			decreaseByValue(Options::changeValueByMouseWheel);
+		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+	{
+		RuleResearch *selectedTopic = _game->getMod()->getResearch(_aliens[_sel]);
+		if (selectedTopic != 0)
+		{
+			_game->pushState(new TechTreeViewerState(selectedTopic, 0));
 		}
 	}
 }
