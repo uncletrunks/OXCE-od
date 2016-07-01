@@ -2077,6 +2077,11 @@ void ScriptParserEventsBase::load(const YAML::Node& node)
 			{
 				EventData data = EventData{};
 				data.offset = i["offset"].as<double>(0) * OffsetScale;
+				if (data.offset == 0 || data.offset >= (int)OffsetMax || data.offset <= -(int)OffsetMax)
+				{
+					Log(LOG_ERROR) << "Invalid offset for '" << getName() << "' equal: '" << i["offset"].as<std::string>() << "'";
+					continue;
+				}
 				ScriptContainerBase scp;
 				if (parseBase(scp, "Global Event Script", i["code"].as<std::string>("")))
 				{
