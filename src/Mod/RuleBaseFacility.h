@@ -39,7 +39,7 @@ class RuleBaseFacility
 {
 private:
 	std::string _type;
-	std::vector<std::string> _requires, _requiresBaseFunc, _provideBaseFunc;
+	std::vector<std::string> _requires, _requiresBaseFunc, _provideBaseFunc, _forbiddenBaseFunc;
 	int _spriteShape, _spriteFacility;
 	bool _lift, _hyper, _mind, _grav;
 	int _size, _buildCost, _refundValue, _buildTime, _monthlyCost;
@@ -63,6 +63,8 @@ public:
 	const std::vector<std::string> &getRequireBaseFunc() const;
 	/// Gets the functions that facility provide in base.
 	const std::vector<std::string> &getProvidedBaseFunc() const;
+	/// Gets the functions that facility prevent in base.
+	const std::vector<std::string> &getForbiddenBaseFunc() const;
 	/// Gets the facility's shape sprite.
 	int getSpriteShape() const;
 	/// Gets the facility's content sprite.

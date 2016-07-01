@@ -19,6 +19,7 @@
 #include "BaseFacility.h"
 #include "../Mod/RuleBaseFacility.h"
 #include "Base.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -154,13 +155,13 @@ bool BaseFacility::inUse() const
 		return false;
 	}
 
-	const std::set<std::string> &otherBaseFunc = _base->getProvidedBaseFunc(this);
-	const std::set<std::string> &usedBaseFunc = _base->getRequireBaseFunc(this);
+	const std::vector<std::string> &otherBaseFunc = _base->getProvidedBaseFunc(this);
+	const std::vector<std::string> &usedBaseFunc = _base->getRequireBaseFunc(this);
 
 	const std::vector<std::string> &thisProve = getRules()->getProvidedBaseFunc();
 	for (std::vector<std::string>::const_iterator i = thisProve.begin(); i != thisProve.end(); ++i)
 	{
-		if (!otherBaseFunc.count(*i) && usedBaseFunc.count(*i)) //we provide something unique and someone else using it.
+		if (!std::binary_search(std::begin(otherBaseFunc),std::end(otherBaseFunc), *i) && std::binary_search(std::begin(usedBaseFunc),std::end(usedBaseFunc), *i)) //we provide something unique and someone else using it.
 			return true;
 	}
 

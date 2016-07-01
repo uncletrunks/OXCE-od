@@ -107,6 +107,9 @@ New recolr and replace script graphic option for items.[br/]
 Option for global events shared by scripts.[br/]
 Custom tags that have user defined values.[br/]
 [br/]
+3.1:[br/]
+Base building can now prevent building other buildings.[br/]
+[br/]
 
 [examples]
 [br/][br/]
@@ -500,6 +503,7 @@ facilities:
         refund: 6           #how many items are returned when facility is dismantled.
     provideBaseFunc: [ A ]  #List of custom IDs that this bulding provide for base.
     requiresBaseFunc: [ ]   #List of custom IDs that are require to build this building in base.
+    forbidenBaseFunc: [ B ] #List of custom IDs that are forbiden by this building.
     trainingRooms: 0        #Number of solder that can be train in that building, require langue strings.
     refundValue: 0          #how much mony is returned when facility is dismantled.
 [/code]
