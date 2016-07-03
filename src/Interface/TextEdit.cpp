@@ -33,7 +33,7 @@ namespace OpenXcom
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-TextEdit::TextEdit(State *state, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _blink(true), _modal(true), _ascii(L'A'), _caretPos(0), _numerical(false), _change(0), _state(state)
+TextEdit::TextEdit(State *state, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _blink(true), _modal(true), _ascii(L'A'), _caretPos(0), _numerical(false), _change(0), _enter(0), _state(state)
 {
 	_isFocused = false;
 	_text = new Text(width, height, 0, 0);
@@ -309,6 +309,17 @@ void TextEdit::draw()
 		}
 	}
 	clear();
+
+	if (_enter)
+	{
+		SDL_Rect square;
+		square.x = 0;
+		square.y = 0;
+		square.w = getWidth();
+		square.h = getHeight();
+		drawRect(&square, getColor());
+	}
+
 	_text->blit(this);
 	if (Options::keyboardMode == KEYBOARD_ON)
 	{
@@ -405,6 +416,7 @@ void TextEdit::mousePress(Action *action, State *state)
  */
 void TextEdit::keyboardPress(Action *action, State *state)
 {
+	bool enterPressed = false;
 	if (Options::keyboardMode == KEYBOARD_OFF)
 	{
 		switch (action->getDetails()->key.keysym.sym)
@@ -475,8 +487,9 @@ void TextEdit::keyboardPress(Action *action, State *state)
 			break;
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER:
-			if (!_value.empty())
+			if (!_value.empty() || _enter != 0)
 			{
+				enterPressed = true;
 				setFocus(false);
 			}
 			break;
@@ -496,6 +509,10 @@ void TextEdit::keyboardPress(Action *action, State *state)
 	{
 		(state->*_change)(action);
 	}
+	if (_enter && enterPressed)
+	{
+		(state->*_enter)(action);
+	}
 
 	InteractiveSurface::keyboardPress(action, state);
 }
@@ -507,6 +524,15 @@ void TextEdit::keyboardPress(Action *action, State *state)
 void TextEdit::onChange(ActionHandler handler)
 {
 	_change = handler;
+}
+
+/**
+* Sets a function to be called every time ENTER is pressed.
+* @param handler Action handler.
+*/
+void TextEdit::onEnter(ActionHandler handler)
+{
+	_enter = handler;
 }
 
 }

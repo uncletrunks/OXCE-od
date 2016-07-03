@@ -31,6 +31,7 @@
 #include "../Mod/Armor.h"
 #include "../Engine/Options.h"
 #include "../Engine/Screen.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -68,6 +69,7 @@ void MiniMapView::draw()
 	}
 	drawRect(0, 0, getWidth(), getHeight(), 0);
 	this->lock();
+	Surface * emptySpace = _set->getFrame(43); //http://www.ufopaedia.org/index.php?title=SCANG.DAT
 	for (int lvl = 0; lvl <= _camera->getCenterPosition().z; lvl++)
 	{
 		int py = _startY;
@@ -82,6 +84,10 @@ void MiniMapView::draw()
 				t = _battleGame->getTile(p);
 				if (!t)
 				{
+					if (Options::minimapBorderIndicator)
+					{
+						emptySpace->blitNShade(this, x, y, 0);
+					}
 					px++;
 					continue;
 				}

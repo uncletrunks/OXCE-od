@@ -28,6 +28,7 @@ namespace OpenXcom
 class SavedBattleGame;
 class Mod;
 class Craft;
+class RuleCraft;
 class Ufo;
 class RuleTerrain;
 class BattleItem;
@@ -57,6 +58,7 @@ private:
 	SavedBattleGame *_save;
 	Mod *_mod;
 	Craft *_craft;
+	RuleCraft *_craftRules;
 	Ufo *_ufo;
 	Base *_base;
 	MissionSite *_mission;

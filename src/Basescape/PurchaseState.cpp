@@ -32,6 +32,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/ComboBox.h"
 #include "../Interface/TextList.h"
 #include "../Savegame/SavedGame.h"
@@ -60,6 +61,7 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 13);
 	_btnOk = new TextButton(148, 16, 8, 176);
 	_btnCancel = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
@@ -77,6 +79,7 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 	_ammoColor = _game->getMod()->getInterface("buyMenu")->getElement("ammoColor")->color;
 
 	add(_window, "window", "buyMenu");
+	add(_btnQuickSearch, "button", "buyMenu");
 	add(_btnOk, "button", "buyMenu");
 	add(_btnCancel, "button", "buyMenu");
 	add(_txtTitle, "text", "buyMenu");
@@ -214,6 +217,12 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 	_cbxCategory->setOptions(_cats);
 	_cbxCategory->onChange((ActionHandler)&PurchaseState::cbxCategoryChange);
 
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&PurchaseState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&PurchaseState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
+
 	updateList();
 
 	_timerInc = new Timer(250);
@@ -282,19 +291,63 @@ std::string PurchaseState::getCategory(int sel) const
 }
 
 /**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void PurchaseState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void PurchaseState::btnQuickSearchApply(Action *)
+{
+	updateList();
+}
+
+/**
  * Filters the current list of items.
  */
 void PurchaseState::updateList()
 {
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
 	_lstItems->clearList();
 	_rows.clear();
 	for (size_t i = 0; i < _items.size(); ++i)
 	{
+		// filter
 		std::string cat = _cats[_cbxCategory->getSelected()];
 		if (cat != "STR_ALL_ITEMS" && cat != getCategory(i))
 		{
 			continue;
 		}
+
+		// quick search
+		if (searchString != L"")
+		{
+			std::wstring projectName = _items[i].name;
+			for (auto & c : projectName) c = towupper(c);
+			if (projectName.find(searchString) == std::string::npos)
+			{
+				continue;
+			}
+		}
+
 		std::wstring name = _items[i].name;
 		bool ammo = false;
 		if (_items[i].type == TRANSFER_ITEM)

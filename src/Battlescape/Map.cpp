@@ -253,6 +253,7 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
  */
 void Map::drawTerrain(Surface *surface)
 {
+	bool isAltPressed = (SDL_GetModState() & KMOD_ALT) != 0;
 	int frameNumber = 0;
 	Surface *tmpSurface;
 	Tile *tile;
@@ -868,6 +869,12 @@ void Map::drawTerrain(Surface *surface)
 								tmpSurface->blitNShade(surface, offset.x, offset.y - 30, tileShade);
 							}
 						}
+						if (isAltPressed)
+						{
+							// draw unit facing indicator
+							tmpSurface = _game->getMod()->getSurfaceSet("DETBLOB.DAT")->getFrame(7 + ((unit->getDirection() + 1) % 8));
+							tmpSurface->blitNShade(surface, offset.x, offset.y, 0);
+						}
 					}
 					// if we can see through the floor, draw the soldier below it if it is on stairs
 					Tile *tileBelow = _save->getTile(mapPosition + Position(0, 0, -1));
@@ -1219,6 +1226,8 @@ void Map::drawTerrain(Surface *surface)
 	{
 		// big explosions cause the screen to flash as bright as possible before any explosions are actually drawn.
 		// this causes everything to look like EGA for a single frame.
+		// Meridian: no frikin flashing!!
+		_flashScreen = false;
 		if (_flashScreen)
 		{
 			for (int x = 0, y = 0; x < surface->getWidth() && y < surface->getHeight();)
@@ -1258,6 +1267,27 @@ void Map::drawTerrain(Surface *surface)
 			}
 		}
 	}
+
+	// draw map borders
+	if (_camera->getShowAllLayers())
+	{
+		Position a, b, c, d;
+		_camera->convertMapToScreen(Position(1,0,0), &a); // top left
+		_camera->convertMapToScreen(Position(_camera->getMapSizeX()+1,0,0), &b); // top right
+		_camera->convertMapToScreen(Position(_camera->getMapSizeX()+1,_camera->getMapSizeY(),0), &c); // bottom right
+		_camera->convertMapToScreen(Position(1,_camera->getMapSizeY(),0), &d); // bottom left
+
+		a += _camera->getMapOffset() + Position(0, 16, 0); // magicNumber = 16 (additional y offset)
+		b += _camera->getMapOffset() + Position(0, 16, 0);
+		c += _camera->getMapOffset() + Position(0, 16, 0);
+		d += _camera->getMapOffset() + Position(0, 16, 0);
+
+		surface->drawLine(a.x, a.y, b.x, b.y, 56); // magicNumber = 56 (green)
+		surface->drawLine(b.x, b.y, c.x, c.y, 56);
+		surface->drawLine(c.x, c.y, d.x, d.y, 56);
+		surface->drawLine(d.x, d.y, a.x, a.y, 56);
+	}
+
 	surface->unlock();
 }
 

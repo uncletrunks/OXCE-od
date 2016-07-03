@@ -93,6 +93,10 @@ OptionsAdvancedState::OptionsAdvancedState(OptionsOrigin origin) : OptionsBaseSt
 			{
 				_settingsBattle.push_back(*i);
 			}
+			else if (i->category() == "STR_OXCE")
+			{
+				_settingsOxce.push_back(*i);
+			}
 		}
 	}
 }
@@ -123,6 +127,10 @@ void OptionsAdvancedState::init()
 	_lstOptions->addRow(2, tr("STR_BATTLESCAPE").c_str(), L"");
 	_lstOptions->setCellColor(_settingsGeneral.size() + 2 + _settingsGeo.size() + 2, 0, _colorGroup);
 	addSettings(_settingsBattle);
+	_lstOptions->addRow(2, L"", L"");
+	_lstOptions->addRow(2, tr("STR_OXCE").c_str(), L"");
+	_lstOptions->setCellColor(_settingsGeneral.size() + 2 + _settingsGeo.size() + 2 + _settingsBattle.size() + 2, 0, _colorGroup);
+	addSettings(_settingsOxce);
 }
 
 /**
@@ -170,6 +178,11 @@ OptionInfo *OptionsAdvancedState::getSetting(size_t sel)
 			 sel <= _settingsGeneral.size() + 2 + _settingsGeo.size() + 2 + _settingsBattle.size())
 	{
 		return &_settingsBattle[sel - 1 - _settingsGeneral.size() - 2 - _settingsGeo.size() - 2];
+	}
+	else if (sel > _settingsGeneral.size() + 2 + _settingsGeo.size() + 2 + _settingsBattle.size() + 2 &&
+		sel <= _settingsGeneral.size() + 2 + _settingsGeo.size() + 2 + _settingsBattle.size() + 2 + _settingsOxce.size())
+	{
+		return &_settingsOxce[sel - 1 - _settingsGeneral.size() - 2 - _settingsGeo.size() - 2 - _settingsBattle.size() - 2];
 	}
 	else
 	{

@@ -73,7 +73,7 @@ namespace OpenXcom
  */
 BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_game(game), _save(game->getSavedGame()->getSavedBattle()), _mod(_game->getMod()),
-	_craft(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0),
+	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0),
 	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _craftZ(0)
@@ -117,6 +117,7 @@ void BattlescapeGenerator::init()
 void BattlescapeGenerator::setCraft(Craft *craft)
 {
 	_craft = craft;
+	_craftRules = _craft->getRules();
 	_craft->setInBattlescape(true);
 }
 
@@ -654,7 +655,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
-			(_craft == 0 && (*i)->getWoundRecovery() == 0 && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
+			(_craft == 0 && ((*i)->getWoundRecovery() == 0 || Options::everyoneFightsNobodyQuits) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 		{
 			// starting conditions - armor transformation or replacement
 			if (startingCondition != 0)
@@ -933,9 +934,20 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 			}
 		}
 	}
-	else if (_craft && !_craft->getRules()->getDeployment().empty() && !_baseInventory)
+	else if (_craft && !_craftRules->getDeployment().empty() && !_baseInventory)
 	{
-		for (std::vector<std::vector<int> >::const_iterator i = _craft->getRules()->getDeployment().begin(); i != _craft->getRules()->getDeployment().end(); ++i)
+		if (_craftInventoryTile == 0)
+		{
+			// Craft inventory tile position defined in the ruleset
+			std::vector<int> coords = _craftRules->getCraftInventoryTile();
+			if (coords.size() >= 3)
+			{
+				Position craftInventoryTilePosition = Position(coords[0] + (_craftPos.x * 10), coords[1] + (_craftPos.y * 10), coords[2] + _craftZ);
+				canPlaceXCOMUnit(_save->getTile(craftInventoryTilePosition));
+			}
+		}
+
+		for (std::vector<std::vector<int> >::const_iterator i = _craftRules->getDeployment().begin(); i != _craftRules->getDeployment().end(); ++i)
 		{
 			Position pos = Position((*i)[0] + (_craftPos.x * 10), (*i)[1] + (_craftPos.y * 10), (*i)[2] + _craftZ);
 			int dir = (*i)[3];
@@ -1761,7 +1773,13 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 				case MSC_ADDCRAFT:
 					if (_craft)
 					{
-						craftMap = _craft->getRules()->getBattlescapeTerrainData()->getRandomMapBlock(999, 999, 0, false);
+						RuleCraft *craftRulesOverride = _save->getMod()->getCraft(command->getCraftName());
+						if (craftRulesOverride != 0)
+						{
+							_craftRules = craftRulesOverride;
+						}
+
+						craftMap = _craftRules->getBattlescapeTerrainData()->getRandomMapBlock(999, 999, 0, false);
 						if (addCraft(craftMap, command, _craftPos))
 						{
 							// by default addCraft adds blocks from group 1.
@@ -1948,7 +1966,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 
 	if (craftMap)
 	{
-		for (std::vector<MapDataSet*>::iterator i = _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
+		for (std::vector<MapDataSet*>::iterator i = _craftRules->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craftRules->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
 			(*i)->loadData();
 			if (_game->getMod()->getMCDPatch((*i)->getName()))
@@ -1957,7 +1975,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			}
 			_save->getMapDataSets()->push_back(*i);
 		}
-		loadMAP(craftMap, _craftPos.x * 10, _craftPos.y * 10, _craft->getRules()->getBattlescapeTerrainData(), mapDataSetIDOffset + craftDataSetIDOffset, true, true);
+		loadMAP(craftMap, _craftPos.x * 10, _craftPos.y * 10, _craftRules->getBattlescapeTerrainData(), mapDataSetIDOffset + craftDataSetIDOffset, true, true);
 		loadRMP(craftMap, _craftPos.x * 10, _craftPos.y * 10, Node::CRAFTSEGMENT);
 		for (int i = 0; i < craftMap->getSizeX() / 10; ++i)
 		{

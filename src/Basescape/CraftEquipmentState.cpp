@@ -27,9 +27,11 @@
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Interface/ComboBox.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Mod/Armor.h"
 #include "../Savegame/Base.h"
@@ -63,9 +65,10 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	_btnOk = new TextButton((craftHasACrew || isNewBattle)? 148:288, 16, (craftHasACrew || isNewBattle)? 164:16, 176);
-	_btnClear = new TextButton(148, 16, 8, 176);
-	_btnInventory = new TextButton(148, 16, 8, 176);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 264, 12);
+	_btnOk = new TextButton((craftHasACrew || isNewBattle)?30:140, 16, (craftHasACrew || isNewBattle)?274:164, 176);
+	_btnClear = new TextButton(102, 16, 164, 176);
+	_btnInventory = new TextButton(102, 16, 164, 176);
 	_txtTitle = new Text(300, 17, 16, 7);
 	_txtItem = new Text(144, 9, 16, 32);
 	_txtStores = new Text(150, 9, 160, 32);
@@ -73,6 +76,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_txtUsed = new Text(110, 9, 130, 24);
 	_txtCrew = new Text(71, 9, 244, 24);
 	_lstEquipment = new TextList(288, 128, 8, 40);
+	_cbxFilterBy = new ComboBox(this, 140, 16, 16, 176, true);
 
 	// Set palette
 	setInterface("craftEquipment");
@@ -80,6 +84,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_ammoColor = _game->getMod()->getInterface("craftEquipment")->getElement("ammoColor")->color;
 
 	add(_window, "window", "craftEquipment");
+	add(_btnQuickSearch, "button", "craftEquipment");
 	add(_btnOk, "button", "craftEquipment");
 	add(_btnClear, "button", "craftEquipment");
 	add(_btnInventory, "button", "craftEquipment");
@@ -90,6 +95,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	add(_txtUsed, "text", "craftEquipment");
 	add(_txtCrew, "text", "craftEquipment");
 	add(_lstEquipment, "list", "craftEquipment");
+	add(_cbxFilterBy, "button", "craftEquipment");
 
 	centerAllSurfaces();
 
@@ -99,6 +105,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftEquipmentState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftEquipmentState::btnOkClick, Options::keyCancel);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftEquipmentState::btnClearClick, Options::keyInvClear);
 
 	_btnClear->setText(tr("STR_UNLOAD_CRAFT"));
 	_btnClear->onMouseClick((ActionHandler)&CraftEquipmentState::btnClearClick);
@@ -107,6 +114,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_btnInventory->setText(tr("STR_INVENTORY"));
 	_btnInventory->onMouseClick((ActionHandler)&CraftEquipmentState::btnInventoryClick);
 	_btnInventory->setVisible(craftHasACrew && !isNewBattle);
+	_btnInventory->onKeyboardPress((ActionHandler)&CraftEquipmentState::btnInventoryClick, Options::keyBattleInventory);
 
 	_txtTitle->setBig();
 	_txtTitle->setText(tr("STR_EQUIPMENT_FOR_CRAFT").arg(c->getName(_game->getLanguage())));
@@ -123,6 +131,53 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	ss3 << tr("STR_SOLDIERS_UC") << ">" << L'\x01'<< c->getNumSoldiers();
 	_txtCrew->setText(ss3.str());
 
+	// populate sort options
+	_categoryStrings.push_back("STR_ALL");
+	_categoryStrings.push_back("STR_EQUIPPED");
+	bool hasUnassigned = false;
+	const std::vector<std::string> &items = _game->getMod()->getItemsList();
+	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
+	{
+		RuleItem *rule = _game->getMod()->getItem(*i);
+		int cQty = rule->isFixed() ? c->getVehicleCount(*i) : c->getItems()->getItem(*i);
+
+		if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE &&
+			_game->getSavedGame()->isResearched(rule->getRequirements()) &&
+			(_base->getStorageItems()->getItem(*i) > 0 || cQty > 0))
+		{
+			if (rule->getCategories().empty())
+			{
+				hasUnassigned = true;
+			}
+			else
+			{
+				for (std::vector<std::string>::const_iterator j = rule->getCategories().begin(); j != rule->getCategories().end(); ++j)
+				{
+					_usedCategoryStrings[(*j)] = true;
+				}
+			}
+		}
+	}
+	const std::vector<std::string> &itemCategories = _game->getMod()->getItemCategoriesList();
+	for (std::vector<std::string>::const_iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
+	{
+		if (_usedCategoryStrings[(*i)])
+		{
+			if (!_game->getMod()->getItemCategory((*i))->isHidden())
+			{
+				_categoryStrings.push_back((*i));
+			}
+		}
+	}
+	if (hasUnassigned)
+	{
+		_categoryStrings.push_back("STR_UNASSIGNED");
+	}
+
+	_cbxFilterBy->setOptions(_categoryStrings);
+	_cbxFilterBy->setSelected(0);
+	_cbxFilterBy->onChange((ActionHandler)&CraftEquipmentState::cbxFilterByChange);
+
 	_lstEquipment->setArrowColumn(203, ARROW_HORIZONTAL);
 	_lstEquipment->setColumns(3, 156, 83, 41);
 	_lstEquipment->setSelectable(true);
@@ -135,6 +190,100 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_lstEquipment->onRightArrowRelease((ActionHandler)&CraftEquipmentState::lstEquipmentRightArrowRelease);
 	_lstEquipment->onRightArrowClick((ActionHandler)&CraftEquipmentState::lstEquipmentRightArrowClick);
 	_lstEquipment->onMousePress((ActionHandler)&CraftEquipmentState::lstEquipmentMousePress);
+
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&CraftEquipmentState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&CraftEquipmentState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
+
+	_timerLeft = new Timer(250);
+	_timerLeft->onTimer((StateHandler)&CraftEquipmentState::moveLeft);
+	_timerRight = new Timer(250);
+	_timerRight->onTimer((StateHandler)&CraftEquipmentState::moveRight);
+}
+
+/**
+ *
+ */
+CraftEquipmentState::~CraftEquipmentState()
+{
+	delete _timerLeft;
+	delete _timerRight;
+}
+
+/**
+ * Filters the equipment list by the selected criterion
+ * @param action Pointer to an action.
+ */
+void CraftEquipmentState::cbxFilterByChange(Action *action)
+{
+	initList();
+}
+
+/**
+* Resets the savegame when coming back from the inventory.
+*/
+void CraftEquipmentState::init()
+{
+	State::init();
+
+	_game->getSavedGame()->setBattleGame(0);
+
+	Craft *c = _base->getCrafts()->at(_craft);
+	c->setInBattlescape(false);
+
+	initList();
+}
+
+/**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void CraftEquipmentState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void CraftEquipmentState::btnQuickSearchApply(Action *)
+{
+	initList();
+}
+
+/**
+ * Shows the equipment in a list filtered by selected criterion.
+ */
+void CraftEquipmentState::initList()
+{
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
+	size_t selIdx = _cbxFilterBy->getSelected();
+	if (selIdx == (size_t)-1)
+	{
+		return;
+	}
+	const std::string selectedCategory = _categoryStrings[selIdx];
+
+	Craft *c = _base->getCrafts()->at(_craft);
+
+	// reset
+	_items.clear();
+	_lstEquipment->clearList();
 
 	int row = 0;
 	const std::vector<std::string> &items = _game->getMod()->getItemsList();
@@ -151,6 +300,40 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 		{
 			cQty = c->getItems()->getItem(*i);
 			_totalItems += cQty;
+		}
+
+		// filter by category
+		if (selectedCategory != "STR_ALL")
+		{
+			if (selectedCategory == "STR_UNASSIGNED")
+			{
+				if (!rule->getCategories().empty())
+				{
+					continue;
+				}
+			}
+			else if (selectedCategory == "STR_EQUIPPED")
+			{
+				if (!(cQty > 0))
+				{
+					continue;
+				}
+			}
+			else if (!rule->belongsToCategory(selectedCategory))
+			{
+				continue;
+			}
+		}
+
+		// quick search
+		if (searchString != L"")
+		{
+			std::wstring projectName = tr((*i));
+			for (auto & c : projectName) c = towupper(c);
+			if (projectName.find(searchString) == std::string::npos)
+			{
+				continue;
+			}
 		}
 
 		if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE &&
@@ -198,32 +381,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 		}
 	}
 
-	_timerLeft = new Timer(250);
-	_timerLeft->onTimer((StateHandler)&CraftEquipmentState::moveLeft);
-	_timerRight = new Timer(250);
-	_timerRight->onTimer((StateHandler)&CraftEquipmentState::moveRight);
-}
-
-/**
- *
- */
-CraftEquipmentState::~CraftEquipmentState()
-{
-	delete _timerLeft;
-	delete _timerRight;
-}
-
-/**
- * Resets the savegame when coming back from the inventory.
- */
-void CraftEquipmentState::init()
-{
-	State::init();
-
-	_game->getSavedGame()->setBattleGame(0);
-
-	Craft *c = _base->getCrafts()->at(_craft);
-	c->setInBattlescape(false);
+	_lstEquipment->draw();
 }
 
 /**
@@ -621,7 +779,7 @@ void CraftEquipmentState::btnInventoryClick(Action *)
 		bgen.runInventory(craft);
 
 		_game->getScreen()->clear();
-		_game->pushState(new InventoryState(false, 0));
+		_game->pushState(new InventoryState(false, 0, _base));
 	}
 }
 

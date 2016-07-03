@@ -275,9 +275,6 @@
     <ClCompile Include="Interface\FpsCounter.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
-    <ClCompile Include="Battlescape\ItemSprite.cpp">
-      <Filter>Battlescape</Filter>
-    </ClCompile>
     <ClCompile Include="Battlescape\UnitSprite.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
@@ -976,6 +973,30 @@
     <ClCompile Include="Mod\RuleConverter.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="Basescape\SoldierSortUtil.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\SoldierAvatarState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Savegame\SoldierAvatar.cpp">
+      <Filter>Savegame</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\ChangeHeadquartersState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\ConfirmEndMissionState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\UfoTrackerState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\TechTreeViewerState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\TechTreeSelectState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -1260,9 +1281,6 @@
     </ClInclude>
     <ClInclude Include="Interface\FpsCounter.h">
       <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Battlescape\ItemSprite.h">
-      <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Battlescape\UnitSprite.h">
       <Filter>Battlescape</Filter>
@@ -1988,6 +2006,30 @@
     </ClInclude>
     <ClInclude Include="Mod\RuleConverter.h">
       <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SoldierSortUtil.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SoldierAvatarState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Savegame\SoldierAvatar.h">
+      <Filter>Savegame</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\ChangeHeadquartersState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\ConfirmEndMissionState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\UfoTrackerState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\TechTreeViewerState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\TechTreeSelectState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

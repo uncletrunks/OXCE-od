@@ -24,6 +24,7 @@
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
+#include "../Engine/SurfaceSet.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Craft.h"
@@ -61,6 +62,7 @@ ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int sha
 	_btnNo = new TextButton(80, 20, 136, 150);
 	_txtMessage = new Text(206, 80, 25, 40);
 	_txtBegin = new Text(206, 17, 25, 130);
+	_sprite = new Surface(24, 24, 202, 30);
 
 	// Set palette
 	setInterface("confirmLanding");
@@ -70,6 +72,7 @@ ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int sha
 	add(_btnNo, "button", "confirmLanding");
 	add(_txtMessage, "text", "confirmLanding");
 	add(_txtBegin, "text", "confirmLanding");
+	add(_sprite);
 
 	centerAllSurfaces();
 
@@ -96,6 +99,26 @@ ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int sha
 	std::wostringstream ss;
 	ss << L'\x01' << tr("STR_BEGIN_MISSION");
 	_txtBegin->setText(ss.str());
+
+	SurfaceSet *sprites = _game->getMod()->getSurfaceSet("DayNightIndicator");
+	if (sprites != 0)
+	{
+		if (_shade <= 0)
+		{
+			// day (0)
+			sprites->getFrame(0)->blit(_sprite);
+		}
+		else if (_shade > _game->getMod()->getMaxDarknessToSeeUnits())
+		{
+			// night (10-15); note: this is configurable in the ruleset (in OXCE only)
+			sprites->getFrame(1)->blit(_sprite);
+		}
+		else
+		{
+			// dusk/dawn (1-9)
+			sprites->getFrame(2)->blit(_sprite);
+		}
+	}
 }
 
 /**

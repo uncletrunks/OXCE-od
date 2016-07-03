@@ -996,7 +996,7 @@ void TileEngine::calculateFOV(const Position &position, int eventRadius, const b
 	}
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if (distanceSq(position, (*i)->getPosition()) <= updateRadius) //could this unit have observed the event?
+		if (distanceSq(position, (*i)->getPosition(), false) <= updateRadius) //could this unit have observed the event?
 		{
 			if (updateTiles)
 			{
@@ -1251,6 +1251,12 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 
 		if (action.targeting)
 		{
+			// start new hit log
+			_save->hitLog.str(L"");
+			_save->hitLog.clear();
+			// log weapon?
+			_save->hitLog << "Reaction fire...\n\n";
+
 			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
@@ -1465,7 +1471,25 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 	}
 
 	const int wounds = target->getFatalWounds();
+	const int stunLevelOrig = target->getStunlevel();
 	const int adjustedDamage = target->damage(relative, damage, type);
+	// lethal + stun
+	const int totalDamage = adjustedDamage + (target->getStunlevel() - stunLevelOrig);
+
+	// hit log
+	const int damagePercent = (totalDamage * 100) / target->getBaseStats()->health;
+	if (damagePercent <= 0)
+	{
+		_save->hitLog << "0 ";
+	}
+	else if (damagePercent <= 20)
+	{
+		_save->hitLog << "hit ";
+	}
+	else
+	{
+		_save->hitLog << "hit! ";
+	}
 
 	if (unit && target->getFaction() != FACTION_PLAYER)
 	{
@@ -1517,6 +1541,28 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 			if (target->getFire() < burnTime)
 			{
 				target->setFire(burnTime); // catch fire and burn
+			}
+		}
+	}
+
+	// fire extinguisher
+	if (target && target->getFire())
+	{
+		if (clipOrWeapon)
+		{
+			// melee weapon, bullet or even a grenade...
+			if (clipOrWeapon->getRules()->isFireExtinguisher())
+			{
+				target->setFire(0);
+			}
+			// if the bullet is not a fire extinguisher, check the weapon itself
+			else if (unit && clipOrWeapon->getRules()->getBattleType() == BT_AMMO)
+			{
+				BattleItem *weapon = unit->getItem(unit->getActiveHand());
+				if (weapon && weapon->getRules()->isFireExtinguisher())
+				{
+					target->setFire(0);
+				}
 			}
 		}
 	}
@@ -3041,7 +3087,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 				{
 					_save->setSelectedUnit(0);
 					_save->getBattleGame()->cancelCurrentAction(true);
-					_save->getBattleGame()->requestEndTurn();
+					_save->getBattleGame()->requestEndTurn(true);
 				}
 			}
 		}
@@ -3080,6 +3126,8 @@ bool TileEngine::meleeAttack(BattleAction *action)
 			hitChance -= targetUnit->getArmor()->getMeleeDodge(targetUnit) * penalty;
 		}
 	}
+	// hit log - new melee attack
+	_save->hitLog << "=> ";
 	if (!RNG::percent(hitChance))
 	{
 		return false;
@@ -3112,6 +3160,12 @@ void TileEngine::medikitRemoveIfEmpty(BattleAction *action)
 void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyPart)
 {
 	RuleItem *rule = action->weapon->getRules();
+
+	if (target->getFatalWound(bodyPart))
+	{
+		// award experience only if healed body part has a fatal wound (to prevent abuse)
+		awardExperience(action->actor, action->weapon, target, false);
+	}
 
 	target->heal(bodyPart, rule->getWoundRecovery(), rule->getHealthRecovery());
 	action->weapon->setHealQuantity(action->weapon->getHealQuantity() - 1);

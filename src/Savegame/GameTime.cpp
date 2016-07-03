@@ -75,6 +75,15 @@ YAML::Node GameTime::save() const
 	return node;
 }
 
+bool GameTime::isLastDayOfMonth()
+{
+	int monthDays[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	// Leap year
+	if ((_year % 4 == 0) && !(_year % 100 == 0 && _year % 400 != 0))
+		monthDays[1]++;
+	return _day == monthDays[_month - 1];
+}
+
 /**
  * Advances the ingame time by 5 seconds, automatically correcting
  * the other components when necessary and sending out a trigger when

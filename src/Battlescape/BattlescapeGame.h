@@ -41,19 +41,19 @@ class Mod;
 class InfoboxOKState;
 class SoldierDiary;
 
-enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK };
+enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK, BA_EXECUTE };
 
 struct BattleActionCost : RuleItemUseCost
 {
 	BattleActionType type;
 	BattleUnit *actor;
-	BattleItem *weapon;
+	BattleItem *weapon, *origWeapon;
 
 	//Default constructor.
-	BattleActionCost() : type(BA_NONE), actor(0), weapon(0) { }
+	BattleActionCost() : type(BA_NONE), actor(0), weapon(0), origWeapon(0) { }
 
 	//Constructor with update.
-	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item) { updateTU(); }
+	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item), origWeapon(0) { updateTU(); }
 
 	/// Update value of TU based of actor, weapon and type.
 	void updateTU();
@@ -72,7 +72,7 @@ struct BattleAction : BattleActionCost
 	bool targeting;
 	int value;
 	std::string result;
-	bool strafe, run;
+	bool strafe, run, ignoreSpottedEnemies;
 	int diff;
 	int autoShotCounter;
 	Position cameraPosition;
@@ -170,7 +170,7 @@ public:
 	/// Moves a unit up or down.
 	void moveUpDown(BattleUnit *unit, int dir);
 	/// Requests the end of the turn (wait for explosions etc to really end the turn).
-	void requestEndTurn();
+	void requestEndTurn(bool askForConfirmation);
 	/// Sets the TU reserved type.
 	void setTUReserved(BattleActionType tur);
 	/// Sets up the cursor taking into account the action.

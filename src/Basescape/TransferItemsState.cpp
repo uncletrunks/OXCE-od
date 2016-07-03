@@ -29,6 +29,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Savegame/BaseFacility.h"
 #include "../Savegame/SavedGame.h"
@@ -60,6 +61,7 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 13);
 	_btnOk = new TextButton(148, 16, 8, 176);
 	_btnCancel = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
@@ -75,6 +77,7 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 	_ammoColor = _game->getMod()->getInterface("transferMenu")->getElement("ammoColor")->color;
 
 	add(_window, "window", "transferMenu");
+	add(_btnQuickSearch, "button", "transferMenu");
 	add(_btnOk, "button", "transferMenu");
 	add(_btnCancel, "button", "transferMenu");
 	add(_txtTitle, "text", "transferMenu");
@@ -206,6 +209,12 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 	_cbxCategory->setOptions(_cats);
 	_cbxCategory->onChange((ActionHandler)&TransferItemsState::cbxCategoryChange);
 
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&TransferItemsState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&TransferItemsState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
+
 	updateList();
 
 	_timerInc = new Timer(250);
@@ -274,19 +283,63 @@ std::string TransferItemsState::getCategory(int sel) const
 }
 
 /**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void TransferItemsState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void TransferItemsState::btnQuickSearchApply(Action *)
+{
+	updateList();
+}
+
+/**
 * Filters the current list of items.
 */
 void TransferItemsState::updateList()
 {
+	std::wstring searchString = _btnQuickSearch->getText();
+	for (auto & c : searchString) c = towupper(c);
+
 	_lstItems->clearList();
 	_rows.clear();
 	for (size_t i = 0; i < _items.size(); ++i)
 	{
+		// filter
 		std::string cat = _cats[_cbxCategory->getSelected()];
 		if (cat != "STR_ALL_ITEMS" && cat != getCategory(i))
 		{
 			continue;
 		}
+
+		// quick search
+		if (searchString != L"")
+		{
+			std::wstring projectName = _items[i].name;
+			for (auto & c : projectName) c = towupper(c);
+			if (projectName.find(searchString) == std::string::npos)
+			{
+				continue;
+			}
+		}
+
 		std::wstring name = _items[i].name;
 		bool ammo = false;
 		if (_items[i].type == TRANSFER_ITEM)

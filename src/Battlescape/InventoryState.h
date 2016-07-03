@@ -29,12 +29,14 @@ namespace OpenXcom
 
 class Surface;
 class Text;
+class TextEdit;
 class InteractiveSurface;
 class Inventory;
 class SavedBattleGame;
 class BattlescapeState;
 class BattleUnit;
 class BattlescapeButton;
+class Base;
 
 /**
  * Screen which displays soldier's inventory.
@@ -43,30 +45,49 @@ class InventoryState : public State
 {
 private:
 	Surface *_bg, *_soldier;
-	Text *_txtName, *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFAcc, *_txtReact, *_txtPSkill, *_txtPStr;
+	Text *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFiringAcc, *_txtThrowingAcc, *_txtMeleeAcc, *_txtPsi;
+	TextEdit *_txtName;
+	TextEdit *_btnQuickSearch;
 	BattlescapeButton *_btnOk, *_btnPrev, *_btnNext, *_btnUnload, *_btnGround, *_btnRank;
 	BattlescapeButton *_btnCreateTemplate, *_btnApplyTemplate;
 	Surface *_selAmmo;
 	Inventory *_inv;
-	std::vector<EquipmentLayoutItem*> _curInventoryTemplate;
+	std::vector<EquipmentLayoutItem*> _curInventoryTemplate, _tempInventoryTemplate;
 	SavedBattleGame *_battleGame;
 	const bool _tu;
 	bool _lightUpdated;
 	BattlescapeState *_parent;
+	Base *_base;
 	std::string _currentTooltip;
+	bool _reloadUnit;
+	/// Helper method for Create Template button
+	void _createInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
+	/// Helper method for Apply Template button
+	void _applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
 public:
 	/// Creates the Inventory state.
-	InventoryState(bool tu, BattlescapeState *parent);
+	InventoryState(bool tu, BattlescapeState *parent, Base *base);
 	/// Cleans up the Inventory state.
 	~InventoryState();
 	/// Updates all soldier info.
 	void init();
+	/// Handler for pressing on the Name edit.
+	void edtSoldierPress(Action *action);
+	/// Handler for changing text on the Name edit.
+	void edtSoldierChange(Action *action);
 	/// Updates the soldier info (Weight, TU).
 	void updateStats();
 	/// Saves the soldiers' equipment-layout.
 	void saveEquipmentLayout();
+	/// Handler for clicking the Armor button.
+	void btnArmorClick(Action *action);
+	/// Handler for clicking the Avatar button.
+	void btnAvatarClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Handler for clicking the Previous button.
 	void btnPrevClick(Action *action);
 	/// Handler for clicking the Next button.

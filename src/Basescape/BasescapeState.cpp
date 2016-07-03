@@ -34,6 +34,7 @@
 #include "../Mod/RuleRegion.h"
 #include "../Menu/ErrorMessageState.h"
 #include "DismantleFacilityState.h"
+#include "ChangeHeadquartersState.h"
 #include "../Geoscape/BuildNewBaseState.h"
 #include "../Engine/Action.h"
 #include "../Savegame/Craft.h"
@@ -51,6 +52,7 @@
 #include "../Geoscape/AllocatePsiTrainingState.h"
 #include "../Geoscape/AllocateTrainingState.h"
 #include "../Mod/RuleInterface.h"
+#include "PlaceFacilityState.h"
 
 namespace OpenXcom
 {
@@ -114,7 +116,8 @@ BasescapeState::BasescapeState(Base *base, Globe *globe) : _base(base), _globe(g
 
 	_mini->setTexture(_game->getMod()->getSurfaceSet("BASEBITS.PCK"));
 	_mini->setBases(_game->getSavedGame()->getBases());
-	_mini->onMouseClick((ActionHandler)&BasescapeState::miniClick);
+	_mini->onMouseClick((ActionHandler)&BasescapeState::miniLeftClick, SDL_BUTTON_LEFT);
+	_mini->onMouseClick((ActionHandler)&BasescapeState::miniRightClick, SDL_BUTTON_RIGHT);
 	_mini->onKeyboardPress((ActionHandler)&BasescapeState::handleKeyPress);
 
 	_edtBase->setBig();
@@ -322,7 +325,7 @@ void BasescapeState::btnPurchaseClick(Action *)
  */
 void BasescapeState::btnSellClick(Action *)
 {
-	_game->pushState(new SellState(_base));
+	_game->pushState(new SellState(_base, 0));
 }
 
 /**
@@ -352,19 +355,27 @@ void BasescapeState::viewLeftClick(Action *)
 	BaseFacility *fac = _view->getSelectedFacility();
 	if (fac != 0)
 	{
-		// Is facility in use?
-		if (fac->inUse())
+		if (SDL_GetModState() & KMOD_CTRL)
 		{
-			_game->pushState(new ErrorMessageState(tr("STR_FACILITY_IN_USE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
-		}
-		// Would base become disconnected?
-		else if (!_base->getDisconnectedFacilities(fac).empty())
-		{
-			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_DISMANTLE_FACILITY"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+			// Ctrl + left click on a completed facility allows moving it
+			_game->pushState(new PlaceFacilityState(_base, fac->getRules(), fac));
 		}
 		else
 		{
-			_game->pushState(new DismantleFacilityState(_base, _view, fac));
+			// Is facility in use?
+			if (fac->inUse())
+			{
+				_game->pushState(new ErrorMessageState(tr("STR_FACILITY_IN_USE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+			}
+			// Would base become disconnected?
+			else if (!_base->getDisconnectedFacilities(fac).empty())
+			{
+				_game->pushState(new ErrorMessageState(tr("STR_CANNOT_DISMANTLE_FACILITY"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+			}
+			else
+			{
+				_game->pushState(new DismantleFacilityState(_base, _view, fac));
+			}
 		}
 	}
 }
@@ -398,7 +409,7 @@ void BasescapeState::viewRightClick(Action *)
 	}
 	else if (f->getRules()->getStorage() > 0)
 	{
-		_game->pushState(new SellState(_base));
+		_game->pushState(new SellState(_base, 0));
 	}
 	else if (f->getRules()->getPersonnel() > 0)
 	{
@@ -469,13 +480,35 @@ void BasescapeState::viewMouseOut(Action *)
  * Selects a new base to display.
  * @param action Pointer to an action.
  */
-void BasescapeState::miniClick(Action *)
+void BasescapeState::miniLeftClick(Action *)
 {
 	size_t base = _mini->getHoveredBase();
 	if (base < _game->getSavedGame()->getBases()->size())
 	{
 		_base = _game->getSavedGame()->getBases()->at(base);
 		init();
+	}
+}
+
+/**
+ * Opens a dialog to make the selected base your HQ.
+ * @param action Pointer to an action.
+ */
+void BasescapeState::miniRightClick(Action *)
+{
+	size_t baseIndex = _mini->getHoveredBase();
+
+	// first select the base that was clicked on (only for visuals)
+	if (baseIndex < _game->getSavedGame()->getBases()->size())
+	{
+		_base = _game->getSavedGame()->getBases()->at(baseIndex);
+		init();
+
+		// then ask the user if it should become HQ (unless it is already HQ)
+		if (baseIndex > 0)
+		{
+			_game->pushState(new ChangeHeadquartersState(_game->getSavedGame()->getBases()->at(baseIndex)));
+		}
 	}
 }
 

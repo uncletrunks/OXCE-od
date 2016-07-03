@@ -27,6 +27,7 @@
 #include "GameTime.h"
 #include "../Mod/RuleAlienMission.h"
 #include "../Savegame/Craft.h"
+#include "../Mod/RuleManufacture.h"
 
 namespace OpenXcom
 {
@@ -45,6 +46,7 @@ class RuleResearch;
 class ResearchProject;
 class Soldier;
 class RuleManufacture;
+class ArticleDefinition;
 class MissionSite;
 class AlienBase;
 class AlienStrategy;
@@ -115,6 +117,9 @@ private:
 	AlienStrategy *_alienStrategy;
 	SavedBattleGame *_battleGame;
 	std::vector<const RuleResearch*> _discovered;
+	std::vector<const ArticleDefinition*> _seenUfopediaItems;
+	std::map<std::string, int> _manufactureRuleStatus;
+	std::map<std::string, int> _researchRuleStatus;
 	std::vector<AlienMission*> _activeMissions;
 	bool _debug, _warned;
 	int _monthsPassed;
@@ -204,6 +209,12 @@ public:
 	SavedBattleGame *getSavedBattle();
 	/// Sets the current battle game.
 	void setBattleGame(SavedBattleGame *battleGame);
+	/// Add a seen UFOpedia article
+	void addSeenUfopediaArticle(const ArticleDefinition *r);
+	/// Sets the status of a manufacture rule
+	void setManufactureRuleStatus(const std::string &manufactureRule, int newStatus);
+	/// Sets the status of a research rule
+	void setResearchRuleStatus(const std::string &researchRule, int newStatus);
 	/// Add a finished ResearchProject
 	void addFinishedResearch(const RuleResearch *r, const Mod *mod = 0, bool score = true);
 	/// Get the list of already discovered research projects
@@ -211,13 +222,19 @@ public:
 	/// Get the list of ResearchProject which can be researched in a Base
 	void getAvailableResearchProjects(std::vector<RuleResearch*> & projects, const Mod *mod, Base *base) const;
 	/// Get the list of Productions which can be manufactured in a Base
-	void getAvailableProductions(std::vector<RuleManufacture*> & productions, const Mod *mod, Base *base) const;
+	void getAvailableProductions(std::vector<RuleManufacture*> & productions, const Mod *mod, Base *base, ManufacturingFilterType filter = MANU_FILTER_DEFAULT) const;
 	/// Get the list of newly available research projects once a research has been completed.
 	void getDependableResearch(std::vector<RuleResearch*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Get the list of newly available manufacture projects once a research has been completed.
 	void getDependableManufacture(std::vector<RuleManufacture*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Check whether a ResearchProject can be researched
 	bool isResearchAvailable(RuleResearch *r, const std::vector<const RuleResearch*> & unlocked, const Mod *mod) const;
+	/// Gets if an UFOpedia article has been seen already.
+	bool isUfopediaArticleSeen(const std::string &article) const;
+	/// Gets the status of a manufacture rule.
+	int getManufactureRuleStatus(const std::string &manufactureRule);
+	/// Gets the status of a research rule.
+	int getResearchRuleStatus(const std::string &researchRule);
 	/// Gets if a research has been unlocked.
 	bool isResearched(const std::string &research) const;
 	/// Gets if a list of research has been unlocked.

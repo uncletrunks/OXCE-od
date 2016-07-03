@@ -50,6 +50,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/SoldierDiary.h"
 #include "../Menu/PauseState.h"
+#include "UfoTrackerState.h"
 #include "InterceptState.h"
 #include "../Basescape/BasescapeState.h"
 #include "../Basescape/SellState.h"
@@ -234,6 +235,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_btnIntercept->setText(tr("STR_INTERCEPT"));
 	_btnIntercept->onMouseClick((ActionHandler)&GeoscapeState::btnInterceptClick);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnInterceptClick, Options::keyGeoIntercept);
+	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfoTrackerClick, SDLK_t);
 	_btnIntercept->setGeoscapeButton(true);
 
 	_btnBases->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
@@ -925,7 +927,10 @@ void GeoscapeState::time5Seconds()
 				}
 				else if (w != 0)
 				{
-					popup(new CraftPatrolState((*j), _globe));
+					if (!(*j)->getIsAutoPatrolling())
+					{
+						popup(new CraftPatrolState((*j), _globe));
+					}
 					(*j)->setDestination(0);
 				}
 				else if (m != 0)
@@ -1072,7 +1077,10 @@ void GeoscapeState::time10Minutes()
 				{
 					(*j)->setLowFuel(true);
 					(*j)->returnToBase();
-					popup(new LowFuelState((*j), this));
+					if (!(*j)->getIsAutoPatrolling())
+					{
+						popup(new LowFuelState((*j), this));
+					}
 				}
 
 				if ((*j)->getDestination() == 0)
@@ -1246,6 +1254,29 @@ void GeoscapeState::time30Minutes()
 				if (item.empty())
 				{
 					(*j)->refuel();
+					// notification
+					if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->notifyWhenRefueled())
+					{
+						std::wstring msg = tr("STR_CRAFT_IS_READY").arg((*j)->getName(_game->getLanguage())).arg((*i)->getName());
+						popup(new CraftErrorState(this, msg));
+					}
+					// auto-patrol
+					if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->canAutoPatrol())
+					{
+						if ((*j)->getIsAutoPatrolling())
+						{
+							Waypoint *w = new Waypoint();
+							w->setLongitude((*j)->getLongitudeAuto());
+							w->setLatitude((*j)->getLatitudeAuto());
+							if (w != 0 && w->getId() == 0)
+							{
+								w->setId(_game->getSavedGame()->getId("STR_WAYPOINT"));
+								_game->getSavedGame()->getWaypoints()->push_back(w);
+							}
+							(*j)->setDestination(w);
+							(*j)->setStatus("STR_OUT");
+						}
+					}
 				}
 				else
 				{
@@ -1254,6 +1285,29 @@ void GeoscapeState::time30Minutes()
 						(*i)->getStorageItems()->removeItem(item);
 						(*j)->refuel();
 						(*j)->setLowFuel(false);
+						// notification
+						if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->notifyWhenRefueled())
+						{
+							std::wstring msg = tr("STR_CRAFT_IS_READY").arg((*j)->getName(_game->getLanguage())).arg((*i)->getName());
+							popup(new CraftErrorState(this, msg));
+						}
+						// auto-patrol
+						if ((*j)->getStatus() == "STR_READY" && (*j)->getRules()->canAutoPatrol())
+						{
+							if ((*j)->getIsAutoPatrolling())
+							{
+								Waypoint *w = new Waypoint();
+								w->setLongitude((*j)->getLongitudeAuto());
+								w->setLatitude((*j)->getLatitudeAuto());
+								if (w != 0 && w->getId() == 0)
+								{
+									w->setId(_game->getSavedGame()->getId("STR_WAYPOINT"));
+									_game->getSavedGame()->getWaypoints()->push_back(w);
+								}
+								(*j)->setDestination(w);
+								(*j)->setStatus("STR_OUT");
+							}
+						}
 					}
 					else if (!(*j)->getLowFuel())
 					{
@@ -1458,7 +1512,7 @@ void GeoscapeState::time1Hour()
 		if (Options::storageLimitsEnforced && (*i)->storesOverfull())
 		{
 			popup(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg((*i)->getName()), _palette, _game->getMod()->getInterface("geoscape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("geoscape")->getElement("errorPalette")->color));
-			popup(new SellState((*i)));
+			popup(new SellState((*i), 0));
 		}
 	}
 	for (std::vector<MissionSite*>::iterator i = _game->getSavedGame()->getMissionSites()->begin(); i != _game->getSavedGame()->getMissionSites()->end(); ++i)
@@ -1543,17 +1597,6 @@ void GeoscapeState::time1Day()
 			(*i)->removeResearch(*iter);
 			RuleResearch * bonus = 0;
 			const RuleResearch * research = (*iter)->getRules();
-			// If "researched" the live alien, his body sent to the stores.
-			if (Options::spendResearchedItems && research->needItem() && _game->getMod()->getUnit(research->getName()))
-			{
-				(*i)->getStorageItems()->addItem(
-					_game->getMod()->getArmor(
-						_game->getMod()->getUnit(
-							research->getName()
-						)->getArmor()
-					)->getCorpseGeoscape()
-				);
-			}
 			if (!(*iter)->getRules()->getGetOneFree().empty())
 			{
 				std::vector<std::string> possibilities;
@@ -1603,7 +1646,7 @@ void GeoscapeState::time1Day()
 			{
 				popup(new CutsceneState(bonus->getCutscene()));
 			}
-			popup(new ResearchCompleteState(newResearch, bonus));
+			popup(new ResearchCompleteState(newResearch, bonus, research));
 			std::vector<RuleResearch *> newPossibleResearch;
 			_game->getSavedGame()->getDependableResearch (newPossibleResearch, (*iter)->getRules(), _game->getMod(), *i);
 			std::vector<RuleManufacture *> newPossibleManufacture;
@@ -1707,6 +1750,29 @@ void GeoscapeState::time1Day()
 		else if (Options::autosave)
 		{
 			popup(new SaveGameState(OPT_GEOSCAPE, SAVE_AUTO_GEOSCAPE, _palette));
+		}
+	}
+
+	// pay attention to your maintenance player!
+	if (_game->getSavedGame()->getTime()->isLastDayOfMonth())
+	{
+		int funds = _game->getSavedGame()->getFunds();
+		int income = _game->getSavedGame()->getCountryFunding();
+		int maintenance = _game->getSavedGame()->getBaseMaintenance();
+		int projection = funds + income - maintenance;
+		if (projection < 0)
+		{
+			projection = std::abs(projection);
+			projection = ((projection / 100000) + 1) * 100000; // round up to 100k
+			std::wstring msg = tr("STR_ECONOMY_WARNING")
+				.arg(Text::formatFunding(funds))
+				.arg(Text::formatFunding(income))
+				.arg(Text::formatFunding(maintenance))
+				.arg(Text::formatFunding(projection));
+			if (msg != L"STR_ECONOMY_WARNING")
+			{
+				popup(new CraftErrorState(this, msg, false));
+			}
 		}
 	}
 }
@@ -1835,6 +1901,15 @@ void GeoscapeState::globeClick(Action *action)
 void GeoscapeState::btnInterceptClick(Action *)
 {
 	_game->pushState(new InterceptState(_globe));
+}
+
+/**
+* Opens the UFO Tracker window.
+* @param action Pointer to an action.
+*/
+void GeoscapeState::btnUfoTrackerClick(Action *)
+{
+	_game->pushState(new UfoTrackerState(this, _globe));
 }
 
 /**
@@ -2156,7 +2231,7 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 	// Whatever happens in the base defense, the UFO has finished its duty
 	ufo->setStatus(Ufo::DESTROYED);
 
-	if (base->getAvailableSoldiers(true) > 0 || !base->getVehicles()->empty())
+	if (base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits) > 0 || !base->getVehicles()->empty())
 	{
 		SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 		_game->getSavedGame()->setBattleGame(bgame);

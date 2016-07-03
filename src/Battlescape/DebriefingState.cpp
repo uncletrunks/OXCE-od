@@ -19,7 +19,9 @@
 #include <algorithm>
 #include <climits>
 #include "DebriefingState.h"
+#include <climits>
 #include "CannotReequipState.h"
+#include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
@@ -35,6 +37,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleRegion.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Mod/RuleUfo.h"
 #include "../Mod/Armor.h"
 #include "../Savegame/AlienBase.h"
@@ -59,6 +62,7 @@
 #include "../Menu/MainMenuState.h"
 #include "../Interface/Cursor.h"
 #include "../Engine/Options.h"
+#include "../Engine/RNG.h"
 #include "../Basescape/ManageAlienContainmentState.h"
 #include "../Engine/Screen.h"
 #include "../Basescape/SellState.h"
@@ -76,7 +80,7 @@ namespace OpenXcom
  * Initializes all the elements in the Debriefing screen.
  * @param game Pointer to the core game.
  */
-DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _noContainment(false), _manageContainment(false), _destroyBase(false)
+DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _noContainment(false), _manageContainment(false), _destroyBase(false), _pageNumber(0), _isBaseDefense(false), _showSellButton(true)
 {
 	_missionStatistics = new MissionStatistics();
 
@@ -91,6 +95,8 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(40, 12, 16, 180);
+	_btnStats = new TextButton(60, 12, 244, 180);
+	_btnSell = new TextButton(60, 12, 176, 180);
 	_txtTitle = new Text(300, 17, 16, 8);
 	_txtItem = new Text(180, 9, 16, 24);
 	_txtQuantity = new Text(60, 9, 200, 24);
@@ -101,11 +107,38 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_lstRecovery = new TextList(290, 80, 16, 32);
 	_lstTotal = new TextList(290, 9, 16, 12);
 
+	// Second page (soldier stats)
+	_txtSoldier     = new Text(90, 9,  16, 24); //16..106 = 90
+	_txtTU          = new Text(18, 9, 106, 24); //106
+	_txtStamina     = new Text(18, 9, 124, 24); //124
+	_txtHealth      = new Text(18, 9, 142, 24); //142
+	_txtBravery     = new Text(18, 9, 160, 24); //160
+	_txtReactions   = new Text(18, 9, 178, 24); //178
+	_txtFiring      = new Text(18, 9, 196, 24); //196
+	_txtThrowing    = new Text(18, 9, 214, 24); //214
+	_txtMelee       = new Text(18, 9, 232, 24); //232
+	_txtStrength    = new Text(18, 9, 250, 24); //250
+	_txtPsiStrength = new Text(18, 9, 268, 24); //268
+	_txtPsiSkill    = new Text(18, 9, 286, 24); //286..304 = 18
+
+	_lstSoldierStats = new TextList(288, 144, 16, 32); // 18 rows
+
+	_txtTooltip = new Text(200, 9, 64, 180);
+
+	// Third page (recovered items)
+	_lstRecoveredItems = new TextList(272, 144, 16, 32); // 18 rows
+
+	applyVisibility();
+
 	// Set palette
 	setInterface("debriefing");
 
+	_ammoColor = _game->getMod()->getInterface("debriefing")->getElement("totals")->color;
+
 	add(_window, "window", "debriefing");
 	add(_btnOk, "button", "debriefing");
+	add(_btnStats, "button", "debriefing");
+	add(_btnSell, "button", "debriefing");
 	add(_txtTitle, "heading", "debriefing");
 	add(_txtItem, "text", "debriefing");
 	add(_txtQuantity, "text", "debriefing");
@@ -116,6 +149,23 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	add(_lstRecovery, "list", "debriefing");
 	add(_lstTotal, "totals", "debriefing");
 
+	add(_txtSoldier, "text", "debriefing");
+	add(_txtTU, "text", "debriefing");
+	add(_txtStamina, "text", "debriefing");
+	add(_txtHealth, "text", "debriefing");
+	add(_txtBravery, "text", "debriefing");
+	add(_txtReactions, "text", "debriefing");
+	add(_txtFiring, "text", "debriefing");
+	add(_txtThrowing, "text", "debriefing");
+	add(_txtMelee, "text", "debriefing");
+	add(_txtStrength, "text", "debriefing");
+	add(_txtPsiStrength, "text", "debriefing");
+	add(_txtPsiSkill, "text", "debriefing");
+	add(_lstSoldierStats, "list", "debriefing");
+	add(_txtTooltip, "text", "debriefing");
+
+	add(_lstRecoveredItems, "list", "debriefing");
+
 	centerAllSurfaces();
 
 	// Set up objects
@@ -125,6 +175,11 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_btnOk->onMouseClick((ActionHandler)&DebriefingState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&DebriefingState::btnOkClick, Options::keyOk);
 	_btnOk->onKeyboardPress((ActionHandler)&DebriefingState::btnOkClick, Options::keyCancel);
+
+	_btnStats->onMouseClick((ActionHandler)&DebriefingState::btnStatsClick);
+
+	_btnSell->setText(tr("STR_SELL"));
+	_btnSell->onMouseClick((ActionHandler)&DebriefingState::btnSellClick);
 
 	_txtTitle->setBig();
 
@@ -144,7 +199,138 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_lstTotal->setColumns(2, 254, 64);
 	_lstTotal->setDot(true);
 
+	// Second page
+	_txtSoldier->setText(tr("STR_NAME_UC"));
+
+	_txtTU->setAlign(ALIGN_CENTER);
+	_txtTU->setText(tr("TU"));
+	_txtTU->setTooltip("STR_TIME_UNITS");
+	_txtTU->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtTU->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtStamina->setAlign(ALIGN_CENTER);
+	_txtStamina->setText(tr("STA"));
+	_txtStamina->setTooltip("STR_STAMINA");
+	_txtStamina->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtStamina->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtHealth->setAlign(ALIGN_CENTER);
+	_txtHealth->setText(tr("HP"));
+	_txtHealth->setTooltip("STR_HEALTH");
+	_txtHealth->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtHealth->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtBravery->setAlign(ALIGN_CENTER);
+	_txtBravery->setText(tr("BRA"));
+	_txtBravery->setTooltip("STR_BRAVERY");
+	_txtBravery->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtBravery->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtReactions->setAlign(ALIGN_CENTER);
+	_txtReactions->setText(tr("REA"));
+	_txtReactions->setTooltip("STR_REACTIONS");
+	_txtReactions->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtReactions->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtFiring->setAlign(ALIGN_CENTER);
+	_txtFiring->setText(tr("ACC"));
+	_txtFiring->setTooltip("STR_FIRING_ACCURACY");
+	_txtFiring->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtFiring->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtThrowing->setAlign(ALIGN_CENTER);
+	_txtThrowing->setText(tr("THR"));
+	_txtThrowing->setTooltip("STR_THROWING_ACCURACY");
+	_txtThrowing->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtThrowing->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtMelee->setAlign(ALIGN_CENTER);
+	_txtMelee->setText(tr("MEL"));
+	_txtMelee->setTooltip("STR_MELEE_ACCURACY");
+	_txtMelee->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtMelee->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtStrength->setAlign(ALIGN_CENTER);
+	_txtStrength->setText(tr("STR"));
+	_txtStrength->setTooltip("STR_STRENGTH");
+	_txtStrength->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtStrength->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtPsiStrength->setAlign(ALIGN_CENTER);
+	_txtPsiStrength->setText(tr("VOO"));
+	_txtPsiStrength->setTooltip("STR_PSIONIC_STRENGTH");
+	_txtPsiStrength->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtPsiStrength->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_txtPsiSkill->setAlign(ALIGN_CENTER);
+	_txtPsiSkill->setText(tr("DOO"));
+	_txtPsiSkill->setTooltip("STR_PSIONIC_SKILL");
+	_txtPsiSkill->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
+	_txtPsiSkill->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
+
+	_lstSoldierStats->setColumns(13, 90, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 0);
+	_lstSoldierStats->setAlign(ALIGN_CENTER);
+	_lstSoldierStats->setAlign(ALIGN_LEFT, 0);
+	_lstSoldierStats->setDot(true);
+
+	// Third page
+	_lstRecoveredItems->setColumns(2, 254, 18);
+	_lstRecoveredItems->setAlign(ALIGN_LEFT);
+	_lstRecoveredItems->setDot(true);
+
 	prepareDebriefing();
+
+	for (std::vector<SoldierStatsEntry>::iterator i = _soldierStats.begin(); i != _soldierStats.end(); ++i)
+	{
+		_lstSoldierStats->addRow(13, (*i).first.c_str(),
+				makeSoldierString((*i).second.tu).c_str(),
+				makeSoldierString((*i).second.stamina).c_str(),
+				makeSoldierString((*i).second.health).c_str(),
+				makeSoldierString((*i).second.bravery).c_str(),
+				makeSoldierString((*i).second.reactions).c_str(),
+				makeSoldierString((*i).second.firing).c_str(),
+				makeSoldierString((*i).second.throwing).c_str(),
+				makeSoldierString((*i).second.melee).c_str(),
+				makeSoldierString((*i).second.strength).c_str(),
+				makeSoldierString((*i).second.psiStrength).c_str(),
+				makeSoldierString((*i).second.psiSkill).c_str(),
+				"");
+		// note: final dummy element to cause dot filling until the end of the line
+	}
+
+	// compare stuff from after and before recovery
+	if (_base)
+	{
+		int row = 0;
+		const std::vector<std::string> &items = _game->getMod()->getItemsList();
+		for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
+		{
+			int qty = _base->getStorageItems()->getItem(*i);
+			if (qty > 0 && (Options::canSellLiveAliens || !_game->getMod()->getItem(*i)->isAlien()))
+			{
+				RuleItem *rule = _game->getMod()->getItem(*i);
+				qty -= _baseItemsBeforeRecovery[rule];
+				_recoveredItems[rule] = qty;
+				if (qty > 0)
+				{
+					std::wostringstream ss;
+					ss << L'\x01' << qty << L'\x01';
+					std::wstring item = tr(*i);
+					if (rule->getBattleType() == BT_AMMO || (rule->getBattleType() == BT_NONE && rule->getClipSize() > 0))
+					{
+						item.insert(0, L"  ");
+						_lstRecoveredItems->addRow(2, item.c_str(), ss.str().c_str());
+						_lstRecoveredItems->setRowColor(row, _ammoColor);
+					}
+					else
+					{
+						_lstRecoveredItems->addRow(2, item.c_str(), ss.str().c_str());
+					}
+					++row;
+				}
+			}
+		}
+	}
 
 	int total = 0, statsY = 0, recoveryY = 0;
 	int civiliansSaved = 0, civiliansDead = 0;
@@ -456,6 +642,75 @@ DebriefingState::~DebriefingState()
 	_roundsPainKiller.clear();
 	_roundsStimulant.clear();
 	_roundsHeal.clear();
+	_baseItemsBeforeRecovery.clear();
+	_recoveredItems.clear();
+}
+
+std::wstring DebriefingState::makeSoldierString(int stat)
+{
+	if (stat == 0) return L"";
+
+	std::wostringstream ss;
+	ss << L'\x01' << L'+' << stat << L'\x01';
+	return ss.str();
+}
+
+void DebriefingState::applyVisibility()
+{
+	bool showScore = _pageNumber == 0;
+	bool showStats = _pageNumber == 1;
+	bool showItems = _pageNumber == 2;
+
+	// First page (scores)
+	_txtItem->setVisible(showScore || showItems);
+	_txtQuantity->setVisible(showScore);
+	_txtScore->setVisible(showScore);
+	_txtRecovery->setVisible(showScore);
+	_txtRating->setVisible(showScore);
+	_lstStats->setVisible(showScore);
+	_lstRecovery->setVisible(showScore);
+	_lstTotal->setVisible(showScore);
+
+	// Second page (soldier stats)
+	_txtSoldier->setVisible(showStats);
+	_txtTU->setVisible(showStats);
+	_txtStamina->setVisible(showStats);
+	_txtHealth->setVisible(showStats);
+	_txtBravery->setVisible(showStats);
+	_txtReactions->setVisible(showStats);
+	_txtFiring->setVisible(showStats);
+	_txtThrowing->setVisible(showStats);
+	_txtMelee->setVisible(showStats);
+	_txtStrength->setVisible(showStats);
+	_txtPsiStrength->setVisible(showStats);
+	_txtPsiSkill->setVisible(showStats);
+	_lstSoldierStats->setVisible(showStats);
+	_txtTooltip->setVisible(showStats);
+
+	// Third page (recovered items)
+	_lstRecoveredItems->setVisible(showItems);
+
+	// Set text on toggle button accordingly
+	_btnSell->setVisible(showItems && _showSellButton);
+	if (showScore)
+	{
+		_btnStats->setText(tr("STR_STATS"));
+	}
+	else if (showStats)
+	{
+		if (_isBaseDefense)
+		{
+			_btnStats->setText(tr("STR_SCORE"));
+		}
+		else
+		{
+			_btnStats->setText(tr("STR_LOOT"));
+		}
+	}
+	else if (showItems)
+	{
+		_btnStats->setText(tr("STR_SCORE"));
+	}
 }
 
 void DebriefingState::init()
@@ -469,6 +724,52 @@ void DebriefingState::init()
 	{
 		_game->getMod()->playMusic(Mod::DEBRIEF_MUSIC_BAD);
 	}
+}
+
+/**
+* Shows a tooltip for the appropriate text.
+* @param action Pointer to an action.
+*/
+void DebriefingState::txtTooltipIn(Action *action)
+{
+	_currentTooltip = action->getSender()->getTooltip();
+	_txtTooltip->setText(tr(_currentTooltip));}
+
+/**
+* Clears the tooltip text.
+* @param action Pointer to an action.
+*/
+void DebriefingState::txtTooltipOut(Action *action)
+{
+	if (_currentTooltip == action->getSender()->getTooltip())
+	{
+		_txtTooltip->setText(L"");
+	}
+}
+
+/**
+ * Displays soldiers' stat increases.
+ * @param action Pointer to an action.
+ */
+void DebriefingState::btnStatsClick(Action *)
+{
+	_pageNumber = (_pageNumber + 1) % 3;
+	if (_isBaseDefense)
+	{
+		// FIXME: temporarily disable loot window for base defense
+		// can implement later, will need to remember stuff at the beginning of the mission already, and also save it in the save file
+		_pageNumber = _pageNumber % 2;
+	}
+	applyVisibility();
+}
+
+/**
+* Opens the Sell/Sack UI (for recovered items ONLY).
+* @param action Pointer to an action.
+*/
+void DebriefingState::btnSellClick(Action *)
+{
+	_game->pushState(new SellState(_base, this, OPT_BATTLESCAPE));
 }
 
 /**
@@ -523,7 +824,7 @@ void DebriefingState::btnOkClick(Action *)
 			}
 			if (!_manageContainment && Options::storageLimitsEnforced && _base->storesOverfull())
 			{
-				_game->pushState(new SellState(_base, OPT_BATTLESCAPE));
+				_game->pushState(new SellState(_base, 0, OPT_BATTLESCAPE));
 				_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()), _palette, _game->getMod()->getInterface("debriefing")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("debriefing")->getElement("errorPalette")->color));
 			}
 		}
@@ -728,6 +1029,8 @@ void DebriefingState::prepareDebriefing()
 		{
 			base = (*i);
 			target = "STR_BASE";
+			_isBaseDefense = true;
+			_showSellButton = false;
 			base->setInBattlescape(false);
 			base->cleanupDefenses(false);
 			for (std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin(); k != _game->getSavedGame()->getRegions()->end(); ++k)
@@ -770,6 +1073,20 @@ void DebriefingState::prepareDebriefing()
 	}
 
 	_base = base;
+
+	// remember stuff before recovery
+	if (_base)
+	{
+		const std::vector<std::string> &items = _game->getMod()->getItemsList();
+		for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
+		{
+			int qty = _base->getStorageItems()->getItem(*i);
+			if (qty > 0 && (Options::canSellLiveAliens || !_game->getMod()->getItem(*i)->isAlien()))
+			{
+				_baseItemsBeforeRecovery[_game->getMod()->getItem(*i)] += qty;
+			}
+		}
+	}
 
 	// UFO crash/landing site disappears
 	for (std::vector<Ufo*>::iterator i = save->getUfos()->begin(); i != save->getUfos()->end(); ++i)
@@ -962,6 +1279,8 @@ void DebriefingState::prepareDebriefing()
 					}
 					// transformed armor doesn't get recovered
 					soldier->setTransformedArmor(0);
+					// soldiers are buried in the default armor (...nicer stats in memorial)
+					soldier->setArmor(_game->getMod()->getArmor(soldier->getRules()->getArmor()));
 
 					(*j)->getStatistics()->KIA = true;
 					save->killSoldier(soldier); // in case we missed the soldier death on battlescape
@@ -985,11 +1304,19 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((((*j)->isInExitArea() || (*j)->getStatus() == STATUS_IGNORE_ME) && (battle->getMissionType() != "STR_BASE_DEFENSE" || success)) || !aborted)
 				{ // so game is not aborted or aborted and unit is on exit area
-					(*j)->postMissionProcedures(save);
+					UnitStats statIncrease;
+					bool hasImproved = (*j)->postMissionProcedures(save, statIncrease);
+					if ((*j)->getGeoscapeSoldier())
+					{
+						//if (hasImproved)
+						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease));
+					}
 					playerInExitArea++;
+
+					recoverItems((*j)->getInventory(), base);
+
 					if (soldier != 0)
 					{
-						recoverItems((*j)->getInventory(), base);
 						// calculate new statString
 						soldier->calcStatString(_game->getMod()->getStatStrings(), (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())));
 					}
@@ -1048,6 +1375,8 @@ void DebriefingState::prepareDebriefing()
 						}
 						// transformed armor doesn't get recovered
 						soldier->setTransformedArmor(0);
+						// soldiers are buried in the default armor (...nicer stats in memorial)
+						soldier->setArmor(_game->getMod()->getArmor(soldier->getRules()->getArmor()));
 
 						(*j)->getStatistics()->MIA = true;
 						save->killSoldier(soldier);
@@ -1207,7 +1536,15 @@ void DebriefingState::prepareDebriefing()
 	// calculate the clips for each type based on the recovered rounds.
 	for (std::map<RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
 	{
-		int total_clips = i->second / i->first->getClipSize();
+		int total_clips = 0;
+		if (Options::statisticalBulletConservation)
+		{
+			total_clips = (i->second + RNG::generate(0, (i->first->getClipSize() - 1))) / i->first->getClipSize();
+		}
+		else
+		{
+			total_clips = i->second / i->first->getClipSize();
+		}
 		if (total_clips > 0)
 			base->getStorageItems()->addItem(i->first->getType(), total_clips);
 	}
@@ -1591,6 +1928,25 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		base->getStorageItems()->addItem(type, 1);
 		_manageContainment = base->getAvailableContainment() - (base->getUsedContainment() * _limitsEnforced) < 0;
 	}
+}
+
+/**
+* Gets the number of recovered items of certain type.
+* @param rule Type of item.
+*/
+int DebriefingState::getRecoveredItemCount(RuleItem *rule)
+{
+	return _recoveredItems[rule];
+}
+
+/**
+* Sets the visibility of the SELL button.
+* @param showSellButton New value.
+*/
+void DebriefingState::setShowSellButton(bool showSellButton)
+{
+	_showSellButton = showSellButton;
+	_btnSell->setVisible(_showSellButton);
 }
 
 }

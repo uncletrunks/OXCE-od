@@ -24,7 +24,9 @@
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Menu/ErrorMessageState.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleInterface.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
@@ -97,9 +99,11 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 	_btnCancel->onKeyboardPress((ActionHandler)&ManufactureStartState::btnCancelClick, Options::keyCancel);
 
 	const std::map<std::string, int> & requiredItems (_item->getRequiredItems());
-	int availableWorkSpace = _base->getFreeWorkshops();
+	const std::map<std::string, int> & producedItems (_item->getProducedItems());
 	bool productionPossible = _game->getSavedGame()->getFunds() > _item->getManufactureCost();
-	productionPossible &= (availableWorkSpace > 0);
+	// check available workspace later
+	//int availableWorkSpace = _base->getFreeWorkshops();
+	//productionPossible &= (availableWorkSpace > 0);
 
 	_txtRequiredItemsTitle->setText(tr("STR_SPECIAL_MATERIALS_REQUIRED"));
 	_txtRequiredItemsTitle->setAlign(ALIGN_CENTER);
@@ -118,9 +122,7 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 
 	ItemContainer * itemContainer (base->getStorageItems());
 	int row = 0;
-	for (std::map<std::string, int>::const_iterator iter = requiredItems.begin();
-		iter != requiredItems.end();
-		++iter)
+	for (std::map<std::string, int>::const_iterator iter = requiredItems.begin(); iter != requiredItems.end(); ++iter)
 	{
 		std::wostringstream s1, s2;
 		s1 << L'\x01' << iter->second;
@@ -129,16 +131,42 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 		_lstRequiredItems->addRow(3, tr(iter->first).c_str(), s1.str().c_str(), s2.str().c_str());
 		row++;
 	}
+	if (!producedItems.empty())
+	{
+		// separator line
+		_lstRequiredItems->addRow(1, tr("STR_UNITS_PRODUCED").c_str());
+		_lstRequiredItems->setCellColor(row, 0, _lstRequiredItems->getSecondaryColor());
+		row++;
+
+		// produced items
+		for (std::map<std::string, int>::const_iterator iter = producedItems.begin(); iter != producedItems.end(); ++iter)
+		{
+			std::wostringstream s1;
+			s1 << L'\x01' << iter->second;
+			_lstRequiredItems->addRow(2, tr(iter->first).c_str(), s1.str().c_str());
+			row++;
+		}
+	}
+
 	_txtRequiredItemsTitle->setVisible(!requiredItems.empty());
 	_txtItemNameColumn->setVisible(!requiredItems.empty());
 	_txtUnitRequiredColumn->setVisible(!requiredItems.empty());
 	_txtUnitAvailableColumn->setVisible(!requiredItems.empty());
-	_lstRequiredItems->setVisible(!requiredItems.empty());
+	_lstRequiredItems->setVisible(!requiredItems.empty() || !producedItems.empty());
 
 	_btnStart->setText(tr("STR_START_PRODUCTION"));
 	_btnStart->onMouseClick((ActionHandler)&ManufactureStartState::btnStartClick);
 	_btnStart->onKeyboardPress((ActionHandler)&ManufactureStartState::btnStartClick, Options::keyOk);
 	_btnStart->setVisible(productionPossible);
+
+	if (_item)
+	{
+		// mark new as normal
+		if (_game->getSavedGame()->getManufactureRuleStatus(_item->getName()) == RuleManufacture::MANU_STATUS_NEW)
+		{
+			_game->getSavedGame()->setManufactureRuleStatus(_item->getName(), RuleManufacture::MANU_STATUS_NORMAL);
+		}
+	}
 }
 
 /**
@@ -156,6 +184,17 @@ void ManufactureStartState::btnCancelClick(Action *)
  */
 void ManufactureStartState::btnStartClick(Action *)
 {
-	_game->pushState(new ManufactureInfoState(_base, _item));
+	if (_item->getCategory() == "STR_CRAFT" && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
+	{
+		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+	}
+	else if (_item->getRequiredSpace() > _base->getFreeWorkshops())
+	{
+		_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_WORK_SPACE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+	}
+	else
+	{
+		_game->pushState(new ManufactureInfoState(_base, _item));
+	}
 }
 }

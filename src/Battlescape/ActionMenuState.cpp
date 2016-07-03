@@ -21,8 +21,10 @@
 #include "../Engine/Options.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Action.h"
+#include "../Engine/Sound.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
+#include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "ActionMenuItem.h"
 #include "PrimeGrenadeState.h"
@@ -67,7 +69,61 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// throwing (if not a fixed weapon)
 	if (!weapon->isFixed() && weapon->getCostThrow().Time > 0)
 	{
-		addItem(BA_THROW, "STR_THROW", &id);
+		addItem(BA_THROW, "STR_THROW", &id, Options::keyBattleActionItem5);
+	}
+
+	if (!Options::showGunMeleeOnTop && weapon->getCostMelee().Time > 0)
+	{
+		// stun rod
+		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
+		{
+			addItem(BA_HIT, "STR_STUN", &id, Options::keyBattleActionItem4);
+		}
+		else
+			// melee weapon
+		{
+			addItem(BA_HIT, "STR_HIT_MELEE", &id, Options::keyBattleActionItem4);
+		}
+	}
+
+	// execute / break neck / cut throat / coup de grace
+	if (Options::executeUnconsciousEnemies && (_action->weapon->getUnit() && _action->weapon->getUnit()->getStatus() == STATUS_UNCONSCIOUS))
+	{
+		BattleItem *otherWeapon = 0;
+
+		// check left hand for secondary weapon
+		BattleItem *leftHandWeapon = _game->getSavedGame()->getSavedBattle()->getSelectedUnit()->getItem("STR_LEFT_HAND");
+		if (leftHandWeapon)
+		{
+			if (leftHandWeapon->getRules()->getCostMelee().Time > 0)
+			{
+				// melee weapons with melee attack (i.e. excl. stun weapons and others)
+				if (leftHandWeapon->getRules()->getBattleType() == BT_MELEE && leftHandWeapon->getRules()->getDamageType()->ResistType == DT_MELEE)
+				{
+					otherWeapon = leftHandWeapon;
+				}
+			}
+		}
+
+		// check right hand for secondary weapon
+		BattleItem *rightHandWeapon = _game->getSavedGame()->getSavedBattle()->getSelectedUnit()->getItem("STR_RIGHT_HAND");
+		if (rightHandWeapon)
+		{
+			if (rightHandWeapon->getRules()->getCostMelee().Time > 0)
+			{
+				// melee weapons with melee attack (i.e. excl. stun weapons and others)
+				if (rightHandWeapon->getRules()->getBattleType() == BT_MELEE && rightHandWeapon->getRules()->getDamageType()->ResistType == DT_MELEE)
+				{
+					otherWeapon = rightHandWeapon;
+				}
+			}
+		}
+
+		if (otherWeapon != 0)
+		{
+			addItem(BA_EXECUTE, "STR_CUT_THROAT", &id, Options::keyBattleActionItem1, otherWeapon);
+			return; // hotkey safety!
+		}
 	}
 
 	if (weapon->isPsiRequired() && _action->actor->getBaseStats()->psiSkill <= 0)
@@ -78,73 +134,74 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// priming
 	if (weapon->getFuseTimerDefault() >= 0 && _action->weapon->getFuseTimer() == -1)
 	{
-		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id);
+		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id, Options::keyBattleActionItem1);
+		return; // hotkey safety!
 	}
 
 	if (weapon->getBattleType() == BT_FIREARM)
 	{
 		if (weapon->isWaypoint() || (_action->weapon->getAmmoItem() && _action->weapon->getAmmoItem()->getRules()->isWaypoint()))
 		{
-			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id);
+			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id, Options::keyBattleActionItem1);
 		}
 		else
 		{
 			if (weapon->getCostAuto().Time > 0)
 			{
-				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id);
+				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id, Options::keyBattleActionItem3);
 			}
 			if (weapon->getCostSnap().Time > 0)
 			{
-				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id);
+				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id, Options::keyBattleActionItem2);
 			}
 			if (weapon->getCostAimed().Time > 0)
 			{
-				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id);
+				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id, Options::keyBattleActionItem1);
 			}
 		}
 	}
 
-	if (weapon->getCostMelee().Time > 0)
+	if (Options::showGunMeleeOnTop && weapon->getCostMelee().Time > 0)
 	{
 		// stun rod
 		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
 		{
-			addItem(BA_HIT, "STR_STUN", &id);
+			addItem(BA_HIT, "STR_STUN", &id, Options::keyBattleActionItem4);
 		}
 		else
-		// melee weapon
+			// melee weapon
 		{
-			addItem(BA_HIT, "STR_HIT_MELEE", &id);
+			addItem(BA_HIT, "STR_HIT_MELEE", &id, Options::keyBattleActionItem4);
 		}
 	}
 
 	// special items
 	if (weapon->getBattleType() == BT_MEDIKIT)
 	{
-		addItem(BA_USE, "STR_USE_MEDI_KIT", &id);
+		addItem(BA_USE, "STR_USE_MEDI_KIT", &id, Options::keyBattleActionItem1);
 	}
 	else if (weapon->getBattleType() == BT_SCANNER)
 	{
-		addItem(BA_USE, "STR_USE_SCANNER", &id);
+		addItem(BA_USE, "STR_USE_SCANNER", &id, Options::keyBattleActionItem1);
 	}
 	else if (weapon->getBattleType() == BT_PSIAMP)
 	{
 		if (weapon->getCostMind().Time > 0)
 		{
-			addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id);
+			addItem(BA_MINDCONTROL, "STR_MIND_CONTROL", &id, Options::keyBattleActionItem3);
 		}
 		if (weapon->getCostPanic().Time > 0)
 		{
-			addItem(BA_PANIC, "STR_PANIC_UNIT", &id);
+			addItem(BA_PANIC, "STR_PANIC_UNIT", &id, Options::keyBattleActionItem2);
 		}
 		if (weapon->getCostUse().Time > 0)
 		{
-			addItem(BA_USE, weapon->getPsiAttackName(), &id);
+			addItem(BA_USE, weapon->getPsiAttackName(), &id, Options::keyBattleActionItem1);
 		}
 	}
 	else if (weapon->getBattleType() == BT_MINDPROBE)
 	{
-		addItem(BA_USE, "STR_USE_MIND_PROBE", &id);
+		addItem(BA_USE, "STR_USE_MIND_PROBE", &id, Options::keyBattleActionItem1);
 	}
 
 }
@@ -163,17 +220,27 @@ ActionMenuState::~ActionMenuState()
  * @param name Action description.
  * @param id Pointer to the new item ID.
  */
-void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id)
+void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id, SDLKey key, BattleItem *secondaryWeapon)
 {
 	std::wstring s1, s2;
 	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon, _game->getMod());
-	int tu = _action->actor->getActionTUs(ba, _action->weapon).Time;
+	if (secondaryWeapon != 0)
+	{
+		// for display only, this action will never miss anyway (alien is unconscious, how could you miss?)
+		acc = 999;
+		// backup the original "weapon" (i.e. unconscious alien) for later use (when we need to execute them)
+		_action->origWeapon = _action->weapon;
+		// this is actually important, so that we spend TUs (and other stats) correctly
+		_action->weapon = secondaryWeapon;
+	}
+	int tu = _action->actor->getActionTUs(ba, (secondaryWeapon == 0) ? _action->weapon : secondaryWeapon).Time;
 
-	if (ba == BA_THROW || ba == BA_AIMEDSHOT || ba == BA_SNAPSHOT || ba == BA_AUTOSHOT || ba == BA_LAUNCH || ba == BA_HIT)
+	if (ba == BA_THROW || ba == BA_AIMEDSHOT || ba == BA_SNAPSHOT || ba == BA_AUTOSHOT || ba == BA_LAUNCH || ba == BA_HIT || ba == BA_EXECUTE)
 		s1 = tr("STR_ACCURACY_SHORT").arg(Text::formatPercentage(acc));
 	s2 = tr("STR_TIME_UNITS_SHORT").arg(tu);
 	_actionMenu[*id]->setAction(ba, tr(name), s1, s2, tu);
 	_actionMenu[*id]->setVisible(true);
+	_actionMenu[*id]->onKeyboardPress((ActionHandler)&ActionMenuState::btnActionMenuItemClick, key);
 	(*id)++;
 }
 
@@ -219,6 +286,8 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 
 	if (btnID != -1)
 	{
+		bool newHitLog = false;
+
 		_action->type = _actionMenu[btnID]->getAction();
 		_action->updateTU();
 		if (_action->type != BA_THROW &&
@@ -378,6 +447,7 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			else
 			{
 				_action->targeting = true;
+				newHitLog = true;
 			}
 			_game->popState();
 		}
@@ -396,12 +466,45 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			{
 				_action->result = "STR_THERE_IS_NO_ONE_THERE";
 			}
+			else
+			{
+				newHitLog = true;
+			}
+			_game->popState();
+		}
+		else if (_action->type == BA_EXECUTE)
+		{
+			if (_action->spendTU(&_action->result))
+			{
+				if (_action->origWeapon != 0)
+				{
+					// kill unit
+					_action->origWeapon->getUnit()->instaKill();
+					// convert inventory item to corpse
+					RuleItem *corpseRules = _game->getMod()->getItem(_action->origWeapon->getUnit()->getArmor()->getCorpseBattlescape()[0]); // we're in an inventory, so we must be a 1x1 unit
+					_action->origWeapon->convertToCorpse(corpseRules);
+					// inform the player
+					_action->result = "STR_TARGET_WAS_EXECUTED";
+					// audio feedback
+					_game->getMod()->getSoundByDepth(_game->getSavedGame()->getSavedBattle()->getDepth(), _action->weapon->getRules()->getMeleeHitSound())->play();
+				}
+			}
 			_game->popState();
 		}
 		else
 		{
 			_action->targeting = true;
+			newHitLog = true;
 			_game->popState();
+		}
+
+		if (newHitLog)
+		{
+			// start new hit log
+			_game->getSavedGame()->getSavedBattle()->hitLog.str(L"");
+			_game->getSavedGame()->getSavedBattle()->hitLog.clear();
+			// log weapon
+			_game->getSavedGame()->getSavedBattle()->hitLog << "Weapon: " << tr(weapon->getType()) << "\n\n";
 		}
 	}
 }

@@ -81,6 +81,8 @@ private:
 	/// Selects a soldier.
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
 public:
+    /// FIXME: hit log
+	std::wostringstream hitLog;
 	/// Creates a new battle save, based on the current generic save.
 	SavedBattleGame(Mod *rule);
 	/// Cleans up the saved game.

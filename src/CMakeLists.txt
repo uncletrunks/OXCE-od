@@ -16,6 +16,8 @@ set ( basescape_src
   Basescape/BasescapeState.h
   Basescape/BuildFacilitiesState.cpp
   Basescape/BuildFacilitiesState.h
+  Basescape/ChangeHeadquartersState.cpp
+  Basescape/ChangeHeadquartersState.h
   Basescape/CraftArmorState.cpp
   Basescape/CraftArmorState.h
   Basescape/CraftEquipmentState.cpp
@@ -66,6 +68,8 @@ set ( basescape_src
   Basescape/SellState.h
   Basescape/SoldierArmorState.cpp
   Basescape/SoldierArmorState.h
+  Basescape/SoldierAvatarState.cpp
+  Basescape/SoldierAvatarState.h
   Basescape/SoldierDiaryMissionState.cpp
   Basescape/SoldierDiaryMissionState.h
   Basescape/SoldierDiaryOverviewState.cpp
@@ -76,10 +80,16 @@ set ( basescape_src
   Basescape/SoldierInfoState.h
   Basescape/SoldierMemorialState.cpp
   Basescape/SoldierMemorialState.h
+  Basescape/SoldierSortUtil.cpp
+  Basescape/SoldierSortUtil.h
   Basescape/SoldiersState.cpp
   Basescape/SoldiersState.h
   Basescape/StoresState.cpp
   Basescape/StoresState.h
+  Basescape/TechTreeSelectState.cpp
+  Basescape/TechTreeSelectState.h
+  Basescape/TechTreeViewerState.cpp
+  Basescape/TechTreeViewerState.h
   Basescape/TransferBaseState.cpp
   Basescape/TransferBaseState.h
   Basescape/TransferConfirmState.cpp
@@ -125,6 +135,8 @@ set ( battlescape_src
   Battlescape/CommendationLateState.h
   Battlescape/CommendationState.cpp
   Battlescape/CommendationState.h
+  Battlescape/ConfirmEndMissionState.cpp
+  Battlescape/ConfirmEndMissionState.h
   Battlescape/DebriefingState.cpp
   Battlescape/DebriefingState.h
   Battlescape/Explosion.cpp
@@ -359,6 +371,8 @@ set ( geoscape_src
   Geoscape/UfoDetectedState.h
   Geoscape/UfoLostState.cpp
   Geoscape/UfoLostState.h
+  Geoscape/UfoTrackerState.cpp
+  Geoscape/UfoTrackerState.h
 )
 
 set ( interface_src
@@ -613,6 +627,8 @@ set ( savegame_src
   Savegame/SerializationHelper.h
   Savegame/Soldier.cpp
   Savegame/Soldier.h
+  Savegame/SoldierAvatar.cpp
+  Savegame/SoldierAvatar.h
   Savegame/SoldierDeath.cpp
   Savegame/SoldierDeath.h
   Savegame/SoldierDiary.cpp

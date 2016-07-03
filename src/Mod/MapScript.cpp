@@ -261,6 +261,7 @@ void MapScript::load(const YAML::Node& node)
 	_executionChances = node["executionChances"].as<int>(_executionChances);
 	_executions = node["executions"].as<int>(_executions);
 	_ufoName = node["UFOName"].as<std::string>(_ufoName);
+	_craftName = node["craftName"].as<std::string>(_craftName);
 	// take no chances, don't accept negative values here.
 	_label = std::abs(node["label"].as<int>(_label));
 }
@@ -385,6 +386,15 @@ MapBlock *MapScript::getNextBlock(RuleTerrain *terrain)
 std::string MapScript::getUFOName()
 {
 	return _ufoName;
+}
+
+/**
+* Gets the name of the craft in the case of "addCraft"
+* @return the craft name.
+*/
+std::string MapScript::getCraftName()
+{
+	return _craftName;
 }
 
 }

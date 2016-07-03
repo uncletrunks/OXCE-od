@@ -41,6 +41,7 @@ namespace OpenXcom
 
 		// add screen elements
 		_txtTitle = new Text(148, 32, 5, 24);
+		_txtWeight = new Text(88, 8, 104, 55);
 
 		// Set palette
 		setPalette("PAL_BATTLEPEDIA");
@@ -49,6 +50,7 @@ namespace OpenXcom
 
 		// add other elements
 		add(_txtTitle);
+		add(_txtWeight);
 
 		// Set up objects
 		_game->getMod()->getSurface("BACK08.SCR")->blit(_bg);
@@ -61,6 +63,9 @@ namespace OpenXcom
 		_txtTitle->setWordWrap(true);
 		_txtTitle->setText(tr(defs->title));
 
+		_txtWeight->setColor(Palette::blockOffset(14) + 15);
+		_txtWeight->setAlign(ALIGN_RIGHT);
+
 		// IMAGE
 		_image = new Surface(32, 48, 157, 5);
 		add(_image);
@@ -69,8 +74,17 @@ namespace OpenXcom
 
 		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
 
-		// SHOT STATS TABLE (for firearms only)
-		if (item->getBattleType() == BT_FIREARM)
+		int weight = item->getWeight();
+		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);
+		if (!ammo_data->empty())
+		{
+			RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[0]);
+			weightLabel = tr("STR_WEIGHT_PEDIA2").arg(weight).arg(weight + ammo_rule->getWeight());
+		}
+		_txtWeight->setText(weight > 0 ? weightLabel : L"");
+
+		// SHOT STATS TABLE (for firearms and melee only)
+		if (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE)
 		{
 			_txtShotType = new Text(100, 17, 8, 66);
 			add(_txtShotType);
@@ -96,7 +110,10 @@ namespace OpenXcom
 			_lstInfo->setColor(Palette::blockOffset(15)+4); // color for %-data!
 			_lstInfo->setColumns(3, 100, 52, 52);
 			_lstInfo->setBig();
+		}
 
+		if (item->getBattleType() == BT_FIREARM)
+		{
 			int current_row = 0;
 			if (item->getCostAuto().Time>0)
 			{
@@ -143,8 +160,32 @@ namespace OpenXcom
 				current_row++;
 			}
 
-			// text_info is BELOW the info table
-			_txtInfo = new Text((ammo_data->size()<3 ? 300 : 180), 56, 8, 138);
+			// text_info is BELOW the info table (table can have 0-3 rows)
+			int shift = (3 - current_row) * 16;
+			if (ammo_data->size() == 2 && current_row <= 1)
+			{
+				shift -= (2 - current_row) * 16;
+			}
+			_txtInfo = new Text((ammo_data->size()<3 ? 300 : 180), 56 + shift, 8, 138 - shift);
+		}
+		else if (item->getBattleType() == BT_MELEE)
+		{
+			if (item->getCostMelee().Time > 0)
+			{
+				std::wstring tu = Text::formatPercentage(item->getCostMelee().Time);
+				if (item->getFlatMelee().Time)
+				{
+					tu.erase(tu.end() - 1);
+				}
+				_lstInfo->addRow(3,
+					tr("STR_SHOT_TYPE_MELEE").c_str(),
+					Text::formatPercentage(item->getAccuracyMelee()).c_str(),
+					tu.c_str());
+				_lstInfo->setCellColor(0, 0, Palette::blockOffset(14) + 15);
+			}
+
+			// text_info is BELOW the info table (with 1 row only)
+			_txtInfo = new Text(300, 88, 8, 106);
 		}
 		else
 		{

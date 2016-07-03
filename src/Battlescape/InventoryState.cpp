@@ -18,6 +18,9 @@
  */
 #include "InventoryState.h"
 #include "Inventory.h"
+#include "../Basescape/SoldierArmorState.h"
+#include "../Basescape/SoldierAvatarState.h"
+#include "../Geoscape/GeoscapeState.h"
 #include "../Engine/Game.h"
 #include "../Engine/FileMap.h"
 #include "../Mod/Mod.h"
@@ -26,6 +29,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/Surface.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/BattlescapeButton.h"
 #include "../Engine/Action.h"
 #include "../Engine/InteractiveSurface.h"
@@ -34,7 +38,9 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Tile.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Savegame/Base.h"
 #include "../Savegame/BattleUnit.h"
+#include "../Savegame/Craft.h"
 #include "../Savegame/Soldier.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
@@ -58,7 +64,7 @@ static const int _applyTemplateBtnY  = 113;
  * @param tu Does Inventory use up Time Units?
  * @param parent Pointer to parent Battlescape.
  */
-InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _lightUpdated(false), _parent(parent)
+InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : _tu(tu), _lightUpdated(false), _parent(parent), _base(base), _reloadUnit(false)
 {
 	_battleGame = _game->getSavedGame()->getSavedBattle();
 
@@ -77,13 +83,13 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
 	_soldier = new Surface(320, 200, 0, 0);
-	_txtName = new Text(210, 17, 28, 6);
+	_txtName = new TextEdit(this, 210, 17, 28, 6);
 	_txtTus = new Text(40, 9, 245, 24);
 	_txtWeight = new Text(70, 9, 245, 24);
-	_txtFAcc = new Text(40, 9, 245, 32);
-	_txtReact = new Text(40, 9, 245, 40);
-	_txtPSkill = new Text(40, 9, 245, 48);
-	_txtPStr = new Text(40, 9, 245, 56);
+	_txtFiringAcc = new Text(70, 9, 245, 32);
+	_txtThrowingAcc = new Text(70, 9, 245, 40);
+	_txtMeleeAcc = new Text(70, 9, 245, 48);
+	_txtPsi = new Text(70, 9, 245, 56);
 	_txtItem = new Text(160, 9, 128, 140);
 	_txtAmmo = new Text(66, 24, 254, 64);
 	_btnOk = new BattlescapeButton(35, 22, 237, 1);
@@ -96,6 +102,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 	_btnApplyTemplate = new BattlescapeButton(32, 22, _templateBtnX, _applyTemplateBtnY);
 	_selAmmo = new Surface(RuleInventory::HAND_W * RuleInventory::SLOT_W, RuleInventory::HAND_H * RuleInventory::SLOT_H, 272, 88);
 	_inv = new Inventory(_game, 320, 200, 0, 0, _parent == 0);
+	_btnQuickSearch = new TextEdit(this, 40, 9, 244, 140);
 
 	// Set palette
 	setPalette("PAL_BATTLESCAPE");
@@ -106,13 +113,14 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 	_game->getMod()->getSurface("TAC01.SCR")->blit(_bg);
 
 	add(_soldier);
+	add(_btnQuickSearch, "textItem", "inventory");
 	add(_txtName, "textName", "inventory", _bg);
 	add(_txtTus, "textTUs", "inventory", _bg);
 	add(_txtWeight, "textWeight", "inventory", _bg);
-	add(_txtFAcc, "textFiring", "inventory", _bg);
-	add(_txtReact, "textReaction", "inventory", _bg);
-	add(_txtPSkill, "textPsiSkill", "inventory", _bg);
-	add(_txtPStr, "textPsiStrength", "inventory", _bg);
+	add(_txtFiringAcc, "textFiring", "inventory", _bg);
+	add(_txtThrowingAcc, "textFiring", "inventory", _bg);
+	add(_txtMeleeAcc, "textFiring", "inventory", _bg);
+	add(_txtPsi, "textFiring", "inventory", _bg);
 	add(_txtItem, "textItem", "inventory", _bg);
 	add(_txtAmmo, "textAmmo", "inventory", _bg);
 	add(_btnOk, "buttonOK", "inventory", _bg);
@@ -138,18 +146,20 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 
 	_txtName->setBig();
 	_txtName->setHighContrast(true);
+	_txtName->onChange((ActionHandler)&InventoryState::edtSoldierChange);
+	_txtName->onMousePress((ActionHandler)&InventoryState::edtSoldierPress);
 
 	_txtTus->setHighContrast(true);
 
 	_txtWeight->setHighContrast(true);
 
-	_txtFAcc->setHighContrast(true);
+	_txtFiringAcc->setHighContrast(true);
 
-	_txtReact->setHighContrast(true);
+	_txtThrowingAcc->setHighContrast(true);
 
-	_txtPSkill->setHighContrast(true);
+	_txtMeleeAcc->setHighContrast(true);
 
-	_txtPStr->setHighContrast(true);
+	_txtPsi->setHighContrast(true);
 
 	_txtItem->setHighContrast(true);
 
@@ -159,6 +169,9 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 	_btnOk->onMouseClick((ActionHandler)&InventoryState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnOkClick, Options::keyCancel);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnOkClick, Options::keyBattleInventory);
+	_btnOk->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
+	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnArmorClick, Options::keyBattleAbort);
+	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnAvatarClick, Options::keyBattleMap);
 	_btnOk->setTooltip("STR_OK");
 	_btnOk->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnOk->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
@@ -203,6 +216,12 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 	_btnApplyTemplate->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnApplyTemplate->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
 
+	_btnQuickSearch->setHighContrast(true);
+	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&InventoryState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(Options::showQuickSearch);
+
+	_btnOk->onKeyboardRelease((ActionHandler)&InventoryState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 
 	// only use copy/paste buttons in setup (i.e. non-tu) mode
 	if (_tu)
@@ -224,10 +243,10 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 
 	_txtTus->setVisible(_tu);
 	_txtWeight->setVisible(Options::showMoreStatsInInventoryView);
-	_txtFAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
-	_txtReact->setVisible(Options::showMoreStatsInInventoryView && !_tu);
-	_txtPSkill->setVisible(Options::showMoreStatsInInventoryView && !_tu);
-	_txtPStr->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtFiringAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtThrowingAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtMeleeAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+	_txtPsi->setVisible(Options::showMoreStatsInInventoryView && !_tu);
 }
 
 static void _clearInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
@@ -246,6 +265,7 @@ static void _clearInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventory
 InventoryState::~InventoryState()
 {
 	_clearInventoryTemplate(_curInventoryTemplate);
+	_clearInventoryTemplate(_tempInventoryTemplate);
 
 	if (_battleGame->getTileEngine())
 	{
@@ -263,6 +283,39 @@ InventoryState::~InventoryState()
 	{
 		Screen::updateScale(Options::geoscapeScale, Options::geoscapeScale, Options::baseXGeoscape, Options::baseYGeoscape, true);
 		_game->getScreen()->resetDisplay(false);
+	}
+}
+
+static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile, bool deleteFixedItems)
+{
+	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
+
+	// clear unit's inventory (i.e. move everything to the ground)
+	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
+	{
+		if ((*i)->getRules()->isFixed())
+		{
+			if (deleteFixedItems)
+			{
+				// delete fixed items completely (e.g. when changing armor)
+				(*i)->setOwner(NULL);
+				BattleItem *item = *i;
+				i = unitInv->erase(i);
+				game->getSavedGame()->getSavedBattle()->removeItem(item);
+			}
+			else
+			{
+				// do nothing, fixed items cannot be moved (individually by the player)!
+				++i;
+			}
+		}
+		else
+		{
+			(*i)->setOwner(NULL);
+			(*i)->setFuseTimer(-1); // unprime explosives before dropping them
+			groundTile->addItem(*i, groundRuleInv);
+			i = unitInv->erase(i);
+		}
 	}
 }
 
@@ -313,6 +366,34 @@ void InventoryState::init()
 	Soldier *s = unit->getGeoscapeSoldier();
 	if (s)
 	{
+		// reload necessary after the change of armor
+		if (_reloadUnit)
+		{
+			// Step 0: update unit's armor
+			unit->updateArmorFromSoldier(s, _battleGame->getDepth(), _game->getMod()->getMaxViewDistance());
+
+			// Step 1: remember the unit's equipment (excl. fixed items)
+			_clearInventoryTemplate(_tempInventoryTemplate);
+			_createInventoryTemplate(_tempInventoryTemplate);
+
+			// Step 2: drop all items (and delete fixed items!!)
+			std::vector<BattleItem*> *unitInv = unit->getInventory();
+			Tile *groundTile = unit->getTile();
+			_clearInventory(_game, unitInv, groundTile, true);
+
+			// Step 3: equip fixed items // Note: the inventory must be *completely* empty before this step
+			_battleGame->initFixedItems(unit);
+
+			// Step 4: re-equip original items (unless slots taken by fixed items)
+			_applyInventoryTemplate(_tempInventoryTemplate);
+
+			// refresh ui
+			_inv->arrangeGround(false); // calls drawItems() too
+
+			// reload done
+			_reloadUnit = false;
+		}
+
 		SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
 		texture->getFrame(20 + s->getRank())->setX(0);
 		texture->getFrame(20 + s->getRank())->setY(0);
@@ -367,6 +448,53 @@ void InventoryState::init()
 }
 
 /**
+ * Disables the input, if not a soldier. Sets the name without a statstring otherwise.
+ * @param action Pointer to an action.
+ */
+void InventoryState::edtSoldierPress(Action *)
+{
+	// renaming available only in the base (not during mission)
+	if (_base == 0)
+	{
+		_txtName->setFocus(false);
+	}
+	else
+	{
+		BattleUnit *unit = _inv->getSelectedUnit();
+		if (unit != 0)
+		{
+			Soldier *s = unit->getGeoscapeSoldier();
+			if (s)
+			{
+				// set the soldier's name without a statstring
+				_txtName->setText(s->getName());
+			}
+			
+		}
+	}
+}
+
+/**
+ * Changes the soldier's name.
+ * @param action Pointer to an action.
+ */
+void InventoryState::edtSoldierChange(Action *)
+{
+	BattleUnit *unit = _inv->getSelectedUnit();
+	if (unit != 0)
+	{
+		Soldier *s = unit->getGeoscapeSoldier();
+		if (s)
+		{
+			// set the soldier's name
+			s->setName(_txtName->getText());
+			// also set the unit's name (with a statstring)
+			unit->setName(s->getName(true));
+		}
+	}
+}
+
+/**
  * Updates the soldier stats (Weight, TU).
  */
 void InventoryState::updateStats()
@@ -386,26 +514,21 @@ void InventoryState::updateStats()
 		_txtWeight->setSecondaryColor(_game->getMod()->getInterface("inventory")->getElement("weight")->color);
 	}
 
-	_txtFAcc->setText(tr("STR_ACCURACY_SHORT").arg((int)(unit->getBaseStats()->firing * unit->getHealth()) / unit->getBaseStats()->health));
+	_txtFiringAcc->setText(tr("STR_FIRING_SHORT").arg(unit->getBaseStats()->firing));
 
-	_txtReact->setText(tr("STR_REACTIONS_SHORT").arg(unit->getBaseStats()->reactions));
+	_txtThrowingAcc->setText(tr("STR_THROWING_SHORT").arg(unit->getBaseStats()->throwing));
 
-	if (unit->getBaseStats()->psiSkill > 0)
-	{
-		_txtPSkill->setText(tr("STR_PSIONIC_SKILL_SHORT").arg(unit->getBaseStats()->psiSkill));
-	}
-	else
-	{
-		_txtPSkill->setText(L"");
-	}
+	_txtMeleeAcc->setText(tr("STR_MELEE_SHORT").arg(unit->getBaseStats()->melee));
 
 	if (unit->getBaseStats()->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 	{
-		_txtPStr->setText(tr("STR_PSIONIC_STRENGTH_SHORT").arg(unit->getBaseStats()->psiStrength));
+		_txtPsi->setText(tr("STR_PSI_SHORT")
+			.arg(unit->getBaseStats()->psiStrength)
+			.arg(unit->getBaseStats()->psiSkill > 0 ? unit->getBaseStats()->psiSkill : 0));
 	}
 	else
 	{
-		_txtPStr->setText(L"");
+		_txtPsi->setText(L"");
 	}
 }
 
@@ -445,6 +568,69 @@ void InventoryState::saveEquipmentLayout()
 				(*j)->getFuseTimer()
 			));
 		}
+	}
+}
+
+/**
+ * Opens the Armor Selection GUI
+ * @param action Pointer to an action.
+ */
+void InventoryState::btnArmorClick(Action *action)
+{
+	if (_base == 0)
+	{
+		// equipment just before mission or during the mission
+		return;
+	}
+
+	// equipment in the base
+	BattleUnit *unit = _battleGame->getSelectedUnit();
+	Soldier *s = unit->getGeoscapeSoldier();
+
+	if (!(s->getCraft() && s->getCraft()->getStatus() == "STR_OUT"))
+	{
+		size_t soldierIndex = 0;
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+		{
+			if ((*i)->getId() == s->getId())
+			{
+				soldierIndex = i - _base->getSoldiers()->begin();
+			}
+		}
+
+		_reloadUnit = true;
+		_game->pushState(new SoldierArmorState(_base, soldierIndex, SA_BATTLESCAPE));
+	}
+}
+
+/**
+ * Opens the Avatar Selection GUI
+ * @param action Pointer to an action.
+ */
+void InventoryState::btnAvatarClick(Action *action)
+{
+	if (_base == 0)
+	{
+		// equipment just before mission or during the mission
+		return;
+	}
+
+	// equipment in the base
+	BattleUnit *unit = _battleGame->getSelectedUnit();
+	Soldier *s = unit->getGeoscapeSoldier();
+
+	if (!(s->getCraft() && s->getCraft()->getStatus() == "STR_OUT"))
+	{
+		size_t soldierIndex = 0;
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+		{
+			if ((*i)->getId() == s->getId())
+			{
+				soldierIndex = i - _base->getSoldiers()->begin();
+			}
+		}
+
+		_game->pushState(new SoldierAvatarState(_base, soldierIndex));
 	}
 }
 
@@ -546,6 +732,34 @@ void InventoryState::btnUnloadClick(Action *)
 }
 
 /**
+* Quick search toggle.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+* Quick search.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnQuickSearchApply(Action *)
+{
+	_inv->setSearchString(_btnQuickSearch->getText());
+}
+
+/**
  * Shows more ground items / rearranges them.
  * @param action Pointer to an action.
  */
@@ -563,17 +777,8 @@ void InventoryState::btnRankClick(Action *)
 	_game->pushState(new UnitInfoState(_battleGame->getSelectedUnit(), _parent, true, false));
 }
 
-void InventoryState::btnCreateTemplateClick(Action *)
+void InventoryState::_createInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
 {
-	// don't accept clicks when moving items
-	if (_inv->getSelectedItem() != 0)
-	{
-		return;
-	}
-
-	// clear current template
-	_clearInventoryTemplate(_curInventoryTemplate);
-
 	// copy inventory instead of just keeping a pointer to it.  that way
 	// create/apply can be used as an undo button for a single unit and will
 	// also work as expected if inventory is modified after 'create' is clicked
@@ -596,7 +801,7 @@ void InventoryState::btnCreateTemplateClick(Action *)
 			ammo = "NONE";
 		}
 
-		_curInventoryTemplate.push_back(new EquipmentLayoutItem(
+		inventoryTemplate.push_back(new EquipmentLayoutItem(
 				(*j)->getRules()->getType(),
 				(*j)->getSlot()->getId(),
 				(*j)->getSlotX(),
@@ -604,57 +809,43 @@ void InventoryState::btnCreateTemplateClick(Action *)
 				ammo,
 				(*j)->getFuseTimer()));
 	}
+}
+
+void InventoryState::btnCreateTemplateClick(Action *)
+{
+	// don't accept clicks when moving items
+	if (_inv->getSelectedItem() != 0)
+	{
+		return;
+	}
+
+	// clear current template
+	_clearInventoryTemplate(_curInventoryTemplate);
+
+	// create new template
+	_createInventoryTemplate(_curInventoryTemplate);
 
 	// give audio feedback
 	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
 	refreshMouse();
 }
 
-static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile)
+void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
 {
-	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
-
-	// clear unit's inventory (i.e. move everything to the ground)
-	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
-	{
-		if ((*i)->getRules()->isFixed())
-		{
-			// do nothing, fixed items cannot be moved!
-			++i;
-		}
-		else
-		{
-			(*i)->setOwner(NULL);
-			groundTile->addItem(*i, groundRuleInv);
-			i = unitInv->erase(i);
-		}
-	}
-}
-
-void InventoryState::btnApplyTemplateClick(Action *)
-{
-	// don't accept clicks when moving items
-	// it's ok if the template is empty -- it will just result in clearing the
-	// unit's inventory
-	if (_inv->getSelectedItem() != 0)
-	{
-		return;
-	}
-
 	BattleUnit               *unit          = _battleGame->getSelectedUnit();
 	std::vector<BattleItem*> *unitInv       = unit->getInventory();
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
 	RuleInventory            *groundRuleInv = _game->getMod()->getInventory("STR_GROUND");
 
-	_clearInventory(_game, unitInv, groundTile);
+	_clearInventory(_game, unitInv, groundTile, false);
 
 	// attempt to replicate inventory template by grabbing corresponding items
 	// from the ground.  if any item is not found on the ground, display warning
 	// message, but continue attempting to fulfill the template as best we can
 	bool itemMissing = false;
 	std::vector<EquipmentLayoutItem*>::iterator templateIt;
-	for (templateIt = _curInventoryTemplate.begin(); templateIt != _curInventoryTemplate.end(); ++templateIt)
+	for (templateIt = inventoryTemplate.begin(); templateIt != inventoryTemplate.end(); ++templateIt)
 	{
 		// check if the slot is not occupied already (e.g. by a fixed weapon)
 		bool alreadyOccupied = false;
@@ -710,15 +901,28 @@ void InventoryState::btnApplyTemplateClick(Action *)
 						continue;
 					}
 
-					// move matched item from ground to the appropriate inv slot
-					(*groundItem)->setOwner(unit);
-					(*groundItem)->setSlot(_game->getMod()->getInventory((*templateIt)->getSlot()));
-					(*groundItem)->setSlotX((*templateIt)->getSlotX());
-					(*groundItem)->setSlotY((*templateIt)->getSlotY());
-					(*groundItem)->setFuseTimer((*templateIt)->getFuseTimer());
-					unitInv->push_back(*groundItem);
-					groundInv->erase(groundItem);
-					found = true;
+					// check if the slot is not occupied already (e.g. by a fixed weapon)
+					if (!_inv->overlapItems(
+						unit,
+						*groundItem,
+						_game->getMod()->getInventory((*templateIt)->getSlot()),
+						(*templateIt)->getSlotX(),
+						(*templateIt)->getSlotY()))
+					{
+						// move matched item from ground to the appropriate inv slot
+						(*groundItem)->setOwner(unit);
+						(*groundItem)->setSlot(_game->getMod()->getInventory((*templateIt)->getSlot()));
+						(*groundItem)->setSlotX((*templateIt)->getSlotX());
+						(*groundItem)->setSlotY((*templateIt)->getSlotY());
+						(*groundItem)->setFuseTimer((*templateIt)->getFuseTimer());
+						unitInv->push_back(*groundItem);
+						groundInv->erase(groundItem);
+					}
+					else
+					{
+						// let the user know or not? probably not... should be obvious why
+					}
+					found = true; // found = true, even if not equiped
 					break;
 				}
 			}
@@ -757,6 +961,19 @@ void InventoryState::btnApplyTemplateClick(Action *)
 	{
 		_inv->showWarning(tr("STR_NOT_ENOUGH_ITEMS_FOR_TEMPLATE"));
 	}
+}
+
+void InventoryState::btnApplyTemplateClick(Action *)
+{
+	// don't accept clicks when moving items
+	// it's ok if the template is empty -- it will just result in clearing the
+	// unit's inventory
+	if (_inv->getSelectedItem() != 0)
+	{
+		return;
+	}
+
+	_applyInventoryTemplate(_curInventoryTemplate);
 
 	// refresh ui
 	_inv->arrangeGround(false);
@@ -790,7 +1007,7 @@ void InventoryState::onClearInventory(Action *)
 	std::vector<BattleItem*> *unitInv    = unit->getInventory();
 	Tile                     *groundTile = unit->getTile();
 
-	_clearInventory(_game, unitInv, groundTile);
+	_clearInventory(_game, unitInv, groundTile, false);
 
 	// refresh ui
 	_inv->arrangeGround(false);
@@ -841,21 +1058,41 @@ void InventoryState::invMouseOver(Action *)
 	BattleItem *item = _inv->getMouseOverItem();
 	if (item != 0)
 	{
+		std::wstring itemName;
 		if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 		{
-			_txtItem->setText(item->getUnit()->getName(_game->getLanguage()));
+			itemName = item->getUnit()->getName(_game->getLanguage());
 		}
 		else
 		{
 			if (_game->getSavedGame()->isResearched(item->getRules()->getRequirements()))
 			{
-				_txtItem->setText(tr(item->getRules()->getName()));
+				itemName = tr(item->getRules()->getName());
 			}
 			else
 			{
-				_txtItem->setText(tr("STR_ALIEN_ARTIFACT"));
+				itemName = tr("STR_ALIEN_ARTIFACT");
 			}
 		}
+		if (Options::showItemNameAndWeightInInventory)
+		{
+			int weight = item->getRules()->getWeight();
+			if (item->getAmmoItem() != item && item->getAmmoItem())
+			{
+				weight += item->getAmmoItem()->getRules()->getWeight();
+			}
+			std::wostringstream ss;
+			ss << itemName;
+			ss << L" [";
+			ss << weight;
+			ss << L"]";
+			_txtItem->setText(ss.str().c_str());
+		}
+		else
+		{
+			_txtItem->setText(itemName);
+		}
+
 		std::wstring s;
 		if (item->getAmmoItem() != 0 && item->needsAmmo())
 		{

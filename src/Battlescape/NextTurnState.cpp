@@ -118,6 +118,10 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 		_timer->onTimer((StateHandler)&NextTurnState::close);
 		_timer->start();
 	}
+
+	// start new hit log
+	_battleGame->hitLog.str(L"New turn");
+	_battleGame->hitLog.clear();
 }
 
 /**

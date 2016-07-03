@@ -21,6 +21,7 @@
 #include "../Mod/Mod.h"
 #include "BattleUnitStatistics.h"
 #include "MissionStatistics.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

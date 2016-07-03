@@ -49,6 +49,7 @@
 #include "DogfightErrorState.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/Mod.h"
+#include "../Engine/Logger.h"
 
 namespace OpenXcom
 {

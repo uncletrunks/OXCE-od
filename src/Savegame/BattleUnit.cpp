@@ -131,6 +131,22 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_energy = _stats.stamina;
 	_health = _stats.health;
 	_morale = 100;
+	if (Options::everyoneFightsNobodyQuits)
+	{
+		// wounded soldiers start with half the energy and lowered morale
+		if (soldier->getWoundRecovery() > 0)
+		{
+			_energy = _stats.stamina / 2;
+			_morale = 75;
+		}
+		// statistically worse than average
+		_health = _health - ((soldier->getWoundRecovery() * 3) / 2);
+		if (_health < 1)
+		{
+			// this is actually a punishment, strategically it is better to leave them behind :)
+			_health = 1;
+		}
+	}
 	_stunlevel = 0;
 	_maxArmor[SIDE_FRONT] = _armor->getFrontArmor();
 	_maxArmor[SIDE_LEFT] = _armor->getSideArmor();
@@ -157,6 +173,40 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 
 	int look = soldier->getGender() + 2 * soldier->getLook() + 8 * soldier->getLookVariant();
 	setRecolor(look, look, _rankInt);
+}
+
+/**
+ * Updates a BattleUnit from a Soldier (after a change of armor)
+ * @param soldier Pointer to the Soldier.
+ * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
+ */
+void BattleUnit::updateArmorFromSoldier(Soldier *soldier, int depth, int maxViewDistance)
+{
+	_stats = *soldier->getCurrentStats();
+	_armor = soldier->getArmor();
+
+	_movementType = _armor->getMovementType();
+	if (_movementType == MT_FLOAT) {
+		if (depth > 0) { _movementType = MT_FLY; } else { _movementType = MT_WALK; }
+	} else if (_movementType == MT_SINK) {
+		if (depth == 0) { _movementType = MT_FLY; } else { _movementType = MT_WALK; }
+	}
+
+	_stats += *_armor->getStats();	// armors may modify effective stats
+	_maxViewDistanceAtDarkSq = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
+	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDarkSq;
+	_maxViewDistanceAtDaySq = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
+	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDaySq;
+	_loftempsSet = _armor->getLoftempsSet();
+
+	_tu = _stats.tu;
+	_energy = _stats.stamina;
+	_health = _stats.health;
+	_currentArmor[SIDE_FRONT] = _armor->getFrontArmor();
+	_currentArmor[SIDE_LEFT] = _armor->getSideArmor();
+	_currentArmor[SIDE_RIGHT] = _armor->getSideArmor();
+	_currentArmor[SIDE_REAR] = _armor->getRearArmor();
+	_currentArmor[SIDE_UNDER] = _armor->getUnderArmor();
 }
 
 /**
@@ -346,6 +396,7 @@ void BattleUnit::load(const YAML::Node &node)
 	_expFiring = node["expFiring"].as<int>(_expFiring);
 	_expThrowing = node["expThrowing"].as<int>(_expThrowing);
 	_expPsiSkill = node["expPsiSkill"].as<int>(_expPsiSkill);
+	_expPsiStrength = node["expPsiStrength"].as<int>(_expPsiStrength);
 	_expMelee = node["expMelee"].as<int>(_expMelee);
 	_turretType = node["turretType"].as<int>(_turretType);
 	_visible = node["visible"].as<bool>(_visible);
@@ -411,6 +462,7 @@ YAML::Node BattleUnit::save() const
 	node["expFiring"] = _expFiring;
 	node["expThrowing"] = _expThrowing;
 	node["expPsiSkill"] = _expPsiSkill;
+	node["expPsiStrength"] = _expPsiStrength;
 	node["expMelee"] = _expMelee;
 	node["turretType"] = _turretType;
 	node["visible"] = _visible;
@@ -1325,6 +1377,7 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *
 				cost = item->getCostSnap();
 				break;
 			case BA_HIT:
+			case BA_EXECUTE:
 				flat = item->getFlatMelee();
 				cost = item->getCostMelee();
 				break;
@@ -2371,9 +2424,10 @@ void BattleUnit::updateGeoscapeStats(Soldier *soldier)
  * Check if unit eligible for squaddie promotion. If yes, promote the unit.
  * Increase the mission counter. Calculate the experience increases.
  * @param geoscape Pointer to geoscape save.
+ * @param statsDiff (out) The passed UnitStats struct will be filled with the stats differences.
  * @return True if the soldier was eligible for squaddie promotion.
  */
-bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
+bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff)
 {
 	Soldier *s = geoscape->getSoldier(_id);
 	if (s == 0)
@@ -2384,6 +2438,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 	updateGeoscapeStats(s);
 
 	UnitStats *stats = s->getCurrentStats();
+	statsDiff -= *stats;        // subtract old stats
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = _stats.health - _health;
 
@@ -2438,6 +2493,8 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape)
 		v = caps.stamina - stats->stamina;
 		if (v > 0) stats->stamina += RNG::generate(0, v/10 + 2);
 	}
+
+	statsDiff += *stats; // add new stats
 
 	return hasImproved;
 }
@@ -2582,18 +2639,18 @@ int BattleUnit::getMotionPoints() const
  * Gets the unit's armor.
  * @return Pointer to armor.
  */
-Armor *BattleUnit::getArmor()
+Armor *BattleUnit::getArmor() const
 {
 	return _armor;
 }
 
 /**
- * Gets the unit's armor.
- * @return Pointer to armor.
+ * Set the unit's name.
+ * @param name Name
  */
-const Armor *BattleUnit::getArmor() const
+void BattleUnit::setName(const std::wstring &name)
 {
-	return _armor;
+	_name = name;
 }
 
 /**

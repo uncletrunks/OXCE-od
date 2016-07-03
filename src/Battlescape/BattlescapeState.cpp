@@ -32,12 +32,14 @@
 #include "Pathfinding.h"
 #include "BattlescapeGame.h"
 #include "WarningMessage.h"
+#include "InfoboxState.h"
 #include "DebriefingState.h"
 #include "MiniMapState.h"
 #include "BattlescapeGenerator.h"
 #include "BriefingState.h"
 #include "../lodepng.h"
 #include "../fmath.h"
+#include "../Geoscape/GeoscapeState.h"
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
 #include "../Engine/LocalizedText.h"
@@ -70,7 +72,11 @@
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/Soldier.h"
 #include "../Savegame/BattleItem.h"
+#include "../Ufopaedia/Ufopaedia.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleInventory.h"
+#include "../Mod/RuleSoldier.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -79,7 +85,7 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0)
+BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _animFrame(0), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
 
@@ -100,6 +106,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_map = new Map(_game, screenWidth, screenHeight, 0, 0, visibleMapHeight);
 
 	_numLayers = new NumberText(3, 5, x + 232, y + 6);
+	_txtKneelStatus = new Text(8, 8, x + 137, y + 15);
 	_rank = new Surface(26, 23, x + 107, y + 33);
 
 	// Create buttons
@@ -126,8 +133,16 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnZeroTUs = new BattlescapeButton(10, 23, x + 49, y + 33);
 	_btnLeftHandItem = new InteractiveSurface(32, 48, x + 8, y + 4);
 	_numAmmoLeft = new NumberText(30, 5, x + 8, y + 4);
+	_numMedikitLeft1 = new NumberText(30, 5, x + 9, y + 32);
+	_numMedikitLeft2 = new NumberText(30, 5, x + 9, y + 39);
+	_numMedikitLeft3 = new NumberText(30, 5, x + 9, y + 46);
+	_numTwoHandedIndicatorLeft = new NumberText(10, 5, x + 36, y + 46);
 	_btnRightHandItem = new InteractiveSurface(32, 48, x + 280, y + 4);
 	_numAmmoRight = new NumberText(30, 5, x + 280, y + 4);
+	_numMedikitRight1 = new NumberText(30, 5, x + 281, y + 32);
+	_numMedikitRight2 = new NumberText(30, 5, x + 281, y + 39);
+	_numMedikitRight3 = new NumberText(30, 5, x + 281, y + 46);
+	_numTwoHandedIndicatorRight = new NumberText(10, 5, x + 308, y + 46);
 	const int visibleUnitX = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->x;
 	const int visibleUnitY = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->y;
 	for (int i = 0; i < VISIBLE_MAX; ++i)
@@ -143,7 +158,17 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnPsi->setVisible(false);
 
 	// Create soldier stats summary
-	_txtName = new Text(136, 10, x + 135, y + 32);
+	SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks");
+	if (texture != 0)
+	{
+		_rankTiny = new Surface(7, 7, x + 135, y + 33);
+		_txtName = new Text(128, 10, x + 143, y + 32);
+	}
+	else
+	{
+		_txtName = new Text(136, 10, x + 135, y + 32);
+		_rankTiny = new Surface(7, 7, x + 264, y + 33);
+	}
 
 	_numTimeUnits = new NumberText(15, 5, x + 136, y + 42);
 	_barTimeUnits = new Bar(102, 3, x + 170, y + 41);
@@ -201,6 +226,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	}
 
 	add(_rank, "rank", "battlescape", _icons);
+	add(_rankTiny, "rank", "battlescape", _icons);
 	add(_btnUnitUp, "buttonUnitUp", "battlescape", _icons);
 	add(_btnUnitDown, "buttonUnitDown", "battlescape", _icons);
 	add(_btnMapUp, "buttonMapUp", "battlescape", _icons);
@@ -213,6 +239,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	add(_btnNextStop, "buttonNextStop", "battlescape", _icons);
 	add(_btnShowLayers, "buttonShowLayers", "battlescape", _icons);
 	add(_numLayers, "numLayers", "battlescape", _icons);
+	add(_txtKneelStatus, "txtKneelStatus", "battlescape", _icons);
 	add(_btnHelp, "buttonHelp", "battlescape", _icons);
 	add(_btnEndTurn, "buttonEndTurn", "battlescape", _icons);
 	add(_btnAbort, "buttonAbort", "battlescape", _icons);
@@ -234,8 +261,16 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	add(_btnZeroTUs, "buttonZeroTUs", "battlescape", _icons);
 	add(_btnLeftHandItem, "buttonLeftHand", "battlescape", _icons);
 	add(_numAmmoLeft, "numAmmoLeft", "battlescape", _icons);
+	add(_numMedikitLeft1, "numMedikitLeft1", "battlescape", _icons);
+	add(_numMedikitLeft2, "numMedikitLeft2", "battlescape", _icons);
+	add(_numMedikitLeft3, "numMedikitLeft3", "battlescape", _icons);
+	add(_numTwoHandedIndicatorLeft, "numTwoHandedIndicatorLeft", "battlescape", _icons);
 	add(_btnRightHandItem, "buttonRightHand", "battlescape", _icons);
 	add(_numAmmoRight, "numAmmoRight", "battlescape", _icons);
+	add(_numMedikitRight1, "numMedikitRight1", "battlescape", _icons);
+	add(_numMedikitRight2, "numMedikitRight2", "battlescape", _icons);
+	add(_numMedikitRight3, "numMedikitRight3", "battlescape", _icons);
+	add(_numTwoHandedIndicatorRight, "numTwoHandedIndicatorRight", "battlescape", _icons);
 	for (int i = 0; i < VISIBLE_MAX; ++i)
 	{
 		add(_btnVisibleUnit[i]);
@@ -260,9 +295,20 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_numLayers->setColor(Palette::blockOffset(1)-2);
 	_numLayers->setValue(1);
 
+	_txtKneelStatus->setColor(Palette::blockOffset(1)-2);
+	_txtKneelStatus->setText(L"");
+
 	_numAmmoLeft->setValue(999);
+	_numMedikitLeft1->setValue(999);
+	_numMedikitLeft2->setValue(999);
+	_numMedikitLeft3->setValue(999);
+	_numTwoHandedIndicatorLeft->setValue(2);
 
 	_numAmmoRight->setValue(999);
+	_numMedikitRight1->setValue(999);
+	_numMedikitRight2->setValue(999);
+	_numMedikitRight3->setValue(999);
+	_numTwoHandedIndicatorRight->setValue(2);
 
 	_icons->onMouseIn((ActionHandler)&BattlescapeState::mouseInIcons);
 	_icons->onMouseOut((ActionHandler)&BattlescapeState::mouseOutIcons);
@@ -313,7 +359,8 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnCenter->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 	_btnCenter->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
-	_btnNextSoldier->onMouseClick((ActionHandler)&BattlescapeState::btnNextSoldierClick);
+	_btnNextSoldier->onMouseClick((ActionHandler)&BattlescapeState::btnNextSoldierClick, SDL_BUTTON_LEFT);
+	_btnNextSoldier->onMouseClick((ActionHandler)&BattlescapeState::btnPrevSoldierClick, SDL_BUTTON_RIGHT);
 	_btnNextSoldier->onKeyboardPress((ActionHandler)&BattlescapeState::btnNextSoldierClick, Options::keyBattleNextUnit);
 	_btnNextSoldier->onKeyboardPress((ActionHandler)&BattlescapeState::btnPrevSoldierClick, Options::keyBattlePrevUnit);
 	_btnNextSoldier->setTooltip("STR_NEXT_UNIT");
@@ -327,9 +374,12 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnNextStop->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnShowLayers->onMouseClick((ActionHandler)&BattlescapeState::btnShowLayersClick);
+	//_btnShowLayers->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
 	_btnShowLayers->setTooltip("STR_MULTI_LEVEL_VIEW");
+	//_btnShowLayers->setTooltip("STR_UFOPAEDIA_UC");
 	_btnShowLayers->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 	_btnShowLayers->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
+	_btnShowLayers->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
 
 	_btnHelp->onMouseClick((ActionHandler)&BattlescapeState::btnHelpClick);
 	_btnHelp->onKeyboardPress((ActionHandler)&BattlescapeState::btnHelpClick, Options::keyBattleOptions);
@@ -340,7 +390,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnEndTurn->onMouseClick((ActionHandler)&BattlescapeState::btnEndTurnClick);
 	_btnEndTurn->onKeyboardPress((ActionHandler)&BattlescapeState::btnEndTurnClick, Options::keyBattleEndTurn);
 	_btnEndTurn->setTooltip("STR_END_TURN");
-	_btnEndTurn->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
+	_btnEndTurn->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInEndTurn);
 	_btnEndTurn->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnAbort->onMouseClick((ActionHandler)&BattlescapeState::btnAbortClick);
@@ -356,15 +406,17 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnStats->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick);
+	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick, SDL_BUTTON_RIGHT);
 	_btnLeftHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnLeftHandItemClick, Options::keyBattleUseLeftHand);
 	_btnLeftHandItem->setTooltip("STR_USE_LEFT_HAND");
-	_btnLeftHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
+	_btnLeftHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInExtraLeftHand);
 	_btnLeftHandItem->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick);
+	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick, SDL_BUTTON_RIGHT);
 	_btnRightHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnRightHandItemClick, Options::keyBattleUseRightHand);
 	_btnRightHandItem->setTooltip("STR_USE_RIGHT_HAND");
-	_btnRightHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
+	_btnRightHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInExtraRightHand);
 	_btnRightHandItem->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnReserveNone->onMouseClick((ActionHandler)&BattlescapeState::btnReserveClick);
@@ -845,6 +897,28 @@ void BattlescapeState::btnShowMapClick(Action *)
 }
 
 /**
+ * Toggles the kneel button.
+ * @param unit Pointer to current unit.
+ */
+void BattlescapeState::toggleKneelButton(BattleUnit* unit)
+{
+	SurfaceSet *sprites = _game->getMod()->getSurfaceSet("KneelButton");
+	if ((unit) && (unit->isKneeled())) {
+		if (sprites == 0) {
+			_txtKneelStatus->setText(L"*");
+		} else {
+			sprites->getFrame(1)->blit(_btnKneel);
+		}
+	} else {
+		if (sprites == 0) {
+			_txtKneelStatus->setText(L"");
+		} else {
+			sprites->getFrame(0)->blit(_btnKneel);
+		}
+	}
+}
+
+/**
  * Toggles the current unit's kneel/standup status.
  * @param action Pointer to an action.
  */
@@ -856,6 +930,7 @@ void BattlescapeState::btnKneelClick(Action *)
 		if (bu)
 		{
 			_battleGame->kneel(bu);
+			toggleKneelButton(bu);
 		}
 
 		// update any path preview if unit kneels
@@ -898,7 +973,7 @@ void BattlescapeState::btnInventoryClick(Action *)
 		_battleGame->getPathfinding()->removePreview();
 		_battleGame->cancelCurrentAction(true);
 
-		_game->pushState(new InventoryState(!_save->getDebugMode(), this));
+		_game->pushState(new InventoryState(!_save->getDebugMode(), this, 0));
 	}
 }
 
@@ -1020,7 +1095,7 @@ void BattlescapeState::btnEndTurnClick(Action *)
 	if (allowButtons())
 	{
 		_txtTooltip->setText(L"");
-		_battleGame->requestEndTurn();
+		_battleGame->requestEndTurn(false);
 	}
 }
 
@@ -1074,7 +1149,7 @@ void BattlescapeState::btnStatsClick(Action *action)
  * Shows an action popup menu. When clicked, creates the action.
  * @param action Pointer to an action.
  */
-void BattlescapeState::btnLeftHandItemClick(Action *)
+void BattlescapeState::btnLeftHandItemClick(Action *action)
 {
 	if (playableUnitSelected())
 	{
@@ -1092,7 +1167,8 @@ void BattlescapeState::btnLeftHandItemClick(Action *)
 		_save->getSelectedUnit()->setActiveHand("STR_LEFT_HAND");
 		_map->draw();
 		BattleItem *leftHandItem = _save->getSelectedUnit()->getLeftHandWeapon();
-		handleItemClick(leftHandItem);
+		bool rightClick = action->getDetails()->button.button == SDL_BUTTON_RIGHT;
+		handleItemClick(leftHandItem, rightClick);
 	}
 }
 
@@ -1100,7 +1176,7 @@ void BattlescapeState::btnLeftHandItemClick(Action *)
  * Shows an action popup menu. When clicked, create the action.
  * @param action Pointer to an action.
  */
-void BattlescapeState::btnRightHandItemClick(Action *)
+void BattlescapeState::btnRightHandItemClick(Action *action)
 {
 	if (playableUnitSelected())
 	{
@@ -1118,7 +1194,8 @@ void BattlescapeState::btnRightHandItemClick(Action *)
 		_save->getSelectedUnit()->setActiveHand("STR_RIGHT_HAND");
 		_map->draw();
 		BattleItem *rightHandItem = _save->getSelectedUnit()->getRightHandWeapon();
-		handleItemClick(rightHandItem);
+		bool rightClick = action->getDetails()->button.button == SDL_BUTTON_RIGHT;
+		handleItemClick(rightHandItem, rightClick);
 	}
 }
 
@@ -1268,6 +1345,7 @@ void BattlescapeState::updateSoldierInfo()
 
 	bool playableUnit = playableUnitSelected();
 	_rank->setVisible(playableUnit);
+	_rankTiny->setVisible(playableUnit);
 	_numTimeUnits->setVisible(playableUnit);
 	_barTimeUnits->setVisible(playableUnit);
 	_barTimeUnits->setVisible(playableUnit);
@@ -1283,11 +1361,20 @@ void BattlescapeState::updateSoldierInfo()
 	_btnLeftHandItem->setVisible(playableUnit);
 	_btnRightHandItem->setVisible(playableUnit);
 	_numAmmoLeft->setVisible(playableUnit);
+	_numMedikitLeft1->setVisible(playableUnit);
+	_numMedikitLeft2->setVisible(playableUnit);
+	_numMedikitLeft3->setVisible(playableUnit);
+	_numTwoHandedIndicatorLeft->setVisible(playableUnit);
 	_numAmmoRight->setVisible(playableUnit);
+	_numMedikitRight1->setVisible(playableUnit);
+	_numMedikitRight2->setVisible(playableUnit);
+	_numMedikitRight3->setVisible(playableUnit);
+	_numTwoHandedIndicatorRight->setVisible(playableUnit);
 	if (!playableUnit)
 	{
 		_txtName->setText(L"");
 		showPsiButton(false);
+		toggleKneelButton(NULL);
 		return;
 	}
 
@@ -1295,12 +1382,76 @@ void BattlescapeState::updateSoldierInfo()
 	Soldier *soldier = battleUnit->getGeoscapeSoldier();
 	if (soldier != 0)
 	{
-		SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
-		texture->getFrame(20 + soldier->getRank())->blit(_rank);
+		// presence of custom background determines what should happen
+		Surface *customBg = _game->getMod()->getSurface("AvatarBackground");
+		if (customBg == 0)
+		{
+			// show rank (vanilla behaviour)
+			SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
+			texture->getFrame(20 + soldier->getRank())->blit(_rank);
+		}
+		else
+		{
+			// show tiny rank (modded)
+			SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks");
+			if (texture != 0)
+			{
+				texture->getFrame(soldier->getRank())->blit(_rankTiny);
+			}
+
+			// use custom background (modded)
+			customBg->blit(_rank);
+
+			// show avatar
+			std::string look = soldier->getArmor()->getSpriteInventory();
+			if (!soldier->getRules()->getArmorForAvatar().empty())
+			{
+				look = _game->getMod()->getArmor(soldier->getRules()->getArmorForAvatar())->getSpriteInventory();
+			}
+			const std::string gender = soldier->getGender() == GENDER_MALE ? "M" : "F";
+			std::stringstream ss;
+			Surface *surf = 0;
+
+			for (int i = 0; i <= 4; ++i)
+			{
+				ss.str("");
+				ss << look;
+				ss << gender;
+				ss << (int)soldier->getLook() + (soldier->getLookVariant() & (15 >> i)) * 4;
+				ss << ".SPK";
+				surf = _game->getMod()->getSurface(ss.str());
+				if (surf)
+				{
+					break;
+				}
+			}
+			if (!surf)
+			{
+				ss.str("");
+				ss << look;
+				ss << ".SPK";
+				surf = _game->getMod()->getSurface(ss.str());
+			}
+
+			// crop
+			surf->getCrop()->x = soldier->getRules()->getAvatarOffsetX();
+			surf->getCrop()->y = soldier->getRules()->getAvatarOffsetY();
+			surf->getCrop()->w = 26;
+			surf->getCrop()->h = 23;
+
+			surf->blit(_rank);
+
+			// reset crop
+			surf->getCrop()->x = 0;
+			surf->getCrop()->y = 0;
+			surf->getCrop()->w = surf->getWidth();
+			surf->getCrop()->h = surf->getHeight();
+		}
 	}
 	else
 	{
 		_rank->clear();
+		_rankTiny->clear();
 	}
 	_numTimeUnits->setValue(battleUnit->getTimeUnits());
 	_barTimeUnits->setMax(battleUnit->getBaseStats()->tu);
@@ -1317,10 +1468,100 @@ void BattlescapeState::updateSoldierInfo()
 	_barMorale->setMax(100);
 	_barMorale->setValue(battleUnit->getMorale());
 
-	drawItem(battleUnit->getLeftHandWeapon(), _btnLeftHandItem, _numAmmoLeft);
-	drawItem(battleUnit->getRightHandWeapon(), _btnRightHandItem, _numAmmoRight);
+	toggleKneelButton(battleUnit);
+
+	//FIXME: Meridian: extract into function later like Yankes did (merge conflict)
+	//drawItem(battleUnit->getLeftHandWeapon(), _btnLeftHandItem, _numAmmoLeft);
+	//drawItem(battleUnit->getRightHandWeapon(), _btnRightHandItem, _numAmmoRight);
+
+	BattleItem *leftHandItem = battleUnit->getItem("STR_LEFT_HAND");
+	_btnLeftHandItem->clear();
+	_numAmmoLeft->setVisible(false);
+	_numMedikitLeft1->setVisible(false);
+	_numMedikitLeft2->setVisible(false);
+	_numMedikitLeft3->setVisible(false);
+	_numTwoHandedIndicatorLeft->setVisible(false);
+	if (leftHandItem)
+	{
+		leftHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnLeftHandItem);
+		if (leftHandItem->getRules()->getBattleType() == BT_FIREARM && (leftHandItem->needsAmmo() || leftHandItem->getRules()->getClipSize() > 0))
+		{
+			_numAmmoLeft->setVisible(true);
+			if (leftHandItem->getAmmoItem())
+				_numAmmoLeft->setValue(leftHandItem->getAmmoItem()->getAmmoQuantity());
+			else
+				_numAmmoLeft->setValue(0);
+		}
+		if (Options::twoHandedIndicator)
+		{
+			_numTwoHandedIndicatorLeft->setVisible(leftHandItem->getRules()->isTwoHanded());
+			_numTwoHandedIndicatorLeft->setColor(leftHandItem->getRules()->isBlockingBothHands() ? 36: 52); // red or green
+		}
+		if (leftHandItem->getRules()->getBattleType() == BT_MEDIKIT)
+		{
+			_numMedikitLeft1->setVisible(true);
+			_numMedikitLeft1->setValue(leftHandItem->getPainKillerQuantity());
+			_numMedikitLeft2->setVisible(true);
+			_numMedikitLeft2->setValue(leftHandItem->getStimulantQuantity());
+			_numMedikitLeft3->setVisible(true);
+			_numMedikitLeft3->setValue(leftHandItem->getHealQuantity());
+		}
+		// primed grenade indicator (static)
+		if (leftHandItem->getFuseTimer() >= 0)
+		{
+			// FIXME: remove after animated indicator works
+			Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+			tempSurface->setX((RuleInventory::HAND_W - leftHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+			tempSurface->setY((RuleInventory::HAND_H - leftHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+			tempSurface->blit(_btnLeftHandItem);
+		}
+	}
+	BattleItem *rightHandItem = battleUnit->getItem("STR_RIGHT_HAND");
+	_btnRightHandItem->clear();
+	_numAmmoRight->setVisible(false);
+	_numMedikitRight1->setVisible(false);
+	_numMedikitRight2->setVisible(false);
+	_numMedikitRight3->setVisible(false);
+	_numTwoHandedIndicatorRight->setVisible(false);
+	if (rightHandItem)
+	{
+		rightHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnRightHandItem);
+		if (rightHandItem->getRules()->getBattleType() == BT_FIREARM && (rightHandItem->needsAmmo() || rightHandItem->getRules()->getClipSize() > 0))
+		{
+			_numAmmoRight->setVisible(true);
+			if (rightHandItem->getAmmoItem())
+				_numAmmoRight->setValue(rightHandItem->getAmmoItem()->getAmmoQuantity());
+			else
+				_numAmmoRight->setValue(0);
+		}
+		if (Options::twoHandedIndicator)
+		{
+			_numTwoHandedIndicatorRight->setVisible(rightHandItem->getRules()->isTwoHanded());
+			_numTwoHandedIndicatorRight->setColor(rightHandItem->getRules()->isBlockingBothHands() ? 36: 52); // red or green
+		}
+		if (rightHandItem->getRules()->getBattleType() == BT_MEDIKIT)
+		{
+			_numMedikitRight1->setVisible(true);
+			_numMedikitRight1->setValue(rightHandItem->getPainKillerQuantity());
+			_numMedikitRight2->setVisible(true);
+			_numMedikitRight2->setValue(rightHandItem->getStimulantQuantity());
+			_numMedikitRight3->setVisible(true);
+			_numMedikitRight3->setValue(rightHandItem->getHealQuantity());
+		}
+		// primed grenade indicator (static)
+		if (rightHandItem->getFuseTimer() >= 0)
+		{
+			// FIXME: remove after animated indicator works
+			Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+			tempSurface->setX((RuleInventory::HAND_W - rightHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+			tempSurface->setY((RuleInventory::HAND_H - rightHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+			tempSurface->blit(_btnRightHandItem);
+		}
+	}
 
 	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
+
+	// go through all units visible to the selected soldier (or other unit, e.g. mind-controlled enemy)
 	int j = 0;
 	for (std::vector<BattleUnit*>::iterator i = battleUnit->getVisibleUnits()->begin(); i != battleUnit->getVisibleUnits()->end() && j < VISIBLE_MAX; ++i)
 	{
@@ -1328,6 +1569,52 @@ void BattlescapeState::updateSoldierInfo()
 		_numVisibleUnit[j]->setVisible(true);
 		_visibleUnit[j] = (*i);
 		++j;
+	}
+
+	// remember where red indicators turn green
+	_numberOfDirectlyVisibleUnits = j;
+
+	// go through all units on the map
+	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end() && j < VISIBLE_MAX; ++i)
+	{
+		// check if they are hostile and visible (by any friendly unit)
+		if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut() && (*i)->getVisible())
+		{
+			bool alreadyShown = false;
+			// check if they are not already shown (e.g. because we see them directly)
+			for (std::vector<BattleUnit*>::iterator k = battleUnit->getVisibleUnits()->begin(); k != battleUnit->getVisibleUnits()->end(); ++k)
+			{
+				if ((*i)->getId() == (*k)->getId())
+				{
+					alreadyShown = true;
+				}
+			}
+			if (!alreadyShown)
+			{
+				_btnVisibleUnit[j]->setVisible(true);
+				_numVisibleUnit[j]->setVisible(true);
+				_visibleUnit[j] = (*i);
+				++j;
+			}
+		}
+	}
+
+	// remember where green indicators turn blue
+	_numberOfEnemiesTotal = j;
+
+	if (Options::bleedingIndicator)
+	{
+		// go through all wounded units under player's control (incl. unconscious)
+		for (std::vector<BattleUnit*>::iterator i = _battleGame->getSave()->getUnits()->begin(); i != _battleGame->getSave()->getUnits()->end() && j < VISIBLE_MAX; ++i)
+		{
+			if ((*i)->getFaction() == FACTION_PLAYER && (*i)->getStatus() != STATUS_DEAD && (*i)->getFatalWounds() > 0)
+			{
+				_btnVisibleUnit[j]->setVisible(true);
+				_numVisibleUnit[j]->setVisible(true);
+				_visibleUnit[j] = (*i);
+				++j;
+			}
+		}
 	}
 
 	showPsiButton(battleUnit->getSpecialWeapon(BT_PSIAMP) != 0);
@@ -1345,7 +1632,7 @@ void BattlescapeState::blinkVisibleUnitButtons()
 		if (_btnVisibleUnit[i]->getVisible() == true)
 		{
 			_btnVisibleUnit[i]->drawRect(0, 0, 15, 12, 15);
-			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, color);
+			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, i < _numberOfDirectlyVisibleUnits ? color : i < _numberOfEnemiesTotal ? 54 : 134);
 		}
 	}
 
@@ -1379,17 +1666,74 @@ void BattlescapeState::blinkHealthBar()
 }
 
 /**
+ * Shows primer warnings on all live grenades.
+ */
+void BattlescapeState::drawPrimers()
+{
+	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
+
+	if (_save->getSelectedUnit())
+	{
+		if (_animFrame == 8)
+		{
+			_animFrame = 0;
+		}
+
+		Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+
+		// left hand
+		BattleItem *leftHandItem = _save->getSelectedUnit()->getItem("STR_LEFT_HAND");
+		if (leftHandItem)
+		{
+			if (leftHandItem->getFuseTimer() >= 0)
+			{
+				tempSurface->setX((RuleInventory::HAND_W - leftHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+				tempSurface->setY((RuleInventory::HAND_H - leftHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+				tempSurface->blit(_btnLeftHandItem);
+				// FIXME: why doesn't this work?
+				//tempSurface->blitNShade(_btnLeftHandItem, 10, 10, Pulsate[_animFrame]);
+			}
+		}
+
+		// right hand
+		BattleItem *rightHandItem = _save->getSelectedUnit()->getItem("STR_RIGHT_HAND");
+		if (rightHandItem)
+		{
+			if (rightHandItem->getFuseTimer() >= 0)
+			{
+				tempSurface->setX((RuleInventory::HAND_W - rightHandItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W/2);
+				tempSurface->setY((RuleInventory::HAND_H - rightHandItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H/2);
+				tempSurface->blit(_btnRightHandItem);
+				// FIXME: animate
+				//tempSurface->blitNShade(_btnRightHandItem, 10, 10, Pulsate[_animFrame]);
+			}
+		}
+
+		_animFrame++;
+	}
+}
+
+/**
  * Popups a context sensitive list of actions the user can choose from.
  * Some actions result in a change of gamestate.
  * @param item Item the user clicked on (righthand/lefthand)
+ * @param rightClick was it a right click?
  */
-void BattlescapeState::handleItemClick(BattleItem *item)
+void BattlescapeState::handleItemClick(BattleItem *item, bool rightClick)
 {
 	// make sure there is an item, and the battlescape is in an idle state
 	if (item && !_battleGame->isBusy())
 	{
-		_battleGame->getCurrentAction()->weapon = item;
-		popup(new ActionMenuState(_battleGame->getCurrentAction(), _icons->getX(), _icons->getY()+16));
+		if (rightClick)
+		{
+			std::string articleId = item->getRules()->getType();
+			Ufopaedia::openArticle(_game, articleId);
+		}
+		else
+		{
+			_battleGame->getCurrentAction()->weapon = item;
+			popup(new ActionMenuState(_battleGame->getCurrentAction(), _icons->getX(), _icons->getY() + 16));
+		}
 	}
 }
 
@@ -1402,6 +1746,8 @@ void BattlescapeState::animate()
 
 	blinkVisibleUnitButtons();
 	blinkHealthBar();
+	// FIXME: animated grenade indicator didn't work... switching to static for now
+	//drawPrimers();
 }
 
 /**
@@ -1491,6 +1837,27 @@ inline void BattlescapeState::handle(Action *action)
 
 			if (action->getDetails()->type == SDL_KEYDOWN)
 			{
+				// "ctrl-h" - show hit log
+				if (action->getDetails()->key.keysym.sym == SDLK_h && (SDL_GetModState() & KMOD_CTRL) != 0)
+				{
+					_game->pushState(new InfoboxState(_save->hitLog.str()));
+				}
+				// "ctrl-w" - show fatal wounds
+				else if (action->getDetails()->key.keysym.sym == SDLK_w && (SDL_GetModState() & KMOD_CTRL) != 0)
+				{
+					int wounds = 0;
+					for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+					{
+						if ((*i)->getOriginalFaction() == FACTION_PLAYER && (*i)->getHealth() > 0 && (*i)->getFatalWounds() > 0)
+						{
+							wounds++;
+						}
+					}
+					std::wostringstream ss;
+					ss << L"Units with fatal wounds: ";
+					ss << wounds;
+					_game->pushState(new InfoboxState(ss.str()));
+				}
 				if (Options::debug)
 				{
 					// "ctrl-d" - enable debug mode
@@ -2090,9 +2457,160 @@ void BattlescapeState::btnZeroTUsClick(Action *action)
 }
 
 /**
- * Shows a tooltip for the appropriate button.
- * @param action Pointer to an action.
- */
+* Shows a tooltip with extra information (used for medikit-type equipment).
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
+{
+	if (allowButtons() && Options::battleTooltips)
+	{
+		// no one selected... do normal tooltip
+		if(!playableUnitSelected())
+		{
+			_currentTooltip = action->getSender()->getTooltip();
+			_txtTooltip->setText(tr(_currentTooltip));
+			return;
+		}
+
+		BattleUnit *selectedUnit = _save->getSelectedUnit();
+		BattleItem *weapon;
+		if (leftHand)
+		{
+			weapon = selectedUnit->getItem("STR_LEFT_HAND");
+		}
+		else
+		{
+			weapon = selectedUnit->getItem("STR_RIGHT_HAND");
+		}
+
+		// no weapon selected... do normal tooltip
+		if(!weapon)
+		{
+			_currentTooltip = action->getSender()->getTooltip();
+			_txtTooltip->setText(tr(_currentTooltip));
+			return;
+		}
+
+		// find the target unit
+		if (weapon->getRules()->getBattleType() == BT_MEDIKIT)
+		{
+			BattleUnit *targetUnit = 0;
+			TileEngine *tileEngine = _game->getSavedGame()->getSavedBattle()->getTileEngine();
+			const std::vector<BattleUnit*> *units = _game->getSavedGame()->getSavedBattle()->getUnits();
+
+			// search for target on the ground
+			bool onGround = false;
+			for (std::vector<BattleUnit*>::const_iterator i = units->begin(); i != units->end() && !targetUnit; ++i)
+			{
+				// we can heal a unit that is at the same position, unconscious and healable(=woundable)
+				if ((*i)->getPosition() == selectedUnit->getPosition() && *i != selectedUnit && (*i)->getStatus() == STATUS_UNCONSCIOUS && (*i)->isWoundable())
+				{
+					targetUnit = *i;
+					onGround = true;
+				}
+			}
+
+			// search for target in front of the selected unit
+			if (!targetUnit)
+			{
+				Position dest;
+				if (tileEngine->validMeleeRange(
+					selectedUnit->getPosition(),
+					selectedUnit->getDirection(),
+					selectedUnit,
+					0, &dest, false))
+				{
+					Tile *tile = _game->getSavedGame()->getSavedBattle()->getTile(dest);
+					if (tile != 0 && tile->getUnit() && tile->getUnit()->isWoundable())
+					{
+						targetUnit = tile->getUnit();
+					}
+				}
+			}
+
+			_currentTooltip = action->getSender()->getTooltip();
+			std::wstring tooltipExtra = tr(_currentTooltip);
+
+			// target unit found
+			if (targetUnit)
+			{
+				if (targetUnit->getOriginalFaction() == FACTION_HOSTILE) {
+					_txtTooltip->setColor(Palette::blockOffset(2));
+					_txtTooltip->setText(tooltipExtra + L"; Target = ENEMY" + (onGround ? L" (on the ground)" : L""));
+				} else if (targetUnit->getOriginalFaction() == FACTION_NEUTRAL) {
+					_txtTooltip->setColor(Palette::blockOffset(6));
+					_txtTooltip->setText(tooltipExtra + L"; Target = NEUTRAL" + (onGround ? L" (on the ground)" : L""));
+				} else if (targetUnit->getOriginalFaction() == FACTION_PLAYER) {
+					_txtTooltip->setColor(Palette::blockOffset(4));
+					_txtTooltip->setText(tooltipExtra + L"; Target = FRIEND" + (onGround ? L" (on the ground)" : L""));
+				}
+			}
+			else
+			{
+				// target unit not found => selected unit is the target (if self-heal is possible)
+				if (weapon->getRules()->getAllowSelfHeal())
+				{
+					targetUnit = selectedUnit;
+					_txtTooltip->setColor(Palette::blockOffset(13));
+					_txtTooltip->setText(tooltipExtra + L"; Target = YOURSELF");
+				}
+				else
+				{
+					// cannot use the weapon (medi-kit) on anyone
+					_currentTooltip = action->getSender()->getTooltip();
+					_txtTooltip->setText(tr(_currentTooltip));
+				}
+			}
+		}
+		else 
+		{
+			// weapon is not of medi-kit battle type
+			_currentTooltip = action->getSender()->getTooltip();
+			_txtTooltip->setText(tr(_currentTooltip));
+		}
+	}
+}
+
+/**
+* Shows a tooltip with extra information (used for medikit-type equipment).
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInExtraLeftHand(Action *action)
+{
+	txtTooltipInExtra(action, true);
+}
+
+/**
+* Shows a tooltip with extra information (used for medikit-type equipment).
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInExtraRightHand(Action *action)
+{
+	txtTooltipInExtra(action, false);
+}
+
+/**
+* Shows a tooltip for the End Turn button.
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInEndTurn(Action *action)
+{
+	if (allowButtons() && Options::battleTooltips)
+	{
+		_currentTooltip = action->getSender()->getTooltip();
+
+		std::wostringstream ss;
+		ss << tr(_currentTooltip);
+		ss << L" ";
+		ss << _save->getTurn();
+		_txtTooltip->setText(ss.str().c_str());
+	}
+}
+
+/**
+* Shows a tooltip for the appropriate button.
+* @param action Pointer to an action.
+*/
 void BattlescapeState::txtTooltipIn(Action *action)
 {
 	if (allowButtons() && Options::battleTooltips)
@@ -2108,6 +2626,9 @@ void BattlescapeState::txtTooltipIn(Action *action)
  */
 void BattlescapeState::txtTooltipOut(Action *action)
 {
+	// reset color
+	_txtTooltip->setColor(Palette::blockOffset(0));
+
 	if (allowButtons() && Options::battleTooltips)
 	{
 		if (_currentTooltip == action->getSender()->getTooltip())

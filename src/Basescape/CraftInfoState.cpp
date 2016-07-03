@@ -33,9 +33,11 @@
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/CraftWeapon.h"
+#include "../Mod/Armor.h"
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Vehicle.h"
 #include "CraftSoldiersState.h"
 #include "CraftWeaponsState.h"
 #include "CraftEquipmentState.h"
@@ -215,22 +217,61 @@ void CraftInfoState::init()
 		_crew->clear();
 		_equip->clear();
 
-		Surface *frame1 = texture->getFrame(38);
-		frame1->setY(0);
-		for (int i = 0, x = 0; i < _craft->getNumSoldiers(); ++i, x += 10)
+		SurfaceSet *customArmorPreviews = _game->getMod()->getSurfaceSet("CustomArmorPreviews");
+		if (customArmorPreviews == 0)
 		{
-			frame1->setX(x);
-			frame1->blit(_crew);
+			// vanilla
+			Surface *frame1 = texture->getFrame(38);
+			frame1->setY(0);
+			for (int i = 0, x = 0; i < _craft->getNumSoldiers(); ++i, x += 10)
+			{
+				frame1->setX(x);
+				frame1->blit(_crew);
+			}
+		}
+		else
+		{
+			// modded armor previews
+			int x = 0;
+			for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+			{
+				if ((*i)->getCraft() == _craft)
+				{
+					Surface *customFrame1 = customArmorPreviews->getFrame((*i)->getArmor()->getCustomArmorPreviewIndex());
+					customFrame1->setY(0);
+					customFrame1->setX(x);
+					customFrame1->blit(_crew);
+					x += 10;
+				}
+			}
 		}
 
-		Surface *frame2 = texture->getFrame(40);
-		frame2->setY(0);
+		SurfaceSet *customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews");
 		int x = 0;
-		for (int i = 0; i < _craft->getNumVehicles(); ++i, x += 10)
+		if (customItemPreviews == 0)
 		{
-			frame2->setX(x);
-			frame2->blit(_equip);
+			// vanilla
+			Surface *frame2 = texture->getFrame(40);
+			frame2->setY(0);
+			for (int i = 0; i < _craft->getNumVehicles(); ++i, x += 10)
+			{
+				frame2->setX(x);
+				frame2->blit(_equip);
+			}
 		}
+		else
+		{
+			// modded HWP/auxiliary previews
+			for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
+			{
+				Surface *customFrame2 = customItemPreviews->getFrame((*i)->getRules()->getCustomItemPreviewIndex());
+				customFrame2->setY(0);
+				customFrame2->setX(x);
+				customFrame2->blit(_equip);
+				x += 10;
+			}
+		}
+
 		Surface *frame3 = texture->getFrame(39);
 		for (int i = 0; i < _craft->getNumEquipment(); i += 4, x += 10)
 		{

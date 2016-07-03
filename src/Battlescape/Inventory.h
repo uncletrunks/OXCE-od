@@ -52,6 +52,7 @@ private:
 	std::map<int, std::map<int, int> > _stackLevel;
 	std::vector<std::pair<int, int> > _grenadeIndicators;
 	NumberText *_stackNumber;
+	std::wstring _searchString;
 	Timer *_animTimer;
 	int _depth;
 	/// Moves an item to a specified slot.
@@ -67,18 +68,24 @@ public:
 	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Sets the inventory's Time Unit mode.
 	void setTuMode(bool tu);
+	/// Gets the inventory's selected unit.
+	BattleUnit *getSelectedUnit() const;
 	/// Sets the inventory's selected unit.
 	void setSelectedUnit(BattleUnit *unit);
 	/// Draws the inventory.
 	void draw();
 	/// Draws the inventory grid.
 	void drawGrid();
+	/// Draws the inventory grid labels.
+	void drawGridLabels(bool showTuCost = false);
 	/// Draws the inventory items.
 	void drawItems();
 	/// Gets the currently selected item.
 	BattleItem *getSelectedItem() const;
 	/// Sets the currently selected item.
 	void setSelectedItem(BattleItem *item);
+	/// Sets the search string.
+	void setSearchString(const std::wstring &searchString);
 	/// Gets the mouse over item.
 	BattleItem *getMouseOverItem() const;
 	/// Sets the mouse over item.

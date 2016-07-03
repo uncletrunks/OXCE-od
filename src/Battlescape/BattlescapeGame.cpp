@@ -59,6 +59,7 @@
 #include "UnitFallBState.h"
 #include "../Engine/Logger.h"
 #include "../Savegame/BattleUnitStatistics.h"
+#include "ConfirmEndMissionState.h"
 
 namespace OpenXcom
 {
@@ -1509,7 +1510,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				}
 				else
 				{
-					_parentState->warning("STR_NO_LINE_OF_FIRE");
+					_parentState->warning("STR_LINE_OF_SIGHT_REQUIRED");
 				}
 			}
 		}
@@ -1530,7 +1531,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				}
 				else
 				{
-					_parentState->warning("STR_NO_LINE_OF_FIRE");
+					_parentState->warning("STR_LINE_OF_SIGHT_REQUIRED");
 				}
 			}
 		}
@@ -1589,6 +1590,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				_currentAction.run = true;
 				_currentAction.strafe = false;
 			}
+			_currentAction.ignoreSpottedEnemies = (SDL_GetModState() & KMOD_SHIFT) != 0;
 			_currentAction.target = pos;
 			_save->getPathfinding()->calculate(_currentAction.actor, _currentAction.target);
 			if (bPreviewed && !_save->getPathfinding()->previewPath() && _save->getPathfinding()->getStartDirection() != -1)
@@ -1618,6 +1620,7 @@ void BattlescapeGame::secondaryAction(const Position &pos)
 	_currentAction.target = pos;
 	_currentAction.actor = _save->getSelectedUnit();
 	_currentAction.strafe = Options::strafe && (SDL_GetModState() & KMOD_CTRL) != 0 && _save->getSelectedUnit()->getTurretType() > -1;
+	_currentAction.ignoreSpottedEnemies = (SDL_GetModState() & KMOD_SHIFT) != 0;
 	statePushBack(new UnitTurnBState(this, _currentAction));
 }
 
@@ -1724,13 +1727,41 @@ void BattlescapeGame::moveUpDown(BattleUnit *unit, int dir)
 /**
  * Requests the end of the turn (waits for explosions etc to really end the turn).
  */
-void BattlescapeGame::requestEndTurn()
+void BattlescapeGame::requestEndTurn(bool askForConfirmation)
 {
 	cancelCurrentAction();
-	if (!_endTurnRequested)
+
+	if (askForConfirmation)
 	{
-		_endTurnRequested = true;
-		statePushBack(0);
+		// check for fatal wounds
+		int soldiersWithFatalWounds = 0;
+		for (std::vector<BattleUnit*>::iterator it = _save->getUnits()->begin(); it != _save->getUnits()->end(); ++it)
+		{
+			if ((*it)->getOriginalFaction() == FACTION_PLAYER && (*it)->getStatus() != STATUS_DEAD && (*it)->getFatalWounds() > 0)
+				soldiersWithFatalWounds++;
+		}
+
+		if (soldiersWithFatalWounds > 0)
+		{
+			// confirm end of turn/mission
+			_parentState->getGame()->pushState(new ConfirmEndMissionState(_save, soldiersWithFatalWounds, this));
+		}
+		else
+		{
+			if (!_endTurnRequested)
+			{
+				_endTurnRequested = true;
+				statePushBack(0);
+			}
+		}
+	}
+	else
+	{
+		if (!_endTurnRequested)
+		{
+			_endTurnRequested = true;
+			statePushBack(0);
+		}
 	}
 }
 

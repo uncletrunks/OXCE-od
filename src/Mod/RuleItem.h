@@ -123,7 +123,7 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable;
+	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher;
 	std::string _defaultInventorySlot;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
@@ -142,6 +142,7 @@ private:
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
+	int _customItemPreviewIndex;
 	int _kneelBonus, _oneHandedPenalty;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 	ModScript::RecolorItemParser::Container _recolorScript;
@@ -357,6 +358,8 @@ public:
 	bool getAllowSelfHeal() const;
 	/// Is this (medikit-type) item consumable?
 	bool isConsumable() const;
+	/// Does this item extinguish fire?
+	bool isFireExtinguisher() const;
 	/// Gets the medikit use type.
 	BattleMediKitType getMediKitType() const;
 	/// Gets the max explosion radius.
@@ -433,6 +436,8 @@ public:
 	int getVaporDensity() const;
 	/// Gets the vapor cloud probability.
 	int getVaporProbability() const;
+	/// Gets the index of the sprite in the CustomItemPreview sprite set
+	int getCustomItemPreviewIndex() const;
 	/// Gets the kneel bonus.
 	int getKneelBonus(Mod *mod) const;
 	/// Gets the one-handed penalty.

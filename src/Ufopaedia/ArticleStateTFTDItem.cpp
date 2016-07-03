@@ -27,6 +27,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextList.h"
+#include <algorithm>
 
 namespace OpenXcom
 {

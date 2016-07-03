@@ -292,7 +292,11 @@ std::wstring Soldier::getCraftString(Language *lang) const
 	std::wstring s;
 	if (_recovery > 0)
 	{
-		s = lang->getString("STR_WOUNDED");
+		std::wostringstream ss;
+		ss << lang->getString("STR_WOUNDED");
+		ss << L">";
+		ss << _recovery;
+		s = ss.str();
 	}
 	else if (_craft == 0)
 	{
@@ -486,6 +490,23 @@ UnitStats *Soldier::getInitStats()
 UnitStats *Soldier::getCurrentStats()
 {
 	return &_currentStats;
+}
+
+void Soldier::setBothStats(UnitStats *stats)
+{
+	_currentStats.tu = stats->tu;
+	_currentStats.stamina = stats->stamina;
+	_currentStats.health = stats->health;
+	_currentStats.bravery = stats->bravery;
+	_currentStats.reactions = stats->reactions;
+	_currentStats.firing = stats->firing;
+	_currentStats.throwing = stats->throwing;
+	_currentStats.melee = stats->melee;
+	_currentStats.strength = stats->strength;
+	_currentStats.psiStrength = stats->psiStrength;
+	_currentStats.psiSkill = stats->psiSkill;
+
+	_initialStats = _currentStats;
 }
 
 /**

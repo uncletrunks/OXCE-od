@@ -33,7 +33,7 @@ RuleCraft::RuleCraft(const std::string &type) :
     _type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _vehicles(0),
     _costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(0), _score(0), _battlescapeTerrainData(0),
-	_spacecraft(false), _listOrder(0), _maxItems(0), _maxDepth(0), _stats()
+	_spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _listOrder(0), _maxItems(0), _maxDepth(0), _stats()
 {
 	for (int i = 0; i < WeaponMax; ++ i)
 	{
@@ -100,8 +100,15 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 		{
 			_deployment = deployment.as<std::vector<std::vector<int> > >(_deployment);
 		}
+
+		if (const YAML::Node &craftInventoryTile = node["craftInventoryTile"])
+		{
+			_craftInventoryTile = craftInventoryTile.as<std::vector<int> >(_craftInventoryTile);
+		}
 	}
 	_spacecraft = node["spacecraft"].as<bool>(_spacecraft);
+	_notifyWhenRefueled = node["notifyWhenRefueled"].as<bool>(_notifyWhenRefueled);
+	_autoPatrol = node["autoPatrol"].as<bool>(_autoPatrol);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
@@ -376,6 +383,24 @@ bool RuleCraft::getSpacecraft() const
 }
 
 /**
+ * Checks if a notification should be displayed when the craft is refueled.
+ * @return True if notification should appear.
+ */
+bool RuleCraft::notifyWhenRefueled() const
+{
+	return _notifyWhenRefueled;
+}
+
+/**
+* Checks if the craft supports auto patrol feature.
+* @return True if auto patrol is supported.
+*/
+bool RuleCraft::canAutoPatrol() const
+{
+	return _autoPatrol;
+}
+
+/**
  * Gets the list weight for this research item.
  * @return The list weight.
  */
@@ -391,6 +416,15 @@ int RuleCraft::getListOrder() const
 std::vector<std::vector<int> > &RuleCraft::getDeployment()
 {
 	return _deployment;
+}
+
+/**
+* Gets the craft inventory tile position.
+* @return The tile position.
+*/
+std::vector<int> &RuleCraft::getCraftInventoryTile()
+{
+	return _craftInventoryTile;
 }
 
 /**

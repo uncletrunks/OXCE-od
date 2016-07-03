@@ -32,10 +32,12 @@ namespace OpenXcom
 class TextButton;
 class Window;
 class Text;
+class TextEdit;
 class TextList;
 class ComboBox;
 class Timer;
 class Base;
+class DebriefingState;
 
 /**
  * Sell/Sack screen that lets the player sell
@@ -45,7 +47,9 @@ class SellState : public State
 {
 private:
 	Base *_base;
+	DebriefingState *_debriefingState;
 	TextButton *_btnOk, *_btnCancel;
+	TextEdit *_btnQuickSearch;
 	Window *_window;
 	Text *_txtTitle, *_txtSales, *_txtFunds, *_txtQuantity, *_txtSell, *_txtValue, *_txtSpaceUsed;
 	ComboBox *_cbxCategory;
@@ -66,7 +70,7 @@ private:
 	TransferRow &getRow() { return _items[_rows[_sel]]; }
 public:
 	/// Creates the Sell state.
-	SellState(Base *base, OptionsOrigin origin = OPT_GEOSCAPE);
+	SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin = OPT_GEOSCAPE);
 	/// Cleans up the Sell state.
 	~SellState();
 	/// Runs the timers.
@@ -77,6 +81,11 @@ public:
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
+	/// Handler for pressing the "Sell all" hotkey.
+	void btnSellAllClick(Action *action);
 	/// Handler for pressing an Increase arrow in the list.
 	void lstItemsLeftArrowPress(Action *action);
 	/// Handler for releasing an Increase arrow in the list.

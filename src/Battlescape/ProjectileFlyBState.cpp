@@ -284,6 +284,8 @@ bool ProjectileFlyBState::createNewProjectile()
 
 	// create a new projectile
 	Projectile *projectile = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
+	// hit log - new bullet
+	_parent->getSave()->hitLog << "=> ";
 
 	// add the projectile on the map
 	_parent->getMap()->setProjectile(projectile);
@@ -358,7 +360,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			_parent->getMap()->setProjectile(0);
 			if (_parent->getPanicHandled())
 			{
-				_action.result = "STR_NO_LINE_OF_FIRE";
+				_action.result = "STR_NO_TRAJECTORY";
 			}
 			_unit->abortTurn();
 			_parent->popState();

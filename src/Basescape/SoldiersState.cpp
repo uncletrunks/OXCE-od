@@ -17,10 +17,13 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "SoldiersState.h"
+#include <climits>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Interface/ComboBox.h"
+#include "../Engine/Action.h"
 #include "../Geoscape/AllocatePsiTrainingState.h"
 #include "../Geoscape/AllocateTrainingState.h"
 #include "../Interface/TextButton.h"
@@ -29,8 +32,10 @@
 #include "../Interface/TextList.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Soldier.h"
+#include "../Savegame/SavedGame.h"
 #include "SoldierInfoState.h"
 #include "SoldierMemorialState.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -40,7 +45,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-SoldiersState::SoldiersState(Base *base) : _base(base)
+SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base->getSoldiers()), _dynGetter(NULL)
 {
 	bool isPsiBtnVisible = Options::anytimePsiTraining && _base->getAvailablePsiLabs() > 0;
 	bool isTrnBtnVisible = Options::anytimePsiTraining && _base->getAvailableTraining() > 0;
@@ -78,10 +83,11 @@ SoldiersState::SoldiersState(Base *base) : _base(base)
 		_btnTraining = new TextButton(96, 16, 112, 176);
 		_btnMemorial = new TextButton(148, 16, 8, 176);
 	}
-	_txtTitle = new Text(310, 17, 5, 8);
+	_txtTitle = new Text(168, 17, 16, 8);
+	_cbxSortBy = new ComboBox(this, 120, 16, 192, 8, false);
 	_txtName = new Text(114, 9, 16, 32);
-	_txtRank = new Text(102, 9, 130, 32);
-	_txtCraft = new Text(82, 9, 222, 32);
+	_txtRank = new Text(102, 9, 128, 32);
+	_txtCraft = new Text(82, 9, 208, 32);
 	_lstSoldiers = new TextList(288, 128, 8, 40);
 
 	// Set palette
@@ -97,6 +103,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base)
 	add(_txtRank, "text2", "soldierList");
 	add(_txtCraft, "text2", "soldierList");
 	add(_lstSoldiers, "list", "soldierList");
+	add(_cbxSortBy, "button", "soldierList");
 
 	centerAllSurfaces();
 
@@ -119,7 +126,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base)
 	_btnMemorial->onMouseClick((ActionHandler)&SoldiersState::btnMemorialClick);
 
 	_txtTitle->setBig();
-	_txtTitle->setAlign(ALIGN_CENTER);
+	_txtTitle->setAlign(ALIGN_LEFT);
 	_txtTitle->setText(tr("STR_SOLDIER_LIST"));
 
 	_txtName->setText(tr("STR_NAME_UC"));
@@ -128,19 +135,104 @@ SoldiersState::SoldiersState(Base *base) : _base(base)
 
 	_txtCraft->setText(tr("STR_CRAFT"));
 
-	_lstSoldiers->setColumns(3, 114, 92, 74);
+	// populate sort options
+	std::vector<std::wstring> sortOptions;
+	sortOptions.push_back(tr("ORIGINAL ORDER"));
+	_sortFunctors.push_back(NULL);
+
+#define PUSH_IN(strId, functor) \
+	sortOptions.push_back(tr(strId)); \
+	_sortFunctors.push_back(new SortFunctor(_game, functor));
+
+	PUSH_IN("ID", idStat);
+	PUSH_IN("FIRST LETTER", nameStat);
+	PUSH_IN("RANK", rankStat);
+	PUSH_IN("MISSIONS", missionsStat);
+	PUSH_IN("KILLS", killsStat);
+	PUSH_IN("WOUND RECOVERY", woundRecoveryStat);
+	PUSH_IN("STR_TIME_UNITS", tuStat);
+	PUSH_IN("STR_STAMINA", staminaStat);
+	PUSH_IN("STR_HEALTH", healthStat);
+	PUSH_IN("STR_BRAVERY", braveryStat);
+	PUSH_IN("STR_REACTIONS", reactionsStat);
+	PUSH_IN("STR_FIRING_ACCURACY", firingStat);
+	PUSH_IN("STR_THROWING_ACCURACY", throwingStat);
+	PUSH_IN("STR_MELEE_ACCURACY", meleeStat);
+	PUSH_IN("STR_STRENGTH", strengthStat);
+	PUSH_IN("STR_PSIONIC_STRENGTH", psiStrengthStat);
+	PUSH_IN("STR_PSIONIC_SKILL", psiSkillStat);
+
+#undef PUSH_IN
+
+	_cbxSortBy->setOptions(sortOptions);
+	_cbxSortBy->setSelected(0);
+	_cbxSortBy->onChange((ActionHandler)&SoldiersState::cbxSortByChange);
+	_cbxSortBy->setText(tr("SORT BY..."));
+
+	_lstSoldiers->setArrowColumn(176, ARROW_VERTICAL);
+	_lstSoldiers->setColumns(4, 112, 80, 72, 16);
+	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(8);
+	_lstSoldiers->onLeftArrowClick((ActionHandler)&SoldiersState::lstItemsLeftArrowClick);
+	_lstSoldiers->onRightArrowClick((ActionHandler)&SoldiersState::lstItemsRightArrowClick);
 	_lstSoldiers->onMouseClick((ActionHandler)&SoldiersState::lstSoldiersClick);
 }
 
 /**
- *
+ * cleans up dynamic state
  */
 SoldiersState::~SoldiersState()
 {
+	for (std::vector<SortFunctor *>::iterator it = _sortFunctors.begin(); it != _sortFunctors.end(); ++it)
+	{
+		delete(*it);
+	}
+}
 
+/**
+ * Sorts the soldiers list by the selected criterion
+ * @param action Pointer to an action.
+ */
+void SoldiersState::cbxSortByChange(Action *action)
+{
+	size_t selIdx = _cbxSortBy->getSelected();
+	if (selIdx == (size_t)-1)
+	{
+		return;
+	}
+
+	SortFunctor *compFunc = _sortFunctors[selIdx];
+	if (compFunc)
+	{
+		std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+	}
+	else
+	{
+		_dynGetter = NULL;
+		// restore original ordering, ignoring (of course) those
+		// soldiers that have been sacked since this state started
+		for (std::vector<Soldier *>::const_iterator it = _origSoldierOrder.begin();
+		it != _origSoldierOrder.end(); ++it)
+		{
+			std::vector<Soldier *>::iterator soldierIt =
+			std::find(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *it);
+			if (soldierIt != _base->getSoldiers()->end())
+			{
+				Soldier *s = *soldierIt;
+				_base->getSoldiers()->erase(soldierIt);
+				_base->getSoldiers()->insert(_base->getSoldiers()->end(), s);
+			}
+		}
+	}
+
+	size_t originalScrollPos = _lstSoldiers->getScroll();
+	if (compFunc)
+	{
+		_dynGetter = compFunc->getGetter();
+	}
+	initList(originalScrollPos);
 }
 
 /**
@@ -150,21 +242,144 @@ SoldiersState::~SoldiersState()
 void SoldiersState::init()
 {
 	State::init();
+	initList(0);
+}
+
+/**
+ * Shows the soldiers in a list at specified offset/scroll.
+ */
+void SoldiersState::initList(size_t scrl)
+{
 	unsigned int row = 0;
 	_lstSoldiers->clearList();
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
-		_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str());
+		// call corresponding getter
+		int dynStat = 0;
+		std::wostringstream ss;
+		if (_dynGetter != NULL) {
+			dynStat = (*_dynGetter)(_game, *i);
+			ss << dynStat;
+		} else {
+			ss << L"";
+		}
+
+		_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str(), ss.str().c_str());
 		if ((*i)->getCraft() == 0)
 		{
 			_lstSoldiers->setRowColor(row, _lstSoldiers->getSecondaryColor());
 		}
 		row++;
 	}
-	if (row > 0 && _lstSoldiers->getScroll() >= row)
+	if (scrl)
+		_lstSoldiers->scrollTo(scrl);
+	_lstSoldiers->draw();
+}
+
+
+/**
+ * Reorders a soldier up.
+ * @param action Pointer to an action.
+ */
+void SoldiersState::lstItemsLeftArrowClick(Action *action)
+{
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	if (row > 0)
 	{
-		_lstSoldiers->scrollTo(0);
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierUp(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierUp(action, row, true);
+		}
 	}
+	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setSelected(-1);
+}
+
+/**
+ * Moves a soldier up on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the top?
+ */
+void SoldiersState::moveSoldierUp(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->begin(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row - 1);
+		_base->getSoldiers()->at(row - 1) = s;
+		if (row != _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() - static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollUp(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
+}
+
+/**
+ * Reorders a soldier down.
+ * @param action Pointer to an action.
+ */
+void SoldiersState::lstItemsRightArrowClick(Action *action)
+{
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	size_t numSoldiers = _base->getSoldiers()->size();
+	if (0 < numSoldiers && INT_MAX >= numSoldiers && row < numSoldiers - 1)
+	{
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			moveSoldierDown(action, row);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+		{
+			moveSoldierDown(action, row, true);
+		}
+	}
+	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setSelected(-1);
+}
+
+/**
+ * Moves a soldier down on the list.
+ * @param action Pointer to an action.
+ * @param row Selected soldier row.
+ * @param max Move the soldier to the bottom?
+ */
+void SoldiersState::moveSoldierDown(Action *action, unsigned int row, bool max)
+{
+	Soldier *s = _base->getSoldiers()->at(row);
+	if (max)
+	{
+		_base->getSoldiers()->erase(_base->getSoldiers()->begin() + row);
+		_base->getSoldiers()->insert(_base->getSoldiers()->end(), s);
+	}
+	else
+	{
+		_base->getSoldiers()->at(row) = _base->getSoldiers()->at(row + 1);
+		_base->getSoldiers()->at(row + 1) = s;
+		if (row != _lstSoldiers->getVisibleRows() - 1 + _lstSoldiers->getScroll())
+		{
+			SDL_WarpMouse(action->getLeftBlackBand() + action->getXMouse(), action->getTopBlackBand() + action->getYMouse() + static_cast<Uint16>(8 * action->getYScale()));
+		}
+		else
+		{
+			_lstSoldiers->scrollDown(false);
+		}
+	}
+	initList(_lstSoldiers->getScroll());
 }
 
 /**
@@ -207,8 +422,14 @@ void SoldiersState::btnMemorialClick(Action *)
  * Shows the selected soldier's info.
  * @param action Pointer to an action.
  */
-void SoldiersState::lstSoldiersClick(Action *)
+void SoldiersState::lstSoldiersClick(Action *action)
 {
+	double mx = action->getAbsoluteXMouse();
+	if (mx >= _lstSoldiers->getArrowsLeftEdge() && mx < _lstSoldiers->getArrowsRightEdge())
+	{
+		return;
+	}
+
 	_game->pushState(new SoldierInfoState(_base, _lstSoldiers->getSelectedRow()));
 }
 

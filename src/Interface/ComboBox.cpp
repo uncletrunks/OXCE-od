@@ -25,6 +25,7 @@
 #include "../Engine/Font.h"
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -43,20 +44,25 @@ const int ComboBox::TEXT_HEIGHT = 8;
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-ComboBox::ComboBox(State *state, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _change(0), _sel(0), _state(state), _lang(0), _toggled(false)
+ComboBox::ComboBox(State *state, int width, int height, int x, int y, bool dropUp) : InteractiveSurface(width, height, x, y), _change(0), _sel(0), _state(state), _lang(0), _toggled(false), _dropUp(dropUp)
 {
 	_button = new TextButton(width, height, x, y);
 	_button->setComboBox(this);
 
 	_arrow = new Surface(11, 8, x + width - BUTTON_WIDTH, y + 4);
 
-	_window = new Window(state, width, MAX_ITEMS * 8 + VERTICAL_MARGIN * 2, x, y + height);
+	int popupHeight = MAX_ITEMS * TEXT_HEIGHT + VERTICAL_MARGIN * 2;
+	int popupY = y + height;
+	if (_dropUp) {
+		popupY = y - popupHeight;
+	}
+	_window = new Window(state, width, popupHeight, x, popupY);
 	_window->setThinBorder();
 
 	_list = new TextList(width - HORIZONTAL_MARGIN * 2 - BUTTON_WIDTH + 1,
 						MAX_ITEMS * TEXT_HEIGHT - 2,
 						x + HORIZONTAL_MARGIN,
-						y + height + VERTICAL_MARGIN);
+						popupY + VERTICAL_MARGIN);
 	_list->setComboBox(this);
 	_list->setColumns(1, _list->getWidth());
 	_list->setSelectable(true);
@@ -100,8 +106,14 @@ void ComboBox::setY(int y)
 	Surface::setY(y);
 	_button->setY(y);
 	_arrow->setY(y + 4);
-	_window->setY(y + getHeight());
-	_list->setY(y + getHeight() + VERTICAL_MARGIN);
+
+	int popupHeight = _window->getHeight();
+	int popupY = y + getHeight();
+	if (_dropUp) {
+		popupY = y - popupHeight;
+	}
+	_window->setY(popupY);
+	_list->setY(popupY + VERTICAL_MARGIN);
 }
 
 /**
@@ -250,6 +262,15 @@ size_t ComboBox::getHoveredListIdx() const
 }
 
 /**
+ * sets the button text independent of the currently selected option.
+ * @param text the text to display
+ */
+void ComboBox::setText(const std::wstring &text)
+{
+	_button->setText(text);
+}
+
+/**
  * Changes the currently selected option.
  * @param sel Selected row.
  */
@@ -276,7 +297,15 @@ void ComboBox::setDropdown(int options)
 	{
 		items--;
 	}
-	_window->setHeight(items * h + VERTICAL_MARGIN * 2);
+
+	int popupHeight = items * h + VERTICAL_MARGIN * 2;
+	int popupY = getY() + getHeight();
+	if (_dropUp) {
+		popupY = getY() - popupHeight;
+	}
+	_window->setY(popupY);
+	_window->setHeight(popupHeight);
+	_list->setY(popupY + VERTICAL_MARGIN);
 	_list->setHeight(items * h);
 }
 
@@ -338,9 +367,10 @@ void ComboBox::handle(Action *action, State *state)
 	_button->handle(action, state);
 	_list->handle(action, state);
 	InteractiveSurface::handle(action, state);
+	int topY = std::min(getY(), _window->getY());
 	if (_window->getVisible() && action->getDetails()->type == SDL_MOUSEBUTTONDOWN &&
 		(action->getAbsoluteXMouse() < getX() || action->getAbsoluteXMouse() >= getX() + getWidth() ||
-		 action->getAbsoluteYMouse() < getY() || action->getAbsoluteYMouse() >= getY() + getHeight() + _window->getHeight()))
+		 action->getAbsoluteYMouse() < topY || action->getAbsoluteYMouse() >= topY + getHeight() + _window->getHeight()))
 	{
 		toggle();
 	}

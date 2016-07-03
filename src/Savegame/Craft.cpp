@@ -37,6 +37,7 @@
 #include "../Mod/Armor.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/AlienDeployment.h"
+#include "SerializationHelper.h"
 
 namespace OpenXcom
 {
@@ -52,7 +53,8 @@ Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	_rules(rules), _base(base), _id(0), _fuel(0), _damage(0),
 	_interceptionOrder(0), _takeoff(0), _weapons(),
 	_status("STR_READY"), _lowFuel(false), _mission(false),
-	_inBattlescape(false), _inDogfight(false), _stats()
+	_inBattlescape(false), _inDogfight(false), _stats(),
+	_isAutoPatrolling(false), _lonAuto(0.0), _latAuto(0.0)
 {
 	_stats = rules->getStats();
 	_items = new ItemContainer();
@@ -209,6 +211,9 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	}
 	_takeoff = node["takeoff"].as<int>(_takeoff);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
+	_isAutoPatrolling = node["isAutoPatrolling"].as<bool>(_isAutoPatrolling);
+	_lonAuto = node["lonAuto"].as<double>(_lonAuto);
+	_latAuto = node["latAuto"].as<double>(_latAuto);
 	if (_inBattlescape)
 		setSpeed(0);
 }
@@ -255,6 +260,10 @@ YAML::Node Craft::save() const
 		node["takeoff"] = _takeoff;
 	if (!_name.empty())
 		node["name"] = Language::wstrToUtf8(_name);
+	if (_isAutoPatrolling)
+		node["isAutoPatrolling"] = _isAutoPatrolling;
+	node["lonAuto"] = serializeDouble(_lonAuto);
+	node["latAuto"] = serializeDouble(_latAuto);
 	return node;
 }
 
@@ -425,6 +434,36 @@ void Craft::setDestination(Target *dest)
 	else
 		setSpeed(_stats.speedMax);
 	MovingTarget::setDestination(dest);
+}
+
+bool Craft::getIsAutoPatrolling() const
+{
+	return _isAutoPatrolling;
+}
+
+void Craft::setIsAutoPatrolling(bool isAuto)
+{
+	_isAutoPatrolling = isAuto;
+}
+
+double Craft::getLongitudeAuto() const
+{
+	return _lonAuto;
+}
+
+void Craft::setLongitudeAuto(double lon)
+{
+	_lonAuto = lon;
+}
+
+double Craft::getLatitudeAuto() const
+{
+	return _latAuto;
+}
+
+void Craft::setLatitudeAuto(double lat)
+{
+	_latAuto = lat;
 }
 
 /**
@@ -839,6 +878,61 @@ bool Craft::insideRadarRange(Target *target) const
 void Craft::consumeFuel()
 {
 	setFuel(_fuel - getFuelConsumption());
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is repaired.
+ */
+unsigned int Craft::calcRepairTime()
+{
+	unsigned int repairTime = 0;
+
+	if (_damage > 0)
+	{
+		repairTime = (int)ceil((double)_damage / _rules->getRepairRate());
+	}
+	return repairTime;
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is refuelled (assumes fuel is available).
+ */
+unsigned int Craft::calcRefuelTime()
+{
+	unsigned int refuelTime = 0;
+
+	int needed = _rules->getMaxFuel() - _fuel;
+	if (needed > 0)
+	{
+		refuelTime = (int)ceil((double)(needed) / _rules->getRefuelRate() / 2.0);
+	}
+	return refuelTime;
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is re-armed (assumes ammo is available).
+ */
+unsigned int Craft::calcRearmTime()
+{
+	unsigned int rearmTime = 0;
+
+	for (int idx = 0; idx < _rules->getWeapons(); idx++)
+	{
+		CraftWeapon *w1 = _weapons.at(idx);
+		if (w1 != 0)
+		{
+			int needed = w1->getRules()->getAmmoMax() - w1->getAmmo();
+			if (needed > 0)
+			{
+				rearmTime += (int)ceil((double)(needed) / w1->getRules()->getRearmRate());
+			}
+		}
+	}
+
+	return rearmTime;
 }
 
 /**
