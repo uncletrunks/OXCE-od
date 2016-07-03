@@ -146,8 +146,8 @@ void TechTreeSelectState::initLists()
 
 	if (searchString.length() < 3)
 	{
-		_lstTopics->addRow(1, tr("STR_QS_THREE_LETTERS_A"));
-		_lstTopics->addRow(1, tr("STR_QS_THREE_LETTERS_B"));
+		_lstTopics->addRow(1, tr("STR_QS_THREE_LETTERS_A").c_str());
+		_lstTopics->addRow(1, tr("STR_QS_THREE_LETTERS_B").c_str());
 		return;
 	}
 

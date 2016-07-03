@@ -254,7 +254,7 @@ void TechTreeViewerState::initLists()
 		// 1. item required
 		if (rule->needItem())
 		{
-			_lstLeft->addRow(1, tr("STR_ITEM_REQUIRED"));
+			_lstLeft->addRow(1, tr("STR_ITEM_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -274,7 +274,7 @@ void TechTreeViewerState::initLists()
 		// 2. requires
 		if (reqs.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_REQUIRES"));
+			_lstLeft->addRow(1, tr("STR_REQUIRES").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -297,7 +297,7 @@ void TechTreeViewerState::initLists()
 		// 3. depends on
 		if (deps.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_DEPENDS_ON"));
+			_lstLeft->addRow(1, tr("STR_DEPENDS_ON").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -325,7 +325,7 @@ void TechTreeViewerState::initLists()
 		// 4. unlocked by
 		if (unlockedBy.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_UNLOCKED_BY"));
+			_lstLeft->addRow(1, tr("STR_UNLOCKED_BY").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -348,7 +348,7 @@ void TechTreeViewerState::initLists()
 		// 5. get for free from
 		if (getForFreeFrom.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_GET_FOR_FREE_FROM"));
+			_lstLeft->addRow(1, tr("STR_GET_FOR_FREE_FROM").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -373,7 +373,7 @@ void TechTreeViewerState::initLists()
 		// 6. required by
 		if (requiredByResearch.size() > 0 || requiredByManufacture.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_REQUIRED_BY"));
+			_lstRight->addRow(1, tr("STR_REQUIRED_BY").c_str());
 			_lstRight->setRowColor(row, 218); // blue
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(0);
@@ -420,7 +420,7 @@ void TechTreeViewerState::initLists()
 		// 7. leads to
 		if (leadsTo.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_LEADS_TO"));
+			_lstRight->addRow(1, tr("STR_LEADS_TO").c_str());
 			_lstRight->setRowColor(row, 218); // blue
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(0);
@@ -448,7 +448,7 @@ void TechTreeViewerState::initLists()
 		// 8. unlocks
 		if (unlocks.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_UNLOCKS"));
+			_lstRight->addRow(1, tr("STR_UNLOCKS").c_str());
 			_lstRight->setRowColor(row, 218); // blue
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(0);
@@ -471,7 +471,7 @@ void TechTreeViewerState::initLists()
 		// 9. gives one for free
 		if (free.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_GIVES_ONE_FOR_FREE"));
+			_lstRight->addRow(1, tr("STR_GIVES_ONE_FOR_FREE").c_str());
 			_lstRight->setRowColor(row, 218); // blue
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(0);
@@ -502,7 +502,7 @@ void TechTreeViewerState::initLists()
 		const std::vector<std::string> reqs = rule->getRequirements();
 		if (reqs.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_RESEARCH_REQUIRED"));
+			_lstLeft->addRow(1, tr("STR_RESEARCH_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -526,7 +526,7 @@ void TechTreeViewerState::initLists()
 		const std::vector<std::string> reqFacilities = rule->getRequireBaseFunc();
 		if (reqFacilities.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_FACILITIES_REQUIRED"));
+			_lstLeft->addRow(1, tr("STR_FACILITIES_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -547,7 +547,7 @@ void TechTreeViewerState::initLists()
 		const std::map<std::string, int> inputs = rule->getRequiredItems();
 		if (inputs.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_MATERIALS_REQUIRED"));
+			_lstLeft->addRow(1, tr("STR_MATERIALS_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
@@ -570,7 +570,7 @@ void TechTreeViewerState::initLists()
 		const std::map<std::string, int> outputs = rule->getProducedItems();
 		if (outputs.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_ITEMS_PRODUCED"));
+			_lstRight->addRow(1, tr("STR_ITEMS_PRODUCED").c_str());
 			_lstRight->setRowColor(row, 218); // blue
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(0);
