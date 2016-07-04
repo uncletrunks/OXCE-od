@@ -19,7 +19,7 @@
 #ifndef OPENXCOM_VERSION_H
 #define OPENXCOM_VERSION_H
 
-#define OPENXCOM_VERSION_SHORT "Extended 2.9+"
+#define OPENXCOM_VERSION_SHORT "Extended 3.0+"
 #define OPENXCOM_VERSION_LONG "1.0.0.0"
 #define OPENXCOM_VERSION_NUMBER 1,0,0,0
 
@@ -28,7 +28,7 @@
 #endif
 
 #ifndef OPENXCOM_VERSION_GIT
-#define OPENXCOM_VERSION_GIT " (v2016-07-03)"
+#define OPENXCOM_VERSION_GIT " (v2016-07-04)"
 #endif
 
 #endif
