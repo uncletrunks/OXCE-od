@@ -669,7 +669,10 @@ void InventoryState::btnOkClick(Action *)
 			(*j)->prepareNewTurn();
 		}
 	}
-	updateLighting();
+	if (_battleGame->getTileEngine())
+	{
+		updateLighting();
+	}
 }
 
 /**
