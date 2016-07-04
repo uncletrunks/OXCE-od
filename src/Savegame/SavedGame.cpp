@@ -1049,7 +1049,7 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
 	const std::vector<const RuleResearch *> &discovered = getDiscoveredResearch();
 	const std::vector<std::string> &researchProjects = mod->getResearchList();
 	const std::vector<ResearchProject *> &baseResearchProjects = base->getResearch();
-	const std::set<std::string> &baseFunc = base->getProvidedBaseFunc();
+	const std::vector<std::string> &baseFunc = base->getProvidedBaseFunc();
 	std::vector<const RuleResearch *> unlocked;
 
 
@@ -1158,7 +1158,7 @@ void SavedGame::getAvailableProductions (std::vector<RuleManufacture *> & produc
 {
 	const std::vector<std::string> &items = mod->getManufactureList();
 	const std::vector<Production *> &baseProductions = base->getProductions();
-	const std::set<std::string> &baseFunc = base->getProvidedBaseFunc();
+	const std::vector<std::string> &baseFunc = base->getProvidedBaseFunc();
 
 	for (std::vector<std::string>::const_iterator iter = items.begin();
 		iter != items.end();
