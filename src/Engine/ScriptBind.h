@@ -385,9 +385,14 @@ struct Arg<A1, A2...> : public Arg<A2...>
 			return curr;
 		}
 	}
+	template<typename A>
+	static ArgEnum typeHelper()
+	{
+		return A::type();
+	}
 	static ScriptRange<ArgEnum> argTypes()
 	{
-		const static ArgEnum types[ver()] = { A1::type(), A2::type()... };
+		const static ArgEnum types[ver()] = { typeHelper<A1>(), typeHelper<A2>()... };
 		return { std::begin(types), std::end(types) };
 	}
 };
@@ -481,12 +486,17 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 		}
 		return lower * T1::ver() + curr;
 	}
+	template<typename T>
+	static ScriptRange<ArgEnum> argHelper()
+	{
+		return T::argTypes();
+	}
 	static ScriptRange<ScriptRange<ArgEnum>> overloadType()
 	{
 		const static ScriptRange<ArgEnum> types[MaxSize] =
 		{
-			T1::argTypes(),
-			T2::argTypes()...,
+			argHelper<T1>(),
+			argHelper<T2>()...,
 		};
 		return { std::begin(types), std::end(types) };
 	}
