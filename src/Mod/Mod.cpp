@@ -524,10 +524,10 @@ T *Mod::getRule(const std::string &id, const std::string &name, const std::map<s
 	}
 	else
 	{
-		if (id != Armor::NONE)
-		{
-			Log(LOG_ERROR) << name << " " << id << " not found";
-		}
+//		if (id != Armor::NONE)
+//		{
+//			Log(LOG_ERROR) << name << " " << id << " not found";
+//		}
 		return 0;
 	}
 }
