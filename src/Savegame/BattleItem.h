@@ -83,9 +83,13 @@ public:
 	/// Spend one bullet.
 	bool spendBullet();
 	/// Gets the item's owner.
-	BattleUnit *getOwner() const;
+	BattleUnit *getOwner();
+	/// Gets the item's owner.
+	const BattleUnit *getOwner() const;
 	/// Gets the item's previous owner.
-	BattleUnit *getPreviousOwner() const;
+	BattleUnit *getPreviousOwner();
+	/// Gets the item's previous owner.
+	const BattleUnit *getPreviousOwner() const;
 	/// Sets the owner.
 	void setOwner(BattleUnit *owner);
 	/// Sets the item's previous owner.
@@ -112,6 +116,8 @@ public:
 	Surface *getBigSprite(SurfaceSet *set) const;
 	/// Gets the item's ammo item.
 	BattleItem *getAmmoItem();
+	/// Gets the item's ammo item.
+	const BattleItem *getAmmoItem() const;
 	/// Determines if this item uses ammo.
 	bool needsAmmo() const;
 	/// Sets the item's ammo item.
@@ -123,7 +129,9 @@ public:
 	/// Gets it's unique id.
 	int getId() const;
 	/// Gets the corpse's unit.
-	BattleUnit *getUnit() const;
+	BattleUnit *getUnit();
+	/// Gets the corpse's unit.
+	const BattleUnit *getUnit() const;
 	/// Sets the corpse's unit.
 	void setUnit(BattleUnit *unit);
 	/// Set medikit Heal quantity

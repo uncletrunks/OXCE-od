@@ -2582,15 +2582,6 @@ int BattleUnit::getMotionPoints() const
  * Gets the unit's armor.
  * @return Pointer to armor.
  */
-Armor *BattleUnit::getArmor()
-{
-	return _armor;
-}
-
-/**
- * Gets the unit's armor.
- * @return Pointer to armor.
- */
 const Armor *BattleUnit::getArmor() const
 {
 	return _armor;
@@ -3724,7 +3715,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
-	bu.add<const Armor, &BattleUnit::getArmor>("getRuleArmor");
+	bu.addRules<Armor, &BattleUnit::getArmor>("getRuleArmor");
 	bu.addFunc<getRightHandWeaponScript>("getRightHandWeapon");
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
@@ -3789,11 +3780,6 @@ void commonImpl(BindBase& b, Mod* mod)
 	b.addCustomConst("blit_legs", BODYPART_LEGS);
 	b.addCustomConst("blit_collapse", BODYPART_COLLAPSING);
 
-	b.addCustomConst("blit_item_righthand", BODYPART_ITEM_RIGHTHAND);
-	b.addCustomConst("blit_item_lefthand", BODYPART_ITEM_LEFTHAND);
-	b.addCustomConst("blit_item_floor", BODYPART_ITEM_FLOOR);
-	b.addCustomConst("blit_item_big", BODYPART_ITEM_INVENTORY);
-
 	b.addCustomConst("blit_large_torso_0", BODYPART_LARGE_TORSO + 0);
 	b.addCustomConst("blit_large_torso_1", BODYPART_LARGE_TORSO + 1);
 	b.addCustomConst("blit_large_torso_2", BODYPART_LARGE_TORSO + 2);
@@ -3818,13 +3804,18 @@ ModScript::RecolorUnitParser::RecolorUnitParser(ScriptGlobal* shared, const std:
 
 	commonImpl(b, mod);
 
+	b.addCustomConst("blit_item_righthand", BODYPART_ITEM_RIGHTHAND);
+	b.addCustomConst("blit_item_lefthand", BODYPART_ITEM_LEFTHAND);
+	b.addCustomConst("blit_item_floor", BODYPART_ITEM_FLOOR);
+	b.addCustomConst("blit_item_big", BODYPART_ITEM_INVENTORY);
+
 	setDefault("unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; return new_pixel;");
 }
 
 /**
  * Constructor of select sprite script parser.
  */
-ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "sprite_index", "sprite_offset", "unit", "blit_part", "anim_frame", "shade" }
+ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "sprite_index", "sprite_offset", "unit", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 

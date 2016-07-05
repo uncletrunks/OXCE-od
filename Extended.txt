@@ -328,7 +328,7 @@ items:
     tags:
       SOME_CUSTOM_TAG: 4  #user defined values used by script.
     scripts:
-      recolorItemSprite: ~      #script that handle recoloring of item pixels.
+      recolorItemSprite: ~      #script that handle recoloring of each pixel in item sprite.
       selectItemSprite: ~       #script that handle selecting graphic for item.
       reactionWeaponAction: ~   #script that handle reacion to shoot, throw or melee from that weapon.
     ai:
@@ -390,7 +390,7 @@ armors:
     tags:
       IS_THIS_NINJA: 1        #user defined values used by script.
     scripts:
-      recolorUnitSprite: ~    #recolor script call for each pixel.
+      recolorUnitSprite: ~    #recolor script call for each pixel in unit sprite, used for corpse sprite too.
       selectUnitSprite: ~     #sprite select script call for each body part.
       reactionUnitAction: ~   #script used for handling reaction for unit performing action.
       reactionUnitReaction: ~ #script used for handling reaction for unit reacting.

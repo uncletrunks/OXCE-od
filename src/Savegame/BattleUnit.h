@@ -383,8 +383,6 @@ public:
 	/// Get motion points for the motion scanner.
 	int getMotionPoints() const;
 	/// Gets the unit's armor.
-	Armor *getArmor();
-	/// Gets the unit's armor.
 	const Armor *getArmor() const;
 	/// Gets the unit's name.
 	std::wstring getName(Language *lang, bool debugAppendId = false) const;
