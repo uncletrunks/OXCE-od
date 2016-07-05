@@ -152,7 +152,7 @@ YAML::Node BattleItem::save() const
  * Gets the ruleset for the item's type.
  * @return Pointer to ruleset.
  */
-RuleItem *BattleItem::getRules() const
+const RuleItem *BattleItem::getRules() const
 {
 	return _rules;
 }
@@ -457,9 +457,9 @@ int BattleItem::setAmmoItem(BattleItem *item)
 	if (_ammoItem)
 		return -1;
 
-	for (std::vector<std::string>::iterator i = _rules->getCompatibleAmmo()->begin(); i != _rules->getCompatibleAmmo()->end(); ++i)
+	for (const std::string &s : *_rules->getCompatibleAmmo())
 	{
-		if (*i == item->getRules()->getType())
+		if (s == item->getRules()->getType())
 		{
 			_ammoItem = item;
 			item->setIsAmmo(true);
@@ -667,7 +667,7 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 
 	Bind<BattleItem> bi = { parser };
 
-	bi.add<RuleItem, &BattleItem::getRules>("getRuleItem");
+	bi.add<const RuleItem, &BattleItem::getRules>("getRuleItem");
 	bi.add<BattleUnit, &BattleItem::getUnit>("getBattleUnit");
 	bi.add<BattleItem, &BattleItem::getAmmoItem>("getAmmoItem");
 	bi.add<BattleUnit, &BattleItem::getPreviousOwner>("getPreviousOwner");

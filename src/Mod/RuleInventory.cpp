@@ -218,7 +218,7 @@ bool RuleInventory::checkSlotInPosition(int *x, int *y) const
  * @param y Slot Y position.
  * @return True if there's a slot there.
  */
-bool RuleInventory::fitItemInSlot(RuleItem *item, int x, int y) const
+bool RuleInventory::fitItemInSlot(const RuleItem *item, int x, int y) const
 {
 	if (_type == INV_HAND)
 	{

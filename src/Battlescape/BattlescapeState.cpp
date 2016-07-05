@@ -1238,7 +1238,7 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* amm
 	ammo->setVisible(false);
 	if (item)
 	{
-		RuleItem *rule = item->getRules();
+		const RuleItem *rule = item->getRules();
 		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item);
 		if (item->getRules()->getBattleType() == BT_FIREARM && (item->needsAmmo() || item->getRules()->getClipSize() > 0))
 		{

@@ -1001,7 +1001,7 @@ void Map::drawTerrain(Surface *surface)
 							if (_cursorType == CT_AIM && Options::battleUFOExtenderAccuracy)
 							{
 								BattleAction *action = _save->getBattleGame()->getCurrentAction();
-								RuleItem *weapon = action->weapon->getRules();
+								const RuleItem *weapon = action->weapon->getRules();
 								std::ostringstream ss;
 								int accuracy = action->actor->getFiringAccuracy(action->type, action->weapon, _game->getMod());
 								int distance = _save->getTileEngine()->distance(Position (itX, itY,itZ), action->actor->getPosition());

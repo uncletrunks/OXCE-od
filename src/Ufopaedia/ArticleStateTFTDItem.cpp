@@ -35,7 +35,7 @@ namespace OpenXcom
 	{
 		RuleItem *item = _game->getMod()->getItem(defs->id);
 
-		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
+		const std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
 
 		// SHOT STATS TABLE (for firearms only)
 		if (item->getBattleType() == BT_FIREARM)

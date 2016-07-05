@@ -310,7 +310,7 @@ public:
 	int getTUUnload() const;
 
 	/// Gets list of compatible ammo.
-	std::vector<std::string> *getCompatibleAmmo();
+	const std::vector<std::string> *getCompatibleAmmo() const;
 	/// Gets the item's damage type.
 	const RuleDamageType *getDamageType() const;
 	/// Gets the item's melee damage type for range weapons.

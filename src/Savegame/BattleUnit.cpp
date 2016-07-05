@@ -1293,7 +1293,7 @@ bool BattleUnit::isOut() const
  * @param item
  * @return TUs
  */
-RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, BattleItem *item) const
+RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const BattleItem *item) const
 {
 	if (item == 0)
 	{
@@ -1302,7 +1302,7 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, BattleItem
 	return getActionTUs(actionType, item->getRules());
 }
 
-RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
+RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const RuleItem *item) const
 {
 	RuleItemUseCost cost;
 	if (item != 0)
@@ -2260,9 +2260,9 @@ bool BattleUnit::checkAmmo()
 
 		for (std::vector<BattleItem*>::iterator i = getInventory()->begin(); i != getInventory()->end(); ++i)
 		{
-			for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
+			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
 			{
-				if ((*c) == (*i)->getRules()->getType())
+				if (s == (*i)->getRules()->getType())
 				{
 					int tuTemp = (*i)->getSlot()->getType() != INV_HAND ? (*i)->getSlot()->getCost(weapon->getSlot()) : 0;
 					if (tuTemp < tuMove)

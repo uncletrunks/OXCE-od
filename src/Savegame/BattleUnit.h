@@ -253,9 +253,9 @@ public:
 	/// The unit is out - either dead or unconscious.
 	bool isOut() const;
 	/// Get the number of time units a certain action takes.
-	RuleItemUseCost getActionTUs(BattleActionType actionType, BattleItem *item) const;
+	RuleItemUseCost getActionTUs(BattleActionType actionType, const BattleItem *item) const;
 	/// Get the number of time units a certain action takes.
-	RuleItemUseCost getActionTUs(BattleActionType actionType, RuleItem *item) const;
+	RuleItemUseCost getActionTUs(BattleActionType actionType, const RuleItem *item) const;
 	/// Spend time units if it can.
 	bool spendTimeUnits(int tu);
 	/// Spend energy if it can.

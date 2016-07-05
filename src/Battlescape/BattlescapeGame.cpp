@@ -641,9 +641,9 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 		BattleItem *weapon = murderer->getItem("STR_RIGHT_HAND");
 		if (weapon)
 		{
-			for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
+			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
 			{
-				if ((*c) == tempAmmo)
+				if (s == tempAmmo)
 				{
 					tempWeapon = weapon->getRules()->getName();
 				}
@@ -652,9 +652,9 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 		weapon = murderer->getItem("STR_LEFT_HAND");
 		if (weapon)
 		{
-			for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
+			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
 			{
-				if ((*c) == tempAmmo)
+				if (s == tempAmmo)
 				{
 					tempWeapon = weapon->getRules()->getName();
 				}
@@ -2009,17 +2009,21 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 			if (!item->getAmmoItem())
 			{
 				ammoFound = false;
-				for (std::vector<BattleItem*>::iterator i = action->actor->getInventory()->begin(); i != action->actor->getInventory()->end() && !ammoFound; ++i)
+				for (BattleItem *i : *action->actor->getInventory())
 				{
-					if ((*i)->getRules()->getBattleType() == BT_AMMO)
+					if (i->getRules()->getBattleType() == BT_AMMO)
 					{
-						for (std::vector<std::string>::iterator j = item->getRules()->getCompatibleAmmo()->begin(); j != item->getRules()->getCompatibleAmmo()->end() && !ammoFound; ++j)
+						for (const std::string &s : *item->getRules()->getCompatibleAmmo())
 						{
-							if ((*i)->getRules()->getName() == *j)
+							if (i->getRules()->getName() == s)
 							{
 								ammoFound = true;
 								break;
 							}
+						}
+						if (ammoFound == true)
+						{
+							break;
 						}
 					}
 				}
@@ -2030,21 +2034,25 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 			}
 		}
 
-		if ( item->getRules()->getBattleType() == BT_AMMO)
+		if (item->getRules()->getBattleType() == BT_AMMO)
 		{
 			// similar to the above, but this time we're checking if the ammo is suitable for a weapon we have.
 			bool weaponFound = false;
-			for (std::vector<BattleItem*>::iterator i = action->actor->getInventory()->begin(); i != action->actor->getInventory()->end() && !weaponFound; ++i)
+			for (BattleItem *i : *action->actor->getInventory())
 			{
-				if ((*i)->getRules()->getBattleType() == BT_FIREARM)
+				if (i->getRules()->getBattleType() == BT_FIREARM)
 				{
-					for (std::vector<std::string>::iterator j = (*i)->getRules()->getCompatibleAmmo()->begin(); j != (*i)->getRules()->getCompatibleAmmo()->end() && !weaponFound; ++j)
+					for (const std::string &s : *i->getRules()->getCompatibleAmmo())
 					{
-						if ((*i)->getRules()->getName() == *j)
+						if (i->getRules()->getName() == s)
 						{
 							weaponFound = true;
 							break;
 						}
+					}
+					if (weaponFound == true)
+					{
+						break;
 					}
 				}
 			}

@@ -276,7 +276,7 @@ void Projectile::applyAccuracy(const Position& origin, Position *target, double 
 	// maxRange is the maximum range a projectile shall ever travel in voxel space
 	double maxRange = keepRange?realDistance:16*1000; // 1000 tiles
 	maxRange = _action.type == BA_HIT?46:maxRange; // up to 2 tiles diagonally (as in the case of reaper v reaper)
-	RuleItem *weapon = _action.weapon->getRules();
+	const RuleItem *weapon = _action.weapon->getRules();
 
 	if (_action.type != BA_THROW && _action.type != BA_HIT)
 	{

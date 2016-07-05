@@ -67,7 +67,7 @@ namespace OpenXcom
 
 		item->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _image);
 
-		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
+		const std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
 
 		// SHOT STATS TABLE (for firearms only)
 		if (item->getBattleType() == BT_FIREARM)

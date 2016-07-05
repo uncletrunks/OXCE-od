@@ -3111,7 +3111,7 @@ void TileEngine::medikitRemoveIfEmpty(BattleAction *action)
  */
 void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyPart)
 {
-	RuleItem *rule = action->weapon->getRules();
+	const RuleItem *rule = action->weapon->getRules();
 
 	target->heal(bodyPart, rule->getWoundRecovery(), rule->getHealthRecovery());
 	action->weapon->setHealQuantity(action->weapon->getHealQuantity() - 1);
@@ -3126,7 +3126,7 @@ void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyP
  */
 void TileEngine::medikitStimulant(BattleAction *action, BattleUnit *target)
 {
-	RuleItem *rule = action->weapon->getRules();
+	const RuleItem *rule = action->weapon->getRules();
 
 	target->stimulant(rule->getEnergyRecovery(), rule->getStunRecovery());
 	action->weapon->setStimulantQuantity(action->weapon->getStimulantQuantity() - 1);
@@ -3141,7 +3141,7 @@ void TileEngine::medikitStimulant(BattleAction *action, BattleUnit *target)
  */
 void TileEngine::medikitPainKiller(BattleAction *action, BattleUnit *target)
 {
-	RuleItem *rule = action->weapon->getRules();
+	const RuleItem *rule = action->weapon->getRules();
 
 	target->painKillers(rule->getMoraleRecovery(), rule->getPainKillerRecovery());
 	action->weapon->setPainKillerQuantity(action->weapon->getPainKillerQuantity() - 1);

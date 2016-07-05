@@ -130,7 +130,7 @@ ItemsArrivingState::ItemsArrivingState(GeoscapeState *state) : _state(state), _b
 						// Check if it's ammo to reload a vehicle
 						for (std::vector<Vehicle*>::iterator v = (*c)->getVehicles()->begin(); v != (*c)->getVehicles()->end(); ++v)
 						{
-							std::vector<std::string>::iterator ammo = std::find((*v)->getRules()->getCompatibleAmmo()->begin(), (*v)->getRules()->getCompatibleAmmo()->end(), item->getType());
+							std::vector<std::string>::const_iterator ammo = std::find((*v)->getRules()->getCompatibleAmmo()->begin(), (*v)->getRules()->getCompatibleAmmo()->end(), item->getType());
 							if (ammo != (*v)->getRules()->getCompatibleAmmo()->end() && (*v)->getAmmo() < item->getClipSize())
 							{
 								int used = std::min((*j)->getQuantity(), item->getClipSize() - (*v)->getAmmo());
