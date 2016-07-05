@@ -1167,6 +1167,19 @@ struct Bind : BindBase
 		addCustomFunc<helper::BindValue<T, int, X>>(getName(get));
 	}
 
+	template<typename P, P* (T::*X)(), const P* (T::*Y)() const>
+	void addPair(const std::string& get)
+	{
+		add<P, X>(get);
+		add<const P, Y>(get);
+	}
+
+	template<typename P, const P* (T::*Y)() const>
+	void addRules(const std::string& get)
+	{
+		add<const P, Y>(get);
+	}
+
 	#define MACRO_COPY_HELP_FUNC(Name, ...) \
 		template<__VA_ARGS__> \
 		void add(const std::string& func) \

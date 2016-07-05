@@ -662,7 +662,7 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 
 	if (std::distance(begin, end) != 3)
 	{
-		Log(LOG_ERROR) << "invaild length of condition arguments";
+		Log(LOG_ERROR) << "Invaild length of condition arguments";
 		return false;
 	}
 
@@ -697,14 +697,14 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 	}
 	if (i == OperatorSize)
 	{
-		Log(LOG_ERROR) << "unknown condition: '" + begin[0].toString() + "'";
+		Log(LOG_ERROR) << "Unknown condition: '" + begin[0].toString() + "'";
 		return false;
 	}
 
 	const auto proc = ph.parser.getProc(ScriptRef{ equalFunc ? "test_eq" : "test_le" });
 	if (callOverloadProc(ph, proc, std::begin(conditionArgs), std::end(conditionArgs)) == false)
 	{
-		Log(LOG_ERROR) << "unsupported operator: '" + begin[0].toString() + "'";
+		Log(LOG_ERROR) << "Unsupported operator: '" + begin[0].toString() + "'";
 		return false;
 	}
 
@@ -731,7 +731,7 @@ bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken*
 {
 	if (ph.codeBlocks.empty() || ph.codeBlocks.back().type != BlockIf)
 	{
-		Log(LOG_ERROR) << "unexpected 'else'";
+		Log(LOG_ERROR) << "Unexpected 'else'";
 		return false;
 	}
 
@@ -761,12 +761,12 @@ bool parseEnd(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 {
 	if (ph.codeBlocks.empty())
 	{
-		Log(LOG_ERROR) << "unexpected 'end'";
+		Log(LOG_ERROR) << "Unexpected 'end'";
 		return false;
 	}
 	if (std::distance(begin, end) != 0)
 	{
-		Log(LOG_ERROR) << "unexpected symbols after 'end'";
+		Log(LOG_ERROR) << "Unexpected symbols after 'end'";
 		return false;
 	}
 
@@ -788,7 +788,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 {
 	if (ph.codeBlocks.size() > 0)
 	{
-		Log(LOG_ERROR) << "can't define variables in code blocks";
+		Log(LOG_ERROR) << "Can't define variables in code blocks";
 		return false;
 	}
 
@@ -809,7 +809,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 	auto size = std::distance(begin, end);
 	if (size < 2 || 3 < size)
 	{
-		Log(LOG_ERROR) << "invaild length of 'var' definition";
+		Log(LOG_ERROR) << "Invaild length of 'var' definition";
 		return false;
 	}
 
@@ -819,14 +819,14 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 	{
 		if (type_curr->size == 0 && !(spec & ArgSpecPtr))
 		{
-			Log(LOG_ERROR) << "can't create variable of type '" << begin->toString() << "'";
+			Log(LOG_ERROR) << "Can't create variable of type '" << begin->toString() << "'";
 			return false;
 		}
 
 		++begin;
 		if (begin->getType() != TokenSymbol || begin->find('.') != std::string::npos || ph.addReg(*begin, ArgSpec(type_curr->type, spec)) == false)
 		{
-			Log(LOG_ERROR) << "invalid variable name '" << begin->toString() << "'";
+			Log(LOG_ERROR) << "Invalid variable name '" << begin->toString() << "'";
 			return false;
 		}
 		if (size == 3)
@@ -836,8 +836,11 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 		}
 		return true;
 	}
-
-	return false;
+	else
+	{
+		Log(LOG_ERROR) << "Invalid type '" << begin->toString() << "'";
+		return false;
+	}
 }
 
 /**
