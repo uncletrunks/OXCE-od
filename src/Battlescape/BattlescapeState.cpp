@@ -406,14 +406,14 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnStats->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick);
-	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick, SDL_BUTTON_RIGHT);
+	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick, SDL_BUTTON_MIDDLE);
 	_btnLeftHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnLeftHandItemClick, Options::keyBattleUseLeftHand);
 	_btnLeftHandItem->setTooltip("STR_USE_LEFT_HAND");
 	_btnLeftHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInExtraLeftHand);
 	_btnLeftHandItem->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick);
-	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick, SDL_BUTTON_RIGHT);
+	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick, SDL_BUTTON_MIDDLE);
 	_btnRightHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnRightHandItemClick, Options::keyBattleUseRightHand);
 	_btnRightHandItem->setTooltip("STR_USE_RIGHT_HAND");
 	_btnRightHandItem->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInExtraRightHand);
@@ -1167,8 +1167,8 @@ void BattlescapeState::btnLeftHandItemClick(Action *action)
 		_save->getSelectedUnit()->setActiveHand("STR_LEFT_HAND");
 		_map->draw();
 		BattleItem *leftHandItem = _save->getSelectedUnit()->getLeftHandWeapon();
-		bool rightClick = action->getDetails()->button.button == SDL_BUTTON_RIGHT;
-		handleItemClick(leftHandItem, rightClick);
+		bool middleClick = action->getDetails()->button.button == SDL_BUTTON_MIDDLE;
+		handleItemClick(leftHandItem, middleClick);
 	}
 }
 
@@ -1194,8 +1194,8 @@ void BattlescapeState::btnRightHandItemClick(Action *action)
 		_save->getSelectedUnit()->setActiveHand("STR_RIGHT_HAND");
 		_map->draw();
 		BattleItem *rightHandItem = _save->getSelectedUnit()->getRightHandWeapon();
-		bool rightClick = action->getDetails()->button.button == SDL_BUTTON_RIGHT;
-		handleItemClick(rightHandItem, rightClick);
+		bool middleClick = action->getDetails()->button.button == SDL_BUTTON_MIDDLE;
+		handleItemClick(rightHandItem, middleClick);
 	}
 }
 
@@ -1717,14 +1717,14 @@ void BattlescapeState::drawPrimers()
  * Popups a context sensitive list of actions the user can choose from.
  * Some actions result in a change of gamestate.
  * @param item Item the user clicked on (righthand/lefthand)
- * @param rightClick was it a right click?
+ * @param middleClick was it a middle click?
  */
-void BattlescapeState::handleItemClick(BattleItem *item, bool rightClick)
+void BattlescapeState::handleItemClick(BattleItem *item, bool middleClick)
 {
 	// make sure there is an item, and the battlescape is in an idle state
 	if (item && !_battleGame->isBusy())
 	{
-		if (rightClick)
+		if (middleClick)
 		{
 			std::string articleId = item->getRules()->getType();
 			Ufopaedia::openArticle(_game, articleId);
