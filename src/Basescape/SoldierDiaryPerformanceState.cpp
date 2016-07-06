@@ -33,6 +33,7 @@
 #include "../Savegame/SoldierDiary.h"
 #include "../Mod/RuleCommendations.h"
 #include "../Engine/Action.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -170,6 +171,7 @@ SoldierDiaryPerformanceState::SoldierDiaryPerformanceState(Base *base, size_t so
 	_lstCommendations->onMouseOver((ActionHandler)&SoldierDiaryPerformanceState::lstInfoMouseOver);
 	_lstCommendations->onMouseOut((ActionHandler)&SoldierDiaryPerformanceState::lstInfoMouseOut);
 	_lstCommendations->onMousePress((ActionHandler)&SoldierDiaryPerformanceState::handle);
+	_lstCommendations->onMouseClick((ActionHandler)&SoldierDiaryPerformanceState::lstInfoMouseClick);
 
 	if (_display == DIARY_KILLS)
 	{
@@ -241,6 +243,7 @@ void SoldierDiaryPerformanceState::init()
 	_lstKillTotals->clearList();
 	_lstMissionTotals->clearList();
 	_commendationsListEntry.clear();
+	_commendationsNames.clear();
 	_txtTitle->setText(_soldier->getName());
 	_lstPerformance->clearList();
     _lstCommendations->clearList();
@@ -320,6 +323,7 @@ void SoldierDiaryPerformanceState::init()
 			_lstCommendations->addRow(2, tr((*i)->getType()).c_str(), tr((*i)->getDecorationDescription()).c_str());
 			_commendationsListEntry.push_back(tr(commendation->getDescription()));
 		}
+		_commendationsNames.push_back((*i)->getType());
 		}
 		drawSprites();
 	}
@@ -459,6 +463,14 @@ void SoldierDiaryPerformanceState::lstInfoMouseOver(Action *)
 void SoldierDiaryPerformanceState::lstInfoMouseOut(Action *)
 {
 	_txtMedalInfo->setText(L"");
+}
+
+/*
+*
+*/
+void SoldierDiaryPerformanceState::lstInfoMouseClick(Action *)
+{
+	Ufopaedia::openArticle(_game, _commendationsNames[_lstCommendations->getSelectedRow()]);
 }
 
 /**
