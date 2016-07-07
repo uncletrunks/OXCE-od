@@ -44,6 +44,8 @@ public:
 	ActionMenuState(BattleAction *action, int x, int y);
 	/// Cleans up the Action Menu state.
 	~ActionMenuState();
+	/// Init function.
+	void init() override;
 	/// Handler for right-clicking anything.
 	void handle(Action *action);
 	/// Handler for clicking a action menu item.

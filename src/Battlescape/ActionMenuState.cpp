@@ -158,6 +158,18 @@ ActionMenuState::~ActionMenuState()
 }
 
 /**
+ * Init function.
+ */
+void ActionMenuState::init()
+{
+	if (!_actionMenu[0]->getVisible())
+	{
+		// Item don't have any actions, close popup.
+		_game->popState();
+	}
+}
+
+/**
  * Adds a new menu item for an action.
  * @param ba Action type.
  * @param name Action description.
