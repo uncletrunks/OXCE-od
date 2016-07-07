@@ -241,18 +241,19 @@ void TileEngine::addLight(const Position &center, int power, int layer)
 			{
 				int diff = z - layer;
 				int distance = (int)Round(sqrt(float(x*x + y*y + diff*diff)));
+				Tile *tile = nullptr;
 
-				if (_save->getTile(Position(center.x + x,center.y + y, z)))
-					_save->getTile(Position(center.x + x,center.y + y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x + x,center.y + y, z));
+				if (tile) tile->addLight(power - distance, layer);
 
-				if (_save->getTile(Position(center.x - x,center.y - y, z)))
-					_save->getTile(Position(center.x - x,center.y - y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x - x,center.y - y, z));
+				if (tile) tile->addLight(power - distance, layer);
 
-				if (_save->getTile(Position(center.x - x,center.y + y, z)))
-					_save->getTile(Position(center.x - x,center.y + y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x - x,center.y + y, z));
+				if (tile) tile->addLight(power - distance, layer);
 
-				if (_save->getTile(Position(center.x + x,center.y - y, z)))
-					_save->getTile(Position(center.x + x,center.y - y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x + x,center.y - y, z));
+				if (tile) tile->addLight(power - distance, layer);
 			}
 		}
 	}

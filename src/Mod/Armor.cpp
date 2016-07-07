@@ -753,6 +753,9 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 	ar.addCustomConst("SIDE_UNDER", SIDE_UNDER);
 
 	ar.add<&Armor::getDrawingRoutine>("getDrawingRoutine");
+	ar.add<&Armor::getVisibilityAtDark>("getVisibilityAtDark");
+	ar.add<&Armor::getVisibilityAtDay>("getVisibilityAtDay");
+	ar.add<&Armor::getPersonalLight>("getPersonalLight");
 	ar.add<&Armor::getSize>("getSize");
 
 	us.addField<&UnitStats::tu>("getTimeUnits");
