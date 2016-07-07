@@ -89,7 +89,7 @@ public:
 		SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	struct ReactionUnitParser : ScriptParserEvents<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*>
+	struct ReactionUnitParser : ScriptParserEvents<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*, int>
 	{
 		ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};

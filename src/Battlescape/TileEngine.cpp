@@ -1251,11 +1251,12 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 
 		if (action.targeting)
 		{
+			int moveType = originalAction.strafe ? BAM_STRAFE : originalAction.run ? BAM_RUN :  BAM_NORMAL;
 			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
-			ModScript::ReactionUnitParser::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg };
+			ModScript::ReactionUnitParser::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType };
 			if (originalAction.weapon)
 			{
 				reactionChance = worker.execute(originalAction.weapon->getRules()->getReacActionScript(), reactionChance, dist);

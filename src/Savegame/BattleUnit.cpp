@@ -3827,7 +3827,7 @@ ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::s
 /**
  * Constructor of reaction chance script parser.
  */
-ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
+ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target", "move" }
 {
 	BindBase b { this };
 
@@ -3839,6 +3839,10 @@ ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const st
 	b.addCustomConst("action_walk", BA_WALK);
 	b.addCustomConst("action_hit", BA_HIT);
 	b.addCustomConst("action_throw", BA_THROW);
+
+	b.addCustomConst("move_normal", BAM_NORMAL);
+	b.addCustomConst("move_run", BAM_RUN);
+	b.addCustomConst("move_strafe", BAM_STRAFE);
 }
 
 /**

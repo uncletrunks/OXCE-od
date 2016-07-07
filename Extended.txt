@@ -112,6 +112,7 @@ Base building can now prevent building other buildings.[br/]
 New tag type that store other mod id.[br/]
 Option for changing defualt unit light radius.[br/]
 New functions exposed to script.[br/]
+Reaction scripts have now information about runing or strafing of target.[br/]
 [br/]
 
 [examples]
