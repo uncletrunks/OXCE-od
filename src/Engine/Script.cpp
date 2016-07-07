@@ -2165,7 +2165,10 @@ void ScriptValuesBase::loadBase(const YAML::Node &node, const ScriptGlobal* shar
 				size_t i = shared->getTag(type, ScriptRef::tempFrom("Tag." + pair.first.as<std::string>()));
 				if (i)
 				{
-					setBase(i, pair.second.as<int>());
+					auto temp = 0;
+					auto data = shared->getTagValueData(type, i);
+					shared->getTagValueType(data.type).load(shared, temp, pair.second);
+					setBase(i, temp);
 				}
 			}
 		}
@@ -2182,8 +2185,10 @@ void ScriptValuesBase::saveBase(YAML::Node &node, const ScriptGlobal* shared, Ar
 	{
 		if (int v = getBase(i))
 		{
-			auto name = shared->getTagName(type, i);
-			tags[name.substr(name.find('.') + 1u).toString()] = v;
+			auto temp = YAML::Node{};
+			auto data = shared->getTagValueData(type, i);
+			shared->getTagValueType(data.type).save(shared, v, temp);
+			tags[data.name.substr(data.name.find('.') + 1u).toString()] = temp;
 		}
 	}
 	node["tags"] = tags;
@@ -2192,6 +2197,35 @@ void ScriptValuesBase::saveBase(YAML::Node &node, const ScriptGlobal* shared, Ar
 ////////////////////////////////////////////////////////////
 //					ScriptGlobal class
 ////////////////////////////////////////////////////////////
+
+/**
+ * Default constructor.
+ */
+ScriptGlobal::ScriptGlobal()
+{
+	addTagValueTypeBase(
+		"int",
+		[](const ScriptGlobal* s, int& value, const YAML::Node& node)
+		{
+			if (node)
+			{
+				value = node.as<int>();
+			}
+		},
+		[](const ScriptGlobal* s, const int& value, YAML::Node& node)
+		{
+			node = value;
+		}
+	);
+}
+
+/**
+ * Destructor.
+ */
+ScriptGlobal::~ScriptGlobal()
+{
+
+}
 
 /**
  * Get tag value.
@@ -2203,7 +2237,7 @@ size_t ScriptGlobal::getTag(ArgEnum type, ScriptRef s) const
 	{
 		for (size_t i = 0; i < data->second.values.size(); ++i)
 		{
-			auto &name = data->second.values[i];
+			auto &name = data->second.values[i].name;
 			if (name == s)
 			{
 				return i + 1;
@@ -2216,7 +2250,7 @@ size_t ScriptGlobal::getTag(ArgEnum type, ScriptRef s) const
 /**
  * Get name of tag value.
  */
-ScriptRef ScriptGlobal::getTagName(ArgEnum type, size_t i) const
+ScriptGlobal::TagValueData ScriptGlobal::getTagValueData(ArgEnum type, size_t i) const
 {
 	auto data = _tagNames.find(type);
 	if (data != _tagNames.end())
@@ -2230,9 +2264,21 @@ ScriptRef ScriptGlobal::getTagName(ArgEnum type, size_t i) const
 }
 
 /**
+ * Get tag value type.
+ */
+ScriptGlobal::TagValueType ScriptGlobal::getTagValueType(size_t valueType) const
+{
+	if (valueType < _tagValueTypes.size())
+	{
+		return _tagValueTypes[valueType];
+	}
+	return {};
+}
+
+/**
  * Add new tag name.
  */
-size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s)
+size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s, size_t valueType)
 {
 	auto& data = _tagNames[type];
 	auto tag = getTag(type, s);
@@ -2242,7 +2288,7 @@ size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s)
 		// test to prevent warp of index value
 		if (data.values.size() < data.limit)
 		{
-			data.values.push_back(s);
+			data.values.push_back(TagValueData{ s, valueType });
 			return data.values.size();
 		}
 		return 0;
@@ -2340,7 +2386,17 @@ void ScriptGlobal::load(const YAML::Node& node)
 				{
 					auto type = i.second.as<std::string>();
 					auto name = i.first.as<std::string>();
-					if (type == "int")
+					auto invalidType = _tagValueTypes.size();
+					auto valueType = invalidType;
+					for (size_t t = 0; t < invalidType; ++t)
+					{
+						if (ScriptRef::tempFrom(type) == _tagValueTypes[t].name)
+						{
+							valueType = t;
+							break;
+						}
+					}
+					if (valueType != invalidType)
 					{
 						auto namePrefix = "Tag." + name;
 						auto tag = getTag(p.first, ScriptRef::tempFrom(namePrefix));
@@ -2348,7 +2404,7 @@ void ScriptGlobal::load(const YAML::Node& node)
 						{
 							continue;
 						}
-						tag = addTag(p.first, addNameRef(namePrefix));
+						tag = addTag(p.first, addNameRef(namePrefix), valueType);
 						if (!tag)
 						{
 							Log(LOG_ERROR) << "Script variable '" + name + "' exceeds limit of " << (int)p.second.limit << " avaiable variables in '" + nodeName + "'.";

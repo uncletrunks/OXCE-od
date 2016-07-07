@@ -85,6 +85,7 @@ class RuleVideo;
 class RuleMusic;
 class RuleMissionScript;
 class ModScript;
+class ModScriptGlobal;
 class ScriptParserBase;
 class ScriptGlobal;
 struct StatAdjustment;
@@ -147,7 +148,7 @@ private:
 
 	RuleGlobe *_globe;
 	RuleConverter *_converter;
-	ScriptGlobal *_scriptGlobal;
+	ModScriptGlobal *_scriptGlobal;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;

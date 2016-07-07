@@ -109,6 +109,7 @@ Custom tags that have user defined values.[br/]
 [br/]
 3.1:[br/]
 Base building can now prevent building other buildings.[br/]
+New tag type that store other mod id.[br/]
 [br/]
 
 [examples]
@@ -543,6 +544,9 @@ extended:
   tags:                     #definitions of user defined values used by script.
     RuleItem:               #used by `items` nodes.
       SOME_CUSTOM_TAG: int
+      #avaiable types:
+      #`int` - natural number
+      #`RuleList` - name of other mod that is loaded. Accessed as id number in script. Have value -1 if mod with that name do not exists.
     RuleArmor:              #used by `armors` nodes.
       IS_THIS_NINJA: int
   scripts:

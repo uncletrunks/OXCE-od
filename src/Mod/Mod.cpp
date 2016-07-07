@@ -198,6 +198,79 @@ void Mod::resetGlobalStatics()
 }
 
 /**
+ * Detail
+ */
+class ModScriptGlobal : public ScriptGlobal
+{
+	size_t _modCurr = 0;
+	std::vector<std::string> _modNames;
+
+	void loadRuleList(int &value, const YAML::Node &node) const
+	{
+		if (node)
+		{
+			auto name = node.as<std::string>();
+			if (name == "master")
+			{
+				value = 0;
+			}
+			else if (name == "current")
+			{
+				value = _modCurr;
+			}
+			else
+			{
+				for (size_t i = 0; i < _modNames.size(); ++i)
+				{
+					if (name == _modNames[i])
+					{
+						value = (int)i;
+						return;
+					}
+				}
+				value = -1;
+			}
+		}
+	}
+	void saveRuleList(const int &value, YAML::Node &node) const
+	{
+		if ((size_t)value < _modNames.size())
+		{
+			node = _modNames[value];
+		}
+	}
+
+public:
+	/// Prepare for loading data.
+	void beginLoad() override
+	{
+		ScriptGlobal::beginLoad();
+
+		addTagValueType<ModScriptGlobal, &ModScriptGlobal::loadRuleList, &ModScriptGlobal::saveRuleList>("RuleList");
+		addConst("RuleList.master", (int)0);
+		addConst("RuleList.current", (int)0);
+	}
+	/// Finishing loading data.
+	void endLoad() override
+	{
+		ScriptGlobal::endLoad();
+	}
+
+	/// Add mod name and id.
+	void addMod(const std::string& s, int i)
+	{
+		auto name = "RuleList." + s;
+		addConst(name, (int)i);
+		_modNames.push_back(s);
+	}
+	/// Set current mod id.
+	void setMod(int i)
+	{
+		updateConst("RuleList.current", (int)i);
+	}
+};
+
+/**
  * Creates an empty mod.
  */
 Mod::Mod() :
@@ -211,7 +284,7 @@ Mod::Mod() :
 	_muteMusic = new Music();
 	_muteSound = new Sound();
 	_globe = new RuleGlobe();
-	_scriptGlobal = new ScriptGlobal();
+	_scriptGlobal = new ModScriptGlobal();
 
 	//load base damage types
 	RuleDamageType *dmg;
@@ -800,16 +873,13 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 	ModScript parser{ _scriptGlobal, this };
 
 	_scriptGlobal->beginLoad();
-	_scriptGlobal->addConst("RuleList.master", (int)0);
-	_scriptGlobal->addConst("RuleList.current", (int)0);
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
-		auto name = "RuleList." + mods[i].first;
-		_scriptGlobal->addConst(name, (int)i);
+		_scriptGlobal->addMod(mods[i].first, (int)i);
 	}
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
-		_scriptGlobal->updateConst("RuleList.current", (int)i);
+		_scriptGlobal->setMod((int)i);
 		try
 		{
 			loadMod(mods[i].second, i, parser);
