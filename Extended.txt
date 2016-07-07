@@ -110,6 +110,7 @@ Custom tags that have user defined values.[br/]
 3.1:[br/]
 Base building can now prevent building other buildings.[br/]
 New tag type that store other mod id.[br/]
+Option for changing defualt unit light radius.[br/]
 [br/]
 
 [examples]
@@ -347,6 +348,7 @@ armors:
     overKill: 0.8        #when damage drops HPs to negative value greater than `overKill * maxHP` then the corpse is destroyed, default value is 0.50.
     visibilityAtDay: 20  #default 20 for all.
     visibilityAtDark: 9  #default 20 for aliens, 9 for humans.
+    personalLight: 15    #solder light radius.
     specialWeapon: ALIEN_PSI_WEAPON #alien psi or melee attack.
     builtInWeapons: #same as for units.
       - STR_SOME_WEAPON

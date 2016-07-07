@@ -191,7 +191,6 @@ void TileEngine::calculateTerrainLighting()
 void TileEngine::calculateUnitLighting()
 {
 	const int layer = 2; // Dynamic lighting layer.
-	const int personalLightPower = 15; // amount of light a unit generates
 	const int fireLightPower = 15; // amount of light a fire generates
 
 	// reset all light to 0 first
@@ -206,7 +205,7 @@ void TileEngine::calculateUnitLighting()
 		// add lighting of soldiers
 		if (_personalLighting && unit->getFaction() == FACTION_PLAYER && !unit->isOut())
 		{
-			currLight = std::max(currLight, personalLightPower);
+			currLight = std::max(currLight, unit->getArmor()->getPersonalLight());
 		}
 		BattleItem *handWeapons[] = { unit->getLeftHandWeapon(), unit->getRightHandWeapon() };
 		for (BattleItem *w : handWeapons)
