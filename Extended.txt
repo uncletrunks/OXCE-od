@@ -578,6 +578,103 @@ extraStrings:
       STR_NO_USES_LEFT: "You can't use medi-kit"      #required when using `medikitType`.
       STR_NOT_ENOUGH_CRAFT_SPACE: "You can't fit it!" #required when you try change armor with 2x2 size and craft don't have space.
 [/code]
+
+Examples of script usage:
+
+[code]
+extended:
+  tags:
+    RuleArmor:
+      CORPSE_SWITCH_ENABLED: int
+      CORPSE_SWITCH_RESOURCES_MOD: RuleList
+      CORPSE_SWITCH_SPRITE_FLOOR_STUN: int
+      CORPSE_SWITCH_SPRITE_FLOOR_WOUND: int
+      CORPSE_SWITCH_SPRITE_FLOOR_DEAD: int
+      CORPSE_SWITCH_SPRITE_BIG_STUN: int
+      CORPSE_SWITCH_SPRITE_BIG_WOUND: int
+      CORPSE_SWITCH_SPRITE_BIG_DEAD: int
+  scripts:
+    selectItemSprite:
+      - offset: 1
+        code: |
+          #custom corpse graphic based on state of unit.
+          var int curr_hp;
+          var int curr_wounds;
+          var int temp;
+          var ptr BattleUnit unit;
+          var ptr RuleArmor armor;
+          
+          item.getBattleUnit unit;
+          unit.getRuleArmor armor;
+          if neq armor null;
+            unit.getHealth curr_hp;
+            unit.getFatalwoundsTotal curr_wounds;
+            armor.getTag temp Tag.CORPSE_SWITCH_ENABLED;
+            if eq temp 1;
+              armor.getTag temp Tag.CORPSE_SWITCH_RESOURCES_MOD;
+              if eq blit_part blit_item_floor;
+                if le curr_hp 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_FLOOR_DEAD;
+                else gt curr_wounds 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_FLOOR_WOUND;
+                else;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_FLOOR_STUN;
+                end;
+                rules.getSpriteOffsetFloorob sprite_index temp;
+                return sprite_index;
+              else eq blit_part blit_item_big;
+                if le curr_hp 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_BIG_DEAD;
+                else gt curr_wounds 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_BIG_WOUND;
+                else;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_BIG_STUN;
+                end;
+                rules.getSpriteOffsetBigobs sprite_index temp;
+                return sprite_index;
+              end;
+            end;
+          end;
+          return sprite_index;
+#enabling this functionality for unit
+armors:
+  - type: STR_NONE_UC
+    tags:
+      CORPSE_SWITCH_ENABLED: 1 #1 enable this functionality for this unit, 0 disable
+      CORPSE_SWITCH_RESOURCES_MOD: current #to what mod sprites belongs to, `current` mean this mod.
+      CORPSE_SWITCH_SPRITE_FLOOR_STUN: 32
+      CORPSE_SWITCH_SPRITE_FLOOR_WOUND: 33
+      CORPSE_SWITCH_SPRITE_FLOOR_DEAD: 34
+      CORPSE_SWITCH_SPRITE_BIG_STUN: 42
+      CORPSE_SWITCH_SPRITE_BIG_WOUND: 43
+      CORPSE_SWITCH_SPRITE_BIG_DEAD: 44
+[/code]
+
+[code]
+armors:
+  - type: PARROT_ARMOR
+    drawingRoutine: 4
+    scripts:
+      selectUnitSprite: |
+        #this script will always run move animation of unit.
+        var int temp;
+        var int walking;
+        unit.isWalking walking;
+        if eq walking 0;
+          unit.getId temp;
+          offsetmod temp 11 0 8; #desync animation of different units
+          add temp anim_frame;
+          wavegen_saw temp 8 8 7;
+          mul sprite_offset 8;
+          add sprite_offset 8;
+          add sprite_offset temp;
+          set sprite_index sprite_offset;
+        else;
+          add sprite_index sprite_offset;
+        end;
+        return sprite_index;
+[/code]
+
 [/examples]
 
 [br/][br/]
