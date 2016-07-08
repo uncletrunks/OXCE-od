@@ -105,7 +105,7 @@ static inline RetEnum wavegen_rect_h(int& reg, const int& period, const int& siz
 		return RetError;
 	reg %= period;
 	if (reg < 0)
-		reg += reg;
+		reg += period;
 	if (reg > size)
 		reg = 0;
 	else
@@ -120,7 +120,7 @@ static inline RetEnum wavegen_saw_h(int& reg, const int& period, const int& size
 		return RetError;
 	reg %= period;
 	if (reg < 0)
-		reg += reg;
+		reg += period;
 	if (reg > size)
 		reg = 0;
 	else if (reg > max)
@@ -135,7 +135,7 @@ static inline RetEnum wavegen_tri_h(int& reg, const int& period, const int& size
 		return RetError;
 	reg %= period;
 	if (reg < 0)
-		reg += reg;
+		reg += period;
 	if (reg > size)
 		reg = 0;
 	else
@@ -198,7 +198,7 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	\
 	IMPL(aggregate,	MACRO_QUOTE({ Reg0 = Reg0 + Data1 * Data2;						return RetContinue; }),		(int& Reg0, int Data1, int Data2)) \
 	IMPL(offset,	MACRO_QUOTE({ Reg0 = Reg0 * Data1 + Data2;						return RetContinue; }),		(int& Reg0, int Data1, int Data2)) \
-	IMPL(offsetmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Data1, Data2, Data3);						}),		(int& Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(offsetmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Mul1, Add2, Mod3);							}),		(int& Reg0, int Mul1, int Add2, int Mod3)) \
 	\
 	IMPL(div,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 /= Data1;		return RetContinue; }),		(int& Reg0, int Data1)) \
 	IMPL(mod,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 %= Data1;		return RetContinue; }),		(int& Reg0, int Data1)) \
@@ -211,9 +211,9 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	IMPL(limit_upper,	MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
 	IMPL(limit_lower,	MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
-	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
-	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Period1, Size2, Max3);				}),		(int& Reg0, int Period1, int Size2, int Max3)) \
+	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3)) \
+	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3)) \
 	\
 	IMPL(get_color,		MACRO_QUOTE({ Reg0 = Data1 >> 4;							return RetContinue; }),		(int& Reg0, int Data1)) \
 	IMPL(set_color,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF) | (Data1 << 4);			return RetContinue; }),		(int& Reg0, int Data1)) \
