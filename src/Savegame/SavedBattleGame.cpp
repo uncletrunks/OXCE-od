@@ -1272,9 +1272,9 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 		keep = (unit->getFaction() != FACTION_PLAYER);
 		if (rightWeapon)
 		{
-			for (std::vector<std::string>::iterator i = rightWeapon->getRules()->getCompatibleAmmo()->begin(); i != rightWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
+			for (const std::string &s : *rightWeapon->getRules()->getCompatibleAmmo())
 			{
-				if (*i == item->getRules()->getType())
+				if (s == item->getRules()->getType())
 				{
 					keep = true;
 					break;
@@ -1283,9 +1283,9 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 		}
 		if (leftWeapon)
 		{
-			for (std::vector<std::string>::iterator i = leftWeapon->getRules()->getCompatibleAmmo()->begin(); i != leftWeapon->getRules()->getCompatibleAmmo()->end(); ++i)
+			for (const std::string &s : *leftWeapon->getRules()->getCompatibleAmmo())
 			{
-				if (*i == item->getRules()->getType())
+				if (s == item->getRules()->getType())
 				{
 					keep = true;
 					break;

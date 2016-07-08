@@ -1786,14 +1786,34 @@ void Base::cleanupDefenses(bool reclaimItems)
 	}
 }
 
+namespace
+{
+
+/**
+ * Store unique values from diffrent vectors.
+ * @param result Vector where final data will be send.
+ * @param temp Temporaly data container storing working buffer.
+ * @param data Data to add.
+ */
+void aggregateUnique(std::vector<std::string> &result, std::vector<std::string> &temp, const std::vector<std::string> &data)
+{
+	temp.clear();
+
+	std::set_union(std::make_move_iterator(std::begin(result)), std::make_move_iterator(std::end(result)), std::begin(data), std::end(data), std::back_inserter(temp));
+
+	std::swap(result, temp);
+}
+
+}
+
 /**
  * Return list of all provided functionality in base.
- * @param skip Skip functions provide by this facility .
+ * @param skip Skip functions provide by this facility.
  * @return List of custom IDs.
  */
-std::set<std::string> Base::getProvidedBaseFunc(const BaseFacility *skip) const
+std::vector<std::string> Base::getProvidedBaseFunc(const BaseFacility *skip) const
 {
-	std::set<std::string> ret;
+	std::vector<std::string> ret, temp;
 
 	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
 	{
@@ -1805,8 +1825,7 @@ std::set<std::string> Base::getProvidedBaseFunc(const BaseFacility *skip) const
 		{
 			continue;
 		}
-		const std::vector<std::string> &prov = (*bf)->getRules()->getProvidedBaseFunc();
-		ret.insert(prov.begin(), prov.end());
+		aggregateUnique(ret, temp, (*bf)->getRules()->getProvidedBaseFunc());
 	}
 
 	return ret;
@@ -1817,9 +1836,9 @@ std::set<std::string> Base::getProvidedBaseFunc(const BaseFacility *skip) const
  * @param skip Skip functions require by this facility.
  * @return List of custom IDs.
  */
-std::set<std::string> Base::getRequireBaseFunc(const BaseFacility *skip) const
+std::vector<std::string> Base::getRequireBaseFunc(const BaseFacility *skip) const
 {
-	std::set<std::string> ret;
+	std::vector<std::string> ret, temp;
 
 	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
 	{
@@ -1827,20 +1846,49 @@ std::set<std::string> Base::getRequireBaseFunc(const BaseFacility *skip) const
 		{
 			continue;
 		}
-		const std::vector<std::string> &prov = (*bf)->getRules()->getRequireBaseFunc();
-		ret.insert(prov.begin(), prov.end());
+		aggregateUnique(ret, temp,  (*bf)->getRules()->getRequireBaseFunc());
 	}
 
 	for (std::vector<ResearchProject*>::const_iterator res = _research.begin(); res != _research.end(); ++res)
 	{
-		const std::vector<std::string> &req = (*res)->getRules()->getRequireBaseFunc();
-		ret.insert(req.begin(), req.end());
+		aggregateUnique(ret, temp, (*res)->getRules()->getRequireBaseFunc());
 	}
 
 	for (std::vector<Production*>::const_iterator prod = _productions.begin(); prod != _productions.end(); ++prod)
 	{
-		const std::vector<std::string> &req = (*prod)->getRules()->getRequireBaseFunc();
-		ret.insert(req.begin(), req.end());
+		aggregateUnique(ret, temp, (*prod)->getRules()->getRequireBaseFunc());
+	}
+
+	return ret;
+}
+
+/**
+ * Return list of all forbiden functionality in base.
+ * @return List of custom IDs.
+ */
+std::vector<std::string> Base::getForbiddenBaseFunc() const
+{
+	std::vector<std::string> ret, temp;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		aggregateUnique(ret, temp, (*bf)->getRules()->getForbiddenBaseFunc());
+	}
+
+	return ret;
+}
+
+/**
+ * Return list of all future provided functionality in base.
+ * @return List of custom IDs.
+ */
+std::vector<std::string> Base::getFutureBaseFunc() const
+{
+	std::vector<std::string> ret, temp;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		aggregateUnique(ret, temp, (*bf)->getRules()->getProvidedBaseFunc());
 	}
 
 	return ret;

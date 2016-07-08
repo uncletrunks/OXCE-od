@@ -55,9 +55,11 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
 	_provideBaseFunc = node["provideBaseFunc"].as< std::vector<std::string> >(_provideBaseFunc);
+	_forbiddenBaseFunc = node["forbiddenBaseFunc"].as< std::vector<std::string> >(_forbiddenBaseFunc);
 
 	std::sort(_requiresBaseFunc.begin(), _requiresBaseFunc.end());
 	std::sort(_provideBaseFunc.begin(), _provideBaseFunc.end());
+	std::sort(_forbiddenBaseFunc.begin(), _forbiddenBaseFunc.end());
 
 	if (node["spriteShape"])
 	{
@@ -161,6 +163,15 @@ const std::vector<std::string> &RuleBaseFacility::getRequireBaseFunc() const
 const std::vector<std::string> &RuleBaseFacility::getProvidedBaseFunc() const
 {
 	return _provideBaseFunc;
+}
+
+/**
+ * Gets the list of forbiden functions by this building.
+ * @return List of function IDs.
+ */
+const std::vector<std::string> &RuleBaseFacility::getForbiddenBaseFunc() const
+{
+	return _forbiddenBaseFunc;
 }
 /**
  * Gets the ID of the sprite used to draw the

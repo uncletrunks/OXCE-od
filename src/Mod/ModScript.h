@@ -84,12 +84,12 @@ public:
 	{
 		RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct SelectUnitParser : ScriptParser<const BattleUnit*, int, int, int>
+	struct SelectUnitParser : ScriptParserEvents<const BattleUnit*, int, int, int>
 	{
 		SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	struct ReactionUnitParser : ScriptParserEvents<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*>
+	struct ReactionUnitParser : ScriptParserEvents<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*, int>
 	{
 		ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
@@ -98,7 +98,7 @@ public:
 	{
 		RecolorItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct SelectItemParser : ScriptParser<const BattleItem*, int, int, int>
+	struct SelectItemParser : ScriptParserEvents<const BattleItem*, int, int, int>
 	{
 		SelectItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};

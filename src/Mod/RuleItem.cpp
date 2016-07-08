@@ -1022,7 +1022,7 @@ int RuleItem::getTUUnload() const
  * Gets a list of compatible ammo.
  * @return Pointer to a list of compatible ammo.
  */
-std::vector<std::string> *RuleItem::getCompatibleAmmo()
+const std::vector<std::string> *RuleItem::getCompatibleAmmo() const
 {
 	return &_compatibleAmmo;
 }

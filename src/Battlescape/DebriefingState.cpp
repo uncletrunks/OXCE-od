@@ -1325,8 +1325,8 @@ void DebriefingState::prepareDebriefing()
 						base->getStorageItems()->addItem((*j)->getType());
 						if ((*j)->getRightHandWeapon())
 						{
-							RuleItem *primaryRule = (*j)->getRightHandWeapon()->getRules();
-							BattleItem *ammoItem = (*j)->getRightHandWeapon()->getAmmoItem();
+							const RuleItem *primaryRule = (*j)->getRightHandWeapon()->getRules();
+							const BattleItem *ammoItem = (*j)->getRightHandWeapon()->getAmmoItem();
 							if (!primaryRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 							{
 								int total = ammoItem->getAmmoQuantity();
@@ -1341,8 +1341,8 @@ void DebriefingState::prepareDebriefing()
 						}
 						if ((*j)->getLeftHandWeapon())
 						{
-							RuleItem *secondaryRule = (*j)->getLeftHandWeapon()->getRules();
-							BattleItem *ammoItem = (*j)->getLeftHandWeapon()->getAmmoItem();
+							const RuleItem *secondaryRule = (*j)->getLeftHandWeapon()->getRules();
+							const BattleItem *ammoItem = (*j)->getLeftHandWeapon()->getAmmoItem();
 							if (!secondaryRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 							{
 								int total = ammoItem->getAmmoQuantity();
@@ -1534,7 +1534,7 @@ void DebriefingState::prepareDebriefing()
 	}
 
 	// calculate the clips for each type based on the recovered rounds.
-	for (std::map<RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
+	for (std::map<const RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
 	{
 		int total_clips = 0;
 		if (Options::statisticalBulletConservation)
@@ -1550,7 +1550,7 @@ void DebriefingState::prepareDebriefing()
 	}
 
 	// calculate the "remaining medikit items" for each type based on the recovered "clips".
-	for (std::map<RuleItem*, int>::const_iterator i = _roundsPainKiller.begin(); i != _roundsPainKiller.end(); ++i)
+	for (std::map<const RuleItem*, int>::const_iterator i = _roundsPainKiller.begin(); i != _roundsPainKiller.end(); ++i)
 	{
 		int totalRecovered = INT_MAX;
 		if (i->first->getPainKillerQuantity() > 0)

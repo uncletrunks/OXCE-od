@@ -222,9 +222,13 @@ public:
 	/// Cleans up the defenses vector and optionally reclaims the tanks and their ammo.
 	void cleanupDefenses(bool reclaimItems);
 	/// Gets available base functionality.
-	std::set<std::string> getProvidedBaseFunc(const BaseFacility *skip = 0) const;
+	std::vector<std::string> getProvidedBaseFunc(const BaseFacility *skip = 0) const;
 	/// Gets used base functionality.
-	std::set<std::string> getRequireBaseFunc(const BaseFacility *skip = 0) const;
+	std::vector<std::string> getRequireBaseFunc(const BaseFacility *skip = 0) const;
+	/// Gets forbiden base functionality.
+	std::vector<std::string> getForbiddenBaseFunc() const;
+	/// Gets future base functionality.
+	std::vector<std::string> getFutureBaseFunc() const;
 };
 
 }

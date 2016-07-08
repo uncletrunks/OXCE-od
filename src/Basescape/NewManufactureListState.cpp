@@ -205,7 +205,7 @@ void NewManufactureListState::lstProdClickRight(Action *)
 	{
 		// display either category or requirements
 		_showRequirements = !_showRequirements;
-		const std::set<std::string> &baseFunc = _base->getProvidedBaseFunc();
+		const std::vector<std::string> &baseFunc = _base->getProvidedBaseFunc();
 
 		for (int row = 0; row < _lstManufacture->getRows(); ++row)
 		{
@@ -218,7 +218,7 @@ void NewManufactureListState::lstProdClickRight(Action *)
 					int count = 0;
 					for (std::vector<std::string>::const_iterator iter = info->getRequireBaseFunc().begin(); iter != info->getRequireBaseFunc().end(); ++iter)
 					{
-						if (baseFunc.find(*iter) != baseFunc.end())
+						if (std::find(baseFunc.begin(), baseFunc.end(), *iter) != baseFunc.end())
 						{
 							continue;
 						}

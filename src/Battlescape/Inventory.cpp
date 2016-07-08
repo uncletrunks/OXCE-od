@@ -783,9 +783,9 @@ void Inventory::mouseClick(Action *action, State *state)
 				else if (!item->getRules()->getCompatibleAmmo()->empty())
 				{
 					bool wrong = true;
-					for (std::vector<std::string>::iterator i = item->getRules()->getCompatibleAmmo()->begin(); i != item->getRules()->getCompatibleAmmo()->end(); ++i)
+					for (const std::string &s : *item->getRules()->getCompatibleAmmo())
 					{
-						if ((*i) == _selItem->getRules()->getType())
+						if (s == _selItem->getRules()->getType())
 						{
 							wrong = false;
 							break;

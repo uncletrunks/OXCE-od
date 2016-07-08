@@ -1345,7 +1345,7 @@ bool BattleUnit::isOut() const
  * @param item
  * @return TUs
  */
-RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, BattleItem *item) const
+RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const BattleItem *item) const
 {
 	if (item == 0)
 	{
@@ -1354,7 +1354,7 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, BattleItem
 	return getActionTUs(actionType, item->getRules());
 }
 
-RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, RuleItem *item) const
+RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const RuleItem *item) const
 {
 	RuleItemUseCost cost;
 	if (item != 0)
@@ -2313,9 +2313,9 @@ bool BattleUnit::checkAmmo()
 
 		for (std::vector<BattleItem*>::iterator i = getInventory()->begin(); i != getInventory()->end(); ++i)
 		{
-			for (std::vector<std::string>::iterator c = weapon->getRules()->getCompatibleAmmo()->begin(); c != weapon->getRules()->getCompatibleAmmo()->end(); ++c)
+			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
 			{
-				if ((*c) == (*i)->getRules()->getType())
+				if (s == (*i)->getRules()->getType())
 				{
 					int tuTemp = (*i)->getSlot()->getType() != INV_HAND ? (*i)->getSlot()->getCost(weapon->getSlot()) : 0;
 					if (tuTemp < tuMove)
@@ -3781,7 +3781,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
-	bu.add<const Armor, &BattleUnit::getArmor>("getRuleArmor");
+	bu.addRules<Armor, &BattleUnit::getArmor>("getRuleArmor");
 	bu.addFunc<getRightHandWeaponScript>("getRightHandWeapon");
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
@@ -3846,11 +3846,6 @@ void commonImpl(BindBase& b, Mod* mod)
 	b.addCustomConst("blit_legs", BODYPART_LEGS);
 	b.addCustomConst("blit_collapse", BODYPART_COLLAPSING);
 
-	b.addCustomConst("blit_item_righthand", BODYPART_ITEM_RIGHTHAND);
-	b.addCustomConst("blit_item_lefthand", BODYPART_ITEM_LEFTHAND);
-	b.addCustomConst("blit_item_floor", BODYPART_ITEM_FLOOR);
-	b.addCustomConst("blit_item_big", BODYPART_ITEM_INVENTORY);
-
 	b.addCustomConst("blit_large_torso_0", BODYPART_LARGE_TORSO + 0);
 	b.addCustomConst("blit_large_torso_1", BODYPART_LARGE_TORSO + 1);
 	b.addCustomConst("blit_large_torso_2", BODYPART_LARGE_TORSO + 2);
@@ -3875,13 +3870,18 @@ ModScript::RecolorUnitParser::RecolorUnitParser(ScriptGlobal* shared, const std:
 
 	commonImpl(b, mod);
 
+	b.addCustomConst("blit_item_righthand", BODYPART_ITEM_RIGHTHAND);
+	b.addCustomConst("blit_item_lefthand", BODYPART_ITEM_LEFTHAND);
+	b.addCustomConst("blit_item_floor", BODYPART_ITEM_FLOOR);
+	b.addCustomConst("blit_item_big", BODYPART_ITEM_INVENTORY);
+
 	setDefault("unit.getRecolor new_pixel; add_burn_shade new_pixel burn shade; return new_pixel;");
 }
 
 /**
  * Constructor of select sprite script parser.
  */
-ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "sprite_index", "sprite_offset", "unit", "blit_part", "anim_frame", "shade" }
+ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "sprite_index", "sprite_offset", "unit", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
@@ -3893,7 +3893,7 @@ ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::s
 /**
  * Constructor of reaction chance script parser.
  */
-ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target" }
+ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target", "move" }
 {
 	BindBase b { this };
 
@@ -3905,6 +3905,10 @@ ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const st
 	b.addCustomConst("action_walk", BA_WALK);
 	b.addCustomConst("action_hit", BA_HIT);
 	b.addCustomConst("action_throw", BA_THROW);
+
+	b.addCustomConst("move_normal", BAM_NORMAL);
+	b.addCustomConst("move_run", BAM_RUN);
+	b.addCustomConst("move_strafe", BAM_STRAFE);
 }
 
 /**

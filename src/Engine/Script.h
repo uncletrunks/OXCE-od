@@ -1025,31 +1025,76 @@ struct ScriptTag
  */
 class ScriptGlobal
 {
+protected:
+	using LoadFunc = void (*)(const ScriptGlobal*, int&, const YAML::Node&);
+	using SaveFunc = void (*)(const ScriptGlobal*, const int&, YAML::Node&);
+
 	friend class ScriptValuesBase;
 
+	struct TagValueType
+	{
+		ScriptRef name;
+		LoadFunc load;
+		SaveFunc save;
+	};
+	struct TagValueData
+	{
+		ScriptRef name;
+		size_t type;
+	};
 	struct TagData
 	{
 		ScriptRef name;
 		size_t limit;
-		std::vector<ScriptRef> values;
+		std::vector<TagValueData> values;
 	};
 
+	template<typename ThisType, void (ThisType::* LoadValue)(int&, const YAML::Node&) const>
+	static void loadHelper(const ScriptGlobal* base, int& value, const YAML::Node& node)
+	{
+		(static_cast<const ThisType*>(base)->*LoadValue)(value, node);
+	}
+	template<typename ThisType, void (ThisType::* SaveValue)(const int&, YAML::Node&) const>
+	static void saveHelper(const ScriptGlobal* base, const int& value, YAML::Node& node)
+	{
+		(static_cast<const ThisType*>(base)->*SaveValue)(value, node);
+	}
+
+	void addTagValueTypeBase(const std::string& name, LoadFunc loadFunc, SaveFunc saveFunc)
+	{
+		_tagValueTypes.push_back(TagValueType{ addNameRef(name), loadFunc, saveFunc });
+	}
+	template<typename ThisType, void (ThisType::* LoadValue)(int&, const YAML::Node&) const, void (ThisType::* SaveValue)(const int&, YAML::Node&) const>
+	void addTagValueType(const std::string& name)
+	{
+		static_assert(std::is_base_of<ScriptGlobal, ThisType>::value, "Type must be derived");
+		addTagValueTypeBase(name, &loadHelper<ThisType, LoadValue>, &saveHelper<ThisType, SaveValue>);
+	}
+private:
 	std::vector<std::vector<char>> _strings;
 	std::vector<std::vector<ScriptContainerBase>> _events;
 	std::map<std::string, ScriptParserBase*> _parserNames;
 	std::vector<ScriptParserEventsBase*> _parserEvents;
 	std::map<ArgEnum, TagData> _tagNames;
+	std::vector<TagValueType> _tagValueTypes;
 
 	/// Get tag value.
 	size_t getTag(ArgEnum type, ScriptRef s) const;
-	/// Get name of tag value.
-	ScriptRef getTagName(ArgEnum type, size_t i) const;
+	/// Get data of tag value.
+	TagValueData getTagValueData(ArgEnum type, size_t i) const;
+	/// Get tag value type.
+	TagValueType getTagValueType(size_t valueType) const;
 	/// Add new tag name.
-	size_t addTag(ArgEnum type, ScriptRef s);
+	size_t addTag(ArgEnum type, ScriptRef s, size_t valueType);
 	/// Add new name ref.
 	ScriptRef addNameRef(const std::string& s);
 
 public:
+	/// Default constructor.
+	ScriptGlobal();
+	/// Destructor.
+	virtual ~ScriptGlobal();
+
 	/// Store parser.
 	void pushParser(ScriptParserBase* parser);
 	/// Store parser.
@@ -1072,29 +1117,23 @@ public:
 	{
 		return getTag<Tag>(ScriptRef::tempFrom(s));
 	}
-	/// Get tag name based on it value.
-	template<typename Tag>
-	ScriptRef getTagName(Tag tag)
-	{
-		return getTagName(Tag::type(), tag.get());
-	}
 	/// Add new tag name.
 	template<typename Tag>
-	Tag addTag(const std::string& s)
+	Tag addTag(const std::string& s, size_t valueType)
 	{
-		return Tag::make(addTag(Tag::type(), addNameRef(s)));
+		return Tag::make(addTag(Tag::type(), addNameRef(s), valueType));
 	}
 	/// Add new type of tag.
 	template<typename Tag>
 	void addTagType()
 	{
-		_tagNames.insert(std::make_pair(Tag::type(), TagData{ ScriptRef{ Tag::Parent::ScriptName }, Tag::limit(), std::vector<ScriptRef>{} }));
+		_tagNames.insert(std::make_pair(Tag::type(), TagData{ ScriptRef{ Tag::Parent::ScriptName }, Tag::limit(), std::vector<TagValueData>{} }));
 	}
 
 	/// Prepare for loading data.
-	void beginLoad();
+	virtual void beginLoad();
 	/// Finishing loading data.
-	void endLoad();
+	virtual void endLoad();
 
 	/// Load global data from YAML.
 	void load(const YAML::Node& node);

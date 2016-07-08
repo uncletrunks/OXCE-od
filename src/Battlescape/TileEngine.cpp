@@ -191,7 +191,6 @@ void TileEngine::calculateTerrainLighting()
 void TileEngine::calculateUnitLighting()
 {
 	const int layer = 2; // Dynamic lighting layer.
-	const int personalLightPower = 15; // amount of light a unit generates
 	const int fireLightPower = 15; // amount of light a fire generates
 
 	// reset all light to 0 first
@@ -206,7 +205,7 @@ void TileEngine::calculateUnitLighting()
 		// add lighting of soldiers
 		if (_personalLighting && unit->getFaction() == FACTION_PLAYER && !unit->isOut())
 		{
-			currLight = std::max(currLight, personalLightPower);
+			currLight = std::max(currLight, unit->getArmor()->getPersonalLight());
 		}
 		BattleItem *handWeapons[] = { unit->getLeftHandWeapon(), unit->getRightHandWeapon() };
 		for (BattleItem *w : handWeapons)
@@ -242,18 +241,19 @@ void TileEngine::addLight(const Position &center, int power, int layer)
 			{
 				int diff = z - layer;
 				int distance = (int)Round(sqrt(float(x*x + y*y + diff*diff)));
+				Tile *tile = nullptr;
 
-				if (_save->getTile(Position(center.x + x,center.y + y, z)))
-					_save->getTile(Position(center.x + x,center.y + y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x + x,center.y + y, z));
+				if (tile) tile->addLight(power - distance, layer);
 
-				if (_save->getTile(Position(center.x - x,center.y - y, z)))
-					_save->getTile(Position(center.x - x,center.y - y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x - x,center.y - y, z));
+				if (tile) tile->addLight(power - distance, layer);
 
-				if (_save->getTile(Position(center.x - x,center.y + y, z)))
-					_save->getTile(Position(center.x - x,center.y + y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x - x,center.y + y, z));
+				if (tile) tile->addLight(power - distance, layer);
 
-				if (_save->getTile(Position(center.x + x,center.y - y, z)))
-					_save->getTile(Position(center.x + x,center.y - y, z))->addLight(power - distance, layer);
+				tile = _save->getTile(Position(center.x + x,center.y - y, z));
+				if (tile) tile->addLight(power - distance, layer);
 			}
 		}
 	}
@@ -1257,11 +1257,12 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 			// log weapon?
 			_save->hitLog << "Reaction fire...\n\n";
 
+			int moveType = originalAction.strafe ? BAM_STRAFE : originalAction.run ? BAM_RUN :  BAM_NORMAL;
 			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
-			ModScript::ReactionUnitParser::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg };
+			ModScript::ReactionUnitParser::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType };
 			if (originalAction.weapon)
 			{
 				reactionChance = worker.execute(originalAction.weapon->getRules()->getReacActionScript(), reactionChance, dist);
@@ -3159,7 +3160,7 @@ void TileEngine::medikitRemoveIfEmpty(BattleAction *action)
  */
 void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyPart)
 {
-	RuleItem *rule = action->weapon->getRules();
+	const RuleItem *rule = action->weapon->getRules();
 
 	if (target->getFatalWound(bodyPart))
 	{
@@ -3180,7 +3181,7 @@ void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyP
  */
 void TileEngine::medikitStimulant(BattleAction *action, BattleUnit *target)
 {
-	RuleItem *rule = action->weapon->getRules();
+	const RuleItem *rule = action->weapon->getRules();
 
 	target->stimulant(rule->getEnergyRecovery(), rule->getStunRecovery());
 	action->weapon->setStimulantQuantity(action->weapon->getStimulantQuantity() - 1);
@@ -3195,7 +3196,7 @@ void TileEngine::medikitStimulant(BattleAction *action, BattleUnit *target)
  */
 void TileEngine::medikitPainKiller(BattleAction *action, BattleUnit *target)
 {
-	RuleItem *rule = action->weapon->getRules();
+	const RuleItem *rule = action->weapon->getRules();
 
 	target->painKillers(rule->getMoraleRecovery(), rule->getPainKillerRecovery());
 	action->weapon->setPainKillerQuantity(action->weapon->getPainKillerQuantity() - 1);

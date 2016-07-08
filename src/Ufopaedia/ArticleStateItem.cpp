@@ -72,7 +72,7 @@ namespace OpenXcom
 
 		item->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _image);
 
-		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
+		const std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
 
 		int weight = item->getWeight();
 		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);

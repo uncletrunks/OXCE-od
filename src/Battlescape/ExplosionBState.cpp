@@ -84,7 +84,7 @@ void ExplosionBState::init()
 {
 	BattleType type = BT_NONE;
 	BattleActionType action = _action.type;
-	RuleItem* itemRule = 0;
+	const RuleItem* itemRule = 0;
 	bool miss = false;
 	if (_item)
 	{

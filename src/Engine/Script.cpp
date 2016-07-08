@@ -662,7 +662,7 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 
 	if (std::distance(begin, end) != 3)
 	{
-		Log(LOG_ERROR) << "invaild length of condition arguments";
+		Log(LOG_ERROR) << "Invaild length of condition arguments";
 		return false;
 	}
 
@@ -697,14 +697,14 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 	}
 	if (i == OperatorSize)
 	{
-		Log(LOG_ERROR) << "unknown condition: '" + begin[0].toString() + "'";
+		Log(LOG_ERROR) << "Unknown condition: '" + begin[0].toString() + "'";
 		return false;
 	}
 
 	const auto proc = ph.parser.getProc(ScriptRef{ equalFunc ? "test_eq" : "test_le" });
 	if (callOverloadProc(ph, proc, std::begin(conditionArgs), std::end(conditionArgs)) == false)
 	{
-		Log(LOG_ERROR) << "unsupported operator: '" + begin[0].toString() + "'";
+		Log(LOG_ERROR) << "Unsupported operator: '" + begin[0].toString() + "'";
 		return false;
 	}
 
@@ -731,7 +731,7 @@ bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken*
 {
 	if (ph.codeBlocks.empty() || ph.codeBlocks.back().type != BlockIf)
 	{
-		Log(LOG_ERROR) << "unexpected 'else'";
+		Log(LOG_ERROR) << "Unexpected 'else'";
 		return false;
 	}
 
@@ -761,12 +761,12 @@ bool parseEnd(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 {
 	if (ph.codeBlocks.empty())
 	{
-		Log(LOG_ERROR) << "unexpected 'end'";
+		Log(LOG_ERROR) << "Unexpected 'end'";
 		return false;
 	}
 	if (std::distance(begin, end) != 0)
 	{
-		Log(LOG_ERROR) << "unexpected symbols after 'end'";
+		Log(LOG_ERROR) << "Unexpected symbols after 'end'";
 		return false;
 	}
 
@@ -788,7 +788,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 {
 	if (ph.codeBlocks.size() > 0)
 	{
-		Log(LOG_ERROR) << "can't define variables in code blocks";
+		Log(LOG_ERROR) << "Can't define variables in code blocks";
 		return false;
 	}
 
@@ -809,7 +809,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 	auto size = std::distance(begin, end);
 	if (size < 2 || 3 < size)
 	{
-		Log(LOG_ERROR) << "invaild length of 'var' definition";
+		Log(LOG_ERROR) << "Invaild length of 'var' definition";
 		return false;
 	}
 
@@ -819,14 +819,14 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 	{
 		if (type_curr->size == 0 && !(spec & ArgSpecPtr))
 		{
-			Log(LOG_ERROR) << "can't create variable of type '" << begin->toString() << "'";
+			Log(LOG_ERROR) << "Can't create variable of type '" << begin->toString() << "'";
 			return false;
 		}
 
 		++begin;
 		if (begin->getType() != TokenSymbol || begin->find('.') != std::string::npos || ph.addReg(*begin, ArgSpec(type_curr->type, spec)) == false)
 		{
-			Log(LOG_ERROR) << "invalid variable name '" << begin->toString() << "'";
+			Log(LOG_ERROR) << "Invalid variable name '" << begin->toString() << "'";
 			return false;
 		}
 		if (size == 3)
@@ -836,8 +836,11 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 		}
 		return true;
 	}
-
-	return false;
+	else
+	{
+		Log(LOG_ERROR) << "Invalid type '" << begin->toString() << "'";
+		return false;
+	}
 }
 
 /**
@@ -2077,6 +2080,11 @@ void ScriptParserEventsBase::load(const YAML::Node& node)
 			{
 				EventData data = EventData{};
 				data.offset = i["offset"].as<double>(0) * OffsetScale;
+				if (data.offset == 0 || data.offset >= (int)OffsetMax || data.offset <= -(int)OffsetMax)
+				{
+					Log(LOG_ERROR) << "Invalid offset for '" << getName() << "' equal: '" << i["offset"].as<std::string>() << "'";
+					continue;
+				}
 				ScriptContainerBase scp;
 				if (parseBase(scp, "Global Event Script", i["code"].as<std::string>("")))
 				{
@@ -2157,7 +2165,10 @@ void ScriptValuesBase::loadBase(const YAML::Node &node, const ScriptGlobal* shar
 				size_t i = shared->getTag(type, ScriptRef::tempFrom("Tag." + pair.first.as<std::string>()));
 				if (i)
 				{
-					setBase(i, pair.second.as<int>());
+					auto temp = 0;
+					auto data = shared->getTagValueData(type, i);
+					shared->getTagValueType(data.type).load(shared, temp, pair.second);
+					setBase(i, temp);
 				}
 			}
 		}
@@ -2174,8 +2185,10 @@ void ScriptValuesBase::saveBase(YAML::Node &node, const ScriptGlobal* shared, Ar
 	{
 		if (int v = getBase(i))
 		{
-			auto name = shared->getTagName(type, i);
-			tags[name.substr(name.find('.') + 1u).toString()] = v;
+			auto temp = YAML::Node{};
+			auto data = shared->getTagValueData(type, i);
+			shared->getTagValueType(data.type).save(shared, v, temp);
+			tags[data.name.substr(data.name.find('.') + 1u).toString()] = temp;
 		}
 	}
 	node["tags"] = tags;
@@ -2184,6 +2197,35 @@ void ScriptValuesBase::saveBase(YAML::Node &node, const ScriptGlobal* shared, Ar
 ////////////////////////////////////////////////////////////
 //					ScriptGlobal class
 ////////////////////////////////////////////////////////////
+
+/**
+ * Default constructor.
+ */
+ScriptGlobal::ScriptGlobal()
+{
+	addTagValueTypeBase(
+		"int",
+		[](const ScriptGlobal* s, int& value, const YAML::Node& node)
+		{
+			if (node)
+			{
+				value = node.as<int>();
+			}
+		},
+		[](const ScriptGlobal* s, const int& value, YAML::Node& node)
+		{
+			node = value;
+		}
+	);
+}
+
+/**
+ * Destructor.
+ */
+ScriptGlobal::~ScriptGlobal()
+{
+
+}
 
 /**
  * Get tag value.
@@ -2195,7 +2237,7 @@ size_t ScriptGlobal::getTag(ArgEnum type, ScriptRef s) const
 	{
 		for (size_t i = 0; i < data->second.values.size(); ++i)
 		{
-			auto &name = data->second.values[i];
+			auto &name = data->second.values[i].name;
 			if (name == s)
 			{
 				return i + 1;
@@ -2208,7 +2250,7 @@ size_t ScriptGlobal::getTag(ArgEnum type, ScriptRef s) const
 /**
  * Get name of tag value.
  */
-ScriptRef ScriptGlobal::getTagName(ArgEnum type, size_t i) const
+ScriptGlobal::TagValueData ScriptGlobal::getTagValueData(ArgEnum type, size_t i) const
 {
 	auto data = _tagNames.find(type);
 	if (data != _tagNames.end())
@@ -2222,9 +2264,21 @@ ScriptRef ScriptGlobal::getTagName(ArgEnum type, size_t i) const
 }
 
 /**
+ * Get tag value type.
+ */
+ScriptGlobal::TagValueType ScriptGlobal::getTagValueType(size_t valueType) const
+{
+	if (valueType < _tagValueTypes.size())
+	{
+		return _tagValueTypes[valueType];
+	}
+	return {};
+}
+
+/**
  * Add new tag name.
  */
-size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s)
+size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s, size_t valueType)
 {
 	auto& data = _tagNames[type];
 	auto tag = getTag(type, s);
@@ -2234,7 +2288,7 @@ size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s)
 		// test to prevent warp of index value
 		if (data.values.size() < data.limit)
 		{
-			data.values.push_back(s);
+			data.values.push_back(TagValueData{ s, valueType });
 			return data.values.size();
 		}
 		return 0;
@@ -2332,7 +2386,17 @@ void ScriptGlobal::load(const YAML::Node& node)
 				{
 					auto type = i.second.as<std::string>();
 					auto name = i.first.as<std::string>();
-					if (type == "int")
+					auto invalidType = _tagValueTypes.size();
+					auto valueType = invalidType;
+					for (size_t t = 0; t < invalidType; ++t)
+					{
+						if (ScriptRef::tempFrom(type) == _tagValueTypes[t].name)
+						{
+							valueType = t;
+							break;
+						}
+					}
+					if (valueType != invalidType)
 					{
 						auto namePrefix = "Tag." + name;
 						auto tag = getTag(p.first, ScriptRef::tempFrom(namePrefix));
@@ -2340,7 +2404,7 @@ void ScriptGlobal::load(const YAML::Node& node)
 						{
 							continue;
 						}
-						tag = addTag(p.first, addNameRef(namePrefix));
+						tag = addTag(p.first, addNameRef(namePrefix), valueType);
 						if (!tag)
 						{
 							Log(LOG_ERROR) << "Script variable '" + name + "' exceeds limit of " << (int)p.second.limit << " avaiable variables in '" + nodeName + "'.";

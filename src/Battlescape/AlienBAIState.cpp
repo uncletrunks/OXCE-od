@@ -187,7 +187,7 @@ void AlienBAIState::think(BattleAction *action)
 	Mod *mod = _save->getBattleState()->getGame()->getMod();
 	if (action->weapon)
 	{
-		RuleItem *rule = action->weapon->getRules();
+		const RuleItem *rule = action->weapon->getRules();
 		if (_save->canUseWeapon(action->weapon, _unit, false))
 		{
 			if (rule->getBattleType() == BT_FIREARM)
@@ -2076,8 +2076,8 @@ BattleActionType AlienBAIState::getReserveMode()
 void AlienBAIState::selectMeleeOrRanged()
 {
 	BattleItem *melee = _unit->getUtilityWeapon(BT_MELEE);
-	RuleItem *rangedWeapon = _unit->getMainHandWeapon()->getRules();
-	RuleItem *meleeWeapon = melee ? melee->getRules() : 0;
+	const RuleItem *rangedWeapon = _unit->getMainHandWeapon()->getRules();
+	const RuleItem *meleeWeapon = melee ? melee->getRules() : 0;
 
 	if (!meleeWeapon)
 	{

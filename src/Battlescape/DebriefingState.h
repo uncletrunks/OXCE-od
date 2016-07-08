@@ -70,7 +70,7 @@ private:
 	std::string _currentTooltip;
 	Text *_txtTooltip;
 	std::vector<ReequipStat> _missingItems;
-	std::map<RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal, _baseItemsBeforeRecovery, _recoveredItems;
+	std::map<const RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal, _baseItemsBeforeRecovery, _recoveredItems;
 	Uint8 _ammoColor;
 	std::map<int, RecoveryItem*> _recoveryStats;
 	bool _positiveScore, _noContainment, _manageContainment, _destroyBase, _isBaseDefense, _showSellButton;

@@ -152,7 +152,7 @@ YAML::Node BattleItem::save() const
  * Gets the ruleset for the item's type.
  * @return Pointer to ruleset.
  */
-RuleItem *BattleItem::getRules() const
+const RuleItem *BattleItem::getRules() const
 {
 	return _rules;
 }
@@ -214,7 +214,16 @@ bool BattleItem::spendBullet()
  * Gets the item's owner.
  * @return Pointer to Battleunit.
  */
-BattleUnit *BattleItem::getOwner() const
+BattleUnit *BattleItem::getOwner()
+{
+	return _owner;
+}
+
+/**
+ * Gets the item's owner.
+ * @return Pointer to Battleunit.
+ */
+const BattleUnit *BattleItem::getOwner() const
 {
 	return _owner;
 }
@@ -223,7 +232,16 @@ BattleUnit *BattleItem::getOwner() const
  * Gets the item's previous owner.
  * @return Pointer to Battleunit.
  */
-BattleUnit *BattleItem::getPreviousOwner() const
+BattleUnit *BattleItem::getPreviousOwner()
+{
+	return _previousOwner;
+}
+
+/**
+ * Gets the item's previous owner.
+ * @return Pointer to Battleunit.
+ */
+const BattleUnit *BattleItem::getPreviousOwner() const
 {
 	return _previousOwner;
 }
@@ -427,6 +445,15 @@ BattleItem *BattleItem::getAmmoItem()
 }
 
 /**
+ * Gets the item's ammo item.
+ * @return The ammo item.
+ */
+const BattleItem *BattleItem::getAmmoItem() const
+{
+	return _ammoItem;
+}
+
+/**
  * Determines if the item uses ammo.
  * @return True if ammo is used.
  */
@@ -457,9 +484,9 @@ int BattleItem::setAmmoItem(BattleItem *item)
 	if (_ammoItem)
 		return -1;
 
-	for (std::vector<std::string>::iterator i = _rules->getCompatibleAmmo()->begin(); i != _rules->getCompatibleAmmo()->end(); ++i)
+	for (const std::string &s : *_rules->getCompatibleAmmo())
 	{
-		if (*i == item->getRules()->getType())
+		if (s == item->getRules()->getType())
 		{
 			_ammoItem = item;
 			item->setIsAmmo(true);
@@ -501,7 +528,16 @@ int BattleItem::getId() const
  * Gets the corpse's unit.
  * @return Pointer to BattleUnit.
  */
-BattleUnit *BattleItem::getUnit() const
+BattleUnit *BattleItem::getUnit()
+{
+	return _unit;
+}
+
+/**
+ * Gets the corpse's unit.
+ * @return Pointer to BattleUnit.
+ */
+const BattleUnit *BattleItem::getUnit() const
 {
 	return _unit;
 }
@@ -664,14 +700,15 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 {
 	parser->registerPointerType<Mod>();
 	parser->registerPointerType<RuleItem>();
+	parser->registerPointerType<BattleUnit>();
 
 	Bind<BattleItem> bi = { parser };
 
-	bi.add<RuleItem, &BattleItem::getRules>("getRuleItem");
-	bi.add<BattleUnit, &BattleItem::getUnit>("getBattleUnit");
-	bi.add<BattleItem, &BattleItem::getAmmoItem>("getAmmoItem");
-	bi.add<BattleUnit, &BattleItem::getPreviousOwner>("getPreviousOwner");
-	bi.add<BattleUnit, &BattleItem::getOwner>("getOwner");
+	bi.addRules<RuleItem, &BattleItem::getRules>("getRuleItem");
+	bi.addPair<BattleUnit, &BattleItem::getUnit, &BattleItem::getUnit>("getBattleUnit");
+	bi.addPair<BattleItem, &BattleItem::getAmmoItem, &BattleItem::getAmmoItem>("getAmmoItem");
+	bi.addPair<BattleUnit, &BattleItem::getPreviousOwner, &BattleItem::getPreviousOwner>("getPreviousOwner");
+	bi.addPair<BattleUnit, &BattleItem::getOwner, &BattleItem::getOwner>("getOwner");
 	bi.add<&BattleItem::getId>("getId");
 	bi.add<&BattleItem::getAmmoQuantity>("getAmmoQuantity");
 	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
@@ -712,7 +749,7 @@ ModScript::RecolorItemParser::RecolorItemParser(ScriptGlobal* shared, const std:
 /**
  * Constructor of select sprite script parser.
  */
-ModScript::SelectItemParser::SelectItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
+ModScript::SelectItemParser::SelectItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "sprite_index", "sprite_offset", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
