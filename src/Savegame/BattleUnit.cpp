@@ -3631,11 +3631,29 @@ void isWalkingScript(const BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
+void isFlyingScript(const BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		ret = bu->getStatus() == STATUS_FLYING;
+		return;
+	}
+	ret = 0;
+}
 void isCollapsingScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
 		ret = bu->getStatus() == STATUS_COLLAPSING;
+		return;
+	}
+	ret = 0;
+}
+void isStandingScript(const BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		ret = bu->getStatus() == STATUS_STANDING;
 		return;
 	}
 	ret = 0;
@@ -3676,7 +3694,9 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getRecolorScript>("getRecolor");
 	bu.add<&BattleUnit::isFloating>("isFloating");
 	bu.add<&BattleUnit::isKneeled>("isKneeled");
+	bu.add<&isStandingScript>("isStanding");
 	bu.add<&isWalkingScript>("isWalking");
+	bu.add<&isFlyingScript>("isFlying");
 	bu.add<&isCollapsingScript>("isCollapsing");
 	bu.add<&BattleUnit::getDirection>("getDirection");
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
