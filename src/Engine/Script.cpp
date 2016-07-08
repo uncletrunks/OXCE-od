@@ -2402,6 +2402,11 @@ void ScriptGlobal::load(const YAML::Node& node)
 						auto tag = getTag(p.first, ScriptRef::tempFrom(namePrefix));
 						if (tag)
 						{
+							auto data = getTagValueData(p.first, tag);
+							if (valueType != data.type)
+							{
+								Log(LOG_ERROR) << "Script variable '" + name + "' have wrong type '" << _tagValueTypes[valueType].name.toString() << "' instead of '" << _tagValueTypes[data.type].name.toString() << "' in '" + nodeName + "'.";
+							}
 							continue;
 						}
 						tag = addTag(p.first, addNameRef(namePrefix), valueType);
