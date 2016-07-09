@@ -581,6 +581,34 @@ extraStrings:
 
 Examples of script usage:
 
+
+[code]
+#special statements
+someScriptCode: |
+  var int temp;     #define variable of type `int` with name `temp`.
+  var int zero 42;  #new variable with begining value of 42.
+
+  if OPERATION A B; #`OPERATION` can be: `lt` - less, `le` - less equal, `gt` - greater, `ge` - greater equal, `eq` - equal, `neq` - not equal
+    #some code 1
+  else OPERATION A B; #`else` can have same condition as first `if`.
+    #some code 2
+  else OPERATION A B; #you can repeat `else` with test multiple times.
+    #some code 3
+  else;
+    #final case, can be skipped.
+  end;
+
+  if or lt A B eq C D;
+    #you can write multiple operation with `or`.
+    #result will be true if any of this operation would return true.
+  end;
+  if and gt A B neq C D le E F;
+    #same for `and` but in this case all operation need be true.
+  end;
+
+  return B; #exit script with value of `B`.
+[/code]
+
 [code]
 extended:
   tags:

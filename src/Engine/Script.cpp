@@ -651,13 +651,28 @@ bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const Selected
 	return false;
 }
 
+constexpr size_t ConditionSize = 6;
+const ScriptRef ConditionNames[ConditionSize] =
+{
+	ScriptRef{ "eq" }, ScriptRef{ "neq" },
+	ScriptRef{ "le" }, ScriptRef{ "gt" },
+	ScriptRef{ "ge" }, ScriptRef{ "lt" },
+};
+
+constexpr size_t ConditionSpecialSize = 2;
+const ScriptRef ConditionSpecNames[ConditionSpecialSize] =
+{
+	ScriptRef{ "or" },
+	ScriptRef{ "and" },
+};
+
+
 /**
  * Helper used of condintion opearations.
  */
-bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begin, const SelectedToken* end)
+bool parseConditionImpl(ParserWriter& ph, int truePos, int falsePos, const SelectedToken* begin, const SelectedToken* end)
 {
 	constexpr size_t TempArgsSize = 4;
-	constexpr size_t OperatorSize = 6;
 
 	if (std::distance(begin, end) != 3)
 	{
@@ -665,28 +680,19 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 		return false;
 	}
 
-	const auto currPos = ph.addLabel();
-
 	SelectedToken conditionArgs[TempArgsSize] =
 	{
 		begin[1],
 		begin[2],
-		{ TokenBuildinLabel, currPos, }, //success
-		{ TokenBuildinLabel, nextPos, }, //failure
-	};
-
-	const char* opNames[OperatorSize] =
-	{
-		"eq", "neq",
-		"le", "gt",
-		"ge", "lt",
+		{ TokenBuildinLabel, truePos, }, //success
+		{ TokenBuildinLabel, falsePos, }, //failure
 	};
 
 	bool equalFunc = false;
 	size_t i = 0;
-	for (; i < OperatorSize; ++i)
+	for (; i < ConditionSize; ++i)
 	{
-		if (begin[0] == ScriptRef{ opNames[i] })
+		if (begin[0] == ConditionNames[i])
 		{
 			if (i < 2) equalFunc = true;
 			if (i & 1) std::swap(conditionArgs[2], conditionArgs[3]); //negate condition result
@@ -694,7 +700,7 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 			break;
 		}
 	}
-	if (i == OperatorSize)
+	if (i == ConditionSize)
 	{
 		Log(LOG_ERROR) << "Unknown condition: '" + begin[0].toString() + "'";
 		return false;
@@ -707,8 +713,51 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 		return false;
 	}
 
-	ph.setLabel(currPos, ph.getCurrPos());
+	return true;
+}
 
+/**
+ * Parse `or` or `and` conditions.
+ */
+bool parseFullConditionImpl(ParserWriter& ph, int falsePos, const SelectedToken* begin, const SelectedToken* end)
+{
+	if (std::distance(begin, end) <= 1)
+	{
+		Log(LOG_ERROR) << "Invaild length of condition arguments";
+		return false;
+	}
+	const auto truePos = ph.addLabel();
+	const auto orFunc = begin[0] == ConditionSpecNames[0];
+	const auto andFunc = begin[0] == ConditionSpecNames[1];
+	if (orFunc || andFunc)
+	{
+		++begin;
+		for (; std::distance(begin, end) > 3; begin += 3)
+		{
+			auto temp = ph.addLabel();
+			if (orFunc)
+			{
+				if (!parseConditionImpl(ph, truePos, temp, begin, begin + 3))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (!parseConditionImpl(ph, temp, falsePos, begin, begin + 3))
+				{
+					return false;
+				}
+			}
+			ph.setLabel(temp, ph.getCurrPos());
+		}
+	}
+	if (!parseConditionImpl(ph, truePos, falsePos, begin, end))
+	{
+		return false;
+	}
+
+	ph.setLabel(truePos, ph.getCurrPos());
 	return true;
 }
 
@@ -720,7 +769,7 @@ bool parseIf(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* b
 	ParserWriter::Block block = { BlockIf, ph.addLabel(), ph.addLabel() };
 	ph.codeBlocks.push_back(block);
 
-	return parseConditionImpl(ph, block.nextLabel, begin, end);
+	return parseFullConditionImpl(ph, block.nextLabel, begin, end);
 }
 
 /**
@@ -749,7 +798,7 @@ bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken*
 	else
 	{
 		block.nextLabel = ph.addLabel();
-		return parseConditionImpl(ph, block.nextLabel, begin, end);
+		return parseFullConditionImpl(ph, block.nextLabel, begin, end);
 	}
 }
 
@@ -840,6 +889,15 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 		Log(LOG_ERROR) << "Invalid type '" << begin->toString() << "'";
 		return false;
 	}
+}
+
+/**
+ * Dummy operation.
+ */
+bool parseDummy(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+{
+	Log(LOG_ERROR) << "Reserved operation for future use";
+	return false;
 }
 
 /**
@@ -1489,7 +1547,10 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 	addParserBase("if", &overloadBuildinProc, {}, &parseIf, nullptr, nullptr);
 	addParserBase("else", &overloadBuildinProc, {}, &parseElse, nullptr, nullptr);
 	addParserBase("end", &overloadBuildinProc, {}, &parseEnd, nullptr, nullptr);
-	addParserBase("var", &overloadBuildinProc,{}, &parseVar, nullptr, nullptr);
+	addParserBase("var", &overloadBuildinProc, {}, &parseVar, nullptr, nullptr);
+	addParserBase("loop", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
+	addParserBase("break", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
+	addParserBase("continue", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
 
 	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq");
 
@@ -1537,6 +1598,20 @@ bool ScriptParserBase::haveNameRef(const std::string& s) const
 	if (findSortHelper(_typeList, ref) != nullptr)
 	{
 		return true;
+	}
+	for (auto& r : ConditionNames)
+	{
+		if (ref == r)
+		{
+			return true;
+		}
+	}
+	for (auto& r : ConditionSpecNames)
+	{
+		if (ref == r)
+		{
+			return true;
+		}
 	}
 	return false;
 }
