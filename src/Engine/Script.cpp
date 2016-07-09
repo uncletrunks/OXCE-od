@@ -162,12 +162,11 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 {
 	if (Options::debug)
 	{
-		static constexpr int offset = 3; //+1 for op, and +2*1 for two reg args.
 		static int limit_count = 0;
 		if (++limit_count < 500)
 		{
 			Logger log;
-			log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p - offset) << " values: " << std::setw(8) << i << std::setw(8) << j;
+			log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p) << " values: " << std::setw(8) << i << std::setw(8) << j;
 		}
 	}
 	return RetContinue;
@@ -993,7 +992,7 @@ ScriptRef addString(std::vector<std::vector<char>>& list, const std::string& s)
 	return ref;
 }
 
-}
+} //namespace
 
 ////////////////////////////////////////////////////////////
 //					ScriptRef class
@@ -1473,7 +1472,7 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 ////////////////////////////////////////////////////////////
 
 /**
- * Constructor
+ * Constructor.
  */
 ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg) : _shared{ shared }, _regUsed{ RegMax }, _name{ name }
 {
@@ -1890,7 +1889,14 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 				if (line_end != range.end())
 					++line_end;
 			}
-			Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
+			if (args[ScriptMaxArg - 1].getType() != TokenNone)
+			{
+				Log(LOG_ERROR) << err << "too many arguments in line: '" << std::string(line_begin, line_end) << "'";
+			}
+			else
+			{
+				Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
+			}
 			return false;
 		}
 		else
