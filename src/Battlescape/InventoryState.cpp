@@ -850,22 +850,6 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 	std::vector<EquipmentLayoutItem*>::iterator templateIt;
 	for (templateIt = inventoryTemplate.begin(); templateIt != inventoryTemplate.end(); ++templateIt)
 	{
-		// check if the slot is not occupied already (e.g. by a fixed weapon)
-		bool alreadyOccupied = false;
-		for (std::vector<BattleItem*>::iterator checkFixedIt = unitInv->begin(); checkFixedIt != unitInv->end(); ++checkFixedIt)
-		{
-			if ((*checkFixedIt)->getSlot()->getId() == (*templateIt)->getSlot())
-			{
-				alreadyOccupied = true;
-				break;
-			}
-		}
-		if (alreadyOccupied)
-		{
-			// if occupied, skip
-			continue;
-		}
-
 		// search for template item in ground inventory
 		std::vector<BattleItem*>::iterator groundItem;
 		const bool needsAmmo = !_game->getMod()->getItem((*templateIt)->getItemType())->getCompatibleAmmo()->empty();
