@@ -1880,6 +1880,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		*this
 	);
 
+	bool haveLastReturn = false;
 	ScriptRef range = ScriptRef{ srcCode.data(), srcCode.data() + srcCode.size() };
 	if (!range)
 	{
@@ -1898,6 +1899,10 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 					Log(LOG_ERROR) << err << "invalid use of label: '" << i->name.toString() << "' without declaration";
 					return false;
 				}
+			}
+			if (!haveLastReturn)
+			{
+				Log(LOG_ERROR) << err << "script need to end with return statemlent";
 			}
 			help.relese();
 			destScript = std::move(tempScript);
@@ -1988,6 +1993,8 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 				Log(LOG_ERROR) << err << "invalid label '"<< label.toString() <<"' in line: '" << line.toString() << "'";
 				return false;
 			}
+
+			haveLastReturn = op == ScriptRef{ "return" };
 
 			// create normal proc call
 			if (callOverloadProc(help, op_curr, args, args+i) == false)
