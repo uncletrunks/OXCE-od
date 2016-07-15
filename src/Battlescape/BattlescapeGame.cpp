@@ -681,7 +681,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 		// Determine murder type
 		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
 		{
-			if ((*j)->getHealth() == 0)
+			if ((*j)->getHealth() <= 0)
 			{
 				killStat.status = STATUS_DEAD;
 			}
@@ -737,7 +737,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 
 		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
 		{
-			if ((*j)->getHealth() == 0)
+			if ((*j)->getHealth() <= 0)
 			{
 				if (murderer)
 				{
