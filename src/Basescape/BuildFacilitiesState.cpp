@@ -128,7 +128,7 @@ bool intersection(const std::vector<std::string> &a, const std::vector<std::stri
 /**
  * Populates the build list from the current "available" facilities.
  */
-void BuildFacilitiesState::PopulateBuildList()
+void BuildFacilitiesState::populateBuildList()
 {
 	_facilities.clear();
 	_lstFacilities->clearList();
@@ -175,7 +175,7 @@ void BuildFacilitiesState::init()
 	_state->init();
 	State::init();
 
-	PopulateBuildList();
+	populateBuildList();
 }
 
 /**
