@@ -31,8 +31,7 @@ sed \
   -e 's/\[date\/\]/'$commitDate'/g' \
   -e 's/\[dateOrigin\/\]/'$openXcomDate'/g' \
   -e 's/\[commitOrigin\/\]/'$openXcomID'/g' \
-  -e 's/\[examples\]//g' \
-  -e 's/\[\/examples\]//g' \
+  -e '/\[examples\]/{$!{:re;N;s/\[\/examples\]//;ty;bre;:y;d;}}' \
   ../Extended.txt > OpenXcomExWeb.txt
 
 sed \

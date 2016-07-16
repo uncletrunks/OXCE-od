@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 3.1[/b]
+[b]Mod version 3.2[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -113,6 +113,9 @@ New tag type that store other mod id.[br/]
 Option for changing defualt unit light radius.[br/]
 New functions exposed to script.[br/]
 Reaction scripts have now information about runing or strafing of target.[br/]
+[br/]
+3.2:[br/]
+New functions exposed to script.[br/]
 [br/]
 
 [examples]
@@ -575,6 +578,131 @@ extraStrings:
       STR_NO_USES_LEFT: "You can't use medi-kit"      #required when using `medikitType`.
       STR_NOT_ENOUGH_CRAFT_SPACE: "You can't fit it!" #required when you try change armor with 2x2 size and craft don't have space.
 [/code]
+
+Examples of script usage:
+
+
+[code]
+#special statements
+someScriptCode: |
+  var int temp;     #define variable of type `int` with name `temp`.
+  var int zero 42;  #new variable with begining value of 42.
+
+  if OPERATION A B; #`OPERATION` can be: `lt` - less, `le` - less equal, `gt` - greater, `ge` - greater equal, `eq` - equal, `neq` - not equal
+    #some code 1
+  else OPERATION A B; #`else` can have same condition as first `if`.
+    #some code 2
+  else OPERATION A B; #you can repeat `else` with test multiple times.
+    #some code 3
+  else;
+    #final case, can be skipped.
+  end;
+
+  if or lt A B eq C D;
+    #you can write multiple operation with `or`.
+    #result will be true if any of this operation would return true.
+  end;
+  if and gt A B neq C D le E F;
+    #same for `and` but in this case all operation need be true.
+  end;
+
+  return B; #exit script with value of `B`.
+[/code]
+
+[code]
+extended:
+  tags:
+    RuleArmor:
+      CORPSE_SWITCH_ENABLED: int
+      CORPSE_SWITCH_RESOURCES_MOD: RuleList
+      CORPSE_SWITCH_SPRITE_FLOOR_STUN: int
+      CORPSE_SWITCH_SPRITE_FLOOR_WOUND: int
+      CORPSE_SWITCH_SPRITE_FLOOR_DEAD: int
+      CORPSE_SWITCH_SPRITE_BIG_STUN: int
+      CORPSE_SWITCH_SPRITE_BIG_WOUND: int
+      CORPSE_SWITCH_SPRITE_BIG_DEAD: int
+  scripts:
+    selectItemSprite:
+      - offset: 1
+        code: |
+          #custom corpse graphic based on state of unit.
+          var int curr_hp;
+          var int curr_wounds;
+          var int temp;
+          var ptr BattleUnit unit;
+          var ptr RuleArmor armor;
+          
+          item.getBattleUnit unit;
+          unit.getRuleArmor armor;
+          if neq armor null;
+            unit.getHealth curr_hp;
+            unit.getFatalwoundsTotal curr_wounds;
+            armor.getTag temp Tag.CORPSE_SWITCH_ENABLED;
+            if eq temp 1;
+              armor.getTag temp Tag.CORPSE_SWITCH_RESOURCES_MOD;
+              if eq blit_part blit_item_floor;
+                if le curr_hp 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_FLOOR_DEAD;
+                else gt curr_wounds 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_FLOOR_WOUND;
+                else;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_FLOOR_STUN;
+                end;
+                rules.getSpriteOffsetFloorob sprite_index temp;
+                return sprite_index;
+              else eq blit_part blit_item_big;
+                if le curr_hp 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_BIG_DEAD;
+                else gt curr_wounds 0;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_BIG_WOUND;
+                else;
+                  armor.getTag sprite_index Tag.CORPSE_SWITCH_SPRITE_BIG_STUN;
+                end;
+                rules.getSpriteOffsetBigobs sprite_index temp;
+                return sprite_index;
+              end;
+            end;
+          end;
+          return sprite_index;
+#enabling this functionality for unit
+armors:
+  - type: STR_NONE_UC
+    tags:
+      CORPSE_SWITCH_ENABLED: 1 #1 enable this functionality for this unit, 0 disable
+      CORPSE_SWITCH_RESOURCES_MOD: current #to what mod sprites belongs to, `current` mean this mod.
+      CORPSE_SWITCH_SPRITE_FLOOR_STUN: 32
+      CORPSE_SWITCH_SPRITE_FLOOR_WOUND: 33
+      CORPSE_SWITCH_SPRITE_FLOOR_DEAD: 34
+      CORPSE_SWITCH_SPRITE_BIG_STUN: 42
+      CORPSE_SWITCH_SPRITE_BIG_WOUND: 43
+      CORPSE_SWITCH_SPRITE_BIG_DEAD: 44
+[/code]
+
+[code]
+armors:
+  - type: PARROT_ARMOR
+    drawingRoutine: 4
+    scripts:
+      selectUnitSprite: |
+        #this script will always run move animation of unit.
+        var int temp;
+        var int walking;
+        unit.isWalking walking;
+        if eq walking 0;
+          unit.getId temp;
+          offsetmod temp 11 0 8; #desync animation of different units
+          add temp anim_frame;
+          wavegen_saw temp 8 8 7;
+          mul sprite_offset 8;
+          add sprite_offset 8;
+          add sprite_offset temp;
+          set sprite_index sprite_offset;
+        else;
+          add sprite_index sprite_offset;
+        end;
+        return sprite_index;
+[/code]
+
 [/examples]
 
 [br/][br/]

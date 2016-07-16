@@ -105,7 +105,7 @@ static inline RetEnum wavegen_rect_h(int& reg, const int& period, const int& siz
 		return RetError;
 	reg %= period;
 	if (reg < 0)
-		reg += reg;
+		reg += period;
 	if (reg > size)
 		reg = 0;
 	else
@@ -120,7 +120,7 @@ static inline RetEnum wavegen_saw_h(int& reg, const int& period, const int& size
 		return RetError;
 	reg %= period;
 	if (reg < 0)
-		reg += reg;
+		reg += period;
 	if (reg > size)
 		reg = 0;
 	else if (reg > max)
@@ -135,7 +135,7 @@ static inline RetEnum wavegen_tri_h(int& reg, const int& period, const int& size
 		return RetError;
 	reg %= period;
 	if (reg < 0)
-		reg += reg;
+		reg += period;
 	if (reg > size)
 		reg = 0;
 	else
@@ -162,12 +162,11 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 {
 	if (Options::debug)
 	{
-		static constexpr int offset = 3; //+1 for op, and +2*1 for two reg args.
 		static int limit_count = 0;
 		if (++limit_count < 500)
 		{
 			Logger log;
-			log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p - offset) << " values: " << std::setw(8) << i << std::setw(8) << j;
+			log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p) << " values: " << std::setw(8) << i << std::setw(8) << j;
 		}
 	}
 	return RetContinue;
@@ -198,7 +197,7 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	\
 	IMPL(aggregate,	MACRO_QUOTE({ Reg0 = Reg0 + Data1 * Data2;						return RetContinue; }),		(int& Reg0, int Data1, int Data2)) \
 	IMPL(offset,	MACRO_QUOTE({ Reg0 = Reg0 * Data1 + Data2;						return RetContinue; }),		(int& Reg0, int Data1, int Data2)) \
-	IMPL(offsetmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Data1, Data2, Data3);						}),		(int& Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(offsetmod,	MACRO_QUOTE({ return mulAddMod_h(Reg0, Mul1, Add2, Mod3);							}),		(int& Reg0, int Mul1, int Add2, int Mod3)) \
 	\
 	IMPL(div,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 /= Data1;		return RetContinue; }),		(int& Reg0, int Data1)) \
 	IMPL(mod,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 %= Data1;		return RetContinue; }),		(int& Reg0, int Data1)) \
@@ -211,9 +210,9 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	IMPL(limit_upper,	MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
 	IMPL(limit_lower,	MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1)) \
 	\
-	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
-	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
-	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Data1, Data2, Data3);					}),		(int& Reg0, int Data1, int Data2, int Data3)) \
+	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Period1, Size2, Max3);				}),		(int& Reg0, int Period1, int Size2, int Max3)) \
+	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3)) \
+	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3)) \
 	\
 	IMPL(get_color,		MACRO_QUOTE({ Reg0 = Data1 >> 4;							return RetContinue; }),		(int& Reg0, int Data1)) \
 	IMPL(set_color,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF) | (Data1 << 4);			return RetContinue; }),		(int& Reg0, int Data1)) \
@@ -652,13 +651,28 @@ bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const Selected
 	return false;
 }
 
+constexpr size_t ConditionSize = 6;
+const ScriptRef ConditionNames[ConditionSize] =
+{
+	ScriptRef{ "eq" }, ScriptRef{ "neq" },
+	ScriptRef{ "le" }, ScriptRef{ "gt" },
+	ScriptRef{ "ge" }, ScriptRef{ "lt" },
+};
+
+constexpr size_t ConditionSpecialSize = 2;
+const ScriptRef ConditionSpecNames[ConditionSpecialSize] =
+{
+	ScriptRef{ "or" },
+	ScriptRef{ "and" },
+};
+
+
 /**
  * Helper used of condintion opearations.
  */
-bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begin, const SelectedToken* end)
+bool parseConditionImpl(ParserWriter& ph, int truePos, int falsePos, const SelectedToken* begin, const SelectedToken* end)
 {
 	constexpr size_t TempArgsSize = 4;
-	constexpr size_t OperatorSize = 6;
 
 	if (std::distance(begin, end) != 3)
 	{
@@ -666,28 +680,19 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 		return false;
 	}
 
-	const auto currPos = ph.addLabel();
-
 	SelectedToken conditionArgs[TempArgsSize] =
 	{
 		begin[1],
 		begin[2],
-		{ TokenBuildinLabel, currPos, }, //success
-		{ TokenBuildinLabel, nextPos, }, //failure
-	};
-
-	const char* opNames[OperatorSize] =
-	{
-		"eq", "neq",
-		"le", "gt",
-		"ge", "lt",
+		{ TokenBuildinLabel, truePos, }, //success
+		{ TokenBuildinLabel, falsePos, }, //failure
 	};
 
 	bool equalFunc = false;
 	size_t i = 0;
-	for (; i < OperatorSize; ++i)
+	for (; i < ConditionSize; ++i)
 	{
-		if (begin[0] == ScriptRef{ opNames[i] })
+		if (begin[0] == ConditionNames[i])
 		{
 			if (i < 2) equalFunc = true;
 			if (i & 1) std::swap(conditionArgs[2], conditionArgs[3]); //negate condition result
@@ -695,7 +700,7 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 			break;
 		}
 	}
-	if (i == OperatorSize)
+	if (i == ConditionSize)
 	{
 		Log(LOG_ERROR) << "Unknown condition: '" + begin[0].toString() + "'";
 		return false;
@@ -708,8 +713,51 @@ bool parseConditionImpl(ParserWriter& ph, int nextPos, const SelectedToken* begi
 		return false;
 	}
 
-	ph.setLabel(currPos, ph.getCurrPos());
+	return true;
+}
 
+/**
+ * Parse `or` or `and` conditions.
+ */
+bool parseFullConditionImpl(ParserWriter& ph, int falsePos, const SelectedToken* begin, const SelectedToken* end)
+{
+	if (std::distance(begin, end) <= 1)
+	{
+		Log(LOG_ERROR) << "Invaild length of condition arguments";
+		return false;
+	}
+	const auto truePos = ph.addLabel();
+	const auto orFunc = begin[0] == ConditionSpecNames[0];
+	const auto andFunc = begin[0] == ConditionSpecNames[1];
+	if (orFunc || andFunc)
+	{
+		++begin;
+		for (; std::distance(begin, end) > 3; begin += 3)
+		{
+			auto temp = ph.addLabel();
+			if (orFunc)
+			{
+				if (!parseConditionImpl(ph, truePos, temp, begin, begin + 3))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (!parseConditionImpl(ph, temp, falsePos, begin, begin + 3))
+				{
+					return false;
+				}
+			}
+			ph.setLabel(temp, ph.getCurrPos());
+		}
+	}
+	if (!parseConditionImpl(ph, truePos, falsePos, begin, end))
+	{
+		return false;
+	}
+
+	ph.setLabel(truePos, ph.getCurrPos());
 	return true;
 }
 
@@ -721,7 +769,7 @@ bool parseIf(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* b
 	ParserWriter::Block block = { BlockIf, ph.addLabel(), ph.addLabel() };
 	ph.codeBlocks.push_back(block);
 
-	return parseConditionImpl(ph, block.nextLabel, begin, end);
+	return parseFullConditionImpl(ph, block.nextLabel, begin, end);
 }
 
 /**
@@ -750,7 +798,7 @@ bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken*
 	else
 	{
 		block.nextLabel = ph.addLabel();
-		return parseConditionImpl(ph, block.nextLabel, begin, end);
+		return parseFullConditionImpl(ph, block.nextLabel, begin, end);
 	}
 }
 
@@ -841,6 +889,15 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 		Log(LOG_ERROR) << "Invalid type '" << begin->toString() << "'";
 		return false;
 	}
+}
+
+/**
+ * Dummy operation.
+ */
+bool parseDummy(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+{
+	Log(LOG_ERROR) << "Reserved operation for future use";
+	return false;
 }
 
 /**
@@ -993,7 +1050,7 @@ ScriptRef addString(std::vector<std::vector<char>>& list, const std::string& s)
 	return ref;
 }
 
-}
+} //namespace
 
 ////////////////////////////////////////////////////////////
 //					ScriptRef class
@@ -1473,7 +1530,7 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 ////////////////////////////////////////////////////////////
 
 /**
- * Constructor
+ * Constructor.
  */
 ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg) : _shared{ shared }, _regUsed{ RegMax }, _name{ name }
 {
@@ -1490,7 +1547,10 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 	addParserBase("if", &overloadBuildinProc, {}, &parseIf, nullptr, nullptr);
 	addParserBase("else", &overloadBuildinProc, {}, &parseElse, nullptr, nullptr);
 	addParserBase("end", &overloadBuildinProc, {}, &parseEnd, nullptr, nullptr);
-	addParserBase("var", &overloadBuildinProc,{}, &parseVar, nullptr, nullptr);
+	addParserBase("var", &overloadBuildinProc, {}, &parseVar, nullptr, nullptr);
+	addParserBase("loop", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
+	addParserBase("break", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
+	addParserBase("continue", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
 
 	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq");
 
@@ -1538,6 +1598,20 @@ bool ScriptParserBase::haveNameRef(const std::string& s) const
 	if (findSortHelper(_typeList, ref) != nullptr)
 	{
 		return true;
+	}
+	for (auto& r : ConditionNames)
+	{
+		if (ref == r)
+		{
+			return true;
+		}
+	}
+	for (auto& r : ConditionSpecNames)
+	{
+		if (ref == r)
+		{
+			return true;
+		}
 	}
 	return false;
 }
@@ -1806,6 +1880,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		*this
 	);
 
+	bool haveLastReturn = false;
 	ScriptRef range = ScriptRef{ srcCode.data(), srcCode.data() + srcCode.size() };
 	if (!range)
 	{
@@ -1824,6 +1899,10 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 					Log(LOG_ERROR) << err << "invalid use of label: '" << i->name.toString() << "' without declaration";
 					return false;
 				}
+			}
+			if (!haveLastReturn)
+			{
+				Log(LOG_ERROR) << err << "script need to end with return statemlent";
 			}
 			help.relese();
 			destScript = std::move(tempScript);
@@ -1890,7 +1969,14 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 				if (line_end != range.end())
 					++line_end;
 			}
-			Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
+			if (args[ScriptMaxArg - 1].getType() != TokenNone)
+			{
+				Log(LOG_ERROR) << err << "too many arguments in line: '" << std::string(line_begin, line_end) << "'";
+			}
+			else
+			{
+				Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
+			}
 			return false;
 		}
 		else
@@ -1907,6 +1993,8 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 				Log(LOG_ERROR) << err << "invalid label '"<< label.toString() <<"' in line: '" << line.toString() << "'";
 				return false;
 			}
+
+			haveLastReturn = op == ScriptRef{ "return" };
 
 			// create normal proc call
 			if (callOverloadProc(help, op_curr, args, args+i) == false)
@@ -2402,6 +2490,11 @@ void ScriptGlobal::load(const YAML::Node& node)
 						auto tag = getTag(p.first, ScriptRef::tempFrom(namePrefix));
 						if (tag)
 						{
+							auto data = getTagValueData(p.first, tag);
+							if (valueType != data.type)
+							{
+								Log(LOG_ERROR) << "Script variable '" + name + "' have wrong type '" << _tagValueTypes[valueType].name.toString() << "' instead of '" << _tagValueTypes[data.type].name.toString() << "' in '" + nodeName + "'.";
+							}
 							continue;
 						}
 						tag = addTag(p.first, addNameRef(namePrefix), valueType);

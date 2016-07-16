@@ -151,6 +151,8 @@ set ( battlescape_src
   Battlescape/Inventory.h
   Battlescape/InventoryState.cpp
   Battlescape/InventoryState.h
+  Battlescape/ItemSprite.cpp
+  Battlescape/ItemSprite.h
   Battlescape/Map.cpp
   Battlescape/Map.h
   Battlescape/MedikitState.cpp
@@ -279,6 +281,9 @@ set ( engine_src
   Engine/Scalers/xbrz.h  
   Engine/Screen.cpp
   Engine/Screen.h
+  Engine/Script.cpp
+  Engine/Script.h
+  Engine/ScriptBind.h
   Engine/ShaderDraw.h
   Engine/ShaderDrawHelper.h
   Engine/ShaderMove.h
@@ -304,6 +309,10 @@ set ( geoscape_src
   Geoscape/AlienBaseState.h
   Geoscape/AllocatePsiTrainingState.cpp
   Geoscape/AllocatePsiTrainingState.h
+  Geoscape/AllocateTrainingState.cpp
+  Geoscape/AllocateTrainingState.h
+  Geoscape/TrainingState.cpp
+  Geoscape/TrainingState.h
   Geoscape/BaseDefenseState.cpp
   Geoscape/BaseDefenseState.h
   Geoscape/BaseDestroyedState.cpp
@@ -504,7 +513,6 @@ set ( mod_src
   Mod/MapScript.h
   Mod/Mod.cpp
   Mod/Mod.h
-  Mod/ModScript.cpp
   Mod/ModScript.h
   Mod/Polygon.cpp
   Mod/Polygon.h

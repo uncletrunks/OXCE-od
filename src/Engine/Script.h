@@ -54,7 +54,7 @@ struct ArgSelector;
 
 }
 
-constexpr int ScriptMaxArg = 8;
+constexpr int ScriptMaxArg = 16;
 constexpr int ScriptMaxReg = 64*sizeof(void*);
 
 /**

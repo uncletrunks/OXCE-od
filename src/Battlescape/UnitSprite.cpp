@@ -66,6 +66,14 @@ UnitSprite::~UnitSprite()
 namespace
 {
 
+/**
+ * Placeholder for surface index for body part not used by normal OpenXcom.
+ */
+const int InvalidSpriteIndex = -256;
+
+/**
+ * Get item if can be visible on sprite.
+ */
 BattleItem *getIfVisible(BattleItem *item)
 {
 	if (item && (!item->getRules()->isFixed() || item->getRules()->getFixedShow()))
@@ -103,7 +111,7 @@ void UnitSprite::selectUnit(Part& p, int index, int dir)
 	const auto* armor = _unit->getArmor();
 
 	//enforce compatibility with basic version
-	if (_unitSurface->getTotalFrames() <= (size_t)(index + dir))
+	if (InvalidSpriteIndex != index && _unitSurface->getTotalFrames() <= (size_t)(index + dir))
 	{
 		throw Exception("Invlid surface set '" + armor->getSpriteSheet() + "' for armor '" + armor->getType() + "': not enoght frames");
 	}
@@ -787,7 +795,7 @@ void UnitSprite::drawRoutine2()
 		{
 			// draw nothing, can be override by script
 			Part p{ BODYPART_LARGE_PROPULSION + _part };
-			selectUnit(p, -8, _animationFrame % 8);
+			selectUnit(p, InvalidSpriteIndex, _animationFrame % 8);
 			blitBody(p);
 		}
 	}
@@ -839,7 +847,7 @@ void UnitSprite::drawRoutine3()
 	{
 		// draw nothing, can be override by script
 		Part p{ BODYPART_LARGE_PROPULSION + _part };
-		selectUnit(p, -8, _animationFrame % 8);
+		selectUnit(p, InvalidSpriteIndex, _animationFrame % 8);
 		blitBody(p);
 	}
 

@@ -682,147 +682,147 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 		// Determine murder type
 		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
 		{
-			if ((*j)->getHealth() == 0)
+			if ((*j)->getHealth() <= 0)
 			{
 				killStat.status = STATUS_DEAD;
 			}
 			else if ((*j)->getStunlevel() >= (*j)->getHealth() && (*j)->getStatus() != STATUS_UNCONSCIOUS)
-		{
+			{
 				killStat.status = STATUS_UNCONSCIOUS;
 			}
 		}
 
-			// Assume that, in absence of a murderer and an explosion, the laster unit to hit the victim is the murderer.
-            // Possible causes of death: bleed out, fire.
+		// Assume that, in absence of a murderer and an explosion, the laster unit to hit the victim is the murderer.
+		// Possible causes of death: bleed out, fire.
 		// Possible causes of unconciousness: wounds, smoke.
 		// Assumption : The last person to hit the victim is the murderer.
-			if (!murderer && !terrainExplosion)
+		if (!murderer && !terrainExplosion)
+		{
+			for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 			{
-				for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+				if ((*i)->getId() == victim->getMurdererId())
 				{
-					if ((*i)->getId() == victim->getMurdererId())
-					{
-						murderer = (*i);
+					murderer = (*i);
 					killStat.weapon = victim->getMurdererWeapon();
 					killStat.weaponAmmo = victim->getMurdererWeaponAmmo();
+					break;
+				}
+			}
+		}
+
+		if (murderer && killStat.status != STATUS_IGNORE_ME)
+		{
+			if (murderer->getFaction() == FACTION_PLAYER && murderer->getOriginalFaction() != FACTION_PLAYER)
+			{
+				// This must be a mind controlled unit. Find out who mind controlled him and award the kill to that unit.
+				for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+				{
+					if ((*i)->getId() == murderer->getMurdererId() && (*i)->getGeoscapeSoldier())
+					{
+						(*i)->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
+						if (victim->getFaction() == FACTION_HOSTILE)
+						{
+							(*i)->getStatistics()->slaveKills++;
+						}
+						victim->setMurdererId((*i)->getId());
 						break;
 					}
 				}
 			}
-
-		if (murderer && killStat.status != STATUS_IGNORE_ME)
-			{
-				if (murderer->getFaction() == FACTION_PLAYER && murderer->getOriginalFaction() != FACTION_PLAYER)
-				{
-					// This must be a mind controlled unit. Find out who mind controlled him and award the kill to that unit.
-				for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
-					{
-					if ((*i)->getId() == murderer->getMurdererId() && (*i)->getGeoscapeSoldier())
-						{
-						(*i)->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
-							if (victim->getFaction() == FACTION_HOSTILE)
-							{
-							(*i)->getStatistics()->slaveKills++;
-							}
-						victim->setMurdererId((*i)->getId());
-							break;
-						}
-					}
-				}
 			else if (!murderer->getStatistics()->duplicateEntry(killStat.status, victim->getId()))
-				{
+			{
 				murderer->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
-					victim->setMurdererId(murderer->getId());
-				}
+				victim->setMurdererId(murderer->getId());
+			}
 		}
 
 		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
 		{
-			if ((*j)->getHealth() == 0)
+			if ((*j)->getHealth() <= 0)
 			{
 				if (murderer)
 				{
-				murderer->addKillCount();
-				victim->killedBy(murderer->getFaction());
-				int modifier = murderer->getFaction() == FACTION_PLAYER ? _save->getFactionMoraleModifier(true) : 100;
+					murderer->addKillCount();
+					victim->killedBy(murderer->getFaction());
+					int modifier = murderer->getFaction() == FACTION_PLAYER ? _save->getFactionMoraleModifier(true) : 100;
 
-				// if there is a known murderer, he will get a morale bonus if he is of a different faction (what with neutral?)
-				if ((victim->getOriginalFaction() == FACTION_PLAYER && murderer->getFaction() == FACTION_HOSTILE) ||
-					(victim->getOriginalFaction() == FACTION_HOSTILE && murderer->getFaction() == FACTION_PLAYER))
-				{
-					murderer->moraleChange(20 * modifier / 100);
-				}
-				// murderer will get a penalty with friendly fire
-				if (victim->getOriginalFaction() == murderer->getOriginalFaction())
-				{
-					murderer->moraleChange(-(2000 / modifier));
-				}
-				if (victim->getOriginalFaction() == FACTION_NEUTRAL)
-				{
-					if (murderer->getOriginalFaction() == FACTION_PLAYER)
+					// if there is a known murderer, he will get a morale bonus if he is of a different faction (what with neutral?)
+					if ((victim->getOriginalFaction() == FACTION_PLAYER && murderer->getFaction() == FACTION_HOSTILE) ||
+						(victim->getOriginalFaction() == FACTION_HOSTILE && murderer->getFaction() == FACTION_PLAYER))
 					{
-						murderer->moraleChange(-(1000 / modifier));
+						murderer->moraleChange(20 * modifier / 100);
 					}
-					else
+					// murderer will get a penalty with friendly fire
+					if (victim->getOriginalFaction() == murderer->getOriginalFaction())
 					{
-						murderer->moraleChange(10);
+						murderer->moraleChange(-(2000 / modifier));
 					}
-				}
-			}
-
-			if (victim->getFaction() != FACTION_NEUTRAL)
-			{
-				int modifier = _save->getUnitMoraleModifier(victim);
-				int loserMod =  _save->getFactionMoraleModifier(victim->getOriginalFaction() != FACTION_HOSTILE);
-				int winnerMod = _save->getFactionMoraleModifier(victim->getOriginalFaction() == FACTION_HOSTILE);
-				for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
-				{
-					if (!(*i)->isOut() && (*i)->getArmor()->getSize() == 1)
+					if (victim->getOriginalFaction() == FACTION_NEUTRAL)
 					{
-						// the losing squad all get a morale loss
-						if ((*i)->getOriginalFaction() == victim->getOriginalFaction())
+						if (murderer->getOriginalFaction() == FACTION_PLAYER)
 						{
-							int bravery = (110 - (*i)->getBaseStats()->bravery) / 10;
-							(*i)->moraleChange(-(modifier * 200 * bravery / loserMod / 100));
-
-							if (victim->getFaction() == FACTION_HOSTILE && murderer)
-							{
-								murderer->setTurnsSinceSpotted(0);
-							}
+							murderer->moraleChange(-(1000 / modifier));
 						}
-						// the winning squad all get a morale increase
 						else
 						{
-							(*i)->moraleChange(10 * winnerMod / 100);
+							murderer->moraleChange(10);
 						}
 					}
 				}
-			}
-			if (murderweapon)
-			{
-				statePushNext(new UnitDieBState(this, (*j), damageType, false));
-			}
-			else
-			{
-				if (hiddenExplosion)
+
+				if (victim->getFaction() != FACTION_NEUTRAL)
 				{
-					// this is instant death from UFO powersources, without screaming sounds
-					statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), true));
+					int modifier = _save->getUnitMoraleModifier(victim);
+					int loserMod =  _save->getFactionMoraleModifier(victim->getOriginalFaction() != FACTION_HOSTILE);
+					int winnerMod = _save->getFactionMoraleModifier(victim->getOriginalFaction() == FACTION_HOSTILE);
+					for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+					{
+						if (!(*i)->isOut() && (*i)->getArmor()->getSize() == 1)
+						{
+							// the losing squad all get a morale loss
+							if ((*i)->getOriginalFaction() == victim->getOriginalFaction())
+							{
+								int bravery = (110 - (*i)->getBaseStats()->bravery) / 10;
+								(*i)->moraleChange(-(modifier * 200 * bravery / loserMod / 100));
+
+								if (victim->getFaction() == FACTION_HOSTILE && murderer)
+								{
+									murderer->setTurnsSinceSpotted(0);
+								}
+							}
+							// the winning squad all get a morale increase
+							else
+							{
+								(*i)->moraleChange(10 * winnerMod / 100);
+							}
+						}
+					}
+				}
+				if (murderweapon)
+				{
+					statePushNext(new UnitDieBState(this, (*j), damageType, false));
 				}
 				else
 				{
-					if (terrainExplosion)
+					if (hiddenExplosion)
 					{
-						// terrain explosion
-						statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), false));
+						// this is instant death from UFO powersources, without screaming sounds
+						statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), true));
 					}
 					else
 					{
-						// no murderer, and no terrain explosion, must be fatal wounds
-						statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), false)); // DT_NONE = STR_HAS_DIED_FROM_A_FATAL_WOUND
+						if (terrainExplosion)
+						{
+							// terrain explosion
+							statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), false));
+						}
+						else
+						{
+							// no murderer, and no terrain explosion, must be fatal wounds
+							statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), false)); // DT_NONE = STR_HAS_DIED_FROM_A_FATAL_WOUND
+						}
 					}
 				}
-			}
 				// one of our own died, record the murderer instead of the victim
 				if (victim->getGeoscapeSoldier())
 				{
@@ -838,13 +838,13 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 			}
 			else if ((*j)->getStunlevel() >= (*j)->getHealth() && (*j)->getStatus() != STATUS_UNCONSCIOUS)
 			{
-			if (victim->getGeoscapeSoldier())
-			{
-				victim->getStatistics()->wasUnconcious = true;
+				if (victim->getGeoscapeSoldier())
+				{
+					victim->getStatistics()->wasUnconcious = true;
+				}
+				statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), true)); // no damage type used there
 			}
-			statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), true)); // no damage type used there
 		}
-	}
 	}
 
 	BattleUnit *bu = _save->getSelectedUnit();
