@@ -2789,29 +2789,31 @@ int TileEngine::calculateParabola(const Position& origin, const Position& target
 		x = (int)((double)origin.x + (double)i * cos(te) * sin(fi));
 		y = (int)((double)origin.y + (double)i * sin(te) * sin(fi));
 		z = (int)((double)origin.z + (double)i * cos(fi) - zK * ((double)i - ro / 2.0) * ((double)i - ro / 2.0) + zA);
-		if (storeTrajectory && trajectory)
-		{
-			trajectory->push_back(Position(x, y, z));
-		}
 		//passes through this point?
-		Position nextPosition = Position(x,y,z);
-		int result = calculateLine(lastPosition, nextPosition, false, 0, excludeUnit);
+		Position nextPosition = Position(x, y, z);
+		std::vector<Position> contactPoint;
+		int result = calculateLine(lastPosition, nextPosition, false, &contactPoint, excludeUnit);
 		if (result != V_EMPTY)
 		{
 			if (lastPosition.z < nextPosition.z)
 			{
 				result = V_OUTOFBOUNDS;
 			}
-			if (!storeTrajectory && trajectory != 0)
+			if (trajectory != nullptr)
 			{ // store the position of impact
-				trajectory->push_back(nextPosition);
+				assert(contactPoint.size() > 0);
+				trajectory->push_back(contactPoint[0]);
 			}
 			return result;
+		}
+		if (storeTrajectory && trajectory != nullptr)
+		{
+			trajectory->push_back(nextPosition);
 		}
 		lastPosition = Position(x,y,z);
 		++i;
 	}
-	if (!storeTrajectory && trajectory != 0)
+	if (!storeTrajectory && trajectory != nullptr)
 	{ // store the position of impact
 		trajectory->push_back(Position(x, y, z));
 	}
