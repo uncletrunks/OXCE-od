@@ -209,6 +209,11 @@ void UfoDetectedState::btnCentreClick(Action *)
  */
 void UfoDetectedState::btnCancelClick(Action *)
 {
+	if (SDL_GetModState() & KMOD_CTRL)
+	{
+		// don't show UFO Detected window for this UFO anymore
+		_game->getSavedGame()->addUfoToIgnoreList(_ufo->getId());
+	}
 	_game->popState();
 }
 

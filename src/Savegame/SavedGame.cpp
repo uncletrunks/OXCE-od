@@ -1976,6 +1976,27 @@ std::vector<MissionStatistics*> *SavedGame::getMissionStatistics()
 }
 
 /**
+* Adds a UFO to the ignore list.
+* @param ufoId Ufo ID.
+*/
+void SavedGame::addUfoToIgnoreList(int ufoId)
+{
+	if (ufoId != 0)
+	{
+		_ignoredUfos.insert(ufoId);
+	}
+}
+
+/**
+* Checks if a UFO is on the ignore list.
+* @param ufoId Ufo ID.
+*/
+bool SavedGame::isUfoOnIgnoreList(int ufoId)
+{
+	return _ignoredUfos.find(ufoId) != _ignoredUfos.end();
+}
+
+/**
  * Registers a soldier's death in the memorial.
  * @param soldier Pointer to dead soldier.
  * @param cause Pointer to cause of death, NULL if missing in action.

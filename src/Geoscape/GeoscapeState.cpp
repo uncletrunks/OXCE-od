@@ -1385,7 +1385,11 @@ void GeoscapeState::time30Minutes()
 				if (detected)
 				{
 					(*u)->setDetected(true);
-					popup(new UfoDetectedState((*u), this, true, (*u)->getHyperDetected()));
+					// don't show if player said he doesn't want to see this UFO anymore
+					if (!_game->getSavedGame()->isUfoOnIgnoreList((*u)->getId()))
+					{
+						popup(new UfoDetectedState((*u), this, true, (*u)->getHyperDetected()));
+					}
 				}
 			}
 			else

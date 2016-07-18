@@ -21,6 +21,7 @@
 
 #include <map>
 #include <vector>
+#include <set>
 #include <string>
 #include <time.h>
 #include <stdint.h>
@@ -131,6 +132,7 @@ private:
 	size_t _selectedBase;
 	std::string _lastselectedArmor; //contains the last selected armour
     std::vector<MissionStatistics*> _missionStatistics;
+	std::set<int> _ignoredUfos;
 
 	void getDependableResearchBasic (std::vector<RuleResearch*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	static SaveInfo getSaveInfo(const std::string &file, Language *lang);
@@ -319,6 +321,10 @@ public:
 	Craft *findCraftByUniqueId(const CraftId& craftId) const;
     /// Gets the list of missions statistics
 	std::vector<MissionStatistics*> *getMissionStatistics();
+	/// Adds a UFO to the ignore list.
+	void addUfoToIgnoreList(int ufoId);
+	/// Checks if a UFO is on the ignore list.
+	bool isUfoOnIgnoreList(int ufoId);
 	/// Handles a soldier's death.
 	std::vector<Soldier*>::iterator killSoldier(Soldier *soldier, BattleUnitKills *cause = 0);
 };
