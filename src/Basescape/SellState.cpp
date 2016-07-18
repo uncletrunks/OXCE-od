@@ -234,7 +234,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 		{
 			qty = _debriefingState->getRecoveredItemCount(rule);
 		}
-		if (qty > 0 && (Options::canSellLiveAliens || !rule->isAlien()))
+		if (qty > 0 && ((Options::canSellLiveAliens && _debriefingState == 0) || !rule->isAlien()))
 		{
 			TransferRow row = { TRANSFER_ITEM, rule, tr(*i), rule->getSellCost(), qty, 0, 0 };
 			_items.push_back(row);
