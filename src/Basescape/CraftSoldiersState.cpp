@@ -160,6 +160,7 @@ CraftSoldiersState::~CraftSoldiersState()
  */
 void CraftSoldiersState::cbxSortByChange(Action *action)
 {
+	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
 	size_t selIdx = _cbxSortBy->getSelected();
 	if (selIdx == (size_t)-1)
 	{
@@ -169,7 +170,11 @@ void CraftSoldiersState::cbxSortByChange(Action *action)
 	SortFunctor *compFunc = _sortFunctors[selIdx];
 	if (compFunc)
 	{
-		std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+		// if CTRL is pressed, we only want to show the dynamic column, without actual sorting
+		if (!ctrlPressed)
+		{
+			std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+		}
 	}
 	else
 	{
