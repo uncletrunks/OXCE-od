@@ -1027,17 +1027,27 @@ void crashDump(void *ex, const std::string &err)
 	std::ostringstream error;
 #ifdef _WIN32
 	PEXCEPTION_POINTERS exception = (PEXCEPTION_POINTERS)ex;
-	if (exception->ExceptionRecord->ExceptionCode == EXCEPTION_CODE_CXX)
+	if (ex)
 	{
-		std::exception *cppException = (std::exception *)exception->ExceptionRecord->ExceptionInformation[1];
-		error << cppException->what();
+		if (exception->ExceptionRecord->ExceptionCode == EXCEPTION_CODE_CXX)
+		{
+			std::exception *cppException = (std::exception *)exception->ExceptionRecord->ExceptionInformation[1];
+			error << cppException->what();
+		}
+		else
+		{
+			error << "code 0x" << std::hex << exception->ExceptionRecord->ExceptionCode;
+		}
 	}
 	else
 	{
-		error << "code 0x" << std::hex << exception->ExceptionRecord->ExceptionCode;
+		error << err;
 	}
 	Log(LOG_FATAL) << "A fatal error has occurred: " << error.str();
-	stackTrace(exception->ContextRecord);
+	if (ex)
+	{
+		stackTrace(exception->ContextRecord);
+	}
 	std::string dumpName = Options::getUserFolder();
 	dumpName += timestamp() + ".dmp";
 	HANDLE dumpFile = CreateFileA(dumpName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
