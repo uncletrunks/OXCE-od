@@ -267,6 +267,7 @@ public:
 	void setMod(int i)
 	{
 		updateConst("RuleList.current", (int)i);
+		_modCurr = i;
 	}
 };
 

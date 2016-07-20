@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sstream>
+#include <exception>
 #include "version.h"
 #include "Engine/Logger.h"
 #include "Engine/CrossPlatform.h"
@@ -55,7 +56,8 @@ void signalLogger(int sig)
 	exit(EXIT_FAILURE);
 }
 
-#include <exception>
+#endif
+
 void exceptionLogger()
 {
 	static bool logged = false;
@@ -70,9 +72,8 @@ void exceptionLogger()
 		error = "Unknown exception";
 	}
 	CrossPlatform::crashDump(0, error);
-	abort();
+	exit(EXIT_FAILURE);
 }
-#endif
 
 Game *game = 0;
 
@@ -85,6 +86,10 @@ int main(int argc, char *argv[])
 	//_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
 	SetUnhandledExceptionFilter(crashLogger);
+#ifdef __MINGW32__
+	// MinGW can use SJLJ or Dwarf exceptions, because of this SEH can't catch it.
+	std::set_terminate(exceptionLogger);
+#endif
 	// Uncomment to debug crash handler
 	// AddVectoredContinueHandler(1, crashLogger);
 #else
