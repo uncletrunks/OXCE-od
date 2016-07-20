@@ -100,6 +100,8 @@ public:
 	void mouseClick(Action *action, State *state);
 	/// Unloads the selected weapon.
 	bool unload();
+	/// Checks whether the given item is visible with the current search string.
+	bool isInSearchString(BattleItem *item);
 	/// Arranges items on the ground.
 	void arrangeGround(bool alterOffset = true);
 	/// Attempts to place an item in an inventory slot.

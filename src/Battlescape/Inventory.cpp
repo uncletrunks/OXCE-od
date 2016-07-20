@@ -1033,6 +1033,71 @@ bool Inventory::unload()
 }
 
 /**
+* Checks whether the given item is visible with the current search string.
+* @param item The item to check.
+* @return True if item should be shown. False otherwise.
+*/
+bool Inventory::isInSearchString(BattleItem *item)
+{
+	if (!_searchString.length())
+	{
+		// No active search string.
+		return true;
+	}
+
+	std::wstring itemLocalName;
+	if (!_game->getSavedGame()->isResearched(item->getRules()->getRequirements()))
+	{
+		// Alien artifact, shouldn't match on the real name.
+		itemLocalName = _game->getLanguage()->getString("STR_ALIEN_ARTIFACT");
+	}
+	else
+	{
+		itemLocalName = _game->getLanguage()->getString(item->getRules()->getName());
+	}
+	std::transform(itemLocalName.begin(), itemLocalName.end(), itemLocalName.begin(), towupper);
+	if (itemLocalName.find(_searchString) != std::wstring::npos)
+	{
+		// Name match.
+		return true;
+	}
+
+	// If present in the Ufopaedia, check categories for a match as well.
+	ArticleDefinition *articleID = _game->getMod()->getUfopaediaArticle(item->getRules()->getType());
+	if (articleID && Ufopaedia::isArticleAvailable(_game->getSavedGame(), articleID))
+	{
+		std::vector<std::string> itemCategories = item->getRules()->getCategories();
+		for (std::vector<std::string>::iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
+		{
+			std::wstring catLocalName = _game->getLanguage()->getString((*i));
+			std::transform(catLocalName.begin(), catLocalName.end(), catLocalName.begin(), towupper);
+			if (catLocalName.find(_searchString) != std::wstring::npos)
+			{
+				// Category match
+				return true;
+			}
+		}
+
+		// Check loaded ammo (if any).
+		if (item->getAmmoItem())
+		{
+			std::vector<std::string> itemAmmoCategories = item->getAmmoItem()->getRules()->getCategories();
+			for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
+			{
+				std::wstring catLocalName = _game->getLanguage()->getString((*i));
+				std::transform(catLocalName.begin(), catLocalName.end(), catLocalName.begin(), towupper);
+				if (catLocalName.find(_searchString) != std::wstring::npos)
+				{
+					// Category match
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/**
  * Arranges items on the ground for the inventory display.
  * Since items on the ground aren't assigned to anyone,
  * they don't actually have permanent slot positions.
@@ -1106,22 +1171,17 @@ void Inventory::arrangeGround(bool alterOffset)
 		// Now for each item type, find the most topleft position that is not occupied and will fit.
 		for (std::vector<BattleItem*>::iterator i = itemListOrder.begin(); i != itemListOrder.end(); ++i)
 		{
-			// quick search
-			if (_searchString != L"")
-			{
-				std::wstring projectName = _game->getLanguage()->getString((*i)->getRules()->getType());
-				for (auto & c : projectName) c = towupper(c);
-				if (projectName.find(_searchString) == std::string::npos)
-				{
-					continue;
-				}
-			}
-
 			// Fetch the list of item stacks for this item type. Then place each stack.
 			std::unordered_map<std::string, std::vector< std::vector<BattleItem*> > >::iterator iterItemList = typeItemLists.find((*i)->getRules()->getType());
 			for (std::vector< std::vector<BattleItem*> >::iterator itemStack = iterItemList->second.begin(); itemStack != iterItemList->second.end(); itemStack++)
 			{
 				BattleItem* itemTypeSample = itemStack->at(0); // Grab a sample of the stack of item type we're trying to place.
+				if (!isInSearchString(itemTypeSample))
+				{
+					// quick search
+					// Not a match with the active search string, skip this item stack. (Will remain outside the visible inventory)
+					continue;
+				}
 
 				// Start searching at the x value where we last placed an item of this size.
 				x = startIndexCacheX[itemTypeSample->getRules()->getInventoryHeight()][itemTypeSample->getRules()->getInventoryWidth()];
