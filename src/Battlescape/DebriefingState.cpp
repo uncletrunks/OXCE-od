@@ -813,6 +813,10 @@ void DebriefingState::btnOkClick(Action *)
 			{
 				_game->pushState(new CannotReequipState(_missingItems));
 			}
+
+			// refresh (we may have sold some prisoners in the meantime)
+			_manageContainment = _base->getAvailableContainment() - (_base->getUsedContainment() * _limitsEnforced) < 0;
+
 			if (_noContainment)
 			{
 				_game->pushState(new NoContainmentState);
