@@ -349,7 +349,7 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 
 	if (_objects[part]->isDoor() && unit->getArmor()->getSize() == 1) // don't allow double-wide units to open swinging doors due to engine limitations
 	{
-		if (unit && !cost.haveTU())
+		if (unit && cost.Time && !cost.haveTU())
 			return 4;
 		if (_unit && _unit != unit && _unit->getPosition() != getPosition())
 			return -1;
@@ -360,7 +360,7 @@ int Tile::openDoor(int part, BattleUnit *unit, BattleActionType reserve)
 	}
 	if (_objects[part]->isUFODoor() && _currentFrame[part] == 0) // ufo door part 0 - door is closed
 	{
-		if (unit && !cost.haveTU())
+		if (unit && cost.Time && !cost.haveTU())
 			return 4;
 		_currentFrame[part] = 1; // start opening door
 		return 1;
