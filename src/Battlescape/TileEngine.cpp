@@ -2507,7 +2507,7 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 		}
 	}
 
-	if (TUCost != 0)
+	if (door == 0 || door == 1)
 	{
 		if (_save->getBattleGame()->checkReservedTU(unit, TUCost, 0))
 		{
@@ -2515,6 +2515,8 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 			{
 				// Update FOV through the doorway.
 				calculateFOV(doorCentre, doorsOpened, true, true);
+				calculateTerrainLighting();
+				calculateUnitLighting();
 			}
 			else return 4;
 		}
