@@ -1615,7 +1615,7 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 		{
 			bool remove = true;
 			// no craft - check productions.
-			for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end();)
+			for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end(); ++i)
 			{
 				if (getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts() < 0 && (*i)->getRules()->getCategory() == "STR_CRAFT")
 				{
@@ -1625,14 +1625,10 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 					remove = false;
 					break;
 				}
-				else
-				{
-					++i;
-				}
 			}
 			if (remove && !_transfers.empty())
 			{
-				for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); )
+				for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 				{
 					if ((*i)->getType() == TRANSFER_CRAFT)
 					{
