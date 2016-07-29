@@ -144,6 +144,7 @@ private:
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	int _customItemPreviewIndex;
 	int _kneelBonus, _oneHandedPenalty;
+	int _monthlySalary, _monthlyMaintenance;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
 	ModScript::RecolorItemParser::Container _recolorScript;
 	ModScript::SelectItemParser::Container _spriteScript;
@@ -442,6 +443,10 @@ public:
 	int getKneelBonus(Mod *mod) const;
 	/// Gets the one-handed penalty.
 	int getOneHandedPenalty(Mod *mod) const;
+	/// Gets the monthly salary.
+	int getMonthlySalary() const;
+	/// Gets the monthly maintenance.
+	int getMonthlyMaintenance() const;
 	/// Gets script used to recolor item sprite.
 	const ModScript::RecolorItemParser::Container &getRecolorScript() const;
 	/// Gets script used to switch sprite of item.

@@ -116,6 +116,10 @@ public:
 	int getAvailableEngineers() const;
 	/// Gets the base's total engineers.
 	int getTotalEngineers() const;
+	/// Gets the base's total other employees.
+	int getTotalOtherEmployees() const;
+	/// Gets the base's total cost of other employees.
+	int getTotalOtherEmployeeCost() const;
 	/// Gets the base's used living quarters.
 	int getUsedQuarters() const;
 	/// Gets the base's available living quarters.
@@ -160,6 +164,8 @@ public:
 	int getSoldierCount(const std::string &soldier) const;
 	/// Gets the base's personnel maintenance.
 	int getPersonnelMaintenance() const;
+	/// Gets the base's item maintenance.
+	int getItemMaintenance() const;
 	/// Gets the base's facility maintenance.
 	int getFacilityMaintenance() const;
 	/// Gets the base's total monthly maintenance.

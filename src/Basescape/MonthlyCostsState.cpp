@@ -147,11 +147,14 @@ MonthlyCostsState::MonthlyCostsState(Base *base) : _base(base)
 	std::wostringstream ss6;
 	ss6 << _base->getTotalScientists();
 	_lstSalaries->addRow(4, tr("STR_SCIENTISTS").c_str(), Text::formatFunding(_game->getMod()->getScientistCost()).c_str(), ss6.str().c_str(), Text::formatFunding(_base->getTotalScientists() * _game->getMod()->getScientistCost()).c_str());
+	std::wostringstream ss6b;
+	ss6b << _base->getTotalOtherEmployees();
+	_lstSalaries->addRow(4, tr("STR_OTHER_EMPLOYEES").c_str(), L"", ss6b.str().c_str(), Text::formatFunding(_base->getTotalOtherEmployeeCost()).c_str());
 
 	_lstMaintenance->setColumns(2, 239, 60);
 	_lstMaintenance->setDot(true);
 	std::wostringstream ss7;
-	ss7 << L'\x01' << Text::formatFunding(_base->getFacilityMaintenance());
+	ss7 << L'\x01' << Text::formatFunding(_base->getFacilityMaintenance() + _base->getItemMaintenance());
 	_lstMaintenance->addRow(2, tr("STR_BASE_MAINTENANCE").c_str(), ss7.str().c_str());
 
 	_lstTotal->setColumns(2, 44, 55);

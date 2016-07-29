@@ -58,7 +58,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_customItemPreviewIndex(0),
-	_kneelBonus(-1), _oneHandedPenalty(-1)
+	_kneelBonus(-1), _oneHandedPenalty(-1),
+	_monthlySalary(0), _monthlyMaintenance(0)
 {
 	_accuracyMulti.setFiring();
 	_meleeMulti.setMelee();
@@ -451,6 +452,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_customItemPreviewIndex = node["customItemPreviewIndex"].as<int>(_customItemPreviewIndex);
 	_kneelBonus = node["kneelBonus"].as<int>(_kneelBonus);
 	_oneHandedPenalty = node["oneHandedPenalty"].as<int>(_oneHandedPenalty);
+	_monthlySalary = node["monthlySalary"].as<int>(_monthlySalary);
+	_monthlyMaintenance = node["monthlyMaintenance"].as<int>(_monthlyMaintenance);
 
 	_damageBonus.load(node["damageBonus"]);
 	_meleeBonus.load(node["meleeBonus"]);
@@ -1842,6 +1845,24 @@ int RuleItem::getKneelBonus(Mod *mod) const
 int RuleItem::getOneHandedPenalty(Mod *mod) const
 {
 	return _oneHandedPenalty != -1 ? _oneHandedPenalty : mod->getOneHandedPenaltyGlobal();
+}
+
+/**
+* Gets the monthly salary.
+* @return Monthly salary.
+*/
+int RuleItem::getMonthlySalary() const
+{
+	return _monthlySalary;
+}
+
+/**
+* Gets the monthly maintenance.
+* @return Monthly maintenance.
+*/
+int RuleItem::getMonthlyMaintenance() const
+{
+	return _monthlyMaintenance;
 }
 
 }

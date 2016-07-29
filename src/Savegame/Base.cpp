@@ -560,6 +560,65 @@ int Base::getTotalEngineers() const
 }
 
 /**
+* Returns the total amount of other employees contained in the base.
+* @return Number of employees.
+*/
+int Base::getTotalOtherEmployees() const
+{
+	int total = 0;
+	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+	{
+		if ((*i)->getType() == TRANSFER_ITEM)
+		{
+			int salary = _mod->getItem((*i)->getItems())->getMonthlySalary();
+			if (salary != 0)
+			{
+				total += (*i)->getQuantity();
+			}
+		}
+	}
+	for (std::map<std::string, int>::const_iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
+	{
+		int salary = _mod->getItem(i->first)->getMonthlySalary();
+		if (salary != 0)
+		{
+			total += i->second;
+		}
+	}
+	return total;
+}
+
+/**
+* Returns the total cost of other employees contained
+* in the base.
+* @return Cost of employees.
+*/
+int Base::getTotalOtherEmployeeCost() const
+{
+	int total = 0;
+	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+	{
+		if ((*i)->getType() == TRANSFER_ITEM)
+		{
+			int salary = _mod->getItem((*i)->getItems())->getMonthlySalary();
+			if (salary != 0)
+			{
+				total += salary * (*i)->getQuantity();
+			}
+		}
+	}
+	for (std::map<std::string, int>::const_iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
+	{
+		int salary = _mod->getItem(i->first)->getMonthlySalary();
+		if (salary != 0)
+		{
+			total += salary * i->second;
+		}
+	}
+	return total;
+}
+
+/**
  * Returns the amount of living quarters used up
  * by personnel in the base.
  * @return Living space.
@@ -1021,6 +1080,37 @@ int Base::getPersonnelMaintenance() const
 	}
 	total += getTotalEngineers() * _mod->getEngineerCost();
 	total += getTotalScientists() * _mod->getScientistCost();
+	total += getTotalOtherEmployeeCost(); // other employees
+	return total;
+}
+
+/**
+* Returns the total amount of monthly costs
+* for maintaining the items in the base.
+* @return Maintenance costs.
+*/
+int Base::getItemMaintenance() const
+{
+	int total = 0;
+	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+	{
+		if ((*i)->getType() == TRANSFER_ITEM)
+		{
+			int maintenance = _mod->getItem((*i)->getItems())->getMonthlyMaintenance();
+			if (maintenance != 0)
+			{
+				total += maintenance * (*i)->getQuantity();
+			}
+		}
+	}
+	for (std::map<std::string, int>::const_iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
+	{
+		int maintenance = _mod->getItem(i->first)->getMonthlyMaintenance();
+		if (maintenance != 0)
+		{
+			total += maintenance * i->second;
+		}
+	}
 	return total;
 }
 
@@ -1049,7 +1139,7 @@ int Base::getFacilityMaintenance() const
  */
 int Base::getMonthlyMaintenace() const
 {
-	return getCraftMaintenance() + getPersonnelMaintenance() + getFacilityMaintenance();
+	return getCraftMaintenance() + getPersonnelMaintenance() + getFacilityMaintenance() + getItemMaintenance();
 }
 
 /**
