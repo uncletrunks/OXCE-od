@@ -38,6 +38,8 @@ class BattleItem;
 class RuleInventory;
 class Particle;
 
+enum LightLayers : Uint8 { LL_AMBIENT, LL_STATIC, LL_UNITS, LL_MAX };
+
 /**
  * Basic element of which a battle map is build.
  * @sa http://www.ufopaedia.org/index.php?title=MAPS
@@ -45,7 +47,7 @@ class Particle;
 class Tile
 {
 public:
-	static struct SerializationKey 
+	static struct SerializationKey
 	{
 		// how many bytes to store for each variable or each member of array of the same name
 		Uint8 index; // for indexing the actual tile array
@@ -56,17 +58,17 @@ public:
         Uint8 boolFields;
 		Uint32 totalBytes; // per structure, including any data not mentioned here and accounting for all array members!
 	} serializationKey;
-	
+
 	static const int NOT_CALCULATED = -1;
 
 protected:
-	static const int LIGHTLAYERS = 3;
+	static const int LIGHTLAYERS = LightLayers::LL_MAX;
 	MapData *_objects[4];
 	int _mapDataID[4];
 	int _mapDataSetID[4];
 	int _currentFrame[4];
 	bool _discovered[3];
-	int _light[LIGHTLAYERS], _lastLight[LIGHTLAYERS];
+	int _light[LIGHTLAYERS];
 	int _smoke;
 	int _fire;
 	int _explosive;
@@ -153,13 +155,13 @@ public:
 	/// Gets the black fog of war status of this tile.
 	bool isDiscovered(int part) const;
 	/// Reset light to zero for this tile.
-	void resetLight(int layer);
+	void resetLight(LightLayers layer);
 	/// Add light to this tile.
-	void addLight(int light, int layer);
+	void addLight(int light, LightLayers layer);
+	/// Get max light to this tile.
+	int getLight(LightLayers layer) const;
 	/// Get the shade amount.
 	int getShade() const;
-	/// Get the shade amount except 2th (dynamic) layer.
-	int getExternalShade() const;
 	/// Destroy a tile part.
 	bool destroy(int part, SpecialTileType type);
 	/// Damage a tile part.

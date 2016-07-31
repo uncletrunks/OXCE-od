@@ -37,8 +37,11 @@ class BattlescapeMessage;
 class Camera;
 class Timer;
 class Text;
+class Tile;
 
 enum CursorType { CT_NONE, CT_NORMAL, CT_AIM, CT_PSI, CT_WAYPOINT, CT_THROW };
+enum MapDataType : int;
+
 /**
  * Interactive map of the battlescape.
  */
@@ -72,6 +75,7 @@ private:
 
 	void drawTerrain(Surface *surface);
 	int getTerrainLevel(Position pos, int size);
+	int getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind);
 	int _iconHeight, _iconWidth, _messageColor;
 	const std::vector<Uint8> *_transparencies;
 public:

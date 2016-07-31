@@ -60,7 +60,6 @@ Tile::Tile(const Position& pos): _smoke(0), _fire(0), _explosive(0), _explosiveT
 	for (int layer = 0; layer < LIGHTLAYERS; layer++)
 	{
 		_light[layer] = 0;
-		_lastLight[layer] = -1;
 	}
 	for (int i = 0; i < 3; ++i)
 	{
@@ -421,10 +420,9 @@ bool Tile::isDiscovered(int part) const
  * Reset the light amount on the tile. This is done before a light level recalculation.
  * @param layer Light is separated in 3 layers: Ambient, Static and Dynamic.
  */
-void Tile::resetLight(int layer)
+void Tile::resetLight(LightLayers layer)
 {
 	_light[layer] = 0;
-	_lastLight[layer] = _light[layer];
 }
 
 /**
@@ -432,10 +430,20 @@ void Tile::resetLight(int layer)
  * @param light Amount of light to add.
  * @param layer Light is separated in 3 layers: Ambient, Static and Dynamic.
  */
-void Tile::addLight(int light, int layer)
+void Tile::addLight(int light, LightLayers layer)
 {
 	if (_light[layer] < light)
 		_light[layer] = light;
+}
+
+/**
+ * Get current light amount of the tile.
+ * @param layer Light is separated in 3 layers: Ambient, Static and Dynamic.
+ * @return Max light value of selected layer.
+ */
+int Tile::getLight(LightLayers layer) const
+{
+	return _light[layer];
 }
 
 /**
@@ -449,26 +457,6 @@ int Tile::getShade() const
 
 	for (int layer = 0; layer < LIGHTLAYERS; layer++)
 	{
-		if (_light[layer] > light)
-			light = _light[layer];
-	}
-
-	return std::max(0, 15 - light);
-}
-
-/**
- * Gets the tile's shade amount 0-15. It returns the brightest of all light layers except 2th (dynamic) layer.
- * Shade level is the inverse of light level. So a maximum amount of light (15) returns shade level 0.
- * @return shade
- */
-int Tile::getExternalShade() const
-{
-	int light = 0;
-	// 2th layer (dynamic) not taken into account
-	for (int layer = 0; layer < LIGHTLAYERS; layer++)
-	{
-		if (layer == 2) continue;
-
 		if (_light[layer] > light)
 			light = _light[layer];
 	}

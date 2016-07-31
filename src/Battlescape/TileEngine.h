@@ -33,7 +33,9 @@ class BattleUnit;
 class BattleItem;
 class Tile;
 struct BattleAction;
+
 enum BattleActionType : Uint8;
+enum LightLayers : Uint8;
 
 
 /**
@@ -54,7 +56,7 @@ private:
 	Position _eventVisibilitySectorL, _eventVisibilitySectorR, _eventVisibilityObserverPos;
 
 	/// Add light source.
-	void addLight(const Position &center, int power, int layer);
+	void addLight(const Position &center, int power, LightLayers layer);
 	/// Calculate blockage amount.
 	int blockage(Tile *tile, const int part, ItemDamageType type, int direction = -1, bool checkingFromOrigin = false);
 	/// Get max view distance.

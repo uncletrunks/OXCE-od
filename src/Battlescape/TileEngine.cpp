@@ -50,6 +50,118 @@
 
 namespace OpenXcom
 {
+namespace
+{
+
+/**
+ * Calculates a line trajectory, using bresenham algorithm in 3D.
+ * @param origin Origin.
+ * @param target Target.
+ * @param posFunc Function call for each step in primary direction of line.
+ * @param driftFunc Function call for each side step of line.
+ */
+template<typename FuncNewPosition, typename FuncDrift>
+bool calculateLineHitHelper(const Position& origin, const Position& target, FuncNewPosition posFunc, FuncDrift driftFunc)
+{
+	int x, x0, x1, delta_x, step_x;
+	int y, y0, y1, delta_y, step_y;
+	int z, z0, z1, delta_z, step_z;
+	int swap_xy, swap_xz;
+	int drift_xy, drift_xz;
+	int cx, cy, cz;
+
+	//start and end points
+	x0 = origin.x;	 x1 = target.x;
+	y0 = origin.y;	 y1 = target.y;
+	z0 = origin.z;	 z1 = target.z;
+
+	//'steep' xy Line, make longest delta x plane
+	swap_xy = abs(y1 - y0) > abs(x1 - x0);
+	if (swap_xy)
+	{
+		std::swap(x0, y0);
+		std::swap(x1, y1);
+	}
+
+	//do same for xz
+	swap_xz = abs(z1 - z0) > abs(x1 - x0);
+	if (swap_xz)
+	{
+		std::swap(x0, z0);
+		std::swap(x1, z1);
+	}
+
+	//delta is Length in each plane
+	delta_x = abs(x1 - x0);
+	delta_y = abs(y1 - y0);
+	delta_z = abs(z1 - z0);
+
+	//drift controls when to step in 'shallow' planes
+	//starting value keeps Line centred
+	drift_xy  = (delta_x / 2);
+	drift_xz  = (delta_x / 2);
+
+	//direction of line
+	step_x = 1;  if (x0 > x1) {  step_x = -1; }
+	step_y = 1;  if (y0 > y1) {  step_y = -1; }
+	step_z = 1;  if (z0 > z1) {  step_z = -1; }
+
+	//starting point
+	y = y0;
+	z = z0;
+
+	//step through longest delta (which we have swapped to x)
+	for (x = x0; x != (x1+step_x); x += step_x)
+	{
+		//copy position
+		cx = x;	cy = y;	cz = z;
+
+		//unswap (in reverse)
+		if (swap_xz) std::swap(cx, cz);
+		if (swap_xy) std::swap(cx, cy);
+		if (posFunc(Position(cx, cy, cz)))
+		{
+			return true;
+		}
+
+		//update progress in other planes
+		drift_xy = drift_xy - delta_y;
+		drift_xz = drift_xz - delta_z;
+
+		//step in y plane
+		if (drift_xy < 0)
+		{
+			y = y + step_y;
+			drift_xy = drift_xy + delta_x;
+
+			cx = x;	cz = z; cy = y;
+			if (swap_xz) std::swap(cx, cz);
+			if (swap_xy) std::swap(cx, cy);
+			if (driftFunc(Position(cx, cy, cz)))
+			{
+				return true;
+			}
+		}
+
+		//same in z
+		if (drift_xz < 0)
+		{
+			z = z + step_z;
+			drift_xz = drift_xz + delta_x;
+
+			cx = x;	cz = z; cy = y;
+			if (swap_xz) std::swap(cx, cz);
+			if (swap_xy) std::swap(cx, cy);
+			if (driftFunc(Position(cx, cy, cz)))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+} // namespace
 
 const int TileEngine::heightFromCenter[11] = {0,-2,+2,-4,+4,-6,+6,-8,+8,-12,+12};
 
@@ -80,11 +192,10 @@ TileEngine::~TileEngine()
   */
 void TileEngine::calculateSunShading()
 {
-	const int layer = 0; // Ambient lighting layer.
 
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 	{
-		_save->getTile(i)->resetLight(layer);
+		_save->getTile(i)->resetLight(LL_AMBIENT);
 		calculateSunShading(_save->getTile(i));
 	}
 }
@@ -99,7 +210,7 @@ void TileEngine::calculateSunShading(const Position &pos)
 	for (int z = _save->getMapSizeZ() - 1; z >= 0; z--)
 	{
 		toUpdate.z = z;
-		_save->getTile(toUpdate)->resetLight(0); //reset ambient lighting
+		_save->getTile(toUpdate)->resetLight(LL_AMBIENT);
 		calculateSunShading(_save->getTile(toUpdate));
 	}
 }
@@ -111,8 +222,6 @@ void TileEngine::calculateSunShading(const Position &pos)
   */
 void TileEngine::calculateSunShading(Tile *tile)
 {
-	const int layer = 0; // Ambient lighting layer.
-
 	int power = 15 - _save->getGlobalShade();
 
 	// At night/dusk sun isn't dropping shades blocked by roofs
@@ -131,7 +240,7 @@ void TileEngine::calculateSunShading(Tile *tile)
 			power -= 2;
 		}
 	}
-	tile->addLight(power, layer);
+	tile->addLight(power, LL_AMBIENT);
 }
 
 /**
@@ -139,13 +248,12 @@ void TileEngine::calculateSunShading(Tile *tile)
   */
 void TileEngine::calculateTerrainLighting()
 {
-	const int layer = 1; // Static lighting layer.
 	const int fireLightPower = 15; // amount of light a fire generates
 
 	// reset all light to 0 first
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 	{
-		_save->getTile(i)->resetLight(layer);
+		_save->getTile(i)->resetLight(LL_STATIC);
 	}
 
 	// add lighting of terrain
@@ -180,7 +288,7 @@ void TileEngine::calculateTerrainLighting()
 			}
 		}
 
-		addLight(tile->getPosition(), currLight, layer);
+		addLight(tile->getPosition(), currLight, LL_STATIC);
 	}
 
 }
@@ -190,20 +298,24 @@ void TileEngine::calculateTerrainLighting()
   */
 void TileEngine::calculateUnitLighting()
 {
-	const int layer = 2; // Dynamic lighting layer.
 	const int fireLightPower = 15; // amount of light a fire generates
 
 	// reset all light to 0 first
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 	{
-		_save->getTile(i)->resetLight(layer);
+		_save->getTile(i)->resetLight(LL_UNITS);
 	}
 
 	for (BattleUnit *unit : *_save->getUnits())
 	{
+		if (unit->isOut())
+		{
+			continue;
+		}
+
 		auto currLight = 0;
 		// add lighting of soldiers
-		if (_personalLighting && unit->getFaction() == FACTION_PLAYER && !unit->isOut())
+		if (_personalLighting && unit->getFaction() == FACTION_PLAYER)
 		{
 			currLight = std::max(currLight, unit->getArmor()->getPersonalLight());
 		}
@@ -220,7 +332,7 @@ void TileEngine::calculateUnitLighting()
 		{
 			currLight = std::max(currLight, fireLightPower);
 		}
-		addLight(unit->getPosition(), currLight, layer);
+		addLight(unit->getPosition(), currLight, LL_UNITS);
 	}
 }
 
@@ -230,30 +342,91 @@ void TileEngine::calculateUnitLighting()
  * @param power Power.
  * @param layer Light is separated in 3 layers: Ambient, Static and Dynamic.
  */
-void TileEngine::addLight(const Position &center, int power, int layer)
+void TileEngine::addLight(const Position &center, int power, LightLayers layer)
 {
-	// only loop through the positive quadrant.
-	for (int x = 0; x <= power; ++x)
+	power -= 1;
+	for (int x = -power; x <= power; ++x)
 	{
-		for (int y = 0; y <= power; ++y)
+		for (int y = -power; y <= power; ++y)
 		{
 			for (int z = 0; z < _save->getMapSizeZ(); z++)
 			{
-				int diff = z - layer;
+				int diff = z - center.z;
 				int distance = (int)Round(sqrt(float(x*x + y*y + diff*diff)));
 				Tile *tile = nullptr;
 
-				tile = _save->getTile(Position(center.x + x,center.y + y, z));
-				if (tile) tile->addLight(power - distance, layer);
+				Position target = Position(center.x + x, center.y + y, z);
+				tile = _save->getTile(target);
+				if (tile)
+				{
+					auto currLight = power - distance + 1;
+					auto trackLine = [&](int light, Position vexelFrom, Position vexelTo)
+					{
+						int steps = 0;
+						bool bigWall = false;
+						Position lastPoint = vexelFrom.toTile();
+						bool hit = calculateLineHitHelper(vexelFrom, vexelTo,
+							[&](Position point)
+							{
+								point = point.toTile();
+								if (point == lastPoint)
+								{
+									return false;
+								}
+								auto lastTile = _save->getTile(lastPoint);
+								auto currTile = _save->getTile(point);
+								auto temp_res = verticalBlockage(lastTile, currTile, DT_NONE);
+								auto result = horizontalBlockage(lastTile, currTile, DT_NONE, steps<2);
+								steps++;
+								if (result == -1)
+								{
+									if (temp_res > 127)
+									{
+										result = 0;
+									}
+									else
+									{
+										bigWall = (point == target);
+										return true; // We hit a big wall
+									}
+								}
+								result += temp_res;
+								if (result > 127)
+								{
+									return true;
+								}
+								if (currTile->getMapData(O_OBJECT))
+								{
+									light -= 2;
+								}
+								lastPoint = point;
+								return false;
+							},
+							[&](Position point)
+							{
+								return false;
+							}
+						);
+						return !hit || bigWall ? light : 0;
+					};
 
-				tile = _save->getTile(Position(center.x - x,center.y - y, z));
-				if (tile) tile->addLight(power - distance, layer);
+					if (currLight < tile->getLight(layer))
+					{
+						continue;
+					}
 
-				tile = _save->getTile(Position(center.x - x,center.y + y, z));
-				if (tile) tile->addLight(power - distance, layer);
+					Position offsetA{ 1, 0, 0 };
+					Position offsetB{ 0, 1, 0 };
+					if ((x > 0) ^ (y > 0))
+					{
+						offsetA = { 0, 0, 0 };
+						offsetB = { 1, 1, 0 };
+					}
+					auto lightA = trackLine(currLight, center.toVexel() + Position(7, 7, 20) + offsetA, target.toVexel() + Position(7, 7, 12) + offsetA);
+					auto lightB = trackLine(currLight, center.toVexel() + Position(7, 7, 20) + offsetB, target.toVexel() + Position(7, 7, 12) + offsetB);
 
-				tile = _save->getTile(Position(center.x + x,center.y - y, z));
-				if (tile) tile->addLight(power - distance, layer);
+					tile->addLight((lightA + lightB) / 2, layer);
+				}
 			}
 		}
 	}
@@ -599,7 +772,7 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	}
 
 	// during dark aliens can see 20 tiles, xcom can see 9 by default... unless overridden by armor
-	if (tile->getExternalShade() > getMaxDarknessToSeeUnits())
+	if (tile->getShade() > getMaxDarknessToSeeUnits())
 	{
 		if (getMaxViewDistanceSq() > currentUnit->getMaxViewDistanceAtDarkSq() &&
 			distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > currentUnit->getMaxViewDistanceAtDarkSq() &&
@@ -1629,10 +1802,14 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		if (part == V_FLOOR && _save->getTile(center.toTile() - Position(0, 0, 1))) {
 			calculateSunShading(center.toTile()); // roof destroyed, update sunlight in this tile column
 		}
+		calculateTerrainLighting();
+		calculateUnitLighting();
 		calculateFOV(center.toTile(), 1, true, true); //append any new units or tiles revealed by the terrain change
 	}
 	else if (effectGenerated)
 	{
+		calculateTerrainLighting();
+		calculateUnitLighting();
 		calculateFOV(center.toTile(), 1, false); //skip updating of tiles
 	}
 	//Note: If bu was knocked out this will have no effect on unit visibility quite yet, as it is not marked as out
@@ -2449,10 +2626,10 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 		{
 			if (unit->spendTimeUnits(TUCost))
 			{
-				// Update FOV through the doorway.
-				calculateFOV(doorCentre, doorsOpened, true, true);
 				calculateTerrainLighting();
 				calculateUnitLighting();
+				// Update FOV through the doorway.
+				calculateFOV(doorCentre, doorsOpened, true, true);
 			}
 			else return 4;
 		}
@@ -2552,160 +2729,78 @@ int TileEngine::closeUfoDoors()
  */
 int TileEngine::calculateLine(const Position& origin, const Position& target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, bool doVoxelCheck, bool onlyVisible, BattleUnit *excludeAllBut)
 {
-	int x, x0, x1, delta_x, step_x;
-	int y, y0, y1, delta_y, step_y;
-	int z, z0, z1, delta_z, step_z;
-	int swap_xy, swap_xz;
-	int drift_xy, drift_xz;
-	int cx, cy, cz;
 	Position lastPoint(origin);
 	int result;
 	int steps = 0;
 
-	//start and end points
-	x0 = origin.x;	 x1 = target.x;
-	y0 = origin.y;	 y1 = target.y;
-	z0 = origin.z;	 z1 = target.z;
-
-	//'steep' xy Line, make longest delta x plane
-	swap_xy = abs(y1 - y0) > abs(x1 - x0);
-	if (swap_xy)
-	{
-		std::swap(x0, y0);
-		std::swap(x1, y1);
-	}
-
-	//do same for xz
-	swap_xz = abs(z1 - z0) > abs(x1 - x0);
-	if (swap_xz)
-	{
-		std::swap(x0, z0);
-		std::swap(x1, z1);
-	}
-
-	//delta is Length in each plane
-	delta_x = abs(x1 - x0);
-	delta_y = abs(y1 - y0);
-	delta_z = abs(z1 - z0);
-
-	//drift controls when to step in 'shallow' planes
-	//starting value keeps Line centred
-	drift_xy  = (delta_x / 2);
-	drift_xz  = (delta_x / 2);
-
-	//direction of line
-	step_x = 1;  if (x0 > x1) {  step_x = -1; }
-	step_y = 1;  if (y0 > y1) {  step_y = -1; }
-	step_z = 1;  if (z0 > z1) {  step_z = -1; }
-
-	//starting point
-	y = y0;
-	z = z0;
-
-	//step through longest delta (which we have swapped to x)
-	for (x = x0; x != (x1+step_x); x += step_x)
-	{
-		//copy position
-		cx = x;	cy = y;	cz = z;
-
-		//unswap (in reverse)
-		if (swap_xz) std::swap(cx, cz);
-		if (swap_xy) std::swap(cx, cy);
-
-		if (storeTrajectory && trajectory)
+	bool hit = calculateLineHitHelper(origin, target,
+		[&](Position point)
 		{
-			trajectory->push_back(Position(cx, cy, cz));
-		}
-		//passes through this point?
-		if (doVoxelCheck)
-		{
-			result = voxelCheck(Position(cx, cy, cz), excludeUnit, false, onlyVisible, excludeAllBut);
-			if (result != V_EMPTY)
+			if (storeTrajectory && trajectory)
 			{
-				if (trajectory)
-				{ // store the position of impact
-					trajectory->push_back(Position(cx, cy, cz));
-				}
-				return result;
+				trajectory->push_back(point);
 			}
-		}
-		else
-		{
-			int temp_res = verticalBlockage(_save->getTile(lastPoint), _save->getTile(Position(cx, cy, cz)), DT_NONE);
-			result = horizontalBlockage(_save->getTile(lastPoint), _save->getTile(Position(cx, cy, cz)), DT_NONE, steps<2);
-			steps++;
-			if (result == -1)
+			//passes through this point?
+			if (doVoxelCheck)
 			{
-				if (temp_res > 127)
+				result = voxelCheck(point, excludeUnit, false, onlyVisible, excludeAllBut);
+				if (result != V_EMPTY)
 				{
-					result = 0;
-				}
-				else
-				{
-					return result; // We hit a big wall
+					if (trajectory)
+					{ // store the position of impact
+						trajectory->push_back(point);
+					}
+					return true;
 				}
 			}
-			result += temp_res;
-			if (result > 127)
+			else
 			{
-				return result;
+				int temp_res = verticalBlockage(_save->getTile(lastPoint), _save->getTile(point), DT_NONE);
+				result = horizontalBlockage(_save->getTile(lastPoint), _save->getTile(point), DT_NONE, steps<2);
+				steps++;
+				if (result == -1)
+				{
+					if (temp_res > 127)
+					{
+						result = 0;
+					}
+					else
+					{
+						return true; // We hit a big wall
+					}
+				}
+				result += temp_res;
+				if (result > 127)
+				{
+					return true;
+				}
+
+				lastPoint = point;
 			}
-
-			lastPoint = Position(cx, cy, cz);
-		}
-		//update progress in other planes
-		drift_xy = drift_xy - delta_y;
-		drift_xz = drift_xz - delta_z;
-
-		//step in y plane
-		if (drift_xy < 0)
+			return false;
+		},
+		[&](Position point)
 		{
-			y = y + step_y;
-			drift_xy = drift_xy + delta_x;
-
 			//check for xy diagonal intermediate voxel step
 			if (doVoxelCheck)
 			{
-				cx = x;	cz = z; cy = y;
-				if (swap_xz) std::swap(cx, cz);
-				if (swap_xy) std::swap(cx, cy);
-				result = voxelCheck(Position(cx, cy, cz), excludeUnit, false, onlyVisible, excludeAllBut);
+				result = voxelCheck(point, excludeUnit, false, onlyVisible, excludeAllBut);
 				if (result != V_EMPTY)
 				{
 					if (trajectory != 0)
 					{ // store the position of impact
-						trajectory->push_back(Position(cx, cy, cz));
+						trajectory->push_back(point);
 					}
-					return result;
+					return true;
 				}
 			}
+			return false;
 		}
-
-		//same in z
-		if (drift_xz < 0)
-		{
-			z = z + step_z;
-			drift_xz = drift_xz + delta_x;
-
-			//check for xz diagonal intermediate voxel step
-			if (doVoxelCheck)
-			{
-				cx = x;	cz = z; cy = y;
-				if (swap_xz) std::swap(cx, cz);
-				if (swap_xy) std::swap(cx, cy);
-				result = voxelCheck(Position(cx, cy, cz), excludeUnit, false, onlyVisible,  excludeAllBut);
-				if (result != V_EMPTY)
-				{
-					if (trajectory != 0)
-					{ // store the position of impact
-						trajectory->push_back(Position(cx, cy, cz));
-					}
-					return result;
-				}
-			}
-		}
+	);
+	if (hit)
+	{
+		return result;
 	}
-
 	return V_EMPTY;
 }
 
@@ -2919,6 +3014,7 @@ void TileEngine::togglePersonalLighting()
 {
 	_personalLighting = !_personalLighting;
 	calculateUnitLighting();
+	recalculateFOV();
 }
 
 /**
@@ -3029,8 +3125,8 @@ bool TileEngine::psiAttack(BattleAction *action)
 				victim->setMurdererId(action->actor->getId());
 			}
 			victim->convertToFaction(action->actor->getFaction());
-			calculateFOV(victim->getPosition()); //happens fairly rarely, so do a full recalc for units in range to handle the potential unit visible cache issues.
 			calculateUnitLighting();
+			calculateFOV(victim->getPosition()); //happens fairly rarely, so do a full recalc for units in range to handle the potential unit visible cache issues.
 			victim->recoverTimeUnits();
 			victim->allowReselect();
 			victim->abortTurn(); // resets unit status to STANDING

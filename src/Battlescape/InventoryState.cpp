@@ -822,8 +822,9 @@ void InventoryState::updateLighting()
 	if (!_lightUpdated)
 	{
 		_lightUpdated = true;
-		_battleGame->getTileEngine()->calculateUnitLighting();
 		_battleGame->getTileEngine()->calculateTerrainLighting();
+		_battleGame->getTileEngine()->calculateUnitLighting();
+		_battleGame->getTileEngine()->recalculateFOV();
 	}
 }
 

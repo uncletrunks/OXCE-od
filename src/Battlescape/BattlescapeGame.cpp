@@ -567,8 +567,9 @@ void BattlescapeGame::endTurn()
 
 	checkForCasualties(nullptr, nullptr, nullptr, false, false);
 
-	// turn off MCed alien lighting.
+	_save->getTileEngine()->calculateTerrainLighting();
 	_save->getTileEngine()->calculateUnitLighting();
+	_save->getTileEngine()->recalculateFOV();
 
 	// if all units from either faction are killed - the mission is over.
 	int liveAliens = 0;
@@ -1792,8 +1793,8 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 
 	if (item->getGlow())
 	{
-		getTileEngine()->calculateUnitLighting();
 		getTileEngine()->calculateTerrainLighting();
+		getTileEngine()->calculateUnitLighting();
 		getTileEngine()->calculateFOV(position, item->getGlowRange(), false);
 	}
 
