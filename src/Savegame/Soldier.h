@@ -169,6 +169,8 @@ public:
 	void die(SoldierDeath *death);
 	/// Gets the soldier's diary.
 	SoldierDiary *getDiary();
+	/// Resets the soldier's diary.
+	void resetDiary();
 	/// Calculate statString.
 	void calcStatString(const std::vector<StatString *> &statStrings, bool psiStrengthEval);
 	/// Trains a soldier's physical stats

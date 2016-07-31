@@ -473,6 +473,25 @@ void GeoscapeState::handle(Action *action)
 				_txtDebug->setText(L"");
 			}
 		}
+		// "ctrl-a" - delete all soldier diaries
+		if (Options::debug && action->getDetails()->key.keysym.sym == SDLK_a && (SDL_GetModState() & KMOD_CTRL) != 0)
+		{
+			if (_game->getSavedGame()->getDebugMode())
+			{
+				_txtDebug->setText(L"SOLDIER DIARIES DELETED");
+				for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+				{
+					for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
+					{
+						(*j)->resetDiary();
+					}
+				}
+			}
+			else
+			{
+				_txtDebug->setText(L"");
+			}
+		}
 		// quick save and quick load
 		else if (!_game->getSavedGame()->isIronman())
 		{

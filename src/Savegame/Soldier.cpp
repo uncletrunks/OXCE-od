@@ -765,6 +765,15 @@ SoldierDiary *Soldier::getDiary()
 }
 
 /**
+* Resets the soldier's diary.
+*/
+void Soldier::resetDiary()
+{
+	delete _diary;
+	_diary = new SoldierDiary();
+}
+
+/**
  * Calculates the soldier's statString
  * Calculates the soldier's statString.
  * @param statStrings List of statString rules.
