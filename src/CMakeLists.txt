@@ -34,6 +34,8 @@ set ( basescape_src
   Basescape/DismantleFacilityState.h
   Basescape/ManageAlienContainmentState.cpp
   Basescape/ManageAlienContainmentState.h
+  Basescape/ManufactureDependenciesTreeState.cpp
+  Basescape/ManufactureDependenciesTreeState.h
   Basescape/ManufactureInfoState.cpp
   Basescape/ManufactureInfoState.h
   Basescape/ManufactureStartState.cpp

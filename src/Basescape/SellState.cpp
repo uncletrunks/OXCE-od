@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "SellState.h"
+#include "ManufactureDependenciesTreeState.h"
 #include <sstream>
 #include <climits>
 #include <cmath>
@@ -692,6 +693,17 @@ void SellState::lstItemsMousePress(Action *action)
 			action->getAbsoluteXMouse() <= _lstItems->getArrowsRightEdge())
 		{
 			changeByValue(Options::changeValueByMouseWheel, -1);
+		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+	{
+		if (getRow().type == TRANSFER_ITEM)
+		{
+			RuleItem *rule = (RuleItem*)getRow().rule;
+			if (rule != 0)
+			{
+				_game->pushState(new ManufactureDependenciesTreeState(rule->getType()));
+			}
 		}
 	}
 }
