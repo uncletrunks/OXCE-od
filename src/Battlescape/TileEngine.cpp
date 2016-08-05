@@ -1169,7 +1169,7 @@ void TileEngine::calculateFOV(const Position &position, int eventRadius, const b
 	}
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if (distanceSq(position, (*i)->getPosition()) <= updateRadius) //could this unit have observed the event?
+		if (distanceSq(position, (*i)->getPosition(), false) <= updateRadius) //could this unit have observed the event?
 		{
 			if (updateTiles)
 			{
