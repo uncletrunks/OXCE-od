@@ -559,6 +559,13 @@ bool SoldierDiary::manageCommendations(Mod *mod)
 									}
 								}
 
+								// FIXME: WORKAROUND for crash issue in PirateZ, NOT a proper fix
+								if ((*singleKill)->weapon == "" || (*singleKill)->weaponAmmo == "")
+								{
+									foundMatch = false;
+									break;
+								}
+
                                 // See if we find no matches with any criteria. If so, break and try the next kill.
 								if ( (*singleKill)->weapon == "STR_WEAPON_UNKNOWN" || (*singleKill)->weaponAmmo == "STR_WEAPON_UNKNOWN" ||
 									((*singleKill)->rank != (*detail) && (*singleKill)->race != (*detail) &&
