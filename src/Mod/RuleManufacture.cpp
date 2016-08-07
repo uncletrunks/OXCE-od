@@ -57,6 +57,8 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 	_cost = node["cost"].as<int>(_cost);
 	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
 	_producedItems = node["producedItems"].as< std::map<std::string, int> >(_producedItems);
+	_spawnedPersonType = node["spawnedPersonType"].as<std::string>(_spawnedPersonType);
+	_spawnedPersonName = node["spawnedPersonName"].as<std::string>(_spawnedPersonName);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
@@ -147,6 +149,24 @@ const std::map<std::string, int> &RuleManufacture::getRequiredItems() const
 const std::map<std::string, int> &RuleManufacture::getProducedItems() const
 {
 	return _producedItems;
+}
+
+/**
+* Gets the "manufactured person", i.e. person spawned when manufacturing project ends.
+* @return The person type ID.
+*/
+const std::string &RuleManufacture::getSpawnedPersonType() const
+{
+	return _spawnedPersonType;
+}
+
+/**
+* Gets the custom name of the "manufactured person".
+* @return The person name translation code.
+*/
+const std::string &RuleManufacture::getSpawnedPersonName() const
+{
+	return _spawnedPersonName;
 }
 
 /**

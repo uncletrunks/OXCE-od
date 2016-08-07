@@ -1521,7 +1521,7 @@ void GeoscapeState::time1Hour()
 		std::map<Production*, productionProgress_e> toRemove;
 		for (std::vector<Production*>::const_iterator j = (*i)->getProductions().begin(); j != (*i)->getProductions().end(); ++j)
 		{
-			toRemove[(*j)] = (*j)->step((*i), _game->getSavedGame(), _game->getMod());
+			toRemove[(*j)] = (*j)->step((*i), _game->getSavedGame(), _game->getMod(), _game->getLanguage());
 		}
 		for (std::map<Production*, productionProgress_e>::iterator j = toRemove.begin(); j != toRemove.end(); ++j)
 		{

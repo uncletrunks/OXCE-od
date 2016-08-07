@@ -43,6 +43,7 @@ class RuleManufacture
 {
 private:
 	std::string _name, _category;
+	std::string _spawnedPersonType, _spawnedPersonName;
 	std::vector<std::string> _requires, _requiresBaseFunc;
 	int _space, _time, _cost;
 	std::map<std::string, int> _requiredItems, _producedItems;
@@ -75,6 +76,10 @@ public:
 	/// Gets the list of items produced by completing "one object" of this project.
 	/// by default: it contains only the "name" item with a value of 1.
 	const std::map<std::string, int> &getProducedItems() const;
+	/// Gets the "manufactured person", i.e. person spawned when manufacturing project ends.
+	const std::string &getSpawnedPersonType() const;
+	/// Gets the custom name of the "manufactured person".
+	const std::string &getSpawnedPersonName() const;
 	/// Gets the list weight for this manufacture item.
 	int getListOrder() const;
 };

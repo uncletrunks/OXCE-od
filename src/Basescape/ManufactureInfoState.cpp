@@ -185,6 +185,7 @@ void ManufactureInfoState::buildUi()
 		_base->addProduction(_production);
 	}
 	_btnSell->setPressed(_production->getSellItems());
+	_btnSell->setVisible(_production->getRules()->getSpawnedPersonType() == "");
 	initProfitInfo();
 	setAssignedEngineer();
 

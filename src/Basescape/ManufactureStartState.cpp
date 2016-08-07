@@ -131,6 +131,24 @@ ManufactureStartState::ManufactureStartState(Base * base, RuleManufacture * item
 		_lstRequiredItems->addRow(3, tr(iter->first).c_str(), s1.str().c_str(), s2.str().c_str());
 		row++;
 	}
+	if (_item->getSpawnedPersonType() != "")
+	{
+		if (base->getAvailableQuarters() <= base->getUsedQuarters())
+		{
+			productionPossible = false;
+		}
+
+		// separator line
+		_lstRequiredItems->addRow(1, tr("STR_PERSON_JOINING").c_str());
+		_lstRequiredItems->setCellColor(row, 0, _lstRequiredItems->getSecondaryColor());
+		row++;
+
+		// person joining
+		std::wostringstream s1;
+		s1 << L'\x01' << 1;
+		_lstRequiredItems->addRow(2, tr(_item->getSpawnedPersonName() != "" ? _item->getSpawnedPersonName() : _item->getSpawnedPersonType()).c_str(), s1.str().c_str());
+		row++;
+	}
 	if (!producedItems.empty())
 	{
 		// separator line

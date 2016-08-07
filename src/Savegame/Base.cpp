@@ -625,7 +625,16 @@ int Base::getTotalOtherEmployeeCost() const
  */
 int Base::getUsedQuarters() const
 {
-	return getTotalSoldiers() + getTotalScientists() + getTotalEngineers();
+	int total = getTotalSoldiers() + getTotalScientists() + getTotalEngineers();
+	for (std::vector<Production*>::const_iterator i = _productions.begin(); i != _productions.end(); ++i)
+	{
+		if ((*i)->getRules()->getSpawnedPersonType() != "")
+		{
+			// reserve one living space for each production project (even if it's on hold)
+			total += 1;
+		}
+	}
+	return total;
 }
 
 /**
