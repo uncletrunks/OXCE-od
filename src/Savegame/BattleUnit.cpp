@@ -104,9 +104,9 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	}
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
-	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDark;
+	_maxViewDistanceAtDarkSq = _maxViewDistanceAtDark*_maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
-	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDay;
+	_maxViewDistanceAtDaySq = _maxViewDistanceAtDay*_maxViewDistanceAtDay;
 	_loftempsSet = _armor->getLoftempsSet();
 	_gender = soldier->getGender();
 	_faceDirection = -1;
@@ -194,9 +194,9 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, int depth, int maxView
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
-	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDark;
+	_maxViewDistanceAtDarkSq = _maxViewDistanceAtDark*_maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
-	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDay;
+	_maxViewDistanceAtDaySq = _maxViewDistanceAtDay*_maxViewDistanceAtDay;
 	_loftempsSet = _armor->getLoftempsSet();
 
 	_tu = _stats.tu;
@@ -274,9 +274,9 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? maxViewDistance : 9;
-	_maxViewDistanceAtDarkSq *= _maxViewDistanceAtDark;
+	_maxViewDistanceAtDarkSq = _maxViewDistanceAtDark*_maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
-	_maxViewDistanceAtDaySq *= _maxViewDistanceAtDay;
+	_maxViewDistanceAtDaySq = _maxViewDistanceAtDay*_maxViewDistanceAtDay;
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids
 	if (armor->getDrawingRoutine() == 14)
