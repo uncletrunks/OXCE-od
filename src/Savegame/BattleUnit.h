@@ -121,7 +121,7 @@ private:
 	std::vector<int> _deathSound;
 	int _value, _aggroSound, _moveSound;
 	int _intelligence, _aggression;
-	int _maxViewDistanceAtDark, _maxViewDistanceAtDay, _maxViewDistanceAtDarkSq, _maxViewDistanceAtDaySq;
+	int _maxViewDistanceAtDark, _maxViewDistanceAtDay;
 	SpecialAbility _specab;
 	Armor *_armor;
 	SoldierGender _gender;
