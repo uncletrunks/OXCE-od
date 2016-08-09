@@ -635,6 +635,53 @@ void InventoryState::btnAvatarClick(Action *action)
 }
 
 /**
+* Handles global equipment layout actions.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
+{
+	// don't accept clicks when moving items
+	if (_inv->getSelectedItem() != 0)
+	{
+		return;
+	}
+
+	// SDLK_1 = 49, SDLK_9 = 57
+	const int index = action->getDetails()->key.keysym.sym - 49;
+	if (index < 0 || index > 8)
+	{
+		return; // just in case
+	}
+
+	std::vector<EquipmentLayoutItem*> *tmpl = _game->getSavedGame()->getGlobalEquipmentLayout(index);
+
+	if ((SDL_GetModState() & KMOD_CTRL) != 0)
+	{
+		// clear current template
+		_clearInventoryTemplate(*tmpl);
+
+		// create new template
+		_createInventoryTemplate(*tmpl);
+
+		// give audio feedback
+		_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
+		refreshMouse();
+	}
+	else
+	{
+		_applyInventoryTemplate(*tmpl);
+
+		// refresh ui
+		_inv->arrangeGround(false);
+		updateStats();
+		refreshMouse();
+
+		// give audio feedback
+		_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
+	}
+}
+
+/**
  * Returns to the previous screen.
  * @param action Pointer to an action.
  */
@@ -1145,6 +1192,15 @@ void InventoryState::handle(Action *action)
 {
 	State::handle(action);
 
+	if (action->getDetails()->type == SDL_KEYDOWN)
+	{
+		// "ctrl+1..9" - save equipment
+		// "1..9" - load equipment
+		if (action->getDetails()->key.keysym.sym >= SDLK_1 && action->getDetails()->key.keysym.sym <= SDLK_9)
+		{
+			btnGlobalEquipmentLayoutClick(action);
+		}
+	}
 
 #ifndef __MORPHOS__
 	if (action->getDetails()->type == SDL_MOUSEBUTTONDOWN)

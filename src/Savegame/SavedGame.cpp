@@ -37,6 +37,7 @@
 #include "Country.h"
 #include "Base.h"
 #include "Craft.h"
+#include "EquipmentLayoutItem.h"
 #include "Region.h"
 #include "Ufo.h"
 #include "Waypoint.h"
@@ -158,7 +159,14 @@ SavedGame::~SavedGame()
 	{
 		delete *i;
 	}
-    for (std::vector<MissionStatistics*>::iterator i = _missionStatistics.begin(); i != _missionStatistics.end(); ++i)
+	for (int j = 0; j < 9; ++j)
+	{
+		for (std::vector<EquipmentLayoutItem*>::iterator i = _globalEquipmentLayout[j].begin(); i != _globalEquipmentLayout[j].end(); ++i)
+		{
+			delete *i;
+		}
+	}
+	for (std::vector<MissionStatistics*>::iterator i = _missionStatistics.begin(); i != _missionStatistics.end(); ++i)
 	{
 		delete *i;
 	}
@@ -485,7 +493,29 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		}
 	}
 
-    for (YAML::const_iterator i = doc["missionStatistics"].begin(); i != doc["missionStatistics"].end(); ++i)
+	for (int j = 0; j < 9; ++j)
+	{
+		std::ostringstream oss;
+		oss << "globalEquipmentLayout" << j;
+		std::string key = oss.str();
+		if (const YAML::Node &layout = doc[key])
+		{
+			for (YAML::const_iterator i = layout.begin(); i != layout.end(); ++i)
+			{
+				EquipmentLayoutItem *layoutItem = new EquipmentLayoutItem(*i);
+				if (mod->getInventory(layoutItem->getSlot()) && mod->getItem(layoutItem->getItemType()) && (layoutItem->getAmmoItem() == "NONE" || mod->getItem(layoutItem->getAmmoItem())))
+				{
+					_globalEquipmentLayout[j].push_back(layoutItem);
+				}
+				else
+				{
+					delete layoutItem;
+				}
+			}
+		}
+	}
+
+	for (YAML::const_iterator i = doc["missionStatistics"].begin(); i != doc["missionStatistics"].end(); ++i)
 	{
 		MissionStatistics *ms = new MissionStatistics();
 		ms->load(*i);
@@ -626,6 +656,17 @@ void SavedGame::save(const std::string &filename) const
 	for (std::vector<Soldier*>::const_iterator i = _deadSoldiers.begin(); i != _deadSoldiers.end(); ++i)
 	{
 		node["deadSoldiers"].push_back((*i)->save());
+	}
+	for (int j = 0; j < 9; ++j)
+	{
+		std::ostringstream oss;
+		oss << "globalEquipmentLayout" << j;
+		std::string key = oss.str();
+		if (!_globalEquipmentLayout[j].empty())
+		{
+			for (std::vector<EquipmentLayoutItem*>::const_iterator i = _globalEquipmentLayout[j].begin(); i != _globalEquipmentLayout[j].end(); ++i)
+				node[key].push_back((*i)->save());
+		}
 	}
 	for (std::vector<MissionStatistics*>::const_iterator i = _missionStatistics.begin(); i != _missionStatistics.end(); ++i)
 	{
@@ -1964,6 +2005,15 @@ Craft *SavedGame::findCraftByUniqueId(const CraftId& craftId) const
 	}
 
 	return NULL;
+}
+
+/**
+* Returns the global equipment layout at specified index.
+* @return Pointer to the EquipmentLayoutItem list.
+*/
+std::vector<EquipmentLayoutItem*> *SavedGame::getGlobalEquipmentLayout(int index)
+{
+	return &_globalEquipmentLayout[index];
 }
 
 /**

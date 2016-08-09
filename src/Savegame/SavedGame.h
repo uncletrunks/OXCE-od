@@ -55,6 +55,7 @@ class AlienMission;
 class Target;
 class Soldier;
 class Craft;
+class EquipmentLayoutItem;
 struct MissionStatistics;
 struct BattleUnitKills;
 
@@ -131,7 +132,8 @@ private:
 	std::vector<Soldier*> _deadSoldiers;
 	size_t _selectedBase;
 	std::string _lastselectedArmor; //contains the last selected armour
-    std::vector<MissionStatistics*> _missionStatistics;
+	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[9];
+	std::vector<MissionStatistics*> _missionStatistics;
 	std::set<int> _ignoredUfos;
 
 	void getDependableResearchBasic (std::vector<RuleResearch*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
@@ -319,6 +321,8 @@ public:
 	std::string getLastSelectedArmor() const;
 	/// Returns the craft corresponding to the specified unique id.
 	Craft *findCraftByUniqueId(const CraftId& craftId) const;
+	/// Gets the global equipment layout at specified index.
+	std::vector<EquipmentLayoutItem*> *getGlobalEquipmentLayout(int index);
     /// Gets the list of missions statistics
 	std::vector<MissionStatistics*> *getMissionStatistics();
 	/// Adds a UFO to the ignore list.

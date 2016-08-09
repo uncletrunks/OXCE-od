@@ -83,6 +83,8 @@ public:
 	void btnArmorClick(Action *action);
 	/// Handler for clicking the Avatar button.
 	void btnAvatarClick(Action *action);
+	/// Handler for pressing the global equipment layout save/load hotkeys.
+	void btnGlobalEquipmentLayoutClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handlers for Quick Search.
