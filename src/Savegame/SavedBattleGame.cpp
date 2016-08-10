@@ -1201,6 +1201,10 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 				placed = true;
 				_items.push_back(item);
 				item->setXCOMProperty(unit->getFaction() == FACTION_PLAYER);
+				if (item->getRules()->getTurretType() > -1)
+				{
+					unit->setTurretType(item->getRules()->getTurretType());
+				}
 			}
 		}
 		// or in the left/right hand
@@ -1211,6 +1215,10 @@ bool SavedBattleGame::addItem(BattleItem *item, BattleUnit *unit, bool allowSeco
 			placed = true;
 			_items.push_back(item);
 			item->setXCOMProperty(unit->getFaction() == FACTION_PLAYER);
+			if (item->getRules()->getTurretType() > -1)
+			{
+				unit->setTurretType(item->getRules()->getTurretType());
+			}
 		}
 		return placed;
 	}
