@@ -99,6 +99,8 @@ struct PromotionInfo
  */
 class SavedGame
 {
+public:
+	static const int MAX_EQUIPMENT_LAYOUT_TEMPLATES = 20;
 private:
 	std::wstring _name;
 	GameDifficulty _difficulty;
@@ -132,7 +134,8 @@ private:
 	std::vector<Soldier*> _deadSoldiers;
 	size_t _selectedBase;
 	std::string _lastselectedArmor; //contains the last selected armour
-	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[9];
+	std::wstring _globalEquipmentLayoutName[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
+	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::vector<MissionStatistics*> _missionStatistics;
 	std::set<int> _ignoredUfos;
 
@@ -321,6 +324,10 @@ public:
 	std::string getLastSelectedArmor() const;
 	/// Returns the craft corresponding to the specified unique id.
 	Craft *findCraftByUniqueId(const CraftId& craftId) const;
+	/// Gets the name of a global equipment layout at specified index.
+	const std::wstring &getGlobalEquipmentLayoutName(int index) const;
+	/// Sets the name of a global equipment layout at specified index.
+	void setGlobalEquipmentLayoutName(int index, const std::wstring &name);
 	/// Gets the global equipment layout at specified index.
 	std::vector<EquipmentLayoutItem*> *getGlobalEquipmentLayout(int index);
     /// Gets the list of missions statistics

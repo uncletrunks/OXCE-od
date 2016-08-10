@@ -60,6 +60,7 @@ private:
 	Base *_base;
 	std::string _currentTooltip;
 	bool _reloadUnit;
+	int _globalLayoutIndex;
 	/// Helper method for Create Template button
 	void _createInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
 	/// Helper method for Apply Template button
@@ -70,6 +71,7 @@ public:
 	/// Cleans up the Inventory state.
 	~InventoryState();
 	/// Updates all soldier info.
+	void setGlobalLayoutIndex(int index);
 	void init();
 	/// Handler for pressing on the Name edit.
 	void edtSoldierPress(Action *action);
@@ -83,8 +85,14 @@ public:
 	void btnArmorClick(Action *action);
 	/// Handler for clicking the Avatar button.
 	void btnAvatarClick(Action *action);
-	/// Handler for pressing the global equipment layout save/load hotkeys.
+	/// Methods for handling the global equipment layout save/load hotkeys.
+	void saveGlobalLayout(int index);
+	void loadGlobalLayout(int index);
 	void btnGlobalEquipmentLayoutClick(Action *action);
+	/// Handler for clicking the Load button.
+	void btnInventoryLoadClick(Action *action);
+	/// Handler for clicking the Save button.
+	void btnInventorySaveClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handlers for Quick Search.

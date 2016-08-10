@@ -159,7 +159,7 @@ SavedGame::~SavedGame()
 	{
 		delete *i;
 	}
-	for (int j = 0; j < 9; ++j)
+	for (int j = 0; j < MAX_EQUIPMENT_LAYOUT_TEMPLATES; ++j)
 	{
 		for (std::vector<EquipmentLayoutItem*>::iterator i = _globalEquipmentLayout[j].begin(); i != _globalEquipmentLayout[j].end(); ++i)
 		{
@@ -493,7 +493,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		}
 	}
 
-	for (int j = 0; j < 9; ++j)
+	for (int j = 0; j < MAX_EQUIPMENT_LAYOUT_TEMPLATES; ++j)
 	{
 		std::ostringstream oss;
 		oss << "globalEquipmentLayout" << j;
@@ -512,6 +512,13 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 					delete layoutItem;
 				}
 			}
+		}
+		std::ostringstream oss2;
+		oss2 << "globalEquipmentLayoutName" << j;
+		std::string key2 = oss2.str();
+		if (doc[key2])
+		{
+			_globalEquipmentLayoutName[j] = Language::utf8ToWstr(doc[key2].as<std::string>());
 		}
 	}
 
@@ -657,7 +664,7 @@ void SavedGame::save(const std::string &filename) const
 	{
 		node["deadSoldiers"].push_back((*i)->save());
 	}
-	for (int j = 0; j < 9; ++j)
+	for (int j = 0; j < MAX_EQUIPMENT_LAYOUT_TEMPLATES; ++j)
 	{
 		std::ostringstream oss;
 		oss << "globalEquipmentLayout" << j;
@@ -666,6 +673,13 @@ void SavedGame::save(const std::string &filename) const
 		{
 			for (std::vector<EquipmentLayoutItem*>::const_iterator i = _globalEquipmentLayout[j].begin(); i != _globalEquipmentLayout[j].end(); ++i)
 				node[key].push_back((*i)->save());
+		}
+		std::ostringstream oss2;
+		oss2 << "globalEquipmentLayoutName" << j;
+		std::string key2 = oss2.str();
+		if (!_globalEquipmentLayoutName[j].empty())
+		{
+			node[key2] = Language::wstrToUtf8(_globalEquipmentLayoutName[j]);
 		}
 	}
 	for (std::vector<MissionStatistics*>::const_iterator i = _missionStatistics.begin(); i != _missionStatistics.end(); ++i)
@@ -2014,6 +2028,25 @@ Craft *SavedGame::findCraftByUniqueId(const CraftId& craftId) const
 std::vector<EquipmentLayoutItem*> *SavedGame::getGlobalEquipmentLayout(int index)
 {
 	return &_globalEquipmentLayout[index];
+}
+
+/**
+* Returns the name of a global equipment layout at specified index.
+* @return A name.
+*/
+const std::wstring &SavedGame::getGlobalEquipmentLayoutName(int index) const
+{
+	return _globalEquipmentLayoutName[index];
+}
+
+/**
+* Sets the name of a global equipment layout at specified index.
+* @param index Array index.
+* @param name New name.
+*/
+void SavedGame::setGlobalEquipmentLayoutName(int index, const std::wstring &name)
+{
+	_globalEquipmentLayoutName[index] = name;
 }
 
 /**

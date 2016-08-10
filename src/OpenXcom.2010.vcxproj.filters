@@ -1000,6 +1000,12 @@
     <ClCompile Include="Basescape\ManufactureDependenciesTreeState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\InventoryLoadState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\InventorySaveState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2036,6 +2042,12 @@
     </ClInclude>
     <ClInclude Include="Basescape\ManufactureDependenciesTreeState.h">
       <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\InventoryLoadState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\InventorySaveState.h">
+      <Filter>Battlescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

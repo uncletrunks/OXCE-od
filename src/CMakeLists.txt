@@ -151,6 +151,10 @@ set ( battlescape_src
   Battlescape/InfoboxState.h
   Battlescape/Inventory.cpp
   Battlescape/Inventory.h
+  Battlescape/InventoryLoadState.cpp
+  Battlescape/InventoryLoadState.h
+  Battlescape/InventorySaveState.cpp
+  Battlescape/InventorySaveState.h
   Battlescape/InventoryState.cpp
   Battlescape/InventoryState.h
   Battlescape/ItemSprite.cpp

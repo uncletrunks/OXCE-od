@@ -17,6 +17,8 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "InventoryState.h"
+#include "InventoryLoadState.h"
+#include "InventorySaveState.h"
 #include "Inventory.h"
 #include "../Basescape/SoldierArmorState.h"
 #include "../Basescape/SoldierAvatarState.h"
@@ -64,7 +66,7 @@ static const int _applyTemplateBtnY  = 113;
  * @param tu Does Inventory use up Time Units?
  * @param parent Pointer to parent Battlescape.
  */
-InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : _tu(tu), _lightUpdated(false), _parent(parent), _base(base), _reloadUnit(false)
+InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : _tu(tu), _lightUpdated(false), _parent(parent), _base(base), _reloadUnit(false), _globalLayoutIndex(-1)
 {
 	_battleGame = _game->getSavedGame()->getSavedBattle();
 
@@ -172,6 +174,8 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	_btnOk->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnArmorClick, Options::keyBattleAbort);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnAvatarClick, Options::keyBattleMap);
+	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnInventoryLoadClick, Options::keyQuickLoad);
+	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnInventorySaveClick, Options::keyQuickSave);
 	_btnOk->setTooltip("STR_OK");
 	_btnOk->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnOk->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
@@ -319,6 +323,11 @@ static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile 
 	}
 }
 
+void InventoryState::setGlobalLayoutIndex(int index)
+{
+	_globalLayoutIndex = index;
+}
+
 /**
  * Updates all soldier stats when the soldier changes.
  */
@@ -441,6 +450,16 @@ void InventoryState::init()
 		{
 			armorSurface->blit(_soldier);
 		}
+	}
+
+	// coming from InventoryLoad window...
+	if (_globalLayoutIndex > -1)
+	{
+		loadGlobalLayout((_globalLayoutIndex));
+		_globalLayoutIndex = -1;
+
+		// refresh ui
+		_inv->arrangeGround(false);
 	}
 
 	updateStats();
@@ -634,12 +653,36 @@ void InventoryState::btnAvatarClick(Action *action)
 	}
 }
 
+void InventoryState::saveGlobalLayout(int index)
+{
+	std::vector<EquipmentLayoutItem*> *tmpl = _game->getSavedGame()->getGlobalEquipmentLayout(index);
+
+	// clear current template
+	_clearInventoryTemplate(*tmpl);
+
+	// create new template
+	_createInventoryTemplate(*tmpl);
+}
+
+void InventoryState::loadGlobalLayout(int index)
+{
+	std::vector<EquipmentLayoutItem*> *tmpl = _game->getSavedGame()->getGlobalEquipmentLayout(index);
+
+	_applyInventoryTemplate(*tmpl);
+}
+
 /**
 * Handles global equipment layout actions.
 * @param action Pointer to an action.
 */
 void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 {
+	if (_base == 0)
+	{
+		// cannot use this feature during the mission!
+		return;
+	}
+
 	// don't accept clicks when moving items
 	if (_inv->getSelectedItem() != 0)
 	{
@@ -653,15 +696,9 @@ void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 		return; // just in case
 	}
 
-	std::vector<EquipmentLayoutItem*> *tmpl = _game->getSavedGame()->getGlobalEquipmentLayout(index);
-
 	if ((SDL_GetModState() & KMOD_CTRL) != 0)
 	{
-		// clear current template
-		_clearInventoryTemplate(*tmpl);
-
-		// create new template
-		_createInventoryTemplate(*tmpl);
+		saveGlobalLayout(index);
 
 		// give audio feedback
 		_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
@@ -669,7 +706,7 @@ void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 	}
 	else
 	{
-		_applyInventoryTemplate(*tmpl);
+		loadGlobalLayout(index);
 
 		// refresh ui
 		_inv->arrangeGround(false);
@@ -679,6 +716,30 @@ void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 		// give audio feedback
 		_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
 	}
+}
+
+/**
+* Opens the InventoryLoad screen.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnInventoryLoadClick(Action *)
+{
+	if (_base == 0)
+	{
+		// cannot use this feature during the mission!
+		return;
+	}
+
+	_game->pushState(new InventoryLoadState(this));
+}
+
+/**
+* Opens the InventorySave screen.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnInventorySaveClick(Action *)
+{
+	_game->pushState(new InventorySaveState(this));
 }
 
 /**
