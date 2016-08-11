@@ -1600,7 +1600,7 @@ int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUn
 void AlienBAIState::meleeAction()
 {
 	BattleActionCost attackCost(BA_HIT, _unit, _unit->getUtilityWeapon(BT_MELEE));
-	if (attackCost.haveTU())
+	if (!attackCost.haveTU())
 	{
 		// cannot make a melee attack - consider some other behaviour, like running away, or standing motionless.
 		return;
@@ -1654,7 +1654,7 @@ void AlienBAIState::meleeAction()
 void AlienBAIState::wayPointAction()
 {
 	BattleActionCost attackCost(BA_LAUNCH, _unit, _unit->getMainHandWeapon());
-	if (attackCost.haveTU())
+	if (!attackCost.haveTU())
 	{
 		// cannot make a launcher attack - consider some other behaviour, like running away, or standing motionless.
 		return;
