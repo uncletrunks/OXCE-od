@@ -1410,6 +1410,35 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTe
 			_save->getTile((*j) + Position(xoff, yoff, 0))->addItem(item, _game->getMod()->getInventory("STR_GROUND"));
 		}
 	}
+	// randomized items
+	for (std::vector<RandomizedItems>::const_iterator i = mapblock->getRandomizedItems()->begin(); i != mapblock->getRandomizedItems()->end(); ++i)
+	{
+		if (i->itemList.size() < 1)
+		{
+			continue; // skip empty definition
+		}
+		else
+		{
+			// mixed = false
+			int index = RNG::generate(0, i->itemList.size() - 1);
+			RuleItem *rule = _game->getMod()->getItem(i->itemList[index]);
+
+			for (int j = 0; j < i->amount; ++j)
+			{
+				if (i->mixed)
+				{
+					// mixed = true
+					index = RNG::generate(0, i->itemList.size() - 1);
+					rule = _game->getMod()->getItem(i->itemList[index]);
+				}
+
+				BattleItem *item = new BattleItem(rule, _save->getCurrentItemId());
+				_save->getItems()->push_back(item);
+				_save->getTile(i->position + Position(xoff, yoff, 0))->addItem(item, _game->getMod()->getInventory("STR_GROUND"));
+			}
+		}
+	}
+
 	return sizez;
 }
 
