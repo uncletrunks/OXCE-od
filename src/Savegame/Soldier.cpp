@@ -601,6 +601,11 @@ void Soldier::setWoundRecovery(int recovery)
 	if (_recovery > 0)
 	{
 		_craft = 0;
+		// remove from training
+		if (Options::removeWoundedFromTraining)
+		{
+			_training = false;
+		}
 	}
 }
 

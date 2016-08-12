@@ -49,6 +49,7 @@ OPT bool showItemNameAndWeightInInventory;
 OPT bool showGunMeleeOnTop;
 OPT bool showQuickSearch;
 OPT bool showAllCommendations;
+OPT bool removeWoundedFromTraining;
 
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter;
