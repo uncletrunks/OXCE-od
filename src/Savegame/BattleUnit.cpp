@@ -3102,6 +3102,8 @@ void BattleUnit::deriveRank()
 			_rankInt = 1;
 		else if (_rank == "STR_ROOKIE")
 			_rankInt = 0;
+		else // e.g. STR_RANK_NONE
+			_rankInt = 0;
 	}
 }
 

@@ -1567,7 +1567,7 @@ bool SavedGame::handlePromotions(std::vector<Soldier*> &participants)
 		}
 	}
 
-	int totalSoldiers = (int)(soldiers.size());
+	int totalSoldiers = soldierData.totalSoldiers;
 
 	if (soldierData.totalCommanders == 0)
 	{
@@ -1651,6 +1651,15 @@ bool SavedGame::handlePromotions(std::vector<Soldier*> &participants)
  */
 void SavedGame::processSoldier(Soldier *soldier, PromotionInfo &soldierData)
 {
+	if (soldier->getRules()->getAllowPromotion())
+	{
+		soldierData.totalSoldiers++;
+	}
+	else
+	{
+		return;
+	}
+
 	switch (soldier->getRank())
 	{
 	case RANK_COMMANDER:

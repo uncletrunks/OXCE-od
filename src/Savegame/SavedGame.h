@@ -85,11 +85,12 @@ struct SaveInfo
 
 struct PromotionInfo
 {
+	int totalSoldiers;
 	int totalCommanders;
 	int totalColonels;
 	int totalCaptains;
 	int totalSergeants;
-	PromotionInfo(): totalCommanders(0), totalColonels(0), totalCaptains(0), totalSergeants(0){}
+	PromotionInfo(): totalSoldiers(0), totalCommanders(0), totalColonels(0), totalCaptains(0), totalSergeants(0){}
 };
 
 /**

@@ -316,6 +316,9 @@ std::wstring Soldier::getCraftString(Language *lang) const
  */
 std::string Soldier::getRankString() const
 {
+	if (!_rules->getAllowPromotion())
+		return "STR_RANK_NONE";
+
 	switch (_rank)
 	{
 	case RANK_ROOKIE:
@@ -361,6 +364,9 @@ SoldierRank Soldier::getRank() const
  */
 void Soldier::promoteRank()
 {
+	if (!_rules->getAllowPromotion())
+		return;
+
 	_rank = (SoldierRank)((int)_rank + 1);
 	if (_rank > RANK_SQUADDIE)
 	{
