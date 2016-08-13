@@ -1990,6 +1990,28 @@ std::vector<std::string> Base::getFutureBaseFunc() const
 }
 
 /**
+* Checks if it is possible to build another facility of a given type.
+* @return True if limit is reached (i.e. can't build anymore).
+*/
+bool Base::isMaxAllowedLimitReached(RuleBaseFacility *rule) const
+{
+	if (rule->getMaxAllowedPerBase() == 0)
+		return false;
+
+	int total = 0;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		if ((*bf)->getRules()->getType() == rule->getType())
+		{
+			total++;
+		}
+	}
+
+	return total >= rule->getMaxAllowedPerBase();
+}
+
+/**
 * Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
 * @return Additional HP healed.
 */

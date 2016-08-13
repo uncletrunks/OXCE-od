@@ -27,8 +27,6 @@
 namespace OpenXcom
 {
 
-class Mod;
-class BaseFacility;
 class Soldier;
 class Craft;
 class ItemContainer;
@@ -36,6 +34,7 @@ class Transfer;
 class Language;
 class Mod;
 class SavedGame;
+class RuleBaseFacility;
 class BaseFacility;
 class ResearchProject;
 class Production;
@@ -235,6 +234,8 @@ public:
 	std::vector<std::string> getForbiddenBaseFunc() const;
 	/// Gets future base functionality.
 	std::vector<std::string> getFutureBaseFunc() const;
+	/// Checks if it is possible to build another facility of a given type.
+	bool isMaxAllowedLimitReached(RuleBaseFacility *rule) const;
 	/// Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
 	float getSickBayAbsoluteBonus() const;
 	/// Gets the amount of additional HP healed in this base due to sick bay facilities (as percentage of max HP per soldier).

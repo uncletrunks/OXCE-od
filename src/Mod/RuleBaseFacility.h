@@ -48,6 +48,7 @@ private:
 	int _radarRange, _radarChance, _defense, _hitRatio, _fireSound, _hitSound;
 	std::string _mapName;
 	int _listOrder, _trainingRooms;
+	int _maxAllowedPerBase;
 	float _sickBayAbsoluteBonus, _sickBayRelativeBonus;
 public:
 	/// Creates a blank facility ruleset.
@@ -122,6 +123,8 @@ public:
 	int getListOrder() const;
 	/// Gets the facility's training capacity.
 	int getTrainingFacilities() const;
+	/// Gets the maximum allowed number of facilities per base.
+	int getMaxAllowedPerBase() const;
 	/// Gets the facility's bonus to hp healed.
 	float getSickBayAbsoluteBonus() const;
 	/// Gets the facility's bonus to hp healed (as percentage of max hp of the soldier).
