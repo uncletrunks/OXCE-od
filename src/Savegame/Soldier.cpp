@@ -42,7 +42,7 @@ namespace OpenXcom
 Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 	_id(id), _nationality(0),
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
-	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0),
+	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0.0f),
 	_recentlyPromoted(false), _psiTraining(false), _training(false),
 	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary())
 {
@@ -114,7 +114,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 	_lookVariant = node["lookVariant"].as<int>(_lookVariant);
 	_missions = node["missions"].as<int>(_missions);
 	_kills = node["kills"].as<int>(_kills);
-	_recovery = node["recovery"].as<int>(_recovery);
+	_recovery = node["recovery"].as<float>(_recovery);
 	Armor *armor = mod->getArmor(node["armor"].as<std::string>());
 	if (armor == 0)
 	{
@@ -180,7 +180,7 @@ YAML::Node Soldier::save() const
 	node["lookVariant"] = _lookVariant;
 	node["missions"] = _missions;
 	node["kills"] = _kills;
-	if (_recovery > 0)
+	if (_recovery > 0.0f)
 		node["recovery"] = _recovery;
 	node["armor"] = _armor->getType();
 	if (_replacedArmor != 0)
@@ -287,15 +287,15 @@ void Soldier::setCraft(Craft *craft)
  * @param lang Language to get strings from.
  * @return Full name.
  */
-std::wstring Soldier::getCraftString(Language *lang) const
+std::wstring Soldier::getCraftString(Language *lang, float absBonus, float relBonus) const
 {
 	std::wstring s;
-	if (_recovery > 0)
+	if (isWounded())
 	{
 		std::wostringstream ss;
 		ss << lang->getString("STR_WOUNDED");
 		ss << L">";
-		ss << _recovery;
+		ss << getWoundRecovery(absBonus, relBonus);
 		s = ss.str();
 	}
 	else if (_craft == 0)
@@ -581,12 +581,31 @@ void Soldier::setTransformedArmor(Armor *armor)
 }
 
 /**
+* Is the soldier wounded or not?.
+* @return True if wounded.
+*/
+bool Soldier::isWounded() const
+{
+	return _recovery > 0.0f;
+}
+
+/**
+* Is the soldier wounded or not?.
+* @return False if wounded.
+*/
+bool Soldier::hasFullHealth() const
+{
+	return !isWounded();
+}
+
+/**
  * Returns the amount of time until the soldier is healed.
  * @return Number of days.
  */
-int Soldier::getWoundRecovery() const
+int Soldier::getWoundRecovery(float absBonus, float relBonus) const
 {
-	return _recovery;
+	float hpPerDay = 1.0f + absBonus + (relBonus * _currentStats.health * 0.01f);
+	return (int)(std::ceil(_recovery / hpPerDay));
 }
 
 /**
@@ -598,7 +617,7 @@ void Soldier::setWoundRecovery(int recovery)
 	_recovery = recovery;
 
 	// dismiss from craft
-	if (_recovery > 0)
+	if (isWounded())
 	{
 		_craft = 0;
 		// remove from training
@@ -612,9 +631,19 @@ void Soldier::setWoundRecovery(int recovery)
 /**
  * Heals soldier wounds.
  */
-void Soldier::heal()
+void Soldier::heal(float absBonus, float relBonus)
 {
-	_recovery--;
+	// 1 hp per day as minimum
+	_recovery -= 1.0f;
+
+	// absolute bonus from sick bay facilities
+	_recovery -= absBonus;
+
+	// relative bonus from sick bay facilities
+	_recovery -= (relBonus * _currentStats.health * 0.01f);
+
+	if (_recovery < 0.0f)
+		_recovery = 0.0f;
 }
 
 /**
@@ -758,7 +787,7 @@ void Soldier::die(SoldierDeath *death)
 	_craft = 0;
 	_psiTraining = false;
 	_recentlyPromoted = false;
-	_recovery = 0;
+	_recovery = 0.0f;
 	for (std::vector<EquipmentLayoutItem*>::iterator i = _equipmentLayout.begin(); i != _equipmentLayout.end(); ++i)
 	{
 		delete *i;
@@ -803,7 +832,7 @@ void Soldier::trainPhys(int customTrainingFactor)
 	UnitStats caps1 = _rules->getStatCaps();
 	UnitStats caps2 = _rules->getTrainingStatCaps();
 	// no P.T. for the wounded
-	if (_recovery == 0)
+	if (hasFullHealth())
 	{
 		if(_currentStats.firing < caps1.firing && RNG::generate(0, caps2.firing) > _currentStats.firing && RNG::percent(customTrainingFactor))
 			_currentStats.firing++;

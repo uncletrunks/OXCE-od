@@ -455,9 +455,14 @@ void SoldierInfoState::init()
 	}
 	_txtCraft->setText(tr("STR_CRAFT_").arg(craft));
 
-	if (_soldier->getWoundRecovery() > 0)
+	if (_soldier->isWounded())
 	{
-		_txtRecovery->setText(tr("STR_WOUND_RECOVERY").arg(tr("STR_DAY", _soldier->getWoundRecovery())));
+		int recoveryTime = 0;
+		if (_base != 0)
+		{
+			recoveryTime = _soldier->getWoundRecovery(_base->getSickBayAbsoluteBonus(), _base->getSickBayRelativeBonus());
+		}
+		_txtRecovery->setText(tr("STR_WOUND_RECOVERY").arg(tr("STR_DAY", recoveryTime)));
 	}
 	else
 	{

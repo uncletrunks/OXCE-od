@@ -1715,11 +1715,13 @@ void GeoscapeState::time1Day()
 			delete(*iter);
 		}
 		// Handle soldier wounds
+		float absBonus = (*i)->getSickBayAbsoluteBonus();
+		float relBonus = (*i)->getSickBayRelativeBonus();
 		for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
 		{
-			if ((*j)->getWoundRecovery() > 0)
+			if ((*j)->isWounded())
 			{
-				(*j)->heal();
+				(*j)->heal(absBonus, relBonus);
 			}
 			if ((*j)->isInTraining())
 			{

@@ -59,7 +59,8 @@ private:
 	SoldierGender _gender;
 	SoldierLook _look;
 	int _lookVariant;
-	int _missions, _kills, _recovery;
+	int _missions, _kills;
+	float _recovery; // amount of HP missing until full recovery... used to calculate recovery time
 	bool _recentlyPromoted, _psiTraining, _training;
 	Armor *_armor;
 	Armor *_replacedArmor;
@@ -90,7 +91,7 @@ public:
 	/// Sets the soldier's craft.
 	void setCraft(Craft *craft);
 	/// Gets the soldier's craft string.
-	std::wstring getCraftString(Language *lang) const;
+	std::wstring getCraftString(Language *lang, float absBonus, float relBonus) const;
 	/// Gets a string version of the soldier's rank.
 	std::string getRankString() const;
 	/// Gets a sprite version of the soldier's rank.
@@ -143,12 +144,16 @@ public:
 	Armor *getTransformedArmor() const;
 	/// Backs up the soldier's original armor (before transformation).
 	void setTransformedArmor(Armor *armor);
+	/// Is the soldier wounded or not?.
+	bool isWounded() const;
+	/// Is the soldier wounded or not?.
+	bool hasFullHealth() const;
 	/// Gets the soldier's wound recovery time.
-	int getWoundRecovery() const;
+	int getWoundRecovery(float absBonus, float relBonus) const;
 	/// Sets the soldier's wound recovery time.
 	void setWoundRecovery(int recovery);
 	/// Heals wound recoveries.
-	void heal();
+	void heal(float absBonus, float relBonus);
 	/// Gets the soldier's equipment-layout.
 	std::vector<EquipmentLayoutItem*> *getEquipmentLayout();
 	/// Trains a soldier's psychic stats

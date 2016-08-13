@@ -567,8 +567,8 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 			{
 				(*j)->getStatistics()->mercyCross = true;
 			}
-			(*j)->getStatistics()->daysWounded = (*j)->getGeoscapeSoldier()->getWoundRecovery();
-			_missionStatistics->injuryList[(*j)->getGeoscapeSoldier()->getId()] = (*j)->getGeoscapeSoldier()->getWoundRecovery();
+			(*j)->getStatistics()->daysWounded = (*j)->getGeoscapeSoldier()->getWoundRecovery(0.0f, 0.0f);
+			_missionStatistics->injuryList[(*j)->getGeoscapeSoldier()->getId()] = (*j)->getGeoscapeSoldier()->getWoundRecovery(0.0f, 0.0f);
 
 			// Award Martyr Medal
 			if ((*j)->getMurdererId() == (*j)->getId() && (*j)->getStatistics()->kills.size() != 0)

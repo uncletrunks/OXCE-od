@@ -213,9 +213,11 @@ void CraftArmorState::initList(size_t scrl)
 	int row = 0;
 	_lstSoldiers->clearList();
 	Craft *c = _base->getCrafts()->at(_craft);
+	float absBonus = _base->getSickBayAbsoluteBonus();
+	float relBonus = _base->getSickBayRelativeBonus();
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
-		_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str(), tr((*i)->getArmor()->getType()).c_str());
+		_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), tr((*i)->getArmor()->getType()).c_str());
 
 		Uint8 color;
 		if ((*i)->getCraft() == c)

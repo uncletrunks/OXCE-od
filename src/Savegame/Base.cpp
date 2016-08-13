@@ -466,7 +466,7 @@ int Base::getAvailableSoldiers(bool checkCombatReadiness, bool everyoneFightsNob
 			total++;
 		}
 		else if (checkCombatReadiness && (((*i)->getCraft() != 0 && (*i)->getCraft()->getStatus() != "STR_OUT") ||
-			((*i)->getCraft() == 0 && ((*i)->getWoundRecovery() == 0 || everyoneFightsNobodyQuits))))
+			((*i)->getCraft() == 0 && ((*i)->hasFullHealth() || everyoneFightsNobodyQuits))))
 		{
 			total++;
 		}
@@ -1987,6 +1987,44 @@ std::vector<std::string> Base::getFutureBaseFunc() const
 	}
 
 	return ret;
+}
+
+/**
+* Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
+* @return Additional HP healed.
+*/
+float Base::getSickBayAbsoluteBonus() const
+{
+	float result = 0.0f;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		if ((*bf)->getBuildTime() == 0)
+		{
+			result += (*bf)->getRules()->getSickBayAbsoluteBonus();
+		}
+	}
+
+	return result;
+}
+
+/**
+* Gets the amount of additional HP healed in this base due to sick bay facilities (as percentage of max HP per soldier).
+* @return Additional percentage of max HP healed.
+*/
+float Base::getSickBayRelativeBonus() const
+{
+	float result = 0.0f;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		if ((*bf)->getBuildTime() == 0)
+		{
+			result += (*bf)->getRules()->getSickBayRelativeBonus();
+		}
+	}
+
+	return result;
 }
 
 }

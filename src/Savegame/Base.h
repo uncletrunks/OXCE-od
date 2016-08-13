@@ -235,6 +235,10 @@ public:
 	std::vector<std::string> getForbiddenBaseFunc() const;
 	/// Gets future base functionality.
 	std::vector<std::string> getFutureBaseFunc() const;
+	/// Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
+	float getSickBayAbsoluteBonus() const;
+	/// Gets the amount of additional HP healed in this base due to sick bay facilities (as percentage of max HP per soldier).
+	float getSickBayRelativeBonus() const;
 };
 
 }

@@ -132,13 +132,13 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	if (Options::everyoneFightsNobodyQuits)
 	{
 		// wounded soldiers start with half the energy and lowered morale
-		if (soldier->getWoundRecovery() > 0)
+		if (soldier->isWounded())
 		{
 			_energy = _stats.stamina / 2;
 			_morale = 75;
 		}
 		// statistically worse than average
-		_health = _health - ((soldier->getWoundRecovery() * 3) / 2);
+		_health = _health - ((soldier->getWoundRecovery(0.0f, 0.0f) * 3) / 2);
 		if (_health < 1)
 		{
 			// this is actually a punishment, strategically it is better to leave them behind :)

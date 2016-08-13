@@ -248,7 +248,7 @@ void AllocateTrainingState::initList(size_t scrl)
 		std::wostringstream strength;
 		strength << (*s)->getCurrentStats()->strength;
 
-		bool isWounded = (*s)->getWoundRecovery() > 0;
+		bool isWounded = (*s)->isWounded();
 		if ((*s)->isInTraining())
 		{
 			_lstSoldiers->addRow(9, (*s)->getName(true).c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr(isWounded ? "STR_NO_WOUNDED" : "STR_YES").c_str());
@@ -386,7 +386,7 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 	_sel = _lstSoldiers->getSelectedRow();
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
-		bool isWounded = _base->getSoldiers()->at(_sel)->getWoundRecovery() > 0;
+		bool isWounded = _base->getSoldiers()->at(_sel)->isWounded();
 		if (!_base->getSoldiers()->at(_sel)->isInTraining())
 		{
 			if (_base->getUsedTraining() < _base->getAvailableTraining())

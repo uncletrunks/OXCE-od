@@ -655,7 +655,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
-			(_craft == 0 && ((*i)->getWoundRecovery() == 0 || Options::everyoneFightsNobodyQuits) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
+			(_craft == 0 && ((*i)->hasFullHealth() || Options::everyoneFightsNobodyQuits) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 		{
 			// starting conditions - armor transformation or replacement
 			if (startingCondition != 0)

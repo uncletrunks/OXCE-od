@@ -220,6 +220,8 @@ void CraftSoldiersState::initList(size_t scrl)
 	int row = 0;
 	_lstSoldiers->clearList();
 	Craft *c = _base->getCrafts()->at(_craft);
+	float absBonus = _base->getSickBayAbsoluteBonus();
+	float relBonus = _base->getSickBayRelativeBonus();
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		// call corresponding getter
@@ -232,7 +234,7 @@ void CraftSoldiersState::initList(size_t scrl)
 			ss << L"";
 		}
 
-		_lstSoldiers->addRow(4, (*i)->getName(true, 19).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage()).c_str(), ss.str().c_str());
+		_lstSoldiers->addRow(4, (*i)->getName(true, 19).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), ss.str().c_str());
 
 		Uint8 color;
 		if ((*i)->getCraft() == c)
@@ -399,7 +401,7 @@ void CraftSoldiersState::lstSoldiersClick(Action *action)
 		{
 			color = _otherCraftColor;
 		}
-		else if (s->getWoundRecovery() == 0)
+		else if (s->hasFullHealth())
 		{
 			auto space = c->getSpaceAvailable();
 			auto armorSize = s->getArmor()->getSize();
