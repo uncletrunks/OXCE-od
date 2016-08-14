@@ -154,6 +154,14 @@ void ConfirmDestinationState::btnOkClick(Action *)
 		return;
 	}
 
+	if (!_craft->arePilotsOnboard())
+	{
+		_game->popState();
+		_game->popState();
+		_game->pushState(new CraftErrorState(0, tr("STR_NOT_ENOUGH_PILOTS").arg(_craft->getRules()->getPilots())));
+		return;
+	}
+
 	Waypoint *w = dynamic_cast<Waypoint*>(_target);
 	if (w != 0 && w->getId() == 0)
 	{

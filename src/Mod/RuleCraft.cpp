@@ -30,7 +30,7 @@ namespace OpenXcom
  * @param type String defining the type.
  */
 RuleCraft::RuleCraft(const std::string &type) :
-    _type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _vehicles(0),
+    _type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _pilots(0), _vehicles(0),
     _costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(0), _score(0), _battlescapeTerrainData(0),
 	_spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _listOrder(0), _maxItems(0), _maxDepth(0), _stats()
@@ -81,6 +81,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_marker = node["marker"].as<int>(_marker);
 	_weapons = node["weapons"].as<int>(_weapons);
 	_soldiers = node["soldiers"].as<int>(_soldiers);
+	_pilots = node["pilots"].as<int>(_pilots);
 	_vehicles = node["vehicles"].as<int>(_vehicles);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costRent = node["costRent"].as<int>(_costRent);
@@ -243,6 +244,15 @@ int RuleCraft::getWeapons() const
 int RuleCraft::getSoldiers() const
 {
 	return _soldiers;
+}
+
+/**
+* Gets the number of pilots that the craft requires in order to take off.
+* @return The number of pilots.
+*/
+int RuleCraft::getPilots() const
+{
+	return _pilots;
 }
 
 /**

@@ -118,7 +118,7 @@ private:
 	std::string _type;
 	std::vector<std::string> _requires;
 	int _sprite, _marker;
-	int _weapons, _soldiers, _vehicles, _costBuy, _costRent, _costSell;
+	int _weapons, _soldiers, _pilots, _vehicles, _costBuy, _costRent, _costSell;
 	char _weaponTypes[WeaponMax][WeaponTypeMax];
 	std::string _refuelItem;
 	std::string _weaponStrings[WeaponMax];
@@ -156,6 +156,8 @@ public:
 	int getWeapons() const;
 	/// Gets the craft's soldier capacity.
 	int getSoldiers() const;
+	/// Gets the craft's pilot capacity/requirement.
+	int getPilots() const;
 	/// Gets the craft's vehicle capacity.
 	int getVehicles() const;
 	/// Gets the craft's cost.

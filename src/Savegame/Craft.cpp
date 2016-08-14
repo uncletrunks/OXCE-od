@@ -1081,6 +1081,27 @@ int Craft::getSpaceUsed() const
 }
 
 /**
+* Checks if there are enough potential pilots onboard.
+* @return True if the craft has enough pilots.
+*/
+bool Craft::arePilotsOnboard() const
+{
+	if (_rules->getPilots() == 0)
+		return true;
+
+	int total = 0;
+	for (Soldier *s : *_base->getSoldiers())
+	{
+		if (s->getCraft() == this)
+		{
+			total++;
+		}
+	}
+
+	return total >= _rules->getPilots();
+}
+
+/**
  * Returns the total amount of vehicles of
  * a certain type stored in the craft.
  * @param vehicle Vehicle type.

@@ -193,6 +193,8 @@ public:
 	int getSpaceAvailable() const;
 	/// Gets the amount of space used inside a craft.
 	int getSpaceUsed() const;
+	/// Checks if there are enough potential pilots onboard.
+	bool arePilotsOnboard() const;
 	/// Gets the craft's vehicles of a certain type.
 	int getVehicleCount(const std::string &vehicle) const;
 	/// Sets the craft's dogfight status.
