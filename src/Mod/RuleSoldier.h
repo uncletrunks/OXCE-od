@@ -46,7 +46,7 @@ private:
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
 	int _avatarOffsetX, _avatarOffsetY;
-	bool _allowPromotion;
+	bool _allowPromotion, _allowPiloting;
 
 	void addSoldierNamePool(const std::string &namFile);
 public:
@@ -88,6 +88,8 @@ public:
 	int getAvatarOffsetY() const;
 	/// Gets the allow promotion flag.
 	bool getAllowPromotion() const;
+	/// Gets the allow piloting flag.
+	bool getAllowPiloting() const;
 	/// Gets the female appearance ratio.
 	int getFemaleFrequency() const;
 	/// Gets the soldier's male death sounds.

@@ -28,6 +28,7 @@
 #include "SavedGame.h"
 #include "ItemContainer.h"
 #include "Soldier.h"
+#include "../Mod/RuleSoldier.h"
 #include "Base.h"
 #include "Ufo.h"
 #include "Waypoint.h"
@@ -1092,7 +1093,7 @@ bool Craft::arePilotsOnboard() const
 	int total = 0;
 	for (Soldier *s : *_base->getSoldiers())
 	{
-		if (s->getCraft() == this)
+		if (s->getCraft() == this && s->getRules()->getAllowPiloting())
 		{
 			total++;
 		}

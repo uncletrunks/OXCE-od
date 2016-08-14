@@ -29,7 +29,7 @@ namespace OpenXcom
  * type of soldier.
  * @param type String defining the type.
  */
-RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0), _standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(66), _avatarOffsetY(42), _allowPromotion(true)
+RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0), _standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(66), _avatarOffsetY(42), _allowPromotion(true), _allowPiloting(true)
 {
 }
 
@@ -76,6 +76,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 	_avatarOffsetX = node["avatarOffsetX"].as<int>(_avatarOffsetX);
 	_avatarOffsetY = node["avatarOffsetY"].as<int>(_avatarOffsetY);
 	_allowPromotion = node["allowPromotion"].as<bool>(_allowPromotion);
+	_allowPiloting = node["allowPiloting"].as<bool>(_allowPiloting);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costSalary = node["costSalary"].as<int>(_costSalary);
 	_standHeight = node["standHeight"].as<int>(_standHeight);
@@ -296,6 +297,15 @@ int RuleSoldier::getAvatarOffsetY() const
 bool RuleSoldier::getAllowPromotion() const
 {
 	return _allowPromotion;
+}
+
+/**
+* Gets the allow piloting flag.
+* @return True if piloting is allowed.
+*/
+bool RuleSoldier::getAllowPiloting() const
+{
+	return _allowPiloting;
 }
 
 /**
