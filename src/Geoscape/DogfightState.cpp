@@ -252,6 +252,10 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 		_weaponFireCountdown[i] = 0;
 	}
 
+	// pilot modifiers
+	const std::vector<Soldier*> pilots = _craft->getPilotList();
+	_pilotAccuracyBonus = _craft->getPilotAccuracyBonus(pilots);
+
 	// Create objects
 	_window = new Surface(160, 96, _x, _y);
 	_battle = new Surface(77, 74, _x + 3, _y + 3);
@@ -833,7 +837,11 @@ void DogfightState::update()
 				if (((p->getPosition() >= _currentDist) || (p->getGlobalType() == CWPGT_BEAM && p->toBeRemoved())) && !_ufo->isCrashed() && !p->getMissed())
 				{
 					// UFO hit.
-					if (RNG::percent(((p->getAccuracy() * (100 + 300 / (5 - _ufoSize)) + 100) / 200) - _ufo->getCraftStats().avoidBonus + _craft->getCraftStats().hitBonus))
+					int chanceToHit = (p->getAccuracy() * (100 + 300 / (5 - _ufoSize)) + 100) / 200; // vanilla xcom
+					chanceToHit -= _ufo->getCraftStats().avoidBonus;
+					chanceToHit += _craft->getCraftStats().hitBonus;
+					chanceToHit += _pilotAccuracyBonus;
+					if (RNG::percent(chanceToHit))
 					{
 						// Formula delivered by Volutar, altered by Extended version.
 						int power = p->getDamage() * (_craft->getCraftStats().powerBonus + 100) / 100;

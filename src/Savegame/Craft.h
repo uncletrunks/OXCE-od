@@ -195,6 +195,10 @@ public:
 	int getSpaceUsed() const;
 	/// Checks if there are enough potential pilots onboard.
 	bool arePilotsOnboard() const;
+	/// Gets the list of craft pilots.
+	const std::vector<Soldier*> getPilotList() const;
+	/// Calculates the accuracy bonus based on pilot skills.
+	int getPilotAccuracyBonus(const std::vector<Soldier*> &pilots) const;
 	/// Gets the craft's vehicles of a certain type.
 	int getVehicleCount(const std::string &vehicle) const;
 	/// Sets the craft's dogfight status.

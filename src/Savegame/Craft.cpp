@@ -1103,6 +1103,54 @@ bool Craft::arePilotsOnboard() const
 }
 
 /**
+* Gets the list of craft pilots.
+* @return List of pilots.
+*/
+const std::vector<Soldier*> Craft::getPilotList() const
+{
+	std::vector<Soldier*> result;
+
+	if (_rules->getPilots() <= 0)
+		return result;
+
+	int total = 0;
+	// in reverse order... pilots are the last to exit the craft, not the first :)
+	for (std::vector<Soldier*>::reverse_iterator i = _base->getSoldiers()->rbegin(); i != _base->getSoldiers()->rend(); ++i)
+	{
+		if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
+		{
+			result.push_back((*i));
+			total++;
+		}
+		if (total >= _rules->getPilots())
+		{
+			break;
+		}
+	}
+
+	return result;
+}
+
+/**
+* Calculates the accuracy bonus based on pilot skills.
+* @return Accuracy bonus.
+*/
+int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots) const
+{
+	if (pilots.empty())
+		return 0;
+
+	int firingAccuracy = 0;
+	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
+	{
+			firingAccuracy += (*i)->getCurrentStats()->firing;
+	}
+	firingAccuracy = firingAccuracy / pilots.size(); // average firing accuracy of all pilots
+
+	return (firingAccuracy * 20) / 100; // bonus = 20% of average firing accuracy (unmodified by armor)
+}
+
+/**
  * Returns the total amount of vehicles of
  * a certain type stored in the craft.
  * @param vehicle Vehicle type.
