@@ -42,6 +42,7 @@
 #include "CraftWeaponsState.h"
 #include "CraftEquipmentState.h"
 #include "CraftArmorState.h"
+#include "CraftPilotsState.h"
 
 namespace OpenXcom
 {
@@ -73,7 +74,8 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	const int top_row = 41;
 	const int bottom = 125;
 	const int bottom_row = 17;
-	_btnOk = new TextButton(288, 16, 16, 176);
+	bool pilots = _craft->getRules()->getPilots() > 0;
+	_btnOk = new TextButton(pilots ? 218 : 288, 16, pilots ? 86 : 16, 176);
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		const int x = i % 2 ? 282 : 14;
@@ -83,6 +85,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	_btnCrew = new TextButton(64, 16, 16, bottom);
 	_btnEquip = new TextButton(64, 16, 16, bottom + bottom_row);
 	_btnArmor = new TextButton(64, 16, 16, bottom + 2 * bottom_row);
+	_btnPilots = new TextButton(64, 16, 16, bottom + 3 * bottom_row);
 	_edtCraft = new TextEdit(this, 140, 16, 80, 8);
 	_txtDamage = new Text(100, 17, 14, 24);
 	_txtFuel = new Text(82, 17, 228, 24);
@@ -116,6 +119,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	add(_btnCrew, "button", "craftInfo");
 	add(_btnEquip, "button", "craftInfo");
 	add(_btnArmor, "button", "craftInfo");
+	add(_btnPilots, "button", "craftInfo");
 	add(_edtCraft, "text1", "craftInfo");
 	add(_txtDamage, "text1", "craftInfo");
 	add(_txtFuel, "text1", "craftInfo");
@@ -153,6 +157,10 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 
 	_btnArmor->setText(tr("STR_ARMOR"));
 	_btnArmor->onMouseClick((ActionHandler)&CraftInfoState::btnArmorClick);
+
+	_btnPilots->setText(tr("STR_PILOTS"));
+	_btnPilots->onMouseClick((ActionHandler)&CraftInfoState::btnPilotsClick);
+	_btnPilots->setVisible(pilots);
 
 	_edtCraft->setBig();
 	_edtCraft->setAlign(ALIGN_CENTER);
@@ -286,6 +294,7 @@ void CraftInfoState::init()
 		_btnCrew->setVisible(false);
 		_btnEquip->setVisible(false);
 		_btnArmor->setVisible(false);
+		_btnPilots->setVisible(false);
 	}
 
 	for(int i = 0; i < _weaponNum; ++i)
@@ -400,6 +409,15 @@ void CraftInfoState::btnEquipClick(Action *)
 void CraftInfoState::btnArmorClick(Action *)
 {
 	_game->pushState(new CraftArmorState(_base, _craftId));
+}
+
+/**
+ * Goes to the Pilots Info screen.
+ * @param action Pointer to an action.
+ */
+void CraftInfoState::btnPilotsClick(Action *)
+{
+	_game->pushState(new CraftPilotsState(_base, _craftId));
 }
 
 /**

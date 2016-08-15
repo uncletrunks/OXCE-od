@@ -46,7 +46,7 @@ private:
 	std::wstring _defaultName;
 	int _weaponNum;
 
-	TextButton *_btnOk, *_btnW[RuleCraft::WeaponMax], *_btnCrew, *_btnEquip, *_btnArmor;
+	TextButton *_btnOk, *_btnW[RuleCraft::WeaponMax], *_btnCrew, *_btnEquip, *_btnArmor, *_btnPilots;
 	Window *_window;
 	TextEdit *_edtCraft;
 	Text *_txtDamage, *_txtFuel;
@@ -71,6 +71,8 @@ public:
 	void btnEquipClick(Action *action);
 	/// Handler for clicking the Armor button.
 	void btnArmorClick(Action *action);
+	/// Handler for clicking the Pilots button.
+	void btnPilotsClick(Action *action);
 	/// Handler for changing the text on the Name edit.
 	void edtCraftChange(Action *action);
 };

@@ -1006,6 +1006,9 @@
     <ClCompile Include="Battlescape\InventorySaveState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Basescape\CraftPilotsState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2048,6 +2051,9 @@
     </ClInclude>
     <ClInclude Include="Battlescape\InventorySaveState.h">
       <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftPilotsState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
