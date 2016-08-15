@@ -1170,6 +1170,38 @@ int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots) const
 }
 
 /**
+* Calculates the approach speed modifier based on pilot skills.
+* @return Approach speed modifier.
+*/
+int Craft::getPilotApproachSpeedModifier(const std::vector<Soldier*> &pilots) const
+{
+	if (pilots.empty())
+		return 2; // vanilla
+
+	int bravery = 0;
+	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
+	{
+		bravery += (*i)->getCurrentStats()->bravery;
+	}
+	bravery = bravery / pilots.size(); // average bravery of all pilots
+
+	if (bravery <= 20)
+	{
+		return 1; // half the speed
+	}
+	else if (bravery >= 90)
+	{
+		return 4; // double the speed
+	}
+	else if (bravery >= 80)
+	{
+		return 3; // 50% speed increase
+	}
+
+	return 2; // normal speed
+}
+
+/**
  * Returns the total amount of vehicles of
  * a certain type stored in the craft.
  * @param vehicle Vehicle type.

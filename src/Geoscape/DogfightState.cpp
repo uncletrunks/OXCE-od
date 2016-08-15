@@ -256,6 +256,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	const std::vector<Soldier*> pilots = _craft->getPilotList();
 	_pilotAccuracyBonus = _craft->getPilotAccuracyBonus(pilots);
 	_pilotDodgeBonus = _craft->getPilotDodgeBonus(pilots);
+	_pilotApproachSpeedModifier = _craft->getPilotApproachSpeedModifier(pilots);
 
 	// Create objects
 	_window = new Surface(160, 96, _x, _y);
@@ -795,7 +796,7 @@ void DogfightState::update()
 		{
 			if (_currentDist < _targetDist && !_ufo->isCrashed() && !_craft->isDestroyed())
 			{
-				distanceChange = 4;
+				distanceChange = 2 * _pilotApproachSpeedModifier;
 				if (_currentDist + distanceChange >_targetDist)
 				{
 					distanceChange = _targetDist - _currentDist;
@@ -803,7 +804,7 @@ void DogfightState::update()
 			}
 			else if (_currentDist > _targetDist && !_ufo->isCrashed() && !_craft->isDestroyed())
 			{
-				distanceChange = -2;
+				distanceChange = -1 * _pilotApproachSpeedModifier;
 			}
 
 			// don't let the interceptor mystically push or pull its fired projectiles
@@ -814,7 +815,7 @@ void DogfightState::update()
 		}
 		else
 		{
-			distanceChange = 4;
+			distanceChange = 2 * _pilotApproachSpeedModifier;
 
 			// UFOs can try to outrun our missiles, don't adjust projectile positions here
 			// If UFOs ever fire anything but beams, those positions need to be adjust here though.

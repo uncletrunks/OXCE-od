@@ -66,7 +66,7 @@ private:
 	size_t _interceptionsCount;
 	int _x, _y, _minimizedIconX, _minimizedIconY;
 	int _weaponNum;
-	int _pilotAccuracyBonus, _pilotDodgeBonus;
+	int _pilotAccuracyBonus, _pilotDodgeBonus, _pilotApproachSpeedModifier;
 
 	// craft min/max, radar min/max, damage min/max
 	int _colors[11];
