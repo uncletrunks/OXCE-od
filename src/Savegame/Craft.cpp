@@ -1147,7 +1147,7 @@ int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots) const
 	}
 	firingAccuracy = firingAccuracy / pilots.size(); // average firing accuracy of all pilots
 
-	return (firingAccuracy * 20) / 100; // bonus = 20% of average firing accuracy (unmodified by armor)
+	return ((firingAccuracy - 55) * 40) / 100; // -6% to 26% (firing accuracy from 40 to 120, unmodified by armor)
 }
 
 /**
@@ -1166,7 +1166,7 @@ int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots) const
 	}
 	reactions = reactions / pilots.size(); // average reactions of all pilots
 
-	return (reactions * 25) / 100; // bonus = 25% of average reactions (unmodified by armor)
+	return ((reactions - 55) * 60) / 100; // -9% to 27% (reactions from 40 to 100, unmodified by armor)
 }
 
 /**
