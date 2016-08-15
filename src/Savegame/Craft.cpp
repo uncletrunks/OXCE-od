@@ -1151,6 +1151,25 @@ int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots) const
 }
 
 /**
+* Calculates the dodge bonus based on pilot skills.
+* @return Dodge bonus.
+*/
+int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots) const
+{
+	if (pilots.empty())
+		return 0;
+
+	int reactions = 0;
+	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
+	{
+		reactions += (*i)->getCurrentStats()->reactions;
+	}
+	reactions = reactions / pilots.size(); // average reactions of all pilots
+
+	return (reactions * 25) / 100; // bonus = 25% of average reactions (unmodified by armor)
+}
+
+/**
  * Returns the total amount of vehicles of
  * a certain type stored in the craft.
  * @param vehicle Vehicle type.
