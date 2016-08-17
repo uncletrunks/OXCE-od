@@ -139,6 +139,7 @@ private:
 	bool _arcingShot;
 	ExperienceTrainingMode _experienceTrainingMode;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
+	int _shotgunBehaviorType, _shotgunSpread, _shotgunChoke;
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
@@ -421,6 +422,12 @@ public:
 	int getDropoff() const;
 	/// Get the number of projectiles to trace.
 	int getShotgunPellets() const;
+	/// Get the shotgun behavior type.
+	int getShotgunBehaviorType() const;
+	/// Get the spread of shotgun projectiles.
+	int getShotgunSpread() const;
+	/// Get the shotgun choke value.
+	int getShotgunChoke() const;
 	/// Gets the weapon's zombie unit.
 	const std::string &getZombieUnit() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
