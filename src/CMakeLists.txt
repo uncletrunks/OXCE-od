@@ -24,6 +24,8 @@ set ( basescape_src
   Basescape/CraftEquipmentState.h
   Basescape/CraftInfoState.cpp
   Basescape/CraftInfoState.h
+  Basescape/CraftPilotSelectState.cpp
+  Basescape/CraftPilotSelectState.h
   Basescape/CraftPilotsState.cpp
   Basescape/CraftPilotsState.h
   Basescape/CraftSoldiersState.cpp

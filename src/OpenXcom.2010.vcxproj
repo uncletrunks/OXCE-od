@@ -222,6 +222,7 @@
     <ClCompile Include="Basescape\CraftArmorState.cpp" />
     <ClCompile Include="Basescape\CraftEquipmentState.cpp" />
     <ClCompile Include="Basescape\CraftInfoState.cpp" />
+    <ClCompile Include="Basescape\CraftPilotSelectState.cpp" />
     <ClCompile Include="Basescape\CraftPilotsState.cpp" />
     <ClCompile Include="Basescape\CraftSoldiersState.cpp" />
     <ClCompile Include="Basescape\CraftsState.cpp" />
@@ -565,6 +566,7 @@
     <ClInclude Include="Basescape\CraftArmorState.h" />
     <ClInclude Include="Basescape\CraftEquipmentState.h" />
     <ClInclude Include="Basescape\CraftInfoState.h" />
+    <ClInclude Include="Basescape\CraftPilotSelectState.h" />
     <ClInclude Include="Basescape\CraftPilotsState.h" />
     <ClInclude Include="Basescape\CraftSoldiersState.h" />
     <ClInclude Include="Basescape\CraftsState.h" />

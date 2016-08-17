@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "CraftPilotsState.h"
+#include "CraftPilotSelectState.h"
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
@@ -49,16 +50,17 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	_txtBravery = new Text(58, 9, 240, 32);
 	_txtPilots = new Text(150, 9, 10, 40);
 	_lstPilots = new TextList(288, 32, 10, 48);
+	_btnAdd = new TextButton(146, 20, 10, 96);
+	_btnRemoveAll = new TextButton(146, 20, 164, 96);
 
 	_txtRequired = new Text(288, 9, 10, 84);
-	_txtHint = new Text(288, 9, 10, 96);
 
-	_txtAccuracyBonus = new Text(100, 9, 10, 124);
-	_txtAccuracyBonusValue = new Text(150, 9, 110, 124);
-	_txtDodgeBonus = new Text(100, 9, 10, 136);
-	_txtDodgeBonusValue = new Text(150, 9, 110, 136);
-	_txtApproachSpeed = new Text(100, 9, 10, 148);
-	_txtApproachSpeedValue = new Text(150, 9, 110, 148);
+	_txtAccuracyBonus = new Text(100, 9, 10, 128);
+	_txtAccuracyBonusValue = new Text(150, 9, 110, 128);
+	_txtDodgeBonus = new Text(100, 9, 10, 140);
+	_txtDodgeBonusValue = new Text(150, 9, 110, 140);
+	_txtApproachSpeed = new Text(100, 9, 10, 152);
+	_txtApproachSpeedValue = new Text(150, 9, 110, 152);
 
 	// Set palette
 	setInterface("costsInfo");
@@ -71,8 +73,9 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	add(_txtBravery, "text1", "costsInfo");
 	add(_txtPilots, "text1", "costsInfo");
 	add(_lstPilots, "list", "costsInfo");
+	add(_btnAdd, "button", "costsInfo");
+	add(_btnRemoveAll, "button", "costsInfo");
 	add(_txtRequired, "text1", "costsInfo");
-	add(_txtHint, "text1", "costsInfo");
 	add(_txtAccuracyBonus, "text1", "costsInfo");
 	add(_txtAccuracyBonusValue, "text2", "costsInfo");
 	add(_txtDodgeBonus, "text1", "costsInfo");
@@ -112,35 +115,65 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	_lstPilots->setAlign(ALIGN_LEFT, 0);
 	_lstPilots->setDot(true);
 
+	_txtRequired->setText(tr("STR_PILOTS_REQUIRED").arg(c->getRules()->getPilots()));
+
+	_btnAdd->setText(tr("STR_ADD_PILOT"));
+	_btnAdd->onMouseClick((ActionHandler)&CraftPilotsState::btnAddClick);
+	_btnRemoveAll->setText(tr("STR_REMOVE_ALL_PILOTS"));
+	_btnRemoveAll->onMouseClick((ActionHandler)&CraftPilotsState::btnRemoveAllClick);
+
+	_txtAccuracyBonus->setText(tr("STR_ACCURACY_BONUS"));
+	_txtDodgeBonus->setText(tr("STR_DODGE_BONUS"));
+	_txtApproachSpeed->setText(tr("STR_APPROACH_SPEED"));
+}
+
+/**
+ *
+ */
+CraftPilotsState::~CraftPilotsState()
+{
+
+}
+
+/**
+* Initializes the state.
+*/
+void CraftPilotsState::init()
+{
+	updateUI();
+}
+
+/**
+* Updates the data on the screen.
+*/
+void CraftPilotsState::updateUI()
+{
+	_lstPilots->clearList();
+
+	Craft *c = _base->getCrafts()->at(_craft);
+
 	const std::vector<Soldier*> pilots = c->getPilotList();
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
-			std::wostringstream ss1;
-			ss1 << (*i)->getCurrentStats()->firing;
-			std::wostringstream ss2;
-			ss2 << (*i)->getCurrentStats()->reactions;
-			std::wostringstream ss3;
-			ss3 << (*i)->getCurrentStats()->bravery;
-			_lstPilots->addRow(5, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), L"");
+		std::wostringstream ss1;
+		ss1 << (*i)->getCurrentStats()->firing;
+		std::wostringstream ss2;
+		ss2 << (*i)->getCurrentStats()->reactions;
+		std::wostringstream ss3;
+		ss3 << (*i)->getCurrentStats()->bravery;
+		_lstPilots->addRow(5, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), L"");
 	}
 
-	_txtRequired->setText(tr("STR_PILOTS_REQUIRED").arg(c->getRules()->getPilots()));
-
-	_txtHint->setText(tr("STR_HINT"));
-
-	_txtAccuracyBonus->setText(tr("STR_ACCURACY_BONUS"));
 	std::wostringstream ss1;
 	int accBonus = c->getPilotAccuracyBonus(pilots);
 	ss1 << (accBonus > 0 ? L"+" : L"") << accBonus << L"%";
 	_txtAccuracyBonusValue->setText(ss1.str().c_str());
 
-	_txtDodgeBonus->setText(tr("STR_DODGE_BONUS"));
 	std::wostringstream ss2;
 	int dodgeBonus = c->getPilotDodgeBonus(pilots);
 	ss2 << (dodgeBonus > 0 ? L"+" : L"") << dodgeBonus << L"%";
 	_txtDodgeBonusValue->setText(ss2.str().c_str());
 
-	_txtApproachSpeed->setText(tr("STR_APPROACH_SPEED"));
 	std::wostringstream ss3;
 	int approachSpeed = c->getPilotApproachSpeedModifier(pilots);
 	switch (approachSpeed)
@@ -162,14 +195,9 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 		break;
 	}
 	_txtApproachSpeedValue->setText(ss3.str().c_str());
-}
 
-/**
- *
- */
-CraftPilotsState::~CraftPilotsState()
-{
-
+	_btnAdd->setVisible(_lstPilots->getRows() < c->getRules()->getPilots());
+	_btnRemoveAll->setVisible(!c->isCrewPilotsOnly());
 }
 
 /**
@@ -179,6 +207,28 @@ CraftPilotsState::~CraftPilotsState()
 void CraftPilotsState::btnOkClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+* Opens a Pilot Selection screen.
+* @param action Pointer to an action.
+*/
+void CraftPilotsState::btnAddClick(Action *)
+{
+	_game->pushState(new CraftPilotSelectState(_base, _craft));
+}
+
+/**
+* Clears the pilot list.
+* @param action Pointer to an action.
+*/
+void CraftPilotsState::btnRemoveAllClick(Action *)
+{
+	Craft *c = _base->getCrafts()->at(_craft);
+
+	c->removeAllPilots();
+
+	updateUI();
 }
 
 }

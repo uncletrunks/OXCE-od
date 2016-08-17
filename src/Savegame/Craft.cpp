@@ -215,6 +215,7 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	_isAutoPatrolling = node["isAutoPatrolling"].as<bool>(_isAutoPatrolling);
 	_lonAuto = node["lonAuto"].as<double>(_lonAuto);
 	_latAuto = node["latAuto"].as<double>(_latAuto);
+	_pilots = node["pilots"].as< std::vector<int> >(_pilots);
 	if (_inBattlescape)
 		setSpeed(0);
 }
@@ -265,6 +266,10 @@ YAML::Node Craft::save() const
 		node["isAutoPatrolling"] = _isAutoPatrolling;
 	node["lonAuto"] = serializeDouble(_lonAuto);
 	node["latAuto"] = serializeDouble(_latAuto);
+	for (std::vector<int>::const_iterator i = _pilots.begin(); i != _pilots.end(); ++i)
+	{
+		node["pilots"].push_back((*i));
+	}
 	return node;
 }
 
@@ -1085,49 +1090,125 @@ int Craft::getSpaceUsed() const
 * Checks if there are enough potential pilots onboard.
 * @return True if the craft has enough pilots.
 */
-bool Craft::arePilotsOnboard() const
+bool Craft::arePilotsOnboard()
 {
 	if (_rules->getPilots() == 0)
 		return true;
 
-	int total = 0;
-	for (Soldier *s : *_base->getSoldiers())
+	// refresh the list of pilots (must be performed here, list may be out-of-date!)
+	getPilotList();
+
+	return _pilots.size() >= _rules->getPilots();
+}
+
+/**
+* Checks if a pilot is already on the list.
+*/
+bool Craft::isPilot(int pilotId)
+{
+	if (std::find(_pilots.begin(), _pilots.end(), pilotId) != _pilots.end())
 	{
-		if (s->getCraft() == this && s->getRules()->getAllowPiloting())
+		return true;
+	}
+
+	return false;
+}
+
+/**
+* Adds a pilot to the list.
+*/
+void Craft::addPilot(int pilotId)
+{
+	if (std::find(_pilots.begin(), _pilots.end(), pilotId) == _pilots.end())
+	{
+		_pilots.push_back(pilotId);
+	}
+}
+
+/**
+* Removes all pilots from the list.
+*/
+void Craft::removeAllPilots()
+{
+	_pilots.clear();
+}
+
+/**
+* Checks if entire crew is made of pilots.
+* @return True if all crew members capable of driving must be pilots to satisfy craft requirement.
+*/
+bool Craft::isCrewPilotsOnly() const
+{
+	int total = 0;
+	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+	{
+		if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
 		{
 			total++;
 		}
 	}
-
-	return total >= _rules->getPilots();
+	if (total == _rules->getPilots())
+	{
+		return true;
+	}
+	return false;
 }
 
 /**
 * Gets the list of craft pilots.
 * @return List of pilots.
 */
-const std::vector<Soldier*> Craft::getPilotList() const
+const std::vector<Soldier*> Craft::getPilotList()
 {
 	std::vector<Soldier*> result;
 
-	if (_rules->getPilots() <= 0)
+	// 1. no pilots
+	if (_rules->getPilots() == 0)
 		return result;
 
+	// 2. only pilots (assign automatically)
 	int total = 0;
-	// in reverse order... pilots are the last to exit the craft, not the first :)
-	for (std::vector<Soldier*>::reverse_iterator i = _base->getSoldiers()->rbegin(); i != _base->getSoldiers()->rend(); ++i)
+	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
 		{
 			result.push_back((*i));
 			total++;
 		}
-		if (total >= _rules->getPilots())
+	}
+	if (total == _rules->getPilots())
+	{
+		// nothing more to do
+	}
+	else
+	{
+		// 3. pilots and soldiers (pilots must be assigned manually)
+		int total2 = 0;
+		result.clear();
+		for (std::vector<int>::iterator i = _pilots.begin(); i != _pilots.end(); ++i)
 		{
-			break;
+			for (std::vector<Soldier*>::iterator j = _base->getSoldiers()->begin(); j != _base->getSoldiers()->end(); ++j)
+			{
+				if ((*j)->getCraft() == this && (*j)->getRules()->getAllowPiloting() && (*j)->getId() == (*i))
+				{
+					result.push_back((*j));
+					total2++;
+					break; // pilot found, don't search anymore
+				}
+			}
+			if (total2 >= _rules->getPilots())
+			{
+				break; // enough pilots found
+			}
 		}
 	}
 
+	// remember the pilots and return
+	removeAllPilots();
+	for (std::vector<Soldier*>::iterator i = result.begin(); i != result.end(); ++i)
+	{
+		addPilot((*i)->getId());
+	}
 	return result;
 }
 

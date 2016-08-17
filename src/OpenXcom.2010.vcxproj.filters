@@ -1009,6 +1009,9 @@
     <ClCompile Include="Basescape\CraftPilotsState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Basescape\CraftPilotSelectState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2053,6 +2056,9 @@
       <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Basescape\CraftPilotsState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftPilotSelectState.h">
       <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>

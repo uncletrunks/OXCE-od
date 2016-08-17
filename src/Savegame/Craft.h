@@ -60,6 +60,7 @@ private:
 	RuleCraftStats _stats;
 	bool _isAutoPatrolling;
 	double _lonAuto, _latAuto;
+	std::vector<int> _pilots;
 public:
 	/// Creates a craft of the specified type.
 	Craft(RuleCraft *rules, Base *base, int id = 0);
@@ -194,9 +195,17 @@ public:
 	/// Gets the amount of space used inside a craft.
 	int getSpaceUsed() const;
 	/// Checks if there are enough potential pilots onboard.
-	bool arePilotsOnboard() const;
+	bool arePilotsOnboard();
+	/// Checks if a pilot is already on the list.
+	bool isPilot(int pilotId);
+	/// Adds a pilot to the list.
+	void addPilot(int pilotId);
+	/// Removes all pilots from the list.
+	void removeAllPilots();
+	/// Checks if entire crew is made of pilots.
+	bool isCrewPilotsOnly() const;
 	/// Gets the list of craft pilots.
-	const std::vector<Soldier*> getPilotList() const;
+	const std::vector<Soldier*> getPilotList();
 	/// Calculates the accuracy bonus based on pilot skills.
 	int getPilotAccuracyBonus(const std::vector<Soldier*> &pilots) const;
 	/// Calculates the dodge bonus based on pilot skills.

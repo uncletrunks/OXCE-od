@@ -16,52 +16,45 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_CRAFTPILOTSSTATE_H
-#define OPENXCOM_CRAFTPILOTSSTATE_H
+#ifndef OPENXCOM_CRAFTPILOTSELECTSTATE_H
+#define OPENXCOM_CRAFTPILOTSELECTSTATE_H
 
+#include <vector>
 #include "../Engine/State.h"
 
 namespace OpenXcom
 {
 
 class Base;
+class Soldier;
 class TextButton;
 class Window;
 class Text;
 class TextList;
 
 /**
- * Displays info about craft pilot(s).
+ * Select Pilot window that allows assigning a pilot to a craft.
  */
-class CraftPilotsState : public State
+class CraftPilotSelectState : public State
 {
 private:
 	Base *_base;
 	size_t _craft;
 
-	TextButton *_btnOk, *_btnAdd, *_btnRemoveAll;
+	TextButton *_btnCancel;
 	Window *_window;
-	Text *_txtTitle, *_txtFiringAcc, *_txtReactions, *_txtBravery, *_txtPilots;
-	Text *_txtRequired;
-	TextList *_lstPilots;
-	Text *_txtAccuracyBonus, *_txtAccuracyBonusValue;
-	Text *_txtDodgeBonus, *_txtDodgeBonusValue;
-	Text *_txtApproachSpeed, *_txtApproachSpeedValue;
-	/// Updates the UI data.
-	void updateUI();
+	Text *_txtTitle, *_txtName, *_txtFiringAcc, *_txtReactions, *_txtBravery;
+	TextList *_lstPilot;
+	std::vector<int> _pilot;
 public:
-	/// Creates the Craft Pilots state.
-	CraftPilotsState(Base *base, size_t craft);
-	/// Cleans up the Craft Pilots state.
-	~CraftPilotsState();
-	/// Initializes the state.
-	void init();
-	/// Handler for clicking the OK button.
-	void btnOkClick(Action *action);
-	/// Handler for clicking the Add button.
-	void btnAddClick(Action *action);
-	/// Handler for clicking the RemoveAll button.
-	void btnRemoveAllClick(Action *action);
+	/// Creates the Select Pilot state.
+	CraftPilotSelectState(Base *base, size_t craft);
+	/// Cleans up the Select Pilot state.
+	~CraftPilotSelectState();
+	/// Handler for clicking the Cancel button.
+	void btnCancelClick(Action *action);
+	/// Handler for clicking the Pilot list.
+	void lstPilotClick(Action *action);
 };
 
 }
