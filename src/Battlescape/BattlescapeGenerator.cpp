@@ -465,9 +465,7 @@ void BattlescapeGenerator::nextStage()
 
 	_save->setAborted(false);
 	_save->setGlobalShade(_worldShade);
-	_save->getTileEngine()->calculateSunShading();
-	_save->getTileEngine()->calculateTerrainLighting();
-	_save->getTileEngine()->calculateUnitLighting();
+	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
 	_save->getTileEngine()->recalculateFOV();
 }
 
@@ -577,9 +575,7 @@ void BattlescapeGenerator::run()
 	// set shade (alien bases are a little darker, sites depend on worldshade)
 	_save->setGlobalShade(_worldShade);
 
-	_save->getTileEngine()->calculateSunShading();
-	_save->getTileEngine()->calculateTerrainLighting();
-	_save->getTileEngine()->calculateUnitLighting();
+	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
 	_save->getTileEngine()->recalculateFOV();
 }
 
@@ -1931,7 +1927,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			_save->getMapDataSets()->push_back(*i);
 			craftDataSetIDOffset++;
 		}
-		
+
 		for (size_t i = 0; i < ufoMaps.size(); ++i)
 		{
 			loadMAP(ufoMaps[i], _ufoPos[i].x * 10, _ufoPos[i].y * 10, ufoTerrain, mapDataSetIDOffset);

@@ -57,7 +57,7 @@ Tile::Tile(const Position& pos): _smoke(0), _fire(0), _explosive(0), _explosiveT
 		_mapDataSetID[i] = -1;
 		_currentFrame[i] = 0;
 	}
-	for (int layer = 0; layer < LIGHTLAYERS; layer++)
+	for (int layer = 0; layer < LL_MAX; layer++)
 	{
 		_light[layer] = 0;
 	}
@@ -426,6 +426,18 @@ void Tile::resetLight(LightLayers layer)
 }
 
 /**
+ * Reset multiple layers of light from defined one.
+ * @param layer From with layer start reset.
+ */
+void Tile::resetLightMulti(LightLayers layer)
+{
+	for (int l = layer; l < LL_MAX; l++)
+	{
+		_light[l] = 0;
+	}
+}
+
+/**
  * Add the light amount on the tile. Only add light if the current light is lower.
  * @param light Amount of light to add.
  * @param layer Light is separated in 3 layers: Ambient, Static and Dynamic.
@@ -446,6 +458,20 @@ int Tile::getLight(LightLayers layer) const
 	return _light[layer];
 }
 
+int Tile::getLightMulti(LightLayers layer) const
+{
+	int light = 0;
+
+	for (int l = layer; l >= 0; --l)
+	{
+		if (_light[l] > light)
+			light = _light[l];
+	}
+
+	return light;
+}
+
+
 /**
  * Gets the tile's shade amount 0-15. It returns the brightest of all light layers.
  * Shade level is the inverse of light level. So a maximum amount of light (15) returns shade level 0.
@@ -455,7 +481,7 @@ int Tile::getShade() const
 {
 	int light = 0;
 
-	for (int layer = 0; layer < LIGHTLAYERS; layer++)
+	for (int layer = 0; layer < LL_MAX; layer++)
 	{
 		if (_light[layer] > light)
 			light = _light[layer];

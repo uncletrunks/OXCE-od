@@ -33,11 +33,11 @@ public:
 	int x, y, z;
 
 	/// Null position constructor.
-	Position() : x(0), y(0), z(0) {};
+	constexpr Position() : x(0), y(0), z(0) {};
 	/// X Y Z position constructor.
-	Position(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {};
+	constexpr Position(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {};
 	/// Copy constructor.
-	Position(const Position& pos) : x(pos.x), y(pos.y), z(pos.z) {};
+	constexpr Position(const Position& pos) : x(pos.x), y(pos.y), z(pos.z) {};
 
 	Position& operator=(const Position& pos) { x = pos.x; y = pos.y; z = pos.z; return *this; }
 
@@ -78,6 +78,7 @@ public:
 	{
 		return Position(x / 16, y / 16, z / 24);
 	}
+
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Position& pos)

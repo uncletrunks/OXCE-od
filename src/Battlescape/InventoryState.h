@@ -101,8 +101,6 @@ private:
 	void updateTemplateButtons(bool isVisible);
 	/// Refresh the hover status of the mouse.
 	void refreshMouse();
-	/// Update lighting.
-	void updateLighting();
 };
 
 }

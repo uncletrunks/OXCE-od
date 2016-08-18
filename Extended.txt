@@ -118,6 +118,7 @@ Reaction scripts have now information about runing or strafing of target.[br/]
 New functions exposed to script.[br/]
 [br/]
 3.3:[br/]
+New light system.[br/]
 [br/]
 
 [examples]

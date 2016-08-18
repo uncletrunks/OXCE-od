@@ -256,7 +256,7 @@ InventoryState::~InventoryState()
 		}
 		Tile *inventoryTile = _battleGame->getSelectedUnit()->getTile();
 		_battleGame->getTileEngine()->applyGravity(inventoryTile);
-		_battleGame->getTileEngine()->calculateTerrainLighting(); // dropping/picking up flares
+		_battleGame->getTileEngine()->calculateLighting(LL_ITEMS); // dropping/picking up flares
 		_battleGame->getTileEngine()->recalculateFOV();
 	}
 	else
@@ -482,10 +482,6 @@ void InventoryState::btnOkClick(Action *)
 
 			(*j)->prepareNewTurn();
 		}
-	}
-	if (_battleGame->getTileEngine())
-	{
-		updateLighting();
 	}
 }
 
@@ -808,24 +804,6 @@ void InventoryState::onClearInventory(Action *)
 void InventoryState::invClick(Action *act)
 {
 	updateStats();
-	if (_tu && act->isMouseRightClick())
-	{
-		updateLighting();
-	}
-}
-
-/**
- * Update lighting in case of unit pick torch/electroflare to hands.
- */
-void InventoryState::updateLighting()
-{
-	if (!_lightUpdated)
-	{
-		_lightUpdated = true;
-		_battleGame->getTileEngine()->calculateTerrainLighting();
-		_battleGame->getTileEngine()->calculateUnitLighting();
-		_battleGame->getTileEngine()->recalculateFOV();
-	}
 }
 
 /**

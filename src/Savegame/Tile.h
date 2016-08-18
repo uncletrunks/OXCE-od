@@ -38,7 +38,7 @@ class BattleItem;
 class RuleInventory;
 class Particle;
 
-enum LightLayers : Uint8 { LL_AMBIENT, LL_STATIC, LL_UNITS, LL_MAX };
+enum LightLayers : Uint8 { LL_AMBIENT, LL_FIRE, LL_ITEMS, LL_UNITS, LL_MAX };
 
 /**
  * Basic element of which a battle map is build.
@@ -62,13 +62,12 @@ public:
 	static const int NOT_CALCULATED = -1;
 
 protected:
-	static const int LIGHTLAYERS = LightLayers::LL_MAX;
 	MapData *_objects[4];
 	int _mapDataID[4];
 	int _mapDataSetID[4];
 	int _currentFrame[4];
 	bool _discovered[3];
-	int _light[LIGHTLAYERS];
+	int _light[LL_MAX];
 	int _smoke;
 	int _fire;
 	int _explosive;
@@ -156,10 +155,14 @@ public:
 	bool isDiscovered(int part) const;
 	/// Reset light to zero for this tile.
 	void resetLight(LightLayers layer);
+	/// Reset light to zero for this tile and multiple layers.
+	void resetLightMulti(LightLayers layer);
 	/// Add light to this tile.
 	void addLight(int light, LightLayers layer);
 	/// Get max light to this tile.
 	int getLight(LightLayers layer) const;
+	/// Get max light to this tile and multiple layers.
+	int getLightMulti(LightLayers layer) const;
 	/// Get the shade amount.
 	int getShade() const;
 	/// Destroy a tile part.

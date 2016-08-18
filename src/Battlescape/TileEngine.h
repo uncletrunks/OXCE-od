@@ -33,6 +33,7 @@ class BattleUnit;
 class BattleItem;
 class Tile;
 struct BattleAction;
+struct GraphSubset;
 
 enum BattleActionType : Uint8;
 enum LightLayers : Uint8;
@@ -44,9 +45,43 @@ enum LightLayers : Uint8;
  */
 class TileEngine
 {
+public:
+	/// Value represent not exisiting position.
+	static constexpr Position invalid = { -1, -1, -1 };
+
 private:
+	/**
+	 * Helper class storing cached visibility blockage data.
+	 */
+	struct VisibilityBlockCache
+	{
+		Uint8 blockDir;
+		Uint8 blockDirUp;
+		Uint8 blockDirDown;
+
+		Uint8 bigWall;
+
+		Uint8 height;
+
+		Uint8 blockUp: 1;
+		Uint8 blockDown: 1;
+		Uint8 smoke: 1;
+		Uint8 fire: 1;
+	};
+	/**
+	 * Helper class storing reaction data.
+	 */
+	struct ReactionScore
+	{
+		BattleUnit *unit;
+		BattleActionType attackType;
+		double reactionScore;
+		double reactionReduction;
+	};
+
 	SavedBattleGame *_save;
 	std::vector<Uint16> *_voxelData;
+	std::vector<VisibilityBlockCache> _blockVisibility;
 	static const int heightFromCenter[11];
 	bool _personalLighting;
 	const int _maxViewDistance;        // 20 tiles by default
@@ -56,31 +91,33 @@ private:
 	Position _eventVisibilitySectorL, _eventVisibilitySectorR, _eventVisibilityObserverPos;
 
 	/// Add light source.
-	void addLight(const Position &center, int power, LightLayers layer);
+	void addLight(GraphSubset gs, const Position &center, int power, LightLayers layer);
 	/// Calculate blockage amount.
 	int blockage(Tile *tile, const int part, ItemDamageType type, int direction = -1, bool checkingFromOrigin = false);
+	/// Get max distance that fire light can reach.
+	inline int getMaxStaticLightDistance() const { return 16; }
+	/// Get max distance that light can reach.
+	inline int getMaxDynamicLightDistance() const { return 24; }
 	/// Get max view distance.
-	inline int getMaxViewDistance() const        {return _maxViewDistance;}
+	inline int getMaxViewDistance() const { return _maxViewDistance; }
 	/// Get square of max view distance.
-	inline int getMaxViewDistanceSq() const      {return _maxViewDistanceSq;}
+	inline int getMaxViewDistanceSq() const { return _maxViewDistanceSq; }
 	/// Get max view distance in voxel space.
-	inline int getMaxVoxelViewDistance() const   {return _maxVoxelViewDistance;}
+	inline int getMaxVoxelViewDistance() const { return _maxVoxelViewDistance; }
 	/// Get threshold of darkness for LoS calculation.
-	inline int getMaxDarknessToSeeUnits() const  {return _maxDarknessToSeeUnits;}
+	inline int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
 
-	void setupEventVisibilitySector(const Position &observerPos, const Position &eventPos, const int &eventRadius);
+	bool setupEventVisibilitySector(const Position &observerPos, const Position &eventPos, const int &eventRadius);
 	inline bool inEventVisibilitySector(const Position &toCheck) const;
 
-	/**
-	 * Helper class storing reaction data
-	 */
-	struct ReactionScore
-	{
-		BattleUnit *unit;
-		BattleActionType attackType;
-		double reactionScore;
-		double reactionReduction;
-	};
+	/// Calculates sun shading of the whole map.
+	void calculateSunShading(GraphSubset gs);
+	/// Recalculates lighting of the battlescape for terrain.
+	void calculateTerrainBackground(GraphSubset gs);
+	/// Recalculates lighting of the battlescape for terrain.
+	void calculateTerrainItems(GraphSubset gs);
+	/// Recalculates lighting of the battlescape for units.
+	void calculateUnitLighting(GraphSubset gs);
 
 	/// Checks validity of a snap shot to this position.
 	ReactionScore determineReactionType(BattleUnit *unit, BattleUnit *target);
@@ -95,26 +132,18 @@ public:
 	TileEngine(SavedBattleGame *save, std::vector<Uint16> *voxelData, int maxViewDistance, int maxDarknessToSeeUnits);
 	/// Cleans up the TileEngine.
 	~TileEngine();
-	/// Calculates sun shading of the whole map.
-	void calculateSunShading();
-	/// Calculates sun shading for the column of tiles at pos
-	void calculateSunShading(const Position &pos);
-	/// Calculates sun shading of a single tile.
-	void calculateSunShading(Tile *tile);
 	/// Calculates visible tiles within the field of view. Supply an eventPosition to do an update limited to a small slice of the view sector.
-	void calculateTilesInFOV(BattleUnit *unit, const Position eventPos = { -1, -1, -1 }, const int eventRadius = 0);
+	void calculateTilesInFOV(BattleUnit *unit, const Position eventPos = invalid, const int eventRadius = 0);
 	/// Calculates visible units within the field of view. Supply an eventPosition to do an update limited to a small slice of the view sector.
-	bool calculateUnitsInFOV(BattleUnit* unit, const Position eventPos = { -1, -1, -1 }, const int eventRadius = 0);
+	bool calculateUnitsInFOV(BattleUnit* unit, const Position eventPos = invalid, const int eventRadius = 0);
 	/// Calculates the field of view from a units view point.
 	bool calculateFOV(BattleUnit *unit, bool doTileRecalc = true, bool doUnitRecalc = true);
 	/// Calculates the field of view within range of a certain position.
 	void calculateFOV(const Position &position, int eventRadius = -1, const bool updateTiles = true, const bool appendToTileVisibility = false);
 	/// Checks reaction fire.
 	bool checkReactionFire(BattleUnit *unit, const BattleAction &originalAction);
-	/// Recalculates lighting of the battlescape for terrain.
-	void calculateTerrainLighting();
-	/// Recalculates lighting of the battlescape for units.
-	void calculateUnitLighting();
+	/// Recalcualte all lighting in some area.
+	void calculateLighting(LightLayers layer, Position position = invalid, int eventRadius = 0, bool terrianChanged = false);
 	/// Handles tile hit.
 	int hitTile(Tile *tile, int damage, const RuleDamageType* type);
 	/// Handles experience training.

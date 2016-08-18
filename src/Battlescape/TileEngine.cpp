@@ -34,6 +34,7 @@
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleUnitStatistics.h"
 #include "../Engine/RNG.h"
+#include "../Engine/GraphSubset.h"
 #include "BattlescapeState.h"
 #include "../Mod/MapDataSet.h"
 #include "../Mod/MapData.h"
@@ -161,9 +162,59 @@ bool calculateLineHitHelper(const Position& origin, const Position& target, Func
 	return false;
 }
 
+/**
+ * Iterate through some subset of map tiles.
+ * @param save Map data.
+ * @param gs Square subset of map area.
+ * @param func Call back.
+ */
+template<typename TileFunc>
+void iterateTiles(SavedBattleGame* save, GraphSubset gs, TileFunc func)
+{
+	const auto totalSizeX = save->getMapSizeX();
+	const auto totalSizeY = save->getMapSizeY();
+	const auto totalSizeZ = save->getMapSizeZ();
+
+	gs = GraphSubset::intersection(gs, GraphSubset{ totalSizeX, totalSizeY });
+	if (gs.size_x() && gs.size_y())
+	{
+		for (int z = 0; z < totalSizeZ; ++z)
+		{
+			auto rowStart = save->getTile(Position{ gs.beg_x, gs.beg_y, z });
+			for (auto stepsY = gs.size_y(); stepsY != 0; --stepsY, rowStart += totalSizeX)
+			{
+				auto curr = rowStart;
+				for (auto stepX = gs.size_x(); stepX != 0; --stepX, curr += 1)
+				{
+					func(curr);
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Generate square subset of map using position and radius.
+ * @param position Starting position.
+ * @param radius Radius of area.
+ * @return Subset of map.
+ */
+GraphSubset mapArea(Position position, int radius)
+{
+	return { std::make_pair(position.x - radius, position.x + radius + 1), std::make_pair(position.y - radius, position.y + radius + 1) };
+}
+
+GraphSubset mapAreaExpand(GraphSubset gs, int radius)
+{
+	return { std::make_pair(gs.beg_x - radius, gs.end_x + radius), std::make_pair(gs.beg_y - radius, gs.end_y + radius) };
+}
+
 } // namespace
 
 const int TileEngine::heightFromCenter[11] = {0,-2,+2,-4,+4,-6,+6,-8,+8,-12,+12};
+
+
+constexpr Position TileEngine::invalid;
 
 /**
  * Sets up a TileEngine.
@@ -177,6 +228,7 @@ TileEngine::TileEngine(SavedBattleGame *save, std::vector<Uint16> *voxelData, in
 	_maxViewDistance(maxViewDistance), _maxViewDistanceSq(maxViewDistance * maxViewDistance),
 	_maxVoxelViewDistance(maxViewDistance * 16), _maxDarknessToSeeUnits(maxDarknessToSeeUnits)
 {
+	_blockVisibility.resize(save->getMapSizeXYZ());
 }
 
 /**
@@ -190,121 +242,110 @@ TileEngine::~TileEngine()
 /**
   * Calculates sun shading for the whole terrain.
   */
-void TileEngine::calculateSunShading()
-{
-
-	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
-	{
-		_save->getTile(i)->resetLight(LL_AMBIENT);
-		calculateSunShading(_save->getTile(i));
-	}
-}
-
-/**
-* Calculates sun shading for all tiles in the column at the given X - Y - coordinates.
-* @param pos The position to calculate sun shading for.Z - coordinate is ignored.
-*/
-void TileEngine::calculateSunShading(const Position &pos)
-{
-	Position toUpdate = pos;
-	for (int z = _save->getMapSizeZ() - 1; z >= 0; z--)
-	{
-		toUpdate.z = z;
-		_save->getTile(toUpdate)->resetLight(LL_AMBIENT);
-		calculateSunShading(_save->getTile(toUpdate));
-	}
-}
-
-/**
-  * Calculates sun shading for 1 tile. Sun comes from above and is blocked by floors or objects.
-  * TODO: angle the shadow according to the time? - link to Options::globeSeasons (or whatever the realistic lighting one is)
-  * @param tile The tile to calculate sun shading for.
-  */
-void TileEngine::calculateSunShading(Tile *tile)
+void TileEngine::calculateSunShading(GraphSubset gs)
 {
 	int power = 15 - _save->getGlobalShade();
 
-	// At night/dusk sun isn't dropping shades blocked by roofs
-	if (_save->getGlobalShade() <= 4)
-	{
-		int block = 0;
-		int x = tile->getPosition().x;
-		int y = tile->getPosition().y;
-		for (int z = _save->getMapSizeZ()-1; z > tile->getPosition().z ; z--)
+	iterateTiles(
+		_save,
+		gs,
+		[&](Tile* tile)
 		{
-			block += blockage(_save->getTile(Position(x, y, z)), O_FLOOR, DT_NONE);
-			block += blockage(_save->getTile(Position(x, y, z)), O_OBJECT, DT_NONE, Pathfinding::DIR_DOWN);
+			auto currLight = power;
+
+			// At night/dusk sun isn't dropping shades blocked by roofs
+			if (_save->getGlobalShade() <= 4)
+			{
+				int block = 0;
+				int x = tile->getPosition().x;
+				int y = tile->getPosition().y;
+				for (int z = _save->getMapSizeZ()-1; z > tile->getPosition().z ; z--)
+				{
+					block += blockage(_save->getTile(Position(x, y, z)), O_FLOOR, DT_NONE);
+					block += blockage(_save->getTile(Position(x, y, z)), O_OBJECT, DT_NONE, Pathfinding::DIR_DOWN);
+				}
+				if (block>0)
+				{
+					currLight -= 2;
+				}
+			}
+			tile->addLight(currLight, LL_AMBIENT);
 		}
-		if (block>0)
-		{
-			power -= 2;
-		}
-	}
-	tile->addLight(power, LL_AMBIENT);
+	);
 }
 
 /**
-  * Recalculates lighting for the terrain: objects,items,fire.
+  * Recalculates lighting for the terrain: fire.
   */
-void TileEngine::calculateTerrainLighting()
+void TileEngine::calculateTerrainBackground(GraphSubset gs)
 {
 	const int fireLightPower = 15; // amount of light a fire generates
 
-	// reset all light to 0 first
-	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
-	{
-		_save->getTile(i)->resetLight(LL_STATIC);
-	}
-
-	// add lighting of terrain
-	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
-	{
-		auto tile = _save->getTile(i);
-		auto currLight = 0;
-
-		// only floors and objects can light up
-		if (tile->getMapData(O_FLOOR)
-			&& tile->getMapData(O_FLOOR)->getLightSource())
+	// add lighting of fire
+	iterateTiles(
+		_save,
+		mapAreaExpand(gs, getMaxStaticLightDistance() - 1),
+		[&](Tile* tile)
 		{
-			currLight = std::max(currLight, tile->getMapData(O_FLOOR)->getLightSource());
-		}
-		if (tile->getMapData(O_OBJECT)
-			&& tile->getMapData(O_OBJECT)->getLightSource())
-		{
-			currLight = std::max(currLight, tile->getMapData(O_OBJECT)->getLightSource());
-		}
+			auto currLight = 0;
 
-		// fires
-		if (tile->getFire())
-		{
-			currLight = std::max(currLight, fireLightPower);
-		}
-
-		for (BattleItem *it : *tile->getInventory())
-		{
-			if (it->getGlow())
+			// only floors and objects can light up
+			if (tile->getMapData(O_FLOOR))
 			{
-				currLight = std::max(currLight, it->getGlowRange());
+				currLight = std::max(currLight, tile->getMapData(O_FLOOR)->getLightSource());
 			}
+			if (tile->getMapData(O_OBJECT))
+			{
+				currLight = std::max(currLight, tile->getMapData(O_OBJECT)->getLightSource());
+			}
+
+			// fires
+			if (tile->getFire())
+			{
+				currLight = std::max(currLight, fireLightPower);
+			}
+
+			if (currLight >= getMaxStaticLightDistance())
+			{
+				currLight = getMaxStaticLightDistance() - 1;
+			}
+			addLight(gs, tile->getPosition(), currLight, LL_FIRE);
 		}
+	);
+}
 
-		addLight(tile->getPosition(), currLight, LL_STATIC);
-	}
+/**
+  * Recalculates lighting for the terrain: objects,items.
+  */
+void TileEngine::calculateTerrainItems(GraphSubset gs)
+{
+	// add lighting of terrain
+	iterateTiles(
+		_save,
+		mapAreaExpand(gs, getMaxDynamicLightDistance() - 1),
+		[&](Tile* tile)
+		{
+			auto currLight = 0;
 
+			for (BattleItem *it : *tile->getInventory())
+			{
+				if (it->getGlow())
+				{
+					currLight = std::max(currLight, it->getGlowRange());
+				}
+			}
+
+			addLight(gs, tile->getPosition(), currLight, LL_ITEMS);
+		}
+	);
 }
 
 /**
   * Recalculates lighting for the units.
   */
-void TileEngine::calculateUnitLighting()
+void TileEngine::calculateUnitLighting(GraphSubset gs)
 {
 	const int fireLightPower = 15; // amount of light a fire generates
-
-	// reset all light to 0 first
-	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
-	{
-		_save->getTile(i)->resetLight(LL_UNITS);
-	}
 
 	for (BattleUnit *unit : *_save->getUnits())
 	{
@@ -332,143 +373,318 @@ void TileEngine::calculateUnitLighting()
 		{
 			currLight = std::max(currLight, fireLightPower);
 		}
-		addLight(unit->getPosition(), currLight, LL_UNITS);
+
+		addLight(gs, unit->getPosition(), currLight, LL_UNITS);
 	}
+}
+
+void TileEngine::calculateLighting(LightLayers layer, Position position, int eventRadius, bool terrianChanged)
+{
+	auto gsDynamic = GraphSubset{ _save->getMapSizeX(), _save->getMapSizeY() };
+	auto gsStatic = gsDynamic;
+
+	if (position != invalid)
+	{
+		gsDynamic = mapArea(position, eventRadius + getMaxDynamicLightDistance());
+		gsStatic = mapArea(position, eventRadius + getMaxStaticLightDistance());
+	}
+
+	if (terrianChanged)
+	{
+		iterateTiles(
+			_save,
+			mapArea(position, position != invalid ? eventRadius + 1 : 1000),
+			[&](Tile* tile)
+			{
+				const auto currPos = tile->getPosition();
+				const auto index = _save->getTileIndex(currPos);
+				const auto mapData = tile->getMapData(O_OBJECT);
+				auto &cache = _blockVisibility[index];
+
+				cache = {};
+				cache.height = -tile->getTerrainLevel();
+				if (mapData)
+				{
+					if (mapData->getTUCost(MT_WALK) == 255)
+					{
+						cache.height = 24;
+					}
+				}
+				cache.smoke = tile->getSmoke();
+				cache.fire = tile->getFire();
+				cache.blockUp = (verticalBlockage(tile, _save->getTile(currPos + Position{ 0, 0, 1 }), DT_NONE) > 127);
+				cache.blockDown = (verticalBlockage(tile, _save->getTile(currPos + Position{ 0, 0, -1 }), DT_NONE) > 127);
+				for (int dir = 0; dir < 8; ++dir)
+				{
+					Position pos = {};
+					Pathfinding::directionToVector(dir, &pos);
+					auto tileNext = _save->getTile(currPos + pos);
+					auto result = 0;
+
+					result = horizontalBlockage(tile, tileNext, DT_NONE, true);
+					if (result == -1)
+					{
+						cache.bigWall |= (1 << dir);
+					}
+
+					result = horizontalBlockage(tile, tileNext, DT_NONE);
+					if (result > 127 || result == -1)
+					{
+						cache.blockDir |= (1 << dir);
+					}
+
+					tileNext = _save->getTile(currPos + pos + Position{ 0, 0, 1 });
+					if (verticalBlockage(tile, tileNext, DT_NONE) > 127)
+					{
+						cache.blockDirUp |= (1 << dir);
+					}
+
+					tileNext = _save->getTile(currPos + pos + Position{ 0, 0, -1 });
+					if (verticalBlockage(tile, tileNext, DT_NONE) > 127)
+					{
+						cache.blockDirDown |= (1 << dir);
+					}
+				}
+			}
+		);
+	}
+
+	if (layer <= LL_FIRE)
+	{
+		iterateTiles(
+			_save,
+			gsStatic,
+			[&](Tile* tile)
+			{
+				tile->resetLightMulti(layer);
+			}
+		);
+	}
+
+	iterateTiles(
+		_save,
+		gsDynamic,
+		[&](Tile* tile)
+		{
+			tile->resetLightMulti(std::max(layer, LL_ITEMS));
+		}
+	);
+
+	if (layer <= LL_AMBIENT) calculateSunShading(gsStatic);
+	if (layer <= LL_FIRE) calculateTerrainBackground(gsStatic);
+	if (layer <= LL_ITEMS) calculateTerrainItems(gsDynamic);
+	if (layer <= LL_UNITS) calculateUnitLighting(gsDynamic);
 }
 
 /**
  * Adds circular light pattern starting from center and losing power with distance travelled.
  * @param center Center.
  * @param power Power.
- * @param layer Light is separated in 3 layers: Ambient, Static and Dynamic.
+ * @param layer Light is separated in 4 layers: Ambient, Tiles, Items, Units.
  */
-void TileEngine::addLight(const Position &center, int power, LightLayers layer)
+void TileEngine::addLight(GraphSubset gs, const Position &center, int power, LightLayers layer)
 {
-	power -= 1;
-	for (int x = -power; x <= power; ++x)
+	if (!power)
 	{
-		for (int y = -power; y <= power; ++y)
+		return;
+	}
+	const auto fire = layer == LL_FIRE;
+	const auto ground = layer == LL_ITEMS || fire;
+	const auto tileHeight = _save->getTile(center)->getTerrainLevel();
+	const auto divide = (fire ? 8 : 4);
+	const auto accuracy = Position(16, 16, 24) / divide;
+	const auto offsetCenter = (accuracy / 2 + Position(-1, -1, (ground ? 0 : accuracy.z/4) - tileHeight * accuracy.z / 24));
+	const auto offsetTarget = (accuracy / 2 + Position(-1, -1, 0));
+
+	iterateTiles(
+		_save,
+		GraphSubset::intersection(gs, mapArea(center, power - 1)),
+		[&](Tile* tile)
 		{
-			for (int z = 0; z < _save->getMapSizeZ(); z++)
+			const auto target = tile->getPosition();
+			const auto diff = target - center;
+			const auto distance = (int)Round(sqrt(distanceSq(target, center, true)));
+			const auto targetLight = tile->getLightMulti(layer);
+			auto currLight = power - distance;
+
+			if (currLight < targetLight)
 			{
-				int diff = z - center.z;
-				int distance = (int)Round(sqrt(float(x*x + y*y + diff*diff)));
-				Tile *tile = nullptr;
+				return;
+			}
 
-				Position target = Position(center.x + x, center.y + y, z);
-				tile = _save->getTile(target);
-				if (tile)
+			Position startVoxel = (center * accuracy) + offsetCenter;
+			Position endVoxel = (target * accuracy) + offsetTarget + Position(0, 0, std::max(0, (_blockVisibility[_save->getTileIndex(target)].height - 1) / (2 * divide)));
+			Position offsetA{ 1, 0, 0 };
+			Position offsetB{ -1, 1, 0 };
+			if ((diff.x > 0) ^ (diff.y > 0))
+			{
+				offsetA = { 1, 1, 0 };
+				offsetB = { -1, -1, 0 };
+			}
+
+			startVoxel += offsetA;
+			endVoxel += offsetA;
+			Position lastTileA = center;
+			Position lastTileB = center;
+			auto stepsA = 0;
+			auto stepsB = 0;
+			auto lightA = currLight;
+			auto lightB = currLight;
+			auto calculateBlock = [&](Position point, Position &lastPoint, int &light, int &steps)
+			{
+				auto height = (point.z % accuracy.z) * divide;
+				point = point / accuracy;
+				if (light <= 0)
 				{
-					auto currLight = power - distance + 1;
-					auto trackLine = [&](int light, Position vexelFrom, Position vexelTo)
-					{
-						int steps = 0;
-						bool bigWall = false;
-						Position lastPoint = vexelFrom.toTile();
-						bool hit = calculateLineHitHelper(vexelFrom, vexelTo,
-							[&](Position point)
-							{
-								point = point.toTile();
-								if (point == lastPoint)
-								{
-									return false;
-								}
-								auto lastTile = _save->getTile(lastPoint);
-								auto currTile = _save->getTile(point);
-								auto temp_res = verticalBlockage(lastTile, currTile, DT_NONE);
-								auto result = horizontalBlockage(lastTile, currTile, DT_NONE, steps<2);
-								steps++;
-								if (result == -1)
-								{
-									if (temp_res > 127)
-									{
-										result = 0;
-									}
-									else
-									{
-										bigWall = (point == target);
-										return true; // We hit a big wall
-									}
-								}
-								result += temp_res;
-								if (result > 127)
-								{
-									return true;
-								}
-								if (currTile->getMapData(O_OBJECT))
-								{
-									light -= 2;
-								}
-								lastPoint = point;
-								return false;
-							},
-							[&](Position point)
-							{
-								return false;
-							}
-						);
-						return !hit || bigWall ? light : 0;
-					};
-
-					if (currLight < tile->getLight(layer))
-					{
-						continue;
-					}
-
-					Position offsetA{ 1, 0, 0 };
-					Position offsetB{ 0, 1, 0 };
-					if ((x > 0) ^ (y > 0))
-					{
-						offsetA = { 0, 0, 0 };
-						offsetB = { 1, 1, 0 };
-					}
-					auto lightA = trackLine(currLight, center.toVexel() + Position(7, 7, 20) + offsetA, target.toVexel() + Position(7, 7, 12) + offsetA);
-					auto lightB = trackLine(currLight, center.toVexel() + Position(7, 7, 20) + offsetB, target.toVexel() + Position(7, 7, 12) + offsetB);
-
-					tile->addLight((lightA + lightB) / 2, layer);
+					return true;
 				}
+				if (point == lastPoint)
+				{
+					return false;
+				}
+				auto dir = -1;
+				auto diff = point - lastPoint;
+				auto result = false;
+				auto& cache = _blockVisibility[_save->getTileIndex(lastPoint)];
+				Pathfinding::vectorToDirection(diff, dir);
+				if (diff.z > 0)
+				{
+					if (dir != -1)
+					{
+						result = cache.blockDirUp & (1 << dir);
+					}
+					else
+					{
+						result = cache.blockUp;
+					}
+				}
+				else if (diff.z == 0)
+				{
+					result = cache.blockDir & (1 << dir);
+
+					if (result && cache.bigWall & (1 << dir))
+					{
+						if (point == target)
+						{
+							result = false;
+						}
+					}
+				}
+				else if (diff.z < 0)
+				{
+					if (dir != -1)
+					{
+						result = cache.blockDirDown & (1 << dir);
+					}
+					else
+					{
+						result = cache.blockDown;
+					}
+				}
+				if (steps > 1)
+				{
+					if (height < cache.height)
+					{
+						light -= 2;
+					}
+					if (cache.smoke)
+					{
+						light -= 1;
+					}
+					if (fire && cache.fire && light <= 15)
+					{
+						result = false;
+					}
+				}
+				++steps;
+				lastPoint = point;
+				if (result || light < targetLight)
+				{
+					light = 0;
+					return true;
+				}
+				return false;
+			};
+			calculateLineHitHelper(startVoxel, endVoxel,
+				[&](Position voxel)
+				{
+					auto resultA = calculateBlock(voxel, lastTileA, lightA, stepsA);
+					auto resultB = calculateBlock(voxel + offsetB, lastTileB, lightB, stepsB);
+					return resultA && resultB;
+				},
+				[&](Position voxel)
+				{
+					return false;
+				}
+			);
+
+			currLight = (lightA + lightB) / 2;
+			if (currLight > targetLight)
+			{
+				tile->addLight(currLight, layer);
 			}
 		}
+	);
+}
+
+/**
+ * Setups the internal event visibility search space reduction system. This system defines a narrow circle sector around
+ * a given event as viewed from an external observer. This allows narrowing down which tiles/units may need to be updated for
+ * the observer based on the event affecting visibility at the event itself and beyond it in its direction.
+ * Imagines a circle around the event of eventRadius, calculates its tangents, and places points at the circle's tangent
+ * intersections for later bounds checking.
+ * @param observerPos Position of the observer of this event.
+ * @param eventPos The centre of the event. Ie a moving unit's position, centre of explosion, a single destroyed tile, etc.
+ * @param eventRadius Radius big enough to fully envelop the event. Ie for a single tile change, set radius to 1.
+ * @return true if area is unlimited.
+ *
+*/
+bool TileEngine::setupEventVisibilitySector(const Position &observerPos, const Position &eventPos, const int &eventRadius)
+{
+	if (eventRadius == 0 || eventPos == Position(-1, -1, -1) || distanceSq(observerPos, eventPos, false) <= eventRadius * eventRadius)
+	{
+		_eventVisibilityObserverPos = Position{ -1, -1, -1 };
+		return true;
+	}
+	else
+	{
+		//Use search space reduction by updating within a narrow circle sector covering the event and any
+		//units beyond it (they can now be hidden or revealed based on what occured at the event position)
+		//So, with a circle at eventPos of radius eventRadius, define its tangent points as viewed from this unit.
+		Position posDiff = eventPos - observerPos;
+		float a = asinf(eventRadius / sqrtf(posDiff.x * posDiff.x + posDiff.y * posDiff.y));
+		float b = atan2f(posDiff.y, posDiff.x);
+		float t1 = b - a;
+		float t2 = b + a;
+		//Define the points where the lines tangent to the circle intersect it. Note: resulting positions are relative to observer, not in direct tile space.
+		_eventVisibilitySectorL.x = roundf(eventPos.x + eventRadius * sinf(t1)) - observerPos.x;
+		_eventVisibilitySectorL.y = roundf(eventPos.y - eventRadius * cosf(t1)) - observerPos.y;
+		_eventVisibilitySectorR.x = roundf(eventPos.x - eventRadius * sinf(t2)) - observerPos.x;
+		_eventVisibilitySectorR.y = roundf(eventPos.y + eventRadius * cosf(t2)) - observerPos.y;
+		_eventVisibilityObserverPos = observerPos;
+		return false;
 	}
 }
 
 /**
-* Setups the internal event visibility search space reduction system. This system defines a narrow circle sector around
-* a given event as viewed from an external observer. This allows narrowing down which tiles/units may need to be updated for
-* the observer based on the event affecting visibility at the event itself and beyond it in its direction.
-* Imagines a circle around the event of eventRadius, calculates its tangents, and places points at the circle's tangent
-* intersections for later bounds checking.
-* @param observerPos Position of the observer of this event.
-* @param eventPos The centre of the event. Ie a moving unit's position, centre of explosion, a single destroyed tile, etc.
-* @param eventRadius Radius big enough to fully envelop the event. Ie for a single tile change, set radius to 1.
-*/
-void TileEngine::setupEventVisibilitySector(const Position &observerPos, const Position &eventPos, const int &eventRadius)
-{
-	Position posDiff = eventPos - observerPos;
-	float a = asinf(eventRadius / sqrtf(posDiff.x * posDiff.x + posDiff.y * posDiff.y));
-	float b = atan2f(posDiff.y, posDiff.x);
-	float t1 = b - a;
-	float t2 = b + a;
-	//Define the points where the lines tangent to the circle intersect it. Note: resulting positions are relative to observer, not in direct tile space.
-	_eventVisibilitySectorL.x = roundf(eventPos.x + eventRadius * sinf(t1)) - observerPos.x;
-	_eventVisibilitySectorL.y = roundf(eventPos.y - eventRadius * cosf(t1)) - observerPos.y;
-	_eventVisibilitySectorR.x = roundf(eventPos.x - eventRadius * sinf(t2)) - observerPos.x;
-	_eventVisibilitySectorR.y = roundf(eventPos.y + eventRadius * cosf(t2)) - observerPos.y;
-	_eventVisibilityObserverPos = observerPos;
-}
-
-/**
-* Checks whether toCheck is within a previously setup eventVisibilitySector. See setupEventVisibilitySector(...).
-* May be used to rapidly reduce the searchspace when updating unit and tile visibility.
-* @param toCheck The position to check.
-* @return true if within the circle sector.
-*/
+ * Checks whether toCheck is within a previously setup eventVisibilitySector. See setupEventVisibilitySector(...).
+ * May be used to rapidly reduce the searchspace when updating unit and tile visibility.
+ * @param toCheck The position to check.
+ * @return true if within the circle sector.
+ */
 inline bool TileEngine::inEventVisibilitySector(const Position &toCheck) const
 {
-	Position posDiff = toCheck - _eventVisibilityObserverPos;
-	//Is toCheck within the arc as defined by the two tangent points?
-	return (!(-_eventVisibilitySectorL.x * posDiff.y + _eventVisibilitySectorL.y * posDiff.x > 0) &&
-		(-_eventVisibilitySectorR.x * posDiff.y + _eventVisibilitySectorR.y * posDiff.x > 0));
+	if (_eventVisibilityObserverPos != Position{ -1, -1, -1 })
+	{
+		Position posDiff = toCheck - _eventVisibilityObserverPos;
+		//Is toCheck within the arc as defined by the two tangent points?
+		return (!(-_eventVisibilitySectorL.x * posDiff.y + _eventVisibilitySectorL.y * posDiff.x > 0) &&
+			(-_eventVisibilitySectorR.x * posDiff.y + _eventVisibilitySectorR.y * posDiff.x > 0));
+	}
+	else
+	{
+		return true;
+	}
 }
 
 /**
@@ -482,7 +698,6 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 {
 	size_t oldNumVisibleUnits = unit->getUnitsSpottedThisTurn().size();
 	bool useTurretDirection = false;
-	bool selfWithinEventRadius = false;
 	if (Options::strafe && (unit->getTurretType() > -1)) {
 		useTurretDirection = true;
 	}
@@ -491,18 +706,10 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 		return false;
 
 	Position posSelf = unit->getPosition();
-	if (eventRadius == 0 || eventPos == Position(-1, -1, -1) || distanceSq(posSelf, eventPos, false) <= eventRadius * eventRadius)
+	if (setupEventVisibilitySector(posSelf, eventPos, eventRadius))
 	{
 		//Asked to do a full check. Or the event is overlapping our tile. Better check everything.
-		selfWithinEventRadius = true;
 		unit->clearVisibleUnits();
-	}
-	else
-	{
-		//Use search space reduction by updating within a narrow circle sector covering the event and any
-		//units beyond it (they can now be hidden or revealed based on what occured at the event position)
-		//So, with a circle at eventPos of radius eventRadius, define its tangent points as viewed from this unit:
-		setupEventVisibilitySector(posSelf, eventPos, eventRadius);
 	}
 
 	//Loop through all units specified and figure out which ones we can actually see.
@@ -518,7 +725,7 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 				{
 					Position posToCheck = posOther + Position(x, y, 0);
 					//If we can now find any unit within the arc defined by the event tangent points, its visibility may have been affected by the event.
-					if (selfWithinEventRadius || inEventVisibilitySector(posToCheck))
+					if (inEventVisibilitySector(posToCheck))
 					{
 						if (!unit->checkViewSector(posToCheck, useTurretDirection))
 						{
@@ -599,17 +806,11 @@ void TileEngine::calculateTilesInFOV(BattleUnit *unit, const Position eventPos, 
 		return;
 	}
 	Position posSelf = unit->getPosition();
-	if (eventPos == Position(-1,-1,-1) || eventPos == unit->getPosition() || distanceSq(posSelf, eventPos, false) <= eventRadius * eventRadius)
+	if (setupEventVisibilitySector(posSelf, eventPos, eventRadius))
 	{
 		//Asked to do a full check. Or unit within event. Should update all.
 		unit->clearVisibleTiles();
 		skipNarrowArcTest = true;
-	}
-	else {
-		//Use search space reduction by updating within a narrow circle sector covering the event and any
-		//tiles beyond it (changes in terrain can reveal tiles beyond the event as well)
-		//So, with a circle at eventPos of radius eventRadius, define its tangent points as viewed from this unit:
-		setupEventVisibilitySector(posSelf, eventPos, eventRadius);
 	}
 
 	//Only recalculate bresenham lines to tiles that are at the event or further away.
@@ -652,7 +853,7 @@ void TileEngine::calculateTilesInFOV(BattleUnit *unit, const Position eventPos, 
 				posTest.x = posSelf.x + signX[direction] * (swap ? y : x);
 				posTest.y = posSelf.y + signY[direction] * (swap ? x : y);
 				//Only continue if the column of tiles at (x,y) is within the narrow arc of interest (if enabled)
-				if (skipNarrowArcTest || inEventVisibilitySector(posTest))
+				if (inEventVisibilitySector(posTest))
 				{
 					for (int z = 0; z < _save->getMapSizeZ(); z++)
 					{
@@ -1713,7 +1914,8 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 {
 	bool terrainChanged = false; //did the hit destroy a tile thereby changing line of sight?
 	int effectGenerated = 0; //did the hit produce smoke (1), fire/light (2) or disabled a unit (3) ?
-	Tile *tile = _save->getTile(center.toTile());
+	Position tilePos = center.toTile();
+	Tile *tile = _save->getTile(tilePos);
 	if (!tile || power <= 0)
 	{
 		return 0;
@@ -1764,7 +1966,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		if (!bu)
 		{
 			// it's possible we have a unit below the actual tile, when he stands on a stairs and sticks his head out to the next tile
-			Tile *below = _save->getTile(center.toTile() - Position(0, 0, 1));
+			Tile *below = _save->getTile(tilePos - Position(0, 0, 1));
 			if (below)
 			{
 				BattleUnit *buBelow = below->getUnit();
@@ -1793,24 +1995,19 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 	{
 		applyGravity(tile);
 	}
-	if (effectGenerated == 2) //fire, or lighting otherwise changed
-	{
-		calculateTerrainLighting(); // fires could have been started
-	}
 	if (terrainChanged) //part of tile destroyed
 	{
-		if (part == V_FLOOR && _save->getTile(center.toTile() - Position(0, 0, 1))) {
-			calculateSunShading(center.toTile()); // roof destroyed, update sunlight in this tile column
+		auto layer = LL_ITEMS;
+		if (part == V_FLOOR && _save->getTile(tilePos - Position(0, 0, 1))) {
+			layer = LL_AMBIENT; // roof destroyed, update sunlight in this tile column
 		}
-		calculateTerrainLighting();
-		calculateUnitLighting();
-		calculateFOV(center.toTile(), 1, true, true); //append any new units or tiles revealed by the terrain change
+		calculateLighting(layer, tilePos, 1, true);
+		calculateFOV(tilePos, 1, true, true); //append any new units or tiles revealed by the terrain change
 	}
 	else if (effectGenerated)
 	{
-		calculateTerrainLighting();
-		calculateUnitLighting();
-		calculateFOV(center.toTile(), 1, false); //skip updating of tiles
+		calculateLighting(LL_FIRE, tilePos, 1);
+		calculateFOV(tilePos, 1, false); //skip updating of tiles
 	}
 	//Note: If bu was knocked out this will have no effect on unit visibility quite yet, as it is not marked as out
 	//and will continue to block visibility at this point in time.
@@ -1980,10 +2177,8 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 				applyGravity(j);
 		}
 	}
-	//TODO: Can update shading and lighting on only tiles affected
-	calculateSunShading(); // roofs could have been destroyed
-	calculateTerrainLighting(); // fires could have been started
-	calculateFOV(center / Position(16, 16, 24), maxRadius + 1, true, true);
+	calculateLighting(LL_AMBIENT, center.toTile(), maxRadius + 1, true); // roofs could have been destroyed and fires could have been started
+	calculateFOV(center.toTile(), maxRadius + 1, true, true);
 }
 
 /**
@@ -2123,44 +2318,42 @@ int TileEngine::verticalBlockage(Tile *startTile, Tile *endTile, ItemDamageType 
 
 	// safety check
 	if (startTile == 0 || endTile == 0) return 0;
-	int direction = endTile->getPosition().z - startTile->getPosition().z;
+
+	auto startPos = startTile->getPosition();
+	auto endPos = endTile->getPosition();
+	int direction = endPos.z - startPos.z;
 
 	if (direction == 0 ) return 0;
 
-	int x = startTile->getPosition().x;
-	int y = startTile->getPosition().y;
-	int z = startTile->getPosition().z;
-
+	Tile *tmpTile = nullptr;
 	if (direction < 0) // down
 	{
-		block += blockage(_save->getTile(Position(x, y, z)), O_FLOOR, type);
+		tmpTile = startTile;
+		block += blockage(tmpTile, O_FLOOR, type);
 		if (!skipObject)
-			block += blockage(_save->getTile(Position(x, y, z)), O_OBJECT, type, Pathfinding::DIR_DOWN);
-		if (x != endTile->getPosition().x || y != endTile->getPosition().y)
+			block += blockage(tmpTile, O_OBJECT, type, Pathfinding::DIR_DOWN);
+		if (startPos.x != endPos.x || startPos.y != endPos.y)
 		{
-			x = endTile->getPosition().x;
-			y = endTile->getPosition().y;
-			int z = startTile->getPosition().z;
-			block += horizontalBlockage(startTile, _save->getTile(Position(x, y, z)), type, skipObject);
-			block += blockage(_save->getTile(Position(x, y, z)), O_FLOOR, type);
+			tmpTile = _save->getTile(Position(endPos.x, endPos.y, startPos.z));
+			block += horizontalBlockage(startTile, tmpTile, type, skipObject);
+			block += blockage(tmpTile, O_FLOOR, type);
 			if (!skipObject)
-				block += blockage(_save->getTile(Position(x, y, z)), O_OBJECT, type, Pathfinding::DIR_DOWN);
+				block += blockage(tmpTile, O_OBJECT, type, Pathfinding::DIR_DOWN);
 		}
 	}
 	else if (direction > 0) // up
 	{
-		block += blockage(_save->getTile(Position(x, y, z+1)), O_FLOOR, type);
+		tmpTile = _save->getTile(Position(startPos.x, startPos.y, startPos.z + 1));
+		block += blockage(tmpTile, O_FLOOR, type);
 		if (!skipObject)
-			block += blockage(_save->getTile(Position(x, y, z+1)), O_OBJECT, type, Pathfinding::DIR_UP);
-		if (x != endTile->getPosition().x || y != endTile->getPosition().y)
+			block += blockage(tmpTile, O_OBJECT, type, Pathfinding::DIR_UP);
+		if (startPos.x != endPos.x || startPos.y != endPos.y)
 		{
-			x = endTile->getPosition().x;
-			y = endTile->getPosition().y;
-			int z = startTile->getPosition().z+1;
-			block += horizontalBlockage(startTile, _save->getTile(Position(x, y, z)), type, skipObject);
-			block += blockage(_save->getTile(Position(x, y, z)), O_FLOOR, type);
+			tmpTile = _save->getTile(Position(endPos.x, endPos.y, startPos.z + 1));
+			block += horizontalBlockage(startTile, tmpTile, type, skipObject);
+			block += blockage(tmpTile, O_FLOOR, type);
 			if (!skipObject)
-				block += blockage(_save->getTile(Position(x, y, z)), O_OBJECT, type, Pathfinding::DIR_UP);
+				block += blockage(tmpTile, O_OBJECT, type, Pathfinding::DIR_UP);
 		}
 	}
 
@@ -2176,18 +2369,21 @@ int TileEngine::verticalBlockage(Tile *startTile, Tile *endTile, ItemDamageType 
  */
 int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageType type, bool skipObject)
 {
-	static const Position oneTileNorth = Position(0, -1, 0);
-	static const Position oneTileEast = Position(1, 0, 0);
-	static const Position oneTileSouth = Position(0, 1, 0);
-	static const Position oneTileWest = Position(-1, 0, 0);
+	const Position oneTileNorth = Position(0, -1, 0);
+	const Position oneTileEast = Position(1, 0, 0);
+	const Position oneTileSouth = Position(0, 1, 0);
+	const Position oneTileWest = Position(-1, 0, 0);
 
 	// safety check
 	if (startTile == 0 || endTile == 0) return 0;
-	if (startTile->getPosition().z != endTile->getPosition().z) return 0;
-	Tile *tmpTile;
+
+	auto startPos = startTile->getPosition();
+	auto endPos = endTile->getPosition();
+	if (startPos.z != endPos.z) return 0;
+	Tile *tmpTile = nullptr;
 
 	int direction;
-	Pathfinding::vectorToDirection(endTile->getPosition() - startTile->getPosition(), direction);
+	Pathfinding::vectorToDirection(endPos - startPos, direction);
 	if (direction == -1) return 0;
 	int block = 0;
 
@@ -2200,51 +2396,58 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 		if (type == DT_NONE) //this is two-way diagonal visibility check, used in original game
 		{
 			block = blockage(startTile, O_NORTHWALL, type) + blockage(endTile, O_WESTWALL, type); //up+right
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileNorth);
+
+			tmpTile = _save->getTile(startPos + oneTileNorth);
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNESW)
 				block += blockage(tmpTile, O_OBJECT, type, 3);
+
 			if (block == 0) break; //this way is opened
-			block = blockage(_save->getTile(startTile->getPosition() + oneTileEast), O_NORTHWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileEast), O_WESTWALL, type); //right+up
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileEast);
+
+			tmpTile = _save->getTile(startPos + oneTileEast);
+			block = blockage(tmpTile, O_NORTHWALL, type)
+				+ blockage(tmpTile, O_WESTWALL, type); //right+up
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNESW)
 				block += blockage(tmpTile, O_OBJECT, type, 7);
 		}
 		else
 		{
-			block = (blockage(startTile,O_NORTHWALL, type) + blockage(endTile,O_WESTWALL, type))/2
-				+ (blockage(_save->getTile(startTile->getPosition() + oneTileEast),O_WESTWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileEast),O_NORTHWALL, type))/2;
+			tmpTile = _save->getTile(startPos + oneTileEast);
+			block = (blockage(startTile, O_NORTHWALL, type) + blockage(endTile,O_WESTWALL, type))/2
+				+ (blockage(tmpTile, O_WESTWALL, type)
+				+ blockage(tmpTile, O_NORTHWALL, type))/2;
 
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),O_OBJECT, type, 4)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileEast),O_OBJECT, type, 6))/2;
+			tmpTile = _save->getTile(startPos + oneTileNorth);
+			block += (blockage(tmpTile, O_OBJECT, type, 4)
+				+ blockage(tmpTile, O_OBJECT, type, 6))/2;
 		}
 		break;
 	case 2: // east
-		block = blockage(endTile,O_WESTWALL, type);
+		block = blockage(endTile, O_WESTWALL, type);
 		break;
 	case 3: // south east
 		if (type == DT_NONE)
 		{
-			block = blockage(_save->getTile(startTile->getPosition() + oneTileSouth), O_NORTHWALL, type)
+			tmpTile = _save->getTile(startPos + oneTileSouth);
+			block = blockage(tmpTile, O_NORTHWALL, type)
 				+ blockage(endTile, O_WESTWALL, type); //down+right
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileSouth);
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNWSE)
 				block += blockage(tmpTile, O_OBJECT, type, 1);
+
 			if (block == 0) break; //this way is opened
-			block = blockage(_save->getTile(startTile->getPosition() + oneTileEast), O_WESTWALL, type)
+
+			tmpTile = _save->getTile(startPos + oneTileEast);
+			block = blockage(tmpTile, O_WESTWALL, type)
 				+ blockage(endTile, O_NORTHWALL, type); //right+down
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileEast);
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNWSE)
 				block += blockage(tmpTile, O_OBJECT, type, 5);
 		}
 		else
 		{
-			block = (blockage(endTile,O_WESTWALL, type) + blockage(endTile,O_NORTHWALL, type))/2
-				+ (blockage(_save->getTile(startTile->getPosition() + oneTileEast),O_WESTWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileSouth),O_NORTHWALL, type))/2;
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),O_OBJECT, type, 0)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileEast),O_OBJECT, type, 6))/2;
+			block = (blockage(endTile, O_WESTWALL, type) + blockage(endTile, O_NORTHWALL, type))/2
+				+ (blockage(_save->getTile(startPos + oneTileEast), O_WESTWALL, type)
+				+ blockage(_save->getTile(startPos + oneTileSouth), O_NORTHWALL, type))/2;
+			block += (blockage(_save->getTile(startPos + oneTileSouth), O_OBJECT, type, 0)
+				+ blockage(_save->getTile(startPos + oneTileEast), O_OBJECT, type, 6))/2;
 		}
 		break;
 	case 4: // south
@@ -2253,24 +2456,26 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 	case 5: // south west
 		if (type == DT_NONE)
 		{
-			block = blockage(_save->getTile(startTile->getPosition() + oneTileSouth), O_NORTHWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileSouth), O_WESTWALL, type); //down+left
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileSouth);
+			tmpTile = _save->getTile(startPos + oneTileSouth);
+			block = blockage(tmpTile, O_NORTHWALL, type)
+				+ blockage(tmpTile, O_WESTWALL, type); //down+left
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNESW)
 				block += blockage(tmpTile, O_OBJECT, type, 7);
+
 			if (block == 0) break; //this way is opened
+
 			block = blockage(startTile, O_WESTWALL, type) + blockage(endTile, O_NORTHWALL, type); //left+down
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileWest);
+			tmpTile = _save->getTile(startPos + oneTileWest);
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNESW)
 				block += blockage(tmpTile, O_OBJECT, type, 3);
 		}
 		else
 		{
 			block = (blockage(endTile,O_NORTHWALL, type) + blockage(startTile,O_WESTWALL, type))/2
-				+ (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),O_WESTWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileSouth),O_NORTHWALL, type))/2;
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),O_OBJECT, type, 0)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileWest),O_OBJECT, type, 2))/2;
+				+ (blockage(_save->getTile(startPos + oneTileSouth),O_WESTWALL, type)
+				+ blockage(_save->getTile(startPos + oneTileSouth),O_NORTHWALL, type))/2;
+			block += (blockage(_save->getTile(startPos + oneTileSouth),O_OBJECT, type, 0)
+				+ blockage(_save->getTile(startPos + oneTileWest),O_OBJECT, type, 2))/2;
 		}
 		break;
 	case 6: // west
@@ -2280,25 +2485,27 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 
 		if (type == DT_NONE)
 		{
+			tmpTile = _save->getTile(startPos + oneTileNorth);
 			block = blockage(startTile, O_NORTHWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileNorth), O_WESTWALL, type); //up+left
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileNorth);
+				+ blockage(tmpTile, O_WESTWALL, type); //up+left
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNWSE)
 				block += blockage(tmpTile, O_OBJECT, type, 5);
+
 			if (block == 0) break; //this way is opened
+
+			tmpTile = _save->getTile(startPos + oneTileWest);
 			block = blockage(startTile, O_WESTWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileWest), O_NORTHWALL, type); //left+up
-			tmpTile = _save->getTile(startTile->getPosition() + oneTileWest);
+				+ blockage(tmpTile, O_NORTHWALL, type); //left+up
 			if (tmpTile && tmpTile->getMapData(O_OBJECT) && tmpTile->getMapData(O_OBJECT)->getBigWall() != Pathfinding::BIGWALLNWSE)
 				block += blockage(tmpTile, O_OBJECT, type, 1);
 		}
 		else
 		{
 			block = (blockage(startTile,O_WESTWALL, type) + blockage(startTile,O_NORTHWALL, type))/2
-				+ (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),O_WESTWALL, type)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileWest),O_NORTHWALL, type))/2;
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),O_OBJECT, type, 4)
-				+ blockage(_save->getTile(startTile->getPosition() + oneTileWest),O_OBJECT, type, 2))/2;
+				+ (blockage(_save->getTile(startPos + oneTileNorth),O_WESTWALL, type)
+				+ blockage(_save->getTile(startPos + oneTileWest),O_NORTHWALL, type))/2;
+			block += (blockage(_save->getTile(startPos + oneTileNorth),O_OBJECT, type, 4)
+				+ blockage(_save->getTile(startPos + oneTileWest),O_OBJECT, type, 2))/2;
 		}
 		break;
 	}
@@ -2345,7 +2552,9 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 	int blockage = 0;
 
 	if (tile == 0) return 0; // probably outside the map here
-	if (tile->getMapData(part))
+
+	MapData *mapData = tile->getMapData(part);
+	if (mapData)
 	{
 		bool check = true;
 		int wall = -1;
@@ -2440,13 +2649,13 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 			}
 		}
 		else if (part == O_FLOOR &&
-					tile->getMapData(part)->getBlock(type) == 0)
+					mapData->getBlock(type) == 0)
 		{
 			if (type != DT_NONE)
 			{
-				blockage += tile->getMapData(part)->getArmor();
+				blockage += mapData->getArmor();
 			}
-			else if (!tile->getMapData(part)->isNoFloor())
+			else if (!mapData->isNoFloor())
 			{
 				return 256;
 			}
@@ -2459,7 +2668,7 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 			{
 				return 256;
 			}
-			blockage += tile->getMapData(part)->getBlock(type);
+			blockage += mapData->getBlock(type);
 		}
 	}
 
@@ -2626,8 +2835,7 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 		{
 			if (unit->spendTimeUnits(TUCost))
 			{
-				calculateTerrainLighting();
-				calculateUnitLighting();
+				calculateLighting(LL_FIRE, doorCentre, doorsOpened, true);
 				// Update FOV through the doorway.
 				calculateFOV(doorCentre, doorsOpened, true, true);
 			}
@@ -3013,7 +3221,7 @@ int TileEngine::voxelCheck(const Position& voxel, BattleUnit *excludeUnit, bool 
 void TileEngine::togglePersonalLighting()
 {
 	_personalLighting = !_personalLighting;
-	calculateUnitLighting();
+	calculateLighting(LL_UNITS);
 	recalculateFOV();
 }
 
@@ -3125,7 +3333,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 				victim->setMurdererId(action->actor->getId());
 			}
 			victim->convertToFaction(action->actor->getFaction());
-			calculateUnitLighting();
+			calculateLighting(LL_UNITS, victim->getPosition());
 			calculateFOV(victim->getPosition()); //happens fairly rarely, so do a full recalc for units in range to handle the potential unit visible cache issues.
 			victim->recoverTimeUnits();
 			victim->allowReselect();

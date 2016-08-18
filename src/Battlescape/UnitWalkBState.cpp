@@ -188,12 +188,12 @@ void UnitWalkBState::think()
 				}
 			}
 
-			// move our personal lighting with us
-			_terrain->calculateUnitLighting();
 			if (_unit->getFaction() != FACTION_PLAYER)
 			{
 				_unit->setVisible(false);
 			}
+			// move our personal lighting with us
+			_terrain->calculateLighting(LL_UNITS, _unit->getPosition(), 2);
 			_terrain->calculateFOV(_unit->getPosition(), 2, false); //update unit visibility for all units which can see last and current position.
 			//tile visibility for this unit is handled later.
 			unitSpotted = (!_falling && !_action.desperate && _parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
@@ -498,7 +498,7 @@ void UnitWalkBState::postPathProcedures()
 		_unit->setTimeUnits(0);
 	}
 
-	_terrain->calculateUnitLighting();
+	_terrain->calculateLighting(LL_UNITS, _unit->getPosition());
 	_terrain->calculateFOV(_unit);
 	if (!_falling)
 		_parent->popState();

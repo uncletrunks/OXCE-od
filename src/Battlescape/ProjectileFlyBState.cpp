@@ -313,7 +313,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			_projectileItem->moveToOwner(0);
 			if (_projectileItem->getGlow())
 			{
-				_parent->getTileEngine()->calculateUnitLighting();
+				_parent->getTileEngine()->calculateLighting(LL_UNITS, _unit->getPosition());
 				_parent->getTileEngine()->calculateFOV(_unit->getPosition(), _projectileItem->getGlowRange(), false);
 			}
 			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
