@@ -42,6 +42,7 @@ class ManageAlienContainmentState : public State
 {
 private:
 	Base *_base;
+	int _prisonType;
 	OptionsOrigin _origin;
 	TextButton *_btnOk, *_btnCancel;
 	Window *_window;
@@ -56,7 +57,7 @@ private:
 	int getQuantity();
 public:
 	/// Creates the ManageAlienContainment state.
-	ManageAlienContainmentState(Base *base, OptionsOrigin origin);
+	ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin);
 	/// Cleans up the ManageAlienContainment state.
 	~ManageAlienContainmentState();
 	/// Runs the timers.

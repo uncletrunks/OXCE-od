@@ -134,6 +134,7 @@ private:
 	int _turretType;
 	int _aiUseDelay, _aiMeleeHitCount;
 	bool _recover, _liveAlien;
+	int _liveAlienPrisonType;
 	int _attraction;
 	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime;
 	bool _arcingShot;
@@ -380,6 +381,8 @@ public:
 	int getAIMeleeHitCount() const;
 	/// Checks if this a live alien.
 	bool isAlien() const;
+	/// Returns to which type of prison does the live alien belong.
+	int getPrisonType() const;
 	/// Should we charge a flat rate?
 	RuleItemUseCost getFlatUse() const;
 	/// Should we charge a flat rate of costMelee?

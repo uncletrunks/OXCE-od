@@ -89,6 +89,8 @@ public:
 	/// Get the localized text.
 	const LocalizedText &tr(const std::string &id) const;
 	/// Get the localized text.
+	const LocalizedText &trAlt(const std::string &id, int alt) const;
+	/// Get the localized text.
 	LocalizedText tr(const std::string &id, unsigned n) const;
 	/// redraw all the text-type surfaces.
 	void redrawText();

@@ -30,9 +30,8 @@ namespace OpenXcom
 
 /**
  * Initializes all the elements in the No Containment screen.
- * @param game Pointer to the core game.
  */
-NoContainmentState::NoContainmentState()
+NoContainmentState::NoContainmentState(int prisonType) : _prisonType(prisonType)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -56,7 +55,7 @@ NoContainmentState::NoContainmentState()
 	_btnOk->onKeyboardPress((ActionHandler)&NoContainmentState::btnOkClick, Options::keyOk);
 	_btnOk->onKeyboardPress((ActionHandler)&NoContainmentState::btnOkClick, Options::keyCancel);
 
-	_txtTitle->setText(tr("STR_ALIEN_DIES_NO_ALIEN_CONTAINMENT_FACILITY"));
+	_txtTitle->setText(trAlt("STR_ALIEN_DIES_NO_ALIEN_CONTAINMENT_FACILITY", _prisonType));
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
 	_txtTitle->setWordWrap(true);

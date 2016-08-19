@@ -80,7 +80,7 @@ namespace OpenXcom
  * Initializes all the elements in the Debriefing screen.
  * @param game Pointer to the core game.
  */
-DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _noContainment(false), _manageContainment(false), _destroyBase(false), _pageNumber(0), _isBaseDefense(false), _showSellButton(true)
+DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _destroyBase(false), _pageNumber(0), _isBaseDefense(false), _showSellButton(true)
 {
 	_missionStatistics = new MissionStatistics();
 
@@ -814,19 +814,32 @@ void DebriefingState::btnOkClick(Action *)
 				_game->pushState(new CannotReequipState(_missingItems));
 			}
 
-			// refresh (we may have sold some prisoners in the meantime)
-			_manageContainment = _base->getAvailableContainment() - (_base->getUsedContainment() * _limitsEnforced) < 0;
+			// refresh! (we may have sold some prisoners in the meantime; directly from Debriefing)
+			for (std::map<int, int>::iterator i = _containmentStateInfo.begin(); i != _containmentStateInfo.end(); ++i)
+			{
+				if (i->second == 2)
+				{
+					if (_base->getAvailableContainment(i->first) - (_base->getUsedContainment(i->first) * _limitsEnforced) >= 0)
+					{
+						_containmentStateInfo[i->first] = 0; // 0 = OK
+					}
+				}
+			}
 
-			if (_noContainment)
+			for (std::map<int, int>::const_iterator i = _containmentStateInfo.begin(); i != _containmentStateInfo.end(); ++i)
 			{
-				_game->pushState(new NoContainmentState);
+				if (i->second == 2)
+				{
+					_game->pushState(new ManageAlienContainmentState(_base, i->first, OPT_BATTLESCAPE));
+					_game->pushState(new ErrorMessageState(trAlt("STR_CONTAINMENT_EXCEEDED", i->first).arg(_base->getName()), _palette, _game->getMod()->getInterface("debriefing")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("debriefing")->getElement("errorPalette")->color));
+				}
+				else if (i->second == 1)
+				{
+					_game->pushState(new NoContainmentState(i->first));
+				}
 			}
-			else if (_manageContainment)
-			{
-				_game->pushState(new ManageAlienContainmentState(_base, OPT_BATTLESCAPE));
-				_game->pushState(new ErrorMessageState(tr("STR_CONTAINMENT_EXCEEDED").arg(_base->getName()), _palette, _game->getMod()->getInterface("debriefing")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("debriefing")->getElement("errorPalette")->color));
-			}
-			if (!_manageContainment && Options::storageLimitsEnforced && _base->storesOverfull())
+
+			if (Options::storageLimitsEnforced && _base->storesOverfull())
 			{
 				_game->pushState(new SellState(_base, 0, OPT_BATTLESCAPE));
 				_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()), _palette, _game->getMod()->getInterface("debriefing")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("debriefing")->getElement("errorPalette")->color));
@@ -1903,9 +1916,10 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		return;
 	}
 	std::string type = from->getType();
-	if (base->getAvailableContainment() == 0)
+	RuleItem *ruleLiveAlienItem = _game->getMod()->getItem(type);
+	if (base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) == 0)
 	{
-		_noContainment = true;
+		_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available
 
 		std::string corpseItem = from->getArmor()->getCorpseGeoscape();
 		RuleItem *rule = _game->getMod()->getItem(corpseItem);
@@ -1930,7 +1944,10 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		}
 
 		base->getStorageItems()->addItem(type, 1);
-		_manageContainment = base->getAvailableContainment() - (base->getUsedContainment() * _limitsEnforced) < 0;
+		if (base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) - (base->getUsedContainment(ruleLiveAlienItem->getPrisonType()) * _limitsEnforced) < 0)
+		{
+			_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 2; // 2 = full
+		}
 	}
 }
 

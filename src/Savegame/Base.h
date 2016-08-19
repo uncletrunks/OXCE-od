@@ -195,11 +195,11 @@ public:
 	int getAvailableTraining() const;
 	/// Gets the total amount of Containment Space
 	/// Gets the amount of free Containment space.
-	int getFreeContainment() const;
+	int getFreeContainment(int prisonType) const;
 	/// Gets the total amount of Containment space.
-	int getAvailableContainment() const;
+	int getAvailableContainment(int prisonType) const;
 	/// Gets the total amount of used Containment space.
-	int getUsedContainment() const;
+	int getUsedContainment(int prisonType) const;
 	/// Sets the craft's battlescape status.
 	void setInBattlescape(bool inbattle);
 	/// Gets if the craft is in battlescape.

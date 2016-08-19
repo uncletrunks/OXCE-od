@@ -35,12 +35,14 @@ class Text;
 class NoContainmentState : public State
 {
 private:
+	int _prisonType;
+
 	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle;
 public:
 	/// Creates the No Containment state.
-	NoContainmentState();
+	NoContainmentState(int prisonType);
 	/// Cleans up the No Containment state.
 	~NoContainmentState();
 	/// Handler for clicking the OK button.

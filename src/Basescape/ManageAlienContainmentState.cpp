@@ -51,15 +51,15 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrigin origin) : _base(base), _origin(origin), _sel(0), _aliensSold(0), _total(0)
+ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0)
 {
-	bool overCrowded = Options::storageLimitsEnforced && _base->getFreeContainment() < 0;
+	bool overCrowded = Options::storageLimitsEnforced && _base->getFreeContainment(_prisonType) < 0;
 	std::vector<std::string> researchList;
 	for (std::vector<ResearchProject*>::const_iterator iter = _base->getResearch().begin(); iter != _base->getResearch().end(); ++iter)
 	{
 		const RuleResearch *research = (*iter)->getRules();
 		RuleItem *item = _game->getMod()->getItem(research->getName());
-		if (item && item->isAlien())
+		if (item && item->isAlien() && item->getPrisonType() == _prisonType)
 		{
 			researchList.push_back(research->getName());
 		}
@@ -100,7 +100,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 	// Set up objects
 	_window->setBackground(_game->getMod()->getSurface((origin == OPT_BATTLESCAPE)? "BACK01.SCR" : "BACK05.SCR"));
 
-	_btnOk->setText(tr("STR_REMOVE_SELECTED"));
+	_btnOk->setText(trAlt("STR_REMOVE_SELECTED", _prisonType));
 	_btnOk->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&ManageAlienContainmentState::btnOkClick, Options::keyOk);
 
@@ -116,25 +116,25 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setText(tr("STR_MANAGE_CONTAINMENT"));
+	_txtTitle->setText(trAlt("STR_MANAGE_CONTAINMENT", _prisonType));
 
-	_txtItem->setText(tr("STR_ALIEN"));
+	_txtItem->setText(trAlt("STR_ALIEN", _prisonType));
 
-	_txtLiveAliens->setText(tr("STR_LIVE_ALIENS"));
+	_txtLiveAliens->setText(trAlt("STR_LIVE_ALIENS", _prisonType));
 	_txtLiveAliens->setWordWrap(true);
 	_txtLiveAliens->setVerticalAlign(ALIGN_BOTTOM);
 
-	_txtDeadAliens->setText(tr("STR_DEAD_ALIENS"));
+	_txtDeadAliens->setText(trAlt("STR_DEAD_ALIENS", _prisonType));
 	_txtDeadAliens->setWordWrap(true);
 	_txtDeadAliens->setVerticalAlign(ALIGN_BOTTOM);
 
-	_txtInterrogatedAliens->setText(tr("STR_UNDER_INTERROGATION"));
+	_txtInterrogatedAliens->setText(trAlt("STR_UNDER_INTERROGATION", _prisonType));
 	_txtInterrogatedAliens->setWordWrap(true);
 	_txtInterrogatedAliens->setVerticalAlign(ALIGN_BOTTOM);
 
-	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(_base->getFreeContainment()));
+	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(_base->getFreeContainment(_prisonType)));
 
-	_txtUsed->setText(tr("STR_SPACE_USED").arg( _base->getUsedContainment()));
+	_txtUsed->setText(tr("STR_SPACE_USED").arg( _base->getUsedContainment(_prisonType)));
 
 	if (Options::canSellLiveAliens)
 	{
@@ -162,7 +162,8 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
 		int qty = _base->getStorageItems()->getItem(*i);
-		if (qty > 0 && _game->getMod()->getItem(*i)->isAlien())
+		RuleItem *rule = _game->getMod()->getItem(*i);
+		if (qty > 0 && rule->isAlien() && rule->getPrisonType() == _prisonType)
 		{
 			_qtys.push_back(0);
 			_aliens.push_back(*i);
@@ -183,7 +184,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, OptionsOrig
 			std::wstring formattedCost = L"";
 			if (Options::canSellLiveAliens)
 			{
-				int sellCost = _game->getMod()->getItem(*i)->getSellCost();
+				int sellCost = rule->getSellCost();
 				formattedCost = Text::formatFunding(sellCost / 1000).append(L"K");
 			}
 
@@ -258,11 +259,15 @@ void ManageAlienContainmentState::btnOkClick(Action *)
 
 	if (Options::storageLimitsEnforced && _base->storesOverfull())
 	{
-		_game->pushState(new SellState(_base, 0, _origin));
 		if (_origin == OPT_BATTLESCAPE)
-			_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()), _palette, _game->getMod()->getInterface("manageContainment")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("manageContainment")->getElement("errorPalette")->color));
+		{
+			// not used anymore, because multiple prison types could spam this screen; it will pop up in Geoscape anyway
+		}
 		else
+		{
+			_game->pushState(new SellState(_base, 0, _origin));
 			_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()), _palette, _game->getMod()->getInterface("manageContainment")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("manageContainment")->getElement("errorPalette")->color));
+		}
  	}
 }
 
@@ -459,8 +464,8 @@ void ManageAlienContainmentState::updateStrings()
 	_lstAliens->setCellText(_sel, 2, ss.str());
 	_lstAliens->setCellText(_sel, 3, ss2.str());
 
-	int aliens = _base->getUsedContainment() - _aliensSold;
-	int spaces = _base->getAvailableContainment() - aliens;
+	int aliens = _base->getUsedContainment(_prisonType) - _aliensSold;
+	int spaces = _base->getAvailableContainment(_prisonType) - aliens;
 	if (Options::storageLimitsEnforced)
 	{
 		_btnOk->setVisible(spaces >= 0);

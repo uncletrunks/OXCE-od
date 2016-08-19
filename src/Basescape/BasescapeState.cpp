@@ -433,7 +433,7 @@ void BasescapeState::viewRightClick(Action *)
 	}
 	else if (f->getRules()->getAliens() > 0)
 	{
-		_game->pushState(new ManageAlienContainmentState(_base, OPT_GEOSCAPE));
+		_game->pushState(new ManageAlienContainmentState(_base, f->getRules()->getPrisonType(), OPT_GEOSCAPE));
 	}
 	else if (f->getRules()->isLift() || f->getRules()->getRadarRange() > 0)
 	{

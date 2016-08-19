@@ -50,6 +50,7 @@ private:
 	int _listOrder, _trainingRooms;
 	int _maxAllowedPerBase;
 	float _sickBayAbsoluteBonus, _sickBayRelativeBonus;
+	int _prisonType;
 public:
 	/// Creates a blank facility ruleset.
 	RuleBaseFacility(const std::string &type);
@@ -129,6 +130,8 @@ public:
 	float getSickBayAbsoluteBonus() const;
 	/// Gets the facility's bonus to hp healed (as percentage of max hp of the soldier).
 	float getSickBayRelativeBonus() const;
+	/// Gets the prison type.
+	int getPrisonType() const;
 };
 
 }

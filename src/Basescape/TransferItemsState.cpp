@@ -666,9 +666,9 @@ void TransferItemsState::increaseByValue(int change)
 		{
 			errorMessage = tr("STR_NOT_ENOUGH_STORE_SPACE");
 		}
-			else if (selItem->isAlien() && Options::storageLimitsEnforced * _aQty + 1 > _baseTo->getAvailableContainment() - Options::storageLimitsEnforced * _baseTo->getUsedContainment())
+			else if (selItem->isAlien() && Options::storageLimitsEnforced * _aQty + 1 > _baseTo->getAvailableContainment(selItem->getPrisonType()) - Options::storageLimitsEnforced * _baseTo->getUsedContainment(selItem->getPrisonType()))
 		{
-			errorMessage = tr("STR_NO_ALIEN_CONTAINMENT_FOR_TRANSFER");
+			errorMessage = trAlt("STR_NO_ALIEN_CONTAINMENT_FOR_TRANSFER", selItem->getPrisonType());
 		}
 		break;
 	}
@@ -711,7 +711,7 @@ void TransferItemsState::increaseByValue(int change)
 			}
 			else
 			{
-				int freeContainment = Options::storageLimitsEnforced ? _baseTo->getAvailableContainment() - _baseTo->getUsedContainment() - _aQty : INT_MAX;
+				int freeContainment = Options::storageLimitsEnforced ? _baseTo->getAvailableContainment(selItem->getPrisonType()) - _baseTo->getUsedContainment(selItem->getPrisonType()) - _aQty : INT_MAX;
 				change = std::min(std::min(freeContainment, getRow().qtySrc - getRow().amount), change);
 				_aQty += change;
 				getRow().amount += change;

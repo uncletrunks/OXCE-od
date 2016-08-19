@@ -899,9 +899,9 @@ int Base::getFreePsiLabs() const
  * Return containment space not in use
  * @return containment space not in use
  */
-int Base::getFreeContainment() const
+int Base::getFreeContainment(int prisonType) const
 {
-	return getAvailableContainment() - getUsedContainment();
+	return getAvailableContainment(prisonType) - getUsedContainment(prisonType);
 }
 
 /**
@@ -1311,12 +1311,14 @@ int Base::getUsedTraining() const
  * Containment Space in the base.
  * @return Containment Lab space.
  */
-int Base::getUsedContainment() const
+int Base::getUsedContainment(int prisonType) const
 {
 	int total = 0;
+	RuleItem *rule = 0;
 	for (std::map<std::string, int>::iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
 	{
-		if (_mod->getItem((i)->first)->isAlien())
+		rule = _mod->getItem((i)->first);
+		if (rule->isAlien() && rule->getPrisonType() == prisonType)
 		{
 			total += (i)->second;
 		}
@@ -1325,7 +1327,8 @@ int Base::getUsedContainment() const
 	{
 		if ((*i)->getType() == TRANSFER_ITEM)
 		{
-			if (_mod->getItem((*i)->getItems())->isAlien())
+			rule = _mod->getItem((*i)->getItems());
+			if (rule->isAlien() && rule->getPrisonType() == prisonType)
 			{
 				total += (*i)->getQuantity();
 			}
@@ -1336,7 +1339,11 @@ int Base::getUsedContainment() const
 		const RuleResearch *projRules = (*i)->getRules();
 		if (projRules->needItem() && _mod->getUnit(projRules->getName()))
 		{
-			++total;
+			rule = _mod->getItem(projRules->getName());
+			if (rule->isAlien() && rule->getPrisonType() == prisonType)
+			{
+				++total;
+			}
 		}
 	}
 	return total;
@@ -1347,12 +1354,12 @@ int Base::getUsedContainment() const
  * available in the base.
  * @return Containment Lab space.
  */
-int Base::getAvailableContainment() const
+int Base::getAvailableContainment(int prisonType) const
 {
 	int total = 0;
 	for (std::vector<BaseFacility*>::const_iterator i = _facilities.begin(); i != _facilities.end(); ++i)
 	{
-		if ((*i)->getBuildTime() == 0)
+		if ((*i)->getBuildTime() == 0 && (*i)->getRules()->getPrisonType() == prisonType)
 		{
 			total += (*i)->getRules()->getAliens();
 		}

@@ -355,6 +355,25 @@ const LocalizedText &State::tr(const std::string &id) const
 }
 
 /**
+* Get the localized text from dictionary.
+* This function forwards the call to Language::getString(const std::string &).
+* @param id The (prefix of) dictionary key to search for.
+* @param alt Used to construct the (suffix of) dictionary key to search for.
+* @return A reference to the localized text.
+*/
+const LocalizedText &State::trAlt(const std::string &id, int alt) const
+{
+	std::ostringstream ss;
+	ss << id;
+	// alt = 0 is the original, alt > 0 are the alternatives
+	if (alt > 0)
+	{
+		ss << "_" << alt;
+	}
+	return _game->getLanguage()->getString(ss.str());
+}
+
+/**
  * Get a modifiable copy of the localized text for dictionary key @a id.
  * This function forwards the call to Language::getString(const std::string &, unsigned).
  * @param id The dictionary key to search for.
