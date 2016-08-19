@@ -194,7 +194,7 @@ public:
 	int getSpaceAvailable() const;
 	/// Gets the amount of space used inside a craft.
 	int getSpaceUsed() const;
-	/// Checks if there are enough potential pilots onboard.
+	/// Checks if there are enough pilots onboard.
 	bool arePilotsOnboard();
 	/// Checks if a pilot is already on the list.
 	bool isPilot(int pilotId);

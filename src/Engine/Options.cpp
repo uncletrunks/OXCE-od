@@ -209,6 +209,7 @@ void create()
 	_info.push_back(OptionInfo("showQuickSearch", &showQuickSearch, true, "STR_SHOW_QUICK_SEARCH", "STR_OXCE"));
 	_info.push_back(OptionInfo("showAllCommendations", &showAllCommendations, false, "STR_SHOW_ALL_COMMENDATIONS", "STR_OXCE"));
 	_info.push_back(OptionInfo("removeWoundedFromTraining", &removeWoundedFromTraining, false, "STR_REMOVE_WOUNDED_FROM_TRAINING", "STR_OXCE"));
+	_info.push_back(OptionInfo("autoAssignPilots", &autoAssignPilots, false, "STR_AUTO_ASSIGN_PILOTS", "STR_OXCE"));
 
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));

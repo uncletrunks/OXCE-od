@@ -54,6 +54,7 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	_btnRemoveAll = new TextButton(146, 20, 164, 96);
 
 	_txtRequired = new Text(288, 9, 10, 84);
+	_txtHint = new Text(288, 9, 10, 96);
 
 	_txtAccuracyBonus = new Text(100, 9, 10, 128);
 	_txtAccuracyBonusValue = new Text(150, 9, 110, 128);
@@ -76,6 +77,7 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	add(_btnAdd, "button", "costsInfo");
 	add(_btnRemoveAll, "button", "costsInfo");
 	add(_txtRequired, "text1", "costsInfo");
+	add(_txtHint, "text1", "costsInfo");
 	add(_txtAccuracyBonus, "text1", "costsInfo");
 	add(_txtAccuracyBonusValue, "text2", "costsInfo");
 	add(_txtDodgeBonus, "text1", "costsInfo");
@@ -116,6 +118,7 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	_lstPilots->setDot(true);
 
 	_txtRequired->setText(tr("STR_PILOTS_REQUIRED").arg(c->getRules()->getPilots()));
+	_txtHint->setText(tr("STR_PILOTS_HINT"));
 
 	_btnAdd->setText(tr("STR_ADD_PILOT"));
 	_btnAdd->onMouseClick((ActionHandler)&CraftPilotsState::btnAddClick);
@@ -196,8 +199,18 @@ void CraftPilotsState::updateUI()
 	}
 	_txtApproachSpeedValue->setText(ss3.str().c_str());
 
-	_btnAdd->setVisible(_lstPilots->getRows() < c->getRules()->getPilots());
-	_btnRemoveAll->setVisible(!c->isCrewPilotsOnly());
+	if (Options::autoAssignPilots)
+	{
+		_txtHint->setVisible(true);
+		_btnAdd->setVisible(false);
+		_btnRemoveAll->setVisible(false);
+	}
+	else
+	{
+		_txtHint->setVisible(false);
+		_btnAdd->setVisible(_lstPilots->getRows() < c->getRules()->getPilots());
+		_btnRemoveAll->setVisible(!c->isCrewPilotsOnly());
+	}
 }
 
 /**

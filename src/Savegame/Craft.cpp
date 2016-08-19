@@ -1087,7 +1087,7 @@ int Craft::getSpaceUsed() const
 }
 
 /**
-* Checks if there are enough potential pilots onboard.
+* Checks if there are enough pilots onboard.
 * @return True if the craft has enough pilots.
 */
 bool Craft::arePilotsOnboard()
@@ -1096,9 +1096,9 @@ bool Craft::arePilotsOnboard()
 		return true;
 
 	// refresh the list of pilots (must be performed here, list may be out-of-date!)
-	getPilotList();
+	const std::vector<Soldier*> pilots = getPilotList();
 
-	return _pilots.size() >= _rules->getPilots();
+	return pilots.size() >= _rules->getPilots();
 }
 
 /**
@@ -1166,39 +1166,60 @@ const std::vector<Soldier*> Craft::getPilotList()
 	if (_rules->getPilots() == 0)
 		return result;
 
-	// 2. only pilots (assign automatically)
-	int total = 0;
-	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+	// 2. take the pilots from the bottom of the crew list automatically, if option enabled
+	if (Options::autoAssignPilots)
 	{
-		if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
+		int counter = 0;
+		// in reverse order
+		for (std::vector<Soldier*>::reverse_iterator i = _base->getSoldiers()->rbegin(); i != _base->getSoldiers()->rend(); ++i)
 		{
-			result.push_back((*i));
-			total++;
+			if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
+			{
+				result.push_back((*i));
+				counter++;
+			}
+			if (counter >= _rules->getPilots())
+			{
+				break; // enough pilots found, don't search more
+			}
 		}
-	}
-	if (total == _rules->getPilots())
-	{
-		// nothing more to do
 	}
 	else
 	{
-		// 3. pilots and soldiers (pilots must be assigned manually)
-		int total2 = 0;
-		result.clear();
-		for (std::vector<int>::iterator i = _pilots.begin(); i != _pilots.end(); ++i)
+		// 3. only pilots (assign automatically)
+		int total = 0;
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 		{
-			for (std::vector<Soldier*>::iterator j = _base->getSoldiers()->begin(); j != _base->getSoldiers()->end(); ++j)
+			if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
 			{
-				if ((*j)->getCraft() == this && (*j)->getRules()->getAllowPiloting() && (*j)->getId() == (*i))
-				{
-					result.push_back((*j));
-					total2++;
-					break; // pilot found, don't search anymore
-				}
+				result.push_back((*i));
+				total++;
 			}
-			if (total2 >= _rules->getPilots())
+		}
+		if (total == _rules->getPilots())
+		{
+			// nothing more to do
+		}
+		else
+		{
+			// 4. pilots and soldiers (pilots must be assigned manually)
+			int total2 = 0;
+			result.clear();
+			for (std::vector<int>::iterator i = _pilots.begin(); i != _pilots.end(); ++i)
 			{
-				break; // enough pilots found
+				for (std::vector<Soldier*>::iterator j = _base->getSoldiers()->begin(); j != _base->getSoldiers()->end(); ++j)
+				{
+					if ((*j)->getCraft() == this && (*j)->getRules()->getAllowPiloting() && (*j)->getId() == (*i))
+					{
+						result.push_back((*j));
+						total2++;
+						break; // pilot found, don't search anymore
+					}
+				}
+				if (total2 >= _rules->getPilots())
+				{
+					break; // enough pilots found
+				}
 			}
 		}
 	}
