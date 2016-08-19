@@ -57,7 +57,8 @@ private:
 	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
-	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight, _activeCamouflage, _predatorVision;
+	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight;
+	int _activeCamouflage, _predatorVision, _heatVision, _psiVision;
 	float _damageModifier[DAMAGE_TYPES];
 	std::vector<int> _loftempsSet;
 	UnitStats _stats;
@@ -160,6 +161,10 @@ public:
 	int getActiveCamouflage() const;
 	/// Gets info about better vision, if any.
 	int getPredatorVision() const;
+	/// Gets info about heat vision.
+	int getHeatVision() const;
+	/// Gets info about psi vision.
+	int getPsiVision() const;
 	/// Gets personal ligth radius;
 	int getPersonalLight() const;
 	/// Gets how armor react to fear.
