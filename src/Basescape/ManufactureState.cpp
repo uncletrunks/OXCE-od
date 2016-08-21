@@ -111,7 +111,7 @@ ManufactureState::ManufactureState(Base *base) : _base(base)
 	_txtTimeLeft->setText(tr("STR_DAYS_HOURS_LEFT"));
 	_txtTimeLeft->setWordWrap(true);
 
-	_lstManufacture->setColumns(5, 115, 15, 52, 56, 48);
+	_lstManufacture->setColumns(5, 114, 16, 52, 56, 48);
 	_lstManufacture->setAlign(ALIGN_RIGHT);
 	_lstManufacture->setAlign(ALIGN_LEFT, 0);
 	_lstManufacture->setSelectable(true);
