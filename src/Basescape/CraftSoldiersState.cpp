@@ -174,6 +174,11 @@ void CraftSoldiersState::cbxSortByChange(Action *action)
 		if (!ctrlPressed)
 		{
 			std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+			bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
+			if (shiftPressed)
+			{
+				std::reverse(_base->getSoldiers()->begin(), _base->getSoldiers()->end());
+			}
 		}
 	}
 	else
