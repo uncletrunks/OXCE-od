@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <cmath>
 #include "Soldier.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Language.h"
