@@ -20,6 +20,8 @@
 #define OPENXCOM_NEXTTURNSTATE_H
 
 #include "../Engine/State.h"
+#include "../Savegame/BattleUnit.h"
+#include "../Mod/RuleStartingCondition.h"
 
 namespace OpenXcom
 {
@@ -30,9 +32,6 @@ class SavedBattleGame;
 class BattlescapeState;
 class Timer;
 class Surface;
-
-enum UnitFaction;
-struct EnvironmentalCondition;
 
 /**
  * Screen which announces the next turn.
