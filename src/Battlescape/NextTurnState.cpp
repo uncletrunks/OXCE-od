@@ -192,7 +192,11 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	}
 
 	// start new hit log
-	_battleGame->hitLog.str(message.empty() ? tr("STR_NEW_TURN") : message);
+	if (message.empty())
+	{
+		message = tr("STR_NEW_TURN");
+	}
+	_battleGame->hitLog.str(message);
 	_battleGame->hitLog.clear();
 
 	if (Options::skipNextTurnScreen && message.empty())
