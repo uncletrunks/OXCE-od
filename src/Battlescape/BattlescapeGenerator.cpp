@@ -544,6 +544,11 @@ void BattlescapeGenerator::run()
 	setupObjectives(ruleDeploy);
 
 	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	RuleStartingCondition *temp = _game->getMod()->getStartingCondition(_terrain->getStartingCondition());
+	if (temp != 0)
+	{
+		startingCondition = temp;
+	}
 	deployXCOM(startingCondition);
 
 	size_t unitCount = _save->getUnits()->size();
