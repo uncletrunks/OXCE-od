@@ -20,8 +20,10 @@
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
 #include "../Engine/Timer.h"
+#include "../Engine/RNG.h"
 #include "../Engine/Screen.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Palette.h"
 #include "../Interface/Window.h"
@@ -52,6 +54,8 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	_txtTurn = new Text(320, 17, 0, 92);
 	_txtSide = new Text(320, 17, 0, 108);
 	_txtMessage = new Text(320, 17, 0, 132);
+	_txtMessage2 = new Text(320, 33, 0, 156);
+	_txtMessage3 = new Text(320, 17, 0, 172);
 	_bg = new Surface(_game->getScreen()->getWidth(), _game->getScreen()->getWidth(), 0, 0);
 
 	// Set palette
@@ -63,6 +67,8 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	add(_txtTurn, "messageWindows", "battlescape");
 	add(_txtSide, "messageWindows", "battlescape");
 	add(_txtMessage, "messageWindows", "battlescape");
+	add(_txtMessage2, "messageWindows", "battlescape");
+	add(_txtMessage3, "messageWindows", "battlescape");
 
 	centerAllSurfaces();
 
@@ -80,6 +86,8 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	_txtTurn->setY(y + 92);
 	_txtSide->setY(y + 108);
 	_txtMessage->setY(y + 132);
+	_txtMessage2->setY(y + 156);
+	_txtMessage3->setY(y + 172);
 
 	// Set up objects
 	_window->setColor(Palette::blockOffset(0)-1);
@@ -110,18 +118,89 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	_txtMessage->setHighContrast(true);
 	_txtMessage->setText(tr("STR_PRESS_BUTTON_TO_CONTINUE"));
 
+	_txtMessage2->setBig();
+	_txtMessage2->setAlign(ALIGN_CENTER);
+	_txtMessage2->setHighContrast(true);
+	_txtMessage2->setText(L"");
+
+	_txtMessage3->setBig();
+	_txtMessage3->setAlign(ALIGN_CENTER);
+	_txtMessage3->setHighContrast(true);
+	_txtMessage3->setText(L"");
+
 	_state->clearMouseScrollingState();
 
-	if (Options::skipNextTurnScreen)
+	// environmental effects
+	std::wstring message;
+
+	RuleStartingCondition *sc = _game->getMod()->getStartingCondition(_battleGame->getStartingConditionType());
+	if (sc)
+	{
+		if (_battleGame->getSide() == FACTION_PLAYER)
+		{
+			// beginning of player's turn
+			EnvironmentalCondition friendly = sc->getEnvironmetalCondition("STR_FRIENDLY");
+
+			bool showMessage = applyEnvironmentalConditionToFaction(FACTION_PLAYER, friendly);
+
+			if (showMessage)
+			{
+				_txtMessage2->setColor(friendly.color);
+				message = tr(friendly.message);
+				_txtMessage2->setText(message);
+			}
+		}
+		else
+		{
+			// beginning of alien's and neutral's turn
+			bool anyoneStanding = false;
+			for (std::vector<BattleUnit*>::iterator j = _battleGame->getUnits()->begin(); j != _battleGame->getUnits()->end(); ++j)
+			{
+				if ((*j)->getOriginalFaction() == FACTION_HOSTILE && !(*j)->isOut())
+				{
+					anyoneStanding = true;
+				}
+			}
+
+			if (anyoneStanding)
+			{
+				EnvironmentalCondition hostile = sc->getEnvironmetalCondition("STR_HOSTILE");
+				EnvironmentalCondition neutral = sc->getEnvironmetalCondition("STR_NEUTRAL");
+
+				bool showMessage = false;
+				if (applyEnvironmentalConditionToFaction(FACTION_HOSTILE, hostile))
+				{
+					_txtMessage2->setColor(hostile.color);
+					_txtMessage2->setText(tr(hostile.message));
+					showMessage = true;
+				}
+				if (applyEnvironmentalConditionToFaction(FACTION_NEUTRAL, neutral))
+				{
+					_txtMessage3->setColor(neutral.color);
+					_txtMessage3->setText(tr(neutral.message));
+					showMessage = true;
+				}
+
+				if (showMessage)
+				{
+					std::wostringstream ss;
+					ss << tr(hostile.message) << tr(neutral.message);
+					message = ss.str();
+				}
+			}
+		}
+	}
+
+	// start new hit log
+	_battleGame->hitLog.str(message.empty() ? tr("STR_NEW_TURN") : message);
+	_battleGame->hitLog.clear();
+
+	if (Options::skipNextTurnScreen && message.empty())
 	{
 		_timer = new Timer(NEXT_TURN_DELAY);
 		_timer->onTimer((StateHandler)&NextTurnState::close);
 		_timer->start();
 	}
-
-	// start new hit log
-	_battleGame->hitLog.str(L"New turn");
-	_battleGame->hitLog.clear();
 }
 
 /**
@@ -130,6 +209,72 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 NextTurnState::~NextTurnState()
 {
 	delete _timer;
+}
+
+/**
+* Applies given environmental condition effects to a given faction.
+* @return True, if any unit was affected (even if damage was zero).
+*/
+bool NextTurnState::applyEnvironmentalConditionToFaction(UnitFaction faction, EnvironmentalCondition condition)
+{
+	// Note: there are limitations, since we're not using a projectile and nobody is actually shooting
+	// 1. no power bonus based on shooting unit's stats (nobody is shooting)
+	// 2. no power range reduction (there is no projectile, range = 0)
+	// 3. no AOE damage from explosions (targets are damaged directly without affecting anyone/anything)
+	// 4. no terrain damage
+	// 5. no self-destruct
+	// 6. no vanilla target morale loss when hurt; vanilla morale loss for fatal wounds still applies though
+	//
+	// 7. no setting target on fire (...could be added if needed)
+	// 8. no fire extinguisher
+
+	bool showMessage = false;
+
+	if (condition.chancePerTurn > 0 && condition.firstTurn <= _battleGame->getTurn() && _battleGame->getTurn() <= condition.lastTurn)
+	{
+		const RuleItem *weaponOrAmmo = _game->getMod()->getItem(condition.weaponOrAmmo);
+		const RuleDamageType *type = weaponOrAmmo->getDamageType();
+		const int power = weaponOrAmmo->getPower(); // no power bonus, no power range reduction
+
+		UnitSide side = SIDE_FRONT;
+		UnitBodyPart bodypart = BODYPART_TORSO;
+
+		if (condition.side > -1)
+		{
+			side = (UnitSide)condition.side;
+		}
+		if (condition.bodyPart > -1)
+		{
+			bodypart = (UnitBodyPart)condition.bodyPart;
+		}
+
+		for (std::vector<BattleUnit*>::iterator j = _battleGame->getUnits()->begin(); j != _battleGame->getUnits()->end(); ++j)
+		{
+			if ((*j)->getOriginalFaction() == faction && (*j)->getStatus() != STATUS_DEAD)
+			{
+				if (RNG::percent(condition.chancePerTurn))
+				{
+					if (condition.side == -1)
+					{
+						side = (UnitSide)RNG::generate(SIDE_FRONT, SIDE_UNDER);
+					}
+					if (condition.bodyPart == -1)
+					{
+						bodypart = (UnitBodyPart)RNG::generate(BODYPART_HEAD, BODYPART_LEFTLEG);
+					}
+					(*j)->damage(Position(1, 1, 1), type->getRandomDamage(power), type, side, bodypart);
+					showMessage = true;
+				}
+			}
+		}
+	}
+
+	// now check for new casualties
+	_battleGame->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
+	// revive units if damage could give hp or reduce stun
+	_battleGame->reviveUnconsciousUnits(true);
+
+	return showMessage;
 }
 
 /**

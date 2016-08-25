@@ -1121,7 +1121,7 @@ static inline void setValueMax(int& value, int diff, int min, int max)
  * @param type The type of damage being inflicted.
  * @return damage done after adjustment
  */
-int BattleUnit::damage(const Position &relative, int power, const RuleDamageType *type)
+int BattleUnit::damage(const Position &relative, int power, const RuleDamageType *type, UnitSide sideOverride, UnitBodyPart bodypartOverride)
 {
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
@@ -1201,6 +1201,16 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 				}
 			}
 		}
+	}
+
+	// side and bodypart overrides (used by environmental conditions only)
+	if (sideOverride != SIDE_MAX)
+	{
+		side = sideOverride;
+	}
+	if (bodypartOverride != BODYPART_MAX)
+	{
+		bodypart = bodypartOverride;
 	}
 
 	int toHealth = 0;

@@ -21,6 +21,43 @@
 #include "../Mod/Mod.h"
 #include <algorithm>
 
+namespace YAML
+{
+	template<>
+	struct convert<OpenXcom::EnvironmentalCondition>
+	{
+		static Node encode(const OpenXcom::EnvironmentalCondition& rhs)
+		{
+			Node node;
+			node["chancePerTurn"] = rhs.chancePerTurn;
+			node["firstTurn"] = rhs.firstTurn;
+			node["lastTurn"] = rhs.lastTurn;
+			node["message"] = rhs.message;
+			node["color"] = rhs.color;
+			node["weaponOrAmmo"] = rhs.weaponOrAmmo;
+			node["side"] = rhs.side;
+			node["bodyPart"] = rhs.bodyPart;
+			return node;
+		}
+
+		static bool decode(const Node& node, OpenXcom::EnvironmentalCondition& rhs)
+		{
+			if (!node.IsMap())
+				return false;
+
+			rhs.chancePerTurn = node["chancePerTurn"].as<int>(rhs.chancePerTurn);
+			rhs.firstTurn = node["firstTurn"].as<int>(rhs.firstTurn);
+			rhs.lastTurn = node["lastTurn"].as<int>(rhs.lastTurn);
+			rhs.message = node["message"].as<std::string>(rhs.message);
+			rhs.color = node["color"].as<int>(rhs.color);
+			rhs.weaponOrAmmo = node["weaponOrAmmo"].as<std::string>(rhs.weaponOrAmmo);
+			rhs.side = node["side"].as<int>(rhs.side);
+			rhs.bodyPart = node["bodyPart"].as<int>(rhs.bodyPart);
+			return true;
+		}
+	};
+}
+
 namespace OpenXcom
 {
 
@@ -50,6 +87,7 @@ void RuleStartingCondition::load(const YAML::Node &node)
 		load(parent);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_environmentalConditions = node["environmentalConditions"].as< std::map<std::string, EnvironmentalCondition> >(_environmentalConditions);
 	_armorTransformations = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformations);
 	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::string> >(_defaultArmor);
 	_defaultItems = node["defaultItems"].as< std::map<std::string, int> >(_defaultItems);
@@ -68,6 +106,25 @@ void RuleStartingCondition::load(const YAML::Node &node)
 std::string RuleStartingCondition::getType() const
 {
 	return _type;
+}
+
+/**
+* Gets the environmental condition for a given faction.
+* @param faction Faction code (STR_FRIENDLY, STR_HOSTILE or STR_NEUTRAL).
+* @return Environmental condition definition.
+*/
+EnvironmentalCondition RuleStartingCondition::getEnvironmetalCondition(const std::string &faction) const
+{
+	if (!_environmentalConditions.empty())
+	{
+		std::map<std::string, EnvironmentalCondition>::const_iterator i = _environmentalConditions.find(faction);
+		if (i != _environmentalConditions.end())
+		{
+			return i->second;
+		}
+	}
+
+	return EnvironmentalCondition();
 }
 
 /**

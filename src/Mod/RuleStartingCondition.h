@@ -27,6 +27,18 @@ namespace OpenXcom
 {
 class Mod;
 
+struct EnvironmentalCondition
+{
+	int chancePerTurn;
+	int firstTurn, lastTurn;
+	std::string message;
+	int color;
+	std::string weaponOrAmmo;
+	int side;
+	int bodyPart;
+	EnvironmentalCondition() : chancePerTurn(0), firstTurn(1), lastTurn(1000), color(29), side(-1), bodyPart(-1) { /*Empty by Design*/ };
+};
+
 /**
  * Represents a specific Starting Condition.
  */
@@ -34,6 +46,7 @@ class RuleStartingCondition
 {
 private:
 	std::string _type;
+	std::map<std::string, EnvironmentalCondition> _environmentalConditions;
 	std::map<std::string, std::string> _armorTransformations;
 	std::map<std::string, std::string> _defaultArmor;
 	std::map<std::string, int> _defaultItems;
@@ -51,6 +64,8 @@ public:
 	void load(const YAML::Node& node);
 	/// Gets the Starting Conditions's type.
 	std::string getType() const;
+	/// Gets the environmental condition for a given faction.
+	EnvironmentalCondition getEnvironmetalCondition(const std::string &faction) const;
 	/// Checks if the craft type is allowed.
 	bool isCraftAllowed(const std::string &craftType) const;
 	/// Gets the replacement armor.
