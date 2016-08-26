@@ -30,6 +30,8 @@
 #include "../Engine/Timer.h"
 #include "Globe.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Soldier.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/CraftWeapon.h"
@@ -238,7 +240,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	_state(state), _craft(craft), _ufo(ufo), _timeout(50), _currentDist(640), _targetDist(560),
 	_end(false), _endUfoHandled(false), _endCraftHandled(false), _destroyUfo(false), _destroyCraft(false), _ufoBreakingOff(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0), _interceptionNumber(0),
-	_interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0)
+	_interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false)
 {
 	_screen = false;
 	_craft->setInDogfight(true);
@@ -569,6 +571,35 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
  */
 DogfightState::~DogfightState()
 {
+	// award experience to the pilots
+	if (_firedAtLeastOnce && _craft && _ufo && (_ufo->isCrashed() || _ufo->isDestroyed()))
+	{
+		const std::vector<Soldier*> pilots = _craft->getPilotList();
+		for (std::vector<Soldier*>::const_iterator it = pilots.begin(); it != pilots.end(); ++it)
+		{
+			if ((*it)->getCurrentStats()->firing < (*it)->getRules()->getStatCaps().firing)
+			{
+				if (RNG::percent((*it)->getRules()->getDogfightExperience().firing))
+				{
+					(*it)->getCurrentStats()->firing++;
+				}
+			}
+			if ((*it)->getCurrentStats()->reactions < (*it)->getRules()->getStatCaps().reactions)
+			{
+				if (RNG::percent((*it)->getRules()->getDogfightExperience().reactions))
+				{
+					(*it)->getCurrentStats()->reactions++;
+				}
+			}
+			if ((*it)->getCurrentStats()->bravery < (*it)->getRules()->getStatCaps().bravery)
+			{
+				if (RNG::percent((*it)->getRules()->getDogfightExperience().bravery))
+				{
+					(*it)->getCurrentStats()->bravery++;
+				}
+			}
+		}
+	}
 	delete _craftDamageAnimTimer;
 	while (!_projectiles.empty())
 	{
@@ -1202,6 +1233,7 @@ void DogfightState::fireWeapon(int i)
 			_projectiles.push_back(p);
 
 			_game->getMod()->getSound("GEO.CAT", w1->getRules()->getSound())->play();
+			_firedAtLeastOnce = true;
 		}
 	}
 }

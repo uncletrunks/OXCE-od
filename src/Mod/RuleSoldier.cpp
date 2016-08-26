@@ -71,6 +71,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 	{
 		_trainingStatCaps.merge(node["statCaps"].as<UnitStats>(_trainingStatCaps));
 	}
+	_dogfightExperience.merge(node["dogfightExperience"].as<UnitStats>(_dogfightExperience));
 	_armor = node["armor"].as<std::string>(_armor);
 	_armorForAvatar = node["armorForAvatar"].as<std::string>(_armorForAvatar);
 	_avatarOffsetX = node["avatarOffsetX"].as<int>(_avatarOffsetX);
@@ -207,6 +208,15 @@ UnitStats RuleSoldier::getStatCaps() const
 UnitStats RuleSoldier::getTrainingStatCaps() const
 {
 	return _trainingStatCaps;
+}
+
+/**
+* Gets the improvement chances for pilots (after dogfight).
+* @return The improvement changes.
+*/
+UnitStats RuleSoldier::getDogfightExperience() const
+{
+	return _dogfightExperience;
 }
 
 /**

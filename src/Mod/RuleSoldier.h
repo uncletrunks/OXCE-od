@@ -39,7 +39,7 @@ class RuleSoldier
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
-	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps;
+	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps, _dogfightExperience;
 	std::string _armor;
 	int _costBuy, _costSalary, _standHeight, _kneelHeight, _floatHeight, _femaleFrequency;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
@@ -68,6 +68,8 @@ public:
 	UnitStats getStatCaps() const;
 	/// Gets the training stat caps.
 	UnitStats getTrainingStatCaps() const;
+	/// Gets the improvement chances for pilots (after dogfight).
+	UnitStats getDogfightExperience() const;
 	/// Gets the cost of the soldier.
 	int getBuyCost() const;
 	/// Gets the monthly salary of the soldier.
