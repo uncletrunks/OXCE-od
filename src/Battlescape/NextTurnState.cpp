@@ -194,9 +194,12 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	// start new hit log
 	if (message.empty())
 	{
-		message = tr("STR_NEW_TURN");
+		_battleGame->hitLog.str(tr("STR_NEW_TURN"));
 	}
-	_battleGame->hitLog.str(message);
+	else
+	{
+		_battleGame->hitLog.str(message);
+	}
 	_battleGame->hitLog.clear();
 
 	if (Options::skipNextTurnScreen && message.empty())
@@ -266,7 +269,7 @@ bool NextTurnState::applyEnvironmentalConditionToFaction(UnitFaction faction, En
 					{
 						bodypart = (UnitBodyPart)RNG::generate(BODYPART_HEAD, BODYPART_LEFTLEG);
 					}
-					(*j)->damage(Position(1, 1, 1), type->getRandomDamage(power), type, side, bodypart);
+					(*j)->damage(Position(0, 0, 0), type->getRandomDamage(power), type, side, bodypart);
 					showMessage = true;
 				}
 			}
