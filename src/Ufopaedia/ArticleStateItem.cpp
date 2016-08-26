@@ -123,7 +123,7 @@ namespace OpenXcom
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_AUTO").c_str(),
+								 tr("STR_SHOT_TYPE_AUTO").arg(item->getAutoShots()).c_str(),
 								 Text::formatPercentage(item->getAccuracyAuto()).c_str(),
 								 tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(14)+15);
