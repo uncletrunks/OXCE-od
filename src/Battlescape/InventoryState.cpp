@@ -677,7 +677,7 @@ void InventoryState::loadGlobalLayout(int index)
 */
 void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 {
-	if (_base == 0)
+	if (_tu)
 	{
 		// cannot use this feature during the mission!
 		return;
@@ -724,7 +724,7 @@ void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 */
 void InventoryState::btnInventoryLoadClick(Action *)
 {
-	if (_base == 0)
+	if (_tu)
 	{
 		// cannot use this feature during the mission!
 		return;
