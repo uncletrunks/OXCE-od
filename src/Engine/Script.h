@@ -637,13 +637,21 @@ struct ScriptValueData
 	ArgEnum type = ArgInvalid;
 	Uint8 size = 0;
 
+	/// Copy constructor.
 	template<typename T>
 	inline ScriptValueData(const T& t);
+	/// Copy constructor.
+	inline ScriptValueData(const ScriptValueData& t);
+	/// Default constructor.
 	inline ScriptValueData() { }
 
+	/// Assign operator.
 	template<typename T>
 	inline ScriptValueData& operator=(const T& t);
+	/// Assign operator.
+	inline ScriptValueData& operator=(const ScriptValueData& t);
 
+	/// Get current stored value.
 	template<typename T>
 	inline const T& getValue() const;
 };
@@ -890,25 +898,50 @@ public:
 	const ScriptGlobal* getGlobal() const { return _shared; }
 };
 
+/**
+ * Copy constructor from pod type.
+ */
 template<typename T>
 inline ScriptValueData::ScriptValueData(const T& t)
 {
-	static_assert(sizeof(T) <= sizeof(data) || sizeof(T) > 255, "Value have too big size!");
+	static_assert(sizeof(T) <= sizeof(data), "Value have too big size!");
 	type = ScriptParserBase::getArgType<T>();
 	size = sizeof(T);
-	memcpy(&data, &t, size);
+	memcpy(&data, &t, sizeof(T));
 }
 
+/**
+ * Copy constructor.
+ */
+inline ScriptValueData::ScriptValueData(const ScriptValueData& t)
+{
+	*this = t;
+}
+
+/**
+ * Assign operator from pod type.
+ */
 template<typename T>
 inline ScriptValueData& ScriptValueData::operator=(const T& t)
 {
-	static_assert(sizeof(T) <= sizeof(data) || sizeof(T) > 255, "Value have too big size!");
-	type = ScriptParserBase::getArgType<T>();
-	size = sizeof(T);
-	memcpy(&data, &t, size);
+	*this = ScriptValueData{ t };
 	return *this;
 }
 
+/**
+ * Assign operator.
+ */
+inline ScriptValueData& ScriptValueData::operator=(const ScriptValueData& t)
+{
+	type = t.type;
+	size = t.size;
+	memcpy(&data, &t.data, sizeof(data));
+	return *this;
+}
+
+/**
+ * Get current stored value.
+ */
 template<typename T>
 inline const T& ScriptValueData::getValue() const
 {
@@ -998,7 +1031,7 @@ template<typename T, typename I>
 struct ScriptTag
 {
 	static_assert(!std::numeric_limits<I>::is_signed, "Type should be unsigned");
-	static_assert(sizeof(I) <= sizeof(size_t), "Type need be less than size_t");
+	static_assert(sizeof(I) <= sizeof(size_t), "Type need be smaller than size_t");
 
 	using Parent = T;
 
@@ -1011,7 +1044,7 @@ struct ScriptTag
 	constexpr explicit operator bool() const { return this->index; }
 
 	/// Get run time value for type.
-	static ArgEnum type() { return ScriptParserBase::getArgType<T*>(); }
+	static ArgEnum type() { return ScriptParserBase::getArgType<ScriptTag<T, I>>(); }
 	/// Test if value can be used.
 	static constexpr bool isValid(size_t i) { return i && i <= limit(); }
 	/// Fake constructor.
@@ -1028,6 +1061,7 @@ class ScriptGlobal
 protected:
 	using LoadFunc = void (*)(const ScriptGlobal*, int&, const YAML::Node&);
 	using SaveFunc = void (*)(const ScriptGlobal*, const int&, YAML::Node&);
+	using CrateFunc = ScriptValueData (*)(size_t i);
 
 	friend class ScriptValuesBase;
 
@@ -1040,12 +1074,13 @@ protected:
 	struct TagValueData
 	{
 		ScriptRef name;
-		size_t type;
+		size_t valueType;
 	};
 	struct TagData
 	{
 		ScriptRef name;
 		size_t limit;
+		CrateFunc crate;
 		std::vector<TagValueData> values;
 	};
 
@@ -1077,6 +1112,7 @@ private:
 	std::vector<ScriptParserEventsBase*> _parserEvents;
 	std::map<ArgEnum, TagData> _tagNames;
 	std::vector<TagValueType> _tagValueTypes;
+	std::vector<ScriptRefData> _refList;
 
 	/// Get tag value.
 	size_t getTag(ArgEnum type, ScriptRef s) const;
@@ -1105,6 +1141,9 @@ public:
 	/// Update const value.
 	void updateConst(const std::string& name, ScriptValueData i);
 
+	/// Get global ref data.
+	const ScriptRefData* getRef(ScriptRef name, ScriptRef postfix = {}) const;
+
 	/// Get tag based on it name.
 	template<typename Tag>
 	Tag getTag(ScriptRef s) const
@@ -1127,7 +1166,18 @@ public:
 	template<typename Tag>
 	void addTagType()
 	{
-		_tagNames.insert(std::make_pair(Tag::type(), TagData{ ScriptRef{ Tag::Parent::ScriptName }, Tag::limit(), std::vector<TagValueData>{} }));
+		_tagNames.insert(
+			std::make_pair(
+				Tag::type(),
+				TagData
+				{
+					ScriptRef{ Tag::Parent::ScriptName },
+					Tag::limit(),
+					[](size_t i) { return ScriptValueData{ Tag::make(i) }; },
+					std::vector<TagValueData>{},
+				}
+			)
+		);
 	}
 
 	/// Prepare for loading data.

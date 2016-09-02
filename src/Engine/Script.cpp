@@ -1309,6 +1309,10 @@ ScriptRefData ParserWriter::getReferece(const ScriptRef& s) const
 	}
 	if (ptr == nullptr)
 	{
+		ptr = parser.getGlobal()->getRef(s);
+	}
+	if (ptr == nullptr)
+	{
 		return ScriptRefData{ };
 	}
 	return *ptr;
@@ -2286,7 +2290,7 @@ void ScriptValuesBase::loadBase(const YAML::Node &node, const ScriptGlobal* shar
 				{
 					auto temp = 0;
 					auto data = shared->getTagValueData(type, i);
-					shared->getTagValueType(data.type).load(shared, temp, pair.second);
+					shared->getTagValueType(data.valueType).load(shared, temp, pair.second);
 					setBase(i, temp);
 				}
 			}
@@ -2306,7 +2310,7 @@ void ScriptValuesBase::saveBase(YAML::Node &node, const ScriptGlobal* shared, Ar
 		{
 			auto temp = YAML::Node{};
 			auto data = shared->getTagValueData(type, i);
-			shared->getTagValueType(data.type).save(shared, v, temp);
+			shared->getTagValueType(data.valueType).save(shared, v, temp);
 			tags[data.name.substr(data.name.find('.') + 1u).toString()] = temp;
 		}
 	}
@@ -2401,13 +2405,18 @@ size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s, size_t valueType)
 {
 	auto& data = _tagNames[type];
 	auto tag = getTag(type, s);
-
 	if (tag == 0)
 	{
+		// is tag used for other tag type?
+		if (findSortHelper(_refList, s))
+		{
+			return 0;
+		}
 		// test to prevent warp of index value
 		if (data.values.size() < data.limit)
 		{
 			data.values.push_back(TagValueData{ s, valueType });
+			addSortHelper(_refList, { s, type, data.crate(data.values.size()) });
 			return data.values.size();
 		}
 		return 0;
@@ -2468,6 +2477,14 @@ void ScriptGlobal::updateConst(const std::string& name, ScriptValueData i)
 }
 
 /**
+ * Get global ref data.
+ */
+const ScriptRefData* ScriptGlobal::getRef(ScriptRef name, ScriptRef postfix) const
+{
+	return findSortHelper(_refList, name, postfix);
+}
+
+/**
  * Prepare for loading data.
  */
 void ScriptGlobal::beginLoad()
@@ -2518,13 +2535,19 @@ void ScriptGlobal::load(const YAML::Node& node)
 					if (valueType != invalidType)
 					{
 						auto namePrefix = "Tag." + name;
+						auto ref = getRef(ScriptRef::tempFrom(namePrefix));
+						if (ref && ref->type != p.first)
+						{
+							Log(LOG_ERROR) << "Script variable '" + name + "' already used in '" + _tagNames[ref->type].name.toString() + "'.";
+							continue;
+						}
 						auto tag = getTag(p.first, ScriptRef::tempFrom(namePrefix));
 						if (tag)
 						{
 							auto data = getTagValueData(p.first, tag);
-							if (valueType != data.type)
+							if (valueType != data.valueType)
 							{
-								Log(LOG_ERROR) << "Script variable '" + name + "' have wrong type '" << _tagValueTypes[valueType].name.toString() << "' instead of '" << _tagValueTypes[data.type].name.toString() << "' in '" + nodeName + "'.";
+								Log(LOG_ERROR) << "Script variable '" + name + "' have wrong type '" << _tagValueTypes[valueType].name.toString() << "' instead of '" << _tagValueTypes[data.valueType].name.toString() << "' in '" + nodeName + "'.";
 							}
 							continue;
 						}

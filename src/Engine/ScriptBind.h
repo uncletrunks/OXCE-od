@@ -728,36 +728,6 @@ struct ArgNullDef
 	}
 };
 
-template<typename T, typename I>
-struct ArgTagDef
-{
-	using ReturnType = ScriptTag<T, I>;
-	static constexpr size_t size = sizeof(ReturnType);
-	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
-	{
-		return sw.const_val<ReturnType>(arg);
-	}
-
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
-	{
-		if (t.getType() == TokenSymbol)
-		{
-			auto tag = ph.parser.getGlobal()->getTag<ScriptTag<T, I>>(t);
-			if (tag)
-			{
-				ph.pushValue(tag);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	static ArgEnum type()
-	{
-		return ScriptParserBase::getArgType<ReturnType>();
-	}
-};
-
 ////////////////////////////////////////////////////////////
 //					ArgSelector class
 ////////////////////////////////////////////////////////////
@@ -781,9 +751,27 @@ struct ArgSelector<int>
 };
 
 template<>
-struct ArgSelector<const int&>
+struct ArgSelector<const int&> : ArgSelector<int>
 {
-	using type = Arg<ArgConstDef, ArgRegDef<int>>;
+
+};
+
+template<typename T, typename I>
+struct ArgSelector<ScriptTag<T, I>>
+{
+	using type = Arg<ArgValueDef<ScriptTag<T, I>>, ArgRegDef<ScriptTag<T, I>>>;
+};
+
+template<typename T, typename I>
+struct ArgSelector<ScriptTag<T, I>&>
+{
+	using type = Arg<ArgRegDef<ScriptTag<T, I>>>;
+};
+
+template<typename T, typename I>
+struct ArgSelector<const ScriptTag<T, I>&> : ArgSelector<ScriptTag<T, I>>
+{
+
 };
 
 template<>
@@ -838,12 +826,6 @@ template<>
 struct ArgSelector<std::nullptr_t>
 {
 	using type = Arg<ArgNullDef>;
-};
-
-template<typename T, typename I>
-struct ArgSelector<ScriptTag<T, I>>
-{
-	using type = Arg<ArgTagDef<T, I>>;
 };
 
 template<typename T>
