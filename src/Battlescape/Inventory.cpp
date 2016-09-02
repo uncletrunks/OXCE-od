@@ -352,22 +352,6 @@ void Inventory::drawItems()
 			}
 		}
 
-		// give it a border
-		// this is the "darker" shade that goes in the corners.
-		for (int x = -1; x <= 1; x += 2)
-		{
-			for (int y = -1; y <= 1; y += 2)
-			{
-				stackLayer.blitNShade(_items, x, y, 11);
-			}
-		}
-		// this is the "slightly darker" version that goes in four cardinals.
-		for (int z = -1; z <= 1; z += 2)
-		{
-			stackLayer.blitNShade(_items, z, 0, 8);
-			stackLayer.blitNShade(_items, 0, z, 8);
-		}
-		// and finally the number itself
 		stackLayer.blit(_items);
 	}
 }
