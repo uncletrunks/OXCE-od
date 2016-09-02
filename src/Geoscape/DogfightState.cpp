@@ -595,7 +595,7 @@ DogfightState::~DogfightState()
 			{
 				if (RNG::percent((*it)->getRules()->getDogfightExperience().bravery))
 				{
-					(*it)->getCurrentStats()->bravery++;
+					(*it)->getCurrentStats()->bravery += 10; // increase by 10 to keep OCD at bay
 				}
 			}
 		}
