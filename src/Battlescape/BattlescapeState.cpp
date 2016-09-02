@@ -461,6 +461,8 @@ BattlescapeState::BattlescapeState() : _reserve(0), _xBeforeMouseScrolling(0), _
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnReloadClick, Options::keyBattleReload);
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnPersonalLightingClick, Options::keyBattlePersonalLighting);
 
+	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnNightVisionClick, Options::keyNightVisionToggle);
+
 	SDLKey buttons[] = {Options::keyBattleCenterEnemy1,
 						Options::keyBattleCenterEnemy2,
 						Options::keyBattleCenterEnemy3,
@@ -1297,6 +1299,15 @@ void BattlescapeState::btnPersonalLightingClick(Action *)
 {
 	if (allowButtons())
 		_save->getTileEngine()->togglePersonalLighting();
+}
+
+/**
+ * Toggles map-wide night vision (purely cosmetic).
+ * @param action Pointer to an action.
+ */
+void BattlescapeState::btnNightVisionClick(Action *action)
+{
+	_map->toggleNightVision();
 }
 
 /**
