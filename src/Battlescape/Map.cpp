@@ -435,7 +435,7 @@ void Map::drawTerrain(Surface *surface)
 
 					if (tile->isDiscovered(2))
 					{
-						tileShade = reShade(tile->getShade());
+						tileShade = reShade(tile);
 					}
 					else
 					{
@@ -487,7 +487,7 @@ void Map::drawTerrain(Surface *surface)
 						int tileNorthShade, tileTwoNorthShade, tileWestShade, tileNorthWestShade, tileSouthWestShade;
 						if (tileNorth->isDiscovered(2))
 						{
-							tileNorthShade = reShade(tileNorth->getShade());
+							tileNorthShade = reShade(tileNorth);
 						}
 						else
 						{
@@ -526,7 +526,7 @@ void Map::drawTerrain(Surface *surface)
 								Tile *tileTwoNorth = _save->getTile(mapPosition - Position(0,2,0));
 								if (tileTwoNorth->isDiscovered(2))
 								{
-									tileTwoNorthShade = reShade(tileTwoNorth->getShade());
+									tileTwoNorthShade = reShade(tileTwoNorth);
 								}
 								else
 								{
@@ -547,7 +547,7 @@ void Map::drawTerrain(Surface *surface)
 								Tile *tileNorthWest = _save->getTile(mapPosition - Position(1,1,0));
 								if (tileNorthWest->isDiscovered(2))
 								{
-									tileNorthWestShade = reShade(tileNorthWest->getShade());
+									tileNorthWestShade = reShade(tileNorthWest);
 								}
 								else
 								{
@@ -581,7 +581,7 @@ void Map::drawTerrain(Surface *surface)
 									Tile *tileSouthWest = _save->getTile(mapPosition + Position(-1, 1, 0));
 									if (tileSouthWest->isDiscovered(2))
 									{
-										tileSouthWestShade = reShade(tileSouthWest->getShade());
+										tileSouthWestShade = reShade(tileSouthWest);
 									}
 									else
 									{
@@ -601,7 +601,7 @@ void Map::drawTerrain(Surface *surface)
 								BattleUnit *westUnit = tileWest->getUnit();
 								if (tileWest->isDiscovered(2))
 								{
-									tileWestShade = reShade(tileWest->getShade());
+									tileWestShade = reShade(tileWest);
 								}
 								else
 								{
@@ -613,7 +613,7 @@ void Map::drawTerrain(Surface *surface)
 								{
 									if ((tileWest->getMapData(O_WESTWALL)->isDoor() || tileWest->getMapData(O_WESTWALL)->isUFODoor())
 											&& tileWest->isDiscovered(0))
-										wallShade = reShade(tileWest->getShade());
+										wallShade = reShade(tileWest);
 									else
 										wallShade = tileWestShade;
 									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_WESTWALL)->getYOffset() + tileOffset.y, wallShade, true, _nvColor);
@@ -623,7 +623,7 @@ void Map::drawTerrain(Surface *surface)
 								{
 									if ((tileWest->getMapData(O_NORTHWALL)->isDoor() || tileWest->getMapData(O_NORTHWALL)->isUFODoor())
 											&& tileWest->isDiscovered(1))
-										wallShade = reShade(tileWest->getShade());
+										wallShade = reShade(tileWest);
 									else
 										wallShade = tileWestShade;
 									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_NORTHWALL)->getYOffset() + tileOffset.y, wallShade, true, _nvColor);
@@ -717,7 +717,7 @@ void Map::drawTerrain(Surface *surface)
 						{
 							if ((tile->getMapData(O_WESTWALL)->isDoor() || tile->getMapData(O_WESTWALL)->isUFODoor())
 								 && tile->isDiscovered(0))
-								wallShade = reShade(tile->getShade());
+								wallShade = reShade(tile);
 							else
 								wallShade = tileShade;
 							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_WESTWALL)->getYOffset(), wallShade, false, _nvColor);
@@ -728,7 +728,7 @@ void Map::drawTerrain(Surface *surface)
 						{
 							if ((tile->getMapData(O_NORTHWALL)->isDoor() || tile->getMapData(O_NORTHWALL)->isUFODoor())
 								 && tile->isDiscovered(1))
-								wallShade = reShade(tile->getShade());
+								wallShade = reShade(tile);
 							else
 								wallShade = tileShade;
 							if (tile->getMapData(O_WESTWALL))
@@ -915,7 +915,7 @@ void Map::drawTerrain(Surface *surface)
 								tunit, part,
 								offset.x,
 								offset.y,
-								reShade(ttile->getShade())
+								reShade(ttile)
 							);
 						}
 					}
@@ -1356,9 +1356,33 @@ void Map::toggleNightVision()
  * @param original tile/item/unit shade
  */
 
-int Map::reShade(const int shade)
+int Map::reShade(Tile *tile)
 {
-	return shade > _fadeShade ? _fadeShade : shade;
+	// no night vision
+	if ((_save->getGlobalShade() <= NIGHT_VISION_THRESHOLD))
+	{
+		return tile->getShade();
+	}
+
+	// full night vision
+	if (Options::fullNightVision)
+	{
+		return tile->getShade() > _fadeShade ? _fadeShade : tile->getShade();
+	}
+
+	// local night vision
+	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+	{
+		if ((*i)->getFaction() == FACTION_PLAYER && !(*i)->isOut())
+		{
+			if (_save->getTileEngine()->distanceSq(tile->getPosition(), (*i)->getPosition(), false) <= (*i)->getArmor()->getVisibilityAtDark() * (*i)->getArmor()->getVisibilityAtDark())
+			{
+				return tile->getShade() > _fadeShade ? _fadeShade : tile->getShade();
+			}
+		}
+	}
+
+	return tile->getShade();
 }
 
 /**

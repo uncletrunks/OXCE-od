@@ -37,6 +37,7 @@ class BattlescapeMessage;
 class Camera;
 class Timer;
 class Text;
+class Tile;
 
 enum CursorType { CT_NONE, CT_NORMAL, CT_AIM, CT_PSI, CT_WAYPOINT, CT_THROW };
 /**
@@ -157,7 +158,7 @@ public:
 	/// Check if the screen is flashing this.
 	bool getBlastFlash();
 	/// Modify shade for fading
-	int reShade(const int shade);
+	int reShade(Tile *tile);
 	/// toggle the night-vision mode
 	void toggleNightVision();
 
