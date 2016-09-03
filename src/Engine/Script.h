@@ -107,6 +107,7 @@ constexpr ArgSpecEnum operator^(ArgSpecEnum a, ArgSpecEnum b)
 {
 	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) ^ static_cast<Uint8>(b));
 }
+
 /**
  * Args types.
  */
@@ -143,30 +144,21 @@ constexpr ArgEnum ArgSpec(ArgEnum arg, ArgSpecEnum spec)
 	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) | static_cast<Uint8>(spec)) : arg;
 }
 /**
- * Specialized version of argument type.
+ * Remove specialization from argument type.
  */
 constexpr ArgEnum ArgRemove(ArgEnum arg, ArgSpecEnum spec)
 {
 	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) & ~static_cast<Uint8>(spec)) : arg;
 }
 /**
- * Test if argument is normal type or special.
- * @param arg
- * @return True if type is normal.
- */
-constexpr bool ArgIsNormal(ArgEnum arg)
-{
-	return ArgBase(arg) != ArgInvalid;
-}
-/**
- * Test if argumet type is register.
+ * Test if argumet type is register (readonly or writeable).
  */
 constexpr bool ArgIsReg(ArgEnum arg)
 {
 	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecReg)) == static_cast<Uint8>(ArgSpecReg);
 }
 /**
- * Test if argumet type is register.
+ * Test if argumet type is variable (writeable register).
  */
 constexpr bool ArgIsVar(ArgEnum arg)
 {
@@ -187,20 +179,21 @@ constexpr bool ArgIsPtrE(ArgEnum arg)
 	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecPtrE)) == static_cast<Uint8>(ArgSpecPtrE);
 }
 /**
- * Compatibility betwean operation argument type and reg type. Greater numbers mean bigger comatibility.
+ * Compatibility betwean operation argument type and variable type. Greater numbers mean bigger comatibility.
  * @param argType Type of operation argument.
- * @param regType Type of reg we try pass to operation.
+ * @param varType Type of variable/value we try pass to operation.
  * @return Zero if incompatible, 255 if both types are same.
  */
-constexpr int ArgCompatible(ArgEnum argType, ArgEnum regType, size_t overloadSize)
+constexpr int ArgCompatible(ArgEnum argType, ArgEnum varType, size_t overloadSize)
 {
 	return
 		argType == ArgInvalid ? 0 :
-		ArgIsVar(argType) && argType != regType ? 0 :
-		ArgBase(argType) != ArgBase(regType) ? 0 :
-		ArgIsReg(argType) != ArgIsReg(regType) ? 0 :
-		ArgIsPtr(argType) != ArgIsPtr(regType) ? 0 :
-			255 - (ArgIsPtrE(argType) != ArgIsPtrE(regType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(regType) ? 64 : 0) - (overloadSize > 8 ? 8 : overloadSize);
+		ArgIsVar(argType) && argType != varType ? 0 :
+		ArgBase(argType) != ArgBase(varType) ? 0 :
+		ArgIsReg(argType) != ArgIsReg(varType) ? 0 :
+		ArgIsPtr(argType) != ArgIsPtr(varType) ? 0 :
+		ArgIsPtrE(argType) && ArgIsPtr(varType) ? 0 :
+			255 - (ArgIsPtrE(argType) != ArgIsPtrE(varType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(varType) ? 64 : 0) - (overloadSize > 8 ? 8 : overloadSize);
 }
 
 /**
@@ -765,6 +758,10 @@ protected:
 		else if (std::is_same<T, std::nullptr_t>::value)
 		{
 			return ArgNull;
+		}
+		else if (std::is_same<T, ProgPos>::value)
+		{
+			return ArgLabel;
 		}
 		else
 		{
