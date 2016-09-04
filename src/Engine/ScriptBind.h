@@ -706,7 +706,7 @@ struct ArgRawDef
 
 struct ArgNullDef
 {
-	using ReturnType = nullptr_t;
+	using ReturnType = std::nullptr_t;
 	static constexpr size_t size = 0;
 	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
