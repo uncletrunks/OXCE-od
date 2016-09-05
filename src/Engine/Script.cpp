@@ -531,7 +531,7 @@ int overloadCustomProc(const ScriptProcData& spd, const ScriptRefData* begin, co
 /**
  * Helper choosing corrct overload function to call.
  */
-bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc, const SelectedToken* begin, const SelectedToken* end)
+bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	if (!proc)
 	{
@@ -542,15 +542,11 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc,
 		return false;
 	}
 
-	ScriptRefData typeArg[ScriptMaxArg];
-	auto beginArg = std::begin(typeArg);
-	auto endArg = std::transform(begin, end, beginArg, [&](const SelectedToken& st){ return ph.getReferece(st); });
-
 	int bestSorce = 0;
 	const ScriptProcData* bestValue = nullptr;
 	for (auto& p : proc)
 	{
-		int tempSorce = p.overload(p, beginArg, endArg);
+		int tempSorce = p.overload(p, begin, end);
 		if (tempSorce)
 		{
 			if (tempSorce == bestSorce)
@@ -595,7 +591,7 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc,
  * Helper used to parse line for build in function.
  */
 template<Uint8 procId, typename FuncGroup>
-bool parseBuildinProc(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseBuildinProc(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	auto opPos = ph.pushProc(procId);
 	int ver = FuncGroup::parse(ph, begin, end);
@@ -613,7 +609,7 @@ bool parseBuildinProc(const ScriptProcData& spd, ParserWriter& ph, const Selecte
 /**
  * Helper used to parse line for custom functions.
  */
-bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	using argFunc = typename helper::ArgSelector<FuncCommon>::type;
 	using argRaw = typename helper::ArgSelector<const Uint8*>::type;
@@ -670,7 +666,7 @@ const ScriptRef ConditionSpecNames[ConditionSpecialSize] =
 /**
  * Helper used of condintion opearations.
  */
-bool parseConditionImpl(ParserWriter& ph, int truePos, int falsePos, const SelectedToken* begin, const SelectedToken* end)
+bool parseConditionImpl(ParserWriter& ph, ScriptRefData truePos, ScriptRefData falsePos, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	constexpr size_t TempArgsSize = 4;
 
@@ -680,19 +676,19 @@ bool parseConditionImpl(ParserWriter& ph, int truePos, int falsePos, const Selec
 		return false;
 	}
 
-	SelectedToken conditionArgs[TempArgsSize] =
+	ScriptRefData conditionArgs[TempArgsSize] =
 	{
 		begin[1],
 		begin[2],
-		{ TokenBuildinLabel, truePos, }, //success
-		{ TokenBuildinLabel, falsePos, }, //failure
+		truePos, //success
+		falsePos, //failure
 	};
 
 	bool equalFunc = false;
 	size_t i = 0;
 	for (; i < ConditionSize; ++i)
 	{
-		if (begin[0] == ConditionNames[i])
+		if (begin[0].name == ConditionNames[i])
 		{
 			if (i < 2) equalFunc = true;
 			if (i & 1) std::swap(conditionArgs[2], conditionArgs[3]); //negate condition result
@@ -702,14 +698,14 @@ bool parseConditionImpl(ParserWriter& ph, int truePos, int falsePos, const Selec
 	}
 	if (i == ConditionSize)
 	{
-		Log(LOG_ERROR) << "Unknown condition: '" + begin[0].toString() + "'";
+		Log(LOG_ERROR) << "Unknown condition: '" + begin[0].name.toString() + "'";
 		return false;
 	}
 
 	const auto proc = ph.parser.getProc(ScriptRef{ equalFunc ? "test_eq" : "test_le" });
 	if (callOverloadProc(ph, proc, std::begin(conditionArgs), std::end(conditionArgs)) == false)
 	{
-		Log(LOG_ERROR) << "Unsupported operator: '" + begin[0].toString() + "'";
+		Log(LOG_ERROR) << "Unsupported operator: '" + begin[0].name.toString() + "'";
 		return false;
 	}
 
@@ -719,7 +715,7 @@ bool parseConditionImpl(ParserWriter& ph, int truePos, int falsePos, const Selec
 /**
  * Parse `or` or `and` conditions.
  */
-bool parseFullConditionImpl(ParserWriter& ph, int falsePos, const SelectedToken* begin, const SelectedToken* end)
+bool parseFullConditionImpl(ParserWriter& ph, ScriptRefData falsePos, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	if (std::distance(begin, end) <= 1)
 	{
@@ -727,8 +723,8 @@ bool parseFullConditionImpl(ParserWriter& ph, int falsePos, const SelectedToken*
 		return false;
 	}
 	const auto truePos = ph.addLabel();
-	const auto orFunc = begin[0] == ConditionSpecNames[0];
-	const auto andFunc = begin[0] == ConditionSpecNames[1];
+	const auto orFunc = begin[0].name == ConditionSpecNames[0];
+	const auto andFunc = begin[0].name == ConditionSpecNames[1];
 	if (orFunc || andFunc)
 	{
 		++begin;
@@ -764,7 +760,7 @@ bool parseFullConditionImpl(ParserWriter& ph, int falsePos, const SelectedToken*
 /**
  * Parser of `if` operation.
  */
-bool parseIf(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseIf(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	ParserWriter::Block block = { BlockIf, ph.addLabel(), ph.addLabel() };
 	ph.codeBlocks.push_back(block);
@@ -775,7 +771,7 @@ bool parseIf(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* b
 /**
  * Parser of `else` operation.
  */
-bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	if (ph.codeBlocks.empty() || ph.codeBlocks.back().type != BlockIf)
 	{
@@ -786,7 +782,7 @@ bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken*
 	ParserWriter::Block& block = ph.codeBlocks.back();
 
 	ph.pushProc(Proc_goto);
-	ph.pushLabel(block.finalLabel);
+	ph.pushLabelTry(block.finalLabel);
 
 	ph.setLabel(block.nextLabel, ph.getCurrPos());
 	if (std::distance(begin, end) == 0)
@@ -805,7 +801,7 @@ bool parseElse(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken*
 /**
  * Parser of `end` operation.
  */
-bool parseEnd(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseEnd(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	if (ph.codeBlocks.empty())
 	{
@@ -821,7 +817,7 @@ bool parseEnd(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 	ParserWriter::Block block = ph.codeBlocks.back();
 	ph.codeBlocks.pop_back();
 
-	if (block.nextLabel != block.finalLabel)
+	if (block.nextLabel.getValue<int>() != block.finalLabel.getValue<int>())
 	{
 		ph.setLabel(block.nextLabel, ph.getCurrPos());
 	}
@@ -832,7 +828,7 @@ bool parseEnd(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 /**
  * Parser of `var` operation that define local variables.
  */
-bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	if (ph.codeBlocks.size() > 0)
 	{
@@ -843,12 +839,12 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 	auto spec = ArgSpecVar;
 	if (begin != end)
 	{
-		if (*begin == ScriptRef{ "ptr" })
+		if (begin[0].name == ScriptRef{ "ptr" })
 		{
 			spec = spec | ArgSpecPtr;
 			++begin;
 		}
-		else if (*begin == ScriptRef{ "ptre" })
+		else if (begin[0].name == ScriptRef{ "ptre" })
 		{
 			spec = spec | ArgSpecPtrE;
 			++begin;
@@ -862,31 +858,36 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 	}
 
 	// adding new custom variables of type selected type.
-	auto type_curr = ph.parser.getType(*begin);
+	auto type_curr = ph.parser.getType(begin[0].name);
 	if (type_curr)
 	{
 		if (type_curr->size == 0 && !(spec & ArgSpecPtr))
 		{
-			Log(LOG_ERROR) << "Can't create variable of type '" << begin->toString() << "'";
+			Log(LOG_ERROR) << "Can't create variable of type '" << begin->name.toString() << "'";
 			return false;
 		}
 
 		++begin;
-		if (begin->getType() != TokenSymbol || begin->find('.') != std::string::npos || ph.addReg(*begin, ArgSpec(type_curr->type, spec)) == false)
+		if (begin[0].type != ArgInvalid || begin[0].name.find('.') != std::string::npos || ph.addReg(begin[0].name, ArgSpec(type_curr->type, spec)) == false)
 		{
-			Log(LOG_ERROR) << "Invalid variable name '" << begin->toString() << "'";
+			Log(LOG_ERROR) << "Invalid variable name '" << begin->name.toString() << "'";
 			return false;
 		}
 		if (size == 3)
 		{
+			ScriptRefData setArgs[2] =
+			{
+				ph.getReferece(begin[0].name),
+				begin[1],
+			};
 			const auto proc = ph.parser.getProc(ScriptRef{ "set" });
-			return callOverloadProc(ph, proc, begin, end);
+			return callOverloadProc(ph, proc, std::begin(setArgs), std::end(setArgs));
 		}
 		return true;
 	}
 	else
 	{
-		Log(LOG_ERROR) << "Invalid type '" << begin->toString() << "'";
+		Log(LOG_ERROR) << "Invalid type '" << begin->name.toString() << "'";
 		return false;
 	}
 }
@@ -894,7 +895,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* 
 /**
  * Parse return statment.
  */
-bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	const auto numberOfArgs = 1;
 
@@ -905,10 +906,9 @@ bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const SelectedToke
 		return false;
 	}
 
-	ScriptRefData ref = ph.getReferece(*begin);
-	if (ref && ref.type == ArgSpec(ArgInt, ArgSpecReg))
+	if (begin[0] && begin[0].type == ArgSpec(ArgInt, ArgSpecReg))
 	{
-		auto reg = ref.value.getValue<RegEnum>();
+		auto reg = begin[0].getValue<RegEnum>();
 		if (reg == RegI0)
 		{
 			// value is on it rigth place, we can quit rigth now.
@@ -923,7 +923,7 @@ bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const SelectedToke
 /**
  * Dummy operation.
  */
-bool parseDummy(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+bool parseDummy(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
 	Log(LOG_ERROR) << "Reserved operation for future use";
 	return false;
@@ -1082,15 +1082,94 @@ ScriptRef addString(std::vector<std::vector<char>>& list, const std::string& s)
 } //namespace
 
 ////////////////////////////////////////////////////////////
-//					ScriptRef class
+//				ParserWriter helpers
 ////////////////////////////////////////////////////////////
+
+/**
+ * Token type
+ */
+enum TokenEnum
+{
+	TokenNone,
+	TokenInvaild,
+	TokenColon,
+	TokenSemicolon,
+	TokenSymbol,
+	TokenNumber,
+};
+
+/**
+ * Struct represents position of token in input string
+ */
+class SelectedToken : public ScriptRef
+{
+	/// type of this token.
+	TokenEnum _type;
+
+public:
+
+	/// Default constructor.
+	SelectedToken() : ScriptRef{ }, _type{ TokenNone }
+	{
+
+	}
+
+	/// Constructor from range.
+	SelectedToken(TokenEnum type, ScriptRef range) : ScriptRef{ range }, _type{ type }
+	{
+
+	}
+
+	/// Get token type.
+	TokenEnum getType() const
+	{
+		return _type;
+	}
+
+	/// Convert token to script ref.
+	ScriptRefData parse(const ParserWriter& ph) const
+	{
+		if (getType() == TokenNumber)
+		{
+			auto str = toString();
+			int value = 0;
+			size_t offset = 0;
+			std::stringstream ss(str);
+			if (str[0] == '-' || str[0] == '+')
+				offset = 1;
+			if (str.size() > 2 + offset && str[offset] == '0' && (str[offset + 1] == 'x' || str[offset + 1] == 'X'))
+				ss >> std::hex;
+			if ((ss >> value))
+				return ScriptRefData{ *this, ArgInt, value };
+		}
+		else if (getType() == TokenSymbol)
+		{
+			auto ref = ph.getReferece(*this);
+			if (ref)
+				return ref;
+		}
+		return ScriptRefData{ *this, ArgInvalid };
+	}
+
+};
+
+class ScriptRefTokens : public ScriptRef
+{
+public:
+	/// Using default constructors.
+	using ScriptRef::ScriptRef;
+
+	/// Extract new token from current object.
+	SelectedToken getNextToken(TokenEnum excepted = TokenNone);
+};
+
 
 /**
  * Function extracting token form range
  * @param excepted what token type we expecting now
  * @return extracted token
  */
-SelectedToken ScriptRef::getNextToken(TokenEnum excepted)
+SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 {
 	//groups of different types of ASCII characters
 	const Uint8 none = 1;
@@ -1408,37 +1487,36 @@ void ParserWriter::updateProc(ReservedPos<ProcOp> pos, int procOffset)
  * @param s name of label.
  * @return true if label was succefuly added.
  */
-bool ParserWriter::pushLabelTry(const ScriptRef& s)
+bool ParserWriter::pushLabelTry(const ScriptRefData& data)
 {
-	ScriptRefData pos = getReferece(s);
-	if (!pos)
+	auto temp = data;
+	if (!temp && temp.name)
 	{
-		pos = addReferece({ s, ArgLabel, addLabel() });
+		temp = addReferece(addLabel(data.name));
 	}
-	if (pos.type != ArgLabel && refLabelsList[pos.value.getValue<int>()] != ProgPos::Unknown)
+	if (temp.type != ArgLabel)
+	{
 		return false;
+	}
 
-	pushLabel(pos.value.getValue<int>());
+	auto index = temp.getValue<int>();
+	if ((!data.name && refLabelsList[index] != ProgPos::Unknown))
+	{
+		return false;
+	}
+	refLabelsUses.push_back(std::make_pair(pushReserved<ProgPos>(), index));
 	return true;
 }
 
 /**
- * Push label arg to proc vector.
- * @param index
- */
-void ParserWriter::pushLabel(int index)
-{
-	refLabelsUses.push_back(std::make_pair(pushReserved<ProgPos>(), index));
-}
-/**
  * Create new label definition for proc vector.
  * @return index of new label.
  */
-int ParserWriter::addLabel()
+ScriptRefData ParserWriter::addLabel(const ScriptRef& name)
 {
 	int pos = refLabelsList.size();
 	refLabelsList.push_back(ProgPos::Unknown);
-	return pos;
+	return ScriptRefData{ name, ArgLabel, pos };
 }
 
 /**
@@ -1447,29 +1525,23 @@ int ParserWriter::addLabel()
  * @param offset set value where label is pointing
  * @return true if operation success
  */
-bool ParserWriter::setLabel(const ScriptRef& s, ProgPos offset)
+bool ParserWriter::setLabel(const ScriptRefData& data, ProgPos offset)
 {
-	ScriptRefData pos = getReferece(s);
-	if (!pos)
+	auto temp = data;
+	if (!temp && temp.name)
 	{
-		pos = addReferece({ s, ArgLabel, addLabel() });
+		temp = addReferece(addLabel(data.name));
 	}
-	if (pos.type != ArgLabel || refLabelsList[pos.value.getValue<int>()] != ProgPos::Unknown)
+	if (temp.type != ArgLabel)
+	{
 		return false;
+	}
 
-	return setLabel(pos.value.getValue<int>(), offset);
-}
-
-/**
- * Setting offset of label on proc vector.
- * @param index index of label.
- * @param offset set value where label is pointing
- * @return true if operation success
- */
-bool ParserWriter::setLabel(int index, ProgPos offset)
-{
+	auto index = temp.getValue<int>();
 	if (refLabelsList[index] != ProgPos::Unknown)
+	{
 		return false;
+	}
 	refLabelsList[index] = offset;
 	return true;
 }
@@ -1479,37 +1551,14 @@ bool ParserWriter::setLabel(int index, ProgPos offset)
  * @param s name of data
  * @return true if data exists and is valid
  */
-bool ParserWriter::pushConstTry(const ScriptRef& s, ArgEnum type)
+bool ParserWriter::pushConstTry(const ScriptRefData& data, ArgEnum type)
 {
-	ScriptRefData pos = getReferece(s);
-	if (pos && pos.type == type && !ArgIsReg(pos.type))
+	if (data && data.type == type && !ArgIsReg(data.type))
 	{
-		pushValue(pos.value);
+		pushValue(data.value);
 		return true;
 	}
 	return false;
-}
-
-/**
- * Try pushing const arg on proc vector.
- * @param s name of const
- * @return true if const exists and is valid
- */
-bool ParserWriter::pushNumberTry(const ScriptRef& s)
-{
-	auto str = s.toString();
-	int value = 0;
-	size_t offset = 0;
-	std::stringstream ss(str);
-	if (str[0] == '-' || str[0] == '+')
-		offset = 1;
-	if (str.size() > 2 + offset && str[offset] == '0' && (str[offset + 1] == 'x' || str[offset + 1] == 'X'))
-		ss >> std::hex;
-	if (!(ss >> value))
-		return false;
-
-	pushValue(value);
-	return true;
 }
 
 /**
@@ -1517,13 +1566,12 @@ bool ParserWriter::pushNumberTry(const ScriptRef& s)
  * @param s name of reg
  * @return true if reg exists and is valid
  */
-bool ParserWriter::pushRegTry(const ScriptRef& s, ArgEnum type)
+bool ParserWriter::pushRegTry(const ScriptRefData& data, ArgEnum type)
 {
-	ScriptRefData pos = getReferece(s);
 	type = ArgSpec(type, ArgSpecReg);
-	if (pos && ArgCompatible(type, pos.type, 0) && pos.value.getValue<RegEnum>() != RegInvaild)
+	if (data && ArgCompatible(type, data.type, 0) && data.value.getValue<RegEnum>() != RegInvaild)
 	{
-		pushValue(static_cast<Uint8>(pos.value.getValue<RegEnum>()));
+		pushValue(static_cast<Uint8>(data.value.getValue<RegEnum>()));
 		return true;
 	}
 	return false;
@@ -1604,7 +1652,7 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 
 	addSortHelper(_typeList, { labelName, ArgLabel, 0 });
 	addSortHelper(_typeList, { nullName, ArgNull, 0 });
-	addSortHelper(_refList, { nullName, ArgNull, {} });
+	addSortHelper(_refList, { nullName, ArgNull });
 }
 
 /**
@@ -1915,7 +1963,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 	);
 
 	bool haveLastReturn = false;
-	ScriptRef range = ScriptRef{ srcCode.data(), srcCode.data() + srcCode.size() };
+	ScriptRefTokens range = ScriptRefTokens{ srcCode.data(), srcCode.data() + srcCode.size() };
 	if (!range)
 	{
 		return false;
@@ -2016,13 +2064,16 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		else
 		{
 			ScriptRef line = ScriptRef{ line_begin, range.begin() };
-
+			ScriptRefData argData[ScriptMaxArg] = { };
 			// matching args form operation definition with args avaliable in string
 			int i = 0;
 			while (i < ScriptMaxArg && args[i].getType() != TokenNone)
+			{
+				argData[i] = args[i].parse(help);
 				++i;
+			}
 
-			if (label && !help.setLabel(label, help.getCurrPos()))
+			if (label && !help.setLabel(label.parse(help), help.getCurrPos()))
 			{
 				Log(LOG_ERROR) << err << "invalid label '"<< label.toString() <<"' in line: '" << line.toString() << "'";
 				return false;
@@ -2031,7 +2082,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 			haveLastReturn = op == ScriptRef{ "return" };
 
 			// create normal proc call
-			if (callOverloadProc(help, op_curr, args, args+i) == false)
+			if (callOverloadProc(help, op_curr, argData, argData+i) == false)
 			{
 				Log(LOG_ERROR) << err << "invalid operation in line: '" << line.toString() << "'";
 				return false;

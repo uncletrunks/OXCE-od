@@ -37,49 +37,6 @@ enum BlockEnum
 	BlockLoop,
 };
 
-/**
- * Struct represents position of token in input string
- */
-class SelectedToken : public ScriptRef
-{
-	/// type of this token.
-	TokenEnum _type;
-	/// custom value.
-	int _tag;
-
-public:
-
-	/// Default constructor.
-	SelectedToken() : ScriptRef{ }, _type{ TokenNone }, _tag{ }
-	{
-
-	}
-
-	/// Constructor from range.
-	SelectedToken(TokenEnum type, ScriptRef range) : ScriptRef{ range }, _type{ type }, _tag{ }
-	{
-
-	}
-
-	/// Constructor from tag.
-	SelectedToken(TokenEnum type, int tag) : ScriptRef{ }, _type{ type }, _tag{ tag }
-	{
-
-	}
-
-	TokenEnum getType() const
-	{
-		return _type;
-	}
-	int getTag() const
-	{
-		return _tag;
-	}
-	void setTag(int i)
-	{
-		_tag = i;
-	}
-};
 
 /**
  * Helper structure used by ScriptParser::parse
@@ -89,8 +46,8 @@ struct ParserWriter
 	struct Block
 	{
 		BlockEnum type;
-		int nextLabel;
-		int finalLabel;
+		ScriptRefData nextLabel;
+		ScriptRefData finalLabel;
 	};
 
 	template<typename T, typename = typename std::enable_if<std::is_pod<T>::value>::type>
@@ -177,42 +134,33 @@ struct ParserWriter
 	void updateProc(ReservedPos<ProcOp> pos, int procOffset);
 
 	/// Try pushing label arg on proc vector. Can't use this to create loop back label.
-	bool pushLabelTry(const ScriptRef& s);
-
-	/// Push label arg to proc vector.
-	void pushLabel(int index);
+	bool pushLabelTry(const ScriptRefData& data);
 
 	/// Create new label for proc vector.
-	int addLabel();
+	ScriptRefData addLabel(const ScriptRef& data = {});
 
 	/// Setting offset of label on proc vector.
-	bool setLabel(const ScriptRef& s, ProgPos offset);
-
-	/// Setting offset of label on proc vector.
-	bool setLabel(int index, ProgPos offset);
-
-	/// Try pushing const arg on proc vector.
-	bool pushNumberTry(const ScriptRef& s);
+	bool setLabel(const ScriptRefData& data, ProgPos offset);
 
 	/// Try pushing reg arg on proc vector.
 	template<typename T>
-	bool pushConstTry(const ScriptRef& s)
+	bool pushConstTry(const ScriptRefData& data)
 	{
-		return pushConstTry(s, ScriptParserBase::getArgType<T>());
+		return pushConstTry(data, ScriptParserBase::getArgType<T>());
 	}
 
 	/// Try pushing data arg on proc vector.
-	bool pushConstTry(const ScriptRef& s, ArgEnum type);
+	bool pushConstTry(const ScriptRefData& data, ArgEnum type);
 
 	/// Try pushing reg arg on proc vector.
 	template<typename T>
-	bool pushRegTry(const ScriptRef& s)
+	bool pushRegTry(const ScriptRefData& data)
 	{
-		return pushRegTry(s, ScriptParserBase::getArgType<T>());
+		return pushRegTry(data, ScriptParserBase::getArgType<T>());
 	}
 
 	/// Try pushing reg arg on proc vector.
-	bool pushRegTry(const ScriptRef& s, ArgEnum type);
+	bool pushRegTry(const ScriptRefData& data, ArgEnum type);
 
 	/// Add new reg arg.
 	template<typename T>
@@ -348,7 +296,7 @@ struct Arg<A1, A2...> : public Arg<A2...>
 	using next::typeFunc;
 	static A1 typeFunc(tag);
 
-	static int parse(ParserWriter& ph, const SelectedToken* t)
+	static int parse(ParserWriter& ph, const ScriptRefData* t)
 	{
 		if (A1::parse(ph, *t))
 		{
@@ -359,7 +307,7 @@ struct Arg<A1, A2...> : public Arg<A2...>
 			return next::parse(ph, t);
 		}
 	}
-	static int parse(ParserWriter& ph, const SelectedToken** begin, const SelectedToken* end)
+	static int parse(ParserWriter& ph, const ScriptRefData** begin, const ScriptRefData* end)
 	{
 		if (*begin == end)
 		{
@@ -371,13 +319,13 @@ struct Arg<A1, A2...> : public Arg<A2...>
 			int curr = parse(ph, *begin);
 			if (curr < 0)
 			{
-				if (ph.getReferece(**begin))
+				if (**begin)
 				{
-					Log(LOG_ERROR) << "Incorrect type of argument '"<< (*begin)->toString() <<"'";
+					Log(LOG_ERROR) << "Incorrect type of argument '"<< (*begin)->name.toString() <<"'";
 				}
 				else
 				{
-					Log(LOG_ERROR) << "Unknown argument '"<< (*begin)->toString() <<"'";
+					Log(LOG_ERROR) << "Unknown argument '"<< (*begin)->name.toString() <<"'";
 				}
 				return -1;
 			}
@@ -407,7 +355,7 @@ struct Arg<>
 	static constexpr int ver() = delete;
 	static void typeFunc() = delete;
 
-	static int parse(ParserWriter& ph, const SelectedToken* begin)
+	static int parse(ParserWriter& ph, const ScriptRefData* begin)
 	{
 		return -1;
 	}
@@ -433,7 +381,7 @@ struct ArgInternal
 
 	static T typeFunc(tag);
 
-	static int parse(ParserWriter& ph, const SelectedToken** begin, const SelectedToken* end)
+	static int parse(ParserWriter& ph, const ScriptRefData** begin, const ScriptRefData* end)
 	{
 		return 0;
 	}
@@ -472,7 +420,7 @@ struct ArgColection<MaxSize, T1, T2...> : public ArgColection<MaxSize, T2...>
 	{
 		return MaxSize;
 	}
-	static int parse(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+	static int parse(ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 	{
 		int curr = T1::parse(ph, &begin, end);
 		if (curr < 0)
@@ -526,7 +474,7 @@ struct ArgColection<MaxSize>
 	{
 		return 0;
 	}
-	static int parse(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end)
+	static int parse(ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 	{
 		//we shoud have used all avaiable tokens.
 		if (begin == end)
@@ -580,13 +528,9 @@ struct ArgRegDef
 		return sw.ref<ReturnType>(*arg);
 	}
 
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	static bool parse(ParserWriter& ph, const ScriptRefData& t)
 	{
-		if (t.getType() == TokenSymbol)
-		{
-			return ph.pushRegTry<ReturnType>(t);
-		}
-		return false;
+		return ph.pushRegTry<ReturnType>(t);
 	}
 
 	static ArgEnum type()
@@ -604,33 +548,14 @@ struct ArgValueDef
 		return sw.const_val<ReturnType>(arg);
 	}
 
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	static bool parse(ParserWriter& ph, const ScriptRefData& t)
 	{
-		if (t.getType() == TokenSymbol)
-		{
-			return ph.pushConstTry<ReturnType>(t);
-		}
-		return false;
+		return ph.pushConstTry<ReturnType>(t);
 	}
 
 	static ArgEnum type()
 	{
 		return ScriptParserBase::getArgType<ReturnType>();
-	}
-};
-
-struct ArgConstDef : ArgValueDef<int>
-{
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
-	{
-		if (t.getType() == TokenNumber)
-		{
-			return ph.pushNumberTry(t);
-		}
-		else
-		{
-			return ArgValueDef<int>::parse(ph, t);
-		}
 	}
 };
 
@@ -643,18 +568,9 @@ struct ArgLabelDef
 		return sw.const_val<ProgPos>(arg);
 	}
 
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	static bool parse(ParserWriter& ph, const ScriptRefData& t)
 	{
-		if (t.getType() == TokenSymbol)
-		{
-			return ph.pushLabelTry(t);
-		}
-		else if (t.getType() == TokenBuildinLabel)
-		{
-			ph.pushLabel(t.getTag());
-			return true;
-		}
-		return false;
+		return ph.pushLabelTry(t);
 	}
 
 	static ArgEnum type()
@@ -672,7 +588,7 @@ struct ArgFuncDef
 		return sw.const_val<FuncCommon>(arg);
 	}
 
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	static bool parse(ParserWriter& ph, const ScriptRefData& t)
 	{
 		return false;
 	}
@@ -693,7 +609,7 @@ struct ArgRawDef
 		return arg;
 	}
 
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	static bool parse(ParserWriter& ph, const ScriptRefData& t)
 	{
 		return false;
 	}
@@ -713,13 +629,9 @@ struct ArgNullDef
 		return nullptr;
 	}
 
-	static bool parse(ParserWriter& ph, const SelectedToken& t)
+	static bool parse(ParserWriter& ph, const ScriptRefData& t)
 	{
-		if (t.getType() == TokenSymbol)
-		{
-			return t == ScriptRef{ "null" };
-		}
-		return false;
+		return t.type == ArgNull;
 	}
 
 	static ArgEnum type()
@@ -747,7 +659,7 @@ struct ArgSelector<int&>
 template<>
 struct ArgSelector<int>
 {
-	using type = Arg<ArgConstDef, ArgRegDef<int>>;
+	using type = Arg<ArgValueDef<int>, ArgRegDef<int>>;
 };
 
 template<>

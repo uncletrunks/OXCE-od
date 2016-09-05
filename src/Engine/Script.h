@@ -219,21 +219,7 @@ enum RetEnum : Uint8
 	RetError = 2,
 };
 
-/**
- * Token type
- */
-enum TokenEnum
-{
-	TokenNone,
-	TokenInvaild,
-	TokenColon,
-	TokenSemicolon,
-	TokenSymbol,
-	TokenNumber,
-	TokenBuildinLabel,
-};
-
-using FuncCommon = RetEnum (*)(ScriptWorkerBase &, const Uint8 *, ProgPos &);
+using FuncCommon = RetEnum (*)(ScriptWorkerBase&, const Uint8*, ProgPos&);
 
 /**
  * Common base of script execution.
@@ -328,13 +314,14 @@ public:
 	}
 };
 
+/**
+ * Raw memory used by scripts.
+ */
 template<int size>
 using ScriptRawMemory = typename std::aligned_storage<size, alignof(void*)>::type;
 
-
-
 /**
- * Class that cache state of script data and is place of script write temporary data.
+ * Class execute scripts and strore its data.
  */
 class ScriptWorkerBase
 {
@@ -365,7 +352,7 @@ protected:
 
 public:
 	/// Default constructor.
-	ScriptWorkerBase() //reg not initialized
+	ScriptWorkerBase()
 	{
 
 	}
@@ -384,6 +371,9 @@ public:
 	}
 };
 
+/**
+ * Strong typed script executor.
+ */
 template<typename... Args>
 class ScriptWorker : public ScriptWorkerBase
 {
@@ -428,6 +418,9 @@ public:
 	}
 };
 
+/**
+ * Strong typed blit script executor.
+ */
 class ScriptWorkerBlit : public ScriptWorkerBase
 {
 	/// Current script set in worker.
@@ -465,6 +458,9 @@ public:
 	}
 };
 
+/**
+ * Range of values.
+ */
 template<typename T>
 class ScriptRange
 {
@@ -510,14 +506,14 @@ public:
 	}
 };
 
+/**
+ * Symbol in script.
+ */
 class ScriptRef : public ScriptRange<char>
 {
 public:
 	/// Default constructor.
-	ScriptRef() : ScriptRange{ }
-	{
-
-	}
+	ScriptRef() = default;
 
 	/// Copy constructor.
 	ScriptRef(const ScriptRef&) = default;
@@ -532,9 +528,6 @@ public:
 	{
 
 	}
-
-	/// Extract new token from current object.
-	SelectedToken getNextToken(TokenEnum excepted = TokenNone);
 
 	/// Find first orrucace of character in string range.
 	size_t find(char c) const
@@ -612,7 +605,7 @@ public:
 };
 
 /**
- * Struct storing storing type data.
+ * Struct storing script type data.
  */
 struct ScriptTypeData
 {
@@ -622,7 +615,7 @@ struct ScriptTypeData
 };
 
 /**
- * Struct storing value used by string.
+ * Struct storing value used by script.
  */
 struct ScriptValueData
 {
@@ -655,12 +648,27 @@ struct ScriptValueData
 struct ScriptRefData
 {
 	ScriptRef name;
-	ArgEnum type;
+	ArgEnum type = ArgInvalid;
 	ScriptValueData value;
 
+	/// Default constructor.
+	ScriptRefData() { }
+	/// Constructor.
+	ScriptRefData(ScriptRef n, ArgEnum t) : name{ n }, type{ t } {  }
+	/// Constructor.
+	ScriptRefData(ScriptRef n, ArgEnum t, ScriptValueData v) : name{ n }, type{ t }, value{ v } {  }
+
+	/// Bool operator.
 	explicit operator bool() const
 	{
-		return name.size() > 0;
+		return type != ArgInvalid;
+	}
+
+	/// Get current stored value.
+	template<typename T>
+	inline const T& getValue() const
+	{
+		return value.getValue<T>();
 	}
 };
 
@@ -669,9 +677,9 @@ struct ScriptRefData
  */
 struct ScriptProcData
 {
-	using argFunc = int (*)(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using argFunc = int (*)(ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end);
 	using getFunc = FuncCommon (*)(int version);
-	using parserFunc = bool (*)(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using parserFunc = bool (*)(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end);
 	using overloadFunc = int (*)(const ScriptProcData& spd, const ScriptRefData* begin, const ScriptRefData* end);
 
 	ScriptRef name;
@@ -683,7 +691,7 @@ struct ScriptProcData
 	argFunc parserArg;
 	getFunc parserGet;
 
-	bool operator()(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end) const
+	bool operator()(ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end) const
 	{
 		return parser(*this, ph, begin, end);
 	}
