@@ -829,6 +829,16 @@ struct BindEq
 		return RetContinue;
 	}
 };
+template<typename T>
+struct BindClear
+{
+	static RetEnum func(T*& t)
+	{
+		t = nullptr;
+		return RetContinue;
+	}
+};
+
 template<typename T, typename P, P T::*X>
 struct BindPropGet
 {
@@ -1018,6 +1028,8 @@ struct Bind : BindBase
 		parser->addParser<helper::FuncGroup<helper::BindSet<const T>>>("set");
 		parser->addParser<helper::FuncGroup<helper::BindSet<T>>>("swap");
 		parser->addParser<helper::FuncGroup<helper::BindSet<const T>>>("swap");
+		parser->addParser<helper::FuncGroup<helper::BindClear<T>>>("clear");
+		parser->addParser<helper::FuncGroup<helper::BindClear<const T>>>("clear");
 		parser->addParser<helper::FuncGroup<helper::BindEq<T>>>("test_eq");
 	}
 

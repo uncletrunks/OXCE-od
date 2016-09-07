@@ -187,6 +187,8 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	\
 	IMPL(set,		MACRO_QUOTE({ Reg0 = Data1;										return RetContinue; }),		(ScriptWorkerBase& c, int& Reg0, int Data1),	"arg1 = arg2") \
 	\
+	IMPL(clear,		MACRO_QUOTE({ Reg0 = 0;											return RetContinue; }),		(ScriptWorkerBase& c, int& Reg0),				"arg1 = 0") \
+	\
 	IMPL(test_le,	MACRO_QUOTE({ Prog = (A <= B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse),	"") \
 	IMPL(test_eq,	MACRO_QUOTE({ Prog = (A == B) ? LabelTrue : LabelFalse;			return RetContinue; }),		(ProgPos& Prog, int A, int B, ProgPos LabelTrue, ProgPos LabelFalse),	"") \
 	\
@@ -870,12 +872,12 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
 		++begin;
 		if (begin[0].type != ArgInvalid || begin[0].name.find('.') != std::string::npos || ph.addReg(begin[0].name, ArgSpec(type_curr->type, spec)) == false)
 		{
-			Log(LOG_ERROR) << "Invalid variable name '" << begin->name.toString() << "'";
+			Log(LOG_ERROR) << "Invalid variable name '" << begin[0].name.toString() << "'";
 			return false;
 		}
 		if (size == 3)
 		{
-			ScriptRefData setArgs[2] =
+			ScriptRefData setArgs[] =
 			{
 				ph.getReferece(begin[0].name),
 				begin[1],
@@ -883,11 +885,20 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
 			const auto proc = ph.parser.getProc(ScriptRef{ "set" });
 			return callOverloadProc(ph, proc, std::begin(setArgs), std::end(setArgs));
 		}
+		else
+		{
+			ScriptRefData setArgs[] =
+			{
+				ph.getReferece(begin[0].name),
+			};
+			const auto proc = ph.parser.getProc(ScriptRef{ "clear" });
+			return callOverloadProc(ph, proc, std::begin(setArgs), std::end(setArgs));
+		}
 		return true;
 	}
 	else
 	{
-		Log(LOG_ERROR) << "Invalid type '" << begin->name.toString() << "'";
+		Log(LOG_ERROR) << "Invalid type '" << begin[0].name.toString() << "'";
 		return false;
 	}
 }
@@ -1553,7 +1564,7 @@ bool ParserWriter::setLabel(const ScriptRefData& data, ProgPos offset)
  */
 bool ParserWriter::pushConstTry(const ScriptRefData& data, ArgEnum type)
 {
-	if (data && data.type == type && !ArgIsReg(data.type))
+	if (data && data.type == type && !ArgIsReg(data.type) && data.value.type == type)
 	{
 		pushValue(data.value);
 		return true;
@@ -1963,6 +1974,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 	);
 
 	bool haveLastReturn = false;
+	bool haveCodeNormal = false;
 	ScriptRefTokens range = ScriptRefTokens{ srcCode.data(), srcCode.data() + srcCode.size() };
 	if (!range)
 	{
@@ -1984,7 +1996,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 			}
 			if (!haveLastReturn)
 			{
-				Log(LOG_ERROR) << err << "script need to end with return statemlent";
+				Log(LOG_ERROR) << err << "script need to end with return statement";
 			}
 			help.relese();
 			destScript = std::move(tempScript);
@@ -2051,6 +2063,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 				if (line_end != range.end())
 					++line_end;
 			}
+
 			if (args[ScriptMaxArg - 1].getType() != TokenNone)
 			{
 				Log(LOG_ERROR) << err << "too many arguments in line: '" << std::string(line_begin, line_end) << "'";
@@ -2061,32 +2074,54 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 			}
 			return false;
 		}
-		else
+
+		ScriptRef line = ScriptRef{ line_begin, range.begin() };
+		ScriptRefData argData[ScriptMaxArg] = { };
+
+		// test validty of operation positions
+		auto isReturn = (op == ScriptRef{ "return" });
+		auto isVarDef = (op == ScriptRef{ "var" });
+		auto isEnd = (op == ScriptRef{ "end" }) || (op == ScriptRef{ "else" });
+
+		if (haveLastReturn && !isEnd)
 		{
-			ScriptRef line = ScriptRef{ line_begin, range.begin() };
-			ScriptRefData argData[ScriptMaxArg] = { };
-			// matching args form operation definition with args avaliable in string
-			int i = 0;
-			while (i < ScriptMaxArg && args[i].getType() != TokenNone)
-			{
-				argData[i] = args[i].parse(help);
-				++i;
-			}
+			Log(LOG_ERROR) << err << "unreachable line after return: '" << line.toString() << "'";
+			return false;
+		}
+		if (haveCodeNormal && isVarDef)
+		{
+			Log(LOG_ERROR) << err << "invalid variable definition after other operations: '" << line.toString() << "'";
+			return false;
+		}
+		if (label && isVarDef)
+		{
+			Log(LOG_ERROR) << err << "label can't be before variable definition: '" << line.toString() << "'";
+			return false;
+		}
 
-			if (label && !help.setLabel(label.parse(help), help.getCurrPos()))
-			{
-				Log(LOG_ERROR) << err << "invalid label '"<< label.toString() <<"' in line: '" << line.toString() << "'";
-				return false;
-			}
+		haveLastReturn = isReturn;
+		haveCodeNormal = !isVarDef;
 
-			haveLastReturn = op == ScriptRef{ "return" };
 
-			// create normal proc call
-			if (callOverloadProc(help, op_curr, argData, argData+i) == false)
-			{
-				Log(LOG_ERROR) << err << "invalid operation in line: '" << line.toString() << "'";
-				return false;
-			}
+		// matching args form operation definition with args avaliable in string
+		int i = 0;
+		while (i < ScriptMaxArg && args[i].getType() != TokenNone)
+		{
+			argData[i] = args[i].parse(help);
+			++i;
+		}
+
+		if (label && !help.setLabel(label.parse(help), help.getCurrPos()))
+		{
+			Log(LOG_ERROR) << err << "invalid label '"<< label.toString() <<"' in line: '" << line.toString() << "'";
+			return false;
+		}
+
+		// create normal proc call
+		if (callOverloadProc(help, op_curr, argData, argData+i) == false)
+		{
+			Log(LOG_ERROR) << err << "invalid operation in line: '" << line.toString() << "'";
+			return false;
 		}
 	}
 }
