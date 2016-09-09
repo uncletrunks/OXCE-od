@@ -179,9 +179,7 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
  */
 #define MACRO_PROC_DEFINITION(IMPL) \
 	/*	Name,		Implementation,													End excecution,				Args,					Description */ \
-	IMPL(ret_none,	MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorkerBase &),	"") \
-	\
-	IMPL(ret_set,	MACRO_QUOTE({ c.ref<int>(RegI0) = Data0;						return RetEnd;		}),		(ScriptWorkerBase& c, int Data0),	"") \
+	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorkerBase&),	"") \
 	\
 	IMPL(goto,		MACRO_QUOTE({ Prog = Label1;									return RetContinue; }),		(ScriptWorkerBase& c, ProgPos& Prog, ProgPos Label1),	"") \
 	\
@@ -300,15 +298,11 @@ enum ProcEnum : Uint8
 
 /**
  * Core function in script engine used to executing scripts
- * @param i0 arg that is visible in script under name "i0"
- * @param i1 arg that is visible in script under name "i1"
  * @param proc array storing operation of script
  * @return Result of executing script
  */
-static inline int scriptExe(int i0, int i1, ScriptWorkerBase& data, const Uint8* proc)
+static inline void scriptExe(ScriptWorkerBase& data, const Uint8* proc)
 {
-	data.ref<int>(RegI0) = i0;
-	data.ref<int>(RegI1) = i1;
 	ProgPos curr = ProgPos::Start;
 	//--------------------------------------------------
 	//			helper macros for this function
@@ -353,43 +347,21 @@ static inline int scriptExe(int i0, int i1, ScriptWorkerBase& data, const Uint8*
 	#undef MACRO_FUNC_ARRAY
 	//--------------------------------------------------
 
-	endLabel:
-	return data.ref<int>(RegI0);
 	errorLabel:
 	static int bugCount = 0;
 	if (++bugCount < 100)
 	{
 		Log(LOG_ERROR) << "Invaild script operation for OpId: " << std::hex << std::showbase << (int)proc[(int)curr] <<" at "<< (int)curr;
 	}
-	return 0;
+
+	endLabel:
+	return;
 }
 
 
 ////////////////////////////////////////////////////////////
 //						Script class
 ////////////////////////////////////////////////////////////
-
-namespace
-{
-
-/**
- * struct used to bliting script
- */
-struct ScriptReplace
-{
-	static inline void func(Uint8& dest, const Uint8& src, ScriptWorkerBase& ref, const Uint8* proc)
-	{
-		if (src)
-		{
-			const int s = scriptExe(src, dest, ref, proc);
-			if (s) dest = s;
-		}
-	}
-};
-
-} //namespace
-
-
 
 /**
  * Bliting one surface to another using script.
@@ -408,26 +380,36 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 		srcShader.setDomain(g);
 	}
 	if (_proc)
-		ShaderDraw<ScriptReplace>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(*this), ShaderScalar(_proc));
+	{
+		ShaderDrawFunc(
+			[&](Uint8& dest, const Uint8& src)
+			{
+				if (src)
+				{
+					ScriptWorkerBlit::Output arg = { src, dest };
+					set(arg);
+					scriptExe(*this, _proc);
+					get(arg);
+					if (arg.getFirst()) dest = arg.getFirst();
+				}
+			},
+			ShaderSurface(dest, 0, 0),
+			srcShader
+		);
+	}
 	else
 		ShaderDraw<helper::StandardShade>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(shade));
 }
 
 /**
  * Execute script with two arguments.
- * @param i0 arg that is visible in script under name "i0"
- * @param i1 arg that is visible in script under name "i1"
  * @return Result value from script.
  */
-int ScriptWorkerBase::executeBase(const Uint8* proc, int i0, int i1)
+void ScriptWorkerBase::executeBase(const Uint8* proc)
 {
 	if (proc)
 	{
-		return scriptExe(i0, i1, *this, proc);
-	}
-	else
-	{
-		return i0;
+		scriptExe(*this, proc);
 	}
 }
 
@@ -870,7 +852,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
 		}
 
 		++begin;
-		if (begin[0].type != ArgInvalid || begin[0].name.find('.') != std::string::npos || ph.addReg(begin[0].name, ArgSpec(type_curr->type, spec)) == false)
+		if (begin[0].type != ArgInvalid || begin[0].name.find('.') != std::string::npos || ph.addReg(begin[0].name, ArgSpecAdd(type_curr->type, spec)) == false)
 		{
 			Log(LOG_ERROR) << "Invalid variable name '" << begin[0].name.toString() << "'";
 			return false;
@@ -908,27 +890,111 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
  */
 bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
-	const auto numberOfArgs = 1;
-
 	auto size = std::distance(begin, end);
-	if (numberOfArgs != size)
+	if (ph.parser.getParamSize() != size)
 	{
 		Log(LOG_ERROR) << "Invaild length of returns arguments";
 		return false;
 	}
 
-	if (begin[0] && begin[0].type == ArgSpec(ArgInt, ArgSpecReg))
+	ScriptRefData outputRegsData[ScriptMaxOut] = { };
+	RegEnum currValueIndex[ScriptMaxOut] = { };
+	RegEnum newValueIndex[ScriptMaxOut] = { };
+
+	for (int i = 0; i < size; ++i)
 	{
-		auto reg = begin[0].getValue<RegEnum>();
-		if (reg == RegI0)
+		outputRegsData[i] = *ph.parser.getParamData(i);
+		if (begin[i].isValueType<RegEnum>() && !ArgCompatible(outputRegsData[i].type, begin[i].type, 1))
 		{
-			// value is on it rigth place, we can quit rigth now.
-			ph.pushProc(Proc_ret_none);
-			return true;
+			Log(LOG_ERROR) << "Invaild return argument '" + begin[i].name.toString() + "'";
+			return false;
+		}
+		currValueIndex[i] = outputRegsData[i].getValue<RegEnum>();
+		newValueIndex[i] = begin[i].getValueOrDefulat<RegEnum>(RegInvaild);
+		if (currValueIndex[i] == newValueIndex[i])
+		{
+			currValueIndex[i] = RegInvaild;
 		}
 	}
-	const auto proc = ph.parser.getProc(ScriptRef{ "ret_set" });
-	return callOverloadProc(ph, proc, begin, end);
+
+	// matching return arguments to return register,
+	// sometimes curret value in one register is needed in another.
+	// we need find order of assigments that will not lose any value.
+	auto any_changed = true;
+	auto all_free = false;
+	while (!all_free && any_changed)
+	{
+		all_free = true;
+		any_changed = false;
+		for (int i = 0; i < size; ++i)
+		{
+			if (currValueIndex[i] == RegInvaild)
+			{
+				continue;
+			}
+			auto free = true;
+			for (int j = 0; j < size; ++j)
+			{
+				if (i != j && currValueIndex[i] == newValueIndex[j])
+				{
+					free = false;
+					break;
+				}
+			}
+			if (free)
+			{
+				any_changed = true;
+				currValueIndex[i] = RegInvaild;
+				ScriptRefData temp[] = { outputRegsData[i], begin[i] };
+
+				const auto proc = ph.parser.getProc(ScriptRef{ "set" });
+				if (!callOverloadProc(ph, proc, std::begin(temp), std::end(temp)))
+				{
+					Log(LOG_ERROR) << "Invaild return argument '" + begin[i].name.toString() + "'";
+					return false;
+				}
+			}
+			else
+			{
+				all_free = false;
+			}
+		}
+	}
+
+	if (!all_free)
+	{
+		// now we can have only cases where return register have circular dependencies:
+		// e.g. A need B, B need C and C need A.
+		// using swap we can fix circular dependencies.
+		for (int i = 0; i < size; ++i)
+		{
+			if (currValueIndex[i] == RegInvaild)
+			{
+				continue;
+			}
+
+			for (int j = 0; j < size; ++j)
+			{
+				if (i != j && newValueIndex[i] == currValueIndex[j])
+				{
+					ScriptRefData temp[] = { outputRegsData[i], outputRegsData[j] };
+
+					const auto proc = ph.parser.getProc(ScriptRef{ "swap" });
+					if (!callOverloadProc(ph, proc, std::begin(temp), std::end(temp)))
+					{
+						return false;
+					}
+
+					// now value from 'i' is in 'j'
+					currValueIndex[j] = currValueIndex[i];
+					currValueIndex[i] = RegInvaild;
+					break;
+				}
+			}
+		}
+	}
+	ph.pushProc(Proc_exit);
+	return true;
 }
 
 /**
@@ -1352,11 +1418,9 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 
 /**
  * Constructor
- * @param scr parsed script
- * @param proc member pointer accessing script operations
- * @param procRefData member pointer accessing script data
- * @param procList all available operations for script
- * @param ref all available data for script
+ * @param regUsed current used reg space.
+ * @param c container that will be fill with script data.
+ * @param d parser having all meta data.
  */
 ParserWriter::ParserWriter(
 		Uint8 regUsed,
@@ -1378,7 +1442,7 @@ ParserWriter::ParserWriter(
  */
 void ParserWriter::relese()
 {
-	pushProc(Proc_ret_none);
+	pushProc(Proc_exit);
 	for (auto& p : refLabelsUses)
 	{
 		updateReserved<ProgPos>(p.first, refLabelsList[p.second]);
@@ -1579,10 +1643,10 @@ bool ParserWriter::pushConstTry(const ScriptRefData& data, ArgEnum type)
  */
 bool ParserWriter::pushRegTry(const ScriptRefData& data, ArgEnum type)
 {
-	type = ArgSpec(type, ArgSpecReg);
-	if (data && ArgCompatible(type, data.type, 0) && data.value.getValue<RegEnum>() != RegInvaild)
+	type = ArgSpecAdd(type, ArgSpecReg);
+	if (data && ArgCompatible(type, data.type, 0) && data.getValue<RegEnum>() != RegInvaild)
 	{
-		pushValue(static_cast<Uint8>(data.value.getValue<RegEnum>()));
+		pushValue(static_cast<Uint8>(data.getValue<RegEnum>()));
 		return true;
 	}
 	return false;
@@ -1597,7 +1661,7 @@ bool ParserWriter::pushRegTry(const ScriptRefData& data, ArgEnum type)
 bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 {
 	ScriptRefData pos = getReferece(s);
-	type = ArgSpec(type, ArgSpecReg);
+	type = ArgSpecAdd(type, ArgSpecReg);
 	if (pos)
 	{
 		return false;
@@ -1624,7 +1688,11 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 /**
  * Constructor.
  */
-ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg) : _shared{ shared }, _regUsed{ RegMax }, _name{ name }
+ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name) :
+	_shared{ shared },
+	_regUsed{ RegMax },
+	_regOutSize{ 0 }, _regOutName{ },
+	_name{ name }
 {
 	//--------------------------------------------------
 	//					op_data init
@@ -1646,15 +1714,6 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 	addParserBase("return", &overloadBuildinProc, {}, &parseReturn, nullptr, nullptr);
 
 	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq");
-
-	if (!firstArg.empty())
-	{
-		addStandartReg(firstArg, RegI0);
-	}
-	if (!secondArg.empty())
-	{
-		addStandartReg(secondArg, RegI1);
-	}
 
 	addType<int>("int");
 
@@ -1776,29 +1835,25 @@ bool ScriptParserBase::haveTypeBase(ArgEnum type)
 }
 
 /**
- * Add standard register.
- * @param s Name of register.
- * @param index Predefined position.
- */
-void ScriptParserBase::addStandartReg(const std::string& s, RegEnum index)
-{
-	if (haveNameRef(s))
-	{
-		throw Exception("Reg name '" + s + "' already used");
-	}
-
-	addSortHelper(_refList, { addNameRef(s), ArgSpec(ArgInt, ArgSpecVar), index });
-}
-
-/**
  * Set name for custom script param.
  * @param s name for custom parameter.
  * @param type type of custom parameter.
- * @param size size of custom parameter.
+ * @param outputReg is this reg used for script output.
  */
-void ScriptParserBase::addScriptArg(const std::string& s, ArgEnum type)
+void ScriptParserBase::addScriptReg(const std::string& s, ArgEnum type, bool writableReg, bool outputReg)
 {
-	type = ArgSpec(ArgRemove(type, ArgSpecVar), ArgSpecReg);
+	if (writableReg || outputReg)
+	{
+		if (outputReg && _regOutSize >= ScriptMaxOut)
+		{
+			throw Exception("Custom output reg limit reach for: '" + s + "'");
+		}
+		type = ArgSpecAdd(type, ArgSpecVar);
+	}
+	else
+	{
+		type = ArgSpecAdd(ArgSpecRemove(type, ArgSpecVar), ArgSpecReg);
+	}
 	auto t = getType(type);
 	if (t == nullptr)
 	{
@@ -1816,13 +1871,18 @@ void ScriptParserBase::addScriptArg(const std::string& s, ArgEnum type)
 			throw Exception("Reg name '" + s + "' already used");
 		}
 
+		auto name = addNameRef(s);
+		if (outputReg)
+		{
+			_regOutName[_regOutSize++] = name;
+		}
 		auto old = _regUsed;
 		_regUsed += size;
-		addSortHelper(_refList, { addNameRef(s), type, static_cast<RegEnum>(old) });
+		addSortHelper(_refList, { name, type, static_cast<RegEnum>(old) });
 	}
 	else
 	{
-		throw Exception("Custom arg limit reach for: '" + s + "'");
+		throw Exception("Custom reg limit reach for: '" + s + "'");
 	}
 }
 
@@ -2202,6 +2262,19 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 			refLog.get(LOG_DEBUG) << _defaultScript << "\n";
 			refLog.get(LOG_DEBUG) << "\n";
 		}
+		if (_regOutSize > 0)
+		{
+			refLog.get(LOG_DEBUG) << "Script return values:\n";
+			for (size_t i = 0; i < _regOutSize; ++i)
+			{
+				auto ref = getRef(_regOutName[i]);
+				if (ref)
+				{
+					refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << ref->name.toString() << std::setw(9) << getTypePrefix(ref->type) << " " << std::setw(9) << argType(ref->type) << "\n";
+				}
+			}
+			refLog.get(LOG_DEBUG) << "\n";
+		}
 		refLog.get(LOG_DEBUG) << "Script data:\n";
 		auto temp = _refList;
 		std::sort(temp.begin(), temp.end(),
@@ -2259,7 +2332,7 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 /**
  * Constructor.
  */
-ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg) : ScriptParserBase(shared, name, firstArg, secondArg)
+ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::string& name) : ScriptParserBase(shared, name)
 {
 	_events.reserve(EventsMax);
 	_eventsData.push_back({ 0, {} });

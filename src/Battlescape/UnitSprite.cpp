@@ -119,8 +119,10 @@ void UnitSprite::selectUnit(Part& p, int index, int dir)
 	auto result = 0;
 	if(scr)
 	{
+		ModScript::SelectUnitParser::Output arg{ index, dir };
 		ModScript::SelectUnitParser::Worker work{ _unit, p.bodyPart, _animationFrame, _shade };
-		result = work.execute(scr, index, dir);
+		work.execute(scr, arg);
+		result = arg.getFirst();
 	}
 	else
 	{

@@ -387,10 +387,11 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set) const
 			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 
+		ModScript::SelectItemParser::Output arg{ i, 0 };
 		ModScript::SelectItemParser::Worker work{ this, BODYPART_ITEM_FLOOR, 0, 0 };
-		i = work.execute(_rules->getSpriteScript(), i, 0);
+		work.execute(_rules->getSpriteScript(), arg);
 
-		surf = set->getFrame(i);
+		surf = set->getFrame(arg.getFirst());
 		if (surf == nullptr)
 		{
 			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enough frames");
@@ -419,10 +420,11 @@ Surface *BattleItem::getBigSprite(SurfaceSet *set) const
 			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 
+		ModScript::SelectItemParser::Output arg{ i, 0 };
 		ModScript::SelectItemParser::Worker work{ this, BODYPART_ITEM_INVENTORY, 0, 0 };
-		i = work.execute(_rules->getSpriteScript(), i, 0);
+		work.execute(_rules->getSpriteScript(), arg);
 
-		surf = set->getFrame(i);
+		surf = set->getFrame(arg.getFirst());
 		if (surf == nullptr)
 		{
 			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enough frames");

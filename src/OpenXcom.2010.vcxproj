@@ -650,6 +650,7 @@
     <ClInclude Include="Engine\Game.h" />
     <ClInclude Include="Engine\GMCat.h" />
     <ClInclude Include="Engine\GraphSubset.h" />
+    <ClInclude Include="Engine\HelperMeta.h" />
     <ClInclude Include="Engine\InteractiveSurface.h" />
     <ClInclude Include="Engine\Language.h" />
     <ClInclude Include="Engine\LanguagePlurality.h" />

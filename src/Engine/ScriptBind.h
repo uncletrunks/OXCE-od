@@ -181,42 +181,6 @@ struct ParserWriter
 namespace helper
 {
 
-template<int I>
-struct PosTag
-{
-	static constexpr int value = I;
-};
-
-template<int... I>
-struct ListTag
-{
-	static constexpr int size = sizeof...(I);
-};
-
-template<typename PT>
-struct IncListTag;
-
-template<int... I>
-struct IncListTag<ListTag<I...>>
-{
-	using type = ListTag<I..., sizeof...(I)>;
-};
-
-template<int I>
-struct PosTagToList
-{
-	using type = typename IncListTag<typename PosTagToList<I - 1>::type>::type;
-};
-
-template<>
-struct PosTagToList<0>
-{
-	using type = ListTag<>;
-};
-
-template<int I>
-using GetListTag = typename PosTagToList<I>::type;
-
 template<typename T, int P>
 using GetType = decltype(T::typeFunc(PosTag<P>{}));
 
@@ -535,7 +499,7 @@ struct ArgRegDef
 
 	static ArgEnum type()
 	{
-		return ArgSpec(ScriptParserBase::getArgType<ReturnType>(), ArgSpecReg);
+		return ArgSpecAdd(ScriptParserBase::getArgType<ReturnType>(), ArgSpecReg);
 	}
 };
 template<typename T>
@@ -756,7 +720,7 @@ using GetArgs = typename GetArgsImpl<decltype(Func::func)>::type;
 //				FuncVer and FuncGroup class
 ////////////////////////////////////////////////////////////
 
-template<typename Func, int Ver, typename PosList = GetListTag<GetArgs<Func>::arg()>>
+template<typename Func, int Ver, typename PosList = MakeListTag<GetArgs<Func>::arg()>>
 struct FuncVer;
 
 template<typename Func, int Ver, int... Pos>
@@ -783,7 +747,7 @@ struct FuncVer<Func, Ver, ListTag<Pos...>>
 	}
 };
 
-template<typename Func, typename VerList = GetListTag<GetArgs<Func>::ver()>>
+template<typename Func, typename VerList = MakeListTag<GetArgs<Func>::ver()>>
 struct FuncGroup;
 
 template<typename Func, int... Ver>

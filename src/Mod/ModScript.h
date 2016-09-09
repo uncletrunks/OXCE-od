@@ -73,6 +73,8 @@ class ModScript
 	{
 
 	}
+
+	using Output = ScriptOutputArgs<int&, int>;
 public:
 
 	const ScriptGlobal* getShared() const
@@ -80,25 +82,25 @@ public:
 		return _shared;
 	}
 
-	struct RecolorUnitParser : ScriptParser<const BattleUnit*, int, int, int, int>
+	struct RecolorUnitParser : ScriptParser<Output, const BattleUnit*, int, int, int, int>
 	{
 		RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct SelectUnitParser : ScriptParserEvents<const BattleUnit*, int, int, int>
+	struct SelectUnitParser : ScriptParserEvents<Output, const BattleUnit*, int, int, int>
 	{
 		SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	struct ReactionUnitParser : ScriptParserEvents<const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*, int>
+	struct ReactionUnitParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*, int>
 	{
 		ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	struct RecolorItemParser : ScriptParser<const BattleItem*, int, int, int>
+	struct RecolorItemParser : ScriptParser<Output, const BattleItem*, int, int, int>
 	{
 		RecolorItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct SelectItemParser : ScriptParserEvents<const BattleItem*, int, int, int>
+	struct SelectItemParser : ScriptParserEvents<Output, const BattleItem*, int, int, int>
 	{
 		SelectItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};

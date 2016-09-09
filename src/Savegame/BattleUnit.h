@@ -48,7 +48,7 @@ class Language;
 class AlienBAIState;
 class CivilianBAIState;
 template<typename, typename...> class ScriptContainer;
-template<typename...> class ScriptParser;
+template<typename, typename...> class ScriptParser;
 class ScriptWorkerBlit;
 struct BattleUnitStatistics;
 struct StatAdjustment;

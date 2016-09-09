@@ -1630,17 +1630,18 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
+			ModScript::ReactionUnitParser::Output arg{ reactionChance, dist };
 			ModScript::ReactionUnitParser::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType };
 			if (originalAction.weapon)
 			{
-				reactionChance = worker.execute(originalAction.weapon->getRules()->getReacActionScript(), reactionChance, dist);
+				worker.execute(originalAction.weapon->getRules()->getReacActionScript(), arg);
 			}
 
-			reactionChance = worker.execute(target->getArmor()->getReacActionScript(), reactionChance, dist);
+			worker.execute(target->getArmor()->getReacActionScript(), arg);
 
-			reactionChance = worker.execute(unit->getArmor()->getReacReactionScript(), reactionChance, dist);
+			worker.execute(unit->getArmor()->getReacReactionScript(), arg);
 
-			if (RNG::percent(reactionChance))
+			if (RNG::percent(arg.getFirst()))
 			{
 				if (action.type == BA_HIT)
 				{
@@ -1651,7 +1652,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 					_save->getBattleGame()->statePushBack(new ProjectileFlyBState(_save->getBattleGame(), action));
 				}
 			}
-			return reactionChance > 0;
+			return arg.getFirst() > 0;
 		}
 	}
 	return false;
