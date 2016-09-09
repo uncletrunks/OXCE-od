@@ -54,6 +54,7 @@
 #include "InterceptState.h"
 #include "../Basescape/BasescapeState.h"
 #include "../Basescape/SellState.h"
+#include "../Basescape/TechTreeViewerState.h"
 #include "../Menu/CutsceneState.h"
 #include "../Menu/ErrorMessageState.h"
 #include "GraphsState.h"
@@ -236,6 +237,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_btnIntercept->onMouseClick((ActionHandler)&GeoscapeState::btnInterceptClick);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnInterceptClick, Options::keyGeoIntercept);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfoTrackerClick, SDLK_t);
+	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnTechTreeViewerClick, Options::keyToggleQuickSearch);
 	_btnIntercept->setGeoscapeButton(true);
 
 	_btnBases->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
@@ -1935,6 +1937,15 @@ void GeoscapeState::btnInterceptClick(Action *)
 void GeoscapeState::btnUfoTrackerClick(Action *)
 {
 	_game->pushState(new UfoTrackerState(this, _globe));
+}
+
+/**
+* Opens the TechTreeViewer window.
+* @param action Pointer to an action.
+*/
+void GeoscapeState::btnTechTreeViewerClick(Action *)
+{
+	_game->pushState(new TechTreeViewerState());
 }
 
 /**

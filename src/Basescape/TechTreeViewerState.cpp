@@ -55,7 +55,8 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *selectedTopicResear
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_txtTitle = new Text(304, 17, 8, 7);
-	_txtSelectedTopic = new Text(304, 9, 8, 24);
+	_txtSelectedTopic = new Text(204, 9, 8, 24);
+	_txtProgress = new Text(100, 9, 212, 24);
 	_lstLeft = new TextList(132, 128, 8, 40);
 	_lstRight = new TextList(132, 128, 164, 40);
 	_btnNew = new TextButton(148, 16, 8, 176);
@@ -67,6 +68,7 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *selectedTopicResear
 	add(_window, "window", "researchMenu");
 	add(_txtTitle, "text", "researchMenu");
 	add(_txtSelectedTopic, "text", "researchMenu");
+	add(_txtProgress, "text", "researchMenu");
 	add(_lstLeft, "list", "researchMenu");
 	add(_lstRight, "list", "researchMenu");
 	add(_btnNew, "button", "researchMenu");
@@ -103,11 +105,25 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *selectedTopicResear
 	_btnOk->onMouseClick((ActionHandler)&TechTreeViewerState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&TechTreeViewerState::btnOkClick, Options::keyCancel);
 
+	int discoveredSum = 0;
 	// pre-calculate globally
 	const std::vector<const RuleResearch *> &discoveredResearch = _game->getSavedGame()->getDiscoveredResearch();
 	for (std::vector<const RuleResearch *>::const_iterator j = discoveredResearch.begin(); j != discoveredResearch.end(); ++j)
 	{
 		_alreadyAvailableStuff.insert((*j)->getName());
+		discoveredSum += (*j)->getCost();
+	}
+
+	int totalSum = 0;
+	const std::vector<std::string> &allResearch = _game->getMod()->getResearchList();
+	RuleResearch *rule = 0;
+	for (std::vector<std::string>::const_iterator j = allResearch.begin(); j != allResearch.end(); ++j)
+	{
+		rule = _game->getMod()->getResearch((*j));
+		if (rule != 0)
+		{
+			totalSum += rule->getCost();
+		}
 	}
 
 	const std::vector<std::string> &items = _game->getMod()->getManufactureList();
@@ -119,6 +135,9 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *selectedTopicResear
 			_alreadyAvailableStuff.insert(m->getName());
 		}
 	}
+
+	_txtProgress->setAlign(ALIGN_RIGHT);
+	_txtProgress->setText(tr("STR_RESEARCH_PROGRESS").arg(discoveredSum * 100 / totalSum));
 }
 
 /**

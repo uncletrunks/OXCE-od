@@ -43,7 +43,7 @@ class TechTreeViewerState : public State
 private:
 	TextButton *_btnOk, *_btnNew;
 	Window *_window;
-	Text *_txtTitle, *_txtSelectedTopic;
+	Text *_txtTitle, *_txtSelectedTopic, *_txtProgress;
 	TextList *_lstLeft, *_lstRight;
 	std::string _selectedTopic;
 	int _selectedFlag;

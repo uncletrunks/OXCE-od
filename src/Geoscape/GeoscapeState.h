@@ -96,6 +96,8 @@ public:
 	void btnInterceptClick(Action *action);
 	/// Handler for clicking the UFO Tracker button.
 	void btnUfoTrackerClick(Action *action);
+	/// Handler for clicking the TechTreeViewer button.
+	void btnTechTreeViewerClick(Action *action);
 	/// Handler for clicking the Bases button.
 	void btnBasesClick(Action *action);
 	/// Handler for clicking the Graph button.
