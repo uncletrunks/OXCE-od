@@ -1721,7 +1721,7 @@ int BattleUnit::getFatalWounds() const
  * Little formula to calculate reaction score.
  * @return Reaction score.
  */
-double BattleUnit::getReactionScore()
+double BattleUnit::getReactionScore() const
 {
 	//(Reactions Stat) x (Current Time Units / Max TUs)
 	double score = ((double)getBaseStats()->reactions * (double)getTimeUnits()) / (double)getBaseStats()->tu;
@@ -3530,6 +3530,14 @@ void getLookVariantScript(const BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
+void geReactionScoreScript(const BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		ret = (int)bu->getReactionScore();
+	}
+	ret = 0;
+}
 void getRecolorScript(const BattleUnit *bu, int &pixel)
 {
 	if (bu)
@@ -3698,6 +3706,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&isWalkingScript>("isWalking");
 	bu.add<&isFlyingScript>("isFlying");
 	bu.add<&isCollapsingScript>("isCollapsing");
+	bu.add<&geReactionScoreScript>("geReactionScore");
 	bu.add<&BattleUnit::getDirection>("getDirection");
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
 	bu.add<&BattleUnit::getWalkingPhase>("getWalkingPhase");
