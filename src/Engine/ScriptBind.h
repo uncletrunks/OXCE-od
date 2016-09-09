@@ -584,13 +584,14 @@ struct ArgRawDef
 	}
 };
 
+template<typename T>
 struct ArgNullDef
 {
-	using ReturnType = std::nullptr_t;
+	using ReturnType = T;
 	static constexpr size_t size = 0;
 	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
-		return nullptr;
+		return ReturnType{};
 	}
 
 	static bool parse(ParserWriter& ph, const ScriptRefData& t)
@@ -635,13 +636,13 @@ struct ArgSelector<const int&> : ArgSelector<int>
 template<typename T, typename I>
 struct ArgSelector<ScriptTag<T, I>>
 {
-	using type = Arg<ArgValueDef<ScriptTag<T, I>>, ArgRegDef<ScriptTag<T, I>>>;
+	using type = Arg<ArgValueDef<ScriptTag<T, I>>, ArgRegDef<ScriptTag<T, I>>, ArgNullDef<ScriptTag<T, I>>>;
 };
 
 template<typename T, typename I>
 struct ArgSelector<ScriptTag<T, I>&>
 {
-	using type = Arg<ArgRegDef<ScriptTag<T, I>>>;
+	using type = Arg<ArgRegDef<ScriptTag<T, I>&>>;
 };
 
 template<typename T, typename I>
@@ -677,7 +678,7 @@ struct ArgSelector<const Uint8*>
 template<typename T>
 struct ArgSelector<T*>
 {
-	using type = Arg<ArgRegDef<T*>, ArgValueDef<T*>, ArgNullDef>;
+	using type = Arg<ArgRegDef<T*>, ArgValueDef<T*>, ArgNullDef<T*>>;
 };
 
 template<typename T>
@@ -689,7 +690,7 @@ struct ArgSelector<T*&>
 template<typename T>
 struct ArgSelector<const T*>
 {
-	using type = Arg<ArgRegDef<const T*>, ArgValueDef<const T*>, ArgNullDef>;
+	using type = Arg<ArgRegDef<const T*>, ArgValueDef<const T*>, ArgNullDef<const T*>>;
 };
 
 template<typename T>
@@ -701,7 +702,7 @@ struct ArgSelector<const T*&>
 template<>
 struct ArgSelector<std::nullptr_t>
 {
-	using type = Arg<ArgNullDef>;
+	using type = Arg<ArgNullDef<std::nullptr_t>>;
 };
 
 template<typename T>
@@ -799,6 +800,24 @@ struct BindClear
 	static RetEnum func(T*& t)
 	{
 		t = nullptr;
+		return RetContinue;
+	}
+};
+template<typename T>
+struct BindEqValue
+{
+	static RetEnum func(ProgPos& Prog, const T& t1, const T& t2, ProgPos LabelTrue, ProgPos LabelFalse)
+	{
+		Prog = (t1 == t2) ? LabelTrue : LabelFalse;
+		return RetContinue;
+	}
+};
+template<typename T>
+struct BindClearValue
+{
+	static RetEnum func(T& t)
+	{
+		t = T{};
 		return RetContinue;
 	}
 };
@@ -1016,19 +1035,25 @@ struct Bind : BindBase
 			addCustomFunc<helper::BindPropSet<T, int, X>>(getName(set));
 		}
 	}
-	template<ScriptValues<T> T::*X>
-	void addScriptValue(bool canEdit = true)
+	void addScriptTag()
 	{
 		using Tag = typename ScriptValues<T>::Tag;
 		parser->getGlobal()->addTagType<Tag>();
+		if (!parser->haveType<Tag>())
+		{
+			parser->addType<Tag>(getName("Tag"));
+			parser->addParser<helper::FuncGroup<helper::BindClearValue<Tag>>>("clear");
+			parser->addParser<helper::FuncGroup<helper::BindEqValue<Tag>>>("test_eq");
+		}
+	}
+	template<ScriptValues<T> T::*X>
+	void addScriptValue(bool canEdit = true)
+	{
+		addScriptTag();
 		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getTag"));
 		if (canEdit)
 		{
 			addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"));
-		}
-		if (!parser->haveType<Tag>())
-		{
-			parser->addType<Tag>(getName("Tag"));
 		}
 	}
 	template<int X>

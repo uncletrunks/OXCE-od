@@ -46,6 +46,8 @@ class SelectedToken;
 class ScriptWorkerBase;
 class ScriptWorkerBlit;
 template<typename, typename...> class ScriptWorker;
+template<typename, typename> struct ScriptTag;
+template<typename, typename> class ScriptValues;
 
 namespace helper
 {
@@ -919,7 +921,7 @@ protected:
 	template<typename First, typename... Rest>
 	void addRegImpl(bool writable, ArgName<First>& n, Rest&... t)
 	{
-		addTypeImpl(n);
+		addTypeImpl(helper::TypeTag<helper::Decay<First>>{});
 		addScriptReg(n.name, ScriptParserBase::getArgType<First>(), writable, helper::TypeInfoImpl<First>::isOutput);
 		addRegImpl(writable, t...);
 	}
@@ -928,18 +930,27 @@ protected:
 		//end loop
 	}
 
+	/// Function for SFINAE, type need to have ScriptRegister function.
 	template<typename First, typename = decltype(&First::ScriptRegister)>
-	void addTypeImpl(ArgName<First*>& n)
+	void addTypeImpl(helper::TypeTag<First*>)
 	{
 		registerPointerType<First>();
 	}
+	/// Function for SFINAE, type need to have ScriptRegister function.
 	template<typename First, typename = decltype(&First::ScriptRegister)>
-	void addTypeImpl(ArgName<const First*>& n)
+	void addTypeImpl(helper::TypeTag<const First*>)
 	{
 		registerPointerType<First>();
 	}
+	/// Function for SFINAE, type need to have ScriptRegister function.
+	template<typename First, typename Index, typename = decltype(&First::ScriptRegister)>
+	void addTypeImpl(helper::TypeTag<ScriptTag<First, Index>>)
+	{
+		registerPointerType<First>();
+	}
+	/// Basic version.
 	template<typename First>
-	void addTypeImpl(ArgName<First>& n)
+	void addTypeImpl(helper::TypeTag<First>)
 	{
 		//nothing to do for rest
 	}
@@ -1260,7 +1271,7 @@ public:
 /**
  * Strong typed tag.
  */
-template<typename T, typename I>
+template<typename T, typename I = Uint8>
 struct ScriptTag
 {
 	static_assert(!std::numeric_limits<I>::is_signed, "Type should be unsigned");
@@ -1275,6 +1286,16 @@ struct ScriptTag
 	constexpr size_t get() const { return static_cast<size_t>(index); }
 	/// Test if tag have valid value.
 	constexpr explicit operator bool() const { return this->index; }
+	/// Equal operator.
+	constexpr bool operator==(ScriptTag t)
+	{
+		return index == t.index;
+	}
+	/// Notequal operator.
+	constexpr bool operator!=(ScriptTag t)
+	{
+		return !(*this == t);
+	}
 
 	/// Get run time value for type.
 	static ArgEnum type() { return ScriptParserBase::getArgType<ScriptTag<T, I>>(); }
@@ -1351,8 +1372,10 @@ private:
 	size_t getTag(ArgEnum type, ScriptRef s) const;
 	/// Get data of tag value.
 	TagValueData getTagValueData(ArgEnum type, size_t i) const;
-	/// Get tag value type.
-	TagValueType getTagValueType(size_t valueType) const;
+	/// Get tag value type data.
+	TagValueType getTagValueTypeData(size_t valueType) const;
+	/// Get tag value type id.
+	size_t getTagValueTypeId(ScriptRef s) const;
 	/// Add new tag name.
 	size_t addTag(ArgEnum type, ScriptRef s, size_t valueType);
 	/// Add new name ref.
@@ -1391,26 +1414,29 @@ public:
 	}
 	/// Add new tag name.
 	template<typename Tag>
-	Tag addTag(const std::string& s, size_t valueType)
+	Tag addTag(const std::string& s, const std::string& valueTypeName)
 	{
-		return Tag::make(addTag(Tag::type(), addNameRef(s), valueType));
+		return Tag::make(addTag(Tag::type(), addNameRef(s), getTagValueTypeId(ScriptRef::tempFrom(valueTypeName))));
 	}
 	/// Add new type of tag.
 	template<typename Tag>
 	void addTagType()
 	{
-		_tagNames.insert(
-			std::make_pair(
-				Tag::type(),
-				TagData
-				{
-					ScriptRef{ Tag::Parent::ScriptName },
-					Tag::limit(),
-					[](size_t i) { return ScriptValueData{ Tag::make(i) }; },
-					std::vector<TagValueData>{},
-				}
-			)
-		);
+		if (_tagNames.find(Tag::type()) == _tagNames.end())
+		{
+			_tagNames.insert(
+				std::make_pair(
+					Tag::type(),
+					TagData
+					{
+						ScriptRef{ Tag::Parent::ScriptName },
+						Tag::limit(),
+						[](size_t i) { return ScriptValueData{ Tag::make(i) }; },
+						std::vector<TagValueData>{},
+					}
+				)
+			);
+		}
 	}
 
 	/// Prepare for loading data.

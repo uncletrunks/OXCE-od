@@ -2449,7 +2449,7 @@ void ScriptValuesBase::loadBase(const YAML::Node &node, const ScriptGlobal* shar
 				{
 					auto temp = 0;
 					auto data = shared->getTagValueData(type, i);
-					shared->getTagValueType(data.valueType).load(shared, temp, pair.second);
+					shared->getTagValueTypeData(data.valueType).load(shared, temp, pair.second);
 					setBase(i, temp);
 				}
 			}
@@ -2469,7 +2469,7 @@ void ScriptValuesBase::saveBase(YAML::Node &node, const ScriptGlobal* shared, Ar
 		{
 			auto temp = YAML::Node{};
 			auto data = shared->getTagValueData(type, i);
-			shared->getTagValueType(data.valueType).save(shared, v, temp);
+			shared->getTagValueTypeData(data.valueType).save(shared, v, temp);
 			tags[data.name.substr(data.name.find('.') + 1u).toString()] = temp;
 		}
 	}
@@ -2546,9 +2546,9 @@ ScriptGlobal::TagValueData ScriptGlobal::getTagValueData(ArgEnum type, size_t i)
 }
 
 /**
- * Get tag value type.
+ * Get tag value type data.
  */
-ScriptGlobal::TagValueType ScriptGlobal::getTagValueType(size_t valueType) const
+ScriptGlobal::TagValueType ScriptGlobal::getTagValueTypeData(size_t valueType) const
 {
 	if (valueType < _tagValueTypes.size())
 	{
@@ -2558,11 +2558,30 @@ ScriptGlobal::TagValueType ScriptGlobal::getTagValueType(size_t valueType) const
 }
 
 /**
+ * Get tag value type id.
+ */
+size_t ScriptGlobal::getTagValueTypeId(ScriptRef s) const
+{
+	for (size_t i = 0; i < _tagValueTypes.size(); ++i)
+	{
+		if (_tagValueTypes[i].name == s)
+		{
+			return i;
+		}
+	}
+	return (size_t)-1;
+}
+
+/**
  * Add new tag name.
  */
 size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s, size_t valueType)
 {
-	auto& data = _tagNames[type];
+	auto data = _tagNames.find(type);
+	if (data == _tagNames.end())
+	{
+		throw Exception("Unknown tag type");
+	}
 	auto tag = getTag(type, s);
 	if (tag == 0)
 	{
@@ -2571,12 +2590,17 @@ size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s, size_t valueType)
 		{
 			return 0;
 		}
-		// test to prevent warp of index value
-		if (data.values.size() < data.limit)
+		// is tag type valid?
+		if (valueType >= _tagValueTypes.size())
 		{
-			data.values.push_back(TagValueData{ s, valueType });
-			addSortHelper(_refList, { s, type, data.crate(data.values.size()) });
-			return data.values.size();
+			return 0;
+		}
+		// test to prevent warp of index value
+		if (data->second.values.size() < data->second.limit)
+		{
+			data->second.values.push_back(TagValueData{ s, valueType });
+			addSortHelper(_refList, { s, type, data->second.crate(data->second.values.size()) });
+			return data->second.values.size();
 		}
 		return 0;
 	}
