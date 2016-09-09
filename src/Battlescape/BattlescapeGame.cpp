@@ -164,7 +164,7 @@ bool BattleActionCost::spendTU(std::string *message)
  * @param save Pointer to the save game.
  * @param parentState Pointer to the parent battlescape state.
  */
-BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false), _endTurnRequested(false), _endTurnProcessed(false)
+BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false), _endTurnRequested(false), _endTurnProcessed(false), _endConfirmationHandled(false)
 {
 
 	_currentAction.actor = 0;
@@ -1732,6 +1732,9 @@ void BattlescapeGame::requestEndTurn(bool askForConfirmation)
 
 	if (askForConfirmation)
 	{
+		if (_endConfirmationHandled)
+			return;
+
 		// check for fatal wounds
 		int soldiersWithFatalWounds = 0;
 		for (std::vector<BattleUnit*>::iterator it = _save->getUnits()->begin(); it != _save->getUnits()->end(); ++it)
@@ -1744,6 +1747,7 @@ void BattlescapeGame::requestEndTurn(bool askForConfirmation)
 		{
 			// confirm end of turn/mission
 			_parentState->getGame()->pushState(new ConfirmEndMissionState(_save, soldiersWithFatalWounds, this));
+			_endConfirmationHandled = true;
 		}
 		else
 		{

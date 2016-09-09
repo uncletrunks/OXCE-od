@@ -100,6 +100,7 @@ private:
 	BattleAction _currentAction;
 	bool _AISecondMove, _playedAggroSound;
 	bool _endTurnRequested, _endTurnProcessed;
+	bool _endConfirmationHandled;
 
 	/// Ends the turn.
 	void endTurn();
