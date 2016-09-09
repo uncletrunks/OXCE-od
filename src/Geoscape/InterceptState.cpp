@@ -33,6 +33,7 @@
 #include "SelectDestinationState.h"
 #include "ConfirmDestinationState.h"
 #include "../Basescape/BasescapeState.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -114,6 +115,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_lstCrafts->setMargin(2);
 	_lstCrafts->onMouseClick((ActionHandler)&InterceptState::lstCraftsLeftClick);
 	_lstCrafts->onMouseClick((ActionHandler)&InterceptState::lstCraftsRightClick, SDL_BUTTON_RIGHT);
+	_lstCrafts->onMouseClick((ActionHandler)&InterceptState::lstCraftsMiddleClick, SDL_BUTTON_MIDDLE);
 
 	int row = 0;
 	for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
@@ -234,6 +236,20 @@ void InterceptState::lstCraftsRightClick(Action *)
 	{
 		_globe->center(c->getLongitude(), c->getLatitude());
 		_game->popState();
+	}
+}
+
+/**
+* Opens the corresponding Ufopaedia article.
+* @param action Pointer to an action.
+*/
+void InterceptState::lstCraftsMiddleClick(Action *)
+{
+	Craft* c = _crafts[_lstCrafts->getSelectedRow()];
+	if (c)
+	{
+		std::string articleId = c->getRules()->getType();
+		Ufopaedia::openArticle(_game, articleId);
 	}
 }
 

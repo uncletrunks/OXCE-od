@@ -35,6 +35,7 @@
 #include "GeoscapeState.h"
 #include "UfoDetectedState.h"
 #include "TargetInfoState.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -114,6 +115,7 @@ UfoTrackerState::UfoTrackerState(GeoscapeState *state, Globe *globe) : _state(st
 	_lstObjects->setMargin(2);
 	_lstObjects->onMouseClick((ActionHandler)&UfoTrackerState::lstObjectsLeftClick);
 	_lstObjects->onMouseClick((ActionHandler)&UfoTrackerState::lstObjectsRightClick, SDL_BUTTON_RIGHT);
+	_lstObjects->onMouseClick((ActionHandler)&UfoTrackerState::lstObjectsMiddleClick, SDL_BUTTON_MIDDLE);
 
 	int row = 0;
 	for (std::vector<MissionSite*>::iterator iSite = _game->getSavedGame()->getMissionSites()->begin(); iSite != _game->getSavedGame()->getMissionSites()->end(); ++iSite)
@@ -227,6 +229,25 @@ void UfoTrackerState::lstObjectsRightClick(Action *)
 	{
 		_globe->center(t->getLongitude(), t->getLatitude());
 		_game->popState();
+	}
+}
+
+/**
+* Opens the corresponding Ufopaedia article.
+* @param action Pointer to an action.
+*/
+void UfoTrackerState::lstObjectsMiddleClick(Action *)
+{
+	Target* t = _objects[_lstObjects->getSelectedRow()];
+	if (t)
+	{
+		Ufo* u = dynamic_cast<Ufo*>(t);
+
+		if (u != 0 && u->getHyperDetected())
+		{
+			std::string articleId = u->getRules()->getType();
+			Ufopaedia::openArticle(_game, articleId);
+		}
 	}
 }
 

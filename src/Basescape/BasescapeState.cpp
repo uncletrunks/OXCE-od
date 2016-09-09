@@ -53,6 +53,7 @@
 #include "../Geoscape/AllocateTrainingState.h"
 #include "../Mod/RuleInterface.h"
 #include "PlaceFacilityState.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -111,6 +112,7 @@ BasescapeState::BasescapeState(Base *base, Globe *globe) : _base(base), _globe(g
 	_view->setTexture(_game->getMod()->getSurfaceSet("BASEBITS.PCK"));
 	_view->onMouseClick((ActionHandler)&BasescapeState::viewLeftClick, SDL_BUTTON_LEFT);
 	_view->onMouseClick((ActionHandler)&BasescapeState::viewRightClick, SDL_BUTTON_RIGHT);
+	_view->onMouseClick((ActionHandler)&BasescapeState::viewMiddleClick, SDL_BUTTON_MIDDLE);
 	_view->onMouseOver((ActionHandler)&BasescapeState::viewMouseOver);
 	_view->onMouseOut((ActionHandler)&BasescapeState::viewMouseOut);
 
@@ -438,6 +440,20 @@ void BasescapeState::viewRightClick(Action *)
 	else if (f->getRules()->isLift() || f->getRules()->getRadarRange() > 0)
 	{
 		_game->popState();
+	}
+}
+
+/**
+* Opens the corresponding Ufopaedia article.
+* @param action Pointer to an action.
+*/
+void BasescapeState::viewMiddleClick(Action *)
+{
+	BaseFacility *f = _view->getSelectedFacility();
+	if (f)
+	{
+		std::string articleId = f->getRules()->getType();
+		Ufopaedia::openArticle(_game, articleId);
 	}
 }
 

@@ -32,6 +32,7 @@
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Savegame/Base.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -118,6 +119,7 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 		}
 	}
 	_lstWeapons->onMouseClick((ActionHandler)&CraftWeaponsState::lstWeaponsClick);
+	_lstWeapons->onMouseClick((ActionHandler)&CraftWeaponsState::lstWeaponsMiddleClick, SDL_BUTTON_MIDDLE);
 }
 
 /**
@@ -165,6 +167,21 @@ void CraftWeaponsState::lstWeaponsClick(Action *)
 
 	_craft->checkup();
 	_game->popState();
+}
+
+/**
+* Opens the corresponding Ufopaedia article.
+* @param action Pointer to an action.
+*/
+void CraftWeaponsState::lstWeaponsMiddleClick(Action *)
+{
+	RuleCraftWeapon *rule = _weapons[_lstWeapons->getSelectedRow()];
+
+	if (rule != 0)
+	{
+		std::string articleId = rule->getType();
+		Ufopaedia::openArticle(_game, articleId);
+	}
 }
 
 }

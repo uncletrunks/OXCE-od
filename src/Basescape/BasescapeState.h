@@ -81,6 +81,8 @@ public:
 	void viewLeftClick(Action *action);
 	/// Handler for right clicking the base view.
 	void viewRightClick(Action *action);
+	/// Handler for middle clicking the base view.
+	void viewMiddleClick(Action *action);
 	/// Handler for hovering the base view.
 	void viewMouseOver(Action *action);
 	/// Handler for hovering out of the base view.

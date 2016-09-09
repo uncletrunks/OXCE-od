@@ -58,6 +58,8 @@ public:
 	void btnCancelClick(Action *action);
 	/// Handler for clicking the Weapons list.
 	void lstWeaponsClick(Action *action);
+	/// Handler for middle clicking the Weapons list.
+	void lstWeaponsMiddleClick(Action *action);
 };
 
 }

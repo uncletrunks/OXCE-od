@@ -47,6 +47,7 @@
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Mod/RuleInterface.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -505,6 +506,12 @@ void CraftEquipmentState::lstEquipmentMousePress(Action *action)
 		{
 			moveLeftByValue(Options::changeValueByMouseWheel);
 		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+	{
+		RuleItem *rule = _game->getMod()->getItem(_items[_sel]);
+		std::string articleId = rule->getType();
+		Ufopaedia::openArticle(_game, articleId);
 	}
 }
 

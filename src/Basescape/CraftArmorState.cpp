@@ -38,6 +38,7 @@
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Ufopaedia/Ufopaedia.h"
 #include "SoldierSortUtil.h"
 #include <algorithm>
 
@@ -416,6 +417,11 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 				s->setArmor(a);
 				_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
 			}
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+		{
+			std::string articleId = s->getArmor()->getType();
+			Ufopaedia::openArticle(_game, articleId);
 		}
 	}
 }

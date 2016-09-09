@@ -62,6 +62,8 @@ public:
 	void lstCraftsLeftClick(Action *action);
 	/// Handler for right clicking the Crafts list.
 	void lstCraftsRightClick(Action *action);
+	/// Handler for middle clicking the Crafts list.
+	void lstCraftsMiddleClick(Action *action);
 };
 
 }

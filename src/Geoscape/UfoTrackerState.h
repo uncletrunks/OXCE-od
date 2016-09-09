@@ -60,6 +60,8 @@ public:
 	void lstObjectsLeftClick(Action *action);
 	/// Handler for right clicking the Objects list.
 	void lstObjectsRightClick(Action *action);
+	/// Handler for middle clicking the Objects list.
+	void lstObjectsMiddleClick(Action *action);
 };
 
 }
