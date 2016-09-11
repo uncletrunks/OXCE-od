@@ -3110,7 +3110,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 				{
 					_save->setSelectedUnit(0);
 					_save->getBattleGame()->cancelCurrentAction(true);
-					_save->getBattleGame()->requestEndTurn(true);
+					_save->getBattleGame()->requestEndTurn(liveAliens == 0);
 				}
 			}
 		}
