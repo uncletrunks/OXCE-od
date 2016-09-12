@@ -1519,7 +1519,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 		}
 	}
 
-	// single place for firing/throwing/melee experience training
+	// single place for firing/throwing/melee experience training (EDIT: there's one more place now... special handling for shotguns)
 	if (unit && unit->getOriginalFaction() == FACTION_PLAYER)
 	{
 		if (clipOrWeapon && clipOrWeapon->getRules()->getBattleType() == BT_AMMO)
@@ -1676,6 +1676,23 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 			if (bu->getFire())
 			{
 				effectGenerated = 2;
+			}
+		}
+		else if (bu)
+		{
+			// Special case: target is already dead, but shotgun experience was not awarded yet since the first shotgun bullet is processed as last
+			bool shotgun = clipOrWeapon && clipOrWeapon->getRules()->getShotgunPellets() != 0 && clipOrWeapon->getRules()->getDamageType()->isDirect();
+			if (shotgun && unit && unit->getOriginalFaction() == FACTION_PLAYER)
+			{
+				if (clipOrWeapon && clipOrWeapon->getRules()->getBattleType() == BT_AMMO)
+				{
+					// send the weapon info, not the ammo info
+					awardExperience(unit, unit->getItem(unit->getActiveHand()), bu, rangeAtack);
+				}
+				else
+				{
+					awardExperience(unit, clipOrWeapon, bu, rangeAtack);
+				}
 			}
 		}
 	}
