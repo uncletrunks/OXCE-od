@@ -1420,6 +1420,14 @@ void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & depen
 	const std::vector<std::string> &mans = mod->getManufactureList();
 	for (std::vector<std::string>::const_iterator iter = mans.begin(); iter != mans.end(); ++iter)
 	{
+		// don't show previously unlocked (and seen!) manufacturing topics
+		std::map<std::string, int>::const_iterator i = _manufactureRuleStatus.find(*iter);
+		if (i != _manufactureRuleStatus.end())
+		{
+			if (i->second != RuleManufacture::MANU_STATUS_NEW)
+				continue;
+		}
+
 		RuleManufacture *m = mod->getManufacture(*iter);
 		const std::vector<std::string> &reqs = m->getRequirements();
 		if (isResearched(m->getRequirements()) && std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
