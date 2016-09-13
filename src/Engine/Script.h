@@ -775,6 +775,11 @@ public:
 	{
 		return compare(*this, s) == 0;
 	}
+	/// Notequal operator.
+	bool operator!=(const ScriptRef& s) const
+	{
+		return compare(*this, s) != 0;
+	}
 	/// Less operator.
 	bool operator<(const ScriptRef& s) const
 	{
@@ -1305,6 +1310,8 @@ struct ScriptTag
 	static constexpr ScriptTag make(size_t i) { return { static_cast<I>(i) }; }
 	/// Max supprted value.
 	static constexpr size_t limit() { return static_cast<size_t>(std::numeric_limits<I>::max()); }
+	/// Null value.
+	static constexpr ScriptTag getNullTag() { return make(0); }
 };
 
 /**
