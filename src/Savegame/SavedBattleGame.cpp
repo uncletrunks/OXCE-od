@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <vector>
 #include "BattleItem.h"
+#include "ItemContainer.h"
 #include "SavedBattleGame.h"
 #include "SavedGame.h"
 #include "Tile.h"
@@ -60,6 +61,7 @@ SavedBattleGame::SavedBattleGame(Mod *rule) :
 		_tileSearch[i].x = ((i%11) - 5);
 		_tileSearch[i].y = ((i/11) - 5);
 	}
+	_baseItems = new ItemContainer();
 }
 
 /**
@@ -101,6 +103,7 @@ SavedBattleGame::~SavedBattleGame()
 
 	delete _pathfinding;
 	delete _tileEngine;
+	delete _baseItems;
 }
 
 /**
@@ -322,6 +325,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_ambience = node["ambience"].as<int>(_ambience);
 	_ambientVolume = node["ambientVolume"].as<double>(_ambientVolume);
 	_music = node["music"].as<std::string>(_music);
+	_baseItems->load(node["baseItems"]);
 }
 
 /**
@@ -453,6 +457,7 @@ YAML::Node SavedBattleGame::save() const
 		node["recoverConditional"].push_back((*i)->save());
 	}
 	node["music"] = _music;
+	node["baseItems"] = _baseItems->save();
 
 	return node;
 }
@@ -519,6 +524,16 @@ void SavedBattleGame::setMissionType(const std::string &missionType)
 const std::string &SavedBattleGame::getMissionType() const
 {
 	return _missionType;
+}
+
+/**
+* Returns the list of items in the base storage rooms BEFORE the mission.
+* Does NOT return items assigned to craft or in transfer.
+* @return Pointer to the item list.
+*/
+ItemContainer *SavedBattleGame::getBaseStorageItems()
+{
+	return _baseItems;
 }
 
 /**

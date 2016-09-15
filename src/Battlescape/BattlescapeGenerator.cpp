@@ -602,6 +602,18 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 	if (_craft != 0)
 		_base = _craft->getBase();
 
+	// we will need this during debriefing to show a list of recovered items
+	// Note: saved info is required only because of base defense missions, other missions could work without a save too
+	// IMPORTANT: the number of vehicles and their ammo has been messed up by Base::setupDefenses() already :( and will need to be handled separately later
+	if (_base != 0)
+	{
+		ItemContainer *rememberMe = _save->getBaseStorageItems();
+		for (std::map<std::string, int>::iterator i = _base->getStorageItems()->getContents()->begin(); i != _base->getStorageItems()->getContents()->end(); ++i)
+		{
+			rememberMe->addItem(i->first, i->second);
+		}
+	}
+
 	// add vehicles that are in the craft - a vehicle is actually an item, which you will never see as it is converted to a unit
 	// however the item itself becomes the weapon it "holds".
 	if (!_baseInventory)

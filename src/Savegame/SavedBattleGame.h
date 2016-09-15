@@ -39,6 +39,7 @@ class TileEngine;
 class BattleItem;
 class Mod;
 class State;
+class ItemContainer;
 
 /**
  * The battlescape data that gets written to disk when the game is saved.
@@ -74,6 +75,7 @@ private:
 	BattleActionType _tuReserved;
 	bool _kneelReserved;
 	std::vector< std::vector<std::pair<int, int> > > _baseModules;
+	ItemContainer *_baseItems;
 	int _depth, _ambience;
 	double _ambientVolume;
 	std::vector<BattleItem*> _recoverGuaranteed, _recoverConditional;
@@ -101,6 +103,8 @@ public:
 	void setMissionType(const std::string &missionType);
 	/// Gets the mission type.
 	const std::string &getMissionType() const;
+	/// Gets the base's items BEFORE the mission.
+	ItemContainer *getBaseStorageItems();
 	/// Sets the starting condition type.
 	void setStartingConditionType(const std::string &startingConditionType);
 	/// Gets the starting condition type.

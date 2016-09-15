@@ -80,7 +80,7 @@ namespace OpenXcom
  * Initializes all the elements in the Debriefing screen.
  * @param game Pointer to the core game.
  */
-DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _destroyBase(false), _pageNumber(0), _isBaseDefense(false), _showSellButton(true)
+DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _destroyBase(false), _pageNumber(0), _showSellButton(true)
 {
 	_missionStatistics = new MissionStatistics();
 
@@ -302,6 +302,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	if (_base)
 	{
 		int row = 0;
+		ItemContainer *origBaseItems = _game->getSavedGame()->getSavedBattle()->getBaseStorageItems();
 		const std::vector<std::string> &items = _game->getMod()->getItemsList();
 		for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 		{
@@ -309,7 +310,20 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 			if (qty > 0 && (Options::canSellLiveAliens || !_game->getMod()->getItem(*i)->isAlien()))
 			{
 				RuleItem *rule = _game->getMod()->getItem(*i);
-				qty -= _baseItemsBeforeRecovery[rule];
+
+				// IGNORE vehicles and their ammo
+				// Note: because their number in base has been messed up by Base::setupDefenses() already in geoscape :(
+				if (_game->getMod()->getUnit(*i) && !rule->isAlien())
+				{
+					// if this vehicle requires ammo, remember to ignore it later too
+					if (!rule->getCompatibleAmmo()->empty())
+					{
+						origBaseItems->addItem(rule->getCompatibleAmmo()->front(), 1000000);
+					}
+					continue;
+				}
+
+				qty -= origBaseItems->getItem(*i);
 				_recoveredItems[rule] = qty;
 				if (qty > 0)
 				{
@@ -642,7 +656,6 @@ DebriefingState::~DebriefingState()
 	_roundsPainKiller.clear();
 	_roundsStimulant.clear();
 	_roundsHeal.clear();
-	_baseItemsBeforeRecovery.clear();
 	_recoveredItems.clear();
 }
 
@@ -698,14 +711,7 @@ void DebriefingState::applyVisibility()
 	}
 	else if (showStats)
 	{
-		if (_isBaseDefense)
-		{
-			_btnStats->setText(tr("STR_SCORE"));
-		}
-		else
-		{
-			_btnStats->setText(tr("STR_LOOT"));
-		}
+		_btnStats->setText(tr("STR_LOOT"));
 	}
 	else if (showItems)
 	{
@@ -754,12 +760,6 @@ void DebriefingState::txtTooltipOut(Action *action)
 void DebriefingState::btnStatsClick(Action *)
 {
 	_pageNumber = (_pageNumber + 1) % 3;
-	if (_isBaseDefense)
-	{
-		// FIXME: temporarily disable loot window for base defense
-		// can implement later, will need to remember stuff at the beginning of the mission already, and also save it in the save file
-		_pageNumber = _pageNumber % 2;
-	}
 	applyVisibility();
 }
 
@@ -1046,8 +1046,6 @@ void DebriefingState::prepareDebriefing()
 		{
 			base = (*i);
 			target = "STR_BASE";
-			_isBaseDefense = true;
-			_showSellButton = false;
 			base->setInBattlescape(false);
 			base->cleanupDefenses(false);
 			for (std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin(); k != _game->getSavedGame()->getRegions()->end(); ++k)
@@ -1090,20 +1088,6 @@ void DebriefingState::prepareDebriefing()
 	}
 
 	_base = base;
-
-	// remember stuff before recovery
-	if (_base)
-	{
-		const std::vector<std::string> &items = _game->getMod()->getItemsList();
-		for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
-		{
-			int qty = _base->getStorageItems()->getItem(*i);
-			if (qty > 0 && (Options::canSellLiveAliens || !_game->getMod()->getItem(*i)->isAlien()))
-			{
-				_baseItemsBeforeRecovery[_game->getMod()->getItem(*i)] += qty;
-			}
-		}
-	}
 
 	// UFO crash/landing site disappears
 	for (std::vector<Ufo*>::iterator i = save->getUfos()->begin(); i != save->getUfos()->end(); ++i)
