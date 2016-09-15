@@ -128,7 +128,7 @@ YAML::Node AlienMission::save() const
  */
 bool AlienMission::isOver() const
 {
-	if (_rule.getObjective() == OBJECTIVE_INFILTRATION)
+	if (_rule.getObjective() == OBJECTIVE_INFILTRATION && _rule.isEndlessInfiltration())
 	{
 		//Infiltrations continue for ever.
 		return false;
@@ -196,8 +196,11 @@ void AlienMission::think(Game &engine, const Globe &globe)
 				break;
 			}
 		}
-		// Infiltrations loop for ever.
-		_nextWave = 0;
+		if (_rule.isEndlessInfiltration())
+		{
+			// Infiltrations loop for ever.
+			_nextWave = 0;
+		}
 	}
 	if (_rule.getObjective() == OBJECTIVE_BASE && _nextWave == _rule.getWaveCount())
 	{

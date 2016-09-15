@@ -94,6 +94,8 @@ public:
 	int getWeight(const size_t monthsPassed) const;
 	/// Gets the inherent odds of this mission spawning a retaliation mission.
 	int getRetaliationOdds() const;
+	/// Should the infiltration end after first cycle or continue indefinitely?
+	bool isEndlessInfiltration() const;
 private:
 	/// The mission's type ID.
 	std::string _type;
@@ -113,6 +115,8 @@ private:
 	int _spawnZone;
 	/// The odds that this mission will result in retaliation
 	int _retaliationOdds;
+	/// Should the infiltration end after first cycle or continue indefinitely?
+	bool _endlessInfiltration;
 };
 
 }
