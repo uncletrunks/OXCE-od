@@ -41,6 +41,7 @@
 #include "SellState.h"
 #include "../Mod/RuleInterface.h"
 #include "TechTreeViewerState.h"
+#include "TransferBaseState.h"
 
 namespace OpenXcom
 {
@@ -51,24 +52,14 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0)
+ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0), _reset(false)
 {
-	bool overCrowded = Options::storageLimitsEnforced && _base->getFreeContainment(_prisonType) < 0;
-	std::vector<std::string> researchList;
-	for (std::vector<ResearchProject*>::const_iterator iter = _base->getResearch().begin(); iter != _base->getResearch().end(); ++iter)
-	{
-		const RuleResearch *research = (*iter)->getRules();
-		RuleItem *item = _game->getMod()->getItem(research->getName());
-		if (item && item->isAlien() && item->getPrisonType() == _prisonType)
-		{
-			researchList.push_back(research->getName());
-		}
-	}
-
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	_btnOk = new TextButton(overCrowded ? 288:148, 16, overCrowded ? 16:8, 176);
+	//_btnOk = new TextButton(overCrowded ? 288:148, 16, overCrowded ? 16:8, 176);
+	_btnOk = new TextButton(148, 16, 8, 176);
 	_btnCancel = new TextButton(148, 16, 164, 176);
+	_btnTransfer = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
 	_txtAvailable =  new Text(190, 9, 10, 24);
 	_txtValueOfSales =  new Text(190, 9, 10, 32);
@@ -85,6 +76,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	add(_window, "window", "manageContainment");
 	add(_btnOk, "button", "manageContainment");
 	add(_btnCancel, "button", "manageContainment");
+	add(_btnTransfer, "button", "manageContainment");
 	add(_txtTitle, "text", "manageContainment");
 	add(_txtAvailable, "text", "manageContainment");
 	add(_txtValueOfSales, "text", "manageContainment");
@@ -108,11 +100,8 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	_btnCancel->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&ManageAlienContainmentState::btnCancelClick, Options::keyCancel);
 
-	if (overCrowded)
-	{
-		_btnCancel->setVisible(false);
-		_btnOk->setVisible(false);
-	}
+	_btnTransfer->setText(tr("STR_GO_TO_TRANSFERS"));
+	_btnTransfer->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnTransferClick);
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
@@ -132,15 +121,6 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	_txtInterrogatedAliens->setWordWrap(true);
 	_txtInterrogatedAliens->setVerticalAlign(ALIGN_BOTTOM);
 
-	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(_base->getFreeContainment(_prisonType)));
-
-	_txtUsed->setText(tr("STR_SPACE_USED").arg( _base->getUsedContainment(_prisonType)));
-
-	if (Options::canSellLiveAliens)
-	{
-		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
-	}
-
 	_lstAliens->setArrowColumn(184, ARROW_HORIZONTAL);
 	if (Options::canSellLiveAliens) {
 		_lstAliens->setColumns(5, 120, 40, 64, 46, 46);
@@ -157,6 +137,62 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	_lstAliens->onRightArrowRelease((ActionHandler)&ManageAlienContainmentState::lstItemsRightArrowRelease);
 	_lstAliens->onRightArrowClick((ActionHandler)&ManageAlienContainmentState::lstItemsRightArrowClick);
 	_lstAliens->onMousePress((ActionHandler)&ManageAlienContainmentState::lstItemsMousePress);
+
+	initList();
+
+	_timerInc = new Timer(250);
+	_timerInc->onTimer((StateHandler)&ManageAlienContainmentState::increase);
+	_timerDec = new Timer(250);
+	_timerDec->onTimer((StateHandler)&ManageAlienContainmentState::decrease);
+}
+
+/**
+ *
+ */
+ManageAlienContainmentState::~ManageAlienContainmentState()
+{
+	delete _timerInc;
+	delete _timerDec;
+}
+
+/**
+* Resets everything that can change when coming back from another screen.
+*/
+void ManageAlienContainmentState::initList()
+{
+	// reset everything
+	_sel = 0;
+	_aliensSold = 0;
+	_total = 0;
+	_qtys.clear();
+	_aliens.clear();
+	_lstAliens->clearList();
+
+	bool overCrowded = Options::storageLimitsEnforced && _base->getFreeContainment(_prisonType) < 0;
+
+	_btnOk->setVisible(!overCrowded);
+	_btnCancel->setVisible(!overCrowded);
+	_btnTransfer->setVisible(overCrowded);
+
+	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(_base->getFreeContainment(_prisonType)));
+
+	_txtUsed->setText(tr("STR_SPACE_USED").arg(_base->getUsedContainment(_prisonType)));
+
+	if (Options::canSellLiveAliens)
+	{
+		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
+	}
+
+	std::vector<std::string> researchList;
+	for (std::vector<ResearchProject*>::const_iterator iter = _base->getResearch().begin(); iter != _base->getResearch().end(); ++iter)
+	{
+		const RuleResearch *research = (*iter)->getRules();
+		RuleItem *item = _game->getMod()->getItem(research->getName());
+		if (item && item->isAlien() && item->getPrisonType() == _prisonType)
+		{
+			researchList.push_back(research->getName());
+		}
+	}
 
 	const std::vector<std::string> &items = _game->getMod()->getItemsList();
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
@@ -197,21 +233,21 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 		_aliens.push_back(*i);
 		_qtys.push_back(0);
 		_lstAliens->addRow(5, tr(*i).c_str(), Options::canSellLiveAliens ? L"-" : L"", L"0", L"0", L"1");
-		_lstAliens->setRowColor(_qtys.size() -1, _lstAliens->getSecondaryColor());
+		_lstAliens->setRowColor(_qtys.size() - 1, _lstAliens->getSecondaryColor());
 	}
-	_timerInc = new Timer(250);
-	_timerInc->onTimer((StateHandler)&ManageAlienContainmentState::increase);
-	_timerDec = new Timer(250);
-	_timerDec->onTimer((StateHandler)&ManageAlienContainmentState::decrease);
 }
 
 /**
- *
- */
-ManageAlienContainmentState::~ManageAlienContainmentState()
+* Resets stuff when coming back from other screens.
+*/
+void ManageAlienContainmentState::init()
 {
-	delete _timerInc;
-	delete _timerDec;
+	State::init();
+
+	if (_reset)
+	{
+		initList();
+	}
 }
 
 /**
@@ -278,6 +314,17 @@ void ManageAlienContainmentState::btnOkClick(Action *)
 void ManageAlienContainmentState::btnCancelClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+* Opens the Transfer UI and gives the player an option to transfer stuff instead of selling it.
+* Returns back to this screen when finished.
+* @param action Pointer to an action.
+*/
+void ManageAlienContainmentState::btnTransferClick(Action *)
+{
+	_reset = true;
+	_game->pushState(new TransferBaseState(_base));
 }
 
 /**
@@ -388,6 +435,7 @@ void ManageAlienContainmentState::lstItemsMousePress(Action *action)
 		RuleResearch *selectedTopic = _game->getMod()->getResearch(_aliens[_sel]);
 		if (selectedTopic != 0)
 		{
+			_reset = false;
 			_game->pushState(new TechTreeViewerState(selectedTopic, 0));
 		}
 	}
@@ -469,6 +517,7 @@ void ManageAlienContainmentState::updateStrings()
 	if (Options::storageLimitsEnforced)
 	{
 		_btnOk->setVisible(spaces >= 0);
+		//_btnTransfer->setVisible(spaces < 0);
 	}
 	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(spaces));
 	_txtUsed->setText(tr("STR_SPACE_USED").arg(aliens));

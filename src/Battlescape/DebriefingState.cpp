@@ -1901,7 +1901,20 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	}
 	std::string type = from->getType();
 	RuleItem *ruleLiveAlienItem = _game->getMod()->getItem(type);
-	if (base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) == 0)
+	bool killPrisonersAutomatically = base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) == 0;
+	if (killPrisonersAutomatically)
+	{
+		// check also other bases, maybe we can transfer/redirect prisoners there
+		for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+		{
+			if ((*i)->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) > 0)
+			{
+				killPrisonersAutomatically = false;
+				break;
+			}
+		}
+	}
+	if (killPrisonersAutomatically)
 	{
 		_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available
 
