@@ -1012,6 +1012,9 @@
     <ClCompile Include="Basescape\CraftPilotSelectState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Mod\CustomPalettes.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2060,6 +2063,9 @@
     </ClInclude>
     <ClInclude Include="Basescape\CraftPilotSelectState.h">
       <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\CustomPalettes.h">
+      <Filter>Mod</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

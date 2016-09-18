@@ -43,6 +43,7 @@
 #include "../Engine/ScriptBind.h"
 #include "SoundDefinition.h"
 #include "ExtraSprites.h"
+#include "CustomPalettes.h"
 #include "ExtraSounds.h"
 #include "../Engine/AdlibMusic.h"
 #include "../fmath.h"
@@ -529,6 +530,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::vector< std::pair<std::string, ExtraSprites *> >::const_iterator i = _extraSprites.begin(); i != _extraSprites.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::vector< std::pair<std::string, CustomPalettes *> >::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1361,6 +1366,14 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 			extraSprites->load(*i, 0);
 		_extraSprites.push_back(std::make_pair(type, extraSprites.release()));
 		_extraSpritesIndex.push_back(type);
+	}
+	for (YAML::const_iterator i = doc["customPalettes"].begin(); i != doc["customPalettes"].end(); ++i)
+	{
+		std::string type = (*i)["type"].as<std::string>();
+		std::auto_ptr<CustomPalettes> customPalettes(new CustomPalettes());
+		customPalettes->load(*i, _modOffset);
+		_customPalettes.push_back(std::make_pair(type, customPalettes.release()));
+		_customPalettesIndex.push_back(type);
 	}
 	for (YAML::const_iterator i = doc["extraSounds"].begin(); i != doc["extraSounds"].end(); ++i)
 	{
@@ -2290,6 +2303,15 @@ std::vector<std::pair<std::string, ExtraSprites *> > Mod::getExtraSprites() cons
 }
 
 /**
+ * Gets the list of custom palettes.
+ * @return The list of custom palettes.
+ */
+std::vector<std::pair<std::string, CustomPalettes *> > Mod::getCustomPalettes() const
+{
+	return _customPalettes;
+}
+
+/**
  * Gets the list of external sounds.
  * @return The list of external sounds.
  */
@@ -2783,6 +2805,7 @@ void Mod::loadVanillaResources()
 			SDL_Color *color = _palettes[s2]->getColors(Palette::backPos + 16 + i);
 			*color = gradient[i];
 		}
+		//_palettes[s2]->savePalMod("../../../customPalettes.rul", "PAL_BATTLESCAPE_CUSTOM", "PAL_BATTLESCAPE");
 	}
 
 	// Load surfaces
@@ -3505,6 +3528,28 @@ void Mod::loadExtraResources()
 					_sounds[setName]->addSound(startSound + soundPack->getModIndex())->load(fullPath);
 				}
 			}
+		}
+	}
+
+	Log(LOG_INFO) << "Loading custom palettes from ruleset...";
+	for (std::vector< std::pair<std::string, CustomPalettes *> >::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
+	{
+		CustomPalettes *palDef = i->second;
+		std::string palTargetName = palDef->getTarget();
+		if (_palettes.find(palTargetName) == _palettes.end())
+		{
+			Log(LOG_VERBOSE) << "WARNING: Palette " << palTargetName << " does not exist!";
+			continue;
+		}
+		else
+		{
+			Log(LOG_VERBOSE) << "Replacing items in target palette: " << palTargetName;
+		}
+
+		Palette *target = _palettes[palTargetName];
+		for (std::map<int, Position>::iterator j = palDef->getPalette()->begin(); j != palDef->getPalette()->end(); ++j)
+		{
+			target->setColor(j->first, j->second.x, j->second.y, j->second.z);
 		}
 	}
 }

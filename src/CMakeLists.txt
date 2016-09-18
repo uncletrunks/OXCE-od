@@ -505,6 +505,8 @@ set ( mod_src
   Mod/ArticleDefinition.h
   Mod/City.cpp
   Mod/City.h
+  Mod/CustomPalettes.cpp
+  Mod/CustomPalettes.h
   Mod/ExtraSounds.cpp
   Mod/ExtraSounds.h
   Mod/ExtraSprites.cpp
