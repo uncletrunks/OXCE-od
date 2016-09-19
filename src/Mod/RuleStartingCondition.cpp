@@ -65,7 +65,7 @@ namespace OpenXcom
  * Creates a blank ruleset for a certain type of Starting Condition.
  * @param type String defining the type.
  */
-RuleStartingCondition::RuleStartingCondition(const std::string &type) : _type(type)
+RuleStartingCondition::RuleStartingCondition(const std::string &type) : _type(type), _mapBackgroundColor(15)
 {
 }
 
@@ -96,7 +96,7 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
-
+	_mapBackgroundColor = node["mapBackgroundColor"].as<int>(_mapBackgroundColor);
 }
 
 /**
@@ -234,6 +234,15 @@ bool RuleStartingCondition::isItemAllowed(const std::string &itemType, Mod *mod)
 const std::map<std::string, int> *RuleStartingCondition::getDefaultItems() const
 {
 	return &_defaultItems;
+}
+
+/**
+* Returns the battlescape map background color.
+* @return Color code.
+*/
+int RuleStartingCondition::getMapBackgroundColor() const
+{
+	return _mapBackgroundColor;
 }
 
 }

@@ -56,6 +56,7 @@ private:
 	int _fadeShade;
 	bool _nightVisionOn;
 	int _nvColor, _nvColorDef;
+	int _bgColor;
 	Game *_game;
 	SavedBattleGame *_save;
 	Surface *_arrow;

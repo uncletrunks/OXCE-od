@@ -55,6 +55,7 @@ private:
 	std::vector<std::string> _allowedItems;
 	std::vector<std::string> _allowedItemCategories;
 	std::vector<std::string> _allowedCraft;
+	int _mapBackgroundColor;
 public:
 	/// Creates a blank Starting Conditions ruleset.
 	RuleStartingCondition(const std::string &type);
@@ -78,6 +79,8 @@ public:
 	bool isItemAllowed(const std::string &itemType, Mod *mod) const;
 	/// Gets the default items.
 	const std::map<std::string, int> *getDefaultItems() const;
+	/// Gets the battlescape map background color.
+	int getMapBackgroundColor() const;
 };
 
 }
