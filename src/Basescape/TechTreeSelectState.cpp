@@ -195,6 +195,9 @@ void TechTreeSelectState::initLists()
 void TechTreeSelectState::onSelectTopic(Action *)
 {
 	int index = _lstTopics->getSelectedRow();
+	if (index >= _availableTopics.size())
+		return;
+
 	const std::string selectedTopic = _availableTopics[index];
 	bool isManufacturingTopic = index >= _firstManufacturingTopicIndex;
 
