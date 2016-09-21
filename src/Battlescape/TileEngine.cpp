@@ -1368,7 +1368,7 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 	}
 	else
 	{
-		if (weapon->getRules()->getBattleType() == BT_MEDIKIT && target->killedBy() != FACTION_PLAYER)
+		if (weapon->getRules()->getBattleType() == BT_MEDIKIT && target->getOriginalFaction() == FACTION_PLAYER && target->killedBy() != FACTION_PLAYER)
 		{
 			// only give experience for actions performed on enemies...
 			// ... unless the action is to heal a fatal wound which was inflicted by an enemy (or neutral)
