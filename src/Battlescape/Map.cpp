@@ -138,6 +138,9 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	{
 		_bgColor = startingCondition->getMapBackgroundColor();
 	}
+
+	_stunIndicator = _game->getMod()->getSurface("FloorStunIndicator");
+	_woundIndicator = _game->getMod()->getSurface("FloorWoundIndicator");
 }
 
 /**
@@ -658,6 +661,35 @@ void Map::drawTerrain(Surface *surface)
 										tileWestShade,
 										true
 									);
+									if (_stunIndicator || _woundIndicator)
+									{
+										BattleUnit *itemUnit = item->getUnit();
+										if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
+										{
+											if (itemUnit->getFatalWounds() > 0)
+											{
+												if (_woundIndicator)
+												{
+													_woundIndicator->blitNShade(surface,
+														screenPosition.x - tileOffset.x,
+														screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
+														tileWestShade,
+														true);
+												}
+											}
+											else
+											{
+												if (_stunIndicator)
+												{
+													_stunIndicator->blitNShade(surface,
+														screenPosition.x - tileOffset.x,
+														screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
+														tileWestShade,
+														true);
+												}
+											}
+										}
+									}
 								}
 								// Draw soldier
 								if (westUnit && westUnit->getStatus() != STATUS_WALKING && (!tileWest->getMapData(O_OBJECT) || tileWest->getMapData(O_OBJECT)->getBigWall() < 6 || tileWest->getMapData(O_OBJECT)->getBigWall() == 9) && (westUnit->getVisible() || _save->getDebugMode()))
@@ -764,6 +796,33 @@ void Map::drawTerrain(Surface *surface)
 								screenPosition.y + tile->getTerrainLevel(),
 								tileShade
 							);
+							if (_stunIndicator || _woundIndicator)
+							{
+								BattleUnit *itemUnit = item->getUnit();
+								if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
+								{
+									if (itemUnit->getFatalWounds() > 0)
+									{
+										if (_woundIndicator)
+										{
+											_woundIndicator->blitNShade(surface,
+												screenPosition.x,
+												screenPosition.y + tile->getTerrainLevel(),
+												tileShade);
+										}
+									}
+									else
+									{
+										if (_stunIndicator)
+										{
+											_stunIndicator->blitNShade(surface,
+												screenPosition.x,
+												screenPosition.y + tile->getTerrainLevel(),
+												tileShade);
+										}
+									}
+								}
+							}
 						}
 					}
 

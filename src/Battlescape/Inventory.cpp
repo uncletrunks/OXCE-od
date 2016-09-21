@@ -254,6 +254,7 @@ void Inventory::drawItems()
 	ScriptWorkerBlit work;
 	_items->clear();
 	_grenadeIndicators.clear();
+	_stunnedIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
 	if (_selUnit != 0)
 	{
@@ -319,6 +320,7 @@ void Inventory::drawItems()
 				// don't show on dead units
 				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 				{
+					_stunnedIndicators.push_back(std::make_pair(x, y));
 					fatalWounds = (*i)->getUnit()->getFatalWounds();
 				}
 			}
@@ -1329,6 +1331,7 @@ void Inventory::showWarning(const std::wstring &msg)
 
 /**
  * Shows primer warnings on all live grenades.
+ * Also shows stunned-indicator on unconscious units.
  */
 void Inventory::drawPrimers()
 {
@@ -1337,11 +1340,24 @@ void Inventory::drawPrimers()
 	{
 		_animFrame = 0;
 	}
+
+	// grenades
 	Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
 	for (std::vector<std::pair<int, int> >::const_iterator i = _grenadeIndicators.begin(); i != _grenadeIndicators.end(); ++i)
 	{
 		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
 	}
+
+	// stunned units
+	tempSurface = _game->getMod()->getSurface("BigStunIndicator");
+	if (tempSurface)
+	{
+		for (std::vector<std::pair<int, int> >::const_iterator i = _stunnedIndicators.begin(); i != _stunnedIndicators.end(); ++i)
+		{
+			tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		}
+	}
+
 	_animFrame++;
 }
 

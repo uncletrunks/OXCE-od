@@ -50,7 +50,7 @@ private:
 	BattleItem *_mouseOverItem;
 	int _groundOffset, _animFrame;
 	std::map<int, std::map<int, int> > _stackLevel;
-	std::vector<std::pair<int, int> > _grenadeIndicators;
+	std::vector<std::pair<int, int> > _grenadeIndicators, _stunnedIndicators;
 	NumberText *_stackNumber;
 	std::wstring _searchString;
 	Timer *_animTimer;
