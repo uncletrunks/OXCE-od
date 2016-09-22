@@ -443,8 +443,15 @@ void CraftArmorState::btnDeequipAllArmorClick(Action *action)
 				_base->getStorageItems()->addItem((*i)->getArmor()->getStoreItem());
 			}
 
-			// assign default armor and update the list
 			Armor *a = _game->getMod()->getArmor((*i)->getRules()->getArmor());
+
+			// -1 armor to stores
+			if (a->getStoreItem() != Armor::NONE)
+			{
+				_base->getStorageItems()->removeItem(a->getStoreItem());
+			}
+
+			// assign default armor and update the list
 			(*i)->setArmor(a);
 			_lstSoldiers->setCellText(row, 2, tr(a->getType()));
 		}
