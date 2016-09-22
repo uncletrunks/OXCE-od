@@ -33,22 +33,19 @@ class CustomPalettes
 private:
 	std::string _type, _target;
 	std::map<int, Position> _palette;
-	int _modIndex;
 public:
 	/// Creates a blank custom palette.
-	CustomPalettes();
+	CustomPalettes(const std::string &type);
 	/// Clean up.
 	virtual ~CustomPalettes();
 	/// Loads the data from YAML.
-	void load(const YAML::Node &node, int modIndex);
+	void load(const YAML::Node &node);
 	/// Gets the palette.
 	std::map<int, Position> *getPalette();
 	/// Gets the type.
 	const std::string &getType() const;
 	/// Gets the target.
 	const std::string &getTarget() const;
-	/// Gets the mod index.
-	int getModIndex() const;
 
 };
 

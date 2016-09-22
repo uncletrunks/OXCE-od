@@ -533,7 +533,7 @@ Mod::~Mod()
 	{
 		delete i->second;
 	}
-	for (std::vector< std::pair<std::string, CustomPalettes *> >::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
+	for (std::map<std::string, CustomPalettes *>::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1369,11 +1369,11 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	}
 	for (YAML::const_iterator i = doc["customPalettes"].begin(); i != doc["customPalettes"].end(); ++i)
 	{
-		std::string type = (*i)["type"].as<std::string>();
-		std::auto_ptr<CustomPalettes> customPalettes(new CustomPalettes());
-		customPalettes->load(*i, _modOffset);
-		_customPalettes.push_back(std::make_pair(type, customPalettes.release()));
-		_customPalettesIndex.push_back(type);
+		CustomPalettes *rule = loadRule(*i, &_customPalettes, &_customPalettesIndex);
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
 	}
 	for (YAML::const_iterator i = doc["extraSounds"].begin(); i != doc["extraSounds"].end(); ++i)
 	{
@@ -2306,9 +2306,9 @@ std::vector<std::pair<std::string, ExtraSprites *> > Mod::getExtraSprites() cons
  * Gets the list of custom palettes.
  * @return The list of custom palettes.
  */
-std::vector<std::pair<std::string, CustomPalettes *> > Mod::getCustomPalettes() const
+const std::vector<std::string> &Mod::getCustomPalettes() const
 {
-	return _customPalettes;
+	return _customPalettesIndex;
 }
 
 /**
@@ -3532,7 +3532,7 @@ void Mod::loadExtraResources()
 	}
 
 	Log(LOG_INFO) << "Loading custom palettes from ruleset...";
-	for (std::vector< std::pair<std::string, CustomPalettes *> >::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
+	for (std::map<std::string, CustomPalettes *>::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
 	{
 		CustomPalettes *palDef = i->second;
 		std::string palTargetName = palDef->getTarget();

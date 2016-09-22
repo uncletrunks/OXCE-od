@@ -25,7 +25,7 @@ namespace OpenXcom
 /**
  * Creates a blank custom palette.
  */
-CustomPalettes::CustomPalettes()
+CustomPalettes::CustomPalettes(const std::string &type) : _type(type)
 {
 }
 
@@ -39,14 +39,12 @@ CustomPalettes::~CustomPalettes()
 /**
  * Loads the custom palette from YAML.
  * @param node YAML node.
- * @param modIndex the internal index of the associated mod.
  */
-void CustomPalettes::load(const YAML::Node &node, int modIndex)
+void CustomPalettes::load(const YAML::Node &node)
 {
 	_type = node["type"].as<std::string>(_type);
 	_target = node["target"].as<std::string>(_target);
 	_palette = node["palette"].as< std::map<int, Position> >(_palette);
-	_modIndex = modIndex;
 }
 
 /**
@@ -74,15 +72,6 @@ const std::string &CustomPalettes::getType() const
 const std::string &CustomPalettes::getTarget() const
 {
 	return _target;
-}
-
-/**
- * Gets the mod index for this custom palette.
- * @return The mod index.
- */
-int CustomPalettes::getModIndex() const
-{
-	return _modIndex;
 }
 
 }

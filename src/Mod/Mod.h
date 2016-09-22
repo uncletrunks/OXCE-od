@@ -141,7 +141,7 @@ private:
 	std::map<std::string, RuleCommendations *> _commendations;
 	std::map<std::string, RuleMissionScript*> _missionScripts;
 	std::vector<std::pair<std::string, ExtraSprites *> > _extraSprites;
-	std::vector<std::pair<std::string, CustomPalettes *> > _customPalettes;
+	std::map<std::string, CustomPalettes *> _customPalettes;
 	std::vector<std::pair<std::string, ExtraSounds *> > _extraSounds;
 	std::map<std::string, ExtraStrings *> _extraStrings;
 	std::vector<StatString*> _statStrings;
@@ -427,7 +427,7 @@ public:
 	/// Gets the list of external Sprites.
 	std::vector<std::pair<std::string, ExtraSprites *> > getExtraSprites() const;
 	/// Gets the list of custom palettes.
-	std::vector<std::pair<std::string, CustomPalettes *> > getCustomPalettes() const;
+	const std::vector<std::string> &getCustomPalettes() const;
 	/// Gets the list of external Sounds.
 	std::vector<std::pair<std::string, ExtraSounds *> > getExtraSounds() const;
 	/// Gets the list of external Strings.
