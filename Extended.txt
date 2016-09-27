@@ -119,6 +119,7 @@ New functions exposed to script.[br/]
 [br/]
 3.3:[br/]
 New light system.[br/]
+Option for reserving more space for mod in common surface/sound sets.[br/]
 [br/]
 
 [examples]
@@ -127,6 +128,12 @@ New light system.[br/]
 
 Example of usage:
 
+In `metadata.yml`:
+[code]
+reservedSpace: 4 #how many BIGOBS.PCK/FLOOROB.PCK/BATTLE.CAT etc. reserve for that mod, this is multiply of default reserved size.
+[/code]
+
+In `*.rul`:
 [code]
 itemCategories:             #from OXCE+
 startingConditions:         #from OXCE+
