@@ -104,7 +104,9 @@ bool equalProduction::operator()(const Production * p) const
 /**
  * Initializes a brand new saved game according to the specified difficulty.
  */
-SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _ironman(false), _globeLon(0.0), _globeLat(0.0), _globeZoom(0), _battleGame(0), _debug(false), _warned(false), _monthsPassed(-1), _selectedBase(0)
+SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _ironman(false), _globeLon(0.0),
+						 _globeLat(0.0), _globeZoom(0), _battleGame(0), _debug(false),
+						 _warned(false), _monthsPassed(-1), _selectedBase(0), _autosales()
 {
 	_time = new GameTime(6, 1, 1, 1999, 12, 0, 0);
 	_alienStrategy = new AlienStrategy();
@@ -529,11 +531,21 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		_missionStatistics.push_back(ms);
 	}
 
+	for (YAML::const_iterator it = doc["autoSales"].begin(); it != doc["autoSales"].end(); ++it)
+	{
+		std::string itype = it->as<std::string>();
+		if (mod->getItem(itype))
+		{
+			_autosales.insert(mod->getItem(itype));
+		}
+	}
+
 	if (const YAML::Node &battle = doc["battleGame"])
 	{
 		_battleGame = new SavedBattleGame(mod);
 		_battleGame->load(battle, mod, this);
 	}
+
 }
 
 /**
@@ -685,6 +697,10 @@ void SavedGame::save(const std::string &filename) const
 	for (std::vector<MissionStatistics*>::const_iterator i = _missionStatistics.begin(); i != _missionStatistics.end(); ++i)
 	{
 		node["missionStatistics"].push_back((*i)->save());
+	}
+	for (std::set<const RuleItem*>::const_iterator i = _autosales.begin(); i != _autosales.end(); ++i)
+	{
+		node["autoSales"].push_back((*i)->getName());
 	}
 	if (_battleGame != 0)
 	{
@@ -2117,6 +2133,32 @@ std::vector<Soldier*>::iterator SavedGame::killSoldier(Soldier *soldier, BattleU
 		}
 	}
 	return j;
+}
+
+/**
+ * enables/disables autosell for an item type
+ */
+void SavedGame::setAutosell(const RuleItem *itype, const bool enabled)
+{
+	if (enabled)
+	{
+		_autosales.insert(itype);
+	}
+	else
+	{
+		_autosales.erase(itype);
+	}
+}
+/**
+ * get autosell state for an item type
+ */
+bool SavedGame::getAutosell(const RuleItem *itype) const
+{
+	if (!Options::autoSell)
+	{
+		return false;
+	}
+	return _autosales.find(itype) != _autosales.end();
 }
 
 }

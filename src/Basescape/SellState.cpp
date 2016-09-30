@@ -120,8 +120,6 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_SELL_ITEMS_SACK_PERSONNEL"));
 
-	_txtSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
-
 	_txtFunds->setText(tr("STR_FUNDS").arg(Text::formatFunding(_game->getSavedGame()->getFunds())));
 
 	_txtSpaceUsed->setVisible(Options::storageLimitsEnforced);
@@ -238,6 +236,11 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 		if (qty > 0 && (Options::canSellLiveAliens || !rule->isAlien()))
 		{
 			TransferRow row = { TRANSFER_ITEM, rule, tr(*i), rule->getSellCost(), qty, 0, 0 };
+			if ((_debriefingState != 0) && (_game->getSavedGame()->getAutosell(rule)))
+			{
+				row.amount = qty;
+				_total += row.cost * qty;
+			}
 			_items.push_back(row);
 			std::string cat = getCategory(_items.size() - 1);
 			if (std::find(_cats.begin(), _cats.end(), cat) == _cats.end())
@@ -246,6 +249,8 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 			}
 		}
 	}
+
+	_txtSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
 
 	_cbxCategory->setOptions(_cats);
 	_cbxCategory->onChange((ActionHandler)&SellState::cbxCategoryChange);
@@ -557,8 +562,19 @@ void SellState::btnOkClick(Action *)
 				{
 					_base->getStorageItems()->removeItem(item->getType(), i->amount);
 				}
+				// set autosell status if we sold all of the item
+				if (_debriefingState != 0)
+				{
+					_game->getSavedGame()->setAutosell(item, (i->qtySrc == i->amount));
+				}
+
 				break;
 			}
+		}
+		else
+		{
+			// disable autosell since we haven't sold any of the item.
+			_game->getSavedGame()->setAutosell((RuleItem*)i->rule, false);
 		}
 	}
 	if (_debriefingState != 0)

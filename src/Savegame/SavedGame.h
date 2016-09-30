@@ -47,6 +47,7 @@ class RuleResearch;
 class ResearchProject;
 class Soldier;
 class RuleManufacture;
+class RuleItem;
 class ArticleDefinition;
 class MissionSite;
 class AlienBase;
@@ -139,6 +140,7 @@ private:
 	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::vector<MissionStatistics*> _missionStatistics;
 	std::set<int> _ignoredUfos;
+	std::set<const RuleItem *> _autosales;
 
 	void getDependableResearchBasic (std::vector<RuleResearch*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	static SaveInfo getSaveInfo(const std::string &file, Language *lang);
@@ -339,6 +341,10 @@ public:
 	bool isUfoOnIgnoreList(int ufoId);
 	/// Handles a soldier's death.
 	std::vector<Soldier*>::iterator killSoldier(Soldier *soldier, BattleUnitKills *cause = 0);
+	/// enables/disables autosell for an item type
+	void setAutosell(const RuleItem *itype, const bool enabled);
+	/// get autosell state for an item type
+	bool getAutosell(const RuleItem *) const;
 };
 }
 #endif
