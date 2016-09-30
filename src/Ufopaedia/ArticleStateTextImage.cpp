@@ -36,7 +36,14 @@ namespace OpenXcom
 		_txtTitle = new Text(defs->text_width, 48, 5, 22);
 
 		// Set palette
-		setPalette("PAL_UFOPAEDIA");
+		if (defs->customPalette)
+		{
+			setCustomPalette(_game->getMod()->getSurface(defs->image_id)->getPalette(), Mod::UFOPAEDIA_CURSOR);
+		}
+		else
+		{
+			setPalette("PAL_UFOPAEDIA");
+		}
 
 		ArticleState::initLayout();
 

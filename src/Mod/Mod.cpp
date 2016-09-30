@@ -790,8 +790,11 @@ void Mod::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	}
 	for (std::map<std::string, Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
 	{
-		if (i->first.substr(i->first.length() - 3, i->first.length()) != "LBM")
-			i->second->setPalette(colors, firstcolor, ncolors);
+		if (i->first.substr(i->first.length() - 3, i->first.length()) == "LBM")
+			continue;
+		if (i->first.find("_CPAL") != std::string::npos)
+			continue;
+		i->second->setPalette(colors, firstcolor, ncolors);
 	}
 	for (std::map<std::string, SurfaceSet*>::iterator i = _sets.begin(); i != _sets.end(); ++i)
 	{

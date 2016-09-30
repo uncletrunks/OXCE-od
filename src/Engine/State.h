@@ -108,6 +108,8 @@ public:
 	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256, bool immediately = true);
 	/// Changes the state's 8bpp palette with certain resources.
 	void setPalette(const std::string &palette, int backpals = -1);
+	/// Changes the state's 8bpp palette with certain resources.
+	void setCustomPalette(SDL_Color *colors, int cursorColor);
 	/// Gets the state's 8bpp palette.
 	SDL_Color *getPalette();
 	/// Let the state know the window has been resized.

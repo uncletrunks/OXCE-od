@@ -526,6 +526,18 @@ void State::setPalette(const std::string &palette, int backpals)
 }
 
 /**
+* Loads palettes from the given resources into the state.
+* @param colors Pointer to the set of colors.
+* @param cursorColor Cursor color to use.
+*/
+void State::setCustomPalette(SDL_Color *colors, int cursorColor)
+{
+	setPalette(colors, 0, 256, false);
+	_cursorColor = cursorColor;
+	setPalette(NULL); // delay actual update to the end
+}
+
+/**
  * Returns the state's 8bpp palette.
  * @return Pointer to the palette's colors.
  */

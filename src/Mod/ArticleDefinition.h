@@ -74,6 +74,7 @@ namespace OpenXcom
 		std::string title;
 		std::string section;
 		std::vector<std::string> requires;
+		bool customPalette;
 
 	protected:
 		UfopaediaTypeId _type_id;
