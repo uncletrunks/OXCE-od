@@ -1357,22 +1357,22 @@ int TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  */
 bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUnit *target, bool rangeAtack)
 {
+	if (!weapon)
+	{
+		return false;
+	}
+
 	if (!target)
 	{
 		return false;
 	}
-	else
+	else if (weapon->getRules()->getBattleType() != BT_MEDIKIT)
 	{
 		// only enemies count, not friends or neutrals
 		if (target->getOriginalFaction() != FACTION_HOSTILE) return false;
 
 		// mind-controlled enemies don't count though!
 		if (target->getFaction() != FACTION_HOSTILE) return false;
-	}
-
-	if (!weapon)
-	{
-		return false;
 	}
 
 	if (weapon->getRules()->getExperienceTrainingMode() > ETM_DEFAULT)
