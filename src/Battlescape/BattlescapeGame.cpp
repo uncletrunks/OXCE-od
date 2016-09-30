@@ -902,11 +902,8 @@ void BattlescapeGame::handleNonTargetAction()
 			{
 				_parentState->warning("STR_GRENADE_IS_ACTIVATED");
 				_currentAction.weapon->setFuseTimer(_currentAction.value);
-				if (_currentAction.weapon->getGlow())
-				{
-					_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
-					_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getGlowRange(), false);
-				}
+				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
+				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);
 			}
 			else
 			{
@@ -1790,10 +1787,10 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 
 	getTileEngine()->applyGravity(_save->getTile(p));
 
-	if (item->getGlow() && updateLight)
+	if (updateLight)
 	{
 		getTileEngine()->calculateLighting(LL_ITEMS, position);
-		getTileEngine()->calculateFOV(position, item->getGlowRange(), false);
+		getTileEngine()->calculateFOV(position, item->getVisibilityUpdateRange(), false);
 	}
 
 }
@@ -1926,7 +1923,7 @@ void BattlescapeGame::findItem(BattleAction *action)
 					if (targetItem->getGlow())
 					{
 						_save->getTileEngine()->calculateLighting(LL_ITEMS, action->actor->getPosition());
-						_save->getTileEngine()->calculateFOV(action->actor->getPosition(), targetItem->getGlowRange(), false);
+						_save->getTileEngine()->calculateFOV(action->actor->getPosition(), targetItem->getVisibilityUpdateRange(), false);
 					}
 				}
 			}

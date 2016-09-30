@@ -59,6 +59,19 @@ enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LE
 enum UnitBodyPartEx {BODYPART_LEGS = BODYPART_MAX, BODYPART_COLLAPSING, BODYPART_ITEM_RIGHTHAND, BODYPART_ITEM_LEFTHAND, BODYPART_ITEM_FLOOR, BODYPART_ITEM_INVENTORY, BODYPART_LARGE_TORSO, BODYPART_LARGE_PROPULSION = BODYPART_LARGE_TORSO + 4, BODYPART_LARGE_TURRET = BODYPART_LARGE_PROPULSION + 4};
 
 /**
+ * Placeholder class for future functionality.
+ */
+class BattleUnitVisibility
+{
+public:
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "BattleUnitVisibility";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+};
+
+/**
  * Represents a moving unit in the battlescape, player controlled or AI controlled
  * it holds info about it's position, items carrying, stats, etc
  */

@@ -972,24 +972,17 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 		return false;
 	}
 
+
+	int visibleDistanceMaxVoxel = getMaxVoxelViewDistance();
 	// during dark aliens can see 20 tiles, xcom can see 9 by default... unless overridden by armor
-	if (tile->getShade() > getMaxDarknessToSeeUnits())
+	if (tile->getShade() > getMaxDarknessToSeeUnits() && tile->getUnit()->getFire() == 0)
 	{
-		if (getMaxViewDistanceSq() > currentUnit->getMaxViewDistanceAtDarkSq() &&
-			distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > currentUnit->getMaxViewDistanceAtDarkSq() &&
-			tile->getUnit()->getFire() == 0)
-		{
-			return false;
-		}
+		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, (int)std::sqrt(currentUnit->getMaxViewDistanceAtDarkSq()) * 16);
 	}
 	// during day (or if enough other light) both see 20 tiles ... unless overridden by armor
 	else
 	{
-		if (getMaxViewDistanceSq() > currentUnit->getMaxViewDistanceAtDaySq() &&
-			distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > currentUnit->getMaxViewDistanceAtDaySq())
-		{
-			return false;
-		}
+		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, (int)std::sqrt(currentUnit->getMaxViewDistanceAtDaySq()) * 16);
 	}
 
 	Position originVoxel = getSightOriginVoxel(currentUnit);
@@ -1007,24 +1000,18 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 		// this is traced in voxel space, with smoke affecting visibility every step of the way
 		_trajectory.clear();
 		calculateLine(originVoxel, scanVoxel, true, &_trajectory, currentUnit);
-		int visibleDistance = _trajectory.size();
+		int visibleDistanceVoxels = _trajectory.size();
 		int densityOfSmoke = 0;
+		int densityOfFire = 0;
 		Position voxelToTile(16, 16, 24);
 		Position trackTile(-1, -1, -1);
 		Tile *t = 0;
 
-		for (int i = 0; i < visibleDistance; i++)
+		for (int i = 0; i < visibleDistanceVoxels; i++)
 		{
 			_trajectory.at(i) /= voxelToTile;
 			if (trackTile != _trajectory.at(i))
 			{
-				// 3  - coefficient of calculation (see above).
-				// 20 - maximum view distance in vanilla Xcom.
-				// Even if MaxViewDistance will be increased via ruleset, smoke will keep effect.
-				if (visibleDistance > getMaxVoxelViewDistance() - densityOfSmoke * getMaxViewDistance()/(3 * 20))
-				{
-					return false;
-				}
 				trackTile = _trajectory.at(i);
 				t = _save->getTile(trackTile);
 			}
@@ -1032,8 +1019,16 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 			{
 				densityOfSmoke += t->getSmoke();
 			}
+			else
+			{
+				densityOfFire += t->getFire();
+			}
 		}
-		unitSeen = visibleDistance <= getMaxVoxelViewDistance() - densityOfSmoke * getMaxViewDistance()/(3 * 20);
+		auto visibilityQuality = visibleDistanceMaxVoxel - visibleDistanceVoxels - densityOfSmoke * getMaxViewDistance()/(3 * 20);
+		ModScript::VisibilityUnitParser::Output arg{ visibilityQuality, visibilityQuality, ScriptTag<BattleUnitVisibility>::getNullTag() };
+		ModScript::VisibilityUnitParser::Worker worker{ currentUnit, tile->getUnit(), visibleDistanceVoxels, visibleDistanceMaxVoxel, densityOfSmoke, densityOfFire };
+		worker.execute(currentUnit->getArmor()->getVisibilityUnitScript(), arg);
+		unitSeen = 0 < arg.getFirst();
 	}
 	return unitSeen;
 }
@@ -2010,6 +2005,11 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
 		calculateLighting(LL_FIRE, tilePos, 1);
 		calculateFOV(tilePos, 1, false); //skip updating of tiles
 	}
+	else
+	{
+		// script could affect visibility of units, fast check if something is changed.
+		calculateFOV(tilePos, 1, false); //skip updating of tiles
+	}
 	//Note: If bu was knocked out this will have no effect on unit visibility quite yet, as it is not marked as out
 	//and will continue to block visibility at this point in time.
 
@@ -2031,9 +2031,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
  */
 void TileEngine::explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
 {
-	double centerZ = center.z / 24 + 0.5;
-	double centerX = center.x / 16 + 0.5;
-	double centerY = center.y / 16 + 0.5;
+	const Position centetTile = center.toTile();
 	int power_;
 	std::map<Tile*, int> tilesAffected;
 	std::vector<BattleItem*> toRemove;
@@ -2069,7 +2067,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 			double sin_fi = sin(fi * M_PI / 180.0);
 			double cos_fi = cos(fi * M_PI / 180.0);
 
-			Tile *origin = _save->getTile(Position(centerX, centerY, centerZ));
+			Tile *origin = _save->getTile(centetTile);
 			Tile *dest = origin;
 			double l = 0;
 			int tileX, tileY, tileZ;
@@ -2093,7 +2091,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 						toRemove.clear();
 						if (bu)
 						{
-							if (distance(dest->getPosition(), Position(centerX, centerY, centerZ)) < 2)
+							if (distance(dest->getPosition(), centetTile) < 2)
 							{
 								// ground zero effect is in effect
 								hitUnit(unit, clipOrWeapon, bu, Position(0, 0, 0), damage, type, rangeAtack);
@@ -2102,7 +2100,7 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 							{
 								// directional damage relative to explosion position.
 								// units above the explosion will be hit in the legs, units lateral to or below will be hit in the torso
-								hitUnit(unit, clipOrWeapon, bu, Position(centerX, centerY, centerZ + 5) - dest->getPosition(), damage, type, rangeAtack);
+								hitUnit(unit, clipOrWeapon, bu, centetTile + Position(0, 0, 5) - dest->getPosition(), damage, type, rangeAtack);
 							}
 
 							// Affect all items and units in inventory
@@ -2137,9 +2135,9 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 
 				l += 1.0;
 
-				tileX = int(floor(centerX + l * sin_te * cos_fi));
-				tileY = int(floor(centerY + l * cos_te * cos_fi));
-				tileZ = int(floor(centerZ + l * sin_fi));
+				tileX = int(floor(centetTile.x + 0.5 + l * sin_te * cos_fi));
+				tileY = int(floor(centetTile.y + 0.5 + l * cos_te * cos_fi));
+				tileZ = int(floor(centetTile.z + 0.5 + l * sin_fi));
 
 				origin = dest;
 				dest = _save->getTile(Position(tileX, tileY, tileZ));
@@ -2178,8 +2176,13 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 				applyGravity(j);
 		}
 	}
-	calculateLighting(LL_AMBIENT, center.toTile(), maxRadius + 1, true); // roofs could have been destroyed and fires could have been started
-	calculateFOV(center.toTile(), maxRadius + 1, true, true);
+	calculateLighting(LL_AMBIENT, centetTile, maxRadius + 1, true); // roofs could have been destroyed and fires could have been started
+	calculateFOV(centetTile, maxRadius + 1, true, true);
+	if (unit && distance(centetTile, unit->getPosition()) > maxRadius + 1)
+	{
+		// unit is away form blast but its visibility can be affected by scripts.
+		calculateFOV(centetTile, 1, false);
+	}
 }
 
 /**

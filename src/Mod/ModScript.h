@@ -51,6 +51,7 @@ class RuleVideo;
 
 class Mod;
 class BattleUnit;
+class BattleUnitVisibility;
 class BattleItem;
 
 class ModScript
@@ -105,6 +106,11 @@ public:
 		SelectItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
+	struct VisibilityUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int, ScriptTag<BattleUnitVisibility>&>, const BattleUnit*, const BattleUnit*, int, int, int, int>
+	{
+		VisibilityUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
 	Warper<RecolorUnitParser> recolorUnitSprite = { "recolorUnitSprite", _mod, _shared };
 	Warper<SelectUnitParser> selectUnitSprite = { "selectUnitSprite", _mod, _shared };
 
@@ -114,6 +120,8 @@ public:
 
 	Warper<RecolorItemParser> recolorItemSprite = { "recolorItemSprite", _mod, _shared };
 	Warper<SelectItemParser> selectItemSprite = { "selectItemSprite", _mod, _shared };
+
+	Warper<VisibilityUnitParser> visibilityUnit = { "visibilityUnit", _mod, _shared };
 };
 
 }

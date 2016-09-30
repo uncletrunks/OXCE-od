@@ -677,6 +677,15 @@ int BattleItem::getGlowRange() const
 }
 
 /**
+ * Gets update range needed by this item. For simplicity we always update to max range if it can glow.
+ * @return Range.
+ */
+int BattleItem::getVisibilityUpdateRange() const
+{
+	return _rules->getBattleType() == BT_FLARE ? getGlowRange() : 1;
+}
+
+/**
  * Sets the flag on this item indicating whether or not it is a clip used in a weapon.
  * @param ammo set the ammo flag to this.
  */

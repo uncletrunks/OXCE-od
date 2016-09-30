@@ -3796,6 +3796,18 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addCustomConst("GENDER_FEMALE", GENDER_FEMALE);
 }
 
+/**
+ * Register BattleUnitVisibility in script parser.
+ * @param parser Script parser.
+ */
+void BattleUnitVisibility::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<BattleUnitVisibility> uv = { parser };
+
+	uv.addScriptTag();
+}
+
+
 namespace
 {
 
@@ -3875,6 +3887,16 @@ ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const st
 }
 
 /**
+ * Constructor of visibility script parser.
+ */
+ModScript::VisibilityUnitParser::VisibilityUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "current_visibility", "default_visibility", "visibility_mode", "observer_unit", "target_unit", "distance", "distance_max", "smoke_density", "fire_density", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+/**
  * Init all required data in script using object data.
  */
 void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn)
@@ -3885,5 +3907,6 @@ void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part
 		w->update(unit->getArmor()->getRecolorScript(), unit, body_part, anim_frame, shade, burn);
 	}
 }
+
 
 } //namespace OpenXcom
