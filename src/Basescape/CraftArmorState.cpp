@@ -437,23 +437,22 @@ void CraftArmorState::btnDeequipAllArmorClick(Action *action)
 	{
 		if (!((*i)->getCraft() && (*i)->getCraft()->getStatus() == "STR_OUT"))
 		{
-			// add +1 armor to stores
-			if ((*i)->getArmor()->getStoreItem() != Armor::NONE)
-			{
-				_base->getStorageItems()->addItem((*i)->getArmor()->getStoreItem());
-			}
-
 			Armor *a = _game->getMod()->getArmor((*i)->getRules()->getArmor());
 
-			// -1 armor to stores
-			if (a->getStoreItem() != Armor::NONE)
+			if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
 			{
-				_base->getStorageItems()->removeItem(a->getStoreItem());
-			}
+				if ((*i)->getArmor()->getStoreItem() != Armor::NONE)
+				{
+					_base->getStorageItems()->addItem((*i)->getArmor()->getStoreItem());
+				}
+				if (a->getStoreItem() != Armor::NONE)
+				{
+					_base->getStorageItems()->removeItem(a->getStoreItem());
+				}
 
-			// assign default armor and update the list
-			(*i)->setArmor(a);
-			_lstSoldiers->setCellText(row, 2, tr(a->getType()));
+				(*i)->setArmor(a);
+				_lstSoldiers->setCellText(row, 2, tr(a->getType()));
+			}
 		}
 		row++;
 	}
