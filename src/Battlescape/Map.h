@@ -46,15 +46,8 @@ class Map : public InteractiveSurface
 {
 private:
 	static const int SCROLL_INTERVAL = 15;
-	static const int FADE_INTERVAL = 23;
-	static const int NIGHT_VISION_THRESHOLD = 6;
-	static const int NIGHT_VISION_SHADE = 4;
 	static const int BULLET_SPRITES = 35;
 	Timer *_scrollMouseTimer, *_scrollKeyTimer;
-	Timer *_fadeTimer;
-	int _fadeShade;
-	bool _nightVisionOn;
-	int _nvColor, _nvColorDef;
 	int _bgColor;
 	Game *_game;
 	SavedBattleGame *_save;
@@ -130,8 +123,6 @@ public:
 	void scrollMouse();
 	/// Keyboard-scrolls the camera.
 	void scrollKey();
-	/// fades in/out
-	void fadeShade();
 	/// Get waypoints vector.
 	std::vector<Position> *getWaypoints();
 	/// Set mouse-buttons' pressed state.
@@ -158,11 +149,6 @@ public:
 	void setBlastFlash(bool flash);
 	/// Check if the screen is flashing this.
 	bool getBlastFlash();
-	/// Modify shade for fading
-	int reShade(const int shade);
-	/// toggle the night-vision mode
-	void toggleNightVision();
-
 };
 
 }
