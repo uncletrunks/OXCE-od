@@ -838,9 +838,6 @@ bool TileEngine::canTargetUnit(Position *originVoxel, Tile *tile, Position *scan
 			}
 		}
 	}
-	// Couldn't find a line of fire; so just set the scanVoxel to be at the centre of the target.
-	// (Not all callers pay attention to the return value of this function.)
-	*scanVoxel = Position((tile->getPosition().x * 16) + 7, (tile->getPosition().y * 16) + 8, targetCenterHeight);
 	return false;
 }
 
@@ -2690,7 +2687,7 @@ int TileEngine::calculateLine(const Position& origin, const Position& target, bo
 			result = voxelCheck(Position(cx, cy, cz), excludeUnit, false, onlyVisible, excludeAllBut);
 			if (result != V_EMPTY)
 			{
-				if (trajectory != nullptr)
+				if (trajectory)
 				{ // store the position of impact
 					trajectory->push_back(Position(cx, cy, cz));
 				}
@@ -2740,7 +2737,7 @@ int TileEngine::calculateLine(const Position& origin, const Position& target, bo
 				result = voxelCheck(Position(cx, cy, cz), excludeUnit, false, onlyVisible, excludeAllBut);
 				if (result != V_EMPTY)
 				{
-					if (trajectory != nullptr)
+					if (trajectory != 0)
 					{ // store the position of impact
 						trajectory->push_back(Position(cx, cy, cz));
 					}

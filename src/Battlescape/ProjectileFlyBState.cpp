@@ -224,17 +224,7 @@ void ProjectileFlyBState::init()
 			}
 			else
 			{
-				if (_parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit) == false)
-				{
-					// if this action requires direct line-of-sight, we should abort.
-					if ((_action.type == BA_SNAPSHOT || _action.type == BA_AUTOSHOT || _action.type == BA_AIMEDSHOT) &&
-					    !_action.weapon->getRules()->getArcingShot())
-					{
-						_action.result = "STR_NO_LINE_OF_FIRE";
-						_parent->popState();
-						return;
-					}
-				}
+				_parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit);
 			}
 		}
 		else if (targetTile->getMapData(O_OBJECT) != 0)
