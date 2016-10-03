@@ -593,28 +593,17 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	if (currentUnit->getFaction() == tile->getUnit()->getFaction()) return true;
 
 	// if beyond global max. range, nobody can see anyone
-	int currentDistanceSq = distanceSq(currentUnit->getPosition(), tile->getPosition(), false);
-	if (currentDistanceSq > getMaxViewDistanceSq())
+	if (distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > getMaxViewDistanceSq())
 	{
 		return false;
-	}
-
-	// psi vision
-	int psiVisionDistance = currentUnit->getArmor()->getPsiVision();
-	bool fearImmune = tile->getUnit()->getArmor()->getFearImmune();
-	if (psiVisionDistance > 0 && !fearImmune)
-	{
-		if (currentDistanceSq <= (psiVisionDistance * psiVisionDistance))
-		{
-			return true; // we already sense the unit, no need to check obstacles or smoke
-		}
 	}
 
 	// during dark aliens can see 20 tiles, xcom can see 9 by default... unless overridden by armor
 	if (tile->getExternalShade() > getMaxDarknessToSeeUnits())
 	{
-		int maxDarkSq = currentUnit->getMaxViewDistanceAtDarkSq(tile->getUnit()->getArmor());
-		if (getMaxViewDistanceSq() > maxDarkSq && currentDistanceSq > maxDarkSq &&
+		int tmp = currentUnit->getMaxViewDistanceAtDarkSq(tile->getUnit()->getArmor());
+		if (getMaxViewDistanceSq() > tmp &&
+			distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > tmp &&
 			tile->getUnit()->getFire() == 0)
 		{
 			return false;
@@ -623,8 +612,9 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	// during day (or if enough other light) both see 20 tiles ... unless overridden by armor
 	else
 	{
-		int maxDaySq = currentUnit->getMaxViewDistanceAtDaySq(tile->getUnit()->getArmor());
-		if (getMaxViewDistanceSq() > maxDaySq && currentDistanceSq > maxDaySq)
+		int tmp = currentUnit->getMaxViewDistanceAtDaySq(tile->getUnit()->getArmor());
+		if (getMaxViewDistanceSq() > tmp &&
+			distanceSq(currentUnit->getPosition(), tile->getPosition(), false) > tmp)
 		{
 			return false;
 		}
@@ -635,9 +625,6 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	Position scanVoxel;
 	std::vector<Position> _trajectory;
 	bool unitSeen = canTargetUnit(&originVoxel, tile, &scanVoxel, currentUnit);
-
-	// heat vision 100% = smoke effectiveness 0%
-	int smokeDensityFactor = 100 - currentUnit->getArmor()->getHeatVision();
 
 	if (unitSeen)
 	{
@@ -662,7 +649,7 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 				// 3  - coefficient of calculation (see above).
 				// 20 - maximum view distance in vanilla Xcom.
 				// Even if MaxViewDistance will be increased via ruleset, smoke will keep effect.
-				if (visibleDistance > getMaxVoxelViewDistance() - densityOfSmoke * smokeDensityFactor * getMaxViewDistance()/(3 * 20 * 100))
+				if (visibleDistance > getMaxVoxelViewDistance() - densityOfSmoke * getMaxViewDistance()/(3 * 20))
 				{
 					return false;
 				}
@@ -674,7 +661,7 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 				densityOfSmoke += t->getSmoke();
 			}
 		}
-		unitSeen = visibleDistance <= getMaxVoxelViewDistance() - densityOfSmoke * smokeDensityFactor * getMaxViewDistance()/(3 * 20 * 100);
+		unitSeen = visibleDistance <= getMaxVoxelViewDistance() - densityOfSmoke * getMaxViewDistance()/(3 * 20);
 	}
 	return unitSeen;
 }
