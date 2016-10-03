@@ -51,7 +51,6 @@ OPT bool showQuickSearch;
 OPT bool showAllCommendations;
 OPT bool removeWoundedFromTraining;
 OPT bool autoAssignPilots;
-OPT bool fullNightVision;
 OPT bool autoSell;
 
 // Flags and other stuff that don't need OptionInfo's.
