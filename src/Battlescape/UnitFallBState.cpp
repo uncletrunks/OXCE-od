@@ -267,8 +267,8 @@ void UnitFallBState::think()
 					_parent->getTileEngine()->hit(here, (*unit)->getBaseStats()->strength, _parent->getMod()->getDamageType(DT_IN), (*unit), 0, false);
 				}
 				// move our personal lighting with us
-				_terrain->calculateUnitLighting();
-				_terrain->calculateFOV((*unit)->getPosition(), 1, false); //update everyone else to see this unit, as well as all this unit's visible units.
+				_terrain->calculateLighting(LL_UNITS, (*unit)->getPosition(), 2);
+				_terrain->calculateFOV((*unit)->getPosition(), 2, false); //update everyone else to see this unit, as well as all this unit's visible units.
 				_terrain->calculateFOV((*unit), true, false); //update tiles
 				_parent->checkForProximityGrenades(*unit);
 				BattleAction fall;

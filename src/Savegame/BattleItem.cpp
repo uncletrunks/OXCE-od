@@ -384,16 +384,17 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set) const
 		//enforce compatibility with basic version
 		if (surf == nullptr)
 		{
-			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enoght frames");
+			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 
+		ModScript::SelectItemParser::Output arg{ i, 0 };
 		ModScript::SelectItemParser::Worker work{ this, BODYPART_ITEM_FLOOR, 0, 0 };
-		i = work.execute(_rules->getSpriteScript(), i, 0);
+		work.execute(_rules->getSpriteScript(), arg);
 
-		surf = set->getFrame(i);
+		surf = set->getFrame(arg.getFirst());
 		if (surf == nullptr)
 		{
-			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enoght frames");
+			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 		return surf;
 	}
@@ -416,16 +417,17 @@ Surface *BattleItem::getBigSprite(SurfaceSet *set) const
 		//enforce compatibility with basic version
 		if (surf == nullptr)
 		{
-			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enoght frames");
+			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 
+		ModScript::SelectItemParser::Output arg{ i, 0 };
 		ModScript::SelectItemParser::Worker work{ this, BODYPART_ITEM_INVENTORY, 0, 0 };
-		i = work.execute(_rules->getSpriteScript(), i, 0);
+		work.execute(_rules->getSpriteScript(), arg);
 
-		surf = set->getFrame(i);
+		surf = set->getFrame(arg.getFirst());
 		if (surf == nullptr)
 		{
-			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enoght frames");
+			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 		return surf;
 	}
@@ -672,6 +674,15 @@ int BattleItem::getGlowRange() const
 {
 	auto owner = _unit ? _unit : _previousOwner;
 	return owner ? _rules->getPowerBonus(owner) : _rules->getPower();
+}
+
+/**
+ * Gets update range needed by this item. For simplicity we always update to max range if it can glow.
+ * @return Range.
+ */
+int BattleItem::getVisibilityUpdateRange() const
+{
+	return _rules->getBattleType() == BT_FLARE ? getGlowRange() : 1;
 }
 
 /**

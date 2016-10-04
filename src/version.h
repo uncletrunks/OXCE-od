@@ -19,16 +19,16 @@
 #ifndef OPENXCOM_VERSION_H
 #define OPENXCOM_VERSION_H
 
-#define OPENXCOM_VERSION_SHORT "Extended 3.2+"
-#define OPENXCOM_VERSION_LONG "3.2.0.0"
-#define OPENXCOM_VERSION_NUMBER 3,2,0,0
+#define OPENXCOM_VERSION_SHORT "Extended 3.3+"
+#define OPENXCOM_VERSION_LONG "3.3.0.0"
+#define OPENXCOM_VERSION_NUMBER 3,3,0,0
 
 #ifdef GIT_BUILD
 #include "git_version.h"
 #endif
 
 #ifndef OPENXCOM_VERSION_GIT
-#define OPENXCOM_VERSION_GIT " (v2016-09-30)"
+#define OPENXCOM_VERSION_GIT " (v2016-10-04)"
 #endif
 
 #endif

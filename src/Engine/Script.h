@@ -26,6 +26,7 @@
 #include <yaml-cpp/yaml.h>
 #include <SDL_stdinc.h>
 
+#include "HelperMeta.h"
 #include "Logger.h"
 #include "Exception.h"
 
@@ -44,7 +45,9 @@ class ParserWriter;
 class SelectedToken;
 class ScriptWorkerBase;
 class ScriptWorkerBlit;
-template<typename...> class ScriptWorker;
+template<typename, typename...> class ScriptWorker;
+template<typename, typename> struct ScriptTag;
+template<typename, typename> class ScriptValues;
 
 namespace helper
 {
@@ -54,8 +57,13 @@ struct ArgSelector;
 
 }
 
+constexpr int ScriptMaxOut = 4;
 constexpr int ScriptMaxArg = 16;
 constexpr int ScriptMaxReg = 64*sizeof(void*);
+
+////////////////////////////////////////////////////////////
+//					enum definitions
+////////////////////////////////////////////////////////////
 
 /**
  * Script execution cunter.
@@ -107,6 +115,7 @@ constexpr ArgSpecEnum operator^(ArgSpecEnum a, ArgSpecEnum b)
 {
 	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) ^ static_cast<Uint8>(b));
 }
+
 /**
  * Args types.
  */
@@ -138,35 +147,26 @@ constexpr ArgEnum ArgBase(ArgEnum arg)
 /**
  * Specialized version of argument type.
  */
-constexpr ArgEnum ArgSpec(ArgEnum arg, ArgSpecEnum spec)
+constexpr ArgEnum ArgSpecAdd(ArgEnum arg, ArgSpecEnum spec)
 {
 	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) | static_cast<Uint8>(spec)) : arg;
 }
 /**
- * Specialized version of argument type.
+ * Remove specialization from argument type.
  */
-constexpr ArgEnum ArgRemove(ArgEnum arg, ArgSpecEnum spec)
+constexpr ArgEnum ArgSpecRemove(ArgEnum arg, ArgSpecEnum spec)
 {
 	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) & ~static_cast<Uint8>(spec)) : arg;
 }
 /**
- * Test if argument is normal type or special.
- * @param arg
- * @return True if type is normal.
- */
-constexpr bool ArgIsNormal(ArgEnum arg)
-{
-	return ArgBase(arg) != ArgInvalid;
-}
-/**
- * Test if argumet type is register.
+ * Test if argumet type is register (readonly or writeable).
  */
 constexpr bool ArgIsReg(ArgEnum arg)
 {
 	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecReg)) == static_cast<Uint8>(ArgSpecReg);
 }
 /**
- * Test if argumet type is register.
+ * Test if argumet type is variable (writeable register).
  */
 constexpr bool ArgIsVar(ArgEnum arg)
 {
@@ -187,20 +187,21 @@ constexpr bool ArgIsPtrE(ArgEnum arg)
 	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecPtrE)) == static_cast<Uint8>(ArgSpecPtrE);
 }
 /**
- * Compatibility betwean operation argument type and reg type. Greater numbers mean bigger comatibility.
+ * Compatibility betwean operation argument type and variable type. Greater numbers mean bigger comatibility.
  * @param argType Type of operation argument.
- * @param regType Type of reg we try pass to operation.
+ * @param varType Type of variable/value we try pass to operation.
  * @return Zero if incompatible, 255 if both types are same.
  */
-constexpr int ArgCompatible(ArgEnum argType, ArgEnum regType, size_t overloadSize)
+constexpr int ArgCompatible(ArgEnum argType, ArgEnum varType, size_t overloadSize)
 {
 	return
 		argType == ArgInvalid ? 0 :
-		ArgIsVar(argType) && argType != regType ? 0 :
-		ArgBase(argType) != ArgBase(regType) ? 0 :
-		ArgIsReg(argType) != ArgIsReg(regType) ? 0 :
-		ArgIsPtr(argType) != ArgIsPtr(regType) ? 0 :
-			255 - (ArgIsPtrE(argType) != ArgIsPtrE(regType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(regType) ? 64 : 0) - (overloadSize > 8 ? 8 : overloadSize);
+		ArgIsVar(argType) && argType != varType ? 0 :
+		ArgBase(argType) != ArgBase(varType) ? 0 :
+		ArgIsReg(argType) != ArgIsReg(varType) ? 0 :
+		ArgIsPtr(argType) != ArgIsPtr(varType) ? 0 :
+		ArgIsPtrE(argType) && ArgIsPtr(varType) ? 0 :
+			255 - (ArgIsPtrE(argType) != ArgIsPtrE(varType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(varType) ? 64 : 0) - (overloadSize > 8 ? 8 : overloadSize);
 }
 
 /**
@@ -210,10 +211,7 @@ enum RegEnum : Uint8
 {
 	RegInvaild = (Uint8)-1,
 
-	RegI0 = 0*sizeof(int),
-	RegI1 = 1*sizeof(int),
-
-	RegMax = 2*sizeof(int),
+	RegMax = 0*sizeof(int),
 };
 
 /**
@@ -226,21 +224,11 @@ enum RetEnum : Uint8
 	RetError = 2,
 };
 
-/**
- * Token type
- */
-enum TokenEnum
-{
-	TokenNone,
-	TokenInvaild,
-	TokenColon,
-	TokenSemicolon,
-	TokenSymbol,
-	TokenNumber,
-	TokenBuildinLabel,
-};
+////////////////////////////////////////////////////////////
+//				containers definitions
+////////////////////////////////////////////////////////////
 
-using FuncCommon = RetEnum (*)(ScriptWorkerBase &, const Uint8 *, ProgPos &);
+using FuncCommon = RetEnum (*)(ScriptWorkerBase&, const Uint8*, ProgPos&);
 
 /**
  * Common base of script execution.
@@ -335,44 +323,187 @@ public:
 	}
 };
 
+////////////////////////////////////////////////////////////
+//					worker definition
+////////////////////////////////////////////////////////////
+
+namespace helper
+{
+
+template<int I, typename Tuple, bool valid = ((size_t)I < std::tuple_size<Tuple>::value)>
+struct GetTupleImpl
+{
+	using type = typename std::tuple_element<I, Tuple>::type;
+	static type get(Tuple& t) { return std::get<I>(t); }
+};
+
+template<int I, typename Tuple>
+struct GetTupleImpl<I, Tuple, false>
+{
+	using type = void;
+	static type get(Tuple& t) { }
+};
+
+template<int I, typename Tuple>
+using GetTupleType = typename GetTupleImpl<I, Tuple>::type;
+
+template<int I, typename Tuple>
+GetTupleType<I, Tuple> GetTupleValue(Tuple& t) { return GetTupleImpl<I, Tuple>::get(t); }
+
+template<typename T>
+struct TypeInfoImpl
+{
+	using t1 = typename std::decay<T>::type;
+	using t2 = typename std::remove_pointer<t1>::type;
+	using t3 = typename std::decay<t2>::type;
+
+	static constexpr bool isRef = std::is_reference<T>::value;
+	static constexpr bool isOutput = isRef && !std::is_const<T>::value;
+	static constexpr bool isPtr = std::is_pointer<t1>::value;
+	static constexpr bool isEditable = isPtr && !std::is_const<t2>::value;
+
+	static constexpr size_t size = std::is_pod<t3>::value ? sizeof(t3) : 0;
+
+	static_assert(size || isPtr, "Type need to be POD to be used as reg or const value.");
+};
+} //namespace helper
+
+/**
+ * Raw memory used by scripts.
+ */
 template<int size>
 using ScriptRawMemory = typename std::aligned_storage<size, alignof(void*)>::type;
 
+/**
+ * Script output and input aguments.
+ */
+template<typename... OutputArgs>
+struct ScriptOutputArgs
+{
+	std::tuple<helper::Decay<OutputArgs>...> data;
 
+	/// Constructor.
+	ScriptOutputArgs(const helper::Decay<OutputArgs>&... args) : data{ args... }
+	{
+
+	}
+
+	/// Getter for first element.
+	auto getFirst() -> helper::GetTupleType<0, decltype(data)> { return helper::GetTupleValue<0>(data); }
+	/// Getter for second element.
+	auto getSecond() -> helper::GetTupleType<1, decltype(data)> { return helper::GetTupleValue<1>(data); }
+	/// Getter for third element.
+	auto getThird() -> helper::GetTupleType<2, decltype(data)> { return helper::GetTupleValue<2>(data); }
+};
 
 /**
- * Class that cache state of script data and is place of script write temporary data.
+ * Class execute scripts and strore its data.
  */
 class ScriptWorkerBase
 {
 	ScriptRawMemory<ScriptMaxReg> reg;
 
-	template<size_t offset, typename First, typename... Rest>
-	void setReg(First f, Rest... t)
+	static constexpr int RegSet = 1;
+	static constexpr int RegNone = 0;
+	static constexpr int RegGet = -1;
+
+
+	template<typename>
+	using SetAllRegs = helper::PosTag<RegSet>;
+
+	template<typename T>
+	using GetWritableRegs = helper::PosTag<helper::TypeInfoImpl<T>::isOutput ? RegGet : RegNone>;
+
+	template<typename T>
+	using SetReadonlyRegs = helper::PosTag<!helper::TypeInfoImpl<T>::isOutput ? RegSet : RegNone>;
+
+	template<int BaseOffset, int I, typename... Args, typename T>
+	void forRegImplLoop(helper::PosTag<RegSet>, const T& arg)
 	{
-		ref<First>(offset) = f;
-		setReg<offset + sizeof(First), Rest...>(t...);
+		using CurrentType =helper::Decay<typename std::tuple_element<I, T>::type>;
+		constexpr int CurrentOffset = BaseOffset + offset<Args...>(I);
+
+		ref<CurrentType>(CurrentOffset) = std::get<I>(arg);
 	}
-	template<size_t offset>
-	void setReg()
+	template<int BaseOffset, int I, typename... Args, typename T>
+	void forRegImplLoop(helper::PosTag<RegNone>, const T& arg)
 	{
-		//end loop
+		// nothing
+	}
+	template<int BaseOffset, int I, typename... Args, typename T>
+	void forRegImplLoop(helper::PosTag<RegGet>, T& arg)
+	{
+		using CurrentType = helper::Decay<typename std::tuple_element<I, T>::type>;
+		constexpr int CurrentOffset = BaseOffset + offset<Args...>(I);
+
+		std::get<I>(arg) = ref<CurrentType>(CurrentOffset);
+	}
+
+	template<int BaseOffset, template<typename> class Filter, typename... Args, typename T, int... I>
+	void forRegImpl(T&& arg, helper::ListTag<I...>)
+	{
+		(void)helper::DummySeq
+		{
+			(forRegImplLoop<BaseOffset, I, Args...>(Filter<Args>{}, std::forward<T>(arg)), 0)...,
+		};
+	}
+
+	template<int BaseOffset, template<typename> class Filter, typename... Args, typename T>
+	void forReg(T&& arg)
+	{
+		forRegImpl<BaseOffset, Filter, Args...>(std::forward<T>(arg), helper::MakeListTag<sizeof...(Args)>{});
+	}
+
+	/// Count offset.
+	template<typename First, typename Second, typename... Rest>
+	static constexpr int offset(int i)
+	{
+		return (i > 0 ? sizeof(First) : 0) + (i > 1 ? offset<Second, Rest...>(i - 1) : 0);
+	}
+	/// Final function of counting offset.
+	template<typename First>
+	static constexpr int offset(int i)
+	{
+		return (i > 0 ? sizeof(First) : 0);
+	}
+
+	template<typename... Args>
+	static constexpr int offsetOutput(helper::TypeTag<ScriptOutputArgs<Args...>>)
+	{
+		return offset<Args...>(sizeof...(Args));
 	}
 
 protected:
 	/// Update values in script.
-	template<typename... Args>
+	template<typename Output, typename... Args>
 	void updateBase(Args... args)
 	{
 		memset(&reg, 0, ScriptMaxReg);
-		setReg<RegMax>(args...);
+		forReg<offsetOutput(helper::TypeTag<Output>{}), SetAllRegs, Args...>(std::tie(args...));
 	}
-	/// Call script with two arguments.
-	int executeBase(const Uint8* proc, int i0, int i1);
+
+	template<typename... Args>
+	void set(const ScriptOutputArgs<Args...>& arg)
+	{
+		forReg<0, SetAllRegs, Args...>(arg.data);
+	}
+	template<typename... Args>
+	void get(ScriptOutputArgs<Args...>& arg)
+	{
+		forReg<0, GetWritableRegs, Args...>(arg.data);
+	}
+	template<typename... Args>
+	void reset(const ScriptOutputArgs<Args...>& arg)
+	{
+		forReg<0, SetReadonlyRegs, Args...>(arg.data);
+	}
+
+	/// Call script.
+	void executeBase(const Uint8* proc);
 
 public:
 	/// Default constructor.
-	ScriptWorkerBase() //reg not initialized
+	ScriptWorkerBase()
 	{
 
 	}
@@ -391,56 +522,84 @@ public:
 	}
 };
 
-template<typename... Args>
-class ScriptWorker : public ScriptWorkerBase
+/**
+ * Strong typed script executor base template.
+ */
+template<typename Output, typename... Args>
+class ScriptWorker;
+
+/**
+ * Strong typed script executor.
+ */
+template<typename... OutputArgs, typename... Args>
+class ScriptWorker<ScriptOutputArgs<OutputArgs...>, Args...> : public ScriptWorkerBase
 {
 public:
+	/// Type of output value from script.
+	using Output = ScriptOutputArgs<OutputArgs...>;
+
 	/// Default constructor.
 	ScriptWorker(Args... args) : ScriptWorkerBase()
 	{
-		updateBase(args...);
+		updateBase<Output>(args...);
 	}
 
 	/// Execute standard script.
 	template<typename Parent>
-	int execute(const ScriptContainer<Parent, Args...>& c, int i0, int i1)
+	void execute(const ScriptContainer<Parent, Args...>& c, Output& arg)
 	{
-		return executeBase(c.data(), i0, i1);
+		static_assert(std::is_same<typename Parent::Output, Output>::value, "Incompatible script output type");
+
+		set(arg);
+		executeBase(c.data());
+		get(arg);
 	}
 
 	/// Execute standard script with global events.
 	template<typename Parent>
-	int execute(const ScriptContainerEvents<Parent, Args...>& c, int i0, int i1)
+	void execute(const ScriptContainerEvents<Parent, Args...>& c, Output& arg)
 	{
+		static_assert(std::is_same<typename Parent::Output, Output>::value, "Incompatible script output type");
+
+		set(arg);
 		auto ptr = c.dataEvents();
 		if (ptr)
 		{
 			while (*ptr)
 			{
-				i0 = executeBase(ptr->data(), i0, i1);
+				reset(arg);
+				executeBase(ptr->data());
 				++ptr;
 			}
 			++ptr;
 		}
-		i0 = executeBase(c.data(), i0, i1);
+		reset(arg);
+		executeBase(c.data());
 		if (ptr)
 		{
 			while (*ptr)
 			{
-				i0 = executeBase(ptr->data(), i0, i1);
+				reset(arg);
+				executeBase(ptr->data());
 				++ptr;
 			}
 		}
-		return i0;
+		get(arg);
 	}
 };
 
+/**
+ * Strong typed blit script executor.
+ */
 class ScriptWorkerBlit : public ScriptWorkerBase
 {
 	/// Current script set in worker.
 	const Uint8* _proc;
 
 public:
+	/// Type of output value from script.
+	using Output = ScriptOutputArgs<int&, int>;
+
 	/// Default constructor.
 	ScriptWorkerBlit() : ScriptWorkerBase(), _proc(nullptr)
 	{
@@ -449,12 +608,13 @@ public:
 
 	/// Update data from container script.
 	template<typename Parent, typename... Args>
-	void update(const ScriptContainer<Parent, Args...>& c, typename std::decay<Args>::type... args)
+	void update(const ScriptContainer<Parent, Args...>& c, helper::Decay<Args>... args)
 	{
+		static_assert(std::is_same<typename Parent::Output, Output>::value, "Incompatible script output type");
 		if (c)
 		{
 			_proc = c.data();
-			updateBase(args...);
+			updateBase<Output>(args...);
 		}
 		else
 		{
@@ -472,6 +632,13 @@ public:
 	}
 };
 
+////////////////////////////////////////////////////////////
+//					objects ranges
+////////////////////////////////////////////////////////////
+
+/**
+ * Range of values.
+ */
 template<typename T>
 class ScriptRange
 {
@@ -517,14 +684,14 @@ public:
 	}
 };
 
+/**
+ * Symbol in script.
+ */
 class ScriptRef : public ScriptRange<char>
 {
 public:
 	/// Default constructor.
-	ScriptRef() : ScriptRange{ }
-	{
-
-	}
+	ScriptRef() = default;
 
 	/// Copy constructor.
 	ScriptRef(const ScriptRef&) = default;
@@ -539,9 +706,6 @@ public:
 	{
 
 	}
-
-	/// Extract new token from current object.
-	SelectedToken getNextToken(TokenEnum excepted = TokenNone);
 
 	/// Find first orrucace of character in string range.
 	size_t find(char c) const
@@ -611,6 +775,11 @@ public:
 	{
 		return compare(*this, s) == 0;
 	}
+	/// Notequal operator.
+	bool operator!=(const ScriptRef& s) const
+	{
+		return compare(*this, s) != 0;
+	}
 	/// Less operator.
 	bool operator<(const ScriptRef& s) const
 	{
@@ -618,8 +787,12 @@ public:
 	}
 };
 
+////////////////////////////////////////////////////////////
+//					parser definitions
+////////////////////////////////////////////////////////////
+
 /**
- * Struct storing storing type data.
+ * Struct storing script type data.
  */
 struct ScriptTypeData
 {
@@ -629,7 +802,7 @@ struct ScriptTypeData
 };
 
 /**
- * Struct storing value used by string.
+ * Struct storing value used by script.
  */
 struct ScriptValueData
 {
@@ -637,13 +810,24 @@ struct ScriptValueData
 	ArgEnum type = ArgInvalid;
 	Uint8 size = 0;
 
+	/// Copy constructor.
 	template<typename T>
 	inline ScriptValueData(const T& t);
+	/// Copy constructor.
+	inline ScriptValueData(const ScriptValueData& t);
+	/// Default constructor.
 	inline ScriptValueData() { }
 
+	/// Assign operator.
 	template<typename T>
 	inline ScriptValueData& operator=(const T& t);
+	/// Assign operator.
+	inline ScriptValueData& operator=(const ScriptValueData& t);
 
+	/// Test if value have have selected type.
+	template<typename T>
+	inline bool isValueType() const;
+	/// Get current stored value.
 	template<typename T>
 	inline const T& getValue() const;
 };
@@ -654,12 +838,38 @@ struct ScriptValueData
 struct ScriptRefData
 {
 	ScriptRef name;
-	ArgEnum type;
+	ArgEnum type = ArgInvalid;
 	ScriptValueData value;
 
+	/// Default constructor.
+	ScriptRefData() { }
+	/// Constructor.
+	ScriptRefData(ScriptRef n, ArgEnum t) : name{ n }, type{ t } {  }
+	/// Constructor.
+	ScriptRefData(ScriptRef n, ArgEnum t, ScriptValueData v) : name{ n }, type{ t }, value{ v } {  }
+
+	/// Get true if this vaild reference.
 	explicit operator bool() const
 	{
-		return name.size() > 0;
+		return type != ArgInvalid;
+	}
+
+	template<typename T>
+	bool isValueType() const
+	{
+		return value.isValueType<T>();
+	}
+	/// Get current stored value.
+	template<typename T>
+	const T& getValue() const
+	{
+		return value.getValue<T>();
+	}
+	/// Get current stored value if have that type or defulat value otherwise.
+	template<typename T>
+	const T& getValueOrDefulat(const T& def) const
+	{
+		return value.isValueType<T>() ? value.getValue<T>() : def;
 	}
 };
 
@@ -668,9 +878,9 @@ struct ScriptRefData
  */
 struct ScriptProcData
 {
-	using argFunc = int (*)(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using argFunc = int (*)(ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end);
 	using getFunc = FuncCommon (*)(int version);
-	using parserFunc = bool (*)(const ScriptProcData& spd, ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end);
+	using parserFunc = bool (*)(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end);
 	using overloadFunc = int (*)(const ScriptProcData& spd, const ScriptRefData* begin, const ScriptRefData* end);
 
 	ScriptRef name;
@@ -682,7 +892,7 @@ struct ScriptProcData
 	argFunc parserArg;
 	getFunc parserGet;
 
-	bool operator()(ParserWriter& ph, const SelectedToken* begin, const SelectedToken* end) const
+	bool operator()(ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end) const
 	{
 		return parser(*this, ph, begin, end);
 	}
@@ -695,6 +905,8 @@ class ScriptParserBase
 {
 	ScriptGlobal* _shared;
 	Uint8 _regUsed;
+	Uint8 _regOutSize;
+	ScriptRef _regOutName[ScriptMaxOut];
 	std::string _name;
 	std::string _defaultScript;
 	std::vector<std::vector<char>> _strings;
@@ -704,38 +916,46 @@ class ScriptParserBase
 
 protected:
 	template<typename Z>
-	struct S
+	struct ArgName
 	{
-		S(const char *n) : name{ n } { }
-		S(const std::string& n) : name{ n.data() } { }
+		ArgName(const char *n) : name{ n } { }
 
 		const char *name;
 	};
 
 	template<typename First, typename... Rest>
-	void addRegImpl(S<First>& n, Rest&... t)
+	void addRegImpl(bool writable, ArgName<First>& n, Rest&... t)
 	{
-		addTypeImpl(n);
-		addScriptArg(n.name, ScriptParserBase::getArgType<First>());
-		addRegImpl(t...);
+		addTypeImpl(helper::TypeTag<helper::Decay<First>>{});
+		addScriptReg(n.name, ScriptParserBase::getArgType<First>(), writable, helper::TypeInfoImpl<First>::isOutput);
+		addRegImpl(writable, t...);
 	}
-	void addRegImpl()
+	void addRegImpl(bool writable)
 	{
 		//end loop
 	}
 
+	/// Function for SFINAE, type need to have ScriptRegister function.
 	template<typename First, typename = decltype(&First::ScriptRegister)>
-	void addTypeImpl(S<First*>& n)
+	void addTypeImpl(helper::TypeTag<First*>)
 	{
 		registerPointerType<First>();
 	}
+	/// Function for SFINAE, type need to have ScriptRegister function.
 	template<typename First, typename = decltype(&First::ScriptRegister)>
-	void addTypeImpl(S<const First*>& n)
+	void addTypeImpl(helper::TypeTag<const First*>)
 	{
 		registerPointerType<First>();
 	}
+	/// Function for SFINAE, type need to have ScriptRegister function.
+	template<typename First, typename Index, typename = decltype(&First::ScriptRegister)>
+	void addTypeImpl(helper::TypeTag<ScriptTag<First, Index>>)
+	{
+		registerPointerType<First>();
+	}
+	/// Basic version.
 	template<typename First>
-	void addTypeImpl(S<First>& n)
+	void addTypeImpl(helper::TypeTag<First>)
 	{
 		//nothing to do for rest
 	}
@@ -758,30 +978,19 @@ protected:
 		{
 			return ArgNull;
 		}
+		else if (std::is_same<T, ProgPos>::value)
+		{
+			return ArgLabel;
+		}
 		else
 		{
 			static ArgEnum curr = registeTypeImplNextValue();
 			return curr;
 		}
 	}
-	template<typename T>
-	struct TypeInfoImpl
-	{
-		using t1 = typename std::decay<T>::type;
-		using t2 = typename std::remove_pointer<t1>::type;
-		using t3 = typename std::decay<t2>::type;
-
-		static constexpr bool isRef = std::is_reference<T>::value;
-		static constexpr bool isPtr = std::is_pointer<t1>::value;
-		static constexpr bool isEditable = isPtr && !std::is_const<t2>::value;
-
-		static constexpr size_t size = std::is_pod<t3>::value ? sizeof(t3) : 0;
-
-		static_assert(size || isPtr, "Type need to be POD to be used as reg or const value.");
-	};
 
 	/// Default constructor.
-	ScriptParserBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg);
+	ScriptParserBase(ScriptGlobal* shared, const std::string& name);
 	/// Destructor.
 	~ScriptParserBase();
 
@@ -796,10 +1005,8 @@ protected:
 	/// Add new name that can be used in data lists.
 	ScriptRef addNameRef(const std::string& s);
 
-	/// Add name for standart reg.
-	void addStandartReg(const std::string& s, RegEnum index);
 	/// Add name for custom parameter.
-	void addScriptArg(const std::string& s, ArgEnum type);
+	void addScriptReg(const std::string& s, ArgEnum type, bool writableReg, bool outputReg);
 	/// Add parsing fuction.
 	void addParserBase(const std::string& s, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc parserArg, ScriptProcData::getFunc parserGet);
 	/// Add new type impl.
@@ -814,7 +1021,7 @@ public:
 	template<typename T>
 	static ArgEnum getArgType()
 	{
-		using info = TypeInfoImpl<T>;
+		using info = helper::TypeInfoImpl<T>;
 		using t3 = typename info::t3;
 
 		auto spec = ArgSpecNone;
@@ -823,7 +1030,7 @@ public:
 		if (info::isPtr) spec = spec | ArgSpecPtr;
 		if (info::isEditable) spec = spec | ArgSpecPtrE;
 
-		return ArgSpec(registeTypeImpl<t3>(), spec);
+		return ArgSpecAdd(registeTypeImpl<t3>(), spec);
 	}
 	/// Add const value.
 	void addConst(const std::string& s, ScriptValueData i);
@@ -845,7 +1052,7 @@ public:
 	template<typename T>
 	void addType(const std::string& s)
 	{
-		using info = TypeInfoImpl<T>;
+		using info = helper::TypeInfoImpl<T>;
 		using t3 = typename info::t3;
 
 		addTypeBase(s, registeTypeImpl<t3>(), info::size);
@@ -872,6 +1079,11 @@ public:
 	/// Get defulat script.
 	const std::string& getDefault() const { return _defaultScript; }
 
+	/// Get number of param.
+	Uint8 getParamSize() const { return _regOutSize; }
+	/// Get param data.
+	const ScriptRefData* getParamData(Uint8 i) const { return getRef(_regOutName[i]); }
+
 	/// Get name of type.
 	ScriptRef getTypeName(ArgEnum type) const;
 	/// Get full name of type.
@@ -890,29 +1102,63 @@ public:
 	const ScriptGlobal* getGlobal() const { return _shared; }
 };
 
+/**
+ * Copy constructor from pod type.
+ */
 template<typename T>
 inline ScriptValueData::ScriptValueData(const T& t)
 {
-	static_assert(sizeof(T) <= sizeof(data) || sizeof(T) > 255, "Value have too big size!");
+	static_assert(sizeof(T) <= sizeof(data), "Value have too big size!");
 	type = ScriptParserBase::getArgType<T>();
 	size = sizeof(T);
-	memcpy(&data, &t, size);
+	memcpy(&data, &t, sizeof(T));
 }
 
+/**
+ * Copy constructor.
+ */
+inline ScriptValueData::ScriptValueData(const ScriptValueData& t)
+{
+	*this = t;
+}
+
+/**
+ * Assign operator from pod type.
+ */
 template<typename T>
 inline ScriptValueData& ScriptValueData::operator=(const T& t)
 {
-	static_assert(sizeof(T) <= sizeof(data) || sizeof(T) > 255, "Value have too big size!");
-	type = ScriptParserBase::getArgType<T>();
-	size = sizeof(T);
-	memcpy(&data, &t, size);
+	*this = ScriptValueData{ t };
 	return *this;
 }
 
+/**
+ * Assign operator.
+ */
+inline ScriptValueData& ScriptValueData::operator=(const ScriptValueData& t)
+{
+	type = t.type;
+	size = t.size;
+	memcpy(&data, &t.data, sizeof(data));
+	return *this;
+}
+
+/**
+ * Test if value have have selected type.
+ */
+template<typename T>
+inline bool ScriptValueData::isValueType() const
+{
+	return type == ScriptParserBase::getArgType<T>();
+}
+
+/**
+ * Get current stored value.
+ */
 template<typename T>
 inline const T& ScriptValueData::getValue() const
 {
-	if (type != ScriptParserBase::getArgType<T>())
+	if (!isValueType<T>())
 	{
 		throw Exception("Invalid cast of value");
 	}
@@ -920,20 +1166,36 @@ inline const T& ScriptValueData::getValue() const
 }
 
 /**
+ * Base template of strong typed parser.
+ */
+template<typename OutputPar, typename... Args>
+class ScriptParser
+{
+public:
+	using Container = ScriptContainerEvents<ScriptParser, Args...>;
+	using Output = OutputPar;
+	using Worker = ScriptWorker<Output, Args...>;
+
+	static_assert(helper::StaticError<ScriptParser>::value, "Invalid parameters to template");
+};
+
+/**
  * Strong typed parser.
  */
-template<typename... Args>
-class ScriptParser : public ScriptParserBase
+template<typename... OutputArgs, typename... Args>
+class ScriptParser<ScriptOutputArgs<OutputArgs...>, Args...> : public ScriptParserBase
 {
 public:
 	using Container = ScriptContainer<ScriptParser, Args...>;
-	using Worker = ScriptWorker<Args...>;
+	using Output = ScriptOutputArgs<OutputArgs...>;
+	using Worker = ScriptWorker<Output, Args...>;
 	friend Container;
 
 	/// Constructor.
-	ScriptParser(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserBase(shared, name, firstArg, secondArg)
+	ScriptParser(ScriptGlobal* shared, const std::string& name, ArgName<OutputArgs>... argOutputNames, ArgName<Args>... argNames) : ScriptParserBase(shared, name)
 	{
-		addRegImpl(argNames...);
+		addRegImpl(true, argOutputNames...);
+		addRegImpl(false, argNames...);
 	}
 };
 
@@ -963,7 +1225,7 @@ protected:
 
 public:
 	/// Constructor.
-	ScriptParserEventsBase(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg);
+	ScriptParserEventsBase(ScriptGlobal* shared, const std::string& name);
 
 	/// Load global data from YAML.
 	virtual void load(const YAML::Node& node) override;
@@ -974,31 +1236,51 @@ public:
 };
 
 /**
- * Strong typed event parser.
+ * Base template of strong typed event parser.
  */
-template<typename... Args>
-class ScriptParserEvents : public ScriptParserEventsBase
+template<typename OutputPar, typename... Args>
+class ScriptParserEvents
 {
 public:
 	using Container = ScriptContainerEvents<ScriptParserEvents, Args...>;
-	using Worker = ScriptWorker<Args...>;
+	using Output = OutputPar;
+	using Worker = ScriptWorker<Output, Args...>;
+
+	static_assert(helper::StaticError<ScriptParserEvents>::value, "Invalid parameters to template");
+};
+
+/**
+ * Strong typed event parser.
+ */
+template<typename... OutputArgs, typename... Args>
+class ScriptParserEvents<ScriptOutputArgs<OutputArgs...>, Args...> : public ScriptParserEventsBase
+{
+public:
+	using Container = ScriptContainerEvents<ScriptParserEvents, Args...>;
+	using Output = ScriptOutputArgs<OutputArgs...>;
+	using Worker = ScriptWorker<Output, Args...>;
 	friend Container;
 
 	/// Constructor.
-	ScriptParserEvents(ScriptGlobal* shared, const std::string& name, const std::string& firstArg, const std::string& secondArg, S<Args>... argNames) : ScriptParserEventsBase(shared, name, firstArg, secondArg)
+	ScriptParserEvents(ScriptGlobal* shared, const std::string& name, ArgName<OutputArgs>... argOutputNames, ArgName<Args>... argNames) : ScriptParserEventsBase(shared, name)
 	{
-		addRegImpl(argNames...);
+		addRegImpl(true, argOutputNames...);
+		addRegImpl(false, argNames...);
 	}
 };
+
+////////////////////////////////////////////////////////////
+//					tags definitions
+////////////////////////////////////////////////////////////
 
 /**
  * Strong typed tag.
  */
-template<typename T, typename I>
+template<typename T, typename I = Uint8>
 struct ScriptTag
 {
 	static_assert(!std::numeric_limits<I>::is_signed, "Type should be unsigned");
-	static_assert(sizeof(I) <= sizeof(size_t), "Type need be less than size_t");
+	static_assert(sizeof(I) <= sizeof(size_t), "Type need be smaller than size_t");
 
 	using Parent = T;
 
@@ -1009,15 +1291,27 @@ struct ScriptTag
 	constexpr size_t get() const { return static_cast<size_t>(index); }
 	/// Test if tag have valid value.
 	constexpr explicit operator bool() const { return this->index; }
+	/// Equal operator.
+	constexpr bool operator==(ScriptTag t)
+	{
+		return index == t.index;
+	}
+	/// Notequal operator.
+	constexpr bool operator!=(ScriptTag t)
+	{
+		return !(*this == t);
+	}
 
 	/// Get run time value for type.
-	static ArgEnum type() { return ScriptParserBase::getArgType<T*>(); }
+	static ArgEnum type() { return ScriptParserBase::getArgType<ScriptTag<T, I>>(); }
 	/// Test if value can be used.
 	static constexpr bool isValid(size_t i) { return i && i <= limit(); }
 	/// Fake constructor.
 	static constexpr ScriptTag make(size_t i) { return { static_cast<I>(i) }; }
 	/// Max supprted value.
 	static constexpr size_t limit() { return static_cast<size_t>(std::numeric_limits<I>::max()); }
+	/// Null value.
+	static constexpr ScriptTag getNullTag() { return make(0); }
 };
 
 /**
@@ -1028,6 +1322,7 @@ class ScriptGlobal
 protected:
 	using LoadFunc = void (*)(const ScriptGlobal*, int&, const YAML::Node&);
 	using SaveFunc = void (*)(const ScriptGlobal*, const int&, YAML::Node&);
+	using CrateFunc = ScriptValueData (*)(size_t i);
 
 	friend class ScriptValuesBase;
 
@@ -1040,12 +1335,13 @@ protected:
 	struct TagValueData
 	{
 		ScriptRef name;
-		size_t type;
+		size_t valueType;
 	};
 	struct TagData
 	{
 		ScriptRef name;
 		size_t limit;
+		CrateFunc crate;
 		std::vector<TagValueData> values;
 	};
 
@@ -1077,13 +1373,16 @@ private:
 	std::vector<ScriptParserEventsBase*> _parserEvents;
 	std::map<ArgEnum, TagData> _tagNames;
 	std::vector<TagValueType> _tagValueTypes;
+	std::vector<ScriptRefData> _refList;
 
 	/// Get tag value.
 	size_t getTag(ArgEnum type, ScriptRef s) const;
 	/// Get data of tag value.
 	TagValueData getTagValueData(ArgEnum type, size_t i) const;
-	/// Get tag value type.
-	TagValueType getTagValueType(size_t valueType) const;
+	/// Get tag value type data.
+	TagValueType getTagValueTypeData(size_t valueType) const;
+	/// Get tag value type id.
+	size_t getTagValueTypeId(ScriptRef s) const;
 	/// Add new tag name.
 	size_t addTag(ArgEnum type, ScriptRef s, size_t valueType);
 	/// Add new name ref.
@@ -1105,6 +1404,9 @@ public:
 	/// Update const value.
 	void updateConst(const std::string& name, ScriptValueData i);
 
+	/// Get global ref data.
+	const ScriptRefData* getRef(ScriptRef name, ScriptRef postfix = {}) const;
+
 	/// Get tag based on it name.
 	template<typename Tag>
 	Tag getTag(ScriptRef s) const
@@ -1119,15 +1421,29 @@ public:
 	}
 	/// Add new tag name.
 	template<typename Tag>
-	Tag addTag(const std::string& s, size_t valueType)
+	Tag addTag(const std::string& s, const std::string& valueTypeName)
 	{
-		return Tag::make(addTag(Tag::type(), addNameRef(s), valueType));
+		return Tag::make(addTag(Tag::type(), addNameRef(s), getTagValueTypeId(ScriptRef::tempFrom(valueTypeName))));
 	}
 	/// Add new type of tag.
 	template<typename Tag>
 	void addTagType()
 	{
-		_tagNames.insert(std::make_pair(Tag::type(), TagData{ ScriptRef{ Tag::Parent::ScriptName }, Tag::limit(), std::vector<TagValueData>{} }));
+		if (_tagNames.find(Tag::type()) == _tagNames.end())
+		{
+			_tagNames.insert(
+				std::make_pair(
+					Tag::type(),
+					TagData
+					{
+						ScriptRef{ Tag::Parent::ScriptName },
+						Tag::limit(),
+						[](size_t i) { return ScriptValueData{ Tag::make(i) }; },
+						std::vector<TagValueData>{},
+					}
+				)
+			);
+		}
 	}
 
 	/// Prepare for loading data.

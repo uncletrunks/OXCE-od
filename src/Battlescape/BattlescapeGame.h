@@ -148,7 +148,7 @@ public:
 	/// Handles unit AI.
 	void handleAI(BattleUnit *unit);
 	/// Drops an item and affects it with gravity.
-	void dropItem(const Position &position, BattleItem *item, bool newItem = false, bool removeItem = false);
+	void dropItem(const Position &position, BattleItem *item, bool newItem = false, bool removeItem = false, bool updateLight = true);
 	/// Converts a unit into a unit of another type.
 	BattleUnit *convertUnit(BattleUnit *unit);
 	/// Handles kneeling action.

@@ -258,6 +258,32 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 }
 
 /**
+ * Get shade of wall.
+ * @param part For what wall do calculations.
+ * @param tileFrot Tile of wall.
+ * @param tileBehind Tile behind wall.
+ * @return Current shade of wall.
+ */
+int Map::getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind)
+{
+	int shade;
+	if (tileFrot->isDiscovered(2))
+	{
+		shade = tileFrot->getShade();
+	}
+	else
+	{
+		shade = 16;
+	}
+	auto data = tileFrot->getMapData(part);
+	if ((data->isDoor() || data->isUFODoor()) && tileFrot->isDiscovered(part))
+	{
+		shade = std::min(tileFrot->getShade(), tileBehind ? tileBehind->getShade() + 5 : 16);
+	}
+	return shade;
+}
+
+/**
  * Draw the terrain.
  * Keep this function as optimised as possible. It's big to minimise overhead of function calls.
  * @param surface The surface to draw on.
@@ -423,6 +449,8 @@ void Map::drawTerrain(Surface *surface)
 					screenPosition.y > -_spriteHeight && screenPosition.y < surface->getHeight() + _spriteHeight )
 				{
 					tile = _save->getTile(mapPosition);
+					Tile *tileNorth = _save->getTile(mapPosition - Position(0,1,0));
+					Tile *tileWest = _save->getTile(mapPosition - Position(1,0,0));
 
 					if (!tile) continue;
 
@@ -473,9 +501,8 @@ void Map::drawTerrain(Surface *surface)
 					}
 
 					// special handling for a moving unit.
-					if (mapPosition.y > 0)
+					if (tileNorth)
 					{
-						Tile *tileNorth = _save->getTile(mapPosition - Position(0,1,0));
 						BattleUnit *bu = tileNorth->getUnit();
 						int tileNorthShade, tileTwoNorthShade, tileWestShade, tileNorthWestShade, tileSouthWestShade;
 						if (tileNorth->isDiscovered(2))
@@ -562,7 +589,7 @@ void Map::drawTerrain(Surface *surface)
 								if (tmpSurface)
 									tmpSurface->blitNShade(surface, screenPosition.x + tileOffset.x, screenPosition.y - tileNorth->getMapData(O_OBJECT)->getYOffset() + tileOffset.y, tileNorthShade);
 							}
-							if (mapPosition.x > 0)
+							if (tileWest)
 							{
 								/*
 								 * Phase V: re-render objects in the tile to the south west
@@ -590,7 +617,6 @@ void Map::drawTerrain(Surface *surface)
 								/*
 								 * Phase VI: we need to re-render everything in the tile to the west.
 								 */
-								Tile *tileWest = _save->getTile(mapPosition - Position(1,0,0));
 								BattleUnit *westUnit = tileWest->getUnit();
 								if (tileWest->isDiscovered(2))
 								{
@@ -604,21 +630,15 @@ void Map::drawTerrain(Surface *surface)
 								tmpSurface = tileWest->getSprite(O_WESTWALL);
 								if (tmpSurface && bu != unit)
 								{
-									if ((tileWest->getMapData(O_WESTWALL)->isDoor() || tileWest->getMapData(O_WESTWALL)->isUFODoor())
-											&& tileWest->isDiscovered(0))
-										wallShade = tileWest->getShade();
-									else
-										wallShade = tileWestShade;
+									Tile *tileWestWest = _save->getTile(mapPosition - Position(2,0,0));
+									wallShade = getWallShade(O_WESTWALL, tileWest, tileWestWest);
 									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_WESTWALL)->getYOffset() + tileOffset.y, wallShade, true);
 								}
 								tmpSurface = tileWest->getSprite(O_NORTHWALL);
 								if (tmpSurface)
 								{
-									if ((tileWest->getMapData(O_NORTHWALL)->isDoor() || tileWest->getMapData(O_NORTHWALL)->isUFODoor())
-											&& tileWest->isDiscovered(1))
-										wallShade = tileWest->getShade();
-									else
-										wallShade = tileWestShade;
+									Tile *tileWestNorth = _save->getTile(mapPosition - Position(1,1,0));
+									wallShade = getWallShade(O_NORTHWALL, tileWest, tileWestNorth);
 									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_NORTHWALL)->getYOffset() + tileOffset.y, wallShade, true);
 								}
 								tmpSurface = tileWest->getSprite(O_OBJECT);
@@ -737,30 +757,15 @@ void Map::drawTerrain(Surface *surface)
 						tmpSurface = tile->getSprite(O_WESTWALL);
 						if (tmpSurface)
 						{
-							if ((tile->getMapData(O_WESTWALL)->isDoor() || tile->getMapData(O_WESTWALL)->isUFODoor())
-								 && tile->isDiscovered(0))
-								wallShade = tile->getShade();
-							else
-								wallShade = tileShade;
+							wallShade = getWallShade(O_WESTWALL, tile, tileWest);
 							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_WESTWALL)->getYOffset(), wallShade);
 						}
 						// Draw north wall
 						tmpSurface = tile->getSprite(O_NORTHWALL);
 						if (tmpSurface)
 						{
-							if ((tile->getMapData(O_NORTHWALL)->isDoor() || tile->getMapData(O_NORTHWALL)->isUFODoor())
-								 && tile->isDiscovered(1))
-								wallShade = tile->getShade();
-							else
-								wallShade = tileShade;
-							if (tile->getMapData(O_WESTWALL))
-							{
-								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), wallShade, true);
-							}
-							else
-							{
-								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), wallShade);
-							}
+							wallShade = getWallShade(O_NORTHWALL, tile, tileNorth);
+							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), wallShade, tile->getMapData(O_WESTWALL));
 						}
 						// Draw object
 						if (tile->getMapData(O_OBJECT) && (tile->getMapData(O_OBJECT)->getBigWall() < 6 || tile->getMapData(O_OBJECT)->getBigWall() == 9))

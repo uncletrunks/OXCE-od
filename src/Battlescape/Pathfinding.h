@@ -38,6 +38,11 @@ struct BattleActionCost;
 class Pathfinding
 {
 private:
+	constexpr static int dir_max = 10;
+	constexpr static int dir_x[dir_max] = {  0, +1, +1, +1,  0, -1, -1, -1,  0,  0};
+	constexpr static int dir_y[dir_max] = { -1, -1,  0, +1, +1, +1,  0, -1,  0,  0};
+	constexpr static int dir_z[dir_max] = {  0,  0,  0,  0,  0,  0,  0,  0, +1, -1};
+
 	SavedBattleGame *_save;
 	std::vector<PathfindingNode> _nodes;
 	int _size;
@@ -78,10 +83,36 @@ public:
 	~Pathfinding();
 	/// Calculates the shortest path.
 	void calculate(BattleUnit *unit, Position endPosition, BattleUnit *missileTarget = 0, int maxTUCost = 1000);
-	/// Converts direction to a vector.
-	static void directionToVector(const int direction, Position *vector);
-	/// Converts a vector to a direction.
-	static void vectorToDirection(const Position &vector, int &dir);
+
+	/**
+	 * Converts direction to a vector. Direction starts north = 0 and goes clockwise.
+	 * @param direction Source direction.
+	 * @param vector Pointer to a position (which acts as a vector).
+	 */
+	static void directionToVector(const int direction, Position *vector)
+	{
+		vector->x = dir_x[direction];
+		vector->y = dir_y[direction];
+		vector->z = dir_z[direction];
+	}
+
+	/**
+	 * Converts direction to a vector. Direction starts north = 0 and goes clockwise.
+	 * @param vector Pointer to a position (which acts as a vector).
+	 * @param dir Resulting direction.
+	 */
+	static void vectorToDirection(const Position &vector, int &dir)
+	{
+		dir = -1;
+		for (int i = 0; i < 8; ++i)
+		{
+			if (dir_x[i] == vector.x && dir_y[i] == vector.y)
+			{
+				dir = i;
+				return;
+			}
+		}
+	}
 	/// Checks whether a path is ready and gives the first direction.
 	int getStartDirection();
 	/// Dequeues a direction.

@@ -358,9 +358,7 @@ void SavedBattleGame::loadMapResources(Mod *mod)
 	}
 
 	initUtilities(mod);
-	getTileEngine()->calculateSunShading();
-	getTileEngine()->calculateTerrainLighting();
-	getTileEngine()->calculateUnitLighting();
+	getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
 	getTileEngine()->recalculateFOV();
 }
 
@@ -1780,8 +1778,6 @@ void SavedBattleGame::prepareNewTurn()
 			if (getTile(i)->getSmoke() != 0)
 				getTile(i)->prepareNewTurn();
 		}
-		// fires could have been started, stopped or smoke could reveal/conceal units.
-		getTileEngine()->calculateTerrainLighting();
 	}
 
 	Mod *mod = getBattleState()->getGame()->getMod();
@@ -1791,6 +1787,10 @@ void SavedBattleGame::prepareNewTurn()
 	}
 
 	reviveUnconsciousUnits();
+
+	// fires could have been started, stopped or smoke could reveal/conceal units.
+	getTileEngine()->calculateLighting(LL_FIRE);
+	getTileEngine()->recalculateFOV();
 }
 
 /**
@@ -1827,9 +1827,6 @@ void SavedBattleGame::reviveUnconsciousUnits(bool noTU)
 					(*i)->turn(false); // makes the unit stand up again
 					(*i)->kneel(false);
 					if (noTU) (*i)->setTimeUnits(0);
-					getTileEngine()->calculateFOV((*i)->getPosition(), 1, false); //Let everyone see this unit and update potentially blocked visibility caused by its revival.
-					getTileEngine()->calculateFOV((*i), true, false); //Update tile visibility for this unit. A full unit check should've been triggered by the above call.
-					getTileEngine()->calculateUnitLighting();
 					removeUnconsciousBodyItem((*i));
 				}
 			}

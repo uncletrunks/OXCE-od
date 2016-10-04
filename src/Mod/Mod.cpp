@@ -3844,6 +3844,19 @@ void offset(const Mod *m, int &base, int modId)
 	}
 }
 
+void getSmokeReduction(const Mod *m, int &smoke)
+{
+	// initial smoke "density" of a smoke grenade is around 15 per tile
+	// we do density/3 to get the decay of visibility
+	// so in fresh smoke we should only have 4 tiles of visibility
+	// this is traced in voxel space, with smoke affecting visibility every step of the way
+
+	// 3  - coefficient of calculation (see above).
+	// 20 - maximum view distance in vanilla Xcom.
+	// Even if MaxViewDistance will be increased via ruleset, smoke will keep effect.
+	smoke = smoke * m->getMaxViewDistance() / (3 * 20);
+}
+
 }
 
 /**
@@ -3860,6 +3873,9 @@ void Mod::ScriptRegister(ScriptParserBase *parser)
 	mod.add<&offset<&Mod::_surfaceOffsetFloorob>>("getSpriteOffsetFloorob");
 	mod.add<&offset<&Mod::_surfaceOffsetHit>>("getSpriteOffsetHit");
 	mod.add<&offset<&Mod::_surfaceOffsetSmoke>>("getSpriteOffsetSmoke");
+	mod.add<&Mod::getMaxDarknessToSeeUnits>("getMaxDarknessToSeeUnits");
+	mod.add<&Mod::getMaxViewDistance>("getMaxViewDistance");
+	mod.add<&getSmokeReduction>("getSmokeReduction");
 }
 
 }

@@ -148,7 +148,7 @@ void UnitDieBState::think()
 	if (_extraFrame == 2)
 	{
 		_parent->getMap()->setUnitDying(false);
-		_parent->getTileEngine()->calculateUnitLighting();
+		_parent->getTileEngine()->calculateLighting(LL_ITEMS, _unit->getPosition(), _unit->getArmor()->getSize());
 		_parent->getTileEngine()->calculateFOV(_unit->getPosition(), _unit->getArmor()->getSize(), false); //Update FOV for anyone that can see me
 		_parent->popState();
 		if (_unit->getOriginalFaction() == FACTION_PLAYER)
@@ -255,7 +255,7 @@ void UnitDieBState::convertUnitToCorpse()
 		std::vector<BattleItem*> itemsToKeep;
 		for (std::vector<BattleItem*>::iterator i = _unit->getInventory()->begin(); i != _unit->getInventory()->end(); ++i)
 		{
-			_parent->dropItem(lastPosition, (*i));
+			_parent->dropItem(lastPosition, (*i), false, false, false);
 			if (!(*i)->getRules()->isFixed())
 			{
 				(*i)->setOwner(0);
@@ -309,7 +309,7 @@ void UnitDieBState::convertUnitToCorpse()
 				{
 					BattleItem *corpse = new BattleItem(_parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[i]), _parent->getSave()->getCurrentItemId());
 					corpse->setUnit(_unit);
-					_parent->dropItem(lastPosition + Position(x,y,0), corpse, true);
+					_parent->dropItem(lastPosition + Position(x,y,0), corpse, true, false);
 					i++;
 				}
 				if (_parent->getSave()->getTile(lastPosition + Position(x,y,0))->getUnit() == _unit) // check in case unit was displaced by another unit

@@ -568,8 +568,8 @@ void BattlescapeGame::endTurn()
 
 	checkForCasualties(nullptr, nullptr, nullptr, false, false);
 
-	// turn off MCed alien lighting.
-	_save->getTileEngine()->calculateUnitLighting();
+	_save->getTileEngine()->calculateLighting(LL_FIRE, TileEngine::invalid, 0, true);
+	_save->getTileEngine()->recalculateFOV();
 
 	// if all units from either faction are killed - the mission is over.
 	int liveAliens = 0;
@@ -903,11 +903,8 @@ void BattlescapeGame::handleNonTargetAction()
 			{
 				_parentState->warning("STR_GRENADE_IS_ACTIVATED");
 				_currentAction.weapon->setFuseTimer(_currentAction.value);
-				if (_currentAction.weapon->getGlow())
-				{
-					_save->getTileEngine()->calculateUnitLighting();
-					_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getGlowRange(), false);
-				}
+				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
+				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);
 			}
 			else
 			{
@@ -1785,7 +1782,7 @@ void BattlescapeGame::setTUReserved(BattleActionType tur)
  * @param newItem Bool whether this is a new item.
  * @param removeItem Bool whether to remove the item from the owner.
  */
-void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool newItem, bool removeItem)
+void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool newItem, bool removeItem, bool updateLight)
 {
 	Position p = position;
 
@@ -1824,11 +1821,10 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 
 	getTileEngine()->applyGravity(_save->getTile(p));
 
-	if (item->getGlow())
+	if (updateLight)
 	{
-		getTileEngine()->calculateUnitLighting();
-		getTileEngine()->calculateTerrainLighting();
-		getTileEngine()->calculateFOV(position, item->getGlowRange(), false);
+		getTileEngine()->calculateLighting(LL_ITEMS, position);
+		getTileEngine()->calculateFOV(position, item->getVisibilityUpdateRange(), false);
 	}
 
 }
@@ -1960,9 +1956,8 @@ void BattlescapeGame::findItem(BattleAction *action)
 					}
 					if (targetItem->getGlow())
 					{
-						_save->getTileEngine()->calculateTerrainLighting();
-						_save->getTileEngine()->calculateUnitLighting();
-						_save->getTileEngine()->calculateFOV(action->actor->getPosition(), targetItem->getGlowRange(), false);
+						_save->getTileEngine()->calculateLighting(LL_ITEMS, action->actor->getPosition());
+						_save->getTileEngine()->calculateFOV(action->actor->getPosition(), targetItem->getVisibilityUpdateRange(), false);
 					}
 				}
 			}

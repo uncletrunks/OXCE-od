@@ -73,6 +73,7 @@ private:
 	ModScript::RecolorUnitParser::Container _recolorScript;
 	ModScript::SelectUnitParser::Container _spriteScript;
 	ModScript::ReactionUnitParser::Container _reacActionScript, _reacReactionScript;
+	ModScript::VisibilityUnitParser::Container _visibilityUnitScript;
 
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
@@ -194,6 +195,8 @@ public:
 	const ModScript::ReactionUnitParser::Container &getReacActionScript() const;
 	/// Gets script used to calculate reaction chance.
 	const ModScript::ReactionUnitParser::Container &getReacReactionScript() const;
+	/// Gets script used to calculate visibility.
+	const ModScript::VisibilityUnitParser::Container &getVisibilityUnitScript() const;
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
 	/// Gets the index of the sprite in the CustomArmorPreview sprite set

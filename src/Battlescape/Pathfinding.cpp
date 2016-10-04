@@ -31,6 +31,10 @@
 namespace OpenXcom
 {
 
+constexpr int Pathfinding::dir_x[Pathfinding::dir_max];
+constexpr int Pathfinding::dir_y[Pathfinding::dir_max];
+constexpr int Pathfinding::dir_z[Pathfinding::dir_max];
+
 int Pathfinding::red = 3;
 int Pathfinding::yellow = 10;
 int Pathfinding::green = 4;
@@ -498,41 +502,6 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 		return 0;
 	else
 		return totalCost;
-}
-
-/**
- * Converts direction to a vector. Direction starts north = 0 and goes clockwise.
- * @param direction Source direction.
- * @param vector Pointer to a position (which acts as a vector).
- */
-void Pathfinding::directionToVector(const int direction, Position *vector)
-{
-	int x[10] = {0, 1, 1, 1, 0, -1, -1, -1,0,0};
-	int y[10] = {-1, -1, 0, 1, 1, 1, 0, -1,0,0};
-	int z[10] = {0, 0, 0, 0, 0, 0, 0, 0, 1, -1};
-	vector->x = x[direction];
-	vector->y = y[direction];
-	vector->z = z[direction];
-}
-
-/**
- * Converts direction to a vector. Direction starts north = 0 and goes clockwise.
- * @param vector Pointer to a position (which acts as a vector).
- * @param dir Resulting direction.
- */
-void Pathfinding::vectorToDirection(const Position &vector, int &dir)
-{
-	dir = -1;
-	int x[8] = {0, 1, 1, 1, 0, -1, -1, -1};
-	int y[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
-	for (int i = 0; i < 8; ++i)
-	{
-		if (x[i] == vector.x && y[i] == vector.y)
-		{
-			dir = i;
-			return;
-		}
-	}
 }
 
 /**

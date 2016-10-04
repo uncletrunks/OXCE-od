@@ -251,6 +251,7 @@ set ( engine_src
   Engine/GMCat.h
   Engine/Game.cpp
   Engine/Game.h
+  Engine/HelperMeta.h
   Engine/InteractiveSurface.cpp
   Engine/InteractiveSurface.h
   Engine/Language.cpp
@@ -288,7 +289,7 @@ set ( engine_src
   Engine/Scalers/scalebit.cpp
   Engine/Scalers/scalebit.h
   Engine/Scalers/xbrz.cpp
-  Engine/Scalers/xbrz.h  
+  Engine/Scalers/xbrz.h
   Engine/Screen.cpp
   Engine/Screen.h
   Engine/Script.cpp

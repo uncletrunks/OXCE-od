@@ -160,6 +160,8 @@ public:
 	bool getGlow() const;
 	/// Gets range of glow in tiles.
 	int getGlowRange() const;
+	/// Calculate range need to be updated by changing this weapon.
+	int getVisibilityUpdateRange() const;
 	/// Sets a flag on the item indicating if this is a clip in a weapon or not.
 	void setIsAmmo(bool ammo);
 	/// Checks a flag on the item to see if it's a clip in a weapon or not.

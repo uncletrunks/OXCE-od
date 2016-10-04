@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 3.2[/b]
+[b]Mod version 3.3[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -117,6 +117,11 @@ Reaction scripts have now information about runing or strafing of target.[br/]
 3.2:[br/]
 New functions exposed to script.[br/]
 [br/]
+3.3:[br/]
+New light system.[br/]
+Option for reserving more space for mod in common surface/sound sets.[br/]
+Visibility scripts that determine visibility of targets.[br/]
+[br/]
 
 [examples]
 [br/][br/]
@@ -124,6 +129,12 @@ New functions exposed to script.[br/]
 
 Example of usage:
 
+In `metadata.yml`:
+[code]
+reservedSpace: 4 #how many BIGOBS.PCK/FLOOROB.PCK/BATTLE.CAT etc. reserve for that mod, this is multiply of default reserved size.
+[/code]
+
+In `*.rul`:
 [code]
 itemCategories:             #from OXCE+
 startingConditions:         #from OXCE+
@@ -402,6 +413,7 @@ armors:
       selectUnitSprite: ~     #sprite select script call for each body part.
       reactionUnitAction: ~   #script used for handling reaction for unit performing action.
       reactionUnitReaction: ~ #script used for handling reaction for unit reacting.
+      visibilityUnit: ~       #script that handle visibility test of other units, return value need be greater than zero to test be succesful. Second return value is used for distinguish between custom visibility modes, `null` is normal visibility.
 [/code]
 
 [code]

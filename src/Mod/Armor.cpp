@@ -182,6 +182,8 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_reacActionScript.load(_type, node, parsers.reactionUnitAction);
 	_reacReactionScript.load(_type, node, parsers.reactionUnitReaction);
 
+	_visibilityUnitScript.load(_type, node, parsers.visibilityUnit);
+
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node, parsers.getShared());
 	_customArmorPreviewIndex = node["customArmorPreviewIndex"].as<int>(_customArmorPreviewIndex);
@@ -715,6 +717,16 @@ const ModScript::ReactionUnitParser::Container &Armor::getReacReactionScript() c
 {
 	return _reacReactionScript;
 }
+
+/**
+ * Get script that caclualte visibility of other units.
+ * @return Script that calculate visibility.
+ */
+const ModScript::VisibilityUnitParser::Container &Armor::getVisibilityUnitScript() const
+{
+	return _visibilityUnitScript;
+}
+
 /**
 * Gets the list of units this armor applies to.
 * @return The list of unit IDs (empty = applies to all).
