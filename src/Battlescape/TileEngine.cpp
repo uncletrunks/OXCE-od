@@ -977,12 +977,12 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	// during dark aliens can see 20 tiles, xcom can see 9 by default... unless overridden by armor
 	if (tile->getShade() > getMaxDarknessToSeeUnits() && tile->getUnit()->getFire() == 0)
 	{
-		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, (int)std::sqrt(currentUnit->getMaxViewDistanceAtDarkSq()) * 16);
+		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, currentUnit->getMaxViewDistanceAtDark(tile->getUnit()->getArmor()) * 16);
 	}
 	// during day (or if enough other light) both see 20 tiles ... unless overridden by armor
 	else
 	{
-		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, (int)std::sqrt(currentUnit->getMaxViewDistanceAtDaySq()) * 16);
+		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, currentUnit->getMaxViewDistanceAtDay(tile->getUnit()->getArmor()) * 16);
 	}
 
 	Position originVoxel = getSightOriginVoxel(currentUnit);
