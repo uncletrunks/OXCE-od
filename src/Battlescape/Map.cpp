@@ -117,6 +117,22 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_txtAccuracy->setHighContrast(true);
 	_txtAccuracy->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 
+	_nightVisionOn = false;
+	_fadeShade = 16;
+	_nvColor = 0;
+	_nvColorDef = 5;
+	Element *e = _game->getMod()->getInterface("battlescape")->getElement("nightVision");
+	if (e != 0)
+	{
+		_nvColorDef = e->color;
+	}
+	_fadeTimer = new Timer(FADE_INTERVAL);
+	if ((_save->getGlobalShade() > NIGHT_VISION_THRESHOLD))
+	{
+		_fadeTimer->onTimer((SurfaceHandler)&Map::fadeShade);
+		_fadeTimer->start();
+	}
+
 	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(_save->getStartingConditionType());
 	if (startingCondition != 0)
 	{
@@ -134,6 +150,7 @@ Map::~Map()
 {
 	delete _scrollMouseTimer;
 	delete _scrollKeyTimer;
+	delete _fadeTimer;
 	delete _arrow;
 	delete _message;
 	delete _camera;
@@ -184,6 +201,7 @@ void Map::think()
 {
 	_scrollMouseTimer->think(0, this);
 	_scrollKeyTimer->think(0, this);
+	_fadeTimer->think(0, this);
 }
 
 /**
@@ -269,7 +287,7 @@ int Map::getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind)
 	int shade;
 	if (tileFrot->isDiscovered(2))
 	{
-		shade = tileFrot->getShade();
+		shade = reShade(tileFrot);
 	}
 	else
 	{
@@ -278,7 +296,7 @@ int Map::getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind)
 	auto data = tileFrot->getMapData(part);
 	if ((data->isDoor() || data->isUFODoor()) && tileFrot->isDiscovered(part))
 	{
-		shade = std::min(tileFrot->getShade(), tileBehind ? tileBehind->getShade() + 5 : 16);
+		shade = std::min(reShade(tileFrot), tileBehind ? tileBehind->getShade() + 5 : 16);
 	}
 	return shade;
 }
@@ -456,7 +474,7 @@ void Map::drawTerrain(Surface *surface)
 
 					if (tile->isDiscovered(2))
 					{
-						tileShade = tile->getShade();
+						tileShade = reShade(tile);
 					}
 					else
 					{
@@ -468,7 +486,7 @@ void Map::drawTerrain(Surface *surface)
 					// Draw floor
 					tmpSurface = tile->getSprite(O_FLOOR);
 					if (tmpSurface)
-						tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_FLOOR)->getYOffset(), tileShade);
+						tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_FLOOR)->getYOffset(), tileShade, false, _nvColor);
 					unit = tile->getUnit();
 
 					// Draw cursor back
@@ -507,7 +525,7 @@ void Map::drawTerrain(Surface *surface)
 						int tileNorthShade, tileTwoNorthShade, tileWestShade, tileNorthWestShade, tileSouthWestShade;
 						if (tileNorth->isDiscovered(2))
 						{
-							tileNorthShade = tileNorth->getShade();
+							tileNorthShade = reShade(tileNorth);
 						}
 						else
 						{
@@ -546,7 +564,7 @@ void Map::drawTerrain(Surface *surface)
 								Tile *tileTwoNorth = _save->getTile(mapPosition - Position(0,2,0));
 								if (tileTwoNorth->isDiscovered(2))
 								{
-									tileTwoNorthShade = tileTwoNorth->getShade();
+									tileTwoNorthShade = reShade(tileTwoNorth);
 								}
 								else
 								{
@@ -555,7 +573,7 @@ void Map::drawTerrain(Surface *surface)
 								tmpSurface = tileTwoNorth->getSprite(O_OBJECT);
 								if (tmpSurface && tileTwoNorth->getMapData(O_OBJECT)->getBigWall() == 6)
 								{
-									tmpSurface->blitNShade(surface, screenPosition.x + tileOffset.x*2, screenPosition.y - tileTwoNorth->getMapData(O_OBJECT)->getYOffset() + tileOffset.y*2, tileTwoNorthShade);
+									tmpSurface->blitNShade(surface, screenPosition.x + tileOffset.x*2, screenPosition.y - tileTwoNorth->getMapData(O_OBJECT)->getYOffset() + tileOffset.y*2, tileTwoNorthShade, false, _nvColor);
 								}
 							}
 
@@ -567,7 +585,7 @@ void Map::drawTerrain(Surface *surface)
 								Tile *tileNorthWest = _save->getTile(mapPosition - Position(1,1,0));
 								if (tileNorthWest->isDiscovered(2))
 								{
-									tileNorthWestShade = tileNorthWest->getShade();
+									tileNorthWestShade = reShade(tileNorthWest);
 								}
 								else
 								{
@@ -576,7 +594,7 @@ void Map::drawTerrain(Surface *surface)
 								tmpSurface = tileNorthWest->getSprite(O_OBJECT);
 								if (tmpSurface && tileNorthWest->getMapData(O_OBJECT)->getBigWall() == 7)
 								{
-									tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tileNorthWest->getMapData(O_OBJECT)->getYOffset() + tileOffset.y*2, tileNorthWestShade);
+									tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tileNorthWest->getMapData(O_OBJECT)->getYOffset() + tileOffset.y*2, tileNorthWestShade, false, _nvColor);
 								}
 							}
 
@@ -587,7 +605,7 @@ void Map::drawTerrain(Surface *surface)
 							{
 								tmpSurface = tileNorth->getSprite(O_OBJECT);
 								if (tmpSurface)
-									tmpSurface->blitNShade(surface, screenPosition.x + tileOffset.x, screenPosition.y - tileNorth->getMapData(O_OBJECT)->getYOffset() + tileOffset.y, tileNorthShade);
+									tmpSurface->blitNShade(surface, screenPosition.x + tileOffset.x, screenPosition.y - tileNorth->getMapData(O_OBJECT)->getYOffset() + tileOffset.y, tileNorthShade, false, _nvColor);
 							}
 							if (tileWest)
 							{
@@ -601,7 +619,7 @@ void Map::drawTerrain(Surface *surface)
 									Tile *tileSouthWest = _save->getTile(mapPosition + Position(-1, 1, 0));
 									if (tileSouthWest->isDiscovered(2))
 									{
-										tileSouthWestShade = tileSouthWest->getShade();
+										tileSouthWestShade = reShade(tileSouthWest);
 									}
 									else
 									{
@@ -610,7 +628,7 @@ void Map::drawTerrain(Surface *surface)
 									tmpSurface = tileSouthWest->getSprite(O_OBJECT);
 									if (tmpSurface)
 									{
-										tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x * 2, screenPosition.y - tileSouthWest->getMapData(O_OBJECT)->getYOffset(), tileSouthWestShade, true);
+										tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x * 2, screenPosition.y - tileSouthWest->getMapData(O_OBJECT)->getYOffset(), tileSouthWestShade, true, _nvColor);
 									}
 								}
 
@@ -620,7 +638,7 @@ void Map::drawTerrain(Surface *surface)
 								BattleUnit *westUnit = tileWest->getUnit();
 								if (tileWest->isDiscovered(2))
 								{
-									tileWestShade = tileWest->getShade();
+									tileWestShade = reShade(tileWest);
 								}
 								else
 								{
@@ -632,25 +650,25 @@ void Map::drawTerrain(Surface *surface)
 								{
 									Tile *tileWestWest = _save->getTile(mapPosition - Position(2,0,0));
 									wallShade = getWallShade(O_WESTWALL, tileWest, tileWestWest);
-									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_WESTWALL)->getYOffset() + tileOffset.y, wallShade, true);
+									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_WESTWALL)->getYOffset() + tileOffset.y, wallShade, true, _nvColor);
 								}
 								tmpSurface = tileWest->getSprite(O_NORTHWALL);
 								if (tmpSurface)
 								{
 									Tile *tileWestNorth = _save->getTile(mapPosition - Position(1,1,0));
 									wallShade = getWallShade(O_NORTHWALL, tileWest, tileWestNorth);
-									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_NORTHWALL)->getYOffset() + tileOffset.y, wallShade, true);
+									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_NORTHWALL)->getYOffset() + tileOffset.y, wallShade, true, _nvColor);
 								}
 								tmpSurface = tileWest->getSprite(O_OBJECT);
 								if (tmpSurface && (tileWest->getMapData(O_OBJECT)->getBigWall() < 6 || tileWest->getMapData(O_OBJECT)->getBigWall() == 9) && tileWest->getMapData(O_OBJECT)->getBigWall() != 3)
 								{
-									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_OBJECT)->getYOffset() + tileOffset.y, tileWestShade, true);
+									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_OBJECT)->getYOffset() + tileOffset.y, tileWestShade, true, _nvColor);
 									// if the object in the tile to the west is a diagonal big wall, we need to cover up the black triangle at the bottom
 									if (tileWest->getMapData(O_OBJECT)->getBigWall() == 2)
 									{
 										tmpSurface = tile->getSprite(O_FLOOR);
 										if (tmpSurface)
-											tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_FLOOR)->getYOffset(), tileShade);
+											tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_FLOOR)->getYOffset(), tileShade, false, _nvColor);
 									}
 								}
 								// draw an item on top of the floor (if any)
@@ -737,13 +755,13 @@ void Map::drawTerrain(Surface *surface)
 										frameNumber += halfAnimFrame + tileWest->getAnimationOffset();
 									}
 									tmpSurface = _game->getMod()->getSurfaceSet("SMOKE.PCK")->getFrame(frameNumber);
-									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y + tileOffset.y, shade, true);
+									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y + tileOffset.y, shade, true, _nvColor);
 								}
 								// Draw object
 								if (tileWest->getMapData(O_OBJECT) && tileWest->getMapData(O_OBJECT)->getBigWall() >= 6 && tileWest->getMapData(O_OBJECT)->getBigWall() != 9)
 								{
 									tmpSurface = tileWest->getSprite(O_OBJECT);
-									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_OBJECT)->getYOffset() + tileOffset.y, tileWestShade, true);
+									tmpSurface->blitNShade(surface, screenPosition.x - tileOffset.x, screenPosition.y - tileWest->getMapData(O_OBJECT)->getYOffset() + tileOffset.y, tileWestShade, true, _nvColor);
 								}
 							}
 						}
@@ -758,21 +776,21 @@ void Map::drawTerrain(Surface *surface)
 						if (tmpSurface)
 						{
 							wallShade = getWallShade(O_WESTWALL, tile, tileWest);
-							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_WESTWALL)->getYOffset(), wallShade);
+							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_WESTWALL)->getYOffset(), wallShade, false, _nvColor);
 						}
 						// Draw north wall
 						tmpSurface = tile->getSprite(O_NORTHWALL);
 						if (tmpSurface)
 						{
 							wallShade = getWallShade(O_NORTHWALL, tile, tileNorth);
-							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), wallShade, tile->getMapData(O_WESTWALL));
+							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), wallShade, tile->getMapData(O_WESTWALL), _nvColor);
 						}
 						// Draw object
 						if (tile->getMapData(O_OBJECT) && (tile->getMapData(O_OBJECT)->getBigWall() < 6 || tile->getMapData(O_OBJECT)->getBigWall() == 9))
 						{
 							tmpSurface = tile->getSprite(O_OBJECT);
 							if (tmpSurface)
-								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade);
+								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade, false, _nvColor);
 						}
 						// draw an item on top of the floor (if any)
 						BattleItem* item = tile->getTopItem();
@@ -887,7 +905,7 @@ void Map::drawTerrain(Surface *surface)
 											_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
 											bulletPositionScreen.x -= tmpSurface->getWidth() / 2;
 											bulletPositionScreen.y -= tmpSurface->getHeight() / 2;
-											tmpSurface->blitNShade(surface, bulletPositionScreen.x, bulletPositionScreen.y, 16);
+											tmpSurface->blitNShade(surface, bulletPositionScreen.x, bulletPositionScreen.y, 16, false, _nvColor);
 										}
 
 										// draw bullet itself
@@ -900,7 +918,7 @@ void Map::drawTerrain(Surface *surface)
 											_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
 											bulletPositionScreen.x -= tmpSurface->getWidth() / 2;
 											bulletPositionScreen.y -= tmpSurface->getHeight() / 2;
-											tmpSurface->blitNShade(surface, bulletPositionScreen.x, bulletPositionScreen.y, 0);
+											tmpSurface->blitNShade(surface, bulletPositionScreen.x, bulletPositionScreen.y, 0, false, _nvColor);
 										}
 									}
 								}
@@ -938,7 +956,7 @@ void Map::drawTerrain(Surface *surface)
 							offset.y += (22 - unit->getHeight());
 							if (tmpSurface)
 							{
-								tmpSurface->blitNShade(surface, offset.x, offset.y - 30, tileShade);
+								tmpSurface->blitNShade(surface, offset.x, offset.y - 30, tileShade, false, _nvColor);
 							}
 						}
 						if (isAltPressed)
@@ -969,7 +987,7 @@ void Map::drawTerrain(Surface *surface)
 								tunit, part,
 								offset.x,
 								offset.y,
-								ttile->getShade()
+								reShade(ttile)
 							);
 						}
 					}
@@ -1002,7 +1020,7 @@ void Map::drawTerrain(Surface *surface)
 							frameNumber += halfAnimFrame + tile->getAnimationOffset();
 						}
 						tmpSurface = _game->getMod()->getSurfaceSet("SMOKE.PCK")->getFrame(frameNumber);
-						tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y, shade);
+						tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y, shade, false, _nvColor);
 					}
 
 					//draw particle clouds
@@ -1051,7 +1069,7 @@ void Map::drawTerrain(Surface *surface)
 						{
 							tmpSurface = tile->getSprite(O_OBJECT);
 							if (tmpSurface)
-								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade, false);
+								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade, false, _nvColor);
 						}
 					}
 					// Draw cursor front
@@ -1323,18 +1341,18 @@ void Map::drawTerrain(Surface *surface)
 					if ((*i)->getCurrentFrame() >= 0)
 					{
 						tmpSurface = _game->getMod()->getSurfaceSet("X1.PCK")->getFrame((*i)->getCurrentFrame());
-						tmpSurface->blitNShade(surface, bulletPositionScreen.x - (tmpSurface->getWidth() / 2), bulletPositionScreen.y - (tmpSurface->getHeight() / 2), 0);
+						tmpSurface->blitNShade(surface, bulletPositionScreen.x - (tmpSurface->getWidth() / 2), bulletPositionScreen.y - (tmpSurface->getHeight() / 2), 0, false, _nvColor);
 					}
 				}
 				else if ((*i)->isHit())
 				{
 					tmpSurface = _game->getMod()->getSurfaceSet("HIT.PCK")->getFrame((*i)->getCurrentFrame());
-					tmpSurface->blitNShade(surface, bulletPositionScreen.x - 15, bulletPositionScreen.y - 25, 0);
+					tmpSurface->blitNShade(surface, bulletPositionScreen.x - 15, bulletPositionScreen.y - 25, 0, false, _nvColor);
 				}
 				else
 				{
 					tmpSurface = _game->getMod()->getSurfaceSet("SMOKE.PCK")->getFrame((*i)->getCurrentFrame());
-					tmpSurface->blitNShade(surface, bulletPositionScreen.x - 15, bulletPositionScreen.y - 15, 0);
+					tmpSurface->blitNShade(surface, bulletPositionScreen.x - 15, bulletPositionScreen.y - 15, 0, false, _nvColor);
 				}
 			}
 		}
@@ -1394,6 +1412,49 @@ void Map::keyboardPress(Action *action, State *state)
 {
 	InteractiveSurface::keyboardPress(action, state);
 	_camera->keyboardPress(action, state);
+}
+
+/**
+ * Handles map vision toggle mode.
+ */
+
+void Map::toggleNightVision()
+{
+	_nightVisionOn = !_nightVisionOn;
+}
+
+/**
+ * Handles fade-in and fade-out shade modification
+ * @param original tile/item/unit shade
+ */
+
+int Map::reShade(Tile *tile)
+{
+	// no night vision
+	if ((_save->getGlobalShade() <= NIGHT_VISION_THRESHOLD))
+	{
+		return tile->getShade();
+	}
+
+	// full night vision
+	if (Options::fullNightVision)
+	{
+		return tile->getShade() > _fadeShade ? _fadeShade : tile->getShade();
+	}
+
+	// local night vision
+	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+	{
+		if ((*i)->getFaction() == FACTION_PLAYER && !(*i)->isOut())
+		{
+			if (_save->getTileEngine()->distanceSq(tile->getPosition(), (*i)->getPosition(), false) <= (*i)->getArmor()->getVisibilityAtDark() * (*i)->getArmor()->getVisibilityAtDark())
+			{
+				return tile->getShade() > _fadeShade ? _fadeShade : tile->getShade();
+			}
+		}
+	}
+
+	return tile->getShade();
 }
 
 /**
@@ -1695,6 +1756,30 @@ void Map::scrollMouse()
 void Map::scrollKey()
 {
 	_camera->scrollKey();
+}
+
+/**
+ * Modify the fade shade level if fade's in progress.
+ */
+void Map::fadeShade()
+{
+	bool hold = SDL_GetKeyState(NULL)[Options::keyNightVisionHold];
+	if ((_nightVisionOn && !hold) || (!_nightVisionOn && hold))
+	{
+		_nvColor = _nvColorDef;
+		if (_fadeShade > NIGHT_VISION_SHADE) // 0 = max brightness
+		{
+			--_fadeShade;
+		}
+	}
+	else
+	{
+		_nvColor = 0;
+		if (_fadeShade < _save->getGlobalShade())
+		{
+			++_fadeShade;
+		}
+	}
 }
 
 /**
