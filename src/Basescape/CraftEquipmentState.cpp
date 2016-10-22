@@ -140,6 +140,8 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
 		RuleItem *rule = _game->getMod()->getItem(*i);
+		if (!rule->canBeEquipped()) continue;
+
 		int cQty = rule->isFixed() ? c->getVehicleCount(*i) : c->getItems()->getItem(*i);
 
 		if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE &&
@@ -291,6 +293,7 @@ void CraftEquipmentState::initList()
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
 		RuleItem *rule = _game->getMod()->getItem(*i);
+		if (!rule->canBeEquipped()) continue;
 
 		int cQty = 0;
 		if (rule->isFixed())
