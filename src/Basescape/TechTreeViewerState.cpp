@@ -573,9 +573,12 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::map<std::string, int>::const_iterator i = inputs.begin(); i != inputs.end(); ++i)
 			{
-				std::wstring name = tr((*i).first);
-				name.insert(0, L"  ");
-				_lstLeft->addRow(1, name.c_str());
+				std::wostringstream name;
+				name << L"  ";
+				name << tr((*i).first);
+				name << L": ";
+				name << (*i).second;
+				_lstLeft->addRow(1, name.str().c_str());
 				_lstLeft->setRowColor(row, 208); // white
 				_leftTopics.push_back("-");
 				_leftFlags.push_back(0);
@@ -596,9 +599,12 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::map<std::string, int>::const_iterator i = outputs.begin(); i != outputs.end(); ++i)
 			{
-				std::wstring name = tr((*i).first);
-				name.insert(0, L"  ");
-				_lstRight->addRow(1, name.c_str());
+				std::wostringstream name;
+				name << L"  ";
+				name << tr((*i).first);
+				name << L": ";
+				name << (*i).second;
+				_lstRight->addRow(1, name.str().c_str());
 				_lstRight->setRowColor(row, 208); // white
 				_rightTopics.push_back("-");
 				_rightFlags.push_back(0);
