@@ -760,7 +760,10 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 					}
 					std::map<std::string, int>::iterator tmp = i;
 					++i;
-					_base->getStorageItems()->removeItem(tmp->first, tmp->second);
+					if (!_baseInventory)
+					{
+						_base->getStorageItems()->removeItem(tmp->first, tmp->second);
+					}
 				}
 				else
 				{
@@ -1644,7 +1647,7 @@ void BattlescapeGenerator::runInventory(Craft *craft)
 {
 	// we need to fake a map for soldier placement
 	_baseInventory = true;
-	int soldiers = craft->getNumSoldiers();
+	int soldiers = craft != 0 ? craft->getNumSoldiers() : _base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits);
 	_mapsize_x = soldiers;
 	_mapsize_y = 1;
 	_mapsize_z = 1;
@@ -1661,7 +1664,7 @@ void BattlescapeGenerator::runInventory(Craft *craft)
 	}
 
 	// ok now generate the battleitems for inventory
-	setCraft(craft);
+	if (craft != 0) setCraft(craft);
 	deployXCOM(0);
 	delete data;
 	delete set;

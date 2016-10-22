@@ -18,6 +18,7 @@
  */
 #include "SoldiersState.h"
 #include <climits>
+#include "../Engine/Screen.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
@@ -35,6 +36,9 @@
 #include "../Savegame/SavedGame.h"
 #include "SoldierInfoState.h"
 #include "SoldierMemorialState.h"
+#include "../Battlescape/InventoryState.h"
+#include "../Battlescape/BattlescapeGenerator.h"
+#include "../Savegame/SavedBattleGame.h"
 #include <algorithm>
 
 namespace OpenXcom
@@ -113,6 +117,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&SoldiersState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&SoldiersState::btnOkClick, Options::keyCancel);
+	_btnOk->onKeyboardPress((ActionHandler)&SoldiersState::btnInventoryClick, Options::keyBattleInventory);
 
 	_btnPsiTraining->setText(tr("STR_PSI_TRAINING"));
 	_btnPsiTraining->onMouseClick((ActionHandler)&SoldiersState::btnPsiTrainingClick);
@@ -252,6 +257,10 @@ void SoldiersState::cbxSortByChange(Action *action)
 void SoldiersState::init()
 {
 	State::init();
+
+	// resets the savegame when coming back from the inventory
+	_game->getSavedGame()->setBattleGame(0);
+
 	initList(0);
 }
 
@@ -428,6 +437,27 @@ void SoldiersState::btnTrainingClick(Action *)
 void SoldiersState::btnMemorialClick(Action *)
 {
 	_game->pushState(new SoldierMemorialState);
+}
+
+/**
+* Displays the inventory screen for the soldiers inside the base.
+* @param action Pointer to an action.
+*/
+void SoldiersState::btnInventoryClick(Action *)
+{
+	if (_base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits) > 0)
+	{
+		SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
+		_game->getSavedGame()->setBattleGame(bgame);
+		bgame->setMissionType("STR_BASE_DEFENSE");
+
+		BattlescapeGenerator bgen = BattlescapeGenerator(_game);
+		bgen.setBase(_base);
+		bgen.runInventory(0);
+
+		_game->getScreen()->clear();
+		_game->pushState(new InventoryState(false, 0, _base));
+	}
 }
 
 /**
