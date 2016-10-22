@@ -686,16 +686,13 @@ void Map::drawTerrain(Surface *surface)
 										BattleUnit *itemUnit = item->getUnit();
 										if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
 										{
-											if (itemUnit->getFatalWounds() > 0)
+											if (itemUnit->getFatalWounds() > 0 && _woundIndicator)
 											{
-												if (_woundIndicator)
-												{
 													_woundIndicator->blitNShade(surface,
 														screenPosition.x - tileOffset.x,
 														screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
 														tileWestShade,
 														true);
-												}
 											}
 											else
 											{
@@ -806,15 +803,12 @@ void Map::drawTerrain(Surface *surface)
 								BattleUnit *itemUnit = item->getUnit();
 								if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
 								{
-									if (itemUnit->getFatalWounds() > 0)
+									if (itemUnit->getFatalWounds() > 0 && _woundIndicator)
 									{
-										if (_woundIndicator)
-										{
 											_woundIndicator->blitNShade(surface,
 												screenPosition.x,
 												screenPosition.y + tile->getTerrainLevel(),
 												tileShade);
-										}
 									}
 									else
 									{
