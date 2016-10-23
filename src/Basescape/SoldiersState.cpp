@@ -260,6 +260,7 @@ void SoldiersState::init()
 
 	// resets the savegame when coming back from the inventory
 	_game->getSavedGame()->setBattleGame(0);
+	_base->setInBattlescape(false);
 
 	initList(0);
 }
