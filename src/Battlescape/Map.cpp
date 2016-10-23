@@ -293,10 +293,13 @@ int Map::getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind)
 	{
 		shade = 16;
 	}
-	auto data = tileFrot->getMapData(part);
-	if ((data->isDoor() || data->isUFODoor()) && tileFrot->isDiscovered(part))
+	if (part)
 	{
-		shade = std::min(reShade(tileFrot), tileBehind ? tileBehind->getShade() + 5 : 16);
+		auto data = tileFrot->getMapData(part);
+		if ((data->isDoor() || data->isUFODoor()) && tileFrot->isDiscovered(part - 1))
+		{
+			shade = std::min(reShade(tileFrot), tileBehind ? tileBehind->getShade() + 5 : 16);
+		}
 	}
 	return shade;
 }
