@@ -3513,18 +3513,6 @@ Tile *TileEngine::applyGravity(Tile *t)
 					_save->addFallingUnit(occupant);
 				}
 			}
-			else if (occupant->isOut())
-			{
-				Position origin = occupant->getPosition();
-				for (int y = occupant->getArmor()->getSize()-1; y >= 0; --y)
-				{
-					for (int x = occupant->getArmor()->getSize()-1; x >= 0; --x)
-					{
-						_save->getTile(origin + Position(x, y, 0))->setUnit(0);
-					}
-				}
-				occupant->setPosition(unitpos);
-			}
 		}
 	}
 	rt = t;

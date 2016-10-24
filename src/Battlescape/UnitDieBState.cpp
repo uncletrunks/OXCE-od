@@ -305,16 +305,16 @@ void UnitDieBState::convertUnitToCorpse()
 		{
 			for (int x = 0; x < size; x++)
 			{
+				if (_parent->getSave()->getTile(lastPosition + Position(x,y,0))->getUnit() == _unit) // check in case unit was displaced by another unit
+				{
+					_parent->getSave()->getTile(lastPosition + Position(x,y,0))->setUnit(0);
+				}
 				if (!_overKill)
 				{
 					BattleItem *corpse = new BattleItem(_parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[i]), _parent->getSave()->getCurrentItemId());
 					corpse->setUnit(_unit);
 					_parent->dropItem(lastPosition + Position(x,y,0), corpse, true, false);
 					i++;
-				}
-				if (_parent->getSave()->getTile(lastPosition + Position(x,y,0))->getUnit() == _unit) // check in case unit was displaced by another unit
-				{
-					_parent->getSave()->getTile(lastPosition + Position(x,y,0))->setUnit(0);
 				}
 			}
 		}
