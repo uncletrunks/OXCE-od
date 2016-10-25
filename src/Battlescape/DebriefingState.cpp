@@ -943,6 +943,7 @@ void DebriefingState::prepareDebriefing()
 	_stats.push_back(new DebriefingStat("STR_ALIENS_KILLED", false));
 	_stats.push_back(new DebriefingStat("STR_ALIEN_CORPSES_RECOVERED", false));
 	_stats.push_back(new DebriefingStat("STR_LIVE_ALIENS_RECOVERED", false));
+	_stats.push_back(new DebriefingStat("STR_LIVE_ALIENS_SURRENDERED", false));
 	_stats.push_back(new DebriefingStat("STR_ALIEN_ARTIFACTS_RECOVERED", false));
 
 	std::string objectiveCompleteText, objectiveFailedText;
@@ -1387,6 +1388,19 @@ void DebriefingState::prepareDebriefing()
 			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea())
 				// mind controlled units may as well count as unconscious
 				&& faction == FACTION_PLAYER && !(*j)->isOut())
+			{
+				for (std::vector<BattleItem*>::iterator k = (*j)->getInventory()->begin(); k != (*j)->getInventory()->end(); ++k)
+				{
+					if (!(*k)->getRules()->isFixed())
+					{
+						(*j)->getTile()->addItem(*k, _game->getMod()->getInventory("STR_GROUND"));
+					}
+				}
+				recoverAlien(*j, base);
+			}
+			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea())
+				// surrendered units may as well count as unconscious too
+				&& (*j)->getUnitRules()->canSurrender() && !(*j)->isOut())
 			{
 				for (std::vector<BattleItem*>::iterator k = (*j)->getInventory()->begin(); k != (*j)->getInventory()->end(); ++k)
 				{
@@ -1929,7 +1943,12 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	else
 	{
 		RuleResearch *research = _game->getMod()->getResearch(type);
-		if (research != 0 && !_game->getSavedGame()->isResearched(type))
+		if (from->getUnitRules()->canSurrender() && !from->isOut())
+		{
+			// 1 point for surrender
+			addStat("STR_LIVE_ALIENS_SURRENDERED", 1, 1);
+		}
+		else if (research != 0 && !_game->getSavedGame()->isResearched(type))
 		{
 			// more points if it's not researched
 			addStat("STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);

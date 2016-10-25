@@ -2271,7 +2271,15 @@ void BattlescapeGame::tallyUnits(int &liveAliens, int &liveSoldiers)
 		{
 			if ((*j)->getOriginalFaction() == FACTION_HOSTILE)
 			{
-				if (!Options::allowPsionicCapture || (*j)->getFaction() != FACTION_PLAYER)
+				if (Options::allowPsionicCapture && (*j)->getFaction() == FACTION_PLAYER)
+				{
+					// don't count psi-captured units
+				}
+				else if ((*j)->getUnitRules()->canSurrender() &&  ((*j)->getStatus() == STATUS_PANICKING || (*j)->getStatus() == STATUS_BERSERK))
+				{
+					// don't count surrendered units
+				}
+				else
 				{
 					liveAliens++;
 				}

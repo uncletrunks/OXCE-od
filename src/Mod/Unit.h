@@ -74,6 +74,7 @@ private:
 	bool _livingWeapon;
 	std::string _meleeWeapon;
 	std::vector<std::string> _builtInWeapons;
+	bool _canSurrender;
 public:
 	/// Creates a blank unit ruleset.
 	Unit(const std::string &type);
@@ -121,6 +122,8 @@ public:
 	const std::string &getMeleeWeapon() const;
 	/// Gets a vector of integrated items this unit has available.
 	const std::vector<std::string> &getBuiltInWeapons() const;
+	/// Checks if this unit can surrender.
+	bool canSurrender() const;
 };
 
 }
