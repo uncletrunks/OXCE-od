@@ -157,7 +157,14 @@ void TechTreeSelectState::initLists()
 	{
 		std::wstring projectName = tr((*i));
 		for (auto & c : projectName) c = towupper(c);
-		if (projectName.find(searchString) == std::string::npos)
+		if (searchString == L"HOCUSPOCUS")
+		{
+			if (_parent->isDiscovered(*i))
+			{
+				continue;
+			}
+		}
+		else if (projectName.find(searchString) == std::string::npos)
 		{
 			continue;
 		}
@@ -174,7 +181,14 @@ void TechTreeSelectState::initLists()
 	{
 		std::wstring projectName = tr((*i));
 		for (auto & c : projectName) c = towupper(c);
-		if (projectName.find(searchString) == std::string::npos)
+		if (searchString == L"HOCUSPOCUS")
+		{
+			if (_parent->isDiscovered(*i))
+			{
+				continue;
+			}
+		}
+		else if (projectName.find(searchString) == std::string::npos)
 		{
 			continue;
 		}

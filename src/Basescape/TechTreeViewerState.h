@@ -66,6 +66,8 @@ public:
 	void btnNewClick(Action *action);
 	/// Sets the selected topic.
 	void setSelectedTopic(const std::string &selectedTopic, bool isManufacturingTopic);
+	/// Is given topic discovered/available?
+	bool isDiscovered(const std::string &topic) const;
 };
 
 }

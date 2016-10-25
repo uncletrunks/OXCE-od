@@ -281,7 +281,7 @@ void TechTreeViewerState::initLists()
 			std::wstring itemName = tr(_selectedTopic);
 			itemName.insert(0, L"  ");
 			_lstLeft->addRow(1, itemName.c_str());
-			if (_alreadyAvailableStuff.find(_selectedTopic) == _alreadyAvailableStuff.end())
+			if (!isDiscovered(_selectedTopic))
 			{
 				_lstLeft->setRowColor(row, 241); // pink
 			}
@@ -303,7 +303,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstLeft->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstLeft->setRowColor(row, 241); // pink
 				}
@@ -331,7 +331,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstLeft->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstLeft->setRowColor(row, 241); // pink
 				}
@@ -354,7 +354,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstLeft->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstLeft->setRowColor(row, 241); // pink
 				}
@@ -377,7 +377,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstLeft->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstLeft->setRowColor(row, 241); // pink
 				}
@@ -407,7 +407,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstRight->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstRight->setRowColor(row, 241); // pink
 				}
@@ -426,7 +426,7 @@ void TechTreeViewerState::initLists()
 				name.insert(0, L"  ");
 				name.append(tr("STR_M_FLAG"));
 				_lstRight->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstRight->setRowColor(row, 241); // pink
 				}
@@ -454,7 +454,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstRight->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstRight->setRowColor(row, 241); // pink
 				}
@@ -477,7 +477,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstRight->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstRight->setRowColor(row, 241); // pink
 				}
@@ -500,7 +500,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstRight->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstRight->setRowColor(row, 241); // pink
 				}
@@ -531,7 +531,7 @@ void TechTreeViewerState::initLists()
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
 				_lstLeft->addRow(1, name.c_str());
-				if (_alreadyAvailableStuff.find((*i)) == _alreadyAvailableStuff.end())
+				if (!isDiscovered((*i)))
 				{
 					_lstLeft->setRowColor(row, 241); // pink
 				}
@@ -651,6 +651,18 @@ void TechTreeViewerState::setSelectedTopic(const std::string &selectedTopic, boo
 {
 	_selectedTopic = selectedTopic;
 	_selectedFlag = isManufacturingTopic ? 2 : 1;
+}
+
+/**
+* Is given topic discovered/available?
+*/
+bool TechTreeViewerState::isDiscovered(const std::string &topic) const
+{
+	if (_alreadyAvailableStuff.find(topic) == _alreadyAvailableStuff.end())
+	{
+		return false;
+	}
+	return true;
 }
 
 }
