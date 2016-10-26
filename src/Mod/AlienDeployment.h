@@ -66,7 +66,7 @@ private:
 	std::vector<DeploymentData> _data;
 	int _width, _length, _height, _civilians;
 	std::vector<std::string> _terrains, _music;
-	int _shade;
+	int _shade, _minShade, _maxShade;
 	std::string _nextStage, _race, _script;
 	bool _finalDestination;
 	std::string _winCutscene, _loseCutscene;
@@ -96,6 +96,10 @@ public:
 	std::vector<std::string> getTerrains() const;
 	/// Gets the shade level for battlescape generation.
 	int getShade() const;
+	/// Gets the min shade level for battlescape generation.
+	int getMinShade() const;
+	/// Gets the max shade level for battlescape generation.
+	int getMaxShade() const;
 	/// Gets the next stage of the mission.
 	std::string getNextStage() const;
 	/// Gets the race to use in the next stage.

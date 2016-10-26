@@ -522,6 +522,14 @@ void BattlescapeGenerator::run()
 	{
 		_worldShade = ruleDeploy->getShade();
 	}
+	else if (ruleDeploy->getMinShade() != -1 && _worldShade < ruleDeploy->getMinShade())
+	{
+		_worldShade = ruleDeploy->getMinShade();
+	}
+	else if (ruleDeploy->getMaxShade() != -1 && _worldShade > ruleDeploy->getMaxShade())
+	{
+		_worldShade = ruleDeploy->getMaxShade();
+	}
 
 	const std::vector<MapScript*> *script = _game->getMod()->getMapScript(_terrain->getScript());
 	if (_game->getMod()->getMapScript(ruleDeploy->getScript()))
