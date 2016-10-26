@@ -285,6 +285,18 @@ namespace OpenXcom
 				}
 			}
 
+			// 4. memento mori
+			for (std::vector<Soldier*>::reverse_iterator j = save->getDeadSoldiers()->rbegin(); j != save->getDeadSoldiers()->rend(); ++j)
+			{
+				for (std::vector<SoldierCommendations*>::iterator k = (*j)->getDiary()->getSoldierCommendations()->begin(); k != (*j)->getDiary()->getSoldierCommendations()->end(); ++k)
+				{
+					if ((*k)->getType() == article->title)
+					{
+						return false;
+					}
+				}
+			}
+
 			return true;
 		}
 
