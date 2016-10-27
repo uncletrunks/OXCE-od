@@ -51,8 +51,8 @@ namespace OpenXcom
  */
 SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
-	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1),
-    _debugMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
+	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20),
+    _debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5)
 {
 	_tileSearch.resize(11*11);
@@ -123,6 +123,8 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_alienCustomMission = node["alienCustomMission"].as<std::string>(_alienCustomMission);
 	_globalShade = node["globalshade"].as<int>(_globalShade);
 	_turn = node["turn"].as<int>(_turn);
+	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
+	_bughuntMode = node["bughuntMode"].as<bool>(_bughuntMode);
 	_depth = node["depth"].as<int>(_depth);
 	int selectedUnit = node["selectedUnit"].as<int>();
 
@@ -382,6 +384,8 @@ YAML::Node SavedBattleGame::save() const
 	node["startingConditionType"] = _startingConditionType;
 	node["globalshade"] = _globalShade;
 	node["turn"] = _turn;
+	node["bughuntMinTurn"] = _bughuntMinTurn;
+	node["bughuntMode"] = _bughuntMode;
 	node["selectedUnit"] = (_selectedUnit?_selectedUnit->getId():-1);
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
@@ -883,6 +887,23 @@ int SavedBattleGame::getTurn() const
 }
 
 /**
+* Sets the bug hunt turn number.
+*/
+void SavedBattleGame::setBughuntMinTurn(int bughuntMinTurn)
+{
+	_bughuntMinTurn = bughuntMinTurn;
+}
+
+/**
+* Gets the bug hunt turn number.
+* @return The bug hunt turn.
+*/
+int SavedBattleGame::getBughuntMinTurn() const
+{
+	return _bughuntMinTurn;
+}
+
+/**
  * Ends the current turn and progresses to the next one.
  */
 void SavedBattleGame::endTurn()
@@ -987,6 +1008,23 @@ void SavedBattleGame::setDebugMode()
 bool SavedBattleGame::getDebugMode() const
 {
 	return _debugMode;
+}
+
+/**
+* Sets the bug hunt mode.
+*/
+void SavedBattleGame::setBughuntMode(bool bughuntMode)
+{
+	_bughuntMode = bughuntMode;
+}
+
+/**
+* Gets the current bug hunt mode.
+* @return Bug hunt mode.
+*/
+bool SavedBattleGame::getBughuntMode() const
+{
+	return _bughuntMode;
 }
 
 /**

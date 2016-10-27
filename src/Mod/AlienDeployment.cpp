@@ -113,7 +113,7 @@ namespace OpenXcom
  * type of deployment data.
  * @param type String defining the type.
  */
-AlienDeployment::AlienDeployment(const std::string &type) : _type(type), _width(0), _length(0), _height(0), _civilians(0), _shade(-1), _minShade(-1), _maxShade(-1), _finalDestination(false), _alert("STR_ALIENS_TERRORISE"), _alertBackground("BACK03.SCR"), _markerName("STR_TERROR_SITE"), _markerIcon(-1), _durationMin(0), _durationMax(0),
+AlienDeployment::AlienDeployment(const std::string &type) : _type(type), _bughuntMinTurn(0), _width(0), _length(0), _height(0), _civilians(0), _shade(-1), _minShade(-1), _maxShade(-1), _finalDestination(false), _alert("STR_ALIENS_TERRORISE"), _alertBackground("BACK03.SCR"), _markerName("STR_TERROR_SITE"), _markerIcon(-1), _durationMin(0), _durationMax(0),
 	_minDepth(0), _maxDepth(0), _minSiteDepth(0), _maxSiteDepth(0), _objectiveType(-1), _objectivesRequired(0), _objectiveCompleteScore(0), _objectiveFailedScore(0), _despawnPenalty(0), _points(0)
 {
 }
@@ -137,6 +137,7 @@ void AlienDeployment::load(const YAML::Node &node)
 	}
 	_type = node["type"].as<std::string>(_type);
 	_startingCondition = node["startingCondition"].as<std::string>(_startingCondition);
+	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
 	_data = node["data"].as< std::vector<DeploymentData> >(_data);
 	_width = node["width"].as<int>(_width);
 	_length = node["length"].as<int>(_length);
@@ -211,6 +212,15 @@ std::string AlienDeployment::getType() const
 std::string AlienDeployment::getStartingCondition() const
 {
 	return _startingCondition;
+}
+
+/**
+* Gets the bug hunt mode minimum turn requirement (default = 0 = not used).
+* @return Bug hunt min turn number.
+*/
+int AlienDeployment::getBughuntMinTurn() const
+{
+	return _bughuntMinTurn;
 }
 
 /**

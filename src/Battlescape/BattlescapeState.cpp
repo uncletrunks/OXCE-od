@@ -1809,6 +1809,17 @@ void BattlescapeState::debug(const std::wstring &message)
 }
 
 /**
+* Shows a bug hunt message in the topleft corner.
+*/
+void BattlescapeState::bugHuntMessage()
+{
+	if (_save->getBughuntMode())
+	{
+		_txtDebug->setText(tr("STR_BUG_HUNT_ACTIVATED"));
+	}
+}
+
+/**
  * Shows a warning message.
  * @param message Warning message.
  */

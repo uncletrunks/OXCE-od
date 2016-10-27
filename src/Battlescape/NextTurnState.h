@@ -48,6 +48,8 @@ private:
 	Surface *_bg;
 	/// Applies a given environmental condition effects to a given faction.
 	bool applyEnvironmentalConditionToFaction(UnitFaction faction, EnvironmentalCondition condition);
+	/// Checks if bug hunt mode should be activated or not.
+	void checkBugHuntMode();
 public:
 	/// Creates the Next Turn state.
 	NextTurnState(SavedBattleGame *battleGame, BattlescapeState *state);

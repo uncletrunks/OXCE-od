@@ -185,6 +185,8 @@ public:
 	Map *getMap() const;
 	/// Show debug message.
 	void debug(const std::wstring &message);
+	/// Show bug hunt message.
+	void bugHuntMessage();
 	/// Show warning message.
 	void warning(const std::string &message);
 	/// Handles keypresses.

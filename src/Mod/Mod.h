@@ -158,6 +158,7 @@ private:
 	int _chanceToStopRetaliation;
 	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
 	int _surrenderMode;
+	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
@@ -401,6 +402,16 @@ public:
 	int getOneHandedPenaltyGlobal() const { return _oneHandedPenaltyGlobal; }
 	/// Gets the surrender mode (default = 0).
 	int getSurrenderMode() const { return _surrenderMode; }
+	/// Gets the bug hunt mode minimum turn requirement (default = 20).
+	int getBughuntMinTurn() const { return _bughuntMinTurn; }
+	/// Gets the bug hunt mode maximum remaining enemies requirement (default = 2).
+	int getBughuntMaxEnemies() const { return _bughuntMaxEnemies; }
+	/// Gets the bug hunt mode "VIP rank" parameter (default = 0).
+	int getBughuntRank() const { return _bughuntRank; }
+	/// Gets the bug hunt mode low morale threshold parameter (default = 40).
+	int getBughuntLowMorale() const { return _bughuntLowMorale; }
+	/// Gets the bug hunt mode time units % parameter (default = 60).
+	int getBughuntTimeUnitsLeft() const { return _bughuntTimeUnitsLeft; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.

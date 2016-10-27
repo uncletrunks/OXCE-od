@@ -2711,6 +2711,16 @@ void BattlescapeGenerator::setTerrain(RuleTerrain *terrain)
  */
 void BattlescapeGenerator::setupObjectives(const AlienDeployment *ruleDeploy)
 {
+	// reset bug hunt mode (necessary for multi-stage missions)
+	_save->setBughuntMode(false);
+	// set global min turn
+	_save->setBughuntMinTurn(_game->getMod()->getBughuntMinTurn());
+	// set min turn override per deployment (if defined)
+	if (ruleDeploy->getBughuntMinTurn() > 0)
+	{
+		_save->setBughuntMinTurn(ruleDeploy->getBughuntMinTurn());
+	}
+
 	int targetType = ruleDeploy->getObjectiveType();
 
 	if (targetType > -1)

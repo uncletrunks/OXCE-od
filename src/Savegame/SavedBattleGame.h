@@ -63,8 +63,8 @@ private:
 	std::string _missionType, _alienCustomDeploy, _alienCustomMission, _startingConditionType;
 	int _globalShade;
 	UnitFaction _side;
-	int _turn;
-	bool _debugMode;
+	int _turn, _bughuntMinTurn;
+	bool _debugMode, _bughuntMode;
 	bool _aborted;
 	int _itemId;
 	int _objectiveType, _objectivesDestroyed, _objectivesNeeded;
@@ -193,12 +193,20 @@ public:
 	bool canUseWeapon(const BattleItem *weapon, const BattleUnit *unit, bool isBerserking) const;
 	/// Gets the turn number.
 	int getTurn() const;
+	/// Sets the bug hunt turn number.
+	void setBughuntMinTurn(int bughuntMinTurn);
+	/// Gets the bug hunt turn number.
+	int getBughuntMinTurn() const;
 	/// Ends the turn.
 	void endTurn();
 	/// Sets debug mode.
 	void setDebugMode();
 	/// Gets debug mode.
 	bool getDebugMode() const;
+	/// Sets bug hunt mode.
+	void setBughuntMode(bool bughuntMode);
+	/// Gets bug hunt mode.
+	bool getBughuntMode() const;
 	/// Load map resources.
 	void loadMapResources(Mod *mod);
 	/// Resets tiles units are standing on

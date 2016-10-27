@@ -202,6 +202,12 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	}
 	_battleGame->hitLog.clear();
 
+	if (_battleGame->getSide() == FACTION_PLAYER)
+	{
+		checkBugHuntMode();
+		_state->bugHuntMessage();
+	}
+
 	if (Options::skipNextTurnScreen && message.empty())
 	{
 		_timer = new Timer(NEXT_TURN_DELAY);
@@ -216,6 +222,52 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 NextTurnState::~NextTurnState()
 {
 	delete _timer;
+}
+
+/**
+* Checks if bug hunt mode should be activated or not.
+*/
+void NextTurnState::checkBugHuntMode()
+{
+	// too early for bug hunt
+	if (_battleGame->getTurn() < _battleGame->getBughuntMinTurn()) return;
+
+	// bug hunt is already activated
+	if (_battleGame->getBughuntMode()) return;
+
+	int count = 0;
+	for (std::vector<BattleUnit*>::iterator j = _battleGame->getUnits()->begin(); j != _battleGame->getUnits()->end(); ++j)
+	{
+		if (!(*j)->isOut())
+		{
+			if ((*j)->getOriginalFaction() == FACTION_HOSTILE)
+			{
+				// we can see them, duh!
+				if ((*j)->getVisible()) return;
+
+				// VIPs are still in the game
+				if ((*j)->getRankInt() <= _game->getMod()->getBughuntRank()) return; // AR_COMMANDER = 0, AR_LEADER = 1, ...
+
+				count++;
+				// too many enemies are still in the game
+				if (count > _game->getMod()->getBughuntMaxEnemies()) return;
+
+				bool hasWeapon = (*j)->getLeftHandWeapon() || (*j)->getRightHandWeapon();
+				bool hasLowMorale = (*j)->getMorale() < _game->getMod()->getBughuntLowMorale();
+				bool hasTooManyTUsLeft = (*j)->getTimeUnits() > ((*j)->getUnitRules()->getStats()->tu * _game->getMod()->getBughuntTimeUnitsLeft() / 100);
+				if (!hasWeapon || hasLowMorale || hasTooManyTUsLeft)
+				{
+					continue; // this unit is powerless, check next unit...
+				}
+				else
+				{
+					return; // this unit is OK, no bug hunt yet!
+				}
+			}
+		}
+	}
+
+	_battleGame->setBughuntMode(true); // if we made it this far, turn on the bug hunt!
 }
 
 /**

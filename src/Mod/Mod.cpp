@@ -280,6 +280,7 @@ Mod::Mod() :
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_maxLookVariant(1), _tooMuchSmokeThreshold(10), _customTrainingFactor(100), _chanceToStopRetaliation(0),
 	_kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80), _surrenderMode(0),
+	_bughuntMinTurn(20), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
 	_startingTime(6, 1, 1, 1999, 12, 0, 0), _facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
 {
@@ -1308,6 +1309,11 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_kneelBonusGlobal = doc["kneelBonusGlobal"].as<int>(_kneelBonusGlobal);
 	_oneHandedPenaltyGlobal = doc["oneHandedPenaltyGlobal"].as<int>(_oneHandedPenaltyGlobal);
 	_surrenderMode = doc["surrenderMode"].as<int>(_surrenderMode);
+	_bughuntMinTurn = doc["bughuntMinTurn"].as<int>(_bughuntMinTurn);
+	_bughuntMaxEnemies = doc["bughuntMaxEnemies"].as<int>(_bughuntMaxEnemies);
+	_bughuntRank = doc["bughuntRank"].as<int>(_bughuntRank);
+	_bughuntLowMorale = doc["bughuntLowMorale"].as<int>(_bughuntLowMorale);
+	_bughuntTimeUnitsLeft = doc["bughuntTimeUnitsLeft"].as<int>(_bughuntTimeUnitsLeft);
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 
