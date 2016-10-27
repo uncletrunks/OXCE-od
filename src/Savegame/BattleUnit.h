@@ -91,6 +91,7 @@ private:
 	int _verticalDirection;
 	Position _destination;
 	UnitStatus _status;
+	bool _wantsToSurrender;
 	int _walkPhase, _fallPhase;
 	std::vector<BattleUnit *> _visibleUnits, _unitsSpottedThisTurn;
 	std::vector<Tile *> _visibleTiles;
@@ -208,6 +209,8 @@ public:
 	int getVerticalDirection() const;
 	/// Gets the unit's status.
 	UnitStatus getStatus() const;
+	/// Does the unit want to surrender?
+	bool wantsToSurrender() const;
 	/// Start the walkingPhase
 	void startWalking(int direction, const Position &destination, Tile *tileBelowMe, bool cache);
 	/// Increase the walkingPhase

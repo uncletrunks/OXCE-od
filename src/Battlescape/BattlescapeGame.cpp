@@ -2254,6 +2254,41 @@ BattleActionType BattlescapeGame::getReservedAction()
 	return _save->getTUReserved();
 }
 
+bool BattlescapeGame::isSurrendering(BattleUnit* bu)
+{
+	int surrenderMode = getMod()->getSurrenderMode();
+	if (surrenderMode == 0)
+	{
+		// turned off, no surrender
+		return false;
+	}
+	else if (surrenderMode == 1)
+	{
+		// all remaining enemy units can surrender and want to surrender now
+		if (bu->getUnitRules()->canSurrender() && (bu->getStatus() == STATUS_PANICKING || bu->getStatus() == STATUS_BERSERK))
+		{
+			return true;
+		}
+	}
+	else if (surrenderMode == 2)
+	{
+		// all remaining enemy units can surrender and want to surrender now or wanted to surrender in the past
+		if (bu->getUnitRules()->canSurrender() && bu->wantsToSurrender())
+		{
+			return true;
+		}
+	}
+	else if (surrenderMode == 3)
+	{
+		// all remaining enemy units have empty hands and want to surrender now or wanted to surrender in the past
+		if (!bu->getLeftHandWeapon() && !bu->getRightHandWeapon() && bu->wantsToSurrender())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 /**
  * Tallies the living units in the game and, if required, converts units into their spawn unit.
  * @param &liveAliens The integer in which to store the live alien tally.
@@ -2275,7 +2310,7 @@ void BattlescapeGame::tallyUnits(int &liveAliens, int &liveSoldiers)
 				{
 					// don't count psi-captured units
 				}
-				else if ((*j)->getUnitRules()->canSurrender() &&  ((*j)->getStatus() == STATUS_PANICKING || (*j)->getStatus() == STATUS_BERSERK))
+				else if (isSurrendering((*j)))
 				{
 					// don't count surrendered units
 				}

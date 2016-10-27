@@ -157,6 +157,7 @@ private:
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor;
 	int _chanceToStopRetaliation;
 	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
+	int _surrenderMode;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
@@ -398,6 +399,8 @@ public:
 	int getKneelBonusGlobal() const { return _kneelBonusGlobal; }
 	/// Gets the global one-handed penalty (default = 80).
 	int getOneHandedPenaltyGlobal() const { return _oneHandedPenaltyGlobal; }
+	/// Gets the surrender mode (default = 0).
+	int getSurrenderMode() const { return _surrenderMode; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.

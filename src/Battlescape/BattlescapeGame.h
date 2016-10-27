@@ -202,6 +202,7 @@ public:
 	/// Returns the type of action that is reserved.
 	BattleActionType getReservedAction();
 	/// Tallies the living units, converting them if necessary.
+	bool isSurrendering(BattleUnit* bu);
 	void tallyUnits(int &liveAliens, int &liveSoldiers);
 	bool convertInfected();
 	/// Sets the kneel reservation setting.

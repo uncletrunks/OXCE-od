@@ -57,7 +57,7 @@ namespace OpenXcom
 BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_faction(FACTION_PLAYER), _originalFaction(FACTION_PLAYER), _killedBy(FACTION_PLAYER), _id(0), _pos(Position()),
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0), _toDirectionTurret(0),
-	_verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
+	_verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
 	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false),
 	_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
 	_motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
@@ -217,7 +217,7 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, int depth, int maxView
 BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance) :
 	_faction(faction), _originalFaction(faction), _killedBy(faction), _id(id), _pos(Position()),
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0),
-	_toDirectionTurret(0), _verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0),
+	_toDirectionTurret(0), _verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _walkPhase(0),
 	_fallPhase(0), _kneeled(false), _floating(false), _dontReselect(false), _fire(0), _currentAIState(0),
 	_visible(false), _expBravery(0), _expReactions(0), _expFiring(0),
 	_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0),
@@ -370,6 +370,7 @@ void BattleUnit::load(const YAML::Node &node)
 	_id = node["id"].as<int>(_id);
 	_faction = (UnitFaction)node["faction"].as<int>(_faction);
 	_status = (UnitStatus)node["status"].as<int>(_status);
+	_wantsToSurrender = node["wantsToSurrender"].as<bool>(_wantsToSurrender);
 	_pos = node["position"].as<Position>(_pos);
 	_direction = _toDirection = node["direction"].as<int>(_direction);
 	_directionTurret = _toDirectionTurret = node["directionTurret"].as<int>(_directionTurret);
@@ -438,6 +439,7 @@ YAML::Node BattleUnit::save() const
 	node["genUnitArmor"] = _armor->getType();
 	node["faction"] = (int)_faction;
 	node["status"] = (int)_status;
+	node["wantsToSurrender"] = _wantsToSurrender;
 	node["position"] = _pos;
 	node["direction"] = _direction;
 	node["directionTurret"] = _directionTurret;
@@ -656,6 +658,15 @@ int BattleUnit::getVerticalDirection() const
 UnitStatus BattleUnit::getStatus() const
 {
 	return _status;
+}
+
+/**
+* Does the unit want to surrender?
+* @return True if the unit wants to surrender
+*/
+bool BattleUnit::wantsToSurrender() const
+{
+	return _wantsToSurrender;
 }
 
 /**
@@ -1872,6 +1883,7 @@ void BattleUnit::prepareMorale(int morale)
 		{
 			int type = RNG::generate(0,100);
 			_status = (type<=33?STATUS_BERSERK:STATUS_PANICKING); // 33% chance of berserk, panic can mean freeze or flee, but that is determined later
+			_wantsToSurrender = true;
 		}
 		else
 		{
@@ -1880,6 +1892,12 @@ void BattleUnit::prepareMorale(int morale)
 			if (chance > 1)
 				addBraveryExp();
 		}
+	}
+	else
+	{
+		// knocked out units are willing to surrender if they wake up
+		if (_status == STATUS_UNCONSCIOUS)
+			_wantsToSurrender = true;
 	}
 }
 /**

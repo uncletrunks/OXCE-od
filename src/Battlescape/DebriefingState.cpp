@@ -1945,8 +1945,8 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		RuleResearch *research = _game->getMod()->getResearch(type);
 		if (from->getUnitRules()->canSurrender() && !from->isOut())
 		{
-			// 1 point for surrender
-			addStat("STR_LIVE_ALIENS_SURRENDERED", 1, 1);
+			// 10 points for surrender
+			addStat("STR_LIVE_ALIENS_SURRENDERED", 1, 10);
 		}
 		else if (research != 0 && !_game->getSavedGame()->isResearched(type))
 		{
