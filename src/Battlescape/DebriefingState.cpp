@@ -1400,7 +1400,7 @@ void DebriefingState::prepareDebriefing()
 			}
 			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea())
 				// surrendered units may as well count as unconscious too
-				&& (*j)->getUnitRules()->canSurrender() && !(*j)->isOut())
+				&& faction != FACTION_PLAYER && !(*j)->isOut())
 			{
 				for (std::vector<BattleItem*>::iterator k = (*j)->getInventory()->begin(); k != (*j)->getInventory()->end(); ++k)
 				{
@@ -1943,20 +1943,15 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	else
 	{
 		RuleResearch *research = _game->getMod()->getResearch(type);
-		if (from->getUnitRules()->canSurrender() && !from->isOut())
-		{
-			// 10 points for surrender
-			addStat("STR_LIVE_ALIENS_SURRENDERED", 1, 10);
-		}
-		else if (research != 0 && !_game->getSavedGame()->isResearched(type))
+		if (research != 0 && !_game->getSavedGame()->isResearched(type))
 		{
 			// more points if it's not researched
-			addStat("STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
+			addStat(from->isOut() ? "STR_LIVE_ALIENS_RECOVERED" : "STR_LIVE_ALIENS_SURRENDERED", 1, from->getValue() * 2);
 		}
 		else
 		{
 			// 10 points for recovery
-			addStat("STR_LIVE_ALIENS_RECOVERED", 1, 10);
+			addStat(from->isOut() ? "STR_LIVE_ALIENS_RECOVERED" : "STR_LIVE_ALIENS_SURRENDERED", 1, 10);
 		}
 
 		base->getStorageItems()->addItem(type, 1);

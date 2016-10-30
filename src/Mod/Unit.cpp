@@ -27,7 +27,7 @@ namespace OpenXcom
  * Creates a certain type of unit.
  * @param type String defining the type.
  */
-Unit::Unit(const std::string &type) : _type(type), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _canSurrender(false)
+Unit::Unit(const std::string &type) : _type(type), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _canSurrender(false), _autoSurrender(false)
 {
 }
 
@@ -70,6 +70,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
 	_livingWeapon = node["livingWeapon"].as<bool>(_livingWeapon);
 	_canSurrender = node["canSurrender"].as<bool>(_canSurrender);
+	_autoSurrender = node["autoSurrender"].as<bool>(_autoSurrender);
 	_meleeWeapon = node["meleeWeapon"].as<std::string>(_meleeWeapon);
 	_builtInWeapons = node["builtInWeapons"].as<std::vector<std::string> >(_builtInWeapons);
 	if (node["deathSound"])
@@ -290,7 +291,16 @@ const std::vector<std::string> &Unit::getBuiltInWeapons() const
 */
 bool Unit::canSurrender() const
 {
-	return _canSurrender;
+	return _canSurrender || _autoSurrender;
+}
+
+/**
+* Checks if this unit surrenders automatically, if all other units surrendered too.
+* @return True if this unit auto-surrenders.
+*/
+bool Unit::autoSurrender() const
+{
+	return _autoSurrender;
 }
 
 }

@@ -2257,6 +2257,14 @@ BattleActionType BattlescapeGame::getReservedAction()
 bool BattlescapeGame::isSurrendering(BattleUnit* bu)
 {
 	int surrenderMode = getMod()->getSurrenderMode();
+
+	// auto-surrender (e.g. units, which won't fight without their masters/controllers)
+	if (surrenderMode > 0 && bu->getUnitRules()->autoSurrender())
+	{
+		return true;
+	}
+
+	// surrender under certain conditions
 	if (surrenderMode == 0)
 	{
 		// turned off, no surrender
