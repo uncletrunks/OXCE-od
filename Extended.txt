@@ -123,6 +123,7 @@ Option for reserving more space for mod in common surface/sound sets.[br/]
 Visibility scripts that determine visibility of targets.[br/]
 [br/]
 3.5:[br/]
+Update to buildin script functions.[br/]
 [br/]
 
 [examples]
