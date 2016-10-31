@@ -1400,7 +1400,7 @@ void DebriefingState::prepareDebriefing()
 			}
 			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea())
 				// surrendered units may as well count as unconscious too
-				&& faction != FACTION_PLAYER && !(*j)->isOut())
+				&& playersSurvived > 0 && faction != FACTION_PLAYER && !(*j)->isOut())
 			{
 				for (std::vector<BattleItem*>::iterator k = (*j)->getInventory()->begin(); k != (*j)->getInventory()->end(); ++k)
 				{
