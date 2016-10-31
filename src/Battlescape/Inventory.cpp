@@ -730,8 +730,13 @@ void Inventory::mouseClick(Action *action, State *state)
 
 				bool canStack = slot->getType() == INV_GROUND && canBeStacked(item, _selItem);
 
+				// Check if this inventory section supports the item
+				if (!_selItem->getRules()->canBePlacedIntoInventorySection(slot->getId()))
+				{
+					_warning->showMessage(_game->getLanguage()->getString("STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION"));
+				}
 				// Put item in empty slot, or stack it, if possible.
-				if (item == 0 || item == _selItem || canStack)
+				else if (item == 0 || item == _selItem || canStack)
 				{
 					if (!overlapItems(_selUnit, _selItem, slot, x, y) && slot->fitItemInSlot(_selItem->getRules(), x, y))
 					{
@@ -1266,6 +1271,13 @@ void Inventory::arrangeGround(bool alterOffset)
  */
 bool Inventory::fitItem(RuleInventory *newSlot, BattleItem *item, std::string &warning)
 {
+	// Check if this inventory section supports the item
+	if (!item->getRules()->canBePlacedIntoInventorySection(newSlot->getId()))
+	{
+		warning = "STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION";
+		return false;
+	}
+
 	bool placed = false;
 	for (int y2 = 0; y2 <= newSlot->getY() / RuleInventory::SLOT_H && !placed; ++y2)
 	{

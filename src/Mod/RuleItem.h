@@ -125,6 +125,7 @@ private:
 	std::string _psiAttackName;
 	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher;
 	std::string _defaultInventorySlot;
+	std::vector<std::string> _supportedInventorySections;
 	int _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
@@ -217,6 +218,10 @@ public:
 	bool getFixedShow() const;
 	/// Get name of the default inventory slot.
 	const std::string &getDefaultInventorySlot() const;
+	/// Gets the item's supported inventory sections.
+	const std::vector<std::string> &getSupportedInventorySections() const;
+	/// Checks if the item can be placed into a given inventory section.
+	bool canBePlacedIntoInventorySection(const std::string &inventorySection) const;
 	/// Gets the item's bullet sprite reference.
 	int getBulletSprite() const;
 	/// Gets the item's fire sound.

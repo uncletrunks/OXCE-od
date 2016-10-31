@@ -400,6 +400,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
 	_fixedWeaponShow = node["fixedWeaponShow"].as<bool>(_fixedWeaponShow);
 	_defaultInventorySlot = node["defaultInventorySlot"].as<std::string>(_defaultInventorySlot);
+	_supportedInventorySections = node["supportedInventorySections"].as< std::vector<std::string> >(_supportedInventorySections);
 	_allowSelfHeal = node["allowSelfHeal"].as<bool>(_allowSelfHeal);
 	_isConsumable = node["isConsumable"].as<bool>(_isConsumable);
 	_isFireExtinguisher = node["isFireExtinguisher"].as<bool>(_isFireExtinguisher);
@@ -671,6 +672,34 @@ bool RuleItem::getFixedShow() const
 const std::string &RuleItem::getDefaultInventorySlot() const
 {
 	return _defaultInventorySlot;
+}
+
+/**
+ * Gets the item's supported inventory sections.
+ * @return The list of inventory sections.
+ */
+const std::vector<std::string> &RuleItem::getSupportedInventorySections() const
+{
+	return _supportedInventorySections;
+}
+
+/**
+ * Checks if the item can be placed into a given inventory section.
+ * @param inventorySection Name of the inventory section (RuleInventory->id).
+ * @return True if the item can be placed into a given inventory section.
+ */
+bool RuleItem::canBePlacedIntoInventorySection(const std::string &inventorySection) const
+{
+	// backwards-compatibility
+	if (_supportedInventorySections.empty())
+		return true;
+
+	// always possible to put an item on the ground
+	if (inventorySection == "STR_GROUND")
+		return true;
+
+	// otherwise check allowed inventory sections
+	return std::find(_supportedInventorySections.begin(), _supportedInventorySections.end(), inventorySection) != _supportedInventorySections.end();
 }
 
 /**
