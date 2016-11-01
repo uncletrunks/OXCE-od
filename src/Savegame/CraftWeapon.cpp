@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -167,7 +167,7 @@ CraftWeaponProjectile* CraftWeapon::fire() const
  * @param mod a pointer to the core mod.
  * @return number of clips loaded.
  */
-int CraftWeapon::getClipsLoaded(Mod *mod)
+int CraftWeapon::getClipsLoaded(const Mod *mod)
 {
 	int retVal = (int)floor((double)_ammo / _rules->getRearmRate());
 	RuleItem *clip = mod->getItem(_rules->getClipItem());

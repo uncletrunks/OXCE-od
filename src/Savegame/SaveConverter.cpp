@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -369,7 +369,7 @@ void SaveConverter::loadDatLease()
 	double lon = -load<Sint16>(data + 0x06) * 0.125 * M_PI / 180;
 	_save->setGlobeLongitude(lon);
 	_save->setGlobeLatitude(lat);
-	
+
 	int zoom = load<Sint16>(data + 0x0C);
 	const int DISTANCE[] = { 90, 120, 180, 360, 450, 720 };
 	for (size_t i = 0; i < 6; ++i)
@@ -569,7 +569,7 @@ void SaveConverter::loadDatMissions()
 				if (_mod->getRegion(_rules->getRegions()[region])->getMissionZones().size() >= 3)
 				{
 					// pick a city for terror missions
-					node["missionSiteZone"] = RNG::generate(0, _mod->getRegion(_rules->getRegions()[region])->getMissionZones().at(3).areas.size() - 1); 
+					node["missionSiteZone"] = RNG::generate(0, _mod->getRegion(_rules->getRegions()[region])->getMissionZones().at(3).areas.size() - 1);
 				}
 				else
 				{
@@ -801,8 +801,9 @@ void SaveConverter::loadDatTransfer()
 		int qty = load<Uint8>(tdata + 0x06);
 		if (qty != 0)
 		{
-			int base = load<Uint8>(tdata + 0x01);
-			Base *b = dynamic_cast<Base*>(_targets[base]);
+			int baseSrc = load<Uint8>(tdata + 0x00);
+			int baseDest = load<Uint8>(tdata + 0x01);
+			Base *b = dynamic_cast<Base*>(_targets[baseDest]);
 			int hours = load<Uint8>(tdata + 0x02);
 			TransferType type = (TransferType)load<Uint8>(tdata + 0x03);
 			int dat = load<Uint8>(tdata + 0x04);
@@ -811,7 +812,15 @@ void SaveConverter::loadDatTransfer()
 			switch (type)
 			{
 			case TRANSFER_CRAFT:
-				transfer->setCraft(dynamic_cast<Craft*>(_targets[dat]));
+				if (baseSrc == 255)
+				{
+					std::string newCraft = _rules->getCrafts()[dat];
+					transfer->setCraft(new Craft(_mod->getCraft(newCraft), b, _save->getId(newCraft)));
+				}
+				else
+				{
+					transfer->setCraft(dynamic_cast<Craft*>(_targets[dat]));
+				}
 				break;
 			case TRANSFER_SOLDIER:
 				transfer->setSoldier(_soldiers[dat]);

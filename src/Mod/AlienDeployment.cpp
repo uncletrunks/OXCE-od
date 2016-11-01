@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -113,8 +113,9 @@ namespace OpenXcom
  * type of deployment data.
  * @param type String defining the type.
  */
-AlienDeployment::AlienDeployment(const std::string &type) : _type(type), _width(0), _length(0), _height(0), _civilians(0), _shade(-1), _finalDestination(false), _alert("STR_ALIENS_TERRORISE"), _alertBackground("BACK03.SCR"), _markerName("STR_TERROR_SITE"), _markerIcon(-1), _durationMin(0), _durationMax(0),
-	_minDepth(0), _maxDepth(0), _minSiteDepth(0), _maxSiteDepth(0), _objectiveType(-1), _objectivesRequired(0), _objectiveCompleteScore(0), _objectiveFailedScore(0), _despawnPenalty(0), _points(0)
+AlienDeployment::AlienDeployment(const std::string &type) : _type(type), _width(0), _length(0), _height(0), _civilians(0), _shade(-1), _finalDestination(false), _alert("STR_ALIENS_TERRORISE"),
+	_alertBackground("BACK03.SCR"), _markerName("STR_TERROR_SITE"), _markerIcon(-1), _durationMin(0), _durationMax(0), _minDepth(0), _maxDepth(0), _minSiteDepth(0), _maxSiteDepth(0),
+	_objectiveType(-1), _objectivesRequired(0), _objectiveCompleteScore(0), _objectiveFailedScore(0), _despawnPenalty(0), _points(0), _turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE)
 {
 }
 
@@ -190,6 +191,9 @@ void AlienDeployment::load(const YAML::Node &node)
 	}
 	_despawnPenalty = node["despawnPenalty"].as<int>(_despawnPenalty);
 	_points = node["points"].as<int>(_points);
+	_cheatTurn = node["cheatTurn"].as<int>(_cheatTurn);
+	_turnLimit = node["turnLimit"].as<int>(_turnLimit);
+	_chronoTrigger = ChronoTrigger(node["chronoTrigger"].as<int>(_chronoTrigger));
 }
 
 /**
@@ -492,4 +496,32 @@ int AlienDeployment::getPoints() const
 {
 	return _points;
 }
+
+/**
+ * Gets the maximum number of turns we have before this mission ends.
+ * @return the turn limit.
+ */
+int AlienDeployment::getTurnLimit() const
+{
+	return _turnLimit;
+}
+
+/**
+ * Gets the action type to perform when the timer expires.
+ * @return the action type to perform.
+ */
+ChronoTrigger AlienDeployment::getChronoTrigger() const
+{
+	return _chronoTrigger;
+}
+
+/**
+ * Gets the turn at which the players become exposed to the AI.
+ * @return the turn to start cheating.
+ */
+int AlienDeployment::getCheatTurn() const
+{
+	return _cheatTurn;
+}
+
 }

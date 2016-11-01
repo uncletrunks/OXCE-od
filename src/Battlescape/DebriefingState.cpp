@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -46,7 +46,6 @@
 #include "../Savegame/ItemContainer.h"
 #include "../Savegame/Region.h"
 #include "../Savegame/SavedBattleGame.h"
-#include "../Savegame/SavedGame.h"
 #include "../Savegame/Soldier.h"
 #include "../Savegame/SoldierDiary.h"
 #include "../Savegame/MissionSite.h"
@@ -612,9 +611,9 @@ void DebriefingState::prepareDebriefing()
 
 	bool aborted = battle->isAborted();
 	bool success = !aborted || battle->allObjectivesDestroyed();
-	Craft* craft = 0;
+	Craft *craft = 0;
 	std::vector<Craft*>::iterator craftIterator;
-	Base* base = 0;
+	Base *base = 0;
 	std::string target;
 
 	int playerInExitArea = 0; // if this stays 0 the craft is lost...

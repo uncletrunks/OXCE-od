@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -476,6 +476,10 @@ void CivilianBAIState::setupPatrol()
 		int closest = 1000000;
 		for (std::vector<Node*>::iterator i = _save->getNodes()->begin(); i != _save->getNodes()->end(); ++i)
 		{
+			if ((*i)->isDummy())
+			{
+				continue;
+			}
 			node = *i;
 			int d = _save->getTileEngine()->distanceSq(_unit->getPosition(), node->getPosition());
 			if (_unit->getPosition().z == node->getPosition().z 

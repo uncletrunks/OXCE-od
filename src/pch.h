@@ -1,5 +1,4 @@
-#ifndef __OXC_PCH_H
-#define __OXC_PCH_H
+#pragma once
 
 // uncomment to check memory leaks in VS
 //#define _CRTDBG_MAP_ALLOC
@@ -60,7 +59,6 @@
 #endif
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <direct.h>
 #include <malloc.h>
 #else
 #include <alloca.h>
@@ -193,5 +191,3 @@
 #include "./Interface/TextList.h"
 #include "./Interface/ToggleTextButton.h"
 #include "./Interface/Window.h"
-
-#endif

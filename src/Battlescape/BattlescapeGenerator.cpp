@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -63,6 +63,7 @@
 #include "CivilianBAIState.h"
 #include "AlienBAIState.h"
 #include "BattlescapeState.h"
+#include "../Engine/Logger.h"
 
 namespace OpenXcom
 {
@@ -76,7 +77,7 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_craft(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0),
-	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _craftZ(0)
+	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _craftZ(0), _blocksToDo(0), _dummy(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
 }
@@ -355,6 +356,9 @@ void BattlescapeGenerator::nextStage()
 	_save->setAlienCustom(_alienCustomDeploy ? _alienCustomDeploy->getType() : "", _alienCustomMission ? _alienCustomMission->getType() : "");
 
 	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getMod()->getDeployment(_save->getMissionType());
+	_save->setTurnLimit(ruleDeploy->getTurnLimit());
+	_save->setChronoTrigger(ruleDeploy->getChronoTrigger());
+	_save->setCheatTurn(ruleDeploy->getCheatTurn());
 	ruleDeploy->getDimensions(&_mapsize_x, &_mapsize_y, &_mapsize_z);
 	size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() -1);
 	_terrain = _game->getMod()->getTerrain(ruleDeploy->getTerrains().at(pick));
@@ -478,6 +482,9 @@ void BattlescapeGenerator::run()
 
 	const AlienDeployment *ruleDeploy = _alienCustomMission ? _alienCustomMission : _game->getMod()->getDeployment(_ufo?_ufo->getRules()->getType():_save->getMissionType());
 
+	_save->setTurnLimit(ruleDeploy->getTurnLimit());
+	_save->setChronoTrigger(ruleDeploy->getChronoTrigger());
+	_save->setCheatTurn(ruleDeploy->getCheatTurn());
 	ruleDeploy->getDimensions(&_mapsize_x, &_mapsize_y, &_mapsize_z);
 
 	_unitSequence = BattleUnit::MAX_SOLDIER_ID; // geoscape soldier IDs should stay below this number
@@ -785,13 +792,18 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 		placeItemByLayout(*i);
 	}
 
+	// auto-equip soldiers (only soldiers without layout) and clean up moved items
+	autoEquip(*_save->getUnits(), _game->getMod(), _save, _craftInventoryTile->getInventory(), ground, _worldShade, _allowAutoLoadout, false);
+}
 
-	// auto-equip soldiers (only soldiers without layout)
-	for (int pass = 0; pass != 4; ++pass)
+void BattlescapeGenerator::autoEquip(std::vector<BattleUnit*> units, Mod *mod, SavedBattleGame *addToSave, std::vector<BattleItem*> *craftInv,
+		RuleInventory *groundRuleInv, int worldShade, bool allowAutoLoadout, bool overrideEquipmentLayout)
+{
+	for (int pass = 0; pass < 4; ++pass)
 	{
-		for (std::vector<BattleItem*>::iterator j = _craftInventoryTile->getInventory()->begin(); j != _craftInventoryTile->getInventory()->end();)
+		for (std::vector<BattleItem*>::iterator j = craftInv->begin(); j != craftInv->end();)
 		{
-			if ((*j)->getSlot() == ground)
+			if ((*j)->getSlot() == groundRuleInv)
 			{
 				bool add = false;
 
@@ -813,7 +825,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 				case 3:
 					add = !(*j)->getRules()->isPistol() &&
 							!(*j)->getRules()->isRifle() &&
-							((*j)->getRules()->getBattleType() != BT_FLARE || _worldShade >= 9);
+							((*j)->getRules()->getBattleType() != BT_FLARE || worldShade >= 9);
 					break;
 				default:
 					break;
@@ -821,19 +833,18 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 
 				if (add)
 				{
-					for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+					for (std::vector<BattleUnit*>::iterator i = units.begin(); i != units.end(); ++i)
 					{
-						if (!(*i)->hasInventory() || !(*i)->getGeoscapeSoldier() || !(*i)->getGeoscapeSoldier()->getEquipmentLayout()->empty())
+						if (!(*i)->hasInventory() || !(*i)->getGeoscapeSoldier() || (!overrideEquipmentLayout && !(*i)->getGeoscapeSoldier()->getEquipmentLayout()->empty()))
 						{
 							continue;
 						}
 						// let's not be greedy, we'll only take a second extra clip
 						// if everyone else has had a chance to take a first.
 						bool allowSecondClip = (pass == 3);
-
-						if (_save->addItem(*j, *i, allowSecondClip, _allowAutoLoadout))
+						if (addToSave->addItem(*j, *i, allowSecondClip, allowAutoLoadout))
 						{
-							j = _craftInventoryTile->getInventory()->erase(j);
+							j = craftInv->erase(j);
 							add = false;
 							break;
 						}
@@ -847,16 +858,20 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 			++j;
 		}
 	}
+
 	// clean up moved items
-	for (std::vector<BattleItem*>::iterator i = _craftInventoryTile->getInventory()->begin(); i != _craftInventoryTile->getInventory()->end();)
+	for (std::vector<BattleItem*>::iterator i = craftInv->begin(); i != craftInv->end();)
 	{
-		if ((*i)->getSlot() != ground)
+		if ((*i)->getSlot() != groundRuleInv)
 		{
-			i = _craftInventoryTile->getInventory()->erase(i);
+			i = craftInv->erase(i);
 		}
 		else
 		{
-			_save->getItems()->push_back(*i);
+			if (addToSave)
+			{
+				addToSave->getItems()->push_back(*i);
+			}
 			++i;
 		}
 	}
@@ -1270,7 +1285,16 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item)
 }
 
 /**
- * Generates a map (set of tiles) for a new battlescape game.
+ * Loads an XCom format MAP file into the tiles of the battlegame.
+ * @param mapblock Pointer to MapBlock.
+ * @param xoff Mapblock offset in X direction.
+ * @param yoff Mapblock offset in Y direction.
+ * @param save Pointer to the current SavedBattleGame.
+ * @param terrain Pointer to the Terrain rule.
+ * @param discovered Whether or not this mapblock is discovered (eg. landingsite of the XCom plane).
+ * @return int Height of the loaded mapblock (this is needed for spawpoint calculation...)
+ * @sa http://www.ufopaedia.org/index.php?title=MAPS
+ * @note Y-axis is in reverse order.
  */
 int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTerrain *terrain, int mapDataSetOffset, bool discovered, bool craft)
 {
@@ -1419,12 +1443,14 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 	}
 
 	size_t nodeOffset = _save->getNodes()->size();
-
+	std::vector<int> badNodes;
+	int nodesAdded = 0;
 	while (mapFile.read((char*)&value, sizeof(value)))
 	{
 		int pos_x = value[1];
 		int pos_y = value[0];
 		int pos_z = value[2];
+		Node *node;
 		if (pos_x < mapblock->getSizeX() && pos_y < mapblock->getSizeY() && pos_z < _mapsize_z)
 		{
 			Position pos = Position(xoff + pos_x, yoff + pos_y, mapblock->getSizeZ() - 1 - pos_z);
@@ -1433,7 +1459,7 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 			int flags    = value[21];
 			int reserved = value[22];
 			int priority = value[23];
-			Node *node = new Node(_save->getNodes()->size(), pos, segment, type, rank, flags, reserved, priority);
+			node = new Node(_save->getNodes()->size(), pos, segment, type, rank, flags, reserved, priority);
 			for (int j = 0; j < 5; ++j)
 			{
 				int connectID = value[4 + j * 3];
@@ -1449,13 +1475,46 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 				}
 				node->getNodeLinks()->push_back(connectID);
 			}
-			_save->getNodes()->push_back(node);
+		}
+		else
+		{
+			// since we use getNodes()->at(n) a lot, we have to push a dummy node into the vector to keep the connections sane,
+			// or else convert the node vector to a map, either way is as much work, so i'm sticking with vector for faster operation.
+			// this is because the "built in" nodeLinks reference each other by number, and it's gonna be implementational hell to try
+			// to adjust those numbers retroactively, post-culling. far better to simply mark these culled nodes as dummies, and discount their use
+			// that way, all the connections will still line up properly in the array.
+			node = new Node();
+			node->setDummy(true);
+			Log(LOG_INFO) << "Bad node in RMP file: " << filename.str() << " Node #" << nodesAdded << " is outside map boundaries at X:" << pos_x << " Y:" << pos_y << " Z:" << pos_z << ". Culling Node.";
+			badNodes.push_back(nodesAdded);
+		}
+		_save->getNodes()->push_back(node);
+		nodesAdded++;
+	}
+
+	for (std::vector<int>::iterator i = badNodes.begin(); i != badNodes.end(); ++i)
+	{
+		int nodeCounter = nodesAdded;
+		for (std::vector<Node*>::reverse_iterator j = _save->getNodes()->rbegin(); j != _save->getNodes()->rend() && nodeCounter > 0; ++j)
+		{
+			if (!(*j)->isDummy())
+			{
+				for(std::vector<int>::iterator k = (*j)->getNodeLinks()->begin(); k != (*j)->getNodeLinks()->end(); ++k)
+				{
+					if (*k - nodeOffset == *i)
+					{
+						Log(LOG_INFO) << "RMP file: " << filename.str() << " Node #" << nodeCounter - 1 << " is linked to Node #" << *i << ", which was culled. Terminating Link.";
+						*k = -1;
+					}
+				}
+			}
+			nodeCounter--;
 		}
 	}
 
 	if (!mapFile.eof())
 	{
-		throw Exception("Invalid RMP file");
+		throw Exception("Invalid RMP file: " + filename.str());
 	}
 
 	mapFile.close();
@@ -2130,6 +2189,10 @@ void BattlescapeGenerator::attachNodeLinks()
 {
 	for (std::vector<Node*>::iterator i = _save->getNodes()->begin(); i != _save->getNodes()->end(); ++i)
 	{
+		if ((*i)->isDummy())
+		{
+			continue;
+		}
 		Node *node = (*i);
 		int segmentX = node->getPosition().x / 10;
 		int segmentY = node->getPosition().y / 10;
@@ -2162,6 +2225,10 @@ void BattlescapeGenerator::attachNodeLinks()
 				{
 					for (std::vector<Node*>::iterator k = _save->getNodes()->begin(); k != _save->getNodes()->end(); ++k)
 					{
+						if ((*k)->isDummy())
+						{
+							continue;
+						}
 						if ((*k)->getSegment() == neighbourSegments[n])
 						{
 							for (std::vector<int>::iterator l = (*k)->getNodeLinks()->begin(); l != (*k)->getNodeLinks()->end(); ++l )

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -2155,8 +2155,10 @@ void TileEngine::explode(const Position &center, int power, const RuleDamageType
 					Pathfinding::vectorToDirection(origin->getPosition() - dest->getPosition(), dir);
 					if (dir != -1 && dir %2) power_ -= 0.5f * type->RadiusReduction; // diagonal movement costs an extra 50% for fire.
 				}
-				if (l>0.5) power_-= horizontalBlockage(origin, dest, type->ResistType, l<1.5) * 2;
-				if (l>0.5) power_-= verticalBlockage(origin, dest, type->ResistType, l<1.5) * 2;
+				if (l > 0.5) {
+					power_ -= horizontalBlockage(origin, dest, type->ResistType, l < 1.5) * 2;
+					power_ -= verticalBlockage(origin, dest, type->ResistType, l < 1.5) * 2;
+				}
 			}
 		}
 	}
@@ -3308,7 +3310,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 		killStat.setUnitStats(victim);
 		killStat.setTurn(_save->getTurn(), _save->getSide());
 		killStat.weapon = action->weapon->getRules()->getName();
-		killStat.weaponAmmo = action->weapon->getRules()->getName();
+		killStat.weaponAmmo = action->weapon->getRules()->getName(); //Psi weapons got no ammo, just filling up the field
 		killStat.faction = victim->getFaction();
 		killStat.mission = _save->getGeoscapeSave()->getMissionStatistics()->size();
 		killStat.id = victim->getId();

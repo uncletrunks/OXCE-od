@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -18,20 +18,15 @@
  */
 
 #include "Language.h"
-#include <assert.h>
 #include <algorithm>
-#include <locale>
 #include <fstream>
 #include <cassert>
 #include <set>
 #include "CrossPlatform.h"
-#include "FileMap.h"
 #include "Logger.h"
-#include "Exception.h"
 #include "Options.h"
 #include "LanguagePlurality.h"
 #include "../Mod/ExtraStrings.h"
-#include "../Interface/TextList.h"
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX

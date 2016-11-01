@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -104,8 +104,6 @@
 #include "../Mod/RuleGlobe.h"
 #include "../Engine/Exception.h"
 #include "../Mod/AlienDeployment.h"
-#include "../Savegame/CraftWeapon.h"
-#include "../Mod/RuleCraftWeapon.h"
 #include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
@@ -826,8 +824,8 @@ void GeoscapeState::time5Seconds()
 						{
 							(*j)->setDestination(0);
 							Waypoint *w = new Waypoint();
-							w->setLongitude(u->getLongitude());
-							w->setLatitude(u->getLatitude());
+							w->setLongitude(u->getMeetLongitude());
+							w->setLatitude(u->getMeetLatitude());
 							w->setId(u->getId());
 							popup(new GeoscapeCraftState((*j), _globe, w));
 						}
@@ -1428,7 +1426,7 @@ void GeoscapeState::time1Hour()
 		for (std::vector<Transfer*>::iterator j = (*i)->getTransfers()->begin(); j != (*i)->getTransfers()->end(); ++j)
 		{
 			(*j)->advance(*i);
-			if (!window && (*j)->getHours() == 0)
+			if (!window && (*j)->getHours() <= 0)
 			{
 				window = true;
 			}

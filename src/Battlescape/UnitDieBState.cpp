@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -83,7 +83,7 @@ UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const Ru
 
         for (std::vector<Node*>::iterator  n = nodes->begin(); n != nodes->end(); ++n)
         {
-            if (_parent->getSave()->getTileEngine()->distanceSq((*n)->getPosition(), _unit->getPosition()) < 4)
+			if (!(*n)->isDummy() && _parent->getSave()->getTileEngine()->distanceSq((*n)->getPosition(), _unit->getPosition()) < 4)
             {
                 (*n)->setType((*n)->getType() | Node::TYPE_DANGEROUS);
             }

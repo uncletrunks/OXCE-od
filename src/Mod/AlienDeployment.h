@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_ALIENDEPLOYMENT_H
-#define OPENXCOM_ALIENDEPLOYMENT_H
-
 #include <vector>
 #include <string>
 #include <yaml-cpp/yaml.h>
@@ -48,6 +46,7 @@ struct BriefingData
 	bool showCraft, showTarget;
 	BriefingData() : palette(0), textOffset(0), music("GMDEFEND"), background("BACK16.SCR"), showCraft(true), showTarget(true) { /*Empty by Design*/ };
 };
+enum ChronoTrigger { FORCE_LOSE, FORCE_ABORT, FORCE_WIN };
 /**
  * Represents a specific type of Alien Deployment.
  * Contains constant info about a Alien Deployment like
@@ -74,7 +73,8 @@ private:
 	BriefingData _briefingData;
 	std::string _markerName, _objectivePopup, _objectiveCompleteText, _objectiveFailedText;
 	int _markerIcon, _durationMin, _durationMax, _minDepth, _maxDepth, _minSiteDepth, _maxSiteDepth;
-	int _objectiveType, _objectivesRequired, _objectiveCompleteScore, _objectiveFailedScore, _despawnPenalty, _points;
+	int _objectiveType, _objectivesRequired, _objectiveCompleteScore, _objectiveFailedScore, _despawnPenalty, _points, _turnLimit, _cheatTurn;
+	ChronoTrigger _chronoTrigger;
 public:
 	/// Creates a blank Alien Deployment ruleset.
 	AlienDeployment(const std::string &type);
@@ -146,7 +146,12 @@ public:
 	int getDespawnPenalty() const;
 	/// Gets the (half hourly) score penalty XCom receives for this site existing.
 	int getPoints() const;
+	/// Gets the turn limit for this deployment.
+	int getTurnLimit() const;
+	/// Gets the action that triggers when the timer runs out.
+	ChronoTrigger getChronoTrigger() const;
+	/// Gets which turn the aliens start cheating on.
+	int getCheatTurn() const;
 };
 
 }
-#endif

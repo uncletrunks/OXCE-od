@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -153,7 +153,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 	{
 		_diary = new SoldierDiary();
 		_diary->load(node["diary"]);
-	}	
+	}
 	calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
 }
 
@@ -202,9 +202,9 @@ YAML::Node Soldier::save() const
 	{
 		node["death"] = _death->save();
 	}
-	if (!_diary->getMissionIdList().empty() || !_diary->getSoldierCommendations()->empty())
+	if (Options::soldierDiaries && (!_diary->getMissionIdList().empty() || !_diary->getSoldierCommendations()->empty()))
 	{
-	node["diary"] = _diary->save();
+		node["diary"] = _diary->save();
 	}
 
 	return node;
