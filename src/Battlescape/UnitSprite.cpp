@@ -185,6 +185,12 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	_shade = shade;
 	_half = half;
 
+	if (_unit->isOut())
+	{
+		// unit is drawn as an item
+		return;
+	}
+
 	_itemA = getIfVisible(_unit->getRightHandWeapon());
 	_itemB = getIfVisible(_unit->getLeftHandWeapon());
 
@@ -332,12 +338,7 @@ void UnitSprite::drawRoutine0()
 	const int offY7[8] = { -4, -6, -1, 0, 3, 0, 1, 0 }; // for the left handed rifles (muton)
 	const int offYKneel = 4;
 	const int offXAiming = 16;
-
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
+	const int soldierHeight = 22;
 
 	const int unitDir = _unit->getDirection();
 	const int walkPhase = _unit->getWalkingPhase();
@@ -377,7 +378,6 @@ void UnitSprite::drawRoutine0()
 	// when walking, torso(fixed sprite) has to be animated up/down
 	if (_unit->getStatus() == STATUS_WALKING)
 	{
-
 		if (_drawingRoutine == 10)
 			torsoHandsWeaponY = mutonYoffWalk[walkPhase];
 		else if (_drawingRoutine == 13 || _drawingRoutine == 14)
@@ -533,11 +533,12 @@ void UnitSprite::drawRoutine0()
 	// offset everything but legs when kneeled
 	if (_unit->isKneeled())
 	{
-		leftArm.offY = (offYKneel);
-		rightArm.offY = (offYKneel);
-		torso.offY = (offYKneel);
-		itemA.offY = (itemA.offY + offYKneel);
-		itemB.offY = (itemB.offY + offYKneel);
+		int offsetTFTD = (_drawingRoutine == 13) ? 1 : 0; // tftd torsos are stubby.
+		leftArm.offY = (offYKneel + offsetTFTD);
+		rightArm.offY = (offYKneel + offsetTFTD);
+		torso.offY = (offYKneel + offsetTFTD);
+		itemA.offY = (itemA.offY + offYKneel + offsetTFTD);
+		itemB.offY = (itemB.offY + offYKneel + offsetTFTD);
 	}
 	else if (_unit->getStatus() != STATUS_WALKING)
 	{
@@ -549,11 +550,11 @@ void UnitSprite::drawRoutine0()
 	// items are calculated for soldier height (22) - some aliens are smaller, so item is drawn lower.
 	if (itemA)
 	{
-		itemA.offY = (itemA.offY + (22 - _unit->getStandHeight()));
+		itemA.offY = (itemA.offY + (soldierHeight - _unit->getStandHeight()));
 	}
 	if (itemB)
 	{
-		itemB.offY = (itemB.offY + (22 - _unit->getStandHeight()));
+		itemB.offY = (itemB.offY + (soldierHeight - _unit->getStandHeight()));
 	}
 
 	if (_unit->getStatus() == STATUS_AIMING)
@@ -631,12 +632,6 @@ void UnitSprite::drawRoutine1()
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
 	const int offXAiming = 16;
-
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
@@ -770,12 +765,6 @@ void UnitSprite::drawRoutine1()
  */
 void UnitSprite::drawRoutine2()
 {
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	const int offX[8] = { -2, -7, -5, 0, 5, 7, 2, 0 }; // hovertank offsets
 	const int offy[8] = { -1, -3, -4, -5, -4, -3, -1, -1 }; // hovertank offsets
 
@@ -830,12 +819,6 @@ void UnitSprite::drawRoutine2()
  */
 void UnitSprite::drawRoutine3()
 {
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	// draw the animated propulsion below the hwp
@@ -865,12 +848,6 @@ void UnitSprite::drawRoutine3()
  */
 void UnitSprite::drawRoutine4()
 {
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	Part s{ BODYPART_TORSO }, itemA{ BODYPART_ITEM_RIGHTHAND }, itemB{ BODYPART_ITEM_LEFTHAND };
 	int stand = 0, walk = 8, die = 72;
 	const int offX[8] = { 8, 10, 7, 4, -9, -11, -7, -3 }; // for the weapons
@@ -892,12 +869,6 @@ void UnitSprite::drawRoutine4()
 		stand = 140;
 		walk = 76;
 		die = 148;
-	}
-
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
 	}
 
 	const int unitDir = _unit->getDirection();
@@ -1001,12 +972,6 @@ void UnitSprite::drawRoutine4()
  */
 void UnitSprite::drawRoutine5()
 {
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	if (_unit->getStatus() == STATUS_WALKING)
@@ -1042,12 +1007,6 @@ void UnitSprite::drawRoutine6()
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
 	const int offXAiming = 16;
-
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
@@ -1224,12 +1183,6 @@ void UnitSprite::drawRoutine7()
 	const int rarmWalk = 40;
 	const int yoffWalk[8] = {1, 0, -1, 0, 1, 0, -1, 0}; // bobbing up and down
 
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		Part coll{ BODYPART_COLLAPSING };
@@ -1287,12 +1240,6 @@ void UnitSprite::drawRoutine8()
 	const int Body = 0, aim = 5, die = 6;
 	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
 
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	selectUnit(legs, Body, Pulsate[_animationFrame % 8]);
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
@@ -1318,12 +1265,6 @@ void UnitSprite::drawRoutine9()
 	// magic numbers
 	const int Body = 0, die = 25;
 
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	selectUnit(torso, Body, _animationFrame % 8);
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
@@ -1342,12 +1283,6 @@ void UnitSprite::drawRoutine9()
  */
 void UnitSprite::drawRoutine11()
 {
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	const int offTurretX[8] = { -2, -6, -5, 0, 5, 6, 2, 0 }; // turret offsets
 	const int offTurretYAbove[8] = { 5, 3, 0, 0, 0, 3, 5, 4 }; // turret offsets
 	const int offTurretYBelow[8] = { -12, -13, -16, -16, -16, -13, -12, -12 }; // turret offsets
@@ -1388,12 +1323,6 @@ void UnitSprite::drawRoutine12()
 {
 	Part s{ BODYPART_LARGE_TORSO + _part };
 
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	selectUnit(s, (_part * 8), _animationFrame % 8);
 
 	blitBody(s);
@@ -1407,12 +1336,6 @@ void UnitSprite::drawRoutine16()
 	Part s{ BODYPART_TORSO };
 	// magic numbers
 	const int die = 8;
-
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
 
 	selectUnit(s, 0, _animationFrame % 8);
 
@@ -1436,12 +1359,6 @@ void UnitSprite::drawRoutine19()
 	// magic numbers
 	const int stand = 0, move = 8, die = 16;
 
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		Part coll{ BODYPART_COLLAPSING };
@@ -1449,8 +1366,7 @@ void UnitSprite::drawRoutine19()
 		blitBody(coll);
 		return;
 	}
-
-	if (_unit->getStatus() == STATUS_WALKING)
+	else if (_unit->getStatus() == STATUS_WALKING)
 	{
 		selectUnit(s, move, _unit->getDirection());
 	}
@@ -1467,12 +1383,6 @@ void UnitSprite::drawRoutine19()
  */
 void UnitSprite::drawRoutine20()
 {
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	if (_unit->getStatus() == STATUS_WALKING)
@@ -1492,12 +1402,6 @@ void UnitSprite::drawRoutine20()
  */
 void UnitSprite::drawRoutine21()
 {
-	if (_unit->isOut())
-	{
-		// unit is drawn as an item
-		return;
-	}
-
 	Part s{ BODYPART_LARGE_TORSO + _part };
 
 	selectUnit(s, (_part * 4), (_unit->getDirection() * 16) + (_animationFrame % 4));

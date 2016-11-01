@@ -51,7 +51,7 @@ UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const Ru
 	_unit(unit), _damageType(damageType), _noSound(noSound), _extraFrame(0), _overKill(false)
 {
 	// don't show the "fall to death" animation when a unit is blasted with explosives or he is already unconscious
-	if (!_damageType->isDirect() || _unit->getStatus() == STATUS_UNCONSCIOUS)
+	if (!_damageType->isDirect() || _unit->getStatus() == STATUS_UNCONSCIOUS || noSound)
 	{
 		_unit->startFalling();
 

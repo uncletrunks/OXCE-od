@@ -370,7 +370,7 @@ private:
  */
 void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe)
 {
-	const Mod &rules = *engine.getMod();
+	const Mod &mod = *engine.getMod();
 	SavedGame &game = *engine.getSavedGame();
 	const size_t curWaypoint = ufo.getTrajectoryPoint();
 	const size_t nextWaypoint = curWaypoint + 1;
@@ -390,7 +390,7 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 	}
 	ufo.setAltitude(trajectory.getAltitude(nextWaypoint));
 	ufo.setTrajectoryPoint(nextWaypoint);
-	const RuleRegion &regionRules = *rules.getRegion(_region);
+	const RuleRegion &regionRules = *mod.getRegion(_region);
 	std::pair<double, double> pos = getWaypoint(trajectory, nextWaypoint, globe, regionRules);
 
 	Waypoint *wp = new Waypoint();
@@ -416,7 +416,7 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 			ufo.setStatus(Ufo::DESTROYED);
 
 			MissionArea area = regionRules.getMissionZones().at(trajectory.getZone(curWaypoint)).areas.at(_missionSiteZone);
-			MissionSite *missionSite = spawnMissionSite(game, rules, area, &ufo);
+			MissionSite *missionSite = spawnMissionSite(game, mod, area, &ufo);
 			if (missionSite)
 			{
 				for (std::vector<Target*>::iterator t = ufo.getFollowers()->begin(); t != ufo.getFollowers()->end();)
@@ -718,8 +718,21 @@ std::pair<double, double> AlienMission::getLandPoint(const Globe &globe, const R
 MissionSite *AlienMission::spawnMissionSite(SavedGame &game, const Mod &mod, const MissionArea &area, const Ufo *ufo, AlienDeployment *missionOveride)
 {
 	Texture *texture = mod.getGlobe()->getTexture(area.texture);
-	AlienDeployment *deployment = missionOveride ? missionOveride : mod.getDeployment(texture->getRandomDeployment());
+	AlienDeployment *deployment = nullptr;
 	AlienDeployment *alienCustomDeploy = ufo ? mod.getDeployment(ufo->getCraftStats().missionCustomDeploy) : 0;
+
+	if (missionOveride)
+	{
+		deployment = missionOveride;
+	}
+	else if (mod.getDeployment(_rule.getSiteType()))
+	{
+		deployment = mod.getDeployment(_rule.getSiteType());
+	}
+	else
+	{
+		deployment = mod.getDeployment(texture->getRandomDeployment());
+	}
 
 	if (deployment)
 	{

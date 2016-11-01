@@ -142,7 +142,7 @@ void AlienBAIState::think(BattleAction *action)
 {
 	action->type = BA_RETHINK;
 	action->actor = _unit;
-	action->weapon = _unit->getMainHandWeapon();
+	action->weapon = _unit->getMainHandWeapon(false);
 	_attackAction->diff = _save->getBattleState()->getGame()->getSavedGame()->getDifficultyCoefficient();
 	_attackAction->actor = _unit;
 	_attackAction->weapon = action->weapon;
@@ -192,15 +192,15 @@ void AlienBAIState::think(BattleAction *action)
 		{
 			if (rule->getBattleType() == BT_FIREARM)
 			{
-				if (!rule->isWaypoint())
-				{
-					_rifle = true;
-					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_SNAPSHOT, _unit, action->weapon));
-				}
-				else
+				if (rule->getWaypoints() != 0 || (action->weapon->getAmmoItem() && action->weapon->getAmmoItem()->getRules()->getWaypoints() != 0))
 				{
 					_blaster = true;
 					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_AIMEDSHOT, _unit, action->weapon));
+				}
+				else
+				{
+					_rifle = true;
+					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_SNAPSHOT, _unit, action->weapon));
 				}
 			}
 			else if (rule->getBattleType() == BT_MELEE)
@@ -503,10 +503,10 @@ void AlienBAIState::setupPatrol()
 		{
 			// can i shoot an object?
 			if (_fromNode->isTarget() &&
-				_unit->getMainHandWeapon() &&
-				_unit->getMainHandWeapon()->getRules()->getAccuracySnap() &&
-				_unit->getMainHandWeapon()->getAmmoItem() &&
-				_unit->getMainHandWeapon()->getAmmoItem()->getRules()->getDamageType()->isDirect() &&
+				_attackAction->weapon &&
+				_attackAction->weapon->getRules()->getAccuracySnap() &&
+				_attackAction->weapon->getAmmoItem() &&
+				_attackAction->weapon->getAmmoItem()->getRules()->getDamageType()->isDirect() &&
 				_save->getModuleMap()[_fromNode->getPosition().x / 10][_fromNode->getPosition().y / 10].second > 0)
 			{
 				// scan this room for objects to destroy
@@ -520,7 +520,7 @@ void AlienBAIState::setupPatrol()
 					{
 						_patrolAction->actor = _unit;
 						_patrolAction->target = Position(i, j, 1);
-						_patrolAction->weapon = _patrolAction->actor->getMainHandWeapon();
+						_patrolAction->weapon = _attackAction->weapon;
 						_patrolAction->type = BA_SNAPSHOT;
 						_patrolAction->updateTU();
 						return;
@@ -1064,7 +1064,7 @@ int AlienBAIState::selectNearestTarget()
 				{
 					BattleAction action;
 					action.actor = _unit;
-					action.weapon = _unit->getMainHandWeapon();
+					action.weapon = _attackAction->weapon;
 					action.target = (*i)->getPosition();
 					Position origin = _save->getTileEngine()->getOriginVoxel(action, 0);
 					valid = _save->getTileEngine()->canTargetUnit(&origin, (*i)->getTile(), &target, _unit);
@@ -1196,7 +1196,7 @@ bool AlienBAIState::selectPointNearTarget(BattleUnit *target, int maxTUs) const
  */
 void AlienBAIState::evaluateAIMode()
 {
-	if (_unit->getCharging() && _attackAction->type != BA_RETHINK)
+	if ((_unit->getCharging() && _attackAction->type != BA_RETHINK))
 	{
 		_AIMode = AI_COMBAT;
 		return;
@@ -1665,7 +1665,7 @@ void AlienBAIState::meleeAction()
  */
 void AlienBAIState::wayPointAction()
 {
-	BattleActionCost attackCost(BA_LAUNCH, _unit, _unit->getMainHandWeapon());
+	BattleActionCost attackCost(BA_LAUNCH, _unit, _attackAction->weapon);
 	if (!attackCost.haveTU())
 	{
 		// cannot make a launcher attack - consider some other behaviour, like running away, or standing motionless.
@@ -1678,7 +1678,7 @@ void AlienBAIState::wayPointAction()
 			continue;
 		_save->getPathfinding()->calculate(_unit, (*i)->getPosition(), *i, -1);
 		if (_save->getPathfinding()->getStartDirection() != -1 &&
-			explosiveEfficacy((*i)->getPosition(), _unit, (_unit->getMainHandWeapon()->getAmmoItem()->getRules()->getPower()/20)+1, _attackAction->diff))
+			explosiveEfficacy((*i)->getPosition(), _unit, (_attackAction->weapon->getAmmoItem()->getRules()->getPower()/20)+1, _attackAction->diff))
 		{
 			_aggroTarget = *i;
 		}
@@ -1698,6 +1698,15 @@ void AlienBAIState::wayPointAction()
 
 		int PathDirection;
 		int CollidesWith;
+		int maxWaypoints = _attackAction->weapon->getRules()->getWaypoints();
+		if (maxWaypoints == 0)
+		{
+			maxWaypoints = _attackAction->weapon->getAmmoItem()->getRules()->getWaypoints();
+		}
+		if (maxWaypoints == -1)
+		{
+			maxWaypoints = 6 + (_attackAction->diff * 2);
+		}
 		Position LastWayPoint = _unit->getPosition();
 		Position LastPosition = _unit->getPosition();
 		Position CurrentPosition = _unit->getPosition();
@@ -1705,7 +1714,7 @@ void AlienBAIState::wayPointAction()
 
 		_save->getPathfinding()->calculate(_unit, _aggroTarget->getPosition(), _aggroTarget, -1);
 		PathDirection = _save->getPathfinding()->dequeuePath();
-		while (PathDirection != -1)
+		while (PathDirection != -1 && _attackAction->waypoints.size() < maxWaypoints)
 		{
 			LastPosition = CurrentPosition;
 			_save->getPathfinding()->directionToVector(PathDirection, &DirectionVector);
@@ -1727,11 +1736,10 @@ void AlienBAIState::wayPointAction()
 					LastWayPoint = CurrentPosition;
 				}
 			}
-
 			PathDirection = _save->getPathfinding()->dequeuePath();
 		}
 		_attackAction->target = _attackAction->waypoints.front();
-		if ((int) _attackAction->waypoints.size() > 6 + (_attackAction->diff * 2) || LastWayPoint != _aggroTarget->getPosition())
+		if (LastWayPoint != _aggroTarget->getPosition())
 		{
 			_attackAction->type = BA_RETHINK;
 		}
@@ -2088,7 +2096,7 @@ BattleActionType AlienBAIState::getReserveMode()
 void AlienBAIState::selectMeleeOrRanged()
 {
 	BattleItem *melee = _unit->getUtilityWeapon(BT_MELEE);
-	const RuleItem *rangedWeapon = _unit->getMainHandWeapon()->getRules();
+	const RuleItem *rangedWeapon = _attackAction->weapon->getRules();
 	const RuleItem *meleeWeapon = melee ? melee->getRules() : 0;
 
 	if (!meleeWeapon)
@@ -2097,7 +2105,7 @@ void AlienBAIState::selectMeleeOrRanged()
 		_melee = false;
 		return;
 	}
-	if (!rangedWeapon || _unit->getMainHandWeapon()->getAmmoItem() == 0)
+	if (!rangedWeapon || _attackAction->weapon->getAmmoItem() == 0)
 	{
 		_rifle = false;
 		return;

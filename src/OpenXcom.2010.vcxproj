@@ -426,6 +426,7 @@
     <ClCompile Include="Menu\SaveGameState.cpp" />
     <ClCompile Include="Menu\SlideshowState.cpp" />
     <ClCompile Include="Menu\StartState.cpp" />
+    <ClCompile Include="Menu\StatisticsState.cpp" />
     <ClCompile Include="Menu\TestState.cpp" />
     <ClCompile Include="Menu\VideoState.cpp" />
     <ClCompile Include="Mod\RuleDamageType.cpp" />
@@ -768,6 +769,7 @@
     <ClInclude Include="Menu\SaveGameState.h" />
     <ClInclude Include="Menu\SlideshowState.h" />
     <ClInclude Include="Menu\StartState.h" />
+    <ClInclude Include="Menu\StatisticsState.h" />
     <ClInclude Include="Menu\TestState.h" />
     <ClInclude Include="Menu\VideoState.h" />
     <ClInclude Include="Mod\RuleDamageType.h" />

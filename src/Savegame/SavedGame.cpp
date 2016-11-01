@@ -101,7 +101,7 @@ bool equalProduction::operator()(const Production * p) const
 /**
  * Initializes a brand new saved game according to the specified difficulty.
  */
-SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _ironman(false), _globeLon(0.0), _globeLat(0.0), _globeZoom(0), _battleGame(0), _debug(false), _warned(false), _monthsPassed(-1), _selectedBase(0)
+SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _end(END_NONE), _ironman(false), _globeLon(0.0), _globeLat(0.0), _globeZoom(0), _battleGame(0), _debug(false), _warned(false), _monthsPassed(-1), _selectedBase(0)
 {
 	_time = new GameTime(6, 1, 1, 1999, 12, 0, 0);
 	_alienStrategy = new AlienStrategy();
@@ -338,6 +338,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 	// Get full save data
 	YAML::Node doc = file[1];
 	_difficulty = (GameDifficulty)doc["difficulty"].as<int>(_difficulty);
+	_end = (GameEnding)doc["end"].as<int>(_end);
 	if (doc["rng"] && (_ironman || !Options::newSeedOnLoad))
 		RNG::setSeed(doc["rng"].as<uint64_t>());
 	_monthsPassed = doc["monthsPassed"].as<int>(_monthsPassed);
@@ -552,7 +553,7 @@ void SavedGame::save(const std::string &filename) const
 	brief["name"] = Language::wstrToUtf8(_name);
 	brief["version"] = OPENXCOM_VERSION_SHORT;
 	std::string git_sha = OPENXCOM_VERSION_GIT;
-	if (git_sha[0] ==  '.')
+	if (!git_sha.empty() && git_sha[0] ==  '.')
 	{
 		git_sha.erase(0,1);
 	}
@@ -591,6 +592,7 @@ void SavedGame::save(const std::string &filename) const
 	out << YAML::BeginDoc;
 	YAML::Node node;
 	node["difficulty"] = (int)_difficulty;
+	node["end"] = (int)_end;
 	node["monthsPassed"] = _monthsPassed;
 	node["graphRegionToggles"] = _graphRegionToggles;
 	node["graphCountryToggles"] = _graphCountryToggles;
@@ -697,14 +699,6 @@ GameDifficulty SavedGame::getDifficulty() const
 	return _difficulty;
 }
 
-int SavedGame::getDifficultyCoefficient() const
-{
-	if (_difficulty > 4)
-		return Mod::DIFFICULTY_COEFFICIENT[4];
-
-	return Mod::DIFFICULTY_COEFFICIENT[_difficulty];
-}
-
 /**
  * Changes the game's difficulty to a new level.
  * @param difficulty New difficulty.
@@ -712,6 +706,34 @@ int SavedGame::getDifficultyCoefficient() const
 void SavedGame::setDifficulty(GameDifficulty difficulty)
 {
 	_difficulty = difficulty;
+}
+
+/**
+ * Returns the game's difficulty coefficient based
+ * on the current level.
+ * @return Difficulty coefficient.
+ */
+int SavedGame::getDifficultyCoefficient() const
+{
+	return Mod::DIFFICULTY_COEFFICIENT[std::min((int)_difficulty, 4)];
+}
+
+/**
+ * Returns the game's current ending.
+ * @return Ending state.
+ */
+GameEnding SavedGame::getEnding() const
+{
+	return _end;
+}
+
+/**
+ * Changes the game's current ending.
+ * @param end New ending.
+ */
+void SavedGame::setEnding(GameEnding end)
+{
+	_end = end;
 }
 
 /**
@@ -888,10 +910,19 @@ int SavedGame::getId(const std::string &name)
 }
 
 /**
+* Resets the list of unique object IDs.
+* @param ids New ID list.
+*/
+const std::map<std::string, int> &SavedGame::getAllIds() const
+{
+	return _ids;
+}
+
+/**
  * Resets the list of unique object IDs.
  * @param ids New ID list.
  */
-void SavedGame::setIds(const std::map<std::string, int> &ids)
+void SavedGame::setAllIds(const std::map<std::string, int> &ids)
 {
 	_ids = ids;
 }

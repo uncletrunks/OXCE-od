@@ -116,11 +116,12 @@ private:
 	int _turnsSinceSpotted;
 	std::string _spawnUnit;
 	std::string _activeHand;
-    BattleUnitStatistics* _statistics;
+	BattleUnitStatistics* _statistics;
 	int _murdererId;	// used to credit the murderer with the kills that this unit got by blowing up on death
-    UnitSide _fatalShotSide;
-    UnitBodyPart _fatalShotBodyPart;
-    std::string _murdererWeapon, _murdererWeaponAmmo;
+	int _mindControllerID;	// used to credit the mind controller with the kills of the mind controllee
+	UnitSide _fatalShotSide;
+	UnitBodyPart _fatalShotBodyPart;
+	std::string _murdererWeapon, _murdererWeaponAmmo;
 
 	// static data
 	std::string _type;
@@ -445,6 +446,8 @@ public:
 	std::string getActiveHand() const;
 	/// Convert's unit to a faction
 	void convertToFaction(UnitFaction f);
+	/// Set health to 0
+	void kill();
 	/// Set health to 0 and set status dead
 	void instaKill();
 	/// Gets the unit's spawn unit.
@@ -544,10 +547,15 @@ public:
     std::string getMurdererWeapon() const;
     /// Set the unit murderer's weapon.
     void setMurdererWeapon(std::string weapon);
-       /// Get the unit murderer's weapon's ammo.
+    /// Get the unit murderer's weapon's ammo.
     std::string getMurdererWeaponAmmo() const;
     /// Set the unit murderer's weapon's ammo.
     void setMurdererWeaponAmmo(std::string weaponAmmo);
+    /// Set the unit mind controller's id.
+	void setMindControllerId(int id);
+	/// Get the unit mind controller's id.
+	int getMindControllerId() const;
+    
 };
 
 } //namespace OpenXcom

@@ -1549,6 +1549,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	// has a weapon
 	BattleItem *weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
 	if (_save->canUseWeapon(weapon, unit, false) &&
+		distance(unit->getPosition(), target->getPosition()) < weapon->getRules()->getMaxRange() &&
 		(	// has a melee weapon and is in melee range
 			(weapon->getRules()->getBattleType() == BT_MELEE &&
 				validMeleeRange(unit, target, unit->getDirection()) &&
@@ -3320,13 +3321,13 @@ bool TileEngine::psiAttack(BattleAction *action)
 			int moraleLoss = (110-victim->getBaseStats()->bravery);
 			if (moraleLoss > 0)
 				victim->moraleChange(-moraleLoss);
+			victim->setMindControllerId(action->actor->getId());
 
 			// Award Panic battle unit kill
 			if (!action->actor->getStatistics()->duplicateEntry(STATUS_PANICKING, victim->getId()))
 			{
 				killStat.status = STATUS_PANICKING;
 				action->actor->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
-				victim->setMurdererId(action->actor->getId());
 			}
 		}
 		else if (action->type == BA_MINDCONTROL)
@@ -3336,8 +3337,8 @@ bool TileEngine::psiAttack(BattleAction *action)
 			{
 				killStat.status = STATUS_TURNING;
 				action->actor->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
-				victim->setMurdererId(action->actor->getId());
 			}
+			victim->setMindControllerId(action->actor->getId());
 			victim->convertToFaction(action->actor->getFaction());
 			calculateLighting(LL_UNITS, victim->getPosition());
 			calculateFOV(victim->getPosition()); //happens fairly rarely, so do a full recalc for units in range to handle the potential unit visible cache issues.

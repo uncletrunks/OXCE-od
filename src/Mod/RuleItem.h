@@ -121,9 +121,9 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable;
+	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable;
 	std::string _defaultInventorySlot;
-	int _invWidth, _invHeight;
+	int _waypoints, _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
 	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery, _moraleRecovery, _painKillerRecovery;
@@ -203,14 +203,14 @@ public:
 	bool isTwoHanded() const;
 	/// Gets if the item can only be used by both hands.
 	bool isBlockingBothHands() const;
-	/// Gets if the item is a launcher.
-	bool isWaypoint() const;
 	/// Gets if the item is fixed.
 	bool isFixed() const;
 	/// Do show fixed weapon on unit.
 	bool getFixedShow() const;
 	/// Get name of the default inventory slot.
 	const std::string &getDefaultInventorySlot() const;
+	/// Gets if the item is a launcher.
+	int getWaypoints() const;
 	/// Gets the item's bullet sprite reference.
 	int getBulletSprite() const;
 	/// Gets the item's fire sound.

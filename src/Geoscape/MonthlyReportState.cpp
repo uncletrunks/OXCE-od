@@ -237,7 +237,9 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 		}
 	}
 	if (resetWarning && _game->getSavedGame()->getWarned())
+	{
 		_game->getSavedGame()->setWarned(false);
+	}
 
 	ss5 << countryList(_happyList, "STR_COUNTRY_IS_PARTICULARLY_PLEASED", "STR_COUNTRIES_ARE_PARTICULARLY_HAPPY");
 	ss5 << countryList(_sadList, "STR_COUNTRY_IS_UNHAPPY_WITH_YOUR_ABILITY", "STR_COUNTRIES_ARE_UNHAPPY_WITH_YOUR_ABILITY");
@@ -251,6 +253,18 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
  */
 MonthlyReportState::~MonthlyReportState()
 {
+}
+
+/**
+ * Make sure the game is over.
+ */
+void MonthlyReportState::init()
+{
+	State::init();
+	if (_gameOver)
+	{
+		_game->getSavedGame()->setEnding(END_LOSE);
+	}
 }
 
 /**
@@ -315,7 +329,11 @@ void MonthlyReportState::btnOkClick(Action *)
 	{
 		if (_txtFailure->getVisible())
 		{
-			_game->pushState(new CutsceneState("loseGame"));
+			_game->pushState(new CutsceneState(CutsceneState::LOSE_GAME));
+			if (_game->getSavedGame()->isIronman())
+			{
+				_game->pushState(new SaveGameState(OPT_GEOSCAPE, SAVE_IRONMAN, _palette));
+			}
 		}
 		else
 		{

@@ -655,7 +655,7 @@ void Map::drawTerrain(Surface *surface)
 									);
 								}
 								// Draw soldier
-								if (westUnit && westUnit->getStatus() != STATUS_WALKING && (!tileWest->getMapData(O_OBJECT) || tileWest->getMapData(O_OBJECT)->getBigWall() < 6 || tileWest->getMapData(O_OBJECT)->getBigWall() == 9) && (westUnit->getVisible() || _save->getDebugMode()))
+								if (westUnit && (!tileWest->getMapData(O_OBJECT) || tileWest->getMapData(O_OBJECT)->getBigWall() < 6 || tileWest->getMapData(O_OBJECT)->getBigWall() == 9) && (westUnit->getVisible() || _save->getDebugMode()))
 								{
 									// the part is 0 for small units, large units have parts 1,2 & 3 depending on the relative x/y position of this tile vs the actual unit position.
 									int part = 0;
@@ -669,7 +669,6 @@ void Map::drawTerrain(Surface *surface)
 										true
 									);
 								}
-
 								// Draw smoke/fire
 								if (tileWest->getSmoke() && tileWest->isDiscovered(2))
 								{
@@ -1470,14 +1469,6 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
 	else
 	{
 		offset->y += getTerrainLevel(unit->getPosition(), size);
-
-		if (unit->getArmor()->getCanHoldWeapon())
-		{
-			if (unit->getStatus() == STATUS_AIMING)
-			{
-				offset->x = -16;
-			}
-		}
 		if (_save->getDepth() > 0)
 		{
 			unit->setFloorAbove(false);
@@ -1496,7 +1487,6 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
 			}
 		}
 	}
-
 }
 
 

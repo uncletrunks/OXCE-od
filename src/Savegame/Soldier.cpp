@@ -74,9 +74,11 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 		}
 		else
 		{
-			_name = L"";
+			// No possible names, just wing it
 			_gender = (RNG::percent(rules->getFemaleFrequency()) ? GENDER_FEMALE : GENDER_MALE);
 			_look = (SoldierLook)RNG::generate(0,3);
+			_name = (_gender == GENDER_FEMALE) ? L"Jane" : L"John";
+			_name += L" Doe";
 		}
 	}
 	_lookVariant = RNG::seedless(0, 15);
@@ -751,7 +753,7 @@ SoldierDiary *Soldier::getDiary()
  */
 void Soldier::calcStatString(const std::vector<StatString *> &statStrings, bool psiStrengthEval)
 {
-	_statString = StatString::calcStatString(_currentStats, statStrings, psiStrengthEval);
+	_statString = StatString::calcStatString(_currentStats, statStrings, psiStrengthEval, _psiTraining);
 }
 
 /**

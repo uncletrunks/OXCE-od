@@ -780,7 +780,7 @@ void Mod::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
 	for (std::map<std::string, Font*>::iterator i = _fonts.begin(); i != _fonts.end(); ++i)
 	{
-		i->second->getSurface()->setPalette(colors, firstcolor, ncolors);
+		i->second->setPalette(colors, firstcolor, ncolors);
 	}
 	for (std::map<std::string, Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
 	{
@@ -982,13 +982,17 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, M
 		if (!missions.empty())
 		{
 			std::set<std::string>::const_iterator j = missions.begin();
-			bool isSiteType = getAlienMission(*j) && getAlienMission(*j)->getObjective() == OBJECTIVE_SITE;
+			if (!getAlienMission(*j))
+			{
+				throw Exception("Error with MissionScript: " + (*i).first + ": alien mission type: " + *j + "not defined, do not incite the judgement of Amaunator."); 
+			}
+			bool isSiteType = getAlienMission(*j)->getObjective() == OBJECTIVE_SITE;
 			rule->setSiteType(isSiteType);
 			for (;j != missions.end(); ++j)
 			{
 				if (getAlienMission(*j) && (getAlienMission(*j)->getObjective() == OBJECTIVE_SITE) != isSiteType)
 				{
-					throw Exception("Error with MissionScript: " + (*i).first + " cannot mix terror/non-terror missions in a single command, so sayeth the wise Alaundo.");
+					throw Exception("Error with MissionScript: " + (*i).first + ": cannot mix terror/non-terror missions in a single command, so sayeth the wise Alaundo."); 
 				}
 			}
 		}
@@ -1676,6 +1680,7 @@ SavedGame *Mod::newSave() const
 	// Set up starting base
 	Base *base = new Base(this);
 	base->load(_startingBase, save, true);
+	save->getBases()->push_back(base);
 
 	// Correct IDs
 	for (std::vector<Craft*>::const_iterator i = base->getCrafts()->begin(); i != base->getCrafts()->end(); ++i)
@@ -1737,7 +1742,7 @@ SavedGame *Mod::newSave() const
 		for (size_t i = 0; i < randomTypes.size(); ++i)
 		{
 			Soldier *soldier = genSoldier(save, randomTypes[i]);
-			if (transportCraft != 0 && i < transportCraft->getRules()->getSoldiers())
+			if (transportCraft != 0 && i < (unsigned)transportCraft->getRules()->getSoldiers())
 			{
 				soldier->setCraft(transportCraft);
 			}
@@ -1752,7 +1757,6 @@ SavedGame *Mod::newSave() const
 		}
 	}
 
-	save->getBases()->push_back(base);
 	// Setup alien strategy
 	save->getAlienStrategy().init(this);
 	save->setTime(_startingTime);
@@ -2519,7 +2523,7 @@ Soldier *Mod::genSoldier(SavedGame *save, std::string type) const
 	// Check for duplicates
 	// Original X-COM gives up after 10 tries so might as well do the same here
 	bool duplicate = true;
-	for (int i = 0; i < 10 && duplicate; i++)
+	for (int i = 0; i < 10 && duplicate; ++i)
 	{
 		delete soldier;
 		soldier = new Soldier(getSoldier(type), getArmor(getSoldier(type)->getArmor()), newId);
@@ -2655,9 +2659,14 @@ const std::vector<MapScript*> *Mod::getMapScript(std::string id) const
 	}
 }
 
-const std::map<std::string, RuleVideo *> *Mod::getVideos() const
+/**
+ * Returns the data for the specified video cutscene.
+ * @param id Video id.
+ * @return A pointer to the data for the specified video.
+ */
+RuleVideo *Mod::getVideo(const std::string &id) const
 {
-	return &_videos;
+	return getRule(id, "Video", _videos);
 }
 
 const std::map<std::string, RuleMusic *> *Mod::getMusic() const
@@ -3300,8 +3309,7 @@ void Mod::loadExtraResources()
 {
 	// Load fonts
 	YAML::Node doc = YAML::LoadFile(FileMap::getFilePath("Language/" + _fontName));
-	Log(LOG_INFO) << "Loading font... " << _fontName;
-	Font::setIndex(Language::utf8ToWstr(doc["chars"].as<std::string>()));
+	Log(LOG_INFO) << "Loading fonts... " << _fontName;
 	for (YAML::const_iterator i = doc["fonts"].begin(); i != doc["fonts"].end(); ++i)
 	{
 		std::string id = (*i)["id"].as<std::string>();

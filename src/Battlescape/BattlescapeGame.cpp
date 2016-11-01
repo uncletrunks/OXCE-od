@@ -332,8 +332,8 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 	}
 
 	_AIActionCounter = action.number;
-
-	if (!unit->getMainHandWeapon() || !unit->getMainHandWeapon()->getAmmoItem())
+	BattleItem *weapon = unit->getMainHandWeapon();
+	if (!weapon || !weapon->getAmmoItem())
 	{
 		if (unit->getOriginalFaction() == FACTION_HOSTILE && unit->getVisibleUnits()->empty())
 		{
@@ -762,7 +762,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 				// This must be a mind controlled unit. Find out who mind controlled him and award the kill to that unit.
 				for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 				{
-					if ((*i)->getId() == murderer->getMurdererId() && (*i)->getGeoscapeSoldier())
+					if ((*i)->getId() == murderer->getMindControllerId() && (*i)->getGeoscapeSoldier())
 					{
 						(*i)->getStatistics()->kills.push_back(new BattleUnitKills(killStat));
 						if (victim->getFaction() == FACTION_HOSTILE)
@@ -781,6 +781,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 			}
 		}
 
+		bool noSound = false;
 		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
 		{
 			if ((*j)->getHealth() <= 0)
@@ -845,26 +846,27 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 				}
 				if (murderweapon)
 				{
-					statePushNext(new UnitDieBState(this, (*j), damageType, false));
+					statePushNext(new UnitDieBState(this, (*j), damageType, noSound));
 				}
 				else
 				{
 					if (hiddenExplosion)
 					{
 						// this is instant death from UFO powersources, without screaming sounds
-						statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), true));
+						noSound = true;
+						statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), noSound));
 					}
 					else
 					{
 						if (terrainExplosion)
 						{
 							// terrain explosion
-							statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), false));
+							statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), noSound));
 						}
 						else
 						{
 							// no murderer, and no terrain explosion, must be fatal wounds
-							statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), false)); // DT_NONE = STR_HAS_DIED_FROM_A_FATAL_WOUND
+							statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), noSound));  // DT_NONE = STR_HAS_DIED_FROM_A_FATAL_WOUND
 						}
 					}
 				}
@@ -887,7 +889,8 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 				{
 					victim->getStatistics()->wasUnconcious = true;
 				}
-				statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), true)); // no damage type used there
+				noSound = true;
+				statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), noSound)); // no damage type used there
 			}
 		}
 	}
@@ -1527,9 +1530,17 @@ void BattlescapeGame::primaryAction(const Position &pos)
 	{
 		if (_currentAction.type == BA_LAUNCH)
 		{
-			_parentState->showLaunchButton(true);
-			_currentAction.waypoints.push_back(pos);
-			getMap()->getWaypoints()->push_back(pos);
+			int maxWaypoints = _currentAction.weapon->getRules()->getWaypoints();
+			if (maxWaypoints == 0)
+			{
+				maxWaypoints = _currentAction.weapon->getAmmoItem()->getRules()->getWaypoints();
+			}
+			if (_currentAction.waypoints.size() < maxWaypoints || maxWaypoints == -1)
+			{
+				_parentState->showLaunchButton(true);
+				_currentAction.waypoints.push_back(pos);
+				getMap()->getWaypoints()->push_back(pos);
+			}
 		}
 		else if (_currentAction.type == BA_USE && _currentAction.weapon->getRules()->getBattleType() == BT_MINDPROBE)
 		{
@@ -1626,8 +1637,8 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				_save->getPathfinding()->removePreview();
 			}
 			_currentAction.run = false;
-			_currentAction.strafe = Options::strafe && modifierPressed && _save->getSelectedUnit()->getTurretType() == -1;
-			if (_currentAction.strafe && _save->getTileEngine()->distance(_currentAction.actor->getPosition(), pos) > 1)
+			_currentAction.strafe = Options::strafe && modifierPressed && _save->getSelectedUnit()->getArmor()->getSize() == 1;
+			if (_currentAction.strafe && _save->getTileEngine()->distance(_currentAction.actor->getPosition(), pos) + std::abs(_currentAction.actor->getPosition().z - pos.z) > 1)
 			{
 				_currentAction.run = true;
 				_currentAction.strafe = false;
@@ -2043,7 +2054,7 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 		worthToTake = item->getRules()->getAttraction();
 
 		// it's always going to be worth while to try and take a blaster launcher, apparently
-		if (!item->getRules()->isWaypoint() && item->getRules()->getBattleType() != BT_AMMO)
+		if (!item->getRules()->getWaypoints() != 0 && item->getRules()->getBattleType() != BT_AMMO)
 		{
 			// we only want weapons that HAVE ammo, or weapons that we have ammo FOR
 			bool ammoFound = true;

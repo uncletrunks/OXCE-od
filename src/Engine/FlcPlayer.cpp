@@ -22,9 +22,10 @@
  */
 
 #include "FlcPlayer.h"
+#include <algorithm>
+#include <cassert>
 #include <string.h>
 #include <math.h>
-#include <assert.h>
 #include <SDL_mixer.h>
 #include <fstream>
 
@@ -108,7 +109,7 @@ bool FlcPlayer::init(const char *filename, void(*frameCallBack)(), Game *game, i
 	_game = game;
 	_dx = dx;
 	_dy = dy;
-	
+
 	_fileSize = 0;
 	_frameCount = 0;
 	_audioFrameData = 0;
@@ -160,10 +161,8 @@ bool FlcPlayer::init(const char *filename, void(*frameCallBack)(), Game *game, i
 	}
 	else // Otherwise create a new one
 	{
-		_mainScreen = SDL_AllocSurface(SDL_SWSURFACE, _screenWidth, _screenHeight, 8, 0, 0, 0, 0);
+		_mainScreen = SDL_AllocSurface(SDL_SWSURFACE, _realScreen->getSurface()->getWidth(), _realScreen->getSurface()->getHeight(), 8, 0, 0, 0, 0);
 	}
-
-	
 
 	return true;
 }
@@ -213,7 +212,7 @@ void FlcPlayer::play(bool skipLastFrame)
 		if(!shouldQuit())
 			SDLPolling();
 	}
-	
+
 }
 
 void FlcPlayer::delay(Uint32 milliseconds)
@@ -281,7 +280,7 @@ bool FlcPlayer::isValidFrame(Uint8 *frameHeader, Uint32 &frameSize, Uint16 &fram
 	readU16(frameType, frameHeader + 4);
 
 	return (frameType == FRAME_TYPE || frameType == AUDIO_CHUNK || frameType == PREFIX_CHUNK);
-} 
+}
 
 void FlcPlayer::decodeAudio(int frames)
 {
@@ -315,14 +314,14 @@ void FlcPlayer::decodeAudio(int frames)
 				++audioFramesFound;
 
 				break;
-		}	
+		}
 	}
 }
 
 void FlcPlayer::decodeVideo(bool skipLastFrame)
 {
 	bool videoFrameFound = false;
-	
+
 	while (!videoFrameFound)
 	{
 		if (!isValidFrame(_videoFrameData, _videoFrameSize, _videoFrameType))
@@ -486,7 +485,7 @@ void FlcPlayer::color256()
 	readU16(numColorPackets, pSrc);
 	pSrc += 2;
 
-	while (numColorPackets--) 
+	while (numColorPackets--)
 	{
 		numColorsSkip = *(pSrc++) + numColors;
 		numColors = *(pSrc++);
@@ -502,6 +501,8 @@ void FlcPlayer::color256()
 			_colors[i].b = *(pSrc++);
 		}
 
+		if (_mainScreen != _realScreen->getSurface()->getSurface())
+			SDL_SetColors(_mainScreen, _colors, numColorsSkip, numColors);
 		_realScreen->setPalette(_colors, numColorsSkip, numColors, true);
 
 		if (numColorPackets >= 1)
@@ -527,20 +528,20 @@ void FlcPlayer::fliSS2()
 
 	pSrc += 2;
 
-	while (lines--) 
+	while (lines--)
 	{
 		readS16(count, (Sint8 *)pSrc);
 		pSrc += 2;
 
-		if ((count & MASK) == SKIP_LINES) 
-		{  
+		if ((count & MASK) == SKIP_LINES)
+		{
 			pDst += (-count)*_mainScreen->pitch;
 			++lines;
 			continue;
 		}
-			
+
 		else if ((count & MASK) == LAST_PIXEL)
-		{  
+		{
 			setLastByte = true;
 			lastByte = (count & 0x00FF);
 			readS16(count, (Sint8 *)pSrc);
@@ -548,24 +549,24 @@ void FlcPlayer::fliSS2()
 		}
 
 		if ((count & MASK) == PACKETS_COUNT)
-		{      
+		{
 			pTmpDst = pDst;
-			while (count--) 
+			while (count--)
 			{
 				columSkip = *(pSrc++);
 				pTmpDst += columSkip;
 				countData = *(pSrc++);
 
-				if (countData > 0) 
+				if (countData > 0)
 				{
 					std::copy(pSrc, pSrc + (2 * countData), pTmpDst);
 					pTmpDst += (2 * countData);
 					pSrc += (2 * countData);
 
 				}
-				else 
+				else
 				{
-					if (countData < 0) 
+					if (countData < 0)
 					{
 						countData = -countData;
 
@@ -600,7 +601,7 @@ void FlcPlayer::fliBRun()
 	pSrc = _chunkData + 6; // Skip chunk header
 	pDst = (Uint8*)_mainScreen->pixels + _offset;
 
-	while (heightCount--) 
+	while (heightCount--)
 	{
 		pTmpDst = pDst;
 		++pSrc; // Read and skip the packet count value
@@ -609,7 +610,7 @@ void FlcPlayer::fliBRun()
 		while (pixels != _headerWidth)
 		{
 			countData = *(pSrc++);
-			if (countData > 0) 
+			if (countData > 0)
 			{
 				fill = *(pSrc++);
 
@@ -617,9 +618,9 @@ void FlcPlayer::fliBRun()
 				pTmpDst += countData;
 				pixels += countData;
 			}
-			else 
+			else
 			{
-				if (countData < 0) 
+				if (countData < 0)
 				{
 					countData = -countData;
 
@@ -653,31 +654,31 @@ void FlcPlayer::fliLC()
 	readU16(lines, pSrc);
 	pSrc += 2;
 
-	while (lines--) 
+	while (lines--)
 	{
 		pTmpDst = pDst;
 		packetsCount = *(pSrc++);
 
-		while (packetsCount--) 
+		while (packetsCount--)
 		{
 			countSkip = *(pSrc++);
 			pTmpDst += countSkip;
 			countData = *(pSrc++);
-			if (countData > 0) 
+			if (countData > 0)
 			{
-				while (countData--) 
+				while (countData--)
 				{
 					*(pTmpDst++) = *(pSrc++);
 				}
 			}
-			else 
+			else
 			{
-				if (countData < 0) 
+				if (countData < 0)
 				{
 					countData = -countData;
 
 					fill = *(pSrc++);
-					while (countData--) 
+					while (countData--)
 					{
 						*(pTmpDst++) = fill;
 					}
@@ -698,7 +699,7 @@ void FlcPlayer::color64()
 	readU16(NumColorPackets, pSrc);
 	pSrc += 2;
 
-	while (NumColorPackets--) 
+	while (NumColorPackets--)
 	{
 		NumColorsSkip = *(pSrc++);
 		NumColors = *(pSrc++);
@@ -715,6 +716,8 @@ void FlcPlayer::color64()
 			_colors[i].b = *(pSrc++) << 2;
 		}
 
+		if (_mainScreen != _realScreen->getSurface()->getSurface())
+			SDL_SetColors(_mainScreen, _colors, NumColorsSkip, NumColors);
 		_realScreen->setPalette(_colors, NumColorsSkip, NumColors, true);
 	}
 }
@@ -726,7 +729,7 @@ void FlcPlayer::fliCopy()
 	pSrc = _chunkData + 6;
 	pDst = (Uint8*)_mainScreen->pixels + _offset;
 
-	while (Lines--) 
+	while (Lines--)
 	{
 		memcpy(pDst, pSrc, _screenWidth);
 		pSrc += _screenWidth;
@@ -740,7 +743,7 @@ void FlcPlayer::black()
 	int Lines = _screenHeight;
 	pDst = (Uint8*)_mainScreen->pixels + _offset;
 
-	while (Lines-- > 0) 
+	while (Lines-- > 0)
 	{
 		memset(pDst, 0, _screenHeight);
 		pDst += _mainScreen->pitch;
@@ -838,7 +841,7 @@ void FlcPlayer::deInitAudio()
 		delete _audioData.playingBuffer;
 		_audioData.playingBuffer = 0;
 	}
-	
+
 }
 
 void FlcPlayer::stop()
@@ -903,7 +906,7 @@ void FlcPlayer::waitForNextFrame(Uint32 delay)
 		}
 	}
 	oldTick = SDL_GetTicks();
-} 
+}
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 inline void FlcPlayer::readU16(Uint16 &dst, const Uint8 * const src)

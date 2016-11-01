@@ -139,9 +139,9 @@ public:
 	/// Gets the string to pop up when the mission objectives are complete.
 	const std::string &getObjectivePopup() const;
 	/// Fills out the objective complete info.
-	bool getObjectiveCompleteInfo(std::string &text, int &score);
+	bool getObjectiveCompleteInfo(std::string &text, int &score) const;
 	/// Fills out the objective failed info.
-	bool getObjectiveFailedInfo(std::string &text, int &score);
+	bool getObjectiveFailedInfo(std::string &text, int &score) const;
 	/// Gets the score penalty XCom receives for ignoring this site.
 	int getDespawnPenalty() const;
 	/// Gets the (half hourly) score penalty XCom receives for this site existing.

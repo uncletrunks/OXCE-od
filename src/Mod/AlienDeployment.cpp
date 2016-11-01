@@ -459,11 +459,11 @@ const std::string &AlienDeployment::getObjectivePopup() const
  * @param &score a reference to the score we wish to alter.
  * @return if there is anything worthwhile processing.
  */
-bool AlienDeployment::getObjectiveCompleteInfo(std::string &text, int &score)
+bool AlienDeployment::getObjectiveCompleteInfo(std::string &text, int &score) const
 {
 	text = _objectiveCompleteText;
 	score = _objectiveCompleteScore;
-	return text != "";
+	return !text.empty();
 }
 
 /**
@@ -472,11 +472,11 @@ bool AlienDeployment::getObjectiveCompleteInfo(std::string &text, int &score)
  * @param &score a reference to the score we wish to alter.
  * @return if there is anything worthwhile processing.
  */
-bool AlienDeployment::getObjectiveFailedInfo(std::string &text, int &score)
+bool AlienDeployment::getObjectiveFailedInfo(std::string &text, int &score) const
 {
 	text = _objectiveFailedText;
 	score = _objectiveFailedScore;
-	return text != "";
+	return !text.empty();
 }
 
 /**

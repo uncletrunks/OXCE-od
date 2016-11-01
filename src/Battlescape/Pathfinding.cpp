@@ -197,7 +197,7 @@ bool Pathfinding::aStarPath(const Position &startPosition, const Position &endPo
 	start->connect(0, 0, 0, endPosition);
 	PathfindingOpenSet openList;
 	openList.push(start);
-	bool missile = (target && maxTUCost == -1);
+	bool missile = (target && maxTUCost == 10000);
 	// if the open list is empty, we've reached the end
 	while (!openList.empty())
 	{
@@ -328,7 +328,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 						fellDown = true;
 					}
 			}
-			else if (_movementType == MT_FLY && belowDestination && belowDestination->getUnit() && belowDestination->getUnit() != unit)
+			else if (!missile && _movementType == MT_FLY && belowDestination && belowDestination->getUnit() && belowDestination->getUnit() != unit)
 			{
 				// 2 or more voxels poking into this tile = no go
 				if (belowDestination->getUnit()->getHeight() + belowDestination->getUnit()->getFloatHeight() - belowDestination->getTerrainLevel() > 26)
@@ -352,7 +352,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 			else if (direction >= DIR_UP && !fellDown)
 			{
 				// check if we can go up or down through gravlift or fly
-				if (validateUpDown(unit, startPosition + offset, direction))
+				if (validateUpDown(unit, startPosition + offset, direction, missile))
 				{
 					cost = 8; // vertical movement by flying suit or grav lift
 				}
@@ -588,10 +588,15 @@ bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarge
 		if (unit != 0)
 		{
 			if (unit == _unit || unit == missileTarget || unit->isOut()) return false;
-			if (_unit && _unit->getFaction() == FACTION_PLAYER && unit->getVisible()) return true;		// player know all visible units
-			if (_unit && _unit->getFaction() == unit->getFaction()) return true;
-			if (_unit && _unit->getFaction() == FACTION_HOSTILE &&
-				std::find(_unit->getUnitsSpottedThisTurn().begin(), _unit->getUnitsSpottedThisTurn().end(), unit) != _unit->getUnitsSpottedThisTurn().end()) return true;
+			if (missileTarget && unit != missileTarget && unit->getFaction() == FACTION_HOSTILE) 
+				return true;			// AI pathfinding with missiles shouldn't path through their own units
+			if (_unit)
+			{
+				if (_unit->getFaction() == FACTION_PLAYER && unit->getVisible()) return true;		// player know all visible units
+				if (_unit->getFaction() == unit->getFaction()) return true;
+				if (_unit->getFaction() == FACTION_HOSTILE && 
+					std::find(_unit->getUnitsSpottedThisTurn().begin(), _unit->getUnitsSpottedThisTurn().end(), unit) != _unit->getUnitsSpottedThisTurn().end()) return true;
+			}
 		}
 		else if (tile->hasNoFloor(0) && _movementType != MT_FLY) // this whole section is devoted to making large units not take part in any kind of falling behaviour
 		{
@@ -822,7 +827,7 @@ bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endP
  * @param direction Up or Down
  * @return bool Whether it's valid.
  */
-bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const int direction)
+bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const int direction, bool missile)
 {
 	Position endPosition;
 	directionToVector(direction, &endPosition);
@@ -833,6 +838,18 @@ bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const i
 	if (startTile->getMapData(O_FLOOR) && destinationTile && destinationTile->getMapData(O_FLOOR) &&
 		(startTile->getMapData(O_FLOOR)->isGravLift() && destinationTile->getMapData(O_FLOOR)->isGravLift()))
 	{
+		if (missile)
+		{
+			if (direction == DIR_UP)
+			{
+				if (destinationTile->getMapData(O_FLOOR)->getLoftID(0) != 0)
+					return false;
+			}
+			else if (startTile->getMapData(O_FLOOR)->getLoftID(0) != 0)
+			{
+				return false;
+			}
+		}
 		return true;
 	}
 	else
@@ -889,14 +906,14 @@ bool Pathfinding::previewPath(bool bRemove)
 		int dir = *i;
 		int tu = getTUCost(pos, dir, &destination, _unit, 0, false); // gets tu cost, but also gets the destination position.
 		int energyUse = tu;
-		if (running)
-		{
-			tu *= 0.75;
-			energyUse *= 1.5;
-		}
 		if (dir >= Pathfinding::DIR_UP)
 		{
 			energyUse = 0;
+		}
+		else if (running)
+		{
+			tu *= 0.75;
+			energyUse *= 1.5;
 		}
 		energy -= energyUse / 2;
 		tus -= tu;

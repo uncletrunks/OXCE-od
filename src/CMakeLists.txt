@@ -463,6 +463,8 @@ set ( menu_src
   Menu/SlideshowState.h
   Menu/StartState.cpp
   Menu/StartState.h
+  Menu/StatisticsState.cpp
+  Menu/StatisticsState.h
   Menu/TestState.cpp
   Menu/TestState.h
   Menu/VideoState.cpp
