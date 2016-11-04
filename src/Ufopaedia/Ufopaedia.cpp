@@ -210,7 +210,7 @@ namespace OpenXcom
 	void Ufopaedia::prev(Game *game)
 	{
 		ArticleDefinitionList articles = getAvailableArticles(game->getSavedGame(), game->getMod());
-		if (_current_index == 0)
+		if (_current_index == 0 || _current_index > articles.size() - 1)
 		{
 			// goto last
 			_current_index = articles.size() - 1;
