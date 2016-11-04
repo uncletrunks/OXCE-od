@@ -34,7 +34,7 @@ Armor::Armor(const std::string &type) :
 	_type(type), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
 	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0),
 	_visibilityAtDark(0), _visibilityAtDay(0), _personalLight(15),
-	_activeCamouflage(0), _predatorVision(0), _heatVision(0), _psiVision(0),
+	_camouflageAtDay(0), _camouflageAtDark(0), _antiCamouflageAtDay(0), _antiCamouflageAtDark(0), _heatVision(0), _psiVision(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
 	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0),
@@ -96,8 +96,10 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_visibilityAtDark = node["visibilityAtDark"].as<int>(_visibilityAtDark);
 	_visibilityAtDay = node["visibilityAtDay"].as<int>(_visibilityAtDay);
 	_personalLight = node["personalLight"].as<int>(_personalLight);
-	_activeCamouflage = node["activeCamouflage"].as<int>(_activeCamouflage);
-	_predatorVision = node["predatorVision"].as<int>(_predatorVision);
+	_camouflageAtDay = node["camouflageAtDay"].as<int>(_camouflageAtDay);
+	_camouflageAtDark = node["camouflageAtDark"].as<int>(_camouflageAtDark);
+	_antiCamouflageAtDay = node["antiCamouflageAtDay"].as<int>(_antiCamouflageAtDay);
+	_antiCamouflageAtDark = node["antiCamouflageAtDark"].as<int>(_antiCamouflageAtDark);
 	_heatVision = node["heatVision"].as<int>(_heatVision);
 	_psiVision = node["psiVision"].as<int>(_psiVision);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
@@ -523,21 +525,39 @@ int Armor::getVisibilityAtDay() const
 }
 
 /**
-* Gets info about camouflage effect.
+* Gets info about camouflage at day.
 * @return The vision distance modifier.
 */
-int Armor::getActiveCamouflage() const
+int Armor::getCamouflageAtDay() const
 {
-	return _activeCamouflage;
+	return _camouflageAtDay;
 }
 
 /**
-* Gets info about better vision.
+* Gets info about camouflage at dark.
 * @return The vision distance modifier.
 */
-int Armor::getPredatorVision() const
+int Armor::getCamouflageAtDark() const
 {
-	return _predatorVision;
+	return _camouflageAtDark;
+}
+
+/**
+* Gets info about anti camouflage at day.
+* @return The vision distance modifier.
+*/
+int Armor::getAntiCamouflageAtDay() const
+{
+	return _antiCamouflageAtDay;
+}
+
+/**
+* Gets info about anti camouflage at dark.
+* @return The vision distance modifier.
+*/
+int Armor::getAntiCamouflageAtDark() const
+{
+	return _antiCamouflageAtDark;
 }
 
 /**

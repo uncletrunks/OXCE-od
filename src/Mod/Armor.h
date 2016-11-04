@@ -58,7 +58,7 @@ private:
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
 	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight;
-	int _activeCamouflage, _predatorVision, _heatVision, _psiVision;
+	int _camouflageAtDay, _camouflageAtDark, _antiCamouflageAtDay, _antiCamouflageAtDark, _heatVision, _psiVision;
 	float _damageModifier[DAMAGE_TYPES];
 	std::vector<int> _loftempsSet;
 	UnitStats _stats;
@@ -158,10 +158,14 @@ public:
 	int getVisibilityAtDark() const;
 	/// Gets max view distance at day in BattleScape.
 	int getVisibilityAtDay() const;
-	/// Gets info about camouflage effect, if any.
-	int getActiveCamouflage() const;
-	/// Gets info about better vision, if any.
-	int getPredatorVision() const;
+	/// Gets info about camouflage at day.
+	int getCamouflageAtDay() const;
+	/// Gets info about camouflage at dark.
+	int getCamouflageAtDark() const;
+	/// Gets info about anti camouflage at day.
+	int getAntiCamouflageAtDay() const;
+	/// Gets info about anti camouflage at dark.
+	int getAntiCamouflageAtDark() const;
 	/// Gets info about heat vision.
 	int getHeatVision() const;
 	/// Gets info about psi vision.
