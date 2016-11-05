@@ -255,6 +255,7 @@ void Inventory::drawItems()
 	_items->clear();
 	_grenadeIndicators.clear();
 	_stunnedIndicators.clear();
+	_woundedIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
 	if (_selUnit != 0)
 	{
@@ -320,8 +321,15 @@ void Inventory::drawItems()
 				// don't show on dead units
 				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 				{
-					_stunnedIndicators.push_back(std::make_pair(x, y));
 					fatalWounds = (*i)->getUnit()->getFatalWounds();
+					if (fatalWounds > 0)
+					{
+						_woundedIndicators.push_back(std::make_pair(x, y));
+					}
+					else
+					{
+						_stunnedIndicators.push_back(std::make_pair(x, y));
+					}
 				}
 			}
 			if (fatalWounds > 0)
@@ -1367,6 +1375,28 @@ void Inventory::drawPrimers()
 		for (std::vector<std::pair<int, int> >::const_iterator i = _stunnedIndicators.begin(); i != _stunnedIndicators.end(); ++i)
 		{
 			tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		}
+	}
+
+	// wounded units
+	tempSurface = _game->getMod()->getSurface("BigWoundIndicator");
+	if (tempSurface)
+	{
+		for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
+		{
+			tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		}
+	}
+	else
+	{
+		// fallback to stun indicator
+		tempSurface = _game->getMod()->getSurface("BigStunIndicator");
+		if (tempSurface)
+		{
+			for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
+			{
+				tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+			}
 		}
 	}
 
