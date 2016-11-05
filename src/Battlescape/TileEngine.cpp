@@ -1497,7 +1497,33 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 					ReactionScore rs = determineReactionType(*i, unit);
 					if (rs.attackType != BA_NONE)
 					{
-						spotters.push_back(rs);
+						if (rs.attackType == BA_SNAPSHOT && Options::battleUFOExtenderAccuracy)
+						{
+							BattleItem *weapon = (*i)->getMainHandWeapon((*i)->getFaction() != FACTION_PLAYER);
+							int accuracy = (*i)->getFiringAccuracy(rs.attackType, weapon, _save->getBattleGame()->getMod());
+							int distance = _save->getTileEngine()->distance((*i)->getPosition(), unit->getPosition());
+							int upperLimit = weapon->getRules()->getSnapRange();
+							int lowerLimit = weapon->getRules()->getMinRange();
+							if (distance > upperLimit)
+							{
+								accuracy -= (distance - upperLimit) * weapon->getRules()->getDropoff();
+							}
+							else if (distance < lowerLimit)
+							{
+								accuracy -= (lowerLimit - distance) * weapon->getRules()->getDropoff();
+							}
+
+							bool outOfRange = distance > weapon->getRules()->getMaxRange() + 1; // special handling for short ranges and diagonals simplified by +1
+							
+							if (accuracy > 0 && !outOfRange)
+							{
+								spotters.push_back(rs);
+							}
+						}
+						else
+						{
+							spotters.push_back(rs);
+						}
 					}
 				}
 			}
