@@ -159,6 +159,7 @@ private:
 	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
 	int _surrenderMode;
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
+	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
@@ -412,6 +413,10 @@ public:
 	int getBughuntLowMorale() const { return _bughuntLowMorale; }
 	/// Gets the bug hunt mode time units % parameter (default = 60).
 	int getBughuntTimeUnitsLeft() const { return _bughuntTimeUnitsLeft; }
+	/// Gets the threshold for defining a glancing hit on a ufo during interception
+	int getUfoGlancingHitThreshold() const { return _ufoGlancingHitThreshold; }
+	/// Gets the parameter for drawing the width of a ufo's beam weapon based on power
+	int getUfoBeamWidthParameter() const { return _ufoBeamWidthParameter; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id) const;
 	/// Gets the list of all research projects.
