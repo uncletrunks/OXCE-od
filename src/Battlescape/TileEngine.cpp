@@ -996,6 +996,12 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, currentUnit->getMaxViewDistanceAtDay(tile->getUnit()->getArmor()) * 16);
 	}
 
+	// oxce 3.3 workaround, remove when fixed? http://openxcom.org/forum/index.php/topic,4822.msg73841.html#msg73841
+	if (currentDistanceSq > ((visibleDistanceMaxVoxel / 16) * (visibleDistanceMaxVoxel / 16)))
+	{
+		return false;
+	}
+
 	Position originVoxel = getSightOriginVoxel(currentUnit);
 
 	Position scanVoxel;
