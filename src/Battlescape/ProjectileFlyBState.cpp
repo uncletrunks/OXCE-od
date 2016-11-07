@@ -567,15 +567,24 @@ void ProjectileFlyBState::think()
 						int spread = _ammo->getRules()->getShotgunSpread();
 						int choke = _action.weapon->getRules()->getShotgunChoke();
 						Position firstPelletImpact = _parent->getMap()->getProjectile()->getPosition(-2);
+						Position originalTarget = _targetVoxel;
 
 						int i = 1;
 						while (i != _ammo->getRules()->getShotgunPellets())
 						{
 							if (behaviorType == 1)
 							{
-								// use impact location to determine spread (instead of originally targeted voxel)
-								_targetVoxel = firstPelletImpact;
+								// use impact location to determine spread (instead of originally targeted voxel), as long as it's not the same as the origin
+								if (firstPelletImpact != _parent->getSave()->getTileEngine()->getOriginVoxel(_action, _parent->getSave()->getTile(_origin)))
+								{
+									_targetVoxel = firstPelletImpact;
+								}
+								else
+								{
+									_targetVoxel = originalTarget;
+								}
 							}
+
 
 							Projectile *proj = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
 
@@ -584,6 +593,7 @@ void ProjectileFlyBState::think()
 							{
 								// pellet spread based on spread and choke values
 								_projectileImpact = proj->calculateTrajectory(std::max(0.0, (1.0 - spread / 100.0) * choke / 100.0));
+
 							}
 							else
 							{
