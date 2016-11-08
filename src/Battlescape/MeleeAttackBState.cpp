@@ -23,7 +23,7 @@
 #include "TileEngine.h"
 #include "Map.h"
 #include "Camera.h"
-#include "AlienBAIState.h"
+#include "AIModule.h"
 #include "../Savegame/Tile.h"
 #include "../Engine/RNG.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -60,14 +60,16 @@ void MeleeAttackBState::init()
 	_initialized = true;
 
 	_weapon = _action.weapon;
-
 	if (!_weapon) // can't shoot without weapon
 	{
 		_parent->popState();
 		return;
 	}
-
 	_ammo = _weapon->getAmmoItem();
+	if (!_ammo)
+	{
+		_ammo = _weapon;
+	}
 
 	if (!_parent->getSave()->getTile(_action.target)) // invalid target position
 	{
@@ -111,7 +113,7 @@ void MeleeAttackBState::init()
 	}
 
 
-	AlienBAIState *ai = dynamic_cast<AlienBAIState*>(_unit->getCurrentAIState());
+	AIModule *ai = _unit->getAIModule();
 
 	if (_unit->getFaction() == _parent->getSave()->getSide() &&
 		_unit->getFaction() != FACTION_PLAYER &&
@@ -209,6 +211,7 @@ void MeleeAttackBState::performMeleeAttack()
 	difference.y = std::max(-1, std::min(1, difference.y));
 
 	Position damagePosition = _voxel + difference;
+
 
 	// make an explosion action
 	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, BA_HIT, _action.weapon, _action.actor, 0, true));

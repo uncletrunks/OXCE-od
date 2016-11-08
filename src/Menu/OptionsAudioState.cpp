@@ -45,7 +45,7 @@ OptionsAudioState::OptionsAudioState(OptionsOrigin origin) : OptionsBaseState(or
 {
 	setCategory(_btnAudio);
 
-	// Create objects
+	// Create object
 	_txtMusicVolume = new Text(114, 9, 94, 8);
 	_slrMusicVolume = new Slider(104, 16, 94, 18);
 
@@ -87,7 +87,7 @@ OptionsAudioState::OptionsAudioState(OptionsOrigin origin) : OptionsBaseState(or
 
 	centerAllSurfaces();
 
-	// Set up objects
+	// Set up object
 	_txtMusicVolume->setText(tr("STR_MUSIC_VOLUME"));
 
 	_slrMusicVolume->setRange(0, SDL_MIX_MAXVOLUME);

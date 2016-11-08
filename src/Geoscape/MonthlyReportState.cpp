@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
 #include "MonthlyReportState.h"
 #include <climits>
 #include <sstream>
-#include <cmath>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
@@ -43,6 +41,7 @@
 #include "../Savegame/SoldierDiary.h"
 #include "../Menu/SaveGameState.h"
 #include "../Mod/RuleInterface.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -286,7 +285,7 @@ void MonthlyReportState::btnOkClick(Action *)
 				Soldier *soldier = _game->getSavedGame()->getSoldier((*s)->getId());
 				// Award medals to eligible soldiers
 				soldier->getDiary()->addMonthlyService();
-				if (soldier->getDiary()->manageCommendations(_game->getMod()))
+				if (soldier->getDiary()->manageCommendations(_game->getMod(), _game->getSavedGame()->getMissionStatistics()))
 				{
 					_soldiersMedalled.push_back(soldier);
 				}
@@ -457,4 +456,5 @@ std::wstring MonthlyReportState::countryList(const std::vector<std::string> &cou
 	}
 	return ss.str();
 }
+
 }

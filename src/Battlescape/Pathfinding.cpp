@@ -507,7 +507,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
  * Checks whether a path is ready and gives the first direction.
  * @return Direction where the unit needs to go next, -1 if it's the end of the path.
  */
-int Pathfinding::getStartDirection()
+int Pathfinding::getStartDirection() const
 {
 	if (_path.empty()) return -1;
 	return _path.back();
@@ -542,7 +542,7 @@ void Pathfinding::abortPath()
  * @param missileTarget Target for a missile.
  * @return True if the movement is blocked.
  */
-bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarget, int bigWallExclusion)
+bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarget, int bigWallExclusion) const
 {
 	if (tile == 0) return true; // probably outside the map here
 
@@ -720,7 +720,7 @@ bool Pathfinding::isBlocked(Tile *startTile, Tile * /* endTile */, const int dir
  * @param here The current tile.
  * @return True if a unit can fall down.
  */
-bool Pathfinding::canFallDown(Tile *here)
+bool Pathfinding::canFallDown(Tile *here) const
 {
 	if (here->getPosition().z == 0)
 		return false;
@@ -737,7 +737,7 @@ bool Pathfinding::canFallDown(Tile *here)
  * @param size The size of the unit.
  * @return True if a unit can fall down.
  */
-bool Pathfinding::canFallDown(Tile *here, int size)
+bool Pathfinding::canFallDown(Tile *here, int size) const
 {
 	for (int x = 0; x != size; ++x)
 	{
@@ -758,7 +758,7 @@ bool Pathfinding::canFallDown(Tile *here, int size)
  * @param endPosition The position we wanna reach.
  * @return True if the unit is going up a stairs.
  */
-bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endPosition)
+bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endPosition) const
 {
 	//condition 1 : endposition has to the south a terrainlevel -16 object (upper part of the stairs)
 	if (_save->getTile(endPosition + Position(0, 1, 0)) && _save->getTile(endPosition + Position(0, 1, 0))->getTerrainLevel() == -16)
@@ -827,7 +827,7 @@ bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endP
  * @param direction Up or Down
  * @return bool Whether it's valid.
  */
-bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const int direction, bool missile)
+bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const int direction, bool missile) const
 {
 	Position endPosition;
 	directionToVector(direction, &endPosition);
@@ -1214,7 +1214,7 @@ bool Pathfinding::isModifierUsed() const
  * Gets a reference to the current path.
  * @return the actual path.
  */
-const std::vector<int> &Pathfinding::getPath()
+const std::vector<int> &Pathfinding::getPath() const
 {
 	return _path;
 }
@@ -1227,4 +1227,5 @@ std::vector<int> Pathfinding::copyPath() const
 {
 	return _path;
 }
+
 }

@@ -48,7 +48,6 @@ class Base : public Target
 private:
 	static const int BASE_SIZE = 6;
 	const Mod *_mod;
-	std::wstring _name;
 	std::vector<BaseFacility*> _facilities;
 	std::vector<Soldier*> _soldiers;
 	std::vector<Craft*> _crafts;
@@ -61,8 +60,11 @@ private:
 	bool _retaliationTarget;
 	std::vector<Vehicle*> _vehicles;
 	std::vector<BaseFacility*> _defenses;
+
 	/// Determines space taken up by ammo clips about to rearm craft.
 	double getIgnoredStores();
+	/// Gets the base's default name (unused).
+	std::wstring getDefaultName(Language* lang) const { return L""; }
 public:
 	/// Creates a new base.
 	Base(const Mod *mod);
@@ -76,8 +78,6 @@ public:
 	YAML::Node saveId() const;
 	/// Gets the base's name.
 	std::wstring getName(Language* lang = 0) const;
-	/// Sets the base's name.
-	void setName(const std::wstring &name);
 	/// Gets the base's marker.
 	int getMarker() const;
 	/// Gets the base's facilities.

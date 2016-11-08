@@ -39,7 +39,7 @@ namespace OpenXcom
  */
 CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 {
-	// Create objects
+	// Create object
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(288, 16, 16, 176);
 	_txtTitle = new Text(300, 16, 10, 8);
@@ -55,7 +55,7 @@ CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 
 	centerAllSurfaces();
 
-	// Set up objects
+	// Set up object
 	_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
@@ -83,11 +83,11 @@ CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 	{
 		modularCommendation = false;
 		noun = "noNoun";
-        if (titleChosen)
-        {
-            _lstSoldiers->addRow(2, L"", L""); // Blank row, will be filled in later
+		if (titleChosen)
+		{
+			_lstSoldiers->addRow(2, L"", L""); // Blank row, will be filled in later
 			row++;
-        }
+		}
 		titleChosen = false;
 		titleRow = row - 1;
 
@@ -139,7 +139,7 @@ CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 				}
 			}
 		}
-        if (titleRow != row - 1)
+		if (titleRow != row - 1)
 		{
 			// Medal name
 			if (modularCommendation)
@@ -157,7 +157,7 @@ CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 		{
 			++commList;
 		}
-	}	
+	}
 }
 
 /**

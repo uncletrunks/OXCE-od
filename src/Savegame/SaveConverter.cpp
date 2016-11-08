@@ -16,12 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
 #include "SaveConverter.h"
 #include <algorithm>
 #include <yaml-cpp/yaml.h>
 #include <SDL_endian.h>
-#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -59,6 +57,7 @@
 #include "../Engine/RNG.h"
 #include "../Mod/RuleConverter.h"
 #include "../Ufopaedia/Ufopaedia.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {

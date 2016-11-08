@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
-#include <cmath>
 #include <sstream>
 #include "BattlescapeGame.h"
 #include "BattlescapeState.h"
@@ -35,8 +33,7 @@
 #include "UnitInfoState.h"
 #include "UnitDieBState.h"
 #include "UnitPanicBState.h"
-#include "AlienBAIState.h"
-#include "CivilianBAIState.h"
+#include "AIModule.h"
 #include "Pathfinding.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Engine/Game.h"
@@ -59,6 +56,7 @@
 #include "UnitFallBState.h"
 #include "../Engine/Logger.h"
 #include "../Savegame/BattleUnitStatistics.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -301,15 +299,12 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		// it should also hide units when they've killed the guy spotting them
 		// it's also for good luck
 
-	BattleAIState *ai = unit->getCurrentAIState();
+	AIModule *ai = unit->getAIModule();
 	if (!ai)
 	{
 		// for some reason the unit had no AI routine assigned..
-		if (unit->getFaction() == FACTION_HOSTILE)
-			unit->setAIState(new AlienBAIState(_save, unit, 0));
-		else
-			unit->setAIState(new CivilianBAIState(_save, unit, 0));
-		ai = unit->getCurrentAIState();
+		unit->setAIModule(new AIModule(_save, unit, 0));
+		ai = unit->getAIModule();
 	}
 	_AIActionCounter++;
 	if (_AIActionCounter == 1)
@@ -318,7 +313,6 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		unit->setHiding(false);
 		if (Options::traceAI) { Log(LOG_INFO) << "#" << unit->getId() << "--" << unit->getType(); }
 	}
-	//AlienBAIState *aggro = dynamic_cast<AlienBAIState*>(ai); // this cast only works when ai was already AlienBAIState at heart
 
 	BattleAction action;
 	action.actor = unit;
@@ -725,7 +719,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 		killStat.weaponAmmo = tempAmmo;
 
 		// Determine murder type
-		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
+		if ((*j)->getStatus() != STATUS_DEAD)
 		{
 			if ((*j)->getHealth() <= 0)
 			{
@@ -782,7 +776,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 		}
 
 		bool noSound = false;
-		if ((*j)->getStatus() != STATUS_DEAD && (*j)->getStatus() != STATUS_COLLAPSING && (*j)->getStatus() != STATUS_TURNING)
+		if ((*j)->getStatus() != STATUS_DEAD)
 		{
 			if ((*j)->getHealth() <= 0)
 			{
@@ -1020,7 +1014,7 @@ void BattlescapeGame::setupCursor()
  * Is used to see if stats can be displayed and action buttons will work.
  * @return Whether a playable unit is selected.
  */
-bool BattlescapeGame::playableUnitSelected()
+bool BattlescapeGame::playableUnitSelected() const
 {
 	return _save->getSelectedUnit() != 0 && (_save->getSide() == FACTION_PLAYER || _save->getDebugMode());
 }
@@ -1122,7 +1116,7 @@ void BattlescapeGame::popState()
 	BattleAction action = _states.front()->getAction();
 
 	if (action.actor && !action.result.empty() && action.actor->getFaction() == FACTION_PLAYER
-    && _playerPanicHandled && (_save->getSide() == FACTION_PLAYER || _debugPlay))
+		&& _playerPanicHandled && (_save->getSide() == FACTION_PLAYER || _debugPlay))
 	{
 		_parentState->warning(action.result);
 		actionFailed = true;
@@ -1219,7 +1213,10 @@ void BattlescapeGame::popState()
 		cancelCurrentAction();
 		getMap()->setCursorType(CT_NORMAL, 1);
 		_parentState->getGame()->getCursor()->setVisible(true);
-		_save->setSelectedUnit(0);
+		if (_save->getSide() == FACTION_PLAYER)
+			_save->setSelectedUnit(0);
+		else
+			_save->selectNextPlayerUnit(true, true);
 	}
 	_parentState->updateSoldierInfo();
 }
@@ -1274,7 +1271,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 
 	if (_save->getSide() == FACTION_HOSTILE && !_debugPlay) // aliens reserve TUs as a percentage rather than just enough for a single action.
 	{
-		AlienBAIState *ai = dynamic_cast<AlienBAIState*>(bu->getCurrentAIState());
+		AIModule *ai = bu->getAIModule();
 		if (ai)
 		{
 			cost.type = ai->getReserveMode();
@@ -1513,7 +1510,7 @@ BattleAction *BattlescapeGame::getCurrentAction()
  * Determines whether an action is currently going on?
  * @return true or false.
  */
-bool BattlescapeGame::isBusy()
+bool BattlescapeGame::isBusy() const
 {
 	return !_states.empty();
 }
@@ -1535,7 +1532,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 			{
 				maxWaypoints = _currentAction.weapon->getAmmoItem()->getRules()->getWaypoints();
 			}
-			if (_currentAction.waypoints.size() < maxWaypoints || maxWaypoints == -1)
+			if ((int)_currentAction.waypoints.size() < maxWaypoints || maxWaypoints == -1)
 			{
 				_parentState->showLaunchButton(true);
 				_currentAction.waypoints.push_back(pos);
@@ -1636,15 +1633,15 @@ void BattlescapeGame::primaryAction(const Position &pos)
 			{
 				_save->getPathfinding()->removePreview();
 			}
+			_currentAction.target = pos;
+			_save->getPathfinding()->calculate(_currentAction.actor, _currentAction.target);
 			_currentAction.run = false;
 			_currentAction.strafe = Options::strafe && modifierPressed && _save->getSelectedUnit()->getArmor()->getSize() == 1;
-			if (_currentAction.strafe && _save->getTileEngine()->distance(_currentAction.actor->getPosition(), pos) + std::abs(_currentAction.actor->getPosition().z - pos.z) > 1)
+			if (_currentAction.strafe && _save->getPathfinding()->getPath().size() > 1)
 			{
 				_currentAction.run = true;
 				_currentAction.strafe = false;
 			}
-			_currentAction.target = pos;
-			_save->getPathfinding()->calculate(_currentAction.actor, _currentAction.target);
 			if (bPreviewed && !_save->getPathfinding()->previewPath() && _save->getPathfinding()->getStartDirection() != -1)
 			{
 				_save->getPathfinding()->removePreview();
@@ -1895,13 +1892,12 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	newUnit->setDirection(unit->getDirection());
 	newUnit->setTimeUnits(0);
 	getSave()->getUnits()->push_back(newUnit);
-	newUnit->setAIState(new AlienBAIState(getSave(), newUnit, 0));
+	newUnit->setAIModule(new AIModule(getSave(), newUnit, 0));
 	newUnit->setVisible(visible);
 
 	getTileEngine()->calculateFOV(newUnit->getPosition());  //happens fairly rarely, so do a full recalc for units in range to handle the potential unit visible cache issues.
 	getTileEngine()->applyGravity(newUnit->getTile());
 	newUnit->dontReselect();
-	//newUnit->getCurrentAIState()->think();
 	return newUnit;
 
 }
@@ -2054,7 +2050,7 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 		worthToTake = item->getRules()->getAttraction();
 
 		// it's always going to be worth while to try and take a blaster launcher, apparently
-		if (!item->getRules()->getWaypoints() != 0 && item->getRules()->getBattleType() != BT_AMMO)
+		if (item->getRules()->getWaypoints() == 0 && item->getRules()->getBattleType() != BT_AMMO)
 		{
 			// we only want weapons that HAVE ammo, or weapons that we have ammo FOR
 			bool ammoFound = true;
@@ -2349,7 +2345,7 @@ void BattlescapeGame::setKneelReserved(bool reserved)
  * Gets the kneel reservation setting.
  * @return Kneel reservation setting.
  */
-bool BattlescapeGame::getKneelReserved()
+bool BattlescapeGame::getKneelReserved() const
 {
 	return _save->getKneelReserved();
 }

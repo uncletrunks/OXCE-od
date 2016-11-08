@@ -277,4 +277,5 @@ void BaseDefenseState::btnOkClick(Action *)
 		}
 	}
 }
+
 }

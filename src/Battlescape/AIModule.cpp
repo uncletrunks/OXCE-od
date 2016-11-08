@@ -16,12 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
-#include <cmath>
 #include <climits>
 #include <algorithm>
-#include "AlienBAIState.h"
-#include "../Savegame/BattleUnit.h"
+#include "AIModule.h"
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/Node.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -37,6 +34,7 @@
 #include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -48,7 +46,7 @@ namespace OpenXcom
  * @param unit Pointer to the unit.
  * @param node Pointer to the node the unit originates from.
  */
-AlienBAIState::AlienBAIState(SavedBattleGame *save, BattleUnit *unit, Node *node) : BattleAIState(save, unit), _aggroTarget(0), _knownEnemies(0), _visibleEnemies(0), _spottingEnemies(0),
+AIModule::AIModule(SavedBattleGame *save, BattleUnit *unit, Node *node) : _save(save), _unit(unit), _aggroTarget(0), _knownEnemies(0), _visibleEnemies(0), _spottingEnemies(0),
 																				_escapeTUs(0), _ambushTUs(0), _reserveTUs(0), _rifle(false), _melee(false), _blaster(false), _grenade(false),
 																				_didPsi(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0)
 {
@@ -61,12 +59,17 @@ AlienBAIState::AlienBAIState(SavedBattleGame *save, BattleUnit *unit, Node *node
 	_attackAction = new BattleAction();
 	_patrolAction = new BattleAction();
 	_psiAction = new BattleAction();
+	_targetFaction = FACTION_PLAYER;
+	if (_unit->getOriginalFaction() == FACTION_NEUTRAL)
+	{
+		_targetFaction = FACTION_HOSTILE;
+	}
 }
 
 /**
  * Deletes the BattleAIState.
  */
-AlienBAIState::~AlienBAIState()
+AIModule::~AIModule()
 {
 	delete _escapeAction;
 	delete _ambushAction;
@@ -79,7 +82,7 @@ AlienBAIState::~AlienBAIState()
  * Loads the AI state from a YAML file.
  * @param node YAML node.
  */
-void AlienBAIState::load(const YAML::Node &node)
+void AIModule::load(const YAML::Node &node)
 {
 	int fromNodeID, toNodeID;
 	fromNodeID = node["fromNode"].as<int>(-1);
@@ -100,7 +103,7 @@ void AlienBAIState::load(const YAML::Node &node)
  * Saves the AI state to a YAML file.
  * @return YAML node.
  */
-YAML::Node AlienBAIState::save() const
+YAML::Node AIModule::save() const
 {
 	int fromNodeID = -1, toNodeID = -1;
 	if (_fromNode)
@@ -117,28 +120,10 @@ YAML::Node AlienBAIState::save() const
 }
 
 /**
- * Enters the current AI state.
- */
-void AlienBAIState::enter()
-{
-	// ROOOAARR !
-
-}
-
-
-/**
- * Exits the current AI state.
- */
-void AlienBAIState::exit()
-{
-
-}
-
-/**
  * Runs any code the state needs to keep updating every AI cycle.
  * @param action (possible) AI action to execute after thinking is done.
  */
-void AlienBAIState::think(BattleAction *action)
+void AIModule::think(BattleAction *action)
 {
 	action->type = BA_RETHINK;
 	action->actor = _unit;
@@ -164,7 +149,14 @@ void AlienBAIState::think(BattleAction *action)
 
 	if (_traceAI)
 	{
-		Log(LOG_INFO) << "Unit has " << _visibleEnemies << "/" << _knownEnemies << " known enemies visible, " << _spottingEnemies << " of whom are spotting him. ";
+		if (_unit->getFaction() == FACTION_HOSTILE)
+		{
+			Log(LOG_INFO) << "Unit has " << _visibleEnemies << "/" << _knownEnemies << " known enemies visible, " << _spottingEnemies << " of whom are spotting him. ";
+		}
+		else
+		{
+			Log(LOG_INFO) << "Civilian Unit has " << _visibleEnemies << " enemies visible, " << _spottingEnemies << " of whom are spotting him. ";
+		}
 		std::string AIMode;
 		switch (_AIMode)
 		{
@@ -408,7 +400,7 @@ void AlienBAIState::think(BattleAction *action)
 /*
  * sets the "was hit" flag to true.
  */
-void AlienBAIState::setWasHitBy(BattleUnit *attacker)
+void AIModule::setWasHitBy(BattleUnit *attacker)
 {
 	if (attacker->getFaction() != _unit->getFaction() && !getWasHitBy(attacker->getId()))
 		_wasHitBy.push_back(attacker->getId());
@@ -418,7 +410,7 @@ void AlienBAIState::setWasHitBy(BattleUnit *attacker)
  * Gets whether the unit was hit.
  * @return if it was hit.
  */
-bool AlienBAIState::getWasHitBy(int attacker) const
+bool AIModule::getWasHitBy(int attacker) const
 {
 	return std::find(_wasHitBy.begin(), _wasHitBy.end(), attacker) != _wasHitBy.end();
 }
@@ -427,7 +419,7 @@ bool AlienBAIState::getWasHitBy(int attacker) const
  * this is mainly going from node to node, moving about the map.
  * handles node selection, and fills out the _patrolAction with useful data.
  */
-void AlienBAIState::setupPatrol()
+void AIModule::setupPatrol()
 {
 	Node *node;
 	_patrolAction->clearTU();
@@ -591,7 +583,7 @@ void AlienBAIState::setupPatrol()
  * position, and set that as our final facing.
  * Fills out the _ambushAction with useful data.
  */
-void AlienBAIState::setupAmbush()
+void AIModule::setupAmbush()
 {
 	_ambushAction->type = BA_RETHINK;
 	int bestScore = 0;
@@ -710,7 +702,7 @@ void AlienBAIState::setupAmbush()
  * or potentially just moving to get a line of sight to a target.
  * Fills out the _attackAction with useful data.
  */
-void AlienBAIState::setupAttack()
+void AIModule::setupAttack()
 {
 	_attackAction->type = BA_RETHINK;
 	_psiAction->type = BA_NONE;
@@ -790,7 +782,7 @@ void AlienBAIState::setupAttack()
  * If there is no such tile, we run away from the target.
  * Fills out the _escapeAction with useful data.
  */
-void AlienBAIState::setupEscape()
+void AIModule::setupEscape()
 {
 	int unitsSpottingMe = getSpottingUnits(_unit->getPosition());
 	int currentTilePreference = 15;
@@ -988,14 +980,18 @@ void AlienBAIState::setupEscape()
  * Counts how many targets, both xcom and civilian are known to this unit
  * @return how many targets are known to us.
  */
-int AlienBAIState::countKnownTargets() const
+int AIModule::countKnownTargets() const
 {
 	int knownEnemies = 0;
-	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+
+	if (_unit->getFaction() == FACTION_HOSTILE)
 	{
-		if (validTarget(*i, true, true))
+		for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 		{
-			++knownEnemies;
+			if (validTarget(*i, true, true))
+			{
+				++knownEnemies;
+			}
 		}
 	}
 	return knownEnemies;
@@ -1006,7 +1002,7 @@ int AlienBAIState::countKnownTargets() const
  * @param pos the Position to check for spotters.
  * @return spotters.
  */
-int AlienBAIState::getSpottingUnits(Position pos) const
+int AIModule::getSpottingUnits(Position pos) const
 {
 	// if we don't actually occupy the position being checked, we need to do a virtual LOF check.
 	bool checking = pos != _unit->getPosition();
@@ -1044,7 +1040,7 @@ int AlienBAIState::getSpottingUnits(Position pos) const
  * This function includes civilians as viable targets.
  * @return viable targets.
  */
-int AlienBAIState::selectNearestTarget()
+int AIModule::selectNearestTarget()
 {
 	int tally = 0;
 	_closestDist= 100;
@@ -1052,7 +1048,7 @@ int AlienBAIState::selectNearestTarget()
 	Position target;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if (validTarget(*i, true, true) &&
+		if (validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE) &&
 			_save->getTileEngine()->visible(_unit, (*i)->getTile()))
 		{
 			tally++;
@@ -1098,7 +1094,7 @@ int AlienBAIState::selectNearestTarget()
  * used for ambush calculations
  * @return if we found one.
  */
-bool AlienBAIState::selectClosestKnownEnemy()
+bool AIModule::selectClosestKnownEnemy()
 {
 	_aggroTarget = 0;
 	int minDist = 255;
@@ -1121,14 +1117,14 @@ bool AlienBAIState::selectClosestKnownEnemy()
  * Selects a random known living Xcom or civilian unit.
  * @return if we found one.
  */
-bool AlienBAIState::selectRandomTarget()
+bool AIModule::selectRandomTarget()
 {
 	int farthest = -100;
 	_aggroTarget = 0;
 
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if (validTarget(*i, true, true))
+		if (validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE))
 		{
 			int dist = RNG::generate(0,20) - _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
 			if (dist > farthest)
@@ -1147,7 +1143,7 @@ bool AlienBAIState::selectRandomTarget()
  * @param maxTUs Maximum time units the path to the target can cost.
  * @return True if a point was found.
  */
-bool AlienBAIState::selectPointNearTarget(BattleUnit *target, int maxTUs) const
+bool AIModule::selectPointNearTarget(BattleUnit *target, int maxTUs) const
 {
 	int size = _unit->getArmor()->getSize();
 	int sizeTarget = target->getArmor()->getSize();
@@ -1194,7 +1190,7 @@ bool AlienBAIState::selectPointNearTarget(BattleUnit *target, int maxTUs) const
 /**
  * Selects an AI mode based on a number of factors, some RNG and the results of the rest of the determinations.
  */
-void AlienBAIState::evaluateAIMode()
+void AIModule::evaluateAIMode()
 {
 	if ((_unit->getCharging() && _attackAction->type != BA_RETHINK))
 	{
@@ -1207,7 +1203,7 @@ void AlienBAIState::evaluateAIMode()
 	{
 		escapeOdds = 12;
 	}
-	if (_unit->getTimeUnits() > _unit->getBaseStats()->tu / 2 || _unit->getCharging())
+	if (_unit->getFaction() == FACTION_HOSTILE && (_unit->getTimeUnits() > _unit->getBaseStats()->tu / 2 || _unit->getCharging()))
 	{
 		escapeOdds = 5;
 	}
@@ -1256,7 +1252,7 @@ void AlienBAIState::evaluateAIMode()
 			}
 		}
 	}
-	else
+	else if (_unit->getFaction() == FACTION_HOSTILE)
 	{
 		combatOdds = 0;
 		escapeOdds = 0;
@@ -1359,6 +1355,12 @@ void AlienBAIState::evaluateAIMode()
 		ambushOdds *= 0.6;
 	}
 
+	// no weapons, not psychic? don't pick combat or ambush
+	if (!_melee && !_rifle && !_blaster && _unit->getBaseStats()->psiSkill == 0)
+	{
+		combatOdds = 0;
+		ambushOdds = 0;
+	}
 	// generate a random number to represent our decision.
 	int decision = RNG::generate(1, std::max(1, patrolOdds + ambushOdds + escapeOdds + combatOdds));
 
@@ -1386,7 +1388,7 @@ void AlienBAIState::evaluateAIMode()
 	}
 
 	// if the aliens are cheating, or the unit is charging, enforce combat as a priority.
-	if (_save->isCheating() || _unit->getCharging() != 0)
+	if ((_unit->getFaction() == FACTION_HOSTILE && _save->isCheating()) || _unit->getCharging() != 0)
 	{
 		_AIMode = AI_COMBAT;
 	}
@@ -1437,7 +1439,7 @@ void AlienBAIState::evaluateAIMode()
  * check the 11x11 grid for a position nearby where we can potentially target him.
  * @return True if a possible position was found.
  */
-bool AlienBAIState::findFirePoint()
+bool AIModule::findFirePoint()
 {
 	if (!selectClosestKnownEnemy())
 		return false;
@@ -1511,9 +1513,9 @@ bool AlienBAIState::findFirePoint()
  * @param radius How big the explosion will be.
  * @param diff Game difficulty.
  * @param grenade Is the explosion coming from a grenade?
- * @return True if it is worthwhile creating an explosion in the target position.
+ * @return Value greter than zero if it is worthwhile creating an explosion in the target position. Bigger value better target.
  */
-int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, int radius, int diff, bool grenade) const
+int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, int radius, int diff, bool grenade) const
 {
 	if (diff == -1)
 	{
@@ -1561,7 +1563,7 @@ int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUn
 				// don't count people who were already grenaded this turn
 			if ((*i)->getTile()->getDangerous() ||
 				// don't count units we don't know about
-				((*i)->getFaction() == FACTION_PLAYER && (*i)->getTurnsSinceSpotted() > _intelligence))
+				((*i)->getFaction() == _targetFaction && (*i)->getTurnsSinceSpotted() > _intelligence))
 				continue;
 
 			// trace a line from the grenade origin to the unit we're checking against
@@ -1572,12 +1574,12 @@ int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUn
 
 			if (collidesWith == V_UNIT && traj.front() / Position(16,16,24) == (*i)->getPosition())
 			{
-				if ((*i)->getFaction() == FACTION_PLAYER)
+				if ((*i)->getFaction() == _targetFaction)
 				{
 					++enemiesAffected;
 					++efficacy;
 				}
-				else if ((*i)->getFaction() == attackingUnit->getFaction())
+				else if ((*i)->getFaction() == attackingUnit->getFaction() || (attackingUnit->getFaction() == FACTION_NEUTRAL && (*i)->getFaction() == FACTION_PLAYER))
 					efficacy -= 2; // friendlies count double
 			}
 		}
@@ -1609,7 +1611,7 @@ int AlienBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingUn
  * Attempts to take a melee attack/charge an enemy we can see.
  * Melee targetting: we can see an enemy, we can move to it so we're charging blindly toward an enemy.
  */
-void AlienBAIState::meleeAction()
+void AIModule::meleeAction()
 {
 	BattleActionCost attackCost(BA_HIT, _unit, _unit->getUtilityWeapon(BT_MELEE));
 	if (!attackCost.haveTU())
@@ -1632,7 +1634,7 @@ void AlienBAIState::meleeAction()
 	{
 		int newDistance = _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
 		if (newDistance > 20 ||
-			!validTarget(*i, true, true))
+			!validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE))
 			continue;
 		//pick closest living unit that we can move to
 		if ((newDistance < distance || newDistance == 1) && !(*i)->isOut())
@@ -1654,7 +1656,7 @@ void AlienBAIState::meleeAction()
 			meleeAttack();
 		}
 	}
-	if (_traceAI && _aggroTarget) { Log(LOG_INFO) << "AlienBAIState::meleeAction:" << " [target]: " << (_aggroTarget->getId()) << " at: "  << _attackAction->target; }
+	if (_traceAI && _aggroTarget) { Log(LOG_INFO) << "AIModule::meleeAction:" << " [target]: " << (_aggroTarget->getId()) << " at: "  << _attackAction->target; }
 	if (_traceAI && _aggroTarget) { Log(LOG_INFO) << "CHARGE!"; }
 }
 
@@ -1663,7 +1665,7 @@ void AlienBAIState::meleeAction()
  *
  * Waypoint targeting: pick from any units currently spotted by our allies.
  */
-void AlienBAIState::wayPointAction()
+void AIModule::wayPointAction()
 {
 	BattleActionCost attackCost(BA_LAUNCH, _unit, _attackAction->weapon);
 	if (!attackCost.haveTU())
@@ -1674,7 +1676,7 @@ void AlienBAIState::wayPointAction()
 	_aggroTarget = 0;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end() && _aggroTarget == 0; ++i)
 	{
-		if (!validTarget(*i, true, true))
+		if (!validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE))
 			continue;
 		_save->getPathfinding()->calculate(_unit, (*i)->getPosition(), *i, -1);
 		if (_save->getPathfinding()->getStartDirection() != -1 &&
@@ -1714,7 +1716,7 @@ void AlienBAIState::wayPointAction()
 
 		_save->getPathfinding()->calculate(_unit, _aggroTarget->getPosition(), _aggroTarget, -1);
 		PathDirection = _save->getPathfinding()->dequeuePath();
-		while (PathDirection != -1 && _attackAction->waypoints.size() < maxWaypoints)
+		while (PathDirection != -1 && (int)_attackAction->waypoints.size() < maxWaypoints)
 		{
 			LastPosition = CurrentPosition;
 			_save->getPathfinding()->directionToVector(PathDirection, &DirectionVector);
@@ -1751,7 +1753,7 @@ void AlienBAIState::wayPointAction()
  *
  * Regular targeting: we can see an enemy, we have a gun, let's try to shoot.
  */
-void AlienBAIState::projectileAction()
+void AIModule::projectileAction()
 {
 	_attackAction->target = _aggroTarget->getPosition();
 	int radius = _attackAction->weapon->getAmmoItem()->getRules()->getExplosionRadius(_unit);
@@ -1764,7 +1766,7 @@ void AlienBAIState::projectileAction()
 /**
  * Selects a fire method based on range, time units, and time units reserved for cover.
  */
-void AlienBAIState::selectFireMethod()
+void AIModule::selectFireMethod()
 {
 	int distance = _save->getTileEngine()->distance(_unit->getPosition(), _attackAction->target);
 	_attackAction->type = BA_RETHINK;
@@ -1826,7 +1828,7 @@ void AlienBAIState::selectFireMethod()
 /**
  * Evaluates whether to throw a grenade at an enemy (or group of enemies) we can see.
  */
-void AlienBAIState::grenadeAction()
+void AIModule::grenadeAction()
 {
 	// do we have a grenade on our belt?
 	BattleItem *grenade = _unit->getGrenadeFromBelt();
@@ -1871,7 +1873,7 @@ void AlienBAIState::grenadeAction()
  * regardless of whether we can see them or not, because we're psychic.
  * @return True if a psionic attack is performed.
  */
-bool AlienBAIState::psiAction()
+bool AIModule::psiAction()
 {
 	BattleItem *item = _unit->getUtilityWeapon(BT_PSIAMP);
 	if (!item)
@@ -1900,7 +1902,7 @@ bool AlienBAIState::psiAction()
 
 	_aggroTarget = 0;
 		// don't let mind controlled soldiers mind control other soldiers.
-	if (_unit->getOriginalFaction() != FACTION_PLAYER
+	if (_unit->getOriginalFaction() == _unit->getFaction()
 		// and we have the required 25 TUs and can still make it to cover
 		&& have
 		// and we didn't already do a psi action this round
@@ -1915,7 +1917,7 @@ bool AlienBAIState::psiAction()
 			if ((*i)->getArmor()->getSize() == 1 &&
 				validTarget(*i, true, false) &&
 				// they must be player units
-				(*i)->getOriginalFaction() == FACTION_PLAYER &&
+				(*i)->getOriginalFaction() == _targetFaction &&
 				(!LOSRequired ||
 				std::find(_unit->getVisibleUnits()->begin(), _unit->getVisibleUnits()->end(), *i) != _unit->getVisibleUnits()->end()))
 			{
@@ -2041,7 +2043,7 @@ bool AlienBAIState::psiAction()
 /**
  * Performs a melee attack action.
  */
-void AlienBAIState::meleeAttack()
+void AIModule::meleeAttack()
 {
 	_unit->lookAt(_aggroTarget->getPosition() + Position(_unit->getArmor()->getSize()-1, _unit->getArmor()->getSize()-1, 0), false);
 	while (_unit->getStatus() == STATUS_TURNING)
@@ -2058,16 +2060,16 @@ void AlienBAIState::meleeAttack()
  * @param includeCivs do we include civilians in the threat assessment?
  * @return whether this target is someone we would like to kill.
  */
-bool AlienBAIState::validTarget(BattleUnit *unit, bool assessDanger, bool includeCivs) const
+bool AIModule::validTarget(BattleUnit *unit, bool assessDanger, bool includeCivs) const
 {
 		// ignore units that are dead/unconscious
 	if (unit->isOut() ||
 		// they must be units that we "know" about
-		_intelligence < unit->getTurnsSinceSpotted() ||
+		(_unit->getFaction() == FACTION_HOSTILE && _intelligence < unit->getTurnsSinceSpotted()) ||
 		// they haven't been grenaded
 		(assessDanger && unit->getTile()->getDangerous()) ||
 		// and they mustn't be on our side
-		unit->getFaction() == FACTION_HOSTILE)
+		unit->getFaction() == _unit->getFaction())
 	{
 		return false;
 	}
@@ -2077,14 +2079,14 @@ bool AlienBAIState::validTarget(BattleUnit *unit, bool assessDanger, bool includ
 		return true;
 	}
 
-	return unit->getFaction() == FACTION_PLAYER;
+	return unit->getFaction() == _targetFaction;
 }
 
 /**
  * Checks the alien's reservation setting.
  * @return the reserve setting.
  */
-BattleActionType AlienBAIState::getReserveMode()
+BattleActionType AIModule::getReserveMode()
 {
 	return _reserve;
 }
@@ -2093,7 +2095,7 @@ BattleActionType AlienBAIState::getReserveMode()
  * We have a dichotomy on our hands: we have a ranged weapon and melee capability.
  * let's make a determination on which one we'll be using this round.
  */
-void AlienBAIState::selectMeleeOrRanged()
+void AIModule::selectMeleeOrRanged()
 {
 	BattleItem *melee = _unit->getUtilityWeapon(BT_MELEE);
 	const RuleItem *rangedWeapon = _attackAction->weapon->getRules();
@@ -2152,7 +2154,7 @@ void AlienBAIState::selectMeleeOrRanged()
  * @param action contains our details one weapon and user, and we set the target for it here.
  * @return if we found a viable node or not.
  */
-bool AlienBAIState::getNodeOfBestEfficacy(BattleAction *action)
+bool AIModule::getNodeOfBestEfficacy(BattleAction *action)
 {
 	int bestScore = 2;
 	Position originVoxel = _save->getTileEngine()->getSightOriginVoxel(_unit);
@@ -2176,7 +2178,8 @@ bool AlienBAIState::getNodeOfBestEfficacy(BattleAction *action)
 					Position targetOriginVoxel = _save->getTileEngine()->getSightOriginVoxel(*j);
 					if (_save->getTileEngine()->canTargetTile(&targetOriginVoxel, _save->getTile((*i)->getPosition()), O_FLOOR, &targetVoxel, *j))
 					{
-						if ((*j)->getFaction() != FACTION_HOSTILE)
+						if ((_unit->getFaction() == FACTION_HOSTILE && (*j)->getFaction() != FACTION_HOSTILE) ||
+							(_unit->getFaction() == FACTION_NEUTRAL && (*j)->getFaction() == FACTION_HOSTILE))
 						{
 							if ((*j)->getTurnsSinceSpotted() <= _intelligence)
 							{
@@ -2200,7 +2203,7 @@ bool AlienBAIState::getNodeOfBestEfficacy(BattleAction *action)
 	return bestScore > 2;
 }
 
-BattleUnit* AlienBAIState::getTarget()
+BattleUnit* AIModule::getTarget()
 {
 	return _aggroTarget;
 }

@@ -71,7 +71,7 @@ private:
 	std::string _spawnUnit;
 	bool _livingWeapon;
 	std::string _meleeWeapon, _psiWeapon;
-	std::vector<std::string> _builtInWeapons;
+	std::vector<std::vector<std::string> > _builtInWeapons;
 public:
 	/// Creates a blank unit ruleset.
 	Unit(const std::string &type);
@@ -120,7 +120,7 @@ public:
 	/// Gets the name of any psi weapon that may be built in to this unit.
 	const std::string &getPsiWeapon() const;
 	/// Gets a vector of integrated items this unit has available.
-	const std::vector<std::string> &getBuiltInWeapons() const;
+	const std::vector<std::vector<std::string> > &getBuiltInWeapons() const;
 };
 
 }

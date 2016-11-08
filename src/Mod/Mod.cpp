@@ -1543,7 +1543,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		std::string type = (*i)["type"].as<std::string>();
 		std::auto_ptr<RuleCommendations> commendations(new RuleCommendations());
 		commendations->load(*i);
-        _commendations[type] = commendations.release();
+		_commendations[type] = commendations.release();
 	}
 	size_t count = 0;
 	for (YAML::const_iterator i = doc["aimAndArmorMultipliers"].begin(); i != doc["aimAndArmorMultipliers"].end() && count < 5; ++i)

@@ -71,7 +71,11 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_livingWeapon = node["livingWeapon"].as<bool>(_livingWeapon);
 	_meleeWeapon = node["meleeWeapon"].as<std::string>(_meleeWeapon);
 	_psiWeapon = node["psiWeapon"].as<std::string>(_psiWeapon);
-	_builtInWeapons = node["builtInWeapons"].as<std::vector<std::string> >(_builtInWeapons);
+	_builtInWeapons = node["builtInWeaponSets"].as<std::vector<std::vector<std::string> > >(_builtInWeapons);
+	if (node["builtInWeapons"])
+	{
+		_builtInWeapons.push_back(node["builtInWeapons"].as<std::vector<std::string> >());
+	}
 	if (node["deathSound"])
 	{
 		_deathSound.clear();
@@ -288,7 +292,7 @@ const std::string &Unit::getPsiWeapon() const
  * any loadout or living weapon item that may be defined.
  * @return list of weapons that are integral to this unit.
  */
-const std::vector<std::string> &Unit::getBuiltInWeapons() const
+const std::vector<std::vector<std::string> > &Unit::getBuiltInWeapons() const
 {
 	return _builtInWeapons;
 }

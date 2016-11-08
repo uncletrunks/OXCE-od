@@ -54,7 +54,6 @@ private:
 	std::vector<Vehicle*> _vehicles;
 	std::string _status;
 	bool _lowFuel, _mission, _inBattlescape, _inDogfight;
-	std::wstring _name;
 	RuleCraftStats _stats;
 public:
 	/// Creates a craft of the specified type.
@@ -75,10 +74,8 @@ public:
 	void changeRules(RuleCraft *rules);
 	/// Gets the craft's ID.
 	int getId() const;
-	/// Gets the craft's name.
-	std::wstring getName(Language *lang) const;
-	/// Sets the craft's name.
-	void setName(const std::wstring &newName);
+	/// Gets the craft's default name.
+	std::wstring getDefaultName(Language *lang) const;
 	/// Gets the craft's marker.
 	int getMarker() const;
 	/// Gets the craft's base.

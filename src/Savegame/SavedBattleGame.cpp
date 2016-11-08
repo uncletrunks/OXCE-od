@@ -35,8 +35,7 @@
 #include "../Mod/Armor.h"
 #include "../Engine/Game.h"
 #include "../Mod/RuleInventory.h"
-#include "../Battlescape/CivilianBAIState.h"
-#include "../Battlescape/AlienBAIState.h"
+#include "../Battlescape/AIModule.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Options.h"
 #include "../Engine/Logger.h"
@@ -53,7 +52,7 @@ SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1),
 	_debugMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
-	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE)
+	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
 {
 	_tileSearch.resize(11*11);
 	for (int i = 0; i < 121; ++i)
@@ -148,7 +147,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 		Tile::SerializationKey serKey;
 		size_t totalTiles = node["totalTiles"].as<size_t>();
 
-        memset(&serKey, 0, sizeof(Tile::SerializationKey));
+		memset(&serKey, 0, sizeof(Tile::SerializationKey));
 		serKey.index = node["tileIndexSize"].as<Uint8>(serKey.index);
 		serKey.totalBytes = node["tileTotalBytesPer"].as<Uint32>(serKey.totalBytes);
 		serKey._fire = node["tileFireSize"].as<Uint8>(serKey._fire);
@@ -218,25 +217,21 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			if ((unit->getId() == selectedUnit) || (_selectedUnit == 0 && !unit->isOut()))
 				_selectedUnit = unit;
 		}
-		if (unit->getStatus() != STATUS_DEAD)
+		if (unit->getStatus() != STATUS_DEAD && unit->getStatus() != STATUS_IGNORE_ME)
 		{
 			if (const YAML::Node &ai = (*i)["AI"])
 			{
-				BattleAIState *aiState;
-				if (faction == FACTION_NEUTRAL)
+				AIModule *aiModule;
+				if (faction != FACTION_PLAYER)
 				{
-					aiState = new CivilianBAIState(this, unit, 0);
-				}
-				else if (faction == FACTION_HOSTILE)
-				{
-					aiState = new AlienBAIState(this, unit, 0);
+					aiModule = new AIModule(this, unit, 0);
 				}
 				else
 				{
 					continue;
 				}
-				aiState->load(ai);
-				unit->setAIState(aiState);
+				aiModule->load(ai);
+				unit->setAIModule(aiModule);
 			}
 		}
 	}
@@ -407,7 +402,7 @@ YAML::Node SavedBattleGame::save() const
 	node["tileSmokeSize"] = Tile::serializationKey._smoke;
 	node["tileIDSize"] = Tile::serializationKey._mapDataID;
 	node["tileSetIDSize"] = Tile::serializationKey._mapDataSetID;
-    node["tileBoolFieldsSize"] = Tile::serializationKey.boolFields;
+	node["tileBoolFieldsSize"] = Tile::serializationKey.boolFields;
 
 	size_t tileDataSize = Tile::serializationKey.totalBytes * _mapsize_z * _mapsize_y * _mapsize_x;
 	Uint8* tileData = (Uint8*) calloc(tileDataSize, 1);
@@ -427,7 +422,7 @@ YAML::Node SavedBattleGame::save() const
 	}
 	node["totalTiles"] = tileDataSize / Tile::serializationKey.totalBytes; // not strictly necessary, just convenient
 	node["binTiles"] = YAML::Binary(tileData, tileDataSize);
-    free(tileData);
+	free(tileData);
 #endif
 	for (std::vector<Node*>::const_iterator i = _nodes.begin(); i != _nodes.end(); ++i)
 	{
@@ -446,8 +441,8 @@ YAML::Node SavedBattleGame::save() const
 		node["items"].push_back((*i)->save());
 	}
 	node["tuReserved"] = (int)_tuReserved;
-    node["kneelReserved"] = _kneelReserved;
-    node["depth"] = _depth;
+	node["kneelReserved"] = _kneelReserved;
+	node["depth"] = _depth;
 	node["ambience"] = _ambience;
 	node["ambientVolume"] = _ambientVolume;
 	for (std::vector<BattleItem*>::const_iterator i = _recoverGuaranteed.begin(); i != _recoverGuaranteed.end(); ++i)
@@ -1047,6 +1042,7 @@ void SavedBattleGame::resetUnitTiles()
 			(*i)->setVisible(true);
 		}
 	}
+	_beforeGame = false;
 }
 
 /**
@@ -1400,7 +1396,7 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
  * Create all fixed items for new created unit.
  * @param unit Unit to equip.
  */
-void SavedBattleGame::initFixedItems(BattleUnit *unit)
+void SavedBattleGame::initFixedItems(BattleUnit *unit, size_t itemLevel)
 {
 	unit->setSpecialWeapon(this);
 	Unit* rule = unit->getUnitRules();
@@ -1410,8 +1406,16 @@ void SavedBattleGame::initFixedItems(BattleUnit *unit)
 	// For aliens and HWP
 	if (rule)
 	{
-		// Built in weapons: the unit has this weapon regardless of loadout or what have you.
-		addFixedItems(unit, rule->getBuiltInWeapons());
+		auto &buildin = rule->getBuiltInWeapons();
+		if (!buildin.empty())
+		{
+			if (itemLevel >= buildin.size())
+			{
+				itemLevel = buildin.size() -1;
+			}
+			// Built in weapons: the unit has this weapon regardless of loadout or what have you.
+			addFixedItems(unit, buildin.at(itemLevel));
+		}
 
 		// terrorist alien's equipment is a special case - they are fitted with a weapon which is the alien's name with suffix _WEAPON
 		if (rule->isLivingWeapon())
@@ -1493,7 +1497,7 @@ void SavedBattleGame::addDestroyedObjective()
  * Returns whether the objectives are destroyed.
  * @return True if the objectives are destroyed.
  */
-bool SavedBattleGame::allObjectivesDestroyed()
+bool SavedBattleGame::allObjectivesDestroyed() const
 {
 	return (_objectivesNeeded > 0 && _objectivesDestroyed == _objectivesNeeded);
 }
@@ -2128,6 +2132,7 @@ void SavedBattleGame::resetTurnCounter()
 	_turn = 1;
 	_cheating = false;
 	_side = FACTION_PLAYER;
+	_beforeGame = true;
 }
 
 /**
@@ -2146,7 +2151,7 @@ void SavedBattleGame::resetTiles()
 /**
  * @return the tilesearch vector for use in AI functions.
  */
-const std::vector<Position> &SavedBattleGame::getTileSearch()
+const std::vector<Position> &SavedBattleGame::getTileSearch() const
 {
 	return _tileSearch;
 }
@@ -2155,7 +2160,7 @@ const std::vector<Position> &SavedBattleGame::getTileSearch()
  * is the AI allowed to cheat?
  * @return true if cheating.
  */
-bool SavedBattleGame::isCheating()
+bool SavedBattleGame::isCheating() const
 {
 	return _cheating;
 }
@@ -2355,7 +2360,7 @@ void SavedBattleGame::setObjectiveType(int type)
  * Get the objective type for the current battle.
  * @return the objective type.
  */
-SpecialTileType SavedBattleGame::getObjectiveType()
+SpecialTileType SavedBattleGame::getObjectiveType() const
 {
 	return (SpecialTileType)(_objectiveType);
 }
@@ -2424,4 +2429,10 @@ void SavedBattleGame::setCheatTurn(int turn)
 {
 	_cheatTurn = turn;
 }
+
+bool SavedBattleGame::isBeforeGame() const
+{
+	return _beforeGame;
+}
+
 }

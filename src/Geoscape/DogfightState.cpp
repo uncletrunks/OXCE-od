@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "DogfightState.h"
+#include <cmath>
 #include <sstream>
 #include "GeoscapeState.h"
 #include "../Engine/Game.h"
@@ -1834,4 +1835,5 @@ bool DogfightState::getWaitForPoly()
 {
 	return _waitForPoly;
 }
+
 }

@@ -29,7 +29,7 @@ class TextList;
 class Soldier;
 
 /**
- * Diary window that shows 
+ * Diary window that show
  * mission details for a soldier.
  */
 class SoldierDiaryMissionState : public State

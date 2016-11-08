@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <algorithm>
 #include <sstream>
+#include <algorithm>
 #include "MapBlock.h"
 #include "../Battlescape/Position.h"
 #include "../Engine/Exception.h"

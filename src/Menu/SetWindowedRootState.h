@@ -18,31 +18,39 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../Engine/State.h"
-
+#include "OptionsBaseState.h"
 namespace OpenXcom
 {
 
 class TextButton;
 class Window;
 class Text;
+class TextEdit;
+class OptionsVideoState;
+enum OptionsOrigin;
 
 /**
- * Screen shown when there's not enough containment
- * to capture a live alien after a mission.
+ * Asks user new coordinates when he pushes Fixed Borderless Pos button.
+ * are changed.
  */
-class NoContainmentState : public State
+class SetWindowedRootState : public State
 {
 private:
-	TextButton *_btnOk;
+	OptionsOrigin _origin;
+	OptionsVideoState *_optionsVideoState;
+	TextButton *_btnOk, *_btnCancel;
 	Window *_window;
-	Text *_txtTitle;
+	Text *_txtTitle, *_txtWindowedModePositionX, *_txtWindowedModePositionY;
+	TextEdit *_edtWindowedModePositionX, *_edtWindowedModePositionY;
 public:
-	/// Creates the No Containment state.
-	NoContainmentState();
-	/// Cleans up the No Containment state.
-	~NoContainmentState();
-	/// Handler for clicking the OK button.
+	/// Creates the Confirm Display Options state.
+	SetWindowedRootState(OptionsOrigin origin, OptionsVideoState *optionsVideoState);
+	/// Cleans up the Confirm Display Options state.
+	~SetWindowedRootState();
+	/// Handler for clicking the Ok button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the Cancel button.
+	void btnCancelClick(Action *action);
 };
 
 }

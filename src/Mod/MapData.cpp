@@ -563,7 +563,7 @@ void MapData::setTUSlide(const int TUSlide)
  * check if this is an xcom base object.
  * @return if it is a base object.
  */
-bool MapData::isBaseModule()
+bool MapData::isBaseModule() const
 {
 	return _baseModule;
 }

@@ -404,9 +404,16 @@ void ExplosionBState::explode()
 	else
 	{
 		BattleUnit *victim = save->getTileEngine()->hit(_center, _power, _damageType, _unit, _item, range);
+
+		const RuleItem *hitItem = _item->getRules();
+		if (_hit && !_pistolWhip && _item->getAmmoItem())
+		{
+			hitItem = _item->getAmmoItem()->getRules();
+		}
+
 		// check if this unit turns others into zombies
-		if (!_item->getRules()->getZombieUnit().empty()
-			&& RNG::percent(_item->getRules()->getSpecialChance())
+		if (!hitItem->getZombieUnit().empty()
+			&& RNG::percent(hitItem->getSpecialChance())
 			&& victim
 			&& victim->getArmor()->getZombiImmune() == false
 			&& victim->getSpawnUnit().empty()
@@ -414,7 +421,7 @@ void ExplosionBState::explode()
 		{
 			// converts the victim to a zombie on death
 			victim->setRespawn(true);
-			victim->setSpawnUnit(_item->getRules()->getZombieUnit());
+			victim->setSpawnUnit(hitItem->getZombieUnit());
 		}
 	}
 

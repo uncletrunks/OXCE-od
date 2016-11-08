@@ -43,7 +43,7 @@ SoldierDiaryMissionState::SoldierDiaryMissionState(Soldier *soldier, int rowEntr
 {
 	_screen = false;
 
-	// Create objects
+	// Create object
 	_window = new Window(this, 300, 128, 10, 36, POPUP_HORIZONTAL);
 	_btnOk = new TextButton(240, 16, 40, 140);
 	_btnPrev = new TextButton(28, 14, 18, 44);
@@ -79,7 +79,7 @@ SoldierDiaryMissionState::SoldierDiaryMissionState(Soldier *soldier, int rowEntr
 
 	centerAllSurfaces();
 
-	// Set up objects
+	// Set up object
 	_window->setBackground(_game->getMod()->getSurface("BACK16.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
@@ -144,7 +144,7 @@ void SoldierDiaryMissionState::init()
 	_txtDaysWounded->setVisible(daysWounded != 0);
 	
 	int kills = 0;
-    bool stunOrKill = false;
+	bool stunOrKill = false;
 
 	for (std::vector<BattleUnitKills*>::iterator i = _soldier->getDiary()->getKills().begin() ; i != _soldier->getDiary()->getKills().end() ; ++i)
 	{
@@ -192,7 +192,7 @@ void SoldierDiaryMissionState::btnPrevClick(Action *)
 	if (_rowEntry == 0)
 		_rowEntry = _soldier->getDiary()->getMissionTotal() - 1;
 	else
-		_rowEntry--;		
+		_rowEntry--;
 	init();
 }
 

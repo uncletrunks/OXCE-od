@@ -41,7 +41,6 @@ private:
 	Base *_base;
 	size_t _craftId;
 	Craft *_craft;
-	std::wstring _defaultName;
 	int _weaponNum;
 
 	TextButton *_btnOk, *_btnW[RuleCraft::WeaponMax], *_btnCrew, *_btnEquip, *_btnArmor;

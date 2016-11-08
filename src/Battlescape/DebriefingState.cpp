@@ -26,7 +26,6 @@
 #include "../Interface/Text.h"
 #include "../Interface/TextList.h"
 #include "../Interface/Window.h"
-#include "NoContainmentState.h"
 #include "PromotionsState.h"
 #include "CommendationState.h"
 #include "CommendationLateState.h"
@@ -262,6 +261,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 	_missionStatistics->daylight = save->getSavedBattle()->getGlobalShade();
 	_missionStatistics->id = _game->getSavedGame()->getMissionStatistics()->size();
+	_game->getSavedGame()->getMissionStatistics()->push_back(_missionStatistics);
 
 	// Award Best-of commendations.
 	int bestScoreID[7] = {0, 0, 0, 0, 0, 0, 0};
@@ -318,7 +318,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 		// Find the best soldier per rank by comparing score.
 		for (std::vector<Soldier*>::iterator j = _game->getSavedGame()->getDeadSoldiers()->begin(); j != _game->getSavedGame()->getDeadSoldiers()->end(); ++j)
 		{
-			int score = (*j)->getDiary()->getScoreTotal();
+			int score = (*j)->getDiary()->getScoreTotal(_game->getSavedGame()->getMissionStatistics());
 
 			// Don't forget this mission's score!
 			if ((*j)->getId() == (*deadUnit)->getId())
@@ -416,19 +416,18 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 			// Set the UnitStats delta
 			(*j)->getStatistics()->delta = *(*j)->getGeoscapeSoldier()->getCurrentStats() - *(*j)->getGeoscapeSoldier()->getInitStats();
 
-			(*j)->getGeoscapeSoldier()->getDiary()->updateDiary((*j)->getStatistics(), _missionStatistics, _game->getMod());
-			if (!(*j)->getStatistics()->MIA && !(*j)->getStatistics()->KIA && (*j)->getGeoscapeSoldier()->getDiary()->manageCommendations(_game->getMod()))
+			(*j)->getGeoscapeSoldier()->getDiary()->updateDiary((*j)->getStatistics(), _game->getSavedGame()->getMissionStatistics(), _game->getMod());
+			if (!(*j)->getStatistics()->MIA && !(*j)->getStatistics()->KIA && (*j)->getGeoscapeSoldier()->getDiary()->manageCommendations(_game->getMod(), _game->getSavedGame()->getMissionStatistics()))
 			{
 				_soldiersCommended.push_back((*j)->getGeoscapeSoldier());
 			}
 			else if ((*j)->getStatistics()->MIA || (*j)->getStatistics()->KIA)
 			{
-				(*j)->getGeoscapeSoldier()->getDiary()->manageCommendations(_game->getMod());
+				(*j)->getGeoscapeSoldier()->getDiary()->manageCommendations(_game->getMod(), _game->getSavedGame()->getMissionStatistics());
 				_deadSoldiersCommended.push_back((*j)->getGeoscapeSoldier());
 			}
 		}
 	}
-	_game->getSavedGame()->getMissionStatistics()->push_back(_missionStatistics);
 
 	_positiveScore = (total > 0);
 }
@@ -467,6 +466,11 @@ void DebriefingState::init()
 	else
 	{
 		_game->getMod()->playMusic(Mod::DEBRIEF_MUSIC_BAD);
+	}
+	if (_noContainment)
+	{
+		_game->pushState(new ErrorMessageState(tr("STR_ALIEN_DIES_NO_ALIEN_CONTAINMENT_FACILITY"), _palette, _game->getMod()->getInterface("debriefing")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("debriefing")->getElement("errorPalette")->color));
+		_noContainment = false;
 	}
 }
 
@@ -510,10 +514,6 @@ void DebriefingState::btnOkClick(Action *)
 			if (!_missingItems.empty())
 			{
 				_game->pushState(new CannotReequipState(_missingItems));
-			}
-			if (_noContainment)
-			{
-				_game->pushState(new NoContainmentState);
 			}
 			else if (_manageContainment)
 			{
@@ -1573,7 +1573,7 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		return;
 	}
 	std::string type = from->getType();
-	if (base->getAvailableContainment() == 0)
+	if (base->getAvailableContainment() == 0 && _game->getSavedGame()->getMonthsPassed() > -1)
 	{
 		_noContainment = true;
 

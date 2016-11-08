@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
 #include "GeoscapeState.h"
-#include <cmath>
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
@@ -105,6 +103,7 @@
 #include "../Engine/Exception.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/RuleInterface.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -452,7 +451,7 @@ void GeoscapeState::handle(Action *action)
 			if (_game->getSavedGame()->getDebugMode())
 			{
 				_txtDebug->setText(L"SOLDIER COMMENDATIONS DELETED");
-                for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+				for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
 				{
 					for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
 					{
@@ -524,6 +523,10 @@ void GeoscapeState::init()
 		{
 			_game->getMod()->playMusic("GMGEO");
 		}
+	}
+	else
+	{
+		_game->getMod()->playMusic("GMINTER");
 	}
 	_globe->unsetNewBaseHover();
 
@@ -830,11 +833,10 @@ void GeoscapeState::time5Seconds()
 						}
 						else
 						{
-							(*j)->setDestination(0);
 							Waypoint *w = new Waypoint();
-							w->setLongitude(u->getMeetLongitude());
-							w->setLatitude(u->getMeetLatitude());
-							w->setId(u->getId());
+							w->setLongitude((*j)->getMeetLongitude());
+							w->setLatitude((*j)->getMeetLatitude());
+							(*j)->setDestination(0);
 							popup(new GeoscapeCraftState((*j), _globe, w));
 						}
 					}
@@ -1549,24 +1551,17 @@ void GeoscapeState::time1Day()
 			(*i)->removeResearch(*iter);
 			RuleResearch * bonus = 0;
 			const RuleResearch * research = (*iter)->getRules();
-			// If "researched" the live alien, his body sent to the stores.
-			if (Options::spendResearchedItems && research->needItem() && _game->getMod()->getUnit(research->getName()))
+			if (Options::retainCorpses && research->destroyItem() && _game->getMod()->getUnit(research->getName()))
 			{
-				(*i)->getStorageItems()->addItem(
-					_game->getMod()->getArmor(
-						_game->getMod()->getUnit(
-							research->getName()
-						)->getArmor()
-					)->getCorpseGeoscape()
-				);
+				(*i)->getStorageItems()->addItem(_game->getMod()->getArmor(_game->getMod()->getUnit(research->getName())->getArmor())->getCorpseGeoscape());
 			}
 			if (!(*iter)->getRules()->getGetOneFree().empty())
 			{
 				std::vector<std::string> possibilities;
-				for (std::vector<std::string>::const_iterator f = (*iter)->getRules()->getGetOneFree().begin(); f != (*iter)->getRules()->getGetOneFree().end(); ++f)
+				for (std::vector<std::string>::const_iterator f = research->getGetOneFree().begin(); f != research->getGetOneFree().end(); ++f)
 				{
 					bool newFound = true;
-					for (std::vector<const RuleResearch*>::const_iterator discovered = _game->getSavedGame()->getDiscoveredResearch().begin(); discovered != _game->getSavedGame()->getDiscoveredResearch().end(); ++discovered)
+					for (std::vector<const RuleResearch*>::const_iterator discovered = _game->getSavedGame()->getDiscoveredResearch().begin(); discovered != _game->getSavedGame()->getDiscoveredResearch().end() && newFound; ++discovered)
 					{
 						if (*f == (*discovered)->getName())
 						{
@@ -1609,11 +1604,11 @@ void GeoscapeState::time1Day()
 			{
 				popup(new CutsceneState(bonus->getCutscene()));
 			}
-			popup(new ResearchCompleteState(newResearch, bonus));
+			popup(new ResearchCompleteState(newResearch, bonus, research));
 			std::vector<RuleResearch *> newPossibleResearch;
-			_game->getSavedGame()->getDependableResearch (newPossibleResearch, (*iter)->getRules(), _game->getMod(), *i);
+			_game->getSavedGame()->getDependableResearch (newPossibleResearch, research, _game->getMod(), *i);
 			std::vector<RuleManufacture *> newPossibleManufacture;
-			_game->getSavedGame()->getDependableManufacture (newPossibleManufacture, (*iter)->getRules(), _game->getMod(), *i);
+			_game->getSavedGame()->getDependableManufacture (newPossibleManufacture, research, _game->getMod(), *i);
 			timerReset();
 			// check for possible researching weapon before clip
 			if (newResearch)
@@ -1644,7 +1639,7 @@ void GeoscapeState::time1Day()
 			{
 				for (std::vector<ResearchProject*>::const_iterator iter2 = (*j)->getResearch().begin(); iter2 != (*j)->getResearch().end(); ++iter2)
 				{
-					if ((*iter)->getRules()->getName() == (*iter2)->getRules()->getName() &&
+					if (research->getName() == (*iter2)->getRules()->getName() &&
 						_game->getMod()->getUnit((*iter2)->getRules()->getName()) == 0)
 					{
 						(*j)->removeResearch(*iter2);

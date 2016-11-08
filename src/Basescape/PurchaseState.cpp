@@ -21,7 +21,6 @@
 #include <sstream>
 #include <climits>
 #include <cfloat>
-#include <cmath>
 #include <iomanip>
 #include <algorithm>
 #include "../fmath.h"

@@ -50,7 +50,7 @@ namespace
 
 /**
  * Helper function counting pitch in bytes with 16byte padding
- * @param bpp bytes per pixel
+ * @param bpp bits per pixel
  * @param width number of pixel in row
  * @return pitch in bytes
  */
@@ -61,7 +61,7 @@ inline int GetPitch(int bpp, int width)
 
 /**
  * Helper function creating aligned buffer
- * @param bpp bytes per pixel
+ * @param bpp bits per pixel
  * @param width number of pixel in row
  * @param height number of rows
  * @return pointer to memory
@@ -983,8 +983,9 @@ void Surface::setTFTDMode(bool mode)
  * checks TFTD mode.
  * @return TFTD mode.
  */
-bool Surface::isTFTDMode()
+bool Surface::isTFTDMode() const
 {
 	return _tftdMode;
 }
+
 }
