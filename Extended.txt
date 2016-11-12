@@ -124,6 +124,7 @@ Visibility scripts that determine visibility of targets.[br/]
 [br/]
 3.5:[br/]
 Update to buildin script functions.[br/]
+Update to recent nightly OpenXcom.[br/]
 [br/]
 
 [examples]
