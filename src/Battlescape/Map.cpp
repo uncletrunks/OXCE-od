@@ -1468,6 +1468,7 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
 	else
 	{
 		offset->y += getTerrainLevel(unit->getPosition(), size);
+
 		if (_save->getDepth() > 0)
 		{
 			unit->setFloorAbove(false);

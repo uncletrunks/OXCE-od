@@ -256,13 +256,13 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 					if (mod->getInventory(type))
 					{
 						item->setSlot(mod->getInventory(type));
-						
+
 					}
 					else
 					{
 						item->setSlot(mod->getInventory("STR_GROUND"));
 					}
-				}				
+				}
 				int owner = (*i)["owner"].as<int>();
 				int prevOwner = (*i)["previousOwner"].as<int>(-1);
 				int unit = (*i)["unit"].as<int>();
