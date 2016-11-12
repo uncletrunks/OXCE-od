@@ -389,6 +389,8 @@ YAML::Node SavedBattleGame::save() const
 	node["height"] = _mapsize_z;
 	node["missionType"] = _missionType;
 	node["startingConditionType"] = _startingConditionType;
+	node["alienCustomDeploy"] = _alienCustomDeploy;
+	node["alienCustomMission"] = _alienCustomMission;
 	node["globalshade"] = _globalShade;
 	node["turn"] = _turn;
 	node["selectedUnit"] = (_selectedUnit?_selectedUnit->getId():-1);
