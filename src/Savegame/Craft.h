@@ -182,6 +182,8 @@ public:
 	CraftId getUniqueId() const;
 	/// Unloads the craft.
 	void unload(const Mod *mod);
+	/// Reuses a base item.
+	void reuseItem(const std::string &item);
 };
 
 }

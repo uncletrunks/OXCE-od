@@ -611,7 +611,7 @@ double Base::getUsedStores()
 	{
 		if ((*i)->getType() == TRANSFER_ITEM)
 		{
-			total += (*i)->getQuantity() * _mod->getItem((*i)->getItems())->getSize();
+			total += (*i)->getQuantity() * _mod->getItem((*i)->getItems(), true)->getSize();
 		}
 		else if ((*i)->getType() == TRANSFER_CRAFT)
 		{
@@ -676,13 +676,13 @@ double Base::getIgnoredStores()
 					int available = getStorageItems()->getItem(clip);
 					if (!clip.empty() && available > 0)
 					{
-						int clipSize = _mod->getItem(clip)->getClipSize();
+						int clipSize = _mod->getItem(clip, true)->getClipSize();
 						int needed = 0;
 						if (clipSize > 0)
 						{
 							needed = ((*w)->getRules()->getAmmoMax() - (*w)->getAmmo()) / clipSize;
 						}
-						space += std::min(available, needed) * _mod->getItem(clip)->getSize();
+						space += std::min(available, needed) * _mod->getItem(clip, true)->getSize();
 					}
 				}
 			}
@@ -1221,7 +1221,7 @@ int Base::getUsedContainment() const
 	int total = 0;
 	for (std::map<std::string, int>::iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
 	{
-		if (_mod->getItem((i)->first)->isAlien())
+		if (_mod->getItem((i)->first, true)->isAlien())
 		{
 			total += (i)->second;
 		}
@@ -1230,7 +1230,7 @@ int Base::getUsedContainment() const
 	{
 		if ((*i)->getType() == TRANSFER_ITEM)
 		{
-			if (_mod->getItem((*i)->getItems())->isAlien())
+			if (_mod->getItem((*i)->getItems(), true)->isAlien())
 			{
 				total += (*i)->getQuantity();
 			}
@@ -1353,7 +1353,14 @@ bool isCompleted::operator()(const BaseFacility *facility) const
 size_t Base::getDetectionChance() const
 {
 	size_t mindShields = std::count_if (_facilities.begin(), _facilities.end(), isMindShield());
-	size_t completedFacilities = std::count_if (_facilities.begin(), _facilities.end(), isCompleted());
+	size_t completedFacilities = 0;
+	for (std::vector<BaseFacility*>::const_iterator i = _facilities.begin(); i != _facilities.end(); ++i)
+	{
+		if ((*i)->getBuildTime() == 0)
+		{
+			completedFacilities += (*i)->getRules()->getSize() * (*i)->getRules()->getSize();
+		}
+	}
 	return ((completedFacilities / 6 + 15) / (mindShields + 1));
 }
 
@@ -1409,13 +1416,13 @@ void Base::setupDefenses()
 	{
 		std::string itemId = (i)->first;
 		int itemQty = (i)->second;
-		RuleItem *rule = _mod->getItem(itemId);
+		RuleItem *rule = _mod->getItem(itemId, true);
 		if (rule->isFixed())
 		{
 			int size = 4;
 			if (_mod->getUnit(itemId))
 			{
-				size = _mod->getArmor(_mod->getUnit(itemId)->getArmor())->getSize();
+				size = _mod->getArmor(_mod->getUnit(itemId)->getArmor(), true)->getSize();
 			}
 			if (rule->getCompatibleAmmo()->empty()) // so this vehicle does not need ammo
 			{
@@ -1427,7 +1434,7 @@ void Base::setupDefenses()
 			}
 			else // so this vehicle needs ammo
 			{
-				RuleItem *ammo = _mod->getItem(rule->getCompatibleAmmo()->front());
+				RuleItem *ammo = _mod->getItem(rule->getCompatibleAmmo()->front(), true);
 				int ammoPerVehicle, clipSize;
 				if (ammo->getClipSize() > 0 && rule->getClipSize() > 0)
 				{
@@ -1619,7 +1626,7 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 		{
 			bool remove = true;
 			// no craft - check productions.
-			for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end();)
+			for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end(); ++i)
 			{
 				if (getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts() < 0 && (*i)->getRules()->getCategory() == "STR_CRAFT")
 				{
@@ -1629,14 +1636,10 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 					remove = false;
 					break;
 				}
-				else
-				{
-					++i;
-				}
 			}
 			if (remove && !_transfers.empty())
 			{
-				for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); )
+				for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 				{
 					if ((*i)->getType() == TRANSFER_CRAFT)
 					{
@@ -1772,7 +1775,7 @@ void Base::cleanupDefenses(bool reclaimItems)
 			_items->addItem(type);
 			if (!rule->getCompatibleAmmo()->empty())
 			{
-				RuleItem *ammo = _mod->getItem(rule->getCompatibleAmmo()->front());
+				RuleItem *ammo = _mod->getItem(rule->getCompatibleAmmo()->front(), true);
 				int ammoPerVehicle;
 				if (ammo->getClipSize() > 0 && rule->getClipSize() > 0)
 				{

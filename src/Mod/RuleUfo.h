@@ -60,7 +60,7 @@ class RuleUfo
 private:
 	std::string _type, _size;
 	int _sprite, _marker;
-	int _power, _range, _score, _reload, _breakOffTime;
+	int _power, _range, _score, _reload, _breakOffTime, _missionScore;
 	RuleTerrain *_battlescapeTerrainData;
 	RuleUfoStats _stats;
 	std::map<std::string, RuleUfoStats> _statsRaceBonus;
@@ -102,6 +102,8 @@ public:
 	const RuleUfoStats& getRaceBonus(const std::string& s) const;
 	/// Gets the UFO's radar range.
 	int getSightRange() const;
+	/// Gets the UFO's mission score.
+	int getMissionScore() const;
 };
 
 }

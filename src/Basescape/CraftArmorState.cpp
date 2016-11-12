@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "CraftArmorState.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
@@ -34,6 +35,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleSoldier.h"
 
 namespace OpenXcom
 {
@@ -165,27 +167,30 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 			SavedGame *save;
 			save = _game->getSavedGame();
 			Armor *a = _game->getMod()->getArmor(save->getLastSelectedArmor());
-			if (save->getMonthsPassed() != -1)
+			if (a && (a->getUnits().empty() || std::find(a->getUnits().begin(), a->getUnits().end(), s->getRules()->getType()) != a->getUnits().end()))
 			{
-				if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
+				if (save->getMonthsPassed() != -1)
 				{
-					if (s->getArmor()->getStoreItem() != Armor::NONE)
+					if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
 					{
-						_base->getStorageItems()->addItem(s->getArmor()->getStoreItem());
-					}
-					if (a->getStoreItem() != Armor::NONE)
-					{
-						_base->getStorageItems()->removeItem(a->getStoreItem());
-					}
+						if (s->getArmor()->getStoreItem() != Armor::NONE)
+						{
+							_base->getStorageItems()->addItem(s->getArmor()->getStoreItem());
+						}
+						if (a->getStoreItem() != Armor::NONE)
+						{
+							_base->getStorageItems()->removeItem(a->getStoreItem());
+						}
 
+						s->setArmor(a);
+						_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
+					}
+				}
+				else
+				{
 					s->setArmor(a);
 					_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
 				}
-			}
-			else
-			{
-				s->setArmor(a);
-				_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
 			}
 		}
 	}

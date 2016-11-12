@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <signal.h>
 #include "../dirent.h"
 #include "Logger.h"
 #include "Exception.h"
@@ -1050,23 +1051,21 @@ std::string now()
 void crashDump(void *ex, const std::string &err)
 {
 	std::ostringstream error;
-#ifdef _WIN32
+#ifdef _MSC_VER
 	PEXCEPTION_POINTERS exception = (PEXCEPTION_POINTERS)ex;
-	if (ex)
+	std::exception *cppException = 0;
+	switch (exception->ExceptionRecord->ExceptionCode)
 	{
-		if (exception->ExceptionRecord->ExceptionCode == EXCEPTION_CODE_CXX)
-		{
-			std::exception *cppException = (std::exception *)exception->ExceptionRecord->ExceptionInformation[1];
-			error << cppException->what();
-		}
-		else
-		{
-			error << "code 0x" << std::hex << exception->ExceptionRecord->ExceptionCode;
-		}
-	}
-	else
-	{
-		error << err;
+	case EXCEPTION_CODE_CXX:
+		cppException = (std::exception *)exception->ExceptionRecord->ExceptionInformation[1];
+		error << cppException->what();
+		break;
+	case EXCEPTION_ACCESS_VIOLATION:
+		error << "Memory access violation. This usually indicates something missing in a mod.";
+		break;
+	default:
+		error << "code 0x" << std::hex << exception->ExceptionRecord->ExceptionCode;
+		break;
 	}
 	Log(LOG_FATAL) << "A fatal error has occurred: " << error.str();
 	if (ex)
@@ -1096,7 +1095,15 @@ void crashDump(void *ex, const std::string &err)
 	else
 	{
 		int signal = *((int*)ex);
-		error << "signal " << signal;
+		switch (signal)
+		{
+		case SIGSEGV:
+			error << "Segmentation fault. This usually indicates something missing in a mod.";
+			break;
+		default:
+			error << "signal " << signal;
+			break;
+		}
 	}
 	Log(LOG_FATAL) << "A fatal error has occurred: " << error.str();
 	stackTrace(0);

@@ -176,6 +176,11 @@ static bool _isCurrentGameType(const SaveInfo &saveInfo, const std::string &curM
 	else
 	{
 		gameMaster = saveInfo.mods[0];
+		size_t pos = gameMaster.find(" ver: ");
+		if (pos != std::string::npos)
+		{
+			gameMaster = gameMaster.substr(0, pos);
+		}
 	}
 
 	if (gameMaster != curMaster)
@@ -389,9 +394,17 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 	// Alien bases must be loaded before alien missions
 	for (YAML::const_iterator i = doc["alienBases"].begin(); i != doc["alienBases"].end(); ++i)
 	{
-		AlienBase *b = new AlienBase();
-		b->load(*i);
-		_alienBases.push_back(b);
+		std::string deployment = (*i)["deployment"].as<std::string>("STR_ALIEN_BASE_ASSAULT");
+		if (mod->getDeployment(deployment))
+		{
+			AlienBase *b = new AlienBase(mod->getDeployment(deployment));
+			b->load(*i);
+			_alienBases.push_back(b);
+		}
+		else
+		{
+			Log(LOG_ERROR) << "Failed to load deployment for alien base " << deployment;
+		}
 	}
 
 	// Missions must be loaded before UFOs.
@@ -581,7 +594,7 @@ void SavedGame::save(const std::string &filename) const
 			{
 				continue;
 			}
-			activeMods.push_back(i->first);
+			activeMods.push_back(i->first + " ver: " + modInfo.getVersion());
 		}
 	}
 	brief["mods"] = activeMods;
@@ -1137,7 +1150,7 @@ void SavedGame::getAvailableResearchProjects (std::vector<RuleResearch *> & proj
 	{
 		for (std::vector<std::string>::const_iterator itUnlocked = (*it)->getUnlocked().begin(); itUnlocked != (*it)->getUnlocked().end(); ++itUnlocked)
 		{
-			unlocked.push_back(mod->getResearch(*itUnlocked));
+			unlocked.push_back(mod->getResearch(*itUnlocked, true));
 		}
 	}
 	for (std::vector<std::string>::const_iterator iter = researchProjects.begin(); iter != researchProjects.end(); ++iter)

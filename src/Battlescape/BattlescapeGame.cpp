@@ -918,7 +918,7 @@ void BattlescapeGame::missionComplete()
 	if (game->getMod()->getDeployment(_save->getMissionType()))
 	{
 		std::string missionComplete = game->getMod()->getDeployment(_save->getMissionType())->getObjectivePopup();
-		if (missionComplete != "")
+		if (!missionComplete.empty())
 		{
 			_infoboxQueue.push_back(new InfoboxOKState(game->getLanguage()->getString(missionComplete)));
 		}
@@ -1814,7 +1814,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 	if (item->getRules()->isFixed())
 		return;
 
-	_save->getTile(p)->addItem(item, getMod()->getInventory("STR_GROUND"));
+	_save->getTile(p)->addItem(item, getMod()->getInventory("STR_GROUND", true));
 
 	if (item->getUnit())
 	{
@@ -1875,13 +1875,13 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	// remove unit-tile link
 	unit->setTile(0);
 
-	Unit* type = getMod()->getUnit(unit->getSpawnUnit());
+	Unit* type = getMod()->getUnit(unit->getSpawnUnit(), true);
 	getSave()->getTile(unit->getPosition())->setUnit(0);
 
 	BattleUnit *newUnit = new BattleUnit(type,
 		FACTION_HOSTILE,
 		_save->getUnits()->back()->getId() + 1,
-		getMod()->getArmor(type->getArmor()),
+		getMod()->getArmor(type->getArmor(), true),
 		getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
 		getDepth(),
 		getMod()->getMaxViewDistance());
@@ -2211,7 +2211,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 				if (!action->actor->getItem("STR_BELT", i))
 				{
 					item->moveToOwner(action->actor);
-					item->setSlot(mod->getInventory("STR_BELT"));
+					item->setSlot(mod->getInventory("STR_BELT", true));
 					item->setSlotX(i);
 					placed = true;
 					break;
@@ -2226,7 +2226,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 			if (!action->actor->getItem("STR_BELT", i))
 			{
 				item->moveToOwner(action->actor);
-				item->setSlot(mod->getInventory("STR_BELT"));
+				item->setSlot(mod->getInventory("STR_BELT", true));
 				item->setSlotX(i);
 				placed = true;
 				break;
@@ -2238,7 +2238,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 		if (!action->actor->getRightHandWeapon())
 		{
 			item->moveToOwner(action->actor);
-			item->setSlot(mod->getInventory("STR_RIGHT_HAND"));
+			item->setSlot(mod->getInventory("STR_RIGHT_HAND", true));
 			placed = true;
 		}
 		break;
@@ -2247,7 +2247,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 		if (!action->actor->getItem("STR_BACK_PACK"))
 		{
 			item->moveToOwner(action->actor);
-			item->setSlot(mod->getInventory("STR_BACK_PACK"));
+			item->setSlot(mod->getInventory("STR_BACK_PACK", true));
 			placed = true;
 		}
 		break;
@@ -2255,7 +2255,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 		if (!action->actor->getLeftHandWeapon())
 		{
 			item->moveToOwner(action->actor);
-			item->setSlot(mod->getInventory("STR_LEFT_HAND"));
+			item->setSlot(mod->getInventory("STR_LEFT_HAND", true));
 			placed = true;
 		}
 		break;

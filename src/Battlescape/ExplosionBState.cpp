@@ -168,7 +168,7 @@ void ExplosionBState::init()
 	}
 	else if (_unit && (_unit->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
 	{
-		RuleItem* corpse = _parent->getMod()->getItem(_unit->getArmor()->getCorpseGeoscape());
+		RuleItem* corpse = _parent->getMod()->getItem(_unit->getArmor()->getCorpseGeoscape(), true);
 		_power = corpse->getPowerBonus(_unit);
 		_damageType = corpse->getDamageType();
 		_radius = corpse->getExplosionRadius(_unit);

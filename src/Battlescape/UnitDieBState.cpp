@@ -178,20 +178,13 @@ void UnitDieBState::think()
 			Game *game = _parent->getSave()->getBattleState()->getGame();
 			if (_unit->getStatus() == STATUS_DEAD)
 			{
-				if (_damageType->ResistType == DT_NONE)
+				if (_damageType->ResistType == DT_NONE && _unit->getSpawnUnit().empty())
 				{
 					game->pushState(new InfoboxOKState(game->getLanguage()->getString("STR_HAS_DIED_FROM_A_FATAL_WOUND", _unit->getGender()).arg(_unit->getName(game->getLanguage()))));
 				}
-				else if (Options::battleNotifyDeath)
+				else if (Options::battleNotifyDeath && _unit->getGeoscapeSoldier() != 0)
 				{
-					if (_damageType->ResistType == DT_NONE && _unit->getSpawnUnit().empty())
-					{
-						game->pushState(new InfoboxOKState(game->getLanguage()->getString("STR_HAS_DIED_FROM_A_FATAL_WOUND", _unit->getGender()).arg(_unit->getName(game->getLanguage()))));
-					}
-					else if (Options::battleNotifyDeath)
-					{
-						game->pushState(new InfoboxState(game->getLanguage()->getString("STR_HAS_BEEN_KILLED", _unit->getGender()).arg(_unit->getName(game->getLanguage()))));
-					}
+					game->pushState(new InfoboxState(game->getLanguage()->getString("STR_HAS_BEEN_KILLED", _unit->getGender()).arg(_unit->getName(game->getLanguage()))));
 				}
 			}
 			else
@@ -319,7 +312,7 @@ void UnitDieBState::convertUnitToCorpse()
 			{
 				if ((*it)->getUnit() == _unit)
 				{
-					RuleItem *corpseRules = _parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[0]); // we're in an inventory, so we must be a 1x1 unit
+					RuleItem *corpseRules = _parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[0], true); // we're in an inventory, so we must be a 1x1 unit
 					(*it)->convertToCorpse(corpseRules);
 					break;
 				}
@@ -340,7 +333,7 @@ void UnitDieBState::convertUnitToCorpse()
 				}
 				if (!_overKill)
 				{
-					BattleItem *corpse = new BattleItem(_parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[i]), _parent->getSave()->getCurrentItemId());
+					BattleItem *corpse = new BattleItem(_parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[i], true), _parent->getSave()->getCurrentItemId());
 					corpse->setUnit(_unit);
 					_parent->dropItem(lastPosition + Position(x,y,0), corpse, true, false);
 					--i;

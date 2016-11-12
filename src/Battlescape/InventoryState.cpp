@@ -333,7 +333,7 @@ void InventoryState::init()
 			ss << gender;
 			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
 			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str());
+			surf = _game->getMod()->getSurface(ss.str(), false);
 			if (surf)
 			{
 				break;
@@ -344,20 +344,20 @@ void InventoryState::init()
 			ss.str("");
 			ss << look;
 			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str());
+			surf = _game->getMod()->getSurface(ss.str(), false);
 		}
 		surf->blit(_soldier);
 	}
 	else
 	{
-		Surface *armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory());
+		Surface *armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory(), false);
 		if (!armorSurface)
 		{
-			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + ".SPK");
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + ".SPK", false);
 		}
 		if (!armorSurface)
 		{
-			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + "M0.SPK");
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + "M0.SPK", false);
 		}
 		if (armorSurface)
 		{
@@ -614,7 +614,7 @@ void InventoryState::btnCreateTemplateClick(Action *)
 
 static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile)
 {
-	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
+	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND", true);
 
 	// clear unit's inventory (i.e. move everything to the ground)
 	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
@@ -647,7 +647,7 @@ void InventoryState::btnApplyTemplateClick(Action *)
 	std::vector<BattleItem*> *unitInv       = unit->getInventory();
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
-	RuleInventory            *groundRuleInv = _game->getMod()->getInventory("STR_GROUND");
+	RuleInventory            *groundRuleInv = _game->getMod()->getInventory("STR_GROUND", true);
 
 	_clearInventory(_game, unitInv, groundTile);
 
@@ -660,7 +660,7 @@ void InventoryState::btnApplyTemplateClick(Action *)
 	{
 		// search for template item in ground inventory
 		std::vector<BattleItem*>::iterator groundItem;
-		const bool needsAmmo = !_game->getMod()->getItem((*templateIt)->getItemType())->getCompatibleAmmo()->empty();
+		const bool needsAmmo = !_game->getMod()->getItem((*templateIt)->getItemType(), true)->getCompatibleAmmo()->empty();
 		bool found = false;
 		bool rescan = true;
 		while (rescan)
@@ -700,7 +700,7 @@ void InventoryState::btnApplyTemplateClick(Action *)
 					if (!_inv->overlapItems(
 						unit,
 						*groundItem,
-						_game->getMod()->getInventory((*templateIt)->getSlot()),
+						_game->getMod()->getInventory((*templateIt)->getSlot(), true),
 						(*templateIt)->getSlotX(),
 						(*templateIt)->getSlotY()))
 					{
@@ -800,7 +800,7 @@ void InventoryState::onClearInventory(Action *)
 	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
 }
 
-void InventoryState::onAutoequip(Action *action)
+void InventoryState::onAutoequip(Action *)
 {
 	// don't act when moving items
 	if (_inv->getSelectedItem() != 0)
@@ -812,7 +812,7 @@ void InventoryState::onAutoequip(Action *action)
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
 	Mod                      *mod           = _game->getMod();
-	RuleInventory            *groundRuleInv = mod->getInventory("STR_GROUND");
+	RuleInventory            *groundRuleInv = mod->getInventory("STR_GROUND", true);
 	int                       worldShade    = _battleGame->getGlobalShade();
 	SavedBattleGame           dummy{ mod };
 

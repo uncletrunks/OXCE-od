@@ -133,13 +133,12 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	case 12: m = "STR_DEC"; break;
 	default: m = "";
 	}
-	int difficulty_threshold = 100*(_game->getSavedGame()->getDifficultyCoefficient()-9);
-
 	_txtMonth->setText(tr("STR_MONTH").arg(tr(m)).arg(year));
 
 	// Calculate rating
+	int difficulty_threshold = _game->getMod()->getDefeatScore() + 100 * _game->getSavedGame()->getDifficultyCoefficient();
 	std::wstring rating = tr("STR_RATING_TERRIBLE");
-	if (_ratingTotal > difficulty_threshold-300)
+	if (_ratingTotal > difficulty_threshold - 300)
 	{
 		rating = tr("STR_RATING_POOR");
 	}
@@ -216,7 +215,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 
 	if (!_gameOver)
 	{
-		if (_game->getSavedGame()->getFunds() <= -1000000)
+		if (_game->getSavedGame()->getFunds() <= _game->getMod()->getDefeatFunds())
 		{
 			if (_game->getSavedGame()->getWarned())
 			{
@@ -388,11 +387,12 @@ void MonthlyReportState::calculateChanges()
 
 	xcomTotal = _game->getSavedGame()->getResearchScores().at(monthOffset) + xcomSubTotal;
 
-
 	if (_game->getSavedGame()->getResearchScores().size() > 2)
 		_lastMonthsRating += _game->getSavedGame()->getResearchScores().at(lastMonthOffset);
+
 	// now that we have our totals we can send the relevant info to the countries
 	// and have them make their decisions weighted on the council's perspective.
+	const RuleAlienMission *infiltration = _game->getMod()->getRandomMission(OBJECTIVE_INFILTRATION, _game->getSavedGame()->getMonthsPassed());
 	for (std::vector<Country*>::iterator k = _game->getSavedGame()->getCountries()->begin(); k != _game->getSavedGame()->getCountries()->end(); ++k)
 	{
 		// add them to the list of new pact members
@@ -405,7 +405,7 @@ void MonthlyReportState::calculateChanges()
 		}
 		// determine satisfaction level, sign pacts, adjust funding
 		// and update activity meters,
-		(*k)->newMonth(xcomTotal, alienTotal);
+		(*k)->newMonth(xcomTotal, alienTotal, infiltration->getPoints());
 		// and after they've made their decisions, calculate the difference, and add
 		// them to the appropriate lists.
 		_fundingDiff += (*k)->getFunding().back()-(*k)->getFunding().at((*k)->getFunding().size()-2);
