@@ -236,7 +236,7 @@ const int DogfightState::_projectileBlobs[4][6][3] =
  */
 DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	_state(state), _craft(craft), _ufo(ufo), _timeout(50), _currentDist(640), _targetDist(560),
-	_end(false), _endUfoHandled(false), _endCraftHandled(false), _destroyUfo(false), _destroyCraft(false), _ufoBreakingOff(false),
+	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0), _interceptionNumber(0),
 	_interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0)
 {
