@@ -197,6 +197,13 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 
 	_drawingRoutine = _unit->getArmor()->getDrawingRoutine();
 
+	if (_unit->getArmor()->getCanHoldWeapon())
+	{
+		if (_unit->getStatus() == STATUS_AIMING)
+		{
+			_x -= 16;
+		}
+	}
 	_burn = 0;
 	int overkill = _unit->getOverKillDamage();
 	int maxHp = _unit->getBaseStats()->health;
