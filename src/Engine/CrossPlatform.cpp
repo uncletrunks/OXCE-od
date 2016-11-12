@@ -78,11 +78,6 @@ namespace OpenXcom
 namespace CrossPlatform
 {
 	std::string errorDlg;
-#ifdef _WIN32
-	const char PATH_SEPARATOR = '\\';
-#else
-	const char PATH_SEPARATOR = '/';
-#endif
 
 /**
  * Determines the available Linux error dialogs.
@@ -92,7 +87,9 @@ void getErrorDialog()
 #ifndef _WIN32
 	if (system(NULL))
 	{
-		if (system("which zenity 2>&1 > /dev/null") == 0)
+		if (getenv("KDE_SESSION_UID") && system("which kdialog 2>&1 > /dev/null") == 0)
+			errorDlg = "kdialog --error ";
+		else if (system("which zenity 2>&1 > /dev/null") == 0)
 			errorDlg = "zenity --error --text=";
 		else if (system("which kdialog 2>&1 > /dev/null") == 0)
 			errorDlg = "kdialog --error ";
@@ -565,13 +562,7 @@ bool deleteFile(const std::string &path)
 
 std::string baseFilename(const std::string &path)
 {
-	size_t sep = path.find_last_of(
-#ifdef _WIN32
-		"/\\"
-#else
-		"/"
-#endif
-		);
+	size_t sep = path.find_last_of(PATH_SEPARATOR);
 	std::string filename;
 	if (sep == std::string::npos)
 	{

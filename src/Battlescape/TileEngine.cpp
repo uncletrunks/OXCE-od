@@ -1460,8 +1460,11 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 				// closer than 20 tiles
 				distanceSq(unit->getPosition(), (*i)->getPosition(), false) <= getMaxViewDistanceSq())
 			{
-				Position originVoxel = _save->getTileEngine()->getSightOriginVoxel(*i);
-				originVoxel.z -= 2;
+				BattleAction falseAction;
+				falseAction.type = BA_SNAPSHOT;
+				falseAction.actor = *i;
+				falseAction.target = unit->getPosition();
+				Position originVoxel = getOriginVoxel(falseAction, 0);
 				Position targetVoxel;
 				AIModule *ai = (*i)->getAIModule();
 				bool gotHit = (ai != 0 && ai->getWasHitBy(unit->getId()));

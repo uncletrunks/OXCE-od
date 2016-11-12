@@ -192,23 +192,23 @@ void CraftInfoState::init()
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->setY(0);
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->blit(_sprite);
 
-	std::wostringstream ss;
-	ss << tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage()));
+	std::wostringstream firlsLine;
+	firlsLine << tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage()));
 	if (_craft->getStatus() == "STR_REPAIRS" && _craft->getDamage() > 0)
 	{
 		int damageHours = (int)ceil((double)_craft->getDamage() / _craft->getRules()->getRepairRate());
-		ss << formatTime(damageHours);
+		firlsLine << formatTime(damageHours);
 	}
-	_txtDamage->setText(ss.str());
+	_txtDamage->setText(firlsLine.str());
 
-	std::wostringstream ss2;
-	ss2 << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
+	std::wostringstream secondLine;
+	secondLine << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
 	if (_craft->getStatus() == "STR_REFUELLING" && _craft->getFuelMax() - _craft->getFuel() > 0)
 	{
 		int fuelHours = (int)ceil((double)(_craft->getFuelMax() - _craft->getFuel()) / _craft->getRules()->getRefuelRate() / 2.0);
-		ss2 << formatTime(fuelHours);
+		secondLine << formatTime(fuelHours);
 	}
-	_txtFuel->setText(ss2.str());
+	_txtFuel->setText(secondLine.str());
 
 	if (_craft->getRules()->getSoldiers() > 0)
 	{
@@ -259,21 +259,21 @@ void CraftInfoState::init()
 			frame->setY(0);
 			frame->blit(_weapon[i]);
 
-			std::wostringstream ss;
-			ss << L'\x01' << tr(w1->getRules()->getType());
-			_txtWName[i]->setText(ss.str());
-			ss.str(L"");
+			std::wostringstream weaponLine;
+			weaponLine << L'\x01' << tr(w1->getRules()->getType());
+			_txtWName[i]->setText(weaponLine.str());
+			weaponLine.str(L"");
 			if (w1->getRules()->getAmmoMax())
 			{
-				ss << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
-				ss << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
+				weaponLine << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
+				weaponLine << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
 				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())
 				{
 					int rearmHours = (int)ceil((double)(w1->getRules()->getAmmoMax() - w1->getAmmo()) / w1->getRules()->getRearmRate());
-					ss << formatTime(rearmHours);
+					weaponLine << formatTime(rearmHours);
 				}
 			}
-			_txtWAmmo[i]->setText(ss.str());
+			_txtWAmmo[i]->setText(weaponLine.str());
 		}
 		else
 		{

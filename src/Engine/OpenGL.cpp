@@ -90,6 +90,10 @@ PFNGLCOMPILESHADERPROC glCompileShader = 0;
 PFNGLATTACHSHADERPROC glAttachShader = 0;
 PFNGLDETACHSHADERPROC glDetachShader = 0;
 PFNGLGETATTACHEDSHADERSPROC glGetAttachedShaders = 0;
+PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog = 0;
+PFNGLGETPROGRAMIVPROC glGetProgramiv = 0;
+PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog = 0;
+PFNGLGETSHADERIVPROC glGetShaderiv = 0;
 PFNGLLINKPROGRAMPROC glLinkProgram = 0;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = 0;
 PFNGLUNIFORM1IPROC glUniform1i = 0;
@@ -142,8 +146,6 @@ void OpenGL::clear() {
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glErrorCheck();
 	glClear(GL_COLOR_BUFFER_BIT);
-	glErrorCheck();
-	glFlush();
 	glErrorCheck();
 }
 
@@ -216,9 +218,6 @@ void OpenGL::refresh(bool smooth, unsigned inwidth, unsigned inheight, unsigned 
 	glEnd();
 	glErrorCheck();
 
-	glFlush();
-	glErrorCheck();
-
     if (shader_support)
 	{
 		glUseProgram(0);
@@ -226,49 +225,44 @@ void OpenGL::refresh(bool smooth, unsigned inwidth, unsigned inheight, unsigned 
 	}
 }
 
-void OpenGL::set_shader(const char *source_yaml_filename)
+bool OpenGL::set_shader(const char *source_yaml_filename)
 {
-	if (!shader_support) return;
+	if (!shader_support) return false;
 
-	GLsizei tCount;
-	GLuint tShader[2];
-	if (fragmentshader)
+	if (glprogram)
 	{
-		if (glprogram)
+		GLsizei tCount;
+		GLuint tShader[2];
+		glGetAttachedShaders(glprogram, 2, &tCount, tShader);
+		glErrorCheck();
+		if (fragmentshader)
 		{
-			glGetAttachedShaders(glprogram,  2,  &tCount,  tShader);
-			glErrorCheck();
-			if ((tCount>0 && tShader[0]==fragmentshader) || (tCount>1 && tShader[1]==fragmentshader)) //necessary check
+			if ((tCount > 0 && tShader[0] == fragmentshader) || (tCount > 1 && tShader[1] == fragmentshader)) //necessary check
 			{
 				glDetachShader(glprogram, fragmentshader);
 				glErrorCheck();
 			}
+			if (glIsShader(fragmentshader))
+			{
+				glDeleteShader(fragmentshader);
+				glErrorCheck();
+				fragmentshader = 0;
+			}
 		}
-		if (glIsShader(fragmentshader))
-		{
-			glDeleteShader(fragmentshader);
-			glErrorCheck();
-			fragmentshader = 0;
-		}
-    }
 
-	if (vertexshader)
-	{
-		if (glprogram)
-		{
-			glGetAttachedShaders(glprogram,  2,  &tCount,  tShader);
-			glErrorCheck();
-			if ((tCount>0 && tShader[0]==vertexshader) || (tCount>1 && tShader[1]==vertexshader)) //necessary check
+		if (vertexshader)
+		{			
+			if ((tCount>0 && tShader[0] == vertexshader) || (tCount>1 && tShader[1] == vertexshader)) //necessary check
 			{
 				glDetachShader(glprogram, vertexshader);
 				glErrorCheck();
 			}
-		}
-		if (glIsShader(vertexshader))
-		{
-			glDeleteShader(vertexshader);
-			glErrorCheck();
-			vertexshader = 0;
+			if (glIsShader(vertexshader))
+			{
+				glDeleteShader(vertexshader);
+				glErrorCheck();
+				vertexshader = 0;
+			}
 		}
 	}
 
@@ -301,31 +295,80 @@ void OpenGL::set_shader(const char *source_yaml_filename)
 
 	glLinkProgram(glprogram);
 	glErrorCheck();
+	GLint linkStatus;
+	glGetProgramiv(glprogram, GL_LINK_STATUS, &linkStatus);
+	glErrorCheck();
+	if (linkStatus != GL_TRUE)
+	{
+		GLint infoLogLength;
+		glGetProgramiv(glprogram, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glErrorCheck();
+		GLchar *infoLog = new GLchar[infoLogLength];
+		glGetProgramInfoLog(glprogram, infoLogLength, NULL, infoLog);
+		glErrorCheck();
+
+		Log(LOG_ERROR) << "OpenGL shader link failed \"" << infoLog << "\"\n";
+
+		delete[] infoLog;
+		glDeleteProgram(glprogram);
+		glErrorCheck();
+		glprogram = 0;
+	}
+
+	return !(glprogram == 0 || vertexshader == 0 || fragmentshader == 0);
+}
+
+static GLuint createShader(GLenum type, const char *source)
+{
+	GLuint shader = glCreateShader(type);
+	glErrorCheck();
+	glShaderSource(shader, 1, &source, 0);
+	glErrorCheck();
+	glCompileShader(shader);
+	glErrorCheck();
+
+	GLint compileSuccess;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess);
+	glErrorCheck();
+	if (compileSuccess != GL_TRUE)
+	{
+		GLint infoLogLength;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glErrorCheck();
+		GLchar *infoLog = new GLchar[infoLogLength];
+		glGetShaderInfoLog(shader, infoLogLength, NULL, infoLog);
+		glErrorCheck();
+
+		Log(LOG_ERROR) << "OpenGL shader compilation failed: \"" << infoLog << "\"\n";
+
+		delete[] infoLog;
+		glDeleteShader(shader);
+		glErrorCheck();
+		shader = 0;
+	}
+
+	return shader;
 }
 
 void OpenGL::set_fragment_shader(const char *source)
 {
-	fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
-	glErrorCheck();
-    glShaderSource(fragmentshader, 1, &source, 0);
-	glErrorCheck();
-    glCompileShader(fragmentshader);
-	glErrorCheck();
-    glAttachShader(glprogram, fragmentshader);
-	glErrorCheck();
+	fragmentshader = createShader(GL_FRAGMENT_SHADER, source);
+	if (fragmentshader)
+	{
+		glAttachShader(glprogram, fragmentshader);
+		glErrorCheck();
+	}
 }
 
 void OpenGL::set_vertex_shader(const char *source)
 {
-    vertexshader = glCreateShader(GL_VERTEX_SHADER);
-	glErrorCheck();
-    glShaderSource(vertexshader, 1, &source, 0);
-	glErrorCheck();
-    glCompileShader(vertexshader);
-	glErrorCheck();
-    glAttachShader(glprogram, vertexshader);
-	glErrorCheck();
-  }
+	vertexshader = createShader(GL_VERTEX_SHADER, source);
+	if (vertexshader)
+	{
+		glAttachShader(glprogram, vertexshader);
+		glErrorCheck();
+	}
+}
 
 void OpenGL::init(int w, int h)
 {
@@ -356,6 +399,10 @@ void OpenGL::init(int w, int h)
 	glAttachShader = (PFNGLATTACHSHADERPROC)glGetProcAddress("glAttachShader");
 	glDetachShader = (PFNGLDETACHSHADERPROC)glGetProcAddress("glDetachShader");
 	glGetAttachedShaders = (PFNGLGETATTACHEDSHADERSPROC)glGetProcAddress("glGetAttachedShaders");
+	glGetProgramiv = (PFNGLGETPROGRAMIVPROC)glGetProcAddress("glGetProgramiv");
+	glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)glGetProcAddress("glGetProgramInfoLog");
+	glGetShaderiv = (PFNGLGETSHADERIVPROC)glGetProcAddress("glGetShaderiv");
+	glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)glGetProcAddress("glGetShaderInfoLog");
 	glLinkProgram = (PFNGLLINKPROGRAMPROC)glGetProcAddress("glLinkProgram");
 	glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)glGetProcAddress("glGetUniformLocation");
 	glUniform1i = (PFNGLUNIFORM1IPROC)glGetProcAddress("glUniform1i");
@@ -373,7 +420,8 @@ void OpenGL::init(int w, int h)
 	shader_support = glCreateProgram && glDeleteProgram && glUseProgram && glCreateShader
 	&& glDeleteShader && glShaderSource && glCompileShader && glAttachShader
 	&& glDetachShader && glLinkProgram && glGetUniformLocation && glIsProgram && glIsShader
-	&& glUniform1i && glUniform2fv && glUniform4fv && glGetAttachedShaders;
+	&& glUniform1i && glUniform2fv && glUniform4fv && glGetAttachedShaders
+	&& glGetShaderiv && glGetShaderInfoLog && glGetProgramiv && glGetProgramInfoLog;
 	
 	if (shader_support)
 	{
