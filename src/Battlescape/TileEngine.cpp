@@ -986,7 +986,6 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	Position originVoxel = getSightOriginVoxel(currentUnit);
 
 	Position scanVoxel;
-	std::vector<Position> _trajectory;
 	bool unitSeen = canTargetUnit(&originVoxel, tile, &scanVoxel, currentUnit);
 
 	if (unitSeen)
@@ -996,32 +995,37 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 		// we do density/3 to get the decay of visibility
 		// so in fresh smoke we should only have 4 tiles of visibility
 		// this is traced in voxel space, with smoke affecting visibility every step of the way
-		_trajectory.clear();
-		calculateLine(originVoxel, scanVoxel, true, &_trajectory, currentUnit);
-		int visibleDistanceVoxels = _trajectory.size();
+		int visibleDistanceVoxels = 0;
 		int densityOfSmoke = 0;
 		int densityOfFire = 0;
-		Position voxelToTile(16, 16, 24);
-		Position trackTile(-1, -1, -1);
-		Tile *t = 0;
 
-		for (int i = 0; i < visibleDistanceVoxels; i++)
+		// gather, when we go stringth line each voxel worth 2 if we drift only 1
+		auto gather = [&](const Position& pos, int weaght)
 		{
-			_trajectory.at(i) /= voxelToTile;
-			if (trackTile != _trajectory.at(i))
+			Tile *curr = _save->getTile(pos.toTile());
+
+			visibleDistanceVoxels += weaght;
+			if (curr->getFire() == 0)
 			{
-				trackTile = _trajectory.at(i);
-				t = _save->getTile(trackTile);
-			}
-			if (t->getFire() == 0)
-			{
-				densityOfSmoke += t->getSmoke();
+				densityOfSmoke += weaght * curr->getSmoke();
 			}
 			else
 			{
-				densityOfFire += t->getFire();
+				densityOfFire += weaght * curr->getFire();
 			}
-		}
+			return false;
+		};
+
+		calculateLineHitHelper(originVoxel, scanVoxel,
+			[&](const Position& pos) { return gather(pos, 2); },
+			[&](const Position& pos) { return gather(pos, 1); }
+		);
+
+		// divide by 2 to have aproximate 3d distance based on vexels we visited
+		visibleDistanceVoxels /= 2;
+		densityOfSmoke /= 2;
+		densityOfFire /= 2;
+
 		auto visibilityQuality = visibleDistanceMaxVoxel - visibleDistanceVoxels - densityOfSmoke * getMaxViewDistance()/(3 * 20);
 		ModScript::VisibilityUnitParser::Output arg{ visibilityQuality, visibilityQuality, ScriptTag<BattleUnitVisibility>::getNullTag() };
 		ModScript::VisibilityUnitParser::Worker worker{ currentUnit, tile->getUnit(), visibleDistanceVoxels, visibleDistanceMaxVoxel, densityOfSmoke, densityOfFire };
