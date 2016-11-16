@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -247,6 +247,16 @@ void Text::setVerticalAlign(TextVAlign valign)
 {
 	_valign = valign;
 	_redraw = true;
+}
+
+/**
+ * Returns the way the text is aligned vertically
+ * relative to the drawing area.
+ * @return Horizontal alignment.
+ */
+TextVAlign Text::getVerticalAlign() const
+{
+	return _valign;
 }
 
 /**

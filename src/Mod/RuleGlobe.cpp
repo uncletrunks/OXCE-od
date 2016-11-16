@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
 #include "RuleGlobe.h"
 #include <SDL_endian.h>
-#include <cmath>
 #include <fstream>
 #include "../Engine/Exception.h"
 #include "Polygon.h"
@@ -28,6 +26,7 @@
 #include "../Engine/Palette.h"
 #include "../Geoscape/Globe.h"
 #include "../Engine/FileMap.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -122,7 +121,7 @@ void RuleGlobe::load(const YAML::Node &node)
 		else if ((*i)["delete"])
 		{
 			int id = (*i)["delete"].as<int>();
-			std::map<int, Texture*>::const_iterator j = _textures.find(id);
+			std::map<int, Texture*>::iterator j = _textures.find(id);
 			if (j != _textures.end())
 			{
 				_textures.erase(j);
@@ -197,7 +196,7 @@ void RuleGlobe::loadDat(const std::string &filename)
 
 		for (int i = 0, j = 0; i < points; ++i)
 		{
-			// Correct X-Com degrees and convert to radians
+			// Correct X-Com degrees and convert to radian
 			double lonRad = value[j++] * 0.125 * M_PI / 180;
 			double latRad = value[j++] * 0.125 * M_PI / 180;
 

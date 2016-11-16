@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -72,7 +72,7 @@ StartState::StartState() : _anim(0)
 	_cursor = new Text(_font->getWidth(), _font->getHeight(), 0, 0);
 	_timer = new Timer(150);
 	
-	setPalette(_font->getSurface()->getPalette(), 0, 2);
+	setPalette(_font->getPalette(), 0, 2);
 
 	add(_text);
 	add(_cursor);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -19,7 +19,6 @@
 #include <list>
 #include <algorithm>
 #include "Pathfinding.h"
-#include "PathfindingNode.h"
 #include "PathfindingOpenSet.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
@@ -198,7 +197,7 @@ bool Pathfinding::aStarPath(const Position &startPosition, const Position &endPo
 	start->connect(0, 0, 0, endPosition);
 	PathfindingOpenSet openList;
 	openList.push(start);
-	bool missile = (target && maxTUCost == -1);
+	bool missile = (target && maxTUCost == 10000);
 	// if the open list is empty, we've reached the end
 	while (!openList.empty())
 	{
@@ -304,7 +303,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 			Position verticalOffset (0, 0, 0);
 
 			// if we are on a stairs try to go up a level
-			if (direction < DIR_UP && startTile->getTerrainLevel() <= -16 && !aboveDestination->hasNoFloor(destinationTile) && !triedStairs)
+			if (direction < DIR_UP && startTile->getTerrainLevel() <= -16 && aboveDestination && !aboveDestination->hasNoFloor(destinationTile) && !triedStairs)
 			{
 					numberOfPartsGoingUp++;
 
@@ -329,7 +328,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 						fellDown = true;
 					}
 			}
-			else if (_movementType == MT_FLY && belowDestination && belowDestination->getUnit() && belowDestination->getUnit() != unit)
+			else if (!missile && _movementType == MT_FLY && belowDestination && belowDestination->getUnit() && belowDestination->getUnit() != unit)
 			{
 				// 2 or more voxels poking into this tile = no go
 				if (belowDestination->getUnit()->getHeight() + belowDestination->getUnit()->getFloatHeight() - belowDestination->getTerrainLevel() > 26)
@@ -353,7 +352,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 			else if (direction >= DIR_UP && !fellDown)
 			{
 				// check if we can go up or down through gravlift or fly
-				if (validateUpDown(unit, startPosition + offset, direction))
+				if (validateUpDown(unit, startPosition + offset, direction, missile))
 				{
 					cost = 8; // vertical movement by flying suit or grav lift
 				}
@@ -370,7 +369,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 
 				if (numberOfPartsFalling == (size+1)*(size+1) && direction != DIR_DOWN)
 				{
-						return false;
+						return 0;
 				}
 			}
 			startTile = _save->getTile(startTile->getPosition() + verticalOffset);
@@ -438,7 +437,8 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
 				cost = (int)((double)cost * 1.5);
 			}
 			cost += wallcost;
-			if (_unit->getFaction() == FACTION_HOSTILE &&
+			if (_unit->getFaction() != FACTION_PLAYER &&
+				_unit->getSpecialAbility() < SPECAB_BURNFLOOR &&
 				destinationTile->getFire() > 0)
 				cost += 32; // try to find a better path, but don't exclude this path entirely.
 
@@ -508,7 +508,7 @@ int Pathfinding::getTUCost(const Position &startPosition, int direction, Positio
  * Checks whether a path is ready and gives the first direction.
  * @return Direction where the unit needs to go next, -1 if it's the end of the path.
  */
-int Pathfinding::getStartDirection()
+int Pathfinding::getStartDirection() const
 {
 	if (_path.empty()) return -1;
 	return _path.back();
@@ -543,7 +543,7 @@ void Pathfinding::abortPath()
  * @param missileTarget Target for a missile.
  * @return True if the movement is blocked.
  */
-bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarget, int bigWallExclusion)
+bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarget, int bigWallExclusion) const
 {
 	if (tile == 0) return true; // probably outside the map here
 
@@ -589,10 +589,15 @@ bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarge
 		if (unit != 0)
 		{
 			if (unit == _unit || unit == missileTarget || unit->isOut()) return false;
-			if (_unit && _unit->getFaction() == FACTION_PLAYER && unit->getVisible()) return true;		// player know all visible units
-			if (_unit && _unit->getFaction() == unit->getFaction()) return true;
-			if (_unit && _unit->getFaction() == FACTION_HOSTILE &&
-				std::find(_unit->getUnitsSpottedThisTurn().begin(), _unit->getUnitsSpottedThisTurn().end(), unit) != _unit->getUnitsSpottedThisTurn().end()) return true;
+			if (missileTarget && unit != missileTarget && unit->getFaction() == FACTION_HOSTILE) 
+				return true;			// AI pathfinding with missiles shouldn't path through their own units
+			if (_unit)
+			{
+				if (_unit->getFaction() == FACTION_PLAYER && unit->getVisible()) return true;		// player know all visible units
+				if (_unit->getFaction() == unit->getFaction()) return true;
+				if (_unit->getFaction() == FACTION_HOSTILE && 
+					std::find(_unit->getUnitsSpottedThisTurn().begin(), _unit->getUnitsSpottedThisTurn().end(), unit) != _unit->getUnitsSpottedThisTurn().end()) return true;
+			}
 		}
 		else if (tile->hasNoFloor(0) && _movementType != MT_FLY) // this whole section is devoted to making large units not take part in any kind of falling behaviour
 		{
@@ -716,7 +721,7 @@ bool Pathfinding::isBlocked(Tile *startTile, Tile * /* endTile */, const int dir
  * @param here The current tile.
  * @return True if a unit can fall down.
  */
-bool Pathfinding::canFallDown(Tile *here)
+bool Pathfinding::canFallDown(Tile *here) const
 {
 	if (here->getPosition().z == 0)
 		return false;
@@ -733,7 +738,7 @@ bool Pathfinding::canFallDown(Tile *here)
  * @param size The size of the unit.
  * @return True if a unit can fall down.
  */
-bool Pathfinding::canFallDown(Tile *here, int size)
+bool Pathfinding::canFallDown(Tile *here, int size) const
 {
 	for (int x = 0; x != size; ++x)
 	{
@@ -754,7 +759,7 @@ bool Pathfinding::canFallDown(Tile *here, int size)
  * @param endPosition The position we wanna reach.
  * @return True if the unit is going up a stairs.
  */
-bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endPosition)
+bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endPosition) const
 {
 	//condition 1 : endposition has to the south a terrainlevel -16 object (upper part of the stairs)
 	if (_save->getTile(endPosition + Position(0, 1, 0)) && _save->getTile(endPosition + Position(0, 1, 0))->getTerrainLevel() == -16)
@@ -823,7 +828,7 @@ bool Pathfinding::isOnStairs(const Position &startPosition, const Position &endP
  * @param direction Up or Down
  * @return bool Whether it's valid.
  */
-bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const int direction)
+bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const int direction, bool missile) const
 {
 	Position endPosition;
 	directionToVector(direction, &endPosition);
@@ -834,6 +839,18 @@ bool Pathfinding::validateUpDown(BattleUnit *bu, Position startPosition, const i
 	if (startTile->getMapData(O_FLOOR) && destinationTile && destinationTile->getMapData(O_FLOOR) &&
 		(startTile->getMapData(O_FLOOR)->isGravLift() && destinationTile->getMapData(O_FLOOR)->isGravLift()))
 	{
+		if (missile)
+		{
+			if (direction == DIR_UP)
+			{
+				if (destinationTile->getMapData(O_FLOOR)->getLoftID(0) != 0)
+					return false;
+			}
+			else if (startTile->getMapData(O_FLOOR)->getLoftID(0) != 0)
+			{
+				return false;
+			}
+		}
 		return true;
 	}
 	else
@@ -890,14 +907,14 @@ bool Pathfinding::previewPath(bool bRemove)
 		int dir = *i;
 		int tu = getTUCost(pos, dir, &destination, _unit, 0, false); // gets tu cost, but also gets the destination position.
 		int energyUse = tu;
-		if (running)
-		{
-			tu *= 0.75;
-			energyUse *= 1.5;
-		}
 		if (dir >= Pathfinding::DIR_UP)
 		{
 			energyUse = 0;
+		}
+		else if (running)
+		{
+			tu *= 0.75;
+			energyUse *= 1.5;
 		}
 		energy -= energyUse / 2;
 		tus -= tu;
@@ -1198,7 +1215,7 @@ bool Pathfinding::isModifierUsed() const
  * Gets a reference to the current path.
  * @return the actual path.
  */
-const std::vector<int> &Pathfinding::getPath()
+const std::vector<int> &Pathfinding::getPath() const
 {
 	return _path;
 }
@@ -1211,4 +1228,5 @@ std::vector<int> Pathfinding::copyPath() const
 {
 	return _path;
 }
+
 }

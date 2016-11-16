@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_CROSSPLATFORM_H
-#define OPENXCOM_CROSSPLATFORM_H
-
 #include <SDL.h>
 #include <string>
 #include <vector>
@@ -33,6 +31,12 @@ namespace OpenXcom
  */
 namespace CrossPlatform
 {
+#ifdef _WIN32
+	const char PATH_SEPARATOR = '\\';
+#else
+	const char PATH_SEPARATOR = '/';
+#endif
+
 	/// Gets the available error dialog.
 	void getErrorDialog();
 	/// Displays an error message.
@@ -89,10 +93,10 @@ namespace CrossPlatform
 	void setWindowIcon(int winResource, const std::string &unixPath);
 	/// Produces a stack trace.
 	void stackTrace(void *ctx);
+	/// Produces a quick timestamp.
+	std::string now();
 	/// Produces a crash dump.
 	void crashDump(void *ex, const std::string &err);
 }
 
 }
-
-#endif

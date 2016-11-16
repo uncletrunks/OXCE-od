@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
-#include <cmath>
 #include "Projectile.h"
 #include "TileEngine.h"
 #include "Map.h"
@@ -34,6 +32,7 @@
 #include "../Savegame/Tile.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Options.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -250,7 +249,8 @@ int Projectile::calculateThrow(double accuracy)
 			if (_action.type == BA_THROW
 				&& endTile
 				&& endTile->getMapData(O_OBJECT)
-				&& endTile->getMapData(O_OBJECT)->getTUCost(MT_WALK) == 255)
+				&& endTile->getMapData(O_OBJECT)->getTUCost(MT_WALK) == 255
+				&& !(endTile->isBigWall() && (endTile->getMapData(O_OBJECT)->getBigWall()<1 || endTile->getMapData(O_OBJECT)->getBigWall()>3)))
 			{
 				test = V_OUTOFBOUNDS;
 			}

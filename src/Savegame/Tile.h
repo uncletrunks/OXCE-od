@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_TILE_H
-#define OPENXCOM_TILE_H
-
 #include <list>
 #include <vector>
 #include "../Battlescape/Position.h"
@@ -55,7 +53,7 @@ public:
 		Uint8 _mapDataID;
 		Uint8 _smoke;
 		Uint8 _fire;
-        Uint8 boolFields;
+		Uint8 boolFields;
 		Uint32 totalBytes; // per structure, including any data not mentioned here and accounting for all array members!
 	} serializationKey;
 
@@ -224,11 +222,11 @@ public:
 	/// Set the tile marker color.
 	void setMarkerColor(int color);
 	/// Get the tile marker color.
-	int getMarkerColor();
+	int getMarkerColor() const;
 	/// Set the tile visible flag.
 	void setVisible(int visibility);
 	/// Get the tile visible flag.
-	int getVisible();
+	int getVisible() const;
 	/// set the direction (used for path previewing)
 	void setPreview(int dir);
 	/// retrieve the direction stored by the pathfinding.
@@ -244,7 +242,7 @@ public:
 	/// set the danger flag on this tile (so the AI will avoid it).
 	void setDangerous();
 	/// check the danger flag on this tile.
-	bool getDangerous();
+	bool getDangerous() const;
 	/// adds a particle to this tile's array.
 	void addParticle(Particle *particle);
 	/// gets a pointer to this tile's particle array.
@@ -253,5 +251,3 @@ public:
 };
 
 }
-
-#endif

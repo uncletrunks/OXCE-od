@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_GLOBE_H
-#define OPENXCOM_GLOBE_H
-
 #include <vector>
 #include <list>
 #include "../Engine/InteractiveSurface.h"
@@ -206,7 +204,7 @@ public:
 	/// Turns off new base hover mode.
 	void unsetNewBaseHover(void);
 	/// Gets state of base hover mode
-	bool getNewBaseHover(void);
+	bool getNewBaseHover(void) const;
 	/// set the _radarLines variable
 	void toggleRadarLines();
 	/// Update the resolution settings, we just resized the window.
@@ -218,5 +216,3 @@ public:
 };
 
 }
-
-#endif

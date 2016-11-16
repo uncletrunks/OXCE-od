@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_RULEITEM_H
-#define OPENXCOM_RULEITEM_H
-
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
@@ -123,10 +121,10 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName;
-	bool _twoHanded, _blockBothHands, _waypoint, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher;
+	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher;
 	std::string _defaultInventorySlot;
 	std::vector<std::string> _supportedInventorySections;
-	int _invWidth, _invHeight;
+	int _waypoints, _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
 	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery, _moraleRecovery, _painKillerRecovery;
@@ -210,8 +208,6 @@ public:
 	bool isTwoHanded() const;
 	/// Gets if the item can only be used by both hands.
 	bool isBlockingBothHands() const;
-	/// Gets if the item is a launcher.
-	bool isWaypoint() const;
 	/// Gets if the item is fixed.
 	bool isFixed() const;
 	/// Do show fixed weapon on unit.
@@ -222,6 +218,8 @@ public:
 	const std::vector<std::string> &getSupportedInventorySections() const;
 	/// Checks if the item can be placed into a given inventory section.
 	bool canBePlacedIntoInventorySection(const std::string &inventorySection) const;
+	/// Gets if the item is a launcher.
+	int getWaypoints() const;
 	/// Gets the item's bullet sprite reference.
 	int getBulletSprite() const;
 	/// Gets the item's fire sound.
@@ -473,5 +471,3 @@ public:
 };
 
 }
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -18,6 +18,7 @@
  */
 #include <algorithm>
 #include "ListLoadState.h"
+#include <algorithm>
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Action.h"
@@ -40,20 +41,12 @@ ListLoadState::ListLoadState(OptionsOrigin origin) : ListGamesState(origin, 0, t
 {
 	// Create objects
 	_btnOld = new TextButton(80, 16, 60, 172);
+	_btnCancel->setX(180);
 
 	add(_btnOld, "button", "saveMenus");
 	
 	// Set up objects
 	_txtTitle->setText(tr("STR_SELECT_GAME_TO_LOAD"));
-
-	if (origin != OPT_MENU)
-	{
-		_btnOld->setVisible(false);
-	}
-	else
-	{
-		_btnCancel->setX(180);
-	}
 
 	_btnOld->setText(tr("STR_ORIGINAL_XCOM"));
 	_btnOld->onMouseClick((ActionHandler)&ListLoadState::btnOldClick);
@@ -91,7 +84,17 @@ void ListLoadState::lstSavesPress(Action *action)
 		const SaveInfo &saveInfo(_saves[_lstSaves->getSelectedRow()]);
 		for (std::vector<std::string>::const_iterator i = saveInfo.mods.begin(); i != saveInfo.mods.end(); ++i)
 		{
-			if (std::find(Options::mods.begin(), Options::mods.end(), std::pair<std::string, bool>(*i, true)) == Options::mods.end())
+			std::string name;
+			size_t versionInfoBreakPoint = (*i).find(" ver: ");
+			if (versionInfoBreakPoint == std::string::npos)
+			{
+				name = *i;
+			}
+			else
+			{
+				name = (*i).substr(0, versionInfoBreakPoint);
+			}
+			if (std::find(Options::mods.begin(), Options::mods.end(), std::make_pair(name, true)) == Options::mods.end())
 			{
 				confirm = true;
 				break;

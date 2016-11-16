@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -161,7 +161,7 @@ NewBattleState::NewBattleState() : _craft(0)
 
 	_txtTerrain->setText(tr("STR_MAP_TERRAIN"));
 
-	_txtDifficulty->setText(tr("STR_ALIEN_DIFFICULTY"));
+	_txtDifficulty->setText(tr("STR_DIFFICULTY"));
 
 	_txtAlienRace->setText(tr("STR_ALIEN_RACE"));
 
@@ -396,7 +396,8 @@ void NewBattleState::initSave()
 	// Generate soldiers
 	for (int i = 0; i < 30; ++i)
 	{
-		Soldier *soldier = mod->genSoldier(save);
+		int randomType = RNG::generate(0, _game->getMod()->getSoldiersList().size() - 1);
+		Soldier *soldier = mod->genSoldier(save, _game->getMod()->getSoldiersList().at(randomType));
 
 		for (int n = 0; n < 5; ++n)
 		{
@@ -479,10 +480,9 @@ void NewBattleState::btnOkClick(Action *)
 		_craft = 0;
 	}
 	// alien base
-	else if (_missionTypes[_cbxMission->getSelected()].find("STR_ALIEN_BASE") != std::string::npos ||
-			 _missionTypes[_cbxMission->getSelected()].find("STR_ALIEN_COLONY") != std::string::npos)
+	else if (_game->getMod()->getDeployment(bgame->getMissionType())->isAlienBase())
 	{
-		AlienBase *b = new AlienBase();
+		AlienBase *b = new AlienBase(_game->getMod()->getDeployment(bgame->getMissionType()));
 		b->setId(1);
 		b->setAlienRace(_alienRaces[_cbxAlienRace->getSelected()]);
 		_craft->setDestination(b);
@@ -498,9 +498,15 @@ void NewBattleState::btnOkClick(Action *)
 		bgen.setUfo(u);
 		// either ground assault or ufo crash
 		if (RNG::generate(0,1) == 1)
+		{
+			u->setStatus(Ufo::LANDED);
 			bgame->setMissionType("STR_UFO_GROUND_ASSAULT");
+		}
 		else
+		{
+			u->setStatus(Ufo::CRASHED);
 			bgame->setMissionType("STR_UFO_CRASH_RECOVERY");
+		}
 		_game->getSavedGame()->getUfos()->push_back(u);
 	}
 	// mission site

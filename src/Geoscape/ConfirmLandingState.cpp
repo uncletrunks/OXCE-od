@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -225,7 +225,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 	else if (b != 0)
 	{
 		AlienRace *race = _game->getMod()->getAlienRace(b->getAlienRace());
-		bgame->setMissionType("STR_ALIEN_BASE_ASSAULT");
+		bgame->setMissionType(b->getDeployment()->getType());
 		bgen.setAlienBase(b);
 		bgen.setAlienRace(b->getAlienRace());
 		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(race->getBaseCustomDeploy()), _game->getMod()->getDeployment(race->getBaseCustomMission()));

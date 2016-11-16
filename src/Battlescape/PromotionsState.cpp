@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -38,7 +38,7 @@ namespace OpenXcom
  */
 PromotionsState::PromotionsState()
 {
-	// Create objects
+	// Create object
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(288, 16, 16, 176);
 	_txtTitle = new Text(300, 17, 10, 8);
@@ -60,7 +60,7 @@ PromotionsState::PromotionsState()
 
 	centerAllSurfaces();
 
-	// Set up objects
+	// Set up object
 	_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));

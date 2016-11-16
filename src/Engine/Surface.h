@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_SURFACE_H
-#define OPENXCOM_SURFACE_H
-
 #include <SDL.h>
 #include <string>
 
@@ -80,20 +78,20 @@ public:
 	virtual void initText(Font *, Font *, Language *) {};
 	/// Copies a portion of another surface into this one.
 	void copy(Surface *surface);
-    /// Draws a filled rectangle on the surface.
-    void drawRect(SDL_Rect *rect, Uint8 color);
+	/// Draws a filled rectangle on the surface.
+	void drawRect(SDL_Rect *rect, Uint8 color);
 	/// Draws a filled rectangle on the surface.
 	void drawRect(Sint16 x, Sint16 y, Sint16 w, Sint16 h, Uint8 color);
-    /// Draws a line on the surface.
-    void drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 color);
-    /// Draws a filled circle on the surface.
-    void drawCircle(Sint16 x, Sint16 y, Sint16 r, Uint8 color);
-    /// Draws a filled polygon on the surface.
-    void drawPolygon(Sint16 *x, Sint16 *y, int n, Uint8 color);
-    /// Draws a textured polygon on the surface.
-    void drawTexturedPolygon(Sint16 *x, Sint16 *y, int n, Surface *texture, int dx, int dy);
-    /// Draws a string on the surface.
-    void drawString(Sint16 x, Sint16 y, const char *s, Uint8 color);
+	/// Draws a line on the surface.
+	void drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 color);
+	/// Draws a filled circle on the surface.
+	void drawCircle(Sint16 x, Sint16 y, Sint16 r, Uint8 color);
+	/// Draws a filled polygon on the surface.
+	void drawPolygon(Sint16 *x, Sint16 *y, int n, Uint8 color);
+	/// Draws a textured polygon on the surface.
+	void drawTexturedPolygon(Sint16 *x, Sint16 *y, int n, Surface *texture, int dx, int dy);
+	/// Draws a string on the surface.
+	void drawString(Sint16 x, Sint16 y, const char *s, Uint8 color);
 	/// Sets the surface's palette.
 	virtual void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/**
@@ -233,10 +231,8 @@ public:
 	/// Sets this button to use a colour lookup table instead of inversion for its alternate form.
 	void setTFTDMode(bool mode);
 	/// checks if this is a TFTD mode surface.
-	bool isTFTDMode();
+	bool isTFTDMode() const;
 
 };
 
 }
-
-#endif

@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_RULEALIENMISSION_H
-#define OPENXCOM_RULEALIENMISSION_H
-
 #include <vector>
 #include <map>
 #include <string>
@@ -96,6 +94,8 @@ public:
 	int getRetaliationOdds() const;
 	/// Should the infiltration end after first cycle or continue indefinitely?
 	bool isEndlessInfiltration() const;
+	/// the type of missionSite to spawn (if any)
+	std::string getSiteType() const { return _siteType; }
 private:
 	/// The mission's type ID.
 	std::string _type;
@@ -117,7 +117,8 @@ private:
 	int _retaliationOdds;
 	/// Should the infiltration end after first cycle or continue indefinitely?
 	bool _endlessInfiltration;
+	/// the type of missionSite to spawn (if any)
+	std::string _siteType;
 };
 
 }
-#endif

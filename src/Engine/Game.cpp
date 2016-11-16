@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Game.h"
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 #include <SDL_mixer.h>
@@ -231,7 +232,6 @@ void Game::run()
 					_screen->handle(&action);
 					_cursor->handle(&action);
 					_fpsCounter->handle(&action);
-					_states.back()->handle(&action);
 					if (action.getDetails()->type == SDL_KEYDOWN)
 					{
 						// "ctrl-g" grab input
@@ -254,6 +254,7 @@ void Game::run()
 							}
 						}
 					}
+					_states.back()->handle(&action);
 					break;
 			}
 		}
@@ -474,7 +475,7 @@ void Game::loadLanguage(const std::string &filename)
 			std::string file = modInfo.getPath() + ss.str();
 			if (CrossPlatform::fileExists(file))
 			{
-				_lang->load(file);				
+				_lang->load(file);
 			}
 		}
 	}
@@ -637,7 +638,13 @@ void Game::initAudio()
 		format = AUDIO_S8;
 	else
 		format = AUDIO_S16SYS;
-	if (Mix_OpenAudio(Options::audioSampleRate, format, 2, 1024) != 0)
+	if (Options::audioSampleRate >= 44100)
+		Options::audioChunkSize = std::max(2048, Options::audioChunkSize);
+	else if (Options::audioSampleRate >= 22050)
+		Options::audioChunkSize = std::max(1024, Options::audioChunkSize);
+	else if (Options::audioSampleRate >= 11025)
+		Options::audioChunkSize = std::max(512, Options::audioChunkSize);
+	if (Mix_OpenAudio(Options::audioSampleRate, format, 2, Options::audioChunkSize) != 0)
 	{
 		Log(LOG_ERROR) << Mix_GetError();
 		Log(LOG_WARNING) << "No sound device detected, audio disabled.";

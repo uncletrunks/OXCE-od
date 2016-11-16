@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_PATHFINDING_H
-#define OPENXCOM_PATHFINDING_H
-
 #include <vector>
 #include "Position.h"
 #include "PathfindingNode.h"
@@ -55,19 +53,19 @@ private:
 	/// Gets the node at certain position.
 	PathfindingNode *getNode(const Position& pos);
 	/// Determines whether a tile blocks a certain movementType.
-	bool isBlocked(Tile *tile, const int part, BattleUnit *missileTarget, int bigWallExclusion = -1);
+	bool isBlocked(Tile *tile, const int part, BattleUnit *missileTarget, int bigWallExclusion = -1) const;
 	/// Tries to find a straight line path between two positions.
 	bool bresenhamPath(const Position& origin, const Position& target, BattleUnit *missileTarget, bool sneak = false, int maxTUCost = 1000);
 	/// Tries to find a path between two positions.
 	bool aStarPath(const Position& origin, const Position& target, BattleUnit *missileTarget, bool sneak = false, int maxTUCost = 1000);
 	/// Determines whether a unit can fall down from this tile.
-	bool canFallDown(Tile *destinationTile);
+	bool canFallDown(Tile *destinationTile) const;
 	/// Determines whether a unit can fall down from this tile.
-	bool canFallDown(Tile *destinationTile, int size);
+	bool canFallDown(Tile *destinationTile, int size) const;
 	std::vector<int> _path;
 public:
 	/// Determines whether the unit is going up a stairs.
-	bool isOnStairs(const Position &startPosition, const Position &endPosition);
+	bool isOnStairs(const Position &startPosition, const Position &endPosition) const;
 	/// Determines whether or not movement between starttile and endtile is possible in the direction.
 	bool isBlocked(Tile *startTile, Tile *endTile, const int direction, BattleUnit *missileTarget);
 	static const int DIR_UP = 8;
@@ -89,7 +87,7 @@ public:
 	 * @param direction Source direction.
 	 * @param vector Pointer to a position (which acts as a vector).
 	 */
-	static void directionToVector(const int direction, Position *vector)
+	static void directionToVector(int direction, Position *vector)
 	{
 		vector->x = dir_x[direction];
 		vector->y = dir_y[direction];
@@ -114,7 +112,7 @@ public:
 		}
 	}
 	/// Checks whether a path is ready and gives the first direction.
-	int getStartDirection();
+	int getStartDirection() const;
 	/// Dequeues a direction.
 	int dequeuePath();
 	/// Gets the TU cost to move from 1 tile to the other.
@@ -124,7 +122,7 @@ public:
 	/// Gets the strafe move setting.
 	bool getStrafeMove() const;
 	/// Checks, for the up/down button, if the movement is valid.
-	bool validateUpDown(BattleUnit *bu, Position startPosition, const int direction);
+	bool validateUpDown(BattleUnit *bu, Position startPosition, const int direction, bool missile = false) const;
 	/// Previews the path.
 	bool previewPath(bool bRemove = false);
 	/// Removes the path preview.
@@ -140,11 +138,9 @@ public:
 	/// Gets the modifier setting.
 	bool isModifierUsed() const;
 	/// Gets a reference to the path.
-	const std::vector<int> &getPath();
+	const std::vector<int> &getPath() const;
 	/// Makes a copy to the path.
 	std::vector<int> copyPath() const;
 };
 
 }
-
-#endif

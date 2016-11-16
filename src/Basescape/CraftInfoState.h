@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_CRAFTINFOSTATE_H
-#define OPENXCOM_CRAFTINFOSTATE_H
-
 #include "../Engine/State.h"
 #include "../Mod/RuleCraft.h"
 
@@ -43,7 +41,6 @@ private:
 	Base *_base;
 	size_t _craftId;
 	Craft *_craft;
-	std::wstring _defaultName;
 	int _weaponNum;
 
 	TextButton *_btnOk, *_btnW[RuleCraft::WeaponMax], *_btnCrew, *_btnEquip, *_btnArmor, *_btnPilots;
@@ -78,5 +75,3 @@ public:
 };
 
 }
-
-#endif

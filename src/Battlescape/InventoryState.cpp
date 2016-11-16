@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -19,6 +19,7 @@
 #include "InventoryState.h"
 #include "InventoryLoadState.h"
 #include "InventorySaveState.h"
+#include <algorithm>
 #include "Inventory.h"
 #include "../Basescape/SoldierArmorState.h"
 #include "../Basescape/SoldierAvatarState.h"
@@ -50,6 +51,7 @@
 #include "../Engine/Options.h"
 #include "UnitInfoState.h"
 #include "BattlescapeState.h"
+#include "BattlescapeGenerator.h"
 #include "TileEngine.h"
 #include "../Mod/RuleInterface.h"
 
@@ -216,6 +218,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : 
 	_btnApplyTemplate->onMouseClick((ActionHandler)&InventoryState::btnApplyTemplateClick);
 	_btnApplyTemplate->onKeyboardPress((ActionHandler)&InventoryState::btnApplyTemplateClick, Options::keyInvApplyTemplate);
 	_btnApplyTemplate->onKeyboardPress((ActionHandler)&InventoryState::onClearInventory, Options::keyInvClear);
+	_btnApplyTemplate->onKeyboardPress((ActionHandler)&InventoryState::onAutoequip, Options::keyInvAutoEquip);
 	_btnApplyTemplate->setTooltip("STR_APPLY_INVENTORY_TEMPLATE");
 	_btnApplyTemplate->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnApplyTemplate->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
@@ -420,7 +423,7 @@ void InventoryState::init()
 			ss << gender;
 			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
 			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str());
+			surf = _game->getMod()->getSurface(ss.str(), false);
 			if (surf)
 			{
 				break;
@@ -431,20 +434,20 @@ void InventoryState::init()
 			ss.str("");
 			ss << look;
 			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str());
+			surf = _game->getMod()->getSurface(ss.str(), false);
 		}
 		surf->blit(_soldier);
 	}
 	else
 	{
-		Surface *armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory());
+		Surface *armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory(), false);
 		if (!armorSurface)
 		{
-			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + ".SPK");
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + ".SPK", false);
 		}
 		if (!armorSurface)
 		{
-			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + "M0.SPK");
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + "M0.SPK", false);
 		}
 		if (armorSurface)
 		{
@@ -943,7 +946,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 	std::vector<BattleItem*> *unitInv       = unit->getInventory();
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
-	RuleInventory            *groundRuleInv = _game->getMod()->getInventory("STR_GROUND");
+	RuleInventory            *groundRuleInv = _game->getMod()->getInventory("STR_GROUND", true);
 
 	_clearInventory(_game, unitInv, groundTile, false);
 
@@ -956,7 +959,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 	{
 		// search for template item in ground inventory
 		std::vector<BattleItem*>::iterator groundItem;
-		const bool needsAmmo = !_game->getMod()->getItem((*templateIt)->getItemType())->getCompatibleAmmo()->empty();
+		const bool needsAmmo = !_game->getMod()->getItem((*templateIt)->getItemType(), true)->getCompatibleAmmo()->empty();
 		bool found = false;
 		bool rescan = true;
 		while (rescan)
@@ -996,7 +999,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 					if (!_inv->overlapItems(
 						unit,
 						*groundItem,
-						_game->getMod()->getInventory((*templateIt)->getSlot()),
+						_game->getMod()->getInventory((*templateIt)->getSlot(), true),
 						(*templateIt)->getSlotX(),
 						(*templateIt)->getSlotY()))
 					{
@@ -1088,7 +1091,7 @@ void InventoryState::refreshMouse()
 
 void InventoryState::onClearInventory(Action *)
 {
-	// don't accept clicks when moving items
+	// don't act when moving items
 	if (_inv->getSelectedItem() != 0)
 	{
 		return;
@@ -1099,6 +1102,35 @@ void InventoryState::onClearInventory(Action *)
 	Tile                     *groundTile = unit->getTile();
 
 	_clearInventory(_game, unitInv, groundTile, false);
+
+	// refresh ui
+	_inv->arrangeGround(false);
+	updateStats();
+	refreshMouse();
+
+	// give audio feedback
+	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
+}
+
+void InventoryState::onAutoequip(Action *)
+{
+	// don't act when moving items
+	if (_inv->getSelectedItem() != 0)
+	{
+		return;
+	}
+
+	BattleUnit               *unit          = _battleGame->getSelectedUnit();
+	Tile                     *groundTile    = unit->getTile();
+	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
+	Mod                      *mod           = _game->getMod();
+	RuleInventory            *groundRuleInv = mod->getInventory("STR_GROUND", true);
+	int                       worldShade    = _battleGame->getGlobalShade();
+	SavedBattleGame           dummy{ mod };
+
+	std::vector<BattleUnit*> units;
+	units.push_back(unit);
+	BattlescapeGenerator::autoEquip(units, mod, &dummy, groundInv, groundRuleInv, worldShade, true, true);
 
 	// refresh ui
 	_inv->arrangeGround(false);
@@ -1313,4 +1345,5 @@ void InventoryState::updateTemplateButtons(bool isVisible)
 		_btnApplyTemplate->clear();
 	}
 }
+
 }

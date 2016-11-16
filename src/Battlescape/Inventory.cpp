@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Inventory.h"
+#include <algorithm>
 #include <cmath>
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInventory.h"
@@ -43,6 +44,7 @@
 #include <algorithm>
 #include "../Ufopaedia/Ufopaedia.h"
 #include <unordered_map>
+#include "../Engine/Screen.h"
 
 namespace OpenXcom
 {
@@ -56,7 +58,7 @@ namespace OpenXcom
  * @param y Y position in pixels.
  * @param base Is the inventory being called from the basescape?
  */
-Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _base(base), _groundOffset(0), _animFrame(0)
+Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _base(base), _mouseOverItem(0), _groundOffset(0), _animFrame(0)
 {
 	_depth = _game->getSavedGame()->getSavedBattle()->getDepth();
 	_grid = new Surface(width, height, x, y);
@@ -638,7 +640,7 @@ void Inventory::mouseClick(Action *action, State *state)
 							return;
 						}
 
-						RuleInventory *newSlot = _game->getMod()->getInventory("STR_GROUND");
+						RuleInventory *newSlot = _game->getMod()->getInventory("STR_GROUND", true);
 						std::string warning = "STR_NOT_ENOUGH_SPACE";
 						bool placed = false;
 
@@ -647,22 +649,22 @@ void Inventory::mouseClick(Action *action, State *state)
 							switch (item->getRules()->getBattleType())
 							{
 							case BT_FIREARM:
-								newSlot = _game->getMod()->getInventory("STR_RIGHT_HAND");
+								newSlot = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
 								break;
 							case BT_MINDPROBE:
 							case BT_PSIAMP:
 							case BT_MELEE:
 							case BT_CORPSE:
-								newSlot = _game->getMod()->getInventory("STR_LEFT_HAND");
+								newSlot = _game->getMod()->getInventory("STR_LEFT_HAND", true);
 								break;
 							default:
 								if (item->getRules()->getInventoryHeight() > 2)
 								{
-									newSlot = _game->getMod()->getInventory("STR_BACK_PACK");
+									newSlot = _game->getMod()->getInventory("STR_BACK_PACK", true);
 								}
 								else
 								{
-									newSlot = _game->getMod()->getInventory("STR_BELT");
+									newSlot = _game->getMod()->getInventory("STR_BELT", true);
 								}
 								break;
 							}
@@ -1002,12 +1004,12 @@ bool Inventory::unload()
 
 	if (_selItem->getSlot()->getType() != INV_HAND)
 	{
-		tuCost += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND"));
+		tuCost += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
 	}
 
 	if (!_tu || _selUnit->spendTimeUnits(tuCost))
 	{
-		moveItem(_selItem, _game->getMod()->getInventory("STR_RIGHT_HAND"), 0, 0);
+		moveItem(_selItem, _game->getMod()->getInventory("STR_RIGHT_HAND", true), 0, 0);
 		_selItem->moveToOwner(_selUnit);
 		if (grenade)
 		{
@@ -1016,7 +1018,7 @@ bool Inventory::unload()
 		}
 		else
 		{
-			moveItem(_selItem->getAmmoItem(), _game->getMod()->getInventory("STR_LEFT_HAND"), 0, 0);
+			moveItem(_selItem->getAmmoItem(), _game->getMod()->getInventory("STR_LEFT_HAND", true), 0, 0);
 			_selItem->getAmmoItem()->moveToOwner(_selUnit);
 			_selItem->setAmmoItem(0);
 		}
@@ -1104,10 +1106,10 @@ bool Inventory::isInSearchString(BattleItem *item)
  */
 void Inventory::arrangeGround(bool alterOffset)
 {
-	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND");
+	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
 
-	int slotsX = (320 - ground->getX()) / RuleInventory::SLOT_W;
-	int slotsY = (200 - ground->getY()) / RuleInventory::SLOT_H;
+	int slotsX = (Screen::ORIGINAL_WIDTH - ground->getX()) / RuleInventory::SLOT_W;
+	int slotsY = (Screen::ORIGINAL_HEIGHT - ground->getY()) / RuleInventory::SLOT_H;
 	int x = 0;
 	int y = 0;
 	bool donePlacing = false;
@@ -1258,9 +1260,9 @@ void Inventory::arrangeGround(bool alterOffset)
 	}
 	if (alterOffset)
 	{
-		if (xMax >= _groundOffset + slotsX - 1)
+		if (xMax >= _groundOffset + slotsX)
 		{
-			_groundOffset += slotsX - 1;
+			_groundOffset += slotsX;
 		}
 		else
 		{

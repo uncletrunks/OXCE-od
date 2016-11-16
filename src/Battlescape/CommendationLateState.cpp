@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -40,7 +40,7 @@ namespace OpenXcom
  */
 CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedalled)
 {
-	// Create objects
+	// Create object
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(288, 16, 16, 176);
 	_txtTitle = new Text(300, 16, 10, 8);
@@ -56,7 +56,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 
 	centerAllSurfaces();
 
-	// Set up objects
+	// Set up object
 	_window->setBackground(_game->getMod()->getSurface("BACK02.SCR"));
 
 	_btnOk->setText(tr("STR_OK"));
@@ -105,14 +105,14 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 		_commendationsNames.push_back("");
 		row++;
 
-		// Loop over all commendations
+		// Loop over all commendation
 		for (std::map<std::string, RuleCommendations *>::const_iterator commList = commendationsList.begin(); commList != commendationsList.end();)
 		{
 			std::wostringstream wssCommendation;
 			modularCommendation = false;
 			noun = "noNoun";
 
-			// Loop over soldier's commendations
+			// Loop over soldier's commendation
 			for (std::vector<SoldierCommendations*>::const_iterator soldierComm = (*s)->getDiary()->getSoldierCommendations()->begin(); soldierComm != (*s)->getDiary()->getSoldierCommendations()->end(); ++soldierComm)
 			{
 				if ((*soldierComm)->getType() == (*commList).first && (*soldierComm)->isNew() && noun == "noNoun")
@@ -146,7 +146,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 						{
 							skipCounter++;
 						}
-						vectorIterator++;					
+						vectorIterator++;
 					}
 					// Establish comms name
 					// Medal name
@@ -164,8 +164,8 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 					row++;
 					break;
 				}
-			} // END SOLDIER COMMS LOOP			
-      
+			} // END SOLDIER COMMS LOOP
+	  
 			if (noun == "noNoun")
 			{
 				++commList;

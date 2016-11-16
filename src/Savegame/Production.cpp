@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Production.h"
+#include <algorithm>
 #include "../Mod/RuleManufacture.h"
 #include "../Mod/RuleSoldier.h"
 #include "Base.h"
@@ -32,8 +33,8 @@
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Engine/Language.h"
 #include "../Engine/Options.h"
-#include <limits>
-#include <algorithm>
+#include <climits>
+#include "BaseFacility.h"
 
 namespace OpenXcom
 {
@@ -91,7 +92,7 @@ void Production::setSellItems (bool sell)
 	_sell = sell;
 }
 
-bool Production::haveEnoughMoneyForOneMoreUnit(SavedGame * g)
+bool Production::haveEnoughMoneyForOneMoreUnit(SavedGame * g) const
 {
 	return (g->getFunds() >= _rules->getManufactureCost());
 }
@@ -108,11 +109,15 @@ bool Production::haveEnoughLivingSpaceForOneMoreUnit(Base * b)
 	return true;
 }
 
-bool Production::haveEnoughMaterialsForOneMoreUnit(Base * b)
+bool Production::haveEnoughMaterialsForOneMoreUnit(Base * b, const Mod *m) const
 {
-	for (std::map<std::string,int>::const_iterator iter = _rules->getRequiredItems().begin(); iter != _rules->getRequiredItems().end(); ++iter)
-		if (b->getStorageItems()->getItem(iter->first) < iter->second)
+	for (std::map<std::string, int>::const_iterator iter = _rules->getRequiredItems().begin(); iter != _rules->getRequiredItems().end(); ++iter)
+	{
+		if (m->getItem(iter->first) != 0 && b->getStorageItems()->getItem(iter->first) < iter->second)
 			return false;
+		else if (m->getCraft(iter->first) != 0 && b->getCraftCount(iter->first) < iter->second)
+			return false;
+	}
 	return true;
 }
 
@@ -120,12 +125,6 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 {
 	int done = getAmountProduced();
 	_timeSpent += _engineers;
-
-	if (!Options::canManufactureMoreItemsPerHour && done < getAmountProduced())
-	{
-		// enforce pre-TFTD manufacturing rules: extra hours are wasted
-		_timeSpent = (done + 1) * _rules->getManufactureTime();
-	}
 
 	if (done < getAmountProduced())
 	{
@@ -145,43 +144,22 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 			{
 				if (_rules->getCategory() == "STR_CRAFT")
 				{
-					Craft *craft = new Craft(m->getCraft(i->first), b, g->getId(i->first));
+					Craft *craft = new Craft(m->getCraft(i->first, true), b, g->getId(i->first));
 					craft->setStatus("STR_REFUELLING");
 					b->getCrafts()->push_back(craft);
 					break;
 				}
 				else
 				{
-					// Check if it's ammo to reload a craft
-					if (m->getItem(i->first)->getBattleType() == BT_NONE)
+					if (m->getItem(i->first, true)->getBattleType() == BT_NONE)
 					{
 						for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
 						{
-							if ((*c)->getStatus() != "STR_READY")
-								continue;
-							for (std::vector<CraftWeapon*>::iterator w = (*c)->getWeapons()->begin(); w != (*c)->getWeapons()->end(); ++w)
-							{
-								if ((*w) != 0 && (*w)->getRules()->getClipItem() == i->first && (*w)->getAmmo() < (*w)->getRules()->getAmmoMax())
-								{
-									(*w)->setRearming(true);
-									(*c)->setStatus("STR_REARMING");
-								}
-							}
-						}
-					}
-					// Check if it's fuel to refuel a craft
-					if (m->getItem(i->first)->getBattleType() == BT_NONE)
-					{
-						for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
-						{
-							if ((*c)->getStatus() != "STR_READY")
-								continue;
-							if ((*c)->getRules()->getRefuelItem() == i->first && 100 > (*c)->getFuelPercentage())
-								(*c)->setStatus("STR_REFUELLING");
+							(*c)->reuseItem(i->first);
 						}
 					}
 					if (getSellItems())
-						g->setFunds(g->getFunds() + (m->getItem(i->first)->getSellCost() * i->second));
+						g->setFunds(g->getFunds() + (m->getItem(i->first, true)->getSellCost() * i->second));
 					else
 						b->getStorageItems()->addItem(i->first, i->second);
 				}
@@ -219,8 +197,8 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 			{
 				// We need to ensure that player has enough cash/item to produce a new unit
 				if (!haveEnoughMoneyForOneMoreUnit(g)) return PROGRESS_NOT_ENOUGH_MONEY;
-				if (!haveEnoughMaterialsForOneMoreUnit(b)) return PROGRESS_NOT_ENOUGH_MATERIALS;
-				startItem(b,g);
+				if (!haveEnoughMaterialsForOneMoreUnit(b, m)) return PROGRESS_NOT_ENOUGH_MATERIALS;
+				startItem(b, g, m);
 			}
 		}
 		while (count < produced);
@@ -230,16 +208,19 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 	{
 		// We need to ensure that player has enough cash/item to produce a new unit
 		if (!haveEnoughMoneyForOneMoreUnit(g)) return PROGRESS_NOT_ENOUGH_MONEY;
-		if (!haveEnoughMaterialsForOneMoreUnit(b)) return PROGRESS_NOT_ENOUGH_MATERIALS;
 		if (!haveEnoughLivingSpaceForOneMoreUnit(b)) return PROGRESS_NOT_ENOUGH_LIVING_SPACE;
-		startItem(b,g);
+		if (!haveEnoughMaterialsForOneMoreUnit(b, m)) return PROGRESS_NOT_ENOUGH_MATERIALS;
+		startItem(b, g, m);
 	}
 	return PROGRESS_NOT_COMPLETE;
 }
 
 int Production::getAmountProduced() const
 {
-	return _timeSpent / _rules->getManufactureTime();
+	if (_rules->getManufactureTime() > 0)
+		return _timeSpent / _rules->getManufactureTime();
+	else
+		return _amount;
 }
 
 const RuleManufacture * Production::getRules() const
@@ -247,12 +228,41 @@ const RuleManufacture * Production::getRules() const
 	return _rules;
 }
 
-void Production::startItem(Base * b, SavedGame * g)
+void Production::startItem(Base * b, SavedGame * g, const Mod *m) const
 {
 	g->setFunds(g->getFunds() - _rules->getManufactureCost());
 	for (std::map<std::string,int>::const_iterator iter = _rules->getRequiredItems().begin(); iter != _rules->getRequiredItems().end(); ++iter)
 	{
-		b->getStorageItems()->removeItem(iter->first, iter->second);
+		if (m->getItem(iter->first) != 0)
+		{
+			b->getStorageItems()->removeItem(iter->first, iter->second);
+		}
+		else if (m->getCraft(iter->first) != 0)
+		{
+			// Find suitable craft
+			for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
+			{
+				if ((*c)->getRules()->getType() == iter->first)
+				{
+					// Unload craft
+					(*c)->unload(m);
+
+					// Clear hangar
+					for (std::vector<BaseFacility*>::iterator f = b->getFacilities()->begin(); f != b->getFacilities()->end(); ++f)
+					{
+						if ((*f)->getCraft() == (*c))
+						{
+							(*f)->setCraft(0);
+							break;
+						}
+					}
+
+					// Remove craft
+					b->getCrafts()->erase(c);
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -277,11 +287,12 @@ void Production::load(const YAML::Node &node)
 	setInfiniteAmount(node["infinite"].as<bool>(getInfiniteAmount()));
 	setSellItems(node["sell"].as<bool>(getSellItems()));
 	// backwards compatibility
-	if (getAmountTotal() == std::numeric_limits<int>::max())
+	if (getAmountTotal() == INT_MAX)
 	{
 		setAmountTotal(999);
 		setInfiniteAmount(true);
 		setSellItems(true);
 	}
 }
+
 }

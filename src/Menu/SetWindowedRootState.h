@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,39 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_NOCONTAINMENTSTATE_H
-#define OPENXCOM_NOCONTAINMENTSTATE_H
-
 #include "../Engine/State.h"
-
+#include "OptionsBaseState.h"
 namespace OpenXcom
 {
 
 class TextButton;
 class Window;
 class Text;
+class TextEdit;
+class OptionsVideoState;
+enum OptionsOrigin;
 
 /**
- * Screen shown when there's not enough containment
- * to capture a live alien after a mission.
+ * Asks user new coordinates when he pushes Fixed Borderless Pos button.
+ * are changed.
  */
-class NoContainmentState : public State
+class SetWindowedRootState : public State
 {
 private:
-	int _prisonType;
-
-	TextButton *_btnOk;
+	OptionsOrigin _origin;
+	OptionsVideoState *_optionsVideoState;
+	TextButton *_btnOk, *_btnCancel;
 	Window *_window;
-	Text *_txtTitle;
+	Text *_txtTitle, *_txtWindowedModePositionX, *_txtWindowedModePositionY;
+	TextEdit *_edtWindowedModePositionX, *_edtWindowedModePositionY;
 public:
-	/// Creates the No Containment state.
-	NoContainmentState(int prisonType);
-	/// Cleans up the No Containment state.
-	~NoContainmentState();
-	/// Handler for clicking the OK button.
+	/// Creates the Confirm Display Options state.
+	SetWindowedRootState(OptionsOrigin origin, OptionsVideoState *optionsVideoState);
+	/// Cleans up the Confirm Display Options state.
+	~SetWindowedRootState();
+	/// Handler for clicking the Ok button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the Cancel button.
+	void btnCancelClick(Action *action);
 };
 
 }
-
-#endif

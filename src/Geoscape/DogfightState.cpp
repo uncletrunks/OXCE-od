@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "DogfightState.h"
+#include <cmath>
 #include <sstream>
 #include "GeoscapeState.h"
 #include "../Engine/Game.h"
@@ -238,7 +239,7 @@ const int DogfightState::_projectileBlobs[4][6][3] =
  */
 DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	_state(state), _craft(craft), _ufo(ufo), _timeout(50), _currentDist(640), _targetDist(560),
-	_end(false), _endUfoHandled(false), _endCraftHandled(false), _destroyUfo(false), _destroyCraft(false), _ufoBreakingOff(false),
+	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0), _interceptionNumber(0),
 	_interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false)
 {
@@ -1053,6 +1054,22 @@ void DogfightState::update()
 		if (!_destroyCraft && (_destroyUfo || _mode == _btnDisengage))
 		{
 			_craft->returnToBase();
+		}
+		if (_ufo->isCrashed())
+		{
+			for (std::vector<Target*>::iterator i = _ufo->getFollowers()->begin(); i != _ufo->getFollowers()->end();)
+			{
+				Craft* c = dynamic_cast<Craft*>(*i);
+				if (c != 0 && c->getNumSoldiers() == 0 && c->getNumVehicles() == 0)
+				{
+					c->returnToBase();
+					i = _ufo->getFollowers()->begin();
+				}
+				else
+				{
+					++i;
+				}
+			}
 		}
 		endDogfight();
 	}
@@ -1920,4 +1937,5 @@ bool DogfightState::getWaitForPoly()
 {
 	return _waitForPoly;
 }
+
 }

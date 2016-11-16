@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -112,32 +112,12 @@ ItemsArrivingState::ItemsArrivingState(GeoscapeState *state) : _state(state), _b
 				// Check if we have an automated use for an item
 				if ((*j)->getType() == TRANSFER_ITEM)
 				{
-					RuleItem *item = _game->getMod()->getItem((*j)->getItems());
-					for (std::vector<Craft*>::iterator c = (*i)->getCrafts()->begin(); c != (*i)->getCrafts()->end(); ++c)
+					RuleItem *item = _game->getMod()->getItem((*j)->getItems(), true);
+					if (item->getBattleType() == BT_NONE)
 					{
-						// Check if it's ammo to reload a craft
-						if ((*c)->getStatus() == "STR_READY")
+						for (std::vector<Craft*>::iterator c = (*i)->getCrafts()->begin(); c != (*i)->getCrafts()->end(); ++c)
 						{
-							for (std::vector<CraftWeapon*>::iterator w = (*c)->getWeapons()->begin(); w != (*c)->getWeapons()->end(); ++w)
-							{
-								if ((*w) != 0 && (*w)->getRules()->getClipItem() == item->getType() && (*w)->getAmmo() < (*w)->getRules()->getAmmoMax())
-								{
-									(*w)->setRearming(true);
-									(*c)->setStatus("STR_REARMING");
-								}
-							}
-						}
-						// Check if it's ammo to reload a vehicle
-						for (std::vector<Vehicle*>::iterator v = (*c)->getVehicles()->begin(); v != (*c)->getVehicles()->end(); ++v)
-						{
-							std::vector<std::string>::const_iterator ammo = std::find((*v)->getRules()->getCompatibleAmmo()->begin(), (*v)->getRules()->getCompatibleAmmo()->end(), item->getType());
-							if (ammo != (*v)->getRules()->getCompatibleAmmo()->end() && (*v)->getAmmo() < item->getClipSize())
-							{
-								int used = std::min((*j)->getQuantity(), item->getClipSize() - (*v)->getAmmo());
-								(*v)->setAmmo((*v)->getAmmo() + used);
-								// Note that the items have already been delivered, so we remove them from the base, not the transfer
-								_base->getStorageItems()->removeItem(item->getType(), used);
-							}
+							(*c)->reuseItem((*j)->getItems());
 						}
 					}
 				}

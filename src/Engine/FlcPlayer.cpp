@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -20,15 +20,16 @@
 /*
  * Based on http://www.libsdl.org/projects/flxplay/
  */
-
+#ifdef _MSC_VER
+#define _SCL_SECURE_NO_WARNINGS
+#endif
 #include "FlcPlayer.h"
+#include <algorithm>
+#include <cassert>
 #include <string.h>
-#include <math.h>
-#include <assert.h>
+#include <cmath>
 #include <SDL_mixer.h>
 #include <fstream>
-#include <algorithm>
-
 #include "Logger.h"
 #include "Screen.h"
 #include "Surface.h"
@@ -161,10 +162,8 @@ bool FlcPlayer::init(const char *filename, void(*frameCallBack)(), Game *game, i
 	}
 	else // Otherwise create a new one
 	{
-		_mainScreen = SDL_AllocSurface(SDL_SWSURFACE, _screenWidth, _screenHeight, 8, 0, 0, 0, 0);
+		_mainScreen = SDL_AllocSurface(SDL_SWSURFACE, _realScreen->getSurface()->getWidth(), _realScreen->getSurface()->getHeight(), 8, 0, 0, 0, 0);
 	}
-
-	
 
 	return true;
 }
@@ -282,7 +281,7 @@ bool FlcPlayer::isValidFrame(Uint8 *frameHeader, Uint32 &frameSize, Uint16 &fram
 	readU16(frameType, frameHeader + 4);
 
 	return (frameType == FRAME_TYPE || frameType == AUDIO_CHUNK || frameType == PREFIX_CHUNK);
-} 
+}
 
 void FlcPlayer::decodeAudio(int frames)
 {
@@ -316,7 +315,7 @@ void FlcPlayer::decodeAudio(int frames)
 				++audioFramesFound;
 
 				break;
-		}	
+		}
 	}
 }
 
@@ -503,6 +502,8 @@ void FlcPlayer::color256()
 			_colors[i].b = *(pSrc++);
 		}
 
+		if (_mainScreen != _realScreen->getSurface()->getSurface())
+			SDL_SetColors(_mainScreen, _colors, numColorsSkip, numColors);
 		_realScreen->setPalette(_colors, numColorsSkip, numColors, true);
 
 		if (numColorPackets >= 1)
@@ -534,14 +535,14 @@ void FlcPlayer::fliSS2()
 		pSrc += 2;
 
 		if ((count & MASK) == SKIP_LINES) 
-		{  
+		{
 			pDst += (-count)*_mainScreen->pitch;
 			++lines;
 			continue;
 		}
 			
 		else if ((count & MASK) == LAST_PIXEL)
-		{  
+		{
 			setLastByte = true;
 			lastByte = (count & 0x00FF);
 			readS16(count, (Sint8 *)pSrc);
@@ -549,7 +550,7 @@ void FlcPlayer::fliSS2()
 		}
 
 		if ((count & MASK) == PACKETS_COUNT)
-		{      
+		{
 			pTmpDst = pDst;
 			while (count--) 
 			{
@@ -564,7 +565,7 @@ void FlcPlayer::fliSS2()
 					pSrc += (2 * countData);
 
 				}
-				else 
+				else
 				{
 					if (countData < 0) 
 					{
@@ -618,7 +619,7 @@ void FlcPlayer::fliBRun()
 				pTmpDst += countData;
 				pixels += countData;
 			}
-			else 
+			else
 			{
 				if (countData < 0) 
 				{
@@ -671,7 +672,7 @@ void FlcPlayer::fliLC()
 					*(pTmpDst++) = *(pSrc++);
 				}
 			}
-			else 
+			else
 			{
 				if (countData < 0) 
 				{
@@ -716,6 +717,8 @@ void FlcPlayer::color64()
 			_colors[i].b = *(pSrc++) << 2;
 		}
 
+		if (_mainScreen != _realScreen->getSurface()->getSurface())
+			SDL_SetColors(_mainScreen, _colors, NumColorsSkip, NumColors);
 		_realScreen->setPalette(_colors, NumColorsSkip, NumColors, true);
 	}
 }
@@ -793,7 +796,8 @@ void FlcPlayer::initAudio(Uint16 format, Uint8 channels)
 
 	if (err)
 	{
-		printf("Failed to open audio (%d)\n", err);
+		Log(LOG_WARNING) << Mix_GetError();
+		Log(LOG_WARNING) << "Failed to init cutscene audio";
 		return;
 	}
 
@@ -823,7 +827,7 @@ void FlcPlayer::deInitAudio()
 		Mix_CloseAudio();
 		_game->initAudio();
 	}
-  else if(_audioData.sharedLock)
+	else if(_audioData.sharedLock)
 		SDL_DestroySemaphore(_audioData.sharedLock);
 
 	if (_audioData.loadingBuffer)
@@ -904,7 +908,7 @@ void FlcPlayer::waitForNextFrame(Uint32 delay)
 		}
 	}
 	oldTick = SDL_GetTicks();
-} 
+}
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 inline void FlcPlayer::readU16(Uint16 &dst, const Uint8 * const src)

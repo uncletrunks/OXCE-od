@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -34,7 +34,7 @@ namespace OpenXcom
 
 	ArticleStateTFTDArmor::ArticleStateTFTDArmor(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs), _row(0)
 	{
-		Armor *armor = _game->getMod()->getArmor(defs->id);
+		Armor *armor = _game->getMod()->getArmor(defs->id, true);
 
 		_lstInfo = new TextList(150, 64, 168, 110);
 		add(_lstInfo);

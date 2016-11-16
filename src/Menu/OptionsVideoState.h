@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_OPTIONSVIDEOSTATE_H
-#define OPENXCOM_OPTIONSVIDEOSTATE_H
-
 #include "../Engine/State.h"
 #include "OptionsBaseState.h"
 #include <SDL.h>
@@ -52,12 +50,13 @@ private:
 	ComboBox *_cbxLanguage, *_cbxFilter, *_cbxDisplayMode, *_cbxGeoScale, *_cbxBattleScale;
 	Text *_txtMode;
 	Text *_txtOptions;
-	ToggleTextButton *_btnLetterbox, *_btnLockMouse;
+	ToggleTextButton *_btnLetterbox, *_btnLockMouse, *_btnRootWindowedMode;
 
 	SDL_Rect** _res;
 	int _resAmount, _resCurrent;
 	std::vector<std::string> _langs, _filters;
 
+	std::string ucWords(std::string str);
 	void updateDisplayResolution();
 public:
 	/// Creates the Options state.
@@ -82,6 +81,8 @@ public:
 	void btnLetterboxClick(Action *action);
 	/// Handler for clicking the Lock Mouse button.
 	void btnLockMouseClick(Action *action);
+	/// Handler for clicking the Root Window Pos button.
+	void btnRootWindowedModeClick(Action *action);
 	/// Handler for updating the selected battlescape scale.
 	void updateBattlescapeScale(Action *action);
 	/// Handler for updating the selected geoscape scale.
@@ -90,8 +91,8 @@ public:
 	void resize(int &, int &);
 	/// Handles keypresses.
 	void handle(Action *action);
+	/// Unpresses Root Window Pos button.
+	void unpressRootWindowedMode();
 };
 
 }
-
-#endif

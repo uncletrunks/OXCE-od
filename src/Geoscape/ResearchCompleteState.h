@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_RESEARCHCOMPLETESTATE
-#define OPENXCOM_RESEARCHCOMPLETESTATE
-
 #include "../Engine/State.h"
+
 namespace OpenXcom
 {
+
 class Game;
 class Window;
 class TextButton;
@@ -31,7 +31,7 @@ class RuleResearch;
 
 /**
  * Window which inform the player that a research project is finished.
- * Allow him to view information about the project(Ufopaedia).
+ * Allow him to view information about the project (Ufopaedia).
  */
 class ResearchCompleteState : public State
 {
@@ -49,4 +49,3 @@ public:
 };
 
 }
-#endif

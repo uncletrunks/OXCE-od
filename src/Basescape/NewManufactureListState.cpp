@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -33,7 +33,6 @@
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
 #include "ManufactureStartState.h"
-#include "../Mod/Mod.h"
 #include "TechTreeViewerState.h"
 
 namespace OpenXcom

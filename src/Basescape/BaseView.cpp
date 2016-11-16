@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "BaseView.h"
+#include <algorithm>
 #include <sstream>
 #include <cmath>
 #include "../Engine/SurfaceSet.h"
@@ -29,8 +30,7 @@
 #include "../Interface/Text.h"
 #include "../Engine/Timer.h"
 #include "../Engine/Options.h"
-#include <limits>
-#include <algorithm>
+#include <climits>
 
 namespace OpenXcom
 {
@@ -44,9 +44,14 @@ namespace OpenXcom
  */
 BaseView::BaseView(int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _base(0), _texture(0), _selFacility(0), _big(0), _small(0), _lang(0), _gridX(0), _gridY(0), _selSize(0), _selector(0), _blink(true)
 {
-	for (int x = 0; x < BASE_SIZE; ++x)
-		for (int y = 0; y < BASE_SIZE; ++y)
-			_facilities[x][y] = 0;
+	// Clear grid
+	for (int i = 0; i < BASE_SIZE; ++i)
+	{
+		for (int j = 0; j < BASE_SIZE; ++j)
+		{
+			_facilities[i][j] = 0;
+		}
+	}
 
 	_timer = new Timer(100);
 	_timer->onTimer((SurfaceHandler)&BaseView::blink);
@@ -90,8 +95,12 @@ void BaseView::setBase(Base *base)
 
 	// Clear grid
 	for (int x = 0; x < BASE_SIZE; ++x)
+	{
 		for (int y = 0; y < BASE_SIZE; ++y)
+		{
 			_facilities[x][y] = 0;
+		}
+	}
 
 	// Fill grid with base facilities
 	for (std::vector<BaseFacility*>::iterator i = _base->getFacilities()->begin(); i != _base->getFacilities()->end(); ++i)
@@ -269,7 +278,7 @@ void BaseView::reCalcQueuedBuildings()
 		if ((*i)->getBuildTime() > 0)
 		{
 			// Set all queued buildings to infinite.
-			if ((*i)->getBuildTime() > (*i)->getRules()->getBuildTime()) (*i)->setBuildTime(std::numeric_limits<int>::max());
+			if ((*i)->getBuildTime() > (*i)->getRules()->getBuildTime()) (*i)->setBuildTime(INT_MAX);
 			facilities.push_back(*i);
 		}
 
@@ -420,12 +429,12 @@ void BaseView::draw()
 			int y = (*i)->getY() + (*i)->getRules()->getSize();
 			if (y < BASE_SIZE)
 			{
-				for (int x = (*i)->getX(); x < (*i)->getX() + (*i)->getRules()->getSize(); ++x)
+				for (int subX = (*i)->getX(); subX < (*i)->getX() + (*i)->getRules()->getSize(); ++subX)
 				{
-					if (_facilities[x][y] != 0 && _facilities[x][y]->getBuildTime() == 0)
+					if (_facilities[subX][y] != 0 && _facilities[subX][y]->getBuildTime() == 0)
 					{
 						Surface *frame = _texture->getFrame(8);
-						frame->setX(x * GRID_SIZE);
+						frame->setX(subX * GRID_SIZE);
 						frame->setY(y * GRID_SIZE - GRID_SIZE / 2);
 						frame->blit(this);
 					}
@@ -574,4 +583,5 @@ void BaseView::setSecondaryColor(Uint8 color)
 {
 	_selectorColor = color;
 }
+
 }

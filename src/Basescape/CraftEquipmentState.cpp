@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -522,7 +522,7 @@ void CraftEquipmentState::lstEquipmentMousePress(Action *action)
 void CraftEquipmentState::updateQuantity()
 {
 	Craft *c = _base->getCrafts()->at(_craft);
-	RuleItem *item = _game->getMod()->getItem(_items[_sel]);
+	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
 	int cQty = 0;
 	if (item->isFixed())
 	{
@@ -546,7 +546,7 @@ void CraftEquipmentState::updateQuantity()
 	Uint8 color;
 	if (cQty == 0)
 	{
-		RuleItem *rule = _game->getMod()->getItem(_items[_sel]);
+		RuleItem *rule = _game->getMod()->getItem(_items[_sel], true);
 		if (rule->getBattleType() == BT_AMMO)
 		{
 			color = _ammoColor;
@@ -585,7 +585,7 @@ void CraftEquipmentState::moveLeft()
 void CraftEquipmentState::moveLeftByValue(int change)
 {
 	Craft *c = _base->getCrafts()->at(_craft);
-	RuleItem *item = _game->getMod()->getItem(_items[_sel]);
+	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
 	int cQty = 0;
 	if (item->isFixed()) cQty = c->getVehicleCount(_items[_sel]);
 	else cQty = c->getItems()->getItem(_items[_sel]);
@@ -596,24 +596,34 @@ void CraftEquipmentState::moveLeftByValue(int change)
 	{
 		if (!item->getCompatibleAmmo()->empty())
 		{
-			// First we remove all vehicles because we want to redistribute the ammo
-			RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front());
-			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end(); )
+			// Calculate how much ammo needs to be added to the base.
+			RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front(), true);
+			int ammoPerVehicle;
+			if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
+			{
+				ammoPerVehicle = item->getClipSize() / ammo->getClipSize();
+			}
+			else
+			{
+				ammoPerVehicle = ammo->getClipSize();
+			}
+			// Put the vehicles and their ammo back as seperate items.
+			if (_game->getSavedGame()->getMonthsPassed() != -1)
+			{
+				_base->getStorageItems()->addItem(_items[_sel], change);
+				_base->getStorageItems()->addItem(ammo->getType(), ammoPerVehicle * change);
+			}
+			// now delete the vehicles from the craft.
+			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end() && change > 0; )
 			{
 				if ((*i)->getRules() == item)
 				{
-					_base->getStorageItems()->addItem(ammo->getType(), (*i)->getAmmo());
 					delete (*i);
 					i = c->getVehicles()->erase(i);
+					--change;
 				}
 				else ++i;
 			}
-			if (_game->getSavedGame()->getMonthsPassed() != -1)
-			{
-				_base->getStorageItems()->addItem(_items[_sel], cQty);
-			}
-			// And now reAdd the count we want to keep in the craft (and redistribute the ammo among them)
-			if (cQty > change) moveRightByValue(cQty - change);
 		}
 		else
 		{
@@ -621,13 +631,13 @@ void CraftEquipmentState::moveLeftByValue(int change)
 			{
 				_base->getStorageItems()->addItem(_items[_sel], change);
 			}
-			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end(); )
+			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end() && change > 0; )
 			{
 				if ((*i)->getRules() == item)
 				{
 					delete (*i);
 					i = c->getVehicles()->erase(i);
-					if (0 >= --change) break;
+					--change;
 				}
 				else ++i;
 			}
@@ -662,7 +672,7 @@ void CraftEquipmentState::moveRight()
 void CraftEquipmentState::moveRightByValue(int change)
 {
 	Craft *c = _base->getCrafts()->at(_craft);
-	RuleItem *item = _game->getMod()->getItem(_items[_sel]);
+	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
 	int bqty = _base->getStorageItems()->getItem(_items[_sel]);
 	if (_game->getSavedGame()->getMonthsPassed() == -1)
 	{
@@ -680,7 +690,7 @@ void CraftEquipmentState::moveRightByValue(int change)
 		int size = 4;
 		if (_game->getMod()->getUnit(item->getType()))
 		{
-			size = _game->getMod()->getArmor(_game->getMod()->getUnit(item->getType())->getArmor())->getSize();
+			size = _game->getMod()->getArmor(_game->getMod()->getUnit(item->getType())->getArmor(), true)->getSize();
 			size *= size;
 		}
 		// Check if there's enough room
@@ -691,7 +701,7 @@ void CraftEquipmentState::moveRightByValue(int change)
 			if (!item->getCompatibleAmmo()->empty())
 			{
 				// And now let's see if we can add the total number of vehicles.
-				RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front());
+				RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front(), true);
 				int ammoPerVehicle, clipSize;
 				if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
 				{
@@ -706,11 +716,11 @@ void CraftEquipmentState::moveRightByValue(int change)
 
 				int baseQty = _base->getStorageItems()->getItem(ammo->getType()) / ammoPerVehicle;
 				if (_game->getSavedGame()->getMonthsPassed() == -1)
-					baseQty = 1;
+					baseQty = change;
 				int canBeAdded = std::min(change, baseQty);
 				if (canBeAdded > 0)
 				{
-					for (int i=0; i < canBeAdded; ++i)
+					for (int i = 0; i < canBeAdded; ++i)
 					{
 						if (_game->getSavedGame()->getMonthsPassed() != -1)
 						{
@@ -724,12 +734,12 @@ void CraftEquipmentState::moveRightByValue(int change)
 				{
 					// So we haven't managed to increase the count of vehicles because of the ammo
 					_timerRight->stop();
-					LocalizedText msg(tr("STR_NOT_ENOUGH_AMMO_TO_ARM_HWP").arg(tr(ammo->getType())));
+					LocalizedText msg(tr("STR_NOT_ENOUGH_AMMO_TO_ARM_HWP").arg(ammoPerVehicle).arg(tr(ammo->getType())));
 					_game->pushState(new ErrorMessageState(msg, _palette, _game->getMod()->getInterface("craftEquipment")->getElement("errorMessage")->color, "BACK04.SCR", _game->getMod()->getInterface("craftEquipment")->getElement("errorPalette")->color));
 				}
 			}
 			else
-				for (int i=0; i < change; ++i)
+				for (int i = 0; i < change; ++i)
 				{
 					c->getVehicles()->push_back(new Vehicle(item, item->getClipSize(), size));
 					if (_game->getSavedGame()->getMonthsPassed() != -1)

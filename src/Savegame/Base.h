@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_BASE_H
-#define OPENXCOM_BASE_H
-
 #include "Target.h"
 #include <string>
 #include <vector>
@@ -49,7 +47,6 @@ class Base : public Target
 private:
 	static const int BASE_SIZE = 6;
 	const Mod *_mod;
-	std::wstring _name;
 	std::vector<BaseFacility*> _facilities;
 	std::vector<Soldier*> _soldiers;
 	std::vector<Craft*> _crafts;
@@ -62,8 +59,11 @@ private:
 	bool _retaliationTarget;
 	std::vector<Vehicle*> _vehicles;
 	std::vector<BaseFacility*> _defenses;
+
 	/// Determines space taken up by ammo clips about to rearm craft.
 	double getIgnoredStores();
+	/// Gets the base's default name (unused).
+	std::wstring getDefaultName(Language *) const { return L""; }
 public:
 	/// Creates a new base.
 	Base(const Mod *mod);
@@ -76,9 +76,7 @@ public:
 	/// Saves the base's ID to YAML.
 	YAML::Node saveId() const;
 	/// Gets the base's name.
-	std::wstring getName(Language* lang = 0) const;
-	/// Sets the base's name.
-	void setName(const std::wstring &name);
+	std::wstring getName(Language *lang = 0) const;
 	/// Gets the base's marker.
 	int getMarker() const;
 	/// Gets the base's facilities.
@@ -243,5 +241,3 @@ public:
 };
 
 }
-
-#endif

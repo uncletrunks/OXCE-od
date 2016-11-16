@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,8 +17,8 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "CraftInfoState.h"
+#include <cmath>
 #include <sstream>
-#include <math.h>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
@@ -202,23 +202,23 @@ void CraftInfoState::init()
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->setY(0);
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->blit(_sprite);
 
-	std::wostringstream ss;
-	ss << tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage()));
+	std::wostringstream firlsLine;
+	firlsLine << tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage()));
 	if (_craft->getStatus() == "STR_REPAIRS" && _craft->getDamage() > 0)
 	{
 		int damageHours = (int)ceil((double)_craft->getDamage() / _craft->getRules()->getRepairRate());
-		ss << formatTime(damageHours);
+		firlsLine << formatTime(damageHours);
 	}
-	_txtDamage->setText(ss.str());
+	_txtDamage->setText(firlsLine.str());
 
-	std::wostringstream ss2;
-	ss2 << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
+	std::wostringstream secondLine;
+	secondLine << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
 	if (_craft->getStatus() == "STR_REFUELLING" && _craft->getFuelMax() - _craft->getFuel() > 0)
 	{
 		int fuelHours = (int)ceil((double)(_craft->getFuelMax() - _craft->getFuel()) / _craft->getRules()->getRefuelRate() / 2.0);
-		ss2 << formatTime(fuelHours);
+		secondLine << formatTime(fuelHours);
 	}
-	_txtFuel->setText(ss2.str());
+	_txtFuel->setText(secondLine.str());
 
 	if (_craft->getRules()->getSoldiers() > 0)
 	{
@@ -309,21 +309,21 @@ void CraftInfoState::init()
 			frame->setY(0);
 			frame->blit(_weapon[i]);
 
-			std::wostringstream ss;
-			ss << L'\x01' << tr(w1->getRules()->getType());
-			_txtWName[i]->setText(ss.str());
-			ss.str(L"");
+			std::wostringstream weaponLine;
+			weaponLine << L'\x01' << tr(w1->getRules()->getType());
+			_txtWName[i]->setText(weaponLine.str());
+			weaponLine.str(L"");
 			if (w1->getRules()->getAmmoMax())
 			{
-				ss << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
-				ss << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
+				weaponLine << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
+				weaponLine << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
 				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())
 				{
 					int rearmHours = (int)ceil((double)(w1->getRules()->getAmmoMax() - w1->getAmmo()) / w1->getRules()->getRearmRate());
-					ss << formatTime(rearmHours);
+					weaponLine << formatTime(rearmHours);
 				}
 			}
-			_txtWAmmo[i]->setText(ss.str());
+			_txtWAmmo[i]->setText(weaponLine.str());
 		}
 		else
 		{
@@ -332,13 +332,12 @@ void CraftInfoState::init()
 		}
 	}
 
-	_defaultName = tr("STR_CRAFTNAME").arg(tr(_craft->getRules()->getType())).arg(_craft->getId());
 }
 
 /**
  * Turns an amount of time into a
  * day/hour string.
- * @param total
+ * @param total Amount in hours.
  */
 std::wstring CraftInfoState::formatTime(int total)
 {
@@ -426,10 +425,13 @@ void CraftInfoState::btnPilotsClick(Action *)
  */
 void CraftInfoState::edtCraftChange(Action *action)
 {
-	_craft->setName(_edtCraft->getText());
-	if (_craft->getName(_game->getLanguage()) == _defaultName)
+	if (_edtCraft->getText() == _craft->getDefaultName(_game->getLanguage()))
 	{
 		_craft->setName(L"");
+	}
+	else
+	{
+		_craft->setName(_edtCraft->getText());
 	}
 	if (action->getDetails()->key.keysym.sym == SDLK_RETURN ||
 		action->getDetails()->key.keysym.sym == SDLK_KP_ENTER)

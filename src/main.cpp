@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -41,7 +41,7 @@
 using namespace OpenXcom;
 
 // Crash handling routines
-#ifdef _WIN32
+#ifdef _MSC_VER
 #include <windows.h>
 LONG WINAPI crashLogger(PEXCEPTION_POINTERS exception)
 {
@@ -62,13 +62,20 @@ void exceptionLogger()
 {
 	static bool logged = false;
 	std::string error;
-	try {
-		if (!logged++) throw;
+	try
+	{
+		if (!logged)
+		{
+			logged = true;
+			throw;
+		}
 	}
-	catch (const std::exception &e) {
+	catch (const std::exception &e)
+	{
 		error = e.what();
 	}
-	catch (...) {
+	catch (...)
+	{
 		error = "Unknown exception";
 	}
 	CrossPlatform::crashDump(0, error);
@@ -81,7 +88,7 @@ Game *game = 0;
 // programming license revoked...
 int main(int argc, char *argv[])
 {
-#ifdef _WIN32
+#ifdef _MSC_VER
 	// Uncomment to check memory leaks in VS
 	//_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
@@ -118,7 +125,6 @@ int main(int argc, char *argv[])
 	game->setState(new StartState);
 	game->run();
 
-	Options::save();
 	// Comment this for faster exit.
 	delete game;
 	return EXIT_SUCCESS;

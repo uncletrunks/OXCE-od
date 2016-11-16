@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,14 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
-#include <cmath>
 #include <fstream>
 #include "Map.h"
 #include "Camera.h"
 #include "UnitSprite.h"
 #include "ItemSprite.h"
-#include "Position.h"
 #include "Pathfinding.h"
 #include "TileEngine.h"
 #include "Projectile.h"
@@ -52,6 +49,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Interface/NumberText.h"
 #include "../Interface/Text.h"
+#include "../fmath.h"
 
 
 /*
@@ -167,7 +165,7 @@ void Map::init()
 	int b = 15; // black
 	int pixels[81] = { 0, 0, b, b, b, b, b, 0, 0,
 					   0, 0, b, f, f, f, b, 0, 0,
-				       0, 0, b, f, f, f, b, 0, 0,
+					   0, 0, b, f, f, f, b, 0, 0,
 					   b, b, b, f, f, f, b, b, b,
 					   b, f, f, f, f, f, f, f, b,
 					   0, b, f, f, f, f, f, b, 0,
@@ -712,7 +710,7 @@ void Map::drawTerrain(Surface *surface)
 									}
 								}
 								// Draw soldier
-								if (westUnit && westUnit->getStatus() != STATUS_WALKING && (!tileWest->getMapData(O_OBJECT) || tileWest->getMapData(O_OBJECT)->getBigWall() < 6 || tileWest->getMapData(O_OBJECT)->getBigWall() == 9) && (westUnit->getVisible() || _save->getDebugMode()))
+								if (westUnit && (!tileWest->getMapData(O_OBJECT) || tileWest->getMapData(O_OBJECT)->getBigWall() < 6 || tileWest->getMapData(O_OBJECT)->getBigWall() == 9) && (westUnit->getVisible() || _save->getDebugMode()))
 								{
 									// the part is 0 for small units, large units have parts 1,2 & 3 depending on the relative x/y position of this tile vs the actual unit position.
 									int part = 0;
@@ -726,7 +724,6 @@ void Map::drawTerrain(Surface *surface)
 										true
 									);
 								}
-
 								// Draw smoke/fire
 								if (tileWest->getSmoke() && tileWest->isDiscovered(2))
 								{
@@ -922,7 +919,7 @@ void Map::drawTerrain(Surface *surface)
 							}
 						}
 					}
-			        unit = tile->getUnit();
+					unit = tile->getUnit();
 					// Draw soldier
 					if (unit && (unit->getVisible() || _save->getDebugMode()))
 					{
@@ -1116,7 +1113,7 @@ void Map::drawTerrain(Surface *surface)
 									break;
 								}
 								// at this point, let's assume the shot is adjusted and set the text amber.
-								_txtAccuracy->setColor(Palette::blockOffset(1)-1);
+								_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::yellow - 1)-1);
 
 								if (distance > upperLimit)
 								{
@@ -1129,7 +1126,7 @@ void Map::drawTerrain(Surface *surface)
 								else
 								{
 									// no adjustment made? set it to green.
-									_txtAccuracy->setColor(Palette::blockOffset(4)-1);
+									_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::green - 1)-1);
 								}
 
 								bool outOfRange = distance > weapon->getMaxRange();
@@ -1154,7 +1151,7 @@ void Map::drawTerrain(Surface *surface)
 								if (accuracy <= 0 || outOfRange)
 								{
 									accuracy = 0;
-									_txtAccuracy->setColor(Palette::blockOffset(2)-1);
+									_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::red - 1)-1);
 								}
 								ss << accuracy;
 								ss << "%";
@@ -1624,13 +1621,6 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
 	{
 		offset->y += getTerrainLevel(unit->getPosition(), size);
 
-		if (unit->getArmor()->getCanHoldWeapon())
-		{
-			if (unit->getStatus() == STATUS_AIMING)
-			{
-				offset->x = -16;
-			}
-		}
 		if (_save->getDepth() > 0)
 		{
 			unit->setFloorAbove(false);
@@ -1649,7 +1639,6 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
 			}
 		}
 	}
-
 }
 
 
@@ -1659,7 +1648,7 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
   * @param size Size of the unit we want to get the level from.
   * @return terrainlevel.
   */
-int Map::getTerrainLevel(Position pos, int size)
+int Map::getTerrainLevel(Position pos, int size) const
 {
 	int lowestlevel = 0;
 
@@ -1842,7 +1831,7 @@ void Map::setWidth(int width)
  * Get the hidden movement screen's vertical position.
  * @return the vertical position of the hidden movement window.
  */
-int Map::getMessageY()
+int Map::getMessageY() const
 {
 	return _message->getY();
 }
@@ -1850,7 +1839,7 @@ int Map::getMessageY()
 /**
  * Get the icon height.
  */
-int Map::getIconHeight()
+int Map::getIconHeight() const
 {
 	return _iconHeight;
 }
@@ -1858,7 +1847,7 @@ int Map::getIconHeight()
 /**
  * Get the icon width.
  */
-int Map::getIconWidth()
+int Map::getIconWidth() const
 {
 	return _iconWidth;
 }
@@ -1869,7 +1858,7 @@ int Map::getIconWidth()
  * @param pos the map position to calculate the sound angle from.
  * @return the angle of the sound (280 to 440).
  */
-int Map::getSoundAngle(Position pos)
+int Map::getSoundAngle(Position pos) const
 {
 	int midPoint = getWidth() / 2;
 	Position relativePosition;
@@ -1907,7 +1896,7 @@ void Map::setBlastFlash(bool flash)
  * Checks if the screen is still being rendered in EGA.
  * @return if we are still in EGA mode.
  */
-bool Map::getBlastFlash()
+bool Map::getBlastFlash() const
 {
 	return _flashScreen;
 }

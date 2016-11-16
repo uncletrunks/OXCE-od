@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -257,7 +257,7 @@ int RuleTerrain::getAmbience() const
  * Gets The generation script name.
  * @return The name of the script to use.
  */
-std::string RuleTerrain::getScript()
+std::string RuleTerrain::getScript() const
 {
 	return _script;
 }
@@ -266,7 +266,7 @@ std::string RuleTerrain::getScript()
  * Gets The list of musics this terrain has to choose from.
  * @return The list of track names.
  */
-const std::vector<std::string> &RuleTerrain::getMusic()
+const std::vector<std::string> &RuleTerrain::getMusic() const
 {
 	return _music;
 }

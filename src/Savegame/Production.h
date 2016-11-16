@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_PRODUCTION_H
-#define OPENXCOM_PRODUCTION_H
-
 #include <yaml-cpp/yaml.h>
 
 namespace OpenXcom
 {
+
 class RuleManufacture;
 class Base;
 class SavedGame;
 class Language;
 class Mod;
 enum productionProgress_e { PROGRESS_NOT_COMPLETE, PROGRESS_COMPLETE, PROGRESS_NOT_ENOUGH_MONEY, PROGRESS_NOT_ENOUGH_MATERIALS, PROGRESS_NOT_ENOUGH_LIVING_SPACE, PROGRESS_MAX, PROGRESS_CONSTRUCTION };
+
 class Production
 {
 public:
@@ -46,7 +46,7 @@ public:
 	void setSellItems (bool);
 	productionProgress_e step(Base * b, SavedGame * g, const Mod *m, Language *lang);
 	const RuleManufacture * getRules() const;
-	void startItem(Base * b, SavedGame * g);
+	void startItem(Base * b, SavedGame * g, const Mod *m) const;
 	YAML::Node save() const;
 	void load(const YAML::Node &node);
 private:
@@ -56,9 +56,9 @@ private:
 	int _timeSpent;
 	int _engineers;
 	bool _sell;
-	bool haveEnoughMoneyForOneMoreUnit(SavedGame * g);
+	bool haveEnoughMoneyForOneMoreUnit(SavedGame * g) const;
 	bool haveEnoughLivingSpaceForOneMoreUnit(Base * b);
-	bool haveEnoughMaterialsForOneMoreUnit(Base * b);
+	bool haveEnoughMaterialsForOneMoreUnit(Base * b, const Mod *m) const;
 };
+
 }
-#endif

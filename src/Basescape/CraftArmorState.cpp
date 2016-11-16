@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "CraftArmorState.h"
 #include <climits>
 #include "../Engine/Game.h"
@@ -40,7 +41,6 @@
 #include "../Mod/RuleSoldier.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "SoldierSortUtil.h"
-#include <algorithm>
 
 namespace OpenXcom
 {
@@ -385,37 +385,30 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 			SavedGame *save;
 			save = _game->getSavedGame();
 			Armor *a = _game->getMod()->getArmor(save->getLastSelectedArmor());
-
-			// this armor doesn't exist... abort (Note: can happen only if modders remove STR_NONE_UC armor)
-			if (a == 0)
-				return;
-
-			// this unit type cannot wear this armor type... abort
-			if (!a->getUnits().empty() &&
-				std::find(a->getUnits().begin(), a->getUnits().end(), s->getRules()->getType()) == a->getUnits().end())
-				return;
-
-			if (save->getMonthsPassed() != -1)
+			if (a && (a->getUnits().empty() || std::find(a->getUnits().begin(), a->getUnits().end(), s->getRules()->getType()) != a->getUnits().end()))
 			{
-				if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
+				if (save->getMonthsPassed() != -1)
 				{
-					if (s->getArmor()->getStoreItem() != Armor::NONE)
+					if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
 					{
-						_base->getStorageItems()->addItem(s->getArmor()->getStoreItem());
-					}
-					if (a->getStoreItem() != Armor::NONE)
-					{
-						_base->getStorageItems()->removeItem(a->getStoreItem());
-					}
+						if (s->getArmor()->getStoreItem() != Armor::NONE)
+						{
+							_base->getStorageItems()->addItem(s->getArmor()->getStoreItem());
+						}
+						if (a->getStoreItem() != Armor::NONE)
+						{
+							_base->getStorageItems()->removeItem(a->getStoreItem());
+						}
 
+						s->setArmor(a);
+						_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
+					}
+				}
+				else
+				{
 					s->setArmor(a);
 					_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
 				}
-			}
-			else
-			{
-				s->setArmor(a);
-				_lstSoldiers->setCellText(_lstSoldiers->getSelectedRow(), 2, tr(a->getType()));
 			}
 		}
 		else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)

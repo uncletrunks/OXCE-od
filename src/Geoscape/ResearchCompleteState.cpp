@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -34,9 +34,9 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param newResearch Pointer to the completed research (or 0, if the ufopedia article shouldn't popup again).
  * @param bonus Pointer to bonus unlocked research.
- * @param research Pointer to the completed research.
+ * @param research Pointer to the research project.
  */
-ResearchCompleteState::ResearchCompleteState(const RuleResearch *newResearch, const RuleResearch *bonus, const RuleResearch *research): _research(newResearch), _bonus(bonus)
+ResearchCompleteState::ResearchCompleteState(const RuleResearch *newResearch, const RuleResearch *bonus, const RuleResearch *research) : _research(newResearch), _bonus(bonus)
 {
 	_screen = false;
 

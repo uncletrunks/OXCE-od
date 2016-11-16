@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -143,7 +143,7 @@ double ItemContainer::getTotalSize(const Mod *mod) const
 	double total = 0;
 	for (std::map<std::string, int>::const_iterator i = _qty.begin(); i != _qty.end(); ++i)
 	{
-		total += mod->getItem(i->first)->getSize() * i->second;
+		total += mod->getItem(i->first, true)->getSize() * i->second;
 	}
 	return total;
 }

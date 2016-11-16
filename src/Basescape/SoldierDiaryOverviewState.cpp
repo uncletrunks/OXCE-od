@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -57,10 +57,10 @@ SoldierDiaryOverviewState::SoldierDiaryOverviewState(Base *base, size_t soldierI
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-    _btnKills = new TextButton(70, 16, 8, 176);
+	_btnKills = new TextButton(70, 16, 8, 176);
 	_btnMissions = new TextButton(70, 16, 86, 176);
-    _btnCommendations = new TextButton(70, 16, 164, 176);
-    _btnOk = new TextButton(70, 16, 242, 176);
+	_btnCommendations = new TextButton(70, 16, 164, 176);
+	_btnOk = new TextButton(70, 16, 242, 176);
 	_btnPrev = new TextButton(28, 14, 8, 8);
 	_btnNext = new TextButton(28, 14, 284, 8);
 	_txtTitle = new Text(310, 16, 5, 8);
@@ -96,7 +96,7 @@ SoldierDiaryOverviewState::SoldierDiaryOverviewState(Base *base, size_t soldierI
 
 	_btnKills->setText(tr("STR_COMBAT"));
 	_btnKills->onMouseClick((ActionHandler)&SoldierDiaryOverviewState::btnKillsClick);
-
+	
 	_btnMissions->setText(tr("STR_PERFORMANCE"));
 	_btnMissions->onMouseClick((ActionHandler)&SoldierDiaryOverviewState::btnMissionsClick);
 
@@ -174,7 +174,7 @@ void SoldierDiaryOverviewState::init()
 	_soldier = _list->at(_soldierId);
 	_txtTitle->setText(_soldier->getName());
 	_lstDiary->clearList();
-
+	
 	std::vector<MissionStatistics*> *missionStatistics = _game->getSavedGame()->getMissionStatistics();
 
 	unsigned int row = 0;
@@ -196,10 +196,10 @@ void SoldierDiaryOverviewState::init()
 		{
 			continue;
 		}
-
+		
 		std::wostringstream ss;
 		ss << (*j)->time.getYear();
-
+		
 		_lstDiary->addRow(5, (*j)->getMissionName(_game->getLanguage()).c_str(),
 							 (*j)->getRatingString(_game->getLanguage()).c_str(),
 							 (*j)->time.getDayString(_game->getLanguage()).c_str(),
@@ -290,7 +290,7 @@ void SoldierDiaryOverviewState::btnNextClick(Action *)
  */
 void SoldierDiaryOverviewState::lstDiaryInfoClick(Action *)
 {
-    int absoluteRowEntry = _lstDiary->getSelectedRow();
+	int absoluteRowEntry = _lstDiary->getSelectedRow();
 	_game->pushState(new SoldierDiaryMissionState(_soldier, absoluteRowEntry));
 }
 

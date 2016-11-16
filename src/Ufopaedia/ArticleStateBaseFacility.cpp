@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -36,7 +36,7 @@ namespace OpenXcom
 
 	ArticleStateBaseFacility::ArticleStateBaseFacility(ArticleDefinitionBaseFacility *defs) : ArticleState(defs->id)
 	{
-		RuleBaseFacility *facility = _game->getMod()->getBaseFacility(defs->id);
+		RuleBaseFacility *facility = _game->getMod()->getBaseFacility(defs->id, true);
 
 		// add screen elements
 		_txtTitle = new Text(200, 17, 10, 24);
