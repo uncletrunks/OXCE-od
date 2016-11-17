@@ -354,7 +354,7 @@ void SoldierInfoState::init()
 	std::ostringstream flagId;
 	flagId << "Flag";
 	flagId << _soldier->getNationality();
-	Surface *flagTexture = _game->getMod()->getSurface(flagId.str().c_str());
+	Surface *flagTexture = _game->getMod()->getSurface(flagId.str().c_str(), false);
 	_flag->clear();
 	if (flagTexture != 0)
 	{

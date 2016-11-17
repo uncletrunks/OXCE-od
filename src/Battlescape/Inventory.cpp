@@ -1371,7 +1371,7 @@ void Inventory::drawPrimers()
 	}
 
 	// stunned units
-	tempSurface = _game->getMod()->getSurface("BigStunIndicator");
+	tempSurface = _game->getMod()->getSurface("BigStunIndicator", false);
 	if (tempSurface)
 	{
 		for (std::vector<std::pair<int, int> >::const_iterator i = _stunnedIndicators.begin(); i != _stunnedIndicators.end(); ++i)
@@ -1381,7 +1381,7 @@ void Inventory::drawPrimers()
 	}
 
 	// wounded units
-	tempSurface = _game->getMod()->getSurface("BigWoundIndicator");
+	tempSurface = _game->getMod()->getSurface("BigWoundIndicator", false);
 	if (tempSurface)
 	{
 		for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
@@ -1392,7 +1392,7 @@ void Inventory::drawPrimers()
 	else
 	{
 		// fallback to stun indicator
-		tempSurface = _game->getMod()->getSurface("BigStunIndicator");
+		tempSurface = _game->getMod()->getSurface("BigStunIndicator", false);
 		if (tempSurface)
 		{
 			for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)

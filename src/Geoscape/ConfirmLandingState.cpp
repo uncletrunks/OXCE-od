@@ -100,7 +100,7 @@ ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int sha
 	ss << L'\x01' << tr("STR_BEGIN_MISSION");
 	_txtBegin->setText(ss.str());
 
-	SurfaceSet *sprites = _game->getMod()->getSurfaceSet("DayNightIndicator");
+	SurfaceSet *sprites = _game->getMod()->getSurfaceSet("DayNightIndicator", false);
 	if (sprites != 0)
 	{
 		if (_shade <= 0)

@@ -148,7 +148,7 @@ void SoldierAvatarState::initPreview(Soldier *s)
 			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
 			ss << ".SPK";
 			std::string debug = ss.str();
-			surf = _game->getMod()->getSurface(ss.str());
+			surf = _game->getMod()->getSurface(ss.str(), false);
 			if (surf)
 			{
 				break;
@@ -159,7 +159,7 @@ void SoldierAvatarState::initPreview(Soldier *s)
 			ss.str("");
 			ss << look;
 			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str());
+			surf = _game->getMod()->getSurface(ss.str(), true);
 		}
 		surf->blit(_soldierSurface);
 	}

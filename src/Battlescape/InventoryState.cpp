@@ -434,7 +434,7 @@ void InventoryState::init()
 			ss.str("");
 			ss << look;
 			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str(), false);
+			surf = _game->getMod()->getSurface(ss.str(), true);
 		}
 		surf->blit(_soldier);
 	}

@@ -69,11 +69,11 @@ namespace OpenXcom
 		{
 			look = armor->getSpriteInventory() + ".SPK";
 		}
-		if (!_game->getMod()->getSurface(look))
+		if (!_game->getMod()->getSurface(look, false))
 		{
 			look = armor->getSpriteInventory();
 		}
-		_game->getMod()->getSurface(look)->blit(_image);
+		_game->getMod()->getSurface(look, true)->blit(_image);
 
 
 		_lstInfo = new TextList(150, 96, 150, 46);

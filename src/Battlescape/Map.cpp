@@ -137,8 +137,8 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 		_bgColor = startingCondition->getMapBackgroundColor();
 	}
 
-	_stunIndicator = _game->getMod()->getSurface("FloorStunIndicator");
-	_woundIndicator = _game->getMod()->getSurface("FloorWoundIndicator");
+	_stunIndicator = _game->getMod()->getSurface("FloorStunIndicator", false);
+	_woundIndicator = _game->getMod()->getSurface("FloorWoundIndicator", false);
 }
 
 /**

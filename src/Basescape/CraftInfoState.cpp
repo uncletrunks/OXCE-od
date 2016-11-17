@@ -225,7 +225,7 @@ void CraftInfoState::init()
 		_crew->clear();
 		_equip->clear();
 
-		SurfaceSet *customArmorPreviews = _game->getMod()->getSurfaceSet("CustomArmorPreviews");
+		SurfaceSet *customArmorPreviews = _game->getMod()->getSurfaceSet("CustomArmorPreviews", false);
 		if (customArmorPreviews == 0)
 		{
 			// vanilla
@@ -254,7 +254,7 @@ void CraftInfoState::init()
 			}
 		}
 
-		SurfaceSet *customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews");
+		SurfaceSet *customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews", false);
 		int x = 0;
 		if (customItemPreviews == 0)
 		{

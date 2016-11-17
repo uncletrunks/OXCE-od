@@ -156,7 +156,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_btnPsi->setVisible(false);
 
 	// Create soldier stats summary
-	SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks");
+	SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks", false);
 	if (texture != 0)
 	{
 		_rankTiny = new Surface(7, 7, x + 135, y + 33);
@@ -1402,7 +1402,7 @@ void BattlescapeState::updateSoldierInfo()
 	if (soldier != 0)
 	{
 		// presence of custom background determines what should happen
-		Surface *customBg = _game->getMod()->getSurface("AvatarBackground");
+		Surface *customBg = _game->getMod()->getSurface("AvatarBackground", false);
 		if (customBg == 0)
 		{
 			// show rank (vanilla behaviour)
@@ -1412,7 +1412,7 @@ void BattlescapeState::updateSoldierInfo()
 		else
 		{
 			// show tiny rank (modded)
-			SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks");
+			SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks", false);
 			if (texture != 0)
 			{
 				texture->getFrame(soldier->getRank())->blit(_rankTiny);
@@ -1438,7 +1438,7 @@ void BattlescapeState::updateSoldierInfo()
 				ss << gender;
 				ss << (int)soldier->getLook() + (soldier->getLookVariant() & (15 >> i)) * 4;
 				ss << ".SPK";
-				surf = _game->getMod()->getSurface(ss.str());
+				surf = _game->getMod()->getSurface(ss.str(), false);
 				if (surf)
 				{
 					break;
@@ -1449,7 +1449,7 @@ void BattlescapeState::updateSoldierInfo()
 				ss.str("");
 				ss << look;
 				ss << ".SPK";
-				surf = _game->getMod()->getSurface(ss.str());
+				surf = _game->getMod()->getSurface(ss.str(), true);
 			}
 
 			// crop
