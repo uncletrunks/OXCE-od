@@ -165,7 +165,7 @@ items:
     tuLoad: 15     #cost of loading weapon.
     tuUnload: 8    #cost of unloading weapon.
     specialChance: 90       #chance in % of triggering effect like zombify or corpse, granade and proxy explosion.
-    fuseTimerType: -2       #set how prime granade works.
+    fuseType: -2            #set how prime granade works.
     # -3 -> no priming, flare always work.
     # -2 -> can prime, unlimited time. Granade explode only after throw. Flare work only after prime.
     # -1 -> can prime, can set time. Granade explode after set time. Flare and Proxy disappere after set time.
