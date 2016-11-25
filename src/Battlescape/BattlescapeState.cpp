@@ -63,6 +63,7 @@
 #include "../Mod/RuleItem.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/Armor.h"
+#include "../Savegame/Node.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
@@ -472,6 +473,23 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_battleGame = new BattlescapeGame(_save, this);
 
 	_barHealthColor = _barHealth->getColor();
+
+	if (_save->getTurn() == 1)
+	{
+		bool error = false;
+		for (std::vector<Node*>::iterator j = _save->getNodes()->begin(); j != _save->getNodes()->end(); ++j)
+		{
+			if ((*j)->isDummy())
+			{
+				error = true;
+				break;
+			}
+		}
+		if (error)
+		{
+			_txtDebug->setText(tr("STR_MAP_GEN_ERROR"));
+		}
+	}
 }
 
 
