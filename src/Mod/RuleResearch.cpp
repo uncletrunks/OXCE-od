@@ -22,7 +22,7 @@
 namespace OpenXcom
 {
 
-RuleResearch::RuleResearch(const std::string &name) : _name(name), _cost(0), _points(0), _needItem(false), _destroyItem(false), _listOrder(0)
+RuleResearch::RuleResearch(const std::string &name) : _name(name), _cost(0), _points(0), _needItem(false), _destroyItem(true), _listOrder(0)
 {
 }
 
