@@ -182,7 +182,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
 	{
 		std::vector<MissionArea> areas = mod.getRegion(_region, true)->getMissionZones().at((_rule.getSpawnZone() == -1) ? trajectory.getZone(0) : _rule.getSpawnZone()).areas;
 		MissionArea area = areas.at((_missionSiteZone == -1) ? RNG::generate(0, areas.size()-1) : _missionSiteZone);
-		spawnMissionSite(game, mod, area, 0, mod.getDeployment(wave.ufoType, true));
+		spawnMissionSite(game, mod, area, 0, mod.getDeployment(wave.ufoType, false));
 	}
 
 	++_nextUfoCounter;
