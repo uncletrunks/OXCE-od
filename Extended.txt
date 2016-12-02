@@ -167,7 +167,7 @@ items:
     specialChance: 90       #chance in % of triggering effect like zombify or corpse, granade and proxy explosion.
     fuseType: -2            #set how prime granade works.
     # -3 -> no priming, flare always work.
-    # -2 -> can prime, unlimited time. Granade explode only after throw. Flare work only after prime.
+    # -2 -> can prime, unlimited time. Granade explode instantly after throw. Flare work only after prime.
     # -1 -> can prime, can set time. Granade explode after set time. Flare and Proxy disappere after set time.
     #  0 -> can prime, set fixed time of 0 turns.
     #  1 -> can prime, set fixed time of 1 turns.
@@ -289,28 +289,29 @@ items:
       # 3-> Flat  [100% - 100%]
       # 4-> Rng(5,10)
       # 5-> 0
+      # 6-> Two dices [0% - 100%] + [0% - 100%]
       ResistType: 1             #what resistance is used by an affected unit, same values like `damageType`.
       FireBlastCalc: false      #fire had special way of calculating blast.
       IgnoreDirection: true     #damage ignores direction of hit, used by smoke and fire.
-      IgnoreSelfDestruct: true  #killing using this damage prevents self-destruct by this unit.
+      IgnoreSelfDestruct: true  #killing using this damage prevents self-destruct by this unit. Used by stun and explosive damage type.
       IgnorePainImmunity: true  #some units don't get stun level from damage.
       IgnoreNormalMoraleLose: false #some units ignore normal morale loss from damage.
-      IgnoreOverKill: false     #disables overkill damage.
-      ArmorEffectiveness: 0.5   #how effective armor is against this damage.
-      RadiusEffectiveness: 0.3  #how power translates to splash radius.
-      RadiusReduction: 10.0     #how much explosion power is reduce per tile.
-      FireThreshold: 0          #how much damage is required to spawn fire on unit (after armor and ToHealth) or tile.
-      SmokeThreshold: 100       #how much damage is required to spawn smoke on tile.
-      ToHealth: 1.0     #how much damage is done to health, can be negative.
-      ToArmor: 0.25     #how much damage is done to armor.
-      ToArmorPre: 0.0   #how much damage is done to armor before applying armor protection.
-      ToWound: 0.1      #determine probability of wounds.
-      ToItem: 0.0       #how much power is applied to items.
-      ToTile: 0.0       #how much power is applied to the ground.
-      ToStun: 0.25      #how much damage increases stun level.
-      ToEnergy: 0.0     #how much power is applied to energy loss.
-      ToTime: 0.0       #how much power is applied to time units loss.
-      ToMorale: 0.0     #how much power is applied to morale loss.
+      IgnoreOverKill: false     #disables overkill damage. Defualt `true`.
+      ArmorEffectiveness: 0.5   #how effective armor is against this damage. Default `0.0` for smoke and stun, `1.0` rest.
+      RadiusEffectiveness: 0.3  #how power translates to splash radius. Defualt `0.05` for smoke, stun, explosive, `0.03` for fire, `0.0` rest.
+      RadiusReduction: 10.0     #how much explosion power is reduce per tile. Default `10.0`.
+      FireThreshold: 0          #how much damage is required to spawn fire on unit (after armor and ToHealth) or tile. Default `0` for fire, `1000.0` for rest.
+      SmokeThreshold: 100       #how much damage is required to spawn smoke on tile. Default `0.0` for smoke, `1000.0` for rest.
+      ToHealth: 1.0     #how much damage is done to health, can be negative. Default `0.0` for stun, smoke, none, `1.0` for rest.
+      ToArmor: 0.25     #how much damage is done to armor. Default `0.0` for stun, smoke, fire, none, `0.25` for rest.
+      ToArmorPre: 0.0   #how much damage is done to armor before applying armor protection. Default `0.0`.
+      ToWound: 0.1      #determine probability of wounds. Defualt `0.0` for stun, smoke, fire, none, `1.0` for rest (`RandomWound` by defulat change it io 1-3 points by defualt!).
+      ToItem: 0.0       #how much power is applied to items. Default `1.0` for explosive, `0.0` for rest.
+      ToTile: 0.0       #how much power is applied to the ground. Default `0.0` for stun, smoke, fire, none, `0.5` for rest.
+      ToStun: 0.25      #how much damage increases stun level. Default `1.0` for stun, smoke, `0.0` for fire, none, `2.5` for rest.
+      ToEnergy: 0.0     #how much power is applied to energy loss. Default `0.0`.
+      ToTime: 0.0       #how much power is applied to time units loss. Default `0.0`.
+      ToMorale: 0.0     #how much power is applied to morale loss. Affeced by target bravery. Default `0.0` (`IgnoreNormalMoraleLose` control normal morale change).
       RandomHealth: false     #do calucaltion of final health change use random value.
       RandomArmor: false      #do calculation of final armor change use random value.
       RandomArmorPre: false   #do calculation of final armor change use random value.
