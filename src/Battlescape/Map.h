@@ -72,7 +72,7 @@ private:
 	SurfaceSet *_projectileSet;
 
 	void drawTerrain(Surface *surface);
-	int getTerrainLevel(Position pos, int size) const;
+	int getTerrainLevel(const Position& pos, int size) const;
 	int getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind);
 	int _iconHeight, _iconWidth, _messageColor;
 	const std::vector<Uint8> *_transparencies;
@@ -142,7 +142,7 @@ public:
 	/// Get the icon width.
 	int getIconWidth() const;
 	/// Convert a map position to a sound angle.
-	int getSoundAngle(Position pos) const;
+	int getSoundAngle(const Position& pos) const;
 	/// Reset the camera smoothing bool.
 	void resetCameraSmoothing();
 	/// Set whether the screen should "flash" or not.

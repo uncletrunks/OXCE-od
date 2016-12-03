@@ -1488,7 +1488,7 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 		Node *node;
 		if (pos_x >= 0 && pos_x < mapblock->getSizeX() &&
 			pos_y >= 0 && pos_y < mapblock->getSizeY() &&
-			pos_z >= 0 && pos_z < _mapsize_z)
+			pos_z >= 0 && pos_z < mapblock->getSizeZ())
 		{
 			Position pos = Position(xoff + pos_x, yoff + pos_y, mapblock->getSizeZ() - 1 - pos_z);
 			int type     = value[19];
@@ -1868,7 +1868,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 					}
 					break;
 				case MSC_ADDLINE:
-					success = addLine((MapDirection)(command->getDirection()), command->getRects());
+					success = addLine((command->getDirection()), command->getRects());
 					break;
 				case MSC_ADDCRAFT:
 					if (_craft)
@@ -2434,7 +2434,7 @@ bool BattlescapeGenerator::addLine(MapDirection direction, const std::vector<SDL
 	int tries = 0;
 	bool placed = false;
 
-	int roadX, roadY;
+	int roadX, roadY = 0;
 	int *iteratorValue = &roadX;
 	MapBlockType comparator = MT_NSROAD;
 	MapBlockType typeToAdd = MT_EWROAD;

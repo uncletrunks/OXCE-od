@@ -897,7 +897,7 @@ GameTime *SavedGame::getTime() const
  * Changes the current time of the game.
  * @param time Game time.
  */
-void SavedGame::setTime(GameTime time)
+void SavedGame::setTime(const GameTime& time)
 {
 	_time = new GameTime(time);
 }

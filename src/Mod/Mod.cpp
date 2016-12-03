@@ -2658,7 +2658,7 @@ const std::vector<SDL_Color> *Mod::getTransparencies() const
 	return &_transparencies;
 }
 
-const std::vector<MapScript*> *Mod::getMapScript(std::string id) const
+const std::vector<MapScript*> *Mod::getMapScript(const std::string& id) const
 {
 	std::map<std::string, std::vector<MapScript*> >::const_iterator i = _mapScripts.find(id);
 	if (_mapScripts.end() != i)
@@ -3434,7 +3434,7 @@ void Mod::loadExtraResources()
 				{
 					Log(LOG_VERBOSE) << "Loading surface set from folder: " << fileName << " starting at frame: " << startFrame;
 					int offset = startFrame;
-					std::set<std::string> contents = FileMap::getVFolderContents(fileName);
+					const std::set<std::string>& contents = FileMap::getVFolderContents(fileName);
 					for (std::set<std::string>::iterator k = contents.begin(); k != contents.end(); ++k)
 					{
 						if (!isImageFile((*k).substr((*k).length() - 4, (*k).length())))
@@ -3471,7 +3471,7 @@ void Mod::loadExtraResources()
 				{
 					if (spritePack->getSubX() == 0 && spritePack->getSubY() == 0)
 					{
-						std::string fullPath = FileMap::getFilePath(fileName);
+						const std::string& fullPath = FileMap::getFilePath(fileName);
 						if (_sets[sheetName]->getFrame(startFrame))
 						{
 							Log(LOG_VERBOSE) << "Replacing frame: " << startFrame;
@@ -3544,7 +3544,7 @@ void Mod::loadExtraResources()
 			{
 				Log(LOG_VERBOSE) << "Loading sound set from folder: " << fileName << " starting at index: " << startSound;
 				int offset = startSound;
-				std::set<std::string> contents = FileMap::getVFolderContents(fileName);
+				const std::set<std::string>& contents = FileMap::getVFolderContents(fileName);
 				for (std::set<std::string>::iterator k = contents.begin(); k != contents.end(); ++k)
 				{
 					try
@@ -3568,7 +3568,7 @@ void Mod::loadExtraResources()
 			}
 			else
 			{
-				std::string fullPath = FileMap::getFilePath(fileName);
+				const std::string& fullPath = FileMap::getFilePath(fileName);
 				if (_sounds[setName]->getSound(startSound))
 				{
 					Log(LOG_VERBOSE) << "Replacing index: " << startSound;

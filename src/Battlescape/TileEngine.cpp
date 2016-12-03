@@ -480,7 +480,7 @@ void TileEngine::calculateLighting(LightLayers layer, Position position, int eve
  * @param power Power.
  * @param layer Light is separated in 4 layers: Ambient, Tiles, Items, Units.
  */
-void TileEngine::addLight(GraphSubset gs, const Position &center, int power, LightLayers layer)
+void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayers layer)
 {
 	if (!power)
 	{
@@ -1233,7 +1233,7 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 	int *spiralArray;
 	int spiralCount;
 
-	int minZ, maxZ;
+	int minZ = 0, maxZ = 0;
 	bool minZfound = false, maxZfound = false;
 
 	if (part == O_OBJECT)
@@ -1351,7 +1351,7 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
  * @param updateTiles true to do an update of visible tiles.
  * @param appendToTileVisibility true to append only new tiles and skip previously seen ones.
  */
-void TileEngine::calculateFOV(const Position &position, int eventRadius, const bool updateTiles, const bool appendToTileVisibility)
+void TileEngine::calculateFOV(Position position, int eventRadius, const bool updateTiles, const bool appendToTileVisibility)
 {
 	int updateRadius;
 	if (eventRadius == -1)
@@ -1914,7 +1914,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
  * @param clipOrWeapon clip or weapon causing the damage.
  * @return The Unit that got hit.
  */
-BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
+BattleUnit *TileEngine::hit(Position center, int power, const RuleDamageType *type, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
 {
 	bool terrainChanged = false; //did the hit destroy a tile thereby changing line of sight?
 	int effectGenerated = 0; //did the hit produce smoke (1), fire/light (2) or disabled a unit (3) ?
@@ -2037,7 +2037,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, const RuleDamageT
  * @param unit The unit that caused the explosion.
  * @param clipOrWeapon The clip or weapon that caused the explosion.
  */
-void TileEngine::explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
+void TileEngine::explode(Position center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
 {
 	const Position centetTile = center.toTile();
 	int hitSide = 0;
@@ -2993,7 +2993,7 @@ int TileEngine::closeUfoDoors()
  * @param excludeAllBut [Optional] The only unit to be considered for ray hits.
  * @return the objectnumber(0-3) or unit(4) or out of map (5) or -1(hit nothing).
  */
-int TileEngine::calculateLine(const Position& origin, const Position& target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, bool doVoxelCheck, bool onlyVisible, BattleUnit *excludeAllBut)
+int TileEngine::calculateLine(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, bool doVoxelCheck, bool onlyVisible, BattleUnit *excludeAllBut)
 {
 	Position lastPoint(origin);
 	int result;
@@ -3081,7 +3081,7 @@ int TileEngine::calculateLine(const Position& origin, const Position& target, bo
  * @param delta Is the deviation of the angles it should take into account, 0,0,0 is perfection.
  * @return The objectnumber(0-3) or unit(4) or out of map (5) or -1(hit nothing).
  */
-int TileEngine::calculateParabola(const Position& origin, const Position& target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta)
+int TileEngine::calculateParabola(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta)
 {
 	double ro = sqrt((double)((target.x - origin.x) * (target.x - origin.x) + (target.y - origin.y) * (target.y - origin.y) + (target.z - origin.z) * (target.z - origin.z)));
 
@@ -3140,7 +3140,7 @@ int TileEngine::calculateParabola(const Position& origin, const Position& target
  * @param voxel The voxel to trace down.
  * @return z coord of "ground".
  */
-int TileEngine::castedShade(const Position& voxel)
+int TileEngine::castedShade(Position voxel)
 {
 	int zstart = voxel.z;
 	Position tmpCoord = voxel / Position(16,16,24);
@@ -3169,7 +3169,7 @@ int TileEngine::castedShade(const Position& voxel)
  * @return True if visible.
  */
 
-bool TileEngine::isVoxelVisible(const Position& voxel)
+bool TileEngine::isVoxelVisible(Position voxel)
 {
 	int zstart = voxel.z+3; // slight Z adjust
 	if ((zstart/24)!=(voxel.z/24))
@@ -3198,7 +3198,7 @@ bool TileEngine::isVoxelVisible(const Position& voxel)
  * @param excludeAllBut If set, the only unit to be considered for ray hits.
  * @return The objectnumber(0-3) or unit(4) or out of map (5) or -1 (hit nothing).
  */
-int TileEngine::voxelCheck(const Position& voxel, BattleUnit *excludeUnit, bool excludeAllUnits, bool onlyVisible, BattleUnit *excludeAllBut)
+int TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool excludeAllUnits, bool onlyVisible, BattleUnit *excludeAllBut)
 {
 	if (_save->isBeforeGame())
 	{
@@ -3293,7 +3293,7 @@ void TileEngine::togglePersonalLighting()
  * @param pos2 Position of second square.
  * @return Distance.
  */
-int TileEngine::distance(const Position &pos1, const Position &pos2) const
+int TileEngine::distance(Position pos1, Position pos2) const
 {
 	int x = pos1.x - pos2.x;
 	int y = pos1.y - pos2.y;
@@ -3307,7 +3307,7 @@ int TileEngine::distance(const Position &pos1, const Position &pos2) const
  * @param considerZ Whether to consider the z coordinate.
  * @return Distance.
  */
-int TileEngine::distanceSq(const Position &pos1, const Position &pos2, bool considerZ) const
+int TileEngine::distanceSq(Position pos1, Position pos2, bool considerZ) const
 {
 	int x = pos1.x - pos2.x;
 	int y = pos1.y - pos2.y;
@@ -3714,7 +3714,7 @@ bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attack
  * @param position Current position.
  * @return Direction or -1 when no window found.
  */
-int TileEngine::faceWindow(const Position &position)
+int TileEngine::faceWindow(Position position)
 {
 	static const Position oneTileEast = Position(1, 0, 0);
 	static const Position oneTileSouth = Position(0, 1, 0);
@@ -3824,7 +3824,7 @@ void TileEngine::recalculateFOV()
  * @param target The target point of the action.
  * @return direction.
  */
-int TileEngine::getDirectionTo(const Position &origin, const Position &target) const
+int TileEngine::getDirectionTo(Position origin, Position target) const
 {
 	double ox = target.x - origin.x;
 	double oy = target.y - origin.y;

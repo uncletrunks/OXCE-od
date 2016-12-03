@@ -123,7 +123,7 @@ private:
 	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
 	bool _spacecraft;
-	int _listOrder, _maxItems, _maxDepth;
+	int _listOrder, _maxItems, _maxAltitude;
 	std::vector<std::vector <int> > _deployment;
 	RuleCraftStats _stats;
 public:
@@ -193,8 +193,10 @@ public:
 	const std::string &getWeaponSlotString(int slot) const;
 	/// Get basic statistic of craft.
 	const RuleCraftStats& getStats() const;
-	/// checks how deep this craft can go.
-	int getMaxDepth() const;
+	/// Gets how high this craft can go.
+	int getMaxAltitude() const;
+	/// Gets if this craft only fights on water.
+	bool isWaterOnly() const;
 };
 
 }
