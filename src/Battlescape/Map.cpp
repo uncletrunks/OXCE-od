@@ -716,10 +716,12 @@ void Map::drawTerrain(Surface *surface)
 									int part = 0;
 									part += tileWest->getPosition().x - westUnit->getPosition().x;
 									part += (tileWest->getPosition().y - westUnit->getPosition().y)*2;
+									Position offset;
+									calculateWalkingOffset(westUnit, &offset);
 									unitSprite.draw(
 										westUnit, part,
-										screenPosition.x - tileOffset.x,
-										screenPosition.y + tileOffset.y + getTerrainLevel(westUnit->getPosition(), westUnit->getArmor()->getSize()),
+										screenPosition.x - tileOffset.x + offset.x,
+										screenPosition.y + tileOffset.y + offset.y + getTerrainLevel(westUnit->getPosition(), westUnit->getArmor()->getSize()),
 										tileWestShade,
 										true
 									);
