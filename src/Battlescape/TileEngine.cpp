@@ -372,7 +372,15 @@ void TileEngine::calculateUnitLighting(GraphSubset gs)
 			currLight = std::max(currLight, fireLightPower);
 		}
 
-		addLight(gs, unit->getPosition(), currLight, LL_UNITS);
+		const auto size = unit->getArmor()->getSize();
+		const auto pos = unit->getPosition();
+		for (int x = 0; x < size; ++x)
+		{
+			for (int y = 0; y < size; ++y)
+			{
+				addLight(gs, pos + Position(x, y, 0), currLight, LL_UNITS);
+			}
+		}
 	}
 }
 
