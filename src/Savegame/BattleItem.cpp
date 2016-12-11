@@ -67,7 +67,7 @@ BattleItem::~BattleItem()
  * Loads the item from a YAML file.
  * @param node YAML node.
  */
-void BattleItem::load(const YAML::Node &node)
+void BattleItem::load(const YAML::Node &node, const ScriptGlobal *shared)
 {
 	_inventoryX = node["inventoryX"].as<int>(_inventoryX);
 	_inventoryY = node["inventoryY"].as<int>(_inventoryY);
@@ -77,13 +77,14 @@ void BattleItem::load(const YAML::Node &node)
 	_stimulant = node["stimulant"].as<int>(_stimulant);
 	_fuseTimer = node["fuseTimer"].as<int>(_fuseTimer);
 	_droppedOnAlienTurn = node["droppedOnAlienTurn"].as<bool>(_droppedOnAlienTurn);
+	_scriptValues.load(node, shared);
 }
 
 /**
  * Saves the item to a YAML file.
  * @return YAML node.
  */
-YAML::Node BattleItem::save() const
+YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 {
 	YAML::Node node;
 	node["id"] = _id;
@@ -144,6 +145,7 @@ YAML::Node BattleItem::save() const
 	node["fuseTimer"] = _fuseTimer;
 	if (_droppedOnAlienTurn)
 		node["droppedOnAlienTurn"] = _droppedOnAlienTurn;
+	_scriptValues.save(node, shared);
 
 	return node;
 }
@@ -728,6 +730,8 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&BattleItem::getPainKillerQuantity>("getPainKillerQuantity");
 	bi.add<&BattleItem::getStimulantQuantity>("getStimulantQuantity");
 	bi.add<&BattleItem::isAmmo>("isAmmo");
+
+	bi.addScriptValue<&BattleItem::_scriptValues>();
 }
 
 namespace

@@ -18,6 +18,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <yaml-cpp/yaml.h>
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
@@ -51,6 +52,8 @@ private:
 	int _fuseTimer, _ammoQuantity;
 	int _painKiller, _heal, _stimulant;
 	bool _XCOMProperty, _droppedOnAlienTurn, _isAmmo;
+	ScriptValues<BattleItem> _scriptValues;
+
 public:
 
 	/// Name of class used in script.
@@ -65,9 +68,9 @@ public:
 	/// Cleans up the item.
 	~BattleItem();
 	/// Loads the item from YAML.
-	void load(const YAML::Node& node);
+	void load(const YAML::Node& node, const ScriptGlobal *shared);
 	/// Saves the item to YAML.
-	YAML::Node save() const;
+	YAML::Node save(const ScriptGlobal *shared) const;
 	/// Gets the item's ruleset.
 	const RuleItem *getRules() const;
 	/// Gets the item's ammo quantity

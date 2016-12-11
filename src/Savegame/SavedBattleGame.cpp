@@ -249,7 +249,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			if (mod->getItem(type))
 			{
 				BattleItem *item = new BattleItem(mod->getItem(type), &_itemId);
-				item->load(*i);
+				item->load(*i, this->getMod()->getScriptGlobal());
 				type = (*i)["inventoryslot"].as<std::string>();
 				if (type != "NULL")
 				{
@@ -450,7 +450,7 @@ YAML::Node SavedBattleGame::save() const
 	}
 	for (std::vector<BattleItem*>::const_iterator i = _items.begin(); i != _items.end(); ++i)
 	{
-		node["items"].push_back((*i)->save());
+		node["items"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	node["tuReserved"] = (int)_tuReserved;
 	node["kneelReserved"] = _kneelReserved;
@@ -459,11 +459,11 @@ YAML::Node SavedBattleGame::save() const
 	node["ambientVolume"] = _ambientVolume;
 	for (std::vector<BattleItem*>::const_iterator i = _recoverGuaranteed.begin(); i != _recoverGuaranteed.end(); ++i)
 	{
-		node["recoverGuaranteed"].push_back((*i)->save());
+		node["recoverGuaranteed"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	for (std::vector<BattleItem*>::const_iterator i = _recoverConditional.begin(); i != _recoverConditional.end(); ++i)
 	{
-		node["recoverConditional"].push_back((*i)->save());
+		node["recoverConditional"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	node["music"] = _music;
 	node["turnLimit"] = _turnLimit;
