@@ -2702,6 +2702,13 @@ RuleMissionScript *Mod::getMissionScript(const std::string &name, bool error) co
 {
 	return getRule(name, "Mission Script", _missionScripts, error);
 }
+
+/// Get global script data.
+ScriptGlobal *Mod::getScriptGlobal() const
+{
+	return _scriptGlobal;
+}
+
 std::string Mod::getFinalResearch() const
 {
 	return _finalResearch;

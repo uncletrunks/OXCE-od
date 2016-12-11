@@ -464,6 +464,8 @@ public:
 	const std::map<std::string, RuleMusic *> *getMusic() const;
 	const std::vector<std::string> *getMissionScriptList() const;
 	RuleMissionScript *getMissionScript(const std::string &name, bool error = false) const;
+	/// Get global script data.
+	ScriptGlobal *getScriptGlobal() const;
 	std::string getFinalResearch() const;
 	const std::map<int, std::string> *getMissionRatings() const;
 	const std::map<int, std::string> *getMonthlyRatings() const;

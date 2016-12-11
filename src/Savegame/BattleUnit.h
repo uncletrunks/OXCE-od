@@ -145,6 +145,7 @@ private:
 	bool _hidingForTurn, _floorAbove, _respawn;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
+	ScriptValues<BattleUnit> _scriptValues;
 
 	/// Helper function initing recolor vector.
 	void setRecolor(int basicLook, int utileLook, int rankLook);
@@ -174,9 +175,9 @@ public:
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.
-	void load(const YAML::Node& node);
+	void load(const YAML::Node &node, const ScriptGlobal *shared);
 	/// Saves the unit to YAML.
-	YAML::Node save() const;
+	YAML::Node save(const ScriptGlobal *shared) const;
 	/// Gets the BattleUnit's ID.
 	int getId() const;
 	/// Sets the unit's position
@@ -554,7 +555,7 @@ public:
 	void setMindControllerId(int id);
 	/// Get the unit mind controller's id.
 	int getMindControllerId() const;
-    
+
 };
 
 } //namespace OpenXcom

@@ -209,7 +209,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			if(!mod->getUnit(type) || !mod->getArmor(armor)) continue;
 			unit = new BattleUnit(mod->getUnit(type), originalFaction, id, mod->getArmor(armor), mod->getStatAdjustment(savedGame->getDifficulty()), _depth, mod->getMaxViewDistance());
 		}
-		unit->load(*i);
+		unit->load(*i, this->getMod()->getScriptGlobal());
 		unit->setSpecialWeapon(this);
 		_units.push_back(unit);
 		if (faction == FACTION_PLAYER)
@@ -446,7 +446,7 @@ YAML::Node SavedBattleGame::save() const
 	}
 	for (std::vector<BattleUnit*>::const_iterator i = _units.begin(); i != _units.end(); ++i)
 	{
-		node["units"].push_back((*i)->save());
+		node["units"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	for (std::vector<BattleItem*>::const_iterator i = _items.begin(); i != _items.end(); ++i)
 	{

@@ -316,7 +316,7 @@ BattleUnit::~BattleUnit()
  * Loads the unit from a YAML file.
  * @param node YAML node.
  */
-void BattleUnit::load(const YAML::Node &node)
+void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 {
 	_id = node["id"].as<int>(_id);
 	_faction = (UnitFaction)node["faction"].as<int>(_faction);
@@ -374,13 +374,14 @@ void BattleUnit::load(const YAML::Node &node)
 		}
 	}
 	_mindControllerID = node["mindControllerID"].as<int>(_mindControllerID);
+	_scriptValues.load(node, shared);
 }
 
 /**
  * Saves the soldier to a YAML file.
  * @return YAML node.
  */
-YAML::Node BattleUnit::save() const
+YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 {
 	YAML::Node node;
 
@@ -444,6 +445,7 @@ YAML::Node BattleUnit::save() const
 		node["recolor"].push_back(p);
 	}
 	node["mindControllerID"] = _mindControllerID;
+	_scriptValues.save(node, shared);
 
 	return node;
 }
@@ -3779,6 +3781,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
 	bu.addFunc<getLeftHandWeaponConstScript>("getLeftHandWeapon");
+
+	bu.addScriptValue<&BattleUnit::_scriptValues>();
 
 	bu.add<&getTileShade>("getTileShade");
 
