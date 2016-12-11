@@ -274,7 +274,8 @@ public:
  * Creates an empty mod.
  */
 Mod::Mod() :
-	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
+	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _maxStaticLightDistance(16), _maxDynamicLightDistance(24), _enhancedLighting(2),
+	_costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_tooMuchSmokeThreshold(10), _customTrainingFactor(100), _chanceToStopRetaliation(0),
 	_kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80), _defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0),
@@ -995,7 +996,7 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, M
 			{
 				if (getAlienMission(*j) && (getAlienMission(*j)->getObjective() == OBJECTIVE_SITE) != isSiteType)
 				{
-					throw Exception("Error with MissionScript: " + (*i).first + ": cannot mix terror/non-terror missions in a single command, so sayeth the wise Alaundo."); 
+					throw Exception("Error with MissionScript: " + (*i).first + ": cannot mix terror/non-terror missions in a single command, so sayeth the wise Alaundo.");
 				}
 			}
 		}
@@ -1568,6 +1569,12 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		{
 			_statAdjustment[i].statGrowth = _statAdjustment[0].statGrowth;
 		}
+	}
+	if (const YAML::Node &lighting = doc["lighting"])
+	{
+		_maxStaticLightDistance = lighting["maxStatic"].as<int>(_maxStaticLightDistance);
+		_maxDynamicLightDistance = lighting["maxDynamic"].as<int>(_maxDynamicLightDistance);
+		_enhancedLighting = lighting["enhanced"].as<int>(_enhancedLighting);
 	}
 }
 

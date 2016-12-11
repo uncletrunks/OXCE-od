@@ -127,6 +127,7 @@ Update to buildin script functions.[br/]
 Update to recent nightly OpenXcom.[br/]
 [br/]
 3.6:[br/]
+Config for new lighting system.[br/]
 [br/]
 
 [examples]
@@ -554,6 +555,13 @@ terrains:
       - name: SOMETHING
         fuseTimers:
           STR_GRANADE: [6, 16]  #all items of that type will have set fuseTimer to random value in range [6, 16].
+[/code]
+
+[code]
+lighting:
+  enhanced: 7     #flags for lighting system, final value = (`1` if enabled for tiles and fire) + (`2` if enabled for items) + (`4` if enabled for units). Default value `7`.
+  maxStatic: 20   #max range of fire and tile light radius. Affect overall game performace! Default `16`.
+  maxDynamic: 30  #max range of unit and item light radius. Affect overall game performace! Defulat `24`.
 [/code]
 
 [code]

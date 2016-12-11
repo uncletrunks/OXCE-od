@@ -148,6 +148,7 @@ private:
 	RuleConverter *_converter;
 	ModScriptGlobal *_scriptGlobal;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
+	int _maxStaticLightDistance, _maxDynamicLightDistance, _enhancedLighting;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _tooMuchSmokeThreshold, _customTrainingFactor;
@@ -360,9 +361,15 @@ public:
 	/// Gets the ruleset for a specific inventory.
 	RuleInventory *getInventory(const std::string &id, bool error = false) const;
 	/// Gets max view distance in BattleScape.
-	inline int getMaxViewDistance() const {return _maxViewDistance;}
+	int getMaxViewDistance() const { return _maxViewDistance; }
 	/// Gets threshold of darkness for LoS calculation.
-	inline int getMaxDarknessToSeeUnits() const {return _maxDarknessToSeeUnits;}
+	int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
+	/// Gets max static (tiles & fire) ligth distance in BattleScape.
+	int getMaxStaticLightDistance() const { return _maxStaticLightDistance; }
+	/// Gets max dynamic (items & units) ligth distance in BattleScape.
+	int getMaxDynamicLightDistance() const { return _maxDynamicLightDistance; }
+	/// Get flags for enhanced lighting, 0x1 - tiles and fire, 0x2 - items, 0x4 - units.
+	int getEnhancedLighting() const { return _enhancedLighting; }
 	/// Get basic damage type
 	const RuleDamageType *getDamageType(ItemDamageType type) const;
 	/// Gets the cost of a soldier.

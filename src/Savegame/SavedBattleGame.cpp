@@ -516,7 +516,7 @@ void SavedBattleGame::initUtilities(Mod *mod)
 	delete _pathfinding;
 	delete _tileEngine;
 	_pathfinding = new Pathfinding(this);
-	_tileEngine = new TileEngine(this, mod->getVoxelData(), mod->getMaxViewDistance(), mod->getMaxDarknessToSeeUnits());
+	_tileEngine = new TileEngine(this, mod);
 }
 
 /**

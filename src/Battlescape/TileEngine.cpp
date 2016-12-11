@@ -221,10 +221,12 @@ constexpr Position TileEngine::invalid;
  * @param maxViewDistance Max view distance in tiles.
  * @param maxDarknessToSeeUnits Threshold of darkness for LoS calculation.
  */
-TileEngine::TileEngine(SavedBattleGame *save, std::vector<Uint16> *voxelData, int maxViewDistance, int maxDarknessToSeeUnits) :
-	_save(save), _voxelData(voxelData), _personalLighting(true),
-	_maxViewDistance(maxViewDistance), _maxViewDistanceSq(maxViewDistance * maxViewDistance),
-	_maxVoxelViewDistance(maxViewDistance * 16), _maxDarknessToSeeUnits(maxDarknessToSeeUnits)
+TileEngine::TileEngine(SavedBattleGame *save, Mod *mod) :
+	_save(save), _voxelData(mod->getVoxelData()), _personalLighting(true),
+	_maxViewDistance(mod->getMaxViewDistance()), _maxViewDistanceSq(_maxViewDistance * _maxViewDistance),
+	_maxVoxelViewDistance(_maxViewDistance * 16), _maxDarknessToSeeUnits(mod->getMaxDarknessToSeeUnits()),
+	_maxStaticLightDistance(mod->getMaxStaticLightDistance()), _maxDynamicLightDistance(mod->getMaxDynamicLightDistance()),
+	_enhancedLighting(mod->getEnhancedLighting())
 {
 	_blockVisibility.resize(save->getMapSizeXYZ());
 }
@@ -333,6 +335,10 @@ void TileEngine::calculateTerrainItems(GraphSubset gs)
 				}
 			}
 
+			if (currLight >= getMaxDynamicLightDistance())
+			{
+				currLight = getMaxDynamicLightDistance() - 1;
+			}
 			addLight(gs, tile->getPosition(), currLight, LL_ITEMS);
 		}
 	);
@@ -372,6 +378,10 @@ void TileEngine::calculateUnitLighting(GraphSubset gs)
 			currLight = std::max(currLight, fireLightPower);
 		}
 
+		if (currLight >= getMaxDynamicLightDistance())
+		{
+			currLight = getMaxDynamicLightDistance() - 1;
+		}
 		const auto size = unit->getArmor()->getSize();
 		const auto pos = unit->getPosition();
 		for (int x = 0; x < size; ++x)
@@ -490,17 +500,21 @@ void TileEngine::calculateLighting(LightLayers layer, Position position, int eve
  */
 void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayers layer)
 {
-	if (!power)
+	if (power <= 0)
 	{
 		return;
 	}
+
 	const auto fire = layer == LL_FIRE;
-	const auto ground = layer == LL_ITEMS || fire;
+	const auto items = layer == LL_ITEMS;
+	const auto units = layer == LL_UNITS;
+	const auto ground = items || fire;
 	const auto tileHeight = _save->getTile(center)->getTerrainLevel();
 	const auto divide = (fire ? 8 : 4);
 	const auto accuracy = Position(16, 16, 24) / divide;
 	const auto offsetCenter = (accuracy / 2 + Position(-1, -1, (ground ? 0 : accuracy.z/4) - tileHeight * accuracy.z / 24));
 	const auto offsetTarget = (accuracy / 2 + Position(-1, -1, 0));
+	const auto clasicLighting = !(getEnhancedLighting() & ((fire ? 1 : 0) | (items ? 2 : 0) | (units ? 4 : 0)));
 
 	iterateTiles(
 		_save,
@@ -513,8 +527,13 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 			const auto targetLight = tile->getLightMulti(layer);
 			auto currLight = power - distance;
 
-			if (currLight < targetLight)
+			if (currLight <= targetLight)
 			{
+				return;
+			}
+			if (clasicLighting)
+			{
+				tile->addLight(currLight, layer);
 				return;
 			}
 

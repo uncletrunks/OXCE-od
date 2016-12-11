@@ -86,6 +86,9 @@ private:
 	const int _maxViewDistanceSq;      // 20 * 20
 	const int _maxVoxelViewDistance;   // maxViewDistance * 16
 	const int _maxDarknessToSeeUnits;  // 9 by default
+	const int _maxStaticLightDistance;
+	const int _maxDynamicLightDistance;
+	const int _enhancedLighting;
 	Position _eventVisibilitySectorL, _eventVisibilitySectorR, _eventVisibilityObserverPos;
 
 	/// Add light source.
@@ -93,17 +96,19 @@ private:
 	/// Calculate blockage amount.
 	int blockage(Tile *tile, const int part, ItemDamageType type, int direction = -1, bool checkingFromOrigin = false);
 	/// Get max distance that fire light can reach.
-	inline int getMaxStaticLightDistance() const { return 16; }
+	int getMaxStaticLightDistance() const { return _maxStaticLightDistance; }
 	/// Get max distance that light can reach.
-	inline int getMaxDynamicLightDistance() const { return 24; }
+	int getMaxDynamicLightDistance() const { return _maxDynamicLightDistance; }
+	/// Get flags for enhanced lighting.
+	int getEnhancedLighting() const { return _enhancedLighting; }
 	/// Get max view distance.
-	inline int getMaxViewDistance() const { return _maxViewDistance; }
+	int getMaxViewDistance() const { return _maxViewDistance; }
 	/// Get square of max view distance.
-	inline int getMaxViewDistanceSq() const { return _maxViewDistanceSq; }
+	int getMaxViewDistanceSq() const { return _maxViewDistanceSq; }
 	/// Get max view distance in voxel space.
-	inline int getMaxVoxelViewDistance() const { return _maxVoxelViewDistance; }
+	int getMaxVoxelViewDistance() const { return _maxVoxelViewDistance; }
 	/// Get threshold of darkness for LoS calculation.
-	inline int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
+	int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
 
 	bool setupEventVisibilitySector(const Position &observerPos, const Position &eventPos, const int &eventRadius);
 	inline bool inEventVisibilitySector(const Position &toCheck) const;
@@ -127,7 +132,7 @@ private:
 	bool tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionType attackType, const BattleAction &originalAction);
 public:
 	/// Creates a new TileEngine class.
-	TileEngine(SavedBattleGame *save, std::vector<Uint16> *voxelData, int maxViewDistance, int maxDarknessToSeeUnits);
+	TileEngine(SavedBattleGame *save, Mod *mod);
 	/// Cleans up the TileEngine.
 	~TileEngine();
 	/// Calculates visible tiles within the field of view. Supply an eventPosition to do an update limited to a small slice of the view sector.
