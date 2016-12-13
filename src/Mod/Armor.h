@@ -55,6 +55,7 @@ private:
 	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
+	int _moveSound;
 	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight;
 	int _camouflageAtDay, _camouflageAtDark, _antiCamouflageAtDay, _antiCamouflageAtDark, _heatVision, _psiVision;
 	float _damageModifier[DAMAGE_TYPES];
@@ -112,6 +113,8 @@ public:
 	int getDrawingRoutine() const;
 	/// DO NOT USE THIS FUNCTION OUTSIDE THE BATTLEUNIT CONSTRUCTOR OR I WILL HUNT YOU DOWN.
 	MovementType getMovementType() const;
+	/// Gets the move sound id. Overrides default/unit's move sound. To be used in BattleUnit constructors only too!
+	int getMoveSound() const;
 	/// Gets whether this is a normal or big unit.
 	int getSize() const;
 	/// Gets how big space armor ocupy in craft.

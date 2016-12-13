@@ -72,11 +72,11 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_floatHeight = soldier->getRules()->getFloatHeight();
 	_deathSound = std::vector<int>(); // this one is hardcoded
 	_aggroSound = -1;
-	_moveSound = -1;  // this one is hardcoded
+	_armor = soldier->getArmor();
+	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : -1; // there's no unit move sound, thus hardcoded -1
 	_intelligence = 2;
 	_aggression = 1;
 	_specab = SPECAB_NONE;
-	_armor = soldier->getArmor();
 	_movementType = _armor->getMovementType();
 	if (_movementType == MT_FLOAT)
 	{
@@ -234,7 +234,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_loftempsSet = _armor->getLoftempsSet();
 	_deathSound = unit->getDeathSounds();
 	_aggroSound = unit->getAggroSound();
-	_moveSound = unit->getMoveSound();
+	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : unit->getMoveSound();
 	_intelligence = unit->getIntelligence();
 	_aggression = unit->getAggression();
 	_specab = (SpecialAbility) unit->getSpecialAbility();
