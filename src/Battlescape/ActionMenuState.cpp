@@ -498,7 +498,10 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 					// inform the player
 					_action->result = "STR_TARGET_WAS_EXECUTED";
 					// audio feedback
-					_game->getMod()->getSoundByDepth(_game->getSavedGame()->getSavedBattle()->getDepth(), _action->weapon->getRules()->getMeleeHitSound())->play();
+					if (_action->weapon->getRules()->getMeleeHitSound() > -1)
+					{
+						_game->getMod()->getSoundByDepth(_game->getSavedGame()->getSavedBattle()->getDepth(), _action->weapon->getRules()->getMeleeHitSound())->play();
+					}
 				}
 			}
 			_game->popState();
