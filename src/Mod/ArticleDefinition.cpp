@@ -199,6 +199,7 @@ namespace OpenXcom
 			customPalette = true;
 		text = node["text"].as<std::string>(text);
 		text_width = node["text_width"].as<int>(text_width);
+		rect_text = node["rect_text"].as<ArticleDefinitionRect>(rect_text);
 	}
 	
 	/**
