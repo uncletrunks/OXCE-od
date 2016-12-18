@@ -240,6 +240,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 			{
 				row.amount = qty;
 				_total += row.cost * qty;
+				_spaceChange -= qty * rule->getSize();
 			}
 			_items.push_back(row);
 			std::string cat = getCategory(_items.size() - 1);
