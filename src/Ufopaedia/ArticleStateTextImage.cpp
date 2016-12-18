@@ -33,7 +33,7 @@ namespace OpenXcom
 	ArticleStateTextImage::ArticleStateTextImage(ArticleDefinitionTextImage *defs) : ArticleState(defs->id)
 	{
 		// add screen elements
-		_txtTitle = new Text(defs->text_width, 48, 5, 22);
+		_txtTitle = new Text(310, 48, 5, 22);
 
 		// Set palette
 		if (defs->customPalette)
