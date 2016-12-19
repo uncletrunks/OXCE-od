@@ -21,12 +21,13 @@
 #include <yaml-cpp/yaml.h>
 #include "../Engine/RNG.h"
 #include "../Engine/Exception.h"
+#include "../Engine/Logger.h"
 
 
 namespace OpenXcom
 {
 
-MapScript::MapScript() : _type(MSC_UNDEFINED), _sizeX(1), _sizeY(1), _sizeZ(0), _executionChances(100), _executions(1), _cumulativeFrequency(0), _label(0), _direction(MD_NONE), _tunnelData(0)
+MapScript::MapScript() : _type(MSC_UNDEFINED), _sizeX(1), _sizeY(1), _sizeZ(0), _executionChances(100), _executions(1), _cumulativeFrequency(0), _label(0), _direction(MD_NONE), _tunnelData(0), _terrain("")
 {
 }
 
@@ -262,6 +263,7 @@ void MapScript::load(const YAML::Node& node)
 	_executions = node["executions"].as<int>(_executions);
 	_ufoName = node["UFOName"].as<std::string>(_ufoName);
 	_craftName = node["craftName"].as<std::string>(_craftName);
+	_terrain = node["terrain"].as<std::string>(_terrain);
 	// take no chances, don't accept negative values here.
 	_label = std::abs(node["label"].as<int>(_label));
 }
@@ -395,6 +397,15 @@ std::string MapScript::getUFOName() const
 std::string MapScript::getCraftName()
 {
 	return _craftName;
+}
+
+/**
+ * Gets the terrain name in the case of addBlockFromTerrain or fillAreaFromTerrain
+ * @return the terrain name.
+ */
+std::string MapScript::getAlternateTerrain() const
+{
+	return _terrain;
 }
 
 }

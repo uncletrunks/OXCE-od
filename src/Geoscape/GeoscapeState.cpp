@@ -2161,6 +2161,12 @@ int GeoscapeState::getFirstFreeDogfightSlot()
  */
 void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 {
+	// Get the shade and texture for the globe at the location of the base, using the ufo position
+	int texture, shade;
+	double baseLon = ufo->getLongitude();
+	double baseLat = ufo->getLatitude();
+	_globe->getPolygonTextureAndShade(baseLon, baseLat, &texture, &shade);
+
 	// Whatever happens in the base defense, the UFO has finished its duty
 	ufo->setStatus(Ufo::DESTROYED);
 
@@ -2173,6 +2179,8 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 		bgen.setBase(base);
 		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(ufo->getCraftStats().missionCustomDeploy));
 		bgen.setAlienRace(ufo->getAlienRace());
+		bgen.setWorldShade(shade);
+		bgen.setWorldTexture(_game->getMod()->getGlobe()->getTexture(texture));
 		bgen.run();
 		_pause = true;
 		_game->pushState(new BriefingState(0, base));

@@ -279,6 +279,7 @@ Mod::Mod() :
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_tooMuchSmokeThreshold(10), _customTrainingFactor(100), _chanceToStopRetaliation(0),
 	_kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80), _defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0),
+	_baseDefenseMapFromLocation(0),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
 {
@@ -1309,6 +1310,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_chanceToStopRetaliation = doc["chanceToStopRetaliation"].as<int>(_chanceToStopRetaliation);
 	_kneelBonusGlobal = doc["kneelBonusGlobal"].as<int>(_kneelBonusGlobal);
 	_oneHandedPenaltyGlobal = doc["oneHandedPenaltyGlobal"].as<int>(_oneHandedPenaltyGlobal);
+	_baseDefenseMapFromLocation = doc["baseDefenseMapFromLocation"].as<int>(_baseDefenseMapFromLocation);
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 

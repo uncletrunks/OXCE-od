@@ -159,6 +159,7 @@ private:
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
+	int _baseDefenseMapFromLocation;
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
 	StatAdjustment _statAdjustment[5];
 
@@ -400,6 +401,8 @@ public:
 	int getKneelBonusGlobal() const { return _kneelBonusGlobal; }
 	/// Gets the global one-handed penalty (default = 80).
 	int getOneHandedPenaltyGlobal() const { return _oneHandedPenaltyGlobal; }
+	/// Gets whether or not to load base defense terrain from globe texture
+	int getBaseDefenseMapFromLocation() const { return _baseDefenseMapFromLocation; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id, bool error = false) const;
 	/// Gets the list of all research projects.

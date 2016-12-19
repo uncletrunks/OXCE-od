@@ -128,6 +128,7 @@ Update to recent nightly OpenXcom.[br/]
 [br/]
 3.6:[br/]
 Config for new lighting system.[br/]
+New map script options made by ohartenstein23.[br/]
 [br/]
 
 [examples]
@@ -562,6 +563,28 @@ lighting:
   enhanced: 7     #flags for lighting system, final value = (`1` if enabled for tiles and fire) + (`2` if enabled for items) + (`4` if enabled for units). Default value `7`.
   maxStatic: 20   #max range of fire and tile light radius. Affect overall game performace! Default `16`.
   maxDynamic: 30  #max range of unit and item light radius. Affect overall game performace! Defulat `24`.
+[/code]
+
+[code]
+mapScripts:
+  - type: CULTA
+    commands:
+    - type: addBlockFromTerrain #Functions the same as addBlock, but takes map blocks defined by terrain:, or from globe-defined texture with value "baseTerrain"
+      blocks: [1, 2, 3] 
+      terrain: FOREST #Add map 1, 2, or 3 from terrain FOREST
+    - type: fillAreaFromTerrain #Functions the same as fillArea, but takes map blocks defined by terrain:, or from globe-defined texture with value "baseTerrain"
+      terrain: DESERT #Fill the rest of the map with map blocks from terrain DESERT
+[/code]
+
+[code]
+globe:
+  textures:
+    - id: 0
+      baseTerrain: CULTA #If baseDefenseMapFromLocation is equal to one, this terrain can be used in conjunction with addBlockFromTerrain and fillAreaFrom terrain to populate empty squares on base defense maps
+[/code]
+
+[code]
+baseDefenseMapFromLocation: 1 #If equal to one, the RNG will be seeded by the base's location when generating the map and returned to it's original value after
 [/code]
 
 [code]

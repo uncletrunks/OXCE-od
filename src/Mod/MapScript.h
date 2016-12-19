@@ -58,7 +58,7 @@ private:
 	int _sizeX, _sizeY, _sizeZ, _executionChances, _executions, _cumulativeFrequency, _label;
 	MapDirection _direction;
 	TunnelData *_tunnelData;
-	std::string _ufoName, _craftName;
+	std::string _ufoName, _craftName, _terrain;
 
 	/// Randomly generate a group from within the array.
 	int getGroupNumber();
@@ -103,6 +103,8 @@ public:
 	std::string getUFOName() const;
 	/// Gets the craft's name (for addCraft)
 	std::string getCraftName();
+	/// Gets alternate terrain for a command other than the one in alienDeploments
+	std::string getAlternateTerrain() const;
 };
 
 }
