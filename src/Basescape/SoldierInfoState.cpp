@@ -262,6 +262,8 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 
 	_btnSack->setText(tr("STR_SACK"));
 	_btnSack->onMouseClick((ActionHandler)&SoldierInfoState::btnSackClick);
+	_btnSack->onKeyboardPress((ActionHandler)&SoldierInfoState::btnSackToggleOn, SDLK_LCTRL);
+	_btnSack->onKeyboardRelease((ActionHandler)&SoldierInfoState::btnSackToggleOff, SDLK_LCTRL);
 
 	_btnDiary->setText(tr("STR_DIARY"));
 	_btnDiary->onMouseClick((ActionHandler)&SoldierInfoState::btnDiaryClick);
@@ -622,7 +624,31 @@ void SoldierInfoState::btnArmorClick(Action *)
  */
 void SoldierInfoState::btnSackClick(Action *)
 {
-	_game->pushState(new SackSoldierState(_base, _soldierId));
+	if ((SDL_GetModState() & KMOD_LCTRL) != 0)
+	{
+		_soldier->demoteRank();
+
+		SurfaceSet *texture = _game->getMod()->getSurfaceSet("BASEBITS.PCK");
+		texture->getFrame(_soldier->getRankSprite())->setX(0);
+		texture->getFrame(_soldier->getRankSprite())->setY(0);
+		texture->getFrame(_soldier->getRankSprite())->blit(_rank);
+
+		_txtRank->setText(tr("STR_RANK_").arg(tr(_soldier->getRankString())));
+	}
+	else
+	{
+		_game->pushState(new SackSoldierState(_base, _soldierId));
+	}
+}
+
+void SoldierInfoState::btnSackToggleOn(Action *)
+{
+	_btnSack->setText(tr("STR_DEMOTE"));
+}
+
+void SoldierInfoState::btnSackToggleOff(Action *)
+{
+	_btnSack->setText(tr("STR_SACK"));
 }
 
 /**
