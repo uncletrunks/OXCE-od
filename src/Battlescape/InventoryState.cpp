@@ -44,6 +44,7 @@
 #include "../Savegame/Base.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/Craft.h"
+#include "../Savegame/ItemContainer.h"
 #include "../Savegame/Soldier.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
@@ -68,7 +69,7 @@ static const int _applyTemplateBtnY  = 113;
  * @param tu Does Inventory use up Time Units?
  * @param parent Pointer to parent Battlescape.
  */
-InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base) : _tu(tu), _lightUpdated(false), _parent(parent), _base(base), _reloadUnit(false), _globalLayoutIndex(-1)
+InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bool noCraft) : _tu(tu), _noCraft(noCraft), _lightUpdated(false), _parent(parent), _base(base), _reloadUnit(false), _globalLayoutIndex(-1)
 {
 	_battleGame = _game->getSavedGame()->getSavedBattle();
 
@@ -1256,6 +1257,72 @@ void InventoryState::invMouseOut(Action *)
 	updateTemplateButtons(!_tu);
 }
 
+void InventoryState::onMoveGroundInventoryToBase(Action *)
+{
+	// don't act when moving items
+	if (_inv->getSelectedItem() != 0)
+	{
+		return;
+	}
+
+	if (_base == 0)
+	{
+		// equipment just before the mission (=after briefing) or during the mission
+		return;
+	}
+
+	if (_noCraft)
+	{
+		// pre-equippping in the base, but *without* a craft
+		return;
+	}
+
+	// ok, which craft?
+	BattleUnit *unit = _battleGame->getSelectedUnit();
+	Soldier *s = unit->getGeoscapeSoldier();
+	Craft *c = s->getCraft();
+
+	if (c == 0 || c->getStatus() == "STR_OUT")
+	{
+		// we're either not in a craft or not in a hangar (should not happen, but just in case)
+		return;
+	}
+		
+	std::vector<BattleItem*> *unitInv = unit->getInventory();
+	Tile                     *groundTile = unit->getTile();
+	std::vector<BattleItem*> *groundInv = groundTile->getInventory();
+
+	// step 1: move stuff from craft to base
+	for (std::vector<BattleItem*>::iterator i = groundInv->begin(); i != groundInv->end(); ++i)
+	{
+		// don't forget the ammo!
+		if ((*i)->getAmmoItem())
+		{
+			c->getItems()->removeItem((*i)->getAmmoItem()->getRules()->getType());
+			_base->getStorageItems()->addItem((*i)->getAmmoItem()->getRules()->getType());
+		}
+		c->getItems()->removeItem((*i)->getRules()->getType());
+		_base->getStorageItems()->addItem((*i)->getRules()->getType());
+	}
+
+	// step 2: clear ground
+	for (std::vector<BattleItem*>::iterator i = groundInv->begin(); i != groundInv->end(); )
+	{
+		(*i)->setOwner(NULL);
+		BattleItem *item = *i;
+		i = groundInv->erase(i);
+		_game->getSavedGame()->getSavedBattle()->removeItem(item);
+	}
+
+	// refresh ui
+	_inv->arrangeGround(false);
+	updateStats();
+	refreshMouse();
+
+	// give audio feedback
+	_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
+}
+
 /**
  * Takes care of any events from the core game engine.
  * @param action Pointer to an action.
@@ -1271,6 +1338,13 @@ void InventoryState::handle(Action *action)
 		if (action->getDetails()->key.keysym.sym >= SDLK_1 && action->getDetails()->key.keysym.sym <= SDLK_9)
 		{
 			btnGlobalEquipmentLayoutClick(action);
+		}
+		if (action->getDetails()->key.keysym.sym == Options::keyInvClear)
+		{
+			if ((SDL_GetModState() & KMOD_CTRL) != 0 && (SDL_GetModState() & KMOD_ALT) != 0)
+			{
+				onMoveGroundInventoryToBase(action);
+			}
 		}
 	}
 

@@ -457,7 +457,7 @@ void SoldiersState::btnInventoryClick(Action *)
 		bgen.runInventory(0);
 
 		_game->getScreen()->clear();
-		_game->pushState(new InventoryState(false, 0, _base));
+		_game->pushState(new InventoryState(false, 0, _base, true));
 	}
 }
 

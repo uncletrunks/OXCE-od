@@ -52,7 +52,7 @@ private:
 	Inventory *_inv;
 	std::vector<EquipmentLayoutItem*> _curInventoryTemplate, _tempInventoryTemplate;
 	SavedBattleGame *_battleGame;
-	const bool _tu;
+	const bool _tu, _noCraft;
 	bool _lightUpdated;
 	BattlescapeState *_parent;
 	Base *_base;
@@ -65,7 +65,7 @@ private:
 	void _applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
 public:
 	/// Creates the Inventory state.
-	InventoryState(bool tu, BattlescapeState *parent, Base *base);
+	InventoryState(bool tu, BattlescapeState *parent, Base *base, bool noCraft = false);
 	/// Cleans up the Inventory state.
 	~InventoryState();
 	/// Updates all soldier info.
@@ -120,6 +120,8 @@ public:
 	void invMouseOver(Action *action);
 	/// Handler for hiding item info.
 	void invMouseOut(Action *action);
+	/// Handler for hitting the [Move Ground Inventory To Base] hotkey.
+	void onMoveGroundInventoryToBase(Action *action);
 	/// Handles keypresses.
 	void handle(Action *action);
 	/// Handler for showing tooltip.
