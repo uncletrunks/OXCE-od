@@ -152,7 +152,7 @@ private:
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
-	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor;
+	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor, _minReactionAccuracy;
 	int _chanceToStopRetaliation;
 	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
 	int _surrenderMode;
@@ -394,6 +394,8 @@ public:
 	int getTooMuchSmokeThreshold() const  {return _tooMuchSmokeThreshold;}
 	/// Gets the custom physical training factor in percent (default = 100).
 	int getCustomTrainingFactor() const { return _customTrainingFactor; }
+	/// Gets the minimum firing accuracy for reaction fire (default = 0).
+	int getMinReactionAccuracy() const { return _minReactionAccuracy; }
 	/// Gets the chance to stop retaliation after unsuccessful xcom base attack (default = 0).
 	int getChanceToStopRetaliation() const { return _chanceToStopRetaliation; }
 	/// Gets the global kneel bonus (default = 115).

@@ -277,7 +277,7 @@ public:
 Mod::Mod() :
 	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
-	_maxLookVariant(0), _tooMuchSmokeThreshold(10), _customTrainingFactor(100), _chanceToStopRetaliation(0),
+	_maxLookVariant(0), _tooMuchSmokeThreshold(10), _customTrainingFactor(100), _minReactionAccuracy(0), _chanceToStopRetaliation(0),
 	_kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80), _surrenderMode(0), _defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0),
 	_bughuntMinTurn(20), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
 	_ufoGlancingHitThreshold(0), _ufoBeamWidthParameter(1000),
@@ -1316,6 +1316,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_maxLookVariant = doc["maxLookVariant"].as<int>(_maxLookVariant);
 	_tooMuchSmokeThreshold = doc["tooMuchSmokeThreshold"].as<int>(_tooMuchSmokeThreshold);
 	_customTrainingFactor = doc["customTrainingFactor"].as<int>(_customTrainingFactor);
+	_minReactionAccuracy = doc["minReactionAccuracy"].as<int>(_minReactionAccuracy);
 	_chanceToStopRetaliation = doc["chanceToStopRetaliation"].as<int>(_chanceToStopRetaliation);
 	_kneelBonusGlobal = doc["kneelBonusGlobal"].as<int>(_kneelBonusGlobal);
 	_oneHandedPenaltyGlobal = doc["oneHandedPenaltyGlobal"].as<int>(_oneHandedPenaltyGlobal);
