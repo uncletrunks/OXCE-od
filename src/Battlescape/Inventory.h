@@ -48,7 +48,8 @@ private:
 	BattleItem *_mouseOverItem;
 	int _groundOffset, _animFrame;
 	std::map<int, std::map<int, int> > _stackLevel;
-	std::vector<std::pair<int, int> > _grenadeIndicators, _stunnedIndicators, _woundedIndicators;
+	Surface *_stunIndicator, *_woundIndicator, *_burnIndicator;
+	std::vector<std::pair<int, int> > _grenadeIndicators, _stunnedIndicators, _woundedIndicators, _burningIndicators;
 	NumberText *_stackNumber;
 	std::wstring _searchString;
 	Timer *_animTimer;

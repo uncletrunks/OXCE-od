@@ -75,6 +75,10 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_animTimer = new Timer(125);
 	_animTimer->onTimer((SurfaceHandler)&Inventory::drawPrimers);
 	_animTimer->start();
+
+	_stunIndicator = _game->getMod()->getSurface("BigStunIndicator", false);
+	_woundIndicator = _game->getMod()->getSurface("BigWoundIndicator", false);
+	_burnIndicator = _game->getMod()->getSurface("BigBurnIndicator", false);
 }
 
 /**
@@ -258,6 +262,7 @@ void Inventory::drawItems()
 	_grenadeIndicators.clear();
 	_stunnedIndicators.clear();
 	_woundedIndicators.clear();
+	_burningIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
 	if (_selUnit != 0)
 	{
@@ -324,11 +329,15 @@ void Inventory::drawItems()
 				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 				{
 					fatalWounds = (*i)->getUnit()->getFatalWounds();
-					if (fatalWounds > 0)
+					if (_burnIndicator && (*i)->getUnit()->getFire() > 0)
+					{
+						_burningIndicators.push_back(std::make_pair(x, y));
+					}
+					else if (_woundIndicator && fatalWounds > 0)
 					{
 						_woundedIndicators.push_back(std::make_pair(x, y));
 					}
-					else
+					else if (_stunIndicator)
 					{
 						_stunnedIndicators.push_back(std::make_pair(x, y));
 					}
@@ -1370,36 +1379,22 @@ void Inventory::drawPrimers()
 		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
 	}
 
-	// stunned units
-	tempSurface = _game->getMod()->getSurface("BigStunIndicator", false);
-	if (tempSurface)
+	// burning units
+	for (std::vector<std::pair<int, int> >::const_iterator i = _burningIndicators.begin(); i != _burningIndicators.end(); ++i)
 	{
-		for (std::vector<std::pair<int, int> >::const_iterator i = _stunnedIndicators.begin(); i != _stunnedIndicators.end(); ++i)
-		{
-			tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
-		}
+		_burnIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
 	}
 
 	// wounded units
-	tempSurface = _game->getMod()->getSurface("BigWoundIndicator", false);
-	if (tempSurface)
+	for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
 	{
-		for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
-		{
-			tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
-		}
+		_woundIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
 	}
-	else
+
+	// stunned units
+	for (std::vector<std::pair<int, int> >::const_iterator i = _stunnedIndicators.begin(); i != _stunnedIndicators.end(); ++i)
 	{
-		// fallback to stun indicator
-		tempSurface = _game->getMod()->getSurface("BigStunIndicator", false);
-		if (tempSurface)
-		{
-			for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
-			{
-				tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
-			}
-		}
+		_stunIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
 	}
 
 	_animFrame++;

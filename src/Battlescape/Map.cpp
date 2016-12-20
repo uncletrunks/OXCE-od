@@ -139,6 +139,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 
 	_stunIndicator = _game->getMod()->getSurface("FloorStunIndicator", false);
 	_woundIndicator = _game->getMod()->getSurface("FloorWoundIndicator", false);
+	_burnIndicator = _game->getMod()->getSurface("FloorBurnIndicator", false);
 }
 
 /**
@@ -682,29 +683,34 @@ void Map::drawTerrain(Surface *surface)
 										tileWestShade,
 										true
 									);
-									if (_stunIndicator || _woundIndicator)
+									if (_stunIndicator || _woundIndicator || _burnIndicator)
 									{
 										BattleUnit *itemUnit = item->getUnit();
 										if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
 										{
-											if (itemUnit->getFatalWounds() > 0 && _woundIndicator)
+											if (_burnIndicator && itemUnit->getFire() > 0)
 											{
-													_woundIndicator->blitNShade(surface,
-														screenPosition.x - tileOffset.x,
-														screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
-														tileWestShade,
-														true);
+												_burnIndicator->blitNShade(surface,
+													screenPosition.x - tileOffset.x,
+													screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
+													tileWestShade,
+													true);
 											}
-											else
+											else if (_woundIndicator && itemUnit->getFatalWounds() > 0)
 											{
-												if (_stunIndicator)
-												{
-													_stunIndicator->blitNShade(surface,
-														screenPosition.x - tileOffset.x,
-														screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
-														tileWestShade,
-														true);
-												}
+												_woundIndicator->blitNShade(surface,
+													screenPosition.x - tileOffset.x,
+													screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
+													tileWestShade,
+													true);
+											}
+											else if (_stunIndicator)
+											{
+												_stunIndicator->blitNShade(surface,
+													screenPosition.x - tileOffset.x,
+													screenPosition.y + tileWest->getTerrainLevel() + tileOffset.y,
+													tileWestShade,
+													true);
 											}
 										}
 									}
@@ -800,27 +806,31 @@ void Map::drawTerrain(Surface *surface)
 								screenPosition.y + tile->getTerrainLevel(),
 								tileShade
 							);
-							if (_stunIndicator || _woundIndicator)
+							if (_stunIndicator || _woundIndicator || _burnIndicator)
 							{
 								BattleUnit *itemUnit = item->getUnit();
 								if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
 								{
-									if (itemUnit->getFatalWounds() > 0 && _woundIndicator)
+									if (_burnIndicator && itemUnit->getFire() > 0)
 									{
-											_woundIndicator->blitNShade(surface,
-												screenPosition.x,
-												screenPosition.y + tile->getTerrainLevel(),
-												tileShade);
+										_burnIndicator->blitNShade(surface,
+											screenPosition.x,
+											screenPosition.y + tile->getTerrainLevel(),
+											tileShade);
 									}
-									else
+									else if (_woundIndicator && itemUnit->getFatalWounds() > 0)
 									{
-										if (_stunIndicator)
-										{
-											_stunIndicator->blitNShade(surface,
-												screenPosition.x,
-												screenPosition.y + tile->getTerrainLevel(),
-												tileShade);
-										}
+										_woundIndicator->blitNShade(surface,
+											screenPosition.x,
+											screenPosition.y + tile->getTerrainLevel(),
+											tileShade);
+									}
+									else if (_stunIndicator)
+									{
+										_stunIndicator->blitNShade(surface,
+											screenPosition.x,
+											screenPosition.y + tile->getTerrainLevel(),
+											tileShade);
 									}
 								}
 							}
