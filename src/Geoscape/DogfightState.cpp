@@ -274,8 +274,9 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 		_range[i] = new Surface(21, 74, _x + r_off, _y + 3);
 		_txtAmmo[i] = new Text(16, 9, _x + w_off, _y + y_off + 18);
 	}
+	_craftSprite = new Surface(22, 25, _x + 93, _y + 40);
 	_damage = new Surface(22, 25, _x + 93, _y + 40);
-
+	_craftShield = new Surface(22, 25, _x + 93, _y + 40);
 	_btnMinimize = new InteractiveSurface(12, 12, _x, _y);
 	_preview = new InteractiveSurface(160, 96, _x, _y);
 	_btnStandoff = new ImageButton(36, 15, _x + 83, _y + 4);
@@ -304,7 +305,9 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 		add(_weapon[i]);
 		add(_range[i]);
 	}
+	add(_craftSprite);
 	add(_damage);
+	add(_craftShield);
 	add(_btnMinimize);
 	add(_btnStandoff, "standoffButton", "dogfight", _window);
 	add(_btnCautious, "cautiousButton", "dogfight", _window);
@@ -423,6 +426,17 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	_colors[DISABLED_WEAPON] = dogfightInterface->getElement("disabledWeapon")->color;
 	_colors[DISABLED_RANGE] = dogfightInterface->getElement("disabledWeapon")->color2;
 	_colors[DISABLED_AMMO] = dogfightInterface->getElement("disabledAmmo")->color;
+	// make sure shield stuff has proper colors, since not part of vanilla interface
+	if (dogfightInterface->getElement("shieldRange") != 0)
+	{
+		_colors[SHIELD_MIN] = dogfightInterface->getElement("shieldRange")->color;
+		_colors[SHIELD_MAX] = dogfightInterface->getElement("shieldRange")->color2;
+	}
+	else
+	{
+		_colors[SHIELD_MIN] = 80; // a nice light blue
+		_colors[SHIELD_MAX] = 85; // darker blue to match
+	}
 
 	for (int i = 0; i < _weaponNum; ++i)
 	{
@@ -504,7 +518,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	frame = set->getFrame(_craft->getRules()->getSprite() + 11);
 	frame->setX(0);
 	frame->setY(0);
-	frame->blit(_damage);
+	frame->blit(_craftSprite);
 
 	_craftDamageAnimTimer->onTimer((StateHandler)&DogfightState::animateCraftDamage);
 
@@ -547,10 +561,10 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	}
 
 	// Get crafts height. Used for damage indication.
-	int x =_damage->getWidth() / 2;
-	for (int y = 0; y < _damage->getHeight(); ++y)
+	int x =_craftSprite->getWidth() / 2;
+	for (int y = 0; y < _craftSprite->getHeight(); ++y)
 	{
-		Uint8 pixelColor = _damage->getPixel(x, y);
+		Uint8 pixelColor = _craftSprite->getPixel(x, y);
 		if (pixelColor >= _colors[CRAFT_MIN] && pixelColor < _colors[CRAFT_MAX])
 		{
 			++_craftHeight;
@@ -558,12 +572,19 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	}
 
 	drawCraftDamage();
+	drawCraftShield();
 
 	// Used for weapon toggling.
 
 	for (int i = 0; i < _weaponNum; ++i)
 	{
 		_weapon[i]->onMouseClick((ActionHandler)&DogfightState::weaponClick);
+	}
+
+	// Set this as the interception handling UFO shield recharge if no other is doing it
+	if (_ufo->getShieldRechargeHandle() == 0)
+	{
+		_ufo->setShieldRechargeHandle(_interceptionNumber);
 	}
 }
 
@@ -607,11 +628,15 @@ DogfightState::~DogfightState()
 		delete _projectiles.back();
 		_projectiles.pop_back();
 	}
+
 	if (_craft)
 		_craft->setInDogfight(false);
 	// set the ufo as "free" for the next engagement (as applicable)
 	if (_ufo)
+	{
 		_ufo->setInterceptionProcessed(false);
+		_ufo->setShieldRechargeHandle(0);
+	}
 }
 
 /**
@@ -675,13 +700,8 @@ void DogfightState::drawCraftDamage()
 			rowColored = false;
 			for (int x = 0; x < _damage->getWidth(); ++x)
 			{
-				int pixelColor = _damage->getPixel(x, y);
-				if (pixelColor >= _colors[DAMAGE_MIN] && pixelColor <= _colors[DAMAGE_MAX])
-				{
-					_damage->setPixel(x, y, _currentCraftDamageColor);
-					rowColored = true;
-				}
-				if (pixelColor >= _colors[CRAFT_MIN] && pixelColor < _colors[CRAFT_MAX])
+				int craftPixel = _craftSprite->getPixel(x, y);
+				if (craftPixel != 0)
 				{
 					_damage->setPixel(x, y, _currentCraftDamageColor);
 					rowColored = true;
@@ -694,6 +714,32 @@ void DogfightState::drawCraftDamage()
 			if (rowsColored == rowsToColor)
 			{
 				break;
+			}
+		}
+	}
+
+}
+
+/**
+ * Draws the craft's shield over it's sprite according to the shield remaining
+ */
+void DogfightState::drawCraftShield()
+{
+	int shieldPercentage = (double)_craft->getShield() / (double)_craft->getShieldCapacity() * 100.0;
+	int maxRow = _craftHeight - (int)floor((double)_craftHeight * (double) (shieldPercentage / 100.));
+	for (int y = _craftShield->getHeight(); y >= 0; --y)
+	{
+		for (int x = 0; x < _craftShield->getWidth(); ++x)
+		{
+			int craftPixel = _craftSprite->getPixel(x, y);
+			if (y < maxRow && craftPixel != 0)
+			{
+				_craftShield->setPixel(x, y, 0);
+			}
+			if (y >= maxRow && craftPixel != 0)
+			{
+				Uint8 shieldColor = std::min(_colors[SHIELD_MAX], _colors[SHIELD_MIN] + (craftPixel - _colors[CRAFT_MIN]));
+				_craftShield->setPixel(x, y, shieldColor);
 			}
 		}
 	}
@@ -859,6 +905,37 @@ void DogfightState::update()
 		ss << _currentDist;
 		_txtDistance->setText(ss.str());
 
+		// Check and recharge craft shields
+		// Check if the UFO's shields are being handled by an interception window
+		if (_ufo->getShieldRechargeHandle() == 0)
+		{
+			_ufo->setShieldRechargeHandle(_interceptionNumber);
+		}
+
+		// UFO shields
+		if ((_ufo->getShield() != 0) && (_interceptionNumber == _ufo->getShieldRechargeHandle()))
+		{
+			double ufoShieldRecharge = double (_ufo->getCraftStats().shieldRecharge) / 100.0;
+			int integerShieldRecharge = floor(ufoShieldRecharge);
+			double fractionShieldRecharge = ufoShieldRecharge - integerShieldRecharge;
+			int shieldToRecharge = integerShieldRecharge + int (std::ceil(fractionShieldRecharge - RNG::generate(0.0, 1.0)));
+			_ufo->setShield(_ufo->getShield() + shieldToRecharge);
+		}
+
+		// Player craft shields
+		if (_craft->getShield() != 0)
+		{
+			double craftShieldRecharge = double (_craft->getCraftStats().shieldRecharge) / 100.0;
+			int integerShieldRecharge = floor(craftShieldRecharge);
+			double fractionShieldRecharge = craftShieldRecharge - integerShieldRecharge;
+			int shieldToRecharge = integerShieldRecharge + int (std::ceil(fractionShieldRecharge - RNG::generate(0.0, 1.0)));
+			if (shieldToRecharge != 0)
+			{
+				_craft->setShield(_craft->getShield() + shieldToRecharge);
+				drawCraftShield();
+			}
+		}
+
 		// Move projectiles and check for hits.
 		for (std::vector<CraftWeaponProjectile*>::iterator it = _projectiles.begin(); it != _projectiles.end(); ++it)
 		{
@@ -879,7 +956,19 @@ void DogfightState::update()
 					{
 						// Formula delivered by Volutar, altered by Extended version.
 						int power = p->getDamage() * (_craft->getCraftStats().powerBonus + 100) / 100;
-						int damage = std::max(0, RNG::generate(power / 2, power) - _ufo->getCraftStats().armor);
+
+						// Handle UFO shields
+						int damage = RNG::generate(power / 2, power);
+						int shieldDamage = damage * p->getShieldDamageModifier() / 100;
+						int shieldBleedThroughDamage = 0;
+						if (_ufo->getShield() != 0)
+						{
+							shieldBleedThroughDamage = std::max(0, shieldDamage - _ufo->getShield()) * _ufo->getCraftStats().shieldBleedThrough / p->getShieldDamageModifier();
+							damage = shieldBleedThroughDamage * _ufo->getCraftStats().shieldBleedThrough / 100;
+							_ufo->setShield(_ufo->getShield() - shieldDamage);
+						}
+
+						damage = std::max(0, damage - _ufo->getCraftStats().armor);
 						_ufo->setDamage(_ufo->getDamage() + damage);
 						if (_ufo->isCrashed())
 						{
@@ -897,19 +986,30 @@ void DogfightState::update()
 						}
 
 						// How hard was the ufo hit?
-						if (damage == 0)
+						if (_ufo->getShield() != 0)
 						{
-							setStatus("STR_UFO_HIT_NO_DAMAGE");
+							setStatus("STR_UFO_SHIELD_HIT");
 						}
 						else
 						{
-							if (damage < _ufo->getCraftStats().damageMax / 2 * _game->getMod()->getUfoGlancingHitThreshold() / 100)
+							if ((damage == 0) && (shieldBleedThroughDamage == 0))
 							{
-								setStatus("STR_UFO_HIT_GLANCING");
+								setStatus("STR_UFO_HIT_NO_DAMAGE");
+							}
+							else if (((damage == 0) && (shieldBleedThroughDamage != 0)) || (shieldBleedThroughDamage != 0))
+							{
+								setStatus("STR_UFO_SHIELD_DOWN");
 							}
 							else
 							{
-								setStatus("STR_UFO_HIT");
+								if (damage < _ufo->getCraftStats().damageMax / 2 * _game->getMod()->getUfoGlancingHitThreshold() / 100)
+								{
+									setStatus("STR_UFO_HIT_GLANCING");
+								}
+								else
+								{
+									setStatus("STR_UFO_HIT");
+								}
 							}
 						}
 
@@ -955,7 +1055,19 @@ void DogfightState::update()
 					{
 						// Formula delivered by Volutar, altered by Extended version.
 						int power = p->getDamage() * (_ufo->getCraftStats().powerBonus + 100) / 100;
-						int damage = std::max(0, RNG::generate(0, power) - _craft->getCraftStats().armor);
+						int damage = RNG::generate(0, power);
+
+						if (_craft->getShield() != 0)
+						{
+							int shieldBleedThroughDamage = std::max(0, damage - _craft->getShield()) * _craft->getCraftStats().shieldBleedThrough / 100;
+							_craft->setShield(_craft->getShield() - damage);
+							damage = shieldBleedThroughDamage;
+							drawCraftShield();
+							setStatus("STR_INTERCEPTOR_SHIELD_HIT");
+						}
+
+						damage = std::max(0, damage - _craft->getCraftStats().armor);
+
 						if (damage)
 						{
 							_craft->setDamage(_craft->getDamage() + damage);
@@ -1408,6 +1520,7 @@ void DogfightState::btnMinimizeClick(Action *)
 		if (_currentDist >= STANDOFF_DIST)
 		{
 			setMinimized(true);
+			_ufo->setShieldRechargeHandle(0);
 		}
 		else
 		{
@@ -1580,12 +1693,27 @@ void DogfightState::drawUfo()
 				{
 					pixelOffset *= 2;
 				}
+
 				Uint8 radarPixelColor = _window->getPixel(currentUfoXposition + x + 3, currentUfoYposition + y + 3); // + 3 cause of the window frame
 				Uint8 color = radarPixelColor - pixelOffset;
 				if (color < _colors[BLOB_MIN])
 				{
 					color = _colors[BLOB_MIN];
 				}
+
+				if (_ufo->getShield() != 0)
+				{
+					Uint8 shieldColor = _colors[SHIELD_MAX] - std::ceil((_colors[SHIELD_MAX] - _colors[SHIELD_MIN]) * double (_ufo->getShield()) / double(_ufo->getCraftStats().shieldCapacity)) + (color - _colors[BLOB_MIN]);
+					if (shieldColor < _colors[SHIELD_MIN])
+					{
+						shieldColor = _colors[SHIELD_MIN];
+					}
+					if (shieldColor <=  _colors[SHIELD_MAX])
+					{
+						color = shieldColor;
+					}
+				}
+
 				_battle->setPixel(currentUfoXposition + x, currentUfoYposition + y, color);
 			}
 		}
@@ -1641,7 +1769,7 @@ void DogfightState::drawProjectile(const CraftWeaponProjectile* p)
 			int beamPower = 0;
 			if (p->getType() == CWPT_PLASMA_BEAM)
 			{
-				beamPower = _ufo->getRules()->getWeaponPower() / _game->getMod()->getUfoBeamWidthParameter();
+				beamPower = floor(_ufo->getRules()->getWeaponPower() / _game->getMod()->getUfoBeamWidthParameter());
 			}
 
 			for (int x = 0; x <= std::min(beamPower, 3); x++)
@@ -1740,7 +1868,9 @@ void DogfightState::setMinimized(const bool minimized)
 		_range[i]->setVisible(!minimized);
 		_txtAmmo[i]->setVisible(!minimized);
 	}
+	_craftSprite->setVisible(!minimized);
 	_damage->setVisible(!minimized);
+	_craftShield->setVisible(!minimized);
 	_txtDistance->setVisible(!minimized);
 	_txtStatus->setVisible(!minimized);
 
@@ -1916,6 +2046,8 @@ void DogfightState::endDogfight()
 {
 	if (_craft)
 		_craft->setInDogfight(false);
+	if (_ufo)
+		_ufo->setShieldRechargeHandle(0);
 	_endDogfight = true;
 }
 

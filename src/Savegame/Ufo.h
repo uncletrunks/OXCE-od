@@ -58,6 +58,7 @@ private:
 	RuleUfoStats _stats;
 	/// Calculates a new speed vector to the destination.
 	void calculateSpeed();
+	int _shield, _shieldRechargeHandle;
 public:
 	/// Creates a UFO of the specified type.
 	Ufo(const RuleUfo *rules);
@@ -163,6 +164,14 @@ public:
 	int getEscapeCountdown() const;
 	void setInterceptionProcessed(bool processed);
 	bool getInterceptionProcessed() const;
+	/// Sets the UFO's shield
+	void setShield(int shield);
+	/// Gets the UFO's shield value
+	int getShield() const;
+	/// Sets which _interceptionNumber in a dogfight handles the UFO shield recharge
+	void setShieldRechargeHandle(int shieldRechargeHandle);
+	/// Gets which _interceptionNumber in a dogfight handles the UFO shield recharge
+	int getShieldRechargeHandle() const;
 };
 
 }

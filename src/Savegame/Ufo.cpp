@@ -43,7 +43,7 @@ Ufo::Ufo(const RuleUfo *rules) : MovingTarget(),
 	_altitude("STR_HIGH_UC"), _status(FLYING), _secondsRemaining(0),
 	_inBattlescape(false), _mission(0), _trajectory(0),
 	_trajectoryPoint(0), _detected(false), _hyperDetected(false), _processedIntercept(false),
-	_shootingAt(0), _hitFrame(0), _fireCountdown(0), _escapeCountdown(0), _stats()
+	_shootingAt(0), _hitFrame(0), _fireCountdown(0), _escapeCountdown(0), _stats(), _shield(-1), _shieldRechargeHandle(0)
 {
 	_stats = rules->getStats();
 }
@@ -109,6 +109,8 @@ void Ufo::load(const YAML::Node &node, const Mod &mod, SavedGame &game)
 	_crashId = node["crashId"].as<int>(_crashId);
 	_landId = node["landId"].as<int>(_landId);
 	_damage = node["damage"].as<int>(_damage);
+	_shield = node["shield"].as<int>(_shield);
+	_shieldRechargeHandle = node["shieldRechargeHandle"].as<int>(_shieldRechargeHandle);
 	_altitude = node["altitude"].as<std::string>(_altitude);
 	_direction = node["direction"].as<std::string>(_direction);
 	_detected = node["detected"].as<bool>(_detected);
@@ -193,6 +195,8 @@ YAML::Node Ufo::save(bool newBattle) const
 		node["landId"] = _landId;
 	}
 	node["damage"] = _damage;
+	node["shield"] = _shield;
+	node["shieldRechargeHandle"] = _shieldRechargeHandle;
 	node["altitude"] = _altitude;
 	node["direction"] = _direction;
 	node["status"] = (int)_status;
@@ -810,6 +814,42 @@ void Ufo::setInterceptionProcessed(bool processed)
 bool Ufo::getInterceptionProcessed() const
 {
 	return _processedIntercept;
+}
+
+/**
+ * Gets the UFO's shield level
+ * @return the points of shield remaining
+ */
+int Ufo::getShield() const
+{
+	return _shield;
+}
+
+/**
+ * Sets the UFO's shield level
+ * @param the shield point value to set
+ */
+void Ufo::setShield(int shield)
+{
+	_shield = std::max(0, std::min(_stats.shieldCapacity, shield));
+}
+
+/**
+ * Sets which _interceptionNumber handles the UFO's shield recharge in a dogfight
+ * @param the _interceptionNumber to set
+ */
+void Ufo::setShieldRechargeHandle(int shieldRechargeHandle)
+{
+	_shieldRechargeHandle = shieldRechargeHandle;
+}
+
+/**
+ * Gets which _interceptionNumber handles the UFO's shield recharge in a dogfight
+ * @return the _interceptionNumber to handle shield recharge
+ */
+int Ufo::getShieldRechargeHandle() const
+{
+	return _shieldRechargeHandle;
 }
 
 }

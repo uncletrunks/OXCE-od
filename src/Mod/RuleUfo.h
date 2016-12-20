@@ -83,6 +83,14 @@ public:
 	int getSprite() const;
 	/// Gets the UFO's globe marker.
 	int getMarker() const;
+	/// Gets the UFO's shield capacity.
+	int getShieldCapacity() const;
+	/// Gets the UFO's shield recharge rate in combat.
+	int getShieldRecharge() const;
+	/// Get the UFO's shield recharge rate in the geoscape.
+	int getShieldRechargeInGeoscape() const;
+	/// Get how much damage bleeds through the UFO's shield when downed
+	int getShieldBleedThrough() const;
 	/// Gets the UFO's weapon power.
 	int getWeaponPower() const;
 	/// Gets the UFO's weapon range.

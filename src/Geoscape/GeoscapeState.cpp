@@ -772,6 +772,24 @@ void GeoscapeState::time5Seconds()
 						}
 					}
 				}
+				// Handle  shield recharge, starting with initializing new UFOs' shields
+				if ((*i)->getShield() == -1)
+				{
+					(*i)->setShield((*i)->getCraftStats().shieldCapacity);
+				}
+
+				if ((*i)->getCraftStats().shieldRechargeInGeoscape == -1)
+				{
+					(*i)->setShield((*i)->getCraftStats().shieldCapacity);
+				}
+				else
+				{
+					double shieldRechargeAmount = (*i)->getCraftStats().shieldRechargeInGeoscape / 100.0;
+					int integerShieldRecharge = floor(shieldRechargeAmount);
+					double fractionShieldRecharge = shieldRechargeAmount - integerShieldRecharge;
+					int shieldToRecharge = integerShieldRecharge + int (std::ceil(fractionShieldRecharge - RNG::generate(0.0, 1.0)));
+					(*i)->setShield((*i)->getShield() + shieldToRecharge);
+				}
 			}
 			break;
 		case Ufo::LANDED:
@@ -884,6 +902,19 @@ void GeoscapeState::time5Seconds()
 			if (!_zoomInEffectTimer->isRunning() && !_zoomOutEffectTimer->isRunning())
 			{
 				(*j)->think();
+				// Handle  shield recharge
+				if ((*j)->getCraftStats().shieldRechargeInGeoscape == -1)
+				{
+					(*j)->setShield((*j)->getCraftStats().shieldCapacity);
+				}
+				else
+				{
+					double shieldRechargeAmount = (*j)->getCraftStats().shieldRechargeInGeoscape / 100.0;
+					int integerShieldRecharge = floor(shieldRechargeAmount);
+					double fractionShieldRecharge = shieldRechargeAmount - integerShieldRecharge;
+					int shieldToRecharge = integerShieldRecharge + int (std::ceil(fractionShieldRecharge - RNG::generate(0.0, 1.0)));
+					(*j)->setShield((*j)->getShield() + shieldToRecharge);
+				}
 			}
 			if ((*j)->reachedDestination())
 			{
@@ -1503,6 +1534,8 @@ void GeoscapeState::time1Hour()
 					popup(new CraftErrorState(this, msg));
 				}
 			}
+			// Recharge craft shields automatically
+			(*j)->setShield((*j)->getShield() + (*j)->getRules()->getShieldRechargeAtBase());
 		}
 	}
 

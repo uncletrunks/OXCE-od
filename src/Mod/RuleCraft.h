@@ -32,13 +32,14 @@ class Mod;
  */
 struct RuleCraftStats
 {
-	int fuelMax, damageMax, speedMax, accel, radarRange, radarChance, sightRange, hitBonus, avoidBonus, powerBonus, armor;
+	int fuelMax, damageMax, speedMax, accel, radarRange, radarChance, sightRange, hitBonus, avoidBonus, powerBonus, armor, shieldCapacity, shieldRecharge, shieldRechargeInGeoscape, shieldBleedThrough;
 
 	/// Default constructor.
 	RuleCraftStats() :
 		fuelMax(0), damageMax(0), speedMax(0), accel(0),
 		radarRange(0), radarChance(0), sightRange(0),
-		hitBonus(0), avoidBonus(0), powerBonus(0), armor(0)
+		hitBonus(0), avoidBonus(0), powerBonus(0), armor(0),
+		shieldCapacity(0), shieldRecharge(0), shieldRechargeInGeoscape(0), shieldBleedThrough(0)
 	{
 
 	}
@@ -56,6 +57,10 @@ struct RuleCraftStats
 		avoidBonus += r.avoidBonus;
 		powerBonus += r.powerBonus;
 		armor += r.armor;
+		shieldCapacity += r.shieldCapacity;
+		shieldRecharge += r.shieldRecharge;
+		shieldRechargeInGeoscape += r.shieldRechargeInGeoscape;
+		shieldBleedThrough += r.shieldBleedThrough;
 		return *this;
 	}
 	/// Subtract different stats.
@@ -72,6 +77,10 @@ struct RuleCraftStats
 		avoidBonus -= r.avoidBonus;
 		powerBonus -= r.powerBonus;
 		armor -= r.armor;
+		shieldCapacity -= r.shieldCapacity;
+		shieldRecharge -= r.shieldRecharge;
+		shieldRechargeInGeoscape -= r.shieldRechargeInGeoscape;
+		shieldBleedThrough -= r.shieldBleedThrough;
 		return *this;
 	}
 	/// Gets negative values of stats.
@@ -95,6 +104,10 @@ struct RuleCraftStats
 		avoidBonus = node["avoidBonus"].as<int>(avoidBonus);
 		powerBonus = node["powerBonus"].as<int>(powerBonus);
 		armor = node["armor"].as<int>(armor);
+		shieldCapacity = node["shieldCapacity"].as<int>(shieldCapacity);
+		shieldRecharge = node["shieldRecharge"].as<int>(shieldRecharge);
+		shieldRechargeInGeoscape = node["shieldRechargeInGeoscape"].as<int>(shieldRechargeInGeoscape);
+		shieldBleedThrough = node["shieldBleedThrough"].as<int>(shieldBleedThrough);
 	}
 };
 
@@ -127,6 +140,7 @@ private:
 	std::vector<std::vector <int> > _deployment;
 	std::vector<int> _craftInventoryTile;
 	RuleCraftStats _stats;
+	int _shield, _shieldRechargeAtBase;
 public:
 	/// Creates a blank craft ruleset.
 	RuleCraft(const std::string &type);
@@ -204,6 +218,16 @@ public:
 	const RuleCraftStats& getStats() const;
 	/// checks how deep this craft can go.
 	int getMaxDepth() const;
+	/// Get the shield capacity for the craft
+	int getShieldCapacity() const;
+	/// Get the shield recharge rate for the craft during a dogfight
+	int getShieldRecharge() const;
+	/// Get the shield recharge rate for the craft in the geoscape
+	int getShieldRechargeInGeoscape() const;
+	/// Get how much damage bleeds through the shield when it goes down
+	int getShieldBleedThrough() const;
+	/// Get how many shield points are recharged per hour at base
+	int getShieldRechargeAtBase() const;
 };
 
 }
