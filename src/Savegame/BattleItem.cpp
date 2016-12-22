@@ -19,6 +19,8 @@
 #include "BattleItem.h"
 #include "BattleUnit.h"
 #include "Tile.h"
+#include "SavedGame.h"
+#include "SavedBattleGame.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
@@ -771,6 +773,20 @@ ModScript::SelectItemParser::SelectItemParser(ScriptGlobal* shared, const std::s
 	commonImpl(b, mod);
 
 	setDefault("add sprite_index sprite_offset; return sprite_index;");
+}
+
+ModScript::CreateItemParser::CreateItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "item", "battle_game", "turn", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+ModScript::NewTurnItemParser::NewTurnItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "item", "battle_game", "turn", "side", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
 }
 
 /**

@@ -970,6 +970,19 @@ void SavedBattleGame::endTurn()
 		{
 			(*i)->setVisible(false);
 		}
+
+		ModScript::NewTurnUnitParser::Output arg{};
+		ModScript::NewTurnUnitParser::Worker work{ (*i), this, this->getTurn(), _side };
+
+		work.execute((*i)->getArmor()->getEventUnitTurnScript(), arg);
+	}
+
+	for (auto& item : _items)
+	{
+		ModScript::NewTurnItemParser::Output arg{};
+		ModScript::NewTurnItemParser::Worker work{ item, this, this->getTurn(), _side };
+
+		work.execute(item->getRules()->getEventItemTurnScript(), arg);
 	}
 
 	// re-run calculateFOV() *after* all aliens have been set not-visible
@@ -1476,6 +1489,11 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 			}
 		}
 	}
+
+	ModScript::CreateUnitParser::Output arg{};
+	ModScript::CreateUnitParser::Worker work{ unit, this, this->getTurn(), };
+
+	work.execute(armor->getEventUnitCreateScript(), arg);
 }
 
 /**
@@ -1825,7 +1843,7 @@ void SavedBattleGame::prepareNewTurn()
 	Mod *mod = getBattleState()->getGame()->getMod();
 	for (std::vector<BattleUnit*>::iterator i = getUnits()->begin(); i != getUnits()->end(); ++i)
 	{
-		(*i)->calculateEnviDamage(mod);
+		(*i)->calculateEnviDamage(mod, this);
 	}
 
 	reviveUnconsciousUnits();

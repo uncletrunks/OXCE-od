@@ -145,6 +145,8 @@ private:
 	ModScript::RecolorItemParser::Container _recolorScript;
 	ModScript::SelectItemParser::Container _spriteScript;
 	ModScript::ReactionUnitParser::Container _reacActionScript;
+	ModScript::NewTurnItemParser::Container _newTurnItemScrip;
+	ModScript::CreateItemParser::Container _createItemScript;
 	ScriptValues<RuleItem> _scriptValues;
 
 	/// Get final value of cost.
@@ -436,11 +438,15 @@ public:
 	/// Gets the one-handed penalty.
 	int getOneHandedPenalty(Mod *mod) const;
 	/// Gets script used to recolor item sprite.
-	const ModScript::RecolorItemParser::Container &getRecolorScript() const;
+	const ModScript::RecolorItemParser::Container &getRecolorScript() const { return _recolorScript; }
 	/// Gets script used to switch sprite of item.
-	const ModScript::SelectItemParser::Container &getSpriteScript() const;
+	const ModScript::SelectItemParser::Container &getSpriteScript() const { return _spriteScript; }
 	/// Gets script used calculate reaction to item action.
-	const ModScript::ReactionUnitParser::Container &getReacActionScript() const;
+	const ModScript::ReactionUnitParser::Container &getReacActionScript() const { return _reacActionScript; }
+	/// Gets scripts that is call when next turn is preperad.
+	const ModScript::NewTurnItemParser::Container &getEventItemTurnScript() const { return _newTurnItemScrip; }
+	/// Gets scripts that is call when item is crated.
+	const ModScript::CreateItemParser::Container &getEventCreateItemScript() const { return _createItemScript; }
 };
 
 }

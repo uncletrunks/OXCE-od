@@ -1074,7 +1074,7 @@ static inline void setValueMax(int& value, int diff, int min, int max)
  * @param type The type of damage being inflicted.
  * @return damage done after adjustment
  */
-int BattleUnit::damage(Position relative, int power, const RuleDamageType *type)
+int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleItem *item)
 {
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
@@ -1156,52 +1156,90 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type)
 		}
 	}
 
-	int toHealth = 0;
-	int toArmorPre = type->getArmorPreDamage(power);
+	const int orgPower = power;
+	const int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
 
-	if (type->ArmorEffectiveness > 0.0f)
 	{
-		power -= getArmor(side) * type->ArmorEffectiveness;
+		ModScript::HitUnitParser::Output args { power, bodypart, side, };
+		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, };
+
+		work.execute(this->getArmor()->getEventUnitHitScript(), args);
+
+		power = args.getFirst();
+		side = (UnitSide)args.getSecond();
+		bodypart = (UnitBodyPart)args.getThird();
 	}
 
-	setValueMax(_currentArmor[side], - toArmorPre, 0, _armor->getArmor(side));
-
-	if (power > 0)
 	{
-		// stun level change
+		constexpr int toHealth = 0;
+		constexpr int toArmor = 1;
+		constexpr int toStun = 2;
+		constexpr int toTime = 3;
+		constexpr int toEnergy = 4;
+		constexpr int toMorale = 5;
+		constexpr int toWound = 6;
+
+		ModScript::DamageUnitParser::Output args { };
+
+		std::get<toArmor>(args.data) += type->getArmorPreDamage(power);
+
+		if (type->ArmorEffectiveness > 0.0f)
+		{
+			power -= getArmor(side) * type->ArmorEffectiveness;
+		}
+
+		if (power > 0)
+		{
+			// stun level change
+			std::get<toStun>(args.data) += type->getStunDamage(power);
+
+			// morale change
+			std::get<toMorale>(args.data) += type->getMoraleDamage(power);
+
+			// time units change
+			std::get<toTime>(args.data) += type->getTimeDamage(power);
+
+			// health change
+			std::get<toHealth>(args.data) += type->getHealthDamage(power);
+
+			// energy change
+			std::get<toEnergy>(args.data) += type->getEnergyDamage(power);
+
+			// fatal wounds change
+			std::get<toWound>(args.data) += type->getWoundDamage(power);
+
+			// armor value change
+			std::get<toArmor>(args.data) += type->getArmorDamage(power);
+		}
+
+		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, };
+
+		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
+
 		if (!_armor->getPainImmune() || type->IgnorePainImmunity)
 		{
-			setValueMax(_stunlevel, type->getStunDamage(power), 0, 4 * _stats.health);
+			setValueMax(_stunlevel, std::get<toStun>(args.data), 0, 4 * _stats.health);
 		}
 
-		// morale change
-		moraleChange(-(110 - _stats.bravery) * type->getMoraleDamage(power) / 100);
+		moraleChange(- (110 - _stats.bravery) * std::get<toMorale>(args.data) / 100);
 
-		// time units change
-		setValueMax(_tu, - type->getTimeDamage(power), 0, _stats.tu);
+		setValueMax(_tu, - std::get<toTime>(args.data), 0, _stats.tu);
 
-		// health change
-		int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
-		toHealth = type->getHealthDamage(power);
-		setValueMax(_health, - toHealth, overKillMinimum, _stats.health);
+		setValueMax(_health, - std::get<toHealth>(args.data), overKillMinimum, _stats.health);
 
-		// energy change
-		setValueMax(_energy, - type->getEnergyDamage(power), 0, _stats.stamina);
+		setValueMax(_energy, - std::get<toEnergy>(args.data), 0, _stats.stamina);
 
-		// fatal wounds change
 		if (isWoundable())
 		{
-			const int wound = type->getWoundDamage(power);
-			_fatalWounds[bodypart] += wound;
-			moraleChange(-wound);
+			_fatalWounds[bodypart] += std::get<toWound>(args.data);
+			moraleChange(-std::get<toWound>(args.data));
 		}
 
-		// armor value change
-		setValueMax(_currentArmor[side], - type->getArmorDamage(power), 0, _armor->getArmor(side));
-	}
+		setValueMax(_currentArmor[side], - std::get<toArmor>(args.data), 0, _armor->getArmor(side));
 
-	setFatalShotInfo(side, bodypart);
-	return toHealth;
+		setFatalShotInfo(side, bodypart);
+		return std::get<toHealth>(args.data);
+	}
 }
 
 /**
@@ -3292,12 +3330,12 @@ void BattleUnit::setEnviSmoke(int damage)
 /**
  * Calculate smoke and fire damage form environment.
  */
-void BattleUnit::calculateEnviDamage(Mod *mod)
+void BattleUnit::calculateEnviDamage(Mod *mod, SavedBattleGame *save)
 {
 	if (_fireMaxHit)
 	{
 		_hitByFire = true;
-		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN));
+		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN), save);
 		// try to set the unit on fire.
 		if (RNG::percent(40 * getArmor()->getDamageModifier(DT_IN)))
 		{
@@ -3311,7 +3349,7 @@ void BattleUnit::calculateEnviDamage(Mod *mod)
 
 	if (_smokeMaxHit)
 	{
-		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE));
+		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE), save);
 	}
 
 	_fireMaxHit = 0;
@@ -3951,6 +3989,44 @@ void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part
 	{
 		w->update(unit->getArmor()->getRecolorScript(), unit, body_part, anim_frame, shade, burn);
 	}
+}
+
+ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+		"to_health",
+		"to_armor",
+		"to_stun",
+		"to_time",
+		"to_energy",
+		"to_morale",
+		"to_wound",
+		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side",  }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+
+	setEmptyReturn();
+}
+
+ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power" }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+ModScript::CreateUnitParser::CreateUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", "side", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
 }
 
 

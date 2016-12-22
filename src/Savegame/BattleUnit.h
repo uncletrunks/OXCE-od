@@ -248,7 +248,7 @@ public:
 	/// Get overkill damage to unit.
 	int getOverKillDamage() const;
 	/// Do damage to the unit.
-	int damage(Position relative, int power, const RuleDamageType *type);
+	int damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleItem *item = nullptr);
 	/// Heal stun level of the unit.
 	void healStun(int power);
 	/// Gets the unit's stun level.
@@ -517,7 +517,7 @@ public:
 	/// Set smoke damage form environment.
 	void setEnviSmoke(int damage);
 	/// Calculate smoke and fire damage form environment.
-	void calculateEnviDamage(Mod *mod);
+	void calculateEnviDamage(Mod *mod, SavedBattleGame *save);
 	/// Use this function to check the unit's movement type.
 	MovementType getMovementType() const;
 	/// Create special weapon for unit.

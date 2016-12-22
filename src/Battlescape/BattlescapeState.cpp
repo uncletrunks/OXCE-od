@@ -1579,7 +1579,7 @@ inline void BattlescapeState::handle(Action *action)
 						{
 							if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
 							{
-								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_AP));
+								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_AP), _save);
 							}
 							_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
 							_save->getBattleGame()->handleState();
@@ -1593,7 +1593,7 @@ inline void BattlescapeState::handle(Action *action)
 						{
 							if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
 							{
-								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_STUN));
+								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_STUN), _save);
 							}
 						}
 						_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);

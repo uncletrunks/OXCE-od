@@ -1871,7 +1871,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 	}
 
 	const int wounds = target->getFatalWounds();
-	const int adjustedDamage = target->damage(relative, damage, type);
+	const int adjustedDamage = target->damage(relative, damage, type, _save, clipOrWeapon);
 
 	if (unit && target->getFaction() != FACTION_PLAYER)
 	{

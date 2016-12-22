@@ -465,6 +465,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 
 	_reacActionScript.load(_type, node, parsers.reactionWeaponAction);
 
+	_newTurnItemScrip.load(_type, node, parsers.newTurnItem);
+	_createItemScript.load(_type, node, parsers.createItem);
+
 	if (!_listOrder)
 	{
 		_listOrder = listOrder;
@@ -1717,32 +1720,6 @@ int RuleItem::getVaporDensity() const
 int RuleItem::getVaporProbability() const
 {
 	return _vaporProbability;
-}
-
-/**
- * Get recoloring script.
- * @return Script for recoloring.
- */
-const ModScript::RecolorItemParser::Container &RuleItem::getRecolorScript() const
-{
-	return _recolorScript;
-}
-
-/**
- * Get switch sprite script.
- * @return Script for switching.
- */
-const ModScript::SelectItemParser::Container &RuleItem::getSpriteScript() const
-{
-	return _spriteScript;
-}
-/**
- * Get script that caclualte reaction based on item that is used for action.
- * @return Script that calculate reaction.
- */
-const ModScript::ReactionUnitParser::Container &RuleItem::getReacActionScript() const
-{
-	return _reacActionScript;
 }
 
 namespace

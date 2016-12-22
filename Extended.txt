@@ -129,6 +129,7 @@ Update to recent nightly OpenXcom.[br/]
 3.6:[br/]
 Config for new lighting system.[br/]
 New map script options made by ohartenstein23.[br/]
+New scripts for items and units.[br/]
 [br/]
 
 [examples]
@@ -358,6 +359,8 @@ items:
       recolorItemSprite: ~      #script that handle recoloring of each pixel in item sprite.
       selectItemSprite: ~       #script that handle selecting graphic for item.
       reactionWeaponAction: ~   #script that handle reacion to shoot, throw or melee from that weapon.
+      createItem: ~             #script call on creation of new item in battlespace.
+      newTurnItem: ~            #script call on each turn for all items in battlescape.
     ai:
       useDelay: 3       #determine on what turn item can be used by aliens.
       meleeHitCount: 25 #number of hits that AI try to do.
@@ -423,6 +426,10 @@ armors:
       reactionUnitAction: ~   #script used for handling reaction for unit performing action.
       reactionUnitReaction: ~ #script used for handling reaction for unit reacting.
       visibilityUnit: ~       #script that handle visibility test of other units, return value need be greater than zero to test be succesful. Second return value is used for distinguish between custom visibility modes, `null` is normal visibility.
+      hitUnit: ~              #script call when unit get hit by something, called before armor handling.
+      damageUnit: ~           #script call after armor handling, it handle damage to unit.
+      createUnit: ~           #script call on creation of new unit in battlescape.
+      newTurnUnit: ~          #script call on every turn for every unit in battlescape.
 [/code]
 
 [code]

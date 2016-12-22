@@ -54,6 +54,9 @@ class BattleUnit;
 class BattleUnitVisibility;
 class BattleItem;
 
+class SavedBattleGame;
+class SavedGame;
+
 class ModScript
 {
 	friend class Mod;
@@ -111,6 +114,33 @@ public:
 		VisibilityUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
+	struct HitUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&>, BattleUnit*, BattleItem*, SavedBattleGame*, int>
+	{
+		HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, SavedBattleGame*, int, int, int, int>
+	{
+		DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
+	struct CreateUnitParser : ScriptParserEvents<ScriptOutputArgs<>, BattleUnit*, SavedBattleGame*, int>
+	{
+		CreateUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+	struct NewTurnUnitParser : ScriptParserEvents<ScriptOutputArgs<>, BattleUnit*, SavedBattleGame*, int, int>
+	{
+		NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
+	struct CreateItemParser : ScriptParserEvents<ScriptOutputArgs<>, BattleItem*, SavedBattleGame*, int>
+	{
+		CreateItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+	struct NewTurnItemParser : ScriptParserEvents<ScriptOutputArgs<>, BattleItem*, SavedBattleGame*, int, int>
+	{
+		NewTurnItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
 	Warper<RecolorUnitParser> recolorUnitSprite = { "recolorUnitSprite", _mod, _shared };
 	Warper<SelectUnitParser> selectUnitSprite = { "selectUnitSprite", _mod, _shared };
 
@@ -122,6 +152,14 @@ public:
 	Warper<SelectItemParser> selectItemSprite = { "selectItemSprite", _mod, _shared };
 
 	Warper<VisibilityUnitParser> visibilityUnit = { "visibilityUnit", _mod, _shared };
+
+	Warper<HitUnitParser> unitHit = { "hitUnit", _mod, _shared };
+	Warper<DamageUnitParser> unitDamage = { "damageUnit", _mod, _shared };
+	Warper<CreateUnitParser> unitCreated = { "createUnit", _mod, _shared };
+	Warper<NewTurnUnitParser> unitNewTurn = { "newTurnUnit", _mod, _shared };
+
+	Warper<CreateItemParser> createItem = { "createItem", _mod, _shared };
+	Warper<NewTurnItemParser> newTurnItem = { "newTurnItem", _mod, _shared };
 };
 
 }
