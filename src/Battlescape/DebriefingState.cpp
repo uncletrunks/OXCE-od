@@ -767,7 +767,10 @@ void DebriefingState::btnStatsClick(Action *)
 */
 void DebriefingState::btnSellClick(Action *)
 {
-	_game->pushState(new SellState(_base, this, OPT_BATTLESCAPE));
+	if (!_destroyBase)
+	{
+		_game->pushState(new SellState(_base, this, OPT_BATTLESCAPE));
+	}
 }
 
 /**
@@ -1102,8 +1105,6 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
-	_base = base;
-
 	// UFO crash/landing site disappears
 	for (std::vector<Ufo*>::iterator i = save->getUfos()->begin(); i != save->getUfos()->end(); ++i)
 	{
@@ -1281,7 +1282,7 @@ void DebriefingState::prepareDebriefing()
 					{
 						if (soldier->getReplacedArmor()->getStoreItem() != Armor::NONE)
 						{
-							_base->getStorageItems()->addItem(soldier->getReplacedArmor()->getStoreItem());
+							base->getStorageItems()->addItem(soldier->getReplacedArmor()->getStoreItem());
 						}
 						soldier->setReplacedArmor(0);
 					}
@@ -1377,7 +1378,7 @@ void DebriefingState::prepareDebriefing()
 						{
 							if (soldier->getReplacedArmor()->getStoreItem() != Armor::NONE)
 							{
-								_base->getStorageItems()->addItem(soldier->getReplacedArmor()->getStoreItem());
+								base->getStorageItems()->addItem(soldier->getReplacedArmor()->getStoreItem());
 							}
 							soldier->setReplacedArmor(0);
 						}
@@ -1636,6 +1637,7 @@ void DebriefingState::prepareDebriefing()
 				{
 
 					delete (*i);
+					base = 0; // To avoid similar (potential) problems as with the deleted craft
 					_game->getSavedGame()->getBases()->erase(i);
 					break;
 				}
@@ -1670,35 +1672,41 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
-	// clean up remaining armor backups
-	// Note: KIA and MIA soldiers have been handled already, only survivors can have non-empty values
-	for (std::vector<Soldier*>::iterator i = base->getSoldiers()->begin(); i != base->getSoldiers()->end(); ++i)
+	if (!_destroyBase)
 	{
-		if ((*i)->getReplacedArmor())
+		// clean up remaining armor backups
+		// Note: KIA and MIA soldiers have been handled already, only survivors can have non-empty values
+		for (std::vector<Soldier*>::iterator i = base->getSoldiers()->begin(); i != base->getSoldiers()->end(); ++i)
 		{
-			(*i)->setArmor((*i)->getReplacedArmor());
-		}
-		else if ((*i)->getTransformedArmor())
-		{
-			(*i)->setArmor((*i)->getTransformedArmor());
+			if ((*i)->getReplacedArmor())
+			{
+				(*i)->setArmor((*i)->getReplacedArmor());
+			}
+			else if ((*i)->getTransformedArmor())
+			{
+				(*i)->setArmor((*i)->getTransformedArmor());
 
+			}
+			(*i)->setReplacedArmor(0);
+			(*i)->setTransformedArmor(0);
 		}
-		(*i)->setReplacedArmor(0);
-		(*i)->setTransformedArmor(0);
-	}
 
-	// clean up automagically spawned items
-	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(battle->getStartingConditionType());
-	if (startingCondition != 0)
-	{
-		const std::map<std::string, int> *defaultItems = startingCondition->getDefaultItems();
-		for (std::map<std::string, int>::const_iterator i = defaultItems->begin(); i != defaultItems->end(); ++i)
+		// clean up automagically spawned items
+		const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(battle->getStartingConditionType());
+		if (startingCondition != 0)
 		{
-			base->getStorageItems()->removeItem(i->first, i->second);
+			const std::map<std::string, int> *defaultItems = startingCondition->getDefaultItems();
+			for (std::map<std::string, int>::const_iterator i = defaultItems->begin(); i != defaultItems->end(); ++i)
+			{
+				base->getStorageItems()->removeItem(i->first, i->second);
+			}
 		}
 	}
 
 	_missionStatistics->success = success;
+
+	// remember the base for later use (of course only if it's not lost already (in that case base=0))
+	_base = base;
 }
 
 /**
