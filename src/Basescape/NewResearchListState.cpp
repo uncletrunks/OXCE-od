@@ -88,7 +88,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base)
 
 	_btnQuickSearch->setText(L""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&NewResearchListState::btnQuickSearchApply);
-	_btnQuickSearch->setVisible(Options::showQuickSearch);
+	_btnQuickSearch->setVisible(false);
 
 	_btnOK->onKeyboardRelease((ActionHandler)&NewResearchListState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 }

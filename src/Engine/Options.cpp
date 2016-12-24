@@ -210,7 +210,6 @@ void create()
 	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_OXCE"));
 	_info.push_back(OptionInfo("showItemNameAndWeightInInventory", &showItemNameAndWeightInInventory, false, "STR_SHOW_ITEM_WEIGHT_IN_INVENTORY", "STR_OXCE"));
 	_info.push_back(OptionInfo("showGunMeleeOnTop", &showGunMeleeOnTop, true, "STR_SHOW_GUN_MELEE_ON_TOP", "STR_OXCE"));
-	_info.push_back(OptionInfo("showQuickSearch", &showQuickSearch, true, "STR_SHOW_QUICK_SEARCH", "STR_OXCE"));
 	_info.push_back(OptionInfo("showAllCommendations", &showAllCommendations, false, "STR_SHOW_ALL_COMMENDATIONS", "STR_OXCE"));
 	_info.push_back(OptionInfo("removeWoundedFromTraining", &removeWoundedFromTraining, false, "STR_REMOVE_WOUNDED_FROM_TRAINING", "STR_OXCE"));
 	_info.push_back(OptionInfo("autoAssignPilots", &autoAssignPilots, false, "STR_AUTO_ASSIGN_PILOTS", "STR_OXCE"));

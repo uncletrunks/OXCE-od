@@ -48,7 +48,6 @@ OPT bool bleedingIndicator, statisticalBulletConservation;
 
 OPT bool showItemNameAndWeightInInventory;
 OPT bool showGunMeleeOnTop;
-OPT bool showQuickSearch;
 OPT bool showAllCommendations;
 OPT bool removeWoundedFromTraining;
 OPT bool autoAssignPilots;
