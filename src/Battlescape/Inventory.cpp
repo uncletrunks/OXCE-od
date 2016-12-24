@@ -292,6 +292,22 @@ void Inventory::drawItems()
 			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
 			work.executeBlit(frame, _items, x, y, 0);
 
+			// two-handed indicator
+			if (Options::twoHandedIndicatorInventory && (*i)->getSlot()->getType() == INV_HAND)
+			{
+				if ((*i)->getRules()->isTwoHanded() || (*i)->getRules()->isBlockingBothHands())
+				{
+					NumberText text = NumberText(10, 5, 0, 0);
+					text.setPalette(getPalette());
+					text.setColor((*i)->getRules()->isBlockingBothHands() ? 36 : 52);
+					text.setBordered(false);
+					text.setX((*i)->getSlot()->getX() + RuleInventory::HAND_W * RuleInventory::SLOT_W - 5);
+					text.setY((*i)->getSlot()->getY() + RuleInventory::HAND_H * RuleInventory::SLOT_H - 7);
+					text.setValue(2);
+					text.blit(_items);
+				}
+			}
+
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{

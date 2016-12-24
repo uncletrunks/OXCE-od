@@ -43,7 +43,7 @@ OPT SDLKey keyBattleLeft, keyBattleRight, keyBattleUp, keyBattleDown, keyBattleL
 	keyToggleQuickSearch, keyNightVisionToggle, keyNightVisionHold;
 
 // Extra options (Meridian's build)
-OPT bool executeUnconsciousEnemies, twoHandedIndicator, minimapBorderIndicator, everyoneFightsNobodyQuits;
+OPT bool executeUnconsciousEnemies, twoHandedIndicator, twoHandedIndicatorInventory, minimapBorderIndicator, everyoneFightsNobodyQuits;
 OPT bool bleedingIndicator, statisticalBulletConservation;
 
 OPT bool showItemNameAndWeightInInventory;

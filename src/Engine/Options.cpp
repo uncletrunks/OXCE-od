@@ -204,6 +204,7 @@ void create()
 	// OXCE+
 	_info.push_back(OptionInfo("executeUnconsciousEnemies", &executeUnconsciousEnemies, true, "STR_COUP_DE_GRACE", "STR_OXCE"));
 	_info.push_back(OptionInfo("twoHandedIndicator", &twoHandedIndicator, true, "STR_TWO_HANDED_INDICATOR", "STR_OXCE"));
+	_info.push_back(OptionInfo("twoHandedIndicatorInventory", &twoHandedIndicatorInventory, false, "STR_TWO_HANDED_INDICATOR_INV", "STR_OXCE"));
 	_info.push_back(OptionInfo("minimapBorderIndicator", &minimapBorderIndicator, true, "STR_MINIMAP_BORDER_INDICATOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("everyoneFightsNobodyQuits", &everyoneFightsNobodyQuits, false, "STR_EVERYONE_FIGHTS_NOBODY_QUITS", "STR_OXCE"));
 	_info.push_back(OptionInfo("bleedingIndicator", &bleedingIndicator, false, "STR_BLEEDING_INDICATOR", "STR_OXCE"));
