@@ -109,7 +109,7 @@ private:
 	std::vector<Uint16> _voxelData;
 	std::vector<std::vector<Uint8> > _transparencyLUTs;
 
-	std::map<std::string, RuleCountry*> _countries;
+	std::map<std::string, RuleCountry*> _countries, _extraGlobeLabels;
 	std::map<std::string, RuleRegion*> _regions;
 	std::map<std::string, RuleBaseFacility*> _facilities;
 	std::map<std::string, RuleCraft*> _crafts;
@@ -166,7 +166,7 @@ private:
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
 	StatAdjustment _statAdjustment[5];
 
-	std::vector<std::string> _countriesIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
+	std::vector<std::string> _countriesIndex, _extraGlobeLabelsIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
 	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _ufopaediaCatIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _extraSpritesIndex, _customPalettesIndex, _extraSoundsIndex, _extraStringsIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
@@ -296,6 +296,10 @@ public:
 	RuleCountry *getCountry(const std::string &id, bool error = false) const;
 	/// Gets the available countries.
 	const std::vector<std::string> &getCountriesList() const;
+	/// Gets the ruleset for an extra globe label type.
+	RuleCountry *getExtraGlobeLabel(const std::string &id, bool error = false) const;
+	/// Gets the available extra globe labels.
+	const std::vector<std::string> &getExtraGlobeLabelsList() const;
 	/// Gets the ruleset for a region type.
 	RuleRegion *getRegion(const std::string &id, bool error = false) const;
 	/// Gets the available regions.

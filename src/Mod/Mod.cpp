@@ -442,6 +442,10 @@ Mod::~Mod()
 	{
 		delete i->second;
 	}
+	for (std::map<std::string, RuleCountry*>::iterator i = _extraGlobeLabels.begin(); i != _extraGlobeLabels.end(); ++i)
+	{
+		delete i->second;
+	}
 	for (std::map<std::string, RuleRegion*>::iterator i = _regions.begin(); i != _regions.end(); ++i)
 	{
 		delete i->second;
@@ -1066,6 +1070,14 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	for (YAML::const_iterator i = doc["countries"].begin(); i != doc["countries"].end(); ++i)
 	{
 		RuleCountry *rule = loadRule(*i, &_countries, &_countriesIndex);
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
+	for (YAML::const_iterator i = doc["extraGlobeLabels"].begin(); i != doc["extraGlobeLabels"].end(); ++i)
+	{
+		RuleCountry *rule = loadRule(*i, &_extraGlobeLabels, &_extraGlobeLabelsIndex);
 		if (rule != 0)
 		{
 			rule->load(*i);
@@ -1829,6 +1841,26 @@ RuleCountry *Mod::getCountry(const std::string &id, bool error) const
 const std::vector<std::string> &Mod::getCountriesList() const
 {
 	return _countriesIndex;
+}
+
+/**
+ * Returns the rules for the specified extra globe label.
+ * @param id Extra globe label type.
+ * @return Rules for the extra globe label.
+ */
+RuleCountry *Mod::getExtraGlobeLabel(const std::string &id, bool error) const
+{
+	return getRule(id, "Extra Globe Label", _extraGlobeLabels, error);
+}
+
+/**
+ * Returns the list of all extra globe labels
+ * provided by the mod.
+ * @return List of extra globe labels.
+ */
+const std::vector<std::string> &Mod::getExtraGlobeLabelsList() const
+{
+	return _extraGlobeLabelsIndex;
 }
 
 /**

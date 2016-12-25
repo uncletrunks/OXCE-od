@@ -1272,7 +1272,6 @@ void Globe::drawDetail()
 		label->setPalette(getPalette());
 		label->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 		label->setAlign(ALIGN_CENTER);
-		label->setColor(COUNTRY_LABEL_COLOR);
 
 		Sint16 x, y;
 		for (std::vector<Country*>::iterator i = _game->getSavedGame()->getCountries()->begin(); i != _game->getSavedGame()->getCountries()->end(); ++i)
@@ -1287,11 +1286,48 @@ void Globe::drawDetail()
 			label->setX(x - 50);
 			label->setY(y);
 			label->setText(_game->getLanguage()->getString((*i)->getRules()->getType()));
+			label->setColor(COUNTRY_LABEL_COLOR);
+			if ((*i)->getRules()->getLabelColor() > 0)
+			{
+				label->setColor((*i)->getRules()->getLabelColor());
+			}
 			label->blit(_countries);
 		}
 
 		delete label;
 	}
+
+	// Draw extra globe labels
+	Text *label = new Text(120, 18, 0, 0);
+	label->setPalette(getPalette());
+	label->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+	label->setAlign(ALIGN_CENTER);
+
+	Sint16 x, y;
+	for (std::vector<std::string>::const_iterator i = _game->getMod()->getExtraGlobeLabelsList().begin(); i != _game->getMod()->getExtraGlobeLabelsList().end(); ++i)
+	{
+		RuleCountry *rule = _game->getMod()->getExtraGlobeLabel((*i), true);
+		if (_zoom >= rule->getZoomLevel())
+		{
+			// Don't draw if label is facing back
+			if (pointBack(rule->getLabelLongitude(), rule->getLabelLatitude()))
+				continue;
+
+			// Convert coordinates
+			polarToCart(rule->getLabelLongitude(), rule->getLabelLatitude(), &x, &y);
+
+			label->setX(x - 60);
+			label->setY(y);
+			label->setText(_game->getLanguage()->getString(rule->getType()));
+			label->setColor(COUNTRY_LABEL_COLOR);
+			if (rule->getLabelColor() > 0)
+			{
+				label->setColor(rule->getLabelColor());
+			}
+			label->blit(_countries);
+		}
+	}
+	delete label;
 
 	// Draw the city and base markers
 	if (_zoom >= 3)
