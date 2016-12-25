@@ -41,6 +41,7 @@
 #include "SellState.h"
 #include "../Mod/RuleInterface.h"
 #include "TechTreeViewerState.h"
+#include "TransferBaseState.h"
 
 namespace OpenXcom
 {
@@ -51,7 +52,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0)
+ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0), _reset(false)
 {
 	bool overCrowded = Options::storageLimitsEnforced && _base->getFreeContainment(_prisonType) < 0;
 	std::vector<std::string> researchList;
@@ -67,8 +68,10 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	_btnOk = new TextButton(overCrowded ? 288:148, 16, overCrowded ? 16:8, 176);
+	//_btnOk = new TextButton(overCrowded ? 288:148, 16, overCrowded ? 16:8, 176);
+	_btnOk = new TextButton(148, 16, 8, 176);
 	_btnCancel = new TextButton(148, 16, 164, 176);
+	_btnTransfer = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
 	_txtAvailable =  new Text(190, 9, 10, 24);
 	_txtValueOfSales =  new Text(190, 9, 10, 32);
@@ -85,6 +88,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	add(_window, "window", "manageContainment");
 	add(_btnOk, "button", "manageContainment");
 	add(_btnCancel, "button", "manageContainment");
+	add(_btnTransfer, "button", "manageContainment");
 	add(_txtTitle, "text", "manageContainment");
 	add(_txtAvailable, "text", "manageContainment");
 	add(_txtValueOfSales, "text", "manageContainment");
@@ -108,11 +112,12 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	_btnCancel->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&ManageAlienContainmentState::btnCancelClick, Options::keyCancel);
 
-	if (overCrowded)
-	{
-		_btnCancel->setVisible(false);
-		_btnOk->setVisible(false);
-	}
+	_btnTransfer->setText(tr("STR_GO_TO_TRANSFERS"));
+	_btnTransfer->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnTransferClick);
+
+	_btnCancel->setVisible(!overCrowded);
+	_btnOk->setVisible(!overCrowded);
+	_btnTransfer->setVisible(overCrowded);
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
@@ -215,6 +220,20 @@ ManageAlienContainmentState::~ManageAlienContainmentState()
 }
 
 /**
+* Resets stuff when coming back from other screens.
+*/
+void ManageAlienContainmentState::init()
+{
+	State::init();
+
+	if (_reset)
+	{
+		_game->popState();
+		_game->pushState(new ManageAlienContainmentState(_base, _prisonType, _origin));
+	}
+}
+
+/**
  * Runs the arrow timers.
  */
 void ManageAlienContainmentState::think()
@@ -278,6 +297,17 @@ void ManageAlienContainmentState::btnOkClick(Action *)
 void ManageAlienContainmentState::btnCancelClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+* Opens the Transfer UI and gives the player an option to transfer stuff instead of selling it.
+* Returns back to this screen when finished.
+* @param action Pointer to an action.
+*/
+void ManageAlienContainmentState::btnTransferClick(Action *)
+{
+	_reset = true;
+	_game->pushState(new TransferBaseState(_base));
 }
 
 /**
