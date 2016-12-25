@@ -42,8 +42,7 @@ private:
 	Base *_base;
 	int _prisonType;
 	OptionsOrigin _origin;
-	bool _reset;
-	TextButton *_btnOk, *_btnCancel, *_btnTransfer;
+	TextButton *_btnOk, *_btnCancel;
 	Window *_window;
 	Text *_txtTitle, *_txtUsed, *_txtAvailable, *_txtValueOfSales, *_txtItem, *_txtLiveAliens, *_txtDeadAliens, *_txtInterrogatedAliens;
 	TextList *_lstAliens;
@@ -54,23 +53,17 @@ private:
 	int _aliensSold, _total;
 	/// Gets selected quantity.
 	int getQuantity();
-	/// initializes the displayed list
-	void initList();
 public:
 	/// Creates the ManageAlienContainment state.
 	ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin);
 	/// Cleans up the ManageAlienContainment state.
 	~ManageAlienContainmentState();
-	/// Resets state.
-	void init();
 	/// Runs the timers.
 	void think();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
-	/// Handler for clicking the Transfer button.
-	void btnTransferClick(Action *action);
 	/// Handler for pressing an Increase arrow in the list.
 	void lstItemsLeftArrowPress(Action *action);
 	/// Handler for releasing an Increase arrow in the list.
