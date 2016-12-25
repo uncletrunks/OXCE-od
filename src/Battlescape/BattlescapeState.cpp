@@ -1856,6 +1856,41 @@ void BattlescapeState::warning(const std::string &message)
 }
 
 /**
+ * Gets melee damage preview.
+ * @param actor Selected unit.
+ * @param weapon Weapon to use for calculation.
+ */
+std::wstring BattlescapeState::getMeleeDamagePreview(BattleUnit *actor, BattleItem *weapon) const
+{
+	if (!weapon)
+		return L"";
+
+	int totalDamage = 0;
+	const RuleDamageType *dmgType;
+	if (weapon->getRules()->getBattleType() == BT_MELEE)
+	{
+		totalDamage += weapon->getRules()->getPowerBonus(actor);
+		dmgType = weapon->getRules()->getDamageType();
+	}
+	else
+	{
+		totalDamage += weapon->getRules()->getMeleeBonus(actor);
+		dmgType = weapon->getRules()->getMeleeType();
+	}
+
+	std::wostringstream ss;
+	ss << tr(weapon->getRules()->getType());
+	ss << L"\n";
+	ss << dmgType->getRandomDamage(totalDamage, 1);
+	ss << L"-";
+	ss << dmgType->getRandomDamage(totalDamage, 2);
+	if (dmgType->RandomType == DRT_UFO_WITH_TWO_DICE)
+		ss << L"*";
+
+	return ss.str();
+}
+
+/**
  * Takes care of any events from the core game engine.
  * @param action Pointer to an action.
  */
@@ -1906,6 +1941,19 @@ inline void BattlescapeState::handle(Action *action)
 					ss << L"Units with fatal wounds: ";
 					ss << wounds;
 					_game->pushState(new InfoboxState(ss.str()));
+				}
+				// "ctrl-m" - melee damage preview
+				else if (action->getDetails()->key.keysym.sym == SDLK_m && (SDL_GetModState() & KMOD_CTRL) != 0)
+				{
+					BattleUnit *actor = _save->getSelectedUnit();
+					if (actor)
+					{
+						std::wostringstream ss;
+						ss << getMeleeDamagePreview(actor, actor->getLeftHandWeapon());
+						ss << L"\n\n";
+						ss << getMeleeDamagePreview(actor, actor->getRightHandWeapon());
+						_game->pushState(new InfoboxState(ss.str()));
+					}
 				}
 				if (Options::debug)
 				{

@@ -189,6 +189,8 @@ public:
 	void bugHuntMessage();
 	/// Show warning message.
 	void warning(const std::string &message);
+	/// Gets melee damage preview.
+	std::wstring getMeleeDamagePreview(BattleUnit *actor, BattleItem *weapon) const;
 	/// Handles keypresses.
 	void handle(Action *action);
 	/// Displays a popup window.

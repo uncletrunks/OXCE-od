@@ -109,7 +109,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_scrollKeyTimer->onTimer((SurfaceHandler)&Map::scrollKey);
 	_camera->setScrollTimer(_scrollMouseTimer, _scrollKeyTimer);
 
-	_txtAccuracy = new Text(24, 9, 0, 0);
+	_txtAccuracy = new Text(44, 18, 0, 0);
 	_txtAccuracy->setSmall();
 	_txtAccuracy->setPalette(_game->getScreen()->getPalette());
 	_txtAccuracy->setHighContrast(true);
@@ -1161,6 +1161,39 @@ void Map::drawTerrain(Surface *surface)
 								}
 								ss << accuracy;
 								ss << "%";
+
+								// display additional damage info
+								if (isAltPressed)
+								{
+									int totalDamage = 0;
+									if (action->weapon->needsAmmo())
+									{
+										if (action->weapon->getAmmoItem() != 0)
+										{
+											const RuleItem *ammoRules = action->weapon->getAmmoItem()->getRules();
+											totalDamage += ammoRules->getPowerBonus(action->actor);
+											totalDamage -= ammoRules->getPowerRangeReduction(distance * 16);
+											ss << "\n";
+											ss << ammoRules->getDamageType()->getRandomDamage(totalDamage, 1);
+											ss << "-";
+											ss << ammoRules->getDamageType()->getRandomDamage(totalDamage, 2);
+											if (ammoRules->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
+												ss << "*";
+										}
+									}
+									else
+									{
+										totalDamage += weapon->getPowerBonus(action->actor);
+										totalDamage -= weapon->getPowerRangeReduction(distance * 16);
+										ss << "\n";
+										ss << weapon->getDamageType()->getRandomDamage(totalDamage, 1);
+										ss << "-";
+										ss << weapon->getDamageType()->getRandomDamage(totalDamage, 2);
+										if (weapon->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
+											ss << "*";
+									}
+								}
+
 								_txtAccuracy->setText(Language::utf8ToWstr(ss.str()));
 								_txtAccuracy->draw();
 								_txtAccuracy->blitNShade(surface, screenPosition.x, screenPosition.y, 0);

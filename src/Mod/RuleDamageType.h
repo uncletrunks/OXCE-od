@@ -108,7 +108,7 @@ struct RuleDamageType
 	/// Default constructor.
 	RuleDamageType();
 	/// Calculate random value of damage.
-	int getRandomDamage(int power) const;
+	int getRandomDamage(int power, int mode = 0) const;
 	/// Do this damage type affect only one target
 	bool isDirect() const;
 	/// Loads item data from YAML.
