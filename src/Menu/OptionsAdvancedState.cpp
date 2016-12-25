@@ -253,6 +253,11 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 			min = 1;
 			max = 5;
 		}
+		else if (i == &Options::nightVisionColor)
+		{
+			min = 1;
+			max = 15;
+		}
 
 		if (*i < min)
 		{

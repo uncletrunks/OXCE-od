@@ -55,7 +55,7 @@ private:
 	Timer *_fadeTimer;
 	int _fadeShade;
 	bool _nightVisionOn;
-	int _nvColor, _nvColorDef;
+	int _nvColor;
 	int _bgColor;
 	Game *_game;
 	SavedBattleGame *_save;

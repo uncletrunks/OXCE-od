@@ -118,12 +118,6 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_nightVisionOn = false;
 	_fadeShade = 16;
 	_nvColor = 0;
-	_nvColorDef = 5;
-	Element *e = _game->getMod()->getInterface("battlescape")->getElement("nightVision");
-	if (e != 0)
-	{
-		_nvColorDef = e->color;
-	}
 	_fadeTimer = new Timer(FADE_INTERVAL);
 	if ((_save->getGlobalShade() > NIGHT_VISION_THRESHOLD))
 	{
@@ -1764,7 +1758,7 @@ void Map::fadeShade()
 	bool hold = SDL_GetKeyState(NULL)[Options::keyNightVisionHold];
 	if ((_nightVisionOn && !hold) || (!_nightVisionOn && hold))
 	{
-		_nvColor = _nvColorDef;
+		_nvColor = Options::nightVisionColor;
 		if (_fadeShade > NIGHT_VISION_SHADE) // 0 = max brightness
 		{
 			--_fadeShade;
