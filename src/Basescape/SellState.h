@@ -46,7 +46,8 @@ class SellState : public State
 private:
 	Base *_base;
 	DebriefingState *_debriefingState;
-	TextButton *_btnOk, *_btnCancel;
+	bool _reset;
+	TextButton *_btnOk, *_btnCancel, *_btnTransfer;
 	TextEdit *_btnQuickSearch;
 	Window *_window;
 	Text *_txtTitle, *_txtSales, *_txtFunds, *_txtQuantity, *_txtSell, *_txtValue, *_txtSpaceUsed;
@@ -71,6 +72,8 @@ public:
 	SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin = OPT_GEOSCAPE);
 	/// Cleans up the Sell state.
 	~SellState();
+	/// Resets state.
+	void init();
 	/// Runs the timers.
 	void think();
 	/// Updates the item list.
@@ -79,6 +82,8 @@ public:
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
+	/// Handler for clicking the Transfer button.
+	void btnTransferClick(Action *action);
 	/// Handlers for Quick Search.
 	void btnQuickSearchToggle(Action *action);
 	void btnQuickSearchApply(Action *action);

@@ -49,6 +49,7 @@
 #include "../Engine/Options.h"
 #include "../Mod/RuleInterface.h"
 #include "../Battlescape/DebriefingState.h"
+#include "TransferBaseState.h"
 
 namespace OpenXcom
 {
@@ -59,15 +60,17 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin) : _base(base), _debriefingState(debriefingState),_sel(0), _total(0), _spaceChange(0), _origin(origin)
+SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin) : _base(base), _debriefingState(debriefingState),_sel(0), _total(0), _spaceChange(0), _origin(origin), _reset(false)
 {
 	bool overfull = _debriefingState == 0 && Options::storageLimitsEnforced && _base->storesOverfull();
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 13);
-	_btnOk = new TextButton(overfull? 288:148, 16, overfull? 16:8, 176);
+	//_btnOk = new TextButton(overfull? 288:148, 16, overfull? 16:8, 176);
+	_btnOk = new TextButton(148, 16, 8, 176);
 	_btnCancel = new TextButton(148, 16, 164, 176);
+	_btnTransfer = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
 	_txtSales = new Text(150, 9, 10, 24);
 	_txtFunds = new Text(150, 9, 160, 24);
@@ -87,6 +90,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	add(_btnQuickSearch, "button", "sellMenu");
 	add(_btnOk, "button", "sellMenu");
 	add(_btnCancel, "button", "sellMenu");
+	add(_btnTransfer, "button", "sellMenu");
 	add(_txtTitle, "text", "sellMenu");
 	add(_txtSales, "text", "sellMenu");
 	add(_txtFunds, "text", "sellMenu");
@@ -110,11 +114,12 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_btnCancel->onMouseClick((ActionHandler)&SellState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&SellState::btnCancelClick, Options::keyCancel);
 
-	if (overfull)
-	{
-		_btnCancel->setVisible(false);
-		_btnOk->setVisible(false);
-	}
+	_btnTransfer->setText(tr("STR_GO_TO_TRANSFERS"));
+	_btnTransfer->onMouseClick((ActionHandler)&SellState::btnTransferClick);
+
+	_btnCancel->setVisible(!overfull);
+	_btnOk->setVisible(!overfull);
+	_btnTransfer->setVisible(overfull);
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
@@ -279,6 +284,20 @@ SellState::~SellState()
 {
 	delete _timerInc;
 	delete _timerDec;
+}
+
+/**
+* Resets stuff when coming back from other screens.
+*/
+void SellState::init()
+{
+	State::init();
+
+	if (_reset)
+	{
+		_game->popState();
+		_game->pushState(new SellState(_base, _debriefingState, _origin));
+	}
 }
 
 /**
@@ -560,6 +579,17 @@ void SellState::btnOkClick(Action *)
 void SellState::btnCancelClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+* Opens the Transfer UI and gives the player an option to transfer stuff instead of selling it.
+* Returns back to this screen when finished.
+* @param action Pointer to an action.
+*/
+void SellState::btnTransferClick(Action *)
+{
+	_reset = true;
+	_game->pushState(new TransferBaseState(_base));
 }
 
 /**
