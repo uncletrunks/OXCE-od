@@ -39,6 +39,7 @@
 #include "../Savegame/Tile.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
+#include "../Ufopaedia/Ufopaedia.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/MapDataSet.h"
@@ -114,6 +115,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_txtAccuracy->setPalette(_game->getScreen()->getPalette());
 	_txtAccuracy->setHighContrast(true);
 	_txtAccuracy->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+	_activeWeaponUfopediaArticleUnlocked = -1;
 
 	_nightVisionOn = false;
 	_fadeShade = 16;
@@ -1165,32 +1167,67 @@ void Map::drawTerrain(Surface *surface)
 								// display additional damage info
 								if (isAltPressed)
 								{
-									int totalDamage = 0;
+									// step 1: determine rule
+									const RuleItem *rule;
 									if (action->weapon->needsAmmo())
 									{
 										if (action->weapon->getAmmoItem() != 0)
 										{
-											const RuleItem *ammoRules = action->weapon->getAmmoItem()->getRules();
-											totalDamage += ammoRules->getPowerBonus(action->actor);
-											totalDamage -= ammoRules->getPowerRangeReduction(distance * 16);
-											ss << "\n";
-											ss << ammoRules->getDamageType()->getRandomDamage(totalDamage, 1);
-											ss << "-";
-											ss << ammoRules->getDamageType()->getRandomDamage(totalDamage, 2);
-											if (ammoRules->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
-												ss << "*";
+											rule = action->weapon->getAmmoItem()->getRules();
+										}
+										else
+										{
+											rule = 0; // empty weapon = no rule
 										}
 									}
 									else
 									{
-										totalDamage += weapon->getPowerBonus(action->actor);
-										totalDamage -= weapon->getPowerRangeReduction(distance * 16);
+										rule = weapon;
+									}
+
+									// step 2: check if unlocked
+									if (_activeWeaponUfopediaArticleUnlocked == -1)
+									{
+										_activeWeaponUfopediaArticleUnlocked = 0;
+										if (_game->getSavedGame()->getMonthsPassed() == -1)
+										{
+											_activeWeaponUfopediaArticleUnlocked = 1; // new battle mode
+										}
+										else if (rule)
+										{
+											_activeWeaponUfopediaArticleUnlocked = 1; // assume unlocked
+											ArticleDefinition *article = _game->getMod()->getUfopaediaArticle(rule->getType(), false);
+											if (article && !Ufopaedia::isArticleAvailable(_game->getSavedGame(), article))
+											{
+												_activeWeaponUfopediaArticleUnlocked = 0; // ammo/weapon locked
+											}
+											if (rule->getType() != weapon->getType())
+											{
+												article = _game->getMod()->getUfopaediaArticle(weapon->getType(), false);
+												if (article && !Ufopaedia::isArticleAvailable(_game->getSavedGame(), article))
+												{
+													_activeWeaponUfopediaArticleUnlocked = 0; // weapon locked
+												}
+											}
+										}
+									}
+
+									// step 3: calculate and draw
+									if (rule && _activeWeaponUfopediaArticleUnlocked == 1)
+									{
+										int totalDamage = 0;
+										totalDamage += rule->getPowerBonus(action->actor);
+										totalDamage -= rule->getPowerRangeReduction(distance * 16);
 										ss << "\n";
-										ss << weapon->getDamageType()->getRandomDamage(totalDamage, 1);
+										ss << rule->getDamageType()->getRandomDamage(totalDamage, 1);
 										ss << "-";
-										ss << weapon->getDamageType()->getRandomDamage(totalDamage, 2);
-										if (weapon->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
+										ss << rule->getDamageType()->getRandomDamage(totalDamage, 2);
+										if (rule->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
 											ss << "*";
+									}
+									else
+									{
+										ss << "\n?-?";
 									}
 								}
 
@@ -1711,6 +1748,7 @@ int Map::getTerrainLevel(Position pos, int size) const
  */
 void Map::setCursorType(CursorType type, int size)
 {
+	_activeWeaponUfopediaArticleUnlocked = -1; // reset cache
 	_cursorType = type;
 	if (_cursorType == CT_NORMAL)
 		_cursorSize = size;

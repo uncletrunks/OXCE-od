@@ -1865,27 +1865,49 @@ std::wstring BattlescapeState::getMeleeDamagePreview(BattleUnit *actor, BattleIt
 	if (!weapon)
 		return L"";
 
-	int totalDamage = 0;
-	const RuleDamageType *dmgType;
-	if (weapon->getRules()->getBattleType() == BT_MELEE)
+	bool discovered = false;
+	if (_game->getSavedGame()->getMonthsPassed() == -1)
 	{
-		totalDamage += weapon->getRules()->getPowerBonus(actor);
-		dmgType = weapon->getRules()->getDamageType();
+		discovered = true; // new battle mode
 	}
 	else
 	{
-		totalDamage += weapon->getRules()->getMeleeBonus(actor);
-		dmgType = weapon->getRules()->getMeleeType();
+		ArticleDefinition *article = _game->getMod()->getUfopaediaArticle(weapon->getRules()->getType(), false);
+		if (article && Ufopaedia::isArticleAvailable(_game->getSavedGame(), article))
+		{
+			discovered = true; // pedia article unlocked
+		}
 	}
 
 	std::wostringstream ss;
-	ss << tr(weapon->getRules()->getType());
-	ss << L"\n";
-	ss << dmgType->getRandomDamage(totalDamage, 1);
-	ss << L"-";
-	ss << dmgType->getRandomDamage(totalDamage, 2);
-	if (dmgType->RandomType == DRT_UFO_WITH_TWO_DICE)
-		ss << L"*";
+	if (discovered)
+	{
+		int totalDamage = 0;
+		const RuleDamageType *dmgType;
+		if (weapon->getRules()->getBattleType() == BT_MELEE)
+		{
+			totalDamage += weapon->getRules()->getPowerBonus(actor);
+			dmgType = weapon->getRules()->getDamageType();
+		}
+		else
+		{
+			totalDamage += weapon->getRules()->getMeleeBonus(actor);
+			dmgType = weapon->getRules()->getMeleeType();
+		}
+
+		ss << tr(weapon->getRules()->getType());
+		ss << L"\n";
+		ss << dmgType->getRandomDamage(totalDamage, 1);
+		ss << L"-";
+		ss << dmgType->getRandomDamage(totalDamage, 2);
+		if (dmgType->RandomType == DRT_UFO_WITH_TWO_DICE)
+			ss << L"*";
+	}
+	else
+	{
+		ss << tr(weapon->getRules()->getType());
+		ss << L"\n?-?";
+	}
 
 	return ss.str();
 }

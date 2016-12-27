@@ -66,6 +66,7 @@ private:
 	int _mouseX, _mouseY;
 	CursorType _cursorType;
 	int _cursorSize;
+	int _activeWeaponUfopediaArticleUnlocked; // -1 = unknown, 0 = locked, 1 = unlocked
 	int _animFrame;
 	Projectile *_projectile;
 	bool _projectileInFOV;
