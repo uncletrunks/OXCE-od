@@ -957,6 +957,10 @@ void SavedBattleGame::endTurn()
 		{
 			(*i)->prepareNewTurn();
 		}
+		else if ((*i)->getOriginalFaction() == _side)
+		{
+			(*i)->updateUnitStats(false, true);
+		}
 		if ((*i)->getFaction() != FACTION_PLAYER)
 		{
 			(*i)->setVisible(false);

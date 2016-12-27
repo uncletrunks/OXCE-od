@@ -312,6 +312,8 @@ public:
 	double getReactionScore() const;
 	/// Prepare for a new turn.
 	void prepareNewTurn(bool fullProcess = true);
+	/// Calculate change in unit stats.
+	void updateUnitStats(bool tuAndEnergy, bool rest);
 	/// Morale change
 	void moraleChange(int change);
 	/// Don't reselect this unit

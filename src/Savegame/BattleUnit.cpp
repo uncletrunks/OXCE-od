@@ -1853,6 +1853,16 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 		return;
 	}
 
+	updateUnitStats(true, true);
+}
+
+/**
+ * Update stats of unit.
+ * @param tuAndEnergy
+ * @param rest
+ */
+void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
+{
 	// snapshot of current stats
 	int TURecovery = _armor->getTimeRecovery(this);
 	int ENRecovery = _armor->getEnergyRecovery(this);
@@ -1861,13 +1871,18 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 	int STRecovery = _armor->getStunRegeneration(this);
 
 	// update stats
-	prepareTimeUnits(TURecovery);
-	prepareEnergy(ENRecovery);
-	prepareHealth(HPRecovery);
-	prepareStun(STRecovery);
-	prepareMorale(MRRecovery);
+	if (tuAndEnergy)
+	{
+		prepareTimeUnits(TURecovery);
+		prepareEnergy(ENRecovery);
+	}
+	if (rest)
+	{
+		prepareHealth(HPRecovery);
+		prepareStun(STRecovery);
+		prepareMorale(MRRecovery);
+	}
 }
-
 
 /**
  * Morale change with bounds check.
@@ -3388,11 +3403,7 @@ BattleItem *BattleUnit::getSpecialWeapon(BattleType type) const
  */
 void BattleUnit::recoverTimeUnits()
 {
-	int TURecovery = _armor->getTimeRecovery(this);
-	int ENRecovery = _armor->getEnergyRecovery(this);
-
-	prepareTimeUnits(TURecovery);
-	prepareEnergy(ENRecovery);
+	updateUnitStats(true, false);
 }
 
 /**
