@@ -487,42 +487,6 @@ int RuleCraft::getMaxDepth() const
 }
 
 /**
- * Gets the shield capacity of this craft
- * @return shield capacity.
- */
-int RuleCraft::getShieldCapacity() const
-{
-	return _stats.shieldCapacity;
-}
-
-/**
- * Gets the shield recharge rate of this craft in combat
- * @return shield recharge rate.
- */
-int RuleCraft::getShieldRecharge() const
-{
-	return _stats.shieldRecharge;
-}
-
-/**
- * Gets the shield recharge rate of this craft out of combate
- * @return shield recharge rate.
- */
-int RuleCraft::getShieldRechargeInGeoscape() const
-{
-	return _stats.shieldRechargeInGeoscape;
-}
-
-/**
- * Gets how much damage bleeds through the shield when it goes down
- * @return damage bleedthrough percentage.
- */
-int RuleCraft::getShieldBleedThrough() const
-{
-	return _stats.shieldBleedThrough;
-}
-
-/**
  * Gets how many shield points are recharged when landed at base per hour
  * @return shield recharged per hour
  */

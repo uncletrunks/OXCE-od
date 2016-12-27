@@ -140,7 +140,7 @@ private:
 	std::vector<std::vector <int> > _deployment;
 	std::vector<int> _craftInventoryTile;
 	RuleCraftStats _stats;
-	int _shield, _shieldRechargeAtBase;
+	int _shieldRechargeAtBase;
 public:
 	/// Creates a blank craft ruleset.
 	RuleCraft(const std::string &type);
@@ -218,14 +218,6 @@ public:
 	const RuleCraftStats& getStats() const;
 	/// checks how deep this craft can go.
 	int getMaxDepth() const;
-	/// Get the shield capacity for the craft
-	int getShieldCapacity() const;
-	/// Get the shield recharge rate for the craft during a dogfight
-	int getShieldRecharge() const;
-	/// Get the shield recharge rate for the craft in the geoscape
-	int getShieldRechargeInGeoscape() const;
-	/// Get how much damage bleeds through the shield when it goes down
-	int getShieldBleedThrough() const;
 	/// Get how many shield points are recharged per hour at base
 	int getShieldRechargeAtBase() const;
 };

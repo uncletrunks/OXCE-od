@@ -87,15 +87,8 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	_btnArmor = new TextButton(64, 16, 16, bottom + 2 * bottom_row);
 	_btnPilots = new TextButton(64, 16, 16, bottom + 3 * bottom_row);
 	_edtCraft = new TextEdit(this, 140, 16, 80, 8);
-	if (_craft->getShieldCapacity() != 0)
-	{
-		_txtDamage = new Text(100, 17, 14, 8);
-	}
-	else
-	{
-		_txtDamage = new Text(100, 17, 14, 24);
-	}
-	_txtShield = new Text(140, 17, 14, 24);
+	_txtDamage = new Text(100, 17, 14, 24);
+	_txtShield = new Text(100, 17, 120, 24);
 	_txtFuel = new Text(82, 17, 228, 24);
 	for(int i = 0; i < _weaponNum; ++i)
 	{
@@ -224,29 +217,32 @@ void CraftInfoState::init()
 	_txtDamage->setText(firlsLine.str());
 
 	std::wostringstream secondLine;
+	secondLine << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
+	if (_craft->getStatus() == "STR_REFUELLING" && _craft->getFuelMax() - _craft->getFuel() > 0)
+	{
+		int fuelHours = (int)ceil((double)(_craft->getFuelMax() - _craft->getFuel()) / _craft->getRules()->getRefuelRate() / 2.0);
+		secondLine << formatTime(fuelHours);
+	}
+	_txtFuel->setText(secondLine.str());
+
+	std::wostringstream thirdLine;
 	if (_craft->getShieldCapacity() != 0)
 	{
-		secondLine << tr("STR_SHIELD").arg(Text::formatPercentage(_craft->getShieldPercentage()));
+		thirdLine << tr("STR_SHIELD").arg(Text::formatPercentage(_craft->getShieldPercentage()));
 		if (_craft->getShield() < _craft->getShieldCapacity())
 		{
-			int shieldHours = (int)ceil((double)_craft->getShieldCapacity() / _craft->getRules()->getShieldRechargeAtBase());
-			secondLine << formatTime(shieldHours);
+			if (_craft->getRules()->getShieldRechargeAtBase() != 0)
+			{
+				int shieldHours = (int)ceil((double)(_craft->getShieldCapacity() - _craft->getShield()) / _craft->getRules()->getShieldRechargeAtBase());
+				thirdLine << formatTime(shieldHours);
+			}
 		}
 	}
 	else
 	{
-		secondLine << "";
+		thirdLine << L"";
 	}
-	_txtShield->setText(secondLine.str());
-
-	std::wostringstream thirdLine;
-	thirdLine << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
-	if (_craft->getStatus() == "STR_REFUELLING" && _craft->getFuelMax() - _craft->getFuel() > 0)
-	{
-		int fuelHours = (int)ceil((double)(_craft->getFuelMax() - _craft->getFuel()) / _craft->getRules()->getRefuelRate() / 2.0);
-		thirdLine << formatTime(fuelHours);
-	}
-	_txtFuel->setText(thirdLine.str());
+	_txtShield->setText(thirdLine.str());
 
 	if (_craft->getRules()->getSoldiers() > 0)
 	{

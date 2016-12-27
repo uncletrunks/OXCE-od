@@ -687,7 +687,7 @@ int Craft::getDamagePercentage() const
  */
 int Craft::getShieldCapacity() const
 {
-	return  _stats.shieldCapacity;
+	return _stats.shieldCapacity;
 }
 
 /**
@@ -696,7 +696,7 @@ int Craft::getShieldCapacity() const
  */
 int Craft::getShield() const
 {
-	return  _shield;
+	return _shield;
 }
 
 /**
@@ -714,7 +714,7 @@ void Craft::setShield(int shield)
  */
 int Craft::getShieldPercentage() const
 {
-	return (int)floor((double)_shield / _stats.shieldCapacity * 100);
+	return _stats.shieldCapacity != 0 ? _shield * 100 / _stats.shieldCapacity : 0;
 }
 
 /**

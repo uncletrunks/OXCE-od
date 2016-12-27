@@ -162,45 +162,6 @@ int RuleUfo::getMarker() const
 }
 
 /**
- * Gets the maximum shield capacity for the UFO
- * @return The shield capacity.
- */
-int RuleUfo::getShieldCapacity() const
-{
-	return _stats.shieldCapacity;
-}
-
-/**
- * Gets the amount of UFO shields recharged
- * per interception game second.
- * @return The shield recharge.
- */
-int RuleUfo::getShieldRecharge() const
-{
-	return _stats.shieldRecharge;
-}
-
-/**
- * Gets the amount of UFO shields recharged
- * per 5 seconds in the geoscape.
- * @return shield recharge rate.
- */
-int RuleUfo::getShieldRechargeInGeoscape() const
-{
-	return _stats.shieldRechargeInGeoscape;
-}
-
-/**
- * Gets the percent of damage that passes through
- * the UFO shield when the shield is downed.
- * @return The shield bleed through percentage.
- */
-int RuleUfo::getShieldBleedThrough() const
-{
-	return _stats.shieldBleedThrough;
-}
-
-/**
  * Gets the maximum damage done by the
  * UFO's weapons per shot.
  * @return The weapon power.

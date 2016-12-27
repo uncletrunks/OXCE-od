@@ -69,8 +69,8 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	_txtSoldier = new Text(60, 9, 164, offset_upper + 60);
 	_txtHWP = new Text(80, 9, 164, offset_upper + 68);
 	_txtFuel = new Text(130, 9, 32, offset_upper + 84);
-	_txtDamage = new Text(80, 9, 164, offset_upper + 76);
-	_txtShield = new Text(80, 9, 164, offset_upper + 84);
+	_txtDamage = new Text(80, 9, 164, offset_upper + 84);
+	_txtShield = new Text(80, 9, 164, offset_upper + 76);
 
 	for(int i = 0; i < _weaponNum; ++i)
 	{
@@ -205,6 +205,7 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	_txtDamage->setText(tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage())));
 
 	_txtShield->setText(tr("STR_SHIELD").arg(Text::formatPercentage(_craft->getShieldPercentage())));
+	_txtShield->setVisible(_craft->getShieldCapacity() != 0);
 
 	for(int i = 0; i < _weaponNum; ++i)
 	{
