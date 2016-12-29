@@ -964,7 +964,15 @@ void DogfightState::update()
 						if (_ufo->getShield() != 0)
 						{
 							shieldDamage = damage * p->getShieldDamageModifier() / 100;
-							damage = std::max(0, shieldDamage - _ufo->getShield()) * _ufo->getCraftStats().shieldBleedThrough / 100;
+							if (p->getShieldDamageModifier() == 0)
+							{
+								damage = 0;
+							}
+							else
+							{
+								// scale down by bleed-through factor and scale up by shield-effectiveness factor
+								damage = std::max(0, shieldDamage - _ufo->getShield()) * _ufo->getCraftStats().shieldBleedThrough / p->getShieldDamageModifier();
+							}
 							_ufo->setShield(_ufo->getShield() - shieldDamage);
 						}
 
