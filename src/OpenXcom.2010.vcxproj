@@ -277,6 +277,8 @@
     <ClCompile Include="Battlescape\AbortMissionState.cpp" />
     <ClCompile Include="Battlescape\ActionMenuItem.cpp" />
     <ClCompile Include="Battlescape\ActionMenuState.cpp" />
+    <ClCompile Include="Battlescape\AlienInventory.cpp" />
+    <ClCompile Include="Battlescape\AlienInventoryState.cpp" />
     <ClCompile Include="Battlescape\AliensCrashState.cpp" />
     <ClCompile Include="Battlescape\AIModule.cpp" />
     <ClCompile Include="Battlescape\BattlescapeGame.cpp" />
@@ -619,6 +621,8 @@
     <ClInclude Include="Battlescape\AbortMissionState.h" />
     <ClInclude Include="Battlescape\ActionMenuItem.h" />
     <ClInclude Include="Battlescape\ActionMenuState.h" />
+    <ClInclude Include="Battlescape\AlienInventory.h" />
+    <ClInclude Include="Battlescape\AlienInventoryState.h" />
     <ClInclude Include="Battlescape\AliensCrashState.h" />
     <ClInclude Include="Battlescape\AIModule.h" />
     <ClInclude Include="Battlescape\BattlescapeGame.h" />

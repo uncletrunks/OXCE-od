@@ -1006,6 +1006,12 @@
     <ClCompile Include="Menu\SetWindowedRootState.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\AlienInventory.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\AlienInventoryState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2056,6 +2062,12 @@
       <Filter>Menu</Filter>
     </ClInclude>
     <ClInclude Include="Engine\HelperMeta.h" />
+    <ClInclude Include="Battlescape\AlienInventory.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\AlienInventoryState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">

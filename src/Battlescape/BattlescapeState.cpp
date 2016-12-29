@@ -28,6 +28,7 @@
 #include "ActionMenuState.h"
 #include "UnitInfoState.h"
 #include "InventoryState.h"
+#include "AlienInventoryState.h"
 #include "Pathfinding.h"
 #include "BattlescapeGame.h"
 #include "WarningMessage.h"
@@ -864,6 +865,15 @@ void BattlescapeState::mapClick(Action *action)
 		else if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 		{
 			_battleGame->primaryAction(pos);
+		}
+		else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+		{
+			_battleGame->cancelCurrentAction();
+			BattleUnit *bu = _save->selectUnit(pos);
+			if (bu && (bu->getVisible() || _save->getDebugMode()))
+			{
+				_game->pushState(new AlienInventoryState(bu));
+			}
 		}
 	}
 }

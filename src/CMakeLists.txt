@@ -60,6 +60,8 @@ set ( battlescape_src
   Battlescape/ActionMenuState.cpp
   Battlescape/AliensCrashState.cpp
   Battlescape/AIModule.cpp
+  Battlescape/AlienInventory.cpp
+  Battlescape/AlienInventoryState.cpp
   Battlescape/BattleState.cpp
   Battlescape/BattlescapeGame.cpp
   Battlescape/BattlescapeGenerator.cpp

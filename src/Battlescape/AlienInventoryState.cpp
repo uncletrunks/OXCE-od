@@ -1,0 +1,118 @@
+/*
+ * Copyright 2010-2016 OpenXcom Developers.
+ *
+ * This file is part of OpenXcom.
+ *
+ * OpenXcom is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenXcom is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include "AlienInventoryState.h"
+#include "AlienInventory.h"
+#include "../Engine/Action.h"
+#include "../Engine/Game.h"
+#include "../Engine/Options.h"
+#include "../Engine/Screen.h"
+#include "../Engine/Surface.h"
+#include "../Interface/BattlescapeButton.h"
+#include "../Interface/Text.h"
+#include "../Mod/Mod.h"
+#include "../Savegame/BattleUnit.h"
+
+namespace OpenXcom
+{
+
+/**
+ * Initializes all the elements in the AlienInventory screen.
+ * @param unit Pointer to the alien unit.
+ */
+AlienInventoryState::AlienInventoryState(BattleUnit *unit)
+{
+	if (Options::maximizeInfoScreens)
+	{
+		Options::baseXResolution = Screen::ORIGINAL_WIDTH;
+		Options::baseYResolution = Screen::ORIGINAL_HEIGHT;
+		_game->getScreen()->resetDisplay(false);
+	}
+
+	// Create objects
+	_bg = new Surface(320, 200, 0, 0);
+	_soldier = new Surface(240, 200, 80, 0);
+	_txtName = new Text(308, 17, 6, 6);
+	_inv = new AlienInventory(_game, 240, 200, 80, 0);
+
+	// Set palette
+	setPalette("PAL_BATTLESCAPE");
+
+	add(_bg);
+
+	// Set up objects
+	Surface *tmp = _game->getMod()->getSurface("AlienInventory", false);
+	if (tmp)
+	{
+		tmp->blit(_bg);
+	}
+
+	add(_soldier);
+	add(_txtName, "textName", "inventory", _bg);
+	add(_inv);
+
+	centerAllSurfaces();
+
+	_txtName->setBig();
+	_txtName->setHighContrast(true);
+	_txtName->setAlign(ALIGN_CENTER);
+	_txtName->setText(unit->getName(_game->getLanguage()));
+
+	_soldier->clear();
+	{
+		Surface *armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory(), false);
+		if (!armorSurface)
+		{
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + ".SPK", false);
+		}
+		if (!armorSurface)
+		{
+			armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory() + "M0.SPK", false);
+		}
+		if (armorSurface)
+		{
+			armorSurface->blit(_soldier);
+		}
+	}
+
+	_inv->setSelectedUnit(unit);
+	_inv->draw();
+
+	// Bleeding indicator
+	tmp = _game->getMod()->getSurface("BigWoundIndicator", false);
+	if (tmp && unit->getFatalWounds() > 0)
+	{
+		tmp->setX(32);
+		tmp->setY(32);
+		tmp->blit(_soldier);
+	}
+}
+
+/**
+ *
+ */
+AlienInventoryState::~AlienInventoryState()
+{
+	if (Options::maximizeInfoScreens)
+	{
+		Screen::updateScale(Options::battlescapeScale, Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, true);
+		_game->getScreen()->resetDisplay(false);
+	}
+}
+
+}
