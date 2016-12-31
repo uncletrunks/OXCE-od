@@ -46,7 +46,7 @@ private:
 	Text *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFiringAcc, *_txtThrowingAcc, *_txtMeleeAcc, *_txtPsi;
 	TextEdit *_txtName;
 	TextEdit *_btnQuickSearch;
-	BattlescapeButton *_btnOk, *_btnPrev, *_btnNext, *_btnUnload, *_btnGround, *_btnRank;
+	BattlescapeButton *_btnOk, *_btnPrev, *_btnNext, *_btnUnload, *_btnGround, *_btnRank, *_btnArmor;
 	BattlescapeButton *_btnCreateTemplate, *_btnApplyTemplate;
 	Surface *_selAmmo;
 	Inventory *_inv;
@@ -81,8 +81,8 @@ public:
 	void saveEquipmentLayout();
 	/// Handler for clicking the Armor button.
 	void btnArmorClick(Action *action);
-	/// Handler for clicking the Avatar button.
-	void btnAvatarClick(Action *action);
+	void btnArmorClickRight(Action *action);
+	void btnArmorClickMiddle(Action *action);
 	/// Methods for handling the global equipment layout save/load hotkeys.
 	void saveGlobalLayout(int index);
 	void loadGlobalLayout(int index);
@@ -128,6 +128,10 @@ public:
 	void txtTooltipIn(Action *action);
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
+	/// Handler for showing armor tooltip.
+	void txtArmorTooltipIn(Action *action);
+	/// Handler for hiding armor tooltip.
+	void txtArmorTooltipOut(Action *action);
 
 private:
 	/// Update the visibility and icons for the template buttons.

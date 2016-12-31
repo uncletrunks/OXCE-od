@@ -55,6 +55,7 @@
 #include "BattlescapeGenerator.h"
 #include "TileEngine.h"
 #include "../Mod/RuleInterface.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -103,6 +104,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_btnUnload = new BattlescapeButton(32, 25, 288, 32);
 	_btnGround = new BattlescapeButton(32, 15, 289, 137);
 	_btnRank = new BattlescapeButton(26, 23, 0, 0);
+	_btnArmor = new BattlescapeButton(40, 70, 60, 65);
 	_btnCreateTemplate = new BattlescapeButton(32, 22, _templateBtnX, _createTemplateBtnY);
 	_btnApplyTemplate = new BattlescapeButton(32, 22, _templateBtnX, _applyTemplateBtnY);
 	_selAmmo = new Surface(RuleInventory::HAND_W * RuleInventory::SLOT_W, RuleInventory::HAND_H * RuleInventory::SLOT_H, 272, 88);
@@ -134,6 +136,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	add(_btnUnload, "buttonUnload", "inventory", _bg);
 	add(_btnGround, "buttonGround", "inventory", _bg);
 	add(_btnRank, "rank", "inventory", _bg);
+	add(_btnArmor, "buttonOK", "inventory", _bg);
 	add(_btnCreateTemplate, "buttonCreate", "inventory", _bg);
 	add(_btnApplyTemplate, "buttonApply", "inventory", _bg);
 	add(_selAmmo);
@@ -176,7 +179,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnOkClick, Options::keyBattleInventory);
 	_btnOk->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnArmorClick, Options::keyBattleAbort);
-	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnAvatarClick, Options::keyBattleMap);
+	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnArmorClickRight, Options::keyBattleMap);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnInventoryLoadClick, Options::keyQuickLoad);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnInventorySaveClick, Options::keyQuickSave);
 	_btnOk->setTooltip("STR_OK");
@@ -209,6 +212,12 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_btnRank->setTooltip("STR_UNIT_STATS");
 	_btnRank->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnRank->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
+
+	_btnArmor->onMouseClick((ActionHandler)&InventoryState::btnArmorClick);
+	_btnArmor->onMouseClick((ActionHandler)&InventoryState::btnArmorClickRight, SDL_BUTTON_RIGHT);
+	_btnArmor->onMouseClick((ActionHandler)&InventoryState::btnArmorClickMiddle, SDL_BUTTON_MIDDLE);
+	_btnArmor->onMouseIn((ActionHandler)&InventoryState::txtArmorTooltipIn);
+	_btnArmor->onMouseOut((ActionHandler)&InventoryState::txtArmorTooltipOut);
 
 	_btnCreateTemplate->onMouseClick((ActionHandler)&InventoryState::btnCreateTemplateClick);
 	_btnCreateTemplate->onKeyboardPress((ActionHandler)&InventoryState::btnCreateTemplateClick, Options::keyInvCreateTemplate);
@@ -402,6 +411,10 @@ void InventoryState::init()
 
 			// refresh ui
 			_inv->arrangeGround(false); // calls drawItems() too
+
+			// reset armor tooltip
+			_currentTooltip = "";
+			_txtItem->setText(L"");
 
 			// reload done
 			_reloadUnit = false;
@@ -630,7 +643,7 @@ void InventoryState::btnArmorClick(Action *action)
  * Opens the Avatar Selection GUI
  * @param action Pointer to an action.
  */
-void InventoryState::btnAvatarClick(Action *action)
+void InventoryState::btnArmorClickRight(Action *action)
 {
 	if (_base == 0)
 	{
@@ -654,6 +667,20 @@ void InventoryState::btnAvatarClick(Action *action)
 		}
 
 		_game->pushState(new SoldierAvatarState(_base, soldierIndex));
+	}
+}
+
+/**
+* Opens Ufopaedia entry for the corresponding armor.
+* @param action Pointer to an action.
+*/
+void InventoryState::btnArmorClickMiddle(Action *action)
+{
+	BattleUnit *unit = _inv->getSelectedUnit();
+	if (unit != 0)
+	{
+		std::string articleId = unit->getArmor()->getType();
+		Ufopaedia::openArticle(_game, articleId);
 	}
 }
 
@@ -1383,6 +1410,52 @@ void InventoryState::txtTooltipIn(Action *action)
 void InventoryState::txtTooltipOut(Action *action)
 {
 	if (_inv->getSelectedItem() == 0 && Options::battleTooltips)
+	{
+		if (_currentTooltip == action->getSender()->getTooltip())
+		{
+			_currentTooltip = "";
+			_txtItem->setText(L"");
+		}
+	}
+}
+
+/**
+* Shows a tooltip for the paperdoll's armor.
+* @param action Pointer to an action.
+*/
+void InventoryState::txtArmorTooltipIn(Action *action)
+{
+	if (_inv->getSelectedItem() == 0)
+	{
+		BattleUnit *unit = _inv->getSelectedUnit();
+		if (unit != 0)
+		{
+			action->getSender()->setTooltip(unit->getArmor()->getType());
+			_currentTooltip = action->getSender()->getTooltip();
+			if (Options::showItemNameAndWeightInInventory)
+			{
+				std::wostringstream ss;
+				ss << tr(_currentTooltip);
+				ss << L" [";
+				ss << unit->getArmor()->getWeight();
+				ss << L"]";
+				_txtItem->setText(ss.str().c_str());
+			}
+			else
+			{
+				_txtItem->setText(tr(_currentTooltip));
+			}
+		}
+	}
+}
+
+/**
+* Clears the armor tooltip text.
+* @param action Pointer to an action.
+*/
+void InventoryState::txtArmorTooltipOut(Action *action)
+{
+	if (_inv->getSelectedItem() == 0)
 	{
 		if (_currentTooltip == action->getSender()->getTooltip())
 		{
