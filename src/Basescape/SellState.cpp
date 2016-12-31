@@ -710,8 +710,13 @@ void SellState::lstItemsMousePress(Action *action)
 			changeByValue(Options::changeValueByMouseWheel, -1);
 		}
 	}
-	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
+		if (action->getAbsoluteXMouse() >= _lstItems->getArrowsLeftEdge() &&
+			action->getAbsoluteXMouse() <= _lstItems->getArrowsRightEdge())
+		{
+			return;
+		}
 		if (getRow().type == TRANSFER_ITEM)
 		{
 			RuleItem *rule = (RuleItem*)getRow().rule;
