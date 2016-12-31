@@ -19,6 +19,7 @@
 #include "SoldierArmorState.h"
 #include <sstream>
 #include <algorithm>
+#include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
@@ -36,6 +37,7 @@
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -125,6 +127,7 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 		}
 	}
 	_lstArmor->onMouseClick((ActionHandler)&SoldierArmorState::lstArmorClick);
+	_lstArmor->onMouseClick((ActionHandler)&SoldierArmorState::lstArmorClickMiddle, SDL_BUTTON_MIDDLE);
 
 	// switch to battlescape theme if called from inventory
 	if (_origin == SA_BATTLESCAPE)
@@ -183,6 +186,16 @@ void SoldierArmorState::lstArmorClick(Action *)
 	_game->getSavedGame()->setLastSelectedArmor(next->getType());
 
 	_game->popState();
+}
+
+/**
+* Shows corresponding Ufopaedia article.
+* @param action Pointer to an action.
+*/
+void SoldierArmorState::lstArmorClickMiddle(Action *action)
+{
+	std::string articleId = _armors[_lstArmor->getSelectedRow()]->getType();
+	Ufopaedia::openArticle(_game, articleId);
 }
 
 }

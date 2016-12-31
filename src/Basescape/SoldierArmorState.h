@@ -61,6 +61,8 @@ public:
 	void btnCancelClick(Action *action);
 	/// Handler for clicking the Weapons list.
 	void lstArmorClick(Action *action);
+	/// Handler for clicking the Weapons list.
+	void lstArmorClickMiddle(Action *action);
 };
 
 }
