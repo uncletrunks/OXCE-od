@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "AlienInventory.h"
+#include <cmath>
 #include "../Engine/Action.h"
 #include "../Engine/Font.h"
 #include "../Engine/Game.h"
