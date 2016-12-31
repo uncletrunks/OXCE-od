@@ -54,6 +54,7 @@ OPT bool autoAssignPilots;
 OPT bool fullNightVision;
 OPT int nightVisionColor;
 OPT bool autoSell;
+OPT bool techTreeViewerSpoilerProtection;
 
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter, newRootWindowedMode, newFullscreen, newAllowResize, newBorderless;

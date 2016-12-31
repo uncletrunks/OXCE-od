@@ -623,6 +623,11 @@ void TechTreeViewerState::onSelectLeftTopic(Action *)
 	int index = _lstLeft->getSelectedRow();
 	if (_leftFlags[index] > 0)
 	{
+		if (Options::techTreeViewerSpoilerProtection)
+		{
+			if (!isDiscovered(_leftTopics[index]))
+				return;
+		}
 		_selectedFlag = _leftFlags[index];
 		_selectedTopic = _leftTopics[index];
 		initLists();
@@ -638,6 +643,11 @@ void TechTreeViewerState::onSelectRightTopic(Action *)
 	int index = _lstRight->getSelectedRow();
 	if (_rightFlags[index] > 0)
 	{
+		if (Options::techTreeViewerSpoilerProtection)
+		{
+			if (!isDiscovered(_rightTopics[index]))
+				return;
+		}
 		_selectedFlag = _rightFlags[index];
 		_selectedTopic = _rightTopics[index];
 		initLists();
