@@ -393,6 +393,15 @@ void BasescapeState::viewRightClick(Action *)
 	{
 		_game->pushState(new BaseInfoState(_base, this));
 	}
+	else if (f->getRules()->isMindShield())
+	{
+		if (f->getBuildTime() == 0)
+		{
+			f->setDisabled(!f->getDisabled());
+			_view->draw();
+			_mini->draw();
+		}
+	}
 	else if (f->getRules()->getCrafts() > 0)
 	{
 		if (f->getCraft() == 0)

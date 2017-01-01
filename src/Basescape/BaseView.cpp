@@ -489,7 +489,7 @@ void BaseView::draw()
 		}
 
 		// Draw time remaining
-		if ((*i)->getBuildTime() > 0)
+		if ((*i)->getBuildTime() > 0 || (*i)->getDisabled())
 		{
 			Text *text = new Text(GRID_SIZE * (*i)->getRules()->getSize(), 16, 0, 0);
 			text->setPalette(getPalette());
@@ -498,7 +498,10 @@ void BaseView::draw()
 			text->setY((*i)->getY() * GRID_SIZE + (GRID_SIZE * (*i)->getRules()->getSize() - 16) / 2);
 			text->setBig();
 			std::wostringstream ss;
-			ss << (*i)->getBuildTime();
+			if ((*i)->getDisabled())
+				ss << L"X";
+			else
+				ss << (*i)->getBuildTime();
 			text->setAlign(ALIGN_CENTER);
 			text->setColor(_cellColor);
 			text->setText(ss.str());

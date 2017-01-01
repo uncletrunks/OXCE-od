@@ -1424,9 +1424,9 @@ struct isMindShield: public std::unary_function<BaseFacility*, bool>
  */
 bool isMindShield::operator()(const BaseFacility *facility) const
 {
-	if (facility->getBuildTime() != 0)
+	if (facility->getBuildTime() != 0 || facility->getDisabled())
 	{
-		// Still building this
+		// Still building this (or is temporarily disabled)
 		return false;
 	}
 	return (facility->getRules()->isMindShield());

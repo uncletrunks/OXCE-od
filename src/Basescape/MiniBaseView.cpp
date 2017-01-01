@@ -116,7 +116,9 @@ void MiniBaseView::draw()
 			for (std::vector<BaseFacility*>::iterator f = _bases->at(i)->getFacilities()->begin(); f != _bases->at(i)->getFacilities()->end(); ++f)
 			{
 				int color;
-				if ((*f)->getBuildTime() == 0)
+				if ((*f)->getDisabled())
+					color = 218; // FIXME: blue
+				else if ((*f)->getBuildTime() == 0)
 					color = _green;
 				else
 					color = _red;

@@ -29,7 +29,7 @@ namespace OpenXcom
  * @param rules Pointer to ruleset.
  * @param base Pointer to base of origin.
  */
-BaseFacility::BaseFacility(RuleBaseFacility *rules, Base *base) : _rules(rules), _base(base), _x(-1), _y(-1), _buildTime(0), _craftForDrawing(0)
+BaseFacility::BaseFacility(RuleBaseFacility *rules, Base *base) : _rules(rules), _base(base), _x(-1), _y(-1), _buildTime(0), _disabled(false), _craftForDrawing(0)
 {
 }
 
@@ -49,6 +49,7 @@ void BaseFacility::load(const YAML::Node &node)
 	_x = node["x"].as<int>(_x);
 	_y = node["y"].as<int>(_y);
 	_buildTime = node["buildTime"].as<int>(_buildTime);
+	_disabled = node["disabled"].as<bool>(_disabled);
 }
 
 /**
@@ -63,6 +64,7 @@ YAML::Node BaseFacility::save() const
 	node["y"] = _y;
 	if (_buildTime != 0)
 		node["buildTime"] = _buildTime;
+	node["disabled"] = _disabled;
 	return node;
 }
 
@@ -173,6 +175,24 @@ bool BaseFacility::inUse() const
 			(_rules->getPsiLaboratories() > 0 && _base->getAvailablePsiLabs() - _rules->getPsiLaboratories() < _base->getUsedPsiLabs()) ||
 			(_rules->getTrainingFacilities() > 0 && _base->getAvailableTraining() - _rules->getTrainingFacilities() < _base->getUsedTraining()) ||
 			(_rules->getAliens() > 0 && _base->getAvailableContainment(_rules->getPrisonType()) - _rules->getAliens() < _base->getUsedContainment(_rules->getPrisonType())));
+}
+
+/**
+ * Checks if the facility is disabled.
+ * @return True if facility is disabled, False otherwise.
+ */
+bool BaseFacility::getDisabled() const
+{
+	return _disabled;
+}
+
+/**
+ * Sets the facility's disabled flag.
+ * @param disabled flag to set.
+ */
+void BaseFacility::setDisabled(bool disabled)
+{
+	_disabled = disabled;
 }
 
 /**
