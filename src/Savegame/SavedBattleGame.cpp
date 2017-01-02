@@ -1412,12 +1412,13 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
  * Create all fixed items for new created unit.
  * @param unit Unit to equip.
  */
-void SavedBattleGame::initFixedItems(BattleUnit *unit, size_t itemLevel)
+void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 {
 	unit->setSpecialWeapon(this);
 	Unit* rule = unit->getUnitRules();
+	const Armor* armor = unit->getArmor();
 	// Built in weapons: the unit has this weapon regardless of loadout or what have you.
-	addFixedItems(unit, unit->getArmor()->getBuiltInWeapons());
+	addFixedItems(unit, armor->getBuiltInWeapons());
 
 	// For aliens and HWP
 	if (rule)

@@ -1886,7 +1886,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 		getDepth(),
 		getMod()->getMaxViewDistance());
 
-	getSave()->initFixedItems(newUnit);
+	getSave()->initUnit(newUnit);
 	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
 	newUnit->setPosition(unit->getPosition());
 	newUnit->setDirection(unit->getDirection());

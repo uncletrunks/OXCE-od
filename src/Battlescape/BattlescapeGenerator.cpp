@@ -968,7 +968,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 			_craftInventoryTile = _save->getTile(node->getPosition());
 			unit->setDirection(RNG::generate(0,7));
 			_save->getUnits()->push_back(unit);
-			_save->initFixedItems(unit);
+			_save->initUnit(unit);
 			_save->getTileEngine()->calculateFOV(unit);
 			return unit;
 		}
@@ -979,7 +979,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				_craftInventoryTile = _save->getTile(unit->getPosition());
 				unit->setDirection(RNG::generate(0,7));
 				_save->getUnits()->push_back(unit);
-				_save->initFixedItems(unit);
+				_save->initUnit(unit);
 				_save->getTileEngine()->calculateFOV(unit);
 				return unit;
 			}
@@ -1004,7 +1004,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				if (_save->setUnitPosition(unit, pos))
 				{
 					_save->getUnits()->push_back(unit);
-					_save->initFixedItems(unit);
+					_save->initUnit(unit);
 					unit->setDirection(dir);
 					return unit;
 				}
@@ -1020,7 +1020,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				if (_save->setUnitPosition(unit, _save->getTile(i)->getPosition()))
 				{
 					_save->getUnits()->push_back(unit);
-					_save->initFixedItems(unit);
+					_save->initUnit(unit);
 					return unit;
 				}
 			}
@@ -1113,7 +1113,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 			size_t itemLevel = (size_t)(_game->getMod()->getAlienItemLevels().at(month).at(RNG::generate(0,9)));
 			if (unit)
 			{
-				_save->initFixedItems(unit, itemLevel);
+				_save->initUnit(unit, itemLevel);
 				if (!rule->isLivingWeapon())
 				{
 					if ((*d).itemSets.size() == 0)
@@ -1645,7 +1645,7 @@ void BattlescapeGenerator::deployCivilians(int max)
 					size_t itemLevel = (size_t)(_game->getMod()->getAlienItemLevels().at(month).at(RNG::generate(0,9)));
 					// Built in weapons: civilians may have levelled item lists with randomized distribution
 					// following the same basic rules as the alien item levels.
-					_save->initFixedItems(civ, itemLevel);
+					_save->initUnit(civ, itemLevel);
 				}
 			}
 		}

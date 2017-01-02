@@ -208,7 +208,7 @@ public:
 	/// Add buildIn weapon form list to unit.
 	void addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed);
 	/// Create all fixed items for new created unit.
-	void initFixedItems(BattleUnit *unit, size_t itemLevel = 0);
+	void initUnit(BattleUnit *unit, size_t itemLevel = 0);
 	/// Sets whether the mission was aborted.
 	void setAborted(bool flag);
 	/// Checks if the mission was aborted.
