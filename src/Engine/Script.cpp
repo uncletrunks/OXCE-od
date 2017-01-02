@@ -891,8 +891,9 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
  */
 bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
-	auto size = std::distance(begin, end);
-	if (ph.parser.getParamSize() != size)
+	const auto size = std::distance(begin, end);
+	const auto returnSize = ph.parser.haveEmptyReturn() ? 0 : ph.parser.getParamSize();
+	if (returnSize != size)
 	{
 		Log(LOG_ERROR) << "Invaild length of returns arguments";
 		return false;
@@ -1691,6 +1692,7 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
  */
 ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name) :
 	_shared{ shared },
+	_emptyReturn{ false },
 	_regUsed{ RegMax },
 	_regOutSize{ 0 }, _regOutName{ },
 	_name{ name }
@@ -2273,6 +2275,10 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 				{
 					refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << ref->name.toString() << std::setw(9) << getTypePrefix(ref->type) << " " << std::setw(9) << argType(ref->type) << "\n";
 				}
+			}
+			if (_emptyReturn)
+			{
+				refLog.get(LOG_DEBUG) << "In this script 'return' statment is empty, script returining values are edited directly\n";
 			}
 			refLog.get(LOG_DEBUG) << "\n";
 		}

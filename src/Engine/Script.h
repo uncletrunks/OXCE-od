@@ -57,7 +57,7 @@ struct ArgSelector;
 
 }
 
-constexpr int ScriptMaxOut = 4;
+constexpr int ScriptMaxOut = 8;
 constexpr int ScriptMaxArg = 16;
 constexpr int ScriptMaxReg = 64*sizeof(void*);
 
@@ -382,6 +382,12 @@ struct ScriptOutputArgs
 {
 	std::tuple<helper::Decay<OutputArgs>...> data;
 
+	/// Default constructor.
+	ScriptOutputArgs() : data{ }
+	{
+
+	}
+
 	/// Constructor.
 	ScriptOutputArgs(const helper::Decay<OutputArgs>&... args) : data{ args... }
 	{
@@ -394,6 +400,21 @@ struct ScriptOutputArgs
 	auto getSecond() -> helper::GetTupleType<1, decltype(data)> { return helper::GetTupleValue<1>(data); }
 	/// Getter for third element.
 	auto getThird() -> helper::GetTupleType<2, decltype(data)> { return helper::GetTupleValue<2>(data); }
+};
+
+/**
+ * Specialization of script output and input aguments.
+ */
+template<>
+struct ScriptOutputArgs<>
+{
+	std::tuple<> data;
+
+	/// Default constructor.
+	ScriptOutputArgs() : data{ }
+	{
+
+	}
 };
 
 /**
@@ -421,7 +442,7 @@ class ScriptWorkerBase
 	void forRegImplLoop(helper::PosTag<RegSet>, const T& arg)
 	{
 		using CurrentType =helper::Decay<typename std::tuple_element<I, T>::type>;
-		constexpr int CurrentOffset = BaseOffset + offset<Args...>(I);
+		constexpr int CurrentOffset = BaseOffset + offset<void, Args...>(I);
 
 		ref<CurrentType>(CurrentOffset) = std::get<I>(arg);
 	}
@@ -434,7 +455,7 @@ class ScriptWorkerBase
 	void forRegImplLoop(helper::PosTag<RegGet>, T& arg)
 	{
 		using CurrentType = helper::Decay<typename std::tuple_element<I, T>::type>;
-		constexpr int CurrentOffset = BaseOffset + offset<Args...>(I);
+		constexpr int CurrentOffset = BaseOffset + offset<void, Args...>(I);
 
 		std::get<I>(arg) = ref<CurrentType>(CurrentOffset);
 	}
@@ -455,22 +476,22 @@ class ScriptWorkerBase
 	}
 
 	/// Count offset.
-	template<typename First, typename Second, typename... Rest>
+	template<typename, typename First, typename... Rest>
 	static constexpr int offset(int i)
 	{
-		return (i > 0 ? sizeof(First) : 0) + (i > 1 ? offset<Second, Rest...>(i - 1) : 0);
+		return (i > 0 ? sizeof(First) : 0) + (i > 1 ? offset<void, Rest...>(i - 1) : 0);
 	}
 	/// Final function of counting offset.
-	template<typename First>
+	template<typename>
 	static constexpr int offset(int i)
 	{
-		return (i > 0 ? sizeof(First) : 0);
+		return 0;
 	}
 
 	template<typename... Args>
 	static constexpr int offsetOutput(helper::TypeTag<ScriptOutputArgs<Args...>>)
 	{
-		return offset<Args...>(sizeof...(Args));
+		return offset<void, Args...>(sizeof...(Args));
 	}
 
 protected:
@@ -904,6 +925,7 @@ struct ScriptProcData
 class ScriptParserBase
 {
 	ScriptGlobal* _shared;
+	bool _emptyReturn;
 	Uint8 _regUsed;
 	Uint8 _regOutSize;
 	ScriptRef _regOutName[ScriptMaxOut];
@@ -1015,6 +1037,8 @@ protected:
 	bool haveTypeBase(ArgEnum type);
 	/// Set defulat script for type.
 	void setDefault(const std::string& s) { _defaultScript = s; }
+	/// Set mode where return donot accept any value.
+	void setEmptyReturn() { _emptyReturn = true; }
 
 public:
 	/// Register type to get run time value representing it.
@@ -1100,6 +1124,8 @@ public:
 	ScriptGlobal* getGlobal() { return _shared; }
 	/// Get script shared data.
 	const ScriptGlobal* getGlobal() const { return _shared; }
+	/// Get true if retun do not accept any argument.
+	bool haveEmptyReturn() const { return _emptyReturn; }
 };
 
 /**
