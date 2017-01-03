@@ -536,6 +536,12 @@ void TextEdit::keyboardPress(Action *action, State *state)
 				_value.erase(_caretPos, 1);
 			}
 			break;
+		case SDLK_ESCAPE:
+			{
+				_value = L"";
+				_caretPos = 0;
+			}
+			// no break; do the ENTER action too
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER:
 			if (!_value.empty() || _enter != 0)
