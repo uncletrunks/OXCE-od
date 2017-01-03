@@ -23,6 +23,7 @@ namespace OpenXcom
 {
 
 class Surface;
+class BattlescapeButton;
 class AlienInventory;
 class BattleUnit;
 class Text;
@@ -34,6 +35,7 @@ class AlienInventoryState : public State
 {
 private:
 	Surface *_bg, *_soldier;
+	BattlescapeButton *_btnArmor;
 	Text *_txtName;
 	AlienInventory *_inv;
 public:
@@ -41,6 +43,10 @@ public:
 	AlienInventoryState(BattleUnit *unit);
 	/// Cleans up the AlienInventory state.
 	~AlienInventoryState();
+	/// Handler for clicking the OK button.
+	void btnOkClick(Action *action);
+	/// Handler for clicking the Armor button.
+	void btnArmorClickMiddle(Action *action);
 };
 
 }

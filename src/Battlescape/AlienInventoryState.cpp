@@ -26,6 +26,7 @@
 #include "../Interface/BattlescapeButton.h"
 #include "../Interface/Text.h"
 #include "../Mod/Mod.h"
+#include "../Ufopaedia/Ufopaedia.h"
 #include "../Savegame/BattleUnit.h"
 
 namespace OpenXcom
@@ -48,6 +49,7 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	_bg = new Surface(320, 200, 0, 0);
 	_soldier = new Surface(240, 200, 80, 0);
 	_txtName = new Text(308, 17, 6, 6);
+	_btnArmor = new BattlescapeButton(40, 70, 140, 65);
 	_inv = new AlienInventory(_game, 240, 200, 80, 0);
 
 	// Set palette
@@ -64,6 +66,7 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 
 	add(_soldier);
 	add(_txtName, "textName", "inventory", _bg);
+	add(_btnArmor, "buttonOK", "inventory", _bg);
 	add(_inv);
 
 	centerAllSurfaces();
@@ -72,6 +75,9 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	_txtName->setHighContrast(true);
 	_txtName->setAlign(ALIGN_CENTER);
 	_txtName->setText(unit->getName(_game->getLanguage()));
+
+	_btnArmor->onKeyboardPress((ActionHandler)&AlienInventoryState::btnOkClick, Options::keyCancel);
+	_btnArmor->onMouseClick((ActionHandler)&AlienInventoryState::btnArmorClickMiddle, SDL_BUTTON_MIDDLE);
 
 	_soldier->clear();
 	{
@@ -112,6 +118,29 @@ AlienInventoryState::~AlienInventoryState()
 	{
 		Screen::updateScale(Options::battlescapeScale, Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, true);
 		_game->getScreen()->resetDisplay(false);
+	}
+}
+
+/**
+ * Returns to the previous screen.
+ * @param action Pointer to an action.
+ */
+void AlienInventoryState::btnOkClick(Action *)
+{
+	_game->popState();
+}
+
+/**
+ * Opens Ufopaedia entry for the corresponding armor.
+ * @param action Pointer to an action.
+ */
+void AlienInventoryState::btnArmorClickMiddle(Action *action)
+{
+	BattleUnit *unit = _inv->getSelectedUnit();
+	if (unit != 0)
+	{
+		std::string articleId = unit->getArmor()->getType();
+		Ufopaedia::openArticle(_game, articleId);
 	}
 }
 
