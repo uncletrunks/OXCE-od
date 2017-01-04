@@ -24,8 +24,7 @@
 #include "../Engine/Language.h"
 #include "../Engine/Options.h"
 #include "../Engine/Screen.h"
-#include "../Engine/Script.h"
-#include "../Engine/Sound.h"
+#include "../Engine/SurfaceSet.h"
 #include "../Interface/Text.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInventory.h"
@@ -163,26 +162,23 @@ void AlienInventory::drawGridLabels()
  */
 void AlienInventory::drawItems()
 {
-	ScriptWorkerBlit work;
 	_items->clear();
 	if (_selUnit != 0)
 	{
 		SurfaceSet *texture = _game->getMod()->getSurfaceSet("BIGOBS.PCK");
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)
 		{
-			int x, y;
-			Surface *frame = (*i)->getBigSprite(texture);
+			Surface *frame = texture->getFrame((*i)->getRules()->getBigSprite());
 			if ((*i)->getSlot()->getType() == INV_HAND)
 			{
-				x = ((*i)->getSlot()->getX() + (*i)->getRules()->getHandSpriteOffX());
-				y = ((*i)->getSlot()->getY() + (*i)->getRules()->getHandSpriteOffY());
+				frame->setX((*i)->getSlot()->getX() + (*i)->getRules()->getHandSpriteOffX());
+				frame->setY((*i)->getSlot()->getY() + (*i)->getRules()->getHandSpriteOffY());
 			}
 			else
 			{
 				continue;
 			}
-			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
-			work.executeBlit(frame, _items, x, y, 0);
+			frame->blit(_items);
 		}
 	}
 }
