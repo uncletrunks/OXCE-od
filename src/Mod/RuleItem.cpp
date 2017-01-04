@@ -25,6 +25,7 @@
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
+#include "../Engine/RNG.h"
 #include "Mod.h"
 #include <algorithm>
 
@@ -41,11 +42,9 @@ const float TilesToVexels = 16.0f;
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
 	_bigSprite(-1), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
-	_fireSound(-1),
-	_hitSound(-1), _hitAnimation(0), _hitMissSound(-1), _hitMissAnimation(-1),
-	_meleeSound(39), _meleeAnimation(0), _meleeMissSound(-1), _meleeMissAnimation(-1),
-	_meleeHitSound(-1), _explosionHitSound(-1),
-	_psiSound(-1), _psiAnimation(-1), _psiMissSound(-1), _psiMissAnimation(-1),
+	_hitAnimation(0), _hitMissAnimation(-1),
+	_meleeAnimation(0), _meleeMissAnimation(-1),
+	_psiAnimation(-1), _psiMissAnimation(-1),
 	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0),
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
@@ -187,6 +186,31 @@ void RuleItem::updateCategories(std::map<std::string, std::string> *replacementR
 }
 
 /**
+ * Loads a sound vector for a given attribute/node.
+ * @param node YAML node.
+ * @param mod Mod for the item.
+ * @param vector Sound vector to load into.
+ */
+void RuleItem::loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector)
+{
+	if (node)
+	{
+		vector.clear();
+		if (node.IsSequence())
+		{
+			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
+			{
+				vector.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
+			}
+		}
+		else
+		{
+			vector.push_back(mod->getSoundOffset(node.as<int>(), "BATTLE.CAT"));
+		}
+	}
+}
+
+/**
  * Loads the item from a YAML file.
  * @param node YAML node.
  * @param mod Mod for the item.
@@ -227,34 +251,13 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		if (_bulletSprite >= 385)
 			_bulletSprite += mod->getModOffset();
 	}
-	if (node["fireSound"])
-	{
-		_fireSound = mod->getSoundOffset(node["fireSound"].as<int>(_fireSound), "BATTLE.CAT");
-	}
-	if (node["hitSound"])
-	{
-		_hitSound = mod->getSoundOffset(node["hitSound"].as<int>(_hitSound), "BATTLE.CAT");
-	}
-	if (node["hitMissSound"])
-	{
-		_hitMissSound = mod->getSoundOffset(node["hitMissSound"].as<int>(_hitMissSound), "BATTLE.CAT");
-	}
-	if (node["meleeSound"])
-	{
-		_meleeSound = mod->getSoundOffset(node["meleeSound"].as<int>(_meleeSound), "BATTLE.CAT");
-	}
-	if (node["meleeMissSound"])
-	{
-		_meleeMissSound = mod->getSoundOffset(node["meleeMissSound"].as<int>(_meleeMissSound), "BATTLE.CAT");
-	}
-	if (node["psiSound"])
-	{
-		_psiSound = mod->getSoundOffset(node["psiSound"].as<int>(_psiSound), "BATTLE.CAT");
-	}
-	if (node["psiMissSound"])
-	{
-		_psiMissSound = mod->getSoundOffset(node["psiMissSound"].as<int>(_psiMissSound), "BATTLE.CAT");
-	}
+	loadSoundVector(node["fireSound"], mod, _fireSound);
+	loadSoundVector(node["hitSound"], mod, _hitSound);
+	loadSoundVector(node["hitMissSound"], mod, _hitMissSound);
+	loadSoundVector(node["meleeSound"], mod, _meleeSound);
+	loadSoundVector(node["meleeMissSound"], mod, _meleeMissSound);
+	loadSoundVector(node["psiSound"], mod, _psiSound);
+	loadSoundVector(node["psiMissSound"], mod, _psiMissSound);
 	if (node["hitAnimation"])
 	{
 		_hitAnimation = mod->getSpriteOffset(node["hitAnimation"].as<int>(_hitAnimation), "SMOKE.PCK");
@@ -279,14 +282,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	{
 		_psiMissAnimation = mod->getSpriteOffset(node["psiMissAnimation"].as<int>(_psiMissAnimation), "HIT.PCK");
 	}
-	if (node["meleeHitSound"])
-	{
-		_meleeHitSound = mod->getSoundOffset(node["meleeHitSound"].as<int>(_meleeHitSound), "BATTLE.CAT");
-	}
-	if (node["explosionHitSound"])
-	{
-		_explosionHitSound = mod->getSoundOffset(node["explosionHitSound"].as<int>(_explosionHitSound), "BATTLE.CAT");
-	}
+	loadSoundVector(node["meleeHitSound"], mod, _meleeHitSound);
+	loadSoundVector(node["explosionHitSound"], mod, _explosionHitSound);
 
 	if (node["battleType"])
 	{
@@ -712,12 +709,27 @@ int RuleItem::getBulletSprite() const
 }
 
 /**
+ * Gets a random sound id from a given sound vector.
+ * @param vector The source vector.
+ * @param defaultValue Default value (in case nothing is specified = vector is empty).
+ * @return The sound id.
+ */
+int RuleItem::getRandomSound(const std::vector<int> &vector, int defaultValue) const
+{
+	if (!vector.empty())
+	{
+		return vector[RNG::generate(0, vector.size() - 1)];
+	}
+	return defaultValue;
+}
+
+/**
  * Gets the item's fire sound.
  * @return The fire sound id.
  */
 int RuleItem::getFireSound() const
 {
-	return _fireSound;
+	return getRandomSound(_fireSound);
 }
 
 /**
@@ -726,7 +738,7 @@ int RuleItem::getFireSound() const
  */
 int RuleItem::getHitSound() const
 {
-	return _hitSound;
+	return getRandomSound(_hitSound);
 }
 
 /**
@@ -744,7 +756,7 @@ int RuleItem::getHitAnimation() const
  */
 int RuleItem::getHitMissSound() const
 {
-	return _hitMissSound;
+	return getRandomSound(_hitMissSound);
 }
 
 /**
@@ -763,7 +775,7 @@ int RuleItem::getHitMissAnimation() const
  */
 int RuleItem::getMeleeSound() const
 {
-	return _meleeSound;
+	return getRandomSound(_meleeSound, 39);
 }
 
 /**
@@ -781,7 +793,7 @@ int RuleItem::getMeleeAnimation() const
  */
 int RuleItem::getMeleeMissSound() const
 {
-	return _meleeMissSound;
+	return getRandomSound(_meleeMissSound);
 }
 
 /**
@@ -799,7 +811,7 @@ int RuleItem::getMeleeMissAnimation() const
  */
 int RuleItem::getMeleeHitSound() const
 {
-	return _meleeHitSound;
+	return getRandomSound(_meleeHitSound);
 }
 
 /**
@@ -808,7 +820,7 @@ int RuleItem::getMeleeHitSound() const
  */
 int RuleItem::getExplosionHitSound() const
 {
-	return _explosionHitSound;
+	return getRandomSound(_explosionHitSound);
 }
 
 /**
@@ -817,7 +829,7 @@ int RuleItem::getExplosionHitSound() const
  */
 int RuleItem::getPsiSound() const
 {
-	return _psiSound;
+	return getRandomSound(_psiSound);
 }
 
 /**
@@ -835,7 +847,7 @@ int RuleItem::getPsiAnimation() const
  */
 int RuleItem::getPsiMissSound() const
 {
-	return _psiMissSound;
+	return getRandomSound(_psiMissSound);
 }
 
 /**

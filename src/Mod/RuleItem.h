@@ -105,11 +105,18 @@ private:
 	int _bigSprite;
 	int _floorSprite;
 	int _handSprite, _bulletSprite;
-	int _fireSound;
-	int _hitSound, _hitAnimation, _hitMissSound, _hitMissAnimation;
-	int _meleeSound, _meleeAnimation, _meleeMissSound, _meleeMissAnimation;
-	int _meleeHitSound, _explosionHitSound;
-	int _psiSound, _psiAnimation, _psiMissSound, _psiMissAnimation;
+	std::vector<int> _fireSound, _hitSound; 
+	int _hitAnimation;
+	std::vector<int> _hitMissSound;
+	int _hitMissAnimation;
+	std::vector<int> _meleeSound;
+	int _meleeAnimation;
+	std::vector<int> _meleeMissSound;
+	int _meleeMissAnimation;
+	std::vector<int> _meleeHitSound, _explosionHitSound, _psiSound;
+	int _psiAnimation;
+	std::vector<int> _psiMissSound;
+	int _psiMissAnimation;
 	int _power;
 	float _powerRangeReduction;
 	float _powerRangeThreshold;
@@ -162,6 +169,10 @@ private:
 	void loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
 	/// Load RuleItemUseCost as bool from yaml.
 	void loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
+	/// Load sound vector from YAML.
+	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
+	/// Gets a random sound from a given vector.
+	int getRandomSound(const std::vector<int> &vector, int defaultValue = -1) const;
 public:
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "RuleItem";
