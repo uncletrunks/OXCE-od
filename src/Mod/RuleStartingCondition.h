@@ -48,7 +48,7 @@ private:
 	std::string _type;
 	std::map<std::string, EnvironmentalCondition> _environmentalConditions;
 	std::map<std::string, std::string> _armorTransformations;
-	std::map<std::string, std::string> _defaultArmor;
+	std::map<std::string, std::map<std::string, int> > _defaultArmor;
 	std::map<std::string, int> _defaultItems;
 	std::vector<std::string> _allowedArmors;
 	std::vector<std::string> _allowedVehicles;
