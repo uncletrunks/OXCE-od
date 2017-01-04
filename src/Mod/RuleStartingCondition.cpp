@@ -19,6 +19,7 @@
 #include "RuleStartingCondition.h"
 #include "RuleItem.h"
 #include "../Mod/Mod.h"
+#include "../Savegame/WeightedOptions.h"
 #include <algorithm>
 
 namespace OpenXcom
@@ -51,7 +52,7 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	}
 	_type = node["type"].as<std::string>(_type);
 	_armorTransformations = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformations);
-	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::string> >(_defaultArmor);
+	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::map<std::string, int> > >(_defaultArmor);
 	_defaultItems = node["defaultItems"].as< std::map<std::string, int> >(_defaultItems);
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
@@ -90,14 +91,20 @@ std::string RuleStartingCondition::getArmorReplacement(const std::string &soldie
 {
 	if (!_allowedArmors.empty() && (std::find(_allowedArmors.begin(), _allowedArmors.end(), armorType) == _allowedArmors.end()))
 	{
-		std::map<std::string, std::string>::const_iterator j = _defaultArmor.find(soldierType);
+		std::map<std::string, std::map<std::string, int> >::const_iterator j = _defaultArmor.find(soldierType);
 		if (j != _defaultArmor.end())
 		{
-			return j->second;
+			WeightedOptions w = WeightedOptions();
+			for (std::map<std::string, int>::const_iterator k = (j->second).begin(); k != (j->second).end(); ++k)
+			{
+				w.set(k->first, k->second);
+			}
+			std::string pick = w.choose();
+			return pick == "noChange" ? "" : pick;
 		}
 	}
 
-	return std::string();
+	return "";
 }
 
 /**
@@ -116,7 +123,7 @@ std::string RuleStartingCondition::getArmorTransformation(const std::string &arm
 		}
 	}
 
-	return std::string();
+	return "";
 }
 
 /**
