@@ -49,6 +49,7 @@ private:
 	int _maxAllowedPerBase;
 	float _sickBayAbsoluteBonus, _sickBayRelativeBonus;
 	int _prisonType;
+	int _rightClickActionType;
 public:
 	/// Creates a blank facility ruleset.
 	RuleBaseFacility(const std::string &type);
@@ -130,6 +131,8 @@ public:
 	float getSickBayRelativeBonus() const;
 	/// Gets the prison type.
 	int getPrisonType() const;
+	/// Gets the action type to perform on right click.
+	int getRightClickActionType() const;
 };
 
 }

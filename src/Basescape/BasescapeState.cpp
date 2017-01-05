@@ -393,6 +393,20 @@ void BasescapeState::viewRightClick(Action *)
 	{
 		_game->pushState(new BaseInfoState(_base, this));
 	}
+	else if (f->getRules()->getRightClickActionType() != 0)
+	{
+		switch (f->getRules()->getRightClickActionType())
+		{
+			case 1: _game->pushState(new ManageAlienContainmentState(_base, f->getRules()->getPrisonType(), OPT_GEOSCAPE)); break;
+			case 2: _game->pushState(new ManufactureState(_base)); break;
+			case 3: _game->pushState(new ResearchState(_base)); break;
+			case 4: if (Options::anytimePsiTraining) _game->pushState(new AllocateTrainingState(_base)); break;
+			case 5: if (Options::anytimePsiTraining) _game->pushState(new AllocatePsiTrainingState(_base)); break;
+			case 6: _game->pushState(new SoldiersState(_base)); break;
+			case 7: _game->pushState(new SellState(_base, 0)); break;
+			default: _game->popState(); break;
+		}
+	}
 	else if (f->getRules()->isMindShield())
 	{
 		if (f->getBuildTime() == 0)
