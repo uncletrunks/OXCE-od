@@ -1681,12 +1681,6 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 
 		if (action.targeting)
 		{
-			// start new hit log
-			_save->hitLog.str(L"");
-			_save->hitLog.clear();
-			// log weapon?
-			_save->hitLog << "Reaction fire...\n\n";
-
 			int moveType = originalAction.strafe ? BAM_STRAFE : originalAction.run ? BAM_RUN :  BAM_NORMAL;
 			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
@@ -1705,6 +1699,12 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 
 			if (RNG::percent(arg.getFirst()))
 			{
+				// start new hit log
+				_save->hitLog.str(L"");
+				_save->hitLog.clear();
+				// log weapon?
+				_save->hitLog << "Reaction fire...\n\n";
+
 				if (action.type == BA_HIT)
 				{
 					_save->getBattleGame()->statePushBack(new MeleeAttackBState(_save->getBattleGame(), action));
