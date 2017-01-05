@@ -23,6 +23,7 @@
 #include "../Mod/AlienRace.h"
 #include "../Mod/RuleStartingCondition.h"
 #include "../Mod/AlienDeployment.h"
+#include "../Mod/ArticleDefinition.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -103,7 +104,7 @@ ConfirmDestinationState::~ConfirmDestinationState()
 /**
 * Checks the starting condition.
 */
-bool ConfirmDestinationState::checkStartingCondition()
+std::wstring ConfirmDestinationState::checkStartingCondition()
 {
 	Ufo* u = dynamic_cast<Ufo*>(_target);
 	MissionSite* m = dynamic_cast<MissionSite*>(_target);
@@ -127,17 +128,50 @@ bool ConfirmDestinationState::checkStartingCondition()
 	else
 	{
 		// for example just a waypoint
-		return true;
+		return L"";
 	}
 
 	if (ruleDeploy == 0)
 	{
 		// e.g. UFOs without alien deployment :(
-		return true;
+		return L"";
 	}
 
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
-	return rule == 0 || rule->isCraftAllowed(_craft->getRules()->getType());
+	if (rule == 0)
+	{
+		// rule doesn't exist (mod upgrades?)
+		return L"";
+	}
+
+	if (rule->isCraftAllowed(_craft->getRules()->getType()))
+	{
+		// craft is allowed
+		return L"";
+	}
+
+	// craft is not allowed
+	const std::vector<std::string> *list = rule->getAllowedCraft();
+	std::wostringstream ss;
+	int i = 0;
+	for (std::vector<std::string>::const_iterator it = list->begin(); it != list->end(); ++it)
+	{
+		ArticleDefinition *article = _game->getMod()->getUfopaediaArticle((*it), false);
+		if (article && _game->getSavedGame()->isResearched(article->requires))
+		{
+			if (i > 0)
+				ss << L", ";
+			ss << tr(*it);
+			i++;
+		}
+	}
+	std::wstring message = ss.str();
+	if (message.empty())
+	{
+		// no suitable craft yet
+		return tr("STR_UNKNOWN");
+	}
+	return ss.str();
 }
 
 /**
@@ -146,11 +180,12 @@ bool ConfirmDestinationState::checkStartingCondition()
  */
 void ConfirmDestinationState::btnOkClick(Action *)
 {
-	if (!checkStartingCondition())
+	std::wstring message = checkStartingCondition();
+	if (!message.empty())
 	{
 		_game->popState();
 		_game->popState();
-		_game->pushState(new CraftErrorState(0, tr("STR_STARTING_CONDITION_CRAFT")));
+		_game->pushState(new CraftErrorState(0, tr("STR_STARTING_CONDITION_CRAFT").arg(message)));
 		return;
 	}
 

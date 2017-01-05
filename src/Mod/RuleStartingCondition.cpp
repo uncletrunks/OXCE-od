@@ -128,6 +128,15 @@ EnvironmentalCondition RuleStartingCondition::getEnvironmetalCondition(const std
 }
 
 /**
+* Returns all allowed craft types.
+* @return List of craft types.
+*/
+const std::vector<std::string> *RuleStartingCondition::getAllowedCraft() const
+{
+	return &_allowedCraft;
+}
+
+/**
 * Checks if the craft type is allowed.
 * @param craftType Craft type name.
 * @return True if allowed, false otherwise.
