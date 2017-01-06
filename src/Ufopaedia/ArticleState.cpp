@@ -89,6 +89,36 @@ namespace OpenXcom
 		case DT_SMOKE:
 			type = "STR_DAMAGE_SMOKE";
 			break;
+		case DT_10:
+			type = "STR_DAMAGE_10";
+			break;
+		case DT_11:
+			type = "STR_DAMAGE_11";
+			break;
+		case DT_12:
+			type = "STR_DAMAGE_12";
+			break;
+		case DT_13:
+			type = "STR_DAMAGE_13";
+			break;
+		case DT_14:
+			type = "STR_DAMAGE_14";
+			break;
+		case DT_15:
+			type = "STR_DAMAGE_15";
+			break;
+		case DT_16:
+			type = "STR_DAMAGE_16";
+			break;
+		case DT_17:
+			type = "STR_DAMAGE_17";
+			break;
+		case DT_18:
+			type = "STR_DAMAGE_18";
+			break;
+		case DT_19:
+			type = "STR_DAMAGE_19";
+			break;
 		default:
 			type = "STR_UNKNOWN";
 			break;

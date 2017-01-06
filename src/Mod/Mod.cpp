@@ -390,6 +390,14 @@ Mod::Mod() :
 	dmg->ToStun = 0.0f;
 	_damageTypes[dmg->ResistType] = dmg;
 
+	for (int itd = DT_10; itd < DAMAGE_TYPES; ++itd)
+	{
+		dmg = new RuleDamageType();
+		dmg->ResistType = static_cast<ItemDamageType>(itd);
+		dmg->IgnoreOverKill = true;
+		_damageTypes[dmg->ResistType] = dmg;
+	}
+
 	_converter = new RuleConverter();
 	_statAdjustment[0].aimAndArmorMultiplier = 0.5;
 	_statAdjustment[0].growthMultiplier = 0;
