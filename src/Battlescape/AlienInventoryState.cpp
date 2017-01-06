@@ -56,6 +56,12 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	setPalette("PAL_BATTLESCAPE");
 
 	add(_bg);
+	add(_soldier);
+	add(_txtName, "textName", "inventory", _bg);
+	add(_btnArmor, "buttonOK", "inventory", _bg);
+	add(_inv);
+
+	centerAllSurfaces();
 
 	// Set up objects
 	Surface *tmp = _game->getMod()->getSurface("AlienInventory", false);
@@ -63,13 +69,6 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	{
 		tmp->blit(_bg);
 	}
-
-	add(_soldier);
-	add(_txtName, "textName", "inventory", _bg);
-	add(_btnArmor, "buttonOK", "inventory", _bg);
-	add(_inv);
-
-	centerAllSurfaces();
 
 	_txtName->setBig();
 	_txtName->setHighContrast(true);
