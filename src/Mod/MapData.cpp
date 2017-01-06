@@ -174,6 +174,16 @@ int MapData::getBlock(ItemDamageType type) const
 	case DT_MELEE:
 	case DT_HE:
 	case DT_IN:
+	case DT_10:
+	case DT_11:
+	case DT_12:
+	case DT_13:
+	case DT_14:
+	case DT_15:
+	case DT_16:
+	case DT_17:
+	case DT_18:
+	case DT_19:
 	case DT_STUN:
 		return _block[2];
 	default:
