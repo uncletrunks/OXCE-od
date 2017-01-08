@@ -1282,6 +1282,9 @@ bool BattlescapeState::playableUnitSelected()
 	return _save->getSelectedUnit() != 0 && allowButtons();
 }
 
+/**
+ * Draw hand item with ammo number.
+ */
 void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* ammo)
 {
 	hand->clear();
@@ -1289,7 +1292,7 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* amm
 	if (item)
 	{
 		const RuleItem *rule = item->getRules();
-		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item);
+		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item, _save->getAnimFrame());
 		if (item->getRules()->getBattleType() == BT_FIREARM && (item->needsAmmo() || item->getRules()->getClipSize() > 0))
 		{
 			ammo->setVisible(true);
@@ -1299,6 +1302,16 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* amm
 				ammo->setValue(0);
 		}
 	}
+}
+
+/**
+ * Draw both hands sprites.
+ */
+void BattlescapeState::drawHandsItems()
+{
+	BattleUnit *battleUnit = _save->getSelectedUnit();
+	drawItem(battleUnit ? battleUnit->getLeftHandWeapon() : nullptr, _btnLeftHandItem, _numAmmoLeft);
+	drawItem(battleUnit ? battleUnit->getRightHandWeapon() : nullptr, _btnRightHandItem, _numAmmoRight);
 }
 
 /**
@@ -1368,8 +1381,7 @@ void BattlescapeState::updateSoldierInfo()
 
 	toggleKneelButton(battleUnit);
 
-	drawItem(battleUnit->getLeftHandWeapon(), _btnLeftHandItem, _numAmmoLeft);
-	drawItem(battleUnit->getRightHandWeapon(), _btnRightHandItem, _numAmmoRight);
+	drawHandsItems();
 
 	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
 	int j = 0;
@@ -1455,6 +1467,7 @@ void BattlescapeState::animate()
 
 	blinkVisibleUnitButtons();
 	blinkHealthBar();
+	drawHandsItems();
 }
 
 /**

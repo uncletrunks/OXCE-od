@@ -49,7 +49,7 @@ namespace OpenXcom
  */
 SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
-	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1),
+	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _animFrame(0),
 	_debugMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
@@ -121,6 +121,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_globalShade = node["globalshade"].as<int>(_globalShade);
 	_turn = node["turn"].as<int>(_turn);
 	_depth = node["depth"].as<int>(_depth);
+	_animFrame = node["animFrame"].as<int>(_animFrame);
 	int selectedUnit = node["selectedUnit"].as<int>();
 
 	for (YAML::const_iterator i = node["mapdatasets"].begin(); i != node["mapdatasets"].end(); ++i)
@@ -393,6 +394,7 @@ YAML::Node SavedBattleGame::save() const
 	node["alienCustomMission"] = _alienCustomMission;
 	node["globalshade"] = _globalShade;
 	node["turn"] = _turn;
+	node["animFrame"] = _animFrame;
 	node["selectedUnit"] = (_selectedUnit?_selectedUnit->getId():-1);
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
@@ -972,6 +974,23 @@ void SavedBattleGame::endTurn()
 
 	if (_side != FACTION_PLAYER)
 		selectNextPlayerUnit();
+}
+
+/**
+ * Get current animation frame number.
+ * @return Numer of frame.
+ */
+int SavedBattleGame::getAnimFrame() const
+{
+	return _animFrame;
+}
+
+/**
+ * Increase animation frame with warparound 705600.
+ */
+void SavedBattleGame::nextAnimFrame()
+{
+	_animFrame = (_animFrame + 1) % (64 * 3*3 * 5*5 * 7*7);
 }
 
 /**

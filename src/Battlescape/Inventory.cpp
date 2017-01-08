@@ -71,8 +71,8 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
 
-	_animTimer = new Timer(125);
-	_animTimer->onTimer((SurfaceHandler)&Inventory::drawPrimers);
+	_animTimer = new Timer(100);
+	_animTimer->onTimer((SurfaceHandler)&Inventory::animate);
 	_animTimer->start();
 }
 
@@ -250,7 +250,7 @@ void Inventory::drawItems()
 			{
 				continue;
 			}
-			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, _animFrame, 0);
 			work.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
@@ -272,7 +272,7 @@ void Inventory::drawItems()
 			int x, y;
 			x = ((*i)->getSlot()->getX() + ((*i)->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
 			y = ((*i)->getSlot()->getY() + (*i)->getSlotY() * RuleInventory::SLOT_H);
-			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, _animFrame, 0);
 			work.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
@@ -314,6 +314,18 @@ void Inventory::drawItems()
 		}
 		// and finally the number itself
 		stackLayer.blit(_items);
+	}
+}
+
+/**
+ * Draws the selected item.
+ */
+void Inventory::drawSelectedItem()
+{
+	if (_selItem)
+	{
+		_selection->clear();
+		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem, _animFrame);
 	}
 }
 
@@ -439,18 +451,18 @@ BattleItem *Inventory::getSelectedItem() const
 void Inventory::setSelectedItem(BattleItem *item)
 {
 	_selItem = (item && !item->getRules()->isFixed()) ? item : 0;
-	if (_selItem == 0)
-	{
-		_selection->clear();
-	}
-	else
+	if (_selItem)
 	{
 		if (_selItem->getSlot()->getType() == INV_GROUND)
 		{
 			_stackLevel[_selItem->getSlotX()][_selItem->getSlotY()] -= 1;
 		}
-		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem);
 	}
+	else
+	{
+		_selection->clear();
+	}
+	drawSelectedItem();
 	drawItems();
 }
 
@@ -1158,16 +1170,32 @@ void Inventory::showWarning(const std::wstring &msg)
 void Inventory::drawPrimers()
 {
 	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
-	if (_animFrame == 8)
-	{
-		_animFrame = 0;
-	}
 	Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
 	for (std::vector<std::pair<int, int> >::const_iterator i = _grenadeIndicators.begin(); i != _grenadeIndicators.end(); ++i)
 	{
-		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
 	}
-	_animFrame++;
+}
+
+/**
+ * Animate surface.
+ */
+void Inventory::animate()
+{
+	if (_tu)
+	{
+		SavedBattleGame* save = _game->getSavedGame()->getSavedBattle();
+		save->nextAnimFrame();
+		_animFrame = save->getAnimFrame();
+	}
+	else
+	{
+		_animFrame++;
+	}
+
+	drawItems();
+	drawPrimers();
+	drawSelectedItem();
 }
 
 }

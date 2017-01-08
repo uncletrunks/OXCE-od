@@ -85,8 +85,10 @@ private:
 	void handleItemClick(BattleItem *item);
 	/// Shifts the red colors of the visible unit buttons backgrounds.
 	void blinkVisibleUnitButtons();
-	/// Draw hand item with ammo number
+	/// Draw hand item with ammo number.
 	void drawItem(BattleItem *item, Surface *hand, NumberText *ammo);
+	/// Draw both hands sprites.
+	void drawHandsItems();
 	/// Shifts the colors of the health bar when unit has fatal wounds.
 	void blinkHealthBar();
 	/// Shows the unit kneel state.

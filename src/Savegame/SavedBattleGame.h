@@ -62,6 +62,7 @@ private:
 	int _globalShade;
 	UnitFaction _side;
 	int _turn;
+	int _animFrame;
 	bool _debugMode;
 	bool _aborted;
 	int _itemId;
@@ -191,6 +192,10 @@ public:
 	int getTurn() const;
 	/// Ends the turn.
 	void endTurn();
+	/// Gets animation frame.
+	int getAnimFrame() const;
+	/// Increase animation frame.
+	void nextAnimFrame();
 	/// Sets debug mode.
 	void setDebugMode();
 	/// Gets debug mode.

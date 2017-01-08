@@ -1350,7 +1350,8 @@ void Map::setSelectorPosition(int mx, int my)
  */
 void Map::animate(bool redraw)
 {
-	_animFrame = (_animFrame + 1) % (64 * 3*3 * 5*5 * 7*7);
+	_save->nextAnimFrame();
+	_animFrame = _save->getAnimFrame();
 
 	// animate tiles
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
