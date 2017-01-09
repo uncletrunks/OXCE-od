@@ -83,6 +83,10 @@ const std::string &ModInfo::getId()          const { return _id;       }
 const std::string &ModInfo::getMaster()      const { return _master;   }
 bool               ModInfo::isMaster()       const { return _isMaster; }
 int                ModInfo::getReservedSpace()        const { return _reservedSpace;     }
+void ModInfo::setReservedSpace(int reservedSpace)
+{
+	_reservedSpace = reservedSpace;
+}
 
 const std::vector<std::string> &ModInfo::getExternalResourceDirs() const { return _externalResourceDirs; }
 }

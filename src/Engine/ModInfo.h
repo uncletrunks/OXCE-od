@@ -60,6 +60,8 @@ public:
 	bool isMaster() const;
 	/// Gets size of mod, bigger mod reserve more values in common colections/surfacesets.
 	int getReservedSpace() const;
+	/// Sets mod size (DO NOT use this method outside Options::updateReservedSpace()).
+	void setReservedSpace(int reservedSpace);
 	/// Gets the list of external resource dirs to load for this mod.
 	const std::vector<std::string> &getExternalResourceDirs() const;
 };
