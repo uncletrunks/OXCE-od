@@ -91,13 +91,29 @@ BattleItem *getIfVisible(BattleItem *item)
  */
 void UnitSprite::selectItem(Part& p, BattleItem *item, int dir)
 {
-	p.src = _itemSurface->getFrame(item->getRules()->getHandSprite() + dir);
+	const auto* rule = item->getRules();
+	auto index = item->getRules()->getHandSprite();
 
 	//enforce compatibility with basic version
-	if (!p.src)
+	if (!_itemSurface->getFrame(index + dir))
 	{
 		throw Exception("Invlid surface set 'HANDOB.PCK' for item '" + item->getRules()->getName() + "': not enough frames");
 	}
+
+	const auto &scr = rule->getSpriteScript();
+	auto result = 0;
+	if(scr)
+	{
+		ModScript::SelectItemParser::Output arg{ index, dir };
+		ModScript::SelectItemParser::Worker work{ item, p.bodyPart, _animationFrame, _shade };
+		work.execute(scr, arg);
+		result = arg.getFirst();
+	}
+	else
+	{
+		result = index + dir;
+	}
+	p.src = _itemSurface->getFrame(result);
 }
 
 /**
@@ -110,7 +126,7 @@ void UnitSprite::selectUnit(Part& p, int index, int dir)
 	const auto* armor = _unit->getArmor();
 
 	//enforce compatibility with basic version
-	if (InvalidSpriteIndex != index && _unitSurface->getTotalFrames() <= (size_t)(index + dir))
+	if (InvalidSpriteIndex != index && !_unitSurface->getFrame(index + dir))
 	{
 		throw Exception("Invlid surface set '" + armor->getSpriteSheet() + "' for armor '" + armor->getType() + "': not enough frames");
 	}
