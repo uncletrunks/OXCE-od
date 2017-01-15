@@ -35,7 +35,6 @@ namespace OpenXcom
 class Tile;
 class BattleItem;
 class Unit;
-class BattleAIState;
 class SavedBattleGame;
 class Node;
 class Surface;
