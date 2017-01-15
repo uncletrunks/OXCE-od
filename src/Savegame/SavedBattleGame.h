@@ -46,6 +46,12 @@ class State;
  */
 class SavedBattleGame
 {
+public:
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "BattleGame";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 private:
 	BattlescapeState *_battleState;
 	Mod *_rule;
@@ -81,8 +87,10 @@ private:
 	int _turnLimit, _cheatTurn;
 	ChronoTrigger _chronoTrigger;
 	bool _beforeGame;
+	ScriptValues<SavedBattleGame> _scriptValues;
 	/// Selects a soldier.
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
+
 public:
 	/// Creates a new battle save, based on the current generic save.
 	SavedBattleGame(Mod *rule);

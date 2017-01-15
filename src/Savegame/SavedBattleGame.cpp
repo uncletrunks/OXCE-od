@@ -39,6 +39,7 @@
 #include "../Engine/RNG.h"
 #include "../Engine/Options.h"
 #include "../Engine/Logger.h"
+#include "../Engine/ScriptBind.h"
 #include "SerializationHelper.h"
 
 namespace OpenXcom
@@ -336,6 +337,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_turnLimit = node["turnLimit"].as<int>(_turnLimit);
 	_chronoTrigger = ChronoTrigger(node["chronoTrigger"].as<int>(_chronoTrigger));
 	_cheatTurn = node["cheatTurn"].as<int>(_cheatTurn);
+	_scriptValues.load(node, _rule->getScriptGlobal());
 }
 
 /**
@@ -471,6 +473,7 @@ YAML::Node SavedBattleGame::save() const
 	node["turnLimit"] = _turnLimit;
 	node["chronoTrigger"] = int(_chronoTrigger);
 	node["cheatTurn"] = _cheatTurn;
+	_scriptValues.save(node, _rule->getScriptGlobal());
 
 	return node;
 }
@@ -2471,6 +2474,20 @@ void SavedBattleGame::setCheatTurn(int turn)
 bool SavedBattleGame::isBeforeGame() const
 {
 	return _beforeGame;
+}
+
+/**
+ * Register Armor in script parser.
+ * @param parser Script parser.
+ */
+void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<SavedBattleGame> sbg = { parser };
+
+	sbg.add<&SavedBattleGame::getTurn>("getTurn");
+	sbg.add<&SavedBattleGame::getAnimFrame>("getAnimFrame");
+
+	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
 }
 
 }
