@@ -562,13 +562,16 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	}
 
 	// Get crafts height. Used for damage indication.
-	int x =_craftSprite->getWidth() / 2;
 	for (int y = 0; y < _craftSprite->getHeight(); ++y)
 	{
-		Uint8 pixelColor = _craftSprite->getPixel(x, y);
-		if (pixelColor >= _colors[CRAFT_MIN] && pixelColor < _colors[CRAFT_MAX])
+		for (int x = 0; x < _craftSprite->getWidth(); ++x)
 		{
-			++_craftHeight;
+			Uint8 pixelColor = _craftSprite->getPixel(x, y);
+			if (pixelColor >= _colors[CRAFT_MIN] && pixelColor < _colors[CRAFT_MAX])
+			{
+				++_craftHeight;
+				break;
+			}
 		}
 	}
 
@@ -730,11 +733,17 @@ void DogfightState::drawCraftShield()
 		return;
 
 	int maxRow = _craftHeight - ((_craftHeight * _craft->getShield()) / _craft->getShieldCapacity());
+	bool startColoring = false;
 	for (int y = _craftShield->getHeight(); y >= 0; --y)
 	{
 		for (int x = 0; x < _craftShield->getWidth(); ++x)
 		{
 			int craftPixel = _craftSprite->getPixel(x, y);
+			if (!startColoring && craftPixel != 0)
+			{
+				maxRow += (y - _craftHeight + 1);
+				startColoring = true;
+			}
 			if (y < maxRow && craftPixel != 0)
 			{
 				_craftShield->setPixel(x, y, 0);
