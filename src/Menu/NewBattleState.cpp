@@ -212,6 +212,11 @@ NewBattleState::NewBattleState() : _craft(0)
 		_cbxAlienRace->setOptions(_alienRaces);
 
 	_slrAlienTech->setRange(0, _game->getMod()->getAlienItemLevels().size()-1);
+	if (_game->getMod()->getAlienItemLevels().size() <= 1)
+	{
+		_slrAlienTech->setVisible(false);
+		_txtAlienTech->setVisible(false);
+	}
 
 	_btnEquip->setText(tr("STR_EQUIP_CRAFT"));
 	_btnEquip->onMouseClick((ActionHandler)&NewBattleState::btnEquipClick);
