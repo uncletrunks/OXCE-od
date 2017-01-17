@@ -20,6 +20,7 @@
 #include "AlienInventory.h"
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
+#include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Engine/Screen.h"
 #include "../Engine/Surface.h"
@@ -50,7 +51,7 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	_soldier = new Surface(240, 200, 80, 0);
 	_txtName = new Text(308, 17, 6, 6);
 	_btnArmor = new BattlescapeButton(40, 70, 140, 65);
-	_inv = new AlienInventory(_game, 240, 200, 80, 0);
+	_inv = new AlienInventory(_game, 320, 200, 0, 0);
 
 	// Set palette
 	setPalette("PAL_BATTLESCAPE");
@@ -73,7 +74,14 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	_txtName->setBig();
 	_txtName->setHighContrast(true);
 	_txtName->setAlign(ALIGN_CENTER);
-	_txtName->setText(unit->getName(_game->getLanguage()));
+	if (unit->getOriginalFaction() == FACTION_NEUTRAL)
+	{
+		_txtName->setText(tr(unit->getType()));
+	}
+	else
+	{
+		_txtName->setText(unit->getName(_game->getLanguage()));
+	}
 
 	_btnArmor->onKeyboardPress((ActionHandler)&AlienInventoryState::btnOkClick, Options::keyCancel);
 	_btnArmor->onMouseClick((ActionHandler)&AlienInventoryState::btnArmorClickMiddle, SDL_BUTTON_MIDDLE);

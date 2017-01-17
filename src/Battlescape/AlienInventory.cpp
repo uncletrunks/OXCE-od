@@ -43,7 +43,7 @@ namespace OpenXcom
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-AlienInventory::AlienInventory(Game *game, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0)
+AlienInventory::AlienInventory(Game *game, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _dynamicOffset(0)
 {
 	_grid = new Surface(width, height, 0, 0);
 	_items = new Surface(width, height, 0, 0);
@@ -87,6 +87,11 @@ BattleUnit *AlienInventory::getSelectedUnit() const
 void AlienInventory::setSelectedUnit(BattleUnit *unit)
 {
 	_selUnit = unit;
+	_dynamicOffset = 0;
+	if (unit && unit->getArmor()->getSize() > 1)
+	{
+		_dynamicOffset = 32;
+	}
 }
 
 /**
@@ -113,6 +118,13 @@ void AlienInventory::drawGrid()
 		{
 			SDL_Rect r;
 			r.x = i->second->getX();
+			r.x += ALIEN_INVENTORY_STATIC_OFFSET;
+
+			if (i->second->getId() == "STR_RIGHT_HAND")
+				r.x -= _dynamicOffset;
+			else if (i->second->getId() == "STR_LEFT_HAND")
+				r.x += _dynamicOffset;
+
 			r.y = i->second->getY();
 			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
 			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
@@ -126,33 +138,6 @@ void AlienInventory::drawGrid()
 		else
 		{
 			continue;
-		}
-	}
-	drawGridLabels();
-}
-
-/**
- * Draws the inventory grid labels.
- */
-void AlienInventory::drawGridLabels()
-{
-	Text text = Text(90, 9, 0, 0);
-	text.setPalette(_grid->getPalette());
-	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-
-	RuleInterface *rule = _game->getMod()->getInterface("inventory");
-
-	text.setColor(rule->getElement("textSlots")->color);
-	text.setHighContrast(true);
-
-	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
-	{
-		if (i->second->getType() == INV_HAND)
-		{
-			text.setX(i->second->getX());
-			text.setY(i->second->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
-			text.setText(_game->getLanguage()->getString(i->second->getId()));
-			text.blit(_grid);
 		}
 	}
 }
@@ -171,7 +156,15 @@ void AlienInventory::drawItems()
 			Surface *frame = texture->getFrame((*i)->getRules()->getBigSprite());
 			if ((*i)->getSlot()->getType() == INV_HAND)
 			{
-				frame->setX((*i)->getSlot()->getX() + (*i)->getRules()->getHandSpriteOffX());
+				int x = (*i)->getSlot()->getX() + (*i)->getRules()->getHandSpriteOffX();
+				x += ALIEN_INVENTORY_STATIC_OFFSET;
+
+				if ((*i)->getSlot()->getId() == "STR_RIGHT_HAND")
+					x -= _dynamicOffset;
+				else if ((*i)->getSlot()->getId() == "STR_LEFT_HAND")
+					x += _dynamicOffset;
+
+				frame->setX(x);
 				frame->setY((*i)->getSlot()->getY() + (*i)->getRules()->getHandSpriteOffY());
 			}
 			else
@@ -235,6 +228,14 @@ void AlienInventory::mouseClick(Action *action, State *state)
 
 		int x = (int)floor(action->getAbsoluteXMouse()) - getX(),
 			y = (int)floor(action->getAbsoluteYMouse()) - getY();
+
+		if (x >= Screen::ORIGINAL_WIDTH / 2)
+			x -= _dynamicOffset;
+		else
+			x += _dynamicOffset;
+
+		x -= ALIEN_INVENTORY_STATIC_OFFSET;
+
 		RuleInventory *slot = getSlotInPosition(&x, &y);
 		if (slot != 0)
 		{

@@ -36,9 +36,11 @@ private:
 	Game *_game;
 	Surface *_grid, *_items;
 	BattleUnit *_selUnit;
+	int _dynamicOffset;
 	/// Gets the slot in the specified position.
 	RuleInventory *getSlotInPosition(int *x, int *y) const;
 public:
+	static const int ALIEN_INVENTORY_STATIC_OFFSET = 80;
 	/// Creates a new inventory view at the specified position and size.
 	AlienInventory(Game *game, int width, int height, int x = 0, int y = 0);
 	/// Cleans up the inventory.
@@ -53,8 +55,6 @@ public:
 	void draw();
 	/// Draws the inventory grid.
 	void drawGrid();
-	/// Draws the inventory grid labels.
-	void drawGridLabels();
 	/// Draws the inventory items.
 	void drawItems();
 	/// Blits the inventory onto another surface.
