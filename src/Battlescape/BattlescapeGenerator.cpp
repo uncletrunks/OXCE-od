@@ -883,7 +883,7 @@ void BattlescapeGenerator::autoEquip(std::vector<BattleUnit*> units, Mod *mod, S
 						// let's not be greedy, we'll only take a second extra clip
 						// if everyone else has had a chance to take a first.
 						bool allowSecondClip = (pass == 3);
-						if (addToSave->addItem(*j, *i, allowSecondClip, allowAutoLoadout))
+						if ((*i)->addItem(*j, mod, addToSave, allowSecondClip, allowAutoLoadout))
 						{
 							j = craftInv->erase(j);
 							add = false;
@@ -932,7 +932,7 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 	if (unit)
 	{
 		BattleItem *item = new BattleItem(_game->getMod()->getItem(vehicle, true), _save->getCurrentItemId());
-		if (!_save->addItem(item, unit))
+		if (!unit->addItem(item, _save->getMod(), _save))
 		{
 			delete item;
 		}
@@ -940,7 +940,7 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 		{
 			std::string ammo = v->getRules()->getCompatibleAmmo()->front();
 			BattleItem *ammoItem = new BattleItem(_game->getMod()->getItem(ammo, true), _save->getCurrentItemId());
-			_save->addItem(ammoItem, unit);
+			unit->addItem(ammoItem, _save->getMod(), _save);
 			ammoItem->setAmmoQuantity(v->getAmmo());
 		}
 		unit->setTurretType(v->getRules()->getTurretType());
@@ -1130,7 +1130,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 						if (ruleItem)
 						{
 							BattleItem *item = new BattleItem(ruleItem, _save->getCurrentItemId());
-							if (!_save->addItem(item, unit))
+							if (!unit->addItem(item, _save->getMod(), _save))
 							{
 								delete item;
 							}

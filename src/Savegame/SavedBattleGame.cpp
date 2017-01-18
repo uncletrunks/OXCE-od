@@ -1426,7 +1426,7 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
 					continue;
 				}
 				BattleItem *item = new BattleItem(ruleItem, getCurrentItemId());
-				if (!addItem(item, unit, false, true, true))
+				if (!unit->addItem(item, _rule, this, false, true, true))
 				{
 					delete item;
 				}
@@ -1435,7 +1435,7 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
 		for (std::vector<RuleItem*>::const_iterator j = ammo.begin(); j != ammo.end(); ++j)
 		{
 			BattleItem *item = new BattleItem(*j, getCurrentItemId());
-			if (!addItem(item, unit, false, true, true))
+			if (!unit->addItem(item, _rule, this, false, true, true))
 			{
 				delete item;
 			}
@@ -1478,7 +1478,7 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 			if (ruleItem)
 			{
 				BattleItem *item = new BattleItem(ruleItem, getCurrentItemId());
-				if (!addItem(item, unit))
+				if (!unit->addItem(item, _rule, this))
 				{
 					delete item;
 				}

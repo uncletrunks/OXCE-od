@@ -814,11 +814,10 @@ void InventoryState::onAutoequip(Action *)
 	Mod                      *mod           = _game->getMod();
 	RuleInventory            *groundRuleInv = mod->getInventory("STR_GROUND", true);
 	int                       worldShade    = _battleGame->getGlobalShade();
-	SavedBattleGame           dummy{ mod };
 
 	std::vector<BattleUnit*> units;
 	units.push_back(unit);
-	BattlescapeGenerator::autoEquip(units, mod, &dummy, groundInv, groundRuleInv, worldShade, true, true);
+	BattlescapeGenerator::autoEquip(units, mod, nullptr, groundInv, groundRuleInv, worldShade, true, true);
 
 	// refresh ui
 	_inv->arrangeGround(false);

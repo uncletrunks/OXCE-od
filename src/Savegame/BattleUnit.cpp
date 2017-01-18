@@ -28,6 +28,7 @@
 #include "../Battlescape/Pathfinding.h"
 #include "../Battlescape/BattlescapeGame.h"
 #include "../Battlescape/AIModule.h"
+#include "../Battlescape/Inventory.h"
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Unit.h"
@@ -1989,6 +1990,230 @@ int BattleUnit::getFire() const
 std::vector<BattleItem*> *BattleUnit::getInventory()
 {
 	return &_inventory;
+}
+
+/**
+ * Adds an item to an XCom soldier (auto-equip).
+ * @param item Pointer to the Item.
+ * @param mod Pointer to the Mod.
+ * @param save Pointer to the saved battle game for storing items.
+ * @param allowSecondClip allow the unit to take a second clip or not. (only applies to xcom soldiers, aliens are allowed regardless of this flag)
+ * @param allowAutoLoadout allow auto equip of weapons for solders.
+ * @param allowUnloadedWeapons allow equip of weapons without ammo.
+ * @return if the item was placed or not.
+ */
+bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save, bool allowSecondClip, bool allowAutoLoadout, bool allowUnloadedWeapons)
+{
+	RuleInventory *rightHand = mod->getInventory("STR_RIGHT_HAND");
+	RuleInventory *leftHand = mod->getInventory("STR_LEFT_HAND");
+	bool placed = false;
+	bool loaded = false;
+	BattleItem *rightWeapon = getRightHandWeapon();
+	BattleItem *leftWeapon = getLeftHandWeapon();
+	const RuleItem *rule = item->getRules();
+	int weight = 0;
+
+	// tanks and aliens don't care about weight or multiple items,
+	// their loadouts are defined in the rulesets and more or less set in stone.
+	if (getFaction() == FACTION_PLAYER && hasInventory())
+	{
+		weight = getCarriedWeight() + rule->getWeight();
+		if (item->getAmmoItem() && item->getAmmoItem() != item)
+		{
+			weight += item->getAmmoItem()->getRules()->getWeight();
+		}
+		// allow all weapons to be loaded by avoiding this check,
+		// they'll return false later anyway if the unit has something in his hand.
+		if (rule->getCompatibleAmmo()->empty())
+		{
+			int tally = 0;
+			for (BattleItem *i : *getInventory())
+			{
+				if (rule->getType() == i->getRules()->getType())
+				{
+					if (allowSecondClip && rule->getBattleType() == BT_AMMO)
+					{
+						tally++;
+						if (tally == 2)
+						{
+							return false;
+						}
+					}
+					else
+					{
+						// we already have one, thanks.
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	// place fixed weapon
+	if (rule->isFixed())
+	{
+		// either in the default slot provided in the ruleset
+		if (!rule->getDefaultInventorySlot().empty())
+		{
+			RuleInventory *defaultSlot = mod->getInventory(rule->getDefaultInventorySlot());
+			BattleItem *defaultSlotWeapon = getItem(rule->getDefaultInventorySlot());
+			if (!defaultSlotWeapon)
+			{
+				item->moveToOwner(this);
+				item->setSlot(defaultSlot);
+				placed = true;
+				if (save) save->getItems()->push_back(item);
+				item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+			}
+		}
+		// or in the left/right hand
+		if (!placed && (!rightWeapon || !leftWeapon))
+		{
+			item->moveToOwner(this);
+			item->setSlot(!rightWeapon ? rightHand : leftHand);
+			placed = true;
+			if (save) save->getItems()->push_back(item);
+			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+		}
+		return placed;
+	}
+
+	// we equip item only if we have skill to use it.
+	if (getBaseStats()->psiSkill <= 0 && rule->isPsiRequired())
+	{
+		return false;
+	}
+
+	bool keep = true;
+	switch (rule->getBattleType())
+	{
+	case BT_FIREARM:
+	case BT_MELEE:
+		if (item->getAmmoItem() || getFaction() != FACTION_PLAYER || !hasInventory() || allowUnloadedWeapons)
+		{
+			loaded = true;
+		}
+
+		if (loaded && (getGeoscapeSoldier() == 0 || allowAutoLoadout))
+		{
+			if (!rightWeapon && getBaseStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
+			{
+				item->moveToOwner(this);
+				item->setSlot(rightHand);
+				placed = true;
+			}
+			if (!placed && !leftWeapon && (getFaction() != FACTION_PLAYER || rule->isFixed()))
+			{
+				item->moveToOwner(this);
+				item->setSlot(leftHand);
+				placed = true;
+			}
+		}
+		break;
+	case BT_AMMO:
+		// xcom weapons will already be loaded, aliens and tanks, however, get their ammo added afterwards.
+		// so let's try to load them here.
+		if (rightWeapon && (rightWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
+			!rightWeapon->getRules()->getCompatibleAmmo()->empty() &&
+			!rightWeapon->getAmmoItem() &&
+			rightWeapon->setAmmoItem(item) == 0)
+		{
+			item->setSlot(rightHand);
+			placed = true;
+			break;
+		}
+		if (leftWeapon && (leftWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
+			!leftWeapon->getRules()->getCompatibleAmmo()->empty() &&
+			!leftWeapon->getAmmoItem() &&
+			leftWeapon->setAmmoItem(item) == 0)
+		{
+			item->setSlot(leftHand);
+			placed = true;
+			break;
+		}
+		// don't take ammo for weapons we don't have.
+		keep = (getFaction() != FACTION_PLAYER);
+		if (rightWeapon)
+		{
+			for (const std::string &s : *rightWeapon->getRules()->getCompatibleAmmo())
+			{
+				if (s == rule->getType())
+				{
+					keep = true;
+					break;
+				}
+			}
+		}
+		if (leftWeapon)
+		{
+			for (const std::string &s : *leftWeapon->getRules()->getCompatibleAmmo())
+			{
+				if (s == rule->getType())
+				{
+					keep = true;
+					break;
+				}
+			}
+		}
+		if (!keep)
+		{
+			break;
+		}
+	default:
+		if (rule->getBattleType() == BT_PSIAMP && getFaction() == FACTION_HOSTILE)
+		{
+			if (!rightWeapon)
+			{
+				item->moveToOwner(this);
+				item->setSlot(rightHand);
+				placed = true;
+			}
+			if (!placed && !leftWeapon)
+			{
+				item->moveToOwner(this);
+				item->setSlot(leftHand);
+				placed = true;
+			}
+		}
+		else if ((getGeoscapeSoldier() == 0 || allowAutoLoadout))
+		{
+			if (getBaseStats()->strength >= weight) // weight is always considered 0 for aliens
+			{
+				for (const std::string &s : mod->getInvsList())
+				{
+					RuleInventory *slot = mod->getInventory(s);
+					if (slot->getType() == INV_SLOT)
+					{
+						for (const RuleSlot &rs : *slot->getSlots())
+						{
+							if (!Inventory::overlapItems(this, item, slot, rs.x, rs.y) && slot->fitItemInSlot(rule, rs.x, rs.y))
+							{
+								item->moveToOwner(this);
+								item->setSlot(slot);
+								item->setSlotX(rs.x);
+								item->setSlotY(rs.y);
+								placed = true;
+								break;
+							}
+						}
+						if (placed)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+	break;
+	}
+
+	if (placed && save)
+	{
+		save->getItems()->push_back(item);
+	}
+	item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+
+	return placed;
 }
 
 /**
