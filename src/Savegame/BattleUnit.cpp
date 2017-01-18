@@ -1055,17 +1055,10 @@ int BattleUnit::getOverKillDamage() const
 
 /**
  * Helper function for setting value with max bound.
- * @param value
- * @param max
- * @param diff
  */
 static inline void setValueMax(int& value, int diff, int min, int max)
 {
-	value += diff;
-	if (value < min)
-		value = min;
-	else if (value > max)
-		value = max;
+	value = Clamp(value + diff, min, max);
 }
 
 /**
@@ -3944,6 +3937,18 @@ struct getLeftHandWeaponConstScript
 	}
 };
 
+struct reduceByBraveryScript
+{
+	static RetEnum func(const BattleUnit *bu, int &ret)
+	{
+		if (bu)
+		{
+			ret = bu->reduceByBravery(ret);
+		}
+		return RetContinue;
+	}
+};
+
 void isWalkingScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -3993,6 +3998,56 @@ struct burnShadeScript
 	}
 };
 
+template<int BattleUnit::*StatCurr, int UnitStats::*StatMax>
+void setBaseStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		(bu->*StatCurr) = Clamp(val, 0, (bu->getBaseStats()->*StatMax));
+	}
+}
+
+template<int BattleUnit::*StatCurr, int BattleUnit::*StatMax>
+void setBaseStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		(bu->*StatCurr) = Clamp(val, 0, (bu->*StatMax));
+	}
+}
+
+template<int BattleUnit::*StatCurr, int UnitStats::*StatMax>
+void setMaxStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		val = Clamp(val, 1, 1000);
+		(bu->getBaseStats()->*StatMax) = val;
+		if ((bu->*StatCurr) > val)
+		{
+			(bu->*StatCurr) = val;
+		}
+	}
+}
+
+template<int UnitStats::*StatMax>
+void setMaxStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		val = Clamp(val, 1, 1000);
+	}
+}
+
+template<int BattleUnit::*StatCurr, int Min, int Max>
+void setBaseStatRangeScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		(bu->*StatCurr) = Clamp(val, Min, Max);
+	}
+}
+
 } // namespace
 
 /**
@@ -4007,6 +4062,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 	Bind<BattleUnit> bu = { parser };
 	BindNested<BattleUnit, UnitStats, &BattleUnit::_stats> us = { bu };
+
 
 	bu.addField<&BattleUnit::_id>("getId");
 	bu.addField<&BattleUnit::_rankInt>("getRank");
@@ -4025,35 +4081,65 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
 	bu.add<&BattleUnit::getWalkingPhase>("getWalkingPhase");
 
+
 	bu.addField<&BattleUnit::_tu>("getTimeUnits");
 	us.addField<&UnitStats::tu>("getTimeUnitsMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_tu, &UnitStats::tu>>("setTimeUnits");
 
 	bu.addField<&BattleUnit::_health>("getHealth");
 	us.addField<&UnitStats::health>("getHealthMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_health, &UnitStats::health>>("setHealth");
 
 	bu.addField<&BattleUnit::_energy>("getEnergy");
 	us.addField<&UnitStats::stamina>("getEnergyMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("setEnergy");
 
 	bu.addField<&BattleUnit::_stunlevel>("getStun");
 	bu.addField<&BattleUnit::_health>("getStunMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_stunlevel, &BattleUnit::_health>>("setStun");
 
 	bu.addField<&BattleUnit::_morale>("getMorale");
 	bu.addFake<100>("getMoraleMax");
+	bu.add<&setBaseStatRangeScript<&BattleUnit::_morale, 0, 100>>("setMorale");
+
 
 	bu.add<&getArmorValueScript>("getArmor");
 	bu.add<&getArmorMaxScript>("getArmorMax");
 
+
 	us.addField<&UnitStats::tu>("Stats.getTimeUnits");
+	bu.add<&setMaxStatScript<&BattleUnit::_tu, &UnitStats::tu>>("Stats.setTimeUnits");
+
 	us.addField<&UnitStats::stamina>("Stats.getStamina");
+	bu.add<&setMaxStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("Stats.setStamina");
+
 	us.addField<&UnitStats::health>("Stats.getHealth");
+	bu.add<&setMaxStatScript<&BattleUnit::_health, &UnitStats::health>>("Stats.setHealth");
+
 	us.addField<&UnitStats::bravery>("Stats.getBravery");
+	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setBravery");
+
 	us.addField<&UnitStats::reactions>("Stats.getReactions");
+	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setReactions");
+
 	us.addField<&UnitStats::firing>("Stats.getFiring");
+	bu.add<&setMaxStatScript<&UnitStats::firing>>("Stats.setFiring");
+
 	us.addField<&UnitStats::throwing>("Stats.getThrowing");
+	bu.add<&setMaxStatScript<&UnitStats::throwing>>("Stats.setThrowing");
+
 	us.addField<&UnitStats::strength>("Stats.getStrength");
+	bu.add<&setMaxStatScript<&UnitStats::strength>>("Stats.setStrength");
+
 	us.addField<&UnitStats::psiStrength>("Stats.getPsiStrength");
+	bu.add<&setMaxStatScript<&UnitStats::psiStrength>>("Stats.setPsiStrength");
+
 	us.addField<&UnitStats::psiSkill>("Stats.getPsiSkill");
+	bu.add<&setMaxStatScript<&UnitStats::psiSkill>>("Stats.setPsiSkill");
+
 	us.addField<&UnitStats::melee>("Stats.getMelee");
+	bu.add<&setMaxStatScript<&UnitStats::melee>>("Stats.setMelee");
+
 
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
@@ -4063,10 +4149,14 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
 	bu.addFunc<getLeftHandWeaponConstScript>("getLeftHandWeapon");
+	bu.addFunc<reduceByBraveryScript>("reduceByBravery");
+
 
 	bu.addScriptValue<&BattleUnit::_scriptValues>();
 
+
 	bu.add<&getTileShade>("getTileShade");
+
 
 	bu.addCustomConst("BODYPART_HEAD", BODYPART_HEAD);
 	bu.addCustomConst("BODYPART_TORSO", BODYPART_TORSO);
