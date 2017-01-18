@@ -1288,19 +1288,25 @@ bool BattlescapeState::playableUnitSelected()
 void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* ammo)
 {
 	hand->clear();
-	ammo->setVisible(false);
 	if (item)
 	{
 		const RuleItem *rule = item->getRules();
 		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item, _save->getAnimFrame());
 		if (item->getRules()->getBattleType() == BT_FIREARM && (item->needsAmmo() || item->getRules()->getClipSize() > 0))
 		{
-			ammo->setVisible(true);
 			if (item->getAmmoItem())
 				ammo->setValue(item->getAmmoItem()->getAmmoQuantity());
 			else
 				ammo->setValue(0);
 		}
+		else
+		{
+			ammo->setVisible(false);
+		}
+	}
+	else
+	{
+		ammo->setVisible(false);
 	}
 }
 
