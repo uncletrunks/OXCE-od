@@ -28,6 +28,9 @@
 #include "../Savegame/Base.h"
 #include "../Savegame/Craft.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Ufo.h"
+#include "../Savegame/MissionSite.h"
+#include "../Savegame/AlienBase.h"
 #include "../Engine/Options.h"
 #include "Globe.h"
 #include "SelectDestinationState.h"
@@ -127,7 +130,47 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			std::wostringstream ssStatus;
 			std::string status = (*j)->getStatus();
 
-			ssStatus << tr(status);
+			if (status == "STR_OUT")
+			{
+				// QoL: let's give the player a bit more info
+				if ((*j)->getDestination() == 0 || (*j)->getIsAutoPatrolling())
+				{
+					ssStatus << tr("STR_PATROLLING");
+				}
+				else if ((*j)->getLowFuel() || (*j)->getMissionComplete() || (*j)->getDestination() == (Target*)(*j)->getBase())
+				{
+					ssStatus << tr("STR_RETURNING");
+				}
+				else
+				{
+					Ufo *u = dynamic_cast<Ufo*>((*j)->getDestination());
+					MissionSite *m = dynamic_cast<MissionSite*>((*j)->getDestination());
+					AlienBase *b = dynamic_cast<AlienBase*>((*j)->getDestination());
+					if (u != 0)
+					{
+						if ((*j)->isInDogfight() || u->getStatus() == Ufo::FLYING)
+						{
+							ssStatus << tr("STR_INTERCEPTING");
+						}
+						else
+						{
+							ssStatus << tr("STR_EN_ROUTE");
+						}
+					}
+					else if (m != 0 || b != 0)
+					{
+						ssStatus << tr("STR_EN_ROUTE");
+					}
+					else
+					{
+						ssStatus << tr(status); // "STR_OUT"
+					}
+				}
+			}
+			else
+			{
+				ssStatus << tr(status);
+			}
 			if (status != "STR_READY" && status != "STR_OUT")
 			{
 				unsigned int maintenanceHours = 0;
@@ -136,7 +179,22 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 				maintenanceHours += (*j)->calcRefuelTime();
 				maintenanceHours += (*j)->calcRearmTime();
 
-				ssStatus << L": " << tr("STR_HOUR", maintenanceHours);
+				int days = maintenanceHours / 24;
+				int hours = maintenanceHours % 24;
+				ssStatus << L" (";
+				if (days > 0)
+				{
+					ssStatus << tr("STR_DAY_SHORT").arg(days);
+				}
+				if (hours > 0)
+				{
+					if (days > 0)
+					{
+						ssStatus << L"/";
+					}
+					ssStatus << tr("STR_HOUR_SHORT").arg(hours);
+				}
+				ssStatus << L")";
 			}
 
 			std::wostringstream ss;
