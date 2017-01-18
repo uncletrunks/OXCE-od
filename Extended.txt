@@ -130,6 +130,7 @@ Update to recent nightly OpenXcom.[br/]
 Config for new lighting system.[br/]
 New map script options made by ohartenstein23.[br/]
 New scripts for items and units.[br/]
+Add option for grenades to explode in hand.[br/]
 [br/]
 
 [examples]
@@ -341,7 +342,8 @@ items:
     allowSelfHeal: true   #can medikit target user.
     medikitType: 0        #change how medikit wroks, `0` default with UI, `1` fast heal, `2` fast stimulant, `3` fast pain killer.
     isConsumable: false   #check if medikit is consumable.
-    defaultInventorySlot: ~ #where place fixed weapon.
+    isExplodingInHands: false #item if primed will explode in hand, default is `fase`.
+    defaultInventorySlot: ~   #where place fixed weapon.
     blockBothHands: false #do item require both hands to use?
     fixedWeaponShow: true #if it's true then it will show fixed weapon on unit.
     hitMissSound: 0       #override `hitSound` when any psi attack was unsuccessful.

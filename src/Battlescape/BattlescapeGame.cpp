@@ -466,45 +466,52 @@ void BattlescapeGame::endTurn()
 		bool exploded = false;
 
 		// check for hot grenades on the ground
-		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
+		for (BattleItem *item : *_save->getItems())
 		{
-			for (std::vector<BattleItem*>::iterator it = _save->getTile(i)->getInventory()->begin(); it != _save->getTile(i)->getInventory()->end(); ++it)
+			const RuleItem *rule = item->getRules();
+			if (item->getFuseTimer() != 0 || rule->getFuseTimerType() == BFT_INSTANT)
 			{
-				if ((*it)->getFuseTimer() != 0 || (*it)->getRules()->getFuseTimerType() == BFT_INSTANT)
-				{
-					continue;
-				}
+				continue;
+			}
 
-				if ((*it)->getRules()->getBattleType() == BT_GRENADE)  // it's a grenade to explode now
+			const Tile *tile = item->getTile();
+			BattleUnit *unit = item->getOwner();
+			if (!tile && unit && rule->isExplodingInHands())
+			{
+				tile = unit->getTile();
+			}
+			if (tile)
+			{
+				if (rule->getBattleType() == BT_GRENADE) // it's a grenade to explode now
 				{
-					if (RNG::percent((*it)->getRules()->getSpecialChance()))
+					if (RNG::percent(rule->getSpecialChance()))
 					{
-						Position p = _save->getTile(i)->getPosition().toVexel() + Position(8, 8, - _save->getTile(i)->getTerrainLevel());
-						statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
+						Position p = tile->getPosition().toVexel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
+						statePushNext(new ExplosionBState(this, p, BA_NONE, item, unit ? unit : item->getPreviousOwner()));
 						exploded = true;
 					}
 					else
 					{
 						//grenade fail to explode.
-						if ((*it)->getRules()->getFuseTimerType() == BFT_SET)
+						if (rule->getFuseTimerType() == BFT_SET)
 						{
-							(*it)->setFuseTimer(1);
+							item->setFuseTimer(1);
 						}
 						else
 						{
-							(*it)->setFuseTimer(-1);
+							item->setFuseTimer(-1);
 						}
 					}
 				}
 				else
 				{
-					forRemoval.push_back((*it));
+					forRemoval.push_back(item);
 				}
 			}
 		}
-		for (std::vector<BattleItem*>::iterator it = forRemoval.begin(); it != forRemoval.end(); ++it)
+		for (BattleItem *item : forRemoval)
 		{
-			_save->removeItem((*it));
+			_save->removeItem(item);
 		}
 		if (exploded)
 		{
