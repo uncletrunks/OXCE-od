@@ -92,9 +92,14 @@ inline ProgPos operator++(ProgPos& pos, int)
 }
 
 /**
+ * Base type for Arg enum.
+ */
+using ArgEnumBase = Uint16;
+
+/**
  * Args special types.
  */
-enum ArgSpecEnum : Uint8
+enum ArgSpecEnum : ArgEnumBase
 {
 	ArgSpecNone = 0x0,
 	ArgSpecReg = 0x1,
@@ -105,21 +110,21 @@ enum ArgSpecEnum : Uint8
 };
 constexpr ArgSpecEnum operator|(ArgSpecEnum a, ArgSpecEnum b)
 {
-	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) | static_cast<Uint8>(b));
+	return static_cast<ArgSpecEnum>(static_cast<ArgEnumBase>(a) | static_cast<ArgEnumBase>(b));
 }
 constexpr ArgSpecEnum operator&(ArgSpecEnum a, ArgSpecEnum b)
 {
-	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) & static_cast<Uint8>(b));
+	return static_cast<ArgSpecEnum>(static_cast<ArgEnumBase>(a) & static_cast<ArgEnumBase>(b));
 }
 constexpr ArgSpecEnum operator^(ArgSpecEnum a, ArgSpecEnum b)
 {
-	return static_cast<ArgSpecEnum>(static_cast<Uint8>(a) ^ static_cast<Uint8>(b));
+	return static_cast<ArgSpecEnum>(static_cast<ArgEnumBase>(a) ^ static_cast<ArgEnumBase>(b));
 }
 
 /**
  * Args types.
  */
-enum ArgEnum : Uint8
+enum ArgEnum : ArgEnumBase
 {
 	ArgInvalid = ArgSpecSize * 0,
 
@@ -134,7 +139,7 @@ enum ArgEnum : Uint8
  */
 constexpr ArgEnum ArgNext(ArgEnum arg)
 {
-	return static_cast<ArgEnum>(static_cast<Uint8>(arg) + static_cast<Uint8>(ArgSpecSize));
+	return static_cast<ArgEnum>(static_cast<ArgEnumBase>(arg) + static_cast<ArgEnumBase>(ArgSpecSize));
 }
 
 /**
@@ -142,49 +147,49 @@ constexpr ArgEnum ArgNext(ArgEnum arg)
  */
 constexpr ArgEnum ArgBase(ArgEnum arg)
 {
-	return static_cast<ArgEnum>((static_cast<Uint8>(arg) & ~(static_cast<Uint8>(ArgSpecSize) - 1)));
+	return static_cast<ArgEnum>((static_cast<ArgEnumBase>(arg) & ~(static_cast<ArgEnumBase>(ArgSpecSize) - 1)));
 }
 /**
  * Specialized version of argument type.
  */
 constexpr ArgEnum ArgSpecAdd(ArgEnum arg, ArgSpecEnum spec)
 {
-	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) | static_cast<Uint8>(spec)) : arg;
+	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<ArgEnumBase>(arg) | static_cast<ArgEnumBase>(spec)) : arg;
 }
 /**
  * Remove specialization from argument type.
  */
 constexpr ArgEnum ArgSpecRemove(ArgEnum arg, ArgSpecEnum spec)
 {
-	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<Uint8>(arg) & ~static_cast<Uint8>(spec)) : arg;
+	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<ArgEnumBase>(arg) & ~static_cast<ArgEnumBase>(spec)) : arg;
 }
 /**
  * Test if argumet type is register (readonly or writeable).
  */
 constexpr bool ArgIsReg(ArgEnum arg)
 {
-	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecReg)) == static_cast<Uint8>(ArgSpecReg);
+	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecReg)) == static_cast<ArgEnumBase>(ArgSpecReg);
 }
 /**
  * Test if argumet type is variable (writeable register).
  */
 constexpr bool ArgIsVar(ArgEnum arg)
 {
-	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecVar)) == static_cast<Uint8>(ArgSpecVar);
+	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecVar)) == static_cast<ArgEnumBase>(ArgSpecVar);
 }
 /**
  * Test if argumet type is pointer.
  */
 constexpr bool ArgIsPtr(ArgEnum arg)
 {
-	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecPtr)) == static_cast<Uint8>(ArgSpecPtr);
+	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecPtr)) == static_cast<ArgEnumBase>(ArgSpecPtr);
 }
 /**
  * Test if argumet type is editable pointer.
  */
 constexpr bool ArgIsPtrE(ArgEnum arg)
 {
-	return (static_cast<Uint8>(arg) & static_cast<Uint8>(ArgSpecPtrE)) == static_cast<Uint8>(ArgSpecPtrE);
+	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecPtrE)) == static_cast<ArgEnumBase>(ArgSpecPtrE);
 }
 /**
  * Compatibility betwean operation argument type and variable type. Greater numbers mean bigger comatibility.
