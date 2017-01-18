@@ -1947,7 +1947,7 @@ bool AIModule::psiAction()
 					{
 						int controlOdds = 40;
 						int morale = victim->getMorale();
-						int bravery = (110 - victim->getBaseStats()->bravery) / 10;
+						int bravery = victim->reduceByBravery(10);
 						if (bravery > 6)
 							controlOdds -= 15;
 						if (bravery < 4)

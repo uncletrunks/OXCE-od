@@ -829,7 +829,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 							// the losing squad all get a morale loss
 							if ((*i)->getOriginalFaction() == victim->getOriginalFaction())
 							{
-								int bravery = (110 - (*i)->getBaseStats()->bravery) / 10;
+								int bravery = (*i)->reduceByBravery(10);
 								(*i)->moraleChange(-(modifier * 200 * bravery / loserMod / 100));
 
 								if (victim->getFaction() == FACTION_HOSTILE && murderer)

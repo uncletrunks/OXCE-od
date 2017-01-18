@@ -315,6 +315,8 @@ public:
 	void updateUnitStats(bool tuAndEnergy, bool rest);
 	/// Morale change
 	void moraleChange(int change);
+	/// Calculate value of morale change based on breavy.
+	int reduceByBravery(int moraleChange) const;
 	/// Don't reselect this unit
 	void dontReselect();
 	/// Reselect this unit

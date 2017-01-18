@@ -1222,7 +1222,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			setValueMax(_stunlevel, std::get<toStun>(args.data), 0, 4 * _stats.health);
 		}
 
-		moraleChange(- (110 - _stats.bravery) * std::get<toMorale>(args.data) / 100);
+		moraleChange(- reduceByBravery(std::get<toMorale>(args.data)));
 
 		setValueMax(_tu, - std::get<toTime>(args.data), 0, _stats.tu);
 
@@ -1936,6 +1936,14 @@ void BattleUnit::moraleChange(int change)
 		_morale = 100;
 	if (_morale < 0)
 		_morale = 0;
+}
+
+/**
+ * Get reduced morale change value by bravery.
+ */
+int BattleUnit::reduceByBravery(int moraleChange) const
+{
+	return (110 - _stats.bravery) * moraleChange / 100;
 }
 
 /**

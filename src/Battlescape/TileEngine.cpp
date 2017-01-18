@@ -1898,7 +1898,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 
 	if (type->IgnoreNormalMoraleLose == false)
 	{
-		const int bravery = (110 - target->getBaseStats()->bravery) / 10;
+		const int bravery = target->reduceByBravery(10);
 		const int modifier = target->getFaction() == FACTION_PLAYER ? _save->getFactionMoraleModifier(true) : 100;
 		const int morale_loss = 100 * (adjustedDamage * bravery / 10) / modifier;
 
@@ -3400,7 +3400,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 
 		if (action->type == BA_PANIC)
 		{
-			int moraleLoss = (110-victim->getBaseStats()->bravery);
+			int moraleLoss = victim->reduceByBravery(100);
 			if (moraleLoss > 0)
 				victim->moraleChange(-moraleLoss);
 			victim->setMindControllerId(action->actor->getId());
