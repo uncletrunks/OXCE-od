@@ -632,6 +632,26 @@ void TechTreeViewerState::initLists()
 				++row;
 			}
 		}
+
+		// 5. person joining
+		if (rule->getSpawnedPersonType() != "")
+		{
+			_lstRight->addRow(1, tr("STR_PERSON_RECRUITED").c_str());
+			_lstRight->setRowColor(row, 218); // blue
+			_rightTopics.push_back("-");
+			_rightFlags.push_back(0);
+			++row;
+
+			// person joining
+			std::wostringstream name;
+			name << L"  ";
+			name << tr(rule->getSpawnedPersonName() != "" ? rule->getSpawnedPersonName() : rule->getSpawnedPersonType());
+			_lstRight->addRow(1, name.str().c_str());
+			_lstRight->setRowColor(row, 208); // white
+			_rightTopics.push_back("-");
+			_rightFlags.push_back(0);
+			++row;
+		}
 	}
 }
 
