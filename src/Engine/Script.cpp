@@ -442,14 +442,15 @@ bool validOverloadProc(const ScriptRange<ScriptRange<ArgEnum>>& overload)
 /**
  * Display arguments
  */
-std::string displayOverloadProc(const ScriptParserBase* spb, const ScriptRange<ScriptRange<ArgEnum>>& overload)
+template<typename T, typename F>
+std::string displayArgs(const ScriptParserBase* spb, const ScriptRange<T>& range, F getType)
 {
 	std::string result = "";
-	for (auto& p : overload)
+	for (auto& p : range)
 	{
 		if (p)
 		{
-			auto type = *p.begin();
+			auto type = getType(p);
 			result += "[";
 			result += spb->getTypePrefix(type);
 			result += spb->getTypeName(type).toString();
@@ -461,6 +462,14 @@ std::string displayOverloadProc(const ScriptParserBase* spb, const ScriptRange<S
 		result.pop_back();
 	}
 	return result;
+}
+
+/**
+ * Display arguments
+ */
+std::string displayOverloadProc(const ScriptParserBase* spb, const ScriptRange<ScriptRange<ArgEnum>>& overload)
+{
+	return displayArgs(spb, overload, [](const ScriptRange<ArgEnum>& o) { return *o.begin(); });
 }
 
 /**
@@ -561,13 +570,31 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc,
 		}
 		else
 		{
-			Log(LOG_ERROR) << "Conflicting overloads for operator '" + proc.begin()->name.toString() + "'";
+			Log(LOG_ERROR) << "Conflicting overloads for operator '" + proc.begin()->name.toString() + "' for:";
+			Log(LOG_ERROR) << "  " << displayArgs(&ph.parser, ScriptRange<ScriptRefData>{ begin, end }, [](const ScriptRefData& r){ return r.type; });
+			Log(LOG_ERROR) << "Excepted:";
+			for (auto& p : proc)
+			{
+				if (p.parserArg != nullptr && p.overloadArg)
+				{
+					Log(LOG_ERROR) << "  " << displayOverloadProc(&ph.parser, p.overloadArg);
+				}
+			}
 			return false;
 		}
 	}
 	else
 	{
-		Log(LOG_ERROR) << "Can't match overload for operator '" + proc.begin()->name.toString() + "'";
+		Log(LOG_ERROR) << "Can't match overload for operator '" + proc.begin()->name.toString() + "' for:";
+		Log(LOG_ERROR) << "  " << displayArgs(&ph.parser, ScriptRange<ScriptRefData>{ begin, end }, [](const ScriptRefData& r){ return r.type; });
+		Log(LOG_ERROR) << "Excepted:";
+		for (auto& p : proc)
+		{
+			if (p.parserArg != nullptr && p.overloadArg)
+			{
+				Log(LOG_ERROR) << "  " << displayOverloadProc(&ph.parser, p.overloadArg);
+			}
+		}
 		return false;
 	}
 }
