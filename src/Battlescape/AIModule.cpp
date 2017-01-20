@@ -2115,8 +2115,7 @@ void AIModule::selectMeleeOrRanged()
 
 	int meleeOdds = 10;
 
-	int dmg = meleeWeapon->getPowerBonus(_unit);
-	dmg *= _aggroTarget->getArmor()->getDamageModifier(meleeWeapon->getDamageType()->ResistType);
+	int dmg = _aggroTarget->reduceByResistance(meleeWeapon->getPowerBonus(_unit), meleeWeapon->getDamageType()->ResistType);
 
 	if (dmg > 50)
 	{

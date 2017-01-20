@@ -317,6 +317,8 @@ public:
 	void moraleChange(int change);
 	/// Calculate value of morale change based on breavy.
 	int reduceByBravery(int moraleChange) const;
+	/// Calculate power reduction by resistances.
+	int reduceByResistance(int power, ItemDamageType resistType) const;
 	/// Don't reselect this unit
 	void dontReselect();
 	/// Reselect this unit

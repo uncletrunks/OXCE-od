@@ -1078,7 +1078,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		return 0;
 	}
 
-	power = (int)floor(power * _armor->getDamageModifier(type->ResistType));
+	power = reduceByResistance(power, type->ResistType);
 
 	if (!type->IgnoreDirection)
 	{
@@ -1805,7 +1805,7 @@ void BattleUnit::prepareHealth(int health)
 	// suffer from fire
 	if (!_hitByFire && _fire > 0)
 	{
-		health -= _armor->getDamageModifier(DT_IN) * RNG::generate(Mod::FIRE_DAMAGE_RANGE[0], Mod::FIRE_DAMAGE_RANGE[1]);
+		health -= reduceByResistance(RNG::generate(Mod::FIRE_DAMAGE_RANGE[0], Mod::FIRE_DAMAGE_RANGE[1]), DT_IN);
 		_fire--;
 	}
 
@@ -1937,6 +1937,14 @@ void BattleUnit::moraleChange(int change)
 int BattleUnit::reduceByBravery(int moraleChange) const
 {
 	return (110 - _stats.bravery) * moraleChange / 100;
+}
+
+/**
+ * Calculate power reduction by resistances.
+ */
+int BattleUnit::reduceByResistance(int power, ItemDamageType resistType) const
+{
+	return (int)floor(power * _armor->getDamageModifier(resistType));
 }
 
 /**
@@ -3949,6 +3957,21 @@ struct reduceByBraveryScript
 	}
 };
 
+struct reduceByResistanceScript
+{
+	static RetEnum func(const BattleUnit *bu, int &ret, int resistType)
+	{
+		if (bu)
+		{
+			if (resistType >= 0 && resistType < DAMAGE_TYPES)
+			{
+				ret = bu->reduceByResistance(ret, (ItemDamageType)resistType);
+			}
+		}
+		return RetContinue;
+	}
+};
+
 void isWalkingScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -4150,6 +4173,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
 	bu.addFunc<getLeftHandWeaponConstScript>("getLeftHandWeapon");
 	bu.addFunc<reduceByBraveryScript>("reduceByBravery");
+	bu.addFunc<reduceByResistanceScript>("reduceByResistance");
 
 
 	bu.addScriptValue<&BattleUnit::_scriptValues>();
