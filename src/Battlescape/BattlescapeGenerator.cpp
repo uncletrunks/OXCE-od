@@ -1126,8 +1126,6 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 	}
 	for (std::vector<DeploymentData>::const_iterator d = deployment->getDeploymentData()->begin(); d != deployment->getDeploymentData()->end(); ++d)
 	{
-		std::string alienName = race->getMember((*d).alienRank);
-
 		int quantity;
 
 		if (_game->getSavedGame()->getDifficulty() < DIFF_VETERAN)
@@ -1141,6 +1139,8 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 
 		for (int i = 0; i < quantity; ++i)
 		{
+			std::string alienName = race->getMember((*d).alienRank);
+
 			bool outside = RNG::generate(0,99) < (*d).percentageOutsideUfo;
 			if (_ufo == 0)
 				outside = false;

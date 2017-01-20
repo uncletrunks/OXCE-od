@@ -38,6 +38,7 @@ private:
 	std::string _baseCustomMission;
 	std::string _retaliationMission;
 	std::vector<std::string> _members;
+	std::vector< std::vector<std::string> > _membersRandom;
 	bool _retaliation;
 	int _retaliationAggression;
 public:
