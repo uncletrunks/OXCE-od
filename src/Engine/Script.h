@@ -205,7 +205,7 @@ constexpr int ArgCompatible(ArgEnum argType, ArgEnum varType, size_t overloadSiz
 		ArgBase(argType) != ArgBase(varType) ? 0 :
 		ArgIsReg(argType) != ArgIsReg(varType) ? 0 :
 		ArgIsPtr(argType) != ArgIsPtr(varType) ? 0 :
-		ArgIsPtrE(argType) && ArgIsPtr(varType) ? 0 :
+		ArgIsPtrE(argType) && !ArgIsPtrE(varType) ? 0 :
 			255 - (ArgIsPtrE(argType) != ArgIsPtrE(varType) ? 128 : 0) - (ArgIsVar(argType) != ArgIsVar(varType) ? 64 : 0) - (overloadSize > 8 ? 8 : overloadSize);
 }
 
