@@ -76,9 +76,22 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	}
 
 	// priming
-	if (weapon->getFuseTimerDefault() >= 0 && _action->weapon->getFuseTimer() == -1)
+	if (weapon->getFuseTimerDefault() >= 0 )
 	{
-		addItem(BA_PRIME, "STR_PRIME_GRENADE", &id);
+		if (_action->weapon->getFuseTimer() == -1)
+		{
+			if (weapon->getCostPrime().Time > 0)
+			{
+				addItem(BA_PRIME, weapon->getPrimeActionName(), &id);
+			}
+		}
+		else
+		{
+			if (weapon->getCostUnprime().Time > 0)
+			{
+				addItem(BA_UNPRIME, weapon->getUnprimeActionName(), &id);
+			}
+		}
 	}
 
 	if (weapon->getBattleType() == BT_FIREARM)
@@ -268,6 +281,10 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 				_action->value = weapon->getFuseTimerDefault();
 				_game->popState();
 			}
+		}
+		else if (_action->type == BA_UNPRIME)
+		{
+			_game->popState();
 		}
 		else if (_action->type == BA_USE && weapon->getBattleType() == BT_MEDIKIT)
 		{

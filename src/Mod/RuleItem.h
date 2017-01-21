@@ -116,11 +116,11 @@ private:
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType, _meleeType;
 	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
-	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime;
+	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime, _costUnprime;
 	int _clipSize, _specialChance, _tuLoad, _tuUnload;
 	BattleType _battleType;
 	BattleFuseType _fuseType;
-	std::string _psiAttackName;
+	std::string _psiAttackName, _primeActionName, _unprimeActionName;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isExplodingInHands;
 	std::string _defaultInventorySlot;
 	int _waypoints, _invWidth, _invHeight;
@@ -133,7 +133,7 @@ private:
 	int _aiUseDelay, _aiMeleeHitCount;
 	bool _recover, _liveAlien;
 	int _attraction;
-	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime;
+	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime, _flatUnprime;
 	bool _arcingShot;
 	ExperienceTrainingMode _experienceTrainingMode;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
@@ -159,6 +159,7 @@ private:
 	void loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
 	/// Load RuleItemUseCost as bool from yaml.
 	void loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
+
 public:
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "RuleItem";
@@ -303,6 +304,8 @@ public:
 	RuleItemUseCost getCostThrow() const;
 	/// Gets the item's prime cost.
 	RuleItemUseCost getCostPrime() const;
+	/// Gets the item's unprime cost.
+	RuleItemUseCost getCostUnprime() const;
 
 	/// Gets the item's load TU cost.
 	int getTULoad() const;
@@ -355,7 +358,7 @@ public:
 	float getPainKillerRecovery() const;
 	/// Gets the medikit ability to self heal.
 	bool getAllowSelfHeal() const;
-	/// Is this (medikit-type) item consumable?
+	/// Is this (medikit-type & items with prime) item consumable?
 	bool isConsumable() const;
 	/// Is this item explode in hands?
 	bool isExplodingInHands() const;
@@ -377,6 +380,7 @@ public:
 	int getAIMeleeHitCount() const;
 	/// Checks if this a live alien.
 	bool isAlien() const;
+
 	/// Should we charge a flat rate?
 	RuleItemUseCost getFlatUse() const;
 	/// Should we charge a flat rate of costMelee?
@@ -385,6 +389,9 @@ public:
 	RuleItemUseCost getFlatThrow() const;
 	/// Should we charge a flat rate of costPrime?
 	RuleItemUseCost getFlatPrime() const;
+	/// Should we charge a flat rate of costPrime?
+	RuleItemUseCost getFlatUnprime() const;
+
 	/// Should this weapon arc?
 	bool getArcingShot() const;
 	/// Which experience training mode to use for this weapon?
@@ -401,6 +408,10 @@ public:
 	int getAutoShots() const;
 	/// Get name of psi attack for action menu.
 	const std::string &getPsiAttackName() const;
+	/// Get name of prime action for action menu.
+	const std::string &getPrimeActionName() const;
+	/// Get name of unprime action for action menu.
+	const std::string &getUnprimeActionName() const;
 	/// is this item a 2 handed weapon?
 	bool isRifle() const;
 	/// is this item a single handed weapon?

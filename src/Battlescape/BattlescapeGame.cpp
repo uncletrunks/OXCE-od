@@ -505,7 +505,14 @@ void BattlescapeGame::endTurn()
 				}
 				else
 				{
-					forRemoval.push_back(item);
+					if (RNG::percent(rule->getSpecialChance()))
+					{
+						forRemoval.push_back(item);
+					}
+					else
+					{
+						item->setFuseTimer(1);
+					}
 				}
 			}
 		}
@@ -952,6 +959,20 @@ void BattlescapeGame::handleNonTargetAction()
 			{
 				_parentState->warning("STR_GRENADE_IS_ACTIVATED");
 				_currentAction.weapon->setFuseTimer(_currentAction.value);
+				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
+				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);
+			}
+			else
+			{
+				_parentState->warning(error);
+			}
+		}
+		else if (_currentAction.type == BA_UNPRIME)
+		{
+			if (_currentAction.spendTU(&error))
+			{
+				_parentState->warning("STR_GRENADE_IS_DEACTIVATED");
+				_currentAction.weapon->setFuseTimer(-1);
 				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
 				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);
 			}

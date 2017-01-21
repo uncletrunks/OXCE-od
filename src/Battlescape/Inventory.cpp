@@ -901,22 +901,24 @@ bool Inventory::unload()
 		}
 	}
 
-	int tuCost = 0;
+	BattleActionCost cost { BA_NONE, _selUnit, _selItem };
 	if (grenade)
 	{
-		tuCost += _selUnit->getActionTUs(BA_PRIME, _selItem).Time / 2;
+		cost.type = BA_UNPRIME;
+		cost.updateTU();
 	}
 	else
 	{
-		tuCost += _selItem->getRules()->getTUUnload();
+		cost.Time += _selItem->getRules()->getTUUnload();
 	}
 
-	if (_selItem->getSlot()->getType() != INV_HAND)
+	if (cost.haveTU() && _selItem->getSlot()->getType() != INV_HAND)
 	{
-		tuCost += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
+		cost.Time += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
 	}
 
-	if (!_tu || _selUnit->spendTimeUnits(tuCost))
+	std::string err;
+	if (!_tu || cost.spendTU(&err))
 	{
 		moveItem(_selItem, _game->getMod()->getInventory("STR_RIGHT_HAND", true), 0, 0);
 		_selItem->moveToOwner(_selUnit);
@@ -935,7 +937,10 @@ bool Inventory::unload()
 	}
 	else
 	{
-		_warning->showMessage(_game->getLanguage()->getString("STR_NOT_ENOUGH_TIME_UNITS"));
+		if (!err.empty())
+		{
+			_warning->showMessage(_game->getLanguage()->getString(err));
+		}
 		return false;
 	}
 

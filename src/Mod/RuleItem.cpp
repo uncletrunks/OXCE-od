@@ -49,10 +49,11 @@ RuleItem::RuleItem(const std::string &type) :
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
-	_battleType(BT_NONE), _fuseType(BFT_NONE), _twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
+	_battleType(BT_NONE), _fuseType(BFT_NONE), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(),
+	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
-	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
+	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
@@ -359,6 +360,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 
 	_power = node["power"].as<int>(_power);
 	_psiAttackName = node["psiAttackName"].as<std::string>(_psiAttackName);
+	_primeActionName = node["primeActionName"].as<std::string>(_primeActionName);
+	_unprimeActionName = node["unprimeActionName"].as<std::string>(_unprimeActionName);
 	_compatibleAmmo = node["compatibleAmmo"].as< std::vector<std::string> >(_compatibleAmmo);
 	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
 
@@ -380,12 +383,14 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	loadCost(_costPanic, node, "Panic");
 	loadCost(_costThrow, node, "Throw");
 	loadCost(_costPrime, node, "Prime");
+	loadCost(_costUnprime, node, "Unprime");
 
 	loadBool(_flatUse.Time, node["flatRate"]);
 	loadPercent(_flatUse, node, "Use");
 	loadPercent(_flatMelee, node, "Melee");
 	loadPercent(_flatThrow, node, "Throw");
 	loadPercent(_flatPrime, node, "Prime");
+	loadPercent(_flatUnprime, node, "Unprime");
 
 	_clipSize = node["clipSize"].as<int>(_clipSize);
 	_specialChance = node["specialChance"].as<int>(_specialChance);
@@ -997,7 +1002,30 @@ RuleItemUseCost RuleItem::getCostThrow() const
  */
 RuleItemUseCost RuleItem::getCostPrime() const
 {
-	return _costPrime;
+	if (!_primeActionName.empty())
+	{
+		return _costPrime;
+	}
+	else
+	{
+		return { };
+	}
+}
+
+/**
+ * Gets the item's time unit percentage for unprime grenade.
+ * @return The prime TU percentage.
+ */
+RuleItemUseCost RuleItem::getCostUnprime() const
+{
+	if (!_unprimeActionName.empty())
+	{
+		return _costUnprime;
+	}
+	else
+	{
+		return { };
+	}
 }
 
 /**
@@ -1252,7 +1280,7 @@ bool RuleItem::getAllowSelfHeal() const
 }
 
 /**
- * Is this (medikit-type) item consumable?
+ * Is this (medikit-type & items with prime) item consumable?
  * @return True if the item is consumable.
  */
 bool RuleItem::isConsumable() const
@@ -1447,6 +1475,15 @@ RuleItemUseCost RuleItem::getFlatPrime() const
 }
 
 /**
+ * Returns whether this item charges a flat rate for costUnprime.
+ * @return True if this item charges a flat rate for costUnprime.
+ */
+RuleItemUseCost RuleItem::getFlatUnprime() const
+{
+	return _flatUnprime;
+}
+
+/**
  * Returns if this weapon should arc its shots.
  * @return True if this weapon should arc its shots.
  */
@@ -1570,6 +1607,22 @@ int RuleItem::getAutoShots() const
 const std::string &RuleItem::getPsiAttackName() const
 {
 	return _psiAttackName;
+}
+
+/**
+ * Get name of prime action for action menu.
+ */
+const std::string &RuleItem::getPrimeActionName() const
+{
+	return _primeActionName;
+}
+
+/**
+ * Get name of unprime action for action menu.
+ */
+const std::string &RuleItem::getUnprimeActionName() const
+{
+	return _unprimeActionName;
 }
 
 /**

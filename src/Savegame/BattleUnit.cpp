@@ -1345,6 +1345,10 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Rule
 				flat = item->getFlatPrime();
 				cost = item->getCostPrime();
 				break;
+			case BA_UNPRIME:
+				flat = item->getFlatUnprime();
+				cost = item->getCostUnprime();
+				break;
 			case BA_THROW:
 				flat = item->getFlatThrow();
 				cost = item->getCostThrow();

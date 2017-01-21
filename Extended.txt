@@ -131,6 +131,8 @@ Config for new lighting system.[br/]
 New map script options made by ohartenstein23.[br/]
 New scripts for items and units.[br/]
 Add option for grenades to explode in hand.[br/]
+Changes in handlig items with prime.[br/]
+Primed granades are not recoverable if consumable property is set.[br/]
 [br/]
 
 [examples]
@@ -214,6 +216,9 @@ items:
     costPrime:
       #cost of Prime granade.
       #same propertes like `costAimed`.
+    costUnprime:
+      #cost of Unprime granade.
+      #same propertes like `costAimed`.
     flatUse:
       #change how cost of all attacks and use work (flat or percent values).
       time: true      #time units cost is flat or %. Alias of `flatRate`.
@@ -230,6 +235,9 @@ items:
       #same propertes like `flatUse`.
     flatPrime:
       #changes how `costPrime` behaves (flat or percent values).
+      #same propertes like `flatUse`.
+    flatUnprime:
+      #changes how `costUnprime` behaves (flat or percent values).
       #same propertes like `flatUse`.
     damageBonus: #used by ammo.
       #each bonus can be writen as: `s: x`, `s: [x]`, `s: [x, y]` or `s: [x, y, z]`.
@@ -335,13 +343,15 @@ items:
     requiresBuy: #what tech is required for the item to be visible in the Hire/Purchase screen.
       - SOME_TECH
       - SOME_TECH_MK2
-    psiAttackName: STR_HIT_MELEE #string id of psi-amp attack name in the pop-up menu. Required to enable special attack.
+    psiAttackName: STR_HIT_MELEE        #string id of psi-amp attack name in the pop-up menu. Required to enable special attack.
+    primeActionName: STR_PRIME_GRENADE  #string id of grenade prime action name in the pop-up menu. Required to enable prime action. Defulat value `STR_PRIME_GRENADE`;
+    unprimeActionName: ~                #string id of grenade unprime action name in the pop-up menu. Required to enable unprime action.
     psiRequired: false    #default based on weapon type, if `true` you need Psi Skill to use the weapon.
     moraleRecovery: 10    #amount of recovered morale by medkit. Defailt `0`.
     painKillerRecovery: 0 #how much missing health convert to morale. Default `1.0`.
     allowSelfHeal: true   #can medikit target user.
     medikitType: 0        #change how medikit wroks, `0` default with UI, `1` fast heal, `2` fast stimulant, `3` fast pain killer.
-    isConsumable: false   #check if medikit is consumable.
+    isConsumable: false   #check if medikit is consumable or primed granade not recoverable.
     isExplodingInHands: false #item if primed will explode in hand, default is `fase`.
     defaultInventorySlot: ~   #where place fixed weapon.
     blockBothHands: false #do item require both hands to use?
