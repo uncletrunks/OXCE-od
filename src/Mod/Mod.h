@@ -158,6 +158,7 @@ private:
 	int _surrenderMode;
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
+	int _soldiersPerSergeant, _soldiersPerCaptain, _soldiersPerColonel, _soldiersPerCommander;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
@@ -422,6 +423,14 @@ public:
 	int getUfoGlancingHitThreshold() const { return _ufoGlancingHitThreshold; }
 	/// Gets the parameter for drawing the width of a ufo's beam weapon based on power
 	int getUfoBeamWidthParameter() const { return _ufoBeamWidthParameter; }
+	/// Gets how many soldiers are needed for one sergeant promotion
+	int getSoldiersPerSergeant() const { return _soldiersPerSergeant; }
+	/// Gets how many soldiers are needed for one captain promotion
+	int getSoldiersPerCaptain() const { return _soldiersPerCaptain; }
+	/// Gets how many soldiers are needed for one colonel promotion
+	int getSoldiersPerColonel() const { return _soldiersPerColonel; }
+	/// Gets how many soldiers are needed for one commander promotion
+	int getSoldiersPerCommander() const { return _soldiersPerCommander; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id, bool error = false) const;
 	/// Gets the list of all research projects.

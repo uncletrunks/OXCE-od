@@ -1660,9 +1660,10 @@ Soldier *SavedGame::getSoldier(int id) const
 /**
  * Handles the higher promotions (not the rookie-squaddie ones).
  * @param participants a list of soldiers that were actually present at the battle.
+ * @param mod the Game Mod
  * @return Whether or not some promotions happened - to show the promotions screen.
  */
-bool SavedGame::handlePromotions(std::vector<Soldier*> &participants)
+bool SavedGame::handlePromotions(std::vector<Soldier*> &participants, const Mod *mod)
 {
 	int soldiersPromoted = 0;
 	Soldier *highestRanked = 0;
@@ -1689,7 +1690,7 @@ bool SavedGame::handlePromotions(std::vector<Soldier*> &participants)
 
 	if (soldierData.totalCommanders == 0)
 	{
-		if (totalSoldiers >= 30)
+		if (totalSoldiers >= mod->getSoldiersPerCommander())
 		{
 			highestRanked = inspectSoldiers(soldiers, participants, RANK_COLONEL);
 			if (highestRanked)
@@ -1703,9 +1704,9 @@ bool SavedGame::handlePromotions(std::vector<Soldier*> &participants)
 		}
 	}
 
-	if ((totalSoldiers / 23) > soldierData.totalColonels)
+	if ((totalSoldiers / mod->getSoldiersPerColonel()) > soldierData.totalColonels)
 	{
-		while ((totalSoldiers / 23) > soldierData.totalColonels)
+		while ((totalSoldiers / mod->getSoldiersPerColonel()) > soldierData.totalColonels)
 		{
 			highestRanked = inspectSoldiers(soldiers, participants, RANK_CAPTAIN);
 			if (highestRanked)
@@ -1722,9 +1723,9 @@ bool SavedGame::handlePromotions(std::vector<Soldier*> &participants)
 		}
 	}
 
-	if ((totalSoldiers / 11) > soldierData.totalCaptains)
+	if ((totalSoldiers / mod->getSoldiersPerCaptain()) > soldierData.totalCaptains)
 	{
-		while ((totalSoldiers / 11) > soldierData.totalCaptains)
+		while ((totalSoldiers / mod->getSoldiersPerCaptain()) > soldierData.totalCaptains)
 		{
 			highestRanked = inspectSoldiers(soldiers, participants, RANK_SERGEANT);
 			if (highestRanked)
@@ -1741,9 +1742,9 @@ bool SavedGame::handlePromotions(std::vector<Soldier*> &participants)
 		}
 	}
 
-	if ((totalSoldiers / 5) > soldierData.totalSergeants)
+	if ((totalSoldiers / mod->getSoldiersPerSergeant()) > soldierData.totalSergeants)
 	{
-		while ((totalSoldiers / 5) > soldierData.totalSergeants)
+		while ((totalSoldiers / mod->getSoldiersPerSergeant()) > soldierData.totalSergeants)
 		{
 			highestRanked = inspectSoldiers(soldiers, participants, RANK_SQUADDIE);
 			if (highestRanked)

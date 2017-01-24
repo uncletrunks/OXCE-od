@@ -806,7 +806,7 @@ void DebriefingState::btnOkClick(Action *)
 			{
 				_game->pushState(new CommendationState(_soldiersCommended));
 			}
-			if (_game->getSavedGame()->handlePromotions(participants))
+			if (_game->getSavedGame()->handlePromotions(participants, _game->getMod()))
 			{
 				_game->pushState(new PromotionsState);
 			}
