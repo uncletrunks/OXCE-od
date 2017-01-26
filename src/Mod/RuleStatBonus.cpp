@@ -58,6 +58,11 @@ float stat2(const BattleUnit *unit)
 	return (stat->*fieldA) * (stat->*fieldB);
 }
 
+float currentFatalWounds(const BattleUnit *unit)
+{
+	return unit->getFatalWounds();
+}
+
 float currentRank(const BattleUnit *unit)
 {
 	return unit->getRankInt();
@@ -227,6 +232,7 @@ BonusStatData statDataMap[] =
 	{ "firingReactions", create2<&UnitStats::firing, &UnitStats::reactions>() },
 
 	{ "rank", create<&currentRank>() },
+	{ "fatalWounds", create<&currentFatalWounds>() },
 
 	{ "healthCurrent", create<&curretHealth>() },
 	{ "tuCurrent", create<&curretTimeUnits>() },
