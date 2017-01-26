@@ -157,8 +157,8 @@ public:
 	int getCraftCount(const std::string &craft) const;
 	/// Gets the base's craft maintenance.
 	int getCraftMaintenance() const;
-	/// Gets the base's soldiers of a certain type.
-	int getSoldierCount(const std::string &soldier) const;
+	/// Gets the total count and total salary of soldiers of a certain type stored in the base.
+	std::pair<int, int> getSoldierCountAndSalary(const std::string &soldier) const;
 	/// Gets the base's personnel maintenance.
 	int getPersonnelMaintenance() const;
 	/// Gets the base's item maintenance.

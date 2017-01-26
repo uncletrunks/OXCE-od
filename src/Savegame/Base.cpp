@@ -1048,19 +1048,21 @@ int Base::getCraftMaintenance() const
 }
 
 /**
- * Returns the total amount of soldiers of
+ * Returns the total count and total salary of soldiers of
  * a certain type stored in the base.
  * @param soldier Soldier type.
- * @return Number of soldiert.
+ * @return Number of soldiers and their salary.
  */
-int Base::getSoldierCount(const std::string &soldier) const
+std::pair<int, int> Base::getSoldierCountAndSalary(const std::string &soldier) const
 {
 	int total = 0;
+	int totalSalary = 0;
 	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 	{
 		if ((*i)->getType() == TRANSFER_SOLDIER && (*i)->getSoldier()->getRules()->getType() == soldier)
 		{
 			total++;
+			totalSalary += (*i)->getSoldier()->getRules()->getSalaryCost((*i)->getSoldier()->getRank());
 		}
 	}
 	for (std::vector<Soldier*>::const_iterator i = _soldiers.begin(); i != _soldiers.end(); ++i)
@@ -1068,9 +1070,10 @@ int Base::getSoldierCount(const std::string &soldier) const
 		if ((*i)->getRules()->getType() == soldier)
 		{
 			total++;
+			totalSalary += (*i)->getRules()->getSalaryCost((*i)->getRank());
 		}
 	}
-	return total;
+	return std::make_pair(total, totalSalary);
 }
 
 /**
@@ -1085,12 +1088,12 @@ int Base::getPersonnelMaintenance() const
 	{
 		if ((*i)->getType() == TRANSFER_SOLDIER)
 		{
-			total += (*i)->getSoldier()->getRules()->getSalaryCost();
+			total += (*i)->getSoldier()->getRules()->getSalaryCost((*i)->getSoldier()->getRank());
 		}
 	}
 	for (std::vector<Soldier*>::const_iterator i = _soldiers.begin(); i != _soldiers.end(); ++i)
 	{
-		total += (*i)->getRules()->getSalaryCost();
+		total += (*i)->getRules()->getSalaryCost((*i)->getRank());
 	}
 	total += getTotalEngineers() * _mod->getEngineerCost();
 	total += getTotalScientists() * _mod->getScientistCost();

@@ -29,7 +29,10 @@ namespace OpenXcom
  * type of soldier.
  * @param type String defining the type.
  */
-RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0), _standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(66), _avatarOffsetY(42), _allowPromotion(true), _allowPiloting(true)
+RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0),
+	_costSalarySquaddie(0), _costSalarySergeant(0), _costSalaryCaptain(0), _costSalaryColonel(0), _costSalaryCommander(0),
+	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(66), _avatarOffsetY(42),
+	_allowPromotion(true), _allowPiloting(true)
 {
 }
 
@@ -80,6 +83,11 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 	_allowPiloting = node["allowPiloting"].as<bool>(_allowPiloting);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costSalary = node["costSalary"].as<int>(_costSalary);
+	_costSalarySquaddie = node["costSalarySquaddie"].as<int>(_costSalarySquaddie);
+	_costSalarySergeant = node["costSalarySergeant"].as<int>(_costSalarySergeant);
+	_costSalaryCaptain = node["costSalaryCaptain"].as<int>(_costSalaryCaptain);
+	_costSalaryColonel = node["costSalaryColonel"].as<int>(_costSalaryColonel);
+	_costSalaryCommander = node["costSalaryCommander"].as<int>(_costSalaryCommander);
 	_standHeight = node["standHeight"].as<int>(_standHeight);
 	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
 	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
@@ -229,12 +237,32 @@ int RuleSoldier::getBuyCost() const
 }
 
 /**
- * Gets the cost of salary for a month.
+* Does salary depend on rank?
+* @return True if salary depends on rank, false otherwise.
+*/
+bool RuleSoldier::isSalaryDynamic() const
+{
+	return _costSalarySquaddie || _costSalarySergeant || _costSalaryCaptain || _costSalaryColonel || _costSalaryCommander;
+}
+
+/**
+ * Gets the cost of salary for a month (for a given rank).
+ * @param rank Soldier rank.
  * @return The cost.
  */
-int RuleSoldier::getSalaryCost() const
+int RuleSoldier::getSalaryCost(int rank) const
 {
-	return _costSalary;
+	int total = _costSalary;
+	switch (rank)
+	{
+		case 1: total += _costSalarySquaddie; break;
+		case 2: total += _costSalarySergeant; break;
+		case 3: total += _costSalaryCaptain; break;
+		case 4: total += _costSalaryColonel; break;
+		case 5: total += _costSalaryCommander; break;
+		default: break;
+	}
+	return total;
 }
 
 /**

@@ -156,7 +156,7 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 		RuleSoldier *rule = _game->getMod()->getSoldier(*i);
 		if (rule->getBuyCost() != 0 && _game->getSavedGame()->isResearched(rule->getRequirements()))
 		{
-			TransferRow row = { TRANSFER_SOLDIER, rule, tr(rule->getType()), rule->getBuyCost(), _base->getSoldierCount(rule->getType()), 0, 0 };
+			TransferRow row = { TRANSFER_SOLDIER, rule, tr(rule->getType()), rule->getBuyCost(), _base->getSoldierCountAndSalary(rule->getType()).first, 0, 0 };
 			_items.push_back(row);
 			std::string cat = getCategory(_items.size() - 1);
 			if (std::find(_cats.begin(), _cats.end(), cat) == _cats.end())

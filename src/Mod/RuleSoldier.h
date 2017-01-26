@@ -39,7 +39,8 @@ private:
 	std::vector<std::string> _requires;
 	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps, _dogfightExperience;
 	std::string _armor;
-	int _costBuy, _costSalary, _standHeight, _kneelHeight, _floatHeight, _femaleFrequency;
+	int _costBuy, _costSalary, _costSalarySquaddie, _costSalarySergeant, _costSalaryCaptain, _costSalaryColonel, _costSalaryCommander;
+	int _standHeight, _kneelHeight, _floatHeight, _femaleFrequency;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
@@ -70,8 +71,10 @@ public:
 	UnitStats getDogfightExperience() const;
 	/// Gets the cost of the soldier.
 	int getBuyCost() const;
-	/// Gets the monthly salary of the soldier.
-	int getSalaryCost() const;
+	/// Does salary depend on rank?
+	bool isSalaryDynamic() const;
+	/// Gets the monthly salary of the soldier (for a given rank).
+	int getSalaryCost(int rank) const;
 	/// Gets the height of the soldier when it's standing.
 	int getStandHeight() const;
 	/// Gets the height of the soldier when it's kneeling.
