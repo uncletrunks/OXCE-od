@@ -170,18 +170,22 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 			{
 				if (spawnedPersonType == "STR_SCIENTIST")
 				{
-					b->setScientists(b->getScientists() + 1);
+					Transfer *t = new Transfer(24);
+					t->setScientists(1);
+					b->getTransfers()->push_back(t);
 				}
 				else if (spawnedPersonType == "STR_ENGINEER")
 				{
-					b->setEngineers(b->getEngineers() + 1);
+					Transfer *t = new Transfer(24);
+					t->setEngineers(1);
+					b->getTransfers()->push_back(t);
 				}
 				else
 				{
 					RuleSoldier *rule = m->getSoldier(spawnedPersonType);
 					if (rule != 0)
 					{
-						Transfer *t = new Transfer(m->getPersonnelTime());
+						Transfer *t = new Transfer(24);
 						Soldier *s = m->genSoldier(g, rule->getType());
 						if (_rules->getSpawnedPersonName() != "")
 						{
