@@ -382,24 +382,66 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 	}
 	if (_proc)
 	{
-		ShaderDrawFunc(
-			[&](Uint8& dest, const Uint8& src)
-			{
-				if (src)
+		if (_events)
+		{
+			ShaderDrawFunc(
+				[&](Uint8& dest, const Uint8& src)
 				{
-					ScriptWorkerBlit::Output arg = { src, dest };
-					set(arg);
-					scriptExe(*this, _proc);
-					get(arg);
-					if (arg.getFirst()) dest = arg.getFirst();
-				}
-			},
-			ShaderSurface(dest, 0, 0),
-			srcShader
-		);
+					if (src)
+					{
+						ScriptWorkerBlit::Output arg = { src, dest };
+						set(arg);
+						auto ptr = _events;
+						while (*ptr)
+						{
+							reset(arg);
+							scriptExe(*this, ptr->data());
+							++ptr;
+						}
+						++ptr;
+
+						reset(arg);
+						scriptExe(*this, _proc);
+
+						while (*ptr)
+						{
+							reset(arg);
+							scriptExe(*this, ptr->data());
+							++ptr;
+						}
+						++ptr;
+
+						get(arg);
+						if (arg.getFirst()) dest = arg.getFirst();
+					}
+				},
+				ShaderSurface(dest, 0, 0),
+				srcShader
+			);
+		}
+		else
+		{
+			ShaderDrawFunc(
+				[&](Uint8& dest, const Uint8& src)
+				{
+					if (src)
+					{
+						ScriptWorkerBlit::Output arg = { src, dest };
+						set(arg);
+						scriptExe(*this, _proc);
+						get(arg);
+						if (arg.getFirst()) dest = arg.getFirst();
+					}
+				},
+				ShaderSurface(dest, 0, 0),
+				srcShader
+			);
+		}
 	}
 	else
+	{
 		ShaderDraw<helper::StandardShade>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(shade));
+	}
 }
 
 /**

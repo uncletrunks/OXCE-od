@@ -621,13 +621,14 @@ class ScriptWorkerBlit : public ScriptWorkerBase
 {
 	/// Current script set in worker.
 	const Uint8* _proc;
+	const ScriptContainerBase* _events;
 
 public:
 	/// Type of output value from script.
 	using Output = ScriptOutputArgs<int&, int>;
 
 	/// Default constructor.
-	ScriptWorkerBlit() : ScriptWorkerBase(), _proc(nullptr)
+	ScriptWorkerBlit() : ScriptWorkerBase(), _proc(nullptr), _events(nullptr)
 	{
 
 	}
@@ -637,14 +638,26 @@ public:
 	void update(const ScriptContainer<Parent, Args...>& c, helper::Decay<Args>... args)
 	{
 		static_assert(std::is_same<typename Parent::Output, Output>::value, "Incompatible script output type");
+		clear();
 		if (c)
 		{
 			_proc = c.data();
+			_events = nullptr;
 			updateBase<Output>(args...);
 		}
-		else
+	}
+
+	/// Update data from container script.
+	template<typename Parent, typename... Args>
+	void update(const ScriptContainerEvents<Parent, Args...>& c, helper::Decay<Args>... args)
+	{
+		static_assert(std::is_same<typename Parent::Output, Output>::value, "Incompatible script output type");
+		clear();
+		if (c)
 		{
-			clear();
+			_proc = c.data();
+			_events = c.dataEvents();
+			updateBase<Output>(args...);
 		}
 	}
 
@@ -655,6 +668,7 @@ public:
 	void clear()
 	{
 		_proc = nullptr;
+		_events = nullptr;
 	}
 };
 

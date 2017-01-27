@@ -86,7 +86,7 @@ public:
 		return _shared;
 	}
 
-	struct RecolorUnitParser : ScriptParser<Output, const BattleUnit*, int, int, int, int>
+	struct RecolorUnitParser : ScriptParserEvents<Output, const BattleUnit*, int, int, int, int>
 	{
 		RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
@@ -100,7 +100,7 @@ public:
 		ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	struct RecolorItemParser : ScriptParser<Output, const BattleItem*, int, int, int>
+	struct RecolorItemParser : ScriptParserEvents<Output, const BattleItem*, int, int, int>
 	{
 		RecolorItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};

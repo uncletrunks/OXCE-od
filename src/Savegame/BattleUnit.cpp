@@ -4271,7 +4271,7 @@ void commonImpl(BindBase& b, Mod* mod)
 /**
  * Constructor of recolor script parser.
  */
-ModScript::RecolorUnitParser::RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "new_pixel", "old_pixel", "unit", "blit_part", "anim_frame", "shade", "burn" }
+ModScript::RecolorUnitParser::RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "new_pixel", "old_pixel", "unit", "blit_part", "anim_frame", "shade", "burn" }
 {
 	BindBase b { this };
 
