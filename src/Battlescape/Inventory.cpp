@@ -654,7 +654,7 @@ void Inventory::mouseClick(Action *action, State *state)
 						setSelectedItem(item);
 						if (item->getFuseTimer() >= 0)
 						{
-							_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_ACTIVATED"));
+							_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getPrimeActionMessage()));
 						}
 					}
 				}
@@ -820,14 +820,14 @@ void Inventory::mouseClick(Action *action, State *state)
 									}
 									else
 									{
-										_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_ACTIVATED"));
+										_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getPrimeActionMessage()));
 										item->setFuseTimer(item->getRules()->getFuseTimerDefault());
 										arrangeGround(false);
 									}
 								}
 								else
 								{
-									_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_DEACTIVATED"));
+									_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getUnprimeActionMessage()));
 									item->setFuseTimer(-1);  // Unprime the grenade
 									arrangeGround(false);
 								}
@@ -925,7 +925,7 @@ bool Inventory::unload()
 		if (grenade)
 		{
 			_selItem->setFuseTimer(-1);
-			_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_DEACTIVATED"));
+			_warning->showMessage(_game->getLanguage()->getString(_selItem->getRules()->getUnprimeActionMessage()));
 		}
 		else
 		{

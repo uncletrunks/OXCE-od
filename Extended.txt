@@ -343,9 +343,11 @@ items:
     requiresBuy: #what tech is required for the item to be visible in the Hire/Purchase screen.
       - SOME_TECH
       - SOME_TECH_MK2
-    psiAttackName: STR_HIT_MELEE        #string id of psi-amp attack name in the pop-up menu. Required to enable special attack.
-    primeActionName: STR_PRIME_GRENADE  #string id of grenade prime action name in the pop-up menu. Required to enable prime action. Defulat value `STR_PRIME_GRENADE`;
-    unprimeActionName: ~                #string id of grenade unprime action name in the pop-up menu. Required to enable unprime action.
+    psiAttackName: STR_HIT_MELEE                      #string id of psi-amp attack name in the pop-up menu. Required to enable special attack.
+    primeActionName: STR_PRIME_GRENADE                #string id of grenade prime action name in the pop-up menu. Required to enable prime action. Defulat value `STR_PRIME_GRENADE`;
+    primeActionMessage: STR_GRENADE_IS_ACTIVATED      #string id of grenade prime action message.
+    unprimeActionName: ~                              #string id of grenade unprime action name in the pop-up menu. Required to enable unprime action.
+    unprimeActionMessage: STR_GRENADE_IS_DEACTIVATED  #string id of grenade unprime action message.
     psiRequired: false    #default based on weapon type, if `true` you need Psi Skill to use the weapon.
     moraleRecovery: 10    #amount of recovered morale by medkit. Defailt `0`.
     painKillerRecovery: 0 #how much missing health convert to morale. Default `1.0`.

@@ -120,7 +120,7 @@ private:
 	int _clipSize, _specialChance, _tuLoad, _tuUnload;
 	BattleType _battleType;
 	BattleFuseType _fuseType;
-	std::string _psiAttackName, _primeActionName, _unprimeActionName;
+	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isExplodingInHands;
 	std::string _defaultInventorySlot;
 	int _waypoints, _invWidth, _invHeight;
@@ -407,11 +407,15 @@ public:
 	/// How many auto shots does this weapon fire.
 	int getAutoShots() const;
 	/// Get name of psi attack for action menu.
-	const std::string &getPsiAttackName() const;
+	const std::string &getPsiAttackName() const { return _psiAttackName; }
 	/// Get name of prime action for action menu.
-	const std::string &getPrimeActionName() const;
+	const std::string &getPrimeActionName() const { return _primeActionName; }
+	/// Get message for prime action.
+	const std::string &getPrimeActionMessage() const { return _primeActionMessage; }
 	/// Get name of unprime action for action menu.
-	const std::string &getUnprimeActionName() const;
+	const std::string &getUnprimeActionName() const { return _unprimeActionName; }
+	/// Get message for unprime action.
+	const std::string &getUnprimeActionMessage() const { return _unprimeActionMessage; }
 	/// is this item a 2 handed weapon?
 	bool isRifle() const;
 	/// is this item a single handed weapon?

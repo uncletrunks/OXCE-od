@@ -957,7 +957,7 @@ void BattlescapeGame::handleNonTargetAction()
 		{
 			if (_currentAction.spendTU(&error))
 			{
-				_parentState->warning("STR_GRENADE_IS_ACTIVATED");
+				_parentState->warning(_currentAction.weapon->getRules()->getPrimeActionMessage());
 				_currentAction.weapon->setFuseTimer(_currentAction.value);
 				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
 				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);
@@ -971,7 +971,7 @@ void BattlescapeGame::handleNonTargetAction()
 		{
 			if (_currentAction.spendTU(&error))
 			{
-				_parentState->warning("STR_GRENADE_IS_DEACTIVATED");
+				_parentState->warning(_currentAction.weapon->getRules()->getUnprimeActionMessage());
 				_currentAction.weapon->setFuseTimer(-1);
 				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
 				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);

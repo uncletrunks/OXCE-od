@@ -49,7 +49,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50),
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
-	_battleType(BT_NONE), _fuseType(BFT_NONE), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(),
+	_battleType(BT_NONE), _fuseType(BFT_NONE), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
 	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
@@ -361,7 +361,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_power = node["power"].as<int>(_power);
 	_psiAttackName = node["psiAttackName"].as<std::string>(_psiAttackName);
 	_primeActionName = node["primeActionName"].as<std::string>(_primeActionName);
+	_primeActionMessage = node["primeActionMessage"].as<std::string>(_primeActionMessage);
 	_unprimeActionName = node["unprimeActionName"].as<std::string>(_unprimeActionName);
+	_unprimeActionMessage = node["unprimeActionMessage"].as<std::string>(_unprimeActionMessage);
 	_compatibleAmmo = node["compatibleAmmo"].as< std::vector<std::string> >(_compatibleAmmo);
 	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
 
@@ -1598,31 +1600,6 @@ int RuleItem::getExplosionSpeed() const
 int RuleItem::getAutoShots() const
 {
 	return _autoShots;
-}
-
-/**
- * Gets the name of psi attack for action popup list.
- * @return String Id.
- */
-const std::string &RuleItem::getPsiAttackName() const
-{
-	return _psiAttackName;
-}
-
-/**
- * Get name of prime action for action menu.
- */
-const std::string &RuleItem::getPrimeActionName() const
-{
-	return _primeActionName;
-}
-
-/**
- * Get name of unprime action for action menu.
- */
-const std::string &RuleItem::getUnprimeActionName() const
-{
-	return _unprimeActionName;
 }
 
 /**
