@@ -58,7 +58,7 @@ class ModScript;
 class Unit
 {
 private:
-	std::string _type;
+	std::string _type, _civilianRecoveryType;
 	std::string _race;
 	std::string _rank;
 	UnitStats _stats;
@@ -82,6 +82,8 @@ public:
 	void load(const YAML::Node& node, Mod *mod);
 	/// Gets the unit's type.
 	std::string getType() const;
+	/// Gets the type of staff (soldier/engineer/scientists) or type of item to be recovered when a civilian is saved.
+	std::string getCivilianRecoveryType() const;
 	/// Gets the unit's stats.
 	UnitStats *getStats();
 	/// Gets the unit's height when standing.

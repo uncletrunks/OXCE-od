@@ -1434,6 +1434,7 @@ void DebriefingState::prepareDebriefing()
 				else
 				{
 					addStat("STR_CIVILIANS_SAVED", 1, (*j)->getValue());
+					recoverCivilian(*j, base);
 				}
 			}
 		}
@@ -1854,6 +1855,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						else if ((*it)->getUnit()->getOriginalFaction() == FACTION_NEUTRAL)
 						{
 							addStat("STR_CIVILIANS_SAVED", 1, (*it)->getUnit()->getValue());
+							recoverCivilian((*it)->getUnit(), base);
 						}
 					}
 				}
@@ -1908,6 +1910,79 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 					for (std::vector<Craft*>::iterator c = base->getCrafts()->begin(); c != base->getCrafts()->end(); ++c)
 					{
 						(*c)->reuseItem((*it)->getRules()->getType());
+					}
+				}
+			}
+		}
+	}
+}
+
+/**
+* Recovers a live civilian from the battlescape.
+* @param from Battle unit to recover.
+* @param base Base to add items to.
+*/
+void DebriefingState::recoverCivilian(BattleUnit *from, Base *base)
+{
+	std::string type = from->getUnitRules()->getCivilianRecoveryType();
+	if (type == "STR_SCIENTIST")
+	{
+		Transfer *t = new Transfer(24);
+		t->setScientists(1);
+		base->getTransfers()->push_back(t);
+	}
+	else if (type == "STR_ENGINEER")
+	{
+		Transfer *t = new Transfer(24);
+		t->setEngineers(1);
+		base->getTransfers()->push_back(t);
+	}
+	else
+	{
+		RuleSoldier *ruleSoldier = _game->getMod()->getSoldier(type);
+		if (ruleSoldier != 0)
+		{
+			Transfer *t = new Transfer(24);
+			Soldier *s = _game->getMod()->genSoldier(_game->getSavedGame(), ruleSoldier->getType());
+			t->setSoldier(s);
+			base->getTransfers()->push_back(t);
+		}
+		else
+		{
+			RuleItem *ruleItem = _game->getMod()->getItem(type);
+			if (ruleItem != 0)
+			{
+				if (!ruleItem->isAlien())
+				{
+					base->getStorageItems()->addItem(type, 1);
+				}
+				else
+				{
+					RuleItem *ruleLiveAlienItem = ruleItem;
+					bool killPrisonersAutomatically = base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) == 0;
+					if (killPrisonersAutomatically)
+					{
+						// check also other bases, maybe we can transfer/redirect prisoners there
+						for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+						{
+							if ((*i)->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) > 0)
+							{
+								killPrisonersAutomatically = false;
+								break;
+							}
+						}
+					}
+					if (killPrisonersAutomatically)
+					{
+						_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available
+					}
+					else
+					{
+						base->getStorageItems()->addItem(type, 1);
+						if (base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) - (base->getUsedContainment(ruleLiveAlienItem->getPrisonType()) * _limitsEnforced) < 0)
+						{
+							_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 2; // 2 = full
+						}
 					}
 				}
 			}

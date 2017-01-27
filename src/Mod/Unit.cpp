@@ -51,6 +51,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 		load(parent, mod);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_civilianRecoveryType = node["civilianRecoveryType"].as<std::string>(_civilianRecoveryType);
 	_race = node["race"].as<std::string>(_race);
 	_rank = node["rank"].as<std::string>(_rank);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
@@ -111,6 +112,15 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 std::string Unit::getType() const
 {
 	return _type;
+}
+
+/**
+* Gets the type of staff (soldier/engineer/scientists) or type of item to be recovered when a civilian is saved.
+* @return The type of staff/item to recover.
+*/
+std::string Unit::getCivilianRecoveryType() const
+{
+	return _civilianRecoveryType;
 }
 
 /**
