@@ -2412,7 +2412,6 @@ ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::
 {
 	_events.reserve(EventsMax);
 	_eventsData.push_back({ 0, {} });
-	_eventsData.push_back({ OffsetMax, {} });
 }
 
 /**
@@ -2470,11 +2469,22 @@ std::vector<ScriptContainerBase> ScriptParserEventsBase::releseEvents()
 	std::sort(std::begin(_eventsData), std::end(_eventsData), [](const EventData& a, const EventData& b) { return a.offset < b.offset; });
 	for (auto& e : _eventsData)
 	{
-		if (_events.size() < EventsMax)
+		const auto reservedSpaceForZero = e.offset < 0;
+		if (_events.size() + (reservedSpaceForZero ?  2 : 1) < EventsMax)
 		{
 			_events.push_back(std::move(e.script));
 		}
+		else
+		{
+			Log(LOG_ERROR) << "Error in script parser '" << getName() << "': global script limit reach";
+			if (reservedSpaceForZero)
+			{
+				_events.emplace_back();
+			}
+			break;
+		}
 	}
+	_events.emplace_back();
 	return std::move(_events);
 }
 
