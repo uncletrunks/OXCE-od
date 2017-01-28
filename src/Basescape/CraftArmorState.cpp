@@ -40,7 +40,6 @@
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Ufopaedia/Ufopaedia.h"
-#include "SoldierSortUtil.h"
 
 namespace OpenXcom
 {
@@ -51,16 +50,16 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param craft ID of the selected craft.
  */
-CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft(craft), _origSoldierOrder(*_base->getSoldiers()), _savedScrollPosition(0)
+CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft(craft), _origSoldierOrder(*_base->getSoldiers()), _savedScrollPosition(0), _dynGetter(NULL)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(148, 16, 164, 176);
 	_txtTitle = new Text(300, 17, 16, 7);
 	_txtName = new Text(114, 9, 16, 32);
-	_txtCraft = new Text(76, 9, 130, 32);
-	_txtArmor = new Text(100, 9, 225, 32);
-	_lstSoldiers = new TextList(292, 128, 8, 40);
+	_txtCraft = new Text(76, 9, 122, 32);
+	_txtArmor = new Text(100, 9, 206, 32);
+	_lstSoldiers = new TextList(288, 128, 8, 40);
 	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
 
 	// Set palette
@@ -128,12 +127,12 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_cbxSortBy->onChange((ActionHandler)&CraftArmorState::cbxSortByChange);
 	_cbxSortBy->setText(tr("SORT BY..."));
 
-	_lstSoldiers->setArrowColumn(193, ARROW_VERTICAL);
-	_lstSoldiers->setColumns(3, 114, 95, 75);
+	_lstSoldiers->setArrowColumn(174, ARROW_VERTICAL);
+	_lstSoldiers->setColumns(4, 106, 84, 74, 16);
+	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
 	_lstSoldiers->setMargin(8);
-	_lstSoldiers->setScrolling(true, 0);
 	_lstSoldiers->onLeftArrowClick((ActionHandler)&CraftArmorState::lstItemsLeftArrowClick);
 	_lstSoldiers->onRightArrowClick((ActionHandler)&CraftArmorState::lstItemsRightArrowClick);
 	_lstSoldiers->onMousePress((ActionHandler)&CraftArmorState::lstSoldiersClick);
@@ -156,6 +155,7 @@ CraftArmorState::~CraftArmorState()
  */
 void CraftArmorState::cbxSortByChange(Action *action)
 {
+	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
 	size_t selIdx = _cbxSortBy->getSelected();
 	if (selIdx == (size_t)-1)
 	{
@@ -165,15 +165,20 @@ void CraftArmorState::cbxSortByChange(Action *action)
 	SortFunctor *compFunc = _sortFunctors[selIdx];
 	if (compFunc)
 	{
-		std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
-		bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
-		if (shiftPressed)
+		// if CTRL is pressed, we only want to show the dynamic column, without actual sorting
+		if (!ctrlPressed)
 		{
-			std::reverse(_base->getSoldiers()->begin(), _base->getSoldiers()->end());
+			std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+			bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
+			if (shiftPressed)
+			{
+				std::reverse(_base->getSoldiers()->begin(), _base->getSoldiers()->end());
+			}
 		}
 	}
 	else
 	{
+		_dynGetter = NULL;
 		// restore original ordering, ignoring (of course) those
 		// soldiers that have been sacked since this state started
 		for (std::vector<Soldier *>::const_iterator it = _origSoldierOrder.begin();
@@ -190,6 +195,10 @@ void CraftArmorState::cbxSortByChange(Action *action)
 		}
 	}
 
+	if (compFunc)
+	{
+		_dynGetter = compFunc->getGetter();
+	}
 	initList(_lstSoldiers->getScroll());
 }
 
@@ -223,7 +232,18 @@ void CraftArmorState::initList(size_t scrl)
 	float relBonus = _base->getSickBayRelativeBonus();
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
-		_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), tr((*i)->getArmor()->getType()).c_str());
+		// call corresponding getter
+		int dynStat = 0;
+		std::wostringstream ss;
+		if (_dynGetter != NULL) {
+			dynStat = (*_dynGetter)(_game, *i);
+			ss << dynStat;
+		}
+		else {
+			ss << L"";
+		}
+
+		_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), tr((*i)->getArmor()->getType()).c_str(), ss.str().c_str());
 
 		Uint8 color;
 		if ((*i)->getCraft() == c)
