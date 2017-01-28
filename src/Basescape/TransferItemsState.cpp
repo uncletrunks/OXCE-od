@@ -683,8 +683,7 @@ void TransferItemsState::increaseByValue(int change)
 		break;
 	case TRANSFER_ITEM:
 		selItem = (RuleItem*)getRow().rule;
-		double storesNeededPerItem = std::max(0.0, selItem->getSize());
-		if (!selItem->isAlien() && _baseTo->storesOverfull(storesNeededPerItem + _iQty))
+		if (!selItem->isAlien() && _baseTo->storesOverfull(selItem->getSize() + _iQty))
 		{
 			errorMessage = tr("STR_NOT_ENOUGH_STORE_SPACE");
 		}
@@ -719,7 +718,7 @@ void TransferItemsState::increaseByValue(int change)
 		case TRANSFER_ITEM:
 			if (!selItem->isAlien())
 			{
-				double storesNeededPerItem = std::max(0.0, ((RuleItem*)getRow().rule)->getSize());
+				double storesNeededPerItem = ((RuleItem*)getRow().rule)->getSize();
 				double freeStores = _baseTo->getAvailableStores() - _baseTo->getUsedStores() - _iQty;
 				double freeStoresForItem = (double)(INT_MAX);
 				if (!AreSame(storesNeededPerItem, 0.0))
@@ -788,8 +787,7 @@ void TransferItemsState::decreaseByValue(int change)
 		const RuleItem *selItem = (RuleItem*)getRow().rule;
 		if (!selItem->isAlien())
 		{
-			double storesNeededPerItem = std::max(0.0, selItem->getSize());
-			_iQty -= storesNeededPerItem * change;
+			_iQty -= selItem->getSize() * change;
 		}
 		else
 		{
