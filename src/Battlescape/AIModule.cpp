@@ -1002,7 +1002,7 @@ int AIModule::countKnownTargets() const
  * @param pos the Position to check for spotters.
  * @return spotters.
  */
-int AIModule::getSpottingUnits(Position pos) const
+int AIModule::getSpottingUnits(const Position& pos) const
 {
 	// if we don't actually occupy the position being checked, we need to do a virtual LOF check.
 	bool checking = pos != _unit->getPosition();
@@ -1947,7 +1947,7 @@ bool AIModule::psiAction()
 					{
 						int controlOdds = 40;
 						int morale = victim->getMorale();
-						int bravery = (110 - victim->getBaseStats()->bravery) / 10;
+						int bravery = victim->reduceByBravery(10);
 						if (bravery > 6)
 							controlOdds -= 15;
 						if (bravery < 4)
@@ -2115,8 +2115,7 @@ void AIModule::selectMeleeOrRanged()
 
 	int meleeOdds = 10;
 
-	int dmg = meleeWeapon->getPowerBonus(_unit);
-	dmg *= _aggroTarget->getArmor()->getDamageModifier(meleeWeapon->getDamageType()->ResistType);
+	int dmg = _aggroTarget->reduceByResistance(meleeWeapon->getPowerBonus(_unit), meleeWeapon->getDamageType()->ResistType);
 
 	if (dmg > 50)
 	{

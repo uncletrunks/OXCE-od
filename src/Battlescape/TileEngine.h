@@ -86,24 +86,29 @@ private:
 	const int _maxViewDistanceSq;      // 20 * 20
 	const int _maxVoxelViewDistance;   // maxViewDistance * 16
 	const int _maxDarknessToSeeUnits;  // 9 by default
+	const int _maxStaticLightDistance;
+	const int _maxDynamicLightDistance;
+	const int _enhancedLighting;
 	Position _eventVisibilitySectorL, _eventVisibilitySectorR, _eventVisibilityObserverPos;
 
 	/// Add light source.
-	void addLight(GraphSubset gs, const Position &center, int power, LightLayers layer);
+	void addLight(GraphSubset gs, Position center, int power, LightLayers layer);
 	/// Calculate blockage amount.
 	int blockage(Tile *tile, const int part, ItemDamageType type, int direction = -1, bool checkingFromOrigin = false);
 	/// Get max distance that fire light can reach.
-	inline int getMaxStaticLightDistance() const { return 16; }
+	int getMaxStaticLightDistance() const { return _maxStaticLightDistance; }
 	/// Get max distance that light can reach.
-	inline int getMaxDynamicLightDistance() const { return 24; }
+	int getMaxDynamicLightDistance() const { return _maxDynamicLightDistance; }
+	/// Get flags for enhanced lighting.
+	int getEnhancedLighting() const { return _enhancedLighting; }
 	/// Get max view distance.
-	inline int getMaxViewDistance() const { return _maxViewDistance; }
+	int getMaxViewDistance() const { return _maxViewDistance; }
 	/// Get square of max view distance.
-	inline int getMaxViewDistanceSq() const { return _maxViewDistanceSq; }
+	int getMaxViewDistanceSq() const { return _maxViewDistanceSq; }
 	/// Get max view distance in voxel space.
-	inline int getMaxVoxelViewDistance() const { return _maxVoxelViewDistance; }
+	int getMaxVoxelViewDistance() const { return _maxVoxelViewDistance; }
 	/// Get threshold of darkness for LoS calculation.
-	inline int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
+	int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
 
 	bool setupEventVisibilitySector(const Position &observerPos, const Position &eventPos, const int &eventRadius);
 	inline bool inEventVisibilitySector(const Position &toCheck) const;
@@ -127,7 +132,7 @@ private:
 	bool tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionType attackType, const BattleAction &originalAction);
 public:
 	/// Creates a new TileEngine class.
-	TileEngine(SavedBattleGame *save, std::vector<Uint16> *voxelData, int maxViewDistance, int maxDarknessToSeeUnits);
+	TileEngine(SavedBattleGame *save, Mod *mod);
 	/// Cleans up the TileEngine.
 	~TileEngine();
 	/// Calculates visible tiles within the field of view. Supply an eventPosition to do an update limited to a small slice of the view sector.
@@ -137,7 +142,7 @@ public:
 	/// Calculates the field of view from a units view point.
 	bool calculateFOV(BattleUnit *unit, bool doTileRecalc = true, bool doUnitRecalc = true);
 	/// Calculates the field of view within range of a certain position.
-	void calculateFOV(const Position &position, int eventRadius = -1, const bool updateTiles = true, const bool appendToTileVisibility = false);
+	void calculateFOV(Position position, int eventRadius = -1, const bool updateTiles = true, const bool appendToTileVisibility = false);
 	/// Checks reaction fire.
 	bool checkReactionFire(BattleUnit *unit, const BattleAction &originalAction);
 	/// Recalcualte all lighting in some area.
@@ -149,9 +154,9 @@ public:
 	/// Handles unit hit.
 	bool hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack = true);
 	/// Handles bullet/weapon hits.
-	BattleUnit *hit(const Position &center, int power, const RuleDamageType *type, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack = true);
+	BattleUnit *hit(Position center, int power, const RuleDamageType *type, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack = true);
 	/// Handles explosions.
-	void explode(const Position &center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack = true);
+	void explode(Position center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack = true);
 	/// Checks if a destroyed tile starts an explosion.
 	Tile *checkForTerrainExplosions();
 	/// Unit opens door?
@@ -159,9 +164,9 @@ public:
 	/// Closes ufo doors.
 	int closeUfoDoors();
 	/// Calculates a line trajectory.
-	int calculateLine(const Position& origin, const Position& target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, bool doVoxelCheck = true, bool onlyVisible = false, BattleUnit *excludeAllBut = 0);
+	int calculateLine(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, bool doVoxelCheck = true, bool onlyVisible = false, BattleUnit *excludeAllBut = 0);
 	/// Calculates a parabola trajectory.
-	int calculateParabola(const Position& origin, const Position& target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta);
+	int calculateParabola(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta);
 	/// Gets the origin voxel of a unit's eyesight.
 	Position getSightOriginVoxel(BattleUnit *currentUnit);
 	/// Checks visibility of a unit on this tile.
@@ -169,9 +174,9 @@ public:
 	/// Turn XCom soldier's personal lighting on or off.
 	void togglePersonalLighting();
 	/// Checks the distance between two positions.
-	int distance(const Position &pos1, const Position &pos2) const;
+	int distance(Position pos1, Position pos2) const;
 	/// Checks the distance squared between two positions.
-	int distanceSq(const Position &pos1, const Position &pos2, bool considerZ = true) const;
+	int distanceSq(Position pos1, Position pos2, bool considerZ = true) const;
 	/// Checks the horizontal blockage of a tile.
 	int horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageType type, bool skipObject = false);
 	/// Checks the vertical blockage of a tile.
@@ -197,7 +202,7 @@ public:
 	/// Returns validity of a melee attack from a given position.
 	bool validMeleeRange(Position pos, int direction, BattleUnit *attacker, BattleUnit *target, Position *dest, bool preferEnemy = true);
 	/// Gets the AI to look through a window.
-	int faceWindow(const Position &position);
+	int faceWindow(Position position);
 	/// Checks a unit's % exposure on a tile.
 	int checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, BattleUnit *excludeAllBut);
 	/// Checks validity for targetting a unit.
@@ -205,11 +210,11 @@ public:
 	/// Check validity for targetting a tile.
 	bool canTargetTile(Position *originVoxel, Tile *tile, int part, Position *scanVoxel, BattleUnit *excludeUnit);
 	/// Calculates the z voxel for shadows.
-	int castedShade(const Position& voxel);
+	int castedShade(Position voxel);
 	/// Checks the visibility of a given voxel.
-	bool isVoxelVisible(const Position& voxel);
+	bool isVoxelVisible(Position voxel);
 	/// Checks what type of voxel occupies this space.
-	int voxelCheck(const Position& voxel, BattleUnit *excludeUnit, bool excludeAllUnits = false, bool onlyVisible = false, BattleUnit *excludeAllBut = 0);
+	int voxelCheck(Position voxel, BattleUnit *excludeUnit, bool excludeAllUnits = false, bool onlyVisible = false, BattleUnit *excludeAllBut = 0);
 	/// Blows this tile up.
 	bool detonate(Tile* tile, int power);
 	/// Validates a throwing action.
@@ -219,7 +224,7 @@ public:
 	/// Recalculates FOV of all units in-game.
 	void recalculateFOV();
 	/// Get direction to a certain point
-	int getDirectionTo(const Position &origin, const Position &target) const;
+	int getDirectionTo(Position origin, Position target) const;
 	/// Get arc between two direction.
 	int getArcDirection(int directionA, int directionB) const;
 	/// determine the origin voxel of a given action.

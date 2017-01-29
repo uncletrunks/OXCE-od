@@ -40,6 +40,7 @@
 #include "../Engine/RNG.h"
 #include "../Engine/Options.h"
 #include "../Engine/Logger.h"
+#include "../Engine/ScriptBind.h"
 #include "SerializationHelper.h"
 
 namespace OpenXcom
@@ -50,7 +51,7 @@ namespace OpenXcom
  */
 SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
-	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20),
+	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20), _animFrame(0),
 	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
@@ -126,6 +127,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
 	_bughuntMode = node["bughuntMode"].as<bool>(_bughuntMode);
 	_depth = node["depth"].as<int>(_depth);
+	_animFrame = node["animFrame"].as<int>(_animFrame);
 	int selectedUnit = node["selectedUnit"].as<int>();
 
 	for (YAML::const_iterator i = node["mapdatasets"].begin(); i != node["mapdatasets"].end(); ++i)
@@ -214,7 +216,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			if(!mod->getUnit(type) || !mod->getArmor(armor)) continue;
 			unit = new BattleUnit(mod->getUnit(type), originalFaction, id, mod->getArmor(armor), mod->getStatAdjustment(savedGame->getDifficulty()), _depth, mod->getMaxViewDistance());
 		}
-		unit->load(*i);
+		unit->load(*i, this->getMod()->getScriptGlobal());
 		unit->setSpecialWeapon(this);
 		_units.push_back(unit);
 		if (faction == FACTION_PLAYER)
@@ -254,7 +256,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			if (mod->getItem(type))
 			{
 				BattleItem *item = new BattleItem(mod->getItem(type), &_itemId);
-				item->load(*i);
+				item->load(*i, this->getMod()->getScriptGlobal());
 				type = (*i)["inventoryslot"].as<std::string>();
 				if (type != "NULL")
 				{
@@ -338,6 +340,10 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_ambientVolume = node["ambientVolume"].as<double>(_ambientVolume);
 	_music = node["music"].as<std::string>(_music);
 	_baseItems->load(node["baseItems"]);
+	_turnLimit = node["turnLimit"].as<int>(_turnLimit);
+	_chronoTrigger = ChronoTrigger(node["chronoTrigger"].as<int>(_chronoTrigger));
+	_cheatTurn = node["cheatTurn"].as<int>(_cheatTurn);
+	_scriptValues.load(node, _rule->getScriptGlobal());
 }
 
 /**
@@ -397,6 +403,7 @@ YAML::Node SavedBattleGame::save() const
 	node["globalshade"] = _globalShade;
 	node["turn"] = _turn;
 	node["bughuntMinTurn"] = _bughuntMinTurn;
+	node["animFrame"] = _animFrame;
 	node["bughuntMode"] = _bughuntMode;
 	node["selectedUnit"] = (_selectedUnit?_selectedUnit->getId():-1);
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
@@ -451,11 +458,11 @@ YAML::Node SavedBattleGame::save() const
 	}
 	for (std::vector<BattleUnit*>::const_iterator i = _units.begin(); i != _units.end(); ++i)
 	{
-		node["units"].push_back((*i)->save());
+		node["units"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	for (std::vector<BattleItem*>::const_iterator i = _items.begin(); i != _items.end(); ++i)
 	{
-		node["items"].push_back((*i)->save());
+		node["items"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	node["tuReserved"] = (int)_tuReserved;
 	node["kneelReserved"] = _kneelReserved;
@@ -464,17 +471,18 @@ YAML::Node SavedBattleGame::save() const
 	node["ambientVolume"] = _ambientVolume;
 	for (std::vector<BattleItem*>::const_iterator i = _recoverGuaranteed.begin(); i != _recoverGuaranteed.end(); ++i)
 	{
-		node["recoverGuaranteed"].push_back((*i)->save());
+		node["recoverGuaranteed"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	for (std::vector<BattleItem*>::const_iterator i = _recoverConditional.begin(); i != _recoverConditional.end(); ++i)
 	{
-		node["recoverConditional"].push_back((*i)->save());
+		node["recoverConditional"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	node["music"] = _music;
 	node["baseItems"] = _baseItems->save();
 	node["turnLimit"] = _turnLimit;
 	node["chronoTrigger"] = int(_chronoTrigger);
 	node["cheatTurn"] = _cheatTurn;
+	_scriptValues.save(node, _rule->getScriptGlobal());
 
 	return node;
 }
@@ -522,7 +530,7 @@ void SavedBattleGame::initUtilities(Mod *mod)
 	delete _pathfinding;
 	delete _tileEngine;
 	_pathfinding = new Pathfinding(this);
-	_tileEngine = new TileEngine(this, mod->getVoxelData(), mod->getMaxViewDistance(), mod->getMaxDarknessToSeeUnits());
+	_tileEngine = new TileEngine(this, mod);
 }
 
 /**
@@ -780,7 +788,7 @@ BattleUnit *SavedBattleGame::selectPlayerUnit(int dir, bool checkReselect, bool 
  * @param pos Position.
  * @return Pointer to a BattleUnit, or 0 when none is found.
  */
-BattleUnit *SavedBattleGame::selectUnit(const Position& pos)
+BattleUnit *SavedBattleGame::selectUnit(Position pos)
 {
 	BattleUnit *bu = getTile(pos)->getUnit();
 
@@ -990,10 +998,27 @@ void SavedBattleGame::endTurn()
 		{
 			(*i)->prepareNewTurn();
 		}
+		else if ((*i)->getOriginalFaction() == _side)
+		{
+			(*i)->updateUnitStats(false, true);
+		}
 		if ((*i)->getFaction() != FACTION_PLAYER)
 		{
 			(*i)->setVisible(false);
 		}
+
+		ModScript::NewTurnUnitParser::Output arg{};
+		ModScript::NewTurnUnitParser::Worker work{ (*i), this, this->getTurn(), _side };
+
+		work.execute((*i)->getArmor()->getEventUnitTurnScript(), arg);
+	}
+
+	for (auto& item : _items)
+	{
+		ModScript::NewTurnItemParser::Output arg{};
+		ModScript::NewTurnItemParser::Worker work{ item, this, this->getTurn(), _side };
+
+		work.execute(item->getRules()->getEventItemTurnScript(), arg);
 	}
 
 	// re-run calculateFOV() *after* all aliens have been set not-visible
@@ -1001,6 +1026,23 @@ void SavedBattleGame::endTurn()
 
 	if (_side != FACTION_PLAYER)
 		selectNextPlayerUnit();
+}
+
+/**
+ * Get current animation frame number.
+ * @return Numer of frame.
+ */
+int SavedBattleGame::getAnimFrame() const
+{
+	return _animFrame;
+}
+
+/**
+ * Increase animation frame with warparound 705600.
+ */
+void SavedBattleGame::nextAnimFrame()
+{
+	_animFrame = (_animFrame + 1) % (64 * 3*3 * 5*5 * 7*7);
 }
 
 /**
@@ -1445,7 +1487,7 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
 					continue;
 				}
 				BattleItem *item = new BattleItem(ruleItem, getCurrentItemId());
-				if (!addItem(item, unit, false, true, true))
+				if (!unit->addItem(item, _rule, this, false, true, true))
 				{
 					delete item;
 				}
@@ -1454,7 +1496,7 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
 		for (std::vector<RuleItem*>::const_iterator j = ammo.begin(); j != ammo.end(); ++j)
 		{
 			BattleItem *item = new BattleItem(*j, getCurrentItemId());
-			if (!addItem(item, unit, false, true, true))
+			if (!unit->addItem(item, _rule, this, false, true, true))
 			{
 				delete item;
 			}
@@ -1466,12 +1508,13 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
  * Create all fixed items for new created unit.
  * @param unit Unit to equip.
  */
-void SavedBattleGame::initFixedItems(BattleUnit *unit, size_t itemLevel)
+void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 {
 	unit->setSpecialWeapon(this);
 	Unit* rule = unit->getUnitRules();
+	const Armor* armor = unit->getArmor();
 	// Built in weapons: the unit has this weapon regardless of loadout or what have you.
-	addFixedItems(unit, unit->getArmor()->getBuiltInWeapons());
+	addFixedItems(unit, armor->getBuiltInWeapons());
 
 	// For aliens and HWP
 	if (rule)
@@ -1496,7 +1539,7 @@ void SavedBattleGame::initFixedItems(BattleUnit *unit, size_t itemLevel)
 			if (ruleItem)
 			{
 				BattleItem *item = new BattleItem(ruleItem, getCurrentItemId());
-				if (!addItem(item, unit))
+				if (!unit->addItem(item, _rule, this))
 				{
 					delete item;
 				}
@@ -1507,6 +1550,11 @@ void SavedBattleGame::initFixedItems(BattleUnit *unit, size_t itemLevel)
 			}
 		}
 	}
+
+	ModScript::CreateUnitParser::Output arg{};
+	ModScript::CreateUnitParser::Worker work{ unit, this, this->getTurn(), };
+
+	work.execute(armor->getEventUnitCreateScript(), arg);
 }
 
 /**
@@ -1856,7 +1904,7 @@ void SavedBattleGame::prepareNewTurn()
 	Mod *mod = getBattleState()->getGame()->getMod();
 	for (std::vector<BattleUnit*>::iterator i = getUnits()->begin(); i != getUnits()->end(); ++i)
 	{
-		(*i)->calculateEnviDamage(mod);
+		(*i)->calculateEnviDamage(mod, this);
 	}
 
 	reviveUnconsciousUnits();
@@ -1912,13 +1960,15 @@ void SavedBattleGame::reviveUnconsciousUnits(bool noTU)
  */
 void SavedBattleGame::removeUnconsciousBodyItem(BattleUnit *bu)
 {
+	int size = bu->getArmor()->getSize();
+	size *= size;
 	// remove the unconscious body item corresponding to this unit
 	for (std::vector<BattleItem*>::iterator it = getItems()->begin(); it != getItems()->end(); )
 	{
 		if ((*it)->getUnit() == bu)
 		{
 			removeItem((*it));
-			break;
+			if (--size == 0) break;
 		}
 		++it;
 	}
@@ -1931,7 +1981,7 @@ void SavedBattleGame::removeUnconsciousBodyItem(BattleUnit *bu)
  * @param testOnly If true then just checks if the unit can be placed at the position.
  * @return True if the unit could be successfully placed.
  */
-bool SavedBattleGame::setUnitPosition(BattleUnit *bu, const Position &position, bool testOnly)
+bool SavedBattleGame::setUnitPosition(BattleUnit *bu, Position position, bool testOnly)
 {
 	int size = bu->getArmor()->getSize() - 1;
 	Position zOffset (0,0,0);
@@ -2161,7 +2211,7 @@ int SavedBattleGame::getFactionMoraleModifier(bool player)
  * @param entryPoint The position around which to attempt to place the unit.
  * @return True if the unit was successfully placed.
  */
-bool SavedBattleGame::placeUnitNearPosition(BattleUnit *unit, Position entryPoint, bool largeFriend)
+bool SavedBattleGame::placeUnitNearPosition(BattleUnit *unit, const Position& entryPoint, bool largeFriend)
 {
 	if (setUnitPosition(unit, entryPoint))
 	{
@@ -2503,6 +2553,20 @@ void SavedBattleGame::setCheatTurn(int turn)
 bool SavedBattleGame::isBeforeGame() const
 {
 	return _beforeGame;
+}
+
+/**
+ * Register Armor in script parser.
+ * @param parser Script parser.
+ */
+void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<SavedBattleGame> sbg = { parser };
+
+	sbg.add<&SavedBattleGame::getTurn>("getTurn");
+	sbg.add<&SavedBattleGame::getAnimFrame>("getAnimFrame");
+
+	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
 }
 
 }

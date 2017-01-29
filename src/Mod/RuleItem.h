@@ -123,12 +123,12 @@ private:
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType, _meleeType;
 	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
-	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime;
+	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime, _costUnprime;
 	int _clipSize, _specialChance, _tuLoad, _tuUnload;
 	BattleType _battleType;
 	BattleFuseType _fuseType;
-	std::string _psiAttackName;
-	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher;
+	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
+	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands;
 	std::string _defaultInventorySlot;
 	std::vector<std::string> _supportedInventorySections;
 	int _waypoints, _invWidth, _invHeight;
@@ -142,7 +142,7 @@ private:
 	bool _recover, _ignoreInBaseDefense, _liveAlien;
 	int _liveAlienPrisonType;
 	int _attraction;
-	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime;
+	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime, _flatUnprime;
 	bool _arcingShot;
 	ExperienceTrainingMode _experienceTrainingMode;
 	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
@@ -157,6 +157,8 @@ private:
 	ModScript::RecolorItemParser::Container _recolorScript;
 	ModScript::SelectItemParser::Container _spriteScript;
 	ModScript::ReactionUnitParser::Container _reacActionScript;
+	ModScript::NewTurnItemParser::Container _newTurnItemScrip;
+	ModScript::CreateItemParser::Container _createItemScript;
 	ScriptValues<RuleItem> _scriptValues;
 
 	/// Get final value of cost.
@@ -173,6 +175,7 @@ private:
 	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
 	/// Gets a random sound from a given vector.
 	int getRandomSound(const std::vector<int> &vector, int defaultValue = -1) const;
+
 public:
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "RuleItem";
@@ -321,6 +324,8 @@ public:
 	RuleItemUseCost getCostThrow() const;
 	/// Gets the item's prime cost.
 	RuleItemUseCost getCostPrime() const;
+	/// Gets the item's unprime cost.
+	RuleItemUseCost getCostUnprime() const;
 
 	/// Gets the item's load TU cost.
 	int getTULoad() const;
@@ -348,7 +353,7 @@ public:
 	/// Gets the chance of special effect like zombify or corpse explosion or mine triggering.
 	int getSpecialChance() const;
 	/// Draws the item's hand sprite onto a surface.
-	void drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem *item = 0) const;
+	void drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem *item = 0, int animFrame = 0) const;
 	/// item's hand spite x offset
 	int getHandSpriteOffX() const;
 	/// item's hand spite y offset
@@ -373,10 +378,12 @@ public:
 	float getPainKillerRecovery() const;
 	/// Gets the medikit ability to self heal.
 	bool getAllowSelfHeal() const;
-	/// Is this (medikit-type) item consumable?
+	/// Is this (medikit-type & items with prime) item consumable?
 	bool isConsumable() const;
 	/// Does this item extinguish fire?
 	bool isFireExtinguisher() const;
+	/// Is this item explode in hands?
+	bool isExplodingInHands() const;
 	/// Gets the medikit use type.
 	BattleMediKitType getMediKitType() const;
 	/// Gets the max explosion radius.
@@ -399,6 +406,7 @@ public:
 	bool isAlien() const;
 	/// Returns to which type of prison does the live alien belong.
 	int getPrisonType() const;
+
 	/// Should we charge a flat rate?
 	RuleItemUseCost getFlatUse() const;
 	/// Should we charge a flat rate of costMelee?
@@ -407,6 +415,9 @@ public:
 	RuleItemUseCost getFlatThrow() const;
 	/// Should we charge a flat rate of costPrime?
 	RuleItemUseCost getFlatPrime() const;
+	/// Should we charge a flat rate of costPrime?
+	RuleItemUseCost getFlatUnprime() const;
+
 	/// Should this weapon arc?
 	bool getArcingShot() const;
 	/// Which experience training mode to use for this weapon?
@@ -422,7 +433,15 @@ public:
 	/// How many auto shots does this weapon fire.
 	int getAutoShots() const;
 	/// Get name of psi attack for action menu.
-	const std::string &getPsiAttackName() const;
+	const std::string &getPsiAttackName() const { return _psiAttackName; }
+	/// Get name of prime action for action menu.
+	const std::string &getPrimeActionName() const { return _primeActionName; }
+	/// Get message for prime action.
+	const std::string &getPrimeActionMessage() const { return _primeActionMessage; }
+	/// Get name of unprime action for action menu.
+	const std::string &getUnprimeActionName() const { return _unprimeActionName; }
+	/// Get message for unprime action.
+	const std::string &getUnprimeActionMessage() const { return _unprimeActionMessage; }
 	/// is this item a 2 handed weapon?
 	bool isRifle() const;
 	/// is this item a single handed weapon?
@@ -474,11 +493,15 @@ public:
 	/// Gets the monthly maintenance.
 	int getMonthlyMaintenance() const;
 	/// Gets script used to recolor item sprite.
-	const ModScript::RecolorItemParser::Container &getRecolorScript() const;
+	const ModScript::RecolorItemParser::Container &getRecolorScript() const { return _recolorScript; }
 	/// Gets script used to switch sprite of item.
-	const ModScript::SelectItemParser::Container &getSpriteScript() const;
+	const ModScript::SelectItemParser::Container &getSpriteScript() const { return _spriteScript; }
 	/// Gets script used calculate reaction to item action.
-	const ModScript::ReactionUnitParser::Container &getReacActionScript() const;
+	const ModScript::ReactionUnitParser::Container &getReacActionScript() const { return _reacActionScript; }
+	/// Gets scripts that is call when next turn is preperad.
+	const ModScript::NewTurnItemParser::Container &getEventItemTurnScript() const { return _newTurnItemScrip; }
+	/// Gets scripts that is call when item is crated.
+	const ModScript::CreateItemParser::Container &getEventCreateItemScript() const { return _createItemScript; }
 };
 
 }

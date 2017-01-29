@@ -19,6 +19,8 @@
 #include "BattleItem.h"
 #include "BattleUnit.h"
 #include "Tile.h"
+#include "SavedGame.h"
+#include "SavedBattleGame.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
@@ -67,7 +69,7 @@ BattleItem::~BattleItem()
  * Loads the item from a YAML file.
  * @param node YAML node.
  */
-void BattleItem::load(const YAML::Node &node)
+void BattleItem::load(const YAML::Node &node, const ScriptGlobal *shared)
 {
 	_inventoryX = node["inventoryX"].as<int>(_inventoryX);
 	_inventoryY = node["inventoryY"].as<int>(_inventoryY);
@@ -77,13 +79,14 @@ void BattleItem::load(const YAML::Node &node)
 	_stimulant = node["stimulant"].as<int>(_stimulant);
 	_fuseTimer = node["fuseTimer"].as<int>(_fuseTimer);
 	_droppedOnAlienTurn = node["droppedOnAlienTurn"].as<bool>(_droppedOnAlienTurn);
+	_scriptValues.load(node, shared);
 }
 
 /**
  * Saves the item to a YAML file.
  * @return YAML node.
  */
-YAML::Node BattleItem::save() const
+YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 {
 	YAML::Node node;
 	node["id"] = _id;
@@ -144,6 +147,7 @@ YAML::Node BattleItem::save() const
 	node["fuseTimer"] = _fuseTimer;
 	if (_droppedOnAlienTurn)
 		node["droppedOnAlienTurn"] = _droppedOnAlienTurn;
+	_scriptValues.save(node, shared);
 
 	return node;
 }
@@ -728,6 +732,8 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&BattleItem::getPainKillerQuantity>("getPainKillerQuantity");
 	bi.add<&BattleItem::getStimulantQuantity>("getStimulantQuantity");
 	bi.add<&BattleItem::isAmmo>("isAmmo");
+
+	bi.addScriptValue<&BattleItem::_scriptValues>();
 }
 
 namespace
@@ -748,7 +754,7 @@ void commonImpl(BindBase& b, Mod* mod)
 /**
  * Constructor of recolor script parser.
  */
-ModScript::RecolorItemParser::RecolorItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
+ModScript::RecolorItemParser::RecolorItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "new_pixel", "old_pixel", "item", "blit_part", "anim_frame", "shade" }
 {
 	BindBase b { this };
 
@@ -767,6 +773,20 @@ ModScript::SelectItemParser::SelectItemParser(ScriptGlobal* shared, const std::s
 	commonImpl(b, mod);
 
 	setDefault("add sprite_index sprite_offset; return sprite_index;");
+}
+
+ModScript::CreateItemParser::CreateItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "item", "battle_game", "turn", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+ModScript::NewTurnItemParser::NewTurnItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "item", "battle_game", "turn", "side", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
 }
 
 /**

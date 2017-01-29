@@ -331,7 +331,7 @@ bool NextTurnState::applyEnvironmentalConditionToFaction(UnitFaction faction, En
 					{
 						bodypart = (UnitBodyPart)RNG::generate(BODYPART_HEAD, BODYPART_LEFTLEG);
 					}
-					(*j)->damage(Position(0, 0, 0), type->getRandomDamage(power), type, side, bodypart);
+					(*j)->damage(Position(0, 0, 0), type->getRandomDamage(power), type, _battleGame, nullptr, side, bodypart);
 					showMessage = true;
 				}
 			}

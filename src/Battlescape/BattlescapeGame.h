@@ -39,7 +39,7 @@ class Mod;
 class InfoboxOKState;
 class SoldierDiary;
 
-enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK, BA_EXECUTE };
+enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_UNPRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK, BA_EXECUTE };
 enum BattleActionMove { BAM_NORMAL = 0, BAM_RUN = 1, BAM_STRAFE = 2 };
 
 struct BattleActionCost : RuleItemUseCost
@@ -146,7 +146,7 @@ public:
 	/// Handles unit AI.
 	void handleAI(BattleUnit *unit);
 	/// Drops an item and affects it with gravity.
-	void dropItem(const Position &position, BattleItem *item, bool newItem = false, bool removeItem = false, bool updateLight = true);
+	void dropItem(Position position, BattleItem *item, bool newItem = false, bool removeItem = false, bool updateLight = true);
 	/// Converts a unit into a unit of another type.
 	BattleUnit *convertUnit(BattleUnit *unit);
 	/// Handles kneeling action.
@@ -158,9 +158,9 @@ public:
 	/// Determines whether there is an action currently going on.
 	bool isBusy() const;
 	/// Activates primary action (left click).
-	void primaryAction(const Position &pos);
+	void primaryAction(Position pos);
 	/// Activates secondary action (right click).
-	void secondaryAction(const Position &pos);
+	void secondaryAction(Position pos);
 	/// Handler for the blaster launcher button.
 	void launchAction();
 	/// Handler for the psi button.

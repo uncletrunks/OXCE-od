@@ -1357,23 +1357,42 @@ bool BattlescapeState::playableUnitSelected()
 	return _save->getSelectedUnit() != 0 && allowButtons();
 }
 
+/**
+ * Draw hand item with ammo number.
+ */
 void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* ammo)
 {
 	hand->clear();
-	ammo->setVisible(false);
 	if (item)
 	{
 		const RuleItem *rule = item->getRules();
-		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item);
+		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item, _save->getAnimFrame());
 		if (item->getRules()->getBattleType() == BT_FIREARM && (item->needsAmmo() || item->getRules()->getClipSize() > 0))
 		{
-			ammo->setVisible(true);
 			if (item->getAmmoItem())
 				ammo->setValue(item->getAmmoItem()->getAmmoQuantity());
 			else
 				ammo->setValue(0);
 		}
+		else
+		{
+			ammo->setVisible(false);
+		}
 	}
+	else
+	{
+		ammo->setVisible(false);
+	}
+}
+
+/**
+ * Draw both hands sprites.
+ */
+void BattlescapeState::drawHandsItems()
+{
+	BattleUnit *battleUnit = _save->getSelectedUnit();
+	drawItem(battleUnit ? battleUnit->getLeftHandWeapon() : nullptr, _btnLeftHandItem, _numAmmoLeft);
+	drawItem(battleUnit ? battleUnit->getRightHandWeapon() : nullptr, _btnRightHandItem, _numAmmoRight);
 }
 
 /**
@@ -1516,9 +1535,8 @@ void BattlescapeState::updateSoldierInfo()
 
 	toggleKneelButton(battleUnit);
 
-	//FIXME: Meridian: extract into function later like Yankes did (merge conflict)
-	//drawItem(battleUnit->getLeftHandWeapon(), _btnLeftHandItem, _numAmmoLeft);
-	//drawItem(battleUnit->getRightHandWeapon(), _btnRightHandItem, _numAmmoRight);
+	// FIXME: Meridian: extract into function later like Yankes did (merge conflict)
+	//drawHandsItems();
 
 	BattleItem *leftHandItem = battleUnit->getItem("STR_LEFT_HAND");
 	_btnLeftHandItem->clear();
@@ -1796,6 +1814,8 @@ void BattlescapeState::animate()
 	blinkHealthBar();
 	// FIXME: animated grenade indicator didn't work... switching to static for now
 	//drawPrimers();
+	// FIXME: added by Yankes?
+	//drawHandsItems();
 }
 
 /**
@@ -2009,7 +2029,7 @@ inline void BattlescapeState::handle(Action *action)
 						{
 							if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
 							{
-								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_AP));
+								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_AP), _save);
 							}
 							_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
 							_save->getBattleGame()->handleState();
@@ -2023,7 +2043,7 @@ inline void BattlescapeState::handle(Action *action)
 						{
 							if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
 							{
-								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_STUN));
+								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_STUN), _save);
 							}
 						}
 						_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);

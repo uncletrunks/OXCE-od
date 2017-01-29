@@ -467,45 +467,59 @@ void BattlescapeGame::endTurn()
 		bool exploded = false;
 
 		// check for hot grenades on the ground
-		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
+		for (BattleItem *item : *_save->getItems())
 		{
-			for (std::vector<BattleItem*>::iterator it = _save->getTile(i)->getInventory()->begin(); it != _save->getTile(i)->getInventory()->end(); ++it)
+			const RuleItem *rule = item->getRules();
+			if (item->getFuseTimer() != 0 || rule->getFuseTimerType() == BFT_INSTANT)
 			{
-				if ((*it)->getFuseTimer() != 0 || (*it)->getRules()->getFuseTimerType() == BFT_INSTANT)
-				{
-					continue;
-				}
+				continue;
+			}
 
-				if ((*it)->getRules()->getBattleType() == BT_GRENADE)  // it's a grenade to explode now
+			const Tile *tile = item->getTile();
+			BattleUnit *unit = item->getOwner();
+			if (!tile && unit && rule->isExplodingInHands())
+			{
+				tile = unit->getTile();
+			}
+			if (tile)
+			{
+				if (rule->getBattleType() == BT_GRENADE) // it's a grenade to explode now
 				{
-					if (RNG::percent((*it)->getRules()->getSpecialChance()))
+					if (RNG::percent(rule->getSpecialChance()))
 					{
-						Position p = _save->getTile(i)->getPosition().toVexel() + Position(8, 8, - _save->getTile(i)->getTerrainLevel());
-						statePushNext(new ExplosionBState(this, p, BA_NONE, (*it), (*it)->getPreviousOwner()));
+						Position p = tile->getPosition().toVexel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
+						statePushNext(new ExplosionBState(this, p, BA_NONE, item, unit ? unit : item->getPreviousOwner()));
 						exploded = true;
 					}
 					else
 					{
 						//grenade fail to explode.
-						if ((*it)->getRules()->getFuseTimerType() == BFT_SET)
+						if (rule->getFuseTimerType() == BFT_SET)
 						{
-							(*it)->setFuseTimer(1);
+							item->setFuseTimer(1);
 						}
 						else
 						{
-							(*it)->setFuseTimer(-1);
+							item->setFuseTimer(-1);
 						}
 					}
 				}
 				else
 				{
-					forRemoval.push_back((*it));
+					if (RNG::percent(rule->getSpecialChance()))
+					{
+						forRemoval.push_back(item);
+					}
+					else
+					{
+						item->setFuseTimer(1);
+					}
 				}
 			}
 		}
-		for (std::vector<BattleItem*>::iterator it = forRemoval.begin(); it != forRemoval.end(); ++it)
+		for (BattleItem *item : forRemoval)
 		{
-			_save->removeItem((*it));
+			_save->removeItem(item);
 		}
 		if (exploded)
 		{
@@ -824,7 +838,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 							// the losing squad all get a morale loss
 							if ((*i)->getOriginalFaction() == victim->getOriginalFaction())
 							{
-								int bravery = (110 - (*i)->getBaseStats()->bravery) / 10;
+								int bravery = (*i)->reduceByBravery(10);
 								(*i)->moraleChange(-(modifier * 200 * bravery / loserMod / 100));
 
 								if (victim->getFaction() == FACTION_HOSTILE && murderer)
@@ -945,8 +959,22 @@ void BattlescapeGame::handleNonTargetAction()
 		{
 			if (_currentAction.spendTU(&error))
 			{
-				_parentState->warning("STR_GRENADE_IS_ACTIVATED");
+				_parentState->warning(_currentAction.weapon->getRules()->getPrimeActionMessage());
 				_currentAction.weapon->setFuseTimer(_currentAction.value);
+				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
+				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);
+			}
+			else
+			{
+				_parentState->warning(error);
+			}
+		}
+		else if (_currentAction.type == BA_UNPRIME)
+		{
+			if (_currentAction.spendTU(&error))
+			{
+				_parentState->warning(_currentAction.weapon->getRules()->getUnprimeActionMessage());
+				_currentAction.weapon->setFuseTimer(-1);
 				_save->getTileEngine()->calculateLighting(LL_UNITS, _currentAction.actor->getPosition());
 				_save->getTileEngine()->calculateFOV(_currentAction.actor->getPosition(), _currentAction.weapon->getVisibilityUpdateRange(), false);
 			}
@@ -1521,7 +1549,7 @@ bool BattlescapeGame::isBusy() const
  * Activates primary action (left click).
  * @param pos Position on the map.
  */
-void BattlescapeGame::primaryAction(const Position &pos)
+void BattlescapeGame::primaryAction(Position pos)
 {
 	bool bPreviewed = Options::battleNewPreviewPath != PATH_NONE;
 
@@ -1666,7 +1694,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
  * Activates secondary action (right click).
  * @param pos Position on the map.
  */
-void BattlescapeGame::secondaryAction(const Position &pos)
+void BattlescapeGame::secondaryAction(Position pos)
 {
 	//  -= turn to or open door =-
 	_currentAction.target = pos;
@@ -1837,9 +1865,9 @@ void BattlescapeGame::setTUReserved(BattleActionType tur)
  * @param newItem Bool whether this is a new item.
  * @param removeItem Bool whether to remove the item from the owner.
  */
-void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool newItem, bool removeItem, bool updateLight)
+void BattlescapeGame::dropItem(Position position, BattleItem *item, bool newItem, bool removeItem, bool updateLight)
 {
-	Position p = position;
+	const Position& p = position;
 
 	// don't spawn anything outside of bounds
 	if (_save->getTile(p) == 0)
@@ -1921,7 +1949,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 		getDepth(),
 		getMod()->getMaxViewDistance());
 
-	getSave()->initFixedItems(newUnit);
+	getSave()->initUnit(newUnit);
 	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
 	newUnit->setPosition(unit->getPosition());
 	newUnit->setDirection(unit->getDirection());

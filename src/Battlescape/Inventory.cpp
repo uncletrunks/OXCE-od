@@ -72,8 +72,8 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
 
-	_animTimer = new Timer(125);
-	_animTimer->onTimer((SurfaceHandler)&Inventory::drawPrimers);
+	_animTimer = new Timer(100);
+	_animTimer->onTimer((SurfaceHandler)&Inventory::animate);
 	_animTimer->start();
 
 	_stunIndicator = _game->getMod()->getSurface("BigStunIndicator", false);
@@ -289,7 +289,7 @@ void Inventory::drawItems()
 			{
 				continue;
 			}
-			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, _animFrame, 0);
 			work.executeBlit(frame, _items, x, y, 0);
 
 			// two-handed indicator
@@ -328,7 +328,7 @@ void Inventory::drawItems()
 			int x, y;
 			x = ((*i)->getSlot()->getX() + ((*i)->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
 			y = ((*i)->getSlot()->getY() + (*i)->getSlotY() * RuleInventory::SLOT_H);
-			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, 0, 0);
+			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, _animFrame, 0);
 			work.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
@@ -390,6 +390,18 @@ void Inventory::drawItems()
 		}
 
 		stackLayer.blit(_items);
+	}
+}
+
+/**
+ * Draws the selected item.
+ */
+void Inventory::drawSelectedItem()
+{
+	if (_selItem)
+	{
+		_selection->clear();
+		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem, _animFrame);
 	}
 }
 
@@ -515,18 +527,18 @@ BattleItem *Inventory::getSelectedItem() const
 void Inventory::setSelectedItem(BattleItem *item)
 {
 	_selItem = (item && !item->getRules()->isFixed()) ? item : 0;
-	if (_selItem == 0)
-	{
-		_selection->clear();
-	}
-	else
+	if (_selItem)
 	{
 		if (_selItem->getSlot()->getType() == INV_GROUND)
 		{
 			_stackLevel[_selItem->getSlotX()][_selItem->getSlotY()] -= 1;
 		}
-		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem);
 	}
+	else
+	{
+		_selection->clear();
+	}
+	drawSelectedItem();
 
 	// 1. first draw the grid
 	if (_tu)
@@ -743,7 +755,7 @@ void Inventory::mouseClick(Action *action, State *state)
 						setSelectedItem(item);
 						if (item->getFuseTimer() >= 0)
 						{
-							_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_ACTIVATED"));
+							_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getPrimeActionMessage()));
 						}
 					}
 				}
@@ -914,14 +926,14 @@ void Inventory::mouseClick(Action *action, State *state)
 									}
 									else
 									{
-										_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_ACTIVATED"));
+										_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getPrimeActionMessage()));
 										item->setFuseTimer(item->getRules()->getFuseTimerDefault());
 										arrangeGround(false);
 									}
 								}
 								else
 								{
-									_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_DEACTIVATED"));
+									_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getUnprimeActionMessage()));
 									item->setFuseTimer(-1);  // Unprime the grenade
 									arrangeGround(false);
 								}
@@ -1017,29 +1029,31 @@ bool Inventory::unload()
 		}
 	}
 
-	int tuCost = 0;
+	BattleActionCost cost { BA_NONE, _selUnit, _selItem };
 	if (grenade)
 	{
-		tuCost += _selUnit->getActionTUs(BA_PRIME, _selItem).Time / 2;
+		cost.type = BA_UNPRIME;
+		cost.updateTU();
 	}
 	else
 	{
-		tuCost += _selItem->getRules()->getTUUnload();
+		cost.Time += _selItem->getRules()->getTUUnload();
 	}
 
-	if (_selItem->getSlot()->getType() != INV_HAND)
+	if (cost.haveTU() && _selItem->getSlot()->getType() != INV_HAND)
 	{
-		tuCost += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
+		cost.Time += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
 	}
 
-	if (!_tu || _selUnit->spendTimeUnits(tuCost))
+	std::string err;
+	if (!_tu || cost.spendTU(&err))
 	{
 		moveItem(_selItem, _game->getMod()->getInventory("STR_RIGHT_HAND", true), 0, 0);
 		_selItem->moveToOwner(_selUnit);
 		if (grenade)
 		{
 			_selItem->setFuseTimer(-1);
-			_warning->showMessage(_game->getLanguage()->getString("STR_GRENADE_IS_DEACTIVATED"));
+			_warning->showMessage(_game->getLanguage()->getString(_selItem->getRules()->getUnprimeActionMessage()));
 		}
 		else
 		{
@@ -1051,7 +1065,10 @@ bool Inventory::unload()
 	}
 	else
 	{
-		_warning->showMessage(_game->getLanguage()->getString("STR_NOT_ENOUGH_TIME_UNITS"));
+		if (!err.empty())
+		{
+			_warning->showMessage(_game->getLanguage()->getString(err));
+		}
 		return false;
 	}
 
@@ -1383,37 +1400,52 @@ void Inventory::showWarning(const std::wstring &msg)
 void Inventory::drawPrimers()
 {
 	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
-	if (_animFrame == 8)
-	{
-		_animFrame = 0;
-	}
 
 	// grenades
 	Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
 	for (std::vector<std::pair<int, int> >::const_iterator i = _grenadeIndicators.begin(); i != _grenadeIndicators.end(); ++i)
 	{
-		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
 	}
 
 	// burning units
 	for (std::vector<std::pair<int, int> >::const_iterator i = _burningIndicators.begin(); i != _burningIndicators.end(); ++i)
 	{
-		_burnIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		_burnIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
 	}
 
 	// wounded units
 	for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
 	{
-		_woundIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		_woundIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
 	}
 
 	// stunned units
 	for (std::vector<std::pair<int, int> >::const_iterator i = _stunnedIndicators.begin(); i != _stunnedIndicators.end(); ++i)
 	{
-		_stunIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame]);
+		_stunIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
+	}
+}
+
+/**
+ * Animate surface.
+ */
+void Inventory::animate()
+{
+	if (_tu)
+	{
+		SavedBattleGame* save = _game->getSavedGame()->getSavedBattle();
+		save->nextAnimFrame();
+		_animFrame = save->getAnimFrame();
+	}
+	else
+	{
+		_animFrame++;
 	}
 
-	_animFrame++;
+	drawItems();
+	drawPrimers();
+	drawSelectedItem();
 }
 
 }

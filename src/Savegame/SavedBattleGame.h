@@ -47,6 +47,12 @@ class ItemContainer;
  */
 class SavedBattleGame
 {
+public:
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "BattleGame";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 private:
 	BattlescapeState *_battleState;
 	Mod *_rule;
@@ -63,6 +69,7 @@ private:
 	int _globalShade;
 	UnitFaction _side;
 	int _turn, _bughuntMinTurn;
+	int _animFrame;
 	bool _debugMode, _bughuntMode;
 	bool _aborted;
 	int _itemId;
@@ -82,8 +89,10 @@ private:
 	int _turnLimit, _cheatTurn;
 	ChronoTrigger _chronoTrigger;
 	bool _beforeGame;
+	ScriptValues<SavedBattleGame> _scriptValues;
 	/// Selects a soldier.
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
+
 public:
     /// FIXME: hit log
 	std::wostringstream hitLog;
@@ -142,7 +151,7 @@ public:
 	 * @param pos The position to convert.
 	 * @return A unique index.
 	 */
-	inline int getTileIndex(const Position& pos) const
+	inline int getTileIndex(Position pos) const
 	{
 		return pos.z * _mapsize_y * _mapsize_x + pos.y * _mapsize_x + pos.x;
 	}
@@ -157,7 +166,7 @@ public:
 	 * @param pos Map position.
 	 * @return Pointer to the tile at that position.
 	 */
-	inline Tile *getTile(const Position& pos)
+	inline Tile *getTile(Position pos)
 	{
 		if (pos.x < 0 || pos.y < 0 || pos.z < 0
 			|| pos.x >= _mapsize_x || pos.y >= _mapsize_y || pos.z >= _mapsize_z)
@@ -184,7 +193,7 @@ public:
 	/// Selects the next soldier.
 	BattleUnit *selectNextPlayerUnit(bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
 	/// Selects the unit with position on map.
-	BattleUnit *selectUnit(const Position& pos);
+	BattleUnit *selectUnit(Position pos);
 	/// Gets the pathfinding object.
 	Pathfinding *getPathfinding() const;
 	/// Gets a pointer to the tileengine.
@@ -201,6 +210,10 @@ public:
 	int getBughuntMinTurn() const;
 	/// Ends the turn.
 	void endTurn();
+	/// Gets animation frame.
+	int getAnimFrame() const;
+	/// Increase animation frame.
+	void nextAnimFrame();
 	/// Sets debug mode.
 	void setDebugMode();
 	/// Gets debug mode.
@@ -222,7 +235,7 @@ public:
 	/// Add buildIn weapon form list to unit.
 	void addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed);
 	/// Create all fixed items for new created unit.
-	void initFixedItems(BattleUnit *unit, size_t itemLevel = 0);
+	void initUnit(BattleUnit *unit, size_t itemLevel = 0);
 	/// Sets whether the mission was aborted.
 	void setAborted(bool flag);
 	/// Checks if the mission was aborted.
@@ -246,7 +259,7 @@ public:
 	/// Removes the body item that corresponds to the unit.
 	void removeUnconsciousBodyItem(BattleUnit *bu);
 	/// Sets or tries to set a unit of a certain size on a certain position of the map.
-	bool setUnitPosition(BattleUnit *bu, const Position &position, bool testOnly = false);
+	bool setUnitPosition(BattleUnit *bu, Position position, bool testOnly = false);
 	/// Adds this unit to the vector of falling units.
 	bool addFallingUnit(BattleUnit* unit);
 	/// Gets the vector of falling units.
@@ -270,7 +283,7 @@ public:
 	/// Checks whether a particular faction has eyes on *unit (whether any unit on that faction sees *unit).
 	bool eyesOnTarget(UnitFaction faction, BattleUnit* unit);
 	/// Attempts to place a unit on or near entryPoint.
-	bool placeUnitNearPosition(BattleUnit *unit, Position entryPoint, bool largeFriend);
+	bool placeUnitNearPosition(BattleUnit *unit, const Position& entryPoint, bool largeFriend);
 	/// Resets the turn counter.
 	void resetTurnCounter();
 	/// Resets the visibility of all tiles on the map.

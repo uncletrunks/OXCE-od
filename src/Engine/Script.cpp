@@ -382,24 +382,66 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 	}
 	if (_proc)
 	{
-		ShaderDrawFunc(
-			[&](Uint8& dest, const Uint8& src)
-			{
-				if (src)
+		if (_events)
+		{
+			ShaderDrawFunc(
+				[&](Uint8& dest, const Uint8& src)
 				{
-					ScriptWorkerBlit::Output arg = { src, dest };
-					set(arg);
-					scriptExe(*this, _proc);
-					get(arg);
-					if (arg.getFirst()) dest = arg.getFirst();
-				}
-			},
-			ShaderSurface(dest, 0, 0),
-			srcShader
-		);
+					if (src)
+					{
+						ScriptWorkerBlit::Output arg = { src, dest };
+						set(arg);
+						auto ptr = _events;
+						while (*ptr)
+						{
+							reset(arg);
+							scriptExe(*this, ptr->data());
+							++ptr;
+						}
+						++ptr;
+
+						reset(arg);
+						scriptExe(*this, _proc);
+
+						while (*ptr)
+						{
+							reset(arg);
+							scriptExe(*this, ptr->data());
+							++ptr;
+						}
+						++ptr;
+
+						get(arg);
+						if (arg.getFirst()) dest = arg.getFirst();
+					}
+				},
+				ShaderSurface(dest, 0, 0),
+				srcShader
+			);
+		}
+		else
+		{
+			ShaderDrawFunc(
+				[&](Uint8& dest, const Uint8& src)
+				{
+					if (src)
+					{
+						ScriptWorkerBlit::Output arg = { src, dest };
+						set(arg);
+						scriptExe(*this, _proc);
+						get(arg);
+						if (arg.getFirst()) dest = arg.getFirst();
+					}
+				},
+				ShaderSurface(dest, 0, 0),
+				srcShader
+			);
+		}
 	}
 	else
+	{
 		ShaderDraw<helper::StandardShade>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(shade));
+	}
 }
 
 /**
@@ -442,14 +484,15 @@ bool validOverloadProc(const ScriptRange<ScriptRange<ArgEnum>>& overload)
 /**
  * Display arguments
  */
-std::string displayOverloadProc(const ScriptParserBase* spb, const ScriptRange<ScriptRange<ArgEnum>>& overload)
+template<typename T, typename F>
+std::string displayArgs(const ScriptParserBase* spb, const ScriptRange<T>& range, F getType)
 {
 	std::string result = "";
-	for (auto& p : overload)
+	for (auto& p : range)
 	{
 		if (p)
 		{
-			auto type = *p.begin();
+			auto type = getType(p);
 			result += "[";
 			result += spb->getTypePrefix(type);
 			result += spb->getTypeName(type).toString();
@@ -461,6 +504,14 @@ std::string displayOverloadProc(const ScriptParserBase* spb, const ScriptRange<S
 		result.pop_back();
 	}
 	return result;
+}
+
+/**
+ * Display arguments
+ */
+std::string displayOverloadProc(const ScriptParserBase* spb, const ScriptRange<ScriptRange<ArgEnum>>& overload)
+{
+	return displayArgs(spb, overload, [](const ScriptRange<ArgEnum>& o) { return *o.begin(); });
 }
 
 /**
@@ -561,13 +612,31 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc,
 		}
 		else
 		{
-			Log(LOG_ERROR) << "Conflicting overloads for operator '" + proc.begin()->name.toString() + "'";
+			Log(LOG_ERROR) << "Conflicting overloads for operator '" + proc.begin()->name.toString() + "' for:";
+			Log(LOG_ERROR) << "  " << displayArgs(&ph.parser, ScriptRange<ScriptRefData>{ begin, end }, [](const ScriptRefData& r){ return r.type; });
+			Log(LOG_ERROR) << "Excepted:";
+			for (auto& p : proc)
+			{
+				if (p.parserArg != nullptr && p.overloadArg)
+				{
+					Log(LOG_ERROR) << "  " << displayOverloadProc(&ph.parser, p.overloadArg);
+				}
+			}
 			return false;
 		}
 	}
 	else
 	{
-		Log(LOG_ERROR) << "Can't match overload for operator '" + proc.begin()->name.toString() + "'";
+		Log(LOG_ERROR) << "Can't match overload for operator '" + proc.begin()->name.toString() + "' for:";
+		Log(LOG_ERROR) << "  " << displayArgs(&ph.parser, ScriptRange<ScriptRefData>{ begin, end }, [](const ScriptRefData& r){ return r.type; });
+		Log(LOG_ERROR) << "Excepted:";
+		for (auto& p : proc)
+		{
+			if (p.parserArg != nullptr && p.overloadArg)
+			{
+				Log(LOG_ERROR) << "  " << displayOverloadProc(&ph.parser, p.overloadArg);
+			}
+		}
 		return false;
 	}
 }
@@ -891,8 +960,9 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
  */
 bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
-	auto size = std::distance(begin, end);
-	if (ph.parser.getParamSize() != size)
+	const auto size = std::distance(begin, end);
+	const auto returnSize = ph.parser.haveEmptyReturn() ? 0 : ph.parser.getParamSize();
+	if (returnSize != size)
 	{
 		Log(LOG_ERROR) << "Invaild length of returns arguments";
 		return false;
@@ -1691,6 +1761,7 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
  */
 ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name) :
 	_shared{ shared },
+	_emptyReturn{ false },
 	_regUsed{ RegMax },
 	_regOutSize{ 0 }, _regOutName{ },
 	_name{ name }
@@ -2274,6 +2345,10 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 					refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << ref->name.toString() << std::setw(9) << getTypePrefix(ref->type) << " " << std::setw(9) << argType(ref->type) << "\n";
 				}
 			}
+			if (_emptyReturn)
+			{
+				refLog.get(LOG_DEBUG) << "In this script 'return' statment is empty, script returining values are edited directly\n";
+			}
 			refLog.get(LOG_DEBUG) << "\n";
 		}
 		refLog.get(LOG_DEBUG) << "Script data:\n";
@@ -2337,7 +2412,6 @@ ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::
 {
 	_events.reserve(EventsMax);
 	_eventsData.push_back({ 0, {} });
-	_eventsData.push_back({ OffsetMax, {} });
 }
 
 /**
@@ -2395,11 +2469,22 @@ std::vector<ScriptContainerBase> ScriptParserEventsBase::releseEvents()
 	std::sort(std::begin(_eventsData), std::end(_eventsData), [](const EventData& a, const EventData& b) { return a.offset < b.offset; });
 	for (auto& e : _eventsData)
 	{
-		if (_events.size() < EventsMax)
+		const auto reservedSpaceForZero = e.offset < 0;
+		if (_events.size() + (reservedSpaceForZero ?  2 : 1) < EventsMax)
 		{
 			_events.push_back(std::move(e.script));
 		}
+		else
+		{
+			Log(LOG_ERROR) << "Error in script parser '" << getName() << "': global script limit reach";
+			if (reservedSpaceForZero)
+			{
+				_events.emplace_back();
+			}
+			break;
+		}
 	}
+	_events.emplace_back();
 	return std::move(_events);
 }
 

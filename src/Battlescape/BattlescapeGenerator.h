@@ -78,6 +78,9 @@ private:
 	std::vector< std::vector<MapBlock*> > _blocks;
 	std::vector< std::vector<bool> > _landingzone;
 	std::vector< std::vector<int> > _segments, _drillMap;
+	std::vector<MapBlock*> _alternateTerrainMaps;
+	std::vector<RuleTerrain*> _alternateTerrains;
+	std::vector<SDL_Rect> _alternateTerrainRects;
 	MapBlock *_dummy;
 
 	/// sets the map size and associated vars
@@ -95,7 +98,7 @@ private:
 	/// Places an item on a soldier based on equipment layout.
 	bool placeItemByLayout(BattleItem *item);
 	/// Loads an XCom MAP file.
-	int loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false);
+	int loadMAP(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false);
 	/// Loads an XCom RMP file.
 	void loadRMP(MapBlock *mapblock, int xoff, int yoff, int segment);
 	/// Fills power sources with an alien fuel object.
@@ -115,11 +118,11 @@ private:
 	/// Load all Xcom weapons.
 	void loadWeapons();
 	/// Adds a craft (either a ufo or an xcom craft) somewhere on the map.
-	bool addCraft(MapBlock *craftMap, MapScript *command, SDL_Rect &craftPos);
+	bool addCraft(MapBlock *craftMap, MapScript *command, SDL_Rect &craftPos, RuleTerrain *terrain);
 	/// Adds a line (generally a road) to the map.
-	bool addLine(MapDirection lineType, const std::vector<SDL_Rect*> *rects);
+	bool addLine(MapDirection lineType, const std::vector<SDL_Rect*> *rects, RuleTerrain *terrain);
 	/// Adds a single block at a given position.
-	bool addBlock(int x, int y, MapBlock *block);
+	bool addBlock(int x, int y, MapBlock *block, bool placeMap);
 	/// Load the nodes from the associated map blocks.
 	void loadNodes();
 	/// Connects all the nodes together.

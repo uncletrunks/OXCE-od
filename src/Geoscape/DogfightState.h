@@ -56,7 +56,8 @@ private:
 	Craft *_craft;
 	Ufo *_ufo;
 	int _timeout, _currentDist, _targetDist, _weaponFireInterval[RuleCraft::WeaponMax], _weaponFireCountdown[RuleCraft::WeaponMax];
-	bool _end, _endUfoHandled, _endCraftHandled, _ufoBreakingOff, _destroyUfo, _destroyCraft, _weaponEnabled[RuleCraft::WeaponMax], _minimized, _endDogfight, _animatingHit, _waitForPoly;
+	bool _end, _endUfoHandled, _endCraftHandled, _ufoBreakingOff, _destroyUfo, _destroyCraft, _weaponEnabled[RuleCraft::WeaponMax];
+	bool _minimized, _endDogfight, _animatingHit, _waitForPoly, _waitForAltitude;
 	std::vector<CraftWeaponProjectile*> _projectiles;
 	static const int _ufoBlobs[8][13][13];
 	static const int _projectileBlobs[4][6][3];
@@ -149,9 +150,17 @@ public:
 	/// Checks if the dogfight should be ended.
 	bool dogfightEnded() const;
 	/// Gets pointer to the UFO in this dogfight.
-	Ufo* getUfo() const;
+	Ufo *getUfo() const;
+	/// Gets pointer to the craft in this dogfight.
+	Craft *getCraft() const;
+	/// Waits until the UFO reaches a polygon.
 	void setWaitForPoly(bool wait);
-	bool getWaitForPoly();
+	/// Waits until the UFO reaches a polygon.
+	bool getWaitForPoly() const;
+	/// Waits until the UFO reaches the right altitude.
+	void setWaitForAltitude(bool wait);
+	/// Waits until the UFO reaches the right altutude.
+	bool getWaitForAltitude() const;
 };
 
 }

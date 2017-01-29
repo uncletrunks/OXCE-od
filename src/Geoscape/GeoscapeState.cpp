@@ -928,7 +928,6 @@ void GeoscapeState::time5Seconds()
 				Waypoint *w = dynamic_cast<Waypoint*>((*j)->getDestination());
 				MissionSite* m = dynamic_cast<MissionSite*>((*j)->getDestination());
 				AlienBase* b = dynamic_cast<AlienBase*>((*j)->getDestination());
-				bool underwater = false;
 				if (u != 0)
 				{
 					switch (u->getStatus())
@@ -941,20 +940,16 @@ void GeoscapeState::time5Seconds()
 							continue;
 						}
 						// Can we actually fight it
-						if ((*j)->getDestination()->getSiteDepth() > (*j)->getRules()->getMaxDepth())
-						{
-							popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_DEPTH")));
-							++j;
-							continue;
-						}
-						else
-						{
-							underwater = (*j)->getRules()->getMaxDepth() > 0;
-						}
 						if (!(*j)->isInDogfight() && !(*j)->getDistance(u))
 						{
 							_dogfightsToBeStarted.push_back(new DogfightState(this, (*j), u));
-							if (underwater && !_globe->insideLand((*j)->getLongitude(), (*j)->getLatitude()))
+							if ((*j)->getRules()->isWaterOnly() && u->getAltitudeInt() > (*j)->getRules()->getMaxAltitude())
+							{
+								popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_DEPTH")));
+								_dogfightsToBeStarted.back()->setMinimized(true);
+								_dogfightsToBeStarted.back()->setWaitForAltitude(true);
+							}
+							else if ((*j)->getRules()->isWaterOnly() && !_globe->insideLand((*j)->getLongitude(), (*j)->getLatitude()))
 							{
 								popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_AIRBORNE")));
 								_dogfightsToBeStarted.back()->setMinimized(true);
@@ -2215,6 +2210,11 @@ void GeoscapeState::handleDogfights()
 				(*d)->setMinimized(false);
 				(*d)->setWaitForPoly(false);
 			}
+			else if ((*d)->getWaitForAltitude() && (*d)->getUfo()->getAltitudeInt() <= (*d)->getCraft()->getRules()->getMaxAltitude())
+			{
+				(*d)->setMinimized(false);
+				(*d)->setWaitForAltitude(false);
+			}
 			else
 			{
 				_minimizedDogfights++;
@@ -2322,6 +2322,12 @@ int GeoscapeState::getFirstFreeDogfightSlot()
  */
 void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 {
+	// Get the shade and texture for the globe at the location of the base, using the ufo position
+	int texture, shade;
+	double baseLon = ufo->getLongitude();
+	double baseLat = ufo->getLatitude();
+	_globe->getPolygonTextureAndShade(baseLon, baseLat, &texture, &shade);
+
 	// Whatever happens in the base defense, the UFO has finished its duty
 	ufo->setStatus(Ufo::DESTROYED);
 
@@ -2334,6 +2340,8 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 		bgen.setBase(base);
 		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(ufo->getCraftStats().missionCustomDeploy));
 		bgen.setAlienRace(ufo->getAlienRace());
+		bgen.setWorldShade(shade);
+		bgen.setWorldTexture(_game->getMod()->getGlobe()->getTexture(texture));
 		bgen.run();
 		_pause = true;
 		_game->pushState(new BriefingState(0, base));

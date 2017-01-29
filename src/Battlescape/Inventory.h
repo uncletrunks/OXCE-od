@@ -79,6 +79,8 @@ public:
 	void drawGridLabels(bool showTuCost = false);
 	/// Draws the inventory items.
 	void drawItems();
+	/// Draws the selected item.
+	void drawSelectedItem();
 	/// Gets the currently selected item.
 	BattleItem *getSelectedItem() const;
 	/// Sets the currently selected item.
@@ -113,6 +115,8 @@ public:
 	void showWarning(const std::wstring &msg);
 	/// Show priming warnings on grenades.
 	void drawPrimers();
+	/// Animate surface.
+	void animate();
 };
 
 }

@@ -193,6 +193,11 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 
 	_visibilityUnitScript.load(_type, node, parsers.visibilityUnit);
 
+	_unitHitScript.load(_type, node, parsers.unitHit);
+	_unitDamageScript.load(_type, node, parsers.unitDamage);
+	_unitNewTurnScript.load(_type, node, parsers.unitNewTurn);
+	_unitCreateScript.load(_type, node, parsers.unitCreated);
+
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node, parsers.getShared());
 	_customArmorPreviewIndex = node["customArmorPreviewIndex"].as<int>(_customArmorPreviewIndex);
@@ -752,51 +757,6 @@ int Armor::getRankColor(int i) const
 bool Armor::hasInventory() const
 {
 	return _hasInventory;
-}
-
-/**
- * Get recoloring script.
- * @return Script for recoloring.
- */
-const ModScript::RecolorUnitParser::Container &Armor::getRecolorScript() const
-{
-	return _recolorScript;
-}
-
-/**
- * Get switch sprite script.
- * @return Script for switching.
- */
-const ModScript::SelectUnitParser::Container &Armor::getSpriteScript() const
-{
-	return _spriteScript;
-}
-
-/**
- * Get script that caclualte reaction based on unit that do action.
- * @return Script that calculate reaction.
- */
-const ModScript::ReactionUnitParser::Container &Armor::getReacActionScript() const
-{
-	return _reacActionScript;
-}
-
-/**
- * Get script that caclualte reaction based on unit that see action.
- * @return Script that calculate reaction.
- */
-const ModScript::ReactionUnitParser::Container &Armor::getReacReactionScript() const
-{
-	return _reacReactionScript;
-}
-
-/**
- * Get script that caclualte visibility of other units.
- * @return Script that calculate visibility.
- */
-const ModScript::VisibilityUnitParser::Container &Armor::getVisibilityUnitScript() const
-{
-	return _visibilityUnitScript;
 }
 
 /**

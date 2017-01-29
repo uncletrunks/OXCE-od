@@ -33,7 +33,7 @@ RuleCraft::RuleCraft(const std::string &type) :
 	_type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _pilots(0), _vehicles(0),
 	_costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(0), _score(0), _battlescapeTerrainData(0),
-	_spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _listOrder(0), _maxItems(0), _maxDepth(0), _stats(),
+	_spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _listOrder(0), _maxItems(0), _maxAltitude(-1), _stats(),
 	_shieldRechargeAtBase(1000)
 {
 	for (int i = 0; i < WeaponMax; ++ i)
@@ -111,7 +111,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 	{
 		_listOrder = listOrder;
 	}
-	_maxDepth = node["maxDepth"].as<int>(_maxDepth);
+	_maxAltitude = node["maxAltitude"].as<int>(_maxAltitude);
 	_maxItems = node["maxItems"].as<int>(_maxItems);
 
 	if (const YAML::Node &types = node["weaponTypes"])
@@ -478,12 +478,22 @@ const RuleCraftStats& RuleCraft::getStats() const
 }
 
 /**
- * Gets the maximum depth this craft can dive to.
- * @return max depth.
+ * Gets the maximum altitude this craft can dogfight to.
+ * @return max altitude (0-4).
  */
-int RuleCraft::getMaxDepth() const
+int RuleCraft::getMaxAltitude() const
 {
-	return _maxDepth;
+	return _maxAltitude;
+}
+
+/**
+ * If the craft is underwater, it can only dogfight over polygons.
+ * TODO: Replace this with its own flag.
+ * @return underwater or not
+ */
+bool RuleCraft::isWaterOnly() const
+{
+	return _maxAltitude > -1;
 }
 
 /**

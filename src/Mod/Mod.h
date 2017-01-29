@@ -150,6 +150,7 @@ private:
 	RuleConverter *_converter;
 	ModScriptGlobal *_scriptGlobal;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
+	int _maxStaticLightDistance, _maxDynamicLightDistance, _enhancedLighting;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor, _minReactionAccuracy;
@@ -164,6 +165,7 @@ private:
 	std::string _fontName, _finalResearch;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
+	int _baseDefenseMapFromLocation;
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
 	StatAdjustment _statAdjustment[5];
 
@@ -370,9 +372,15 @@ public:
 	/// Gets the ruleset for a specific inventory.
 	RuleInventory *getInventory(const std::string &id, bool error = false) const;
 	/// Gets max view distance in BattleScape.
-	inline int getMaxViewDistance() const {return _maxViewDistance;}
+	int getMaxViewDistance() const { return _maxViewDistance; }
 	/// Gets threshold of darkness for LoS calculation.
-	inline int getMaxDarknessToSeeUnits() const {return _maxDarknessToSeeUnits;}
+	int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
+	/// Gets max static (tiles & fire) ligth distance in BattleScape.
+	int getMaxStaticLightDistance() const { return _maxStaticLightDistance; }
+	/// Gets max dynamic (items & units) ligth distance in BattleScape.
+	int getMaxDynamicLightDistance() const { return _maxDynamicLightDistance; }
+	/// Get flags for enhanced lighting, 0x1 - tiles and fire, 0x2 - items, 0x4 - units.
+	int getEnhancedLighting() const { return _enhancedLighting; }
 	/// Get basic damage type
 	const RuleDamageType *getDamageType(ItemDamageType type) const;
 	/// Gets the cost of a soldier.
@@ -431,6 +439,8 @@ public:
 	int getSoldiersPerColonel() const { return _soldiersPerColonel; }
 	/// Gets how many soldiers are needed for one commander promotion
 	int getSoldiersPerCommander() const { return _soldiersPerCommander; }
+	/// Gets whether or not to load base defense terrain from globe texture
+	int getBaseDefenseMapFromLocation() const { return _baseDefenseMapFromLocation; }
 	/// Gets the ruleset for a specific research project.
 	RuleResearch *getResearch (const std::string &id, bool error = false) const;
 	/// Gets the list of all research projects.
@@ -491,12 +501,14 @@ public:
 	const std::map<std::string, SoundDefinition *> *getSoundDefinitions() const;
 	/// Gets the list of transparency colors,
 	const std::vector<SDL_Color> *getTransparencies() const;
-	const std::vector<MapScript*> *getMapScript(std::string id) const;
+	const std::vector<MapScript*> *getMapScript(const std::string& id) const;
 	/// Gets a video for intro/outro etc.
 	RuleVideo *getVideo(const std::string &id, bool error = false) const;
 	const std::map<std::string, RuleMusic *> *getMusic() const;
 	const std::vector<std::string> *getMissionScriptList() const;
 	RuleMissionScript *getMissionScript(const std::string &name, bool error = false) const;
+	/// Get global script data.
+	ScriptGlobal *getScriptGlobal() const;
 	std::string getFinalResearch() const;
 	const std::map<int, std::string> *getMissionRatings() const;
 	const std::map<int, std::string> *getMonthlyRatings() const;

@@ -1576,7 +1576,8 @@ void Map::setSelectorPosition(int mx, int my)
  */
 void Map::animate(bool redraw)
 {
-	_animFrame = (_animFrame + 1) % (64 * 3*3 * 5*5 * 7*7);
+	_save->nextAnimFrame();
+	_animFrame = _save->getAnimFrame();
 
 	// animate tiles
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
@@ -1724,7 +1725,7 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset)
   * @param size Size of the unit we want to get the level from.
   * @return terrainlevel.
   */
-int Map::getTerrainLevel(Position pos, int size) const
+int Map::getTerrainLevel(const Position& pos, int size) const
 {
 	int lowestlevel = 0;
 
@@ -1935,7 +1936,7 @@ int Map::getIconWidth() const
  * @param pos the map position to calculate the sound angle from.
  * @return the angle of the sound (280 to 440).
  */
-int Map::getSoundAngle(Position pos) const
+int Map::getSoundAngle(const Position& pos) const
 {
 	int midPoint = getWidth() / 2;
 	Position relativePosition;
@@ -1949,7 +1950,7 @@ int Map::getSoundAngle(Position pos) const
 	// we use +- 80 instead of +- 90, so as not to go ALL the way left or right
 	// which would effectively mute the sound out of one speaker.
 	// since Mix_SetPosition uses modulo 360, we can't feed it a negative number, so add 360 instead.
-	return 360 + (relativePosition.x / (double)(midPoint / 80.0));
+	return 360 + (relativePosition.x / (midPoint / 80.0));
 }
 
 /**

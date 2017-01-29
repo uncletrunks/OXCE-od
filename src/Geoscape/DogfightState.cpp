@@ -240,8 +240,8 @@ const int DogfightState::_projectileBlobs[4][6][3] =
 DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	_state(state), _craft(craft), _ufo(ufo), _timeout(50), _currentDist(640), _targetDist(560),
 	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
-	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0), _interceptionNumber(0),
-	_interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false)
+	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _waitForAltitude(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0),
+	_interceptionNumber(0), _interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false)
 {
 	_screen = false;
 	_craft->setInDogfight(true);
@@ -1907,22 +1907,19 @@ void DogfightState::setMinimized(const bool minimized)
  */
 void DogfightState::btnMinimizedIconClick(Action *)
 {
-	if (_craft->getDestination()->getSiteDepth() > _craft->getRules()->getMaxDepth())
+	if (_craft->getRules()->isWaterOnly() && _ufo->getAltitudeInt() > _craft->getRules()->getMaxAltitude())
 	{
 		_state->popup(new DogfightErrorState(_craft, tr("STR_UNABLE_TO_ENGAGE_DEPTH")));
+		setWaitForAltitude(true);
+	}
+	else if (_craft->getRules()->isWaterOnly() && !_state->getGlobe()->insideLand(_craft->getLongitude(), _craft->getLatitude()))
+	{
+		_state->popup(new DogfightErrorState(_craft, tr("STR_UNABLE_TO_ENGAGE_AIRBORNE")));
+		setWaitForPoly(true);
 	}
 	else
 	{
-		bool underwater = _craft->getRules()->getMaxDepth() > 0;
-		if (underwater && !_state->getGlobe()->insideLand(_craft->getLongitude(), _craft->getLatitude()))
-		{
-			_state->popup(new DogfightErrorState(_craft, tr("STR_UNABLE_TO_ENGAGE_AIRBORNE")));
-			setWaitForPoly(true);
-		}
-		else
-		{
-			setMinimized(false);
-		}
+		setMinimized(false);
 	}
 }
 
@@ -2057,9 +2054,18 @@ bool DogfightState::dogfightEnded() const
  * Returns the UFO associated to this dogfight.
  * @return Returns pointer to UFO object associated to this dogfight.
  */
-Ufo* DogfightState::getUfo() const
+Ufo *DogfightState::getUfo() const
 {
 	return _ufo;
+}
+
+/**
+ * Returns the craft associated to this dogfight.
+ * @return Returns pointer to craft object associated to this dogfight.
+ */
+Craft *DogfightState::getCraft() const
+{
+	return _craft;
 }
 
 /**
@@ -2088,9 +2094,19 @@ void DogfightState::setWaitForPoly(bool wait)
 	_waitForPoly = wait;
 }
 
-bool DogfightState::getWaitForPoly()
+bool DogfightState::getWaitForPoly() const
 {
 	return _waitForPoly;
+}
+
+void DogfightState::setWaitForAltitude(bool wait)
+{
+	_waitForAltitude = wait;
+}
+
+bool DogfightState::getWaitForAltitude() const
+{
+	return _waitForAltitude;
 }
 
 }

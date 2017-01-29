@@ -28,6 +28,7 @@
 #include "../Battlescape/Pathfinding.h"
 #include "../Battlescape/BattlescapeGame.h"
 #include "../Battlescape/AIModule.h"
+#include "../Battlescape/Inventory.h"
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Unit.h"
@@ -348,12 +349,9 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
  */
 BattleUnit::~BattleUnit()
 {
-	if (!getGeoscapeSoldier())
+	for (std::vector<BattleUnitKills*>::const_iterator i = _statistics->kills.begin(); i != _statistics->kills.end(); ++i)
 	{
-		for (std::vector<BattleUnitKills*>::const_iterator i = _statistics->kills.begin(); i != _statistics->kills.end(); ++i)
-		{
-			delete *i;
-		}
+		delete *i;
 	}
 	delete _statistics;
 	delete _currentAIState;
@@ -363,7 +361,7 @@ BattleUnit::~BattleUnit()
  * Loads the unit from a YAML file.
  * @param node YAML node.
  */
-void BattleUnit::load(const YAML::Node &node)
+void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 {
 	_id = node["id"].as<int>(_id);
 	_faction = (UnitFaction)node["faction"].as<int>(_faction);
@@ -423,13 +421,14 @@ void BattleUnit::load(const YAML::Node &node)
 		}
 	}
 	_mindControllerID = node["mindControllerID"].as<int>(_mindControllerID);
+	_scriptValues.load(node, shared);
 }
 
 /**
  * Saves the soldier to a YAML file.
  * @return YAML node.
  */
-YAML::Node BattleUnit::save() const
+YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 {
 	YAML::Node node;
 
@@ -495,6 +494,7 @@ YAML::Node BattleUnit::save() const
 		node["recolor"].push_back(p);
 	}
 	node["mindControllerID"] = _mindControllerID;
+	_scriptValues.save(node, shared);
 
 	return node;
 }
@@ -539,7 +539,7 @@ int BattleUnit::getId() const
  * @param pos position
  * @param updateLastPos refresh last stored position
  */
-void BattleUnit::setPosition(const Position& pos, bool updateLastPos)
+void BattleUnit::setPosition(Position pos, bool updateLastPos)
 {
 	if (updateLastPos) { _lastPos = _pos; }
 	_pos = pos;
@@ -549,7 +549,7 @@ void BattleUnit::setPosition(const Position& pos, bool updateLastPos)
  * Gets the BattleUnit's position.
  * @return position
  */
-const Position& BattleUnit::getPosition() const
+Position BattleUnit::getPosition() const
 {
 	return _pos;
 }
@@ -558,7 +558,7 @@ const Position& BattleUnit::getPosition() const
  * Gets the BattleUnit's position.
  * @return position
  */
-const Position& BattleUnit::getLastPosition() const
+Position BattleUnit::getLastPosition() const
 {
 	return _lastPos;
 }
@@ -578,7 +578,7 @@ Position BattleUnit::getPositionVexels() const
  * Gets the BattleUnit's destination.
  * @return destination
  */
-const Position& BattleUnit::getDestination() const
+Position BattleUnit::getDestination() const
 {
 	return _destination;
 }
@@ -676,7 +676,7 @@ bool BattleUnit::wantsToSurrender() const
  * @param tileBelowMe Which tile is currently below the unit.
  * @param cache Update cache?
  */
-void BattleUnit::startWalking(int direction, const Position &destination, Tile *tileBelowMe, bool cache)
+void BattleUnit::startWalking(int direction, Position destination, Tile *tileBelowMe, bool cache)
 {
 	if (direction >= Pathfinding::DIR_UP)
 	{
@@ -816,7 +816,7 @@ int BattleUnit::getDiagonalWalkingPhase() const
  * @param point Position to look at.
  * @param turret True to turn the turret, false to turn the unit.
  */
-void BattleUnit::lookAt(const Position &point, bool turret)
+void BattleUnit::lookAt(Position point, bool turret)
 {
 	int dir = directionTo (point);
 
@@ -1021,7 +1021,7 @@ void BattleUnit::aim(bool aiming)
  * @param point given position.
  * @return direction.
  */
-int BattleUnit::directionTo(const Position &point) const
+int BattleUnit::directionTo(Position point) const
 {
 	double ox = point.x - _pos.x;
 	double oy = point.y - _pos.y;
@@ -1112,17 +1112,10 @@ int BattleUnit::getOverKillDamage() const
 
 /**
  * Helper function for setting value with max bound.
- * @param value
- * @param max
- * @param diff
  */
 static inline void setValueMax(int& value, int diff, int min, int max)
 {
-	value += diff;
-	if (value < min)
-		value = min;
-	else if (value > max)
-		value = max;
+	value = Clamp(value + diff, min, max);
 }
 
 /**
@@ -1132,7 +1125,7 @@ static inline void setValueMax(int& value, int diff, int min, int max)
  * @param type The type of damage being inflicted.
  * @return damage done after adjustment
  */
-int BattleUnit::damage(const Position &relative, int power, const RuleDamageType *type, UnitSide sideOverride, UnitBodyPart bodypartOverride)
+int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleItem *item, UnitSide sideOverride, UnitBodyPart bodypartOverride)
 {
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
@@ -1142,7 +1135,7 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 		return 0;
 	}
 
-	power = (int)floor(power * _armor->getDamageModifier(type->ResistType));
+	power = reduceByResistance(power, type->ResistType);
 
 	if (!type->IgnoreDirection)
 	{
@@ -1214,6 +1207,20 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 		}
 	}
 
+	const int orgPower = power;
+	const int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
+
+	{
+		ModScript::HitUnitParser::Output args { power, bodypart, side, };
+		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, };
+
+		work.execute(this->getArmor()->getEventUnitHitScript(), args);
+
+		power = args.getFirst();
+		side = (UnitSide)args.getSecond();
+		bodypart = (UnitBodyPart)args.getThird();
+	}
+
 	// side and bodypart overrides (used by environmental conditions only)
 	if (sideOverride != SIDE_MAX)
 	{
@@ -1224,52 +1231,76 @@ int BattleUnit::damage(const Position &relative, int power, const RuleDamageType
 		bodypart = bodypartOverride;
 	}
 
-	int toHealth = 0;
-	int toArmorPre = type->getArmorPreDamage(power);
-
-	if (type->ArmorEffectiveness > 0.0f)
 	{
-		power -= getArmor(side) * type->ArmorEffectiveness;
-	}
+		constexpr int toHealth = 0;
+		constexpr int toArmor = 1;
+		constexpr int toStun = 2;
+		constexpr int toTime = 3;
+		constexpr int toEnergy = 4;
+		constexpr int toMorale = 5;
+		constexpr int toWound = 6;
 
-	setValueMax(_currentArmor[side], - toArmorPre, 0, _armor->getArmor(side));
+		ModScript::DamageUnitParser::Output args { };
 
-	if (power > 0)
-	{
-		// stun level change
+		std::get<toArmor>(args.data) += type->getArmorPreDamage(power);
+
+		if (type->ArmorEffectiveness > 0.0f)
+		{
+			power -= getArmor(side) * type->ArmorEffectiveness;
+		}
+
+		if (power > 0)
+		{
+			// stun level change
+			std::get<toStun>(args.data) += type->getStunDamage(power);
+
+			// morale change
+			std::get<toMorale>(args.data) += type->getMoraleDamage(power);
+
+			// time units change
+			std::get<toTime>(args.data) += type->getTimeDamage(power);
+
+			// health change
+			std::get<toHealth>(args.data) += type->getHealthDamage(power);
+
+			// energy change
+			std::get<toEnergy>(args.data) += type->getEnergyDamage(power);
+
+			// fatal wounds change
+			std::get<toWound>(args.data) += type->getWoundDamage(power);
+
+			// armor value change
+			std::get<toArmor>(args.data) += type->getArmorDamage(power);
+		}
+
+		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, };
+
+		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
+
 		if (!_armor->getPainImmune() || type->IgnorePainImmunity)
 		{
-			setValueMax(_stunlevel, type->getStunDamage(power), 0, 4 * _stats.health);
+			setValueMax(_stunlevel, std::get<toStun>(args.data), 0, 4 * _stats.health);
 		}
 
-		// morale change
-		moraleChange(-(110 - _stats.bravery) * type->getMoraleDamage(power) / 100);
+		moraleChange(- reduceByBravery(std::get<toMorale>(args.data)));
 
-		// time units change
-		setValueMax(_tu, - type->getTimeDamage(power), 0, _stats.tu);
+		setValueMax(_tu, - std::get<toTime>(args.data), 0, _stats.tu);
 
-		// health change
-		int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
-		toHealth = type->getHealthDamage(power);
-		setValueMax(_health, - toHealth, overKillMinimum, _stats.health);
+		setValueMax(_health, - std::get<toHealth>(args.data), overKillMinimum, _stats.health);
 
-		// energy change
-		setValueMax(_energy, - type->getEnergyDamage(power), 0, _stats.stamina);
+		setValueMax(_energy, - std::get<toEnergy>(args.data), 0, _stats.stamina);
 
-		// fatal wounds change
 		if (isWoundable())
 		{
-			const int wound = type->getWoundDamage(power);
-			_fatalWounds[bodypart] += wound;
-			moraleChange(-wound);
+			_fatalWounds[bodypart] += std::get<toWound>(args.data);
+			moraleChange(-std::get<toWound>(args.data));
 		}
 
-		// armor value change
-		setValueMax(_currentArmor[side], - type->getArmorDamage(power), 0, _armor->getArmor(side));
-	}
+		setValueMax(_currentArmor[side], - std::get<toArmor>(args.data), 0, _armor->getArmor(side));
 
-	setFatalShotInfo(side, bodypart);
-	return toHealth;
+		setFatalShotInfo(side, bodypart);
+		return std::get<toHealth>(args.data);
+	}
 }
 
 /**
@@ -1380,6 +1411,10 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Rule
 			case BA_PRIME:
 				flat = item->getFlatPrime();
 				cost = item->getCostPrime();
+				break;
+			case BA_UNPRIME:
+				flat = item->getFlatUnprime();
+				cost = item->getCostUnprime();
 				break;
 			case BA_THROW:
 				flat = item->getFlatThrow();
@@ -1842,7 +1877,7 @@ void BattleUnit::prepareHealth(int health)
 	// suffer from fire
 	if (!_hitByFire && _fire > 0)
 	{
-		health -= _armor->getDamageModifier(DT_IN) * RNG::generate(Mod::FIRE_DAMAGE_RANGE[0], Mod::FIRE_DAMAGE_RANGE[1]);
+		health -= reduceByResistance(RNG::generate(Mod::FIRE_DAMAGE_RANGE[0], Mod::FIRE_DAMAGE_RANGE[1]), DT_IN);
 		_fire--;
 	}
 
@@ -1929,6 +1964,16 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 		return;
 	}
 
+	updateUnitStats(true, true);
+}
+
+/**
+ * Update stats of unit.
+ * @param tuAndEnergy
+ * @param rest
+ */
+void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
+{
 	// snapshot of current stats
 	int TURecovery = _armor->getTimeRecovery(this);
 	int ENRecovery = _armor->getEnergyRecovery(this);
@@ -1937,13 +1982,18 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 	int STRecovery = _armor->getStunRegeneration(this);
 
 	// update stats
-	prepareTimeUnits(TURecovery);
-	prepareEnergy(ENRecovery);
-	prepareHealth(HPRecovery);
-	prepareStun(STRecovery);
-	prepareMorale(MRRecovery);
+	if (tuAndEnergy)
+	{
+		prepareTimeUnits(TURecovery);
+		prepareEnergy(ENRecovery);
+	}
+	if (rest)
+	{
+		prepareHealth(HPRecovery);
+		prepareStun(STRecovery);
+		prepareMorale(MRRecovery);
+	}
 }
-
 
 /**
  * Morale change with bounds check.
@@ -1958,6 +2008,22 @@ void BattleUnit::moraleChange(int change)
 		_morale = 100;
 	if (_morale < 0)
 		_morale = 0;
+}
+
+/**
+ * Get reduced morale change value by bravery.
+ */
+int BattleUnit::reduceByBravery(int moraleChange) const
+{
+	return (110 - _stats.bravery) * moraleChange / 100;
+}
+
+/**
+ * Calculate power reduction by resistances.
+ */
+int BattleUnit::reduceByResistance(int power, ItemDamageType resistType) const
+{
+	return (int)floor(power * _armor->getDamageModifier(resistType));
 }
 
 /**
@@ -2012,6 +2078,230 @@ int BattleUnit::getFire() const
 std::vector<BattleItem*> *BattleUnit::getInventory()
 {
 	return &_inventory;
+}
+
+/**
+ * Adds an item to an XCom soldier (auto-equip).
+ * @param item Pointer to the Item.
+ * @param mod Pointer to the Mod.
+ * @param save Pointer to the saved battle game for storing items.
+ * @param allowSecondClip allow the unit to take a second clip or not. (only applies to xcom soldiers, aliens are allowed regardless of this flag)
+ * @param allowAutoLoadout allow auto equip of weapons for solders.
+ * @param allowUnloadedWeapons allow equip of weapons without ammo.
+ * @return if the item was placed or not.
+ */
+bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save, bool allowSecondClip, bool allowAutoLoadout, bool allowUnloadedWeapons)
+{
+	RuleInventory *rightHand = mod->getInventory("STR_RIGHT_HAND");
+	RuleInventory *leftHand = mod->getInventory("STR_LEFT_HAND");
+	bool placed = false;
+	bool loaded = false;
+	BattleItem *rightWeapon = getRightHandWeapon();
+	BattleItem *leftWeapon = getLeftHandWeapon();
+	const RuleItem *rule = item->getRules();
+	int weight = 0;
+
+	// tanks and aliens don't care about weight or multiple items,
+	// their loadouts are defined in the rulesets and more or less set in stone.
+	if (getFaction() == FACTION_PLAYER && hasInventory())
+	{
+		weight = getCarriedWeight() + rule->getWeight();
+		if (item->getAmmoItem() && item->getAmmoItem() != item)
+		{
+			weight += item->getAmmoItem()->getRules()->getWeight();
+		}
+		// allow all weapons to be loaded by avoiding this check,
+		// they'll return false later anyway if the unit has something in his hand.
+		if (rule->getCompatibleAmmo()->empty())
+		{
+			int tally = 0;
+			for (BattleItem *i : *getInventory())
+			{
+				if (rule->getType() == i->getRules()->getType())
+				{
+					if (allowSecondClip && rule->getBattleType() == BT_AMMO)
+					{
+						tally++;
+						if (tally == 2)
+						{
+							return false;
+						}
+					}
+					else
+					{
+						// we already have one, thanks.
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	// place fixed weapon
+	if (rule->isFixed())
+	{
+		// either in the default slot provided in the ruleset
+		if (!rule->getDefaultInventorySlot().empty())
+		{
+			RuleInventory *defaultSlot = mod->getInventory(rule->getDefaultInventorySlot());
+			BattleItem *defaultSlotWeapon = getItem(rule->getDefaultInventorySlot());
+			if (!defaultSlotWeapon)
+			{
+				item->moveToOwner(this);
+				item->setSlot(defaultSlot);
+				placed = true;
+				if (save) save->getItems()->push_back(item);
+				item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+			}
+		}
+		// or in the left/right hand
+		if (!placed && (!rightWeapon || !leftWeapon))
+		{
+			item->moveToOwner(this);
+			item->setSlot(!rightWeapon ? rightHand : leftHand);
+			placed = true;
+			if (save) save->getItems()->push_back(item);
+			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+		}
+		return placed;
+	}
+
+	// we equip item only if we have skill to use it.
+	if (getBaseStats()->psiSkill <= 0 && rule->isPsiRequired())
+	{
+		return false;
+	}
+
+	bool keep = true;
+	switch (rule->getBattleType())
+	{
+	case BT_FIREARM:
+	case BT_MELEE:
+		if (item->getAmmoItem() || getFaction() != FACTION_PLAYER || !hasInventory() || allowUnloadedWeapons)
+		{
+			loaded = true;
+		}
+
+		if (loaded && (getGeoscapeSoldier() == 0 || allowAutoLoadout))
+		{
+			if (!rightWeapon && getBaseStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
+			{
+				item->moveToOwner(this);
+				item->setSlot(rightHand);
+				placed = true;
+			}
+			if (!placed && !leftWeapon && (getFaction() != FACTION_PLAYER || rule->isFixed()))
+			{
+				item->moveToOwner(this);
+				item->setSlot(leftHand);
+				placed = true;
+			}
+		}
+		break;
+	case BT_AMMO:
+		// xcom weapons will already be loaded, aliens and tanks, however, get their ammo added afterwards.
+		// so let's try to load them here.
+		if (rightWeapon && (rightWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
+			!rightWeapon->getRules()->getCompatibleAmmo()->empty() &&
+			!rightWeapon->getAmmoItem() &&
+			rightWeapon->setAmmoItem(item) == 0)
+		{
+			item->setSlot(rightHand);
+			placed = true;
+			break;
+		}
+		if (leftWeapon && (leftWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
+			!leftWeapon->getRules()->getCompatibleAmmo()->empty() &&
+			!leftWeapon->getAmmoItem() &&
+			leftWeapon->setAmmoItem(item) == 0)
+		{
+			item->setSlot(leftHand);
+			placed = true;
+			break;
+		}
+		// don't take ammo for weapons we don't have.
+		keep = (getFaction() != FACTION_PLAYER);
+		if (rightWeapon)
+		{
+			for (const std::string &s : *rightWeapon->getRules()->getCompatibleAmmo())
+			{
+				if (s == rule->getType())
+				{
+					keep = true;
+					break;
+				}
+			}
+		}
+		if (leftWeapon)
+		{
+			for (const std::string &s : *leftWeapon->getRules()->getCompatibleAmmo())
+			{
+				if (s == rule->getType())
+				{
+					keep = true;
+					break;
+				}
+			}
+		}
+		if (!keep)
+		{
+			break;
+		}
+	default:
+		if (rule->getBattleType() == BT_PSIAMP && getFaction() == FACTION_HOSTILE)
+		{
+			if (!rightWeapon)
+			{
+				item->moveToOwner(this);
+				item->setSlot(rightHand);
+				placed = true;
+			}
+			if (!placed && !leftWeapon)
+			{
+				item->moveToOwner(this);
+				item->setSlot(leftHand);
+				placed = true;
+			}
+		}
+		else if ((getGeoscapeSoldier() == 0 || allowAutoLoadout))
+		{
+			if (getBaseStats()->strength >= weight) // weight is always considered 0 for aliens
+			{
+				for (const std::string &s : mod->getInvsList())
+				{
+					RuleInventory *slot = mod->getInventory(s);
+					if (slot->getType() == INV_SLOT)
+					{
+						for (const RuleSlot &rs : *slot->getSlots())
+						{
+							if (!Inventory::overlapItems(this, item, slot, rs.x, rs.y) && slot->fitItemInSlot(rule, rs.x, rs.y))
+							{
+								item->moveToOwner(this);
+								item->setSlot(slot);
+								item->setSlotX(rs.x);
+								item->setSlotY(rs.y);
+								placed = true;
+								break;
+							}
+						}
+						if (placed)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+	break;
+	}
+
+	if (placed && save)
+	{
+		save->getItems()->push_back(item);
+	}
+	item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+
+	return placed;
 }
 
 /**
@@ -3399,12 +3689,12 @@ void BattleUnit::setEnviSmoke(int damage)
 /**
  * Calculate smoke and fire damage form environment.
  */
-void BattleUnit::calculateEnviDamage(Mod *mod)
+void BattleUnit::calculateEnviDamage(Mod *mod, SavedBattleGame *save)
 {
 	if (_fireMaxHit)
 	{
 		_hitByFire = true;
-		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN));
+		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN), save);
 		// try to set the unit on fire.
 		if (RNG::percent(40 * getArmor()->getDamageModifier(DT_IN)))
 		{
@@ -3418,7 +3708,7 @@ void BattleUnit::calculateEnviDamage(Mod *mod)
 
 	if (_smokeMaxHit)
 	{
-		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE));
+		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE), save);
 	}
 
 	_fireMaxHit = 0;
@@ -3510,11 +3800,7 @@ BattleItem *BattleUnit::getSpecialWeapon(BattleType type) const
  */
 void BattleUnit::recoverTimeUnits()
 {
-	int TURecovery = _armor->getTimeRecovery(this);
-	int ENRecovery = _armor->getEnergyRecovery(this);
-
-	prepareTimeUnits(TURecovery);
-	prepareEnergy(ENRecovery);
+	updateUnitStats(true, false);
 }
 
 /**
@@ -3586,7 +3872,7 @@ std::string BattleUnit::getMurdererWeapon() const
  * Set the murderer's weapon.
  * @param string murderer's weapon.
  */
-void BattleUnit::setMurdererWeapon(std::string weapon)
+void BattleUnit::setMurdererWeapon(const std::string& weapon)
 {
 	_murdererWeapon = weapon;
 }
@@ -3604,7 +3890,7 @@ std::string BattleUnit::getMurdererWeaponAmmo() const
  * Set the murderer's weapon's ammo.
  * @param string murderer weapon ammo.
  */
-void BattleUnit::setMurdererWeaponAmmo(std::string weaponAmmo)
+void BattleUnit::setMurdererWeaponAmmo(const std::string& weaponAmmo)
 {
 	_murdererWeaponAmmo = weaponAmmo;
 }
@@ -3784,6 +4070,33 @@ struct getLeftHandWeaponConstScript
 	}
 };
 
+struct reduceByBraveryScript
+{
+	static RetEnum func(const BattleUnit *bu, int &ret)
+	{
+		if (bu)
+		{
+			ret = bu->reduceByBravery(ret);
+		}
+		return RetContinue;
+	}
+};
+
+struct reduceByResistanceScript
+{
+	static RetEnum func(const BattleUnit *bu, int &ret, int resistType)
+	{
+		if (bu)
+		{
+			if (resistType >= 0 && resistType < DAMAGE_TYPES)
+			{
+				ret = bu->reduceByResistance(ret, (ItemDamageType)resistType);
+			}
+		}
+		return RetContinue;
+	}
+};
+
 void isWalkingScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -3833,6 +4146,56 @@ struct burnShadeScript
 	}
 };
 
+template<int BattleUnit::*StatCurr, int UnitStats::*StatMax>
+void setBaseStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		(bu->*StatCurr) = Clamp(val, 0, (bu->getBaseStats()->*StatMax));
+	}
+}
+
+template<int BattleUnit::*StatCurr, int BattleUnit::*StatMax>
+void setBaseStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		(bu->*StatCurr) = Clamp(val, 0, (bu->*StatMax));
+	}
+}
+
+template<int BattleUnit::*StatCurr, int UnitStats::*StatMax>
+void setMaxStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		val = Clamp(val, 1, 1000);
+		(bu->getBaseStats()->*StatMax) = val;
+		if ((bu->*StatCurr) > val)
+		{
+			(bu->*StatCurr) = val;
+		}
+	}
+}
+
+template<int UnitStats::*StatMax>
+void setMaxStatScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		val = Clamp(val, 1, 1000);
+	}
+}
+
+template<int BattleUnit::*StatCurr, int Min, int Max>
+void setBaseStatRangeScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		(bu->*StatCurr) = Clamp(val, Min, Max);
+	}
+}
+
 } // namespace
 
 /**
@@ -3847,6 +4210,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 	Bind<BattleUnit> bu = { parser };
 	BindNested<BattleUnit, UnitStats, &BattleUnit::_stats> us = { bu };
+
 
 	bu.addField<&BattleUnit::_id>("getId");
 	bu.addField<&BattleUnit::_rankInt>("getRank");
@@ -3865,35 +4229,65 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
 	bu.add<&BattleUnit::getWalkingPhase>("getWalkingPhase");
 
+
 	bu.addField<&BattleUnit::_tu>("getTimeUnits");
 	us.addField<&UnitStats::tu>("getTimeUnitsMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_tu, &UnitStats::tu>>("setTimeUnits");
 
 	bu.addField<&BattleUnit::_health>("getHealth");
 	us.addField<&UnitStats::health>("getHealthMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_health, &UnitStats::health>>("setHealth");
 
 	bu.addField<&BattleUnit::_energy>("getEnergy");
 	us.addField<&UnitStats::stamina>("getEnergyMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("setEnergy");
 
 	bu.addField<&BattleUnit::_stunlevel>("getStun");
 	bu.addField<&BattleUnit::_health>("getStunMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_stunlevel, &BattleUnit::_health>>("setStun");
 
 	bu.addField<&BattleUnit::_morale>("getMorale");
 	bu.addFake<100>("getMoraleMax");
+	bu.add<&setBaseStatRangeScript<&BattleUnit::_morale, 0, 100>>("setMorale");
+
 
 	bu.add<&getArmorValueScript>("getArmor");
 	bu.add<&getArmorMaxScript>("getArmorMax");
 
+
 	us.addField<&UnitStats::tu>("Stats.getTimeUnits");
+	bu.add<&setMaxStatScript<&BattleUnit::_tu, &UnitStats::tu>>("Stats.setTimeUnits");
+
 	us.addField<&UnitStats::stamina>("Stats.getStamina");
+	bu.add<&setMaxStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("Stats.setStamina");
+
 	us.addField<&UnitStats::health>("Stats.getHealth");
+	bu.add<&setMaxStatScript<&BattleUnit::_health, &UnitStats::health>>("Stats.setHealth");
+
 	us.addField<&UnitStats::bravery>("Stats.getBravery");
+	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setBravery");
+
 	us.addField<&UnitStats::reactions>("Stats.getReactions");
+	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setReactions");
+
 	us.addField<&UnitStats::firing>("Stats.getFiring");
+	bu.add<&setMaxStatScript<&UnitStats::firing>>("Stats.setFiring");
+
 	us.addField<&UnitStats::throwing>("Stats.getThrowing");
+	bu.add<&setMaxStatScript<&UnitStats::throwing>>("Stats.setThrowing");
+
 	us.addField<&UnitStats::strength>("Stats.getStrength");
+	bu.add<&setMaxStatScript<&UnitStats::strength>>("Stats.setStrength");
+
 	us.addField<&UnitStats::psiStrength>("Stats.getPsiStrength");
+	bu.add<&setMaxStatScript<&UnitStats::psiStrength>>("Stats.setPsiStrength");
+
 	us.addField<&UnitStats::psiSkill>("Stats.getPsiSkill");
+	bu.add<&setMaxStatScript<&UnitStats::psiSkill>>("Stats.setPsiSkill");
+
 	us.addField<&UnitStats::melee>("Stats.getMelee");
+	bu.add<&setMaxStatScript<&UnitStats::melee>>("Stats.setMelee");
+
 
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
@@ -3903,8 +4297,15 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
 	bu.addFunc<getLeftHandWeaponConstScript>("getLeftHandWeapon");
+	bu.addFunc<reduceByBraveryScript>("reduceByBravery");
+	bu.addFunc<reduceByResistanceScript>("reduceByResistance");
+
+
+	bu.addScriptValue<&BattleUnit::_scriptValues>();
+
 
 	bu.add<&getTileShade>("getTileShade");
+
 
 	bu.addCustomConst("BODYPART_HEAD", BODYPART_HEAD);
 	bu.addCustomConst("BODYPART_TORSO", BODYPART_TORSO);
@@ -3991,7 +4392,7 @@ void commonImpl(BindBase& b, Mod* mod)
 /**
  * Constructor of recolor script parser.
  */
-ModScript::RecolorUnitParser::RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParser{ shared, name, "new_pixel", "old_pixel", "unit", "blit_part", "anim_frame", "shade", "burn" }
+ModScript::RecolorUnitParser::RecolorUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "new_pixel", "old_pixel", "unit", "blit_part", "anim_frame", "shade", "burn" }
 {
 	BindBase b { this };
 
@@ -4060,6 +4461,44 @@ void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part
 	{
 		w->update(unit->getArmor()->getRecolorScript(), unit, body_part, anim_frame, shade, burn);
 	}
+}
+
+ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+		"to_health",
+		"to_armor",
+		"to_stun",
+		"to_time",
+		"to_energy",
+		"to_morale",
+		"to_wound",
+		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side",  }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+
+	setEmptyReturn();
+}
+
+ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power" }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+ModScript::CreateUnitParser::CreateUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", "side", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
 }
 
 

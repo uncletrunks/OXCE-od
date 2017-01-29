@@ -404,7 +404,7 @@ void InventoryState::init()
 			_clearInventory(_game, unitInv, groundTile, true);
 
 			// Step 3: equip fixed items // Note: the inventory must be *completely* empty before this step
-			_battleGame->initFixedItems(unit);
+			_battleGame->initUnit(unit);
 
 			// Step 4: re-equip original items (unless slots taken by fixed items)
 			_applyInventoryTemplate(_tempInventoryTemplate);
@@ -1154,11 +1154,10 @@ void InventoryState::onAutoequip(Action *)
 	Mod                      *mod           = _game->getMod();
 	RuleInventory            *groundRuleInv = mod->getInventory("STR_GROUND", true);
 	int                       worldShade    = _battleGame->getGlobalShade();
-	SavedBattleGame           dummy{ mod };
 
 	std::vector<BattleUnit*> units;
 	units.push_back(unit);
-	BattlescapeGenerator::autoEquip(units, mod, &dummy, groundInv, groundRuleInv, worldShade, true, true);
+	BattlescapeGenerator::autoEquip(units, mod, nullptr, groundInv, groundRuleInv, worldShade, true, true);
 
 	// refresh ui
 	_inv->arrangeGround(false);
