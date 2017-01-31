@@ -173,6 +173,7 @@ private:
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
 	size_t _surfaceOffsetBigobs = 0;
 	size_t _surfaceOffsetFloorob = 0;
+	size_t _surfaceOffsetHandob = 0;
 	size_t _surfaceOffsetSmoke = 0;
 	size_t _surfaceOffsetHit = 0;
 	size_t _surfaceOffsetBasebits = 0;

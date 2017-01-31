@@ -1033,6 +1033,7 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, M
 		_surfaceOffsetBasebits = getSurfaceSet("BASEBITS.PCK")->getTotalFrames();
 		_surfaceOffsetBigobs = getSurfaceSet("BIGOBS.PCK")->getTotalFrames();
 		_surfaceOffsetFloorob = getSurfaceSet("FLOOROB.PCK")->getTotalFrames();
+		_surfaceOffsetHandob = getSurfaceSet("HANDOB.PCK")->getTotalFrames();
 		_surfaceOffsetHit = getSurfaceSet("HIT.PCK")->getTotalFrames();
 		_surfaceOffsetSmoke = getSurfaceSet("SMOKE.PCK")->getTotalFrames();
 
@@ -3922,6 +3923,7 @@ void Mod::ScriptRegister(ScriptParserBase *parser)
 	mod.add<&offset<&Mod::_surfaceOffsetBasebits>>("getSpriteOffsetBasebits");
 	mod.add<&offset<&Mod::_surfaceOffsetBigobs>>("getSpriteOffsetBigobs");
 	mod.add<&offset<&Mod::_surfaceOffsetFloorob>>("getSpriteOffsetFloorob");
+	mod.add<&offset<&Mod::_surfaceOffsetHandob>>("getSpriteOffsetHandob");
 	mod.add<&offset<&Mod::_surfaceOffsetHit>>("getSpriteOffsetHit");
 	mod.add<&offset<&Mod::_surfaceOffsetSmoke>>("getSpriteOffsetSmoke");
 	mod.add<&Mod::getMaxDarknessToSeeUnits>("getMaxDarknessToSeeUnits");
