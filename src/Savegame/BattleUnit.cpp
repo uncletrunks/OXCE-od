@@ -4012,6 +4012,15 @@ void isStandingScript(const BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
+void isAimingScript(const BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		ret = bu->getStatus() == STATUS_AIMING;
+		return;
+	}
+	ret = 0;
+}
 
 struct burnShadeScript
 {
@@ -4103,6 +4112,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&isWalkingScript>("isWalking");
 	bu.add<&isFlyingScript>("isFlying");
 	bu.add<&isCollapsingScript>("isCollapsing");
+	bu.add<&isAimingScript>("isAiming");
 	bu.add<&geReactionScoreScript>("geReactionScore");
 	bu.add<&BattleUnit::getDirection>("getDirection");
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
