@@ -1162,6 +1162,14 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		power = args.getFirst();
 		side = (UnitSide)args.getSecond();
 		bodypart = (UnitBodyPart)args.getThird();
+		if (side >= SIDE_MAX)
+		{
+			side = {};
+		}
+		if (bodypart >= BODYPART_MAX)
+		{
+			bodypart = {};
+		}
 	}
 
 	{
