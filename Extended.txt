@@ -135,6 +135,8 @@ Changes in handlig items with prime.[br/]
 Primed granades are not recoverable if consumable property is set.[br/]
 [br/]
 3.6a:[br/]
+Fix couple of bugs.[br/]
+Add some missed scripts.[br/]
 [br/]
 
 [examples]
