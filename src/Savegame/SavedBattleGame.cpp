@@ -1970,7 +1970,10 @@ void SavedBattleGame::removeUnconsciousBodyItem(BattleUnit *bu)
 			removeItem((*it));
 			if (--size == 0) break;
 		}
-		++it;
+		else
+		{
+			++it;
+		}
 	}
 }
 
