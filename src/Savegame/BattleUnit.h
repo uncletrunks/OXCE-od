@@ -332,7 +332,7 @@ public:
 	/// Get the list of items in the inventory.
 	std::vector<BattleItem*> *getInventory();
 	/// Add item to unit.
-	bool addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save, bool allowSecondClip = false, bool allowAutoLoadout = false, bool allowUnloadedWeapons = false);
+	bool addItem(BattleItem *item, const Mod *mod, bool allowSecondClip = false, bool allowAutoLoadout = false, bool allowUnloadedWeapons = false);
 	/// Let AI do their thing.
 	void think(BattleAction *action);
 	/// Get AI Module.

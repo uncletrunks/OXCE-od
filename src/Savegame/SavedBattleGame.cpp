@@ -1207,20 +1207,12 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
 					ammo.push_back(ruleItem);
 					continue;
 				}
-				BattleItem *item = new BattleItem(ruleItem, getCurrentItemId());
-				if (!unit->addItem(item, _rule, this, false, true, true))
-				{
-					delete item;
-				}
+				createItemForUnit(ruleItem, unit, true);
 			}
 		}
 		for (std::vector<RuleItem*>::const_iterator j = ammo.begin(); j != ammo.end(); ++j)
 		{
-			BattleItem *item = new BattleItem(*j, getCurrentItemId());
-			if (!unit->addItem(item, _rule, this, false, true, true))
-			{
-				delete item;
-			}
+			createItemForUnit(*j, unit, true);
 		}
 	}
 }
@@ -1259,12 +1251,8 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 			RuleItem *ruleItem = _rule->getItem(terroristWeapon);
 			if (ruleItem)
 			{
-				BattleItem *item = new BattleItem(ruleItem, getCurrentItemId());
-				if (!unit->addItem(item, _rule, this))
-				{
-					delete item;
-				}
-				else
+				BattleItem *item = createItemForUnit(ruleItem, unit);
+				if (item)
 				{
 					unit->setTurretType(item->getRules()->getTurretType());
 				}
@@ -1276,6 +1264,79 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 	ModScript::CreateUnitParser::Worker work{ unit, this, this->getTurn(), };
 
 	work.execute(armor->getEventUnitCreateScript(), arg);
+}
+
+/**
+ * Init new created item.
+ * @param item
+ */
+void SavedBattleGame::initItem(BattleItem *item)
+{
+	ModScript::CreateItemParser::Output arg{};
+	ModScript::CreateItemParser::Worker work{ item, this, this->getTurn(), };
+
+	work.execute(item->getRules()->getEventCreateItemScript(), arg);
+}
+
+/**
+ * Create new item for unit.
+ */
+BattleItem *SavedBattleGame::createItemForUnit(const std::string& type, BattleUnit *unit, bool fixedWeapon)
+{
+	return createItemForUnit(_rule->getItem(type, true), unit, fixedWeapon);
+}
+
+/**
+ * Create new item for unit.
+ */
+BattleItem *SavedBattleGame::createItemForUnit(RuleItem *rule, BattleUnit *unit, bool fixedWeapon)
+{
+	BattleItem *item = new BattleItem(rule, getCurrentItemId());
+	if (!unit->addItem(item, _rule, false, fixedWeapon, fixedWeapon))
+	{
+		delete item;
+		item = nullptr;
+	}
+	else
+	{
+		_items.push_back(item);
+		initItem(item);
+	}
+	return item;
+}
+
+/**
+ * Create new buildin item for unit.
+ */
+BattleItem *SavedBattleGame::createItemForUnitBuildin(RuleItem *rule, BattleUnit *unit)
+{
+	BattleItem *item = new BattleItem(rule, getCurrentItemId());
+	item->setOwner(unit);
+	deleteList(item);
+	return item;
+}
+/**
+ * Create new item for tile.
+ */
+BattleItem *SavedBattleGame::createItemForTile(const std::string& type, Tile *tile)
+{
+	return createItemForTile(_rule->getItem(type, true), tile);
+}
+
+/**
+ * Create new item for tile;
+ */
+BattleItem *SavedBattleGame::createItemForTile(RuleItem *rule, Tile *tile)
+{
+	BattleItem *item = new BattleItem(rule, getCurrentItemId());
+	if (tile)
+	{
+		RuleInventory *ground = _rule->getInventory("STR_GROUND", true);
+		tile->addItem(item, ground);
+	}
+	_items.push_back(item);
+	initItem(item);
+	return item;
 }
 
 /**

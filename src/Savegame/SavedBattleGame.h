@@ -218,8 +218,20 @@ public:
 	void removeItem(BattleItem *item);
 	/// Add buildIn weapon form list to unit.
 	void addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed);
-	/// Create all fixed items for new created unit.
+	/// Init new created unit.
 	void initUnit(BattleUnit *unit, size_t itemLevel = 0);
+	/// Init new created item.
+	void initItem(BattleItem *item);
+	/// Create new item for unit.
+	BattleItem *createItemForUnit(RuleItem *rule, BattleUnit *unit, bool fixedWeapon = false);
+	/// Create new item for unit.
+	BattleItem *createItemForUnit(const std::string& type, BattleUnit *unit, bool fixedWeapon = false);
+	/// Create new buildin item for unit.
+	BattleItem *createItemForUnitBuildin(RuleItem *rule, BattleUnit *unit);
+	/// Create new item for tile.
+	BattleItem *createItemForTile(RuleItem *rule, Tile *tile);
+	/// Create new item for tile.
+	BattleItem *createItemForTile(const std::string& type, Tile *tile);
 	/// Sets whether the mission was aborted.
 	void setAborted(bool flag);
 	/// Checks if the mission was aborted.

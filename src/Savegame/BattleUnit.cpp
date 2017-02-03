@@ -2023,7 +2023,7 @@ std::vector<BattleItem*> *BattleUnit::getInventory()
  * @param allowUnloadedWeapons allow equip of weapons without ammo.
  * @return if the item was placed or not.
  */
-bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save, bool allowSecondClip, bool allowAutoLoadout, bool allowUnloadedWeapons)
+bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip, bool allowAutoLoadout, bool allowUnloadedWeapons)
 {
 	RuleInventory *rightHand = mod->getInventory("STR_RIGHT_HAND");
 	RuleInventory *leftHand = mod->getInventory("STR_LEFT_HAND");
@@ -2083,7 +2083,6 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save
 				item->moveToOwner(this);
 				item->setSlot(defaultSlot);
 				placed = true;
-				if (save) save->getItems()->push_back(item);
 				item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 			}
 		}
@@ -2093,7 +2092,6 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save
 			item->moveToOwner(this);
 			item->setSlot(!rightWeapon ? rightHand : leftHand);
 			placed = true;
-			if (save) save->getItems()->push_back(item);
 			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 		}
 		return placed;
@@ -2228,10 +2226,6 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save
 	break;
 	}
 
-	if (placed && save)
-	{
-		save->getItems()->push_back(item);
-	}
 	item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 
 	return placed;
@@ -3620,17 +3614,6 @@ void BattleUnit::goToTimeOut()
 }
 
 /**
- * Helper function used by `BattleUnit::setSpecialWeapon`
- */
-static inline BattleItem *createItem(SavedBattleGame *save, BattleUnit *unit, RuleItem *rule)
-{
-	BattleItem *item = new BattleItem(rule, save->getCurrentItemId());
-	item->setOwner(unit);
-	save->deleteList(item);
-	return item;
-}
-
-/**
  * Set special weapon that is handled outside inventory.
  * @param save
  */
@@ -3645,20 +3628,20 @@ void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 		item = mod->getItem(getUnitRules()->getMeleeWeapon());
 		if (item && i < SPEC_WEAPON_MAX)
 		{
-			_specWeapon[i++] = createItem(save, this, item);
+			_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
 		}
 	}
 	item = mod->getItem(getArmor()->getSpecialWeapon());
 	if (item && i < SPEC_WEAPON_MAX)
 	{
-		_specWeapon[i++] = createItem(save, this, item);
+		_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
 	}
 	if (getBaseStats()->psiSkill > 0 && getOriginalFaction() == FACTION_HOSTILE)
 	{
 		item = mod->getItem(getUnitRules()->getPsiWeapon());
 		if (item && i < SPEC_WEAPON_MAX)
 		{
-			_specWeapon[i++] = createItem(save, this, item);
+			_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
 		}
 	}
 }

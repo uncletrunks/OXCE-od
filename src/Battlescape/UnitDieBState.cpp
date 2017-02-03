@@ -277,7 +277,7 @@ void UnitDieBState::convertUnitToCorpse()
 		std::vector<BattleItem*> itemsToKeep;
 		for (std::vector<BattleItem*>::iterator i = _unit->getInventory()->begin(); i != _unit->getInventory()->end(); ++i)
 		{
-			_parent->dropItem(lastPosition, (*i), false, false, false);
+			_parent->dropItem(lastPosition, (*i), false, false);
 			if (!(*i)->getRules()->isFixed())
 			{
 				(*i)->setOwner(0);
@@ -333,9 +333,9 @@ void UnitDieBState::convertUnitToCorpse()
 				}
 				if (!_overKill)
 				{
-					BattleItem *corpse = new BattleItem(_parent->getMod()->getItem(_unit->getArmor()->getCorpseBattlescape()[i], true), _parent->getSave()->getCurrentItemId());
+					BattleItem *corpse = _parent->getSave()->createItemForTile(_unit->getArmor()->getCorpseBattlescape()[i], nullptr);
 					corpse->setUnit(_unit);
-					_parent->dropItem(lastPosition + Position(x,y,0), corpse, true, false);
+					_parent->dropItem(lastPosition + Position(x,y,0), corpse, false);
 					--i;
 				}
 			}
