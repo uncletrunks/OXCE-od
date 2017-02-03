@@ -1155,7 +1155,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 
 	{
 		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, };
+		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
@@ -1214,7 +1214,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, };
+		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
 
@@ -4351,7 +4351,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 		"to_energy",
 		"to_morale",
 		"to_wound",
-		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side",  }
+		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side", "damaging_type", }
 {
 	BindBase b { this };
 
@@ -4360,7 +4360,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	setEmptyReturn();
 }
 
-ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power" }
+ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power", "damaging_type", }
 {
 	BindBase b { this };
 
