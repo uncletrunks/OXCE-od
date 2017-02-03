@@ -277,6 +277,7 @@ void BattleItem::moveToOwner(BattleUnit *owner)
 {
 	_previousOwner = _owner ? _owner:owner;
 	_owner = owner;
+	_tile = nullptr;
 	if (_previousOwner != 0)
 	{
 		for (std::vector<BattleItem*>::iterator i = _previousOwner->getInventory()->begin(); i != _previousOwner->getInventory()->end(); ++i)

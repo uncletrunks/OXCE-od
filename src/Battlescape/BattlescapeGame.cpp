@@ -2195,11 +2195,12 @@ int BattlescapeGame::takeItemFromGround(BattleItem* item, BattleAction *action)
 		}
 		else
 		{
+			Tile *tile = item->getTile();
 			// check that the item will fit in our inventory, and if so, take it
 			if (takeItem(item, action))
 			{
 				action->actor->spendTimeUnits(6);
-				item->getTile()->removeItem(item);
+				tile->removeItem(item);
 				return success;
 			}
 			else
