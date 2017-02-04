@@ -1157,7 +1157,7 @@ void InventoryState::onAutoequip(Action *)
 
 	std::vector<BattleUnit*> units;
 	units.push_back(unit);
-	BattlescapeGenerator::autoEquip(units, mod, nullptr, groundInv, groundRuleInv, worldShade, true, true);
+	BattlescapeGenerator::autoEquip(units, mod, groundInv, groundRuleInv, worldShade, true, true);
 
 	// refresh ui
 	_inv->arrangeGround(false);

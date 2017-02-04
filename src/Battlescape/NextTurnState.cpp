@@ -325,7 +325,7 @@ bool NextTurnState::applyEnvironmentalConditionToFaction(UnitFaction faction, En
 				{
 					if (condition.side == -1)
 					{
-						side = (UnitSide)RNG::generate(SIDE_FRONT, SIDE_UNDER);
+						side = (UnitSide)RNG::generate((int)SIDE_FRONT, (int)SIDE_UNDER);
 					}
 					if (condition.bodyPart == -1)
 					{

@@ -173,7 +173,7 @@ public:
 	/// Sets up the objectives for the map.
 	void setupObjectives(const AlienDeployment *ruleDeploy);
 	// Autoequip a set of units
-	static void autoEquip(std::vector<BattleUnit*> units, Mod *mod, SavedBattleGame *addToSave, std::vector<BattleItem*> *craftInv,
+	static void autoEquip(std::vector<BattleUnit*> units, Mod *mod, std::vector<BattleItem*> *craftInv,
 		RuleInventory *groundRuleInv, int worldShade, bool allowAutoLoadout, bool overrideEquipmentLayout);
 };
 

@@ -1437,12 +1437,12 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 		BattleItem *item = unit->getRightHandWeapon();
 		if (item)
 		{
-			dropItem(unit->getPosition(), item, false, true);
+			dropItem(unit->getPosition(), item, true);
 		}
 		item = unit->getLeftHandWeapon();
 		if (item)
 		{
-			dropItem(unit->getPosition(), item, false, true);
+			dropItem(unit->getPosition(), item, true);
 		}
 		// let's try a few times to get a tile to run to.
 		for (int i= 0; i < 20; i++)
@@ -1865,7 +1865,7 @@ void BattlescapeGame::setTUReserved(BattleActionType tur)
  * @param newItem Bool whether this is a new item.
  * @param removeItem Bool whether to remove the item from the owner.
  */
-void BattlescapeGame::dropItem(Position position, BattleItem *item, bool newItem, bool removeItem, bool updateLight)
+void BattlescapeGame::dropItem(Position position, BattleItem *item, bool removeItem, bool updateLight)
 {
 	const Position& p = position;
 
@@ -1884,10 +1884,6 @@ void BattlescapeGame::dropItem(Position position, BattleItem *item, bool newItem
 		item->getUnit()->setPosition(p);
 	}
 
-	if (newItem)
-	{
-		_save->getItems()->push_back(item);
-	}
 	else if (_save->getSide() != FACTION_PLAYER)
 	{
 		item->setTurnFlag(true);
@@ -2230,11 +2226,12 @@ int BattlescapeGame::takeItemFromGround(BattleItem* item, BattleAction *action)
 		}
 		else
 		{
+			Tile *tile = item->getTile();
 			// check that the item will fit in our inventory, and if so, take it
 			if (takeItem(item, action))
 			{
 				action->actor->spendTimeUnits(6);
-				item->getTile()->removeItem(item);
+				tile->removeItem(item);
 				return success;
 			}
 			else

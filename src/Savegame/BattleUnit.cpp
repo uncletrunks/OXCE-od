@@ -1212,13 +1212,21 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 
 	{
 		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, };
+		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
 		power = args.getFirst();
 		side = (UnitSide)args.getSecond();
 		bodypart = (UnitBodyPart)args.getThird();
+		if (side >= SIDE_MAX)
+		{
+			side = {};
+		}
+		if (bodypart >= BODYPART_MAX)
+		{
+			bodypart = {};
+		}
 	}
 
 	// side and bodypart overrides (used by environmental conditions only)
@@ -1273,7 +1281,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, };
+		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
 
@@ -2090,7 +2098,7 @@ std::vector<BattleItem*> *BattleUnit::getInventory()
  * @param allowUnloadedWeapons allow equip of weapons without ammo.
  * @return if the item was placed or not.
  */
-bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save, bool allowSecondClip, bool allowAutoLoadout, bool allowUnloadedWeapons)
+bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip, bool allowAutoLoadout, bool allowUnloadedWeapons)
 {
 	RuleInventory *rightHand = mod->getInventory("STR_RIGHT_HAND");
 	RuleInventory *leftHand = mod->getInventory("STR_LEFT_HAND");
@@ -2150,7 +2158,6 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save
 				item->moveToOwner(this);
 				item->setSlot(defaultSlot);
 				placed = true;
-				if (save) save->getItems()->push_back(item);
 				item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 			}
 		}
@@ -2160,7 +2167,6 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save
 			item->moveToOwner(this);
 			item->setSlot(!rightWeapon ? rightHand : leftHand);
 			placed = true;
-			if (save) save->getItems()->push_back(item);
 			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 		}
 		return placed;
@@ -2295,10 +2301,6 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, SavedBattleGame *save
 	break;
 	}
 
-	if (placed && save)
-	{
-		save->getItems()->push_back(item);
-	}
 	item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 
 	return placed;
@@ -3733,17 +3735,6 @@ void BattleUnit::goToTimeOut()
 }
 
 /**
- * Helper function used by `BattleUnit::setSpecialWeapon`
- */
-static inline BattleItem *createItem(SavedBattleGame *save, BattleUnit *unit, RuleItem *rule)
-{
-	BattleItem *item = new BattleItem(rule, save->getCurrentItemId());
-	item->setOwner(unit);
-	save->deleteList(item);
-	return item;
-}
-
-/**
  * Set special weapon that is handled outside inventory.
  * @param save
  */
@@ -3758,20 +3749,20 @@ void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 		item = mod->getItem(getUnitRules()->getMeleeWeapon());
 		if (item && i < SPEC_WEAPON_MAX)
 		{
-			_specWeapon[i++] = createItem(save, this, item);
+			_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
 		}
 	}
 	item = mod->getItem(getArmor()->getSpecialWeapon());
 	if (item && i < SPEC_WEAPON_MAX)
 	{
-		_specWeapon[i++] = createItem(save, this, item);
+		_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
 	}
 	if (getBaseStats()->psiSkill > 0 && getOriginalFaction() == FACTION_HOSTILE)
 	{
 		item = mod->getItem(getUnitRules()->getPsiWeapon());
 		if (item && i < SPEC_WEAPON_MAX)
 		{
-			_specWeapon[i++] = createItem(save, this, item);
+			_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
 		}
 	}
 }
@@ -4133,6 +4124,15 @@ void isStandingScript(const BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
+void isAimingScript(const BattleUnit *bu, int &ret)
+{
+	if (bu)
+	{
+		ret = bu->getStatus() == STATUS_AIMING;
+		return;
+	}
+	ret = 0;
+}
 
 struct burnShadeScript
 {
@@ -4224,6 +4224,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&isWalkingScript>("isWalking");
 	bu.add<&isFlyingScript>("isFlying");
 	bu.add<&isCollapsingScript>("isCollapsing");
+	bu.add<&isAimingScript>("isAiming");
 	bu.add<&geReactionScoreScript>("geReactionScore");
 	bu.add<&BattleUnit::getDirection>("getDirection");
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
@@ -4471,7 +4472,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 		"to_energy",
 		"to_morale",
 		"to_wound",
-		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side",  }
+		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side", "damaging_type", }
 {
 	BindBase b { this };
 
@@ -4480,7 +4481,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	setEmptyReturn();
 }
 
-ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power" }
+ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power", "damaging_type", }
 {
 	BindBase b { this };
 

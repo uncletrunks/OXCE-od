@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 3.6[/b]
+[b]Mod version 3.6a[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -133,6 +133,11 @@ New scripts for items and units.[br/]
 Add option for grenades to explode in hand.[br/]
 Changes in handlig items with prime.[br/]
 Primed granades are not recoverable if consumable property is set.[br/]
+[br/]
+3.6a:[br/]
+Fix couple of bugs.[br/]
+Add some missed scripts.[br/]
+Add damage type param to unit damage script.[br/]
 [br/]
 
 [examples]
@@ -590,10 +595,19 @@ lighting:
 mapScripts:
   - type: CULTA
     commands:
-    - type: addBlockFromTerrain #Functions the same as addBlock, but takes map blocks defined by terrain:, or from globe-defined texture with value "baseTerrain"
+    - type: addBlock
       blocks: [1, 2, 3] 
       terrain: FOREST #Add map 1, 2, or 3 from terrain FOREST
-    - type: fillAreaFromTerrain #Functions the same as fillArea, but takes map blocks defined by terrain:, or from globe-defined texture with value "baseTerrain"
+    - type: addLine
+      direction: vertical
+      rects:
+        - [1, 1, 4, 1]
+      terrain: URBAN #Add a road from terrain URBAN
+    - type: addUFO
+      terrain: MOUNT #UFO's LZ block will be from terrain MOUNT
+    - type: addCraft
+      terrain: JUNGLE #Player craft's LZ block will be from terrain JUNGLE
+    - type: fillArea
       terrain: DESERT #Fill the rest of the map with map blocks from terrain DESERT
 [/code]
 
