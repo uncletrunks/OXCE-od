@@ -140,6 +140,7 @@ Add some missed scripts.[br/]
 Add damage type param to unit damage script.[br/]
 [br/]
 3.6b:[br/]
+Fix critical bug in unit damage function.[br/]
 [br/]
 
 [examples]
