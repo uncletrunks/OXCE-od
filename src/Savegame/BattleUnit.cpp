@@ -1217,15 +1217,15 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
 		power = args.getFirst();
-		side = (UnitSide)args.getSecond();
-		bodypart = (UnitBodyPart)args.getThird();
-		if (side >= SIDE_MAX)
-		{
-			side = {};
-		}
+		bodypart = (UnitBodyPart)args.getSecond();
+		side = (UnitSide)args.getThird();
 		if (bodypart >= BODYPART_MAX)
 		{
 			bodypart = {};
+		}
+		if (side >= SIDE_MAX)
+		{
+			side = {};
 		}
 	}
 
