@@ -1227,7 +1227,26 @@ bool GeoscapeState::processMissionSite(MissionSite *site) const
 	}
 	else
 	{
-		removeSite = site->getFollowers()->empty(); // CHEEKY EXPLOIT
+		if (site->getRules()->despawnEvenIfTargeted())
+		{
+			for (std::vector<Target*>::iterator k = site->getFollowers()->begin(); k != site->getFollowers()->end();)
+			{
+				Craft* c = dynamic_cast<Craft*>(*k);
+				if (c != 0)
+				{
+					c->returnToBase();
+					k = site->getFollowers()->begin();
+				}
+				else
+				{
+					++k;
+				}
+			}
+		}
+		else
+		{
+			removeSite = site->getFollowers()->empty(); // CHEEKY EXPLOIT
+		}
 	}
 
 	int score = removeSite ? site->getDeployment()->getDespawnPenalty() : site->getDeployment()->getPoints();
