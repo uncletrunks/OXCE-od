@@ -98,8 +98,6 @@ public:
 	SoldierRank getRank() const;
 	/// Increase the soldier's military rank.
 	void promoteRank();
-	/// Decrease the soldier's military rank.
-	void demoteRank();
 	/// Gets the soldier's missions.
 	int getMissions() const;
 	/// Gets the soldier's kills.

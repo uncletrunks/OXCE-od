@@ -379,17 +379,6 @@ void Soldier::promoteRank()
 }
 
 /**
-* Decrease the soldier's military rank.
-*/
-void Soldier::demoteRank()
-{
-	if (_rank > RANK_ROOKIE)
-	{
-		_rank = (SoldierRank)((int)_rank - 1);
-	}
-}
-
-/**
  * Returns the soldier's amount of missions.
  * @return Missions.
  */

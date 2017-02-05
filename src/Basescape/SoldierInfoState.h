@@ -77,8 +77,6 @@ public:
 	void btnArmorClick(Action *action);
 	/// Handler for clicking the Sack button.
 	void btnSackClick(Action *action);
-	void btnSackToggleOn(Action *action);
-	void btnSackToggleOff(Action *action);
 	/// Handler for clicking the Diary button.
 	void btnDiaryClick(Action *action);
 	/// Handler for clicking the flag.
