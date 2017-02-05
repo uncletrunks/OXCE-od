@@ -1218,7 +1218,7 @@ private:
  * @param ts Pointer to mission site.
  * @return Has mission site expired?
  */
-bool GeoscapeState::processMissionSite(MissionSite *site) const
+bool GeoscapeState::processMissionSite(MissionSite *site)
 {
 	bool removeSite = site->getSecondsRemaining() < 30 * 60;
 	if (!removeSite)
@@ -1227,6 +1227,7 @@ bool GeoscapeState::processMissionSite(MissionSite *site) const
 	}
 	else
 	{
+		bool noFollowers = site->getFollowers()->empty();
 		if (site->getRules()->despawnEvenIfTargeted())
 		{
 			for (std::vector<Target*>::iterator k = site->getFollowers()->begin(); k != site->getFollowers()->end();)
@@ -1242,10 +1243,14 @@ bool GeoscapeState::processMissionSite(MissionSite *site) const
 					++k;
 				}
 			}
+			if (!noFollowers)
+			{
+				popup(new UfoLostState(site->getName(_game->getLanguage())));
+			}
 		}
 		else
 		{
-			removeSite = site->getFollowers()->empty(); // CHEEKY EXPLOIT
+			removeSite = noFollowers; // CHEEKY EXPLOIT
 		}
 	}
 

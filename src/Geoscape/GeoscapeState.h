@@ -148,7 +148,7 @@ public:
 	/// Handler for clicking the timer button.
 	void btnTimerClick(Action *action);
 	/// Process a mission site
-	bool processMissionSite(MissionSite *site) const;
+	bool processMissionSite(MissionSite *site);
 	/// Handles base defense
 	void handleBaseDefense(Base *base, Ufo *ufo);
 	/// Update the resolution settings, we just resized the window.
