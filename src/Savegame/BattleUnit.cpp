@@ -2159,6 +2159,10 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 				item->setSlot(defaultSlot);
 				placed = true;
 				item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+				if (item->getRules()->getTurretType() > -1)
+				{
+					setTurretType(item->getRules()->getTurretType());
+				}
 			}
 		}
 		// or in the left/right hand
@@ -2168,6 +2172,10 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 			item->setSlot(!rightWeapon ? rightHand : leftHand);
 			placed = true;
 			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+			if (item->getRules()->getTurretType() > -1)
+			{
+				setTurretType(item->getRules()->getTurretType());
+			}
 		}
 		return placed;
 	}
