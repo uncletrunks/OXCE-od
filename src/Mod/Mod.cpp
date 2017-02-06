@@ -409,6 +409,13 @@ Mod::Mod() :
 		_statAdjustment[i].aimAndArmorMultiplier = 1.0;
 		_statAdjustment[i].growthMultiplier = i;
 	}
+
+	// Setting default value for array
+	_ufoTractorBeamSizeModifiers[0] = 400;
+	_ufoTractorBeamSizeModifiers[1] = 200;
+	_ufoTractorBeamSizeModifiers[2] = 100;
+	_ufoTractorBeamSizeModifiers[3] = 50;
+	_ufoTractorBeamSizeModifiers[4] = 25;
 }
 
 /**
@@ -1352,6 +1359,15 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_bughuntTimeUnitsLeft = doc["bughuntTimeUnitsLeft"].as<int>(_bughuntTimeUnitsLeft);
 	_ufoGlancingHitThreshold = doc["ufoGlancingHitThreshold"].as<int>(_ufoGlancingHitThreshold);
 	_ufoBeamWidthParameter = doc["ufoBeamWidthParameter"].as<int>(_ufoBeamWidthParameter);
+	if (doc["ufoTractorBeamSizeModifiers"])
+	{
+		int index = 0;
+		for (YAML::const_iterator i = doc["ufoTractorBeamSizeModifiers"].begin(); i != doc["ufoTractorBeamSizeModifiers"].end() && index < 5; ++i)
+		{
+			_ufoTractorBeamSizeModifiers[index] = (*i).as<int>(_ufoTractorBeamSizeModifiers[index]);
+			index++;
+		}
+	}
 	_soldiersPerSergeant = doc["soldiersPerSergeant"].as<int>(_soldiersPerSergeant);
 	_soldiersPerCaptain = doc["soldiersPerCaptain"].as<int>(_soldiersPerCaptain);
 	_soldiersPerColonel = doc["soldiersPerColonel"].as<int>(_soldiersPerColonel);

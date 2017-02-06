@@ -159,6 +159,7 @@ private:
 	int _surrenderMode;
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
+	int _ufoTractorBeamSizeModifiers[5];
 	int _soldiersPerSergeant, _soldiersPerCaptain, _soldiersPerColonel, _soldiersPerCommander;
 	int _performanceBonusFactor;
 	bool _useCustomCategories;
@@ -434,6 +435,8 @@ public:
 	int getUfoGlancingHitThreshold() const { return _ufoGlancingHitThreshold; }
 	/// Gets the parameter for drawing the width of a ufo's beam weapon based on power
 	int getUfoBeamWidthParameter() const { return _ufoBeamWidthParameter; }
+	/// Gets the modifier to a tractor beam's power based on a ufo's size
+	int getUfoTractorBeamSizeModifier(int ufoSize) const { return _ufoTractorBeamSizeModifiers[ufoSize]; }
 	/// Gets how many soldiers are needed for one sergeant promotion
 	int getSoldiersPerSergeant() const { return _soldiersPerSergeant; }
 	/// Gets how many soldiers are needed for one captain promotion

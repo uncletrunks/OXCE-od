@@ -30,7 +30,8 @@ RuleCraftWeapon::RuleCraftWeapon(const std::string &type) :
 	_type(type), _sprite(-1), _sound(-1), _damage(0), _shieldDamageModifier(100), _range(0), _accuracy(0),
 	_reloadCautious(0), _reloadStandard(0), _reloadAggressive(0), _ammoMax(0),
 	_rearmRate(1), _projectileSpeed(0), _weaponType(0), _projectileType(CWPT_CANNON_ROUND),
-	_stats(), _underwaterOnly(false)
+	_stats(), _underwaterOnly(false),
+	_tractorBeamPower(0)
 {
 }
 
@@ -83,6 +84,7 @@ void RuleCraftWeapon::load(const YAML::Node &node, Mod *mod)
 	_clip = node["clip"].as<std::string>(_clip);
 	_weaponType = node["weaponType"].as<int>(_weaponType);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
+	_tractorBeamPower = node["tractorBeamPower"].as<int>(_tractorBeamPower);
 }
 
 /**
@@ -265,6 +267,15 @@ const RuleCraftStats& RuleCraftWeapon::getBonusStats() const
 bool RuleCraftWeapon::isWaterOnly() const
 {
 	return _underwaterOnly;
+}
+
+/**
+ * Get the craft weapon's tractor beam power
+ * @return The tractor beam power.
+ */
+int RuleCraftWeapon::getTractorBeamPower() const
+{
+	return _tractorBeamPower;
 }
 
 }

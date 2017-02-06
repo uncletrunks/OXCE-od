@@ -60,6 +60,7 @@ private:
 	/// Calculates a new speed vector to the destination.
 	void calculateSpeed();
 	int _shield, _shieldRechargeHandle;
+	int _tractorBeamSlowdown;
 public:
 	/// Creates a UFO of the specified type.
 	Ufo(const RuleUfo *rules);
@@ -175,6 +176,10 @@ public:
 	void setShieldRechargeHandle(int shieldRechargeHandle);
 	/// Gets which _interceptionNumber in a dogfight handles the UFO shield recharge
 	int getShieldRechargeHandle() const;
+	/// Sets the number of tractor beams locked on to a UFO
+	void setTractorBeamSlowdown(int tractorsBeamSlowdown);
+	/// Gets the number of tractor beams locked on to a UFO
+	int getTractorBeamSlowdown() const;
 };
 
 }

@@ -42,6 +42,7 @@ private:
 	std::string _launcher, _clip;
 	RuleCraftStats _stats;
 	bool _underwaterOnly;
+	int _tractorBeamPower;
 public:
 	/// Creates a blank craft weapon ruleset.
 	RuleCraftWeapon(const std::string &type);
@@ -87,6 +88,8 @@ public:
 	const RuleCraftStats& getBonusStats() const;
 	/// Is this item restricted to use underwater?
 	bool isWaterOnly() const;
+	/// Get the craft weapon's tractor beam power
+	int getTractorBeamPower() const;
 };
 
 }
