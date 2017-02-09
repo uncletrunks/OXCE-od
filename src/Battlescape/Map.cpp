@@ -1097,79 +1097,87 @@ void Map::drawTerrain(Surface *surface)
 							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y, 0);
 
 							// UFO extender accuracy: display adjusted accuracy value on crosshair in real-time.
-							if (_cursorType == CT_AIM && Options::battleUFOExtenderAccuracy)
+							if ((_cursorType == CT_AIM || _cursorType == CT_PSI || _cursorType == CT_WAYPOINT) && Options::battleUFOExtenderAccuracy)
 							{
 								BattleAction *action = _save->getBattleGame()->getCurrentAction();
 								const RuleItem *weapon = action->weapon->getRules();
 								std::ostringstream ss;
-								int accuracy = action->actor->getFiringAccuracy(action->type, action->weapon, _game->getMod());
-								int distance = _save->getTileEngine()->distance(Position (itX, itY,itZ), action->actor->getPosition());
-								int upperLimit = 200;
-								int lowerLimit = weapon->getMinRange();
-								switch (action->type)
-								{
-								case BA_AIMEDSHOT:
-									upperLimit = weapon->getAimRange();
-									break;
-								case BA_SNAPSHOT:
-									upperLimit = weapon->getSnapRange();
-									break;
-								case BA_AUTOSHOT:
-									upperLimit = weapon->getAutoRange();
-									break;
-								default:
-									break;
-								}
-								// at this point, let's assume the shot is adjusted and set the text amber.
-								_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::yellow - 1)-1);
+								int distance = _save->getTileEngine()->distance(Position(itX, itY, itZ), action->actor->getPosition());
 
-								if (distance > upperLimit)
+								if (_cursorType == CT_AIM)
 								{
-									accuracy -= (distance - upperLimit) * weapon->getDropoff();
-								}
-								else if (distance < lowerLimit)
-								{
-									accuracy -= (lowerLimit - distance) * weapon->getDropoff();
-								}
-								else
-								{
-									// no adjustment made? set it to green.
-									_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::green - 1)-1);
-								}
-
-								bool outOfRange = distance > weapon->getMaxRange();
-								// special handling for short ranges and diagonals
-								if (outOfRange && action->actor->directionTo(action->target) % 2 == 1)
-								{
-									// special handling for maxRange 1: allow it to target diagonally adjacent tiles, even though they are technically 2 tiles away.
-									if (weapon->getMaxRange() == 1
-										&& distance == 2)
+									int accuracy = action->actor->getFiringAccuracy(action->type, action->weapon, _game->getMod());
+									int upperLimit = 200;
+									int lowerLimit = weapon->getMinRange();
+									switch (action->type)
 									{
-										outOfRange = false;
+									case BA_AIMEDSHOT:
+										upperLimit = weapon->getAimRange();
+										break;
+									case BA_SNAPSHOT:
+										upperLimit = weapon->getSnapRange();
+										break;
+									case BA_AUTOSHOT:
+										upperLimit = weapon->getAutoRange();
+										break;
+									default:
+										break;
 									}
-									// special handling for maxRange 2: allow it to target diagonally adjacent tiles on a level above/below, even though they are technically 3 tiles away.
-									else if (weapon->getMaxRange() == 2
-										&& distance == 3
-										&& itZ != action->actor->getPosition().z)
-									{
-										outOfRange = false;
-									}
-								}
-								// zero accuracy or out of range: set it red.
-								if (accuracy <= 0 || outOfRange)
-								{
-									accuracy = 0;
-									_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::red - 1)-1);
-								}
-								ss << accuracy;
-								ss << "%";
+									// at this point, let's assume the shot is adjusted and set the text amber.
+									_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::yellow - 1) - 1);
 
-								// display additional damage info
+									if (distance > upperLimit)
+									{
+										accuracy -= (distance - upperLimit) * weapon->getDropoff();
+									}
+									else if (distance < lowerLimit)
+									{
+										accuracy -= (lowerLimit - distance) * weapon->getDropoff();
+									}
+									else
+									{
+										// no adjustment made? set it to green.
+										_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::green - 1) - 1);
+									}
+
+									bool outOfRange = distance > weapon->getMaxRange();
+									// special handling for short ranges and diagonals
+									if (outOfRange && action->actor->directionTo(action->target) % 2 == 1)
+									{
+										// special handling for maxRange 1: allow it to target diagonally adjacent tiles, even though they are technically 2 tiles away.
+										if (weapon->getMaxRange() == 1
+											&& distance == 2)
+										{
+											outOfRange = false;
+										}
+										// special handling for maxRange 2: allow it to target diagonally adjacent tiles on a level above/below, even though they are technically 3 tiles away.
+										else if (weapon->getMaxRange() == 2
+											&& distance == 3
+											&& itZ != action->actor->getPosition().z)
+										{
+											outOfRange = false;
+										}
+									}
+									// zero accuracy or out of range: set it red.
+									if (accuracy <= 0 || outOfRange)
+									{
+										accuracy = 0;
+										_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::red - 1) - 1);
+									}
+									ss << accuracy;
+									ss << "%";
+								}
+
+								// display additional damage and psi-effectiveness info
 								if (isAltPressed)
 								{
 									// step 1: determine rule
 									const RuleItem *rule;
-									if (action->weapon->needsAmmo())
+									if (weapon->getBattleType() == BT_PSIAMP)
+									{
+										rule = weapon;
+									}
+									else if (action->weapon->needsAmmo())
 									{
 										if (action->weapon->getAmmoItem() != 0)
 										{
@@ -1215,15 +1223,37 @@ void Map::drawTerrain(Surface *surface)
 									// step 3: calculate and draw
 									if (rule && _activeWeaponUfopediaArticleUnlocked == 1)
 									{
-										int totalDamage = 0;
-										totalDamage += rule->getPowerBonus(action->actor);
-										totalDamage -= rule->getPowerRangeReduction(distance * 16);
-										ss << "\n";
-										ss << rule->getDamageType()->getRandomDamage(totalDamage, 1);
-										ss << "-";
-										ss << rule->getDamageType()->getRandomDamage(totalDamage, 2);
-										if (rule->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
-											ss << "*";
+										if (rule->getBattleType() == BT_PSIAMP)
+										{
+											float attackStrength = action->actor->getPsiAccuracy(action->type, action->weapon);
+											float defenseStrength = 30.0f; // indicator ignores: +victim->getArmor()->getPsiDefence(victim);
+
+											Position p = action->actor->getPosition().toVexel() - Position(itX, itY, itZ).toVexel();
+											p *= p;
+											int min = attackStrength - defenseStrength - rule->getPsiAccuracyRangeReduction(sqrt(float(p.x + p.y + p.z)));
+											int max = min + 55;
+											if (max <= 0)
+											{
+												ss << "0%";
+											}
+											else
+											{
+												ss << min << "-" << max << "%";
+											}
+										}
+										if (rule->getBattleType() != BT_PSIAMP || action->type == BA_USE)
+										{
+											int totalDamage = 0;
+											totalDamage += rule->getPowerBonus(action->actor);
+											totalDamage -= rule->getPowerRangeReduction(distance * 16);
+											if (_cursorType != CT_WAYPOINT)
+												ss << "\n";
+											ss << rule->getDamageType()->getRandomDamage(totalDamage, 1);
+											ss << "-";
+											ss << rule->getDamageType()->getRandomDamage(totalDamage, 2);
+											if (rule->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
+												ss << "*";
+										}
 									}
 									else
 									{
@@ -1242,7 +1272,7 @@ void Map::drawTerrain(Surface *surface)
 							tmpSurface = _game->getMod()->getSurfaceSet("CURSOR.PCK")->getFrame(frameNumber);
 							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y, 0);
 						}
-						if (_cursorType > 2 && _camera->getViewLevel() == itZ)
+						if (!isAltPressed && _cursorType > 2 && _camera->getViewLevel() == itZ)
 						{
 							int frame[6] = {0, 0, 0, 11, 13, 15};
 							tmpSurface = _game->getMod()->getSurfaceSet("CURSOR.PCK")->getFrame(frame[_cursorType] + (_animFrame / 4) % 2);
