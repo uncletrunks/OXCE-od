@@ -391,10 +391,8 @@ int RuleStatBonus::getBonus(const BattleUnit* unit) const
 	float power = 0;
 	for (size_t i = 0; i < _bonus.size(); ++i)
 		power += _bonus[i].first(unit) * _bonus[i].second;
-	if (power >= 0)
-		return power + RNG::generateEx(100) * 0.01f; //Random round up.
-	else
-		return power - RNG::generateEx(100) * 0.01f; //Random round down.
+
+	return (int)floor(power + 0.5f); // no more random flickering!
 }
 
 } //namespace OpenXcom
