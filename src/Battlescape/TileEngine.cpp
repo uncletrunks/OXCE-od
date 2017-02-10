@@ -1905,7 +1905,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 		target->moraleChange(-morale_loss);
 	}
 
-	if ((target->getSpecialAbility() == SPECAB_EXPLODEONDEATH || target->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !target->isOut() && (target->getHealth() == 0 || target->getStunlevel() >= target->getHealth()))
+	if ((target->getSpecialAbility() == SPECAB_EXPLODEONDEATH || target->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !target->isOut() && (target->getHealth() <= 0 || target->getStunlevel() >= target->getHealth()))
 	{
 		if (type->IgnoreSelfDestruct == false)
 		{
