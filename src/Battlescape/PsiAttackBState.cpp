@@ -103,7 +103,7 @@ void PsiAttackBState::init()
 
 	int height = _target->getFloatHeight() + (_target->getHeight() / 2) - _parent->getSave()->getTile(_action.target)->getTerrainLevel();
 	Position voxel = _action.target.toVexel() + Position(8, 8, height);
-	_parent->statePushFront(new ExplosionBState(_parent, voxel, _action.type, _item, _unit));
+	_parent->statePushFront(new ExplosionBState(_parent, voxel, _action));
 }
 
 

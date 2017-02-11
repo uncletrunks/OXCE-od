@@ -1068,7 +1068,7 @@ static inline void setValueMax(int& value, int diff, int min, int max)
  * @param type The type of damage being inflicted.
  * @return damage done after adjustment
  */
-int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleItem *item)
+int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack)
 {
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
@@ -1155,7 +1155,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 
 	{
 		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, type->ResistType, };
+		ModScript::HitUnitParser::Worker work { this, attack.damage_item, save, orgPower, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
@@ -1214,7 +1214,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, type->ResistType, };
+		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, save, power, orgPower, bodypart, side, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
 
@@ -3575,7 +3575,7 @@ void BattleUnit::calculateEnviDamage(Mod *mod, SavedBattleGame *save)
 	if (_fireMaxHit)
 	{
 		_hitByFire = true;
-		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN), save);
+		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN), save, { });
 		// try to set the unit on fire.
 		if (RNG::percent(40 * getArmor()->getDamageModifier(DT_IN)))
 		{
@@ -3589,7 +3589,7 @@ void BattleUnit::calculateEnviDamage(Mod *mod, SavedBattleGame *save)
 
 	if (_smokeMaxHit)
 	{
-		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE), save);
+		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE), save, { });
 	}
 
 	_fireMaxHit = 0;

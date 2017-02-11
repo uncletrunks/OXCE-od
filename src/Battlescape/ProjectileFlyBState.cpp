@@ -491,20 +491,20 @@ void ProjectileFlyBState::think()
 				{
 					pos.x--;
 				}
-				BattleItem *item = _parent->getMap()->getProjectile()->getItem();
-				_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
 
-				if (item->getRules()->getBattleType() == BT_GRENADE && RNG::percent(item->getRules()->getSpecialChance()) && ((Options::battleInstantGrenade && item->getFuseTimer() == 0) || item->getRules()->getFuseTimerType() == BFT_INSTANT))
+				_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
+				const RuleItem *ruleItem = _action.weapon->getRules();
+				if (ruleItem->getBattleType() == BT_GRENADE && RNG::percent(ruleItem->getSpecialChance()) && ((Options::battleInstantGrenade && _action.weapon->getFuseTimer() == 0) || ruleItem->getFuseTimerType() == BFT_INSTANT))
 				{
 					// it's a hot grenade to explode immediately
-					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action.type, item, _action.actor));
+					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action));
 				}
 				else
 				{
-					_parent->dropItem(pos, item);
+					_parent->dropItem(pos, _action.weapon);
 					if (_unit->getFaction() != FACTION_PLAYER && _projectileItem->getRules()->getBattleType() == BT_GRENADE)
 					{
-						_parent->getTileEngine()->setDangerZone(pos, item->getRules()->getExplosionRadius(_action.actor), _action.actor);
+						_parent->getTileEngine()->setDangerZone(pos, ruleItem->getExplosionRadius(_action.actor), _action.actor);
 					}
 				}
 			}
@@ -548,8 +548,7 @@ void ProjectileFlyBState::think()
 
 					_parent->statePushFront(new ExplosionBState(
 						_parent, _parent->getMap()->getProjectile()->getPosition(offset),
-						_action.type,
-						_ammo, _action.actor, 0,
+						_action, 0,
 						(_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem()),
 						shotgun ? 0 : _range + _parent->getMap()->getProjectile()->getDistance()
 					));
@@ -574,7 +573,7 @@ void ProjectileFlyBState::think()
 									Explosion *explosion = new Explosion(proj->getPosition(1), _ammo->getRules()->getHitAnimation());
 									int power = _ammo->getRules()->getPowerBonus(_unit) - _ammo->getRules()->getPowerRangeReduction(proj->getDistance());
 									_parent->getMap()->getExplosions()->push_back(explosion);
-									_parent->getSave()->getTileEngine()->hit(proj->getPosition(1), power, _ammo->getRules()->getDamageType(), 0, _action.weapon);
+									_parent->getSave()->getTileEngine()->hit(_action, proj->getPosition(1), power, _ammo->getRules()->getDamageType());
 								}
 							}
 							++i;

@@ -1863,7 +1863,7 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
  * @param type damage type of hit.
  * @return Did unit get hit?
  */
-bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack)
+bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack)
 {
 	if (!target || target->getHealth() <= 0)
 	{
@@ -1871,29 +1871,21 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 	}
 
 	const int wounds = target->getFatalWounds();
-	const int adjustedDamage = target->damage(relative, damage, type, _save, clipOrWeapon);
+	const int adjustedDamage = target->damage(relative, damage, type, _save, attack);
 
-	if (unit && target->getFaction() != FACTION_PLAYER)
+	if (attack.attacer && target->getFaction() != FACTION_PLAYER)
 	{
 		// if it's going to bleed to death and it's not a player, give credit for the kill.
 		if (wounds < target->getFatalWounds())
 		{
-			target->killedBy(unit->getFaction());
+			target->killedBy(attack.attacer->getFaction());
 		}
 	}
 
 	// single place for firing/throwing/melee experience training
-	if (unit && unit->getOriginalFaction() == FACTION_PLAYER)
+	if (attack.attacer && attack.attacer->getOriginalFaction() == FACTION_PLAYER)
 	{
-		if (clipOrWeapon && clipOrWeapon->getRules()->getBattleType() == BT_AMMO)
-		{
-			// send the weapon info, not the ammo info
-			awardExperience(unit, unit->getItem(unit->getActiveHand()), target, rangeAtack);
-		}
-		else
-		{
-			awardExperience(unit, clipOrWeapon, target, rangeAtack);
-		}
+		awardExperience(attack.attacer, attack.weapon_item, target, rangeAtack);
 	}
 
 	if (type->IgnoreNormalMoraleLose == false)
@@ -1910,7 +1902,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
 		if (type->IgnoreSelfDestruct == false)
 		{
 			Position p = Position(target->getPosition().x * 16, target->getPosition().y * 16, target->getPosition().z * 24);
-			_save->getBattleGame()->statePushNext(new ExplosionBState(_save->getBattleGame(), p, BA_NONE, 0, target, 0));
+			_save->getBattleGame()->statePushNext(new ExplosionBState(_save->getBattleGame(), p, { BA_NONE, target, nullptr }, 0));
 		}
 	}
 
@@ -1941,7 +1933,7 @@ bool TileEngine::hitUnit(BattleUnit *unit, BattleItem *clipOrWeapon, BattleUnit 
  * @param clipOrWeapon clip or weapon causing the damage.
  * @return The Unit that got hit.
  */
-BattleUnit *TileEngine::hit(Position center, int power, const RuleDamageType *type, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
+BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, bool rangeAtack)
 {
 	bool terrainChanged = false; //did the hit destroy a tile thereby changing line of sight?
 	int effectGenerated = 0; //did the hit produce smoke (1), fire/light (2) or disabled a unit (3) ?
@@ -1953,7 +1945,7 @@ BattleUnit *TileEngine::hit(Position center, int power, const RuleDamageType *ty
 	}
 
 	BattleUnit *bu = tile->getUnit();
-	const int part = voxelCheck(center, unit);
+	const int part = voxelCheck(center, attack.attacer);
 	const int damage = type->getRandomDamage(power);
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
@@ -1962,7 +1954,7 @@ BattleUnit *TileEngine::hit(Position center, int power, const RuleDamageType *ty
 		{
 			for (std::vector<BattleItem*>::iterator i = tile->getInventory()->begin(); i != tile->getInventory()->end(); ++i)
 			{
-				if (hitUnit(unit, clipOrWeapon, (*i)->getUnit(), Position(0,0,0), damage, type, rangeAtack))
+				if (hitUnit(attack, (*i)->getUnit(), Position(0,0,0), damage, type, rangeAtack))
 				{
 					if ((*i)->getGlow()) effectGenerated = 2; //Any glowing corpses?
 					nothing = false;
@@ -2014,7 +2006,7 @@ BattleUnit *TileEngine::hit(Position center, int power, const RuleDamageType *ty
 			const Position target = bu->getPosition().toVexel() + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
 			const Position relative = (center - target) - Position(0,0,verticaloffset);
 
-			hitUnit(unit, clipOrWeapon, bu, relative, damage, type, rangeAtack);
+			hitUnit(attack, bu, relative, damage, type, rangeAtack);
 			if (bu->getFire())
 			{
 				effectGenerated = 2;
@@ -2064,7 +2056,7 @@ BattleUnit *TileEngine::hit(Position center, int power, const RuleDamageType *ty
  * @param unit The unit that caused the explosion.
  * @param clipOrWeapon The clip or weapon that caused the explosion.
  */
-void TileEngine::explode(Position center, int power, const RuleDamageType *type, int maxRadius, BattleUnit *unit, BattleItem *clipOrWeapon, bool rangeAtack)
+void TileEngine::explode(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, int maxRadius, bool rangeAtack)
 {
 	const Position centetTile = center.toTile();
 	int hitSide = 0;
@@ -2142,13 +2134,13 @@ void TileEngine::explode(Position center, int power, const RuleDamageType *type,
 							if (distance(dest->getPosition(), centetTile) < 2)
 							{
 								// ground zero effect is in effect
-								hitUnit(unit, clipOrWeapon, bu, Position(0, 0, 0), damage, type, rangeAtack);
+								hitUnit(attack, bu, Position(0, 0, 0), damage, type, rangeAtack);
 							}
 							else
 							{
 								// directional damage relative to explosion position.
 								// units above the explosion will be hit in the legs, units lateral to or below will be hit in the torso
-								hitUnit(unit, clipOrWeapon, bu, centetTile + Position(0, 0, 5) - dest->getPosition(), damage, type, rangeAtack);
+								hitUnit(attack, bu, centetTile + Position(0, 0, 5) - dest->getPosition(), damage, type, rangeAtack);
 							}
 
 							// Affect all items and units in inventory
@@ -2157,7 +2149,7 @@ void TileEngine::explode(Position center, int power, const RuleDamageType *type,
 							{
 								for (std::vector<BattleItem*>::iterator it = bu->getInventory()->begin(); it != bu->getInventory()->end(); ++it)
 								{
-									if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && type->getItemDamage(itemDamage) > (*it)->getRules()->getArmor())
+									if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && type->getItemDamage(itemDamage) > (*it)->getRules()->getArmor())
 									{
 										toRemove.push_back(*it);
 									}
@@ -2167,7 +2159,7 @@ void TileEngine::explode(Position center, int power, const RuleDamageType *type,
 						// Affect all items and units on ground
 						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
 						{
-							if (!hitUnit(unit, clipOrWeapon, (*it)->getUnit(), Position(0, 0, 0), damage, type) && type->getItemDamage(damage) > (*it)->getRules()->getArmor())
+							if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), damage, type) && type->getItemDamage(damage) > (*it)->getRules()->getArmor())
 							{
 								toRemove.push_back(*it);
 							}
@@ -2252,7 +2244,7 @@ void TileEngine::explode(Position center, int power, const RuleDamageType *type,
 	}
 	calculateLighting(LL_AMBIENT, centetTile, maxRadius + 1, true); // roofs could have been destroyed and fires could have been started
 	calculateFOV(centetTile, maxRadius + 1, true, true);
-	if (unit && distance(centetTile, unit->getPosition()) > maxRadius + 1)
+	if (attack.attacer && distance(centetTile, attack.attacer->getPosition()) > maxRadius + 1)
 	{
 		// unit is away form blast but its visibility can be affected by scripts.
 		calculateFOV(centetTile, 1, false);

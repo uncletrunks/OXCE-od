@@ -48,10 +48,10 @@ struct BattleActionCost : RuleItemUseCost
 	BattleUnit *actor;
 	BattleItem *weapon;
 
-	//Default constructor.
+	/// Default constructor.
 	BattleActionCost() : type(BA_NONE), actor(0), weapon(0) { }
 
-	//Constructor with update.
+	/// Constructor with update.
 	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item) { updateTU(); }
 
 	/// Update value of TU based of actor, weapon and type.
@@ -80,8 +80,28 @@ struct BattleAction : BattleActionCost
 	bool finalAction;
 	int number; // first action of turn, second, etc.?
 
-	//Default constructor
+	/// Default constructor
 	BattleAction() : target(-1, -1, -1), targeting(false), value(0), strafe(false), run(false), diff(0), autoShotCounter(0), cameraPosition(0, 0, -1), desperate(false), finalFacing(-1), finalAction(false), number(0) { }
+};
+
+struct BattleActionAttack
+{
+	BattleActionType type;
+	BattleUnit *attacer;
+	BattleItem *weapon_item;
+	BattleItem *damage_item;
+
+	/// Defulat constructor.
+	BattleActionAttack(BattleActionType action = BA_NONE) : type{ action }, attacer{ nullptr }, weapon_item{ nullptr }, damage_item{ nullptr }
+	{
+
+	}
+
+	/// Constructor.
+	BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item);
+
+	/// Constructor.
+	BattleActionAttack(const BattleActionCost &action);
 };
 
 /**

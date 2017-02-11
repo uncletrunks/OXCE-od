@@ -248,7 +248,7 @@ public:
 	/// Get overkill damage to unit.
 	int getOverKillDamage() const;
 	/// Do damage to the unit.
-	int damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleItem *item = nullptr);
+	int damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack);
 	/// Heal stun level of the unit.
 	void healStun(int power);
 	/// Gets the unit's stun level.

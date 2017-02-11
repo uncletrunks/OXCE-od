@@ -157,6 +157,51 @@ bool BattleActionCost::spendTU(std::string *message)
 }
 
 /**
+ * Constructor for Battle Action attack.
+ * @param action type of action.
+ * @param unit unit performing attack.
+ * @param item weapon of choice.
+ */
+BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item) : type{ action }, attacer{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
+{
+	if (item)
+	{
+		const RuleItem *rule = item->getRules();
+		switch (rule->getBattleType())
+		{
+		case BT_FIREARM:
+			weapon_item = item;
+			damage_item = type != BA_HIT ? item->getAmmoItem() : item;
+			break;
+
+		case BT_PROXIMITYGRENADE:
+		case BT_GRENADE:
+			weapon_item = item;
+			damage_item = item;
+			if (attacer && damage_item->getPreviousOwner())
+			{
+				attacer = damage_item->getPreviousOwner();
+			}
+			break;
+
+		default:
+			weapon_item = item;
+			damage_item = item;
+			break;
+		}
+	}
+}
+
+/**
+ * Constructor from BattleActionCost.
+ * @param action Action.
+ */
+BattleActionAttack::BattleActionAttack(const BattleActionCost& action) : BattleActionAttack{ action.type, action.actor, action.weapon }
+{
+
+}
+
+/**
  * Initializes all the elements in the Battlescape screen.
  * @param save Pointer to the save game.
  * @param parentState Pointer to the parent battlescape state.
@@ -487,7 +532,7 @@ void BattlescapeGame::endTurn()
 					if (RNG::percent(rule->getSpecialChance()))
 					{
 						Position p = tile->getPosition().toVexel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
-						statePushNext(new ExplosionBState(this, p, BA_NONE, item, unit ? unit : item->getPreviousOwner()));
+						statePushNext(new ExplosionBState(this, p, { BA_NONE, unit, item }));
 						exploded = true;
 					}
 					else
@@ -531,7 +576,7 @@ void BattlescapeGame::endTurn()
 	if (t)
 	{
 		Position p = t->getPosition().toVexel();
-		statePushNext(new ExplosionBState(this, p, BA_NONE, 0, 0, t));
+		statePushNext(new ExplosionBState(this, p, { }, t));
 		statePushBack(0);
 		return;
 	}
@@ -555,7 +600,7 @@ void BattlescapeGame::endTurn()
 		if (t)
 		{
 			Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
-			statePushNext(new ExplosionBState(this, p, BA_NONE, 0, 0, t));
+			statePushNext(new ExplosionBState(this, p, { }, t));
 			statePushBack(0);
 			_endTurnProcessed = true;
 			return;
@@ -2398,7 +2443,7 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 					if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() >= 0 && RNG::percent((*i)->getRules()->getSpecialChance()))
 					{
 						Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
-						statePushNext(new ExplosionBState(this, p, BA_NONE, (*i), (*i)->getPreviousOwner()));
+						statePushNext(new ExplosionBState(this, p, { BA_NONE, nullptr, (*i), }));
 						exploded = true;
 					}
 				}
