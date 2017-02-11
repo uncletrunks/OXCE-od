@@ -1155,7 +1155,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 
 	{
 		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, attack.damage_item, save, orgPower, type->ResistType, };
+		ModScript::HitUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacer, save, orgPower, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
@@ -1214,7 +1214,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, save, power, orgPower, bodypart, side, type->ResistType, };
+		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacer, save, power, orgPower, bodypart, side, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
 
@@ -4344,14 +4344,15 @@ void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part
 }
 
 ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
-		"to_health",
-		"to_armor",
-		"to_stun",
-		"to_time",
-		"to_energy",
-		"to_morale",
-		"to_wound",
-		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side", "damaging_type", }
+	"to_health",
+	"to_armor",
+	"to_stun",
+	"to_time",
+	"to_energy",
+	"to_morale",
+	"to_wound",
+	"unit", "damaging_item", "weapon_item", "attacker",
+	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", }
 {
 	BindBase b { this };
 
@@ -4360,7 +4361,12 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	setEmptyReturn();
 }
 
-ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power", "damaging_type", }
+ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"power",
+	"part",
+	"side",
+	"unit", "damaging_item", "weapon_item", "attacker",
+	"battle_game", "orig_power", "damaging_type", }
 {
 	BindBase b { this };
 

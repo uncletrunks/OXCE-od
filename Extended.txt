@@ -143,6 +143,7 @@ Add damage type param to unit damage script.[br/]
 Fix critical bug in unit damage function.[br/]
 [br/]
 3.7:[br/]
+New params with shooting weapon and shooter to damage and hit script.[br/]
 [br/]
 
 [examples]
