@@ -104,6 +104,8 @@ if ( NOT OPENGL_FOUND )
     "Continuing building without OpenGL support."
     )
   add_definitions(-D__NO_OPENGL)
+else ()
+    include_directories ( ${OPENGL_INCLUDE_DIR} )
 endif ()
 
 # Read version number

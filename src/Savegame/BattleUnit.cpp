@@ -3017,7 +3017,7 @@ int BattleUnit::getMoveSound() const
  */
 bool BattleUnit::isWoundable() const
 {
-	return !_armor->getBleedImmune(!(_type=="SOLDIER" || (Options::alienBleeding && _faction != FACTION_PLAYER)));
+	return !_armor->getBleedImmune(!(_type=="SOLDIER" || (Options::alienBleeding && _originalFaction != FACTION_PLAYER)));
 }
 
 /**

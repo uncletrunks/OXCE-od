@@ -112,9 +112,11 @@ SavedBattleGame::~SavedBattleGame()
  */
 void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGame)
 {
-	_mapsize_x = node["width"].as<int>(_mapsize_x);
-	_mapsize_y = node["length"].as<int>(_mapsize_y);
-	_mapsize_z = node["height"].as<int>(_mapsize_z);
+	int mapsize_x = node["width"].as<int>(_mapsize_x);
+	int mapsize_y = node["length"].as<int>(_mapsize_y);
+	int mapsize_z = node["height"].as<int>(_mapsize_z);
+	initMap(mapsize_x, mapsize_y, mapsize_z);
+
 	_missionType = node["missionType"].as<std::string>(_missionType);
 	_startingConditionType = node["startingConditionType"].as<std::string>(_startingConditionType);
 	_alienCustomDeploy = node["alienCustomDeploy"].as<std::string>(_alienCustomDeploy);
@@ -131,8 +133,6 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 		MapDataSet *mds = mod->getMapDataSet(name);
 		_mapDataSets.push_back(mds);
 	}
-
-	initMap(_mapsize_x, _mapsize_y, _mapsize_z);
 
 	if (!node["tileTotalBytesPer"])
 	{
@@ -486,23 +486,22 @@ YAML::Node SavedBattleGame::save() const
  */
 void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z)
 {
-	if (!_nodes.empty())
+	// Clear old map data
+	for (std::vector<Node*>::iterator i = _nodes.begin(); i != _nodes.end(); ++i)
 	{
-		for (std::vector<Node*>::iterator i = _nodes.begin(); i != _nodes.end(); ++i)
-		{
-			delete *i;
-		}
-
-		_nodes.clear();
-		_mapDataSets.clear();
+		delete *i;
 	}
+
+	_nodes.clear();
+	_mapDataSets.clear();
+
+	// Create tile objects
 	_mapsize_x = mapsize_x;
 	_mapsize_y = mapsize_y;
 	_mapsize_z = mapsize_z;
 
 	_tiles.clear();
 	_tiles.reserve(_mapsize_z * _mapsize_y * _mapsize_x);
-	/* create tile objects */
 	for (int i = 0; i < _mapsize_z * _mapsize_y * _mapsize_x; ++i)
 	{
 		Position pos;
