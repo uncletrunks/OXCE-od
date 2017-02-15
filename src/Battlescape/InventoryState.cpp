@@ -1321,14 +1321,20 @@ void InventoryState::onMoveGroundInventoryToBase(Action *)
 	// step 1: move stuff from craft to base
 	for (std::vector<BattleItem*>::iterator i = groundInv->begin(); i != groundInv->end(); ++i)
 	{
+		std::string weaponRule = (*i)->getRules()->getType();
 		// don't forget the ammo!
 		if ((*i)->getAmmoItem())
 		{
-			c->getItems()->removeItem((*i)->getAmmoItem()->getRules()->getType());
-			_base->getStorageItems()->addItem((*i)->getAmmoItem()->getRules()->getType());
+			std::string ammoRule = (*i)->getAmmoItem()->getRules()->getType();
+			// only real ammo
+			if (weaponRule != ammoRule)
+			{
+				c->getItems()->removeItem(ammoRule);
+				_base->getStorageItems()->addItem(ammoRule);
+			}
 		}
-		c->getItems()->removeItem((*i)->getRules()->getType());
-		_base->getStorageItems()->addItem((*i)->getRules()->getType());
+		c->getItems()->removeItem(weaponRule);
+		_base->getStorageItems()->addItem(weaponRule);
 	}
 
 	// step 2: clear ground
