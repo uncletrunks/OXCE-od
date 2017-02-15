@@ -64,7 +64,8 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	_txtIncome = new Text(300, 9, 16, 32);
 	_txtMaintenance = new Text(130, 9, 16, 40);
 	_txtBalance = new Text(160, 9, 146, 40);
-	_txtDesc = new Text(280, 132, 16, 48);
+	_txtBonus = new Text(300, 9, 16, 48);
+	_txtDesc = new Text(280, 124, 16, 56);
 	_txtFailure = new Text(290, 160, 15, 10);
 
 	// Set palette
@@ -79,6 +80,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	add(_txtIncome, "text1", "monthlyReport");
 	add(_txtMaintenance, "text1", "monthlyReport");
 	add(_txtBalance, "text1", "monthlyReport");
+	add(_txtBonus, "text1", "monthlyReport");
 	add(_txtDesc, "text2", "monthlyReport");
 	add(_txtFailure, "text2", "monthlyReport");
 
@@ -183,6 +185,29 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	std::wostringstream ss2;
 	ss2 << tr("STR_MAINTENANCE") << L"> \x01" << Text::formatFunding(_game->getSavedGame()->getBaseMaintenance());
 	_txtMaintenance->setText(ss2.str());
+
+	int performanceBonus = _ratingTotal * _game->getMod()->getPerformanceBonusFactor();
+	if (performanceBonus > 0)
+	{
+		// increase funds by performance bonus
+		_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + performanceBonus);
+		// display
+		std::wostringstream ss4;
+		ss4 << tr("STR_PERFORMANCE_BONUS") << L"> \x01" << Text::formatFunding(performanceBonus);
+		_txtBonus->setText(ss4.str());
+		// shuffle the fields a bit for better overview
+		int upper = _txtMaintenance->getY();
+		int lower = _txtBonus->getY();
+		_txtMaintenance->setY(lower);
+		_txtBalance->setY(lower);
+		_txtBonus->setY(upper);
+	}
+	else
+	{
+		// vanilla view
+		_txtBonus->setVisible(false);
+		_txtDesc->setY(_txtBonus->getY());
+	}
 
 	std::wostringstream ss3;
 	ss3 << tr("STR_BALANCE") << L"> \x01" << Text::formatFunding(_game->getSavedGame()->getFunds());
@@ -342,6 +367,7 @@ void MonthlyReportState::btnOkClick(Action *)
 			_txtIncome->setVisible(false);
 			_txtMaintenance->setVisible(false);
 			_txtBalance->setVisible(false);
+			_txtBonus->setVisible(false);
 			_txtDesc->setVisible(false);
 			_btnOk->setVisible(false);
 			_btnBigOk->setVisible(true);
