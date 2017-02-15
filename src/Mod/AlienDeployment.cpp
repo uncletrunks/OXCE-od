@@ -138,6 +138,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	}
 	_type = node["type"].as<std::string>(_type);
 	_startingCondition = node["startingCondition"].as<std::string>(_startingCondition);
+	_unlockedResearch = node["unlockedResearch"].as<std::string>(_unlockedResearch);
 	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
 	_data = node["data"].as< std::vector<DeploymentData> >(_data);
 	_width = node["width"].as<int>(_width);
@@ -224,6 +225,15 @@ std::string AlienDeployment::getType() const
 std::string AlienDeployment::getStartingCondition() const
 {
 	return _startingCondition;
+}
+
+/**
+* Returns the research topic to be unlocked after a successful mission.
+* @return String ID for research topic.
+*/
+std::string AlienDeployment::getUnlockedResearch() const
+{
+	return _unlockedResearch;
 }
 
 /**

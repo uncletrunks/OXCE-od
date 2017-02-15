@@ -1709,6 +1709,16 @@ void DebriefingState::prepareDebriefing()
 
 	_missionStatistics->success = success;
 
+	// Unlock research defined in alien deployment, if the mission was a success
+	if (success && ruleDeploy)
+	{
+		const RuleResearch *research = _game->getMod()->getResearch(ruleDeploy->getUnlockedResearch());
+		if (research)
+		{
+			_game->getSavedGame()->addFinishedResearch(research, _game->getMod(), true);
+		}
+	}
+
 	// remember the base for later use (of course only if it's not lost already (in that case base=0))
 	_base = base;
 }

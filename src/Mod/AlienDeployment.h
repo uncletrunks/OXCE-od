@@ -64,6 +64,7 @@ class AlienDeployment
 private:
 	std::string _type;
 	std::string _startingCondition;
+	std::string _unlockedResearch;
 	int _bughuntMinTurn;
 	std::vector<DeploymentData> _data;
 	int _width, _length, _height, _civilians;
@@ -90,6 +91,8 @@ public:
 	std::string getType() const;
 	/// Gets the Alien Deployment's starting condition.
 	std::string getStartingCondition() const;
+	/// Gets the research topic to be unlocked after a successful mission.
+	std::string getUnlockedResearch() const;
 	/// Gets the bug hunt mode minimum turn requirement (default = 0 = not used).
 	int getBughuntMinTurn() const;
 	/// Gets a pointer to the data.
