@@ -161,34 +161,12 @@ void MapData::setFlags(bool isUfoDoor, bool stopLOS, bool isNoFloor, int bigWall
  */
 int MapData::getBlock(ItemDamageType type) const
 {
-	switch (type)
-	{
-	case DT_NONE:
+	if (type == DT_NONE)
 		return _block[1];
-	case DT_SMOKE:
+	else if (type == DT_SMOKE)
 		return _block[3];
-	case DT_ACID:
-	case DT_AP:
-	case DT_LASER:
-	case DT_PLASMA:
-	case DT_MELEE:
-	case DT_HE:
-	case DT_IN:
-	case DT_10:
-	case DT_11:
-	case DT_12:
-	case DT_13:
-	case DT_14:
-	case DT_15:
-	case DT_16:
-	case DT_17:
-	case DT_18:
-	case DT_19:
-	case DT_STUN:
+	else if (type > DT_NONE && type < DAMAGE_TYPES)
 		return _block[2];
-	default:
-		break;
-	}
 
 	return 0;
 }
