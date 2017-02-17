@@ -257,6 +257,37 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 		}
 	}
 
+	if (_game->getMod()->getUseCustomCategories())
+	{
+		// first find all relevant item categories
+		std::vector<std::string> tempCats;
+		for (std::vector<TransferRow>::iterator i = _items.begin(); i != _items.end(); ++i)
+		{
+			if ((*i).type == TRANSFER_ITEM)
+			{
+				RuleItem *rule = (RuleItem*)((*i).rule);
+				for (std::vector<std::string>::const_iterator j = rule->getCategories().begin(); j != rule->getCategories().end(); ++j)
+				{
+					if (std::find(tempCats.begin(), tempCats.end(), (*j)) == tempCats.end())
+					{
+						tempCats.push_back((*j));
+					}
+				}
+			}
+		}
+		// then use them nicely in order
+		_cats.clear();
+		_cats.push_back("STR_ALL_ITEMS");
+		const std::vector<std::string> &categories = _game->getMod()->getItemCategoriesList();
+		for (std::vector<std::string>::const_iterator k = categories.begin(); k != categories.end(); ++k)
+		{
+			if (std::find(tempCats.begin(), tempCats.end(), (*k)) != tempCats.end())
+			{
+				_cats.push_back((*k));
+			}
+		}
+	}
+
 	_txtSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
 
 	_cbxCategory->setOptions(_cats);
@@ -352,6 +383,28 @@ std::string SellState::getCategory(int sel) const
 }
 
 /**
+ * Determines if a row item belongs to a given category.
+ * @param sel Selected row.
+ * @param cat Category.
+ * @returns True if row item belongs to given category, otherwise False.
+ */
+bool SellState::belongsToCategory(int sel, const std::string &cat) const
+{
+	switch (_items[sel].type)
+	{
+	case TRANSFER_SOLDIER:
+	case TRANSFER_SCIENTIST:
+	case TRANSFER_ENGINEER:
+	case TRANSFER_CRAFT:
+		return false;
+	case TRANSFER_ITEM:
+		RuleItem *rule = (RuleItem*)_items[sel].rule;
+		return rule->belongsToCategory(cat);
+	}
+	return false;
+}
+
+/**
 * Quick search toggle.
 * @param action Pointer to an action.
 */
@@ -393,9 +446,19 @@ void SellState::updateList()
 	{
 		// filter
 		std::string cat = _cats[_cbxCategory->getSelected()];
-		if (cat != "STR_ALL_ITEMS" && cat != getCategory(i))
+		if (_game->getMod()->getUseCustomCategories())
 		{
-			continue;
+			if (cat != "STR_ALL_ITEMS" && !belongsToCategory(i, cat))
+			{
+				continue;
+			}
+		}
+		else
+		{
+			if (cat != "STR_ALL_ITEMS" && cat != getCategory(i))
+			{
+				continue;
+			}
 		}
 
 		// quick search

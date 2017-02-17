@@ -61,6 +61,8 @@ private:
 	Timer *_timerInc, *_timerDec;
 	/// Gets the category of the current selection.
 	std::string getCategory(int sel) const;
+	/// Determines if the current selection belongs to a given category.
+	bool belongsToCategory(int sel, const std::string &cat) const;
 	/// Gets the row of the current selection.
 	TransferRow &getRow() { return _items[_rows[_sel]]; }
 public:

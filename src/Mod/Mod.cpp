@@ -282,7 +282,7 @@ Mod::Mod() :
 	_kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80), _surrenderMode(0), _defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0),
 	_bughuntMinTurn(20), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
 	_ufoGlancingHitThreshold(0), _ufoBeamWidthParameter(1000),
-	_soldiersPerSergeant(5), _soldiersPerCaptain(11), _soldiersPerColonel(23), _soldiersPerCommander(30), _performanceBonusFactor(0),
+	_soldiersPerSergeant(5), _soldiersPerCaptain(11), _soldiersPerColonel(23), _soldiersPerCommander(30), _performanceBonusFactor(0), _useCustomCategories(false),
 	_baseDefenseMapFromLocation(0),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
@@ -1357,6 +1357,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_soldiersPerColonel = doc["soldiersPerColonel"].as<int>(_soldiersPerColonel);
 	_soldiersPerCommander = doc["soldiersPerCommander"].as<int>(_soldiersPerCommander);
 	_performanceBonusFactor = doc["performanceBonusFactor"].as<int>(_performanceBonusFactor);
+	_useCustomCategories = doc["useCustomCategories"].as<bool>(_useCustomCategories);
 	_baseDefenseMapFromLocation = doc["baseDefenseMapFromLocation"].as<int>(_baseDefenseMapFromLocation);
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
