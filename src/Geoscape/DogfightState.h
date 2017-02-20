@@ -71,7 +71,7 @@ private:
 	int _colors[13];
 	// Ends the dogfight.
 	void endDogfight();
-	bool _tractorLockedOn[4];
+	bool _tractorLockedOn[RuleCraft::WeaponMax];
 
 public:
 	/// Creates the Dogfight state.

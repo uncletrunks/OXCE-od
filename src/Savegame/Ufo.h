@@ -177,7 +177,7 @@ public:
 	/// Gets which _interceptionNumber in a dogfight handles the UFO shield recharge
 	int getShieldRechargeHandle() const;
 	/// Sets the number of tractor beams locked on to a UFO
-	void setTractorBeamSlowdown(int tractorsBeamSlowdown);
+	void setTractorBeamSlowdown(int tractorBeamSlowdown);
 	/// Gets the number of tractor beams locked on to a UFO
 	int getTractorBeamSlowdown() const;
 };

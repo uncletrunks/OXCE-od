@@ -253,6 +253,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	{
 		_weaponEnabled[i] = true;
 		_weaponFireCountdown[i] = 0;
+		_tractorLockedOn[i] = false;
 	}
 
 	// pilot modifiers
@@ -590,12 +591,6 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	{
 		_ufo->setShieldRechargeHandle(_interceptionNumber);
 	}
-
-	// Set up the array of bools to check which weapons have a tractor beam locked on the ufo
-	for (int i = 0; i < 4; i++)
-	{
-		_tractorLockedOn[i] = {false};
-	}
 }
 
 /**
@@ -871,7 +866,7 @@ void DogfightState::update()
 		}
 	}
 	// Crappy craft is chasing UFO.
-        int speedMinusTractors = std::max(0, _ufo->getSpeed() - _ufo->getTractorBeamSlowdown());
+	int speedMinusTractors = std::max(0, _ufo->getSpeed() - _ufo->getTractorBeamSlowdown());
 	if (speedMinusTractors > _craft->getCraftStats().speedMax)
 	{
 		_ufoBreakingOff = true;
@@ -1148,28 +1143,31 @@ void DogfightState::update()
 			}
 
 			// Handle craft tractor beams
-			if (_currentDist <= w->getRules()->getRange() * 8 && _mode != _btnStandoff
-				&& _mode != _btnDisengage && !_ufo->isCrashed() && !_craft->isDestroyed()
-				&& _weaponEnabled[i] && w->getRules()->getTractorBeamPower() != 0)
+			if (w->getRules()->getTractorBeamPower() != 0)
 			{
-				if (!_tractorLockedOn[i])
+				if (_currentDist <= w->getRules()->getRange() * 8 && _mode != _btnStandoff
+					&& _mode != _btnDisengage && !_ufo->isCrashed() && !_craft->isDestroyed()
+					&& _weaponEnabled[i])
 				{
-					_tractorLockedOn[i] = true;
-					int tractorBeamSlowdown = _ufo->getTractorBeamSlowdown();
-					tractorBeamSlowdown += w->getRules()->getTractorBeamPower() * _game->getMod()->getUfoTractorBeamSizeModifier(_ufoSize) / 100;
-					_ufo->setTractorBeamSlowdown(tractorBeamSlowdown);
-					setStatus("STR_TRACTOR_BEAM_ENGAGED");
+					if (!_tractorLockedOn[i])
+					{
+						_tractorLockedOn[i] = true;
+						int tractorBeamSlowdown = _ufo->getTractorBeamSlowdown();
+						tractorBeamSlowdown += w->getRules()->getTractorBeamPower() * _game->getMod()->getUfoTractorBeamSizeModifier(_ufoSize) / 100;
+						_ufo->setTractorBeamSlowdown(tractorBeamSlowdown);
+						setStatus("STR_TRACTOR_BEAM_ENGAGED");
+					}
 				}
-			}
-			else if (w->getRules()->getTractorBeamPower() != 0)
-			{
-				if (_tractorLockedOn[i])
+				else
 				{
-					_tractorLockedOn[i] = false;
-					int tractorBeamSlowdown = _ufo->getTractorBeamSlowdown();
-					tractorBeamSlowdown -= w->getRules()->getTractorBeamPower() * _game->getMod()->getUfoTractorBeamSizeModifier(_ufoSize) / 100;
-					_ufo->setTractorBeamSlowdown(tractorBeamSlowdown);
-					setStatus("STR_TRACTOR_BEAM_DISENGAGED");
+					if (_tractorLockedOn[i])
+					{
+						_tractorLockedOn[i] = false;
+						int tractorBeamSlowdown = _ufo->getTractorBeamSlowdown();
+						tractorBeamSlowdown -= w->getRules()->getTractorBeamPower() * _game->getMod()->getUfoTractorBeamSizeModifier(_ufoSize) / 100;
+						_ufo->setTractorBeamSlowdown(tractorBeamSlowdown);
+						setStatus("STR_TRACTOR_BEAM_DISENGAGED");
+					}
 				}
 			}
 
