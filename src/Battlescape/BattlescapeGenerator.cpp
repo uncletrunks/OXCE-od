@@ -844,6 +844,8 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 	// equip soldiers based on equipment-layout
 	for (std::vector<BattleItem*>::iterator i = _craftInventoryTile->getInventory()->begin(); i != _craftInventoryTile->getInventory()->end(); ++i)
 	{
+		// set all the items on this tile as belonging to the XCOM faction.
+		(*i)->setXCOMProperty(true);
 		// don't let the soldiers take extra ammo yet
 		if ((*i)->getRules()->getBattleType() == BT_AMMO)
 			continue;
@@ -1799,7 +1801,6 @@ void BattlescapeGenerator::loadWeapons()
 			{
 				if ((*j)->getSlot() == _game->getMod()->getInventory("STR_GROUND", true) && (*i)->setAmmoItem(*j) == 0)
 				{
-					(*j)->setXCOMProperty(true);
 					(*j)->setSlot(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
 					loaded = true;
 				}
