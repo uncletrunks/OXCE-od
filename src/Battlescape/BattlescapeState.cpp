@@ -872,7 +872,10 @@ void BattlescapeState::mapClick(Action *action)
 			BattleUnit *bu = _save->selectUnit(pos);
 			if (bu && (bu->getVisible() || _save->getDebugMode()))
 			{
-				_game->pushState(new AlienInventoryState(bu));
+				if (bu->getOriginalFaction() != FACTION_PLAYER || !bu->hasInventory())
+				{
+					_game->pushState(new AlienInventoryState(bu));
+				}
 			}
 		}
 	}
