@@ -963,7 +963,7 @@ void updateOptions()
 	//if (!_commandLine.empty())
 	for (std::vector<OptionInfo>::iterator i = _info.begin(); i != _info.end(); ++i)
 	{
-		i->load(_commandLine);
+		i->load(_commandLine, true);
 	}
 }
 

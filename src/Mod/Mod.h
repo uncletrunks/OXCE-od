@@ -170,6 +170,7 @@ private:
 	GameTime _startingTime;
 	int _baseDefenseMapFromLocation;
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
+	std::map<std::string, std::string> _fixedUserOptions;
 	StatAdjustment _statAdjustment[5];
 
 	std::vector<std::string> _countriesIndex, _extraGlobeLabelsIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
@@ -522,6 +523,7 @@ public:
 	std::string getFinalResearch() const;
 	const std::map<int, std::string> *getMissionRatings() const;
 	const std::map<int, std::string> *getMonthlyRatings() const;
+	const std::map<std::string, std::string> &getFixedUserOptions() const;
 	StatAdjustment *getStatAdjustment(int difficulty);
 	int getDefeatScore() const;
 	int getDefeatFunds() const;

@@ -42,13 +42,16 @@ OptionsAdvancedState::OptionsAdvancedState(OptionsOrigin origin) : OptionsBaseSt
 
 	// Create objects
 	_lstOptions = new TextList(200, 136, 94, 8);
-	
+
+	auto activeMaster = Options::getActiveMaster(); // FIXME: interface ruleset
 	if (origin != OPT_BATTLESCAPE)
 	{
+		_greyedOutColor = activeMaster == "xcom2" ? 50 : 100;
 		add(_lstOptions, "optionLists", "advancedMenu");
 	}
 	else
 	{
+		_greyedOutColor = activeMaster == "xcom2" ? 240 : 238;
 		add(_lstOptions, "optionLists", "battlescape");
 	}
 	centerAllSurfaces();
@@ -139,6 +142,7 @@ void OptionsAdvancedState::init()
  */
 void OptionsAdvancedState::addSettings(const std::vector<OptionInfo> &settings)
 {
+	auto fixeduserOptions = _game->getMod()->getFixedUserOptions();
 	for (std::vector<OptionInfo>::const_iterator i = settings.begin(); i != settings.end(); ++i)
 	{
 		std::wstring name = tr(i->description());
@@ -154,6 +158,12 @@ void OptionsAdvancedState::addSettings(const std::vector<OptionInfo> &settings)
 			value = ss.str();
 		}
 		_lstOptions->addRow(2, name.c_str(), value.c_str());
+		// grey out fixed options
+		std::map<std::string, std::string>::const_iterator it = fixeduserOptions.find(i->id());
+		if (it != fixeduserOptions.end())
+		{
+			_lstOptions->setRowColor(_lstOptions->getRows() - 1, _greyedOutColor);
+		}
 	}
 }
 
@@ -204,6 +214,14 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 	size_t sel = _lstOptions->getSelectedRow();
 	OptionInfo *setting = getSetting(sel);
 	if (!setting) return;
+
+	// greyed out options are fixed, cannot be changed by the user
+	auto fixeduserOptions = _game->getMod()->getFixedUserOptions();
+	std::map<std::string, std::string>::const_iterator it = fixeduserOptions.find(setting->id());
+	if (it != fixeduserOptions.end())
+	{
+		return;
+	}
 
 	std::wstring settingText;
 	if (setting->type() == OPTION_BOOL)
