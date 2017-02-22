@@ -25,6 +25,7 @@ namespace OpenXcom
 
 class Base;
 class TextButton;
+class ToggleTextButton;
 class Window;
 class Text;
 class TextEdit;
@@ -41,13 +42,13 @@ private:
 	Base *_base;
 	bool _showRequirements, _detailClicked;
 	TextButton *_btnOk;
+	ToggleTextButton *_btnShowOnlyNew;
 	TextEdit *_btnQuickSearch;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtCategory;
 	TextList *_lstManufacture;
 	ComboBox *_cbxCategory;
 	ComboBox *_cbxFilter;
-	ComboBox *_cbxActions;
 	std::vector<RuleManufacture *> _possibleProductions;
 	std::vector<std::string> _catStrings;
 	std::vector<std::string> _displayedStrings;
@@ -62,8 +63,6 @@ public:
 	/// Handlers for Quick Search.
 	void btnQuickSearchToggle(Action *action);
 	void btnQuickSearchApply(Action *action);
-	/// Handler for clicking the [Mark All As ...] button.
-	void cbxActionsChange(Action * action);
 	/// Handlers for clicking on the list.
 	void lstProdClickLeft (Action * action);
 	void lstProdClickRight(Action * action);
@@ -72,6 +71,10 @@ public:
 	void cbxCategoryChange (Action * action);
 	/// Handler for changing the basic filter
 	void cbxFilterChange(Action * action);
+	/// Handler for clicking the [Show Only New] button.
+	void btnShowOnlyNewClick(Action *action);
+	/// Handler for clicking the [Mark All As Seen] button.
+	void btnMarkAllAsSeenClick(Action *action);
 	/// Fills the list of possible productions.
 	void fillProductionList(bool refreshCategories);
 };

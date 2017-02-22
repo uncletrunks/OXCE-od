@@ -29,8 +29,6 @@ enum ManufacturingFilterType
 	MANU_FILTER_DEFAULT,
 	MANU_FILTER_DEFAULT_SUPPLIES_OK,
 	MANU_FILTER_DEFAULT_NO_SUPPLIES,
-	MANU_FILTER_NEW,
-	MANU_FILTER_HIDDEN,
 	MANU_FILTER_FACILITY_REQUIRED
 };
 	
@@ -49,8 +47,6 @@ private:
 public:
 	static const int MANU_STATUS_NEW = 0;
 	static const int MANU_STATUS_NORMAL = 1;
-	static const int MANU_STATUS_HIDDEN = 2;
-	static const int MANU_STATUSES = 3;
 	/// Creates a new manufacture.
 	RuleManufacture(const std::string &name);
 	/// Loads the manufacture from YAML.

@@ -20,6 +20,7 @@
 #include "NewManufactureListState.h"
 #include "../Interface/Window.h"
 #include "../Interface/TextButton.h"
+#include "../Interface/ToggleTextButton.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
@@ -50,13 +51,13 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	_window = new Window(this, 320, 156, 0, 22, POPUP_BOTH);
 	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 35);
 	_btnOk = new TextButton(148, 16, 164, 154);
+	_btnShowOnlyNew = new ToggleTextButton(148, 16, 8, 154);
 	_txtTitle = new Text(320, 17, 0, 30);
 	_txtItem = new Text(156, 9, 10, 62);
 	_txtCategory = new Text(130, 9, 166, 62);
 	_lstManufacture = new TextList(288, 80, 8, 70);
 	_cbxFilter = new ComboBox(this, 146, 16, 10, 46);
 	_cbxCategory = new ComboBox(this, 146, 16, 166, 46);
-	_cbxActions = new ComboBox(this, 148, 16, 8, 154, true);
 
 	// Set palette
 	setInterface("selectNewManufacture");
@@ -64,13 +65,13 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	add(_window, "window", "selectNewManufacture");
 	add(_btnQuickSearch, "button", "selectNewManufacture");
 	add(_btnOk, "button", "selectNewManufacture");
+	add(_btnShowOnlyNew, "button", "selectNewManufacture");
 	add(_txtTitle, "text", "selectNewManufacture");
 	add(_txtItem, "text", "selectNewManufacture");
 	add(_txtCategory, "text", "selectNewManufacture");
 	add(_lstManufacture, "list", "selectNewManufacture");
 	add(_cbxFilter, "catBox", "selectNewManufacture");
 	add(_cbxCategory, "catBox", "selectNewManufacture");
-	add(_cbxActions, "button", "selectNewManufacture");
 
 	centerAllSurfaces();
 
@@ -95,28 +96,21 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewManufactureListState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&NewManufactureListState::btnOkClick, Options::keyCancel);
+	_btnOk->onKeyboardPress((ActionHandler)&NewManufactureListState::btnMarkAllAsSeenClick, Options::keyInvClear);
+
+	_btnShowOnlyNew->setText(tr("STR_SHOW_ONLY_NEW"));
+	_btnShowOnlyNew->onMouseClick((ActionHandler)&NewManufactureListState::btnShowOnlyNewClick);
 
 	std::vector<std::string> filterOptions;
 	filterOptions.push_back("STR_FILTER_DEFAULT");
 	filterOptions.push_back("STR_FILTER_DEFAULT_SUPPLIES_OK");
 	filterOptions.push_back("STR_FILTER_DEFAULT_NO_SUPPLIES");
-	filterOptions.push_back("STR_FILTER_NEW");
-	filterOptions.push_back("STR_FILTER_HIDDEN");
 	filterOptions.push_back("STR_FILTER_FACILITY_REQUIRED");
 	_cbxFilter->setOptions(filterOptions);
 	_cbxFilter->onChange((ActionHandler)&NewManufactureListState::cbxFilterChange);
 
 	_catStrings.push_back("STR_ALL_ITEMS");
 	_cbxCategory->setOptions(_catStrings);
-
-	std::vector<std::string> actionOptions;
-	actionOptions.push_back("STR_MARK_ALL_AS_NEW");
-	actionOptions.push_back("STR_MARK_ALL_AS_NORMAL");
-	actionOptions.push_back("STR_MARK_ALL_AS_HIDDEN");
-	_cbxActions->setOptions(actionOptions);
-	_cbxActions->onChange((ActionHandler)&NewManufactureListState::cbxActionsChange);
-	_cbxActions->setSelected(-1);
-	_cbxActions->setText(tr("STR_MARK_ALL_AS"));
 
 	_btnQuickSearch->setText(L""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&NewManufactureListState::btnQuickSearchApply);
@@ -141,31 +135,6 @@ void NewManufactureListState::init()
 void NewManufactureListState::btnOkClick(Action *)
 {
 	_game->popState();
-}
-
-/**
- * Marks all items as new/normal/hidden.
- * @param action Pointer to an action.
- */
-void NewManufactureListState::cbxActionsChange(Action *)
-{
-	int newState = _cbxActions->getSelected();
-	_cbxActions->setSelected(-1);
-	_cbxActions->setText(tr("STR_MARK_ALL_AS"));
-
-	ManufacturingFilterType basicFilter = (ManufacturingFilterType)(_cbxFilter->getSelected());
-	if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
-		return;
-
-	if (newState >= 0)
-	{
-		for (std::vector<std::string>::const_iterator i = _displayedStrings.begin(); i != _displayedStrings.end(); ++i)
-		{
-			_game->getSavedGame()->setManufactureRuleStatus((*i), newState);
-		}
-
-		fillProductionList(false);
-	}
 }
 
 /**
@@ -242,14 +211,10 @@ void NewManufactureListState::lstProdClickRight(Action *)
 		// change status
 		const std::string rule = _displayedStrings[_lstManufacture->getSelectedRow()];
 		int oldState = _game->getSavedGame()->getManufactureRuleStatus(rule);
-		int newState = (oldState + 1) % RuleManufacture::MANU_STATUSES;
+		int newState = 1 - oldState;
 		_game->getSavedGame()->setManufactureRuleStatus(rule, newState);
 
-		if (newState == RuleManufacture::MANU_STATUS_HIDDEN)
-		{
-			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 246); // purple
-		}
-		else if (newState == RuleManufacture::MANU_STATUS_NEW)
+		if (newState == RuleManufacture::MANU_STATUS_NEW)
 		{
 			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 218); // light blue
 		}
@@ -317,6 +282,34 @@ void NewManufactureListState::btnQuickSearchApply(Action *)
 }
 
 /**
+* Filter to display only new items.
+* @param action Pointer to an action.
+*/
+void NewManufactureListState::btnShowOnlyNewClick(Action *)
+{
+	fillProductionList(false);
+}
+
+/**
+* Marks all items as seen
+* @param action Pointer to an action.
+*/
+void NewManufactureListState::btnMarkAllAsSeenClick(Action *)
+{
+	ManufacturingFilterType basicFilter = (ManufacturingFilterType)(_cbxFilter->getSelected());
+	if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
+		return;
+
+	for (std::vector<std::string>::const_iterator i = _displayedStrings.begin(); i != _displayedStrings.end(); ++i)
+	{
+		// mark all (new) manufacture items as normal
+		_game->getSavedGame()->setManufactureRuleStatus((*i), RuleManufacture::MANU_STATUS_NORMAL);
+	}
+
+	fillProductionList(false);
+}
+
+/**
  * Fills the list of possible productions.
  */
 void NewManufactureListState::fillProductionList(bool refreshCategories)
@@ -346,6 +339,16 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 	{
 		if (((*it)->getCategory() == _catStrings[_cbxCategory->getSelected()]) || (_catStrings[_cbxCategory->getSelected()] == "STR_ALL_ITEMS"))
 		{
+			// filter
+			bool isNew = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_NEW;
+			if (_btnShowOnlyNew->getPressed())
+			{
+				if (!isNew)
+				{
+					continue;
+				}
+			}
+
 			// quick search
 			if (searchString != L"")
 			{
@@ -356,9 +359,6 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 					continue;
 				}
 			}
-
-			bool isNew = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_NEW;
-			bool isHidden = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_HIDDEN;
 
 			// supplies calculation
 			int productionPossible = 10; // max
@@ -392,16 +392,6 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 					ss << L'+';
 				}
 			}
-			if (basicFilter == MANU_FILTER_DEFAULT && isHidden)
-				continue;
-			if (basicFilter == MANU_FILTER_DEFAULT_SUPPLIES_OK && isHidden)
-				continue;
-			if (basicFilter == MANU_FILTER_DEFAULT_NO_SUPPLIES && isHidden)
-				continue;
-			if (basicFilter == MANU_FILTER_NEW && !isNew)
-				continue;
-			if (basicFilter == MANU_FILTER_HIDDEN && !isHidden)
-				continue;
 
 			_lstManufacture->addRow(3, tr((*it)->getName()).c_str(), tr((*it)->getCategory()).c_str(), ss.str().c_str());
 			_displayedStrings.push_back((*it)->getName().c_str());
@@ -413,11 +403,7 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 			}
 			else
 			{
-				if (isHidden)
-				{
-					_lstManufacture->setRowColor(row, 246); // purple
-				}
-				else if (isNew)
+				if (isNew)
 				{
 					_lstManufacture->setRowColor(row, 218); // light blue
 					hasUnseen = true;
@@ -427,8 +413,8 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 		}
 	}
 
-	std::wstring label = tr("STR_MARK_ALL_AS");
-	_cbxActions->setText((hasUnseen ? L"* " : L"") + label);
+	std::wstring label = tr("STR_SHOW_ONLY_NEW");
+	_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
 
 	if (refreshCategories)
 	{
