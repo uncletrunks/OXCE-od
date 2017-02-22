@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <yaml-cpp/yaml.h>
+#include "MapScript.h"
 
 namespace OpenXcom
 {
@@ -46,6 +47,7 @@ private:
 	int _radarRange, _radarChance, _defense, _hitRatio, _fireSound, _hitSound;
 	std::string _mapName;
 	int _listOrder, _trainingRooms;
+	std::vector<VerticalLevel> _verticalLevels;
 public:
 	/// Creates a blank facility ruleset.
 	RuleBaseFacility(const std::string &type);
@@ -119,6 +121,8 @@ public:
 	int getListOrder() const;
 	/// Gets the facility's training capacity.
 	int getTrainingFacilities() const;
+	/// Gets the vertical levels for this facility map generation.
+	const std::vector<VerticalLevel> &getVerticalLevels() const;
 };
 
 }

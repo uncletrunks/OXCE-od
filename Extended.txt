@@ -146,6 +146,7 @@ Fix critical bug in unit damage function.[br/]
 New params with shooting weapon and shooter to damage and hit script.[br/]
 Merge chagnes from master.[br/]
 Random functions in script.[br/]
+Vertical map generation support.[br/]
 [br/]
 
 [examples]
@@ -617,6 +618,24 @@ mapScripts:
       terrain: JUNGLE #Player craft's LZ block will be from terrain JUNGLE
     - type: fillArea
       terrain: DESERT #Fill the rest of the map with map blocks from terrain DESERT
+  - type: URBAN
+    commands:
+    - type: addBlock
+      size: [2, 2, 4] # When using verticalLevels, definition of height is necessary
+      verticalLevels: # This block will be a series of maps stacked on top of each other, chosen randomly as with normal addBlock command
+      - type: ground # "ground" type maps are always placed first
+        groups: 6 # Pick the first block from group 6
+        size: [2, 2, 1] # Size in x and y must match the size of the block, vertical size definition is necessary for command to run properly
+      - type: middle # "middle" types are filler between "ground" and "ceiling," a list of all middle types is created to loop over to fill the vertical distance
+        groups: 7 # Pick a middle floor for this block from group 7
+        terrain: SOME_ALTERNATE_URBAN # It's possible to make each section a different terrain
+        size: [2, 2, 1]
+      - type: middle # This one is placed after the previous one, the command alternates back and forth between this and the previous to fill the size in z
+        blocks: [13, 14, 15]
+        size: [2, 2, 1]
+      - type: ceiling # Placed on top of all the other blocks
+        groups: 9
+        size: [2, 2, 1]
 [/code]
 
 [code]
