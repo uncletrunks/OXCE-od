@@ -270,7 +270,7 @@ namespace OpenXcom
 			}
 
 			// 2. or if the article was opened already
-			if (save->isUfopediaArticleSeen(article->id))
+			if (save->getUfopediaRuleStatus(article->id) != ArticleDefinition::PEDIA_STATUS_NEW)
 			{
 				return false;
 			}

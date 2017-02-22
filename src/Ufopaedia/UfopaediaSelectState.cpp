@@ -27,6 +27,7 @@
 #include "../Interface/Text.h"
 #include "../Interface/TextEdit.h"
 #include "../Interface/TextButton.h"
+#include "../Interface/ToggleTextButton.h"
 #include "../Interface/TextList.h"
 #include "../Mod/Mod.h"
 #include "../Savegame/SavedGame.h"
@@ -46,7 +47,7 @@ namespace OpenXcom
 
 		// set buttons
 		_btnOk = new TextButton(108, 16, 164, 166);
-		_btnMarkAllAsSeen = new TextButton(108, 16, 48, 166);
+		_btnShowOnlyNew = new ToggleTextButton(108, 16, 48, 166);
 		_lstSelection = new TextList(224, 104, 40, 50);
 
 		// Set palette
@@ -56,7 +57,7 @@ namespace OpenXcom
 		add(_btnQuickSearch, "button2", "ufopaedia");
 		add(_txtTitle, "text", "ufopaedia");
 		add(_btnOk, "button2", "ufopaedia");
-		add(_btnMarkAllAsSeen, "button2", "ufopaedia");
+		add(_btnShowOnlyNew, "button2", "ufopaedia");
 		add(_lstSelection, "list", "ufopaedia");
 
 		centerAllSurfaces();
@@ -70,16 +71,18 @@ namespace OpenXcom
 		_btnOk->setText(tr("STR_OK"));
 		_btnOk->onMouseClick((ActionHandler)&UfopaediaSelectState::btnOkClick);
 		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnOkClick,Options::keyCancel);
+		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnMarkAllAsSeenClick, Options::keyInvClear);
 
-		_btnMarkAllAsSeen->setText(tr("MARK ALL AS SEEN"));
-		_btnMarkAllAsSeen->onMouseClick((ActionHandler)&UfopaediaSelectState::btnMarkAllAsSeenClick);
+		_btnShowOnlyNew->setText(tr("STR_SHOW_ONLY_NEW"));
+		_btnShowOnlyNew->onMouseClick((ActionHandler)&UfopaediaSelectState::btnShowOnlyNewClick);
 
 		_lstSelection->setColumns(1, 206);
 		_lstSelection->setSelectable(true);
 		_lstSelection->setBackground(_window);
 		_lstSelection->setMargin(18);
 		_lstSelection->setAlign(ALIGN_CENTER);
-		_lstSelection->onMouseClick((ActionHandler)&UfopaediaSelectState::lstSelectionClick);
+		_lstSelection->onMouseClick((ActionHandler)&UfopaediaSelectState::lstSelectionClick, SDL_BUTTON_LEFT);
+		_lstSelection->onMouseClick((ActionHandler)&UfopaediaSelectState::lstSelectionClickRight, SDL_BUTTON_RIGHT);
 
 		_btnQuickSearch->setText(L""); // redraw
 		_btnQuickSearch->onEnter((ActionHandler)&UfopaediaSelectState::btnQuickSearchApply);
@@ -110,21 +113,34 @@ namespace OpenXcom
 	}
 
 	/**
-	 * Marks all items as seen
-	 * @param action Pointer to an action.
-	 */
-	void UfopaediaSelectState::btnMarkAllAsSeenClick(Action *)
-	{
-		loadSelectionList(true);
-	}
-
-	/**
 	 *
 	 * @param action Pointer to an action.
 	 */
 	void UfopaediaSelectState::lstSelectionClick(Action *)
 	{
 		Ufopaedia::openArticle(_game, _filtered_article_list[_lstSelection->getSelectedRow()]);
+	}
+
+	/**
+	 * Toggles the topic status.
+	 * @param action Pointer to an action.
+	 */
+	void UfopaediaSelectState::lstSelectionClickRight(Action *)
+	{
+		// change status
+		const std::string rule = _filtered_article_list[_lstSelection->getSelectedRow()]->id;
+		int oldState = _game->getSavedGame()->getUfopediaRuleStatus(rule);
+		int newState = 1 - oldState;
+		_game->getSavedGame()->setUfopediaRuleStatus(rule, newState);
+
+		if (newState == ArticleDefinition::PEDIA_STATUS_NEW)
+		{
+			_lstSelection->setRowColor(_lstSelection->getSelectedRow(), 90); // light green
+		}
+		else
+		{
+			_lstSelection->setRowColor(_lstSelection->getSelectedRow(), _lstSelection->getColor());
+		}
 	}
 
 	/**
@@ -155,6 +171,24 @@ namespace OpenXcom
 		loadSelectionList(false);
 	}
 
+	/**
+	* Filter to display only new items.
+	* @param action Pointer to an action.
+	*/
+	void UfopaediaSelectState::btnShowOnlyNewClick(Action *)
+	{
+		loadSelectionList(false);
+	}
+
+	/**
+	* Marks all items as seen
+	* @param action Pointer to an action.
+	*/
+	void UfopaediaSelectState::btnMarkAllAsSeenClick(Action *)
+	{
+		loadSelectionList(true);
+	}
+
 	void UfopaediaSelectState::loadSelectionList(bool markAllAsSeen)
 	{
 		std::wstring searchString = _btnQuickSearch->getText();
@@ -171,6 +205,15 @@ namespace OpenXcom
 		bool hasUnseen = false;
 		for (it = _article_list.begin(); it!=_article_list.end(); ++it)
 		{
+			// filter
+			if (_btnShowOnlyNew->getPressed())
+			{
+				if (_game->getSavedGame()->getUfopediaRuleStatus((*it)->id) != ArticleDefinition::PEDIA_STATUS_NEW)
+				{
+					continue;
+				}
+			}
+
 			// quick search
 			if (searchString != L"")
 			{
@@ -187,30 +230,20 @@ namespace OpenXcom
 
 			if (markAllAsSeen)
 			{
-				// remember all listed articles as seen
-				_game->getSavedGame()->addSeenUfopediaArticle((*it));
+				// remember all listed articles as seen/normal
+				_game->getSavedGame()->setUfopediaRuleStatus((*it)->id, ArticleDefinition::PEDIA_STATUS_NORMAL);
 			}
-			else if (!_game->getSavedGame()->isUfopediaArticleSeen((*it)->id))
+			else if (_game->getSavedGame()->getUfopediaRuleStatus((*it)->id) == ArticleDefinition::PEDIA_STATUS_NEW)
 			{
-				// mark as unseen
+				// highlight as new
 				_lstSelection->setCellColor(row, 0, 90); // light green
 				hasUnseen = true;
 			}
 			row++;
 		}
 
-		if (!hasUnseen)
-		{
-			_btnMarkAllAsSeen->setVisible(false);
-			_btnOk->setWidth(_btnOk->getX()+_btnOk->getWidth()-_btnMarkAllAsSeen->getX());
-			_btnOk->setX(_btnMarkAllAsSeen->getX());
-		}
-		else
-		{
-			_btnMarkAllAsSeen->setVisible(true);
-			_btnOk->setWidth(_btnMarkAllAsSeen->getWidth());
-			_btnOk->setX(_btnMarkAllAsSeen->getX()+_btnMarkAllAsSeen->getWidth()+8);
-		}
+		std::wstring label = tr("STR_SHOW_ONLY_NEW");
+		_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
 	}
 
 }

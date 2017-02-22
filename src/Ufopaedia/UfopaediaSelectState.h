@@ -29,6 +29,7 @@ namespace OpenXcom
 	class Text;
 	class TextEdit;
 	class TextButton;
+	class ToggleTextButton;
 	class TextList;
 
 	/**
@@ -46,7 +47,8 @@ namespace OpenXcom
 		Window *_window;
 		TextEdit *_btnQuickSearch;
 		Text *_txtTitle;
-		TextButton *_btnOk, *_btnMarkAllAsSeen;
+		TextButton *_btnOk;
+		ToggleTextButton *_btnShowOnlyNew;
 		TextList *_lstSelection;
 		ArticleDefinitionList _article_list, _filtered_article_list;
 
@@ -55,10 +57,13 @@ namespace OpenXcom
 		/// Handlers for Quick Search.
 		void btnQuickSearchToggle(Action *action);
 		void btnQuickSearchApply(Action *action);
-		/// Handler for clicking the [Mark All As Seen] button.
-		void btnMarkAllAsSeenClick(Action * action);
 		/// Handler for clicking the selection list.
 		void lstSelectionClick(Action *action);
+		void lstSelectionClickRight(Action *action);
+		/// Handler for clicking the [Show Only New] button.
+		void btnShowOnlyNewClick(Action *action);
+		/// Handler for clicking the [Mark All As Seen] button.
+		void btnMarkAllAsSeenClick(Action *action);
 		/// load available articles into the selection list
 		void loadSelectionList(bool markAllAsSeen);
 	};

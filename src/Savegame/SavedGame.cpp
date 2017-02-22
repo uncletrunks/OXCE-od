@@ -507,15 +507,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		}
 	}
 
-	for (YAML::const_iterator it = doc["seenUfopediaItems"].begin(); it != doc["seenUfopediaItems"].end(); ++it)
-	{
-		std::string ufopaediaItem = it->as<std::string>();
-		if (mod->getUfopaediaArticle(ufopaediaItem))
-		{
-			_seenUfopediaItems.push_back(mod->getUfopaediaArticle(ufopaediaItem));
-		}
-	}
-
+	_ufopediaRuleStatus = doc["ufopediaRuleStatus"].as< std::map<std::string, int> >(_ufopediaRuleStatus);
 	_manufactureRuleStatus = doc["manufactureRuleStatus"].as< std::map<std::string, int> >(_manufactureRuleStatus);
 	_researchRuleStatus = doc["researchRuleStatus"].as< std::map<std::string, int> >(_researchRuleStatus);
 
@@ -727,10 +719,7 @@ void SavedGame::save(const std::string &filename) const
 	{
 		node["poppedResearch"].push_back((*i)->getName());
 	}
-	for (std::vector<const ArticleDefinition *>::const_iterator i = _seenUfopediaItems.begin(); i != _seenUfopediaItems.end(); ++i)
-	{
-		node["seenUfopediaItems"].push_back((*i)->id);
-	}
+	node["ufopediaRuleStatus"] = _ufopediaRuleStatus;
 	node["manufactureRuleStatus"] = _manufactureRuleStatus;
 	node["researchRuleStatus"] = _researchRuleStatus;
 	node["alienStrategy"] = _alienStrategy->save();
@@ -1168,16 +1157,13 @@ void SavedGame::setBattleGame(SavedBattleGame *battleGame)
 }
 
 /**
- * Add a UfopediaArticle to the list of already seen UfopediaArticle
- * @param r The newly opened UfopediaArticle
+ * Sets the status of a ufopedia rule
+ * @param ufopediaRule The rule ID
+ * @param newStatus Status to be set
  */
-void SavedGame::addSeenUfopediaArticle (const ArticleDefinition * r)
+void SavedGame::setUfopediaRuleStatus(const std::string &ufopediaRule, int newStatus)
 {
-	std::vector<const ArticleDefinition *>::const_iterator itSeen = std::find(_seenUfopediaItems.begin(), _seenUfopediaItems.end(), r);
-	if (itSeen == _seenUfopediaItems.end())
-	{
-		_seenUfopediaItems.push_back(r);
-	}
+	_ufopediaRuleStatus[ufopediaRule] = newStatus;
 }
 
 /**
@@ -1548,27 +1534,19 @@ void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & depen
 }
 
 /**
- * Returns if a certain ufopedia article has been seen.
- * @param article Article ID.
- * @return Whether it's seen or not.
+ * Gets the status of a ufopedia rule.
+ * @param ufopediaRule Ufopedia rule ID.
+ * @return Status (0=new, 1=normal).
  */
-bool SavedGame::isUfopediaArticleSeen(const std::string &article) const
+int SavedGame::getUfopediaRuleStatus(const std::string &ufopediaRule)
 {
-	if (article.empty())
-		return true;
-	for (std::vector<const ArticleDefinition *>::const_iterator i = _seenUfopediaItems.begin(); i != _seenUfopediaItems.end(); ++i)
-	{
-		if ((*i)->id == article)
-			return true;
-	}
-
-	return false;
+	return _ufopediaRuleStatus[ufopediaRule];
 }
 
 /**
  * Gets the status of a manufacture rule.
- * @param manufacture Manufacture rule ID.
- * @return Status (0=new, 1=normal, 2=hidden).
+ * @param manufactureRule Manufacture rule ID.
+ * @return Status (0=new, 1=normal).
  */
 int SavedGame::getManufactureRuleStatus(const std::string &manufactureRule)
 {

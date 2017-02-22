@@ -24,6 +24,7 @@
 #include "../Engine/Surface.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
+#include "../Mod/ArticleDefinition.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/Mod.h"
 #include "../Savegame/SavedGame.h"
@@ -44,8 +45,8 @@ namespace OpenXcom
 		_btnPrev = new TextButton(30, 14, 40, 5);
 		_btnNext = new TextButton(30, 14, 75, 5);
 
-		// remember this article as seen
-		_game->getSavedGame()->addSeenUfopediaArticle(_game->getMod()->getUfopaediaArticle(_id));
+		// remember this article as seen/normal
+		_game->getSavedGame()->setUfopediaRuleStatus(_id, ArticleDefinition::PEDIA_STATUS_NORMAL);
 	}
 
 	/**

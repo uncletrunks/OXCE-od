@@ -127,7 +127,7 @@ private:
 	AlienStrategy *_alienStrategy;
 	SavedBattleGame *_battleGame;
 	std::vector<const RuleResearch*> _discovered;
-	std::vector<const ArticleDefinition*> _seenUfopediaItems;
+	std::map<std::string, int> _ufopediaRuleStatus;
 	std::map<std::string, int> _manufactureRuleStatus;
 	std::map<std::string, int> _researchRuleStatus;
 	std::vector<AlienMission*> _activeMissions;
@@ -230,8 +230,8 @@ public:
 	SavedBattleGame *getSavedBattle();
 	/// Sets the current battle game.
 	void setBattleGame(SavedBattleGame *battleGame);
-	/// Add a seen UFOpedia article
-	void addSeenUfopediaArticle(const ArticleDefinition *r);
+	/// Sets the status of a ufopedia rule
+	void setUfopediaRuleStatus(const std::string &ufopediaRule, int newStatus);
 	/// Sets the status of a manufacture rule
 	void setManufactureRuleStatus(const std::string &manufactureRule, int newStatus);
 	/// Sets the status of a research rule
@@ -250,8 +250,8 @@ public:
 	void getDependableManufacture(std::vector<RuleManufacture*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Check whether a ResearchProject can be researched
 	bool isResearchAvailable(RuleResearch *r, const std::vector<const RuleResearch*> & unlocked, const Mod *mod) const;
-	/// Gets if an UFOpedia article has been seen already.
-	bool isUfopediaArticleSeen(const std::string &article) const;
+	/// Gets the status of a ufopedia rule.
+	int getUfopediaRuleStatus(const std::string &ufopediaRule);
 	/// Gets the status of a manufacture rule.
 	int getManufactureRuleStatus(const std::string &manufactureRule);
 	/// Gets the status of a research rule.
