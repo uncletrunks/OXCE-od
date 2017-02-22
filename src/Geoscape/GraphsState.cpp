@@ -52,7 +52,7 @@ struct GraphButInfo
  * Initializes all the elements in the Graphs screen.
  * @param game Pointer to the core game.
  */
-GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _is100Pressed(false), _is200Pressed(false), _is400Pressed(false), _is800Pressed(false), _is1600Pressed(false)
+GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _zoom(100)
 {
 	// Create object
 	_bg = new InteractiveSurface(320, 200, 0, 0);
@@ -69,11 +69,6 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _is10
 	_txtFactor = new Text(38, 11, 96, 28);
 	_txtMonths = new TextList(205, 8, 115, 183);
 	_txtYears = new TextList(200, 8, 121, 191);
-	_btn100 = new ToggleTextButton(17, 13, 0, 187);
-	_btn200 = new ToggleTextButton(17, 13, 17, 187);
-	_btn400 = new ToggleTextButton(17, 13, 34, 187);
-	_btn800 = new ToggleTextButton(17, 13, 51, 187);
-	_btn1600 = new ToggleTextButton(20, 13, 68, 187);
 
 	// Set palette
 	setInterface("graphs");
@@ -295,28 +290,6 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _is10
 
 	_txtFactor->setText(tr("STR_FINANCE_THOUSANDS"));
 
-	add(_btn100, "button", "graphs");
-	add(_btn200, "button", "graphs");
-	add(_btn400, "button", "graphs");
-	add(_btn800, "button", "graphs");
-	add(_btn1600, "button", "graphs");
-
-	_btn100->setText(tr("1"));
-	_btn100->setPressed(_is100Pressed);
-	_btn100->onMouseClick((ActionHandler)&GraphsState::btnScale100Click);
-	_btn200->setText(tr("2"));
-	_btn200->setPressed(_is200Pressed);
-	_btn200->onMouseClick((ActionHandler)&GraphsState::btnScale200Click);
-	_btn400->setText(tr("4"));
-	_btn400->setPressed(_is400Pressed);
-	_btn400->onMouseClick((ActionHandler)&GraphsState::btnScale400Click);
-	_btn800->setText(tr("8"));
-	_btn800->setPressed(_is800Pressed);
-	_btn800->onMouseClick((ActionHandler)&GraphsState::btnScale800Click);
-	_btn1600->setText(tr("16"));
-	_btn1600->setPressed(_is1600Pressed);
-	_btn1600->onMouseClick((ActionHandler)&GraphsState::btnScale1600Click);
-
 	// Set up buttons
 	_btnUfoRegion->onMousePress((ActionHandler)&GraphsState::btnUfoRegionClick);
 	_btnUfoCountry->onMousePress((ActionHandler)&GraphsState::btnUfoCountryClick);
@@ -327,6 +300,8 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _is10
 	_btnGeoscape->onMousePress((ActionHandler)&GraphsState::btnGeoscapeClick);
 	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnGeoscapeClick, Options::keyCancel);
 	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnGeoscapeClick, Options::keyGeoGraphs);
+	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomInClick, SDLK_KP_PLUS);
+	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomOutClick, SDLK_KP_MINUS);
 
 	centerAllSurfaces();
 }
@@ -359,106 +334,25 @@ GraphsState::~GraphsState()
 }
 
 /**
- * Switches scale to 0 to 90 resp. -10 to 80
- * @param action Pointer to an action.
- */
-void GraphsState::btnScale100Click(Action *)
+* Zooms in.
+* @param action Pointer to an action.
+*/
+void GraphsState::btnZoomInClick(Action *)
 {
-	_is100Pressed = !_is100Pressed;
-	_is200Pressed = false;
-	_is400Pressed = false;
-	_is800Pressed = false;
-	_is1600Pressed = false;
-
-	_btn100->setPressed(_is100Pressed);
-	_btn200->setPressed(_is200Pressed);
-	_btn400->setPressed(_is400Pressed);
-	_btn800->setPressed(_is800Pressed);
-	_btn1600->setPressed(_is1600Pressed);
+	_zoom = _zoom * 2 / 3;
+	if (_zoom < 5) _zoom = 5;
 
 	drawLines();
 }
 
 /**
- * Switches scale to 0 to 180 resp. -20 to 160
- * @param action Pointer to an action.
- */
-void GraphsState::btnScale200Click(Action *)
+* Zooms out.
+* @param action Pointer to an action.
+*/
+void GraphsState::btnZoomOutClick(Action *)
 {
-	_is100Pressed = false;
-	_is200Pressed = !_is200Pressed;
-	_is400Pressed = false;
-	_is800Pressed = false;
-	_is1600Pressed = false;
-
-	_btn100->setPressed(_is100Pressed);
-	_btn200->setPressed(_is200Pressed);
-	_btn400->setPressed(_is400Pressed);
-	_btn800->setPressed(_is800Pressed);
-	_btn1600->setPressed(_is1600Pressed);
-
-	drawLines();
-}
-
-/**
- * Switches scale to 0 to 360 resp. -40 to 320
- * @param action Pointer to an action.
- */
-void GraphsState::btnScale400Click(Action *)
-{
-	_is100Pressed = false;
-	_is200Pressed = false;
-	_is400Pressed = !_is400Pressed;
-	_is800Pressed = false;
-	_is1600Pressed = false;
-
-	_btn100->setPressed(_is100Pressed);
-	_btn200->setPressed(_is200Pressed);
-	_btn400->setPressed(_is400Pressed);
-	_btn800->setPressed(_is800Pressed);
-	_btn1600->setPressed(_is1600Pressed);
-
-	drawLines();
-}
-
-/**
- * Switches scale to 0 to 720 resp.  -80 to 640
- * @param action Pointer to an action.
- */
-void GraphsState::btnScale800Click(Action *)
-{
-	_is100Pressed = false;
-	_is200Pressed = false;
-	_is400Pressed = false;
-	_is800Pressed = !_is800Pressed;
-	_is1600Pressed = false;
-
-	_btn100->setPressed(_is100Pressed);
-	_btn200->setPressed(_is200Pressed);
-	_btn400->setPressed(_is400Pressed);
-	_btn800->setPressed(_is800Pressed);
-	_btn1600->setPressed(_is1600Pressed);
-
-	drawLines();
-}
-
-/**
- * Switches scale to 0 to 1440 resp. -160 to 1280
- * @param action Pointer to an action.
- */
-void GraphsState::btnScale1600Click(Action *)
-{
-	_is100Pressed = false;
-	_is200Pressed = false;
-	_is400Pressed = false;
-	_is800Pressed = false;
-	_is1600Pressed = !_is1600Pressed;
-
-	_btn100->setPressed(_is100Pressed);
-	_btn200->setPressed(_is200Pressed);
-	_btn400->setPressed(_is400Pressed);
-	_btn800->setPressed(_is800Pressed);
-	_btn1600->setPressed(_is1600Pressed);
+	_zoom = _zoom * 3 / 2;
+	if (_zoom > 100) _zoom = 100;
 
 	drawLines();
 }
@@ -741,10 +635,6 @@ void GraphsState::resetScreen()
 void GraphsState::updateScale(double lowerLimit, double upperLimit)
 {
 	double increment = ((upperLimit - lowerLimit) / 9);
-	if (increment < 10)
-	{
-		increment = 10;
-	}
 	double text = lowerLimit;
 	for (int i = 0; i < 10; ++i)
 	{
@@ -850,18 +740,9 @@ void GraphsState::drawCountryLines()
 		}
 	}
 
-	// user is intentionally overriding the calculated scale
-	if (_is100Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -10; upperLimit =   80; } else { lowerLimit = 0; upperLimit =   90; }
-	} else if (_is200Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -20; upperLimit =  160; } else { lowerLimit = 0; upperLimit =  180; }
-	} else if (_is400Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -40; upperLimit =  320; } else { lowerLimit = 0; upperLimit =  360; }
-	} else if (_is800Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -80; upperLimit =  640; } else { lowerLimit = 0; upperLimit =  720; }
-	} else if (_is1600Pressed) {
-		if (lowerLimit < 0) { lowerLimit = -160; upperLimit = 1280; } else { lowerLimit = 0; upperLimit = 1440; }
-	}
+	// custom zoom
+	lowerLimit = (lowerLimit * _zoom) / 100;
+	upperLimit = (upperLimit * _zoom) / 100;
 
 	range = upperLimit - lowerLimit;
 	double units = range / 126;
@@ -1039,18 +920,9 @@ void GraphsState::drawRegionLines()
 		}
 	}
 
-	// user is intentionally overriding the calculated scale
-	if (_is100Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -10; upperLimit =   80; } else { lowerLimit = 0; upperLimit =   90; }
-	} else if (_is200Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -20; upperLimit =  160; } else { lowerLimit = 0; upperLimit =  180; }
-	} else if (_is400Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -40; upperLimit =  320; } else { lowerLimit = 0; upperLimit =  360; }
-	} else if (_is800Pressed) {
-		if (lowerLimit < 0) { lowerLimit =  -80; upperLimit =  640; } else { lowerLimit = 0; upperLimit =  720; }
-	} else if (_is1600Pressed) {
-		if (lowerLimit < 0) { lowerLimit = -160; upperLimit = 1280; } else { lowerLimit = 0; upperLimit = 1440; }
-	}
+	// custom zoom
+	lowerLimit = (lowerLimit * _zoom) / 100;
+	upperLimit = (upperLimit * _zoom) / 100;
 
 	range = upperLimit - lowerLimit;
 	double units = range / 126;
