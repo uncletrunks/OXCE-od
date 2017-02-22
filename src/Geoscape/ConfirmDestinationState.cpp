@@ -123,7 +123,7 @@ std::wstring ConfirmDestinationState::checkStartingCondition()
 	{
 		AlienRace *race = _game->getMod()->getAlienRace(b->getAlienRace());
 		ruleDeploy = _game->getMod()->getDeployment(race->getBaseCustomMission());
-		if (!ruleDeploy) ruleDeploy = _game->getMod()->getDeployment("STR_ALIEN_BASE_ASSAULT");
+		if (!ruleDeploy) ruleDeploy = _game->getMod()->getDeployment(b->getDeployment()->getType());
 	}
 	else
 	{
