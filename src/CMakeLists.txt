@@ -67,6 +67,7 @@ set ( battlescape_src
   Battlescape/BattlescapeGenerator.cpp
   Battlescape/BattlescapeMessage.cpp
   Battlescape/BattlescapeState.cpp
+  Battlescape/BriefingLightState.cpp
   Battlescape/BriefingState.cpp
   Battlescape/Camera.cpp
   Battlescape/CannotReequipState.cpp

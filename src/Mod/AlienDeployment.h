@@ -73,7 +73,7 @@ private:
 	std::string _nextStage, _race, _script;
 	bool _finalDestination, _isAlienBase;
 	std::string _winCutscene, _loseCutscene;
-	std::string _alert, _alertBackground;
+	std::string _alert, _alertBackground, _alertDescription;
 	BriefingData _briefingData;
 	std::string _markerName, _objectivePopup, _objectiveCompleteText, _objectiveFailedText;
 	WeightedOptions _genMission;
@@ -125,6 +125,8 @@ public:
 	std::string getAlertMessage() const;
 	/// Gets the alert background for this mission type.
 	std::string getAlertBackground() const;
+	/// Gets the alert description for this mission type.
+	std::string getAlertDescription() const;
 	/// Gets the briefing data for this mission type.
 	BriefingData getBriefingData() const;
 	/// Gets the marker name for this mission.

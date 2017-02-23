@@ -25,39 +25,25 @@ namespace OpenXcom
 class TextButton;
 class Window;
 class Text;
-class TextEdit;
-class Target;
-class Globe;
 class AlienDeployment;
 
 /**
- * Generic window used to display all the
- * crafts targeting a certain point on the map.
+ * Briefing screen which displays basic info
+ * about a mission site or an alien base.
  */
-class TargetInfoState : public State
+class BriefingLightState : public State
 {
 private:
-	Target *_target;
-	Globe *_globe;
-
-	TextButton *_btnIntercept, *_btnOk, *_btnInfo;
+	TextButton *_btnOk;
 	Window *_window;
-	TextEdit *_edtTitle;
-	Text *_txtTargetted, *_txtFollowers;
-	AlienDeployment *_deploymentRule;
+	Text *_txtTitle, *_txtBriefing;
 public:
-	/// Creates the Target Info state.
-	TargetInfoState(Target *target, Globe *globe);
-	/// Cleans up the Target Info state.
-	~TargetInfoState();
-	/// Handler for clicking the Intercept button.
-	void btnInterceptClick(Action *action);
-	/// Handler for clicking the OK button.
+	/// Creates the BriefingLight state.
+	BriefingLightState(AlienDeployment *deployment);
+	/// Cleans up the BriefingLight state.
+	~BriefingLightState();
+	/// Handler for clicking the Ok button.
 	void btnOkClick(Action *action);
-	/// Handler for clicking the Info button.
-	void btnInfoClick(Action *action);
-	/// Handler for changing the text on the Name edit.
-	void edtTitleChange(Action *action);
 };
 
 }
