@@ -64,12 +64,16 @@ BaseDefenseState::BaseDefenseState(Base *base, Ufo *ufo, GeoscapeState *state) :
 	_txtInit = new Text(300, 10, 16, 24);
 	_lstDefenses = new TextList(300, 128, 16, 40);
 	_btnOk = new TextButton(120, 18, 100, 170);
+	_btnStart = new TextButton(148, 16, 8, 176);
+	_btnAbort = new TextButton(148, 16, 164, 176);
 
 	// Set palette
 	setInterface("baseDefense");
 
 	add(_window, "window", "baseDefense");
 	add(_btnOk, "button", "baseDefense");
+	add(_btnStart, "button", "baseDefense");
+	add(_btnAbort, "button", "baseDefense");
 	add(_txtTitle, "text", "baseDefense");
 	add(_txtInit, "text", "baseDefense");
 	add(_lstDefenses, "text", "baseDefense");
@@ -85,6 +89,12 @@ BaseDefenseState::BaseDefenseState(Base *base, Ufo *ufo, GeoscapeState *state) :
 	_btnOk->onKeyboardPress((ActionHandler)&BaseDefenseState::btnOkClick, Options::keyCancel);
 	_btnOk->setVisible(false);
 
+	_btnStart->setText(tr("STR_START_FIRING"));
+	_btnStart->onMouseClick((ActionHandler)&BaseDefenseState::btnStartClick);
+
+	_btnAbort->setText(tr("STR_SKIP_FIRING"));
+	_btnAbort->onMouseClick((ActionHandler)&BaseDefenseState::btnOkClick);
+
 	_txtTitle->setBig();
 	_txtTitle->setText(tr("STR_BASE_UNDER_ATTACK").arg(_base->getName()));
 	_txtInit->setVisible(false);
@@ -96,7 +106,6 @@ BaseDefenseState::BaseDefenseState(Base *base, Ufo *ufo, GeoscapeState *state) :
 	_defenses = _base->getDefenses()->size();
 	_timer = new Timer(250);
 	_timer->onTimer((StateHandler)&BaseDefenseState::nextStep);
-	_timer->start();
 
 	_explosionCount = 0;
 }
@@ -223,6 +232,17 @@ void BaseDefenseState::nextStep()
 			break;
 		}
 	}
+}
+
+/**
+* Starts base defense
+* @param action Pointer to an action.
+*/
+void BaseDefenseState::btnStartClick(Action *)
+{
+	_btnStart->setVisible(false);
+	_btnAbort->setVisible(false);
+	_timer->start();
 }
 
 /**
