@@ -503,23 +503,41 @@ void GraphsState::btnRegionListClick(Action * action)
 	size_t number = 0;
 	ToggleTextButton *button = dynamic_cast<ToggleTextButton*>(action->getSender());
 
-	if (button == _btnRegionTotal)
-	{
-		number = _regionToggles.size() - 1;
-	}
-	else
+	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
 		for (size_t i = 0; i < _btnRegions.size(); ++i)
 		{
-			if (button == _btnRegions[i])
+			if (button != _btnRegions[i])
 			{
-				number = i + _butRegionsOffset;
-				break;
+				_btnRegions[i]->setPressed(button->getPressed());
 			}
 		}
+		_btnRegionTotal->setPressed(button->getPressed());
+		for (std::vector<GraphButInfo*>::const_iterator i = _regionToggles.begin(); i != _regionToggles.end(); ++i)
+		{
+			(*i)->_pushed = button->getPressed();
+		}
 	}
+	else
+	{
+		if (button == _btnRegionTotal)
+		{
+			number = _regionToggles.size() - 1;
+		}
+		else
+		{
+			for (size_t i = 0; i < _btnRegions.size(); ++i)
+			{
+				if (button == _btnRegions[i])
+				{
+					number = i + _butRegionsOffset;
+					break;
+				}
+			}
+		}
 
-	_regionToggles.at(number)->_pushed = button->getPressed();
+		_regionToggles.at(number)->_pushed = button->getPressed();
+	}
 
 	drawLines();
 }
@@ -533,23 +551,41 @@ void GraphsState::btnCountryListClick(Action * action)
 	size_t number = 0;
 	ToggleTextButton *button = dynamic_cast<ToggleTextButton*>(action->getSender());
 
-	if (button == _btnCountryTotal)
-	{
-		number = _countryToggles.size() - 1;
-	}
-	else
+	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
 		for (size_t i = 0; i < _btnCountries.size(); ++i)
 		{
-			if (button == _btnCountries[i])
+			if (button != _btnCountries[i])
 			{
-				number = i + _butCountriesOffset;
-				break;
+				_btnCountries[i]->setPressed(button->getPressed());
 			}
 		}
+		_btnCountryTotal->setPressed(button->getPressed());
+		for (std::vector<GraphButInfo*>::const_iterator i = _countryToggles.begin(); i != _countryToggles.end(); ++i)
+		{
+			(*i)->_pushed = button->getPressed();
+		}
 	}
+	else
+	{
+		if (button == _btnCountryTotal)
+		{
+			number = _countryToggles.size() - 1;
+		}
+		else
+		{
+			for (size_t i = 0; i < _btnCountries.size(); ++i)
+			{
+				if (button == _btnCountries[i])
+				{
+					number = i + _butCountriesOffset;
+					break;
+				}
+			}
+		}
 
-	_countryToggles.at(number)->_pushed = button->getPressed();
+		_countryToggles.at(number)->_pushed = button->getPressed();
+	}
 
 	drawLines();
 }
