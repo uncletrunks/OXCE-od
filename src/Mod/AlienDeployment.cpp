@@ -145,6 +145,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_length = node["length"].as<int>(_length);
 	_height = node["height"].as<int>(_height);
 	_civilians = node["civilians"].as<int>(_civilians);
+	_civiliansByType = node["civiliansByType"].as<std::map<std::string, int> >(_civiliansByType);
 	_terrains = node["terrains"].as<std::vector<std::string> >(_terrains);
 	_shade = node["shade"].as<int>(_shade);
 	_minShade = node["minShade"].as<int>(_minShade);
@@ -275,6 +276,15 @@ void AlienDeployment::getDimensions(int *width, int *length, int *height) const
 int AlienDeployment::getCivilians() const
 {
 	return _civilians;
+}
+
+/**
+ * Gets the number of civilians per type.
+ * @return The number of civilians per type.
+ */
+const std::map<std::string, int> &AlienDeployment::getCiviliansByType() const
+{
+	return _civiliansByType;
 }
 
 /**

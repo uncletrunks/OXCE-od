@@ -507,6 +507,10 @@ void BattlescapeGenerator::nextStage()
 	}
 
 	deployCivilians(ruleDeploy->getCivilians());
+	for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+	{
+		deployCivilians(i->second, true, i->first);
+	}
 
 	_save->setAborted(false);
 	_save->setGlobalShade(_worldShade);
@@ -614,6 +618,10 @@ void BattlescapeGenerator::run()
 	}
 
 	deployCivilians(ruleDeploy->getCivilians());
+	for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+	{
+		deployCivilians(i->second, true, i->first);
+	}
 
 	if (_generateFuel)
 	{
@@ -1665,7 +1673,7 @@ void BattlescapeGenerator::explodePowerSources()
  * Spawns civilians on a terror mission.
  * @param max Maximum number of civilians to spawn.
  */
-void BattlescapeGenerator::deployCivilians(int max)
+void BattlescapeGenerator::deployCivilians(int max, bool roundUp, const std::string &civilianType)
 {
 	if (max)
 	{
@@ -1673,7 +1681,7 @@ void BattlescapeGenerator::deployCivilians(int max)
 		// to that person: this is only partially true;
 		// 0 civilians would only be a possibility if there were already 80 units,
 		// or no spawn nodes for civilians, but it would always try to spawn at least 8.
-		int number = RNG::generate(max/2, max);
+		int number = RNG::generate(roundUp ? (max+1)/2 : max/2, max);
 
 		if (number > 0)
 		{
@@ -1691,8 +1699,16 @@ void BattlescapeGenerator::deployCivilians(int max)
 			}
 			for (int i = 0; i < number; ++i)
 			{
-				size_t pick = RNG::generate(0, _terrain->getCivilianTypes().size() -1);
-				Unit* rule = _game->getMod()->getUnit(_terrain->getCivilianTypes().at(pick), true);
+				Unit* rule = 0;
+				if (civilianType.size() > 0)
+				{
+					rule = _game->getMod()->getUnit(civilianType, true);
+				}
+				else
+				{
+					size_t pick = RNG::generate(0, _terrain->getCivilianTypes().size() - 1);
+					rule = _game->getMod()->getUnit(_terrain->getCivilianTypes().at(pick), true);
+				}
 				BattleUnit* civ = addCivilian(rule);
 				if (civ)
 				{

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <map>
 #include <vector>
 #include <string>
 #include <yaml-cpp/yaml.h>
@@ -68,6 +69,7 @@ private:
 	int _bughuntMinTurn;
 	std::vector<DeploymentData> _data;
 	int _width, _length, _height, _civilians;
+	std::map<std::string, int> _civiliansByType;
 	std::vector<std::string> _terrains, _music;
 	int _shade, _minShade, _maxShade;
 	std::string _nextStage, _race, _script;
@@ -101,6 +103,8 @@ public:
 	void getDimensions(int *width, int *length, int *height) const;
 	/// Gets civilians.
 	int getCivilians() const;
+	/// Gets civilians by type.
+	const std::map<std::string, int> &getCiviliansByType() const;
 	/// Gets the terrain for battlescape generation.
 	std::vector<std::string> getTerrains() const;
 	/// Gets the shade level for battlescape generation.

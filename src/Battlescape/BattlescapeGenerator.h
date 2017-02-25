@@ -112,7 +112,7 @@ private:
 	/// Deploys the aliens, according to the alien deployment rules.
 	void deployAliens(const AlienDeployment *deployment);
 	/// Spawns civilians on a terror mission.
-	void deployCivilians(int max);
+	void deployCivilians(int max, bool roundUp = false, const std::string &civilianType = "");
 	/// Finds a spot near a friend to spawn at.
 	bool placeUnitNearFriend(BattleUnit *unit);
 	/// Load all Xcom weapons.
