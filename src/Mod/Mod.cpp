@@ -1393,6 +1393,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 	_fixedUserOptions = doc["fixedUserOptions"].as<std::map<std::string, std::string> >(_fixedUserOptions);
+	_hiddenMovementBackgrounds = doc["hiddenMovementBackgrounds"].as<std::vector<std::string> >(_hiddenMovementBackgrounds);
 
 	_defeatScore = doc["defeatScore"].as<int>(_defeatScore);
 	_defeatFunds = doc["defeatFunds"].as<int>(_defeatFunds);
@@ -2854,6 +2855,11 @@ const std::map<int, std::string> *Mod::getMonthlyRatings() const
 const std::map<std::string, std::string> &Mod::getFixedUserOptions() const
 {
 	return _fixedUserOptions;
+}
+
+const std::vector<std::string> &Mod::getHiddenMovementBackgrounds() const
+{
+	return _hiddenMovementBackgrounds;
 }
 
 namespace

@@ -63,6 +63,8 @@ SavedBattleGame::SavedBattleGame(Mod *rule) :
 		_tileSearch[i].y = ((i/11) - 5);
 	}
 	_baseItems = new ItemContainer();
+
+	setRandomHiddenMovementBackground(0);
 }
 
 /**
@@ -2391,6 +2393,31 @@ void SavedBattleGame::setCheatTurn(int turn)
 bool SavedBattleGame::isBeforeGame() const
 {
 	return _beforeGame;
+}
+
+/**
+ * Randomly chooses hidden movement background.
+ */
+void SavedBattleGame::setRandomHiddenMovementBackground(const Mod *mod)
+{
+	if (mod && !mod->getHiddenMovementBackgrounds().empty())
+	{
+		int rng = RNG::generate(0, mod->getHiddenMovementBackgrounds().size() - 1);
+		_hiddenMovementBackground = mod->getHiddenMovementBackgrounds().at(rng);
+	}
+	else
+	{
+		_hiddenMovementBackground = "TAC00.SCR";
+	}
+}
+
+/**
+ * Gets the hidden movement background ID.
+ * @return hidden movement background ID
+ */
+std::string SavedBattleGame::getHiddenMovementBackground() const
+{
+	return _hiddenMovementBackground;
 }
 
 /**

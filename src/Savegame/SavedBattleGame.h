@@ -89,6 +89,7 @@ private:
 	int _turnLimit, _cheatTurn;
 	ChronoTrigger _chronoTrigger;
 	bool _beforeGame;
+	std::string _hiddenMovementBackground;
 	ScriptValues<SavedBattleGame> _scriptValues;
 	/// Selects a soldier.
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
@@ -359,6 +360,10 @@ public:
 	/// Sets the turn to start the aliens cheating.
 	void setCheatTurn(int turn);
 	bool isBeforeGame() const;
+	/// Randomly chooses hidden movement background.
+	void setRandomHiddenMovementBackground(const Mod *mod);
+	/// Gets the hidden movement background ID.
+	std::string getHiddenMovementBackground() const;
 };
 
 }
