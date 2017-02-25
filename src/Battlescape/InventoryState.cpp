@@ -1033,6 +1033,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 					{
 						// move matched item from ground to the appropriate inv slot
 						(*groundItem)->setOwner(unit);
+						(*groundItem)->setTile(0);
 						(*groundItem)->setSlot(_game->getMod()->getInventory((*templateIt)->getSlot()));
 						(*groundItem)->setSlotX((*templateIt)->getSlotX());
 						(*groundItem)->setSlotY((*templateIt)->getSlotY());
