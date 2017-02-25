@@ -162,7 +162,7 @@ void OptionsAdvancedState::addSettings(const std::vector<OptionInfo> &settings)
 		std::map<std::string, std::string>::const_iterator it = fixeduserOptions.find(i->id());
 		if (it != fixeduserOptions.end())
 		{
-			_lstOptions->setRowColor(_lstOptions->getRows() - 1, _greyedOutColor);
+			_lstOptions->setRowColor(_lstOptions->getTexts() - 1, _greyedOutColor);
 		}
 	}
 }
