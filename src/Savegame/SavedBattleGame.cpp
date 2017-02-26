@@ -2339,6 +2339,35 @@ bool SavedBattleGame::isBeforeGame() const
 	return _beforeGame;
 }
 
+namespace
+{
+
+void randomChanceScript(SavedBattleGame* sbg, int& val)
+{
+	if (sbg)
+	{
+		val = RNG::percent(val);
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
+void randomRangeScript(SavedBattleGame* sbg, int& val, int min, int max)
+{
+	if (sbg && max >= min)
+	{
+		val = RNG::generate(min, max);
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
+} // namespace
+
 /**
  * Register Armor in script parser.
  * @param parser Script parser.
@@ -2349,6 +2378,9 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 
 	sbg.add<&SavedBattleGame::getTurn>("getTurn");
 	sbg.add<&SavedBattleGame::getAnimFrame>("getAnimFrame");
+
+	sbg.add<&randomChanceScript>("randomChance");
+	sbg.add<&randomRangeScript>("randomRange");
 
 	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
 }

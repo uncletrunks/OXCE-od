@@ -1091,10 +1091,12 @@ struct Bind : BindBase
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int, int))
 
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int, int))
 
 	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)())
 	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)() const)

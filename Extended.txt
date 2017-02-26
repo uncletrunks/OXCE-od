@@ -145,6 +145,7 @@ Fix critical bug in unit damage function.[br/]
 3.7:[br/]
 New params with shooting weapon and shooter to damage and hit script.[br/]
 Merge chagnes from master.[br/]
+Random functions in script.[br/]
 [br/]
 
 [examples]
