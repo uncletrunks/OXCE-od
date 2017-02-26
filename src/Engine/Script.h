@@ -427,6 +427,7 @@ struct ScriptOutputArgs<>
  */
 class ScriptWorkerBase
 {
+	std::string log_buffer;
 	ScriptRawMemory<ScriptMaxReg> reg;
 
 	static constexpr int RegSet = 1;
@@ -546,6 +547,11 @@ public:
 	{
 		return *reinterpret_cast<const T*>(ptr + offset);
 	}
+
+	/// Add text to log buffer.
+	void log_buffer_add(const std::string& s);
+	/// Flush buffer to log file.
+	void log_buffer_flush(ProgPos& p);
 };
 
 /**

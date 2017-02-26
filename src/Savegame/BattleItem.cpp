@@ -708,6 +708,37 @@ bool BattleItem::isAmmo() const
 	return _isAmmo;
 }
 
+
+namespace
+{
+
+std::string debugDisplayScript(const BattleItem* bt)
+{
+	if (bt)
+	{
+		auto rule = bt->getRules();
+		std::string s;
+		s += BattleItem::ScriptName;
+		s += "(name: \"";
+		s += rule->getName();
+		s += "\" id: ";
+		s += std::to_string(bt->getId());
+		if (bt->isAmmo())
+		{
+			s += " ammo: ";
+			s += std::to_string(bt->getAmmoQuantity());
+		}
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+}
+
 /**
  * Register BattleItem in script parser.
  * @param parser Script parser.
@@ -735,6 +766,7 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&BattleItem::isAmmo>("isAmmo");
 
 	bi.addScriptValue<&BattleItem::_scriptValues>();
+	bi.addDebugDisplay<&debugDisplayScript>();
 }
 
 namespace

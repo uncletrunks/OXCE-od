@@ -4075,6 +4075,42 @@ void setBaseStatRangeScript(BattleUnit *bu, int val)
 	}
 }
 
+std::string debugDisplayScript(const BattleUnit* bu)
+{
+	if (bu)
+	{
+		std::string s;
+		s += BattleUnit::ScriptName;
+		s += "(type: \"";
+		s += bu->getType();
+		auto unit = bu->getUnitRules();
+		if (unit)
+		{
+			s += "\" race: \"";
+			s += unit->getRace();
+		}
+		s += "\" id: ";
+		s += std::to_string(bu->getId());
+		s += " faction: ";
+		switch (bu->getFaction())
+		{
+		case FACTION_HOSTILE: s += "Hostile"; break;
+		case FACTION_NEUTRAL: s += "Neutral"; break;
+		case FACTION_PLAYER: s += "Player"; break;
+		}
+		s += " hp: ";
+		s += std::to_string(bu->getHealth());
+		s += "/";
+		s += std::to_string(bu->getBaseStats()->health);
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
 } // namespace
 
 /**
@@ -4182,6 +4218,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 
 	bu.addScriptValue<&BattleUnit::_scriptValues>();
+	bu.addDebugDisplay<&debugDisplayScript>();
 
 
 	bu.add<&getTileShade>("getTileShade");

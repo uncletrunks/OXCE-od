@@ -157,21 +157,6 @@ static inline RetEnum call_func_h(ScriptWorkerBase& c, FuncCommon func, const Ui
 	return r;
 }
 
-[[gnu::always_inline]]
-static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
-{
-	if (Options::debug)
-	{
-		static int limit_count = 0;
-		if (++limit_count < 500)
-		{
-			Logger log;
-			log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p) << " values: " << std::setw(8) << i << std::setw(8) << j;
-		}
-	}
-	return RetContinue;
-}
-
 
 /**
  * Main macro defining all available operation in script engine.
@@ -222,8 +207,6 @@ static inline RetEnum debug_log_h(ProgPos& p, int i, int j)
 	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1),		"Add value of shade to pixel color in arg1") \
 	\
 	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8* d, ScriptWorkerBase& c, ProgPos& p),		"") \
-	\
-	IMPL(debug_log,		MACRO_QUOTE({ return debug_log_h(p, Data1, Data2);								}),		(ProgPos& p, int Data1, int Data2),		"Display debug informations") \
 
 
 ////////////////////////////////////////////////////////////
@@ -260,6 +243,26 @@ struct Func_test_eq_null
 	static RetEnum func (ProgPos& Prog, std::nullptr_t, std::nullptr_t, ProgPos LabelTrue, ProgPos)
 	{
 		Prog = LabelTrue;
+		return RetContinue;
+	}
+};
+
+struct Func_debug_impl_int
+{
+	[[gnu::always_inline]]
+	static RetEnum func (ScriptWorkerBase& c, int i)
+	{
+		c.log_buffer_add(std::to_string(i));
+		return RetContinue;
+	}
+};
+
+struct Func_debug_flush
+{
+	[[gnu::always_inline]]
+	static RetEnum func (ScriptWorkerBase& c, ProgPos& p)
+	{
+		c.log_buffer_flush(p);
 		return RetContinue;
 	}
 };
@@ -453,6 +456,38 @@ void ScriptWorkerBase::executeBase(const Uint8* proc)
 	if (proc)
 	{
 		scriptExe(*this, proc);
+	}
+}
+
+/**
+ * Add text to log buffer.
+ */
+void ScriptWorkerBase::log_buffer_add(const std::string& s)
+{
+	if (!log_buffer.empty())
+	{
+		log_buffer += " ";
+	}
+	log_buffer += s;
+}
+
+/**
+ * Flush buffer to log file.
+ */
+void ScriptWorkerBase::log_buffer_flush(ProgPos& p)
+{
+	constexpr int limit = 500;
+	static int limit_count = 0;
+	if (++limit_count < limit)
+	{
+		Logger log;
+		log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p) << ": " << log_buffer;
+		log_buffer.clear();
+	}
+	else if (limit_count == limit)
+	{
+		Logger log;
+		log.get(LOG_DEBUG) << "Script debug log limit reach";
 	}
 }
 
@@ -1066,6 +1101,30 @@ bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefDat
 	}
 	ph.pushProc(Proc_exit);
 	return true;
+}
+
+/**
+ * Parse `debug_log` operator.
+ */
+bool parseDebugLog(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
+{
+	if (!Options::debug)
+	{
+		return true;
+	}
+
+	for (auto i = begin; i != end; ++i)
+	{
+		const auto proc = ph.parser.getProc(ScriptRef{ "debug_impl" });
+		if (!callOverloadProc(ph, proc, i, std::next(i)))
+		{
+			Log(LOG_ERROR) << "Invaild debug argument '" + i->name.toString() + "'";
+			return false;
+		}
+	}
+
+	const auto proc = ph.parser.getProc(ScriptRef{ "debug_flush" });
+	return proc.size() == 1 && (*proc.begin())(ph, nullptr, nullptr);
 }
 
 /**
@@ -1785,12 +1844,15 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 	buildin("else", &parseElse);
 	buildin("end", &parseEnd);
 	buildin("var", &parseVar);
+	buildin("debug_log", &parseDebugLog);
 	buildin("loop", &parseDummy);
 	buildin("break", &parseDummy);
 	buildin("continue", &parseDummy);
 	buildin("return", &parseReturn);
 
 	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq", "");
+	addParser<helper::FuncGroup<Func_debug_impl_int>>("debug_impl", "");
+	addParser<helper::FuncGroup<Func_debug_flush>>("debug_flush", "");
 
 	addType<int>("int");
 

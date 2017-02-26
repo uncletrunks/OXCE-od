@@ -870,6 +870,16 @@ struct BindValue
 	}
 };
 
+template<typename T, std::string (*X)(const T*)>
+struct BindDebugDisplay
+{
+	static RetEnum func(ScriptWorkerBase& swb, const T* t)
+	{
+		swb.log_buffer_add(X(t));
+		return RetContinue;
+	}
+};
+
 template<typename T, T f>
 struct BindFunc;
 
@@ -1039,6 +1049,11 @@ struct Bind : BindBase
 		{
 			addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"), "Set tag of " + std::string{ T::ScriptName });
 		}
+	}
+	template<std::string (*X)(const T*)>
+	void addDebugDisplay()
+	{
+		addCustomFunc<helper::BindDebugDisplay<T, X>>("debug_impl", "");
 	}
 	template<int X>
 	void addFake(const std::string& get)

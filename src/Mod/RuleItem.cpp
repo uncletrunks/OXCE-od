@@ -1768,6 +1768,23 @@ void getBattleTypeScript(RuleItem *ri, int &ret)
 	ret = (int)BT_NONE;
 }
 
+std::string debugDisplayScript(const RuleItem* ri)
+{
+	if (ri)
+	{
+		std::string s;
+		s += RuleItem::ScriptName;
+		s += "(name: \"";
+		s += ri->getName();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
 }
 
 
@@ -1812,6 +1829,7 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::isBlockingBothHands>("isBlockingBothHands");
 
 	ri.addScriptValue<&RuleItem::_scriptValues>(false);
+	ri.addDebugDisplay<&debugDisplayScript>();
 }
 
 /**
