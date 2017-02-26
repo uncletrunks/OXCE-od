@@ -1769,23 +1769,28 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 	//--------------------------------------------------
 	//					op_data init
 	//--------------------------------------------------
-	#define MACRO_ALL_INIT(NAME, ...) \
-		addParserBase(#NAME, nullptr, helper::FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType(), &parseBuildinProc<MACRO_PROC_ID(NAME), helper::FuncGroup<MACRO_FUNC_ID(NAME)>>, nullptr, nullptr);
+	#define MACRO_ALL_INIT(NAME, IMPL, ARGS, DESC) \
+		addParserBase(#NAME, DESC, nullptr, helper::FuncGroup<MACRO_FUNC_ID(NAME)>::overloadType(), &parseBuildinProc<MACRO_PROC_ID(NAME), helper::FuncGroup<MACRO_FUNC_ID(NAME)>>, nullptr, nullptr);
 
 	MACRO_PROC_DEFINITION(MACRO_ALL_INIT)
 
 	#undef MACRO_ALL_INIT
 
-	addParserBase("if", &overloadBuildinProc, {}, &parseIf, nullptr, nullptr);
-	addParserBase("else", &overloadBuildinProc, {}, &parseElse, nullptr, nullptr);
-	addParserBase("end", &overloadBuildinProc, {}, &parseEnd, nullptr, nullptr);
-	addParserBase("var", &overloadBuildinProc, {}, &parseVar, nullptr, nullptr);
-	addParserBase("loop", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
-	addParserBase("break", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
-	addParserBase("continue", &overloadBuildinProc, {}, &parseDummy, nullptr, nullptr);
-	addParserBase("return", &overloadBuildinProc, {}, &parseReturn, nullptr, nullptr);
+	auto buildin = [&](const std::string& s, ScriptProcData::parserFunc func)
+	{
+		addParserBase(s, {}, &overloadBuildinProc, {}, func, nullptr, nullptr);
+	};
 
-	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq");
+	buildin("if", &parseIf);
+	buildin("else", &parseElse);
+	buildin("end", &parseEnd);
+	buildin("var", &parseVar);
+	buildin("loop", &parseDummy);
+	buildin("break", &parseDummy);
+	buildin("continue", &parseDummy);
+	buildin("return", &parseReturn);
+
+	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq", "");
 
 	addType<int>("int");
 
@@ -1853,7 +1858,7 @@ ScriptRef ScriptParserBase::addNameRef(const std::string& s)
  * @param s function name
  * @param parser parsing fu
  */
-void ScriptParserBase::addParserBase(const std::string& s, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc arg, ScriptProcData::getFunc get)
+void ScriptParserBase::addParserBase(const std::string& s, const std::string& description, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc arg, ScriptProcData::getFunc get)
 {
 	if (haveNameRef(s))
 	{
@@ -1871,7 +1876,7 @@ void ScriptParserBase::addParserBase(const std::string& s, ScriptProcData::overl
 	{
 		overload = validOverloadProc(overloadArg) ? &overloadCustomProc : &overloadInvalidProc;
 	}
-	addSortHelper(_procList, { addNameRef(s), overload, overloadArg, parser, arg, get });
+	addSortHelper(_procList, { addNameRef(s), addNameRef(description), overload, overloadArg, parser, arg, get });
 }
 
 /**
@@ -2392,9 +2397,9 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 			refLog.get(LOG_DEBUG) << "Script operations:\n";
 			for (auto& p : temp)
 			{
-				if (p.parserArg != nullptr && p.overloadArg)
+				if (p.parserArg != nullptr && p.overloadArg && p.description.size() != 0)
 				{
-					refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << p.name.toString() << "Args: " << displayOverloadProc(this, p.overloadArg) << "\n";
+					refLog.get(LOG_DEBUG) << "Name: " << std::setw(40) << p.name.toString() << "Args: " << std::setw(50) << displayOverloadProc(this, p.overloadArg) << (p.description != ScriptRef{"-"} ? std::string("Desc: ") + p.description.toString() + "\n" : "\n");
 				}
 			}
 		}

@@ -924,6 +924,7 @@ struct ScriptProcData
 	using overloadFunc = int (*)(const ScriptProcData& spd, const ScriptRefData* begin, const ScriptRefData* end);
 
 	ScriptRef name;
+	ScriptRef description;
 
 	overloadFunc overload;
 	ScriptRange<ScriptRange<ArgEnum>> overloadArg;
@@ -1049,7 +1050,7 @@ protected:
 	/// Add name for custom parameter.
 	void addScriptReg(const std::string& s, ArgEnum type, bool writableReg, bool outputReg);
 	/// Add parsing fuction.
-	void addParserBase(const std::string& s, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc parserArg, ScriptProcData::getFunc parserGet);
+	void addParserBase(const std::string& s, const std::string& description, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc parserArg, ScriptProcData::getFunc parserGet);
 	/// Add new type impl.
 	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
 	/// Test if type was added impl.
@@ -1081,9 +1082,9 @@ public:
 	void updateConst(const std::string& s, ScriptValueData i);
 	/// Add line parsing function.
 	template<typename T>
-	void addParser(const std::string& s)
+	void addParser(const std::string& s, const std::string& description)
 	{
-		addParserBase(s, nullptr, T::overloadType(), nullptr, &T::parse, &T::getDynamic);
+		addParserBase(s, description, nullptr, T::overloadType(), nullptr, &T::parse, &T::getDynamic);
 	}
 	/// Test if type was already added.
 	template<typename T>
