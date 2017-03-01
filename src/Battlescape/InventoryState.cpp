@@ -1228,7 +1228,7 @@ void InventoryState::invMouseOver(Action *)
 		}
 
 		std::wstring s;
-		if (item->getAmmoItem() != 0 && item->needsAmmo())
+		if (item->getAmmoItem() != 0 && (item->needsAmmo() || item->getRules()->getClipSize() > 0))
 		{
 			s = tr("STR_AMMO_ROUNDS_LEFT").arg(item->getAmmoItem()->getAmmoQuantity());
 			SDL_Rect r;
