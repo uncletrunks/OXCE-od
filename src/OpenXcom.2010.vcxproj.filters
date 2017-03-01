@@ -1015,6 +1015,9 @@
     <ClCompile Include="Battlescape\BriefingLightState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Geoscape\CraftNotEnoughPilotsState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2073,6 +2076,9 @@
     </ClInclude>
     <ClInclude Include="Battlescape\BriefingLightState.h">
       <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\CraftNotEnoughPilotsState.h">
+      <Filter>Geoscape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

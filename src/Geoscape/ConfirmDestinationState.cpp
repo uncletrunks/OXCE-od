@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "CraftErrorState.h"
+#include "CraftNotEnoughPilotsState.h"
 #include "ConfirmDestinationState.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
@@ -193,7 +194,7 @@ void ConfirmDestinationState::btnOkClick(Action *)
 	{
 		_game->popState();
 		_game->popState();
-		_game->pushState(new CraftErrorState(0, tr("STR_NOT_ENOUGH_PILOTS").arg(_craft->getRules()->getPilots())));
+		_game->pushState(new CraftNotEnoughPilotsState(_craft));
 		return;
 	}
 

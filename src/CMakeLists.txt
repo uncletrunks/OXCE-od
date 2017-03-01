@@ -170,6 +170,7 @@ set ( geoscape_src
   Geoscape/ConfirmLandingState.cpp
   Geoscape/ConfirmNewBaseState.cpp
   Geoscape/CraftErrorState.cpp
+  Geoscape/CraftNotEnoughPilotsState.cpp
   Geoscape/CraftPatrolState.cpp
   Geoscape/DogfightErrorState.cpp
   Geoscape/DogfightState.cpp
