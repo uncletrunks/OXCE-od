@@ -161,6 +161,8 @@ private:
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	int _ufoTractorBeamSizeModifiers[5];
 	int _soldiersPerSergeant, _soldiersPerCaptain, _soldiersPerColonel, _soldiersPerCommander;
+	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
+	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
 	bool _useCustomCategories;
 	int _defeatScore, _defeatFunds;
@@ -447,6 +449,20 @@ public:
 	int getSoldiersPerColonel() const { return _soldiersPerColonel; }
 	/// Gets how many soldiers are needed for one commander promotion
 	int getSoldiersPerCommander() const { return _soldiersPerCommander; }
+	/// Gets the firing accuracy needed for no bonus/penalty
+	int getPilotAccuracyZeroPoint() const { return _pilotAccuracyZeroPoint; }
+	/// Gets the firing accuracy impact (as percentage of distance to zero point) on pilot's aim in dogfight
+	int getPilotAccuracyRange() const { return _pilotAccuracyRange; }
+	/// Gets the reactions needed for no bonus/penalty
+	int getPilotReactionsZeroPoint() const { return _pilotReactionsZeroPoint; }
+	/// Gets the reactions impact (as percentage of distance to zero point) on pilot's dodge ability in dogfight
+	int getPilotReactionsRange() const { return _pilotReactionsRange; }
+	/// Gets the pilot's bravery needed for very bold approach speed
+	int getPilotBraveryThresholdVeryBold() const { return _pilotBraveryThresholds[0]; }
+	/// Gets the pilot's bravery needed for bold approach speed
+	int getPilotBraveryThresholdBold() const { return _pilotBraveryThresholds[1]; }
+	/// Gets the pilot's bravery needed for normal approach speed
+	int getPilotBraveryThresholdNormal() const { return _pilotBraveryThresholds[2]; }
 	/// Gets a performance bonus factor
 	int getPerformanceBonusFactor() const { return _performanceBonusFactor; }
 	/// Should custom categories be used in Buy/Sell/Transfer GUIs?

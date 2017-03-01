@@ -282,7 +282,9 @@ Mod::Mod() :
 	_kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80), _surrenderMode(0), _defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0),
 	_bughuntMinTurn(20), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
 	_ufoGlancingHitThreshold(0), _ufoBeamWidthParameter(1000),
-	_soldiersPerSergeant(5), _soldiersPerCaptain(11), _soldiersPerColonel(23), _soldiersPerCommander(30), _performanceBonusFactor(0), _useCustomCategories(false),
+	_soldiersPerSergeant(5), _soldiersPerCaptain(11), _soldiersPerColonel(23), _soldiersPerCommander(30),
+	_pilotAccuracyZeroPoint(55), _pilotAccuracyRange(40), _pilotReactionsZeroPoint(55), _pilotReactionsRange(60),
+	_performanceBonusFactor(0), _useCustomCategories(false),
 	_baseDefenseMapFromLocation(0),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
@@ -416,6 +418,10 @@ Mod::Mod() :
 	_ufoTractorBeamSizeModifiers[2] = 100;
 	_ufoTractorBeamSizeModifiers[3] = 50;
 	_ufoTractorBeamSizeModifiers[4] = 25;
+
+	_pilotBraveryThresholds[0] = 90;
+	_pilotBraveryThresholds[1] = 80;
+	_pilotBraveryThresholds[2] = 30;
 }
 
 /**
@@ -1387,6 +1393,19 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_soldiersPerCaptain = doc["soldiersPerCaptain"].as<int>(_soldiersPerCaptain);
 	_soldiersPerColonel = doc["soldiersPerColonel"].as<int>(_soldiersPerColonel);
 	_soldiersPerCommander = doc["soldiersPerCommander"].as<int>(_soldiersPerCommander);
+	_pilotAccuracyZeroPoint = doc["pilotAccuracyZeroPoint"].as<int>(_pilotAccuracyZeroPoint);
+	_pilotAccuracyRange = doc["pilotAccuracyRange"].as<int>(_pilotAccuracyRange);
+	_pilotReactionsZeroPoint = doc["pilotReactionsZeroPoint"].as<int>(_pilotReactionsZeroPoint);
+	_pilotReactionsRange = doc["pilotReactionsRange"].as<int>(_pilotReactionsRange);
+	if (doc["pilotBraveryThresholds"])
+	{
+		int index = 0;
+		for (YAML::const_iterator i = doc["pilotBraveryThresholds"].begin(); i != doc["pilotBraveryThresholds"].end() && index < 3; ++i)
+		{
+			_pilotBraveryThresholds[index] = (*i).as<int>(_pilotBraveryThresholds[index]);
+			index++;
+		}
+	}
 	_performanceBonusFactor = doc["performanceBonusFactor"].as<int>(_performanceBonusFactor);
 	_useCustomCategories = doc["useCustomCategories"].as<bool>(_useCustomCategories);
 	_baseDefenseMapFromLocation = doc["baseDefenseMapFromLocation"].as<int>(_baseDefenseMapFromLocation);

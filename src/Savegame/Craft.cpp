@@ -1265,7 +1265,7 @@ const std::vector<Soldier*> Craft::getPilotList()
 * Calculates the accuracy bonus based on pilot skills.
 * @return Accuracy bonus.
 */
-int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots) const
+int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots, const Mod *mod) const
 {
 	if (pilots.empty())
 		return 0;
@@ -1277,14 +1277,14 @@ int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots) const
 	}
 	firingAccuracy = firingAccuracy / pilots.size(); // average firing accuracy of all pilots
 
-	return ((firingAccuracy - 55) * 40) / 100; // -6% to 26% (firing accuracy from 40 to 120, unmodified by armor)
+	return ((firingAccuracy - mod->getPilotAccuracyZeroPoint()) * mod->getPilotAccuracyRange()) / 100;
 }
 
 /**
 * Calculates the dodge bonus based on pilot skills.
 * @return Dodge bonus.
 */
-int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots) const
+int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots, const Mod *mod) const
 {
 	if (pilots.empty())
 		return 0;
@@ -1296,14 +1296,14 @@ int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots) const
 	}
 	reactions = reactions / pilots.size(); // average reactions of all pilots
 
-	return ((reactions - 55) * 60) / 100; // -9% to 27% (reactions from 40 to 100, unmodified by armor)
+	return ((reactions - mod->getPilotReactionsZeroPoint()) * mod->getPilotReactionsRange()) / 100;
 }
 
 /**
 * Calculates the approach speed modifier based on pilot skills.
 * @return Approach speed modifier.
 */
-int Craft::getPilotApproachSpeedModifier(const std::vector<Soldier*> &pilots) const
+int Craft::getPilotApproachSpeedModifier(const std::vector<Soldier*> &pilots, const Mod *mod) const
 {
 	if (pilots.empty())
 		return 2; // vanilla
@@ -1315,20 +1315,22 @@ int Craft::getPilotApproachSpeedModifier(const std::vector<Soldier*> &pilots) co
 	}
 	bravery = bravery / pilots.size(); // average bravery of all pilots
 
-	if (bravery <= 20)
-	{
-		return 1; // half the speed
-	}
-	else if (bravery >= 90)
+	if (bravery >= mod->getPilotBraveryThresholdVeryBold())
 	{
 		return 4; // double the speed
 	}
-	else if (bravery >= 80)
+	else if (bravery >= mod->getPilotBraveryThresholdBold())
 	{
 		return 3; // 50% speed increase
 	}
-
-	return 2; // normal speed
+	else if (bravery >= mod->getPilotBraveryThresholdNormal())
+	{
+		return 2; // normal speed
+	}
+	else
+	{
+		return 1; // half the speed
+	}
 }
 
 /**

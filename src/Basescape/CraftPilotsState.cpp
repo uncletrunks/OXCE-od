@@ -168,17 +168,17 @@ void CraftPilotsState::updateUI()
 	}
 
 	std::wostringstream ss1;
-	int accBonus = c->getPilotAccuracyBonus(pilots);
+	int accBonus = c->getPilotAccuracyBonus(pilots, _game->getMod());
 	ss1 << (accBonus > 0 ? L"+" : L"") << accBonus << L"%";
 	_txtAccuracyBonusValue->setText(ss1.str().c_str());
 
 	std::wostringstream ss2;
-	int dodgeBonus = c->getPilotDodgeBonus(pilots);
+	int dodgeBonus = c->getPilotDodgeBonus(pilots, _game->getMod());
 	ss2 << (dodgeBonus > 0 ? L"+" : L"") << dodgeBonus << L"%";
 	_txtDodgeBonusValue->setText(ss2.str().c_str());
 
 	std::wostringstream ss3;
-	int approachSpeed = c->getPilotApproachSpeedModifier(pilots);
+	int approachSpeed = c->getPilotApproachSpeedModifier(pilots, _game->getMod());
 	switch (approachSpeed)
 	{
 	case 1:
