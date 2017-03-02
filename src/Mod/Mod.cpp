@@ -274,7 +274,7 @@ public:
  * Creates an empty mod.
  */
 Mod::Mod() :
-	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _maxStaticLightDistance(16), _maxDynamicLightDistance(24), _enhancedLighting(2),
+	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _maxStaticLightDistance(16), _maxDynamicLightDistance(24), _enhancedLighting(7),
 	_costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_tooMuchSmokeThreshold(10), _customTrainingFactor(100), _chanceToStopRetaliation(0),
