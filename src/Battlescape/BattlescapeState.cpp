@@ -86,7 +86,7 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false), _autosave(false), _animFrame(0), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0)
+BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false), _autosave(false), _animFrame(0), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
 
@@ -1686,6 +1686,27 @@ void BattlescapeState::updateSoldierInfo()
 		}
 	}
 
+	// remember where blue indicators turn purple
+	_numberOfEnemiesTotalPlusWounded = j;
+
+	if (Options::knockOutIndicator)
+	{
+		// go through all units under player's control (excl. unconscious)
+		for (std::vector<BattleUnit*>::iterator i = _battleGame->getSave()->getUnits()->begin(); i != _battleGame->getSave()->getUnits()->end() && j < VISIBLE_MAX; ++i)
+		{
+			if ((*i)->getFaction() == FACTION_PLAYER && !((*i)->isOut()) && (*i)->getHealth() > 0)
+			{
+				if ((*i)->getStunlevel() * 100 / (*i)->getHealth() >= 75)
+				{
+					_btnVisibleUnit[j]->setVisible(true);
+					_numVisibleUnit[j]->setVisible(true);
+					_visibleUnit[j] = (*i);
+				}
+				++j;
+			}
+		}
+	}
+
 	showPsiButton(battleUnit->getSpecialWeapon(BT_PSIAMP) != 0);
 }
 
@@ -1701,7 +1722,8 @@ void BattlescapeState::blinkVisibleUnitButtons()
 		if (_btnVisibleUnit[i]->getVisible() == true)
 		{
 			_btnVisibleUnit[i]->drawRect(0, 0, 15, 12, 15);
-			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, i < _numberOfDirectlyVisibleUnits ? color : i < _numberOfEnemiesTotal ? 54 : 134);
+			int bgColor = i < _numberOfDirectlyVisibleUnits ? color : i < _numberOfEnemiesTotal ? 54 : i < _numberOfEnemiesTotalPlusWounded ? 134 : 198;
+			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, bgColor);
 		}
 	}
 
