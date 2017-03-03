@@ -1018,6 +1018,9 @@
     <ClCompile Include="Geoscape\CraftNotEnoughPilotsState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
+    <ClCompile Include="Geoscape\NewPossiblePurchaseState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2078,6 +2081,9 @@
       <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Geoscape\CraftNotEnoughPilotsState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\NewPossiblePurchaseState.h">
       <Filter>Geoscape</Filter>
     </ClInclude>
   </ItemGroup>

@@ -186,6 +186,7 @@ set ( geoscape_src
   Geoscape/MonthlyReportState.cpp
   Geoscape/MultipleTargetsState.cpp
   Geoscape/NewPossibleManufactureState.cpp
+  Geoscape/NewPossiblePurchaseState.cpp
   Geoscape/NewPossibleResearchState.cpp
   Geoscape/ProductionCompleteState.cpp
   Geoscape/PsiTrainingState.cpp
