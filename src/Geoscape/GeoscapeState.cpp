@@ -1697,6 +1697,11 @@ void GeoscapeState::time1Day()
 			{
 				(*i)->getStorageItems()->addItem(_game->getMod()->getArmor(_game->getMod()->getUnit(research->getName())->getArmor(), true)->getCorpseGeoscape());
 			}
+			RuleItem *spawnedItem = _game->getMod()->getItem(research->getSpawnedItem());
+			if (spawnedItem)
+			{
+				(*i)->getStorageItems()->addItem(research->getSpawnedItem());
+			}
 			if (!(*iter)->getRules()->getGetOneFree().empty())
 			{
 				std::vector<std::string> possibilities;

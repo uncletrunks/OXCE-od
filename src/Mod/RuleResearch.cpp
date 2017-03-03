@@ -40,6 +40,7 @@ void RuleResearch::load(const YAML::Node &node, int listOrder)
 	_name = node["name"].as<std::string>(_name);
 	_lookup = node["lookup"].as<std::string>(_lookup);
 	_cutscene = node["cutscene"].as<std::string>(_cutscene);
+	_spawnedItem = node["spawnedItem"].as<std::string>(_spawnedItem);
 	_cost = node["cost"].as<int>(_cost);
 	_points = node["points"].as<int>(_points);
 	_dependencies = node["dependencies"].as< std::vector<std::string> >(_dependencies);
@@ -171,6 +172,15 @@ int RuleResearch::getListOrder() const
 const std::string & RuleResearch::getCutscene() const
 {
 	return _cutscene;
+}
+
+/**
+ * Gets the item to spawn in the base stores when this topic is researched.
+ * @return The item id.
+ */
+const std::string & RuleResearch::getSpawnedItem() const
+{
+	return _spawnedItem;
 }
 
 }

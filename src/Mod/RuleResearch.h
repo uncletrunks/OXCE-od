@@ -38,7 +38,7 @@ namespace OpenXcom
 class RuleResearch
 {
  private:
-	std::string _name, _lookup, _cutscene;
+	std::string _name, _lookup, _cutscene, _spawnedItem;
 	int _cost, _points;
 	std::vector<std::string> _dependencies, _unlocks, _getOneFree, _requires, _requiresBaseFunc;
 	bool _needItem, _destroyItem;
@@ -75,5 +75,7 @@ public:
 	int getListOrder() const;
 	/// Gets the cutscene to play when this item is researched
 	const std::string & getCutscene() const;
+	/// Gets the item to spawn in the base stores when this topic is researched.
+	const std::string & getSpawnedItem() const;
 };
 }
