@@ -78,7 +78,7 @@ namespace OpenXcom
  * Initializes all the elements in the Debriefing screen.
  * @param game Pointer to the core game.
  */
-DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _destroyBase(false), _pageNumber(0), _showSellButton(true)
+DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(true), _destroyBase(false), _showSellButton(true), _pageNumber(0)
 {
 	_missionStatistics = new MissionStatistics();
 
@@ -1314,10 +1314,9 @@ void DebriefingState::prepareDebriefing()
 				if ((((*j)->isInExitArea() || (*j)->getStatus() == STATUS_IGNORE_ME) && (battle->getMissionType() != "STR_BASE_DEFENSE" || success)) || !aborted)
 				{ // so game is not aborted or aborted and unit is on exit area
 					UnitStats statIncrease;
-					bool hasImproved = (*j)->postMissionProcedures(save, statIncrease);
+					(*j)->postMissionProcedures(save, statIncrease);
 					if ((*j)->getGeoscapeSoldier())
 					{
-						//if (hasImproved)
 						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease));
 					}
 					playerInExitArea++;
@@ -1501,7 +1500,7 @@ void DebriefingState::prepareDebriefing()
 				{
 					if (battle->getTile(i)->getMapData(part))
 					{
-						size_t specialType = battle->getTile(i)->getMapData(part)->getSpecialType();
+						int specialType = battle->getTile(i)->getMapData(part)->getSpecialType();
 						if (specialType != nonRecoverType && _recoveryStats.find(specialType) != _recoveryStats.end())
 						{
 							addStat(_recoveryStats[specialType]->name, 1, _recoveryStats[specialType]->value);

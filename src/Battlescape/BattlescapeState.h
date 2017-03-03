@@ -60,7 +60,6 @@ private:
 	InteractiveSurface *_btnVisibleUnit[VISIBLE_MAX];
 	NumberText *_numVisibleUnit[VISIBLE_MAX];
 	BattleUnit *_visibleUnit[VISIBLE_MAX];
-	int _numberOfDirectlyVisibleUnits, _numberOfEnemiesTotal, _numberOfEnemiesTotalPlusWounded;
 	WarningMessage *_warning;
 	Text *_txtName, *_txtKneelStatus;
 	NumberText *_numTimeUnits, *_numEnergy, *_numHealth, *_numMorale, *_numLayers, *_numAmmoLeft, *_numAmmoRight;
@@ -68,7 +67,6 @@ private:
 	NumberText *_numTwoHandedIndicatorLeft, *_numTwoHandedIndicatorRight;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
 	Timer *_animTimer, *_gameTimer;
-	int _animFrame; // for grenade timers
 	SavedBattleGame *_save;
 	Text *_txtDebug, *_txtTooltip;
 	std::vector<State*> _popups;
@@ -85,6 +83,8 @@ private:
 	Position _cursorPosition;
 	Uint8 _barHealthColor;
 	bool _autosave;
+	int _animFrame; // for grenade timers
+	int _numberOfDirectlyVisibleUnits, _numberOfEnemiesTotal, _numberOfEnemiesTotalPlusWounded;
 	/// Popups a context sensitive list of actions the user can choose from.
 	void handleItemClick(BattleItem *item, bool rightClick);
 	/// Shifts the red colors of the visible unit buttons backgrounds.

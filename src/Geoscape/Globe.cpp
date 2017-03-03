@@ -1307,7 +1307,7 @@ void Globe::drawDetail()
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getExtraGlobeLabelsList().begin(); i != _game->getMod()->getExtraGlobeLabelsList().end(); ++i)
 	{
 		RuleCountry *rule = _game->getMod()->getExtraGlobeLabel((*i), true);
-		if (_zoom >= rule->getZoomLevel())
+		if ((int)(_zoom) >= rule->getZoomLevel())
 		{
 			// Don't draw if label is facing back
 			if (pointBack(rule->getLabelLongitude(), rule->getLabelLatitude()))

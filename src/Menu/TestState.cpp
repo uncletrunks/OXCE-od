@@ -231,7 +231,7 @@ int TestState::checkRMP(MapBlock *mapblock)
 
 int TestState::loadMAP(MapBlock *mapblock)
 {
-	int sizex, sizey, sizez;
+	int sizez;
 	char size[3];
 	std::ostringstream filename;
 	filename << "MAPS/" << mapblock->getName() << ".MAP";
@@ -244,8 +244,8 @@ int TestState::loadMAP(MapBlock *mapblock)
 	}
 
 	mapFile.read((char*)&size, sizeof(size));
-	sizey = (int)size[0];
-	sizex = (int)size[1];
+	//sizey = (int)size[0];
+	//sizex = (int)size[1];
 	sizez = (int)size[2];
 
 	//mapblock->setSizeZ(sizez); // commented out, for testing purposes we don't need to HACK it like in real code

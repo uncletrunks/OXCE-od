@@ -309,46 +309,6 @@ void ManufactureInfoState::exitState()
 	}
 }
 
-static void _formatProfit (int profit, std::wostringstream &outStream)
-{
-	bool profitIsNeg = false;
-	if (0 > profit)
-	{
-		profit = -profit;
-		profitIsNeg = true;
-	}
-
-	int modulo = 0;
-	std::wstring suffix = L"";
-	if (1000000000 <= profit)
-	{
-		modulo = (profit % 1000000000) / 100000000;
-		profit /= 1000000000;
-		suffix = L"B";
-	}
-	else if (1000000 <= profit)
-	{
-		modulo = (profit % 1000000) / 100000;
-		profit /= 1000000;
-		suffix = L"M";
-	}
-	else if (1000 <= profit)
-	{
-		modulo = (profit % 1000) / 100;
-		profit /= 1000;
-		suffix = L"K";
-	}
-
-	if (profit < 10)
-	{
-		outStream << (profitIsNeg ? L"-" : L"+") << L"$" << profit << L"." << modulo << suffix;
-	}
-	else
-	{
-		outStream << (profitIsNeg ? L"-" : L"+") << L"$" << profit << suffix;
-	}
-}
-
 /**
  * Updates display of assigned/available engineer/workshop space.
  */

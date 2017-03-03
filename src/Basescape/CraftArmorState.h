@@ -47,10 +47,10 @@ private:
 	TextList *_lstSoldiers;
 
 	Base *_base;
+	size_t _craft, _savedScrollPosition;
 	std::vector<Soldier *> _origSoldierOrder;
 	std::vector<SortFunctor *> _sortFunctors;
 	getStatFn_t _dynGetter;
-	size_t _craft, _savedScrollPosition;
 	///initializes the display list based on the craft soldier's list and the position to display
 	void initList(size_t scrl);
 public:

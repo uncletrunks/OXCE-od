@@ -56,7 +56,6 @@ private:
 	int _fadeShade;
 	bool _nightVisionOn;
 	int _nvColor;
-	int _bgColor;
 	Game *_game;
 	SavedBattleGame *_save;
 	Surface *_arrow;
@@ -77,6 +76,7 @@ private:
 	int _visibleMapHeight;
 	std::vector<Position> _waypoints;
 	bool _unitDying, _smoothCamera, _smoothingEngaged, _flashScreen;
+	int _bgColor;
 	PathPreview _previewSetting;
 	Text *_txtAccuracy;
 	SurfaceSet *_projectileSet;

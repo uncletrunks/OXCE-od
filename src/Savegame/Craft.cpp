@@ -1126,7 +1126,7 @@ bool Craft::arePilotsOnboard()
 	// refresh the list of pilots (must be performed here, list may be out-of-date!)
 	const std::vector<Soldier*> pilots = getPilotList();
 
-	return pilots.size() >= _rules->getPilots();
+	return (int)(pilots.size()) >= _rules->getPilots();
 }
 
 /**

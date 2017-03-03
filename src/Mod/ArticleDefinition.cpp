@@ -55,7 +55,7 @@ namespace OpenXcom
 	 * Constructor.
 	 * @param type_id Article type of this instance.
 	 */
-	ArticleDefinition::ArticleDefinition(UfopaediaTypeId type_id) : _type_id(type_id), _listOrder(0), customPalette(false)
+	ArticleDefinition::ArticleDefinition(UfopaediaTypeId type_id) : _type_id(type_id), customPalette(false), _listOrder(0)
 	{}
 
 	/**

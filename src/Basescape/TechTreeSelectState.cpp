@@ -218,7 +218,7 @@ void TechTreeSelectState::initLists()
 */
 void TechTreeSelectState::onSelectTopic(Action *)
 {
-	int index = _lstTopics->getSelectedRow();
+	size_t index = _lstTopics->getSelectedRow();
 	if (index >= _availableTopics.size())
 		return;
 

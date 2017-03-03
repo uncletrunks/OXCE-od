@@ -208,7 +208,7 @@ void CraftPilotsState::updateUI()
 	else
 	{
 		_txtHint->setVisible(false);
-		_btnAdd->setVisible(_lstPilots->getRows() < c->getRules()->getPilots());
+		_btnAdd->setVisible((int)(_lstPilots->getRows()) < c->getRules()->getPilots());
 		_btnRemoveAll->setVisible(!c->isCrewPilotsOnly());
 	}
 }

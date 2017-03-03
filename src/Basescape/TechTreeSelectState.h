@@ -44,7 +44,7 @@ private:
 	Text *_txtTitle;
 	TextList *_lstTopics;
 	std::vector<std::string> _availableTopics;
-	int _firstManufacturingTopicIndex;
+	size_t _firstManufacturingTopicIndex;
 	void initLists();
 	void onSelectTopic(Action *action);
 public:

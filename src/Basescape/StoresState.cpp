@@ -426,6 +426,8 @@ void StoresState::updateArrows()
 	_sortSpaceUsed->setShape(ARROW_NONE);
 	switch (itemOrder)
 	{
+	case ITEM_SORT_NONE:
+		break;
 	case ITEM_SORT_NAME_ASC:
 		_sortName->setShape(ARROW_SMALL_UP);
 		break;
@@ -449,6 +451,8 @@ void StoresState::updateArrows()
 		break;
 	case ITEM_SORT_SPACE_USED_DESC:
 		_sortSpaceUsed->setShape(ARROW_SMALL_DOWN);
+		break;
+	default:
 		break;
 	}
 }

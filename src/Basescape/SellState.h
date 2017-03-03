@@ -46,7 +46,6 @@ class SellState : public State
 private:
 	Base *_base;
 	DebriefingState *_debriefingState;
-	bool _reset;
 	TextButton *_btnOk, *_btnCancel, *_btnTransfer;
 	TextEdit *_btnQuickSearch;
 	Window *_window;
@@ -63,6 +62,7 @@ private:
 	Timer *_timerInc, *_timerDec;
 	Uint8 _ammoColor;
 	OptionsOrigin _origin;
+	bool _reset;
 	/// Gets the category of the current selection.
 	std::string getCategory(int sel) const;
 	/// Determines if the current selection belongs to a given category.

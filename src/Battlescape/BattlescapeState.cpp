@@ -1763,7 +1763,7 @@ void BattlescapeState::blinkHealthBar()
  */
 void BattlescapeState::drawPrimers()
 {
-	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
+	//const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
 
 	if (_save->getSelectedUnit())
 	{

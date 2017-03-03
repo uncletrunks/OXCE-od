@@ -1315,7 +1315,6 @@ void InventoryState::onMoveGroundInventoryToBase(Action *)
 		return;
 	}
 		
-	std::vector<BattleItem*> *unitInv = unit->getInventory();
 	Tile                     *groundTile = unit->getTile();
 	std::vector<BattleItem*> *groundInv = groundTile->getInventory();
 

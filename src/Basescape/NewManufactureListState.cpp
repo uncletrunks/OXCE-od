@@ -175,7 +175,7 @@ void NewManufactureListState::lstProdClickRight(Action *)
 		_showRequirements = !_showRequirements;
 		const std::vector<std::string> &baseFunc = _base->getProvidedBaseFunc();
 
-		for (int row = 0; row < _lstManufacture->getRows(); ++row)
+		for (size_t row = 0; row < _lstManufacture->getRows(); ++row)
 		{
 			RuleManufacture *info = _game->getMod()->getManufacture(_displayedStrings[row]);
 			if (info)
@@ -421,7 +421,7 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 		_catStrings.clear();
 		_catStrings.push_back("STR_ALL_ITEMS");
 
-		for (int r = 0; r < _lstManufacture->getRows(); ++r)
+		for (size_t r = 0; r < _lstManufacture->getRows(); ++r)
 		{
 			RuleManufacture *info = _game->getMod()->getManufacture(_displayedStrings[r]);
 			if (info)

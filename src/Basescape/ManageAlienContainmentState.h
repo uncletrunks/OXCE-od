@@ -42,7 +42,6 @@ private:
 	Base *_base;
 	int _prisonType;
 	OptionsOrigin _origin;
-	bool _reset;
 	TextButton *_btnOk, *_btnCancel, *_btnTransfer;
 	Window *_window;
 	Text *_txtTitle, *_txtUsed, *_txtAvailable, *_txtValueOfSales, *_txtItem, *_txtLiveAliens, *_txtDeadAliens, *_txtInterrogatedAliens;
@@ -52,6 +51,7 @@ private:
 	std::vector<std::string> _aliens;
 	size_t _sel;
 	int _aliensSold, _total;
+	bool _reset;
 	/// Gets selected quantity.
 	int getQuantity();
 public:

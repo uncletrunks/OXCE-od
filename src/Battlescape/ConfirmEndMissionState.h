@@ -41,8 +41,8 @@ private:
 	Text *_txtTitle, *_txtWounded, *_txtConfirm;
 	TextButton *_btnOk, *_btnCancel;
 	SavedBattleGame *_battleGame;
-	BattlescapeGame *_parent;
 	int _wounded;
+	BattlescapeGame *_parent;
 public:
 	/// Creates the ConfirmEndMission state.
 	ConfirmEndMissionState(SavedBattleGame *battleGame, int wounded, BattlescapeGame *parent);
