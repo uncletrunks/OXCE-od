@@ -614,9 +614,9 @@ void SellState::btnOkClick(Action *)
 				{
 					_base->getStorageItems()->removeItem(item->getType(), i->amount);
 				}
-				// set autosell status if we sold all of the item
 				if (_debriefingState != 0)
 				{
+					// set autosell status if we sold all of the item
 					_game->getSavedGame()->setAutosell(item, (i->qtySrc == i->amount));
 				}
 
@@ -625,8 +625,11 @@ void SellState::btnOkClick(Action *)
 		}
 		else
 		{
-			// disable autosell since we haven't sold any of the item.
-			_game->getSavedGame()->setAutosell((RuleItem*)i->rule, false);
+			if (_debriefingState != 0 && i->type == TRANSFER_ITEM)
+			{
+				// disable autosell since we haven't sold any of the item.
+				_game->getSavedGame()->setAutosell((RuleItem*)i->rule, false);
+			}
 		}
 	}
 	if (_debriefingState != 0)
