@@ -1124,7 +1124,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			case 6:	side = SIDE_LEFT; 										break;
 			case 7:	side = RNG::generate(0,2) < 2 ? SIDE_FRONT:SIDE_LEFT; 	break;
 			}
-			if (relative.z > getHeight())
+			if (relative.z >= getHeight())
 			{
 				bodypart = BODYPART_HEAD;
 			}
@@ -1783,7 +1783,7 @@ void BattleUnit::prepareTimeUnits(int tu)
 	  tu = int(encumbrance * tu);
 	}
 	// Each fatal wound to the left or right leg reduces the soldier's TUs by 10%.
-	tu -= (tu * (_fatalWounds[BODYPART_LEFTLEG]+_fatalWounds[BODYPART_RIGHTLEG] * 10))/100;
+	tu -= (tu * ((_fatalWounds[BODYPART_LEFTLEG]+_fatalWounds[BODYPART_RIGHTLEG]) * 10))/100;
 	setTimeUnits(tu);
 }
 

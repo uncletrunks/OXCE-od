@@ -92,7 +92,7 @@ private:
 	std::vector<VerticalLevel> _verticalLevels;
 
 	/// sets the map size and associated vars
-	void init();
+	void init(bool resetTerrain);
 	/// Generates a new battlescape map.
 	void generateMap(const std::vector<MapScript*> *script);
 	/// Adds a vehicle to the game.

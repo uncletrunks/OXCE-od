@@ -484,7 +484,7 @@ YAML::Node SavedBattleGame::save() const
  * @param mapsize_y
  * @param mapsize_z
  */
-void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z)
+void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z, bool resetTerrain)
 {
 	// Clear old map data
 	for (std::vector<Node*>::iterator i = _nodes.begin(); i != _nodes.end(); ++i)
@@ -493,7 +493,11 @@ void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z)
 	}
 
 	_nodes.clear();
-	_mapDataSets.clear();
+
+	if (resetTerrain)
+	{
+		_mapDataSets.clear();
+	}
 
 	// Create tile objects
 	_mapsize_x = mapsize_x;

@@ -1203,29 +1203,6 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
-	// calculate the clips for each type based on the recovered rounds.
-	for (std::map<const RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
-	{
-		int total_clips = i->second / i->first->getClipSize();
-		if (total_clips > 0)
-			base->getStorageItems()->addItem(i->first->getType(), total_clips);
-	}
-
-	// calculate the "remaining medikit items" for each type based on the recovered "clips".
-	for (std::map<const RuleItem*, int>::const_iterator i = _roundsPainKiller.begin(); i != _roundsPainKiller.end(); ++i)
-	{
-		int totalRecovered = INT_MAX;
-		if (i->first->getPainKillerQuantity() > 0)
-			totalRecovered = std::min(totalRecovered, i->second / i->first->getPainKillerQuantity());
-		if (i->first->getStimulantQuantity() > 0)
-			totalRecovered = std::min(totalRecovered, _roundsStimulant[i->first] / i->first->getStimulantQuantity());
-		if (i->first->getHealQuantity() > 0)
-			totalRecovered = std::min(totalRecovered, _roundsHeal[i->first] / i->first->getHealQuantity());
-
-		if (totalRecovered > 0)
-			base->getStorageItems()->addItem(i->first->getType(), totalRecovered);
-	}
-
 	// recover all our goodies
 	if (playersSurvived > 0)
 	{
@@ -1249,6 +1226,29 @@ void DebriefingState::prepareDebriefing()
 		// assuming this was a multi-stage mission,
 		// recover everything that was in the craft in the previous stage
 		recoverItems(battle->getGuaranteedRecoveredItems(), base);
+	}
+
+	// calculate the clips for each type based on the recovered rounds.
+	for (std::map<const RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
+	{
+		int total_clips = i->second / i->first->getClipSize();
+		if (total_clips > 0)
+			base->getStorageItems()->addItem(i->first->getType(), total_clips);
+	}
+
+	// calculate the "remaining medikit items" for each type based on the recovered "clips".
+	for (std::map<const RuleItem*, int>::const_iterator i = _roundsPainKiller.begin(); i != _roundsPainKiller.end(); ++i)
+	{
+		int totalRecovered = INT_MAX;
+		if (i->first->getPainKillerQuantity() > 0)
+			totalRecovered = std::min(totalRecovered, i->second / i->first->getPainKillerQuantity());
+		if (i->first->getStimulantQuantity() > 0)
+			totalRecovered = std::min(totalRecovered, _roundsStimulant[i->first] / i->first->getStimulantQuantity());
+		if (i->first->getHealQuantity() > 0)
+			totalRecovered = std::min(totalRecovered, _roundsHeal[i->first] / i->first->getHealQuantity());
+
+		if (totalRecovered > 0)
+			base->getStorageItems()->addItem(i->first->getType(), totalRecovered);
 	}
 
 	// reequip craft after a non-base-defense mission (of course only if it's not lost already (that case craft=0))

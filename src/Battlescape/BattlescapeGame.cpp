@@ -2499,4 +2499,9 @@ void BattlescapeGame::playSound(int sound)
 }
 
 
+std::list<BattleState*> BattlescapeGame::getStates()
+{
+	return _states;
+}
+
 }

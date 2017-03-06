@@ -237,6 +237,7 @@ public:
 	void playSound(int sound);
 	/// Sets up a mission complete notification.
 	void missionComplete();
+	std::list<BattleState*> getStates();
 };
 
 }
