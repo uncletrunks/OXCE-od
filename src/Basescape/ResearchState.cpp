@@ -78,6 +78,7 @@ ResearchState::ResearchState(Base *base) : _base(base)
 
 	_btnNew->setText(tr("STR_NEW_PROJECT"));
 	_btnNew->onMouseClick((ActionHandler)&ResearchState::btnNewClick);
+	_btnNew->onKeyboardPress((ActionHandler)&ResearchState::btnNewClick, Options::keyToggleQuickSearch);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&ResearchState::btnOkClick);
