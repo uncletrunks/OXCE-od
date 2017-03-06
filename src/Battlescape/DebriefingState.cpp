@@ -1902,6 +1902,15 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						_rounds[rule] += (*it)->getAmmoQuantity();
 						break;
 					case BT_FIREARM:
+						{
+							if (!(*it)->needsAmmo() && (*it)->getRules()->getClipSize() > 0)
+							{
+								// It's a weapon without clips
+								_rounds[(*it)->getRules()] += (*it)->getAmmoQuantity();
+								break;
+							}
+						}
+						// Fall-through...
 					case BT_MELEE:
 						// It's a weapon, count any rounds left in the clip.
 						{
