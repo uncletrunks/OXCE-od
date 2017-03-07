@@ -1701,8 +1701,8 @@ void BattlescapeState::updateSoldierInfo()
 					_btnVisibleUnit[j]->setVisible(true);
 					_numVisibleUnit[j]->setVisible(true);
 					_visibleUnit[j] = (*i);
+					++j;
 				}
-				++j;
 			}
 		}
 	}
