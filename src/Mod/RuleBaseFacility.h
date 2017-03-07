@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <yaml-cpp/yaml.h>
+#include "MapScript.h"
 
 namespace OpenXcom
 {
@@ -50,6 +51,7 @@ private:
 	float _sickBayAbsoluteBonus, _sickBayRelativeBonus;
 	int _prisonType;
 	int _rightClickActionType;
+	std::vector<VerticalLevel> _verticalLevels;
 public:
 	/// Creates a blank facility ruleset.
 	RuleBaseFacility(const std::string &type);
@@ -133,6 +135,8 @@ public:
 	int getPrisonType() const;
 	/// Gets the action type to perform on right click.
 	int getRightClickActionType() const;
+	/// Gets the vertical levels for this facility map generation.
+	const std::vector<VerticalLevel> &getVerticalLevels() const;
 };
 
 }

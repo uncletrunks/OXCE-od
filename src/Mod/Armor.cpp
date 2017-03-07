@@ -781,6 +781,23 @@ void getArmorValueScript(Armor *ar, int &ret, int side)
 	ret = 0;
 }
 
+std::string debugDisplayScript(const Armor* ar)
+{
+	if (ar)
+	{
+		std::string s;
+		s += Armor::ScriptName;
+		s += "(name: \"";
+		s += ar->getType();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
 }
 
 /**
@@ -818,6 +835,7 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 	ar.add<&getArmorValueScript>("getArmor");
 
 	ar.addScriptValue<&Armor::_scriptValues>(false);
+	ar.addDebugDisplay<&debugDisplayScript>();
 }
 
 /**

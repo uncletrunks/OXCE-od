@@ -1391,7 +1391,7 @@ void DebriefingState::prepareDebriefing()
 					}
 				}
 			}
-			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea())
+			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea()) && !_destroyBase
 				// mind controlled units may as well count as unconscious
 				&& faction == FACTION_PLAYER && (!(*j)->isOut() || (*j)->getStatus() == STATUS_IGNORE_ME))
 			{
@@ -1555,6 +1555,31 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
+	// recover all our goodies
+	if (playersSurvived > 0)
+	{
+		int aadivider = (target == "STR_UFO") ? 10 : 150;
+		for (std::vector<DebriefingStat*>::iterator i = _stats.begin(); i != _stats.end(); ++i)
+		{
+			// alien alloys recovery values are divided by 10 or divided by 150 in case of an alien base
+			if ((*i)->item == _recoveryStats[ALIEN_ALLOYS]->name)
+			{
+				(*i)->qty = (*i)->qty / aadivider;
+				(*i)->score = (*i)->score / aadivider;
+			}
+
+			// recoverable battlescape tiles are now converted to items and put in base inventory
+			if ((*i)->recovery && (*i)->qty > 0)
+			{
+				base->getStorageItems()->addItem((*i)->item, (*i)->qty);
+			}
+		}
+
+		// assuming this was a multi-stage mission,
+		// recover everything that was in the craft in the previous stage
+		recoverItems(battle->getGuaranteedRecoveredItems(), base);
+	}
+
 	// calculate the clips for each type based on the recovered rounds.
 	for (std::map<const RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
 	{
@@ -1586,31 +1611,6 @@ void DebriefingState::prepareDebriefing()
 			base->getStorageItems()->addItem(i->first->getType(), totalRecovered);
 	}
 
-	// recover all our goodies
-	if (playersSurvived > 0)
-	{
-		int aadivider = (target == "STR_UFO") ? 10 : 150;
-		for (std::vector<DebriefingStat*>::iterator i = _stats.begin(); i != _stats.end(); ++i)
-		{
-			// alien alloys recovery values are divided by 10 or divided by 150 in case of an alien base
-			if ((*i)->item == _recoveryStats[ALIEN_ALLOYS]->name)
-			{
-				(*i)->qty = (*i)->qty / aadivider;
-				(*i)->score = (*i)->score / aadivider;
-			}
-
-			// recoverable battlescape tiles are now converted to items and put in base inventory
-			if ((*i)->recovery && (*i)->qty > 0)
-			{
-				base->getStorageItems()->addItem((*i)->item, (*i)->qty);
-			}
-		}
-
-		// assuming this was a multi-stage mission,
-		// recover everything that was in the craft in the previous stage
-		recoverItems(battle->getGuaranteedRecoveredItems(), base);
-	}
-
 	// reequip craft after a non-base-defense mission (of course only if it's not lost already (that case craft=0))
 	if (craft)
 	{
@@ -1638,7 +1638,6 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((*i) == base)
 				{
-
 					delete (*i);
 					base = 0; // To avoid similar (potential) problems as with the deleted craft
 					_game->getSavedGame()->getBases()->erase(i);

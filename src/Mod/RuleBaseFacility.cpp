@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "RuleBaseFacility.h"
 #include "Mod.h"
+#include "MapScript.h"
 
 namespace OpenXcom
 {
@@ -28,7 +29,7 @@ namespace OpenXcom
  * type of base facility.
  * @param type String defining the type.
  */
-RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f), _prisonType(0), _rightClickActionType(0)
+RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f), _prisonType(0), _rightClickActionType(0), _verticalLevels()
 {
 }
 
@@ -126,6 +127,21 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 			if (cost.first <= 0)
 			{
 				_buildCostItems.erase(id);
+			}
+		}
+	}
+
+	// Load any VerticalLevels into a map if we have them
+	if (node["verticalLevels"])
+	{
+		_verticalLevels.clear();
+		for (YAML::const_iterator i = node["verticalLevels"].begin(); i != node["verticalLevels"].end(); ++i)
+		{
+			if ((*i)["type"])
+			{
+				VerticalLevel level;
+				level.load(*i);
+				_verticalLevels.push_back(level);
 			}
 		}
 	}
@@ -496,6 +512,15 @@ int RuleBaseFacility::getPrisonType() const
 int RuleBaseFacility::getRightClickActionType() const
 {
 	return _rightClickActionType;
+}
+
+/*
+ * Gets the vertical levels for a base facility map
+ * @return the vector of VerticalLevels
+ */
+const std::vector<VerticalLevel> &RuleBaseFacility::getVerticalLevels() const
+{
+	return _verticalLevels;
 }
 
 }

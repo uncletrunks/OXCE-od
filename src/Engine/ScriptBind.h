@@ -870,6 +870,16 @@ struct BindValue
 	}
 };
 
+template<typename T, std::string (*X)(const T*)>
+struct BindDebugDisplay
+{
+	static RetEnum func(ScriptWorkerBase& swb, const T* t)
+	{
+		swb.log_buffer_add(X(t));
+		return RetContinue;
+	}
+};
+
 template<typename T, T f>
 struct BindFunc;
 
@@ -968,9 +978,9 @@ struct BindBase
 	}
 
 	template<typename X>
-	void addCustomFunc(const std::string& name)
+	void addCustomFunc(const std::string& name, const std::string& description = "-")
 	{
-		parser->addParser<helper::FuncGroup<X>>(name);
+		parser->addParser<helper::FuncGroup<X>>(name, description);
 	}
 	void addCustomConst(const std::string& name, int i)
 	{
@@ -989,13 +999,13 @@ struct Bind : BindBase
 
 	Bind(ScriptParserBase* p) : BindBase{ p }
 	{
-		parser->addParser<helper::FuncGroup<helper::BindSet<T*>>>("set");
-		parser->addParser<helper::FuncGroup<helper::BindSet<const T*>>>("set");
-		parser->addParser<helper::FuncGroup<helper::BindSwap<T*>>>("swap");
-		parser->addParser<helper::FuncGroup<helper::BindSwap<const T*>>>("swap");
-		parser->addParser<helper::FuncGroup<helper::BindClear<T*>>>("clear");
-		parser->addParser<helper::FuncGroup<helper::BindClear<const T*>>>("clear");
-		parser->addParser<helper::FuncGroup<helper::BindEq<const T*>>>("test_eq");
+		parser->addParser<helper::FuncGroup<helper::BindSet<T*>>>("set", "arg1 = arg2");
+		parser->addParser<helper::FuncGroup<helper::BindSet<const T*>>>("set", "arg1 = arg2");
+		parser->addParser<helper::FuncGroup<helper::BindSwap<T*>>>("swap", "Swap value of arg1 and arg2");
+		parser->addParser<helper::FuncGroup<helper::BindSwap<const T*>>>("swap", "Swap value of arg1 and arg2");
+		parser->addParser<helper::FuncGroup<helper::BindClear<T*>>>("clear", "arg1 = null");
+		parser->addParser<helper::FuncGroup<helper::BindClear<const T*>>>("clear", "arg1 = null");
+		parser->addParser<helper::FuncGroup<helper::BindEq<const T*>>>("test_eq", "");
 	}
 
 	std::string getName(const std::string& s)
@@ -1011,10 +1021,10 @@ struct Bind : BindBase
 	template<int T::*X>
 	void addField(const std::string& get, const std::string& set = "")
 	{
-		addCustomFunc<helper::BindPropGet<T, int, X>>(getName(get));
+		addCustomFunc<helper::BindPropGet<T, int, X>>(getName(get), "Get int field of " + std::string{ T::ScriptName });
 		if (!set.empty())
 		{
-			addCustomFunc<helper::BindPropSet<T, int, X>>(getName(set));
+			addCustomFunc<helper::BindPropSet<T, int, X>>(getName(set), "Set int field of " + std::string{ T::ScriptName });
 		}
 	}
 	void addScriptTag()
@@ -1024,26 +1034,31 @@ struct Bind : BindBase
 		if (!parser->haveType<Tag>())
 		{
 			parser->addType<Tag>(getName("Tag"));
-			parser->addParser<helper::FuncGroup<helper::BindSet<Tag>>>("set");
-			parser->addParser<helper::FuncGroup<helper::BindSwap<Tag>>>("swap");
-			parser->addParser<helper::FuncGroup<helper::BindClear<Tag>>>("clear");
-			parser->addParser<helper::FuncGroup<helper::BindEq<Tag>>>("test_eq");
+			parser->addParser<helper::FuncGroup<helper::BindSet<Tag>>>("set", "arg1 = arg2");
+			parser->addParser<helper::FuncGroup<helper::BindSwap<Tag>>>("swap", "Swap value of arg1 and arg2");
+			parser->addParser<helper::FuncGroup<helper::BindClear<Tag>>>("clear", "arg1 = null");
+			parser->addParser<helper::FuncGroup<helper::BindEq<Tag>>>("test_eq", "");
 		}
 	}
 	template<ScriptValues<T> T::*X>
 	void addScriptValue(bool canEdit = true)
 	{
 		addScriptTag();
-		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getTag"));
+		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getTag"), "Get tag of " + std::string{ T::ScriptName });
 		if (canEdit)
 		{
-			addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"));
+			addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"), "Set tag of " + std::string{ T::ScriptName });
 		}
+	}
+	template<std::string (*X)(const T*)>
+	void addDebugDisplay()
+	{
+		addCustomFunc<helper::BindDebugDisplay<T, X>>("debug_impl", "");
 	}
 	template<int X>
 	void addFake(const std::string& get)
 	{
-		addCustomFunc<helper::BindValue<T, int, X>>(getName(get));
+		addCustomFunc<helper::BindValue<T, int, X>>(getName(get), "Get int field of " + std::string{ T::ScriptName });
 	}
 
 	template<typename P, P* (T::*X)(), const P* (T::*Y)() const>
@@ -1076,10 +1091,12 @@ struct Bind : BindBase
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int, int))
 
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int, int))
 
 	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)())
 	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)() const)

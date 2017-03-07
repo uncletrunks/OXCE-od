@@ -45,11 +45,11 @@ namespace OpenXcom
 /**
  * Sets up an ProjectileFlyBState.
  */
-ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action, Position origin, int range) : BattleState(parent, action), _unit(0), _ammo(0), _projectileItem(0), _origin(origin), _originVoxel(-1,-1,-1), _projectileImpact(0), _range(range), _initialized(false), _targetFloor(false)
+ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action, Position origin, int range) : BattleState(parent, action), _unit(0), _ammo(0), _origin(origin), _originVoxel(-1,-1,-1), _projectileImpact(0), _range(range), _initialized(false), _targetFloor(false)
 {
 }
 
-ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _ammo(0), _projectileItem(0), _origin(action.actor->getPosition()), _originVoxel(-1,-1,-1), _projectileImpact(0), _range(0), _initialized(false), _targetFloor(false)
+ProjectileFlyBState::ProjectileFlyBState(BattlescapeGame *parent, BattleAction action) : BattleState(parent, action), _unit(0), _ammo(0), _origin(action.actor->getPosition()), _originVoxel(-1,-1,-1), _projectileImpact(0), _range(0), _initialized(false), _targetFloor(false)
 {
 }
 
@@ -71,7 +71,6 @@ void ProjectileFlyBState::init()
 	_initialized = true;
 
 	BattleItem *weapon = _action.weapon;
-	_projectileItem = 0;
 
 	if (!weapon) // can't shoot without weapon
 	{
@@ -181,7 +180,6 @@ void ProjectileFlyBState::init()
 		{
 			_action.target.z += 1;
 		}
-		_projectileItem = weapon;
 		break;
 	default:
 		_parent->popState();
@@ -213,7 +211,6 @@ void ProjectileFlyBState::init()
 		// if there is no LOF to the center, try elsewhere (more outward).
 		// Store this target voxel.
 		Tile *targetTile = _parent->getSave()->getTile(_action.target);
-		Position hitPos;
 		Position originVoxel = _parent->getTileEngine()->getOriginVoxel(_action, _parent->getSave()->getTile(_origin));
 		if (targetTile->getUnit() &&
 			((_unit->getFaction() != FACTION_PLAYER) ||
@@ -308,17 +305,18 @@ bool ProjectileFlyBState::createNewProjectile()
 	if (_action.type == BA_THROW)
 	{
 		_projectileImpact = projectile->calculateThrow(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider);
+		const RuleItem *ruleItem = _action.weapon->getRules();
 		if (_projectileImpact == V_FLOOR || _projectileImpact == V_UNIT || _projectileImpact == V_OBJECT)
 		{
-			if (_unit->getFaction() != FACTION_PLAYER && _projectileItem->getRules()->getBattleType() == BT_GRENADE)
+			if (_unit->getFaction() != FACTION_PLAYER && ruleItem->getBattleType() == BT_GRENADE)
 			{
-				_projectileItem->setFuseTimer(_projectileItem->getRules()->getFuseTimerDefault());
+				_action.weapon->setFuseTimer(ruleItem->getFuseTimerDefault());
 			}
-			_projectileItem->moveToOwner(0);
-			if (_projectileItem->getGlow())
+			_action.weapon->moveToOwner(0);
+			if (_action.weapon->getGlow())
 			{
 				_parent->getTileEngine()->calculateLighting(LL_UNITS, _unit->getPosition());
-				_parent->getTileEngine()->calculateFOV(_unit->getPosition(), _projectileItem->getGlowRange(), false);
+				_parent->getTileEngine()->calculateFOV(_unit->getPosition(), _action.weapon->getGlowRange(), false);
 			}
 			_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_THROW)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 		}
@@ -493,20 +491,20 @@ void ProjectileFlyBState::think()
 				{
 					pos.x--;
 				}
-				BattleItem *item = _parent->getMap()->getProjectile()->getItem();
-				_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
 
-				if (item->getRules()->getBattleType() == BT_GRENADE && RNG::percent(item->getRules()->getSpecialChance()) && ((Options::battleInstantGrenade && item->getFuseTimer() == 0) || item->getRules()->getFuseTimerType() == BFT_INSTANT))
+				_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
+				const RuleItem *ruleItem = _action.weapon->getRules();
+				if (ruleItem->getBattleType() == BT_GRENADE && RNG::percent(ruleItem->getSpecialChance()) && ((Options::battleInstantGrenade && _action.weapon->getFuseTimer() == 0) || ruleItem->getFuseTimerType() == BFT_INSTANT))
 				{
 					// it's a hot grenade to explode immediately
-					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action.type, item, _action.actor));
+					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action));
 				}
 				else
 				{
-					_parent->dropItem(pos, item);
-					if (_unit->getFaction() != FACTION_PLAYER && _projectileItem->getRules()->getBattleType() == BT_GRENADE)
+					_parent->dropItem(pos, _action.weapon);
+					if (_unit->getFaction() != FACTION_PLAYER && ruleItem->getBattleType() == BT_GRENADE)
 					{
-						_parent->getTileEngine()->setDangerZone(pos, item->getRules()->getExplosionRadius(_action.actor), _action.actor);
+						_parent->getTileEngine()->setDangerZone(pos, ruleItem->getExplosionRadius(_action.actor), _action.actor);
 					}
 				}
 			}
@@ -550,8 +548,7 @@ void ProjectileFlyBState::think()
 
 					_parent->statePushFront(new ExplosionBState(
 						_parent, _parent->getMap()->getProjectile()->getPosition(offset),
-						_action.type,
-						_ammo, _action.actor, 0,
+						_action, 0,
 						(_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem()),
 						shotgun ? 0 : _range + _parent->getMap()->getProjectile()->getDistance()
 					));
@@ -608,7 +605,7 @@ void ProjectileFlyBState::think()
 									Explosion *explosion = new Explosion(proj->getPosition(1), _ammo->getRules()->getHitAnimation());
 									int power = _ammo->getRules()->getPowerBonus(_unit) - _ammo->getRules()->getPowerRangeReduction(proj->getDistance());
 									_parent->getMap()->getExplosions()->push_back(explosion);
-									_parent->getSave()->getTileEngine()->hit(proj->getPosition(1), power, _ammo->getRules()->getDamageType(), 0, _action.weapon);
+									_parent->getSave()->getTileEngine()->hit(_action, proj->getPosition(1), power, _ammo->getRules()->getDamageType());
 								}
 							}
 							++i;

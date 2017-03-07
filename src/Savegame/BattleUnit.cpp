@@ -1125,7 +1125,7 @@ static inline void setValueMax(int& value, int diff, int min, int max)
  * @param type The type of damage being inflicted.
  * @return damage done after adjustment
  */
-int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleItem *item, UnitSide sideOverride, UnitBodyPart bodypartOverride)
+int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack, UnitSide sideOverride, UnitBodyPart bodypartOverride)
 {
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
@@ -1181,7 +1181,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			case 6:	side = SIDE_LEFT; 										break;
 			case 7:	side = RNG::generate(0,2) < 2 ? SIDE_FRONT:SIDE_LEFT; 	break;
 			}
-			if (relative.z > getHeight())
+			if (relative.z >= getHeight())
 			{
 				bodypart = BODYPART_HEAD;
 			}
@@ -1212,7 +1212,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 
 	{
 		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, item, save, orgPower, type->ResistType, };
+		ModScript::HitUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacer, save, orgPower, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
@@ -1281,7 +1281,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, item, save, power, orgPower, bodypart, side, type->ResistType, };
+		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacer, save, power, orgPower, bodypart, side, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
 
@@ -1851,7 +1851,7 @@ void BattleUnit::prepareTimeUnits(int tu)
 	  tu = int(encumbrance * tu);
 	}
 	// Each fatal wound to the left or right leg reduces the soldier's TUs by 10%.
-	tu -= (tu * (_fatalWounds[BODYPART_LEFTLEG]+_fatalWounds[BODYPART_RIGHTLEG] * 10))/100;
+	tu -= (tu * ((_fatalWounds[BODYPART_LEFTLEG]+_fatalWounds[BODYPART_RIGHTLEG]) * 10))/100;
 	setTimeUnits(tu);
 }
 
@@ -3704,7 +3704,7 @@ void BattleUnit::calculateEnviDamage(Mod *mod, SavedBattleGame *save)
 	if (_fireMaxHit)
 	{
 		_hitByFire = true;
-		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN), save);
+		damage(Position(0, 0, 0), _fireMaxHit, mod->getDamageType(DT_IN), save, { });
 		// try to set the unit on fire.
 		if (RNG::percent(40 * getArmor()->getDamageModifier(DT_IN)))
 		{
@@ -3718,7 +3718,7 @@ void BattleUnit::calculateEnviDamage(Mod *mod, SavedBattleGame *save)
 
 	if (_smokeMaxHit)
 	{
-		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE), save);
+		damage(Position(0,0,0), _smokeMaxHit, mod->getDamageType(DT_SMOKE), save, { });
 	}
 
 	_fireMaxHit = 0;
@@ -4204,6 +4204,42 @@ void setBaseStatRangeScript(BattleUnit *bu, int val)
 	}
 }
 
+std::string debugDisplayScript(const BattleUnit* bu)
+{
+	if (bu)
+	{
+		std::string s;
+		s += BattleUnit::ScriptName;
+		s += "(type: \"";
+		s += bu->getType();
+		auto unit = bu->getUnitRules();
+		if (unit)
+		{
+			s += "\" race: \"";
+			s += unit->getRace();
+		}
+		s += "\" id: ";
+		s += std::to_string(bu->getId());
+		s += " faction: ";
+		switch (bu->getFaction())
+		{
+		case FACTION_HOSTILE: s += "Hostile"; break;
+		case FACTION_NEUTRAL: s += "Neutral"; break;
+		case FACTION_PLAYER: s += "Player"; break;
+		}
+		s += " hp: ";
+		s += std::to_string(bu->getHealth());
+		s += "/";
+		s += std::to_string(bu->getBaseStats()->health);
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
 } // namespace
 
 /**
@@ -4311,6 +4347,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 
 	bu.addScriptValue<&BattleUnit::_scriptValues>();
+	bu.addDebugDisplay<&debugDisplayScript>();
 
 
 	bu.add<&getTileShade>("getTileShade");
@@ -4480,7 +4517,8 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 		"to_energy",
 		"to_morale",
 		"to_wound",
-		"unit", "damaging_item", "battle_game", "currPower", "orig_power", "part", "side", "damaging_type", }
+	"unit", "damaging_item", "weapon_item", "attacker",
+	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", }
 {
 	BindBase b { this };
 
@@ -4489,7 +4527,12 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	setEmptyReturn();
 }
 
-ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "power", "part", "side", "unit", "damaging_item", "battle_game", "orig_power", "damaging_type", }
+ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"power",
+	"part",
+	"side",
+	"unit", "damaging_item", "weapon_item", "attacker",
+	"battle_game", "orig_power", "damaging_type", }
 {
 	BindBase b { this };
 

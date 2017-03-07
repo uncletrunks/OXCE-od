@@ -158,6 +158,51 @@ bool BattleActionCost::spendTU(std::string *message)
 }
 
 /**
+ * Constructor for Battle Action attack.
+ * @param action type of action.
+ * @param unit unit performing attack.
+ * @param item weapon of choice.
+ */
+BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item) : type{ action }, attacer{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
+{
+	if (item)
+	{
+		const RuleItem *rule = item->getRules();
+		switch (rule->getBattleType())
+		{
+		case BT_FIREARM:
+			weapon_item = item;
+			damage_item = type != BA_HIT ? item->getAmmoItem() : item;
+			break;
+
+		case BT_PROXIMITYGRENADE:
+		case BT_GRENADE:
+			weapon_item = item;
+			damage_item = item;
+			if (attacer && damage_item->getPreviousOwner())
+			{
+				attacer = damage_item->getPreviousOwner();
+			}
+			break;
+
+		default:
+			weapon_item = item;
+			damage_item = item;
+			break;
+		}
+	}
+}
+
+/**
+ * Constructor from BattleActionCost.
+ * @param action Action.
+ */
+BattleActionAttack::BattleActionAttack(const BattleActionCost& action) : BattleActionAttack{ action.type, action.actor, action.weapon }
+{
+
+}
+
+/**
  * Initializes all the elements in the Battlescape screen.
  * @param save Pointer to the save game.
  * @param parentState Pointer to the parent battlescape state.
@@ -488,7 +533,7 @@ void BattlescapeGame::endTurn()
 					if (RNG::percent(rule->getSpecialChance()))
 					{
 						Position p = tile->getPosition().toVexel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
-						statePushNext(new ExplosionBState(this, p, BA_NONE, item, unit ? unit : item->getPreviousOwner()));
+						statePushNext(new ExplosionBState(this, p, { BA_NONE, unit, item }));
 						exploded = true;
 					}
 					else
@@ -532,7 +577,7 @@ void BattlescapeGame::endTurn()
 	if (t)
 	{
 		Position p = t->getPosition().toVexel();
-		statePushNext(new ExplosionBState(this, p, BA_NONE, 0, 0, t));
+		statePushNext(new ExplosionBState(this, p, { }, t));
 		statePushBack(0);
 		return;
 	}
@@ -556,7 +601,7 @@ void BattlescapeGame::endTurn()
 		if (t)
 		{
 			Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
-			statePushNext(new ExplosionBState(this, p, BA_NONE, 0, 0, t));
+			statePushNext(new ExplosionBState(this, p, { }, t));
 			statePushBack(0);
 			_endTurnProcessed = true;
 			return;
@@ -672,7 +717,8 @@ void BattlescapeGame::endTurn()
 void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const BattleItem *murderweapon, BattleUnit *origMurderer, bool hiddenExplosion, bool terrainExplosion)
 {
 	// If the victim was killed by the murderer's death explosion, fetch who killed the murderer and make HIM the murderer!
-	if (origMurderer && !origMurderer->getGeoscapeSoldier() && origMurderer->getUnitRules()->getSpecialAbility() == SPECAB_EXPLODEONDEATH && origMurderer->getStatus() == STATUS_DEAD && origMurderer->getMurdererId() != 0)
+	if (origMurderer && !origMurderer->getGeoscapeSoldier() && (origMurderer->getUnitRules()->getSpecialAbility() == SPECAB_EXPLODEONDEATH || origMurderer->getUnitRules()->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
+		&& origMurderer->getStatus() == STATUS_DEAD && origMurderer->getMurdererId() != 0)
 	{
 		for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 		{
@@ -2484,7 +2530,7 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 					if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() >= 0 && RNG::percent((*i)->getRules()->getSpecialChance()))
 					{
 						Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
-						statePushNext(new ExplosionBState(this, p, BA_NONE, (*i), (*i)->getPreviousOwner()));
+						statePushNext(new ExplosionBState(this, p, { BA_NONE, nullptr, (*i), }));
 						exploded = true;
 					}
 				}
@@ -2537,5 +2583,10 @@ void BattlescapeGame::playSound(int sound)
 	}
 }
 
+
+std::list<BattleState*> BattlescapeGame::getStates()
+{
+	return _states;
+}
 
 }

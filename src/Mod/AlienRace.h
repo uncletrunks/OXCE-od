@@ -39,7 +39,6 @@ private:
 	std::string _retaliationMission;
 	std::vector<std::string> _members;
 	std::vector< std::vector<std::string> > _membersRandom;
-	bool _retaliation;
 	int _retaliationAggression;
 public:
 	/// Creates a blank alien race ruleset.
@@ -60,8 +59,6 @@ public:
 	const std::string &getRetaliationMission() const;
 	/// Gets how aggressive alien are to spawn retaliation mission after destroying ufo.
 	int getRetaliationAggression() const;
-	/// Gets if the race can retaliate.
-	bool canRetaliate() const;
 };
 
 }

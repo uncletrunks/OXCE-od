@@ -143,7 +143,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		}
 		else
 		{
-			if (weapon->getCostUnprime().Time > 0)
+			if (weapon->getCostUnprime().Time > 0 && !weapon->getUnprimeActionName().empty())
 			{
 				addItem(BA_UNPRIME, weapon->getUnprimeActionName(), &id, Options::keyBattleActionItem2); // FIXME: hotkey safety?!
 			}
