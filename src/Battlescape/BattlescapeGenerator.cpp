@@ -3037,7 +3037,7 @@ void BattlescapeGenerator::attachNodeLinks()
 						for (std::vector<int>::iterator l = (*k)->getNodeLinks()->begin(); l != (*k)->getNodeLinks()->end(); ++l )
 						{
 							std::map<int, int>::iterator invertedDirection = neighbourDirectionsInverted.find((*l));
-							if (invertedDirection != neighbourDirectionsInverted.end() && (*invertedDirection).second == *linkDirection)
+							if (invertedDirection != neighbourDirectionsInverted.end() && !((*j).first == -1 || (*j).first == -6) && (*invertedDirection).second == *linkDirection)
 							{
 								*l = node->getID();
 								*linkDirection = (*k)->getID();
