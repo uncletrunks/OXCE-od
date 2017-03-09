@@ -495,7 +495,7 @@ void ProjectileFlyBState::think()
 				if (ruleItem->getBattleType() == BT_GRENADE && RNG::percent(ruleItem->getSpecialChance()) && ((Options::battleInstantGrenade && _action.weapon->getFuseTimer() == 0) || ruleItem->getFuseTimerType() == BFT_INSTANT))
 				{
 					// it's a hot grenade to explode immediately
-					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), _action));
+					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), { _action, nullptr }));
 				}
 				else
 				{
@@ -546,7 +546,7 @@ void ProjectileFlyBState::think()
 
 					_parent->statePushFront(new ExplosionBState(
 						_parent, _parent->getMap()->getProjectile()->getPosition(offset),
-						_action, 0,
+						{ _action, _ammo }, 0,
 						(_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem()),
 						shotgun ? 0 : _range + _parent->getMap()->getProjectile()->getDistance()
 					));
@@ -571,7 +571,7 @@ void ProjectileFlyBState::think()
 									Explosion *explosion = new Explosion(proj->getPosition(1), _ammo->getRules()->getHitAnimation());
 									int power = _ammo->getRules()->getPowerBonus(_unit) - _ammo->getRules()->getPowerRangeReduction(proj->getDistance());
 									_parent->getMap()->getExplosions()->push_back(explosion);
-									_parent->getSave()->getTileEngine()->hit(_action, proj->getPosition(1), power, _ammo->getRules()->getDamageType());
+									_parent->getSave()->getTileEngine()->hit({ _action, _ammo }, proj->getPosition(1), power, _ammo->getRules()->getDamageType());
 								}
 							}
 							++i;

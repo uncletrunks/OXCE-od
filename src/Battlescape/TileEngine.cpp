@@ -1873,19 +1873,19 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 	const int wounds = target->getFatalWounds();
 	const int adjustedDamage = target->damage(relative, damage, type, _save, attack);
 
-	if (attack.attacer && target->getFaction() != FACTION_PLAYER)
+	if (attack.attacker && target->getFaction() != FACTION_PLAYER)
 	{
 		// if it's going to bleed to death and it's not a player, give credit for the kill.
 		if (wounds < target->getFatalWounds())
 		{
-			target->killedBy(attack.attacer->getFaction());
+			target->killedBy(attack.attacker->getFaction());
 		}
 	}
 
 	// single place for firing/throwing/melee experience training
-	if (attack.attacer && attack.attacer->getOriginalFaction() == FACTION_PLAYER)
+	if (attack.attacker && attack.attacker->getOriginalFaction() == FACTION_PLAYER)
 	{
-		awardExperience(attack.attacer, attack.weapon_item, target, rangeAtack);
+		awardExperience(attack.attacker, attack.weapon_item, target, rangeAtack);
 	}
 
 	if (type->IgnoreNormalMoraleLose == false)
@@ -1945,7 +1945,7 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 	}
 
 	BattleUnit *bu = tile->getUnit();
-	const int part = voxelCheck(center, attack.attacer);
+	const int part = voxelCheck(center, attack.attacker);
 	const int damage = type->getRandomDamage(power);
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
@@ -2244,7 +2244,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 	}
 	calculateLighting(LL_AMBIENT, centetTile, maxRadius + 1, true); // roofs could have been destroyed and fires could have been started
 	calculateFOV(centetTile, maxRadius + 1, true, true);
-	if (attack.attacer && distance(centetTile, attack.attacer->getPosition()) > maxRadius + 1)
+	if (attack.attacker && distance(centetTile, attack.attacker->getPosition()) > maxRadius + 1)
 	{
 		// unit is away form blast but its visibility can be affected by scripts.
 		calculateFOV(centetTile, 1, false);
