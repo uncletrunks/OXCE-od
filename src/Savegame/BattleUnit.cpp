@@ -1212,7 +1212,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 
 	{
 		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacer, save, orgPower, type->ResistType, };
+		ModScript::HitUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgPower, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
@@ -1281,7 +1281,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacer, save, power, orgPower, bodypart, side, type->ResistType, };
+		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, power, orgPower, bodypart, side, type->ResistType, };
 
 		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
 

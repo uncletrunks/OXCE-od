@@ -50,7 +50,7 @@ ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, Battl
 {
 	_action.type = attack.type;
 	_action.weapon = attack.damage_item;
-	_action.actor = attack.attacer;
+	_action.actor = attack.attacker;
 	_action.target = center.toTile();
 }
 
@@ -95,17 +95,17 @@ void ExplosionBState::init()
 		_pistolWhip = (type != BT_MELEE && action == BA_HIT);
 		if (_pistolWhip)
 		{
-			_power += itemRule->getMeleeBonus(_attack.attacer);
+			_power += itemRule->getMeleeBonus(_attack.attacker);
 
 			_radius = 0;
 			_damageType = itemRule->getMeleeType();
 		}
 		else
 		{
-			_power += itemRule->getPowerBonus(_attack.attacer);
+			_power += itemRule->getPowerBonus(_attack.attacker);
 			_power -= itemRule->getPowerRangeReduction(_range);
 
-			_radius = itemRule->getExplosionRadius(_attack.attacer);
+			_radius = itemRule->getExplosionRadius(_attack.attacker);
 			_damageType = itemRule->getDamageType();
 		}
 
@@ -166,12 +166,12 @@ void ExplosionBState::init()
 		_radius = _power /10;
 		_areaOfEffect = true;
 	}
-	else if (_attack.attacer && (_attack.attacer->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _attack.attacer->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
+	else if (_attack.attacker && (_attack.attacker->getSpecialAbility() == SPECAB_EXPLODEONDEATH || _attack.attacker->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
 	{
-		RuleItem* corpse = _parent->getMod()->getItem(_attack.attacer->getArmor()->getCorpseGeoscape(), true);
-		_power = corpse->getPowerBonus(_attack.attacer);
+		RuleItem* corpse = _parent->getMod()->getItem(_attack.attacker->getArmor()->getCorpseGeoscape(), true);
+		_power = corpse->getPowerBonus(_attack.attacker);
 		_damageType = corpse->getDamageType();
-		_radius = corpse->getExplosionRadius(_attack.attacer);
+		_radius = corpse->getExplosionRadius(_attack.attacker);
 		_areaOfEffect = true;
 		if (!RNG::percent(corpse->getSpecialChance()))
 		{
@@ -363,9 +363,9 @@ void ExplosionBState::explode()
 	// last minute adjustment: determine if we actually
 	if (_hit)
 	{
-		if (_attack.attacer && !_attack.attacer->isOut())
+		if (_attack.attacker && !_attack.attacker->isOut())
 		{
-			_attack.attacer->aim(false);
+			_attack.attacker->aim(false);
 		}
 
 		if (_power <= 0)
@@ -427,14 +427,14 @@ void ExplosionBState::explode()
 	}
 
 	// now check for new casualties
-	_parent->checkForCasualties(_attack.damage_item ? _damageType : 0, _attack.damage_item, _attack.attacer, false, terrainExplosion);
+	_parent->checkForCasualties(_attack.damage_item ? _damageType : 0, _attack.damage_item, _attack.attacker, false, terrainExplosion);
 	// revive units if damage could give hp or reduce stun
 	_parent->getSave()->reviveUnconsciousUnits(true);
 
 	// if this explosion was caused by a unit shooting, now it's the time to put the gun down
-	if (_attack.attacer && !_attack.attacer->isOut() && _lowerWeapon)
+	if (_attack.attacker && !_attack.attacker->isOut() && _lowerWeapon)
 	{
-		_attack.attacer->aim(false);
+		_attack.attacker->aim(false);
 	}
 
 	if (_attack.damage_item && (_attack.damage_item->getRules()->getBattleType() == BT_GRENADE || _attack.damage_item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
@@ -450,7 +450,7 @@ void ExplosionBState::explode()
 	{
 		Position p = t->getPosition().toVexel();
 		p += Position(8,8,0);
-		_parent->statePushFront(new ExplosionBState(_parent, p, { BA_NONE, _attack.attacer, nullptr }, t));
+		_parent->statePushFront(new ExplosionBState(_parent, p, { BA_NONE, _attack.attacker, nullptr }, t));
 	}
 }
 

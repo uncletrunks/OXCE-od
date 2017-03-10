@@ -163,7 +163,7 @@ bool BattleActionCost::spendTU(std::string *message)
  * @param unit unit performing attack.
  * @param item weapon of choice.
  */
-BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item) : type{ action }, attacer{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
+BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item, BattleItem *ammo) : type{ action }, attacker{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
 {
 	if (item)
 	{
@@ -172,16 +172,16 @@ BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit
 		{
 		case BT_FIREARM:
 			weapon_item = item;
-			damage_item = type != BA_HIT ? item->getAmmoItem() : item;
+			damage_item = type != BA_HIT ? (ammo ? ammo : item->getAmmoItem()) : item;
 			break;
 
 		case BT_PROXIMITYGRENADE:
 		case BT_GRENADE:
 			weapon_item = item;
 			damage_item = item;
-			if (attacer && damage_item->getPreviousOwner())
+			if (attacker && damage_item->getPreviousOwner())
 			{
-				attacer = damage_item->getPreviousOwner();
+				attacker = damage_item->getPreviousOwner();
 			}
 			break;
 
@@ -197,7 +197,7 @@ BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit
  * Constructor from BattleActionCost.
  * @param action Action.
  */
-BattleActionAttack::BattleActionAttack(const BattleActionCost& action) : BattleActionAttack{ action.type, action.actor, action.weapon }
+BattleActionAttack::BattleActionAttack(const BattleActionCost& action, BattleItem *ammo) : BattleActionAttack{ action.type, action.actor, action.weapon, ammo }
 {
 
 }

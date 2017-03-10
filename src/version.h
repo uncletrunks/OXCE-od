@@ -18,7 +18,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define OPENXCOM_VERSION_SHORT "Extended 3.7+"
+#define OPENXCOM_VERSION_SHORT "Extended 3.7a+"
 #define OPENXCOM_VERSION_LONG "3.7.0.0"
 #define OPENXCOM_VERSION_NUMBER 3,7,0,0
 
@@ -27,5 +27,5 @@
 #endif
 
 #ifndef OPENXCOM_VERSION_GIT
-#define OPENXCOM_VERSION_GIT " (v2017-03-07)"
+#define OPENXCOM_VERSION_GIT " (v2017-03-10)"
 #endif

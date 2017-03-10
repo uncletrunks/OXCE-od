@@ -87,21 +87,21 @@ struct BattleAction : BattleActionCost
 struct BattleActionAttack
 {
 	BattleActionType type;
-	BattleUnit *attacer;
+	BattleUnit *attacker;
 	BattleItem *weapon_item;
 	BattleItem *damage_item;
 
 	/// Defulat constructor.
-	BattleActionAttack(BattleActionType action = BA_NONE) : type{ action }, attacer{ nullptr }, weapon_item{ nullptr }, damage_item{ nullptr }
+	BattleActionAttack(BattleActionType action = BA_NONE) : type{ action }, attacker{ nullptr }, weapon_item{ nullptr }, damage_item{ nullptr }
 	{
 
 	}
 
 	/// Constructor.
-	BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item);
+	BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item, BattleItem *ammo = nullptr);
 
 	/// Constructor.
-	BattleActionAttack(const BattleActionCost &action);
+	BattleActionAttack(const BattleActionCost &action, BattleItem *ammo);
 };
 
 /**
