@@ -158,17 +158,8 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_btnPsi->setVisible(false);
 
 	// Create soldier stats summary
-	SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks", false);
-	if (texture != 0)
-	{
-		_rankTiny = new Surface(7, 7, x + 135, y + 33);
-		_txtName = new Text(128, 10, x + 143, y + 32);
-	}
-	else
-	{
-		_txtName = new Text(136, 10, x + 135, y + 32);
-		_rankTiny = new Surface(7, 7, x + 264, y + 33);
-	}
+	_rankTiny = new Surface(7, 7, x + 135, y + 33);
+	_txtName = new Text(136, 10, x + 135, y + 32);
 
 	_numTimeUnits = new NumberText(15, 5, x + 136, y + 42);
 	_barTimeUnits = new Bar(102, 3, x + 170, y + 41);
@@ -245,6 +236,17 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	add(_btnAbort, "buttonAbort", "battlescape", _icons);
 	add(_btnStats, "buttonStats", "battlescape", _icons);
 	add(_txtName, "textName", "battlescape", _icons);
+	// need to do this here, because of TFTD
+	bool tinyRanksEnabled = _game->getMod()->getSurface("AvatarBackground", false) != 0 && _game->getMod()->getSurfaceSet("TinyRanks", false) != 0;
+	if (tinyRanksEnabled)
+	{
+		// put tiny rank icon where name used to be
+		_rankTiny->setX(_txtName->getX());
+		_rankTiny->setY(_txtName->getY() + 1);
+		// move name more to the right
+		_txtName->setWidth(_txtName->getWidth() - 8);
+		_txtName->setX(_txtName->getX() + 8);
+	}
 	add(_numTimeUnits, "numTUs", "battlescape", _icons);
 	add(_numEnergy, "numEnergy", "battlescape", _icons);
 	add(_numHealth, "numHealth", "battlescape", _icons);
