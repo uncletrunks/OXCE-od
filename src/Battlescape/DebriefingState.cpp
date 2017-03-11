@@ -1407,7 +1407,7 @@ void DebriefingState::prepareDebriefing()
 				}
 				recoverAlien(*j, base);
 			}
-			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea()) && !_destroyBase
+			else if (oldFaction == FACTION_HOSTILE && !aborted && !_destroyBase
 				// surrendered units may as well count as unconscious too
 				&& playersSurvived > 0 && faction != FACTION_PLAYER && !(*j)->isOut())
 			{
