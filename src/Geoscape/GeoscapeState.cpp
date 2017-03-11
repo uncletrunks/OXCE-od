@@ -1701,7 +1701,9 @@ void GeoscapeState::time1Day()
 			RuleItem *spawnedItem = _game->getMod()->getItem(research->getSpawnedItem());
 			if (spawnedItem)
 			{
-				(*i)->getStorageItems()->addItem(research->getSpawnedItem());
+				Transfer *t = new Transfer(1);
+				t->setItems(research->getSpawnedItem());
+				(*i)->getTransfers()->push_back(t);
 			}
 			if (!(*iter)->getRules()->getGetOneFree().empty())
 			{
