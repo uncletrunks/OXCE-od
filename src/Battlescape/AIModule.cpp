@@ -2051,6 +2051,7 @@ void AIModule::meleeAttack()
 	if (_traceAI) { Log(LOG_INFO) << "Attack unit: " << _aggroTarget->getId(); }
 	_attackAction->target = _aggroTarget->getPosition();
 	_attackAction->type = BA_HIT;
+	_attackAction->weapon = _unit->getUtilityWeapon(BT_MELEE);
 }
 
 /**
