@@ -55,6 +55,7 @@ private:
 	std::vector<std::string> _items;
 	int _totalItems;
 	Uint8 _ammoColor;
+	bool _reload;
 	/// Updates quantities of item.
 	void updateQuantity();
 	/// initializes the displayed list

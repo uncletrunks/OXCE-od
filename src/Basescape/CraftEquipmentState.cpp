@@ -58,7 +58,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param craft ID of the selected craft.
  */
-CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _craft(craft), _base(base), _totalItems(0), _ammoColor(0)
+CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _craft(craft), _base(base), _totalItems(0), _ammoColor(0), _reload(true)
 {
 	Craft *c = _base->getCrafts()->at(_craft);
 	bool craftHasACrew = c->getNumSoldiers() > 0;
@@ -234,7 +234,8 @@ void CraftEquipmentState::init()
 	Craft *c = _base->getCrafts()->at(_craft);
 	c->setInBattlescape(false);
 
-	initList();
+	// don't reload after closing error popups
+	_reload ? initList() : _reload = true;
 }
 
 /**
@@ -736,6 +737,7 @@ void CraftEquipmentState::moveRightByValue(int change)
 					_timerRight->stop();
 					LocalizedText msg(tr("STR_NOT_ENOUGH_AMMO_TO_ARM_HWP").arg(ammoPerVehicle).arg(tr(ammo->getType())));
 					_game->pushState(new ErrorMessageState(msg, _palette, _game->getMod()->getInterface("craftEquipment")->getElement("errorMessage")->color, "BACK04.SCR", _game->getMod()->getInterface("craftEquipment")->getElement("errorPalette")->color));
+					_reload = false;
 				}
 			}
 			else
@@ -756,6 +758,7 @@ void CraftEquipmentState::moveRightByValue(int change)
 			_timerRight->stop();
 			LocalizedText msg(tr("STR_NO_MORE_EQUIPMENT_ALLOWED", c->getRules()->getMaxItems()));
 			_game->pushState(new ErrorMessageState(msg, _palette, _game->getMod()->getInterface("craftEquipment")->getElement("errorMessage")->color, "BACK04.SCR", _game->getMod()->getInterface("craftEquipment")->getElement("errorPalette")->color));
+			_reload = false;
 			change = c->getRules()->getMaxItems() - _totalItems;
 		}
 		c->getItems()->addItem(_items[_sel],change);
