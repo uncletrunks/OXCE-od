@@ -831,7 +831,7 @@ BattleItem* Tile::getTopItem()
 	BattleItem* biggestItem = 0;
 	for (std::vector<BattleItem*>::iterator i = _inventory.begin(); i != _inventory.end(); ++i)
 	{
-		int temp = (*i)->getRules()->getWeight();
+		int temp = (*i)->getTotalWeight();
 		if (temp > biggestWeight)
 		{
 			biggestWeight = temp;

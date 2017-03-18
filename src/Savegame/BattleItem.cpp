@@ -505,6 +505,20 @@ int BattleItem::setAmmoItem(BattleItem *item)
 }
 
 /**
+ * Get item weight with ammo weight.
+ * @return Weight.
+ */
+int BattleItem::getTotalWeight() const
+{
+	int weight = _rules->getWeight();
+	if (_ammoItem && _ammoItem != this)
+	{
+		weight += _ammoItem->_rules->getWeight();
+	}
+	return weight;
+}
+
+/**
  * Gets the item's tile.
  * @return The tile.
  */
@@ -760,6 +774,7 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&BattleItem::getAmmoQuantity>("getAmmoQuantity");
 	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
 	bi.add<&BattleItem::getGlow>("getGlow");
+	bi.add<&BattleItem::getTotalWeight>("getTotalWeight");
 	bi.add<&BattleItem::getHealQuantity>("getHealQuantity");
 	bi.add<&BattleItem::getPainKillerQuantity>("getPainKillerQuantity");
 	bi.add<&BattleItem::getStimulantQuantity>("getStimulantQuantity");

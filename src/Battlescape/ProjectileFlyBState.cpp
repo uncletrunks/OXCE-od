@@ -665,11 +665,7 @@ bool ProjectileFlyBState::validThrowRange(BattleAction *action, Position origin,
 	}
 	int offset = 2;
 	int zd = (origin.z)-((action->target.z * 24 + offset) - target->getTerrainLevel());
-	int weight = action->weapon->getRules()->getWeight();
-	if (action->weapon->getAmmoItem() && action->weapon->getAmmoItem() != action->weapon)
-	{
-		weight += action->weapon->getAmmoItem()->getRules()->getWeight();
-	}
+	int weight = action->weapon->getTotalWeight();
 	double maxDistance = (getMaxThrowDistance(weight, action->actor->getBaseStats()->strength, zd) + 8) / 16.0;
 	int xdiff = action->target.x - action->actor->getPosition().x;
 	int ydiff = action->target.y - action->actor->getPosition().y;

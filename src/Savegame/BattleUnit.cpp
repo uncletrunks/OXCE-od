@@ -2038,11 +2038,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 	// their loadouts are defined in the rulesets and more or less set in stone.
 	if (getFaction() == FACTION_PLAYER && hasInventory())
 	{
-		weight = getCarriedWeight() + rule->getWeight();
-		if (item->getAmmoItem() && item->getAmmoItem() != item)
-		{
-			weight += item->getAmmoItem()->getRules()->getWeight();
-		}
+		weight = getCarriedWeight() + item->getTotalWeight();
 		// allow all weapons to be loaded by avoiding this check,
 		// they'll return false later anyway if the unit has something in his hand.
 		if (rule->getCompatibleAmmo()->empty())
@@ -3238,8 +3234,7 @@ int BattleUnit::getCarriedWeight(BattleItem *draggingItem) const
 	for (std::vector<BattleItem*>::const_iterator i = _inventory.begin(); i != _inventory.end(); ++i)
 	{
 		if ((*i) == draggingItem) continue;
-		weight += (*i)->getRules()->getWeight();
-		if ((*i)->getAmmoItem() != (*i) && (*i)->getAmmoItem()) weight += (*i)->getAmmoItem()->getRules()->getWeight();
+		weight += (*i)->getTotalWeight();
 	}
 	return std::max(0,weight);
 }
