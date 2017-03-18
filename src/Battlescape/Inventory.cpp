@@ -231,11 +231,12 @@ void Inventory::drawItems()
 		// Soldier items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)
 		{
-			if ((*i) == _selItem)
+			Surface *frame = (*i)->getBigSprite(texture);
+
+			if ((*i) == _selItem || !frame)
 				continue;
 
 			int x, y;
-			Surface *frame = (*i)->getBigSprite(texture);
 			if ((*i)->getSlot()->getType() == INV_SLOT)
 			{
 				x = ((*i)->getSlot()->getX() + (*i)->getSlotX() * RuleInventory::SLOT_W);
