@@ -125,6 +125,8 @@ public:
 	int setAmmoItem(BattleItem *item);
 	/// Get total weight (with ammo).
 	int getTotalWeight() const;
+	/// Get primary waypoints count.
+	int getPrimaryWaypoints() const;
 	/// Gets the item's tile.
 	Tile *getTile() const;
 	/// Sets the tile.

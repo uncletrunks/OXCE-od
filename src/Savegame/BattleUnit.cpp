@@ -2425,11 +2425,11 @@ BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 	//prioritize blaster
 	if (!quickest && _faction != FACTION_PLAYER)
 	{
-		if (weaponRightHand->getRules()->getWaypoints() != 0 || weaponRightHand->getAmmoItem()->getRules()->getWaypoints() != 0)
+		if (weaponRightHand->getPrimaryWaypoints() != 0)
 		{
 			return weaponRightHand;
 		}
-		if (weaponLeftHand->getRules()->getWaypoints() != 0 || weaponLeftHand->getAmmoItem()->getRules()->getWaypoints() != 0)
+		if (weaponLeftHand->getPrimaryWaypoints() != 0)
 		{
 			return weaponLeftHand;
 		}

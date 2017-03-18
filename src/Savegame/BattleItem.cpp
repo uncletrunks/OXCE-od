@@ -519,6 +519,20 @@ int BattleItem::getTotalWeight() const
 }
 
 /**
+ * Get wayponts count of weapon or from primary ammo.
+ * @return Maximum waypoints count or -1 if unlimited.
+ */
+int BattleItem::getPrimaryWaypoints() const
+{
+	int waypoints = _rules->getWaypoints();
+	if (waypoints == 0 && _ammoItem && _ammoItem != this)
+	{
+		waypoints = _ammoItem->_rules->getWaypoints();
+	}
+	return waypoints;
+}
+
+/**
  * Gets the item's tile.
  * @return The tile.
  */

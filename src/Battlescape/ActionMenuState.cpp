@@ -96,7 +96,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 
 	if (weapon->getBattleType() == BT_FIREARM)
 	{
-		if (weapon->getWaypoints() != 0 || (_action->weapon->getAmmoItem() && _action->weapon->getAmmoItem()->getRules()->getWaypoints() != 0))
+		if (_action->weapon->getPrimaryWaypoints() != 0)
 		{
 			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id);
 		}

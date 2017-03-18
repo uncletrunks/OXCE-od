@@ -184,7 +184,7 @@ void AIModule::think(BattleAction *action)
 		{
 			if (rule->getBattleType() == BT_FIREARM)
 			{
-				if (rule->getWaypoints() != 0 || (action->weapon->getAmmoItem() && action->weapon->getAmmoItem()->getRules()->getWaypoints() != 0))
+				if (action->weapon->getPrimaryWaypoints() != 0)
 				{
 					_blaster = true;
 					_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_AIMEDSHOT, _unit, action->weapon));
@@ -1700,11 +1700,7 @@ void AIModule::wayPointAction()
 
 		int PathDirection;
 		int CollidesWith;
-		int maxWaypoints = _attackAction->weapon->getRules()->getWaypoints();
-		if (maxWaypoints == 0)
-		{
-			maxWaypoints = _attackAction->weapon->getAmmoItem()->getRules()->getWaypoints();
-		}
+		int maxWaypoints = _attackAction->weapon->getPrimaryWaypoints();
 		if (maxWaypoints == -1)
 		{
 			maxWaypoints = 6 + (_attackAction->diff * 2);
