@@ -1680,7 +1680,7 @@ void AIModule::wayPointAction()
 			continue;
 		_save->getPathfinding()->calculate(_unit, (*i)->getPosition(), *i, -1);
 		if (_save->getPathfinding()->getStartDirection() != -1 &&
-			explosiveEfficacy((*i)->getPosition(), _unit, (_attackAction->weapon->getAmmoItem()->getRules()->getPower()/20)+1, _attackAction->diff))
+			explosiveEfficacy((*i)->getPosition(), _unit, _attackAction->weapon->getAmmoItem()->getRules()->getExplosionRadius(_unit), _attackAction->diff))
 		{
 			_aggroTarget = *i;
 		}
