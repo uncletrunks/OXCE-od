@@ -284,6 +284,7 @@ void CraftEquipmentState::initList()
 	Craft *c = _base->getCrafts()->at(_craft);
 
 	// reset
+	_totalItems = 0;
 	_items.clear();
 	_lstEquipment->clearList();
 
