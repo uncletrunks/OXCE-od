@@ -1495,10 +1495,14 @@ void SavedGame::getDependableResearchBasic (std::vector<RuleResearch *> & depend
 		if (std::find((*iter)->getDependencies().begin(), (*iter)->getDependencies().end(), research->getName()) != (*iter)->getDependencies().end()
 			|| std::find((*iter)->getUnlocked().begin(), (*iter)->getUnlocked().end(), research->getName()) != (*iter)->getUnlocked().end())
 		{
-			dependables.push_back(*iter);
-			if ((*iter)->getCost() == 0)
+			// If the tech isn't already on our list; add it, and recursively check any free techs it grants.
+			if (std::find(dependables.begin(), dependables.end(), *iter) == dependables.end())
 			{
-				getDependableResearchBasic(dependables, *iter, mod, base);
+				dependables.push_back(*iter);
+				if ((*iter)->getCost() == 0)
+				{
+					getDependableResearchBasic(dependables, *iter, mod, base);
+				}
 			}
 		}
 	}
