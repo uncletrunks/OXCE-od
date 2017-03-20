@@ -235,7 +235,11 @@ void CraftEquipmentState::init()
 	c->setInBattlescape(false);
 
 	// don't reload after closing error popups
-	_reload ? initList() : _reload = true;
+	if (_reload)
+	{
+		initList();
+	}
+	_reload = true;
 }
 
 /**
