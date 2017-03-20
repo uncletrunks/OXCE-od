@@ -28,6 +28,7 @@
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Script.h"
 #include "../Engine/ScriptBind.h"
+#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -765,6 +766,46 @@ std::string debugDisplayScript(const BattleItem* bt)
 	}
 }
 
+void setFuseTimerScript(BattleItem* bt, int i)
+{
+	if (bt)
+	{
+		bt->setFuseTimer(Clamp(i, 1, 100));
+	}
+}
+
+void setAmmoQuantityScript(BattleItem* bt, int i)
+{
+	if (bt)
+	{
+		bt->setAmmoQuantity(Clamp(i, 1, bt->getRules()->getClipSize()));
+	}
+}
+
+void setHealQuantityScript(BattleItem* bt, int i)
+{
+	if (bt)
+	{
+		bt->setHealQuantity(Clamp(i, 0, bt->getRules()->getHealQuantity()));
+	}
+}
+
+void setPainKillerQuantityScript(BattleItem* bt, int i)
+{
+	if (bt)
+	{
+		bt->setPainKillerQuantity(Clamp(i, 0, bt->getRules()->getPainKillerQuantity()));
+	}
+}
+
+void setStimulantQuantityScript(BattleItem* bt, int i)
+{
+	if (bt)
+	{
+		bt->setStimulantQuantity(Clamp(i, 0, bt->getRules()->getStimulantQuantity()));
+	}
+}
+
 }
 
 /**
@@ -785,14 +826,24 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.addPair<BattleUnit, &BattleItem::getPreviousOwner, &BattleItem::getPreviousOwner>("getPreviousOwner");
 	bi.addPair<BattleUnit, &BattleItem::getOwner, &BattleItem::getOwner>("getOwner");
 	bi.add<&BattleItem::getId>("getId");
-	bi.add<&BattleItem::getAmmoQuantity>("getAmmoQuantity");
-	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
 	bi.add<&BattleItem::getGlow>("getGlow");
 	bi.add<&BattleItem::getTotalWeight>("getTotalWeight");
-	bi.add<&BattleItem::getHealQuantity>("getHealQuantity");
-	bi.add<&BattleItem::getPainKillerQuantity>("getPainKillerQuantity");
-	bi.add<&BattleItem::getStimulantQuantity>("getStimulantQuantity");
 	bi.add<&BattleItem::isAmmo>("isAmmo");
+
+	bi.add<&BattleItem::getAmmoQuantity>("getAmmoQuantity");
+	bi.add<&setAmmoQuantityScript>("setAmmoQuantity");
+
+	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
+	bi.add<&setFuseTimerScript>("setFuseTimer");
+
+	bi.add<&BattleItem::getHealQuantity>("getHealQuantity");
+	bi.add<&setHealQuantityScript>("setHealQuantity");
+
+	bi.add<&BattleItem::getPainKillerQuantity>("getPainKillerQuantity");
+	bi.add<&setPainKillerQuantityScript>("setPainKillerQuantity");
+
+	bi.add<&BattleItem::getStimulantQuantity>("getStimulantQuantity");
+	bi.add<&setStimulantQuantityScript>("setStimulantQuantity");
 
 	bi.addScriptValue<&BattleItem::_scriptValues>();
 	bi.addDebugDisplay<&debugDisplayScript>();
