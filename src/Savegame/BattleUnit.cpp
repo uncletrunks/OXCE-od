@@ -2233,7 +2233,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
  */
 void BattleUnit::think(BattleAction *action)
 {
-	checkAmmo();
+	reloadAmmo();
 	_currentAIState->think(action);
 }
 
@@ -2529,7 +2529,7 @@ BattleItem *BattleUnit::getLeftHandWeapon() const
  * Check if we have ammo and reload if needed (used for AI).
  * @return Do we have ammo?
  */
-bool BattleUnit::checkAmmo()
+bool BattleUnit::reloadAmmo()
 {
 	BattleItem *list[2] =
 	{

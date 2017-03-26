@@ -2038,7 +2038,7 @@ void BattlescapeGame::findItem(BattleAction *action)
 					if (!targetItem->getAmmoItem())
 					{
 						// try to load our weapon
-						action->actor->checkAmmo();
+						action->actor->reloadAmmo();
 					}
 					if (targetItem->getGlow())
 					{
