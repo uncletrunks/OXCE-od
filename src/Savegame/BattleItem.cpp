@@ -752,10 +752,14 @@ std::string debugDisplayScript(const BattleItem* bt)
 		s += rule->getName();
 		s += "\" id: ";
 		s += std::to_string(bt->getId());
-		if (bt->isAmmo())
+
+		auto clipSize = rule->getClipSize();
+		if (clipSize > 0)
 		{
 			s += " ammo: ";
 			s += std::to_string(bt->getAmmoQuantity());
+			s += "/";
+			s += std::to_string(clipSize);
 		}
 		s += ")";
 		return s;
