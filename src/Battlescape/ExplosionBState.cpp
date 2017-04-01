@@ -46,7 +46,7 @@ namespace OpenXcom
  * @param lowerWeapon Whether the unit causing this explosion should now lower their weapon.
  * @param range Distance between weapon and target.
  */
-ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleActionAttack attack, Tile *tile, bool lowerWeapon, int range) : BattleState(parent), _attack(attack), _center(center), _damageType(), _tile(tile), _power(0), _radius(6), _range(range), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _pistolWhip(false), _hit(false)
+ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleActionAttack attack, Tile *tile, bool lowerWeapon, int range) : BattleState(parent), _attack(attack), _center(center), _damageType(), _tile(tile), _power(0), _radius(6), _range(range), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _hit(false), _psi(false)
 {
 	_action.type = attack.type;
 	_action.weapon = attack.damage_item;
@@ -92,8 +92,9 @@ void ExplosionBState::init()
 		type = itemRule->getBattleType();
 
 		_power = 0;
-		_pistolWhip = (type != BT_MELEE && action == BA_HIT);
-		if (_pistolWhip)
+		_hit = action == BA_HIT;
+		_psi = type == BT_PSIAMP && action != BA_USE && !_hit;
+		if (_hit && type != BT_MELEE)
 		{
 			_power += itemRule->getMeleeBonus(_attack.attacker);
 
@@ -110,7 +111,7 @@ void ExplosionBState::init()
 		}
 
 		//testing if we hit target
-		if (type == BT_PSIAMP && !_pistolWhip)
+		if (type == BT_PSIAMP && !_hit)
 		{
 			if (action != BA_USE)
 			{
@@ -122,7 +123,7 @@ void ExplosionBState::init()
 				miss = true;
 			}
 		}
-		else if (type == BT_MELEE || _pistolWhip)
+		else if (type == BT_MELEE || _hit)
 		{
 			if (!_parent->getTileEngine()->meleeAttack(&_action))
 			{
@@ -140,7 +141,7 @@ void ExplosionBState::init()
 
 		_areaOfEffect = type != BT_MELEE && _radius != 0 &&
 						(type != BT_PSIAMP || action == BA_USE) &&
-						!_pistolWhip && !miss;
+						!_hit && !miss;
 	}
 	else if (_tile)
 	{
@@ -233,32 +234,30 @@ void ExplosionBState::init()
 	// create a bullet hit
 	{
 		_parent->setStateInterval(std::max(1, ((BattlescapeState::DEFAULT_ANIM_SPEED/2) - (10 * itemRule->getExplosionSpeed()))));
-		_hit = _pistolWhip || type == BT_MELEE;
-		bool psi = type == BT_PSIAMP && action != BA_USE && !_pistolWhip;
 		int anim = -1;
 		int sound = -1;
 
-		// melee weapon with ammo
-		BattleItem *ammo = !_pistolWhip && _hit ? _attack.damage_item->getAmmoItem() : 0;
+		const RuleItem *weaponRule = _attack.weapon_item->getRules();
+		const RuleItem *damageRule = _attack.weapon_item != _attack.damage_item ? itemRule : nullptr;
 
-		if (_hit || psi)
+		if (_hit || _psi)
 		{
-			anim = itemRule->getMeleeAnimation();
-			if (psi)
+			anim = weaponRule->getMeleeAnimation();
+			if (_psi)
 			{
 				// psi attack sound is based weapon hit sound
-				sound = itemRule->getHitSound();
+				sound = weaponRule->getHitSound();
 
-				optValue(anim, itemRule->getPsiAnimation());
-				optValue(sound, itemRule->getPsiSound());
+				optValue(anim, weaponRule->getPsiAnimation());
+				optValue(sound, weaponRule->getPsiSound());
 			}
 			else
 			{
-				sound = itemRule->getMeleeSound();
-				if (ammo)
+				sound = weaponRule->getMeleeSound();
+				if (damageRule)
 				{
-					optValue(anim, ammo->getRules()->getMeleeAnimation());
-					optValue(sound, ammo->getRules()->getMeleeSound());
+					optValue(anim, damageRule->getMeleeAnimation());
+					optValue(sound, damageRule->getMeleeSound());
 				}
 			}
 		}
@@ -270,24 +269,24 @@ void ExplosionBState::init()
 
 		if (miss)
 		{
-			if (_hit || psi)
+			if (_hit || _psi)
 			{
-				optValue(anim, itemRule->getMeleeMissAnimation());
-				if (psi)
+				optValue(anim, weaponRule->getMeleeMissAnimation());
+				if (_psi)
 				{
 					// psi attack sound is based weapon hit sound
-					optValue(sound, itemRule->getHitMissSound());
+					optValue(sound, weaponRule->getHitMissSound());
 
-					optValue(anim, itemRule->getPsiMissAnimation());
-					optValue(sound, itemRule->getPsiMissSound());
+					optValue(anim, weaponRule->getPsiMissAnimation());
+					optValue(sound, weaponRule->getPsiMissSound());
 				}
 				else
 				{
-					optValue(sound, itemRule->getMeleeMissSound());
-					if (ammo)
+					optValue(sound, weaponRule->getMeleeMissSound());
+					if (damageRule)
 					{
-						optValue(anim, ammo->getRules()->getMeleeMissAnimation());
-						optValue(sound, ammo->getRules()->getMeleeMissSound());
+						optValue(anim, damageRule->getMeleeMissAnimation());
+						optValue(sound, damageRule->getMeleeMissSound());
 					}
 				}
 			}
@@ -300,13 +299,13 @@ void ExplosionBState::init()
 
 		if (anim != -1)
 		{
-			Explosion *explosion = new Explosion(_center, anim, 0, false, (_hit || psi)); // Don't burn the tile
+			Explosion *explosion = new Explosion(_center, anim, 0, false, (_hit || _psi)); // Don't burn the tile
 			_parent->getMap()->getExplosions()->push_back(explosion);
 		}
 		_parent->getMap()->getCamera()->setViewLevel(_center.z / 24);
 
 		BattleUnit *target = t->getUnit();
-		if ((_hit || psi) && _parent->getSave()->getSide() == FACTION_HOSTILE && target && target->getFaction() == FACTION_PLAYER)
+		if ((_hit || _psi) && _parent->getSave()->getSide() == FACTION_HOSTILE && target && target->getFaction() == FACTION_PLAYER)
 		{
 			_parent->getMap()->getCamera()->centerOnPosition(t->getPosition(), false);
 		}
@@ -374,20 +373,16 @@ void ExplosionBState::explode()
 			return;
 		}
 
-		int sound = _attack.damage_item->getRules()->getMeleeHitSound();
-		if (!_pistolWhip)
+		int sound = _attack.weapon_item->getRules()->getMeleeHitSound();
+		if (_attack.weapon_item != _attack.damage_item)
 		{
 			// melee weapon with ammo
-			BattleItem *ammo = _attack.damage_item->getAmmoItem();
-			if (ammo)
-			{
-				optValue(sound, ammo->getRules()->getMeleeHitSound());
-			}
+			optValue(sound, _attack.damage_item->getRules()->getMeleeHitSound());
 		}
 		_parent->playSound(sound, _action.target);
 	}
 
-	bool range = !(_hit || (_attack.damage_item && _attack.damage_item->getRules()->getBattleType() == BT_PSIAMP));
+	bool range = !(_hit || (_attack.weapon_item->getRules()->getBattleType() == BT_PSIAMP));
 
 	if (_areaOfEffect)
 	{
@@ -398,10 +393,6 @@ void ExplosionBState::explode()
 		BattleUnit *victim = save->getTileEngine()->hit(_attack, _center, _power, _damageType, range);
 
 		const RuleItem *hitItem = _attack.damage_item->getRules();
-		if (_hit && !_pistolWhip && _attack.damage_item->getAmmoItem())
-		{
-			hitItem = _attack.damage_item->getAmmoItem()->getRules();
-		}
 
 		// check if this unit turns others into zombies
 		if (!hitItem->getZombieUnit().empty()
@@ -450,7 +441,7 @@ void ExplosionBState::explode()
 	{
 		Position p = t->getPosition().toVexel();
 		p += Position(8,8,0);
-		_parent->statePushFront(new ExplosionBState(_parent, p, { BA_NONE, _attack.attacker, nullptr }, t));
+		_parent->statePushFront(new ExplosionBState(_parent, p, BattleActionAttack{ BA_NONE, _attack.attacker, }, t));
 	}
 }
 

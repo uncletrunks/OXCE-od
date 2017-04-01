@@ -1595,11 +1595,12 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 		distance(unit->getPosition(), target->getPosition()) < weapon->getRules()->getMaxRange() &&
 		(	// has a melee weapon and is in melee range
 			(weapon->getRules()->getBattleType() == BT_MELEE &&
+				weapon->getAmmoForAction(BA_HIT) &&
 				validMeleeRange(unit, target, unit->getDirection()) &&
 				BattleActionCost(BA_HIT, unit, weapon).haveTU()) ||
 			// has a gun capable of snap shot with ammo
 			(weapon->getRules()->getBattleType() != BT_MELEE &&
-				weapon->getAmmoItem() &&
+				weapon->getAmmoForAction(BA_SNAPSHOT)  &&
 				BattleActionCost(BA_SNAPSHOT, unit, weapon).haveTU())))
 	{
 		reaction.attackType = BA_SNAPSHOT;
@@ -1639,7 +1640,8 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 	action.target = target->getPosition();
 	action.updateTU();
 
-	if (action.weapon->getAmmoItem() && action.weapon->getAmmoItem()->getAmmoQuantity() && action.haveTU())
+	auto ammo = action.weapon->getAmmoForAction(attackType);
+	if (ammo && action.haveTU())
 	{
 		action.targeting = true;
 
@@ -1654,7 +1656,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 				unit->setAIModule(ai);
 			}
 
-			int radius = action.weapon->getAmmoItem()->getRules()->getExplosionRadius(unit);
+			int radius = ammo->getRules()->getExplosionRadius(unit);
 			if (radius > 0 &&
 				ai->explosiveEfficacy(action.target, unit, radius, -1) == 0)
 			{
@@ -1911,7 +1913,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 		if (type->IgnoreSelfDestruct == false)
 		{
 			Position p = Position(target->getPosition().x * 16, target->getPosition().y * 16, target->getPosition().z * 24);
-			_save->getBattleGame()->statePushNext(new ExplosionBState(_save->getBattleGame(), p, { BA_NONE, target, nullptr }, 0));
+			_save->getBattleGame()->statePushNext(new ExplosionBState(_save->getBattleGame(), p, BattleActionAttack{ BA_NONE, target, }, 0));
 		}
 	}
 

@@ -124,9 +124,14 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_btnReserveKneel = new BattlescapeButton(10, 23, x + 96, y + 33);
 	_btnZeroTUs = new BattlescapeButton(10, 23, x + 49, y + 33);
 	_btnLeftHandItem = new InteractiveSurface(32, 48, x + 8, y + 4);
-	_numAmmoLeft = new NumberText(30, 5, x + 8, y + 4);
 	_btnRightHandItem = new InteractiveSurface(32, 48, x + 280, y + 4);
-	_numAmmoRight = new NumberText(30, 5, x + 280, y + 4);
+	_numAmmoLeft.reserve(RuleItem::AmmoSlotMax);
+	_numAmmoRight.reserve(RuleItem::AmmoSlotMax);
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		_numAmmoLeft.push_back(new NumberText(30, 5, x + 8, y + 4 + 6*slot));
+		_numAmmoRight.push_back(new NumberText(30, 5, x + 280, y + 4 + 6*slot));
+	}
 	const int visibleUnitX = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->x;
 	const int visibleUnitY = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->y;
 	for (int i = 0; i < VISIBLE_MAX; ++i)
@@ -232,9 +237,12 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	add(_btnReserveKneel, "buttonReserveKneel", "battlescape", _icons);
 	add(_btnZeroTUs, "buttonZeroTUs", "battlescape", _icons);
 	add(_btnLeftHandItem, "buttonLeftHand", "battlescape", _icons);
-	add(_numAmmoLeft, "numAmmoLeft", "battlescape", _icons);
 	add(_btnRightHandItem, "buttonRightHand", "battlescape", _icons);
-	add(_numAmmoRight, "numAmmoRight", "battlescape", _icons);
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		add(_numAmmoLeft[slot], "numAmmoLeft", "battlescape", _icons);
+		add(_numAmmoRight[slot], "numAmmoRight", "battlescape", _icons);
+	}
 	for (int i = 0; i < VISIBLE_MAX; ++i)
 	{
 		add(_btnVisibleUnit[i]);
@@ -259,9 +267,11 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_numLayers->setColor(Palette::blockOffset(1)-2);
 	_numLayers->setValue(1);
 
-	_numAmmoLeft->setValue(999);
-
-	_numAmmoRight->setValue(999);
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		_numAmmoLeft[slot]->setValue(999);
+		_numAmmoRight[slot]->setValue(999);
+	}
 
 	_icons->onMouseIn((ActionHandler)&BattlescapeState::mouseInIcons);
 	_icons->onMouseOut((ActionHandler)&BattlescapeState::mouseOutIcons);
@@ -1285,28 +1295,34 @@ bool BattlescapeState::playableUnitSelected()
 /**
  * Draw hand item with ammo number.
  */
-void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* ammo)
+void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<NumberText*> &ammoText)
 {
 	hand->clear();
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		ammoText[slot]->setVisible(false);
+	}
 	if (item)
 	{
 		const RuleItem *rule = item->getRules();
 		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item, _save->getAnimFrame());
-		if (item->getRules()->getBattleType() == BT_FIREARM && (item->needsAmmo() || item->getRules()->getClipSize() > 0))
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			if (item->getAmmoItem())
-				ammo->setValue(item->getAmmoItem()->getAmmoQuantity());
-			else
-				ammo->setValue(0);
+			auto ammo = item->getAmmoForSlot(slot);
+			if (!ammo)
+			{
+				if (item->isWeaponWithAmmo())
+				{
+					ammoText[slot]->setVisible(true);
+					ammoText[slot]->setValue(0);
+				}
+			}
+			else if(ammo->getRules()->getClipSize() > 0)
+			{
+				ammoText[slot]->setVisible(true);
+				ammoText[slot]->setValue(ammo->getAmmoQuantity());
+			}
 		}
-		else
-		{
-			ammo->setVisible(false);
-		}
-	}
-	else
-	{
-		ammo->setVisible(false);
 	}
 }
 
@@ -1350,8 +1366,11 @@ void BattlescapeState::updateSoldierInfo()
 	_barMorale->setVisible(playableUnit);
 	_btnLeftHandItem->setVisible(playableUnit);
 	_btnRightHandItem->setVisible(playableUnit);
-	_numAmmoLeft->setVisible(playableUnit);
-	_numAmmoRight->setVisible(playableUnit);
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		_numAmmoLeft[slot]->setVisible(playableUnit);
+		_numAmmoRight[slot]->setVisible(playableUnit);
+	}
 	if (!playableUnit)
 	{
 		_txtName->setText(L"");

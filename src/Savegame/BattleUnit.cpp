@@ -1362,9 +1362,11 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Rule
 				cost = item->getCostThrow();
 				break;
 			case BA_AUTOSHOT:
+				flat = item->getFlatAuto();
 				cost = item->getCostAuto();
 				break;
 			case BA_SNAPSHOT:
+				flat = item->getFlatSnap();
 				cost = item->getCostSnap();
 				break;
 			case BA_HIT:
@@ -1373,6 +1375,7 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Rule
 				break;
 			case BA_LAUNCH:
 			case BA_AIMEDSHOT:
+				flat = item->getFlatAimed();
 				cost = item->getCostAimed();
 				break;
 			case BA_USE:
@@ -2014,6 +2017,41 @@ std::vector<BattleItem*> *BattleUnit::getInventory()
 }
 
 /**
+ * Fit item into inventory slot.
+ * @param slot Slot to fit.
+ * @param item Item to fit.
+ * @return True if succeded, false otherwise.
+ */
+bool BattleUnit::fitItemToInventory(RuleInventory *slot, BattleItem *item)
+{
+	auto rule = item->getRules();
+	if (slot->getType() == INV_HAND)
+	{
+		if (!Inventory::overlapItems(this, item, slot))
+		{
+			item->moveToOwner(this);
+			item->setSlot(slot);
+			return true;
+		}
+	}
+	else if (slot->getType() == INV_SLOT)
+	{
+		for (const RuleSlot &rs : *slot->getSlots())
+		{
+			if (!Inventory::overlapItems(this, item, slot, rs.x, rs.y) && slot->fitItemInSlot(rule, rs.x, rs.y))
+			{
+				item->moveToOwner(this);
+				item->setSlot(slot);
+				item->setSlotX(rs.x);
+				item->setSlotY(rs.y);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+/**
  * Adds an item to an XCom soldier (auto-equip).
  * @param item Pointer to the Item.
  * @param mod Pointer to the Mod.
@@ -2029,8 +2067,6 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 	RuleInventory *leftHand = mod->getInventory("STR_LEFT_HAND");
 	bool placed = false;
 	bool loaded = false;
-	BattleItem *rightWeapon = getRightHandWeapon();
-	BattleItem *leftWeapon = getLeftHandWeapon();
 	const RuleItem *rule = item->getRules();
 	int weight = 0;
 
@@ -2041,7 +2077,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 		weight = getCarriedWeight() + item->getTotalWeight();
 		// allow all weapons to be loaded by avoiding this check,
 		// they'll return false later anyway if the unit has something in his hand.
-		if (rule->getCompatibleAmmo()->empty())
+		if (rule->getBattleType() != BT_FIREARM && rule->getBattleType() != BT_MELEE)
 		{
 			int tally = 0;
 			for (BattleItem *i : *getInventory())
@@ -2083,10 +2119,8 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 			}
 		}
 		// or in the left/right hand
-		if (!placed && (!rightWeapon || !leftWeapon))
+		if (!placed && (fitItemToInventory(rightHand, item) || fitItemToInventory(rightHand, item)))
 		{
-			item->moveToOwner(this);
-			item->setSlot(!rightWeapon ? rightHand : leftHand);
 			placed = true;
 			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 		}
@@ -2104,89 +2138,70 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 	{
 	case BT_FIREARM:
 	case BT_MELEE:
-		if (item->getAmmoItem() || getFaction() != FACTION_PLAYER || !hasInventory() || allowUnloadedWeapons)
+		if (item->haveAnyAmmo() || getFaction() != FACTION_PLAYER || !hasInventory() || allowUnloadedWeapons)
 		{
 			loaded = true;
 		}
 
 		if (loaded && (getGeoscapeSoldier() == 0 || allowAutoLoadout))
 		{
-			if (!rightWeapon && getBaseStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
+			if (getBaseStats()->strength * 0.66 >= weight) // weight is always considered 0 for aliens
 			{
-				item->moveToOwner(this);
-				item->setSlot(rightHand);
-				placed = true;
-			}
-			if (!placed && !leftWeapon && (getFaction() != FACTION_PLAYER || rule->isFixed()))
-			{
-				item->moveToOwner(this);
-				item->setSlot(leftHand);
-				placed = true;
+				if (fitItemToInventory(rightHand, item))
+				{
+					placed = true;
+				}
+				if (!placed && getFaction() != FACTION_PLAYER && fitItemToInventory(leftHand, item))
+				{
+					placed = true;
+				}
 			}
 		}
 		break;
 	case BT_AMMO:
-		// xcom weapons will already be loaded, aliens and tanks, however, get their ammo added afterwards.
-		// so let's try to load them here.
-		if (rightWeapon && (rightWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
-			!rightWeapon->getRules()->getCompatibleAmmo()->empty() &&
-			!rightWeapon->getAmmoItem() &&
-			rightWeapon->setAmmoItem(item) == 0)
 		{
-			item->setSlot(rightHand);
-			placed = true;
-			break;
-		}
-		if (leftWeapon && (leftWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
-			!leftWeapon->getRules()->getCompatibleAmmo()->empty() &&
-			!leftWeapon->getAmmoItem() &&
-			leftWeapon->setAmmoItem(item) == 0)
-		{
-			item->setSlot(leftHand);
-			placed = true;
-			break;
-		}
-		// don't take ammo for weapons we don't have.
-		keep = (getFaction() != FACTION_PLAYER);
-		if (rightWeapon)
-		{
-			for (const std::string &s : *rightWeapon->getRules()->getCompatibleAmmo())
+			BattleItem *rightWeapon = getRightHandWeapon();
+			BattleItem *leftWeapon = getLeftHandWeapon();
+			// xcom weapons will already be loaded, aliens and tanks, however, get their ammo added afterwards.
+			// so let's try to load them here.
+			if (rightWeapon && (rightWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
+				rightWeapon->isWeaponWithAmmo() && rightWeapon->setAmmoPreMission(item))
 			{
-				if (s == rule->getType())
+				placed = true;
+				break;
+			}
+			if (leftWeapon && (leftWeapon->getRules()->isFixed() || getFaction() != FACTION_PLAYER || allowUnloadedWeapons) &&
+				leftWeapon->isWeaponWithAmmo() && leftWeapon->setAmmoPreMission(item))
+			{
+				placed = true;
+				break;
+			}
+			// don't take ammo for weapons we don't have.
+			keep = (getFaction() != FACTION_PLAYER);
+			if (rightWeapon)
+			{
+				if (rightWeapon->getRules()->getSlotForAmmo(rule->getType()) != -1)
 				{
 					keep = true;
-					break;
 				}
 			}
-		}
-		if (leftWeapon)
-		{
-			for (const std::string &s : *leftWeapon->getRules()->getCompatibleAmmo())
+			if (leftWeapon)
 			{
-				if (s == rule->getType())
+				if (leftWeapon->getRules()->getSlotForAmmo(rule->getType()) != -1)
 				{
 					keep = true;
-					break;
 				}
 			}
-		}
-		if (!keep)
-		{
-			break;
+			if (!keep)
+			{
+				break;
+			}
 		}
 	default:
 		if (rule->getBattleType() == BT_PSIAMP && getFaction() == FACTION_HOSTILE)
 		{
-			if (!rightWeapon)
+			if (fitItemToInventory(rightHand, item) || fitItemToInventory(leftHand, item))
 			{
-				item->moveToOwner(this);
-				item->setSlot(rightHand);
-				placed = true;
-			}
-			if (!placed && !leftWeapon)
-			{
-				item->moveToOwner(this);
-				item->setSlot(leftHand);
 				placed = true;
 			}
 		}
@@ -2199,18 +2214,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 					RuleInventory *slot = mod->getInventory(s);
 					if (slot->getType() == INV_SLOT)
 					{
-						for (const RuleSlot &rs : *slot->getSlots())
-						{
-							if (!Inventory::overlapItems(this, item, slot, rs.x, rs.y) && slot->fitItemInSlot(rule, rs.x, rs.y))
-							{
-								item->moveToOwner(this);
-								item->setSlot(slot);
-								item->setSlotX(rs.x);
-								item->setSlotY(rs.y);
-								placed = true;
-								break;
-							}
-						}
+						placed = fitItemToInventory(slot, item);
 						if (placed)
 						{
 							break;
@@ -2219,7 +2223,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 				}
 			}
 		}
-	break;
+		break;
 	}
 
 	item->setXCOMProperty(getFaction() == FACTION_PLAYER);
@@ -2405,9 +2409,9 @@ BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 	BattleItem *weaponLeftHand = getLeftHandWeapon();
 
 	// ignore weapons without ammo (rules out grenades)
-	if (!weaponRightHand || !weaponRightHand->getAmmoItem() || !weaponRightHand->getAmmoItem()->getAmmoQuantity())
+	if (!weaponRightHand || !weaponRightHand->haveAnyAmmo())
 		weaponRightHand = 0;
-	if (!weaponLeftHand || !weaponLeftHand->getAmmoItem() || !weaponLeftHand->getAmmoItem()->getAmmoQuantity())
+	if (!weaponLeftHand || !weaponLeftHand->haveAnyAmmo())
 		weaponLeftHand = 0;
 
 	// if there is only one weapon, it's easy:
@@ -2425,11 +2429,11 @@ BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 	//prioritize blaster
 	if (!quickest && _faction != FACTION_PLAYER)
 	{
-		if (weaponRightHand->getPrimaryWaypoints() != 0)
+		if (weaponRightHand->getCurrentWaypoints() != 0)
 		{
 			return weaponRightHand;
 		}
-		if (weaponLeftHand->getPrimaryWaypoints() != 0)
+		if (weaponLeftHand->getCurrentWaypoints() != 0)
 		{
 			return weaponLeftHand;
 		}
@@ -2540,41 +2544,36 @@ bool BattleUnit::reloadAmmo()
 	for (int i = 0; i < 2; ++i)
 	{
 		BattleItem *weapon = list[i];
-		if (!weapon || weapon->getAmmoItem() != 0 || weapon->getRules()->getBattleType() == BT_MELEE)
+		if (!weapon || !weapon->isWeaponWithAmmo() || weapon->haveAllAmmo())
 		{
 			continue;
 		}
 
 		// we have a non-melee weapon with no ammo and 15 or more TUs - we might need to look for ammo then
 		BattleItem *ammo = 0;
-		int tuCost = weapon->getRules()->getTULoad();
-		int tuMove = getTimeUnits() - tuCost;
+		auto ruleWeapon = weapon->getRules();
+		auto tuCost = getTimeUnits();
+		auto slotAmmo = 0;
 
-		if (tuMove < 0)
+		for (BattleItem* i : *getInventory())
 		{
-			continue;
-		}
-
-		for (std::vector<BattleItem*>::iterator i = getInventory()->begin(); i != getInventory()->end(); ++i)
-		{
-			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
+			int slot = ruleWeapon->getSlotForAmmo(i->getRules()->getType());
+			if (slot != -1)
 			{
-				if (s == (*i)->getRules()->getType())
+				int tuTemp = i->getSlot()->getType() != INV_HAND ? i->getSlot()->getCost(weapon->getSlot()) : 0;
+				tuTemp += ruleWeapon->getTULoad(slot);
+				if (tuTemp < tuCost)
 				{
-					int tuTemp = (*i)->getSlot()->getType() != INV_HAND ? (*i)->getSlot()->getCost(weapon->getSlot()) : 0;
-					if (tuTemp < tuMove)
-					{
-						tuMove = tuTemp;
-						ammo = (*i);
-					}
-					continue;
+					tuCost = tuTemp;
+					ammo = i;
+					slotAmmo = slot;
 				}
 			}
 		}
 
-		if (ammo && spendTimeUnits(tuCost + tuMove))
+		if (ammo && spendTimeUnits(tuCost))
 		{
-			weapon->setAmmoItem(ammo);
+			weapon->setAmmoForSlot(slotAmmo, ammo);
 			ammo->moveToOwner(0);
 
 			return true;

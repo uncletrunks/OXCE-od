@@ -429,10 +429,10 @@ void CraftEquipmentState::moveLeftByValue(int change)
 	// Convert vehicle to item
 	if (item->isFixed())
 	{
-		if (!item->getCompatibleAmmo()->empty())
+		if (!item->getPrimaryCompatibleAmmo()->empty())
 		{
 			// Calculate how much ammo needs to be added to the base.
-			RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front(), true);
+			RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
 			int ammoPerVehicle;
 			if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
 			{
@@ -533,10 +533,10 @@ void CraftEquipmentState::moveRightByValue(int change)
 		if (room > 0)
 		{
 			change = std::min(room, change);
-			if (!item->getCompatibleAmmo()->empty())
+			if (!item->getPrimaryCompatibleAmmo()->empty())
 			{
 				// And now let's see if we can add the total number of vehicles.
-				RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front(), true);
+				RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
 				int ammoPerVehicle, clipSize;
 				if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
 				{

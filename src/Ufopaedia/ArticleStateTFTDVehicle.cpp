@@ -84,9 +84,9 @@ namespace OpenXcom
 		
 		_lstStats2->addRow(2, tr("STR_WEAPON").c_str(), tr(defs->weapon).c_str());
 				
-		if (!item->getCompatibleAmmo()->empty())
+		if (!item->getPrimaryCompatibleAmmo()->empty())
 		{
-			RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front(), true);
+			RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
 
 			std::wostringstream ss8;
 			ss8 << ammo->getPower();

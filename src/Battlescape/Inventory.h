@@ -52,6 +52,12 @@ private:
 	NumberText *_stackNumber;
 	Timer *_animTimer;
 	int _depth;
+	RuleInventory *_inventorySlotRightHand = nullptr;
+	RuleInventory *_inventorySlotLeftHand = nullptr;
+	RuleInventory *_inventorySlotBackPack = nullptr;
+	RuleInventory *_inventorySlotBelt = nullptr;
+	RuleInventory *_inventorySlotGround = nullptr;
+
 	/// Moves an item to a specified slot.
 	void moveItem(BattleItem *item, RuleInventory *slot, int x, int y);
 	/// Gets the slot in the specified position.

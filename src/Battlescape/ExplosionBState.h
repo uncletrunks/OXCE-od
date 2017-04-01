@@ -43,7 +43,7 @@ private:
 	int _power;
 	int _radius;
 	int _range;
-	bool _areaOfEffect, _lowerWeapon, _pistolWhip, _hit;
+	bool _areaOfEffect, _lowerWeapon, _hit, _psi;
 
 	/// Calculates the effects of the explosion.
 	void explode();

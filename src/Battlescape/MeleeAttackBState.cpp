@@ -60,15 +60,17 @@ void MeleeAttackBState::init()
 	_initialized = true;
 
 	_weapon = _action.weapon;
-	if (!_weapon) // can't shoot without weapon
+	if (!_weapon) // can't hit without weapon
 	{
 		_parent->popState();
 		return;
 	}
-	_ammo = _weapon->getAmmoItem();
+
+	_ammo = _action.weapon->getAmmoForAction(BA_HIT, &_action.result);
 	if (!_ammo)
 	{
-		_ammo = _weapon;
+		_parent->popState();
+		return;
 	}
 
 	if (!_parent->getSave()->getTile(_action.target)) // invalid target position
@@ -164,7 +166,7 @@ void MeleeAttackBState::think()
 		_target && _target->getHealth() > 0 &&
 		_target->getHealth() > _target->getStunlevel() &&
 		// and we still have ammo to make the attack
-		_weapon->getAmmoItem() &&
+		_weapon->getAmmoForAction(BA_HIT) &&
 		// spend the TUs immediately
 		_action.spendTU())
 	{
@@ -197,11 +199,7 @@ void MeleeAttackBState::performMeleeAttack()
 	_unit->aim(true);
 
 	// use up ammo if applicable
-	if (!_parent->getSave()->getDebugMode() && _weapon->getRules()->getBattleType() == BT_MELEE && _ammo && _ammo->spendBullet() == false)
-	{
-		_parent->getSave()->removeItem(_ammo);
-		_action.weapon->setAmmoItem(0);
-	}
+	_action.weapon->spendAmmoForAction(BA_HIT, _parent->getSave());
 	_parent->getMap()->setCursorType(CT_NONE);
 
 	// offset the damage voxel ever so slightly so that the target knows which side the attack came from
@@ -214,7 +212,7 @@ void MeleeAttackBState::performMeleeAttack()
 
 
 	// make an explosion action
-	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, { _action, _ammo }, 0, true));
+	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, BattleActionAttack{ _action, _ammo, }, 0, true));
 
 
 	_reaction = true;

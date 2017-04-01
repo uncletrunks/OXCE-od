@@ -329,10 +329,14 @@ public:
 	void setFire(int fire);
 	/// Get fire.
 	int getFire() const;
+
 	/// Get the list of items in the inventory.
 	std::vector<BattleItem*> *getInventory();
+	/// Fit item into inventory slot.
+	bool fitItemToInventory(RuleInventory *slot, BattleItem *item);
 	/// Add item to unit.
 	bool addItem(BattleItem *item, const Mod *mod, bool allowSecondClip = false, bool allowAutoLoadout = false, bool allowUnloadedWeapons = false);
+
 	/// Let AI do their thing.
 	void think(BattleAction *action);
 	/// Get AI Module.

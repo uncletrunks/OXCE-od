@@ -345,12 +345,15 @@ void BattlescapeGenerator::nextStage()
 			}
 
 			// at this point, we know what happens with the item, so let's apply it to any ammo as well.
-			BattleItem *ammo = (*i)->getAmmoItem();
-			if (ammo && ammo != *i)
+			for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 			{
-				// break any tile links, because all the tiles are about to disappear.
-				ammo->setTile(0);
-				toContainer->push_back(ammo);
+				BattleItem *ammo = (*i)->getAmmoForSlot(slot);
+				if (ammo && ammo != *i)
+				{
+					// break any tile links, because all the tiles are about to disappear.
+					ammo->setTile(0);
+					toContainer->push_back(ammo);
+				}
 			}
 			// and now the actual item itself.
 			(*i)->setTile(0);
@@ -665,9 +668,9 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 					// send disabled vehicles back to base
 					_base->getStorageItems()->addItem((*i)->getRules()->getType(), 1);
 					// ammo too, if necessary
-					if (!(*i)->getRules()->getCompatibleAmmo()->empty())
+					if (!(*i)->getRules()->getPrimaryCompatibleAmmo()->empty())
 					{
-						RuleItem *ammo = _game->getMod()->getItem((*i)->getRules()->getCompatibleAmmo()->front());
+						RuleItem *ammo = _game->getMod()->getItem((*i)->getRules()->getPrimaryCompatibleAmmo()->front());
 						_base->getStorageItems()->addItem(ammo->getType(), (*i)->getAmmo());
 					}
 				}
@@ -942,9 +945,9 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 	if (unit)
 	{
 		_save->createItemForUnit(vehicle, unit);
-		if (!v->getRules()->getCompatibleAmmo()->empty())
+		if (!v->getRules()->getPrimaryCompatibleAmmo()->empty())
 		{
-			std::string ammo = v->getRules()->getCompatibleAmmo()->front();
+			std::string ammo = v->getRules()->getPrimaryCompatibleAmmo()->front();
 			BattleItem *ammoItem = _save->createItemForUnit(ammo, unit);
 			if (ammoItem)
 			{
@@ -1266,56 +1269,75 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item)
 	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
 	if (item->getSlot() == ground)
 	{
-		bool loaded;
-		RuleInventory *righthand = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
+		auto& itemType = item->getRules()->getType();
 
 		// find the first soldier with a matching layout-slot
-		for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+		for (auto unit : *_save->getUnits())
 		{
 			// skip the vehicles, we need only X-Com soldiers WITH equipment-layout
-			if ((*i)->getArmor()->getSize() > 1 || !(*i)->getGeoscapeSoldier() || (*i)->getGeoscapeSoldier()->getEquipmentLayout()->empty())
+			if (unit->getArmor()->getSize() > 1 || !unit->getGeoscapeSoldier() || unit->getGeoscapeSoldier()->getEquipmentLayout()->empty())
 			{
 				continue;
 			}
 
 			// find the first matching layout-slot which is not already occupied
-			std::vector<EquipmentLayoutItem*> *layoutItems = (*i)->getGeoscapeSoldier()->getEquipmentLayout();
-			for (std::vector<EquipmentLayoutItem*>::iterator j = layoutItems->begin(); j != layoutItems->end(); ++j)
+			for (auto layoutItem : *unit->getGeoscapeSoldier()->getEquipmentLayout())
 			{
-				if (item->getRules()->getType() != (*j)->getItemType()
-				|| (*i)->getItem((*j)->getSlot(), (*j)->getSlotX(), (*j)->getSlotY())) continue;
+				if (itemType != layoutItem->getItemType()) continue;
 
-				if ((*j)->getAmmoItem() == "NONE")
+				auto inventorySlot = _game->getMod()->getInventory(layoutItem->getSlot(), true);
+
+				if (unit->getItem(inventorySlot, layoutItem->getSlotX(), layoutItem->getSlotY())) continue;
+
+				auto toLoad = 0;
+				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 				{
-					loaded = true;
-				}
-				else
-				{
-					loaded = false;
-					// maybe we find the layout-ammo on the ground to load it with
-					for (std::vector<BattleItem*>::iterator k = _craftInventoryTile->getInventory()->begin(); (!loaded) && k != _craftInventoryTile->getInventory()->end(); ++k)
+					if (layoutItem->getAmmoItemForSlot(slot) != "NONE")
 					{
-						if ((*k)->getRules()->getType() == (*j)->getAmmoItem() && (*k)->getSlot() == ground
-						&& item->setAmmoItem((*k)) == 0)
+						++toLoad;
+					}
+				}
+
+				if (toLoad)
+				{
+					// maybe we find the layout-ammo on the ground to load it with
+					for (auto ammo : *_craftInventoryTile->getInventory())
+					{
+						if (ammo->getSlot() == ground)
 						{
-							(*k)->setSlot(righthand);
-							loaded = true;
-							// note: soldier is not owner of the ammo, we are using this fact when saving equipments
+							auto& ammoType = ammo->getRules()->getType();
+							for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+							{
+								if (ammoType == layoutItem->getAmmoItemForSlot(slot))
+								{
+									if (item->setAmmoPreMission(ammo))
+									{
+										--toLoad;
+									}
+									// even if item was not loaded other slots can't use it either
+									break;
+								}
+							}
+							if (!toLoad)
+							{
+								break;
+							}
 						}
 					}
 				}
+
 				// only place the weapon onto the soldier when it's loaded with its layout-ammo (if any)
-				if (loaded)
+				if (!toLoad || item->haveAnyAmmo())
 				{
-					item->moveToOwner((*i));
-					item->setSlot(_game->getMod()->getInventory((*j)->getSlot(), true));
-					item->setSlotX((*j)->getSlotX());
-					item->setSlotY((*j)->getSlotY());
+					item->moveToOwner(unit);
+					item->setSlot(inventorySlot);
+					item->setSlotX(layoutItem->getSlotX());
+					item->setSlotY(layoutItem->getSlotY());
 					if (Options::includePrimeStateInSavedLayout &&
 						(item->getRules()->getBattleType() == BT_GRENADE ||
 						item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
 					{
-						item->setFuseTimer((*j)->getFuseTimer());
+						item->setFuseTimer(layoutItem->getFuseTimer());
 					}
 					return true;
 				}
@@ -1803,28 +1825,29 @@ void BattlescapeGenerator::runInventory(Craft *craft)
  */
 void BattlescapeGenerator::loadWeapons()
 {
+	auto groundSlot = _game->getMod()->getInventory("STR_GROUND", true);
 	// let's try to load this weapon, whether we equip it or not.
-	for (std::vector<BattleItem*>::iterator i = _craftInventoryTile->getInventory()->begin(); i != _craftInventoryTile->getInventory()->end(); ++i)
+	for (BattleItem* i : *_craftInventoryTile->getInventory())
 	{
-		if (!(*i)->getRules()->isFixed() &&
-			!(*i)->getRules()->getCompatibleAmmo()->empty() &&
-			(*i)->getAmmoItem() == 0 &&
-			((*i)->getRules()->getBattleType() == BT_FIREARM || (*i)->getRules()->getBattleType() == BT_MELEE))
+		if (i->isWeaponWithAmmo() && //TODO test this check
+			!i->haveAllAmmo() &&
+			!i->getRules()->isFixed())
 		{
-			bool loaded = false;
-			for (std::vector<BattleItem*>::iterator j = _craftInventoryTile->getInventory()->begin(); j != _craftInventoryTile->getInventory()->end() && !loaded; ++j)
+			for (BattleItem* j : *_craftInventoryTile->getInventory())
 			{
-				if ((*j)->getSlot() == _game->getMod()->getInventory("STR_GROUND", true) && (*i)->setAmmoItem(*j) == 0)
+				if (j->getSlot() == groundSlot && i->setAmmoPreMission(j))
 				{
-					(*j)->setSlot(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
-					loaded = true;
+					if (!i->haveAllAmmo())
+					{
+						break;
+					}
 				}
 			}
 		}
 	}
 	for (std::vector<BattleItem*>::iterator i = _craftInventoryTile->getInventory()->begin(); i != _craftInventoryTile->getInventory()->end();)
 	{
-		if ((*i)->getSlot() != _game->getMod()->getInventory("STR_GROUND", true))
+		if ((*i)->getSlot() != groundSlot)
 		{
 			i = _craftInventoryTile->getInventory()->erase(i);
 			continue;

@@ -149,6 +149,7 @@ Random functions in script.[br/]
 Vertical map generation support.[br/]
 [br/]
 3.8:[br/]
+Add multi ammo weapons.[br/]
 [br/]
 
 [examples]
@@ -242,10 +243,19 @@ items:
       morale: true    #morale cost is flat or reduced by bravery. Default `true`.
       health: true    #health points cost is flat or %. Default `true`.
       stun: false     #stun damage applied by atack is flat or % of max health. Default `true`.
+    flatAimed:
+      #changes how `costAimed` behaves (flat or percent values), if -1 it use `flatUse` value.
+      #same propertes like `flatUse`.
+    flatAuto:
+      #changes how `costAuto` behaves (flat or percent values), if -1 it use `flatAimed` value.
+      #same propertes like `flatUse`.
+    flatSnap:
+      #changes how `costSnap` behaves (flat or percent values), if -1 it use `flatAimed` value.
+      #same propertes like `flatUse`.
     flatMelee:
       #optional for `costMelee` in range weapons.
       #same propertes like `flatUse`.
-      #use of null (aka `~`) will cause fall back to `flatUse` values.
+      #use of null (aka `~`) or -1 in property will cause fall back to `flatUse` values.
     flatThrow:
       #changes how `costThrow` behaves (flat or percent values).
       #same propertes like `flatUse`.
@@ -255,6 +265,41 @@ items:
     flatUnprime:
       #changes how `costUnprime` behaves (flat or percent values).
       #same propertes like `flatUse`.
+    confAimed:
+      shots: 1              #number of shots. Defulat `1`.
+      name: STR_AIMED_SHOT  #name of attack in action menu.
+      ammoSlot: 0           #with ammo slot is used by this attack. Defulat `0`.
+    confAuto:
+      shots: 3              #number of shots, its alias with `autoShots`.
+      #...
+      #same properties as `confAimed`
+      #...
+    confSnap:
+      #...
+      #same properties as `confAimed`
+      #...
+    confMelee:
+      name: ~               #if no name is set name then it will be set based on damage type (stun or normal melee).
+      #...
+      #same properties as `confAimed`
+      #...
+    ammo:   #list of avaiable ammo slots in weapon.
+      0:
+        tuLoad: 10                          #alias to `tuLoad` in parent node.
+        toUnload: 20                        #alias to `tuUnload` in parent node.
+        compatibleAmmo: [ AMMO_A, AMMO_B ]  #alias to `compatibleAmmo` in parent node.
+      1:
+        #...
+        #analoge properties as `0` but without aliasing to parent.
+        #...
+      2:
+        #...
+        #analoge properties as `0` but without aliasing to parent.
+        #...
+      3:
+        #...
+        #analoge properties as `0` but without aliasing to parent.
+        #...
     damageBonus: #used by ammo.
       #each bonus can be writen as: `s: x`, `s: [x]`, `s: [x, y]` or `s: [x, y, z]`.
       #where each value represents coefficient of polynomial `x * s + y * s^2 + z * s^3`.

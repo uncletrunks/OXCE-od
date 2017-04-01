@@ -88,6 +88,20 @@ struct RuleItemUseCost
 };
 
 /**
+ * Common configuration of item action.
+ */
+struct RuleItemAction
+{
+	int accuracy = 0;
+	int range = 0;
+	int shots = 1;
+	int ammoSlot = 0;
+	RuleItemUseCost cost;
+	RuleItemUseCost flat;
+	std::string name;
+};
+
+/**
  * Represents a specific type of item.
  * Contains constant info about an item like
  * storage size, sell price, etc.
@@ -95,6 +109,10 @@ struct RuleItemUseCost
  */
 class RuleItem
 {
+public:
+	/// Maximum number of ammo slots on weapon.
+	static const int AmmoSlotMax = 4;
+
 private:
 	std::string _type, _name; // two types of objects can have the same name
 	std::vector<std::string> _requires;
@@ -113,11 +131,12 @@ private:
 	int _power;
 	float _powerRangeReduction;
 	float _powerRangeThreshold;
-	std::vector<std::string> _compatibleAmmo;
+	std::vector<std::string> _compatibleAmmo[AmmoSlotMax];
 	RuleDamageType _damageType, _meleeType;
-	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
-	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime, _costUnprime;
-	int _clipSize, _specialChance, _tuLoad, _tuUnload;
+	RuleItemAction _confAimed, _confAuto, _confSnap, _confMelee;
+	int _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
+	RuleItemUseCost _costUse, _costMind, _costPanic, _costThrow, _costPrime, _costUnprime;
+	int _clipSize, _specialChance, _tuLoad[AmmoSlotMax], _tuUnload[AmmoSlotMax];
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
@@ -133,10 +152,10 @@ private:
 	int _aiUseDelay, _aiMeleeHitCount;
 	bool _recover, _liveAlien;
 	int _attraction;
-	RuleItemUseCost _flatUse, _flatMelee, _flatThrow, _flatPrime, _flatUnprime;
+	RuleItemUseCost _flatUse, _flatThrow, _flatPrime, _flatUnprime;
 	bool _arcingShot;
 	ExperienceTrainingMode _experienceTrainingMode;
-	int _listOrder, _maxRange, _aimRange, _snapRange, _autoRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _autoShots, _shotgunPellets;
+	int _listOrder, _maxRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _shotgunPellets;
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
@@ -159,6 +178,8 @@ private:
 	void loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
 	/// Load RuleItemUseCost as bool from yaml.
 	void loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
+	/// Load RuleItemAction from yaml.
+	void loadConfAction(RuleItemAction& a, const YAML::Node& node, const std::string& name) const;
 
 public:
 	/// Name of class used in script.
@@ -269,6 +290,15 @@ public:
 	/// Get multiplier of throwing form unit statistics
 	int getThrowMultiplier(const BattleUnit *unit) const;
 
+	/// Get configuration of aimed shot action.
+	const RuleItemAction *getConfigAimed() const;
+	/// Get configuration of autoshot action.
+	const RuleItemAction *getConfigAuto() const;
+	/// Get configuration of snapshot action.
+	const RuleItemAction *getConfigSnap() const;
+	/// Get configuration of melee action.
+	const RuleItemAction *getConfigMelee() const;
+
 	/// Gets the item's aimed shot accuracy.
 	int getAccuracyAimed() const;
 	/// Gets the item's autoshot accuracy.
@@ -307,13 +337,34 @@ public:
 	/// Gets the item's unprime cost.
 	RuleItemUseCost getCostUnprime() const;
 
-	/// Gets the item's load TU cost.
-	int getTULoad() const;
-	/// Gets the item's unload TU cost.
-	int getTUUnload() const;
+	/// Should we charge a flat rate of costAimed?
+	RuleItemUseCost getFlatAimed() const;
+	/// Should we charge a flat rate of costAuto?
+	RuleItemUseCost getFlatAuto() const;
+	/// Should we charge a flat rate of costSnap?
+	RuleItemUseCost getFlatSnap() const;
+	/// Should we charge a flat rate of costMelee?
+	RuleItemUseCost getFlatMelee() const;
+	/// Should we charge a flat rate?
+	RuleItemUseCost getFlatUse() const;
+	/// Should we charge a flat rate of costThrow?
+	RuleItemUseCost getFlatThrow() const;
+	/// Should we charge a flat rate of costPrime?
+	RuleItemUseCost getFlatPrime() const;
+	/// Should we charge a flat rate of costPrime?
+	RuleItemUseCost getFlatUnprime() const;
 
+	/// Gets the item's load TU cost.
+	int getTULoad(int slot) const;
+	/// Gets the item's unload TU cost.
+	int getTUUnload(int slot) const;
 	/// Gets list of compatible ammo.
-	const std::vector<std::string> *getCompatibleAmmo() const;
+	const std::vector<std::string> *getPrimaryCompatibleAmmo() const;
+	/// Get slot position for ammo type.
+	int getSlotForAmmo(const std::string &type) const;
+	/// Get slot position for ammo type.
+	const std::vector<std::string> *getCompatibleAmmoForSlot(int slot) const;
+
 	/// Gets the item's damage type.
 	const RuleDamageType *getDamageType() const;
 	/// Gets the item's melee damage type for range weapons.
@@ -381,17 +432,6 @@ public:
 	/// Checks if this a live alien.
 	bool isAlien() const;
 
-	/// Should we charge a flat rate?
-	RuleItemUseCost getFlatUse() const;
-	/// Should we charge a flat rate of costMelee?
-	RuleItemUseCost getFlatMelee() const;
-	/// Should we charge a flat rate of costThrow?
-	RuleItemUseCost getFlatThrow() const;
-	/// Should we charge a flat rate of costPrime?
-	RuleItemUseCost getFlatPrime() const;
-	/// Should we charge a flat rate of costPrime?
-	RuleItemUseCost getFlatUnprime() const;
-
 	/// Should this weapon arc?
 	bool getArcingShot() const;
 	/// Which experience training mode to use for this weapon?
@@ -404,8 +444,6 @@ public:
 	int getBulletSpeed() const;
 	/// How fast does the explosion animation play?
 	int getExplosionSpeed() const;
-	/// How many auto shots does this weapon fire.
-	int getAutoShots() const;
 	/// Get name of psi attack for action menu.
 	const std::string &getPsiAttackName() const { return _psiAttackName; }
 	/// Get name of prime action for action menu.

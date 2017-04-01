@@ -93,7 +93,16 @@ void ProjectileFlyBState::init()
 
 	_unit = _action.actor;
 
-	_ammo = weapon->getAmmoItem();
+	bool reactionShoot = _unit->getFaction() != _parent->getSave()->getSide();
+	if (_action.type != BA_THROW)
+	{
+		_ammo = _action.weapon->getAmmoForAction(_action.type, reactionShoot ? nullptr : &_action.result);
+		if (!_ammo)
+		{
+			_parent->popState();
+			return;
+		}
+	}
 
 	if (_unit->isOut() || _unit->getHealth() <= 0 || _unit->getHealth() < _unit->getStunlevel())
 	{
@@ -103,13 +112,11 @@ void ProjectileFlyBState::init()
 	}
 
 	// reaction fire
-	if (_unit->getFaction() != _parent->getSave()->getSide())
+	if (reactionShoot)
 	{
-		// no ammo or target is dead: give the time units back and cancel the shot.
-		if (_ammo == 0
-			|| !_parent->getSave()->getTile(_action.target)->getUnit()
-			|| _parent->getSave()->getTile(_action.target)->getUnit()->isOut()
-			|| _parent->getSave()->getTile(_action.target)->getUnit() != _parent->getSave()->getSelectedUnit())
+		auto target = _parent->getSave()->getTile(_action.target)->getUnit();
+		// target is dead: cancel the shot.
+		if (!target || target->isOut() || target != _parent->getSave()->getSelectedUnit())
 		{
 			_parent->popState();
 			return;
@@ -129,18 +136,6 @@ void ProjectileFlyBState::init()
 	case BA_AIMEDSHOT:
 	case BA_AUTOSHOT:
 	case BA_LAUNCH:
-		if (_ammo == 0)
-		{
-			_action.result = "STR_NO_AMMUNITION_LOADED";
-			_parent->popState();
-			return;
-		}
-		if (_ammo->getAmmoQuantity() == 0)
-		{
-			_action.result = "STR_NO_ROUNDS_LEFT";
-			_parent->popState();
-			return;
-		}
 		if (distance > weapon->getRules()->getMaxRange())
 		{
 			// special handling for short ranges and diagonals
@@ -345,10 +340,9 @@ bool ProjectileFlyBState::createNewProjectile()
 			{
 				_parent->getMod()->getSoundByDepth(_parent->getDepth(), _action.weapon->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
 			}
-			if (!_parent->getSave()->getDebugMode() && _action.type != BA_LAUNCH && _ammo->spendBullet() == false)
+			if (_action.type != BA_LAUNCH)
 			{
-				_parent->getSave()->removeItem(_ammo);
-				_action.weapon->setAmmoItem(0);
+				_action.weapon->spendAmmoForAction(_action.type, _parent->getSave());
 			}
 		}
 		else
@@ -388,10 +382,9 @@ bool ProjectileFlyBState::createNewProjectile()
 			{
 				_parent->getMod()->getSoundByDepth(_parent->getDepth(), _action.weapon->getRules()->getFireSound())->play(-1, _parent->getMap()->getSoundAngle(projectile->getOrigin()));
 			}
-			if (!_parent->getSave()->getDebugMode() && _action.type != BA_LAUNCH && _ammo->spendBullet() == false)
+			if (_action.type != BA_LAUNCH)
 			{
-				_parent->getSave()->removeItem(_ammo);
-				_action.weapon->setAmmoItem(0);
+				_action.weapon->spendAmmoForAction(_action.type, _parent->getSave());
 			}
 		}
 		else
@@ -431,8 +424,7 @@ void ProjectileFlyBState::think()
 		bool hasFloor = t && !t->hasNoFloor(bt);
 		bool unitCanFly = _action.actor->getMovementType() == MT_FLY;
 
-		if (_action.type == BA_AUTOSHOT
-			&& _action.autoShotCounter < _action.weapon->getRules()->getAutoShots()
+		if (_action.weapon->haveNextShotsForAction(_action.type, _action.autoShotCounter)
 			&& !_action.actor->isOut()
 			&& _ammo->getAmmoQuantity() != 0
 			&& (hasFloor || unitCanFly))
@@ -495,7 +487,7 @@ void ProjectileFlyBState::think()
 				if (ruleItem->getBattleType() == BT_GRENADE && RNG::percent(ruleItem->getSpecialChance()) && ((Options::battleInstantGrenade && _action.weapon->getFuseTimer() == 0) || ruleItem->getFuseTimerType() == BFT_INSTANT))
 				{
 					// it's a hot grenade to explode immediately
-					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), { _action, nullptr }));
+					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), BattleActionAttack{ _action, _action.weapon, }));
 				}
 				else
 				{
@@ -528,10 +520,9 @@ void ProjectileFlyBState::think()
 				}
 
 				_parent->getMap()->resetCameraSmoothing();
-				if (!_parent->getSave()->getDebugMode() && _ammo && _action.type == BA_LAUNCH && _ammo->spendBullet() == false)
+				if (_action.type == BA_LAUNCH)
 				{
-					_parent->getSave()->removeItem(_ammo);
-					_action.weapon->setAmmoItem(0);
+					_action.weapon->spendAmmoForAction(_action.type, _parent->getSave());
 				}
 
 				if (_projectileImpact != V_OUTOFBOUNDS)
@@ -547,7 +538,7 @@ void ProjectileFlyBState::think()
 					_parent->statePushFront(new ExplosionBState(
 						_parent, _parent->getMap()->getProjectile()->getPosition(offset),
 						{ _action, _ammo }, 0,
-						(_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem()),
+						_action.weapon->haveNextShotsForAction(_action.type, _action.autoShotCounter) || !_action.weapon->getAmmoForAction(_action.type),
 						shotgun ? 0 : _range + _parent->getMap()->getProjectile()->getDistance()
 					));
 
@@ -615,7 +606,7 @@ void ProjectileFlyBState::think()
 						}
 					}
 				}
-				else if (_action.type != BA_AUTOSHOT || _action.autoShotCounter == _action.weapon->getRules()->getAutoShots() || !_action.weapon->getAmmoItem())
+				else if (!_action.weapon->haveNextShotsForAction(_action.type, _action.autoShotCounter) || !_action.weapon->getAmmoForAction(_action.type))
 				{
 					_unit->aim(false);
 				}

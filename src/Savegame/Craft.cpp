@@ -1066,9 +1066,9 @@ void Craft::unload(const Mod *mod)
 	for (std::vector<Vehicle*>::iterator v = _vehicles.begin(); v != _vehicles.end(); ++v)
 	{
 		_base->getStorageItems()->addItem((*v)->getRules()->getType());
-		if (!(*v)->getRules()->getCompatibleAmmo()->empty())
+		if (!(*v)->getRules()->getPrimaryCompatibleAmmo()->empty())
 		{
-			_base->getStorageItems()->addItem((*v)->getRules()->getCompatibleAmmo()->front(), (*v)->getAmmo());
+			_base->getStorageItems()->addItem((*v)->getRules()->getPrimaryCompatibleAmmo()->front(), (*v)->getAmmo());
 		}
 	}
 
