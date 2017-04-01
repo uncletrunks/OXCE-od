@@ -1989,7 +1989,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			for (int j = 0; j < command->getExecutions(); ++j)
 			{
 				// Loop over the VerticalLevels if they exist, otherwise just do single level
-				for (int m = 0; m <= _verticalLevels.size(); m++)
+				for (size_t m = 0; m <= _verticalLevels.size(); m++)
 				{
 					if (m == _verticalLevels.size() && m != 0)
 					{
@@ -2024,7 +2024,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 					{
 						terrain = _baseTerrain;
 					}
-					else if (terrainName != "") 
+					else if (terrainName != "")
 					{
 						//get the terrain according to the string name
 						terrain = _game->getMod()->getTerrain(terrainName);
@@ -2105,7 +2105,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 								_craftDeployed = true;
 								success = true;
 							}
-							
+
 							if (m != 0 && _craftDeployed)
 							{
 								if (currentLevel.levelType != "empty" && currentLevel.levelType != "craft")
@@ -2565,7 +2565,7 @@ void BattlescapeGenerator::generateBaseMap()
 				int zOff;
 
 				// Loop over the vertical levels to load the map
-				for (int k = 0; k <= _verticalLevels.size(); k++)
+				for (size_t k = 0; k <= _verticalLevels.size(); k++)
 				{
 					if (k == _verticalLevels.size())
 					{
@@ -2585,7 +2585,7 @@ void BattlescapeGenerator::generateBaseMap()
 					{
 						terrain = _baseTerrain;
 					}
-					else if (terrainName != "") 
+					else if (terrainName != "")
 					{
 						//get the terrain according to the string name
 						terrain = _game->getMod()->getTerrain(terrainName);
@@ -2772,7 +2772,7 @@ bool BattlescapeGenerator::populateVerticalLevels(MapScript *command)
 			{
 				continue;
 			}
-			
+
 			if ((*i).levelSizeZ <= zLevelsLeft)
 			{
 				stop = false;
@@ -2847,7 +2847,7 @@ void BattlescapeGenerator::loadNodes()
 	}
 
 	// Loading nodes for verticalLevels maps
-	for (int i = 0; i < _notInBlocks.size(); i++)
+	for (size_t i = 0; i < _notInBlocks.size(); i++)
 	{
 		loadRMP(_notInBlocks[i], _notInBlocksRects[i].x * 10, _notInBlocksRects[i].y * 10, _notInBlocksOffsets[i], segment++);
 	}
@@ -2958,7 +2958,7 @@ void BattlescapeGenerator::attachNodeLinks()
 		int nodeZ = node->getPosition().z;
 		std::map<int, std::vector<int> > neighbourDirections;
 
-		// Make a list of directions in which to look for neighbouring nodes		
+		// Make a list of directions in which to look for neighbouring nodes
 		if (nodeX != 0)
 		{
 			std::vector<int> tempVector;

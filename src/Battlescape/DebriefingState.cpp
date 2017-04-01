@@ -1136,7 +1136,7 @@ void DebriefingState::prepareDebriefing()
 			// if this was a 2-stage mission, and we didn't abort (ie: we have time to clean up)
 			// we can recover items from the earlier stages as well
 			recoverItems(battle->getConditionalRecoveredItems(), base);
-			int nonRecoverType = 0;
+			size_t nonRecoverType = 0;
 			if (ruleDeploy && ruleDeploy->getObjectiveType())
 			{
 				nonRecoverType = ruleDeploy->getObjectiveType();
