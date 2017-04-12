@@ -1919,6 +1919,23 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 		}
 	}
 
+	if (attack.attacker)
+	{
+		// Record the last unit to hit our victim. If a victim dies without warning*, this unit gets the credit.
+		// *Because the unit died in a fire or bled out.
+		target->setMurdererId(attack.attacker->getId());
+		target->setMurdererWeapon("STR_WEAPON_UNKNOWN");
+		target->setMurdererWeaponAmmo("STR_WEAPON_UNKNOWN");
+		if (attack.weapon_item)
+		{
+			target->setMurdererWeapon(attack.weapon_item->getRules()->getName());
+		}
+		if (attack.damage_item)
+		{
+			target->setMurdererWeaponAmmo(attack.damage_item->getRules()->getName());
+		}
+	}
+
 	return true;
 }
 

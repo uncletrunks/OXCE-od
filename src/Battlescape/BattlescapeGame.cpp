@@ -215,7 +215,7 @@ BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parent
 
 	_debugPlay = false;
 
-	checkForCasualties(nullptr, nullptr, nullptr, true);
+	checkForCasualties(nullptr, BattleActionAttack{ }, true);
 	cancelCurrentAction();
 }
 
@@ -618,7 +618,7 @@ void BattlescapeGame::endTurn()
 		getMap()->setCursorType(CT_NONE);
 	}
 
-	checkForCasualties(nullptr, nullptr, nullptr, false, false);
+	checkForCasualties(nullptr, BattleActionAttack{ }, false, false);
 
 	_save->getTileEngine()->calculateLighting(LL_FIRE, TileEngine::invalid, 0, true);
 	_save->getTileEngine()->recalculateFOV();
@@ -713,8 +713,9 @@ void BattlescapeGame::endTurn()
  * @param hiddenExplosion Set to true for the explosions of UFO Power sources at start of battlescape.
  * @param terrainExplosion Set to true for the explosions of terrain.
  */
-void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const BattleItem *murderweapon, BattleUnit *origMurderer, bool hiddenExplosion, bool terrainExplosion)
+void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, BattleActionAttack attack, bool hiddenExplosion, bool terrainExplosion)
 {
+	auto origMurderer = attack.attacker;
 	// If the victim was killed by the murderer's death explosion, fetch who killed the murderer and make HIM the murderer!
 	if (origMurderer && !origMurderer->getGeoscapeSoldier() && (origMurderer->getUnitRules()->getSpecialAbility() == SPECAB_EXPLODEONDEATH || origMurderer->getUnitRules()->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
 		&& origMurderer->getStatus() == STATUS_DEAD && origMurderer->getMurdererId() != 0)
@@ -732,33 +733,13 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 	std::string tempWeapon = "STR_WEAPON_UNKNOWN", tempAmmo = "STR_WEAPON_UNKNOWN";
 	if (origMurderer)
 	{
-		if (murderweapon)
+		if (attack.weapon_item)
 		{
-			tempAmmo = murderweapon->getRules()->getName();
-			tempWeapon = tempAmmo;
+			tempWeapon = attack.weapon_item->getRules()->getName();
 		}
-
-		BattleItem *weapon = origMurderer->getItem("STR_RIGHT_HAND");
-		if (weapon)
+		if (attack.damage_item)
 		{
-			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
-			{
-				if (s == tempAmmo)
-				{
-					tempWeapon = weapon->getRules()->getName();
-				}
-			}
-		}
-		weapon = origMurderer->getItem("STR_LEFT_HAND");
-		if (weapon)
-		{
-			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
-			{
-				if (s == tempAmmo)
-				{
-					tempWeapon = weapon->getRules()->getName();
-				}
-			}
+			tempAmmo = attack.damage_item->getRules()->getName();
 		}
 	}
 
@@ -899,7 +880,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 						}
 					}
 				}
-				if (murderweapon)
+				if (damageType)
 				{
 					statePushNext(new UnitDieBState(this, (*j), damageType, noSound));
 				}

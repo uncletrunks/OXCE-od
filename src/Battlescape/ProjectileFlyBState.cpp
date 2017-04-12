@@ -612,13 +612,6 @@ void ProjectileFlyBState::think()
 									_unit->setTurnsSinceSpotted(0);
 								}
 							}
-							// Record the last unit to hit our victim. If a victim dies without warning*, this unit gets the credit.
-							// *Because the unit died in a fire or bled out.
-							victim->setMurdererId(_unit->getId());
-							if (_action.weapon != 0)
-								victim->setMurdererWeapon(_action.weapon->getRules()->getName());
-							if (_ammo != 0)
-								victim->setMurdererWeaponAmmo(_ammo->getRules()->getName());
 						}
 					}
 				}

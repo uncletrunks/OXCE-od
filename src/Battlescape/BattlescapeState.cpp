@@ -1587,7 +1587,7 @@ inline void BattlescapeState::handle(Action *action)
 							{
 								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_AP), _save, { });
 							}
-							_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
+							_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
 							_save->getBattleGame()->handleState();
 						}
 					}
@@ -1602,7 +1602,7 @@ inline void BattlescapeState::handle(Action *action)
 								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_STUN), _save, { });
 							}
 						}
-						_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
+						_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
 						_save->getBattleGame()->handleState();
 					}
 					// f11 - voxel map dump
