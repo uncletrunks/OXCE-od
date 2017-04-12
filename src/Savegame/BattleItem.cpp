@@ -359,7 +359,7 @@ void BattleItem::setSlotY(int y)
  */
 bool BattleItem::occupiesSlot(int x, int y, BattleItem *item) const
 {
-	if (item == this)
+	if (item == this || !_inventorySlot)
 		return false;
 	if (_inventorySlot->getType() == INV_HAND)
 		return true;
