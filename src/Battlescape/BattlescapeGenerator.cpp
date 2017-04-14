@@ -420,6 +420,13 @@ void BattlescapeGenerator::nextStage()
 		throw Exception("Map generator encountered an error: " + _terrain->getScript() + " script not found.");
 	}
 
+	// cleanup before map old map is destroyed
+	for (auto unit : *_save->getUnits())
+	{
+		unit->clearVisibleTiles();
+		unit->clearVisibleUnits();
+	}
+
 	generateMap(script);
 
 	setupObjectives(ruleDeploy);
