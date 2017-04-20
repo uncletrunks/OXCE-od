@@ -122,7 +122,7 @@ private:
 	float _powerRangeThreshold;
 	std::vector<std::string> _compatibleAmmo;
 	RuleDamageType _damageType, _meleeType;
-	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow;
+	int _accuracyAimed, _accuracyAuto, _accuracySnap, _accuracyMelee, _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow, _accuracyCloseQuarters;
 	RuleItemUseCost _costAimed, _costAuto, _costSnap, _costMelee, _costUse, _costMind, _costPanic, _costThrow, _costPrime, _costUnprime;
 	int _clipSize, _specialChance, _tuLoad, _tuUnload;
 	BattleType _battleType;
@@ -153,7 +153,7 @@ private:
 	int _customItemPreviewIndex;
 	int _kneelBonus, _oneHandedPenalty;
 	int _monthlySalary, _monthlyMaintenance;
-	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
+	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti, _closeQuartersMulti;
 	ModScript::RecolorItemParser::Container _recolorScript;
 	ModScript::SelectItemParser::Container _spriteScript;
 	ModScript::ReactionUnitParser::Container _reacActionScript;
@@ -288,6 +288,8 @@ public:
 	int getMeleeMultiplier(const BattleUnit *unit) const;
 	/// Get multiplier of throwing form unit statistics
 	int getThrowMultiplier(const BattleUnit *unit) const;
+	/// Get multiplier of close quarters combat from unit statistics
+	int getCloseQuartersMultiplier(const BattleUnit *unit) const;
 
 	/// Gets the item's aimed shot accuracy.
 	int getAccuracyAimed() const;
@@ -305,6 +307,8 @@ public:
 	int getAccuracyPanic() const;
 	/// Gets the item's throw accuracy.
 	int getAccuracyThrow() const;
+	/// Gets the item's close quarters combat accuracy.
+	int getAccuracyCloseQuarters(Mod *mod) const;
 
 	/// Gets the item's aimed shot cost.
 	RuleItemUseCost getCostAimed() const;

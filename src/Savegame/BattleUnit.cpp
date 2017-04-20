@@ -1732,6 +1732,11 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item,
 		kneeled = false;
 		result = item->getRules()->getThrowMultiplier(this) * item->getRules()->getAccuracyThrow() / 100;
 	}
+	else if (actionType == BA_CQB)
+	{
+		kneeled = false;
+		result = item->getRules()->getCloseQuartersMultiplier(this) * item->getRules()->getAccuracyCloseQuarters(mod) / 100;
+	}
 
 	if (kneeled)
 	{

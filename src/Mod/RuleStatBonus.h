@@ -44,6 +44,8 @@ public:
 	void setMelee();
 	/// Set default throwing bonus.
 	void setThrowing();
+	/// Set default close quarters combat bonus.
+	void setCloseQuarters();
 	/// Set default psi attack bonus.
 	void setPsiAttack();
 	/// Set default psi defense bonus.

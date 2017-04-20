@@ -46,7 +46,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_meleeAnimation(0), _meleeMissAnimation(-1),
 	_psiAnimation(-1), _psiMissAnimation(-1),
 	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0),
-	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
+	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100), _accuracyCloseQuarters(-1),
 	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
 	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
@@ -64,6 +64,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_accuracyMulti.setFiring();
 	_meleeMulti.setMelee();
 	_throwMulti.setThrowing();
+	_closeQuartersMulti.setCloseQuarters();
 }
 
 /**
@@ -375,6 +376,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_accuracyMind = node["accuracyMindControl"].as<int>(_accuracyMind);
 	_accuracyPanic = node["accuracyPanic"].as<int>(_accuracyPanic);
 	_accuracyThrow = node["accuracyThrow"].as<int>(_accuracyThrow);
+	_accuracyCloseQuarters = node["accuracyCloseQuarters"].as<int>(_accuracyCloseQuarters);
 
 	loadCost(_costAimed, node, "Aimed");
 	loadCost(_costAuto, node, "Auto");
@@ -471,6 +473,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_accuracyMulti.load(node["accuracyMultiplier"]);
 	_meleeMulti.load(node["meleeMultiplier"]);
 	_throwMulti.load(node["throwMultiplier"]);
+	_closeQuartersMulti.load(node["closeQuartersMultiplier"]);
 
 	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
 	_powerRangeThreshold = node["powerRangeThreshold"].as<float>(_powerRangeThreshold);
@@ -970,6 +973,15 @@ int RuleItem::getAccuracyPanic() const
 int RuleItem::getAccuracyThrow() const
 {
 	return _accuracyThrow;
+}
+
+/**
+ * Gets the item's accuracy for close quarters combat.
+ * @return The close quarters accuracy.
+ */
+int RuleItem::getAccuracyCloseQuarters(Mod *mod) const
+{
+	return _accuracyCloseQuarters != -1 ? _accuracyCloseQuarters : mod->getCloseQuartersAccuracyGlobal();
 }
 
 /**
@@ -1825,6 +1837,17 @@ int RuleItem::getThrowMultiplier(const BattleUnit *unit) const
 {
 	return _throwMulti.getBonus(unit);
 }
+
+/**
+ * Compute multiplier of close quarters accuracy based on unit stats.
+ * @param stats unit stats
+ * @return multiplier.
+ */
+int RuleItem::getCloseQuartersMultiplier(const BattleUnit *unit) const
+{
+	return _closeQuartersMulti.getBonus(unit);
+}
+
 /**
  * Gets the associated special type of this item.
  * note that type 14 is the alien brain, and types

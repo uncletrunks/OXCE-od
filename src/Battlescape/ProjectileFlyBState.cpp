@@ -186,6 +186,113 @@ void ProjectileFlyBState::init()
 		return;
 	}
 
+	// Check for close quarters combat
+	if (_parent->getMod()->getEnableCloseQuartersCombat() && _action.type != BA_THROW && _action.type != BA_LAUNCH && _unit->getTurretType() == -1)
+	{
+		// Start by finding a 'target' for the check, looking in tile in front of firing unit and working our way to the back
+		BattleUnit* closeQuartersTarget;
+		int surroundingTilePositions [8][2] = {
+			{0, -1}, // north (-y direction)
+			{1, -1}, // northeast
+			{1, 0}, // east (+ x direction)
+			{1, 1}, // southeast
+			{0, 1}, // south (+y direction)
+			{-1, 1}, // southwest
+			{-1, 0}, // west (-x direction)
+			{-1, -1}}; // northwest
+		int unitFacing = _unit->getDirection();
+		bool unitFound = false;
+		for (int testFacing = 0; testFacing < 5; testFacing++)
+		{
+			unitFound = false;
+
+			int facingsToTest[2] = {
+				unitFacing - testFacing < 0 ? unitFacing - testFacing + 8 : unitFacing - testFacing,
+				unitFacing + testFacing > 7 ? unitFacing + testFacing - 8 : unitFacing + testFacing};
+			for (const auto& currentFacing : facingsToTest)
+			{
+				Position tileToCheck = _origin;
+				tileToCheck.x += surroundingTilePositions[currentFacing][0];
+				tileToCheck.y += surroundingTilePositions[currentFacing][1];
+
+				if (_parent->getSave()->getTile(tileToCheck)) // Make sure the tile is in bounds
+				{
+					closeQuartersTarget = _parent->getSave()->selectUnit(tileToCheck);
+					// Variable for LOS check
+					int checkDirection = _parent->getTileEngine()->getDirectionTo(tileToCheck, _unit->getPosition());
+					if (closeQuartersTarget && _unit->getFaction() != closeQuartersTarget->getFaction() // Unit must exist and not be same faction
+						&&  _parent->getTileEngine()->validMeleeRange(closeQuartersTarget, _unit, checkDirection) // Unit must be able to see the unit attempting to fire
+						&& !(_unit->getFaction() == FACTION_PLAYER && closeQuartersTarget->getFaction() == FACTION_NEUTRAL) // Civilians don't inhibit player
+						&& !(_unit->getFaction() == FACTION_NEUTRAL && closeQuartersTarget->getFaction() == FACTION_PLAYER)) // Player doesn't inhibit civilians
+					{
+						unitFound = true;
+						break; // We have our target, continue to CQB check
+					}
+				}
+			}
+
+			if (unitFound)
+			{
+				break;
+			}
+		}	
+
+		if (unitFound)
+		{
+			// Create a dummy action for the CQB check
+			BattleAction closeQuartersCheck = _action;
+			closeQuartersCheck.type = BA_CQB;
+			closeQuartersCheck.target = closeQuartersTarget->getPosition();
+
+			// Roll for the check
+			if (!_parent->getTileEngine()->meleeAttack(&closeQuartersCheck))
+			{
+				// Failed the check, roll again to see result
+				if (_parent->getSave()->getSide() == FACTION_PLAYER) // Only show message during player's turn
+				{
+					_action.result = "STR_FAILED_CQB_CHECK";
+				}
+				int closeQuartersFailedResults[6] = {
+					0, // Fire straight down
+					3, // Fire straight up
+					-2, // Fire left 90 degrees
+					-1, // Fire left 45 degrees
+					1, // Fire right 45 degrees
+					2}; // Fire right 90 degrees
+				int closeQuartersFailedResult = RNG::generate(0, 5);
+				Position closeQuartersFailedNewTarget = _unit->getPosition();
+				if (closeQuartersFailedResult == 1)
+				{
+					closeQuartersFailedNewTarget.z += 1;
+				}
+				else if (closeQuartersFailedResult != 0)
+				{
+					int newFacing = unitFacing + closeQuartersFailedResults[closeQuartersFailedResult];
+					newFacing = newFacing > 7 ? newFacing - 8 : newFacing;
+					newFacing = newFacing < 0 ? newFacing + 8 : newFacing;
+
+					closeQuartersFailedNewTarget.x += surroundingTilePositions[newFacing][0];
+					closeQuartersFailedNewTarget.y += surroundingTilePositions[newFacing][1];
+				}
+
+				// Make sure the new target is in bounds
+				if (!_parent->getSave()->getTile(closeQuartersFailedResult))
+				{
+					// Default to firing at our feet
+					closeQuartersFailedNewTarget = _unit->getPosition();
+				}
+
+				// Turn to look at new target
+				_action.target = closeQuartersFailedNewTarget;
+				_unit->lookAt(_action.target, _unit->getTurretType() != -1);
+				while (_unit->getStatus() == STATUS_TURNING)
+				{
+					_unit->turn();
+				}
+			}
+		}
+	}
+
 	if (_action.type == BA_LAUNCH || (Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && _parent->getSave()->getSide() == FACTION_PLAYER) || !_parent->getPanicHandled())
 	{
 		// target nothing, targets the middle of the tile

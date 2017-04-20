@@ -155,7 +155,7 @@ private:
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor, _minReactionAccuracy;
 	int _chanceToStopRetaliation;
-	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
+	int _kneelBonusGlobal, _oneHandedPenaltyGlobal, _enableCloseQuartersCombat, _closeQuartersAccuracyGlobal;
 	int _surrenderMode;
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
@@ -423,6 +423,10 @@ public:
 	int getKneelBonusGlobal() const { return _kneelBonusGlobal; }
 	/// Gets the global one-handed penalty (default = 80).
 	int getOneHandedPenaltyGlobal() const { return _oneHandedPenaltyGlobal; }
+	/// Gets whether close quarters combat is enabled (default = 0 is off).
+	int getEnableCloseQuartersCombat() const { return _enableCloseQuartersCombat; }
+	/// Gets the default close quarters combat accuracy (default = 100).
+	int getCloseQuartersAccuracyGlobal() const { return _closeQuartersAccuracyGlobal; }
 	/// Gets the surrender mode (default = 0).
 	int getSurrenderMode() const { return _surrenderMode; }
 	/// Gets the bug hunt mode minimum turn requirement (default = 20).

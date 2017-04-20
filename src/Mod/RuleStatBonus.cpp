@@ -320,6 +320,16 @@ void RuleStatBonus::setThrowing()
 }
 
 /**
+ * Set default bonus for close quarters combat
+ */
+void RuleStatBonus::setCloseQuarters()
+{
+	_bonus.clear();
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::melee>, 0.5f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::reactions>, 0.5f));
+}
+
+/**
  * Set default bonus for psi attack accuracy.
  */
 void RuleStatBonus::setPsiAttack()
