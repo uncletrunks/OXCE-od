@@ -273,7 +273,14 @@ void TechTreeViewerState::initLists()
 		// 1. item required
 		if (rule->needItem())
 		{
-			_lstLeft->addRow(1, tr("STR_ITEM_REQUIRED").c_str());
+			if (rule->destroyItem())
+			{
+				_lstLeft->addRow(1, tr("STR_ITEM_DESTROYED").c_str());
+			}
+			else
+			{
+				_lstLeft->addRow(1, tr("STR_ITEM_REQUIRED").c_str());
+			}
 			_lstLeft->setRowColor(row, 218); // blue
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(0);
