@@ -67,6 +67,7 @@ private:
 	int _faceColorGroup, _hairColorGroup, _utileColorGroup, _rankColorGroup;
 	std::vector<int> _faceColor, _hairColor, _utileColor, _rankColor;
 	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
+	int _ignoresMeleeThreat, _createsMeleeThreat;
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
@@ -185,6 +186,10 @@ public:
 	bool getPainImmune(bool def = false) const;
 	/// Gets how armor react to zombification.
 	bool getZombiImmune(bool def = false) const;
+	/// Gets whether or not this unit ignores close quarters threats.
+	bool getIgnoresMeleeThreat(bool def = false) const;
+	/// Gets whether or not this unit is a close quarters threat.
+	bool getCreatesMeleeThreat(bool def = true) const;
 	/// Gets how much negative hp is require to gib unit.
 	float getOverKill() const;
 	/// Get face base color

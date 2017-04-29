@@ -187,7 +187,7 @@ void ProjectileFlyBState::init()
 	}
 
 	// Check for close quarters combat
-	if (_parent->getMod()->getEnableCloseQuartersCombat() && _action.type != BA_THROW && _action.type != BA_LAUNCH && _unit->getTurretType() == -1 && _unit->getArmor()->getSize() == 1)
+	if (_parent->getMod()->getEnableCloseQuartersCombat() && _action.type != BA_THROW && _action.type != BA_LAUNCH && _unit->getTurretType() == -1 && !_unit->getArmor()->getIgnoresMeleeThreat())
 	{
 		// Start by finding a 'target' for the check, looking in tile in front of firing unit and working our way to the back
 		BattleUnit* closeQuartersTarget;
@@ -221,7 +221,7 @@ void ProjectileFlyBState::init()
 					// Variable for LOS check
 					int checkDirection = _parent->getTileEngine()->getDirectionTo(tileToCheck, _unit->getPosition());
 					if (closeQuartersTarget && _unit->getFaction() != closeQuartersTarget->getFaction() // Unit must exist and not be same faction
-						&& closeQuartersTarget->getArmor()->getSize() == 1 // Exclude 2x2 units
+						&& closeQuartersTarget->getArmor()->getCreatesMeleeThreat() // Unit must be valid defender, 2x2 default false here
 						&&  _parent->getTileEngine()->validMeleeRange(closeQuartersTarget, _unit, checkDirection) // Unit must be able to see the unit attempting to fire
 						&& !(_unit->getFaction() == FACTION_PLAYER && closeQuartersTarget->getFaction() == FACTION_NEUTRAL) // Civilians don't inhibit player
 						&& !(_unit->getFaction() == FACTION_NEUTRAL && closeQuartersTarget->getFaction() == FACTION_PLAYER)) // Player doesn't inhibit civilians

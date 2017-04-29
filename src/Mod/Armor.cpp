@@ -37,7 +37,9 @@ Armor::Armor(const std::string &type) :
 	_camouflageAtDay(0), _camouflageAtDark(0), _antiCamouflageAtDay(0), _antiCamouflageAtDark(0), _heatVision(0), _psiVision(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
-	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0),
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1),
+	_ignoresMeleeThreat(-1), _createsMeleeThreat(-1),
+	_overKill(0.5f), _meleeDodgeBackPenalty(0),
 	_customArmorPreviewIndex(0)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
@@ -143,6 +145,8 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 			_bleedImmune = 1;
 			_painImmune = 1;
 			_zombiImmune = 1;
+			_ignoresMeleeThreat = 1;
+			_createsMeleeThreat = 0;
 		}
 	}
 	if (node["fearImmune"])
@@ -160,6 +164,14 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	if (node["zombiImmune"] && _size == 1) //Big units are always immune, because game we don't have 2x2 unit zombie
 	{
 		_zombiImmune = node["zombiImmune"].as<bool>();
+	}
+	if (node["ignoresMeleeThreat"])
+	{
+		_ignoresMeleeThreat = node["ignoresMeleeThreat"].as<bool>();
+	}
+	if (node["createsMeleeThreat"])
+	{
+		_createsMeleeThreat = node["createsMeleeThreat"].as<bool>();
 	}
 	_overKill = node["overKill"].as<float>(_overKill);
 	_meleeDodgeBackPenalty = node["meleeDodgeBackPenalty"].as<float>(_meleeDodgeBackPenalty);
@@ -640,6 +652,26 @@ bool Armor::getPainImmune(bool def) const
 bool Armor::getZombiImmune(bool def) const
 {
 	return _zombiImmune != -1 ? _zombiImmune : def;
+}
+
+/**
+ * Gets whether or not this unit ignores close quarters threats.
+ * @param def Default value.
+ * @return Ignores CQB check?
+ */
+bool Armor::getIgnoresMeleeThreat(bool def) const
+{
+	return _ignoresMeleeThreat != -1 ? _ignoresMeleeThreat : def;
+}
+
+/**
+ * Gets whether or not this unit is a close quarters threat.
+ * @param def Default value.
+ * @return Creates CQB check for others?
+ */
+bool Armor::getCreatesMeleeThreat(bool def) const
+{
+	return _createsMeleeThreat != -1 ? _createsMeleeThreat : def;
 }
 
 /**
