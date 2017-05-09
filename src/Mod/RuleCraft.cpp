@@ -33,7 +33,7 @@ RuleCraft::RuleCraft(const std::string &type) :
 	_type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _pilots(0), _vehicles(0),
 	_costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(0), _score(0), _battlescapeTerrainData(0),
-	_spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _listOrder(0), _maxItems(0), _maxAltitude(-1), _stats(),
+	_allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _listOrder(0), _maxItems(0), _maxAltitude(-1), _stats(),
 	_shieldRechargeAtBase(1000)
 {
 	for (int i = 0; i < WeaponMax; ++ i)
@@ -103,6 +103,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 		}
 	}
 	_deployment = node["deployment"].as< std::vector< std::vector<int> > >(_deployment);
+	_allowLanding = node["allowLanding"].as<bool>(_allowLanding);
 	_spacecraft = node["spacecraft"].as<bool>(_spacecraft);
 	_notifyWhenRefueled = node["notifyWhenRefueled"].as<bool>(_notifyWhenRefueled);
 	_autoPatrol = node["autoPatrol"].as<bool>(_autoPatrol);
@@ -378,6 +379,15 @@ int RuleCraft::getScore() const
 RuleTerrain *RuleCraft::getBattlescapeTerrainData()
 {
 	return _battlescapeTerrainData;
+}
+
+/**
+ * Checks if this craft is capable of landing (on missions).
+ * @return True if this ship is capable of landing (on missions).
+ */
+bool RuleCraft::getAllowLanding() const
+{
+	return _allowLanding;
 }
 
 /**
