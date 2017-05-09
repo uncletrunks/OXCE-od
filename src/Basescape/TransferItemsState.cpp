@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "TransferItemsState.h"
+#include "ManufactureDependenciesTreeState.h"
 #include <algorithm>
 #include <sstream>
 #include <climits>
@@ -687,6 +688,22 @@ void TransferItemsState::lstItemsMousePress(Action *action)
 			action->getAbsoluteXMouse() <= _lstItems->getArrowsRightEdge())
 		{
 			decreaseByValue(Options::changeValueByMouseWheel);
+		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+	{
+		if (action->getAbsoluteXMouse() >= _lstItems->getArrowsLeftEdge() &&
+			action->getAbsoluteXMouse() <= _lstItems->getArrowsRightEdge())
+		{
+			return;
+		}
+		if (getRow().type == TRANSFER_ITEM)
+		{
+			RuleItem *rule = (RuleItem*)getRow().rule;
+			if (rule != 0)
+			{
+				_game->pushState(new ManufactureDependenciesTreeState(rule->getType()));
+			}
 		}
 	}
 	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
