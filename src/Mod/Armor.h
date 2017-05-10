@@ -53,7 +53,7 @@ private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
 	std::vector<std::string> _corpseBattle;
 	std::vector<std::string> _builtInWeapons;
-	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
+	int _frontArmor, _sideArmor, _leftArmorDiff, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
 	int _moveSound;
 	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight;
@@ -98,8 +98,10 @@ public:
 	std::string getSpriteInventory() const;
 	/// Gets the front armor level.
 	int getFrontArmor() const;
-	/// Gets the side armor level.
-	int getSideArmor() const;
+	/// Gets the left side armor level.
+	int getLeftSideArmor() const;
+	/// Gets the right side armor level.
+	int getRightSideArmor() const;
 	/// Gets the rear armor level.
 	int getRearArmor() const;
 	/// Gets the under armor level.

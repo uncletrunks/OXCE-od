@@ -31,7 +31,7 @@ const std::string Armor::NONE = "STR_NONE";
  * @param type String defining the type.
  */
 Armor::Armor(const std::string &type) :
-	_type(type), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
+	_type(type), _frontArmor(0), _sideArmor(0), _leftArmorDiff(0), _rearArmor(0), _underArmor(0),
 	_drawingRoutine(0), _movementType(MT_WALK), _moveSound(-1), _size(1), _weight(0),
 	_visibilityAtDark(0), _visibilityAtDay(0), _personalLight(15),
 	_camouflageAtDay(0), _camouflageAtDark(0), _antiCamouflageAtDay(0), _antiCamouflageAtDark(0), _heatVision(0), _psiVision(0),
@@ -90,6 +90,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_specWeapon = node["specialWeapon"].as<std::string>(_specWeapon);
 	_frontArmor = node["frontArmor"].as<int>(_frontArmor);
 	_sideArmor = node["sideArmor"].as<int>(_sideArmor);
+	_leftArmorDiff = node["leftArmorDiff"].as<int>(_leftArmorDiff);
 	_rearArmor = node["rearArmor"].as<int>(_rearArmor);
 	_underArmor = node["underArmor"].as<int>(_underArmor);
 	_drawingRoutine = node["drawingRoutine"].as<int>(_drawingRoutine);
@@ -253,10 +254,19 @@ int Armor::getFrontArmor() const
 }
 
 /**
- * Gets the side armor level.
- * @return The side armor level.
+ * Gets the left side armor level.
+ * @return The left side armor level.
  */
-int Armor::getSideArmor() const
+int Armor::getLeftSideArmor() const
+{
+	return _sideArmor + _leftArmorDiff;
+}
+
+/**
+* Gets the right side armor level.
+* @return The right side armor level.
+*/
+int Armor::getRightSideArmor() const
 {
 	return _sideArmor;
 }
@@ -289,7 +299,7 @@ int Armor::getArmor(UnitSide side) const
 	switch (side)
 	{
 	case SIDE_FRONT:	return _frontArmor;
-	case SIDE_LEFT:		return _sideArmor;
+	case SIDE_LEFT:		return _sideArmor + _leftArmorDiff;
 	case SIDE_RIGHT:	return _sideArmor;
 	case SIDE_REAR:		return _rearArmor;
 	case SIDE_UNDER:	return _underArmor;
