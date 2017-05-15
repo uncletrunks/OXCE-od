@@ -78,7 +78,14 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	rect.w = _bg->getWidth();
 	rect.x = rect.y = 0;
 
-	_bg->drawRect(&rect, Palette::blockOffset(0) + 15);
+	// Note: un-hardcoded the color from 15 to ruleset value, default 15
+	int bgColor = 15;
+	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(_battleGame->getStartingConditionType());
+	if (startingCondition != 0)
+	{
+		bgColor = startingCondition->getMapBackgroundColor();
+	}
+	_bg->drawRect(&rect, Palette::blockOffset(0) + bgColor);
 	// make this screen line up with the hidden movement screen
 	_window->setY(y);
 	_txtTitle->setY(y + 68);
