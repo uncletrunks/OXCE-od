@@ -47,6 +47,7 @@ public:
 	productionProgress_e step(Base * b, SavedGame * g, const Mod *m, Language *lang);
 	const RuleManufacture * getRules() const;
 	void startItem(Base * b, SavedGame * g, const Mod *m) const;
+	void refundItem(Base * b, SavedGame * g, const Mod *m) const;
 	YAML::Node save() const;
 	void load(const YAML::Node &node);
 private:

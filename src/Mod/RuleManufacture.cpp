@@ -25,7 +25,7 @@ namespace OpenXcom
  * Creates a new Manufacture.
  * @param name The unique manufacture name.
  */
-RuleManufacture::RuleManufacture(const std::string &name) : _name(name), _space(0), _time(0), _cost(0), _listOrder(0)
+RuleManufacture::RuleManufacture(const std::string &name) : _name(name), _space(0), _time(0), _cost(0), _refund(false), _listOrder(0)
 {
 	_producedItems[name] = 1;
 }
@@ -55,6 +55,7 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 	_space = node["space"].as<int>(_space);
 	_time = node["time"].as<int>(_time);
 	_cost = node["cost"].as<int>(_cost);
+	_refund = node["refund"].as<bool>(_refund);
 	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
 	_producedItems = node["producedItems"].as< std::map<std::string, int> >(_producedItems);
 	_spawnedPersonType = node["spawnedPersonType"].as<std::string>(_spawnedPersonType);
@@ -131,6 +132,15 @@ int RuleManufacture::getManufactureTime() const
 int RuleManufacture::getManufactureCost() const
 {
 	return _cost;
+}
+
+/**
+ * Should all resources of a cancelled project be refunded?
+ * @return True, if all resources should be refunded. False otherwise.
+ */
+bool RuleManufacture::getRefund() const
+{
+	return _refund;
 }
 
 /**

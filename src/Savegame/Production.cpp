@@ -270,6 +270,22 @@ void Production::startItem(Base * b, SavedGame * g, const Mod *m) const
 	}
 }
 
+void Production::refundItem(Base * b, SavedGame * g, const Mod *m) const
+{
+	g->setFunds(g->getFunds() + _rules->getManufactureCost());
+	for (std::map<std::string, int>::const_iterator iter = _rules->getRequiredItems().begin(); iter != _rules->getRequiredItems().end(); ++iter)
+	{
+		if (m->getItem(iter->first) != 0)
+		{
+			b->getStorageItems()->addItem(iter->first, iter->second);
+		}
+		else if (m->getCraft(iter->first) != 0)
+		{
+			// not supported
+		}
+	}
+}
+
 YAML::Node Production::save() const
 {
 	YAML::Node node;

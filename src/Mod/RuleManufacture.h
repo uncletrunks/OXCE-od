@@ -42,6 +42,7 @@ private:
 	std::string _spawnedPersonType, _spawnedPersonName;
 	std::vector<std::string> _requires, _requiresBaseFunc;
 	int _space, _time, _cost;
+	bool _refund;
 	std::map<std::string, int> _requiredItems, _producedItems;
 	int _listOrder;
 public:
@@ -65,6 +66,8 @@ public:
 	int getManufactureTime() const;
 	/// Gets the cost of manufacturing one object.
 	int getManufactureCost() const;
+	/// Should all resources of a cancelled project be refunded?
+	bool getRefund() const;
 	/// Gets the list of items required to manufacture one object.
 	const std::map<std::string, int> &getRequiredItems() const;
 	/// Gets the list of items produced by completing "one object" of this project.

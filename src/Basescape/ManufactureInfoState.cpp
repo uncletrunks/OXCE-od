@@ -177,7 +177,21 @@ void ManufactureInfoState::buildUi()
 	_btnOk->onKeyboardPress((ActionHandler)&ManufactureInfoState::btnOkClick, Options::keyOk);
 	_btnOk->onKeyboardPress((ActionHandler)&ManufactureInfoState::btnOkClick, Options::keyCancel);
 
-	_btnStop->setText(tr("STR_STOP_PRODUCTION"));
+	if (!_item && _production)
+	{
+		if (_production->getRules()->getRefund())
+		{
+			_btnStop->setText(tr("STR_REFUND_PRODUCTION"));
+		}
+		else
+		{
+			_btnStop->setText(tr("STR_STOP_PRODUCTION"));
+		}
+	}
+	else
+	{
+		_btnStop->setText(tr("STR_CANCEL_UC"));
+	}
 	_btnStop->onMouseClick((ActionHandler)&ManufactureInfoState::btnStopClick);
 	if (!_production)
 	{
@@ -279,6 +293,10 @@ void ManufactureInfoState::btnSellClick(Action *)
  */
 void ManufactureInfoState::btnStopClick(Action *)
 {
+	if (!_item && _production && _production->getRules()->getRefund())
+	{
+		_production->refundItem(_base, _game->getSavedGame(), _game->getMod());
+	}
 	_base->removeProduction(_production);
 	exitState();
 }
