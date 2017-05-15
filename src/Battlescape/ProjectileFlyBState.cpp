@@ -277,7 +277,7 @@ void ProjectileFlyBState::init()
 				}
 
 				// Make sure the new target is in bounds
-				if (!_parent->getSave()->getTile(closeQuartersFailedResult))
+				if (!_parent->getSave()->getTile(closeQuartersFailedNewTarget))
 				{
 					// Default to firing at our feet
 					closeQuartersFailedNewTarget = _unit->getPosition();
