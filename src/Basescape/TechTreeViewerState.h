@@ -49,7 +49,7 @@ private:
 	int _selectedFlag;
 	std::vector<std::string> _leftTopics, _rightTopics;
 	std::vector<int> _leftFlags, _rightFlags; // 0=none, 1=research, 2=manufacturing
-	std::unordered_set<std::string> _alreadyAvailableStuff;
+	std::unordered_set<std::string> _alreadyAvailableResearch, _alreadyAvailableManufacture;
 	void initLists();
 	void onSelectLeftTopic(Action *action);
 	void onSelectRightTopic(Action *action);
@@ -66,8 +66,10 @@ public:
 	void btnNewClick(Action *action);
 	/// Sets the selected topic.
 	void setSelectedTopic(const std::string &selectedTopic, bool isManufacturingTopic);
-	/// Is given topic discovered/available?
-	bool isDiscovered(const std::string &topic) const;
+	/// Is given research topic discovered/available?
+	bool isDiscoveredResearch(const std::string &topic) const;
+	/// Is given manufacture topic discovered/available?
+	bool isDiscoveredManufacture(const std::string &topic) const;
 };
 
 }

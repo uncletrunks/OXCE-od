@@ -157,14 +157,14 @@ void TechTreeSelectState::initLists()
 	{
 		if (Options::techTreeViewerSpoilerProtection)
 		{
-			if (!_parent->isDiscovered(*i))
+			if (!_parent->isDiscoveredResearch(*i))
 				continue;
 		}
 		std::wstring projectName = tr((*i));
 		for (auto & c : projectName) c = towupper(c);
 		if (searchString == L"HOCUSPOCUS")
 		{
-			if (_parent->isDiscovered(*i))
+			if (_parent->isDiscoveredResearch(*i))
 			{
 				continue;
 			}
@@ -186,14 +186,14 @@ void TechTreeSelectState::initLists()
 	{
 		if (Options::techTreeViewerSpoilerProtection)
 		{
-			if (!_parent->isDiscovered(*i))
+			if (!_parent->isDiscoveredManufacture(*i))
 				continue;
 		}
 		std::wstring projectName = tr((*i));
 		for (auto & c : projectName) c = towupper(c);
 		if (searchString == L"HOCUSPOCUS")
 		{
-			if (_parent->isDiscovered(*i))
+			if (_parent->isDiscoveredManufacture(*i))
 			{
 				continue;
 			}
