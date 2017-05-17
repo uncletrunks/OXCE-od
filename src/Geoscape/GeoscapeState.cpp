@@ -78,6 +78,7 @@
 #include "NewPossibleResearchState.h"
 #include "NewPossibleManufactureState.h"
 #include "NewPossiblePurchaseState.h"
+#include "NewPossibleCraftState.h"
 #include "../Savegame/Production.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/ItemContainer.h"
@@ -1762,6 +1763,8 @@ void GeoscapeState::time1Day()
 			_game->getSavedGame()->getDependableManufacture (newPossibleManufacture, research, _game->getMod(), *i);
 			std::vector<RuleItem *> newPossiblePurchase;
 			_game->getSavedGame()->getDependablePurchase(newPossiblePurchase, research, _game->getMod());
+			std::vector<RuleCraft *> newPossibleCraft;
+			_game->getSavedGame()->getDependableCraft(newPossibleCraft, research, _game->getMod());
 			timerReset();
 			// check for possible researching weapon before clip
 			if (newResearch)
@@ -1790,6 +1793,10 @@ void GeoscapeState::time1Day()
 			if (!newPossiblePurchase.empty())
 			{
 				popup(new NewPossiblePurchaseState(*i, newPossiblePurchase));
+			}
+			if (!newPossibleCraft.empty())
+			{
+				popup(new NewPossibleCraftState(*i, newPossibleCraft));
 			}
 			// now iterate through all the bases and remove this project from their labs
 			for (std::vector<Base*>::iterator j = _game->getSavedGame()->getBases()->begin(); j != _game->getSavedGame()->getBases()->end(); ++j)

@@ -1561,6 +1561,29 @@ void SavedGame::getDependablePurchase(std::vector<RuleItem *> & dependables, con
 }
 
 /**
+ * Get the list of newly available craft to purchase/rent once a ResearchProject has been completed.
+ * @param dependables the list of RuleCraft which are now available.
+ * @param research The RuleResearch which has just been discovered
+ * @param mod the Game Mod
+ */
+void SavedGame::getDependableCraft(std::vector<RuleCraft *> & dependables, const RuleResearch *research, const Mod * mod) const
+{
+	const std::vector<std::string> &craftlist = mod->getCraftsList();
+	for (std::vector<std::string>::const_iterator iter = craftlist.begin(); iter != craftlist.end(); ++iter)
+	{
+		RuleCraft *craftItem = mod->getCraft(*iter);
+		const std::vector<std::string> &reqs = craftItem->getRequirements();
+		if (std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
+		{
+			if (isResearched(craftItem->getRequirements()))
+			{
+				dependables.push_back(craftItem);
+			}
+		}
+	}
+}
+
+/**
  * Gets the status of a ufopedia rule.
  * @param ufopediaRule Ufopedia rule ID.
  * @return Status (0=new, 1=normal).
