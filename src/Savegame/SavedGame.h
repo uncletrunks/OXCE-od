@@ -27,6 +27,7 @@
 #include "../Mod/RuleAlienMission.h"
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleManufacture.h"
+#include "../Mod/RuleBaseFacility.h"
 
 namespace OpenXcom
 {
@@ -252,6 +253,8 @@ public:
 	void getDependablePurchase(std::vector<RuleItem*> & dependables, const RuleResearch *research, const Mod *mod) const;
 	/// Get the list of newly available craft to purchase/rent once a research has been completed.
 	void getDependableCraft(std::vector<RuleCraft*> & dependables, const RuleResearch *research, const Mod *mod) const;
+	/// Get the list of newly available facilities to build once a research has been completed.
+	void getDependableFacilities(std::vector<RuleBaseFacility*> & dependables, const RuleResearch *research, const Mod *mod) const;
 	/// Check whether a ResearchProject can be researched
 	bool isResearchAvailable(RuleResearch *r, const std::vector<const RuleResearch*> & unlocked, const Mod *mod) const;
 	/// Gets the status of a ufopedia rule.

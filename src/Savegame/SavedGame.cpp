@@ -49,6 +49,7 @@
 #include "../Mod/ArticleDefinition.h"
 #include "../Mod/RuleResearch.h"
 #include "../Mod/RuleManufacture.h"
+#include "../Mod/RuleBaseFacility.h"
 #include "Production.h"
 #include "MissionSite.h"
 #include "AlienBase.h"
@@ -1578,6 +1579,29 @@ void SavedGame::getDependableCraft(std::vector<RuleCraft *> & dependables, const
 			if (isResearched(craftItem->getRequirements()))
 			{
 				dependables.push_back(craftItem);
+			}
+		}
+	}
+}
+
+/**
+ * Get the list of newly available facilities to build once a ResearchProject has been completed.
+ * @param dependables the list of RuleBaseFacility which are now available.
+ * @param research The RuleResearch which has just been discovered
+ * @param mod the Game Mod
+ */
+void SavedGame::getDependableFacilities(std::vector<RuleBaseFacility *> & dependables, const RuleResearch *research, const Mod * mod) const
+{
+	const std::vector<std::string> &facilitylist = mod->getBaseFacilitiesList();
+	for (std::vector<std::string>::const_iterator iter = facilitylist.begin(); iter != facilitylist.end(); ++iter)
+	{
+		RuleBaseFacility *facilityItem = mod->getBaseFacility(*iter);
+		const std::vector<std::string> &reqs = facilityItem->getRequirements();
+		if (std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
+		{
+			if (isResearched(facilityItem->getRequirements()))
+			{
+				dependables.push_back(facilityItem);
 			}
 		}
 	}
