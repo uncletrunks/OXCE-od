@@ -694,15 +694,26 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 		{
 			for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
 			{
-				if (startingCondition != 0 && !startingCondition->isVehicleAllowed((*i)->getRules()->getType()))
+				RuleItem *item = (*i)->getRules();
+				if (startingCondition != 0 && !startingCondition->isVehicleAllowed(item->getType()))
 				{
 					// send disabled vehicles back to base
-					_base->getStorageItems()->addItem((*i)->getRules()->getType(), 1);
+					_base->getStorageItems()->addItem(item->getType(), 1);
 					// ammo too, if necessary
-					if (!(*i)->getRules()->getCompatibleAmmo()->empty())
+					if (!item->getCompatibleAmmo()->empty())
 					{
-						RuleItem *ammo = _game->getMod()->getItem((*i)->getRules()->getCompatibleAmmo()->front());
-						_base->getStorageItems()->addItem(ammo->getType(), (*i)->getAmmo());
+						// Calculate how much ammo needs to be added to the base.
+						RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front(), true);
+						int ammoPerVehicle;
+						if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
+						{
+							ammoPerVehicle = item->getClipSize() / ammo->getClipSize();
+						}
+						else
+						{
+							ammoPerVehicle = ammo->getClipSize();
+						}
+						_base->getStorageItems()->addItem(ammo->getType(), ammoPerVehicle);
 					}
 				}
 				else
