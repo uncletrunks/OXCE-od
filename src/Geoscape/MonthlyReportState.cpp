@@ -327,16 +327,13 @@ void MonthlyReportState::btnOkClick(Action *)
 			psi = psi || (*b)->getAvailablePsiLabs();
 			training = training || (*b)->getAvailableTraining();
 		}
-		if (!Options::anytimePsiTraining)
+		if (psi && !Options::anytimePsiTraining)
 		{
-			if (psi)
-			{
-				_game->pushState(new PsiTrainingState);
-			}
-			else if (training)
-			{
-				_game->pushState(new TrainingState);
-			}
+			_game->pushState(new PsiTrainingState);
+		}
+		else if (training && !Options::anytimeMartialTraining)
+		{
+			_game->pushState(new TrainingState);
 		}
 		// Autosave
 		if (_game->getSavedGame()->isIronman())

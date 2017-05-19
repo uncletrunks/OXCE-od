@@ -400,7 +400,7 @@ void BasescapeState::viewRightClick(Action *)
 			case 1: _game->pushState(new ManageAlienContainmentState(_base, f->getRules()->getPrisonType(), OPT_GEOSCAPE)); break;
 			case 2: _game->pushState(new ManufactureState(_base)); break;
 			case 3: _game->pushState(new ResearchState(_base)); break;
-			case 4: if (Options::anytimePsiTraining) _game->pushState(new AllocateTrainingState(_base)); break;
+			case 4: if (Options::anytimeMartialTraining) _game->pushState(new AllocateTrainingState(_base)); break;
 			case 5: if (Options::anytimePsiTraining) _game->pushState(new AllocatePsiTrainingState(_base)); break;
 			case 6: _game->pushState(new SoldiersState(_base)); break;
 			case 7: _game->pushState(new SellState(_base, 0)); break;
@@ -444,7 +444,7 @@ void BasescapeState::viewRightClick(Action *)
 	{
 		_game->pushState(new AllocatePsiTrainingState(_base));
 	}
-	else if (f->getRules()->getTrainingFacilities() > 0 && Options::anytimePsiTraining && _base->getAvailableTraining() > 0)
+	else if (f->getRules()->getTrainingFacilities() > 0 && Options::anytimeMartialTraining && _base->getAvailableTraining() > 0)
 	{
 		_game->pushState(new AllocateTrainingState(_base));
 	}

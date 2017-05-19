@@ -52,7 +52,7 @@ namespace OpenXcom
 SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base->getSoldiers()), _dynGetter(NULL)
 {
 	bool isPsiBtnVisible = Options::anytimePsiTraining && _base->getAvailablePsiLabs() > 0;
-	bool isTrnBtnVisible = Options::anytimePsiTraining && _base->getAvailableTraining() > 0;
+	bool isTrnBtnVisible = Options::anytimeMartialTraining && _base->getAvailableTraining() > 0;
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
