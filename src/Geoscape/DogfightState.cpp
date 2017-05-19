@@ -920,9 +920,16 @@ void DogfightState::update()
 
 		_currentDist += distanceChange;
 
-		std::wostringstream ss;
-		ss << _currentDist;
-		_txtDistance->setText(ss.str());
+		if (_game->getMod()->getShowDogfightDistanceInKm())
+		{
+			_txtDistance->setText(tr("STR_KILOMETERS").arg(_currentDist / 8));
+		}
+		else
+		{
+			std::wostringstream ss;
+			ss << _currentDist;
+			_txtDistance->setText(ss.str());
+		}
 
 		// Check and recharge craft shields
 		// Check if the UFO's shields are being handled by an interception window

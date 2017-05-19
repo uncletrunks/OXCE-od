@@ -164,7 +164,7 @@ private:
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
-	bool _useCustomCategories;
+	bool _useCustomCategories, _showDogfightDistanceInKm;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch;
@@ -471,6 +471,8 @@ public:
 	int getPerformanceBonusFactor() const { return _performanceBonusFactor; }
 	/// Should custom categories be used in Buy/Sell/Transfer GUIs?
 	bool getUseCustomCategories() const { return _useCustomCategories; }
+	/// Should distance in dogfight GUI be shown in kilometers?
+	bool getShowDogfightDistanceInKm() const { return _showDogfightDistanceInKm; }
 	/// Gets whether or not to load base defense terrain from globe texture
 	int getBaseDefenseMapFromLocation() const { return _baseDefenseMapFromLocation; }
 	/// Gets the ruleset for a specific research project.
