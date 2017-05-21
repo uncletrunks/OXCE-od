@@ -53,6 +53,7 @@ OPT bool removeWoundedFromTraining;
 OPT bool autoAssignPilots;
 OPT bool fullNightVision;
 OPT int nightVisionColor;
+OPT bool autoNightVision;
 OPT bool autoSell;
 OPT bool techTreeViewerSpoilerProtection;
 

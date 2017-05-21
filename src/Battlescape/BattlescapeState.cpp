@@ -463,8 +463,18 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	// shortcuts without a specific button
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnReloadClick, Options::keyBattleReload);
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnPersonalLightingClick, Options::keyBattlePersonalLighting);
-
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnNightVisionClick, Options::keyNightVisionToggle);
+	if (Options::autoNightVision)
+	{
+		// during the night
+		if (_save->getGlobalShade() > _game->getMod()->getMaxDarknessToSeeUnits())
+		{
+			// turn personal lighting off
+			_save->getTileEngine()->togglePersonalLighting();
+			// turn night vision on
+			_map->toggleNightVision();
+		}
+	}
 
 	SDLKey buttons[] = {Options::keyBattleCenterEnemy1,
 						Options::keyBattleCenterEnemy2,
@@ -1334,7 +1344,7 @@ void BattlescapeState::btnReloadClick(Action *)
 }
 
 /**
- * Toggles soldier's personal lighting (purely cosmetic).
+ * Toggles soldier's personal lighting.
  * @param action Pointer to an action.
  */
 void BattlescapeState::btnPersonalLightingClick(Action *)
@@ -1344,12 +1354,13 @@ void BattlescapeState::btnPersonalLightingClick(Action *)
 }
 
 /**
- * Toggles map-wide night vision (purely cosmetic).
+ * Toggles night vision (purely cosmetic).
  * @param action Pointer to an action.
  */
 void BattlescapeState::btnNightVisionClick(Action *action)
 {
-	_map->toggleNightVision();
+	if (allowButtons())
+		_map->toggleNightVision();
 }
 
 /**
