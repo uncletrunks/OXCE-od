@@ -106,6 +106,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	filterOptions.push_back("STR_FILTER_DEFAULT_SUPPLIES_OK");
 	filterOptions.push_back("STR_FILTER_DEFAULT_NO_SUPPLIES");
 	filterOptions.push_back("STR_FILTER_FACILITY_REQUIRED");
+	filterOptions.push_back("STR_FILTER_HIDDEN");
 	_cbxFilter->setOptions(filterOptions);
 	_cbxFilter->onChange((ActionHandler)&NewManufactureListState::cbxFilterChange);
 
@@ -211,10 +212,14 @@ void NewManufactureListState::lstProdClickRight(Action *)
 		// change status
 		const std::string rule = _displayedStrings[_lstManufacture->getSelectedRow()];
 		int oldState = _game->getSavedGame()->getManufactureRuleStatus(rule);
-		int newState = 1 - oldState;
+		int newState = (oldState + 1) % RuleManufacture::MANU_STATUSES;
 		_game->getSavedGame()->setManufactureRuleStatus(rule, newState);
 
-		if (newState == RuleManufacture::MANU_STATUS_NEW)
+		if (newState == RuleManufacture::MANU_STATUS_HIDDEN)
+		{
+			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 246); // purple
+		}
+		else if (newState == RuleManufacture::MANU_STATUS_NEW)
 		{
 			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 218); // light blue
 		}
@@ -303,7 +308,10 @@ void NewManufactureListState::btnMarkAllAsSeenClick(Action *)
 	for (std::vector<std::string>::const_iterator i = _displayedStrings.begin(); i != _displayedStrings.end(); ++i)
 	{
 		// mark all (new) manufacture items as normal
-		_game->getSavedGame()->setManufactureRuleStatus((*i), RuleManufacture::MANU_STATUS_NORMAL);
+		if (_game->getSavedGame()->getManufactureRuleStatus((*i)) != RuleManufacture::MANU_STATUS_HIDDEN)
+		{
+			_game->getSavedGame()->setManufactureRuleStatus((*i), RuleManufacture::MANU_STATUS_NORMAL);
+		}
 	}
 
 	fillProductionList(false);
@@ -340,6 +348,16 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 		if (((*it)->getCategory() == _catStrings[_cbxCategory->getSelected()]) || (_catStrings[_cbxCategory->getSelected()] == "STR_ALL_ITEMS"))
 		{
 			// filter
+			bool isHidden = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_HIDDEN;
+			if (basicFilter == MANU_FILTER_DEFAULT && isHidden)
+				continue;
+			if (basicFilter == MANU_FILTER_DEFAULT_SUPPLIES_OK && isHidden)
+				continue;
+			if (basicFilter == MANU_FILTER_DEFAULT_NO_SUPPLIES && isHidden)
+				continue;
+			if (basicFilter == MANU_FILTER_HIDDEN && !isHidden)
+				continue;
+
 			bool isNew = _game->getSavedGame()->getManufactureRuleStatus((*it)->getName()) == RuleManufacture::MANU_STATUS_NEW;
 			if (_btnShowOnlyNew->getPressed())
 			{
@@ -403,7 +421,11 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 			}
 			else
 			{
-				if (isNew)
+				if (isHidden)
+				{
+					_lstManufacture->setRowColor(row, 246); // purple
+				}
+				else if (isNew)
 				{
 					_lstManufacture->setRowColor(row, 218); // light blue
 					hasUnseen = true;

@@ -1620,7 +1620,7 @@ int SavedGame::getUfopediaRuleStatus(const std::string &ufopediaRule)
 /**
  * Gets the status of a manufacture rule.
  * @param manufactureRule Manufacture rule ID.
- * @return Status (0=new, 1=normal).
+ * @return Status (0=new, 1=normal, 2=hidden).
  */
 int SavedGame::getManufactureRuleStatus(const std::string &manufactureRule)
 {
