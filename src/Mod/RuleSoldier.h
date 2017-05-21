@@ -44,7 +44,7 @@ private:
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
-	int _avatarOffsetX, _avatarOffsetY;
+	int _avatarOffsetX, _avatarOffsetY, _flagOffset;
 	bool _allowPromotion, _allowPiloting;
 
 	void addSoldierNamePool(const std::string &namFile);
@@ -89,6 +89,8 @@ public:
 	int getAvatarOffsetX() const;
 	/// Gets the Y offset used for avatar.
 	int getAvatarOffsetY() const;
+	/// Gets the flag offset.
+	int getFlagOffset() const;
 	/// Gets the allow promotion flag.
 	bool getAllowPromotion() const;
 	/// Gets the allow piloting flag.

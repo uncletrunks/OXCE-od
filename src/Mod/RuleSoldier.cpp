@@ -31,7 +31,7 @@ namespace OpenXcom
  */
 RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0),
 	_costSalarySquaddie(0), _costSalarySergeant(0), _costSalaryCaptain(0), _costSalaryColonel(0), _costSalaryCommander(0),
-	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(66), _avatarOffsetY(42),
+	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(66), _avatarOffsetY(42), _flagOffset(0),
 	_allowPromotion(true), _allowPiloting(true)
 {
 }
@@ -79,6 +79,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 	_armorForAvatar = node["armorForAvatar"].as<std::string>(_armorForAvatar);
 	_avatarOffsetX = node["avatarOffsetX"].as<int>(_avatarOffsetX);
 	_avatarOffsetY = node["avatarOffsetY"].as<int>(_avatarOffsetY);
+	_flagOffset = node["flagOffset"].as<int>(_flagOffset);
 	_allowPromotion = node["allowPromotion"].as<bool>(_allowPromotion);
 	_allowPiloting = node["allowPiloting"].as<bool>(_allowPiloting);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
@@ -326,6 +327,15 @@ int RuleSoldier::getAvatarOffsetX() const
 int RuleSoldier::getAvatarOffsetY() const
 {
 	return _avatarOffsetY;
+}
+
+/**
+* Gets the flag offset.
+* @return The flag offset.
+*/
+int RuleSoldier::getFlagOffset() const
+{
+	return _flagOffset;
 }
 
 /**
