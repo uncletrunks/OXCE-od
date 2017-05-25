@@ -87,6 +87,38 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	_btnArmor->onMouseClick((ActionHandler)&AlienInventoryState::btnArmorClickMiddle, SDL_BUTTON_MIDDLE);
 
 	_soldier->clear();
+
+	Soldier *s = unit->getGeoscapeSoldier();
+	if (s)
+	{
+		const std::string look = s->getArmor()->getSpriteInventory();
+		const std::string gender = s->getGender() == GENDER_MALE ? "M" : "F";
+		std::stringstream ss;
+		Surface *surf = 0;
+
+		for (int i = 0; i <= 4; ++i)
+		{
+			ss.str("");
+			ss << look;
+			ss << gender;
+			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
+			ss << ".SPK";
+			surf = _game->getMod()->getSurface(ss.str(), false);
+			if (surf)
+			{
+				break;
+			}
+		}
+		if (!surf)
+		{
+			ss.str("");
+			ss << look;
+			ss << ".SPK";
+			surf = _game->getMod()->getSurface(ss.str(), true);
+		}
+		surf->blit(_soldier);
+	}
+	else
 	{
 		Surface *armorSurface = _game->getMod()->getSurface(unit->getArmor()->getSpriteInventory(), false);
 		if (!armorSurface)
