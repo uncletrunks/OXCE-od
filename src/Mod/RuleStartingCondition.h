@@ -67,6 +67,8 @@ public:
 	std::string getType() const;
 	/// Gets the environmental condition for a given faction.
 	EnvironmentalCondition getEnvironmetalCondition(const std::string &faction) const;
+	/// Gets the allowed armor types.
+	const std::vector<std::string> *getAllowedArmors() const;
 	/// Gets the allowed craft types.
 	const std::vector<std::string> *getAllowedCraft() const;
 	/// Checks if the craft type is allowed.

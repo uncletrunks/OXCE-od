@@ -23,6 +23,7 @@ namespace OpenXcom
 {
 
 class TextButton;
+class ToggleTextButton;
 class Window;
 class Text;
 class AlienDeployment;
@@ -35,8 +36,11 @@ class BriefingLightState : public State
 {
 private:
 	TextButton *_btnOk;
+	ToggleTextButton *_btnArmors;
 	Window *_window;
-	Text *_txtTitle, *_txtBriefing;
+	Text *_txtTitle, *_txtBriefing, *_txtArmors;
+	// Checks the starting condition
+	std::wstring checkStartingCondition(AlienDeployment *deployment);
 public:
 	/// Creates the BriefingLight state.
 	BriefingLightState(AlienDeployment *deployment);
@@ -44,6 +48,8 @@ public:
 	~BriefingLightState();
 	/// Handler for clicking the Ok button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the Armors button.
+	void btnArmorsClick(Action *action);
 };
 
 }

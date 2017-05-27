@@ -129,6 +129,15 @@ EnvironmentalCondition RuleStartingCondition::getEnvironmetalCondition(const std
 }
 
 /**
+* Returns all allowed armor types.
+* @return List of armor types.
+*/
+const std::vector<std::string> *RuleStartingCondition::getAllowedArmors() const
+{
+	return &_allowedArmors;
+}
+
+/**
 * Returns all allowed craft types.
 * @return List of craft types.
 */
