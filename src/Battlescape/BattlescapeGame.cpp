@@ -1866,8 +1866,6 @@ void BattlescapeGame::dropItem(Position position, BattleItem *item, bool removeI
 	if (item->getRules()->isFixed())
 		return;
 
-	_save->getTile(p)->addItem(item, getMod()->getInventory("STR_GROUND", true));
-
 	if (item->getUnit())
 	{
 		item->getUnit()->setPosition(p);
@@ -1886,6 +1884,8 @@ void BattlescapeGame::dropItem(Position position, BattleItem *item, bool removeI
 	{
 		item->setOwner(0);
 	}
+
+	_save->getTile(p)->addItem(item, getMod()->getInventory("STR_GROUND", true));
 
 	getTileEngine()->applyGravity(_save->getTile(p));
 
