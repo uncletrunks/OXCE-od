@@ -162,7 +162,7 @@ void TechTreeSelectState::initLists()
 		}
 		std::wstring projectName = tr((*i));
 		for (auto & c : projectName) c = towupper(c);
-		if (searchString == L"HOCUSPOCUS")
+		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredResearch(*i))
 			{
@@ -191,7 +191,7 @@ void TechTreeSelectState::initLists()
 		}
 		std::wstring projectName = tr((*i));
 		for (auto & c : projectName) c = towupper(c);
-		if (searchString == L"HOCUSPOCUS")
+		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredManufacture(*i))
 			{
