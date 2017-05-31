@@ -2879,7 +2879,10 @@ int BattleUnit::getMiniMapSpriteIndex() const
 		else
 			return 24;
 	case FACTION_NEUTRAL:
-		return 6;
+		if (_armor->getSize() == 1)
+			return 6;
+		else
+			return 12;
 	default:
 		if (_armor->getSize() == 1)
 			return 0;
