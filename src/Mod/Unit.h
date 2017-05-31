@@ -73,6 +73,7 @@ private:
 	std::string _meleeWeapon, _psiWeapon;
 	std::vector<std::vector<std::string> > _builtInWeapons;
 	bool _canSurrender, _autoSurrender;
+	bool _isLeeroyJenkins;
 public:
 	/// Creates a blank unit ruleset.
 	Unit(const std::string &type);
@@ -128,6 +129,7 @@ public:
 	bool canSurrender() const;
 	/// Checks if this unit surrenders automatically, if all other units surrendered too.
 	bool autoSurrender() const;
+	bool isLeeroyJenkins() const { return _isLeeroyJenkins; };
 };
 
 }

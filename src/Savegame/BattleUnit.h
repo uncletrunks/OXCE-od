@@ -144,6 +144,7 @@ private:
 	int _breathFrame;
 	bool _breathing;
 	bool _hidingForTurn, _floorAbove, _respawn;
+	bool _isLeeroyJenkins;	// always charges enemy, never retreats.
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
 	ScriptValues<BattleUnit> _scriptValues;
@@ -576,6 +577,8 @@ public:
 	void setMindControllerId(int id);
 	/// Get the unit mind controller's id.
 	int getMindControllerId() const;
+	/// Get the unit leeroyJenkins flag
+	bool isLeeroyJenkins() const { return _isLeeroyJenkins; };
 
 };
 

@@ -120,6 +120,67 @@ YAML::Node AIModule::save() const
 }
 
 /**
+ * Mindless charge strategy. For mindless units.
+ * Consists of running around and charging nearest visible enemy.
+ * @param action (possible) AI action to execute after thinking is done.
+ */
+void AIModule::dont_think(BattleAction *action)
+{
+	if (_traceAI)
+	{
+		Log(LOG_INFO) << "LEEROY: Unit " << _unit->getId() << " of type " << _unit->getType() << " is Leeroy...";
+	}
+	Mod *mod = _save->getBattleState()->getGame()->getMod();
+	if (action->weapon)
+	{
+		const RuleItem *rule = action->weapon->getRules();
+		if (_save->canUseWeapon(action->weapon, _unit, false))
+		{
+			if (rule->getBattleType() == BT_MELEE)
+			{
+				_melee = true;
+				_reachableWithAttack = _save->getPathfinding()->findReachable(_unit, BattleActionCost(BA_HIT, _unit, action->weapon));
+			}
+		}
+		else
+		{
+			action->weapon = 0;
+			_reachableWithAttack.clear();
+		}
+	}
+	int visibleEnemiesToAttack = selectNearestTargetLeeroy();
+	if (_traceAI)
+	{
+		Log(LOG_INFO) << "LEEROY: visibleEnemiesToAttack: " << visibleEnemiesToAttack << " _melee: " << _melee;
+	}
+	if ((visibleEnemiesToAttack > 0) && _melee)
+	{
+		if (_traceAI)
+		{
+			Log(LOG_INFO) << "LEEROY: LEEROYIN' at someone!";
+		}
+		meleeAction();
+		action->type = _attackAction->type;
+		action->target = _attackAction->target;
+		// if this is a firepoint action, set our facing.
+		action->finalFacing = _attackAction->finalFacing;
+		action->updateTU();
+	}
+	else
+	{
+		if (_traceAI)
+		{
+			Log(LOG_INFO) << "LEEROY: No one to LEEROY!, patrolling...";
+		}
+		setupPatrol();
+		_unit->setCharging(0);
+		_reserve = BA_NONE;
+		action->type = _patrolAction->type;
+		action->target = _patrolAction->target;
+	}
+}
+
+/**
  * Runs any code the state needs to keep updating every AI cycle.
  * @param action (possible) AI action to execute after thinking is done.
  */
@@ -174,6 +235,12 @@ void AIModule::think(BattleAction *action)
 			break;
 		}
 		Log(LOG_INFO) << "Currently using " << AIMode << " behaviour";
+	}
+
+	if (_unit->isLeeroyJenkins())
+	{
+		dont_think(action);
+	    return;
 	}
 
 	Mod *mod = _save->getBattleState()->getGame()->getMod();
@@ -1090,6 +1157,49 @@ int AIModule::selectNearestTarget()
 }
 
 /**
+ * Selects the nearest known living target we can see/reach and returns the number of visible enemies.
+ * This function includes civilians as viable targets.
+ * Note: Differs from selectNearestTarget() in calling selectPointNearTargetLeeroy().
+ * @return viable targets.
+ */
+int AIModule::selectNearestTargetLeeroy()
+{
+	int tally = 0;
+	_closestDist = 100;
+	_aggroTarget = 0;
+	Position target;
+	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+	{
+		if (validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE) &&
+			_save->getTileEngine()->visible(_unit, (*i)->getTile()))
+		{
+			tally++;
+			int dist = _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
+			if (dist < _closestDist)
+			{
+				bool valid = false;
+				if (selectPointNearTargetLeeroy(*i))
+				{
+					int dir = _save->getTileEngine()->getDirectionTo(_attackAction->target, (*i)->getPosition());
+					valid = _save->getTileEngine()->validMeleeRange(_attackAction->target, dir, _unit, *i, 0);
+				}
+				if (valid)
+				{
+					_closestDist = dist;
+					_aggroTarget = *i;
+				}
+			}
+		}
+	}
+	if (_aggroTarget)
+	{
+		return tally;
+	}
+
+	return 0;
+}
+
+/**
  * Selects the nearest known living Xcom unit.
  * used for ambush calculations
  * @return if we found one.
@@ -1177,6 +1287,54 @@ bool AIModule::selectPointNearTarget(BattleUnit *target, int maxTUs) const
 							_attackAction->target = checkPath;
 							returnValue = true;
 							distance = distanceCurrent;
+						}
+						_save->getPathfinding()->abortPath();
+					}
+				}
+			}
+		}
+	}
+	return returnValue;
+}
+
+/**
+ * Selects a point near enough to our target to perform a melee attack.
+ * Note: Differs from selectPointNearTarget() in that it doesn't consider:
+ *  - remaining TUs (charge even if not enough TUs to attack)
+ *  - dangerous tiles (grenades? pfff!)
+ *  - melee dodge (not intelligent enough to attack from behind)
+ * @param target Pointer to a target.
+ * @return True if a point was found.
+ */
+bool AIModule::selectPointNearTargetLeeroy(BattleUnit *target) const
+{
+	int size = _unit->getArmor()->getSize();
+	int targetsize = target->getArmor()->getSize();
+	bool returnValue = false;
+	unsigned int distance = 1000;
+	for (int z = -1; z <= 1; ++z)
+	{
+		for (int x = -size; x <= targetsize; ++x)
+		{
+			for (int y = -size; y <= targetsize; ++y)
+			{
+				if (x || y) // skip the unit itself
+				{
+					Position checkPath = target->getPosition() + Position(x, y, z);
+					if (_save->getTile(checkPath) == 0 || std::find(_reachable.begin(), _reachable.end(), _save->getTileIndex(checkPath)) == _reachable.end())
+						continue;
+					int dir = _save->getTileEngine()->getDirectionTo(checkPath, target->getPosition());
+					bool valid = _save->getTileEngine()->validMeleeRange(checkPath, dir, _unit, target, 0);
+					bool fitHere = _save->setUnitPosition(_unit, checkPath, true);
+
+					if (valid && fitHere)
+					{
+						_save->getPathfinding()->calculate(_unit, checkPath, 0, 100000); // disregard unit's TUs.
+						if (_save->getPathfinding()->getStartDirection() != -1 && _save->getPathfinding()->getPath().size() < distance)
+						{
+							_attackAction->target = checkPath;
+							returnValue = true;
+							distance = _save->getPathfinding()->getPath().size();
 						}
 						_save->getPathfinding()->abortPath();
 					}

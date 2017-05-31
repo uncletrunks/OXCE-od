@@ -61,7 +61,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
 	_motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT), _fatalShotBodyPart(BODYPART_HEAD), _armor(0),
-	_geoscapeSoldier(soldier), _unitRules(0), _rankInt(0), _turretType(-1), _hidingForTurn(false), _floorAbove(false), _respawn(false)
+	_geoscapeSoldier(soldier), _unitRules(0), _rankInt(0), _turretType(-1), _hidingForTurn(false), _floorAbove(false), _respawn(false), _isLeeroyJenkins(false)
 {
 	_name = soldier->getName(true);
 	_id = soldier->getId();
@@ -228,7 +228,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT),
 	_fatalShotBodyPart(BODYPART_HEAD), _armor(armor), _geoscapeSoldier(0),  _unitRules(unit),
-	_rankInt(0), _turretType(-1), _hidingForTurn(false), _respawn(false)
+	_rankInt(0), _turretType(-1), _hidingForTurn(false), _respawn(false), _isLeeroyJenkins(false)
 {
 	_type = unit->getType();
 	_rank = unit->getRank();
@@ -247,6 +247,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_spawnUnit = unit->getSpawnUnit();
 	_value = unit->getValue();
 	_faceDirection = -1;
+	_isLeeroyJenkins = unit->isLeeroyJenkins();
 
 	_movementType = _armor->getMovementType();
 	if (_movementType == MT_FLOAT)

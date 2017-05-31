@@ -53,6 +53,10 @@ private:
 	std::vector<int> _reachable, _reachableWithAttack, _wasHitBy;
 	BattleActionType _reserve;
 	UnitFaction _targetFaction;
+
+	bool selectPointNearTargetLeeroy(BattleUnit *target) const;
+	int selectNearestTargetLeeroy();
+	void dont_think(BattleAction *action);
 public:
 	/// Creates a new AIModule linked to the game and a certain unit.
 	AIModule(SavedBattleGame *save, BattleUnit *unit, Node *node);
