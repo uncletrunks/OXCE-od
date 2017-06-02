@@ -213,6 +213,8 @@ void ProjectileFlyBState::init()
 				int checkDirection = _parent->getTileEngine()->getDirectionTo(tileToCheck, _unit->getPosition());
 				if (closeQuartersTarget && _unit->getFaction() != closeQuartersTarget->getFaction() // Unit must exist and not be same faction
 					&& closeQuartersTarget->getArmor()->getCreatesMeleeThreat() // Unit must be valid defender, 2x2 default false here
+					&& closeQuartersTarget->getTimeUnits() >= _parent->getMod()->getCloseQuartersTuCostGlobal() // Unit must have enough TUs
+					&& closeQuartersTarget->getEnergy() >= _parent->getMod()->getCloseQuartersEnergyCostGlobal() // Unit must have enough Energy
 					&& _parent->getTileEngine()->validMeleeRange(closeQuartersTarget, _unit, checkDirection) // Unit must be able to see the unit attempting to fire
 					&& !(_unit->getFaction() == FACTION_PLAYER && closeQuartersTarget->getFaction() == FACTION_NEUTRAL) // Civilians don't inhibit player
 					&& !(_unit->getFaction() == FACTION_NEUTRAL && closeQuartersTarget->getFaction() == FACTION_PLAYER)) // Player doesn't inhibit civilians
@@ -275,7 +277,9 @@ void ProjectileFlyBState::init()
 						_unit->turn();
 					}
 
-					// We're done, don't check remaining CQB candidates anymore
+					// We're done, spend TUs and Energy; and don't check remaining CQB candidates anymore
+					(*bu)->spendTimeUnits(_parent->getMod()->getCloseQuartersTuCostGlobal());
+					(*bu)->spendEnergy(_parent->getMod()->getCloseQuartersEnergyCostGlobal());
 					break;
 				}
 			}
