@@ -117,9 +117,20 @@ UfoDetectedState::UfoDetectedState(Ufo *ufo, GeoscapeState *state, bool detected
 	_btnCentre->setText(tr("STR_CENTER_ON_UFO_TIME_5_SECONDS"));
 	_btnCentre->onMouseClick((ActionHandler)&UfoDetectedState::btnCentreClick);
 
-	_btnCancel->setText(tr("STR_CANCEL_UC"));
+	if (SDL_GetModState() & KMOD_CTRL)
+	{
+		_btnCancel->setText(tr("STR_CANCEL_AND_IGNORE_UC"));
+	}
+	else
+	{
+		_btnCancel->setText(tr("STR_CANCEL_UC"));
+	}
 	_btnCancel->onMouseClick((ActionHandler)&UfoDetectedState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&UfoDetectedState::btnCancelClick, Options::keyCancel);
+	_btnCancel->onKeyboardPress((ActionHandler)&UfoDetectedState::toggleCancel, SDLK_LCTRL);
+	_btnCancel->onKeyboardRelease((ActionHandler)&UfoDetectedState::toggleCancel, SDLK_LCTRL);
+	_btnCancel->onKeyboardPress((ActionHandler)&UfoDetectedState::toggleCancel, SDLK_RCTRL);
+	_btnCancel->onKeyboardRelease((ActionHandler)&UfoDetectedState::toggleCancel, SDLK_RCTRL);
 
 	if (detected)
 	{
@@ -235,6 +246,22 @@ void UfoDetectedState::btnCancelClick(Action *)
 		_game->getSavedGame()->addUfoToIgnoreList(_ufo->getId());
 	}
 	_game->popState();
+}
+
+/**
+ * Toggles Cancel button.
+ * @param action Pointer to an action.
+ */
+void UfoDetectedState::toggleCancel(Action *)
+{
+	if (SDL_GetModState() & KMOD_CTRL)
+	{
+		_btnCancel->setText(tr("STR_CANCEL_AND_IGNORE_UC"));
+	}
+	else
+	{
+		_btnCancel->setText(tr("STR_CANCEL_UC"));
+	}
 }
 
 }
