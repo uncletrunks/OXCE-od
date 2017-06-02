@@ -515,6 +515,7 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 	const auto offsetCenter = (accuracy / 2 + Position(-1, -1, (ground ? 0 : accuracy.z/4) - tileHeight * accuracy.z / 24));
 	const auto offsetTarget = (accuracy / 2 + Position(-1, -1, 0));
 	const auto clasicLighting = !(getEnhancedLighting() & ((fire ? 1 : 0) | (items ? 2 : 0) | (units ? 4 : 0)));
+	const auto topVoxel = (_blockVisibility[_save->getTileIndex(center)].blockUp ? (center.z + 1) : _save->getMapSizeZ()) * accuracy.z - 1;
 
 	iterateTiles(
 		_save,
@@ -555,6 +556,13 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 			auto stepsB = 0;
 			auto lightA = currLight;
 			auto lightB = currLight;
+
+			if (startVoxel.z > topVoxel)
+			{
+				//Do not peek out your head outside map
+				startVoxel.z = topVoxel;
+			}
+
 			auto calculateBlock = [&](Position point, Position &lastPoint, int &light, int &steps)
 			{
 				auto height = (point.z % accuracy.z) * divide;
@@ -630,6 +638,7 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 				}
 				return false;
 			};
+
 			calculateLineHitHelper(startVoxel, endVoxel,
 				[&](Position voxel)
 				{
