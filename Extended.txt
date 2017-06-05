@@ -150,6 +150,7 @@ Vertical map generation support.[br/]
 [br/]
 3.8:[br/]
 Add multi ammo weapons.[br/]
+New param with battle action for unit hit and damage script.[br/]
 [br/]
 
 [examples]

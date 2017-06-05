@@ -1155,7 +1155,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 
 	{
 		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgPower, type->ResistType, };
+		ModScript::HitUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgPower, type->ResistType, attack.type, };
 
 		work.execute(this->getArmor()->getEventUnitHitScript(), args);
 
@@ -1214,7 +1214,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, power, orgPower, bodypart, side, type->ResistType, };
+		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, power, orgPower, bodypart, side, type->ResistType, attack.type, };
 
 		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
 
@@ -4383,7 +4383,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	"to_morale",
 	"to_wound",
 	"unit", "damaging_item", "weapon_item", "attacker",
-	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", }
+	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", "battle_action", }
 {
 	BindBase b { this };
 
@@ -4397,7 +4397,7 @@ ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string&
 	"part",
 	"side",
 	"unit", "damaging_item", "weapon_item", "attacker",
-	"battle_game", "orig_power", "damaging_type", }
+	"battle_game", "orig_power", "damaging_type", "battle_action", }
 {
 	BindBase b { this };
 
