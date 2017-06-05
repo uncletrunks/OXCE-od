@@ -1,33 +1,67 @@
 # Makefile for: http://mxe.cc/
 # Get mxe from `git clone https://github.com/mxe/mxe.git`
-# Build mxe with packs: `make gcc sdl sdl_gfx sdl_image sdl_mixer glew`
-# Get yaml-cpp form `git clone https://github.com/jbeder/yaml-cpp.git`
-TARGET =
+# Build mxe with packs: `make gcc sdl sdl_gfx sdl_image sdl_mixer glew yaml-cpp`
+# and get yaml-cpp master: `git clone https://github.com/jbeder/yaml-cpp.git`
+# Or build mxe with yaml: `make gcc sdl sdl_gfx sdl_image sdl_mixer glew yaml-cpp`
+#
+# ARCH can be either i686-w64-mingw32.static or x86_64-w64-mingw32.static if you installed packs for it.
+#
+# Example:
+#
+# make -f Makefile.mxe ARCH=x86_64-w64-mingw32.static
+#
+# With mxe-supplied yaml-cpp:
+#
+# make -f Makefile.mxe ARCH=x86_64-w64-mingw32.static MXE_YAML=1
+#
+# You can also set BIN=whatever.exe to rename the .exe
+#
+# make -f Makefile.mxe ARCH=x86_64-w64-mingw32.static MXE_YAML=1 BIN=OpenXcomExPlusMinus64.exe
+#
+# Or build with mxe and yaml-cpp cloned somewhere else than side-by-side with OpenXcom:
+#
+# make -f Makefile.mxe MXE_DIR=/tmp/mxe YAML_INC=/tmp/yaml-cpp/include/ YAML_DIR=/tmp/yaml-cpp/src/
+#
+
+BIN ?= OpenXcomEx.exe
+ARCH ?= i686-w64-mingw32.static
 
 # Directories and files
-MXE_DIR = ../../mxe
+MXE_DIR ?= ../../mxe
 PATH := $(MXE_DIR)/usr/bin:$(PATH)
-YAML_INC = ../../yaml-cpp/include/
-YAML_SRC = ../../yaml-cpp/src/
 OBJDIR = ../obj/
 BINDIR = ../bin/
-SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp $(YAML_SRC)*.cpp $(YAML_SRC)*/*.cpp)
+YAML_INC ?= ../../yaml-cpp/include/
+YAML_SRC ?= ../../yaml-cpp/src/
+
+SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp)
+
+# if MXE_YAML is set, use the mxe-supplied one
+ifeq ($(strip $(MXE_YAML)),)
+	SRCS += $(wildcard $(YAML_SRC)*.cpp $(YAML_SRC)*/*.cpp)
+	YAML_LIB =
+else
+	YAML_INC = $(MXE_DIR)/usr/$(ARCH)/include/yaml-cpp
+	YAML_SRC =
+	YAML_LIB = -lyaml-cpp
+endif
+
 OBJRES = ../obj/OpenXcom_res.o
 OBJS = $(OBJRES) $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS)))
 RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/openxcomex.ico
 
-
-# Target-specific settings
-CXX = i686-w64-mingw32.static-gcc
-RC = i686-w64-mingw32.static-windres
-SDL_CONFIG = i686-w64-mingw32.static-sdl-config
-SDL_INC = $(MXE_DIR)/usr/i686-w64-mingw32.static/include/SDL
-SDL_PKG = i686-w64-mingw32.static-pkg-config
-BIN = OpenXcomEx.exe
+# Arch-specific settings
+CXX = $(ARCH)-gcc
+RC = $(ARCH)-windres
+PKG_CONFIG = $(ARCH)-pkg-config
+SDL_CONFIG = $(ARCH)-sdl-config
 
 # Compiler settings
-CXXFLAGS = -Wall -O3 -s -std=gnu++11 `$(SDL_CONFIG) --cflags` $(addprefix -D,$(TARGET)) -I$(SDL_INC) -I$(YAML_INC) `$(SDL_PKG)  SDL_mixer --cflags `
-LDFLAGS = -s `$(SDL_CONFIG) --libs` -lopengl32 -lshlwapi -lSDLmain -lSDL_gfx -lSDL_mixer -lSDL_image -lstdc++ `$(SDL_PKG) SDL_mixer --libs` `$(SDL_PKG) SDL_image --libs` -ldbghelp
+CXXFLAGS = -Wall -O3 -s -std=gnu++11 -I$(YAML_INC) \
+	`$(SDL_CONFIG) --cflags` `$(PKG_CONFIG)  SDL_mixer --cflags ` `$(PKG_CONFIG) SDL_gfx --cflags`
+
+LDFLAGS = -s `$(SDL_CONFIG) --libs` $(YAML_LIB) -lopengl32 -lshlwapi `$(PKG_CONFIG) SDL_gfx --libs` \
+	-lstdc++ `$(PKG_CONFIG) SDL_mixer --libs` `$(PKG_CONFIG) SDL_image --libs` -ldbghelp
 
 # Rules
 all: $(BINDIR)$(BIN)
@@ -74,7 +108,7 @@ $(OBJDIR)%.o:: Ufopaedia/%.cpp
 $(OBJDIR)%.o:: $(YAML_SRC)%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJDIR)%.o:: $(YAML_SRC)contrib/%.cpp
+$(OBJDIR)%.o:: $(YAML_SRC)/contrib/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJRES):$(RES)
