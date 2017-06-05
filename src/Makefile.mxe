@@ -64,10 +64,10 @@ LDFLAGS = -s `$(SDL_CONFIG) --libs` $(YAML_LIB) -lopengl32 -lshlwapi `$(PKG_CONF
 	-lstdc++ `$(PKG_CONFIG) SDL_mixer --libs` `$(PKG_CONFIG) SDL_image --libs` -ldbghelp
 
 # Rules
-all: $(BINDIR)$(BIN)
+all: $(BINDIR)/$(BIN)
 
-$(BINDIR)$(BIN): $(OBJS)
-	$(CXX) $(OBJS) $(LDFLAGS) -o $(BINDIR)$(BIN)
+$(BINDIR)/$(BIN): $(OBJS)
+	$(CXX) $(OBJS) $(LDFLAGS) -o $(BINDIR)/$(BIN)
 
 $(OBJDIR)%.o:: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -115,7 +115,7 @@ $(OBJRES):$(RES)
 	$(RC) -o $@ $<
 
 clean:
-	rm -f $(BINDIR)$(BIN) $(OBJDIR)*.o
+	rm -f $(BINDIR)/$(BIN) $(OBJDIR)/*.o
 
 .PHONY: all clean
 
