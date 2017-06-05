@@ -20,7 +20,7 @@
 #
 # Or build with mxe and yaml-cpp cloned somewhere else than side-by-side with OpenXcom:
 #
-# make -f Makefile.mxe MXE_DIR=/tmp/mxe YAML_INC=/tmp/yaml-cpp/include/ YAML_DIR=/tmp/yaml-cpp/src/
+# make -f Makefile.mxe MXE_DIR=/tmp/mxe YAML_INC=/tmp/yaml-cpp/include/ YAML_SRC=/tmp/yaml-cpp/src/
 #
 
 BIN ?= OpenXcomEx.exe
