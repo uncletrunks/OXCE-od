@@ -1329,7 +1329,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 		case BA_AIMEDSHOT: cost.Time += (bu->getBaseStats()->tu / 2); break; // 50%
 		default: break;
 		}
-		return cost.haveTU();
+		return cost.Time <= 0 || cost.haveTU();
 	}
 
 	cost.updateTU();
