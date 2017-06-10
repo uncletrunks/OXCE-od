@@ -314,9 +314,9 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 				if (_game->getMod()->getUnit(*i) && !rule->isAlien())
 				{
 					// if this vehicle requires ammo, remember to ignore it later too
-					if (!rule->getCompatibleAmmo()->empty())
+					if (!rule->getPrimaryCompatibleAmmo()->empty())
 					{
-						origBaseItems->addItem(rule->getCompatibleAmmo()->front(), 1000000);
+						origBaseItems->addItem(rule->getPrimaryCompatibleAmmo()->front(), 1000000);
 					}
 					continue;
 				}
@@ -1331,38 +1331,30 @@ void DebriefingState::prepareDebriefing()
 					else
 					{ // non soldier player = tank
 						base->getStorageItems()->addItem((*j)->getType());
-						if ((*j)->getRightHandWeapon())
+
+						auto unloadWeapon = [&](BattleItem *weapon)
 						{
-							const RuleItem *primaryRule = (*j)->getRightHandWeapon()->getRules();
-							const BattleItem *ammoItem = (*j)->getRightHandWeapon()->getAmmoItem();
-							if (!primaryRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
+							if (weapon)
 							{
-								int total = ammoItem->getAmmoQuantity();
-
-								if (primaryRule->getClipSize()) // meaning this tank can store multiple clips
+								const RuleItem *primaryRule = weapon->getRules();
+								const BattleItem *ammoItem = weapon->getAmmoForSlot(0);
+								const auto *compatible = primaryRule->getPrimaryCompatibleAmmo();
+								if (!compatible->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 								{
-									total /= ammoItem->getRules()->getClipSize();
+									int total = ammoItem->getAmmoQuantity();
+
+									if (primaryRule->getClipSize()) // meaning this tank can store multiple clips
+									{
+										total /= ammoItem->getRules()->getClipSize();
+									}
+
+									base->getStorageItems()->addItem(compatible->front(), total);
 								}
-
-								base->getStorageItems()->addItem(primaryRule->getCompatibleAmmo()->front(), total);
 							}
-						}
-						if ((*j)->getLeftHandWeapon())
-						{
-							const RuleItem *secondaryRule = (*j)->getLeftHandWeapon()->getRules();
-							const BattleItem *ammoItem = (*j)->getLeftHandWeapon()->getAmmoItem();
-							if (!secondaryRule->getCompatibleAmmo()->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
-							{
-								int total = ammoItem->getAmmoQuantity();
+						};
 
-								if (secondaryRule->getClipSize()) // meaning this tank can store multiple clips
-								{
-									total /= ammoItem->getRules()->getClipSize();
-								}
-
-								base->getStorageItems()->addItem(secondaryRule->getCompatibleAmmo()->front(), total);
-							}
-						}
+						unloadWeapon((*j)->getRightHandWeapon());
+						unloadWeapon((*j)->getLeftHandWeapon());
 					}
 				}
 				else
@@ -1488,7 +1480,7 @@ void DebriefingState::prepareDebriefing()
 			// if this was a 2-stage mission, and we didn't abort (ie: we have time to clean up)
 			// we can recover items from the earlier stages as well
 			recoverItems(battle->getConditionalRecoveredItems(), base);
-			int nonRecoverType = 0;
+			size_t nonRecoverType = 0;
 			if (ruleDeploy && ruleDeploy->getObjectiveType())
 			{
 				nonRecoverType = ruleDeploy->getObjectiveType();
@@ -1775,7 +1767,7 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 			ReequipStat stat = {i->first, missing, craft->getName(_game->getLanguage())};
 			_missingItems.push_back(stat);
 		}
-		if (tankRule->getCompatibleAmmo()->empty())
+		if (tankRule->getPrimaryCompatibleAmmo()->empty())
 		{ // so this tank does NOT require ammo
 			for (int j = 0; j < canBeAdded; ++j)
 				craft->getVehicles()->push_back(new Vehicle(tankRule, tankRule->getClipSize(), size));
@@ -1783,7 +1775,7 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 		}
 		else
 		{ // so this tank requires ammo
-			RuleItem *ammo = _game->getMod()->getItem(tankRule->getCompatibleAmmo()->front(), true);
+			RuleItem *ammo = _game->getMod()->getItem(tankRule->getPrimaryCompatibleAmmo()->front(), true);
 			int ammoPerVehicle, clipSize;
 			if (ammo->getClipSize() > 0 && tankRule->getClipSize() > 0)
 			{
@@ -1902,7 +1894,8 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						break;
 					case BT_FIREARM:
 						{
-							if (!(*it)->needsAmmo() && (*it)->getRules()->getClipSize() > 0)
+							// FIXME: only checks primary slot atm
+							if (!(*it)->needsAmmoForSlot(0) && (*it)->getRules()->getClipSize() > 0)
 							{
 								// It's a weapon without clips
 								_rounds[(*it)->getRules()] += (*it)->getAmmoQuantity();
@@ -1913,10 +1906,13 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 					case BT_MELEE:
 						// It's a weapon, count any rounds left in the clip.
 						{
-							BattleItem *clip = (*it)->getAmmoItem();
-							if (clip && clip->getRules()->getClipSize() > 0 && clip != *it)
+							for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 							{
-								_rounds[clip->getRules()] += clip->getAmmoQuantity();
+								BattleItem *clip = (*it)->getAmmoForSlot(slot);
+								if (clip && clip->getRules()->getClipSize() > 0 && clip != *it)
+								{
+									_rounds[clip->getRules()] += clip->getAmmoQuantity();
+								}
 							}
 						}
 						// Fall-through, to recover the weapon itself.

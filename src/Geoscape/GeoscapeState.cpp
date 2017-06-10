@@ -1773,13 +1773,13 @@ void GeoscapeState::time1Day()
 			if (newResearch)
 			{
 				RuleItem *item = _game->getMod()->getItem(newResearch->getName());
-				if (item && item->getBattleType() == BT_FIREARM && !item->getCompatibleAmmo()->empty())
+				if (item && item->getBattleType() == BT_FIREARM && !item->getPrimaryCompatibleAmmo()->empty())
 				{
 					RuleManufacture *man = _game->getMod()->getManufacture(item->getType());
 					if (man && !man->getRequirements().empty())
 					{
 						const std::vector<std::string> &req = man->getRequirements();
-						RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front());
+						RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front());
 						if (ammo && std::find(req.begin(), req.end(), ammo->getType()) != req.end() && !_game->getSavedGame()->isResearched(req))
 						{
 							popup(new ResearchRequiredState(item));

@@ -303,9 +303,9 @@ void StoresState::initList(bool grandTotal)
 						{
 							qty += 1;
 						}
-						else if (!(*vehicle)->getRules()->getCompatibleAmmo()->empty())
+						else if (!(*vehicle)->getRules()->getPrimaryCompatibleAmmo()->empty())
 						{
-							if ((*vehicle)->getRules()->getCompatibleAmmo()->front() == (*item))
+							if ((*vehicle)->getRules()->getPrimaryCompatibleAmmo()->front() == (*item))
 							{
 								qty += (*vehicle)->getAmmo();
 							}
@@ -367,9 +367,9 @@ void StoresState::initList(bool grandTotal)
 							{
 								qty += 1;
 							}
-							else if (!(*vehicle)->getRules()->getCompatibleAmmo()->empty())
+							else if (!(*vehicle)->getRules()->getPrimaryCompatibleAmmo()->empty())
 							{
-								if ((*vehicle)->getRules()->getCompatibleAmmo()->front() == (*item))
+								if ((*vehicle)->getRules()->getPrimaryCompatibleAmmo()->front() == (*item))
 								{
 									qty += (*vehicle)->getAmmo();
 								}

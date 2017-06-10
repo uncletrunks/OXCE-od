@@ -559,7 +559,8 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 			for (YAML::const_iterator i = layout.begin(); i != layout.end(); ++i)
 			{
 				EquipmentLayoutItem *layoutItem = new EquipmentLayoutItem(*i);
-				if (mod->getInventory(layoutItem->getSlot()) && mod->getItem(layoutItem->getItemType()) && (layoutItem->getAmmoItem() == "NONE" || mod->getItem(layoutItem->getAmmoItem())))
+				// FIXME: checks only primary ammo atm
+				if (mod->getInventory(layoutItem->getSlot()) && mod->getItem(layoutItem->getItemType()) && (layoutItem->getAmmoItemForSlot(0) == "NONE" || mod->getItem(layoutItem->getAmmoItemForSlot(0))))
 				{
 					_globalEquipmentLayout[j].push_back(layoutItem);
 				}

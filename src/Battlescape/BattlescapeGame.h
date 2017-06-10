@@ -51,6 +51,9 @@ struct BattleActionCost : RuleItemUseCost
 	/// Default constructor.
 	BattleActionCost() : type(BA_NONE), actor(0), weapon(0), origWeapon(0) { }
 
+	/// Constructor from unit.
+	BattleActionCost(BattleUnit *unit) : type(BA_NONE), actor(0), weapon(0) { }
+
 	/// Constructor with update.
 	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item), origWeapon(0) { updateTU(); }
 
@@ -92,13 +95,13 @@ struct BattleActionAttack
 	BattleItem *damage_item;
 
 	/// Defulat constructor.
-	BattleActionAttack(BattleActionType action = BA_NONE) : type{ action }, attacker{ nullptr }, weapon_item{ nullptr }, damage_item{ nullptr }
+	BattleActionAttack(BattleActionType action = BA_NONE, BattleUnit *unit = nullptr) : type{ action }, attacker{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
 	{
 
 	}
 
 	/// Constructor.
-	BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item, BattleItem *ammo = nullptr);
+	BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item, BattleItem *ammo);
 
 	/// Constructor.
 	BattleActionAttack(const BattleActionCost &action, BattleItem *ammo);
@@ -160,7 +163,7 @@ public:
 	/// Sets state think interval.
 	void setStateInterval(Uint32 interval);
 	/// Checks for casualties in battle.
-	void checkForCasualties(const RuleDamageType *damageType, const BattleItem *murderweapon, BattleUnit *origMurderer, bool hiddenExplosion = false, bool terrainExplosion = false);
+	void checkForCasualties(const RuleDamageType *damageType, BattleActionAttack attack, bool hiddenExplosion = false, bool terrainExplosion = false);
 	/// Checks reserved tu and energy.
 	bool checkReservedTU(BattleUnit *bu, int tu, int energy, bool justChecking = false);
 	/// Handles unit AI.

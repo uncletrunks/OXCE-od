@@ -72,7 +72,7 @@ namespace OpenXcom
 
 		item->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _image);
 
-		const std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
+		const std::vector<std::string> *ammo_data = item->getPrimaryCompatibleAmmo();
 
 		int weight = item->getWeight();
 		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);
@@ -123,7 +123,7 @@ namespace OpenXcom
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_AUTO").arg(item->getAutoShots()).c_str(),
+								 tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
 								 Text::formatPercentage(item->getAccuracyAuto()).c_str(),
 								 tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(14)+15);
@@ -138,7 +138,7 @@ namespace OpenXcom
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_SNAP").c_str(),
+								 tr("STR_SHOT_TYPE_SNAP").arg(item->getConfigSnap()->shots).c_str(),
 								 Text::formatPercentage(item->getAccuracySnap()).c_str(),
 								 tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(14)+15);
@@ -153,7 +153,7 @@ namespace OpenXcom
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_AIMED").c_str(),
+								 tr("STR_SHOT_TYPE_AIMED").arg(item->getConfigAimed()->shots).c_str(),
 								 Text::formatPercentage(item->getAccuracyAimed()).c_str(),
 								 tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(14)+15);

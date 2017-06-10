@@ -345,12 +345,15 @@ void BattlescapeGenerator::nextStage()
 			}
 
 			// at this point, we know what happens with the item, so let's apply it to any ammo as well.
-			BattleItem *ammo = (*i)->getAmmoItem();
-			if (ammo && ammo != *i)
+			for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 			{
-				// break any tile links, because all the tiles are about to disappear.
-				ammo->setTile(0);
-				toContainer->push_back(ammo);
+				BattleItem *ammo = (*i)->getAmmoForSlot(slot);
+				if (ammo && ammo != *i)
+				{
+					// break any tile links, because all the tiles are about to disappear.
+					ammo->setTile(0);
+					toContainer->push_back(ammo);
+				}
 			}
 			// and now the actual item itself.
 			(*i)->setTile(0);
@@ -440,7 +443,6 @@ void BattlescapeGenerator::nextStage()
 			if (!(*j)->isOut())
 			{
 				(*j)->setTurnsSinceSpotted(255);
-				(*j)->clearVisibleTiles();
 				if (!selectedFirstSoldier && (*j)->getGeoscapeSoldier())
 				{
 					_save->setSelectedUnit(*j);
@@ -700,10 +702,10 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 					// send disabled vehicles back to base
 					_base->getStorageItems()->addItem(item->getType(), 1);
 					// ammo too, if necessary
-					if (!item->getCompatibleAmmo()->empty())
+					if (!item->getPrimaryCompatibleAmmo()->empty())
 					{
 						// Calculate how much ammo needs to be added to the base.
-						RuleItem *ammo = _game->getMod()->getItem(item->getCompatibleAmmo()->front(), true);
+						RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
 						int ammoPerVehicle;
 						if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
 						{
@@ -990,9 +992,9 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 	if (unit)
 	{
 		_save->createItemForUnit(vehicle, unit);
-		if (!v->getRules()->getCompatibleAmmo()->empty())
+		if (!v->getRules()->getPrimaryCompatibleAmmo()->empty())
 		{
-			std::string ammo = v->getRules()->getCompatibleAmmo()->front();
+			std::string ammo = v->getRules()->getPrimaryCompatibleAmmo()->front();
 			BattleItem *ammoItem = _save->createItemForUnit(ammo, unit);
 			if (ammoItem)
 			{
@@ -1325,56 +1327,75 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item)
 	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
 	if (item->getSlot() == ground)
 	{
-		bool loaded;
-		RuleInventory *righthand = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
+		auto& itemType = item->getRules()->getType();
 
 		// find the first soldier with a matching layout-slot
-		for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+		for (auto unit : *_save->getUnits())
 		{
 			// skip the vehicles, we need only X-Com soldiers WITH equipment-layout
-			if ((*i)->getArmor()->getSize() > 1 || !(*i)->getGeoscapeSoldier() || (*i)->getGeoscapeSoldier()->getEquipmentLayout()->empty())
+			if (unit->getArmor()->getSize() > 1 || !unit->getGeoscapeSoldier() || unit->getGeoscapeSoldier()->getEquipmentLayout()->empty())
 			{
 				continue;
 			}
 
 			// find the first matching layout-slot which is not already occupied
-			std::vector<EquipmentLayoutItem*> *layoutItems = (*i)->getGeoscapeSoldier()->getEquipmentLayout();
-			for (std::vector<EquipmentLayoutItem*>::iterator j = layoutItems->begin(); j != layoutItems->end(); ++j)
+			for (auto layoutItem : *unit->getGeoscapeSoldier()->getEquipmentLayout())
 			{
-				if (item->getRules()->getType() != (*j)->getItemType()
-				|| (*i)->getItem((*j)->getSlot(), (*j)->getSlotX(), (*j)->getSlotY())) continue;
+				if (itemType != layoutItem->getItemType()) continue;
 
-				if ((*j)->getAmmoItem() == "NONE")
+				auto inventorySlot = _game->getMod()->getInventory(layoutItem->getSlot(), true);
+
+				if (unit->getItem(inventorySlot, layoutItem->getSlotX(), layoutItem->getSlotY())) continue;
+
+				auto toLoad = 0;
+				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 				{
-					loaded = true;
-				}
-				else
-				{
-					loaded = false;
-					// maybe we find the layout-ammo on the ground to load it with
-					for (std::vector<BattleItem*>::iterator k = _craftInventoryTile->getInventory()->begin(); (!loaded) && k != _craftInventoryTile->getInventory()->end(); ++k)
+					if (layoutItem->getAmmoItemForSlot(slot) != "NONE")
 					{
-						if ((*k)->getRules()->getType() == (*j)->getAmmoItem() && (*k)->getSlot() == ground
-						&& item->setAmmoItem((*k)) == 0)
+						++toLoad;
+					}
+				}
+
+				if (toLoad)
+				{
+					// maybe we find the layout-ammo on the ground to load it with
+					for (auto ammo : *_craftInventoryTile->getInventory())
+					{
+						if (ammo->getSlot() == ground)
 						{
-							(*k)->setSlot(righthand);
-							loaded = true;
-							// note: soldier is not owner of the ammo, we are using this fact when saving equipments
+							auto& ammoType = ammo->getRules()->getType();
+							for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+							{
+								if (ammoType == layoutItem->getAmmoItemForSlot(slot))
+								{
+									if (item->setAmmoPreMission(ammo))
+									{
+										--toLoad;
+									}
+									// even if item was not loaded other slots can't use it either
+									break;
+								}
+							}
+							if (!toLoad)
+							{
+								break;
+							}
 						}
 					}
 				}
+
 				// only place the weapon onto the soldier when it's loaded with its layout-ammo (if any)
-				if (loaded)
+				if (!toLoad || item->haveAnyAmmo())
 				{
-					item->moveToOwner((*i));
-					item->setSlot(_game->getMod()->getInventory((*j)->getSlot(), true));
-					item->setSlotX((*j)->getSlotX());
-					item->setSlotY((*j)->getSlotY());
+					item->moveToOwner(unit);
+					item->setSlot(inventorySlot);
+					item->setSlotX(layoutItem->getSlotX());
+					item->setSlotY(layoutItem->getSlotY());
 					if (Options::includePrimeStateInSavedLayout &&
 						(item->getRules()->getBattleType() == BT_GRENADE ||
 						item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
 					{
-						item->setFuseTimer((*j)->getFuseTimer());
+						item->setFuseTimer(layoutItem->getFuseTimer());
 					}
 					return true;
 				}
@@ -1870,28 +1891,29 @@ void BattlescapeGenerator::runInventory(Craft *craft)
  */
 void BattlescapeGenerator::loadWeapons()
 {
+	auto groundSlot = _game->getMod()->getInventory("STR_GROUND", true);
 	// let's try to load this weapon, whether we equip it or not.
-	for (std::vector<BattleItem*>::iterator i = _craftInventoryTile->getInventory()->begin(); i != _craftInventoryTile->getInventory()->end(); ++i)
+	for (BattleItem* i : *_craftInventoryTile->getInventory())
 	{
-		if (!(*i)->getRules()->isFixed() &&
-			!(*i)->getRules()->getCompatibleAmmo()->empty() &&
-			(*i)->getAmmoItem() == 0 &&
-			((*i)->getRules()->getBattleType() == BT_FIREARM || (*i)->getRules()->getBattleType() == BT_MELEE))
+		if (i->isWeaponWithAmmo() && //TODO test this check
+			!i->haveAllAmmo() &&
+			!i->getRules()->isFixed())
 		{
-			bool loaded = false;
-			for (std::vector<BattleItem*>::iterator j = _craftInventoryTile->getInventory()->begin(); j != _craftInventoryTile->getInventory()->end() && !loaded; ++j)
+			for (BattleItem* j : *_craftInventoryTile->getInventory())
 			{
-				if ((*j)->getSlot() == _game->getMod()->getInventory("STR_GROUND", true) && (*i)->setAmmoItem(*j) == 0)
+				if (j->getSlot() == groundSlot && i->setAmmoPreMission(j))
 				{
-					(*j)->setSlot(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
-					loaded = true;
+					if (!i->haveAllAmmo())
+					{
+						break;
+					}
 				}
 			}
 		}
 	}
 	for (std::vector<BattleItem*>::iterator i = _craftInventoryTile->getInventory()->begin(); i != _craftInventoryTile->getInventory()->end();)
 	{
-		if ((*i)->getSlot() != _game->getMod()->getInventory("STR_GROUND", true))
+		if ((*i)->getSlot() != groundSlot)
 		{
 			i = _craftInventoryTile->getInventory()->erase(i);
 			continue;
@@ -2062,7 +2084,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			for (int j = 0; j < command->getExecutions(); ++j)
 			{
 				// Loop over the VerticalLevels if they exist, otherwise just do single level
-				for (int m = 0; m <= _verticalLevels.size(); m++)
+				for (size_t m = 0; m <= _verticalLevels.size(); m++)
 				{
 					if (m == _verticalLevels.size() && m != 0)
 					{
@@ -2097,7 +2119,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 					{
 						terrain = _baseTerrain;
 					}
-					else if (terrainName != "") 
+					else if (terrainName != "")
 					{
 						//get the terrain according to the string name
 						terrain = _game->getMod()->getTerrain(terrainName);
@@ -2158,7 +2180,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 						}
 
 						craftMap = _craftRules->getBattlescapeTerrainData()->getRandomMapBlock(999, 999, 0, false);
-							if (m == 0 && addCraft(craftMap, command, _craftPos, terrain))
+						if (m == 0 && addCraft(craftMap, command, _craftPos, terrain))
 						{
 							// by default addCraft adds blocks from group 1.
 							// this can be overwritten in the command by defining specific groups or blocks
@@ -2169,42 +2191,42 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 							{
 								for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
 								{
-										if (_blocks[x][y])
+									if (_blocks[x][y])
 									{
-											addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
+										addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
 									}
 								}
 							}
 							_craftDeployed = true;
 							success = true;
 						}
-							
-							if (m != 0 && _craftDeployed)
+
+						if (m != 0 && _craftDeployed)
+						{
+							if (currentLevel.levelType != "empty" && currentLevel.levelType != "craft")
 							{
-								if (currentLevel.levelType != "empty" && currentLevel.levelType != "craft")
-								{
-									block = command->getNextBlock(terrain);
-								}
+								block = command->getNextBlock(terrain);
+							}
 
-								if (block)
+							if (block)
+							{
+								for (x = _craftPos.x; x < _craftPos.x + _craftPos.w; ++x)
 								{
-									for (x = _craftPos.x; x < _craftPos.x + _craftPos.w; ++x)
+									for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
 									{
-										for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
-										{
-											addMAPAlternate(block, x, y, zOff, terrain);
-											addSegmentVertical(block, x, y, zOff);
+										addMAPAlternate(block, x, y, zOff, terrain);
+										addSegmentVertical(block, x, y, zOff);
 
-											block = command->getNextBlock(terrain);
-										}
+										block = command->getNextBlock(terrain);
 									}
 								}
-
-								if (currentLevel.levelType == "craft")
-								{
-									_craftZ = zOff;
-								}
 							}
+
+							if (currentLevel.levelType == "craft")
+							{
+								_craftZ = zOff;
+							}
+						}
 					}
 					break;
 				case MSC_ADDUFO:
@@ -2638,7 +2660,7 @@ void BattlescapeGenerator::generateBaseMap()
 				int zOff;
 
 				// Loop over the vertical levels to load the map
-				for (int k = 0; k <= _verticalLevels.size(); k++)
+				for (size_t k = 0; k <= _verticalLevels.size(); k++)
 				{
 					if (k == _verticalLevels.size())
 					{
@@ -2658,7 +2680,7 @@ void BattlescapeGenerator::generateBaseMap()
 					{
 						terrain = _baseTerrain;
 					}
-					else if (terrainName != "") 
+					else if (terrainName != "")
 					{
 						//get the terrain according to the string name
 						terrain = _game->getMod()->getTerrain(terrainName);
@@ -2845,7 +2867,7 @@ bool BattlescapeGenerator::populateVerticalLevels(MapScript *command)
 			{
 				continue;
 			}
-			
+
 			if ((*i).levelSizeZ <= zLevelsLeft)
 			{
 				stop = false;
@@ -2920,7 +2942,7 @@ void BattlescapeGenerator::loadNodes()
 		}
 
 	// Loading nodes for verticalLevels maps
-	for (int i = 0; i < _notInBlocks.size(); i++)
+	for (size_t i = 0; i < _notInBlocks.size(); i++)
 	{
 		loadRMP(_notInBlocks[i], _notInBlocksRects[i].x * 10, _notInBlocksRects[i].y * 10, _notInBlocksOffsets[i], segment++);
 	}
@@ -3031,7 +3053,7 @@ void BattlescapeGenerator::attachNodeLinks()
 		int nodeZ = node->getPosition().z;
 		std::map<int, std::vector<int> > neighbourDirections;
 
-		// Make a list of directions in which to look for neighbouring nodes		
+		// Make a list of directions in which to look for neighbouring nodes
 		if (nodeX != 0)
 		{
 			std::vector<int> tempVector;

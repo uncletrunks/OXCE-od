@@ -318,19 +318,44 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	{
 		if (mod->getItem((*i)["type"].as<std::string>()))
 		{
-			int ammo = (*i)["ammoItem"].as<int>();
-			if (ammo != -1)
+			auto setItem = [&](int slot, const YAML::Node& n)
 			{
-				for (std::vector<BattleItem*>::iterator ammoi = _items.begin(); ammoi != _items.end(); ++ammoi)
+				if (n)
 				{
-					if ((*ammoi)->getId() == ammo)
+					int ammoId = n.as<int>();
+					if (ammoId != -1)
 					{
-						(*weaponi)->setAmmoItem((*ammoi));
-						break;
+						if (ammoId == (*weaponi)->getId())
+						{
+							(*weaponi)->setAmmoForSlot(slot, (*weaponi));
+						}
+						else
+						{
+							for (auto item : _items)
+							{
+								if (item->getId() == ammoId)
+								{
+									(*weaponi)->setAmmoForSlot(slot, item);
+									break;
+								}
+							}
+						}
 					}
 				}
+			};
+
+			if (const YAML::Node& ammoSlots = (*i)["ammoItemSlots"])
+			{
+				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+				{
+					setItem(slot, ammoSlots[slot]);
+				}
 			}
-			 ++weaponi;
+			else
+			{
+				setItem(0, (*i)["ammoItem"]);
+			}
+			++weaponi;
 		}
 	}
 	_objectiveType = node["objectiveType"].as<int>(_objectiveType);

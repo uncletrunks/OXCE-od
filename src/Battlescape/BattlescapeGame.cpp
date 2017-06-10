@@ -167,28 +167,15 @@ BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit
 {
 	if (item)
 	{
-		const RuleItem *rule = item->getRules();
-		switch (rule->getBattleType())
+		weapon_item = item;
+		damage_item = ammo;
+		const auto battleType = item->getRules()->getBattleType();
+		if (battleType == BT_PROXIMITYGRENADE || battleType == BT_GRENADE)
 		{
-		case BT_FIREARM:
-			weapon_item = item;
-			damage_item = type != BA_HIT ? (ammo ? ammo : item->getAmmoItem()) : item;
-			break;
-
-		case BT_PROXIMITYGRENADE:
-		case BT_GRENADE:
-			weapon_item = item;
-			damage_item = item;
-			if (attacker && damage_item->getPreviousOwner())
+			if (attacker && weapon_item->getPreviousOwner())
 			{
-				attacker = damage_item->getPreviousOwner();
+				attacker = weapon_item->getPreviousOwner();
 			}
-			break;
-
-		default:
-			weapon_item = item;
-			damage_item = item;
-			break;
 		}
 	}
 }
@@ -216,7 +203,7 @@ BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parent
 
 	_debugPlay = false;
 
-	checkForCasualties(nullptr, nullptr, nullptr, true);
+	checkForCasualties(nullptr, BattleActionAttack{ }, true);
 	cancelCurrentAction();
 }
 
@@ -373,7 +360,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 
 	_AIActionCounter = action.number;
 	BattleItem *weapon = unit->getMainHandWeapon();
-	if (!weapon || !weapon->getAmmoItem())
+	if (!weapon || !weapon->haveAnyAmmo())
 	{
 		if (unit->getOriginalFaction() == FACTION_HOSTILE && unit->getVisibleUnits()->empty())
 		{
@@ -533,7 +520,7 @@ void BattlescapeGame::endTurn()
 					if (RNG::percent(rule->getSpecialChance()))
 					{
 						Position p = tile->getPosition().toVexel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
-						statePushNext(new ExplosionBState(this, p, { BA_NONE, unit, item }));
+						statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, unit, item, item, }));
 						exploded = true;
 					}
 					else
@@ -577,7 +564,7 @@ void BattlescapeGame::endTurn()
 	if (t)
 	{
 		Position p = t->getPosition().toVexel();
-		statePushNext(new ExplosionBState(this, p, { }, t));
+		statePushNext(new ExplosionBState(this, p, BattleActionAttack{ }, t));
 		statePushBack(0);
 		return;
 	}
@@ -601,7 +588,7 @@ void BattlescapeGame::endTurn()
 		if (t)
 		{
 			Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
-			statePushNext(new ExplosionBState(this, p, { }, t));
+			statePushNext(new ExplosionBState(this, p, BattleActionAttack{ }, t));
 			statePushBack(0);
 			_endTurnProcessed = true;
 			return;
@@ -619,7 +606,7 @@ void BattlescapeGame::endTurn()
 		getMap()->setCursorType(CT_NONE);
 	}
 
-	checkForCasualties(nullptr, nullptr, nullptr, false, false);
+	checkForCasualties(nullptr, BattleActionAttack{ }, false, false);
 
 	_save->getTileEngine()->calculateLighting(LL_FIRE, TileEngine::invalid, 0, true);
 	_save->getTileEngine()->recalculateFOV();
@@ -714,8 +701,9 @@ void BattlescapeGame::endTurn()
  * @param hiddenExplosion Set to true for the explosions of UFO Power sources at start of battlescape.
  * @param terrainExplosion Set to true for the explosions of terrain.
  */
-void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const BattleItem *murderweapon, BattleUnit *origMurderer, bool hiddenExplosion, bool terrainExplosion)
+void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, BattleActionAttack attack, bool hiddenExplosion, bool terrainExplosion)
 {
+	auto origMurderer = attack.attacker;
 	// If the victim was killed by the murderer's death explosion, fetch who killed the murderer and make HIM the murderer!
 	if (origMurderer && !origMurderer->getGeoscapeSoldier() && (origMurderer->getUnitRules()->getSpecialAbility() == SPECAB_EXPLODEONDEATH || origMurderer->getUnitRules()->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
 		&& origMurderer->getStatus() == STATUS_DEAD && origMurderer->getMurdererId() != 0)
@@ -733,33 +721,13 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 	std::string tempWeapon = "STR_WEAPON_UNKNOWN", tempAmmo = "STR_WEAPON_UNKNOWN";
 	if (origMurderer)
 	{
-		if (murderweapon)
+		if (attack.weapon_item)
 		{
-			tempAmmo = murderweapon->getRules()->getName();
-			tempWeapon = tempAmmo;
+			tempWeapon = attack.weapon_item->getRules()->getName();
 		}
-
-		BattleItem *weapon = origMurderer->getItem("STR_RIGHT_HAND");
-		if (weapon)
+		if (attack.damage_item)
 		{
-			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
-			{
-				if (s == tempAmmo)
-				{
-					tempWeapon = weapon->getRules()->getName();
-				}
-			}
-		}
-		weapon = origMurderer->getItem("STR_LEFT_HAND");
-		if (weapon)
-		{
-			for (const std::string &s : *weapon->getRules()->getCompatibleAmmo())
-			{
-				if (s == tempAmmo)
-				{
-					tempWeapon = weapon->getRules()->getName();
-				}
-			}
+			tempAmmo = attack.damage_item->getRules()->getName();
 		}
 	}
 
@@ -900,7 +868,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, const
 						}
 					}
 				}
-				if (murderweapon)
+				if (damageType)
 				{
 					statePushNext(new UnitDieBState(this, (*j), damageType, noSound));
 				}
@@ -1603,11 +1571,7 @@ void BattlescapeGame::primaryAction(Position pos)
 	{
 		if (_currentAction.type == BA_LAUNCH)
 		{
-			int maxWaypoints = _currentAction.weapon->getRules()->getWaypoints();
-			if (maxWaypoints == 0)
-			{
-				maxWaypoints = _currentAction.weapon->getAmmoItem()->getRules()->getWaypoints();
-			}
+			int maxWaypoints = _currentAction.weapon->getCurrentWaypoints();
 			if ((int)_currentAction.waypoints.size() < maxWaypoints || maxWaypoints == -1)
 			{
 				_parentState->showLaunchButton(true);
@@ -2073,10 +2037,10 @@ void BattlescapeGame::findItem(BattleAction *action)
 				if (takeItemFromGround(targetItem, action) == 0)
 				{
 					// if it isn't loaded or it is ammo
-					if (!targetItem->getAmmoItem())
+					if (!targetItem->haveAnyAmmo())
 					{
 						// try to load our weapon
-						action->actor->checkAmmo();
+						action->actor->reloadAmmo();
 					}
 					if (targetItem->getGlow())
 					{
@@ -2155,27 +2119,20 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 		worthToTake = item->getRules()->getAttraction();
 
 		// it's always going to be worth while to try and take a blaster launcher, apparently
-		if (item->getRules()->getWaypoints() == 0 && item->getRules()->getBattleType() != BT_AMMO)
+		if (item->getRules()->getBattleType() == BT_FIREARM && item->getCurrentWaypoints() == 0)
 		{
 			// we only want weapons that HAVE ammo, or weapons that we have ammo FOR
 			bool ammoFound = true;
-			if (!item->getAmmoItem())
+			if (!item->haveAnyAmmo())
 			{
 				ammoFound = false;
 				for (BattleItem *i : *action->actor->getInventory())
 				{
 					if (i->getRules()->getBattleType() == BT_AMMO)
 					{
-						for (const std::string &s : *item->getRules()->getCompatibleAmmo())
+						if (item->getRules()->getSlotForAmmo(i->getRules()->getName()) != -1)
 						{
-							if (i->getRules()->getName() == s)
-							{
-								ammoFound = true;
-								break;
-							}
-						}
-						if (ammoFound == true)
-						{
+							ammoFound = true;
 							break;
 						}
 					}
@@ -2195,16 +2152,9 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 			{
 				if (i->getRules()->getBattleType() == BT_FIREARM)
 				{
-					for (const std::string &s : *i->getRules()->getCompatibleAmmo())
+					if (i->getRules()->getSlotForAmmo(item->getRules()->getName()) != -1)
 					{
-						if (i->getRules()->getName() == s)
-						{
-							weaponFound = true;
-							break;
-						}
-					}
-					if (weaponFound == true)
-					{
+						weaponFound = true;
 						break;
 					}
 				}
@@ -2276,7 +2226,6 @@ int BattlescapeGame::takeItemFromGround(BattleItem* item, BattleAction *action)
 			// check that the item will fit in our inventory, and if so, take it
 			if (takeItem(item, action))
 			{
-				action->actor->spendTimeUnits(6);
 				tile->removeItem(item);
 				return success;
 			}
@@ -2299,70 +2248,79 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 {
 	bool placed = false;
 	Mod *mod = _parentState->getGame()->getMod();
+	auto rightWeapon = action->actor->getRightHandWeapon();
+	auto leftWeapon = action->actor->getLeftHandWeapon();
+	auto unit = action->actor;
+
+	auto reloadWeapon = [&unit](BattleItem* weapon, BattleItem* i)
+	{
+		if (weapon && weapon->isWeaponWithAmmo() && !weapon->haveAllAmmo())
+		{
+			auto slot = weapon->getRules()->getSlotForAmmo(i->getRules()->getType());
+			if (slot != -1)
+			{
+				BattleActionCost cost{ unit };
+				cost.Time += i->getSlot()->getCost(weapon->getSlot());
+				cost.Time += weapon->getRules()->getTULoad(slot);
+				if (cost.haveTU() && !weapon->getAmmoForSlot(slot))
+				{
+					weapon->setAmmoForSlot(slot, i);
+					cost.spendTU();
+					return true;
+				}
+			}
+		}
+		return false;
+	};
+
+	auto equipItem = [&unit](RuleInventory *slot, BattleItem* i)
+	{
+		BattleActionCost cost{ unit };
+		cost.Time += i->getSlot()->getCost(slot);
+		if (cost.haveTU() && unit->fitItemToInventory(slot, i))
+		{
+			cost.spendTU();
+			return true;
+		}
+		return false;
+	};
+
 	switch (item->getRules()->getBattleType())
 	{
 	case BT_AMMO:
 		// find equipped weapons that can be loaded with this ammo
-		if (action->actor->getRightHandWeapon() && action->actor->getRightHandWeapon()->getAmmoItem() == 0)
+		if (reloadWeapon(rightWeapon, item))
 		{
-			if (action->actor->getRightHandWeapon()->setAmmoItem(item) == 0)
-			{
-				placed = true;
-			}
+			placed = true;
+		}
+		else if (reloadWeapon(leftWeapon, item))
+		{
+			placed = true;
 		}
 		else
 		{
-			for (int i = 0; i != 4; ++i)
-			{
-				if (!action->actor->getItem("STR_BELT", i))
-				{
-					item->moveToOwner(action->actor);
-					item->setSlot(mod->getInventory("STR_BELT", true));
-					item->setSlotX(i);
-					placed = true;
-					break;
-				}
-			}
+			placed = equipItem(mod->getInventory("STR_BELT", true), item);
 		}
 		break;
 	case BT_GRENADE:
 	case BT_PROXIMITYGRENADE:
-		for (int i = 0; i != 4; ++i)
-		{
-			if (!action->actor->getItem("STR_BELT", i))
-			{
-				item->moveToOwner(action->actor);
-				item->setSlot(mod->getInventory("STR_BELT", true));
-				item->setSlotX(i);
-				placed = true;
-				break;
-			}
-		}
+		placed = equipItem(mod->getInventory("STR_BELT", true), item);
 		break;
 	case BT_FIREARM:
 	case BT_MELEE:
-		if (!action->actor->getRightHandWeapon())
+		if (!rightWeapon)
 		{
-			item->moveToOwner(action->actor);
-			item->setSlot(mod->getInventory("STR_RIGHT_HAND", true));
-			placed = true;
+			placed = equipItem(mod->getInventory("STR_RIGHT_HAND", true), item);
 		}
 		break;
 	case BT_MEDIKIT:
 	case BT_SCANNER:
-		if (!action->actor->getItem("STR_BACK_PACK"))
-		{
-			item->moveToOwner(action->actor);
-			item->setSlot(mod->getInventory("STR_BACK_PACK", true));
-			placed = true;
-		}
+		placed = equipItem(mod->getInventory("STR_BACK_PACK", true), item);
 		break;
 	case BT_MINDPROBE:
-		if (!action->actor->getLeftHandWeapon())
+		if (!leftWeapon)
 		{
-			item->moveToOwner(action->actor);
-			item->setSlot(mod->getInventory("STR_LEFT_HAND", true));
-			placed = true;
+			placed = equipItem(mod->getInventory("STR_LEFT_HAND", true), item);
 		}
 		break;
 	default: break;
@@ -2530,7 +2488,7 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 					if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() >= 0 && RNG::percent((*i)->getRules()->getSpecialChance()))
 					{
 						Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
-						statePushNext(new ExplosionBState(this, p, { BA_NONE, nullptr, (*i), }));
+						statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, nullptr, (*i), (*i), }));
 						exploded = true;
 					}
 				}

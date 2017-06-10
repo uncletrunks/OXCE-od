@@ -346,7 +346,7 @@ bool NextTurnState::applyEnvironmentalConditionToFaction(UnitFaction faction, En
 	}
 
 	// now check for new casualties
-	_battleGame->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
+	_battleGame->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
 	// revive units if damage could give hp or reduce stun
 	_battleGame->reviveUnconsciousUnits(true);
 

@@ -46,15 +46,15 @@ RuleItem::RuleItem(const std::string &type) :
 	_meleeAnimation(0), _meleeMissAnimation(-1),
 	_psiAnimation(-1), _psiMissAnimation(-1),
 	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0),
-	_accuracyAimed(0), _accuracyAuto(0), _accuracySnap(0), _accuracyMelee(0), _accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100), _accuracyCloseQuarters(-1),
-	_costAimed(0), _costAuto(0, -1), _costSnap(0, -1), _costMelee(0), _costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
-	_clipSize(0), _specialChance(100), _tuLoad(15), _tuUnload(8),
+	_accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100), _accuracyCloseQuarters(-1),
+	_costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
+	_clipSize(0), _specialChance(100), _tuLoad{ }, _tuUnload{ },
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
 	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
-	_recover(true), _ignoreInBaseDefense(false), _liveAlien(false), _liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatMelee(-1, -1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
-	_maxRange(200), _aimRange(200), _snapRange(15), _autoRange(7), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _autoShots(3), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
+	_recover(true), _ignoreInBaseDefense(false), _liveAlien(false), _liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
+	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
 	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_customItemPreviewIndex(0),
@@ -65,6 +65,35 @@ RuleItem::RuleItem(const std::string &type) :
 	_meleeMulti.setMelee();
 	_throwMulti.setThrowing();
 	_closeQuartersMulti.setCloseQuarters();
+
+	for (auto& load : _tuLoad)
+	{
+		load = 15;
+	}
+	for (auto& unload : _tuUnload)
+	{
+		unload = 8;
+	}
+
+	_confAimed.range = 200;
+	_confSnap.range = 15;
+	_confAuto.range = 7;
+
+	_confAimed.cost = RuleItemUseCost(0);
+	_confSnap.cost = RuleItemUseCost(0, -1);
+	_confAuto.cost = RuleItemUseCost(0, -1);
+	_confMelee.cost = RuleItemUseCost(0);
+
+	_confAimed.flat = RuleItemUseCost(-1, -1);
+	_confSnap.flat = RuleItemUseCost(-1, -1);
+	_confAuto.flat = RuleItemUseCost(-1, -1);
+	_confMelee.flat = RuleItemUseCost(-1, -1);
+
+	_confAimed.name = "STR_AIMED_SHOT";
+	_confSnap.name = "STR_SNAP_SHOT";
+	_confAuto.name = "STR_AUTO_SHOT";
+
+	_confAuto.shots = 3;
 }
 
 /**
@@ -172,6 +201,33 @@ void RuleItem::loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::s
 		loadInt(a.Morale, cost["morale"]);
 		loadInt(a.Health, cost["health"]);
 		loadInt(a.Stun, cost["stun"]);
+	}
+}
+
+/**
+ * Load RuleItemAction from yaml.
+ * @param a Item use config.
+ * @param node YAML node.
+ * @param name Name of action type.
+ */
+void RuleItem::loadConfAction(RuleItemAction& a, const YAML::Node& node, const std::string& name) const
+{
+	if (const YAML::Node& conf = node["conf" + name])
+	{
+		a.shots = conf["shots"].as<int>(a.shots);
+		a.name = conf["name"].as<std::string>(a.name);
+		if (const YAML::Node& slot = conf["ammoSlot"])
+		{
+			auto s = slot.as<int>(a.ammoSlot);
+			if (s < -1 || s >= AmmoSlotMax)
+			{
+				Log(LOG_ERROR) << "ammoSlot outside of allowed range for " << "conf" + name << " in '" << _name << "'";
+			}
+			else
+			{
+				a.ammoSlot = s;
+			}
+		}
 	}
 }
 
@@ -294,7 +350,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		{
 			_psiReqiured = true;
 			_dropoff = 1;
-			_aimRange = 0;
+			_confAimed.range = 0;
 			_accuracyMulti.setPsiAttack();
 		}
 		else
@@ -365,23 +421,22 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_primeActionMessage = node["primeActionMessage"].as<std::string>(_primeActionMessage);
 	_unprimeActionName = node["unprimeActionName"].as<std::string>(_unprimeActionName);
 	_unprimeActionMessage = node["unprimeActionMessage"].as<std::string>(_unprimeActionMessage);
-	_compatibleAmmo = node["compatibleAmmo"].as< std::vector<std::string> >(_compatibleAmmo);
 	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
 
-	_accuracyAimed = node["accuracyAimed"].as<int>(_accuracyAimed);
-	_accuracyAuto = node["accuracyAuto"].as<int>(_accuracyAuto);
-	_accuracySnap = node["accuracySnap"].as<int>(_accuracySnap);
-	_accuracyMelee = node["accuracyMelee"].as<int>(_accuracyMelee);
+	_confAimed.accuracy = node["accuracyAimed"].as<int>(_confAimed.accuracy);
+	_confAuto.accuracy = node["accuracyAuto"].as<int>(_confAuto.accuracy);
+	_confSnap.accuracy = node["accuracySnap"].as<int>(_confSnap.accuracy);
+	_confMelee.accuracy = node["accuracyMelee"].as<int>(_confMelee.accuracy);
 	_accuracyUse = node["accuracyUse"].as<int>(_accuracyUse);
 	_accuracyMind = node["accuracyMindControl"].as<int>(_accuracyMind);
 	_accuracyPanic = node["accuracyPanic"].as<int>(_accuracyPanic);
 	_accuracyThrow = node["accuracyThrow"].as<int>(_accuracyThrow);
 	_accuracyCloseQuarters = node["accuracyCloseQuarters"].as<int>(_accuracyCloseQuarters);
 
-	loadCost(_costAimed, node, "Aimed");
-	loadCost(_costAuto, node, "Auto");
-	loadCost(_costSnap, node, "Snap");
-	loadCost(_costMelee, node, "Melee");
+	loadCost(_confAimed.cost, node, "Aimed");
+	loadCost(_confAuto.cost, node, "Auto");
+	loadCost(_confSnap.cost, node, "Snap");
+	loadCost(_confMelee.cost, node, "Melee");
 	loadCost(_costUse, node, "Use");
 	loadCost(_costMind, node, "MindControl");
 	loadCost(_costPanic, node, "Panic");
@@ -390,16 +445,42 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	loadCost(_costUnprime, node, "Unprime");
 
 	loadBool(_flatUse.Time, node["flatRate"]);
+
+	loadPercent(_confAimed.flat, node, "Aimed");
+	loadPercent(_confAuto.flat, node, "Auto");
+	loadPercent(_confSnap.flat, node, "Snap");
+	loadPercent(_confMelee.flat, node, "Melee");
 	loadPercent(_flatUse, node, "Use");
-	loadPercent(_flatMelee, node, "Melee");
 	loadPercent(_flatThrow, node, "Throw");
 	loadPercent(_flatPrime, node, "Prime");
 	loadPercent(_flatUnprime, node, "Unprime");
 
+	loadConfAction(_confAimed, node, "Aimed");
+	loadConfAction(_confAuto, node, "Auto");
+	loadConfAction(_confSnap, node, "Snap");
+	loadConfAction(_confMelee, node, "Melee");
+
+	auto loadAmmoConf = [&](int offset, const YAML::Node &n)
+	{
+		if (n)
+		{
+			_compatibleAmmo[offset] = n["compatibleAmmo"].as<std::vector<std::string>>(_compatibleAmmo[offset]);
+			_tuLoad[offset] = n["tuLoad"].as<int>(_tuLoad[offset]);
+			_tuUnload[offset] = n["tuUnload"].as<int>(_tuUnload[offset]);
+		}
+	};
+
+	loadAmmoConf(0, node);
+	if (const YAML::Node &nodeAmmo = node["ammo"])
+	{
+		for (int slot = 0; slot < AmmoSlotMax; ++slot)
+		{
+			loadAmmoConf(slot, nodeAmmo[std::to_string(slot)]);
+		}
+	}
+
 	_clipSize = node["clipSize"].as<int>(_clipSize);
 	_specialChance = node["specialChance"].as<int>(_specialChance);
-	_tuLoad = node["tuLoad"].as<int>(_tuLoad);
-	_tuUnload = node["tuUnload"].as<int>(_tuUnload);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
 	_blockBothHands = node["blockBothHands"].as<bool>(_blockBothHands);
 	_waypoints = node["waypoints"].as<int>(_waypoints);
@@ -442,14 +523,14 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_experienceTrainingMode = (ExperienceTrainingMode)node["experienceTrainingMode"].as<int>(_experienceTrainingMode);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_maxRange = node["maxRange"].as<int>(_maxRange);
-	_aimRange = node["aimRange"].as<int>(_aimRange);
-	_snapRange = node["snapRange"].as<int>(_snapRange);
-	_autoRange = node["autoRange"].as<int>(_autoRange);
+	_confAimed.range = node["aimRange"].as<int>(_confAimed.range);
+	_confAuto.range = node["autoRange"].as<int>(_confAuto.range);
+	_confSnap.range = node["snapRange"].as<int>(_confSnap.range);
 	_minRange = node["minRange"].as<int>(_minRange);
 	_dropoff = node["dropoff"].as<int>(_dropoff);
 	_bulletSpeed = node["bulletSpeed"].as<int>(_bulletSpeed);
 	_explosionSpeed = node["explosionSpeed"].as<int>(_explosionSpeed);
-	_autoShots = node["autoShots"].as<int>(_autoShots);
+	_confAuto.shots = node["autoShots"].as<int>(_confAuto.shots);
 	_shotgunPellets = node["shotgunPellets"].as<int>(_shotgunPellets);
 	_shotgunBehaviorType = node["shotgunBehavior"].as<int>(_shotgunBehaviorType);
 	_shotgunSpread = node["shotgunSpread"].as<int>(_shotgunSpread);
@@ -899,9 +980,42 @@ float RuleItem::getPowerRangeReduction(float range) const
  */
 float RuleItem::getPsiAccuracyRangeReduction(float range) const
 {
-	range -= _aimRange * TilesToVexels;
+	range -= _confAimed.range * TilesToVexels;
 	return (_dropoff * VexelsToTiles) * (range > 0 ? range : 0);
 }
+
+/**
+ * Get configuration of aimed shot action.
+ */
+const RuleItemAction *RuleItem::getConfigAimed() const
+{
+	return &_confAimed;
+}
+
+/**
+ * Get configuration of autoshot action.
+ */
+const RuleItemAction *RuleItem::getConfigAuto() const
+{
+	return &_confAuto;
+}
+
+/**
+ * Get configuration of snapshot action.
+ */
+const RuleItemAction *RuleItem::getConfigSnap() const
+{
+	return &_confSnap;
+}
+
+/**
+ * Get configuration of melee action.
+ */
+const RuleItemAction *RuleItem::getConfigMelee() const
+{
+	return &_confMelee;
+}
+
 
 /**
  * Gets the item's accuracy for snapshots.
@@ -909,7 +1023,7 @@ float RuleItem::getPsiAccuracyRangeReduction(float range) const
  */
 int RuleItem::getAccuracySnap() const
 {
-	return _accuracySnap;
+	return _confSnap.accuracy;
 }
 
 /**
@@ -918,7 +1032,7 @@ int RuleItem::getAccuracySnap() const
  */
 int RuleItem::getAccuracyAuto() const
 {
-	return _accuracyAuto;
+	return _confAuto.accuracy;
 }
 
 /**
@@ -927,7 +1041,7 @@ int RuleItem::getAccuracyAuto() const
  */
 int RuleItem::getAccuracyAimed() const
 {
-	return _accuracyAimed;
+	return _confAimed.accuracy;
 }
 
 /**
@@ -936,7 +1050,7 @@ int RuleItem::getAccuracyAimed() const
  */
 int RuleItem::getAccuracyMelee() const
 {
-	return _accuracyMelee;
+	return _confMelee.accuracy;
 }
 
 /**
@@ -990,7 +1104,7 @@ int RuleItem::getAccuracyCloseQuarters(Mod *mod) const
  */
 RuleItemUseCost RuleItem::getCostAimed() const
 {
-	return _costAimed;
+	return _confAimed.cost;
 }
 
 /**
@@ -999,7 +1113,7 @@ RuleItemUseCost RuleItem::getCostAimed() const
  */
 RuleItemUseCost RuleItem::getCostAuto() const
 {
-	return getDefault(_costAuto, _costAimed);
+	return getDefault(_confAuto.cost, _confAimed.cost);
 }
 
 /**
@@ -1008,7 +1122,7 @@ RuleItemUseCost RuleItem::getCostAuto() const
  */
 RuleItemUseCost RuleItem::getCostSnap() const
 {
-	return getDefault(_costSnap, _costAimed);
+	return getDefault(_confSnap.cost, _confAimed.cost);
 }
 
 /**
@@ -1017,7 +1131,7 @@ RuleItemUseCost RuleItem::getCostSnap() const
  */
 RuleItemUseCost RuleItem::getCostMelee() const
 {
-	return _costMelee;
+	return _confMelee.cost;
 }
 
 /**
@@ -1090,29 +1204,59 @@ RuleItemUseCost RuleItem::getCostUnprime() const
 
 /**
  * Gets the item's time unit for loading weapon ammo.
+ * @param slot Slot position.
  * @return The throw TU.
  */
-int RuleItem::getTULoad() const
+int RuleItem::getTULoad(int slot) const
 {
-	return _tuLoad;
+	return _tuLoad[slot];
 }
 
 /**
  * Gets the item's time unit for unloading weapon ammo.
+ * @param slot Slot position.
  * @return The throw TU.
  */
-int RuleItem::getTUUnload() const
+int RuleItem::getTUUnload(int slot) const
 {
-	return _tuUnload;
+	return _tuUnload[slot];
 }
 
 /**
  * Gets a list of compatible ammo.
  * @return Pointer to a list of compatible ammo.
  */
-const std::vector<std::string> *RuleItem::getCompatibleAmmo() const
+const std::vector<std::string> *RuleItem::getPrimaryCompatibleAmmo() const
 {
-	return &_compatibleAmmo;
+	return &_compatibleAmmo[0];
+}
+
+/**
+ * Gets slot position for ammo type.
+ * @param type Type of ammo item.
+ * @return Slot position.
+ */
+int RuleItem::getSlotForAmmo(const std::string& type) const
+{
+	for (int i = 0; i < AmmoSlotMax; ++i)
+	{
+		for (const auto& t : _compatibleAmmo[i])
+		{
+			if (t == type)
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+/**
+ *  Get slot position for ammo type.
+ */
+const std::vector<std::string> *RuleItem::getCompatibleAmmoForSlot(int slot) const
+{
+	return &_compatibleAmmo[slot];
 }
 
 /**
@@ -1218,9 +1362,12 @@ void RuleItem::drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem 
 	if (item)
 	{
 		frame = item->getBigSprite(texture);
-		ScriptWorkerBlit scr;
-		BattleItem::ScriptFill(&scr, item, BODYPART_ITEM_INVENTORY, animFrame, 0);
-		scr.executeBlit(frame, surface, this->getHandSpriteOffX(), this->getHandSpriteOffY(), 0);
+		if (frame)
+		{
+			ScriptWorkerBlit scr;
+			BattleItem::ScriptFill(&scr, item, BODYPART_ITEM_INVENTORY, animFrame, 0);
+			scr.executeBlit(frame, surface, this->getHandSpriteOffX(), this->getHandSpriteOffY(), 0);
+		}
 	}
 	else
 	{
@@ -1527,21 +1674,48 @@ int RuleItem::getPrisonType() const
 }
 
 /**
+ * Returns whether this item charges a flat rate for costAimed.
+ * @return True if this item charges a flat rate for costAimed.
+ */
+RuleItemUseCost RuleItem::getFlatAimed() const
+{
+	return getDefault(_confAimed.flat, _flatUse);
+}
+
+/**
+ * Returns whether this item charges a flat rate for costAuto.
+ * @return True if this item charges a flat rate for costAuto.
+ */
+RuleItemUseCost RuleItem::getFlatAuto() const
+{
+	return getDefault(_confAuto.flat, getDefault(_confAimed.flat, _flatUse));
+}
+
+/**
+ * Returns whether this item charges a flat rate for costSnap.
+ * @return True if this item charges a flat rate for costSnap.
+ */
+RuleItemUseCost RuleItem::getFlatSnap() const
+{
+	return getDefault(_confSnap.flat, getDefault(_confAimed.flat, _flatUse));
+}
+
+/**
+ * Returns whether this item charges a flat rate for costMelee.
+ * @return True if this item charges a flat rate for costMelee.
+ */
+RuleItemUseCost RuleItem::getFlatMelee() const
+{
+	return getDefault(_confMelee.flat, _flatUse);
+}
+
+/**
  * Returns whether this item charges a flat rate of use and attack cost.
  * @return True if this item charges a flat rate of use and attack cost.
  */
 RuleItemUseCost RuleItem::getFlatUse() const
 {
 	return _flatUse;
-}
-
-/**
- * Returns whether this item charges a flat rate for costThrow.
- * @return True if this item charges a flat rate for costThrow.
- */
-RuleItemUseCost RuleItem::getFlatMelee() const
-{
-	return getDefault(_flatMelee, _flatUse);
 }
 
 /**
@@ -1622,7 +1796,7 @@ int RuleItem::getMaxRange() const
  */
 int RuleItem::getAimRange() const
 {
-	return _aimRange;
+	return _confAimed.range;
 }
 
 /**
@@ -1631,7 +1805,7 @@ int RuleItem::getAimRange() const
  */
 int RuleItem::getSnapRange() const
 {
-	return _snapRange;
+	return _confSnap.range;
 }
 
 /**
@@ -1640,7 +1814,7 @@ int RuleItem::getSnapRange() const
  */
 int RuleItem::getAutoRange() const
 {
-	return _autoRange;
+	return _confAuto.range;
 }
 
 /**
@@ -1677,15 +1851,6 @@ int RuleItem::getBulletSpeed() const
 int RuleItem::getExplosionSpeed() const
 {
 	return _explosionSpeed;
-}
-
-/**
- * Gets the amount of auto shots fired by this weapon.
- * @return The shots.
- */
-int RuleItem::getAutoShots() const
-{
-	return _autoShots;
 }
 
 /**

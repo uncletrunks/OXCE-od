@@ -152,7 +152,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 
 	if (weapon->getBattleType() == BT_FIREARM)
 	{
-		if (weapon->getWaypoints() != 0 || (_action->weapon->getAmmoItem() && _action->weapon->getAmmoItem()->getRules()->getWaypoints() != 0))
+		if (_action->weapon->getCurrentWaypoints() != 0)
 		{
 			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id, Options::keyBattleActionItem1);
 		}
@@ -160,31 +160,36 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		{
 			if (weapon->getCostAuto().Time > 0)
 			{
-				addItem(BA_AUTOSHOT, "STR_AUTO_SHOT", &id, Options::keyBattleActionItem3);
+				addItem(BA_AUTOSHOT, weapon->getConfigAuto()->name, &id, Options::keyBattleActionItem3);
 			}
 			if (weapon->getCostSnap().Time > 0)
 			{
-				addItem(BA_SNAPSHOT, "STR_SNAP_SHOT", &id, Options::keyBattleActionItem2);
+				addItem(BA_SNAPSHOT,  weapon->getConfigSnap()->name, &id, Options::keyBattleActionItem2);
 			}
 			if (weapon->getCostAimed().Time > 0)
 			{
-				addItem(BA_AIMEDSHOT, "STR_AIMED_SHOT", &id, Options::keyBattleActionItem1);
+				addItem(BA_AIMEDSHOT,  weapon->getConfigAimed()->name, &id, Options::keyBattleActionItem1);
 			}
 		}
 	}
 
 	if (Options::showGunMeleeOnTop && weapon->getCostMelee().Time > 0)
 	{
-		// stun rod
-		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
+		std::string name = weapon->getConfigMelee()->name;
+		if (name.empty())
 		{
-			addItem(BA_HIT, "STR_STUN", &id, Options::keyBattleActionItem4);
-		}
-		else
+			// stun rod
+			if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
+			{
+				name = "STR_STUN";
+			}
+			else
 			// melee weapon
-		{
-			addItem(BA_HIT, "STR_HIT_MELEE", &id, Options::keyBattleActionItem4);
+			{
+				name = "STR_HIT_MELEE";
+			}
 		}
+		addItem(BA_HIT, name, &id, Options::keyBattleActionItem4);
 	}
 
 	// special items
@@ -468,9 +473,9 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			{
 				//nothing
 			}
-			else if (_action->weapon->getAmmoItem() ==0 || (_action->weapon->getAmmoItem() && _action->weapon->getAmmoItem()->getAmmoQuantity() == 0))
+			else if (!_action->weapon->getAmmoForAction(BA_LAUNCH, &_action->result))
 			{
-				_action->result = "STR_NO_AMMUNITION_LOADED";
+				//nothing
 			}
 			else
 			{

@@ -101,8 +101,6 @@ public:
 	void wayPointAction();
 	/// Attempts to fire at an enemy we can see.
 	void projectileAction();
-	/// Selects a fire method.
-	void selectFireMethod();
 	/// Attempts to throw a grenade at an enemy (or group of enemies) we can see.
 	void grenadeAction();
 	/// Performs a psionic attack.

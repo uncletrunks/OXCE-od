@@ -79,6 +79,12 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_stunIndicator = _game->getMod()->getSurface("BigStunIndicator", false);
 	_woundIndicator = _game->getMod()->getSurface("BigWoundIndicator", false);
 	_burnIndicator = _game->getMod()->getSurface("BigBurnIndicator", false);
+
+	_inventorySlotRightHand = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
+	_inventorySlotLeftHand = _game->getMod()->getInventory("STR_LEFT_HAND", true);
+	_inventorySlotBackPack = _game->getMod()->getInventory("STR_BACK_PACK", true);
+	_inventorySlotBelt = _game->getMod()->getInventory("STR_BELT", true);
+	_inventorySlotGround = _game->getMod()->getInventory("STR_GROUND", true);
 }
 
 /**
@@ -270,11 +276,12 @@ void Inventory::drawItems()
 		// Soldier items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)
 		{
-			if ((*i) == _selItem)
+			Surface *frame = (*i)->getBigSprite(texture);
+
+			if ((*i) == _selItem || !frame)
 				continue;
 
 			int x, y;
-			Surface *frame = (*i)->getBigSprite(texture);
 			if ((*i)->getSlot()->getType() == INV_SLOT)
 			{
 				x = ((*i)->getSlot()->getX() + (*i)->getSlotX() * RuleInventory::SLOT_W);
@@ -435,7 +442,7 @@ void Inventory::moveItem(BattleItem *item, RuleInventory *slot, int x, int y)
 			if (slot->getType() == INV_GROUND)
 			{
 				item->moveToOwner(0);
-				_selUnit->getTile()->addItem(item, item->getSlot());
+				_selUnit->getTile()->addItem(item, slot);
 				if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 				{
 					item->getUnit()->setPosition(_selUnit->getPosition());
@@ -677,7 +684,7 @@ void Inventory::mouseClick(Action *action, State *state)
 							return;
 						}
 
-						RuleInventory *newSlot = _game->getMod()->getInventory("STR_GROUND", true);
+						RuleInventory *newSlot = _inventorySlotGround;
 						std::string warning = "STR_NOT_ENOUGH_SPACE";
 						bool placed = false;
 
@@ -686,22 +693,22 @@ void Inventory::mouseClick(Action *action, State *state)
 							switch (item->getRules()->getBattleType())
 							{
 							case BT_FIREARM:
-								newSlot = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
+								newSlot = _inventorySlotRightHand;
 								break;
 							case BT_MINDPROBE:
 							case BT_PSIAMP:
 							case BT_MELEE:
 							case BT_CORPSE:
-								newSlot = _game->getMod()->getInventory("STR_LEFT_HAND", true);
+								newSlot = _inventorySlotLeftHand;
 								break;
 							default:
 								if (item->getRules()->getInventoryHeight() > 2)
 								{
-									newSlot = _game->getMod()->getInventory("STR_BACK_PACK", true);
+									newSlot = _inventorySlotBackPack;
 								}
 								else
 								{
-									newSlot = _game->getMod()->getInventory("STR_BELT", true);
+									newSlot = _inventorySlotBelt;
 								}
 								break;
 							}
@@ -818,49 +825,73 @@ void Inventory::mouseClick(Action *action, State *state)
 					}
 				}
 				// Put item in weapon
-				else if (!item->getRules()->getCompatibleAmmo()->empty())
+				else if (item->isWeaponWithAmmo())
 				{
-					bool wrong = true;
-					for (const std::string &s : *item->getRules()->getCompatibleAmmo())
-					{
-						if (s == _selItem->getRules()->getType())
-						{
-							wrong = false;
-							break;
-						}
-					}
-					if (wrong)
+					int slotAmmo = item->getRules()->getSlotForAmmo(_selItem->getRules()->getType());
+					if (slotAmmo == -1)
 					{
 						_warning->showMessage(_game->getLanguage()->getString("STR_WRONG_AMMUNITION_FOR_THIS_WEAPON"));
 					}
 					else
 					{
-						int tuCost = item->getRules()->getTULoad();
+						int tuCost = item->getRules()->getTULoad(slotAmmo);
 
 						if (_selItem->getSlot()->getType() != INV_HAND)
 						{
-							tuCost += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND"));
+							tuCost += _selItem->getSlot()->getCost(_inventorySlotRightHand);
 						}
 
-						if (item->getAmmoItem() != 0)
+						BattleItem *weaponRightHand = _selUnit->getRightHandWeapon();
+						BattleItem *weaponLeftHand = _selUnit->getLeftHandWeapon();
+
+						auto canLoad = true;
+						if (item->getAmmoForSlot(slotAmmo) != 0)
 						{
-							_warning->showMessage(_game->getLanguage()->getString("STR_WEAPON_IS_ALREADY_LOADED"));
-						}
-						else if (!_tu || _selUnit->spendTimeUnits(tuCost))
-						{
-							moveItem(_selItem, 0, 0, 0);
-							item->setAmmoItem(_selItem);
-							_selItem->moveToOwner(0);
-							setSelectedItem(0);
-							_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_RELOAD)->play();
-							if (item->getSlot()->getType() == INV_GROUND)
+							auto tuUnload = item->getRules()->getTUUnload(slotAmmo);
+							if ((SDL_GetModState() & KMOD_SHIFT) && (!_tu || tuUnload) && (item == weaponRightHand || item == weaponLeftHand))
 							{
-								arrangeGround(false);
+								auto checkBoth = [&](BattleItem *i)
+								{
+									return nullptr == i || item == i || _selItem == i;
+								};
+
+								if (checkBoth(weaponRightHand) && checkBoth(weaponLeftHand))
+								{
+									tuCost += tuUnload;
+								}
+								else
+								{
+									canLoad = false;
+									_warning->showMessage(_game->getLanguage()->getString("STR_BOTH_HANDS_MUST_BE_EMPTY"));
+								}
+							}
+							else
+							{
+								canLoad = false;
+								_warning->showMessage(_game->getLanguage()->getString("STR_WEAPON_IS_ALREADY_LOADED"));
 							}
 						}
-						else
+						if (canLoad)
 						{
-							_warning->showMessage(_game->getLanguage()->getString("STR_NOT_ENOUGH_TIME_UNITS"));
+							if (!_tu || _selUnit->spendTimeUnits(tuCost))
+							{
+								moveItem(_selItem, nullptr, 0, 0);
+								auto oldAmmo = item->setAmmoForSlot(slotAmmo, _selItem);
+								if (oldAmmo)
+								{
+									moveItem(oldAmmo, (item == weaponRightHand ? _inventorySlotLeftHand : _inventorySlotRightHand), 0, 0);
+								}
+								setSelectedItem(0);
+								_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_RELOAD)->play();
+								if (item->getSlot()->getType() == INV_GROUND)
+								{
+									arrangeGround(false);
+								}
+							}
+							else
+							{
+								_warning->showMessage(_game->getLanguage()->getString("STR_NOT_ENOUGH_TIME_UNITS"));
+							}
 						}
 					}
 				}
@@ -995,7 +1026,11 @@ bool Inventory::unload()
 		return false;
 	}
 
-	const bool grenade = _selItem->getRules()->getBattleType() == BT_GRENADE || _selItem->getRules()->getBattleType() == BT_PROXIMITYGRENADE;
+	const auto type = _selItem->getRules()->getBattleType();
+	const bool grenade = type == BT_GRENADE || type == BT_PROXIMITYGRENADE;
+	const bool weapon = type == BT_FIREARM || type == BT_MELEE;
+	int slotForAmmoUnload = -1;
+	int toForAmmoUnload = 0;
 
 	// Item should be able to unload or unprimed.
 	if (grenade)
@@ -1006,17 +1041,69 @@ bool Inventory::unload()
 			return false;
 		}
 	}
-	else
+	else if (weapon)
 	{
 		// Item must be loaded
-		if (_selItem->getAmmoItem() == 0 && !_selItem->getRules()->getCompatibleAmmo()->empty())
+		bool showError = false;
+		auto checkSlot = [&](int slot)
 		{
-			_warning->showMessage(_game->getLanguage()->getString("STR_NO_AMMUNITION_LOADED"));
+			if (!_selItem->needsAmmoForSlot(slot))
+			{
+				return false;
+			}
+
+			auto tu = _selItem->getRules()->getTUUnload(slot);
+			if (tu == 0 && !_tu)
+			{
+				return false;
+			}
+
+			auto ammo = _selItem->getAmmoForSlot(slot);
+			if (ammo)
+			{
+				toForAmmoUnload = tu;
+				slotForAmmoUnload = slot;
+				return true;
+			}
+			else
+			{
+				showError = true;
+				return false;
+			}
+		};
+		if (!(SDL_GetModState() & KMOD_SHIFT))
+		{
+			for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+			{
+				if (checkSlot(slot))
+				{
+					break;
+				}
+			}
 		}
-		if (_selItem->getAmmoItem() == 0 || !_selItem->needsAmmo() || !_selItem->getRules()->getTUUnload())
+		else
 		{
+			for (int slot = RuleItem::AmmoSlotMax - 1; slot >= 0; --slot)
+			{
+				if (checkSlot(slot))
+				{
+					break;
+				}
+			}
+		}
+		if (slotForAmmoUnload == -1)
+		{
+			if (showError)
+			{
+				_warning->showMessage(_game->getLanguage()->getString("STR_NO_AMMUNITION_LOADED"));
+			}
 			return false;
 		}
+	}
+	else
+	{
+		// not weapon or grenade, can't use unload button
+		return false;
 	}
 
 	// Hands must be free
@@ -1037,19 +1124,18 @@ bool Inventory::unload()
 	}
 	else
 	{
-		cost.Time += _selItem->getRules()->getTUUnload();
+		cost.Time += toForAmmoUnload;
 	}
 
 	if (cost.haveTU() && _selItem->getSlot()->getType() != INV_HAND)
 	{
-		cost.Time += _selItem->getSlot()->getCost(_game->getMod()->getInventory("STR_RIGHT_HAND", true));
+		cost.Time += _selItem->getSlot()->getCost(_inventorySlotRightHand);
 	}
 
 	std::string err;
 	if (!_tu || cost.spendTU(&err))
 	{
-		moveItem(_selItem, _game->getMod()->getInventory("STR_RIGHT_HAND", true), 0, 0);
-		_selItem->moveToOwner(_selUnit);
+		moveItem(_selItem, _inventorySlotRightHand, 0, 0);
 		if (grenade)
 		{
 			_selItem->setFuseTimer(-1);
@@ -1057,11 +1143,11 @@ bool Inventory::unload()
 		}
 		else
 		{
-			moveItem(_selItem->getAmmoItem(), _game->getMod()->getInventory("STR_LEFT_HAND", true), 0, 0);
-			_selItem->getAmmoItem()->moveToOwner(_selUnit);
-			_selItem->setAmmoItem(0);
+			auto oldAmmo = _selItem->setAmmoForSlot(slotForAmmoUnload, nullptr);
+			moveItem(oldAmmo, _inventorySlotLeftHand, 0, 0);
 		}
 		setSelectedItem(0);
+		return true;
 	}
 	else
 	{
@@ -1071,8 +1157,6 @@ bool Inventory::unload()
 		}
 		return false;
 	}
-
-	return true;
 }
 
 /**
@@ -1121,10 +1205,10 @@ bool Inventory::isInSearchString(BattleItem *item)
 			}
 		}
 
-		// Check loaded ammo (if any).
-		if (item->getAmmoItem())
+		// Check loaded ammo (if any). FIXME: only checks primary ammo atm
+		if (item->getAmmoForSlot(0))
 		{
-			std::vector<std::string> itemAmmoCategories = item->getAmmoItem()->getRules()->getCategories();
+			std::vector<std::string> itemAmmoCategories = item->getAmmoForSlot(0)->getRules()->getCategories();
 			for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
 			{
 				std::wstring catLocalName = _game->getLanguage()->getString((*i));
@@ -1148,7 +1232,7 @@ bool Inventory::isInSearchString(BattleItem *item)
  */
 void Inventory::arrangeGround(bool alterOffset)
 {
-	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
+	RuleInventory *ground = _inventorySlotGround;
 
 	int slotsX = (Screen::ORIGINAL_WIDTH - ground->getX()) / RuleInventory::SLOT_W;
 	int slotsY = (Screen::ORIGINAL_HEIGHT - ground->getY()) / RuleInventory::SLOT_H;
@@ -1369,18 +1453,31 @@ bool Inventory::fitItem(RuleInventory *newSlot, BattleItem *item, std::string &w
  */
 bool Inventory::canBeStacked(BattleItem *itemA, BattleItem *itemB)
 {
-		//both items actually exist
-	return (itemA != 0 && itemB != 0 &&
-		//both items have the same ruleset
-		itemA->getRules() == itemB->getRules() &&
-		// either they both have no ammo
-		((!itemA->getAmmoItem() && !itemB->getAmmoItem()) ||
+	//both items actually exist
+	if (!itemA || !itemB) return false;
+
+	//both items have the same ruleset
+	if (itemA->getRules() != itemB->getRules()) return false;
+
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		auto ammoA = itemA->getAmmoForSlot(slot);
+		auto ammoB = itemB->getAmmoForSlot(slot);
 		// or they both have ammo
-		(itemA->getAmmoItem() && itemB->getAmmoItem() &&
-		// and the same ammo type
-		itemA->getAmmoItem()->getRules() == itemB->getAmmoItem()->getRules() &&
-		// and the same ammo quantity
-		itemA->getAmmoItem()->getAmmoQuantity() == itemB->getAmmoItem()->getAmmoQuantity())) &&
+		if (ammoA && ammoB)
+		{
+			// and the same ammo type
+			if (ammoA->getRules() != ammoB->getRules()) return false;
+			// and the same ammo quantity
+			if (ammoA->getAmmoQuantity() != ammoB->getAmmoQuantity()) return false;
+		}
+		else if (ammoA || ammoB)
+		{
+			return false;
+		}
+	}
+
+	return (
 		// and neither is set to explode
 		itemA->getFuseTimer() == -1 && itemB->getFuseTimer() == -1 &&
 		// and neither is a corpse or unconscious unit

@@ -18,6 +18,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <yaml-cpp/yaml.h>
+#include "../Mod/RuleItem.h"
 #include "../Engine/Script.h"
 
 namespace OpenXcom
@@ -31,6 +32,10 @@ class SurfaceSet;
 class Surface;
 class ScriptWorkerBlit;
 class ScriptParserBase;
+class SavedBattleGame;
+class RuleItemAction;
+
+enum BattleActionType : Uint8;
 
 /**
  * Represents a single item in the battlescape.
@@ -48,10 +53,14 @@ private:
 	Tile *_tile;
 	RuleInventory *_inventorySlot;
 	int _inventoryX, _inventoryY;
-	BattleItem *_ammoItem;
+	BattleItem *_ammoItem[RuleItem::AmmoSlotMax] = { };
 	int _fuseTimer, _ammoQuantity;
 	int _painKiller, _heal, _stimulant;
-	bool _XCOMProperty, _droppedOnAlienTurn, _isAmmo;
+	bool _XCOMProperty, _droppedOnAlienTurn, _isAmmo, _isWeaponWithAmmo;
+	const RuleItemAction *_confAimedOrLaunch = nullptr;
+	const RuleItemAction *_confSnap = nullptr;
+	const RuleItemAction *_confAuto = nullptr;
+	const RuleItemAction *_confMelee = nullptr;
 	ScriptValues<BattleItem> _scriptValues;
 
 public:
@@ -115,14 +124,40 @@ public:
 	Surface *getFloorSprite(SurfaceSet *set) const;
 	/// Gets the item's inventory sprite.
 	Surface *getBigSprite(SurfaceSet *set) const;
-	/// Gets the item's ammo item.
-	BattleItem *getAmmoItem();
-	/// Gets the item's ammo item.
-	const BattleItem *getAmmoItem() const;
+
+	/// Check if item can use any ammo.
+	bool isWeaponWithAmmo() const;
+	/// Check if weapon is armed.
+	bool haveAnyAmmo() const;
+	/// Check if weapon have all ammo slot filled.
+	bool haveAllAmmo() const;
+	/// Sets the item's ammo item based on it type.
+	bool setAmmoPreMission(BattleItem *item);
+	/// Get ammo slot for action.
+	const RuleItemAction *getActionConfNullable(BattleActionType action) const;
+	/// Get ammo slot for action.
+	const RuleItemAction *getActionConf(BattleActionType action) const;
+	/// Get ammo for action.
+	const BattleItem *getAmmoForAction(BattleActionType action) const;
+	/// Get ammo for action.
+	BattleItem *getAmmoForAction(BattleActionType action, std::string* message = nullptr);
+	/// Spend weapon ammo.
+	void spendAmmoForAction(BattleActionType action, SavedBattleGame *save);
+	/// How many auto shots does this weapon fire.
+	bool haveNextShotsForAction(BattleActionType action, int shotCount) const;
 	/// Determines if this item uses ammo.
-	bool needsAmmo() const;
-	/// Sets the item's ammo item.
-	int setAmmoItem(BattleItem *item);
+	bool needsAmmoForSlot(int slot) const;
+	/// Set the item's ammo slot.
+	BattleItem *setAmmoForSlot(int slot, BattleItem *item);
+	/// Gets the item's ammo item.
+	BattleItem *getAmmoForSlot(int slot);
+	/// Gets the item's ammo item.
+	const BattleItem *getAmmoForSlot(int slot) const;
+	/// Get total weight (with ammo).
+	int getTotalWeight() const;
+	/// Get waypoints count.
+	int getCurrentWaypoints() const;
+
 	/// Gets the item's tile.
 	Tile *getTile() const;
 	/// Sets the tile.

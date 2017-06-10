@@ -132,13 +132,18 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_btnReserveKneel = new BattlescapeButton(10, 23, x + 96, y + 33);
 	_btnZeroTUs = new BattlescapeButton(10, 23, x + 49, y + 33);
 	_btnLeftHandItem = new InteractiveSurface(32, 48, x + 8, y + 4);
-	_numAmmoLeft = new NumberText(30, 5, x + 8, y + 4);
+	_btnRightHandItem = new InteractiveSurface(32, 48, x + 280, y + 4);
+	_numAmmoLeft.reserve(RuleItem::AmmoSlotMax);
+	_numAmmoRight.reserve(RuleItem::AmmoSlotMax);
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		_numAmmoLeft.push_back(new NumberText(30, 5, x + 8, y + 4 + 6 * slot));
+		_numAmmoRight.push_back(new NumberText(30, 5, x + 280, y + 4 + 6 * slot));
+	}
 	_numMedikitLeft1 = new NumberText(30, 5, x + 9, y + 32);
 	_numMedikitLeft2 = new NumberText(30, 5, x + 9, y + 39);
 	_numMedikitLeft3 = new NumberText(30, 5, x + 9, y + 46);
 	_numTwoHandedIndicatorLeft = new NumberText(10, 5, x + 36, y + 46);
-	_btnRightHandItem = new InteractiveSurface(32, 48, x + 280, y + 4);
-	_numAmmoRight = new NumberText(30, 5, x + 280, y + 4);
 	_numMedikitRight1 = new NumberText(30, 5, x + 281, y + 32);
 	_numMedikitRight2 = new NumberText(30, 5, x + 281, y + 39);
 	_numMedikitRight3 = new NumberText(30, 5, x + 281, y + 46);
@@ -262,13 +267,16 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	add(_btnReserveKneel, "buttonReserveKneel", "battlescape", _icons);
 	add(_btnZeroTUs, "buttonZeroTUs", "battlescape", _icons);
 	add(_btnLeftHandItem, "buttonLeftHand", "battlescape", _icons);
-	add(_numAmmoLeft, "numAmmoLeft", "battlescape", _icons);
+	add(_btnRightHandItem, "buttonRightHand", "battlescape", _icons);
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		add(_numAmmoLeft[slot], "numAmmoLeft", "battlescape", _icons);
+		add(_numAmmoRight[slot], "numAmmoRight", "battlescape", _icons);
+	}
 	add(_numMedikitLeft1, "numMedikitLeft1", "battlescape", _icons);
 	add(_numMedikitLeft2, "numMedikitLeft2", "battlescape", _icons);
 	add(_numMedikitLeft3, "numMedikitLeft3", "battlescape", _icons);
 	add(_numTwoHandedIndicatorLeft, "numTwoHandedIndicatorLeft", "battlescape", _icons);
-	add(_btnRightHandItem, "buttonRightHand", "battlescape", _icons);
-	add(_numAmmoRight, "numAmmoRight", "battlescape", _icons);
 	add(_numMedikitRight1, "numMedikitRight1", "battlescape", _icons);
 	add(_numMedikitRight2, "numMedikitRight2", "battlescape", _icons);
 	add(_numMedikitRight3, "numMedikitRight3", "battlescape", _icons);
@@ -297,16 +305,19 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_numLayers->setColor(Palette::blockOffset(1)-2);
 	_numLayers->setValue(1);
 
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		_numAmmoLeft[slot]->setValue(999);
+		_numAmmoRight[slot]->setValue(999);
+	}
 	_txtKneelStatus->setColor(Palette::blockOffset(1)-2);
 	_txtKneelStatus->setText(L"");
 
-	_numAmmoLeft->setValue(999);
 	_numMedikitLeft1->setValue(999);
 	_numMedikitLeft2->setValue(999);
 	_numMedikitLeft3->setValue(999);
 	_numTwoHandedIndicatorLeft->setValue(2);
 
-	_numAmmoRight->setValue(999);
 	_numMedikitRight1->setValue(999);
 	_numMedikitRight2->setValue(999);
 	_numMedikitRight3->setValue(999);
@@ -1333,7 +1344,7 @@ void BattlescapeState::btnReserveClick(Action *action)
  */
 void BattlescapeState::btnReloadClick(Action *)
 {
-	if (playableUnitSelected() && _save->getSelectedUnit()->checkAmmo())
+	if (playableUnitSelected() && _save->getSelectedUnit()->reloadAmmo())
 	{
 		_game->getMod()->getSoundByDepth(_save->getDepth(), Mod::ITEM_RELOAD)->play(-1, getMap()->getSoundAngle(_save->getSelectedUnit()->getPosition()));
 		updateSoldierInfo();
@@ -1373,28 +1384,34 @@ bool BattlescapeState::playableUnitSelected()
 /**
  * Draw hand item with ammo number.
  */
-void BattlescapeState::drawItem(BattleItem* item, Surface* hand, NumberText* ammo)
+void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<NumberText*> &ammoText)
 {
 	hand->clear();
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		ammoText[slot]->setVisible(false);
+	}
 	if (item)
 	{
 		const RuleItem *rule = item->getRules();
 		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item, _save->getAnimFrame());
-		if (item->getRules()->getBattleType() == BT_FIREARM && (item->needsAmmo() || item->getRules()->getClipSize() > 0))
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			if (item->getAmmoItem())
-				ammo->setValue(item->getAmmoItem()->getAmmoQuantity());
-			else
-				ammo->setValue(0);
+			auto ammo = item->getAmmoForSlot(slot);
+			if (!ammo)
+			{
+				if (item->isWeaponWithAmmo())
+				{
+					ammoText[slot]->setVisible(true);
+					ammoText[slot]->setValue(0);
+				}
+			}
+			else if(ammo->getRules()->getClipSize() > 0)
+			{
+				ammoText[slot]->setVisible(true);
+				ammoText[slot]->setValue(ammo->getAmmoQuantity());
+			}
 		}
-		else
-		{
-			ammo->setVisible(false);
-		}
-	}
-	else
-	{
-		ammo->setVisible(false);
 	}
 }
 
@@ -1439,12 +1456,15 @@ void BattlescapeState::updateSoldierInfo()
 	_barMorale->setVisible(playableUnit);
 	_btnLeftHandItem->setVisible(playableUnit);
 	_btnRightHandItem->setVisible(playableUnit);
-	_numAmmoLeft->setVisible(playableUnit);
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		_numAmmoLeft[slot]->setVisible(playableUnit);
+		_numAmmoRight[slot]->setVisible(playableUnit);
+	}
 	_numMedikitLeft1->setVisible(playableUnit);
 	_numMedikitLeft2->setVisible(playableUnit);
 	_numMedikitLeft3->setVisible(playableUnit);
 	_numTwoHandedIndicatorLeft->setVisible(playableUnit);
-	_numAmmoRight->setVisible(playableUnit);
 	_numMedikitRight1->setVisible(playableUnit);
 	_numMedikitRight2->setVisible(playableUnit);
 	_numMedikitRight3->setVisible(playableUnit);
@@ -1552,24 +1572,13 @@ void BattlescapeState::updateSoldierInfo()
 	//drawHandsItems();
 
 	BattleItem *leftHandItem = battleUnit->getItem("STR_LEFT_HAND");
-	_btnLeftHandItem->clear();
-	_numAmmoLeft->setVisible(false);
+	drawItem(leftHandItem, _btnLeftHandItem, _numAmmoLeft);
 	_numMedikitLeft1->setVisible(false);
 	_numMedikitLeft2->setVisible(false);
 	_numMedikitLeft3->setVisible(false);
 	_numTwoHandedIndicatorLeft->setVisible(false);
 	if (leftHandItem)
 	{
-		leftHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnLeftHandItem);
-		if ((leftHandItem->getRules()->getBattleType() == BT_FIREARM || leftHandItem->getRules()->getBattleType() == BT_MELEE)
-			&& (leftHandItem->needsAmmo() || leftHandItem->getRules()->getClipSize() > 0))
-		{
-			_numAmmoLeft->setVisible(true);
-			if (leftHandItem->getAmmoItem())
-				_numAmmoLeft->setValue(leftHandItem->getAmmoItem()->getAmmoQuantity());
-			else
-				_numAmmoLeft->setValue(0);
-		}
 		if (Options::twoHandedIndicator)
 		{
 			_numTwoHandedIndicatorLeft->setVisible(leftHandItem->getRules()->isTwoHanded());
@@ -1595,24 +1604,13 @@ void BattlescapeState::updateSoldierInfo()
 		}
 	}
 	BattleItem *rightHandItem = battleUnit->getItem("STR_RIGHT_HAND");
-	_btnRightHandItem->clear();
-	_numAmmoRight->setVisible(false);
+	drawItem(rightHandItem, _btnRightHandItem, _numAmmoRight);
 	_numMedikitRight1->setVisible(false);
 	_numMedikitRight2->setVisible(false);
 	_numMedikitRight3->setVisible(false);
 	_numTwoHandedIndicatorRight->setVisible(false);
 	if (rightHandItem)
 	{
-		rightHandItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _btnRightHandItem);
-		if ((rightHandItem->getRules()->getBattleType() == BT_FIREARM || rightHandItem->getRules()->getBattleType() == BT_MELEE)
-			&& (rightHandItem->needsAmmo() || rightHandItem->getRules()->getClipSize() > 0))
-		{
-			_numAmmoRight->setVisible(true);
-			if (rightHandItem->getAmmoItem())
-				_numAmmoRight->setValue(rightHandItem->getAmmoItem()->getAmmoQuantity());
-			else
-				_numAmmoRight->setValue(0);
-		}
 		if (Options::twoHandedIndicator)
 		{
 			_numTwoHandedIndicatorRight->setVisible(rightHandItem->getRules()->isTwoHanded());
@@ -2068,7 +2066,7 @@ inline void BattlescapeState::handle(Action *action)
 							{
 								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_AP), _save, { });
 							}
-							_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
+							_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
 							_save->getBattleGame()->handleState();
 						}
 					}
@@ -2083,7 +2081,7 @@ inline void BattlescapeState::handle(Action *action)
 								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_STUN), _save, { });
 							}
 						}
-						_save->getBattleGame()->checkForCasualties(nullptr, nullptr, nullptr, true, false);
+						_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
 						_save->getBattleGame()->handleState();
 					}
 					// f11 - voxel map dump
