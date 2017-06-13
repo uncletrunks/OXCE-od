@@ -919,7 +919,7 @@ void InventoryState::_createInventoryTemplate(std::vector<EquipmentLayoutItem*> 
 			continue;
 		}
 
-		_curInventoryTemplate.push_back(new EquipmentLayoutItem((*j)));
+		inventoryTemplate.push_back(new EquipmentLayoutItem((*j)));
 	}
 }
 
