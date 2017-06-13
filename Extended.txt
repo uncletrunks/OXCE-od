@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 3.8[/b]
+[b]Mod version 3.8a[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -152,6 +152,8 @@ Vertical map generation support.[br/]
 Add multi ammo weapons.[br/]
 New param with battle action for unit hit and damage script.[br/]
 [br/]
+3.8a:[br/]
+[br/]
 
 [examples]
 [br/][br/]
@@ -281,6 +283,7 @@ items:
       #...
     confMelee:
       name: ~               #if no name is set name then it will be set based on damage type (stun or normal melee).
+      ammoSlot: -1          #override when `battleType` is change, `0` for melee weapons, `-1` for rest.
       #...
       #same properties as `confAimed`
       #...

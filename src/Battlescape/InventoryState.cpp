@@ -992,7 +992,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 			}
 			if (skipAmmo)
 			{
-				break;
+				continue;
 			}
 
 			if ((*templateIt)->getItemType() == groundItemName)
@@ -1016,6 +1016,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 				}
 				if (!skipWeapon)
 				{
+					matchedWeapon = *groundItem;
 					found = true; // found = true, even if not equiped
 					break;
 				}
@@ -1026,6 +1027,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 		// the right weapon, unload the target weapon, load the right ammo, and use it
 		if (!found && matchedWeapon)
 		{
+			found = true;
 			auto allMatch = true;
 			for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 			{

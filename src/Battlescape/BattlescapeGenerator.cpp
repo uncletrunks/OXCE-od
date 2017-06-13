@@ -1895,7 +1895,7 @@ void BattlescapeGenerator::loadWeapons()
 	// let's try to load this weapon, whether we equip it or not.
 	for (BattleItem* i : *_craftInventoryTile->getInventory())
 	{
-		if (i->isWeaponWithAmmo() && //TODO test this check
+		if (i->isWeaponWithAmmo() &&
 			!i->haveAllAmmo() &&
 			!i->getRules()->isFixed())
 		{
@@ -1903,7 +1903,7 @@ void BattlescapeGenerator::loadWeapons()
 			{
 				if (j->getSlot() == groundSlot && i->setAmmoPreMission(j))
 				{
-					if (!i->haveAllAmmo())
+					if (i->haveAllAmmo())
 					{
 						break;
 					}

@@ -346,6 +346,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	if (node["battleType"])
 	{
 		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
+
 		if (_battleType == BT_PSIAMP)
 		{
 			_psiReqiured = true;
@@ -357,6 +358,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		{
 			_psiReqiured = false;
 		}
+
 		if (_battleType == BT_PROXIMITYGRENADE)
 		{
 			_fuseType = BFT_INSTANT;
@@ -368,6 +370,15 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		else
 		{
 			_fuseType = BFT_NONE;
+		}
+
+		if (_battleType == BT_MELEE)
+		{
+			_confMelee.ammoSlot = 0;
+		}
+		else
+		{
+			_confMelee.ammoSlot = -1;
 		}
 
 		if (_battleType == BT_CORPSE)
