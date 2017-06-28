@@ -1308,19 +1308,19 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<Num
 		rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), hand, item, _save->getAnimFrame());
 		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			auto ammo = item->getAmmoForSlot(slot);
-			if (!ammo)
+			if (item->isAmmoVisibleForSlot(slot))
 			{
-				if (item->isWeaponWithAmmo())
+				auto ammo = item->getAmmoForSlot(slot);
+				if (!ammo)
 				{
 					ammoText[slot]->setVisible(true);
 					ammoText[slot]->setValue(0);
 				}
-			}
-			else if(ammo->getRules()->getClipSize() > 0)
-			{
-				ammoText[slot]->setVisible(true);
-				ammoText[slot]->setValue(ammo->getAmmoQuantity());
+				else
+				{
+					ammoText[slot]->setVisible(true);
+					ammoText[slot]->setValue(ammo->getAmmoQuantity());
+				}
 			}
 		}
 	}
