@@ -944,7 +944,7 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getMod()->getArmor(rule->getArmor(), true), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
 	if (unit)
 	{
-		_save->createItemForUnit(vehicle, unit);
+		_save->createItemForUnit(vehicle, unit, true);
 		if (!v->getRules()->getPrimaryCompatibleAmmo()->empty())
 		{
 			std::string ammo = v->getRules()->getPrimaryCompatibleAmmo()->front();

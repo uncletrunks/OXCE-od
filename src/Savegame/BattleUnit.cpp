@@ -2119,7 +2119,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 			}
 		}
 		// or in the left/right hand
-		if (!placed && (fitItemToInventory(rightHand, item) || fitItemToInventory(rightHand, item)))
+		if (!placed && (fitItemToInventory(rightHand, item) || fitItemToInventory(leftHand, item)))
 		{
 			placed = true;
 			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
