@@ -44,6 +44,7 @@ BattleItem::BattleItem(RuleItem *rules, int *id) : _id(*id), _rules(rules), _own
 	(*id)++;
 	if (_rules)
 	{
+		_confMelee = _rules->getConfigMelee();
 		setAmmoQuantity(_rules->getClipSize());
 		if (_rules->getBattleType() == BT_MEDIKIT)
 		{
@@ -57,20 +58,30 @@ BattleItem::BattleItem(RuleItem *rules, int *id) : _id(*id), _rules(rules), _own
 			_confAimedOrLaunch = _rules->getConfigAimed();
 			_confAuto = _rules->getConfigAuto();
 			_confSnap = _rules->getConfigSnap();
+			bool showSelfAmmo = _rules->getClipSize() > 0;
 			for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 			{
+				bool used = false;
+				used |= (_confAimedOrLaunch && _confAimedOrLaunch->ammoSlot == slot);
+				used |= (_confAuto && _confAuto->ammoSlot == slot);
+				used |= (_confSnap && _confSnap->ammoSlot == slot);
+				used |= (_confMelee && _confMelee->ammoSlot == slot);
 				if (_rules->getCompatibleAmmoForSlot(slot)->empty())
 				{
+					if (used && showSelfAmmo)
+					{
+						_ammoVisibility[slot] = true;
+						showSelfAmmo = false;
+					}
 					_ammoItem[slot] = this;
 				}
 				else
 				{
+					_ammoVisibility[slot] = used;
 					_isWeaponWithAmmo = true;
 				}
 			}
 		}
-
-		_confMelee = _rules->getConfigMelee();
 	}
 }
 
@@ -646,10 +657,10 @@ void BattleItem::spendAmmoForAction(BattleActionType action, SavedBattleGame* sa
 }
 
 /**
- *
- * @param action
- * @param shotCount
- * @return
+ * Check how many shoots attack can perform.
+ * @param action Attack type.
+ * @param shotCount Current shot count.
+ * @return True if still can shoot.
  */
 bool BattleItem::haveNextShotsForAction(BattleActionType action, int shotCount) const
 {
@@ -713,6 +724,14 @@ BattleItem *BattleItem::getAmmoForSlot(int slot)
 const BattleItem *BattleItem::getAmmoForSlot(int slot) const
 {
 	return _ammoItem[slot];
+}
+
+/**
+ * Get ammo count visibility for slot.
+ */
+bool BattleItem::isAmmoVisibleForSlot(int slot) const
+{
+	return _ammoVisibility[slot];
 }
 
 /**

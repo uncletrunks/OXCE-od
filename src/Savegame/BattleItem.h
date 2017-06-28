@@ -54,6 +54,7 @@ private:
 	RuleInventory *_inventorySlot;
 	int _inventoryX, _inventoryY;
 	BattleItem *_ammoItem[RuleItem::AmmoSlotMax] = { };
+	bool _ammoVisibility[RuleItem::AmmoSlotMax] = { };
 	int _fuseTimer, _ammoQuantity;
 	int _painKiller, _heal, _stimulant;
 	bool _XCOMProperty, _droppedOnAlienTurn, _isAmmo, _isWeaponWithAmmo;
@@ -153,6 +154,8 @@ public:
 	BattleItem *getAmmoForSlot(int slot);
 	/// Gets the item's ammo item.
 	const BattleItem *getAmmoForSlot(int slot) const;
+	/// Get ammo count visibility for slot.
+	bool isAmmoVisibleForSlot(int slot) const;
 	/// Get total weight (with ammo).
 	int getTotalWeight() const;
 	/// Get waypoints count.
