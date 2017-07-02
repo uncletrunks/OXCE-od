@@ -1645,8 +1645,8 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 				validMeleeRange(unit, target, unit->getDirection()) &&
 				BattleActionCost(BA_HIT, unit, weapon).haveTU()) ||
 			// has a gun capable of snap shot with ammo
-			(weapon->getRules()->getBattleType() != BT_MELEE &&
-				weapon->getAmmoForAction(BA_SNAPSHOT)  &&
+			(weapon->getRules()->getBattleType() == BT_FIREARM &&
+				weapon->getAmmoForAction(BA_SNAPSHOT) &&
 				BattleActionCost(BA_SNAPSHOT, unit, weapon).haveTU())))
 	{
 		reaction.attackType = BA_SNAPSHOT;
