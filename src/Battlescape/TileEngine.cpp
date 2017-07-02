@@ -3448,17 +3448,9 @@ bool TileEngine::psiAttack(BattleAction *action)
 			victim->allowReselect();
 			victim->abortTurn(); // resets unit status to STANDING
 			// if all units from either faction are mind controlled - auto-end the mission.
-			if (_save->getSide() == FACTION_PLAYER && Options::battleAutoEnd && Options::allowPsionicCapture)
+			if (_save->getSide() == FACTION_PLAYER && Options::allowPsionicCapture)
 			{
-				int liveAliens = 0;
-				int liveSoldiers = 0;
-				_save->getBattleGame()->tallyUnits(liveAliens, liveSoldiers);
-				if (liveAliens == 0 || liveSoldiers == 0)
-				{
-					_save->setSelectedUnit(0);
-					_save->getBattleGame()->cancelCurrentAction(true);
-					_save->getBattleGame()->requestEndTurn();
-				}
+				_save->getBattleGame()->autoEndBattle();
 			}
 		}
 		return true;

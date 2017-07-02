@@ -1099,7 +1099,7 @@ void SaveConverter::loadDatResearch()
 				bool popped = load<Uint8>(rdata + 0x12) != 0;
 				if (discovered)
 				{
-					_save->addFinishedResearch(research, _mod, false);
+					_save->addFinishedResearch(research, _mod, 0, false);
 				}
 				else if (popped)
 				{
@@ -1135,7 +1135,7 @@ void SaveConverter::loadDatUp()
 					RuleResearch *research = _mod->getResearch(*r);
 					if (research && research->getCost() == 0)
 					{
-						_save->addFinishedResearch(research, _mod);
+						_save->addFinishedResearch(research, _mod, 0, false);
 					}
 				}
 			}
