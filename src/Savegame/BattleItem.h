@@ -138,6 +138,8 @@ public:
 	const RuleItemAction *getActionConfNullable(BattleActionType action) const;
 	/// Get ammo slot for action.
 	const RuleItemAction *getActionConf(BattleActionType action) const;
+	/// Determines if this item uses ammo.
+	bool needsAmmoForAction(BattleActionType action) const;
 	/// Get ammo for action.
 	const BattleItem *getAmmoForAction(BattleActionType action) const;
 	/// Get ammo for action.
