@@ -575,6 +575,20 @@ const RuleItemAction *BattleItem::getActionConf(BattleActionType action) const
 }
 
 /**
+ * Determines if this item uses ammo.
+ */
+bool BattleItem::needsAmmoForAction(BattleActionType action) const
+{
+	auto conf = getActionConfNullable(action);
+	if (!conf || conf->ammoSlot == -1)
+	{
+		return false;
+	}
+
+	return needsAmmoForSlot(conf->ammoSlot);
+}
+
+/**
  * Get ammo used by action.
  * @param action Battle Action done using this item.
  * @return
