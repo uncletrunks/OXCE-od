@@ -252,7 +252,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			{
 				BattleItem *item = new BattleItem(mod->getItem(type), &_itemId);
 				item->load(*i, this->getMod()->getScriptGlobal());
-				type = (*i)["inventoryslot"].as<std::string>();
+				type = (*i)["inventoryslot"].as<std::string>("NULL");
 				if (type != "NULL")
 				{
 					if (mod->getInventory(type))
