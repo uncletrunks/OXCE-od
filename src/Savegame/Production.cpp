@@ -101,7 +101,8 @@ bool Production::haveEnoughLivingSpaceForOneMoreUnit(Base * b)
 {
 	if (_rules->getSpawnedPersonType() != "")
 	{
-		if (b->getAvailableQuarters() <= b->getUsedQuarters())
+		// Note: if the production is running then the space we need is already counted by getUsedQuarters
+		if (b->getAvailableQuarters() < b->getUsedQuarters())
 		{
 			return false;
 		}
