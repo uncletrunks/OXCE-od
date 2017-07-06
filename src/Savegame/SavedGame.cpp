@@ -559,8 +559,26 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 			for (YAML::const_iterator i = layout.begin(); i != layout.end(); ++i)
 			{
 				EquipmentLayoutItem *layoutItem = new EquipmentLayoutItem(*i);
-				// FIXME: checks only primary ammo atm
-				if (mod->getInventory(layoutItem->getSlot()) && mod->getItem(layoutItem->getItemType()) && (layoutItem->getAmmoItemForSlot(0) == "NONE" || mod->getItem(layoutItem->getAmmoItemForSlot(0))))
+
+				// check if everything still exists (in case of mod upgrades)
+				bool error = false;
+				if (!mod->getInventory(layoutItem->getSlot()))
+					error = true;
+				if (!mod->getItem(layoutItem->getItemType()))
+					error = true;
+				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+				{
+					if (layoutItem->getAmmoItemForSlot(slot) == "NONE" || mod->getItem(layoutItem->getAmmoItemForSlot(slot)))
+					{
+						// ok
+					}
+					else
+					{
+						error = true;
+						break;
+					}
+				}
+				if (!error)
 				{
 					_globalEquipmentLayout[j].push_back(layoutItem);
 				}

@@ -1870,6 +1870,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 			// put items back in the base
 			if (!rule->isFixed() && rule->isRecoverable() && (!rule->isConsumable() || (*it)->getFuseTimer() < 0))
 			{
+				bool recoverWeapon = true;
 				switch (rule->getBattleType())
 				{
 					case BT_CORPSE:
@@ -1893,19 +1894,15 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						_rounds[rule] += (*it)->getAmmoQuantity();
 						break;
 					case BT_FIREARM:
-						{
-							// FIXME: only checks primary slot atm
-							if (!(*it)->needsAmmoForSlot(0) && (*it)->getRules()->getClipSize() > 0)
-							{
-								// It's a weapon without clips
-								_rounds[(*it)->getRules()] += (*it)->getAmmoQuantity();
-								break;
-							}
-						}
-						// Fall-through...
 					case BT_MELEE:
-						// It's a weapon, count any rounds left in the clip.
 						{
+							// Special case: built-in ammo (e.g. throwing knives)
+							if (!(*it)->needsAmmoForSlot(0) && rule->getClipSize() > 0)
+							{
+								_rounds[rule] += (*it)->getAmmoQuantity();
+								recoverWeapon = false;
+							}
+							// It's a weapon, count any rounds left in the clip(s).
 							for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 							{
 								BattleItem *clip = (*it)->getAmmoForSlot(slot);
@@ -1917,7 +1914,10 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						}
 						// Fall-through, to recover the weapon itself.
 					default:
-						base->getStorageItems()->addItem(rule->getType(), 1);
+						if (recoverWeapon)
+						{
+							base->getStorageItems()->addItem(rule->getType(), 1);
+						}
 				}
 				if (rule->getBattleType() == BT_NONE)
 				{

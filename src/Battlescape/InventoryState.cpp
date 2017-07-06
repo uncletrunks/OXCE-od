@@ -1220,16 +1220,10 @@ void InventoryState::invMouseOver(Action *)
 		}
 		if (Options::showItemNameAndWeightInInventory)
 		{
-			int weight = item->getTotalWeight();
-			//int weight = item->getRules()->getWeight();
-			//if (item->getAmmoItem() != item && item->getAmmoItem())
-			//{
-			//	weight += item->getAmmoItem()->getRules()->getWeight();
-			//}
 			std::wostringstream ss;
 			ss << itemName;
 			ss << L" [";
-			ss << weight;
+			ss << item->getTotalWeight();
 			ss << L"]";
 			_txtItem->setText(ss.str().c_str());
 		}
@@ -1333,17 +1327,21 @@ void InventoryState::onMoveGroundInventoryToBase(Action *)
 	for (std::vector<BattleItem*>::iterator i = groundInv->begin(); i != groundInv->end(); ++i)
 	{
 		std::string weaponRule = (*i)->getRules()->getType();
-		// don't forget the ammo! FIXME: only checks the first ammo atm
-		if ((*i)->getAmmoForSlot(0))
+		// check all ammo slots first
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			std::string ammoRule = (*i)->getAmmoForSlot(0)->getRules()->getType();
-			// only real ammo
-			if (weaponRule != ammoRule)
+			if ((*i)->getAmmoForSlot(slot))
 			{
-				c->getItems()->removeItem(ammoRule);
-				_base->getStorageItems()->addItem(ammoRule);
+				std::string ammoRule = (*i)->getAmmoForSlot(slot)->getRules()->getType();
+				// only real ammo
+				if (weaponRule != ammoRule)
+				{
+					c->getItems()->removeItem(ammoRule);
+					_base->getStorageItems()->addItem(ammoRule);
+				}
 			}
 		}
+		// and the weapon as last
 		c->getItems()->removeItem(weaponRule);
 		_base->getStorageItems()->addItem(weaponRule);
 	}

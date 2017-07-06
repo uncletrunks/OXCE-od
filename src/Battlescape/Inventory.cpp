@@ -1205,18 +1205,20 @@ bool Inventory::isInSearchString(BattleItem *item)
 			}
 		}
 
-		// Check loaded ammo (if any). FIXME: only checks primary ammo atm
-		if (item->getAmmoForSlot(0))
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			std::vector<std::string> itemAmmoCategories = item->getAmmoForSlot(0)->getRules()->getCategories();
-			for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
+			if (item->getAmmoForSlot(slot))
 			{
-				std::wstring catLocalName = _game->getLanguage()->getString((*i));
-				std::transform(catLocalName.begin(), catLocalName.end(), catLocalName.begin(), towupper);
-				if (catLocalName.find(_searchString) != std::wstring::npos)
+				std::vector<std::string> itemAmmoCategories = item->getAmmoForSlot(slot)->getRules()->getCategories();
+				for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
 				{
-					// Category match
-					return true;
+					std::wstring catLocalName = _game->getLanguage()->getString((*i));
+					std::transform(catLocalName.begin(), catLocalName.end(), catLocalName.begin(), towupper);
+					if (catLocalName.find(_searchString) != std::wstring::npos)
+					{
+						// Category match
+						return true;
+					}
 				}
 			}
 		}

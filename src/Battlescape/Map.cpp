@@ -1177,11 +1177,14 @@ void Map::drawTerrain(Surface *surface)
 									{
 										rule = weapon;
 									}
+									// FIXME: only checking the 1st ammo slot to determine if the weapon uses ammo or not
+									// assuming nobody would combine throwing knives (ammo-less) with a grenade launcher
+									// ...asked Yankes to add ->needsAmmoForAction() method
 									else if (action->weapon->needsAmmoForSlot(0))
 									{
-										if (action->weapon->getAmmoForSlot(0) != 0)
+										if (action->weapon->getAmmoForAction(action->type) != 0)
 										{
-											rule = action->weapon->getAmmoForSlot(0)->getRules();
+											rule = action->weapon->getAmmoForAction(action->type)->getRules();
 										}
 										else
 										{

@@ -78,6 +78,7 @@ namespace OpenXcom
 		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);
 		if (!ammo_data->empty())
 		{
+			// Note: weight including primary ammo only!
 			RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[0]);
 			weightLabel = tr("STR_WEIGHT_PEDIA2").arg(weight).arg(weight + ammo_rule->getWeight());
 		}
