@@ -2096,7 +2096,7 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 				{
 					if (i->getRules()->getBattleType() == BT_AMMO)
 					{
-						if (item->getRules()->getSlotForAmmo(i->getRules()->getName()) != -1)
+						if (item->getRules()->getSlotForAmmo(i->getRules()->getType()) != -1)
 						{
 							ammoFound = true;
 							break;
@@ -2118,7 +2118,7 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 			{
 				if (i->getRules()->getBattleType() == BT_FIREARM)
 				{
-					if (i->getRules()->getSlotForAmmo(item->getRules()->getName()) != -1)
+					if (i->getRules()->getSlotForAmmo(item->getRules()->getType()) != -1)
 					{
 						weaponFound = true;
 						break;
