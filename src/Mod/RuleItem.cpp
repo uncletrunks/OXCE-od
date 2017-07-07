@@ -254,6 +254,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	}
 	_type = node["type"].as<std::string>(_type);
 	_name = node["name"].as<std::string>(_name);
+	_nameAsAmmo = node["nameAsAmmo"].as<std::string>(_nameAsAmmo);
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
 	_requiresBuy = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuy);
 	_categories = node["categories"].as< std::vector<std::string> >(_categories);
@@ -591,6 +592,15 @@ const std::string &RuleItem::getType() const
 const std::string &RuleItem::getName() const
 {
 	return _name;
+}
+
+/**
+ * Gets name id to use when displaing in loaded weapon.
+ * @return Translation StringId.
+ */
+const std::string &RuleItem::getNameAsAmmo() const
+{
+	return _nameAsAmmo;
 }
 
 /**

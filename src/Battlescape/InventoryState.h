@@ -27,6 +27,7 @@ namespace OpenXcom
 
 class Surface;
 class Text;
+class NumberText;
 class InteractiveSurface;
 class Inventory;
 class SavedBattleGame;
@@ -46,12 +47,16 @@ private:
 	BattlescapeButton *_btnCreateTemplate, *_btnApplyTemplate;
 	Surface *_selAmmo;
 	Inventory *_inv;
+
 	std::vector<EquipmentLayoutItem*> _curInventoryTemplate;
 	SavedBattleGame *_battleGame;
 	const bool _tu;
 	bool _lightUpdated;
 	BattlescapeState *_parent;
 	std::string _currentTooltip;
+	int _mouseHoverItemFrame = 0;
+	BattleItem *_mouseHoverItem = nullptr;
+
 public:
 	/// Creates the Inventory state.
 	InventoryState(bool tu, BattlescapeState *parent);
@@ -90,7 +95,9 @@ public:
 	/// Handler for hiding item info.
 	void invMouseOut(Action *action);
 	/// Handles keypresses.
-	void handle(Action *action);
+	void handle(Action *action) override;
+	/// Runs state functionality every cycle.
+	void think() override;
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
 	/// Handler for hiding tooltip.

@@ -113,6 +113,8 @@ public:
 	void drawPrimers();
 	/// Animate surface.
 	void animate();
+	/// Get current animation frame for invenotry.
+	int getAnimFrame() const { return _animFrame; }
 };
 
 }

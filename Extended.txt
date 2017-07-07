@@ -157,6 +157,7 @@ Bug fix.[br/]
 [br/]
 3.9:[br/]
 Bug fix.[br/]
+Improvments in displaying multiple ammo items in inventory.[br/]
 [br/]
 
 [examples]
@@ -187,6 +188,7 @@ difficultyBasedRetaliationDelay: #from OXCE+
 [code]
 items:
   - type: STR_ITEM_TYPE #default config ...
+    nameAsInem: ~           #string id used for displaying postfix ammo text in loaded weapon.
     categories: ~           #from OXCE+
     kneelBonus: -1          #kneel weapon accuracy bonus in prercent.
     oneHandedPenalty: -1    #two hand weapon accuracy penalty in percent.

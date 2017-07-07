@@ -114,7 +114,7 @@ public:
 	static const int AmmoSlotMax = 4;
 
 private:
-	std::string _type, _name; // two types of objects can have the same name
+	std::string _type, _name, _nameAsAmmo; // two types of objects can have the same name
 	std::vector<std::string> _requires;
 	std::vector<std::string> _requiresBuy;
 	std::vector<std::string> _categories;
@@ -199,6 +199,8 @@ public:
 	const std::string &getType() const;
 	/// Gets the item's name.
 	const std::string &getName() const;
+	/// Gets the item's name when loaded in weapon.
+	const std::string &getNameAsAmmo() const;
 	/// Gets the item's requirements.
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the item's buy requirements.
