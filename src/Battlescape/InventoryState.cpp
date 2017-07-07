@@ -1002,6 +1002,10 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 				bool skipWeapon = false;
 				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 				{
+					if (!(*groundItem)->needsAmmoForSlot(slot))
+					{
+						continue;
+					}
 					BattleItem *loadedAmmo = (*groundItem)->getAmmoForSlot(slot);
 					if ((needsAmmo[slot] && (!loadedAmmo || targetAmmo[slot] != loadedAmmo->getRules()->getType()))
 						|| (!needsAmmo[slot] && loadedAmmo))
@@ -1037,7 +1041,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 			{
 				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 				{
-					if (!needsAmmo[slot] || matchedAmmo[slot])
+					if ((*groundItem)->needsAmmoForSlot(slot) && (!needsAmmo[slot] || matchedAmmo[slot]))
 					{
 						// unload the existing ammo (if any) from the weapon
 						BattleItem *loadedAmmo = matchedWeapon->setAmmoForSlot(slot, matchedAmmo[slot]);
