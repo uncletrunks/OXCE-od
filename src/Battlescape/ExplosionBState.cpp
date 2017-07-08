@@ -382,7 +382,7 @@ void ExplosionBState::explode()
 		_parent->playSound(sound, _action.target);
 	}
 
-	bool range = !(_hit || (_attack.weapon_item->getRules()->getBattleType() == BT_PSIAMP));
+	bool range = !(_hit || (_attack.weapon_item && _attack.weapon_item->getRules()->getBattleType() == BT_PSIAMP));
 
 	if (_areaOfEffect)
 	{
