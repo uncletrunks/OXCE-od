@@ -52,7 +52,7 @@ struct BattleActionCost : RuleItemUseCost
 	BattleActionCost() : type(BA_NONE), actor(0), weapon(0), origWeapon(0) { }
 
 	/// Constructor from unit.
-	BattleActionCost(BattleUnit *unit) : type(BA_NONE), actor(0), weapon(0) { }
+	BattleActionCost(BattleUnit *unit) : type(BA_NONE), actor(unit), weapon(0) { }
 
 	/// Constructor with update.
 	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item), origWeapon(0) { updateTU(); }
