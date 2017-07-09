@@ -423,9 +423,9 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set) const
 			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 
-		ModScript::SelectItemParser::Output arg{ i, 0 };
-		ModScript::SelectItemParser::Worker work{ this, BODYPART_ITEM_FLOOR, 0, 0 };
-		work.execute(_rules->getSpriteScript(), arg);
+		ModScript::SelectItemSprite::Output arg{ i, 0 };
+		ModScript::SelectItemSprite::Worker work{ this, BODYPART_ITEM_FLOOR, 0, 0 };
+		work.execute(_rules->getScript<ModScript::SelectItemSprite>(), arg);
 
 		surf = set->getFrame(arg.getFirst());
 		if (surf == nullptr)
@@ -456,9 +456,9 @@ Surface *BattleItem::getBigSprite(SurfaceSet *set) const
 			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enough frames");
 		}
 
-		ModScript::SelectItemParser::Output arg{ i, 0 };
-		ModScript::SelectItemParser::Worker work{ this, BODYPART_ITEM_INVENTORY, 0, 0 };
-		work.execute(_rules->getSpriteScript(), arg);
+		ModScript::SelectItemSprite::Output arg{ i, 0 };
+		ModScript::SelectItemSprite::Worker work{ this, BODYPART_ITEM_INVENTORY, 0, 0 };
+		work.execute(_rules->getScript<ModScript::SelectItemSprite>(), arg);
 
 		surf = set->getFrame(arg.getFirst());
 		if (surf == nullptr)
@@ -1255,7 +1255,7 @@ void BattleItem::ScriptFill(ScriptWorkerBlit* w, BattleItem* item, int part, int
 	w->clear();
 	if(item)
 	{
-		const auto &scr = item->getRules()->getRecolorScript();
+		const auto &scr = item->getRules()->getScript<ModScript::RecolorItemSprite>();
 		if (scr)
 		{
 			w->update(scr, item, part, anim_frame, shade);

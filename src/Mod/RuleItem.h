@@ -161,11 +161,7 @@ private:
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	int _kneelBonus, _oneHandedPenalty;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
-	ModScript::RecolorItemParser::Container _recolorScript;
-	ModScript::SelectItemParser::Container _spriteScript;
-	ModScript::ReactionUnitParser::Container _reacActionScript;
-	ModScript::NewTurnItemParser::Container _newTurnItemScrip;
-	ModScript::CreateItemParser::Container _createItemScript;
+	ModScript::BattleItemScripts::Container _battleItemScripts;
 	ScriptValues<RuleItem> _scriptValues;
 
 	/// Get final value of cost.
@@ -494,16 +490,9 @@ public:
 	int getKneelBonus(Mod *mod) const;
 	/// Gets the one-handed penalty.
 	int getOneHandedPenalty(Mod *mod) const;
-	/// Gets script used to recolor item sprite.
-	const ModScript::RecolorItemParser::Container &getRecolorScript() const { return _recolorScript; }
-	/// Gets script used to switch sprite of item.
-	const ModScript::SelectItemParser::Container &getSpriteScript() const { return _spriteScript; }
-	/// Gets script used calculate reaction to item action.
-	const ModScript::ReactionUnitParser::Container &getReacActionScript() const { return _reacActionScript; }
-	/// Gets scripts that is call when next turn is preperad.
-	const ModScript::NewTurnItemParser::Container &getEventItemTurnScript() const { return _newTurnItemScrip; }
-	/// Gets scripts that is call when item is crated.
-	const ModScript::CreateItemParser::Container &getEventCreateItemScript() const { return _createItemScript; }
+	/// Gets script.
+	template<typename Script>
+	const typename Script::Container &getScript() const { return _battleItemScripts.get<Script>(); }
 };
 
 }

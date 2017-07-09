@@ -55,6 +55,14 @@ namespace helper
 template<typename T>
 struct ArgSelector;
 
+template<typename Z>
+struct ArgName
+{
+	ArgName(const char *n) : name{ n } { }
+
+	const char *name;
+};
+
 }
 
 constexpr int ScriptMaxOut = 8;
@@ -371,6 +379,7 @@ struct TypeInfoImpl
 
 	static_assert(size || isPtr, "Type need to be POD to be used as reg or const value.");
 };
+
 } //namespace helper
 
 /**
@@ -963,16 +972,8 @@ class ScriptParserBase
 	std::vector<ScriptRefData> _refList;
 
 protected:
-	template<typename Z>
-	struct ArgName
-	{
-		ArgName(const char *n) : name{ n } { }
-
-		const char *name;
-	};
-
 	template<typename First, typename... Rest>
-	void addRegImpl(bool writable, ArgName<First>& n, Rest&... t)
+	void addRegImpl(bool writable, helper::ArgName<First>& n, Rest&... t)
 	{
 		addTypeImpl(helper::TypeTag<helper::Decay<First>>{});
 		addScriptReg(n.name, ScriptParserBase::getArgType<First>(), writable, helper::TypeInfoImpl<First>::isOutput);
@@ -1244,7 +1245,7 @@ public:
 	friend Container;
 
 	/// Constructor.
-	ScriptParser(ScriptGlobal* shared, const std::string& name, ArgName<OutputArgs>... argOutputNames, ArgName<Args>... argNames) : ScriptParserBase(shared, name)
+	ScriptParser(ScriptGlobal* shared, const std::string& name, helper::ArgName<OutputArgs>... argOutputNames, helper::ArgName<Args>... argNames) : ScriptParserBase(shared, name)
 	{
 		addRegImpl(true, argOutputNames...);
 		addRegImpl(false, argNames...);
@@ -1314,7 +1315,7 @@ public:
 	friend Container;
 
 	/// Constructor.
-	ScriptParserEvents(ScriptGlobal* shared, const std::string& name, ArgName<OutputArgs>... argOutputNames, ArgName<Args>... argNames) : ScriptParserEventsBase(shared, name)
+	ScriptParserEvents(ScriptGlobal* shared, const std::string& name, helper::ArgName<OutputArgs>... argOutputNames, helper::ArgName<Args>... argNames) : ScriptParserEventsBase(shared, name)
 	{
 		addRegImpl(true, argOutputNames...);
 		addRegImpl(false, argNames...);
@@ -1557,6 +1558,116 @@ public:
 		return setBase(t.get(), i);
 	}
 };
+
+////////////////////////////////////////////////////////////
+//					script groups
+////////////////////////////////////////////////////////////
+
+template<typename Parent, typename... Parsers>
+class ScriptGroupContainer : public Parsers::ContainerWarper...
+{
+public:
+	/// Get container by type.
+	template<typename SelectedParser>
+	typename SelectedParser::Container& get()
+	{
+		return *static_cast<typename SelectedParser::ContainerWarper*>(this);
+	}
+
+	/// Get container by type.
+	template<typename SelectedParser>
+	const typename SelectedParser::Container& get() const
+	{
+		return *static_cast<const typename SelectedParser::ContainerWarper*>(this);
+	}
+
+	/// Load scripts.
+	void load(const std::string& type, const YAML::Node& node, const Parent& parsers)
+	{
+		(void)helper::DummySeq
+		{
+			(get<Parsers>().load(type, node, parsers.template get<Parsers>()), 0)...,
+		};
+	}
+};
+
+template<typename Parser, char... NameChars>
+class ScriptGroupNamedParser : public Parser
+{
+    template<typename... C>
+    static constexpr int length(int curr, char head, C... tail)
+    {
+        return head ? length(curr + 1, tail...) : curr;
+    }
+    static constexpr int length(int curr, char head)
+    {
+        return head ? throw "Script name to long!" : curr;
+    }
+
+	static constexpr int nameLenght = length(0, NameChars...);
+
+public:
+	using BaseType = Parser;
+	struct ContainerWarper : Parser::Container
+	{
+
+	};
+
+	template<typename Master>
+	ScriptGroupNamedParser(ScriptGlobal* shared, Master* master) : Parser{ shared, std::string{ { NameChars... }, 0, nameLenght, }, master, }
+	{
+
+	}
+
+	BaseType& getBase() { return *this; }
+};
+
+template<typename Master, typename... Parsers>
+class ScriptGroup : Parsers...
+{
+public:
+	using Container = ScriptGroupContainer<ScriptGroup, Parsers...>;
+
+	/// Constructor.
+	ScriptGroup(ScriptGlobal* shared, Master* master) : Parsers{ shared, master, }...
+	{
+		(void)helper::DummySeq
+		{
+			(shared->pushParser(&get<Parsers>()), 0)...,
+		};
+	}
+
+	/// Get parser by type.
+	template<typename SelectedParser>
+	typename SelectedParser::BaseType& get()
+	{
+		return *static_cast<SelectedParser*>(this);
+	}
+
+	/// Get parser by type.
+	template<typename SelectedParser>
+	const typename SelectedParser::BaseType& get() const
+	{
+		return *static_cast<const SelectedParser*>(this);
+	}
+};
+
+#define MACRO_GET_STRING_1(str, i) \
+    (sizeof(str) > (i) ? str[(i)] : 0)
+
+#define MACRO_GET_STRING_4(str, i) \
+    MACRO_GET_STRING_1(str, i+0),  \
+    MACRO_GET_STRING_1(str, i+1),  \
+    MACRO_GET_STRING_1(str, i+2),  \
+    MACRO_GET_STRING_1(str, i+3)
+
+#define MACRO_GET_STRING_16(str, i) \
+    MACRO_GET_STRING_4(str, i+0),   \
+    MACRO_GET_STRING_4(str, i+4),   \
+    MACRO_GET_STRING_4(str, i+8),   \
+    MACRO_GET_STRING_4(str, i+12)
+
+#define MACRO_NAMED_SCRIPT(nameString, type) ScriptGroupNamedParser<type, MACRO_GET_STRING_16(nameString, 0), MACRO_GET_STRING_16(nameString, 16)>
 
 } //namespace OpenXcom
 

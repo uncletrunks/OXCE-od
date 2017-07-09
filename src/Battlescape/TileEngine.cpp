@@ -1063,9 +1063,9 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 		densityOfFire /= 2;
 
 		auto visibilityQuality = visibleDistanceMaxVoxel - visibleDistanceVoxels - densityOfSmoke * getMaxViewDistance()/(3 * 20);
-		ModScript::VisibilityUnitParser::Output arg{ visibilityQuality, visibilityQuality, ScriptTag<BattleUnitVisibility>::getNullTag() };
-		ModScript::VisibilityUnitParser::Worker worker{ currentUnit, tile->getUnit(), visibleDistanceVoxels, visibleDistanceMaxVoxel, densityOfSmoke, densityOfFire };
-		worker.execute(currentUnit->getArmor()->getVisibilityUnitScript(), arg);
+		ModScript::VisibilityUnit::Output arg{ visibilityQuality, visibilityQuality, ScriptTag<BattleUnitVisibility>::getNullTag() };
+		ModScript::VisibilityUnit::Worker worker{ currentUnit, tile->getUnit(), visibleDistanceVoxels, visibleDistanceMaxVoxel, densityOfSmoke, densityOfFire };
+		worker.execute(currentUnit->getArmor()->getScript<ModScript::VisibilityUnit>(), arg);
 		unitSeen = 0 < arg.getFirst();
 	}
 	return unitSeen;
@@ -1671,16 +1671,16 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
-			ModScript::ReactionUnitParser::Output arg{ reactionChance, dist };
-			ModScript::ReactionUnitParser::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType };
+			ModScript::ReactionCommon::Output arg{ reactionChance, dist };
+			ModScript::ReactionCommon::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType };
 			if (originalAction.weapon)
 			{
-				worker.execute(originalAction.weapon->getRules()->getReacActionScript(), arg);
+				worker.execute(originalAction.weapon->getRules()->getScript<ModScript::ReactionWeaponAction>(), arg);
 			}
 
-			worker.execute(target->getArmor()->getReacActionScript(), arg);
+			worker.execute(target->getArmor()->getScript<ModScript::ReactionUnitAction>(), arg);
 
-			worker.execute(unit->getArmor()->getReacReactionScript(), arg);
+			worker.execute(unit->getArmor()->getScript<ModScript::ReactionUnitReaction>(), arg);
 
 			if (RNG::percent(arg.getFirst()))
 			{

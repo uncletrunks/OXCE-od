@@ -561,13 +561,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
 	_scriptValues.load(node, parsers.getShared());
 
-	_recolorScript.load(_type, node, parsers.recolorItemSprite);
-	_spriteScript.load(_type, node, parsers.selectItemSprite);
-
-	_reacActionScript.load(_type, node, parsers.reactionWeaponAction);
-
-	_newTurnItemScrip.load(_type, node, parsers.newTurnItem);
-	_createItemScript.load(_type, node, parsers.createItem);
+	_battleItemScripts.load(_type, node, parsers.battleItemScripts);
 
 	if (!_listOrder)
 	{

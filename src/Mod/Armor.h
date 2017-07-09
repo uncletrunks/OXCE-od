@@ -68,14 +68,7 @@ private:
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
-	ModScript::RecolorUnitParser::Container _recolorScript;
-	ModScript::SelectUnitParser::Container _spriteScript;
-	ModScript::ReactionUnitParser::Container _reacActionScript, _reacReactionScript;
-	ModScript::VisibilityUnitParser::Container _visibilityUnitScript;
-	ModScript::HitUnitParser::Container _unitHitScript;
-	ModScript::DamageUnitParser::Container _unitDamageScript;
-	ModScript::NewTurnUnitParser::Container _unitNewTurnScript;
-	ModScript::CreateUnitParser::Container _unitCreateScript;
+	ModScript::BattleUnitScripts::Container _battleUnitScripts;
 
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
@@ -188,24 +181,9 @@ public:
 	int getRankColor(int i) const;
 	/// Can we access this unit's inventory?
 	bool hasInventory() const;
-	/// Gets script used to recolor unit sprite.
-	const ModScript::RecolorUnitParser::Container &getRecolorScript() const { return _recolorScript; }
-	/// Gets script used to switch body elements in unit sprite.
-	const ModScript::SelectUnitParser::Container &getSpriteScript() const { return _spriteScript; }
-	/// Gets script used to calculate reaction chance.
-	const ModScript::ReactionUnitParser::Container &getReacActionScript() const { return _reacActionScript; }
-	/// Gets script used to calculate reaction chance.
-	const ModScript::ReactionUnitParser::Container &getReacReactionScript() const { return _reacReactionScript; }
-	/// Gets script used to calculate visibility.
-	const ModScript::VisibilityUnitParser::Container &getVisibilityUnitScript() const { return _visibilityUnitScript; }
-	/// Gets script that is called when unit get hit by attack, but before damage is applayed.
-	const ModScript::HitUnitParser::Container &getEventUnitHitScript() const { return _unitHitScript; }
-	/// Gets script that is called when unit is damaged.
-	const ModScript::DamageUnitParser::Container &getEventUnitDamageScript() const { return _unitDamageScript; }
-	/// Gets scripts that is call when next turn is preperad.
-	const ModScript::NewTurnUnitParser::Container &getEventUnitTurnScript() const { return _unitNewTurnScript; }
-	/// Gets scripts that is call when unit is crated.
-	const ModScript::CreateUnitParser::Container &getEventUnitCreateScript() const { return _unitCreateScript; }
+	/// Gets script.
+	template<typename Script>
+	const typename Script::Container &getScript() const { return _battleUnitScripts.get<Script>(); }
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
 };

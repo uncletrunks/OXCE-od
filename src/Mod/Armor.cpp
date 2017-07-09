@@ -174,19 +174,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_rankColor = node["spriteRankColor"].as<std::vector<int> >(_rankColor);
 	_utileColor = node["spriteUtileColor"].as<std::vector<int> >(_utileColor);
 
-	//small hack, we use script as defualt behavior to simplyfy code.
-	_recolorScript.load(_type, node, parsers.recolorUnitSprite);
-	_spriteScript.load(_type, node, parsers.selectUnitSprite);
-
-	_reacActionScript.load(_type, node, parsers.reactionUnitAction);
-	_reacReactionScript.load(_type, node, parsers.reactionUnitReaction);
-
-	_visibilityUnitScript.load(_type, node, parsers.visibilityUnit);
-
-	_unitHitScript.load(_type, node, parsers.unitHit);
-	_unitDamageScript.load(_type, node, parsers.unitDamage);
-	_unitNewTurnScript.load(_type, node, parsers.unitNewTurn);
-	_unitCreateScript.load(_type, node, parsers.unitCreated);
+	_battleUnitScripts.load(_type, node, parsers.battleUnitScripts);
 
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node, parsers.getShared());
