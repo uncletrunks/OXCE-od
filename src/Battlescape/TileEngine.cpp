@@ -1753,24 +1753,23 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 	{
 		return false;
 	}
-	else
-	{
-		// only enemies count, not friends or neutrals
-		if (target->getOriginalFaction() != FACTION_HOSTILE) return false;
-
-		// mind-controlled enemies don't count though!
-		if (target->getFaction() != FACTION_HOSTILE) return false;
-	}
 
 	if (!weapon)
 	{
 		return false;
 	}
 
-	if (weapon->getRules()->getExperienceTrainingMode() > ETM_DEFAULT)
+	using upExpType = void (BattleUnit::*)();
+
+	ExperienceTrainingMode expType = weapon->getRules()->getExperienceTrainingMode();
+	upExpType expFuncA = nullptr;
+	upExpType expFuncB = nullptr;
+	int expMultiply = 100;
+
+	if (expType > ETM_DEFAULT)
 	{
 		// can train psi strength and psi skill only if psi skill is already > 0
-		if (weapon->getRules()->getExperienceTrainingMode() >= ETM_PSI_STRENGTH && weapon->getRules()->getExperienceTrainingMode() <= ETM_PSI_STRENGTH_OR_SKILL_2X)
+		if (expType >= ETM_PSI_STRENGTH && expType <= ETM_PSI_STRENGTH_OR_SKILL_2X)
 		{
 			// cannot use "unit->getBaseStats()->psiSkill", because armor can give +psiSkill bonus
 			if (unit->getGeoscapeSoldier() && unit->getGeoscapeSoldier()->getCurrentStats()->psiSkill <= 0)
@@ -1779,86 +1778,119 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 
 		switch (weapon->getRules()->getExperienceTrainingMode())
 		{
-		case ETM_MELEE_100: unit->addMeleeExp(); break;
-		case ETM_MELEE_50: if (RNG::percent(50)) { unit->addMeleeExp(); } break;
-		case ETM_MELEE_33: if (RNG::percent(33)) { unit->addMeleeExp(); } break;
-		case ETM_FIRING_100: unit->addFiringExp(); break;
-		case ETM_FIRING_50: if (RNG::percent(50)) { unit->addFiringExp(); } break;
-		case ETM_FIRING_33: if (RNG::percent(33)) { unit->addFiringExp(); } break;
-		case ETM_THROWING_100: unit->addThrowingExp(); break;
-		case ETM_THROWING_50: if (RNG::percent(50)) { unit->addThrowingExp(); } break;
-		case ETM_THROWING_33: if (RNG::percent(33)) { unit->addThrowingExp(); } break;
-		case ETM_FIRING_AND_THROWING: unit->addFiringExp(); unit->addThrowingExp(); break;
-		case ETM_FIRING_OR_THROWING: if (RNG::percent(50)) { unit->addFiringExp(); } else { unit->addThrowingExp(); } break;
-		case ETM_REACTIONS: unit->addReactionExp(); break;
-		case ETM_REACTIONS_AND_MELEE: unit->addReactionExp(); unit->addMeleeExp(); break;
-		case ETM_REACTIONS_AND_FIRING: unit->addReactionExp(); unit->addFiringExp(); break;
-		case ETM_REACTIONS_AND_THROWING: unit->addReactionExp(); unit->addThrowingExp(); break;
-		case ETM_REACTIONS_OR_MELEE: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addMeleeExp(); } break;
-		case ETM_REACTIONS_OR_FIRING: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addFiringExp(); } break;
-		case ETM_REACTIONS_OR_THROWING: if (RNG::percent(50)) { unit->addReactionExp(); } else { unit->addThrowingExp(); } break;
-		case ETM_BRAVERY: unit->addBraveryExp(); break;
-		case ETM_BRAVERY_2X: unit->addBraveryExp(); unit->addBraveryExp(); break;
-		case ETM_BRAVERY_AND_REACTIONS: unit->addBraveryExp(); unit->addReactionExp(); break;
-		case ETM_BRAVERY_OR_REACTIONS: if (RNG::percent(50)) { unit->addBraveryExp(); } else { unit->addReactionExp(); } break;
-		case ETM_BRAVERY_OR_REACTIONS_2X: if (RNG::percent(50)) { unit->addBraveryExp(); unit->addBraveryExp(); } else { unit->addReactionExp(); unit->addReactionExp(); } break;
-		case ETM_PSI_STRENGTH: unit->addPsiStrengthExp(); break;
-		case ETM_PSI_STRENGTH_2X: unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); break;
-		case ETM_PSI_SKILL: unit->addPsiSkillExp(); break;
-		case ETM_PSI_SKILL_2X: unit->addPsiSkillExp(); unit->addPsiSkillExp(); break;
-		case ETM_PSI_STRENGTH_AND_SKILL: unit->addPsiStrengthExp(); unit->addPsiSkillExp(); break;
-		case ETM_PSI_STRENGTH_AND_SKILL_2X: unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); unit->addPsiSkillExp(); unit->addPsiSkillExp(); break;
-		case ETM_PSI_STRENGTH_OR_SKILL: if (RNG::percent(50)) { unit->addPsiStrengthExp(); } else { unit->addPsiSkillExp(); } break;
-		case ETM_PSI_STRENGTH_OR_SKILL_2X: if (RNG::percent(50)) { unit->addPsiStrengthExp(); unit->addPsiStrengthExp(); } else { unit->addPsiSkillExp(); unit->addPsiSkillExp(); } break;
+		case ETM_MELEE_100: expFuncA = &BattleUnit::addMeleeExp; break;
+		case ETM_MELEE_50: expMultiply = 50; expFuncA = &BattleUnit::addMeleeExp; break;
+		case ETM_MELEE_33: expMultiply = 33; expFuncA = &BattleUnit::addMeleeExp; break;
+		case ETM_FIRING_100: expFuncA = &BattleUnit::addFiringExp; break;
+		case ETM_FIRING_50: expMultiply = 50; expFuncA = &BattleUnit::addFiringExp; break;
+		case ETM_FIRING_33: expMultiply = 33; expFuncA = &BattleUnit::addFiringExp; break;
+		case ETM_THROWING_100: expFuncA = &BattleUnit::addThrowingExp; break;
+		case ETM_THROWING_50: expMultiply = 50; expFuncA = &BattleUnit::addThrowingExp; break;
+		case ETM_THROWING_33: expMultiply = 33; expFuncA = &BattleUnit::addThrowingExp; break;
+		case ETM_FIRING_AND_THROWING: expFuncA = &BattleUnit::addFiringExp; expFuncB = &BattleUnit::addThrowingExp; break;
+		case ETM_FIRING_OR_THROWING: if (RNG::percent(50)) { expFuncA = &BattleUnit::addFiringExp; } else { expFuncA = &BattleUnit::addThrowingExp; } break;
+		case ETM_REACTIONS: expMultiply = 100; expFuncA = &BattleUnit::addReactionExp; break;
+		case ETM_REACTIONS_AND_MELEE: expFuncA = &BattleUnit::addReactionExp; expFuncB = &BattleUnit::addMeleeExp; break;
+		case ETM_REACTIONS_AND_FIRING: expFuncA = &BattleUnit::addReactionExp; expFuncB = &BattleUnit::addFiringExp; break;
+		case ETM_REACTIONS_AND_THROWING: expFuncA = &BattleUnit::addReactionExp; expFuncB = &BattleUnit::addThrowingExp; break;
+		case ETM_REACTIONS_OR_MELEE: if (RNG::percent(50)) { expFuncA = &BattleUnit::addReactionExp; } else { expFuncA = &BattleUnit::addMeleeExp; } break;
+		case ETM_REACTIONS_OR_FIRING: if (RNG::percent(50)) { expFuncA = &BattleUnit::addReactionExp; } else { expFuncA = &BattleUnit::addFiringExp; } break;
+		case ETM_REACTIONS_OR_THROWING: if (RNG::percent(50)) { expFuncA = &BattleUnit::addReactionExp; } else { expFuncA = &BattleUnit::addThrowingExp; } break;
+		case ETM_BRAVERY: expFuncA = &BattleUnit::addBraveryExp; break;
+		case ETM_BRAVERY_2X: expMultiply = 200; expFuncA = &BattleUnit::addBraveryExp; break;
+		case ETM_BRAVERY_AND_REACTIONS: expFuncA = &BattleUnit::addBraveryExp; expFuncB = &BattleUnit::addReactionExp; break;
+		case ETM_BRAVERY_OR_REACTIONS: if (RNG::percent(50)) { expFuncA = &BattleUnit::addBraveryExp; } else { expFuncA = &BattleUnit::addReactionExp; } break;
+		case ETM_BRAVERY_OR_REACTIONS_2X: expMultiply = 200; if (RNG::percent(50)) { expFuncA = &BattleUnit::addBraveryExp; } else { expFuncA = &BattleUnit::addReactionExp; } break;
+		case ETM_PSI_STRENGTH: expFuncA = &BattleUnit::addPsiStrengthExp; break;
+		case ETM_PSI_STRENGTH_2X: expMultiply = 200; expFuncA = &BattleUnit::addPsiStrengthExp; break;
+		case ETM_PSI_SKILL: expFuncA = &BattleUnit::addPsiSkillExp; break;
+		case ETM_PSI_SKILL_2X: expMultiply = 200; expFuncA = &BattleUnit::addPsiSkillExp; break;
+		case ETM_PSI_STRENGTH_AND_SKILL: expFuncA = &BattleUnit::addPsiStrengthExp; expFuncB = &BattleUnit::addPsiSkillExp; break;
+		case ETM_PSI_STRENGTH_AND_SKILL_2X: expMultiply = 200; expFuncA = &BattleUnit::addPsiStrengthExp; expFuncB = &BattleUnit::addPsiSkillExp; break;
+		case ETM_PSI_STRENGTH_OR_SKILL: if (RNG::percent(50)) { expFuncA = &BattleUnit::addPsiStrengthExp; } else { expFuncA = &BattleUnit::addPsiSkillExp; } break;
+		case ETM_PSI_STRENGTH_OR_SKILL_2X: expMultiply = 200; if (RNG::percent(50)) { expFuncA = &BattleUnit::addPsiStrengthExp; } else { expFuncA = &BattleUnit::addPsiSkillExp; } break;
 		case ETM_NOTHING:
 		default:
 			return false;
 		}
-
-		return true;
 	}
-
-	// GRENADES AND PROXIES
-	if (weapon->getRules()->getBattleType() == BT_GRENADE || weapon->getRules()->getBattleType() == BT_PROXIMITYGRENADE)
-	{
-		unit->addThrowingExp(); // e.g. willie pete, acid grenade, stun grenade, HE grenade, smoke grenade, proxy grenade, ...
-	}
-	// MELEE
-	else if (weapon->getRules()->getBattleType() == BT_MELEE)
-	{
-		unit->addMeleeExp(); // e.g. cattle prod, cutlass, rope, ...
-	}
-	// FIREARMS and other
 	else
 	{
-		if (!rangeAtack)
+		// GRENADES AND PROXIES
+		if (weapon->getRules()->getBattleType() == BT_GRENADE || weapon->getRules()->getBattleType() == BT_PROXIMITYGRENADE)
 		{
-			unit->addMeleeExp(); // e.g. rifle/shotgun gun butt, ...
+			expType = ETM_THROWING_100;
+			expFuncA = &BattleUnit::addThrowingExp; // e.g. willie pete, acid grenade, stun grenade, HE grenade, smoke grenade, proxy grenade, ...
 		}
-		else if (weapon->getRules()->getArcingShot())
+		// MELEE
+		else if (weapon->getRules()->getBattleType() == BT_MELEE)
 		{
-			unit->addThrowingExp(); // e.g. flamethrower, javelins, combat bow, grenade launcher, molotov, black powder bomb, stick grenade, acid flask, apple, ...
+			expType = ETM_MELEE_100;
+			expFuncA = &BattleUnit::addMeleeExp; // e.g. cattle prod, cutlass, rope, ...
 		}
+		// FIREARMS and other
 		else
 		{
-			int maxRange = weapon->getRules()->getMaxRange();
-			if (maxRange > 10)
+			if (!rangeAtack)
 			{
-				unit->addFiringExp(); // e.g. panzerfaust, harpoon gun, shotgun, assault rifle, rocket launcher, small launcher, heavy cannon, blaster launcher, ...
+				expType = ETM_MELEE_100;
+				expFuncA = &BattleUnit::addMeleeExp; // e.g. rifle/shotgun gun butt, ...
 			}
-			else if (maxRange > 1)
+			else if (weapon->getRules()->getArcingShot())
 			{
-				unit->addThrowingExp(); // e.g. fuso knives, zapper, ...
-			}
-			else if (maxRange == 1)
-			{
-				unit->addMeleeExp(); // e.g. hammer, chainsaw, fusion torch, ...
+				expType = ETM_THROWING_100;
+				expFuncA = &BattleUnit::addThrowingExp; // e.g. flamethrower, javelins, combat bow, grenade launcher, molotov, black powder bomb, stick grenade, acid flask, apple, ...
 			}
 			else
 			{
-				return false; // what is this? no training!
+				int maxRange = weapon->getRules()->getMaxRange();
+				if (maxRange > 10)
+				{
+					expType = ETM_FIRING_100;
+					expFuncA = &BattleUnit::addFiringExp; // e.g. panzerfaust, harpoon gun, shotgun, assault rifle, rocket launcher, small launcher, heavy cannon, blaster launcher, ...
+				}
+				else if (maxRange > 1)
+				{
+					expType = ETM_THROWING_100;
+					expFuncA = &BattleUnit::addThrowingExp; // e.g. fuso knives, zapper, ...
+				}
+				else if (maxRange == 1)
+				{
+					expType = ETM_MELEE_100;
+					expFuncA = &BattleUnit::addMeleeExp; // e.g. hammer, chainsaw, fusion torch, ...
+				}
+				else
+				{
+					return false; // what is this? no training!
+				}
 			}
 		}
+	}
+
+	// only enemies count, not friends or neutrals
+	if (target->getOriginalFaction() != FACTION_HOSTILE) expMultiply = 0;
+
+	// mind-controlled enemies don't count though!
+	if (target->getFaction() != FACTION_HOSTILE) expMultiply = 0;
+
+
+
+	ModScript::AwardExperience::Output arg{ expMultiply, expType, };
+	ModScript::AwardExperience::Worker work{ unit, target, weapon, };
+
+	work.execute(target->getArmor()->getScript<ModScript::AwardExperience>(), arg);
+
+	expMultiply = arg.getFirst();
+
+	for (int i = expMultiply / 100; i > 0; --i)
+	{
+		if (expFuncA) (unit->*expFuncA)();
+		if (expFuncB) (unit->*expFuncB)();
+	}
+	if (RNG::percent(expMultiply % 100))
+	{
+		if (expFuncA) (unit->*expFuncA)();
+		if (expFuncB) (unit->*expFuncB)();
 	}
 
 	return true;

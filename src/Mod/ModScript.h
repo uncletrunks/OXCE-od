@@ -127,6 +127,11 @@ class ModScript
 		NewTurnItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
+	struct AwardExperienceParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*>
+	{
+		AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
 public:
 	/// Get shared state.
 	const ScriptGlobal* getShared() const
@@ -150,6 +155,8 @@ public:
 	using DamageUnit = MACRO_NAMED_SCRIPT("damageUnit", DamageUnitParser);
 	using CreateUnit = MACRO_NAMED_SCRIPT("createUnit", CreateUnitParser);
 	using NewTurnUnit = MACRO_NAMED_SCRIPT("newTurnUnit", NewTurnUnitParser);
+
+	using AwardExperience = MACRO_NAMED_SCRIPT("awardExperience", AwardExperienceParser);
 
 	using VisibilityUnit = MACRO_NAMED_SCRIPT("visibilityUnit", VisibilityUnitParser);
 
@@ -180,6 +187,8 @@ public:
 		DamageUnit,
 		CreateUnit,
 		NewTurnUnit,
+
+		AwardExperience,
 
 		VisibilityUnit
 	>;

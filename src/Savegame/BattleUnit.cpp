@@ -4425,5 +4425,12 @@ ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std:
 	b.addCustomPtr<const Mod>("rules", mod);
 }
 
+ModScript::AwardExperienceParser::AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "experience_multipler", "experience_type", "attacker", "unit", "weapon", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
 
 } //namespace OpenXcom

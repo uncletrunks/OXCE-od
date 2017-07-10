@@ -158,6 +158,7 @@ Bug fix.[br/]
 3.9:[br/]
 Bug fix.[br/]
 Improvments in displaying multiple ammo items in inventory.[br/]
+Script altering experience grain.[br/]
 [br/]
 
 [examples]
@@ -446,6 +447,7 @@ items:
       reactionWeaponAction: ~   #script that handle reacion to shoot, throw or melee from that weapon.
       createItem: ~             #script call on creation of new item in battlespace.
       newTurnItem: ~            #script call on each turn for all items in battlescape.
+      awardExperience: ~        #script that handle experiance grain from hiting unit.
     ai:
       useDelay: 3       #determine on what turn item can be used by aliens.
       meleeHitCount: 25 #number of hits that AI try to do.
