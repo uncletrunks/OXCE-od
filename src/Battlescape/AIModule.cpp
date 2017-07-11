@@ -2025,10 +2025,35 @@ bool AIModule::psiAction()
 
 		if (_visibleEnemies)
 		{
-			auto ammo = _attackAction->weapon->getAmmoForAction(_attackAction->type);
-			if (ammo && ammo->getRules()->getPowerBonus(_attackAction->actor) >= weightToAttack)
+			BattleActionType actions[] = {
+				BA_AIMEDSHOT,
+				BA_AUTOSHOT,
+				BA_SNAPSHOT,
+				BA_HIT,
+			};
+			for (auto action : actions)
 			{
-				return false;
+				auto ammo = _attackAction->weapon->getAmmoForAction(action);
+				if (!ammo)
+				{
+					continue;
+				}
+
+				int weightPower = ammo->getRules()->getPowerBonus(_attackAction->actor);
+				if (action == BA_HIT)
+				{
+					// prefer psi over melee
+					weightPower /= 2;
+				}
+				else
+				{
+					// prefer machineguns
+					weightPower *= _attackAction->weapon->getActionConf(action)->shots;
+				}
+				if (weightPower >= weightToAttack)
+				{
+					return false;
+				}
 			}
 		}
 		else if (RNG::generate(35, 155) >= weightToAttack)
