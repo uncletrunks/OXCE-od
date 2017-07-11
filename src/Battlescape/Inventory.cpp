@@ -1255,41 +1255,41 @@ void Inventory::arrangeGround(bool alterOffset)
 		occupiedSlots.resize(slotsY, std::vector<bool>(slotsX * 2, false));
 
 		// Move items out of the way and find which stack they'll end up in within the inventory.
-		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
+		for (auto& i : *(_selUnit->getTile()->getInventory()))
 		{
 			// first move all items out of the way - a big number in X direction
-			(*i)->setSlot(ground);
-			(*i)->setSlotX(1000000);
-			(*i)->setSlotY(0);
+			i->setSlot(ground);
+			i->setSlotX(1000000);
+			i->setSlotY(0);
 
 			// Only handle visible items from this point on.
-			if ((*i)->getRules()->getInventoryWidth())
+			if (i->getRules()->getInventoryWidth())
 			{
 				// Each item type has a list of stacks. Find / create a suitable one for this item.
-				std::unordered_map<std::string, std::vector< std::vector<BattleItem*> > >::iterator iterItemList = typeItemLists.find((*i)->getRules()->getType());
+				auto iterItemList = typeItemLists.find(i->getRules()->getType());
 				if (iterItemList == typeItemLists.end()) {
 					// New item type, create a list of item stacks for it.
-					iterItemList = typeItemLists.insert(std::pair<std::string, std::vector< std::vector<BattleItem*> > >((*i)->getRules()->getType(), { { (*i) } })).first;
-					itemListOrder.push_back((*i));
+					iterItemList = typeItemLists.insert(std::pair<std::string, std::vector< std::vector<BattleItem*> > >(i->getRules()->getType(), { { i } })).first;
+					itemListOrder.push_back(i);
 					// Figure out the largest item size present:
-					x = std::max(x, (*i)->getRules()->getInventoryWidth());
-					y = std::max(y, (*i)->getRules()->getInventoryHeight());
+					x = std::max(x, i->getRules()->getInventoryWidth());
+					y = std::max(y, i->getRules()->getInventoryHeight());
 				}
 				else {
 					// With the item type found. Find which stack of this item type to add the item to.
 					bool stacked = false;
-					for (std::vector< std::vector<BattleItem*> >::iterator itemStack = iterItemList->second.begin(); itemStack != iterItemList->second.end(); itemStack++)
+					for (auto& itemStack : iterItemList->second)
 					{
-						if (canBeStacked((*i), itemStack->at(0)))
+						if (canBeStacked(i, itemStack.at(0)))
 						{
-							itemStack->push_back((*i));
+							itemStack.push_back(i);
 							stacked = true;
 							break;
 						}
 					}
 					if (!stacked) {
 						// Not able to be stacked with previously placed items of this type. Make a new stack containing only this item.
-						iterItemList->second.push_back({ (*i) });
+						iterItemList->second.push_back({ i });
 					}
 				}
 			}
@@ -1297,23 +1297,31 @@ void Inventory::arrangeGround(bool alterOffset)
 		// Create the cache of last placed index for a given item size.
 		startIndexCacheX.resize(y + 1, std::vector<int>(x + 1, 0));
 
+		// Before we place the items, we should sort the itemListOrder vector using the 'list order' of the items.
+		std::sort(itemListOrder.begin(), itemListOrder.end(), [](BattleItem* const &a, BattleItem* const &b)
+			{
+				return a->getRules()->getListOrder() < b->getRules()->getListOrder();
+			}
+		);
+
 		// Now for each item type, find the most topleft position that is not occupied and will fit.
-		for (std::vector<BattleItem*>::iterator i = itemListOrder.begin(); i != itemListOrder.end(); ++i)
+		for (auto& i : itemListOrder)
 		{
 			// Fetch the list of item stacks for this item type. Then place each stack.
-			std::unordered_map<std::string, std::vector< std::vector<BattleItem*> > >::iterator iterItemList = typeItemLists.find((*i)->getRules()->getType());
-			for (std::vector< std::vector<BattleItem*> >::iterator itemStack = iterItemList->second.begin(); itemStack != iterItemList->second.end(); itemStack++)
+			auto iterItemList = typeItemLists.find(i->getRules()->getType());
+			for (auto& itemStack : iterItemList->second)
 			{
-				BattleItem* itemTypeSample = itemStack->at(0); // Grab a sample of the stack of item type we're trying to place.
+				BattleItem* itemTypeSample = itemStack.at(0); // Grab a sample of the stack of item type we're trying to place.
 				if (!isInSearchString(itemTypeSample))
 				{
 					// quick search
 					// Not a match with the active search string, skip this item stack. (Will remain outside the visible inventory)
-					continue;
+					break;
 				}
 
 				// Start searching at the x value where we last placed an item of this size.
-				x = startIndexCacheX[itemTypeSample->getRules()->getInventoryHeight()][itemTypeSample->getRules()->getInventoryWidth()];
+				// But also don't let more than half a screen behind the furtherst item (because we want to keep similar items together).
+				x = std::max(xMax - slotsX/2, startIndexCacheX[itemTypeSample->getRules()->getInventoryHeight()][itemTypeSample->getRules()->getInventoryWidth()]);
 				y = 0;
 				donePlacing = false;
 				while (!donePlacing)
@@ -1355,9 +1363,10 @@ void Inventory::arrangeGround(bool alterOffset)
 						}
 
 						// Place all items from this stack in the location we just reserved.
-						for (std::vector<BattleItem*>::iterator j = itemStack->begin(); j != itemStack->end(); ++j) {
-							(*j)->setSlotX(x);
-							(*j)->setSlotY(y);
+						for (auto& j : itemStack)
+						{
+							j->setSlotX(x);
+							j->setSlotY(y);
 							_stackLevel[x][y] += 1;
 						}
 						donePlacing = true;
@@ -1374,7 +1383,6 @@ void Inventory::arrangeGround(bool alterOffset)
 				}
 				// Now update the shortcut cache so that items to follow are able to skip a decent chunk of their search,
 				// as there can be no spot before this x-address with available slots for items that are larger in one or more dimensions.
-				std::map<std::pair<int, int>, int>::iterator cacheToUpdate;
 				int firstPossibleX = itemTypeSample->getRules()->getInventoryHeight() * 2 > slotsY ? x + itemTypeSample->getRules()->getInventoryWidth() : x;
 				for (size_t offsetY = itemTypeSample->getRules()->getInventoryHeight(); offsetY < startIndexCacheX.size(); ++offsetY)
 				{
@@ -1383,8 +1391,8 @@ void Inventory::arrangeGround(bool alterOffset)
 						startIndexCacheX[offsetY][offsetX] = std::max(firstPossibleX, startIndexCacheX[offsetY][offsetX]);
 					}
 				}
-			}
-		}
+			} // end stacks for this item type
+		} // end of item types
 	}
 	if (alterOffset)
 	{
