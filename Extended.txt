@@ -161,6 +161,7 @@ Improvments in displaying multiple ammo items in inventory.[br/]
 Script altering experience grain.[br/]
 [br/]
 3.9a:[br/]
+Bug fix.[br/]
 [br/]
 
 [examples]

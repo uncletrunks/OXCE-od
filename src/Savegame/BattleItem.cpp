@@ -546,7 +546,7 @@ bool BattleItem::setAmmoPreMission(BattleItem *item)
  * @param action Action type.
  * @return Return config of item action or nullptr for wrong action type or item.
  */
-const RuleItemAction *BattleItem::getActionConfNullable(BattleActionType action) const
+const RuleItemAction *BattleItem::getActionConf(BattleActionType action) const
 {
 	switch (action)
 	{
@@ -560,26 +560,11 @@ const RuleItemAction *BattleItem::getActionConfNullable(BattleActionType action)
 }
 
 /**
- * Get configuration of action on that item.
- * @param action Action type.
- * @return Return config of item action.
- */
-const RuleItemAction *BattleItem::getActionConf(BattleActionType action) const
-{
-	auto rule = getActionConfNullable(action);
-	if (!rule)
-	{
-		throw Exception("Unsupported action (val: " + std::to_string((int)action) + ") for item " + _rules->getType());
-	}
-	return rule;
-}
-
-/**
  * Determines if this item uses ammo.
  */
 bool BattleItem::needsAmmoForAction(BattleActionType action) const
 {
-	auto conf = getActionConfNullable(action);
+	auto conf = getActionConf(action);
 	if (!conf || conf->ammoSlot == -1)
 	{
 		return false;
@@ -596,6 +581,10 @@ bool BattleItem::needsAmmoForAction(BattleActionType action) const
 const BattleItem *BattleItem::getAmmoForAction(BattleActionType action) const
 {
 	auto conf = getActionConf(action);
+	if (!conf)
+	{
+		return nullptr;
+	}
 	if (conf->ammoSlot == -1)
 	{
 		return this;
@@ -618,6 +607,10 @@ const BattleItem *BattleItem::getAmmoForAction(BattleActionType action) const
 BattleItem *BattleItem::getAmmoForAction(BattleActionType action, std::string* message)
 {
 	auto conf = getActionConf(action);
+	if (!conf)
+	{
+		return nullptr;
+	}
 	if (conf->ammoSlot == -1)
 	{
 		return this;
@@ -678,7 +671,7 @@ void BattleItem::spendAmmoForAction(BattleActionType action, SavedBattleGame* sa
  */
 bool BattleItem::haveNextShotsForAction(BattleActionType action, int shotCount) const
 {
-	auto conf = getActionConfNullable(action);
+	auto conf = getActionConf(action);
 	if (conf)
 	{
 		return shotCount < conf->shots;
@@ -1041,7 +1034,7 @@ struct getAmmoForActionScript
 	static RetEnum func(BattleItem *weapon, BattleItem *&ammo, int action)
 	{
 		BattleActionType bat = (BattleActionType)action;
-		if (weapon && weapon->getActionConfNullable(bat))
+		if (weapon)
 		{
 			ammo = weapon->getAmmoForAction(bat);
 		}
@@ -1058,7 +1051,7 @@ struct getAmmoForActionConstScript
 	static RetEnum func(const BattleItem *weapon, const BattleItem *&ammo, int action)
 	{
 		BattleActionType bat = (BattleActionType)action;
-		if (weapon && weapon->getActionConfNullable(bat))
+		if (weapon)
 		{
 			ammo = weapon->getAmmoForAction(bat);
 		}
