@@ -135,8 +135,6 @@ public:
 	/// Sets the item's ammo item based on it type.
 	bool setAmmoPreMission(BattleItem *item);
 	/// Get ammo slot for action.
-	const RuleItemAction *getActionConfNullable(BattleActionType action) const;
-	/// Get ammo slot for action.
 	const RuleItemAction *getActionConf(BattleActionType action) const;
 	/// Determines if this item uses ammo.
 	bool needsAmmoForAction(BattleActionType action) const;
