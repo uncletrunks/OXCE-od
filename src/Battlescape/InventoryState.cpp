@@ -1204,6 +1204,11 @@ void InventoryState::invMouseOver(Action *)
 	}
 
 	BattleItem *item = _inv->getMouseOverItem();
+	if (item != _mouseHoverItem)
+	{
+		_mouseHoverItemFrame = _inv->getAnimFrame();
+		_mouseHoverItem = item;
+	}
 	if (item != 0)
 	{
 		std::wstring itemName;
@@ -1213,15 +1218,38 @@ void InventoryState::invMouseOver(Action *)
 		}
 		else
 		{
-			if (_game->getSavedGame()->isResearched(item->getRules()->getRequirements()))
+			auto save = _game->getSavedGame();
+			if (save->isResearched(item->getRules()->getRequirements()))
 			{
-				itemName = tr(item->getRules()->getName());
+				std::wstring text = tr(item->getRules()->getName());
+				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+				{
+					if (!item->needsAmmoForSlot(slot))
+					{
+						continue;
+					}
+
+					auto ammo = item->getAmmoForSlot(slot);
+					if (!ammo || !save->isResearched(ammo->getRules()->getRequirements()))
+					{
+						continue;
+					}
+
+					const auto& ammoName = ammo->getRules()->getNameAsAmmo();
+					if (!ammoName.empty())
+					{
+						text += L" ";
+						text += tr(ammoName);
+					}
+				}
+				itemName = text;
 			}
 			else
 			{
 				itemName = tr("STR_ALIEN_ARTIFACT");
 			}
 		}
+
 		if (Options::showItemNameAndWeightInInventory)
 		{
 			std::wostringstream ss;
@@ -1236,38 +1264,28 @@ void InventoryState::invMouseOver(Action *)
 			_txtItem->setText(itemName);
 		}
 
-		std::wstring s;
-		if (item->getAmmoForSlot(0) != 0 && (item->needsAmmoForSlot(0) || item->getRules()->getClipSize() > 0))
+		// FIXME still need to merge this: if (item->getAmmoForSlot(0) != 0 && (item->needsAmmoForSlot(0) || item->getRules()->getClipSize() > 0))
+		_selAmmo->clear();
+		if (item->isWeaponWithAmmo() && item->haveAnyAmmo())
 		{
-			s = tr("STR_AMMO_ROUNDS_LEFT").arg(item->getAmmoForSlot(0)->getAmmoQuantity());
-			SDL_Rect r;
-			r.x = 0;
-			r.y = 0;
-			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
-			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
-			_selAmmo->drawRect(&r, _game->getMod()->getInterface("inventory")->getElement("grid")->color);
-			r.x++;
-			r.y++;
-			r.w -= 2;
-			r.h -= 2;
-			_selAmmo->drawRect(&r, Palette::blockOffset(0)+15);
-			item->getAmmoForSlot(0)->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selAmmo);
 			updateTemplateButtons(false);
+			_txtAmmo->setText(L"");
 		}
 		else
 		{
-			_selAmmo->clear();
+			_mouseHoverItem = nullptr;
 			updateTemplateButtons(!_tu);
+			std::wstring s;
+			if (item->getAmmoQuantity() != 0)
+			{
+				s = tr("STR_AMMO_ROUNDS_LEFT").arg(item->getAmmoQuantity());
+			}
+			else if (item->getRules()->getBattleType() == BT_MEDIKIT)
+			{
+				s = tr("STR_MEDI_KIT_QUANTITIES_LEFT").arg(item->getPainKillerQuantity()).arg(item->getStimulantQuantity()).arg(item->getHealQuantity());
+			}
+			_txtAmmo->setText(s);
 		}
-		if (item->getAmmoQuantity() != 0 && item->needsAmmoForSlot(0))
-		{
-			s = tr("STR_AMMO_ROUNDS_LEFT").arg(item->getAmmoQuantity());
-		}
-		else if (item->getRules()->getBattleType() == BT_MEDIKIT)
-		{
-			s = tr("STR_MEDI_KIT_QUANTITIES_LEFT").arg(item->getPainKillerQuantity()).arg(item->getStimulantQuantity()).arg(item->getHealQuantity());
-		}
-		_txtAmmo->setText(s);
 	}
 	else
 	{
@@ -1290,6 +1308,7 @@ void InventoryState::invMouseOut(Action *)
 	_txtItem->setText(L"");
 	_txtAmmo->setText(L"");
 	_selAmmo->clear();
+	_mouseHoverItem = nullptr;
 	updateTemplateButtons(!_tu);
 }
 
@@ -1406,6 +1425,64 @@ void InventoryState::handle(Action *action)
 		}
 	}
 #endif
+}
+
+/**
+ * Cycle throug loaded ammo in hover over item.
+ */
+void InventoryState::think()
+{
+	if (_mouseHoverItem)
+	{
+		auto anim = _inv->getAnimFrame();
+		auto seq = std::max(((anim - _mouseHoverItemFrame) / 10) - 1, 0); // `-1` cause that first item will be show bit more longer
+		auto modulo = 0;
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+		{
+			if (_mouseHoverItem->needsAmmoForSlot(slot) && _mouseHoverItem->getAmmoForSlot(slot))
+			{
+				++modulo;
+			}
+		}
+		if (modulo)
+		{
+			seq %= modulo;
+		}
+
+		BattleItem* firstAmmo = nullptr;
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+		{
+			if (_mouseHoverItem->needsAmmoForSlot(slot) && _mouseHoverItem->getAmmoForSlot(slot))
+			{
+				firstAmmo = _mouseHoverItem->getAmmoForSlot(slot);
+				if (slot >= seq)
+				{
+					break;
+				}
+			}
+		}
+		if (firstAmmo)
+		{
+			_txtAmmo->setText(tr("STR_AMMO_ROUNDS_LEFT").arg(firstAmmo->getAmmoQuantity()));
+			SDL_Rect r;
+			r.x = 0;
+			r.y = 0;
+			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
+			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
+			_selAmmo->drawRect(&r, _game->getMod()->getInterface("inventory")->getElement("grid")->color);
+			r.x++;
+			r.y++;
+			r.w -= 2;
+			r.h -= 2;
+			_selAmmo->drawRect(&r, Palette::blockOffset(0)+15);
+			firstAmmo->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selAmmo, firstAmmo, anim);
+		}
+		else
+		{
+			_selAmmo->clear();
+		}
+	}
+	State::think();
 }
 
 /**

@@ -147,7 +147,6 @@ private:
 	std::set<int> _ignoredUfos;
 	std::set<const RuleItem *> _autosales;
 
-	void getDependableResearchBasic (std::vector<RuleResearch*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	static SaveInfo getSaveInfo(const std::string &file, Language *lang);
 public:
 	static const std::string AUTOSAVE_GEOSCAPE, AUTOSAVE_BATTLESCAPE, QUICKSAVE;
@@ -238,15 +237,17 @@ public:
 	/// Sets the status of a research rule
 	void setResearchRuleStatus(const std::string &researchRule, int newStatus);
 	/// Add a finished ResearchProject
-	void addFinishedResearch(const RuleResearch *r, const Mod *mod = 0, bool score = true);
+	void addFinishedResearchSimple(const RuleResearch *research);
+	/// Add a finished ResearchProject
+	void addFinishedResearch(const RuleResearch *research, const Mod *mod, Base *base, bool score = true);
 	/// Get the list of already discovered research projects
 	const std::vector<const RuleResearch*> & getDiscoveredResearch() const;
 	/// Get the list of ResearchProject which can be researched in a Base
-	void getAvailableResearchProjects(std::vector<RuleResearch*> & projects, const Mod *mod, Base *base) const;
+	void getAvailableResearchProjects(std::vector<RuleResearch*> & projects, const Mod *mod, Base *base, bool considerDebugMode = false) const;
+	/// Get the list of newly available research projects once a research has been completed.
+	void getNewlyAvailableResearchProjects(std::vector<RuleResearch*> & before, std::vector<RuleResearch*> & after, std::vector<RuleResearch*> & diff) const;
 	/// Get the list of Productions which can be manufactured in a Base
 	void getAvailableProductions(std::vector<RuleManufacture*> & productions, const Mod *mod, Base *base, ManufacturingFilterType filter = MANU_FILTER_DEFAULT) const;
-	/// Get the list of newly available research projects once a research has been completed.
-	void getDependableResearch(std::vector<RuleResearch*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Get the list of newly available manufacture projects once a research has been completed.
 	void getDependableManufacture(std::vector<RuleManufacture*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
 	/// Get the list of newly available items to purchase once a research has been completed.
@@ -255,18 +256,18 @@ public:
 	void getDependableCraft(std::vector<RuleCraft*> & dependables, const RuleResearch *research, const Mod *mod) const;
 	/// Get the list of newly available facilities to build once a research has been completed.
 	void getDependableFacilities(std::vector<RuleBaseFacility*> & dependables, const RuleResearch *research, const Mod *mod) const;
-	/// Check whether a ResearchProject can be researched
-	bool isResearchAvailable(RuleResearch *r, const std::vector<const RuleResearch*> & unlocked, const Mod *mod) const;
 	/// Gets the status of a ufopedia rule.
 	int getUfopediaRuleStatus(const std::string &ufopediaRule);
 	/// Gets the status of a manufacture rule.
 	int getManufactureRuleStatus(const std::string &manufactureRule);
 	/// Gets the status of a research rule.
 	int getResearchRuleStatus(const std::string &researchRule);
-	/// Gets if a research has been unlocked.
-	bool isResearched(const std::string &research) const;
-	/// Gets if a list of research has been unlocked.
-	bool isResearched(const std::vector<std::string> &research) const;
+	/// Gets if a research still has undiscovered "protected unlocks".
+	bool hasUndiscoveredProtectedUnlock(const RuleResearch * r, const Mod * mod) const;
+	/// Gets if a certain research has been completed.
+	bool isResearched(const std::string &research, bool considerDebugMode = true) const;
+	/// Gets if a certain list of research topics has been completed.
+	bool isResearched(const std::vector<std::string> &research, bool considerDebugMode = true) const;
 	/// Gets the soldier matching this ID.
 	Soldier *getSoldier(int id) const;
 	/// Handles the higher promotions.

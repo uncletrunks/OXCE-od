@@ -78,4 +78,17 @@ public:
 	/// Gets the item to spawn in the base stores when this topic is researched.
 	const std::string & getSpawnedItem() const;
 };
+
+/**
+ * Compares RuleResearch pointers based on the research name.
+ */
+class CompareRuleResearch
+{
+public:
+	bool operator()(const RuleResearch *a, const RuleResearch *b) const
+	{
+		return a->getName() < b->getName();
+	}
+};
+
 }

@@ -74,7 +74,7 @@ private:
 	int _shade, _minShade, _maxShade;
 	std::string _nextStage, _race, _script;
 	bool _finalDestination, _isAlienBase;
-	std::string _winCutscene, _loseCutscene;
+	std::string _winCutscene, _loseCutscene, _abortCutscene;
 	std::string _alert, _alertBackground, _alertDescription;
 	BriefingData _briefingData;
 	std::string _markerName, _objectivePopup, _objectiveCompleteText, _objectiveFailedText;
@@ -125,6 +125,8 @@ public:
 	std::string getWinCutscene() const;
 	/// Gets the cutscene to play when this mission is lost.
 	std::string getLoseCutscene() const;
+	/// Gets the cutscene to play when this mission is aborted.
+	std::string getAbortCutscene() const;
 	/// Gets the alert message for this mission type.
 	std::string getAlertMessage() const;
 	/// Gets the alert background for this mission type.

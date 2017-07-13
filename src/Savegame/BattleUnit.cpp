@@ -1216,10 +1216,10 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 	const int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
 
 	{
-		ModScript::HitUnitParser::Output args { power, bodypart, side, };
-		ModScript::HitUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgPower, type->ResistType, attack.type, };
+		ModScript::HitUnit::Output args { power, bodypart, side, };
+		ModScript::HitUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgPower, type->ResistType, attack.type, };
 
-		work.execute(this->getArmor()->getEventUnitHitScript(), args);
+		work.execute(this->getArmor()->getScript<ModScript::HitUnit>(), args);
 
 		power = args.getFirst();
 		bodypart = (UnitBodyPart)args.getSecond();
@@ -1253,7 +1253,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		constexpr int toMorale = 5;
 		constexpr int toWound = 6;
 
-		ModScript::DamageUnitParser::Output args { };
+		ModScript::DamageUnit::Output args { };
 
 		std::get<toArmor>(args.data) += type->getArmorPreDamage(power);
 
@@ -1286,9 +1286,9 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			std::get<toArmor>(args.data) += type->getArmorDamage(power);
 		}
 
-		ModScript::DamageUnitParser::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, power, orgPower, bodypart, side, type->ResistType, attack.type, };
+		ModScript::DamageUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, power, orgPower, bodypart, side, type->ResistType, attack.type, };
 
-		work.execute(this->getArmor()->getEventUnitDamageScript(), args);
+		work.execute(this->getArmor()->getScript<ModScript::DamageUnit>(), args);
 
 		if (!_armor->getPainImmune() || type->IgnorePainImmunity)
 		{
@@ -2774,7 +2774,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff
 	updateGeoscapeStats(s);
 
 	UnitStats *stats = s->getCurrentStats();
-	statsDiff -= *stats;        // subtract old stats
+	statsDiff -= *stats;        // subtract old stat
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = _stats.health - _health;
 
@@ -2830,7 +2830,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff
 		if (v > 0) stats->stamina += RNG::generate(0, v/10 + 2);
 	}
 
-	statsDiff += *stats; // add new stats
+	statsDiff += *stats; // add new stat
 
 	return hasImproved;
 }
@@ -4512,7 +4512,7 @@ void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part
 	w->clear();
 	if(unit)
 	{
-		w->update(unit->getArmor()->getRecolorScript(), unit, body_part, anim_frame, shade, burn);
+		w->update(unit->getArmor()->getScript<ModScript::RecolorUnitSprite>(), unit, body_part, anim_frame, shade, burn);
 	}
 }
 
@@ -4554,6 +4554,13 @@ ModScript::CreateUnitParser::CreateUnitParser(ScriptGlobal* shared, const std::s
 }
 
 ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", "side", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+ModScript::AwardExperienceParser::AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "experience_multipler", "experience_type", "attacker", "unit", "weapon", }
 {
 	BindBase b { this };
 

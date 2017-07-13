@@ -28,6 +28,7 @@ namespace OpenXcom
 class Surface;
 class Text;
 class TextEdit;
+class NumberText;
 class InteractiveSurface;
 class Inventory;
 class SavedBattleGame;
@@ -57,6 +58,8 @@ private:
 	BattlescapeState *_parent;
 	Base *_base;
 	std::string _currentTooltip;
+	int _mouseHoverItemFrame = 0;
+	BattleItem *_mouseHoverItem = nullptr;
 	bool _reloadUnit;
 	int _globalLayoutIndex;
 	/// Helper method for Create Template button
@@ -123,7 +126,9 @@ public:
 	/// Handler for hitting the [Move Ground Inventory To Base] hotkey.
 	void onMoveGroundInventoryToBase(Action *action);
 	/// Handles keypresses.
-	void handle(Action *action);
+	void handle(Action *action) override;
+	/// Runs state functionality every cycle.
+	void think() override;
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
 	/// Handler for hiding tooltip.

@@ -2084,6 +2084,22 @@ inline void BattlescapeState::handle(Action *action)
 						_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
 						_save->getBattleGame()->handleState();
 					}
+					// "ctrl-w" - warp unit
+					else if (_save->getDebugMode() && action->getDetails()->key.keysym.sym == SDLK_w && (SDL_GetModState() & KMOD_CTRL) != 0)
+					{
+						debug(L"Beam me up Scotty");
+						BattleUnit *unit = _save->getSelectedUnit();
+						Position newPos;
+						_map->getSelectorPosition(&newPos);
+						if (unit != 0 && newPos.x >= 0)
+						{
+							unit->getTile()->setUnit(0);
+							unit->setPosition(newPos);
+							_save->getTile(newPos)->setUnit(unit);
+							_save->getTileEngine()->calculateLighting(LL_UNITS);
+							_save->getBattleGame()->handleState();
+						}
+					}
 					// f11 - voxel map dump
 					else if (action->getDetails()->key.keysym.sym == SDLK_F11)
 					{
@@ -2494,7 +2510,11 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 		std::string cutscene;
 		if (ruleDeploy)
 		{
-			if (abort || inExitArea == 0)
+			if (abort)
+			{
+				cutscene = ruleDeploy->getAbortCutscene();
+			}
+			else if (inExitArea == 0)
 			{
 				cutscene = ruleDeploy->getLoseCutscene();
 			}
@@ -2521,8 +2541,7 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 			// Autosave if game is over
 			if (_game->getSavedGame()->getEnding() != END_NONE && _game->getSavedGame()->isIronman())
 			{
-				_game->getSavedGame()->setBattleGame(0);
-				_game->pushState(new SaveGameState(OPT_GEOSCAPE, SAVE_IRONMAN, _palette));
+				_game->pushState(new SaveGameState(OPT_BATTLESCAPE, SAVE_IRONMAN, _palette));
 			}
 		}
 	}

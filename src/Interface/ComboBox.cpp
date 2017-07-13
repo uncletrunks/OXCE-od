@@ -24,9 +24,10 @@
 #include "../Engine/State.h"
 #include "../Engine/Language.h"
 #include "../Engine/Font.h"
+#include "../Engine/Game.h"
 #include "../Engine/Action.h"
 #include "../Engine/Options.h"
-#include <algorithm>
+#include "../Engine/Screen.h"
 
 namespace OpenXcom
 {
@@ -37,6 +38,17 @@ const int ComboBox::MAX_ITEMS = 10;
 const int ComboBox::BUTTON_WIDTH = 14;
 const int ComboBox::TEXT_HEIGHT = 8;
 
+static int getPopupWindowY(int buttonHeight, int buttonY, int popupHeight, bool popupAboveButton)
+{
+	int belowButtonY = buttonY + buttonHeight;
+	if (popupAboveButton)
+	{
+		// used when popup list won't fit below the button; display it above
+		return buttonY - popupHeight;
+	}
+	return belowButtonY;
+}
+
 /**
  * Sets up a combobox with the specified size and position.
  * @param state Pointer to state the combobox belongs to.
@@ -45,7 +57,7 @@ const int ComboBox::TEXT_HEIGHT = 8;
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-ComboBox::ComboBox(State *state, int width, int height, int x, int y, bool dropUp) : InteractiveSurface(width, height, x, y), _change(0), _sel(0), _state(state), _lang(0), _toggled(false), _dropUp(dropUp)
+ComboBox::ComboBox(State *state, int width, int height, int x, int y, bool popupAboveButton) : InteractiveSurface(width, height, x, y), _change(0), _sel(0), _state(state), _lang(0), _toggled(false), _popupAboveButton(popupAboveButton)
 {
 	_button = new TextButton(width, height, x, y);
 	_button->setComboBox(this);
@@ -53,15 +65,12 @@ ComboBox::ComboBox(State *state, int width, int height, int x, int y, bool dropU
 	_arrow = new Surface(11, 8, x + width - BUTTON_WIDTH, y + 4);
 
 	int popupHeight = MAX_ITEMS * TEXT_HEIGHT + VERTICAL_MARGIN * 2;
-	int popupY = y + height;
-	if (_dropUp) {
-		popupY = y - popupHeight;
-	}
+	int popupY = getPopupWindowY(height, y, popupHeight, popupAboveButton);
 	_window = new Window(state, width, popupHeight, x, popupY);
 	_window->setThinBorder();
 
 	_list = new TextList(width - HORIZONTAL_MARGIN * 2 - BUTTON_WIDTH + 1,
-						MAX_ITEMS * TEXT_HEIGHT - 2,
+						popupHeight - (VERTICAL_MARGIN * 2 + 2),
 						x + HORIZONTAL_MARGIN,
 						popupY + VERTICAL_MARGIN);
 	_list->setComboBox(this);
@@ -109,10 +118,7 @@ void ComboBox::setY(int y)
 	_arrow->setY(y + 4);
 
 	int popupHeight = _window->getHeight();
-	int popupY = y + getHeight();
-	if (_dropUp) {
-		popupY = y - popupHeight;
-	}
+	int popupY = getPopupWindowY(getHeight(), y, popupHeight, _popupAboveButton);
 	_window->setY(popupY);
 	_list->setY(popupY + VERTICAL_MARGIN);
 }
@@ -300,10 +306,7 @@ void ComboBox::setDropdown(int options)
 	}
 
 	int popupHeight = items * h + VERTICAL_MARGIN * 2;
-	int popupY = getY() + getHeight();
-	if (_dropUp) {
-		popupY = getY() - popupHeight;
-	}
+	int popupY = getPopupWindowY(getHeight(), getY(), popupHeight, _popupAboveButton);
 	_window->setY(popupY);
 	_window->setHeight(popupHeight);
 	_list->setY(popupY + VERTICAL_MARGIN);

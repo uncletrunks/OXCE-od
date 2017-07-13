@@ -18,6 +18,7 @@
  */
 #include "CraftSoldiersState.h"
 #include <climits>
+#include <algorithm>
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
@@ -36,7 +37,6 @@
 #include "SoldierInfoState.h"
 #include "../Mod/Armor.h"
 #include "../Mod/RuleInterface.h"
-#include <algorithm>
 
 namespace OpenXcom
 {
@@ -47,7 +47,8 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param craft ID of the selected craft.
  */
-CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base), _craft(craft), _otherCraftColor(0), _origSoldierOrder(*_base->getSoldiers()), _dynGetter(NULL)
+CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft)
+		:  _base(base), _craft(craft), _otherCraftColor(0), _origSoldierOrder(*_base->getSoldiers()), _dynGetter(NULL)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -58,8 +59,8 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
 	_txtCraft = new Text(84, 9, 208, 32);
 	_txtAvailable = new Text(110, 9, 16, 24);
 	_txtUsed = new Text(110, 9, 122, 24);
-	_lstSoldiers = new TextList(288, 128, 8, 40);
 	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
+	_lstSoldiers = new TextList(288, 128, 8, 40);
 
 	// Set palette
 	setInterface("craftSoldiers");
@@ -99,7 +100,7 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
 
 	// populate sort options
 	std::vector<std::wstring> sortOptions;
-	sortOptions.push_back(tr("ORIGINAL ORDER"));
+	sortOptions.push_back(tr("STR_ORIGINAL_ORDER"));
 	_sortFunctors.push_back(NULL);
 
 #define PUSH_IN(strId, functor) \
@@ -108,10 +109,10 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
 
 	PUSH_IN("ID", idStat);
 	PUSH_IN("FIRST LETTER", nameStat);
-	PUSH_IN("RANK", rankStat);
-	PUSH_IN("MISSIONS", missionsStat);
-	PUSH_IN("KILLS", killsStat);
-	PUSH_IN("WOUND RECOVERY", woundRecoveryStat);
+	PUSH_IN("STR_RANK", rankStat);
+	PUSH_IN("STR_MISSIONS2", missionsStat);
+	PUSH_IN("STR_KILLS2", killsStat);
+	PUSH_IN("STR_WOUND_RECOVERY2", woundRecoveryStat);
 	PUSH_IN("STR_TIME_UNITS", tuStat);
 	PUSH_IN("STR_STAMINA", staminaStat);
 	PUSH_IN("STR_HEALTH", healthStat);
@@ -129,7 +130,7 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
 	_cbxSortBy->setOptions(sortOptions);
 	_cbxSortBy->setSelected(0);
 	_cbxSortBy->onChange((ActionHandler)&CraftSoldiersState::cbxSortByChange);
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 
 	_lstSoldiers->setArrowColumn(176, ARROW_VERTICAL);
 	_lstSoldiers->setColumns(4, 106, 86, 72, 16);
@@ -148,7 +149,8 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft) :  _base(base),
  */
 CraftSoldiersState::~CraftSoldiersState()
 {
-	for (std::vector<SortFunctor *>::iterator it = _sortFunctors.begin(); it != _sortFunctors.end(); ++it)
+	for (std::vector<SortFunctor *>::iterator it = _sortFunctors.begin();
+		it != _sortFunctors.end(); ++it)
 	{
 		delete(*it);
 	}
@@ -158,7 +160,7 @@ CraftSoldiersState::~CraftSoldiersState()
  * Sorts the soldiers list by the selected criterion
  * @param action Pointer to an action.
  */
-void CraftSoldiersState::cbxSortByChange(Action *action)
+void CraftSoldiersState::cbxSortByChange(Action *)
 {
 	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
 	size_t selIdx = _cbxSortBy->getSelected();
@@ -187,10 +189,10 @@ void CraftSoldiersState::cbxSortByChange(Action *action)
 		// restore original ordering, ignoring (of course) those
 		// soldiers that have been sacked since this state started
 		for (std::vector<Soldier *>::const_iterator it = _origSoldierOrder.begin();
-		it != _origSoldierOrder.end(); ++it)
+			it != _origSoldierOrder.end(); ++it)
 		{
 			std::vector<Soldier *>::iterator soldierIt =
-			std::find(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *it);
+				std::find(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *it);
 			if (soldierIt != _base->getSoldiers()->end())
 			{
 				Soldier *s = *soldierIt;
@@ -293,7 +295,7 @@ void CraftSoldiersState::lstItemsLeftArrowClick(Action *action)
 			moveSoldierUp(action, row, true);
 		}
 	}
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 	_cbxSortBy->setSelected(-1);
 }
 
@@ -346,7 +348,7 @@ void CraftSoldiersState::lstItemsRightArrowClick(Action *action)
 			moveSoldierDown(action, row, true);
 		}
 	}
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 	_cbxSortBy->setSelected(-1);
 }
 

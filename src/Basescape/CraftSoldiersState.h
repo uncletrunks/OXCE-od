@@ -52,7 +52,7 @@ private:
 	std::vector<Soldier *> _origSoldierOrder;
 	std::vector<SortFunctor *> _sortFunctors;
 	getStatFn_t _dynGetter;
-	///initializes the display list based on the craft soldier's list and the position to display
+	/// initializes the display list based on the craft soldier's list and the position to display
 	void initList(size_t scrl);
 public:
 	/// Creates the Craft Soldiers state.

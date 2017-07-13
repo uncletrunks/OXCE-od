@@ -64,27 +64,13 @@ class ModScript
 	ScriptGlobal* _shared;
 	Mod* _mod;
 
-	template<typename T>
-	struct Warper : T
-	{
-		Warper(const std::string& name, Mod* mod, ScriptGlobal* shared) : T{ shared, name, mod }
-		{
-			shared->pushParser(this);
-		}
-	};
-
 	ModScript(ScriptGlobal* shared, Mod* mod) : _shared{ shared }, _mod{ mod }
 	{
 
 	}
 
 	using Output = ScriptOutputArgs<int&, int>;
-public:
 
-	const ScriptGlobal* getShared() const
-	{
-		return _shared;
-	}
 
 	struct RecolorUnitParser : ScriptParserEvents<Output, const BattleUnit*, int, int, int, int>
 	{
@@ -141,25 +127,87 @@ public:
 		NewTurnItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	Warper<RecolorUnitParser> recolorUnitSprite = { "recolorUnitSprite", _mod, _shared };
-	Warper<SelectUnitParser> selectUnitSprite = { "selectUnitSprite", _mod, _shared };
+	struct AwardExperienceParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*>
+	{
+		AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
 
-	Warper<ReactionUnitParser> reactionWeaponAction = { "reactionWeaponAction", _mod, _shared };
-	Warper<ReactionUnitParser> reactionUnitAction = { "reactionUnitAction", _mod, _shared };
-	Warper<ReactionUnitParser> reactionUnitReaction = { "reactionUnitReaction", _mod, _shared };
+public:
+	/// Get shared state.
+	const ScriptGlobal* getShared() const
+	{
+		return _shared;
+	}
 
-	Warper<RecolorItemParser> recolorItemSprite = { "recolorItemSprite", _mod, _shared };
-	Warper<SelectItemParser> selectItemSprite = { "selectItemSprite", _mod, _shared };
+	using ReactionCommon = ReactionUnitParser;
 
-	Warper<VisibilityUnitParser> visibilityUnit = { "visibilityUnit", _mod, _shared };
+	////////////////////////////////////////////////////////////
+	//					unit script
+	////////////////////////////////////////////////////////////
 
-	Warper<HitUnitParser> unitHit = { "hitUnit", _mod, _shared };
-	Warper<DamageUnitParser> unitDamage = { "damageUnit", _mod, _shared };
-	Warper<CreateUnitParser> unitCreated = { "createUnit", _mod, _shared };
-	Warper<NewTurnUnitParser> unitNewTurn = { "newTurnUnit", _mod, _shared };
+	using RecolorUnitSprite = MACRO_NAMED_SCRIPT("recolorUnitSprite", RecolorUnitParser);
+	using SelectUnitSprite = MACRO_NAMED_SCRIPT("selectUnitSprite", SelectUnitParser);
 
-	Warper<CreateItemParser> createItem = { "createItem", _mod, _shared };
-	Warper<NewTurnItemParser> newTurnItem = { "newTurnItem", _mod, _shared };
+	using ReactionUnitAction = MACRO_NAMED_SCRIPT("reactionUnitAction", ReactionUnitParser);
+	using ReactionUnitReaction = MACRO_NAMED_SCRIPT("reactionUnitReaction", ReactionUnitParser);
+
+	using HitUnit = MACRO_NAMED_SCRIPT("hitUnit", HitUnitParser);
+	using DamageUnit = MACRO_NAMED_SCRIPT("damageUnit", DamageUnitParser);
+	using CreateUnit = MACRO_NAMED_SCRIPT("createUnit", CreateUnitParser);
+	using NewTurnUnit = MACRO_NAMED_SCRIPT("newTurnUnit", NewTurnUnitParser);
+
+	using AwardExperience = MACRO_NAMED_SCRIPT("awardExperience", AwardExperienceParser);
+
+	using VisibilityUnit = MACRO_NAMED_SCRIPT("visibilityUnit", VisibilityUnitParser);
+
+	////////////////////////////////////////////////////////////
+	//					item script
+	////////////////////////////////////////////////////////////
+
+	using RecolorItemSprite = MACRO_NAMED_SCRIPT("recolorItemSprite", RecolorItemParser);
+	using SelectItemSprite = MACRO_NAMED_SCRIPT("selectItemSprite", SelectItemParser);
+
+	using ReactionWeaponAction = MACRO_NAMED_SCRIPT("reactionWeaponAction", ReactionUnitParser);
+
+	using CreateItem = MACRO_NAMED_SCRIPT("createItem", CreateItemParser);
+	using NewTurnItem = MACRO_NAMED_SCRIPT("newTurnItem", NewTurnItemParser);
+
+	////////////////////////////////////////////////////////////
+	//					groups
+	////////////////////////////////////////////////////////////
+
+	using BattleUnitScripts = ScriptGroup<Mod,
+		RecolorUnitSprite,
+		SelectUnitSprite,
+
+		ReactionUnitAction,
+		ReactionUnitReaction,
+
+		HitUnit,
+		DamageUnit,
+		CreateUnit,
+		NewTurnUnit,
+
+		AwardExperience,
+
+		VisibilityUnit
+	>;
+
+	using BattleItemScripts = ScriptGroup<Mod,
+		RecolorItemSprite,
+		SelectItemSprite,
+
+		ReactionWeaponAction,
+
+		CreateItem,
+		NewTurnItem
+	>;
+
+	////////////////////////////////////////////////////////////
+	//					members
+	////////////////////////////////////////////////////////////
+	BattleUnitScripts battleUnitScripts = { _shared, _mod, };
+	BattleItemScripts battleItemScripts = { _shared, _mod, };
 };
 
 }

@@ -1037,18 +1037,18 @@ void SavedBattleGame::endTurn()
 			(*i)->setVisible(false);
 		}
 
-		ModScript::NewTurnUnitParser::Output arg{};
-		ModScript::NewTurnUnitParser::Worker work{ (*i), this, this->getTurn(), _side };
+		ModScript::NewTurnUnit::Output arg{};
+		ModScript::NewTurnUnit::Worker work{ (*i), this, this->getTurn(), _side };
 
-		work.execute((*i)->getArmor()->getEventUnitTurnScript(), arg);
+		work.execute((*i)->getArmor()->getScript<ModScript::NewTurnUnit>(), arg);
 	}
 
 	for (auto& item : _items)
 	{
-		ModScript::NewTurnItemParser::Output arg{};
-		ModScript::NewTurnItemParser::Worker work{ item, this, this->getTurn(), _side };
+		ModScript::NewTurnItem::Output arg{};
+		ModScript::NewTurnItem::Worker work{ item, this, this->getTurn(), _side };
 
-		work.execute(item->getRules()->getEventItemTurnScript(), arg);
+		work.execute(item->getRules()->getScript<ModScript::NewTurnItem>(), arg);
 	}
 
 	// re-run calculateFOV() *after* all aliens have been set not-visible
@@ -1343,10 +1343,10 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 		}
 	}
 
-	ModScript::CreateUnitParser::Output arg{};
-	ModScript::CreateUnitParser::Worker work{ unit, this, this->getTurn(), };
+	ModScript::CreateUnit::Output arg{};
+	ModScript::CreateUnit::Worker work{ unit, this, this->getTurn(), };
 
-	work.execute(armor->getEventUnitCreateScript(), arg);
+	work.execute(armor->getScript<ModScript::CreateUnit>(), arg);
 }
 
 /**
@@ -1355,10 +1355,10 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
  */
 void SavedBattleGame::initItem(BattleItem *item)
 {
-	ModScript::CreateItemParser::Output arg{};
-	ModScript::CreateItemParser::Worker work{ item, this, this->getTurn(), };
+	ModScript::CreateItem::Output arg{};
+	ModScript::CreateItem::Worker work{ item, this, this->getTurn(), };
 
-	work.execute(item->getRules()->getEventCreateItemScript(), arg);
+	work.execute(item->getRules()->getScript<ModScript::CreateItem>(), arg);
 }
 
 /**
@@ -1461,12 +1461,7 @@ void SavedBattleGame::addDestroyedObjective()
 		{
 			if (getObjectiveType() == MUST_DESTROY)
 			{
-				if (Options::battleAutoEnd)
-				{
-					setSelectedUnit(0);
-					_battleState->getBattleGame()->cancelCurrentAction(true);
-					_battleState->getBattleGame()->requestEndTurn(false);
-				}
+				_battleState->getBattleGame()->autoEndBattle();
 			}
 			else
 			{

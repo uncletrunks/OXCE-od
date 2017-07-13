@@ -295,7 +295,7 @@ void NewBattleState::load(const std::string &filename)
 				const std::vector<std::string> &research = mod->getResearchList();
 				for (std::vector<std::string>::const_iterator i = research.begin(); i != research.end(); ++i)
 				{
-					save->addFinishedResearch(mod->getResearch(*i));
+					save->addFinishedResearchSimple(mod->getResearch(*i));
 				}
 
 				// Generate items
@@ -450,7 +450,7 @@ void NewBattleState::initSave()
 	const std::vector<std::string> &research = mod->getResearchList();
 	for (std::vector<std::string>::const_iterator i = research.begin(); i != research.end(); ++i)
 	{
-		save->addFinishedResearch(mod->getResearch(*i));
+		save->addFinishedResearchSimple(mod->getResearch(*i));
 	}
 
 	_game->setSavedGame(save);

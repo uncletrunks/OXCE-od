@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <climits>
 #include "DebriefingState.h"
-#include <climits>
 #include "CannotReequipState.h"
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
@@ -201,67 +200,67 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_txtSoldier->setText(tr("STR_NAME_UC"));
 
 	_txtTU->setAlign(ALIGN_CENTER);
-	_txtTU->setText(tr("TU"));
+	_txtTU->setText(tr("STR_TIME_UNITS_ABBREVIATION"));
 	_txtTU->setTooltip("STR_TIME_UNITS");
 	_txtTU->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtTU->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtStamina->setAlign(ALIGN_CENTER);
-	_txtStamina->setText(tr("STA"));
+	_txtStamina->setText(tr("STR_STAMINA_ABBREVIATION"));
 	_txtStamina->setTooltip("STR_STAMINA");
 	_txtStamina->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtStamina->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtHealth->setAlign(ALIGN_CENTER);
-	_txtHealth->setText(tr("HP"));
+	_txtHealth->setText(tr("STR_HEALTH_ABBREVIATION"));
 	_txtHealth->setTooltip("STR_HEALTH");
 	_txtHealth->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtHealth->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtBravery->setAlign(ALIGN_CENTER);
-	_txtBravery->setText(tr("BRA"));
+	_txtBravery->setText(tr("STR_BRAVERY_ABBREVIATION"));
 	_txtBravery->setTooltip("STR_BRAVERY");
 	_txtBravery->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtBravery->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtReactions->setAlign(ALIGN_CENTER);
-	_txtReactions->setText(tr("REA"));
+	_txtReactions->setText(tr("STR_REACTIONS_ABBREVIATION"));
 	_txtReactions->setTooltip("STR_REACTIONS");
 	_txtReactions->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtReactions->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtFiring->setAlign(ALIGN_CENTER);
-	_txtFiring->setText(tr("ACC"));
+	_txtFiring->setText(tr("STR_FIRING_ACCURACY_ABBREVIATION"));
 	_txtFiring->setTooltip("STR_FIRING_ACCURACY");
 	_txtFiring->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtFiring->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtThrowing->setAlign(ALIGN_CENTER);
-	_txtThrowing->setText(tr("THR"));
+	_txtThrowing->setText(tr("STR_THROWING_ACCURACY_ABBREVIATION"));
 	_txtThrowing->setTooltip("STR_THROWING_ACCURACY");
 	_txtThrowing->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtThrowing->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtMelee->setAlign(ALIGN_CENTER);
-	_txtMelee->setText(tr("MEL"));
+	_txtMelee->setText(tr("STR_MELEE_ACCURACY_ABBREVIATION"));
 	_txtMelee->setTooltip("STR_MELEE_ACCURACY");
 	_txtMelee->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtMelee->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtStrength->setAlign(ALIGN_CENTER);
-	_txtStrength->setText(tr("STR"));
+	_txtStrength->setText(tr("STR_STRENGTH_ABBREVIATION"));
 	_txtStrength->setTooltip("STR_STRENGTH");
 	_txtStrength->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtStrength->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtPsiStrength->setAlign(ALIGN_CENTER);
-	_txtPsiStrength->setText(tr("VOO"));
+	_txtPsiStrength->setText(tr("STR_PSIONIC_STRENGTH_ABBREVIATION"));
 	_txtPsiStrength->setTooltip("STR_PSIONIC_STRENGTH");
 	_txtPsiStrength->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtPsiStrength->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtPsiSkill->setAlign(ALIGN_CENTER);
-	_txtPsiSkill->setText(tr("DOO"));
+	_txtPsiSkill->setText(tr("STR_PSIONIC_SKILL_ABBREVIATION"));
 	_txtPsiSkill->setTooltip("STR_PSIONIC_SKILL");
 	_txtPsiSkill->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtPsiSkill->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
@@ -292,7 +291,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 				makeSoldierString((*i).second.strength).c_str(),
 				makeSoldierString((*i).second.psiStrength).c_str(),
 				makeSoldierString((*i).second.psiSkill).c_str(),
-				"");
+				L"");
 		// note: final dummy element to cause dot filling until the end of the line
 	}
 
@@ -547,11 +546,11 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 		}
 		if ((*deadUnit)->getId() == bestScoreID[(*deadUnit)->getGeoscapeSoldier()->getRank()])
 		{
-			(*deadUnit)->getGeoscapeSoldier()->getDiary()->awardBestOfRank((*deadUnit)->getGeoscapeSoldier()->getRank());
+			(*deadUnit)->getGeoscapeSoldier()->getDiary()->awardBestOfRank(bestScore[(*deadUnit)->getGeoscapeSoldier()->getRank()]);
 		}
 		if ((*deadUnit)->getId() == bestOverallScorersID)
 		{
-			(*deadUnit)->getGeoscapeSoldier()->getDiary()->awardBestOverall();
+			(*deadUnit)->getGeoscapeSoldier()->getDiary()->awardBestOverall(bestOverallScore);
 		}
 	}
 
@@ -737,7 +736,8 @@ void DebriefingState::init()
 void DebriefingState::txtTooltipIn(Action *action)
 {
 	_currentTooltip = action->getSender()->getTooltip();
-	_txtTooltip->setText(tr(_currentTooltip));}
+	_txtTooltip->setText(tr(_currentTooltip));
+}
 
 /**
 * Clears the tooltip text.
@@ -796,16 +796,16 @@ void DebriefingState::btnOkClick(Action *)
 	}
 	else
 	{
+		if (!_deadSoldiersCommended.empty())
+		{
+			_game->pushState(new CommendationLateState(_deadSoldiersCommended));
+		}
+		if (!_soldiersCommended.empty())
+		{
+			_game->pushState(new CommendationState(_soldiersCommended));
+		}
 		if (!_destroyBase)
 		{
-			if (!_deadSoldiersCommended.empty())
-			{
-				_game->pushState(new CommendationLateState(_deadSoldiersCommended));
-			}
-			if (!_soldiersCommended.empty())
-			{
-				_game->pushState(new CommendationState(_soldiersCommended));
-			}
 			if (_game->getSavedGame()->handlePromotions(participants, _game->getMod()))
 			{
 				_game->pushState(new PromotionsState);
@@ -1316,9 +1316,7 @@ void DebriefingState::prepareDebriefing()
 					UnitStats statIncrease;
 					(*j)->postMissionProcedures(save, statIncrease);
 					if ((*j)->getGeoscapeSoldier())
-					{
 						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease));
-					}
 					playerInExitArea++;
 
 					recoverItems((*j)->getInventory(), base);
@@ -1492,7 +1490,7 @@ void DebriefingState::prepareDebriefing()
 				{
 					if (battle->getTile(i)->getMapData(part))
 					{
-						int specialType = battle->getTile(i)->getMapData(part)->getSpecialType();
+						size_t specialType = battle->getTile(i)->getMapData(part)->getSpecialType();
 						if (specialType != nonRecoverType && _recoveryStats.find(specialType) != _recoveryStats.end())
 						{
 							addStat(_recoveryStats[specialType]->name, 1, _recoveryStats[specialType]->value);
@@ -1705,7 +1703,7 @@ void DebriefingState::prepareDebriefing()
 		const RuleResearch *research = _game->getMod()->getResearch(ruleDeploy->getUnlockedResearch());
 		if (research)
 		{
-			_game->getSavedGame()->addFinishedResearch(research, _game->getMod(), true);
+			_game->getSavedGame()->addFinishedResearch(research, _game->getMod(), base, true);
 		}
 	}
 

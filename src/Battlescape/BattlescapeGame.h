@@ -243,6 +243,8 @@ public:
 	/// Sets up a mission complete notification.
 	void missionComplete();
 	std::list<BattleState*> getStates();
+	/// Auto end the battle if conditions are met.
+	void autoEndBattle();
 };
 
 }

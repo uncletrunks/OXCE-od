@@ -1517,6 +1517,14 @@ bool AIModule::findFirePoint()
  */
 int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, int radius, int diff, bool grenade) const
 {
+	Tile *targetTile = _save->getTile(targetPos);
+
+	// don't throw grenades at flying enemies.
+	if (grenade && targetPos.z > 0 && targetTile->hasNoFloor(_save->getTile(targetPos - Position(0,0,1))))
+	{
+		return false;
+	}
+
 	if (diff == -1)
 	{
 		diff = _save->getBattleState()->getGame()->getSavedGame()->getDifficultyCoefficient();
@@ -1541,8 +1549,8 @@ int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, i
 	efficacy += diff/2;
 
 	// account for the unit we're targetting
-	BattleUnit *target = _save->getTile(targetPos)->getUnit();
-	if (target && !_save->getTile(targetPos)->getDangerous())
+	BattleUnit *target = targetTile->getUnit();
+	if (target && !targetTile->getDangerous())
 	{
 		++enemiesAffected;
 		++efficacy;
