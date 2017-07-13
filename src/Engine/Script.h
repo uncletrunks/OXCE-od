@@ -1595,16 +1595,16 @@ template<typename Parser, char... NameChars>
 class ScriptGroupNamedParser : public Parser
 {
     template<typename... C>
-    static constexpr int length(int curr, char head, C... tail)
+    static constexpr unsigned length(unsigned curr, char head, C... tail)
     {
         return head ? length(curr + 1, tail...) : curr;
     }
-    static constexpr int length(int curr, char head)
+    static constexpr unsigned length(unsigned curr, char head)
     {
         return head ? throw "Script name to long!" : curr;
     }
 
-	static constexpr int nameLenght = length(0, NameChars...);
+	static constexpr unsigned nameLenght = length(0, NameChars...);
 
 public:
 	using BaseType = Parser;
