@@ -910,7 +910,7 @@ void InventoryState::invMouseOver(Action *)
 		}
 
 		_selAmmo->clear();
-		if (item->isWeaponWithAmmo() && item->haveAnyAmmo())
+		if ((item->isWeaponWithAmmo() || item->getRules()->getClipSize() > 0) && item->haveAnyAmmo())
 		{
 			updateTemplateButtons(false);
 			_txtAmmo->setText(L"");
@@ -992,7 +992,8 @@ void InventoryState::think()
 		auto modulo = 0;
 		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			if (_mouseHoverItem->needsAmmoForSlot(slot) && _mouseHoverItem->getAmmoForSlot(slot))
+			bool showSelfAmmo = slot == 0 && _mouseHoverItem->getRules()->getClipSize() > 0;
+			if ((_mouseHoverItem->needsAmmoForSlot(slot) || showSelfAmmo) && _mouseHoverItem->getAmmoForSlot(slot))
 			{
 				++modulo;
 			}
@@ -1005,7 +1006,8 @@ void InventoryState::think()
 		BattleItem* firstAmmo = nullptr;
 		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			if (_mouseHoverItem->needsAmmoForSlot(slot) && _mouseHoverItem->getAmmoForSlot(slot))
+			bool showSelfAmmo = slot == 0 && _mouseHoverItem->getRules()->getClipSize() > 0;
+			if ((_mouseHoverItem->needsAmmoForSlot(slot) || showSelfAmmo) && _mouseHoverItem->getAmmoForSlot(slot))
 			{
 				firstAmmo = _mouseHoverItem->getAmmoForSlot(slot);
 				if (slot >= seq)
