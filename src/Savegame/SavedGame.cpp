@@ -1217,7 +1217,6 @@ const std::vector<const RuleResearch *> & SavedGame::getDiscoveredResearch() con
  */
 void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> & projects, const Mod * mod, Base * base, bool considerDebugMode) const
 {
-	const std::vector<std::string> &baseFunc = base->getProvidedBaseFunc();
 	// This list is used for topics that can be researched even if *not all* dependencies have been discovered yet (e.g. STR_ALIEN_ORIGINS)
 	// Note: all requirements of such topics *have to* be discovered though! This will be handled elsewhere.
 	std::vector<const RuleResearch *> unlocked;
@@ -1290,6 +1289,13 @@ void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> & proje
 			{
 				continue;
 			}
+
+			// Check for required buildings/functions in the given base
+			const std::vector<std::string> &baseFunc = base->getProvidedBaseFunc();
+			if (!std::includes(baseFunc.begin(), baseFunc.end(), research->getRequireBaseFunc().begin(), research->getRequireBaseFunc().end()))
+			{
+				continue;
+			}
 		}
 		else
 		{
@@ -1298,10 +1304,6 @@ void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> & proje
 			{
 				continue;
 			}
-		}
-		if (!std::includes(baseFunc.begin(), baseFunc.end(), research->getRequireBaseFunc().begin(), research->getRequireBaseFunc().end()))
-		{
-			continue;
 		}
 
 		// Haleluja, all checks passed, add the research topic to the list
