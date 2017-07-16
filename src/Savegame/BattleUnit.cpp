@@ -1186,8 +1186,19 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		constexpr int toEnergy = 4;
 		constexpr int toMorale = 5;
 		constexpr int toWound = 6;
+		constexpr int toTransform = 7;
 
 		ModScript::DamageUnit::Output args { };
+
+		const RuleItem *specialDamegeTransform = attack.damage_item ? attack.damage_item->getRules() : nullptr;
+		if (specialDamegeTransform && !specialDamegeTransform->getZombieUnit().empty())
+		{
+			std::get<toTransform>(args.data) = getOriginalFaction() != FACTION_HOSTILE ? specialDamegeTransform->getSpecialChance() : 0;
+		}
+		else
+		{
+			specialDamegeTransform = nullptr;
+		}
 
 		std::get<toArmor>(args.data) += type->getArmorPreDamage(power);
 
@@ -1244,6 +1255,17 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		}
 
 		setValueMax(_currentArmor[side], - std::get<toArmor>(args.data), 0, _maxArmor[side]);
+
+
+		// check if this unit turns others into zombies
+		if (specialDamegeTransform && RNG::percent(std::get<toTransform>(args.data))
+			&& getArmor()->getZombiImmune() == false
+			&& getSpawnUnit().empty())
+		{
+			// converts the victim to a zombie on death
+			setRespawn(true);
+			setSpawnUnit(specialDamegeTransform->getZombieUnit());
+		}
 
 		setFatalShotInfo(side, bodypart);
 		return std::get<toHealth>(args.data);
@@ -4432,6 +4454,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	"to_energy",
 	"to_morale",
 	"to_wound",
+	"to_transform",
 	"unit", "damaging_item", "weapon_item", "attacker",
 	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", "battle_action", }
 {

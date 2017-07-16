@@ -181,6 +181,7 @@ Update nightly.[br/]
 3.10b:[br/]
 [br/]
 4.0:[br/]
+Damage script can now alter zombie transformation chance.[br/]
 [br/]
 
 [examples]
