@@ -1176,17 +1176,22 @@ void SavedBattleGame::deleteList(BattleItem* item)
  */
 void SavedBattleGame::removeItem(BattleItem *item)
 {
-	bool find = false;
-	for (std::vector<BattleItem*>::iterator i = _items.begin(); i != _items.end(); ++i)
+	auto purge = [](std::vector<BattleItem*> &inventory, BattleItem* forDelete)
 	{
-		if (*i == item)
+		auto begin = inventory.begin();
+		auto end = inventory.end();
+		for (auto i = begin; i != end; ++i)
 		{
-			find = true;
-			_items.erase(i);
-			break;
+			if (*i == forDelete)
+			{
+				inventory.erase(i);
+				return true;
+			}
 		}
-	}
-	if (!find)
+		return false;
+	};
+
+	if (!purge(_items, item))
 	{
 		return;
 	}
@@ -1196,28 +1201,26 @@ void SavedBattleGame::removeItem(BattleItem *item)
 	BattleUnit *b = item->getOwner();
 	if (t)
 	{
-		for (std::vector<BattleItem*>::iterator it = t->getInventory()->begin(); it != t->getInventory()->end(); ++it)
-		{
-			if ((*it) == item)
-			{
-				t->getInventory()->erase(it);
-				break;
-			}
-		}
+		purge(*t->getInventory(), item);
 	}
 	if (b)
 	{
-		for (std::vector<BattleItem*>::iterator it = b->getInventory()->begin(); it != b->getInventory()->end(); ++it)
-		{
-			if ((*it) == item)
-			{
-				b->getInventory()->erase(it);
-				break;
-			}
-		}
+		purge(*b->getInventory(), item);
 	}
 
 	deleteList(item);
+
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		auto ammo = item->getAmmoForSlot(slot);
+		if (ammo && ammo != item)
+		{
+			if (purge(_items, ammo))
+			{
+				deleteList(ammo);
+			}
+		}
+	}
 }
 
 /**
