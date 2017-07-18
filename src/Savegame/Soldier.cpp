@@ -687,10 +687,8 @@ void Soldier::trainPsi()
 			else if (_currentStats.psiStrength < psiStrengthCap) _psiStrImprovement = RNG::generate(1, 3);
 		}
 	}
-	_currentStats.psiSkill += _improvement;
-	_currentStats.psiStrength += _psiStrImprovement;
-	if (_currentStats.psiSkill > psiSkillCap) _currentStats.psiSkill = psiSkillCap;
-	if (_currentStats.psiStrength > psiStrengthCap) _currentStats.psiStrength = psiStrengthCap;
+	_currentStats.psiSkill = std::max(_currentStats.psiSkill, std::min(_currentStats.psiSkill+_improvement, psiSkillCap));
+	_currentStats.psiStrength = std::max(_currentStats.psiStrength, std::min(_currentStats.psiStrength+_psiStrImprovement, psiStrengthCap));
 }
 
 /**
