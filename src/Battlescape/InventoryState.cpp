@@ -1265,7 +1265,8 @@ void InventoryState::invMouseOver(Action *)
 		}
 
 		_selAmmo->clear();
-		if ((item->isWeaponWithAmmo() || item->getRules()->getClipSize() > 0) && item->haveAnyAmmo())
+		bool hasSelfAmmo = item->getRules()->getBattleType() != BT_AMMO && item->getRules()->getClipSize() > 0;
+		if ((item->isWeaponWithAmmo() || hasSelfAmmo) && item->haveAnyAmmo())
 		{
 			updateTemplateButtons(false);
 			_txtAmmo->setText(L"");
@@ -1275,7 +1276,7 @@ void InventoryState::invMouseOver(Action *)
 			_mouseHoverItem = nullptr;
 			updateTemplateButtons(!_tu);
 			std::wstring s;
-			if (item->getAmmoQuantity() != 0)
+			if (item->getAmmoQuantity() != 0 && item->getRules()->getBattleType() == BT_AMMO)
 			{
 				s = tr("STR_AMMO_ROUNDS_LEFT").arg(item->getAmmoQuantity());
 			}
