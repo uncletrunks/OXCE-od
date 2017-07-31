@@ -215,7 +215,6 @@ void create()
 	_info.push_back(OptionInfo("showGunMeleeOnTop", &showGunMeleeOnTop, true, "STR_SHOW_GUN_MELEE_ON_TOP", "STR_OXCE"));
 	_info.push_back(OptionInfo("showAllCommendations", &showAllCommendations, false, "STR_SHOW_ALL_COMMENDATIONS", "STR_OXCE"));
 	_info.push_back(OptionInfo("removeWoundedFromTraining", &removeWoundedFromTraining, false, "STR_REMOVE_WOUNDED_FROM_TRAINING", "STR_OXCE"));
-	_info.push_back(OptionInfo("autoAssignPilots", &autoAssignPilots, false, "STR_AUTO_ASSIGN_PILOTS", "STR_OXCE"));
 	_info.push_back(OptionInfo("fullNightVision", &fullNightVision, false, "STR_FULL_NIGHT_VISION", "STR_OXCE"));
 	_info.push_back(OptionInfo("nightVisionColor", &nightVisionColor, 8, "STR_NIGHT_VISION_COLOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("autoNightVision", &autoNightVision, false, "STR_AUTO_NIGHT_VISION", "STR_OXCE"));

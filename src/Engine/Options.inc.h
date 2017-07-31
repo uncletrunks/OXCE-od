@@ -50,7 +50,6 @@ OPT bool showItemNameAndWeightInInventory;
 OPT bool showGunMeleeOnTop;
 OPT bool showAllCommendations;
 OPT bool removeWoundedFromTraining;
-OPT bool autoAssignPilots;
 OPT bool fullNightVision;
 OPT int nightVisionColor;
 OPT bool autoNightVision;

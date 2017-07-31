@@ -205,10 +205,8 @@ public:
 	void addPilot(int pilotId);
 	/// Removes all pilots from the list.
 	void removeAllPilots();
-	/// Checks if entire crew is made of pilots.
-	bool isCrewPilotsOnly() const;
 	/// Gets the list of craft pilots.
-	const std::vector<Soldier*> getPilotList();
+	const std::vector<Soldier*> getPilotList(bool autoAdd);
 	/// Calculates the accuracy bonus based on pilot skills.
 	int getPilotAccuracyBonus(const std::vector<Soldier*> &pilots, const Mod *mod) const;
 	/// Calculates the dodge bonus based on pilot skills.

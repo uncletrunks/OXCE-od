@@ -1124,7 +1124,7 @@ bool Craft::arePilotsOnboard()
 		return true;
 
 	// refresh the list of pilots (must be performed here, list may be out-of-date!)
-	const std::vector<Soldier*> pilots = getPilotList();
+	const std::vector<Soldier*> pilots = getPilotList(true);
 
 	return (int)(pilots.size()) >= _rules->getPilots();
 }
@@ -1162,59 +1162,19 @@ void Craft::removeAllPilots()
 }
 
 /**
-* Checks if entire crew is made of pilots.
-* @return True if all crew members capable of driving must be pilots to satisfy craft requirement.
-*/
-bool Craft::isCrewPilotsOnly() const
-{
-	int total = 0;
-	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
-	{
-		if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
-		{
-			total++;
-		}
-	}
-	if (total == _rules->getPilots())
-	{
-		return true;
-	}
-	return false;
-}
-
-/**
 * Gets the list of craft pilots.
 * @return List of pilots.
 */
-const std::vector<Soldier*> Craft::getPilotList()
+const std::vector<Soldier*> Craft::getPilotList(bool autoAdd)
 {
 	std::vector<Soldier*> result;
 
-	// 1. no pilots
+	// 1. no pilots needed
 	if (_rules->getPilots() == 0)
 		return result;
 
-	// 2. take the pilots from the bottom of the crew list automatically, if option enabled
-	if (Options::autoAssignPilots)
 	{
-		int counter = 0;
-		// in reverse order
-		for (std::vector<Soldier*>::reverse_iterator i = _base->getSoldiers()->rbegin(); i != _base->getSoldiers()->rend(); ++i)
-		{
-			if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
-			{
-				result.push_back((*i));
-				counter++;
-			}
-			if (counter >= _rules->getPilots())
-			{
-				break; // enough pilots found, don't search more
-			}
-		}
-	}
-	else
-	{
-		// 3. only pilots (assign automatically)
+		// 2. just enough pilots or pilot candidates onboard (assign them all automatically)
 		int total = 0;
 		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 		{
@@ -1230,9 +1190,10 @@ const std::vector<Soldier*> Craft::getPilotList()
 		}
 		else
 		{
-			// 4. pilots and soldiers (pilots must be assigned manually)
+			// 3. mix of manually selected pilots and pilot candidates onboard
 			int total2 = 0;
 			result.clear();
+			// 3a. first take all available (manually selected) pilots
 			for (std::vector<int>::iterator i = _pilots.begin(); i != _pilots.end(); ++i)
 			{
 				for (std::vector<Soldier*>::iterator j = _base->getSoldiers()->begin(); j != _base->getSoldiers()->end(); ++j)
@@ -1247,6 +1208,22 @@ const std::vector<Soldier*> Craft::getPilotList()
 				if (total2 >= _rules->getPilots())
 				{
 					break; // enough pilots found
+				}
+			}
+			if (autoAdd)
+			{
+				// 3b. if not enough manually selected pilots, take some pilot candidates automatically (take from the rear first)
+				for (std::vector<Soldier*>::reverse_iterator k = _base->getSoldiers()->rbegin(); k != _base->getSoldiers()->rend(); ++k)
+				{
+					if ((*k)->getCraft() == this && (*k)->getRules()->getAllowPiloting() && !isPilot((*k)->getId()))
+					{
+						result.push_back((*k));
+						total2++;
+					}
+					if (total2 >= _rules->getPilots())
+					{
+						break; // enough pilots found
+					}
 				}
 			}
 		}
