@@ -1912,8 +1912,26 @@ void GeoscapeState::time1Day()
 	// pay attention to your maintenance player!
 	if (_game->getSavedGame()->getTime()->isLastDayOfMonth())
 	{
+		// approximate score at the end of the month
+		size_t invertedEntry = _game->getSavedGame()->getFundsList().size() - 1;
+		int scoreTotal = _game->getSavedGame()->getResearchScores().at(invertedEntry);
+		if (_game->getSavedGame()->getMonthsPassed() > 1)
+		{
+			// the council is more lenient after the first month
+			scoreTotal += 400;
+		}
+		for (std::vector<Region*>::iterator iter = _game->getSavedGame()->getRegions()->begin(); iter != _game->getSavedGame()->getRegions()->end(); ++iter)
+		{
+			scoreTotal += (*iter)->getActivityXcom().at(invertedEntry) - (*iter)->getActivityAlien().at(invertedEntry);
+		}
+		int performanceBonus = scoreTotal * _game->getMod()->getPerformanceBonusFactor();
+		if (performanceBonus < 0)
+		{
+			performanceBonus = 0; // bonus only, no malus
+		}
+
 		int funds = _game->getSavedGame()->getFunds();
-		int income = _game->getSavedGame()->getCountryFunding();
+		int income = _game->getSavedGame()->getCountryFunding() + performanceBonus;
 		int maintenance = _game->getSavedGame()->getBaseMaintenance();
 		int projection = funds + income - maintenance;
 		if (projection < 0)
