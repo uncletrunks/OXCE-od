@@ -2020,22 +2020,6 @@ inline void BattlescapeState::handle(Action *action)
 				{
 					_game->pushState(new InfoboxState(_save->hitLog.str()));
 				}
-				// "ctrl-w" - show fatal wounds
-				else if (action->getDetails()->key.keysym.sym == SDLK_w && (SDL_GetModState() & KMOD_CTRL) != 0)
-				{
-					int wounds = 0;
-					for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
-					{
-						if ((*i)->getOriginalFaction() == FACTION_PLAYER && (*i)->getHealth() > 0 && (*i)->getFatalWounds() > 0)
-						{
-							wounds++;
-						}
-					}
-					std::wostringstream ss;
-					ss << L"Units with fatal wounds: ";
-					ss << wounds;
-					_game->pushState(new InfoboxState(ss.str()));
-				}
 				// "ctrl-m" - melee damage preview
 				else if (action->getDetails()->key.keysym.sym == SDLK_m && (SDL_GetModState() & KMOD_CTRL) != 0)
 				{
