@@ -134,7 +134,34 @@ void MiniMapView::draw()
 				{
 					int frame = 9 + _frame;
 					Surface * s = _set->getFrame(frame);
-					s->blitNShade(this, x, y, 0);
+					bool allHidden = true;
+					bool atLeastOnePrimed = false;
+					for (auto item : *t->getInventory())
+					{
+						if (!item->getRules()->isHiddenOnMinimap())
+						{
+							allHidden = false;
+							if (item->getFuseTimer() >= 0)
+							{
+								atLeastOnePrimed = true;
+								break; // no need to search further
+							}
+						}
+					}
+					if (allHidden)
+					{
+						// empty
+					}
+					else if (atLeastOnePrimed)
+					{
+						// dye red
+						s->blitNShade(this, x, y, 0, false, Pathfinding::red);
+					}
+					else
+					{
+						// vanilla
+						s->blitNShade(this, x, y, 0);
+					}
 				}
 
 				px++;

@@ -146,6 +146,7 @@ private:
 	int _clipSize, _specialChance, _tuLoad[AmmoSlotMax], _tuUnload[AmmoSlotMax];
 	BattleType _battleType;
 	BattleFuseType _fuseType;
+	bool _hiddenOnMinimap;
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands;
 	std::string _defaultInventorySlot;
@@ -397,6 +398,8 @@ public:
 	BattleFuseType getFuseTimerType() const;
 	/// Gets the item's default fuse value.
 	int getFuseTimerDefault() const;
+	/// Is this item (e.g. a mine) hidden on the minimap?
+	bool isHiddenOnMinimap() const;
 	/// Gets the item's inventory width.
 	int getInventoryWidth() const;
 	/// Gets the item's inventory height.
