@@ -76,6 +76,7 @@ private:
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
 	int _customArmorPreviewIndex;
+	bool _allowsRunning, _allowsStrafing, _allowsKneeling;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -212,6 +213,12 @@ public:
 	const std::vector<std::string> &getUnits() const;
 	/// Gets the index of the sprite in the CustomArmorPreview sprite set
 	int getCustomArmorPreviewIndex() const;
+	/// Can you run while wearing this armor?
+	bool allowsRunning() const;
+	/// Can you strafe while wearing this armor?
+	bool allowsStrafing() const;
+	/// Can you kneel while wearing this armor?
+	bool allowsKneeling() const;
 };
 
 }

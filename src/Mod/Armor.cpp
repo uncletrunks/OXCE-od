@@ -40,7 +40,8 @@ Armor::Armor(const std::string &type) :
 	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1),
 	_ignoresMeleeThreat(-1), _createsMeleeThreat(-1),
 	_overKill(0.5f), _meleeDodgeBackPenalty(0),
-	_customArmorPreviewIndex(0)
+	_customArmorPreviewIndex(0),
+	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -205,6 +206,9 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node, parsers.getShared());
 	_customArmorPreviewIndex = node["customArmorPreviewIndex"].as<int>(_customArmorPreviewIndex);
+	_allowsRunning = node["allowsRunning"].as<bool>(_allowsRunning);
+	_allowsStrafing = node["allowsStrafing"].as<bool>(_allowsStrafing);
+	_allowsKneeling = node["allowsKneeling"].as<bool>(_allowsKneeling);
 }
 
 /**
@@ -878,6 +882,33 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 int Armor::getCustomArmorPreviewIndex() const
 {
 	return _customArmorPreviewIndex;
+}
+
+/**
+ * Can you run while wearing this armor?
+ * @return True if you are allowed to run.
+ */
+bool Armor::allowsRunning() const
+{
+	return _allowsRunning;
+}
+
+/**
+ * Can you strafe while wearing this armor?
+ * @return True if you are allowed to strafe.
+ */
+bool Armor::allowsStrafing() const
+{
+	return _allowsStrafing;
+}
+
+/**
+ * Can you kneel while wearing this armor?
+ * @return True if you are allowed to kneel.
+ */
+bool Armor::allowsKneeling() const
+{
+	return _allowsKneeling;
 }
 
 }
