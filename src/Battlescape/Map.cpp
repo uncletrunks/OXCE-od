@@ -1246,6 +1246,7 @@ void Map::drawTerrain(Surface *surface)
 											int totalDamage = 0;
 											totalDamage += rule->getPowerBonus(action->actor);
 											totalDamage -= rule->getPowerRangeReduction(distance * 16);
+											if (totalDamage < 0) totalDamage = 0;
 											if (_cursorType != CT_WAYPOINT)
 												ss << "\n";
 											ss << rule->getDamageType()->getRandomDamage(totalDamage, 1);
