@@ -1697,13 +1697,20 @@ void DebriefingState::prepareDebriefing()
 
 	_missionStatistics->success = success;
 
-	// Unlock research defined in alien deployment, if the mission was a success
-	if (success && ruleDeploy)
+	if (success && ruleDeploy && base)
 	{
+		// Unlock research defined in alien deployment, if the mission was a success
 		const RuleResearch *research = _game->getMod()->getResearch(ruleDeploy->getUnlockedResearch());
 		if (research)
 		{
 			_game->getSavedGame()->addFinishedResearch(research, _game->getMod(), base, true);
+		}
+
+		// Give bounty item defined in alien deployment, if the mission was a success
+		const RuleItem *bountyItem = _game->getMod()->getItem(ruleDeploy->getMissionBountyItem());
+		if (bountyItem)
+		{
+			base->getStorageItems()->addItem(bountyItem->getType());
 		}
 	}
 

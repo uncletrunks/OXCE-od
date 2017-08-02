@@ -139,6 +139,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_type = node["type"].as<std::string>(_type);
 	_startingCondition = node["startingCondition"].as<std::string>(_startingCondition);
 	_unlockedResearch = node["unlockedResearch"].as<std::string>(_unlockedResearch);
+	_missionBountyItem = node["missionBountyItem"].as<std::string>(_missionBountyItem);
 	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
 	_data = node["data"].as< std::vector<DeploymentData> >(_data);
 	_width = node["width"].as<int>(_width);
@@ -237,6 +238,15 @@ std::string AlienDeployment::getStartingCondition() const
 std::string AlienDeployment::getUnlockedResearch() const
 {
 	return _unlockedResearch;
+}
+
+/**
+* Returns the item to be recovered/given after a successful mission.
+* @return String ID for the item.
+*/
+std::string AlienDeployment::getMissionBountyItem() const
+{
+	return _missionBountyItem;
 }
 
 /**
