@@ -1732,7 +1732,11 @@ void GeoscapeState::time1Day()
 				}
 				if (!possibilities.empty())
 				{
-					size_t pick = RNG::generate(0, possibilities.size()-1);
+					size_t pick = 0;
+					if (!research->sequentialGetOneFree())
+					{
+						pick = RNG::generate(0, possibilities.size() - 1);
+					}
 					std::string sel = possibilities.at(pick);
 					bonus = _game->getMod()->getResearch(sel, true);
 					_game->getSavedGame()->addFinishedResearch(bonus, _game->getMod(), (*i));

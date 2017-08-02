@@ -41,6 +41,7 @@ class RuleResearch
 	std::string _name, _lookup, _cutscene, _spawnedItem;
 	int _cost, _points;
 	std::vector<std::string> _dependencies, _unlocks, _getOneFree, _requires, _requiresBaseFunc;
+	bool _sequentialGetOneFree;
 	bool _needItem, _destroyItem;
 	int _listOrder;
 public:
@@ -55,6 +56,8 @@ public:
 	const std::string &getName() const;
 	/// Gets the research dependencies.
 	const std::vector<std::string> &getDependencies() const;
+	/// Checks if this ResearchProject gives free topics in sequential order (or random order).
+	bool sequentialGetOneFree() const;
 	/// Checks if this ResearchProject needs a corresponding Item to be researched.
 	bool needItem() const;
 	/// Checks if this ResearchProject consumes the corresponding Item when research completes.

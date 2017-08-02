@@ -23,7 +23,7 @@
 namespace OpenXcom
 {
 
-RuleResearch::RuleResearch(const std::string &name) : _name(name), _cost(0), _points(0), _needItem(false), _destroyItem(false), _listOrder(0)
+RuleResearch::RuleResearch(const std::string &name) : _name(name), _cost(0), _points(0), _sequentialGetOneFree(false), _needItem(false), _destroyItem(false), _listOrder(0)
 {
 }
 
@@ -49,6 +49,7 @@ void RuleResearch::load(const YAML::Node &node, int listOrder)
 	_getOneFree = node["getOneFree"].as< std::vector<std::string> >(_getOneFree);
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
+	_sequentialGetOneFree = node["sequentialGetOneFree"].as<bool>(_sequentialGetOneFree);
 	_needItem = node["needItem"].as<bool>(_needItem);
 	_destroyItem = node["destroyItem"].as<bool>(_destroyItem);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
@@ -89,6 +90,15 @@ const std::string &RuleResearch::getName() const
 const std::vector<std::string> &RuleResearch::getDependencies() const
 {
 	return _dependencies;
+}
+
+/**
+ * Checks if this ResearchProject gives free topics in sequential order (or random order).
+ * @return True if the ResearchProject gives free topics in sequential order.
+ */
+bool RuleResearch::sequentialGetOneFree() const
+{
+	return _sequentialGetOneFree;
 }
 
 /**

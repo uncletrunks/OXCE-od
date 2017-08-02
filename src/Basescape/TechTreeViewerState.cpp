@@ -518,7 +518,14 @@ void TechTreeViewerState::initLists()
 		// 9. gives one for free
 		if (free.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_GIVES_ONE_FOR_FREE").c_str());
+			if (rule->sequentialGetOneFree())
+			{
+				_lstRight->addRow(1, tr("STR_GIVES_ONE_FOR_FREE_SEQ").c_str());
+			}
+			else
+			{
+				_lstRight->addRow(1, tr("STR_GIVES_ONE_FOR_FREE").c_str());
+			}
 			_lstRight->setRowColor(row, 218); // blue
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(0);
