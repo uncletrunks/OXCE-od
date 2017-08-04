@@ -1731,6 +1731,19 @@ void GeoscapeState::time1Day()
 						possibilities.push_back(*f);
 					}
 				}
+				for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = research->getGetOneFreeProtected().begin(); itMap != research->getGetOneFreeProtected().end(); ++itMap)
+				{
+					if (_game->getSavedGame()->isResearched(itMap->first, false))
+					{
+						for (std::vector<std::string>::const_iterator itVector = itMap->second.begin(); itVector != itMap->second.end(); ++itVector)
+						{
+							if (!_game->getSavedGame()->isResearched(*itVector, false))
+							{
+								possibilities.push_back(*itVector);
+							}
+						}
+					}
+				}
 				if (!possibilities.empty())
 				{
 					size_t pick = 0;
@@ -1830,9 +1843,9 @@ void GeoscapeState::time1Day()
 				{
 					if (research->getName() == (*iter2)->getRules()->getName())
 					{
-						if (!_game->getSavedGame()->isResearched(research->getGetOneFree(), false))
+						if (_game->getSavedGame()->hasUndiscoveredGetOneFree(research, true))
 						{
-							// This research topic still has some more undiscovered "getOneFree" topics, keep it!
+							// This research topic still has some more undiscovered and *AVAILABLE* "getOneFree" topics, keep it!
 						}
 						else if (_game->getSavedGame()->hasUndiscoveredProtectedUnlock(research, _game->getMod()))
 						{

@@ -1233,15 +1233,16 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 	{
 		const RuleResearch *currentQueueItem = queue.at(currentQueueIndex);
 
-		// 1. Find out and remember if the currentQueueItem has any undiscovered "protected unlocks"
+		// 1. Find out and remember if the currentQueueItem has any undiscovered "protected unlocks" or "getOneFree"
 		bool hasUndiscoveredProtectedUnlocks = hasUndiscoveredProtectedUnlock(currentQueueItem, mod);
+		bool hasAnyUndiscoveredGetOneFrees = hasUndiscoveredGetOneFree(currentQueueItem, false);
 
 		// 2. If the currentQueueItem was *not* already discovered before, add it to discovered research
 		bool checkRelatedZeroCostTopics = true;
 		if (!isResearched(currentQueueItem->getName(), false))
 		{
 			_discovered.push_back(currentQueueItem);
-			if (!hasUndiscoveredProtectedUnlocks && isResearched(currentQueueItem->getGetOneFree(), false))
+			if (!hasUndiscoveredProtectedUnlocks && !hasAnyUndiscoveredGetOneFrees)
 			{
 				// If the currentQueueItem can't tell you anything anymore, remove it from popped research
 				// Note: this is for optimisation purposes only, functionally it is *not* required...
@@ -1390,9 +1391,9 @@ void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> & proje
 		// Remove the already researched topics from the list *UNLESS* they can still give you something more
 		if (isResearched(research->getName(), false))
 		{
-			if (!isResearched(research->getGetOneFree(), false))
+			if (hasUndiscoveredGetOneFree(research, true))
 			{
-				// This research topic still has some more undiscovered "getOneFree" topics, keep it!
+				// This research topic still has some more undiscovered and *AVAILABLE* "getOneFree" topics, keep it!
 			}
 			else if (hasUndiscoveredProtectedUnlock(research, mod))
 			{
@@ -1630,6 +1631,39 @@ int SavedGame::getManufactureRuleStatus(const std::string &manufactureRule)
 int SavedGame::getResearchRuleStatus(const std::string &researchRule)
 {
 	return _researchRuleStatus[researchRule];
+}
+
+/**
+ * Returns if a research still has undiscovered "getOneFree".
+ * @param r Research to check.
+ * @param checkOnlyAvailableTopics Check only available topics (=topics with discovered prerequisite) or all topics?
+ * @return Whether it has any undiscovered "getOneFree" or not.
+ */
+bool SavedGame::hasUndiscoveredGetOneFree(const RuleResearch * r, bool checkOnlyAvailableTopics) const
+{
+	if (!isResearched(r->getGetOneFree(), false))
+	{
+		return true; // found something undiscovered already, no need to search further
+	}
+	else
+	{
+		// search through getOneFreeProtected topics too
+		for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = r->getGetOneFreeProtected().begin(); itMap != r->getGetOneFreeProtected().end(); ++itMap)
+		{
+			if (checkOnlyAvailableTopics && !isResearched(itMap->first, false))
+			{
+				// skip this group, its prerequisite has not been discovered yet
+			}
+			else
+			{
+				if (!isResearched(itMap->second, false))
+				{
+					return true; // found something undiscovered already, no need to search further
+				}
+			}
+		}
+	}
+	return false;
 }
 
 /**

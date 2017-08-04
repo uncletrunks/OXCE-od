@@ -262,6 +262,8 @@ public:
 	int getManufactureRuleStatus(const std::string &manufactureRule);
 	/// Gets the status of a research rule.
 	int getResearchRuleStatus(const std::string &researchRule);
+	/// Gets if a research still has undiscovered "getOneFree".
+	bool hasUndiscoveredGetOneFree(const RuleResearch * r, bool checkOnlyAvailableTopics) const;
 	/// Gets if a research still has undiscovered "protected unlocks".
 	bool hasUndiscoveredProtectedUnlock(const RuleResearch * r, const Mod * mod) const;
 	/// Gets if a certain research has been completed.

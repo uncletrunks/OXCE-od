@@ -42,6 +42,7 @@ class RuleResearch
 	int _cost, _points;
 	std::vector<std::string> _dependencies, _unlocks, _getOneFree, _requires, _requiresBaseFunc;
 	bool _sequentialGetOneFree;
+	std::map<std::string, std::vector<std::string> > _getOneFreeProtected;
 	bool _needItem, _destroyItem;
 	int _listOrder;
 public:
@@ -68,6 +69,8 @@ public:
 	int getPoints() const;
 	/// Gets the list of ResearchProjects granted at random for free by this research.
 	const std::vector<std::string> &getGetOneFree() const;
+	/// Gets the list(s) of ResearchProjects granted at random for free by this research (if a defined prerequisite is met).
+	const std::map<std::string, std::vector<std::string> > &getGetOneFreeProtected() const;
 	/// Gets what to look up in the ufopedia.
 	std::string getLookup() const;
 	/// Gets the requirements for this ResearchProject.

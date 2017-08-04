@@ -217,13 +217,12 @@ void TechTreeViewerState::initLists()
 		std::vector<std::string> leadsTo;
 		const std::vector<std::string> unlocks = rule->getUnlocked();
 		const std::vector<std::string> free = rule->getGetOneFree();
+		const std::map<std::string, std::vector<std::string> > freeProtected = rule->getGetOneFreeProtected();
 
 		for (std::vector<std::string>::const_iterator j = manufactureList.begin(); j != manufactureList.end(); ++j)
 		{
 			RuleManufacture *temp = _game->getMod()->getManufacture(*j);
-
-			const std::vector<std::string> reqs = temp->getRequirements();
-			for (std::vector<std::string>::const_iterator i = reqs.begin(); i != reqs.end(); ++i)
+			for (std::vector<std::string>::const_iterator i = temp->getRequirements().begin(); i != temp->getRequirements().end(); ++i)
 			{
 				if (*i == rule->getName())
 				{
@@ -235,33 +234,38 @@ void TechTreeViewerState::initLists()
 		for (std::vector<std::string>::const_iterator j = researchList.begin(); j != researchList.end(); ++j)
 		{
 			RuleResearch *temp = _game->getMod()->getResearch(*j);
-
-			const std::vector<std::string> unlocks = temp->getUnlocked();
-			for (std::vector<std::string>::const_iterator i = unlocks.begin(); i != unlocks.end(); ++i)
+			for (std::vector<std::string>::const_iterator i = temp->getUnlocked().begin(); i != temp->getUnlocked().end(); ++i)
 			{
 				if (*i == rule->getName())
 				{
 					unlockedBy.push_back(*j);
 				}
 			}
-			const std::vector<std::string> free = temp->getGetOneFree();
-			for (std::vector<std::string>::const_iterator i = free.begin(); i != free.end(); ++i)
+			for (std::vector<std::string>::const_iterator i = temp->getGetOneFree().begin(); i != temp->getGetOneFree().end(); ++i)
 			{
 				if (*i == rule->getName())
 				{
 					getForFreeFrom.push_back(*j);
 				}
 			}
-			const std::vector<std::string> reqs = temp->getRequirements();
-			for (std::vector<std::string>::const_iterator i = reqs.begin(); i != reqs.end(); ++i)
+			for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = temp->getGetOneFreeProtected().begin(); itMap != temp->getGetOneFreeProtected().end(); ++itMap)
+			{
+				for (std::vector<std::string>::const_iterator i = itMap->second.begin(); i != itMap->second.end(); ++i)
+				{
+					if (*i == rule->getName())
+					{
+						getForFreeFrom.push_back(*j);
+					}
+				}
+			}
+			for (std::vector<std::string>::const_iterator i = temp->getRequirements().begin(); i != temp->getRequirements().end(); ++i)
 			{
 				if (*i == rule->getName())
 				{
 					requiredByResearch.push_back(*j);
 				}
 			}
-			const std::vector<std::string> deps = temp->getDependencies();
-			for (std::vector<std::string>::const_iterator i = deps.begin(); i != deps.end(); ++i)
+			for (std::vector<std::string>::const_iterator i = temp->getDependencies().begin(); i != temp->getDependencies().end(); ++i)
 			{
 				if (*i == rule->getName())
 				{
@@ -542,6 +546,37 @@ void TechTreeViewerState::initLists()
 				_rightTopics.push_back((*i));
 				_rightFlags.push_back(1);
 				++row;
+			}
+			for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = freeProtected.begin(); itMap != freeProtected.end(); ++itMap)
+			{
+				std::wstring name2 = tr(itMap->first);
+				name2.insert(0, L" ");
+				name2.append(L":");
+				_lstRight->addRow(1, name2.c_str());
+				if (isDiscoveredResearch(itMap->first))
+				{
+					_lstRight->setRowColor(row, 208); // white
+				}
+				else
+				{
+					_lstRight->setRowColor(row, 213); // gold
+				}
+				_rightTopics.push_back(itMap->first);
+				_rightFlags.push_back(1);
+				++row;
+				for (std::vector<std::string>::const_iterator i = itMap->second.begin(); i != itMap->second.end(); ++i)
+				{
+					std::wstring name = tr((*i));
+					name.insert(0, L"  ");
+					_lstRight->addRow(1, name.c_str());
+					if (!isDiscoveredResearch((*i)))
+					{
+						_lstRight->setRowColor(row, 241); // pink
+					}
+					_rightTopics.push_back((*i));
+					_rightFlags.push_back(1);
+					++row;
+				}
 			}
 		}
 	}

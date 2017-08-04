@@ -50,6 +50,7 @@ void RuleResearch::load(const YAML::Node &node, int listOrder)
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
 	_sequentialGetOneFree = node["sequentialGetOneFree"].as<bool>(_sequentialGetOneFree);
+	_getOneFreeProtected = node["getOneFreeProtected"].as< std::map<std::string, std::vector<std::string> > >(_getOneFreeProtected);
 	_needItem = node["needItem"].as<bool>(_needItem);
 	_destroyItem = node["destroyItem"].as<bool>(_destroyItem);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
@@ -143,6 +144,15 @@ int RuleResearch::getPoints() const
 const std::vector<std::string> &RuleResearch::getGetOneFree() const
 {
 	return _getOneFree;
+}
+
+/**
+ * Gets the list(s) of ResearchProjects granted at random for free by this research (if a defined prerequisite is met).
+ * @return The list(s) of ResearchProjects.
+ */
+const std::map<std::string, std::vector<std::string> > &RuleResearch::getGetOneFreeProtected() const
+{
+	return _getOneFreeProtected;
 }
 
 /**
