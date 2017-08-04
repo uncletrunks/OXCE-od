@@ -178,6 +178,8 @@ public:
 	void calcStatString(const std::vector<StatString *> &statStrings, bool psiStrengthEval);
 	/// Trains a soldier's physical stats
 	void trainPhys(int customTrainingFactor);
+	/// Is the soldier already fully trained?
+	bool isFullyTrained();
 	/// Returns whether the unit is in training or not
 	bool isInTraining();
 	/// set the training status

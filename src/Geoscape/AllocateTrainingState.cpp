@@ -253,17 +253,31 @@ void AllocateTrainingState::initList(size_t scrl)
 		std::wostringstream strength;
 		strength << (*s)->getCurrentStats()->strength;
 
+		bool isDone = (*s)->isFullyTrained();
 		bool isWounded = (*s)->isWounded();
-		if ((*s)->isInTraining())
-		{
-			_lstSoldiers->addRow(9, (*s)->getName(true).c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr(isWounded ? "STR_NO_WOUNDED" : "STR_YES").c_str());
-			_lstSoldiers->setRowColor(row, _lstSoldiers->getSecondaryColor());
-		}
+		bool isTraining = (*s)->isInTraining();
+
+		std::wstring status;
+		if (isDone)
+			status = tr("STR_NO_DONE");
+		else if (isWounded)
+			status = tr("STR_NO_WOUNDED");
+		else if (isTraining)
+			status = tr("STR_YES");
 		else
-		{
-			_lstSoldiers->addRow(9, (*s)->getName(true).c_str(), tu.str().c_str(), stamina.str().c_str(), health.str().c_str(), firing.str().c_str(), throwing.str().c_str(), melee.str().c_str(), strength.str().c_str(), tr(isWounded ? "STR_NO_WOUNDED" : "STR_NO").c_str());
-			_lstSoldiers->setRowColor(row, _lstSoldiers->getColor());
-		}
+			status = tr("STR_NO");
+
+		_lstSoldiers->addRow(9,
+			(*s)->getName(true).c_str(),
+			tu.str().c_str(),
+			stamina.str().c_str(),
+			health.str().c_str(),
+			firing.str().c_str(),
+			throwing.str().c_str(),
+			melee.str().c_str(),
+			strength.str().c_str(),
+			status.c_str());
+		_lstSoldiers->setRowColor(row, isTraining ? _lstSoldiers->getSecondaryColor() : _lstSoldiers->getColor());
 		row++;
 	}
 	if (scrl)
@@ -391,6 +405,9 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 	_sel = _lstSoldiers->getSelectedRow();
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
+		// can't put fully trained soldiers back into training
+		if (_base->getSoldiers()->at(_sel)->isFullyTrained()) return;
+
 		bool isWounded = _base->getSoldiers()->at(_sel)->isWounded();
 		if (!_base->getSoldiers()->at(_sel)->isInTraining())
 		{

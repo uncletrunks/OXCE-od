@@ -160,7 +160,6 @@ set ( geoscape_src
   Geoscape/AlienBaseState.cpp
   Geoscape/AllocatePsiTrainingState.cpp
   Geoscape/AllocateTrainingState.cpp
-  Geoscape/TrainingState.cpp
   Geoscape/BaseDefenseState.cpp
   Geoscape/BaseDestroyedState.cpp
   Geoscape/BaseNameState.cpp
@@ -196,6 +195,8 @@ set ( geoscape_src
   Geoscape/ResearchRequiredState.cpp
   Geoscape/SelectDestinationState.cpp
   Geoscape/TargetInfoState.cpp
+  Geoscape/TrainingFinishedState.cpp
+  Geoscape/TrainingState.cpp
   Geoscape/UfoDetectedState.cpp
   Geoscape/UfoLostState.cpp
   Geoscape/UfoTrackerState.cpp

@@ -851,6 +851,28 @@ void Soldier::trainPhys(int customTrainingFactor)
 			_currentStats.stamina++;
 	}
 }
+
+/**
+ * Is the soldier already fully trained?
+ * @return True, if the soldier cannot gain any more stats in the training facility.
+ */
+bool Soldier::isFullyTrained()
+{
+	UnitStats trainingCaps = _rules->getTrainingStatCaps();
+
+	if (_currentStats.firing < trainingCaps.firing
+		|| _currentStats.health < trainingCaps.health
+		|| _currentStats.melee < trainingCaps.melee
+		|| _currentStats.throwing < trainingCaps.throwing
+		|| _currentStats.strength < trainingCaps.strength
+		|| _currentStats.tu < trainingCaps.tu
+		|| _currentStats.stamina < trainingCaps.stamina)
+	{
+		return false;
+	}
+	return true;
+}
+
 /**
  * returns whether or not the unit is in physical training
  */
