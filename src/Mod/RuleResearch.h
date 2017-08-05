@@ -40,7 +40,7 @@ class RuleResearch
  private:
 	std::string _name, _lookup, _cutscene, _spawnedItem;
 	int _cost, _points;
-	std::vector<std::string> _dependencies, _unlocks, _getOneFree, _requires, _requiresBaseFunc;
+	std::vector<std::string> _dependencies, _unlocks, _disables, _getOneFree, _requires, _requiresBaseFunc;
 	bool _sequentialGetOneFree;
 	std::map<std::string, std::vector<std::string> > _getOneFreeProtected;
 	bool _needItem, _destroyItem;
@@ -48,6 +48,7 @@ class RuleResearch
 public:
 	static const int RESEARCH_STATUS_NEW = 0;
 	static const int RESEARCH_STATUS_NORMAL = 1;
+	static const int RESEARCH_STATUS_DISABLED = 2;
 	RuleResearch(const std::string &name);
 	/// Loads the research from YAML.
 	void load(const YAML::Node& node, int listOrder);
@@ -65,6 +66,8 @@ public:
 	bool destroyItem() const;
 	/// Gets the list of ResearchProjects unlocked by this research.
 	const std::vector<std::string> &getUnlocked() const;
+	/// Gets the list of ResearchProjects disabled by this research.
+	const std::vector<std::string> &getDisabled() const;
 	/// Gets the points earned for discovering this ResearchProject.
 	int getPoints() const;
 	/// Gets the list of ResearchProjects granted at random for free by this research.

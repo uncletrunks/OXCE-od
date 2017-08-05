@@ -1726,6 +1726,10 @@ void GeoscapeState::time1Day()
 				std::vector<std::string> possibilities;
 				for (std::vector<std::string>::const_iterator f = research->getGetOneFree().begin(); f != research->getGetOneFree().end(); ++f)
 				{
+					if (_game->getSavedGame()->isResearchRuleStatusDisabled(*f))
+					{
+						continue; // skip disabled topics
+					}
 					if (!_game->getSavedGame()->isResearched(*f, false))
 					{
 						possibilities.push_back(*f);
@@ -1737,6 +1741,10 @@ void GeoscapeState::time1Day()
 					{
 						for (std::vector<std::string>::const_iterator itVector = itMap->second.begin(); itVector != itMap->second.end(); ++itVector)
 						{
+							if (_game->getSavedGame()->isResearchRuleStatusDisabled(*itVector))
+							{
+								continue; // skip disabled topics
+							}
 							if (!_game->getSavedGame()->isResearched(*itVector, false))
 							{
 								possibilities.push_back(*itVector);
@@ -1845,11 +1853,11 @@ void GeoscapeState::time1Day()
 					{
 						if (_game->getSavedGame()->hasUndiscoveredGetOneFree(research, true))
 						{
-							// This research topic still has some more undiscovered and *AVAILABLE* "getOneFree" topics, keep it!
+							// This research topic still has some more undiscovered non-disabled and *AVAILABLE* "getOneFree" topics, keep it!
 						}
 						else if (_game->getSavedGame()->hasUndiscoveredProtectedUnlock(research, _game->getMod()))
 						{
-							// This research topic still has one or more undiscovered "protected unlocks", keep it!
+							// This research topic still has one or more undiscovered non-disabled "protected unlocks", keep it!
 						}
 						else
 						{
@@ -1898,6 +1906,24 @@ void GeoscapeState::time1Day()
 			}
 		}
 	}
+
+	// check and remove disabled projects from ongoing research
+	for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+	{
+		std::vector<ResearchProject*> obsolete;
+		for (std::vector<ResearchProject*>::const_iterator iter = (*i)->getResearch().begin(); iter != (*i)->getResearch().end(); ++iter)
+		{
+			if (_game->getSavedGame()->isResearchRuleStatusDisabled((*iter)->getRules()->getName()))
+			{
+				obsolete.push_back(*iter);
+			}
+		}
+		for (std::vector<ResearchProject*>::const_iterator iter = obsolete.begin(); iter != obsolete.end(); ++iter)
+		{
+			(*i)->removeResearch(*iter);
+		}
+	}
+
 	// handle regional and country points for alien bases
 	for (std::vector<AlienBase*>::const_iterator b = _game->getSavedGame()->getAlienBases()->begin(); b != _game->getSavedGame()->getAlienBases()->end(); ++b)
 	{

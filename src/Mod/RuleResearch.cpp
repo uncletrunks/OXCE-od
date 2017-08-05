@@ -46,6 +46,7 @@ void RuleResearch::load(const YAML::Node &node, int listOrder)
 	_points = node["points"].as<int>(_points);
 	_dependencies = node["dependencies"].as< std::vector<std::string> >(_dependencies);
 	_unlocks = node["unlocks"].as< std::vector<std::string> >(_unlocks);
+	_disables = node["disables"].as< std::vector<std::string> >(_disables);
 	_getOneFree = node["getOneFree"].as< std::vector<std::string> >(_getOneFree);
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
@@ -126,6 +127,15 @@ bool RuleResearch::destroyItem() const
 const std::vector<std::string> &RuleResearch::getUnlocked() const
 {
 	return _unlocks;
+}
+
+/**
+ * Gets the list of ResearchProjects disabled by this research.
+ * @return The list of ResearchProjects.
+ */
+const std::vector<std::string> &RuleResearch::getDisabled() const
+{
+	return _disables;
 }
 
 /**

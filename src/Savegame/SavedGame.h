@@ -236,6 +236,8 @@ public:
 	void setManufactureRuleStatus(const std::string &manufactureRule, int newStatus);
 	/// Sets the status of a research rule
 	void setResearchRuleStatus(const std::string &researchRule, int newStatus);
+	/// Remove a research from the "already discovered" list
+	void removeDiscoveredResearch(const RuleResearch *research);
 	/// Add a finished ResearchProject
 	void addFinishedResearchSimple(const RuleResearch *research);
 	/// Add a finished ResearchProject
@@ -260,16 +262,18 @@ public:
 	int getUfopediaRuleStatus(const std::string &ufopediaRule);
 	/// Gets the status of a manufacture rule.
 	int getManufactureRuleStatus(const std::string &manufactureRule);
-	/// Gets the status of a research rule.
-	int getResearchRuleStatus(const std::string &researchRule);
-	/// Gets if a research still has undiscovered "getOneFree".
+	/// Is the research new?
+	bool isResearchRuleStatusNew(const std::string &researchRule) const;
+	/// Is the research permanently disabled?
+	bool isResearchRuleStatusDisabled(const std::string &researchRule) const;
+	/// Gets if a research still has undiscovered non-disabled "getOneFree".
 	bool hasUndiscoveredGetOneFree(const RuleResearch * r, bool checkOnlyAvailableTopics) const;
-	/// Gets if a research still has undiscovered "protected unlocks".
+	/// Gets if a research still has undiscovered non-disabled "protected unlocks".
 	bool hasUndiscoveredProtectedUnlock(const RuleResearch * r, const Mod * mod) const;
 	/// Gets if a certain research has been completed.
 	bool isResearched(const std::string &research, bool considerDebugMode = true) const;
 	/// Gets if a certain list of research topics has been completed.
-	bool isResearched(const std::vector<std::string> &research, bool considerDebugMode = true) const;
+	bool isResearched(const std::vector<std::string> &research, bool considerDebugMode = true, bool skipDisabled = false) const;
 	/// Gets the soldier matching this ID.
 	Soldier *getSoldier(int id) const;
 	/// Handles the higher promotions.

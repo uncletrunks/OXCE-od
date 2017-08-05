@@ -211,11 +211,13 @@ void TechTreeViewerState::initLists()
 		const std::vector<std::string> reqs = rule->getRequirements();
 		const std::vector<std::string> deps = rule->getDependencies();
 		std::vector<std::string> unlockedBy;
+		std::vector<std::string> disabledBy;
 		std::vector<std::string> getForFreeFrom;
 		std::vector<std::string> requiredByResearch;
 		std::vector<std::string> requiredByManufacture;
 		std::vector<std::string> leadsTo;
 		const std::vector<std::string> unlocks = rule->getUnlocked();
+		const std::vector<std::string> disables = rule->getDisabled();
 		const std::vector<std::string> free = rule->getGetOneFree();
 		const std::map<std::string, std::vector<std::string> > freeProtected = rule->getGetOneFreeProtected();
 
@@ -239,6 +241,13 @@ void TechTreeViewerState::initLists()
 				if (*i == rule->getName())
 				{
 					unlockedBy.push_back(*j);
+				}
+			}
+			for (std::vector<std::string>::const_iterator i = temp->getDisabled().begin(); i != temp->getDisabled().end(); ++i)
+			{
+				if (*i == rule->getName())
+				{
+					disabledBy.push_back(*j);
 				}
 			}
 			for (std::vector<std::string>::const_iterator i = temp->getGetOneFree().begin(); i != temp->getGetOneFree().end(); ++i)
@@ -373,7 +382,7 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
-		// 4. unlocked by
+		// 4a. unlocked by
 		if (unlockedBy.size() > 0)
 		{
 			_lstLeft->addRow(1, tr("STR_UNLOCKED_BY").c_str());
@@ -382,6 +391,29 @@ void TechTreeViewerState::initLists()
 			_leftFlags.push_back(0);
 			++row;
 			for (std::vector<std::string>::const_iterator i = unlockedBy.begin(); i != unlockedBy.end(); ++i)
+			{
+				std::wstring name = tr((*i));
+				name.insert(0, L"  ");
+				_lstLeft->addRow(1, name.c_str());
+				if (!isDiscoveredResearch((*i)))
+				{
+					_lstLeft->setRowColor(row, 241); // pink
+				}
+				_leftTopics.push_back((*i));
+				_leftFlags.push_back(1);
+				++row;
+			}
+		}
+
+		// 4b. disabled by
+		if (disabledBy.size() > 0)
+		{
+			_lstLeft->addRow(1, tr("STR_DISABLED_BY").c_str());
+			_lstLeft->setRowColor(row, 218); // blue
+			_leftTopics.push_back("-");
+			_leftFlags.push_back(0);
+			++row;
+			for (std::vector<std::string>::const_iterator i = disabledBy.begin(); i != disabledBy.end(); ++i)
 			{
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
@@ -496,7 +528,7 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
-		// 8. unlocks
+		// 8a. unlocks
 		if (unlocks.size() > 0)
 		{
 			_lstRight->addRow(1, tr("STR_UNLOCKS").c_str());
@@ -505,6 +537,29 @@ void TechTreeViewerState::initLists()
 			_rightFlags.push_back(0);
 			++row;
 			for (std::vector<std::string>::const_iterator i = unlocks.begin(); i != unlocks.end(); ++i)
+			{
+				std::wstring name = tr((*i));
+				name.insert(0, L"  ");
+				_lstRight->addRow(1, name.c_str());
+				if (!isDiscoveredResearch((*i)))
+				{
+					_lstRight->setRowColor(row, 241); // pink
+				}
+				_rightTopics.push_back((*i));
+				_rightFlags.push_back(1);
+				++row;
+			}
+		}
+
+		// 8b. disables
+		if (disables.size() > 0)
+		{
+			_lstRight->addRow(1, tr("STR_DISABLES").c_str());
+			_lstRight->setRowColor(row, 218); // blue
+			_rightTopics.push_back("-");
+			_rightFlags.push_back(0);
+			++row;
+			for (std::vector<std::string>::const_iterator i = disables.begin(); i != disables.end(); ++i)
 			{
 				std::wstring name = tr((*i));
 				name.insert(0, L"  ");
