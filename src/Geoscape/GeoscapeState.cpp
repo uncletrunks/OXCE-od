@@ -453,50 +453,115 @@ void GeoscapeState::handle(Action *action)
 				_txtDebug->setText(L"");
 			}
 		}
-		// "ctrl-c" - delete all soldier commendations
-		if (Options::debug && action->getDetails()->key.keysym.sym == SDLK_c && (SDL_GetModState() & KMOD_CTRL) != 0)
+		if (Options::debug && _game->getSavedGame()->getDebugMode() && (SDL_GetModState() & KMOD_CTRL) != 0)
 		{
-			if (_game->getSavedGame()->getDebugMode())
+			// "ctrl-1"
+			if (action->getDetails()->key.keysym.sym == SDLK_1)
 			{
-				_txtDebug->setText(L"SOLDIER COMMENDATIONS DELETED");
-				for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+				_txtDebug->setText(L"I'M A BILLIONAIRE! ALMOST...");
+				_game->getSavedGame()->setFunds(999999999);
+			}
+			// "ctrl-2"
+			if (action->getDetails()->key.keysym.sym == SDLK_2)
+			{
+				_txtDebug->setText(L"ALL FACILITY CONSTRUCTION COMPLETED");
+				for (auto& base : *_game->getSavedGame()->getBases())
 				{
-					for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
+					for (auto& facility : *base->getFacilities())
 					{
-						for (std::vector<SoldierCommendations*>::iterator k = (*j)->getDiary()->getSoldierCommendations()->begin(); k != (*j)->getDiary()->getSoldierCommendations()->end(); ++k)
-						{
-							delete *k;
-						}
-						(*j)->getDiary()->getSoldierCommendations()->clear();
+						facility->setBuildTime(0);
 					}
 				}
 			}
-			else
+			// "ctrl-3"
+			if (action->getDetails()->key.keysym.sym == SDLK_3)
 			{
-				_txtDebug->setText(L"");
+				_txtDebug->setText(L"+50 SCIENTISTS/ENGINEERS");
+				for (auto& base : *_game->getSavedGame()->getBases())
+				{
+					base->setScientists(base->getScientists() + 50);
+					base->setEngineers(base->getEngineers() + 50);
+				}
 			}
-		}
-		// "ctrl-a" - delete all soldier diaries
-		if (Options::debug && action->getDetails()->key.keysym.sym == SDLK_a && (SDL_GetModState() & KMOD_CTRL) != 0)
-		{
-			if (_game->getSavedGame()->getDebugMode())
+			// "ctrl-4"
+			if (action->getDetails()->key.keysym.sym == SDLK_4)
+			{
+				_txtDebug->setText(L"+2 ALL ITEMS");
+				for (auto& base : *_game->getSavedGame()->getBases())
+				{
+					for (auto& itemRule : _game->getMod()->getItemsList())
+					{
+						auto *item = _game->getMod()->getItem(itemRule);
+						if (item && item->isRecoverable() && !item->isAlien() && item->getSellCost() > 0)
+						{
+							base->getStorageItems()->addItem(itemRule, 2);
+						}
+					}
+				}
+			}
+			// "ctrl-5"
+			if (action->getDetails()->key.keysym.sym == SDLK_5)
+			{
+				_txtDebug->setText(L"+2 ALL LIVE ALIENS");
+				for (auto& base : *_game->getSavedGame()->getBases())
+				{
+					for (auto& itemRule : _game->getMod()->getItemsList())
+					{
+						auto *item = _game->getMod()->getItem(itemRule);
+						if (item && item->isRecoverable() && item->isAlien() && item->getSellCost() > 0)
+						{
+							base->getStorageItems()->addItem(itemRule, 2);
+						}
+					}
+				}
+			}
+			// "ctrl-6"
+			if (action->getDetails()->key.keysym.sym == SDLK_6)
+			{
+				_txtDebug->setText(L"XCOM/ALIEN ACTIVITY FOR THIS MONTH RESET");
+				size_t invertedEntry = _game->getSavedGame()->getFundsList().size() - 1;
+				for (auto& region : *_game->getSavedGame()->getRegions())
+				{
+					region->getActivityXcom().at(invertedEntry) = 0;
+					region->getActivityAlien().at(invertedEntry) = 0;
+				}
+				for (auto& country : *_game->getSavedGame()->getCountries())
+				{
+					country->getActivityXcom().at(invertedEntry) = 0;
+					country->getActivityAlien().at(invertedEntry) = 0;
+				}
+			}
+			// "ctrl-a"
+			if (action->getDetails()->key.keysym.sym == SDLK_a)
 			{
 				_txtDebug->setText(L"SOLDIER DIARIES DELETED");
-				for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+				for (auto& base : *_game->getSavedGame()->getBases())
 				{
-					for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
+					for (auto& soldier : *base->getSoldiers())
 					{
-						(*j)->resetDiary();
+						soldier->resetDiary();
 					}
 				}
 			}
-			else
+			// "ctrl-c"
+			if (action->getDetails()->key.keysym.sym == SDLK_c)
 			{
-				_txtDebug->setText(L"");
+				_txtDebug->setText(L"SOLDIER COMMENDATIONS DELETED");
+				for (auto& base : *_game->getSavedGame()->getBases())
+				{
+					for (auto& soldier : *base->getSoldiers())
+					{
+						for (auto& commendation : *soldier->getDiary()->getSoldierCommendations())
+						{
+							delete commendation;
+						}
+						soldier->getDiary()->getSoldierCommendations()->clear();
+					}
+				}
 			}
 		}
 		// quick save and quick load
-		else if (!_game->getSavedGame()->isIronman())
+		if (!_game->getSavedGame()->isIronman())
 		{
 			if (action->getDetails()->key.keysym.sym == Options::keyQuickSave)
 			{
