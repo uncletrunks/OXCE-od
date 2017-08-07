@@ -136,7 +136,7 @@ void MiniMapView::draw()
 					Surface * s = _set->getFrame(frame);
 					bool allHidden = true;
 					bool atLeastOnePrimed = false;
-					for (auto item : *t->getInventory())
+					for (auto& item : *t->getInventory())
 					{
 						if (!item->getRules()->isHiddenOnMinimap())
 						{
