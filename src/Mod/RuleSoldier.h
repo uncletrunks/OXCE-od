@@ -26,6 +26,7 @@ namespace OpenXcom
 
 class Mod;
 class SoldierNamePool;
+class StatString;
 
 /**
  * Represents the creation data for an X-COM unit.
@@ -46,6 +47,7 @@ private:
 	std::string _armorForAvatar;
 	int _avatarOffsetX, _avatarOffsetY, _flagOffset;
 	bool _allowPromotion, _allowPiloting;
+	std::vector<StatString*> _statStrings;
 
 	void addSoldierNamePool(const std::string &namFile);
 public:
@@ -103,6 +105,8 @@ public:
 	const std::vector<int> &getFemaleDeathSounds() const;
 	/// Gets the pool list for soldier names.
 	const std::vector<SoldierNamePool*> &getNames() const;
+	/// Gets the list of StatStrings.
+	const std::vector<StatString *> &getStatStrings() const;
 };
 
 }

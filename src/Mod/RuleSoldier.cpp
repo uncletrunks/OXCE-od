@@ -19,6 +19,7 @@
 #include "RuleSoldier.h"
 #include "Mod.h"
 #include "SoldierNamePool.h"
+#include "StatString.h"
 #include "../Engine/FileMap.h"
 
 namespace OpenXcom
@@ -42,6 +43,10 @@ RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _c
 RuleSoldier::~RuleSoldier()
 {
 	for (std::vector<SoldierNamePool*>::iterator i = _names.begin(); i != _names.end(); ++i)
+	{
+		delete *i;
+	}
+	for (std::vector<StatString*>::iterator i = _statStrings.begin(); i != _statStrings.end(); ++i)
 	{
 		delete *i;
 	}
@@ -153,6 +158,13 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 				addSoldierNamePool(fileName);
 			}
 		}
+	}
+
+	for (YAML::const_iterator i = node["statStrings"].begin(); i != node["statStrings"].end(); ++i)
+	{
+		StatString *statString = new StatString();
+		statString->load(*i);
+		_statStrings.push_back(statString);
 	}
 }
 
@@ -390,6 +402,15 @@ const std::vector<int> &RuleSoldier::getFemaleDeathSounds() const
 const std::vector<SoldierNamePool*> &RuleSoldier::getNames() const
 {
 	return _names;
+}
+
+/**
+* Gets the list of StatStrings.
+* @return The list of StatStrings.
+*/
+const std::vector<StatString *> &RuleSoldier::getStatStrings() const
+{
+	return _statStrings;
 }
 
 }
