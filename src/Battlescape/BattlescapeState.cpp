@@ -2015,8 +2015,13 @@ inline void BattlescapeState::handle(Action *action)
 
 			if (action->getDetails()->type == SDL_KEYDOWN)
 			{
+				// "ctrl-b" - reopen briefing
+				if (action->getDetails()->key.keysym.sym == SDLK_b && (SDL_GetModState() & KMOD_CTRL) != 0)
+				{
+					_game->pushState(new BriefingState(0, 0, true));
+				}
 				// "ctrl-h" - show hit log
-				if (action->getDetails()->key.keysym.sym == SDLK_h && (SDL_GetModState() & KMOD_CTRL) != 0)
+				else if (action->getDetails()->key.keysym.sym == SDLK_h && (SDL_GetModState() & KMOD_CTRL) != 0)
 				{
 					_game->pushState(new InfoboxState(_save->hitLog.str()));
 				}
