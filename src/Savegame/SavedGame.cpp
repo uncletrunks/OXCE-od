@@ -117,6 +117,11 @@ SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _end(END_NONE), _ironman(fa
 	_incomes.push_back(0);
 	_expenditures.push_back(0);
 	_lastselectedArmor="STR_NONE_UC";
+
+	for (int j = 0; j < MAX_CRAFT_LOADOUT_TEMPLATES; ++j)
+	{
+		_globalCraftLoadout[j] = new ItemContainer();
+	}
 }
 
 /**
@@ -168,6 +173,10 @@ SavedGame::~SavedGame()
 		{
 			delete *i;
 		}
+	}
+	for (int j = 0; j < MAX_CRAFT_LOADOUT_TEMPLATES; ++j)
+	{
+		delete _globalCraftLoadout[j];
 	}
 	for (std::vector<MissionStatistics*>::iterator i = _missionStatistics.begin(); i != _missionStatistics.end(); ++i)
 	{
@@ -597,6 +606,24 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		}
 	}
 
+	for (int j = 0; j < MAX_CRAFT_LOADOUT_TEMPLATES; ++j)
+	{
+		std::ostringstream oss;
+		oss << "globalCraftLoadout" << j;
+		std::string key = oss.str();
+		if (const YAML::Node &loadout = doc[key])
+		{
+			_globalCraftLoadout[j]->load(loadout);
+		}
+		std::ostringstream oss2;
+		oss2 << "globalCraftLoadoutName" << j;
+		std::string key2 = oss2.str();
+		if (doc[key2])
+		{
+			_globalCraftLoadoutName[j] = Language::utf8ToWstr(doc[key2].as<std::string>());
+		}
+	}
+
 	for (YAML::const_iterator i = doc["missionStatistics"].begin(); i != doc["missionStatistics"].end(); ++i)
 	{
 		MissionStatistics *ms = new MissionStatistics();
@@ -763,6 +790,23 @@ void SavedGame::save(const std::string &filename) const
 		if (!_globalEquipmentLayoutName[j].empty())
 		{
 			node[key2] = Language::wstrToUtf8(_globalEquipmentLayoutName[j]);
+		}
+	}
+	for (int j = 0; j < MAX_CRAFT_LOADOUT_TEMPLATES; ++j)
+	{
+		std::ostringstream oss;
+		oss << "globalCraftLoadout" << j;
+		std::string key = oss.str();
+		if (_globalCraftLoadout[j])
+		{
+			node[key] = _globalCraftLoadout[j]->save();
+		}
+		std::ostringstream oss2;
+		oss2 << "globalCraftLoadoutName" << j;
+		std::string key2 = oss2.str();
+		if (!_globalCraftLoadoutName[j].empty())
+		{
+			node[key2] = Language::wstrToUtf8(_globalCraftLoadoutName[j]);
 		}
 	}
 	if (Options::soldierDiaries)
@@ -2367,6 +2411,34 @@ const std::wstring &SavedGame::getGlobalEquipmentLayoutName(int index) const
 void SavedGame::setGlobalEquipmentLayoutName(int index, const std::wstring &name)
 {
 	_globalEquipmentLayoutName[index] = name;
+}
+
+/**
+* Returns the global craft loadout at specified index.
+* @return Pointer to the ItemContainer list.
+*/
+ItemContainer *SavedGame::getGlobalCraftLoadout(int index)
+{
+	return _globalCraftLoadout[index];
+}
+
+/**
+* Returns the name of a global craft loadout at specified index.
+* @return A name.
+*/
+const std::wstring &SavedGame::getGlobalCraftLoadoutName(int index) const
+{
+	return _globalCraftLoadoutName[index];
+}
+
+/**
+* Sets the name of a global craft loadout at specified index.
+* @param index Array index.
+* @param name New name.
+*/
+void SavedGame::setGlobalCraftLoadoutName(int index, const std::wstring &name)
+{
+	_globalCraftLoadoutName[index] = name;
 }
 
 /**

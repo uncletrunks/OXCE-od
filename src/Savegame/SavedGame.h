@@ -56,6 +56,7 @@ class Target;
 class Soldier;
 class Craft;
 class EquipmentLayoutItem;
+class ItemContainer;
 struct MissionStatistics;
 struct BattleUnitKills;
 
@@ -107,6 +108,7 @@ class SavedGame
 {
 public:
 	static const int MAX_EQUIPMENT_LAYOUT_TEMPLATES = 20;
+	static const int MAX_CRAFT_LOADOUT_TEMPLATES = 10;
 private:
 	std::wstring _name;
 	GameDifficulty _difficulty;
@@ -143,6 +145,8 @@ private:
 	std::string _lastselectedArmor; //contains the last selected armour
 	std::wstring _globalEquipmentLayoutName[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
+	std::wstring _globalCraftLoadoutName[MAX_CRAFT_LOADOUT_TEMPLATES];
+	ItemContainer *_globalCraftLoadout[MAX_CRAFT_LOADOUT_TEMPLATES];
 	std::vector<MissionStatistics*> _missionStatistics;
 	std::set<int> _ignoredUfos;
 	std::set<const RuleItem *> _autosales;
@@ -358,7 +362,13 @@ public:
 	void setGlobalEquipmentLayoutName(int index, const std::wstring &name);
 	/// Gets the global equipment layout at specified index.
 	std::vector<EquipmentLayoutItem*> *getGlobalEquipmentLayout(int index);
-    /// Gets the list of missions statistics
+	/// Gets the name of a global craft loadout at specified index.
+	const std::wstring &getGlobalCraftLoadoutName(int index) const;
+	/// Sets the name of a global craft loadout at specified index.
+	void setGlobalCraftLoadoutName(int index, const std::wstring &name);
+	/// Gets the global craft loadout at specified index.
+	ItemContainer *getGlobalCraftLoadout(int index);
+	/// Gets the list of missions statistics
 	std::vector<MissionStatistics*> *getMissionStatistics();
 	/// Adds a UFO to the ignore list.
 	void addUfoToIgnoreList(int ufoId);

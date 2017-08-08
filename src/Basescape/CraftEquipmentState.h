@@ -97,11 +97,18 @@ public:
 	/// Moves an item to the craft.
 	void moveRight();
 	/// Moves the given number of items to the craft.
-	void moveRightByValue(int change);
+	void moveRightByValue(int change, bool suppressErrors = false);
 	/// Empties the contents of the craft, moving all of the items back to the base.
 	void btnClearClick(Action *action);
 	/// Handler for clicking the Inventory button.
 	void btnInventoryClick(Action *action);
+	/// Methods for handling the global craft loadout save/load hotkeys.
+	void saveGlobalLoadout(int index);
+	void loadGlobalLoadout(int index);
+	/// Handler for clicking the Load button.
+	void btnLoadClick(Action *action);
+	/// Handler for clicking the Save button.
+	void btnSaveClick(Action *action);
 };
 
 }

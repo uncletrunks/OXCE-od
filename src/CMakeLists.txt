@@ -10,6 +10,8 @@ set ( basescape_src
   Basescape/BuildFacilitiesState.cpp
   Basescape/ChangeHeadquartersState.cpp
   Basescape/CraftArmorState.cpp
+  Basescape/CraftEquipmentLoadState.cpp
+  Basescape/CraftEquipmentSaveState.cpp
   Basescape/CraftEquipmentState.cpp
   Basescape/CraftInfoState.cpp
   Basescape/CraftPilotSelectState.cpp

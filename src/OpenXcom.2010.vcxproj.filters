@@ -1030,6 +1030,12 @@
     <ClCompile Include="Geoscape\TrainingFinishedState.cpp">
       <Filter>Geoscape</Filter>
     </ClCompile>
+    <ClCompile Include="Basescape\CraftEquipmentLoadState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\CraftEquipmentSaveState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2103,6 +2109,12 @@
     </ClInclude>
     <ClInclude Include="Geoscape\TrainingFinishedState.h">
       <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftEquipmentLoadState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftEquipmentSaveState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

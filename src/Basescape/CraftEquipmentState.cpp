@@ -17,6 +17,8 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "CraftEquipmentState.h"
+#include "CraftEquipmentLoadState.h"
+#include "CraftEquipmentSaveState.h"
 #include <climits>
 #include <sstream>
 #include <algorithm>
@@ -43,6 +45,8 @@
 #include "../Savegame/Vehicle.h"
 #include "../Savegame/SavedGame.h"
 #include "../Menu/ErrorMessageState.h"
+#include "../Battlescape/CannotReequipState.h"
+#include "../Battlescape/DebriefingState.h"
 #include "../Battlescape/InventoryState.h"
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -107,6 +111,8 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 	_btnOk->onMouseClick((ActionHandler)&CraftEquipmentState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftEquipmentState::btnOkClick, Options::keyCancel);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftEquipmentState::btnClearClick, Options::keyInvClear);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftEquipmentState::btnLoadClick, Options::keyQuickLoad);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftEquipmentState::btnSaveClick, Options::keyQuickSave);
 
 	_btnClear->setText(tr("STR_UNLOAD_CRAFT"));
 	_btnClear->onMouseClick((ActionHandler)&CraftEquipmentState::btnClearClick);
@@ -674,8 +680,9 @@ void CraftEquipmentState::moveRight()
 /**
  * Moves the given number of items (selected) to the craft.
  * @param change Item difference.
+ * @param suppressErrors Suppress error messages?
  */
-void CraftEquipmentState::moveRightByValue(int change)
+void CraftEquipmentState::moveRightByValue(int change, bool suppressErrors)
 {
 	Craft *c = _base->getCrafts()->at(_craft);
 	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
@@ -738,11 +745,14 @@ void CraftEquipmentState::moveRightByValue(int change)
 				}
 				else
 				{
-					// So we haven't managed to increase the count of vehicles because of the ammo
-					_timerRight->stop();
-					LocalizedText msg(tr("STR_NOT_ENOUGH_AMMO_TO_ARM_HWP").arg(ammoPerVehicle).arg(tr(ammo->getType())));
-					_game->pushState(new ErrorMessageState(msg, _palette, _game->getMod()->getInterface("craftEquipment")->getElement("errorMessage")->color, "BACK04.SCR", _game->getMod()->getInterface("craftEquipment")->getElement("errorPalette")->color));
-					_reload = false;
+					if (!suppressErrors)
+					{
+						// So we haven't managed to increase the count of vehicles because of the ammo
+						_timerRight->stop();
+						LocalizedText msg(tr("STR_NOT_ENOUGH_AMMO_TO_ARM_HWP").arg(ammoPerVehicle).arg(tr(ammo->getType())));
+						_game->pushState(new ErrorMessageState(msg, _palette, _game->getMod()->getInterface("craftEquipment")->getElement("errorMessage")->color, "BACK04.SCR", _game->getMod()->getInterface("craftEquipment")->getElement("errorPalette")->color));
+						_reload = false;
+					}
 				}
 			}
 			else
@@ -760,10 +770,13 @@ void CraftEquipmentState::moveRightByValue(int change)
 	{
 		if (c->getRules()->getMaxItems() > 0 && _totalItems + change > c->getRules()->getMaxItems())
 		{
-			_timerRight->stop();
-			LocalizedText msg(tr("STR_NO_MORE_EQUIPMENT_ALLOWED", c->getRules()->getMaxItems()));
-			_game->pushState(new ErrorMessageState(msg, _palette, _game->getMod()->getInterface("craftEquipment")->getElement("errorMessage")->color, "BACK04.SCR", _game->getMod()->getInterface("craftEquipment")->getElement("errorPalette")->color));
-			_reload = false;
+			if (!suppressErrors)
+			{
+				_timerRight->stop();
+				LocalizedText msg(tr("STR_NO_MORE_EQUIPMENT_ALLOWED", c->getRules()->getMaxItems()));
+				_game->pushState(new ErrorMessageState(msg, _palette, _game->getMod()->getInterface("craftEquipment")->getElement("errorMessage")->color, "BACK04.SCR", _game->getMod()->getInterface("craftEquipment")->getElement("errorPalette")->color));
+				_reload = false;
+			}
 			change = c->getRules()->getMaxItems() - _totalItems;
 		}
 		c->getItems()->addItem(_items[_sel],change);
@@ -805,6 +818,122 @@ void CraftEquipmentState::btnInventoryClick(Action *)
 
 		_game->getScreen()->clear();
 		_game->pushState(new InventoryState(false, 0, _base));
+	}
+}
+
+void CraftEquipmentState::saveGlobalLoadout(int index)
+{
+	// clear the template
+	ItemContainer *tmpl = _game->getSavedGame()->getGlobalCraftLoadout(index);
+	tmpl->getContents()->clear();
+
+	Craft *c = _base->getCrafts()->at(_craft);
+	// save only what is visible on the screen (can be DIFFERENT than what's really in the craft for various reasons)
+	for (auto& itemRule : _items)
+	{
+		RuleItem *item = _game->getMod()->getItem(itemRule, true);
+		int cQty = 0;
+		if (item->isFixed())
+		{
+			cQty = c->getVehicleCount(itemRule);
+		}
+		else
+		{
+			cQty = c->getItems()->getItem(itemRule);
+		}
+		if (cQty > 0)
+		{
+			tmpl->addItem(itemRule, cQty);
+		}
+	}
+}
+
+void CraftEquipmentState::loadGlobalLoadout(int index)
+{
+	// reset filters and reload the full equipment list
+	_btnQuickSearch->setText(L"");
+	_cbxFilterBy->setSelected(0);
+	initList();
+
+	// first move everything visible back to base
+	for (_sel = 0; _sel != _items.size(); ++_sel)
+	{
+		moveLeftByValue(INT_MAX);
+	}
+
+	// now start applying the template (consider ONLY items visible on the GUI)
+	ItemContainer *tmpl = _game->getSavedGame()->getGlobalCraftLoadout(index);
+	for (_sel = 0; _sel != _items.size(); ++_sel)
+	{
+		RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
+		int tQty = tmpl->getItem(item->getName());
+		moveRightByValue(tQty, true);
+	}
+
+	// lastly check and report what's missing
+	Craft *c = _base->getCrafts()->at(_craft);
+	std::wstring craftName = c->getName(_game->getLanguage());
+	std::vector<ReequipStat> _missingItems;
+	for (auto& templateItem : *tmpl->getContents())
+	{
+		RuleItem *item = _game->getMod()->getItem(templateItem.first, false);
+		if (item)
+		{
+			int tQty = templateItem.second;
+			int cQty = 0;
+			if (item->isFixed())
+			{
+				// Note: we will also report HWPs as missing:
+				// - if there is not enough ammo to arm them
+				// - if there is not enough cargo space in the craft
+				cQty = c->getVehicleCount(item->getName());
+			}
+			else
+			{
+				cQty = c->getItems()->getItem(item->getName());
+			}
+			int missing = tQty - cQty;
+			if (missing > 0)
+			{
+				ReequipStat stat = { item->getName(), missing, craftName, item->getListOrder() };
+				_missingItems.push_back(stat);
+			}
+		}
+	}
+
+	if (!_missingItems.empty())
+	{
+		std::sort(_missingItems.begin(), _missingItems.end(), [](const ReequipStat &a, const ReequipStat &b)
+			{
+				return a.listOrder < b.listOrder;
+			}
+		);
+		_game->pushState(new CannotReequipState(_missingItems));
+		_reload = false;
+	}
+}
+
+/**
+* Opens the CraftEquipmentLoadState screen.
+* @param action Pointer to an action.
+*/
+void CraftEquipmentState::btnLoadClick(Action *)
+{
+	if (_game->getSavedGame()->getMonthsPassed() > -1)
+	{
+		_game->pushState(new CraftEquipmentLoadState(this));
+	}
+}
+
+/**
+* Opens the CraftEquipmentSaveState screen.
+* @param action Pointer to an action.
+*/
+void CraftEquipmentState::btnSaveClick(Action *)
+{
+	if (_game->getSavedGame()->getMonthsPassed() > -1)
+	{
+		_game->pushState(new CraftEquipmentSaveState(this));
 	}
 }
 
