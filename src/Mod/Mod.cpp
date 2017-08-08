@@ -1832,17 +1832,6 @@ SavedGame *Mod::newSave() const
 		save->getId((*i)->getRules()->getType());
 	}
 
-	// Determine starting transport craft
-	Craft *transportCraft = 0;
-	for (std::vector<Craft*>::iterator c = base->getCrafts()->begin(); c != base->getCrafts()->end(); ++c)
-	{
-		if ((*c)->getRules()->getSoldiers() > 0)
-		{
-			transportCraft = (*c);
-			break;
-		}
-	}
-
 	// Determine starting soldier types
 	std::vector<std::string> soldierTypes = _soldiersIndex;
 	for (std::vector<std::string>::iterator i = soldierTypes.begin(); i != soldierTypes.end();)
@@ -1886,10 +1875,6 @@ SavedGame *Mod::newSave() const
 		for (size_t i = 0; i < randomTypes.size(); ++i)
 		{
 			Soldier *soldier = genSoldier(save, randomTypes[i]);
-			if (transportCraft != 0 && i < (unsigned)transportCraft->getRules()->getSoldiers())
-			{
-				soldier->setCraft(transportCraft);
-			}
 			base->getSoldiers()->push_back(soldier);
 			// Award soldier a special 'original eigth' commendation
 			SoldierDiary *diary = soldier->getDiary();
@@ -1897,6 +1882,46 @@ SavedGame *Mod::newSave() const
 			for (std::vector<SoldierCommendations*>::iterator comm = diary->getSoldierCommendations()->begin(); comm != diary->getSoldierCommendations()->end(); ++comm)
 			{
 				(*comm)->makeOld();
+			}
+		}
+		// Assign pilots to craft (interceptors first, transport last) and non-pilots to transports only
+		for (auto& soldier : *base->getSoldiers())
+		{
+			if (soldier->getArmor()->getSize() > 1)
+			{
+				// "Large soldiers" just stay in the base
+			}
+			else if (soldier->getRules()->getAllowPiloting())
+			{
+				Craft *found = 0;
+				for (auto& craft : *base->getCrafts())
+				{
+					if (!found && craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getSoldiers())
+					{
+						// Remember transporter as fall-back, but search further for interceptors
+						found = craft;
+					}
+					if (!craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getPilots())
+					{
+						// Fill interceptors with minimum amount of pilots necessary
+						found = craft;
+					}
+				}
+				soldier->setCraft(found);
+			}
+			else
+			{
+				Craft *found = 0;
+				for (auto& craft : *base->getCrafts())
+				{
+					if (craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getSoldiers())
+					{
+						// First available transporter will do
+						found = craft;
+						break;
+					}
+				}
+				soldier->setCraft(found);
 			}
 		}
 	}
