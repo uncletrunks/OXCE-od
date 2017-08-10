@@ -130,6 +130,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			std::wostringstream ssStatus;
 			std::string status = (*j)->getStatus();
 
+			bool hasEnoughPilots = (*j)->arePilotsOnboard();
 			if (status == "STR_OUT")
 			{
 				// QoL: let's give the player a bit more info
@@ -169,7 +170,14 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			}
 			else
 			{
-				ssStatus << tr(status);
+				if (!hasEnoughPilots && status == "STR_READY")
+				{
+					ssStatus << tr("STR_PILOT_MISSING");
+				}
+				else
+				{
+					ssStatus << tr(status);
+				}
 			}
 			if (status != "STR_READY" && status != "STR_OUT")
 			{
@@ -226,7 +234,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			}
 			_crafts.push_back(*j);
 			_lstCrafts->addRow(4, (*j)->getName(_game->getLanguage()).c_str(), ssStatus.str().c_str(), (*i)->getName().c_str(), ss.str().c_str());
-			if (status == "STR_READY")
+			if (hasEnoughPilots && status == "STR_READY")
 			{
 				_lstCrafts->setCellColor(row, 1, _lstCrafts->getSecondaryColor());
 			}
