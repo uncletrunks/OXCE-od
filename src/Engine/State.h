@@ -48,6 +48,7 @@ protected:
 	static Game *_game;
 	std::vector<Surface*> _surfaces;
 	bool _screen;
+	bool _soundPlayed;
 	InteractiveSurface *_modal;
 	RuleInterface *_ruleInterface;
 	RuleInterface *_ruleInterfaceParent;

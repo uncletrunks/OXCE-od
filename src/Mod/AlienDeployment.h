@@ -76,6 +76,7 @@ private:
 	bool _finalDestination, _isAlienBase;
 	std::string _winCutscene, _loseCutscene, _abortCutscene;
 	std::string _alert, _alertBackground, _alertDescription;
+	int _alertSound;
 	BriefingData _briefingData;
 	std::string _markerName, _objectivePopup, _objectiveCompleteText, _objectiveFailedText;
 	WeightedOptions _genMission;
@@ -135,6 +136,8 @@ public:
 	std::string getAlertBackground() const;
 	/// Gets the alert description for this mission type.
 	std::string getAlertDescription() const;
+	/// Gets the alert sound for this mission type.
+	int getAlertSound() const;
 	/// Gets the briefing data for this mission type.
 	BriefingData getBriefingData() const;
 	/// Gets the marker name for this mission.

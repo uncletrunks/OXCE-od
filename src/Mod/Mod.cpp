@@ -1543,7 +1543,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		RuleInterface *rule = loadRule(*i, &_interfaces);
 		if (rule != 0)
 		{
-			rule->load(*i);
+			rule->load(*i, this);
 		}
 	}
 	for (YAML::const_iterator i = doc["soundDefs"].begin(); i != doc["soundDefs"].end(); ++i)
