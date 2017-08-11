@@ -130,7 +130,6 @@ void AIModule::dont_think(BattleAction *action)
 	{
 		Log(LOG_INFO) << "LEEROY: Unit " << _unit->getId() << " of type " << _unit->getType() << " is Leeroy...";
 	}
-	Mod *mod = _save->getBattleState()->getGame()->getMod();
 	if (action->weapon)
 	{
 		const RuleItem *rule = action->weapon->getRules();
