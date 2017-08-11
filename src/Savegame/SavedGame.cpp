@@ -1837,7 +1837,7 @@ bool SavedGame::isResearched(const std::vector<std::string> &research, bool cons
 	if (skipDisabled)
 	{
 		// ignore all disabled topics (as if they didn't exist)
-		for (std::vector<std::string>::const_iterator j = matches.begin(); j != matches.end();)
+		for (std::vector<std::string>::iterator j = matches.begin(); j != matches.end();)
 		{
 			if (isResearchRuleStatusDisabled(*j))
 			{
