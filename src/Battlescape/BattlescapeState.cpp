@@ -533,13 +533,16 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_btnReserveAuto->setGroup(&_reserve);
 
 	// Set music
-	if (_save->getMusic() == "")
+	if (!Options::playBriefingMusicDuringEquipment)
 	{
-		_game->getMod()->playMusic("GMTACTIC");
-	}
-	else
-	{
-		_game->getMod()->playMusic(_save->getMusic());
+		if (_save->getMusic() == "")
+		{
+			_game->getMod()->playMusic("GMTACTIC");
+		}
+		else
+		{
+			_game->getMod()->playMusic(_save->getMusic());
+		}
 	}
 
 	_animTimer = new Timer(DEFAULT_ANIM_SPEED, true);
@@ -617,6 +620,19 @@ void BattlescapeState::init()
 	}
 	if (_firstInit)
 	{
+		// Set music
+		if (Options::playBriefingMusicDuringEquipment)
+		{
+			if (_save->getMusic() == "")
+			{
+				_game->getMod()->playMusic("GMTACTIC");
+			}
+			else
+			{
+				_game->getMod()->playMusic(_save->getMusic());
+			}
+		}
+
 		if (!playableUnitSelected())
 		{
 			selectNextPlayerUnit();
