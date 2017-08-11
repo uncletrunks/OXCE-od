@@ -47,7 +47,14 @@ namespace OpenXcom
 		_lstStats = new TextList(300, 89, 10, 48);
 
 		// Set palette
-		setPalette("PAL_UFOPAEDIA");
+		if (defs->customPalette)
+		{
+			setCustomPalette(_game->getMod()->getSurface(defs->image_id)->getPalette(), Mod::UFOPAEDIA_CURSOR);
+		}
+		else
+		{
+			setPalette("PAL_UFOPAEDIA");
+		}
 
 		ArticleState::initLayout();
 
@@ -57,7 +64,14 @@ namespace OpenXcom
 		add(_lstStats);
 
 		// Set up objects
-		_game->getMod()->getSurface("BACK10.SCR")->blit(_bg);
+		if (!defs->image_id.empty())
+		{
+			_game->getMod()->getSurface(defs->image_id)->blit(_bg);
+		}
+		else
+		{
+			_game->getMod()->getSurface("BACK10.SCR")->blit(_bg);
+		}
 		_btnOk->setColor(Palette::blockOffset(5));
 		_btnPrev->setColor(Palette::blockOffset(5));
 		_btnNext->setColor(Palette::blockOffset(5));

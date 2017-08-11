@@ -260,6 +260,7 @@ namespace OpenXcom
 		/// Loads the article from YAML.
 		void load(const YAML::Node& node, int listOrder);
 
+		std::string image_id;
 		std::string text;
 		std::string weapon;
 	};
