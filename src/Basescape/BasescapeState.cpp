@@ -362,6 +362,7 @@ void BasescapeState::viewLeftClick(Action *)
 		if (allowed && (SDL_GetModState() & KMOD_CTRL))
 		{
 			// Ctrl + left click on a base facility allows moving it
+			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _game->getMod()->getTheBiggestRipOffEver());
 			_game->pushState(new PlaceFacilityState(_base, fac->getRules(), fac));
 		}
 		else
