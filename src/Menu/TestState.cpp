@@ -52,16 +52,16 @@ TestState::TestState()
 	_btnCancel = new TextButton(146, 16, 164, 176);
 
 	// Set palette
-	setInterface("newBattleMenu");
+	setInterface("tests");
 
-	add(_window, "window", "newBattleMenu");
-	add(_txtTitle, "heading", "newBattleMenu");
-	add(_txtTestCase, "text", "newBattleMenu");
-	add(_txtDescription, "heading", "newBattleMenu");
-	add(_lstOutput, "text", "newBattleMenu");
-	add(_btnRun, "button2", "newBattleMenu");
-	add(_btnCancel, "button2", "newBattleMenu");
-	add(_cbxTestCase, "button1", "newBattleMenu"); // add as last (display over all other components)
+	add(_window, "window", "tests");
+	add(_txtTitle, "heading", "tests");
+	add(_txtTestCase, "text", "tests");
+	add(_txtDescription, "heading", "tests");
+	add(_lstOutput, "text", "tests");
+	add(_btnRun, "button2", "tests");
+	add(_btnCancel, "button2", "tests");
+	add(_cbxTestCase, "button1", "tests"); // add as last (display over all other components)
 
 	centerAllSurfaces();
 

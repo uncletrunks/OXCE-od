@@ -47,13 +47,13 @@ TrainingFinishedState::TrainingFinishedState(Base *base, const std::vector<Soldi
 	_lstPossibilities = new TextList(250, 80, 35, 50);
 
 	// Set palette
-	setInterface("geoManufacture");
+	setInterface("trainingFinished");
 
-	add(_window, "window", "geoManufacture");
-	add(_btnOk, "button", "geoManufacture");
-	add(_btnOpen, "button", "geoManufacture");
-	add(_txtTitle, "text1", "geoManufacture");
-	add(_lstPossibilities, "text2", "geoManufacture");
+	add(_window, "window", "trainingFinished");
+	add(_btnOk, "button", "trainingFinished");
+	add(_btnOpen, "button", "trainingFinished");
+	add(_txtTitle, "text1", "trainingFinished");
+	add(_lstPossibilities, "text2", "trainingFinished");
 
 	centerAllSurfaces();
 

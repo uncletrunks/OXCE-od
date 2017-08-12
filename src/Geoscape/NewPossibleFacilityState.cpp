@@ -48,13 +48,13 @@ NewPossibleFacilityState::NewPossibleFacilityState(Base *base, Globe *globe, con
 	_lstPossibilities = new TextList(250, 80, 35, 50);
 
 	// Set palette
-	setInterface("geoManufacture");
+	setInterface("geoNewFacility");
 
-	add(_window, "window", "geoManufacture");
-	add(_btnOk, "button", "geoManufacture");
-	add(_btnOpen, "button", "geoManufacture");
-	add(_txtTitle, "text1", "geoManufacture");
-	add(_lstPossibilities, "text2", "geoManufacture");
+	add(_window, "window", "geoNewFacility");
+	add(_btnOk, "button", "geoNewFacility");
+	add(_btnOpen, "button", "geoNewFacility");
+	add(_txtTitle, "text1", "geoNewFacility");
+	add(_lstPossibilities, "text2", "geoNewFacility");
 
 	centerAllSurfaces();
 

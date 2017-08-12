@@ -46,12 +46,12 @@ CraftNotEnoughPilotsState::CraftNotEnoughPilotsState(Craft *craft) : _craft(craf
 	_txtMessage = new Text(246, 96, 37, 42);
 
 	// Set palette
-	setInterface("geoCraftScreens");
+	setInterface("craftPilotError");
 
-	add(_window, "window", "geoCraftScreens");
-	add(_btnOk, "button", "geoCraftScreens");
-	add(_btnAssignPilots, "button", "geoCraftScreens");
-	add(_txtMessage, "text1", "geoCraftScreens");
+	add(_window, "window", "craftPilotError");
+	add(_btnOk, "button", "craftPilotError");
+	add(_btnAssignPilots, "button", "craftPilotError");
+	add(_txtMessage, "text1", "craftPilotError");
 
 	centerAllSurfaces();
 

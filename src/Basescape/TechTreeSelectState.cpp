@@ -47,13 +47,13 @@ TechTreeSelectState::TechTreeSelectState(TechTreeViewerState *parent) : _parent(
 	_btnOk = new TextButton(206, 16, 57, 145);
 
 	// Set palette
-	setInterface("allocateResearch");
+	setInterface("techTreeSelect");
 
-	add(_window, "window", "allocateResearch");
-	add(_btnQuickSearch, "button2", "allocateResearch");
-	add(_txtTitle, "text", "allocateResearch");
-	add(_btnOk, "button2", "allocateResearch");
-	add(_lstTopics, "list", "researchMenu");
+	add(_window, "window", "techTreeSelect");
+	add(_btnQuickSearch, "button", "techTreeSelect");
+	add(_txtTitle, "text", "techTreeSelect");
+	add(_btnOk, "button", "techTreeSelect");
+	add(_lstTopics, "list", "techTreeSelect");
 
 	centerAllSurfaces();
 

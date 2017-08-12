@@ -47,13 +47,13 @@ NewPossiblePurchaseState::NewPossiblePurchaseState(Base * base, const std::vecto
 	_lstPossibilities = new TextList(250, 80, 35, 50);
 
 	// Set palette
-	setInterface("geoManufacture");
+	setInterface("geoNewItem");
 
-	add(_window, "window", "geoManufacture");
-	add(_btnOk, "button", "geoManufacture");
-	add(_btnPurchase, "button", "geoManufacture");
-	add(_txtTitle, "text1", "geoManufacture");
-	add(_lstPossibilities, "text2", "geoManufacture");
+	add(_window, "window", "geoNewItem");
+	add(_btnOk, "button", "geoNewItem");
+	add(_btnPurchase, "button", "geoNewItem");
+	add(_txtTitle, "text1", "geoNewItem");
+	add(_lstPossibilities, "text2", "geoNewItem");
 
 	centerAllSurfaces();
 

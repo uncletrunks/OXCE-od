@@ -67,23 +67,23 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0), _base(base),
 	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
 
 	// Set palette
-	setPalette("PAL_BASESCAPE", _game->getMod()->getInterface("allocatePsi")->getElement("palette")->color);
+	setInterface("allocateMartial");
 
-	add(_window, "window", "allocatePsi");
-	add(_btnOk, "button", "allocatePsi");
-	add(_txtName, "text", "allocatePsi");
-	add(_txtTitle, "text", "allocatePsi");
-	add(_txtRemaining, "text", "allocatePsi");
-	add(_txtTraining, "text", "allocatePsi");
-	add(_lstSoldiers, "list", "allocatePsi");
-	add(_txtTu, "text", "allocatePsi");
-	add(_txtStamina, "text", "allocatePsi");
-	add(_txtHealth, "text", "allocatePsi");
-	add(_txtFiring, "text", "allocatePsi");
-	add(_txtThrowing, "text", "allocatePsi");
-	add(_txtMelee, "text", "allocatePsi");
-	add(_txtStrength, "text", "allocatePsi");
-	add(_cbxSortBy, "button", "allocatePsi");
+	add(_window, "window", "allocateMartial");
+	add(_btnOk, "button", "allocateMartial");
+	add(_txtName, "text", "allocateMartial");
+	add(_txtTitle, "text", "allocateMartial");
+	add(_txtRemaining, "text", "allocateMartial");
+	add(_txtTraining, "text", "allocateMartial");
+	add(_lstSoldiers, "list", "allocateMartial");
+	add(_txtTu, "text", "allocateMartial");
+	add(_txtStamina, "text", "allocateMartial");
+	add(_txtHealth, "text", "allocateMartial");
+	add(_txtFiring, "text", "allocateMartial");
+	add(_txtThrowing, "text", "allocateMartial");
+	add(_txtMelee, "text", "allocateMartial");
+	add(_txtStrength, "text", "allocateMartial");
+	add(_cbxSortBy, "button", "allocateMartial");
 
 	centerAllSurfaces();
 

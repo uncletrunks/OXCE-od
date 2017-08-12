@@ -51,13 +51,13 @@ CraftEquipmentSaveState::CraftEquipmentSaveState(CraftEquipmentState *parent) : 
 	_edtSave = new TextEdit(this, 188, 9, 0, 0);
 
 	// Set palette
-	setInterface("craftEquipment");
+	setInterface("craftEquipmentSave");
 
-	add(_window, "window", "craftEquipment");
-	add(_txtTitle, "text", "craftEquipment");
-	add(_lstLoadout, "list", "craftEquipment");
-	add(_btnCancel, "button", "craftEquipment");
-	add(_btnSave, "button", "craftEquipment");
+	add(_window, "window", "craftEquipmentSave");
+	add(_txtTitle, "text", "craftEquipmentSave");
+	add(_lstLoadout, "list", "craftEquipmentSave");
+	add(_btnCancel, "button", "craftEquipmentSave");
+	add(_btnSave, "button", "craftEquipmentSave");
 	add(_edtSave);
 
 	centerAllSurfaces();

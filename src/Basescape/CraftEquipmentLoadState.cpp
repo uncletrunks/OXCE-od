@@ -46,12 +46,12 @@ CraftEquipmentLoadState::CraftEquipmentLoadState(CraftEquipmentState *parent) : 
 	_btnCancel = new TextButton(120, 16, 90, 148);
 
 	// Set palette
-	setInterface("craftEquipment");
+	setInterface("craftEquipmentLoad");
 
-	add(_window, "window", "craftEquipment");
-	add(_txtTitle, "text", "craftEquipment");
-	add(_lstLoadout, "list", "craftEquipment");
-	add(_btnCancel, "button", "craftEquipment");
+	add(_window, "window", "craftEquipmentLoad");
+	add(_txtTitle, "text", "craftEquipmentLoad");
+	add(_lstLoadout, "list", "craftEquipmentLoad");
+	add(_btnCancel, "button", "craftEquipmentLoad");
 
 	centerAllSurfaces();
 

@@ -56,16 +56,16 @@ CraftPilotSelectState::CraftPilotSelectState(Base *base, size_t craft) : _base(b
 	_txtBravery = new Text(20, 9, 230, 52);
 	_lstPilot = new TextList(200, 80, 53, 68);
 
-	setInterface("costsInfo");
+	setInterface("craftPilotsSelect");
 
-	add(_window, "window", "costsInfo");
-	add(_btnCancel, "button", "costsInfo");
-	add(_txtTitle, "text2", "costsInfo");
-	add(_txtName, "text1", "costsInfo");
-	add(_txtFiringAcc, "text1", "costsInfo");
-	add(_txtReactions, "text1", "costsInfo");
-	add(_txtBravery, "text1", "costsInfo");
-	add(_lstPilot, "list", "costsInfo");
+	add(_window, "window", "craftPilotsSelect");
+	add(_btnCancel, "button", "craftPilotsSelect");
+	add(_txtTitle, "text2", "craftPilotsSelect");
+	add(_txtName, "text1", "craftPilotsSelect");
+	add(_txtFiringAcc, "text1", "craftPilotsSelect");
+	add(_txtReactions, "text1", "craftPilotsSelect");
+	add(_txtBravery, "text1", "craftPilotsSelect");
+	add(_lstPilot, "list", "craftPilotsSelect");
 
 	centerAllSurfaces();
 

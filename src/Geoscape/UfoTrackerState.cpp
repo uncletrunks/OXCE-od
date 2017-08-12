@@ -71,17 +71,17 @@ UfoTrackerState::UfoTrackerState(GeoscapeState *state, Globe *globe) : _state(st
 	_lstObjects = new TextList(290, 64, 12, 78);
 
 	// Set palette
-	setInterface("geoCraftScreens");
+	setInterface("ufoTracker");
 
-	add(_window, "window", "geoCraftScreens");
-	add(_btnCancel, "button", "geoCraftScreens");
-	add(_txtTitle, "text1", "geoCraftScreens");
-	add(_txtObject, "text2", "geoCraftScreens");
-	add(_txtSize, "text2", "geoCraftScreens");
-	add(_txtAltitude, "text2", "geoCraftScreens");
-	add(_txtHeading, "text2", "geoCraftScreens");
-	add(_txtSpeed, "text2", "geoCraftScreens");
-	add(_lstObjects, "list", "geoCraftScreens");
+	add(_window, "window", "ufoTracker");
+	add(_btnCancel, "button", "ufoTracker");
+	add(_txtTitle, "text1", "ufoTracker");
+	add(_txtObject, "text2", "ufoTracker");
+	add(_txtSize, "text2", "ufoTracker");
+	add(_txtAltitude, "text2", "ufoTracker");
+	add(_txtHeading, "text2", "ufoTracker");
+	add(_txtSpeed, "text2", "ufoTracker");
+	add(_lstObjects, "list", "ufoTracker");
 
 	centerAllSurfaces();
 

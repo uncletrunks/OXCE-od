@@ -63,25 +63,25 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	_txtApproachSpeedValue = new Text(150, 9, 110, 152);
 
 	// Set palette
-	setInterface("costsInfo");
+	setInterface("craftPilots");
 
-	add(_window, "window", "costsInfo");
-	add(_btnOk, "button", "costsInfo");
-	add(_txtTitle, "text1", "costsInfo");
-	add(_txtFiringAcc, "text1", "costsInfo");
-	add(_txtReactions, "text1", "costsInfo");
-	add(_txtBravery, "text1", "costsInfo");
-	add(_txtPilots, "text1", "costsInfo");
-	add(_lstPilots, "list", "costsInfo");
-	add(_btnAdd, "button", "costsInfo");
-	add(_btnRemoveAll, "button", "costsInfo");
-	add(_txtRequired, "text1", "costsInfo");
-	add(_txtAccuracyBonus, "text1", "costsInfo");
-	add(_txtAccuracyBonusValue, "text2", "costsInfo");
-	add(_txtDodgeBonus, "text1", "costsInfo");
-	add(_txtDodgeBonusValue, "text2", "costsInfo");
-	add(_txtApproachSpeed, "text1", "costsInfo");
-	add(_txtApproachSpeedValue, "text2", "costsInfo");
+	add(_window, "window", "craftPilots");
+	add(_btnOk, "button", "craftPilots");
+	add(_txtTitle, "text1", "craftPilots");
+	add(_txtFiringAcc, "text1", "craftPilots");
+	add(_txtReactions, "text1", "craftPilots");
+	add(_txtBravery, "text1", "craftPilots");
+	add(_txtPilots, "text1", "craftPilots");
+	add(_lstPilots, "list", "craftPilots");
+	add(_btnAdd, "button", "craftPilots");
+	add(_btnRemoveAll, "button", "craftPilots");
+	add(_txtRequired, "text1", "craftPilots");
+	add(_txtAccuracyBonus, "text1", "craftPilots");
+	add(_txtAccuracyBonusValue, "text2", "craftPilots");
+	add(_txtDodgeBonus, "text1", "craftPilots");
+	add(_txtDodgeBonusValue, "text2", "craftPilots");
+	add(_txtApproachSpeed, "text1", "craftPilots");
+	add(_txtApproachSpeedValue, "text2", "craftPilots");
 
 	centerAllSurfaces();
 
@@ -140,6 +140,7 @@ CraftPilotsState::~CraftPilotsState()
 */
 void CraftPilotsState::init()
 {
+	State::init();
 	updateUI();
 }
 

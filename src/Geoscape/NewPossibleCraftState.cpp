@@ -47,13 +47,13 @@ NewPossibleCraftState::NewPossibleCraftState(Base * base, const std::vector<Rule
 	_lstPossibilities = new TextList(250, 80, 35, 50);
 
 	// Set palette
-	setInterface("geoManufacture");
+	setInterface("geoNewCraft");
 
-	add(_window, "window", "geoManufacture");
-	add(_btnOk, "button", "geoManufacture");
-	add(_btnPurchase, "button", "geoManufacture");
-	add(_txtTitle, "text1", "geoManufacture");
-	add(_lstPossibilities, "text2", "geoManufacture");
+	add(_window, "window", "geoNewCraft");
+	add(_btnOk, "button", "geoNewCraft");
+	add(_btnPurchase, "button", "geoNewCraft");
+	add(_txtTitle, "text1", "geoNewCraft");
+	add(_lstPossibilities, "text2", "geoNewCraft");
 
 	centerAllSurfaces();
 

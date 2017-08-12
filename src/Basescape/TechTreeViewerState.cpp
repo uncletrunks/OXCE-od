@@ -63,16 +63,16 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *selectedTopicResear
 	_btnOk = new TextButton(148, 16, 164, 176);
 
 	// Set palette
-	setInterface("researchMenu");
+	setInterface("techTreeViewer");
 
-	add(_window, "window", "researchMenu");
-	add(_txtTitle, "text", "researchMenu");
-	add(_txtSelectedTopic, "text", "researchMenu");
-	add(_txtProgress, "text", "researchMenu");
-	add(_lstLeft, "list", "researchMenu");
-	add(_lstRight, "list", "researchMenu");
-	add(_btnNew, "button", "researchMenu");
-	add(_btnOk, "button", "researchMenu");
+	add(_window, "window", "techTreeViewer");
+	add(_txtTitle, "text", "techTreeViewer");
+	add(_txtSelectedTopic, "text", "techTreeViewer");
+	add(_txtProgress, "text", "techTreeViewer");
+	add(_lstLeft, "list", "techTreeViewer");
+	add(_lstRight, "list", "techTreeViewer");
+	add(_btnNew, "button", "techTreeViewer");
+	add(_btnOk, "button", "techTreeViewer");
 
 	centerAllSurfaces();
 

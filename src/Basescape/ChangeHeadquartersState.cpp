@@ -28,13 +28,13 @@ ChangeHeadquartersState::ChangeHeadquartersState(Base *base) : _base(base)
 	_txtBase = new Text(142, 9, 25, 85);
 
 	// Set palette
-	setInterface("dismantleFacility");
+	setInterface("changeHeadquarters");
 
-	add(_window, "window", "dismantleFacility");
-	add(_btnOk, "button", "dismantleFacility");
-	add(_btnCancel, "button", "dismantleFacility");
-	add(_txtTitle, "text", "dismantleFacility");
-	add(_txtBase, "text", "dismantleFacility");
+	add(_window, "window", "changeHeadquarters");
+	add(_btnOk, "button", "changeHeadquarters");
+	add(_btnCancel, "button", "changeHeadquarters");
+	add(_txtTitle, "text", "changeHeadquarters");
+	add(_txtBase, "text", "changeHeadquarters");
 
 	centerAllSurfaces();
 

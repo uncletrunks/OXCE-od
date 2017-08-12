@@ -48,13 +48,13 @@ ManufactureDependenciesTreeState::ManufactureDependenciesTreeState(const std::st
 	_btnOk = new TextButton(100, 16, 163, 153);
 
 	// Set palette
-	setInterface("sellMenu");
+	setInterface("dependencyTree");
 
-	add(_window, "window", "sellMenu");
-	add(_txtTitle, "text", "sellMenu");
-	add(_btnShowAll, "button", "sellMenu");
-	add(_btnOk, "button", "sellMenu");
-	add(_lstTopics, "list", "sellMenu");
+	add(_window, "window", "dependencyTree");
+	add(_txtTitle, "text", "dependencyTree");
+	add(_btnShowAll, "button", "dependencyTree");
+	add(_btnOk, "button", "dependencyTree");
+	add(_lstTopics, "list", "dependencyTree");
 
 	centerAllSurfaces();
 
