@@ -465,6 +465,7 @@
     <ClCompile Include="Menu\SlideshowState.cpp" />
     <ClCompile Include="Menu\StartState.cpp" />
     <ClCompile Include="Menu\StatisticsState.cpp" />
+    <ClCompile Include="Menu\TestPaletteState.cpp" />
     <ClCompile Include="Menu\TestState.cpp" />
     <ClCompile Include="Menu\VideoState.cpp" />
     <ClCompile Include="Mod\CustomPalettes.cpp" />
@@ -830,6 +831,7 @@
     <ClInclude Include="Menu\SlideshowState.h" />
     <ClInclude Include="Menu\StartState.h" />
     <ClInclude Include="Menu\StatisticsState.h" />
+    <ClInclude Include="Menu\TestPaletteState.h" />
     <ClInclude Include="Menu\TestState.h" />
     <ClInclude Include="Menu\VideoState.h" />
     <ClInclude Include="Mod\CustomPalettes.h" />

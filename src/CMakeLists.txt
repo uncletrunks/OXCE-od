@@ -255,6 +255,7 @@ set ( menu_src
   Menu/SlideshowState.cpp
   Menu/StartState.cpp
   Menu/StatisticsState.cpp
+  Menu/TestPaletteState.cpp
   Menu/TestState.cpp
   Menu/VideoState.cpp
 )

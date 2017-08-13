@@ -1036,6 +1036,9 @@
     <ClCompile Include="Basescape\CraftEquipmentSaveState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Menu\TestPaletteState.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2115,6 +2118,9 @@
     </ClInclude>
     <ClInclude Include="Basescape\CraftEquipmentSaveState.h">
       <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\TestPaletteState.h">
+      <Filter>Menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
