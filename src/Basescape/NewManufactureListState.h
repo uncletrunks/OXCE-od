@@ -52,6 +52,7 @@ private:
 	std::vector<RuleManufacture *> _possibleProductions;
 	std::vector<std::string> _catStrings;
 	std::vector<std::string> _displayedStrings;
+	Uint8 _hiddenColor, _facilityRequiredColor;
 
 public:
 	/// Creates the state.

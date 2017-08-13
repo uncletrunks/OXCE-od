@@ -117,7 +117,7 @@ void MiniBaseView::draw()
 			{
 				int color;
 				if ((*f)->getDisabled())
-					color = 218; // FIXME: blue
+					color = _blue;
 				else if ((*f)->getBuildTime() == 0)
 					color = _green;
 				else
@@ -168,6 +168,10 @@ void MiniBaseView::setColor(Uint8 color)
 void MiniBaseView::setSecondaryColor(Uint8 color)
 {
 	_red = color;
+}
+void MiniBaseView::setBorderColor(Uint8 color)
+{
+	_blue = color;
 }
 
 }

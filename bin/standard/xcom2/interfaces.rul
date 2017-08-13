@@ -125,6 +125,8 @@ interfaces: #done
         color: 1
         color2: 239
         border: 239
+      - id: disabledUserOption
+        color: 3
   - type: modsMenu
     elements:
       - id: optionLists
@@ -610,6 +612,9 @@ interfaces: #done
         color2: 2
       - id: disabledAmmo
         color: 20
+      - id: shieldRange
+        color: 224
+        color2: 229
       - id: previewTop
         pos: [0, 96]
         size: [160, 17]
@@ -744,6 +749,7 @@ interfaces: #done
         color: 1
       - id: list
         color: 1
+        color2: 239
         border: 1
       - id: button1
         color: 1
@@ -1045,6 +1051,7 @@ interfaces: #done
         color: 1
       - id: text
         color: 1
+        color2: 81
   - type: changeHeadquarters
     palette: PAL_BASESCAPE
     elements:
@@ -1080,8 +1087,12 @@ interfaces: #done
       - id: text
         color: 1   # pink
       - id: list
-        color: 239   # white
+        color: 1
+        color2: 239
         border: 1  # pink
+      - id: listExtended
+        color: 156
+        color2: 244
       - id: button
         color: 1   # blue
       - id: catBox
@@ -1137,6 +1148,7 @@ interfaces: #done
         color: 1   # blue
       - id: list
         color: 1   # white
+        color2: 239
         border: 1  # blue
       - id: button
         color: 1   # purple
@@ -1160,10 +1172,14 @@ interfaces: #done
         color: 1     # blue
       - id: text
         color: 1   # blue
-        color2: 239  # white
+        color2: 244  # white
       - id: list
-        color: 239   # purple
-        border: 1  # blue
+        color: 3
+        color2: 239
+        border: 1
+      - id: listExtended
+        color: 244
+        color2: 146
       - id: button
         color: 1   # purple
   - type: techTreeSelect
@@ -1578,6 +1594,7 @@ interfaces: #done
       - id: miniBase
         color: 8
         color2: 80
+        border: 159
   - type: battlescape
     palette: PAL_BATTLESCAPE
     elements:
@@ -1722,6 +1739,12 @@ interfaces: #done
       - id: visibleUnits
         pos: [300, -16]
         color: 1
+      - id: squadsightUnits
+        color: 86
+      - id: woundedUnits
+        color: 246
+      - id: passingOutUnits
+        color: 158
       - id: icons
         size: [320, 56]
         TFTDMode: true
@@ -1749,6 +1772,20 @@ interfaces: #done
         color: -1
         color2: 80
         border: -1
+      - id: disabledUserOption
+        color: 240
+      - id: medikitRed
+        color: 11
+      - id: medikitGreen
+        color: 5
+      - id: medikitBlue
+        color: 15
+      - id: medikitOrange
+        color: 8
+      - id: twoHandedRed
+        color: 9
+      - id: twoHandedGreen
+        color: 83
   - type: briefing
     elements:
       - id: window
@@ -1809,6 +1846,7 @@ interfaces: #done
         color2: 176    # red (overweight)
       - id: numStack
         color: 82
+        color2: 0
   - type: stats
     elements:
       - id: textName
@@ -1878,6 +1916,8 @@ interfaces: #done
         pos: [282, 28]
         color: 80
         TFTDMode: true
+      - id: emptySpace
+        color: 180
   - type: medikit
     elements:
       - id: textPK

@@ -29,6 +29,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleInterface.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
@@ -61,6 +62,9 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 
 	// Set palette
 	setInterface("selectNewManufacture");
+
+	_hiddenColor = _game->getMod()->getInterface("selectNewManufacture")->getElement("listExtended")->color;
+	_facilityRequiredColor = _game->getMod()->getInterface("selectNewManufacture")->getElement("listExtended")->color2;
 
 	add(_window, "window", "selectNewManufacture");
 	add(_btnQuickSearch, "button", "selectNewManufacture");
@@ -217,15 +221,15 @@ void NewManufactureListState::lstProdClickRight(Action *)
 
 		if (newState == RuleManufacture::MANU_STATUS_HIDDEN)
 		{
-			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 246); // purple
+			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), _hiddenColor);
 		}
 		else if (newState == RuleManufacture::MANU_STATUS_NEW)
 		{
-			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 218); // light blue
+			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), _lstManufacture->getSecondaryColor());
 		}
 		else
 		{
-			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), 208); // white
+			_lstManufacture->setRowColor(_lstManufacture->getSelectedRow(), _lstManufacture->getColor());
 		}
 	}
 }
@@ -417,17 +421,17 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 			// colors
 			if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
 			{
-				_lstManufacture->setRowColor(row, 213); // yellow
+				_lstManufacture->setRowColor(row, _facilityRequiredColor);
 			}
 			else
 			{
 				if (isHidden)
 				{
-					_lstManufacture->setRowColor(row, 246); // purple
+					_lstManufacture->setRowColor(row, _hiddenColor);
 				}
 				else if (isNew)
 				{
-					_lstManufacture->setRowColor(row, 218); // light blue
+					_lstManufacture->setRowColor(row, _lstManufacture->getSecondaryColor());
 					hasUnseen = true;
 				}
 			}

@@ -433,17 +433,8 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo) :
 	_colors[DISABLED_WEAPON] = dogfightInterface->getElement("disabledWeapon")->color;
 	_colors[DISABLED_RANGE] = dogfightInterface->getElement("disabledWeapon")->color2;
 	_colors[DISABLED_AMMO] = dogfightInterface->getElement("disabledAmmo")->color;
-	// make sure shield stuff has proper colors, since not part of vanilla interface
-	if (dogfightInterface->getElement("shieldRange") != 0)
-	{
-		_colors[SHIELD_MIN] = dogfightInterface->getElement("shieldRange")->color;
-		_colors[SHIELD_MAX] = dogfightInterface->getElement("shieldRange")->color2;
-	}
-	else
-	{
-		_colors[SHIELD_MIN] = 80; // a nice light blue
-		_colors[SHIELD_MAX] = 85; // darker blue to match
-	}
+	_colors[SHIELD_MIN] = dogfightInterface->getElement("shieldRange")->color;
+	_colors[SHIELD_MAX] = dogfightInterface->getElement("shieldRange")->color2;
 
 	for (int i = 0; i < _weaponNum; ++i)
 	{

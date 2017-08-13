@@ -20,6 +20,7 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleInterface.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -43,15 +44,14 @@ OptionsAdvancedState::OptionsAdvancedState(OptionsOrigin origin) : OptionsBaseSt
 	// Create objects
 	_lstOptions = new TextList(200, 136, 94, 8);
 
-	auto activeMaster = Options::getActiveMaster(); // FIXME: interface ruleset
 	if (origin != OPT_BATTLESCAPE)
 	{
-		_greyedOutColor = activeMaster == "xcom2" ? 50 : 100;
+		_greyedOutColor = _game->getMod()->getInterface("advancedMenu")->getElement("disabledUserOption")->color;
 		add(_lstOptions, "optionLists", "advancedMenu");
 	}
 	else
 	{
-		_greyedOutColor = activeMaster == "xcom2" ? 240 : 238;
+		_greyedOutColor = _game->getMod()->getInterface("battlescape")->getElement("disabledUserOption")->color;
 		add(_lstOptions, "optionLists", "battlescape");
 	}
 	centerAllSurfaces();

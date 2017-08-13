@@ -98,6 +98,19 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	const int x = screenWidth/2 - iconsWidth/2;
 	const int y = screenHeight - iconsHeight;
 
+	_indicatorTextColor = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->color;
+	_indicatorGreen = _game->getMod()->getInterface("battlescape")->getElement("squadsightUnits")->color;
+	_indicatorBlue = _game->getMod()->getInterface("battlescape")->getElement("woundedUnits")->color;
+	_indicatorPurple = _game->getMod()->getInterface("battlescape")->getElement("passingOutUnits")->color;
+
+	_twoHandedRed = _game->getMod()->getInterface("battlescape")->getElement("twoHandedRed")->color;
+	_twoHandedGreen = _game->getMod()->getInterface("battlescape")->getElement("twoHandedGreen")->color;
+
+	_medikitRed = _game->getMod()->getInterface("battlescape")->getElement("medikitRed")->color;
+	_medikitGreen = _game->getMod()->getInterface("battlescape")->getElement("medikitGreen")->color;
+	_medikitBlue = _game->getMod()->getInterface("battlescape")->getElement("medikitBlue")->color;
+	_medikitOrange = _game->getMod()->getInterface("battlescape")->getElement("medikitOrange")->color;
+
 	// Create buttonbar - this should be on the centerbottom of the screen
 	_icons = new InteractiveSurface(iconsWidth, iconsHeight, x, y);
 
@@ -497,7 +510,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 						Options::keyBattleCenterEnemy8,
 						Options::keyBattleCenterEnemy9,
 						Options::keyBattleCenterEnemy10};
-	Uint8 color = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->color;
 	for (int i = 0; i < VISIBLE_MAX; ++i)
 	{
 		std::ostringstream tooltip;
@@ -507,7 +519,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 		_btnVisibleUnit[i]->setTooltip(tooltip.str());
 		_btnVisibleUnit[i]->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 		_btnVisibleUnit[i]->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
-		_numVisibleUnit[i]->setColor(color);
+		_numVisibleUnit[i]->setColor(_indicatorTextColor);
 		_numVisibleUnit[i]->setValue(i+1);
 	}
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
@@ -1605,7 +1617,7 @@ void BattlescapeState::updateSoldierInfo()
 		if (Options::twoHandedIndicator)
 		{
 			_numTwoHandedIndicatorLeft->setVisible(leftHandItem->getRules()->isTwoHanded());
-			_numTwoHandedIndicatorLeft->setColor(leftHandItem->getRules()->isBlockingBothHands() ? 36: 52); // red or green
+			_numTwoHandedIndicatorLeft->setColor(leftHandItem->getRules()->isBlockingBothHands() ? _twoHandedRed: _twoHandedGreen);
 		}
 		if (leftHandItem->getRules()->getBattleType() == BT_MEDIKIT)
 		{
@@ -1637,7 +1649,7 @@ void BattlescapeState::updateSoldierInfo()
 		if (Options::twoHandedIndicator)
 		{
 			_numTwoHandedIndicatorRight->setVisible(rightHandItem->getRules()->isTwoHanded());
-			_numTwoHandedIndicatorRight->setColor(rightHandItem->getRules()->isBlockingBothHands() ? 36: 52); // red or green
+			_numTwoHandedIndicatorRight->setColor(rightHandItem->getRules()->isBlockingBothHands() ? _twoHandedRed : _twoHandedGreen);
 		}
 		if (rightHandItem->getRules()->getBattleType() == BT_MEDIKIT)
 		{
@@ -1753,7 +1765,7 @@ void BattlescapeState::blinkVisibleUnitButtons()
 		if (_btnVisibleUnit[i]->getVisible() == true)
 		{
 			_btnVisibleUnit[i]->drawRect(0, 0, 15, 12, 15);
-			int bgColor = i < _numberOfDirectlyVisibleUnits ? color : i < _numberOfEnemiesTotal ? 54 : i < _numberOfEnemiesTotalPlusWounded ? 134 : 198;
+			int bgColor = i < _numberOfDirectlyVisibleUnits ? color : i < _numberOfEnemiesTotal ? _indicatorGreen : i < _numberOfEnemiesTotalPlusWounded ? _indicatorBlue : _indicatorPurple;
 			_btnVisibleUnit[i]->drawRect(1, 1, 13, 10, bgColor);
 		}
 	}
@@ -2762,13 +2774,13 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
 			if (targetUnit)
 			{
 				if (targetUnit->getOriginalFaction() == FACTION_HOSTILE) {
-					_txtTooltip->setColor(Palette::blockOffset(2));
+					_txtTooltip->setColor(Palette::blockOffset(_medikitRed));
 					_txtTooltip->setText(tooltipExtra + L"; Target = ENEMY" + (onGround ? L" (on the ground)" : L""));
 				} else if (targetUnit->getOriginalFaction() == FACTION_NEUTRAL) {
-					_txtTooltip->setColor(Palette::blockOffset(6));
+					_txtTooltip->setColor(Palette::blockOffset(_medikitOrange));
 					_txtTooltip->setText(tooltipExtra + L"; Target = NEUTRAL" + (onGround ? L" (on the ground)" : L""));
 				} else if (targetUnit->getOriginalFaction() == FACTION_PLAYER) {
-					_txtTooltip->setColor(Palette::blockOffset(4));
+					_txtTooltip->setColor(Palette::blockOffset(_medikitGreen));
 					_txtTooltip->setText(tooltipExtra + L"; Target = FRIEND" + (onGround ? L" (on the ground)" : L""));
 				}
 			}
@@ -2778,7 +2790,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
 				if (weapon->getRules()->getAllowSelfHeal())
 				{
 					targetUnit = selectedUnit;
-					_txtTooltip->setColor(Palette::blockOffset(13));
+					_txtTooltip->setColor(Palette::blockOffset(_medikitBlue));
 					_txtTooltip->setText(tooltipExtra + L"; Target = YOURSELF");
 				}
 				else

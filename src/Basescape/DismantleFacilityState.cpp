@@ -95,8 +95,6 @@ DismantleFacilityState::DismantleFacilityState(Base *base, BaseView *view, BaseF
 	}
 
 	_txtRefundValue->setAlign(ALIGN_CENTER);
-	//_txtRefundValue->setColor(218); // # blue
-	_txtRefundValue->setSecondaryColor(208); // # white, FIXME: add to interface.rul as color2
 	_txtRefundValue->setText(tr("STR_REFUND_VALUE").arg(Text::formatFunding(refundValue)));
 	_txtRefundValue->setVisible(refundValue != 0);
 }

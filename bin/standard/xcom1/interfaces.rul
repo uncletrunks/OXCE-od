@@ -125,6 +125,8 @@ interfaces:
         color: 138   # yellow
         color2: 239  # bright green
         border: 133  # minty green
+      - id: disabledUserOption
+        color: 100   # grey
   - type: modsMenu
     elements:
       - id: optionLists
@@ -580,6 +582,9 @@ interfaces:
         color2: 7
       - id: disabledAmmo
         color: 24
+      - id: shieldRange
+        color: 80
+        color2: 85
       - id: previewTop
         pos: [0, 96]
         size: [160, 15]
@@ -713,6 +718,7 @@ interfaces:
         color: 138   # yellow
       - id: list
         color: 133
+        color2: 90
         border: 239
       - id: button1
         color: 133   # minty green
@@ -862,7 +868,7 @@ interfaces:
         color2: 208  # white
       - id: list
         color: 218   # blue
-        color2: 208  # white
+        color2: 241  # pink
       - id: button
         color: 218   # blue
   - type: buyMenu
@@ -1008,6 +1014,7 @@ interfaces:
         color: 246   # purple
       - id: text
         color: 218   # blue
+        color2: 208  # white
   - type: changeHeadquarters
     palette: PAL_BASESCAPE
     elements:
@@ -1045,7 +1052,11 @@ interfaces:
         color: 241   # pink
       - id: list
         color: 208   # white
+        color2: 218  # light blue
         border: 241  # pink
+      - id: listExtended
+        color: 246   # purple
+        color2: 213  # gold
       - id: button
         color: 218   # blue
       - id: catBox
@@ -1102,6 +1113,7 @@ interfaces:
         color: 218   # blue
       - id: list
         color: 208   # white
+        color2: 241  # pink
         border: 218  # blue
       - id: button
         color: 246   # purple
@@ -1129,7 +1141,11 @@ interfaces:
         color2: 208  # white
       - id: list
         color: 246   # purple
+        color2: 241  # pink
         border: 218  # blue
+      - id: listExtended
+        color: 208   # white
+        color2: 213  # gold
       - id: button
         color: 246   # purple
   - type: techTreeSelect
@@ -1546,6 +1562,7 @@ interfaces:
       - id: miniBase
         color: 48    # green
         color2: 32   # red
+        border: 218  # blue
   - type: battlescape
     palette: PAL_BATTLESCAPE
     elements:
@@ -1606,6 +1623,12 @@ interfaces:
       - id: visibleUnits
         pos: [300, -16]
         color: 16
+      - id: squadsightUnits
+        color: 54
+      - id: woundedUnits
+        color: 134
+      - id: passingOutUnits
+        color: 198
       - id: icons
         size: [320, 56]
       - id: numLayers
@@ -1621,6 +1644,8 @@ interfaces:
         color: -1
         color2: 14
         border: -1
+      - id: disabledUserOption
+        color: 238
       - id: messageWindowButtons
         color: -1
       - id: messageWindowBorder
@@ -1633,6 +1658,18 @@ interfaces:
         color: 24
         color2: 28
         border: 15
+      - id: medikitRed
+        color: 2
+      - id: medikitGreen
+        color: 4
+      - id: medikitBlue
+        color: 13
+      - id: medikitOrange
+        color: 6
+      - id: twoHandedRed
+        color: 36
+      - id: twoHandedGreen
+        color: 52
   - type: briefing
     elements:
       - id: window
@@ -1679,6 +1716,7 @@ interfaces:
         color: 8
       - id: numStack
         color: 66
+        color2: 32
   - type: stats
     elements:
       - id: textName
@@ -1731,6 +1769,8 @@ interfaces:
       # required
       - id: textLevel
         color: 64
+      - id: emptySpace
+        color: 260
   - type: medikit
     elements:
       - id: numPK

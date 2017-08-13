@@ -60,6 +60,9 @@ namespace OpenXcom
  */
 Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _base(base), _mouseOverItem(0), _groundOffset(0), _animFrame(0)
 {
+	_twoHandedRed = _game->getMod()->getInterface("battlescape")->getElement("twoHandedRed")->color;
+	_twoHandedGreen = _game->getMod()->getInterface("battlescape")->getElement("twoHandedGreen")->color;
+
 	_depth = _game->getSavedGame()->getSavedBattle()->getDepth();
 	_grid = new Surface(width, height, 0, 0);
 	_items = new Surface(width, height, 0, 0);
@@ -270,6 +273,7 @@ void Inventory::drawItems()
 	_woundedIndicators.clear();
 	_burningIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
+	Uint8 color2 = _game->getMod()->getInterface("inventory")->getElement("numStack")->color2;
 	if (_selUnit != 0)
 	{
 		SurfaceSet *texture = _game->getMod()->getSurfaceSet("BIGOBS.PCK");
@@ -306,7 +310,7 @@ void Inventory::drawItems()
 				{
 					NumberText text = NumberText(10, 5, 0, 0);
 					text.setPalette(getPalette());
-					text.setColor((*i)->getRules()->isBlockingBothHands() ? 36 : 52);
+					text.setColor((*i)->getRules()->isBlockingBothHands() ? _twoHandedRed : _twoHandedGreen);
 					text.setBordered(false);
 					text.setX((*i)->getSlot()->getX() + RuleInventory::HAND_W * RuleInventory::SLOT_W - 5);
 					text.setY((*i)->getSlot()->getY() + RuleInventory::HAND_H * RuleInventory::SLOT_H - 7);
@@ -376,7 +380,7 @@ void Inventory::drawItems()
 				_stackNumber->setY(((*i)->getSlot()->getY() + ((*i)->getSlotY() + (*i)->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H)-6);
 				_stackNumber->setValue(fatalWounds);
 				_stackNumber->draw();
-				_stackNumber->setColor(32); // red
+				_stackNumber->setColor(color2);
 				_stackNumber->blit(&stackLayer);
 			}
 

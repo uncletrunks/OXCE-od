@@ -49,9 +49,6 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 	Text text = Text(25, 9, 0, 0);
 	text.setPalette(_bg->getPalette());
 	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-
-	RuleInterface *rule = _game->getMod()->getInterface("inventory");
-
 	text.setHighContrast(highContrast);
 	for (int row = 0; row < 22; ++row)
 	{

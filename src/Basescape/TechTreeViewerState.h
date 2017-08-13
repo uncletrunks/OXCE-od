@@ -45,6 +45,7 @@ private:
 	Window *_window;
 	Text *_txtTitle, *_txtSelectedTopic, *_txtProgress;
 	TextList *_lstLeft, *_lstRight;
+	Uint8 _purple, _pink, _blue, _white, _gold;
 	std::string _selectedTopic;
 	int _selectedFlag;
 	std::vector<std::string> _leftTopics, _rightTopics;
