@@ -29,7 +29,6 @@
 #include "../Interface/TextEdit.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Action.h"
-#include "../Engine/Palette.h"
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/CraftWeapon.h"
@@ -155,12 +154,6 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	_edtCraft->setBig();
 	_edtCraft->setAlign(ALIGN_CENTER);
 	_edtCraft->onChange((ActionHandler)&CraftInfoState::edtCraftChange);
-
-	_txtDamage->setColor(Palette::blockOffset(13)+10);
-	_txtDamage->setSecondaryColor(Palette::blockOffset(13));
-
-	_txtFuel->setColor(Palette::blockOffset(13)+10);
-	_txtFuel->setSecondaryColor(Palette::blockOffset(13));
 
 	for(int i =0; i < _weaponNum; ++i)
 	{
