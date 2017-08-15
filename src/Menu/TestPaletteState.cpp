@@ -19,6 +19,7 @@
 #include "TestPaletteState.h"
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
+#include "../Interface/NumberText.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Mod/Mod.h"
@@ -46,6 +47,55 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 	_btnCancel->onMouseClick((ActionHandler)&TestPaletteState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&TestPaletteState::btnCancelClick, Options::keyCancel);
 
+	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
+	bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
+
+	// basic palette
+	if (ctrlPressed)
+	{
+		Surface surf = Surface(20, 11, 0, 0);
+		surf.setPalette(_bg->getPalette());
+		for (int row = 0; row < 16; ++row)
+		{
+			for (int column = 0; column < 16; ++column)
+			{
+				int index = row * 16 + column;
+				surf.setX(column * 20);
+				surf.setY(row * 11);
+				surf.drawRect(0, 0, 20, 11, index);
+				surf.blit(_bg);
+			}
+		}
+		return;
+	}
+
+	// small digits without/with border
+	if (shiftPressed)
+	{
+		NumberText text = NumberText(25, 9, 0, 0);
+		text.setPalette(_bg->getPalette());
+		text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+		text.setBordered(highContrast);
+		for (int row = 0; row < 22; ++row)
+		{
+			for (int column = 0; column < 12; ++column)
+			{
+				int index = row * 12 + column;
+				if (index > 255)
+				{
+					return;
+				}
+				text.setColor(index);
+				text.setX(column * 26);
+				text.setY(row * 9);
+				text.setValue(index);
+				text.blit(_bg);
+			}
+		}
+		return;
+	}
+
+	// normal text without/with high contrast
 	Text text = Text(25, 9, 0, 0);
 	text.setPalette(_bg->getPalette());
 	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
