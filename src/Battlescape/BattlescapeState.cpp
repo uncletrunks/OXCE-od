@@ -516,12 +516,16 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 		_btnVisibleUnit[i]->onMouseClick((ActionHandler)&BattlescapeState::btnVisibleUnitClick);
 		_btnVisibleUnit[i]->onKeyboardPress((ActionHandler)&BattlescapeState::btnVisibleUnitClick, buttons[i]);
 		tooltip << "STR_CENTER_ON_ENEMY_" << (i+1);
-		_btnVisibleUnit[i]->setTooltip(tooltip.str());
+		_txtVisibleUnitTooltip[i] = tooltip.str();
+		_btnVisibleUnit[i]->setTooltip(_txtVisibleUnitTooltip[i]);
 		_btnVisibleUnit[i]->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 		_btnVisibleUnit[i]->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 		_numVisibleUnit[i]->setColor(_indicatorTextColor);
 		_numVisibleUnit[i]->setValue(i+1);
 	}
+	_txtVisibleUnitTooltip[VISIBLE_MAX] = "STR_CENTER_ON_WOUNDED_FRIEND";
+	_txtVisibleUnitTooltip[VISIBLE_MAX+1] = "STR_CENTER_ON_SHOCKED_FRIEND";
+
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
 	_btnLaunch->onMouseClick((ActionHandler)&BattlescapeState::btnLaunchClick);
@@ -1677,6 +1681,7 @@ void BattlescapeState::updateSoldierInfo()
 	int j = 0;
 	for (std::vector<BattleUnit*>::iterator i = battleUnit->getVisibleUnits()->begin(); i != battleUnit->getVisibleUnits()->end() && j < VISIBLE_MAX; ++i)
 	{
+		_btnVisibleUnit[j]->setTooltip(_txtVisibleUnitTooltip[j]);
 		_btnVisibleUnit[j]->setVisible(true);
 		_numVisibleUnit[j]->setVisible(true);
 		_visibleUnit[j] = (*i);
@@ -1703,6 +1708,7 @@ void BattlescapeState::updateSoldierInfo()
 			}
 			if (!alreadyShown)
 			{
+				_btnVisibleUnit[j]->setTooltip(_txtVisibleUnitTooltip[j]);
 				_btnVisibleUnit[j]->setVisible(true);
 				_numVisibleUnit[j]->setVisible(true);
 				_visibleUnit[j] = (*i);
@@ -1721,6 +1727,7 @@ void BattlescapeState::updateSoldierInfo()
 		{
 			if ((*i)->getFaction() == FACTION_PLAYER && (*i)->getStatus() != STATUS_DEAD && (*i)->getFatalWounds() > 0)
 			{
+				_btnVisibleUnit[j]->setTooltip(_txtVisibleUnitTooltip[VISIBLE_MAX]);
 				_btnVisibleUnit[j]->setVisible(true);
 				_numVisibleUnit[j]->setVisible(true);
 				_visibleUnit[j] = (*i);
@@ -1741,6 +1748,7 @@ void BattlescapeState::updateSoldierInfo()
 			{
 				if ((*i)->getStunlevel() * 100 / (*i)->getHealth() >= 75)
 				{
+					_btnVisibleUnit[j]->setTooltip(_txtVisibleUnitTooltip[VISIBLE_MAX+1]);
 					_btnVisibleUnit[j]->setVisible(true);
 					_numVisibleUnit[j]->setVisible(true);
 					_visibleUnit[j] = (*i);
