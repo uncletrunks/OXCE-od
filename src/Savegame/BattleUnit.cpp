@@ -3178,12 +3178,26 @@ int BattleUnit::getMaxViewDistance(int baseVisibility, int nerf, int buff) const
 
 int BattleUnit::getMaxViewDistanceAtDark(const Armor *otherUnitArmor) const
 {
-	return getMaxViewDistance(_maxViewDistanceAtDark, otherUnitArmor->getCamouflageAtDark(), _armor->getAntiCamouflageAtDark());
+	if (otherUnitArmor)
+	{
+		return getMaxViewDistance(_maxViewDistanceAtDark, otherUnitArmor->getCamouflageAtDark(), _armor->getAntiCamouflageAtDark());
+	}
+	else
+	{
+		return _maxViewDistanceAtDark;
+	}
 }
 
 int BattleUnit::getMaxViewDistanceAtDay(const Armor *otherUnitArmor) const
 {
-	return getMaxViewDistance(_maxViewDistanceAtDay, otherUnitArmor->getCamouflageAtDay(), _armor->getAntiCamouflageAtDay());
+	if (otherUnitArmor)
+	{
+		return getMaxViewDistance(_maxViewDistanceAtDay, otherUnitArmor->getCamouflageAtDay(), _armor->getAntiCamouflageAtDay());
+	}
+	else
+	{
+		return _maxViewDistanceAtDay;
+	}
 }
 
 /**

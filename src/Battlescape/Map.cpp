@@ -1548,7 +1548,7 @@ int Map::reShade(Tile *tile)
 	{
 		if ((*i)->getFaction() == FACTION_PLAYER && !(*i)->isOut())
 		{
-			if (_save->getTileEngine()->distanceSq(tile->getPosition(), (*i)->getPosition(), false) <= (*i)->getArmor()->getVisibilityAtDark() * (*i)->getArmor()->getVisibilityAtDark())
+			if (_save->getTileEngine()->distanceSq(tile->getPosition(), (*i)->getPosition(), false) <= (*i)->getMaxViewDistanceAtDark(0) * (*i)->getMaxViewDistanceAtDark(0))
 			{
 				return tile->getShade() > _fadeShade ? _fadeShade : tile->getShade();
 			}
