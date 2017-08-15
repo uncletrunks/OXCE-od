@@ -2062,10 +2062,7 @@ void GeoscapeState::time1Day()
 				.arg(Text::formatFunding(income))
 				.arg(Text::formatFunding(maintenance))
 				.arg(Text::formatFunding(projection));
-			if (msg != L"STR_ECONOMY_WARNING")
-			{
-				popup(new CraftErrorState(this, msg, false));
-			}
+			popup(new CraftErrorState(this, msg, false));
 		}
 	}
 }

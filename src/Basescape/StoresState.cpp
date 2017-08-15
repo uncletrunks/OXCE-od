@@ -158,7 +158,7 @@ StoresState::StoresState(Base *base) : _base(base)
 	_txtItem->setText(tr("STR_ITEM"));
 
 	_txtQuantity->setText(tr("STR_QUANTITY_UC"));
-	_txtSize->setText(tr("SIZE"));
+	_txtSize->setText(tr("STR_SIZE_UC"));
 	_txtSpaceUsed->setText(tr("STR_SPACE_USED_UC"));
 
 	_lstStores->setColumns(4, 162, 40, 50, 34);

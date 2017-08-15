@@ -1,4 +1,20 @@
 en-US:
+#Extended+ BEGIN
+#=================== Basescape ===================
+#SoldierAvatarState.cpp
+  STR_AVATAR_NAME_1: "#01 Male, Blonde"
+  STR_AVATAR_NAME_2: "#02 Male, Brown hair"
+  STR_AVATAR_NAME_3: "#03 Male, Asian"
+  STR_AVATAR_NAME_4: "#04 Male, African"
+  STR_AVATAR_NAME_5: "#05 Female, Blonde"
+  STR_AVATAR_NAME_6: "#06 Female, Brown hair"
+  STR_AVATAR_NAME_7: "#07 Female, Asian"
+  STR_AVATAR_NAME_8: "#08 Female, African"
+#=================== Battlescape ===================
+#InventoryState.cpp
+  STR_PSI_SHORT: "PSI>{ALT}{0}/{1}"
+#Extended+ END
+#==================================================================================================================
   STR_AVENGER_UFOPEDIA: "TRANSPORTER AND COMBAT SPACECRAFT. THE ULTIMATE REPLICATION OF ALIEN TECHNOLOGY."
   STR_INTERCEPTOR_UFOPEDIA: "COMBAT AIRCRAFT WITH DUAL PULSE DETONATION ENGINES AND SPECIALLY SHIELDED ELECTRONIC SYSTEMS. THE BEST AVAILABLE EARTH BASED TECHNOLOGY."
   STR_LIGHTNING_UFOPEDIA: "TRANSPORTER AND COMBAT CRAFT. A CRUDE BUT EFFECTIVE REPLICATION OF ALIEN PROPULSION SYSTEMS."
@@ -416,7 +432,7 @@ en-US:
   STR_TIME_UNIT_COST: "TU COST"
   STR_DAMAGE_UC: "DAMAGE"
   STR_AMMO: "AMMO"
-  STR_SHOT_TYPE_AUTO: "Auto"
+  STR_SHOT_TYPE_AUTO: "Auto (x{0})"
   STR_SHOT_TYPE_SNAP: "Snap"
   STR_SHOT_TYPE_AIMED: "Aimed"
   STR_CONSTRUCTION_TIME: "Construction Time"

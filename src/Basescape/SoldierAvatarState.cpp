@@ -95,7 +95,7 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 
 	_txtTitle->setHighContrast(true);
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setText(tr("SELECT AVATAR FOR\n{0}").arg(s->getName()));
+	_txtTitle->setText(tr("STR_SELECT_AVATAR_FOR").arg(s->getName()));
 
 	_txtType->setHighContrast(true);
 	_txtType->setText(tr("STR_TYPE"));

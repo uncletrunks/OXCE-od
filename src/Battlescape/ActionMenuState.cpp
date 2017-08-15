@@ -540,7 +540,7 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			_game->getSavedGame()->getSavedBattle()->hitLog.str(L"");
 			_game->getSavedGame()->getSavedBattle()->hitLog.clear();
 			// log weapon
-			_game->getSavedGame()->getSavedBattle()->hitLog << "Weapon: " << tr(weapon->getType()) << "\n\n";
+			_game->getSavedGame()->getSavedBattle()->hitLog << tr("STR_HIT_LOG_WEAPON") << L": " << tr(weapon->getType()) << L"\n\n";
 		}
 	}
 }

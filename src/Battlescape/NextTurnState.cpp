@@ -211,7 +211,7 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	// start new hit log
 	if (message.empty())
 	{
-		_battleGame->hitLog.str(tr("STR_NEW_TURN"));
+		_battleGame->hitLog.str(tr("STR_HIT_LOG_NEW_TURN"));
 	}
 	else
 	{

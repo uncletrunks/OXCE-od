@@ -142,19 +142,19 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 
 	// populate sort options
 	std::vector<std::wstring> sortOptions;
-	sortOptions.push_back(tr("ORIGINAL ORDER"));
+	sortOptions.push_back(tr("STR_ORIGINAL_ORDER"));
 	_sortFunctors.push_back(NULL);
 
 #define PUSH_IN(strId, functor) \
 	sortOptions.push_back(tr(strId)); \
 	_sortFunctors.push_back(new SortFunctor(_game, functor));
 
-	PUSH_IN("ID", idStat);
-	PUSH_IN("FIRST LETTER", nameStat);
-	PUSH_IN("RANK", rankStat);
-	PUSH_IN("MISSIONS", missionsStat);
-	PUSH_IN("KILLS", killsStat);
-	PUSH_IN("WOUND RECOVERY", woundRecoveryStat);
+	PUSH_IN("STR_ID", idStat);
+	PUSH_IN("STR_FIRST_LETTER", nameStat);
+	PUSH_IN("ST_RANK", rankStat);
+	PUSH_IN("STR_MISSIONS2", missionsStat);
+	PUSH_IN("STR_KILLS2", killsStat);
+	PUSH_IN("STR_WOUND_RECOVERY2", woundRecoveryStat);
 	PUSH_IN("STR_TIME_UNITS", tuStat);
 	PUSH_IN("STR_STAMINA", staminaStat);
 	PUSH_IN("STR_HEALTH", healthStat);
@@ -172,7 +172,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_cbxSortBy->setOptions(sortOptions);
 	_cbxSortBy->setSelected(0);
 	_cbxSortBy->onChange((ActionHandler)&SoldiersState::cbxSortByChange);
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 
 	_lstSoldiers->setArrowColumn(176, ARROW_VERTICAL);
 	_lstSoldiers->setColumns(4, 112, 80, 72, 16);
@@ -317,7 +317,7 @@ void SoldiersState::lstItemsLeftArrowClick(Action *action)
 			moveSoldierUp(action, row, true);
 		}
 	}
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 	_cbxSortBy->setSelected(-1);
 }
 
@@ -370,7 +370,7 @@ void SoldiersState::lstItemsRightArrowClick(Action *action)
 			moveSoldierDown(action, row, true);
 		}
 	}
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 	_cbxSortBy->setSelected(-1);
 }
 

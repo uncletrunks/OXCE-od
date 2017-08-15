@@ -95,19 +95,19 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 
 	// populate sort options
 	std::vector<std::wstring> sortOptions;
-	sortOptions.push_back(tr("ORIGINAL ORDER"));
+	sortOptions.push_back(tr("STR_ORIGINAL_ORDER"));
 	_sortFunctors.push_back(NULL);
 
 #define PUSH_IN(strId, functor) \
 	sortOptions.push_back(tr(strId)); \
 	_sortFunctors.push_back(new SortFunctor(_game, functor));
 
-	PUSH_IN("ID", idStat);
-	PUSH_IN("FIRST LETTER", nameStat);
-	PUSH_IN("RANK", rankStat);
-	PUSH_IN("MISSIONS", missionsStat);
-	PUSH_IN("KILLS", killsStat);
-	PUSH_IN("WOUND RECOVERY", woundRecoveryStat);
+	PUSH_IN("STR_ID", idStat);
+	PUSH_IN("STR_FIRST_LETTER", nameStat);
+	PUSH_IN("STR_RANK", rankStat);
+	PUSH_IN("STR_MISSIONS2", missionsStat);
+	PUSH_IN("STR_KILLS2", killsStat);
+	PUSH_IN("STR_WOUND_RECOVERY2", woundRecoveryStat);
 	PUSH_IN("STR_TIME_UNITS", tuStat);
 	PUSH_IN("STR_STAMINA", staminaStat);
 	PUSH_IN("STR_HEALTH", healthStat);
@@ -125,7 +125,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_cbxSortBy->setOptions(sortOptions);
 	_cbxSortBy->setSelected(0);
 	_cbxSortBy->onChange((ActionHandler)&CraftArmorState::cbxSortByChange);
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 
 	_lstSoldiers->setArrowColumn(174, ARROW_VERTICAL);
 	_lstSoldiers->setColumns(4, 106, 84, 74, 16);
@@ -284,7 +284,7 @@ void CraftArmorState::lstItemsLeftArrowClick(Action *action)
 			moveSoldierUp(action, row, true);
 		}
 	}
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 	_cbxSortBy->setSelected(-1);
 }
 
@@ -337,7 +337,7 @@ void CraftArmorState::lstItemsRightArrowClick(Action *action)
 			moveSoldierDown(action, row, true);
 		}
 	}
-	_cbxSortBy->setText(tr("SORT BY..."));
+	_cbxSortBy->setText(tr("STR_SORT_BY"));
 	_cbxSortBy->setSelected(-1);
 }
 

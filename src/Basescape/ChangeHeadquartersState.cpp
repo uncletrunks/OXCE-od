@@ -50,7 +50,7 @@ ChangeHeadquartersState::ChangeHeadquartersState(Base *base) : _base(base)
 	_btnCancel->onKeyboardPress((ActionHandler)&ChangeHeadquartersState::btnCancelClick, Options::keyCancel);
 
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setText(tr("New HQ"));
+	_txtTitle->setText(tr("STR_MOVE_HQ_TO"));
 
 	_txtBase->setAlign(ALIGN_CENTER);
 	_txtBase->setText(_base->getName());

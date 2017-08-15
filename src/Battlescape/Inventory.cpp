@@ -684,7 +684,7 @@ void Inventory::mouseClick(Action *action, State *state)
 						// cannot move fixed items with Ctrl+click
 						if (item->getRules()->isFixed())
 						{
-							_warning->showMessage(_game->getLanguage()->getString("Fixed items cannot be moved!"));
+							_warning->showMessage(_game->getLanguage()->getString("STR_FIXED_ITEMS_CANNOT_BE_MOVED"));
 							return;
 						}
 

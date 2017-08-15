@@ -141,6 +141,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 				else if ((*j)->getLowFuel() || (*j)->getMissionComplete() || (*j)->getDestination() == (Target*)(*j)->getBase())
 				{
 					ssStatus << tr("STR_RETURNING");
+					//ssStatus << tr("STR_RETURNING_TO_BASE"); // vanilla craft info
 				}
 				else
 				{
@@ -149,9 +150,14 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 					AlienBase *b = dynamic_cast<AlienBase*>((*j)->getDestination());
 					if (u != 0)
 					{
-						if ((*j)->isInDogfight() || u->getStatus() == Ufo::FLYING)
+						if ((*j)->isInDogfight())
+						{
+							ssStatus << tr("STR_TAILING_UFO");
+						}
+						else if (u->getStatus() == Ufo::FLYING)
 						{
 							ssStatus << tr("STR_INTERCEPTING");
+							//ssStatus << tr("STR_INTERCEPTING_UFO").arg(u->getId()); // vanilla craft info
 						}
 						else
 						{

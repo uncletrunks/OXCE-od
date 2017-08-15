@@ -83,9 +83,9 @@ CraftPilotSelectState::CraftPilotSelectState(Base *base, size_t craft) : _base(b
 
 	_txtName->setText(tr("STR_NAME"));
 
-	_txtFiringAcc->setText(tr("ACC"));
-	_txtReactions->setText(tr("REA"));
-	_txtBravery->setText(tr("BRA"));
+	_txtFiringAcc->setText(tr("STR_FIRING_ACCURACY_ABBREVIATION"));
+	_txtReactions->setText(tr("STR_REACTIONS_ABBREVIATION"));
+	_txtBravery->setText(tr("STR_BRAVERY_ABBREVIATION"));
 
 	_lstPilot->setColumns(4, 124, 20, 20, 20);
 	_lstPilot->setAlign(ALIGN_RIGHT);

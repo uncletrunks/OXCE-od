@@ -2772,21 +2772,24 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
 			}
 
 			_currentTooltip = action->getSender()->getTooltip();
-			std::wstring tooltipExtra = tr(_currentTooltip);
+			std::wostringstream tooltipExtra;
+			tooltipExtra << tr(_currentTooltip);
 
 			// target unit found
 			if (targetUnit)
 			{
 				if (targetUnit->getOriginalFaction() == FACTION_HOSTILE) {
 					_txtTooltip->setColor(Palette::blockOffset(_medikitRed));
-					_txtTooltip->setText(tooltipExtra + L"; Target = ENEMY" + (onGround ? L" (on the ground)" : L""));
+					tooltipExtra << tr("STR_TARGET_ENEMY");
 				} else if (targetUnit->getOriginalFaction() == FACTION_NEUTRAL) {
 					_txtTooltip->setColor(Palette::blockOffset(_medikitOrange));
-					_txtTooltip->setText(tooltipExtra + L"; Target = NEUTRAL" + (onGround ? L" (on the ground)" : L""));
+					tooltipExtra << tr("STR_TARGET_NEUTRAL");
 				} else if (targetUnit->getOriginalFaction() == FACTION_PLAYER) {
 					_txtTooltip->setColor(Palette::blockOffset(_medikitGreen));
-					_txtTooltip->setText(tooltipExtra + L"; Target = FRIEND" + (onGround ? L" (on the ground)" : L""));
+					tooltipExtra << tr("STR_TARGET_FRIEND");
 				}
+				if (onGround) tooltipExtra << tr("STR_TARGET_ON_THE_GROUND");
+				_txtTooltip->setText(tooltipExtra.str());
 			}
 			else
 			{
@@ -2795,7 +2798,9 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
 				{
 					targetUnit = selectedUnit;
 					_txtTooltip->setColor(Palette::blockOffset(_medikitBlue));
-					_txtTooltip->setText(tooltipExtra + L"; Target = YOURSELF");
+					tooltipExtra << tr("STR_TARGET_YOURSELF");
+					if (onGround) tooltipExtra << tr("STR_TARGET_ON_THE_GROUND");
+					_txtTooltip->setText(tooltipExtra.str());
 				}
 				else
 				{

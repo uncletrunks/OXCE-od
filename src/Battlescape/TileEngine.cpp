@@ -1734,7 +1734,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 				_save->hitLog.str(L"");
 				_save->hitLog.clear();
 				// log weapon?
-				_save->hitLog << "Reaction fire...\n\n";
+				_save->hitLog << _save->getBattleGame()->tr("STR_HIT_LOG_REACTION_FIRE") << L"\n\n";
 
 				if (action.type == BA_HIT)
 				{
@@ -1976,15 +1976,15 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 	const int damagePercent = (totalDamage * 100) / target->getBaseStats()->health;
 	if (damagePercent <= 0)
 	{
-		_save->hitLog << "0 ";
+		_save->hitLog << _save->getBattleGame()->tr("STR_HIT_LOG_NO_DAMAGE");
 	}
 	else if (damagePercent <= 20)
 	{
-		_save->hitLog << "hit ";
+		_save->hitLog << _save->getBattleGame()->tr("STR_HIT_LOG_SMALL_DAMAGE");
 	}
 	else
 	{
-		_save->hitLog << "hit! ";
+		_save->hitLog << _save->getBattleGame()->tr("STR_HIT_LOG_BIG_DAMAGE");
 	}
 
 	if (attack.attacker && target->getFaction() != FACTION_PLAYER)
@@ -3627,7 +3627,7 @@ bool TileEngine::meleeAttack(BattleAction *action)
 		}
 	}
 	// hit log - new melee attack
-	_save->hitLog << "=> ";
+	_save->hitLog << _save->getBattleGame()->tr("STR_HIT_LOG_NEW_BULLET");
 	if (!RNG::percent(hitChance))
 	{
 		return false;
