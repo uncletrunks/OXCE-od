@@ -119,7 +119,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_map = new Map(_game, screenWidth, screenHeight, 0, 0, visibleMapHeight);
 
 	_numLayers = new NumberText(3, 5, x + 232, y + 6);
-	_txtKneelStatus = new Text(8, 8, x + 137, y + 15);
 	_rank = new Surface(26, 23, x + 107, y + 33);
 
 	// Create buttons
@@ -248,7 +247,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	add(_btnNextStop, "buttonNextStop", "battlescape", _icons);
 	add(_btnShowLayers, "buttonShowLayers", "battlescape", _icons);
 	add(_numLayers, "numLayers", "battlescape", _icons);
-	add(_txtKneelStatus, "txtKneelStatus", "battlescape", _icons);
 	add(_btnHelp, "buttonHelp", "battlescape", _icons);
 	add(_btnEndTurn, "buttonEndTurn", "battlescape", _icons);
 	add(_btnAbort, "buttonAbort", "battlescape", _icons);
@@ -323,8 +321,6 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 		_numAmmoLeft[slot]->setValue(999);
 		_numAmmoRight[slot]->setValue(999);
 	}
-	_txtKneelStatus->setColor(Palette::blockOffset(1)-2);
-	_txtKneelStatus->setText(L"");
 
 	_numMedikitLeft1->setValue(999);
 	_numMedikitLeft2->setValue(999);
