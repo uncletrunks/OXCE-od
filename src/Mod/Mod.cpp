@@ -3688,9 +3688,6 @@ void Mod::modResources()
 			_surfaces["UNIBORD.PCK"]->setPixel(x, y, _surfaces["UNIBORD.PCK"]->getPixel(x, y - 8));
 			_surfaces["UNIBORD.PCK"]->setPixel(x, y - 8, 0);
 		}
-
-	// handob2 is used for all the left handed sprites.
-	_sets["HANDOB2.PCK"] = new SurfaceSet(*_sets["HANDOB.PCK"]);
 }
 
 /**
