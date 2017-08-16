@@ -1648,12 +1648,15 @@ void SavedGame::getDependableCraft(std::vector<RuleCraft *> & dependables, const
 	for (std::vector<std::string>::const_iterator iter = craftlist.begin(); iter != craftlist.end(); ++iter)
 	{
 		RuleCraft *craftItem = mod->getCraft(*iter);
-		const std::vector<std::string> &reqs = craftItem->getRequirements();
-		if (std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
+		if (craftItem->getBuyCost() != 0)
 		{
-			if (isResearched(craftItem->getRequirements()))
+			const std::vector<std::string> &reqs = craftItem->getRequirements();
+			if (std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
 			{
-				dependables.push_back(craftItem);
+				if (isResearched(craftItem->getRequirements()))
+				{
+					dependables.push_back(craftItem);
+				}
 			}
 		}
 	}
