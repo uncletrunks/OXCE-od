@@ -65,26 +65,23 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 	// Set palette
 	setPalette("PAL_BATTLESCAPE");
 
-	add(_window, "messageWindowBorder", "battlescape");
+	add(_window, "window", "soldierAvatar");
 	add(_soldierSurface);
-	add(_btnCancel, "messageWindowButtons", "battlescape");
-	add(_btnOk, "messageWindowButtons", "battlescape");
-	add(_txtTitle, "messageWindows", "battlescape");
-	add(_txtType, "messageWindows", "battlescape");
-	add(_lstAvatar, "optionLists", "battlescape");
+	add(_btnCancel, "button", "soldierAvatar");
+	add(_btnOk, "button", "soldierAvatar");
+	add(_txtTitle, "text", "soldierAvatar");
+	add(_txtType, "text", "soldierAvatar");
+	add(_lstAvatar, "list", "soldierAvatar");
 
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setHighContrast(true);
-	_window->setBackground(_game->getMod()->getSurface("TAC00.SCR"));
+	_window->setBackground(_game->getMod()->getSurface("BACK14.SCR"));
 
-	_btnCancel->setHighContrast(true);
 	_btnCancel->setText(tr("STR_CANCEL_UC"));
 	_btnCancel->onMouseClick((ActionHandler)&SoldierAvatarState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&SoldierAvatarState::btnCancelClick, Options::keyCancel);
 
-	_btnOk->setHighContrast(true);
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&SoldierAvatarState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&SoldierAvatarState::btnOkClick, Options::keyOk);
@@ -93,14 +90,11 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 	_origAvatar = SoldierAvatar("original", s->getGender(), s->getLook(), s->getLookVariant());
 	initPreview(s);
 
-	_txtTitle->setHighContrast(true);
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_SELECT_AVATAR_FOR").arg(s->getName()));
 
-	_txtType->setHighContrast(true);
 	_txtType->setText(tr("STR_TYPE"));
 
-	_lstAvatar->setHighContrast(true);
 	_lstAvatar->setColumns(1, 125);
 	_lstAvatar->setSelectable(true);
 	_lstAvatar->setBackground(_window);
@@ -124,6 +118,9 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 		_lstAvatar->addRow(1, tr(i->getAvatarName()).c_str());
 	}
 	_lstAvatar->onMouseClick((ActionHandler)&SoldierAvatarState::lstAvatarClick);
+
+	// switch to battlescape theme if called from inventory
+	applyBattlescapeTheme();
 }
 
 /**
