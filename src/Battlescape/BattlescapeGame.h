@@ -187,8 +187,8 @@ public:
 	void launchAction();
 	/// Handler for the psi button.
 	void psiButtonAction();
-	/// Handle psi attack.
-	bool psiAttack(BattleAction *action);
+	/// Handle psi attack result message.
+	void psiAttackMessage(BattleActionAttack attack, BattleUnit *victim);
 	/// Moves a unit up or down.
 	void moveUpDown(BattleUnit *unit, int dir);
 	/// Requests the end of the turn (wait for explosions etc to really end the turn).

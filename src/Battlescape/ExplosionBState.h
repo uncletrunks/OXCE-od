@@ -40,6 +40,7 @@ private:
 	Position _center;
 	const RuleDamageType *_damageType;
 	Tile *_tile;
+	BattleUnit *_targetPsiOrHit;
 	int _power;
 	int _radius;
 	int _range;
