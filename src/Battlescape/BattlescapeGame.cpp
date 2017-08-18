@@ -171,7 +171,7 @@ BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit
 		const auto battleType = item->getRules()->getBattleType();
 		if (battleType == BT_PROXIMITYGRENADE || battleType == BT_GRENADE)
 		{
-			if (attacker && weapon_item->getPreviousOwner())
+			if (!attacker && weapon_item->getPreviousOwner())
 			{
 				attacker = weapon_item->getPreviousOwner();
 			}
