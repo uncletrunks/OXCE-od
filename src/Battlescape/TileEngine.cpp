@@ -426,8 +426,8 @@ void TileEngine::calculateLighting(LightLayers layer, Position position, int eve
 						cache.height = 24;
 					}
 				}
-				cache.smoke = tile->getSmoke();
-				cache.fire = tile->getFire();
+				cache.smoke = (tile->getSmoke() > 0);
+				cache.fire = (tile->getFire() > 0);
 				cache.blockUp = (verticalBlockage(tile, _save->getTile(currPos + Position{ 0, 0, 1 }), DT_NONE) > 127);
 				cache.blockDown = (verticalBlockage(tile, _save->getTile(currPos + Position{ 0, 0, -1 }), DT_NONE) > 127);
 				for (int dir = 0; dir < 8; ++dir)
@@ -516,6 +516,7 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 	const auto offsetTarget = (accuracy / 2 + Position(-1, -1, 0));
 	const auto clasicLighting = !(getEnhancedLighting() & ((fire ? 1 : 0) | (items ? 2 : 0) | (units ? 4 : 0)));
 	const auto topVoxel = (_blockVisibility[_save->getTileIndex(center)].blockUp ? (center.z + 1) : _save->getMapSizeZ()) * accuracy.z - 1;
+	const auto maxFirePower = std::min(15, getMaxStaticLightDistance() - 1);
 
 	iterateTiles(
 		_save,
@@ -616,17 +617,17 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 				}
 				if (steps > 1)
 				{
-					if (height < cache.height)
+					if (cache.fire && fire && light <= maxFirePower) //some tile on path have fire, skip further calculation because destionation tile should be lighted by this fire.
 					{
-						light -= 2;
+						result = true;
 					}
-					if (cache.smoke)
+					else if (cache.smoke)
 					{
 						light -= 1;
 					}
-					if (fire && cache.fire && light <= 15)
+					if (height < cache.height)
 					{
-						result = false;
+						light -= 2;
 					}
 				}
 				++steps;
@@ -2077,20 +2078,17 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 	if (terrainChanged || effectGenerated)
 	{
 		applyGravity(tile);
-	}
-	if (terrainChanged) //part of tile destroyed
-	{
 		auto layer = LL_ITEMS;
-		if (part == V_FLOOR && _save->getTile(tilePos - Position(0, 0, 1))) {
+		if (part == V_FLOOR && _save->getTile(tilePos - Position(0, 0, 1)))
+		{
 			layer = LL_AMBIENT; // roof destroyed, update sunlight in this tile column
 		}
+		else if (effectGenerated)
+		{
+			layer = LL_FIRE; // spawned fire or smoke that can block light.
+		}
 		calculateLighting(layer, tilePos, 1, true);
-		calculateFOV(tilePos, 1, true, true); //append any new units or tiles revealed by the terrain change
-	}
-	else if (effectGenerated)
-	{
-		calculateLighting(LL_FIRE, tilePos, 1);
-		calculateFOV(tilePos, 1, false); //skip updating of tiles
+		calculateFOV(tilePos, 1, true, terrainChanged); //append any new units or tiles revealed by the terrain change
 	}
 	else
 	{
