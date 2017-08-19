@@ -504,6 +504,11 @@ bool ProjectileFlyBState::createNewProjectile()
 			return false;
 		}
 	}
+
+	if (!projectile->getActionResult().empty())
+	{
+		_action.result = projectile->getActionResult();
+	}
 	
 	if (_action.type != BA_THROW && _action.type != BA_LAUNCH)
 		_unit->getStatistics()->shotsFiredCounter++;
@@ -736,6 +741,7 @@ void ProjectileFlyBState::think()
 								{
 									ai->setWasHitBy(_unit);
 									_unit->setTurnsSinceSpotted(0);
+									_unit->setTurnsLeftSpottedForSnipers(std::max(victim->getUnitRules()->getSpotter(), _unit->getTurnsLeftSpottedForSnipers()));
 								}
 							}
 						}

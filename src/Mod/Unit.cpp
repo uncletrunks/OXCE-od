@@ -27,7 +27,7 @@ namespace OpenXcom
  * Creates a certain type of unit.
  * @param type String defining the type.
  */
-Unit::Unit(const std::string &type) : _type(type), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false)
+Unit::Unit(const std::string &type) : _type(type), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false)
 {
 }
 
@@ -66,6 +66,8 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_value = node["value"].as<int>(_value);
 	_intelligence = node["intelligence"].as<int>(_intelligence);
 	_aggression = node["aggression"].as<int>(_aggression);
+	_spotter = node["spotter"].as<int>(_spotter);
+	_sniper = node["sniper"].as<int>(_sniper);
 	_energyRecovery = node["energyRecovery"].as<int>(_energyRecovery);
 	_specab = (SpecialAbility)node["specab"].as<int>(_specab);
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
@@ -230,6 +232,25 @@ int Unit::getIntelligence() const
 int Unit::getAggression() const
 {
 	return _aggression;
+}
+
+/**
+ * Gets the spotter score. Determines how many turns sniper AI units can act on this unit seeing your troops.
+ * @return The unit's spotter value.
+ */
+int Unit::getSpotter() const
+{
+	// Lazy balance - use -1 to make this the same as intelligence value
+	return (_spotter == -1) ? _intelligence : _spotter;
+}
+
+/**
+ * Gets the sniper score. Determines the chances of firing from out of LOS on spotted units.
+ * @return The unit's spotter value.
+ */
+int Unit::getSniper() const
+{
+	return _sniper;
 }
 
 /**

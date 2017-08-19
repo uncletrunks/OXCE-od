@@ -142,6 +142,7 @@ private:
 	RuleDamageType _damageType, _meleeType;
 	RuleItemAction _confAimed, _confAuto, _confSnap, _confMelee;
 	int _accuracyUse, _accuracyMind, _accuracyPanic, _accuracyThrow, _accuracyCloseQuarters;
+	int _noLOSAccuracyPenalty;
 	RuleItemUseCost _costUse, _costMind, _costPanic, _costThrow, _costPrime, _costUnprime;
 	int _clipSize, _specialChance, _tuLoad[AmmoSlotMax], _tuUnload[AmmoSlotMax];
 	BattleType _battleType;
@@ -338,6 +339,8 @@ public:
 	int getAccuracyThrow() const;
 	/// Gets the item's close quarters combat accuracy.
 	int getAccuracyCloseQuarters(Mod *mod) const;
+	/// Get penalty for firing this weapon on out-of-LOS targets
+	int getNoLOSAccuracyPenalty(Mod *mod) const;
 
 	/// Gets the item's aimed shot cost.
 	RuleItemUseCost getCostAimed() const;

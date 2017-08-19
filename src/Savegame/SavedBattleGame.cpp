@@ -1017,7 +1017,7 @@ void SavedBattleGame::endTurn()
 
 	if (_side == FACTION_PLAYER)
 	{
-		// update the "number of turns since last spotted"
+		// update the "number of turns since last spotted" and the number of turns left sniper AI knows about player units
 		for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
 		{
 			if ((*i)->getTurnsSinceSpotted() < 255)
@@ -1027,6 +1027,11 @@ void SavedBattleGame::endTurn()
 			if (_cheating && (*i)->getFaction() == FACTION_PLAYER && !(*i)->isOut())
 			{
 				(*i)->setTurnsSinceSpotted(0);
+			}
+
+			if ((*i)->getTurnsLeftSpottedForSnipers() != 0)
+			{
+				(*i)->setTurnsLeftSpottedForSnipers((*i)->getTurnsLeftSpottedForSnipers() - 1);
 			}
 		}
 	}

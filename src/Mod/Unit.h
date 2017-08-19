@@ -66,7 +66,7 @@ private:
 	int _standHeight, _kneelHeight, _floatHeight;
 	std::vector<int> _deathSound;
 	int _value, _aggroSound, _moveSound;
-	int _intelligence, _aggression, _energyRecovery;
+	int _intelligence, _aggression, _spotter, _sniper, _energyRecovery;
 	SpecialAbility _specab;
 	std::string _spawnUnit;
 	bool _livingWeapon;
@@ -109,6 +109,10 @@ public:
 	int getIntelligence() const;
 	/// Gets the aggression. Determines the chance of revenge and taking cover.
 	int getAggression() const;
+	/// Gets the spotter score. This is the number of turns sniper AI units can use spotting info from this unit.
+	int getSpotter() const;
+	/// Gets the sniper score. Determines chance of acting on information gained by spotter units.
+	int getSniper() const;
 	/// Gets the alien's special ability.
 	int getSpecialAbility() const;
 	/// Gets the unit's spawn unit.

@@ -112,7 +112,7 @@ private:
 	int _moraleRestored;
 	int _coverReserve;
 	BattleUnit *_charging;
-	int _turnsSinceSpotted;
+	int _turnsSinceSpotted, _turnsLeftSpottedForSnipers;
 	std::string _spawnUnit;
 	std::string _activeHand;
 	BattleUnitStatistics* _statistics;
@@ -498,6 +498,10 @@ public:
 	void setTurnsSinceSpotted (int turns);
 	/// Set how many turns this unit will be exposed for.
 	int getTurnsSinceSpotted() const;
+	/// Set how many turns left snipers know about this target.
+	void setTurnsLeftSpottedForSnipers (int turns);
+	/// Get how many turns left snipers know about this target.
+	int  getTurnsLeftSpottedForSnipers() const;
 	/// Get this unit's original faction
 	UnitFaction getOriginalFaction() const;
 	/// call this after the default copy constructor deletes the cache?

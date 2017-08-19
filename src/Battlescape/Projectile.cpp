@@ -320,6 +320,34 @@ void Projectile::applyAccuracy(Position origin, Position *target, double accurac
 	else
 		zShift = xyShift + zDist / 2;
 
+	// Apply penalty for having no LOS to target
+	int noLOSAccuracyPenalty = _action.weapon->getRules()->getNoLOSAccuracyPenalty(_mod);
+	if (noLOSAccuracyPenalty != -1)
+	{
+		bool hasLOS = false;
+		BattleUnit *bu = _action.actor;
+		BattleUnit *targetUnit = _save->getTile(target->toTile())->getUnit();
+
+		_save->getTileEngine()->calculateTilesInFOV(bu, target->toTile(), 1);
+		if (targetUnit)
+		{
+			hasLOS = bu->hasVisibleUnit(targetUnit);
+		}
+		else
+		{
+			hasLOS = bu->hasVisibleTile(_save->getTile(target->toTile()));
+		}
+
+		if (!hasLOS)
+		{
+			accuracy = accuracy * noLOSAccuracyPenalty / 100;
+			if (_save->getSide() == FACTION_PLAYER) // Only show message during player's turn
+			{
+				_action.result = "STR_NO_LOS_PENALTY";
+			}
+		}
+	}
+
 	int deviation = RNG::generate(0, 100) - (accuracy * 100);
 
 	if (deviation >= 0)
@@ -447,6 +475,16 @@ Position Projectile::getOrigin() const
 Position Projectile::getTarget() const
 {
 	return _action.target;
+}
+
+/**
+ * Gets the result for the battle action
+ * Used when the no-LOS penalty applies
+ * @return action result string
+ */
+std::string Projectile::getActionResult() const
+{
+	return _action.result;
 }
 
 /**

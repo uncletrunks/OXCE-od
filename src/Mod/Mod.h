@@ -154,10 +154,12 @@ private:
 	int _costHireEngineer, _costHireScientist;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
+	int _aiFireChoiceIntelCoeff, _aiFireChoiceAggroCoeff;
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor, _minReactionAccuracy;
 	int _chanceToStopRetaliation;
 	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
 	int _enableCloseQuartersCombat, _closeQuartersAccuracyGlobal, _closeQuartersTuCostGlobal, _closeQuartersEnergyCostGlobal;
+	int _noLOSAccuracyPenaltyGlobal;
 	int _surrenderMode;
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
@@ -418,6 +420,10 @@ public:
 	int getAIUseDelayMelee() const    {return _aiUseDelayMelee;}
 	/// Gets first turn when AI can use psionic abilities.
 	int getAIUseDelayPsionic() const  {return _aiUseDelayPsionic;}
+	/// Gets how much AI intelligence should be used to determine firing mode for sniping.
+	int getAIFireChoiceIntelCoeff() const {return _aiFireChoiceIntelCoeff;}
+	/// Gets how much AI aggression should be used to determine firing mode for sniping.
+	int getAIFireChoiceAggroCoeff() const {return _aiFireChoiceAggroCoeff;}
 	/// Gets maximum supported lookVariant (0-15)
 	int getMaxLookVariant() const  {return abs(_maxLookVariant) % 16;}
 	/// Gets the threshold for too much smoke (vanilla default = 10).
@@ -440,6 +446,8 @@ public:
 	int getCloseQuartersTuCostGlobal() const { return _closeQuartersTuCostGlobal; }
 	/// Gets the default close quarters combat energy cost (default = 8).
 	int getCloseQuartersEnergyCostGlobal() const { return _closeQuartersEnergyCostGlobal; }
+	/// Gets the default accuracy penalty for having no LOS to the target (default = 0 is no penalty)
+	int getNoLOSAccuracyPenaltyGlobal() const { return _noLOSAccuracyPenaltyGlobal; }
 	/// Gets the surrender mode (default = 0).
 	int getSurrenderMode() const { return _surrenderMode; }
 	/// Gets the bug hunt mode minimum turn requirement (default = 20).
