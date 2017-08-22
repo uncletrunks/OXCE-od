@@ -28,7 +28,6 @@ namespace OpenXcom
 {
 
 class BattleUnit;
-class LocalizedText;
 class SavedBattleGame;
 class BattleItem;
 class BattleState;
@@ -244,7 +243,6 @@ public:
 	/// Sets up a mission complete notification.
 	void missionComplete();
 	std::list<BattleState*> getStates();
-	const LocalizedText &tr(const std::string &id) const;
 	/// Auto end the battle if conditions are met.
 	void autoEndBattle();
 };

@@ -379,7 +379,7 @@ bool ProjectileFlyBState::createNewProjectile()
 	// create a new projectile
 	Projectile *projectile = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
 	// hit log - new bullet
-	_parent->getSave()->hitLog << _parent->tr("STR_HIT_LOG_NEW_BULLET");
+	_parent->getSave()->hitLog << _parent->getSave()->getBattleState()->tr("STR_HIT_LOG_NEW_BULLET");
 
 	// add the projectile on the map
 	_parent->getMap()->setProjectile(projectile);

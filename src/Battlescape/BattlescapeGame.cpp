@@ -38,7 +38,6 @@
 #include "../Mod/AlienDeployment.h"
 #include "../Engine/Game.h"
 #include "../Engine/Language.h"
-#include "../Engine/LocalizedText.h"
 #include "../Engine/Sound.h"
 #include "../Mod/Mod.h"
 #include "../Interface/Cursor.h"
@@ -2556,11 +2555,6 @@ void BattlescapeGame::playSound(int sound)
 std::list<BattleState*> BattlescapeGame::getStates()
 {
 	return _states;
-}
-
-const LocalizedText &BattlescapeGame::tr(const std::string &id) const
-{
-	return _parentState->getGame()->getLanguage()->getString(id);
 }
 
 /**
