@@ -184,9 +184,9 @@ public:
 	/// Calculate success rate of psi attack.
 	int psiAttackCalculate(BattleActionType type, BattleUnit *attacker, BattleUnit *victim, BattleItem *weapon);
 	/// Attempts a panic or mind control action.
-	bool psiAttack(BattleAction *action);
+	bool psiAttack(BattleActionAttack attack, BattleUnit *victim);
 	/// Attempts a melee attack action.
-	bool meleeAttack(BattleAction *action);
+	bool meleeAttack(BattleActionAttack attack, BattleUnit *victim);
 	/// Remove the medikit from the game if consumable and empty.
 	void medikitRemoveIfEmpty(BattleAction *action);
 	/// Try using medikit heal ability.

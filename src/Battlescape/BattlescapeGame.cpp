@@ -172,7 +172,7 @@ BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit
 		const auto battleType = item->getRules()->getBattleType();
 		if (battleType == BT_PROXIMITYGRENADE || battleType == BT_GRENADE)
 		{
-			if (attacker && weapon_item->getPreviousOwner())
+			if (!attacker && weapon_item->getPreviousOwner())
 			{
 				attacker = weapon_item->getPreviousOwner();
 			}
@@ -1765,34 +1765,28 @@ void BattlescapeGame::psiButtonAction()
 }
 
 /**
- * Handler for the psi atack action.
+ * Handler for the psi atack result message.
  */
-bool BattlescapeGame::psiAttack(BattleAction *action)
+void BattlescapeGame::psiAttackMessage(BattleActionAttack attack, BattleUnit *victim)
 {
-	if (getTileEngine()->psiAttack(action))
+	if (victim)
 	{
 		Game *game = getSave()->getBattleState()->getGame();
-		if (action->actor->getFaction() == FACTION_HOSTILE)
+		if (attack.attacker->getFaction() == FACTION_HOSTILE)
 		{
 			// show a little infobox with the name of the unit and "... is under alien control"
-			BattleUnit *unit = getSave()->getTile(action->target)->getUnit();
-			if (action->type == BA_MINDCONTROL)
-				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_IS_UNDER_ALIEN_CONTROL", unit->getGender()).arg(unit->getName(game->getLanguage()))));
+			if (attack.type == BA_MINDCONTROL)
+				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_IS_UNDER_ALIEN_CONTROL", victim->getGender()).arg(victim->getName(game->getLanguage()))));
 		}
 		else
 		{
 			// show a little infobox if it's successful
-			if (action->type == BA_PANIC)
+			if (attack.type == BA_PANIC)
 				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_MORALE_ATTACK_SUCCESSFUL")));
-			else if (action->type == BA_MINDCONTROL)
+			else if (attack.type == BA_MINDCONTROL)
 				game->pushState(new InfoboxState(game->getLanguage()->getString("STR_MIND_CONTROL_SUCCESSFUL")));
 			getSave()->getBattleState()->updateSoldierInfo();
 		}
-		return true;
-	}
-	else
-	{
-		return false;
 	}
 }
 

@@ -2180,7 +2180,7 @@ bool AIModule::psiAction()
 
 		if (!_aggroTarget || !weightToAttack) return false;
 
-		if (_visibleEnemies)
+		if (_visibleEnemies && _attackAction->weapon)
 		{
 			BattleActionType actions[] = {
 				BA_AIMEDSHOT,

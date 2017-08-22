@@ -1455,7 +1455,7 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<Num
  */
 void BattlescapeState::drawHandsItems()
 {
-	BattleUnit *battleUnit = _save->getSelectedUnit();
+	BattleUnit *battleUnit = playableUnitSelected() ? _save->getSelectedUnit() : nullptr;
 	drawItem(battleUnit ? battleUnit->getLeftHandWeapon() : nullptr, _btnLeftHandItem, _numAmmoLeft);
 	drawItem(battleUnit ? battleUnit->getRightHandWeapon() : nullptr, _btnRightHandItem, _numAmmoRight);
 }

@@ -231,13 +231,14 @@ void ProjectileFlyBState::init()
 
 			for (std::vector<BattleUnit*>::iterator bu = closeQuartersTargetList.begin(); bu != closeQuartersTargetList.end(); ++bu)
 			{
-				// Create a dummy action for the CQB check
-				BattleAction closeQuartersCheck = _action;
-				closeQuartersCheck.type = BA_CQB;
-				closeQuartersCheck.target = (*bu)->getPosition();
+				BattleActionAttack attack;
+				attack.type = BA_CQB;
+				attack.attacker = _action.actor;
+				attack.weapon_item = _action.weapon;
+				attack.damage_item = _action.weapon;
 
 				// Roll for the check
-				if (!_parent->getTileEngine()->meleeAttack(&closeQuartersCheck))
+				if (!_parent->getTileEngine()->meleeAttack(attack, (*bu)))
 				{
 					// Failed the check, roll again to see result
 					if (_parent->getSave()->getSide() == FACTION_PLAYER) // Only show message during player's turn
