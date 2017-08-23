@@ -300,8 +300,8 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _zoom
 	_btnGeoscape->onMousePress((ActionHandler)&GraphsState::btnGeoscapeClick);
 	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnGeoscapeClick, Options::keyCancel);
 	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnGeoscapeClick, Options::keyGeoGraphs);
-	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomInClick, SDLK_KP_PLUS);
-	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomOutClick, SDLK_KP_MINUS);
+	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomInClick, Options::keyGraphsZoomIn);
+	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomOutClick, Options::keyGraphsZoomOut);
 
 	centerAllSurfaces();
 }

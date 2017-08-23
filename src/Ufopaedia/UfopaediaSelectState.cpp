@@ -71,7 +71,7 @@ namespace OpenXcom
 		_btnOk->setText(tr("STR_OK"));
 		_btnOk->onMouseClick((ActionHandler)&UfopaediaSelectState::btnOkClick);
 		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnOkClick,Options::keyCancel);
-		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnMarkAllAsSeenClick, Options::keyInvClear);
+		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnMarkAllAsSeenClick, Options::keyMarkAllAsSeen);
 
 		_btnShowOnlyNew->setText(tr("STR_SHOW_ONLY_NEW"));
 		_btnShowOnlyNew->onMouseClick((ActionHandler)&UfopaediaSelectState::btnShowOnlyNewClick);

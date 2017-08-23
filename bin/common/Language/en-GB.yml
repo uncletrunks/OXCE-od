@@ -7,11 +7,11 @@ en-GB:
   STR_ID: "ID"
   STR_FIRST_LETTER: "FIRST LETTER"
 #CraftEquipmentLoadState.cpp
-  STR_LOAD_CRAFT_LOADOUT_TEMPLATE: "LOAD CRAFT LOADOUT"
+  STR_LOAD_CRAFT_LOADOUT_TEMPLATE: "Load Craft Loadout"
   STR_EMPTY_SLOT_N: "Empty slot {0}"
   STR_UNNAMED_SLOT_N: "Unnamed slot {0}"
 #CraftEquipmentSaveState.cpp
-  STR_SAVE_CRAFT_LOADOUT_TEMPLATE: "SAVE CRAFT LOADOUT"
+  STR_SAVE_CRAFT_LOADOUT_TEMPLATE: "Save Craft Loadout"
   STR_SAVE_UC: "SAVE"
 #CraftEquipmentState.cpp
   STR_ALL: "Everything"
@@ -77,7 +77,7 @@ en-GB:
   STR_QS_THREE_LETTERS_B: "into the Quick Search box..."
   STR_M_FLAG: " [m]"
 #TechTreeViewerState.cpp
-  STR_TECH_TREE_VIEWER: "TECH TREE VIEWER"
+  STR_TECH_TREE_VIEWER: "Tech Tree Viewer"
   STR_SELECT_TOPIC: "Select Topic"
   STR_RESEARCH_PROGRESS: "Progress>{ALT} {0}%"
   STR_ITEM_DESTROYED: "Item destroyed:"
@@ -136,9 +136,9 @@ en-GB:
   STR_FIXED_ITEMS_CANNOT_BE_MOVED: "Fixed items cannot be moved!"
   STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION: "It's not allowed to place that item there.{NEWLINE}Don't ask why!"
 #InventoryLoadState.cpp
-  STR_LOAD_EQUIPMENT_TEMPLATE: "LOAD EQUIPMENT TEMPLATE"
+  STR_LOAD_EQUIPMENT_TEMPLATE: "Load Equipment Template"
 #InventorySaveState.cpp
-  STR_SAVE_EQUIPMENT_TEMPLATE: "SAVE EQUIPMENT TEMPLATE"
+  STR_SAVE_EQUIPMENT_TEMPLATE: "Save Equipment Template"
 #InventoryState.cpp
   STR_FIRING_SHORT: "Firing>{ALT}{0}"
   STR_THROWING_SHORT: "Throw>{ALT}{0}"
@@ -194,14 +194,22 @@ en-GB:
   STR_TECH_SPOILER_PROTECTION_DESC: "With this option on, you won't be able to check where the yet-unresearched topics lead to."
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT: "Play Briefing music longer"
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT_DESC: "Briefing music will continue playing during equipment phase until the Battlescape is displayed."
+  STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
+  STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
+  STR_MARK_ALL_AS_SEEN: "Mark All As Seen"
+  STR_SELECT_ALL: "Select All"
+  STR_DESELECT_ALL: "Deselect All"
+  STR_RESET_ALL: "Reset All"
+  STR_INVENTORY_ARMOR: "Change Armor (via Inventory)"
+  STR_INVENTORY_AVATAR: "Change Avatar (via Inventory)"
   STR_ACTION_ITEM_1: "Item Action 1 (Aim/Use)"
   STR_ACTION_ITEM_2: "Item Action 2 (Snap)"
   STR_ACTION_ITEM_3: "Item Action 3 (Auto)"
   STR_ACTION_ITEM_4: "Item Action 4 (Melee)"
   STR_ACTION_ITEM_5: "Item Action 5 (Throw)"
   STR_TOGGLE_QUICK_SEARCH: "Toggle Quick Search Field"
-  STR_TOGGLE_NIGHT_VISION: "Toggle Night Display"
-  STR_HOLD_NIGHT_VISION: "Show Night Display"
+  STR_TOGGLE_NIGHT_VISION: "Toggle Night Vision"
+  STR_HOLD_NIGHT_VISION: "Short Night Vision"
 #=================== Geoscape ===================
 #AllocateTrainingState.cpp
   STR_PHYSICAL_TRAINING: "Martial Training"

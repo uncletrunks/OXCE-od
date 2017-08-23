@@ -292,7 +292,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 
 	_cbxCategory->setOptions(_cats);
 	_cbxCategory->onChange((ActionHandler)&SellState::cbxCategoryChange);
-	_cbxCategory->onKeyboardPress((ActionHandler)&SellState::btnSellAllClick, Options::keyInvClear);
+	_cbxCategory->onKeyboardPress((ActionHandler)&SellState::btnSellAllClick, Options::keySelectAll);
 
 	_btnQuickSearch->setText(L""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&SellState::btnQuickSearchApply);
