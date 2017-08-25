@@ -62,6 +62,7 @@ private:
 	int _sprite, _marker;
 	int _power, _range, _score, _reload, _breakOffTime, _missionScore;
 	int _fireSound;
+	int _alertSound;
 	RuleTerrain *_battlescapeTerrainData;
 	RuleUfoStats _stats;
 	std::map<std::string, RuleUfoStats> _statsRaceBonus;
@@ -97,6 +98,8 @@ public:
 	int getBreakOffTime() const;
 	/// Gets the UFO's fire sound.
 	int getFireSound() const;
+	/// Gets the alert sound for this UFO.
+	int getAlertSound() const;
 	/// Gets the name of the surface that represents this UFO.
 	const std::string &getModSprite() const;
 	/// Get basic statistic of UFO.

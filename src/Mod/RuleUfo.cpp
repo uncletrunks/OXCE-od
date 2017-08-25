@@ -31,7 +31,7 @@ namespace OpenXcom
 RuleUfo::RuleUfo(const std::string &type) :
 	_type(type), _size("STR_VERY_SMALL"), _sprite(-1), _marker(-1),
 	_power(0), _range(0), _score(0), _reload(0), _breakOffTime(0), _missionScore(1),
-	_fireSound(-1),
+	_fireSound(-1), _alertSound(-1),
 	_battlescapeTerrainData(0), _stats(), _statsRaceBonus()
 {
 	_stats.sightRange = 268;
@@ -90,6 +90,10 @@ void RuleUfo::load(const YAML::Node &node, Mod *mod)
 	if (node["fireSound"])
 	{
 		_fireSound = mod->getSoundOffset(node["fireSound"].as<int>(_fireSound), "GEO.CAT");
+	}
+	if (node["alertSound"])
+	{
+		_alertSound = mod->getSoundOffset(node["alertSound"].as<int>(_alertSound), "GEO.CAT");
 	}
 }
 
@@ -225,6 +229,15 @@ int RuleUfo::getBreakOffTime() const
 int RuleUfo::getFireSound() const
 {
 	return _fireSound;
+}
+
+/**
+ * Gets the UFO's alert sound.
+ * @return The alert sound ID.
+ */
+int RuleUfo::getAlertSound() const
+{
+	return _alertSound;
 }
 
 /**
