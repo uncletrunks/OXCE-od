@@ -276,6 +276,7 @@ public:
  */
 Mod::Mod() :
 	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _maxStaticLightDistance(16), _maxDynamicLightDistance(24), _enhancedLighting(0),
+	_costHireEngineer(0), _costHireScientist(0),
 	_costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_maxLookVariant(0), _tooMuchSmokeThreshold(10), _customTrainingFactor(100), _minReactionAccuracy(0), _chanceToStopRetaliation(0),
@@ -1362,6 +1363,8 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	}
 	_maxViewDistance = doc["maxViewDistance"].as<int>(_maxViewDistance);
 	_maxDarknessToSeeUnits = doc["maxDarknessToSeeUnits"].as<int>(_maxDarknessToSeeUnits);
+	_costHireEngineer = doc["costHireEngineer"].as<int>(_costHireEngineer);
+	_costHireScientist = doc["costHireScientist"].as<int>(_costHireScientist);
 	_costEngineer = doc["costEngineer"].as<int>(_costEngineer);
 	_costScientist = doc["costScientist"].as<int>(_costScientist);
 	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
@@ -2299,8 +2302,25 @@ const std::vector<std::string> &Mod::getArmorsList() const
 }
 
 /**
- * Returns the cost of an individual engineer
- * for purchase/maintenance.
+ * Returns the hiring cost of an individual engineer.
+ * @return Cost.
+ */
+int Mod::getHireEngineerCost() const
+{
+	return _costHireEngineer != 0 ? _costHireEngineer : _costEngineer * 2;
+}
+
+/**
+* Returns the hiring cost of an individual scientist.
+* @return Cost.
+*/
+int Mod::getHireScientistCost() const
+{
+	return _costHireScientist != 0 ? _costHireScientist: _costScientist * 2;
+}
+
+/**
+ * Returns the monthly cost of an individual engineer.
  * @return Cost.
  */
 int Mod::getEngineerCost() const
@@ -2309,8 +2329,7 @@ int Mod::getEngineerCost() const
 }
 
 /**
- * Returns the cost of an individual scientist
- * for purchase/maintenance.
+ * Returns the monthly cost of an individual scientist.
  * @return Cost.
  */
 int Mod::getScientistCost() const

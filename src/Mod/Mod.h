@@ -151,6 +151,7 @@ private:
 	ModScriptGlobal *_scriptGlobal;
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _maxStaticLightDistance, _maxDynamicLightDistance, _enhancedLighting;
+	int _costHireEngineer, _costHireScientist;
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor, _minReactionAccuracy;
@@ -397,9 +398,13 @@ public:
 	const RuleDamageType *getDamageType(ItemDamageType type) const;
 	/// Gets the cost of a soldier.
 	int getSoldierCost() const;
-	/// Gets the cost of an engineer.
+	/// Gets the cost of hiring an engineer.
+	int getHireEngineerCost() const;
+	/// Gets the cost of hiring a scientist.
+	int getHireScientistCost() const;
+	/// Gets the monthly cost of an engineer.
 	int getEngineerCost() const;
-	/// Gets the cost of a scientist.
+	/// Gets the monthly cost of a scientist.
 	int getScientistCost() const;
 	/// Gets the transfer time of personnel.
 	int getPersonnelTime() const;
