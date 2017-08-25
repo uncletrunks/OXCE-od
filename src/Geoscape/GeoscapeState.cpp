@@ -48,6 +48,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/SoldierDiary.h"
 #include "../Menu/PauseState.h"
+#include "SelectMusicTrackState.h"
 #include "UfoTrackerState.h"
 #include "InterceptState.h"
 #include "../Basescape/BasescapeState.h"
@@ -239,6 +240,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnInterceptClick, Options::keyGeoIntercept);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfoTrackerClick, Options::keyGeoUfoTracker);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnTechTreeViewerClick, Options::keyGeoTechTreeViewer);
+	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnSelectMusicTrackClick, Options::keySelectMusicTrack);
 	_btnIntercept->setGeoscapeButton(true);
 
 	_btnBases->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
@@ -2212,6 +2214,15 @@ void GeoscapeState::btnUfoTrackerClick(Action *)
 void GeoscapeState::btnTechTreeViewerClick(Action *)
 {
 	_game->pushState(new TechTreeViewerState());
+}
+
+/**
+ * Opens the jukebox.
+ * @param action Pointer to an action.
+ */
+void GeoscapeState::btnSelectMusicTrackClick(Action *)
+{
+	_game->pushState(new SelectMusicTrackState(SMT_GEOSCAPE));
 }
 
 /**

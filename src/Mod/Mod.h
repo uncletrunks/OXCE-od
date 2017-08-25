@@ -280,6 +280,8 @@ public:
 	SurfaceSet *getSurfaceSet(const std::string &name, bool error = true) const;
 	/// Gets a particular music.
 	Music *getMusic(const std::string &name, bool error = true) const;
+	/// Gets the available music tracks.
+	const std::map<std::string, Music*> &getMusicTrackList() const;
 	/// Plays a particular music.
 	void playMusic(const std::string &name, int id = 0);
 	/// Gets a particular sound.

@@ -97,6 +97,8 @@ public:
 	void btnUfoTrackerClick(Action *action);
 	/// Handler for clicking the TechTreeViewer button.
 	void btnTechTreeViewerClick(Action *action);
+	/// Handler for clicking the [SelectMusicTrack] button.
+	void btnSelectMusicTrackClick(Action *action);
 	/// Handler for clicking the Bases button.
 	void btnBasesClick(Action *action);
 	/// Handler for clicking the Graph button.

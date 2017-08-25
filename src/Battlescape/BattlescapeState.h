@@ -172,6 +172,8 @@ public:
 	void btnReserveClick(Action *action);
 	/// Handler for clicking the reload button.
 	void btnReloadClick(Action *action);
+	/// Handler for clicking the [SelectMusicTrack] button.
+	void btnSelectMusicTrackClick(Action *action);
 	/// Handler for clicking the lighting button.
 	void btnPersonalLightingClick(Action *action);
 	/// Handler for toggling the "night vision" mode.

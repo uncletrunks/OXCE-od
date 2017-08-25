@@ -206,6 +206,19 @@ interfaces:
         color: 239   # bright green
         color2: 138  # yellow
         border: 133  # minty green
+  - type: selectMusicTrack
+    elements:
+      - id: palette
+        color: 0     # brown
+      - id: window
+        color: 239   # bright green
+      - id: text
+        color: 138   # yellow
+      - id: list
+        color: 133   # minty green
+        border: 239  # bright green
+      - id: button
+        color: 133   # minty green
   - type: intercept
     elements:
       - id: palette

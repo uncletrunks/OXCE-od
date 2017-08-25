@@ -13,6 +13,11 @@ en-GB:
 #=================== Battlescape ===================
 #InventoryState.cpp
   STR_PSI_SHORT: "PSI>{ALT}{0}/{1}"
+#=================== Geoscape ===================
+#SelectMusicTrackState.cpp
+  GMGEO1: "Geoscape Track #1"
+  GMGEO2: "Geoscape Track #2"
+  GMTACTIC: "Battlescape Track"
 #Extended+ END
 #==================================================================================================================
   STR_AVENGER_UFOPEDIA: "TRANSPORTER AND COMBAT SPACECRAFT. THE ULTIMATE REPLICATION OF ALIEN TECHNOLOGY."

@@ -196,6 +196,7 @@ set ( geoscape_src
   Geoscape/ResearchCompleteState.cpp
   Geoscape/ResearchRequiredState.cpp
   Geoscape/SelectDestinationState.cpp
+  Geoscape/SelectMusicTrackState.cpp
   Geoscape/TargetInfoState.cpp
   Geoscape/TrainingFinishedState.cpp
   Geoscape/TrainingState.cpp

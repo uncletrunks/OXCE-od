@@ -693,6 +693,16 @@ Music *Mod::getMusic(const std::string &name, bool error) const
 }
 
 /**
+ * Returns the list of all music tracks
+ * provided by the mod.
+ * @return List of music tracks.
+ */
+const std::map<std::string, Music*> &Mod::getMusicTrackList() const
+{
+	return _musics;
+}
+
+/**
  * Returns a random music from the mod.
  * @param name Name of the music to pick from.
  * @return Pointer to the music.

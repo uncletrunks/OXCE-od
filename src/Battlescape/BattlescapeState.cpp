@@ -40,6 +40,7 @@
 #include "../lodepng.h"
 #include "../fmath.h"
 #include "../Geoscape/GeoscapeState.h"
+#include "../Geoscape/SelectMusicTrackState.h"
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
 #include "../Engine/LocalizedText.h"
@@ -482,6 +483,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 
 	// shortcuts without a specific button
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnReloadClick, Options::keyBattleReload);
+	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnSelectMusicTrackClick, Options::keySelectMusicTrack);
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnPersonalLightingClick, Options::keyBattlePersonalLighting);
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnNightVisionClick, Options::keyNightVisionToggle);
 	if (Options::autoNightVision)
@@ -1383,6 +1385,18 @@ void BattlescapeState::btnReloadClick(Action *)
 	{
 		_game->getMod()->getSoundByDepth(_save->getDepth(), Mod::ITEM_RELOAD)->play(-1, getMap()->getSoundAngle(_save->getSelectedUnit()->getPosition()));
 		updateSoldierInfo();
+	}
+}
+
+/**
+ * Opens the jukebox.
+ * @param action Pointer to an action.
+ */
+void BattlescapeState::btnSelectMusicTrackClick(Action *)
+{
+	if (allowButtons())
+	{
+		_game->pushState(new SelectMusicTrackState(SMT_BATTLESCAPE));
 	}
 }
 

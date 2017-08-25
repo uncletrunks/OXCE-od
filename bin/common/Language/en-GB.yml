@@ -210,6 +210,7 @@ en-GB:
   STR_TOGGLE_QUICK_SEARCH: "Toggle Quick Search Field"
   STR_TOGGLE_NIGHT_VISION: "Toggle Night Vision"
   STR_HOLD_NIGHT_VISION: "Short Night Vision"
+  STR_SELECT_MUSIC_TRACK: "Select Music Track"
 #=================== Geoscape ===================
 #AllocateTrainingState.cpp
   STR_PHYSICAL_TRAINING: "Martial Training"

@@ -200,6 +200,19 @@ interfaces: #done
         border: 1
       - id: button
         color: 1
+  - type: selectMusicTrack
+    elements:
+      - id: palette
+        color: 4
+      - id: window
+        color: 1
+      - id: text
+        color: 1
+      - id: list
+        color: 1
+        border: 1
+      - id: button
+        color: 1
   - type: intercept
     elements:
       - id: palette

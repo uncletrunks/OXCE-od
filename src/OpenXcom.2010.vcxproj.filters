@@ -1039,6 +1039,9 @@
     <ClCompile Include="Menu\TestPaletteState.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
+    <ClCompile Include="Geoscape\SelectMusicTrackState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2121,6 +2124,9 @@
     </ClInclude>
     <ClInclude Include="Menu\TestPaletteState.h">
       <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\SelectMusicTrackState.h">
+      <Filter>Geoscape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

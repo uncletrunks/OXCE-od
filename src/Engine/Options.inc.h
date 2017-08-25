@@ -48,7 +48,7 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer,
 	keyMarkAllAsSeen, keySelectAll, keyDeselectAll, keyResetAll,
 	keyInventoryArmor, keyInventoryAvatar, keyInventorySave, keyInventoryLoad,
 	keyBattleActionItem1, keyBattleActionItem2, keyBattleActionItem3, keyBattleActionItem4, keyBattleActionItem5,
-	keyNightVisionToggle, keyNightVisionHold;
+	keyNightVisionToggle, keyNightVisionHold, keySelectMusicTrack;
 
 // Extra options (Meridian's build)
 OPT bool executeUnconsciousEnemies, twoHandedIndicator, twoHandedIndicatorInventory, minimapBorderIndicator, everyoneFightsNobodyQuits;

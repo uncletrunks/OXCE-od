@@ -13,6 +13,16 @@ en-GB:
 #=================== Battlescape ===================
 #InventoryState.cpp
   STR_PSI_SHORT: "M.C.>{ALT}{0}/{1}"
+#=================== Geoscape ===================
+#SelectMusicTrackState.cpp
+  GMGEO1: "Geoscape Track #1"
+  GMGEO2: "Geoscape Track #2"
+  GMGEO3: "Geoscape Track #3"
+  GMGEO4: "Geoscape Track #4"
+  GMGEO5: "Geoscape Track #5"
+  GMGEO6: "Geoscape Track #6"
+  GMTACDRY: "Battlescape Track (Land)"
+  GMTACWET: "Battlescape Track (Water)"
 #Extended+ END
 #==================================================================================================================
   STR_LEVIATHAN_UFOPEDIA: "A TRANSPORT AND INTERCEPT FLYING SUB, WITH EXTREME DEPTH CAPABILITY. A SUPERB SYNTHESIS OF ALIEN AND HUMAN TECHNOLOGY, UTILISING ION PROPULSION SYSTEMS AND MAGNETIC ARRAY NAVIGATION."

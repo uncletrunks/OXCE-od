@@ -410,6 +410,7 @@
     <ClCompile Include="Geoscape\MonthlyReportState.cpp" />
     <ClCompile Include="Geoscape\MultipleTargetsState.cpp" />
     <ClCompile Include="Geoscape\SelectDestinationState.cpp" />
+    <ClCompile Include="Geoscape\SelectMusicTrackState.cpp" />
     <ClCompile Include="Geoscape\TargetInfoState.cpp" />
     <ClCompile Include="Geoscape\TrainingFinishedState.cpp" />
     <ClCompile Include="Geoscape\TrainingState.cpp" />
@@ -777,6 +778,7 @@
     <ClInclude Include="Geoscape\PsiTrainingState.h" />
     <ClInclude Include="Geoscape\ResearchCompleteState.h" />
     <ClInclude Include="Geoscape\SelectDestinationState.h" />
+    <ClInclude Include="Geoscape\SelectMusicTrackState.h" />
     <ClInclude Include="Geoscape\TargetInfoState.h" />
     <ClInclude Include="Geoscape\TrainingFinishedState.h" />
     <ClInclude Include="Geoscape\TrainingState.h" />
