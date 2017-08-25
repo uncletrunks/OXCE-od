@@ -1368,6 +1368,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_initialFunding = doc["initialFunding"].as<int>(_initialFunding);
 	_alienFuel = doc["alienFuel"].as<std::pair<std::string, int> >(_alienFuel);
 	_fontName = doc["fontName"].as<std::string>(_fontName);
+	_psiUnlockResearch = doc["psiUnlockResearch"].as<std::string>(_psiUnlockResearch);
 
 	_aiUseDelayGrenade = doc["turnAIUseGrenade"].as<int>(_aiUseDelayGrenade);
 	_aiUseDelayBlaster = doc["turnAIUseBlaster"].as<int>(_aiUseDelayBlaster);
@@ -1671,6 +1672,12 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 			_psiRequirements = rule->getRequirements();
 			break;
 		}
+	}
+	// override the default (used when you want to separate screening and training)
+	if (!_psiUnlockResearch.empty())
+	{
+		_psiRequirements.clear();
+		_psiRequirements.push_back(_psiUnlockResearch);
 	}
 
 	for (YAML::const_iterator i = doc["cutscenes"].begin(); i != doc["cutscenes"].end(); ++i)

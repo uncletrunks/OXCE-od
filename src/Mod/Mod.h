@@ -169,7 +169,7 @@ private:
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
-	std::string _fontName, _finalResearch;
+	std::string _fontName, _finalResearch, _psiUnlockResearch;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
 	int _baseDefenseMapFromLocation;
