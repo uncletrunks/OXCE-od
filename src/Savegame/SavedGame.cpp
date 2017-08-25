@@ -1625,12 +1625,18 @@ void SavedGame::getDependablePurchase(std::vector<RuleItem *> & dependables, con
 	for (std::vector<std::string>::const_iterator iter = itemlist.begin(); iter != itemlist.end(); ++iter)
 	{
 		RuleItem *item = mod->getItem(*iter);
-		const std::vector<std::string> &reqs = item->getBuyRequirements();
-		if (std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
+		if (item->getBuyCost() != 0)
 		{
-			if (isResearched(item->getBuyRequirements()))
+			const std::vector<std::string> &reqs = item->getRequirements();
+			bool found = std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end();
+			const std::vector<std::string> &reqsBuy = item->getBuyRequirements();
+			bool foundBuy = std::find(reqsBuy.begin(), reqsBuy.end(), research->getName()) != reqsBuy.end();
+			if (found || foundBuy)
 			{
-				dependables.push_back(item);
+				if (isResearched(item->getBuyRequirements()) && isResearched(item->getRequirements()))
+				{
+					dependables.push_back(item);
+				}
 			}
 		}
 	}
