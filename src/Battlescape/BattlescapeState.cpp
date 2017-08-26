@@ -107,6 +107,8 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_twoHandedRed = _game->getMod()->getInterface("battlescape")->getElement("twoHandedRed")->color;
 	_twoHandedGreen = _game->getMod()->getInterface("battlescape")->getElement("twoHandedGreen")->color;
 
+	_tooltipDefaultColor = _game->getMod()->getInterface("battlescape")->getElement("textTooltip")->color;
+
 	_medikitRed = _game->getMod()->getInterface("battlescape")->getElement("medikitRed")->color;
 	_medikitGreen = _game->getMod()->getInterface("battlescape")->getElement("medikitGreen")->color;
 	_medikitBlue = _game->getMod()->getInterface("battlescape")->getElement("medikitBlue")->color;
@@ -2889,7 +2891,7 @@ void BattlescapeState::txtTooltipIn(Action *action)
 void BattlescapeState::txtTooltipOut(Action *action)
 {
 	// reset color
-	_txtTooltip->setColor(Palette::blockOffset(0));
+	_txtTooltip->setColor(_tooltipDefaultColor);
 
 	if (allowButtons() && Options::battleTooltips)
 	{
