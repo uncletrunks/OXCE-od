@@ -1516,8 +1516,8 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 				(*i)->getReactionScore() >= threshold &&
 				// not a friend
 				(*i)->getFaction() != _save->getSide() &&
-				// not a civilian
-				(*i)->getFaction() != FACTION_NEUTRAL &&
+				// not a civilian, or a civilian shooting at bad guys
+				((*i)->getFaction() != FACTION_NEUTRAL || unit->getFaction() == FACTION_HOSTILE) &&
 				// closer than 20 tiles
 				distanceSq(unit->getPosition(), (*i)->getPosition(), false) <= getMaxViewDistanceSq())
 			{
