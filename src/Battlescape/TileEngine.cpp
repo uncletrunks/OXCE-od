@@ -1028,7 +1028,11 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	// during day (or if enough other light) both see 20 tiles ... unless overridden by armor
 	else
 	{
-		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, currentUnit->getMaxViewDistanceAtDay(tile->getUnit()->getArmor()) * 16);
+		// Note: fire cancels enemy's camouflage
+		visibleDistanceMaxVoxel = std::min(
+			visibleDistanceMaxVoxel,
+			currentUnit->getMaxViewDistanceAtDay(tile->getUnit()->getFire() > 0 ? 0 : tile->getUnit()->getArmor()) * 16
+		);
 	}
 
 	// oxce 3.3 workaround, remove when fixed? http://openxcom.org/forum/index.php/topic,4822.msg73841.html#msg73841
