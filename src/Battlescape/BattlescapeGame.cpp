@@ -1929,6 +1929,9 @@ void BattlescapeGame::dropItem(Position position, BattleItem *item, bool removeI
  */
 BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 {
+	// only ever respawn once
+	unit->setAlreadyRespawned(true);
+
 	bool visible = unit->getVisible();
 
 	getSave()->getBattleState()->showPsiButton(false);

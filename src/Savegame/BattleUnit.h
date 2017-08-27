@@ -143,7 +143,7 @@ private:
 	int _turretType;
 	int _breathFrame;
 	bool _breathing;
-	bool _hidingForTurn, _floorAbove, _respawn;
+	bool _hidingForTurn, _floorAbove, _respawn, _alreadyRespawned;
 	bool _isLeeroyJenkins;	// always charges enemy, never retreats.
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
@@ -454,6 +454,10 @@ public:
 	void setRespawn(bool respawn);
 	/// Get the units's respawn flag.
 	bool getRespawn() const;
+	/// Set the units's alreadyRespawned flag.
+	void setAlreadyRespawned(bool alreadyRespawned);
+	/// Get the units's alreadyRespawned flag.
+	bool getAlreadyRespawned() const;
 	/// Get the units's rank string.
 	std::string getRankString() const;
 	/// Get the geoscape-soldier object.

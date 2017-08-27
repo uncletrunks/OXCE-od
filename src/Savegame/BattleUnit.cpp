@@ -61,7 +61,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
 	_motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT), _fatalShotBodyPart(BODYPART_HEAD), _armor(0),
-	_geoscapeSoldier(soldier), _unitRules(0), _rankInt(0), _turretType(-1), _hidingForTurn(false), _floorAbove(false), _respawn(false), _isLeeroyJenkins(false)
+	_geoscapeSoldier(soldier), _unitRules(0), _rankInt(0), _turretType(-1), _hidingForTurn(false), _floorAbove(false), _respawn(false), _alreadyRespawned(false), _isLeeroyJenkins(false)
 {
 	_name = soldier->getName(true);
 	_id = soldier->getId();
@@ -228,7 +228,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT),
 	_fatalShotBodyPart(BODYPART_HEAD), _armor(armor), _geoscapeSoldier(0),  _unitRules(unit),
-	_rankInt(0), _turretType(-1), _hidingForTurn(false), _respawn(false), _isLeeroyJenkins(false)
+	_rankInt(0), _turretType(-1), _hidingForTurn(false), _respawn(false), _alreadyRespawned(false), _isLeeroyJenkins(false)
 {
 	_type = unit->getType();
 	_rank = unit->getRank();
@@ -407,6 +407,7 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
 	_motionPoints = node["motionPoints"].as<int>(0);
 	_respawn = node["respawn"].as<bool>(_respawn);
+	_alreadyRespawned = node["alreadyRespawned"].as<bool>(_alreadyRespawned);
 	_activeHand = node["activeHand"].as<std::string>(_activeHand);
 	if (node["tempUnitStatistics"])
 	{
@@ -484,6 +485,7 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 		node["spawnUnit"] = _spawnUnit;
 	node["motionPoints"] = _motionPoints;
 	node["respawn"] = _respawn;
+	node["alreadyRespawned"] = _alreadyRespawned;
 	node["activeHand"] = _activeHand;
 	node["tempUnitStatistics"] = _statistics->save();
 	node["murdererId"] = _murdererId;
@@ -3224,6 +3226,23 @@ void BattleUnit::setRespawn(bool respawn)
 bool BattleUnit::getRespawn() const
 {
 	return _respawn;
+}
+
+/**
+ * Marks this unit as already respawned (or not).
+ * @param alreadyRespawned whether it already respawned.
+ */
+void BattleUnit::setAlreadyRespawned(bool alreadyRespawned)
+{
+	_alreadyRespawned = alreadyRespawned;
+}
+
+/**
+ * Gets this unit's alreadyRespawned flag.
+ */
+bool BattleUnit::getAlreadyRespawned() const
+{
+	return _alreadyRespawned;
 }
 
 /**

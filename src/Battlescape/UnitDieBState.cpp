@@ -219,8 +219,11 @@ void UnitDieBState::think()
 		}
 		if (!_unit->getSpawnUnit().empty() && !_overKill)
 		{
-			// converts the dead zombie to a chryssalid
-			_parent->convertUnit(_unit);
+			if (!_unit->getAlreadyRespawned())
+			{
+				// converts the dead zombie to a chryssalid
+				_parent->convertUnit(_unit);
+			}
 		}
 		else
 		{
