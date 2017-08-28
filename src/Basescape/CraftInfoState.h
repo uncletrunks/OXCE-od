@@ -60,6 +60,8 @@ public:
 	void init();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the Ufopedia button.
+	void btnUfopediaClick(Action *action);
 	/// Handler for clicking the weapon button.
 	void btnWClick(Action *action);
 	/// Handler for clicking the Crew button.
