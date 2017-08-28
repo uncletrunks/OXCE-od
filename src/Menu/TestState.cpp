@@ -235,8 +235,8 @@ void TestState::btnHighContrastClick(Action *action)
 
 void TestState::testCase0()
 {
-	_lstOutput->addRow(1, tr("Starting...").c_str());
-	_lstOutput->addRow(1, tr("Checking terrain...").c_str());
+	_lstOutput->addRow(1, tr("STR_TESTS_STARTING").c_str());
+	_lstOutput->addRow(1, tr("STR_BAD_NODES_CHECKING_TERRAIN").c_str());
 	int total = 0;
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getTerrainList().begin(); i != _game->getMod()->getTerrainList().end(); ++i)
 	{
@@ -246,7 +246,7 @@ void TestState::testCase0()
 			total += checkRMP((*j));
 		}
 	}
-	_lstOutput->addRow(1, tr("Checking UFOs...").c_str());
+	_lstOutput->addRow(1, tr("STR_BAD_NODES_CHECKING_UFOS").c_str());
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getUfosList().begin(); i != _game->getMod()->getUfosList().end(); ++i)
 	{
 		RuleUfo *ufoRule = _game->getMod()->getUfo((*i));
@@ -258,7 +258,7 @@ void TestState::testCase0()
 			}
 		}
 	}
-	_lstOutput->addRow(1, tr("Checking craft...").c_str());
+	_lstOutput->addRow(1, tr("STR_BAD_NODES_CHECKING_CRAFT").c_str());
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getCraftsList().begin(); i != _game->getMod()->getCraftsList().end(); ++i)
 	{
 		RuleCraft *craftRule = _game->getMod()->getCraft((*i));
@@ -272,14 +272,14 @@ void TestState::testCase0()
 	}
 	if (total > 0)
 	{
-		_lstOutput->addRow(1, tr("Total errors found (there may be duplicates): {0}").arg(total).c_str());
-		_lstOutput->addRow(1, tr("Detailed info about bad nodes has been saved into openxcom.log").c_str());
+		_lstOutput->addRow(1, tr("STR_TESTS_ERRORS_FOUND").arg(total).c_str());
+		_lstOutput->addRow(1, tr("STR_BAD_NODES_DETAILED_INFO").c_str());
 	}
 	else
 	{
-		_lstOutput->addRow(1, tr("No errors found.").c_str());
+		_lstOutput->addRow(1, tr("STR_TESTS_NO_ERRORS_FOUND").c_str());
 	}
-	_lstOutput->addRow(1, tr("Finished.").c_str());
+	_lstOutput->addRow(1, tr("STR_TESTS_FINISHED").c_str());
 }
 
 int TestState::checkRMP(MapBlock *mapblock)
