@@ -1527,6 +1527,7 @@ interfaces: #done
         color: 1
       - id: text
         color: 1
+        color2: 244
       - id: list
         color: 244
       - id: button

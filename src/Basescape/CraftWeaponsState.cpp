@@ -55,7 +55,8 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 	_txtArmament = new Text(76, 9, 66, 52);
 	_txtQuantity = new Text(50, 9, 140, 52);
 	_txtAmmunition = new Text(68, 17, 200, 44);
-	_lstWeapons = new TextList(188, 80, 58, 68);
+	_lstWeapons = new TextList(188, 64, 58, 68);
+	_txtCurrentWeapon = new Text(188, 9, 66, 140);
 
 	// Set palette
 	setInterface("craftWeapons");
@@ -67,6 +68,7 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 	add(_txtQuantity, "text", "craftWeapons");
 	add(_txtAmmunition, "text", "craftWeapons");
 	add(_lstWeapons, "list", "craftWeapons");
+	add(_txtCurrentWeapon, "text", "craftWeapons");
 
 	centerAllSurfaces();
 
@@ -88,6 +90,17 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 	_txtAmmunition->setText(tr("STR_AMMUNITION_AVAILABLE"));
 	_txtAmmunition->setWordWrap(true);
 	_txtAmmunition->setVerticalAlign(ALIGN_BOTTOM);
+
+	const std::string slotName = _craft->getRules()->getWeaponSlotString(weapon);
+	CraftWeapon *current = _craft->getWeapons()->at(_weapon);
+	if (current != 0)
+	{
+		_txtCurrentWeapon->setText(tr(slotName).arg(tr(current->getRules()->getType())));
+	}
+	else
+	{
+		_txtCurrentWeapon->setText(tr(slotName).arg(tr("STR_NONE_UC")));
+	}
 
 	_lstWeapons->setColumns(3, 94, 50, 36);
 	_lstWeapons->setSelectable(true);
