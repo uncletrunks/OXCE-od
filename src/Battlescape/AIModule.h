@@ -56,6 +56,7 @@ private:
 
 	bool selectPointNearTargetLeeroy(BattleUnit *target) const;
 	int selectNearestTargetLeeroy();
+	void meleeActionLeeroy();
 	void dont_think(BattleAction *action);
 public:
 	/// Creates a new AIModule linked to the game and a certain unit.
