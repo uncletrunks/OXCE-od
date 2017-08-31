@@ -103,7 +103,7 @@ void MeleeAttackBState::init()
 		_unit->lookAt(_action.target, _unit->getTurretType() != -1);
 		while (_unit->getStatus() == STATUS_TURNING)
 		{
-			_unit->turn();
+			_unit->turn(_unit->getTurretType() != -1);
 		}
 	}
 

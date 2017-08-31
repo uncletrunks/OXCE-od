@@ -601,6 +601,7 @@ void BattleUnit::setDirection(int direction)
 	_direction = direction;
 	_toDirection = direction;
 	_directionTurret = direction;
+	_toDirectionTurret = direction;
 }
 
 /**

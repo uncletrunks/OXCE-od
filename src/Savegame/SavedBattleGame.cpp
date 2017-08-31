@@ -961,6 +961,15 @@ int SavedBattleGame::getBughuntMinTurn() const
  */
 void SavedBattleGame::endTurn()
 {
+	// reset turret direction for all hostile and neutral units (as it may have been changed during reaction fire)
+	for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
+	{
+		if ((*i)->getOriginalFaction() != FACTION_PLAYER)
+		{
+			(*i)->setDirection((*i)->getDirection()); // this is not pointless, the method sets more than just the direction
+		}
+	}
+
 	if (_side == FACTION_PLAYER)
 	{
 		if (_selectedUnit && _selectedUnit->getOriginalFaction() == FACTION_PLAYER)

@@ -124,7 +124,7 @@ void ProjectileFlyBState::init()
 		_unit->lookAt(_action.target, _unit->getTurretType() != -1);
 		while (_unit->getStatus() == STATUS_TURNING)
 		{
-			_unit->turn();
+			_unit->turn(_unit->getTurretType() != -1);
 		}
 	}
 
@@ -270,7 +270,7 @@ void ProjectileFlyBState::init()
 					_unit->lookAt(_action.target, _unit->getTurretType() != -1);
 					while (_unit->getStatus() == STATUS_TURNING)
 					{
-						_unit->turn();
+						_unit->turn(_unit->getTurretType() != -1);
 					}
 
 					// We're done, spend TUs and Energy; and don't check remaining CQB candidates anymore
