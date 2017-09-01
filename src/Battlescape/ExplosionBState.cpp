@@ -107,7 +107,7 @@ void ExplosionBState::init()
 			_damageType = itemRule->getDamageType();
 		}
 
-		if (_hit || _psi)
+		if (type == BT_PSIAMP || _hit)
 		{
 			Position targetPos = _center.toTile();
 			_targetPsiOrHit = _parent->getSave()->getTile(targetPos)->getUnit();
