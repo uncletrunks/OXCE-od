@@ -309,7 +309,7 @@ void ExplosionBState::init()
 
 		if (anim != -1)
 		{
-			Explosion *explosion = new Explosion(_center, anim, 0, false, _targetPsiOrHit); // Don't burn the tile
+			Explosion *explosion = new Explosion(_center, anim, 0, false, (_hit || _psi)); // Don't burn the tile
 			_parent->getMap()->getExplosions()->push_back(explosion);
 		}
 		_parent->getMap()->getCamera()->setViewLevel(_center.z / 24);
