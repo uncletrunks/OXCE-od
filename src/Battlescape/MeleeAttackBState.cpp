@@ -129,6 +129,11 @@ void MeleeAttackBState::init()
 		_target = _parent->getSave()->getTile(_action.target)->getUnit();
 	}
 
+	if (!_target)
+	{
+		throw Exception("This is a known (but tricky) bug... still fixing it, sorry. In the meantime, try save scumming option or kill all aliens in debug mode to finish the mission.");
+	}
+
 	int height = _target->getFloatHeight() + (_target->getHeight() / 2) - _parent->getSave()->getTile(_action.target)->getTerrainLevel();
 	_voxel = _action.target.toVexel() + Position(8, 8, height);
 
