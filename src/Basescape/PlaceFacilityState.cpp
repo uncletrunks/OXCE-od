@@ -92,7 +92,7 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	_txtCost->setText(tr("STR_COST_UC"));
 
 	_numCost->setBig();
-	_numCost->setText(Text::formatFunding(_origFac != 0 ? 0 : _rule->getBuildCost()));
+	_numCost->setText(Text::formatFunding(_origFac != 0 ? _game->getMod()->getTheBiggestRipOffEver() : _rule->getBuildCost()));
 
 	_txtTime->setText(tr("STR_CONSTRUCTION_TIME_UC"));
 
@@ -133,11 +133,20 @@ void PlaceFacilityState::viewClick(Action *)
 		// EXPERIMENTAL!: just moving an existing facility
 		// FIXME: can lead to disconnected bases (easy to check, but would not be able to move the Access Lift)
 		// FIXME: queued facilities' build time is not recalculated (easy to do)
-		// FIXME: currently moving at no cost (probably should depend on difficulty...
 		//        ... fixed moving cost per tile? or dynamic based on size, type, distance, etc.?)
-		if (!_view->isPlaceable(_rule, _origFac))
+		if (_view->getGridX() == _origFac->getX() && _view->getGridY() == _origFac->getY())
+		{
+			// unchanged location -> no message, no cost.
+			_game->popState();
+		}
+		else if (!_view->isPlaceable(_rule, _origFac))
 		{
 			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+		}
+		else if (_game->getSavedGame()->getFunds() < _game->getMod()->getTheBiggestRipOffEver())
+		{
+			_game->popState();
+			_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_MONEY"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
 		}
 		else
 		{
@@ -151,6 +160,7 @@ void PlaceFacilityState::viewClick(Action *)
 				if (_origFac->getBuildTime() > 0 && _view->isQueuedBuilding(_rule)) _origFac->setBuildTime(INT_MAX);
 				_view->reCalcQueuedBuildings();
 			}
+			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _game->getMod()->getTheBiggestRipOffEver());
 			_game->popState();
 		}
 	}
