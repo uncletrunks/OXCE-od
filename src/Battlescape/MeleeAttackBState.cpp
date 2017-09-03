@@ -29,6 +29,7 @@
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
+#include "../Engine/Exception.h"
 #include "../Engine/Sound.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
