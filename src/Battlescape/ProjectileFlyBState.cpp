@@ -104,7 +104,7 @@ void ProjectileFlyBState::init()
 		}
 	}
 
-	if (_unit->isOut() || _unit->getHealth() <= 0 || _unit->getHealth() < _unit->getStunlevel())
+	if (_unit->isOut() || _unit->isOutThresholdExceed())
 	{
 		// something went wrong - we can't shoot when dead or unconscious, or if we're about to fall over.
 		_parent->popState();
@@ -116,7 +116,7 @@ void ProjectileFlyBState::init()
 	{
 		auto target = _parent->getSave()->getTile(_action.target)->getUnit();
 		// target is dead: cancel the shot.
-		if (!target || target->isOut() || target != _parent->getSave()->getSelectedUnit())
+		if (!target || target->isOut() || target->isOutThresholdExceed() || target != _parent->getSave()->getSelectedUnit())
 		{
 			_parent->popState();
 			return;

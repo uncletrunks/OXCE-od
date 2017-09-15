@@ -263,6 +263,8 @@ public:
 	int getFallingPhase() const;
 	/// The unit is out - either dead or unconscious.
 	bool isOut() const;
+	/// Check if unit stats will cause knock out.
+	bool isOutThresholdExceed() const;
 	/// Get the number of time units a certain action takes.
 	RuleItemUseCost getActionTUs(BattleActionType actionType, const BattleItem *item) const;
 	/// Get the number of time units a certain action takes.

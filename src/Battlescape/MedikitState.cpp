@@ -228,7 +228,7 @@ void MedikitState::onHealClick(Action *)
 		_action->actor->getStatistics()->woundsHealed++;
 		update();
 
-		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && _targetUnit->getStunlevel() < _targetUnit->getHealth() && _targetUnit->getHealth() > 0)
+		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && !_targetUnit->isOutThresholdExceed())
 		{
 			if (!_revivedTarget)
 			{
@@ -266,7 +266,7 @@ void MedikitState::onStimulantClick(Action *)
 		update();
 
 		// if the unit has revived we quit this screen automatically
-		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && _targetUnit->getStunlevel() < _targetUnit->getHealth() && _targetUnit->getHealth() > 0)
+		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && !_targetUnit->isOutThresholdExceed())
 		{
 			_action->actor->getStatistics()->revivedSoldier++;
 			onEndClick(0);

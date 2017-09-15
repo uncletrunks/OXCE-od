@@ -1491,10 +1491,8 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 		{
 				// not dead/unconscious
 			if (!(*i)->isOut() &&
-				// not dying
-				(*i)->getHealth() > 0 &&
-				// not about to pass out
-				(*i)->getStunlevel() < (*i)->getHealth() &&
+				// not dying or not about to pass out
+				!(*i)->isOutThresholdExceed() &&
 				// have any chances for reacting
 				(*i)->getReactionScore() >= threshold &&
 				// not a friend
@@ -1961,7 +1959,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 		target->moraleChange(-morale_loss);
 	}
 
-	if ((target->getSpecialAbility() == SPECAB_EXPLODEONDEATH || target->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !target->isOut() && (target->getHealth() <= 0 || target->getStunlevel() >= target->getHealth()))
+	if ((target->getSpecialAbility() == SPECAB_EXPLODEONDEATH || target->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !target->isOut() && target->isOutThresholdExceed())
 	{
 		if (type->IgnoreSelfDestruct == false)
 		{
@@ -3683,7 +3681,7 @@ Tile *TileEngine::applyGravity(Tile *t)
 		}
 		if (unitpos != occupant->getPosition())
 		{
-			if (occupant->getHealth() > 0 && occupant->getStunlevel() < occupant->getHealth())
+			if (!occupant->isOutThresholdExceed())
 			{
 				if (occupant->getMovementType() == MT_FLY)
 				{

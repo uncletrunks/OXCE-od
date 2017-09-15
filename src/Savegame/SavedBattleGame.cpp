@@ -1752,7 +1752,7 @@ void SavedBattleGame::reviveUnconsciousUnits(bool noTU)
 					}
 				}
 			}
-			if ((*i)->getStatus() == STATUS_UNCONSCIOUS && (*i)->getStunlevel() < (*i)->getHealth() && (*i)->getHealth() > 0)
+			if ((*i)->getStatus() == STATUS_UNCONSCIOUS && !(*i)->isOutThresholdExceed())
 			{
 				Tile *targetTile = getTile(originalPosition);
 				bool largeUnit =  targetTile && targetTile->getUnit() && targetTile->getUnit() != *i && targetTile->getUnit()->getArmor()->getSize() != 1;

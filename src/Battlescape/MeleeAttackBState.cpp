@@ -66,7 +66,8 @@ void MeleeAttackBState::init()
 		return;
 	}
 
-	_ammo = _action.weapon->getAmmoForAction(BA_HIT, &_action.result);
+	bool reactionShoot = _unit->getFaction() != _parent->getSave()->getSide();
+	_ammo = _action.weapon->getAmmoForAction(BA_HIT, reactionShoot ? nullptr : &_action.result);
 	if (!_ammo)
 	{
 		_parent->popState();
@@ -81,7 +82,7 @@ void MeleeAttackBState::init()
 
 	_unit = _action.actor;
 
-	if (_unit->isOut() || _unit->getHealth() <= 0 || _unit->getHealth() < _unit->getStunlevel())
+	if (_unit->isOut() || _unit->isOutThresholdExceed())
 	{
 		// something went wrong - we can't shoot when dead or unconscious, or if we're about to fall over.
 		_parent->popState();
@@ -89,13 +90,11 @@ void MeleeAttackBState::init()
 	}
 
 	// reaction fire
-	if (_unit->getFaction() != _parent->getSave()->getSide())
+	if (reactionShoot)
 	{
 		// no ammo or target is dead: give the time units back and cancel the shot.
-		if (_ammo == 0
-			|| !_parent->getSave()->getTile(_action.target)->getUnit()
-			|| _parent->getSave()->getTile(_action.target)->getUnit()->isOut()
-			|| _parent->getSave()->getTile(_action.target)->getUnit() != _parent->getSave()->getSelectedUnit())
+		auto target = _parent->getSave()->getTile(_action.target)->getUnit();
+		if (!target || target->isOut() || target->isOutThresholdExceed() || target != _parent->getSave()->getSelectedUnit())
 		{
 			_parent->popState();
 			return;
@@ -136,6 +135,7 @@ void MeleeAttackBState::init()
 	{
 		_hitNumber = _weapon->getRules()->getAIMeleeHitCount() - 1;
 	}
+
 	performMeleeAttack();
 }
 
@@ -163,8 +163,7 @@ void MeleeAttackBState::think()
 		// not performing a reaction attack
 		_unit->getFaction() == _parent->getSave()->getSide() &&
 		// whose target is still alive or at least conscious
-		_target && _target->getHealth() > 0 &&
-		_target->getHealth() > _target->getStunlevel() &&
+		_target && !_target->isOutThresholdExceed() &&
 		// and we still have ammo to make the attack
 		_weapon->getAmmoForAction(BA_HIT) &&
 		// spend the TUs immediately

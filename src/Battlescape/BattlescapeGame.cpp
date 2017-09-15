@@ -2313,7 +2313,7 @@ bool BattlescapeGame::convertInfected()
 	bool retVal = false;
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if ((*i)->getHealth() > 0 && (*i)->getHealth() >= (*i)->getStunlevel() && (*i)->getRespawn())
+		if (!(*i)->isOutThresholdExceed() && (*i)->getRespawn())
 		{
 			retVal = true;
 			(*i)->setRespawn(false);

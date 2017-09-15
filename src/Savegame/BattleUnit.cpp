@@ -1355,6 +1355,15 @@ bool BattleUnit::isOut() const
 }
 
 /**
+ * Return true when unit stun level is greater that current health or unit have no health.
+ * @return true if unit should be knockout.
+ */
+bool BattleUnit::isOutThresholdExceed() const
+{
+	return getHealth() <= 0 || getHealth() <= getStunlevel();
+}
+
+/**
  * Get the number of time units a certain action takes.
  * @param actionType
  * @param item

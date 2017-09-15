@@ -79,7 +79,7 @@ void UnitFallBState::think()
 		bool largeCheck = true;
 		bool falling = true;
 		int size = (*unit)->getArmor()->getSize() - 1;
-		if ((*unit)->getHealth() <= 0 || (*unit)->getStunlevel() >= (*unit)->getHealth())
+		if ((*unit)->isOutThresholdExceed())
 		{
 			unit = _parent->getSave()->getFallingUnits()->erase(unit);
 			continue;
