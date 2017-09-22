@@ -1523,17 +1523,19 @@ void GenerateSupplyMission::operator()(const AlienBase *base) const
  */
 void GeoscapeState::time1Day()
 {
-	for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
+	SavedGame *saveGame = _game->getSavedGame();
+	Mod *mod = _game->getMod();
+	for (Base *base : *_game->getSavedGame()->getBases())
 	{
 		// Handle facility construction
-		for (std::vector<BaseFacility*>::iterator j = (*i)->getFacilities()->begin(); j != (*i)->getFacilities()->end(); ++j)
+		for (BaseFacility *facility : *base->getFacilities())
 		{
-			if ((*j)->getBuildTime() > 0)
+			if (facility->getBuildTime() > 0)
 			{
-				(*j)->build();
-				if ((*j)->getBuildTime() == 0)
+				facility->build();
+				if (facility->getBuildTime() == 0)
 				{
-					popup(new ProductionCompleteState((*i),  tr((*j)->getRules()->getType()), this, PROGRESS_CONSTRUCTION));
+					popup(new ProductionCompleteState(base,  tr(facility->getRules()->getType()), this, PROGRESS_CONSTRUCTION));
 				}
 			}
 		}
@@ -1541,67 +1543,67 @@ void GeoscapeState::time1Day()
 		// Handle science project
 		// 1. gather finished research
 		std::vector<ResearchProject*> finished;
-		for (std::vector<ResearchProject*>::const_iterator iter = (*i)->getResearch().begin(); iter != (*i)->getResearch().end(); ++iter)
+		for (ResearchProject *project : base->getResearch())
 		{
-			if ((*iter)->step())
+			if (project->step())
 			{
-				finished.push_back(*iter);
+				finished.push_back(project);
 			}
 		}
 		// 2. remember available research before adding new finished research
-		std::vector<RuleResearch *> before;
+		std::vector<RuleResearch*> before;
 		if (!finished.empty())
 		{
-			_game->getSavedGame()->getAvailableResearchProjects(before, _game->getMod(), *i);
+			saveGame->getAvailableResearchProjects(before, mod, base);
 		}
 		// 3. add finished research, including lookups and getonefrees (up to 4x)
-		for (std::vector<ResearchProject*>::const_iterator iter = finished.begin(); iter != finished.end(); ++iter)
+		for (ResearchProject *project : finished)
 		{
 			// 3a. remove finished research from the base where it was researched
-			(*i)->removeResearch(*iter);
+			base->removeResearch(project);
 			// 3b. handle interrogation
-			RuleResearch * bonus = 0;
-			const RuleResearch * research = (*iter)->getRules();
-			if (Options::retainCorpses && research->destroyItem() && _game->getMod()->getUnit(research->getName()))
+			RuleResearch *bonus = 0;
+			const RuleResearch *research = project->getRules();
+			if (Options::retainCorpses && research->destroyItem() && mod->getUnit(research->getName()))
 			{
-				(*i)->getStorageItems()->addItem(_game->getMod()->getArmor(_game->getMod()->getUnit(research->getName())->getArmor(), true)->getCorpseGeoscape());
+				base->getStorageItems()->addItem(mod->getArmor(mod->getUnit(research->getName())->getArmor(), true)->getCorpseGeoscape());
 			}
 			// 3c. handle getonefrees (topic+lookup)
-			if (!(*iter)->getRules()->getGetOneFree().empty())
+			if (!research->getGetOneFree().empty())
 			{
 				std::vector<std::string> possibilities;
-				for (std::vector<std::string>::const_iterator f = research->getGetOneFree().begin(); f != research->getGetOneFree().end(); ++f)
+				for (const std::string& free : research->getGetOneFree())
 				{
-					if (!_game->getSavedGame()->isResearched(*f, false))
+					if (!saveGame->isResearched(free, false))
 					{
-						possibilities.push_back(*f);
+						possibilities.push_back(free);
 					}
 				}
 				if (!possibilities.empty())
 				{
 					size_t pick = RNG::generate(0, possibilities.size()-1);
 					std::string sel = possibilities.at(pick);
-					bonus = _game->getMod()->getResearch(sel, true);
-					_game->getSavedGame()->addFinishedResearch(bonus, _game->getMod(), (*i));
+					bonus = mod->getResearch(sel, true);
+					saveGame->addFinishedResearch(bonus, mod, base);
 					if (!bonus->getLookup().empty())
 					{
-						_game->getSavedGame()->addFinishedResearch(_game->getMod()->getResearch(bonus->getLookup(), true), _game->getMod(), (*i));
+						saveGame->addFinishedResearch(mod->getResearch(bonus->getLookup(), true), mod, base);
 					}
 				}
 			}
 			// 3d. determine and remember if the ufopedia article should pop up again or not
 			// Note: because different topics may lead to the same lookup
-			const RuleResearch * newResearch = research;
+			const RuleResearch *newResearch = research;
 			std::string name = research->getLookup().empty() ? research->getName() : research->getLookup();
-			if (_game->getSavedGame()->isResearched(name, false))
+			if (saveGame->isResearched(name, false))
 			{
 				newResearch = 0;
 			}
 			// 3e. handle core research (topic+lookup)
-			_game->getSavedGame()->addFinishedResearch(research, _game->getMod(), (*i));
+			saveGame->addFinishedResearch(research, mod, base);
 			if (!research->getLookup().empty())
 			{
-				_game->getSavedGame()->addFinishedResearch(_game->getMod()->getResearch(research->getLookup(), true), _game->getMod(), (*i));
+				saveGame->addFinishedResearch(mod->getResearch(research->getLookup(), true), mod, base);
 			}
 			// 3e. handle cutscene
 			if (!research->getCutscene().empty())
@@ -1619,15 +1621,15 @@ void GeoscapeState::time1Day()
 			// 3g. warning if weapon is researched before its clip
 			if (newResearch)
 			{
-				RuleItem *item = _game->getMod()->getItem(newResearch->getName());
+				RuleItem *item = mod->getItem(newResearch->getName());
 				if (item && item->getBattleType() == BT_FIREARM && !item->getPrimaryCompatibleAmmo()->empty())
 				{
-					RuleManufacture *man = _game->getMod()->getManufacture(item->getType());
+					RuleManufacture *man = mod->getManufacture(item->getType());
 					if (man && !man->getRequirements().empty())
 					{
 						const std::vector<std::string> &req = man->getRequirements();
-						RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front());
-						if (ammo && std::find(req.begin(), req.end(), ammo->getType()) != req.end() && !_game->getSavedGame()->isResearched(req, true))
+						RuleItem *ammo = mod->getItem(item->getPrimaryCompatibleAmmo()->front());
+						if (ammo && std::find(req.begin(), req.end(), ammo->getType()) != req.end() && !saveGame->isResearched(req, true))
 						{
 							popup(new ResearchRequiredState(item));
 						}
@@ -1636,47 +1638,47 @@ void GeoscapeState::time1Day()
 			}
 			// 3h. inform about new possible research
 			std::vector<RuleResearch *> after;
-			_game->getSavedGame()->getAvailableResearchProjects(after, _game->getMod(), *i);
+			saveGame->getAvailableResearchProjects(after, mod, base);
 			std::vector<RuleResearch *> newPossibleResearch;
-			_game->getSavedGame()->getNewlyAvailableResearchProjects(before, after, newPossibleResearch);
-			popup(new NewPossibleResearchState(*i, newPossibleResearch));
+			saveGame->getNewlyAvailableResearchProjects(before, after, newPossibleResearch);
+			popup(new NewPossibleResearchState(base, newPossibleResearch));
 			// 3i. inform about new possible manufacture
 			std::vector<RuleManufacture *> newPossibleManufacture;
-			_game->getSavedGame()->getDependableManufacture(newPossibleManufacture, research, _game->getMod(), *i);
+			saveGame->getDependableManufacture(newPossibleManufacture, research, mod, base);
 			if (!newPossibleManufacture.empty())
 			{
-				popup(new NewPossibleManufactureState(*i, newPossibleManufacture));
+				popup(new NewPossibleManufactureState(base, newPossibleManufacture));
 			}
 			// 3j. now iterate through all the bases and remove this project from their labs (unless it can still yield more stuff!)
-			for (std::vector<Base*>::iterator j = _game->getSavedGame()->getBases()->begin(); j != _game->getSavedGame()->getBases()->end(); ++j)
+			for (Base *otherBase : *saveGame->getBases())
 			{
-				for (std::vector<ResearchProject*>::const_iterator iter2 = (*j)->getResearch().begin(); iter2 != (*j)->getResearch().end(); ++iter2)
+				for (ResearchProject* otherProject : otherBase->getResearch())
 				{
-					if (research->getName() == (*iter2)->getRules()->getName())
+					if (research->getName() == otherProject->getRules()->getName())
 					{
-						if (!_game->getSavedGame()->isResearched(research->getGetOneFree(), false))
+						if (!saveGame->isResearched(research->getGetOneFree(), false))
 						{
 							// This research topic still has some more undiscovered "getOneFree" topics, keep it!
 						}
-						else if (_game->getSavedGame()->hasUndiscoveredProtectedUnlock(research, _game->getMod()))
+						else if (saveGame->hasUndiscoveredProtectedUnlock(research, mod))
 						{
 							// This research topic still has one or more undiscovered "protected unlocks", keep it!
 						}
 						else
 						{
 							// This topic can't give you anything else anymore, remove it!
-							(*j)->removeResearch(*iter2);
+							otherBase->removeResearch(otherProject);
 							break;
 						}
 					}
 				}
 			}
 			// 3k. remove processed item from the list (and continue with the next item)
-			delete(*iter);
+			delete(project);
 		}
 
 		// Handle soldier wounds
-		for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
+		for (std::vector<Soldier*>::iterator j = base->getSoldiers()->begin(); j != base->getSoldiers()->end(); ++j)
 		{
 			if ((*j)->getWoundRecovery() > 0)
 			{
@@ -1688,19 +1690,19 @@ void GeoscapeState::time1Day()
 			}
 		}
 		// Handle psionic training
-		if ((*i)->getAvailablePsiLabs() > 0 && Options::anytimePsiTraining)
+		if (base->getAvailablePsiLabs() > 0 && Options::anytimePsiTraining)
 		{
-			for (std::vector<Soldier*>::const_iterator s = (*i)->getSoldiers()->begin(); s != (*i)->getSoldiers()->end(); ++s)
+			for (std::vector<Soldier*>::const_iterator s = base->getSoldiers()->begin(); s != base->getSoldiers()->end(); ++s)
 			{
 				(*s)->trainPsi1Day();
-				(*s)->calcStatString(_game->getMod()->getStatStrings(), (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())));
+				(*s)->calcStatString(_game->getMod()->getStatStrings(), (Options::psiStrengthEval && saveGame->isResearched(_game->getMod()->getPsiRequirements())));
 			}
 		}
 	}
 	// handle regional and country points for alien bases
-	for (std::vector<AlienBase*>::const_iterator b = _game->getSavedGame()->getAlienBases()->begin(); b != _game->getSavedGame()->getAlienBases()->end(); ++b)
+	for (std::vector<AlienBase*>::const_iterator b = saveGame->getAlienBases()->begin(); b != saveGame->getAlienBases()->end(); ++b)
 	{
-		for (std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin(); k != _game->getSavedGame()->getRegions()->end(); ++k)
+		for (std::vector<Region*>::iterator k = saveGame->getRegions()->begin(); k != saveGame->getRegions()->end(); ++k)
 		{
 			if ((*k)->getRules()->insideRegion((*b)->getLongitude(), (*b)->getLatitude()))
 			{
@@ -1708,7 +1710,7 @@ void GeoscapeState::time1Day()
 				break;
 			}
 		}
-		for (std::vector<Country*>::iterator k = _game->getSavedGame()->getCountries()->begin(); k != _game->getSavedGame()->getCountries()->end(); ++k)
+		for (std::vector<Country*>::iterator k = saveGame->getCountries()->begin(); k != saveGame->getCountries()->end(); ++k)
 		{
 			if ((*k)->getRules()->insideCountry((*b)->getLongitude(), (*b)->getLatitude()))
 			{
@@ -1719,14 +1721,14 @@ void GeoscapeState::time1Day()
 	}
 
 	// Handle resupply of alien bases.
-	std::for_each(_game->getSavedGame()->getAlienBases()->begin(), _game->getSavedGame()->getAlienBases()->end(),
-			  GenerateSupplyMission(*_game->getMod(), *_game->getSavedGame()));
+	std::for_each(saveGame->getAlienBases()->begin(), saveGame->getAlienBases()->end(),
+			  GenerateSupplyMission(*_game->getMod(), *saveGame));
 
 	// Autosave 3 times a month
-	int day = _game->getSavedGame()->getTime()->getDay();
+	int day = saveGame->getTime()->getDay();
 	if (day == 10 || day == 20)
 	{
-		if (_game->getSavedGame()->isIronman())
+		if (saveGame->isIronman())
 		{
 			popup(new SaveGameState(OPT_GEOSCAPE, SAVE_IRONMAN, _palette));
 		}
