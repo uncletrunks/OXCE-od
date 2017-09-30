@@ -58,6 +58,7 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *selectedTopicResear
 	_txtTitle = new Text(304, 17, 8, 7);
 	_txtSelectedTopic = new Text(204, 9, 8, 24);
 	_txtProgress = new Text(100, 9, 212, 24);
+	_txtCostIndicator = new Text(100, 9, 16, 32); // experimental cost indicator
 	_lstLeft = new TextList(132, 128, 8, 40);
 	_lstRight = new TextList(132, 128, 164, 40);
 	_btnNew = new TextButton(148, 16, 8, 176);
@@ -76,6 +77,7 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *selectedTopicResear
 	add(_txtTitle, "text", "techTreeViewer");
 	add(_txtSelectedTopic, "text", "techTreeViewer");
 	add(_txtProgress, "text", "techTreeViewer");
+	add(_txtCostIndicator, "text", "techTreeViewer");
 	add(_lstLeft, "list", "techTreeViewer");
 	add(_lstRight, "list", "techTreeViewer");
 	add(_btnNew, "button", "techTreeViewer");
@@ -186,11 +188,17 @@ void TechTreeViewerState::btnNewClick(Action *)
  */
 void TechTreeViewerState::initLists()
 {
-	std::wostringstream ss;
-	ss << tr(_selectedTopic);
-	if (_selectedFlag == 2)
-		ss << tr("STR_M_FLAG");
-	_txtSelectedTopic->setText(tr("STR_TOPIC").arg(ss.str()));
+	// Set topic name
+	{
+		std::wostringstream ss;
+		ss << tr(_selectedTopic);
+		if (_selectedFlag == 2)
+		{
+			ss << tr("STR_M_FLAG");
+			_txtCostIndicator->setText(L"");
+		}
+		_txtSelectedTopic->setText(tr("STR_TOPIC").arg(ss.str()));
+	}
 
 	// reset
 	_leftTopics.clear();
@@ -210,6 +218,25 @@ void TechTreeViewerState::initLists()
 		RuleResearch *rule = _game->getMod()->getResearch(_selectedTopic);
 		if (rule == 0)
 			return;
+
+		// Cost indicator
+		{
+			std::wostringstream ss;
+			int cost = rule->getCost();
+			std::vector<std::tuple<int, std::wstring>> symbol_values
+					({{100, L"#"}, {20, L"="}, {5, L"-"}});
+
+			for (auto& sym : symbol_values)
+			{
+				while (cost >= std::get<0>(sym))
+				{
+					cost -= std::get<0>(sym);
+					ss << std::get<1>(sym);
+				}
+			}
+			_txtCostIndicator->setText(ss.str());
+		}
+		//
 
 		const std::vector<std::string> &researchList = _game->getMod()->getResearchList();
 		const std::vector<std::string> &manufactureList = _game->getMod()->getManufactureList();
