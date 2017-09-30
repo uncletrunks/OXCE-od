@@ -31,7 +31,7 @@ namespace OpenXcom
 class CustomPalettes
 {
 private:
-	std::string _type, _target;
+	std::string _type, _target, _file;
 	std::map<int, Position> _palette;
 public:
 	/// Creates a blank custom palette.
@@ -46,6 +46,8 @@ public:
 	const std::string &getType() const;
 	/// Gets the target.
 	const std::string &getTarget() const;
+	/// Gets the source file in JASC palette format (256 colors).
+	const std::string &getFile() const;
 
 };
 

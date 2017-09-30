@@ -3853,9 +3853,41 @@ void Mod::loadExtraResources()
 		}
 
 		Palette *target = _palettes[palTargetName];
-		for (std::map<int, Position>::iterator j = palDef->getPalette()->begin(); j != palDef->getPalette()->end(); ++j)
+		std::string fileName = palDef->getFile();
+		if (fileName.empty())
 		{
-			target->setColor(j->first, j->second.x, j->second.y, j->second.z);
+			for (std::map<int, Position>::iterator j = palDef->getPalette()->begin(); j != palDef->getPalette()->end(); ++j)
+			{
+				target->setColor(j->first, j->second.x, j->second.y, j->second.z);
+			}
+		}
+		else
+		{
+			// Load from JASC file
+			const std::string& fullPath = FileMap::getFilePath(fileName);
+			std::ifstream palFile(fullPath);
+			if (palFile.is_open())
+			{
+				std::string line;
+				std::getline(palFile, line); // header
+				std::getline(palFile, line); // file format
+				std::getline(palFile, line); // number of colors
+				int r = 0, g = 0, b = 0;
+				for (int j = 0; j < 256; ++j)
+				{
+					std::getline(palFile, line); // j-th color index
+					std::stringstream ss(line);
+					ss >> r;
+					ss >> g;
+					ss >> b;
+					target->setColor(j, r, g, b);
+				}
+				palFile.close();
+			}
+			else
+			{
+				throw Exception(fullPath + " not found");
+			}
 		}
 	}
 }

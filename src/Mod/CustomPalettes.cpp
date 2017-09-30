@@ -44,6 +44,7 @@ void CustomPalettes::load(const YAML::Node &node)
 {
 	_type = node["type"].as<std::string>(_type);
 	_target = node["target"].as<std::string>(_target);
+	_file = node["file"].as<std::string>(_file);
 	_palette = node["palette"].as< std::map<int, Position> >(_palette);
 }
 
@@ -72,6 +73,15 @@ const std::string &CustomPalettes::getType() const
 const std::string &CustomPalettes::getTarget() const
 {
 	return _target;
+}
+
+/**
+ * Gets the source file in JASC palette format (256 colors).
+ * @return The relative file path and name.
+ */
+const std::string &CustomPalettes::getFile() const
+{
+	return _file;
 }
 
 }
