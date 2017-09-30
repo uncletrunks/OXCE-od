@@ -44,7 +44,7 @@ protected:
 	BaseView *_view;
 	TextButton *_btnCancel;
 	Window *_window;
-	Text *_txtFacility, *_txtCost, *_numCost, *_txtTime, *_numTime, *_txtMaintenance, *_numMaintenance;
+	Text *_txtFacility, *_txtCost, *_numCost, *_numResources, *_txtTime, *_numTime, *_txtMaintenance, *_numMaintenance;
 public:
 	/// Creates the Place Facility state.
 	PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseFacility *origFac = 0);

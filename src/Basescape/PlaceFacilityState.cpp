@@ -54,10 +54,12 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	_txtFacility = new Text(110, 9, 202, 50);
 	_txtCost = new Text(110, 9, 202, 62);
 	_numCost = new Text(110, 17, 202, 70);
-	_txtTime = new Text(110, 9, 202, 90);
-	_numTime = new Text(110, 17, 202, 98);
-	_txtMaintenance = new Text(110, 9, 202, 118);
-	_numMaintenance = new Text(110, 17, 202, 126);
+	_numResources = new Text(110, 25, 202, 87);
+	const size_t resourceTextOffset = 9*std::min((size_t)3, _rule->getBuildCostItems().size());
+	_txtTime = new Text(110, 9, 202, 90+resourceTextOffset);
+	_numTime = new Text(110, 17, 202, 98+resourceTextOffset);
+	_txtMaintenance = new Text(110, 9, 202, 118+resourceTextOffset);
+	_numMaintenance = new Text(110, 17, 202, 126+resourceTextOffset);
 
 	// Set palette
 	setInterface("placeFacility");
@@ -68,6 +70,7 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	add(_txtFacility, "text", "placeFacility");
 	add(_txtCost, "text", "placeFacility");
 	add(_numCost, "numbers", "placeFacility");
+	add(_numResources, "numbers", "placeFacility");
 	add(_txtTime, "text", "placeFacility");
 	add(_numTime, "numbers", "placeFacility");
 	add(_txtMaintenance, "text", "placeFacility");
@@ -93,6 +96,20 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 
 	_numCost->setBig();
 	_numCost->setText(Text::formatFunding(_origFac != 0 ? _game->getMod()->getTheBiggestRipOffEver() : _rule->getBuildCost()));
+
+	if (!_rule->getBuildCostItems().empty())
+	{
+		std::wostringstream ss;
+
+		// Currently, the text box will only fit three lines of items.
+		// But I'm going to add everything to the list anyway.
+		for (auto& item : _rule->getBuildCostItems())
+		{
+			// Note: `item` is of the form (item name, (cost number, refund number))
+			ss << tr(item.first) << " : " << item.second.first << std::endl;
+		}
+		_numResources->setText(ss.str());
+	}
 
 	_txtTime->setText(tr("STR_CONSTRUCTION_TIME_UC"));
 
