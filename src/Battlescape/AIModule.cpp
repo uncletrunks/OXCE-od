@@ -334,10 +334,17 @@ void AIModule::think(BattleAction *action)
 		}
 	}
 	if (_spottingEnemies > 2
-		|| _unit->getHealth() < 2 * _unit->getBaseStats()->health / 3
-		|| (_aggroTarget && _aggroTarget->getTurnsSinceSpotted() > _intelligence))
+		|| _unit->getHealth() < 2 * _unit->getBaseStats()->health / 3)
 	{
 		evaluate = true;
+	}
+	else if (_aggroTarget && _aggroTarget->getTurnsSinceSpotted() > _intelligence)
+	{
+		// Special case for snipers, target may not be visible, but that shouldn't cause us to re-evaluate
+		if (!_unit->getUnitRules()->getSniper() || !_aggroTarget->getTurnsLeftSpottedForSnipers())
+		{
+			evaluate = true;
+		}
 	}
 
 
@@ -1509,6 +1516,12 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 	int tuCost = _unit->getActionTUs(action->type, action->weapon).Time;
 	int tuTotal = _unit->getBaseStats()->tu;
 
+	// Return a score of zero if this firing mode doesn't exist for this weapon
+	if (!tuCost)
+	{
+		return 0;
+	}
+
 	if (checkLOF)
 	{
 		Position origin = _save->getTileEngine()->getOriginVoxel((*action), 0);
@@ -2161,8 +2174,17 @@ bool AIModule::sniperAction()
 		_attackAction->target = sniperBattleAction.target;
 		_attackAction->type = sniperBattleAction.type;
 		_attackAction->weapon = sniperBattleAction.weapon;
+		_visibleEnemies = _visibleEnemies ? _visibleEnemies : 1; // Make sure we count at least our target as visible, otherwise we might not shoot!
 
 		if (_traceAI) { Log(LOG_INFO) << "Target for sniper found at (" << sniperBattleAction.target.x << "," << sniperBattleAction.target.y << "," << sniperBattleAction.target.z << ")." ;}
+
+		_attackAction->updateTU();
+		if (!_attackAction->haveTU())
+		{
+			_attackAction->type = BA_RETHINK;
+			if (_traceAI) { Log(LOG_INFO) << "But not enough TUs to shoot." ;}
+			return false;
+		}
 
 		return true;
 	}

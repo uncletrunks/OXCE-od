@@ -145,8 +145,6 @@ en-GB:
   STR_MELEE_SHORT: "Melee>{ALT}{0}"
 #NextTurnState.cpp
   STR_HIT_LOG_NEW_TURN: "New Turn"
-#Projectile.cpp
-  STR_NO_LOS_PENALTY: "Accuracy loss for no LOS!"
 #ProjectileFlyBState.cpp
   STR_FAILED_CQB_CHECK: "Enemy managed to interrupt your attack!"
   STR_NO_TRAJECTORY: "No viable trajectory!"

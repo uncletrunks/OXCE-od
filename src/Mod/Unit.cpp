@@ -246,7 +246,7 @@ int Unit::getSpotter() const
 
 /**
  * Gets the sniper score. Determines the chances of firing from out of LOS on spotted units.
- * @return The unit's spotter value.
+ * @return The unit's sniper value.
  */
 int Unit::getSniper() const
 {
