@@ -3974,6 +3974,32 @@ int BattleUnit::getMindControllerId() const
 	return _mindControllerID;
 }
 
+/**
+ * Gets the spotter score. Determines how many turns sniper AI units can act on this unit seeing your troops.
+ * @return The unit's spotter value.
+ */
+int BattleUnit::getSpotterDuration() const
+{
+	if (_unitRules)
+	{
+		return _unitRules->getSpotterDuration();
+	}
+	return 0;
+}
+
+/**
+ * Is this unit capable of shooting beyond max. visual range?
+ * @return True, if unit is capable of shooting beyond max. visual range.
+ */
+bool BattleUnit::isSniper() const
+{
+	if (_unitRules && _unitRules->getSniperPercentage() > 0)
+	{
+		return true;
+	}
+	return false;
+}
+
 
 namespace
 {

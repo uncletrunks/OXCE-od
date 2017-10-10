@@ -785,7 +785,7 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 								{
 									(*i)->setTurnsSinceSpotted(0);
 
-									(*i)->setTurnsLeftSpottedForSnipers(std::max(unit->getUnitRules()->getSpotter(), (*i)->getTurnsLeftSpottedForSnipers())); // defaults to 0 = no information given to snipers
+									(*i)->setTurnsLeftSpottedForSnipers(std::max(unit->getSpotterDuration(), (*i)->getTurnsLeftSpottedForSnipers())); // defaults to 0 = no information given to snipers
 								}
 							}
 

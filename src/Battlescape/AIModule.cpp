@@ -341,7 +341,7 @@ void AIModule::think(BattleAction *action)
 	else if (_aggroTarget && _aggroTarget->getTurnsSinceSpotted() > _intelligence)
 	{
 		// Special case for snipers, target may not be visible, but that shouldn't cause us to re-evaluate
-		if (!_unit->getUnitRules()->getSniper() || !_aggroTarget->getTurnsLeftSpottedForSnipers())
+		if (!_unit->isSniper() || !_aggroTarget->getTurnsLeftSpottedForSnipers())
 		{
 			evaluate = true;
 		}
@@ -792,9 +792,13 @@ void AIModule::setupAttack()
 		{
 			wayPointAction();
 		}
-		else if (RNG::percent(_unit->getUnitRules()->getSniper())) // don't always act on spotter information unless modder says so.
+		else if (_unit->getUnitRules()) // xcom soldiers (under mind control) lack unit rules!
 		{
-			sniperAttack = sniperAction();
+			// don't always act on spotter information unless modder says so
+			if (RNG::percent(_unit->getUnitRules()->getSniperPercentage()))
+			{
+				sniperAttack = sniperAction();
+			}
 		}
 	}
 
@@ -2545,7 +2549,7 @@ bool AIModule::validTarget(BattleUnit *unit, bool assessDanger, bool includeCivs
 	if (unit->isOut() ||
 		// they must be units that we "know" about
 		// units known by spotters and this one is a sniper count as "known" too
-		(_unit->getFaction() == FACTION_HOSTILE && (_intelligence < unit->getTurnsSinceSpotted() || (_unit->getUnitRules()->getSniper() && !unit->getTurnsLeftSpottedForSnipers()))) ||
+		(_unit->getFaction() == FACTION_HOSTILE && (_intelligence < unit->getTurnsSinceSpotted() || (_unit->isSniper() && !unit->getTurnsLeftSpottedForSnipers()))) ||
 		// they haven't been grenaded
 		(assessDanger && unit->getTile()->getDangerous()) ||
 		// and they mustn't be on our side

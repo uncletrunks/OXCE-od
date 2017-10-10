@@ -238,7 +238,7 @@ int Unit::getAggression() const
  * Gets the spotter score. Determines how many turns sniper AI units can act on this unit seeing your troops.
  * @return The unit's spotter value.
  */
-int Unit::getSpotter() const
+int Unit::getSpotterDuration() const
 {
 	// Lazy balance - use -1 to make this the same as intelligence value
 	return (_spotter == -1) ? _intelligence : _spotter;
@@ -248,7 +248,7 @@ int Unit::getSpotter() const
  * Gets the sniper score. Determines the chances of firing from out of LOS on spotted units.
  * @return The unit's sniper value.
  */
-int Unit::getSniper() const
+int Unit::getSniperPercentage() const
 {
 	return _sniper;
 }

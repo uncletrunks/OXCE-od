@@ -110,9 +110,9 @@ public:
 	/// Gets the aggression. Determines the chance of revenge and taking cover.
 	int getAggression() const;
 	/// Gets the spotter score. This is the number of turns sniper AI units can use spotting info from this unit.
-	int getSpotter() const;
+	int getSpotterDuration() const;
 	/// Gets the sniper score. Determines chance of acting on information gained by spotter units.
-	int getSniper() const;
+	int getSniperPercentage() const;
 	/// Gets the alien's special ability.
 	int getSpecialAbility() const;
 	/// Gets the unit's spawn unit.

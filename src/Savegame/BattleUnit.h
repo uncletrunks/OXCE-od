@@ -587,6 +587,10 @@ public:
 	int getMindControllerId() const;
 	/// Get the unit leeroyJenkins flag
 	bool isLeeroyJenkins() const { return _isLeeroyJenkins; };
+	/// Gets the spotter score. This is the number of turns sniper AI units can use spotting info from this unit.
+	int getSpotterDuration() const;
+	/// Is this unit capable of shooting beyond max. visual range?
+	bool isSniper() const;
 
 };
 
