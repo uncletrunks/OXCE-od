@@ -18,9 +18,9 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define OPENXCOM_VERSION_SHORT "3.9c"
-#define OPENXCOM_VERSION_LONG "3.9.0.0"
-#define OPENXCOM_VERSION_NUMBER 3,9,0,0
+#define OPENXCOM_VERSION_SHORT "3.10"
+#define OPENXCOM_VERSION_LONG "3.10.0.0"
+#define OPENXCOM_VERSION_NUMBER 3,10,0,0
 
 #ifdef GIT_BUILD
 #include "git_version.h"
