@@ -41,7 +41,8 @@ Armor::Armor(const std::string &type) :
 	_ignoresMeleeThreat(-1), _createsMeleeThreat(-1),
 	_overKill(0.5f), _meleeDodgeBackPenalty(0),
 	_customArmorPreviewIndex(0),
-	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true)
+	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true),
+	_instantWoundRecovery(false)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -209,6 +210,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_allowsRunning = node["allowsRunning"].as<bool>(_allowsRunning);
 	_allowsStrafing = node["allowsStrafing"].as<bool>(_allowsStrafing);
 	_allowsKneeling = node["allowsKneeling"].as<bool>(_allowsKneeling);
+	_instantWoundRecovery = node["instantWoundRecovery"].as<bool>(_instantWoundRecovery);
 }
 
 /**
@@ -909,6 +911,15 @@ bool Armor::allowsStrafing() const
 bool Armor::allowsKneeling() const
 {
 	return _allowsKneeling;
+}
+
+/**
+ * Does this armor instantly recover any wounds after the battle?
+ * @return True if soldier should not get any recovery time.
+ */
+bool Armor::getInstantWoundRecovery() const
+{
+	return _instantWoundRecovery;
 }
 
 }

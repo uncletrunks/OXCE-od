@@ -2821,7 +2821,10 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff
 	{
 		healthLoss = 0;
 	}
-	s->setWoundRecovery(RNG::generate((healthLoss*0.5),(healthLoss*1.5)));
+	if (!_armor->getInstantWoundRecovery())
+	{
+		s->setWoundRecovery(RNG::generate((healthLoss*0.5),(healthLoss*1.5)));
+	}
 
 	if (_expBravery && stats->bravery < caps.bravery)
 	{

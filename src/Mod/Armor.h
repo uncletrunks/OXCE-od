@@ -77,6 +77,7 @@ private:
 	ScriptValues<Armor> _scriptValues;
 	int _customArmorPreviewIndex;
 	bool _allowsRunning, _allowsStrafing, _allowsKneeling;
+	bool _instantWoundRecovery;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -219,6 +220,8 @@ public:
 	bool allowsStrafing() const;
 	/// Can you kneel while wearing this armor?
 	bool allowsKneeling() const;
+	/// Does this armor instantly recover any wounds after the battle?
+	bool getInstantWoundRecovery() const;
 };
 
 }
