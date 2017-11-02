@@ -598,7 +598,7 @@ BattleItem *Inventory::getMouseOverItem() const
  */
 void Inventory::setMouseOverItem(BattleItem *item)
 {
-	_mouseOverItem = (item && !item->getRules()->isFixed()) ? item : 0;
+	_mouseOverItem = (item && !(item->getRules()->isFixed() && item->getRules()->getBattleType() == BT_NONE)) ? item : 0;
 }
 
 /**
