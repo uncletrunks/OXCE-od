@@ -847,7 +847,7 @@ BattleItem* Tile::getTopItem()
  * @param smoke amount of smoke.
  * @param fire amount of file.
  */
-static inline void applyEnvi(BattleUnit* unit, int smoke, int fire)
+static inline void applyEnvi(BattleUnit* unit, int smoke, int fire, bool smokeDamage)
 {
 	if (unit)
 	{
@@ -861,7 +861,7 @@ static inline void applyEnvi(BattleUnit* unit, int smoke, int fire)
 			}
 		}
 		// no fire: must be smoke
-		else
+		else if (smokeDamage)
 		{
 			// try to knock this guy out.
 			unit->setEnviSmoke(smoke / 4 + 1);
@@ -874,7 +874,7 @@ static inline void applyEnvi(BattleUnit* unit, int smoke, int fire)
  * average out any smoke added by the number of overlaps.
  * apply fire/smoke damage to units as applicable.
  */
-void Tile::prepareNewTurn()
+void Tile::prepareNewTurn(bool smokeDamage)
 {
 	// we've received new smoke in this turn, but we're not on fire, average out the smoke.
 	if ( _overlaps != 0 && _smoke != 0 && _fire == 0)
@@ -884,14 +884,13 @@ void Tile::prepareNewTurn()
 	// if we still have smoke/fire
 	if (_smoke)
 	{
-		applyEnvi(_unit, _smoke, _fire);
+		applyEnvi(_unit, _smoke, _fire, smokeDamage);
 		for (std::vector<BattleItem*>::iterator i = _inventory.begin(); i != _inventory.end(); ++i)
 		{
-			applyEnvi((*i)->getUnit(), _smoke, _fire);
+			applyEnvi((*i)->getUnit(), _smoke, _fire, smokeDamage);
 		}
 	}
 	_overlaps = 0;
-	_danger = false;
 }
 
 /**
@@ -996,9 +995,9 @@ void Tile::addOverlap()
 /**
  * set the danger flag on this tile.
  */
-void Tile::setDangerous()
+void Tile::setDangerous(bool danger)
 {
-	_danger = true;
+	_danger = danger;
 }
 
 /**

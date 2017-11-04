@@ -59,6 +59,9 @@ private:
 	RuleUfoStats _stats;
 	/// Calculates a new speed vector to the destination.
 	void calculateSpeed();
+
+	using MovingTarget::load;
+	using MovingTarget::save;
 public:
 	/// Creates a UFO of the specified type.
 	Ufo(const RuleUfo *rules);

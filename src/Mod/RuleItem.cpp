@@ -55,7 +55,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
 	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0),
-	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
+	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_kneelBonus(-1), _oneHandedPenalty(-1)
 {
@@ -542,6 +542,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
+	_landOnly = node["landOnly"].as<bool>(_landOnly);
 	_specialType = node["specialType"].as<int>(_specialType);
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
@@ -1830,12 +1831,21 @@ bool RuleItem::isLOSRequired() const
 }
 
 /**
- * Can this item be used on land or is it underwater only?
+ * Can this item only be used underwater?
  * @return if this is an underwater weapon or not.
  */
 bool RuleItem::isWaterOnly() const
 {
 	return _underwaterOnly;
+}
+
+/**
+* Can this item only be used on land?
+* @return if this is a land weapon or not.
+*/
+bool RuleItem::isLandOnly() const
+{
+	return _landOnly;
 }
 
 /**
@@ -1896,6 +1906,7 @@ int RuleItem::getThrowMultiplier(const BattleUnit *unit) const
 {
 	return _throwMulti.getBonus(unit);
 }
+
 /**
  * Gets the associated special type of this item.
  * note that type 14 is the alien brain, and types

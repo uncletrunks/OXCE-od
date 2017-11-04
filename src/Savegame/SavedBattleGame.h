@@ -38,6 +38,7 @@ class TileEngine;
 class BattleItem;
 class Mod;
 class State;
+class RuleItem;
 
 /**
  * The battlescape data that gets written to disk when the game is saved.

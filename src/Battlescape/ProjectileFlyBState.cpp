@@ -498,7 +498,7 @@ void ProjectileFlyBState::think()
 					}
 				}
 			}
-			else if (_action.type == BA_LAUNCH && _action.waypoints.size() > 1 && _projectileImpact == -1)
+			else if (_action.type == BA_LAUNCH && _action.waypoints.size() > 1 && _projectileImpact == V_EMPTY)
 			{
 				_origin = _action.waypoints.front();
 				_action.waypoints.pop_front();
@@ -542,6 +542,12 @@ void ProjectileFlyBState::think()
 						shotgun ? 0 : _range + _parent->getMap()->getProjectile()->getDistance()
 					));
 
+					if (_projectileImpact == V_UNIT)
+					{
+						projectileHitUnit(_parent->getMap()->getProjectile()->getPosition(offset));
+					}
+
+//					int firingXP = _unit->getFiringXP();
 					// special shotgun behaviour: trace extra projectile paths, and add bullet hits at their termination points.
 					if (shotgun)
 					{
@@ -551,18 +557,28 @@ void ProjectileFlyBState::think()
 							// create a projectile
 							Projectile *proj = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
 							// let it trace to the point where it hits
-							_projectileImpact = proj->calculateTrajectory(std::max(0.0, (_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / 100.0) - i * 5.0));
-							if (_projectileImpact != V_EMPTY)
+							int secondaryImpact = proj->calculateTrajectory(std::max(0.0, (_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / 100.0) - i * 5.0));
+							if (secondaryImpact != V_EMPTY)
 							{
 								// as above: skip the shot to the end of it's path
 								proj->skipTrajectory();
 								// insert an explosion and hit
-								if (_projectileImpact != V_OUTOFBOUNDS)
+								if (secondaryImpact != V_OUTOFBOUNDS)
 								{
-									Explosion *explosion = new Explosion(proj->getPosition(1), _ammo->getRules()->getHitAnimation());
+									if (secondaryImpact == V_UNIT)
+									{
+										projectileHitUnit(proj->getPosition(offset));
+									}
+									Explosion *explosion = new Explosion(proj->getPosition(offset), _ammo->getRules()->getHitAnimation());
 									int power = _ammo->getRules()->getPowerBonus(_unit) - _ammo->getRules()->getPowerRangeReduction(proj->getDistance());
 									_parent->getMap()->getExplosions()->push_back(explosion);
-									_parent->getSave()->getTileEngine()->hit({ _action, _ammo }, proj->getPosition(1), power, _ammo->getRules()->getDamageType());
+									_parent->getSave()->getTileEngine()->hit({ _action, _ammo }, proj->getPosition(offset), power, _ammo->getRules()->getDamageType());
+
+									//do not work yet
+//									if (_ammo->getRules()->getExplosionRadius(_unit) != 0)
+//									{
+//										_parent->getTileEngine()->explode({ _action, _ammo }, proj->getPosition(offset), _ammo->getRules()->getPower(), _ammo->getRules()->getDamageType(), _ammo->getRules()->getExplosionRadius(), _unit);
+//									}
 								}
 							}
 							++i;
@@ -570,41 +586,11 @@ void ProjectileFlyBState::think()
 						}
 					}
 
-					if (_projectileImpact == 4)
-					{
-						BattleUnit *victim = _parent->getSave()->getTile(_parent->getMap()->getProjectile()->getPosition(offset) / Position(16,16,24))->getUnit();
-						BattleUnit *targetVictim = _parent->getSave()->getTile(_action.target)->getUnit(); // Who we were aiming at (not necessarily who we hit)
-						if (victim && !victim->isOut())
-						{
-							victim->getStatistics()->hitCounter++;
-							if (_unit->getOriginalFaction() == FACTION_PLAYER && victim->getOriginalFaction() == FACTION_PLAYER)
-							{
-								victim->getStatistics()->shotByFriendlyCounter++;
-								_unit->getStatistics()->shotFriendlyCounter++;
-							}
-							if (victim == targetVictim) // Hit our target
-							{
-								_unit->getStatistics()->shotsLandedCounter++;
-								if (_parent->getTileEngine()->distance(_action.actor->getPosition(), victim->getPosition()) > 30)
-								{
-									_unit->getStatistics()->longDistanceHitCounter++;
-								}
-								if (_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) < _parent->getTileEngine()->distance(_action.actor->getPosition(), victim->getPosition()))
-								{
-									_unit->getStatistics()->lowAccuracyHitCounter++;
-								}
-							}
-							if (victim->getFaction() == FACTION_HOSTILE)
-							{
-								AIModule *ai = victim->getAIModule();
-								if (ai != 0)
-								{
-									ai->setWasHitBy(_unit);
-									_unit->setTurnsSinceSpotted(0);
-								}
-							}
-						}
-					}
+					//TODO check if (_projectileImpact == 4)
+//					if (_unit->getFiringXP() > firingXP + 1)
+//					{
+//						_unit->nerfFiringXP(firingXP + 1);
+//					}
 				}
 				else if (!_action.weapon->haveNextShotsForAction(_action.type, _action.autoShotCounter) || !_action.weapon->getAmmoForAction(_action.type))
 				{
@@ -707,6 +693,49 @@ void ProjectileFlyBState::setOriginVoxel(const Position& pos)
 void ProjectileFlyBState::targetFloor()
 {
 	_targetFloor = true;
+}
+
+void ProjectileFlyBState::projectileHitUnit(Position pos)
+{
+	BattleUnit *victim = _parent->getSave()->getTile(pos / Position(16,16,24))->getUnit();
+	BattleUnit *targetVictim = _parent->getSave()->getTile(_action.target)->getUnit(); // Who we were aiming at (not necessarily who we hit)
+	if (victim && !victim->isOut())
+	{
+		victim->getStatistics()->hitCounter++;
+		if (_unit->getOriginalFaction() == FACTION_PLAYER && victim->getOriginalFaction() == FACTION_PLAYER)
+		{
+			victim->getStatistics()->shotByFriendlyCounter++;
+			_unit->getStatistics()->shotFriendlyCounter++;
+		}
+		if (victim == targetVictim) // Hit our target
+		{
+			_unit->getStatistics()->shotsLandedCounter++;
+			if (_parent->getTileEngine()->distance(_action.actor->getPosition(), victim->getPosition()) > 30)
+			{
+				_unit->getStatistics()->longDistanceHitCounter++;
+			}
+			if (_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) < _parent->getTileEngine()->distance(_action.actor->getPosition(), victim->getPosition()))
+			{
+				_unit->getStatistics()->lowAccuracyHitCounter++;
+			}
+		}
+		if (victim->getFaction() == FACTION_HOSTILE)
+		{
+			AIModule *ai = victim->getAIModule();
+			if (ai != 0)
+			{
+				ai->setWasHitBy(_unit);
+				_unit->setTurnsSinceSpotted(0);
+			}
+		}
+		// Record the last unit to hit our victim. If a victim dies without warning*, this unit gets the credit.
+		// *Because the unit died in a fire or bled out.
+		victim->setMurdererId(_unit->getId());
+		if (_action.weapon != 0)
+			victim->setMurdererWeapon(_action.weapon->getRules()->getName());
+		if (_ammo != 0)
+			victim->setMurdererWeaponAmmo(_ammo->getRules()->getName());
+	}
 }
 
 }

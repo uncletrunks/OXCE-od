@@ -157,7 +157,7 @@ private:
 	ExperienceTrainingMode _experienceTrainingMode;
 	int _listOrder, _maxRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _shotgunPellets;
 	std::string _zombieUnit;
-	bool _LOSRequired, _underwaterOnly, _psiReqiured;
+	bool _LOSRequired, _underwaterOnly, _landOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	int _kneelBonus, _oneHandedPenalty;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti;
@@ -474,8 +474,10 @@ public:
 	const std::string &getZombieUnit() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
-	/// Is this item restricted to use underwater?
+	/// Is this item restricted to underwater use?
 	bool isWaterOnly() const;
+	/// Is this item restricted to land use?
+	bool isLandOnly() const;
 	/// Is this item require unit with psi skill to use it?
 	bool isPsiRequired() const;
 	/// Get the associated special type of this item.

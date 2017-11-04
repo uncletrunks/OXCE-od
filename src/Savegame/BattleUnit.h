@@ -566,6 +566,8 @@ public:
 	void setMindControllerId(int id);
 	/// Get the unit mind controller's id.
 	int getMindControllerId() const;
+	int getFiringXP() const;
+	void nerfFiringXP(int newXP);
 
 };
 

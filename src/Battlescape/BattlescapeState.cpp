@@ -547,10 +547,17 @@ void BattlescapeState::init()
 		_reserve = _btnReserveNone;
 		break;
 	}
-	if (_firstInit && playableUnitSelected())
+	if (_firstInit)
 	{
-		_battleGame->setupCursor();
-		_map->getCamera()->centerOnPosition(_save->getSelectedUnit()->getPosition());
+		if (!playableUnitSelected())
+		{
+			selectNextPlayerUnit();
+		}
+		if (playableUnitSelected())
+		{
+			_battleGame->setupCursor();
+			_map->getCamera()->centerOnPosition(_save->getSelectedUnit()->getPosition());
+		}
 		_firstInit = false;
 		_btnReserveNone->setGroup(&_reserve);
 		_btnReserveSnap->setGroup(&_reserve);
@@ -943,9 +950,7 @@ void BattlescapeState::btnInventoryClick(Action *)
 		updateSoldierInfo();
 	}
 	if (playableUnitSelected()
-		&& (_save->getSelectedUnit()->getArmor()->getSize() == 1 || _save->getDebugMode())
-		&& (_save->getSelectedUnit()->getOriginalFaction() == FACTION_PLAYER ||
-			_save->getSelectedUnit()->getRankString() != "STR_LIVE_TERRORIST"))
+		&& (_save->getSelectedUnit()->hasInventory() || _save->getDebugMode()))
 	{
 		// clean up the waypoints
 		if (_battleGame->getCurrentAction()->type == BA_LAUNCH)
