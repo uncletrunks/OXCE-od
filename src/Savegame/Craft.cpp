@@ -740,7 +740,7 @@ void Craft::think()
 	}
 	if (reachedDestination() && _dest == (Target*)_base)
 	{
-		setInterceptionOrder(0);
+		setInterceptionOrder(0); // just to be sure
 		checkup();
 		setDestination(0);
 		setSpeed(0);

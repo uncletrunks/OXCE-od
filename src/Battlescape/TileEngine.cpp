@@ -2185,6 +2185,15 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 					{
 						const int damage = type->getRandomDamage(power_);
 						BattleUnit *bu = dest->getUnit();
+						Tile *tileBelow = _save->getTile(dest->getPosition() - Position(0,0,1));
+						if (!bu && dest->getPosition().z > 0 && dest->hasNoFloor(tileBelow))
+						{
+							bu = tileBelow->getUnit();
+							if (bu && bu->getHeight() + bu->getFloatHeight() - tileBelow->getTerrainLevel() <= 24)
+							{
+								bu = 0; // if the unit below has no voxels poking into the tile, don't damage it.
+							}
+						}
 
 						toRemove.clear();
 						if (bu)
@@ -2406,12 +2415,20 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 			}
 		}
 		// add some smoke if tile was destroyed and not set on fire
-		if (destroyed && !tiles[i]->getFire())
+		if (destroyed)
 		{
-			int smoke = RNG::generate(1, (volume / 2) + 3) + (volume / 2);
-			if (smoke > tiles[i]->getSmoke())
+			if (tiles[i]->getFire() && !tiles[i]->getMapData(O_FLOOR) && !tiles[i]->getMapData(O_OBJECT))
 			{
-				tiles[i]->setSmoke(std::max(0, std::min(smoke, 15)));
+				tiles[i]->setFire(0);// if the object set the floor on fire, and the floor was subsequently destroyed, the fire needs to go out
+			}
+
+			if (!tiles[i]->getFire())
+			{
+				int smoke = RNG::generate(1, (volume / 2) + 3) + (volume / 2);
+				if (smoke > tiles[i]->getSmoke())
+				{
+					tiles[i]->setSmoke(std::max(0, std::min(smoke, 15)));
+				}
 			}
 		}
 	}
@@ -3629,7 +3646,7 @@ Tile *TileEngine::applyGravity(Tile *t)
 				}
 				else
 				{
-					occupant->startWalking(Pathfinding::DIR_DOWN, occupant->getPosition() + Position(0,0,-1), _save->getTile(occupant->getPosition() + Position(0,0,-1)), true);
+					occupant->setPosition(occupant->getPosition()); // this is necessary to set the unit up for falling correctly, updating their "lastPos"
 					_save->addFallingUnit(occupant);
 				}
 			}

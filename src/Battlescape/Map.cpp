@@ -888,17 +888,20 @@ void Map::drawTerrain(Surface *surface)
 							int part = 0;
 							part += ttile->getPosition().x - tunit->getPosition().x;
 							part += (ttile->getPosition().y - tunit->getPosition().y)*2;
-							Position offset;
-							calculateWalkingOffset(tunit, &offset);
-							offset += screenPosition;
-							offset += Position(0, 24, 0);
+							if (part != 1 && part != 2)
+							{
+								Position offset;
+								calculateWalkingOffset(tunit, &offset);
+								offset += screenPosition;
+								offset += Position(0, 24, 0);
 
-							unitSprite.draw(
-								tunit, part,
-								offset.x,
-								offset.y,
-								ttile->getShade()
-							);
+								unitSprite.draw(
+									tunit, part,
+									offset.x,
+									offset.y,
+									ttile->getShade()
+								);
+							}
 						}
 					}
 

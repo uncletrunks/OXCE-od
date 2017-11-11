@@ -655,6 +655,7 @@ void GeoscapeState::timeAdvance()
 		timeSpan = 12 * 5 * 6 * 2 * 24;
 	}
 
+
 	for (int i = 0; i < timeSpan && !_pause; ++i)
 	{
 		TimeTrigger trigger;
@@ -676,7 +677,7 @@ void GeoscapeState::timeAdvance()
 		}
 	}
 
-	_pause = !_dogfightsToBeStarted.empty();
+	_pause = !_dogfightsToBeStarted.empty() || _zoomInEffectTimer->isRunning() || _zoomOutEffectTimer->isRunning();
 
 	timeDisplay();
 	_globe->draw();
@@ -709,44 +710,41 @@ void GeoscapeState::time5Seconds()
 		switch ((*i)->getStatus())
 		{
 		case Ufo::FLYING:
-			if (!_zoomInEffectTimer->isRunning() && !_zoomOutEffectTimer->isRunning())
+			(*i)->think();
+			if ((*i)->reachedDestination())
 			{
-				(*i)->think();
-				if ((*i)->reachedDestination())
+				size_t count = _game->getSavedGame()->getMissionSites()->size();
+				AlienMission *mission = (*i)->getMission();
+				bool detected = (*i)->getDetected();
+				mission->ufoReachedWaypoint(**i, *_game, *_globe);
+				if (detected != (*i)->getDetected() && !(*i)->getFollowers()->empty())
 				{
-					size_t count = _game->getSavedGame()->getMissionSites()->size();
-					AlienMission *mission = (*i)->getMission();
-					bool detected = (*i)->getDetected();
-					mission->ufoReachedWaypoint(**i, *_game, *_globe);
-					if (detected != (*i)->getDetected() && !(*i)->getFollowers()->empty())
+					if (!((*i)->getTrajectory().getID() == UfoTrajectory::RETALIATION_ASSAULT_RUN && (*i)->getStatus() == Ufo::LANDED))
+						popup(new UfoLostState((*i)->getName(_game->getLanguage())));
+				}
+				if (count < _game->getSavedGame()->getMissionSites()->size())
+				{
+					MissionSite *site = _game->getSavedGame()->getMissionSites()->back();
+					site->setDetected(true);
+					popup(new MissionDetectedState(site, this));
+				}
+				// If UFO was destroyed, don't spawn missions
+				if ((*i)->getStatus() == Ufo::DESTROYED)
+					return;
+				if (Base *base = dynamic_cast<Base*>((*i)->getDestination()))
+				{
+					mission->setWaveCountdown(30 * (RNG::generate(0, 400) + 48));
+					(*i)->setDestination(0);
+					base->setupDefenses();
+					timerReset();
+					if (!base->getDefenses()->empty())
 					{
-						if (!((*i)->getTrajectory().getID() == UfoTrajectory::RETALIATION_ASSAULT_RUN && (*i)->getStatus() == Ufo::LANDED))
-							popup(new UfoLostState((*i)->getName(_game->getLanguage())));
+						popup(new BaseDefenseState(base, *i, this));
 					}
-					if (count < _game->getSavedGame()->getMissionSites()->size())
+					else
 					{
-						MissionSite *site = _game->getSavedGame()->getMissionSites()->back();
-						site->setDetected(true);
-						popup(new MissionDetectedState(site, this));
-					}
-					// If UFO was destroyed, don't spawn missions
-					if ((*i)->getStatus() == Ufo::DESTROYED)
+						handleBaseDefense(base, *i);
 						return;
-					if (Base *base = dynamic_cast<Base*>((*i)->getDestination()))
-					{
-						mission->setWaveCountdown(30 * (RNG::generate(0, 400) + 48));
-						(*i)->setDestination(0);
-						base->setupDefenses();
-						timerReset();
-						if (!base->getDefenses()->empty())
-						{
-							popup(new BaseDefenseState(base, *i, this));
-						}
-						else
-						{
-							handleBaseDefense(base, *i);
-							return;
-						}
 					}
 				}
 			}
@@ -834,8 +832,8 @@ void GeoscapeState::time5Seconds()
 						else
 						{
 							Waypoint *w = new Waypoint();
-							w->setLongitude((*j)->getMeetLongitude());
-							w->setLatitude((*j)->getMeetLatitude());
+							w->setLongitude(u->getLongitude());
+							w->setLatitude(u->getLatitude());
 							w->setId(u->getId());
 							(*j)->setDestination(0);
 							popup(new GeoscapeCraftState((*j), _globe, w));
@@ -858,10 +856,9 @@ void GeoscapeState::time5Seconds()
 					}
 				}
 			}
-			if (!_zoomInEffectTimer->isRunning() && !_zoomOutEffectTimer->isRunning())
-			{
-				(*j)->think();
-			}
+
+			(*j)->think();
+
 			if ((*j)->reachedDestination())
 			{
 				Ufo* u = dynamic_cast<Ufo*>((*j)->getDestination());
@@ -997,6 +994,19 @@ void GeoscapeState::time5Seconds()
 		else
 		{
 			++i;
+		}
+	}
+
+	// Check any dogfights waiting to open
+	for (std::list<DogfightState*>::iterator d = _dogfights.begin(); d != _dogfights.end(); ++d)
+	{
+		if ((*d)->isMinimized())
+		{
+			if (((*d)->getWaitForPoly() && _globe->insideLand((*d)->getUfo()->getLongitude(), (*d)->getUfo()->getLatitude())) ||
+				((*d)->getWaitForAltitude() && (*d)->getUfo()->getAltitudeInt() <= (*d)->getCraft()->getRules()->getMaxAltitude()))
+			{
+				_pause = true; // the USO reached the sea during this interval period, stop the timer and let handleDogfights() take it from there.
+			}
 		}
 	}
 
@@ -1865,6 +1875,10 @@ void GeoscapeState::globeClick(Action *action)
  */
 void GeoscapeState::btnInterceptClick(Action *)
 {
+	if (buttonsDisabled())
+	{
+		return;
+	}
 	_game->pushState(new InterceptState(_globe));
 }
 
@@ -1874,6 +1888,10 @@ void GeoscapeState::btnInterceptClick(Action *)
  */
 void GeoscapeState::btnBasesClick(Action *)
 {
+	if (buttonsDisabled())
+	{
+		return;
+	}
 	timerReset();
 	if (!_game->getSavedGame()->getBases()->empty())
 	{
@@ -1891,6 +1909,10 @@ void GeoscapeState::btnBasesClick(Action *)
  */
 void GeoscapeState::btnGraphsClick(Action *)
 {
+	if (buttonsDisabled())
+	{
+		return;
+	}
 	_game->pushState(new GraphsState);
 }
 
@@ -1900,6 +1922,10 @@ void GeoscapeState::btnGraphsClick(Action *)
  */
 void GeoscapeState::btnUfopaediaClick(Action *)
 {
+	if (buttonsDisabled())
+	{
+		return;
+	}
 	Ufopaedia::open(_game);
 }
 
@@ -1909,6 +1935,10 @@ void GeoscapeState::btnUfopaediaClick(Action *)
  */
 void GeoscapeState::btnOptionsClick(Action *)
 {
+	if (buttonsDisabled())
+	{
+		return;
+	}
 	_game->pushState(new PauseState(OPT_GEOSCAPE));
 }
 
@@ -1918,6 +1948,10 @@ void GeoscapeState::btnOptionsClick(Action *)
  */
 void GeoscapeState::btnFundingClick(Action *)
 {
+	if (buttonsDisabled())
+	{
+		return;
+	}
 	_game->pushState(new FundingState);
 }
 
@@ -2701,6 +2735,10 @@ void GeoscapeState::resize(int &dX, int &dY)
 	_sideLine->setHeight(Options::baseYResolution);
 	_sideLine->setY(0);
 	_sideLine->drawRect(0, 0, _sideLine->getWidth(), _sideLine->getHeight(), 15);
+}
+bool GeoscapeState::buttonsDisabled()
+{
+	return _zoomInEffectTimer->isRunning() || _zoomOutEffectTimer->isRunning();
 }
 
 }

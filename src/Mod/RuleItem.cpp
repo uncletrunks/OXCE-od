@@ -21,6 +21,7 @@
 #include "RuleInventory.h"
 #include "RuleDamageType.h"
 #include "../Savegame/BattleUnit.h"
+#include "../Engine/Exception.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
@@ -433,6 +434,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_unprimeActionName = node["unprimeActionName"].as<std::string>(_unprimeActionName);
 	_unprimeActionMessage = node["unprimeActionMessage"].as<std::string>(_unprimeActionMessage);
 	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
+	_clipSize = node["clipSize"].as<int>(_clipSize);
 
 	_confAimed.accuracy = node["accuracyAimed"].as<int>(_confAimed.accuracy);
 	_confAuto.accuracy = node["accuracyAuto"].as<int>(_confAuto.accuracy);
@@ -489,7 +491,16 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		}
 	}
 
-	_clipSize = node["clipSize"].as<int>(_clipSize);
+	if ((_battleType == BT_MELEE || _battleType == BT_FIREARM) && _clipSize == 0)
+	{
+		for (RuleItemAction* conf : { &_confAimed, &_confAuto, &_confSnap, &_confMelee, })
+		{
+			if (conf->ammoSlot != -1 && _compatibleAmmo[conf->ammoSlot].empty())
+			{
+				throw Exception("Weapon " + _type + " has clip size 0 and no ammo defined. Please use 'clipSize: -1' for unlimited ammo, or allocate a compatibleAmmo item.");
+			}
+		}
+	}
 	_specialChance = node["specialChance"].as<int>(_specialChance);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
 	_blockBothHands = node["blockBothHands"].as<bool>(_blockBothHands);
