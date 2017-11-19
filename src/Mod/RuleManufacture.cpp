@@ -50,7 +50,7 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 		_producedItems[_name] = value;
 	}
 	_category = node["category"].as<std::string>(_category);
-	_requires = node["requires"].as< std::vector<std::string> >(_requires);
+	_requiresName = node["requires"].as< std::vector<std::string> >(_requiresName);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
 	_space = node["space"].as<int>(_space);
 	_time = node["time"].as<int>(_time);
@@ -63,6 +63,14 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 		_listOrder = listOrder;
 	}
 	std::sort(_requiresBaseFunc.begin(), _requiresBaseFunc.end());
+}
+
+/**
+ * Cross link with other Rules.
+ */
+void RuleManufacture::afterLoad(const Mod* mod)
+{
+	_requires = mod->getResearch(_requiresName);
 }
 
 /**
@@ -88,7 +96,7 @@ const std::string &RuleManufacture::getCategory() const
  * manufacture this object.
  * @return A list of research IDs.
  */
-const std::vector<std::string> &RuleManufacture::getRequirements() const
+const std::vector<const RuleResearch*> &RuleManufacture::getRequirements() const
 {
 	return _requires;
 }

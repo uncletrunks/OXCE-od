@@ -101,32 +101,9 @@ bool equalProduction::operator()(const Production * p) const
 	return p->getRules() == _item;
 }
 
-bool stringLess(const std::string &a, const std::string &b)
-{
-	if (a.size() < b.size())
-	{
-		return true;
-	}
-	else if (a.size() > b.size())
-	{
-		return false;
-	}
-	else
-	{
-		return std::lexicographical_compare(
-			a.begin(), a.end(),
-			b.begin(), b.end());
-	}
-}
-
 bool researchLess(const RuleResearch *a, const RuleResearch *b)
 {
-	return stringLess(a->getName(), b->getName());
-}
-
-bool researchStringLess(const RuleResearch *a, const std::string &b)
-{
-	return stringLess(a->getName(), b);
+	return std::less<const RuleResearch *>{}(a, b);
 }
 
 template<typename T>
@@ -143,8 +120,8 @@ bool haveReserchVector(const std::vector<const RuleResearch*> &vec, const RuleRe
 
 bool haveReserchVector(const std::vector<const RuleResearch*> &vec,  const std::string &res)
 {
-	auto find = std::lower_bound(vec.begin(), vec.end(), res, researchStringLess);
-	return find != vec.end() && (*find)->getName() == res;
+	auto find = std::find_if(vec.begin(), vec.end(), [&](const RuleResearch* r){ return r->getName() == res; });
+	return find != vec.end();
 }
 
 }
@@ -1161,7 +1138,7 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 
 		// 2. If the currentQueueItem was *not* already discovered before, add it to discovered research
 		bool checkRelatedZeroCostTopics = true;
-		if (!isResearched(currentQueueItem->getName(), false))
+		if (!isResearched(currentQueueItem, false))
 		{
 			_discovered.push_back(currentQueueItem);
 			sortReserchVector(_discovered);
@@ -1234,9 +1211,9 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 						else
 						{
 							// for "protected" topics, we need to check if the currentQueueItem can unlock it or not
-							for (const std::string &itUnlocks : currentQueueItem->getUnlocked())
+							for (auto& itUnlocks : currentQueueItem->getUnlocked())
 							{
-								if (itProjectToTest->getName() == itUnlocks)
+								if (itProjectToTest == itUnlocks)
 								{
 									queue.push_back(itProjectToTest);
 									break;
@@ -1276,17 +1253,17 @@ void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> &projec
 	std::vector<const RuleResearch *> unlocked;
 	for (const RuleResearch *research : _discovered)
 	{
-		for (const std::string &itUnlocked : research->getUnlocked())
+		for (auto& itUnlocked : research->getUnlocked())
 		{
-			unlocked.push_back(mod->getResearch(itUnlocked, true));
+			unlocked.push_back(itUnlocked);
 		}
 		sortReserchVector(unlocked);
 	}
 
 	// Create a list of research topics available for research in the given base
-	for (const std::string &name : mod->getResearchList())
+	for (auto& pair : mod->getResearchMap())
 	{
-		RuleResearch *research = mod->getResearch(name);
+		RuleResearch *research = pair.second;
 
 		if ((considerDebugMode && _debug) || haveReserchVector(unlocked, research))
 		{
@@ -1436,8 +1413,8 @@ void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & depen
 	for (std::vector<std::string>::const_iterator iter = mans.begin(); iter != mans.end(); ++iter)
 	{
 		RuleManufacture *m = mod->getManufacture(*iter);
-		const std::vector<std::string> &reqs = m->getRequirements();
-		if (isResearched(m->getRequirements()) && std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
+		const auto &reqs = m->getRequirements();
+		if (isResearched(reqs) && std::find(reqs.begin(), reqs.end(), research) != reqs.end())
 		{
 			dependables.push_back(m);
 		}
@@ -1453,12 +1430,11 @@ void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & depen
 bool SavedGame::hasUndiscoveredProtectedUnlock(const RuleResearch * r, const Mod * mod) const
 {
 	// Note: checking for not yet discovered unlocks protected by "requires" (which also implies cost = 0)
-	for (const std::string &itUnlocked : r->getUnlocked())
+	for (auto& unlock : r->getUnlocked())
 	{
-		RuleResearch *unlock = mod->getResearch(itUnlocked, true);
 		if (!unlock->getRequirements().empty())
 		{
-			if (!isResearched(unlock->getName(), false))
+			if (!isResearched(unlock, false))
 			{
 				return true;
 			}
@@ -1483,20 +1459,46 @@ bool SavedGame::isResearched(const std::string &research, bool considerDebugMode
 	return haveReserchVector(_discovered, research);
 }
 
+bool SavedGame::isResearched(const RuleResearch *research, bool considerDebugMode) const
+{
+	//if (research.empty())
+	//	return true;
+	if (considerDebugMode && _debug)
+		return true;
+
+	return haveReserchVector(_discovered, research);
+}
+
+bool SavedGame::isResearched(const std::vector<std::string> &research) const
+{
+	if (research.empty())
+		return true;
+
+	for (const std::string &r : research)
+	{
+		if (!haveReserchVector(_discovered, r))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 /**
  * Returns if a certain list of research topics has been completed.
  * @param research List of research IDs.
  * @param considerDebugMode Should debug mode be considered or not.
  * @return Whether it's researched or not.
  */
-bool SavedGame::isResearched(const std::vector<std::string> &research, bool considerDebugMode) const
+bool SavedGame::isResearched(const std::vector<const RuleResearch *> &research, bool considerDebugMode) const
 {
 	if (research.empty())
 		return true;
 	if (considerDebugMode && _debug)
 		return true;
 
-	for (const std::string &r : research)
+	for (auto& r : research)
 	{
 		if (!haveReserchVector(_discovered, r))
 		{

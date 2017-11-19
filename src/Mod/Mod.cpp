@@ -948,6 +948,18 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 	{
 		j->second->updateCategories(&replacementRules);
 	}
+	for (auto& rule : _research)
+	{
+		rule.second->afterLoad(this);
+	}
+	for (auto& rule : _items)
+	{
+		rule.second->afterLoad(this);
+	}
+	for (auto& rule : _manufacture)
+	{
+		rule.second->afterLoad(this);
+	}
 
 	sortLists();
 	loadExtraResources();
@@ -2230,9 +2242,39 @@ const std::vector<std::string> &Mod::getInvsList() const
  * @param id Research project type.
  * @return Rules for the research project.
  */
-RuleResearch *Mod::getResearch (const std::string &id, bool error) const
+RuleResearch *Mod::getResearch(const std::string &id, bool error) const
 {
 	return getRule(id, "Research", _research, error);
+}
+
+/**
+ * Gets the ruleset list for from reserch list.
+ */
+std::vector<const RuleResearch*> Mod::getResearch(const std::vector<std::string> &id) const
+{
+	std::vector<const RuleResearch*> dest;
+	dest.reserve(id.size());
+	for (auto& n : id)
+	{
+		auto r = getResearch(n, false);
+		if (r)
+		{
+			dest.push_back(r);
+		}
+		else
+		{
+			Log(LOG_ERROR) << "Unknow reserch " + n;
+		}
+	}
+	return dest;
+}
+
+/**
+ * Gets the ruleset for a specific research project.
+ */
+const std::map<std::string, RuleResearch *> &Mod::getResearchMap() const
+{
+	return _research;
 }
 
 /**
@@ -2426,7 +2468,7 @@ template <typename T>
 struct compareRule : public std::binary_function<const std::string&, const std::string&, bool>
 {
 	Mod *_mod;
-	typedef T*(Mod::*RuleLookup)(const std::string &id, bool error);
+	typedef T*(Mod::*RuleLookup)(const std::string &id, bool error) const;
 	RuleLookup _lookup;
 
 	compareRule(Mod *mod, RuleLookup lookup) : _mod(mod), _lookup(lookup)
@@ -2743,9 +2785,9 @@ ScriptGlobal *Mod::getScriptGlobal() const
 	return _scriptGlobal;
 }
 
-std::string Mod::getFinalResearch() const
+RuleResearch *Mod::getFinalResearch() const
 {
-	return _finalResearch;
+	return getResearch(_finalResearch, true);
 }
 
 const std::map<int, std::string> *Mod::getMissionRatings() const

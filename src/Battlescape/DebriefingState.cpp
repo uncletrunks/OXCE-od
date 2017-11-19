@@ -1864,7 +1864,7 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	else
 	{
 		RuleResearch *research = _game->getMod()->getResearch(type);
-		if (research != 0 && !_game->getSavedGame()->isResearched(type))
+		if (research != 0 && !_game->getSavedGame()->isResearched(research))
 		{
 			// more points if it's not researched
 			addStat("STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);

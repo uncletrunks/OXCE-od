@@ -21,6 +21,8 @@
 #include <map>
 #include <yaml-cpp/yaml.h>
 
+#include "RuleResearch.h"
+
 namespace OpenXcom
 {
 
@@ -31,21 +33,26 @@ class RuleManufacture
 {
 private:
 	std::string _name, _category;
-	std::vector<std::string> _requires, _requiresBaseFunc;
+	std::vector<std::string> _requiresName, _requiresBaseFunc;
+	std::vector<const RuleResearch*> _requires;
 	int _space, _time, _cost;
 	std::map<std::string, int> _requiredItems, _producedItems;
 	int _listOrder;
 public:
 	/// Creates a new manufacture.
 	RuleManufacture(const std::string &name);
+
 	/// Loads the manufacture from YAML.
 	void load(const YAML::Node& node, int listOrder);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets the manufacture name.
 	const std::string &getName() const;
 	/// Gets the manufacture category.
 	const std::string &getCategory() const;
 	/// Gets the manufacture's requirements.
-	const std::vector<std::string> &getRequirements() const;
+	const std::vector<const RuleResearch*> &getRequirements() const;
 	/// Gets the base requirements.
 	const std::vector<std::string> &getRequireBaseFunc() const;
 	/// Gets the required workshop space.

@@ -24,6 +24,7 @@
 #include "RuleDamageType.h"
 #include "Unit.h"
 #include "ModScript.h"
+#include "RuleResearch.h"
 
 namespace OpenXcom
 {
@@ -127,9 +128,10 @@ public:
 
 private:
 	std::string _type, _name, _nameAsAmmo; // two types of objects can have the same name
-	std::vector<std::string> _requires;
-	std::vector<std::string> _requiresBuy;
+	std::vector<std::string> _requiresName;
+	std::vector<std::string> _requiresBuyName;
 	std::vector<std::string> _categories;
+	std::vector<const RuleResearch *> _requires, _requiresBuy;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
 	int _bigSprite;
@@ -208,6 +210,9 @@ public:
 	void updateCategories(std::map<std::string, std::string> *replacementRules);
 	/// Loads item data from YAML.
 	void load(const YAML::Node& node, Mod *mod, int listIndex, const ModScript& parsers);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets the item's type.
 	const std::string &getType() const;
 	/// Gets the item's name.
@@ -215,9 +220,9 @@ public:
 	/// Gets the item's name when loaded in weapon.
 	const std::string &getNameAsAmmo() const;
 	/// Gets the item's requirements.
-	const std::vector<std::string> &getRequirements() const;
+	const std::vector<const RuleResearch*> &getRequirements() const;
 	/// Gets the item's buy requirements.
-	const std::vector<std::string> &getBuyRequirements() const;
+	const std::vector<const RuleResearch*> &getBuyRequirements() const;
 	/// Gets the item's categories.
 	const std::vector<std::string> &getCategories() const;
 	/// Checks if the item belongs to a category.

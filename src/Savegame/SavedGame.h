@@ -232,8 +232,12 @@ public:
 	bool hasUndiscoveredProtectedUnlock(const RuleResearch * r, const Mod * mod) const;
 	/// Gets if a certain research has been completed.
 	bool isResearched(const std::string &research, bool considerDebugMode = true) const;
+	/// Gets if a certain research has been completed.
+	bool isResearched(const RuleResearch *research, bool considerDebugMode = true) const;
 	/// Gets if a certain list of research topics has been completed.
-	bool isResearched(const std::vector<std::string> &research, bool considerDebugMode = true) const;
+	bool isResearched(const std::vector<std::string> &research) const;
+	/// Gets if a certain list of research topics has been completed.
+	bool isResearched(const std::vector<const RuleResearch *> &research, bool considerDebugMode = true) const;
 	/// Gets the soldier matching this ID.
 	Soldier *getSoldier(int id) const;
 	/// Handles the higher promotions.

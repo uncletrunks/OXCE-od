@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
+#include "Mod.h"
 
 namespace OpenXcom
 {
@@ -40,33 +41,38 @@ class RuleResearch
  private:
 	std::string _name, _lookup, _cutscene;
 	int _cost, _points;
-	std::vector<std::string> _dependencies, _unlocks, _getOneFree, _requires, _requiresBaseFunc;
+	std::vector<std::string> _dependenciesName, _unlocksName, _getOneFreeName, _requiresName, _requiresBaseFunc;
+	std::vector<const RuleResearch*> _dependencies, _unlocks, _getOneFree, _requires;
 	bool _needItem, _destroyItem;
 	int _listOrder;
 public:
 	RuleResearch(const std::string &name);
+
 	/// Loads the research from YAML.
 	void load(const YAML::Node& node, int listOrder);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets time needed to discover this ResearchProject.
 	int getCost() const;
 	/// Gets the research name.
 	const std::string &getName() const;
 	/// Gets the research dependencies.
-	const std::vector<std::string> &getDependencies() const;
+	const std::vector<const RuleResearch*> &getDependencies() const;
 	/// Checks if this ResearchProject needs a corresponding Item to be researched.
 	bool needItem() const;
 	/// Checks if this ResearchProject consumes the corresponding Item when research completes.
 	bool destroyItem() const;
 	/// Gets the list of ResearchProjects unlocked by this research.
-	const std::vector<std::string> &getUnlocked() const;
+	const std::vector<const RuleResearch*> &getUnlocked() const;
 	/// Gets the points earned for discovering this ResearchProject.
 	int getPoints() const;
 	/// Gets the list of ResearchProjects granted at random for free by this research.
-	const std::vector<std::string> &getGetOneFree() const;
+	const std::vector<const RuleResearch*> &getGetOneFree() const;
 	/// Gets what to look up in the ufopedia.
-	std::string getLookup() const;
+	const std::string &getLookup() const;
 	/// Gets the requirements for this ResearchProject.
-	const std::vector<std::string> &getRequirements() const;
+	const std::vector<const RuleResearch*> &getRequirements() const;
 	/// Gets the base requirements for this ResearchProject.
 	const std::vector<std::string> &getRequireBaseFunc() const;
 	/// Gets the list weight for this research item.

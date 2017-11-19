@@ -1572,7 +1572,7 @@ void GeoscapeState::time1Day()
 			// 3a. remove finished research from the base where it was researched
 			base->removeResearch(project);
 			// 3b. handle interrogation
-			RuleResearch *bonus = 0;
+			const RuleResearch *bonus = 0;
 			const RuleResearch *research = project->getRules();
 			if (Options::retainCorpses && research->destroyItem() && mod->getUnit(research->getName()))
 			{
@@ -1581,8 +1581,8 @@ void GeoscapeState::time1Day()
 			// 3c. handle getonefrees (topic+lookup)
 			if (!research->getGetOneFree().empty())
 			{
-				std::vector<std::string> possibilities;
-				for (const std::string& free : research->getGetOneFree())
+				std::vector<const RuleResearch *> possibilities;
+				for (auto& free : research->getGetOneFree())
 				{
 					if (!saveGame->isResearched(free, false))
 					{
@@ -1592,8 +1592,7 @@ void GeoscapeState::time1Day()
 				if (!possibilities.empty())
 				{
 					size_t pick = RNG::generate(0, possibilities.size()-1);
-					std::string sel = possibilities.at(pick);
-					bonus = mod->getResearch(sel, true);
+					bonus = possibilities.at(pick);
 					saveGame->addFinishedResearch(bonus, mod, base);
 					if (!bonus->getLookup().empty())
 					{
@@ -1637,9 +1636,9 @@ void GeoscapeState::time1Day()
 					RuleManufacture *man = mod->getManufacture(item->getType());
 					if (man && !man->getRequirements().empty())
 					{
-						const std::vector<std::string> &req = man->getRequirements();
+						const auto &req = man->getRequirements();
 						RuleItem *ammo = mod->getItem(item->getPrimaryCompatibleAmmo()->front());
-						if (ammo && std::find(req.begin(), req.end(), ammo->getType()) != req.end() && !saveGame->isResearched(req, true))
+						if (ammo && std::find_if(req.begin(), req.end(), [&](const RuleResearch* r){ return r->getName() == ammo->getType(); }) != req.end() && !saveGame->isResearched(req, true))
 						{
 							popup(new ResearchRequiredState(item));
 						}

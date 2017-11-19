@@ -283,8 +283,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_type = node["type"].as<std::string>(_type);
 	_name = node["name"].as<std::string>(_name);
 	_nameAsAmmo = node["nameAsAmmo"].as<std::string>(_nameAsAmmo);
-	_requires = node["requires"].as< std::vector<std::string> >(_requires);
-	_requiresBuy = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuy);
+	_requiresName = node["requires"].as< std::vector<std::string> >(_requiresName);
+	_requiresBuyName = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuyName);
 	_categories = node["categories"].as< std::vector<std::string> >(_categories);
 	_size = node["size"].as<double>(_size);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
@@ -611,6 +611,14 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 }
 
 /**
+ * Cross link with other Rules.
+ */
+void RuleItem::afterLoad(const Mod* mod)
+{
+	_requires = mod->getResearch(_requiresName);
+}
+
+/**
  * Gets the item type. Each item has a unique type.
  * @return The item's type.
  */
@@ -643,7 +651,7 @@ const std::string &RuleItem::getNameAsAmmo() const
  * use this item.
  * @return The list of research IDs.
  */
-const std::vector<std::string> &RuleItem::getRequirements() const
+const std::vector<const RuleResearch *> &RuleItem::getRequirements() const
 {
 	return _requires;
 }
@@ -653,7 +661,7 @@ const std::vector<std::string> &RuleItem::getRequirements() const
  * buy this item from market.
  * @return The list of research IDs.
  */
-const std::vector<std::string> &RuleItem::getBuyRequirements() const
+const std::vector<const RuleResearch *> &RuleItem::getBuyRequirements() const
 {
 	return _requiresBuy;
 }
