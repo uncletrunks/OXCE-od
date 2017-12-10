@@ -59,7 +59,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
 	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false),
 	_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
-	_motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
+	_motionPoints(0), _kills(0), _hitByFire(false), _hitByAnything(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT), _fatalShotBodyPart(BODYPART_HEAD), _armor(0),
 	_geoscapeSoldier(soldier), _unitRules(0), _rankInt(0), _turretType(-1), _hidingForTurn(false), _floorAbove(false), _respawn(false)
 {
@@ -173,7 +173,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_toDirectionTurret(0), _verticalDirection(0), _status(STATUS_STANDING), _walkPhase(0),
 	_fallPhase(0), _kneeled(false), _floating(false), _dontReselect(false), _fire(0), _currentAIState(0),
 	_visible(false), _expBravery(0), _expReactions(0), _expFiring(0),
-	_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _kills(0), _hitByFire(false), _fireMaxHit(0), _smokeMaxHit(0),
+	_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _kills(0), _hitByFire(false), _hitByAnything(false), _fireMaxHit(0), _smokeMaxHit(0),
 	_moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT),
 	_fatalShotBodyPart(BODYPART_HEAD), _armor(armor), _geoscapeSoldier(0),  _unitRules(unit),
@@ -1073,6 +1073,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
 
+	_hitByAnything = true;
 	if (power <= 0 || _health <= 0)
 	{
 		return 0;
@@ -1891,6 +1892,11 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 	if (_faction != _originalFaction)
 	{
 		_faction = _originalFaction;
+		if (_faction == FACTION_PLAYER && _currentAIState)
+		{
+			delete _currentAIState;
+			_currentAIState = 0;
+		}
 		return;
 	}
 
@@ -2831,10 +2837,10 @@ int BattleUnit::getFatalWound(int part) const
  */
 void BattleUnit::heal(int part, int woundAmount, int healthAmount)
 {
-	if (part < 0 || part > 5)
+	if (part < 0 || part > 5 || !_fatalWounds[part])
+	{
 		return;
-	if (!_fatalWounds[part])
-		return;
+	}
 
 	setValueMax(_fatalWounds[part], -woundAmount, 0, 100);
 	setValueMax(_health, healthAmount, 1, getBaseStats()->health); //Hippocratic Oath: First do no harm
@@ -3784,13 +3790,36 @@ int BattleUnit::getMindControllerId() const
 	return _mindControllerID;
 }
 
+/**
+ * Get the unit's total firing xp for this mission.
+ */
 int BattleUnit::getFiringXP() const
 {
 	return _expFiring;
 }
+
+/**
+ * Artificially alter a unit's firing xp. (used for shotguns)
+ */
 void BattleUnit::nerfFiringXP(int newXP)
 {
 	_expFiring = newXP;
+}
+
+/**
+ * Was this unit just hit?
+ */
+bool BattleUnit::getHitState()
+{
+	return _hitByAnything;
+}
+
+/**
+ * reset the unit hit state.
+ */
+void BattleUnit::resetHitState()
+{
+	_hitByAnything = false;
 }
 
 

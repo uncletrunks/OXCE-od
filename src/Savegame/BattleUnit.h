@@ -105,7 +105,7 @@ private:
 	int _motionPoints;
 	int _kills;
 	int _faceDirection; // used only during strafeing moves
-	bool _hitByFire;
+	bool _hitByFire, _hitByAnything;
 	int _fireMaxHit;
 	int _smokeMaxHit;
 	int _moraleRestored;
@@ -566,8 +566,14 @@ public:
 	void setMindControllerId(int id);
 	/// Get the unit mind controller's id.
 	int getMindControllerId() const;
+	/// Get the unit's total firing xp for this mission.
 	int getFiringXP() const;
+	/// Artificially alter a unit's firing xp. (used for shotguns)
 	void nerfFiringXP(int newXP);
+	/// Was this unit just hit?
+	bool getHitState();
+	/// reset the unit hit state.
+	void resetHitState();
 
 };
 

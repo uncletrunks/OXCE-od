@@ -2416,4 +2416,15 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
 }
 
+/**
+ * Resets all unit hit state flags.
+ */
+void SavedBattleGame::resetUnitHitStates()
+{
+	for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
+	{
+		(*i)->resetHitState();
+	}
+}
+
 }
