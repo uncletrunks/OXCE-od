@@ -484,10 +484,17 @@ void ProjectileFlyBState::think()
 
 				_parent->getMod()->getSoundByDepth(_parent->getDepth(), Mod::ITEM_DROP)->play(-1, _parent->getMap()->getSoundAngle(pos));
 				const RuleItem *ruleItem = _action.weapon->getRules();
-				if (ruleItem->getBattleType() == BT_GRENADE && RNG::percent(ruleItem->getSpecialChance()) && ((Options::battleInstantGrenade && _action.weapon->getFuseTimer() == 0) || ruleItem->getFuseTimerType() == BFT_INSTANT))
+				if (_action.weapon->fuseThrowEvent())
 				{
-					// it's a hot grenade to explode immediately
-					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), BattleActionAttack{ _action, _action.weapon, }));
+					if (ruleItem->getBattleType() == BT_GRENADE || ruleItem->getBattleType() == BT_PROXIMITYGRENADE)
+					{
+						// it's a hot grenade to explode immediately
+						_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), BattleActionAttack{ _action, _action.weapon, }));
+					}
+					else
+					{
+						_parent->getSave()->removeItem(_action.weapon);
+					}
 				}
 				else
 				{

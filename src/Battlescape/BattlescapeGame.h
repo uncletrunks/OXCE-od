@@ -229,7 +229,7 @@ public:
 	/// Checks the kneel reservation setting.
 	bool getKneelReserved() const;
 	/// Checks for and triggers proximity grenades.
-	bool checkForProximityGrenades(BattleUnit *unit);
+	int checkForProximityGrenades(BattleUnit *unit);
 	/// Cleans up all the deleted states.
 	void cleanupDeleted();
 	/// Get the depth of the saved game.

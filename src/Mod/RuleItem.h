@@ -102,6 +102,18 @@ struct RuleItemAction
 };
 
 /**
+ * Config for fuse triggers.
+ */
+struct RuleItemFuseTrigger
+{
+	bool defaultBehavior = true;
+	bool throwTrigger = false;
+	bool throwExplode = false;
+	bool proximityTrigger = false;
+	bool proximityExplode = false;
+};
+
+/**
  * Represents a specific type of item.
  * Contains constant info about an item like
  * storage size, sell price, etc.
@@ -139,6 +151,7 @@ private:
 	int _clipSize, _specialChance, _tuLoad[AmmoSlotMax], _tuUnload[AmmoSlotMax];
 	BattleType _battleType;
 	BattleFuseType _fuseType;
+	RuleItemFuseTrigger _fuseTriggerEvents;
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isExplodingInHands;
 	std::string _defaultInventorySlot;
@@ -167,7 +180,9 @@ private:
 	/// Get final value of cost.
 	RuleItemUseCost getDefault(const RuleItemUseCost& a, const RuleItemUseCost& b) const;
 	/// Load bool as int from yaml.
-	void loadBool(int& a, const YAML::Node& node) const;
+	void loadBool(bool& a, const YAML::Node& node) const;
+	/// Load bool as int from yaml.
+	void loadTriBool(int& a, const YAML::Node& node) const;
 	/// Load int from yaml.
 	void loadInt(int& a, const YAML::Node& node) const;
 	/// Load RuleItemUseCost from yaml.
@@ -176,6 +191,8 @@ private:
 	void loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
 	/// Load RuleItemAction from yaml.
 	void loadConfAction(RuleItemAction& a, const YAML::Node& node, const std::string& name) const;
+	/// Load RuleItemFuseTrigger from yaml.
+	void loadConfFuse(RuleItemFuseTrigger& a, const YAML::Node& node, const std::string& name) const;
 
 public:
 	/// Name of class used in script.
@@ -373,6 +390,9 @@ public:
 	BattleFuseType getFuseTimerType() const;
 	/// Gets the item's default fuse value.
 	int getFuseTimerDefault() const;
+	/// Get fuse trigger event.
+	const RuleItemFuseTrigger *getFuseTriggerEvent() const;
+
 	/// Gets the item's inventory width.
 	int getInventoryWidth() const;
 	/// Gets the item's inventory height.

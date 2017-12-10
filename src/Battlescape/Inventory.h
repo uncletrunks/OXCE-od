@@ -48,7 +48,6 @@ private:
 	BattleItem *_mouseOverItem;
 	int _groundOffset, _animFrame;
 	std::map<int, std::map<int, int> > _stackLevel;
-	std::vector<std::pair<int, int> > _grenadeIndicators;
 	NumberText *_stackNumber;
 	Timer *_animTimer;
 	int _depth;
@@ -109,8 +108,6 @@ public:
 	static bool overlapItems(BattleUnit *unit, BattleItem *item, RuleInventory *slot, int x = 0, int y = 0);
 	/// Shows a warning message.
 	void showWarning(const std::wstring &msg);
-	/// Show priming warnings on grenades.
-	void drawPrimers();
 	/// Animate surface.
 	void animate();
 	/// Get current animation frame for invenotry.

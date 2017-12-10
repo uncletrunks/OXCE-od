@@ -501,11 +501,6 @@ void BattlescapeGame::endTurn()
 		for (BattleItem *item : *_save->getItems())
 		{
 			const RuleItem *rule = item->getRules();
-			if (item->getFuseTimer() != 0 || rule->getFuseTimerType() == BFT_INSTANT)
-			{
-				continue;
-			}
-
 			const Tile *tile = item->getTile();
 			BattleUnit *unit = item->getOwner();
 			if (!tile && unit && rule->isExplodingInHands())
@@ -514,9 +509,9 @@ void BattlescapeGame::endTurn()
 			}
 			if (tile)
 			{
-				if (rule->getBattleType() == BT_GRENADE) // it's a grenade to explode now
+				if (item->fuseEndTurnEffect())
 				{
-					if (RNG::percent(rule->getSpecialChance()))
+					if (rule->getBattleType() == BT_GRENADE) // it's a grenade to explode now
 					{
 						Position p = tile->getPosition().toVexel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
 						statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, unit, item, item, }));
@@ -524,26 +519,7 @@ void BattlescapeGame::endTurn()
 					}
 					else
 					{
-						//grenade fail to explode.
-						if (rule->getFuseTimerType() == BFT_SET)
-						{
-							item->setFuseTimer(1);
-						}
-						else
-						{
-							item->setFuseTimer(-1);
-						}
-					}
-				}
-				else
-				{
-					if (RNG::percent(rule->getSpecialChance()))
-					{
 						forRemoval.push_back(item);
-					}
-					else
-					{
-						item->setFuseTimer(1);
 					}
 				}
 			}
@@ -572,12 +548,9 @@ void BattlescapeGame::endTurn()
 	{
 		if (_save->getSide() != FACTION_NEUTRAL)
 		{
-			for (std::vector<BattleItem*>::iterator it = _save->getItems()->begin(); it != _save->getItems()->end(); ++it)
+			for (BattleItem *item : *_save->getItems())
 			{
-					if ((*it)->getFuseTimer() > 0)
-					{
-						(*it)->setFuseTimer((*it)->getFuseTimer() - 1);
-					}
+				item->fuseTimerEvent();
 			}
 		}
 
@@ -2379,11 +2352,12 @@ bool BattlescapeGame::getKneelReserved() const
  * Checks one tile around the unit in every direction.
  * For a large unit we check every tile it occupies.
  * @param unit Pointer to a unit.
- * @return True if a proximity grenade was triggered.
+ * @return 2 if a proximity grenade was triggered, 1 if light was changed.
  */
-bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
+int BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 {
 	bool exploded = false;
+	bool glow = false;
 	int size = unit->getArmor()->getSize() + 1;
 	for (int tx = -1; tx < size; tx++)
 	{
@@ -2392,19 +2366,44 @@ bool BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 			Tile *t = _save->getTile(unit->getPosition() + Position(tx,ty,0));
 			if (t)
 			{
-				for (std::vector<BattleItem*>::iterator i = t->getInventory()->begin(); i != t->getInventory()->end(); ++i)
+				std::vector<BattleItem*> forRemoval;
+				for (BattleItem *item : *t->getInventory())
 				{
-					if ((*i)->getRules()->getBattleType() == BT_PROXIMITYGRENADE && (*i)->getFuseTimer() >= 0 && RNG::percent((*i)->getRules()->getSpecialChance()))
+					const RuleItem *ruleItem = item->getRules();
+					bool g = item->getGlow();
+					if (item->fuseProximityEvent())
 					{
-						Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
-						statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, nullptr, (*i), (*i), }));
-						exploded = true;
+						if (ruleItem->getBattleType() == BT_GRENADE && ruleItem->getBattleType() == BT_PROXIMITYGRENADE)
+						{
+							Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
+							statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, nullptr, item, item, }));
+							exploded = true;
+						}
+						else
+						{
+							forRemoval.push_back(item);
+							if (g)
+							{
+								glow = true;
+							}
+						}
 					}
+					else
+					{
+						if (g != item->getGlow())
+						{
+							glow = true;
+						}
+					}
+				}
+				for (BattleItem *item : forRemoval)
+				{
+					_save->removeItem(item);
 				}
 			}
 		}
 	}
-	return exploded;
+	return exploded ? 2 : glow ? 1 : 0;
 }
 
 /**

@@ -227,9 +227,15 @@ void Inventory::drawGrid()
  */
 void Inventory::drawItems()
 {
+	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
+	Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+	auto primers = [&](int x, int y, bool a)
+	{
+		tempSurface->blitNShade(_items, x, y, Pulsate[_animFrame % 8], false, a ? 0 : 32);
+	};
+
 	ScriptWorkerBlit work;
 	_items->clear();
-	_grenadeIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
 	if (_selUnit != 0)
 	{
@@ -263,7 +269,7 @@ void Inventory::drawItems()
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
-				_grenadeIndicators.push_back(std::make_pair(x, y));
+				primers(x, y, (*i)->isFuseEnabled());
 			}
 		}
 		Surface stackLayer(getWidth(), getHeight(), 0, 0);
@@ -285,7 +291,7 @@ void Inventory::drawItems()
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
-				_grenadeIndicators.push_back(std::make_pair(x, y));
+				primers(x, y, (*i)->isFuseEnabled());
 			}
 
 			// item stacking
@@ -1274,19 +1280,6 @@ void Inventory::showWarning(const std::wstring &msg)
 }
 
 /**
- * Shows primer warnings on all live grenades.
- */
-void Inventory::drawPrimers()
-{
-	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
-	Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
-	for (std::vector<std::pair<int, int> >::const_iterator i = _grenadeIndicators.begin(); i != _grenadeIndicators.end(); ++i)
-	{
-		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
-	}
-}
-
-/**
  * Animate surface.
  */
 void Inventory::animate()
@@ -1303,7 +1296,6 @@ void Inventory::animate()
 	}
 
 	drawItems();
-	drawPrimers();
 	drawSelectedItem();
 }
 

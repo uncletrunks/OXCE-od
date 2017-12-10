@@ -29,6 +29,7 @@
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Script.h"
 #include "../Engine/ScriptBind.h"
+#include "../Engine/RNG.h"
 #include "../fmath.h"
 
 namespace OpenXcom
@@ -39,7 +40,7 @@ namespace OpenXcom
  * @param rules Pointer to ruleset.
  * @param id The id of the item.
  */
-BattleItem::BattleItem(RuleItem *rules, int *id) : _id(*id), _rules(rules), _owner(0), _previousOwner(0), _unit(0), _tile(0), _inventorySlot(0), _inventoryX(0), _inventoryY(0), _ammoItem{ }, _fuseTimer(-1), _ammoQuantity(0), _painKiller(0), _heal(0), _stimulant(0), _XCOMProperty(false), _droppedOnAlienTurn(false), _isAmmo(false), _isWeaponWithAmmo(false)
+BattleItem::BattleItem(RuleItem *rules, int *id) : _id(*id), _rules(rules), _owner(0), _previousOwner(0), _unit(0), _tile(0), _inventorySlot(0), _inventoryX(0), _inventoryY(0), _ammoItem{ }, _fuseTimer(-1), _ammoQuantity(0), _painKiller(0), _heal(0), _stimulant(0), _XCOMProperty(false), _droppedOnAlienTurn(false), _isAmmo(false), _isWeaponWithAmmo(false), _fuseEnabled(false)
 {
 	(*id)++;
 	if (_rules)
@@ -105,6 +106,7 @@ void BattleItem::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_heal = node["heal"].as<int>(_heal);
 	_stimulant = node["stimulant"].as<int>(_stimulant);
 	_fuseTimer = node["fuseTimer"].as<int>(_fuseTimer);
+	_fuseEnabled = node["fuseEnabed"].as<bool>(_fuseEnabled);
 	_droppedOnAlienTurn = node["droppedOnAlienTurn"].as<bool>(_droppedOnAlienTurn);
 	_scriptValues.load(node, shared);
 }
@@ -176,6 +178,7 @@ YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 	node["heal"] = _heal;
 	node["stimulant"] = _stimulant;
 	node["fuseTimer"] = _fuseTimer;
+	node["fuseEnabed"] = _fuseEnabled;
 	if (_droppedOnAlienTurn)
 		node["droppedOnAlienTurn"] = _droppedOnAlienTurn;
 	_scriptValues.save(node, shared);
@@ -207,8 +210,180 @@ int BattleItem::getFuseTimer() const
  */
 void BattleItem::setFuseTimer(int turns)
 {
+	auto event = _rules->getFuseTriggerEvent();
 	_fuseTimer = turns;
+	if (_fuseTimer >= 0)
+	{
+		if (event->throwTrigger || event->proximityTrigger)
+		{
+			_fuseEnabled = false;
+		}
+		else if (event->defaultBehavior)
+		{
+			_fuseEnabled = true;
+		}
+		else
+		{
+			_fuseEnabled = false;
+		}
+	}
+	else
+	{
+		_fuseEnabled = false;
+	}
 }
+
+/**
+ * Gets if fuse was triggered.
+ */
+bool BattleItem::isFuseEnabled() const
+{
+	return _fuseEnabled;
+}
+
+/**
+ * Called at end of turn.
+ */
+void BattleItem::fuseTimerEvent()
+{
+	auto event = _rules->getFuseTriggerEvent();
+	if (_fuseEnabled && getFuseTimer() > 0)
+	{
+		if (event->defaultBehavior)
+		{
+			if (_rules->getFuseTimerType() != BFT_INSTANT)
+			{
+				--_fuseTimer;
+			}
+		}
+	}
+}
+
+/**
+ * Get if item can trigger end of turn effect.
+ * @return True if grenade should explode or other item removed
+ */
+bool BattleItem::fuseEndTurnEffect()
+{
+	auto event = _rules->getFuseTriggerEvent();
+	auto check = [&]
+	{
+		if (_fuseEnabled && getFuseTimer() == 0)
+		{
+			if (event->defaultBehavior)
+			{
+				return _rules->getFuseTimerType() != BFT_INSTANT;
+			}
+		}
+		return false;
+	};
+
+	if (check())
+	{
+		if (RNG::percent(_rules->getSpecialChance()))
+		{
+			return true;
+		}
+		else
+		{
+			//grenade fail to explode or item to get removed.
+			if (_rules->getFuseTimerType() == BFT_SET)
+			{
+				setFuseTimer(1);
+			}
+			else
+			{
+				setFuseTimer(-1);
+			}
+		}
+	}
+	return false;
+}
+
+/**
+ * Called when item is throw.
+ */
+bool BattleItem::fuseThrowEvent()
+{
+	auto event = _rules->getFuseTriggerEvent();
+	auto check = [&]
+	{
+		if (_fuseEnabled && getFuseTimer() == 0)
+		{
+			if (event->throwExplode)
+			{
+				return true;
+			}
+			else if (event->defaultBehavior)
+			{
+				return _rules->getBattleType() == BT_GRENADE && (Options::battleInstantGrenade || _rules->getFuseTimerType() == BFT_INSTANT);
+			}
+		}
+		return false;
+	};
+
+	if (event->throwTrigger)
+	{
+		if (_rules->getFuseTimerType() == BFT_NONE)
+		{
+			_fuseEnabled = true;
+			_fuseTimer = 0;
+		}
+		else if (_fuseTimer >= 0)
+		{
+			_fuseEnabled = true;
+		}
+	}
+
+	if (check())
+	{
+		return RNG::percent(_rules->getSpecialChance());
+	}
+	return false;
+}
+
+/**
+ * Called when item is throw.
+ */
+bool BattleItem::fuseProximityEvent()
+{
+	auto event = _rules->getFuseTriggerEvent();
+	auto check = [&]
+	{
+		if (_fuseEnabled && getFuseTimer() >= 0)
+		{
+			if (event->proximityExplode)
+			{
+				return true;
+			}
+			else if (event->defaultBehavior)
+			{
+				return _rules->getBattleType() == BT_PROXIMITYGRENADE;
+			}
+		}
+		return false;
+	};
+
+	if (event->proximityTrigger)
+	{
+		if (_rules->getFuseTimerType() == BFT_NONE)
+		{
+			_fuseEnabled = true;
+			_fuseTimer = 0;
+		}
+		else if (_fuseTimer >= 0)
+		{
+			_fuseEnabled = true;
+		}
+	}
+
+	if (check())
+	{
+		return RNG::percent(_rules->getSpecialChance());
+	}
+	return false;
+}
+
 
 /**
  * Gets the quantity of ammo in this item.
@@ -939,7 +1114,14 @@ void BattleItem::convertToCorpse(RuleItem *rules)
  */
 bool BattleItem::getGlow() const
 {
-	return _rules->getBattleType() == BT_FLARE && (_rules->getFuseTimerType() == BFT_NONE || _fuseTimer >= 0);
+	if (_rules->getBattleType() == BT_FLARE)
+	{
+		return _rules->getFuseTimerType() == BFT_NONE || (_fuseEnabled && getFuseTimer() >= 0);
+	}
+	else
+	{
+		return false;
+	}
 }
 
 /**
@@ -1168,6 +1350,8 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 
 	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
 	bi.add<&setFuseTimerScript>("setFuseTimer");
+
+	bi.add<&BattleItem::isFuseEnabled>("isFuseEnabled");
 
 	bi.add<&BattleItem::getHealQuantity>("getHealQuantity");
 	bi.add<&setHealQuantityScript>("setHealQuantity");

@@ -275,10 +275,10 @@ void UnitFallBState::think()
 					}
 				}
 				// move our personal lighting with us
-				_terrain->calculateLighting(LL_UNITS, (*unit)->getPosition(), 2);
+				auto change = _parent->checkForProximityGrenades(*unit);
+				_terrain->calculateLighting(change ? LL_ITEMS : LL_UNITS, (*unit)->getPosition(), 2);
 				_terrain->calculateFOV((*unit)->getPosition(), 2, false); //update everyone else to see this unit, as well as all this unit's visible units.
 				_terrain->calculateFOV((*unit), true, false); //update tiles
-				_parent->checkForProximityGrenades(*unit);
 				if ((*unit)->getStatus() == STATUS_STANDING)
 				{
 					BattleAction fall;

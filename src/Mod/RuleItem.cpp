@@ -50,7 +50,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
 	_costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
 	_clipSize(0), _specialChance(100), _tuLoad{ }, _tuUnload{ },
-	_battleType(BT_NONE), _fuseType(BFT_NONE), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
+	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
 	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
@@ -123,7 +123,19 @@ RuleItemUseCost RuleItem::getDefault(const RuleItemUseCost& a, const RuleItemUse
  * @param a value to set.
  * @param node YAML node.
  */
-void RuleItem::loadBool(int& a, const YAML::Node& node) const
+void RuleItem::loadBool(bool& a, const YAML::Node& node) const
+{
+	if (node)
+	{
+		a = node.as<bool>();
+	}
+}
+/**
+ * Load nullable bool value and store it in int (with null as -1).
+ * @param a value to set.
+ * @param node YAML node.
+ */
+void RuleItem::loadTriBool(int& a, const YAML::Node& node) const
 {
 	if (node)
 	{
@@ -170,15 +182,15 @@ void RuleItem::loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std
 	{
 		if (cost.IsScalar())
 		{
-			loadBool(a.Time, cost);
+			loadTriBool(a.Time, cost);
 		}
 		else
 		{
-			loadBool(a.Time, cost["time"]);
-			loadBool(a.Energy, cost["energy"]);
-			loadBool(a.Morale, cost["morale"]);
-			loadBool(a.Health, cost["health"]);
-			loadBool(a.Stun, cost["stun"]);
+			loadTriBool(a.Time, cost["time"]);
+			loadTriBool(a.Energy, cost["energy"]);
+			loadTriBool(a.Morale, cost["morale"]);
+			loadTriBool(a.Health, cost["health"]);
+			loadTriBool(a.Stun, cost["stun"]);
 		}
 	}
 }
@@ -226,6 +238,21 @@ void RuleItem::loadConfAction(RuleItemAction& a, const YAML::Node& node, const s
 				a.ammoSlot = s;
 			}
 		}
+	}
+}
+
+/**
+ * Load RuleItemFuseTrigger from yaml.
+ */
+void RuleItem::loadConfFuse(RuleItemFuseTrigger& a, const YAML::Node& node, const std::string& name) const
+{
+	if (const YAML::Node& conf = node[name])
+	{
+		loadBool(a.defaultBehavior, conf["defaultBehavior"]);
+		loadBool(a.throwTrigger, conf["throwTrigger"]);
+		loadBool(a.throwExplode, conf["throwExplode"]);
+		loadBool(a.proximityTrigger, conf["proximityTrigger"]);
+		loadBool(a.proximityExplode, conf["proximityExplode"]);
 	}
 }
 
@@ -436,6 +463,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
 	_clipSize = node["clipSize"].as<int>(_clipSize);
 
+	loadConfFuse(_fuseTriggerEvents, node, "fuseTriggerEvents");
+
 	_confAimed.accuracy = node["accuracyAimed"].as<int>(_confAimed.accuracy);
 	_confAuto.accuracy = node["accuracyAuto"].as<int>(_confAuto.accuracy);
 	_confSnap.accuracy = node["accuracySnap"].as<int>(_confSnap.accuracy);
@@ -456,7 +485,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	loadCost(_costPrime, node, "Prime");
 	loadCost(_costUnprime, node, "Unprime");
 
-	loadBool(_flatUse.Time, node["flatRate"]);
+	loadTriBool(_flatUse.Time, node["flatRate"]);
 
 	loadPercent(_confAimed.flat, node, "Aimed");
 	loadPercent(_confAuto.flat, node, "Auto");
@@ -1275,6 +1304,14 @@ int RuleItem::getFuseTimerDefault() const
 	{
 		return -1; //can't prime
 	}
+}
+
+/**
+ * Get fuse trigger event.
+ */
+const RuleItemFuseTrigger *RuleItem::getFuseTriggerEvent() const
+{
+	return &_fuseTriggerEvents;
 }
 
 /**

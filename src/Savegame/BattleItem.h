@@ -57,7 +57,7 @@ private:
 	bool _ammoVisibility[RuleItem::AmmoSlotMax] = { };
 	int _fuseTimer, _ammoQuantity;
 	int _painKiller, _heal, _stimulant;
-	bool _XCOMProperty, _droppedOnAlienTurn, _isAmmo, _isWeaponWithAmmo;
+	bool _XCOMProperty, _droppedOnAlienTurn, _isAmmo, _isWeaponWithAmmo, _fuseEnabled;
 	const RuleItemAction *_confAimedOrLaunch = nullptr;
 	const RuleItemAction *_confSnap = nullptr;
 	const RuleItemAction *_confAuto = nullptr;
@@ -87,10 +87,22 @@ public:
 	int getAmmoQuantity() const;
 	/// Sets the item's ammo quantity.
 	void setAmmoQuantity(int qty);
+
 	/// Gets the turn until explosion
 	int getFuseTimer() const;
 	/// Sets the turns until explosion.
 	void setFuseTimer(int turns);
+	/// Gets if fuse was triggered.
+	bool isFuseEnabled() const;
+	/// Called on end of turn is triggered.
+	void fuseTimerEvent();
+	/// Get if item can trigger end of turn effect.
+	bool fuseEndTurnEffect();
+	/// Called when item fuse is triggered on throw.
+	bool fuseThrowEvent();
+	/// Called when item fuse is triggered on throw.
+	bool fuseProximityEvent();
+
 	/// Spend one bullet.
 	bool spendBullet();
 	/// Gets the item's owner.
