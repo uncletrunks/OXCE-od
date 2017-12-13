@@ -1019,82 +1019,92 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
  */
 BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 {
-//	unit->setId(_unitCount++);
-
-	if ((_craft == 0 || !_craftDeployed) && !_baseInventory)
+	if (_baseInventory)
 	{
-		Node* node = _save->getSpawnNode(NR_XCOM, unit);
-		if (node)
+		if (unit->hasInventory())
 		{
-			_save->setUnitPosition(unit, node->getPosition());
-			_craftInventoryTile = _save->getTile(node->getPosition());
-			unit->setDirection(RNG::generate(0,7));
 			_save->getUnits()->push_back(unit);
 			_save->initUnit(unit);
-			_save->getTileEngine()->calculateFOV(unit);
 			return unit;
 		}
-		else if (_save->getMissionType() != "STR_BASE_DEFENSE")
+	}
+	else
+	{
+		if (_craft == 0 || !_craftDeployed)
 		{
-			if (placeUnitNearFriend(unit))
+			Node* node = _save->getSpawnNode(NR_XCOM, unit);
+			if (node)
 			{
-				_craftInventoryTile = _save->getTile(unit->getPosition());
-				unit->setDirection(RNG::generate(0,7));
+				_save->setUnitPosition(unit, node->getPosition());
+				_craftInventoryTile = _save->getTile(node->getPosition());
+				unit->setDirection(RNG::generate(0, 7));
 				_save->getUnits()->push_back(unit);
 				_save->initUnit(unit);
 				_save->getTileEngine()->calculateFOV(unit);
 				return unit;
 			}
-		}
-	}
-	else if (_craft && !_craftRules->getDeployment().empty() && !_baseInventory)
-	{
-		if (_craftInventoryTile == 0)
-		{
-			// Craft inventory tile position defined in the ruleset
-			std::vector<int> coords = _craftRules->getCraftInventoryTile();
-			if (coords.size() >= 3)
+			else if (_save->getMissionType() != "STR_BASE_DEFENSE")
 			{
-				Position craftInventoryTilePosition = Position(coords[0] + (_craftPos.x * 10), coords[1] + (_craftPos.y * 10), coords[2] + _craftZ);
-				canPlaceXCOMUnit(_save->getTile(craftInventoryTilePosition));
+				if (placeUnitNearFriend(unit))
+				{
+					_craftInventoryTile = _save->getTile(unit->getPosition());
+					unit->setDirection(RNG::generate(0, 7));
+					_save->getUnits()->push_back(unit);
+					_save->initUnit(unit);
+					_save->getTileEngine()->calculateFOV(unit);
+					return unit;
+				}
 			}
 		}
+		else if (_craft && !_craft->getRules()->getDeployment().empty())
+		{
+			if (_craftInventoryTile == 0)
+			{
+				// Craft inventory tile position defined in the ruleset
+				std::vector<int> coords = _craftRules->getCraftInventoryTile();
+				if (coords.size() >= 3)
+				{
+					Position craftInventoryTilePosition = Position(coords[0] + (_craftPos.x * 10), coords[1] + (_craftPos.y * 10), coords[2] + _craftZ);
+					canPlaceXCOMUnit(_save->getTile(craftInventoryTilePosition));
+				}
+			}
 
-		for (std::vector<std::vector<int> >::const_iterator i = _craftRules->getDeployment().begin(); i != _craftRules->getDeployment().end(); ++i)
-		{
-			Position pos = Position((*i)[0] + (_craftPos.x * 10), (*i)[1] + (_craftPos.y * 10), (*i)[2] + _craftZ);
-			int dir = (*i)[3];
-			bool canPlace = true;
-			for (int x = 0; x < unit->getArmor()->getSize(); ++x)
+			for (std::vector<std::vector<int> >::const_iterator i = _craft->getRules()->getDeployment().begin(); i != _craft->getRules()->getDeployment().end(); ++i)
 			{
-				for (int y = 0; y < unit->getArmor()->getSize(); ++y)
+				Position pos = Position((*i)[0] + (_craftPos.x * 10), (*i)[1] + (_craftPos.y * 10), (*i)[2] + _craftZ);
+				int dir = (*i)[3];
+				bool canPlace = true;
+				for (int x = 0; x < unit->getArmor()->getSize(); ++x)
 				{
-					canPlace = (canPlace && canPlaceXCOMUnit(_save->getTile(pos + Position(x,y,0))));
+					for (int y = 0; y < unit->getArmor()->getSize(); ++y)
+					{
+						canPlace = (canPlace && canPlaceXCOMUnit(_save->getTile(pos + Position(x, y, 0))));
+					}
 				}
-			}
-			if (canPlace)
-			{
-				if (_save->setUnitPosition(unit, pos))
+				if (canPlace)
 				{
-					_save->getUnits()->push_back(unit);
-					_save->initUnit(unit);
-					unit->setDirection(dir);
-					return unit;
+					if (_save->setUnitPosition(unit, pos))
+					{
+						_save->getUnits()->push_back(unit);
+						_save->initUnit(unit);
+						unit->setDirection(dir);
+						return unit;
+					}
 				}
 			}
 		}
-	}
-	else
-	{
-		for (int i = 0; i < _mapsize_x * _mapsize_y * _mapsize_z; ++i)
+		else
 		{
-			if (canPlaceXCOMUnit(_save->getTile(i)))
+			for (int i = 0; i < _mapsize_x * _mapsize_y * _mapsize_z; ++i)
 			{
-				if (_save->setUnitPosition(unit, _save->getTile(i)->getPosition()))
+				if (canPlaceXCOMUnit(_save->getTile(i)))
 				{
-					_save->getUnits()->push_back(unit);
-					_save->initUnit(unit);
-					return unit;
+					if (_save->setUnitPosition(unit, _save->getTile(i)->getPosition()))
+					{
+						_save->initUnit(unit);
+						_save->getUnits()->push_back(unit);
+						return unit;
+					}
 				}
 			}
 		}
@@ -1867,21 +1877,13 @@ void BattlescapeGenerator::runInventory(Craft *craft)
 {
 	// we need to fake a map for soldier placement
 	_baseInventory = true;
-	int soldiers = craft != 0 ? craft->getNumSoldiers() : _base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits);
-	_mapsize_x = soldiers;
-	_mapsize_y = 1;
+	_mapsize_x = 2;
+	_mapsize_y = 2;
 	_mapsize_z = 1;
 	_save->initMap(_mapsize_x, _mapsize_y, _mapsize_z);
 	MapDataSet *set = new MapDataSet("dummy");
 	MapData *data = new MapData(set);
-	for (int i = 0; i < soldiers; ++i)
-	{
-		Tile *tile = _save->getTile(i);
-		tile->setMapData(data, 0, 0, O_FLOOR);
-		tile->getMapData(O_FLOOR)->setSpecialType(START_POINT, 0);
-		tile->getMapData(O_FLOOR)->setTUWalk(0);
-		tile->getMapData(O_FLOOR)->setFlags(false, false, false, 0, false, false, false, false, false);
-	}
+	_craftInventoryTile = _save->getTile(0);
 
 	// ok now generate the battleitems for inventory
 	if (craft != 0) setCraft(craft);

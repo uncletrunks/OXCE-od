@@ -942,10 +942,10 @@ void DebriefingState::prepareDebriefing()
 	Base *base = 0;
 	std::string target;
 
-	int playerInExitArea = 0; // if this stays 0 the craft is lost...
+	int playersInExitArea = 0; // if this stays 0 the craft is lost...
 	int playersSurvived = 0; // if this stays 0 the craft is lost...
 	int playersUnconscious = 0;
-
+	int playersInEntryArea = 0;
 
 	_stats.push_back(new DebriefingStat("STR_ALIENS_KILLED", false));
 	_stats.push_back(new DebriefingStat("STR_ALIEN_CORPSES_RECOVERED", false));
@@ -1155,6 +1155,14 @@ void DebriefingState::prepareDebriefing()
 			{
 				playersUnconscious++;
 			}
+			else if ((*j)->isInExitArea(END_POINT))
+			{
+				playersInExitArea++;
+			}
+			else if ((*j)->isInExitArea(START_POINT))
+			{
+				playersInEntryArea++;
+			}
 			playersSurvived++;
 		}
 		else if ((*j)->getOriginalFaction() == FACTION_PLAYER && (*j)->getStatus() == STATUS_DEAD)
@@ -1172,6 +1180,22 @@ void DebriefingState::prepareDebriefing()
 			}
 		}
 	}
+
+	if (ruleDeploy && ruleDeploy->getEscapeType() != ESCAPE_NONE)
+	{
+		if (ruleDeploy->getEscapeType() != ESCAPE_EXIT)
+		{
+			success = playersInEntryArea > 0;
+		}
+
+		if (ruleDeploy->getEscapeType() != ESCAPE_ENTRY)
+		{
+			success = success || playersInExitArea > 0;
+		}
+	}
+
+	playersInExitArea = 0;
+
 	if (playersSurvived == 1)
 	{
 		for (std::vector<BattleUnit*>::iterator j = battle->getUnits()->begin(); j != battle->getUnits()->end(); ++j)
@@ -1311,13 +1335,13 @@ void DebriefingState::prepareDebriefing()
 		{ // so this unit is not dead...
 			if (oldFaction == FACTION_PLAYER)
 			{
-				if ((((*j)->isInExitArea() || (*j)->getStatus() == STATUS_IGNORE_ME) && (battle->getMissionType() != "STR_BASE_DEFENSE" || success)) || !aborted)
+				if ((((*j)->isInExitArea(START_POINT) || (*j)->getStatus() == STATUS_IGNORE_ME) && (battle->getMissionType() != "STR_BASE_DEFENSE" || success)) || !aborted || (aborted && (*j)->isInExitArea(END_POINT)))
 				{ // so game is not aborted or aborted and unit is on exit area
 					UnitStats statIncrease;
 					(*j)->postMissionProcedures(save, statIncrease);
 					if ((*j)->getGeoscapeSoldier())
 						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease));
-					playerInExitArea++;
+					playersInExitArea++;
 
 					recoverItems((*j)->getInventory(), base);
 
@@ -1358,6 +1382,7 @@ void DebriefingState::prepareDebriefing()
 				else
 				{ // so game is aborted and unit is not on exit area
 					addStat("STR_XCOM_OPERATIVES_MISSING_IN_ACTION", 1, -value);
+					playersSurvived--;
 					if (soldier != 0)
 					{
 						(*j)->updateGeoscapeStats(soldier);
@@ -1381,7 +1406,7 @@ void DebriefingState::prepareDebriefing()
 					}
 				}
 			}
-			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea()) && !_destroyBase
+			else if (oldFaction == FACTION_HOSTILE && (!aborted || (*j)->isInExitArea(START_POINT)) && !_destroyBase
 				// mind controlled units may as well count as unconscious
 				&& faction == FACTION_PLAYER && (!(*j)->isOut() || (*j)->getStatus() == STATUS_IGNORE_ME))
 			{
@@ -1428,7 +1453,7 @@ void DebriefingState::prepareDebriefing()
 			}
 		}
 	}
-	if (craft != 0 && ((playerInExitArea == 0 && aborted) || (playersSurvived == 0)))
+	if (craft != 0 && ((playersInExitArea == 0 && aborted) || (playersSurvived == 0)))
 	{
 		addStat("STR_XCOM_CRAFT_LOST", 1, -craft->getRules()->getScore());
 		// Since this is not a base defense mission, we can safely erase the craft,
@@ -1469,7 +1494,24 @@ void DebriefingState::prepareDebriefing()
 			_txtTitle->setText(tr("STR_ALIENS_DEFEATED"));
 			if (objectiveCompleteText != "")
 			{
-				addStat(objectiveCompleteText, 1, objectiveCompleteScore);
+				int victoryStat = 0;
+				if (ruleDeploy->getEscapeType() != ESCAPE_NONE)
+				{
+					if (ruleDeploy->getEscapeType() != ESCAPE_EXIT)
+					{
+						victoryStat += playersInEntryArea;
+					}
+					if (ruleDeploy->getEscapeType() != ESCAPE_ENTRY)
+					{
+						victoryStat += playersInExitArea;
+					}
+				}
+				else
+				{
+					victoryStat = 1;
+				}
+
+				addStat(objectiveCompleteText, victoryStat, objectiveCompleteScore);
 			}
 		}
 
@@ -1832,40 +1874,38 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 		}
 		else
 		{
-			if (rule->getRecoveryPoints() && !(*it)->getXCOMProperty())
+			if (rule->isRecoverable() && !(*it)->getXCOMProperty())
 			{
-				if (rule->getBattleType() == BT_CORPSE && (*it)->getUnit()->getStatus() == STATUS_DEAD)
+				if (rule->getBattleType() == BT_CORPSE)
 				{
-					std::string corpseItem = (*it)->getUnit()->getArmor()->getCorpseGeoscape();
-					RuleItem *rule = _game->getMod()->getItem(corpseItem);
-					if (rule->isRecoverable())
+					BattleUnit *corpseUnit = (*it)->getUnit();
+					if (corpseUnit->getStatus() == STATUS_DEAD)
 					{
-						addStat("STR_ALIEN_CORPSES_RECOVERED", 1, (*it)->getUnit()->getValue());
-						base->getStorageItems()->addItem(corpseItem, 1);
-					}
-				}
-				else if (rule->getBattleType() == BT_CORPSE)
-				{
-					// it's unconscious
-					if ((*it)->getUnit()->getStatus() == STATUS_UNCONSCIOUS ||
-						// or it's in timeout because it's unconscious from the previous stage
-						// units can be in timeout and alive, and we assume they flee.
-						((*it)->getUnit()->getStatus() == STATUS_IGNORE_ME &&
-						(*it)->getUnit()->getHealth() > 0 &&
-						(*it)->getUnit()->getHealth() < (*it)->getUnit()->getStunlevel()))
-					{
-						if ((*it)->getUnit()->getOriginalFaction() == FACTION_HOSTILE)
+						base->getStorageItems()->addItem(corpseUnit->getArmor()->getCorpseGeoscape(), 1);
+						if ((*it)->getRules()->getRecoveryPoints())
 						{
-							recoverAlien((*it)->getUnit(), base);
+							addStat("STR_ALIEN_CORPSES_RECOVERED", 1, (*it)->getRules()->getRecoveryPoints());
 						}
-						else if ((*it)->getUnit()->getOriginalFaction() == FACTION_NEUTRAL)
+					}
+					else if (corpseUnit->getStatus() == STATUS_UNCONSCIOUS ||
+							// or it's in timeout because it's unconscious from the previous stage
+							// units can be in timeout and alive, and we assume they flee.
+							(corpseUnit->getStatus() == STATUS_IGNORE_ME &&
+							corpseUnit->getHealth() > 0 &&
+							corpseUnit->getHealth() < corpseUnit->getStunlevel()))
+					{
+						if (corpseUnit->getOriginalFaction() == FACTION_HOSTILE)
 						{
-							addStat("STR_CIVILIANS_SAVED", 1, (*it)->getUnit()->getValue());
+							recoverAlien(corpseUnit, base);
+						}
+						else if (corpseUnit->getOriginalFaction() == FACTION_NEUTRAL)
+						{
+							addStat("STR_CIVILIANS_SAVED", 1, corpseUnit->getValue());
 							recoverCivilian((*it)->getUnit(), base);
 						}
 					}
 				}
-				// only "recover" unresearched items
+				// only add recovery points for unresearched items
 				else if (!_game->getSavedGame()->isResearched(rule->getType()))
 				{
 					addStat("STR_ALIEN_ARTIFACTS_RECOVERED", 1, rule->getRecoveryPoints());
@@ -1878,7 +1918,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 				bool recoverWeapon = true;
 				switch (rule->getBattleType())
 				{
-					case BT_CORPSE:
+					case BT_CORPSE: // corpses are handled above, do not process them here.
 						break;
 					case BT_MEDIKIT:
 						if (rule->isConsumable())

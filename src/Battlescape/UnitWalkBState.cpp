@@ -192,13 +192,15 @@ void UnitWalkBState::think()
 			{
 				_unit->setVisible(false);
 			}
+
+			auto change = _parent->checkForProximityGrenades(_unit);
 			// move our personal lighting with us
-			_terrain->calculateLighting(LL_UNITS, _unit->getPosition(), 2);
+			_terrain->calculateLighting(change ? LL_ITEMS : LL_UNITS, _unit->getPosition(), 2);
 			_terrain->calculateFOV(_unit->getPosition(), 2, false); //update unit visibility for all units which can see last and current position.
 			//tile visibility for this unit is handled later.
 			unitSpotted = (!_action.ignoreSpottedEnemies && !_falling && !_action.desperate && _parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
 
-			if (_parent->checkForProximityGrenades(_unit))
+			if (change > 1)
 			{
 				_parent->popState();
 				return;

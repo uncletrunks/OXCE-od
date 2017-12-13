@@ -662,13 +662,14 @@ void AlienMission::spawnAlienBase(Game &engine, const MissionArea &area, std::pa
 	const Mod &ruleset = *engine.getMod();
 	// Once the last UFO is spawned, the aliens build their base.
 	AlienDeployment *deployment;
+	Texture *texture = ruleset.getGlobe()->getTexture(area.texture);
 	if (ruleset.getDeployment(_rule.getSiteType()))
 	{
 		deployment = ruleset.getDeployment(_rule.getSiteType());
 	}
-	else if (ruleset.getGlobe()->getTexture(area.texture) && !ruleset.getGlobe()->getTexture(area.texture)->getDeployments().empty())
+	else if (texture && !texture->getDeployments().empty())
 	{
-		deployment = ruleset.getDeployment(ruleset.getGlobe()->getTexture(area.texture)->getRandomDeployment(), true);
+		deployment = ruleset.getDeployment(texture->getRandomDeployment(), true);
 	}
 	else
 	{
@@ -783,6 +784,10 @@ MissionSite *AlienMission::spawnMissionSite(SavedGame &game, const Mod &mod, con
 	}
 	else
 	{
+		if (!texture)
+		{
+			throw Exception("Error occurred while spawning mission site: " + _rule.getType());
+		}
 		deployment = mod.getDeployment(texture->getRandomDeployment(), true);
 	}
 

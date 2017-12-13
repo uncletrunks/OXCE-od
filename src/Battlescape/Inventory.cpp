@@ -266,9 +266,15 @@ void Inventory::drawGridLabels(bool showTuCost)
  */
 void Inventory::drawItems()
 {
+	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
+	Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
+	auto primers = [&](int x, int y, bool a)
+	{
+		tempSurface->blitNShade(_items, x, y, Pulsate[_animFrame % 8], false, a ? 0 : 32);
+	};
+
 	ScriptWorkerBlit work;
 	_items->clear();
-	_grenadeIndicators.clear();
 	_stunnedIndicators.clear();
 	_woundedIndicators.clear();
 	_burningIndicators.clear();
@@ -322,7 +328,7 @@ void Inventory::drawItems()
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
-				_grenadeIndicators.push_back(std::make_pair(x, y));
+				primers(x, y, (*i)->isFuseEnabled());
 			}
 		}
 		Surface stackLayer(getWidth(), getHeight(), 0, 0);
@@ -345,7 +351,7 @@ void Inventory::drawItems()
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
-				_grenadeIndicators.push_back(std::make_pair(x, y));
+				primers(x, y, (*i)->isFuseEnabled());
 			}
 
 			// fatal wounds
@@ -677,7 +683,7 @@ void Inventory::mouseClick(Action *action, State *state)
 					x += _groundOffset;
 				}
 				BattleItem *item = _selUnit->getItem(slot, x, y);
-				if (item != 0)
+				if (item != 0 && !item->getRules()->isFixed())
 				{
 					if ((SDL_GetModState() & KMOD_CTRL))
 					{
@@ -1512,19 +1518,11 @@ void Inventory::showWarning(const std::wstring &msg)
 }
 
 /**
- * Shows primer warnings on all live grenades.
- * Also shows stunned-indicator on unconscious units.
+ * Shows extra indicators on units.
  */
 void Inventory::drawPrimers()
 {
 	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
-
-	// grenades
-	Surface *tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(6);
-	for (std::vector<std::pair<int, int> >::const_iterator i = _grenadeIndicators.begin(); i != _grenadeIndicators.end(); ++i)
-	{
-		tempSurface->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
-	}
 
 	// burning units
 	for (std::vector<std::pair<int, int> >::const_iterator i = _burningIndicators.begin(); i != _burningIndicators.end(); ++i)

@@ -58,6 +58,8 @@ private:
 	bool _isAutoPatrolling;
 	double _lonAuto, _latAuto;
 	std::vector<int> _pilots;
+
+	using MovingTarget::load;
 public:
 	/// Creates a craft of the specified type.
 	Craft(RuleCraft *rules, Base *base, int id = 0);

@@ -42,6 +42,7 @@
 #include "../Engine/Logger.h"
 #include "../Engine/ScriptBind.h"
 #include "SerializationHelper.h"
+#include "../Mod/RuleItem.h"
 
 namespace OpenXcom
 {
@@ -923,6 +924,10 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 	{
 		return false;
 	}
+	if (getDepth() != 0 && rule->isLandOnly())
+	{
+		return false;
+	}
 	if (rule->isBlockingBothHands() && unit->getFaction() == FACTION_PLAYER && !isBerserking && unit->getLeftHandWeapon() != 0 && unit->getRightHandWeapon() != 0)
 	{
 		return false;
@@ -1711,6 +1716,7 @@ void SavedBattleGame::prepareNewTurn()
 		{
 			tilesOnSmoke.push_back(getTile(i));
 		}
+		getTile(i)->setDangerous(false);
 	}
 
 	// now make the smoke spread.
@@ -1771,7 +1777,7 @@ void SavedBattleGame::prepareNewTurn()
 		for (int i = 0; i < _mapsize_x * _mapsize_y * _mapsize_z; ++i)
 		{
 			if (getTile(i)->getSmoke() != 0)
-				getTile(i)->prepareNewTurn();
+				getTile(i)->prepareNewTurn(getDepth() == 0);
 		}
 	}
 
@@ -2432,6 +2438,7 @@ bool SavedBattleGame::isBeforeGame() const
 	return _beforeGame;
 }
 
+
 namespace
 {
 
@@ -2501,6 +2508,17 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 	sbg.add<&randomRangeScript>("randomRange");
 
 	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
+}
+
+/**
+ * Resets all unit hit state flags.
+ */
+void SavedBattleGame::resetUnitHitStates()
+{
+	for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
+	{
+		(*i)->resetHitState();
+	}
 }
 
 }

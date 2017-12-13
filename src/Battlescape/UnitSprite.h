@@ -49,7 +49,7 @@ private:
 	};
 
 	BattleUnit *_unit;
-	BattleItem *_itemA, *_itemB;
+	BattleItem *_itemR, *_itemL;
 	SurfaceSet *_unitSurface, *_itemSurface, *_fireSurface;
 	Surface *_dest;
 	Mod *_mod;

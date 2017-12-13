@@ -22,6 +22,7 @@
 #include "RuleInventory.h"
 #include "RuleDamageType.h"
 #include "../Savegame/BattleUnit.h"
+#include "../Engine/Exception.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
@@ -50,13 +51,13 @@ RuleItem::RuleItem(const std::string &type) :
 	_noLOSAccuracyPenalty(-1),
 	_costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
 	_clipSize(0), _specialChance(100), _tuLoad{ }, _tuUnload{ },
-	_battleType(BT_NONE), _fuseType(BFT_NONE), _hiddenOnMinimap(false), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
+	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _hiddenOnMinimap(false), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
 	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
 	_recover(true), _ignoreInBaseDefense(false), _liveAlien(false), _liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
-	_LOSRequired(false), _underwaterOnly(false), _psiReqiured(false),
+	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_customItemPreviewIndex(0),
 	_kneelBonus(-1), _oneHandedPenalty(-1),
@@ -126,7 +127,19 @@ RuleItemUseCost RuleItem::getDefault(const RuleItemUseCost& a, const RuleItemUse
  * @param a value to set.
  * @param node YAML node.
  */
-void RuleItem::loadBool(int& a, const YAML::Node& node) const
+void RuleItem::loadBool(bool& a, const YAML::Node& node) const
+{
+	if (node)
+	{
+		a = node.as<bool>();
+	}
+}
+/**
+ * Load nullable bool value and store it in int (with null as -1).
+ * @param a value to set.
+ * @param node YAML node.
+ */
+void RuleItem::loadTriBool(int& a, const YAML::Node& node) const
 {
 	if (node)
 	{
@@ -173,15 +186,15 @@ void RuleItem::loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std
 	{
 		if (cost.IsScalar())
 		{
-			loadBool(a.Time, cost);
+			loadTriBool(a.Time, cost);
 		}
 		else
 		{
-			loadBool(a.Time, cost["time"]);
-			loadBool(a.Energy, cost["energy"]);
-			loadBool(a.Morale, cost["morale"]);
-			loadBool(a.Health, cost["health"]);
-			loadBool(a.Stun, cost["stun"]);
+			loadTriBool(a.Time, cost["time"]);
+			loadTriBool(a.Energy, cost["energy"]);
+			loadTriBool(a.Morale, cost["morale"]);
+			loadTriBool(a.Health, cost["health"]);
+			loadTriBool(a.Stun, cost["stun"]);
 		}
 	}
 }
@@ -229,6 +242,21 @@ void RuleItem::loadConfAction(RuleItemAction& a, const YAML::Node& node, const s
 				a.ammoSlot = s;
 			}
 		}
+	}
+}
+
+/**
+ * Load RuleItemFuseTrigger from yaml.
+ */
+void RuleItem::loadConfFuse(RuleItemFuseTrigger& a, const YAML::Node& node, const std::string& name) const
+{
+	if (const YAML::Node& conf = node[name])
+	{
+		loadBool(a.defaultBehavior, conf["defaultBehavior"]);
+		loadBool(a.throwTrigger, conf["throwTrigger"]);
+		loadBool(a.throwExplode, conf["throwExplode"]);
+		loadBool(a.proximityTrigger, conf["proximityTrigger"]);
+		loadBool(a.proximityExplode, conf["proximityExplode"]);
 	}
 }
 
@@ -436,6 +464,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_unprimeActionMessage = node["unprimeActionMessage"].as<std::string>(_unprimeActionMessage);
 	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
 	_hiddenOnMinimap = node["hiddenOnMinimap"].as<bool>(_hiddenOnMinimap);
+	_clipSize = node["clipSize"].as<int>(_clipSize);
+
+	loadConfFuse(_fuseTriggerEvents, node, "fuseTriggerEvents");
 
 	_confAimed.accuracy = node["accuracyAimed"].as<int>(_confAimed.accuracy);
 	_confAuto.accuracy = node["accuracyAuto"].as<int>(_confAuto.accuracy);
@@ -459,7 +490,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	loadCost(_costPrime, node, "Prime");
 	loadCost(_costUnprime, node, "Unprime");
 
-	loadBool(_flatUse.Time, node["flatRate"]);
+	loadTriBool(_flatUse.Time, node["flatRate"]);
 
 	loadPercent(_confAimed.flat, node, "Aimed");
 	loadPercent(_confAuto.flat, node, "Auto");
@@ -494,7 +525,16 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		}
 	}
 
-	_clipSize = node["clipSize"].as<int>(_clipSize);
+	if ((_battleType == BT_MELEE || _battleType == BT_FIREARM) && _clipSize == 0)
+	{
+		for (RuleItemAction* conf : { &_confAimed, &_confAuto, &_confSnap, &_confMelee, })
+		{
+			if (conf->ammoSlot != -1 && _compatibleAmmo[conf->ammoSlot].empty())
+			{
+				throw Exception("Weapon " + _type + " has clip size 0 and no ammo defined. Please use 'clipSize: -1' for unlimited ammo, or allocate a compatibleAmmo item.");
+			}
+		}
+	}
 	_specialChance = node["specialChance"].as<int>(_specialChance);
 	_twoHanded = node["twoHanded"].as<bool>(_twoHanded);
 	_blockBothHands = node["blockBothHands"].as<bool>(_blockBothHands);
@@ -554,6 +594,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
+	_landOnly = node["landOnly"].as<bool>(_landOnly);
 	_specialType = node["specialType"].as<int>(_specialType);
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
@@ -1352,6 +1393,14 @@ bool RuleItem::isHiddenOnMinimap() const
 }
 
 /**
+ * Get fuse trigger event.
+ */
+const RuleItemFuseTrigger *RuleItem::getFuseTriggerEvent() const
+{
+	return &_fuseTriggerEvents;
+}
+
+/**
  * Gets the item's width in a soldier's inventory.
  * @return The width.
  */
@@ -1972,12 +2021,21 @@ bool RuleItem::isLOSRequired() const
 }
 
 /**
- * Can this item be used on land or is it underwater only?
+ * Can this item only be used underwater?
  * @return if this is an underwater weapon or not.
  */
 bool RuleItem::isWaterOnly() const
 {
 	return _underwaterOnly;
+}
+
+/**
+* Can this item only be used on land?
+* @return if this is a land weapon or not.
+*/
+bool RuleItem::isLandOnly() const
+{
+	return _landOnly;
 }
 
 /**

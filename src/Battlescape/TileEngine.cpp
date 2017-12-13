@@ -1534,7 +1534,24 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 				Position originVoxel = getOriginVoxel(falseAction, 0);
 				Position targetVoxel;
 				AIModule *ai = (*i)->getAIModule();
-				bool gotHit = (ai != 0 && ai->getWasHitBy(unit->getId()));
+
+				// Inquisitor's note regarding 'gotHit' variable
+				// in vanilla, the 'hitState' flag is the only part of this equation that comes into play.
+				// any time a unit takes damage, this flag is set, then it would be reset by a call to
+				// a function analogous to SavedBattleGame::resetUnitHitStates(), any time:
+				// 1: a unit was selected by being clicked on.
+				// 2: either "next unit" button was pressed.
+				// 3: the inventory screen was accessed. (i didn't look too far into this one, it's possible it's only called in the pre-mission equip screen)
+				// 4: the same place where we call it, immediately before every move the AI makes.
+				// this flag is responsible for units turning around to respond to hits, and is in keeping with the details listed on http://www.ufopaedia.org/index.php/Reaction_fire_triggers
+				// we've gone for a slightly different implementation: AI units keep a list of which units have hit them and don't forget until the end of the player's turn.
+				// this method is in keeping with the spirit of the original feature, but much less exploitable by players.
+				// the hitState flag in our implementation allows player units to turn and react as they did in the original, (which is far less cumbersome than giving them all an AI module)
+				// we don't extend the same "enhanced aggressor memory" courtesy to players, because in the original, they could only turn and react to damage immediately after it happened.
+				// this is because as much as we want the player's soldiers dead, we don't want them to feel like we're being unfair about it.
+
+				bool gotHit = (ai != 0 && ai->getWasHitBy(unit->getId())) || (ai == 0 && (*i)->getHitState());
+
 					// can actually see the target Tile, or we got hit
 				if (((*i)->checkViewSector(unit->getPosition()) || gotHit) &&
 					// can actually target the unit
@@ -2289,6 +2306,15 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 					{
 						const int damage = type->getRandomDamage(power_);
 						BattleUnit *bu = dest->getUnit();
+						Tile *tileBelow = _save->getTile(dest->getPosition() - Position(0,0,1));
+						if (!bu && dest->getPosition().z > 0 && dest->hasNoFloor(tileBelow))
+						{
+							bu = tileBelow->getUnit();
+							if (bu && bu->getHeight() + bu->getFloatHeight() - tileBelow->getTerrainLevel() <= 24)
+							{
+								bu = 0; // if the unit below has no voxels poking into the tile, don't damage it.
+							}
+						}
 
 						toRemove.clear();
 						if (bu)
@@ -2510,12 +2536,20 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 			}
 		}
 		// add some smoke if tile was destroyed and not set on fire
-		if (destroyed && !tiles[i]->getFire())
+		if (destroyed)
 		{
-			int smoke = RNG::generate(1, (volume / 2) + 3) + (volume / 2);
-			if (smoke > tiles[i]->getSmoke())
+			if (tiles[i]->getFire() && !tiles[i]->getMapData(O_FLOOR) && !tiles[i]->getMapData(O_OBJECT))
 			{
-				tiles[i]->setSmoke(std::max(0, std::min(smoke, 15)));
+				tiles[i]->setFire(0);// if the object set the floor on fire, and the floor was subsequently destroyed, the fire needs to go out
+			}
+
+			if (!tiles[i]->getFire())
+			{
+				int smoke = RNG::generate(1, (volume / 2) + 3) + (volume / 2);
+				if (smoke > tiles[i]->getSmoke())
+				{
+					tiles[i]->setSmoke(std::max(0, std::min(smoke, 15)));
+				}
 			}
 		}
 	}
@@ -3752,7 +3786,7 @@ Tile *TileEngine::applyGravity(Tile *t)
 				}
 				else
 				{
-					occupant->startWalking(Pathfinding::DIR_DOWN, occupant->getPosition() + Position(0,0,-1), _save->getTile(occupant->getPosition() + Position(0,0,-1)), true);
+					occupant->setPosition(occupant->getPosition()); // this is necessary to set the unit up for falling correctly, updating their "lastPos"
 					_save->addFallingUnit(occupant);
 				}
 			}
@@ -4147,7 +4181,7 @@ void TileEngine::setDangerZone(Position pos, int radius, BattleUnit *unit)
 		return;
 	}
 	// set the epicenter as dangerous
-	tile->setDangerous();
+	tile->setDangerous(true);
 	Position originVoxel = (pos * Position(16,16,24)) + Position(8,8,12 + -tile->getTerrainLevel());
 	Position targetVoxel;
 	for (int x = -radius; x != radius; ++x)
@@ -4173,7 +4207,7 @@ void TileEngine::setDangerZone(Position pos, int radius, BattleUnit *unit)
 						{
 							if (trajectory.size() && (trajectory.back() / Position(16,16,24)) == pos + Position(x,y,0))
 							{
-								tile->setDangerous();
+								tile->setDangerous(true);
 							}
 						}
 					}

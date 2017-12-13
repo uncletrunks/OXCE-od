@@ -102,6 +102,18 @@ struct RuleItemAction
 };
 
 /**
+ * Config for fuse triggers.
+ */
+struct RuleItemFuseTrigger
+{
+	bool defaultBehavior = true;
+	bool throwTrigger = false;
+	bool throwExplode = false;
+	bool proximityTrigger = false;
+	bool proximityExplode = false;
+};
+
+/**
  * Represents a specific type of item.
  * Contains constant info about an item like
  * storage size, sell price, etc.
@@ -148,6 +160,7 @@ private:
 	BattleType _battleType;
 	BattleFuseType _fuseType;
 	bool _hiddenOnMinimap;
+	RuleItemFuseTrigger _fuseTriggerEvents;
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands;
 	std::string _defaultInventorySlot;
@@ -169,7 +182,7 @@ private:
 	int _listOrder, _maxRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _shotgunPellets;
 	int _shotgunBehaviorType, _shotgunSpread, _shotgunChoke;
 	std::string _zombieUnit;
-	bool _LOSRequired, _underwaterOnly, _psiReqiured;
+	bool _LOSRequired, _underwaterOnly, _landOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	int _customItemPreviewIndex;
 	int _kneelBonus, _oneHandedPenalty;
@@ -181,7 +194,9 @@ private:
 	/// Get final value of cost.
 	RuleItemUseCost getDefault(const RuleItemUseCost& a, const RuleItemUseCost& b) const;
 	/// Load bool as int from yaml.
-	void loadBool(int& a, const YAML::Node& node) const;
+	void loadBool(bool& a, const YAML::Node& node) const;
+	/// Load bool as int from yaml.
+	void loadTriBool(int& a, const YAML::Node& node) const;
 	/// Load int from yaml.
 	void loadInt(int& a, const YAML::Node& node) const;
 	/// Load RuleItemUseCost from yaml.
@@ -194,6 +209,8 @@ private:
 	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
 	/// Gets a random sound from a given vector.
 	int getRandomSound(const std::vector<int> &vector, int defaultValue = -1) const;
+	/// Load RuleItemFuseTrigger from yaml.
+	void loadConfFuse(RuleItemFuseTrigger& a, const YAML::Node& node, const std::string& name) const;
 
 public:
 	/// Name of class used in script.
@@ -403,6 +420,9 @@ public:
 	int getFuseTimerDefault() const;
 	/// Is this item (e.g. a mine) hidden on the minimap?
 	bool isHiddenOnMinimap() const;
+	/// Get fuse trigger event.
+	const RuleItemFuseTrigger *getFuseTriggerEvent() const;
+
 	/// Gets the item's inventory width.
 	int getInventoryWidth() const;
 	/// Gets the item's inventory height.
@@ -516,8 +536,10 @@ public:
 	const std::string &getZombieUnit() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
-	/// Is this item restricted to use underwater?
+	/// Is this item restricted to underwater use?
 	bool isWaterOnly() const;
+	/// Is this item restricted to land use?
+	bool isLandOnly() const;
 	/// Is this item require unit with psi skill to use it?
 	bool isPsiRequired() const;
 	/// Get the associated special type of this item.

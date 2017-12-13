@@ -68,6 +68,9 @@ const std::string SavedGame::AUTOSAVE_GEOSCAPE = "_autogeo_.asav",
 				  SavedGame::AUTOSAVE_BATTLESCAPE = "_autobattle_.asav",
 				  SavedGame::QUICKSAVE = "_quick_.asav";
 
+namespace
+{
+
 struct findRuleResearch : public std::unary_function<ResearchProject *,
 								bool>
 {
@@ -100,6 +103,54 @@ equalProduction::equalProduction(RuleManufacture * item) : _item(item)
 bool equalProduction::operator()(const Production * p) const
 {
 	return p->getRules() == _item;
+}
+
+bool stringLess(const std::string &a, const std::string &b)
+{
+	if (a.size() < b.size())
+	{
+		return true;
+	}
+	else if (a.size() > b.size())
+	{
+		return false;
+	}
+	else
+	{
+		return std::lexicographical_compare(
+			a.begin(), a.end(),
+			b.begin(), b.end());
+	}
+}
+
+bool researchLess(const RuleResearch *a, const RuleResearch *b)
+{
+	return stringLess(a->getName(), b->getName());
+}
+
+bool researchStringLess(const RuleResearch *a, const std::string &b)
+{
+	return stringLess(a->getName(), b);
+}
+
+template<typename T>
+void sortReserchVector(std::vector<T> &vec)
+{
+	std::sort(vec.begin(), vec.end(), researchLess);
+}
+
+bool haveReserchVector(const std::vector<const RuleResearch*> &vec, const RuleResearch *res)
+{
+	auto find = std::lower_bound(vec.begin(), vec.end(), res, researchLess);
+	return find != vec.end() && *find == res;
+}
+
+bool haveReserchVector(const std::vector<const RuleResearch*> &vec,  const std::string &res)
+{
+	auto find = std::lower_bound(vec.begin(), vec.end(), res, researchStringLess);
+	return find != vec.end() && (*find)->getName() == res;
+}
+
 }
 
 /**
@@ -516,6 +567,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 			Log(LOG_ERROR) << "Failed to load research " << research;
 		}
 	}
+	sortReserchVector(_discovered);
 
 	_ufopediaRuleStatus = doc["ufopediaRuleStatus"].as< std::map<std::string, int> >(_ufopediaRuleStatus);
 	_manufactureRuleStatus = doc["manufactureRuleStatus"].as< std::map<std::string, int> >(_manufactureRuleStatus);
@@ -1270,6 +1322,7 @@ void SavedGame::removeDiscoveredResearch(const RuleResearch * research)
 void SavedGame::addFinishedResearchSimple(const RuleResearch * research)
 {
 	_discovered.push_back(research);
+	sortReserchVector(_discovered);
 }
 
 /**
@@ -1305,6 +1358,7 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 		if (!isResearched(currentQueueItem->getName(), false))
 		{
 			_discovered.push_back(currentQueueItem);
+			sortReserchVector(_discovered);
 			if (!hasUndiscoveredProtectedUnlocks && !hasAnyUndiscoveredGetOneFrees)
 			{
 				// If the currentQueueItem can't tell you anything anymore, remove it from popped research
@@ -1358,16 +1412,16 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 			}
 
 			// 3b. Iterate through all available projects and add zero-cost projects to the processing queue
-			for (std::vector<RuleResearch*>::const_iterator itProjectToTest = availableResearch.begin(); itProjectToTest != availableResearch.end(); ++itProjectToTest)
+			for (const RuleResearch *itProjectToTest : availableResearch)
 			{
 				// We are only interested in zero-cost projects!
-				if ((*itProjectToTest)->getCost() == 0)
+				if (itProjectToTest->getCost() == 0)
 				{
 					// We are only interested in *new* projects (i.e. not processed or scheduled for processing yet)
 					bool isAlreadyInTheQueue = false;
-					for (std::vector<const RuleResearch *>::const_iterator itQueue = queue.begin(); itQueue != queue.end(); ++itQueue)
+					for (const RuleResearch *itQueue : queue)
 					{
-						if ((*itQueue)->getName() == (*itProjectToTest)->getName())
+						if (itQueue->getName() == itProjectToTest->getName())
 						{
 							isAlreadyInTheQueue = true;
 							break;
@@ -1376,19 +1430,19 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 
 					if (!isAlreadyInTheQueue)
 					{
-						if ((*itProjectToTest)->getRequirements().empty())
+						if (itProjectToTest->getRequirements().empty())
 						{
 							// no additional checks for "unprotected" topics
-							queue.push_back((*itProjectToTest));
+							queue.push_back(itProjectToTest);
 						}
 						else
 						{
 							// for "protected" topics, we need to check if the currentQueueItem can unlock it or not
-							for (std::vector<std::string>::const_iterator itUnlocks = currentQueueItem->getUnlocked().begin(); itUnlocks != currentQueueItem->getUnlocked().end(); ++itUnlocks)
+							for (const std::string &itUnlocks : currentQueueItem->getUnlocked())
 							{
-								if ((*itProjectToTest)->getName() == (*itUnlocks))
+								if (itProjectToTest->getName() == itUnlocks)
 								{
-									queue.push_back((*itProjectToTest));
+									queue.push_back(itProjectToTest);
 									break;
 								}
 							}
@@ -1419,31 +1473,32 @@ const std::vector<const RuleResearch *> & SavedGame::getDiscoveredResearch() con
  * @param base a pointer to a Base
  * @param considerDebugMode Should debug mode be considered or not.
  */
-void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> & projects, const Mod * mod, Base * base, bool considerDebugMode) const
+void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> &projects, const Mod *mod, Base *base, bool considerDebugMode) const
 {
 	// This list is used for topics that can be researched even if *not all* dependencies have been discovered yet (e.g. STR_ALIEN_ORIGINS)
 	// Note: all requirements of such topics *have to* be discovered though! This will be handled elsewhere.
 	std::vector<const RuleResearch *> unlocked;
-	for (std::vector<const RuleResearch *>::const_iterator it = _discovered.begin(); it != _discovered.end(); ++it)
+	for (const RuleResearch *research : _discovered)
 	{
-		for (std::vector<std::string>::const_iterator itUnlocked = (*it)->getUnlocked().begin(); itUnlocked != (*it)->getUnlocked().end(); ++itUnlocked)
+		for (const std::string &itUnlocked : research->getUnlocked())
 		{
-			unlocked.push_back(mod->getResearch(*itUnlocked, true));
+			unlocked.push_back(mod->getResearch(itUnlocked, true));
 		}
+		sortReserchVector(unlocked);
 	}
 
 	// Create a list of research topics available for research in the given base
-	for (std::vector<std::string>::const_iterator iter = mod->getResearchList().begin(); iter != mod->getResearchList().end(); ++iter)
+	for (const std::string &name : mod->getResearchList())
 	{
 		// This research topic is permanently disabled, ignore it!
-		if (isResearchRuleStatusDisabled(*iter))
+		if (isResearchRuleStatusDisabled(name))
 		{
 			continue;
 		}
 
-		RuleResearch *research = mod->getResearch(*iter);
+		RuleResearch *research = mod->getResearch(name);
 
-		if ((considerDebugMode && _debug) || std::find(unlocked.begin(), unlocked.end(), research) != unlocked.end())
+		if ((considerDebugMode && _debug) || haveReserchVector(unlocked, research))
 		{
 			// Empty, these research topics are on the "unlocked list", *don't* check the dependencies!
 		}
@@ -1539,9 +1594,9 @@ void SavedGame::getNewlyAvailableResearchProjects(std::vector<RuleResearch *> & 
 	// We could move the sorting of "before" vector right after its creation to optimize a little bit more.
 	// But sorting a short list is negligible compared to other operations we had to do to get to this point.
 	// So I decided to leave it here, so that it's 100% clear what's going on.
-	std::sort(before.begin(), before.end(), CompareRuleResearch());
-	std::sort(after.begin(), after.end(), CompareRuleResearch());
-	std::set_difference(after.begin(), after.end(), before.begin(), before.end(), std::inserter(diff, diff.begin()), CompareRuleResearch());
+	sortReserchVector(before);
+	sortReserchVector(after);
+	std::set_difference(after.begin(), after.end(), before.begin(), before.end(), std::inserter(diff, diff.begin()), researchLess);
 }
 
 /**
@@ -1789,14 +1844,14 @@ bool SavedGame::hasUndiscoveredGetOneFree(const RuleResearch * r, bool checkOnly
 bool SavedGame::hasUndiscoveredProtectedUnlock(const RuleResearch * r, const Mod * mod) const
 {
 	// Note: checking for not yet discovered unlocks protected by "requires" (which also implies cost = 0)
-	for (std::vector<std::string>::const_iterator itUnlocked = r->getUnlocked().begin(); itUnlocked != r->getUnlocked().end(); ++itUnlocked)
+	for (const std::string &itUnlocked : r->getUnlocked())
 	{
-		if (isResearchRuleStatusDisabled(*itUnlocked))
+		if (isResearchRuleStatusDisabled(itUnlocked))
 		{
 			// ignore all disabled topics (as if they didn't exist)
 			continue;
 		}
-		RuleResearch *unlock = mod->getResearch(*itUnlocked, true);
+		RuleResearch *unlock = mod->getResearch(itUnlocked, true);
 		if (!unlock->getRequirements().empty())
 		{
 			if (!isResearched(unlock->getName(), false))
@@ -1820,13 +1875,8 @@ bool SavedGame::isResearched(const std::string &research, bool considerDebugMode
 	//	return true;
 	if (considerDebugMode && _debug)
 		return true;
-	for (std::vector<const RuleResearch *>::const_iterator i = _discovered.begin(); i != _discovered.end(); ++i)
-	{
-		if ((*i)->getName() == research)
-			return true;
-	}
 
-	return false;
+	return haveReserchVector(_discovered, research);
 }
 
 /**
@@ -1858,21 +1908,16 @@ bool SavedGame::isResearched(const std::vector<std::string> &research, bool cons
 			}
 		}
 	}
-	for (std::vector<const RuleResearch *>::const_iterator i = _discovered.begin(); i != _discovered.end(); ++i)
+
+	for (const std::string &r : matches)
 	{
-		for (std::vector<std::string>::iterator j = matches.begin(); j != matches.end(); ++j)
+		if (!haveReserchVector(_discovered, r))
 		{
-			if ((*i)->getName() == *j)
-			{
-				j = matches.erase(j);
-				break;
-			}
+			return false;
 		}
-		if (matches.empty())
-			return true;
 	}
 
-	return false;
+	return true;
 }
 
 /**

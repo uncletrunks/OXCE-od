@@ -39,6 +39,7 @@ class BattleItem;
 class Mod;
 class State;
 class ItemContainer;
+class RuleItem;
 
 /**
  * The battlescape data that gets written to disk when the game is saved.
@@ -359,11 +360,14 @@ public:
 	void setChronoTrigger(ChronoTrigger trigger);
 	/// Sets the turn to start the aliens cheating.
 	void setCheatTurn(int turn);
+	/// Check whether the battle has actually commenced or not.
 	bool isBeforeGame() const;
 	/// Randomly chooses hidden movement background.
 	void setRandomHiddenMovementBackground(const Mod *mod);
 	/// Gets the hidden movement background ID.
 	std::string getHiddenMovementBackground() const;
+	/// Reset all the unit hit state flags.
+	void resetUnitHitStates();
 };
 
 }

@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 3.9c[/b]
+[b]Mod version 3.10[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -169,6 +169,11 @@ Bug fix.[br/]
 3.9c:[br/]
 Bug fix.[br/]
 [br/]
+3.10:[br/]
+Bug fix.[br/]
+Update nightly.[br/]
+New grenade fuse config.[br/]
+[br/]
 
 [examples]
 [br/][br/]
@@ -217,6 +222,12 @@ items:
     # ...
     # 22 -> can prime, set fixed time of 22 turns.
     # 23 -> can prime, set fixed time of 23 turns.
+    fuseTriggerEvents:
+      defaultBehavior: true   #used to enable default fuse behavior. Defualt `true`.
+      throwTrigger: false     #timer start on throw.
+      throwExplode: false     #item explode (grenade) or is removed on thorw. Defualt `false`. `specialChance` affect this.
+      proximityTrigger: false #timer start when unit move in it proximity. Defulat `false`.
+      proximityExplode: false #item explode (grenade, proxi) or is removed when unit move in it porximity. Default `false`. `specialChance` affect this.
     accuracyUse: 0          #bonus to accuracy of Psi-Amp special attack.
     accuracyMindControl: 0  #bonus to accuracy of Psi-Amp Mind Control attack.
     accuracyPanic: 0        #bonus to accuracy of Psi-Amp Panic attack.

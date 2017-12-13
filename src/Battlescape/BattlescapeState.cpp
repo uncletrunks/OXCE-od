@@ -67,6 +67,7 @@
 #include "../Mod/RuleItem.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/Armor.h"
+#include "../Mod/RuleUfo.h"
 #include "../Savegame/Node.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -75,6 +76,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/BattleItem.h"
 #include "../Ufopaedia/Ufopaedia.h"
+#include "../Savegame/Ufo.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleSoldier.h"
@@ -1059,9 +1061,7 @@ void BattlescapeState::btnInventoryClick(Action *)
 		updateSoldierInfo();
 	}
 	if (playableUnitSelected()
-		&& (_save->getSelectedUnit()->getArmor()->getSize() == 1 || _save->getDebugMode())
-		&& (_save->getSelectedUnit()->getOriginalFaction() == FACTION_PLAYER ||
-			_save->getSelectedUnit()->getRankString() != "STR_LIVE_TERRORIST"))
+		&& (_save->getSelectedUnit()->hasInventory() || _save->getDebugMode()))
 	{
 		// clean up the waypoints
 		if (_battleGame->getCurrentAction()->type == BA_LAUNCH)
@@ -2528,6 +2528,17 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 		_game->getMod()->getSoundByDepth(0, _save->getAmbientSound())->stopLoop();
 	}
 	AlienDeployment *ruleDeploy = _game->getMod()->getDeployment(_save->getMissionType());
+	if (!ruleDeploy)
+	{
+		for (std::vector<Ufo*>::iterator ufo =_game->getSavedGame()->getUfos()->begin(); ufo != _game->getSavedGame()->getUfos()->end(); ++ufo)
+		{
+			if ((*ufo)->isInBattlescape())
+			{
+				ruleDeploy = _game->getMod()->getDeployment((*ufo)->getRules()->getType());
+				break;
+			}
+		}
+	}
 	std::string nextStage;
 	if (ruleDeploy)
 	{
