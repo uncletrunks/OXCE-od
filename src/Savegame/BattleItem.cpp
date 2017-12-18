@@ -1116,7 +1116,7 @@ bool BattleItem::getGlow() const
 {
 	if (_rules->getBattleType() == BT_FLARE)
 	{
-		return _rules->getFuseTimerType() == BFT_NONE || (_fuseEnabled && getFuseTimer() >= 0);
+		return (_rules->getFuseTriggerEvent()->defaultBehavior && _rules->getFuseTimerType() == BFT_NONE) || (_fuseEnabled && getFuseTimer() >= 0);
 	}
 	else
 	{
