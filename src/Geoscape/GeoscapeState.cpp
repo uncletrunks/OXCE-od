@@ -2064,10 +2064,10 @@ void GeoscapeState::time1Day()
 			performanceBonus = 0; // bonus only, no malus
 		}
 
-		int funds = _game->getSavedGame()->getFunds();
-		int income = _game->getSavedGame()->getCountryFunding() + performanceBonus;
-		int maintenance = _game->getSavedGame()->getBaseMaintenance();
-		int projection = funds + income - maintenance;
+		int64_t funds = _game->getSavedGame()->getFunds();
+		int64_t income = _game->getSavedGame()->getCountryFunding() + performanceBonus;
+		int64_t maintenance = _game->getSavedGame()->getBaseMaintenance();
+		int64_t projection = funds + income - maintenance;
 		if (projection < 0)
 		{
 			projection = std::abs(projection);
