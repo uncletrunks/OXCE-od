@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <locale>
 #include "Ufopaedia.h"
 #include "UfopaediaSelectState.h"
 #include "../Mod/ArticleDefinition.h"
@@ -192,7 +193,7 @@ namespace OpenXcom
 	void UfopaediaSelectState::loadSelectionList(bool markAllAsSeen)
 	{
 		std::wstring searchString = _btnQuickSearch->getText();
-		for (auto & c : searchString) c = towupper(c);
+		for (auto & c : searchString) c = toupper(c, std::locale(""));
 
 		ArticleDefinitionList::iterator it;
 
@@ -218,7 +219,7 @@ namespace OpenXcom
 			if (searchString != L"")
 			{
 				std::wstring projectName = tr((*it)->title);
-				for (auto & c : projectName) c = towupper(c);
+				for (auto & c : projectName) c = toupper(c, std::locale(""));
 				if (projectName.find(searchString) == std::string::npos)
 				{
 					continue;

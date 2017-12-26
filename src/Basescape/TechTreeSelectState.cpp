@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <locale>
 #include "TechTreeSelectState.h"
 #include "TechTreeViewerState.h"
 #include "../Engine/Action.h"
@@ -138,7 +139,7 @@ void TechTreeSelectState::btnQuickSearchApply(Action *)
 void TechTreeSelectState::initLists()
 {
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = towupper(c);
+	for (auto & c : searchString) c = toupper(c, std::locale(""));
 
 	_firstManufacturingTopicIndex = 0;
 	_availableTopics.clear();
@@ -161,7 +162,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::wstring projectName = tr((*i));
-		for (auto & c : projectName) c = towupper(c);
+		for (auto & c : projectName) c = toupper(c, std::locale(""));
 		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredResearch(*i))
@@ -190,7 +191,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::wstring projectName = tr((*i));
-		for (auto & c : projectName) c = towupper(c);
+		for (auto & c : projectName) c = toupper(c, std::locale(""));
 		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredManufacture(*i))
