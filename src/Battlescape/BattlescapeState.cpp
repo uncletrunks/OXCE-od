@@ -39,7 +39,6 @@
 #include "BriefingState.h"
 #include "../lodepng.h"
 #include "../fmath.h"
-#include "../Geoscape/GeoscapeState.h"
 #include "../Geoscape/SelectMusicTrackState.h"
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
@@ -402,12 +401,10 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 	_btnNextStop->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnShowLayers->onMouseClick((ActionHandler)&BattlescapeState::btnShowLayersClick);
-	//_btnShowLayers->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
 	_btnShowLayers->setTooltip("STR_MULTI_LEVEL_VIEW");
-	//_btnShowLayers->setTooltip("STR_UFOPAEDIA_UC");
 	_btnShowLayers->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 	_btnShowLayers->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
-	_btnShowLayers->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
+	_btnShowLayers->onKeyboardPress((ActionHandler)&BattlescapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
 
 	_btnHelp->onMouseClick((ActionHandler)&BattlescapeState::btnHelpClick);
 	_btnHelp->onKeyboardPress((ActionHandler)&BattlescapeState::btnHelpClick, Options::keyBattleOptions);
@@ -1174,6 +1171,18 @@ void BattlescapeState::selectPreviousPlayerUnit(bool checkReselect, bool setRese
 void BattlescapeState::btnShowLayersClick(Action *)
 {
 	_numLayers->setValue(_map->getCamera()->toggleShowAllLayers());
+}
+
+/**
+ * Opens the Ufopaedia.
+ * @param action Pointer to an action.
+ */
+void BattlescapeState::btnUfopaediaClick(Action *)
+{
+	if (allowButtons())
+	{
+		Ufopaedia::open(_game);
+	}
 }
 
 /**

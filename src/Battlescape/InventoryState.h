@@ -94,6 +94,8 @@ public:
 	void btnInventoryLoadClick(Action *action);
 	/// Handler for clicking the Save button.
 	void btnInventorySaveClick(Action *action);
+	/// Handler for clicking the Ufopaedia button.
+	void btnUfopaediaClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handlers for Quick Search.
