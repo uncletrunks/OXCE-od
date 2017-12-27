@@ -176,6 +176,7 @@ New grenade fuse config.[br/]
 [br/]
 3.10a:[br/]
 Bug fix.[br/]
+Update nightly.[br/]
 [br/]
 
 [examples]

@@ -82,6 +82,9 @@ private:
 	std::vector<VisibilityBlockCache> _blockVisibility;
 	static const int heightFromCenter[11];
 	bool _personalLighting;
+	Tile *_cacheTile;
+	Tile *_cacheTileBelow;
+	Position _cacheTilePos;
 	const int _maxViewDistance;        // 20 tiles by default
 	const int _maxViewDistanceSq;      // 20 * 20
 	const int _maxVoxelViewDistance;   // maxViewDistance * 16
@@ -215,10 +218,12 @@ public:
 	bool isVoxelVisible(Position voxel);
 	/// Checks what type of voxel occupies this space.
 	int voxelCheck(Position voxel, BattleUnit *excludeUnit, bool excludeAllUnits = false, bool onlyVisible = false, BattleUnit *excludeAllBut = 0);
+	/// Flushes cache of voxel check
+	void voxelCheckFlush();
 	/// Blows this tile up.
 	bool detonate(Tile* tile, int power);
 	/// Validates a throwing action.
-	bool validateThrow(BattleAction &action, Position originVoxel, Position targetVoxel, double *curve = 0, int *voxelType = 0);
+	bool validateThrow(BattleAction &action, Position originVoxel, Position targetVoxel, double *curve = 0, int *voxelType = 0, bool forced = false);
 	/// Opens any doors this door is connected to.
 	std::pair<int, Position> checkAdjacentDoors(Position pos, int part);
 	/// Recalculates FOV of all units in-game.
