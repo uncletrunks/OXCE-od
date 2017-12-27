@@ -1694,6 +1694,20 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
  */
 void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 {
+	auto recoveryAmmo = [&](BattleItem* item)
+	{
+
+		// Don't need case of built-in ammo, since this is a fixed weapon
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+		{
+			BattleItem *clip = item->getAmmoForSlot(slot);
+			if (clip && clip->getRules()->isRecoverable() && !clip->getRules()->isFixed()
+				&& clip->getRules()->getClipSize() > 0 && clip != item)
+			{
+				_rounds[clip->getRules()] += clip->getAmmoQuantity();
+			}
+		}
+	};
 	for (std::vector<BattleItem*>::iterator it = from->begin(); it != from->end(); ++it)
 	{
 		const RuleItem *rule = (*it)->getRules();
@@ -1766,16 +1780,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 					case BT_FIREARM:
 					case BT_MELEE:
 						// It's a weapon, count any rounds left in the clip.
-						{
-							for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
-							{
-								BattleItem *clip = (*it)->getAmmoForSlot(slot);
-								if (clip && clip->getRules()->getClipSize() > 0 && clip != *it)
-								{
-									_rounds[clip->getRules()] += clip->getAmmoQuantity();
-								}
-							}
-						}
+						recoveryAmmo(*it);
 						// Fall-through, to recover the weapon itself.
 					default:
 						base->getStorageItems()->addItem(rule->getType(), 1);
@@ -1786,6 +1791,21 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 					{
 						(*c)->reuseItem(rule->getType());
 					}
+				}
+			}
+			// special case of fixed weapons on a soldier's armor, but not HWPs
+			// makes sure we recover the ammuntion from this weapon
+			else if (rule->isFixed() && (*it)->getOwner()->getOriginalFaction() == FACTION_PLAYER && (*it)->getOwner()->getGeoscapeSoldier())
+			{
+				switch (rule->getBattleType())
+				{
+					case BT_FIREARM:
+					case BT_MELEE:
+						// It's a weapon, count any rounds left in the clip.
+						recoveryAmmo(*it);
+						break;
+					default:
+						break;
 				}
 			}
 		}
