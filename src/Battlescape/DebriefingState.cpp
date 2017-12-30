@@ -1694,20 +1694,41 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
  */
 void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 {
-	auto recoveryAmmo = [&](BattleItem* item)
+	auto checkForRecovery = [&](BattleItem* item, const RuleItem *rule)
 	{
+		return !rule->isFixed() && rule->isRecoverable() && (!rule->isConsumable() || item->getFuseTimer() < 0);
+	};
 
+	auto recoveryAmmo = [&](BattleItem* clip, const RuleItem *rule)
+	{
+		if (rule->getBattleType() == BT_AMMO && rule->getClipSize() > 0)
+		{
+			// It's a clip, count any rounds left.
+			_rounds[rule] += clip->getAmmoQuantity();
+		}
+		else
+		{
+			base->getStorageItems()->addItem(rule->getType(), 1);
+		}
+	};
+
+	auto recoveryAmmoInWeapon = [&](BattleItem* weapon)
+	{
 		// Don't need case of built-in ammo, since this is a fixed weapon
 		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			BattleItem *clip = item->getAmmoForSlot(slot);
-			if (clip && clip->getRules()->isRecoverable() && !clip->getRules()->isFixed()
-				&& clip->getRules()->getClipSize() > 0 && clip != item)
+			BattleItem *clip = weapon->getAmmoForSlot(slot);
+			if (clip && clip != weapon)
 			{
-				_rounds[clip->getRules()] += clip->getAmmoQuantity();
+				const RuleItem *rule = clip->getRules();
+				if (checkForRecovery(clip, rule))
+				{
+					recoveryAmmo(clip, rule);
+				}
 			}
 		}
 	};
+
 	for (std::vector<BattleItem*>::iterator it = from->begin(); it != from->end(); ++it)
 	{
 		const RuleItem *rule = (*it)->getRules();
@@ -1753,7 +1774,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 			}
 
 			// put items back in the base
-			if (!rule->isFixed() && rule->isRecoverable() && (!rule->isConsumable() || (*it)->getFuseTimer() < 0))
+			if (checkForRecovery(*it, rule))
 			{
 				switch (rule->getBattleType())
 				{
@@ -1774,13 +1795,12 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						}
 						break;
 					case BT_AMMO:
-						// It's a clip, count any rounds left.
-						_rounds[rule] += (*it)->getAmmoQuantity();
+						recoveryAmmo(*it, rule);
 						break;
 					case BT_FIREARM:
 					case BT_MELEE:
 						// It's a weapon, count any rounds left in the clip.
-						recoveryAmmo(*it);
+						recoveryAmmoInWeapon(*it);
 						// Fall-through, to recover the weapon itself.
 					default:
 						base->getStorageItems()->addItem(rule->getType(), 1);
@@ -1802,7 +1822,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 					case BT_FIREARM:
 					case BT_MELEE:
 						// It's a weapon, count any rounds left in the clip.
-						recoveryAmmo(*it);
+						recoveryAmmoInWeapon(*it);
 						break;
 					default:
 						break;
