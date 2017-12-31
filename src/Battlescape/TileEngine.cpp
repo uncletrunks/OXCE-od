@@ -3996,10 +3996,7 @@ bool TileEngine::validateThrow(BattleAction &action, Position originVoxel, Posit
 	{
 		std::vector<Position> trajectory;
 		test = calculateParabola(originVoxel, targetVoxel, false, &trajectory, action.actor, curvature, Position(0,0,0));
-		Position impactTile = trajectory.at(0) / Position(16, 16, 24);
-		Position targetTile = targetVoxel / Position(16, 16, 24);
-		Position belowTargetTile = targetTile - Position(0, 0, 1);
-		if (test != V_OUTOFBOUNDS && (impactTile == targetTile || impactTile == belowTargetTile))
+		if (test != V_OUTOFBOUNDS && (trajectory.at(0) / Position(16, 16, 24)) == (targetVoxel / Position(16, 16, 24)))
 		{
 			if (voxelType)
 			{
