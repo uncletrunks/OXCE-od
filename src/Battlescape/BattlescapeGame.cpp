@@ -2472,7 +2472,7 @@ int BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 					bool g = item->getGlow();
 					if (item->fuseProximityEvent())
 					{
-						if (ruleItem->getBattleType() == BT_GRENADE && ruleItem->getBattleType() == BT_PROXIMITYGRENADE)
+						if (ruleItem->getBattleType() == BT_GRENADE || ruleItem->getBattleType() == BT_PROXIMITYGRENADE)
 						{
 							Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
 							statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, nullptr, item, item, }));

@@ -1864,6 +1864,41 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
  */
 void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 {
+	auto checkForRecovery = [&](BattleItem* item, const RuleItem *rule)
+	{
+		return !rule->isFixed() && rule->isRecoverable() && (!rule->isConsumable() || item->getFuseTimer() < 0);
+	};
+
+	auto recoveryAmmo = [&](BattleItem* clip, const RuleItem *rule)
+	{
+		if (rule->getBattleType() == BT_AMMO && rule->getClipSize() > 0)
+		{
+			// It's a clip, count any rounds left.
+			_rounds[rule] += clip->getAmmoQuantity();
+		}
+		else
+		{
+			base->getStorageItems()->addItem(rule->getType(), 1);
+		}
+	};
+
+	auto recoveryAmmoInWeapon = [&](BattleItem* weapon)
+	{
+		// Don't need case of built-in ammo, since this is a fixed weapon
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+		{
+			BattleItem *clip = weapon->getAmmoForSlot(slot);
+			if (clip && clip != weapon)
+			{
+				const RuleItem *rule = clip->getRules();
+				if (checkForRecovery(clip, rule))
+				{
+					recoveryAmmo(clip, rule);
+				}
+			}
+		}
+	};
+
 	for (std::vector<BattleItem*>::iterator it = from->begin(); it != from->end(); ++it)
 	{
 		const RuleItem *rule = (*it)->getRules();
@@ -1882,10 +1917,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 					if (corpseUnit->getStatus() == STATUS_DEAD)
 					{
 						base->getStorageItems()->addItem(corpseUnit->getArmor()->getCorpseGeoscape(), 1);
-						if ((*it)->getRules()->getRecoveryPoints())
-						{
-							addStat("STR_ALIEN_CORPSES_RECOVERED", 1, (*it)->getRules()->getRecoveryPoints());
-						}
+						addStat("STR_ALIEN_CORPSES_RECOVERED", 1, (*it)->getRules()->getRecoveryPoints());
 					}
 					else if (corpseUnit->getStatus() == STATUS_UNCONSCIOUS ||
 							// or it's in timeout because it's unconscious from the previous stage
@@ -1913,7 +1945,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 			}
 
 			// put items back in the base
-			if (!rule->isFixed() && rule->isRecoverable() && (!rule->isConsumable() || (*it)->getFuseTimer() < 0))
+			if (checkForRecovery(*it, rule))
 			{
 				bool recoverWeapon = true;
 				switch (rule->getBattleType())
@@ -1935,28 +1967,12 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						}
 						break;
 					case BT_AMMO:
-						// It's a clip, count any rounds left.
-						_rounds[rule] += (*it)->getAmmoQuantity();
+						recoveryAmmo(*it, rule);
 						break;
 					case BT_FIREARM:
 					case BT_MELEE:
-						{
-							// Special case: built-in ammo (e.g. throwing knives)
-							if (!(*it)->needsAmmoForSlot(0) && rule->getClipSize() > 0)
-							{
-								_rounds[rule] += (*it)->getAmmoQuantity();
-								recoverWeapon = false;
-							}
-							// It's a weapon, count any rounds left in the clip(s).
-							for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
-							{
-								BattleItem *clip = (*it)->getAmmoForSlot(slot);
-								if (clip && clip->getRules()->getClipSize() > 0 && clip != *it)
-								{
-									_rounds[clip->getRules()] += clip->getAmmoQuantity();
-								}
-							}
-						}
+						// It's a weapon, count any rounds left in the clip.
+						recoveryAmmoInWeapon(*it);
 						// Fall-through, to recover the weapon itself.
 					default:
 						if (recoverWeapon)
@@ -1970,6 +1986,21 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 					{
 						(*c)->reuseItem(rule->getType());
 					}
+				}
+			}
+			// special case of fixed weapons on a soldier's armor, but not HWPs
+			// makes sure we recover the ammuntion from this weapon
+			else if (rule->isFixed() && (*it)->getOwner()->getOriginalFaction() == FACTION_PLAYER && (*it)->getOwner()->getGeoscapeSoldier())
+			{
+				switch (rule->getBattleType())
+				{
+					case BT_FIREARM:
+					case BT_MELEE:
+						// It's a weapon, count any rounds left in the clip.
+						recoveryAmmoInWeapon(*it);
+						break;
+					default:
+						break;
 				}
 			}
 		}
@@ -2087,12 +2118,15 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	{
 		_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available
 
-		std::string corpseItem = from->getArmor()->getCorpseGeoscape();
-		RuleItem *rule = _game->getMod()->getItem(corpseItem);
-		if (rule->isRecoverable())
+		if (!from->getArmor()->getCorpseBattlescape().empty())
 		{
-			addStat("STR_ALIEN_CORPSES_RECOVERED", 1, from->getValue());
-			base->getStorageItems()->addItem(corpseItem, 1);
+			RuleItem *corpseRule = _game->getMod()->getItem(from->getArmor()->getCorpseBattlescape().front());
+			if (corpseRule && corpseRule->isRecoverable())
+			{
+				addStat("STR_ALIEN_CORPSES_RECOVERED", 1, corpseRule->getRecoveryPoints());
+				std::string corpseItem = from->getArmor()->getCorpseGeoscape();
+				base->getStorageItems()->addItem(corpseItem, 1);
+			}
 		}
 	}
 	else

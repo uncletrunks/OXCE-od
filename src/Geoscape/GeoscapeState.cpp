@@ -1066,7 +1066,7 @@ void GeoscapeState::time5Seconds()
 				}
 				else if (m != 0)
 				{
-					if ((*j)->getNumSoldiers() > 0 && (*j)->getRules()->getAllowLanding())
+					if (((*j)->getNumSoldiers() > 0 || (*j)->getNumVehicles() > 0) && (*j)->getRules()->getAllowLanding())
 					{
 						// look up polygons texture
 						int texture, shade;
@@ -1084,7 +1084,7 @@ void GeoscapeState::time5Seconds()
 				{
 					if (b->isDiscovered())
 					{
-						if ((*j)->getNumSoldiers() > 0 && (*j)->getRules()->getAllowLanding())
+						if (((*j)->getNumSoldiers() > 0 || (*j)->getNumVehicles() > 0) && (*j)->getRules()->getAllowLanding())
 						{
 							int texture, shade;
 							_globe->getPolygonTextureAndShade(b->getLongitude(), b->getLatitude(), &texture, &shade);
