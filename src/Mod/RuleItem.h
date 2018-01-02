@@ -173,7 +173,7 @@ private:
 	int _armor;
 	int _turretType;
 	int _aiUseDelay, _aiMeleeHitCount;
-	bool _recover, _ignoreInBaseDefense, _liveAlien;
+	bool _recover, _recoverCorpse, _ignoreInBaseDefense, _liveAlien;
 	int _liveAlienPrisonType;
 	int _attraction;
 	RuleItemUseCost _flatUse, _flatThrow, _flatPrime, _flatUnprime;
@@ -473,6 +473,8 @@ public:
 	int getArmor() const;
 	/// Gets the item's recoverability.
 	bool isRecoverable() const;
+	/// Gets the corpse item's recoverability.
+	bool isCorpseRecoverable() const;
 	/// Checks if the item can be equipped in base defense mission.
 	bool canBeEquippedBeforeBaseDefense() const;
 	/// Gets the item's turret type.
