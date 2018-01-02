@@ -2023,7 +2023,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 		}
 	}
 
-	// single place for firing/throwing/melee experience training (EDIT: there's one more place now... special handling for shotguns)
+	// single place for firing/throwing/melee experience training
 	if (attack.attacker && attack.attacker->getOriginalFaction() == FACTION_PLAYER)
 	{
 		awardExperience(attack.attacker, attack.weapon_item, target, rangeAtack);
@@ -2184,15 +2184,6 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 			if (bu->getFire())
 			{
 				effectGenerated = 2;
-			}
-		}
-		else if (bu)
-		{
-			// Special case: target is already dead, but shotgun experience was not awarded yet since the first shotgun bullet is processed as last
-			bool shotgun = attack.damage_item && attack.damage_item->getRules()->getShotgunPellets() != 0 && attack.damage_item->getRules()->getDamageType()->isDirect();
-			if (shotgun && attack.attacker && attack.attacker->getOriginalFaction() == FACTION_PLAYER)
-			{
-				awardExperience(attack.attacker, attack.weapon_item, bu, rangeAtack);
 			}
 		}
 	}
