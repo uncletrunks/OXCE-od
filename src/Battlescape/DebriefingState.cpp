@@ -1971,6 +1971,12 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						break;
 					case BT_FIREARM:
 					case BT_MELEE:
+						// Special case: built-in ammo (e.g. throwing knives or bamboo stick)
+						if (!(*it)->needsAmmoForSlot(0) && rule->getClipSize() > 0)
+						{
+							_rounds[rule] += (*it)->getAmmoQuantity();
+							recoverWeapon = false;
+						}
 						// It's a weapon, count any rounds left in the clip.
 						recoveryAmmoInWeapon(*it);
 						// Fall-through, to recover the weapon itself.
