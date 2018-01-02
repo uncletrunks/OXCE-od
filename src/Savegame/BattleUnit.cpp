@@ -4007,19 +4007,31 @@ bool BattleUnit::isSniper() const
 }
 
 /**
- * Get the unit's total firing xp for this mission.
+ * Remembers the unit's XP (used for shotguns).
  */
-int BattleUnit::getFiringXP() const
+void BattleUnit::rememberXP()
 {
-	return _expFiring;
+	_expBraveryTmp = _expBravery;
+	_expReactionsTmp = _expReactions;
+	_expFiringTmp = _expFiring;
+	_expThrowingTmp = _expThrowing;
+	_expPsiSkillTmp = _expPsiSkill;
+	_expPsiStrengthTmp = _expPsiStrength;
+	_expMeleeTmp = _expMelee;
 }
 
 /**
- * Artificially alter a unit's firing xp. (used for shotguns)
+ * Artificially alter a unit's XP (used for shotguns).
  */
-void BattleUnit::nerfFiringXP(int newXP)
+void BattleUnit::nerfXP()
 {
-	_expFiring = newXP;
+	if (_expBravery > _expBraveryTmp + 1) _expBravery = _expBraveryTmp + 1;
+	if (_expReactions > _expReactionsTmp + 1) _expReactions = _expReactionsTmp + 1;
+	if (_expFiring > _expFiringTmp + 1) _expFiring = _expFiringTmp + 1;
+	if (_expThrowing > _expThrowingTmp + 1) _expThrowing = _expThrowingTmp + 1;
+	if (_expPsiSkill > _expPsiSkillTmp + 1) _expPsiSkill = _expPsiSkillTmp + 1;
+	if (_expPsiStrength > _expPsiStrengthTmp + 1) _expPsiStrength = _expPsiStrengthTmp + 1;
+	if (_expMelee > _expMeleeTmp + 1) _expMelee = _expMeleeTmp + 1;
 }
 
 /**

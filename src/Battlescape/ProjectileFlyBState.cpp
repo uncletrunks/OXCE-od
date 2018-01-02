@@ -662,7 +662,9 @@ void ProjectileFlyBState::think()
 						projectileHitUnit(_parent->getMap()->getProjectile()->getPosition(offset));
 					}
 
-//					int firingXP = _unit->getFiringXP();
+					// remember unit's original XP values, used for nerfing below
+					_unit->rememberXP();
+
 					// special shotgun behaviour: trace extra projectile paths, and add bullet hits at their termination points.
 					if (shotgun)
 					{
@@ -734,11 +736,8 @@ void ProjectileFlyBState::think()
 						}
 					}
 
-					//TODO check if (_projectileImpact == 4)
-//					if (_unit->getFiringXP() > firingXP + 1)
-//					{
-//						_unit->nerfFiringXP(firingXP + 1);
-//					}
+					// nerf unit's XP values (gained via extra shotgun bullets)
+					_unit->nerfXP();
 				}
 				else if (!_action.weapon->haveNextShotsForAction(_action.type, _action.autoShotCounter) || !_action.weapon->getAmmoForAction(_action.type))
 				{
