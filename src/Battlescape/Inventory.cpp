@@ -687,13 +687,6 @@ void Inventory::mouseClick(Action *action, State *state)
 				{
 					if ((SDL_GetModState() & KMOD_CTRL))
 					{
-						// cannot move fixed items with Ctrl+click
-						if (item->getRules()->isFixed())
-						{
-							_warning->showMessage(_game->getLanguage()->getString("STR_FIXED_ITEMS_CANNOT_BE_MOVED"));
-							return;
-						}
-
 						RuleInventory *newSlot = _inventorySlotGround;
 						std::string warning = "STR_NOT_ENOUGH_SPACE";
 						bool placed = false;

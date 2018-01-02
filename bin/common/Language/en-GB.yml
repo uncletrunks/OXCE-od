@@ -133,7 +133,6 @@ en-GB:
   STR_SELL: "SELL"
   STR_LIVE_ALIENS_SURRENDERED: "ENEMIES SURRENDERED"
 #Inventory.cpp
-  STR_FIXED_ITEMS_CANNOT_BE_MOVED: "Fixed items cannot be moved!"
   STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION: "It's not allowed to place that item there.{NEWLINE}Don't ask why!"
 #InventoryLoadState.cpp
   STR_LOAD_EQUIPMENT_TEMPLATE: "Load Equipment Template"
