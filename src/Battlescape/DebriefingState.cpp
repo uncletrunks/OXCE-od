@@ -403,6 +403,10 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 	if (recoveryY > 0)
 	{
+		if (_txtRecovery->getText().empty())
+		{
+			_txtRecovery->setText(tr("STR_BOUNTY"));
+		}
 		_txtRecovery->setY(_lstStats->getY() + statsY + 5);
 		_lstRecovery->setY(_txtRecovery->getY() + 8);
 		_lstTotal->setY(_lstRecovery->getY() + recoveryY + 5);
@@ -933,7 +937,26 @@ void DebriefingState::prepareDebriefing()
 
 	SavedGame *save = _game->getSavedGame();
 	SavedBattleGame *battle = save->getSavedBattle();
+
 	AlienDeployment *ruleDeploy = _game->getMod()->getDeployment(battle->getMissionType());
+	// OXCE: Don't forget custom mission overrides
+	auto alienCustomMission = _game->getMod()->getDeployment(battle->getAlienCustomMission());
+	if (alienCustomMission)
+	{
+		ruleDeploy = alienCustomMission;
+	}
+	// OXCE+: Don't forget about UFO landings/crash sites
+	if (!ruleDeploy)
+	{
+		for (std::vector<Ufo*>::iterator ufo = _game->getSavedGame()->getUfos()->begin(); ufo != _game->getSavedGame()->getUfos()->end(); ++ufo)
+		{
+			if ((*ufo)->isInBattlescape())
+			{
+				ruleDeploy = _game->getMod()->getDeployment((*ufo)->getRules()->getType());
+				break;
+			}
+		}
+	}
 
 	bool aborted = battle->isAborted();
 	bool success = !aborted || battle->allObjectivesDestroyed();
@@ -1753,6 +1776,14 @@ void DebriefingState::prepareDebriefing()
 		if (bountyItem)
 		{
 			base->getStorageItems()->addItem(bountyItem->getType());
+			auto specialType = bountyItem->getSpecialType();
+			if (specialType > 1)
+			{
+				if (_recoveryStats.find(specialType) != _recoveryStats.end())
+				{
+					addStat(_recoveryStats[specialType]->name, 1, _recoveryStats[specialType]->value);
+				}
+			}
 		}
 	}
 

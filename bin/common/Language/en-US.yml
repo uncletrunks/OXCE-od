@@ -132,6 +132,7 @@ en-US:
   STR_LOOT: "LOOT"
   STR_SELL: "SELL"
   STR_LIVE_ALIENS_SURRENDERED: "ENEMIES SURRENDERED"
+  STR_BOUNTY: "BOUNTY"
 #Inventory.cpp
   STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION: "It's not allowed to place that item there.{NEWLINE}Don't ask why!"
 #InventoryLoadState.cpp
