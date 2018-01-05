@@ -73,8 +73,6 @@ public:
 	Position getOrigin() const;
 	/// Gets the targetted tile for the projectile.
 	Position getTarget() const;
-	/// Gets the string result for the battle action.
-	std::string getActionResult() const;
 	/// Gets the distance that projectile traveled.
 	float getDistance() const;
 	/// Is this projectile being drawn back-to-front or front-to-back?

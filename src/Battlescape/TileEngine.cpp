@@ -1099,6 +1099,127 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 }
 
 /**
+ * Checks to see if a tile is visible through darkness, obstacles and smoke.
+ * Note: psi vision, heat vision, camouflage/anti-camouflage and Y-scripts are intentionally removed.
+ * @param currentUnit The watcher.
+ * @param tile The tile to check for.
+ * @return True if visible.
+ */
+bool TileEngine::isTileInLOS(BattleUnit *currentUnit, Tile *tile)
+{
+	// if there is no tile, we can't see it
+	if (!tile)
+	{
+		return false;
+	}
+
+	// if beyond global max. range, nobody can see anything
+	int currentDistanceSq = distanceSq(currentUnit->getPosition(), tile->getPosition(), false);
+	if (currentDistanceSq > getMaxViewDistanceSq())
+	{
+		return false;
+	}
+
+	// environmental (light/darkness) visibility
+	int visibleDistanceMaxVoxel = getMaxVoxelViewDistance();
+	if (tile->getShade() > getMaxDarknessToSeeUnits())
+	{
+		// in darkness aliens can see 20 tiles, xcom can see 9 by default... unless overridden by armor
+		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, currentUnit->getMaxViewDistanceAtDark(0) * 16);
+	}
+	else
+	{
+		// during day (or if enough other light) both see 20 tiles ... unless overridden by armor
+		visibleDistanceMaxVoxel = std::min(visibleDistanceMaxVoxel, currentUnit->getMaxViewDistanceAtDay(0) * 16);
+	}
+	if (currentDistanceSq > ((visibleDistanceMaxVoxel / 16) * (visibleDistanceMaxVoxel / 16)))
+	{
+		return false;
+	}
+
+	// Note: this is **NOT** vanilla LOF check algorithm, but for now an acceptable compromise?
+	// Most notable differences:
+	// 1. different originVoxel
+	// 2. missing secondary target voxel, used if the primary target voxel (from canTargetTile()) isn't in LOF
+	// 3. simplified LOF check for empty tiles (which would also be used for secondary target voxels, if they were checked)
+	// 4. not considering action type (e.g. shoot vs launch)
+	Position originVoxel = getSightOriginVoxel(currentUnit);
+	Position scanVoxel;
+	std::vector<Position> _trajectory;
+	bool seen = true;
+
+	// Note: If force-firing, always aim at the center of the target tile
+	// This way we can at least shoot inside a window without a penalty (otherwise we would be usually penalized by invisibility of the tile's floor)
+	bool forceFire = Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && _save->getSide() == FACTION_PLAYER;
+
+	if (!forceFire && tile->getMapData(O_OBJECT) != 0)
+	{
+		seen = canTargetTile(&originVoxel, tile, O_OBJECT, &scanVoxel, currentUnit);
+	}
+	else if (!forceFire && tile->getMapData(O_NORTHWALL) != 0)
+	{
+		seen = canTargetTile(&originVoxel, tile, O_NORTHWALL, &scanVoxel, currentUnit);
+	}
+	else if (!forceFire && tile->getMapData(O_WESTWALL) != 0)
+	{
+		seen = canTargetTile(&originVoxel, tile, O_WESTWALL, &scanVoxel, currentUnit);
+	}
+	else if (!forceFire && tile->getMapData(O_FLOOR) != 0)
+	{
+		seen = canTargetTile(&originVoxel, tile, O_FLOOR, &scanVoxel, currentUnit);
+	}
+	else
+	{
+		scanVoxel = Position((tile->getPosition().x * 16) + 8, (tile->getPosition().y * 16) + 8, (tile->getPosition().z * 24) + 12);
+		// Draw a line to the middle of the target tile and store the position of the endpoint of the line
+		int test = calculateLine(originVoxel, scanVoxel, false, &_trajectory, currentUnit);
+		if (test != -1)
+		{
+			seen = (scanVoxel == _trajectory.back());
+		}
+	}
+
+	if (seen)
+	{
+		// now check if we really see it taking into account smoke tiles
+		// initial smoke "density" of a smoke grenade is around 15 per tile
+		// we do density/3 to get the decay of visibility
+		// so in fresh smoke we should only have 4 tiles of visibility
+		// this is traced in voxel space, with smoke affecting visibility every step of the way
+		_trajectory.clear();
+		calculateLine(originVoxel, scanVoxel, true, &_trajectory, currentUnit);
+		int visibleDistanceVoxels = _trajectory.size();
+		int densityOfSmoke = 0;
+		int densityOfFire = 0;
+		Position voxelToTile(16, 16, 24);
+		Position trackTile(-1, -1, -1);
+		Tile *t = 0;
+
+		for (int i = 0; i < visibleDistanceVoxels; i++)
+		{
+			_trajectory.at(i) /= voxelToTile;
+			if (trackTile != _trajectory.at(i))
+			{
+				trackTile = _trajectory.at(i);
+				t = _save->getTile(trackTile);
+			}
+			if (t->getFire() == 0)
+			{
+				densityOfSmoke += t->getSmoke();
+			}
+			else
+			{
+				densityOfFire += t->getFire();
+			}
+		}
+		visibleDistanceMaxVoxel = getMaxVoxelViewDistance(); // reset again (because of smoke formula)
+		auto visibilityQuality = visibleDistanceMaxVoxel - visibleDistanceVoxels - densityOfSmoke * getMaxViewDistance()/(3 * 20);
+		seen = 0 < visibilityQuality;
+	}
+	return seen;
+}
+
+/**
  * Checks for how exposed unit is for another unit.
  * @param originVoxel Voxel of trace origin (eye or gun's barrel).
  * @param tile The tile to check for.

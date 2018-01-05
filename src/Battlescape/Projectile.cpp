@@ -391,14 +391,13 @@ void Projectile::applyAccuracy(Position origin, Position *target, double accurac
 			BattleUnit *bu = _action.actor;
 			BattleUnit *targetUnit = t->getUnit();
 
-			_save->getTileEngine()->calculateTilesInFOV(bu, target->toTile(), 1);
 			if (targetUnit)
 			{
-				hasLOS = bu->hasVisibleUnit(targetUnit);
+				hasLOS = _save->getTileEngine()->visible(bu, t);
 			}
 			else
 			{
-				hasLOS = bu->hasVisibleTile(t);
+				hasLOS = _save->getTileEngine()->isTileInLOS(bu, t);
 			}
 
 			if (!hasLOS)
@@ -535,16 +534,6 @@ Position Projectile::getOrigin() const
 Position Projectile::getTarget() const
 {
 	return _action.target;
-}
-
-/**
- * Gets the result for the battle action
- * Used when the no-LOS penalty applies
- * @return action result string
- */
-std::string Projectile::getActionResult() const
-{
-	return _action.result;
 }
 
 /**

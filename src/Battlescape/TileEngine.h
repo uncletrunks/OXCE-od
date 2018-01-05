@@ -174,6 +174,8 @@ public:
 	Position getSightOriginVoxel(BattleUnit *currentUnit);
 	/// Checks visibility of a unit on this tile.
 	bool visible(BattleUnit *currentUnit, Tile *tile);
+	/// Checks visibility of a tile.
+	bool isTileInLOS(BattleUnit *currentUnit, Tile *tile);
 	/// Turn XCom soldier's personal lighting on or off.
 	void togglePersonalLighting();
 	/// Checks the distance between two positions.

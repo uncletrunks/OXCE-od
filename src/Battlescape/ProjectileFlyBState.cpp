@@ -505,11 +505,6 @@ bool ProjectileFlyBState::createNewProjectile()
 		}
 	}
 
-	if (!projectile->getActionResult().empty())
-	{
-		_action.result = projectile->getActionResult();
-	}
-	
 	if (_action.type != BA_THROW && _action.type != BA_LAUNCH)
 		_unit->getStatistics()->shotsFiredCounter++;
 

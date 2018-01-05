@@ -1143,6 +1143,28 @@ void Map::drawTerrain(Surface *surface)
 										_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::green - 1) - 1);
 									}
 
+									// Include LOS penalty for tiles in the unit's current view range
+									// Don't recalculate LOS for outside of the current FOV
+									int noLOSAccuracyPenalty = action->weapon->getRules()->getNoLOSAccuracyPenalty(_game->getMod());
+									if (noLOSAccuracyPenalty != -1)
+									{
+										bool hasLOS = false;
+										if (unit && (unit->getVisible() || _save->getDebugMode()))
+										{
+											hasLOS = _save->getTileEngine()->visible(action->actor, tile);
+										}
+										else
+										{
+											hasLOS = _save->getTileEngine()->isTileInLOS(action->actor, tile);
+										}
+
+										if (!hasLOS)
+										{
+											accuracy = accuracy * noLOSAccuracyPenalty / 100;
+											_txtAccuracy->setColor(Palette::blockOffset(Pathfinding::yellow - 1) - 1);
+										}
+									}
+
 									bool outOfRange = distance > weapon->getMaxRange();
 									// special handling for short ranges and diagonals
 									if (outOfRange && action->actor->directionTo(action->target) % 2 == 1)
