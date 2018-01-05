@@ -239,8 +239,9 @@ void StoresState::btnQuickSearchApply(Action *)
  */
 void StoresState::initList(bool grandTotal)
 {
+	std::locale myLocale = std::locale("");
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, std::locale(""));
+	for (auto & c : searchString) c = toupper(c, myLocale);
 
 	// clear everything
 	_lstStores->clearList();
@@ -254,7 +255,7 @@ void StoresState::initList(bool grandTotal)
 		if (searchString != L"")
 		{
 			std::wstring projectName = tr((*item));
-			for (auto & c : projectName) c = toupper(c, std::locale(""));
+			for (auto & c : projectName) c = toupper(c, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;

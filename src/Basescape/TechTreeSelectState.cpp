@@ -138,8 +138,9 @@ void TechTreeSelectState::btnQuickSearchApply(Action *)
 */
 void TechTreeSelectState::initLists()
 {
+	std::locale myLocale = std::locale("");
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, std::locale(""));
+	for (auto & c : searchString) c = toupper(c, myLocale);
 
 	_firstManufacturingTopicIndex = 0;
 	_availableTopics.clear();
@@ -162,7 +163,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::wstring projectName = tr((*i));
-		for (auto & c : projectName) c = toupper(c, std::locale(""));
+		for (auto & c : projectName) c = toupper(c, myLocale);
 		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredResearch(*i))
@@ -191,7 +192,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::wstring projectName = tr((*i));
-		for (auto & c : projectName) c = toupper(c, std::locale(""));
+		for (auto & c : projectName) c = toupper(c, myLocale);
 		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredManufacture(*i))

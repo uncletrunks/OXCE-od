@@ -376,8 +376,9 @@ void PurchaseState::btnQuickSearchApply(Action *)
  */
 void PurchaseState::updateList()
 {
+	std::locale myLocale = std::locale("");
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, std::locale(""));
+	for (auto & c : searchString) c = toupper(c, myLocale);
 
 	_lstItems->clearList();
 	_rows.clear();
@@ -404,7 +405,7 @@ void PurchaseState::updateList()
 		if (searchString != L"")
 		{
 			std::wstring projectName = _items[i].name;
-			for (auto & c : projectName) c = toupper(c, std::locale(""));
+			for (auto & c : projectName) c = toupper(c, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;

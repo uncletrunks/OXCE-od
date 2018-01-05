@@ -53,6 +53,7 @@ private:
 	std::vector<std::pair<int, int> > _stunnedIndicators, _woundedIndicators, _burningIndicators;
 	NumberText *_stackNumber;
 	std::wstring _searchString;
+	std::locale _myLocale = std::locale("");
 	Timer *_animTimer;
 	int _depth;
 	RuleInventory *_inventorySlotRightHand = nullptr;
@@ -65,8 +66,6 @@ private:
 	void moveItem(BattleItem *item, RuleInventory *slot, int x, int y);
 	/// Gets the slot in the specified position.
 	RuleInventory *getSlotInPosition(int *x, int *y) const;
-	/// Converts to uppercase, for iterators.
-	static wchar_t upCase(wchar_t c);
 public:
 	/// Creates a new inventory view at the specified position and size.
 	Inventory(Game *game, int width, int height, int x = 0, int y = 0, bool base = false);

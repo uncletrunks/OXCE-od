@@ -192,8 +192,9 @@ namespace OpenXcom
 
 	void UfopaediaSelectState::loadSelectionList(bool markAllAsSeen)
 	{
+		std::locale myLocale = std::locale("");
 		std::wstring searchString = _btnQuickSearch->getText();
-		for (auto & c : searchString) c = toupper(c, std::locale(""));
+		for (auto & c : searchString) c = toupper(c, myLocale);
 
 		ArticleDefinitionList::iterator it;
 
@@ -219,7 +220,7 @@ namespace OpenXcom
 			if (searchString != L"")
 			{
 				std::wstring projectName = tr((*it)->title);
-				for (auto & c : projectName) c = toupper(c, std::locale(""));
+				for (auto & c : projectName) c = toupper(c, myLocale);
 				if (projectName.find(searchString) == std::string::npos)
 				{
 					continue;
