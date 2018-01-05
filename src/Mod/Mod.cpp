@@ -1913,11 +1913,14 @@ SavedGame *Mod::newSave() const
 			Soldier *soldier = genSoldier(save, randomTypes[i]);
 			base->getSoldiers()->push_back(soldier);
 			// Award soldier a special 'original eigth' commendation
-			SoldierDiary *diary = soldier->getDiary();
-			diary->awardOriginalEightCommendation();
-			for (std::vector<SoldierCommendations*>::iterator comm = diary->getSoldierCommendations()->begin(); comm != diary->getSoldierCommendations()->end(); ++comm)
+			if (_commendations.find("STR_MEDAL_ORIGINAL8_NAME") != _commendations.end())
 			{
-				(*comm)->makeOld();
+				SoldierDiary *diary = soldier->getDiary();
+				diary->awardOriginalEightCommendation();
+				for (std::vector<SoldierCommendations*>::iterator comm = diary->getSoldierCommendations()->begin(); comm != diary->getSoldierCommendations()->end(); ++comm)
+				{
+					(*comm)->makeOld();
+				}
 			}
 		}
 		// Assign pilots to craft (interceptors first, transport last) and non-pilots to transports only
