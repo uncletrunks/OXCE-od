@@ -18,7 +18,6 @@
  */
 #include "Inventory.h"
 #include <algorithm>
-#include <locale>
 #include <cmath>
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInventory.h"
