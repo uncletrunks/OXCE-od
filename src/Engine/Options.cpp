@@ -805,8 +805,15 @@ void updateReservedSpace()
 		{
 			if (i->second.isMaster())
 			{
-				i->second.setReservedSpace(maxSize);
-				Log(LOG_INFO) << "reservedSpace for: " << i->first << " updated to: " << i->second.getReservedSpace();
+				if (i->second.getReservedSpace() < maxSize)
+				{
+					i->second.setReservedSpace(maxSize);
+					Log(LOG_INFO) << "reservedSpace for: " << i->first << " updated to: " << i->second.getReservedSpace();
+				}
+				else
+				{
+					Log(LOG_INFO) << "reservedSpace for: " << i->first << " is: " << i->second.getReservedSpace();
+				}
 			}
 		}
 	}
