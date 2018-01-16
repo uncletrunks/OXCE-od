@@ -372,9 +372,14 @@ void BasescapeState::viewLeftClick(Action *)
 				_game->pushState(new ErrorMessageState(tr("STR_FACILITY_IN_USE"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
 			}
 			// Would base become disconnected?
-			else if (!_base->getDisconnectedFacilities(fac).empty())
+			else if (!_base->getDisconnectedFacilities(fac).empty() && fac->getRules()->getLeavesBehindOnSell().size() == 0)
 			{
 				_game->pushState(new ErrorMessageState(tr("STR_CANNOT_DISMANTLE_FACILITY"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+			}
+			// Is this facility being built from a dismantled one or building over a previous building?
+			else if (fac->getBuildTime() > 0 && fac->getIfHadPreviousFacility())
+			{
+				_game->pushState(new ErrorMessageState(tr("STR_CANNOT_DISMANTLE_FACILITY_UPGRADING"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
 			}
 			else
 			{

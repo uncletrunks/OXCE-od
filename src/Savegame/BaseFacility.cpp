@@ -29,7 +29,7 @@ namespace OpenXcom
  * @param rules Pointer to ruleset.
  * @param base Pointer to base of origin.
  */
-BaseFacility::BaseFacility(RuleBaseFacility *rules, Base *base) : _rules(rules), _base(base), _x(-1), _y(-1), _buildTime(0), _disabled(false), _craftForDrawing(0)
+BaseFacility::BaseFacility(RuleBaseFacility *rules, Base *base) : _rules(rules), _base(base), _x(-1), _y(-1), _buildTime(0), _disabled(false), _craftForDrawing(0), _hadPreviousFacility(false)
 {
 }
 
@@ -50,6 +50,7 @@ void BaseFacility::load(const YAML::Node &node)
 	_y = node["y"].as<int>(_y);
 	_buildTime = node["buildTime"].as<int>(_buildTime);
 	_disabled = node["disabled"].as<bool>(_disabled);
+	_hadPreviousFacility = node["hadPreviousFacility"].as<bool>(_hadPreviousFacility);
 }
 
 /**
@@ -65,6 +66,7 @@ YAML::Node BaseFacility::save() const
 	if (_buildTime != 0)
 		node["buildTime"] = _buildTime;
 	node["disabled"] = _disabled;
+	node["hadPreviousFacility"] = _hadPreviousFacility;
 	return node;
 }
 
@@ -143,6 +145,8 @@ void BaseFacility::setBuildTime(int time)
 void BaseFacility::build()
 {
 	_buildTime--;
+	if (_buildTime == 0)
+		_hadPreviousFacility = false;
 }
 
 /**
@@ -211,6 +215,25 @@ Craft *BaseFacility::getCraft() const
 void BaseFacility::setCraft(Craft *craft)
 {
 	_craftForDrawing = craft;
+}
+
+/**
+ * Gets whether this facility was placed over another or was placed by removing another
+ * Used for determining if this facility should count for base connectivity
+ * @return true if placed over or by removing another facility
+ */
+bool BaseFacility::getIfHadPreviousFacility() const
+{
+	return _hadPreviousFacility;
+}
+
+/**
+ * Sets whether this facility was placed over another or was placed by removing another
+ * @param was there another facility just here?
+ */
+void BaseFacility::setIfHadPreviousFacility(bool hadPreviousFacility)
+{
+	_hadPreviousFacility = hadPreviousFacility;
 }
 
 }

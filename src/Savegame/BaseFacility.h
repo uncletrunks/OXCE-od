@@ -41,6 +41,7 @@ private:
 	int _x, _y, _buildTime;
 	bool _disabled;
 	Craft *_craftForDrawing;	// craft, used for drawing facility
+	bool _hadPreviousFacility;
 public:
 	/// Creates a base facility of the specified type.
 	BaseFacility(RuleBaseFacility *rules, Base *base);
@@ -76,6 +77,10 @@ public:
 	Craft *getCraft() const;
 	/// Sets craft, used for drawing facility.
 	void setCraft(Craft *craft);
+	/// Gets whether this facility was placed over another or was placed by removing another
+	bool getIfHadPreviousFacility() const;
+	/// Sets whether this facility was placed over another or was placed by removing another
+	void setIfHadPreviousFacility(bool hadPreviousFacility);
 };
 
 }

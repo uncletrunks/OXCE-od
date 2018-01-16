@@ -220,7 +220,27 @@ bool BaseView::isPlaceable(RuleBaseFacility *rule, BaseFacility *facilityBeingMo
 				// when moving an existing facility, it should not block itself
 				if (facilityBeingMoved == 0)
 				{
-					return false;
+					// Further check to see if the facility already there can be built over and we're not removing an important base function
+					if (_facilities[x][y]->getRules()->getCanBeBuiltOver() && !_facilities[x][y]->inUse() && !_facilities[x][y]->getIfHadPreviousFacility())
+					{
+						// Make sure the facility we're building over is entirely within the size of the one we're checking
+						if (_facilities[x][y]->getX() < _gridX || _facilities[x][y]->getX() + _facilities[x][y]->getRules()->getSize() > _gridX + rule->getSize()
+							|| _facilities[x][y]->getY() < _gridY || _facilities[x][y]->getY() + _facilities[x][y]->getRules()->getSize() > _gridY + rule->getSize())
+							return false;
+
+						const std::vector<std::string> &buildOverFacilities = rule->getBuildOverFacilities();
+						// If the list of base facilities we can build over is empty, then we can build over anything that allows it
+						if (!buildOverFacilities.size() == 0)
+						{
+							// Otherwise, we need to check if the facility we're trying to build over is on the list
+							if (!std::binary_search(buildOverFacilities.begin(), buildOverFacilities.end(), _facilities[x][y]->getRules()->getType()))
+								return false;
+						}
+					}
+					else
+					{
+						return false;
+					}
 				}
 				else if (_facilities[x][y] != facilityBeingMoved)
 				{
@@ -407,7 +427,7 @@ void BaseView::draw()
 	for (std::vector<BaseFacility*>::iterator i = _base->getFacilities()->begin(); i != _base->getFacilities()->end(); ++i)
 	{
 		// Draw connectors
-		if ((*i)->getBuildTime() == 0)
+		if ((*i)->getBuildTime() == 0 || (*i)->getIfHadPreviousFacility())
 		{
 			// Facilities to the right
 			int x = (*i)->getX() + (*i)->getRules()->getSize();
@@ -415,7 +435,7 @@ void BaseView::draw()
 			{
 				for (int y = (*i)->getY(); y < (*i)->getY() + (*i)->getRules()->getSize(); ++y)
 				{
-					if (_facilities[x][y] != 0 && _facilities[x][y]->getBuildTime() == 0)
+					if (_facilities[x][y] != 0 && (_facilities[x][y]->getBuildTime() == 0 || _facilities[x][y]->getIfHadPreviousFacility()))
 					{
 						Surface *frame = _texture->getFrame(7);
 						frame->setX(x * GRID_SIZE - GRID_SIZE / 2);
@@ -431,7 +451,7 @@ void BaseView::draw()
 			{
 				for (int subX = (*i)->getX(); subX < (*i)->getX() + (*i)->getRules()->getSize(); ++subX)
 				{
-					if (_facilities[subX][y] != 0 && _facilities[subX][y]->getBuildTime() == 0)
+					if (_facilities[subX][y] != 0 && (_facilities[subX][y]->getBuildTime() == 0 || _facilities[subX][y]->getIfHadPreviousFacility()))
 					{
 						Surface *frame = _texture->getFrame(8);
 						frame->setX(subX * GRID_SIZE);
@@ -502,6 +522,8 @@ void BaseView::draw()
 				ss << L"X";
 			else
 				ss << (*i)->getBuildTime();
+			if ((*i)->getIfHadPreviousFacility()) // Indicate that this facility still counts for connectivity
+				ss << L"*";
 			text->setAlign(ALIGN_CENTER);
 			text->setColor(_cellColor);
 			text->setText(ss.str());

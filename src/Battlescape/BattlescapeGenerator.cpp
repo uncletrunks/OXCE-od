@@ -2590,7 +2590,7 @@ void BattlescapeGenerator::generateBaseMap()
 	// add modules based on the base's layout
 	for (std::vector<BaseFacility*>::const_iterator i = _base->getFacilities()->begin(); i != _base->getFacilities()->end(); ++i)
 	{
-		if ((*i)->getBuildTime() == 0)
+		if ((*i)->getBuildTime() == 0 || (*i)->getIfHadPreviousFacility())
 		{
 			int num = 0;
 			int xLimit = (*i)->getX() + (*i)->getRules()->getSize() -1;

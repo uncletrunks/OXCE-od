@@ -211,16 +211,67 @@ void PlaceFacilityState::viewClick(Action *)
 					return;
 				}
 			}
+			// Remove any facilities we're building over
+			int reducedBuildTime = 0;
+			bool buildingOver = false;
+			for (int i = _base->getFacilities()->size() - 1; i >= 0; --i)
+			{
+				BaseFacility *checkFacility = _base->getFacilities()->at(i);
+				if (checkFacility && checkFacility->getX() >= _view->getGridX() && checkFacility->getX() < _view->getGridX() + _rule->getSize() // Make sure the facility is in the same place as the one we're building
+					&& checkFacility->getY() >= _view->getGridY() && checkFacility->getY() < _view->getGridY() + _rule->getSize())
+				{
+					// Get a refund from the facility we're building over
+					const std::map<std::string, std::pair<int, int> > &itemCost = checkFacility->getRules()->getBuildCostItems();
+
+					if (checkFacility->getBuildTime() > checkFacility->getRules()->getBuildTime())
+					{
+						// Give full refund if this is an unstarted, queued build.
+						_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + checkFacility->getRules()->getBuildCost());
+						for (std::map<std::string, std::pair<int, int> >::const_iterator j = itemCost.begin(); j != itemCost.end(); ++j)
+						{
+							_base->getStorageItems()->addItem(j->first, j->second.first);
+						}
+					}
+					else
+					{
+						// Give partial refund if this is a started build or a completed facility.
+						_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + checkFacility->getRules()->getRefundValue());
+						for (std::map<std::string, std::pair<int, int> >::const_iterator j = itemCost.begin(); j != itemCost.end(); ++i)
+						{
+							_base->getStorageItems()->addItem(j->first, j->second.second);
+						}
+
+						// Reduce the build time of the new facility
+						reducedBuildTime += (checkFacility->getRules()->getBuildTime() - checkFacility->getBuildTime()) / (_rule->getSize() * _rule->getSize());
+
+						// This only counts as building over something if it wasn't in construction
+						if (checkFacility->getBuildTime() == 0)
+							buildingOver = true;
+					}
+
+					// Remove the facility from the base
+					_base->getFacilities()->erase(_base->getFacilities()->begin() + i);
+					delete checkFacility;
+				}
+
+			}
+
 			BaseFacility *fac = new BaseFacility(_rule, _base);
 			fac->setX(_view->getGridX());
 			fac->setY(_view->getGridY());
 			fac->setBuildTime(_rule->getBuildTime());
+			if (buildingOver)
+			{
+				fac->setIfHadPreviousFacility(true);
+				fac->setBuildTime(std::max(1, fac->getBuildTime() - reducedBuildTime));
+			}
 			_base->getFacilities()->push_back(fac);
 			if (Options::allowBuildingQueue)
 			{
 				if (_view->isQueuedBuilding(_rule)) fac->setBuildTime(INT_MAX);
 				_view->reCalcQueuedBuildings();
 			}
+			_view->setBase(_base);
 			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _rule->getBuildCost());
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{
