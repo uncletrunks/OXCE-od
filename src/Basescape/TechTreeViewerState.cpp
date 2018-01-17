@@ -223,7 +223,7 @@ void TechTreeViewerState::initLists()
 		{
 			std::wostringstream ss;
 			int cost = rule->getCost();
-			std::vector<std::tuple<int, std::wstring>> symbol_values
+			std::vector<std::pair<int, std::wstring>> symbol_values
 					({{100, L"#"}, {20, L"="}, {5, L"-"}});
 
 			for (auto& sym : symbol_values)
