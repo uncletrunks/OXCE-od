@@ -2320,11 +2320,18 @@ BattleActionType BattlescapeGame::getReservedAction()
 
 bool BattlescapeGame::isSurrendering(BattleUnit* bu)
 {
+	// if we already decided to surrender this turn, don't change our decision (until next turn)
+	if (bu->isSurrendering())
+	{
+		return true;
+	}
+
 	int surrenderMode = getMod()->getSurrenderMode();
 
 	// auto-surrender (e.g. units, which won't fight without their masters/controllers)
 	if (surrenderMode > 0 && bu->getUnitRules()->autoSurrender())
 	{
+		bu->setSurrendering(true);
 		return true;
 	}
 
@@ -2332,14 +2339,13 @@ bool BattlescapeGame::isSurrendering(BattleUnit* bu)
 	if (surrenderMode == 0)
 	{
 		// turned off, no surrender
-		return false;
 	}
 	else if (surrenderMode == 1)
 	{
 		// all remaining enemy units can surrender and want to surrender now
 		if (bu->getUnitRules()->canSurrender() && (bu->getStatus() == STATUS_PANICKING || bu->getStatus() == STATUS_BERSERK))
 		{
-			return true;
+			bu->setSurrendering(true);
 		}
 	}
 	else if (surrenderMode == 2)
@@ -2347,7 +2353,7 @@ bool BattlescapeGame::isSurrendering(BattleUnit* bu)
 		// all remaining enemy units can surrender and want to surrender now or wanted to surrender in the past
 		if (bu->getUnitRules()->canSurrender() && bu->wantsToSurrender())
 		{
-			return true;
+			bu->setSurrendering(true);
 		}
 	}
 	else if (surrenderMode == 3)
@@ -2355,10 +2361,11 @@ bool BattlescapeGame::isSurrendering(BattleUnit* bu)
 		// all remaining enemy units have empty hands and want to surrender now or wanted to surrender in the past
 		if (!bu->getLeftHandWeapon() && !bu->getRightHandWeapon() && bu->wantsToSurrender())
 		{
-			return true;
+			bu->setSurrendering(true);
 		}
 	}
-	return false;
+
+	return bu->isSurrendering();
 }
 
 /**

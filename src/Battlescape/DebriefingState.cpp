@@ -1447,7 +1447,7 @@ void DebriefingState::prepareDebriefing()
 			}
 			else if (oldFaction == FACTION_HOSTILE && !aborted && !_destroyBase
 				// surrendered units may as well count as unconscious too
-				&& playersSurvived > 0 && faction != FACTION_PLAYER && !(*j)->isOut())
+				&& playersSurvived > 0 && faction != FACTION_PLAYER && !(*j)->isOut() && (*j)->isSurrendering())
 			{
 				if ((*j)->getTile())
 				{
@@ -2175,15 +2175,16 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	else
 	{
 		RuleResearch *research = _game->getMod()->getResearch(type);
+		bool surrender = !from->isOut() && from->isSurrendering();
 		if (research != 0 && !_game->getSavedGame()->isResearched(type))
 		{
 			// more points if it's not researched
-			addStat(from->isOut() ? "STR_LIVE_ALIENS_RECOVERED" : "STR_LIVE_ALIENS_SURRENDERED", 1, from->getValue() * 2);
+			addStat(surrender ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
 		}
 		else
 		{
 			// 10 points for recovery
-			addStat(from->isOut() ? "STR_LIVE_ALIENS_RECOVERED" : "STR_LIVE_ALIENS_SURRENDERED", 1, 10);
+			addStat(surrender ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, 10);
 		}
 
 		base->getStorageItems()->addItem(type, 1);

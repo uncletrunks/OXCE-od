@@ -87,7 +87,7 @@ private:
 	int _verticalDirection;
 	Position _destination;
 	UnitStatus _status;
-	bool _wantsToSurrender;
+	bool _wantsToSurrender, _isSurrendering;
 	int _walkPhase, _fallPhase;
 	std::vector<BattleUnit *> _visibleUnits, _unitsSpottedThisTurn;
 	std::vector<Tile *> _visibleTiles;
@@ -211,6 +211,10 @@ public:
 	UnitStatus getStatus() const;
 	/// Does the unit want to surrender?
 	bool wantsToSurrender() const;
+	/// Is the unit surrendering this turn?
+	bool isSurrendering() const;
+	/// Mark the unit as surrendering this turn.
+	void setSurrendering(bool isSurrendering);
 	/// Start the walkingPhase
 	void startWalking(int direction, Position destination, Tile *tileBelowMe, bool cache);
 	/// Increase the walkingPhase
