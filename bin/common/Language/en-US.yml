@@ -194,6 +194,8 @@ en-US:
   STR_TECH_SPOILER_PROTECTION_DESC: "With this option on, you won't be able to check where the yet-unresearched topics lead to."
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT: "Play Briefing music longer"
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT_DESC: "Briefing music will continue playing during equipment phase until the Battlescape is displayed."
+  STR_UFO_LANDING_ALERT: "UFO landing alert"
+  STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"
