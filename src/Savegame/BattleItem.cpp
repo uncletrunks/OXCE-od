@@ -108,6 +108,7 @@ void BattleItem::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_fuseTimer = node["fuseTimer"].as<int>(_fuseTimer);
 	_fuseEnabled = node["fuseEnabed"].as<bool>(_fuseEnabled);
 	_droppedOnAlienTurn = node["droppedOnAlienTurn"].as<bool>(_droppedOnAlienTurn);
+	_XCOMProperty = node["XCOMProperty"].as<bool>(_XCOMProperty);
 	_scriptValues.load(node, shared);
 }
 
@@ -181,6 +182,10 @@ YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 	node["fuseEnabed"] = _fuseEnabled;
 	if (_droppedOnAlienTurn)
 		node["droppedOnAlienTurn"] = _droppedOnAlienTurn;
+	if (_XCOMProperty)
+	{
+		node["XCOMProperty"] = _XCOMProperty;
+	}
 	_scriptValues.save(node, shared);
 
 	return node;
