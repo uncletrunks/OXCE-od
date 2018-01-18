@@ -634,6 +634,7 @@ void BattlescapeGame::endTurn()
 			_parentState->finishBattle(true, inExit);
 			return;
 		case FORCE_WIN:
+		case FORCE_WIN_SURRENDER:
 			_parentState->finishBattle(false, liveSoldiers);
 			return;
 		case FORCE_LOSE:

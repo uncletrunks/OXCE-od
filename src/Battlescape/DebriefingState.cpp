@@ -1443,11 +1443,19 @@ void DebriefingState::prepareDebriefing()
 						}
 					}
 				}
-				recoverAlien(*j, base);
+				if (!(*j)->getArmor()->getCorpseBattlescape().empty())
+				{
+					RuleItem *corpseRule = _game->getMod()->getItem((*j)->getArmor()->getCorpseBattlescape().front());
+					if (corpseRule && corpseRule->isRecoverable())
+					{
+						recoverAlien(*j, base);
+					}
+				}
 			}
 			else if (oldFaction == FACTION_HOSTILE && !aborted && !_destroyBase
 				// surrendered units may as well count as unconscious too
-				&& playersSurvived > 0 && faction != FACTION_PLAYER && !(*j)->isOut() && (*j)->isSurrendering())
+				&& playersSurvived > 0 && faction != FACTION_PLAYER && (!(*j)->isOut() || (*j)->getStatus() == STATUS_IGNORE_ME)
+				&& ((*j)->isSurrendering() || battle->getChronoTrigger() == FORCE_WIN_SURRENDER))
 			{
 				if ((*j)->getTile())
 				{
@@ -1459,7 +1467,14 @@ void DebriefingState::prepareDebriefing()
 						}
 					}
 				}
-				recoverAlien(*j, base);
+				if (!(*j)->getArmor()->getCorpseBattlescape().empty())
+				{
+					RuleItem *corpseRule = _game->getMod()->getItem((*j)->getArmor()->getCorpseBattlescape().front());
+					if (corpseRule && corpseRule->isRecoverable())
+					{
+						recoverAlien(*j, base);
+					}
+				}
 			}
 			else if (oldFaction == FACTION_NEUTRAL)
 			{
@@ -2175,16 +2190,17 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	else
 	{
 		RuleResearch *research = _game->getMod()->getResearch(type);
-		bool surrender = !from->isOut() && from->isSurrendering();
+		bool surrendered = (!from->isOut() || from->getStatus() == STATUS_IGNORE_ME)
+			&& (from->isSurrendering() || _game->getSavedGame()->getSavedBattle()->getChronoTrigger() == FORCE_WIN_SURRENDER);
 		if (research != 0 && !_game->getSavedGame()->isResearched(type))
 		{
 			// more points if it's not researched
-			addStat(surrender ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
+			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
 		}
 		else
 		{
 			// 10 points for recovery
-			addStat(surrender ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, 10);
+			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, 10);
 		}
 
 		base->getStorageItems()->addItem(type, 1);

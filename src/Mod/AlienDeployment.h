@@ -49,7 +49,7 @@ struct BriefingData
 	bool showCraft, showTarget;
 	BriefingData() : palette(0), textOffset(0), music("GMDEFEND"), background("BACK16.SCR"), showCraft(true), showTarget(true) { /*Empty by Design*/ };
 };
-enum ChronoTrigger { FORCE_LOSE, FORCE_ABORT, FORCE_WIN };
+enum ChronoTrigger { FORCE_LOSE, FORCE_ABORT, FORCE_WIN, FORCE_WIN_SURRENDER };
 enum EscapeType { ESCAPE_NONE, ESCAPE_EXIT, ESCAPE_ENTRY, ESCAPE_EITHER };
 /**
  * Represents a specific type of Alien Deployment.
