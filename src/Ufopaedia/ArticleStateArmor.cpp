@@ -32,6 +32,7 @@
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
+#include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
 {
@@ -46,17 +47,22 @@ namespace OpenXcom
 		// Set palette
 		setPalette("PAL_BATTLEPEDIA");
 
+		_buttonColor = _game->getMod()->getInterface("articleArmor")->getElement("button")->color;
+		_textColor = _game->getMod()->getInterface("articleArmor")->getElement("text")->color;
+		_listColor1 = _game->getMod()->getInterface("articleArmor")->getElement("list")->color;
+		_listColor2 = _game->getMod()->getInterface("articleArmor")->getElement("list")->color2;
+
 		ArticleState::initLayout();
 
 		// add other elements
 		add(_txtTitle);
 
 		// Set up objects
-		_btnOk->setColor(Palette::blockOffset(0)+15);
-		_btnPrev->setColor(Palette::blockOffset(0)+15);
-		_btnNext->setColor(Palette::blockOffset(0)+15);
+		_btnOk->setColor(_buttonColor);
+		_btnPrev->setColor(_buttonColor);
+		_btnNext->setColor(_buttonColor);
 
-		_txtTitle->setColor(Palette::blockOffset(14)+15);
+		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();
 		_txtTitle->setText(tr(defs->title));
 
@@ -79,14 +85,14 @@ namespace OpenXcom
 		_lstInfo = new TextList(150, 96, 150, 46);
 		add(_lstInfo);
 
-		_lstInfo->setColor(Palette::blockOffset(14)+15);
+		_lstInfo->setColor(_listColor1);
 		_lstInfo->setColumns(2, 125, 25);
 		_lstInfo->setDot(true);
 
 		_txtInfo = new Text(300, 56, 8, 150);
 		add(_txtInfo);
 
-		_txtInfo->setColor(Palette::blockOffset(14)+15);
+		_txtInfo->setColor(_textColor);
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 
@@ -143,7 +149,7 @@ namespace OpenXcom
 				ss << L"+";
 			ss << stat;
 			_lstInfo->addRow(2, tr(label).c_str(), ss.str().c_str());
-			_lstInfo->setCellColor(_row, 1, Palette::blockOffset(15)+4);
+			_lstInfo->setCellColor(_row, 1, _listColor2);
 			++_row;
 		}
 	}
@@ -151,7 +157,7 @@ namespace OpenXcom
 	void ArticleStateArmor::addStat(const std::string &label, const std::wstring &stat)
 	{
 		_lstInfo->addRow(2, tr(label).c_str(), stat.c_str());
-		_lstInfo->setCellColor(_row, 1, Palette::blockOffset(15)+4);
+		_lstInfo->setCellColor(_row, 1, _listColor2);
 		++_row;
 	}
 }

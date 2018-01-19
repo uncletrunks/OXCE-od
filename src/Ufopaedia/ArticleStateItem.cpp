@@ -31,6 +31,7 @@
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
+#include "../Mod/RuleInterface.h"
 
 namespace OpenXcom
 {
@@ -46,6 +47,12 @@ namespace OpenXcom
 		// Set palette
 		setPalette("PAL_BATTLEPEDIA");
 
+		_buttonColor = _game->getMod()->getInterface("articleItem")->getElement("button")->color;
+		_textColor = _game->getMod()->getInterface("articleItem")->getElement("text")->color;
+		_listColor1 = _game->getMod()->getInterface("articleItem")->getElement("list")->color;
+		_listColor2 = _game->getMod()->getInterface("articleItem")->getElement("list")->color2;
+		_ammoColor = _game->getMod()->getInterface("articleItem")->getElement("ammoColor")->color;
+
 		ArticleState::initLayout();
 
 		// add other elements
@@ -54,16 +61,16 @@ namespace OpenXcom
 
 		// Set up objects
 		_game->getMod()->getSurface("BACK08.SCR")->blit(_bg);
-		_btnOk->setColor(Palette::blockOffset(9));
-		_btnPrev->setColor(Palette::blockOffset(9));
-		_btnNext->setColor(Palette::blockOffset(9));
+		_btnOk->setColor(_buttonColor);
+		_btnPrev->setColor(_buttonColor);
+		_btnNext->setColor(_buttonColor);
 
-		_txtTitle->setColor(Palette::blockOffset(14)+15);
+		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
 		_txtTitle->setText(tr(defs->title));
 
-		_txtWeight->setColor(Palette::blockOffset(14) + 15);
+		_txtWeight->setColor(_textColor);
 		_txtWeight->setAlign(ALIGN_RIGHT);
 
 		// IMAGE
@@ -89,26 +96,26 @@ namespace OpenXcom
 		{
 			_txtShotType = new Text(100, 17, 8, 66);
 			add(_txtShotType);
-			_txtShotType->setColor(Palette::blockOffset(14)+15);
+			_txtShotType->setColor(_textColor);
 			_txtShotType->setWordWrap(true);
 			_txtShotType->setText(tr("STR_SHOT_TYPE"));
 
 			_txtAccuracy = new Text(50, 17, 104, 66);
 			add(_txtAccuracy);
-			_txtAccuracy->setColor(Palette::blockOffset(14)+15);
+			_txtAccuracy->setColor(_textColor);
 			_txtAccuracy->setWordWrap(true);
 			_txtAccuracy->setText(tr("STR_ACCURACY_UC"));
 
 			_txtTuCost = new Text(60, 17, 158, 66);
 			add(_txtTuCost);
-			_txtTuCost->setColor(Palette::blockOffset(14)+15);
+			_txtTuCost->setColor(_textColor);
 			_txtTuCost->setWordWrap(true);
 			_txtTuCost->setText(tr("STR_TIME_UNIT_COST"));
 
 			_lstInfo = new TextList(204, 55, 8, 82);
 			add(_lstInfo);
 
-			_lstInfo->setColor(Palette::blockOffset(15)+4); // color for %-data!
+			_lstInfo->setColor(_listColor2); // color for %-data!
 			_lstInfo->setColumns(3, 100, 52, 52);
 			_lstInfo->setBig();
 		}
@@ -127,7 +134,7 @@ namespace OpenXcom
 								 tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
 								 Text::formatPercentage(item->getAccuracyAuto()).c_str(),
 								 tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(14)+15);
+				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
@@ -142,7 +149,7 @@ namespace OpenXcom
 								 tr("STR_SHOT_TYPE_SNAP").arg(item->getConfigSnap()->shots).c_str(),
 								 Text::formatPercentage(item->getAccuracySnap()).c_str(),
 								 tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(14)+15);
+				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
@@ -157,7 +164,7 @@ namespace OpenXcom
 								 tr("STR_SHOT_TYPE_AIMED").arg(item->getConfigAimed()->shots).c_str(),
 								 Text::formatPercentage(item->getAccuracyAimed()).c_str(),
 								 tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(14)+15);
+				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
@@ -182,7 +189,7 @@ namespace OpenXcom
 					tr("STR_SHOT_TYPE_MELEE").c_str(),
 					Text::formatPercentage(item->getAccuracyMelee()).c_str(),
 					tu.c_str());
-				_lstInfo->setCellColor(0, 0, Palette::blockOffset(14) + 15);
+				_lstInfo->setCellColor(0, 0, _listColor1);
 			}
 
 			// text_info is BELOW the info table (with 1 row only)
@@ -196,7 +203,7 @@ namespace OpenXcom
 
 		add(_txtInfo);
 
-		_txtInfo->setColor(Palette::blockOffset(14)+15);
+		_txtInfo->setColor(_textColor);
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 
@@ -208,14 +215,14 @@ namespace OpenXcom
 		{
 			_txtAmmoType[i] = new Text(82, 16, 194, 20 + i*49);
 			add(_txtAmmoType[i]);
-			_txtAmmoType[i]->setColor(Palette::blockOffset(14)+15);
+			_txtAmmoType[i]->setColor(_textColor);
 			_txtAmmoType[i]->setAlign(ALIGN_CENTER);
 			_txtAmmoType[i]->setVerticalAlign(ALIGN_MIDDLE);
 			_txtAmmoType[i]->setWordWrap(true);
 
 			_txtAmmoDamage[i] = new Text(82, 17, 194, 40 + i*49);
 			add(_txtAmmoDamage[i]);
-			_txtAmmoDamage[i]->setColor(Palette::blockOffset(2));
+			_txtAmmoDamage[i]->setColor(_ammoColor);
 			_txtAmmoDamage[i]->setAlign(ALIGN_CENTER);
 			_txtAmmoDamage[i]->setBig();
 
@@ -228,13 +235,13 @@ namespace OpenXcom
 			case BT_FIREARM:
 				_txtDamage = new Text(82, 10, 194, 7);
 				add(_txtDamage);
-				_txtDamage->setColor(Palette::blockOffset(14)+15);
+				_txtDamage->setColor(_textColor);
 				_txtDamage->setAlign(ALIGN_CENTER);
 				_txtDamage->setText(tr("STR_DAMAGE_UC"));
 
 				_txtAmmo = new Text(50, 10, 268, 7);
 				add(_txtAmmo);
-				_txtAmmo->setColor(Palette::blockOffset(14)+15);
+				_txtAmmo->setColor(_textColor);
 				_txtAmmo->setAlign(ALIGN_CENTER);
 				_txtAmmo->setText(tr("STR_AMMO"));
 
@@ -279,7 +286,7 @@ namespace OpenXcom
 			case BT_MELEE:
 				_txtDamage = new Text(82, 10, 194, 7);
 				add(_txtDamage);
-				_txtDamage->setColor(Palette::blockOffset(14)+15);
+				_txtDamage->setColor(_textColor);
 				_txtDamage->setAlign(ALIGN_CENTER);
 				_txtDamage->setText(tr("STR_DAMAGE_UC"));
 
