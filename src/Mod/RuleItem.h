@@ -159,8 +159,8 @@ private:
 	int _clipSize, _specialChance, _tuLoad[AmmoSlotMax], _tuUnload[AmmoSlotMax];
 	BattleType _battleType;
 	BattleFuseType _fuseType;
-	bool _hiddenOnMinimap;
 	RuleItemFuseTrigger _fuseTriggerEvents;
+	bool _hiddenOnMinimap;
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands;
 	std::string _defaultInventorySlot;
