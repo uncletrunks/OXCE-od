@@ -1,6 +1,14 @@
 en-US:
 #Extended+ BEGIN
 #=================== Basescape ===================
+#BasescapeState.cpp
+  STR_CANNOT_DISMANTLE_FACILITY_UPGRADING: "CANNOT DISMANTLE FACILITY!{SMALLLINE}Facility cannot be removed during upgrading."
+#BaseView.cpp
+  STR_CANNOT_UPGRADE_FACILITY_ALREADY_UPGRADING: "CANNOT BUILD HERE!{SMALLLINE}Existing facility is already being built over."
+  STR_CANNOT_UPGRADE_FACILITY_WRONG_SIZE: "CANNOT BUILD HERE!{SMALLLINE}Selected facility must completely cover existing facility."
+  STR_CANNOT_UPGRADE_FACILITY_WRONG_TYPE: "CANNOT BUILD HERE!{SMALLLINE}Existing facility cannot be upgraded over by selected facility."
+  STR_CANNOT_UPGRADE_FACILITY_DISALLOWED: "CANNOT BUILD HERE!{SMALLLINE}Existing facility cannot be built over."
+  STR_CANNOT_BUILD_QUEUE_OFF: "CANNOT BUILD HERE!{SMALLLINE}Connecting facilities must finish construction first."
 #ChangeHeadquartersState.cpp
   STR_MOVE_HQ_TO: "Move HQ to"
 #CraftArmorState.cpp

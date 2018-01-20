@@ -472,6 +472,7 @@ void GeoscapeState::handle(Action *action)
 					for (auto& facility : *base->getFacilities())
 					{
 						facility->setBuildTime(0);
+						facility->setIfHadPreviousFacility(false);
 					}
 				}
 			}

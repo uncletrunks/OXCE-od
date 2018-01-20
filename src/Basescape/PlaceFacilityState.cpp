@@ -156,7 +156,7 @@ void PlaceFacilityState::viewClick(Action *)
 			// unchanged location -> no message, no cost.
 			_game->popState();
 		}
-		else if (!_view->isPlaceable(_rule, _origFac))
+		else if (_view->getPlacementError(_rule, _origFac))
 		{
 			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
 		}
@@ -184,9 +184,36 @@ void PlaceFacilityState::viewClick(Action *)
 	else
 	{
 		// placing a brand new facility
-		if (!_view->isPlaceable(_rule))
+		int placementErrorCode = _view->getPlacementError(_rule);
+		if (placementErrorCode)
 		{
-			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+			switch (placementErrorCode)
+			{
+				case 1:
+					_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+					break;
+				case 2:
+					_game->pushState(new ErrorMessageState(tr("STR_FACILITY_IN_USE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+					break;
+				case 3:
+					_game->pushState(new ErrorMessageState(tr("STR_CANNOT_UPGRADE_FACILITY_ALREADY_UPGRADING"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+					break;
+				case 4:
+					_game->pushState(new ErrorMessageState(tr("STR_CANNOT_UPGRADE_FACILITY_WRONG_SIZE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+					break;
+				case 5:
+					_game->pushState(new ErrorMessageState(tr("STR_CANNOT_UPGRADE_FACILITY_WRONG_TYPE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+					break;
+				case 6:
+					_game->pushState(new ErrorMessageState(tr("STR_CANNOT_UPGRADE_FACILITY_DISALLOWED"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+					break;
+				case 7:
+					_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_QUEUE_OFF"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+					break;
+				default:
+					_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+					break;
+			}
 		}
 		else if (_base->isMaxAllowedLimitReached(_rule))
 		{
