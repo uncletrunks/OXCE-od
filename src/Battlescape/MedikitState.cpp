@@ -120,7 +120,7 @@ MedikitButton::MedikitButton(int y) : InteractiveSurface(30, 20, 190, y)
  * @param targetUnit The wounded unit.
  * @param action The healing action.
  */
-MedikitState::MedikitState (BattleUnit *targetUnit, BattleAction *action, TileEngine *tile) : _targetUnit(targetUnit), _action(action), _tileEngine(tile)
+MedikitState::MedikitState (BattleUnit *targetUnit, BattleAction *action, TileEngine *tile) : _targetUnit(targetUnit), _action(action), _tileEngine(tile), _revivedTarget(false)
 {
 	if (Options::maximizeInfoScreens)
 	{
@@ -227,10 +227,19 @@ void MedikitState::onHealClick(Action *)
 		_medikitView->invalidate();
 		_action->actor->getStatistics()->woundsHealed++;
 		update();
-
+		
 		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && _targetUnit->getStunlevel() < _targetUnit->getHealth() && _targetUnit->getHealth() > 0)
 		{
-			_action->actor->getStatistics()->revivedSoldier++;
+			if (!_revivedTarget)
+			{
+				_action->actor->getStatistics()->revivedSoldier++;
+				_revivedTarget = true;
+			}
+			// if the unit has revived and has no more wounds, we quit this screen automatically
+			if (_targetUnit->getFatalWounds() == 0)
+			{
+				onEndClick(0);
+			}
 		}
 	}
 	else
