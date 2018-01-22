@@ -155,6 +155,7 @@ private:
 	int _costEngineer, _costScientist, _timePersonnel, _initialFunding;
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _aiFireChoiceIntelCoeff, _aiFireChoiceAggroCoeff;
+	bool _aiExtendedFireModeChoice, _aiRespectMaxRange;
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor, _minReactionAccuracy;
 	int _chanceToStopRetaliation;
 	int _kneelBonusGlobal, _oneHandedPenaltyGlobal;
@@ -430,6 +431,10 @@ public:
 	int getAIFireChoiceIntelCoeff() const {return _aiFireChoiceIntelCoeff;}
 	/// Gets how much AI aggression should be used to determine firing mode for sniping.
 	int getAIFireChoiceAggroCoeff() const {return _aiFireChoiceAggroCoeff;}
+	/// Gets whether or not to use extended firing mode scoring for determining which attack the AI should use
+	bool getAIExtendedFireModeChoice() const {return _aiExtendedFireModeChoice;}
+	/// Gets whether or not the AI should try to shoot beyond a weapon's max range, true = don't shoot if you can't
+	bool getAIRespectMaxRange() const {return _aiRespectMaxRange;}
 	/// Gets maximum supported lookVariant (0-15)
 	int getMaxLookVariant() const  {return abs(_maxLookVariant) % 16;}
 	/// Gets the threshold for too much smoke (vanilla default = 10).

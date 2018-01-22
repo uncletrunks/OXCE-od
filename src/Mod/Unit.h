@@ -74,6 +74,7 @@ private:
 	std::vector<std::vector<std::string> > _builtInWeapons;
 	bool _canSurrender, _autoSurrender;
 	bool _isLeeroyJenkins;
+	bool _waitIfOutsideWeaponRange;
 public:
 	/// Creates a blank unit ruleset.
 	Unit(const std::string &type);
@@ -134,6 +135,8 @@ public:
 	/// Checks if this unit surrenders automatically, if all other units surrendered too.
 	bool autoSurrender() const;
 	bool isLeeroyJenkins() const { return _isLeeroyJenkins; };
+	/// Should the unit get "stuck" trying to fire from outside of weapon range? Vanilla bug, that may serve as "feature" in rare cases.
+	bool waitIfOutsideWeaponRange() { return _waitIfOutsideWeaponRange; };
 };
 
 }

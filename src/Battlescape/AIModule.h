@@ -112,6 +112,7 @@ public:
 	bool sniperAction();
 	/// Attempts to fire at an enemy we can see.
 	void projectileAction();
+	void extendedFireModeChoice(BattleActionCost& costAuto, BattleActionCost& costSnap, BattleActionCost& costAimed);
 	/// Attempts to throw a grenade at an enemy (or group of enemies) we can see.
 	void grenadeAction();
 	/// Performs a psionic attack.

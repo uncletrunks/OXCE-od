@@ -1471,10 +1471,10 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 
 	// Get base accuracy for the action
 	int accuracy = _unit->getFiringAccuracy(action->type, action->weapon, _save->getBattleGame()->getMod());
+	int distance = _save->getTileEngine()->distance(_unit->getPosition(), target->getPosition());
 
 	if (Options::battleUFOExtenderAccuracy && action->type != BA_THROW)
 	{
-		int distance = _save->getTileEngine()->distance(_unit->getPosition(), target->getPosition());
 		int upperLimit;
 		if (action->type == BA_AIMEDSHOT)
 		{
@@ -1498,10 +1498,10 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 		{
 			accuracy -= (lowerLimit - distance) * action->weapon->getRules()->getDropoff();
 		}
-
-		if (distance > action->weapon->getRules()->getMaxRange())
-			accuracy = 0;
 	}
+
+	if (action->type != BA_THROW && distance > action->weapon->getRules()->getMaxRange())
+		accuracy = 0;
 
 	int numberOfShots = 1;
 	if (action->type == BA_AIMEDSHOT)
@@ -1812,6 +1812,8 @@ bool AIModule::findFirePoint()
 	Position target;
 	const int BASE_SYSTEMATIC_SUCCESS = 100;
 	const int FAST_PASS_THRESHOLD = 125;
+	bool waitIfOutsideWeaponRange = _unit->getGeoscapeSoldier() ? false : _unit->getUnitRules()->waitIfOutsideWeaponRange();
+	bool extendedFireModeChoiceEnabled = _save->getBattleGame()->getMod()->getAIExtendedFireModeChoice();
 	int bestScore = 0;
 	_attackAction->type = BA_RETHINK;
 	for (std::vector<Position>::const_iterator i = randomTileSearch.begin(); i != randomTileSearch.end(); ++i)
@@ -1839,6 +1841,19 @@ bool AIModule::findFirePoint()
 				{
 					score += 10;
 				}
+
+				// Extended behavior: if we have a limited-range weapon, bump up the score for getting closer to the target, down for further
+				if (!waitIfOutsideWeaponRange && extendedFireModeChoiceEnabled)
+				{
+					int distanceToTarget = _save->getTileEngine()->distance(_unit->getPosition(), _aggroTarget->getPosition());
+					if (_attackAction->weapon && distanceToTarget > _attackAction->weapon->getRules()->getMaxRange()) // make sure we can get the ruleset before checking the range
+					{
+						int proposedDistance = _save->getTileEngine()->distance(pos, _aggroTarget->getPosition());
+						proposedDistance = std::max(proposedDistance, 1);
+						score = score * distanceToTarget / proposedDistance;
+					}
+				}
+
 				if (score > bestScore)
 				{
 					bestScore = score;
@@ -2231,6 +2246,30 @@ void AIModule::projectileAction()
 	testEffect(costSnap, BA_SNAPSHOT);
 	testEffect(costAimed, BA_AIMEDSHOT);
 
+	// Is the unit willigly waiting outside of weapon's range (e.g. ninja camouflaged in ambush)?
+	bool waitIfOutsideWeaponRange = _unit->getGeoscapeSoldier() ? false : _unit->getUnitRules()->waitIfOutsideWeaponRange();
+
+	// Do we want to use the extended firing mode scoring?
+	bool extendedFireModeChoiceEnabled = _save->getBattleGame()->getMod()->getAIExtendedFireModeChoice();
+	if (!waitIfOutsideWeaponRange && extendedFireModeChoiceEnabled)
+	{
+		// Note: this will also check for the weapon's max range
+		extendedFireModeChoice(costAuto, costSnap, costAimed);
+		return;
+	}
+
+	// Do we want to check if the weapon is in range?
+	bool aiRespectsMaxRange = _save->getBattleGame()->getMod()->getAIRespectMaxRange();
+	if (!waitIfOutsideWeaponRange && aiRespectsMaxRange)
+	{
+		// If we want to check and it's not in range, perhaps we should re-think shooting
+		if (distance > _attackAction->weapon->getRules()->getMaxRange())
+		{
+			return;
+		}
+	}
+
+	// vanilla
 	if (distance < 4)
 	{
 		if (costAuto.haveTU())
@@ -2279,6 +2318,58 @@ void AIModule::projectileAction()
 	{
 		_attackAction->type = BA_AUTOSHOT;
 	}
+}
+
+void AIModule::extendedFireModeChoice(BattleActionCost& costAuto, BattleActionCost& costSnap, BattleActionCost& costAimed)
+{
+	std::vector<BattleActionType> attackOptions = { };
+	if (costAimed.haveTU())
+	{
+		attackOptions.push_back(BA_AIMEDSHOT);
+	}
+	if (costAuto.haveTU())
+	{
+		attackOptions.push_back(BA_AUTOSHOT);
+	}
+	if (costSnap.haveTU())
+	{
+		attackOptions.push_back(BA_SNAPSHOT);
+	}
+
+	BattleActionType chosenAction = BA_RETHINK;
+	BattleAction testAction = *_attackAction;
+	int score = 0;
+	for (auto &i : attackOptions)
+	{
+		testAction.type = i;
+		int newScore = scoreFiringMode(&testAction, _aggroTarget, false);
+
+		// Add a random factor to the firing mode score based on intelligence
+		// An intelligence value of 10 will decrease this random factor to 0
+		// Default values for and intelligence value of 0 will make this a 50% to 150% roll
+		int intelligenceModifier = _save->getBattleGame()->getMod()->getAIFireChoiceIntelCoeff() * std::max(10 - _unit->getIntelligence(), 0);
+		newScore = newScore * (100 + RNG::generate(-intelligenceModifier, intelligenceModifier)) / 100;
+
+		// More aggressive units get a modifier to the score for auto shots
+		// Aggresion = 0 lowers the score, aggro = 1 is no modifier, aggro > 1 bumps up the score by 5% (configurable) for each increment over 1
+		if (i == BA_AUTOSHOT)
+		{
+			newScore = newScore * (100 + (_unit->getAggression() - 1) * _save->getBattleGame()->getMod()->getAIFireChoiceAggroCoeff()) / 100;
+		}
+
+		if (newScore > score)
+		{
+			score = newScore;
+			chosenAction = i;
+		}
+
+		if (_traceAI)
+		{
+			Log(LOG_INFO) << "Evaluate option " << i << ", score = " << newScore;
+		}
+	}
+
+	_attackAction->type = chosenAction;
 }
 
 /**
