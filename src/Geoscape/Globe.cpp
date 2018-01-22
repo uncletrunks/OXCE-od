@@ -852,7 +852,14 @@ void Globe::blink()
 	for (size_t i = 0; i != _markerSet->getTotalFrames(); ++i)
 	{
 		if (i != CITY_MARKER)
-			_markerSet->getFrame(i)->offset(_blink);
+		{
+			// FIXME: can we do it nicer? this will cycle through thousands of frames (depending on mod offset)
+			// instead of just a dozen that are really needed...
+			if (_markerSet->getFrame(i))
+			{
+				_markerSet->getFrame(i)->offset(_blink);
+			}
+		}
 	}
 
 	drawMarkers();
