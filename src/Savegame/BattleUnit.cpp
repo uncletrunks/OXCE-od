@@ -1336,7 +1336,7 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			moraleChange(-std::get<toWound>(args.data));
 		}
 
-		setValueMax(_currentArmor[side], - std::get<toArmor>(args.data), 0, _armor->getArmor(side));
+		setValueMax(_currentArmor[side], - std::get<toArmor>(args.data), 0, _maxArmor[side]);
 
 		setFatalShotInfo(side, bodypart);
 		return std::get<toHealth>(args.data);
