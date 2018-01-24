@@ -49,7 +49,6 @@ private:
 	std::map<std::string, EnvironmentalCondition> _environmentalConditions;
 	std::map<std::string, std::string> _armorTransformations;
 	std::map<std::string, std::map<std::string, int> > _defaultArmor;
-	std::map<std::string, int> _defaultItems;
 	std::vector<std::string> _allowedArmors;
 	std::vector<std::string> _allowedVehicles;
 	std::vector<std::string> _allowedItems;
@@ -81,8 +80,6 @@ public:
 	bool isVehicleAllowed(const std::string &vehicleType) const;
 	/// Checks if the item type is allowed.
 	bool isItemAllowed(const std::string &itemType, Mod *mod) const;
-	/// Gets the default items.
-	const std::map<std::string, int> *getDefaultItems() const;
 	/// Gets the battlescape map background color.
 	int getMapBackgroundColor() const;
 };

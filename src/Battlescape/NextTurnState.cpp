@@ -293,6 +293,14 @@ void NextTurnState::checkBugHuntMode()
 */
 bool NextTurnState::applyEnvironmentalConditionToFaction(UnitFaction faction, EnvironmentalCondition condition)
 {
+	// Killing people before battle starts causes a crash
+	// Panicking people before battle starts causes endless loop
+	// Let's just avoid this instead of reworking everything
+	if (faction == FACTION_PLAYER && _battleGame->getTurn() <= 1)
+	{
+		return false;
+	}
+
 	// Note: there are limitations, since we're not using a projectile and nobody is actually shooting
 	// 1. no power bonus based on shooting unit's stats (nobody is shooting)
 	// 2. no power range reduction (there is no projectile, range = 0)

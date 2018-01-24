@@ -175,8 +175,8 @@ public:
 	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);
 	/// Creates a BattleUnit from unit.
 	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance);
-	/// Updates a BattleUnit from a Soldier (after a change of armor).
-	void updateArmorFromSoldier(Soldier *soldier, int depth, int maxViewDistance);
+	/// Updates BattleUnit's armor and related attributes (after a change/transformation of armor).
+	void updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int depth, int maxViewDistance);
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.

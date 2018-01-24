@@ -91,7 +91,6 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_environmentalConditions = node["environmentalConditions"].as< std::map<std::string, EnvironmentalCondition> >(_environmentalConditions);
 	_armorTransformations = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformations);
 	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::map<std::string, int> > >(_defaultArmor);
-	_defaultItems = node["defaultItems"].as< std::map<std::string, int> >(_defaultItems);
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
@@ -250,15 +249,6 @@ bool RuleStartingCondition::isItemAllowed(const std::string &itemType, Mod *mod)
 	}
 
 	return false; // if everything fails, item is not allowed
-}
-
-/**
-* Returns all the default items.
-* @return List of items.
-*/
-const std::map<std::string, int> *RuleStartingCondition::getDefaultItems() const
-{
-	return &_defaultItems;
 }
 
 /**

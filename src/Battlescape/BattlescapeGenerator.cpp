@@ -409,6 +409,38 @@ void BattlescapeGenerator::nextStage()
 	_terrain = _game->getMod()->getTerrain(ruleDeploy->getTerrains().at(pick), true);
 	_worldShade = ruleDeploy->getShade();
 
+	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	RuleStartingCondition *temp = _game->getMod()->getStartingCondition(_terrain->getStartingCondition());
+	if (temp != 0)
+	{
+		startingCondition = temp;
+	}
+	_save->setStartingConditionType(startingCondition != 0 ? startingCondition->getType() : "");
+
+	// starting conditions - armor transformation (no armor replacement! that is done only before the 1st stage)
+	if (startingCondition != 0)
+	{
+		for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
+		{
+			if ((*j)->getOriginalFaction() == FACTION_PLAYER && (*j)->getGeoscapeSoldier())
+			{
+				std::string transformedArmor = startingCondition->getArmorTransformation((*j)->getArmor()->getType());
+				if (!transformedArmor.empty())
+				{
+					// remember the original armor (i.e. only if there were no transformations in earlier stage(s)!)
+					if (!(*j)->getGeoscapeSoldier()->getTransformedArmor())
+					{
+						(*j)->getGeoscapeSoldier()->setTransformedArmor(_game->getMod()->getArmor((*j)->getArmor()->getType()));
+					}
+					// change soldier's armor (needed for inventory view!)
+					(*j)->getGeoscapeSoldier()->setArmor(_game->getMod()->getArmor(transformedArmor));
+					// change battleunit's armor
+					(*j)->updateArmorFromSoldier((*j)->getGeoscapeSoldier(), _game->getMod()->getArmor(transformedArmor), _save->getDepth(), _game->getMod()->getMaxViewDistance());
+				}
+			}
+		}
+	}
+
 	const std::vector<MapScript*> *script = _game->getMod()->getMapScript(_terrain->getScript());
 	if (_game->getMod()->getMapScript(ruleDeploy->getScript()))
 	{
@@ -672,7 +704,6 @@ void BattlescapeGenerator::run()
  */
 void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondition)
 {
-	// we will need this during debriefing for some cleanup
 	_save->setStartingConditionType(startingCondition != 0 ? startingCondition->getType() : "");
 
 	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
@@ -815,18 +846,6 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 				_base->getStorageItems()->addItem(i->first, i->second);
 			}
 			else
-			{
-				for (int count = 0; count < i->second; count++)
-				{
-					_save->createItemForTile(i->first, _craftInventoryTile);
-				}
-			}
-		}
-		// add automagically spawned items
-		if (startingCondition != 0)
-		{
-			const std::map<std::string, int> *defaultItems = startingCondition->getDefaultItems();
-			for (std::map<std::string, int>::const_iterator i = defaultItems->begin(); i != defaultItems->end(); ++i)
 			{
 				for (int count = 0; count < i->second; count++)
 				{

@@ -173,14 +173,16 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 }
 
 /**
- * Updates a BattleUnit from a Soldier (after a change of armor)
- * @param soldier Pointer to the Soldier.
- * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
+ * Updates BattleUnit's armor and related attributes (after a change/transformation of armor).
+ * @param soldier Pointer to the Geoscape Soldier.
+ * @param ruleArmor Pointer to the new Armor ruleset.
+ * @param depth The depth of the battlefield.
+ * @param maxViewDistance Maximum default view distance during the day.
  */
-void BattleUnit::updateArmorFromSoldier(Soldier *soldier, int depth, int maxViewDistance)
+void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int depth, int maxViewDistance)
 {
 	_stats = *soldier->getCurrentStats();
-	_armor = soldier->getArmor();
+	_armor = ruleArmor;
 
 	_movementType = _armor->getMovementType();
 	if (_movementType == MT_FLOAT) {
@@ -207,6 +209,9 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, int depth, int maxView
 	_currentArmor[SIDE_RIGHT] = _maxArmor[SIDE_RIGHT];
 	_currentArmor[SIDE_REAR] = _maxArmor[SIDE_REAR];
 	_currentArmor[SIDE_UNDER] = _maxArmor[SIDE_UNDER];
+
+	int look = soldier->getGender() + 2 * soldier->getLook() + 8 * soldier->getLookVariant();
+	setRecolor(look, look, _rankInt);
 }
 
 /**
@@ -519,6 +524,7 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
  */
 void BattleUnit::setRecolor(int basicLook, int utileLook, int rankLook)
 {
+	_recolor.clear(); // reset in case of OXCE+ on-the-fly armor changes/transformations
 	const int colorsMax = 4;
 	std::pair<int, int> colors[colorsMax] =
 	{
