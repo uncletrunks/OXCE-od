@@ -65,7 +65,10 @@ private:
 	int _mouseX, _mouseY;
 	CursorType _cursorType;
 	int _cursorSize;
-	int _activeWeaponUfopediaArticleUnlocked; // -1 = unknown, 0 = locked, 1 = unlocked
+	int _cacheActiveWeaponUfopediaArticleUnlocked; // -1 = unknown, 0 = locked, 1 = unlocked
+	bool _cacheIsCtrlPressed;
+	Position _cacheCursorPosition;
+	int _cacheHasLOS; // -1 = unknown, 0 = no LOS, 1 = has LOS
 	int _animFrame;
 	Projectile *_projectile;
 	bool _projectileInFOV;
