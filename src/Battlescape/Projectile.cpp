@@ -397,7 +397,7 @@ void Projectile::applyAccuracy(Position origin, Position *target, double accurac
 			}
 			else
 			{
-				hasLOS = _save->getTileEngine()->isTileInLOS(bu, t);
+				hasLOS = _save->getTileEngine()->isTileInLOS(&_action, t);
 			}
 
 			if (!hasLOS)

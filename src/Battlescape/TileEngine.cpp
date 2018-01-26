@@ -1101,17 +1101,19 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 /**
  * Checks to see if a tile is visible through darkness, obstacles and smoke.
  * Note: psi vision, heat vision, camouflage/anti-camouflage and Y-scripts are intentionally removed.
- * @param currentUnit The watcher.
+ * @param action Current battle action.
  * @param tile The tile to check for.
  * @return True if visible.
  */
-bool TileEngine::isTileInLOS(BattleUnit *currentUnit, Tile *tile)
+bool TileEngine::isTileInLOS(BattleAction *action, Tile *tile)
 {
 	// if there is no tile, we can't see it
 	if (!tile)
 	{
 		return false;
 	}
+
+	BattleUnit *currentUnit = action->actor;
 
 	// if beyond global max. range, nobody can see anything
 	int currentDistanceSq = distanceSq(currentUnit->getPosition(), tile->getPosition(), false);
@@ -1137,48 +1139,135 @@ bool TileEngine::isTileInLOS(BattleUnit *currentUnit, Tile *tile)
 		return false;
 	}
 
-	// Note: this is **NOT** vanilla LOF check algorithm, but for now an acceptable compromise?
-	// Most notable differences:
-	// 1. different originVoxel
-	// 2. missing secondary target voxel, used if the primary target voxel (from canTargetTile()) isn't in LOF
-	// 3. simplified LOF check for empty tiles (which would also be used for secondary target voxels, if they were checked)
-	// 4. not considering action type (e.g. shoot vs launch)
-	Position originVoxel = getSightOriginVoxel(currentUnit);
+	// We MUST build a temp action, because current action doesn't yet have updated target (when only aiming)
+	BattleAction tempAction;
+	tempAction.actor = currentUnit;
+	tempAction.type = action->type;
+	tempAction.target = tile->getPosition();
+
+	Position originVoxel = getOriginVoxel(tempAction, currentUnit->getTile());
 	Position scanVoxel;
 	std::vector<Position> _trajectory;
-	bool seen = true;
+	bool seen = false;
 
-	// Note: If force-firing, always aim at the center of the target tile
-	// This way we can at least shoot inside a window without a penalty (otherwise we would be usually penalized by invisibility of the tile's floor)
 	bool forceFire = Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && _save->getSide() == FACTION_PLAYER;
 
-	if (!forceFire && tile->getMapData(O_OBJECT) != 0)
+	// Primary LOF check
+	if (forceFire)
 	{
-		seen = canTargetTile(&originVoxel, tile, O_OBJECT, &scanVoxel, currentUnit);
+		// if force-firing, always aim at the center of the target tile
+		scanVoxel = Position((tile->getPosition().x * 16) + 8, (tile->getPosition().y * 16) + 8, (tile->getPosition().z * 24) + 12);
 	}
-	else if (!forceFire && tile->getMapData(O_NORTHWALL) != 0)
+	else if (tile->getMapData(O_OBJECT) != 0)
 	{
-		seen = canTargetTile(&originVoxel, tile, O_NORTHWALL, &scanVoxel, currentUnit);
+		if (canTargetTile(&originVoxel, tile, O_OBJECT, &scanVoxel, currentUnit))
+		{
+			seen = true;
+		}
+		else
+		{
+			scanVoxel = Position((tile->getPosition().x * 16) + 8, (tile->getPosition().y * 16) + 8, (tile->getPosition().z * 24) + 10);
+		}
 	}
-	else if (!forceFire && tile->getMapData(O_WESTWALL) != 0)
+	else if (tile->getMapData(O_NORTHWALL) != 0)
 	{
-		seen = canTargetTile(&originVoxel, tile, O_WESTWALL, &scanVoxel, currentUnit);
+		if (canTargetTile(&originVoxel, tile, O_NORTHWALL, &scanVoxel, currentUnit))
+		{
+			seen = true;
+		}
+		else
+		{
+			scanVoxel = Position((tile->getPosition().x * 16) + 8, (tile->getPosition().y * 16), (tile->getPosition().z * 24) + 9);
+		}
 	}
-	else if (!forceFire && tile->getMapData(O_FLOOR) != 0)
+	else if (tile->getMapData(O_WESTWALL) != 0)
 	{
-		seen = canTargetTile(&originVoxel, tile, O_FLOOR, &scanVoxel, currentUnit);
+		if (canTargetTile(&originVoxel, tile, O_WESTWALL, &scanVoxel, currentUnit))
+		{
+			seen = true;
+		}
+		else
+		{
+			scanVoxel = Position((tile->getPosition().x * 16), (tile->getPosition().y * 16) + 8, (tile->getPosition().z * 24) + 9);
+		}
+	}
+	else if (tile->getMapData(O_FLOOR) != 0)
+	{
+		if (canTargetTile(&originVoxel, tile, O_FLOOR, &scanVoxel, currentUnit))
+		{
+			seen = true;
+		}
+		else
+		{
+			scanVoxel = Position((tile->getPosition().x * 16) + 8, (tile->getPosition().y * 16) + 8, (tile->getPosition().z * 24) + 2);
+		}
 	}
 	else
 	{
 		scanVoxel = Position((tile->getPosition().x * 16) + 8, (tile->getPosition().y * 16) + 8, (tile->getPosition().z * 24) + 12);
-		// Draw a line to the middle of the target tile and store the position of the endpoint of the line
+	}
+
+	// Secondary LOF check
+	if (!seen)
+	{
 		int test = calculateLine(originVoxel, scanVoxel, false, &_trajectory, currentUnit);
-		if (test != -1)
+		if (test == V_EMPTY)
 		{
-			seen = (scanVoxel == _trajectory.back());
+			// We have hit nothing at all, LOF is clear (Note: _trajectory is empty)
+			seen = true;
+		}
+		else if (test == V_OUTOFBOUNDS)
+		{
+			// FIXME/TESTME
+			seen = false;
+		}
+		else
+		{
+			// Let's assume we hit and double-check
+			seen = true;
+
+			// inspired by Projectile::calculateTrajectory()
+			Position hitPos = Position(_trajectory.at(0).x / 16, _trajectory.at(0).y / 16, _trajectory.at(0).z / 24);
+			if (test == V_UNIT && _save->getTile(hitPos) && _save->getTile(hitPos)->getUnit() == 0) //no unit? must be lower
+			{
+				hitPos = Position(hitPos.x, hitPos.y, hitPos.z - 1);
+			}
+
+			if (hitPos != tempAction.target /*&& tempAction.result.empty()*/)
+			{
+				if (test == V_NORTHWALL)
+				{
+					if (hitPos.y - 1 != tempAction.target.y)
+					{
+						seen = false;
+					}
+				}
+				else if (test == V_WESTWALL)
+				{
+					if (hitPos.x - 1 != tempAction.target.x)
+					{
+						seen = false;
+					}
+				}
+				else if (test == V_UNIT)
+				{
+					BattleUnit *hitUnit = _save->getTile(hitPos)->getUnit();
+					BattleUnit *targetUnit = tile->getUnit();
+					if (hitUnit != targetUnit)
+					{
+						seen = false;
+					}
+				}
+				else
+				{
+					seen = false;
+				}
+			}
 		}
 	}
 
+	// LOS check uses sight origin voxel (LOF check uses origin voxel)
+	originVoxel = getSightOriginVoxel(currentUnit);
 	if (seen)
 	{
 		// now check if we really see it taking into account smoke tiles
