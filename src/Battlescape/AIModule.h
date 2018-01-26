@@ -94,7 +94,7 @@ public:
 	/// Selects the nearest reachable point relative to a target.
 	bool selectPointNearTarget(BattleUnit *target, int maxTUs) const;
 	/// Selects a target from a list of units seen by spotter units for out-of-LOS actions
-	bool selectSpottedUnitForSniper(BattleAction *sniperBattleAction);
+	bool selectSpottedUnitForSniper();
 	/// Scores a firing mode action based on distance to target and accuracy.
 	int scoreFiringMode(BattleAction *action, BattleUnit *target, bool checkLOF);
 	/// re-evaluate our situation, and make a decision from our available options.
@@ -112,7 +112,8 @@ public:
 	bool sniperAction();
 	/// Attempts to fire at an enemy we can see.
 	void projectileAction();
-	void extendedFireModeChoice(BattleActionCost& costAuto, BattleActionCost& costSnap, BattleActionCost& costAimed);
+	/// Chooses a firing mode for the AI based on expected number of hits per turn
+	void extendedFireModeChoice(BattleActionCost& costAuto, BattleActionCost& costSnap, BattleActionCost& costAimed, BattleActionCost& costThrow, bool checkLOF = false);
 	/// Attempts to throw a grenade at an enemy (or group of enemies) we can see.
 	void grenadeAction();
 	/// Performs a psionic attack.
