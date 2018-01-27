@@ -1015,6 +1015,11 @@ void InventoryState::think()
 					break;
 				}
 			}
+			else
+			{
+				// this will skip empty slot
+				++seq;
+			}
 		}
 		if (firstAmmo)
 		{
