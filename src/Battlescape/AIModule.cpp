@@ -1375,8 +1375,9 @@ bool AIModule::selectSpottedUnitForSniper()
 	BattleActionCost costAuto(BA_AUTOSHOT, _attackAction->actor, _attackAction->weapon);
 	BattleActionCost costSnap(BA_SNAPSHOT, _attackAction->actor, _attackAction->weapon);
 	BattleActionCost costAimed(BA_AIMEDSHOT, _attackAction->actor, _attackAction->weapon);
-	// Only want to check throwing if we have a grenade, the default constructor returns false from haveTU()
+
 	BattleActionCost costThrow;
+	// Only want to check throwing if we have a grenade, the default constructor (line above) conveniently returns false from haveTU()
 	if (_grenade)
 	{
 		// We know we have a grenade, now we need to know if we have the TUs to throw it
@@ -2168,20 +2169,17 @@ void AIModule::wayPointAction()
  */
 bool AIModule::sniperAction()
 {
-	if (_traceAI) { Log(LOG_INFO) << "Attempting sniper action..." ;}
+	if (_traceAI) { Log(LOG_INFO) << "Attempting sniper action..."; }
 
 	if (selectSpottedUnitForSniper())
 	{
-		_visibleEnemies = _visibleEnemies ? _visibleEnemies : 1; // Make sure we count at least our target as visible, otherwise we might not shoot!
+		_visibleEnemies = std::max(_visibleEnemies, 1); // Make sure we count at least our target as visible, otherwise we might not shoot!
 
-		if (_traceAI) { Log(LOG_INFO) << "Target for sniper found at (" << _attackAction->target.x << "," << _attackAction->target.y << "," << _attackAction->target.z << ")." ;}
+		if (_traceAI) { Log(LOG_INFO) << "Target for sniper found at (" << _attackAction->target.x << "," << _attackAction->target.y << "," << _attackAction->target.z << ")."; }
 		return true;
 	}
-	else if (_traceAI)
-	{
-		Log(LOG_INFO) << "No valid target found or not enough TUs for sniper action.";
-	}
 
+	if (_traceAI) { Log(LOG_INFO) << "No valid target found or not enough TUs for sniper action."; }
 	return false;
 }
 
@@ -2225,7 +2223,7 @@ void AIModule::projectileAction()
 	{
 		// Note: this will also check for the weapon's max range
 		BattleActionCost costThrow; // Not actually checked here, just passed to extendedFireModeChoice as a necessary argument
-		extendedFireModeChoice(costAuto, costSnap, costAimed, costThrow);
+		extendedFireModeChoice(costAuto, costSnap, costAimed, costThrow, false);
 		return;
 	}
 
