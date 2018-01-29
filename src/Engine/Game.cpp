@@ -454,32 +454,27 @@ Language *Game::getLanguage() const
  */
 void Game::loadLanguage(const std::string &filename)
 {
-	std::ostringstream ss;
-	ss << "/Language/" << filename << ".yml";
-	std::string path = CrossPlatform::searchDataFile("common" + ss.str());
-	try
-	{
-		_lang->load(path);
-	}
-	catch (YAML::Exception &e)
-	{
-		throw Exception(path + ": " + std::string(e.what()));
-	}
+	const std::string dirLanguage = "/Language/";
+	const std::string dirLanguageAndroid = "/Language/Android/";
+	const std::string dirLanguageOXCE = "/Language/OXCE/";
 
+	// Step 1: openxcom "common" strings
+	loadLanguageCommon(filename, dirLanguage, false);
+	loadLanguageCommon(filename, dirLanguageAndroid, true);
+	loadLanguageCommon(filename, dirLanguageOXCE, true);
+
+	// Step 2: mod strings (note: xcom1 and xcom2 are also "standard" mods)
 	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)
 	{
 		if (i->second)
 		{
-			std::string modId = i->first;
-			ModInfo modInfo = Options::getModInfos().find(modId)->second;
-			std::string file = modInfo.getPath() + ss.str();
-			if (CrossPlatform::fileExists(file))
-			{
-				_lang->load(file);
-			}
+			loadLanguageMods(i->first, filename, dirLanguage);
+			loadLanguageMods(i->first, filename, dirLanguageAndroid);
+			loadLanguageMods(i->first, filename, dirLanguageOXCE);
 		}
 	}
 
+	// Step 3: mod extra-strings (from all mods at once)
 	ExtraStrings *strings = 0;
 	std::map<std::string, ExtraStrings *> extraStrings = _mod->getExtraStrings();
 	if (!extraStrings.empty())
@@ -490,6 +485,37 @@ void Game::loadLanguage(const std::string &filename)
 		}
 	}
 	_lang->load(strings);
+}
+
+void Game::loadLanguageCommon(const std::string &filename, const std::string &directory, bool checkIfExists)
+{
+	std::ostringstream ss;
+	ss << directory << filename << ".yml";
+	std::string path = CrossPlatform::searchDataFile("common" + ss.str());
+	try
+	{
+		if (checkIfExists && !CrossPlatform::fileExists(path))
+		{
+			return;
+		}
+		_lang->load(path);
+	}
+	catch (YAML::Exception &e)
+	{
+		throw Exception(path + ": " + std::string(e.what()));
+	}
+}
+
+void Game::loadLanguageMods(const std::string &modId, const std::string &filename, const std::string &directory)
+{
+	std::ostringstream ss;
+	ss << directory << filename << ".yml";
+	ModInfo modInfo = Options::getModInfos().find(modId)->second;
+	std::string file = modInfo.getPath() + ss.str();
+	if (CrossPlatform::fileExists(file))
+	{
+		_lang->load(file);
+	}
 }
 
 /**

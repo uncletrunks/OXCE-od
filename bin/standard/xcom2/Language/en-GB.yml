@@ -1,32 +1,4 @@
 en-GB:
-#Extended+ BEGIN
-#=================== Basescape ===================
-#SoldierAvatarState.cpp
-  STR_AVATAR_NAME_1: "#01 Dolph"
-  STR_AVATAR_NAME_2: "#02 Will"
-  STR_AVATAR_NAME_3: "#03 Sylvester"
-  STR_AVATAR_NAME_4: "#04 Dwayne"
-  STR_AVATAR_NAME_5: "#05 Linda"
-  STR_AVATAR_NAME_6: "#06 Uma"
-  STR_AVATAR_NAME_7: "#07 Halle"
-  STR_AVATAR_NAME_8: "#08 Angelina"
-#=================== Battlescape ===================
-#InventoryState.cpp
-  STR_PSI_SHORT: "M.C.>{ALT}{0}/{1}"
-#=================== Geoscape ===================
-#GeoscapeState.cpp
-  STR_UFO_HAS_LANDED: "USO has touched down at\n{0}"
-#SelectMusicTrackState.cpp
-  GMGEO1: "Geoscape Track #1"
-  GMGEO2: "Geoscape Track #2"
-  GMGEO3: "Geoscape Track #3"
-  GMGEO4: "Geoscape Track #4"
-  GMGEO5: "Geoscape Track #5"
-  GMGEO6: "Geoscape Track #6"
-  GMTACDRY: "Battlescape Track (Land)"
-  GMTACWET: "Battlescape Track (Water)"
-#Extended+ END
-#==================================================================================================================
   STR_LEVIATHAN_UFOPEDIA: "A TRANSPORT AND INTERCEPT FLYING SUB, WITH EXTREME DEPTH CAPABILITY. A SUPERB SYNTHESIS OF ALIEN AND HUMAN TECHNOLOGY, UTILISING ION PROPULSION SYSTEMS AND MAGNETIC ARRAY NAVIGATION."
   STR_BARRACUDA_UFOPEDIA: "THE BRITISH HYDROSPACE BARRACUDA, POWERED BY SUPER-HEATED LASER ENGINES. ONE OF THE FASTEST INTERCEPT SHIPS IN THE WORLD, CAPABLE OF SUBMERSIBLE AND ATMOSPHERIC FLIGHT, A KEY CRAFT IN THE COMING BATTLE."
   STR_HAMMERHEAD_UFOPEDIA: "A TRANSPORT AND INTERCEPT CRAFT. A REPLICATION OF MAGNETIC ARRAY SYSTEMS IN AN X-COM SHIP. ALTHOUGH SMALL, ITS' DESIGN IS A BREATHTAKING TECHNICAL ACHIEVEMENT."
@@ -533,7 +505,7 @@ en-GB:
   STR_TIME_UNIT_COST: "TU COST"
   STR_DAMAGE_UC: "DAMAGE"
   STR_AMMO: "AMMO"
-  STR_SHOT_TYPE_AUTO: "Auto (x{0})"
+  STR_SHOT_TYPE_AUTO: "Auto"
   STR_SHOT_TYPE_SNAP: "Snap"
   STR_SHOT_TYPE_AIMED: "Aimed"
   STR_CONSTRUCTION_TIME: "Construction Time"
