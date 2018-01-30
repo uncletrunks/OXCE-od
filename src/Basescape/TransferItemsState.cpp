@@ -498,6 +498,7 @@ void TransferItemsState::completeTransfer()
 					if ((*s)->getCraft() == craft)
 					{
 						if ((*s)->isInPsiTraining()) (*s)->setPsiTraining();
+						(*s)->setTraining(false);
 						if (craft->getStatus() == "STR_OUT") _baseTo->getSoldiers()->push_back(*s);
 						else
 						{
