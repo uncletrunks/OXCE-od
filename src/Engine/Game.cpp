@@ -468,6 +468,15 @@ void Game::loadLanguage(const std::string &filename)
 	{
 		if (i->second)
 		{
+			// if a master mod (e.g. piratez) has a master (e.g. xcom1), load it too (even though technically it is not enabled)
+			ModInfo modInfo = Options::getModInfos().find(i->first)->second;
+			if (modInfo.isMaster() && modInfo.getMaster().length() > 1)
+			{
+				loadLanguageMods(modInfo.getMaster(), filename, dirLanguage);
+				loadLanguageMods(modInfo.getMaster(), filename, dirLanguageAndroid);
+				loadLanguageMods(modInfo.getMaster(), filename, dirLanguageOXCE);
+			}
+			// now load the mod itself
 			loadLanguageMods(i->first, filename, dirLanguage);
 			loadLanguageMods(i->first, filename, dirLanguageAndroid);
 			loadLanguageMods(i->first, filename, dirLanguageOXCE);
