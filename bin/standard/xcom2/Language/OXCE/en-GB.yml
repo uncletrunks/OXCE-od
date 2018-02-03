@@ -14,7 +14,7 @@ en-GB:
   STR_PSI_SHORT: "M.C.>{ALT}{0}/{1}"
 #=================== Geoscape ===================
 #GeoscapeState.cpp
-  STR_UFO_HAS_LANDED: "USO has touched down at\n{0}"
+  STR_UFO_HAS_LANDED: "USO has touched down at{NEWLINE}{0}"
 #SelectMusicTrackState.cpp
   GMGEO1: "Geoscape Track #1"
   GMGEO2: "Geoscape Track #2"
