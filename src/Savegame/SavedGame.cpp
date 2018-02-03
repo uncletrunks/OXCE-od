@@ -580,6 +580,25 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		_bases.push_back(b);
 	}
 
+	// Finish loading UFOs after bases (more specifically after crafts) are loaded
+	for (YAML::const_iterator i = doc["ufos"].begin(); i != doc["ufos"].end(); ++i)
+	{
+		int ufoId = (*i)["id"].as<int>();
+		Ufo *ufo = 0;
+		for (std::vector<Ufo*>::iterator u = _ufos.begin(); u != _ufos.end(); ++u)
+		{
+			if ((*u)->getId() == ufoId)
+			{
+				ufo = (*u);
+				break;
+			}
+		}
+		if (ufo)
+		{
+			ufo->finishLoading(*i, *this);
+		}
+	}
+
 	const YAML::Node &research = doc["poppedResearch"];
 	for (YAML::const_iterator it = research.begin(); it != research.end(); ++it)
 	{
@@ -2572,6 +2591,31 @@ bool SavedGame::getAutosell(const RuleItem *itype) const
 		return false;
 	}
 	return _autosales.find(itype) != _autosales.end();
+}
+
+/**
+ * Stop hunting the given xcom craft.
+ */
+void SavedGame::stopHuntingXcomCraft(Craft *craft)
+{
+	for (std::vector<Ufo*>::iterator u = _ufos.begin(); u != _ufos.end(); ++u)
+	{
+		(*u)->resetOriginalDestination(craft);
+	}
+}
+
+/**
+ * Stop hunting all xcom craft from a given xcom base.
+ */
+void SavedGame::stopHuntingXcomCrafts(Base *base)
+{
+	for (std::vector<Craft*>::iterator c = base->getCrafts()->begin(); c != base->getCrafts()->end(); ++c)
+	{
+		for (std::vector<Ufo*>::iterator u = _ufos.begin(); u != _ufos.end(); ++u)
+		{
+			(*u)->resetOriginalDestination((*c));
+		}
+	}
 }
 
 }

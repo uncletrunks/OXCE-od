@@ -569,6 +569,9 @@ interfaces: #done
       - id: button1
         color: 1
         TFTDMode: true
+      - id: minimizeButtonDummy
+        color: 1
+        TFTDMode: true
       - id: standoffButton
         color: 1
         pos: [84, 4]

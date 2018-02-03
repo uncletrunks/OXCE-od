@@ -1496,6 +1496,7 @@ void DebriefingState::prepareDebriefing()
 		// Since this is not a base defense mission, we can safely erase the craft,
 		// without worrying it's vehicles' destructor calling double (on base defense missions
 		// all vehicle object in the craft is also referenced by base->getVehicles() !!)
+		_game->getSavedGame()->stopHuntingXcomCraft(craft); // lost during ground mission
 		delete craft;
 		craft = 0; // To avoid a crash down there!!
 		base->getCrafts()->erase(craftIterator);
@@ -1707,6 +1708,7 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((*i) == base)
 				{
+					_game->getSavedGame()->stopHuntingXcomCrafts((*i)); // destroyed together with the base
 					delete (*i);
 					base = 0; // To avoid similar (potential) problems as with the deleted craft
 					_game->getSavedGame()->getBases()->erase(i);

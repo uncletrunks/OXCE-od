@@ -31,6 +31,7 @@ class AlienMission;
 class UfoTrajectory;
 class SavedGame;
 class Mod;
+class Waypoint;
 
 /**
  * Represents an alien UFO on the map.
@@ -61,16 +62,22 @@ private:
 	void calculateSpeed();
 	int _shield, _shieldRechargeHandle;
 	int _tractorBeamSlowdown;
+	bool _isHunterKiller;
+	int _huntMode;
+	bool _isHunting;
+	Waypoint *_origWaypoint;
 
 	using MovingTarget::load;
 	using MovingTarget::save;
 public:
 	/// Creates a UFO of the specified type.
-	Ufo(const RuleUfo *rules);
+	Ufo(const RuleUfo *rules, int hunterKillerPercentage = 0, int huntMode = 0);
 	/// Cleans up the UFO.
 	~Ufo();
 	/// Loads the UFO from YAML.
 	void load(const YAML::Node& node, const Mod &ruleset, SavedGame &game);
+	/// Finishes loading the UFO from YAML (called after XCOM craft are loaded).
+	void finishLoading(const YAML::Node& node, SavedGame &save);
 	/// Saves the UFO to YAML.
 	YAML::Node save(bool newBattle) const;
 	/// Saves the UFO's ID to YAML.
@@ -145,6 +152,12 @@ public:
 	const UfoTrajectory &getTrajectory() const { return *_trajectory; }
 	/// Gets the UFO's mission object.
 	AlienMission *getMission() const { return _mission; }
+	/// Gets the Xcom craft targeted by this UFO.
+	Craft *getTargetedXcomCraft() const;
+	/// Resets the original destination if targeting the given craft.
+	void resetOriginalDestination(Craft *craft);
+	/// Sets the Xcom craft targeted by this UFO.
+	void setTargetedXcomCraft(Craft *craft);
 	/// Sets the UFO's destination.
 	void setDestination(Target *dest);
 	/// Get which interceptor this ufo is engaging.
@@ -183,6 +196,15 @@ public:
 	void setTractorBeamSlowdown(int tractorBeamSlowdown);
 	/// Gets the number of tractor beams locked on to a UFO
 	int getTractorBeamSlowdown() const;
+	/// Is this UFO a hunter-killer?
+	bool isHunterKiller() const;
+	void setHunterKiller(bool isHunterKiller);
+	/// Gets the UFO's hunting preferences.
+	int getHuntMode() const;
+	/// Is this UFO actively hunting right now?
+	bool isHunting() const;
+	/// Checks if a target is inside the UFO's radar range.
+	bool insideRadarRange(Target *target) const;
 };
 
 }

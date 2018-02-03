@@ -811,7 +811,7 @@ void Craft::returnToBase()
 /**
  * Moves the craft to its destination.
  */
-void Craft::think()
+bool Craft::think()
 {
 	if (_takeoff == 0)
 	{
@@ -830,7 +830,9 @@ void Craft::think()
 		_lowFuel = false;
 		_mission = false;
 		_takeoff = 0;
+		return true;
 	}
+	return false;
 }
 
 /**
@@ -1447,6 +1449,48 @@ void Craft::reuseItem(const std::string& item)
 	// Check if it's fuel to refuel the craft
 	if (item == _rules->getRefuelItem() && _fuel < _rules->getMaxFuel())
 		_status = "STR_REFUELLING";
+}
+
+/**
+ * Gets the attraction value of the craft for alien hunter-killers.
+ * @param huntMode Hunt mode ID.
+ * @return Attraction value.
+ */
+int Craft::getHunterKillerAttraction(int huntMode) const
+{
+	int attraction = 0;
+	if (huntMode == 0)
+	{
+		// prefer interceptors...
+		if (_rules->getAllowLanding())
+		{
+			// craft that can land (i.e. transports) are not attractive
+			attraction += 10000;
+		}
+		if (_rules->getSoldiers() > 0)
+		{
+			// craft with soldiers are not attractive
+			attraction += 5000;
+		}
+		// craft with more pilots are less atractive
+		attraction += _rules->getPilots() * 100;
+		// craft with a lot of damage taken are less attractive (yes, aliens show mercy... or arrogance?)
+		attraction += _damage * 100 / _stats.damageMax;
+	}
+	else
+	{
+		// prefer transports...
+		if (!_rules->getAllowLanding())
+		{
+			// craft that cannot land (i.e. interceptors) are not attractive
+			attraction += 10000;
+		}
+		// craft with more soldiers are more attractive
+		attraction += 10000 - (_rules->getSoldiers() * 100);
+	}
+
+	// the higher the number the less attractive the target is for UFO hunter-killers
+	return attraction;
 }
 
 }

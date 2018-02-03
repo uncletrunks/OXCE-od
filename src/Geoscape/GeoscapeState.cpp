@@ -20,6 +20,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include <climits>
 #include <functional>
 #include "../Engine/RNG.h"
 #include "../Engine/Game.h"
@@ -800,6 +801,7 @@ void GeoscapeState::time5Seconds()
 	}
 
 	// Handle UFO logic
+	bool ufoIsAttacking = false;
 	for (std::vector<Ufo*>::iterator i = _game->getSavedGame()->getUfos()->begin(); i != _game->getSavedGame()->getUfos()->end(); ++i)
 	{
 		switch ((*i)->getStatus())
@@ -808,6 +810,36 @@ void GeoscapeState::time5Seconds()
 			(*i)->think();
 			if ((*i)->reachedDestination())
 			{
+				Craft* c = dynamic_cast<Craft*>((*i)->getDestination());
+				if (c != 0)
+				{
+					// Not more than 1 interception at a time.
+					if (_dogfights.size() + _dogfightsToBeStarted.size() >= 1)
+					{
+						continue;
+					}
+					// More checks...
+					// Note: do NOT use getDistance() since it can return non-zero distance even for objects on the same position (floating point math...)
+					if (!c->isInDogfight() /*&& !c->getDistance(*i) */&& !c->isDestroyed() && (*i)->isHunting())
+					{
+						_dogfightsToBeStarted.push_back(new DogfightState(this, c, *i, true));
+						if (!_dogfightStartTimer->isRunning())
+						{
+							_pause = true;
+							timerReset();
+							_globe->center(c->getLongitude(), c->getLatitude());
+							startDogfight();
+							_dogfightStartTimer->start();
+						}
+						_game->getMod()->playMusic("GMINTER");
+
+						// Don't process certain craft logic (moving and reaching destination)
+						ufoIsAttacking = true;
+					}
+					// Don't handle other logic for this UFO, just continue with the next one
+					continue;
+				}
+
 				size_t count = _game->getSavedGame()->getMissionSites()->size();
 				AlienMission *mission = (*i)->getMission();
 				bool detected = (*i)->getDetected();
@@ -935,6 +967,7 @@ void GeoscapeState::time5Seconds()
 						}
 					}
 				}
+				_game->getSavedGame()->stopHuntingXcomCraft((*j)); // destroyed in dogfight
 				delete *j;
 				j = (*i)->getCrafts()->erase(j);
 				continue;
@@ -978,10 +1011,17 @@ void GeoscapeState::time5Seconds()
 				}
 			}
 
-			(*j)->think();
+			if (!ufoIsAttacking)
+			{
+				bool returnedToBase = (*j)->think();
+				if (returnedToBase)
+				{
+					_game->getSavedGame()->stopHuntingXcomCraft((*j)); // hiding in the base is good enough, obviously
+				}
+			}
 
 			// Handle craft shield recharge
-			if ((*j)->getShield() < (*j)->getCraftStats().shieldCapacity)
+			if (!ufoIsAttacking && (*j)->getShield() < (*j)->getCraftStats().shieldCapacity)
 			{
 				int shieldRechargeInGeoscape = (*j)->getCraftStats().shieldRechargeInGeoscape;
 				if (shieldRechargeInGeoscape == -1)
@@ -997,7 +1037,7 @@ void GeoscapeState::time5Seconds()
 				}
 			}
 
-			if ((*j)->reachedDestination())
+			if (!ufoIsAttacking && (*j)->reachedDestination())
 			{
 				Ufo* u = dynamic_cast<Ufo*>((*j)->getDestination());
 				Waypoint *w = dynamic_cast<Waypoint*>((*j)->getDestination());
@@ -1017,7 +1057,15 @@ void GeoscapeState::time5Seconds()
 						// Can we actually fight it
 						if (!(*j)->isInDogfight() && !(*j)->getDistance(u))
 						{
-							_dogfightsToBeStarted.push_back(new DogfightState(this, (*j), u));
+							if (u->isHunting())
+							{
+								Craft* c = dynamic_cast<Craft*>(u->getDestination());
+								if (c != 0 && c == (*j))
+								{
+									ufoIsAttacking = true;
+								}
+							}
+							_dogfightsToBeStarted.push_back(new DogfightState(this, (*j), u, ufoIsAttacking));
 							if ((*j)->getRules()->isWaterOnly() && u->getAltitudeInt() > (*j)->getRules()->getMaxAltitude())
 							{
 								popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_DEPTH")));
@@ -1279,6 +1327,65 @@ void GeoscapeState::time10Minutes()
 		}
 		// Now mark the bases as discovered.
 		std::for_each(discovered.begin(), discovered.end(), SetRetaliationTarget());
+	}
+
+	// Handle UFO hunting logic
+	for (std::vector<Ufo*>::iterator ufo = _game->getSavedGame()->getUfos()->begin(); ufo != _game->getSavedGame()->getUfos()->end(); ++ufo)
+	{
+		if ((*ufo)->isHunterKiller() && (*ufo)->getStatus() == Ufo::FLYING)
+		{
+			// current target and attraction
+			int newAttraction = INT_MAX;
+			Craft *newTarget = 0;
+			Craft *originalTarget = (*ufo)->getTargetedXcomCraft();
+			if (originalTarget)
+			{
+				if ((*ufo)->insideRadarRange(originalTarget))
+				{
+					newTarget = originalTarget;
+					newAttraction = newTarget->getHunterKillerAttraction((*ufo)->getHuntMode());
+				}
+			}
+			// look for more attractive target
+			for (std::vector<Base*>::iterator base = _game->getSavedGame()->getBases()->begin(); base != _game->getSavedGame()->getBases()->end(); ++base)
+			{
+				for (std::vector<Craft*>::iterator craft = (*base)->getCrafts()->begin(); craft != (*base)->getCrafts()->end(); ++craft)
+				{
+					if ((*craft)->getStatus() == "STR_OUT" && (*craft)->getHunterKillerAttraction((*ufo)->getHuntMode()) < newAttraction)
+					{
+						if ((*ufo)->insideRadarRange(*craft))
+						{
+							newTarget = (*craft);
+							newAttraction = newTarget->getHunterKillerAttraction((*ufo)->getHuntMode());
+						}
+					}
+				}
+			}
+			if (newTarget)
+			{
+				if (newTarget != originalTarget)
+				{
+					// set new target
+					(*ufo)->setTargetedXcomCraft(newTarget);
+					// TODO: rethink: always reveal the hunting UFO (even outside of radar range?)
+					(*ufo)->setDetected(true);
+					if ((*ufo)->getId() == 0)
+					{
+						(*ufo)->setId(_game->getSavedGame()->getId("STR_UFO"));
+					}
+					// inform the player
+					std::wstring msg = tr("STR_UFO_STARTED_HUNTING")
+						.arg((*ufo)->getName(_game->getLanguage()))
+						.arg(newTarget->getName(_game->getLanguage()));
+					popup(new CraftErrorState(this, msg));
+				}
+			}
+			else if (originalTarget)
+			{
+				// stop hunting
+				(*ufo)->resetOriginalDestination(originalTarget);
+			}
+		}
 	}
 }
 
@@ -1589,7 +1696,8 @@ void GeoscapeState::time30Minutes()
 						}
 					}
 				}
-				if (!detected)
+				// TODO: rethink: hunting UFOs stay visible even outside of radar range?
+				if (!detected && !(*u)->isHunting())
 				{
 					(*u)->setDetected(false);
 					(*u)->setHyperDetected(false);

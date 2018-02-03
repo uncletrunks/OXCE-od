@@ -348,7 +348,17 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 	if (ufoRule == 0)
 		return 0;
 	// Spawn according to sequence.
-	Ufo *ufo = new Ufo(ufoRule);
+	int hunterKillerPercentage = wave.hunterKillerPercentage;
+	if (hunterKillerPercentage == -1)
+	{
+		hunterKillerPercentage = ufoRule->getHunterKillerPercentage();
+	}
+	int huntMode = wave.huntMode;
+	if (huntMode == -1)
+	{
+		huntMode = ufoRule->getHuntMode();
+	}
+	Ufo *ufo = new Ufo(ufoRule, hunterKillerPercentage, huntMode);
 	ufo->setMissionInfo(this, &trajectory);
 	const RuleRegion &regionRules = *mod.getRegion(_region, true);
 	std::pair<double, double> pos = getWaypoint(trajectory, 0, globe, regionRules);

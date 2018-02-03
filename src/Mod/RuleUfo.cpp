@@ -31,6 +31,7 @@ namespace OpenXcom
 RuleUfo::RuleUfo(const std::string &type) :
 	_type(type), _size("STR_VERY_SMALL"), _sprite(-1), _marker(-1),
 	_power(0), _range(0), _score(0), _reload(0), _breakOffTime(0), _missionScore(1),
+	_hunterKillerPercentage(0), _huntMode(0),
 	_fireSound(-1), _alertSound(-1),
 	_battlescapeTerrainData(0), _stats(), _statsRaceBonus()
 {
@@ -67,6 +68,8 @@ void RuleUfo::load(const YAML::Node &node, Mod *mod)
 	_reload = node["reload"].as<int>(_reload);
 	_breakOffTime = node["breakOffTime"].as<int>(_breakOffTime);
 	_missionScore = node["missionScore"].as<int>(_missionScore);
+	_hunterKillerPercentage = node["hunterKillerPercentage"].as<int>(_hunterKillerPercentage);
+	_huntMode = node["huntMode"].as<int>(_huntMode);
 
 	_stats.load(node);
 
@@ -281,6 +284,24 @@ const RuleUfoStats& RuleUfo::getRaceBonus(const std::string& s) const
 int RuleUfo::getMissionScore() const
 {
 	return _missionScore;
+}
+
+/**
+ * Gets the UFO's chance to become a hunter-killer.
+ * @return Percentage to become a hunter-killer.
+ */
+int RuleUfo::getHunterKillerPercentage() const
+{
+	return _hunterKillerPercentage;
+}
+
+/**
+ * Gets the UFO's hunting preferences.
+ * @return Hunt mode ID.
+ */
+int RuleUfo::getHuntMode() const
+{
+	return _huntMode;
 }
 
 }

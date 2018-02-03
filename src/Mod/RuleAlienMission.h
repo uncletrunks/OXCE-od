@@ -55,6 +55,22 @@ struct MissionWave
 	 * The UFO executes a special action based on the mission objective.
 	 */
 	bool objective;
+	/// The chance to become a hunter-killer UFO upon spawning.
+	/**
+	 * -1 (default): take the info from RuleUfo
+	 *  0: not a hunter-killer
+	 *  1..99: percentage chance to be flagged as hunter-killer upon spawn
+	 *  100: always a hunter-killer
+	 */
+	int hunterKillerPercentage;
+	/// Algorithm to use when prioritizing xcom targets
+	/**
+	 * -1 (default): take the info from RuleUfo
+	 * 0: prefer hunting xcom interceptors
+	 * 1: prefer hunting xcom transports
+	 * 2: random preference (0 or 1) determined at spawn
+	 */
+	int huntMode;
 };
 
 enum MissionObjective { OBJECTIVE_SCORE, OBJECTIVE_INFILTRATION, OBJECTIVE_BASE, OBJECTIVE_SITE, OBJECTIVE_RETALIATION, OBJECTIVE_SUPPLY };

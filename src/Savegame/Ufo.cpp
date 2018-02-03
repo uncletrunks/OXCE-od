@@ -24,10 +24,12 @@
 #include "AlienMission.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Language.h"
+#include "../Engine/RNG.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleUfo.h"
 #include "../Mod/UfoTrajectory.h"
 #include "../Mod/RuleAlienMission.h"
+#include "Base.h"
 #include "SavedGame.h"
 #include "Waypoint.h"
 
@@ -46,15 +48,23 @@ const char *Ufo::ALTITUDE_STRING[] = {
  * Initializes a UFO of the specified type.
  * @param rules Pointer to ruleset.
  */
-Ufo::Ufo(const RuleUfo *rules) : MovingTarget(),
+Ufo::Ufo(const RuleUfo *rules, int hunterKillerPercentage, int huntMode) : MovingTarget(),
 	_rules(rules), _id(0), _crashId(0), _landId(0), _damage(0), _direction("STR_NORTH"),
 	_altitude("STR_HIGH_UC"), _status(FLYING), _secondsRemaining(0),
 	_inBattlescape(false), _mission(0), _trajectory(0),
 	_trajectoryPoint(0), _detected(false), _hyperDetected(false), _processedIntercept(false),
 	_shootingAt(0), _hitFrame(0), _fireCountdown(0), _escapeCountdown(0), _stats(), _shield(-1), _shieldRechargeHandle(0),
-	_tractorBeamSlowdown(0)
+	_tractorBeamSlowdown(0), _isHunterKiller(false), _huntMode(0), _isHunting(false), _origWaypoint(0)
 {
 	_stats = rules->getStats();
+	if (hunterKillerPercentage > 0)
+	{
+		_isHunterKiller = RNG::percent(hunterKillerPercentage);
+		if (_isHunterKiller)
+		{
+			_huntMode = huntMode > 1 ? RNG::generate(0, 1) : huntMode;
+		}
+	}
 }
 
 /**
@@ -82,12 +92,20 @@ Ufo::~Ufo()
 	}
 	if (_dest)
 	{
-		Waypoint *wp = dynamic_cast<Waypoint*>(_dest);
-		if (wp != 0)
+		if (!_isHunting)
 		{
-			delete _dest;
-			_dest = 0;
+			Waypoint *wp = dynamic_cast<Waypoint*>(_dest);
+			if (wp != 0)
+			{
+				delete _dest;
+				_dest = 0;
+			}
 		}
+	}
+	if (_origWaypoint)
+	{
+		delete _origWaypoint;
+		_origWaypoint = 0;
 	}
 }
 
@@ -187,6 +205,53 @@ void Ufo::load(const YAML::Node &node, const Mod &mod, SavedGame &game)
 }
 
 /**
+ * Finishes loading the UFO from YAML (called after XCOM craft are loaded).
+ * @param node YAML node.
+ * @param save The game data. Used to find the UFO's target (= xcom craft).
+ */
+void Ufo::finishLoading(const YAML::Node &node, SavedGame &save)
+{
+	_isHunterKiller = node["isHunterKiller"].as<bool>(_isHunterKiller);
+	_huntMode = node["huntMode"].as<int>(_huntMode);
+	_isHunting = node["isHunting"].as<bool>(_isHunting);
+
+	if (_isHunting)
+	{
+		if (const YAML::Node &dest = node["dest"])
+		{
+			std::string type = dest["type"].as<std::string>();
+			int id = dest["id"].as<int>();
+			bool found = false;
+			for (std::vector<Base*>::iterator b = save.getBases()->begin(); b != save.getBases()->end(); ++b)
+			{
+				for (std::vector<Craft*>::iterator c = (*b)->getCrafts()->begin(); c != (*b)->getCrafts()->end(); ++c)
+				{
+					if ((*c)->getId() == id && (*c)->getRules()->getType() == type)
+					{
+						if (_dest)
+						{
+							// this is just a dummy waypoint created during normal loading, not a craft... yet
+							delete _dest;
+						}
+						_dest = (*c); // not calling setDestination(), because of possible side effects
+						found = true;
+						break;
+					}
+				}
+				if (found) break;
+			}
+		}
+
+		if (const YAML::Node &origWaypoint = node["origWaypoint"])
+		{
+			_origWaypoint = new Waypoint();
+			_origWaypoint->setLongitude(origWaypoint["lon"].as<double>());
+			_origWaypoint->setLatitude(origWaypoint["lat"].as<double>());
+		}
+	}
+}
+
+/**
  * Saves the UFO to a YAML file.
  * @return YAML node.
  */
@@ -217,6 +282,15 @@ YAML::Node Ufo::save(bool newBattle) const
 		node["secondsRemaining"] = _secondsRemaining;
 	if (_inBattlescape)
 		node["inBattlescape"] = _inBattlescape;
+
+	if (_isHunterKiller)
+		node["isHunterKiller"] = _isHunterKiller;
+	node["huntMode"] = _huntMode;
+	if (_isHunting)
+		node["isHunting"] = _isHunting;
+	if (_origWaypoint)
+		node["origWaypoint"] = _origWaypoint->save();
+
 	if (!newBattle)
 	{
 		node["mission"] = _mission->getId();
@@ -552,7 +626,7 @@ void Ufo::think()
 	{
 	case FLYING:
 		move();
-		if (reachedDestination())
+		if (reachedDestination() && !isHunting())
 		{
 			// Prevent further movement.
 			setSpeed(0);
@@ -697,6 +771,69 @@ void Ufo::setHyperDetected(bool hyperdetected)
 }
 
 /**
+ * Gets the Xcom craft targeted by this UFO.
+ * @return Pointer to Xcom craft.
+ */
+Craft *Ufo::getTargetedXcomCraft() const
+{
+	Craft *craft = dynamic_cast<Craft*>(_dest);
+	return craft;
+}
+
+/**
+ * Resets the original destination if targeting the given craft.
+ * @param dest Pointer to Xcom craft.
+ */
+void Ufo::resetOriginalDestination(Craft *craft)
+{
+	if (craft == getTargetedXcomCraft())
+	{
+		if (_origWaypoint)
+		{
+			Waypoint *wp = new Waypoint();
+			wp->setLatitude(_origWaypoint->getLatitude());
+			wp->setLongitude(_origWaypoint->getLongitude());
+
+			setDestination(wp); // hunting flag will be reset too
+
+			delete _origWaypoint;
+			_origWaypoint = 0;
+		}
+		else
+		{
+			throw Exception("Corrupt state: Unknown original UFO destination.");
+		}
+	}
+}
+
+/**
+ * Sets the Xcom craft targeted by this UFO.
+ * @param dest Pointer to Xcom craft.
+ */
+void Ufo::setTargetedXcomCraft(Craft *craft)
+{
+	if (craft)
+	{
+		// if we're not hunting yet, remember the original destination waypoint
+		// if we're hunting already, keep the original information
+		if (!_isHunting)
+		{
+			if (_origWaypoint)
+			{
+				delete _origWaypoint;
+				_origWaypoint = 0;
+			}
+			_origWaypoint = new Waypoint();
+			_origWaypoint->setLatitude(_dest->getLatitude());
+			_origWaypoint->setLongitude(_dest->getLongitude());
+		}
+
+		setDestination(craft);
+		_isHunting = true; // must be after setDestination()
+	}
+}
+
+/**
  * Handle destination changes, making sure to delete old waypoint destinations.
  * @param dest Pointer to the new destination.
  */
@@ -704,7 +841,12 @@ void Ufo::setDestination(Target *dest)
 {
 	Waypoint *old = dynamic_cast<Waypoint*>(_dest);
 	MovingTarget::setDestination(dest);
-	delete old;
+	if (!_isHunting)
+	{
+		// delete only waypoints, not xcom craft
+		delete old;
+	}
+	_isHunting = false; // reset flag, will be set in setTargetedXcomCraft()
 }
 
 /**
@@ -893,6 +1035,57 @@ void Ufo::setTractorBeamSlowdown(int tractorBeamSlowdown)
 int Ufo::getTractorBeamSlowdown() const
 {
 	return _tractorBeamSlowdown;
+}
+
+/**
+ * Is this UFO a hunter-killer?
+ * @return True if UFO is a hunter-killer.
+ */
+bool Ufo::isHunterKiller() const
+{
+	return _isHunterKiller;
+}
+
+/**
+ * Sets if the UFO is a hunter-killer.
+ * @param isHunterKiller new value to set
+ */
+void Ufo::setHunterKiller(bool isHunterKiller)
+{
+	_isHunterKiller = isHunterKiller;
+}
+
+/**
+ * Gets the UFO's hunting preferences.
+ * @return Hunt mode ID.
+ */
+int Ufo::getHuntMode() const
+{
+	return _huntMode;
+}
+
+/**
+* Is this UFO actively hunting right now?
+* @return True if UFO is actively hunting.
+*/
+bool Ufo::isHunting() const
+{
+	return _isHunting;
+}
+
+/**
+* Returns if a certain target is inside the UFO's
+* radar range, taking in account the positions of both.
+* @param target Pointer to target to compare.
+* @return True if inside radar range.
+*/
+bool Ufo::insideRadarRange(Target *target) const
+{
+	if (_stats.radarRange == 0)
+		return false;
+
+	double range = _stats.radarRange * (1 / 60.0) * (M_PI / 180);
+	return (getDistance(target) <= range);
 }
 
 }

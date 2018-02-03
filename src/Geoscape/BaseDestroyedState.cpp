@@ -119,6 +119,7 @@ void BaseDestroyedState::btnOkClick(Action *)
 	{
 		if ((*i) == _base)
 		{
+			_game->getSavedGame()->stopHuntingXcomCrafts((*i)); // destroyed together with the base
 			delete (*i);
 			_game->getSavedGame()->getBases()->erase(i);
 			break;

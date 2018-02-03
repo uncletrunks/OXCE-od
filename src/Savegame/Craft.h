@@ -172,7 +172,7 @@ public:
 	/// Checks if a target is inside the craft's radar range.
 	bool insideRadarRange(Target *target) const;
 	/// Handles craft logic.
-	void think();
+	bool think();
 	/// Does a craft full checkup.
 	void checkup();
 	/// Consumes the craft's fuel.
@@ -231,6 +231,8 @@ public:
 	void unload(const Mod *mod);
 	/// Reuses a base item.
 	void reuseItem(const std::string &item);
+	/// Gets the attraction value of the craft for alien hunter-killers.
+	int getHunterKillerAttraction(int huntMode) const;
 };
 
 }

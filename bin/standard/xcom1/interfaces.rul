@@ -558,6 +558,8 @@ interfaces:
         color: 133   # minty green
   - type: dogfight
     elements:
+      - id: minimizeButtonDummy
+        color: 80
       - id: standoffButton
         color: 81
       - id: cautiousButton

@@ -380,6 +380,10 @@ public:
 	void setAutosell(const RuleItem *itype, const bool enabled);
 	/// get autosell state for an item type
 	bool getAutosell(const RuleItem *) const;
+	/// Stop hunting the given xcom craft.
+	void stopHuntingXcomCraft(Craft *craft);
+	/// Stop hunting all xcom craft from a given xcom base.
+	void stopHuntingXcomCrafts(Base *base);
 };
 
 }
