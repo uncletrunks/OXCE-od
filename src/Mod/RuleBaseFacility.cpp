@@ -120,11 +120,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 			cost.first = i->second["build"].as<int>(cost.first);
 			cost.second = i->second["refund"].as<int>(cost.second);
 
-			if (cost.first < cost.second)
-			{
-				cost.second = cost.first;
-			}
-			if (cost.first <= 0)
+			if (cost.first <= 0 && cost.second <= 0)
 			{
 				_buildCostItems.erase(id);
 			}
