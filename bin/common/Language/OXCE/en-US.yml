@@ -119,7 +119,6 @@ en-US:
 #BattlescapeState.cpp
   STR_CENTER_ON_WOUNDED_FRIEND: "Center on Wounded Friend"
   STR_CENTER_ON_SHOCKED_FRIEND: "Center on Shocked Friend"
-  STR_MAP_GEN_ERROR: "Map error detected. Please send log to devs/modders."
   STR_BUG_HUNT_ACTIVATED: "Bug Hunt mode activated: enemies are visible on the minimap!"
   STR_TARGET_ENEMY: "; Target = ENEMY"
   STR_TARGET_NEUTRAL: "; Target = NEUTRAL"
