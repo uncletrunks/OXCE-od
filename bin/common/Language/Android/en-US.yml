@@ -34,3 +34,5 @@ en-US:
   STR_DRAGREORDER_DESC: "Drag soldiers to reorder them in the craft equipment screen."
   STR_SHOW_CURSOR: "Show cursor"
   STR_SHOW_CURSOR_DESC: "Draw the yellow cursor arrow. Useful with a mouse."
+  STR_FRAMESKIP: "Maximum frames skipped"
+  STR_FRAMESKIP_DESC: "This is the maximum number of frames that may be skipped by the draw code during gameplay"
