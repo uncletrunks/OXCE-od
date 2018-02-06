@@ -73,7 +73,7 @@ en-US:
 #SoldierArmorState.cpp
   STR_NOT_ENOUGH_CRAFT_SPACE: "Not enough space onboard!"
 #SoldierAvatarState.cpp
-  STR_SELECT_AVATAR_FOR: "SELECT AVATAR FOR\n{0}"
+  STR_SELECT_AVATAR_FOR: "SELECT AVATAR FOR{NEWLINE}{0}"
 #SoldiersState.h
   STR_TRAINING: "Training"
 #StoresState.cpp
