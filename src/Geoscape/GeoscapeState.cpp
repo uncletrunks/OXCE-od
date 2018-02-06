@@ -879,26 +879,26 @@ void GeoscapeState::time5Seconds()
 						return;
 					}
 				}
-				// Init UFO shields
-				if ((*i)->getShield() == -1)
+			}
+			// Init UFO shields
+			if ((*i)->getShield() == -1)
+			{
+				(*i)->setShield((*i)->getCraftStats().shieldCapacity);
+			}
+			// Recharge UFO shields
+			else if ((*i)->getShield() < (*i)->getCraftStats().shieldCapacity)
+			{
+				int shieldRechargeInGeoscape = (*i)->getCraftStats().shieldRechargeInGeoscape;
+				if (shieldRechargeInGeoscape == -1)
 				{
 					(*i)->setShield((*i)->getCraftStats().shieldCapacity);
 				}
-				// Recharge UFO shields
-				else if ((*i)->getShield() < (*i)->getCraftStats().shieldCapacity)
+				else if (shieldRechargeInGeoscape > 0)
 				{
-					int shieldRechargeInGeoscape = (*i)->getCraftStats().shieldRechargeInGeoscape;
-					if (shieldRechargeInGeoscape == -1)
-					{
-						(*i)->setShield((*i)->getCraftStats().shieldCapacity);
-					}
-					else if (shieldRechargeInGeoscape > 0)
-					{
-						int total = shieldRechargeInGeoscape / 100;
-						if (RNG::percent(shieldRechargeInGeoscape % 100))
-							total++;
-						(*i)->setShield((*i)->getShield() + total);
-					}
+					int total = shieldRechargeInGeoscape / 100;
+					if (RNG::percent(shieldRechargeInGeoscape % 100))
+						total++;
+					(*i)->setShield((*i)->getShield() + total);
 				}
 			}
 			break;
