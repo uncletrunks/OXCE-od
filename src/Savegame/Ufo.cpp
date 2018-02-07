@@ -830,6 +830,10 @@ void Ufo::setTargetedXcomCraft(Craft *craft)
 
 		setDestination(craft);
 		_isHunting = true; // must be after setDestination()
+		if (_rules->getHuntSpeed() > 0)
+		{
+			setSpeed(_stats.speedMax * _rules->getHuntSpeed() / 100);
+		}
 	}
 }
 
