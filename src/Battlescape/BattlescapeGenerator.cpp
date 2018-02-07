@@ -3291,6 +3291,13 @@ bool BattlescapeGenerator::addCraft(MapBlock *craftMap, MapScript *command, SDL_
 		}
 	}
 
+	if (!placed)
+	{
+		throw Exception("Map generator encountered an error: UFO or craft (MapBlock: "
+			+ craftMap->getName()
+			+ ") could not be placed on the map. You may try turning on 'save scumming' to work around this issue.");
+	}
+
 	return placed;
 }
 
