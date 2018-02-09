@@ -2615,6 +2615,9 @@ void BattlescapeGenerator::generateBaseMap()
 			int xLimit = (*i)->getX() + (*i)->getRules()->getSize() -1;
 			int yLimit = (*i)->getY() + (*i)->getRules()->getSize() -1;
 
+			// Do we use the normal method for placing items on the ground or an explicit definition?
+			bool storageCheckerboard = ((*i)->getRules()->getStorageTiles().size() == 0);
+
 			// If the facility lacks a verticalLevels ruleset definition, use this original code
 			if ((*i)->getRules()->getVerticalLevels().size() == 0)
 			{
@@ -2635,7 +2638,7 @@ void BattlescapeGenerator::generateBaseMap()
 					addBlock(x, y, _terrain->getMapBlock(newname.str()), true);
 					_drillMap[x][y] = MD_NONE;
 					num++;
-					if ((*i)->getRules()->getStorage() > 0)
+					if ((*i)->getRules()->getStorage() > 0 && storageCheckerboard)
 					{
 						int groundLevel;
 						for (groundLevel = _mapsize_z -1; groundLevel >= 0; --groundLevel)
@@ -2759,7 +2762,7 @@ void BattlescapeGenerator::generateBaseMap()
 					for (int x = (*i)->getX(); x <= xLimit; ++x)
 					{
 						_drillMap[x][y] = MD_NONE;
-						if ((*i)->getRules()->getStorage() > 0)
+						if ((*i)->getRules()->getStorage() > 0 && storageCheckerboard)
 						{
 							int groundLevel;
 							for (groundLevel = _mapsize_z -1; groundLevel >= 0; --groundLevel)
@@ -2797,6 +2800,45 @@ void BattlescapeGenerator::generateBaseMap()
 					}
 				}
 			}
+
+			// Extended handling for placing storage tiles by ruleset definition
+			if ((*i)->getRules()->getStorage() > 0 && !storageCheckerboard)
+			{
+				int x = (*i)->getX();
+				int y = (*i)->getY();
+
+				for (std::vector<Position>::const_iterator j = (*i)->getRules()->getStorageTiles().begin(); j != (*i)->getRules()->getStorageTiles().end(); ++j)
+				{
+					if (j->x < 0 || j->x / 10 > (*i)->getRules()->getSize()
+						|| j->y < 0 || j->y / 10 > (*i)->getRules()->getSize()
+						|| j->z < 0 || j->z > _mapsize_z)
+					{
+						Log(LOG_ERROR) << "Tile position " << (*j) << " is outside the facility " << (*i)->getRules()->getType() << ", skipping placing items there.";
+						continue;
+					}
+
+					Position tilePos = Position((x * 10) + j->x, (y * 10) + j->y, j->z);
+					if (!_save->getTile(tilePos))
+					{
+						Log(LOG_ERROR) << "Tile position " << tilePos << ", from the facility " << (*i)->getRules()->getType() << ", is outside the map; skipping placing items there.";
+						continue;
+					}
+
+					_save->getStorageSpace().push_back(tilePos);
+
+					if (!_craftInventoryTile) // just to be safe, make sure we have a craft inventory tile
+					{
+						_craftInventoryTile = _save->getTile(tilePos);
+					}
+				}
+
+				// Crash gracefully with some information before we spawn a map where no items could be placed.
+				if (_save->getStorageSpace().size() == 0)
+				{
+					throw Exception("Could not place items on given tiles in storage facility " + (*i)->getRules()->getType());
+				}
+			}
+
 			for (int x = (*i)->getX(); x <= xLimit; ++x)
 			{
 				_drillMap[x][yLimit] = MD_VERTICAL;

@@ -27,6 +27,7 @@ namespace OpenXcom
 {
 
 class Mod;
+class Position;
 
 /**
  * Represents a specific type of base facility.
@@ -56,6 +57,7 @@ private:
 	int _removalTime;
 	bool _canBeBuiltOver;
 	std::vector<std::string> _buildOverFacilities;
+	std::vector<Position> _storageTiles;
 public:
 	/// Creates a blank facility ruleset.
 	RuleBaseFacility(const std::string &type);
@@ -149,6 +151,8 @@ public:
 	bool getCanBeBuiltOver() const;
 	/// Gets which facilities are allowed to be replaced by this building
 	const std::vector<std::string> &getBuildOverFacilities() const;
+	/// Gets a list of which tiles are used to place items stored in this facility
+	const std::vector<Position> &getStorageTiles() const;
 };
 
 }
