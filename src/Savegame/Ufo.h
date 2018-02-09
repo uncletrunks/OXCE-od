@@ -63,7 +63,7 @@ private:
 	int _shield, _shieldRechargeHandle;
 	int _tractorBeamSlowdown;
 	bool _isHunterKiller;
-	int _huntMode;
+	int _huntMode, _huntBehavior;
 	bool _isHunting;
 	Waypoint *_origWaypoint;
 
@@ -71,7 +71,7 @@ private:
 	using MovingTarget::save;
 public:
 	/// Creates a UFO of the specified type.
-	Ufo(const RuleUfo *rules, int hunterKillerPercentage = 0, int huntMode = 0);
+	Ufo(const RuleUfo *rules, int hunterKillerPercentage = 0, int huntMode = 0, int huntBehavior = 0);
 	/// Cleans up the UFO.
 	~Ufo();
 	/// Loads the UFO from YAML.
@@ -201,6 +201,8 @@ public:
 	void setHunterKiller(bool isHunterKiller);
 	/// Gets the UFO's hunting preferences.
 	int getHuntMode() const;
+	/// Gets the UFO's hunting behavior.
+	int getHuntBehavior() const;
 	/// Is this UFO actively hunting right now?
 	bool isHunting() const;
 	/// Checks if a target is inside the UFO's radar range.

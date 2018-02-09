@@ -71,6 +71,14 @@ struct MissionWave
 	 * 2: random preference (0 or 1) determined at spawn
 	 */
 	int huntMode;
+	/// Algorithm to use when considering retreating from the dogfight
+	/**
+	* -1 (default): take the info from RuleUfo
+	* 0: flee if you're losing
+	* 1: never flee, never crash (is destroyed instead of crashing)
+	* 2: random preference (0 or 1) determined at spawn
+	*/
+	int huntBehavior;
 };
 
 enum MissionObjective { OBJECTIVE_SCORE, OBJECTIVE_INFILTRATION, OBJECTIVE_BASE, OBJECTIVE_SITE, OBJECTIVE_RETALIATION, OBJECTIVE_SUPPLY };

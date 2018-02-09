@@ -894,7 +894,7 @@ void DogfightState::update()
 			if (_ufoIsAttacking)
 			{
 				// TODO: rethink: unhardcode run away thresholds?
-				if (_ufo->getDamage() > _ufo->getCraftStats().damageMax / 3)
+				if (_ufo->getDamage() > _ufo->getCraftStats().damageMax / 3 && _ufo->getHuntBehavior() != 1)
 				{
 					if (_craft->getDamage() > _craft->getDamageMax() / 2)
 					{

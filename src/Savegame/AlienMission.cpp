@@ -358,7 +358,12 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 	{
 		huntMode = ufoRule->getHuntMode();
 	}
-	Ufo *ufo = new Ufo(ufoRule, hunterKillerPercentage, huntMode);
+	int huntBehavior = wave.huntBehavior;
+	if (huntBehavior == -1)
+	{
+		huntBehavior = ufoRule->getHuntBehavior();
+	}
+	Ufo *ufo = new Ufo(ufoRule, hunterKillerPercentage, huntMode, huntBehavior);
 	ufo->setMissionInfo(this, &trajectory);
 	const RuleRegion &regionRules = *mod.getRegion(_region, true);
 	std::pair<double, double> pos = getWaypoint(trajectory, 0, globe, regionRules);

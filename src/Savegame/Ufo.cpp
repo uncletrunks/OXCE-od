@@ -48,13 +48,13 @@ const char *Ufo::ALTITUDE_STRING[] = {
  * Initializes a UFO of the specified type.
  * @param rules Pointer to ruleset.
  */
-Ufo::Ufo(const RuleUfo *rules, int hunterKillerPercentage, int huntMode) : MovingTarget(),
+Ufo::Ufo(const RuleUfo *rules, int hunterKillerPercentage, int huntMode, int huntBehavior) : MovingTarget(),
 	_rules(rules), _id(0), _crashId(0), _landId(0), _damage(0), _direction("STR_NORTH"),
 	_altitude("STR_HIGH_UC"), _status(FLYING), _secondsRemaining(0),
 	_inBattlescape(false), _mission(0), _trajectory(0),
 	_trajectoryPoint(0), _detected(false), _hyperDetected(false), _processedIntercept(false),
 	_shootingAt(0), _hitFrame(0), _fireCountdown(0), _escapeCountdown(0), _stats(), _shield(-1), _shieldRechargeHandle(0),
-	_tractorBeamSlowdown(0), _isHunterKiller(false), _huntMode(0), _isHunting(false), _origWaypoint(0)
+	_tractorBeamSlowdown(0), _isHunterKiller(false), _huntMode(0), _huntBehavior(0), _isHunting(false), _origWaypoint(0)
 {
 	_stats = rules->getStats();
 	if (hunterKillerPercentage > 0)
@@ -63,6 +63,7 @@ Ufo::Ufo(const RuleUfo *rules, int hunterKillerPercentage, int huntMode) : Movin
 		if (_isHunterKiller)
 		{
 			_huntMode = huntMode > 1 ? RNG::generate(0, 1) : huntMode;
+			_huntBehavior = huntBehavior > 1 ? RNG::generate(0, 1) : huntBehavior;
 		}
 	}
 }
@@ -213,6 +214,7 @@ void Ufo::finishLoading(const YAML::Node &node, SavedGame &save)
 {
 	_isHunterKiller = node["isHunterKiller"].as<bool>(_isHunterKiller);
 	_huntMode = node["huntMode"].as<int>(_huntMode);
+	_huntBehavior = node["huntBehavior"].as<int>(_huntBehavior);
 	_isHunting = node["isHunting"].as<bool>(_isHunting);
 
 	if (_isHunting)
@@ -286,6 +288,7 @@ YAML::Node Ufo::save(bool newBattle) const
 	if (_isHunterKiller)
 		node["isHunterKiller"] = _isHunterKiller;
 	node["huntMode"] = _huntMode;
+	node["huntBehavior"] = _huntBehavior;
 	if (_isHunting)
 		node["isHunting"] = _isHunting;
 	if (_origWaypoint)
@@ -422,6 +425,13 @@ void Ufo::setDamage(int damage)
 	else if (_damage >= _stats.damageMax / 2)
 	{
 		_status = CRASHED;
+
+		// kamikaze never crash lands
+		if (_huntBehavior == 1)
+		{
+			_damage = _stats.damageMax;
+			_status = DESTROYED;
+		}
 	}
 }
 
@@ -1066,6 +1076,15 @@ void Ufo::setHunterKiller(bool isHunterKiller)
 int Ufo::getHuntMode() const
 {
 	return _huntMode;
+}
+
+/**
+ * Gets the UFO's hunting behavior.
+ * @return Hunt behavior ID.
+ */
+int Ufo::getHuntBehavior() const
+{
+	return _huntBehavior;
 }
 
 /**

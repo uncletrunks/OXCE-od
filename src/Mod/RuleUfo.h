@@ -61,7 +61,7 @@ private:
 	std::string _type, _size;
 	int _sprite, _marker;
 	int _power, _range, _score, _reload, _breakOffTime, _missionScore;
-	int _hunterKillerPercentage, _huntMode, _huntSpeed;
+	int _hunterKillerPercentage, _huntMode, _huntSpeed, _huntBehavior;
 	int _fireSound;
 	int _alertSound;
 	RuleTerrain *_battlescapeTerrainData;
@@ -117,6 +117,8 @@ public:
 	int getHuntMode() const;
 	/// Gets the UFO's hunting speed (in percent of maximum speed).
 	int getHuntSpeed() const;
+	/// Gets the UFO's hunting behavior (normal, kamikaze or random).
+	int getHuntBehavior() const;
 };
 
 }
