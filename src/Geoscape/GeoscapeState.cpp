@@ -785,6 +785,12 @@ void GeoscapeState::timeAdvance()
  */
 void GeoscapeState::time5Seconds()
 {
+	// If in "slow mode", handle UFO hunting logic every 5 seconds, not only every 10 minutes
+	if (_timeSpeed == _btn5Secs || _timeSpeed == _btn1Min)
+	{
+		ufoHunting();
+	}
+
 	// Game over if there are no more bases.
 	if (_game->getSavedGame()->getBases()->empty())
 	{
@@ -1330,6 +1336,11 @@ void GeoscapeState::time10Minutes()
 	}
 
 	// Handle UFO hunting logic
+	ufoHunting();
+}
+
+void GeoscapeState::ufoHunting()
+{
 	for (std::vector<Ufo*>::iterator ufo = _game->getSavedGame()->getUfos()->begin(); ufo != _game->getSavedGame()->getUfos()->end(); ++ufo)
 	{
 		if ((*ufo)->isHunterKiller() && (*ufo)->getStatus() == Ufo::FLYING)
