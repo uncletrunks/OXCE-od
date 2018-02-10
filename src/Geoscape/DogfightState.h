@@ -79,6 +79,8 @@ public:
 	DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool ufoIsAttacking = false);
 	/// Cleans up the Dogfight state.
 	~DogfightState();
+	/// Returns true if this is a hunter-killer dogfight.
+	bool isUfoAttacking() const;
 	/// Runs the timers.
 	void think();
 	/// Animates the window.

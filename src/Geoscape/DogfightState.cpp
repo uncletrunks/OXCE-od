@@ -710,6 +710,15 @@ DogfightState::~DogfightState()
 }
 
 /**
+ * Returns true if this is a hunter-killer dogfight. Otherwise returns false.
+ * @return Is this a hunter-killer dogfight?
+ */
+bool DogfightState::isUfoAttacking() const
+{
+	return _ufoIsAttacking;
+}
+
+/**
  * Runs the higher level dogfight functionality.
  */
 void DogfightState::think()

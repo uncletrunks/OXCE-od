@@ -817,16 +817,34 @@ void GeoscapeState::time5Seconds()
 			if ((*i)->reachedDestination())
 			{
 				Craft* c = dynamic_cast<Craft*>((*i)->getDestination());
-				if (c != 0)
+				if (c != 0 && !c->isDestroyed() && (*i)->isHunting())
 				{
-					// Not more than 1 interception at a time.
-					if (_dogfights.size() + _dogfightsToBeStarted.size() >= 1)
+					// Check if some other HK already attacked before us (at the very same moment)
+					int hkDogfights = 0;
+					for (auto f : _dogfights) if (f->isUfoAttacking()) { hkDogfights++; }
+					for (auto g : _dogfightsToBeStarted) if (g->isUfoAttacking()) { hkDogfights++; }
+
+					// If yes, wait... not more than 1 HK interception allowed at a time.
+					if (hkDogfights >= 1)
 					{
 						continue;
 					}
-					// More checks...
-					// Note: do NOT use getDistance() since it can return non-zero distance even for objects on the same position (floating point math...)
-					if (!c->isInDogfight() /*&& !c->getDistance(*i) */&& !c->isDestroyed() && (*i)->isHunting())
+
+					// If not, interrupt all other (regular) interceptions to prevent a dead-lock (and other possible side effects)
+					std::list<DogfightState*>::iterator it = _dogfights.begin();
+					for (; it != _dogfights.end();)
+					{
+						delete *it;
+						it = _dogfights.erase(it);
+					}
+					for (it = _dogfightsToBeStarted.begin(); it != _dogfightsToBeStarted.end();)
+					{
+						delete *it;
+						it = _dogfightsToBeStarted.erase(it);
+					}
+					_minimizedDogfights = 0;
+
+					// Start the dogfight
 					{
 						_dogfightsToBeStarted.push_back(new DogfightState(this, c, *i, true));
 						if (!_dogfightStartTimer->isRunning())
@@ -1054,8 +1072,8 @@ void GeoscapeState::time5Seconds()
 					switch (u->getStatus())
 					{
 					case Ufo::FLYING:
-						// Not more than 4 interceptions at a time.
-						if (_dogfights.size() + _dogfightsToBeStarted.size() >= 4)
+						// Not more than 4 interceptions at a time... but hunter-killers are always allowed
+						if (!u->isHunterKiller() && _dogfights.size() + _dogfightsToBeStarted.size() >= 4)
 						{
 							++j;
 							continue;
@@ -1063,15 +1081,38 @@ void GeoscapeState::time5Seconds()
 						// Can we actually fight it
 						if (!(*j)->isInDogfight() && !(*j)->getDistance(u))
 						{
-							if (u->isHunting())
+							if (u->isHunterKiller())
 							{
-								Craft* c = dynamic_cast<Craft*>(u->getDestination());
-								if (c != 0 && c == (*j))
+								// Check if some other HK already attacked before us (at the very same moment)
+								int hkDogfights = 0;
+								for (auto f : _dogfights) if (f->isUfoAttacking()) { hkDogfights++; }
+								for (auto g : _dogfightsToBeStarted) if (g->isUfoAttacking()) { hkDogfights++; }
+
+								// If yes, wait... not more than 1 HK interception allowed at a time.
+								if (hkDogfights >= 1)
 								{
-									ufoIsAttacking = true;
+									++j;
+									continue;
 								}
+
+								// If not, interrupt all other (regular) interceptions to prevent a dead-lock (and other possible side effects)
+								std::list<DogfightState*>::iterator it = _dogfights.begin();
+								for (; it != _dogfights.end();)
+								{
+									delete *it;
+									it = _dogfights.erase(it);
+								}
+								for (it = _dogfightsToBeStarted.begin(); it != _dogfightsToBeStarted.end();)
+								{
+									delete *it;
+									it = _dogfightsToBeStarted.erase(it);
+								}
+								_minimizedDogfights = 0;
+
+								// Don't process certain craft logic (moving and reaching destination)
+								ufoIsAttacking = true;
 							}
-							_dogfightsToBeStarted.push_back(new DogfightState(this, (*j), u, ufoIsAttacking));
+							_dogfightsToBeStarted.push_back(new DogfightState(this, (*j), u, u->isHunterKiller()));
 							if ((*j)->getRules()->isWaterOnly() && u->getAltitudeInt() > (*j)->getRules()->getMaxAltitude())
 							{
 								popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_DEPTH")));
