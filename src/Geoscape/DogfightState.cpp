@@ -240,7 +240,9 @@ const int DogfightState::_projectileBlobs[4][6][3] =
  * @param ufoIsAttacking Is UFO the aggressor?
  */
 DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool ufoIsAttacking) :
-	_state(state), _craft(craft), _ufo(ufo), _ufoIsAttacking(ufoIsAttacking), _disableDisengage(false), _timeout(50), _currentDist(640), _targetDist(560),
+	_state(state), _craft(craft), _ufo(ufo),
+	_ufoIsAttacking(ufoIsAttacking), _disableDisengage(false), _disableCautious(false),
+	_timeout(50), _currentDist(640), _targetDist(560),
 	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _hunterKillerBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _waitForAltitude(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0),
 	_interceptionNumber(0), _interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false)
@@ -270,11 +272,15 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	}
 
 	// HK options
-	if (ufoIsAttacking)
+	if (_ufoIsAttacking)
 	{
 		if (_ufo->getCraftStats().speedMax > _craft->getCraftStats().speedMax)
 		{
 			_disableDisengage = true;
+		}
+		if (_weaponNum == 0)
+		{
+			_disableCautious = true;
 		}
 	}
 
@@ -366,7 +372,10 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	if (_ufoIsAttacking)
 	{
 		_window->drawRect(_btnStandoff->getX() + 2, _btnStandoff->getY() + 2, _btnStandoff->getWidth() - 4, _btnStandoff->getHeight() - 4, dogfightInterface->getElement("standoffButton")->color + 4);
-		_window->drawRect(_btnCautious->getX() + 2, _btnCautious->getY() + 2, _btnCautious->getWidth() - 4, _btnCautious->getHeight() - 4, dogfightInterface->getElement("cautiousButton")->color + 4);
+		if (_disableCautious)
+		{
+			_window->drawRect(_btnCautious->getX() + 2, _btnCautious->getY() + 2, _btnCautious->getWidth() - 4, _btnCautious->getHeight() - 4, dogfightInterface->getElement("cautiousButton")->color + 4);
+		}
 		_window->drawRect(_btnStandard->getX() + 2, _btnStandard->getY() + 2, _btnStandard->getWidth() - 4, _btnStandard->getHeight() - 4, dogfightInterface->getElement("standardButton")->color + 4);
 		if (_disableDisengage)
 		{
@@ -410,7 +419,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	_btnCautious->copy(_window);
 	_btnCautious->setGroup(&_mode);
 	_btnCautious->onMousePress((ActionHandler)&DogfightState::btnCautiousPress);
-	_btnCautious->setVisible(!_ufoIsAttacking);
+	_btnCautious->setVisible(!_disableCautious);
 
 	_btnStandard->copy(_window);
 	_btnStandard->setGroup(&_mode);
@@ -581,7 +590,14 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	{
 		if (_craft->getWeapons()->at(i))
 		{
-			_weaponFireInterval[i] = _craft->getWeapons()->at(i)->getRules()->getStandardReload();
+			if (!_ufoIsAttacking)
+			{
+				_weaponFireInterval[i] = _craft->getWeapons()->at(i)->getRules()->getStandardReload();
+			}
+			else
+			{
+				_weaponFireInterval[i] = _craft->getWeapons()->at(i)->getRules()->getAggressiveReload();
+			}
 		}
 	}
 
@@ -1164,6 +1180,12 @@ void DogfightState::update()
 					chancetoHit -= _craft->getCraftStats().avoidBonus;
 					chancetoHit += _ufo->getCraftStats().hitBonus;
 					chancetoHit -= _pilotDodgeBonus;
+					// evasive maneuvers
+					if (_ufoIsAttacking && _mode == _btnCautious)
+					{
+						// HK's chance to hit is halved, but craft's reload time is doubled too
+						chancetoHit = chancetoHit / 2;
+					}
 					if (RNG::percent(chancetoHit))
 					{
 						// Formula delivered by Volutar, altered by Extended version.
@@ -1187,7 +1209,7 @@ void DogfightState::update()
 							drawCraftDamage();
 							setStatus("STR_INTERCEPTOR_DAMAGED");
 							_game->getMod()->getSound("GEO.CAT", Mod::INTERCEPTOR_HIT)->play(); //10
-							if (_mode == _btnCautious && _craft->getDamagePercentage() >= 50)
+							if (_mode == _btnCautious && _craft->getDamagePercentage() >= 50 && !_ufoIsAttacking)
 							{
 								_targetDist = STANDOFF_DIST;
 							}
@@ -1265,7 +1287,7 @@ void DogfightState::update()
 			if (w->getAmmo() == 0 && !projectileInFlight && !_craft->isDestroyed())
 			{
 				// Handle craft distance according to option set by user and available ammo.
-				if (_mode == _btnCautious)
+				if (_mode == _btnCautious && !_ufoIsAttacking)
 				{
 					minimumDistance();
 				}
@@ -1747,16 +1769,34 @@ void DogfightState::btnCautiousPress(Action *)
 	if (!_ufo->isCrashed() && !_craft->isDestroyed() && !_ufoBreakingOff)
 	{
 		_end = false;
-		setStatus("STR_CAUTIOUS_ATTACK");
-		for (int i = 0; i < _weaponNum; ++i)
+		if (!_ufoIsAttacking)
 		{
-			CraftWeapon* w = _craft->getWeapons()->at(i);
-			if (w != 0)
+			setStatus("STR_CAUTIOUS_ATTACK");
+			for (int i = 0; i < _weaponNum; ++i)
 			{
-				_weaponFireInterval[i] = w->getRules()->getCautiousReload();
+				CraftWeapon* w = _craft->getWeapons()->at(i);
+				if (w != 0)
+				{
+					_weaponFireInterval[i] = w->getRules()->getCautiousReload();
+				}
 			}
+			minimumDistance();
 		}
-		minimumDistance();
+		else
+		{
+			setStatus("STR_EVASIVE_MANEUVERS");
+			for (int i = 0; i < _weaponNum; ++i)
+			{
+				CraftWeapon* w = _craft->getWeapons()->at(i);
+				if (w != 0)
+				{
+					// double the craft's reload time to balance halving the HK's chance to hit
+					_weaponFireInterval[i] = w->getRules()->getAggressiveReload() * 2;
+				}
+			}
+			// same distance as aggressive (by design)
+			_targetDist = 64;
+		}
 	}
 }
 
@@ -1848,7 +1888,7 @@ void DogfightState::previewClick(Action *)
 	_preview->setVisible(false);
 	// Reenable all other buttons to prevent misclicks
 	_btnStandoff->setVisible(!_ufoIsAttacking);
-	_btnCautious->setVisible(!_ufoIsAttacking);
+	_btnCautious->setVisible(!_disableCautious);
 	_btnStandard->setVisible(!_ufoIsAttacking);
 	_btnAggressive->setVisible(true);
 	_btnDisengage->setVisible(!_disableDisengage);

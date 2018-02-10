@@ -14,6 +14,8 @@ en-US:
 #InventoryState.cpp
   STR_PSI_SHORT: "M.C.>{ALT}{0}/{1}"
 #=================== Geoscape ===================
+#DogfightState.cpp
+  STR_EVASIVE_MANEUVERS: "EVASIVE MANEUVERS"
 #GeoscapeState.cpp
   STR_UFO_HAS_LANDED: "USO has touched down at{NEWLINE}{0}"
 #SelectMusicTrackState.cpp
