@@ -135,7 +135,7 @@ private:
 	std::string _weaponStrings[WeaponMax];
 	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
-	bool _allowLanding, _spacecraft, _notifyWhenRefueled, _autoPatrol;
+	bool _allowLanding, _allowAlienBaseDetection, _spacecraft, _notifyWhenRefueled, _autoPatrol;
 	int _listOrder, _maxItems, _maxAltitude;
 	std::vector<std::vector <int> > _deployment;
 	std::vector<int> _craftInventoryTile;
@@ -198,6 +198,8 @@ public:
 	RuleTerrain *getBattlescapeTerrainData();
 	/// Checks if this craft is capable of landing (on missions).
 	bool getAllowLanding() const;
+	/// Checks if this craft is capable of detecting an alien base.
+	bool getAllowAlienBaseDetection() const;
 	/// Checks if this craft is capable of travelling to mars.
 	bool getSpacecraft() const;
 	/// Should notification be displayed when the craft is refueled?
