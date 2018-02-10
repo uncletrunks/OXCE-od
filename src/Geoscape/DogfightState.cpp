@@ -240,7 +240,7 @@ const int DogfightState::_projectileBlobs[4][6][3] =
  * @param ufoIsAttacking Is UFO the aggressor?
  */
 DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool ufoIsAttacking) :
-	_state(state), _craft(craft), _ufo(ufo), _ufoIsAttacking(ufoIsAttacking), _timeout(50), _currentDist(640), _targetDist(560),
+	_state(state), _craft(craft), _ufo(ufo), _ufoIsAttacking(ufoIsAttacking), _disableDisengage(false), _timeout(50), _currentDist(640), _targetDist(560),
 	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _hunterKillerBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _waitForAltitude(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0),
 	_interceptionNumber(0), _interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false)
@@ -267,6 +267,15 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	if (!pilots.empty())
 	{
 		_craftAccelerationBonus = std::min(4, (_craft->getCraftStats().accel / 3) + 1);
+	}
+
+	// HK options
+	if (ufoIsAttacking)
+	{
+		if (_ufo->getCraftStats().speedMax > _craft->getCraftStats().speedMax)
+		{
+			_disableDisengage = true;
+		}
 	}
 
 	// Create objects
@@ -359,7 +368,10 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 		_window->drawRect(_btnStandoff->getX() + 2, _btnStandoff->getY() + 2, _btnStandoff->getWidth() - 4, _btnStandoff->getHeight() - 4, dogfightInterface->getElement("standoffButton")->color + 4);
 		_window->drawRect(_btnCautious->getX() + 2, _btnCautious->getY() + 2, _btnCautious->getWidth() - 4, _btnCautious->getHeight() - 4, dogfightInterface->getElement("cautiousButton")->color + 4);
 		_window->drawRect(_btnStandard->getX() + 2, _btnStandard->getY() + 2, _btnStandard->getWidth() - 4, _btnStandard->getHeight() - 4, dogfightInterface->getElement("standardButton")->color + 4);
-		_window->drawRect(_btnDisengage->getX() + 2, _btnDisengage->getY() + 2, _btnDisengage->getWidth() - 4, _btnDisengage->getHeight() - 4, dogfightInterface->getElement("disengageButton")->color + 4);
+		if (_disableDisengage)
+		{
+			_window->drawRect(_btnDisengage->getX() + 2, _btnDisengage->getY() + 2, _btnDisengage->getWidth() - 4, _btnDisengage->getHeight() - 4, dogfightInterface->getElement("disengageButton")->color + 4);
+		}
 		int offset = dogfightInterface->getElement("minimizeButtonDummy")->TFTDMode ? 1 : 0;
 		_window->drawRect(_btnMinimize->getX() + 1 + offset, _btnMinimize->getY() + 1, _btnMinimize->getWidth() - 2 - offset, _btnMinimize->getHeight() - 2, dogfightInterface->getElement("minimizeButtonDummy")->color + 4);
 	}
@@ -416,7 +428,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	_btnDisengage->copy(_window);
 	_btnDisengage->onMousePress((ActionHandler)&DogfightState::btnDisengagePress);
 	_btnDisengage->setGroup(&_mode);
-	_btnDisengage->setVisible(!_ufoIsAttacking);
+	_btnDisengage->setVisible(!_disableDisengage);
 
 	_btnUfo->copy(_window);
 	_btnUfo->onMouseClick((ActionHandler)&DogfightState::btnUfoClick);
@@ -1300,6 +1312,11 @@ void DogfightState::update()
 		if (!_destroyCraft && (_destroyUfo || _mode == _btnDisengage))
 		{
 			_craft->returnToBase();
+			// Need to give the craft at least one step advantage over the hunter-killer (to be able to escape)
+			if (_ufoIsAttacking)
+			{
+				_craft->move();
+			}
 		}
 		if (_ufo->isCrashed())
 		{
@@ -1834,7 +1851,7 @@ void DogfightState::previewClick(Action *)
 	_btnCautious->setVisible(!_ufoIsAttacking);
 	_btnStandard->setVisible(!_ufoIsAttacking);
 	_btnAggressive->setVisible(true);
-	_btnDisengage->setVisible(!_ufoIsAttacking);
+	_btnDisengage->setVisible(!_disableDisengage);
 	_btnUfo->setVisible(true);
 	_btnMinimize->setVisible(!_ufoIsAttacking);
 	for (int i = 0; i < _weaponNum; ++i)
