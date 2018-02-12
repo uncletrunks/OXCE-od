@@ -548,7 +548,9 @@ armors:
 [code]
 crafts:
   - type: STR_CRAFT_TYPE #default config ...
-    radarChance: 100    #how effective craft radar is, default 100.
+    radarRange: 672     #craft radar range. Default `672`.
+    radarChance: 100    #craft radar dedection chance. Default `100`.
+    sightRange: 1696    #alien base dedection range. Default `1696`.
     weapons: 4          #weapon number increased to 4.
     weaponTypes:        #definition of allowed weapon types in craft. Max 4 different types per slot.
       - 0               #slot 1 accepts weapons with type 0. This is default.
@@ -587,10 +589,11 @@ craftWeapons:
 [code]
 ufos:
   - type: STR_UFO_TYPE #default config ...
-    hitBonus: 0   #bonus percentage to all weapons hit chance. Range [0, 100].
-    avoidBonus: 0 #bonus percentage to UFO dodge chance. Range [0, 100].
-    powerBonus: 0 #bonus percentage to all weapons damage. Range [0, 100].
-    armor: 0      #amount of blocked damage per hit.
+    sightRange: 268 #xcom base dedection range. Default `268`.
+    hitBonus: 0     #bonus percentage to all weapons hit chance. Range [0, 100].
+    avoidBonus: 0   #bonus percentage to UFO dodge chance. Range [0, 100].
+    powerBonus: 0   #bonus percentage to all weapons damage. Range [0, 100].
+    armor: 0        #amount of blocked damage per hit.
     craftCustomDeploy: STR_BATTLESHIP_1 #override craft default weapon deploy.
     missionCustomDeploy: STR_TERROR_MISSION_2 #override mission defulat weapon deploy.
     raceBonus: #bonus stats per race.
