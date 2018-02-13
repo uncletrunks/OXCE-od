@@ -158,6 +158,7 @@ en-US:
   STR_BOUNTY: "BOUNTY"
 #Inventory.cpp
   STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION: "It's not allowed to place that item there.{NEWLINE}Don't ask why!"
+  STR_ONE_HAND_MUST_BE_EMPTY: "At least one hand must be empty!"
 #InventoryLoadState.cpp
   STR_LOAD_EQUIPMENT_TEMPLATE: "Load Equipment Template"
 #InventorySaveState.cpp
@@ -223,6 +224,8 @@ en-US:
   STR_FRIENDLY_CRAFT_ESCORT_DESC: "Allows your craft to follow and provide air defense for other craft in the Geoscape."
   STR_DRAW_ENEMY_RADAR_CIRCLES: "Draw enemy radar circles"
   STR_DRAW_ENEMY_RADAR_CIRCLES_DESC: "If enabled, radar range of enemy interceptors (HKs) and defense perimeter of enemy bases will be visible."
+  STR_ALLOW_ONE_HANDED_UNLOADING: "Single-handed weapon unloading"
+  STR_ALLOW_ONE_HANDED_UNLOADING_DESC: "If enabled, weapons can be unloaded even when the off-hand is not free. In such a case, the ammo is dropped on the ground."
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"
