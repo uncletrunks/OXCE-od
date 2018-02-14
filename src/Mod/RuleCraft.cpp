@@ -79,7 +79,12 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 			_sprite += mod->getModOffset();
 	}
 	_stats.load(node);
-	_marker = node["marker"].as<int>(_marker);
+	if (node["marker"])
+	{
+		_marker = node["marker"].as<int>(_marker);
+		if (_marker > 8)
+			_marker += mod->getModOffset();
+	}
 	_weapons = node["weapons"].as<int>(_weapons);
 	_soldiers = node["soldiers"].as<int>(_soldiers);
 	_pilots = node["pilots"].as<int>(_pilots);
