@@ -2635,7 +2635,16 @@ void BattlescapeGenerator::generateBaseMap()
 					mapnum += num;
 					if (mapnum < 10) newname << 0;
 					newname << mapnum;
-					addBlock(x, y, _terrain->getMapBlock(newname.str()), true);
+					auto block = _terrain->getMapBlock(newname.str());
+					if (!block)
+					{
+						throw Exception("Map generator encountered an error: map block "
+							+ newname.str()
+							+ " is not defined in terrain "
+							+ _terrain->getName()
+							+ ".");
+					}
+					addBlock(x, y, block, true);
 					_drillMap[x][y] = MD_NONE;
 					num++;
 					if ((*i)->getRules()->getStorage() > 0 && storageCheckerboard)
