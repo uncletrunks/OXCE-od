@@ -263,7 +263,7 @@ void PlaceFacilityState::viewClick(Action *)
 					{
 						// Give partial refund if this is a started build or a completed facility.
 						_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + checkFacility->getRules()->getRefundValue());
-						for (std::map<std::string, std::pair<int, int> >::const_iterator j = itemCost.begin(); j != itemCost.end(); ++i)
+						for (std::map<std::string, std::pair<int, int> >::const_iterator j = itemCost.begin(); j != itemCost.end(); ++j)
 						{
 							_base->getStorageItems()->addItem(j->first, j->second.second);
 						}
