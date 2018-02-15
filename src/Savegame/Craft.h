@@ -167,6 +167,8 @@ public:
 	int getFuelLimit(Base *base) const;
 	/// Returns the craft to its base.
 	void returnToBase();
+	/// Returns the crew to their base (using transfers).
+	void evacuateCrew(const Mod *mod);
 	/// Checks if a target is detected by the craft's radar.
 	bool detect(Target *target) const;
 	/// Checks if a target is inside the craft's radar range.

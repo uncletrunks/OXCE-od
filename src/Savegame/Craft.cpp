@@ -27,6 +27,7 @@
 #include "SavedGame.h"
 #include "ItemContainer.h"
 #include "Soldier.h"
+#include "Transfer.h"
 #include "../Mod/RuleSoldier.h"
 #include "Base.h"
 #include "Ufo.h"
@@ -806,6 +807,31 @@ int Craft::getFuelLimit(Base *base) const
 void Craft::returnToBase()
 {
 	setDestination(_base);
+}
+
+/**
+ * Returns the crew to their base (using transfers).
+ */
+void Craft::evacuateCrew(const Mod *mod)
+{
+	for (std::vector<Soldier*>::iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); )
+	{
+		if ((*s)->getCraft() == this)
+		{
+			// Remove soldier from the craft...
+			(*s)->setCraft(0);
+			// ... and let them walk home :)
+			Transfer *t = new Transfer(mod->getPersonnelTime());
+			t->setSoldier((*s));
+			_base->getTransfers()->push_back(t);
+			s = _base->getSoldiers()->erase(s);
+		}
+		else
+		{
+			++s;
+		}
+	}
+	removeAllPilots(); // just in case
 }
 
 /**

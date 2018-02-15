@@ -1383,6 +1383,11 @@ void DogfightState::update()
 		{
 			// End dogfight if craft is destroyed.
 			setStatus("STR_INTERCEPTOR_DESTROYED");
+			if (_ufoIsAttacking)
+			{
+				// Fighter pilots managed to eject just in time, Transport crew jumped out asap (with parachutes)
+				_craft->evacuateCrew(_game->getMod());
+			}
 			_timeout += 30;
 			_game->getMod()->getSound("GEO.CAT", Mod::INTERCEPTOR_EXPLODE)->play();
 			finalRun = true;
