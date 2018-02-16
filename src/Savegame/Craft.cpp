@@ -1501,6 +1501,7 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 		{
 			// craft with soldiers are not attractive
 			attraction += 5000;
+			attraction += _rules->getSoldiers() * 10;
 		}
 		// craft with more pilots are less atractive
 		attraction += _rules->getPilots() * 100;
