@@ -148,6 +148,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 					Ufo *u = dynamic_cast<Ufo*>((*j)->getDestination());
 					MissionSite *m = dynamic_cast<MissionSite*>((*j)->getDestination());
 					AlienBase *b = dynamic_cast<AlienBase*>((*j)->getDestination());
+					Craft *x = dynamic_cast<Craft*>((*j)->getDestination());
 					if (u != 0)
 					{
 						if ((*j)->isInDogfight())
@@ -163,6 +164,10 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 						{
 							ssStatus << tr("STR_EN_ROUTE");
 						}
+					}
+					else if (x != 0)
+					{
+						ssStatus << tr("STR_ESCORTING");
 					}
 					else if (m != 0 || b != 0)
 					{

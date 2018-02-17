@@ -580,6 +580,36 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		_bases.push_back(b);
 	}
 
+	// Finish loading crafts after bases (more specifically after all crafts) are loaded, because of references between crafts (i.e. friendly escorts)
+	if (Options::friendlyCraftEscort)
+	{
+		for (YAML::const_iterator i = doc["bases"].begin(); i != doc["bases"].end(); ++i)
+		{
+			// Bases don't have IDs and names are not unique, so need to consider lon/lat too
+			double lon = (*i)["lon"].as<double>(0.0);
+			double lat = (*i)["lat"].as<double>(0.0);
+			std::wstring baseName = L"";
+			if (const YAML::Node &name = (*i)["name"])
+			{
+				baseName = Language::utf8ToWstr(name.as<std::string>());
+			}
+
+			Base *base = 0;
+			for (std::vector<Base*>::iterator b = _bases.begin(); b != _bases.end(); ++b)
+			{
+				if (AreSame(lon, (*b)->getLongitude()) && AreSame(lat, (*b)->getLatitude()) && (*b)->getName() == baseName)
+				{
+					base = (*b);
+					break;
+				}
+			}
+			if (base)
+			{
+				base->finishLoading(*i, this);
+			}
+		}
+	}
+
 	// Finish loading UFOs after bases (more specifically after crafts) are loaded
 	for (YAML::const_iterator i = doc["ufos"].begin(); i != doc["ufos"].end(); ++i)
 	{

@@ -227,6 +227,33 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 }
 
 /**
+ * Finishes loading the craft from YAML (called after all other XCOM craft are loaded too).
+ * @param node YAML node.
+ * @param save The game data. Used to find the UFO's target (= xcom craft).
+ */
+void Craft::finishLoading(const YAML::Node &node, SavedGame *save)
+{
+	if (const YAML::Node &dest = node["dest"])
+	{
+		std::string type = dest["type"].as<std::string>();
+		int id = dest["id"].as<int>();
+
+		bool found = false;
+		for (std::vector<Base*>::iterator bi = save->getBases()->begin(); bi != save->getBases()->end() && !found; ++bi)
+		{
+			for (std::vector<Craft*>::iterator ci = (*bi)->getCrafts()->begin(); ci != (*bi)->getCrafts()->end() && !found; ++ci)
+			{
+				if ((*ci)->getId() == id && (*ci)->getRules()->getType() == type)
+				{
+					setDestination(*ci);
+					found = true;
+				}
+			}
+		}
+	}
+}
+
+/**
  * Saves the craft to a YAML file.
  * @return YAML node.
  */
@@ -773,10 +800,15 @@ double Craft::getDistanceFromBase() const
  * while it's on the air, based on its speed.
  * @return Fuel amount.
  */
-int Craft::getFuelConsumption() const
+int Craft::getFuelConsumption(int escortSpeed) const
 {
 	if (!_rules->getRefuelItem().empty())
 		return 1;
+	if (escortSpeed > 0)
+	{
+		// based on the speed of the escorted craft, but capped between 50% and 100% of escorting craft's speed
+		return std::max(_rules->getMaxSpeed() / 200, std::min(escortSpeed / 100, _rules->getMaxSpeed() / 100));
+	}
 	return (int)floor(_speed / 100.0);
 }
 
@@ -798,7 +830,7 @@ int Craft::getFuelLimit() const
  */
 int Craft::getFuelLimit(Base *base) const
 {
-	return (int)floor(getFuelConsumption() * getDistance(base) / (_speedRadian * 120));
+	return (int)floor(getFuelConsumption(0) * getDistance(base) / (_speedRadian * 120));
 }
 
 /**
@@ -937,9 +969,9 @@ bool Craft::insideRadarRange(Target *target) const
  * Consumes the craft's fuel every 10 minutes
  * while it's on the air.
  */
-void Craft::consumeFuel()
+void Craft::consumeFuel(int escortSpeed)
 {
-	setFuel(_fuel - getFuelConsumption());
+	setFuel(_fuel - getFuelConsumption(escortSpeed));
 }
 
 /**

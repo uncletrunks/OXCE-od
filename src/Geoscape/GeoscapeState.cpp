@@ -1067,6 +1067,7 @@ void GeoscapeState::time5Seconds()
 				Waypoint *w = dynamic_cast<Waypoint*>((*j)->getDestination());
 				MissionSite* m = dynamic_cast<MissionSite*>((*j)->getDestination());
 				AlienBase* b = dynamic_cast<AlienBase*>((*j)->getDestination());
+				Craft* x = dynamic_cast<Craft*>((*j)->getDestination());
 				if (u != 0)
 				{
 					switch (u->getStatus())
@@ -1198,6 +1199,13 @@ void GeoscapeState::time5Seconds()
 						}
 					}
 				}
+				else if (x != 0)
+				{
+					if (x->getStatus() != "STR_OUT" || x->isDestroyed())
+					{
+						(*j)->returnToBase();
+					}
+				}
 			}
 			 ++j;
 		}
@@ -1317,7 +1325,16 @@ void GeoscapeState::time10Minutes()
 		{
 			if ((*j)->getStatus() == "STR_OUT")
 			{
-				(*j)->consumeFuel();
+				int escortSpeed = 0;
+				if (Options::friendlyCraftEscort)
+				{
+					Craft *x = dynamic_cast<Craft*>((*j)->getDestination());
+					if (x != 0)
+					{
+						escortSpeed = x->getSpeed();
+					}
+				}
+				(*j)->consumeFuel(escortSpeed);
 				if (!(*j)->getLowFuel() && (*j)->getFuel() <= (*j)->getFuelLimit())
 				{
 					(*j)->setLowFuel(true);

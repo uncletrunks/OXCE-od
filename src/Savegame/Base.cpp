@@ -233,6 +233,40 @@ void Base::load(const YAML::Node &node, SavedGame *save, bool newGame, bool newB
 }
 
 /**
+ * Finishes loading the base (more specifically all craft in the base) from YAML.
+ * @param node YAML node.
+ * @param save Pointer to saved game.
+ */
+void Base::finishLoading(const YAML::Node &node, SavedGame *save)
+{
+	for (YAML::const_iterator i = node["crafts"].begin(); i != node["crafts"].end(); ++i)
+	{
+		int id = (*i)["id"].as<int>();
+		std::string type = (*i)["type"].as<std::string>();
+		if (_mod->getCraft(type))
+		{
+			Craft *craft = 0;
+			for (std::vector<Craft*>::iterator c = _crafts.begin(); c != _crafts.end(); ++c)
+			{
+				if ((*c)->getId() == id && (*c)->getRules()->getType() == type)
+				{
+					craft = (*c);
+					break;
+				}
+			}
+			if (craft)
+			{
+				craft->finishLoading(*i, save);
+			}
+		}
+		else
+		{
+			Log(LOG_ERROR) << "Failed to load craft " << type;
+		}
+	}
+}
+
+/**
  * Saves the base to a YAML file.
  * @return YAML node.
  */

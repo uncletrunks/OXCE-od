@@ -73,6 +73,8 @@ public:
 	~Base();
 	/// Loads the base from YAML.
 	void load(const YAML::Node& node, SavedGame *save, bool newGame, bool newBattleGame = false);
+	/// Finishes loading the base (more specifically all craft in the base) from YAML.
+	void finishLoading(const YAML::Node& node, SavedGame *save);
 	/// Saves the base to YAML.
 	YAML::Node save() const;
 	/// Saves the base's ID to YAML.

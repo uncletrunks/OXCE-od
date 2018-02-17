@@ -202,6 +202,8 @@ en-GB:
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT_DESC: "Briefing music will continue playing during equipment phase until the Battlescape is displayed."
   STR_UFO_LANDING_ALERT: "UFO landing alert"
   STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
+  STR_FRIENDLY_CRAFT_ESCORT: "Friendly craft escort"
+  STR_FRIENDLY_CRAFT_ESCORT_DESC: "Allows your craft to follow and provide air defence for other craft in the Geoscape."
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"
@@ -250,6 +252,7 @@ en-GB:
 #InterceptState.cpp
   STR_RETURNING: "RETURNING"
   STR_INTERCEPTING: "INTERCEPTING"
+  STR_ESCORTING: "ESCORTING"
   STR_EN_ROUTE: "EN ROUTE"
   STR_PILOT_MISSING: "PILOT MISSING"
   STR_DAY_SHORT: "{0}d"

@@ -67,6 +67,8 @@ public:
 	~Craft();
 	/// Loads the craft from YAML.
 	void load(const YAML::Node& node, const Mod *mod, SavedGame *save);
+	/// Finishes loading the craft from YAML (called after all other XCOM craft are loaded too).
+	void finishLoading(const YAML::Node& node, SavedGame *save);
 	/// Saves the craft to YAML.
 	YAML::Node save() const;
 	/// Saves the craft's ID to YAML.
@@ -160,7 +162,7 @@ public:
 	/// Gets the craft's distance from its base.
 	double getDistanceFromBase() const;
 	/// Gets the craft's fuel consumption.
-	int getFuelConsumption() const;
+	int getFuelConsumption(int escortSpeed) const;
 	/// Gets the craft's minimum fuel limit.
 	int getFuelLimit() const;
 	/// Gets the craft's minimum fuel limit to go to a base.
@@ -178,7 +180,7 @@ public:
 	/// Does a craft full checkup.
 	void checkup();
 	/// Consumes the craft's fuel.
-	void consumeFuel();
+	void consumeFuel(int escortSpeed);
 	/// Calculates the time to repair
 	unsigned int calcRepairTime();
 	/// Calculates the time to refuel
