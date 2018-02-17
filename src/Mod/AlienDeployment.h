@@ -84,6 +84,7 @@ private:
 	int _markerIcon, _durationMin, _durationMax, _minDepth, _maxDepth, _minSiteDepth, _maxSiteDepth, _genMissionFrequency;
 	int _objectiveType, _objectivesRequired, _objectiveCompleteScore, _objectiveFailedScore, _despawnPenalty, _points, _turnLimit, _cheatTurn;
 	ChronoTrigger _chronoTrigger;
+	bool _keepCraftAfterFailedMission;
 	EscapeType _escapeType;
 public:
 	/// Creates a blank Alien Deployment ruleset.
@@ -187,6 +188,7 @@ public:
 
 	int getGenMissionFrequency() const;
 
+	bool keepCraftAfterFailedMission() const;
 	EscapeType getEscapeType() const;
 
 };

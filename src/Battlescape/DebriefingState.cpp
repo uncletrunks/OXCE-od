@@ -1492,15 +1492,26 @@ void DebriefingState::prepareDebriefing()
 	}
 	if (craft != 0 && ((playersInExitArea == 0 && aborted) || (playersSurvived == 0)))
 	{
-		addStat("STR_XCOM_CRAFT_LOST", 1, -craft->getRules()->getScore());
-		// Since this is not a base defense mission, we can safely erase the craft,
-		// without worrying it's vehicles' destructor calling double (on base defense missions
-		// all vehicle object in the craft is also referenced by base->getVehicles() !!)
-		_game->getSavedGame()->stopHuntingXcomCraft(craft); // lost during ground mission
-		delete craft;
-		craft = 0; // To avoid a crash down there!!
-		base->getCrafts()->erase(craftIterator);
-		_txtTitle->setText(tr("STR_CRAFT_IS_LOST"));
+		if (craft->getRules()->keepCraftAfterFailedMission())
+		{
+			// craft was not even on the battlescape (e.g. paratroopers)
+		}
+		else if (ruleDeploy->keepCraftAfterFailedMission())
+		{
+			// craft didn't wait for you (e.g. escape/extraction missions)
+		}
+		else
+		{
+			addStat("STR_XCOM_CRAFT_LOST", 1, -craft->getRules()->getScore());
+			// Since this is not a base defense mission, we can safely erase the craft,
+			// without worrying it's vehicles' destructor calling double (on base defense missions
+			// all vehicle object in the craft is also referenced by base->getVehicles() !!)
+			_game->getSavedGame()->stopHuntingXcomCraft(craft); // lost during ground mission
+			delete craft;
+			craft = 0; // To avoid a crash down there!!
+			base->getCrafts()->erase(craftIterator);
+			_txtTitle->setText(tr("STR_CRAFT_IS_LOST"));
+		}
 		playersSurvived = 0; // assuming you aborted and left everyone behind
 		success = false;
 	}
