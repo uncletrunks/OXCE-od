@@ -1328,10 +1328,14 @@ void GeoscapeState::time10Minutes()
 				int escortSpeed = 0;
 				if (Options::friendlyCraftEscort)
 				{
-					Craft *x = dynamic_cast<Craft*>((*j)->getDestination());
-					if (x != 0)
+					Craft *escortee = dynamic_cast<Craft*>((*j)->getDestination());
+					if (escortee != 0)
 					{
-						escortSpeed = x->getSpeed();
+						double escortRange = 20 * (1 / 60.0) * (M_PI / 180); // 20 nautical miles
+						if ((*j)->getDistance(escortee) < escortRange)
+						{
+							escortSpeed = escortee->getSpeed();
+						}
 					}
 				}
 				(*j)->consumeFuel(escortSpeed);
