@@ -1565,7 +1565,7 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 		// craft with more crew capacity (i.e. transports) are more attractive
 		attraction += 500000 - (_rules->getSoldiers() * 1000);
 		// faster craft (i.e. interceptors) are less attractive
-		attraction += 100000 - _rules->getMaxSpeed();
+		attraction += 100000 + _rules->getMaxSpeed();
 	}
 
 	// the higher the number the less attractive the target is for UFO hunter-killers
