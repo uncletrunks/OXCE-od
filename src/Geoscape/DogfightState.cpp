@@ -1385,7 +1385,6 @@ void DogfightState::update()
 			setStatus("STR_INTERCEPTOR_DESTROYED");
 			if (_ufoIsAttacking)
 			{
-				// Fighter pilots managed to eject just in time, Transport crew jumped out asap (with parachutes)
 				_craft->evacuateCrew(_game->getMod());
 			}
 			_timeout += 30;

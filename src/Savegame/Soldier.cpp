@@ -787,6 +787,7 @@ void Soldier::die(SoldierDeath *death)
 	// Clean up associations
 	_craft = 0;
 	_psiTraining = false;
+	_training = false;
 	_recentlyPromoted = false;
 	_recovery = 0.0f;
 	for (std::vector<EquipmentLayoutItem*>::iterator i = _equipmentLayout.begin(); i != _equipmentLayout.end(); ++i)

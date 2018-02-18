@@ -167,6 +167,7 @@ private:
 	int _ufoTractorBeamSizeModifiers[5];
 	int _escortRange;
 	bool _escortsJoinFightAgainstHK;
+	int _crewEmergencyEvacuationSurvivalChance, _pilotsEmergencyEvacuationSurvivalChance;
 	int _soldiersPerSergeant, _soldiersPerCaptain, _soldiersPerColonel, _soldiersPerCommander;
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
@@ -483,6 +484,10 @@ public:
 	double getEscortRange() const;
 	/// Should escorts join the fight against HK (automatically)? Or is only fighting one-on-one allowed?
 	int getEscortsJoinFightAgainstHK() const { return _escortsJoinFightAgainstHK; }
+	/// Gets the crew emergency evacuation survival chance
+	int getCrewEmergencyEvacuationSurvivalChance() const { return _crewEmergencyEvacuationSurvivalChance; }
+	/// Gets the pilots emergency evacuation survival chance
+	int getPilotsEmergencyEvacuationSurvivalChance() const { return _pilotsEmergencyEvacuationSurvivalChance; }
 	/// Gets how many soldiers are needed for one sergeant promotion
 	int getSoldiersPerSergeant() const { return _soldiersPerSergeant; }
 	/// Gets how many soldiers are needed for one captain promotion

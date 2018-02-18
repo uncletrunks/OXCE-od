@@ -854,17 +854,26 @@ void Craft::evacuateCrew(const Mod *mod)
 	{
 		if ((*s)->getCraft() == this)
 		{
-			// Remove soldier from the craft...
-			(*s)->setCraft(0);
-			// ... and let them walk home :)
-			Transfer *t = new Transfer(mod->getPersonnelTime());
-			t->setSoldier((*s));
-			_base->getTransfers()->push_back(t);
-			s = _base->getSoldiers()->erase(s);
+			int survivalChance = isPilot((*s)->getId()) ? mod->getPilotsEmergencyEvacuationSurvivalChance() : mod->getCrewEmergencyEvacuationSurvivalChance();
+			if (RNG::percent(survivalChance))
+			{
+				// remove from craft
+				(*s)->setCraft(0);
+				// transfer to base
+				Transfer *t = new Transfer(mod->getPersonnelTime());
+				t->setSoldier((*s));
+				_base->getTransfers()->push_back(t);
+				// next
+				s = _base->getSoldiers()->erase(s);
+			}
+			else
+			{
+				++s; // will be killed later
+			}
 		}
 		else
 		{
-			++s;
+			++s; // next
 		}
 	}
 	removeAllPilots(); // just in case
