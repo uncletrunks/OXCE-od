@@ -2366,7 +2366,7 @@ void GeoscapeState::globeClick(Action *action)
 	// Clicking markers on the globe
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
-		std::vector<Target*> v = _globe->getTargets(mouseX, mouseY, false);
+		std::vector<Target*> v = _globe->getTargets(mouseX, mouseY, false, 0);
 		if (!v.empty())
 		{
 			_game->pushState(new MultipleTargetsState(v, 0, this));

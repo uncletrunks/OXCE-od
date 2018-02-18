@@ -33,6 +33,7 @@ class Timer;
 class Target;
 class LocalizedText;
 class RuleGlobe;
+class Craft;
 
 /**
  * Interactive globe view of the world.
@@ -156,7 +157,7 @@ public:
 	/// Turns on/off the globe detail.
 	void toggleDetail();
 	/// Gets all the targets near a point on the globe.
-	std::vector<Target*> getTargets(int x, int y, bool craft) const;
+	std::vector<Target*> getTargets(int x, int y, bool craft, Craft *currentCraft) const;
 	/// Caches visible globe polygons.
 	void cachePolygons();
 	/// Sets the palette of the globe.

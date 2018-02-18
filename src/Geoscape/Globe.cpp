@@ -693,7 +693,7 @@ bool Globe::targetNear(Target* target, int x, int y) const
  * @param craft Only get craft targets.
  * @return List of pointers to targets.
  */
-std::vector<Target*> Globe::getTargets(int x, int y, bool craft) const
+std::vector<Target*> Globe::getTargets(int x, int y, bool craft, Craft *currentCraft) const
 {
 	std::vector<Target*> v;
 	if (!craft || Options::friendlyCraftEscort)
@@ -710,6 +710,8 @@ std::vector<Target*> Globe::getTargets(int x, int y, bool craft) const
 
 			for (std::vector<Craft*>::iterator j = (*i)->getCrafts()->begin(); j != (*i)->getCrafts()->end(); ++j)
 			{
+				if ((*j) == currentCraft)
+					continue;
 				if ((*j)->getLongitude() == (*i)->getLongitude() && (*j)->getLatitude() == (*i)->getLatitude() && (*j)->getDestination() == 0)
 					continue;
 
