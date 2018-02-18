@@ -846,7 +846,36 @@ void GeoscapeState::time5Seconds()
 
 					// Start the dogfight
 					{
+						// Main target
 						_dogfightsToBeStarted.push_back(new DogfightState(this, c, *i, true));
+
+						// Start fighting escorts and other craft as well (if they are in escort range)
+						if (_game->getMod()->getEscortsJoinFightAgainstHK())
+						{
+							int secondaryTargets = 0;
+							for (std::vector<Base*>::iterator bi = _game->getSavedGame()->getBases()->begin(); bi != _game->getSavedGame()->getBases()->end(); ++bi)
+							{
+								for (std::vector<Craft*>::iterator ci = (*bi)->getCrafts()->begin(); ci != (*bi)->getCrafts()->end(); ++ci)
+								{
+									// craft is flying (i.e. not in base)
+									if ((*ci) != c && (*ci)->getStatus() == "STR_OUT" && !(*ci)->isDestroyed())
+									{
+										// craft is close enough and has at least one loaded weapon
+										if ((*ci)->getNumWeapons(true) > 0 && (*ci)->getDistance(c) < _game->getMod()->getEscortRange())
+										{
+											// only up to 4 dogfights = 1 main + 3 secondary
+											if (secondaryTargets < 3)
+											{
+												// Note: push_front() is used so that main target is attacked first
+												_dogfightsToBeStarted.push_front(new DogfightState(this, (*ci), *i, true));
+												secondaryTargets++;
+											}
+										}
+									}
+								}
+							}
+						}
+
 						if (!_dogfightStartTimer->isRunning())
 						{
 							_pause = true;
@@ -1113,7 +1142,37 @@ void GeoscapeState::time5Seconds()
 								// Don't process certain craft logic (moving and reaching destination)
 								ufoIsAttacking = true;
 							}
+
+							// Main target
 							_dogfightsToBeStarted.push_back(new DogfightState(this, (*j), u, u->isHunterKiller()));
+
+							if (u->isHunterKiller() && _game->getMod()->getEscortsJoinFightAgainstHK())
+							{
+								// Start fighting escorts and other craft as well (if they are in escort range)
+								int secondaryTargets = 0;
+								for (std::vector<Base*>::iterator bi = _game->getSavedGame()->getBases()->begin(); bi != _game->getSavedGame()->getBases()->end(); ++bi)
+								{
+									for (std::vector<Craft*>::iterator ci = (*bi)->getCrafts()->begin(); ci != (*bi)->getCrafts()->end(); ++ci)
+									{
+										// craft is flying (i.e. not in base)
+										if ((*ci) != (*j) && (*ci)->getStatus() == "STR_OUT" && !(*ci)->isDestroyed())
+										{
+											// craft is close enough and has at least one loaded weapon
+											if ((*ci)->getNumWeapons(true) > 0 && (*ci)->getDistance((*j)) < _game->getMod()->getEscortRange())
+											{
+												// only up to 4 dogfights = 1 main + 3 secondary
+												if (secondaryTargets < 3)
+												{
+													// Note: push_front() is used so that main target is attacked first
+													_dogfightsToBeStarted.push_front(new DogfightState(this, (*ci), u, u->isHunterKiller()));
+													secondaryTargets++;
+												}
+											}
+										}
+									}
+								}
+							}
+
 							if ((*j)->getRules()->isWaterOnly() && u->getAltitudeInt() > (*j)->getRules()->getMaxAltitude())
 							{
 								popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_DEPTH")));
@@ -1331,8 +1390,7 @@ void GeoscapeState::time10Minutes()
 					Craft *escortee = dynamic_cast<Craft*>((*j)->getDestination());
 					if (escortee != 0)
 					{
-						double escortRange = 20 * (1 / 60.0) * (M_PI / 180); // 20 nautical miles
-						if ((*j)->getDistance(escortee) < escortRange)
+						if ((*j)->getDistance(escortee) < _game->getMod()->getEscortRange())
 						{
 							escortSpeed = escortee->getSpeed();
 						}

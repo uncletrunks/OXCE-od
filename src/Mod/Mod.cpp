@@ -287,6 +287,7 @@ Mod::Mod() :
 	_surrenderMode(0),
 	_bughuntMinTurn(20), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
 	_ufoGlancingHitThreshold(0), _ufoBeamWidthParameter(1000),
+	_escortRange(20), _escortsJoinFightAgainstHK(true),
 	_soldiersPerSergeant(5), _soldiersPerCaptain(11), _soldiersPerColonel(23), _soldiersPerCommander(30),
 	_pilotAccuracyZeroPoint(55), _pilotAccuracyRange(40), _pilotReactionsZeroPoint(55), _pilotReactionsRange(60),
 	_performanceBonusFactor(0), _useCustomCategories(false), _showDogfightDistanceInKm(false),
@@ -1426,6 +1427,8 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 			index++;
 		}
 	}
+	_escortRange = doc["escortRange"].as<int>(_escortRange);
+	_escortsJoinFightAgainstHK = doc["escortsJoinFightAgainstHK"].as<bool>(_escortsJoinFightAgainstHK);
 	_soldiersPerSergeant = doc["soldiersPerSergeant"].as<int>(_soldiersPerSergeant);
 	_soldiersPerCaptain = doc["soldiersPerCaptain"].as<int>(_soldiersPerCaptain);
 	_soldiersPerColonel = doc["soldiersPerColonel"].as<int>(_soldiersPerColonel);
@@ -2363,6 +2366,15 @@ int Mod::getScientistCost() const
 int Mod::getPersonnelTime() const
 {
 	return _timePersonnel;
+}
+
+/**
+ * Gets the escort range.
+ * @return Escort range (converted from nautical miles into radians).
+ */
+double Mod::getEscortRange() const
+{
+	return _escortRange * (1 / 60.0) * (M_PI / 180);
 }
 
 /**

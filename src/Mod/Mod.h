@@ -165,6 +165,8 @@ private:
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	int _ufoTractorBeamSizeModifiers[5];
+	int _escortRange;
+	bool _escortsJoinFightAgainstHK;
 	int _soldiersPerSergeant, _soldiersPerCaptain, _soldiersPerColonel, _soldiersPerCommander;
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
@@ -477,6 +479,10 @@ public:
 	int getUfoBeamWidthParameter() const { return _ufoBeamWidthParameter; }
 	/// Gets the modifier to a tractor beam's power based on a ufo's size
 	int getUfoTractorBeamSizeModifier(int ufoSize) const { return _ufoTractorBeamSizeModifiers[ufoSize]; }
+	/// Gets the escort range
+	double getEscortRange() const;
+	/// Should escorts join the fight against HK (automatically)? Or is only fighting one-on-one allowed?
+	int getEscortsJoinFightAgainstHK() const { return _escortsJoinFightAgainstHK; }
 	/// Gets how many soldiers are needed for one sergeant promotion
 	int getSoldiersPerSergeant() const { return _soldiersPerSergeant; }
 	/// Gets how many soldiers are needed for one captain promotion

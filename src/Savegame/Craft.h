@@ -110,7 +110,7 @@ public:
 	/// Sets the auto patrol latitude.
 	void setLatitudeAuto(double lat);
 	/// Gets the craft's amount of weapons.
-	int getNumWeapons() const;
+	int getNumWeapons(bool onlyLoaded = false) const;
 	/// Gets the craft's amount of soldiers.
 	int getNumSoldiers() const;
 	/// Gets the craft's amount of equipment.

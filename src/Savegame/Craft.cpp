@@ -497,7 +497,7 @@ void Craft::setLatitudeAuto(double lat)
  * equipped on this craft.
  * @return Number of weapons.
  */
-int Craft::getNumWeapons() const
+int Craft::getNumWeapons(bool onlyLoaded) const
 {
 	if (_rules->getWeapons() == 0)
 	{
@@ -510,6 +510,10 @@ int Craft::getNumWeapons() const
 	{
 		if ((*i) != 0)
 		{
+			if (onlyLoaded && !(*i)->getAmmo())
+			{
+				continue;
+			}
 			total++;
 		}
 	}
