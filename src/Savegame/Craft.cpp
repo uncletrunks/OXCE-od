@@ -1527,17 +1527,18 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 		if (_rules->getAllowLanding())
 		{
 			// craft that can land (i.e. transports) are not attractive
-			attraction += 10000;
+			attraction += 1000000;
 		}
 		if (_rules->getSoldiers() > 0)
 		{
-			// craft with soldiers are not attractive
-			attraction += 5000;
-			attraction += _rules->getSoldiers() * 10;
+			// craft with more crew capacity (i.e. transports) are less attractive
+			attraction += 500000 + (_rules->getSoldiers() * 1000);
 		}
-		// craft with more pilots are less atractive
-		attraction += _rules->getPilots() * 100;
-		// craft with a lot of damage taken are less attractive (yes, aliens show mercy... or arrogance?)
+		// faster craft (i.e. interceptors) are more attractive
+		attraction += 100000 - _rules->getMaxSpeed();
+		// craft with more damage taken are less attractive
+		// this is just to simplify re-targeting when interceptor is fast enough to disengage
+		// and another identical but healthier interceptor is waiting for its chance
 		attraction += _damage * 100 / _stats.damageMax;
 	}
 	else
@@ -1546,10 +1547,12 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 		if (!_rules->getAllowLanding())
 		{
 			// craft that cannot land (i.e. interceptors) are not attractive
-			attraction += 10000;
+			attraction += 1000000;
 		}
-		// craft with more soldiers are more attractive
-		attraction += 10000 - (_rules->getSoldiers() * 100);
+		// craft with more crew capacity (i.e. transports) are more attractive
+		attraction += 500000 - (_rules->getSoldiers() * 1000);
+		// faster craft (i.e. interceptors) are less attractive
+		attraction += 100000 - _rules->getMaxSpeed();
 	}
 
 	// the higher the number the less attractive the target is for UFO hunter-killers
