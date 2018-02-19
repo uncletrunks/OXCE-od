@@ -179,6 +179,7 @@ private:
 	std::string _fontName, _finalResearch, _psiUnlockResearch;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
+	int _startingDifficulty;
 	int _baseDefenseMapFromLocation;
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
 	std::map<std::string, std::string> _fixedUserOptions;
@@ -546,6 +547,8 @@ public:
 	const YAML::Node &getStartingBase() const;
 	/// Gets the game starting time.
 	const GameTime &getStartingTime() const;
+	/// Gets the game starting difficulty.
+	int getStartingDifficulty() const { return _startingDifficulty; }
 	/// Gets an MCDPatch.
 	MCDPatch *getMCDPatch(const std::string &name) const;
 	/// Gets the list of external Sprites.

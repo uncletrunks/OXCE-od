@@ -51,7 +51,27 @@ NewGameState::NewGameState()
 	_txtTitle = new Text(192, 9, 64, 20);
 	_txtIronman = new Text(90, 24, 162, 135);
 
-	_difficulty = _btnBeginner;
+	switch (_game->getMod()->getStartingDifficulty())
+	{
+	case 0:
+		_difficulty = _btnBeginner;
+		break;
+	case 1:
+		_difficulty = _btnExperienced;
+		break;
+	case 2:
+		_difficulty = _btnVeteran;
+		break;
+	case 3:
+		_difficulty = _btnGenius;
+		break;
+	case 4:
+		_difficulty = _btnSuperhuman;
+		break;
+	default:
+		_difficulty = _btnBeginner;
+		break;
+	}
 
 	// Set palette
 	setInterface("newGameMenu");
