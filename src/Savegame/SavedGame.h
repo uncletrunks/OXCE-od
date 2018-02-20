@@ -226,6 +226,8 @@ public:
 	int getBaseMaintenance() const;
 	/// Gets the list of UFOs.
 	std::vector<Ufo*> *getUfos();
+	/// Gets the list of UFOs.
+	const std::vector<Ufo*> *getUfos() const;
 	/// Gets the list of waypoints.
 	std::vector<Waypoint*> *getWaypoints();
 	/// Gets the list of mission sites.
@@ -381,7 +383,7 @@ public:
 	/// get autosell state for an item type
 	bool getAutosell(const RuleItem *) const;
 	/// Stop hunting the given xcom craft.
-	void stopHuntingXcomCraft(Craft *craft);
+	void stopHuntingXcomCraft(Craft *target);
 	/// Stop hunting all xcom craft from a given xcom base.
 	void stopHuntingXcomCrafts(Base *base);
 };

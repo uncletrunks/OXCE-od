@@ -380,6 +380,26 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 	wp->setLongitude(pos.first);
 	wp->setLatitude(pos.second);
 	ufo->setDestination(wp);
+
+	// Only hunter-killers can escort
+	if (ufo->isHunterKiller() && wave.escort)
+	{
+		ufo->setEscort(true);
+		// Find a UFO to escort
+		for (std::vector<Ufo*>::const_iterator u = game.getUfos()->begin(); u != game.getUfos()->end(); ++u)
+		{
+			// From the same mission
+			if ((*u)->getMission()->getId() == ufo->getMission()->getId())
+			{
+				// But not another hunter-killer, we escort only normal UFOs
+				if (!(*u)->isHunterKiller())
+				{
+					ufo->setEscortedUfo((*u));
+					break;
+				}
+			}
+		}
+	}
 	return ufo;
 }
 

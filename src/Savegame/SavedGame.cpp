@@ -610,7 +610,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		}
 	}
 
-	// Finish loading UFOs after bases (more specifically after crafts) are loaded
+	// Finish loading UFOs after all craft and all other UFOs are loaded
 	for (YAML::const_iterator i = doc["ufos"].begin(); i != doc["ufos"].end(); ++i)
 	{
 		int ufoId = (*i)["id"].as<int>();
@@ -1280,6 +1280,15 @@ int SavedGame::getBaseMaintenance() const
  * @return Pointer to UFO list.
  */
 std::vector<Ufo*> *SavedGame::getUfos()
+{
+	return &_ufos;
+}
+
+/**
+ * Returns the list of alien UFOs.
+ * @return Pointer to UFO list.
+ */
+const std::vector<Ufo*> *SavedGame::getUfos() const
 {
 	return &_ufos;
 }
@@ -2626,11 +2635,11 @@ bool SavedGame::getAutosell(const RuleItem *itype) const
 /**
  * Stop hunting the given xcom craft.
  */
-void SavedGame::stopHuntingXcomCraft(Craft *craft)
+void SavedGame::stopHuntingXcomCraft(Craft *target)
 {
 	for (std::vector<Ufo*>::iterator u = _ufos.begin(); u != _ufos.end(); ++u)
 	{
-		(*u)->resetOriginalDestination(craft);
+		(*u)->resetOriginalDestination(target);
 	}
 }
 

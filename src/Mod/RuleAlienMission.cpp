@@ -35,6 +35,7 @@ namespace YAML
 			node["hunterKillerPercentage"] = rhs.hunterKillerPercentage;
 			node["huntMode"] = rhs.huntMode;
 			node["huntBehavior"] = rhs.huntBehavior;
+			node["escort"] = rhs.escort;
 			return node;
 		}
 
@@ -51,6 +52,7 @@ namespace YAML
 			rhs.hunterKillerPercentage = node["hunterKillerPercentage"].as<int>(-1);
 			rhs.huntMode = node["huntMode"].as<int>(-1);
 			rhs.huntBehavior = node["huntBehavior"].as<int>(-1);
+			rhs.escort = node["escort"].as<bool>(false);
 			return true;
 		}
 	};

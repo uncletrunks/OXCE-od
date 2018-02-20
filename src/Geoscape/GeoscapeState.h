@@ -75,7 +75,7 @@ public:
 	void time5Seconds();
 	/// Trigger whenever 10 minutes pass.
 	void time10Minutes();
-	void ufoHunting();
+	void ufoHuntingAndEscorting();
 	/// Trigger whenever 30 minutes pass.
 	void time30Minutes();
 	/// Trigger whenever 1 hour passes.

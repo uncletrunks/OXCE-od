@@ -785,10 +785,10 @@ void GeoscapeState::timeAdvance()
  */
 void GeoscapeState::time5Seconds()
 {
-	// If in "slow mode", handle UFO hunting logic every 5 seconds, not only every 10 minutes
+	// If in "slow mode", handle UFO hunting and escorting logic every 5 seconds, not only every 10 minutes
 	if (_timeSpeed == _btn5Secs || _timeSpeed == _btn1Min)
 	{
-		ufoHunting();
+		ufoHuntingAndEscorting();
 	}
 
 	// Game over if there are no more bases.
@@ -814,7 +814,7 @@ void GeoscapeState::time5Seconds()
 		{
 		case Ufo::FLYING:
 			(*i)->think();
-			if ((*i)->reachedDestination())
+			if ((*i)->reachedDestination() && !(*i)->isEscorting())
 			{
 				Craft* c = dynamic_cast<Craft*>((*i)->getDestination());
 				if (c != 0 && !c->isDestroyed() && (*i)->isHunting())
@@ -1020,7 +1020,7 @@ void GeoscapeState::time5Seconds()
 						}
 					}
 				}
-				_game->getSavedGame()->stopHuntingXcomCraft((*j)); // destroyed in dogfight
+				_game->getSavedGame()->stopHuntingXcomCraft((*j)); // craft destroyed in dogfight
 				delete *j;
 				j = (*i)->getCrafts()->erase(j);
 				continue;
@@ -1460,11 +1460,11 @@ void GeoscapeState::time10Minutes()
 		std::for_each(discovered.begin(), discovered.end(), SetRetaliationTarget());
 	}
 
-	// Handle UFO hunting logic
-	ufoHunting();
+	// Handle UFO re-targeting (i.e. hunting and escorting) logic
+	ufoHuntingAndEscorting();
 }
 
-void GeoscapeState::ufoHunting()
+void GeoscapeState::ufoHuntingAndEscorting()
 {
 	for (std::vector<Ufo*>::iterator ufo = _game->getSavedGame()->getUfos()->begin(); ufo != _game->getSavedGame()->getUfos()->end(); ++ufo)
 	{
@@ -1473,7 +1473,11 @@ void GeoscapeState::ufoHunting()
 			// current target and attraction
 			int newAttraction = INT_MAX;
 			Craft *newTarget = 0;
-			Craft *originalTarget = (*ufo)->getTargetedXcomCraft();
+			Craft *originalTarget = 0;
+			if ((*ufo)->isHunting())
+			{
+				originalTarget = (*ufo)->getTargetedXcomCraft();
+			}
 			if (originalTarget)
 			{
 				if ((*ufo)->insideRadarRange(originalTarget))
@@ -1487,12 +1491,13 @@ void GeoscapeState::ufoHunting()
 			{
 				for (std::vector<Craft*>::iterator craft = (*base)->getCrafts()->begin(); craft != (*base)->getCrafts()->end(); ++craft)
 				{
-					if ((*craft)->getStatus() == "STR_OUT" && (*craft)->getHunterKillerAttraction((*ufo)->getHuntMode()) < newAttraction)
+					if ((*craft)->getStatus() == "STR_OUT")
 					{
-						if ((*ufo)->insideRadarRange(*craft))
+						int tmpAttraction = (*craft)->getHunterKillerAttraction((*ufo)->getHuntMode());
+						if (tmpAttraction < newAttraction && (*ufo)->insideRadarRange(*craft))
 						{
 							newTarget = (*craft);
-							newAttraction = newTarget->getHunterKillerAttraction((*ufo)->getHuntMode());
+							newAttraction = tmpAttraction;
 						}
 					}
 				}
@@ -1520,6 +1525,25 @@ void GeoscapeState::ufoHunting()
 			{
 				// stop hunting
 				(*ufo)->resetOriginalDestination(originalTarget);
+			}
+
+			// If we are not preoccupied by hunting, let's see if there is still anyone left to escort
+			if ((*ufo)->isEscort() && !(*ufo)->isHunting() && !(*ufo)->isEscorting())
+			{
+				// Find a UFO to escort
+				for (std::vector<Ufo*>::const_iterator t = _game->getSavedGame()->getUfos()->begin(); t != _game->getSavedGame()->getUfos()->end(); ++t)
+				{
+					// From the same mission
+					if ((*t)->getMission()->getId() == (*ufo)->getMission()->getId())
+					{
+						// But not another hunter-killer, we escort only normal UFOs
+						if (!(*t)->isHunterKiller())
+						{
+							(*ufo)->setEscortedUfo((*t));
+							break;
+						}
+					}
+				}
 			}
 		}
 	}

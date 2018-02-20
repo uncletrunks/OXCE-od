@@ -62,13 +62,16 @@ private:
 	void calculateSpeed();
 	int _shield, _shieldRechargeHandle;
 	int _tractorBeamSlowdown;
-	bool _isHunterKiller;
+	bool _isHunterKiller, _isEscort;
 	int _huntMode, _huntBehavior;
-	bool _isHunting;
+	bool _isHunting, _isEscorting;
 	Waypoint *_origWaypoint;
 
 	using MovingTarget::load;
 	using MovingTarget::save;
+
+	void backupOriginalDestination();
+	void resetOriginalDestination();
 public:
 	/// Creates a UFO of the specified type.
 	Ufo(const RuleUfo *rules, int hunterKillerPercentage = 0, int huntMode = 0, int huntBehavior = 0);
@@ -155,9 +158,11 @@ public:
 	/// Gets the Xcom craft targeted by this UFO.
 	Craft *getTargetedXcomCraft() const;
 	/// Resets the original destination if targeting the given craft.
-	void resetOriginalDestination(Craft *craft);
+	void resetOriginalDestination(Craft *target);
 	/// Sets the Xcom craft targeted by this UFO.
 	void setTargetedXcomCraft(Craft *craft);
+	/// Sets the UFO escorted by this UFO.
+	void setEscortedUfo(Ufo *ufo);
 	/// Sets the UFO's destination.
 	void setDestination(Target *dest);
 	/// Get which interceptor this ufo is engaging.
@@ -199,12 +204,17 @@ public:
 	/// Is this UFO a hunter-killer?
 	bool isHunterKiller() const;
 	void setHunterKiller(bool isHunterKiller);
+	/// Is this UFO an escort?
+	bool isEscort() const;
+	void setEscort(bool isEscort);
 	/// Gets the UFO's hunting preferences.
 	int getHuntMode() const;
 	/// Gets the UFO's hunting behavior.
 	int getHuntBehavior() const;
 	/// Is this UFO actively hunting right now?
 	bool isHunting() const;
+	/// Is this UFO escorting other UFO right now?
+	bool isEscorting() const;
 	/// Checks if a target is inside the UFO's radar range.
 	bool insideRadarRange(Target *target) const;
 };

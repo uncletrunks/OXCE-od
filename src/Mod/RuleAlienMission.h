@@ -79,6 +79,11 @@ struct MissionWave
 	* 2: random preference (0 or 1) determined at spawn
 	*/
 	int huntBehavior;
+	/// Does this wave escort/protect the previous wave(s)?
+	/**
+	* The UFO escorts other UFO(s) from the same mission.
+	*/
+	bool escort;
 };
 
 enum MissionObjective { OBJECTIVE_SCORE, OBJECTIVE_INFILTRATION, OBJECTIVE_BASE, OBJECTIVE_SITE, OBJECTIVE_RETALIATION, OBJECTIVE_SUPPLY };
