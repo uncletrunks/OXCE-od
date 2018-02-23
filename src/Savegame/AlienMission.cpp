@@ -247,6 +247,12 @@ void AlienMission::think(Game &engine, const Globe &globe)
 	{
 		size_t spawnTimer = _rule.getWave(_nextWave).spawnTimer / 30;
 		_spawnCountdown = (spawnTimer/2 + RNG::generate(0, spawnTimer)) * 30;
+
+		if (_spawnCountdown == 0)
+		{
+			// spawn more UFOs immediately
+			think(engine, globe);
+		}
 	}
 }
 
