@@ -25,7 +25,7 @@ namespace OpenXcom
 /**
  * Initializes an alien base
  */
-AlienBase::AlienBase(AlienDeployment *deployment) : Target(), _id(0), _inBattlescape(false), _discovered(false), _deployment(deployment)
+AlienBase::AlienBase(AlienDeployment *deployment) : Target(), _id(0), _inBattlescape(false), _discovered(false), _deployment(deployment), _genMissionCount(0)
 {
 	// allow spawning hunt missions immediately after the base is created, i.e. no initial delay
 	_minutesSinceLastHuntMissionGeneration = _deployment->getHuntMissionMaxFrequency();
@@ -50,6 +50,7 @@ void AlienBase::load(const YAML::Node &node)
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
 	_discovered = node["discovered"].as<bool>(_discovered);
 	_minutesSinceLastHuntMissionGeneration = node["minutesSinceLastHuntMissionGeneration"].as<int>(_minutesSinceLastHuntMissionGeneration);
+	_genMissionCount = node["genMissionCount"].as<int>(_genMissionCount);
 }
 
 /**
@@ -67,6 +68,7 @@ YAML::Node AlienBase::save() const
 		node["discovered"] = _discovered;
 	node["deployment"] = _deployment->getType();
 	node["minutesSinceLastHuntMissionGeneration"] = _minutesSinceLastHuntMissionGeneration;
+	node["genMissionCount"] = _genMissionCount;
 	return node;
 }
 
@@ -196,6 +198,24 @@ int AlienBase::getMinutesSinceLastHuntMissionGeneration() const
 void AlienBase::setMinutesSinceLastHuntMissionGeneration(int newValue)
 {
 	_minutesSinceLastHuntMissionGeneration = newValue;
+}
+
+/**
+ * Gets the number of genMissions generated so far by this base.
+ * @return Number of missions.
+ */
+int AlienBase::getGenMissionCount() const
+{
+	return _genMissionCount;
+}
+
+/**
+ * Sets the number of genMissions generated so far by this base.
+ * @param newValue Number of missions.
+ */
+void AlienBase::setGenMissionCount(int newValue)
+{
+	_genMissionCount = newValue;
 }
 
 }

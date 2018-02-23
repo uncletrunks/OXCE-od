@@ -36,6 +36,7 @@ private:
 	bool _inBattlescape, _discovered;
 	AlienDeployment *_deployment;
 	int _minutesSinceLastHuntMissionGeneration;
+	int _genMissionCount;
 public:
 	/// Creates an alien base.
 	AlienBase(AlienDeployment *deployment);
@@ -74,6 +75,10 @@ public:
 	int getMinutesSinceLastHuntMissionGeneration() const;
 	/// Sets the number of minutes passed since the last hunt mission was generated.
 	void setMinutesSinceLastHuntMissionGeneration(int newValue);
+	/// Gets the number of genMissions generated so far by this base.
+	int getGenMissionCount() const;
+	/// Sets the number of genMissions generated so far by this base.
+	void setGenMissionCount(int newValue);
 
 };
 

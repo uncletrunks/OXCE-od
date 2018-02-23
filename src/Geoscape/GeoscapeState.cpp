@@ -2057,7 +2057,7 @@ public:
 	/// Store rules and game data references for later use.
 	GenerateSupplyMission(const Mod &mod, SavedGame &save) : _mod(mod), _save(save) { /* Empty by design */ }
 	/// Check and spawn mission.
-	void operator()(const AlienBase *base) const;
+	void operator()(AlienBase *base) const;
 private:
 	const Mod &_mod;
 	SavedGame &_save;
@@ -2068,11 +2068,11 @@ private:
  * There is a 6/101 chance of the mission spawning.
  * @param base A pointer to the alien base.
  */
-void GenerateSupplyMission::operator()(const AlienBase *base) const
+void GenerateSupplyMission::operator()(AlienBase *base) const
 {
 	if (_mod.getAlienMission(base->getDeployment()->getGenMissionType()))
 	{
-		if (RNG::percent(base->getDeployment()->getGenMissionFrequency()))
+		if (base->getGenMissionCount() < base->getDeployment()->getGenMissionLimit() && RNG::percent(base->getDeployment()->getGenMissionFrequency()))
 		{
 			//Spawn supply mission for this base.
 			const RuleAlienMission &rule = *_mod.getAlienMission(base->getDeployment()->getGenMissionType());
@@ -2094,6 +2094,7 @@ void GenerateSupplyMission::operator()(const AlienBase *base) const
 			}
 			mission->setMissionSiteZone(targetZone);
 			mission->start();
+			base->setGenMissionCount(base->getGenMissionCount() + 1); // increase counter, used to check mission limit
 			_save.getAlienMissions().push_back(mission);
 		}
 	}
