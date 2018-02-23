@@ -2006,6 +2006,18 @@ void GenerateSupplyMission::operator()(const AlienBase *base) const
 			mission->setId(_save.getId("ALIEN_MISSIONS"));
 			mission->setRace(base->getAlienRace());
 			mission->setAlienBase(base);
+			int targetZone = -1;
+			if (mission->getRules().getObjective() == OBJECTIVE_SITE)
+			{
+				int missionZone = mission->getRules().getSpawnZone();
+				RuleRegion *regionRules = _mod.getRegion(mission->getRegion());
+				const std::vector<MissionArea> areas = regionRules->getMissionZones().at(missionZone).areas;
+				if (!areas.empty())
+				{
+					targetZone = RNG::generate(0, areas.size() - 1);
+				}
+			}
+			mission->setMissionSiteZone(targetZone);
 			mission->start();
 			_save.getAlienMissions().push_back(mission);
 		}
