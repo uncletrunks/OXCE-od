@@ -35,6 +35,7 @@ private:
 	std::string _race;
 	bool _inBattlescape, _discovered;
 	AlienDeployment *_deployment;
+	int _minutesSinceLastHuntMissionGeneration;
 public:
 	/// Creates an alien base.
 	AlienBase(AlienDeployment *deployment);
@@ -69,6 +70,11 @@ public:
 
 	AlienDeployment *getDeployment() const;
  
+	/// Gets the number of minutes passed since the last hunt mission was generated.
+	int getMinutesSinceLastHuntMissionGeneration() const;
+	/// Sets the number of minutes passed since the last hunt mission was generated.
+	void setMinutesSinceLastHuntMissionGeneration(int newValue);
+
 };
 
 }

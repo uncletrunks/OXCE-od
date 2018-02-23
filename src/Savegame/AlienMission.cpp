@@ -381,6 +381,12 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 	ufo->setSpeed(trajectory.getSpeedPercentage(0) * ufo->getCraftStats().speedMax);
 	ufo->setLongitude(pos.first);
 	ufo->setLatitude(pos.second);
+	if (_base && _rule.getObjective() != OBJECTIVE_SUPPLY)
+	{
+		// override starting location for hunt missions
+		ufo->setLongitude(_base->getLongitude());
+		ufo->setLatitude(_base->getLatitude());
+	}
 	Waypoint *wp = new Waypoint();
 	pos = getWaypoint(trajectory, 1, globe, regionRules);
 	wp->setLongitude(pos.first);

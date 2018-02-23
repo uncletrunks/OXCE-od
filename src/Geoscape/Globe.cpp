@@ -1075,7 +1075,7 @@ void Globe::XuLine(Surface* surface, Surface* src, double x1, double y1, double 
 }
 
 /**
- * Draws the radar ranges of player bases (player craft and UFO hunter-killers) on the globe.
+ * Draws the radar ranges of player bases, player craft, alien bases and UFO hunter-killers on the globe.
  */
 void Globe::drawRadars()
 {
@@ -1144,7 +1144,9 @@ void Globe::drawRadars()
 
 			if (range>0) drawGlobeCircle(lat,lon,range,24);
 		}
+	}
 
+	{
 		// Draw radars around UFO hunter-killers
 		for (std::vector<Ufo*>::iterator u = _game->getSavedGame()->getUfos()->begin(); u != _game->getSavedGame()->getUfos()->end(); ++u)
 		{
@@ -1154,6 +1156,19 @@ void Globe::drawRadars()
 				lon = (*u)->getLongitude();
 				range = (*u)->getCraftStats().radarRange;
 				range = range * (1 / 60.0) * (M_PI / 180);
+
+				if (range > 0) drawGlobeCircle(lat, lon, range, 24);
+			}
+		}
+
+		// Draw radars around alien bases
+		for (std::vector<AlienBase*>::iterator ab = _game->getSavedGame()->getAlienBases()->begin(); ab != _game->getSavedGame()->getAlienBases()->end(); ++ab)
+		{
+			if ((*ab)->getDeployment()->getBaseDetectionRange() > 0 && (*ab)->isDiscovered())
+			{
+				lat = (*ab)->getLatitude();
+				lon = (*ab)->getLongitude();
+				range = (*ab)->getDeployment()->getBaseDetectionRange();
 
 				if (range > 0) drawGlobeCircle(lat, lon, range, 24);
 			}

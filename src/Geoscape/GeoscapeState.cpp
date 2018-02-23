@@ -1460,6 +1460,9 @@ void GeoscapeState::time10Minutes()
 		std::for_each(discovered.begin(), discovered.end(), SetRetaliationTarget());
 	}
 
+	// Handle alien bases detecting xcom craft and generating hunt missions
+	baseHunting();
+
 	// Handle UFO re-targeting (i.e. hunting and escorting) logic
 	ufoHuntingAndEscorting();
 }
@@ -1543,6 +1546,78 @@ void GeoscapeState::ufoHuntingAndEscorting()
 							break;
 						}
 					}
+				}
+			}
+		}
+	}
+}
+
+void GeoscapeState::baseHunting()
+{
+	for (std::vector<AlienBase*>::iterator ab = _game->getSavedGame()->getAlienBases()->begin(); ab != _game->getSavedGame()->getAlienBases()->end(); ++ab)
+	{
+		if ((*ab)->getDeployment()->getBaseDetectionRange() > 0)
+		{
+			// Increase counter by 10 minutes
+			(*ab)->setMinutesSinceLastHuntMissionGeneration((*ab)->getMinutesSinceLastHuntMissionGeneration() + 10);
+
+			// Check counter
+			if ((*ab)->getMinutesSinceLastHuntMissionGeneration() >= (*ab)->getDeployment()->getHuntMissionMaxFrequency())
+			{
+				// Look for nearby craft
+				bool started = false;
+				for (std::vector<Base*>::iterator bi = _game->getSavedGame()->getBases()->begin(); bi != _game->getSavedGame()->getBases()->end(); ++bi)
+				{
+					for (std::vector<Craft*>::iterator ci = (*bi)->getCrafts()->begin(); ci != (*bi)->getCrafts()->end(); ++ci)
+					{
+						// Craft is flying (i.e. not in base)
+						if ((*ci)->getStatus() == "STR_OUT" && !(*ci)->isDestroyed())
+						{
+							// Craft is close enough and RNG is in our favour
+							if ((*ci)->getDistance((*ab)) < (*ab)->getDeployment()->getBaseDetectionRange() && RNG::percent((*ab)->getDeployment()->getBaseDetectionChance()))
+							{
+								// Generate a hunt mission
+								auto mission = (*ab)->getDeployment()->generateHuntMission(_game->getSavedGame()->getMonthsPassed());
+								if (_game->getMod()->getAlienMission(mission))
+								{
+									// Spawn hunt mission for this base.
+									const RuleAlienMission &rule = *_game->getMod()->getAlienMission(mission);
+									AlienMission *mission = new AlienMission(rule);
+									mission->setRegion(_game->getSavedGame()->locateRegion(*(*ab))->getRules()->getType(), *_game->getMod());
+									mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
+									mission->setRace((*ab)->getAlienRace());
+									mission->setAlienBase((*ab));
+									int targetZone = -1;
+									if (mission->getRules().getObjective() == OBJECTIVE_SITE)
+									{
+										int missionZone = mission->getRules().getSpawnZone();
+										RuleRegion *regionRules = _game->getMod()->getRegion(mission->getRegion());
+										const std::vector<MissionArea> areas = regionRules->getMissionZones().at(missionZone).areas;
+										if (!areas.empty())
+										{
+											targetZone = RNG::generate(0, areas.size() - 1);
+										}
+									}
+									mission->setMissionSiteZone(targetZone);
+									mission->start();
+									_game->getSavedGame()->getAlienMissions().push_back(mission);
+
+									// Start immediately
+									mission->think(*_game, *_globe);
+
+									// Reset counter
+									(*ab)->setMinutesSinceLastHuntMissionGeneration(0);
+									started = true;
+									break;
+								}
+								else if (mission != "")
+								{
+									throw Exception("Alien Base tried to generate undefined hunt mission: " + mission);
+								}
+							}
+						}
+					}
+					if (started) break;
 				}
 			}
 		}
