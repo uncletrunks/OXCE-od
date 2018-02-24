@@ -436,6 +436,8 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 				// But not another hunter-killer, we escort only normal UFOs
 				if (!(*u)->isHunterKiller())
 				{
+					ufo->setLongitude((*u)->getLongitude());
+					ufo->setLatitude((*u)->getLatitude());
 					ufo->setEscortedUfo((*u));
 					break;
 				}
