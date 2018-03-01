@@ -464,13 +464,13 @@ void Game::loadLanguage(const std::string &filename)
 	loadLanguageCommon(filename, dirLanguageOXCE, true);
 
 	// Step 2: mod strings (note: xcom1 and xcom2 are also "standard" mods)
-	std::vector<ModInfo> activeMods = Options::getActiveMods();
-	for (std::vector<ModInfo>::const_iterator i = activeMods.begin(); i != activeMods.end(); ++i)
+	std::vector<const ModInfo*> activeMods = Options::getActiveMods();
+	for (std::vector<const ModInfo*>::const_iterator i = activeMods.begin(); i != activeMods.end(); ++i)
 	{
 		// if a master mod (e.g. piratez) has a master (e.g. xcom1), load it too (even though technically it is not enabled)
-		if ((*i).isMaster() && (*i).getMaster().length() > 1)
+		if ((*i)->isMaster() && (*i)->getMaster().length() > 1)
 		{
-			ModInfo masterModInfo = Options::getModInfos().find((*i).getMaster())->second;
+			const ModInfo *masterModInfo = &Options::getModInfos().at((*i)->getMaster());
 			loadLanguageMods(masterModInfo, filename, dirLanguage);
 			loadLanguageMods(masterModInfo, filename, dirLanguageAndroid);
 			loadLanguageMods(masterModInfo, filename, dirLanguageOXCE);
@@ -509,11 +509,11 @@ void Game::loadLanguageCommon(const std::string &filename, const std::string &di
 	}
 }
 
-void Game::loadLanguageMods(const ModInfo &modInfo, const std::string &filename, const std::string &directory)
+void Game::loadLanguageMods(const ModInfo *modInfo, const std::string &filename, const std::string &directory)
 {
 	std::ostringstream ss;
 	ss << directory << filename << ".yml";
-	std::string file = modInfo.getPath() + ss.str();
+	std::string file = modInfo->getPath() + ss.str();
 	if (CrossPlatform::fileExists(file))
 	{
 		_lang->load(file);
