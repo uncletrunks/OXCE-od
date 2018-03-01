@@ -88,5 +88,20 @@ void ModInfo::setReservedSpace(int reservedSpace)
 	_reservedSpace = reservedSpace;
 }
 
+/**
+ * Checks if a given mod can be activated.
+ * It must either be:
+ * - a Master mod
+ * - a standalone mod (no master)
+ * - depend on the current Master mod
+ * @param curMaster Id of the active master mod.
+ * @return True if it's activable, false otherwise.
+*/
+bool ModInfo::canActivate(const std::string &curMaster) const
+{
+	return (isMaster() || getMaster().empty() || getMaster() == curMaster);
+}
+
+
 const std::vector<std::string> &ModInfo::getExternalResourceDirs() const { return _externalResourceDirs; }
 }

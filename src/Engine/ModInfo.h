@@ -58,6 +58,8 @@ public:
 	const std::string &getMaster() const;
 	/// Gets whether this mod is a master (i.e. a vanilla game/total conversion)
 	bool isMaster() const;
+	/// Gets whether this mod can be activated.
+	bool canActivate(const std::string &curMaster) const;
 	/// Gets size of mod, bigger mod reserve more values in common colections/surfacesets.
 	int getReservedSpace() const;
 	/// Sets mod size (DO NOT use this method outside Options::updateReservedSpace()).
