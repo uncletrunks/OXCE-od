@@ -369,6 +369,7 @@ set ( ufopedia_src
   Ufopaedia/ArticleStateTextImage.cpp
   Ufopaedia/ArticleStateUfo.cpp
   Ufopaedia/ArticleStateVehicle.cpp
+  Ufopaedia/StatsForNerdsState.cpp
   Ufopaedia/Ufopaedia.cpp
   Ufopaedia/UfopaediaSelectState.cpp
   Ufopaedia/UfopaediaStartState.cpp

@@ -43,6 +43,7 @@
 #include "ArticleStateTFTDCraft.h"
 #include "ArticleStateTFTDCraftWeapon.h"
 #include "ArticleStateTFTDUso.h"
+#include "StatsForNerdsState.h"
 #include "../Engine/Game.h"
 
 namespace OpenXcom
@@ -178,6 +179,22 @@ namespace OpenXcom
 		{
 			ArticleDefinition *article = game->getMod()->getUfopaediaArticle(id);
 			game->pushState(createArticleState(article));
+		}
+	}
+
+	/**
+	 * Checks if selected article_id is available -> if yes, open its (raw) details.
+	 * @param game Pointer to actual game.
+	 * @param article_id Article id to find.
+	 */
+	void Ufopaedia::openArticleDetail(Game *game, const std::string &article_id)
+	{
+		std::string id = article_id;
+		size_t tmpIndex = getArticleIndex(game->getSavedGame(), game->getMod(), id);
+		if (tmpIndex != (size_t)-1)
+		{
+			ArticleDefinition *article = game->getMod()->getUfopaediaArticle(id);
+			game->pushState(new StatsForNerdsState(article));
 		}
 	}
 

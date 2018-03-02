@@ -1845,3 +1845,24 @@ interfaces:
         color2: 244  # light blue
       - id: ammoColor
         color: 32    # red
+  - type: statsForNerds
+    palette: PAL_BASESCAPE
+    elements:
+      - id: palette
+        color: 1     # burgundy
+      - id: window
+        color: 218   # blue
+      - id: text
+        color: 218   # blue
+        color2: 208  # white
+      - id: list
+        color: 246   # purple
+        color2: 241  # pink
+        border: 218  # blue
+      - id: listExtended
+        color: 208   # white
+        color2: 213  # gold
+      - id: button
+        color: 246   # purple
+      - id: comboBox
+        color: 241   # pink
