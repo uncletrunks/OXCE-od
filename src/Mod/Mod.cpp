@@ -308,14 +308,6 @@ Mod::Mod() :
 
 	dmg = new RuleDamageType();
 	dmg->ResistType = DT_NONE;
-	dmg->RandomType = DRT_NONE;
-	dmg->IgnoreOverKill = true;
-	dmg->ToHealth = 0.0f;
-	dmg->ToArmor = 0.0f;
-	dmg->ToWound = 0.0f;
-	dmg->ToItem = 0.0f;
-	dmg->ToTile = 0.0f;
-	dmg->ToStun = 0.0f;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
