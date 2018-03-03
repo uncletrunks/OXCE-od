@@ -311,6 +311,7 @@ en-GB:
 #=================== Ufopaedia ===================
 #ArticleState.cpp
   STR_DAMAGE_NONE: "NONE"
+  STR_INFO_UFOPEDIA: "INFO"
 #ArticleStateCraft.cpp
   STR_COCKPIT_CAPACITY: "PILOTS>{ALT}{0}{ALT}"
 #ArticleStateItem.cpp

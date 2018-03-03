@@ -149,7 +149,7 @@ namespace OpenXcom
 		_btnNext->setText(L">>");
 		_btnNext->onMouseClick((ActionHandler)&ArticleState::btnNextClick);
 		_btnNext->onKeyboardPress((ActionHandler)&ArticleState::btnNextClick, Options::keyGeoRight);
-		_btnInfo->setText(tr("STR_INFO"));
+		_btnInfo->setText(tr("STR_INFO_UFOPEDIA"));
 		_btnInfo->onMouseClick((ActionHandler)&ArticleState::btnInfoClick);
 		_btnInfo->onKeyboardPress((ActionHandler)&ArticleState::btnInfoClick, Options::keyGeoUfopedia);
 		_btnInfo->setVisible(false);

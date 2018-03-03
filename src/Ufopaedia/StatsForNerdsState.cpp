@@ -223,6 +223,8 @@ void StatsForNerdsState::initLists()
 	_showIds = _btnIncludeIds->getPressed();
 	_showDefaults = _btnIncludeDefaults->getPressed();
 
+	_counter = 0;
+
 	switch (_typeId)
 	{
 	case UFOPAEDIA_TYPE_ITEM:
@@ -255,12 +257,35 @@ void StatsForNerdsState::addTranslation(std::wostringstream &ss, const std::stri
 }
 
 /**
- * Adds a section heading to the table.
+ * Adds a section name to the table.
+ */
+void StatsForNerdsState::addSection(const std::wstring &name, const std::wstring &desc, Uint8 color)
+{
+	_lstRawData->addRow(2, name.c_str(), desc.c_str());
+	_lstRawData->setRowColor(_lstRawData->getTexts() - 1, color);
+}
+
+/**
+ * Adds a group heading to the table.
  */
 void StatsForNerdsState::addHeading(const std::wstring &propertyName)
 {
 	_lstRawData->addRow(2, propertyName.c_str(), L"");
 	_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 0, _blue);
+
+	// reset counter
+	_counter = 0;
+}
+
+/**
+ * Ends a group with a heading, potentially removing the heading... if the group turned out to be empty.
+ */
+void StatsForNerdsState::endHeading()
+{
+	if (_counter == 0)
+	{
+		_lstRawData->removeLastRow();
+	}
 }
 
 /**
@@ -275,6 +300,7 @@ void StatsForNerdsState::addSingleString(std::wostringstream &ss, const std::str
 	resetStream(ss);
 	addTranslation(ss, id);
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (id != defaultId)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -304,6 +330,7 @@ void StatsForNerdsState::addVectorOfStrings(std::wostringstream &ss, const std::
 	}
 	ss << L"}";
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (!vec.empty())
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -329,6 +356,7 @@ void StatsForNerdsState::addBoolean(std::wostringstream &ss, const bool &value, 
 		ss << L"false";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -347,6 +375,7 @@ void StatsForNerdsState::addFloat(std::wostringstream &ss, const float &value, c
 	resetStream(ss);
 	ss << value;
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (!AreSame(value, defaultvalue))
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -365,6 +394,7 @@ void StatsForNerdsState::addDouble(std::wostringstream &ss, const double &value,
 	resetStream(ss);
 	ss << value;
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (!AreSame(value, defaultvalue))
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -383,6 +413,7 @@ void StatsForNerdsState::addInteger(std::wostringstream &ss, const int &value, c
 	resetStream(ss);
 	ss << value;
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -406,6 +437,7 @@ void StatsForNerdsState::addIntegerPercent(std::wostringstream &ss, const int &v
 		ss << L"%";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -435,6 +467,7 @@ void StatsForNerdsState::addVectorOfIntegers(std::wostringstream &ss, const std:
 	}
 	ss << L"}";
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (!vec.empty())
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -472,6 +505,7 @@ void StatsForNerdsState::addBattleType(std::wostringstream &ss, const BattleType
 		ss << L" [" << value << L"]";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -517,6 +551,7 @@ void StatsForNerdsState::addDamageType(std::wostringstream &ss, const ItemDamage
 		ss << L" [" << value << L"]";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -549,6 +584,7 @@ void StatsForNerdsState::addDamageRandomType(std::wostringstream &ss, const Item
 		ss << L" [" << value << L"]";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -579,6 +615,7 @@ void StatsForNerdsState::addBattleFuseType(std::wostringstream &ss, const Battle
 		ss << L" [" << value << L"]";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -597,6 +634,7 @@ void StatsForNerdsState::addRuleItemUseCostBasic(std::wostringstream &ss, const 
 	resetStream(ss);
 	ss << value.Time;
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value.Time != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -604,51 +642,103 @@ void StatsForNerdsState::addRuleItemUseCostBasic(std::wostringstream &ss, const 
 }
 
 /**
+ * Adds a number to the string stream, optionally formatted as boolean.
+ */
+void StatsForNerdsState::addBoolOrInteger(std::wostringstream &ss, const int &value, bool formatAsBoolean)
+{
+	if (formatAsBoolean)
+	{
+		if (value == 1)
+			ss << L"true";
+		else if (value == 0)
+			ss << L"false";
+		else
+			ss << value;
+	}
+	else
+	{
+		ss << value;
+	}
+}
+
+/**
+ * Adds a number to the string stream, optionally formatted as boolean.
+ */
+void StatsForNerdsState::addPercentageSignOrNothing(std::wostringstream &ss, const int &value, bool smartFormat)
+{
+	if (smartFormat)
+	{
+		// 1 means flat: true
+		if (value != 1)
+		{
+			ss << L"%";
+		}
+	}
+}
+
+/**
  * Adds a full RuleItemUseCost to the table.
  */
-void StatsForNerdsState::addRuleItemUseCostFull(std::wostringstream &ss, const RuleItemUseCost &value, const std::wstring &propertyName, const RuleItemUseCost &defaultvalue)
+void StatsForNerdsState::addRuleItemUseCostFull(std::wostringstream &ss, const RuleItemUseCost &value, const std::wstring &propertyName, const RuleItemUseCost &defaultvalue, bool smartFormat, const RuleItemUseCost &formatBy)
 {
+	bool isDefault = false;
 	if (value.Time == defaultvalue.Time &&
 		value.Energy == defaultvalue.Energy &&
 		value.Morale == defaultvalue.Morale &&
 		value.Health == defaultvalue.Health &&
-		value.Stun == defaultvalue.Stun && !_showDefaults)
+		value.Stun == defaultvalue.Stun)
+	{
+		isDefault = true;
+	}
+	if (isDefault && !_showDefaults)
 	{
 		return;
 	}
+	bool isFlatAttribute = propertyName.find(L"flat") == 0;
 	resetStream(ss);
-	bool isDefault = true;
-	if (value.Time != defaultvalue.Time)
+	bool isFirst = true;
+	// always show non-zero TUs, even if it's a default value
+	if (value.Time != 0 || _showDefaults)
 	{
-		ss << L"time:" << value.Time;
-		isDefault = false;
+		ss << L"time:";
+		addBoolOrInteger(ss, value.Time, isFlatAttribute);
+		addPercentageSignOrNothing(ss, formatBy.Time, smartFormat);
+		isFirst = false;
 	}
-	if (value.Energy != defaultvalue.Energy)
+	if (value.Energy != defaultvalue.Energy || _showDefaults)
 	{
-		if (!isDefault) ss << L", ";
-		ss << L"energy:" << value.Energy;
-		isDefault = false;
+		if (!isFirst) ss << L", ";
+		ss << L"energy:";
+		addBoolOrInteger(ss, value.Energy, isFlatAttribute);
+		addPercentageSignOrNothing(ss, formatBy.Energy, smartFormat);
+		isFirst = false;
 	}
-	if (value.Morale != defaultvalue.Morale)
+	if (value.Morale != defaultvalue.Morale || _showDefaults)
 	{
-		if (!isDefault) ss << L", ";
-		ss << L"morale:" << value.Morale;
-		isDefault = false;
+		if (!isFirst) ss << L", ";
+		ss << L"morale:";
+		addBoolOrInteger(ss, value.Morale, isFlatAttribute);
+		addPercentageSignOrNothing(ss, formatBy.Morale, smartFormat);
+		isFirst = false;
 	}
-	if (value.Health != defaultvalue.Health)
+	if (value.Health != defaultvalue.Health || _showDefaults)
 	{
-		if (!isDefault) ss << L", ";
-		ss << L"health:" << value.Health;
-		isDefault = false;
+		if (!isFirst) ss << L", ";
+		ss << L"health:";
+		addBoolOrInteger(ss, value.Health, isFlatAttribute);
+		addPercentageSignOrNothing(ss, formatBy.Health, smartFormat);
+		isFirst = false;
 	}
-	if (value.Stun != defaultvalue.Stun)
+	if (value.Stun != defaultvalue.Stun || _showDefaults)
 	{
-		if (!isDefault) ss << L", ";
-		ss << L"stun:" << value.Stun;
-		isDefault = false;
+		if (!isFirst) ss << L", ";
+		ss << L"stun:";
+		addBoolOrInteger(ss, value.Stun, isFlatAttribute);
+		addPercentageSignOrNothing(ss, formatBy.Stun, smartFormat);
+		isFirst = false;
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
-
+	++_counter;
 	if (!isDefault)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -678,6 +768,7 @@ void StatsForNerdsState::addBattleMediKitType(std::wostringstream &ss, const Bat
 		ss << L" [" << value << L"]";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -736,6 +827,7 @@ void StatsForNerdsState::addExperienceTrainingMode(std::wostringstream &ss, cons
 		ss << L" [" << value << L"]";
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -755,7 +847,16 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 	bool isFirst = true;
 	for (RuleStatBonusDataOrig item : *value.getBonusRaw())
 	{
-		if (!isFirst)
+		bool isEmpty = true;
+		for (float n : item.second)
+		{
+			if (!AreSame(n, 0.0f))
+			{
+				isEmpty = false;
+				break;
+			}
+		}
+		if (!isFirst && !isEmpty)
 		{
 			ss << L" + ";
 		}
@@ -790,6 +891,7 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 		}
 	}
 	_lstRawData->addRow(2, propertyName.c_str(), ss.str().c_str());
+	++_counter;
 	if (value.isModded())
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
@@ -832,45 +934,11 @@ void StatsForNerdsState::initItemList()
 
 	std::wostringstream ss;
 
-	addSingleString(ss, itemRule->getType(), L"type");
 	addSingleString(ss, itemRule->getName(), L"name", itemRule->getType());
 	addSingleString(ss, itemRule->getNameAsAmmo(), L"nameAsAmmo");
 
-	addVectorOfStrings(ss, itemRule->getRequirements(), L"requires");
-	addVectorOfStrings(ss, itemRule->getBuyRequirements(), L"requiresBuy");
-	addVectorOfStrings(ss, itemRule->getCategories(), L"categories");
-
-	addDouble(ss, itemRule->getSize(), L"size");
-
-	addInteger(ss, itemRule->getBuyCost(), L"costBuy");
-	addInteger(ss, itemRule->getSellCost(), L"costSell");
-	addInteger(ss, itemRule->getTransferTime(), L"transferTime", 24);
-	addInteger(ss, itemRule->getWeight(), L"weight", 3);
-
-	addInteger(ss, itemRule->getBigSprite(), L"bigSprite", -1);
-	addInteger(ss, itemRule->getFloorSprite(), L"floorSprite", -1);
-	addInteger(ss, itemRule->getHandSprite(), L"handSprite", 120);
-	addInteger(ss, itemRule->getBulletSprite(), L"bulletSprite", -1);
-
-	addVectorOfIntegers(ss, itemRule->getFireSoundRaw(), L"fireSound");
-	addVectorOfIntegers(ss, itemRule->getHitSoundRaw(), L"hitSound");
-	addVectorOfIntegers(ss, itemRule->getHitMissSoundRaw(), L"hitMissSound");
-	addVectorOfIntegers(ss, itemRule->getMeleeSoundRaw(), L"meleeSound");
-	addVectorOfIntegers(ss, itemRule->getMeleeMissSoundRaw(), L"meleeMissSound");
-	addVectorOfIntegers(ss, itemRule->getPsiSoundRaw(), L"psiSound");
-	addVectorOfIntegers(ss, itemRule->getPsiMissSoundRaw(), L"psiMissSound");
-
-	addInteger(ss, itemRule->getHitAnimation(), L"hitAnimation");
-	addInteger(ss, itemRule->getHitMissAnimation(), L"hitMissAnimation", -1);
-	addInteger(ss, itemRule->getMeleeAnimation(), L"meleeAnimation");
-	addInteger(ss, itemRule->getMeleeMissAnimation(), L"meleeMissAnimation", -1);
-	addInteger(ss, itemRule->getPsiAnimation(), L"psiAnimation", -1);
-	addInteger(ss, itemRule->getPsiMissAnimation(), L"psiMissAnimation", -1);
-
-	addVectorOfIntegers(ss, itemRule->getMeleeHitSoundRaw(), L"meleeHitSound");
-	addVectorOfIntegers(ss, itemRule->getExplosionHitSoundRaw(), L"explosionHitSound");
-
 	addBattleType(ss, itemRule->getBattleType(), L"battleType");
+	addInteger(ss, itemRule->getWeight(), L"weight", 3);
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -925,18 +993,14 @@ void StatsForNerdsState::initItemList()
 		addBoolean(ss, rule->RandomEnergy, L"  RandomEnergy", mod->getDamageType(rule->ResistType)->RandomEnergy);
 		addBoolean(ss, rule->RandomTime, L"  RandomTime", mod->getDamageType(rule->ResistType)->RandomTime);
 		addBoolean(ss, rule->RandomMorale, L"  RandomMorale", mod->getDamageType(rule->ResistType)->RandomMorale);
+
+		endHeading();
 	}
 
 	// skillApplied*
 	// strengthApplied*
 
 	addInteger(ss, itemRule->getPower(), L"power");
-
-	addSingleString(ss, itemRule->getPsiAttackName(), L"psiAttackName");
-	addSingleString(ss, itemRule->getPrimeActionName(), L"primeActionName", "STR_PRIME_GRENADE");
-	addSingleString(ss, itemRule->getPrimeActionMessage(), L"primeActionMessage", "STR_GRENADE_IS_ACTIVATED");
-	addSingleString(ss, itemRule->getUnprimeActionName(), L"unprimeActionName");
-	addSingleString(ss, itemRule->getUnprimeActionMessage(), L"unprimeActionMessage", "STR_GRENADE_IS_DEACTIVATED");
 
 	BattleFuseType fuseTypeDefault = BFT_NONE;
 	if (itemRule->getBattleType() == BT_PROXIMITYGRENADE)
@@ -958,6 +1022,7 @@ void StatsForNerdsState::initItemList()
 		addBoolean(ss, itemRule->getFuseTriggerEvent()->throwExplode, L"  throwExplode");
 		addBoolean(ss, itemRule->getFuseTriggerEvent()->proximityTrigger, L"  proximityTrigger");
 		addBoolean(ss, itemRule->getFuseTriggerEvent()->proximityExplode, L"  proximityExplode");
+		endHeading();
 	}
 
 	addIntegerPercent(ss, itemRule->getConfigAimed()->accuracy, L"accuracyAimed");
@@ -971,45 +1036,24 @@ void StatsForNerdsState::initItemList()
 	addIntegerPercent(ss, itemRule->getAccuracyCloseQuarters(mod), L"accuracyCloseQuarters", 100); // not raw!
 	addIntegerPercent(ss, itemRule->getNoLOSAccuracyPenalty(mod), L"noLOSAccuracyPenalty", -1); // not raw!
 
-	addRuleItemUseCostBasic(ss, itemRule->getCostAimed(), L"tuAimed");
-	addRuleItemUseCostBasic(ss, itemRule->getCostAuto(), L"tuAuto");
-	addRuleItemUseCostBasic(ss, itemRule->getCostSnap(), L"tuSnap");
-	addRuleItemUseCostBasic(ss, itemRule->getCostMelee(), L"tuMelee");
+	addRuleItemUseCostFull(ss, itemRule->getCostAimed(), L"costAimed", RuleItemUseCost(), true, itemRule->getFlatAimed());
+	addRuleItemUseCostFull(ss, itemRule->getCostAuto(), L"costAuto", RuleItemUseCost(), true, itemRule->getFlatAuto());
+	addRuleItemUseCostFull(ss, itemRule->getCostSnap(), L"costSnap", RuleItemUseCost(), true, itemRule->getFlatSnap());
+	addRuleItemUseCostFull(ss, itemRule->getCostMelee(), L"costMelee", RuleItemUseCost(), true, itemRule->getFlatMelee());
 	int tuUseDefault = (itemRule->getBattleType() == BT_PSIAMP && itemRule->getPsiAttackName().empty()) ? 0 : 25;
-	addRuleItemUseCostBasic(ss, itemRule->getCostUse(), L"tuUse", tuUseDefault);
-	addRuleItemUseCostBasic(ss, itemRule->getCostMind(), L"tuMindcontrol", 25);
-	addRuleItemUseCostBasic(ss, itemRule->getCostPanic(), L"tuPanic", 25);
-	addRuleItemUseCostBasic(ss, itemRule->getCostThrow(), L"tuThrow", 25);
-	addRuleItemUseCostBasic(ss, itemRule->getCostPrime(), L"tuPrime", 50);
-	addRuleItemUseCostBasic(ss, itemRule->getCostUnprime(), L"tuUnprime", 25);
-
-	addRuleItemUseCostFull(ss, itemRule->getCostAimed(), L"costAimed");
-	addRuleItemUseCostFull(ss, itemRule->getCostAuto(), L"costAuto");
-	addRuleItemUseCostFull(ss, itemRule->getCostSnap(), L"costSnap");
-	addRuleItemUseCostFull(ss, itemRule->getCostMelee(), L"costMelee");
-	addRuleItemUseCostFull(ss, itemRule->getCostUse(), L"costUse", RuleItemUseCost(tuUseDefault));
-	addRuleItemUseCostFull(ss, itemRule->getCostMind(), L"costMindcontrol", RuleItemUseCost(25));
-	addRuleItemUseCostFull(ss, itemRule->getCostPanic(), L"costPanic", RuleItemUseCost(25));
-	addRuleItemUseCostFull(ss, itemRule->getCostThrow(), L"costThrow", RuleItemUseCost(25));
-	addRuleItemUseCostFull(ss, itemRule->getCostPrime(), L"costPrime", RuleItemUseCost(50));
-	addRuleItemUseCostFull(ss, itemRule->getCostUnprime(), L"costUnprime", RuleItemUseCost(25));
-
-	// flatRate*
-
-	addRuleItemUseCostFull(ss, itemRule->getFlatAimed(), L"flatAimed", RuleItemUseCost(0, 1));
-	addRuleItemUseCostFull(ss, itemRule->getFlatAuto(), L"flatAuto", RuleItemUseCost(0, 1));
-	addRuleItemUseCostFull(ss, itemRule->getFlatSnap(), L"flatSnap", RuleItemUseCost(0, 1));
-	addRuleItemUseCostFull(ss, itemRule->getFlatMelee(), L"flatMelee", RuleItemUseCost(0, 1));
-	addRuleItemUseCostFull(ss, itemRule->getFlatUse(), L"flatUse", RuleItemUseCost(0, 1));
-	addRuleItemUseCostFull(ss, itemRule->getFlatThrow(), L"flatThrow", RuleItemUseCost(0, 1));
-	addRuleItemUseCostFull(ss, itemRule->getFlatPrime(), L"flatPrime", RuleItemUseCost(0, 1));
-	addRuleItemUseCostFull(ss, itemRule->getFlatUnprime(), L"flatUnprime", RuleItemUseCost(0, 1));
+	addRuleItemUseCostFull(ss, itemRule->getCostUse(), L"costUse", RuleItemUseCost(tuUseDefault), true, itemRule->getFlatUse());
+	addRuleItemUseCostFull(ss, itemRule->getCostMind(), L"costMindcontrol", RuleItemUseCost(25), true, itemRule->getFlatUse()); // using flatUse!
+	addRuleItemUseCostFull(ss, itemRule->getCostPanic(), L"costPanic", RuleItemUseCost(25), true, itemRule->getFlatUse()); // using flatUse!
+	addRuleItemUseCostFull(ss, itemRule->getCostThrow(), L"costThrow", RuleItemUseCost(25), true, itemRule->getFlatThrow());
+	addRuleItemUseCostFull(ss, itemRule->getCostPrime(), L"costPrime", RuleItemUseCost(50), true, itemRule->getFlatPrime());
+	addRuleItemUseCostFull(ss, itemRule->getCostUnprime(), L"costUnprime", RuleItemUseCost(25), true, itemRule->getFlatUnprime());
 
 	addHeading(L"confAimed:");
 	{
 		addInteger(ss, itemRule->getConfigAimed()->shots, L"  shots", 1);
 		addSingleString(ss, itemRule->getConfigAimed()->name, L"  name", "STR_AIMED_SHOT");
 		addInteger(ss, itemRule->getConfigAimed()->ammoSlot, L"  ammoSlot");
+		endHeading();
 	}
 
 	addHeading(L"confAuto:");
@@ -1017,6 +1061,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getConfigAuto()->shots, L"  shots", 3);
 		addSingleString(ss, itemRule->getConfigAuto()->name, L"  name", "STR_AUTO_SHOT");
 		addInteger(ss, itemRule->getConfigAuto()->ammoSlot, L"  ammoSlot");
+		endHeading();
 	}
 
 	addHeading(L"confSnap:");
@@ -1024,6 +1069,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getConfigSnap()->shots, L"  shots", 1);
 		addSingleString(ss, itemRule->getConfigSnap()->name, L"  name", "STR_SNAP_SHOT");
 		addInteger(ss, itemRule->getConfigSnap()->ammoSlot, L"  ammoSlot");
+		endHeading();
 	}
 
 	addHeading(L"confMelee:");
@@ -1032,17 +1078,19 @@ void StatsForNerdsState::initItemList()
 		addSingleString(ss, itemRule->getConfigMelee()->name, L"  name");
 		int ammoSlotDefault = itemRule->getBattleType() == BT_MELEE ? 0 : -1;
 		addInteger(ss, itemRule->getConfigMelee()->ammoSlot, L"  ammoSlot", ammoSlotDefault);
+		endHeading();
 	}
 
 	// compatibleAmmo*
 	// tuLoad*
 	// tuUnload*
 
-	addHeading(L"ammo[0]:");
+	addHeading(L"primaryAmmo:");
 	{
 		addVectorOfStrings(ss, *itemRule->getCompatibleAmmoForSlot(0), L"  compatibleAmmo");
 		addInteger(ss, itemRule->getTULoad(0), L"  tuLoad", 15);
 		addInteger(ss, itemRule->getTUUnload(0), L"  tuUnload", 8);
+		endHeading();
 	}
 
 	addHeading(L"ammo[1]:");
@@ -1050,6 +1098,7 @@ void StatsForNerdsState::initItemList()
 		addVectorOfStrings(ss, *itemRule->getCompatibleAmmoForSlot(1), L"  compatibleAmmo");
 		addInteger(ss, itemRule->getTULoad(1), L"  tuLoad", 15);
 		addInteger(ss, itemRule->getTUUnload(1), L"  tuUnload", 8);
+		endHeading();
 	}
 
 	addHeading(L"ammo[2]:");
@@ -1057,6 +1106,7 @@ void StatsForNerdsState::initItemList()
 		addVectorOfStrings(ss, *itemRule->getCompatibleAmmoForSlot(2), L"  compatibleAmmo");
 		addInteger(ss, itemRule->getTULoad(2), L"  tuLoad", 15);
 		addInteger(ss, itemRule->getTUUnload(2), L"  tuUnload", 8);
+		endHeading();
 	}
 
 	addHeading(L"ammo[3]:");
@@ -1064,11 +1114,10 @@ void StatsForNerdsState::initItemList()
 		addVectorOfStrings(ss, *itemRule->getCompatibleAmmoForSlot(3), L"  compatibleAmmo");
 		addInteger(ss, itemRule->getTULoad(3), L"  tuLoad", 15);
 		addInteger(ss, itemRule->getTUUnload(3), L"  tuUnload", 8);
+		endHeading();
 	}
 
 	addInteger(ss, itemRule->getSpecialChance(), L"specialChance", 100);
-	addBoolean(ss, itemRule->isTwoHanded(), L"twoHanded");
-	addBoolean(ss, itemRule->isBlockingBothHands(), L"blockBothHands");
 	addInteger(ss, itemRule->getWaypoints(), L"waypoints");
 	addBoolean(ss, itemRule->isFixed(), L"fixedWeapon");
 	addBoolean(ss, itemRule->getFixedShow(), L"fixedWeaponShow");
@@ -1078,8 +1127,6 @@ void StatsForNerdsState::initItemList()
 	addBoolean(ss, itemRule->isConsumable(), L"isConsumable");
 	addBoolean(ss, itemRule->isFireExtinguisher(), L"isFireExtinguisher");
 	addBoolean(ss, itemRule->isExplodingInHands(), L"isExplodingInHands");
-	addInteger(ss, itemRule->getInventoryWidth(), L"invWidth", 1);
-	addInteger(ss, itemRule->getInventoryHeight(), L"invHeight", 1);
 
 	addInteger(ss, itemRule->getPainKillerQuantity(), L"painKiller");
 	addInteger(ss, itemRule->getHealQuantity(), L"heal");
@@ -1092,17 +1139,8 @@ void StatsForNerdsState::initItemList()
 	addFloat(ss, itemRule->getPainKillerRecovery(), L"painKillerRecovery", 1.0f);
 	addBattleMediKitType(ss, itemRule->getMediKitType(), L"medikitType");
 
-	addInteger(ss, itemRule->getRecoveryPoints(), L"recoveryPoints");
 	addInteger(ss, itemRule->getArmor(), L"armor", 20);
 	addInteger(ss, itemRule->getTurretType(), L"turretType", -1);
-
-	addHeading(L"ai:");
-	{
-		int useDelayCurrent = itemRule->getAIUseDelay(mod);
-		int useDelayDefault = useDelayCurrent > 0 ? -1 : useDelayCurrent;
-		addInteger(ss, useDelayCurrent, L"  useDelay", useDelayDefault); // not raw!
-		addInteger(ss, itemRule->getAIMeleeHitCount(), L"  meleeHitCount", 25);
-	}
 
 	addBoolean(ss, itemRule->isRecoverable(), L"recover", true);
 	addBoolean(ss, itemRule->isCorpseRecoverable(), L"recoverCorpse", true);
@@ -1114,7 +1152,6 @@ void StatsForNerdsState::initItemList()
 
 	addExperienceTrainingMode(ss, itemRule->getExperienceTrainingMode(), L"experienceTrainingMode");
 
-	addInteger(ss, itemRule->getListOrder(), L"listOrder");
 	addInteger(ss, itemRule->getMaxRange(), L"maxRange", 200);
 	int aimRangeDefault = itemRule->getBattleType() == BT_PSIAMP ? 0 : 200;
 	addInteger(ss, itemRule->getAimRange(), L"aimRange", aimRangeDefault);
@@ -1123,8 +1160,6 @@ void StatsForNerdsState::initItemList()
 	addInteger(ss, itemRule->getMinRange(), L"minRange");
 	int dropoffDefault = itemRule->getBattleType() == BT_PSIAMP ? 1 : 2;
 	addInteger(ss, itemRule->getDropoff(), L"dropoff", dropoffDefault);
-	addInteger(ss, itemRule->getBulletSpeed(), L"bulletSpeed");
-	addInteger(ss, itemRule->getExplosionSpeed(), L"explosionSpeed");
 
 	// autoShots*
 
@@ -1139,12 +1174,13 @@ void StatsForNerdsState::initItemList()
 	addBoolean(ss, itemRule->isLandOnly(), L"landOnly");
 
 	addInteger(ss, itemRule->getSpecialType(), L"specialType", -1);
-	addInteger(ss, itemRule->getVaporColor(), L"vaporColor", -1);
-	addInteger(ss, itemRule->getVaporDensity(), L"vaporDensity");
-	addInteger(ss, itemRule->getVaporProbability(), L"vaporProbability", 15);
 	addInteger(ss, itemRule->getCustomItemPreviewIndex(), L"customItemPreviewIndex");
 	addIntegerPercent(ss, itemRule->getKneelBonus(mod), L"kneelBonus", 115); // not raw!
-	addIntegerPercent(ss, itemRule->getOneHandedPenalty(mod), L"oneHandedPenalty", 80); // not raw!
+	addBoolean(ss, itemRule->isTwoHanded(), L"twoHanded");
+	addBoolean(ss, itemRule->isBlockingBothHands(), L"blockBothHands");
+	int oneHandedPenaltyCurrent = itemRule->getOneHandedPenalty(mod);
+	int oneHandedPenaltyDefault = itemRule->isTwoHanded() ? 80 : oneHandedPenaltyCurrent;
+	addIntegerPercent(ss, oneHandedPenaltyCurrent, L"oneHandedPenalty", oneHandedPenaltyDefault); // not raw!
 	addInteger(ss, itemRule->getMonthlySalary(), L"monthlySalary");
 	addInteger(ss, itemRule->getMonthlyMaintenance(), L"monthlyMaintenance");
 
@@ -1159,6 +1195,95 @@ void StatsForNerdsState::initItemList()
 	addFloat(ss, itemRule->getPowerRangeThresholdRaw(), L"powerRangeThreshold");
 	int psiRequiredDefault = itemRule->getBattleType() == BT_PSIAMP ? true : false;
 	addBoolean(ss, itemRule->isPsiRequired(), L"psiRequired", psiRequiredDefault);
+
+	addDouble(ss, itemRule->getSize(), L"size");
+	addInteger(ss, itemRule->getBuyCost(), L"costBuy");
+	addInteger(ss, itemRule->getSellCost(), L"costSell");
+	addInteger(ss, itemRule->getTransferTime(), L"transferTime", 24);
+
+	addVectorOfStrings(ss, itemRule->getRequirements(), L"requires");
+	addVectorOfStrings(ss, itemRule->getBuyRequirements(), L"requiresBuy");
+	addVectorOfStrings(ss, itemRule->getCategories(), L"categories");
+
+	if (_showDebug)
+	{
+		addSection(L"DEBUG section", L"Intended for modders only", _white);
+
+		addInteger(ss, itemRule->getBigSprite(), L"bigSprite", -1);
+		addInteger(ss, itemRule->getFloorSprite(), L"floorSprite", -1);
+		addInteger(ss, itemRule->getHandSprite(), L"handSprite", 120);
+		addInteger(ss, itemRule->getBulletSprite(), L"bulletSprite", -1);
+
+		addVectorOfIntegers(ss, itemRule->getFireSoundRaw(), L"fireSound");
+		addVectorOfIntegers(ss, itemRule->getHitSoundRaw(), L"hitSound");
+		addVectorOfIntegers(ss, itemRule->getHitMissSoundRaw(), L"hitMissSound");
+		addVectorOfIntegers(ss, itemRule->getMeleeSoundRaw(), L"meleeSound");
+		addVectorOfIntegers(ss, itemRule->getMeleeMissSoundRaw(), L"meleeMissSound");
+		addVectorOfIntegers(ss, itemRule->getPsiSoundRaw(), L"psiSound");
+		addVectorOfIntegers(ss, itemRule->getPsiMissSoundRaw(), L"psiMissSound");
+
+		addInteger(ss, itemRule->getHitAnimation(), L"hitAnimation");
+		addInteger(ss, itemRule->getHitMissAnimation(), L"hitMissAnimation", -1);
+		addInteger(ss, itemRule->getMeleeAnimation(), L"meleeAnimation");
+		addInteger(ss, itemRule->getMeleeMissAnimation(), L"meleeMissAnimation", -1);
+		addInteger(ss, itemRule->getPsiAnimation(), L"psiAnimation", -1);
+		addInteger(ss, itemRule->getPsiMissAnimation(), L"psiMissAnimation", -1);
+
+		addVectorOfIntegers(ss, itemRule->getMeleeHitSoundRaw(), L"meleeHitSound");
+		addVectorOfIntegers(ss, itemRule->getExplosionHitSoundRaw(), L"explosionHitSound");
+
+		addInteger(ss, itemRule->getBulletSpeed(), L"bulletSpeed");
+		addInteger(ss, itemRule->getExplosionSpeed(), L"explosionSpeed");
+
+		addInteger(ss, itemRule->getVaporColor(), L"vaporColor", -1);
+		addInteger(ss, itemRule->getVaporDensity(), L"vaporDensity");
+		addInteger(ss, itemRule->getVaporProbability(), L"vaporProbability", 15);
+
+		addSingleString(ss, itemRule->getPsiAttackName(), L"psiAttackName");
+		addSingleString(ss, itemRule->getPrimeActionName(), L"primeActionName", "STR_PRIME_GRENADE");
+		addSingleString(ss, itemRule->getPrimeActionMessage(), L"primeActionMessage", "STR_GRENADE_IS_ACTIVATED");
+		addSingleString(ss, itemRule->getUnprimeActionName(), L"unprimeActionName");
+		addSingleString(ss, itemRule->getUnprimeActionMessage(), L"unprimeActionMessage", "STR_GRENADE_IS_DEACTIVATED");
+
+		addInteger(ss, itemRule->getInventoryWidth(), L"invWidth", 1);
+		addInteger(ss, itemRule->getInventoryHeight(), L"invHeight", 1);
+
+		addHeading(L"ai:");
+		{
+			int useDelayCurrent = itemRule->getAIUseDelay(mod);
+			int useDelayDefault = useDelayCurrent > 0 ? -1 : useDelayCurrent;
+			addInteger(ss, useDelayCurrent, L"  useDelay", useDelayDefault); // not raw!
+			addInteger(ss, itemRule->getAIMeleeHitCount(), L"  meleeHitCount", 25);
+			endHeading();
+		}
+
+		addRuleItemUseCostBasic(ss, itemRule->getCostAimed(), L"tuAimed");
+		addRuleItemUseCostBasic(ss, itemRule->getCostAuto(), L"tuAuto");
+		addRuleItemUseCostBasic(ss, itemRule->getCostSnap(), L"tuSnap");
+		addRuleItemUseCostBasic(ss, itemRule->getCostMelee(), L"tuMelee");
+		int tuUseDefault = (itemRule->getBattleType() == BT_PSIAMP && itemRule->getPsiAttackName().empty()) ? 0 : 25;
+		addRuleItemUseCostBasic(ss, itemRule->getCostUse(), L"tuUse", tuUseDefault);
+		addRuleItemUseCostBasic(ss, itemRule->getCostMind(), L"tuMindcontrol", 25);
+		addRuleItemUseCostBasic(ss, itemRule->getCostPanic(), L"tuPanic", 25);
+		addRuleItemUseCostBasic(ss, itemRule->getCostThrow(), L"tuThrow", 25);
+		addRuleItemUseCostBasic(ss, itemRule->getCostPrime(), L"tuPrime", 50);
+		addRuleItemUseCostBasic(ss, itemRule->getCostUnprime(), L"tuUnprime", 25);
+
+		// flatRate*
+
+		addRuleItemUseCostFull(ss, itemRule->getFlatAimed(), L"flatAimed", RuleItemUseCost(0, 1));
+		addRuleItemUseCostFull(ss, itemRule->getFlatAuto(), L"flatAuto", RuleItemUseCost(0, 1));
+		addRuleItemUseCostFull(ss, itemRule->getFlatSnap(), L"flatSnap", RuleItemUseCost(0, 1));
+		addRuleItemUseCostFull(ss, itemRule->getFlatMelee(), L"flatMelee", RuleItemUseCost(0, 1));
+		addRuleItemUseCostFull(ss, itemRule->getFlatUse(), L"flatUse", RuleItemUseCost(0, 1));
+		addRuleItemUseCostFull(ss, itemRule->getFlatThrow(), L"flatThrow", RuleItemUseCost(0, 1));
+		addRuleItemUseCostFull(ss, itemRule->getFlatPrime(), L"flatPrime", RuleItemUseCost(0, 1));
+		addRuleItemUseCostFull(ss, itemRule->getFlatUnprime(), L"flatUnprime", RuleItemUseCost(0, 1));
+
+		addSingleString(ss, itemRule->getType(), L"type");
+		addInteger(ss, itemRule->getRecoveryPoints(), L"recoveryPoints");
+		addInteger(ss, itemRule->getListOrder(), L"listOrder");
+	}
 }
 
 }

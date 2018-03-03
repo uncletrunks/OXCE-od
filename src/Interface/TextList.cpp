@@ -413,6 +413,38 @@ void TextList::addRow(int cols, ...)
 }
 
 /**
+ * Removes the last row from the text list.
+ */
+void TextList::removeLastRow()
+{
+	if (!_texts.empty())
+	{
+		_texts.pop_back();
+	}
+	if (!_rows.empty())
+	{
+		size_t toRemove = _rows.back();
+		while (!_rows.empty() && _rows.back() == toRemove)
+		{
+			_rows.pop_back();
+		}
+	}
+	if (_arrowPos != -1)
+	{
+		if (!_arrowLeft.empty())
+		{
+			_arrowLeft.pop_back();
+		}
+		if (!_arrowRight.empty())
+		{
+			_arrowRight.pop_back();
+		}
+	}
+	_redraw = true;
+	updateArrows();
+}
+
+/**
  * Changes the columns that the list contains.
  * While rows can be unlimited, columns need to be specified
  * since they can have various widths for lining up the text.

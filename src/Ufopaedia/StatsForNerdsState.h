@@ -51,12 +51,15 @@ private:
 	std::string _topicId;
 	std::vector<std::string> _filterOptions;
 	bool _showDebug, _showIds, _showDefaults;
+	int _counter;
 
 	void buildUI();
 	void initLists();
 	void resetStream(std::wostringstream &ss);
 	void addTranslation(std::wostringstream &ss, const std::string &id);
+	void addSection(const std::wstring &name, const std::wstring &desc, Uint8 color);
 	void addHeading(const std::wstring &propertyName);
+	void endHeading();
 	void addSingleString(std::wostringstream &ss, const std::string &id, const std::wstring &propertyName, const std::string &defaultId = "");
 	void addVectorOfStrings(std::wostringstream &ss, const std::vector<std::string> &vec, const std::wstring &propertyName);
 	void addBoolean(std::wostringstream &ss, const bool &value, const std::wstring &propertyName, const bool &defaultvalue = false);
@@ -70,7 +73,9 @@ private:
 	void addDamageRandomType(std::wostringstream &ss, const ItemDamageRandomType &value, const std::wstring &propertyName, const ItemDamageRandomType &defaultvalue = DRT_DEFAULT);
 	void addBattleFuseType(std::wostringstream &ss, const BattleFuseType &value, const std::wstring &propertyName, const BattleFuseType &defaultvalue = BFT_NONE);
 	void addRuleItemUseCostBasic(std::wostringstream &ss, const RuleItemUseCost &value, const std::wstring &propertyName, const int &defaultvalue = 0);
-	void addRuleItemUseCostFull(std::wostringstream &ss, const RuleItemUseCost &value, const std::wstring &propertyName, const RuleItemUseCost &defaultvalue = RuleItemUseCost());
+	void addBoolOrInteger(std::wostringstream &ss, const int &value, bool formatAsBoolean);
+	void addPercentageSignOrNothing(std::wostringstream &ss, const int &value, bool smartFormat);
+	void addRuleItemUseCostFull(std::wostringstream &ss, const RuleItemUseCost &value, const std::wstring &propertyName, const RuleItemUseCost &defaultvalue = RuleItemUseCost(), bool smartFormat = false, const RuleItemUseCost &formatBy = RuleItemUseCost());
 	void addBattleMediKitType(std::wostringstream &ss, const BattleMediKitType &value, const std::wstring &propertyName, const BattleMediKitType &defaultvalue = BMT_NORMAL);
 	void addExperienceTrainingMode(std::wostringstream &ss, const ExperienceTrainingMode &value, const std::wstring &propertyName, const ExperienceTrainingMode &defaultvalue = ETM_DEFAULT);
 	void addRuleStatBonus(std::wostringstream &ss, const RuleStatBonus &value, const std::wstring &propertyName);
