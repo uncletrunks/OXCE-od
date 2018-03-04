@@ -65,7 +65,7 @@ private:
 	void addBoolean(std::wostringstream &ss, const bool &value, const std::wstring &propertyName, const bool &defaultvalue = false);
 	void addFloat(std::wostringstream &ss, const float &value, const std::wstring &propertyName, const float &defaultvalue = 0.0f);
 	void addDouble(std::wostringstream &ss, const double &value, const std::wstring &propertyName, const double &defaultvalue = 0.0);
-	void addInteger(std::wostringstream &ss, const int &value, const std::wstring &propertyName, const int &defaultvalue = 0);
+	void addInteger(std::wostringstream &ss, const int &value, const std::wstring &propertyName, const int &defaultvalue = 0, bool formatAsMoney = false, const std::string &specialTranslation = "", const int &specialvalue = -1);
 	void addIntegerPercent(std::wostringstream &ss, const int &value, const std::wstring &propertyName, const int &defaultvalue = 0);
 	void addVectorOfIntegers(std::wostringstream &ss, const std::vector<int> &vec, const std::wstring &propertyName);
 	void addBattleType(std::wostringstream &ss, const BattleType &value, const std::wstring &propertyName, const BattleType &defaultvalue = BT_NONE);
