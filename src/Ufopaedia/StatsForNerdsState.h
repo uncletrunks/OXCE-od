@@ -39,8 +39,10 @@ class StatsForNerdsState : public State
 {
 private:
 	Window *_window;
-	Text *_txtTitle, *_txtArticle;
+	Text *_txtTitle;
 	ComboBox *_cbxRelatedStuff;
+	Text *_txtArticle;
+	TextButton *_btnPrev, *_btnNext;
 	TextList *_lstRawData;
 	ToggleTextButton *_btnIncludeDebug, *_btnIncludeIds, *_btnIncludeDefaults;
 	TextButton *_btnOk;
@@ -49,40 +51,46 @@ private:
 
 	UfopaediaTypeId _typeId;
 	std::string _topicId;
+	bool _mainArticle;
+	size_t _currentDetailIndex;
+
 	std::vector<std::string> _filterOptions;
 	bool _showDebug, _showIds, _showDefaults;
 	int _counter;
+	bool _indent;
 
 	void buildUI();
 	void initLists();
 	void resetStream(std::wostringstream &ss);
 	void addTranslation(std::wostringstream &ss, const std::string &id);
+	std::wstring trp(const std::string &propertyName);
 	void addSection(const std::wstring &name, const std::wstring &desc, Uint8 color);
-	void addHeading(const std::wstring &propertyName);
+	void addHeading(const std::string &propertyName);
 	void endHeading();
-	void addSingleString(std::wostringstream &ss, const std::string &id, const std::wstring &propertyName, const std::string &defaultId = "");
-	void addVectorOfStrings(std::wostringstream &ss, const std::vector<std::string> &vec, const std::wstring &propertyName);
-	void addBoolean(std::wostringstream &ss, const bool &value, const std::wstring &propertyName, const bool &defaultvalue = false);
-	void addFloat(std::wostringstream &ss, const float &value, const std::wstring &propertyName, const float &defaultvalue = 0.0f);
-	void addDouble(std::wostringstream &ss, const double &value, const std::wstring &propertyName, const double &defaultvalue = 0.0);
-	void addInteger(std::wostringstream &ss, const int &value, const std::wstring &propertyName, const int &defaultvalue = 0, bool formatAsMoney = false, const std::string &specialTranslation = "", const int &specialvalue = -1);
-	void addIntegerPercent(std::wostringstream &ss, const int &value, const std::wstring &propertyName, const int &defaultvalue = 0);
-	void addVectorOfIntegers(std::wostringstream &ss, const std::vector<int> &vec, const std::wstring &propertyName);
-	void addBattleType(std::wostringstream &ss, const BattleType &value, const std::wstring &propertyName, const BattleType &defaultvalue = BT_NONE);
-	void addDamageType(std::wostringstream &ss, const ItemDamageType &value, const std::wstring &propertyName, const ItemDamageType &defaultvalue = DT_NONE);
-	void addDamageRandomType(std::wostringstream &ss, const ItemDamageRandomType &value, const std::wstring &propertyName, const ItemDamageRandomType &defaultvalue = DRT_DEFAULT);
-	void addBattleFuseType(std::wostringstream &ss, const BattleFuseType &value, const std::wstring &propertyName, const BattleFuseType &defaultvalue = BFT_NONE);
-	void addRuleItemUseCostBasic(std::wostringstream &ss, const RuleItemUseCost &value, const std::wstring &propertyName, const int &defaultvalue = 0);
+	void addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId = "");
+	void addVectorOfStrings(std::wostringstream &ss, const std::vector<std::string> &vec, const std::string &propertyName);
+	void addBoolean(std::wostringstream &ss, const bool &value, const std::string &propertyName, const bool &defaultvalue = false);
+	void addFloat(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue = 0.0f);
+	void addFloatAsPercentage(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue = 0.0f);
+	void addDouble(std::wostringstream &ss, const double &value, const std::string &propertyName, const double &defaultvalue = 0.0);
+	void addInteger(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0, bool formatAsMoney = false, const std::string &specialTranslation = "", const int &specialvalue = -1);
+	void addIntegerPercent(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
+	void addVectorOfIntegers(std::wostringstream &ss, const std::vector<int> &vec, const std::string &propertyName);
+	void addBattleType(std::wostringstream &ss, const BattleType &value, const std::string &propertyName, const BattleType &defaultvalue = BT_NONE);
+	void addDamageType(std::wostringstream &ss, const ItemDamageType &value, const std::string &propertyName, const ItemDamageType &defaultvalue = DT_NONE);
+	void addDamageRandomType(std::wostringstream &ss, const ItemDamageRandomType &value, const std::string &propertyName, const ItemDamageRandomType &defaultvalue = DRT_DEFAULT);
+	void addBattleFuseType(std::wostringstream &ss, const BattleFuseType &value, const std::string &propertyName, const BattleFuseType &defaultvalue = BFT_NONE);
+	void addRuleItemUseCostBasic(std::wostringstream &ss, const RuleItemUseCost &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addBoolOrInteger(std::wostringstream &ss, const int &value, bool formatAsBoolean);
 	void addPercentageSignOrNothing(std::wostringstream &ss, const int &value, bool smartFormat);
-	void addRuleItemUseCostFull(std::wostringstream &ss, const RuleItemUseCost &value, const std::wstring &propertyName, const RuleItemUseCost &defaultvalue = RuleItemUseCost(), bool smartFormat = false, const RuleItemUseCost &formatBy = RuleItemUseCost());
-	void addBattleMediKitType(std::wostringstream &ss, const BattleMediKitType &value, const std::wstring &propertyName, const BattleMediKitType &defaultvalue = BMT_NORMAL);
-	void addExperienceTrainingMode(std::wostringstream &ss, const ExperienceTrainingMode &value, const std::wstring &propertyName, const ExperienceTrainingMode &defaultvalue = ETM_DEFAULT);
-	void addRuleStatBonus(std::wostringstream &ss, const RuleStatBonus &value, const std::wstring &propertyName);
+	void addRuleItemUseCostFull(std::wostringstream &ss, const RuleItemUseCost &value, const std::string &propertyName, const RuleItemUseCost &defaultvalue = RuleItemUseCost(), bool smartFormat = false, const RuleItemUseCost &formatBy = RuleItemUseCost());
+	void addBattleMediKitType(std::wostringstream &ss, const BattleMediKitType &value, const std::string &propertyName, const BattleMediKitType &defaultvalue = BMT_NORMAL);
+	void addExperienceTrainingMode(std::wostringstream &ss, const ExperienceTrainingMode &value, const std::string &propertyName, const ExperienceTrainingMode &defaultvalue = ETM_DEFAULT);
+	void addRuleStatBonus(std::wostringstream &ss, const RuleStatBonus &value, const std::string &propertyName);
 	void initItemList();
 public:
 	/// Creates the StatsForNerdsState state.
-	StatsForNerdsState(const ArticleDefinition *article);
+	StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex);
 	StatsForNerdsState(const UfopaediaTypeId typeId, const std::string topicId);
 	/// Cleans up the StatsForNerdsState state.
 	~StatsForNerdsState();
@@ -94,6 +102,14 @@ public:
 	void btnRefreshClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the [Previous] button.
+	void btnPrevClick(Action *action);
+	/// Handler for clicking the [Next] button.
+	void btnNextClick(Action *action);
+	/// Handler for clicking the [Scroll Up] button.
+	void btnScrollUpClick(Action *action);
+	/// Handler for clicking the [Scroll Down] button.
+	void btnScrollDownClick(Action *action);
 };
 
 }
