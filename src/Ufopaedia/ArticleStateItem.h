@@ -53,5 +53,6 @@ namespace OpenXcom
 		Text *_txtAmmoDamage[3];
 		Surface *_imageAmmo[3];
 		Uint8 _buttonColor, _textColor, _listColor1, _listColor2, _ammoColor;
+		int getDamageTypeTextColor(ItemDamageType dt);
 	};
 }

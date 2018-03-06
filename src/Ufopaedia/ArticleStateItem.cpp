@@ -258,6 +258,7 @@ namespace OpenXcom
 						ss << L"x" << item->getShotgunPellets();
 					}
 					_txtAmmoDamage[0]->setText(ss.str());
+					_txtAmmoDamage[0]->setColor(getDamageTypeTextColor(item->getDamageType()->ResistType));
 				}
 				else
 				{
@@ -276,6 +277,7 @@ namespace OpenXcom
 								ss << L"x" << ammo_rule->getShotgunPellets();
 							}
 							_txtAmmoDamage[i]->setText(ss.str());
+							_txtAmmoDamage[i]->setColor(getDamageTypeTextColor(ammo_rule->getDamageType()->ResistType));
 
 							ammo_rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _imageAmmo[i]);
 						}
@@ -311,4 +313,102 @@ namespace OpenXcom
 	ArticleStateItem::~ArticleStateItem()
 	{}
 
+	int ArticleStateItem::getDamageTypeTextColor(ItemDamageType dt)
+	{
+		Element *interfaceElement = 0;
+		int color = _ammoColor;
+
+		switch (dt)
+		{
+			case DT_NONE:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTNone");
+				break;
+
+			case DT_AP:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTAP");
+				break;
+
+			case DT_IN:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTIN");
+				break;
+
+			case DT_HE:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTHE");
+				break;
+
+			case DT_LASER:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTLaser");
+				break;
+
+			case DT_PLASMA:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTPlasma");
+				break;
+
+			case DT_STUN:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTStun");
+				break;
+
+			case DT_MELEE:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTMelee");
+				break;
+
+			case DT_ACID:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTAcid");
+				break;
+
+			case DT_SMOKE:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDTSmoke");
+				break;
+
+			case DT_10:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT10");
+				break;
+
+			case DT_11:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT11");
+				break;
+
+			case DT_12:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT12");
+				break;
+
+			case DT_13:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT13");
+				break;
+
+			case DT_14:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT14");
+				break;
+
+			case DT_15:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT15");
+				break;
+
+			case DT_16:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT16");
+				break;
+
+			case DT_17:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT17");
+				break;
+
+			case DT_18:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT18");
+				break;
+
+			case DT_19:
+				interfaceElement = _game->getMod()->getInterface("articleItem")->getElement("ammoColorDT19");
+				break;
+
+			default :
+				break;
+		}
+
+		if (interfaceElement)
+		{
+			color = interfaceElement->color;
+		}
+
+		return color;
+	}
 }
