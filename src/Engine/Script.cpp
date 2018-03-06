@@ -2356,7 +2356,7 @@ void ScriptParserBase::load(const YAML::Node& node)
  */
 void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 {
-	if (Options::debug)
+	if (Options::debug && Options::verboseLogging)
 	{
 		auto argType = [&](ArgEnum type) -> std::string
 		{
