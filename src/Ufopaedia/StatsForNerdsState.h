@@ -64,7 +64,7 @@ private:
 	void resetStream(std::wostringstream &ss);
 	void addTranslation(std::wostringstream &ss, const std::string &id);
 	std::wstring trp(const std::string &propertyName);
-	void addSection(const std::wstring &name, const std::wstring &desc, Uint8 color);
+	void addSection(const std::wstring &name, const std::wstring &desc, Uint8 color, bool forceShow = false);
 	void addHeading(const std::string &propertyName);
 	void endHeading();
 	void addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId = "");
@@ -87,6 +87,8 @@ private:
 	void addBattleMediKitType(std::wostringstream &ss, const BattleMediKitType &value, const std::string &propertyName, const BattleMediKitType &defaultvalue = BMT_NORMAL);
 	void addExperienceTrainingMode(std::wostringstream &ss, const ExperienceTrainingMode &value, const std::string &propertyName, const ExperienceTrainingMode &defaultvalue = ETM_DEFAULT);
 	void addRuleStatBonus(std::wostringstream &ss, const RuleStatBonus &value, const std::string &propertyName);
+	void addSpriteResourcePath(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const int &resourceId);
+	void addSoundVectorResourcePaths(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const std::vector<int> &resourceIds);
 	void initItemList();
 public:
 	/// Creates the StatsForNerdsState state.

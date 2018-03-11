@@ -29,6 +29,8 @@
 #include "../Interface/TextList.h"
 #include "../Interface/ToggleTextButton.h"
 #include "../Interface/Window.h"
+#include "../Mod/ExtraSounds.h"
+#include "../Mod/ExtraSprites.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleItem.h"
@@ -354,10 +356,13 @@ std::wstring StatsForNerdsState::trp(const std::string &propertyName)
 /**
  * Adds a section name to the table.
  */
-void StatsForNerdsState::addSection(const std::wstring &name, const std::wstring &desc, Uint8 color)
+void StatsForNerdsState::addSection(const std::wstring &name, const std::wstring &desc, Uint8 color, bool forceShow)
 {
-	_lstRawData->addRow(2, name.c_str(), desc.c_str());
-	_lstRawData->setRowColor(_lstRawData->getTexts() - 1, color);
+	if (_showDefaults || forceShow)
+	{
+		_lstRawData->addRow(2, name.c_str(), desc.c_str());
+		_lstRawData->setRowColor(_lstRawData->getTexts() - 1, color);
+	}
 }
 
 /**
@@ -994,38 +999,38 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 	bool isFirst = true;
 	for (RuleStatBonusDataOrig item : *value.getBonusRaw())
 	{
-		bool isEmpty = true;
-		for (float n : item.second)
-		{
-			if (!AreSame(n, 0.0f))
-			{
-				isEmpty = false;
-				break;
-			}
-		}
-		if (!isFirst && !isEmpty)
-		{
-			ss << L" + ";
-		}
 		int power = 0;
 		for (float number : item.second)
 		{
 			++power;
 			if (!AreSame(number, 0.0f))
 			{
+				float numberAbs = number;
+				if (!isFirst)
+				{
+					if (number > 0.0f)
+					{
+						ss << L" + ";
+					}
+					else
+					{
+						ss << L" - ";
+						numberAbs = std::abs(number);
+					}
+				}
 				if (item.first == "flatOne")
 				{
-					ss << number * 1;
+					ss << numberAbs * 1;
 				}
 				if (item.first == "flatHundred")
 				{
-					ss << number * pow(100, power);
+					ss << numberAbs * pow(100, power);
 				}
 				else
 				{
-					if (!AreSame(number, 1.0f))
+					if (!AreSame(numberAbs, 1.0f))
 					{
-						ss << number << L"*";
+						ss << numberAbs << L"*";
 					}
 					addTranslation(ss, translationMap[item.first]);
 					if (power > 1)
@@ -1045,6 +1050,80 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 	}
 }
 
+/**
+ * Adds a sprite resource path to the table.
+ */
+void StatsForNerdsState::addSpriteResourcePath(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const int &resourceId)
+{
+	// go through all extra sprites from all mods
+	for (auto resourceSet : mod->getExtraSprites())
+	{
+		// only check the relevant ones (e.g. "BIGOBS.PCK")
+		if (resourceSet.first == resourceSetName)
+		{
+			// strip mod offset from the in-game ID
+			int originalSpriteId = resourceId - (resourceSet.second->getModIndex());
+
+			auto mapOfSprites = resourceSet.second->getSprites();
+			auto individualSprite = mapOfSprites->find(originalSpriteId);
+			if (individualSprite != mapOfSprites->end())
+			{
+				std::wostringstream numbers;
+				resetStream(numbers);
+				numbers << L"  " << originalSpriteId << L" + " << resourceSet.second->getModIndex();
+
+				resetStream(ss);
+				ss << Language::utf8ToWstr(individualSprite->second);
+
+				_lstRawData->addRow(2, numbers.str().c_str(), ss.str().c_str());
+				++_counter;
+				_lstRawData->setRowColor(_lstRawData->getTexts() - 1, _gold);
+				return;
+			}
+		}
+	}
+}
+
+/**
+ * Adds sound resource paths to the table.
+ */
+void StatsForNerdsState::addSoundVectorResourcePaths(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const std::vector<int> &resourceIds)
+{
+	if (resourceIds.empty())
+	{
+		return;
+	}
+
+	// go through all extra sounds from all mods
+	for (auto resourceSet : mod->getExtraSounds())
+	{
+		// only check the relevant ones (e.g. "BATTLE.CAT")
+		if (resourceSet.first == resourceSetName)
+		{
+			for (auto resourceId : resourceIds)
+			{
+				// strip mod offset from the in-game ID
+				int originalSoundId = resourceId - (resourceSet.second->getModIndex());
+
+				auto mapOfSounds = resourceSet.second->getSounds();
+				auto individualSound = mapOfSounds->find(originalSoundId);
+				if (individualSound != mapOfSounds->end())
+				{
+					std::wostringstream numbers;
+					resetStream(numbers);
+					numbers << L"  " << originalSoundId << L" + " << resourceSet.second->getModIndex();
+
+					resetStream(ss);
+					ss << Language::utf8ToWstr(individualSound->second);
+
+					_lstRawData->addRow(2, numbers.str().c_str(), ss.str().c_str());
+					++_counter;
+					_lstRawData->setRowColor(_lstRawData->getTexts() - 1, _gold);
+				}
+			}
+		}
+	}
+}
 
 /**
  * Shows the "raw" RuleItem data.
@@ -1370,7 +1449,7 @@ void StatsForNerdsState::initItemList()
 
 	if (_showDebug)
 	{
-		addSection(L"{Modding section}", L"You don't need this info as a player", _gold);
+		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
 
 		addSection(L"{Naming}", L"", _white);
 		addSingleString(ss, itemRule->getType(), "type");
@@ -1380,8 +1459,8 @@ void StatsForNerdsState::initItemList()
 
 		addSection(L"{Inventory}", L"", _white);
 		addInteger(ss, itemRule->getCustomItemPreviewIndex(), "customItemPreviewIndex");
-		addInteger(ss, itemRule->getInventoryWidth(), "invWidth", 1);
-		addInteger(ss, itemRule->getInventoryHeight(), "invHeight", 1);
+		addInteger(ss, itemRule->getInventoryWidth(), "invWidth", -1); // always show!
+		addInteger(ss, itemRule->getInventoryHeight(), "invHeight", -1); // always show!
 		addSingleString(ss, itemRule->getDefaultInventorySlot(), "defaultInventorySlot");
 		addBoolean(ss, itemRule->isFixed(), "fixedWeapon");
 
@@ -1428,20 +1507,32 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getTurretType(), "turretType", -1);
 
 		addInteger(ss, itemRule->getBigSprite(), "bigSprite", -1);
+		addSpriteResourcePath(ss, mod, "BIGOBS.PCK", itemRule->getBigSprite());
 		addInteger(ss, itemRule->getFloorSprite(), "floorSprite", -1);
+		addSpriteResourcePath(ss, mod, "FLOOROB.PCK", itemRule->getFloorSprite());
 		addInteger(ss, itemRule->getHandSprite(), "handSprite", 120);
+		addSpriteResourcePath(ss, mod, "HANDOB.PCK", itemRule->getHandSprite());
 		addInteger(ss, itemRule->getBulletSprite(), "bulletSprite", -1);
 
 		addSection(L"{Sounds}", L"", _white);
 		addVectorOfIntegers(ss, itemRule->getFireSoundRaw(), "fireSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getFireSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getHitSoundRaw(), "hitSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getHitSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getHitMissSoundRaw(), "hitMissSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getHitMissSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getMeleeSoundRaw(), "meleeSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getMeleeSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getMeleeHitSoundRaw(), "meleeHitSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getMeleeHitSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getMeleeMissSoundRaw(), "meleeMissSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getMeleeMissSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getPsiSoundRaw(), "psiSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getPsiSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getPsiMissSoundRaw(), "psiMissSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getPsiMissSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getExplosionHitSoundRaw(), "explosionHitSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getExplosionHitSoundRaw());
 
 		addSection(L"{Animations}", L"", _white);
 		addInteger(ss, itemRule->getHitAnimation(), "hitAnimation");
