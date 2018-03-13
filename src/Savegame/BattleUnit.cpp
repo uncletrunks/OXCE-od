@@ -68,12 +68,12 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_type = "SOLDIER";
 	_rank = soldier->getRankString();
 	_stats = *soldier->getCurrentStats();
-	_standHeight = soldier->getRules()->getStandHeight();
-	_kneelHeight = soldier->getRules()->getKneelHeight();
-	_floatHeight = soldier->getRules()->getFloatHeight();
+	_armor = soldier->getArmor();
+	_standHeight = _armor->getStandHeight() == -1 ? soldier->getRules()->getStandHeight() : _armor->getStandHeight();
+	_kneelHeight = _armor->getKneelHeight() == -1 ? soldier->getRules()->getKneelHeight() : _armor->getKneelHeight();
+	_floatHeight = _armor->getFloatHeight() == -1 ? soldier->getRules()->getFloatHeight() : _armor->getFloatHeight();
 	_deathSound = std::vector<int>(); // this one is hardcoded
 	_aggroSound = -1;
-	_armor = soldier->getArmor();
 	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : -1; // there's no unit move sound, thus hardcoded -1
 	_intelligence = 2;
 	_aggression = 1;
@@ -184,6 +184,10 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int 
 	_stats = *soldier->getCurrentStats();
 	_armor = ruleArmor;
 
+	_standHeight = _armor->getStandHeight() == -1 ? soldier->getRules()->getStandHeight() : _armor->getStandHeight();
+	_kneelHeight = _armor->getKneelHeight() == -1 ? soldier->getRules()->getKneelHeight() : _armor->getKneelHeight();
+	_floatHeight = _armor->getFloatHeight() == -1 ? soldier->getRules()->getFloatHeight() : _armor->getFloatHeight();
+
 	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : -1; // there's no unit move sound, thus hardcoded -1
 
 	_movementType = _armor->getMovementType();
@@ -241,9 +245,9 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_rank = unit->getRank();
 	_race = unit->getRace();
 	_stats = *unit->getStats();
-	_standHeight = unit->getStandHeight();
-	_kneelHeight = unit->getKneelHeight();
-	_floatHeight = unit->getFloatHeight();
+	_standHeight = _armor->getStandHeight() == -1 ? unit->getStandHeight() : _armor->getStandHeight();
+	_kneelHeight = _armor->getKneelHeight() == -1 ? unit->getKneelHeight() : _armor->getKneelHeight();
+	_floatHeight = _armor->getFloatHeight() == -1 ? unit->getFloatHeight() : _armor->getFloatHeight();
 	_loftempsSet = _armor->getLoftempsSet();
 	_deathSound = unit->getDeathSounds();
 	_aggroSound = unit->getAggroSound();

@@ -78,6 +78,7 @@ private:
 	int _customArmorPreviewIndex;
 	bool _allowsRunning, _allowsStrafing, _allowsKneeling;
 	bool _instantWoundRecovery;
+	int _standHeight, _kneelHeight, _floatHeight;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
@@ -222,6 +223,12 @@ public:
 	bool allowsKneeling() const;
 	/// Does this armor instantly recover any wounds after the battle?
 	bool getInstantWoundRecovery() const;
+	/// Gets a unit's height when standing while wearing this armor.
+	int getStandHeight() const;
+	/// Gets a unit's height when kneeling while wearing this armor.
+	int getKneelHeight() const;
+	/// Gets a unit's float elevation while wearing this armor.
+	int getFloatHeight() const;
 };
 
 }

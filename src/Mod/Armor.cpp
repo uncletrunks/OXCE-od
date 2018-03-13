@@ -42,7 +42,8 @@ Armor::Armor(const std::string &type) :
 	_overKill(0.5f), _meleeDodgeBackPenalty(0),
 	_customArmorPreviewIndex(0),
 	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true),
-	_instantWoundRecovery(false)
+	_instantWoundRecovery(false),
+	_standHeight(-1), _kneelHeight(-1), _floatHeight(-1)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -211,6 +212,9 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_allowsStrafing = node["allowsStrafing"].as<bool>(_allowsStrafing);
 	_allowsKneeling = node["allowsKneeling"].as<bool>(_allowsKneeling);
 	_instantWoundRecovery = node["instantWoundRecovery"].as<bool>(_instantWoundRecovery);
+	_standHeight = node["standHeight"].as<int>(_standHeight);
+	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
+	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
 }
 
 /**
@@ -920,6 +924,33 @@ bool Armor::allowsKneeling() const
 bool Armor::getInstantWoundRecovery() const
 {
 	return _instantWoundRecovery;
+}
+
+/**
+ * Returns a unit's height at standing in this armor.
+ * @return The unit's height.
+ */
+int Armor::getStandHeight() const
+{
+	return _standHeight;
+}
+
+/**
+ * Returns a unit's height at kneeling in this armor.
+ * @return The unit's kneeling height.
+ */
+int Armor::getKneelHeight() const
+{
+	return _kneelHeight;
+}
+
+/**
+ * Returns a unit's floating elevation in this armor.
+ * @return The unit's floating height.
+ */
+int Armor::getFloatHeight() const
+{
+	return _floatHeight;
 }
 
 }
