@@ -49,6 +49,7 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 
 	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
 	bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
+	bool altPressed = SDL_GetModState() & KMOD_ALT;
 
 	// basic palette
 	if (ctrlPressed)
@@ -89,6 +90,35 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 				text.setX(column * 26);
 				text.setY(row * 9);
 				text.setValue(index);
+				text.blit(_bg);
+			}
+		}
+		return;
+	}
+
+	// big text without/with high contrast
+	if (altPressed)
+	{
+		Text text = Text(13, 17, 0, 0);
+		text.setPalette(_bg->getPalette());
+		text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+		text.setHighContrast(highContrast);
+		text.setBig();
+		for (int row = 0; row < 11; ++row)
+		{
+			for (int column = 0; column < 24; ++column)
+			{
+				int index = row * 24 + column;
+				if (index > 255)
+				{
+					return;
+				}
+				text.setColor(index);
+				text.setX(column * 13);
+				text.setY(row * 17);
+				std::wostringstream ss;
+				ss << index % 10;
+				text.setText(ss.str().c_str());
 				text.blit(_bg);
 			}
 		}
