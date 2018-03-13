@@ -1169,6 +1169,7 @@ void StatsForNerdsState::addSoundVectorResourcePaths(std::wostringstream &ss, Mo
 void StatsForNerdsState::initItemList()
 {
 	_lstRawData->clearList();
+	_lstRawData->setIgnoreSeparators(true);
 
 	std::wostringstream ssTopic;
 	ssTopic << tr(_topicId);
