@@ -1460,6 +1460,9 @@ public:
 	/// Get global ref data.
 	const ScriptRefData* getRef(ScriptRef name, ScriptRef postfix = {}) const;
 
+	/// Get all tag names
+	const std::map<ArgEnum, TagData> &getTagNames() const { return _tagNames; }
+
 	/// Get tag based on it name.
 	template<typename Tag>
 	Tag getTag(ScriptRef s) const
@@ -1517,6 +1520,8 @@ class ScriptValuesBase
 	std::vector<int> values;
 
 protected:
+	/// Get all values
+	const std::vector<int> &getValues() const { return values; }
 	/// Set value.
 	void setBase(size_t t, int i);
 	/// Get value.
@@ -1557,6 +1562,8 @@ public:
 	{
 		return setBase(t.get(), i);
 	}
+	/// Get all values
+	const std::vector<int> &getValuesRaw() const { return getValues(); }
 };
 
 ////////////////////////////////////////////////////////////

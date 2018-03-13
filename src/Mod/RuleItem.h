@@ -582,6 +582,7 @@ public:
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _battleItemScripts.get<Script>(); }
+	const ScriptValues<RuleItem> &getScriptValuesRaw() const { return _scriptValues; }
 };
 
 }

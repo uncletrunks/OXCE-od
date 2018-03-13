@@ -238,6 +238,18 @@ void StatsForNerdsState::btnRefreshClick(Action *)
  */
 void StatsForNerdsState::btnOkClick(Action *)
 {
+	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
+
+	if (ctrlPressed)
+	{
+		Log(LOG_INFO) << Language::wstrToUtf8(_txtArticle->getText());
+		for (int row = 0; row < _lstRawData->getTexts(); ++row)
+		{
+			Log(LOG_INFO) << Language::wstrToUtf8(_lstRawData->getCellText(row, 0)) << "\t\t" << Language::wstrToUtf8(_lstRawData->getCellText(row, 1));
+		}
+		return;
+	}
+
 	_game->popState();
 }
 
@@ -363,6 +375,9 @@ void StatsForNerdsState::addSection(const std::wstring &name, const std::wstring
 		_lstRawData->addRow(2, name.c_str(), desc.c_str());
 		_lstRawData->setRowColor(_lstRawData->getTexts() - 1, color);
 	}
+
+	// reset counter
+	_counter = 0;
 }
 
 /**
@@ -560,6 +575,29 @@ void StatsForNerdsState::addInteger(std::wostringstream &ss, const int &value, c
 	if (value != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds a script tag to the table.
+ */
+void StatsForNerdsState::addIntegerScriptTag(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+{
+	if (value == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	ss << trp(propertyName);
+	ss << L": ";
+	ss << value;
+	_lstRawData->setFlooding(true);
+	_lstRawData->addRow(1, ss.str().c_str());
+	_lstRawData->setFlooding(false);
+	++_counter;
+	if (value != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 0, _pink);
 	}
 }
 
@@ -1263,7 +1301,25 @@ void StatsForNerdsState::initItemList()
 		const RuleDamageType *rule = (i == 0) ? itemRule->getDamageType() : itemRule->getMeleeType();
 		if (i == 0)
 		{
-			addDamageType(ss, rule->ResistType, "damageType", DAMAGE_TYPES); // always show!
+			ItemDamageType damageTypeDefault = DT_NONE;
+			if (rule->ResistType == DT_NONE)
+			{
+				if (itemRule->getBattleType() == BT_FIREARM || itemRule->getBattleType() == BT_AMMO || itemRule->getBattleType() == BT_MELEE)
+				{
+					if (itemRule->getClipSize() != 0)
+					{
+						damageTypeDefault = DAMAGE_TYPES;
+					}
+				}
+				else if (itemRule->getBattleType() == BT_PSIAMP)
+				{
+					if (!itemRule->getPsiAttackName().empty())
+					{
+						damageTypeDefault = DAMAGE_TYPES;
+					}
+				}
+			}
+			addDamageType(ss, rule->ResistType, "damageType", damageTypeDefault);
 			addInteger(ss, itemRule->getPower(), "power");
 			addFloat(ss, itemRule->getPowerRangeReductionRaw(), "powerRangeReduction");
 			addFloat(ss, itemRule->getPowerRangeThresholdRaw(), "powerRangeThreshold");
@@ -1587,6 +1643,19 @@ void StatsForNerdsState::initItemList()
 		addRuleItemUseCostFull(ss, itemRule->getFlatThrow(), "flatThrow", RuleItemUseCost(0, 1));
 		addRuleItemUseCostFull(ss, itemRule->getFlatPrime(), "flatPrime", RuleItemUseCost(0, 1));
 		addRuleItemUseCostFull(ss, itemRule->getFlatUnprime(), "flatUnprime", RuleItemUseCost(0, 1));
+
+		addSection(L"{Script tags}", L"", _white, true);
+		{
+			auto tagValues = itemRule->getScriptValuesRaw().getValuesRaw();
+			ArgEnum index = ScriptParserBase::getArgType<ScriptTag<RuleItem>>();
+			auto tagNames = mod->getScriptGlobal()->getTagNames().at(index);
+			for (size_t i = 0; i < tagValues.size(); ++i)
+			{
+				auto nameAsString = tagNames.values[i].name.toString().substr(4);
+				addIntegerScriptTag(ss, tagValues.at(i), nameAsString);
+			}
+			endHeading();
+		}
 	}
 }
 

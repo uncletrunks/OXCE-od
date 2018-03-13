@@ -74,6 +74,7 @@ private:
 	void addFloatAsPercentage(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue = 0.0f);
 	void addDouble(std::wostringstream &ss, const double &value, const std::string &propertyName, const double &defaultvalue = 0.0);
 	void addInteger(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0, bool formatAsMoney = false, const std::string &specialTranslation = "", const int &specialvalue = -1);
+	void addIntegerScriptTag(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addIntegerPercent(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addVectorOfIntegers(std::wostringstream &ss, const std::vector<int> &vec, const std::string &propertyName);
 	void addBattleType(std::wostringstream &ss, const BattleType &value, const std::string &propertyName, const BattleType &defaultvalue = BT_NONE);

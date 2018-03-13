@@ -457,11 +457,13 @@ void Game::loadLanguage(const std::string &filename)
 	const std::string dirLanguage = "/Language/";
 	const std::string dirLanguageAndroid = "/Language/Android/";
 	const std::string dirLanguageOXCE = "/Language/OXCE/";
+	const std::string dirLanguageTechnical = "/Language/Technical/";
 
 	// Step 1: openxcom "common" strings
 	loadLanguageCommon(filename, dirLanguage, false);
 	loadLanguageCommon(filename, dirLanguageAndroid, true);
 	loadLanguageCommon(filename, dirLanguageOXCE, true);
+	loadLanguageCommon(filename, dirLanguageTechnical, true);
 
 	// Step 2: mod strings (note: xcom1 and xcom2 are also "standard" mods)
 	std::vector<const ModInfo*> activeMods = Options::getActiveMods();
@@ -474,11 +476,13 @@ void Game::loadLanguage(const std::string &filename)
 			loadLanguageMods(masterModInfo, filename, dirLanguage);
 			loadLanguageMods(masterModInfo, filename, dirLanguageAndroid);
 			loadLanguageMods(masterModInfo, filename, dirLanguageOXCE);
+			loadLanguageMods(masterModInfo, filename, dirLanguageTechnical);
 		}
 		// now load the mod itself
 		loadLanguageMods((*i), filename, dirLanguage);
 		loadLanguageMods((*i), filename, dirLanguageAndroid);
 		loadLanguageMods((*i), filename, dirLanguageOXCE);
+		loadLanguageMods((*i), filename, dirLanguageTechnical);
 	}
 
 	// Step 3: mod extra-strings (from all mods at once)
