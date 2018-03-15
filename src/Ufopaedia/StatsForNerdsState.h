@@ -19,6 +19,8 @@
  */
 #include "../Engine/State.h"
 #include "../Mod/ArticleDefinition.h"
+#include "../Mod/Armor.h"
+#include "../Mod/MapData.h"
 #include "../Mod/RuleDamageType.h"
 #include "../Mod/RuleItem.h"
 
@@ -59,7 +61,7 @@ private:
 	int _counter;
 	bool _indent;
 
-	void buildUI();
+	void buildUI(bool debug, bool ids, bool defaults);
 	void initLists();
 	void resetStream(std::wostringstream &ss);
 	void addTranslation(std::wostringstream &ss, const std::string &id);
@@ -67,7 +69,7 @@ private:
 	void addSection(const std::wstring &name, const std::wstring &desc, Uint8 color, bool forceShow = false);
 	void addHeading(const std::string &propertyName);
 	void endHeading();
-	void addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId = "");
+	void addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId = "", bool translate = true);
 	void addVectorOfStrings(std::wostringstream &ss, const std::vector<std::string> &vec, const std::string &propertyName);
 	void addBoolean(std::wostringstream &ss, const bool &value, const std::string &propertyName, const bool &defaultvalue = false);
 	void addFloat(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue = 0.0f);
@@ -91,10 +93,17 @@ private:
 	void addSpriteResourcePath(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const int &resourceId);
 	void addSoundVectorResourcePaths(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const std::vector<int> &resourceIds);
 	void initItemList();
+	void addUnitStatFormatted(std::wostringstream &ss, const int &value, const std::string &label, bool &isFirst);
+	void addUnitStatBonus(std::wostringstream &ss, const UnitStats &value, const std::string &propertyName);
+	void addArmorDamageModifiers(std::wostringstream &ss, const std::vector<float> &vec, const std::string &propertyName);
+	void addMovementType(std::wostringstream &ss, const MovementType &value, const std::string &propertyName, const MovementType &defaultvalue = MT_WALK);
+	void addForcedTorso(std::wostringstream &ss, const ForcedTorso &value, const std::string &propertyName, const ForcedTorso &defaultvalue = TORSO_USE_GENDER);
+	void addDrawingRoutine(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
+	void initArmorList();
 public:
 	/// Creates the StatsForNerdsState state.
-	StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex);
-	StatsForNerdsState(const UfopaediaTypeId typeId, const std::string topicId);
+	StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex, bool debug, bool ids, bool defaults);
+	StatsForNerdsState(const UfopaediaTypeId typeId, const std::string topicId, bool debug, bool ids, bool defaults);
 	/// Cleans up the StatsForNerdsState state.
 	~StatsForNerdsState();
 	/// Initializes the state.

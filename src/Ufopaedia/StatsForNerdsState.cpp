@@ -29,6 +29,7 @@
 #include "../Interface/TextList.h"
 #include "../Interface/ToggleTextButton.h"
 #include "../Interface/Window.h"
+#include "../Mod/Armor.h"
 #include "../Mod/ExtraSounds.h"
 #include "../Mod/ExtraSprites.h"
 #include "../Mod/Mod.h"
@@ -80,33 +81,33 @@ std::map<std::string, std::string> translationMap =
 /**
  * Initializes all the elements on the UI.
  */
-StatsForNerdsState::StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex) : _counter(0), _indent(false)
+StatsForNerdsState::StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex, bool debug, bool ids, bool defaults) : _counter(0), _indent(false)
 {
 	_typeId = article->getType();
 	_topicId = article->id;
 	_mainArticle = true;
 	_currentDetailIndex = currentDetailIndex;
 
-	buildUI();
+	buildUI(debug, ids, defaults);
 }
 
 /**
  * Initializes all the elements on the UI.
  */
-StatsForNerdsState::StatsForNerdsState(const UfopaediaTypeId typeId, const std::string topicId) : _counter(0), _indent(false)
+StatsForNerdsState::StatsForNerdsState(const UfopaediaTypeId typeId, const std::string topicId, bool debug, bool ids, bool defaults) : _counter(0), _indent(false)
 {
 	_typeId = typeId;
 	_topicId = topicId;
 	_mainArticle = false;
 	_currentDetailIndex = 0; // dummy
 
-	buildUI();
+	buildUI(debug, ids, defaults);
 }
 
 /**
  * Builds the UI.
  */
-void StatsForNerdsState::buildUI()
+void StatsForNerdsState::buildUI(bool debug, bool ids, bool defaults)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -159,12 +160,15 @@ void StatsForNerdsState::buildUI()
 	_lstRawData->setWordWrap(true);
 
 	_btnIncludeDebug->setText(tr("STR_INCLUDE_DEBUG"));
+	_btnIncludeDebug->setPressed(debug);
 	_btnIncludeDebug->onMouseClick((ActionHandler)&StatsForNerdsState::btnRefreshClick);
 
 	_btnIncludeIds->setText(tr("STR_INCLUDE_IDS"));
+	_btnIncludeIds->setPressed(ids);
 	_btnIncludeIds->onMouseClick((ActionHandler)&StatsForNerdsState::btnRefreshClick);
 
 	_btnIncludeDefaults->setText(tr("STR_INCLUDE_DEFAULTS"));
+	_btnIncludeDefaults->setPressed(defaults);
 	_btnIncludeDefaults->onMouseClick((ActionHandler)&StatsForNerdsState::btnRefreshClick);
 
 	_btnOk->setText(tr("STR_OK"));
@@ -218,7 +222,7 @@ void StatsForNerdsState::cbxAmmoSelect(Action *)
 	size_t selIdx = _cbxRelatedStuff->getSelected();
 	if (selIdx > 0)
 	{
-		_game->pushState(new StatsForNerdsState(UFOPAEDIA_TYPE_ITEM, _filterOptions.at(selIdx)));
+		_game->pushState(new StatsForNerdsState(UFOPAEDIA_TYPE_ITEM, _filterOptions.at(selIdx), _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed()));
 	}
 }
 
@@ -259,7 +263,7 @@ void StatsForNerdsState::btnOkClick(Action *)
  */
 void StatsForNerdsState::btnPrevClick(Action *)
 {
-	Ufopaedia::prevDetail(_game, _currentDetailIndex);
+	Ufopaedia::prevDetail(_game, _currentDetailIndex, _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed());
 }
 
 /**
@@ -268,7 +272,7 @@ void StatsForNerdsState::btnPrevClick(Action *)
  */
 void StatsForNerdsState::btnNextClick(Action *)
 {
-	Ufopaedia::nextDetail(_game, _currentDetailIndex);
+	Ufopaedia::nextDetail(_game, _currentDetailIndex, _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed());
 }
 
 /**
@@ -305,6 +309,9 @@ void StatsForNerdsState::initLists()
 	{
 	case UFOPAEDIA_TYPE_ITEM:
 		initItemList();
+		break;
+	case UFOPAEDIA_TYPE_ARMOR:
+		initArmorList();
 		break;
 	default:
 		break;
@@ -408,14 +415,21 @@ void StatsForNerdsState::endHeading()
 /**
  * Adds a single string value to the table.
  */
-void StatsForNerdsState::addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId)
+void StatsForNerdsState::addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId, bool translate)
 {
 	if (id == defaultId && !_showDefaults)
 	{
 		return;
 	}
 	resetStream(ss);
-	addTranslation(ss, id);
+	if (translate)
+	{
+		addTranslation(ss, id);
+	}
+	else
+	{
+		ss << Language::utf8ToWstr(id);
+	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
 	if (id != defaultId)
@@ -1649,6 +1663,414 @@ void StatsForNerdsState::initItemList()
 		{
 			auto tagValues = itemRule->getScriptValuesRaw().getValuesRaw();
 			ArgEnum index = ScriptParserBase::getArgType<ScriptTag<RuleItem>>();
+			auto tagNames = mod->getScriptGlobal()->getTagNames().at(index);
+			for (size_t i = 0; i < tagValues.size(); ++i)
+			{
+				auto nameAsString = tagNames.values[i].name.toString().substr(4);
+				addIntegerScriptTag(ss, tagValues.at(i), nameAsString);
+			}
+			endHeading();
+		}
+	}
+}
+
+/**
+ * Adds a unit stat to the string stream, formatted with a label.
+ */
+void StatsForNerdsState::addUnitStatFormatted(std::wostringstream &ss, const int &value, const std::string &label, bool &isFirst)
+{
+	if (value != 0 || _showDefaults)
+	{
+		if (!isFirst) ss << L", ";
+		ss << tr(label) << L":" << value;
+		isFirst = false;
+	}
+}
+
+/**
+ * Adds a UnitStats info to the table.
+ */
+void StatsForNerdsState::addUnitStatBonus(std::wostringstream &ss, const UnitStats &value, const std::string &propertyName)
+{
+	bool isDefault = value.tu == 0 && value.stamina == 0 && value.health == 0 && value.strength == 0
+		&& value.reactions == 0 && value.firing == 0 && value.melee == 0 && value.throwing == 0
+		&& value.psiSkill == 0 && value.psiStrength == 0 && value.bravery == 0;
+	if (isDefault && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	bool isFirst = true;
+	addUnitStatFormatted(ss, value.tu, "STR_TIME_UNITS_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.stamina, "STR_STAMINA_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.health, "STR_HEALTH_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.strength, "STR_STRENGTH_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.reactions, "STR_REACTIONS_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.firing, "STR_FIRING_ACCURACY_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.melee, "STR_MELEE_ACCURACY_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.throwing, "STR_THROWING_ACCURACY_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.psiStrength, "STR_PSIONIC_STRENGTH_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.psiSkill, "STR_PSIONIC_SKILL_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.bravery, "STR_BRAVERY_ABBREVIATION", isFirst);
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (!isDefault)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds a vector of damage modifiers to the table.
+ */
+void StatsForNerdsState::addArmorDamageModifiers(std::wostringstream &ss, const std::vector<float> &vec, const std::string &propertyName)
+{
+	bool isDefault = true;
+	for (auto &item : vec)
+	{
+		if (!AreSame(item, 1.0f))
+		{
+			isDefault = false;
+		}
+	}
+	if (isDefault && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	int index = 0;
+	bool isFirst = true;
+	ss << L"{";
+	for (auto &item : vec)
+	{
+		if (!AreSame(item, 1.0f) || _showDefaults)
+		{
+			if (!isFirst)
+			{
+				ss << L", ";
+			}
+			switch (index)
+			{
+				case 0: ss << tr("STR_DAMAGE_NONE"); break;
+				case 1: ss << tr("STR_DAMAGE_ARMOR_PIERCING"); break;
+				case 2: ss << tr("STR_DAMAGE_INCENDIARY"); break;
+				case 3: ss << tr("STR_DAMAGE_HIGH_EXPLOSIVE"); break;
+				case 4: ss << tr("STR_DAMAGE_LASER_BEAM"); break;
+				case 5: ss << tr("STR_DAMAGE_PLASMA_BEAM"); break;
+				case 6: ss << tr("STR_DAMAGE_STUN"); break;
+				case 7: ss << tr("STR_DAMAGE_MELEE"); break;
+				case 8: ss << tr("STR_DAMAGE_ACID"); break;
+				case 9: ss << tr("STR_DAMAGE_SMOKE"); break;
+				case 10: ss << tr("STR_DAMAGE_10"); break;
+				case 11: ss << tr("STR_DAMAGE_11"); break;
+				case 12: ss << tr("STR_DAMAGE_12"); break;
+				case 13: ss << tr("STR_DAMAGE_13"); break;
+				case 14: ss << tr("STR_DAMAGE_14"); break;
+				case 15: ss << tr("STR_DAMAGE_15"); break;
+				case 16: ss << tr("STR_DAMAGE_16"); break;
+				case 17: ss << tr("STR_DAMAGE_17"); break;
+				case 18: ss << tr("STR_DAMAGE_18"); break;
+				case 19: ss << tr("STR_DAMAGE_19"); break;
+				default: ss << tr("STR_UNKNOWN"); break;
+			}
+			ss << L": " << item * 100 << L"%";
+			isFirst = false;
+		}
+		index++;
+	}
+	ss << L"}";
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (!isDefault)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds a MovementType to the table.
+ */
+void StatsForNerdsState::addMovementType(std::wostringstream &ss, const MovementType &value, const std::string &propertyName, const MovementType &defaultvalue)
+{
+	if (value == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	switch (value)
+	{
+		case MT_WALK: ss << tr("MT_WALK"); break;
+		case MT_FLY: ss << tr("MT_FLY"); break;
+		case MT_SLIDE: ss << tr("MT_SLIDE"); break;
+		case MT_FLOAT: ss << tr("MT_FLOAT"); break;
+		case MT_SINK: ss << tr("MT_SINK"); break;
+		default: ss << tr("STR_UNKNOWN"); break;
+	}
+	if (_showIds)
+	{
+		ss << L" [" << value << L"]";
+	}
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (value != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds a ForcedTorso to the table.
+ */
+void StatsForNerdsState::addForcedTorso(std::wostringstream &ss, const ForcedTorso &value, const std::string &propertyName, const ForcedTorso &defaultvalue)
+{
+	if (value == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	switch (value)
+	{
+		case TORSO_USE_GENDER: ss << tr("TORSO_USE_GENDER"); break;
+		case TORSO_ALWAYS_MALE: ss << tr("TORSO_ALWAYS_MALE"); break;
+		case TORSO_ALWAYS_FEMALE: ss << tr("TORSO_ALWAYS_FEMALE"); break;
+		default: ss << tr("STR_UNKNOWN"); break;
+	}
+	if (_showIds)
+	{
+		ss << L" [" << value << L"]";
+	}
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (value != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds a DrawingRoutine to the table.
+ */
+void StatsForNerdsState::addDrawingRoutine(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+{
+	if (value == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	switch (value)
+	{
+		case 0: ss << tr("DRAWING_ROUTINE_SOLDIER_SECTOID"); break;
+		case 1: ss << tr("DRAWING_ROUTINE_FLOATER"); break;
+		case 2: ss << tr("DRAWING_ROUTINE_HWP"); break;
+		case 3: ss << tr("DRAWING_ROUTINE_CYBERDISC"); break;
+		case 4: ss << tr("DRAWING_ROUTINE_CIVILIAN_ETHEREAL"); break;
+		case 5: ss << tr("DRAWING_ROUTINE_SECTOPOD_REAPER"); break;
+		case 6: ss << tr("DRAWING_ROUTINE_SNAKEMAN"); break;
+		case 7: ss << tr("DRAWING_ROUTINE_CHRYSSALID"); break;
+		case 8: ss << tr("DRAWING_ROUTINE_SILACOID"); break;
+		case 9: ss << tr("DRAWING_ROUTINE_CELATID"); break;
+		case 10: ss << tr("DRAWING_ROUTINE_MUTON"); break;
+		case 11: ss << tr("DRAWING_ROUTINE_SWS"); break;
+		case 12: ss << tr("DRAWING_ROUTINE_HALLUCINOID"); break;
+		case 13: ss << tr("DRAWING_ROUTINE_AQUANAUTS"); break;
+		case 14: ss << tr("DRAWING_ROUTINE_CALCINITE_AND_MORE"); break;
+		case 15: ss << tr("DRAWING_ROUTINE_AQUATOID"); break;
+		case 16: ss << tr("DRAWING_ROUTINE_BIO_DRONE"); break;
+		case 17: ss << tr("DRAWING_ROUTINE_TFTD_CIVILIAN_A"); break;
+		case 18: ss << tr("DRAWING_ROUTINE_TFTD_CIVILIAN_B"); break;
+		case 19: ss << tr("DRAWING_ROUTINE_TENTACULAT"); break;
+		case 20: ss << tr("DRAWING_ROUTINE_TRISCENE"); break;
+		case 21: ss << tr("DRAWING_ROUTINE_XARQUID"); break;
+		case 22: ss << tr("DRAWING_ROUTINE_INVERTED_CYBERDISC"); break;
+		default: ss << tr("STR_UNKNOWN"); break;
+	}
+	if (_showIds)
+	{
+		ss << L" [" << value << L"]";
+	}
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (value != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Shows the "raw" (Rule)Armor data.
+ */
+void StatsForNerdsState::initArmorList()
+{
+	_lstRawData->clearList();
+	_lstRawData->setIgnoreSeparators(true);
+
+	std::wostringstream ssTopic;
+	ssTopic << tr(_topicId);
+	if (_showIds)
+	{
+		ssTopic << L" [" << Language::utf8ToWstr(_topicId) << L"]";
+	}
+
+	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
+
+	Mod *mod = _game->getMod();
+	Armor *armorRule = mod->getArmor(_topicId);
+	if (!armorRule)
+		return;
+
+	_filterOptions.clear();
+	_cbxRelatedStuff->setVisible(false);
+
+	std::wostringstream ss;
+
+	addUnitStatBonus(ss, *armorRule->getStats(), "stats");
+
+	addInteger(ss, armorRule->getWeight(), "weight");
+
+	addInteger(ss, armorRule->getSize(), "size", 1);
+
+	addBoolean(ss, armorRule->allowsRunning(), "allowsRunning", true);
+	addBoolean(ss, armorRule->allowsStrafing(), "allowsStrafing", true);
+	addBoolean(ss, armorRule->allowsKneeling(), "allowsKneeling", true);
+
+	bool fearImmuneDefault = false;
+	bool bleedImmuneDefault = false;
+	bool painImmuneDefault = false;
+	bool zombiImmuneDefault = false;
+	bool ignoresMeleeThreatDefault = false;
+	bool createsMeleeThreatDefault = true;
+
+	if (armorRule->getSize() != 1)
+	{
+		fearImmuneDefault = true;
+		bleedImmuneDefault = true;
+		painImmuneDefault = true;
+		zombiImmuneDefault = true;
+		ignoresMeleeThreatDefault = true;
+		createsMeleeThreatDefault = false;
+	}
+
+	addBoolean(ss, armorRule->getFearImmune(), "fearImmune", fearImmuneDefault);
+	addBoolean(ss, armorRule->getBleedImmune(), "bleedImmune", bleedImmuneDefault); // not considering alienBleeding option!
+	addBoolean(ss, armorRule->getPainImmune(), "painImmune", painImmuneDefault);
+	addBoolean(ss, armorRule->getZombiImmune(), "zombiImmune", zombiImmuneDefault);
+	addBoolean(ss, armorRule->getIgnoresMeleeThreat(), "ignoresMeleeThreat", ignoresMeleeThreatDefault);
+	addBoolean(ss, armorRule->getCreatesMeleeThreat(), "createsMeleeThreat", createsMeleeThreatDefault);
+
+	_filterOptions.clear();
+	for (auto biw : armorRule->getBuiltInWeapons())
+	{
+		// ignore dummy inventory padding
+		if (biw.find("INV_NULL") == std::string::npos || _showDebug)
+		{
+			_filterOptions.push_back(biw);
+		}
+	}
+	addVectorOfStrings(ss, _filterOptions, "builtInWeapons");
+	addSingleString(ss, armorRule->getSpecialWeapon(), "specialWeapon");
+
+	if (!armorRule->getSpecialWeapon().empty())
+	{
+		_filterOptions.push_back(armorRule->getSpecialWeapon());
+	}
+
+	_filterOptions.insert(_filterOptions.begin(), "STR_BUILT_IN_ITEMS");
+	_cbxRelatedStuff->setOptions(_filterOptions);
+	_cbxRelatedStuff->setVisible(_filterOptions.size() > 1);
+	if (_filterOptions.size() > 1)
+	{
+		_txtTitle->setAlign(ALIGN_LEFT);
+	}
+
+	addIntegerPercent(ss, armorRule->getHeatVision(), "heatVision");
+	addInteger(ss, armorRule->getPsiVision(), "psiVision");
+
+	addInteger(ss, armorRule->getVisibilityAtDay(), "visibilityAtDay");
+	addInteger(ss, armorRule->getVisibilityAtDark(), "visibilityAtDark");
+	addInteger(ss, armorRule->getCamouflageAtDay(), "camouflageAtDay");
+	addInteger(ss, armorRule->getCamouflageAtDark(), "camouflageAtDark");
+	addInteger(ss, armorRule->getAntiCamouflageAtDay(), "antiCamouflageAtDay");
+	addInteger(ss, armorRule->getAntiCamouflageAtDark(), "antiCamouflageAtDark");
+
+	addRuleStatBonus(ss, *armorRule->getPsiDefenceRaw(), "psiDefence");
+	addRuleStatBonus(ss, *armorRule->getMeleeDodgeRaw(), "meleeDodge");
+	addFloatAsPercentage(ss, armorRule->getMeleeDodgeBackPenalty(), "meleeDodgeBackPenalty");
+
+	addHeading("recovery");
+	{
+		addRuleStatBonus(ss, *armorRule->getTimeRecoveryRaw(), "time");
+		addRuleStatBonus(ss, *armorRule->getEnergyRecoveryRaw(), "energy");
+		addRuleStatBonus(ss, *armorRule->getMoraleRecoveryRaw(), "morale");
+		addRuleStatBonus(ss, *armorRule->getHealthRecoveryRaw(), "health");
+		addRuleStatBonus(ss, *armorRule->getStunRegenerationRaw(), "stun");
+		endHeading();
+	}
+
+	addVectorOfStrings(ss, armorRule->getUnits(), "units");
+
+	if (_showDebug)
+	{
+		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
+
+		addSection(L"{Naming}", L"", _white);
+		addSingleString(ss, armorRule->getType(), "type");
+
+		addSection(L"{Recovery}", L"", _white);
+		addVectorOfStrings(ss, armorRule->getCorpseBattlescape(), "corpseBattle");
+		addSingleString(ss, armorRule->getCorpseGeoscape(), "corpseGeo");
+		addSingleString(ss, armorRule->getStoreItem(), "storeItem");
+
+		addSection(L"{Inventory}", L"", _white);
+		addSingleString(ss, armorRule->getSpriteInventory(), "spriteInv", "", false);
+		addBoolean(ss, armorRule->hasInventory(), "allowInv", true);
+
+		addSection(L"{Sprites}", L"", _white);
+		addInteger(ss, armorRule->getCustomArmorPreviewIndex(), "customArmorPreviewIndex");
+		addSingleString(ss, armorRule->getSpriteSheet(), "spriteSheet", "", false);
+		addInteger(ss, armorRule->getFaceColorGroup(), "spriteFaceGroup");
+		addVectorOfIntegers(ss, armorRule->getFaceColorRaw(), "spriteFaceColor");
+		addInteger(ss, armorRule->getHairColorGroup(), "spriteHairGroup");
+		addVectorOfIntegers(ss, armorRule->getHairColorRaw(), "spriteHairColor");
+		addInteger(ss, armorRule->getUtileColorGroup(), "spriteUtileGroup");
+		addVectorOfIntegers(ss, armorRule->getUtileColorRaw(), "spriteUtileColor");
+		addInteger(ss, armorRule->getRankColorGroup(), "spriteRankGroup");
+		addVectorOfIntegers(ss, armorRule->getRankColorRaw(), "spriteRankColor");
+
+		addSection(L"{Sounds}", L"", _white);
+		addInteger(ss, armorRule->getMoveSound(), "moveSound", -1);
+		std::vector<int> tmpSoundVector;
+		tmpSoundVector.push_back(armorRule->getMoveSound());
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", tmpSoundVector);
+
+		addSection(L"{Animations}", L"", _white);
+		addDrawingRoutine(ss, armorRule->getDrawingRoutine(), "drawingRoutine");
+		addBoolean(ss, armorRule->getConstantAnimation(), "constantAnimation");
+		addMovementType(ss, armorRule->getMovementType(), "movementType");
+		addForcedTorso(ss, armorRule->getForcedTorso(), "forcedTorso");
+		addInteger(ss, armorRule->getDeathFrames(), "deathFrames", 3);
+
+		addSection(L"{Calculations}", L"", _white);
+		addVectorOfIntegers(ss, armorRule->getLoftempsSet(), "loftempsSet");
+		addInteger(ss, armorRule->getPersonalLight(), "personalLight", 15);
+		addInteger(ss, armorRule->getStandHeight(), "standHeight", -1);
+		addInteger(ss, armorRule->getKneelHeight(), "kneelHeight", -1);
+		addInteger(ss, armorRule->getFloatHeight(), "floatHeight", -1);
+		addFloat(ss, armorRule->getOverKill(), "overKill", 0.5f);
+		addBoolean(ss, armorRule->getInstantWoundRecovery(), "instantWoundRecovery");
+
+		addSection(L"{Basics}", L"Stuff from the main article", _white, true);
+		addInteger(ss, armorRule->getFrontArmor(), "frontArmor");
+		addInteger(ss, armorRule->getRightSideArmor(), "sideArmor");
+		addInteger(ss, armorRule->getLeftSideArmor() - armorRule->getRightSideArmor(), "leftArmorDiff");
+		addInteger(ss, armorRule->getRearArmor(), "rearArmor");
+		addInteger(ss, armorRule->getUnderArmor(), "underArmor");
+
+		addArmorDamageModifiers(ss, armorRule->getDamageModifiersRaw(), "damageModifier");
+
+		addSection(L"{Script tags}", L"", _white, true);
+		{
+			auto tagValues = armorRule->getScriptValuesRaw().getValuesRaw();
+			ArgEnum index = ScriptParserBase::getArgType<ScriptTag<Armor>>();
 			auto tagNames = mod->getScriptGlobal()->getTagNames().at(index);
 			for (size_t i = 0; i < tagValues.size(); ++i)
 			{

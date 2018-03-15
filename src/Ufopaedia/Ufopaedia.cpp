@@ -194,7 +194,7 @@ namespace OpenXcom
 		if (tmpIndex != (size_t)-1)
 		{
 			ArticleDefinition *article = game->getMod()->getUfopaediaArticle(id);
-			game->pushState(new StatsForNerdsState(article, tmpIndex));
+			game->pushState(new StatsForNerdsState(article, tmpIndex, false, false, false));
 		}
 	}
 
@@ -231,7 +231,7 @@ namespace OpenXcom
 	 * Open the next article detail (Stats for Nerds) in the list. Loops to the first.
 	 * @param game Pointer to actual game.
 	 */
-	void Ufopaedia::nextDetail(Game *game, size_t currentDetailIndex)
+	void Ufopaedia::nextDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults)
 	{
 		ArticleDefinitionList articles = getAvailableArticles(game->getSavedGame(), game->getMod());
 		if (currentDetailIndex >= articles.size() - 1)
@@ -244,7 +244,7 @@ namespace OpenXcom
 			currentDetailIndex++;
 		}
 		game->popState();
-		game->pushState(new StatsForNerdsState(articles[currentDetailIndex], currentDetailIndex));
+		game->pushState(new StatsForNerdsState(articles[currentDetailIndex], currentDetailIndex, debug, ids, defaults));
 	}
 
 	/**
@@ -271,7 +271,7 @@ namespace OpenXcom
 	 * Open the previous article detail (Stats for Nerds) in the list. Loops to the last.
 	 * @param game Pointer to actual game.
 	 */
-	void Ufopaedia::prevDetail(Game *game, size_t currentDetailIndex)
+	void Ufopaedia::prevDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults)
 	{
 		ArticleDefinitionList articles = getAvailableArticles(game->getSavedGame(), game->getMod());
 		if (currentDetailIndex == 0 || currentDetailIndex > articles.size() - 1)
@@ -284,7 +284,7 @@ namespace OpenXcom
 			currentDetailIndex--;
 		}
 		game->popState();
-		game->pushState(new StatsForNerdsState(articles[currentDetailIndex], currentDetailIndex));
+		game->pushState(new StatsForNerdsState(articles[currentDetailIndex], currentDetailIndex, debug, ids, defaults));
 	}
 
 	/**

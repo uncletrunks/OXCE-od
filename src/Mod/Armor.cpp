@@ -405,6 +405,16 @@ float Armor::getDamageModifier(ItemDamageType dt) const
 	return _damageModifier[(int)dt];
 }
 
+const std::vector<float> Armor::getDamageModifiersRaw() const
+{
+	std::vector<float> result;
+	for (int i = 0; i < DAMAGE_TYPES; i++)
+	{
+		result.push_back(_damageModifier[i]);
+	}
+	return result;
+}
+
 /** Gets the loftempSet.
  * @return The loftempsSet.
  */

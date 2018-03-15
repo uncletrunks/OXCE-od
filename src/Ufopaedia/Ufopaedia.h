@@ -61,11 +61,11 @@ namespace OpenXcom
 
 		/// article navigation to next article.
 		static void next(Game *game);
-		static void nextDetail(Game *game, size_t currentDetailIndex);
+		static void nextDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults);
 
 		/// article navigation to previous article.
 		static void prev(Game *game);
-		static void prevDetail(Game *game, size_t currentDetailIndex);
+		static void prevDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults);
 
 		/// load a vector with article ids that are currently visible of a given section.
 		static void list(SavedGame *save, Mod *rule, const std::string &section, ArticleDefinitionList &data);

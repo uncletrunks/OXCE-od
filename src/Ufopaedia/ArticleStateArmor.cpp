@@ -61,6 +61,8 @@ namespace OpenXcom
 		_btnOk->setColor(_buttonColor);
 		_btnPrev->setColor(_buttonColor);
 		_btnNext->setColor(_buttonColor);
+		_btnInfo->setColor(_buttonColor);
+		_btnInfo->setVisible(true);
 
 		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();

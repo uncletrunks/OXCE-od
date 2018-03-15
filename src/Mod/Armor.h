@@ -124,27 +124,35 @@ public:
 	int getTotalSize() const;
 	/// Gets damage modifier.
 	float getDamageModifier(ItemDamageType dt) const;
+	const std::vector<float> getDamageModifiersRaw() const;
 	/// Gets loftempSet
 	const std::vector<int> &getLoftempsSet() const;
 	/// Gets the armor's stats.
 	const UnitStats *getStats() const;
 	/// Gets unit psi defense.
 	int getPsiDefence(const BattleUnit* unit) const;
+	const RuleStatBonus *getPsiDefenceRaw() const { return &_psiDefence; }
 	/// Gets unit melee dodge chance.
 	int getMeleeDodge(const BattleUnit* unit) const;
+	const RuleStatBonus *getMeleeDodgeRaw() const { return &_meleeDodge; }
 	/// Gets unit dodge penalty if hit from behind.
 	float getMeleeDodgeBackPenalty() const;
 
 	/// Gets unit TU recovery.
 	int getTimeRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getTimeRecoveryRaw() const { return &_timeRecovery; }
 	/// Gets unit Energy recovery.
 	int getEnergyRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getEnergyRecoveryRaw() const { return &_energyRecovery; }
 	/// Gets unit Morale recovery.
 	int getMoraleRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getMoraleRecoveryRaw() const { return &_moraleRecovery; }
 	/// Gets unit Health recovery.
 	int getHealthRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getHealthRecoveryRaw() const { return &_healthRecovery; }
 	/// Gets unit Stun recovery.
 	int getStunRegeneration(const BattleUnit* unit) const;
+	const RuleStatBonus *getStunRegenerationRaw() const { return &_stunRecovery; }
 
 	/// Gets the armor's weight.
 	int getWeight() const;
@@ -200,17 +208,22 @@ public:
 	int getRankColorGroup() const;
 	/// Get face base color
 	int getFaceColor(int i) const;
+	const std::vector<int> &getFaceColorRaw() const { return _faceColor; }
 	/// Get hair base color
 	int getHairColor(int i) const;
+	const std::vector<int> &getHairColorRaw() const { return _hairColor; }
 	/// Get utile base color
 	int getUtileColor(int i) const;
+	const std::vector<int> &getUtileColorRaw() const { return _utileColor; }
 	/// Get rank base color
 	int getRankColor(int i) const;
+	const std::vector<int> &getRankColorRaw() const { return _rankColor; }
 	/// Can we access this unit's inventory?
 	bool hasInventory() const;
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _battleUnitScripts.get<Script>(); }
+	const ScriptValues<Armor> &getScriptValuesRaw() const { return _scriptValues; }
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
 	/// Gets the index of the sprite in the CustomArmorPreview sprite set
