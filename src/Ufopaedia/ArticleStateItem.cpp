@@ -303,6 +303,7 @@ namespace OpenXcom
 					ss << L"x" << item->getShotgunPellets();
 				}
 				_txtAmmoDamage[0]->setText(ss.str());
+				_txtAmmoDamage[0]->setColor(getDamageTypeTextColor(item->getDamageType()->ResistType));
 				break;
 			default: break;
 		}
