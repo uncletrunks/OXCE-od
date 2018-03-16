@@ -21,6 +21,7 @@
 #include "Position.h"
 #include "BattlescapeGame.h"
 #include "../Mod/RuleItem.h"
+#include "../Mod/MapData.h"
 #include <SDL.h>
 
 namespace OpenXcom
@@ -227,7 +228,7 @@ public:
 	/// Validates a throwing action.
 	bool validateThrow(BattleAction &action, Position originVoxel, Position targetVoxel, double *curve = 0, int *voxelType = 0, bool forced = false);
 	/// Opens any doors this door is connected to.
-	std::pair<int, Position> checkAdjacentDoors(Position pos, int part);
+	std::pair<int, Position> checkAdjacentDoors(Position pos, TilePart part);
 	/// Recalculates FOV of all units in-game.
 	void recalculateFOV();
 	/// Get direction to a certain point

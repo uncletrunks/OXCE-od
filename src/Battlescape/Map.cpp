@@ -280,7 +280,7 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
  * @param tileBehind Tile behind wall.
  * @return Current shade of wall.
  */
-int Map::getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind)
+int Map::getWallShade(TilePart part, Tile* tileFrot, Tile* tileBehind)
 {
 	int shade;
 	if (tileFrot->isDiscovered(2))
