@@ -29,6 +29,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Timer.h"
 #include "../Engine/Options.h"
+#include "../Engine/CrossPlatform.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -376,9 +377,9 @@ void PurchaseState::btnQuickSearchApply(Action *)
  */
 void PurchaseState::updateList()
 {
-	std::locale myLocale = std::locale("");
+	std::locale myLocale = CrossPlatform::testLocale();
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, myLocale);
+	CrossPlatform::upperCase(searchString, myLocale);
 
 	_lstItems->clearList();
 	_rows.clear();
@@ -405,7 +406,7 @@ void PurchaseState::updateList()
 		if (searchString != L"")
 		{
 			std::wstring projectName = _items[i].name;
-			for (auto & c : projectName) c = toupper(c, myLocale);
+			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;

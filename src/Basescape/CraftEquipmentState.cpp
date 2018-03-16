@@ -23,6 +23,7 @@
 #include <sstream>
 #include <algorithm>
 #include <locale>
+#include "../Engine/CrossPlatform.h"
 #include "../Engine/Screen.h"
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
@@ -282,9 +283,9 @@ void CraftEquipmentState::btnQuickSearchApply(Action *)
  */
 void CraftEquipmentState::initList()
 {
-	std::locale myLocale = std::locale("");
+	std::locale myLocale = CrossPlatform::testLocale();
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, myLocale);
+	CrossPlatform::upperCase(searchString, myLocale);
 
 	size_t selIdx = _cbxFilterBy->getSelected();
 	if (selIdx == (size_t)-1)
@@ -344,7 +345,7 @@ void CraftEquipmentState::initList()
 		if (searchString != L"")
 		{
 			std::wstring projectName = tr((*i));
-			for (auto & c : projectName) c = toupper(c, myLocale);
+			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;

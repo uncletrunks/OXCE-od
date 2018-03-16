@@ -48,6 +48,7 @@
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Engine/Timer.h"
 #include "../Engine/Options.h"
+#include "../Engine/CrossPlatform.h"
 #include "../Mod/RuleInterface.h"
 #include "../Battlescape/DebriefingState.h"
 #include "TransferBaseState.h"
@@ -438,9 +439,9 @@ void SellState::btnQuickSearchApply(Action *)
  */
 void SellState::updateList()
 {
-	std::locale myLocale = std::locale("");
+	std::locale myLocale = CrossPlatform::testLocale();
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, myLocale);
+	CrossPlatform::upperCase(searchString, myLocale);
 
 	_lstItems->clearList();
 	_rows.clear();
@@ -467,7 +468,7 @@ void SellState::updateList()
 		if (searchString != L"")
 		{
 			std::wstring projectName = _items[i].name;
-			for (auto & c : projectName) c = toupper(c, myLocale);
+			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;

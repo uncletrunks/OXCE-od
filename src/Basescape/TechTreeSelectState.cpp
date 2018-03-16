@@ -22,6 +22,7 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Engine/CrossPlatform.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
@@ -138,9 +139,9 @@ void TechTreeSelectState::btnQuickSearchApply(Action *)
 */
 void TechTreeSelectState::initLists()
 {
-	std::locale myLocale = std::locale("");
+	std::locale myLocale = CrossPlatform::testLocale();
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, myLocale);
+	CrossPlatform::upperCase(searchString, myLocale);
 
 	_firstManufacturingTopicIndex = 0;
 	_availableTopics.clear();
@@ -163,7 +164,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::wstring projectName = tr((*i));
-		for (auto & c : projectName) c = toupper(c, myLocale);
+		CrossPlatform::upperCase(projectName, myLocale);
 		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredResearch(*i))
@@ -192,7 +193,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::wstring projectName = tr((*i));
-		for (auto & c : projectName) c = toupper(c, myLocale);
+		CrossPlatform::upperCase(projectName, myLocale);
 		if (searchString == L"SHAZAM")
 		{
 			if (_parent->isDiscoveredManufacture(*i))

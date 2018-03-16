@@ -26,6 +26,7 @@
 #include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Interface/ComboBox.h"
+#include "../Engine/CrossPlatform.h"
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
@@ -327,9 +328,9 @@ void NewManufactureListState::btnMarkAllAsSeenClick(Action *)
  */
 void NewManufactureListState::fillProductionList(bool refreshCategories)
 {
-	std::locale myLocale = std::locale("");
+	std::locale myLocale = CrossPlatform::testLocale();
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, myLocale);
+	CrossPlatform::upperCase(searchString, myLocale);
 
 	if (refreshCategories)
 	{
@@ -377,7 +378,7 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 			if (searchString != L"")
 			{
 				std::wstring projectName = tr((*it)->getName());
-				for (auto & c : projectName) c = toupper(c, myLocale);
+				CrossPlatform::upperCase(projectName, myLocale);
 				if (projectName.find(searchString) == std::string::npos)
 				{
 					continue;

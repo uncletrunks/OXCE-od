@@ -20,6 +20,7 @@
 #include "NewResearchListState.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Engine/CrossPlatform.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
@@ -204,9 +205,9 @@ void NewResearchListState::btnMarkAllAsSeenClick(Action *)
  */
 void NewResearchListState::fillProjectList(bool markAllAsSeen)
 {
-	std::locale myLocale = std::locale("");
+	std::locale myLocale = CrossPlatform::testLocale();
 	std::wstring searchString = _btnQuickSearch->getText();
-	for (auto & c : searchString) c = toupper(c, myLocale);
+	CrossPlatform::upperCase(searchString, myLocale);
 
 	_projects.clear();
 	_lstResearch->clearList();
@@ -231,7 +232,7 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 		if (searchString != L"")
 		{
 			std::wstring projectName = tr((*it)->getName());
-			for (auto & c : projectName) c = toupper(c, myLocale);
+			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				it = _projects.erase(it);

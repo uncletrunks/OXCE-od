@@ -661,6 +661,52 @@ std::string getLocale()
 }
 
 /**
+ * Tests locale availability and remembers the result in user settings.
+ * @return Locale.
+ */
+std::locale testLocale()
+{
+	std::locale test;
+	try
+	{
+		// Don't try again if you failed once already
+		if (!Options::simpleUppercase)
+		{
+			test = std::locale("");
+		}
+	}
+	catch (const std::runtime_error &e)
+	{
+		Log(LOG_ERROR) << e.what();
+
+		// Workaround for this issue: https://openxcom.org/forum/index.php/topic,5047.msg93780.html#msg93780
+		Options::simpleUppercase = true;
+	}
+	catch (...)
+	{
+		Options::simpleUppercase = true;
+	}
+	return test;
+}
+
+/**
+ * Converts a wide string into upper case.
+ */
+void upperCase(std::wstring &input, std::locale &myLocale)
+{
+	if (!Options::simpleUppercase)
+	{
+		// converts non-English characters too
+		for (auto & c : input) c = toupper(c, myLocale);
+	}
+	else
+	{
+		// fallback, works for English characters only
+		for (auto & c : input) c = towupper(c);
+	}
+}
+
+/**
  * Checks if the system's default quit shortcut was pressed.
  * @param ev SDL event.
  * @return Is quitting necessary?

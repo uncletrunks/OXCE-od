@@ -44,6 +44,7 @@
 #include "../Ufopaedia/Ufopaedia.h"
 #include <unordered_map>
 #include "../Engine/Screen.h"
+#include "../Engine/CrossPlatform.h"
 
 namespace OpenXcom
 {
@@ -59,6 +60,8 @@ namespace OpenXcom
  */
 Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _base(base), _mouseOverItem(0), _groundOffset(0), _animFrame(0)
 {
+	_myLocale = CrossPlatform::testLocale();
+
 	_twoHandedRed = _game->getMod()->getInterface("battlescape")->getElement("twoHandedRed")->color;
 	_twoHandedGreen = _game->getMod()->getInterface("battlescape")->getElement("twoHandedGreen")->color;
 
@@ -579,7 +582,7 @@ void Inventory::setSelectedItem(BattleItem *item)
 void Inventory::setSearchString(const std::wstring &searchString)
 {
 	_searchString = searchString;
-	for (auto & c : _searchString) c = toupper(c, _myLocale);
+	CrossPlatform::upperCase(_searchString, _myLocale);
 	arrangeGround(true);
 }
 
@@ -1184,7 +1187,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 	{
 		itemLocalName = _game->getLanguage()->getString(item->getRules()->getName());
 	}
-	for (auto & c : itemLocalName) c = toupper(c, _myLocale);
+	CrossPlatform::upperCase(itemLocalName, _myLocale);
 	if (itemLocalName.find(_searchString) != std::wstring::npos)
 	{
 		// Name match.
@@ -1199,7 +1202,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 		for (std::vector<std::string>::iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
 		{
 			std::wstring catLocalName = _game->getLanguage()->getString((*i));
-			for (auto & c : catLocalName) c = toupper(c, _myLocale);
+			CrossPlatform::upperCase(catLocalName, _myLocale);
 			if (catLocalName.find(_searchString) != std::wstring::npos)
 			{
 				// Category match
@@ -1215,7 +1218,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 				for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
 				{
 					std::wstring catLocalName = _game->getLanguage()->getString((*i));
-					for (auto & c : catLocalName) c = toupper(c, _myLocale);
+					CrossPlatform::upperCase(catLocalName, _myLocale);
 					if (catLocalName.find(_searchString) != std::wstring::npos)
 					{
 						// Category match

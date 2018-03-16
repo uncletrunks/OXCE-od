@@ -225,6 +225,8 @@ void create()
 	_info.push_back(OptionInfo("ufoLandingAlert", &ufoLandingAlert, false, "STR_UFO_LANDING_ALERT", "STR_OXCE"));
 	_info.push_back(OptionInfo("friendlyCraftEscort", &friendlyCraftEscort, false, "STR_FRIENDLY_CRAFT_ESCORT", "STR_OXCE"));
 
+	_info.push_back(OptionInfo("simpleUppercase", &simpleUppercase, false));
+
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
 	_info.push_back(OptionInfo("keyCancel", &keyCancel, SDLK_ESCAPE, "STR_CANCEL", "STR_GENERAL"));

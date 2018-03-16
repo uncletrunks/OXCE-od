@@ -54,7 +54,7 @@ private:
 	std::vector<std::pair<int, int> > _stunnedIndicators, _woundedIndicators, _burningIndicators;
 	NumberText *_stackNumber;
 	std::wstring _searchString;
-	std::locale _myLocale = std::locale("");
+	std::locale _myLocale;
 	Timer *_animTimer;
 	int _depth;
 	RuleInventory *_inventorySlotRightHand = nullptr;
