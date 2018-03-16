@@ -143,8 +143,8 @@ void UnitFallBState::think()
 			{
 				for (int y = (*unit)->getArmor()->getSize() - 1; y >= 0; --y)
 				{
-					Tile *tileBelow = _parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,-1));
-					tilesToFallInto.push_back(tileBelow);
+					Tile *tileTarget = _parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,-1));
+					tilesToFallInto.push_back(tileTarget);
 				}
 			}
 
@@ -256,8 +256,8 @@ void UnitFallBState::think()
 			if (falling)
 			{
 				Position destination = (*unit)->getPosition() + Position(0,0,-1);
-				Tile *tileBelow = _parent->getSave()->getTile(destination);
-				(*unit)->startWalking(Pathfinding::DIR_DOWN, destination, tileBelow, onScreen);
+				Tile *tileDest = _parent->getSave()->getTile(destination);
+				(*unit)->startWalking(Pathfinding::DIR_DOWN, destination, tileDest, onScreen);
 				++unit;
 			}
 			else
