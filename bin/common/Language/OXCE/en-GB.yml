@@ -43,6 +43,8 @@ en-GB:
   STR_VERY_BOLD: "Very bold (+100%)"
 #DismantleFacilityState.cpp
   STR_REFUND_VALUE: "Sales value> {ALT}{0}"
+#GlobalResearchState.cpp
+  STR_RESEARCH_OVERVIEW: "RESEARCH OVERVIEW"
 #ManageAlienContainmentState.cpp
   STR_GO_TO_TRANSFERS: "Transfer..."
 #ManufactureDependenciesTreeState.cpp

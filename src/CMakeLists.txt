@@ -20,6 +20,7 @@ set ( basescape_src
   Basescape/CraftWeaponsState.cpp
   Basescape/CraftsState.cpp
   Basescape/DismantleFacilityState.cpp
+  Basescape/GlobalResearchState.cpp
   Basescape/ManageAlienContainmentState.cpp
   Basescape/ManufactureDependenciesTreeState.cpp
   Basescape/ManufactureInfoState.cpp

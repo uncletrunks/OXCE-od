@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright 2010-2016 OpenXcom Developers.
+ * Copyright 2010-2018 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -29,32 +29,29 @@ class TextList;
 class Base;
 
 /**
- * Research screen that lets the player manage
- * all the researching operations of a base.
+ * Global Research screen that provides overview
+ * of the ongoing research operations in all the bases.
  */
-class ResearchState : public State
+class GlobalResearchState : public State
 {
 private:
-	Base *_base;
-	TextButton *_btnNew, *_btnOk;
+	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtAvailable, *_txtAllocated, *_txtSpace, *_txtProject, *_txtScientists, *_txtProgress;
 	TextList *_lstResearch;
+
+	std::vector<Base*> _bases;
+    bool _openedFromBasescape;
 public:
-	/// Creates the Research state.
-	ResearchState(Base *base);
-	/// Cleans up the Research state.
-	~ResearchState();
+	/// Creates the GlobalResearchState.
+	GlobalResearchState(bool openedFromBasescape);
+	/// Cleans up the GlobalResearchState.
+	~GlobalResearchState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
-	/// Handler for clicking the New Research button.
-	void btnNewClick(Action *action);
 	/// Handler for clicking the ResearchProject list.
-	void onSelectProject(Action *action);
-	void onOpenTechTreeViewer(Action *action);
-    /// Handler for opening the Current Global Research UI.
-	void onCurrentGlobalResearchClick(Action *action);
-	/// Fills the ResearchProject list with Base ResearchProjects.
+	void onSelectBase(Action *action);
+	/// Fills the list with ResearchProjects from all bases.
 	void fillProjectList();
 	/// Updates the research list.
 	void init();
