@@ -89,14 +89,6 @@ public:
 	void update();
 	// Fires the weapons.
 	void fireWeapon(int i);
-	// Fires the first weapon.
-	void fireWeapon1();
-	// Fires the second weapon.
-	void fireWeapon2();
-	// Fires the third weapon.
-	void fireWeapon3();
-	// Fires the fourth weapon.
-	void fireWeapon4();
 	// Fires UFO weapon.
 	void ufoFireWeapon();
 	// Sets the craft to minimum distance.

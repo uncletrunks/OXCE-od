@@ -1168,16 +1168,13 @@ void DogfightState::update()
 					}
 				}
 				// Check if projectile passed it's maximum range.
-				if (p->getGlobalType() == CWPGT_MISSILE)
+				if (p->getGlobalType() == CWPGT_MISSILE && p->getPosition() / 8 >= p->getRange())
 				{
-					if (p->getPosition() / 8 >= p->getRange())
-					{
-						p->remove();
-					}
-					else if (!_ufo->isCrashed())
-					{
-						projectileInFlight = true;
-					}
+					p->remove();
+				}
+				else if (!_ufo->isCrashed())
+				{
+					projectileInFlight = true;
 				}
 			}
 			// Projectiles fired by UFO.
@@ -1257,8 +1254,11 @@ void DogfightState::update()
 			if (wTimer == 0 && _currentDist <= w->getRules()->getRange() * 8 && w->getAmmo() > 0 && _mode != _btnStandoff
 				&& _mode != _btnDisengage && !_ufo->isCrashed() && !_craft->isDestroyed())
 			{
-				fireWeapon(i);
-				projectileInFlight = true;
+				if (_weaponEnabled[i])
+				{
+					fireWeapon(i);
+					projectileInFlight = true;
+				}
 			}
 			else if (wTimer > 0)
 			{
@@ -1592,59 +1592,23 @@ void DogfightState::update()
  */
 void DogfightState::fireWeapon(int i)
 {
-	if (_weaponEnabled[i])
+	CraftWeapon *w1 = _craft->getWeapons()->at(i);
+	if (w1->setAmmo(w1->getAmmo() - 1))
 	{
-		CraftWeapon *w1 = _craft->getWeapons()->at(i);
-		if (w1->setAmmo(w1->getAmmo() - 1))
-		{
-			_weaponFireCountdown[i] = _weaponFireInterval[i];
+		_weaponFireCountdown[i] = _weaponFireInterval[i];
 
-			std::wostringstream ss;
-			ss << w1->getAmmo();
-			_txtAmmo[i]->setText(ss.str());
+		std::wostringstream ss;
+		ss << w1->getAmmo();
+		_txtAmmo[i]->setText(ss.str());
 
-			CraftWeaponProjectile *p = w1->fire();
-			p->setDirection(D_UP);
-			p->setHorizontalPosition((i % 2 ? HP_RIGHT : HP_LEFT) * (1 + 2 * (i / 2)));
-			_projectiles.push_back(p);
+		CraftWeaponProjectile *p = w1->fire();
+		p->setDirection(D_UP);
+		p->setHorizontalPosition((i % 2 ? HP_RIGHT : HP_LEFT) * (1 + 2 * (i / 2)));
+		_projectiles.push_back(p);
 
-			_game->getMod()->getSound("GEO.CAT", w1->getRules()->getSound())->play();
-			_firedAtLeastOnce = true;
-		}
+		_game->getMod()->getSound("GEO.CAT", w1->getRules()->getSound())->play();
+		_firedAtLeastOnce = true;
 	}
-}
-
-/**
- * Fires a shot from the first weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon1()
-{
-	fireWeapon(0);
-}
-/**
- * Fires a shot from the second weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon2()
-{
-	fireWeapon(1);
-}
-/**
- * Fires a shot from the third weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon3()
-{
-	fireWeapon(2);
-}
-/**
- * Fires a shot from the fourth weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon4()
-{
-	fireWeapon(3);
 }
 
 /**
