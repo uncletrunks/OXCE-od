@@ -1258,6 +1258,7 @@ void DogfightState::update()
 				&& _mode != _btnDisengage && !_ufo->isCrashed() && !_craft->isDestroyed())
 			{
 				fireWeapon(i);
+				projectileInFlight = true;
 			}
 			else if (wTimer > 0)
 			{
