@@ -394,6 +394,7 @@ void AIModule::think(BattleAction *action)
 				break;
 			case 2:
 				_reserve = BA_SNAPSHOT;
+				break;
 			default:
 				break;
 			}
