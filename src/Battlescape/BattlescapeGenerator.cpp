@@ -1524,7 +1524,8 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 				{
 					_save->getTile(Position(x, y, z))->setMapData(0, -1, -1, O_OBJECT);
 				}
-				_save->getTile(Position(x, y, z))->setMapData(md, mapDataID, mapDataSetID, (TilePart)part);
+				TilePart tp = (TilePart) part;
+				_save->getTile(Position(x, y, z))->setMapData(md, mapDataID, mapDataSetID, tp);
 			}
 		}
 
@@ -2987,8 +2988,8 @@ void BattlescapeGenerator::clearModule(int x, int y, int sizeX, int sizeY)
 			for (int dy = y; dy != y + sizeY; ++dy)
 			{
 				Tile *tile = _save->getTile(Position(dx,dy,z));
-				for (TilePart i = O_FLOOR; i <= O_OBJECT; i = (TilePart)((int)i + 1))
-					tile->setMapData(0, -1, -1, i);
+				for (int i = O_FLOOR; i <= O_OBJECT; i++)
+					tile->setMapData(0, -1, -1, (TilePart)i);
 			}
 		}
 	}
@@ -3738,7 +3739,8 @@ void BattlescapeGenerator::setupObjectives(const AlienDeployment *ruleDeploy)
 		{
 			for (int j = O_FLOOR; j <= O_OBJECT; ++j)
 			{
-				if (_save->getTile(i)->getMapData(j) && _save->getTile(i)->getMapData(j)->getSpecialType() == targetType)
+				TilePart tp = (TilePart)j;
+				if (_save->getTile(i)->getMapData(tp) && _save->getTile(i)->getMapData(tp)->getSpecialType() == targetType)
 				{
 					actualCount++;
 				}

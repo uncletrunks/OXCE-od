@@ -94,13 +94,13 @@ void MiniMapView::draw()
 					px++;
 					continue;
 				}
-					for (int i = 0; i < 4; i++)
-					{
-						data = t->getMapData(i);
+				for (int i = O_FLOOR; i <= O_OBJECT; i++)
+				{
+					data = t->getMapData((TilePart)i);
 
-						if (data && data->getMiniMapIndex())
-						{
-						Surface * s = _set->getFrame (data->getMiniMapIndex()+35);
+					if (data && data->getMiniMapIndex())
+					{
+						Surface * s = _set->getFrame(data->getMiniMapIndex() + 35);
 						if (s)
 						{
 							int shade = 16;

@@ -1577,11 +1577,12 @@ void DebriefingState::prepareDebriefing()
 			for (int i = 0; i < battle->getMapSizeXYZ(); ++i)
 			{
 				// get recoverable map data objects from the battlescape map
-				for (int part = 0; part < 4; ++part)
+				for (int part = O_FLOOR; part <= O_OBJECT; ++part)
 				{
-					if (battle->getTile(i)->getMapData(part))
+					TilePart tp = (TilePart)part;
+					if (battle->getTile(i)->getMapData(tp))
 					{
-						size_t specialType = battle->getTile(i)->getMapData(part)->getSpecialType();
+						size_t specialType = battle->getTile(i)->getMapData(tp)->getSpecialType();
 						if (specialType != nonRecoverType && _recoveryStats.find(specialType) != _recoveryStats.end())
 						{
 							addStat(_recoveryStats[specialType]->name, 1, _recoveryStats[specialType]->value);
