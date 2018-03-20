@@ -2054,18 +2054,22 @@ inline void BattlescapeState::handle(Action *action)
 
 			if (action->getDetails()->type == SDL_KEYDOWN)
 			{
+				SDLKey key = action->getDetails()->key.keysym.sym;
+				bool ctrlPressed = (SDL_GetModState() & KMOD_CTRL) != 0;
+				bool shiftPressed = (SDL_GetModState() & KMOD_SHIFT) != 0;
+
 				// "ctrl-b" - reopen briefing
-				if (action->getDetails()->key.keysym.sym == SDLK_b && (SDL_GetModState() & KMOD_CTRL) != 0)
+				if (key == SDLK_b && ctrlPressed)
 				{
 					_game->pushState(new BriefingState(0, 0, true));
 				}
 				// "ctrl-h" - show hit log
-				else if (action->getDetails()->key.keysym.sym == SDLK_h && (SDL_GetModState() & KMOD_CTRL) != 0)
+				else if (key == SDLK_h && ctrlPressed)
 				{
 					_game->pushState(new InfoboxState(_save->hitLog.str()));
 				}
 				// "ctrl-m" - melee damage preview
-				else if (action->getDetails()->key.keysym.sym == SDLK_m && (SDL_GetModState() & KMOD_CTRL) != 0)
+				else if (key == SDLK_m && ctrlPressed)
 				{
 					BattleUnit *actor = _save->getSelectedUnit();
 					if (actor)
@@ -2080,47 +2084,61 @@ inline void BattlescapeState::handle(Action *action)
 				if (Options::debug)
 				{
 					// "ctrl-d" - enable debug mode
-					if (action->getDetails()->key.keysym.sym == SDLK_d && (SDL_GetModState() & KMOD_CTRL) != 0)
+					if (key == SDLK_d && ctrlPressed)
 					{
 						_save->setDebugMode();
 						debug(L"Debug Mode");
 					}
 					// "ctrl-v" - reset tile visibility
-					else if (_save->getDebugMode() && action->getDetails()->key.keysym.sym == SDLK_v && (SDL_GetModState() & KMOD_CTRL) != 0)
+					else if (_save->getDebugMode() && key == SDLK_v && ctrlPressed)
 					{
 						debug(L"Resetting tile visibility");
 						_save->resetTiles();
 					}
-					// "ctrl-k" - kill all aliens
-					else if (_save->getDebugMode() && action->getDetails()->key.keysym.sym == SDLK_k && (SDL_GetModState() & KMOD_CTRL) != 0)
+					else if (_save->getDebugMode() && (key == SDLK_k || key == SDLK_j) && ctrlPressed)
 					{
-						debug(L"Influenza bacterium dispersed");
-						for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i !=_save->getUnits()->end(); ++i)
+						bool stunOnly = (key == SDLK_j);
+						if (shiftPressed)
 						{
-							if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
+							// kill (ctrl-shift-k) or stun (ctrl-shift-j) just a single unit (under the cursor)
+							Position newPos;
+							_map->getSelectorPosition(&newPos);
+							Tile *tile = _save->getTile(newPos);
+							if (tile)
 							{
-								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_AP), _save, { });
-							}
-							_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
-							_save->getBattleGame()->handleState();
-						}
-					}
-					// "ctrl-j" - stun all aliens
-					else if (_save->getDebugMode() && action->getDetails()->key.keysym.sym == SDLK_j && (SDL_GetModState() & KMOD_CTRL) != 0)
-					{
-						debug(L"Deploying Celine Dion album");
-						for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i !=_save->getUnits()->end(); ++i)
-						{
-							if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
-							{
-								(*i)->damage(Position(0,0,0), 1000, _game->getMod()->getDamageType(DT_STUN), _save, { });
+								BattleUnit *unit = tile->getUnit();
+								if (unit && !unit->isOut())
+								{
+									debug(L"Bingo!");
+									unit->damage(Position(0, 0, 0), 1000, _game->getMod()->getDamageType(stunOnly ? DT_STUN : DT_AP), _save, {});
+								}
 							}
 						}
-						_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{ }, true, false);
+						else
+						{
+							if (stunOnly)
+							{
+								// "ctrl-j" - stun all aliens
+								debug(L"Deploying Celine Dion album");
+							}
+							else
+							{
+								// "ctrl-k" - kill all aliens
+								debug(L"Influenza bacterium dispersed");
+							}
+							for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+							{
+								if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
+								{
+									(*i)->damage(Position(0, 0, 0), 1000, _game->getMod()->getDamageType(stunOnly ? DT_STUN : DT_AP), _save, { });
+								}
+							}
+						}
+						_save->getBattleGame()->checkForCasualties(nullptr, BattleActionAttack{}, true, false);
 						_save->getBattleGame()->handleState();
 					}
 					// "ctrl-w" - warp unit
-					else if (_save->getDebugMode() && action->getDetails()->key.keysym.sym == SDLK_w && (SDL_GetModState() & KMOD_CTRL) != 0)
+					else if (_save->getDebugMode() && key == SDLK_w && ctrlPressed)
 					{
 						debug(L"Beam me up Scotty");
 						BattleUnit *unit = _save->getSelectedUnit();
@@ -2136,12 +2154,12 @@ inline void BattlescapeState::handle(Action *action)
 						}
 					}
 					// f11 - voxel map dump
-					else if (action->getDetails()->key.keysym.sym == SDLK_F11)
+					else if (key == SDLK_F11)
 					{
 						saveVoxelMap();
 					}
 					// f9 - ai
-					else if (action->getDetails()->key.keysym.sym == SDLK_F9 && Options::traceAI)
+					else if (key == SDLK_F9 && Options::traceAI)
 					{
 						saveAIMap();
 					}
@@ -2149,18 +2167,18 @@ inline void BattlescapeState::handle(Action *action)
 				// quick save and quick load
 				if (!_game->getSavedGame()->isIronman())
 				{
-					if (action->getDetails()->key.keysym.sym == Options::keyQuickSave)
+					if (key == Options::keyQuickSave)
 					{
 						_game->pushState(new SaveGameState(OPT_BATTLESCAPE, SAVE_QUICK, _palette));
 					}
-					else if (action->getDetails()->key.keysym.sym == Options::keyQuickLoad)
+					else if (key == Options::keyQuickLoad)
 					{
 						_game->pushState(new LoadGameState(OPT_BATTLESCAPE, SAVE_QUICK, _palette));
 					}
 				}
 
 				// voxel view dump
-				if (action->getDetails()->key.keysym.sym == Options::keyBattleVoxelView)
+				if (key == Options::keyBattleVoxelView)
 				{
 					saveVoxelView();
 				}
