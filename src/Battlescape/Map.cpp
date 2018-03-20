@@ -726,7 +726,7 @@ void Map::drawTerrain(Surface *surface)
 									unitSprite.draw(
 										westUnit, part,
 										screenPosition.x - tileOffset.x + offset.x,
-										screenPosition.y + tileOffset.y + offset.y + getTerrainLevel(westUnit->getPosition(), westUnit->getArmor()->getSize()),
+										screenPosition.y + tileOffset.y + offset.y,
 										tileWestShade,
 										true
 									);
