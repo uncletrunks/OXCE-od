@@ -2140,17 +2140,23 @@ inline void BattlescapeState::handle(Action *action)
 					// "ctrl-w" - warp unit
 					else if (_save->getDebugMode() && key == SDLK_w && ctrlPressed)
 					{
-						debug(L"Beam me up Scotty");
 						BattleUnit *unit = _save->getSelectedUnit();
-						Position newPos;
-						_map->getSelectorPosition(&newPos);
-						if (unit != 0 && newPos.x >= 0)
+						if (unit && unit->getArmor()->getSize() < 2)
 						{
-							unit->getTile()->setUnit(0);
-							unit->setPosition(newPos);
-							_save->getTile(newPos)->setUnit(unit);
-							_save->getTileEngine()->calculateLighting(LL_UNITS);
-							_save->getBattleGame()->handleState();
+							Position newPos;
+							_map->getSelectorPosition(&newPos);
+							Tile *tile = _save->getTile(newPos);
+							if (tile)
+							{
+								debug(L"Beam me up Scotty");
+								_save->getPathfinding()->removePreview();
+
+								unit->getTile()->setUnit(0);
+								unit->setPosition(newPos);
+								tile->setUnit(unit);
+								_save->getTileEngine()->calculateLighting(LL_UNITS);
+								_save->getBattleGame()->handleState();
+							}
 						}
 					}
 					// f11 - voxel map dump
