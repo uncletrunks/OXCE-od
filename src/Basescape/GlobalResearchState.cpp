@@ -31,6 +31,7 @@
 #include "ResearchState.h"
 #include "../Savegame/ResearchProject.h"
 #include "../Mod/RuleResearch.h"
+#include "TechTreeViewerState.h"
 
 namespace OpenXcom
 {
@@ -92,7 +93,8 @@ GlobalResearchState::GlobalResearchState(bool openedFromBasescape) : _openedFrom
 	_lstResearch->setBackground(_window);
 	_lstResearch->setMargin(2);
 	_lstResearch->setWordWrap(true);
-	_lstResearch->onMouseClick((ActionHandler)&GlobalResearchState::onSelectBase);
+	_lstResearch->onMouseClick((ActionHandler)&GlobalResearchState::onSelectBase, SDL_BUTTON_LEFT);
+	_lstResearch->onMouseClick((ActionHandler)&GlobalResearchState::onOpenTechTreeViewer, SDL_BUTTON_MIDDLE);
 }
 
 /**
@@ -136,6 +138,20 @@ void GlobalResearchState::onSelectBase(Action *)
 }
 
 /**
+ * Opens the TechTreeViewer for the corresponding topic.
+ * @param action Pointer to an action.
+ */
+void GlobalResearchState::onOpenTechTreeViewer(Action *)
+{
+	const RuleResearch *selectedTopic = _topics[_lstResearch->getSelectedRow()];
+
+	if (selectedTopic)
+	{
+		_game->pushState(new TechTreeViewerState(selectedTopic, 0));
+	}
+}
+
+/**
  * Updates the research list
  * after going to other screens.
  */
@@ -151,6 +167,7 @@ void GlobalResearchState::init()
 void GlobalResearchState::fillProjectList()
 {
 	_bases.clear();
+	_topics.clear();
 	_lstResearch->clearList();
 
 	int availableScientists = 0;
@@ -166,7 +183,9 @@ void GlobalResearchState::fillProjectList()
 			_lstResearch->addRow(3, baseName.c_str(), L"", L"");
 			_lstResearch->setRowColor(_lstResearch->getTexts() - 1, _lstResearch->getSecondaryColor());
 
-			_bases.push_back(0); // dummy
+			// dummy
+			_bases.push_back(0);
+			_topics.push_back(0);
 		}
 		for (std::vector<ResearchProject *>::const_iterator iter = baseProjects.begin(); iter != baseProjects.end(); ++iter)
 		{
@@ -178,6 +197,7 @@ void GlobalResearchState::fillProjectList()
 			_lstResearch->addRow(3, wstr.c_str(), sstr.str().c_str(), tr((*iter)->getResearchProgress()).c_str());
 
 			_bases.push_back(base);
+			_topics.push_back(_game->getMod()->getResearch(r->getName()));
 		}
 
 		availableScientists += base->getAvailableScientists();

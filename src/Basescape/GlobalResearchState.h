@@ -27,6 +27,7 @@ class Window;
 class Text;
 class TextList;
 class Base;
+class RuleResearch;
 
 /**
  * Global Research screen that provides overview
@@ -41,7 +42,8 @@ private:
 	TextList *_lstResearch;
 
 	std::vector<Base*> _bases;
-    bool _openedFromBasescape;
+	std::vector<RuleResearch*> _topics;
+	bool _openedFromBasescape;
 public:
 	/// Creates the GlobalResearchState.
 	GlobalResearchState(bool openedFromBasescape);
@@ -51,6 +53,7 @@ public:
 	void btnOkClick(Action *action);
 	/// Handler for clicking the ResearchProject list.
 	void onSelectBase(Action *action);
+	void onOpenTechTreeViewer(Action *action);
 	/// Fills the list with ResearchProjects from all bases.
 	void fillProjectList();
 	/// Updates the research list.
