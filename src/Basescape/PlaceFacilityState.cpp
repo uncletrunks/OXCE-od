@@ -55,7 +55,7 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	_txtCost = new Text(110, 9, 202, 62);
 	_numCost = new Text(110, 17, 202, 70);
 	_numResources = new Text(110, 25, 202, 87);
-	const size_t resourceTextOffset = 9*std::min((size_t)3, _rule->getBuildCostItems().size());
+	const size_t resourceTextOffset = 9*std::min((size_t)3, (_origFac == nullptr ? _rule->getBuildCostItems().size() : 0));
 	_txtTime = new Text(110, 9, 202, 90+resourceTextOffset);
 	_numTime = new Text(110, 17, 202, 98+resourceTextOffset);
 	_txtMaintenance = new Text(110, 9, 202, 118+resourceTextOffset);
@@ -95,9 +95,9 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	_txtCost->setText(tr("STR_COST_UC"));
 
 	_numCost->setBig();
-	_numCost->setText(Text::formatFunding(_origFac != 0 ? _game->getMod()->getTheBiggestRipOffEver() : _rule->getBuildCost()));
+	_numCost->setText(Text::formatFunding(_origFac != nullptr ? _game->getMod()->getTheBiggestRipOffEver() : _rule->getBuildCost()));
 
-	if (!_rule->getBuildCostItems().empty())
+	if (_origFac == nullptr && !_rule->getBuildCostItems().empty())
 	{
 		std::wostringstream ss;
 
