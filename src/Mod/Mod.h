@@ -172,7 +172,7 @@ private:
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
-	bool _useCustomCategories, _showDogfightDistanceInKm;
+	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
@@ -515,6 +515,8 @@ public:
 	bool getUseCustomCategories() const { return _useCustomCategories; }
 	/// Should distance in dogfight GUI be shown in kilometers?
 	bool getShowDogfightDistanceInKm() const { return _showDogfightDistanceInKm; }
+	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
+	bool getShowFullNameInAlienInventory() const { return _showFullNameInAlienInventory; }
 	/// Self-explanatory
 	int getTheMostUselessOptionEver() const { return _theMostUselessOptionEver; }
 	/// Shame on you!

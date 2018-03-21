@@ -60,6 +60,7 @@ class Unit
 private:
 	std::string _type, _civilianRecoveryType;
 	std::string _race;
+	int _showFullNameInAlienInventory;
 	std::string _rank;
 	UnitStats _stats;
 	std::string _armor;
@@ -137,6 +138,8 @@ public:
 	bool isLeeroyJenkins() const { return _isLeeroyJenkins; };
 	/// Should the unit get "stuck" trying to fire from outside of weapon range? Vanilla bug, that may serve as "feature" in rare cases.
 	bool waitIfOutsideWeaponRange() { return _waitIfOutsideWeaponRange; };
+	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
+	bool getShowFullNameInAlienInventory(Mod *mod) const;
 };
 
 }

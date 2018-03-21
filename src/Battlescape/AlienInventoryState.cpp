@@ -80,7 +80,24 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	}
 	else
 	{
-		_txtName->setText(unit->getName(_game->getLanguage()));
+		if (unit->getUnitRules())
+		{
+			if (unit->getUnitRules()->getShowFullNameInAlienInventory(_game->getMod()))
+			{
+				// e.g. Sectoid Leader
+				_txtName->setText(unit->getName(_game->getLanguage()));
+			}
+			else
+			{
+				// e.g. Sectoid
+				_txtName->setText(tr(unit->getUnitRules()->getRace()));
+			}
+		}
+		else
+		{
+			// Soldier names
+			_txtName->setText(unit->getName(_game->getLanguage()));
+		}
 	}
 
 	_btnArmor->onKeyboardPress((ActionHandler)&AlienInventoryState::btnOkClick, Options::keyCancel);

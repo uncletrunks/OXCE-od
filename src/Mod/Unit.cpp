@@ -27,7 +27,7 @@ namespace OpenXcom
  * Creates a certain type of unit.
  * @param type String defining the type.
  */
-Unit::Unit(const std::string &type) : _type(type), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false), _waitIfOutsideWeaponRange(false)
+Unit::Unit(const std::string &type) : _type(type), _showFullNameInAlienInventory(-1), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false), _waitIfOutsideWeaponRange(false)
 {
 }
 
@@ -53,6 +53,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_type = node["type"].as<std::string>(_type);
 	_civilianRecoveryType = node["civilianRecoveryType"].as<std::string>(_civilianRecoveryType);
 	_race = node["race"].as<std::string>(_race);
+	_showFullNameInAlienInventory = node["showFullNameInAlienInventory"].as<int>(_showFullNameInAlienInventory);
 	_rank = node["rank"].as<std::string>(_rank);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
 	_armor = node["armor"].as<std::string>(_armor);
@@ -348,6 +349,19 @@ bool Unit::canSurrender() const
 bool Unit::autoSurrender() const
 {
 	return _autoSurrender;
+}
+
+/**
+ * Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
+ * @return True if full name can be shown.
+ */
+bool Unit::getShowFullNameInAlienInventory(Mod *mod) const
+{
+	if (_showFullNameInAlienInventory != -1)
+	{
+		return _showFullNameInAlienInventory == 0 ? false : true;
+	}
+	return mod->getShowFullNameInAlienInventory();
 }
 
 }
