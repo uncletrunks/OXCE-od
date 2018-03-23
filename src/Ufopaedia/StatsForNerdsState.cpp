@@ -247,7 +247,7 @@ void StatsForNerdsState::btnOkClick(Action *)
 	if (ctrlPressed)
 	{
 		Log(LOG_INFO) << Language::wstrToUtf8(_txtArticle->getText());
-		for (int row = 0; row < _lstRawData->getTexts(); ++row)
+		for (size_t row = 0; row < _lstRawData->getTexts(); ++row)
 		{
 			Log(LOG_INFO) << Language::wstrToUtf8(_lstRawData->getCellText(row, 0)) << "\t\t" << Language::wstrToUtf8(_lstRawData->getCellText(row, 1));
 		}
