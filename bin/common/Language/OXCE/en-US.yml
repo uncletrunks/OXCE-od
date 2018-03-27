@@ -287,17 +287,12 @@ en-US:
   STR_HIGH_CONTRAST: "HIGH"
   STR_PREVIEW: "PREVIEW"
   STR_TEST_CASE: "Test case:"
-  STR_BAD_NODES: "Bad nodes in RMP files check"
-  STR_BAD_NODES_DESC: "Checks RMP files for nodes outside of map boundaries.{NEWLINE}These will NOT cause any crashes, but they will be ignored by the game, thus not work as intended."
   STR_RUN: "Run selected test!"
   STR_TESTS_STARTING: "Starting..."
   STR_TESTS_ERRORS_FOUND: "Total errors found (there may be duplicates): {0}"
   STR_TESTS_NO_ERRORS_FOUND: "No errors found."
   STR_TESTS_FINISHED: "Finished."
-  STR_BAD_NODES_CHECKING_TERRAIN: "Checking terrain..."
-  STR_BAD_NODES_CHECKING_UFOS: "Checking UFOs..."
-  STR_BAD_NODES_CHECKING_CRAFT: "Checking craft..."
-  STR_BAD_NODES_DETAILED_INFO: "Detailed info about bad nodes has been saved into openxcom.log"
+  STR_DETAILED_INFO_IN_LOG_FILE: "Detailed info has been saved into openxcom.log"
 #=================== Savegame ===================
 #Soldier.cpp
   STR_RANK_NONE: "-"

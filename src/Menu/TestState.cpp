@@ -32,6 +32,8 @@
 #include "../Engine/Logger.h"
 #include "../Mod/RuleTerrain.h"
 #include "../Mod/MapBlock.h"
+#include "../Mod/MapDataSet.h"
+#include "../Mod/MapData.h"
 #include "../Mod/RuleUfo.h"
 
 namespace OpenXcom
@@ -132,6 +134,7 @@ TestState::TestState()
 	_txtTestCase->setText(tr("STR_TEST_CASE"));
 
 	_testCases.push_back("STR_BAD_NODES");
+	_testCases.push_back("STR_ZERO_COST_MOVEMENT");
 
 	_cbxTestCase->setOptions(_testCases);
 	_cbxTestCase->onChange((ActionHandler)&TestState::cbxTestCaseChange);
@@ -161,6 +164,8 @@ TestState::~TestState()
 */
 void TestState::cbxTestCaseChange(Action *)
 {
+	_lstOutput->clearList();
+
 	size_t index = _cbxTestCase->getSelected();
 	_txtDescription->setText(tr(_testCases[index]+"_DESC"));
 }
@@ -177,6 +182,7 @@ void TestState::btnRunClick(Action *action)
 	switch (index)
 	{
 		case 0: testCase0(); break;
+		case 1: testCase1(); break;
 		default: break;
 	}
 }
@@ -233,10 +239,129 @@ void TestState::btnHighContrastClick(Action *action)
 	_game->pushState(new TestPaletteState(palette, true));
 }
 
+void TestState::testCase1()
+{
+	_lstOutput->addRow(1, tr("STR_TESTS_STARTING").c_str());
+	_lstOutput->addRow(1, tr("STR_CHECKING_TERRAIN").c_str());
+	int total = 0;
+	std::map<std::string, std::set<int>> uniqueResults;
+	for (auto terrainName : _game->getMod()->getTerrainList())
+	{
+		RuleTerrain *terrainRule = _game->getMod()->getTerrain(terrainName);
+		total += checkMCD(terrainRule, uniqueResults);
+	}
+	_lstOutput->addRow(1, tr("STR_CHECKING_UFOS").c_str());
+	for (auto ufoName : _game->getMod()->getUfosList())
+	{
+		RuleUfo *ufoRule = _game->getMod()->getUfo(ufoName);
+		RuleTerrain *terrainRule = ufoRule->getBattlescapeTerrainData();
+		if (!terrainRule)
+		{
+			continue;
+		}
+		total += checkMCD(terrainRule, uniqueResults);
+	}
+	_lstOutput->addRow(1, tr("STR_CHECKING_CRAFT").c_str());
+	for (auto craftName : _game->getMod()->getCraftsList())
+	{
+		RuleCraft *craftRule = _game->getMod()->getCraft(craftName);
+		RuleTerrain *terrainRule = craftRule->getBattlescapeTerrainData();
+		if (!terrainRule)
+		{
+			continue;
+		}
+		total += checkMCD(terrainRule, uniqueResults);
+	}
+	if (total > 0)
+	{
+		_lstOutput->addRow(1, tr("STR_TESTS_ERRORS_FOUND").arg(total).c_str());
+		_lstOutput->addRow(1, tr("STR_DETAILED_INFO_IN_LOG_FILE").c_str());
+	}
+	else
+	{
+		_lstOutput->addRow(1, tr("STR_TESTS_NO_ERRORS_FOUND").c_str());
+	}
+
+	// summary (unique)
+	if (total > 0)
+	{
+		Log(LOG_INFO) << "----------";
+		Log(LOG_INFO) << "SUMMARY";
+		Log(LOG_INFO) << "----------";
+		for (auto mapItem : uniqueResults)
+		{
+			std::ostringstream ss;
+			ss << mapItem.first << ": ";
+			bool first = true;
+			for (auto setItem : mapItem.second)
+			{
+				if (!first)
+				{
+					ss << ", ";
+				}
+				else
+				{
+					first = false;
+				}
+				ss << setItem;
+			}
+			std::string line = ss.str();
+			Log(LOG_INFO) << line;
+		}
+	}
+	_lstOutput->addRow(1, tr("STR_TESTS_FINISHED").c_str());
+}
+
+int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set<int>> &uniqueResults)
+{
+	int errors = 0;
+	for (auto myMapDataSet : *terrainRule->getMapDataSets())
+	{
+		int index = 0;
+		myMapDataSet->loadData();
+		for (auto myMapData : *myMapDataSet->getObjects())
+		{
+			if (myMapData->getObjectType() == O_FLOOR)
+			{
+				if (myMapData->getTUCost(MT_WALK) < 1)
+				{
+					std::ostringstream ss;
+					ss << " walk:" << myMapData->getTUCost(MT_WALK) << " terrain:" << terrainRule->getName() << " dataset:" << myMapDataSet->getName() << " index:" << index;
+					std::string str = ss.str();
+					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE+ test cases.";
+					errors++;
+					uniqueResults[myMapDataSet->getName()].insert(index);
+				}
+				if (myMapData->getTUCost(MT_FLY) < 1)
+				{
+					std::ostringstream ss;
+					ss << "  fly:" << myMapData->getTUCost(MT_FLY) << " terrain:" << terrainRule->getName() << " dataset:" << myMapDataSet->getName() << " index:" << index;
+					std::string str = ss.str();
+					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE+ test cases.";
+					errors++;
+					uniqueResults[myMapDataSet->getName()].insert(index);
+				}
+				if (myMapData->getTUCost(MT_SLIDE) < 1)
+				{
+					std::ostringstream ss;
+					ss << "slide:" << myMapData->getTUCost(MT_SLIDE) << " terrain:" << terrainRule->getName() << " dataset:" << myMapDataSet->getName() << " index:" << index;
+					std::string str = ss.str();
+					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE+ test cases.";
+					errors++;
+					uniqueResults[myMapDataSet->getName()].insert(index);
+				}
+			}
+			index++;
+		}
+		//myMapDataSet->unloadData();
+	}
+	return errors;
+}
+
 void TestState::testCase0()
 {
 	_lstOutput->addRow(1, tr("STR_TESTS_STARTING").c_str());
-	_lstOutput->addRow(1, tr("STR_BAD_NODES_CHECKING_TERRAIN").c_str());
+	_lstOutput->addRow(1, tr("STR_CHECKING_TERRAIN").c_str());
 	int total = 0;
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getTerrainList().begin(); i != _game->getMod()->getTerrainList().end(); ++i)
 	{
@@ -246,7 +371,7 @@ void TestState::testCase0()
 			total += checkRMP((*j));
 		}
 	}
-	_lstOutput->addRow(1, tr("STR_BAD_NODES_CHECKING_UFOS").c_str());
+	_lstOutput->addRow(1, tr("STR_CHECKING_UFOS").c_str());
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getUfosList().begin(); i != _game->getMod()->getUfosList().end(); ++i)
 	{
 		RuleUfo *ufoRule = _game->getMod()->getUfo((*i));
@@ -258,7 +383,7 @@ void TestState::testCase0()
 			}
 		}
 	}
-	_lstOutput->addRow(1, tr("STR_BAD_NODES_CHECKING_CRAFT").c_str());
+	_lstOutput->addRow(1, tr("STR_CHECKING_CRAFT").c_str());
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getCraftsList().begin(); i != _game->getMod()->getCraftsList().end(); ++i)
 	{
 		RuleCraft *craftRule = _game->getMod()->getCraft((*i));
@@ -273,7 +398,7 @@ void TestState::testCase0()
 	if (total > 0)
 	{
 		_lstOutput->addRow(1, tr("STR_TESTS_ERRORS_FOUND").arg(total).c_str());
-		_lstOutput->addRow(1, tr("STR_BAD_NODES_DETAILED_INFO").c_str());
+		_lstOutput->addRow(1, tr("STR_DETAILED_INFO_IN_LOG_FILE").c_str());
 	}
 	else
 	{

@@ -18,6 +18,8 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../Engine/State.h"
+#include <map>
+#include <set>
 
 namespace OpenXcom
 {
@@ -28,6 +30,7 @@ class Text;
 class ComboBox;
 class TextList;
 class MapBlock;
+class RuleTerrain;
 
 /**
  * A state for testing most common modding mistakes.
@@ -46,6 +49,8 @@ private:
 	std::vector<std::string> _paletteList;
 	std::vector<std::string> _testCases;
 	/// Test cases.
+	void testCase1();
+	int checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set<int>> &uniqueResults);
 	void testCase0();
 	int checkRMP(MapBlock *mapblock);
 	int loadMAP(MapBlock *mapblock);

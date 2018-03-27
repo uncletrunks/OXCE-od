@@ -1,6 +1,16 @@
 en-US:
 #=================== Menu ===================
 #TestState.cpp
+  STR_BAD_NODES: "Bad nodes in RMP files"
+  STR_BAD_NODES_DESC: "Checks RMP files for nodes outside of map boundaries.{NEWLINE}These will NOT cause any crashes, but they will be ignored by the game, thus not work as intended."
+#
+  STR_ZERO_COST_MOVEMENT: "Zero cost floor movement in MCD files"
+  STR_ZERO_COST_MOVEMENT_DESC: "Checks MCD files for floor objects with zero movement cost.{NEWLINE}These will not cause any crashes, but may cause endless loops (when AI moves in a zero-cost-circle)."
+#
+  STR_CHECKING_TERRAIN: "Checking terrain..."
+  STR_CHECKING_UFOS: "Checking UFOs..."
+  STR_CHECKING_CRAFT: "Checking craft..."
+#
   PAL_GEOSCAPE: "PAL_GEOSCAPE"
   PAL_BASESCAPE: "PAL_BASESCAPE"
   PAL_GRAPHS: "PAL_GRAPHS"
