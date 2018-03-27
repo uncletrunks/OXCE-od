@@ -1,4 +1,10 @@
 extraSprites: #done
+  - type: ExtendedPediaInfoButton
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/info-button-tftd.png
   - type: Pathfinding
     files:
       0: Resources/Pathfinding/Pathfinding.png

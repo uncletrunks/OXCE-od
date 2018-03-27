@@ -2004,3 +2004,23 @@ interfaces: #done
         pos: [90, 55]
         color: 6
         color2: 12
+  - type: statsForNerds
+    elements:
+      - id: palette
+        color: 0
+      - id: window
+        color: 1
+      - id: text
+        color: 1
+        color2: 244
+      - id: list
+        color: 1     # xcom1 purple (property name, property default value)
+        color2: 239  # xcom1 pink (property value)
+        border: 1    # xcom1 blue (header)
+      - id: listExtended
+        color: 244   # xcom1 white (section label)
+        color2: 244  # xcom1 gold (resource paths)
+      - id: button
+        color: 1
+      - id: comboBox
+        color: 239

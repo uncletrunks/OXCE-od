@@ -27,6 +27,7 @@
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
+#include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 #include <algorithm>
 
@@ -35,6 +36,8 @@ namespace OpenXcom
 
 	ArticleStateTFTDItem::ArticleStateTFTDItem(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
+		_btnInfo->setVisible(true);
+
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
 
 		const std::vector<std::string> *ammo_data = item->getPrimaryCompatibleAmmo();

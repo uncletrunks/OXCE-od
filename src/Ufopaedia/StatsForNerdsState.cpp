@@ -308,9 +308,11 @@ void StatsForNerdsState::initLists()
 	switch (_typeId)
 	{
 	case UFOPAEDIA_TYPE_ITEM:
+	case UFOPAEDIA_TYPE_TFTD_ITEM:
 		initItemList();
 		break;
 	case UFOPAEDIA_TYPE_ARMOR:
+	case UFOPAEDIA_TYPE_TFTD_ARMOR:
 		initArmorList();
 		break;
 	default:

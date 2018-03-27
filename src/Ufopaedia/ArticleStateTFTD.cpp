@@ -35,6 +35,11 @@ namespace OpenXcom
 		// Set palette
 		setPalette("PAL_BASESCAPE");
 
+		_btnInfo->setX(183);
+		_btnInfo->setY(179);
+		_btnInfo->setHeight(10);
+		_btnInfo->setWidth(40);
+		_btnInfo->setColor(Palette::blockOffset(0) + 2);
 		_btnOk->setX(227);
 		_btnOk->setY(179);
 		_btnOk->setHeight(10);
@@ -55,6 +60,20 @@ namespace OpenXcom
 
 		_game->getMod()->getSurface("BACK08.SCR")->blit(_bg);
 		_game->getMod()->getSurface(defs->image_id)->blit(_bg);
+
+		Surface *button = _game->getMod()->getSurface("ExtendedPediaInfoButton");
+		if (button)
+		{
+			switch (defs->getType())
+			{
+				case UFOPAEDIA_TYPE_TFTD_ITEM:
+				case UFOPAEDIA_TYPE_TFTD_ARMOR:
+					button->blit(_bg);
+					break;
+				default:
+					break;
+			}
+		}
 
 		_txtInfo = new Text(defs->text_width, 150, 320 - defs->text_width, 34);
 		_txtTitle = new Text(284, 16, 36, 14);
