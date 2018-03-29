@@ -24,6 +24,7 @@
 #include "../Engine/Surface.h"
 #include "../Engine/LocalizedText.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleInterface.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 
@@ -32,36 +33,86 @@ namespace OpenXcom
 
 	ArticleStateTFTD::ArticleStateTFTD(ArticleDefinitionTFTD *defs) : ArticleState(defs->id)
 	{
+		RuleInterface *ruleInterface;
+		switch (defs->getType())
+		{
+			case UFOPAEDIA_TYPE_TFTD:
+				ruleInterface = _game->getMod()->getInterface("articleTFTD");
+				break;
+			case UFOPAEDIA_TYPE_TFTD_CRAFT:
+				ruleInterface = _game->getMod()->getInterface("articleCraftTFTD");
+				break;
+			case UFOPAEDIA_TYPE_TFTD_CRAFT_WEAPON:
+				ruleInterface = _game->getMod()->getInterface("articleCraftWeaponTFTD");
+				break;
+			case UFOPAEDIA_TYPE_TFTD_VEHICLE:
+				ruleInterface = _game->getMod()->getInterface("articleVehicleTFTD");
+				break;
+			case UFOPAEDIA_TYPE_TFTD_ITEM:
+				ruleInterface = _game->getMod()->getInterface("articleItemTFTD");
+				break;
+			case UFOPAEDIA_TYPE_TFTD_ARMOR:
+				ruleInterface = _game->getMod()->getInterface("articleArmorTFTD");
+				break;
+			case UFOPAEDIA_TYPE_TFTD_BASE_FACILITY:
+				ruleInterface = _game->getMod()->getInterface("articleBaseFacilityTFTD");
+				break;
+			case UFOPAEDIA_TYPE_TFTD_USO:
+				ruleInterface = _game->getMod()->getInterface("articleUsoTFTD");
+				break;
+			default:
+				ruleInterface = _game->getMod()->getInterface("articleTFTD");
+				break;
+		}
+
 		// Set palette
-		setPalette("PAL_BASESCAPE");
+		setPalette(ruleInterface->getPalette());
+
+		_buttonColor = ruleInterface->getElement("button")->color;
+		_textColor = ruleInterface->getElement("text")->color;
+		_textColor2 = ruleInterface->getElement("text")->color2;
+		_listColor1 = ruleInterface->getElement("list")->color;
+		_listColor2 = ruleInterface->getElement("list")->color2;
+		if (ruleInterface->getElement("ammoColor"))
+		{
+			_ammoColor = ruleInterface->getElement("ammoColor")->color;
+		}
 
 		_btnInfo->setX(183);
 		_btnInfo->setY(179);
 		_btnInfo->setHeight(10);
 		_btnInfo->setWidth(40);
-		_btnInfo->setColor(Palette::blockOffset(0) + 2);
+		_btnInfo->setColor(_buttonColor);
 		_btnOk->setX(227);
 		_btnOk->setY(179);
 		_btnOk->setHeight(10);
 		_btnOk->setWidth(23);
-		_btnOk->setColor(Palette::blockOffset(0)+2);
+		_btnOk->setColor(_buttonColor);
 		_btnPrev->setX(254);
 		_btnPrev->setY(179);
 		_btnPrev->setHeight(10);
 		_btnPrev->setWidth(23);
-		_btnPrev->setColor(Palette::blockOffset(0)+2);
+		_btnPrev->setColor(_buttonColor);
 		_btnNext->setX(281);
 		_btnNext->setY(179);
 		_btnNext->setHeight(10);
 		_btnNext->setWidth(23);
-		_btnNext->setColor(Palette::blockOffset(0)+2);
+		_btnNext->setColor(_buttonColor);
 
 		ArticleState::initLayout();
 
-		_game->getMod()->getSurface("BACK08.SCR")->blit(_bg);
-		_game->getMod()->getSurface(defs->image_id)->blit(_bg);
+		// Step 1: background image
+		_game->getMod()->getSurface(ruleInterface->getBackgroundImage())->blit(_bg);
 
-		Surface *button = _game->getMod()->getSurface("ExtendedPediaInfoButton");
+		// Step 2: article image (optional)
+		Surface *image = _game->getMod()->getSurface(defs->image_id, false);
+		if (image)
+		{
+			image->blit(_bg);
+		}
+
+		// Step 3: info button image
+		Surface *button = _game->getMod()->getSurface(ruleInterface->getBackgroundImage() + "-InfoButton", false);
 		if (button)
 		{
 			switch (defs->getType())
@@ -81,13 +132,13 @@ namespace OpenXcom
 		add(_txtTitle);
 		add(_txtInfo);
 
-		_txtTitle->setColor(Palette::blockOffset(0)+2);
+		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
 		_txtTitle->setAlign(ALIGN_CENTER);
 		_txtTitle->setText(tr(defs->title));
 
-		_txtInfo->setColor(Palette::blockOffset(0)+2);
+		_txtInfo->setColor(_textColor);
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 

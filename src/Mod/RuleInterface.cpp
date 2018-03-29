@@ -49,6 +49,7 @@ void RuleInterface::load(const YAML::Node& node, Mod *mod)
 	}
 	_palette = node["palette"].as<std::string>(_palette);
 	_parent = node["parent"].as<std::string>(_parent);
+	_backgroundImage = node["backgroundImage"].as<std::string>(_backgroundImage);
 	_music = node["music"].as<std::string>(_music);
 	if (node["sound"])
 	{
@@ -105,6 +106,11 @@ const std::string &RuleInterface::getPalette() const
 const std::string &RuleInterface::getParent() const
 {
 	return _parent;
+}
+
+const std::string &RuleInterface::getBackgroundImage() const
+{
+	return _backgroundImage;
 }
 
 const std::string &RuleInterface::getMusic() const

@@ -1,5 +1,5 @@
 extraSprites: #done
-  - type: ExtendedPediaInfoButton
+  - type: BACK08.SCR-InfoButton
     width: 320
     height: 200
     singleImage: true

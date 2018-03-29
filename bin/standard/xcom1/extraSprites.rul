@@ -1,4 +1,52 @@
 extraSprites:
+  - type: ExtendedPediaBackgroundPalBasescape
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_BASESCAPE/background-ufo.png
+  - type: ExtendedPediaBackgroundPalBasescape-InfoButton
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_BASESCAPE/info-button-ufo.png
+  - type: ExtendedPediaBackgroundPalBattlepedia
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_BATTLEPEDIA/background-ufo.png
+  - type: ExtendedPediaBackgroundPalBattlepedia-InfoButton
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_BATTLEPEDIA/info-button-ufo.png
+  - type: ExtendedPediaBackgroundPalGeoscape
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_GEOSCAPE/background-ufo.png
+  - type: ExtendedPediaBackgroundPalGeoscape-InfoButton
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_GEOSCAPE/info-button-ufo.png
+  - type: ExtendedPediaBackgroundPalUfopaedia
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_UFOPAEDIA/background-ufo.png
+  - type: ExtendedPediaBackgroundPalUfopaedia-InfoButton
+    width: 320
+    height: 200
+    singleImage: true
+    files:
+      0: Resources/Extended/Pedia/PAL_UFOPAEDIA/info-button-ufo.png
   - type: Pathfinding
     files:
       0: Resources/Pathfinding/Pathfinding.png

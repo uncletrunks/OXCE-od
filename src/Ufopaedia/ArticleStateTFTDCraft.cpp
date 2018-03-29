@@ -36,8 +36,8 @@ namespace OpenXcom
 		_txtStats = new Text(131, 56, 187, 116);
 		add(_txtStats);
 
-		_txtStats->setColor(Palette::blockOffset(0)+2);
-		_txtStats->setSecondaryColor(Palette::blockOffset(15)+4);
+		_txtStats->setColor(_textColor);
+		_txtStats->setSecondaryColor(_textColor2);
 
 		std::wostringstream ss;
 		ss << tr("STR_MAXIMUM_SPEED_UC").arg(Text::formatNumber(craft->getMaxSpeed())) << L'\n';

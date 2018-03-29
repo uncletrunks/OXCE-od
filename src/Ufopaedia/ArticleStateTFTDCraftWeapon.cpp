@@ -37,24 +37,24 @@ namespace OpenXcom
 		_lstInfo = new TextList(150, 50, 168, 126);
 		add(_lstInfo);
 
-		_lstInfo->setColor(Palette::blockOffset(0)+2);
+		_lstInfo->setColor(_listColor1);
 		_lstInfo->setColumns(2, 100, 68); // deliberately making this wider than the original to account for finnish.
 		_lstInfo->setDot(true);
 
 		_lstInfo->addRow(2, tr("STR_DAMAGE").c_str(), Text::formatNumber(weapon->getDamage()).c_str());
-		_lstInfo->setCellColor(0, 1, Palette::blockOffset(15)+4);
+		_lstInfo->setCellColor(0, 1, _listColor2);
 
 		_lstInfo->addRow(2, tr("STR_RANGE").c_str(), tr("STR_KILOMETERS").arg(weapon->getRange()).c_str());
-		_lstInfo->setCellColor(1, 1, Palette::blockOffset(15)+4);
+		_lstInfo->setCellColor(1, 1, _listColor2);
 
 		_lstInfo->addRow(2, tr("STR_ACCURACY").c_str(), Text::formatPercentage(weapon->getAccuracy()).c_str());
-		_lstInfo->setCellColor(2, 1, Palette::blockOffset(15)+4);
+		_lstInfo->setCellColor(2, 1, _listColor2);
 
 		_lstInfo->addRow(2, tr("STR_RE_LOAD_TIME").c_str(), tr("STR_SECONDS").arg(weapon->getStandardReload()).c_str());
-		_lstInfo->setCellColor(3, 1, Palette::blockOffset(15)+4);
+		_lstInfo->setCellColor(3, 1, _listColor2);
 
 		_lstInfo->addRow(2, tr("STR_ROUNDS").c_str(), Text::formatNumber(weapon->getAmmoMax()).c_str());
-		_lstInfo->setCellColor(4, 1, Palette::blockOffset(15)+4);
+		_lstInfo->setCellColor(4, 1, _listColor2);
 
 		centerAllSurfaces();
 	}

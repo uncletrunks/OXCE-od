@@ -47,26 +47,26 @@ namespace OpenXcom
 		{
 			_txtShotType = new Text(53, 17, 8, 157);
 			add(_txtShotType);
-			_txtShotType->setColor(Palette::blockOffset(0)+2);
+			_txtShotType->setColor(_textColor);
 			_txtShotType->setWordWrap(true);
 			_txtShotType->setText(tr("STR_SHOT_TYPE"));
 
 			_txtAccuracy = new Text(57, 17, 61, 157);
 			add(_txtAccuracy);
-			_txtAccuracy->setColor(Palette::blockOffset(0)+2);
+			_txtAccuracy->setColor(_textColor);
 			_txtAccuracy->setWordWrap(true);
 			_txtAccuracy->setText(tr("STR_ACCURACY_UC"));
 
 			_txtTuCost = new Text(56, 17, 118, 157);
 			add(_txtTuCost);
-			_txtTuCost->setColor(Palette::blockOffset(0)+2);
+			_txtTuCost->setColor(_textColor);
 			_txtTuCost->setWordWrap(true);
 			_txtTuCost->setText(tr("STR_TIME_UNIT_COST"));
 
 			_lstInfo = new TextList(140, 55, 8, 170);
 			add(_lstInfo);
 
-			_lstInfo->setColor(Palette::blockOffset(15)+4); // color for %-data!
+			_lstInfo->setColor(_listColor2); // color for %-data!
 			_lstInfo->setColumns(3, 70, 40, 30);
 
 			int current_row = 0;
@@ -81,7 +81,7 @@ namespace OpenXcom
 								 tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
 								 Text::formatPercentage(item->getAccuracyAuto()).c_str(),
 								 tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(0)+2);
+				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
@@ -96,7 +96,7 @@ namespace OpenXcom
 								 tr("STR_SHOT_TYPE_SNAP").c_str(),
 								 Text::formatPercentage(item->getAccuracySnap()).c_str(),
 								 tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(0)+2);
+				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
@@ -111,7 +111,7 @@ namespace OpenXcom
 								 tr("STR_SHOT_TYPE_AIMED").c_str(),
 								 Text::formatPercentage(item->getAccuracyAimed()).c_str(),
 								 tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, Palette::blockOffset(0)+2);
+				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 		}
@@ -123,12 +123,12 @@ namespace OpenXcom
 		{
 			_txtAmmoType[i] = new Text(120, 9, 168, 144 + i*10);
 			add(_txtAmmoType[i]);
-			_txtAmmoType[i]->setColor(Palette::blockOffset(0)+2);
+			_txtAmmoType[i]->setColor(_textColor);
 			_txtAmmoType[i]->setWordWrap(true);
 
 			_txtAmmoDamage[i] = new Text(20, 9, 300, 144 + i*10);
 			add(_txtAmmoDamage[i]);
-			_txtAmmoDamage[i]->setColor(Palette::blockOffset(3)+6);
+			_txtAmmoDamage[i]->setColor(_ammoColor);
 		}
 
 		switch (item->getBattleType())

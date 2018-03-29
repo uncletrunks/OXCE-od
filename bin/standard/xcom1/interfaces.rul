@@ -1901,6 +1901,104 @@ interfaces:
       #  color: 32    # red
       #- id: ammoColorDT19
       #  color: 32    # red
+  - type: articleTFTD
+    palette: PAL_UFOPAEDIA
+    backgroundImage: ExtendedPediaBackgroundPalUfopaedia
+    elements:
+      - id: button
+        color: 239      # grey (was 83: light grey)
+      - id: text
+        color: 239      # grey
+        color2: 244     # turquoise
+      - id: list
+        color: 239      # grey
+        color2: 244     # turquoise
+  - type: articleCraftTFTD
+    palette: PAL_UFOPAEDIA
+    backgroundImage: ExtendedPediaBackgroundPalUfopaedia
+    elements:
+      - id: button
+        color: 239      # grey
+      - id: text
+        color: 239      # grey
+        color2: 244     # turquoise
+      - id: list
+        color: 239      # grey
+        color2: 244     # turquoise
+  - type: articleCraftWeaponTFTD
+    palette: PAL_BATTLEPEDIA
+    backgroundImage: ExtendedPediaBackgroundPalBattlepedia
+    elements:
+      - id: button
+        color: 144      # orange (was 16: orange)
+      - id: text
+        color: 239      # grey
+        color2: 244     # light blue
+      - id: list
+        color: 239      # grey
+        color2: 244     # light blue
+  - type: articleVehicleTFTD
+    palette: PAL_BATTLEPEDIA
+    backgroundImage: ExtendedPediaBackgroundPalBattlepedia
+    elements:
+      - id: button
+        color: 144      # orange (in vanilla PAL_UFOPAEDIA was used! but PAL_BATTLEPEDIA allows for pictures to be reused for inventory)
+      - id: text
+        color: 239      # grey
+        color2: 244     # light blue
+      - id: list
+        color: 239      # grey
+        color2: 244     # light blue
+  - type: articleItemTFTD
+    palette: PAL_BATTLEPEDIA
+    backgroundImage: ExtendedPediaBackgroundPalBattlepedia
+    elements:
+      - id: button
+        color: 144      # orange
+      - id: text
+        color: 239      # grey
+        color2: 244     # light blue
+      - id: list
+        color: 239      # grey
+        color2: 244     # light blue
+      - id: ammoColor
+        color: 32       # red
+  - type: articleArmorTFTD
+    palette: PAL_BATTLEPEDIA
+    backgroundImage: ExtendedPediaBackgroundPalBattlepedia
+    elements:
+      - id: button
+        color: 144      # orange (was 15: orange)
+      - id: text
+        color: 239      # grey
+        color2: 244     # light blue
+      - id: list
+        color: 239      # grey
+        color2: 244     # light blue
+  - type: articleBaseFacilityTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: ExtendedPediaBackgroundPalBasescape
+    elements:
+      - id: button
+        color: 208      # white
+      - id: text
+        color: 208      # white
+        color2: 218     # blue
+      - id: list
+        color: 208      # white
+        color2: 218     # blue
+  - type: articleUsoTFTD
+    palette: PAL_GEOSCAPE
+    backgroundImage: ExtendedPediaBackgroundPalGeoscape
+    elements:
+      - id: button
+        color: 133      # minty green
+      - id: text
+        color: 133      # minty green
+        color2: 138     # yellow
+      - id: list
+        color: 133      # minty green
+        color2: 138     # yellow
   - type: statsForNerds
     palette: PAL_BASESCAPE
     elements:

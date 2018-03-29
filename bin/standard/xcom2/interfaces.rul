@@ -2004,6 +2004,104 @@ interfaces: #done
         pos: [90, 55]
         color: 6
         color2: 12
+  - type: articleTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleCraftTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleCraftWeaponTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleVehicleTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleItemTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: ammoColor
+        color: 54      # green
+  - type: articleArmorTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleBaseFacilityTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleUsoTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
   - type: statsForNerds
     elements:
       - id: palette

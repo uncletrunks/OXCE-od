@@ -40,6 +40,7 @@ private:
 	std::string _type;
 	std::string _palette;
 	std::string _parent;
+	std::string _backgroundImage;
 	std::string _music;
 	int _sound;
 
@@ -57,6 +58,8 @@ public:
 	const std::string &getPalette() const;
 	/// Get parent interface rule.
 	const std::string &getParent() const;
+	/// Get background image.
+	const std::string &getBackgroundImage() const;
 	/// Get music.
 	const std::string &getMusic() const;
 	/// Get sound.
