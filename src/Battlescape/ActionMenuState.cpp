@@ -337,15 +337,15 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			{
 				_action->result = "STR_LAND_EQUIPMENT";
 			}
-			_game->popState();
-		}
-		else if (_action->type != BA_THROW &&
-			_action->actor->getFaction() == FACTION_PLAYER &&
-			weapon->isBlockingBothHands() &&
-			_action->actor->getLeftHandWeapon() != 0 &&
-			_action->actor->getRightHandWeapon() != 0)
-		{
-			_action->result = "STR_MUST_USE_BOTH_HANDS";
+			else if (weapon->isBlockingBothHands())
+			{
+				_action->result = "STR_MUST_USE_BOTH_HANDS";
+			}
+			else
+			{
+				// Needs a default! Otherwise expect nasty side effects and crashes, if someone changes the validation and forgets to add an action result
+				_action->result = "STR_UNKNOWN";
+			}
 			_game->popState();
 		}
 		else if (_action->type == BA_PRIME)
