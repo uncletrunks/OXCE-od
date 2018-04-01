@@ -2117,8 +2117,8 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 						break;
 					}
 
-				int x, y;
-				MapBlock *block = 0;
+					int x, y;
+					MapBlock *block = 0;
 
 					// Handle whether or not to use verticalLevels
 					VerticalLevel currentLevel;
@@ -2161,143 +2161,143 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 					}
 
 
-				switch (command->getType())
-				{
-				case MSC_ADDBLOCK:
+					switch (command->getType())
+					{
+					case MSC_ADDBLOCK:
 						if (!doLevels || currentLevel.levelType != "empty")
 						{
-					block = command->getNextBlock(terrain);
+							block = command->getNextBlock(terrain);
 						}
 
-					// select an X and Y position from within the rects, using an even distribution
+						// select an X and Y position from within the rects, using an even distribution
 						if (block && m == 0 && selectPosition(command->getRects(), x, y, block->getSizeX(), block->getSizeY()))
-					{
-						if (terrain == _terrain)
 						{
-							success = addBlock(x, y, block, true) || success;
-						}
-						else // adding a block from an alternate terrain, loads map data after scripts are run
-						{
-							bool blockAdded = addBlock(x, y, block, false);
-							if (blockAdded)
+							if (terrain == _terrain)
 							{
-									addMAPAlternate(block, x, y, zOff, terrain);
+								success = addBlock(x, y, block, true) || success;
 							}
-							success = blockAdded || success;
+							else // adding a block from an alternate terrain, loads map data after scripts are run
+							{
+								bool blockAdded = addBlock(x, y, block, false);
+								if (blockAdded)
+								{
+									addMAPAlternate(block, x, y, zOff, terrain);
+								}
+								success = blockAdded || success;
+							}
 						}
-					}
 
 						if (block && m != 0)
 						{
 							addMAPAlternate(block, x, y, zOff, terrain);
 							addSegmentVertical(block, x, y, zOff);
 						}
-					break;
-				case MSC_ADDLINE:
+						break;
+					case MSC_ADDLINE:
 						success = addLine((MapDirection)(command->getDirection()), command->getRects(), terrain, zOff);
-					break;
-				case MSC_ADDCRAFT:
-					if (_craft)
-					{
-						RuleCraft *craftRulesOverride = _save->getMod()->getCraft(command->getCraftName());
-						if (craftRulesOverride != 0)
+						break;
+					case MSC_ADDCRAFT:
+						if (_craft)
 						{
-							_craftRules = craftRulesOverride;
-						}
-
-						craftMap = _craftRules->getBattlescapeTerrainData()->getRandomMapBlock(999, 999, 0, false);
-						if (m == 0 && addCraft(craftMap, command, _craftPos, terrain))
-						{
-							// by default addCraft adds blocks from group 1.
-							// this can be overwritten in the command by defining specific groups or blocks
-							// or this behaviour can be suppressed by leaving group 1 empty
-							// this is intentional to allow for TFTD's cruise liners/etc
-							// in this situation, you can end up with ANYTHING under your craft, so be careful
-							for (x = _craftPos.x; x < _craftPos.x + _craftPos.w; ++x)
+							RuleCraft *craftRulesOverride = _save->getMod()->getCraft(command->getCraftName());
+							if (craftRulesOverride != 0)
 							{
-								for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
-								{
-									if (_blocks[x][y])
-									{
-										addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
-									}
-								}
-							}
-							_craftDeployed = true;
-							success = true;
-						}
-
-						if (m != 0 && _craftDeployed)
-						{
-							if (currentLevel.levelType != "empty" && currentLevel.levelType != "craft")
-							{
-								block = command->getNextBlock(terrain);
+								_craftRules = craftRulesOverride;
 							}
 
-							if (block)
+							craftMap = _craftRules->getBattlescapeTerrainData()->getRandomMapBlock(999, 999, 0, false);
+							if (m == 0 && addCraft(craftMap, command, _craftPos, terrain))
 							{
+								// by default addCraft adds blocks from group 1.
+								// this can be overwritten in the command by defining specific groups or blocks
+								// or this behaviour can be suppressed by leaving group 1 empty
+								// this is intentional to allow for TFTD's cruise liners/etc
+								// in this situation, you can end up with ANYTHING under your craft, so be careful
 								for (x = _craftPos.x; x < _craftPos.x + _craftPos.w; ++x)
 								{
 									for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
 									{
-										addMAPAlternate(block, x, y, zOff, terrain);
-										addSegmentVertical(block, x, y, zOff);
-
-										block = command->getNextBlock(terrain);
-									}
-								}
-							}
-
-							if (currentLevel.levelType == "craft")
-							{
-								_craftZ = zOff;
-							}
-						}
-					}
-					break;
-				case MSC_ADDUFO:
-					// as above, note that the craft and the ufo will never be allowed to overlap.
-					// significant difference here is that we accept a UFOName string here to choose the UFO map
-					// and we store the UFO positions in a vector, which we iterate later when actually loading the
-					// map and route data. this makes it possible to add multiple UFOs to a single map
-					// IMPORTANTLY: all the UFOs must use _exactly_ the same MCD set.
-					// this is fine for most UFOs but it does mean small scouts can't be combined with larger ones
-					// unless some major alterations are done to the MCD sets and maps themselves beforehand
-					// this is because serializing all the MCDs is an implementational nightmare from my perspective,
-					// and modders can take care of all that manually on their end.
-					if (_game->getMod()->getUfo(command->getUFOName()))
-					{
-						ufoTerrain = _game->getMod()->getUfo(command->getUFOName())->getBattlescapeTerrainData();
-					}
-					else if (_ufo)
-					{
-						ufoTerrain = _ufo->getRules()->getBattlescapeTerrainData();
-					}
-
-					if (ufoTerrain)
-					{
-						MapBlock *ufoMap = ufoTerrain->getRandomMapBlock(999, 999, 0, false);
-						SDL_Rect ufoPosTemp;
-							if (m == 0 && addCraft(ufoMap, command, ufoPosTemp, terrain)) // Choose UFO location when on ground level
-						{
-							_ufoPos.push_back(ufoPosTemp);
-							ufoMaps.push_back(ufoMap);
-							for (x = ufoPosTemp.x; x < ufoPosTemp.x + ufoPosTemp.w; ++x)
-							{
-								for (y = ufoPosTemp.y; y < ufoPosTemp.y + ufoPosTemp.h; ++y)
-								{
 										if (_blocks[x][y])
-									{
+										{
 											addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
 										}
 									}
+								}
+								_craftDeployed = true;
+								success = true;
+							}
+
+							if (m != 0 && _craftDeployed)
+							{
+								if (currentLevel.levelType != "empty" && currentLevel.levelType != "craft")
+								{
+									block = command->getNextBlock(terrain);
+								}
+
+								if (block)
+								{
+									for (x = _craftPos.x; x < _craftPos.x + _craftPos.w; ++x)
+									{
+										for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
+										{
+											addMAPAlternate(block, x, y, zOff, terrain);
+											addSegmentVertical(block, x, y, zOff);
+
+											block = command->getNextBlock(terrain);
+										}
 									}
+								}
+
+								if (currentLevel.levelType == "craft")
+								{
+									_craftZ = zOff;
+								}
+							}
+						}
+						break;
+					case MSC_ADDUFO:
+						// as above, note that the craft and the ufo will never be allowed to overlap.
+						// significant difference here is that we accept a UFOName string here to choose the UFO map
+						// and we store the UFO positions in a vector, which we iterate later when actually loading the
+						// map and route data. this makes it possible to add multiple UFOs to a single map
+						// IMPORTANTLY: all the UFOs must use _exactly_ the same MCD set.
+						// this is fine for most UFOs but it does mean small scouts can't be combined with larger ones
+						// unless some major alterations are done to the MCD sets and maps themselves beforehand
+						// this is because serializing all the MCDs is an implementational nightmare from my perspective,
+						// and modders can take care of all that manually on their end.
+						if (_game->getMod()->getUfo(command->getUFOName()))
+						{
+							ufoTerrain = _game->getMod()->getUfo(command->getUFOName())->getBattlescapeTerrainData();
+						}
+						else if (_ufo)
+						{
+							ufoTerrain = _ufo->getRules()->getBattlescapeTerrainData();
+						}
+
+						if (ufoTerrain)
+						{
+							MapBlock *ufoMap = ufoTerrain->getRandomMapBlock(999, 999, 0, false);
+							SDL_Rect ufoPosTemp;
+							if (m == 0 && addCraft(ufoMap, command, ufoPosTemp, terrain)) // Choose UFO location when on ground level
+							{
+								_ufoPos.push_back(ufoPosTemp);
+								ufoMaps.push_back(ufoMap);
+								for (x = ufoPosTemp.x; x < ufoPosTemp.x + ufoPosTemp.w; ++x)
+								{
+									for (y = ufoPosTemp.y; y < ufoPosTemp.y + ufoPosTemp.h; ++y)
+									{
+										if (_blocks[x][y])
+										{
+											addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
+										}
+									}
+								}
 								_ufoZ.push_back(0);
 								success = true;
 							}
 
 							if (m != 0) // Check for loading more vertical levels, but only add if LZ was chosen
-									{
+							{
 								if (currentLevel.levelType != "empty" && currentLevel.levelType != "craft")
 								{
 									block = command->getNextBlock(terrain);
@@ -2313,40 +2313,40 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 											addSegmentVertical(block, x, y, zOff);
 
 											block = command->getNextBlock(terrain);
+										}
 									}
 								}
-							}
-							success = true;
+								success = true;
 
 								if (currentLevel.levelType == "craft")
 								{
 									_ufoZ.back() = zOff;
 								}
+							}
 						}
-					}
-					break;
-				case MSC_DIGTUNNEL:
-					drillModules(command->getTunnelData(), command->getRects(), command->getDirection());
-					success = true; // this command is fail-proof
-					break;
-				case MSC_FILLAREA:
-					block = command->getNextBlock(terrain);
+						break;
+					case MSC_DIGTUNNEL:
+						drillModules(command->getTunnelData(), command->getRects(), command->getDirection());
+						success = true; // this command is fail-proof
+						break;
+					case MSC_FILLAREA:
+						block = command->getNextBlock(terrain);
 						if (m == 0)
 						{
-					while (block)
-					{
-						if (selectPosition(command->getRects(), x, y, block->getSizeX(), block->getSizeY()))
-						{
-							// fill area will succeed if even one block is added
-							if (terrain == _terrain)
+							while (block)
 							{
-								success = addBlock(x, y, block, true) || success;
-							}
-							else // adding a block from an alternate terrain, loads map data after scripts are run
-							{
-								bool blockAdded = addBlock(x, y, block, false);
-								if (blockAdded)
+								if (selectPosition(command->getRects(), x, y, block->getSizeX(), block->getSizeY()))
 								{
+									// fill area will succeed if even one block is added
+									if (terrain == _terrain)
+									{
+										success = addBlock(x, y, block, true) || success;
+									}
+									else // adding a block from an alternate terrain, loads map data after scripts are run
+									{
+										bool blockAdded = addBlock(x, y, block, false);
+										if (blockAdded)
+										{
 											addMAPAlternate(block, x, y, zOff, terrain);
 										}
 										success = blockAdded || success;
@@ -2359,13 +2359,13 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 									blockRect.w = block->getSizeX();
 									blockRect.h = block->getSizeY();
 									_placedBlockRects.push_back(blockRect);
-						}
-						else
-						{
-							break;
-						}
-						block = command->getNextBlock(terrain);
-					}
+								}
+								else
+								{
+									break;
+								}
+								block = command->getNextBlock(terrain);
+							}
 						}
 						else if (m != 0)
 						{
@@ -2388,72 +2388,72 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 							}
 						}
 						break;
-				case MSC_CHECKBLOCK:
-					for (std::vector<SDL_Rect*>::const_iterator k = command->getRects()->begin(); k != command->getRects()->end() && !success; ++k)
-					{
-						for (x = (*k)->x; x != (*k)->x + (*k)->w && x != _mapsize_x / 10 && !success; ++x)
+					case MSC_CHECKBLOCK:
+						for (std::vector<SDL_Rect*>::const_iterator k = command->getRects()->begin(); k != command->getRects()->end() && !success; ++k)
 						{
-							for (y = (*k)->y; y != (*k)->y + (*k)->h && y != _mapsize_y / 10 && !success; ++y)
+							for (x = (*k)->x; x != (*k)->x + (*k)->w && x != _mapsize_x / 10 && !success; ++x)
 							{
-								if (!command->getGroups()->empty())
+								for (y = (*k)->y; y != (*k)->y + (*k)->h && y != _mapsize_y / 10 && !success; ++y)
 								{
-									for (std::vector<int>::const_iterator z = command->getGroups()->begin(); z != command->getGroups()->end() && !success; ++z)
+									if (!command->getGroups()->empty())
 									{
-										success = _blocks[x][y]->isInGroup((*z));
-									}
-								}
-								else if (!command->getBlocks()->empty())
-								{
-									for (std::vector<int>::const_iterator z = command->getBlocks()->begin(); z != command->getBlocks()->end() && !success; ++z)
-									{
-										if ((size_t)(*z) < _terrain->getMapBlocks()->size())
+										for (std::vector<int>::const_iterator z = command->getGroups()->begin(); z != command->getGroups()->end() && !success; ++z)
 										{
-											success = (_blocks[x][y] == _terrain->getMapBlocks()->at(*z));
+											success = _blocks[x][y]->isInGroup((*z));
 										}
 									}
-								}
-								else
-								{
-									// wildcard, we don't care what block it is, we just wanna know if there's a block here
-									success = (_blocks[x][y] != 0);
+									else if (!command->getBlocks()->empty())
+									{
+										for (std::vector<int>::const_iterator z = command->getBlocks()->begin(); z != command->getBlocks()->end() && !success; ++z)
+										{
+											if ((size_t)(*z) < _terrain->getMapBlocks()->size())
+											{
+												success = (_blocks[x][y] == _terrain->getMapBlocks()->at(*z));
+											}
+										}
+									}
+									else
+									{
+										// wildcard, we don't care what block it is, we just wanna know if there's a block here
+										success = (_blocks[x][y] != 0);
+									}
 								}
 							}
 						}
-					}
-					break;
-				case MSC_REMOVE:
-					success = removeBlocks(command);
-					break;
-				case MSC_RESIZE:
-					if (_save->getMissionType() == "STR_BASE_DEFENSE")
-					{
-						throw Exception("Map Generator encountered an error: Base defense map cannot be resized.");
-					}
-					if (_blocksToDo < (_mapsize_x / 10) * (_mapsize_y / 10))
-					{
-						throw Exception("Map Generator encountered an error: One does not simply resize the map after adding blocks.");
-					}
+						break;
+					case MSC_REMOVE:
+						success = removeBlocks(command);
+						break;
+					case MSC_RESIZE:
+						if (_save->getMissionType() == "STR_BASE_DEFENSE")
+						{
+							throw Exception("Map Generator encountered an error: Base defense map cannot be resized.");
+						}
+						if (_blocksToDo < (_mapsize_x / 10) * (_mapsize_y / 10))
+						{
+							throw Exception("Map Generator encountered an error: One does not simply resize the map after adding blocks.");
+						}
 
-					if (command->getSizeX() > 0 && command->getSizeX() != _mapsize_x / 10)
-					{
-						_mapsize_x = command->getSizeX() * 10;
-					}
-					if (command->getSizeY() > 0 && command->getSizeY() != _mapsize_y / 10)
-					{
-						_mapsize_y = command->getSizeY() * 10;
-					}
-					if (command->getSizeZ() > 0 && command->getSizeZ() != _mapsize_z)
-					{
-						_mapsize_z = command->getSizeZ();
-					}
+						if (command->getSizeX() > 0 && command->getSizeX() != _mapsize_x / 10)
+						{
+							_mapsize_x = command->getSizeX() * 10;
+						}
+						if (command->getSizeY() > 0 && command->getSizeY() != _mapsize_y / 10)
+						{
+							_mapsize_y = command->getSizeY() * 10;
+						}
+						if (command->getSizeZ() > 0 && command->getSizeZ() != _mapsize_z)
+						{
+							_mapsize_z = command->getSizeZ();
+						}
 						init(false);
-					break;
-				default:
-					break;
+						break;
+					default:
+						break;
+					}
 				}
 			}
 		}
-	}
 	}
 
 	if (_blocksToDo)
@@ -2490,16 +2490,16 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 					loadedAlternateTerrains[terrainToLoad] = mapDataSetIDOffset;
 					alternateTerrainDataOffset = mapDataSetIDOffset;
 
-				for (std::vector<MapDataSet*>::iterator j = _alternateTerrains.at(i)->getMapDataSets()->begin(); j != _alternateTerrains.at(i)->getMapDataSets()->end(); ++j)
-				{
-					(*j)->loadData();
-					if (_game->getMod()->getMCDPatch((*j)->getName()))
+					for (std::vector<MapDataSet*>::iterator j = _alternateTerrains.at(i)->getMapDataSets()->begin(); j != _alternateTerrains.at(i)->getMapDataSets()->end(); ++j)
 					{
-						_game->getMod()->getMCDPatch((*j)->getName())->modifyData(*j);
+						(*j)->loadData();
+						if (_game->getMod()->getMCDPatch((*j)->getName()))
+						{
+							_game->getMod()->getMCDPatch((*j)->getName())->modifyData(*j);
+						}
+						_save->getMapDataSets()->push_back(*j);
+						mapDataSetIDOffset++;
 					}
-					_save->getMapDataSets()->push_back(*j);
-					mapDataSetIDOffset++;
-				}
 				}
 			}
 			else // go back to an already loaded terrain
@@ -2510,7 +2510,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 
 			// Now that we have the new terrain, load the maps
 			bool visible = (_save->getMissionType() == "STR_BASE_DEFENSE");
-			loadMAP(_alternateTerrainMaps.at(i), _alternateTerrainRects[i].x * 10, _alternateTerrainRects[i].y * 10, _alternateTerrainHeights.at(i),  terrainToLoad, alternateTerrainDataOffset, visible);
+			loadMAP(_alternateTerrainMaps.at(i), _alternateTerrainRects[i].x * 10, _alternateTerrainRects[i].y * 10, _alternateTerrainHeights.at(i), terrainToLoad, alternateTerrainDataOffset, visible);
 
 		}
 	}
@@ -2568,11 +2568,11 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 		{
 			for (int j = (_craftPos.y * 10) - 1; j <= (_craftPos.y * 10) + craftMap->getSizeY(); j++)
 			{
-				for (int k = _mapsize_z-1; k >= _craftZ; --k)
+				for (int k = _mapsize_z - 1; k >= _craftZ; --k)
 				{
-					if (_save->getTile(Position(i,j,k)))
+					if (_save->getTile(Position(i, j, k)))
 					{
-						_save->getTile(Position(i,j,k))->setDiscovered(true, 2);
+						_save->getTile(Position(i, j, k))->setDiscovered(true, 2);
 					}
 				}
 			}
