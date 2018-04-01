@@ -27,7 +27,7 @@
 namespace OpenXcom
 {
 
-MapScript::MapScript() : _type(MSC_UNDEFINED), _sizeX(1), _sizeY(1), _sizeZ(0), _executionChances(100), _executions(1), _cumulativeFrequency(0), _label(0), _direction(MD_NONE), _tunnelData(0), _terrain(""), _verticalLevels()
+MapScript::MapScript() : _type(MSC_UNDEFINED), _canBeSkipped(false), _sizeX(1), _sizeY(1), _sizeZ(0), _executionChances(100), _executions(1), _cumulativeFrequency(0), _label(0), _direction(MD_NONE), _tunnelData(0), _terrain(""), _verticalLevels()
 {
 }
 
@@ -259,6 +259,7 @@ void MapScript::load(const YAML::Node& node)
 	}
 
 
+	_canBeSkipped = node["canBeSkipped"].as<bool>(_canBeSkipped);
 	_executionChances = node["executionChances"].as<int>(_executionChances);
 	_executions = node["executions"].as<int>(_executions);
 	_ufoName = node["UFOName"].as<std::string>(_ufoName);

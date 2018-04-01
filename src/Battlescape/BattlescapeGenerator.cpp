@@ -2206,8 +2206,15 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 							}
 
 							craftMap = _craftRules->getBattlescapeTerrainData()->getRandomMapBlock(999, 999, 0, false);
-							if (m == 0 && addCraft(craftMap, command, _craftPos, terrain))
+							if (m == 0)
 							{
+								bool craftPlaced = addCraft(craftMap, command, _craftPos, terrain);
+								if (!craftPlaced)
+								{
+									throw Exception("Map generator encountered an error: Craft (MapBlock: "
+										+ craftMap->getName()
+										+ ") could not be placed on the map. You may try turning on 'save scumming' to work around this issue.");
+								}
 								// by default addCraft adds blocks from group 1.
 								// this can be overwritten in the command by defining specific groups or blocks
 								// or this behaviour can be suppressed by leaving group 1 empty
@@ -2278,8 +2285,23 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 						{
 							MapBlock *ufoMap = ufoTerrain->getRandomMapBlock(999, 999, 0, false);
 							SDL_Rect ufoPosTemp;
-							if (m == 0 && addCraft(ufoMap, command, ufoPosTemp, terrain)) // Choose UFO location when on ground level
+							if (m == 0) // Choose UFO location when on ground level
 							{
+								bool ufoPlaced = addCraft(ufoMap, command, ufoPosTemp, terrain);
+								if (!ufoPlaced)
+								{
+									if (command->canBeSkipped())
+									{
+										Log(LOG_WARNING) << "Map generator encountered a problem: UFO (MapBlock: " << ufoMap->getName() << ") could not be placed on the map. Command skipped.";
+										break;
+									}
+									else
+									{
+										throw Exception("Map generator encountered an error: UFO (MapBlock: "
+											+ ufoMap->getName()
+											+ ") could not be placed on the map. You may try turning on 'save scumming' to work around this issue.");
+									}
+								}
 								_ufoPos.push_back(ufoPosTemp);
 								ufoMaps.push_back(ufoMap);
 								for (x = ufoPosTemp.x; x < ufoPosTemp.x + ufoPosTemp.w; ++x)
@@ -3341,13 +3363,6 @@ bool BattlescapeGenerator::addCraft(MapBlock *craftMap, MapScript *command, SDL_
 				}
 			}
 		}
-	}
-
-	if (!placed)
-	{
-		throw Exception("Map generator encountered an error: UFO or craft (MapBlock: "
-			+ craftMap->getName()
-			+ ") could not be placed on the map. You may try turning on 'save scumming' to work around this issue.");
 	}
 
 	return placed;
