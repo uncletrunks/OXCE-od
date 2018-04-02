@@ -149,6 +149,17 @@ void OptionsBaseState::restart(OptionsOrigin origin)
 	}
 	else if (origin == OPT_BATTLESCAPE)
 	{
+		BattlescapeState *origBattleState = 0;
+		if (_game->getSavedGame() != 0 && _game->getSavedGame()->getSavedBattle() != 0)
+		{
+			origBattleState = _game->getSavedGame()->getSavedBattle()->getBattleState();
+		}
+		if (origBattleState != 0)
+		{
+			// We need to reset palettes here already, can't wait for the destructor
+			origBattleState->resetPalettes();
+		}
+
 		_game->setState(new GeoscapeState);
 		BattlescapeState *bs = new BattlescapeState;
 		_game->pushState(bs);

@@ -76,7 +76,7 @@ private:
 	Uint8 _medikitRed, _medikitGreen, _medikitBlue, _medikitOrange;
 	std::vector<State*> _popups;
 	BattlescapeGame *_battleGame;
-	bool _firstInit;
+	bool _firstInit, _paletteResetNeeded;
 	bool _isMouseScrolling, _isMouseScrolled;
 	int _xBeforeMouseScrolling, _yBeforeMouseScrolling;
 	Position _mapOffsetBeforeMouseScrolling;
@@ -115,6 +115,7 @@ public:
 	BattlescapeState();
 	/// Cleans up the Battlescape state.
 	~BattlescapeState();
+	void resetPalettes();
 	/// Initializes the battlescapestate.
 	void init();
 	/// Runs the timers and handles popups.

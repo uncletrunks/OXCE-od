@@ -46,6 +46,7 @@ class RuleStartingCondition
 {
 private:
 	std::string _type;
+	std::map<std::string, std::string> _paletteTransformations;
 	std::map<std::string, EnvironmentalCondition> _environmentalConditions;
 	std::map<std::string, std::string> _armorTransformations;
 	std::map<std::string, std::map<std::string, int> > _defaultArmor;
@@ -64,6 +65,8 @@ public:
 	void load(const YAML::Node& node);
 	/// Gets the Starting Conditions's type.
 	std::string getType() const;
+	/// Gets the palette transformations.
+	const std::map<std::string, std::string> *getPaletteTransformations() const;
 	/// Gets the environmental condition for a given faction.
 	EnvironmentalCondition getEnvironmetalCondition(const std::string &faction) const;
 	/// Gets the allowed armor types.

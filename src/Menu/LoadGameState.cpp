@@ -151,6 +151,13 @@ void LoadGameState::think()
 	{
 		_game->popState();
 
+		// Remember for later (palette reset)
+		BattlescapeState *origBattleState = 0;
+		if (_game->getSavedGame() != 0 && _game->getSavedGame()->getSavedBattle() != 0)
+		{
+			origBattleState = _game->getSavedGame()->getSavedBattle()->getBattleState();
+		}
+
 		// Load the game
 		SavedGame *s = new SavedGame();
 		try
@@ -169,6 +176,11 @@ void LoadGameState::think()
 				Options::baseXResolution = Options::baseXGeoscape;
 				Options::baseYResolution = Options::baseYGeoscape;
 				_game->getScreen()->resetDisplay(false);
+				if (origBattleState != 0)
+				{
+					// We need to reset palettes here already, can't wait for the destructor
+					origBattleState->resetPalettes();
+				}
 				_game->setState(new GeoscapeState);
 				if (_game->getSavedGame()->getSavedBattle() != 0)
 				{

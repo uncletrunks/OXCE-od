@@ -88,6 +88,7 @@ void RuleStartingCondition::load(const YAML::Node &node)
 		load(parent);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_paletteTransformations = node["paletteTransformations"].as< std::map<std::string, std::string> >(_paletteTransformations);
 	_environmentalConditions = node["environmentalConditions"].as< std::map<std::string, EnvironmentalCondition> >(_environmentalConditions);
 	_armorTransformations = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformations);
 	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::map<std::string, int> > >(_defaultArmor);
@@ -106,6 +107,15 @@ void RuleStartingCondition::load(const YAML::Node &node)
 std::string RuleStartingCondition::getType() const
 {
 	return _type;
+}
+
+/**
+ * Gets the palette transformations.
+ * @return Map of palette transformations.
+ */
+const std::map<std::string, std::string> *RuleStartingCondition::getPaletteTransformations() const
+{
+	return &_paletteTransformations;
 }
 
 /**

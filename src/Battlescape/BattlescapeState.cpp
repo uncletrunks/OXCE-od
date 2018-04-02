@@ -78,6 +78,7 @@
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleStartingCondition.h"
 #include <algorithm>
 
 namespace OpenXcom
@@ -87,7 +88,7 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false), _autosave(false), _animFrame(0), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
+BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteResetNeeded(false), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false), _autosave(false), _animFrame(0), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
 
@@ -195,6 +196,23 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _isMouseSc
 
 	_txtDebug = new Text(300, 10, 20, 0);
 	_txtTooltip = new Text(300, 10, x + 2, y - 10);
+
+	// Palette transformations
+	std::string startingConditionType = _game->getSavedGame()->getSavedBattle()->getStartingConditionType();
+	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(startingConditionType);
+	if (startingCondition)
+	{
+		for (auto change : *startingCondition->getPaletteTransformations())
+		{
+			Palette *origPal = _game->getMod()->getPalette(change.first, false);
+			Palette *newPal = _game->getMod()->getPalette(change.second, false);
+			if (origPal && newPal)
+			{
+				origPal->copyFrom(newPal);
+				_paletteResetNeeded = true;
+			}
+		}
+	}
 
 	// Set palette
 	_game->getSavedGame()->getSavedBattle()->setPaletteByDepth(this);
@@ -579,6 +597,28 @@ BattlescapeState::~BattlescapeState()
 	delete _animTimer;
 	delete _gameTimer;
 	delete _battleGame;
+
+	resetPalettes();
+}
+
+void BattlescapeState::resetPalettes()
+{
+	if (_paletteResetNeeded)
+	{
+		for (auto origPal : _game->getMod()->getPalettes())
+		{
+			if (origPal.first.find("PAL_") == 0)
+			{
+				std::string backupName = "BACKUP_" + origPal.first;
+				Palette *backupPal = _game->getMod()->getPalette(backupName, false);
+				if (backupPal)
+				{
+					origPal.second->copyFrom(backupPal);
+				}
+			}
+		}
+		_paletteResetNeeded = false;
+	}
 }
 
 /**
