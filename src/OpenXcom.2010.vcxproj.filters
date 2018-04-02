@@ -1048,6 +1048,9 @@
     <ClCompile Include="Basescape\GlobalResearchState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Menu\HelloCommanderState.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2139,6 +2142,9 @@
     </ClInclude>
     <ClInclude Include="Basescape\GlobalResearchState.h">
       <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\HelloCommanderState.h">
+      <Filter>Menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
