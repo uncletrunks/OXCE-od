@@ -47,13 +47,11 @@ TestState::TestState()
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_txtTitle = new Text(300, 17, 10, 7);
-	_txtPalette = new Text(86, 9, 10, 30);
-	_cbxPalette = new ComboBox(this, 114, 16, 98, 26);
-	_btnLowContrast = new TextButton(42, 16, 220, 26);
-	_btnHighContrast = new TextButton(42, 16, 270, 26);
-	_btnPreview = new TextButton(92, 16, 220, 26);
-	_txtTestCase = new Text(86, 9, 10, 50);
-	_cbxTestCase = new ComboBox(this, 214, 16, 98, 46);
+	_txtPalette = new Text(66, 9, 10, 30);
+	_cbxPalette = new ComboBox(this, 114, 16, 78, 26);
+	_cbxPaletteAction = new ComboBox(this, 114, 16, 198, 26);
+	_txtTestCase = new Text(66, 9, 10, 50);
+	_cbxTestCase = new ComboBox(this, 234, 16, 78, 46);
 	_txtDescription = new Text(300, 25, 10, 66);
 	_lstOutput = new TextList(284, 80, 10, 94);
 	_btnRun = new TextButton(146, 16, 10, 176);
@@ -65,9 +63,6 @@ TestState::TestState()
 	add(_window, "window", "tests");
 	add(_txtTitle, "heading", "tests");
 	add(_txtPalette, "text", "tests");
-	add(_btnLowContrast, "button2", "tests");
-	add(_btnHighContrast, "button2", "tests");
-	add(_btnPreview, "button2", "tests");
 	add(_txtTestCase, "text", "tests");
 	add(_txtDescription, "heading", "tests");
 	add(_lstOutput, "text", "tests");
@@ -75,6 +70,7 @@ TestState::TestState()
 	add(_btnCancel, "button2", "tests");
 	add(_cbxTestCase, "button1", "tests"); // add as last (display over all other components)
 	add(_cbxPalette, "button1", "tests"); // add as last (display over all other components)
+	add(_cbxPaletteAction, "button1", "tests"); // add as last (display over all other components)
 
 	centerAllSurfaces();
 
@@ -87,49 +83,27 @@ TestState::TestState()
 
 	_txtPalette->setText(tr("STR_PALETTE"));
 
-	bool isTFTD = false;
-	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)
+	for (auto pal : _game->getMod()->getPalettes())
 	{
-		if (i->second)
+		if (pal.first.find("BACKUP_") != 0)
 		{
-			if (i->first == "xcom2")
-			{
-				isTFTD = true;
-				break;
-			}
+			_paletteList.push_back(pal.first);
 		}
 	}
 
-	_paletteList.push_back("PAL_GEOSCAPE");
-	_paletteList.push_back("PAL_BASESCAPE");
-	_paletteList.push_back("PAL_GRAPHS");
-	if (!isTFTD)
-	{
-		_paletteList.push_back("PAL_UFOPAEDIA");
-		_paletteList.push_back("PAL_BATTLEPEDIA");
-	}
-	_paletteList.push_back("PAL_BATTLESCAPE");
-	if (isTFTD)
-	{
-		_paletteList.push_back("PAL_BATTLESCAPE_1");
-		_paletteList.push_back("PAL_BATTLESCAPE_2");
-		_paletteList.push_back("PAL_BATTLESCAPE_3");
-	}
-
 	_cbxPalette->setOptions(_paletteList);
-	_cbxPalette->onChange((ActionHandler)&TestState::cbxPaletteChange);
 
-	_btnLowContrast->setText(tr("STR_LOW_CONTRAST"));
-	_btnLowContrast->onMouseClick((ActionHandler)&TestState::btnLowContrastClick);
-	_btnLowContrast->setVisible(false);
+	std::vector<std::string> _actionList;
+	_actionList.push_back("STR_PREVIEW");
+	_actionList.push_back("STR_TINY_BORDERLESS");
+	_actionList.push_back("STR_TINY_BORDER");
+	_actionList.push_back("STR_SMALL_LOW_CONTRAST");
+	_actionList.push_back("STR_SMALL_HIGH_CONTRAST");
+	_actionList.push_back("STR_BIG_LOW_CONTRAST");
+	_actionList.push_back("STR_BIG_HIGH_CONTRAST");
 
-	_btnHighContrast->setText(tr("STR_HIGH_CONTRAST"));
-	_btnHighContrast->onMouseClick((ActionHandler)&TestState::btnHighContrastClick);
-	_btnHighContrast->setVisible(false);
-
-	_btnPreview->setText(tr("STR_PREVIEW"));
-	_btnPreview->onMouseClick((ActionHandler)&TestState::btnLowContrastClick);
-	_btnPreview->setVisible(true);
+	_cbxPaletteAction->setOptions(_actionList);
+	_cbxPaletteAction->onChange((ActionHandler)&TestState::cbxPaletteAction);
 
 	_txtTestCase->setText(tr("STR_TEST_CASE"));
 
@@ -197,46 +171,17 @@ void TestState::btnCancelClick(Action *action)
 }
 
 /**
-* Updates the UI buttons.
-* @param action Pointer to an action.
-*/
-void TestState::cbxPaletteChange(Action *)
-{
-	size_t index = _cbxPalette->getSelected();
-	if (_paletteList[index].find("PAL_BATTLESCAPE") != std::string::npos)
-	{
-		_btnPreview->setVisible(false);
-		_btnLowContrast->setVisible(true);
-		_btnHighContrast->setVisible(true);
-	}
-	else
-	{
-		_btnPreview->setVisible(true);
-		_btnLowContrast->setVisible(false);
-		_btnHighContrast->setVisible(false);
-	}
-}
-
-/**
-* Shows palette preview with low contrast.
-* @param action Pointer to an action.
-*/
-void TestState::btnLowContrastClick(Action *action)
+ * Shows palette preview with low contrast.
+ * @param action Pointer to an action.
+ */
+void TestState::cbxPaletteAction(Action *action)
 {
 	size_t index = _cbxPalette->getSelected();
 	const std::string palette = _paletteList[index];
-	_game->pushState(new TestPaletteState(palette, false));
-}
 
-/**
-* Shows palette preview with high contrast.
-* @param action Pointer to an action.
-*/
-void TestState::btnHighContrastClick(Action *action)
-{
-	size_t index = _cbxPalette->getSelected();
-	const std::string palette = _paletteList[index];
-	_game->pushState(new TestPaletteState(palette, true));
+	PaletteActionType type = (PaletteActionType)_cbxPaletteAction->getSelected();
+
+	_game->pushState(new TestPaletteState(palette, type));
 }
 
 void TestState::testCase1()

@@ -81,6 +81,38 @@ void Palette::loadDat(const std::string &filename, int ncolors, int offset)
 }
 
 /**
+ * Initializes an all-black palette.
+ */
+void Palette::initBlack()
+{
+	if (_colors != 0)
+		throw Exception("initBlack can be run only once");
+	_count = 256;
+	_colors = new SDL_Color[_count];
+	memset(_colors, 0, sizeof(SDL_Color) * _count);
+
+	for (int i = 0; i < _count; ++i)
+	{
+		_colors[i].r = 0;
+		_colors[i].g = 0;
+		_colors[i].b = 0;
+		_colors[i].unused = 255;
+	}
+	_colors[0].unused = 0;
+}
+
+/**
+ * Loads the colors from an existing palette.
+ */
+void Palette::copyFrom(Palette *srcPal)
+{
+	for (int i = 0; i < srcPal->getColorCount(); i++)
+	{
+		setColor(i, srcPal->getColors(i)->r, srcPal->getColors(i)->g, srcPal->getColors(i)->b);
+	}
+}
+
+/**
  * Provides access to colors contained in the palette.
  * @param offset Offset to a specific color.
  * @return Pointer to the requested SDL_Color.

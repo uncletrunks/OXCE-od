@@ -19,6 +19,7 @@
 #include "TestPaletteState.h"
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
+#include "../Engine/Palette.h"
 #include "../Interface/NumberText.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
@@ -30,7 +31,7 @@ namespace OpenXcom
 /**
  * Initializes all the elements in the test palette screen.
  */
-TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast)
+TestPaletteState::TestPaletteState(const std::string &palette, PaletteActionType action)
 {
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
@@ -38,6 +39,7 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 
 	// Set palette
 	setPalette(palette);
+	int maxColors = _game->getMod()->getPalette(palette)->getColorCount();
 
 	add(_bg);
 	add(_btnCancel);
@@ -47,12 +49,8 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 	_btnCancel->onMouseClick((ActionHandler)&TestPaletteState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&TestPaletteState::btnCancelClick, Options::keyCancel);
 
-	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
-	bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
-	bool altPressed = SDL_GetModState() & KMOD_ALT;
-
 	// basic palette
-	if (ctrlPressed)
+	if (action == PAT_PREVIEW)
 	{
 		Surface surf = Surface(20, 11, 0, 0);
 		surf.setPalette(_bg->getPalette());
@@ -61,6 +59,7 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 			for (int column = 0; column < 16; ++column)
 			{
 				int index = row * 16 + column;
+				if (index >= maxColors) return;
 				surf.setX(column * 20);
 				surf.setY(row * 11);
 				surf.drawRect(0, 0, 20, 11, index);
@@ -71,21 +70,18 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 	}
 
 	// small digits without/with border
-	if (shiftPressed)
+	if (action == PAT_TINY_BORDERLESS || action == PAT_TINY_BORDER)
 	{
 		NumberText text = NumberText(25, 9, 0, 0);
 		text.setPalette(_bg->getPalette());
 		text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-		text.setBordered(highContrast);
+		text.setBordered((action == PAT_TINY_BORDER));
 		for (int row = 0; row < 22; ++row)
 		{
 			for (int column = 0; column < 12; ++column)
 			{
 				int index = row * 12 + column;
-				if (index > 255)
-				{
-					return;
-				}
+				if (index >= maxColors) return;
 				text.setColor(index);
 				text.setX(column * 26);
 				text.setY(row * 9);
@@ -97,22 +93,19 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 	}
 
 	// big text without/with high contrast
-	if (altPressed)
+	if (action == PAT_BIG_LOW || action == PAT_BIG_HIGH)
 	{
 		Text text = Text(13, 17, 0, 0);
 		text.setPalette(_bg->getPalette());
 		text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-		text.setHighContrast(highContrast);
+		text.setHighContrast((action == PAT_BIG_HIGH));
 		text.setBig();
 		for (int row = 0; row < 11; ++row)
 		{
 			for (int column = 0; column < 24; ++column)
 			{
 				int index = row * 24 + column;
-				if (index > 255)
-				{
-					return;
-				}
+				if (index >= maxColors) return;
 				text.setColor(index);
 				text.setX(column * 13);
 				text.setY(row * 17);
@@ -129,16 +122,13 @@ TestPaletteState::TestPaletteState(const std::string &palette, bool highContrast
 	Text text = Text(25, 9, 0, 0);
 	text.setPalette(_bg->getPalette());
 	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-	text.setHighContrast(highContrast);
+	text.setHighContrast((action == PAT_SMALL_HIGH));
 	for (int row = 0; row < 22; ++row)
 	{
 		for (int column = 0; column < 12; ++column)
 		{
 			int index = row * 12 + column;
-			if (index > 255)
-			{
-				return;
-			}
+			if (index >= maxColors) return;
 			text.setColor(index);
 			text.setX(column * 26);
 			text.setY(row * 9);

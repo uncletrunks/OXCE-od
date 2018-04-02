@@ -3875,8 +3875,9 @@ void Mod::loadExtraResources()
 		std::string palTargetName = palDef->getTarget();
 		if (_palettes.find(palTargetName) == _palettes.end())
 		{
-			Log(LOG_VERBOSE) << "WARNING: Palette " << palTargetName << " does not exist!";
-			continue;
+			Log(LOG_INFO) << "Creating a new palette: " << palTargetName;
+			_palettes[palTargetName] = new Palette();
+			_palettes[palTargetName]->initBlack();
 		}
 		else
 		{
@@ -3919,6 +3920,19 @@ void Mod::loadExtraResources()
 			{
 				throw Exception(fullPath + " not found");
 			}
+		}
+	}
+
+	Log(LOG_INFO) << "Making palette backups...";
+	for (auto pal : _palettes)
+	{
+		if (pal.first.find("PAL_") == 0)
+		{
+			Log(LOG_INFO) << "Creating a backup for palette: " << pal.first;
+			std::string newName = "BACKUP_" + pal.first;
+			_palettes[newName] = new Palette();
+			_palettes[newName]->initBlack();
+			_palettes[newName]->copyFrom(pal.second);
 		}
 	}
 }

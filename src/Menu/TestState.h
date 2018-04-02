@@ -39,11 +39,11 @@ class TestState : public State
 {
 private:
 	Window *_window;
-	TextButton *_btnLowContrast, *_btnHighContrast, *_btnPreview;
 	TextButton *_btnRun, *_btnCancel;
 	Text *_txtPalette;
 	Text *_txtTitle, *_txtTestCase, *_txtDescription;
 	ComboBox *_cbxPalette;
+	ComboBox *_cbxPaletteAction;
 	ComboBox *_cbxTestCase;
 	TextList *_lstOutput;
 	std::vector<std::string> _paletteList;
@@ -65,12 +65,8 @@ public:
 	void btnRunClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
-	/// Handler for changing the Palette combobox.
-	void cbxPaletteChange(Action *action);
-	/// Handler for clicking the LowContrast button.
-	void btnLowContrastClick(Action *action);
-	/// Handler for clicking the HighContrast button.
-	void btnHighContrastClick(Action *action);
+	/// Handler for selecting the Palette Action from the combobox.
+	void cbxPaletteAction(Action *action);
 };
 
 }

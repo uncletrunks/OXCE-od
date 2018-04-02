@@ -22,6 +22,8 @@
 namespace OpenXcom
 {
 
+enum PaletteActionType { PAT_PREVIEW, PAT_TINY_BORDERLESS, PAT_TINY_BORDER, PAT_SMALL_LOW, PAT_SMALL_HIGH, PAT_BIG_LOW, PAT_BIG_HIGH };
+
 class Surface;
 class TextButton;
 
@@ -35,7 +37,7 @@ private:
 	TextButton *_btnCancel;
 public:
 	/// Creates the Test state.
-	TestPaletteState(const std::string &palette, bool highContrast = false);
+	TestPaletteState(const std::string &palette, PaletteActionType action);
 	/// Cleans up the Test state.
 	~TestPaletteState();
 	/// Handler for clicking the Cancel button.

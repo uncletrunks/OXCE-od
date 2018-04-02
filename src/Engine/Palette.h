@@ -40,8 +40,14 @@ public:
 	~Palette();
 	/// Loads the colors from an X-Com palette.
 	void loadDat(const std::string &filename, int ncolors, int offset = 0);
+	/// Initializes an all-black palette.
+	void initBlack();
+	/// Loads the colors from an existing palette.
+	void copyFrom(Palette *srcPal);
 	// Gets a certain color from the palette.
 	SDL_Color *getColors(int offset = 0) const;
+	// Gets a number of colors in the palette.
+	int getColorCount() const { return _count; }
 
 	void savePal(const std::string &file) const;
 	void savePalMod(const std::string &file, const std::string &type, const std::string &target) const;
