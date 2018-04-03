@@ -3928,7 +3928,7 @@ void Mod::loadExtraResources()
 	{
 		if (pal.first.find("PAL_") == 0)
 		{
-			Log(LOG_INFO) << "Creating a backup for palette: " << pal.first;
+			Log(LOG_VERBOSE) << "Creating a backup for palette: " << pal.first;
 			std::string newName = "BACKUP_" + pal.first;
 			_palettes[newName] = new Palette();
 			_palettes[newName]->initBlack();
