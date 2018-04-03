@@ -2577,7 +2577,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			}
 			_save->getMapDataSets()->push_back(*i);
 		}
-		loadMAP(craftMap, _craftPos.x * 10, _craftPos.y * 10, _craftZ, _craftRules->getBattlescapeTerrainData(), mapDataSetIDOffset + craftDataSetIDOffset, true, true);
+		loadMAP(craftMap, _craftPos.x * 10, _craftPos.y * 10, _craftZ, _craftRules->getBattlescapeTerrainData(), mapDataSetIDOffset + craftDataSetIDOffset, _craftRules->isMapVisible(), true);
 		loadRMP(craftMap, _craftPos.x * 10, _craftPos.y * 10, _craftZ, Node::CRAFTSEGMENT);
 		for (int i = 0; i < craftMap->getSizeX() / 10; ++i)
 		{
@@ -2594,7 +2594,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 				{
 					if (_save->getTile(Position(i, j, k)))
 					{
-						_save->getTile(Position(i, j, k))->setDiscovered(true, 2);
+						_save->getTile(Position(i, j, k))->setDiscovered(_craftRules->isMapVisible(), 2);
 					}
 				}
 			}

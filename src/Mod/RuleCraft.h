@@ -141,6 +141,7 @@ private:
 	std::vector<int> _craftInventoryTile;
 	RuleCraftStats _stats;
 	int _shieldRechargeAtBase;
+	bool _mapVisible;
 public:
 	/// Creates a blank craft ruleset.
 	RuleCraft(const std::string &type);
@@ -226,6 +227,8 @@ public:
 	bool isWaterOnly() const;
 	/// Get how many shield points are recharged per hour at base
 	int getShieldRechargeAtBase() const;
+	/// Get whether the craft's map should be visible at the start of a battle
+	bool isMapVisible() const;
 };
 
 }

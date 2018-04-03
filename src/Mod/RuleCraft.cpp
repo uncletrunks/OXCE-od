@@ -35,7 +35,8 @@ RuleCraft::RuleCraft(const std::string &type) :
 	_transferTime(0), _score(0), _battlescapeTerrainData(0),
 	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false),
 	_listOrder(0), _maxItems(0), _maxAltitude(-1), _stats(),
-	_shieldRechargeAtBase(1000)
+	_shieldRechargeAtBase(1000),
+	_mapVisible(true)
 {
 	for (int i = 0; i < WeaponMax; ++ i)
 	{
@@ -151,6 +152,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 			_weaponStrings[i] = str[i].as<std::string>();
 	}
 	_shieldRechargeAtBase = node["shieldRechargedAtBase"].as<int>(_shieldRechargeAtBase);
+	_mapVisible = node["mapVisible"].as<bool>(_mapVisible);
 }
 
 /**
@@ -529,6 +531,15 @@ bool RuleCraft::isWaterOnly() const
 int RuleCraft::getShieldRechargeAtBase() const
 {
 	return _shieldRechargeAtBase;
+}
+
+/**
+ * Gets whether or not the craft map should be visible at the beginning of the battlescape
+ * @return visible or not?
+ */
+bool RuleCraft::isMapVisible() const
+{
+	return _mapVisible;
 }
 
 }
