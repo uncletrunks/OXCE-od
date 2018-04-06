@@ -1,0 +1,71 @@
+# Directories and files
+OBJDIR = ../obj/
+BINDIR = ../bin/
+SRCS_SDL = C:/MinGW/mingw32/include/SDL/
+SRCS_YAML = C:/work/yaml-cpp/
+SRCS_YAML_CPP = $(wildcard $(SRCS_YAML)src/*.cpp $(SRCS_YAML)src/contrib/*.cpp)
+SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp)
+OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) $(patsubst %.cpp, $(OBJDIR)yaml/%.o, $(notdir $(SRCS_YAML_CPP)))
+
+BIN = OpenXcom
+
+# Compiler settings
+CXXFLAGS ?= -Og
+CXXFLAGS += -Wall -std=gnu++11
+
+CXXFLAGS += -I$(SRCS_YAML)include -I$(SRCS_SDL)
+
+LIBS = -lshlwapi -lws2_32 -lopengl32 -lglu32 -mwindows -lmingw32 -lpthread -static -static-libstdc++ -lwinmm -lSDL_gfx -lSDL_mixer -lvorbisfile -logg -lmodplug -lvorbis -logg -lFLAC -lFLAC++ -lws2_32 -lSDLmain -lSDL_Image -ljpeg -lpng12 -lz -lsmpeg -lSDL -lm -luser32 -lgdi32 -lwinmm -ldxguid -lDbgHelp
+
+# Rules
+all: $(BINDIR)$(BIN)
+
+$(BINDIR)$(BIN): $(OBJS)
+	$(CXX) $(OBJS) $(LDFLAGS) $(LIBS) -o $(BINDIR)$(BIN)
+
+$(OBJDIR)%.o:: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Basescape/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Battlescape/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Engine/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Engine/Scalers/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Engine/Adlib/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Geoscape/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Interface/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Menu/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Mod/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Savegame/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)%.o:: Ufopaedia/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)yaml/%.o:: $(SRCS_YAML)src/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)yaml/%.o:: $(SRCS_YAML)src/contrib/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	rm -f $(BINDIR)$(BIN) $(OBJDIR)*.o
+
+.PHONY: all clean
