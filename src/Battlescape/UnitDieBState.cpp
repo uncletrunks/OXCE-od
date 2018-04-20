@@ -262,6 +262,7 @@ void UnitDieBState::convertUnitToCorpse()
 	if (!_noSound)
 	{
 		_parent->getSave()->getBattleState()->showPsiButton(false);
+		_parent->getSave()->getBattleState()->showSpecialButton(false);
 	}
 	// remove the unconscious body item corresponding to this unit, and if it was being carried, keep track of what slot it was in
 	if (lastPosition != Position(-1,-1,-1))

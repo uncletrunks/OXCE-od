@@ -135,6 +135,7 @@ private:
 	int _bigSprite;
 	int _floorSprite;
 	int _handSprite, _bulletSprite;
+	int _specialIconSprite;
 	std::vector<int> _fireSound, _hitSound; 
 	int _hitAnimation;
 	std::vector<int> _hitMissSound;
@@ -162,7 +163,7 @@ private:
 	RuleItemFuseTrigger _fuseTriggerEvents;
 	bool _hiddenOnMinimap;
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
-	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands;
+	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
 	std::string _defaultInventorySlot;
 	std::vector<std::string> _supportedInventorySections;
 	int _waypoints, _invWidth, _invHeight;
@@ -256,6 +257,8 @@ public:
 	int getFloorSprite() const;
 	/// Gets the item's reference in HANDOB.PCK for use in inventory.
 	int getHandSprite() const;
+	/// Gets the item's reference in SPICONS.DAT for special weapon button.
+	int getSpecialIconSprite() const;
 	/// Gets if the item is two-handed.
 	bool isTwoHanded() const;
 	/// Gets if the item can only be used by both hands.
@@ -480,6 +483,8 @@ public:
 	bool isFireExtinguisher() const;
 	/// Is this item explode in hands?
 	bool isExplodingInHands() const;
+	/// If this is used as a speacialWeapon, is it accessed by empty hand?
+	bool isSpecialUsingEmptyHand() const;
 	/// Gets the medikit use type.
 	BattleMediKitType getMediKitType() const;
 	/// Gets the max explosion radius.

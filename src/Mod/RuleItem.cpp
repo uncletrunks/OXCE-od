@@ -42,7 +42,7 @@ const float TilesToVexels = 16.0f;
  */
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
-	_bigSprite(-1), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
+	_bigSprite(-1), _floorSprite(-1), _handSprite(120), _bulletSprite(-1), _specialIconSprite(-1),
 	_hitAnimation(0), _hitMissAnimation(-1),
 	_meleeAnimation(0), _meleeMissAnimation(-1),
 	_psiAnimation(-1), _psiMissAnimation(-1),
@@ -52,7 +52,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
 	_clipSize(0), _specialChance(100), _tuLoad{ }, _tuUnload{ },
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _hiddenOnMinimap(false), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
-	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
+	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _specialUseEmptyHand(false),
+	_waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
 	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _liveAlien(false), _liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
@@ -339,6 +340,10 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		if (_bulletSprite >= 385)
 			_bulletSprite += mod->getModOffset();
 	}
+	if (node["specialIconSprite"])
+	{
+		_specialIconSprite = mod->getSpriteOffset(node["specialIconSprite"].as<int>(_specialIconSprite), "SPICONS.DAT");
+	}
 	loadSoundVector(node["fireSound"], mod, _fireSound);
 	loadSoundVector(node["hitSound"], mod, _hitSound);
 	loadSoundVector(node["hitMissSound"], mod, _hitMissSound);
@@ -549,6 +554,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_isConsumable = node["isConsumable"].as<bool>(_isConsumable);
 	_isFireExtinguisher = node["isFireExtinguisher"].as<bool>(_isFireExtinguisher);
 	_isExplodingInHands = node["isExplodingInHands"].as<bool>(_isExplodingInHands);
+	_specialUseEmptyHand = node["specialUseEmptyHand"].as<bool>(_specialUseEmptyHand);
 	_invWidth = node["invWidth"].as<int>(_invWidth);
 	_invHeight = node["invHeight"].as<int>(_invHeight);
 
@@ -771,6 +777,15 @@ int RuleItem::getFloorSprite() const
 int RuleItem::getHandSprite() const
 {
 	return _handSprite;
+}
+
+/**
+ * Gets the reference in SPICONS.DAT for use in battlescape.
+ * @return The sprite reference.
+ */
+int RuleItem::getSpecialIconSprite() const
+{
+	return _specialIconSprite;
 }
 
 /**
@@ -1599,6 +1614,15 @@ bool RuleItem::isFireExtinguisher() const
 bool RuleItem::isExplodingInHands() const
 {
 	return _isExplodingInHands;
+}
+
+/**
+ * If this item is used as a specialWeapon, can it be accessed by an empty hand?
+ * @return True if accessed by empty hand.
+ */
+bool RuleItem::isSpecialUsingEmptyHand() const
+{
+	return _specialUseEmptyHand;
 }
 
 /**

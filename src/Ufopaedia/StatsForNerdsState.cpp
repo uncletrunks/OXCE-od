@@ -1536,6 +1536,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getInventoryHeight(), "invHeight", -1); // always show!
 		addSingleString(ss, itemRule->getDefaultInventorySlot(), "defaultInventorySlot");
 		addBoolean(ss, itemRule->isFixed(), "fixedWeapon");
+		addBoolean(ss, itemRule->isSpecialUsingEmptyHand(), "specialUseEmptyHand");
 
 		addSection(L"{Recovery}", L"", _white);
 		addBoolean(ss, !itemRule->canBeEquippedBeforeBaseDefense(), "ignoreInBaseDefense"); // negated!
@@ -1585,6 +1586,8 @@ void StatsForNerdsState::initItemList()
 		addSpriteResourcePath(ss, mod, "FLOOROB.PCK", itemRule->getFloorSprite());
 		addInteger(ss, itemRule->getHandSprite(), "handSprite", 120);
 		addSpriteResourcePath(ss, mod, "HANDOB.PCK", itemRule->getHandSprite());
+		addInteger(ss, itemRule->getSpecialIconSprite(), "specialIconSprite", -1);
+		addSpriteResourcePath(ss, mod, "SPICONS.DAT", itemRule->getSpecialIconSprite());
 		addInteger(ss, itemRule->getBulletSprite(), "bulletSprite", -1);
 
 		addSection(L"{Sounds}", L"", _white);

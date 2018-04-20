@@ -23,6 +23,7 @@
 #include "../Engine/Script.h"
 #include "../Engine/ScriptBind.h"
 #include "../Engine/Language.h"
+#include "../Engine/Exception.h"
 #include "../Engine/Options.h"
 #include "../Engine/RNG.h"
 #include "../Battlescape/Pathfinding.h"
@@ -2553,12 +2554,22 @@ BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 		weaponLeftHand = 0;
 
 	// if there is only one weapon, it's easy:
+	// For the most part... we can still check for a specialWeapon!
 	if (weaponRightHand && !weaponLeftHand)
 		return weaponRightHand;
 	else if (!weaponRightHand && weaponLeftHand)
 		return weaponLeftHand;
 	else if (!weaponRightHand && !weaponLeftHand)
+	{
+		// Only need to check for firearms since melee/psi is handled elsewhere
+		BattleItem* specialWeapon = getSpecialWeapon(BT_FIREARM);
+		if (specialWeapon)
+		{
+			return specialWeapon;
+		}
+
 		return 0;
+	}
 
 	// otherwise pick the one with the least snapshot TUs
 	int tuRightHand = getActionTUs(BA_SNAPSHOT, weaponRightHand).Time;
@@ -3861,10 +3872,20 @@ void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 		item = mod->getItem(getUnitRules()->getMeleeWeapon());
 		if (item && i < SPEC_WEAPON_MAX)
 		{
+			if ((item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE) && !item->getClipSize())
+			{
+				throw Exception("Weapon " + item->getType() + " is used as a special weapon on unit " + getUnitRules()->getType() + " but doesn't have it's own ammo - give it a clipSize!");
+			}
 			_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
 		}
 	}
+
 	item = mod->getItem(getArmor()->getSpecialWeapon());
+	if (item && (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE) && !item->getClipSize())
+	{
+		throw Exception("Weapon " + item->getType() + " is used as a special weapon on armor " + getArmor()->getType() + " but doesn't have it's own ammo - give it a clipSize!");
+	}
+
 	if (item && i < SPEC_WEAPON_MAX)
 	{
 		_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
@@ -3892,6 +3913,29 @@ BattleItem *BattleUnit::getSpecialWeapon(BattleType type) const
 		}
 		if (_specWeapon[i]->getRules()->getBattleType() == type)
 		{
+			return _specWeapon[i];
+		}
+	}
+	return 0;
+}
+
+/**
+ * Gets the special weapon that uses an icon
+ * @param type Parameter passed to get back the type of the weapon
+ * @return Pointer the the weapon, null if not found
+ */
+BattleItem *BattleUnit::getSpecialIconWeapon(BattleType &type) const
+{
+	for (int i = 0; i < SPEC_WEAPON_MAX; ++i)
+	{
+		if (!_specWeapon[i])
+		{
+			break;
+		}
+
+		if (_specWeapon[i]->getRules()->getSpecialIconSprite() != -1)
+		{
+			type = _specWeapon[i]->getRules()->getBattleType();
 			return _specWeapon[i];
 		}
 	}

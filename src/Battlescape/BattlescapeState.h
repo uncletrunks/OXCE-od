@@ -52,7 +52,7 @@ private:
 	Map *_map;
 	BattlescapeButton *_btnUnitUp, *_btnUnitDown, *_btnMapUp, *_btnMapDown, *_btnShowMap, *_btnKneel;
 	BattlescapeButton *_btnInventory, *_btnCenter, *_btnNextSoldier, *_btnNextStop, *_btnShowLayers, *_btnHelp;
-	BattlescapeButton *_btnEndTurn, *_btnAbort, *_btnLaunch, *_btnPsi, *_reserve;
+	BattlescapeButton *_btnEndTurn, *_btnAbort, *_btnLaunch, *_btnPsi, *_btnSpecial, *_reserve;
 	InteractiveSurface *_btnStats;
 	BattlescapeButton *_btnReserveNone, *_btnReserveSnap, *_btnReserveAimed, *_btnReserveAuto, *_btnReserveKneel, *_btnZeroTUs;
 	InteractiveSurface *_btnLeftHandItem, *_btnRightHandItem;
@@ -172,6 +172,8 @@ public:
 	void btnLaunchClick(Action *action);
 	/// Handler for clicking the use psi button.
 	void btnPsiClick(Action *action);
+	/// Handler for clicking the use special weapon button.
+	void btnSpecialClick(Action *action);
 	/// Handler for clicking a reserved button.
 	void btnReserveClick(Action *action);
 	/// Handler for clicking the reload button.
@@ -214,6 +216,8 @@ public:
 	void showLaunchButton(bool show);
 	/// Shows the PSI button.
 	void showPsiButton(bool show);
+	/// Shows the special weapon button.
+	void showSpecialButton(bool show, int sprite = 1);
 	/// Clears mouse-scrolling state.
 	void clearMouseScrollingState();
 	/// Returns a pointer to the battlegame, in case we need its functions.
@@ -239,9 +243,10 @@ public:
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
 	/// Handler for showing tooltip with extra information (used for medikit-type equipment)
-	void txtTooltipInExtra(Action *action, bool leftHand);
+	void txtTooltipInExtra(Action *action, bool leftHand, bool special = false);
 	void txtTooltipInExtraLeftHand(Action *action);
 	void txtTooltipInExtraRightHand(Action *action);
+	void txtTooltipInExtraSpecial(Action *action);
 	/// Handler for showing tooltip with extra information (about current turn)
 	void txtTooltipInEndTurn(Action *action);
 	/// Handler for hiding tooltip.

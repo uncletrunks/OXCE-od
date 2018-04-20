@@ -177,6 +177,8 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_btnLaunch->setVisible(false);
 	_btnPsi = new BattlescapeButton(32, 24, screenWidth - 32, 25); // we need screenWidth, because that is independent of the black bars on the screen
 	_btnPsi->setVisible(false);
+	_btnSpecial = new BattlescapeButton(32, 24, screenWidth - 32, 25); // we need screenWidth, because that is independent of the black bars on the screen
+	_btnSpecial->setVisible(false);
 
 	// Create soldier stats summary
 	_rankTiny = new Surface(7, 7, x + 135, y + 33);
@@ -325,6 +327,8 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_game->getMod()->getSurfaceSet("SPICONS.DAT")->getFrame(0)->blit(_btnLaunch);
 	add(_btnPsi);
 	_game->getMod()->getSurfaceSet("SPICONS.DAT")->getFrame(1)->blit(_btnPsi);
+	add(_btnSpecial);
+	_game->getMod()->getSurfaceSet("SPICONS.DAT")->getFrame(1)->blit(_btnSpecial); // use psi button for default
 
 	// Set up objects
 	_save = _game->getSavedGame()->getSavedBattle();
@@ -546,6 +550,13 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
 	_btnLaunch->onMouseClick((ActionHandler)&BattlescapeState::btnLaunchClick);
 	_btnPsi->onMouseClick((ActionHandler)&BattlescapeState::btnPsiClick);
+
+	_btnSpecial->onMouseClick((ActionHandler)&BattlescapeState::btnSpecialClick);
+	_btnSpecial->onMouseClick((ActionHandler)&BattlescapeState::btnSpecialClick, SDL_BUTTON_MIDDLE);
+	_btnSpecial->onKeyboardPress((ActionHandler)&BattlescapeState::btnSpecialClick, Options::keyBattleUseSpecial);
+	_btnSpecial->setTooltip("STR_USE_SPECIAL_ITEM");
+	_btnSpecial->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipInExtraSpecial);
+	_btnSpecial->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_txtName->setHighContrast(true);
 
@@ -1299,6 +1310,19 @@ void BattlescapeState::btnLeftHandItemClick(Action *action)
 		_save->getSelectedUnit()->setActiveHand("STR_LEFT_HAND");
 		_map->draw();
 		BattleItem *leftHandItem = _save->getSelectedUnit()->getLeftHandWeapon();
+		if (!leftHandItem)
+		{
+			std::vector<BattleType> typesToCheck = {BT_MELEE, BT_PSIAMP, BT_FIREARM, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE};
+			for (auto &type : typesToCheck)
+			{
+				leftHandItem = _save->getSelectedUnit()->getSpecialWeapon(type);
+				if (leftHandItem && leftHandItem->getRules()->isSpecialUsingEmptyHand())
+				{
+					break;
+				}
+				leftHandItem = 0;
+			}
+		}
 		bool middleClick = action->getDetails()->button.button == SDL_BUTTON_MIDDLE;
 		handleItemClick(leftHandItem, middleClick);
 	}
@@ -1326,6 +1350,19 @@ void BattlescapeState::btnRightHandItemClick(Action *action)
 		_save->getSelectedUnit()->setActiveHand("STR_RIGHT_HAND");
 		_map->draw();
 		BattleItem *rightHandItem = _save->getSelectedUnit()->getRightHandWeapon();
+		if (!rightHandItem)
+		{
+			std::vector<BattleType> typesToCheck = {BT_MELEE, BT_PSIAMP, BT_FIREARM, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE};
+			for (auto &type : typesToCheck)
+			{
+				rightHandItem = _save->getSelectedUnit()->getSpecialWeapon(type);
+				if (rightHandItem && rightHandItem->getRules()->isSpecialUsingEmptyHand())
+				{
+					break;
+				}
+				rightHandItem = 0;
+			}
+		}
 		bool middleClick = action->getDetails()->button.button == SDL_BUTTON_MIDDLE;
 		handleItemClick(rightHandItem, middleClick);
 	}
@@ -1374,6 +1411,38 @@ void BattlescapeState::btnPsiClick(Action *action)
 {
 	_battleGame->psiButtonAction();
 	action->getDetails()->type = SDL_NOEVENT; // consume the event
+}
+
+/**
+ * Shows action menu for special weapons.
+ * @param action Pointer to an action.
+ */
+void BattlescapeState::btnSpecialClick(Action *action)
+{
+	if (playableUnitSelected())
+	{
+		// concession for touch devices:
+		// click on the item to cancel action, and don't pop up a menu to select a new one
+		// TODO: wrap this in an IFDEF ?
+		if (_battleGame->getCurrentAction()->targeting)
+		{
+			_battleGame->cancelCurrentAction();
+			return;
+		}
+
+		_battleGame->cancelCurrentAction();
+
+		BattleType type;
+		BattleItem *specialItem = _save->getSelectedUnit()->getSpecialIconWeapon(type);
+		if (!specialItem)
+		{
+			return;
+		}
+
+		_map->draw();
+		bool middleClick = action->getDetails()->button.button == SDL_BUTTON_MIDDLE;
+		handleItemClick(specialItem, middleClick);
+	}
 }
 
 /**
@@ -1555,6 +1624,7 @@ void BattlescapeState::updateSoldierInfo()
 	{
 		_txtName->setText(L"");
 		showPsiButton(false);
+		showSpecialButton(false);
 		toggleKneelButton(0);
 		return;
 	}
@@ -1802,6 +1872,16 @@ void BattlescapeState::updateSoldierInfo()
 	}
 
 	showPsiButton(battleUnit->getSpecialWeapon(BT_PSIAMP) != 0);
+	BattleType type = BT_NONE;
+	if (battleUnit->getSpecialIconWeapon(type) && type != BT_NONE && type != BT_AMMO && type != BT_GRENADE && type != BT_PROXIMITYGRENADE && type != BT_FLARE && type != BT_CORPSE)
+	{
+		showPsiButton(false);
+		showSpecialButton(true, battleUnit->getSpecialIconWeapon(type)->getRules()->getSpecialIconSprite());
+	}
+	else
+	{
+		showSpecialButton(false);
+	}
 }
 
 /**
@@ -2675,6 +2755,19 @@ void BattlescapeState::showPsiButton(bool show)
 }
 
 /**
+ * Shows the special button.
+ * @param show Show special button?
+ */
+void BattlescapeState::showSpecialButton(bool show, int sprite)
+{
+	if (show)
+	{
+		_game->getMod()->getSurfaceSet("SPICONS.DAT")->getFrame(sprite)->blit(_btnSpecial);
+	}
+	_btnSpecial->setVisible(show);
+}
+
+/**
  * Clears mouse-scrolling state (isMouseScrolling).
  */
 void BattlescapeState::clearMouseScrollingState()
@@ -2784,7 +2877,7 @@ void BattlescapeState::btnZeroTUsClick(Action *action)
 * Shows a tooltip with extra information (used for medikit-type equipment).
 * @param action Pointer to an action.
 */
-void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
+void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool special)
 {
 	if (allowButtons() && Options::battleTooltips)
 	{
@@ -2801,6 +2894,11 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand)
 		if (leftHand)
 		{
 			weapon = selectedUnit->getItem("STR_LEFT_HAND");
+		}
+		else if (special)
+		{
+			BattleType type;
+			weapon = selectedUnit->getSpecialIconWeapon(type);
 		}
 		else
 		{
@@ -2916,6 +3014,15 @@ void BattlescapeState::txtTooltipInExtraLeftHand(Action *action)
 void BattlescapeState::txtTooltipInExtraRightHand(Action *action)
 {
 	txtTooltipInExtra(action, false);
+}
+
+/**
+* Shows a tooltip with extra information (used for medikit-type equipment).
+* @param action Pointer to an action.
+*/
+void BattlescapeState::txtTooltipInExtraSpecial(Action *action)
+{
+	txtTooltipInExtra(action, false, true);
 }
 
 /**

@@ -558,6 +558,8 @@ public:
 	void setSpecialWeapon(SavedBattleGame *save);
 	/// Get special weapon.
 	BattleItem *getSpecialWeapon(BattleType type) const;
+	/// Gets special weapon that uses an icon, if any.
+	BattleItem *getSpecialIconWeapon(BattleType &type) const;
 	/// Checks if this unit is in hiding for a turn.
 	bool isHiding() const {return _hidingForTurn; };
 	/// Sets this unit is in hiding for a turn (or not).
