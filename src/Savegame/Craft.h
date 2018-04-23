@@ -54,6 +54,7 @@ private:
 	std::vector<Vehicle*> _vehicles;
 	std::string _status;
 	bool _lowFuel, _mission, _inBattlescape, _inDogfight;
+	double _speedMaxRadian;
 	RuleCraftStats _stats;
 	bool _isAutoPatrolling;
 	double _lonAuto, _latAuto;
@@ -161,8 +162,8 @@ public:
 	void setMissionComplete(bool mission);
 	/// Gets the craft's distance from its base.
 	double getDistanceFromBase() const;
-	/// Gets the craft's fuel consumption.
-	int getFuelConsumption(int escortSpeed) const;
+	/// Gets the craft's fuel consumption at a certain speed.
+	int getFuelConsumption(int speed, int escortSpeed) const;
 	/// Gets the craft's minimum fuel limit.
 	int getFuelLimit() const;
 	/// Gets the craft's minimum fuel limit to go to a base.

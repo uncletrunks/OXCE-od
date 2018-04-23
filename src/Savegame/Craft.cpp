@@ -72,6 +72,7 @@ Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	{
 		setBase(base);
 	}
+	_speedMaxRadian = calculateRadianSpeed(_rules->getMaxSpeed());
 }
 
 /**
@@ -801,10 +802,11 @@ double Craft::getDistanceFromBase() const
 
 /**
  * Returns the amount of fuel the craft uses up
- * while it's on the air, based on its speed.
+ * while it's on the air.
+ * @param speed Craft speed for estimation.
  * @return Fuel amount.
  */
-int Craft::getFuelConsumption(int escortSpeed) const
+int Craft::getFuelConsumption(int speed, int escortSpeed) const
 {
 	if (!_rules->getRefuelItem().empty())
 		return 1;
@@ -813,7 +815,7 @@ int Craft::getFuelConsumption(int escortSpeed) const
 		// based on the speed of the escorted craft, but capped between 50% and 100% of escorting craft's speed
 		return std::max(_rules->getMaxSpeed() / 200, std::min(escortSpeed / 100, _rules->getMaxSpeed() / 100));
 	}
-	return (int)floor(_speed / 100.0);
+	return (int)floor(speed / 100.0);
 }
 
 /**
@@ -834,7 +836,7 @@ int Craft::getFuelLimit() const
  */
 int Craft::getFuelLimit(Base *base) const
 {
-	return (int)floor(getFuelConsumption(0) * getDistance(base) / (_speedRadian * 120));
+	return (int)floor(getFuelConsumption(_rules->getMaxSpeed(), 0) * getDistance(base) / (_speedMaxRadian * 120));
 }
 
 /**
@@ -984,7 +986,7 @@ bool Craft::insideRadarRange(Target *target) const
  */
 void Craft::consumeFuel(int escortSpeed)
 {
-	setFuel(_fuel - getFuelConsumption(escortSpeed));
+	setFuel(_fuel - getFuelConsumption(_speed, escortSpeed));
 }
 
 /**
