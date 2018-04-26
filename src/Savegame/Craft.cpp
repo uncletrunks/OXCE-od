@@ -72,7 +72,7 @@ Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	{
 		setBase(base);
 	}
-	_speedMaxRadian = calculateRadianSpeed(_rules->getMaxSpeed());
+	_speedMaxRadian = calculateRadianSpeed(_rules->getMaxSpeed()) * 120;
 }
 
 /**
@@ -836,7 +836,7 @@ int Craft::getFuelLimit() const
  */
 int Craft::getFuelLimit(Base *base) const
 {
-	return (int)floor(getFuelConsumption(_rules->getMaxSpeed(), 0) * getDistance(base) / (_speedMaxRadian * 120));
+	return (int)floor(getFuelConsumption(_rules->getMaxSpeed(), 0) * getDistance(base) / _speedMaxRadian);
 }
 
 /**
