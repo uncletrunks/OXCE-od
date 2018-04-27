@@ -1461,8 +1461,8 @@ void GeoscapeState::time1Hour()
 		{
 			if (j->second > PROGRESS_NOT_COMPLETE)
 			{
-				(*i)->removeProduction (j->first);
 				popup(new ProductionCompleteState((*i),  tr(j->first->getRules()->getName()), this, j->second));
+				(*i)->removeProduction(j->first);
 			}
 		}
 
@@ -1569,11 +1569,14 @@ void GeoscapeState::time1Day()
 		// 3. add finished research, including lookups and getonefrees (up to 4x)
 		for (ResearchProject *project : finished)
 		{
-			// 3a. remove finished research from the base where it was researched
-			base->removeResearch(project);
-			// 3b. handle interrogation
 			const RuleResearch *bonus = 0;
 			const RuleResearch *research = project->getRules();
+
+			// 3a. remove finished research from the base where it was researched
+			base->removeResearch(project);
+			project = nullptr;
+
+			// 3b. handle interrogation
 			if (Options::retainCorpses && research->destroyItem() && mod->getUnit(research->getName()))
 			{
 				base->getStorageItems()->addItem(mod->getArmor(mod->getUnit(research->getName())->getArmor(), true)->getCorpseGeoscape());
@@ -1682,8 +1685,6 @@ void GeoscapeState::time1Day()
 					}
 				}
 			}
-			// 3k. remove processed item from the list (and continue with the next item)
-			delete(project);
 		}
 
 		// Handle soldier wounds
