@@ -57,7 +57,7 @@ private:
 	Mod *_mod;
 	RuleInventory *_inventorySlotGround = nullptr;
 	Craft *_craft;
-	RuleCraft *_craftRules;
+	const RuleCraft *_craftRules;
 	Ufo *_ufo;
 	Base *_base;
 	MissionSite *_mission;

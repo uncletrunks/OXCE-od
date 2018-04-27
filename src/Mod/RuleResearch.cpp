@@ -73,6 +73,12 @@ void RuleResearch::afterLoad(const Mod* mod)
 	_unlocks = mod->getResearch(_unlocksName);
 	_getOneFree = mod->getResearch(_getOneFreeName);
 	_requires = mod->getResearch(_requiresName);
+
+	//remove not needed data
+	_dependenciesName.clear();
+	_unlocksName.clear();
+	_getOneFreeName.clear();
+	_requiresName.clear();
 }
 
 /**

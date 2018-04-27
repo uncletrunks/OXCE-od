@@ -48,7 +48,7 @@ namespace OpenXcom
  * @param base Pointer to base of origin.
  * @param id ID to assign to the craft (0 to not assign).
  */
-Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
+Craft::Craft(const RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	_rules(rules), _base(base), _id(0), _fuel(0), _damage(0),
 	_interceptionOrder(0), _takeoff(0), _weapons(),
 	_status("STR_READY"), _lowFuel(false), _mission(false),
@@ -150,7 +150,7 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 		}
 		else
 		{
-			Log(LOG_ERROR) << "Failed to load item " << type;			
+			Log(LOG_ERROR) << "Failed to load item " << type;
 		}
 	}
 	_status = node["status"].as<std::string>(_status);
@@ -287,7 +287,7 @@ YAML::Node Craft::saveId() const
  * Returns the ruleset for the craft's type.
  * @return Pointer to ruleset.
  */
-RuleCraft *Craft::getRules() const
+const RuleCraft *Craft::getRules() const
 {
 	return _rules;
 }

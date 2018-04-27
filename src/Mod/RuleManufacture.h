@@ -21,10 +21,13 @@
 #include <map>
 #include <yaml-cpp/yaml.h>
 
-#include "RuleResearch.h"
-
 namespace OpenXcom
 {
+
+class RuleResearch;
+class RuleItem;
+class RuleCraft;
+class Mod;
 
 /**
  * Represents the information needed to manufacture an object.
@@ -36,7 +39,10 @@ private:
 	std::vector<std::string> _requiresName, _requiresBaseFunc;
 	std::vector<const RuleResearch*> _requires;
 	int _space, _time, _cost;
-	std::map<std::string, int> _requiredItems, _producedItems;
+	std::map<std::string, int> _requiredItemsNames, _producedItemsNames;
+	std::map<const RuleItem*, int> _requiredItems, _producedItems;
+	std::map<const RuleCraft*, int> _requiredCrafts;
+	const RuleCraft* _producedCraft;
 	int _listOrder;
 public:
 	/// Creates a new manufacture.
@@ -62,10 +68,14 @@ public:
 	/// Gets the cost of manufacturing one object.
 	int getManufactureCost() const;
 	/// Gets the list of items required to manufacture one object.
-	const std::map<std::string, int> &getRequiredItems() const;
+	const std::map<const RuleItem*, int> &getRequiredItems() const;
+	/// Gets the list of crafts required to manufacture one object.
+	const std::map<const RuleCraft*, int> &getRequiredCrafts() const;
 	/// Gets the list of items produced by completing "one object" of this project.
 	/// by default: it contains only the "name" item with a value of 1.
-	const std::map<std::string, int> &getProducedItems() const;
+	const std::map<const RuleItem*, int> &getProducedItems() const;
+	/// If this produce craft return its type, otherweasie null.
+	const RuleCraft* getProducedCraft() const;
 	/// Gets the list weight for this manufacture item.
 	int getListOrder() const;
 };

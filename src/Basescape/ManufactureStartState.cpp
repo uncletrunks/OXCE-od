@@ -26,6 +26,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
@@ -98,7 +99,6 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 	_btnCancel->onMouseClick((ActionHandler)&ManufactureStartState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&ManufactureStartState::btnCancelClick, Options::keyCancel);
 
-	const std::map<std::string, int> & requiredItems (_item->getRequiredItems());
 	int availableWorkSpace = _base->getFreeWorkshops();
 	bool productionPossible = _game->getSavedGame()->getFunds() > _item->getManufactureCost();
 	productionPossible &= (availableWorkSpace > 0);
@@ -119,32 +119,37 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 	_lstRequiredItems->setBackground(_window);
 
 	int row = 0;
-	for (std::map<std::string, int>::const_iterator iter = requiredItems.begin();
-		iter != requiredItems.end();
-		++iter)
+	for (auto& iter : _item->getRequiredCrafts())
 	{
+		auto count = base->getCraftCountForProduction(iter.first);
+
 		std::wostringstream s1, s2;
-		s1 << iter->second;
-		if (_game->getMod()->getItem(iter->first) != 0)
-		{
-			s2 << base->getStorageItems()->getItem(iter->first);
-			productionPossible &= (base->getStorageItems()->getItem(iter->first) >= iter->second);
-		}
-		else if (_game->getMod()->getCraft(iter->first) != 0)
-		{
-			s2 << base->getCraftCount(iter->first);
-			productionPossible &= (base->getCraftCount(iter->first) >= iter->second);
-		}
-		_lstRequiredItems->addRow(3, tr(iter->first).c_str(), s1.str().c_str(), s2.str().c_str());
+		s1 << iter.second;
+		s2 << count;
+		productionPossible &= (count >= iter.second);
+		_lstRequiredItems->addRow(3, tr(iter.first->getType()).c_str(), s1.str().c_str(), s2.str().c_str());
 		_lstRequiredItems->setCellColor(row, 1, _lstRequiredItems->getSecondaryColor());
 		_lstRequiredItems->setCellColor(row, 2, _lstRequiredItems->getSecondaryColor());
 		row++;
 	}
-	_txtRequiredItemsTitle->setVisible(!requiredItems.empty());
-	_txtItemNameColumn->setVisible(!requiredItems.empty());
-	_txtUnitRequiredColumn->setVisible(!requiredItems.empty());
-	_txtUnitAvailableColumn->setVisible(!requiredItems.empty());
-	_lstRequiredItems->setVisible(!requiredItems.empty());
+	for (auto& iter : _item->getRequiredItems())
+	{
+		auto count = base->getStorageItems()->getItem(iter.first->getType());
+
+		std::wostringstream s1, s2;
+		s1 << iter.second;
+		s2 << count;
+		productionPossible &= (count >= iter.second);
+		_lstRequiredItems->addRow(3, tr(iter.first->getType()).c_str(), s1.str().c_str(), s2.str().c_str());
+		_lstRequiredItems->setCellColor(row, 1, _lstRequiredItems->getSecondaryColor());
+		_lstRequiredItems->setCellColor(row, 2, _lstRequiredItems->getSecondaryColor());
+		row++;
+	}
+	_txtRequiredItemsTitle->setVisible(row);
+	_txtItemNameColumn->setVisible(row);
+	_txtUnitRequiredColumn->setVisible(row);
+	_txtUnitAvailableColumn->setVisible(row);
+	_lstRequiredItems->setVisible(row);
 
 	_btnStart->setText(tr("STR_START_PRODUCTION"));
 	_btnStart->onMouseClick((ActionHandler)&ManufactureStartState::btnStartClick);
@@ -167,7 +172,7 @@ void ManufactureStartState::btnCancelClick(Action *)
  */
 void ManufactureStartState::btnStartClick(Action *)
 {
-	if (_item->getCategory() == "STR_CRAFT" && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
+	if (_item->getProducedCraft() && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
 	{
 		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
 	}

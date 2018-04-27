@@ -18,6 +18,9 @@
  */
 #include <algorithm>
 #include "RuleManufacture.h"
+#include "RuleResearch.h"
+#include "RuleCraft.h"
+#include "RuleItem.h"
 
 namespace OpenXcom
 {
@@ -25,9 +28,9 @@ namespace OpenXcom
  * Creates a new Manufacture.
  * @param name The unique manufacture name.
  */
-RuleManufacture::RuleManufacture(const std::string &name) : _name(name), _space(0), _time(0), _cost(0), _listOrder(0)
+RuleManufacture::RuleManufacture(const std::string &name) : _name(name), _space(0), _time(0), _cost(0), _producedCraft(0), _listOrder(0)
 {
-	_producedItems[name] = 1;
+	_producedItemsNames[name] = 1;
 }
 
 /**
@@ -41,13 +44,13 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 	{
 		load(parent, listOrder);
 	}
-	bool same = (1 == _producedItems.size() && _name == _producedItems.begin()->first);
+	bool same = (1 == _producedItemsNames.size() && _name == _producedItemsNames.begin()->first);
 	_name = node["name"].as<std::string>(_name);
 	if (same)
 	{
-		int value = _producedItems.begin()->second;
-		_producedItems.clear();
-		_producedItems[_name] = value;
+		int value = _producedItemsNames.begin()->second;
+		_producedItemsNames.clear();
+		_producedItemsNames[_name] = value;
 	}
 	_category = node["category"].as<std::string>(_category);
 	_requiresName = node["requires"].as< std::vector<std::string> >(_requiresName);
@@ -55,8 +58,8 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 	_space = node["space"].as<int>(_space);
 	_time = node["time"].as<int>(_time);
 	_cost = node["cost"].as<int>(_cost);
-	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
-	_producedItems = node["producedItems"].as< std::map<std::string, int> >(_producedItems);
+	_requiredItemsNames = node["requiredItems"].as< std::map<std::string, int> >(_requiredItemsNames);
+	_producedItemsNames = node["producedItems"].as< std::map<std::string, int> >(_producedItemsNames);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
@@ -71,6 +74,51 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 void RuleManufacture::afterLoad(const Mod* mod)
 {
 	_requires = mod->getResearch(_requiresName);
+	if (_category == "STR_CRAFT")
+	{
+		auto item = _producedItemsNames.begin();
+		if (item == _producedItemsNames.end())
+		{
+			throw Exception("No craft defined for production " + _name);
+		}
+		else if (item->second != 1)
+		{
+			throw Exception("Only one craft can be build in production " + _name);
+		}
+		else
+		{
+			_producedCraft = mod->getCraft(item->first, true);
+		}
+	}
+	else
+	{
+		for (auto& i : _producedItemsNames)
+		{
+			_producedItems[mod->getItem(i.first, true)] = i.second;
+		}
+	}
+	for (auto& i : _requiredItemsNames)
+	{
+		auto itemRule = mod->getItem(i.first, false);
+		auto craftRule = mod->getCraft(i.first, false);
+		if (itemRule)
+		{
+			_requiredItems[itemRule] = i.second;
+		}
+		else if (craftRule)
+		{
+			_requiredCrafts[craftRule] = i.second;
+		}
+		else
+		{
+			throw Exception("Unknow require " + i.first + " in production " + _name);
+		}
+	}
+
+	//remove not needed data
+	_requiresName.clear();
+	_producedItemsNames.clear();
+	_requiredItemsNames.clear();
 }
 
 /**
@@ -143,18 +191,35 @@ int RuleManufacture::getManufactureCost() const
  * Gets the list of items required to manufacture one object.
  * @return The list of items required to manufacture one object.
  */
-const std::map<std::string, int> &RuleManufacture::getRequiredItems() const
+const std::map<const RuleItem*, int> &RuleManufacture::getRequiredItems() const
 {
 	return _requiredItems;
+}
+
+/**
+ * Gets the list of crafts required to manufacture one object.
+ */
+const std::map<const RuleCraft*, int> &RuleManufacture::getRequiredCrafts() const
+{
+	return _requiredCrafts;
 }
 
 /**
  * Gets the list of items produced by completing "one object" of this project.
  * @return The list of items produced by completing "one object" of this project.
  */
-const std::map<std::string, int> &RuleManufacture::getProducedItems() const
+const std::map<const RuleItem*, int> &RuleManufacture::getProducedItems() const
 {
 	return _producedItems;
+}
+
+/**
+ * Gets craft build by this project. null if is not craft production.
+ * @return Craft rule set.
+ */
+const RuleCraft* RuleManufacture::getProducedCraft() const
+{
+	return _producedCraft;
 }
 
 /**

@@ -26,6 +26,7 @@ namespace OpenXcom
 {
 
 class Mod;
+class RuleCraft;
 class BaseFacility;
 class Soldier;
 class Craft;
@@ -153,7 +154,9 @@ public:
 	/// Gets the base's long range detection.
 	int getLongRangeDetection() const;
 	/// Gets the base's crafts of a certain type.
-	int getCraftCount(const std::string &craft) const;
+	int getCraftCount(const RuleCraft *craft) const;
+	/// Gets the base's crafts of a certain type.
+	int getCraftCountForProduction(const RuleCraft *craft) const;
 	/// Gets the base's craft maintenance.
 	int getCraftMaintenance() const;
 	/// Gets the base's soldiers of a certain type.

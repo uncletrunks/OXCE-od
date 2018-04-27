@@ -777,7 +777,7 @@ int Base::getUsedHangars() const
 	}
 	for (std::vector<Production*>::const_iterator i = _productions.begin(); i != _productions.end(); ++i)
 	{
-		if ((*i)->getRules()->getCategory() == "STR_CRAFT")
+		if ((*i)->getRules()->getProducedCraft())
 		{
 			// This should be fixed on the case when (*i)->getInfiniteAmount() == TRUE
 			total += ((*i)->getAmountTotal() - (*i)->getAmountProduced());
@@ -936,19 +936,35 @@ int Base::getLongRangeDetection() const
  * @param craft Craft type.
  * @return Number of craft.
  */
-int Base::getCraftCount(const std::string &craft) const
+int Base::getCraftCount(const RuleCraft *craft) const
 {
 	int total = 0;
 	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 	{
-		if ((*i)->getType() == TRANSFER_CRAFT && (*i)->getCraft()->getRules()->getType() == craft)
+		if ((*i)->getType() == TRANSFER_CRAFT && (*i)->getCraft()->getRules() == craft)
 		{
 			total++;
 		}
 	}
 	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
 	{
-		if ((*i)->getRules()->getType() == craft)
+		if ((*i)->getRules() == craft)
+		{
+			total++;
+		}
+	}
+	return total;
+}
+
+/**
+ * Gets the base's crafts of a certain type.
+ */
+int Base::getCraftCountForProduction(const RuleCraft *craft) const
+{
+	int total = 0;
+	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
+	{
+		if ((*i)->getRules() == craft && (*i)->getStatus() != "STR_OUT")
 		{
 			total++;
 		}
@@ -1624,29 +1640,45 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 		}
 		else
 		{
-			bool remove = true;
-			// no craft - check productions.
-			for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end(); ++i)
+			auto remove = -(getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts());
+			if (remove > 0)
 			{
-				if (getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts() < 0 && (*i)->getRules()->getCategory() == "STR_CRAFT")
+				// no craft - check productions.
+				for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end(); )
 				{
-					_engineers += (*i)->getAssignedEngineers();
-					delete *i;
-					_productions.erase(i);
-					remove = false;
-					break;
+					if ((*i)->getRules()->getProducedCraft())
+					{
+						_engineers += (*i)->getAssignedEngineers();
+						delete *i;
+						i = _productions.erase(i);
+						if (--remove <= 0)
+						{
+							break;
+						}
+					}
+					else
+					{
+						++i;
+					}
 				}
 			}
-			if (remove && !_transfers.empty())
+			if (remove > 0)
 			{
-				for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+				for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); )
 				{
 					if ((*i)->getType() == TRANSFER_CRAFT)
 					{
 						delete (*i)->getCraft();
 						delete *i;
-						_transfers.erase(i);
-						break;
+						i = _transfers.erase(i);
+						if (--remove <= 0)
+						{
+							break;
+						}
+					}
+					else
+					{
+						++i;
 					}
 				}
 			}

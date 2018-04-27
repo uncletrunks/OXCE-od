@@ -46,7 +46,7 @@ class Vehicle;
 class Craft : public MovingTarget
 {
 private:
-	RuleCraft *_rules;
+	const RuleCraft *_rules;
 	Base *_base;
 	int _id, _fuel, _damage, _interceptionOrder, _takeoff;
 	std::vector<CraftWeapon*> _weapons;
@@ -59,7 +59,7 @@ private:
 	using MovingTarget::load;
 public:
 	/// Creates a craft of the specified type.
-	Craft(RuleCraft *rules, Base *base, int id = 0);
+	Craft(const RuleCraft *rules, Base *base, int id = 0);
 	/// Cleans up the craft.
 	~Craft();
 	/// Loads the craft from YAML.
@@ -71,7 +71,7 @@ public:
 	/// Loads a craft ID from YAML.
 	static CraftId loadId(const YAML::Node &node);
 	/// Gets the craft's ruleset.
-	RuleCraft *getRules() const;
+	const RuleCraft *getRules() const;
 	/// Sets the craft's ruleset.
 	void changeRules(RuleCraft *rules);
 	/// Gets the craft's ID.

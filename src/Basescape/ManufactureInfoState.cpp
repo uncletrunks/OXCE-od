@@ -200,22 +200,21 @@ void ManufactureInfoState::buildUi()
 
 void ManufactureInfoState::initProfitInfo ()
 {
-	Mod *mod = _game->getMod();
 	const RuleManufacture *item = _production->getRules();
 
 	_producedItemsValue = 0;
-	for (std::map<std::string, int>::const_iterator i = item->getProducedItems().begin(); i != item->getProducedItems().end(); ++i)
+	auto ruleCraft = item->getProducedCraft();
+	if (ruleCraft)
 	{
-		int sellValue = 0;
-		if (item->getCategory() == "STR_CRAFT")
+		_producedItemsValue += ruleCraft->getSellCost();
+	}
+	else
+	{
+		for (auto& i : item->getProducedItems())
 		{
-			sellValue = mod->getCraft(i->first, true)->getSellCost();
+			int sellValue = i.first->getSellCost();
+			_producedItemsValue += sellValue * i.second;
 		}
-		else
-		{
-			sellValue = mod->getItem(i->first, true)->getSellCost();
-		}
-		_producedItemsValue += sellValue * i->second;
 	}
 }
 
@@ -425,7 +424,7 @@ void ManufactureInfoState::lessEngineerClick(Action *action)
 void ManufactureInfoState::moreUnit(int change)
 {
 	if (change <= 0) return;
-	if (_production->getRules()->getCategory() == "STR_CRAFT" && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
+	if (_production->getRules()->getProducedCraft() && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
 	{
 		_timerMoreUnit->stop();
 		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
@@ -434,7 +433,7 @@ void ManufactureInfoState::moreUnit(int change)
 	{
 		int units = _production->getAmountTotal();
 		change = std::min(INT_MAX - units, change);
-		if (_production->getRules()->getCategory() == "STR_CRAFT")
+		if (_production->getRules()->getProducedCraft())
 			change = std::min(_base->getAvailableHangars() - _base->getUsedHangars(), change);
 		_production->setAmountTotal(units+change);
 		setAssignedEngineer();
@@ -473,7 +472,7 @@ void ManufactureInfoState::moreUnitClick(Action *action)
 	if (_production->getInfiniteAmount()) return; // We can't increase over infinite :)
 	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
-		if (_production->getRules()->getCategory() == "STR_CRAFT")
+		if (_production->getRules()->getProducedCraft())
 		{
 			moreUnit(INT_MAX);
 		}

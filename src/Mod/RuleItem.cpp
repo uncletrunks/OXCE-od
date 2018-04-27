@@ -616,6 +616,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 void RuleItem::afterLoad(const Mod* mod)
 {
 	_requires = mod->getResearch(_requiresName);
+
+	//remove not needed data
+	_requiresName.clear();
 }
 
 /**
