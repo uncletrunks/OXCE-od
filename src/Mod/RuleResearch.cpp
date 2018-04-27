@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "RuleResearch.h"
 #include "../Engine/Exception.h"
+#include "../Engine/Collections.h"
 #include "Mod.h"
 
 namespace OpenXcom
@@ -75,10 +76,10 @@ void RuleResearch::afterLoad(const Mod* mod)
 	_requires = mod->getResearch(_requiresName);
 
 	//remove not needed data
-	_dependenciesName.clear();
-	_unlocksName.clear();
-	_getOneFreeName.clear();
-	_requiresName.clear();
+	Collections::cleanMemory(_dependenciesName);
+	Collections::cleanMemory(_unlocksName);
+	Collections::cleanMemory(_getOneFreeName);
+	Collections::cleanMemory(_requiresName);
 }
 
 /**

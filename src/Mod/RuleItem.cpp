@@ -22,6 +22,7 @@
 #include "RuleDamageType.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Engine/Exception.h"
+#include "../Engine/Collections.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
@@ -618,7 +619,7 @@ void RuleItem::afterLoad(const Mod* mod)
 	_requires = mod->getResearch(_requiresName);
 
 	//remove not needed data
-	_requiresName.clear();
+	Collections::cleanMemory(_requiresName);
 }
 
 /**

@@ -21,6 +21,7 @@
 #include "RuleResearch.h"
 #include "RuleCraft.h"
 #include "RuleItem.h"
+#include "../Engine/Collections.h"
 
 namespace OpenXcom
 {
@@ -116,9 +117,9 @@ void RuleManufacture::afterLoad(const Mod* mod)
 	}
 
 	//remove not needed data
-	_requiresName.clear();
-	_producedItemsNames.clear();
-	_requiredItemsNames.clear();
+	Collections::cleanMemory(_requiresName);
+	Collections::cleanMemory(_producedItemsNames);
+	Collections::cleanMemory(_requiredItemsNames);
 }
 
 /**
