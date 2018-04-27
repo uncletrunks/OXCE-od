@@ -1053,6 +1053,8 @@ void Craft::unload(const Mod *mod)
 		{
 			_base->getStorageItems()->addItem((*w)->getRules()->getLauncherItem());
 			_base->getStorageItems()->addItem((*w)->getRules()->getClipItem(), (*w)->getClipsLoaded(mod));
+			delete (*w);
+			(*w) = nullptr;
 		}
 	}
 
@@ -1070,7 +1072,10 @@ void Craft::unload(const Mod *mod)
 		{
 			_base->getStorageItems()->addItem((*v)->getRules()->getPrimaryCompatibleAmmo()->front(), (*v)->getAmmo());
 		}
+		delete (*v);
+		(*v) = nullptr;
 	}
+	_vehicles.clear();
 
 	// Remove soldiers
 	for (std::vector<Soldier*>::iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)
