@@ -367,6 +367,10 @@ static inline void scriptExe(ScriptWorkerBase& data, const Uint8* proc)
 //						Script class
 ////////////////////////////////////////////////////////////
 
+void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, int shade)
+{
+	executeBlit(src, dest, x, y, shade, GraphSubset{ dest->getWidth(), dest->getHeight() } );
+}
 /**
  * Bliting one surface to another using script.
  * @param src source surface.
@@ -374,15 +378,13 @@ static inline void scriptExe(ScriptWorkerBase& data, const Uint8* proc)
  * @param x x offset of source surface.
  * @param y y offset of source surface.
  */
-void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half)
+void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, int shade, GraphSubset mask)
 {
 	ShaderMove<Uint8> srcShader(src, x, y);
-	if (half)
-	{
-		GraphSubset g = srcShader.getDomain();
-		g.beg_x = g.end_x/2;
-		srcShader.setDomain(g);
-	}
+	ShaderMove<Uint8> destShader(dest, 0, 0);
+
+	destShader.setDomain(mask);
+
 	if (_proc)
 	{
 		if (_events)
@@ -418,7 +420,7 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 						if (arg.getFirst()) dest = arg.getFirst();
 					}
 				},
-				ShaderSurface(dest, 0, 0),
+				destShader,
 				srcShader
 			);
 		}
@@ -436,14 +438,14 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 						if (arg.getFirst()) dest = arg.getFirst();
 					}
 				},
-				ShaderSurface(dest, 0, 0),
+				destShader,
 				srcShader
 			);
 		}
 	}
 	else
 	{
-		ShaderDraw<helper::StandardShade>(ShaderSurface(dest, 0, 0), srcShader, ShaderScalar(shade));
+		ShaderDraw<helper::StandardShade>(destShader, srcShader, ShaderScalar(shade));
 	}
 }
 

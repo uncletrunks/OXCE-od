@@ -46,10 +46,12 @@ UnitSprite::UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet) :
 	_unitSurface(0),
 	_itemSurface(mod->getSurfaceSet("HANDOB.PCK")),
 	_fireSurface(mod->getSurfaceSet("SMOKE.PCK")),
+	_breathSurface(mod->getSurfaceSet("BREATH-1.PCK", false)),
 	_dest(dest), _mod(mod),
 	_part(0), _animationFrame(frame), _drawingRoutine(0),
-	_helmet(helmet), _half(false),
-	_x(0), _y(0), _shade(0), _burn(0)
+	_helmet(helmet),
+	_x(0), _y(0), _shade(0), _burn(0),
+	_mask(0, 0)
 {
 
 }
@@ -161,7 +163,7 @@ void UnitSprite::blitItem(Part& item)
 
 	_dest->lock();
 
-	work.executeBlit(item.src, _dest,  _x + item.offX, _y + item.offY, _shade, _half);
+	work.executeBlit(item.src, _dest,  _x + item.offX, _y + item.offY, _shade, _mask);
 
 	_dest->unlock();
 }
@@ -181,7 +183,7 @@ void UnitSprite::blitBody(Part& body)
 
 	_dest->lock();
 
-	work.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _shade, _half);
+	work.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _shade, _mask);
 
 	_dest->unlock();
 }
@@ -190,7 +192,7 @@ void UnitSprite::blitBody(Part& body)
  * Draws a unit, using the drawing rules of the unit.
  * This function is called by Map, for each unit on the screen.
  */
-void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool half)
+void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask)
 {
 	_x = x;
 	_y = y;
@@ -198,7 +200,7 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	_unit = unit;
 	_part = part;
 	_shade = shade;
-	_half = half;
+	_mask = mask;
 
 	if (_unit->isOut())
 	{
@@ -267,7 +269,16 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	// draw fire
 	if (unit->getFire() > 0)
 	{
-		_fireSurface->getFrame(4 + (_animationFrame / 2) % 4)->blitNShade(_dest, _x, _y, 0);
+		_fireSurface->getFrame(4 + (_animationFrame / 2) % 4)->blitNShade(_dest, _x, _y, 0, _mask);
+	}
+	if (_breathSurface && unit->getBreathFrame() > 0)
+	{
+		auto tmpSurface = _breathSurface->getFrame(unit->getBreathFrame() - 1);
+		if (tmpSurface)
+		{
+			// lower the bubbles for shorter or kneeling units.
+			tmpSurface->blitNShade(_dest, _x, _y- 30 + (22 - unit->getHeight()), shade, _mask);
+		}
 	}
 }
 

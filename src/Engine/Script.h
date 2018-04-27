@@ -29,6 +29,7 @@
 #include "HelperMeta.h"
 #include "Logger.h"
 #include "Exception.h"
+#include "GraphSubset.h"
 
 
 namespace OpenXcom
@@ -677,7 +678,9 @@ public:
 	}
 
 	/// Programmable bliting using script.
-	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half = false);
+	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade);
+	/// Programmable bliting using script.
+	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, GraphSubset mask);
 
 	/// Clear all worker data.
 	void clear()
