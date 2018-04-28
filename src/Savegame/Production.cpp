@@ -18,6 +18,7 @@
  */
 #include "Production.h"
 #include <algorithm>
+#include "../Engine/Collections.h"
 #include "../Mod/RuleManufacture.h"
 #include "Base.h"
 #include "SavedGame.h"
@@ -196,39 +197,33 @@ void Production::startItem(Base * b, SavedGame * g, const Mod *m) const
 	}
 	for (auto& i : _rules->getRequiredCrafts())
 	{
-		auto numberToRemove = i.second;
 		// Find suitable craft
-		for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); )
-		{
-			if ((*c)->getRules() == i.first)
+		Collections::deleteIf(*b->getCrafts(), i.second,
+			[&](Craft* craft)
 			{
-				// Unload craft
-				(*c)->unload(m);
-
-				// Clear hangar
-				for (std::vector<BaseFacility*>::iterator f = b->getFacilities()->begin(); f != b->getFacilities()->end(); ++f)
+				if (craft->getRules() == i.first)
 				{
-					if ((*f)->getCraft() == (*c))
+					// Unload craft
+					craft->unload(m);
+
+					// Clear hangar
+					for (std::vector<BaseFacility*>::iterator f = b->getFacilities()->begin(); f != b->getFacilities()->end(); ++f)
 					{
-						(*f)->setCraft(0);
-						break;
+						if ((*f)->getCraft() == craft)
+						{
+							(*f)->setCraft(0);
+							break;
+						}
 					}
-				}
 
-				// Remove craft
-				delete *c;
-				c = b->getCrafts()->erase(c);
-				--numberToRemove;
-				if (numberToRemove <= 0)
+					return true;
+				}
+				else
 				{
-					break;
+					return false;
 				}
 			}
-			else
-			{
-				 ++c;
-			}
-		}
+		);
 	}
 }
 

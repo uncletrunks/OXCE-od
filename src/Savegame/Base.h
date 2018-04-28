@@ -60,6 +60,7 @@ private:
 	bool _inBattlescape;
 	bool _retaliationTarget;
 	std::vector<Vehicle*> _vehicles;
+	std::vector<Vehicle*> _vehiclesFromBase;
 	std::vector<BaseFacility*> _defenses;
 
 	/// Determines space taken up by ammo clips about to rearm craft.

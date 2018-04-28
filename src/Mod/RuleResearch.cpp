@@ -76,10 +76,10 @@ void RuleResearch::afterLoad(const Mod* mod)
 	_requires = mod->getResearch(_requiresName);
 
 	//remove not needed data
-	Collections::cleanMemory(_dependenciesName);
-	Collections::cleanMemory(_unlocksName);
-	Collections::cleanMemory(_getOneFreeName);
-	Collections::cleanMemory(_requiresName);
+	Collections::deleteAll(_dependenciesName);
+	Collections::deleteAll(_unlocksName);
+	Collections::deleteAll(_getOneFreeName);
+	Collections::deleteAll(_requiresName);
 }
 
 /**

@@ -41,6 +41,7 @@
 #include "../Engine/Exception.h"
 #include "../Engine/Logger.h"
 #include "../Engine/ScriptBind.h"
+#include "../Engine/Collections.h"
 #include "SoundDefinition.h"
 #include "ExtraSprites.h"
 #include "ExtraSounds.h"
@@ -1530,11 +1531,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		}
 		if (_mapScripts.find(type) != _mapScripts.end())
 		{
-			for (std::vector<MapScript*>::iterator j = _mapScripts[type].begin(); j != _mapScripts[type].end();)
-			{
-				delete *j;
-				j = _mapScripts[type].erase(j);
-			}
+			Collections::deleteAll(_mapScripts[type]);
 		}
 		for (YAML::const_iterator j = (*i)["commands"].begin(); j != (*i)["commands"].end(); ++j)
 		{

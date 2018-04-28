@@ -619,7 +619,7 @@ void RuleItem::afterLoad(const Mod* mod)
 	_requires = mod->getResearch(_requiresName);
 
 	//remove not needed data
-	Collections::cleanMemory(_requiresName);
+	Collections::deleteAll(_requiresName);
 }
 
 /**

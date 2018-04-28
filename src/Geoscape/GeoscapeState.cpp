@@ -29,6 +29,7 @@
 #include "../Engine/Screen.h"
 #include "../Engine/Surface.h"
 #include "../Engine/Options.h"
+#include "../Engine/Collections.h"
 #include "Globe.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
@@ -968,34 +969,25 @@ void GeoscapeState::time5Seconds()
 	}
 
 	// Clean up dead UFOs and end dogfights which were minimized.
-	for (std::vector<Ufo*>::iterator i = _game->getSavedGame()->getUfos()->begin(); i != _game->getSavedGame()->getUfos()->end();)
-	{
-		if ((*i)->getStatus() == Ufo::DESTROYED)
+	Collections::deleteIf(*_game->getSavedGame()->getUfos(), _game->getSavedGame()->getUfos()->size(),
+		[&](Ufo* ufo)
 		{
-			if (!(*i)->getFollowers()->empty())
+			if (ufo->getStatus() == Ufo::DESTROYED)
 			{
-				// Remove all dogfights with this UFO.
-				for (std::list<DogfightState*>::iterator d = _dogfights.begin(); d != _dogfights.end();)
-				{
-					if ((*d)->getUfo() == (*i))
+				Collections::deleteIf(_dogfights, _dogfights.size(),
+					[&](DogfightState* dogfight)
 					{
-						delete *d;
-						d = _dogfights.erase(d);
+						return dogfight->getUfo() == ufo;
 					}
-					else
-					{
-						++d;
-					}
-				}
+				);
+				return true;
 			}
-			delete *i;
-			i = _game->getSavedGame()->getUfos()->erase(i);
+			else
+			{
+				return false;
+			}
 		}
-		else
-		{
-			++i;
-		}
-	}
+	);
 
 	// Check any dogfights waiting to open
 	for (std::list<DogfightState*>::iterator d = _dogfights.begin(); d != _dogfights.end(); ++d)
@@ -1011,18 +1003,12 @@ void GeoscapeState::time5Seconds()
 	}
 
 	// Clean up unused waypoints
-	for (std::vector<Waypoint*>::iterator i = _game->getSavedGame()->getWaypoints()->begin(); i != _game->getSavedGame()->getWaypoints()->end();)
-	{
-		if ((*i)->getFollowers()->empty())
+	Collections::deleteIf(*_game->getSavedGame()->getWaypoints(), _game->getSavedGame()->getWaypoints()->size(),
+		[&](Waypoint* way)
 		{
-			delete *i;
-			i = _game->getSavedGame()->getWaypoints()->erase(i);
+			return way->getFollowers()->empty();
 		}
-		else
-		{
-			++i;
-		}
-	}
+	);
 }
 
 /**

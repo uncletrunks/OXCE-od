@@ -24,6 +24,7 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Engine/Timer.h"
+#include "../Engine/Collections.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
@@ -449,16 +450,12 @@ void CraftEquipmentState::moveLeftByValue(int change)
 				_base->getStorageItems()->addItem(ammo->getType(), ammoPerVehicle * change);
 			}
 			// now delete the vehicles from the craft.
-			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end() && change > 0; )
-			{
-				if ((*i)->getRules() == item)
+			Collections::deleteIf(*c->getVehicles(), change,
+				[&](Vehicle* v)
 				{
-					delete (*i);
-					i = c->getVehicles()->erase(i);
-					--change;
+					return v->getRules() == item;
 				}
-				else ++i;
-			}
+			);
 		}
 		else
 		{
@@ -466,16 +463,12 @@ void CraftEquipmentState::moveLeftByValue(int change)
 			{
 				_base->getStorageItems()->addItem(_items[_sel], change);
 			}
-			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end() && change > 0; )
-			{
-				if ((*i)->getRules() == item)
+			Collections::deleteIf(*c->getVehicles(), change,
+				[&](Vehicle* v)
 				{
-					delete (*i);
-					i = c->getVehicles()->erase(i);
-					--change;
+					return v->getRules() == item;
 				}
-				else ++i;
-			}
+			);
 		}
 	}
 	else

@@ -117,9 +117,9 @@ void RuleManufacture::afterLoad(const Mod* mod)
 	}
 
 	//remove not needed data
-	Collections::cleanMemory(_requiresName);
-	Collections::cleanMemory(_producedItemsNames);
-	Collections::cleanMemory(_requiredItemsNames);
+	Collections::deleteAll(_requiresName);
+	Collections::deleteAll(_producedItemsNames);
+	Collections::deleteAll(_requiredItemsNames);
 }
 
 /**

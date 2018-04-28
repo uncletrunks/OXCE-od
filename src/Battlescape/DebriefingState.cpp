@@ -1504,10 +1504,6 @@ void DebriefingState::prepareDebriefing()
 				if ((*c)->getStatus() != "STR_OUT")
 					reequipCraft(base, *c, false);
 			}
-			// Clear base->getVehicles() objects, they aren't needed anymore.
-			for (std::vector<Vehicle*>::iterator i = base->getVehicles()->begin(); i != base->getVehicles()->end(); ++i)
-				delete (*i);
-			base->getVehicles()->clear();
 		}
 		else if (_game->getSavedGame()->getMonthsPassed() != -1)
 		{

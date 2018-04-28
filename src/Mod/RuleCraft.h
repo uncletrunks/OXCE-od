@@ -178,13 +178,13 @@ public:
 	/// Gets the craft's score.
 	int getScore() const;
 	/// Gets the craft's terrain data.
-	RuleTerrain *getBattlescapeTerrainData();
+	RuleTerrain *getBattlescapeTerrainData() const;
 	/// Checks if this craft is capable of travelling to mars.
 	bool getSpacecraft() const;
 	/// Gets the list weight for this craft.
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.
-	std::vector<std::vector<int> > &getDeployment();
+	const std::vector<std::vector<int> > &getDeployment() const;
 	/// Gets the item limit for this craft.
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.

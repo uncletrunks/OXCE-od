@@ -19,6 +19,7 @@
  */
 #include <vector>
 #include <map>
+#include <list>
 #include "Exception.h"
 
 namespace OpenXcom
@@ -31,43 +32,154 @@ class Collections
 {
 public:
 	template<typename T>
-	static void cleanMemory(std::vector<T>& vec)
+	static void deleteAll(const T& p)
+	{
+		//nothing
+	}
+	template<typename T>
+	static void deleteAll(T* p)
+	{
+		delete p;
+	}
+	template<typename T>
+	static void deleteAll(std::vector<T>& vec)
+	{
+		for (auto p : vec)
+		{
+			deleteAll(p);
+		}
+		removeAll(vec);
+	}
+	template<typename T>
+	static void deleteAll(std::list<T>& list)
+	{
+		for (auto p : list)
+		{
+			deleteAll(p);
+		}
+		removeAll(list);
+	}
+	template<typename K, typename V>
+	static void deleteAll(std::map<K, V>& map)
+	{
+		for (auto p : map)
+		{
+			deleteAll(p.second);
+		}
+		removeAll(map);
+	}
+
+	/**
+	 * Remove and delete (if pointer) items from colection with limit.
+	 * @param colection Ccolection from witch remove items
+	 * @param numberToRemove Limit of removal
+	 * @param func Test what should be removed, can modyfy everyting except this colection
+	 * @return Number of values left to remove
+	 */
+	template<typename C, typename F>
+	static int deleteIf(C& colection, int numberToRemove, F&& func)
+	{
+		return removeIf(colection, numberToRemove,
+			[&](typename C::reference t)
+			{
+				if (func(t))
+				{
+					deleteAll(t);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		);
+	}
+
+	/**
+	 * Clear vector. It set capacity to zero too.
+	 * @param vec
+	 */
+	template<typename T>
+	static void removeAll(std::vector<T>& vec)
 	{
 		std::vector<T>{}.swap(vec);
 	}
-	template<typename K, typename V>
-	static void cleanMemory(std::map<K, V>& vec)
+
+	/**
+	 * Clear container.
+	 * @param colection
+	 */
+	template<typename C>
+	static void removeAll(C& colection)
 	{
-		std::map<K, V>{}.swap(vec);
+		colection.clear();
 	}
 
+	/**
+	 * Remove items from vector with limit.
+	 * @param vec Vector from witch remove items
+	 * @param numberToRemove Limit of removal
+	 * @param func Test what should be removed, can modyfy everyting except this vector
+	 * @return Number of values left to remove
+	 */
 	template<typename T, typename F>
-	static void removeIf(std::vector<T>& vec, int numberToRemove, F& func)
+	static int removeIf(std::vector<T>& vec, int numberToRemove, F&& func)
 	{
 		if (numberToRemove <= 0)
 		{
-			return;
+			return 0;
 		}
-		for (auto it = vec.begin(); it != vec.end(); )
+		auto begin = vec.begin();
+		auto newEnd = vec.begin();
+		//similar to `std::remove_if` but it do not allow modyfy anything in `func`
+		for (auto it = begin; it != vec.end(); ++it)
 		{
-			auto value = *it;
+			auto& value = *it;
+			if (numberToRemove > 0 && func(value))
+			{
+				--numberToRemove;
+			}
+			else
+			{
+				*newEnd = std::move(value);
+				++newEnd;
+			}
+		}
+		vec.erase(newEnd, vec.end());
+		return numberToRemove;
+	}
+
+	/**
+	 * Remove items from colection with limit.
+	 * @param list List from witch remove items
+	 * @param numberToRemove Limit of removal
+	 * @param func Test what should be removed, can modyfy everyting except this colection
+	 * @return Number of values left to remove
+	 */
+	template<typename C, typename F>
+	static int removeIf(C& colection, int numberToRemove, F&& func)
+	{
+		if (numberToRemove <= 0)
+		{
+			return 0;
+		}
+		for (auto it = colection.begin(); it != colection.end(); )
+		{
+			auto& value = *it;
 			if (func(value))
 			{
-				if (value != *it)
-				{
-					throw Exception("removeIf error, someone else modified collection");
-				}
+				it = colection.erase(it);
 				if (--numberToRemove == 0)
 				{
-					return;
+					return 0;
 				}
-				it = vec.erase(it);
 			}
 			else
 			{
 				++it;
 			}
 		}
+		return numberToRemove;
 	}
 };
 

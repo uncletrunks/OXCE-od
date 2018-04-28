@@ -26,6 +26,7 @@
 #include "../Engine/Screen.h"
 #include "../Engine/Palette.h"
 #include "../Engine/Surface.h"
+#include "../Engine/Collections.h"
 #include "../Interface/Text.h"
 #include "../Interface/BattlescapeButton.h"
 #include "../Engine/Action.h"
@@ -235,12 +236,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 
 static void _clearInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
 {
-	for (std::vector<EquipmentLayoutItem*>::iterator eraseIt = inventoryTemplate.begin();
-		 eraseIt != inventoryTemplate.end();
-		 eraseIt = inventoryTemplate.erase(eraseIt))
-	{
-		delete *eraseIt;
-	}
+	Collections::deleteAll(inventoryTemplate);
 }
 
 /**

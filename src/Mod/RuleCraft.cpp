@@ -357,7 +357,7 @@ int RuleCraft::getScore() const
  * Gets the terrain data needed to draw the Craft in the battlescape.
  * @return The terrain data.
  */
-RuleTerrain *RuleCraft::getBattlescapeTerrainData()
+RuleTerrain *RuleCraft::getBattlescapeTerrainData() const
 {
 	return _battlescapeTerrainData;
 }
@@ -384,7 +384,7 @@ int RuleCraft::getListOrder() const
  * Gets the deployment layout for this craft.
  * @return The deployment layout.
  */
-std::vector<std::vector<int> > &RuleCraft::getDeployment()
+const std::vector<std::vector<int> > &RuleCraft::getDeployment() const
 {
 	return _deployment;
 }
