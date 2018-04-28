@@ -88,7 +88,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
     
     ***/
 
-	std::map<std::string, RuleCommendations *> commendationsList = _game->getMod()->getCommendation();
+	const std::map<std::string, RuleCommendations *> commendationsList = _game->getMod()->getCommendationsList();
 	bool modularCommendation;
 	std::string noun;
 
