@@ -1,4 +1,4 @@
-# Directories and files
+# Directories and file
 OBJDIR = ../obj/
 BINDIR = ../bin/
 SRCS_SDL = C:/MinGW/mingw32/include/SDL/
@@ -9,7 +9,7 @@ OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) $(patsubst %.cpp, $(OB
 
 BIN = OpenXcom
 
-# Compiler settings
+# Compiler setting
 CXXFLAGS ?= -Og
 CXXFLAGS += -Wall -std=gnu++11
 
@@ -17,7 +17,7 @@ CXXFLAGS += -I$(SRCS_YAML)include -I$(SRCS_SDL)
 
 LIBS = -lshlwapi -lws2_32 -lopengl32 -lglu32 -mwindows -lmingw32 -lpthread -static -static-libstdc++ -lwinmm -lSDL_gfx -lSDL_mixer -lvorbisfile -logg -lmodplug -lvorbis -logg -lFLAC -lFLAC++ -lws2_32 -lSDLmain -lSDL_Image -ljpeg -lpng12 -lz -lsmpeg -lSDL -lm -luser32 -lgdi32 -lwinmm -ldxguid -lDbgHelp
 
-# Rules
+# Rule
 all: $(BINDIR)$(BIN)
 
 $(BINDIR)$(BIN): $(OBJS)
