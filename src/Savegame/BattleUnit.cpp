@@ -2554,13 +2554,13 @@ BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 		weaponLeftHand = 0;
 
 	// if there is only one weapon, it's easy:
-	// For the most part... we can still check for a specialWeapon!
 	if (weaponRightHand && !weaponLeftHand)
 		return weaponRightHand;
 	else if (!weaponRightHand && weaponLeftHand)
 		return weaponLeftHand;
 	else if (!weaponRightHand && !weaponLeftHand)
 	{
+		// Allow *AI* to use also a special weapon, but only when both hands are empty
 		// Only need to check for firearms since melee/psi is handled elsewhere
 		BattleItem* specialWeapon = getSpecialWeapon(BT_FIREARM);
 		if (specialWeapon)

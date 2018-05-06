@@ -1873,10 +1873,11 @@ void BattlescapeState::updateSoldierInfo()
 
 	showPsiButton(battleUnit->getSpecialWeapon(BT_PSIAMP) != 0);
 	BattleType type = BT_NONE;
-	if (battleUnit->getSpecialIconWeapon(type) && type != BT_NONE && type != BT_AMMO && type != BT_GRENADE && type != BT_PROXIMITYGRENADE && type != BT_FLARE && type != BT_CORPSE)
+	BattleItem *specialWeapon = battleUnit->getSpecialIconWeapon(type); // updates type!
+	if (specialWeapon && type != BT_NONE && type != BT_AMMO && type != BT_GRENADE && type != BT_PROXIMITYGRENADE && type != BT_FLARE && type != BT_CORPSE)
 	{
 		showPsiButton(false);
-		showSpecialButton(true, battleUnit->getSpecialIconWeapon(type)->getRules()->getSpecialIconSprite());
+		showSpecialButton(true, specialWeapon->getRules()->getSpecialIconSprite());
 	}
 	else
 	{
