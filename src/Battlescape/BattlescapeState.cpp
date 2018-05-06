@@ -1312,7 +1312,7 @@ void BattlescapeState::btnLeftHandItemClick(Action *action)
 		BattleItem *leftHandItem = _save->getSelectedUnit()->getLeftHandWeapon();
 		if (!leftHandItem)
 		{
-			std::vector<BattleType> typesToCheck = {BT_MELEE, BT_PSIAMP, BT_FIREARM, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE};
+			auto typesToCheck = {BT_MELEE, BT_PSIAMP, BT_FIREARM, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE};
 			for (auto &type : typesToCheck)
 			{
 				leftHandItem = _save->getSelectedUnit()->getSpecialWeapon(type);
@@ -1352,7 +1352,7 @@ void BattlescapeState::btnRightHandItemClick(Action *action)
 		BattleItem *rightHandItem = _save->getSelectedUnit()->getRightHandWeapon();
 		if (!rightHandItem)
 		{
-			std::vector<BattleType> typesToCheck = {BT_MELEE, BT_PSIAMP, BT_FIREARM, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE};
+			auto typesToCheck = {BT_MELEE, BT_PSIAMP, BT_FIREARM, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE};
 			for (auto &type : typesToCheck)
 			{
 				rightHandItem = _save->getSelectedUnit()->getSpecialWeapon(type);
@@ -2195,10 +2195,55 @@ inline void BattlescapeState::handle(Action *action)
 					BattleUnit *actor = _save->getSelectedUnit();
 					if (actor)
 					{
+						BattleItem *leftWeapon = actor->getLeftHandWeapon();
+
+						BattleItem *rightWeapon = actor->getRightHandWeapon();
+
+						BattleItem *specialWeapon = 0;
+						auto typesToCheck = {BT_MELEE, BT_PSIAMP, BT_FIREARM, BT_MEDIKIT, BT_SCANNER, BT_MINDPROBE};
+						for (auto &type : typesToCheck)
+						{
+							specialWeapon = actor->getSpecialWeapon(type);
+							if (specialWeapon && specialWeapon->getRules()->isSpecialUsingEmptyHand())
+							{
+								break;
+							}
+							specialWeapon = 0;
+						}
+
+						BattleType type;
+						BattleItem *anotherSpecialWeapon = actor->getSpecialIconWeapon(type);
+						if (anotherSpecialWeapon && anotherSpecialWeapon == specialWeapon)
+						{
+							anotherSpecialWeapon = 0;
+						}
+
 						std::wostringstream ss;
-						ss << getMeleeDamagePreview(actor, actor->getLeftHandWeapon());
-						ss << L"\n\n";
-						ss << getMeleeDamagePreview(actor, actor->getRightHandWeapon());
+						bool first = true;
+						if (leftWeapon)
+						{
+							ss << getMeleeDamagePreview(actor, leftWeapon);
+							first = false;
+						}
+						if (rightWeapon)
+						{
+							if (!first) ss << L"\n\n";
+							ss << getMeleeDamagePreview(actor, rightWeapon);
+							first = false;
+						}
+						if (specialWeapon)
+						{
+							if (!first) ss << L"\n\n";
+							ss << getMeleeDamagePreview(actor, specialWeapon);
+							first = false;
+						}
+						if (anotherSpecialWeapon)
+						{
+							if (!first) ss << L"\n\n";
+							ss << getMeleeDamagePreview(actor, anotherSpecialWeapon);
+							first = false;
+						}
+
 						_game->pushState(new InfoboxState(ss.str()));
 					}
 				}
