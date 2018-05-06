@@ -7,6 +7,9 @@ en-GB:
   STR_ZERO_COST_MOVEMENT: "Zero cost floor movement in MCD files"
   STR_ZERO_COST_MOVEMENT_DESC: "Checks MCD files for floor objects with zero movement cost.{NEWLINE}These will not cause any crashes, but may cause endless loops (when AI moves in a zero-cost-circle)."
 #
+  STR_PALETTE_CHECK: "Palette matching"
+  STR_PALETTE_CHECK_DESC: "Tries to match palettes of modded images to official palettes and reports any images that don't have a 100% match."
+#
   STR_CHECKING_TERRAIN: "Checking terrain..."
   STR_CHECKING_UFOS: "Checking UFOs..."
   STR_CHECKING_CRAFT: "Checking craft..."

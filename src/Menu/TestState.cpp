@@ -30,6 +30,8 @@
 #include "../Engine/Exception.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/Logger.h"
+#include "../Engine/Palette.h"
+#include "../Mod/ExtraSprites.h"
 #include "../Mod/RuleTerrain.h"
 #include "../Mod/MapBlock.h"
 #include "../Mod/MapDataSet.h"
@@ -38,6 +40,35 @@
 
 namespace OpenXcom
 {
+
+// items are (roughly) ordered by frequency of use... to save a few CPU cycles when looking for a match
+static std::map<int, PaletteTestMetadata> _paletteMetadataMap =
+{
+	{ 1, PaletteTestMetadata("UFO_PAL_BATTLEPEDIA", 1, 255, 0, "Palettes/UFO-JASC/PAL_BATTLEPEDIA.pal", false) },
+	{ 2, PaletteTestMetadata("UFO_PAL_BATTLESCAPE", 1, 255, 0, "Palettes/UFO-JASC/PAL_BATTLESCAPE.pal", false) },
+
+	{ 3, PaletteTestMetadata("UFO_PAL_BATTLE_COMMON", 1, 239, 0, "Palettes/UFO-JASC/PAL_BATTLE_COMMON.pal", false) }, // ignore last 16 colors
+
+	{ 4, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE.pal", false) }, // ignore last color too
+
+	{ 5, PaletteTestMetadata("UFO_PAL_UFOPAEDIA", 1, 255, 0, "Palettes/UFO-JASC/PAL_UFOPAEDIA.pal", false) },
+	{ 6, PaletteTestMetadata("TFTD_PAL_BASESCAPE", 1, 255, 0, "Palettes/TFTD-JASC/PAL_BASESCAPE.pal", true) }, // TFTD's ufopedia
+
+	{ 7, PaletteTestMetadata("UFO_PAL_BASESCAPE", 1, 255, 0, "Palettes/UFO-JASC/PAL_BASESCAPE.pal", true) },
+
+	{ 8, PaletteTestMetadata("UFO_PAL_GEOSCAPE", 1, 255, 0, "Palettes/UFO-JASC/PAL_GEOSCAPE.pal", true) },
+	{ 9, PaletteTestMetadata("TFTD_PAL_GEOSCAPE", 1, 255, 0, "Palettes/TFTD-JASC/PAL_GEOSCAPE.pal", true) },
+
+	{ 10, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE_1", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE_1.pal", false) },
+	{ 11, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE_2", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE_2.pal", false) },
+	{ 12, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE_3", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE_3.pal", false) },
+
+	{ 13, PaletteTestMetadata("UFO_PAL_BACKGROUND_SAFE", 0, 255, 0, "Palettes/UFO-JASC-SAFE/PAL_BACKGROUND_SAFE.pal", false) },
+	{ 14, PaletteTestMetadata("TFTD_PAL_BACKGROUND_SAFE", 0, 255, 0, "Palettes/TFTD-JASC-SAFE/PAL_BACKGROUND_SAFE.pal", false) },
+
+	{ 15, PaletteTestMetadata("UFO_PAL_GRAPHS", 1, 255, 0, "Palettes/UFO-JASC/PAL_GRAPHS.pal", false) },
+	{ 16, PaletteTestMetadata("TFTD_PAL_GRAPHS", 1, 255, 0, "Palettes/TFTD-JASC/PAL_GRAPHS.pal", false) }
+};
 
 /**
  * Initializes all the elements in the test screen.
@@ -109,6 +140,7 @@ TestState::TestState()
 
 	_testCases.push_back("STR_BAD_NODES");
 	_testCases.push_back("STR_ZERO_COST_MOVEMENT");
+	_testCases.push_back("STR_PALETTE_CHECK");
 
 	_cbxTestCase->setOptions(_testCases);
 	_cbxTestCase->onChange((ActionHandler)&TestState::cbxTestCaseChange);
@@ -130,6 +162,10 @@ TestState::TestState()
 
 TestState::~TestState()
 {
+	for (auto item : _vanillaPalettes)
+	{
+		delete item.second;
+	}
 }
 
 /**
@@ -157,6 +193,7 @@ void TestState::btnRunClick(Action *action)
 	{
 		case 0: testCase0(); break;
 		case 1: testCase1(); break;
+		case 2: testCase2(); break;
 		default: break;
 	}
 }
@@ -171,7 +208,7 @@ void TestState::btnCancelClick(Action *action)
 }
 
 /**
- * Shows palette preview with low contrast.
+ * Shows palette preview.
  * @param action Pointer to an action.
  */
 void TestState::cbxPaletteAction(Action *action)
@@ -182,6 +219,194 @@ void TestState::cbxPaletteAction(Action *action)
 	PaletteActionType type = (PaletteActionType)_cbxPaletteAction->getSelected();
 
 	_game->pushState(new TestPaletteState(palette, type));
+}
+
+void TestState::testCase2()
+{
+	_lstOutput->addRow(1, tr("STR_TESTS_STARTING").c_str());
+	if (_vanillaPalettes.empty())
+	{
+		for (auto item : _paletteMetadataMap)
+		{
+			_vanillaPalettes[item.first] = new Palette();
+			_vanillaPalettes[item.first]->initBlack();
+
+			// Load from JASC file
+			const std::string& fullPath = FileMap::getFilePath(item.second.palettePath);
+			std::ifstream palFile(fullPath);
+			if (palFile.is_open())
+			{
+				std::string line;
+				std::getline(palFile, line); // header
+				std::getline(palFile, line); // file format
+				std::getline(palFile, line); // number of colors
+				int r = 0, g = 0, b = 0;
+				for (int j = 0; j < 256; ++j)
+				{
+					std::getline(palFile, line); // j-th color index
+					std::stringstream ss(line);
+					ss >> r;
+					ss >> g;
+					ss >> b;
+					_vanillaPalettes[item.first]->copyColor(j, r, g, b); // raw RGB copy, no side effects!
+				}
+				palFile.close();
+			}
+			else
+			{
+				throw Exception(fullPath + " not found");
+			}
+		}
+	}
+
+	int total = 0;
+	for (auto i : _game->getMod()->getExtraSprites())
+	{
+		std::string sheetName = i.first;
+		if (sheetName.find("_CPAL") != std::string::npos)
+		{
+			// custom palettes cannot be matched, skip
+			continue;
+		}
+
+		ExtraSprites *spritePack = i.second;
+		if (spritePack->getSingleImage())
+		{
+			const std::string& fullPath = FileMap::getFilePath((*spritePack->getSprites())[0]);
+			total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+		}
+		else
+		{
+			for (auto j : *spritePack->getSprites())
+			{
+				int startFrame = j.first;
+				std::string fileName = j.second;
+				if (fileName.substr(fileName.length() - 1, 1) == "/")
+				{
+					const std::set<std::string>& contents = FileMap::getVFolderContents(fileName);
+					for (std::set<std::string>::iterator k = contents.begin(); k != contents.end(); ++k)
+					{
+						if (!_game->getMod()->isImageFile((*k).substr((*k).length() - 4, (*k).length())))
+							continue;
+						try
+						{
+							const std::string& fullPath = FileMap::getFilePath(fileName + *k);
+							total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+						}
+						catch (Exception &e)
+						{
+							Log(LOG_WARNING) << e.what();
+						}
+					}
+				}
+				else
+				{
+					if (spritePack->getSubX() == 0 && spritePack->getSubY() == 0)
+					{
+						const std::string& fullPath = FileMap::getFilePath(fileName);
+						total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+					}
+					else
+					{
+						const std::string& fullPath = FileMap::getFilePath((*spritePack->getSprites())[startFrame]);
+						total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+					}
+				}
+			}
+		}
+	}
+
+	if (total > 0)
+	{
+		_lstOutput->addRow(1, tr("STR_TESTS_ERRORS_FOUND").arg(total).c_str());
+		_lstOutput->addRow(1, tr("STR_DETAILED_INFO_IN_LOG_FILE").c_str());
+	}
+	else
+	{
+		_lstOutput->addRow(1, tr("STR_TESTS_NO_ERRORS_FOUND").c_str());
+	}
+	_lstOutput->addRow(1, tr("STR_TESTS_FINISHED").c_str());
+}
+
+int TestState::checkPalette(const std::string& fullPath, int width, int height)
+{
+	Surface *image = new Surface(width, height);
+	image->loadImage(fullPath);
+
+	SDL_Palette *palette = image->getSurface()->format->palette;
+	if (!palette)
+	{
+		Log(LOG_ERROR) << "Image doesn't have a palette at all! Full path: " << fullPath;
+		delete image;
+		return 1;
+	}
+
+	int ncolors = image->getSurface()->format->palette->ncolors;
+	if (ncolors != 256)
+	{
+		Log(LOG_ERROR) << "Image palette doesn't have 256 colors! Full path: " << fullPath;
+	}
+
+	int bestMatch = 0;
+	int matchedPaletteIndex = 0;
+	for (auto item : _vanillaPalettes)
+	{
+		int match = matchPalette(image, item.first, item.second);
+		if (match > bestMatch)
+		{
+			bestMatch = match;
+			matchedPaletteIndex = item.first;
+		}
+		if (match == 100)
+		{
+			break;
+		}
+	}
+
+	delete image;
+
+	if (bestMatch < 100)
+	{
+		Log(LOG_INFO) << "Best match: " << bestMatch << "%; palette: " << _paletteMetadataMap[matchedPaletteIndex].paletteName << "; path: " << fullPath;
+		return 1;
+	}
+
+	return 0;
+}
+
+int TestState::matchPalette(Surface *image, int index, Palette *test)
+{
+	SDL_Color *colors = image->getSurface()->format->palette->colors;
+	int matched = 0;
+
+	int firstIndexToCheck = _paletteMetadataMap[index].firstIndexToCheck;
+	int lastIndexToCheck = _paletteMetadataMap[index].lastIndexToCheck;
+	int maxTolerance = _paletteMetadataMap[index].maxTolerance;
+	bool usesBackPals = _paletteMetadataMap[index].usesBackPals;
+
+	for (int i = firstIndexToCheck; i <= lastIndexToCheck; i++)
+	{
+		if (usesBackPals)
+		{
+			if (i >= 224 && i <= 239)
+			{
+				// don't check and consider matched
+				matched++;
+				continue;
+			}
+		}
+
+		Uint8 rdiff = (colors[i].r > test->getColors(i)->r ? colors[i].r - test->getColors(i)->r : test->getColors(i)->r - colors[i].r);
+		Uint8 gdiff = (colors[i].g > test->getColors(i)->g ? colors[i].g - test->getColors(i)->g : test->getColors(i)->g - colors[i].g);
+		Uint8 bdiff = (colors[i].b > test->getColors(i)->b ? colors[i].b - test->getColors(i)->b : test->getColors(i)->b - colors[i].b);
+
+		if (rdiff <= maxTolerance && gdiff <= maxTolerance && bdiff <= maxTolerance)
+		{
+			matched++;
+		}
+	}
+
+	return matched * 100 / (lastIndexToCheck - firstIndexToCheck + 1);
 }
 
 void TestState::testCase1()

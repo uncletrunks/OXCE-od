@@ -194,6 +194,29 @@ void Palette::savePalMod(const std::string &file, const std::string &type, const
 	out.close();
 }
 
+void Palette::savePalJasc(const std::string &file) const
+{
+	std::ofstream out(file.c_str());
+	short count = _count;
+
+	// header
+	out << "JASC-PAL\n";
+	out << "0100\n";
+	out << "256\n";
+
+	// Colors
+	for (int i = 0; i < count; ++i)
+	{
+		out << std::to_string(_colors[i].r);
+		out << " ";
+		out << std::to_string(_colors[i].g);
+		out << " ";
+		out << std::to_string(_colors[i].b);
+		out << "\n";
+	}
+	out.close();
+}
+
 void Palette::setColors(SDL_Color* pal, int ncolors)
 {
 	if (_colors != 0)
@@ -242,6 +265,13 @@ void Palette::setColor(int index, int r, int g, int b)
 		_colors[index].g++;
 		_colors[index].b++;
 	}
+}
+
+void Palette::copyColor(int index, int r, int g, int b)
+{
+	_colors[index].r = r;
+	_colors[index].g = g;
+	_colors[index].b = b;
 }
 
 }

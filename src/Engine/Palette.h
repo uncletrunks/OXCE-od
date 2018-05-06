@@ -51,8 +51,10 @@ public:
 
 	void savePal(const std::string &file) const;
 	void savePalMod(const std::string &file, const std::string &type, const std::string &target) const;
+	void savePalJasc(const std::string &file) const;
 	void setColors(SDL_Color* pal, int ncolors);
 	void setColor(int index, int r, int g, int b);
+	void copyColor(int index, int r, int g, int b);
 	/// Converts a given color into a RGBA color value.
 	static Uint32 getRGBA(SDL_Color* pal, Uint8 color);
 	/// Gets the position of a given palette.

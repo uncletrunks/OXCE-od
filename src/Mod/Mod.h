@@ -218,8 +218,6 @@ private:
 	SoundSet *getSoundSet(const std::string &name, bool error = true) const;
 	/// Loads battlescape specific resources.
 	void loadBattlescapeResources();
-	/// Checks if an extension is a valid image file.
-	bool isImageFile(std::string extension) const;
 	/// Loads a specified music file.
 	Music *loadMusic(MusicFormat fmt, const std::string &file, int track, float volume, CatFile *adlibcat, CatFile *aintrocat, GMCatFile *gmcat) const;
 	/// Creates a transparency lookup table for a given palette.
@@ -284,6 +282,8 @@ public:
 	/// For internal use only
 	const std::map<std::string, int> &getUfopaediaSections() const { return _ufopaediaSections; }
 
+	/// Checks if an extension is a valid image file.
+	bool isImageFile(std::string extension) const;
 	/// Gets a particular font.
 	Font *getFont(const std::string &name, bool error = true) const;
 	/// Gets a particular surface.
