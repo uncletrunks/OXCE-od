@@ -968,11 +968,11 @@ void Craft::checkup()
  */
 bool Craft::detect(Target *target) const
 {
-	if (_rules->getRadarRange() == 0 || !insideRadarRange(target))
+	if (_stats.radarRange == 0 || !insideRadarRange(target))
 		return false;
 
 	// backward compatibility with vanilla
-	if (_rules->getRadarChance() == 100)
+	if (_stats.radarChance == 100)
 		return true;
 
 	Ufo *u = dynamic_cast<Ufo*>(target);
@@ -1024,7 +1024,7 @@ unsigned int Craft::calcRefuelTime()
 {
 	unsigned int refuelTime = 0;
 
-	int needed = _rules->getMaxFuel() - _fuel;
+	int needed = _stats.fuelMax - _fuel;
 	if (needed > 0)
 	{
 		refuelTime = (int)ceil((double)(needed) / _rules->getRefuelRate() / 2.0);
@@ -1536,7 +1536,7 @@ void Craft::reuseItem(const std::string& item)
 		return;
 
 	// Check if it's fuel to refuel the craft
-	if (item == _rules->getRefuelItem() && _fuel < _rules->getMaxFuel())
+	if (item == _rules->getRefuelItem() && _fuel < _stats.fuelMax)
 		_status = "STR_REFUELLING";
 }
 
