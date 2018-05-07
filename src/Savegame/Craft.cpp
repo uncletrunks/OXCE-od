@@ -72,7 +72,15 @@ Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	{
 		setBase(base);
 	}
-	_speedMaxRadian = calculateRadianSpeed(_rules->getMaxSpeed()) * 120;
+	recalcSpeedMaxRadian();
+}
+
+/**
+ * Helper method.
+ */
+void Craft::recalcSpeedMaxRadian()
+{
+	_speedMaxRadian = calculateRadianSpeed(_stats.speedMax) * 120;
 }
 
 /**
@@ -225,6 +233,8 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	_pilots = node["pilots"].as< std::vector<int> >(_pilots);
 	if (_inBattlescape)
 		setSpeed(0);
+
+	recalcSpeedMaxRadian();
 }
 
 /**
@@ -614,6 +624,8 @@ void Craft::addCraftStats(const RuleCraftStats& s)
 		_base->getStorageItems()->addItem(_rules->getRefuelItem(), overflowFuel / _rules->getRefuelRate());
 	}
 	setFuel(_fuel);
+
+	recalcSpeedMaxRadian();
 }
 
 /**
@@ -813,7 +825,7 @@ int Craft::getFuelConsumption(int speed, int escortSpeed) const
 	if (escortSpeed > 0)
 	{
 		// based on the speed of the escorted craft, but capped between 50% and 100% of escorting craft's speed
-		return std::max(_rules->getMaxSpeed() / 200, std::min(escortSpeed / 100, _rules->getMaxSpeed() / 100));
+		return std::max(_stats.speedMax / 200, std::min(escortSpeed / 100, _stats.speedMax / 100));
 	}
 	return (int)floor(speed / 100.0);
 }
@@ -836,7 +848,7 @@ int Craft::getFuelLimit() const
  */
 int Craft::getFuelLimit(Base *base) const
 {
-	return (int)floor(getFuelConsumption(_rules->getMaxSpeed(), 0) * getDistance(base) / _speedMaxRadian);
+	return (int)floor(getFuelConsumption(_stats.speedMax, 0) * getDistance(base) / _speedMaxRadian);
 }
 
 /**
@@ -1550,7 +1562,7 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 			attraction += 500000 + (_rules->getSoldiers() * 1000);
 		}
 		// faster craft (i.e. interceptors) are more attractive
-		attraction += 100000 - _rules->getMaxSpeed();
+		attraction += 100000 - _stats.speedMax;
 		// craft with more damage taken are less attractive
 		// this is just to simplify re-targeting when interceptor is fast enough to disengage
 		// and another identical but healthier interceptor is waiting for its chance
@@ -1567,7 +1579,7 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 		// craft with more crew capacity (i.e. transports) are more attractive
 		attraction += 500000 - (_rules->getSoldiers() * 1000);
 		// faster craft (i.e. interceptors) are less attractive
-		attraction += 100000 + _rules->getMaxSpeed();
+		attraction += 100000 + _stats.speedMax;
 	}
 
 	// the higher the number the less attractive the target is for UFO hunter-killers

@@ -60,6 +60,8 @@ private:
 	double _lonAuto, _latAuto;
 	std::vector<int> _pilots;
 
+	void recalcSpeedMaxRadian();
+
 	using MovingTarget::load;
 public:
 	/// Creates a craft of the specified type.
