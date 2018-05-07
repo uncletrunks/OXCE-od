@@ -1589,6 +1589,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getSpecialIconSprite(), "specialIconSprite", -1);
 		addSpriteResourcePath(ss, mod, "SPICONS.DAT", itemRule->getSpecialIconSprite());
 		addInteger(ss, itemRule->getBulletSprite(), "bulletSprite", -1);
+		addSingleString(ss, itemRule->getMediKitCustomBackground(), "medikitBackground");
 
 		addSection(L"{Sounds}", L"", _white);
 		addVectorOfIntegers(ss, itemRule->getFireSoundRaw(), "fireSound");

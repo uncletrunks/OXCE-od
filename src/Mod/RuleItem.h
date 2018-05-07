@@ -169,6 +169,7 @@ private:
 	int _waypoints, _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
+	std::string _medikitBackground;
 	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery, _moraleRecovery, _painKillerRecovery;
 	int _recoveryPoints;
 	int _armor;
@@ -487,6 +488,8 @@ public:
 	bool isSpecialUsingEmptyHand() const;
 	/// Gets the medikit use type.
 	BattleMediKitType getMediKitType() const;
+	/// Gets the medikit custom background.
+	const std::string &getMediKitCustomBackground() const;
 	/// Gets the max explosion radius.
 	int getExplosionRadius(const BattleUnit *unit) const;
 	/// Gets the recovery points score

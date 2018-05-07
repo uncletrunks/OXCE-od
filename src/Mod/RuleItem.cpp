@@ -568,6 +568,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_moraleRecovery = node["moraleRecovery"].as<int>(_moraleRecovery);
 	_painKillerRecovery = node["painKillerRecovery"].as<float>(_painKillerRecovery);
 	_medikitType = (BattleMediKitType)node["medikitType"].as<int>(_medikitType);
+	_medikitBackground = node["medikitBackground"].as<std::string>(_medikitBackground);
 
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);
 	_armor = node["armor"].as<int>(_armor);
@@ -1633,6 +1634,16 @@ BattleMediKitType RuleItem::getMediKitType() const
 {
 	return _medikitType;
 }
+
+/**
+ * Gets the medikit custom background.
+ * @return Sprite ID.
+ */
+const std::string &RuleItem::getMediKitCustomBackground() const
+{
+	return _medikitBackground;
+}
+
 /**
  * Returns the item's max explosion radius. Small explosions don't have a restriction.
  * Larger explosions are restricted using a formula, with a maximum of radius 10 no matter how large the explosion is.
