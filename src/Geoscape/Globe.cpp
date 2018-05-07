@@ -1146,6 +1146,7 @@ void Globe::drawRadars()
 		}
 	}
 
+	if (Options::drawEnemyRadarCircles)
 	{
 		// Draw radars around UFO hunter-killers
 		for (std::vector<Ufo*>::iterator u = _game->getSavedGame()->getUfos()->begin(); u != _game->getSavedGame()->getUfos()->end(); ++u)

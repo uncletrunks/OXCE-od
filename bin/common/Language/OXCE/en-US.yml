@@ -207,6 +207,8 @@ en-US:
   STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
   STR_FRIENDLY_CRAFT_ESCORT: "Friendly craft escort"
   STR_FRIENDLY_CRAFT_ESCORT_DESC: "Allows your craft to follow and provide air defense for other craft in the Geoscape."
+  STR_DRAW_ENEMY_RADAR_CIRCLES: "Draw enemy radar circles"
+  STR_DRAW_ENEMY_RADAR_CIRCLES_DESC: "If enabled, radar range of enemy interceptors (HKs) and defense perimeter of enemy bases will be visible."
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"

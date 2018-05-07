@@ -224,6 +224,7 @@ void create()
 	_info.push_back(OptionInfo("playBriefingMusicDuringEquipment", &playBriefingMusicDuringEquipment, false, "STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT", "STR_OXCE"));
 	_info.push_back(OptionInfo("ufoLandingAlert", &ufoLandingAlert, false, "STR_UFO_LANDING_ALERT", "STR_OXCE"));
 	_info.push_back(OptionInfo("friendlyCraftEscort", &friendlyCraftEscort, false, "STR_FRIENDLY_CRAFT_ESCORT", "STR_OXCE"));
+	_info.push_back(OptionInfo("drawEnemyRadarCircles", &drawEnemyRadarCircles, true, "STR_DRAW_ENEMY_RADAR_CIRCLES", "STR_OXCE"));
 
 	_info.push_back(OptionInfo("simpleUppercase", &simpleUppercase, false));
 
