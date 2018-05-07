@@ -37,6 +37,7 @@ class RuleSoldier
 {
 private:
 	std::string _type;
+	int _listOrder;
 	std::vector<std::string> _requires;
 	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps, _dogfightExperience;
 	std::string _armor;
@@ -56,9 +57,11 @@ public:
 	/// Cleans up the soldier ruleset.
 	~RuleSoldier();
 	/// Loads the soldier data from YAML.
-	void load(const YAML::Node& node, Mod *mod);
+	void load(const YAML::Node& node, Mod *mod, int listOrder);
 	/// Gets the soldier's type.
 	std::string getType() const;
+	/// Gets the list/sort order of the soldier's type.
+	int getListOrder() const;
 	/// Gets the soldier's requirements.
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the minimum stats for the random stats generator.

@@ -13,6 +13,7 @@ en-GB:
 #CraftArmorState.cpp
   STR_ID: "ID"
   STR_FIRST_LETTER: "FIRST LETTER"
+  STR_SOLDIER_TYPE: "SOLDIER TYPE"
 #CraftEquipmentLoadState.cpp
   STR_LOAD_CRAFT_LOADOUT_TEMPLATE: "Load Craft Loadout"
   STR_EMPTY_SLOT_N: "Empty slot {0}"

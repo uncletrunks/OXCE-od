@@ -1,4 +1,5 @@
 #include "SoldierSortUtil.h"
+#include "../Mod/RuleSoldier.h"
 
 #define GET_ATTRIB_STAT_FN(attrib) \
 	int OpenXcom::attrib##Stat(Game *game, Soldier *s) { return s->getCurrentStats()->attrib; }
@@ -42,6 +43,10 @@ int OpenXcom::nameStat(Game *game, Soldier *s)
 		return 0;
 	}
 	return s->getName().at(0);
+}
+int OpenXcom::typeStat(Game *game, Soldier *s)
+{
+	return s->getRules()->getListOrder();
 }
 GET_SOLDIER_STAT_FN(rank, Rank)
 GET_SOLDIER_STAT_FN(missions, Missions)

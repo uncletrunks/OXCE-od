@@ -46,6 +46,7 @@ GET_ATTRIB_STAT_FN(melee)
 	int attrib##Stat(Game *game, Soldier *s);
 GET_SOLDIER_STAT_FN(id, Id)
 GET_SOLDIER_STAT_FN(name, Name)
+GET_SOLDIER_STAT_FN(type, Type)
 GET_SOLDIER_STAT_FN(rank, Rank)
 GET_SOLDIER_STAT_FN(missions, Missions)
 GET_SOLDIER_STAT_FN(kills, Kills)
