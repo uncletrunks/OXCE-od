@@ -105,8 +105,6 @@ ResearchState::ResearchState(Base *base) : _base(base)
 	_lstResearch->setWordWrap(true);
 	_lstResearch->onMouseClick((ActionHandler)&ResearchState::onSelectProject, SDL_BUTTON_LEFT);
 	_lstResearch->onMouseClick((ActionHandler)&ResearchState::onOpenTechTreeViewer, SDL_BUTTON_MIDDLE);
-
-	fillProjectList();
 }
 
 /**
