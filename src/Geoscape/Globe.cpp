@@ -1122,7 +1122,7 @@ void Globe::drawRadars()
 					if ((*j)->getBuildTime() == 0)
 					{
 						tr = (*j)->getRules()->getRadarRange();
-						if (tr > range) range = tr;
+						if (tr < MAX_DRAW_RADAR_CIRCLE_RADIUS && tr > range) range = tr;
 					}
 				}
 				range = range * (1 / 60.0) * (M_PI / 180);
