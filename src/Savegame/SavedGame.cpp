@@ -592,6 +592,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 	_ufopediaRuleStatus = doc["ufopediaRuleStatus"].as< std::map<std::string, int> >(_ufopediaRuleStatus);
 	_manufactureRuleStatus = doc["manufactureRuleStatus"].as< std::map<std::string, int> >(_manufactureRuleStatus);
 	_researchRuleStatus = doc["researchRuleStatus"].as< std::map<std::string, int> >(_researchRuleStatus);
+	_hiddenPurchaseItemsMap = doc["hiddenPurchaseItems"].as< std::map<std::string, bool> >(_hiddenPurchaseItemsMap);
 
 	for (YAML::const_iterator i = doc["bases"].begin(); i != doc["bases"].end(); ++i)
 	{
@@ -878,6 +879,7 @@ void SavedGame::save(const std::string &filename) const
 	node["ufopediaRuleStatus"] = _ufopediaRuleStatus;
 	node["manufactureRuleStatus"] = _manufactureRuleStatus;
 	node["researchRuleStatus"] = _researchRuleStatus;
+	node["hiddenPurchaseItems"] = _hiddenPurchaseItemsMap;
 	node["alienStrategy"] = _alienStrategy->save();
 	for (std::vector<Soldier*>::const_iterator i = _deadSoldiers.begin(); i != _deadSoldiers.end(); ++i)
 	{
@@ -1366,6 +1368,25 @@ void SavedGame::setManufactureRuleStatus(const std::string &manufactureRule, int
 void SavedGame::setResearchRuleStatus(const std::string &researchRule, int newStatus)
 {
 	_researchRuleStatus[researchRule] = newStatus;
+}
+
+/**
+ * Sets the hidden status of a purchase item
+ * @param purchase item name 
+ * @param hidden
+ */
+void SavedGame::setHiddenPurchaseItemsStatus(const std::string &itemName, bool hidden)
+{
+	_hiddenPurchaseItemsMap[itemName] = hidden;
+}
+
+/**
+ * Get the map of hidden items
+ * @return map
+ */
+const std::map<std::string, bool> &SavedGame::getHiddenPurchaseItems()
+{
+    return _hiddenPurchaseItemsMap;
 }
 
 /*

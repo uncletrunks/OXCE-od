@@ -136,6 +136,7 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 	_lstItems->onMousePress((ActionHandler)&PurchaseState::lstItemsMousePress);
 
 	_cats.push_back("STR_ALL_ITEMS");
+	_cats.push_back("STR_FILTER_HIDDEN");
 
 	const std::vector<std::string> &cw = _game->getMod()->getCraftWeaponsList();
 	for (std::vector<std::string>::const_iterator i = cw.begin(); i != cw.end(); ++i)
@@ -236,6 +237,7 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 		// then use them nicely in order
 		_cats.clear();
 		_cats.push_back("STR_ALL_ITEMS");
+		_cats.push_back("STR_FILTER_HIDDEN");
 		const std::vector<std::string> &categories = _game->getMod()->getItemCategoriesList();
 		for (std::vector<std::string>::const_iterator k = categories.begin(); k != categories.end(); ++k)
 		{
@@ -345,6 +347,61 @@ bool PurchaseState::belongsToCategory(int sel, const std::string &cat) const
 }
 
 /**
+ * Determines if a row item is supposed to be hidden
+ * @param sel Selected row.
+ * @param cat Category.
+ * @returns True if row item is hidden
+ */
+bool PurchaseState::isHidden(int sel) const
+{
+	std::string itemName;
+	bool isCraft = false;
+
+	switch (_items[sel].type)
+	{
+	case TRANSFER_SOLDIER:
+	case TRANSFER_SCIENTIST:
+	case TRANSFER_ENGINEER:
+		return false;
+	case TRANSFER_CRAFT:
+		isCraft = true; // fall-through
+	case TRANSFER_ITEM:
+		if (isCraft)
+		{
+			RuleCraft *rule = (RuleCraft*)_items[sel].rule;
+			if (rule != 0)
+			{
+				itemName = rule->getType();
+			}
+		}
+		else
+		{
+			RuleItem *rule = (RuleItem*)_items[sel].rule;
+			if (rule != 0)
+			{
+				itemName = rule->getType();
+			}
+		}
+		if (!itemName.empty())
+		{
+			std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
+			std::map<std::string, bool>::const_iterator iter = hiddenMap.find(itemName);
+			if (iter != hiddenMap.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				// not found = not hidden
+				return false;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
 * Quick search toggle.
 * @param action Pointer to an action.
 */
@@ -387,7 +444,19 @@ void PurchaseState::updateList()
 	{
 		// filter
 		std::string cat = _cats[_cbxCategory->getSelected()];
-		if (_game->getMod()->getUseCustomCategories())
+		bool hidden = isHidden(i);
+		if (cat == "STR_FILTER_HIDDEN")
+		{
+			if (!hidden)
+			{
+				continue;
+			}
+		}
+		else if (hidden)
+		{
+			continue;
+		}
+		else if (_game->getMod()->getUseCustomCategories())
 		{
 			if (cat != "STR_ALL_ITEMS" && !belongsToCategory(i, cat))
 			{
@@ -629,6 +698,51 @@ void PurchaseState::lstItemsMousePress(Action *action)
 				std::string articleId = rule->getType();
 				Ufopaedia::openArticle(_game, articleId);
 			}
+		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+	{
+		if (action->getAbsoluteXMouse() >= _lstItems->getArrowsLeftEdge() &&
+			action->getAbsoluteXMouse() <= _lstItems->getArrowsRightEdge())
+		{
+			return;
+		}
+		std::string itemName;
+		if (getRow().type == TRANSFER_ITEM)
+		{
+			RuleItem *rule = (RuleItem*)getRow().rule;
+			if (rule != 0)
+			{
+				itemName = rule->getType();
+			}
+		}
+		else if (getRow().type == TRANSFER_CRAFT)
+		{
+			RuleCraft *rule = (RuleCraft*)getRow().rule;
+			if (rule != 0)
+			{
+				itemName = rule->getType();
+			}
+		}
+		if (!itemName.empty())
+		{
+			std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
+			std::map<std::string, bool>::iterator iter = hiddenMap.find(itemName);
+			if (iter != hiddenMap.end())
+			{
+				// found => flip it
+				_game->getSavedGame()->setHiddenPurchaseItemsStatus(itemName, !iter->second);
+			}
+			else
+			{
+				// not found = not hidden yet => hide it
+				_game->getSavedGame()->setHiddenPurchaseItemsStatus(itemName, true);
+			}
+
+			// update screen
+			size_t scrollPos = _lstItems->getScroll();
+			updateList();
+			_lstItems->scrollTo(scrollPos);
 		}
 	}
 }
