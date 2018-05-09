@@ -267,7 +267,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
  * @param trajectory The rule for the desired trajectory.
  * @return Pointer to the spawned UFO. If the mission does not desire to spawn a UFO, 0 is returned.
  */
-Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory)
+Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory)
 {
 	RuleUfo *ufoRule = mod.getUfo(wave.ufoType);
 	int hunterKillerPercentage = wave.hunterKillerPercentage;
@@ -296,7 +296,7 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 			// Spawn a battleship straight for the XCOM base.
 			const RuleUfo &battleshipRule = *mod.getUfo(_rule.getSpawnUfo(), true);
 			const UfoTrajectory &assaultTrajectory = *mod.getUfoTrajectory(UfoTrajectory::RETALIATION_ASSAULT_RUN, true);
-			Ufo *ufo = new Ufo(&battleshipRule);
+			Ufo *ufo = new Ufo(&battleshipRule, game.getId("STR_UFO_UNIQUE"));
 			ufo->setMissionInfo(this, &assaultTrajectory);
 			std::pair<double, double> pos;
 			if (trajectory.getAltitude(0) == "STR_GROUND")
@@ -329,11 +329,11 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 		Ufo *ufo = 0;
 		if (wave.objective)
 		{
-			ufo = new Ufo(ufoRule);
+			ufo = new Ufo(ufoRule, game.getId("STR_UFO_UNIQUE"));
 		}
 		else
 		{
-			ufo = new Ufo(ufoRule, hunterKillerPercentage, huntMode, huntBehavior);
+			ufo = new Ufo(ufoRule, game.getId("STR_UFO_UNIQUE"), hunterKillerPercentage, huntMode, huntBehavior);
 		}
 		ufo->setMissionInfo(this, &trajectory);
 		const RuleRegion &regionRules = *mod.getRegion(_region, true);
@@ -399,7 +399,7 @@ Ufo *AlienMission::spawnUfo(const SavedGame &game, const Mod &mod, const Globe &
 	if (ufoRule == 0)
 		return 0;
 	// Spawn according to sequence.
-	Ufo *ufo = new Ufo(ufoRule, hunterKillerPercentage, huntMode, huntBehavior);
+	Ufo *ufo = new Ufo(ufoRule, game.getId("STR_UFO_UNIQUE"), hunterKillerPercentage, huntMode, huntBehavior);
 	ufo->setMissionInfo(this, &trajectory);
 	const RuleRegion &regionRules = *mod.getRegion(_region, true);
 	std::pair<double, double> pos = getWaypoint(trajectory, 0, globe, regionRules);

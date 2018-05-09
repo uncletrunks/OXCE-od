@@ -47,8 +47,9 @@ const char *Ufo::ALTITUDE_STRING[] = {
 /**
  * Initializes a UFO of the specified type.
  * @param rules Pointer to ruleset.
+ * @param uniqueId unique ID to assign to the UFO (0 to not assign).
  */
-Ufo::Ufo(const RuleUfo *rules, int hunterKillerPercentage, int huntMode, int huntBehavior) : MovingTarget(),
+Ufo::Ufo(const RuleUfo *rules, int uniqueId, int hunterKillerPercentage, int huntMode, int huntBehavior) : MovingTarget(),
 	_rules(rules), _id(0), _crashId(0), _landId(0), _damage(0), _direction("STR_NORTH"),
 	_altitude("STR_HIGH_UC"), _status(FLYING), _secondsRemaining(0),
 	_inBattlescape(false), _mission(0), _trajectory(0),
@@ -57,6 +58,10 @@ Ufo::Ufo(const RuleUfo *rules, int hunterKillerPercentage, int huntMode, int hun
 	_tractorBeamSlowdown(0), _isHunterKiller(false), _isEscort(false), _huntMode(0), _huntBehavior(0), _isHunting(false), _isEscorting(false), _origWaypoint(0)
 {
 	_stats = rules->getStats();
+	if (uniqueId != 0)
+	{
+		_uniqueId = uniqueId;
+	}
 	if (hunterKillerPercentage > 0)
 	{
 		_isHunterKiller = RNG::percent(hunterKillerPercentage);
@@ -139,6 +144,7 @@ private:
 void Ufo::load(const YAML::Node &node, const Mod &mod, SavedGame &game)
 {
 	MovingTarget::load(node);
+	_uniqueId = node["uniqueId"].as<int>(_uniqueId);
 	_id = node["id"].as<int>(_id);
 	_crashId = node["crashId"].as<int>(_crashId);
 	_landId = node["landId"].as<int>(_landId);
@@ -260,19 +266,22 @@ void Ufo::finishLoading(const YAML::Node &node, SavedGame &save)
 			std::string type = dest["type"].as<std::string>();
 			if (type == "STR_UFO")
 			{
-				int id = dest["id"].as<int>();
-				for (std::vector<Ufo*>::iterator u = save.getUfos()->begin(); u != save.getUfos()->end(); ++u)
+				int uniqueUfoId = dest["uniqueId"].as<int>(0);
+				if (uniqueUfoId > 0)
 				{
-					if ((*u)->getId() == id)
+					for (std::vector<Ufo*>::iterator u = save.getUfos()->begin(); u != save.getUfos()->end(); ++u)
 					{
-						if (_dest)
+						if ((*u)->getUniqueId() == uniqueUfoId)
 						{
-							// this is just a dummy waypoint created during normal loading, not a UFO... yet
-							delete _dest;
-							_dest = 0;
+							if (_dest)
+							{
+								// this is just a dummy waypoint created during normal loading, not a UFO... yet
+								delete _dest;
+								_dest = 0;
+							}
+							setDestination((*u));
+							break;
 						}
-						setDestination((*u));
-						break;
 					}
 				}
 			}
@@ -297,6 +306,7 @@ YAML::Node Ufo::save(bool newBattle) const
 {
 	YAML::Node node = MovingTarget::save();
 	node["type"] = _rules->getType();
+	node["uniqueId"] = _uniqueId;
 	node["id"] = _id;
 	if (_crashId)
 	{
@@ -354,7 +364,8 @@ YAML::Node Ufo::saveId() const
 {
 	YAML::Node node = MovingTarget::saveId();
 	node["type"] = "STR_UFO";
-	node["id"] = _id;
+	node["id"] = _id; // not unique!
+	node["uniqueId"] = _uniqueId;
 	return node;
 }
 
@@ -378,9 +389,18 @@ void Ufo::changeRules(const RuleUfo *rules)
 }
 
 /**
- * Returns the UFO's unique ID. If it's 0,
- * this UFO has never been detected.
+ * Returns the UFO's unique ID.
  * @return Unique ID.
+ */
+int Ufo::getUniqueId() const
+{
+	return _uniqueId;
+}
+
+/**
+ * Returns the UFO's non-unique ID. If it's 0,
+ * this UFO has never been detected.
+ * @return Non-unique ID.
  */
 int Ufo::getId() const
 {
@@ -388,8 +408,8 @@ int Ufo::getId() const
 }
 
 /**
- * Changes the UFO's unique ID.
- * @param id Unique ID.
+ * Changes the UFO's non-unique ID.
+ * @param id Non-unique ID.
  */
 void Ufo::setId(int id)
 {
@@ -397,7 +417,7 @@ void Ufo::setId(int id)
 }
 
 /**
- * Returns the UFO's unique default name.
+ * Returns the UFO's non-unique default name.
  * @param lang Language to get strings from.
  * @return Full name.
  */

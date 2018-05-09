@@ -112,7 +112,7 @@ public:
 	void setMissionSiteZone(int zone);
 private:
 	/// Spawns a UFO, based on mission rules.
-	Ufo *spawnUfo(const SavedGame &game, const Mod &mod, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory);
+	Ufo *spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory);
 	/// Spawn an alien base
 	void spawnAlienBase(Game &engine, const MissionArea &area, std::pair<double, double> pos);
 	/// Select a destination (lon/lat) based on the criteria of our trajectory and desired waypoint.

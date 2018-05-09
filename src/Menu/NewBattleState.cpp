@@ -497,7 +497,7 @@ void NewBattleState::btnOkClick(Action *)
 	// ufo assault
 	else if (_craft && _game->getMod()->getUfo(_missionTypes[_cbxMission->getSelected()]))
 	{
-		Ufo *u = new Ufo(_game->getMod()->getUfo(_missionTypes[_cbxMission->getSelected()]));
+		Ufo *u = new Ufo(_game->getMod()->getUfo(_missionTypes[_cbxMission->getSelected()]), 1);
 		u->setId(1);
 		_craft->setDestination(u);
 		bgen.setUfo(u);

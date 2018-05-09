@@ -523,7 +523,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		std::string type = (*i)["type"].as<std::string>();
 		if (mod->getUfo(type))
 		{
-			Ufo *u = new Ufo(mod->getUfo(type));
+			Ufo *u = new Ufo(mod->getUfo(type), 0);
 			u->load(*i, *mod, *this);
 			_ufos.push_back(u);
 		}
@@ -634,19 +634,22 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 	// Finish loading UFOs after all craft and all other UFOs are loaded
 	for (YAML::const_iterator i = doc["ufos"].begin(); i != doc["ufos"].end(); ++i)
 	{
-		int ufoId = (*i)["id"].as<int>();
-		Ufo *ufo = 0;
-		for (std::vector<Ufo*>::iterator u = _ufos.begin(); u != _ufos.end(); ++u)
+		int uniqueUfoId = (*i)["uniqueId"].as<int>(0);
+		if (uniqueUfoId > 0)
 		{
-			if ((*u)->getId() == ufoId)
+			Ufo *ufo = 0;
+			for (std::vector<Ufo*>::iterator u = _ufos.begin(); u != _ufos.end(); ++u)
 			{
-				ufo = (*u);
-				break;
+				if ((*u)->getUniqueId() == uniqueUfoId)
+				{
+					ufo = (*u);
+					break;
+				}
 			}
-		}
-		if (ufo)
-		{
-			ufo->finishLoading(*i, *this);
+			if (ufo)
+			{
+				ufo->finishLoading(*i, *this);
+			}
 		}
 	}
 

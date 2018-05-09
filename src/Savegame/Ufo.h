@@ -46,6 +46,7 @@ public:
 	enum UfoStatus { FLYING, LANDED, CRASHED, DESTROYED };
 private:
 	const RuleUfo *_rules;
+	int _uniqueId;
 	int _id, _crashId, _landId, _damage;
 	std::string _direction, _altitude;
 	enum UfoStatus _status;
@@ -74,7 +75,7 @@ private:
 	void resetOriginalDestination();
 public:
 	/// Creates a UFO of the specified type.
-	Ufo(const RuleUfo *rules, int hunterKillerPercentage = 0, int huntMode = 0, int huntBehavior = 0);
+	Ufo(const RuleUfo *rules, int uniqueId, int hunterKillerPercentage = 0, int huntMode = 0, int huntBehavior = 0);
 	/// Cleans up the UFO.
 	~Ufo();
 	/// Loads the UFO from YAML.
@@ -89,9 +90,11 @@ public:
 	const RuleUfo *getRules() const;
 	/// Sets the UFO's ruleset.
 	void changeRules(const RuleUfo *rules);
-	/// Gets the UFO's ID.
+	/// Gets the (unique) UFO's ID.
+	int getUniqueId() const;
+	/// Gets the (non-unique) UFO's ID.
 	int getId() const;
-	/// Sets the UFO's ID.
+	/// Sets the (non-unique) UFO's ID.
 	void setId(int id);
 	/// Gets the UFO's default name.
 	std::wstring getDefaultName(Language *lang) const;
