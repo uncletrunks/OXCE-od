@@ -184,6 +184,7 @@ private:
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
 	std::map<std::string, std::string> _fixedUserOptions;
 	std::vector<std::string> _hiddenMovementBackgrounds;
+	std::vector<int> _flagByKills;
 	StatAdjustment _statAdjustment[5];
 
 	std::map<std::string, int> _ufopaediaSections;
@@ -602,6 +603,7 @@ public:
 	const std::map<int, std::string> *getMonthlyRatings() const;
 	const std::map<std::string, std::string> &getFixedUserOptions() const;
 	const std::vector<std::string> &getHiddenMovementBackgrounds() const;
+	const std::vector<int> &getFlagByKills() const;
 	StatAdjustment *getStatAdjustment(int difficulty);
 	int getDefeatScore() const;
 	int getDefeatFunds() const;

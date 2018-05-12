@@ -257,8 +257,12 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	// Can't change nationality of dead soldiers
 	if (_base != 0)
 	{
-		_flag->onMouseClick((ActionHandler)&SoldierInfoState::btnFlagClick, SDL_BUTTON_LEFT);
-		_flag->onMouseClick((ActionHandler)&SoldierInfoState::btnFlagClick, SDL_BUTTON_RIGHT);
+		// Ignore also if flags are used to indicate number of kills
+		if (_game->getMod()->getFlagByKills().empty())
+		{
+			_flag->onMouseClick((ActionHandler)&SoldierInfoState::btnFlagClick, SDL_BUTTON_LEFT);
+			_flag->onMouseClick((ActionHandler)&SoldierInfoState::btnFlagClick, SDL_BUTTON_RIGHT);
+		}
 	}
 
 	_btnSack->setText(tr("STR_SACK"));
@@ -354,7 +358,24 @@ void SoldierInfoState::init()
 
 	std::ostringstream flagId;
 	flagId << "Flag";
-	flagId << _soldier->getNationality() + _soldier->getRules()->getFlagOffset();
+	const std::vector<int> mapping = _game->getMod()->getFlagByKills();
+	if (mapping.empty())
+	{
+		flagId << _soldier->getNationality() + _soldier->getRules()->getFlagOffset();
+	}
+	else
+	{
+		int index = 0;
+		for (auto item : mapping)
+		{
+			if (_soldier->getKills() <= item)
+			{
+				break;
+			}
+			index++;
+		}
+		flagId << index + _soldier->getRules()->getFlagOffset();
+	}
 	Surface *flagTexture = _game->getMod()->getSurface(flagId.str().c_str(), false);
 	_flag->clear();
 	if (flagTexture != 0)
