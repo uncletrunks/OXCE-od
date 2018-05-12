@@ -60,7 +60,6 @@ RuleItem::RuleItem(const std::string &type) :
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
-	_customItemPreviewIndex(0),
 	_kneelBonus(-1), _oneHandedPenalty(-1),
 	_monthlySalary(0), _monthlyMaintenance(0)
 {
@@ -97,6 +96,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_confAuto.name = "STR_AUTO_SHOT";
 
 	_confAuto.shots = 3;
+
+	_customItemPreviewIndex.push_back(0);
 }
 
 /**
@@ -609,7 +610,19 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
-	_customItemPreviewIndex = node["customItemPreviewIndex"].as<int>(_customItemPreviewIndex);
+	if (const YAML::Node &cipi = node["customItemPreviewIndex"])
+	{
+		if (cipi.IsScalar())
+		{
+			int cipiSingle = cipi.as<int>();
+			_customItemPreviewIndex.clear();
+			_customItemPreviewIndex.push_back(cipiSingle);
+		}
+		else
+		{
+			_customItemPreviewIndex = cipi.as< std::vector<int> >(_customItemPreviewIndex);
+		}
+	}
 	_kneelBonus = node["kneelBonus"].as<int>(_kneelBonus);
 	_oneHandedPenalty = node["oneHandedPenalty"].as<int>(_oneHandedPenalty);
 	_monthlySalary = node["monthlySalary"].as<int>(_monthlySalary);
@@ -2279,7 +2292,7 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
  * Gets the index of the sprite in the CustomItemPreview sprite set.
  * @return Sprite index.
  */
-int RuleItem::getCustomItemPreviewIndex() const
+const std::vector<int> &RuleItem::getCustomItemPreviewIndex() const
 {
 	return _customItemPreviewIndex;
 }

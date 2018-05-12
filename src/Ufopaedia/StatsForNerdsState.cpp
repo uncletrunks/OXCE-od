@@ -1531,7 +1531,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getListOrder(), "listOrder");
 
 		addSection(L"{Inventory}", L"", _white);
-		addInteger(ss, itemRule->getCustomItemPreviewIndex(), "customItemPreviewIndex");
+		addVectorOfIntegers(ss, itemRule->getCustomItemPreviewIndex(), "customItemPreviewIndex");
 		addInteger(ss, itemRule->getInventoryWidth(), "invWidth", -1); // always show!
 		addInteger(ss, itemRule->getInventoryHeight(), "invHeight", -1); // always show!
 		addSingleString(ss, itemRule->getDefaultInventorySlot(), "defaultInventorySlot");
@@ -2031,7 +2031,7 @@ void StatsForNerdsState::initArmorList()
 		addBoolean(ss, armorRule->hasInventory(), "allowInv", true);
 
 		addSection(L"{Sprites}", L"", _white);
-		addInteger(ss, armorRule->getCustomArmorPreviewIndex(), "customArmorPreviewIndex");
+		addVectorOfIntegers(ss, armorRule->getCustomArmorPreviewIndex(), "customArmorPreviewIndex");
 		addSingleString(ss, armorRule->getSpriteSheet(), "spriteSheet", "", false);
 		addInteger(ss, armorRule->getFaceColorGroup(), "spriteFaceGroup");
 		addVectorOfIntegers(ss, armorRule->getFaceColorRaw(), "spriteFaceColor");

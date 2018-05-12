@@ -186,7 +186,7 @@ private:
 	std::string _zombieUnit;
 	bool _LOSRequired, _underwaterOnly, _landOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
-	int _customItemPreviewIndex;
+	std::vector<int> _customItemPreviewIndex;
 	int _kneelBonus, _oneHandedPenalty;
 	int _monthlySalary, _monthlyMaintenance;
 	RuleStatBonus _damageBonus, _meleeBonus, _accuracyMulti, _meleeMulti, _throwMulti, _closeQuartersMulti;
@@ -578,7 +578,7 @@ public:
 	/// Gets the vapor cloud probability.
 	int getVaporProbability() const;
 	/// Gets the index of the sprite in the CustomItemPreview sprite set
-	int getCustomItemPreviewIndex() const;
+	const std::vector<int> &getCustomItemPreviewIndex() const;
 	/// Gets the kneel bonus.
 	int getKneelBonus(Mod *mod) const;
 	/// Gets the one-handed penalty.

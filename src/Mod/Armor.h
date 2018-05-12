@@ -75,7 +75,7 @@ private:
 
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
-	int _customArmorPreviewIndex;
+	std::vector<int> _customArmorPreviewIndex;
 	bool _allowsRunning, _allowsStrafing, _allowsKneeling;
 	bool _instantWoundRecovery;
 	int _standHeight, _kneelHeight, _floatHeight;
@@ -227,7 +227,7 @@ public:
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
 	/// Gets the index of the sprite in the CustomArmorPreview sprite set
-	int getCustomArmorPreviewIndex() const;
+	const std::vector<int> &getCustomArmorPreviewIndex() const;
 	/// Can you run while wearing this armor?
 	bool allowsRunning() const;
 	/// Can you strafe while wearing this armor?

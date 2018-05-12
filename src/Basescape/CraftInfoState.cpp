@@ -261,11 +261,14 @@ void CraftInfoState::init()
 			{
 				if ((*i)->getCraft() == _craft)
 				{
-					Surface *customFrame1 = customArmorPreviews->getFrame((*i)->getArmor()->getCustomArmorPreviewIndex());
-					customFrame1->setY(0);
-					customFrame1->setX(x);
-					customFrame1->blit(_crew);
-					x += 10;
+					for (auto index : (*i)->getArmor()->getCustomArmorPreviewIndex())
+					{
+						Surface *customFrame1 = customArmorPreviews->getFrame(index);
+						customFrame1->setY(0);
+						customFrame1->setX(x);
+						customFrame1->blit(_crew);
+						x += 10;
+					}
 				}
 			}
 		}
@@ -288,11 +291,14 @@ void CraftInfoState::init()
 			// modded HWP/auxiliary previews
 			for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
 			{
-				Surface *customFrame2 = customItemPreviews->getFrame((*i)->getRules()->getCustomItemPreviewIndex());
-				customFrame2->setY(0);
-				customFrame2->setX(x);
-				customFrame2->blit(_equip);
-				x += 10;
+				for (auto index : (*i)->getRules()->getCustomItemPreviewIndex())
+				{
+					Surface *customFrame2 = customItemPreviews->getFrame(index);
+					customFrame2->setY(0);
+					customFrame2->setX(x);
+					customFrame2->blit(_equip);
+					x += 10;
+				}
 			}
 		}
 

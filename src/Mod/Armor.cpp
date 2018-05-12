@@ -40,7 +40,6 @@ Armor::Armor(const std::string &type) :
 	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1),
 	_ignoresMeleeThreat(-1), _createsMeleeThreat(-1),
 	_overKill(0.5f), _meleeDodgeBackPenalty(0),
-	_customArmorPreviewIndex(0),
 	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true),
 	_instantWoundRecovery(false),
 	_standHeight(-1), _kneelHeight(-1), _floatHeight(-1)
@@ -52,6 +51,8 @@ Armor::Armor(const std::string &type) :
 	_timeRecovery.setTimeRecovery();
 	_energyRecovery.setEnergyRecovery();
 	_stunRecovery.setStunRecovery();
+
+	_customArmorPreviewIndex.push_back(0);
 }
 
 /**
@@ -207,7 +208,19 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node, parsers.getShared());
-	_customArmorPreviewIndex = node["customArmorPreviewIndex"].as<int>(_customArmorPreviewIndex);
+	if (const YAML::Node &capi = node["customArmorPreviewIndex"])
+	{
+		if (capi.IsScalar())
+		{
+			int capiSingle = capi.as<int>();
+			_customArmorPreviewIndex.clear();
+			_customArmorPreviewIndex.push_back(capiSingle);
+		}
+		else
+		{
+			_customArmorPreviewIndex = capi.as< std::vector<int> >(_customArmorPreviewIndex);
+		}
+	}
 	_allowsRunning = node["allowsRunning"].as<bool>(_allowsRunning);
 	_allowsStrafing = node["allowsStrafing"].as<bool>(_allowsStrafing);
 	_allowsKneeling = node["allowsKneeling"].as<bool>(_allowsKneeling);
@@ -895,7 +908,7 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
  * Gets the index of the sprite in the CustomArmorPreview sprite set.
  * @return Sprite index.
  */
-int Armor::getCustomArmorPreviewIndex() const
+const std::vector<int> &Armor::getCustomArmorPreviewIndex() const
 {
 	return _customArmorPreviewIndex;
 }
