@@ -86,6 +86,7 @@ en-GB:
   STR_QS_THREE_LETTERS_A: "Please enter at least 3 letters"
   STR_QS_THREE_LETTERS_B: "into the Quick Search box..."
   STR_M_FLAG: " [m]"
+  STR_F_FLAG: " [f]"
 #TechTreeViewerState.cpp
   STR_TECH_TREE_VIEWER: "Tech Tree Viewer"
   STR_SELECT_TOPIC: "Select Topic"
@@ -93,6 +94,8 @@ en-GB:
   STR_ITEM_DESTROYED: "Item destroyed:"
   STR_ITEM_REQUIRED: "Item required:"
   STR_FACILITIES_REQUIRED: "Facilities required:"
+  STR_FACILITIES_PROVIDED: "Facilities provided:"
+  STR_FACILITIES_FORBIDDEN: "Facilities forbidden:"
   STR_REQUIRES: "Requires:"
   STR_DEPENDS_ON: "Depends on:"
   STR_UNLOCKED_BY: "Unlocked by:"

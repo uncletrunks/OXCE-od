@@ -34,6 +34,9 @@ class Text;
 class TextList;
 class RuleResearch;
 class RuleManufacture;
+class RuleBaseFacility;
+
+enum TTVMode { TTV_NONE, TTV_RESEARCH, TTV_MANUFACTURING, TTV_FACILITIES };
 
 /**
  * TechTreeViewer screen, where you can browse the Tech Tree.
@@ -47,16 +50,16 @@ private:
 	TextList *_lstLeft, *_lstRight;
 	Uint8 _purple, _pink, _blue, _white, _gold;
 	std::string _selectedTopic;
-	int _selectedFlag;
+	TTVMode _selectedFlag;
 	std::vector<std::string> _leftTopics, _rightTopics;
-	std::vector<int> _leftFlags, _rightFlags; // 0=none, 1=research, 2=manufacturing
-	std::unordered_set<std::string> _alreadyAvailableResearch, _alreadyAvailableManufacture;
+	std::vector<TTVMode> _leftFlags, _rightFlags;
+	std::unordered_set<std::string> _alreadyAvailableResearch, _alreadyAvailableManufacture, _alreadyAvailableFacilities;
 	void initLists();
 	void onSelectLeftTopic(Action *action);
 	void onSelectRightTopic(Action *action);
 public:
 	/// Creates the Tech Tree Viewer state.
-	TechTreeViewerState(const RuleResearch *selectedTopicResearch = 0, const RuleManufacture *selectedTopicManufacture = 0);
+	TechTreeViewerState(const RuleResearch *r = 0, const RuleManufacture *m = 0, const RuleBaseFacility *f = 0);
 	/// Cleans up the Tech Tree Viewer state.
 	~TechTreeViewerState();
 	/// Initializes the state.
@@ -66,11 +69,13 @@ public:
 	/// Handler for clicking the New button.
 	void btnNewClick(Action *action);
 	/// Sets the selected topic.
-	void setSelectedTopic(const std::string &selectedTopic, bool isManufacturingTopic);
+	void setSelectedTopic(const std::string &selectedTopic, TTVMode topicType);
 	/// Is given research topic discovered/available?
 	bool isDiscoveredResearch(const std::string &topic) const;
 	/// Is given manufacture topic discovered/available?
 	bool isDiscoveredManufacture(const std::string &topic) const;
+	/// Is given base facility discovered/available?
+	bool isDiscoveredFacility(const std::string &topic) const;
 };
 
 }
