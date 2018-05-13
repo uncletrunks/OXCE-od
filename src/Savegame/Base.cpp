@@ -1000,12 +1000,12 @@ int Base::getDefenseValue() const
 int Base::getShortRangeDetection() const
 {
 	int total = 0;
-	int minRadarRange = _mod->getMinRadarRange();
+	int minRadarRange = _mod->getShortRadarRange();
 
 	if (minRadarRange == 0) return 0;
 	for (std::vector<BaseFacility*>::const_iterator i = _facilities.begin(); i != _facilities.end(); ++i)
 	{
-		if ((*i)->getRules()->getRadarRange() == minRadarRange && (*i)->getBuildTime() == 0)
+		if ((*i)->getRules()->getRadarRange() > 0 && (*i)->getRules()->getRadarRange() <= minRadarRange && (*i)->getBuildTime() == 0)
 		{
 			total++;
 		}
@@ -1021,7 +1021,7 @@ int Base::getShortRangeDetection() const
 int Base::getLongRangeDetection() const
 {
 	int total = 0;
-	int minRadarRange = _mod->getMinRadarRange();
+	int minRadarRange = _mod->getShortRadarRange();
 
 	for (std::vector<BaseFacility*>::const_iterator i = _facilities.begin(); i != _facilities.end(); ++i)
 	{

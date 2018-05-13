@@ -174,6 +174,7 @@ private:
 	int _performanceBonusFactor;
 	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
+	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch, _psiUnlockResearch;
@@ -578,8 +579,8 @@ public:
 	int getAlienFuelQuantity() const;
 	/// Gets the font name.
 	std::string getFontName() const;
-	/// Gets the minimum radar's range.
-	int getMinRadarRange() const;
+	/// Gets the maximum radar range still considered as short.
+	int getShortRadarRange() const;
 	/// Gets information on an interface element.
 	RuleInterface *getInterface(const std::string &id, bool error = true) const;
 	/// Gets the ruleset for the globe.

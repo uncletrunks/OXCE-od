@@ -291,7 +291,7 @@ Mod::Mod() :
 	_soldiersPerSergeant(5), _soldiersPerCaptain(11), _soldiersPerColonel(23), _soldiersPerCommander(30),
 	_pilotAccuracyZeroPoint(55), _pilotAccuracyRange(40), _pilotReactionsZeroPoint(55), _pilotReactionsRange(60),
 	_performanceBonusFactor(0), _useCustomCategories(false), _showDogfightDistanceInKm(false), _showFullNameInAlienInventory(false),
-	_theMostUselessOptionEver(0), _theBiggestRipOffEver(0),
+	_theMostUselessOptionEver(0), _theBiggestRipOffEver(0), _shortRadarRange(0),
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
 	_baseDefenseMapFromLocation(0),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
@@ -1449,6 +1449,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_showFullNameInAlienInventory = doc["showFullNameInAlienInventory"].as<bool>(_showFullNameInAlienInventory);
 	_theMostUselessOptionEver = doc["theMostUselessOptionEver"].as<int>(_theMostUselessOptionEver);
 	_theBiggestRipOffEver = doc["theBiggestRipOffEver"].as<int>(_theBiggestRipOffEver);
+	_shortRadarRange = doc["shortRadarRange"].as<int>(_shortRadarRange);
 	_baseDefenseMapFromLocation = doc["baseDefenseMapFromLocation"].as<int>(_baseDefenseMapFromLocation);
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
@@ -2875,11 +2876,14 @@ std::string Mod::getFontName() const
 }
 
 /**
- * Returns the minimum facilitie's radar range.
- * @return The minimum range.
+ * Returns the maximum radar range still considered as short.
+ * @return The short radar range threshold.
  */
- int Mod::getMinRadarRange() const
+ int Mod::getShortRadarRange() const
  {
+	if (_shortRadarRange > 0)
+		return _shortRadarRange;
+
 	int minRadarRange = 0;
 
 	{
