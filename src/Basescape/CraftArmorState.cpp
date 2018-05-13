@@ -58,7 +58,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_txtTitle = new Text(300, 17, 16, 7);
 	_txtName = new Text(114, 9, 16, 32);
 	_txtCraft = new Text(76, 9, 122, 32);
-	_txtArmor = new Text(100, 9, 206, 32);
+	_txtArmor = new Text(100, 9, 192, 32);
 	_lstSoldiers = new TextList(288, 128, 8, 40);
 	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
 
@@ -128,8 +128,8 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_cbxSortBy->onChange((ActionHandler)&CraftArmorState::cbxSortByChange);
 	_cbxSortBy->setText(tr("STR_SORT_BY"));
 
-	_lstSoldiers->setArrowColumn(174, ARROW_VERTICAL);
-	_lstSoldiers->setColumns(4, 106, 84, 74, 16);
+	//_lstSoldiers->setArrowColumn(-1, ARROW_VERTICAL);
+	_lstSoldiers->setColumns(3, 106, 70, 104);
 	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);
@@ -228,23 +228,35 @@ void CraftArmorState::initList(size_t scrl)
 	Uint8 otherCraftColor = _game->getMod()->getInterface("craftArmor")->getElement("otherCraft")->color;
 	int row = 0;
 	_lstSoldiers->clearList();
+
+	if (_dynGetter != NULL)
+	{
+		_lstSoldiers->setArrowColumn(160, ARROW_VERTICAL);
+		_lstSoldiers->setColumns(4, 106, 70, 88, 16);
+	}
+	else
+	{
+		_lstSoldiers->setArrowColumn(-1, ARROW_VERTICAL);
+		_lstSoldiers->setColumns(3, 106, 70, 104);
+	}
+
 	Craft *c = _base->getCrafts()->at(_craft);
 	float absBonus = _base->getSickBayAbsoluteBonus();
 	float relBonus = _base->getSickBayRelativeBonus();
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
-		// call corresponding getter
-		int dynStat = 0;
-		std::wostringstream ss;
-		if (_dynGetter != NULL) {
-			dynStat = (*_dynGetter)(_game, *i);
+		if (_dynGetter != NULL)
+		{
+			// call corresponding getter
+			int dynStat = (*_dynGetter)(_game, *i);
+			std::wostringstream ss;
 			ss << dynStat;
+			_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), tr((*i)->getArmor()->getType()).c_str(), ss.str().c_str());
 		}
-		else {
-			ss << L"";
+		else
+		{
+			_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), tr((*i)->getArmor()->getType()).c_str());
 		}
-
-		_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), tr((*i)->getArmor()->getType()).c_str(), ss.str().c_str());
 
 		Uint8 color;
 		if ((*i)->getCraft() == c)

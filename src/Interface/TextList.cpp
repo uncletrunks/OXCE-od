@@ -456,6 +456,7 @@ void TextList::setColumns(int cols, ...)
 	va_list args;
 	va_start(args, cols);
 
+	_columns.clear();
 	for (int i = 0; i < cols; ++i)
 	{
 		_columns.push_back(va_arg(args, int));
