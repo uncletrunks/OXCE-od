@@ -450,7 +450,7 @@ int Ufo::getMarker() const
 	case Ufo::FLYING:
 		return _rules->getMarker() == -1 ? 2 : _rules->getMarker();
 	case Ufo::LANDED:
-		return 3;
+		return _rules->getLandedMarker() == -1 ? 3 : _rules->getLandedMarker();
 	case Ufo::CRASHED:
 		return 4;
 	default:

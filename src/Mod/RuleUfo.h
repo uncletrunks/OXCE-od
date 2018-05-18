@@ -59,7 +59,7 @@ class RuleUfo
 {
 private:
 	std::string _type, _size;
-	int _sprite, _marker;
+	int _sprite, _marker, _landedMarker;
 	int _power, _range, _score, _reload, _breakOffTime, _missionScore;
 	int _hunterKillerPercentage, _huntMode, _huntSpeed, _huntBehavior;
 	int _fireSound;
@@ -85,6 +85,8 @@ public:
 	int getSprite() const;
 	/// Gets the UFO's globe marker.
 	int getMarker() const;
+	/// Gets the UFO's globe marker when landed.
+	int getLandedMarker() const;
 	/// Gets the UFO's weapon power.
 	int getWeaponPower() const;
 	/// Gets the UFO's weapon range.
