@@ -3953,6 +3953,16 @@ void getTileShade(const BattleUnit *bu, int &shade)
 	shade = 0;
 }
 
+void getStunMaxScript(const BattleUnit *bu, int &maxStun)
+{
+	if (bu)
+	{
+		maxStun = bu->getBaseStats()->health * 4;
+		return;
+	}
+	maxStun = 0;
+}
+
 struct getRightHandWeaponScript
 {
 	static RetEnum func(BattleUnit *bu, BattleItem *&bi)
@@ -4131,6 +4141,15 @@ void setMaxStatScript(BattleUnit *bu, int val)
 	}
 }
 
+template<int BattleUnit::*StatCurr>
+void setStunScript(BattleUnit *bu, int val)
+{
+	if (bu)
+	{
+		(bu->*StatCurr) = Clamp(val, 0, (bu->getBaseStats()->health) * 4);
+	}
+}
+
 template<int UnitStats::*StatMax>
 void setMaxStatScript(BattleUnit *bu, int val)
 {
@@ -4233,8 +4252,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&setBaseStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("setEnergy");
 
 	bu.addField<&BattleUnit::_stunlevel>("getStun");
-	bu.addField<&BattleUnit::_health>("getStunMax");
-	bu.add<&setBaseStatScript<&BattleUnit::_stunlevel, &BattleUnit::_health>>("setStun");
+	bu.add<&getStunMaxScript>("getStunMax");
+	bu.add<&setStunScript<&BattleUnit::_stunlevel>>("setStun");
 
 	bu.addField<&BattleUnit::_morale>("getMorale");
 	bu.addFake<100>("getMoraleMax");
