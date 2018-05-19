@@ -46,10 +46,10 @@ HelloCommanderState::HelloCommanderState()
 		return;
 	}
 
-	// Check 2: 100th mission
-	const int missionNumberSearch = 100;
+	// Check 2: 100th mission, 200th mission, etc.
+	const int missionModulo = 100;
 	int missionNumber = _game->getSavedGame()->getMissionStatistics()->size();
-	if (missionNumber != missionNumberSearch)
+	if (missionNumber % missionModulo != 0)
 	{
 		_exit = true;
 		return;
@@ -128,8 +128,11 @@ HelloCommanderState::HelloCommanderState()
 
 	_txtMessage->setColor(244);
 	_txtMessage->setWordWrap(true);
-	std::wstring message = L"Hello Lewis and Ben,\n\nthis was your 100th mission!\n\nWe are extremely impressed with the progress of the XCOM project thus far, Commanders. Your recent results were beyond our expectations... and that is not a statement this Council makes lightly.\n\nAnd remember, we'll be watching...\n\n          -- Meridian";
-	_txtMessage->setText(message);
+	std::wostringstream ss;
+	ss << L"Hello Lewis and Ben,\n\nthis was your ";
+	ss << missionNumber;
+	ss << L"th mission!\n\nWe are extremely impressed with the progress of the XCOM project thus far, Commanders. Your recent results were beyond our expectations... and that is not a statement this Council makes lightly.\n\nAnd remember, we'll be watching...\n\n          -- Meridian";
+	_txtMessage->setText(ss.str());
 }
 
 /**
