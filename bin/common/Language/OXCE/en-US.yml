@@ -87,6 +87,7 @@ en-US:
   STR_QS_THREE_LETTERS_B: "into the Quick Search box..."
   STR_M_FLAG: " [m]"
   STR_F_FLAG: " [f]"
+  STR_I_FLAG: " [i]"
 #TechTreeViewerState.cpp
   STR_TECH_TREE_VIEWER: "Tech Tree Viewer"
   STR_SELECT_TOPIC: "Select Topic"
@@ -108,6 +109,8 @@ en-US:
   STR_GIVES_ONE_FOR_FREE_SEQ: "Gives one for free (sequential):"
   STR_GIVES_ONE_FOR_FREE: "Gives one for free:"
   STR_RESEARCH_REQUIRED: "Research required:"
+  STR_RESEARCH_REQUIRED_USE: "Research required (use):"
+  STR_RESEARCH_REQUIRED_BUY: "Research required (buy):"
   STR_MATERIALS_REQUIRED: "Materials required:"
   STR_ITEMS_PRODUCED: "Items produced:"
   STR_PERSON_RECRUITED: "Person recruited:"

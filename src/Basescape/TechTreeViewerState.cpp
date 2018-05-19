@@ -23,6 +23,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/RuleBaseFacility.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Mod/RuleResearch.h"
 #include "../Engine/LocalizedText.h"
@@ -131,33 +132,50 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *r, const RuleManufa
 
 	int totalSum = 0;
 	const std::vector<std::string> &allResearch = _game->getMod()->getResearchList();
-	RuleResearch *rule = 0;
+	RuleResearch *resRule = 0;
 	for (std::vector<std::string>::const_iterator j = allResearch.begin(); j != allResearch.end(); ++j)
 	{
-		rule = _game->getMod()->getResearch((*j));
-		if (rule != 0)
+		resRule = _game->getMod()->getResearch((*j));
+		if (resRule != 0)
 		{
-			totalSum += rule->getCost();
+			totalSum += resRule->getCost();
 		}
 	}
 
-	const std::vector<std::string> &items = _game->getMod()->getManufactureList();
-	for (std::vector<std::string>::const_iterator iter = items.begin(); iter != items.end(); ++iter)
+	const std::vector<std::string> &allManufacturing = _game->getMod()->getManufactureList();
+	RuleManufacture *manRule = 0;
+	for (std::vector<std::string>::const_iterator iter = allManufacturing.begin(); iter != allManufacturing.end(); ++iter)
 	{
-		RuleManufacture *m = _game->getMod()->getManufacture(*iter);
-		if (_game->getSavedGame()->isResearched(m->getRequirements()))
+		manRule = _game->getMod()->getManufacture(*iter);
+		if (_game->getSavedGame()->isResearched(manRule->getRequirements()))
 		{
-			_alreadyAvailableManufacture.insert(m->getName());
+			_alreadyAvailableManufacture.insert(manRule->getName());
 		}
 	}
 
 	const std::vector<std::string> &facilities = _game->getMod()->getBaseFacilitiesList();
+	RuleBaseFacility *facRule = 0;
 	for (std::vector<std::string>::const_iterator iter = facilities.begin(); iter != facilities.end(); ++iter)
 	{
-		RuleBaseFacility *f = _game->getMod()->getBaseFacility(*iter);
-		if (_game->getSavedGame()->isResearched(f->getRequirements()))
+		facRule = _game->getMod()->getBaseFacility(*iter);
+		if (_game->getSavedGame()->isResearched(facRule->getRequirements()))
 		{
-			_alreadyAvailableFacilities.insert(f->getType());
+			_alreadyAvailableFacilities.insert(facRule->getType());
+		}
+	}
+
+	const std::vector<std::string> &allItems = _game->getMod()->getItemsList();
+	RuleItem *itemRule = 0;
+	for (std::vector<std::string>::const_iterator iter = allItems.begin(); iter != allItems.end(); ++iter)
+	{
+		itemRule = _game->getMod()->getItem(*iter);
+		if (!itemRule->getRequirements().empty() || !itemRule->getBuyRequirements().empty())
+		{
+			_protectedItems.insert(itemRule->getType());
+			if (_game->getSavedGame()->isResearched(itemRule->getRequirements()) && _game->getSavedGame()->isResearched(itemRule->getBuyRequirements()))
+			{
+				_alreadyAvailableItems.insert(itemRule->getType());
+			}
 		}
 	}
 
@@ -218,6 +236,11 @@ void TechTreeViewerState::initLists()
 			ss << tr("STR_F_FLAG");
 			_txtCostIndicator->setText(L"");
 		}
+		else if (_selectedFlag == TTV_ITEMS)
+		{
+			ss << tr("STR_I_FLAG");
+			_txtCostIndicator->setText(L"");
+		}
 		_txtSelectedTopic->setText(tr("STR_TOPIC").arg(ss.str()));
 	}
 
@@ -271,6 +294,7 @@ void TechTreeViewerState::initLists()
 		std::vector<std::string> requiredByResearch;
 		std::vector<std::string> requiredByManufacture;
 		std::vector<std::string> requiredByFacilities;
+		std::vector<std::string> requiredByItems;
 		std::vector<std::string> leadsTo;
 		const std::vector<std::string> unlocks = rule->getUnlocked();
 		const std::vector<std::string> disables = rule->getDisabled();
@@ -297,6 +321,25 @@ void TechTreeViewerState::initLists()
 				if (i == rule->getName())
 				{
 					requiredByFacilities.push_back(f);
+				}
+			}
+		}
+
+		for (auto &item : _game->getMod()->getItemsList())
+		{
+			RuleItem *temp = _game->getMod()->getItem(item);
+			for (auto &i : temp->getRequirements())
+			{
+				if (i == rule->getName())
+				{
+					requiredByItems.push_back(item);
+				}
+			}
+			for (auto &i : temp->getBuyRequirements())
+			{
+				if (i == rule->getName())
+				{
+					requiredByItems.push_back(item);
 				}
 			}
 		}
@@ -522,7 +565,7 @@ void TechTreeViewerState::initLists()
 		row = 0;
 
 		// 6. required by
-		if (requiredByResearch.size() > 0 || requiredByManufacture.size() > 0 || requiredByFacilities.size() > 0)
+		if (requiredByResearch.size() > 0 || requiredByManufacture.size() > 0 || requiredByFacilities.size() > 0 || requiredByItems.size() > 0)
 		{
 			_lstRight->addRow(1, tr("STR_REQUIRED_BY").c_str());
 			_lstRight->setRowColor(row, _blue);
@@ -583,6 +626,25 @@ void TechTreeViewerState::initLists()
 				}
 				_rightTopics.push_back((*i));
 				_rightFlags.push_back(TTV_FACILITIES);
+				++row;
+			}
+		}
+
+		// 6d. required by items
+		if (requiredByItems.size() > 0)
+		{
+			for (std::vector<std::string>::const_iterator i = requiredByItems.begin(); i != requiredByItems.end(); ++i)
+			{
+				std::wstring name = tr((*i));
+				name.insert(0, L"  ");
+				name.append(tr("STR_I_FLAG"));
+				_lstRight->addRow(1, name.c_str());
+				if (!isProtectedAndDiscoveredItem((*i)))
+				{
+					_lstRight->setRowColor(row, _pink);
+				}
+				_rightTopics.push_back((*i));
+				_rightFlags.push_back(TTV_ITEMS);
 				++row;
 			}
 		}
@@ -940,6 +1002,61 @@ void TechTreeViewerState::initLists()
 			}
 		}
 	}
+	else if (_selectedFlag == TTV_ITEMS)
+	{
+		int row = 0;
+		RuleItem *rule = _game->getMod()->getItem(_selectedTopic);
+		if (rule == 0)
+			return;
+
+		// 1. requires to use/equip
+		const std::vector<std::string> reqs = rule->getRequirements();
+		if (reqs.size() > 0)
+		{
+			_lstLeft->addRow(1, tr("STR_RESEARCH_REQUIRED_USE").c_str());
+			_lstLeft->setRowColor(row, _blue);
+			_leftTopics.push_back("-");
+			_leftFlags.push_back(TTV_NONE);
+			++row;
+			for (std::vector<std::string>::const_iterator i = reqs.begin(); i != reqs.end(); ++i)
+			{
+				std::wstring name = tr((*i));
+				name.insert(0, L"  ");
+				_lstLeft->addRow(1, name.c_str());
+				if (!isDiscoveredResearch((*i)))
+				{
+					_lstLeft->setRowColor(row, _pink);
+				}
+				_leftTopics.push_back((*i));
+				_leftFlags.push_back(TTV_RESEARCH);
+				++row;
+			}
+		}
+
+		// 2. requires to buy
+		const std::vector<std::string> reqsBuy = rule->getBuyRequirements();
+		if (reqsBuy.size() > 0)
+		{
+			_lstLeft->addRow(1, tr("STR_RESEARCH_REQUIRED_BUY").c_str());
+			_lstLeft->setRowColor(row, _blue);
+			_leftTopics.push_back("-");
+			_leftFlags.push_back(TTV_NONE);
+			++row;
+			for (std::vector<std::string>::const_iterator i = reqsBuy.begin(); i != reqsBuy.end(); ++i)
+			{
+				std::wstring name = tr((*i));
+				name.insert(0, L"  ");
+				_lstLeft->addRow(1, name.c_str());
+				if (!isDiscoveredResearch((*i)))
+				{
+					_lstLeft->setRowColor(row, _pink);
+				}
+				_leftTopics.push_back((*i));
+				_leftFlags.push_back(TTV_RESEARCH);
+				++row;
+			}
+		}
+	}
 }
 
 /**
@@ -962,6 +1079,10 @@ void TechTreeViewerState::onSelectLeftTopic(Action *)
 				return;
 			}
 			else if (_leftFlags[index] == TTV_FACILITIES && !isDiscoveredFacility(_leftTopics[index]))
+			{
+				return;
+			}
+			else if (_leftFlags[index] == TTV_ITEMS && !isProtectedAndDiscoveredItem(_leftTopics[index]))
 			{
 				return;
 			}
@@ -992,6 +1113,10 @@ void TechTreeViewerState::onSelectRightTopic(Action *)
 				return;
 			}
 			else if (_rightFlags[index] == TTV_FACILITIES && !isDiscoveredFacility(_rightTopics[index]))
+			{
+				return;
+			}
+			else if (_rightFlags[index] == TTV_ITEMS && !isProtectedAndDiscoveredItem(_rightTopics[index]))
 			{
 				return;
 			}
@@ -1041,6 +1166,30 @@ bool TechTreeViewerState::isDiscoveredManufacture(const std::string &topic) cons
 bool TechTreeViewerState::isDiscoveredFacility(const std::string &topic) const
 {
 	if (_alreadyAvailableFacilities.find(topic) == _alreadyAvailableFacilities.end())
+	{
+		return false;
+	}
+	return true;
+}
+
+/**
+* Is given item protected by any research?
+*/
+bool TechTreeViewerState::isProtectedItem(const std::string &topic) const
+{
+	if (_protectedItems.find(topic) == _protectedItems.end())
+	{
+		return false;
+	}
+	return true;
+}
+
+/**
+* Is given protected item discovered/available for both purchase and usage/equipment?
+*/
+bool TechTreeViewerState::isProtectedAndDiscoveredItem(const std::string &topic) const
+{
+	if (_alreadyAvailableItems.find(topic) == _alreadyAvailableItems.end())
 	{
 		return false;
 	}

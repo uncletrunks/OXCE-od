@@ -36,7 +36,7 @@ class RuleResearch;
 class RuleManufacture;
 class RuleBaseFacility;
 
-enum TTVMode { TTV_NONE, TTV_RESEARCH, TTV_MANUFACTURING, TTV_FACILITIES };
+enum TTVMode { TTV_NONE, TTV_RESEARCH, TTV_MANUFACTURING, TTV_FACILITIES, TTV_ITEMS };
 
 /**
  * TechTreeViewer screen, where you can browse the Tech Tree.
@@ -54,6 +54,7 @@ private:
 	std::vector<std::string> _leftTopics, _rightTopics;
 	std::vector<TTVMode> _leftFlags, _rightFlags;
 	std::unordered_set<std::string> _alreadyAvailableResearch, _alreadyAvailableManufacture, _alreadyAvailableFacilities;
+	std::unordered_set<std::string> _protectedItems, _alreadyAvailableItems;
 	void initLists();
 	void onSelectLeftTopic(Action *action);
 	void onSelectRightTopic(Action *action);
@@ -76,6 +77,10 @@ public:
 	bool isDiscoveredManufacture(const std::string &topic) const;
 	/// Is given base facility discovered/available?
 	bool isDiscoveredFacility(const std::string &topic) const;
+	/// Is given item protected by any research?
+	bool isProtectedItem(const std::string &topic) const;
+	/// Is given protected item discovered/available for both purchase and usage/equipment?
+	bool isProtectedAndDiscoveredItem(const std::string &topic) const;
 };
 
 }
