@@ -439,9 +439,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		_meleeType.load(alter);
 	}
 
-	if (node["skillApplied"])
+	if (const YAML::Node &skill = node["skillApplied"])
 	{
-		if (node["skillApplied"].as<int>(false))
+		if (skill.as<bool>(false))
 		{
 			_meleeMulti.setMelee();
 		}
