@@ -1504,6 +1504,21 @@ bool BattlescapeGame::cancelCurrentAction(bool bForce)
 				}
 				return true;
 			}
+			else if (_currentAction.type == BA_AUTOSHOT && _currentAction.sprayTargeting && !_currentAction.waypoints.empty())
+			{
+				_currentAction.waypoints.pop_back();
+				if (!getMap()->getWaypoints()->empty())
+				{
+					getMap()->getWaypoints()->pop_back();
+				}
+
+				if (_currentAction.waypoints.empty())
+				{
+					_currentAction.sprayTargeting = false;
+					getMap()->getWaypoints()->clear();
+				}
+				return true;
+			}
 			else
 			{
 				if (Options::battleConfirmFireMode && !_currentAction.waypoints.empty())
@@ -1566,6 +1581,69 @@ void BattlescapeGame::primaryAction(Position pos)
 				_currentAction.waypoints.push_back(pos);
 				getMap()->getWaypoints()->push_back(pos);
 			}
+		}
+		else if (_currentAction.sprayTargeting) // Special "spray" auto shot that allows placing shots between waypoints
+		{
+			int maxWaypoints = _currentAction.weapon->getRules()->getSprayWaypoints();
+			if ((int)_currentAction.waypoints.size() >= maxWaypoints ||
+				((SDL_GetModState() & KMOD_CTRL) != 0 && (SDL_GetModState() & KMOD_SHIFT) != 0) ||
+				(!Options::battleConfirmFireMode && (int)_currentAction.waypoints.size() == maxWaypoints - 1))
+			{
+				// If we're firing early, pick one last waypoint.
+				if ((int)_currentAction.waypoints.size() < maxWaypoints)
+				{
+					_currentAction.waypoints.push_back(pos);
+					getMap()->getWaypoints()->push_back(pos);
+				}
+
+				getMap()->setCursorType(CT_NONE);
+
+				// Populate the action's waypoints with the positions we want to fire at
+				// Start from the last shot and move to the first, since we'll be using the last element first and then pop_back()
+				int numberOfShots = _currentAction.weapon->getRules()->getConfigAuto()->shots;
+				int numberOfWaypoints = _currentAction.waypoints.size();
+				_currentAction.waypoints.clear();
+				for (int i = numberOfShots - 1; i > 0; --i)
+				{
+					// Evenly space shots along the waypoints according to number of waypoints and the number of shots
+					// Use voxel positions to get more uniform spacing
+					// We add Position(8, 8, 12) to target middle of tile
+					int waypointIndex = std::max(0, std::min(numberOfWaypoints - 1, i * (numberOfWaypoints - 1) / (numberOfShots - 1)));
+					Position previousWaypoint = getMap()->getWaypoints()->at(waypointIndex).toVexel() + Position(8, 8, 12);
+					Position nextWaypoint = getMap()->getWaypoints()->at(std::min((int)getMap()->getWaypoints()->size() - 1, waypointIndex + 1)).toVexel() + Position(8, 8, 12);
+					Position targetPos;
+					targetPos.x = previousWaypoint.x + (nextWaypoint.x - previousWaypoint.x) * (i * (numberOfWaypoints - 1) % (numberOfShots - 1)) / (numberOfShots - 1);
+					targetPos.y = previousWaypoint.y + (nextWaypoint.y - previousWaypoint.y) * (i * (numberOfWaypoints - 1) % (numberOfShots - 1)) / (numberOfShots - 1);
+					targetPos.z = previousWaypoint.z + (nextWaypoint.z - previousWaypoint.z) * (i * (numberOfWaypoints - 1) % (numberOfShots - 1)) / (numberOfShots - 1);
+
+					_currentAction.waypoints.push_back(targetPos);
+				}
+				_currentAction.waypoints.push_back(getMap()->getWaypoints()->front().toVexel() + Position(8, 8, 12));
+				_currentAction.target = _currentAction.waypoints.back().toTile();
+
+				getMap()->getWaypoints()->clear();
+				_parentState->getGame()->getCursor()->setVisible(false);
+				_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
+				_states.push_back(new ProjectileFlyBState(this, _currentAction));
+				statePushFront(new UnitTurnBState(this, _currentAction));
+				_currentAction.sprayTargeting = false;
+				_currentAction.waypoints.clear();
+			}
+			else if ((int)_currentAction.waypoints.size() < maxWaypoints)
+			{
+				_currentAction.waypoints.push_back(pos);
+				getMap()->getWaypoints()->push_back(pos);
+			}
+		}
+		else if (_currentAction.type == BA_AUTOSHOT &&
+			_currentAction.weapon->getRules()->getSprayWaypoints() > 0 &&
+			(SDL_GetModState() & KMOD_CTRL) != 0 &&
+			(SDL_GetModState() & KMOD_SHIFT) != 0 &&
+			_currentAction.waypoints.empty()) // Starts the spray autoshot targeting
+		{
+			_currentAction.sprayTargeting = true;
+			_currentAction.waypoints.push_back(pos);
+			getMap()->getWaypoints()->push_back(pos);
 		}
 		else if (_currentAction.type == BA_USE && _currentAction.weapon->getRules()->getBattleType() == BT_MINDPROBE)
 		{

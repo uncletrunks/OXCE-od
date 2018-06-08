@@ -96,6 +96,7 @@ en-US:
   arcingShot: "Arcing?"
   isFireExtinguisher: "Fire exinguisher?"
   waypoints: "Max waypoints"
+  sprayWaypoints: "Spray shot waypoints"
 #
   shotgunPellets: "Number of pellets"
   shotgunBehavior: "Shotgun behavior"

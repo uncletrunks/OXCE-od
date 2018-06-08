@@ -377,6 +377,33 @@ bool ProjectileFlyBState::createNewProjectile()
 {
 	++_action.autoShotCounter;
 
+	// Special handling for "spray" auto attack, get target positions from the action's waypoints, starting from the back
+	if (_action.sprayTargeting)
+	{
+		// Since we're just spraying, target the middle of the tile
+		_targetVoxel = _action.waypoints.back();
+		Position targetPosition = _targetVoxel.toTile();
+		Position actorPosition = _action.actor->getPosition();
+		int maxRange = _action.weapon->getRules()->getMaxRange();
+
+		// The waypoint targeting is possibly out of range of the gun, so move the voxel to the max range of the gun if it is
+		int distance = _parent->getTileEngine()->distance(actorPosition, targetPosition);
+		if (distance > maxRange)
+		{
+			_targetVoxel = (actorPosition + (targetPosition - actorPosition) * maxRange / distance).toVexel() + Position(8, 8, 12);
+			targetPosition = _targetVoxel.toTile();
+		}
+
+		// Turn at the end (to a potentially modified target position)
+		_unit->lookAt(targetPosition, _unit->getTurretType() != -1);
+		while (_unit->getStatus() == STATUS_TURNING)
+		{
+			_unit->turn(_unit->getTurretType() != -1);
+		}
+
+		_action.waypoints.pop_back();
+	}
+
 	// create a new projectile
 	Projectile *projectile = new Projectile(_parent->getMod(), _parent->getSave(), _action, _origin, _targetVoxel, _ammo);
 	// hit log - new bullet

@@ -1366,7 +1366,7 @@ void Map::drawTerrain(Surface *surface)
 								tmpSurface = _game->getMod()->getSurfaceSet("CURSOR.PCK")->getFrame(7);
 								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y, 0);
 							}
-							if (_save->getBattleGame()->getCurrentAction()->type == BA_LAUNCH)
+							if (_save->getBattleGame()->getCurrentAction()->type == BA_LAUNCH || _save->getBattleGame()->getCurrentAction()->sprayTargeting)
 							{
 								_numWaypid->setValue(waypid);
 								_numWaypid->draw();

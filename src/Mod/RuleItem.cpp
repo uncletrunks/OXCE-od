@@ -61,7 +61,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_kneelBonus(-1), _oneHandedPenalty(-1),
-	_monthlySalary(0), _monthlyMaintenance(0)
+	_monthlySalary(0), _monthlyMaintenance(0),
+	_sprayWaypoints(0)
 {
 	_accuracyMulti.setFiring();
 	_meleeMulti.setMelee();
@@ -628,6 +629,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_oneHandedPenalty = node["oneHandedPenalty"].as<int>(_oneHandedPenalty);
 	_monthlySalary = node["monthlySalary"].as<int>(_monthlySalary);
 	_monthlyMaintenance = node["monthlyMaintenance"].as<int>(_monthlyMaintenance);
+	_sprayWaypoints = node["sprayWaypoints"].as<int>(_sprayWaypoints);
 
 	_damageBonus.load(node["damageBonus"]);
 	_meleeBonus.load(node["meleeBonus"]);
@@ -2345,6 +2347,15 @@ int RuleItem::getMonthlySalary() const
 int RuleItem::getMonthlyMaintenance() const
 {
 	return _monthlyMaintenance;
+}
+
+/**
+ * Gets how many waypoints are used for a "spray" attack
+ * @return Number of waypoints.
+ */
+int RuleItem::getSprayWaypoints() const
+{
+	return _sprayWaypoints;
 }
 
 }
