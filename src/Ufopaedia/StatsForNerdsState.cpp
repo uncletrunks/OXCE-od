@@ -482,11 +482,11 @@ void StatsForNerdsState::addBoolean(std::wostringstream &ss, const bool &value, 
 	resetStream(ss);
 	if (value)
 	{
-		ss << L"true";
+		ss << tr("STR_TRUE");
 	}
 	else
 	{
-		ss << L"false";
+		ss << tr("STR_FALSE");
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -855,9 +855,9 @@ void StatsForNerdsState::addBoolOrInteger(std::wostringstream &ss, const int &va
 	if (formatAsBoolean)
 	{
 		if (value == 1)
-			ss << L"true";
+			ss << tr("STR_TRUE");
 		else if (value == 0)
-			ss << L"false";
+			ss << tr("STR_FALSE");
 		else
 			ss << value;
 	}
