@@ -2219,7 +2219,17 @@ Soldier *SavedGame::inspectSoldiers(std::vector<Soldier*> &soldiers, std::vector
 	Soldier *highestRanked = 0;
 	for (std::vector<Soldier*>::iterator i = soldiers.begin(); i != soldiers.end(); ++i)
 	{
-		if ((*i)->getRank() == rank)
+		const std::vector<std::string> &rankStrings = (*i)->getRules()->getRankStrings();
+		bool rankIsMatching = ((*i)->getRank() == rank);
+		if (!rankStrings.empty())
+		{
+			// if rank is matching, but there are no more higher ranks defined for this soldier type, skip this soldier
+			if (rankIsMatching && (rank >= (int)rankStrings.size() - 1))
+			{
+				rankIsMatching = false;
+			}
+		}
+		if (rankIsMatching)
 		{
 			int score = getSoldierScore(*i);
 			if (score > highestScore && (!Options::fieldPromotions || std::find(participants.begin(), participants.end(), *i) != participants.end()))

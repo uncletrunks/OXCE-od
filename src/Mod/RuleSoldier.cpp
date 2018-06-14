@@ -167,6 +167,8 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder)
 		_statStrings.push_back(statString);
 	}
 
+	_rankStrings = node["rankStrings"].as< std::vector<std::string> >(_rankStrings);
+
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
@@ -426,6 +428,15 @@ const std::vector<SoldierNamePool*> &RuleSoldier::getNames() const
 const std::vector<StatString *> &RuleSoldier::getStatStrings() const
 {
 	return _statStrings;
+}
+
+/**
+ * Gets the list of strings for this soldier's ranks
+ * @return The list rank strings.
+ */
+const std::vector<std::string> &RuleSoldier::getRankStrings() const
+{
+	return _rankStrings;
 }
 
 }

@@ -337,22 +337,41 @@ std::wstring Soldier::getCraftString(Language *lang, float absBonus, float relBo
  */
 std::string Soldier::getRankString() const
 {
+	const std::vector<std::string> &rankStrings = _rules->getRankStrings();
 	if (!_rules->getAllowPromotion())
-		return "STR_RANK_NONE";
+	{
+		// even if promotion is not allowed, we allow to use a different "Rookie" translation per soldier type
+		if (rankStrings.empty())
+		{
+			return "STR_RANK_NONE";
+		}
+	}
 
 	switch (_rank)
 	{
 	case RANK_ROOKIE:
+		if (rankStrings.size() > 0)
+			return rankStrings.at(0);
 		return "STR_ROOKIE";
 	case RANK_SQUADDIE:
+		if (rankStrings.size() > 1)
+			return rankStrings.at(1);
 		return "STR_SQUADDIE";
 	case RANK_SERGEANT:
+		if (rankStrings.size() > 2)
+			return rankStrings.at(2);
 		return "STR_SERGEANT";
 	case RANK_CAPTAIN:
+		if (rankStrings.size() > 3)
+			return rankStrings.at(3);
 		return "STR_CAPTAIN";
 	case RANK_COLONEL:
+		if (rankStrings.size() > 4)
+			return rankStrings.at(4);
 		return "STR_COLONEL";
 	case RANK_COMMANDER:
+		if (rankStrings.size() > 5)
+			return rankStrings.at(5);
 		return "STR_COMMANDER";
 	default:
 		return "";
@@ -387,6 +406,16 @@ void Soldier::promoteRank()
 {
 	if (!_rules->getAllowPromotion())
 		return;
+
+	const std::vector<std::string> &rankStrings = _rules->getRankStrings();
+	if (!rankStrings.empty())
+	{
+		// stop if the soldier already has the maximum possible rank for his soldier type
+		if ((int)_rank >= rankStrings.size() - 1)
+		{
+			return;
+		}
+	}
 
 	_rank = (SoldierRank)((int)_rank + 1);
 	if (_rank > RANK_SQUADDIE)
