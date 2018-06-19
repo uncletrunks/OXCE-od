@@ -79,6 +79,12 @@ en-US:
   STR_SELECT_AVATAR_FOR: "SELECT AVATAR FOR{NEWLINE}{0}"
 #SoldiersState.h
   STR_TRAINING: "Training"
+  STR_SOLDIER_INFO: "Soldier Info"
+#SoldierTransformationAssignState.cpp
+  STR_TRANSFER_TIME: "Transfer Time>{ALT}{0}"
+  STR_RECOVERY_TIME: "Recovery Time>{ALT}{0}"
+  STR_CURRENT_STATS: "Current stats"
+  STR_CHANGES: "Changes"
 #StoresState.cpp
   STR_GRAND_TOTAL: "Grand Total"
 #TechTreeSelectState.cpp

@@ -93,6 +93,7 @@
 #include "RuleGlobe.h"
 #include "RuleVideo.h"
 #include "RuleConverter.h"
+#include "RuleSoldierTransformation.h"
 
 namespace OpenXcom
 {
@@ -295,7 +296,7 @@ Mod::Mod() :
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
 	_baseDefenseMapFromLocation(0),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
-	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0)
+	_researchListOrder(0),  _manufactureListOrder(0), _transformationListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0)
 {
 	_muteMusic = new Music();
 	_muteSound = new Sound();
@@ -543,6 +544,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, RuleManufacture *>::const_iterator i = _manufacture.begin(); i != _manufacture.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleSoldierTransformation *>::const_iterator i = _soldierTransformation.begin(); i != _soldierTransformation.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1281,6 +1286,15 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		{
 			_manufactureListOrder += 100;
 			rule->load(*i, _manufactureListOrder);
+		}
+	}
+	for (YAML::const_iterator i = doc["soldierTransformation"].begin(); i != doc["soldierTransformation"].end(); ++i)
+	{
+		RuleSoldierTransformation *rule = loadRule(*i, &_soldierTransformation, &_soldierTransformationIndex, "name");
+		if (rule != 0)
+		{
+			_transformationListOrder += 100;
+			rule->load(*i, _transformationListOrder);
 		}
 	}
 	for (YAML::const_iterator i = doc["ufopaedia"].begin(); i != doc["ufopaedia"].end(); ++i)
@@ -2494,6 +2508,25 @@ const std::vector<std::string> &Mod::getManufactureList() const
 }
 
 /**
+ * Returns the rules for the specified soldier transformation project.
+ * @param id Soldier transformation project type.
+ * @return Rules for the soldier transformation project.
+ */
+RuleSoldierTransformation *Mod::getSoldierTransformation (const std::string &id, bool error) const
+{
+	return getRule(id, "SoldierTransformation", _soldierTransformation, error);
+}
+
+/**
+ * Returns the list of soldier transformation projects.
+ * @return The list of soldier transformation projects.
+ */
+const std::vector<std::string> &Mod::getSoldierTransformationList() const
+{
+	return _soldierTransformationIndex;
+}
+
+/**
  * Generates and returns a list of facilities for custom bases.
  * The list contains all the facilities that are listed in the 'startingBase'
  * part of the ruleset.
@@ -2783,6 +2816,7 @@ void Mod::sortLists()
 	std::sort(_facilitiesIndex.begin(), _facilitiesIndex.end(), compareRule<RuleBaseFacility>(this, (compareRule<RuleBaseFacility>::RuleLookup)&Mod::getBaseFacility));
 	std::sort(_researchIndex.begin(), _researchIndex.end(), compareRule<RuleResearch>(this, (compareRule<RuleResearch>::RuleLookup)&Mod::getResearch));
 	std::sort(_manufactureIndex.begin(), _manufactureIndex.end(), compareRule<RuleManufacture>(this, (compareRule<RuleManufacture>::RuleLookup)&Mod::getManufacture));
+	std::sort(_soldierTransformationIndex.begin(), _soldierTransformationIndex.end(), compareRule<RuleSoldierTransformation>(this,  (compareRule<RuleSoldierTransformation>::RuleLookup)&Mod::getSoldierTransformation));
 	std::sort(_invsIndex.begin(), _invsIndex.end(), compareRule<RuleInventory>(this, (compareRule<RuleInventory>::RuleLookup)&Mod::getInventory));
 	// special cases
 	std::sort(_craftWeaponsIndex.begin(), _craftWeaponsIndex.end(), compareRule<RuleCraftWeapon>(this));

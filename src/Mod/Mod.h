@@ -62,6 +62,7 @@ class ArticleDefinition;
 class RuleInventory;
 class RuleResearch;
 class RuleManufacture;
+class RuleSoldierTransformation;
 class AlienRace;
 class RuleStartingCondition;
 class AlienDeployment;
@@ -129,6 +130,7 @@ private:
 	std::map<std::string, RuleInventory*> _invs;
 	std::map<std::string, RuleResearch *> _research;
 	std::map<std::string, RuleManufacture *> _manufacture;
+	std::map<std::string, RuleSoldierTransformation *> _soldierTransformation;
 	std::map<std::string, UfoTrajectory *> _ufoTrajectories;
 	std::map<std::string, RuleAlienMission *> _alienMissions;
 	std::map<std::string, RuleInterface *> _interfaces;
@@ -190,11 +192,11 @@ private:
 
 	std::map<std::string, int> _ufopaediaSections;
 	std::vector<std::string> _countriesIndex, _extraGlobeLabelsIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
-	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _ufopaediaCatIndex, _researchIndex, _manufactureIndex, _MCDPatchesIndex;
+	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _ufopaediaCatIndex, _researchIndex, _manufactureIndex, _soldierTransformationIndex, _MCDPatchesIndex;
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _extraSpritesIndex, _customPalettesIndex, _extraSoundsIndex, _extraStringsIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
-	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _ufopaediaListOrder, _invListOrder, _soldierListOrder;
+	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _transformationListOrder, _ufopaediaListOrder, _invListOrder, _soldierListOrder;
 	size_t _modOffset;
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
 	size_t _surfaceOffsetBigobs = 0;
@@ -537,6 +539,10 @@ public:
 	RuleManufacture *getManufacture (const std::string &id, bool error = false) const;
 	/// Gets the list of all manufacture projects.
 	const std::vector<std::string> &getManufactureList() const;
+	/// Gets the ruleset for a specific soldier transformation project.
+	RuleSoldierTransformation *getSoldierTransformation(const std::string &id, bool error = false) const;
+	/// Gets the list of all soldier transformation projects.
+	const std::vector<std::string> &getSoldierTransformationList() const;
 	/// Gets facilities for custom bases.
 	std::vector<RuleBaseFacility*> getCustomBaseFacilities() const;
 	/// Gets a specific UfoTrajectory.

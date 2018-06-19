@@ -50,6 +50,7 @@
 #include "../Mod/RuleResearch.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Mod/RuleBaseFacility.h"
+#include "../Mod/RuleSoldierTransformation.h"
 #include "Production.h"
 #include "MissionSite.h"
 #include "AlienBase.h"
@@ -1755,6 +1756,33 @@ void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & depen
 		{
 			dependables.push_back(m);
 		}
+	}
+}
+
+/**
+ * Get the list of RuleSoldierTransformation which can occur at a base.
+ * @param transformations the list of Transformations which are available.
+ * @param mod the Game Mod
+ * @param base a pointer to a Base
+ */
+void SavedGame::getAvailableTransformations (std::vector<RuleSoldierTransformation *> & transformations, const Mod * mod, Base * base) const
+{
+	const std::vector<std::string> &items = mod->getSoldierTransformationList();
+	const std::vector<std::string> &baseFunc = base->getProvidedBaseFunc();
+
+	for (std::vector<std::string>::const_iterator iter = items.begin(); iter != items.end(); ++iter)
+	{
+		RuleSoldierTransformation *m = mod->getSoldierTransformation(*iter);
+		if (!isResearched(m->getRequiredResearch()))
+		{
+			continue;
+		}
+		if (!std::includes(baseFunc.begin(), baseFunc.end(), m->getRequiredBaseFuncs().begin(), m->getRequiredBaseFuncs().end()))
+		{
+			continue;
+		}
+
+		transformations.push_back(m);
 	}
 }
 

@@ -2000,6 +2000,13 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 				}
 			}
 
+			// Check if the bodies of our dead soldiers were left, even if we don't recover them
+			// This is so we can give them a proper burial... or raise the dead!
+			if ((*it)->getUnit() && (*it)->getUnit()->getStatus() == STATUS_DEAD && (*it)->getUnit()->getGeoscapeSoldier())
+			{
+				(*it)->getUnit()->getGeoscapeSoldier()->setCorpseRecovered(true);
+			}
+
 			// put items back in the base
 			if (checkForRecovery(*it, rule))
 			{

@@ -39,6 +39,7 @@ class EquipmentLayoutItem;
 class SoldierDeath;
 class SoldierDiary;
 class SavedGame;
+class RuleSoldierTransformation;
 
 /**
  * Represents a soldier hired by the player.
@@ -67,6 +68,8 @@ private:
 	SoldierDeath *_death;
 	SoldierDiary *_diary;
 	std::wstring _statString;
+	bool _corpseRecovered;
+	std::map<std::string, int> _previousTransformations;
 public:
 	/// Creates a new soldier.
 	Soldier(RuleSoldier *rules, Armor *armor, int id = 0);
@@ -184,6 +187,17 @@ public:
 	bool isInTraining();
 	/// set the training status
 	void setTraining(bool training);
+	/// Sets whether the soldier's body was recovered from a battle
+	void setCorpseRecovered(bool corpseRecovered);
+	/// Gets the previous transformations performed on this soldier
+	std::map<std::string, int> &getPreviousTransformations();
+	/// Returns whether the unit is eligible for a certain transformation
+	bool isEligibleForTransformation(RuleSoldierTransformation *transformationRule);
+	/// Performs a transformation on this soldier
+	void transform(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
+	/// Calculates how this project changes the soldier's stats
+	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
+
 };
 
 }

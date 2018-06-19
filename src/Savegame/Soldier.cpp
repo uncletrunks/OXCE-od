@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cmath>
+#include <algorithm>
 #include "Soldier.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Language.h"
@@ -30,6 +31,7 @@
 #include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
 #include "../Mod/StatString.h"
+#include "../Mod/RuleSoldierTransformation.h"
 
 namespace OpenXcom
 {
@@ -45,7 +47,8 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
 	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0.0f),
 	_recentlyPromoted(false), _psiTraining(false), _training(false),
-	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary())
+	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary()),
+	_corpseRecovered(false)
 {
 	if (id != 0)
 	{
@@ -158,6 +161,8 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 		_diary->load(node["diary"], mod);
 	}
 	calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
+	_corpseRecovered = node["corpseRecovered"].as<bool>(_corpseRecovered);
+	_previousTransformations = node["previousTransformations"].as<std::map<std::string, int > >(_previousTransformations);
 }
 
 /**
@@ -209,6 +214,8 @@ YAML::Node Soldier::save() const
 	{
 		node["diary"] = _diary->save();
 	}
+	node["corpseRecovered"] = _corpseRecovered;
+	node["previousTransformations"] = _previousTransformations;
 
 	return node;
 }
@@ -293,7 +300,18 @@ void Soldier::setCraft(Craft *craft)
 std::wstring Soldier::getCraftString(Language *lang, float absBonus, float relBonus) const
 {
 	std::wstring s;
-	if (isWounded())
+	if (_death)
+	{
+		if (_death->getCause())
+		{
+			s = lang->getString("STR_KILLED_IN_ACTION", _gender);
+		}
+		else
+		{
+			s = lang->getString("STR_MISSING_IN_ACTION", _gender);
+		}
+	}
+	else if (isWounded())
 	{
 		std::wostringstream ss;
 		ss << lang->getString("STR_WOUNDED");
@@ -895,6 +913,254 @@ bool Soldier::isInTraining()
 void Soldier::setTraining(bool training)
 {
 	_training = training;
+}
+
+/**
+ * Sets whether or not the unit's corpse was recovered from a battle
+ */
+void Soldier::setCorpseRecovered(bool corpseRecovered)
+{
+	_corpseRecovered = corpseRecovered;
+}
+
+/**
+ * Gets the previous transformations performed on this soldier
+ * @return The map of previous transformations
+ */
+std::map<std::string, int> &Soldier::getPreviousTransformations()
+{
+	return _previousTransformations;
+}
+
+/**
+ * Checks whether or not the soldier is eligible for a certain transformation
+ */
+bool Soldier::isEligibleForTransformation(RuleSoldierTransformation *transformationRule)
+{
+	// alive and well
+	if (!_death && !isWounded() && !transformationRule->isAllowingAliveSoldiers())
+		return false;
+
+	// alive and wounded
+	if (!_death && isWounded() && !transformationRule->isAllowingWoundedSoldiers())
+		return false;
+
+	// dead
+	if (_death && !transformationRule->isAllowingDeadSoldiers())
+		return false;
+
+	// dead and vaporized, or missing in action
+	if (_death && !_corpseRecovered && transformationRule->needsCorpseRecovered())
+		return false;
+
+	// Is the soldier of the correct type?
+	const std::vector<std::string> &allowedTypes = transformationRule->getAllowedSoldierTypes();
+	std::vector<std::string >::const_iterator it;
+	it = std::find(allowedTypes.begin(), allowedTypes.end(), _rules->getType());
+	if (it == allowedTypes.end())
+		return false;
+
+	// Does this soldier's transformation history preclude this new project?
+	const std::vector<std::string> &requiredTransformations = transformationRule->getRequiredPreviousTransformations();
+	const std::vector<std::string> &forbiddenTransformations = transformationRule->getForbiddenPreviousTransformations();
+	for (auto it : requiredTransformations)
+	{
+		if (_previousTransformations.find(it) == _previousTransformations.end())
+			return false;
+	}
+
+	for (auto it : forbiddenTransformations)
+	{
+		if (_previousTransformations.find(it) != _previousTransformations.end())
+			return false;
+	}
+
+	// Does this soldier meet the minimum stat requirements for the project?
+	UnitStats minStats = transformationRule->getRequiredMinStats();
+	if (_currentStats.tu < minStats.tu ||
+		_currentStats.stamina < minStats.stamina ||
+		_currentStats.health < minStats.health ||
+		_currentStats.bravery < minStats.bravery ||
+		_currentStats.reactions < minStats.reactions ||
+		_currentStats.firing < minStats.firing ||
+		_currentStats.throwing < minStats.throwing ||
+		_currentStats.melee < minStats.melee ||
+		_currentStats.strength < minStats.strength ||
+		_currentStats.psiStrength < minStats.psiStrength ||
+		_currentStats.psiSkill < minStats.psiSkill)
+		return false;
+
+	return true;
+}
+
+/**
+ * Performs a transformation on this unit
+ */
+void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier)
+{
+	if (_death)
+	{
+		_corpseRecovered = false; // They're not a corpse anymore!
+		delete _death;
+		_death = 0;
+	}
+
+	if (transformationRule->getRecoveryTime() >= 0)
+	{
+		_recovery = transformationRule->getRecoveryTime();
+	}
+	_training = false;
+	_psiTraining = false;
+
+	// needed, because the armor size may change (also, it just makes sense)
+	sourceSoldier->setCraft(0);
+
+	if (transformationRule->isCreatingClone())
+	{
+		// a clone already has the correct soldier type, but random stats
+		// if we don't want random stats, let's copy them from the source soldier
+		if (!transformationRule->isUsingRandomStats())
+		{
+			UnitStats newStats = *sourceSoldier->getCurrentStats() + calculateStatChanges(mod, transformationRule, sourceSoldier);
+			setBothStats(&newStats);
+		}
+	}
+	else
+	{
+		// change soldier type if needed
+		if (_rules->getType() != transformationRule->getProducedSoldierType())
+		{
+			_rules = mod->getSoldier(transformationRule->getProducedSoldierType());
+		}
+
+		// change stats
+		if (transformationRule->isUsingRandomStats())
+		{
+			Soldier *tmpSoldier = new Soldier(_rules, 0, _id);
+			setBothStats(tmpSoldier->getCurrentStats());
+			delete tmpSoldier;
+			tmpSoldier = 0;
+		}
+		else
+		{
+			_currentStats += calculateStatChanges(mod, transformationRule, sourceSoldier);
+		}
+	}
+
+	if (!transformationRule->isKeepingSoldierArmor())
+	{
+		if (transformationRule->getProducedSoldierArmor().empty())
+		{
+			// default armor of the soldier's type
+			_armor = mod->getArmor(_rules->getArmor());
+		}
+		else
+		{
+			// explicitly defined armor
+			_armor = mod->getArmor(transformationRule->getProducedSoldierArmor());
+		}
+	}
+
+	// Remember the performed transformation (on the source soldier)
+	auto& history = sourceSoldier->getPreviousTransformations();
+	auto it = history.find(transformationRule->getName());
+	if (it != history.end())
+	{
+		it->second += 1;
+	}
+	else
+	{
+		history[transformationRule->getName()] = 1;
+	}
+}
+
+/**
+ * Calculates the stat changes a soldier undergoes from this project
+ * @param mod Pointer to the mod
+ * @return The stat changes
+ */
+UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier)
+{
+	UnitStats statChange;
+
+	// If this project uses random stats from the produced soldier type's rules, we don't need calculations!
+	if (transformationRule->isUsingRandomStats())
+		return statChange;
+
+	UnitStats initialStats = *sourceSoldier->getInitStats();
+	UnitStats currentStats = *sourceSoldier->getCurrentStats();
+	UnitStats gainedStats = currentStats - initialStats;
+
+	// Flat stat changes
+	statChange += transformationRule->getFlatOverallStatChange();
+
+	// Stat changes based on current stats
+	statChange.tu += transformationRule->getPercentOverallStatChange().tu * currentStats.tu / 100;
+	statChange.stamina += transformationRule->getPercentOverallStatChange().stamina * currentStats.stamina / 100;
+	statChange.health += transformationRule->getPercentOverallStatChange().health * currentStats.health / 100;
+	statChange.bravery += transformationRule->getPercentOverallStatChange().bravery * currentStats.bravery / 100;
+	statChange.reactions += transformationRule->getPercentOverallStatChange().reactions * currentStats.reactions / 100;
+	statChange.firing += transformationRule->getPercentOverallStatChange().firing * currentStats.firing / 100;
+	statChange.throwing += transformationRule->getPercentOverallStatChange().throwing * currentStats.throwing / 100;
+	statChange.strength += transformationRule->getPercentOverallStatChange().strength * currentStats.strength / 100;
+	statChange.psiStrength += transformationRule->getPercentOverallStatChange().psiStrength * currentStats.psiStrength / 100;
+	statChange.psiSkill += transformationRule->getPercentOverallStatChange().psiSkill * currentStats.psiSkill / 100;
+	statChange.melee += transformationRule->getPercentOverallStatChange().melee * currentStats.melee / 100;
+
+	// Stat changes based on gained stats
+	statChange.tu += transformationRule->getPercentGainedStatChange().tu * gainedStats.tu / 100;
+	statChange.stamina += transformationRule->getPercentGainedStatChange().stamina * gainedStats.stamina / 100;
+	statChange.health += transformationRule->getPercentGainedStatChange().health * gainedStats.health / 100;
+	statChange.bravery += transformationRule->getPercentGainedStatChange().bravery * gainedStats.bravery / 100;
+	statChange.reactions += transformationRule->getPercentGainedStatChange().reactions * gainedStats.reactions / 100;
+	statChange.firing += transformationRule->getPercentGainedStatChange().firing * gainedStats.firing / 100;
+	statChange.throwing += transformationRule->getPercentGainedStatChange().throwing * gainedStats.throwing / 100;
+	statChange.strength += transformationRule->getPercentGainedStatChange().strength * gainedStats.strength / 100;
+	statChange.psiStrength += transformationRule->getPercentGainedStatChange().psiStrength * gainedStats.psiStrength / 100;
+	statChange.psiSkill += transformationRule->getPercentGainedStatChange().psiSkill * gainedStats.psiSkill / 100;
+	statChange.melee += transformationRule->getPercentGainedStatChange().melee * gainedStats.melee / 100;
+
+	// round (mathematically) to whole tens
+	int sign = statChange.bravery < 0 ? -1 : 1;
+	statChange.bravery = ((statChange.bravery + (sign * 5)) / 10) * 10;
+
+	if (transformationRule->hasLowerBoundAtMinStats())
+	{
+		UnitStats lowerBound = mod->getSoldier(transformationRule->getProducedSoldierType())->getMinStats();
+		UnitStats cappedChange = lowerBound - currentStats;
+		statChange.tu = std::max(statChange.tu, cappedChange.tu);
+		statChange.stamina = std::max(statChange.stamina, cappedChange.stamina);
+		statChange.health = std::max(statChange.health, cappedChange.health);
+		statChange.bravery = std::max(statChange.bravery, cappedChange.bravery);
+		statChange.reactions = std::max(statChange.reactions, cappedChange.reactions);
+		statChange.firing = std::max(statChange.firing, cappedChange.firing);
+		statChange.throwing = std::max(statChange.throwing, cappedChange.throwing);
+		statChange.strength = std::max(statChange.strength, cappedChange.strength);
+		statChange.psiStrength = std::max(statChange.psiStrength, cappedChange.psiStrength);
+		statChange.psiSkill = std::max(statChange.psiSkill, cappedChange.psiSkill);
+		statChange.melee = std::max(statChange.melee, cappedChange.melee);
+	}
+
+	if (transformationRule->hasUpperBoundAtMaxStats() || transformationRule->hasUpperBoundAtStatCaps())
+	{
+		UnitStats upperBound = transformationRule->hasUpperBoundAtMaxStats()
+			? mod->getSoldier(transformationRule->getProducedSoldierType())->getMaxStats()
+			: mod->getSoldier(transformationRule->getProducedSoldierType())->getStatCaps();
+		UnitStats cappedChange = upperBound - currentStats;
+		statChange.tu = std::min(statChange.tu, cappedChange.tu);
+		statChange.stamina = std::min(statChange.stamina, cappedChange.stamina);
+		statChange.health = std::min(statChange.health, cappedChange.health);
+		statChange.bravery = std::min(statChange.bravery, cappedChange.bravery);
+		statChange.reactions = std::min(statChange.reactions, cappedChange.reactions);
+		statChange.firing = std::min(statChange.firing, cappedChange.firing);
+		statChange.throwing = std::min(statChange.throwing, cappedChange.throwing);
+		statChange.strength = std::min(statChange.strength, cappedChange.strength);
+		statChange.psiStrength = std::min(statChange.psiStrength, cappedChange.psiStrength);
+		statChange.psiSkill = std::min(statChange.psiSkill, cappedChange.psiSkill);
+		statChange.melee = std::min(statChange.melee, cappedChange.melee);
+	}
+
+	return statChange;
 }
 
 }

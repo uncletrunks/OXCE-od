@@ -271,6 +271,7 @@
     <ClCompile Include="Basescape\SoldierMemorialState.cpp" />
     <ClCompile Include="Basescape\SoldierSortUtil.cpp" />
     <ClCompile Include="Basescape\SoldiersState.cpp" />
+    <ClCompile Include="Basescape\SoldierTransformationState.cpp" />
     <ClCompile Include="Basescape\StoresState.cpp" />
     <ClCompile Include="Basescape\TechTreeSelectState.cpp" />
     <ClCompile Include="Basescape\TechTreeViewerState.cpp" />
@@ -474,6 +475,7 @@
     <ClCompile Include="Mod\CustomPalettes.cpp" />
     <ClCompile Include="Mod\RuleDamageType.cpp" />
     <ClCompile Include="Mod\RuleItemCategory.cpp" />
+    <ClCompile Include="Mod\RuleSoldierTransformation.cpp" />
     <ClCompile Include="Mod\RuleStartingCondition.cpp" />
     <ClCompile Include="Mod\RuleStatBonus.cpp" />
     <ClCompile Include="Mod\RuleCommendations.cpp" />
@@ -628,6 +630,7 @@
     <ClInclude Include="Basescape\SoldierMemorialState.h" />
     <ClInclude Include="Basescape\SoldierSortUtil.h" />
     <ClInclude Include="Basescape\SoldiersState.h" />
+    <ClInclude Include="Basescape\SoldierTransformationState.h" />
     <ClInclude Include="Basescape\StoresState.h" />
     <ClInclude Include="Basescape\TechTreeSelectState.h" />
     <ClInclude Include="Basescape\TechTreeViewerState.h" />
@@ -844,6 +847,7 @@
     <ClInclude Include="Mod\CustomPalettes.h" />
     <ClInclude Include="Mod\RuleDamageType.h" />
     <ClInclude Include="Mod\RuleItemCategory.h" />
+    <ClInclude Include="Mod\RuleSoldierTransformation.h" />
     <ClInclude Include="Mod\RuleStartingCondition.h" />
     <ClInclude Include="Mod\RuleStatBonus.h" />
     <ClInclude Include="Mod\RuleCommendations.h" />

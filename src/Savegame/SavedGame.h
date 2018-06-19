@@ -57,6 +57,7 @@ class Soldier;
 class Craft;
 class EquipmentLayoutItem;
 class ItemContainer;
+class RuleSoldierTransformation;
 struct MissionStatistics;
 struct BattleUnitKills;
 
@@ -263,6 +264,8 @@ public:
 	void getAvailableProductions(std::vector<RuleManufacture*> & productions, const Mod *mod, Base *base, ManufacturingFilterType filter = MANU_FILTER_DEFAULT) const;
 	/// Get the list of newly available manufacture projects once a research has been completed.
 	void getDependableManufacture(std::vector<RuleManufacture*> & dependables, const RuleResearch *research, const Mod *mod, Base *base) const;
+	/// Get the list of Soldier Transformations that can occur at a base
+	void getAvailableTransformations(std::vector<RuleSoldierTransformation*> & transformations, const Mod *mod, Base *base) const;
 	/// Get the list of newly available items to purchase once a research has been completed.
 	void getDependablePurchase(std::vector<RuleItem*> & dependables, const RuleResearch *research, const Mod *mod) const;
 	/// Get the list of newly available craft to purchase/rent once a research has been completed.

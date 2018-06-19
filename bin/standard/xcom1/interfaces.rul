@@ -2020,3 +2020,23 @@ interfaces:
         color: 246   # purple
       - id: comboBox
         color: 241   # pink
+  - type: soldierTransformation
+    palette: PAL_BASESCAPE
+    elements:
+      - id: palette
+        color: 2     # orange
+      - id: window
+        color: 241   # pink
+      - id: text
+        color: 218   # blue
+        color2: 208  # white
+      - id: list1
+        color: 246   # purple
+        color2: 208  # white
+        border: 218  # blue
+      - id: list2
+        color: 218   # blue
+        color2: 208  # white
+        border: 218  # blue
+      - id: button
+        color: 218   # blue

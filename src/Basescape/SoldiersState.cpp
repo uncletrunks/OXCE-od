@@ -21,6 +21,7 @@
 #include "../Engine/Screen.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleSoldierTransformation.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/ComboBox.h"
@@ -36,6 +37,7 @@
 #include "../Savegame/SavedGame.h"
 #include "SoldierInfoState.h"
 #include "SoldierMemorialState.h"
+#include "SoldierTransformationState.h"
 #include "../Battlescape/InventoryState.h"
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -53,40 +55,30 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 {
 	bool isPsiBtnVisible = Options::anytimePsiTraining && _base->getAvailablePsiLabs() > 0;
 	bool isTrnBtnVisible = Options::anytimeMartialTraining && _base->getAvailableTraining() > 0;
+	std::vector<RuleSoldierTransformation* > availableTransformations;
+	_game->getSavedGame()->getAvailableTransformations(availableTransformations, _game->getMod(), _base);
+	bool isTransformationAvailable = availableTransformations.size() > 0;
+
+	// if both training buttons would be displayed, or if there are any transformations, switch to combobox
+	bool showCombobox = isTransformationAvailable || (isPsiBtnVisible && isTrnBtnVisible);
+	// 3 buttons or 2 buttons?
+	bool showThreeButtons = !showCombobox && (isPsiBtnVisible || isTrnBtnVisible);
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	if (isPsiBtnVisible)
-	{
-		if (isTrnBtnVisible)
-		{
-			_btnOk = new TextButton(70, 16, 242, 176);
-			_btnPsiTraining = new TextButton(70, 16, 164, 176);
-			_btnTraining = new TextButton(70, 16, 86, 176);
-			_btnMemorial = new TextButton(70, 16, 8, 176);
-		}
-		else
-		{
-			_btnOk = new TextButton(96, 16, 216, 176);
-			_btnPsiTraining = new TextButton(96, 16, 112, 176);
-			_btnTraining = new TextButton(96, 16, 112, 176);
-			_btnMemorial = new TextButton(96, 16, 8, 176);
-		}
-	}
-	else if (isTrnBtnVisible)
+	if (showThreeButtons)
 	{
 		_btnOk = new TextButton(96, 16, 216, 176);
-		_btnPsiTraining = new TextButton(96, 16, 112, 176);
-		_btnTraining = new TextButton(96, 16, 112, 176);
 		_btnMemorial = new TextButton(96, 16, 8, 176);
 	}
 	else
 	{
 		_btnOk = new TextButton(148, 16, 164, 176);
-		_btnPsiTraining = new TextButton(148, 16, 164, 176);
-		_btnTraining = new TextButton(96, 16, 112, 176);
 		_btnMemorial = new TextButton(148, 16, 8, 176);
 	}
+	_btnPsiTraining = new TextButton(96, 16, 112, 176);
+	_btnTraining = new TextButton(96, 16, 112, 176);
+	_cbxScreenActions = new ComboBox(this, 148, 16, 8, 176, true);
 	_txtTitle = new Text(168, 17, 16, 8);
 	_cbxSortBy = new ComboBox(this, 120, 16, 192, 8, false);
 	_txtName = new Text(114, 9, 16, 32);
@@ -99,15 +91,22 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 
 	add(_window, "window", "soldierList");
 	add(_btnOk, "button", "soldierList");
-	add(_btnPsiTraining, "button", "soldierList");
-	add(_btnTraining, "button", "soldierList");
-	add(_btnMemorial, "button", "soldierList");
 	add(_txtTitle, "text1", "soldierList");
 	add(_txtName, "text2", "soldierList");
 	add(_txtRank, "text2", "soldierList");
 	add(_txtCraft, "text2", "soldierList");
 	add(_lstSoldiers, "list", "soldierList");
 	add(_cbxSortBy, "button", "soldierList");
+	if (showCombobox)
+	{
+		add(_cbxScreenActions, "button", "soldierList");
+	}
+	else
+	{
+		add(_btnMemorial, "button", "soldierList");
+		add(_btnPsiTraining, "button", "soldierList");
+		add(_btnTraining, "button", "soldierList");
+	}
 
 	centerAllSurfaces();
 
@@ -129,6 +128,32 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 
 	_btnMemorial->setText(tr("STR_MEMORIAL"));
 	_btnMemorial->onMouseClick((ActionHandler)&SoldiersState::btnMemorialClick);
+
+	_availableOptions.clear();
+	if (showCombobox)
+	{
+		_btnMemorial->setVisible(false);
+		_btnPsiTraining->setVisible(false);
+		_btnTraining->setVisible(false);
+
+		_availableOptions.push_back("STR_SOLDIER_INFO");
+		_availableOptions.push_back("STR_MEMORIAL");
+
+		if (isPsiBtnVisible)
+			_availableOptions.push_back("STR_PSI_TRAINING");
+
+		if (isTrnBtnVisible)
+			_availableOptions.push_back("STR_TRAINING");
+
+		for (auto transformationRule : availableTransformations)
+		{
+			_availableOptions.push_back(transformationRule->getName());
+		}
+
+		_cbxScreenActions->setOptions(_availableOptions);
+		_cbxScreenActions->setSelected(0);
+		_cbxScreenActions->onChange((ActionHandler)&SoldiersState::cbxScreenActionsChange);
+	}
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_LEFT);
@@ -175,7 +200,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_cbxSortBy->onChange((ActionHandler)&SoldiersState::cbxSortByChange);
 	_cbxSortBy->setText(tr("STR_SORT_BY"));
 
-	_lstSoldiers->setArrowColumn(188, ARROW_VERTICAL);
+	//_lstSoldiers->setArrowColumn(188, ARROW_VERTICAL);
 	_lstSoldiers->setColumns(3, 106, 98, 76);
 	_lstSoldiers->setAlign(ALIGN_RIGHT, 3);
 	_lstSoldiers->setSelectable(true);
@@ -271,8 +296,52 @@ void SoldiersState::init()
  */
 void SoldiersState::initList(size_t scrl)
 {
-	unsigned int row = 0;
 	_lstSoldiers->clearList();
+
+	_filteredListOfSoldiers.clear();
+
+	std::string selAction = "STR_SOLDIER_INFO";
+	if (!_availableOptions.empty())
+	{
+		selAction = _availableOptions.at(_cbxScreenActions->getSelected());
+	}
+
+	if (selAction == "STR_SOLDIER_INFO")
+	{
+		_lstSoldiers->setArrowColumn(188, ARROW_VERTICAL);
+
+		// all soldiers in the base
+		_filteredListOfSoldiers = *_base->getSoldiers();
+	}
+	else
+	{
+		_lstSoldiers->setArrowColumn(-1, ARROW_VERTICAL);
+
+		// filtered list of soldiers eligible for transformation
+		RuleSoldierTransformation *transformationRule = _game->getMod()->getSoldierTransformation(selAction);
+		if (transformationRule)
+		{
+			for (auto& soldier : *_base->getSoldiers())
+			{
+				if (soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT")
+				{
+					// soldiers outside of the base are not eligible
+					continue;
+				}
+				if (soldier->isEligibleForTransformation(transformationRule))
+				{
+					_filteredListOfSoldiers.push_back(soldier);
+				}
+			}
+			for (auto& deadMan : *_game->getSavedGame()->getDeadSoldiers())
+			{
+				if (deadMan->isEligibleForTransformation(transformationRule))
+				{
+					_filteredListOfSoldiers.push_back(deadMan);
+				}
+			}
+		}
+	}
 
 	if (_dynGetter != NULL)
 	{
@@ -285,24 +354,31 @@ void SoldiersState::initList(size_t scrl)
 
 	float absBonus = _base->getSickBayAbsoluteBonus();
 	float relBonus = _base->getSickBayRelativeBonus();
-	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+	unsigned int row = 0;
+	for (std::vector<Soldier*>::iterator i = _filteredListOfSoldiers.begin(); i != _filteredListOfSoldiers.end(); ++i)
 	{
+		std::wstring craftString = (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus);
+
 		if (_dynGetter != NULL)
 		{
 			// call corresponding getter
 			int dynStat = (*_dynGetter)(_game, *i);
 			std::wostringstream ss;
 			ss << dynStat;
-			_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), ss.str().c_str());
+			_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), craftString.c_str(), ss.str().c_str());
 		}
 		else
 		{
-			_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str());
+			_lstSoldiers->addRow(3, (*i)->getName(true).c_str(), tr((*i)->getRankString()).c_str(), craftString.c_str());
 		}
 
 		if ((*i)->getCraft() == 0)
 		{
 			_lstSoldiers->setRowColor(row, _lstSoldiers->getSecondaryColor());
+		}
+		if ((*i)->getDeath())
+		{
+			_lstSoldiers->setRowColor(row, _txtCraft->getColor());
 		}
 		row++;
 	}
@@ -436,7 +512,7 @@ void SoldiersState::btnPsiTrainingClick(Action *)
 }
 
 /**
- * Opens the Psionic Training screen.
+ * Opens the Martial Training screen.
  * @param action Pointer to an action.
  */
 void SoldiersState::btnTrainingClick(Action *)
@@ -451,6 +527,36 @@ void SoldiersState::btnTrainingClick(Action *)
 void SoldiersState::btnMemorialClick(Action *)
 {
 	_game->pushState(new SoldierMemorialState);
+}
+
+/**
+ * Opens the selected screen from the combo box
+ * @param action Pointer to an action
+ */
+void SoldiersState::cbxScreenActionsChange(Action *action)
+{
+	const std::string selAction = _availableOptions.at(_cbxScreenActions->getSelected());
+
+	if (selAction == "STR_MEMORIAL")
+	{
+		_cbxScreenActions->setSelected(0);
+		_game->pushState(new SoldierMemorialState);
+	}
+	else if (selAction == "STR_PSI_TRAINING")
+	{
+		_cbxScreenActions->setSelected(0);
+		_game->pushState(new AllocatePsiTrainingState(_base));
+	}
+	else if (selAction == "STR_TRAINING")
+	{
+		_cbxScreenActions->setSelected(0);
+		_game->pushState(new AllocateTrainingState(_base));
+	}
+	else
+	{
+		// "STR_SOLDIER_INFO" or any available soldier transformation
+		initList(0);
+	}
 }
 
 /**
@@ -486,7 +592,23 @@ void SoldiersState::lstSoldiersClick(Action *action)
 		return;
 	}
 
-	_game->pushState(new SoldierInfoState(_base, _lstSoldiers->getSelectedRow()));
+	const std::string selAction = _availableOptions.at(_cbxScreenActions->getSelected());
+	if (selAction == "STR_SOLDIER_INFO")
+	{
+		_game->pushState(new SoldierInfoState(_base, _lstSoldiers->getSelectedRow()));
+	}
+	else
+	{
+		RuleSoldierTransformation *transformationRule = _game->getMod()->getSoldierTransformation(selAction);
+		if (transformationRule)
+		{
+			_game->pushState(new SoldierTransformationState(
+				transformationRule,
+				_base,
+				_filteredListOfSoldiers.at(_lstSoldiers->getSelectedRow()),
+				&_filteredListOfSoldiers));
+		}
+	}
 }
 
 }

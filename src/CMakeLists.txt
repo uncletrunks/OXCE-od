@@ -52,6 +52,7 @@ set ( basescape_src
   Basescape/SoldierMemorialState.cpp
   Basescape/SoldierSortUtil.cpp
   Basescape/SoldiersState.cpp
+  Basescape/SoldierTransformationState.cpp
   Basescape/StoresState.cpp
   Basescape/TechTreeSelectState.cpp
   Basescape/TechTreeViewerState.cpp
@@ -303,6 +304,7 @@ set ( mod_src
   Mod/RuleRegion.cpp
   Mod/RuleResearch.cpp
   Mod/RuleSoldier.cpp
+  Mod/RuleSoldierTransformation.cpp
   Mod/RuleStatBonus.cpp
   Mod/RuleTerrain.cpp
   Mod/RuleUfo.cpp

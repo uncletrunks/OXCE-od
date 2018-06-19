@@ -1051,6 +1051,12 @@
     <ClCompile Include="Menu\HelloCommanderState.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
+    <ClCompile Include="Mod\RuleSoldierTransformation.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\SoldierTransformationState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2145,6 +2151,12 @@
     </ClInclude>
     <ClInclude Include="Menu\HelloCommanderState.h">
       <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleSoldierTransformation.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SoldierTransformationState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
