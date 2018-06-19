@@ -71,7 +71,7 @@ private:
 	std::string _alienRace;
 	const AlienDeployment *_alienCustomDeploy, *_alienCustomMission;
 	int _alienItemLevel;
-	bool _allowAutoLoadout, _baseInventory, _generateFuel, _craftDeployed;
+	bool _allowAutoLoadout, _baseInventory, _generateFuel, _craftDeployed, _ufoDeployed;
 	int _craftZ;
 	SDL_Rect _craftPos;
 	std::vector<SDL_Rect> _ufoPos;

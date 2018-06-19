@@ -76,7 +76,7 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0),
-	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _craftZ(0), _blocksToDo(0), _dummy(0)
+	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _blocksToDo(0), _dummy(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
 }
@@ -2109,6 +2109,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			// each command can be attempted multiple times, as randomization within the rects may occur
 			for (int j = 0; j < command->getExecutions(); ++j)
 			{
+				_ufoDeployed = false; // reset EACH time
 				// Loop over the VerticalLevels if they exist, otherwise just do single level
 				for (size_t m = 0; m <= _verticalLevels.size(); m++)
 				{
@@ -2209,29 +2210,33 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 							if (m == 0)
 							{
 								bool craftPlaced = addCraft(craftMap, command, _craftPos, terrain);
-								if (!craftPlaced)
+								// Note: if label != 0, we assume that this may actually fail and will be handled by subsequent command(s)
+								if (!craftPlaced && command->getLabel() == 0)
 								{
 									throw Exception("Map generator encountered an error: Craft (MapBlock: "
 										+ craftMap->getName()
 										+ ") could not be placed on the map. You may try turning on 'save scumming' to work around this issue.");
 								}
-								// by default addCraft adds blocks from group 1.
-								// this can be overwritten in the command by defining specific groups or blocks
-								// or this behaviour can be suppressed by leaving group 1 empty
-								// this is intentional to allow for TFTD's cruise liners/etc
-								// in this situation, you can end up with ANYTHING under your craft, so be careful
-								for (x = _craftPos.x; x < _craftPos.x + _craftPos.w; ++x)
+								if (craftPlaced)
 								{
-									for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
+									// by default addCraft adds blocks from group 1.
+									// this can be overwritten in the command by defining specific groups or blocks
+									// or this behaviour can be suppressed by leaving group 1 empty
+									// this is intentional to allow for TFTD's cruise liners/etc
+									// in this situation, you can end up with ANYTHING under your craft, so be careful
+									for (x = _craftPos.x; x < _craftPos.x + _craftPos.w; ++x)
 									{
-										if (_blocks[x][y])
+										for (y = _craftPos.y; y < _craftPos.y + _craftPos.h; ++y)
 										{
-											addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
+											if (_blocks[x][y])
+											{
+												addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
+											}
 										}
 									}
+									_craftDeployed = true;
+									success = true;
 								}
-								_craftDeployed = true;
-								success = true;
 							}
 
 							if (m != 0 && _craftDeployed)
@@ -2288,11 +2293,12 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 							if (m == 0) // Choose UFO location when on ground level
 							{
 								bool ufoPlaced = addCraft(ufoMap, command, ufoPosTemp, terrain);
-								if (!ufoPlaced)
+								// Note: if label != 0, we assume that this may actually fail and will be handled by subsequent command(s)
+								if (!ufoPlaced && command->getLabel() == 0)
 								{
 									if (command->canBeSkipped())
 									{
-										Log(LOG_WARNING) << "Map generator encountered a problem: UFO (MapBlock: " << ufoMap->getName() << ") could not be placed on the map. Command skipped.";
+										Log(LOG_INFO) << "Map generator encountered a recoverable problem: UFO (MapBlock: " << ufoMap->getName() << ") could not be placed on the map. Command skipped.";
 										break;
 									}
 									else
@@ -2302,23 +2308,27 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 											+ ") could not be placed on the map. You may try turning on 'save scumming' to work around this issue.");
 									}
 								}
-								_ufoPos.push_back(ufoPosTemp);
-								ufoMaps.push_back(ufoMap);
-								for (x = ufoPosTemp.x; x < ufoPosTemp.x + ufoPosTemp.w; ++x)
+								if (ufoPlaced)
 								{
-									for (y = ufoPosTemp.y; y < ufoPosTemp.y + ufoPosTemp.h; ++y)
+									_ufoPos.push_back(ufoPosTemp);
+									ufoMaps.push_back(ufoMap);
+									for (x = ufoPosTemp.x; x < ufoPosTemp.x + ufoPosTemp.w; ++x)
 									{
-										if (_blocks[x][y])
+										for (y = ufoPosTemp.y; y < ufoPosTemp.y + ufoPosTemp.h; ++y)
 										{
-											addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
+											if (_blocks[x][y])
+											{
+												addMAPAlternate(_blocks[x][y], x, y, zOff, terrain);
+											}
 										}
 									}
+									_ufoZ.push_back(0);
+									_ufoDeployed = true;
+									success = true;
 								}
-								_ufoZ.push_back(0);
-								success = true;
 							}
 
-							if (m != 0) // Check for loading more vertical levels, but only add if LZ was chosen
+							if (m != 0 && _ufoDeployed)
 							{
 								if (currentLevel.levelType != "empty" && currentLevel.levelType != "craft")
 								{
