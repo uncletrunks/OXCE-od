@@ -592,7 +592,11 @@ void SoldiersState::lstSoldiersClick(Action *action)
 		return;
 	}
 
-	const std::string selAction = _availableOptions.at(_cbxScreenActions->getSelected());
+	std::string selAction = "STR_SOLDIER_INFO";
+	if (!_availableOptions.empty())
+	{
+		selAction = _availableOptions.at(_cbxScreenActions->getSelected());
+	}
 	if (selAction == "STR_SOLDIER_INFO")
 	{
 		_game->pushState(new SoldierInfoState(_base, _lstSoldiers->getSelectedRow()));
