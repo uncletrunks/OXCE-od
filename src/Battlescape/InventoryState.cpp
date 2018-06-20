@@ -425,9 +425,9 @@ void InventoryState::init()
 		}
 
 		SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
-		texture->getFrame(20 + s->getRank())->setX(0);
-		texture->getFrame(20 + s->getRank())->setY(0);
-		texture->getFrame(20 + s->getRank())->blit(_btnRank);
+		texture->getFrame(s->getRankSpriteBattlescape())->setX(0);
+		texture->getFrame(s->getRankSpriteBattlescape())->setY(0);
+		texture->getFrame(s->getRankSpriteBattlescape())->blit(_btnRank);
 
 		const std::string look = s->getArmor()->getSpriteInventory();
 		const std::string gender = s->getGender() == GENDER_MALE ? "M" : "F";

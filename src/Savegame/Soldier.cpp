@@ -380,15 +380,24 @@ std::string Soldier::getRankString() const
 
 /**
  * Returns a graphic representation of
- * the soldier's military rank.
- * @note THE MEANING OF LIFE
+ * the soldier's military rank from BASEBITS.PCK.
+ * @note THE MEANING OF LIFE (is now obscured as a default)
  * @return Sprite ID for rank.
  */
 int Soldier::getRankSprite() const
 {
-	return 42 + _rank;
+	return _rules->getRankSprite() + _rank;
 }
 
+/**
+ * Returns a graphic representation of
+ * the soldier's military rank from SMOKE.PCK
+ * @return Sprite ID for rank.
+ */
+int Soldier::getRankSpriteBattlescape() const
+{
+	return _rules->getRankSpriteBattlescape() + _rank;
+}
 
 /**
  * Returns the soldier's military rank.

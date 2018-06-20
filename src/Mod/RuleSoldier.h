@@ -50,6 +50,7 @@ private:
 	bool _allowPromotion, _allowPiloting;
 	std::vector<StatString*> _statStrings;
 	std::vector<std::string> _rankStrings;
+	int _rankSprite, _rankSpriteBattlescape;
 
 	void addSoldierNamePool(const std::string &namFile);
 public:
@@ -111,8 +112,12 @@ public:
 	const std::vector<SoldierNamePool*> &getNames() const;
 	/// Gets the list of StatStrings.
 	const std::vector<StatString *> &getStatStrings() const;
-	/// Gets the list of strings for ranks
+	/// Gets the list of strings for ranks.
 	const std::vector<std::string> &getRankStrings() const;
+	/// Gets the offset of the rank sprite in BASEBITS.PCK.
+	int getRankSprite() const;
+	/// Gets the offset of the rank sprite in SMOKE.PCK.
+	int getRankSpriteBattlescape() const;
 };
 
 }

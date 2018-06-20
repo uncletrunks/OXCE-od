@@ -1639,7 +1639,7 @@ void BattlescapeState::updateSoldierInfo()
 		{
 			// show rank (vanilla behaviour)
 			SurfaceSet *texture = _game->getMod()->getSurfaceSet("SMOKE.PCK");
-			texture->getFrame(20 + soldier->getRank())->blit(_rank);
+			texture->getFrame(soldier->getRankSpriteBattlescape())->blit(_rank);
 		}
 		else
 		{

@@ -33,7 +33,8 @@ namespace OpenXcom
 RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _listOrder(0), _costBuy(0), _costSalary(0),
 	_costSalarySquaddie(0), _costSalarySergeant(0), _costSalaryCaptain(0), _costSalaryColonel(0), _costSalaryCommander(0),
 	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(67), _avatarOffsetY(48), _flagOffset(0),
-	_allowPromotion(true), _allowPiloting(true)
+	_allowPromotion(true), _allowPiloting(true),
+	_rankSprite(42), _rankSpriteBattlescape(20)
 {
 }
 
@@ -168,6 +169,14 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder)
 	}
 
 	_rankStrings = node["rankStrings"].as< std::vector<std::string> >(_rankStrings);
+	if (node["rankSprite"])
+	{
+		_rankSprite = mod->getSpriteOffset(node["rankSprite"].as<int>(_rankSprite), "BASEBITS.PCK");
+	}
+	if (node["rankBattleSprite"])
+	{
+		_rankSpriteBattlescape = mod->getSpriteOffset(node["rankBattleSprite"].as<int>(_rankSpriteBattlescape), "SMOKE.PCK");
+	}
 
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
@@ -437,6 +446,24 @@ const std::vector<StatString *> &RuleSoldier::getStatStrings() const
 const std::vector<std::string> &RuleSoldier::getRankStrings() const
 {
 	return _rankStrings;
+}
+
+/**
+ * Gets the index of the sprites to use to represent this soldier's rank in BASEBITS.PCK
+ * @return The sprite index.
+ */
+int RuleSoldier::getRankSprite() const
+{
+	return _rankSprite;
+}
+
+/**
+ * Gets the index of the sprites to use to represent this soldier's rank in SMOKE.PCK
+ * @return The sprite index.
+ */
+int RuleSoldier::getRankSpriteBattlescape() const
+{
+	return _rankSpriteBattlescape;
 }
 
 }
