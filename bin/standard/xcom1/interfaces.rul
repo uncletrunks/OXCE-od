@@ -1749,6 +1749,7 @@ interfaces:
         color2: 16
       - id: textItem
         color: 48
+        color2: 16
       - id: textAmmo
         color: 64
         color2: 16

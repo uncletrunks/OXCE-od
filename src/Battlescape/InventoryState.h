@@ -58,8 +58,10 @@ private:
 	BattlescapeState *_parent;
 	Base *_base;
 	std::string _currentTooltip;
+	std::wstring _currentDamageTooltip;
 	int _mouseHoverItemFrame = 0;
 	BattleItem *_mouseHoverItem = nullptr;
+	BattleItem *_currentDamageTooltipItem = nullptr;
 	bool _reloadUnit;
 	int _globalLayoutIndex;
 	/// Helper method for Create Template button
@@ -122,6 +124,7 @@ public:
 	/// Handler for clicking on the inventory.
 	void invClick(Action *action);
 	/// Handler for showing item info.
+	void calculateCurrentDamageTooltip();
 	void invMouseOver(Action *action);
 	/// Handler for hiding item info.
 	void invMouseOut(Action *action);

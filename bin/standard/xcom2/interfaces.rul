@@ -1865,6 +1865,7 @@ interfaces: #done
         color2: 16
       - id: textItem
         color: 192
+        color2: 16
       - id: textAmmo
         color: 48
         color2: 16

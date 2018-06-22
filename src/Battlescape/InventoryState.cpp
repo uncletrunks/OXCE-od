@@ -1200,6 +1200,99 @@ void InventoryState::invClick(Action *act)
 }
 
 /**
+ * Calculates item damage info.
+ */
+void InventoryState::calculateCurrentDamageTooltip()
+{
+	// Differences against battlescape indicator:
+	// 1. doesn't consider which action (auto/snap/aim/melee) is used... just takes ammo from primary slot
+	// 2. doesn't show psi success chance (distance is unknown)
+	// 3. doesn't consider range power reduction (distance is unknown)
+
+	const BattleUnit *currentUnit = _inv->getSelectedUnit();
+
+	if (!currentUnit)
+		return;
+
+	if (!_currentDamageTooltipItem)
+		return;
+
+	const RuleItem *weaponRule = _currentDamageTooltipItem->getRules();
+	const int PRIMARY_SLOT = 0;
+
+	// step 1: determine rule
+	const RuleItem *rule;
+	if (weaponRule->getBattleType() == BT_PSIAMP)
+	{
+		rule = weaponRule;
+	}
+	else if (_currentDamageTooltipItem->needsAmmoForSlot(PRIMARY_SLOT))
+	{
+		if (_currentDamageTooltipItem->getAmmoForSlot(PRIMARY_SLOT) != 0)
+		{
+			rule = _currentDamageTooltipItem->getAmmoForSlot(PRIMARY_SLOT)->getRules();
+		}
+		else
+		{
+			rule = 0; // empty weapon = no rule
+		}
+	}
+	else
+	{
+		rule = weaponRule;
+	}
+
+	// step 2: check if unlocked
+	if (_game->getSavedGame()->getMonthsPassed() == -1)
+	{
+		// new battle mode
+	}
+	else if (rule)
+	{
+		// instead of checking the weapon/ammo itself... we're checking their ufopedia articles here
+		// same as for the battlescape indicator
+		// it's arguable if this is the correct approach, but so far this is what we have
+		ArticleDefinition *article = _game->getMod()->getUfopaediaArticle(rule->getType(), false);
+		if (article && !Ufopaedia::isArticleAvailable(_game->getSavedGame(), article))
+		{
+			// ammo/weapon locked
+			rule = 0;
+		}
+		if (rule && rule->getType() != weaponRule->getType())
+		{
+			article = _game->getMod()->getUfopaediaArticle(weaponRule->getType(), false);
+			if (article && !Ufopaedia::isArticleAvailable(_game->getSavedGame(), article))
+			{
+				// weapon locked
+				rule = 0;
+			}
+		}
+	}
+
+	// step 3: calculate and remember
+	if (rule)
+	{
+		if (rule->getBattleType() != BT_CORPSE)
+		{
+			int totalDamage = 0;
+			totalDamage += rule->getPowerBonus(currentUnit);
+			//totalDamage -= rule->getPowerRangeReduction(distance * 16);
+			if (totalDamage < 0) totalDamage = 0;
+			std::wostringstream ss;
+			ss << rule->getDamageType()->getRandomDamage(totalDamage, 1);
+			ss << "-";
+			ss << rule->getDamageType()->getRandomDamage(totalDamage, 2);
+			if (rule->getDamageType()->RandomType == DRT_UFO_WITH_TWO_DICE)
+				ss << "*";
+			_currentDamageTooltip = tr("STR_DAMAGE_UC_").arg(ss.str());
+		}
+	}
+	else
+	{
+		_currentDamageTooltip = tr("STR_DAMAGE_UC_").arg(tr("STR_UNKNOWN"));
+	}
+}
+/**
  * Shows item info.
  * @param action Pointer to an action.
  */
@@ -1210,11 +1303,28 @@ void InventoryState::invMouseOver(Action *)
 		return;
 	}
 
+	bool altPressed = ((SDL_GetModState() & KMOD_ALT) != 0);
+	bool currentDamageTooltipItemChanged = false;
+
 	BattleItem *item = _inv->getMouseOverItem();
 	if (item != _mouseHoverItem)
 	{
 		_mouseHoverItemFrame = _inv->getAnimFrame();
 		_mouseHoverItem = item;
+	}
+	if (altPressed)
+	{
+		if (item != _currentDamageTooltipItem)
+		{
+			currentDamageTooltipItemChanged = true;
+			_currentDamageTooltipItem = item;
+			_currentDamageTooltip = L"";
+		}
+	}
+	else
+	{
+		_currentDamageTooltipItem = nullptr;
+		_currentDamageTooltip = L"";
 	}
 	if (item != 0)
 	{
@@ -1249,7 +1359,18 @@ void InventoryState::invMouseOver(Action *)
 						text += tr(ammoName);
 					}
 				}
-				itemName = text;
+				if (altPressed)
+				{
+					if (currentDamageTooltipItemChanged)
+					{
+						calculateCurrentDamageTooltip();
+					}
+					itemName = _currentDamageTooltip;
+				}
+				else
+				{
+					itemName = text;
+				}
 			}
 			else
 			{
@@ -1257,7 +1378,7 @@ void InventoryState::invMouseOver(Action *)
 			}
 		}
 
-		if (Options::showItemNameAndWeightInInventory)
+		if (!altPressed && Options::showItemNameAndWeightInInventory)
 		{
 			std::wostringstream ss;
 			ss << itemName;
@@ -1316,6 +1437,8 @@ void InventoryState::invMouseOut(Action *)
 	_txtAmmo->setText(L"");
 	_selAmmo->clear();
 	_mouseHoverItem = nullptr;
+	_currentDamageTooltipItem = nullptr;
+	_currentDamageTooltip = L"";
 	updateTemplateButtons(!_tu);
 }
 
