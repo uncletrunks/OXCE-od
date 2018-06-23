@@ -36,7 +36,7 @@
 
 namespace OpenXcom
 {
-	UfopaediaSelectState::UfopaediaSelectState(const std::string &section) : _section(section)
+	UfopaediaSelectState::UfopaediaSelectState(const std::string &section) : _section(section), _lstScroll(0)
 	{
 		_screen = false;
 
@@ -120,6 +120,7 @@ namespace OpenXcom
 	 */
 	void UfopaediaSelectState::lstSelectionClick(Action *)
 	{
+		_lstScroll = _lstSelection->getScroll();
 		Ufopaedia::openArticle(_game, _filtered_article_list[_lstSelection->getSelectedRow()]);
 	}
 
@@ -247,6 +248,11 @@ namespace OpenXcom
 
 		std::wstring label = tr("STR_SHOW_ONLY_NEW");
 		_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
+		if (_lstScroll > 0)
+		{
+			_lstSelection->scrollTo(_lstScroll);
+			_lstScroll = 0;
+		}
 	}
 
 }

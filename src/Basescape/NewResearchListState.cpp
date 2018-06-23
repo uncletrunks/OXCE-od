@@ -42,7 +42,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-NewResearchListState::NewResearchListState(Base *base) : _base(base)
+NewResearchListState::NewResearchListState(Base *base) : _base(base), _lstScroll(0)
 {
 	_screen = false;
 
@@ -110,6 +110,7 @@ void NewResearchListState::init()
  */
 void NewResearchListState::onSelectProject(Action *)
 {
+	_lstScroll = _lstResearch->getScroll();
 	_game->pushState(new ResearchInfoState(_base, _projects[_lstResearch->getSelectedRow()]));
 }
 
@@ -141,6 +142,7 @@ void NewResearchListState::onToggleProjectStatus(Action *)
 */
 void NewResearchListState::onOpenTechTreeViewer(Action *)
 {
+	_lstScroll = _lstResearch->getScroll();
 	const RuleResearch *selectedTopic = _projects[_lstResearch->getSelectedRow()];
 	_game->pushState(new TechTreeViewerState(selectedTopic, 0));
 }
@@ -278,6 +280,11 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 
 	std::wstring label = tr("STR_SHOW_ONLY_NEW");
 	_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
+	if (_lstScroll > 0)
+	{
+		_lstResearch->scrollTo(_lstScroll);
+		_lstScroll = 0;
+	}
 }
 
 }

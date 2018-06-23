@@ -64,7 +64,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param craft ID of the selected craft.
  */
-CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _craft(craft), _base(base), _totalItems(0), _ammoColor(0), _reload(true)
+CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _lstScroll(0), _sel(0), _craft(craft), _base(base), _totalItems(0), _ammoColor(0), _reload(true)
 {
 	Craft *c = _base->getCrafts()->at(_craft);
 	bool craftHasACrew = c->getNumSoldiers() > 0;
@@ -398,6 +398,11 @@ void CraftEquipmentState::initList()
 	}
 
 	_lstEquipment->draw();
+	if (_lstScroll > 0)
+	{
+		_lstEquipment->scrollTo(_lstScroll);
+		_lstScroll = 0;
+	}
 }
 
 /**
@@ -524,6 +529,7 @@ void CraftEquipmentState::lstEquipmentMousePress(Action *action)
 	}
 	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
 	{
+		_lstScroll = _lstEquipment->getScroll();
 		RuleItem *rule = _game->getMod()->getItem(_items[_sel]);
 		std::string articleId = rule->getType();
 		Ufopaedia::openArticle(_game, articleId);

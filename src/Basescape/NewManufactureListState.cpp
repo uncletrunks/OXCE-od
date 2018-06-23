@@ -47,7 +47,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _showRequirements(false), _detailClicked(false)
+NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _showRequirements(false), _detailClicked(false), _lstScroll(0)
 {
 	_screen = false;
 
@@ -150,6 +150,8 @@ void NewManufactureListState::btnOkClick(Action *)
  */
 void NewManufactureListState::lstProdClickLeft(Action *)
 {
+	_lstScroll = _lstManufacture->getScroll();
+
 	ManufacturingFilterType basicFilter = (ManufacturingFilterType)(_cbxFilter->getSelected());
 	if (basicFilter == MANU_FILTER_FACILITY_REQUIRED)
 		return;
@@ -242,6 +244,7 @@ void NewManufactureListState::lstProdClickRight(Action *)
 */
 void NewManufactureListState::lstProdClickMiddle(Action *)
 {
+	_lstScroll = _lstManufacture->getScroll();
 	const RuleManufacture *selectedTopic = _game->getMod()->getManufacture(_displayedStrings[_lstManufacture->getSelectedRow()]);
 	_game->pushState(new TechTreeViewerState(0, selectedTopic));
 }
@@ -444,6 +447,11 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 
 	std::wstring label = tr("STR_SHOW_ONLY_NEW");
 	_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
+	if (_lstScroll > 0)
+	{
+		_lstManufacture->scrollTo(_lstScroll);
+		_lstScroll = 0;
+	}
 
 	if (refreshCategories)
 	{
