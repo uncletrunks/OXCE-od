@@ -36,6 +36,7 @@ RuleUfo::RuleUfo(const std::string &type) :
 	_battlescapeTerrainData(0), _stats(), _statsRaceBonus()
 {
 	_stats.sightRange = 268;
+	_stats.radarRange = 672; // same default as in RuleCraft (used by hunter-killers)
 	_statsRaceBonus[""] = RuleUfoStats();
 }
 
