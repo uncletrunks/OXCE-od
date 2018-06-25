@@ -265,6 +265,8 @@ public:
 	void healStun(int power);
 	/// Gets the unit's stun level.
 	int getStunlevel() const;
+	/// Is the unit losing HP (due to negative health regeneration)?
+	bool hasNegativeHealthRegen() const;
 	/// Knocks the unit out instantly.
 	void knockOut(BattlescapeGame *battle);
 	/// Start falling sequence.

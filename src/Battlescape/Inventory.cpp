@@ -31,6 +31,7 @@
 #include "../Engine/Options.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Savegame/BattleItem.h"
 #include "../Mod/RuleItem.h"
@@ -84,6 +85,20 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_stunIndicator = _game->getMod()->getSurface("BigStunIndicator", false);
 	_woundIndicator = _game->getMod()->getSurface("BigWoundIndicator", false);
 	_burnIndicator = _game->getMod()->getSurface("BigBurnIndicator", false);
+	_shockIndicator = _game->getMod()->getSurface("BigShockIndicator", false);
+
+	const SavedBattleGame *battleSave = _game->getSavedGame()->getSavedBattle();
+	if (battleSave)
+	{
+		const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(battleSave->getStartingConditionType());
+		if (startingCondition)
+		{
+			if (!startingCondition->getInventoryShockIndicator().empty())
+			{
+				_shockIndicator = _game->getMod()->getSurface(startingCondition->getInventoryShockIndicator(), false);
+			}
+		}
+	}
 
 	_inventorySlotRightHand = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
 	_inventorySlotLeftHand = _game->getMod()->getInventory("STR_LEFT_HAND", true);
@@ -371,6 +386,10 @@ void Inventory::drawItems()
 					else if (_woundIndicator && fatalWounds > 0)
 					{
 						_woundedIndicators.push_back(std::make_pair(x, y));
+					}
+					else if (_shockIndicator && (*i)->getUnit()->hasNegativeHealthRegen())
+					{
+						_shockedIndicators.push_back(std::make_pair(x, y));
 					}
 					else if (_stunIndicator)
 					{
@@ -1529,6 +1548,12 @@ void Inventory::drawPrimers()
 	for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
 	{
 		_woundIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
+	}
+
+	// units in shock
+	for (std::vector<std::pair<int, int> >::const_iterator i = _shockedIndicators.begin(); i != _shockedIndicators.end(); ++i)
+	{
+		_shockIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
 	}
 
 	// stunned units

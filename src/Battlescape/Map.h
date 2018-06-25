@@ -59,7 +59,7 @@ private:
 	Game *_game;
 	SavedBattleGame *_save;
 	Surface *_arrow;
-	Surface *_stunIndicator, *_woundIndicator, *_burnIndicator;
+	Surface *_stunIndicator, *_woundIndicator, *_burnIndicator, *_shockIndicator;
 	int _spriteWidth, _spriteHeight;
 	int _selectorX, _selectorY;
 	int _mouseX, _mouseY;

@@ -98,6 +98,8 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
 	_mapBackgroundColor = node["mapBackgroundColor"].as<int>(_mapBackgroundColor);
+	_inventoryShockIndicator = node["inventoryShockIndicator"].as<std::string>(_inventoryShockIndicator);
+	_mapShockIndicator = node["mapShockIndicator"].as<std::string>(_mapShockIndicator);
 }
 
 /**
@@ -268,6 +270,24 @@ bool RuleStartingCondition::isItemAllowed(const std::string &itemType, Mod *mod)
 int RuleStartingCondition::getMapBackgroundColor() const
 {
 	return _mapBackgroundColor;
+}
+
+/**
+ * Returns the inventory shock indicator sprite name.
+ * @return Sprite name.
+ */
+const std::string &RuleStartingCondition::getInventoryShockIndicator() const
+{
+	return _inventoryShockIndicator;
+}
+
+/**
+ * Returns the map shock indicator sprite name.
+ * @return Sprite name.
+ */
+const std::string &RuleStartingCondition::getMapShockIndicator() const
+{
+	return _mapShockIndicator;
 }
 
 }

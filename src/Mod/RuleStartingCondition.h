@@ -56,6 +56,8 @@ private:
 	std::vector<std::string> _allowedItemCategories;
 	std::vector<std::string> _allowedCraft;
 	int _mapBackgroundColor;
+	std::string _inventoryShockIndicator;
+	std::string _mapShockIndicator;
 public:
 	/// Creates a blank Starting Conditions ruleset.
 	RuleStartingCondition(const std::string &type);
@@ -85,6 +87,10 @@ public:
 	bool isItemAllowed(const std::string &itemType, Mod *mod) const;
 	/// Gets the battlescape map background color.
 	int getMapBackgroundColor() const;
+	/// Gets the inventory shock indicator sprite name.
+	const std::string &getInventoryShockIndicator() const;
+	/// Gets the map shock indicator sprite name.
+	const std::string &getMapShockIndicator() const;
 };
 
 }

@@ -1371,6 +1371,15 @@ int BattleUnit::getStunlevel() const
 	return _stunlevel;
 }
 
+bool BattleUnit::hasNegativeHealthRegen() const
+{
+	if (_health > 0)
+	{
+		return _armor->getHealthRecovery(this) < 0;
+	}
+	return false;
+}
+
 /**
  * Raises a unit's stun level sufficiently so that the unit is ready to become unconscious.
  * Used when another unit falls on top of this unit.
