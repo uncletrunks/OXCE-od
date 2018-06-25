@@ -141,6 +141,7 @@ en-GB:
   STR_TARGET_YOURSELF: "; Target = YOURSELF"
   STR_TARGET_ON_THE_GROUND: " (on the ground)"
   STR_USE_SPECIAL_ITEM: "Use Special Item"
+  STR_NO_EXPERIENCE_YET: "No experience yet:"
 #BriefingLightState.cpp
   STR_WHAT_CAN_I_WEAR: "What can I wear?"
   STR_STARTING_CONDITION_ARMORS: "This mission requires specific gear.{NEWLINE}{NEWLINE}Allowed armour types are: {0}"

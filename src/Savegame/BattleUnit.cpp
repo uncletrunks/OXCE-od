@@ -2815,6 +2815,14 @@ void BattleUnit::addMeleeExp()
 	_expMelee++;
 }
 
+/**
+ * Did the unit gain any experience yet?
+ */
+bool BattleUnit::hasGainedAnyExperience()
+{
+	return _expBravery || _expReactions || _expFiring || _expPsiSkill || _expPsiStrength || _expMelee || _expThrowing;
+}
+
 void BattleUnit::updateGeoscapeStats(Soldier *soldier) const
 {
 	soldier->addMissionCount();
@@ -2882,7 +2890,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff
 	}
 
 	bool hasImproved = false;
-	if (_expBravery || _expReactions || _expFiring || _expPsiSkill || _expPsiStrength || _expMelee || _expThrowing)
+	if (hasGainedAnyExperience())
 	{
 		hasImproved = true;
 		if (s->getRank() == RANK_ROOKIE)

@@ -2189,6 +2189,27 @@ inline void BattlescapeState::handle(Action *action)
 				{
 					_game->pushState(new InfoboxState(_save->hitLog.str()));
 				}
+				// "ctrl-e" - experience log
+				else if (key == SDLK_e && ctrlPressed)
+				{
+					std::wostringstream ss;
+					ss << tr("STR_NO_EXPERIENCE_YET");
+					ss << L"\n\n";
+					bool first = true;
+					for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
+					{
+						if ((*i)->getOriginalFaction() == FACTION_PLAYER && !(*i)->isOut())
+						{
+							if ((*i)->getGeoscapeSoldier() && !(*i)->hasGainedAnyExperience())
+							{
+								if (!first) ss << L", ";
+								ss << (*i)->getName(_game->getLanguage());
+								first = false;
+							}
+						}
+					}
+					_game->pushState(new InfoboxState(ss.str()));
+				}
 				// "ctrl-m" - melee damage preview
 				else if (key == SDLK_m && ctrlPressed)
 				{
