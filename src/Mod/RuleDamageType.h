@@ -105,6 +105,15 @@ struct RuleDamageType
 	/// Damage type use random conversion morale lose.
 	bool RandomMorale;
 
+	/// Which tile damage method should be used?
+	/// A. For AOE (area-of-effect) weapons:
+	///   TileDamageMethod==1: (50%-150% * power * ToTile)
+	///   TileDamageMethod==2: ((power x RandomTile) * ToTile), which defaults to vanilla 50% damage for HE and 0% for stun, smoke and incendiary
+	/// B. For non-AOE (projectile) weapons:
+	///   TileDamageMethod==1: (50%-150% * power * ToTile), which defaults to vanilla 25%-75% damage for AP/laser/plasma/etc.
+	///   TileDamageMethod==2: ((damage x RandomTile) * ToTile)
+	int TileDamageMethod;
+
 	/// Default constructor.
 	RuleDamageType();
 	/// Calculate random value of damage.

@@ -195,6 +195,7 @@ en-US:
   RandomItem: "Item damage RNG?"
   ToTile: "Terrain dmg multiplier"
   RandomTile: "Terrain dmg RNG?"
+  TileDamageMethod: "Tile Damage Method"
 #
   confAimed: "Aimed action:"
   confAuto: "Auto action:"

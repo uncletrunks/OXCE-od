@@ -2347,7 +2347,7 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 		}
 		if (nothing)
 		{
-			const int tileDmg = type->getTileDamage(damage);
+			const int tileDmg = type->getTileDamage(type->TileDamageMethod == 1 ? power : damage);
 			//Do we need to update the visibility of units due to smoke/fire?
 			effectGenerated = hitTile(tile, damage, type);
 			//If a tile was destroyed we may have revealed new areas for one or more observers

@@ -34,7 +34,8 @@ RuleDamageType::RuleDamageType() :
 	ArmorEffectiveness(1.0f), RadiusEffectiveness(0.0f), RadiusReduction(10.0f),
 	FireThreshold(1000), SmokeThreshold(1000),
 	ToHealth(1.0f), ToArmor(0.1f), ToArmorPre(0.0f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f),
-	RandomHealth(false), RandomArmor(false), RandomArmorPre(false), RandomWound(true), RandomItem(false), RandomTile(false), RandomStun(true), RandomEnergy(false), RandomTime(false), RandomMorale(false)
+	RandomHealth(false), RandomArmor(false), RandomArmorPre(false), RandomWound(true), RandomItem(false), RandomTile(false), RandomStun(true), RandomEnergy(false), RandomTime(false), RandomMorale(false),
+	TileDamageMethod(1)
 {
 
 }
@@ -168,6 +169,8 @@ void RuleDamageType::load(const YAML::Node& node)
 	RandomEnergy = node["RandomEnergy"].as<bool>(RandomEnergy);
 	RandomTime = node["RandomTime"].as<bool>(RandomTime);
 	RandomMorale = node["RandomMorale"].as<bool>(RandomMorale);
+
+	TileDamageMethod = node["TileDamageMethod"].as<int>(TileDamageMethod);
 }
 
 namespace
@@ -256,6 +259,11 @@ int RuleDamageType::getItemDamage(int power) const
  */
 int RuleDamageType::getTileDamage(int power) const
 {
+	if (TileDamageMethod == 1)
+	{
+		return getDamageHelper(false, ToTile, RNG::generate(power / 2, 3 * power / 2));
+	}
+
 	return getDamageHelper(RandomTile, ToTile, power);
 }
 
