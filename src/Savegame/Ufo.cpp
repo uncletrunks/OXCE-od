@@ -287,7 +287,7 @@ void Ufo::finishLoading(const YAML::Node &node, SavedGame &save)
 			}
 		}
 	}
-	if (_isHunting || _isEscorting)
+	//if (_isHunting || _isEscorting)
 	{
 		if (const YAML::Node &origWaypoint = node["origWaypoint"])
 		{

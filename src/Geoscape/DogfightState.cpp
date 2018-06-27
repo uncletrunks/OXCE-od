@@ -1516,6 +1516,12 @@ void DogfightState::update()
 					if (_ufo->getCrashId() == 0)
 					{
 						_ufo->setCrashId(_game->getSavedGame()->getId("STR_CRASH_SITE"));
+						if (_ufo->isHunterKiller())
+						{
+							// stop being a hunter-killer
+							_ufo->resetOriginalDestination(_craft);
+							_ufo->setHunterKiller(false);
+						}
 					}
 				}
 			}
