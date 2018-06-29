@@ -105,6 +105,7 @@ private:
 	int _expBraveryTmp, _expReactionsTmp, _expFiringTmp, _expThrowingTmp, _expPsiSkillTmp, _expPsiStrengthTmp, _expMeleeTmp;
 	int improveStat(int exp) const;
 	int _motionPoints;
+	int _scannedTurn;
 	int _kills;
 	int _faceDirection; // used only during strafeing moves
 	bool _hitByFire, _hitByAnything;
@@ -421,6 +422,10 @@ public:
 	void stimulant (int energy, int stun);
 	/// Get motion points for the motion scanner.
 	int getMotionPoints() const;
+	/// Get turn when unit was scanned by the motion scanner.
+	int getScannedTurn() const { return _scannedTurn; }
+	/// Set turn when unit was scanned by the motion scanner.
+	void setScannedTurn(int turn) { _scannedTurn = turn; }
 	/// Gets the unit's armor.
 	const Armor *getArmor() const;
 	/// Sets the unit's name.

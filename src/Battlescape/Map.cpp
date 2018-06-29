@@ -1481,6 +1481,35 @@ void Map::drawTerrain(Surface *surface)
 			_arrow->blitNShade(surface, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + arrowBob[_animFrame % 8], 0);
 		}
 	}
+	// Draw motion scanner arrows
+	if (isAltPressed && _save->getSide() == FACTION_PLAYER)
+	{
+		for (auto myUnit : *_save->getUnits())
+		{
+			if (myUnit->getScannedTurn() == _save->getTurn() && myUnit->getFaction() != FACTION_PLAYER && !myUnit->isOut())
+			{
+				Position temp = myUnit->getPosition();
+				temp.z = _camera->getViewLevel();
+				_camera->convertMapToScreen(temp, &screenPosition);
+				screenPosition += _camera->getMapOffset();
+				Position offset;
+				//calculateWalkingOffset(myUnit, &offset);
+				if (myUnit->getArmor()->getSize() > 1)
+				{
+					offset.y += 4;
+				}
+				offset.y += 24 - myUnit->getHeight();
+				if (myUnit->isKneeled())
+				{
+					offset.y -= 2;
+				}
+				if (this->getCursorType() != CT_NONE)
+				{
+					_arrow->blitNShade(surface, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + arrowBob[_animFrame % 8], 0);
+				}
+			}
+		}
+	}
 	delete _numWaypid;
 
 	// check if we got big explosions
