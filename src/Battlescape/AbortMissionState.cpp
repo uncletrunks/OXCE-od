@@ -103,6 +103,9 @@ AbortMissionState::AbortMissionState(SavedBattleGame *battleGame, BattlescapeSta
 	{
 		if ((*i)->getOriginalFaction() == FACTION_PLAYER && !(*i)->isOut())
 		{
+			if ((*i)->isSummonedPlayerUnit())
+				continue;
+
 			if ((*i)->isInExitArea(START_POINT))
 			{
 				_inEntrance++;

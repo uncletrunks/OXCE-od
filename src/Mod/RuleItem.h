@@ -186,7 +186,8 @@ private:
 	ExperienceTrainingMode _experienceTrainingMode;
 	int _listOrder, _maxRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _shotgunPellets;
 	int _shotgunBehaviorType, _shotgunSpread, _shotgunChoke;
-	std::string _zombieUnit;
+	std::string _zombieUnit, _spawnUnit;
+	int _spawnUnitFaction;
 	bool _LOSRequired, _underwaterOnly, _landOnly, _psiReqiured;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	std::vector<int> _customItemPreviewIndex;
@@ -569,6 +570,10 @@ public:
 	int getShotgunChoke() const;
 	/// Gets the weapon's zombie unit.
 	const std::string &getZombieUnit() const;
+	/// Gets the weapon's spawn unit.
+	const std::string &getSpawnUnit() const;
+	/// Gets which faction the spawned unit should have.
+	int getSpawnUnitFaction() const;
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
 	/// Is this item restricted to underwater use?

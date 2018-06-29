@@ -58,6 +58,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
 	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _liveAlien(false), _liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
+	_spawnUnitFaction(-1),
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_kneelBonus(-1), _oneHandedPenalty(-1),
@@ -605,6 +606,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_shotgunSpread = node["shotgunSpread"].as<int>(_shotgunSpread);
 	_shotgunChoke = node["shotgunChoke"].as<int>(_shotgunChoke);
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
+	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
+	_spawnUnitFaction = node["spawnUnitFaction"].as<int>(_spawnUnitFaction);
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
@@ -2084,6 +2087,24 @@ int RuleItem::getShotgunChoke() const
 const std::string &RuleItem::getZombieUnit() const
 {
 	return _zombieUnit;
+}
+
+/**
+ * Gets the unit that is spawned when this item hits something.
+ * @return The weapon's spawn unit.
+ */
+const std::string &RuleItem::getSpawnUnit() const
+{
+	return _spawnUnit;
+}
+
+/**
+ * Gets which faction the spawned unit should be.
+ * @return The spawned unit's faction.
+ */
+int RuleItem::getSpawnUnitFaction() const
+{
+	return _spawnUnitFaction;
 }
 
 /**

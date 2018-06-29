@@ -148,6 +148,7 @@ private:
 	bool _breathing;
 	bool _hidingForTurn, _floorAbove, _respawn, _alreadyRespawned;
 	bool _isLeeroyJenkins;	// always charges enemy, never retreats.
+	bool _summonedPlayerUnit;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
 	bool _capturable;
@@ -621,6 +622,10 @@ public:
 	void resetHitState();
 	/// Gets whether this unit can be captured alive (applies to aliens).
 	bool getCapturable() const;
+	/// Marks this unit as summoned by an item and therefore won't count for recovery or total player units left.
+	void setSummonedPlayerUnit(bool summonedPlayerUnit);
+	/// Was this unit summoned by an item?
+	bool isSummonedPlayerUnit() const;
 };
 
 } //namespace OpenXcom

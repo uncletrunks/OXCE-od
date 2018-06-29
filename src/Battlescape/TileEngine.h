@@ -239,6 +239,8 @@ public:
 	Position getOriginVoxel(BattleAction &action, Tile *tile);
 	/// mark a region of the map as "dangerous" for a turn.
 	void setDangerZone(Position pos, int radius, BattleUnit *unit);
+	/// Checks if a position is valid for a unit, used for spawning and forced movement.
+	bool isPositionValidForUnit(Position &position, BattleUnit *unit, bool checkSurrounding = false, int startSurroundingCheckDirection = 0);
 
 };
 

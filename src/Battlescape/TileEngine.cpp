@@ -4517,4 +4517,78 @@ void TileEngine::setDangerZone(Position pos, int radius, BattleUnit *unit)
 	}
 }
 
+/**
+ * Checks if a position is a valid place for a unit to be placed
+ * @param position Pointer to the position to check
+ * @param unit Pointer to the unit
+ * @param checkSurrounding Do we need to check the 8 tiles around the selected one? (default false)
+ * @param startSurroundingCheckDirection Which direction should we start the check? (default 0 = north)
+ * @return true if we found a valid position and stored it in the pointer passed to the function
+ */
+bool TileEngine::isPositionValidForUnit(Position &position, BattleUnit *unit, bool checkSurrounding, int startSurroundingCheckDirection)
+{
+	int unitSize = unit->getArmor()->getSize();
+	std::vector<Position > positionsToCheck;
+	positionsToCheck.push_back(position);
+	if (checkSurrounding)
+	{
+		// Look up the surrounding directions
+		int surroundingTilePositions [8][2] = {
+			{0, -1}, // north (-y direction)
+			{1, -1}, // northeast
+			{1, 0}, // east (+ x direction)
+			{1, 1}, // southeast
+			{0, 1}, // south (+y direction)
+			{-1, 1}, // southwest
+			{-1, 0}, // west (-x direction)
+			{-1, -1}}; // northwest
+		for (int i = 0; i < 8; i++)
+		{
+			positionsToCheck.push_back(position + Position(surroundingTilePositions[(startSurroundingCheckDirection + i) % 8][0] * unitSize, surroundingTilePositions[(startSurroundingCheckDirection + i) % 8][1] * unitSize, 0));
+		}
+	}
+
+	for (std::vector<Position >::iterator i = positionsToCheck.begin(); i != positionsToCheck.end(); ++i)
+	{
+		bool passedCheck = true;
+
+		for (int x = unitSize - 1; x >= 0; x--)
+		{
+			for (int y = unitSize - 1; y >= 0; y--)
+			{
+				// Make sure the location is in bounds and nothing blocks being there
+				Position positionToCheck = (*i) + Position(x, y, 0);
+				Tile* tileToCheck = _save->getTile(positionToCheck);
+				if (!tileToCheck || (tileToCheck->getUnit() && tileToCheck->getUnit() != unit) ||
+					tileToCheck->getTUCost(O_OBJECT, unit->getMovementType()) == 255 ||
+					(tileToCheck->getMapData(O_OBJECT) && tileToCheck->getMapData(O_OBJECT)->getBigWall() && tileToCheck->getMapData(O_OBJECT)->getBigWall() <= 3))
+				{
+					passedCheck = false;
+				}
+			}
+		}
+
+		// Extra test for large units
+		if (passedCheck && unitSize > 1)
+		{
+			_save->getPathfinding()->setUnit(unit);
+			for (int dir = 2; dir <= 4; ++dir)
+			{
+				if (_save->getPathfinding()->isBlocked(_save->getTile(*i), 0, dir, 0))
+				{
+					passedCheck = false;
+				}
+			}
+		}
+
+		if (passedCheck)
+		{
+			position = (*i);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 }

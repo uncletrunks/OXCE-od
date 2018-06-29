@@ -453,6 +453,12 @@ void ExplosionBState::explode()
 		p += Position(8,8,0);
 		_parent->statePushFront(new ExplosionBState(_parent, p, BattleActionAttack{ BA_NONE, _attack.attacker, }, t));
 	}
+
+	// Spawn a unit if the item does that
+	if (_attack.damage_item && !_attack.damage_item->getRules()->getSpawnUnit().empty())
+	{
+		_parent->spawnNewUnit(_attack, _center.toTile());
+	}
 }
 
 }

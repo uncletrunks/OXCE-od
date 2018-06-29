@@ -203,6 +203,7 @@ BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parent
 
 	_debugPlay = false;
 
+	spawnFromPrimedItems();
 	checkForCasualties(nullptr, BattleActionAttack{ }, true);
 	cancelCurrentAction();
 }
@@ -605,6 +606,9 @@ void BattlescapeGame::endTurn()
 			}
 			else if ((*j)->getOriginalFaction() == FACTION_PLAYER)
 			{
+				if ((*j)->isSummonedPlayerUnit())
+					continue;
+
 				if ((*j)->isInExitArea(END_POINT))
 				{
 					inExit++;
@@ -2048,6 +2052,191 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 }
 
 /**
+ * Spawns a new unit mid-battle
+ * @param attack BattleActionAttack that calls to spawn the unit
+ * @param position Tile position to try and spawn unit on
+ */
+void BattlescapeGame::spawnNewUnit(BattleItem *item)
+{
+	spawnNewUnit(BattleActionAttack{ BA_NONE, nullptr, item, item, }, item->getTile()->getPosition());
+}
+
+void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
+{
+	if (!attack.damage_item) // no idea how this happened, but make sure we have an item
+		return;
+
+	const RuleItem *item = attack.damage_item->getRules();
+	Unit *type = getMod()->getUnit(item->getSpawnUnit(), true);
+	BattleUnit *newUnit = 0;
+
+	// Check which faction the new unit will be
+	UnitFaction faction;
+	if (item->getSpawnUnitFaction() == -1 && attack.attacker)
+	{
+		faction = attack.attacker->getFaction();
+	}
+	else
+	{
+		switch (item->getSpawnUnitFaction())
+		{
+			case 0:
+				faction = FACTION_PLAYER;
+				break;
+			case 1:
+				faction = FACTION_HOSTILE;
+				break;
+			case 2:
+				faction = FACTION_NEUTRAL;
+				break;
+			default:
+				faction = FACTION_HOSTILE;
+				break;
+		}
+	}
+
+	// Create the unit
+	switch (faction)
+	{
+		case FACTION_HOSTILE: // Enemy units get stat adjustments based on difficulty
+			newUnit = new BattleUnit(type,
+				faction,
+				_save->getUnits()->back()->getId() + 1,
+				getMod()->getArmor(type->getArmor(), true),
+				getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
+				getDepth(),
+				getMod()->getMaxViewDistance());
+			break;
+		default: // Everybody else doesn't
+			newUnit = new BattleUnit(type,
+				faction,
+				_save->getUnits()->back()->getId() + 1,
+				getMod()->getArmor(type->getArmor(), true),
+				0,
+				getDepth(),
+				getMod()->getMaxViewDistance());
+			break;
+	}
+
+	// Validate the position for the unit, checking if there's a surrounding tile if necessary
+	int checkDirection = attack.attacker ? (attack.attacker->getDirection() + 4) % 8 : 0;
+	bool positionValid = getTileEngine()->isPositionValidForUnit(position, newUnit, true, checkDirection);
+	if (positionValid) // Place the unit and initialize it in the battlescape
+	{
+		int unitDirection = attack.attacker ? attack.attacker->getDirection() : RNG::generate(0, 7);
+		// If this is a tank, arm it with its weapon
+		if (getMod()->getItem(newUnit->getType()) && getMod()->getItem(newUnit->getType())->isFixed())
+		{
+			RuleItem *item = getMod()->getItem(newUnit->getType());
+			_save->createItemForUnit(item, newUnit, true);
+			if (!item->getPrimaryCompatibleAmmo()->empty())
+			{
+				RuleItem *ammo = getMod()->getItem(item->getPrimaryCompatibleAmmo()->front());
+				BattleItem *ammoItem = _save->createItemForUnit(ammo, newUnit);
+				if (ammoItem)
+				{
+					int clipSize;
+					if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
+					{
+						clipSize = item->getClipSize();
+					}
+					else
+					{
+						clipSize = ammo->getClipSize();
+					}
+					ammoItem->setAmmoQuantity(clipSize);
+				}
+			}
+			newUnit->setTurretType(item->getTurretType());
+		}
+
+		getSave()->initUnit(newUnit);
+		for (int x = newUnit->getArmor()->getSize() - 1; x >= 0; x--)
+		{
+			for (int y = newUnit->getArmor()->getSize() - 1; y >= 0; y--)
+			{
+				Tile* tile = getSave()->getTile(position + Position(x, y, 0));
+				tile->setUnit(newUnit, getSave()->getTile(position + Position(x, y, -1)));
+			}
+		}
+		newUnit->setPosition(position);
+		newUnit->setDirection(unitDirection);
+		newUnit->setTimeUnits(0);
+		getSave()->getUnits()->push_back(newUnit);
+		if (faction != FACTION_PLAYER)
+			newUnit->setAIModule(new AIModule(getSave(), newUnit, 0));
+		else
+			newUnit->setSummonedPlayerUnit(true);
+		bool visible = faction == FACTION_PLAYER;
+		newUnit->setVisible(visible);
+
+		getTileEngine()->calculateFOV(newUnit->getPosition());  //happens fairly rarely, so do a full recalc for units in range to handle the potential unit visible cache issues.
+		getTileEngine()->applyGravity(newUnit->getTile());
+	}
+	else
+	{
+		delete newUnit;
+	}
+}
+
+/**
+ * Spawns units from items primed before battle
+ */
+void BattlescapeGame::spawnFromPrimedItems()
+{
+	std::vector<BattleItem*> itemsSpawningUnits;
+
+	for (std::vector<BattleItem*>::iterator i = _save->getItems()->begin(); i != _save->getItems()->end(); ++i)
+	{
+		if (!(*i)->getRules()->getSpawnUnit().empty() && !(*i)->getXCOMProperty())
+		{
+			if ((*i)->getRules()->getBattleType() == BT_GRENADE && (*i)->getFuseTimer() == 0 && (*i)->isFuseEnabled())
+			{
+				itemsSpawningUnits.push_back((*i));
+			}
+		}
+	}
+
+	for (BattleItem *item : itemsSpawningUnits)
+	{
+		spawnNewUnit(item);
+		_save->removeItem(item);
+	}	
+}
+
+/**
+ * Removes spawned units that belong to the player to avoid dealing with recovery
+ */
+void BattlescapeGame::removeSummonedPlayerUnits()
+{
+	std::vector<BattleUnit*>::iterator unit = _save->getUnits()->begin();
+	while (unit != _save->getUnits()->end())
+	{
+		if (!(*unit)->isSummonedPlayerUnit())
+		{
+			++unit;
+		}
+		else
+		{
+			if ((*unit)->getStatus() == STATUS_UNCONSCIOUS || (*unit)->getStatus() == STATUS_DEAD)
+				_save->removeUnconsciousBodyItem((*unit));
+
+			for (int x = (*unit)->getArmor()->getSize() - 1; x >= 0; x--)
+			{
+				for (int y = (*unit)->getArmor()->getSize() - 1; y >= 0; y--)
+				{
+					Tile *tile = getSave()->getTile((*unit)->getPosition() + Position(x, y, 0));
+					tile->setUnit(0);
+				}
+			}
+
+			delete (*unit);
+			unit = _save->getUnits()->erase(unit);
+		}
+	}
+}
+
+/**
  * Gets the map.
  * @return map.
  */
@@ -2495,6 +2684,9 @@ void BattlescapeGame::tallyUnits(int &liveAliens, int &liveSoldiers)
 			}
 			else if ((*j)->getOriginalFaction() == FACTION_PLAYER)
 			{
+				if ((*j)->isSummonedPlayerUnit())
+					continue;
+
 				if ((*j)->getFaction() == FACTION_PLAYER)
 				{
 					liveSoldiers++;

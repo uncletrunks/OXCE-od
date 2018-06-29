@@ -173,6 +173,13 @@ public:
 	void dropItem(Position position, BattleItem *item, bool removeItem = false, bool updateLight = true);
 	/// Converts a unit into a unit of another type.
 	BattleUnit *convertUnit(BattleUnit *unit);
+	/// Spawns a new unit in the middle of battle.
+	void spawnNewUnit(BattleItem *item);
+	void spawnNewUnit(BattleActionAttack attack, Position position);
+	/// Spawns units from items that explode before battle
+	void spawnFromPrimedItems();
+	/// Removes spawned units that belong to the player to avoid dealing with recovery
+	void removeSummonedPlayerUnits();
 	/// Handles kneeling action.
 	bool kneel(BattleUnit *bu);
 	/// Cancels the current action.

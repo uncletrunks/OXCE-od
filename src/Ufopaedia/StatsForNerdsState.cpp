@@ -1712,6 +1712,8 @@ void StatsForNerdsState::initItemList()
 		}
 		addIntegerPercent(ss, itemRule->getSpecialChance(), "specialChance", 100);
 		addSingleString(ss, itemRule->getZombieUnit(), "zombieUnit");
+		addSingleString(ss, itemRule->getSpawnUnit(), "spawnUnit");
+		addInteger(ss, itemRule->getSpawnUnitFaction(), "spawnUnitFaction", -1);
 
 		addSection(L"{Sprites}", L"", _white);
 		addBoolean(ss, itemRule->getFixedShow(), "fixedWeaponShow");

@@ -2642,6 +2642,9 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 	{
 		_game->getMod()->getSoundByDepth(0, _save->getAmbientSound())->stopLoop();
 	}
+
+	_battleGame->removeSummonedPlayerUnits();
+
 	AlienDeployment *ruleDeploy = _game->getMod()->getDeployment(_save->getMissionType());
 	if (!ruleDeploy)
 	{
