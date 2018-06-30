@@ -40,7 +40,7 @@
 namespace OpenXcom
 {
 
-std::map<std::string, std::string> translationMap =
+const std::map<std::string, std::string> StatsForNerdsState::translationMap =
 {
 	{ "flatOne", "" }, // no translation
 	{ "flatHundred", "" }, // no translation
@@ -1086,7 +1086,7 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 					{
 						ss << numberAbs << L"*";
 					}
-					addTranslation(ss, translationMap[item.first]);
+					addTranslation(ss, translationMap.at(item.first));
 					if (power > 1)
 					{
 						ss << L"^" << power;

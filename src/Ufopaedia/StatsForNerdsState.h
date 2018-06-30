@@ -101,6 +101,7 @@ private:
 	void addDrawingRoutine(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void initArmorList();
 public:
+	static const std::map<std::string, std::string> translationMap;
 	/// Creates the StatsForNerdsState state.
 	StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex, bool debug, bool ids, bool defaults);
 	StatsForNerdsState(const UfopaediaTypeId typeId, const std::string topicId, bool debug, bool ids, bool defaults);

@@ -32,6 +32,8 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 #include "../Mod/RuleInterface.h"
+#include "../fmath.h"
+#include "StatsForNerdsState.h"
 
 namespace OpenXcom
 {
@@ -39,6 +41,86 @@ namespace OpenXcom
 	ArticleStateItem::ArticleStateItem(ArticleDefinitionItem *defs) : ArticleState(defs->id)
 	{
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
+
+		int bottomOffset = 20;
+		std::wstring accuracyModifier = addRuleStatBonus(*item->getAccuracyMultiplierRaw());
+		std::wstring powerBonus = addRuleStatBonus(*item->getDamageBonusRaw());
+
+		if (!item->getAccuracyMultiplierRaw()->isModded())
+		{
+			// don't show default accuracy multiplier
+			bottomOffset = 9;
+		}
+
+		if (!_game->getMod()->getExtraNerdyPediaInfo())
+		{
+			// feature turned off
+			bottomOffset = 0;
+		}
+		else if (item->getBattleType() == BT_AMMO)
+		{
+			// don't show accuracy multiplier... even if someone mods it by mistake, it still makes no sense
+			bottomOffset = 9;
+		}
+		else if (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE)
+		{
+			if (item->getClipSize() != 0)
+			{
+				// correct info loaded already... weapon has built-in ammo
+			}
+			else
+			{
+				// need to check power bonus on all compatible ammo
+				bool first = true;
+				bool allSame = true;
+				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+				{
+					for (auto ammo : *item->getCompatibleAmmoForSlot(slot))
+					{
+						RuleItem *ammoItemRule = _game->getMod()->getItem(ammo, true);
+						if (first)
+						{
+							powerBonus = addRuleStatBonus(*ammoItemRule->getDamageBonusRaw());
+							first = false;
+						}
+						else
+						{
+							std::wstring otherPowerBonus = addRuleStatBonus(*ammoItemRule->getDamageBonusRaw());
+							if (powerBonus != otherPowerBonus)
+							{
+								allSame = false;
+								powerBonus = tr("STR_MULTIPLE_DIFFERENT_BONUSES");
+							}
+						}
+						if (!allSame) break;
+					}
+					if (!allSame) break;
+				}
+			}
+		}
+		else if (item->getBattleType() == BT_PSIAMP)
+		{
+			// correct info loaded already
+		}
+		else
+		{
+			// nothing to show for other item types
+			bottomOffset = 0;
+		}
+
+		if (powerBonus.empty())
+		{
+			if (!item->getAccuracyMultiplierRaw()->isModded())
+			{
+				// both power bonus and accuracy multiplier are vanilla, hide info completely
+				bottomOffset = 0;
+			}
+			else
+			{
+				// display zero instead of empty string
+				powerBonus = L"0";
+			}
+		}
 
 		// add screen elements
 		_txtTitle = new Text(148, 32, 5, 24);
@@ -176,7 +258,7 @@ namespace OpenXcom
 			{
 				shift -= (2 - current_row) * 16;
 			}
-			_txtInfo = new Text((ammo_data->size()<3 ? 300 : 180), 56 + shift, 8, 138 - shift);
+			_txtInfo = new Text((ammo_data->size()<3 ? 300 : 180), 56 + shift - bottomOffset, 8, 138 - shift);
 		}
 		else if (item->getBattleType() == BT_MELEE)
 		{
@@ -195,12 +277,12 @@ namespace OpenXcom
 			}
 
 			// text_info is BELOW the info table (with 1 row only)
-			_txtInfo = new Text(300, 88, 8, 106);
+			_txtInfo = new Text(300, 88 - bottomOffset, 8, 106);
 		}
 		else
 		{
 			// text_info is larger and starts on top
-			_txtInfo = new Text(300, 125, 8, 67);
+			_txtInfo = new Text(300, 125 - bottomOffset, 8, 67);
 		}
 
 		add(_txtInfo);
@@ -209,6 +291,28 @@ namespace OpenXcom
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 
+		// STATS FOR NERDS extract
+		_txtAccuracyModifier = new Text(300, 9, 8, 174);
+		_txtPowerBonus = new Text(300, 17, 8, 183);
+
+		if (bottomOffset > 0)
+		{
+			if (bottomOffset >= 20)
+			{
+				add(_txtAccuracyModifier);
+			}
+			add(_txtPowerBonus);
+		}
+
+		_txtAccuracyModifier->setColor(_textColor);
+		_txtAccuracyModifier->setSecondaryColor(_listColor2);
+		_txtAccuracyModifier->setWordWrap(false);
+		_txtAccuracyModifier->setText(tr("STR_ACCURACY_MODIFIER").arg(accuracyModifier));
+
+		_txtPowerBonus->setColor(_textColor);
+		_txtPowerBonus->setSecondaryColor(_listColor2);
+		_txtPowerBonus->setWordWrap(true);
+		_txtPowerBonus->setText(tr("STR_POWER_BONUS").arg(powerBonus));
 
 		// AMMO column
 		std::wostringstream ss;
@@ -313,6 +417,59 @@ namespace OpenXcom
 
 	ArticleStateItem::~ArticleStateItem()
 	{}
+
+	std::wstring ArticleStateItem::addRuleStatBonus(const RuleStatBonus &value)
+	{
+		std::wostringstream ss;
+		bool isFirst = true;
+		for (RuleStatBonusDataOrig item : *value.getBonusRaw())
+		{
+			int power = 0;
+			for (float number : item.second)
+			{
+				++power;
+				if (!AreSame(number, 0.0f))
+				{
+					float numberAbs = number;
+					if (!isFirst)
+					{
+						if (number > 0.0f)
+						{
+							ss << L" + ";
+						}
+						else
+						{
+							ss << L" - ";
+							numberAbs = std::abs(number);
+						}
+					}
+					if (item.first == "flatOne")
+					{
+						ss << numberAbs * 1;
+					}
+					if (item.first == "flatHundred")
+					{
+						ss << numberAbs * pow(100, power);
+					}
+					else
+					{
+						if (!AreSame(numberAbs, 1.0f))
+						{
+							ss << numberAbs << L"*";
+						}
+						
+						ss << tr(StatsForNerdsState::translationMap.at(item.first));
+						if (power > 1)
+						{
+							ss << L"^" << power;
+						}
+					}
+					isFirst = false;
+				}
+			}
+		}
+		return ss.str();
+	}
 
 	int ArticleStateItem::getDamageTypeTextColor(ItemDamageType dt)
 	{

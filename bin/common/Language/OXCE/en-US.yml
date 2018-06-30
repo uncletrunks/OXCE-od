@@ -327,6 +327,9 @@ en-US:
   STR_WEIGHT_PEDIA1: "Wt: {0}"
   STR_WEIGHT_PEDIA2: "Wt: {0}/{1}"
   STR_SHOT_TYPE_MELEE: "Melee"
+  STR_ACCURACY_MODIFIER: "Accuracy modifier>{ALT} {0}"
+  STR_POWER_BONUS: "Power bonus>{ALT} {0}"
+  STR_MULTIPLE_DIFFERENT_BONUSES: "multiple bonuses on various compatible ammo"
 #StatsForNerdsState.cpp
   STR_STATS_FOR_NERDS: "Stats for Nerds"
   STR_ARTICLE: "Article>{ALT} {0}"

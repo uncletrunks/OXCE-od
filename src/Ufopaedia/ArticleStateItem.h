@@ -43,6 +43,8 @@ namespace OpenXcom
 		Text *_txtTitle;
 		Text *_txtWeight;
 		Text *_txtInfo;
+		Text *_txtAccuracyModifier;
+		Text *_txtPowerBonus;
 		TextList *_lstInfo;
 		Text *_txtShotType;
 		Text *_txtAccuracy;
@@ -53,6 +55,7 @@ namespace OpenXcom
 		Text *_txtAmmoDamage[3];
 		Surface *_imageAmmo[3];
 		Uint8 _buttonColor, _textColor, _listColor1, _listColor2, _ammoColor;
+		std::wstring addRuleStatBonus(const RuleStatBonus &value);
 		int getDamageTypeTextColor(ItemDamageType dt);
 	};
 }

@@ -174,7 +174,7 @@ private:
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
-	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
+	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory, _extraNerdyPediaInfo;
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
@@ -525,6 +525,8 @@ public:
 	bool getShowDogfightDistanceInKm() const { return _showDogfightDistanceInKm; }
 	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
 	bool getShowFullNameInAlienInventory() const { return _showFullNameInAlienInventory; }
+	/// Display extra item info (accuracy modifier and power bonus) in the main pedia article?
+	bool getExtraNerdyPediaInfo() const { return _extraNerdyPediaInfo; }
 	/// Self-explanatory
 	int getTheMostUselessOptionEver() const { return _theMostUselessOptionEver; }
 	/// Shame on you!
