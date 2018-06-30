@@ -293,6 +293,7 @@ void Inventory::drawItems()
 	ScriptWorkerBlit work;
 	_items->clear();
 	_stunnedIndicators.clear();
+	_shockedIndicators.clear();
 	_woundedIndicators.clear();
 	_burningIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
