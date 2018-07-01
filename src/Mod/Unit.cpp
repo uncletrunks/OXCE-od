@@ -27,7 +27,7 @@ namespace OpenXcom
  * Creates a certain type of unit.
  * @param type String defining the type.
  */
-Unit::Unit(const std::string &type) : _type(type), _showFullNameInAlienInventory(-1), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false), _waitIfOutsideWeaponRange(false)
+Unit::Unit(const std::string &type) : _type(type), _showFullNameInAlienInventory(-1), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _capturable(CAP_DEFAULT), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false), _waitIfOutsideWeaponRange(false)
 {
 }
 
@@ -79,6 +79,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_waitIfOutsideWeaponRange = node["waitIfOutsideWeaponRange"].as<bool>(_waitIfOutsideWeaponRange);
 	_meleeWeapon = node["meleeWeapon"].as<std::string>(_meleeWeapon);
 	_psiWeapon = node["psiWeapon"].as<std::string>(_psiWeapon);
+	_capturable = (Capturability)node["capturable"].as<int>(_capturable);
 	_builtInWeapons = node["builtInWeaponSets"].as<std::vector<std::vector<std::string> > >(_builtInWeapons);
 	if (node["builtInWeapons"])
 	{
@@ -331,6 +332,15 @@ const std::string &Unit::getPsiWeapon() const
 const std::vector<std::vector<std::string> > &Unit::getBuiltInWeapons() const
 {
 	return _builtInWeapons;
+}
+
+/**
+* Gets whether the alien can be captured alive.
+* @return a value determining whether the alien can be captured alive.
+*/
+Capturability Unit::getCapturable() const
+{
+	return _capturable;
 }
 
 /**
