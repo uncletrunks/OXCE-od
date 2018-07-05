@@ -164,7 +164,7 @@ void Inventory::setSelectedUnit(BattleUnit *unit)
 {
 	_selUnit = unit;
 	_groundOffset = 999;
-	arrangeGround();
+	arrangeGround(1);
 }
 
 /**
@@ -603,7 +603,7 @@ void Inventory::setSearchString(const std::wstring &searchString)
 {
 	_searchString = searchString;
 	CrossPlatform::upperCase(_searchString, _myLocale);
-	arrangeGround(true);
+	arrangeGround(1);
 }
 
 /**
@@ -769,7 +769,7 @@ void Inventory::mouseClick(Action *action, State *state)
 								placed = true;
 								moveItem(item, newSlot, 0, 0);
 								_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_DROP)->play();
-								arrangeGround(false);
+								arrangeGround();
 							}
 							else
 							{
@@ -910,7 +910,7 @@ void Inventory::mouseClick(Action *action, State *state)
 								_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_RELOAD)->play();
 								if (item->getSlot()->getType() == INV_GROUND)
 								{
-									arrangeGround(false);
+									arrangeGround();
 								}
 							}
 							else
@@ -984,14 +984,14 @@ void Inventory::mouseClick(Action *action, State *state)
 									{
 										_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getPrimeActionMessage()));
 										item->setFuseTimer(item->getRules()->getFuseTimerDefault());
-										arrangeGround(false);
+										arrangeGround();
 									}
 								}
 								else
 								{
 									_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getUnprimeActionMessage()));
 									item->setFuseTimer(-1);  // Unprime the grenade
-									arrangeGround(false);
+									arrangeGround();
 								}
 							}
 						}
@@ -1255,9 +1255,9 @@ bool Inventory::isInSearchString(BattleItem *item)
  * Arranges items on the ground for the inventory display.
  * Since items on the ground aren't assigned to anyone,
  * they don't actually have permanent slot positions.
- * @param alterOffset Whether to alter the ground offset.
+ * @param alterOffset Whether to alter the ground offset and in which direction.
  */
-void Inventory::arrangeGround(bool alterOffset)
+void Inventory::arrangeGround(int alterOffset)
 {
 	RuleInventory *ground = _inventorySlotGround;
 
@@ -1419,7 +1419,7 @@ void Inventory::arrangeGround(bool alterOffset)
 			} // end stacks for this item type
 		} // end of item types
 	}
-	if (alterOffset)
+	if (alterOffset > 0)
 	{
 		if (xMax >= _groundOffset + slotsX)
 		{
@@ -1428,6 +1428,20 @@ void Inventory::arrangeGround(bool alterOffset)
 		else
 		{
 			_groundOffset = 0;
+		}
+	}
+	else if (alterOffset < 0)
+	{
+		// one step back
+		_groundOffset -= slotsX;
+
+		// if too much, as many steps forward as possible
+		if (_groundOffset < 0)
+		{
+			while (xMax >= _groundOffset + slotsX)
+			{
+				_groundOffset += slotsX;
+			}
 		}
 	}
 	drawItems();

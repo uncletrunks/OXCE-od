@@ -206,7 +206,8 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_btnUnload->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnUnload->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
 
-	_btnGround->onMouseClick((ActionHandler)&InventoryState::btnGroundClick);
+	_btnGround->onMouseClick((ActionHandler)&InventoryState::btnGroundClick, SDL_BUTTON_LEFT);
+	_btnGround->onMouseClick((ActionHandler)&InventoryState::btnGroundClick, SDL_BUTTON_RIGHT);
 	_btnGround->setTooltip("STR_SCROLL_RIGHT");
 	_btnGround->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnGround->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
@@ -413,7 +414,7 @@ void InventoryState::init()
 			_applyInventoryTemplate(_tempInventoryTemplate);
 
 			// refresh ui
-			_inv->arrangeGround(false); // calls drawItems() too
+			_inv->arrangeGround(); // calls drawItems() too
 
 			// reset armor tooltip
 			_currentTooltip = "";
@@ -479,7 +480,7 @@ void InventoryState::init()
 		_globalLayoutIndex = -1;
 
 		// refresh ui
-		_inv->arrangeGround(false);
+		_inv->arrangeGround();
 	}
 
 	updateStats();
@@ -733,7 +734,7 @@ void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 		loadGlobalLayout(index);
 
 		// refresh ui
-		_inv->arrangeGround(false);
+		_inv->arrangeGround();
 		updateStats();
 		refreshMouse();
 
@@ -903,9 +904,23 @@ void InventoryState::btnQuickSearchApply(Action *)
  * Shows more ground items / rearranges them.
  * @param action Pointer to an action.
  */
-void InventoryState::btnGroundClick(Action *)
+void InventoryState::btnGroundClick(Action *action)
 {
-	_inv->arrangeGround();
+	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+	{
+		// scroll backwards
+		_inv->arrangeGround(-1);
+	}
+	else if ((SDL_GetModState() & KMOD_SHIFT) != 0)
+	{
+		// scroll backwards
+		_inv->arrangeGround(-1);
+	}
+	else
+	{
+		// scroll forward
+		_inv->arrangeGround(1);
+	}
 }
 
 /**
@@ -1124,7 +1139,7 @@ void InventoryState::btnApplyTemplateClick(Action *)
 	_applyInventoryTemplate(_curInventoryTemplate);
 
 	// refresh ui
-	_inv->arrangeGround(false);
+	_inv->arrangeGround();
 	updateStats();
 	refreshMouse();
 
@@ -1158,7 +1173,7 @@ void InventoryState::onClearInventory(Action *)
 	_clearInventory(_game, unitInv, groundTile, false);
 
 	// refresh ui
-	_inv->arrangeGround(false);
+	_inv->arrangeGround();
 	updateStats();
 	refreshMouse();
 
@@ -1186,7 +1201,7 @@ void InventoryState::onAutoequip(Action *)
 	BattlescapeGenerator::autoEquip(units, mod, groundInv, groundRuleInv, worldShade, true, true);
 
 	// refresh ui
-	_inv->arrangeGround(false);
+	_inv->arrangeGround();
 	updateStats();
 	refreshMouse();
 
@@ -1514,7 +1529,7 @@ void InventoryState::onMoveGroundInventoryToBase(Action *)
 	}
 
 	// refresh ui
-	_inv->arrangeGround(false);
+	_inv->arrangeGround();
 	updateStats();
 	refreshMouse();
 
