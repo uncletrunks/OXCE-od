@@ -113,7 +113,7 @@ public:
 	/// Checks whether the given item is visible with the current search string.
 	bool isInSearchString(BattleItem *item);
 	/// Arranges items on the ground.
-	void arrangeGround(int alterOffset);
+	void arrangeGround(bool alterOffset = true);
 	/// Attempts to place an item in an inventory slot.
 	bool fitItem(RuleInventory *newSlot, BattleItem *item, std::string &warning);
 	/// Checks if two items can be stacked on one another.

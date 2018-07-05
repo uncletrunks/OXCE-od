@@ -164,7 +164,7 @@ void Inventory::setSelectedUnit(BattleUnit *unit)
 {
 	_selUnit = unit;
 	_groundOffset = 999;
-	arrangeGround(1);
+	arrangeGround();
 }
 
 /**
@@ -1255,9 +1255,9 @@ bool Inventory::isInSearchString(BattleItem *item)
  * Arranges items on the ground for the inventory display.
  * Since items on the ground aren't assigned to anyone,
  * they don't actually have permanent slot positions.
- * @param alterOffset Whether to alter the ground offset and in which direction.
+ * @param alterOffset Whether to alter the ground offset.
  */
-void Inventory::arrangeGround(int alterOffset)
+void Inventory::arrangeGround(bool alterOffset)
 {
 	RuleInventory *ground = _inventorySlotGround;
 
@@ -1419,7 +1419,7 @@ void Inventory::arrangeGround(int alterOffset)
 			} // end stacks for this item type
 		} // end of item types
 	}
-	if (alterOffset > 0)
+	if (alterOffset)
 	{
 		if (xMax >= _groundOffset + slotsX)
 		{
@@ -1428,20 +1428,6 @@ void Inventory::arrangeGround(int alterOffset)
 		else
 		{
 			_groundOffset = 0;
-		}
-	}
-	else if (alterOffset < 0)
-	{
-		// one step back
-		_groundOffset -= slotsX;
-
-		// if too much, as many steps forward as possible
-		if (_groundOffset < 0)
-		{
-			while (xMax >= _groundOffset + slotsX)
-			{
-				_groundOffset += slotsX;
-			}
 		}
 	}
 	drawItems();

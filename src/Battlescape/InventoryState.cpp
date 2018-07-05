@@ -206,8 +206,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_btnUnload->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnUnload->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
 
-	_btnGround->onMouseClick((ActionHandler)&InventoryState::btnGroundClick, SDL_BUTTON_LEFT);
-	_btnGround->onMouseClick((ActionHandler)&InventoryState::btnGroundClick, SDL_BUTTON_RIGHT);
+	_btnGround->onMouseClick((ActionHandler)&InventoryState::btnGroundClick);
 	_btnGround->setTooltip("STR_SCROLL_RIGHT");
 	_btnGround->onMouseIn((ActionHandler)&InventoryState::txtTooltipIn);
 	_btnGround->onMouseOut((ActionHandler)&InventoryState::txtTooltipOut);
@@ -904,18 +903,9 @@ void InventoryState::btnQuickSearchApply(Action *)
  * Shows more ground items / rearranges them.
  * @param action Pointer to an action.
  */
-void InventoryState::btnGroundClick(Action *action)
+void InventoryState::btnGroundClick(Action *)
 {
-	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
-	{
-		// scroll left
-		_inv->arrangeGround(-1);
-	}
-	else
-	{
-		// scroll right
-		_inv->arrangeGround(1);
-	}
+	_inv->arrangeGround();
 }
 
 /**
