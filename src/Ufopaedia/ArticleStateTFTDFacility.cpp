@@ -25,6 +25,7 @@
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
+#include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 
 namespace OpenXcom
@@ -32,6 +33,8 @@ namespace OpenXcom
 
 	ArticleStateTFTDFacility::ArticleStateTFTDFacility(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
+		_btnInfo->setVisible(true);
+
 		RuleBaseFacility *facility = _game->getMod()->getBaseFacility(defs->id, true);
 
 		_lstInfo = new TextList(150, 50, 168, 150);

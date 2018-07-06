@@ -381,3 +381,7 @@ en-GB:
   STR_DAMAGE_17: "17"
   STR_DAMAGE_18: "18"
   STR_DAMAGE_19: "19"
+#
+  STR_NAUTICAL_MILES: "{0} nautical miles"
+  STR_COST_BUILD: "build"
+  STR_COST_REFUND: "refund"

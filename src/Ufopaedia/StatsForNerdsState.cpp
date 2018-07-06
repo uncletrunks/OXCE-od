@@ -33,6 +33,7 @@
 #include "../Mod/ExtraSounds.h"
 #include "../Mod/ExtraSprites.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleBaseFacility.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleItem.h"
 #include "../fmath.h"
@@ -314,6 +315,10 @@ void StatsForNerdsState::initLists()
 	case UFOPAEDIA_TYPE_ARMOR:
 	case UFOPAEDIA_TYPE_TFTD_ARMOR:
 		initArmorList();
+		break;
+	case UFOPAEDIA_TYPE_BASE_FACILITY:
+	case UFOPAEDIA_TYPE_TFTD_BASE_FACILITY:
+		initFacilityList();
 		break;
 	default:
 		break;
@@ -633,6 +638,27 @@ void StatsForNerdsState::addIntegerPercent(std::wostringstream &ss, const int &v
 	{
 		ss << L"%";
 	}
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (value != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds a single integer number (representing a distance in nautical miles) to the table.
+ */
+void StatsForNerdsState::addIntegerNauticalMiles(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+{
+	if (value == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	ss << tr("STR_NAUTICAL_MILES").arg(value);
+	ss << L" = ";
+	ss << tr("STR_KILOMETERS").arg(value * 1852 / 1000);
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
 	if (value != defaultvalue)
@@ -2090,6 +2116,197 @@ void StatsForNerdsState::initArmorList()
 			}
 			endHeading();
 		}
+	}
+}
+
+/**
+ * Adds a vector of Positions to the table.
+ */
+void StatsForNerdsState::addVectorOfPositions(std::wostringstream &ss, const std::vector<Position> &vec, const std::string &propertyName)
+{
+	if (vec.empty() && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	int i = 0;
+	ss << L"{";
+	for (auto &item : vec)
+	{
+		if (i > 0)
+		{
+			ss << L", ";
+		}
+		ss << L"(" << item.x << L"," << item.y << L"," << item.z << L")";
+		i++;
+	}
+	ss << L"}";
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (!vec.empty())
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds a build cost item to the table.
+ */
+void StatsForNerdsState::addBuildCostItem(std::wostringstream &ss, const std::pair<const std::string, std::pair<int, int> > &costItem)
+{
+	resetStream(ss);
+	int i = 0;
+	addTranslation(ss, costItem.first);
+	ss << L": " << tr("STR_COST_BUILD") << ": ";
+	ss << costItem.second.first;
+	ss << L", " << tr("STR_COST_REFUND") << ": ";
+	ss << costItem.second.second;
+	_lstRawData->addRow(2, L"", ss.str().c_str());
+	++_counter;
+	_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+}
+
+/**
+ * Adds a human readable form of base facility right-click action type to the table.
+ */
+void StatsForNerdsState::addRightClickActionType(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+{
+	if (value == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	switch (value)
+	{
+	case 0: ss << tr("BFRCT_DEFAULT"); break;
+	case 1: ss << tr("BFRCT_PRISON"); break;
+	case 2: ss << tr("BFRCT_ENGINEERING"); break;
+	case 3: ss << tr("BFRCT_RESEARCH"); break;
+	case 4: ss << tr("BFRCT_GYM"); break;
+	case 5: ss << tr("BFRCT_PSI_LABS"); break;
+	case 6: ss << tr("BFRCT_BARRACKS"); break;
+	case 7: ss << tr("BFRCT_GREY_MARKET"); break;
+	default: ss << tr("BFRCT_GEOSCAPE"); break;
+	}
+	if (_showIds)
+	{
+		ss << L" [" << value << L"]";
+	}
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (value != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Shows the "raw" RuleBaseFacility data.
+ */
+void StatsForNerdsState::initFacilityList()
+{
+	_lstRawData->clearList();
+	_lstRawData->setIgnoreSeparators(true);
+
+	std::wostringstream ssTopic;
+	ssTopic << tr(_topicId);
+	if (_showIds)
+	{
+		ssTopic << L" [" << Language::utf8ToWstr(_topicId) << L"]";
+	}
+
+	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
+
+	Mod *mod = _game->getMod();
+	RuleBaseFacility *facilityRule = mod->getBaseFacility(_topicId);
+	if (!facilityRule)
+		return;
+
+	_filterOptions.clear();
+	_cbxRelatedStuff->setVisible(false);
+
+	std::wostringstream ss;
+
+	addVectorOfStrings(ss, facilityRule->getRequirements(), "requires");
+
+	addInteger(ss, facilityRule->getSize(), "size", 1);
+	addInteger(ss, facilityRule->getBuildCost(), "buildCost", 0, true);
+	addHeading("buildCostItems");
+	{
+		for (auto& costItem : facilityRule->getBuildCostItems())
+		{
+			addBuildCostItem(ss, costItem);
+		}
+		endHeading();
+	}
+	addInteger(ss, facilityRule->getBuildTime(), "buildTime");
+	addInteger(ss, facilityRule->getMonthlyCost(), "monthlyCost", 0, true);
+	addInteger(ss, facilityRule->getRefundValue(), "refundValue", 0, true);
+
+	addVectorOfStrings(ss, facilityRule->getRequireBaseFunc(), "requiresBaseFunc");
+	addVectorOfStrings(ss, facilityRule->getProvidedBaseFunc(), "provideBaseFunc");
+	addVectorOfStrings(ss, facilityRule->getForbiddenBaseFunc(), "forbiddenBaseFunc");
+
+	addBoolean(ss, facilityRule->isLift(), "lift");
+	addBoolean(ss, facilityRule->isHyperwave(), "hyper");
+	addBoolean(ss, facilityRule->isMindShield(), "mind");
+	addBoolean(ss, facilityRule->isGravShield(), "grav");
+
+	addInteger(ss, facilityRule->getStorage(), "storage");
+	addInteger(ss, facilityRule->getPersonnel(), "personnel");
+	addInteger(ss, facilityRule->getAliens(), "aliens");
+	addInteger(ss, facilityRule->getPrisonType(), "prisonType");
+	addInteger(ss, facilityRule->getCrafts(), "crafts");
+	addInteger(ss, facilityRule->getLaboratories(), "labs");
+	addInteger(ss, facilityRule->getWorkshops(), "workshops");
+	addInteger(ss, facilityRule->getPsiLaboratories(), "psiLabs");
+	addInteger(ss, facilityRule->getTrainingFacilities(), "trainingRooms");
+
+	addIntegerNauticalMiles(ss, facilityRule->getRadarRange(), "radarRange");
+	addIntegerPercent(ss, facilityRule->getRadarChance(), "radarChance");
+	addInteger(ss, facilityRule->getDefenseValue(), "defense");
+	addIntegerPercent(ss, facilityRule->getHitRatio(), "hitRatio");
+
+	addInteger(ss, facilityRule->getMaxAllowedPerBase(), "maxAllowedPerBase");
+	addFloat(ss, facilityRule->getSickBayAbsoluteBonus(), "sickBayAbsoluteBonus");
+	addFloat(ss, facilityRule->getSickBayRelativeBonus(), "sickBayRelativeBonus");
+
+	addRightClickActionType(ss, facilityRule->getRightClickActionType(), "rightClickActionType");
+
+	addVectorOfStrings(ss, facilityRule->getLeavesBehindOnSell(), "leavesBehindOnSell");
+	addInteger(ss, facilityRule->getRemovalTime(), "removalTime");
+	addBoolean(ss, facilityRule->getCanBeBuiltOver(), "canBeBuiltOver");
+	addVectorOfStrings(ss, facilityRule->getBuildOverFacilities(), "buildOverFacilities");
+
+	if (_showDebug)
+	{
+		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
+
+		addSection(L"{Naming}", L"", _white);
+		addSingleString(ss, facilityRule->getType(), "type");
+		addInteger(ss, facilityRule->getListOrder(), "listOrder");
+
+		addSection(L"{Visuals}", L"", _white);
+		addSingleString(ss, facilityRule->getMapName(), "mapName");
+		addBoolean(ss, !facilityRule->getVerticalLevels().empty(), "verticalLevels*"); // just say if there are any or not
+		addVectorOfPositions(ss, facilityRule->getStorageTiles(), "storageTiles");
+
+		addInteger(ss, facilityRule->getSpriteShape(), "spriteShape", -1);
+		addSpriteResourcePath(ss, mod, "BASEBITS.PCK", facilityRule->getSpriteShape());
+
+		addInteger(ss, facilityRule->getSpriteFacility(), "spriteFacility", -1);
+		addSpriteResourcePath(ss, mod, "BASEBITS.PCK", facilityRule->getSpriteFacility());
+
+		addSection(L"{Sounds}", L"", _white);
+		addInteger(ss, facilityRule->getFireSound(), "fireSound");
+		std::vector<int> tmpSoundVector;
+		tmpSoundVector.push_back(facilityRule->getFireSound());
+		addSoundVectorResourcePaths(ss, mod, "GEO.CAT", tmpSoundVector);
+
+		addInteger(ss, facilityRule->getHitSound(), "hitSound");
+		tmpSoundVector.clear();
+		tmpSoundVector.push_back(facilityRule->getHitSound());
+		addSoundVectorResourcePaths(ss, mod, "GEO.CAT", tmpSoundVector);
 	}
 }
 
