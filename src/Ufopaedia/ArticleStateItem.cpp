@@ -43,10 +43,21 @@ namespace OpenXcom
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
 
 		int bottomOffset = 20;
-		std::wstring accuracyModifier = addRuleStatBonus(*item->getAccuracyMultiplierRaw());
+		std::wstring accuracyModifier;
+		bool isAccurracyModded = false;
+		if (item->getBattleType() == BT_MELEE)
+		{
+			accuracyModifier = addRuleStatBonus(*item->getMeleeMultiplierRaw());
+			isAccurracyModded = item->getMeleeMultiplierRaw()->isModded();
+		}
+		else
+		{
+			accuracyModifier = addRuleStatBonus(*item->getAccuracyMultiplierRaw());
+			isAccurracyModded = item->getAccuracyMultiplierRaw()->isModded();
+		}
 		std::wstring powerBonus = addRuleStatBonus(*item->getDamageBonusRaw());
 
-		if (!item->getAccuracyMultiplierRaw()->isModded())
+		if (!isAccurracyModded)
 		{
 			// don't show default accuracy multiplier
 			bottomOffset = 9;
@@ -110,7 +121,7 @@ namespace OpenXcom
 
 		if (powerBonus.empty())
 		{
-			if (!item->getAccuracyMultiplierRaw()->isModded())
+			if (!isAccurracyModded)
 			{
 				// both power bonus and accuracy multiplier are vanilla, hide info completely
 				bottomOffset = 0;
