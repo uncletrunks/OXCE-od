@@ -1810,6 +1810,14 @@ int BattleUnit::getFiringAccuracy(BattleActionType actionType, BattleItem *item,
 		{
 			result = result * item->getRules()->getOneHandedPenalty(mod) / 100;
 		}
+		else if (item->getRules()->isSpecialUsingEmptyHand())
+		{
+			// for special weapons that use an empty hand... already one hand with an item is enough for the penalty to apply
+			if (getRightHandWeapon() != 0 || getLeftHandWeapon() != 0)
+			{
+				result = result * item->getRules()->getOneHandedPenalty(mod) / 100;
+			}
+		}
 	}
 
 	return result * modifier / 100;
