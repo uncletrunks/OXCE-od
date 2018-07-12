@@ -33,8 +33,6 @@ RuleSoldierTransformation::RuleSoldierTransformation(const std::string &name) :
 	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0),
 	_useRandomStats(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false)
 {
-	// convenience default
-	_producedSoldierType = name;
 }
 
 /**

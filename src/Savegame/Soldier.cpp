@@ -1057,7 +1057,7 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 	else
 	{
 		// change soldier type if needed
-		if (_rules->getType() != transformationRule->getProducedSoldierType())
+		if (!transformationRule->getProducedSoldierType().empty() && _rules->getType() != transformationRule->getProducedSoldierType())
 		{
 			_rules = mod->getSoldier(transformationRule->getProducedSoldierType());
 		}
@@ -1153,9 +1153,15 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 	int sign = statChange.bravery < 0 ? -1 : 1;
 	statChange.bravery = ((statChange.bravery + (sign * 5)) / 10) * 10;
 
+	RuleSoldier *transformationSoldierType = _rules;
+	if (!transformationRule->getProducedSoldierType().empty())
+	{
+		transformationSoldierType = mod->getSoldier(transformationRule->getProducedSoldierType());
+	}
+
 	if (transformationRule->hasLowerBoundAtMinStats())
 	{
-		UnitStats lowerBound = mod->getSoldier(transformationRule->getProducedSoldierType())->getMinStats();
+		UnitStats lowerBound = transformationSoldierType->getMinStats();
 		UnitStats cappedChange = lowerBound - currentStats;
 		statChange.tu = std::max(statChange.tu, cappedChange.tu);
 		statChange.stamina = std::max(statChange.stamina, cappedChange.stamina);
@@ -1173,8 +1179,8 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 	if (transformationRule->hasUpperBoundAtMaxStats() || transformationRule->hasUpperBoundAtStatCaps())
 	{
 		UnitStats upperBound = transformationRule->hasUpperBoundAtMaxStats()
-			? mod->getSoldier(transformationRule->getProducedSoldierType())->getMaxStats()
-			: mod->getSoldier(transformationRule->getProducedSoldierType())->getStatCaps();
+			? transformationSoldierType->getMaxStats()
+			: transformationSoldierType->getStatCaps();
 		UnitStats cappedChange = upperBound - currentStats;
 		statChange.tu = std::min(statChange.tu, cappedChange.tu);
 		statChange.stamina = std::min(statChange.stamina, cappedChange.stamina);

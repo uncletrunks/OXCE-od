@@ -310,7 +310,11 @@ void SoldierTransformationState::performTransformation()
 	if (_transformationRule->isCreatingClone())
 	{
 		int newId = _game->getSavedGame()->getId("STR_SOLDIER");
-		RuleSoldier *newSoldierType = _game->getMod()->getSoldier(_transformationRule->getProducedSoldierType());
+		RuleSoldier *newSoldierType = _game->getMod()->getSoldier(_sourceSoldier->getRules()->getType());
+		if (!_transformationRule->getProducedSoldierType().empty())
+		{
+			newSoldierType = _game->getMod()->getSoldier(_transformationRule->getProducedSoldierType());
+		}
 		destinationSoldier = new Soldier(
 			newSoldierType,
 			_game->getMod()->getArmor(newSoldierType->getArmor()),
@@ -322,7 +326,7 @@ void SoldierTransformationState::performTransformation()
 		destinationSoldier->setLookVariant(_sourceSoldier->getLookVariant());
 
 		// preserve nationality only for soldiers of the same type
-		if (_sourceSoldier->getRules()->getType() == _transformationRule->getProducedSoldierType())
+		if (_sourceSoldier->getRules() == newSoldierType)
 		{
 			destinationSoldier->setNationality(_sourceSoldier->getNationality());
 		}
