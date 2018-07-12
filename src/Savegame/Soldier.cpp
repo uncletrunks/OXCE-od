@@ -1060,6 +1060,36 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 		if (!transformationRule->getProducedSoldierType().empty() && _rules->getType() != transformationRule->getProducedSoldierType())
 		{
 			_rules = mod->getSoldier(transformationRule->getProducedSoldierType());
+
+			// demote soldier if needed (i.e. when new soldier type doesn't support the current rank)
+			if (!_rules->getAllowPromotion())
+			{
+				_rank = RANK_ROOKIE;
+			}
+			else if (!_rules->getRankStrings().empty() && (int)_rank > _rules->getRankStrings().size() - 1)
+			{
+				switch (_rules->getRankStrings().size() - 1)
+				{
+				case 1:
+					_rank = RANK_SQUADDIE;
+					break;
+				case 2:
+					_rank = RANK_SERGEANT;
+					break;
+				case 3:
+					_rank = RANK_CAPTAIN;
+					break;
+				case 4:
+					_rank = RANK_COLONEL;
+					break;
+				case 5:
+					_rank = RANK_COMMANDER; // I hereby demote you to commander! :P
+					break;
+				default:
+					_rank = RANK_ROOKIE;
+					break;
+				}
+			}
 		}
 
 		// change stats
