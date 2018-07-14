@@ -343,6 +343,15 @@ void SoldierTransformationState::performTransformation()
 				_game->getSavedGame()->getDeadSoldiers()->erase(it);
 			}
 		}
+		else if (_transformationRule->getTransferTime() > 0)
+		{
+			// transfer time on a live soldier already at the base (doesn't make much sense, but we need to handle it anyway)
+			std::vector<Soldier*>::iterator it = find(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), _sourceSoldier);
+			if (it != _base->getSoldiers()->end())
+			{
+				_base->getSoldiers()->erase(it);
+			}
+		}
 	}
 
 	if (_transformationRule->getTransferTime() > 0 || _transformationRule->isCreatingClone() || _sourceSoldier->getDeath())
