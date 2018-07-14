@@ -2113,6 +2113,12 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 			expType = ETM_MELEE_100;
 			expFuncA = &BattleUnit::addMeleeExp; // e.g. cattle prod, cutlass, rope, ...
 		}
+		// MEDIKITS
+		else if (weapon->getRules()->getBattleType() == BT_MEDIKIT)
+		{
+			// medikits don't train anything by default
+			return false;
+		}
 		// FIREARMS and other
 		else
 		{
