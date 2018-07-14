@@ -329,17 +329,17 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		else if (_action->type != BA_THROW &&
 			!_game->getSavedGame()->getSavedBattle()->canUseWeapon(_action->weapon, _action->actor, false))
 		{
-			if (weapon->isWaterOnly())
+			if (weapon->isBlockingBothHands())
+			{
+				_action->result = "STR_MUST_USE_BOTH_HANDS";
+			}
+			else if (weapon->isWaterOnly())
 			{
 				_action->result = "STR_UNDERWATER_EQUIPMENT";
 			}
 			else if (weapon->isLandOnly())
 			{
 				_action->result = "STR_LAND_EQUIPMENT";
-			}
-			else if (weapon->isBlockingBothHands())
-			{
-				_action->result = "STR_MUST_USE_BOTH_HANDS";
 			}
 			else
 			{
