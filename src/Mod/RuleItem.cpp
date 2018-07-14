@@ -345,6 +345,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	{
 		_specialIconSprite = mod->getSpriteOffset(node["specialIconSprite"].as<int>(_specialIconSprite), "SPICONS.DAT");
 	}
+	loadSoundVector(node["reloadSound"], mod, _reloadSound);
 	loadSoundVector(node["fireSound"], mod, _fireSound);
 	loadSoundVector(node["hitSound"], mod, _hitSound);
 	loadSoundVector(node["hitMissSound"], mod, _hitMissSound);
@@ -907,6 +908,19 @@ int RuleItem::getRandomSound(const std::vector<int> &vector, int defaultValue) c
 		return vector[RNG::generate(0, vector.size() - 1)];
 	}
 	return defaultValue;
+}
+
+/**
+ * Gets the item's reload sound.
+ * @return The reload sound id.
+ */
+int RuleItem::getReloadSound() const
+{
+	if (_reloadSound.empty())
+	{
+		return Mod::ITEM_RELOAD;
+	}
+	return getRandomSound(_reloadSound);
 }
 
 /**

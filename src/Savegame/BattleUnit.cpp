@@ -73,6 +73,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_standHeight = _armor->getStandHeight() == -1 ? soldier->getRules()->getStandHeight() : _armor->getStandHeight();
 	_kneelHeight = _armor->getKneelHeight() == -1 ? soldier->getRules()->getKneelHeight() : _armor->getKneelHeight();
 	_floatHeight = _armor->getFloatHeight() == -1 ? soldier->getRules()->getFloatHeight() : _armor->getFloatHeight();
+	_lastReloadSound = Mod::ITEM_RELOAD;
 	_deathSound = std::vector<int>(); // this one is hardcoded
 	_aggroSound = -1;
 	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : -1; // there's no unit move sound, thus hardcoded -1
@@ -250,6 +251,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_kneelHeight = _armor->getKneelHeight() == -1 ? unit->getKneelHeight() : _armor->getKneelHeight();
 	_floatHeight = _armor->getFloatHeight() == -1 ? unit->getFloatHeight() : _armor->getFloatHeight();
 	_loftempsSet = _armor->getLoftempsSet();
+	_lastReloadSound = Mod::ITEM_RELOAD;
 	_deathSound = unit->getDeathSounds();
 	_aggroSound = unit->getAggroSound();
 	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : unit->getMoveSound();
@@ -2735,6 +2737,7 @@ bool BattleUnit::reloadAmmo()
 			weapon->setAmmoForSlot(slotAmmo, ammo);
 			ammo->moveToOwner(0);
 
+			_lastReloadSound = ruleWeapon->getReloadSound();
 			return true;
 		}
 	}

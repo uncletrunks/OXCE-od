@@ -1593,6 +1593,8 @@ void StatsForNerdsState::initItemList()
 		addSingleString(ss, itemRule->getMediKitCustomBackground(), "medikitBackground");
 
 		addSection(L"{Sounds}", L"", _white);
+		addVectorOfIntegers(ss, itemRule->getReloadSoundRaw(), "reloadSound");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getReloadSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getFireSoundRaw(), "fireSound");
 		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getFireSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getHitSoundRaw(), "hitSound");

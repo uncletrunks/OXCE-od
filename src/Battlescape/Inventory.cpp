@@ -907,7 +907,7 @@ void Inventory::mouseClick(Action *action, State *state)
 									moveItem(oldAmmo, (item == weaponRightHand ? _inventorySlotLeftHand : _inventorySlotRightHand), 0, 0);
 								}
 								setSelectedItem(0);
-								_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_RELOAD)->play();
+								_game->getMod()->getSoundByDepth(_depth, item->getRules()->getReloadSound())->play();
 								if (item->getSlot()->getType() == INV_GROUND)
 								{
 									arrangeGround();

@@ -131,6 +131,7 @@ private:
 	std::wstring _name;
 	UnitStats _stats;
 	int _standHeight, _kneelHeight, _floatHeight;
+	int _lastReloadSound;
 	std::vector<int> _deathSound;
 	int _value, _aggroSound, _moveSound;
 	int _intelligence, _aggression;
@@ -445,6 +446,8 @@ public:
 	int getLoftemps(int entry = 0) const;
 	/// Get the unit's value.
 	int getValue() const;
+	/// Get the reload sound (of the last reloaded weapon).
+	int getReloadSound() const { return _lastReloadSound; }
 	/// Get the unit's death sounds.
 	const std::vector<int> &getDeathSounds() const;
 	/// Get the unit's move sound.

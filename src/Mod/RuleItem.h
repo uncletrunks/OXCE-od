@@ -136,7 +136,8 @@ private:
 	int _floorSprite;
 	int _handSprite, _bulletSprite;
 	int _specialIconSprite;
-	std::vector<int> _fireSound, _hitSound; 
+	std::vector<int> _reloadSound;
+	std::vector<int> _fireSound, _hitSound;
 	int _hitAnimation;
 	std::vector<int> _hitMissSound;
 	int _hitMissAnimation;
@@ -278,6 +279,9 @@ public:
 	int getWaypoints() const;
 	/// Gets the item's bullet sprite reference.
 	int getBulletSprite() const;
+	/// Gets the item's reload sound.
+	int getReloadSound() const;
+	const std::vector<int> &getReloadSoundRaw() const { return _reloadSound; }
 	/// Gets the item's fire sound.
 	int getFireSound() const;
 	const std::vector<int> &getFireSoundRaw() const { return _fireSound; }

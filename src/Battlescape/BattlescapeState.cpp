@@ -1485,7 +1485,7 @@ void BattlescapeState::btnReloadClick(Action *)
 {
 	if (playableUnitSelected() && _save->getSelectedUnit()->reloadAmmo())
 	{
-		_game->getMod()->getSoundByDepth(_save->getDepth(), Mod::ITEM_RELOAD)->play(-1, getMap()->getSoundAngle(_save->getSelectedUnit()->getPosition()));
+		_game->getMod()->getSoundByDepth(_save->getDepth(), _save->getSelectedUnit()->getReloadSound())->play(-1, getMap()->getSoundAngle(_save->getSelectedUnit()->getPosition()));
 		updateSoldierInfo();
 	}
 }
