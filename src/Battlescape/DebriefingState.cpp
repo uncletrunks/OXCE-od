@@ -1495,6 +1495,7 @@ void DebriefingState::prepareDebriefing()
 			}
 		}
 	}
+	bool lostCraft = false;
 	if (craft != 0 && ((playersInExitArea == 0 && aborted) || (playersSurvived == 0)))
 	{
 		if (craft->getRules()->keepCraftAfterFailedMission())
@@ -1514,6 +1515,7 @@ void DebriefingState::prepareDebriefing()
 			_game->getSavedGame()->stopHuntingXcomCraft(craft); // lost during ground mission
 			delete craft;
 			craft = 0; // To avoid a crash down there!!
+			lostCraft = true;
 			base->getCrafts()->erase(craftIterator);
 			_txtTitle->setText(tr("STR_CRAFT_IS_LOST"));
 		}
@@ -1609,7 +1611,11 @@ void DebriefingState::prepareDebriefing()
 	}
 	else
 	{
-		if (target == "STR_BASE")
+		if (lostCraft)
+		{
+			_txtTitle->setText(tr("STR_CRAFT_IS_LOST"));
+		}
+		else if (target == "STR_BASE")
 		{
 			_txtTitle->setText(tr("STR_BASE_IS_LOST"));
 			_destroyBase = true;
