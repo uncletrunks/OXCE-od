@@ -566,7 +566,6 @@ void BattlescapeGenerator::nextStage()
 	_save->setAborted(false);
 	_save->setGlobalShade(_worldShade);
 	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
-	_save->getTileEngine()->recalculateFOV();
 }
 
 /**
@@ -696,7 +695,6 @@ void BattlescapeGenerator::run()
 	_save->setGlobalShade(_worldShade);
 
 	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
-	_save->getTileEngine()->recalculateFOV();
 }
 
 /**
