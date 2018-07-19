@@ -241,64 +241,60 @@ void CraftInfoState::init()
 		_crew->clear();
 		_equip->clear();
 
-		SurfaceSet *customArmorPreviews = _game->getMod()->getSurfaceSet("CustomArmorPreviews", false);
-		if (customArmorPreviews == 0)
+		Surface *frame1 = texture->getFrame(38);
+		frame1->setY(0);
+
+		SurfaceSet *customArmorPreviews = _game->getMod()->getSurfaceSet("CustomArmorPreviews");
+		int x = 0;
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 		{
-			// vanilla
-			Surface *frame1 = texture->getFrame(38);
-			frame1->setY(0);
-			for (int i = 0, x = 0; i < _craft->getNumSoldiers(); ++i, x += 10)
+			if ((*i)->getCraft() == _craft)
 			{
-				frame1->setX(x);
-				frame1->blit(_crew);
-			}
-		}
-		else
-		{
-			// modded armor previews
-			int x = 0;
-			for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
-			{
-				if ((*i)->getCraft() == _craft)
+				for (auto index : (*i)->getArmor()->getCustomArmorPreviewIndex())
 				{
-					for (auto index : (*i)->getArmor()->getCustomArmorPreviewIndex())
+					Surface *customFrame1 = customArmorPreviews->getFrame(index);
+					if (customFrame1)
 					{
-						Surface *customFrame1 = customArmorPreviews->getFrame(index);
+						// modded armor previews
 						customFrame1->setY(0);
 						customFrame1->setX(x);
 						customFrame1->blit(_crew);
-						x += 10;
 					}
+					else
+					{
+						// vanilla
+						frame1->setX(x);
+						frame1->blit(_crew);
+					}
+					x += 10;
 				}
 			}
 		}
 
-		SurfaceSet *customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews", false);
-		int x = 0;
-		if (customItemPreviews == 0)
+		Surface *frame2 = texture->getFrame(40);
+		frame2->setY(0);
+
+		SurfaceSet *customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews");
+		x = 0;
+		for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
 		{
-			// vanilla
-			Surface *frame2 = texture->getFrame(40);
-			frame2->setY(0);
-			for (int i = 0; i < _craft->getNumVehicles(); ++i, x += 10)
+			for (auto index : (*i)->getRules()->getCustomItemPreviewIndex())
 			{
-				frame2->setX(x);
-				frame2->blit(_equip);
-			}
-		}
-		else
-		{
-			// modded HWP/auxiliary previews
-			for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
-			{
-				for (auto index : (*i)->getRules()->getCustomItemPreviewIndex())
+				Surface *customFrame2 = customItemPreviews->getFrame(index);
+				if (customFrame2)
 				{
-					Surface *customFrame2 = customItemPreviews->getFrame(index);
+					// modded HWP/auxiliary previews
 					customFrame2->setY(0);
 					customFrame2->setX(x);
 					customFrame2->blit(_equip);
-					x += 10;
 				}
+				else
+				{
+					// vanilla
+					frame2->setX(x);
+					frame2->blit(_equip);
+				}
+				x += 10;
 			}
 		}
 

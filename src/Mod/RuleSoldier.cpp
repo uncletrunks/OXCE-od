@@ -34,7 +34,7 @@ RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _listOrder(0), 
 	_costSalarySquaddie(0), _costSalarySergeant(0), _costSalaryCaptain(0), _costSalaryColonel(0), _costSalaryCommander(0),
 	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _avatarOffsetX(67), _avatarOffsetY(48), _flagOffset(0),
 	_allowPromotion(true), _allowPiloting(true),
-	_rankSprite(42), _rankSpriteBattlescape(20)
+	_rankSprite(42), _rankSpriteBattlescape(20), _rankSpriteTiny(0)
 {
 }
 
@@ -176,6 +176,10 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder)
 	if (node["rankBattleSprite"])
 	{
 		_rankSpriteBattlescape = mod->getSpriteOffset(node["rankBattleSprite"].as<int>(_rankSpriteBattlescape), "SMOKE.PCK");
+	}
+	if (node["rankTinySprite"])
+	{
+		_rankSpriteTiny = mod->getSpriteOffset(node["rankTinySprite"].as<int>(_rankSpriteTiny), "TinyRanks");
 	}
 
 	_listOrder = node["listOrder"].as<int>(_listOrder);
@@ -464,6 +468,15 @@ int RuleSoldier::getRankSprite() const
 int RuleSoldier::getRankSpriteBattlescape() const
 {
 	return _rankSpriteBattlescape;
+}
+
+/**
+ * Gets the index of the sprites to use to represent this soldier's rank in TinyRanks
+ * @return The sprite index.
+ */
+int RuleSoldier::getRankSpriteTiny() const
+{
+	return _rankSpriteTiny;
 }
 
 }

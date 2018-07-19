@@ -400,6 +400,16 @@ int Soldier::getRankSpriteBattlescape() const
 }
 
 /**
+ * Returns a graphic representation of
+ * the soldier's military rank from TinyRanks
+ * @return Sprite ID for rank.
+ */
+int Soldier::getRankSpriteTiny() const
+{
+	return _rules->getRankSpriteTiny() + _rank;
+}
+
+/**
  * Returns the soldier's military rank.
  * @return Rank enum.
  */

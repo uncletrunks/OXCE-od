@@ -3366,6 +3366,11 @@ void Mod::loadVanillaResources()
 	Window::soundPopup[2] = getSound("GEO.CAT", Mod::WINDOW_POPUP[2]);
 
 	loadBattlescapeResources(); // TODO load this at battlescape start, unload at battlescape end?
+
+	// dummy resources, that need to be defined in order for mod loading to work correctly
+	_sets["CustomArmorPreviews"] = new SurfaceSet(10, 18);
+	_sets["CustomItemPreviews"] = new SurfaceSet(10, 18);
+	_sets["TinyRanks"] = new SurfaceSet(7, 7);
 }
 
 /**

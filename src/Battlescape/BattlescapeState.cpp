@@ -276,8 +276,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	add(_btnStats, "buttonStats", "battlescape", _icons);
 	add(_txtName, "textName", "battlescape", _icons);
 	// need to do this here, because of TFTD
-	bool tinyRanksEnabled = _game->getMod()->getSurface("AvatarBackground", false) != 0 && _game->getMod()->getSurfaceSet("TinyRanks", false) != 0;
-	if (tinyRanksEnabled)
+	if (_game->getMod()->getSurface("AvatarBackground", false))
 	{
 		// put tiny rank icon where name used to be
 		_rankTiny->setX(_txtName->getX());
@@ -1644,10 +1643,11 @@ void BattlescapeState::updateSoldierInfo()
 		else
 		{
 			// show tiny rank (modded)
-			SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks", false);
-			if (texture != 0)
+			SurfaceSet *texture = _game->getMod()->getSurfaceSet("TinyRanks");
+			Surface *spr = texture->getFrame(soldier->getRankSpriteTiny());
+			if (spr)
 			{
-				texture->getFrame(soldier->getRank())->blit(_rankTiny);
+				spr->blit(_rankTiny);
 			}
 
 			// use custom background (modded)

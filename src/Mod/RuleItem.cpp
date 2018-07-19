@@ -614,15 +614,17 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
 	if (const YAML::Node &cipi = node["customItemPreviewIndex"])
 	{
+		_customItemPreviewIndex.clear();
 		if (cipi.IsScalar())
 		{
-			int cipiSingle = cipi.as<int>();
-			_customItemPreviewIndex.clear();
-			_customItemPreviewIndex.push_back(cipiSingle);
+			_customItemPreviewIndex.push_back(mod->getSpriteOffset(cipi.as<int>(), "CustomItemPreviews"));
 		}
 		else
 		{
-			_customItemPreviewIndex = cipi.as< std::vector<int> >(_customItemPreviewIndex);
+			for (YAML::const_iterator i = cipi.begin(); i != cipi.end(); ++i)
+			{
+				_customItemPreviewIndex.push_back(mod->getSpriteOffset(i->as<int>(), "CustomItemPreviews"));
+			}
 		}
 	}
 	_kneelBonus = node["kneelBonus"].as<int>(_kneelBonus);

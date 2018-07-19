@@ -210,15 +210,17 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_scriptValues.load(node, parsers.getShared());
 	if (const YAML::Node &capi = node["customArmorPreviewIndex"])
 	{
+		_customArmorPreviewIndex.clear();
 		if (capi.IsScalar())
 		{
-			int capiSingle = capi.as<int>();
-			_customArmorPreviewIndex.clear();
-			_customArmorPreviewIndex.push_back(capiSingle);
+			_customArmorPreviewIndex.push_back(mod->getSpriteOffset(capi.as<int>(), "CustomArmorPreviews"));
 		}
 		else
 		{
-			_customArmorPreviewIndex = capi.as< std::vector<int> >(_customArmorPreviewIndex);
+			for (YAML::const_iterator i = capi.begin(); i != capi.end(); ++i)
+			{
+				_customArmorPreviewIndex.push_back(mod->getSpriteOffset(i->as<int>(), "CustomArmorPreviews"));
+			}
 		}
 	}
 	_allowsRunning = node["allowsRunning"].as<bool>(_allowsRunning);

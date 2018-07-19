@@ -50,7 +50,7 @@ private:
 	bool _allowPromotion, _allowPiloting;
 	std::vector<StatString*> _statStrings;
 	std::vector<std::string> _rankStrings;
-	int _rankSprite, _rankSpriteBattlescape;
+	int _rankSprite, _rankSpriteBattlescape, _rankSpriteTiny;
 
 	void addSoldierNamePool(const std::string &namFile);
 public:
@@ -118,6 +118,8 @@ public:
 	int getRankSprite() const;
 	/// Gets the offset of the rank sprite in SMOKE.PCK.
 	int getRankSpriteBattlescape() const;
+	/// Gets the offset of the rank sprite in TinyRanks.
+	int getRankSpriteTiny() const;
 };
 
 }

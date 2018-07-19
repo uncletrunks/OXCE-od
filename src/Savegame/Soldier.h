@@ -99,6 +99,8 @@ public:
 	int getRankSprite() const;
 	/// Gets a sprite version of the soldier's rank. Used for SMOKE.PCK.
 	int getRankSpriteBattlescape() const;
+	/// Gets a sprite version of the soldier's rank. Used for TinyRanks.
+	int getRankSpriteTiny() const;
 	/// Gets the soldier's rank.
 	SoldierRank getRank() const;
 	/// Increase the soldier's military rank.
