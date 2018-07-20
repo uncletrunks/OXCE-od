@@ -1700,6 +1700,18 @@ void DogfightState::maximumDistance()
 }
 
 /**
+ * Sets the craft to the distance relevant for aggressive attack.
+ */
+void DogfightState::aggressiveDistance()
+{
+	maximumDistance();
+	if (_targetDist > AGGRESSIVE_DIST)
+	{
+		_targetDist = AGGRESSIVE_DIST;
+	}
+}
+
+/**
  * Updates the status text and restarts
  * the text timeout counter.
  * @param status New status text.
@@ -1779,7 +1791,7 @@ void DogfightState::btnCautiousPress(Action *)
 				}
 			}
 			// same distance as aggressive (by design)
-			_targetDist = 64;
+			aggressiveDistance();
 		}
 	}
 }
@@ -1824,7 +1836,7 @@ void DogfightState::btnAggressivePress(Action *)
 				_weaponFireInterval[i] = w->getRules()->getAggressiveReload();
 			}
 		}
-		_targetDist = 64;
+		aggressiveDistance();
 	}
 }
 

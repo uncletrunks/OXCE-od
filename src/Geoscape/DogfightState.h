@@ -26,6 +26,7 @@ namespace OpenXcom
 {
 
 const int STANDOFF_DIST = 560;
+const int AGGRESSIVE_DIST = 64;
 enum ColorNames { CRAFT_MIN, CRAFT_MAX, RADAR_MIN, RADAR_MAX, DAMAGE_MIN, DAMAGE_MAX, BLOB_MIN, RANGE_METER, DISABLED_WEAPON, DISABLED_AMMO, DISABLED_RANGE, SHIELD_MIN, SHIELD_MAX };
 
 class ImageButton;
@@ -95,6 +96,8 @@ public:
 	void minimumDistance();
 	// Sets the craft to maximum distance.
 	void maximumDistance();
+	// Sets the craft to maximum distance or 8 km, whichever is smaller.
+	void aggressiveDistance();
 	/// Changes the status text.
 	void setStatus(const std::string &status);
 	/// Handler for clicking the Minimize button.
