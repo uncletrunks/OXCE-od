@@ -1162,13 +1162,13 @@ void BattlescapeState::btnPrevSoldierClick(Action *)
  * @param setReselect When true, flag the current unit first.
  * @param checkInventory When true, don't select a unit that has no inventory.
  */
-void BattlescapeState::selectNextPlayerUnit(bool checkReselect, bool setReselect, bool checkInventory)
+void BattlescapeState::selectNextPlayerUnit(bool checkReselect, bool setReselect, bool checkInventory, bool checkFOV)
 {
 	if (allowButtons())
 	{
 		if (_battleGame->getCurrentAction()->type != BA_NONE) return;
 		BattleUnit *unit = _save->selectNextPlayerUnit(checkReselect, setReselect, checkInventory);
-		updateSoldierInfo();
+		updateSoldierInfo(checkFOV);
 		if (unit) _map->getCamera()->centerOnPosition(unit->getPosition());
 		_battleGame->cancelCurrentAction();
 		_battleGame->getCurrentAction()->actor = unit;
@@ -1578,7 +1578,7 @@ void BattlescapeState::drawHandsItems()
 /**
  * Updates a soldier's name/rank/tu/energy/health/morale.
  */
-void BattlescapeState::updateSoldierInfo()
+void BattlescapeState::updateSoldierInfo(bool checkFOV)
 {
 	BattleUnit *battleUnit = _save->getSelectedUnit();
 
@@ -1788,7 +1788,10 @@ void BattlescapeState::updateSoldierInfo()
 		}
 	}
 
-	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
+	if (checkFOV)
+	{
+		_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
+	}
 
 	// go through all units visible to the selected soldier (or other unit, e.g. mind-controlled enemy)
 	int j = 0;

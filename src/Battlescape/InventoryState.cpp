@@ -364,7 +364,7 @@ void InventoryState::init()
 	{
 		if (_parent)
 		{
-			_parent->selectNextPlayerUnit(false, false, true);
+			_parent->selectNextPlayerUnit(false, false, true, _tu);
 		}
 		else
 		{
