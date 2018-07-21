@@ -1035,7 +1035,7 @@ bool Soldier::isEligibleForTransformation(RuleSoldierTransformation *transformat
 		_currentStats.melee < minStats.melee ||
 		_currentStats.strength < minStats.strength ||
 		_currentStats.psiStrength < minStats.psiStrength ||
-		_currentStats.psiSkill < minStats.psiSkill)
+		(_currentStats.psiSkill < minStats.psiSkill && minStats.psiSkill != 0)) // The != 0 is required for the "psi training at any time" option, as it sets skill to negative in training
 		return false;
 
 	return true;
