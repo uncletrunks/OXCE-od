@@ -176,7 +176,7 @@ en-GB:
 #TileEngine.cpp
   STR_HIT_LOG_NO_DAMAGE: "0 "
   STR_HIT_LOG_SMALL_DAMAGE: "hit "
-  STR_HIT_LOG_BIG_DAMAGE: "hit! "
+  STR_HIT_LOG_BIG_DAMAGE: "HIT "
   STR_HIT_LOG_REACTION_FIRE: "Reaction fire..."
 #=================== Engine ===================
 #Options.cpp
