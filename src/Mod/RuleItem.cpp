@@ -463,7 +463,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	if (node["strengthApplied"].as<bool>(false))
 	{
 		_damageBonus.setStrength();
-		_meleeMulti.setModded(true); // vanilla default = false
+		_damageBonus.setModded(true); // vanilla default = false
 	}
 
 	_power = node["power"].as<int>(_power);
