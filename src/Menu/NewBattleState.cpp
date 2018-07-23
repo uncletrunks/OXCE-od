@@ -438,10 +438,11 @@ void NewBattleState::initSave()
 		RuleItem *rule = _game->getMod()->getItem(*i);
 		if (rule->getBattleType() != BT_CORPSE && rule->isRecoverable())
 		{
-			base->getStorageItems()->addItem(*i, 1);
+			int howMany = rule->getBattleType() == BT_AMMO ? 2 : 1;
+			base->getStorageItems()->addItem(*i, howMany);
 			if (rule->getBattleType() != BT_NONE && !rule->isFixed() && rule->getBigSprite() > -1)
 			{
-				_craft->getItems()->addItem(*i, 1);
+				_craft->getItems()->addItem(*i, howMany);
 			}
 		}
 	}
