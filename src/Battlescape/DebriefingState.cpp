@@ -1513,6 +1513,7 @@ void DebriefingState::prepareDebriefing()
 			// without worrying it's vehicles' destructor calling double (on base defense missions
 			// all vehicle object in the craft is also referenced by base->getVehicles() !!)
 			_game->getSavedGame()->stopHuntingXcomCraft(craft); // lost during ground mission
+			_game->getSavedGame()->removeAllSoldiersFromXcomCraft(craft); // needed in case some soldiers couldn't spawn
 			delete craft;
 			craft = 0; // To avoid a crash down there!!
 			lostCraft = true;

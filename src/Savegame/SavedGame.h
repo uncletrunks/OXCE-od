@@ -392,6 +392,8 @@ public:
 	void setAutosell(const RuleItem *itype, const bool enabled);
 	/// get autosell state for an item type
 	bool getAutosell(const RuleItem *) const;
+	/// Removes all soldiers from a given craft.
+	void removeAllSoldiersFromXcomCraft(Craft *craft);
 	/// Stop hunting the given xcom craft.
 	void stopHuntingXcomCraft(Craft *target);
 	/// Stop hunting all xcom craft from a given xcom base.

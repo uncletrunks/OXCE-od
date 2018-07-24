@@ -2703,6 +2703,23 @@ bool SavedGame::getAutosell(const RuleItem *itype) const
 }
 
 /**
+ * Removes all soldiers from a given craft.
+ */
+void SavedGame::removeAllSoldiersFromXcomCraft(Craft *craft)
+{
+	for (auto base : _bases)
+	{
+		for (auto soldier : *base->getSoldiers())
+		{
+			if (soldier->getCraft() == craft)
+			{
+				soldier->setCraft(0);
+			}
+		}
+	}
+}
+
+/**
  * Stop hunting the given xcom craft.
  */
 void SavedGame::stopHuntingXcomCraft(Craft *target)
