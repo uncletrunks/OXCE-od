@@ -828,7 +828,10 @@ void DebriefingState::btnOkClick(Action *)
 			{
 				if (i->second == 2)
 				{
-					if (_base->getAvailableContainment(i->first) - (_base->getUsedContainment(i->first) * _limitsEnforced) >= 0)
+					int availableContainment = _base->getAvailableContainment(i->first);
+					int usedContainment = _base->getUsedContainment(i->first);
+					int freeContainment = availableContainment - (usedContainment * _limitsEnforced);
+					if (availableContainment > 0 && freeContainment >= 0)
 					{
 						_containmentStateInfo[i->first] = 0; // 0 = OK
 					}
@@ -2140,14 +2143,18 @@ void DebriefingState::recoverCivilian(BattleUnit *from, Base *base)
 					}
 					if (killPrisonersAutomatically)
 					{
-						_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available
+						_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available in any base
 					}
 					else
 					{
 						base->getStorageItems()->addItem(type, 1);
-						if (base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) - (base->getUsedContainment(ruleLiveAlienItem->getPrisonType()) * _limitsEnforced) < 0)
+						int availableContainment = base->getAvailableContainment(ruleLiveAlienItem->getPrisonType());
+						int usedContainment = base->getUsedContainment(ruleLiveAlienItem->getPrisonType());
+						int freeContainment = availableContainment - (usedContainment * _limitsEnforced);
+						// no capacity, or not enough capacity
+						if (availableContainment == 0 || freeContainment < 0)
 						{
-							_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 2; // 2 = full
+							_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 2; // 2 = overfull
 						}
 					}
 				}
@@ -2192,7 +2199,7 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	}
 	if (killPrisonersAutomatically)
 	{
-		_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available
+		_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 1; // 1 = not available in any base
 
 		if (!from->getArmor()->getCorpseBattlescape().empty())
 		{
@@ -2225,9 +2232,13 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		}
 
 		base->getStorageItems()->addItem(type, 1);
-		if (base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) - (base->getUsedContainment(ruleLiveAlienItem->getPrisonType()) * _limitsEnforced) < 0)
+		int availableContainment = base->getAvailableContainment(ruleLiveAlienItem->getPrisonType());
+		int usedContainment = base->getUsedContainment(ruleLiveAlienItem->getPrisonType());
+		int freeContainment = availableContainment - (usedContainment * _limitsEnforced);
+		// no capacity, or not enough capacity
+		if (availableContainment == 0 || freeContainment < 0)
 		{
-			_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 2; // 2 = full
+			_containmentStateInfo[ruleLiveAlienItem->getPrisonType()] = 2; // 2 = overfull
 		}
 	}
 }

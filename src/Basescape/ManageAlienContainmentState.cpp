@@ -54,7 +54,6 @@ namespace OpenXcom
  */
 ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0), _reset(false)
 {
-	bool overCrowded = Options::storageLimitsEnforced && _base->getFreeContainment(_prisonType) < 0;
 	std::vector<std::string> researchList;
 	for (std::vector<ResearchProject*>::const_iterator iter = _base->getResearch().begin(); iter != _base->getResearch().end(); ++iter)
 	{
@@ -68,7 +67,6 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	//_btnOk = new TextButton(overCrowded ? 288:148, 16, overCrowded ? 16:8, 176);
 	_btnOk = new TextButton(148, 16, 8, 176);
 	_btnCancel = new TextButton(148, 16, 164, 176);
 	_btnTransfer = new TextButton(148, 16, 164, 176);
@@ -114,6 +112,14 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 
 	_btnTransfer->setText(tr("STR_GO_TO_TRANSFERS"));
 	_btnTransfer->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnTransferClick);
+
+	int availableContainment = _base->getAvailableContainment(_prisonType);
+	int freeContainment = availableContainment - _base->getUsedContainment(_prisonType);
+	bool overCrowded = false;
+	if (availableContainment == 0 || Options::storageLimitsEnforced)
+	{
+		overCrowded = (freeContainment < 0);
+	}
 
 	_btnCancel->setVisible(!overCrowded);
 	_btnOk->setVisible(!overCrowded);
@@ -495,8 +501,9 @@ void ManageAlienContainmentState::updateStrings()
 	_lstAliens->setCellText(_sel, 3, ss2.str());
 
 	int aliens = _base->getUsedContainment(_prisonType) - _aliensSold;
-	int spaces = _base->getAvailableContainment(_prisonType) - aliens;
-	if (Options::storageLimitsEnforced)
+	int availableContainment = _base->getAvailableContainment(_prisonType);
+	int spaces = availableContainment - aliens;
+	if (availableContainment == 0 || Options::storageLimitsEnforced)
 	{
 		_btnOk->setVisible(spaces >= 0);
 	}
