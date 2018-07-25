@@ -80,3 +80,7 @@ nbproject/
 src/OpenXcom.2010.VC.opendb
 bin/user
 /makefile
+openxcom.app/
+CMakeFiles/
+CMakeCache.txt
+git_version.h
