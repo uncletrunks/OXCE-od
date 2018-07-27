@@ -306,7 +306,7 @@ public:
 	/// calculate the number of map modules remaining
 	void calculateModuleMap();
 	/// a shortcut to the geoscape save.
-	SavedGame *getGeoscapeSave();
+	SavedGame *getGeoscapeSave() const;
 	/// get the depth of the battlescape game.
 	int getDepth() const;
 	/// set the depth of the battlescape game.

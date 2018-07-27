@@ -182,6 +182,7 @@ Update nightly.[br/]
 [br/]
 4.0:[br/]
 Damage script can now alter zombie transformation chance.[br/]
+Add access to current difficulty level in scripts.[br/]
 [br/]
 
 [examples]

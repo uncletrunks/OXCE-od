@@ -2172,7 +2172,7 @@ void SavedBattleGame::calculateModuleMap()
  * get a pointer to the geoscape save
  * @return a pointer to the geoscape save.
  */
-SavedGame *SavedBattleGame::getGeoscapeSave()
+SavedGame *SavedBattleGame::getGeoscapeSave() const
 {
 	return _battleState->getGame()->getSavedGame();
 }
@@ -2392,6 +2392,18 @@ void randomRangeScript(SavedBattleGame* sbg, int& val, int min, int max)
 	}
 }
 
+void difficultyLevelScript(const SavedBattleGame* sbg, int& val)
+{
+	if (sbg)
+	{
+		val = sbg->getGeoscapeSave()->getDifficulty();
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
 } // namespace
 
 /**
@@ -2408,7 +2420,16 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 	sbg.add<&randomChanceScript>("randomChance");
 	sbg.add<&randomRangeScript>("randomRange");
 
+	sbg.add<&difficultyLevelScript>("difficultyLevel");
+
 	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
+
+
+	sbg.addCustomConst("DIFF_BEGINNER", DIFF_BEGINNER);
+	sbg.addCustomConst("DIFF_EXPERIENCED", DIFF_EXPERIENCED);
+	sbg.addCustomConst("DIFF_VETERAN", DIFF_VETERAN);
+	sbg.addCustomConst("DIFF_GENIUS", DIFF_GENIUS);
+	sbg.addCustomConst("DIFF_SUPERHUMAN", DIFF_SUPERHUMAN);
 }
 
 /**
