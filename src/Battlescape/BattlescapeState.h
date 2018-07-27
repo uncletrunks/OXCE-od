@@ -65,7 +65,7 @@ private:
 	Text *_txtName;
 	NumberText *_numTimeUnits, *_numEnergy, *_numHealth, *_numMorale, *_numLayers;
 	std::vector<NumberText*> _numAmmoLeft, _numAmmoRight;
-	NumberText *_numMedikitLeft1, *_numMedikitLeft2, *_numMedikitLeft3, *_numMedikitRight1, *_numMedikitRight2, *_numMedikitRight3;
+	std::vector<NumberText*> _numMedikitLeft, _numMedikitRight;
 	NumberText *_numTwoHandedIndicatorLeft, *_numTwoHandedIndicatorRight;
 	Uint8 _twoHandedRed, _twoHandedGreen;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
@@ -88,7 +88,6 @@ private:
 	Position _cursorPosition;
 	Uint8 _barHealthColor;
 	bool _autosave;
-	int _animFrame; // for grenade timers
 	int _numberOfDirectlyVisibleUnits, _numberOfEnemiesTotal, _numberOfEnemiesTotalPlusWounded;
 	Uint8 _indicatorTextColor, _indicatorGreen, _indicatorBlue, _indicatorPurple;
 	/// Popups a context sensitive list of actions the user can choose from.
@@ -96,13 +95,11 @@ private:
 	/// Shifts the red colors of the visible unit buttons backgrounds.
 	void blinkVisibleUnitButtons();
 	/// Draw hand item with ammo number.
-	void drawItem(BattleItem *item, Surface *hand, std::vector<NumberText*> &ammoText);
+	void drawItem(BattleItem *item, Surface *hand, std::vector<NumberText*> &ammoText, std::vector<NumberText*> &medikitText, NumberText *twoHandedText);
 	/// Draw both hands sprites.
 	void drawHandsItems();
 	/// Shifts the colors of the health bar when unit has fatal wounds.
 	void blinkHealthBar();
-	/// Show priming warnings on grenades.
-	void drawPrimers();
 	/// Shows the unit kneel state.
 	void toggleKneelButton(BattleUnit* unit);
 public:

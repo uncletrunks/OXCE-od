@@ -124,6 +124,7 @@ class RuleItem
 public:
 	/// Maximum number of ammo slots on weapon.
 	static const int AmmoSlotMax = 4;
+	static const int MedikitSlots = 3;
 
 private:
 	std::string _type, _name, _nameAsAmmo; // two types of objects can have the same name
