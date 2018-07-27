@@ -51,7 +51,6 @@ private:
 	int _groundOffset, _animFrame;
 	std::map<int, std::map<int, int> > _stackLevel;
 	Surface *_stunIndicator, *_woundIndicator, *_burnIndicator, *_shockIndicator;
-	std::vector<std::pair<int, int> > _stunnedIndicators, _woundedIndicators, _burningIndicators, _shockedIndicators;
 	NumberText *_stackNumber;
 	std::wstring _searchString;
 	std::locale _myLocale;
@@ -122,8 +121,6 @@ public:
 	static bool overlapItems(BattleUnit *unit, BattleItem *item, RuleInventory *slot, int x = 0, int y = 0);
 	/// Shows a warning message.
 	void showWarning(const std::wstring &msg);
-	/// Show extra indicators on units.
-	void drawPrimers();
 	/// Animate surface.
 	void animate();
 	/// Get current animation frame for invenotry.

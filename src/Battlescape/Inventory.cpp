@@ -289,13 +289,13 @@ void Inventory::drawItems()
 	{
 		tempSurface->blitNShade(_items, x, y, Pulsate[_animFrame % 8], false, a ? 0 : 32);
 	};
+	auto indicators = [&](Surface *surf, int x, int y)
+	{
+		surf->blitNShade(_items, x, y, Pulsate[_animFrame % 8]);
+	};
 
 	ScriptWorkerBlit work;
 	_items->clear();
-	_stunnedIndicators.clear();
-	_shockedIndicators.clear();
-	_woundedIndicators.clear();
-	_burningIndicators.clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
 	Uint8 color2 = _game->getMod()->getInterface("inventory")->getElement("numStack")->color2;
 	if (_selUnit != 0)
@@ -382,19 +382,19 @@ void Inventory::drawItems()
 					fatalWounds = (*i)->getUnit()->getFatalWounds();
 					if (_burnIndicator && (*i)->getUnit()->getFire() > 0)
 					{
-						_burningIndicators.push_back(std::make_pair(x, y));
+						indicators(_burnIndicator, x, y);
 					}
 					else if (_woundIndicator && fatalWounds > 0)
 					{
-						_woundedIndicators.push_back(std::make_pair(x, y));
+						indicators(_woundIndicator, x, y);
 					}
 					else if (_shockIndicator && (*i)->getUnit()->hasNegativeHealthRegen())
 					{
-						_shockedIndicators.push_back(std::make_pair(x, y));
+						indicators(_shockIndicator, x, y);
 					}
 					else if (_stunIndicator)
 					{
-						_stunnedIndicators.push_back(std::make_pair(x, y));
+						indicators(_stunIndicator, x, y);
 					}
 				}
 			}
@@ -1585,38 +1585,6 @@ void Inventory::showWarning(const std::wstring &msg)
 }
 
 /**
- * Shows extra indicators on units.
- */
-void Inventory::drawPrimers()
-{
-	const int Pulsate[8] = { 0, 1, 2, 3, 4, 3, 2, 1 };
-
-	// burning units
-	for (std::vector<std::pair<int, int> >::const_iterator i = _burningIndicators.begin(); i != _burningIndicators.end(); ++i)
-	{
-		_burnIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
-	}
-
-	// wounded units
-	for (std::vector<std::pair<int, int> >::const_iterator i = _woundedIndicators.begin(); i != _woundedIndicators.end(); ++i)
-	{
-		_woundIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
-	}
-
-	// units in shock
-	for (std::vector<std::pair<int, int> >::const_iterator i = _shockedIndicators.begin(); i != _shockedIndicators.end(); ++i)
-	{
-		_shockIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
-	}
-
-	// stunned units
-	for (std::vector<std::pair<int, int> >::const_iterator i = _stunnedIndicators.begin(); i != _stunnedIndicators.end(); ++i)
-	{
-		_stunIndicator->blitNShade(_items, (*i).first, (*i).second, Pulsate[_animFrame % 8]);
-	}
-}
-
-/**
  * Animate surface.
  */
 void Inventory::animate()
@@ -1633,7 +1601,6 @@ void Inventory::animate()
 	}
 
 	drawItems();
-	drawPrimers();
 	drawSelectedItem();
 }
 
