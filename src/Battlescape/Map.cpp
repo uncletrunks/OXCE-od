@@ -124,11 +124,8 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_fadeShade = 16;
 	_nvColor = 0;
 	_fadeTimer = new Timer(FADE_INTERVAL);
-	if ((_save->getGlobalShade() > NIGHT_VISION_THRESHOLD))
-	{
-		_fadeTimer->onTimer((SurfaceHandler)&Map::fadeShade);
-		_fadeTimer->start();
-	}
+	_fadeTimer->onTimer((SurfaceHandler)&Map::fadeShade);
+	_fadeTimer->start();
 
 	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(_save->getStartingConditionType());
 	if (startingCondition != 0)
@@ -1632,7 +1629,13 @@ void Map::toggleNightVision()
 int Map::reShade(Tile *tile)
 {
 	// no night vision
-	if ((_save->getGlobalShade() <= NIGHT_VISION_THRESHOLD))
+	if (_nvColor == 0)
+	{
+		return tile->getShade();
+	}
+
+	// already bright enough
+	if ((tile->getShade() <= NIGHT_VISION_SHADE))
 	{
 		return tile->getShade();
 	}
@@ -1974,10 +1977,18 @@ void Map::fadeShade()
 	}
 	else
 	{
-		_nvColor = 0;
-		if (_fadeShade < _save->getGlobalShade())
+		if (_nvColor != 0)
 		{
-			++_fadeShade;
+			if (_fadeShade < _save->getGlobalShade())
+			{
+				// gradually fade away
+				++_fadeShade;
+			}
+			else
+			{
+				// and at the end turn off night vision
+				_nvColor = 0;
+			}
 		}
 	}
 }

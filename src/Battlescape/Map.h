@@ -48,7 +48,6 @@ class Map : public InteractiveSurface
 private:
 	static const int SCROLL_INTERVAL = 15;
 	static const int FADE_INTERVAL = 23;
-	static const int NIGHT_VISION_THRESHOLD = 6;
 	static const int NIGHT_VISION_SHADE = 4;
 	static const int BULLET_SPRITES = 35;
 	Timer *_scrollMouseTimer, *_scrollKeyTimer;
