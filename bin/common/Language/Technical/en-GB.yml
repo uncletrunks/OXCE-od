@@ -46,6 +46,7 @@ en-GB:
   DRT_FIRE: "special fire damage"
   DRT_NONE: "no damage"
   DRT_UFO_WITH_TWO_DICE: "0-200% spread (2 dice roll)"
+  DRT_EASY: "50-200% spread"
 #
   BFT_NONE: "none"
   BFT_INSTANT: "instant"

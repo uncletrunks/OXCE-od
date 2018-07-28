@@ -47,7 +47,6 @@ RuleDamageType::RuleDamageType() :
  */
 int RuleDamageType::getRandomDamage(int power, int mode) const
 {
-	int dmgRng = 0;
 	ItemDamageRandomType randType = RandomType;
 	if (randType == DRT_UFO_WITH_TWO_DICE)
 	{
@@ -66,6 +65,24 @@ int RuleDamageType::getRandomDamage(int power, int mode) const
 			return power * 2;
 		}
 	}
+	else if (randType == DRT_EASY)
+	{
+		int min = power / 2; // 50%
+		int max = power * 2; // 200%
+		if (mode == 0)
+		{
+			return RNG::generate(min, max);
+		}
+		else if (mode == 1)
+		{
+			return min;
+		}
+		else
+		{
+			return max;
+		}
+	}
+
 	const bool def = randType == DRT_DEFAULT;
 	if (def)
 	{
@@ -79,6 +96,7 @@ int RuleDamageType::getRandomDamage(int power, int mode) const
 		}
 	}
 
+	int dmgRng = 0;
 	switch (randType)
 	{
 	case DRT_UFO: dmgRng = (def ? Mod::DAMAGE_RANGE : 100); break;

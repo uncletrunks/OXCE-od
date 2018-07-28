@@ -774,6 +774,7 @@ void StatsForNerdsState::addDamageRandomType(std::wostringstream &ss, const Item
 		case DRT_FIRE: ss << tr("DRT_FIRE"); break;
 		case DRT_NONE: ss << tr("DRT_NONE"); break;
 		case DRT_UFO_WITH_TWO_DICE: ss << tr("DRT_UFO_WITH_TWO_DICE"); break;
+		case DRT_EASY: ss << tr("DRT_EASY"); break;
 		default: ss << tr("STR_UNKNOWN"); break;
 	}
 	if (_showIds)
