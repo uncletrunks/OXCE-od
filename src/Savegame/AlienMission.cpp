@@ -175,6 +175,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
 	if (ufo)
 	{
 		//Some missions may not spawn a UFO!
+		ufo->setMissionWaveNumber(_nextWave);
 		game.getUfos()->push_back(ufo);
 	}
 	else if ((mod.getDeployment(wave.ufoType) && !mod.getUfo(wave.ufoType) && mod.getDeployment(wave.ufoType)->getMarkerName() != "") // a mission site that we want to spawn directly
@@ -402,7 +403,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 	Ufo *ufo = new Ufo(ufoRule, game.getId("STR_UFO_UNIQUE"), hunterKillerPercentage, huntMode, huntBehavior);
 	ufo->setMissionInfo(this, &trajectory);
 	const RuleRegion &regionRules = *mod.getRegion(_region, true);
-	std::pair<double, double> pos = getWaypoint(trajectory, 0, globe, regionRules);
+	std::pair<double, double> pos = getWaypoint(wave, trajectory, 0, globe, regionRules);
 	ufo->setAltitude(trajectory.getAltitude(0));
 	if (trajectory.getAltitude(0) == "STR_GROUND")
 	{
@@ -418,7 +419,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 		ufo->setLatitude(_base->getLatitude());
 	}
 	Waypoint *wp = new Waypoint();
-	pos = getWaypoint(trajectory, 1, globe, regionRules);
+	pos = getWaypoint(wave, trajectory, 1, globe, regionRules);
 	wp->setLongitude(pos.first);
 	wp->setLatitude(pos.second);
 	ufo->setDestination(wp);
@@ -493,7 +494,7 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 	const size_t curWaypoint = ufo.getTrajectoryPoint();
 	const size_t nextWaypoint = curWaypoint + 1;
 	const UfoTrajectory &trajectory = ufo.getTrajectory();
-	int waveNumber = _nextWave - 1;
+	int waveNumber = ufo.getMissionWaveNumber() > -1 ? ufo.getMissionWaveNumber() : _nextWave - 1;
 	if (waveNumber < 0)
 	{
 		waveNumber = _rule.getWaveCount() - 1;
@@ -509,7 +510,7 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 	ufo.setAltitude(trajectory.getAltitude(nextWaypoint));
 	ufo.setTrajectoryPoint(nextWaypoint);
 	const RuleRegion &regionRules = *mod.getRegion(_region, true);
-	std::pair<double, double> pos = getWaypoint(trajectory, nextWaypoint, globe, regionRules);
+	std::pair<double, double> pos = getWaypoint(wave, trajectory, nextWaypoint, globe, regionRules);
 
 	Waypoint *wp = new Waypoint();
 	wp->setLongitude(pos.first);
@@ -793,19 +794,14 @@ void AlienMission::setRegion(const std::string &region, const Mod &mod)
  * @param region the ruleset for the region of our mission.
  * @return a set of lon and lat coordinates based on the criteria of the trajectory.
  */
-std::pair<double, double> AlienMission::getWaypoint(const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region)
+std::pair<double, double> AlienMission::getWaypoint(const MissionWave &wave, const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region)
 {
-	int waveNumber = _nextWave - 1;
-	if (waveNumber < 0)
-	{
-		waveNumber = _rule.getWaveCount() - 1;
-	}
 	if (trajectory.getZone(nextWaypoint) >= region.getMissionZones().size())
 	{
 		logMissionError(trajectory.getZone(nextWaypoint), region);
 	}
 
-	if (_missionSiteZone != -1 && _rule.getWave(waveNumber).objective && trajectory.getZone(nextWaypoint) == (size_t)(_rule.getSpawnZone()))
+	if (_missionSiteZone != -1 && wave.objective && trajectory.getZone(nextWaypoint) == (size_t)(_rule.getSpawnZone()))
 	{
 		const MissionArea *area = &region.getMissionZones().at(_rule.getObjective()).areas.at(_missionSiteZone);
 		return std::make_pair(area->lonMin, area->latMin);

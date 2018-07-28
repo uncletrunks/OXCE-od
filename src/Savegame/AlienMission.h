@@ -116,7 +116,7 @@ private:
 	/// Spawn an alien base
 	void spawnAlienBase(Game &engine, const MissionArea &area, std::pair<double, double> pos);
 	/// Select a destination (lon/lat) based on the criteria of our trajectory and desired waypoint.
-	std::pair<double, double> getWaypoint(const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region);
+	std::pair<double, double> getWaypoint(const MissionWave &wave, const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region);
 	/// Get a random landing point inside the given region zone.
 	std::pair<double, double> getLandPoint(const Globe &globe, const RuleRegion &region, size_t zone);
 	/// Spawns a MissionSite at a specific location.

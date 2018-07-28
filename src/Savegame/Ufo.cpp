@@ -50,7 +50,7 @@ const char *Ufo::ALTITUDE_STRING[] = {
  * @param uniqueId unique ID to assign to the UFO (0 to not assign).
  */
 Ufo::Ufo(const RuleUfo *rules, int uniqueId, int hunterKillerPercentage, int huntMode, int huntBehavior) : MovingTarget(),
-	_rules(rules), _id(0), _crashId(0), _landId(0), _damage(0), _direction("STR_NORTH"),
+	_rules(rules), _missionWaveNumber(-1), _id(0), _crashId(0), _landId(0), _damage(0), _direction("STR_NORTH"),
 	_altitude("STR_HIGH_UC"), _status(FLYING), _secondsRemaining(0),
 	_inBattlescape(false), _mission(0), _trajectory(0),
 	_trajectoryPoint(0), _detected(false), _hyperDetected(false), _processedIntercept(false),
@@ -145,6 +145,7 @@ void Ufo::load(const YAML::Node &node, const Mod &mod, SavedGame &game)
 {
 	MovingTarget::load(node);
 	_uniqueId = node["uniqueId"].as<int>(_uniqueId);
+	_missionWaveNumber = node["missionWaveNumber"].as<int>(_missionWaveNumber);
 	_id = node["id"].as<int>(_id);
 	_crashId = node["crashId"].as<int>(_crashId);
 	_landId = node["landId"].as<int>(_landId);
@@ -307,6 +308,7 @@ YAML::Node Ufo::save(bool newBattle) const
 	YAML::Node node = MovingTarget::save();
 	node["type"] = _rules->getType();
 	node["uniqueId"] = _uniqueId;
+	node["missionWaveNumber"] = _missionWaveNumber;
 	node["id"] = _id;
 	if (_crashId)
 	{

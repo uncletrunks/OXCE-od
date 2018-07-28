@@ -47,6 +47,7 @@ public:
 private:
 	const RuleUfo *_rules;
 	int _uniqueId;
+	int _missionWaveNumber;
 	int _id, _crashId, _landId, _damage;
 	std::string _direction, _altitude;
 	enum UfoStatus _status;
@@ -92,6 +93,10 @@ public:
 	void changeRules(const RuleUfo *rules);
 	/// Gets the (unique) UFO's ID.
 	int getUniqueId() const;
+	/// Gets the mission wave number that created this UFO.
+	int getMissionWaveNumber() const { return _missionWaveNumber; }
+	/// Sets the mission wave number that created this UFO.
+	void setMissionWaveNumber(int missionWaveNumber) { _missionWaveNumber = missionWaveNumber; }
 	/// Gets the (non-unique) UFO's ID.
 	int getId() const;
 	/// Sets the (non-unique) UFO's ID.
