@@ -36,6 +36,7 @@ namespace YAML
 			node["huntMode"] = rhs.huntMode;
 			node["huntBehavior"] = rhs.huntBehavior;
 			node["escort"] = rhs.escort;
+			node["interruptPercentage"] = rhs.interruptPercentage;
 			return node;
 		}
 
@@ -53,6 +54,7 @@ namespace YAML
 			rhs.huntMode = node["huntMode"].as<int>(-1);
 			rhs.huntBehavior = node["huntBehavior"].as<int>(-1);
 			rhs.escort = node["escort"].as<bool>(false);
+			rhs.interruptPercentage = node["interruptPercentage"].as<int>(0);
 			return true;
 		}
 	};

@@ -47,7 +47,7 @@
 namespace OpenXcom
 {
 
-AlienMission::AlienMission(const RuleAlienMission &rule) : _rule(rule), _nextWave(0), _nextUfoCounter(0), _spawnCountdown(0), _liveUfos(0), _uniqueID(0), _missionSiteZone(-1), _base(0)
+AlienMission::AlienMission(const RuleAlienMission &rule) : _rule(rule), _nextWave(0), _nextUfoCounter(0), _spawnCountdown(0), _liveUfos(0), _interrupted(false), _uniqueID(0), _missionSiteZone(-1), _base(0)
 {
 	// Empty by design.
 }
@@ -82,6 +82,7 @@ void AlienMission::load(const YAML::Node& node, SavedGame &game)
 	_nextUfoCounter = node["nextUfoCounter"].as<size_t>(_nextUfoCounter);
 	_spawnCountdown = node["spawnCountdown"].as<size_t>(_spawnCountdown);
 	_liveUfos = node["liveUfos"].as<size_t>(_liveUfos);
+	_interrupted = node["interrupted"].as<bool>(_interrupted);
 	_uniqueID = node["uniqueID"].as<int>(_uniqueID);
 	if (const YAML::Node &base = node["alienBase"])
 	{
@@ -117,6 +118,10 @@ YAML::Node AlienMission::save() const
 	node["nextUfoCounter"] = _nextUfoCounter;
 	node["spawnCountdown"] = _spawnCountdown;
 	node["liveUfos"] = _liveUfos;
+	if (_interrupted)
+	{
+		node["interrupted"] = _interrupted;
+	}
 	node["uniqueID"] = _uniqueID;
 	if (_base)
 	{
@@ -134,6 +139,10 @@ YAML::Node AlienMission::save() const
  */
 bool AlienMission::isOver() const
 {
+	if (_interrupted && !_liveUfos)
+	{
+		return true;
+	}
 	if (_rule.getObjective() == OBJECTIVE_INFILTRATION && _rule.isEndlessInfiltration())
 	{
 		//Infiltrations continue for ever.
@@ -160,6 +169,12 @@ private:
 
 void AlienMission::think(Game &engine, const Globe &globe)
 {
+	// if interrupted, don't generate any more UFOs or anything else
+	if (_interrupted)
+	{
+		return;
+	}
+
 	const Mod &mod = *engine.getMod();
 	SavedGame &game = *engine.getSavedGame();
 	if (_nextWave >= _rule.getWaveCount())

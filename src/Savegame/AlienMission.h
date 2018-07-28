@@ -52,6 +52,7 @@ private:
 	size_t _nextUfoCounter;
 	size_t _spawnCountdown;
 	size_t _liveUfos;
+	bool _interrupted;
 	int _uniqueID, _missionSiteZone;
 	const AlienBase *_base;
 public:
@@ -100,6 +101,8 @@ public:
 	void increaseLiveUfos() { ++_liveUfos; }
 	/// Decrease number of live UFOs.
 	void decreaseLiveUfos() { --_liveUfos; }
+	/// Sets the interrupted flag.
+	void setInterrupted(bool interrupted) { _interrupted = interrupted; }
 	/// Handle UFO reaching a waypoint.
 	void ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe);
 	/// Handle UFO lifting from the ground.

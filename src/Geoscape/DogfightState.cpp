@@ -1104,7 +1104,7 @@ void DogfightState::update()
 						}
 
 						damage = std::max(0, damage - _ufo->getCraftStats().armor);
-						_ufo->setDamage(_ufo->getDamage() + damage);
+						_ufo->setDamage(_ufo->getDamage() + damage, _game->getMod());
 						if (_ufo->isCrashed())
 						{
 							_ufo->setShotDownByCraftId(_craft->getUniqueId());
@@ -1547,7 +1547,7 @@ void DogfightState::update()
 			if (!_state->getGlobe()->insideLand(_ufo->getLongitude(), _ufo->getLatitude())) // Brought it down over water
 			{
 				finalRun = true;
-				_ufo->setDamage(_ufo->getCraftStats().damageMax);
+				_ufo->setDamage(_ufo->getCraftStats().damageMax, _game->getMod());
 				_ufo->setShotDownByCraftId(_craft->getUniqueId());
 				_ufo->setSpeed(0);
 				_ufo->setStatus(Ufo::DESTROYED);

@@ -219,7 +219,7 @@ void BaseDefenseState::nextStep()
 					dmg = std::max(0, dmg - _ufo->getShield());
 					_ufo->setShield(_ufo->getShield() - shieldDamage);
 				}
-				_ufo->setDamage(_ufo->getDamage() + dmg);
+				_ufo->setDamage(_ufo->getDamage() + dmg, _game->getMod());
 			}
 			if (_ufo->getStatus() == Ufo::DESTROYED)
 				_action = BDA_DESTROY;

@@ -473,7 +473,7 @@ int Ufo::getDamage() const
  * Changes the amount of damage this UFO has taken.
  * @param damage Amount of damage.
  */
-void Ufo::setDamage(int damage)
+void Ufo::setDamage(int damage, const Mod *mod)
 {
 	_damage = damage;
 	if (_damage < 0)
@@ -493,6 +493,31 @@ void Ufo::setDamage(int damage)
 		{
 			_damage = _stats.damageMax;
 			_status = DESTROYED;
+		}
+	}
+	if (_status == CRASHED || _status == DESTROYED)
+	{
+		int waveNumber = _missionWaveNumber;
+
+		// special case for retaliation UFO attacking the base
+		const RuleUfo *battleshipRule = mod->getUfo(_mission->getRules().getSpawnUfo(), true);
+		const UfoTrajectory *assaultTrajectory = mod->getUfoTrajectory(UfoTrajectory::RETALIATION_ASSAULT_RUN, true);
+		if (_rules == battleshipRule && _trajectory == assaultTrajectory)
+		{
+			waveNumber = _mission->getRules().getWaveCount() - 1; // last wave
+		}
+
+		// backwards save compatibility
+		if (waveNumber > -1)
+		{
+			const MissionWave &wave = _mission->getRules().getWave(waveNumber);
+			if (wave.interruptPercentage > 0)
+			{
+				if (RNG::percent(wave.interruptPercentage))
+				{
+					_mission->setInterrupted(true);
+				}
+			}
 		}
 	}
 }

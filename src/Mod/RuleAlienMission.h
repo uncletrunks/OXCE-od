@@ -84,6 +84,13 @@ struct MissionWave
 	* The UFO escorts other UFO(s) from the same mission.
 	*/
 	bool escort;
+	/// The chance to interrupt the alien mission when successfully shooting down a UFO from this wave.
+	/**
+	*  0 (default): cannot interrupt
+	*  1..99: percentage chance to be interrupted
+	*  100: always interrupted
+	*/
+	int interruptPercentage;
 };
 
 enum MissionObjective { OBJECTIVE_SCORE, OBJECTIVE_INFILTRATION, OBJECTIVE_BASE, OBJECTIVE_SITE, OBJECTIVE_RETALIATION, OBJECTIVE_SUPPLY };
