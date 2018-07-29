@@ -281,6 +281,8 @@ en-US:
   STR_HOUR_SHORT: "{0}h"
 #MonthlyReportState.cpp
   STR_PERFORMANCE_BONUS: "Performance Bonus"
+  STR_COUNTRY_HAS_CANCELLED_A_SECRET_PACT: "{0} has renounced the pact with alien forces and was allowed to return to the project."
+  STR_COUNTRIES_HAVE_CANCELLED_A_SECRET_PACT: "{0} have renounced the pact with alien forces and were allowed to return to the project."
 #NewPossibleCraftState.cpp
   STR_WE_CAN_NOW_RENT: "We can now rent"
 #NewPossibleFacilityState.cpp

@@ -45,7 +45,7 @@ private:
 	Text *_txtDesc, *_txtFailure;
 	bool _gameOver;
 	int _ratingTotal, _fundingDiff, _lastMonthsRating;
-	std::vector<std::string> _happyList, _sadList, _pactList;
+	std::vector<std::string> _happyList, _sadList, _pactList, _cancelPactList;
 	Globe *_globe;
 	std::vector<Soldier*> _soldiersMedalled;
 	/// Builds a country list string.

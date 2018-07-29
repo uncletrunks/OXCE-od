@@ -32,6 +32,7 @@ class AlienBase : public Target
 {
 private:
 	int _id;
+	std::string _pactCountry;
 	std::string _race;
 	bool _inBattlescape, _discovered;
 	AlienDeployment *_deployment;
@@ -56,6 +57,10 @@ public:
 	std::wstring getDefaultName(Language *lang) const;
 	/// Gets the alien base's marker.
 	int getMarker() const;
+	/// Gets the alien base's pact country.
+	const std::string &getPactCountry() const;
+	/// Sets the alien base's pact country.
+	void setPactCountry(const std::string &pactCountry);
 	/// Gets the alien base's amount of active hours..
 	std::string getAlienRace() const;
 	/// Sets the alien base's alien race.

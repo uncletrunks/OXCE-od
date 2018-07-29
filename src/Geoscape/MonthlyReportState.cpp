@@ -51,7 +51,7 @@ namespace OpenXcom
  * @param psi Show psi training afterwards?
  * @param globe Pointer to the globe.
  */
-MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _ratingTotal(0), _fundingDiff(0), _lastMonthsRating(0), _happyList(0), _sadList(0), _pactList(0)
+MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _ratingTotal(0), _fundingDiff(0), _lastMonthsRating(0), _happyList(0), _sadList(0), _pactList(0), _cancelPactList(0)
 {
 	_globe = globe;
 	// Create objects
@@ -231,6 +231,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	{
 		satisFactionString = tr("STR_YOU_HAVE_NOT_SUCCEEDED");
 		_pactList.erase(_pactList.begin(), _pactList.end());
+		_cancelPactList.erase(_cancelPactList.begin(), _cancelPactList.end());
 		_happyList.erase(_happyList.begin(), _happyList.end());
 		_sadList.erase(_sadList.begin(), _sadList.end());
 		_gameOver = true;
@@ -247,6 +248,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 				ss5.str(L"");
 				ss5 << tr("STR_YOU_HAVE_NOT_SUCCEEDED");
 				_pactList.erase(_pactList.begin(), _pactList.end());
+				_cancelPactList.erase(_cancelPactList.begin(), _cancelPactList.end());
 				_happyList.erase(_happyList.begin(), _happyList.end());
 				_sadList.erase(_sadList.begin(), _sadList.end());
 				_gameOver = true;
@@ -267,6 +269,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	ss5 << countryList(_happyList, "STR_COUNTRY_IS_PARTICULARLY_PLEASED", "STR_COUNTRIES_ARE_PARTICULARLY_HAPPY");
 	ss5 << countryList(_sadList, "STR_COUNTRY_IS_UNHAPPY_WITH_YOUR_ABILITY", "STR_COUNTRIES_ARE_UNHAPPY_WITH_YOUR_ABILITY");
 	ss5 << countryList(_pactList, "STR_COUNTRY_HAS_SIGNED_A_SECRET_PACT", "STR_COUNTRIES_HAVE_SIGNED_A_SECRET_PACT");
+	ss5 << countryList(_cancelPactList, "STR_COUNTRY_HAS_CANCELLED_A_SECRET_PACT", "STR_COUNTRIES_HAVE_CANCELLED_A_SECRET_PACT");
 
 	_txtDesc->setText(ss5.str());
 }
@@ -421,6 +424,7 @@ void MonthlyReportState::calculateChanges()
 	{
 		pactScore = infiltration->getPoints();
 	}
+	int averageFunding = _game->getSavedGame()->getCountryFunding() / _game->getSavedGame()->getCountries()->size() / 1000 * 1000;
 	for (std::vector<Country*>::iterator k = _game->getSavedGame()->getCountries()->begin(); k != _game->getSavedGame()->getCountries()->end(); ++k)
 	{
 		// add them to the list of new pact members
@@ -431,9 +435,13 @@ void MonthlyReportState::calculateChanges()
 		{
 			_pactList.push_back((*k)->getRules()->getType());
 		}
+		if ((*k)->getCancelPact() && (*k)->getPact())
+		{
+			_cancelPactList.push_back((*k)->getRules()->getType());
+		}
 		// determine satisfaction level, sign pacts, adjust funding
 		// and update activity meters,
-		(*k)->newMonth(xcomTotal, alienTotal, pactScore);
+		(*k)->newMonth(xcomTotal, alienTotal, pactScore, averageFunding);
 		// and after they've made their decisions, calculate the difference, and add
 		// them to the appropriate lists.
 		_fundingDiff += (*k)->getFunding().back()-(*k)->getFunding().at((*k)->getFunding().size()-2);

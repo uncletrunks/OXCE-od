@@ -1274,6 +1274,18 @@ void DebriefingState::prepareDebriefing()
 				std::for_each(save->getAlienMissions().begin(), save->getAlienMissions().end(),
 							ClearAlienBase(*i));
 
+				// If there was a pact with this base, cancel it?
+				if (_game->getMod()->getAllowCountriesToCancelAlienPact() && !(*i)->getPactCountry().empty())
+				{
+					for (std::vector<Country*>::iterator cntr = _game->getSavedGame()->getCountries()->begin(); cntr != _game->getSavedGame()->getCountries()->end(); ++cntr)
+					{
+						if ((*cntr)->getRules()->getType() == (*i)->getPactCountry())
+						{
+							(*cntr)->setCancelPact();
+							break;
+						}
+					}
+				}
 				delete *i;
 				save->getAlienBases()->erase(i);
 				break;

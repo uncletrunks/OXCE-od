@@ -212,7 +212,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
 		for (std::vector<Country*>::iterator c = game.getCountries()->begin(); c != game.getCountries()->end(); ++c)
 		{
 			RuleRegion *region = mod.getRegion(_region, true);
-			if (!(*c)->getPact() && !(*c)->getNewPact() && region->insideRegion((*c)->getRules()->getLabelLongitude(), (*c)->getRules()->getLabelLatitude()))
+			if ((*c)->canBeInfiltrated() && region->insideRegion((*c)->getRules()->getLabelLongitude(), (*c)->getRules()->getLabelLatitude()))
 			{
 				(*c)->setNewPact();
 				std::vector<MissionArea> areas = region->getMissionZones().at(_rule.getSpawnZone()).areas;
@@ -229,7 +229,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
 				while (!(globe.insideLand(pos.first, pos.second)
 					&& region->insideRegion(pos.first, pos.second))
 					&& tries < 100);
-				spawnAlienBase(engine, area, pos);
+				spawnAlienBase((*c), engine, area, pos);
 				break;
 			}
 		}
@@ -256,7 +256,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
 		while (!(globe.insideLand(pos.first, pos.second)
 			&& region->insideRegion(pos.first, pos.second))
 			&& tries < 100);
-		spawnAlienBase(engine, area, pos);
+		spawnAlienBase(0, engine, area, pos);
 	}
 
 	if (_nextWave != _rule.getWaveCount())
@@ -748,10 +748,11 @@ void AlienMission::addScore(double lon, double lat, SavedGame &game) const
 
 /**
  * Spawn an alien base.
+ * @param pactCountry A country that has signed a pact with the aliens and allowed them to build this base.
  * @param engine The game engine, required to get access to game data and game rules.
  * @param zone The mission zone, required for determining the base coordinates.
  */
-void AlienMission::spawnAlienBase(Game &engine, const MissionArea &area, std::pair<double, double> pos)
+void AlienMission::spawnAlienBase(Country *pactCountry, Game &engine, const MissionArea &area, std::pair<double, double> pos)
 {
 	SavedGame &game = *engine.getSavedGame();
 	const Mod &ruleset = *engine.getMod();
@@ -771,6 +772,10 @@ void AlienMission::spawnAlienBase(Game &engine, const MissionArea &area, std::pa
 		deployment = ruleset.getDeployment("STR_ALIEN_BASE_ASSAULT", true);
 	}
 	AlienBase *ab = new AlienBase(deployment);
+	if (pactCountry)
+	{
+		ab->setPactCountry(pactCountry->getRules()->getType());
+	}
 	ab->setAlienRace(_race);
 	ab->setId(game.getId(deployment->getMarkerName()));
 	ab->setLongitude(pos.first);

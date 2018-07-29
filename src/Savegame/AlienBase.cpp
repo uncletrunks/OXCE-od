@@ -46,6 +46,7 @@ void AlienBase::load(const YAML::Node &node)
 {
 	Target::load(node);
 	_id = node["id"].as<int>(_id);
+	_pactCountry = node["pactCountry"].as<std::string>(_pactCountry);
 	_race = node["race"].as<std::string>(_race);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
 	_discovered = node["discovered"].as<bool>(_discovered);
@@ -61,6 +62,7 @@ YAML::Node AlienBase::save() const
 {
 	YAML::Node node = Target::save();
 	node["id"] = _id;
+	node["pactCountry"] = _pactCountry;
 	node["race"] = _race;
 	if (_inBattlescape)
 		node["inBattlescape"] = _inBattlescape;
@@ -121,6 +123,24 @@ int AlienBase::getMarker() const
 	if (!_discovered)
 		return -1;
 	return _deployment->getMarkerIcon();
+}
+
+/**
+ * Returns the country this base has a pact with.
+ * @return Country ID.
+ */
+const std::string &AlienBase::getPactCountry() const
+{
+	return _pactCountry;
+}
+
+/**
+ * Changes the country that has a pact with this alien base.
+ * @param pactCountry Country ID.
+ */
+void AlienBase::setPactCountry(const std::string &pactCountry)
+{
+	_pactCountry = pactCountry;
 }
 
 /**
