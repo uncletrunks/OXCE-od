@@ -1613,28 +1613,28 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 	{
 		// hangar destruction - destroy crafts and any production of crafts
 		// if this will mean there is no hangar to contain it
-		if ((*facility)->getCraft())
+		if ((*facility)->getCraftForDrawing())
 		{
 			// remove all soldiers
 			for (Soldier *s : _soldiers)
 			{
-				if (s->getCraft() == (*facility)->getCraft())
+				if (s->getCraft() == (*facility)->getCraftForDrawing())
 				{
 					s->setCraft(0);
 				}
 			}
 
 			// remove all items
-			while (!(*facility)->getCraft()->getItems()->getContents()->empty())
+			while (!(*facility)->getCraftForDrawing()->getItems()->getContents()->empty())
 			{
-				std::map<std::string, int>::iterator i = (*facility)->getCraft()->getItems()->getContents()->begin();
+				std::map<std::string, int>::iterator i = (*facility)->getCraftForDrawing()->getItems()->getContents()->begin();
 				_items->addItem(i->first, i->second);
-				(*facility)->getCraft()->getItems()->removeItem(i->first, i->second);
+				(*facility)->getCraftForDrawing()->getItems()->removeItem(i->first, i->second);
 			}
 			Collections::deleteIf(_crafts, 1,
 				[&](Craft* c)
 				{
-					return c == (*facility)->getCraft();
+					return c == (*facility)->getCraftForDrawing();
 				}
 			);
 		}

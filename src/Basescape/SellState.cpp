@@ -390,9 +390,9 @@ void SellState::btnOkClick(Action *)
 				// Clear hangar
 				for (std::vector<BaseFacility*>::iterator f = _base->getFacilities()->begin(); f != _base->getFacilities()->end(); ++f)
 				{
-					if ((*f)->getCraft() == craft)
+					if ((*f)->getCraftForDrawing() == craft)
 					{
-						(*f)->setCraft(0);
+						(*f)->setCraftForDrawing(0);
 						break;
 					}
 				}

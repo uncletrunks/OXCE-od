@@ -68,9 +68,9 @@ public:
 	/// Checks if the facility is currently in use.
 	bool inUse() const;
 	/// Gets craft, used for drawing facility.
-	Craft *getCraft() const;
+	Craft *getCraftForDrawing() const;
 	/// Sets craft, used for drawing facility.
-	void setCraft(Craft *craft);
+	void setCraftForDrawing(Craft *craft);
 };
 
 }

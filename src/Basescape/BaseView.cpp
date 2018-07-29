@@ -465,17 +465,17 @@ void BaseView::draw()
 					frame->setX((*i)->getX() * GRID_SIZE + ((*i)->getRules()->getSize() - 1) * GRID_SIZE / 2 + 2);
 					frame->setY((*i)->getY() * GRID_SIZE + ((*i)->getRules()->getSize() - 1) * GRID_SIZE / 2 - 4);
 					frame->blit(this);
-					(*i)->setCraft(*craft);
+					(*i)->setCraftForDrawing(*craft);
 				}
 				else
 				{
-					(*i)->setCraft(0);
+					(*i)->setCraftForDrawing(0);
 				}
 				++craft;
 			}
 			else
 			{
-				(*i)->setCraft(0);
+				(*i)->setCraftForDrawing(0);
 			}
 		}
 

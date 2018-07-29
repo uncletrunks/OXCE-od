@@ -209,9 +209,9 @@ void Production::startItem(Base * b, SavedGame * g, const Mod *m) const
 					// Clear hangar
 					for (std::vector<BaseFacility*>::iterator f = b->getFacilities()->begin(); f != b->getFacilities()->end(); ++f)
 					{
-						if ((*f)->getCraft() == craft)
+						if ((*f)->getCraftForDrawing() == craft)
 						{
-							(*f)->setCraft(0);
+							(*f)->setCraftForDrawing(0);
 							break;
 						}
 					}
