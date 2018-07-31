@@ -42,7 +42,55 @@ namespace OpenXcom
 		std::wostringstream ss;
 		ss << tr("STR_MAXIMUM_SPEED_UC").arg(Text::formatNumber(craft->getMaxSpeed())) << L'\n';
 		ss << tr("STR_ACCELERATION").arg(craft->getAcceleration()) << L'\n';
-		ss << tr("STR_FUEL_CAPACITY").arg(Text::formatNumber(craft->getMaxFuel())) << L'\n';
+		switch (_game->getMod()->getPediaReplaceCraftFuelWithRangeType())
+		{
+			int range;
+
+			// Both max range alone and average range get rounded
+			case 0:
+			case 2:
+				range = craft->calculateRange(_game->getMod()->getPediaReplaceCraftFuelWithRangeType());
+				if (range == -1)
+				{
+					ss << tr("STR_MAXIMUM_RANGE").arg(tr("STR_INFINITE_RANGE")) << L'\n';
+					break;
+				}
+
+				// Round the answer to
+				if (range < 100)
+				{
+					// don't round if it's small!
+				}
+				else if (range < 1000)
+				{
+					// nearest 10 nautical miles
+					range += 10 / 2;
+					range -= range % 10;
+				}
+				else
+				{
+					// nearest 100 nautical miles
+					range += 100 / 2;
+					range -= range % 100;
+				}
+
+				ss << tr("STR_MAXIMUM_RANGE").arg(Text::formatNumber(range)) << L'\n';
+				break;
+			// Min-maxxers can fret over exact numbers
+			case 1:
+				if (craft->calculateRange(0) == -1)
+				{
+					ss << tr("STR_MAXIMUM_RANGE").arg(tr("STR_INFINITE_RANGE")) << L'\n';
+					break;
+				}
+
+				ss << tr("STR_MINIMUM_RANGE").arg(Text::formatNumber(craft->calculateRange(1))) << L'\n';
+				ss << tr("STR_MAXIMUM_RANGE").arg(Text::formatNumber(craft->calculateRange(0))) << L'\n';
+				break;
+			default :
+				ss << tr("STR_FUEL_CAPACITY").arg(Text::formatNumber(craft->getMaxFuel())) << L'\n';
+				break;
+		}
 		ss << tr("STR_WEAPON_PODS").arg(craft->getWeapons()) << L'\n';
 		ss << tr("STR_DAMAGE_CAPACITY_UC").arg(Text::formatNumber(craft->getMaxDamage())) << L'\n';
 		ss << tr("STR_CARGO_SPACE").arg(craft->getSoldiers()) << L'\n';

@@ -229,6 +229,8 @@ public:
 	int getShieldRechargeAtBase() const;
 	/// Get whether the craft's map should be visible at the start of a battle
 	bool isMapVisible() const;
+	/// Calculate the theoretical range of the craft in nautical miles
+	int calculateRange(int type);
 };
 
 }

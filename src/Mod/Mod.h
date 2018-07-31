@@ -189,6 +189,7 @@ private:
 	std::map<std::string, std::string> _fixedUserOptions;
 	std::vector<std::string> _hiddenMovementBackgrounds;
 	std::vector<int> _flagByKills;
+	int _pediaReplaceCraftFuelWithRangeType;
 	StatAdjustment _statAdjustment[5];
 
 	std::map<std::string, int> _ufopaediaSections;
@@ -592,6 +593,8 @@ public:
 	std::string getFontName() const;
 	/// Gets the maximum radar range still considered as short.
 	int getShortRadarRange() const;
+	/// Gets what type of information should be shown in craft articles for the fuel capacity/range
+	int getPediaReplaceCraftFuelWithRangeType() const;
 	/// Gets information on an interface element.
 	RuleInterface *getInterface(const std::string &id, bool error = true) const;
 	/// Gets the ruleset for the globe.

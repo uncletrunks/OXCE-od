@@ -294,7 +294,7 @@ Mod::Mod() :
 	_performanceBonusFactor(0), _useCustomCategories(false), _showDogfightDistanceInKm(false), _showFullNameInAlienInventory(false), _extraNerdyPediaInfo(false),
 	_theMostUselessOptionEver(0), _theBiggestRipOffEver(0), _shortRadarRange(0),
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
-	_baseDefenseMapFromLocation(0),
+	_baseDefenseMapFromLocation(0), _pediaReplaceCraftFuelWithRangeType(-1),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _transformationListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0)
 {
@@ -1493,6 +1493,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_theBiggestRipOffEver = doc["theBiggestRipOffEver"].as<int>(_theBiggestRipOffEver);
 	_shortRadarRange = doc["shortRadarRange"].as<int>(_shortRadarRange);
 	_baseDefenseMapFromLocation = doc["baseDefenseMapFromLocation"].as<int>(_baseDefenseMapFromLocation);
+	_pediaReplaceCraftFuelWithRangeType = doc["pediaReplaceCraftFuelWithRangeType"].as<int>(_pediaReplaceCraftFuelWithRangeType);
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 	_fixedUserOptions = doc["fixedUserOptions"].as<std::map<std::string, std::string> >(_fixedUserOptions);
@@ -2964,6 +2965,16 @@ std::string Mod::getFontName() const
 
 	return minRadarRange;
  }
+
+/**
+ * Returns what should be displayed in craft pedia articles for fuel capacity/range
+ * @return 0 = Max theoretical range, 1 = Min and max theoretical max range, 2 = average of the two
+ * Otherwise (default), just show the fuel capacity
+ */
+int Mod::getPediaReplaceCraftFuelWithRangeType() const
+{
+	return _pediaReplaceCraftFuelWithRangeType;
+}
 
 /**
  * Gets information on an interface.
