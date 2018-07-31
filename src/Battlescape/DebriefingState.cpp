@@ -1153,8 +1153,6 @@ void DebriefingState::prepareDebriefing()
 			}
 			else if ((*i)->getStatus() == Ufo::CRASHED || !aborted)
 			{
-				// Note: just before removing the UFO, check for mission interruption (by setting the UFO damage to max)
-				(*i)->setDamage((*i)->getCraftStats().damageMax, _game->getMod());
 				delete *i;
 				save->getUfos()->erase(i);
 				break;
@@ -1765,7 +1763,6 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((*i)->getMission() == am)
 				{
-					// Note: no need to check for mission interruption here, the mission is over and will be deleted in the next step
 					delete *i;
 					i = _game->getSavedGame()->getUfos()->erase(i);
 				}
