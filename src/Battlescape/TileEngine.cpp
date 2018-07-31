@@ -1049,7 +1049,7 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 
 	Position scanVoxel;
 	std::vector<Position> _trajectory;
-	bool unitSeen = canTargetUnit(&originVoxel, tile, &scanVoxel, currentUnit);
+	bool unitSeen = canTargetUnit(&originVoxel, tile, &scanVoxel, currentUnit, false);
 
 	// heat vision 100% = smoke effectiveness 0%
 	int smokeDensityFactor = 100 - currentUnit->getArmor()->getHeatVision();
@@ -1159,7 +1159,7 @@ bool TileEngine::isTileInLOS(BattleAction *action, Tile *tile)
 	}
 	else if (tile->getMapData(O_OBJECT) != 0)
 	{
-		if (canTargetTile(&originVoxel, tile, O_OBJECT, &scanVoxel, currentUnit))
+		if (canTargetTile(&originVoxel, tile, O_OBJECT, &scanVoxel, currentUnit, false))
 		{
 			seen = true;
 		}
@@ -1170,7 +1170,7 @@ bool TileEngine::isTileInLOS(BattleAction *action, Tile *tile)
 	}
 	else if (tile->getMapData(O_NORTHWALL) != 0)
 	{
-		if (canTargetTile(&originVoxel, tile, O_NORTHWALL, &scanVoxel, currentUnit))
+		if (canTargetTile(&originVoxel, tile, O_NORTHWALL, &scanVoxel, currentUnit, false))
 		{
 			seen = true;
 		}
@@ -1181,7 +1181,7 @@ bool TileEngine::isTileInLOS(BattleAction *action, Tile *tile)
 	}
 	else if (tile->getMapData(O_WESTWALL) != 0)
 	{
-		if (canTargetTile(&originVoxel, tile, O_WESTWALL, &scanVoxel, currentUnit))
+		if (canTargetTile(&originVoxel, tile, O_WESTWALL, &scanVoxel, currentUnit, false))
 		{
 			seen = true;
 		}
@@ -1192,7 +1192,7 @@ bool TileEngine::isTileInLOS(BattleAction *action, Tile *tile)
 	}
 	else if (tile->getMapData(O_FLOOR) != 0)
 	{
-		if (canTargetTile(&originVoxel, tile, O_FLOOR, &scanVoxel, currentUnit))
+		if (canTargetTile(&originVoxel, tile, O_FLOOR, &scanVoxel, currentUnit, false))
 		{
 			seen = true;
 		}
@@ -1390,10 +1390,11 @@ int TileEngine::checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit
  * @param tile The tile to check for.
  * @param scanVoxel is returned coordinate of hit.
  * @param excludeUnit is self (not to hit self).
+ * @param rememberObstacles Remember obstacles for no LOF indicator?
  * @param potentialUnit is a hypothetical unit to draw a virtual line of fire for AI. if left blank, this function behaves normally.
  * @return True if the unit can be targetted.
  */
-bool TileEngine::canTargetUnit(Position *originVoxel, Tile *tile, Position *scanVoxel, BattleUnit *excludeUnit, BattleUnit *potentialUnit)
+bool TileEngine::canTargetUnit(Position *originVoxel, Tile *tile, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles, BattleUnit *potentialUnit)
 {
 	Position targetVoxel = Position((tile->getPosition().x * 16) + 7, (tile->getPosition().y * 16) + 8, tile->getPosition().z * 24);
 	std::vector<Position> _trajectory;
@@ -1477,6 +1478,11 @@ bool TileEngine::canTargetUnit(Position *originVoxel, Tile *tile, Position *scan
 			{
 				return true;
 			}
+			if (rememberObstacles && _trajectory.size()>0)
+			{
+				Tile *tileObstacle = _save->getTile(Position(_trajectory.at(0).x / 16, _trajectory.at(0).y / 16, _trajectory.at(0).z / 24));
+				if (tileObstacle) tileObstacle->setObstacle(test);
+			}
 		}
 	}
 	return false;
@@ -1489,9 +1495,10 @@ bool TileEngine::canTargetUnit(Position *originVoxel, Tile *tile, Position *scan
  * @param part Tile part to check for.
  * @param scanVoxel Is returned coordinate of hit.
  * @param excludeUnit Is self (not to hit self).
+ * @param rememberObstacles Remember obstacles for no LOF indicator?
  * @return True if the tile can be targetted.
  */
-bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Position *scanVoxel, BattleUnit *excludeUnit)
+bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles)
 {
 	static int sliceObjectSpiral[82] = {8,8, 8,6, 10,6, 10,8, 10,10, 8,10, 6,10, 6,8, 6,6, //first circle
 		8,4, 10,4, 12,4, 12,6, 12,8, 12,10, 12,12, 10,12, 8,12, 6,12, 4,12, 4,10, 4,8, 4,6, 4,4, 6,4, //second circle
@@ -1531,6 +1538,13 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 		spiralCount = 41;
 		minZfound = true; minZ=0;
 		maxZfound = true; maxZ=0;
+	}
+	else if (part == MapData::O_DUMMY) // used only for no line of fire indicator
+	{
+		spiralArray = sliceObjectSpiral;
+		spiralCount = 41;
+		minZfound = true; minZ = 12;
+		maxZfound = true; maxZ = 12;
 	}
 	else
 	{
@@ -1609,6 +1623,11 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 				{
 					return true;
 				}
+			}
+			if (rememberObstacles && _trajectory.size()>0)
+			{
+				Tile *tileObstacle = _save->getTile(Position(_trajectory.at(0).x / 16, _trajectory.at(0).y / 16, _trajectory.at(0).z / 24));
+				if (tileObstacle) tileObstacle->setObstacle(test);
 			}
 		}
 	}
@@ -1764,7 +1783,7 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 					// can actually see the target Tile, or we got hit
 				if (((*i)->checkViewSector(unit->getPosition()) || gotHit) &&
 					// can actually target the unit
-					canTargetUnit(&originVoxel, tile, &targetVoxel, *i) &&
+					canTargetUnit(&originVoxel, tile, &targetVoxel, *i, false) &&
 					// can actually see the unit
 					visible(*i, tile))
 				{
@@ -4132,7 +4151,7 @@ bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attack
 						Position originVoxel = Position(origin->getPosition() * Position(16,16,24))
 							+ Position(8,8,attacker->getHeight() + attacker->getFloatHeight() - 4 -origin->getTerrainLevel());
 						Position targetVoxel;
-						if (canTargetUnit(&originVoxel, targetTile, &targetVoxel, attacker))
+						if (canTargetUnit(&originVoxel, targetTile, &targetVoxel, attacker, false))
 						{
 							if (dest)
 							{
@@ -4261,6 +4280,11 @@ bool TileEngine::validateThrow(BattleAction &action, Position originVoxel, Posit
 		else
 		{
 			curvature += 0.5;
+			if (test != V_OUTOFBOUNDS && action.actor->getFaction() == FACTION_PLAYER) //obstacle indicator is only for player
+			{
+				Tile* hitTile = _save->getTile(tilePos);
+				hitTile->setObstacle(test);
+			}
 		}
 	}
 	if (curvature >= 5.0)

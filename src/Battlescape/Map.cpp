@@ -78,7 +78,7 @@ namespace OpenXcom
  * @param y Y position in pixels.
  * @param visibleMapHeight Current visible map height.
  */
-Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) : InteractiveSurface(width, height, x, y), _game(game), _arrow(0), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _projectile(0), _projectileInFOV(false), _explosionInFOV(false), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _smoothingEngaged(false), _flashScreen(false), _bgColor(15)
+Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) : InteractiveSurface(width, height, x, y), _game(game), _arrow(0), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _projectile(0), _projectileInFOV(false), _explosionInFOV(false), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _smoothingEngaged(false), _flashScreen(false), _bgColor(15), _showObstacles(false)
 {
 	_iconHeight = _game->getMod()->getInterface("battlescape")->getElement("icons")->h;
 	_iconWidth = _game->getMod()->getInterface("battlescape")->getElement("icons")->w;
@@ -109,6 +109,9 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_scrollKeyTimer = new Timer(SCROLL_INTERVAL);
 	_scrollKeyTimer->onTimer((SurfaceHandler)&Map::scrollKey);
 	_camera->setScrollTimer(_scrollMouseTimer, _scrollKeyTimer);
+	_obstacleTimer = new Timer(2500);
+	_obstacleTimer->stop();
+	_obstacleTimer->onTimer((SurfaceHandler)&Map::disableObstacles);
 
 	_txtAccuracy = new Text(44, 18, 0, 0);
 	_txtAccuracy->setSmall();
@@ -160,6 +163,7 @@ Map::~Map()
 	delete _scrollMouseTimer;
 	delete _scrollKeyTimer;
 	delete _fadeTimer;
+	delete _obstacleTimer;
 	delete _arrow;
 	delete _message;
 	delete _camera;
@@ -211,6 +215,7 @@ void Map::think()
 	_scrollMouseTimer->think(0, this);
 	_scrollKeyTimer->think(0, this);
 	_fadeTimer->think(0, this);
+	_obstacleTimer->think(0, this);
 }
 
 /**
@@ -331,7 +336,7 @@ void Map::drawTerrain(Surface *surface)
 	int bulletLowX=16000, bulletLowY=16000, bulletLowZ=16000, bulletHighX=0, bulletHighY=0, bulletHighZ=0;
 	int dummy;
 	BattleUnit *unit = 0;
-	int tileShade, wallShade, tileColor;
+	int tileShade, wallShade, tileColor, obstacleShade;
 	UnitSprite unitSprite(surface, _game->getMod(), _animFrame, _save->getDepth() != 0);
 	ItemSprite itemSprite(surface, _game->getMod(), _animFrame);
 
@@ -487,10 +492,21 @@ void Map::drawTerrain(Surface *surface)
 					if (tile->isDiscovered(2))
 					{
 						tileShade = reShade(tile);
+						obstacleShade = tileShade;
+						if (_showObstacles)
+						{
+							if (tile->isObstacle())
+							{
+								if (tileShade > 7) obstacleShade = 7;
+								if (tileShade < 2) obstacleShade = 2;
+								obstacleShade += (arrowBob[_animFrame % 8] * 2 - 2);
+							}
+						}
 					}
 					else
 					{
 						tileShade = 16;
+						obstacleShade = 16;
 					}
 
 					tileColor = tile->getMarkerColor();
@@ -498,7 +514,12 @@ void Map::drawTerrain(Surface *surface)
 					// Draw floor
 					tmpSurface = tile->getSprite(O_FLOOR);
 					if (tmpSurface)
-						tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_FLOOR)->getYOffset(), tileShade, false, _nvColor);
+					{
+						if (tile->getObstacle(O_FLOOR))
+							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_FLOOR)->getYOffset(), obstacleShade, false, _nvColor);
+						else
+							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_FLOOR)->getYOffset(), tileShade, false, _nvColor);
+					}
 					unit = tile->getUnit();
 
 					// Draw cursor back
@@ -799,21 +820,32 @@ void Map::drawTerrain(Surface *surface)
 						if (tmpSurface)
 						{
 							wallShade = getWallShade(O_WESTWALL, tile, tileWest);
-							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_WESTWALL)->getYOffset(), wallShade, false, _nvColor);
+							if (tile->getObstacle(O_WESTWALL))
+								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_WESTWALL)->getYOffset(), obstacleShade, false, _nvColor);
+							else
+								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_WESTWALL)->getYOffset(), wallShade, false, _nvColor);
 						}
 						// Draw north wall
 						tmpSurface = tile->getSprite(O_NORTHWALL);
 						if (tmpSurface)
 						{
 							wallShade = getWallShade(O_NORTHWALL, tile, tileNorth);
-							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), wallShade, tile->getMapData(O_WESTWALL), _nvColor);
+							if (tile->getObstacle(O_NORTHWALL))
+								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), obstacleShade, tile->getMapData(O_WESTWALL), _nvColor);
+							else
+								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_NORTHWALL)->getYOffset(), wallShade, tile->getMapData(O_WESTWALL), _nvColor);
 						}
 						// Draw object
 						if (tile->getMapData(O_OBJECT) && (tile->getMapData(O_OBJECT)->getBigWall() < 6 || tile->getMapData(O_OBJECT)->getBigWall() == 9))
 						{
 							tmpSurface = tile->getSprite(O_OBJECT);
 							if (tmpSurface)
-								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade, false, _nvColor);
+							{
+								if (tile->getObstacle(O_OBJECT))
+									tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), obstacleShade, false, _nvColor);
+								else
+									tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade, false, _nvColor);
+							}
 						}
 						// draw an item on top of the floor (if any)
 						BattleItem* item = tile->getTopItem();
@@ -972,7 +1004,7 @@ void Map::drawTerrain(Surface *surface)
 							unit, part,
 							offset.x,
 							offset.y,
-							tileShade
+							tile->getObstacle(4) ? obstacleShade : tileShade
 						);
 						if (unit->getBreathFrame() > 0)
 						{
@@ -1103,7 +1135,12 @@ void Map::drawTerrain(Surface *surface)
 						{
 							tmpSurface = tile->getSprite(O_OBJECT);
 							if (tmpSurface)
-								tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade, false, _nvColor);
+							{
+								if (tile->getObstacle(O_OBJECT))
+									tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), obstacleShade, false, _nvColor);
+								else
+									tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y - tile->getMapData(O_OBJECT)->getYOffset(), tileShade, false, _nvColor);
+							}
 						}
 					}
 					// Draw cursor front
@@ -2124,6 +2161,46 @@ void Map::setBlastFlash(bool flash)
 bool Map::getBlastFlash() const
 {
 	return _flashScreen;
+}
+
+/**
+ * Resets obstacle markers.
+ */
+void Map::resetObstacles(void)
+{
+	for (int z = 0; z < _save->getMapSizeZ(); z++)
+		for (int y = 0; y < _save->getMapSizeY(); y++)
+			for (int x = 0; x < _save->getMapSizeX(); x++)
+			{
+				Tile *tile = _save->getTile(Position(x, y, z));
+				if (tile) tile->resetObstacle();
+			}
+	_showObstacles = false;
+}
+
+/**
+ * Enables obstacle markers.
+ */
+void Map::enableObstacles(void)
+{
+	_showObstacles = true;
+	if (_obstacleTimer)
+	{
+		_obstacleTimer->stop();
+		_obstacleTimer->start();
+	}
+}
+
+/**
+ * Disables obstacle markers.
+ */
+void Map::disableObstacles(void)
+{
+	_showObstacles = false;
+	if (_obstacleTimer)
+	{
+		_obstacleTimer->stop();
+	}
 }
 
 }
