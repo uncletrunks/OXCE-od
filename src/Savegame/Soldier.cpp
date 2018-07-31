@@ -1053,7 +1053,7 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 		_death = 0;
 	}
 
-	if (transformationRule->getRecoveryTime() >= 0)
+	if (transformationRule->getRecoveryTime() > 0)
 	{
 		_recovery = transformationRule->getRecoveryTime();
 	}
