@@ -245,7 +245,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	_timeout(50), _currentDist(640), _targetDist(560),
 	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _hunterKillerBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _waitForAltitude(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0),
-	_interceptionNumber(0), _interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false)
+	_interceptionNumber(0), _interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false), _experienceAwarded(false)
 {
 	_screen = false;
 	_craft->setInDogfight(true);
@@ -660,35 +660,6 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
  */
 DogfightState::~DogfightState()
 {
-	// award experience to the pilots
-	if (_firedAtLeastOnce && _craft && _ufo && (_ufo->isCrashed() || _ufo->isDestroyed()))
-	{
-		const std::vector<Soldier*> pilots = _craft->getPilotList(false);
-		for (std::vector<Soldier*>::const_iterator it = pilots.begin(); it != pilots.end(); ++it)
-		{
-			if ((*it)->getCurrentStats()->firing < (*it)->getRules()->getStatCaps().firing)
-			{
-				if (RNG::percent((*it)->getRules()->getDogfightExperience().firing))
-				{
-					(*it)->getCurrentStats()->firing++;
-				}
-			}
-			if ((*it)->getCurrentStats()->reactions < (*it)->getRules()->getStatCaps().reactions)
-			{
-				if (RNG::percent((*it)->getRules()->getDogfightExperience().reactions))
-				{
-					(*it)->getCurrentStats()->reactions++;
-				}
-			}
-			if ((*it)->getCurrentStats()->bravery < (*it)->getRules()->getStatCaps().bravery)
-			{
-				if (RNG::percent((*it)->getRules()->getDogfightExperience().bravery))
-				{
-					(*it)->getCurrentStats()->bravery += 10; // increase by 10 to keep OCD at bay
-				}
-			}
-		}
-	}
 	delete _craftDamageAnimTimer;
 	while (!_projectiles.empty())
 	{
@@ -1105,6 +1076,7 @@ void DogfightState::update()
 
 						damage = std::max(0, damage - _ufo->getCraftStats().armor);
 						_ufo->setDamage(_ufo->getDamage() + damage, _game->getMod());
+						_state->handleDogfightExperience(); // called after setDamage
 						if (_ufo->isCrashed())
 						{
 							_ufo->setShotDownByCraftId(_craft->getUniqueId());
@@ -1548,6 +1520,7 @@ void DogfightState::update()
 			{
 				finalRun = true;
 				_ufo->setDamage(_ufo->getCraftStats().damageMax, _game->getMod());
+				_state->handleDogfightExperience(); // called after setDamage
 				_ufo->setShotDownByCraftId(_craft->getUniqueId());
 				_ufo->setSpeed(0);
 				_ufo->setStatus(Ufo::DESTROYED);
@@ -2318,6 +2291,39 @@ void DogfightState::setWaitForAltitude(bool wait)
 bool DogfightState::getWaitForAltitude() const
 {
 	return _waitForAltitude;
+}
+
+void DogfightState::awardExperienceToPilots()
+{
+	if (_firedAtLeastOnce && !_experienceAwarded && _craft && _ufo && (_ufo->isCrashed() || _ufo->isDestroyed()))
+	{
+		const std::vector<Soldier*> pilots = _craft->getPilotList(false);
+		for (std::vector<Soldier*>::const_iterator it = pilots.begin(); it != pilots.end(); ++it)
+		{
+			if ((*it)->getCurrentStats()->firing < (*it)->getRules()->getStatCaps().firing)
+			{
+				if (RNG::percent((*it)->getRules()->getDogfightExperience().firing))
+				{
+					(*it)->getCurrentStats()->firing++;
+				}
+			}
+			if ((*it)->getCurrentStats()->reactions < (*it)->getRules()->getStatCaps().reactions)
+			{
+				if (RNG::percent((*it)->getRules()->getDogfightExperience().reactions))
+				{
+					(*it)->getCurrentStats()->reactions++;
+				}
+			}
+			if ((*it)->getCurrentStats()->bravery < (*it)->getRules()->getStatCaps().bravery)
+			{
+				if (RNG::percent((*it)->getRules()->getDogfightExperience().bravery))
+				{
+					(*it)->getCurrentStats()->bravery += 10; // increase by 10 to keep OCD at bay
+				}
+			}
+		}
+		_experienceAwarded = true;
+	}
 }
 
 }

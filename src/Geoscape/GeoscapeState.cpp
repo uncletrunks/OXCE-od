@@ -2882,6 +2882,26 @@ void GeoscapeState::handleDogfights()
 }
 
 /**
+ * Goes through all dogfight instances and tries to award pilot experience.
+ * This is called each time any UFO takes any damage in dogfight... very ugly, but I couldn't find a better place for it.
+ *
+ * History lesson:
+ * - this was in the DogfightState destructor before, but could lead to CTD when people reloaded a saved game while dogfights were still active
+ * - both OXCE+ and vanilla OXC still access already deleted objects (_craft and _ufo) in the destructor... that doesn't seem to trigger CTD that often though
+ */
+void GeoscapeState::handleDogfightExperience()
+{
+	for (auto d : _dogfights)
+	{
+		d->awardExperienceToPilots();
+	}
+	for (auto ds : _dogfightsToBeStarted)
+	{
+		ds->awardExperienceToPilots();
+	}
+}
+
+/**
  * Gets the number of minimized dogfights.
  * @return Number of minimized dogfights.
  */
