@@ -25,6 +25,7 @@
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
+#include "../Interface/TextButton.h"
 #include "../Interface/Text.h"
 
 namespace OpenXcom
@@ -32,6 +33,8 @@ namespace OpenXcom
 
 	ArticleStateTFTDCraft::ArticleStateTFTDCraft(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
+		_btnInfo->setVisible(true);
+
 		RuleCraft *craft = _game->getMod()->getCraft(defs->id, true);
 		_txtStats = new Text(131, 56, 187, 116);
 		add(_txtStats);

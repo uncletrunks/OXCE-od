@@ -487,6 +487,11 @@ bool RuleCraft::isValidWeaponSlot(int slot, int weaponType) const
 	return false;
 }
 
+int RuleCraft::getWeaponTypesRaw(int slot, int subslot) const
+{
+	return _weaponTypes[slot][subslot];
+}
+
 /**
  * Return string ID of weapon slot name for geoscape craft state.
  * @param slot value less than WeaponMax.

@@ -80,6 +80,7 @@ private:
 	void addIntegerScriptTag(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addIntegerPercent(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addIntegerNauticalMiles(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
+	void addIntegerKnots(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addVectorOfIntegers(std::wostringstream &ss, const std::vector<int> &vec, const std::string &propertyName);
 	void addBattleType(std::wostringstream &ss, const BattleType &value, const std::string &propertyName, const BattleType &defaultvalue = BT_NONE);
 	void addDamageType(std::wostringstream &ss, const ItemDamageType &value, const std::string &propertyName, const ItemDamageType &defaultvalue = DT_NONE);
@@ -106,6 +107,7 @@ private:
 	void addBuildCostItem(std::wostringstream &ss, const std::pair<const std::string, std::pair<int, int> > &costItem);
 	void addRightClickActionType(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void initFacilityList();
+	void initCraftList();
 public:
 	static const std::map<std::string, std::string> translationMap;
 	/// Creates the StatsForNerdsState state.

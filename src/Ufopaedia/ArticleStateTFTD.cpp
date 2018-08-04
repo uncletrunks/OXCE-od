@@ -120,6 +120,7 @@ namespace OpenXcom
 				case UFOPAEDIA_TYPE_TFTD_ITEM:
 				case UFOPAEDIA_TYPE_TFTD_ARMOR:
 				case UFOPAEDIA_TYPE_TFTD_BASE_FACILITY:
+				case UFOPAEDIA_TYPE_TFTD_CRAFT:
 					button->blit(_bg);
 					break;
 				default:

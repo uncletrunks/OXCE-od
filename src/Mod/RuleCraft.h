@@ -217,6 +217,7 @@ public:
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.
 	bool isValidWeaponSlot(int slot, int weaponType) const;
+	int getWeaponTypesRaw(int slot, int subslot) const;
 	/// Get description string of weapon slot.
 	const std::string &getWeaponSlotString(int slot) const;
 	/// Get basic statistic of craft.

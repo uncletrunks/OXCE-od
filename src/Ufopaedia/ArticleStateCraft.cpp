@@ -59,6 +59,8 @@ namespace OpenXcom
 		_btnOk->setColor(Palette::blockOffset(15)-1);
 		_btnPrev->setColor(Palette::blockOffset(15)-1);
 		_btnNext->setColor(Palette::blockOffset(15)-1);
+		_btnInfo->setColor(Palette::blockOffset(15)-1);
+		_btnInfo->setVisible(true);
 
 		_txtTitle->setColor(Palette::blockOffset(14)+15);
 		_txtTitle->setBig();
