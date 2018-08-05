@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "RuleSoldier.h"
 #include "Mod.h"
 #include "SoldierNamePool.h"
@@ -59,7 +60,14 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 	// Just in case
 	if (_type == "XCOM")
 		_type = "STR_SOLDIER";
+
+	//requires
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
+	_requiresBuyBaseFunc = node["requiresBuyBaseFunc"].as< std::vector<std::string> >(_requiresBuyBaseFunc);
+
+	std::sort(_requiresBuyBaseFunc.begin(), _requiresBuyBaseFunc.end());
+
+
 	_minStats.merge(node["minStats"].as<UnitStats>(_minStats));
 	_maxStats.merge(node["maxStats"].as<UnitStats>(_maxStats));
 	_statCaps.merge(node["statCaps"].as<UnitStats>(_statCaps));
@@ -158,6 +166,15 @@ std::string RuleSoldier::getType() const
 const std::vector<std::string> &RuleSoldier::getRequirements() const
 {
 	return _requires;
+}
+
+/**
+ * Gets the base functions required to buy solder.
+ * @retreturn The sorted list of base functions ID
+ */
+const std::vector<std::string> &RuleSoldier::getRequiresBuyBaseFunc() const
+{
+	return _requiresBuyBaseFunc;
 }
 
 /**

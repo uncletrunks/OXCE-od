@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "RuleCraft.h"
 #include "RuleTerrain.h"
 #include "../Engine/Exception.h"
@@ -69,7 +70,14 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 		load(parent, mod, listOrder);
 	}
 	_type = node["type"].as<std::string>(_type);
+
+	//requires
 	_requires = node["requires"].as< std::vector<std::string> >(_requires);
+	_requiresBuyBaseFunc = node["requiresBuyBaseFunc"].as< std::vector<std::string> >(_requiresBuyBaseFunc);
+
+	std::sort(_requiresBuyBaseFunc.begin(), _requiresBuyBaseFunc.end());
+
+
 	if (node["sprite"])
 	{
 		_sprite = node["sprite"].as<int>(_sprite);
@@ -154,6 +162,15 @@ const std::string &RuleCraft::getType() const
 const std::vector<std::string> &RuleCraft::getRequirements() const
 {
 	return _requires;
+}
+
+/**
+ * Gets the base functions required to buy craft.
+ * @retreturn The sorted list of base functions ID
+ */
+const std::vector<std::string> &RuleCraft::getRequiresBuyBaseFunc() const
+{
+	return _requiresBuyBaseFunc;
 }
 
 /**

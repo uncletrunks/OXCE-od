@@ -37,6 +37,7 @@ class RuleSoldier
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
+	std::vector<std::string> _requiresBuyBaseFunc;
 	UnitStats _minStats, _maxStats, _statCaps;
 	std::string _armor;
 	int _costBuy, _costSalary, _standHeight, _kneelHeight, _floatHeight, _femaleFrequency;
@@ -55,6 +56,8 @@ public:
 	std::string getType() const;
 	/// Gets the soldier's requirements.
 	const std::vector<std::string> &getRequirements() const;
+	/// Gets the base functions required to buy solder.
+	const std::vector<std::string> &getRequiresBuyBaseFunc() const;
 	/// Gets the minimum stats for the random stats generator.
 	UnitStats getMinStats() const;
 	/// Gets the maximum stats for the random stats generator.

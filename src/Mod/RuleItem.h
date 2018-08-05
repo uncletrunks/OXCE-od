@@ -132,6 +132,7 @@ private:
 	std::vector<std::string> _requiresBuyName;
 	std::vector<std::string> _categories;
 	std::vector<const RuleResearch *> _requires, _requiresBuy;
+	std::vector<std::string> _requiresBuyBaseFunc;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
 	int _bigSprite;
@@ -223,6 +224,8 @@ public:
 	const std::vector<const RuleResearch*> &getRequirements() const;
 	/// Gets the item's buy requirements.
 	const std::vector<const RuleResearch*> &getBuyRequirements() const;
+	/// Gets the base functions required to buy craft.
+	const std::vector<std::string> &getRequiresBuyBaseFunc() const;
 	/// Gets the item's categories.
 	const std::vector<std::string> &getCategories() const;
 	/// Checks if the item belongs to a category.

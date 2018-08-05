@@ -115,6 +115,7 @@ public:
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
+	std::vector<std::string> _requiresBuyBaseFunc;
 	int _sprite, _marker;
 	int _weapons, _soldiers, _vehicles, _costBuy, _costRent, _costSell;
 	char _weaponTypes[WeaponMax][WeaponTypeMax];
@@ -137,6 +138,8 @@ public:
 	const std::string &getType() const;
 	/// Gets the craft's requirements.
 	const std::vector<std::string> &getRequirements() const;
+	/// Gets the base functions required to buy craft.
+	const std::vector<std::string> &getRequiresBuyBaseFunc() const;
 	/// Gets the craft's sprite.
 	int getSprite() const;
 	/// Gets the craft's globe marker.
@@ -161,6 +164,8 @@ public:
 	int getRentCost() const;
 	/// Gets the craft's value.
 	int getSellCost() const;
+	/// Gets craft type.
+	int getCraftType() const;
 	/// Gets the craft's refuel item.
 	const std::string &getRefuelItem() const;
 	/// Gets the craft's repair rate.

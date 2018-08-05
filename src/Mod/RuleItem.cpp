@@ -284,8 +284,15 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_type = node["type"].as<std::string>(_type);
 	_name = node["name"].as<std::string>(_name);
 	_nameAsAmmo = node["nameAsAmmo"].as<std::string>(_nameAsAmmo);
+
+	//requires
 	_requiresName = node["requires"].as< std::vector<std::string> >(_requiresName);
 	_requiresBuyName = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuyName);
+	_requiresBuyBaseFunc = node["requiresBuyBaseFunc"].as< std::vector<std::string> >(_requiresBuyBaseFunc);
+
+	std::sort(_requiresBuyBaseFunc.begin(), _requiresBuyBaseFunc.end());
+
+
 	_categories = node["categories"].as< std::vector<std::string> >(_categories);
 	_size = node["size"].as<double>(_size);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
@@ -668,6 +675,15 @@ const std::vector<const RuleResearch *> &RuleItem::getRequirements() const
 const std::vector<const RuleResearch *> &RuleItem::getBuyRequirements() const
 {
 	return _requiresBuy;
+}
+
+/**
+ * Gets the base functions required to buy item.
+ * @retreturn The sorted list of base functions ID
+ */
+const std::vector<std::string> &RuleItem::getRequiresBuyBaseFunc() const
+{
+	return _requiresBuyBaseFunc;
 }
 
 /**
