@@ -1635,7 +1635,7 @@ void StatsForNerdsState::initItemList()
 		addBoolean(ss, itemRule->getFixedShow(), "fixedWeaponShow");
 		addInteger(ss, itemRule->getTurretType(), "turretType", -1);
 
-		addInteger(ss, itemRule->getBigSprite(), "bigSprite", -1);
+		addInteger(ss, itemRule->getBigSprite(), "bigSprite", -999);
 		addSpriteResourcePath(ss, mod, "BIGOBS.PCK", itemRule->getBigSprite());
 		addInteger(ss, itemRule->getFloorSprite(), "floorSprite", -1);
 		addSpriteResourcePath(ss, mod, "FLOOROB.PCK", itemRule->getFloorSprite());

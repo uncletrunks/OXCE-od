@@ -629,7 +629,7 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set) const
 Surface *BattleItem::getBigSprite(SurfaceSet *set) const
 {
 	int i = _rules->getBigSprite();
-	if (i != -1)
+	if (i != -999)
 	{
 		Surface *surf = set->getFrame(i);
 		//enforce compatibility with basic version
