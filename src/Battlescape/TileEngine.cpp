@@ -1514,6 +1514,7 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 
 	int minZ = 0, maxZ = 0;
 	bool minZfound = false, maxZfound = false;
+	bool dummy = false;
 
 	if (part == O_OBJECT)
 	{
@@ -1575,7 +1576,20 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 		}
 	}
 
-	if (!minZfound) return false;//empty object!!!
+	if (!minZfound)
+	{
+		if (rememberObstacles)
+		{
+			// dummy attempt (only to highlight obstacles)
+			minZfound = true;
+			minZ = 10;
+			dummy = true;
+		}
+		else
+		{
+			return false;//empty object!!!
+		}
+	}
 
 	if (!maxZfound)
 	{
@@ -1599,7 +1613,20 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 		}
 	}
 
-	if (!maxZfound) return false;//it's impossible to get there
+	if (!maxZfound)
+	{
+		if (rememberObstacles)
+		{
+			// dummy attempt (only to highlight obstacles)
+			maxZfound = true;
+			maxZ = 10;
+			dummy = true;
+		}
+		else
+		{
+			return false;//it's impossible to get there
+		}
+	}
 
 	if (minZ > maxZ) minZ = maxZ;
 	int rangeZ = maxZ - minZ;
@@ -1615,7 +1642,7 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 			scanVoxel->y = targetVoxel.y + spiralArray[i*2+1];
 			_trajectory.clear();
 			int test = calculateLine(*originVoxel, *scanVoxel, false, &_trajectory, excludeUnit, true);
-			if (test == part) //bingo
+			if (test == part && !dummy) //bingo
 			{
 				if (_trajectory.at(0).x/16 == scanVoxel->x/16 &&
 					_trajectory.at(0).y/16 == scanVoxel->y/16 &&
