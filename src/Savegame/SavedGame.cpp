@@ -482,7 +482,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		std::string deployment = "STR_TERROR_MISSION";
 		if (mod->getAlienMission(type) && mod->getDeployment(deployment))
 		{
-			MissionSite *m = new MissionSite(mod->getAlienMission(type), mod->getDeployment(deployment));
+			MissionSite *m = new MissionSite(mod->getAlienMission(type), mod->getDeployment(deployment), nullptr);
 			m->load(*i);
 			_missionSites.push_back(m);
 		}

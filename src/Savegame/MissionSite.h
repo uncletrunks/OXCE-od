@@ -42,7 +42,7 @@ private:
 	bool _inBattlescape, _detected;
 public:
 	/// Creates a mission site.
-	MissionSite(const RuleAlienMission *rules, const AlienDeployment *deployment, const AlienDeployment *alienWeaponDeploy = 0);
+	MissionSite(const RuleAlienMission *rules, const AlienDeployment *deployment, const AlienDeployment *alienWeaponDeploy);
 	/// Cleans up the mission site.
 	~MissionSite();
 	/// Loads the mission site from YAML.

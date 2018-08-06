@@ -52,6 +52,7 @@ void MissionSite::load(const YAML::Node &node)
 	_race = node["race"].as<std::string>(_race);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
 	_detected = node["detected"].as<bool>(_detected);
+	//_missionCustomDeploy loaded outside
 }
 
 /**
