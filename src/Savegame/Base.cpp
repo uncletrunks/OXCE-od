@@ -1432,13 +1432,9 @@ void Base::setupDefenses()
 		std::string itemId = (i)->first;
 		int itemQty = (i)->second;
 		RuleItem *rule = _mod->getItem(itemId, true);
-		if (rule->isFixed())
+		if (rule->getVehicleUnit())
 		{
-			int size = 4;
-			if (_mod->getUnit(itemId))
-			{
-				size = _mod->getArmor(_mod->getUnit(itemId)->getArmor(), true)->getSize();
-			}
+			int size = rule->getVehicleUnit()->getArmor()->getTotalSize();
 			if (rule->getPrimaryCompatibleAmmo()->empty()) // so this vehicle does not need ammo
 			{
 				for (int j = 0; j < itemQty; ++j)

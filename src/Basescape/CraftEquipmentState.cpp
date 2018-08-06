@@ -144,7 +144,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _sel(0), _c
 		RuleItem *rule = _game->getMod()->getItem(*i);
 
 		int cQty = 0;
-		if (rule->isFixed())
+		if (rule->getVehicleUnit())
 		{
 			cQty = c->getVehicleCount(*i);
 		}
@@ -360,7 +360,7 @@ void CraftEquipmentState::updateQuantity()
 	Craft *c = _base->getCrafts()->at(_craft);
 	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
 	int cQty = 0;
-	if (item->isFixed())
+	if (item->getVehicleUnit())
 	{
 		cQty = c->getVehicleCount(_items[_sel]);
 	}
@@ -423,12 +423,12 @@ void CraftEquipmentState::moveLeftByValue(int change)
 	Craft *c = _base->getCrafts()->at(_craft);
 	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
 	int cQty = 0;
-	if (item->isFixed()) cQty = c->getVehicleCount(_items[_sel]);
+	if (item->getVehicleUnit()) cQty = c->getVehicleCount(_items[_sel]);
 	else cQty = c->getItems()->getItem(_items[_sel]);
 	if (change <= 0 || cQty <= 0) return;
 	change = std::min(cQty, change);
 	// Convert vehicle to item
-	if (item->isFixed())
+	if (item->getVehicleUnit())
 	{
 		if (!item->getPrimaryCompatibleAmmo()->empty())
 		{
@@ -513,14 +513,9 @@ void CraftEquipmentState::moveRightByValue(int change)
 	if (0 >= change || 0 >= bqty) return;
 	change = std::min(bqty, change);
 	// Do we need to convert item to vehicle?
-	if (item->isFixed())
+	if (item->getVehicleUnit())
 	{
-		int size = 4;
-		if (_game->getMod()->getUnit(item->getType()))
-		{
-			size = _game->getMod()->getArmor(_game->getMod()->getUnit(item->getType())->getArmor(), true)->getSize();
-			size *= size;
-		}
+		int size = item->getVehicleUnit()->getArmor()->getTotalSize();
 		// Check if there's enough room
 		int room = std::min(c->getRules()->getVehicles() - c->getNumVehicles(), c->getSpaceAvailable() / size);
 		if (room > 0)

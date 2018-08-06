@@ -961,6 +961,10 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 	{
 		rule.second->afterLoad(this);
 	}
+	for (auto& rule : _units)
+	{
+		rule.second->afterLoad(this);
+	}
 
 	sortLists();
 	loadExtraResources();

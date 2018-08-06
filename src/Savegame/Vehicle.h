@@ -50,7 +50,7 @@ public:
 	/// Sets the vehicle's ammo.
 	void setAmmo(int ammo);
 	/// Gets the vehicle's size.
-	int getSize() const;
+	int getTotalSize() const;
 };
 
 }

@@ -1840,7 +1840,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	BattleUnit *newUnit = new BattleUnit(type,
 		FACTION_HOSTILE,
 		_save->getUnits()->back()->getId() + 1,
-		getMod()->getArmor(type->getArmor(), true),
+		type->getArmor(),
 		getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
 		getDepth(),
 		getMod()->getMaxViewDistance());

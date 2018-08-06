@@ -142,15 +142,25 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	for (YAML::const_iterator i = node["vehicles"].begin(); i != node["vehicles"].end(); ++i)
 	{
 		std::string type = (*i)["type"].as<std::string>();
-		if (mod->getItem(type))
+		auto ruleItem = mod->getItem(type);
+		if (ruleItem)
 		{
-			Vehicle *v = new Vehicle(mod->getItem(type), 0, 4);
-			v->load(*i);
-			_vehicles.push_back(v);
+			auto ruleUnit = ruleItem->getVehicleUnit();
+			if (ruleUnit)
+			{
+				int size = ruleUnit->getArmor()->getTotalSize();
+				Vehicle *v = new Vehicle(ruleItem, 0, size);
+				v->load(*i);
+				_vehicles.push_back(v);
+			}
+			else
+			{
+				Log(LOG_ERROR) << "Failed to load vehicle " << type;
+			}
 		}
 		else
 		{
-			Log(LOG_ERROR) << "Failed to load item " << type;
+			Log(LOG_ERROR) << "Failed to load vehicles item " << type;
 		}
 	}
 	_status = node["status"].as<std::string>(_status);
@@ -964,7 +974,7 @@ int Craft::getSpaceUsed() const
 	int vehicleSpaceUsed = 0;
 	for (Vehicle* v : _vehicles)
 	{
-		vehicleSpaceUsed += v->getSize();
+		vehicleSpaceUsed += v->getTotalSize();
 	}
 	for (Soldier *s : *_base->getSoldiers())
 	{

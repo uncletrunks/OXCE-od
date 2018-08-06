@@ -225,11 +225,9 @@ void ManageAlienContainmentState::btnOkClick(Action *)
 			{
 				// add the corpses
 				_base->getStorageItems()->addItem(
-					_game->getMod()->getArmor(
-						_game->getMod()->getUnit(
-							_aliens[i], true
-						)->getArmor(), true
-					)->getCorpseGeoscape(), _qtys[i]
+					_game->getMod()->getUnit(
+						_aliens[i], true
+					)->getArmor()->getCorpseGeoscape(), _qtys[i]
 				); // ;)
 			}
 		}

@@ -40,7 +40,7 @@ const float TilesToVexels = 16.0f;
  * @param type String defining the type.
  */
 RuleItem::RuleItem(const std::string &type) :
-	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
+	_type(type), _name(type), _vehicleUnit(nullptr), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
 	_bigSprite(-1), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
 	_fireSound(-1),
 	_hitSound(-1), _hitAnimation(0), _hitMissSound(-1), _hitMissAnimation(-1),
@@ -624,6 +624,11 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 void RuleItem::afterLoad(const Mod* mod)
 {
 	_requires = mod->getResearch(_requiresName);
+	// fixedWeapons can mean vehicle
+	if (_fixedWeapon)
+	{
+		_vehicleUnit = mod->getUnit(_type);
+	}
 
 	//remove not needed data
 	Collections::deleteAll(_requiresName);
@@ -704,6 +709,14 @@ const std::vector<std::string> &RuleItem::getCategories() const
 bool RuleItem::belongsToCategory(const std::string &category) const
 {
 	return std::find(_categories.begin(), _categories.end(), category) != _categories.end();
+}
+
+/**
+ * Gets unit rule if the item is vehicle weapon.
+ */
+Unit* RuleItem::getVehicleUnit() const
+{
+	return _vehicleUnit;
 }
 
 /**

@@ -920,12 +920,11 @@ void BattlescapeGenerator::autoEquip(std::vector<BattleUnit*> units, Mod *mod, s
  */
 BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 {
-	std::string vehicle = v->getRules()->getType();
-	Unit *rule = _game->getMod()->getUnit(vehicle, true);
-	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getMod()->getArmor(rule->getArmor(), true), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
+	Unit *rule = v->getRules()->getVehicleUnit();
+	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, rule->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
 	if (unit)
 	{
-		_save->createItemForUnit(vehicle, unit, true);
+		_save->createItemForUnit(v->getRules(), unit, true);
 		if (!v->getRules()->getPrimaryCompatibleAmmo()->empty())
 		{
 			std::string ammo = v->getRules()->getPrimaryCompatibleAmmo()->front();
@@ -1151,7 +1150,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
  */
 BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outside)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getMod()->getArmor(rules->getArmor(), true), _game->getMod()->getStatAdjustment(_game->getSavedGame()->getDifficulty()), _save->getDepth(), _game->getMod()->getMaxViewDistance());
+	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, rules->getArmor(), _game->getMod()->getStatAdjustment(_game->getSavedGame()->getDifficulty()), _save->getDepth(), _game->getMod()->getMaxViewDistance());
 	Node *node = 0;
 
 	// safety to avoid index out of bounds errors
@@ -1223,7 +1222,7 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
  */
 BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _game->getMod()->getArmor(rules->getArmor(), true), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance());
+	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, rules->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance());
 	Node *node = _save->getSpawnNode(0, unit);
 
 	if (node)

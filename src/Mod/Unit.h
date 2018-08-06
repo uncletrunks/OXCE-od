@@ -49,6 +49,7 @@ struct StatAdjustment
 };
 
 class Mod;
+class Armor;
 class ModScript;
 
 /**
@@ -62,7 +63,8 @@ private:
 	std::string _race;
 	std::string _rank;
 	UnitStats _stats;
-	std::string _armor;
+	std::string _armorName;
+	Armor* _armor;
 	int _standHeight, _kneelHeight, _floatHeight;
 	std::vector<int> _deathSound;
 	int _value, _aggroSound, _moveSound;
@@ -79,6 +81,9 @@ public:
 	~Unit();
 	/// Loads the unit data from YAML.
 	void load(const YAML::Node& node, Mod *mod);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets the unit's type.
 	std::string getType() const;
 	/// Gets the unit's stats.
@@ -90,7 +95,7 @@ public:
 	/// Gets the unit's float elevation.
 	int getFloatHeight() const;
 	/// Gets the armor type.
-	std::string getArmor() const;
+	Armor* getArmor() const;
 	/// Gets the alien race type.
 	std::string getRace() const;
 	/// Gets the alien rank.

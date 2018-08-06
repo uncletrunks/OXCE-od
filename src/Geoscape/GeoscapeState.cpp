@@ -1565,7 +1565,7 @@ void GeoscapeState::time1Day()
 			// 3b. handle interrogation
 			if (Options::retainCorpses && research->destroyItem() && mod->getUnit(research->getName()))
 			{
-				base->getStorageItems()->addItem(mod->getArmor(mod->getUnit(research->getName())->getArmor(), true)->getCorpseGeoscape());
+				base->getStorageItems()->addItem(mod->getUnit(research->getName())->getArmor()->getCorpseGeoscape());
 			}
 			// 3c. handle getonefrees (topic+lookup)
 			if (!research->getGetOneFree().empty())

@@ -37,9 +37,13 @@ namespace OpenXcom
 
 	ArticleStateVehicle::ArticleStateVehicle(ArticleDefinitionVehicle *defs) : ArticleState(defs->id)
 	{
-		Unit *unit = _game->getMod()->getUnit(defs->id, true);
-		Armor *armor = _game->getMod()->getArmor(unit->getArmor(), true);
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
+		Unit *unit = item->getVehicleUnit();
+		if (!unit)
+		{
+			throw Exception("Item " + defs->id + " do not have vehicle unit defined");
+		}
+		Armor *armor = unit->getArmor();
 
 		// add screen elements
 		_txtTitle = new Text(310, 17, 5, 23);

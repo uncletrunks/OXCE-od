@@ -101,7 +101,7 @@ void Vehicle::setAmmo(int ammo)
  * in a transport craft.
  * @return Size in tiles.
  */
-int Vehicle::getSize() const
+int Vehicle::getTotalSize() const
 {
 	return _size;
 }

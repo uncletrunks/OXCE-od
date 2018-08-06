@@ -34,9 +34,13 @@ namespace OpenXcom
 
 	ArticleStateTFTDVehicle::ArticleStateTFTDVehicle(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
-		Unit *unit = _game->getMod()->getUnit(defs->id, true);
-		Armor *armor = _game->getMod()->getArmor(unit->getArmor(), true);
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
+		Unit *unit = item->getVehicleUnit();
+		if (!unit)
+		{
+			throw Exception("Item " + defs->id + " do not have vehicle unit defined");
+		}
+		Armor *armor = unit->getArmor();
 
 		_lstStats = new TextList(150, 65, 168, 106);
 

@@ -133,6 +133,8 @@ private:
 	std::vector<std::string> _categories;
 	std::vector<const RuleResearch *> _requires, _requiresBuy;
 	std::vector<std::string> _requiresBuyBaseFunc;
+
+	Unit* _vehicleUnit;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
 	int _bigSprite;
@@ -230,6 +232,8 @@ public:
 	const std::vector<std::string> &getCategories() const;
 	/// Checks if the item belongs to a category.
 	bool belongsToCategory(const std::string &category) const;
+	/// Gets unit rule if the item is vehicle weapon.
+	Unit* getVehicleUnit() const;
 	/// Gets the item's size.
 	double getSize() const;
 	/// Gets the item's purchase cost.
