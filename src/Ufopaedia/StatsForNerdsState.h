@@ -68,7 +68,7 @@ private:
 	void addTranslation(std::wostringstream &ss, const std::string &id);
 	std::wstring trp(const std::string &propertyName);
 	void addSection(const std::wstring &name, const std::wstring &desc, Uint8 color, bool forceShow = false);
-	void addHeading(const std::string &propertyName);
+	void addHeading(const std::string &propertyName, const std::string &moreDetail = "", bool addDifficulty = false);
 	void endHeading();
 	void addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId = "", bool translate = true);
 	void addVectorOfStrings(std::wostringstream &ss, const std::vector<std::string> &vec, const std::string &propertyName);
@@ -81,6 +81,8 @@ private:
 	void addIntegerPercent(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addIntegerNauticalMiles(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addIntegerKnots(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
+	void addIntegerKm(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
+	void addIntegerSeconds(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0, const int &value2 = -1);
 	void addVectorOfIntegers(std::wostringstream &ss, const std::vector<int> &vec, const std::string &propertyName);
 	void addBattleType(std::wostringstream &ss, const BattleType &value, const std::string &propertyName, const BattleType &defaultvalue = BT_NONE);
 	void addDamageType(std::wostringstream &ss, const ItemDamageType &value, const std::string &propertyName, const ItemDamageType &defaultvalue = DT_NONE);
@@ -108,6 +110,9 @@ private:
 	void addRightClickActionType(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void initFacilityList();
 	void initCraftList();
+	void addHuntMode(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
+	void addHuntBehavior(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
+	void initUfoList();
 public:
 	static const std::map<std::string, std::string> translationMap;
 	/// Creates the StatsForNerdsState state.

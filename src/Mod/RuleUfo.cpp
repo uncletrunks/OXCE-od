@@ -299,6 +299,11 @@ const RuleUfoStats& RuleUfo::getRaceBonus(const std::string& s) const
 		return _statsRaceBonus.find("")->second;
 }
 
+const std::map<std::string, RuleUfoStats> &RuleUfo::getRaceBonusRaw() const
+{
+	return _statsRaceBonus;
+}
+
 /**
  * Gets the amount of points awarded every 30 minutes
  * while the UFO is on a mission (doubled when landed).

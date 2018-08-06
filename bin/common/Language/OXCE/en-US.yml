@@ -370,6 +370,8 @@ en-US:
   STR_COST_MORALE: "morale"
   STR_COST_HEALTH: "health"
   STR_COST_STUN: "stun"
+  STR_COST_BUILD: "build"
+  STR_COST_REFUND: "refund"
 #
   STR_DAMAGE_10: "10"
   STR_DAMAGE_11: "11"
@@ -384,5 +386,6 @@ en-US:
 #
   STR_NAUTICAL_MILES: "{0} nautical miles"
   STR_KILOMETERS_PER_HOUR: "{0} km/h"
-  STR_COST_BUILD: "build"
-  STR_COST_REFUND: "refund"
+  STR_SECONDS_LONG: "{0} seconds"
+  STR_RACE_BONUS: "Race bonus"
+  STR_FOR_DIFFICULTY: "for difficulty: {0}"

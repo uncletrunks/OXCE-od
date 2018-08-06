@@ -109,8 +109,7 @@ public:
 	const RuleUfoStats& getStats() const;
 	/// Get race bonus of statistic of UFO.
 	const RuleUfoStats& getRaceBonus(const std::string& s) const;
-	/// Gets the UFO's radar range.
-	int getSightRange() const;
+	const std::map<std::string, RuleUfoStats> &getRaceBonusRaw() const;
 	/// Gets the UFO's mission score.
 	int getMissionScore() const;
 	/// Gets the UFO's chance to become a hunter-killer.
