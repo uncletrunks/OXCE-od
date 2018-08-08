@@ -124,6 +124,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_cacheHasLOS = -1;
 
 	_nightVisionOn = false;
+	_maxBrightnessVisionOn = false;
 	_fadeShade = 16;
 	_nvColor = 0;
 	_fadeTimer = new Timer(FADE_INTERVAL);
@@ -1658,6 +1659,11 @@ void Map::toggleNightVision()
 	_nightVisionOn = !_nightVisionOn;
 }
 
+void Map::toggleMaxBrightnessVision()
+{
+	_maxBrightnessVisionOn = !_maxBrightnessVisionOn;
+}
+
 /**
  * Handles fade-in and fade-out shade modification
  * @param original tile/item/unit shade
@@ -1665,6 +1671,12 @@ void Map::toggleNightVision()
 
 int Map::reShade(Tile *tile)
 {
+	// when modders just don't know where to stop...
+	if (_maxBrightnessVisionOn)
+	{
+		return 0;
+	}
+
 	// no night vision
 	if (_nvColor == 0)
 	{

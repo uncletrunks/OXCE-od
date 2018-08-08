@@ -88,7 +88,7 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteResetNeeded(false), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false), _autosave(false), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
+BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteResetNeeded(false), _paletteResetRequested(false), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false), _autosave(false), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
 
@@ -633,6 +633,18 @@ void BattlescapeState::resetPalettes()
  */
 void BattlescapeState::init()
 {
+	if (_paletteResetRequested)
+	{
+		_paletteResetRequested = false;
+
+		resetPalettes();
+		_game->getSavedGame()->getSavedBattle()->setPaletteByDepth(this);
+		for (auto surface : _surfaces)
+		{
+			surface->setPalette(_palette);
+		}
+	}
+
 	if (_save->getAmbientSound() != -1)
 	{
 		_game->getMod()->getSoundByDepth(_save->getDepth(), _save->getAmbientSound())->loop();
@@ -2102,6 +2114,17 @@ inline void BattlescapeState::handle(Action *action)
 				else if (key == SDLK_h && ctrlPressed)
 				{
 					_game->pushState(new InfoboxState(_save->hitLog.str()));
+				}
+				// "ctrl-Home" - reset default palettes
+				else if (key == SDLK_HOME && ctrlPressed)
+				{
+					_paletteResetRequested = true;
+					init();
+				}
+				// "ctrl-End" - toggle max brightness
+				else if (key == SDLK_END && ctrlPressed)
+				{
+					_map->toggleMaxBrightnessVision();
 				}
 				// "ctrl-e" - experience log
 				else if (key == SDLK_e && ctrlPressed)
