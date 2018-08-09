@@ -666,18 +666,6 @@ DogfightState::~DogfightState()
 		delete _projectiles.back();
 		_projectiles.pop_back();
 	}
-
-	if (_craft)
-	{
-		_craft->setInDogfight(false);
-		_craft->setInterceptionOrder(0);
-	}
-	// set the ufo as "free" for the next engagement (as applicable)
-	if (_ufo)
-	{
-		_ufo->setInterceptionProcessed(false);
-		_ufo->setShieldRechargeHandle(0);
-	}
 }
 
 /**
@@ -2257,10 +2245,19 @@ Craft *DogfightState::getCraft() const
  */
 void DogfightState::endDogfight()
 {
+	if (_endDogfight)
+		return;
 	if (_craft)
+	{
 		_craft->setInDogfight(false);
+		_craft->setInterceptionOrder(0);
+	}
+	// set the ufo as "free" for the next engagement (as applicable)
 	if (_ufo)
+	{
+		_ufo->setInterceptionProcessed(false);
 		_ufo->setShieldRechargeHandle(0);
+	}
 	_endDogfight = true;
 }
 
