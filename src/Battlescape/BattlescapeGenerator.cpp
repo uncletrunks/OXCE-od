@@ -407,6 +407,7 @@ void BattlescapeGenerator::nextStage()
 	ruleDeploy->getDimensions(&_mapsize_x, &_mapsize_y, &_mapsize_z);
 	size_t pick = RNG::generate(0, ruleDeploy->getTerrains().size() -1);
 	_terrain = _game->getMod()->getTerrain(ruleDeploy->getTerrains().at(pick), true);
+	setDepth(ruleDeploy, true);
 	_worldShade = ruleDeploy->getShade();
 
 	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
@@ -564,6 +565,7 @@ void BattlescapeGenerator::nextStage()
 	}
 
 	_save->setAborted(false);
+	setMusic(ruleDeploy, true);
 	_save->setGlobalShade(_worldShade);
 	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
 }
@@ -605,19 +607,8 @@ void BattlescapeGenerator::run()
 			_terrain = _game->getMod()->getTerrain(_worldTexture->getRandomTerrain(target), true);
 		}
 	}
-
-	// new battle menu will have set the depth already
-	if (_save->getDepth() == 0)
-	{
-		if (ruleDeploy->getMaxDepth() > 0)
-		{
-			_save->setDepth(RNG::generate(ruleDeploy->getMinDepth(), ruleDeploy->getMaxDepth()));
-		}
-		else if (_terrain->getMaxDepth() > 0)
-		{
-			_save->setDepth(RNG::generate(_terrain->getMinDepth(), _terrain->getMaxDepth()));
-		}
-	}
+	
+	setDepth(ruleDeploy, false);
 
 	if (ruleDeploy->getShade() != -1)
 	{
@@ -683,14 +674,7 @@ void BattlescapeGenerator::run()
 		explodePowerSources();
 	}
 
-	if (!ruleDeploy->getMusic().empty())
-	{
-		_save->setMusic(ruleDeploy->getMusic().at(RNG::generate(0, ruleDeploy->getMusic().size()-1)));
-	}
-	else if (!_terrain->getMusic().empty())
-	{
-		_save->setMusic(_terrain->getMusic().at(RNG::generate(0, _terrain->getMusic().size()-1)));
-	}
+	setMusic(ruleDeploy, false);
 	// set shade (alien bases are a little darker, sites depend on worldshade)
 	_save->setGlobalShade(_worldShade);
 
@@ -3783,6 +3767,50 @@ void BattlescapeGenerator::setupObjectives(const AlienDeployment *ruleDeploy)
 				_save->setObjectiveCount(objectives);
 			}
 		}
+	}
+}
+
+/**
+* Sets the depth based on the terrain or the provided AlienDeployment rule.
+* @param ruleDeploy the deployment data we're gleaning data from.
+* @param nextStage whether the mission is progressing to the next stage.
+*/
+void BattlescapeGenerator::setDepth(const AlienDeployment* ruleDeploy, bool nextStage)
+{
+	if (_save->getDepth() > 0 && !nextStage)
+	{
+		// new battle menu will have set the depth already
+		return;
+	}
+
+	if (ruleDeploy->getMaxDepth() > 0)
+	{
+		_save->setDepth(RNG::generate(ruleDeploy->getMinDepth(), ruleDeploy->getMaxDepth()));
+	}
+	else if (_terrain->getMaxDepth() > 0 || nextStage)
+	{
+		_save->setDepth(RNG::generate(_terrain->getMinDepth(), _terrain->getMaxDepth()));
+	}
+}
+
+/**
+* Sets the background music based on the terrain or the provided AlienDeployment rule.
+* @param ruleDeploy the deployment data we're gleaning data from.
+* @param nextStage whether the mission is progressing to the next stage.
+*/
+void BattlescapeGenerator::setMusic(const AlienDeployment* ruleDeploy, bool nextStage)
+{
+	if (!ruleDeploy->getMusic().empty())
+	{
+		_save->setMusic(ruleDeploy->getMusic().at(RNG::generate(0, ruleDeploy->getMusic().size() - 1)));
+	}
+	else if (!_terrain->getMusic().empty())
+	{
+		_save->setMusic(_terrain->getMusic().at(RNG::generate(0, _terrain->getMusic().size() - 1)));
+	}
+	else if (nextStage)
+	{
+		_save->setMusic("");
 	}
 }
 
