@@ -20,6 +20,7 @@
 #include "../Engine/RNG.h"
 #include "../Engine/Language.h"
 #include "../Engine/Options.h"
+#include "../Engine/ScriptBind.h"
 #include "Craft.h"
 #include "EquipmentLayoutItem.h"
 #include "SoldierDeath.h"
@@ -103,7 +104,7 @@ Soldier::~Soldier()
  * @param mod Game mod.
  * @param save Pointer to savegame.
  */
-void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
+void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, const ScriptGlobal *shared)
 {
 	_id = node["id"].as<int>(_id);
 	_name = Language::utf8ToWstr(node["name"].as<std::string>());
@@ -157,13 +158,14 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 		_diary->load(node["diary"]);
 	}
 	calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
+	_scriptValues.load(node, shared);
 }
 
 /**
  * Saves the soldier to a YAML file.
  * @return YAML node.
  */
-YAML::Node Soldier::save() const
+YAML::Node Soldier::save(const ScriptGlobal *shared) const
 {
 	YAML::Node node;
 	node["type"] = _rules->getType();
@@ -208,6 +210,7 @@ YAML::Node Soldier::save() const
 	{
 		node["diary"] = _diary->save();
 	}
+	_scriptValues.save(node, shared);
 
 	return node;
 }
@@ -796,4 +799,126 @@ void Soldier::setTraining(bool training)
 	_training = training;
 }
 
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void getGenderScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getGender();
+		return;
+	}
+	ret = 0;
 }
+void getRankScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getRank();
+		return;
+	}
+	ret = 0;
+}
+void getLookScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getLook();
+		return;
+	}
+	ret = 0;
+}
+void getLookVariantScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getLookVariant();
+		return;
+	}
+	ret = 0;
+}
+struct getRuleSoldierScript
+{
+	static RetEnum func(const Soldier *so, const RuleSoldier* &ret)
+	{
+		if (so)
+		{
+			ret = so->getRules();
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+
+std::string debugDisplayScript(const Soldier* so)
+{
+	if (so)
+	{
+		std::string s;
+		s += Soldier::ScriptName;
+		s += "(type: \"";
+		s += so->getRules()->getType();
+		s += "\" id: ";
+		s += std::to_string(so->getId());
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+} // namespace
+
+/**
+ * Register Soldier in script parser.
+ * @param parser Script parser.
+ */
+void Soldier::ScriptRegister(ScriptParserBase* parser)
+{
+	parser->registerPointerType<RuleSoldier>();
+
+	Bind<Soldier> so = { parser };
+	BindNested<Soldier, UnitStats, &Soldier::_currentStats> us = { so };
+
+
+	so.addField<&Soldier::_id>("getId");
+	so.add<&getRankScript>("getRank");
+	so.add<&getGenderScript>("getGender");
+	so.add<&getLookScript>("getLook");
+	so.add<&getLookVariantScript>("getLookVariant");
+
+
+	us.addField<&UnitStats::tu>("Stats.getTimeUnits", "Stats.setTimeUnits");
+	us.addField<&UnitStats::stamina>("Stats.getStamina", "Stats.setStamina");
+	us.addField<&UnitStats::health>("Stats.getHealth", "Stats.setHealth");
+	us.addField<&UnitStats::bravery>("Stats.getBravery", "Stats.setBravery");
+	us.addField<&UnitStats::reactions>("Stats.getReactions", "Stats.setReactions");
+	us.addField<&UnitStats::firing>("Stats.getFiring", "Stats.setFiring");
+	us.addField<&UnitStats::throwing>("Stats.getThrowing", "Stats.setThrowing");
+	us.addField<&UnitStats::strength>("Stats.getStrength", "Stats.setStrength");
+	us.addField<&UnitStats::psiStrength>("Stats.getPsiStrength", "Stats.setPsiStrength");
+	us.addField<&UnitStats::psiSkill>("Stats.getPsiSkill", "Stats.setPsiSkill");
+	us.addField<&UnitStats::melee>("Stats.getMelee", "Stats.setMelee");
+
+
+	so.addFunc<getRuleSoldierScript>("getRuleSoldier");
+	so.add<&Soldier::getWoundRecovery>("getWoundRecovery");
+	so.add<&Soldier::setWoundRecovery>("setWoundRecovery");
+
+
+	so.addScriptValue<&Soldier::_scriptValues>();
+	so.addDebugDisplay<&debugDisplayScript>();
+}
+
+} // namespace OpenXcom

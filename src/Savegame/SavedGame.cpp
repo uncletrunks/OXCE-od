@@ -552,7 +552,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		if (mod->getSoldier(type))
 		{
 			Soldier *soldier = new Soldier(mod->getSoldier(type), 0);
-			soldier->load(*i, mod, this);
+			soldier->load(*i, mod, this, mod->getScriptGlobal());
 			_deadSoldiers.push_back(soldier);
 		}
 		else
@@ -579,7 +579,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
  * Saves a saved game's contents to a YAML file.
  * @param filename YAML filename.
  */
-void SavedGame::save(const std::string &filename) const
+void SavedGame::save(const std::string &filename, Mod *mod) const
 {
 	std::string s = Options::getMasterUserFolder() + filename;
 	std::ofstream sav(s.c_str());
@@ -696,7 +696,7 @@ void SavedGame::save(const std::string &filename) const
 	node["alienStrategy"] = _alienStrategy->save();
 	for (std::vector<Soldier*>::const_iterator i = _deadSoldiers.begin(); i != _deadSoldiers.end(); ++i)
 	{
-		node["deadSoldiers"].push_back((*i)->save());
+		node["deadSoldiers"].push_back((*i)->save(mod->getScriptGlobal()));
 	}
 	if (Options::soldierDiaries)
 	{

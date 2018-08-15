@@ -184,6 +184,7 @@ Update nightly.[br/]
 Damage script can now alter zombie transformation chance.[br/]
 Add access to current difficulty level in scripts.[br/]
 Add base function requirmets to buy items, crafts and solders.[br/]
+Add access to geoscape soldier in scripts.[br/]
 [br/]
 
 [examples]

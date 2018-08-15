@@ -20,11 +20,13 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include "Unit.h"
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
 
 class Mod;
+class ModScript;
 class SoldierNamePool;
 
 /**
@@ -34,6 +36,13 @@ class SoldierNamePool;
  */
 class RuleSoldier
 {
+public:
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "RuleSoldier";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
@@ -43,6 +52,7 @@ private:
 	int _costBuy, _costSalary, _standHeight, _kneelHeight, _floatHeight, _femaleFrequency;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<SoldierNamePool*> _names;
+	ScriptValues<RuleSoldier> _scriptValues;
 
 	void addSoldierNamePool(const std::string &namFile);
 public:
@@ -51,7 +61,7 @@ public:
 	/// Cleans up the soldier ruleset.
 	~RuleSoldier();
 	/// Loads the soldier data from YAML.
-	void load(const YAML::Node& node, Mod *mod);
+	void load(const YAML::Node& node, Mod *mod, const ModScript &parsers);
 	/// Gets the soldier's type.
 	std::string getType() const;
 	/// Gets the soldier's requirements.

@@ -1180,7 +1180,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		RuleSoldier *rule = loadRule(*i, &_soldiers, &_soldiersIndex);
 		if (rule != 0)
 		{
-			rule->load(*i, this);
+			rule->load(*i, this, parsers);
 		}
 	}
 	for (YAML::const_iterator i = doc["units"].begin(); i != doc["units"].end(); ++i)

@@ -143,7 +143,7 @@ public:
 	/// Loads a saved game from YAML.
 	void load(const std::string &filename, Mod *mod);
 	/// Saves a saved game to YAML.
-	void save(const std::string &filename) const;
+	void save(const std::string &filename, Mod *mod) const;
 	/// Gets the game name.
 	std::wstring getName() const;
 	/// Sets the game name.

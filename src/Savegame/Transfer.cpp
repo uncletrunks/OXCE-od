@@ -65,7 +65,7 @@ bool Transfer::load(const YAML::Node& node, Base *base, const Mod *mod, SavedGam
 		if (mod->getSoldier(type) != 0)
 		{
 			_soldier = new Soldier(mod->getSoldier(type), 0);
-			_soldier->load(soldier, mod, save);
+			_soldier->load(soldier, mod, save, mod->getScriptGlobal());
 		}
 		else
 		{
@@ -111,13 +111,13 @@ bool Transfer::load(const YAML::Node& node, Base *base, const Mod *mod, SavedGam
  * Saves the transfer to a YAML file.
  * @return YAML node.
  */
-YAML::Node Transfer::save() const
+YAML::Node Transfer::save(const Base *b, const Mod *mod) const
 {
 	YAML::Node node;
 	node["hours"] = _hours;
 	if (_soldier != 0)
 	{
-		node["soldier"] = _soldier->save();
+		node["soldier"] = _soldier->save(mod->getScriptGlobal());
 	}
 	else if (_craft != 0)
 	{

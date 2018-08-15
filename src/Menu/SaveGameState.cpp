@@ -158,7 +158,7 @@ void SaveGameState::think()
 		try
 		{
 			std::string backup = _filename + ".bak";
-			_game->getSavedGame()->save(backup);
+			_game->getSavedGame()->save(backup, _game->getMod());
 			std::string fullPath = Options::getMasterUserFolder() + _filename;
 			std::string bakPath = Options::getMasterUserFolder() + backup;
 			if (!CrossPlatform::moveFile(bakPath, fullPath))

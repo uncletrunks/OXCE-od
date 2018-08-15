@@ -1057,7 +1057,7 @@ void SaveConverter::loadDatSoldier()
 			node["id"] = _save->getId("STR_SOLDIER");
 
 			Soldier *soldier = new Soldier(_mod->getSoldier(_mod->getSoldiersList().front(), true), 0);
-			soldier->load(node, _mod, _save);
+			soldier->load(node, _mod, _save, _mod->getScriptGlobal());
 			if (base != 0xFFFF)
 			{
 				Base *b = dynamic_cast<Base*>(_targets[base]);

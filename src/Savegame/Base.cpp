@@ -141,7 +141,7 @@ void Base::load(const YAML::Node &node, SavedGame *save, bool newGame, bool newB
 		if (_mod->getSoldier(type))
 		{
 			Soldier *s = new Soldier(_mod->getSoldier(type), 0);
-			s->load(*i, _mod, save);
+			s->load(*i, _mod, save, _mod->getScriptGlobal());
 			s->setCraft(0);
 			if (const YAML::Node &craft = (*i)["craft"])
 			{
@@ -240,7 +240,7 @@ YAML::Node Base::save() const
 	}
 	for (std::vector<Soldier*>::const_iterator i = _soldiers.begin(); i != _soldiers.end(); ++i)
 	{
-		node["soldiers"].push_back((*i)->save());
+		node["soldiers"].push_back((*i)->save(_mod->getScriptGlobal()));
 	}
 	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
 	{
@@ -253,7 +253,7 @@ YAML::Node Base::save() const
 		node["inBattlescape"] = _inBattlescape;
 	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 	{
-		node["transfers"].push_back((*i)->save());
+		node["transfers"].push_back((*i)->save(this, _mod));
 	}
 	for (std::vector<ResearchProject*>::const_iterator i = _research.begin(); i != _research.end(); ++i)
 	{

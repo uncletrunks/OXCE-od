@@ -19,8 +19,10 @@
 #include <algorithm>
 #include "RuleSoldier.h"
 #include "Mod.h"
+#include "ModScript.h"
 #include "SoldierNamePool.h"
 #include "../Engine/FileMap.h"
+#include "../Engine/ScriptBind.h"
 
 namespace OpenXcom
 {
@@ -50,11 +52,11 @@ RuleSoldier::~RuleSoldier()
  * @param node YAML node.
  * @param mod Mod for the unit.
  */
-void RuleSoldier::load(const YAML::Node &node, Mod *mod)
+void RuleSoldier::load(const YAML::Node &node, Mod *mod, const ModScript &parsers)
 {
 	if (const YAML::Node &parent = node["refNode"])
 	{
-		load(parent, mod);
+		load(parent, mod, parsers);
 	}
 	_type = node["type"].as<std::string>(_type);
 	// Just in case
@@ -139,6 +141,8 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod)
 			}
 		}
 	}
+
+	_scriptValues.load(node, parsers.getShared());
 }
 
 void RuleSoldier::addSoldierNamePool(const std::string &namFile)
@@ -292,6 +296,63 @@ const std::vector<int> &RuleSoldier::getFemaleDeathSounds() const
 const std::vector<SoldierNamePool*> &RuleSoldier::getNames() const
 {
 	return _names;
+}
+
+
+namespace
+{
+
+std::string debugDisplayScript(const RuleSoldier* rs)
+{
+	if (rs)
+	{
+		std::string s;
+		s += RuleSoldier::ScriptName;
+		s += "(name: \"";
+		s += rs->getType();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+template<UnitStats RuleSoldier::* Stats>
+void addStats(Bind<RuleSoldier>& ra, std::string postFix)
+{
+	BindNested<RuleSoldier, UnitStats, Stats> us = { ra };
+
+	us.template addField<&UnitStats::tu>("getTimeUnits" + postFix);
+	us.template addField<&UnitStats::stamina>("getStamina" + postFix);
+	us.template addField<&UnitStats::health>("getHealth" + postFix);
+	us.template addField<&UnitStats::bravery>("getBravery" + postFix);
+	us.template addField<&UnitStats::reactions>("getReactions" + postFix);
+	us.template addField<&UnitStats::firing>("getFiring" + postFix);
+	us.template addField<&UnitStats::throwing>("getThrowing" + postFix);
+	us.template addField<&UnitStats::strength>("getStrength" + postFix);
+	us.template addField<&UnitStats::psiStrength>("getPsiStrength" + postFix);
+	us.template addField<&UnitStats::psiSkill>("getPsiSkill" + postFix);
+	us.template addField<&UnitStats::melee>("getMelee" + postFix);
+}
+
+}
+
+/**
+ * Register Armor in script parser.
+ * @param parser Script parser.
+ */
+void RuleSoldier::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<RuleSoldier> ra = { parser };
+
+	addStats<&RuleSoldier::_statCaps>(ra, "Cap");
+	addStats<&RuleSoldier::_minStats>(ra, "Min");
+	addStats<&RuleSoldier::_maxStats>(ra, "Max");
+
+	ra.addScriptValue<&RuleSoldier::_scriptValues>(false);
+	ra.addDebugDisplay<&debugDisplayScript>();
 }
 
 }

@@ -3858,6 +3858,10 @@ void BattleUnit::resetHitState()
 }
 
 
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
 namespace
 {
 
@@ -3914,6 +3918,61 @@ void getLookVariantScript(const BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
+
+struct getRuleSoldierScript
+{
+	static RetEnum func(const BattleUnit *bu, const RuleSoldier* &ret)
+	{
+		if (bu)
+		{
+			auto g = bu->getGeoscapeSoldier();
+			if (g)
+			{
+				ret = g->getRules();
+			}
+			else
+			{
+				ret = nullptr;
+			}
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+struct getGeoscapeSoldierScript
+{
+	static RetEnum func(BattleUnit *bu, Soldier* &ret)
+	{
+		if (bu)
+		{
+			ret = bu->getGeoscapeSoldier();
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+struct getGeoscapeSoldierConstScript
+{
+	static RetEnum func(const BattleUnit *bu, const Soldier* &ret)
+	{
+		if (bu)
+		{
+			ret = bu->getGeoscapeSoldier();
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+
 void geReactionScoreScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -4214,6 +4273,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 {
 	parser->registerPointerType<Mod>();
 	parser->registerPointerType<Armor>();
+	parser->registerPointerType<RuleSoldier>();
 	parser->registerPointerType<BattleItem>();
 
 	Bind<BattleUnit> bu = { parser };
@@ -4302,6 +4362,9 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
 	bu.addRules<Armor, &BattleUnit::getArmor>("getRuleArmor");
+	bu.addFunc<getRuleSoldierScript>("getRuleSoldier");
+	bu.addFunc<getGeoscapeSoldierScript>("getGeosacpeSoldier");
+	bu.addFunc<getGeoscapeSoldierConstScript>("getGeosacpeSoldier");
 	bu.addFunc<getRightHandWeaponScript>("getRightHandWeapon");
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
