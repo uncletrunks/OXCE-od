@@ -487,8 +487,6 @@ public:
 	int getTurnsSinceSpotted() const;
 	/// Get this unit's original faction
 	UnitFaction getOriginalFaction() const;
-	/// call this after the default copy constructor deletes the cache?
-	void invalidateCache();
 	/// Get alien/HWP unit.
 	Unit *getUnitRules() const { return _unitRules; }
 	Position lastCover;

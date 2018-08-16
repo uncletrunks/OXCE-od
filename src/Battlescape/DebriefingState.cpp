@@ -18,6 +18,7 @@
  */
 #include <algorithm>
 #include <climits>
+#include "TileEngine.h"
 #include "DebriefingState.h"
 #include "CannotReequipState.h"
 #include "../Engine/Action.h"
@@ -1287,13 +1288,7 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((*j)->getTile())
 				{
-					for (std::vector<BattleItem*>::iterator k = (*j)->getInventory()->begin(); k != (*j)->getInventory()->end(); ++k)
-					{
-						if (!(*k)->getRules()->isFixed())
-						{
-							(*j)->getTile()->addItem(*k, _game->getMod()->getInventory("STR_GROUND", true));
-						}
-					}
+					battle->getTileEngine()->itemDropInventory((*j)->getTile(), (*j));
 				}
 				recoverAlien(*j, base);
 			}

@@ -55,6 +55,7 @@ private:
 	Game *_game;
 	SavedBattleGame *_save;
 	Mod *_mod;
+	RuleInventory *_inventorySlotGround = nullptr;
 	Craft *_craft;
 	RuleCraft *_craftRules;
 	Ufo *_ufo;
@@ -104,7 +105,7 @@ private:
 	/// Adds a civlian to the game.
 	BattleUnit *addCivilian(Unit *rules);
 	/// Places an item on a soldier based on equipment layout.
-	bool placeItemByLayout(BattleItem *item);
+	bool placeItemByLayout(BattleItem *item, const std::vector<BattleItem*> &itemList);
 	/// Loads an XCom MAP file.
 	int loadMAP(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false);
 	/// Sets an XCom MAP file to be loaded after mapscript is processed.
@@ -128,7 +129,7 @@ private:
 	/// Finds a spot near a friend to spawn at.
 	bool placeUnitNearFriend(BattleUnit *unit);
 	/// Load all Xcom weapons.
-	void loadWeapons();
+	void loadWeapons(const std::vector<BattleItem*> &itemList);
 	/// Adds a craft (either a ufo or an xcom craft) somewhere on the map.
 	bool addCraft(MapBlock *craftMap, MapScript *command, SDL_Rect &craftPos, RuleTerrain *terrain);
 	/// Adds a line (generally a road) to the map.

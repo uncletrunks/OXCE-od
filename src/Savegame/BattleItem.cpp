@@ -488,10 +488,19 @@ void BattleItem::setPreviousOwner(BattleUnit *owner)
  */
 void BattleItem::moveToOwner(BattleUnit *owner)
 {
-	_previousOwner = _owner ? _owner:owner;
-	_owner = owner;
-	_tile = nullptr;
-	if (_previousOwner != 0)
+	if (owner == _owner)
+	{
+		return;
+	}
+
+	setOwner(owner);
+
+	if (_tile)
+	{
+		_tile->removeItem(this);
+		_tile = nullptr;
+	}
+	if (_previousOwner)
 	{
 		for (std::vector<BattleItem*>::iterator i = _previousOwner->getInventory()->begin(); i != _previousOwner->getInventory()->end(); ++i)
 		{
@@ -502,7 +511,7 @@ void BattleItem::moveToOwner(BattleUnit *owner)
 			}
 		}
 	}
-	if (_owner != 0)
+	if (_owner)
 	{
 		_owner->getInventory()->push_back(this);
 	}
@@ -891,6 +900,7 @@ BattleItem *BattleItem::setAmmoForSlot(int slot, BattleItem* item)
 	_ammoItem[slot] = item;
 	if (item)
 	{
+		item->moveToOwner(nullptr);
 		item->setSlot(nullptr);
 		item->setIsAmmo(true);
 	}

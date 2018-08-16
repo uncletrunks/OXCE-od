@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include "../Engine/Screen.h"
+#include "TileEngine.h"
 
 namespace OpenXcom
 {
@@ -352,47 +353,7 @@ void Inventory::drawSelectedItem()
  */
 void Inventory::moveItem(BattleItem *item, RuleInventory *slot, int x, int y)
 {
-	// Make items vanish (eg. ammo in weapons)
-	if (slot == 0)
-	{
-		if (item->getSlot()->getType() == INV_GROUND)
-		{
-			_selUnit->getTile()->removeItem(item);
-		}
-		else
-		{
-			item->moveToOwner(0);
-		}
-	}
-	else
-	{
-		// Handle dropping from/to ground.
-		if (slot != item->getSlot())
-		{
-			if (slot->getType() == INV_GROUND)
-			{
-				item->moveToOwner(0);
-				_selUnit->getTile()->addItem(item, slot);
-				if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
-				{
-					item->getUnit()->setPosition(_selUnit->getPosition());
-				}
-			}
-			else if (item->getSlot() == 0 || item->getSlot()->getType() == INV_GROUND)
-			{
-				item->moveToOwner(_selUnit);
-				_selUnit->getTile()->removeItem(item);
-				item->setTurnFlag(false);
-				if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
-				{
-					item->getUnit()->setPosition(Position(-1,-1,-1));
-				}
-			}
-		}
-		item->setSlot(slot);
-		item->setSlotX(x);
-		item->setSlotY(y);
-	}
+	_game->getSavedGame()->getSavedBattle()->getTileEngine()->itemMoveInventory(_selUnit->getTile(), _selUnit, item, slot, x, y);
 }
 
 /**
@@ -775,7 +736,6 @@ void Inventory::mouseClick(Action *action, State *state)
 						{
 							if (!_tu || _selUnit->spendTimeUnits(tuCost))
 							{
-								moveItem(_selItem, nullptr, 0, 0);
 								auto oldAmmo = item->setAmmoForSlot(slotAmmo, _selItem);
 								if (oldAmmo)
 								{

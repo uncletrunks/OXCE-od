@@ -263,28 +263,9 @@ void UnitDieBState::convertUnitToCorpse()
 	}
 
 	// move inventory from unit to the ground
-	if (dropItems)
+	if (dropItems && _unit->getTile())
 	{
-		std::vector<BattleItem*> itemsToKeep;
-		for (std::vector<BattleItem*>::iterator i = _unit->getInventory()->begin(); i != _unit->getInventory()->end(); ++i)
-		{
-			_parent->dropItem(lastPosition, (*i), false, false);
-			if (!(*i)->getRules()->isFixed())
-			{
-				(*i)->setOwner(0);
-			}
-			else
-			{
-				itemsToKeep.push_back(*i);
-			}
-		}
-
-		_unit->getInventory()->clear();
-
-		for (std::vector<BattleItem*>::iterator i = itemsToKeep.begin(); i != itemsToKeep.end(); ++i)
-		{
-			_unit->getInventory()->push_back(*i);
-		}
+		_parent->getTileEngine()->itemDropInventory(_unit->getTile(), _unit);
 	}
 
 	// remove unit-tile link

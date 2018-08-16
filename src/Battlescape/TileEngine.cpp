@@ -224,7 +224,7 @@ constexpr Position TileEngine::invalid;
  * @param maxDarknessToSeeUnits Threshold of darkness for LoS calculation.
  */
 TileEngine::TileEngine(SavedBattleGame *save, Mod *mod) :
-	_save(save), _voxelData(mod->getVoxelData()), _personalLighting(true), _cacheTile(0), _cacheTileBelow(0),
+	_save(save), _voxelData(mod->getVoxelData()), _inventorySlotGround(mod->getInventory("STR_GROUND", true)), _personalLighting(true), _cacheTile(0), _cacheTileBelow(0),
 	_maxViewDistance(mod->getMaxViewDistance()), _maxViewDistanceSq(_maxViewDistance * _maxViewDistance),
 	_maxVoxelViewDistance(_maxViewDistance * 16), _maxDarknessToSeeUnits(mod->getMaxDarknessToSeeUnits()),
 	_maxStaticLightDistance(mod->getMaxStaticLightDistance()), _maxDynamicLightDistance(mod->getMaxDynamicLightDistance()),
@@ -3729,6 +3729,96 @@ Tile *TileEngine::applyGravity(Tile *t)
 
 	return rt;
 }
+
+/**
+ * Drop item on ground.
+ */
+void TileEngine::itemDrop(Tile *t, BattleItem *item, bool updateLight)
+{
+	// don't spawn anything outside of bounds
+	if (t == 0)
+		return;
+
+	Position p = t->getPosition();
+
+	// don't ever drop fixed items
+	if (item->getRules()->isFixed())
+		return;
+
+	if (_save->getSide() != FACTION_PLAYER)
+	{
+		item->setTurnFlag(true);
+	}
+
+	itemMoveInventory(t, nullptr, item, _inventorySlotGround, 0, 0);
+
+	applyGravity(t);
+
+	if (updateLight)
+	{
+		calculateLighting(LL_ITEMS, p);
+		calculateFOV(p, item->getVisibilityUpdateRange(), false);
+	}
+}
+
+/**
+ * Drop all unit items on ground.
+ */
+void TileEngine::itemDropInventory(Tile *t, BattleUnit *unit)
+{
+	auto &inv = *unit->getInventory();
+	for (std::vector<BattleItem*>::iterator j = inv.begin(); j != inv.end();)
+	{
+		if (!(*j)->getRules()->isFixed())
+		{
+			(*j)->setOwner(nullptr);
+			t->addItem(*j, _inventorySlotGround);
+			if ((*j)->getUnit() && (*j)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+			{
+				(*j)->getUnit()->setPosition(t->getPosition());
+			}
+			j = inv.erase(j);
+		}
+		else
+		{
+			++j;
+		}
+	}
+}
+
+/**
+ * Move item to other place in inventory or ground.
+ */
+void TileEngine::itemMoveInventory(Tile *t, BattleUnit *unit, BattleItem *item, RuleInventory *slot, int x, int y)
+{
+	// Handle dropping from/to ground.
+	if (slot != item->getSlot())
+	{
+		if (slot == _inventorySlotGround)
+		{
+			item->moveToOwner(nullptr);
+			t->addItem(item, slot);
+			if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+			{
+				item->getUnit()->setPosition(t->getPosition());
+			}
+		}
+		else if (item->getSlot() == 0 || item->getSlot() == _inventorySlotGround)
+		{
+			item->moveToOwner(unit);
+			t->removeItem(item);
+			item->setTurnFlag(false);
+			if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+			{
+				item->getUnit()->setPosition(Position(-1,-1,-1));
+			}
+		}
+	}
+	item->setSlot(slot);
+	item->setSlotX(x);
+	item->setSlotY(y);
+}
+
 
 /**
  * Validates the melee range between two units.

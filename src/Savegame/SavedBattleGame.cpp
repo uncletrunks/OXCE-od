@@ -275,7 +275,8 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 				{
 					if ((*bu)->getId() == owner)
 					{
-						item->moveToOwner(*bu);
+						item->setOwner(*bu);
+						(*bu)->getInventory()->push_back(item);
 					}
 					if ((*bu)->getId() == unit)
 					{
@@ -295,7 +296,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 				{
 					Position pos = (*i)["position"].as<Position>();
 					if (pos.x != -1)
-						getTile(pos)->addItem(item, mod->getInventory("STR_GROUND", true));
+						getTile(pos)->addItem(item, item->getSlot());
 				}
 				toContainer[pass]->push_back(item);
 			}
@@ -1148,7 +1149,7 @@ void SavedBattleGame::randomizeItemLocations(Tile *t)
 	{
 		for (std::vector<BattleItem*>::iterator it = t->getInventory()->begin(); it != t->getInventory()->end();)
 		{
-			if ((*it)->getSlot()->getId() == "STR_GROUND")
+			if ((*it)->getSlot()->getType() == INV_GROUND)
 			{
 				getTile(_storageSpace.at(RNG::generate(0, _storageSpace.size() -1)))->addItem(*it, (*it)->getSlot());
 				it = t->getInventory()->erase(it);
@@ -1197,16 +1198,7 @@ void SavedBattleGame::removeItem(BattleItem *item)
 	}
 
 	// due to strange design, the item has to be removed from the tile it is on too (if it is on a tile)
-	Tile *t = item->getTile();
-	BattleUnit *b = item->getOwner();
-	if (t)
-	{
-		purge(*t->getInventory(), item);
-	}
-	if (b)
-	{
-		purge(*b->getInventory(), item);
-	}
+	item->moveToOwner(nullptr);
 
 	deleteList(item);
 

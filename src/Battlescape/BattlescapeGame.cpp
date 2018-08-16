@@ -1811,45 +1811,7 @@ void BattlescapeGame::setTUReserved(BattleActionType tur)
  */
 void BattlescapeGame::dropItem(Position position, BattleItem *item, bool removeItem, bool updateLight)
 {
-	const Position& p = position;
-
-	// don't spawn anything outside of bounds
-	if (_save->getTile(p) == 0)
-		return;
-
-	// don't ever drop fixed items
-	if (item->getRules()->isFixed())
-		return;
-
-	if (item->getUnit())
-	{
-		item->getUnit()->setPosition(p);
-	}
-
-	else if (_save->getSide() != FACTION_PLAYER)
-	{
-		item->setTurnFlag(true);
-	}
-
-	if (removeItem)
-	{
-		item->moveToOwner(0);
-	}
-	else if (item->getRules()->getBattleType() != BT_GRENADE && item->getRules()->getBattleType() != BT_PROXIMITYGRENADE)
-	{
-		item->setOwner(0);
-	}
-
-	_save->getTile(p)->addItem(item, getMod()->getInventory("STR_GROUND", true));
-
-	getTileEngine()->applyGravity(_save->getTile(p));
-
-	if (updateLight)
-	{
-		getTileEngine()->calculateLighting(LL_ITEMS, position);
-		getTileEngine()->calculateFOV(position, item->getVisibilityUpdateRange(), false);
-	}
-
+	_save->getTileEngine()->itemDrop(_save->getTile(position), item, updateLight);
 }
 
 /**
@@ -1867,13 +1829,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 
 	unit->instaKill();
 
-	for (std::vector<BattleItem*>::iterator i = unit->getInventory()->begin(); i != unit->getInventory()->end(); ++i)
-	{
-		dropItem(unit->getPosition(), (*i));
-		(*i)->setOwner(0);
-	}
-
-	unit->getInventory()->clear();
+	getSave()->getTileEngine()->itemDropInventory(unit->getTile(), unit);
 
 	// remove unit-tile link
 	unit->setTile(0);

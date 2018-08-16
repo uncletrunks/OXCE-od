@@ -2616,7 +2616,6 @@ bool BattleUnit::reloadAmmo()
 		if (ammo && spendTimeUnits(tuCost))
 		{
 			weapon->setAmmoForSlot(slotAmmo, ammo);
-			ammo->moveToOwner(0);
 
 			return true;
 		}
