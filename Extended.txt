@@ -185,6 +185,7 @@ Damage script can now alter zombie transformation chance.[br/]
 Add access to current difficulty level in scripts.[br/]
 Add base function requirmets to buy items, crafts and solders.[br/]
 Add access to geoscape soldier in scripts.[br/]
+Add script that is run at end of mission.[br/]
 [br/]
 
 [examples]
