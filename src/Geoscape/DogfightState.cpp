@@ -1212,39 +1212,6 @@ void DogfightState::fireWeapon(int i)
 }
 
 /**
- * Fires a shot from the first weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon1()
-{
-	fireWeapon(0);
-}
-/**
- * Fires a shot from the second weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon2()
-{
-	fireWeapon(1);
-}
-/**
- * Fires a shot from the third weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon3()
-{
-	fireWeapon(2);
-}
-/**
- * Fires a shot from the fourth weapon
- * equipped on the craft.
- */
-void DogfightState::fireWeapon4()
-{
-	fireWeapon(3);
-}
-
-/**
  *	Each time a UFO will try to fire it's cannons
  *	a calculation is made. There's only 10% chance
  *	that it will actually fire.
