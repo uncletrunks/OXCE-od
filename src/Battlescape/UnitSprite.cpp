@@ -215,13 +215,6 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, Graph
 
 	_drawingRoutine = _unit->getArmor()->getDrawingRoutine();
 
-	if (_unit->getArmor()->getCanHoldWeapon())
-	{
-		if (_unit->getStatus() == STATUS_AIMING)
-		{
-			_x -= 16;
-		}
-	}
 	_burn = 0;
 	int overkill = _unit->getOverKillDamage();
 	int maxHp = _unit->getBaseStats()->health;
@@ -371,7 +364,7 @@ void UnitSprite::drawRoutine0()
 	const int offX7[8] = { 0, 6, 8, 12, 2, -5, -5, -13 }; // for the left handed rifles (muton)
 	const int offY7[8] = { -4, -6, -1, 0, 3, 0, 1, 0 }; // for the left handed rifles (muton)
 	const int offYKneel = 4;
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 	const int soldierHeight = 22;
 
 	const int unitDir = _unit->getDirection();
@@ -665,7 +658,7 @@ void UnitSprite::drawRoutine1()
 	const int offY2[8] = { 1, -4, -1, 0, 3, 3, 5, 0 }; // for the weapons
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
@@ -913,7 +906,7 @@ void UnitSprite::drawRoutine4()
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
 	const int standConvert[8] = { 3, 2, 1, 0, 7, 6, 5, 4 }; // array for converting stand frames for some tftd civilians
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 
 	if (_drawingRoutine == 17) // tftd civilian - first set
 	{
@@ -1062,7 +1055,7 @@ void UnitSprite::drawRoutine6()
 	const int offY2[8] = { 1, -4, -2, 0, 3, 3, 5, 0 }; // for the weapons
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
