@@ -101,7 +101,7 @@ namespace OpenXcom
 			if (item->getCostAuto().Time>0)
 			{
 				std::wstring tu = Text::formatPercentage(item->getCostAuto().Time);
-				if (item->getFlatUse().Time)
+				if (item->getFlatAuto().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
@@ -116,7 +116,7 @@ namespace OpenXcom
 			if (item->getCostSnap().Time>0)
 			{
 				std::wstring tu = Text::formatPercentage(item->getCostSnap().Time);
-				if (item->getFlatUse().Time)
+				if (item->getFlatSnap().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
@@ -131,7 +131,7 @@ namespace OpenXcom
 			if (item->getCostAimed().Time>0)
 			{
 				std::wstring tu = Text::formatPercentage(item->getCostAimed().Time);
-				if (item->getFlatUse().Time)
+				if (item->getFlatAimed().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
