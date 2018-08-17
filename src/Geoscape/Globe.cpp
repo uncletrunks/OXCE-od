@@ -259,7 +259,7 @@ Globe::Globe(Game* game, int cenX, int cenY, int width, int height, int x, int y
 {
 	_rules = game->getMod()->getGlobe();
 	_texture = new SurfaceSet(*_game->getMod()->getSurfaceSet("TEXTURE.DAT"));
-	_markerSet = new SurfaceSet(*_game->getMod()->getSurfaceSet("GlobeMarkers"));
+	_markerSet = _game->getMod()->getSurfaceSet("GlobeMarkers");
 
 	_countries = new Surface(width, height, x, y);
 	_markers = new Surface(width, height, x, y);
@@ -299,7 +299,6 @@ Globe::~Globe()
 	delete _countries;
 	delete _markers;
 	delete _texture;
-	delete _markerSet;
 	delete _radars;
 	delete _clipper;
 
@@ -826,7 +825,6 @@ void Globe::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	Surface::setPalette(colors, firstcolor, ncolors);
 
 	_texture->setPalette(colors, firstcolor, ncolors);
-	_markerSet->setPalette(colors, firstcolor, ncolors);
 
 	_countries->setPalette(colors, firstcolor, ncolors);
 	_markers->setPalette(colors, firstcolor, ncolors);
@@ -848,12 +846,6 @@ void Globe::think()
 void Globe::blink()
 {
 	_blink = -_blink;
-
-	for (size_t i = 0; i != _markerSet->getTotalFrames(); ++i)
-	{
-		if (i != CITY_MARKER)
-			_markerSet->getFrame(i)->offset(_blink);
-	}
 
 	drawMarkers();
 }
@@ -1502,10 +1494,38 @@ void Globe::drawTarget(Target *target, Surface *surface)
 	{
 		Sint16 x, y;
 		polarToCart(target->getLongitude(), target->getLatitude(), &x, &y);
-		Surface *marker = _markerSet->getFrame(target->getMarker());
-		marker->setX(x - 1);
-		marker->setY(y - 1);
-		marker->blit(surface);
+		auto i = target->getMarker();
+		ShaderMove<const Uint8> surf{ _markerSet->getFrame(i), x - 1, y - 1 };
+		ShaderMove<Uint8> dest{ surface };
+
+		if (i == CITY_MARKER || _blink > 0)
+		{
+			ShaderDrawFunc(
+				[](Uint8& dest, Uint8 src)
+				{
+					if (src)
+					{
+						dest = src;
+					}
+				},
+				dest,
+				surf
+			);
+		}
+		else
+		{
+			ShaderDrawFunc(
+				[](Uint8& dest, Uint8 src)
+				{
+					if (src)
+					{
+						dest = src + 1;
+					}
+				},
+				dest,
+				surf
+			);
+		}
 	}
 }
 
@@ -1516,7 +1536,7 @@ void Globe::drawTarget(Target *target, Surface *surface)
 void Globe::drawMarkers()
 {
 	_markers->clear();
-
+	_markers->lock();
 	// Draw the base markers
 	for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
 	{
@@ -1555,6 +1575,7 @@ void Globe::drawMarkers()
 			drawTarget(*j, _markers);
 		}
 	}
+	_markers->unlock();
 }
 
 /**
