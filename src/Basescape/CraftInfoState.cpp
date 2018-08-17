@@ -119,7 +119,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		add(_txtWName[i], "text2", "craftInfo");
-		add(_txtWAmmo[i], "text2", "craftInfo");
+		add(_txtWAmmo[i], "text3", "craftInfo");
 		add(_weapon[i]);
 	}
 	add(_sprite);

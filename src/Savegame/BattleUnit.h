@@ -144,6 +144,7 @@ private:
 	bool _hidingForTurn, _floorAbove, _respawn;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
+	bool _capturable;
 	ScriptValues<BattleUnit> _scriptValues;
 
 	/// Helper function initing recolor vector.
@@ -574,7 +575,8 @@ public:
 	bool getHitState();
 	/// reset the unit hit state.
 	void resetHitState();
-
+	/// Gets whether this unit can be captured alive (applies to aliens).
+	bool getCapturable() const;
 };
 
 } //namespace OpenXcom

@@ -1410,7 +1410,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 
 	while (mapFile.read((char*)&value, sizeof(value)))
 	{
-		for (int part = 0; part < 4; ++part)
+		for (int part = O_FLOOR; part <= O_OBJECT; ++part)
 		{
 			terrainObjectID = ((unsigned char)value[part]);
 			if (terrainObjectID>0)
@@ -1420,9 +1420,10 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 				MapData *md = terrain->getMapData(&mapDataID, &mapDataSetID);
 				if (mapDataSetOffset > 0) // ie: ufo or craft.
 				{
-					_save->getTile(Position(x, y, z))->setMapData(0, -1, -1, 3);
+					_save->getTile(Position(x, y, z))->setMapData(0, -1, -1, O_OBJECT);
 				}
-				_save->getTile(Position(x, y, z))->setMapData(md, mapDataID, mapDataSetID, part);
+				TilePart tp = (TilePart) part;
+				_save->getTile(Position(x, y, z))->setMapData(md, mapDataID, mapDataSetID, tp);
 			}
 		}
 
@@ -2816,8 +2817,8 @@ void BattlescapeGenerator::clearModule(int x, int y, int sizeX, int sizeY)
 			for (int dy = y; dy != y + sizeY; ++dy)
 			{
 				Tile *tile = _save->getTile(Position(dx,dy,z));
-				for (int i = 0; i < 4; ++i)
-					tile->setMapData(0, -1, -1, i);
+				for (int i = O_FLOOR; i <= O_OBJECT; i++)
+					tile->setMapData(0, -1, -1, (TilePart)i);
 			}
 		}
 	}
@@ -3337,7 +3338,7 @@ void BattlescapeGenerator::drillModules(TunnelData* data, const std::vector<SDL_
 		{
 			if (_blocks[i][j] == 0)
 				continue;
-			Tile *tile;
+			
 			MapData *md;
 
 			if (dir != MD_VERTICAL)
@@ -3345,6 +3346,7 @@ void BattlescapeGenerator::drillModules(TunnelData* data, const std::vector<SDL_
 				// drill east
 				if (i < (_mapsize_x / 10)-1 && (_drillMap[i][j] == MD_HORIZONTAL || _drillMap[i][j] == MD_BOTH) && _blocks[i+1][j] != 0)
 				{
+					Tile *tile;
 					// remove stuff
 					for (int k = rect.y; k != rect.y + rect.h; ++k)
 					{
@@ -3420,7 +3422,7 @@ void BattlescapeGenerator::drillModules(TunnelData* data, const std::vector<SDL_
 					if (wWall)
 					{
 						md = _terrain->getMapDataSets()->at(wWall->set)->getObjects()->at(wWall->entry);
-						tile = _save->getTile(Position((i*10)+rect.x, (j*10)+9, data->level));
+						Tile *tile = _save->getTile(Position((i*10)+rect.x, (j*10)+9, data->level));
 						tile->setMapData(md, wWall->entry, wWall->set, O_WESTWALL);
 						tile = _save->getTile(Position((i*10)+rect.x+rect.w, (j*10)+9, data->level));
 						tile->setMapData(md, wWall->entry, wWall->set, O_WESTWALL);
@@ -3429,7 +3431,7 @@ void BattlescapeGenerator::drillModules(TunnelData* data, const std::vector<SDL_
 					if (corner)
 					{
 						md = _terrain->getMapDataSets()->at(corner->set)->getObjects()->at(corner->entry);
-						tile = _save->getTile(Position((i*10)+rect.x, (j+1)*10, data->level));
+						Tile *tile = _save->getTile(Position((i*10)+rect.x, (j+1)*10, data->level));
 						if (tile->getMapData(O_WESTWALL) == 0)
 							tile->setMapData(md, corner->entry, corner->set, O_WESTWALL);
 					}
@@ -3547,9 +3549,10 @@ void BattlescapeGenerator::setupObjectives(const AlienDeployment *ruleDeploy)
 
 		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 		{
-			for (int j = 0; j != 4; ++j)
+			for (int j = O_FLOOR; j <= O_OBJECT; ++j)
 			{
-				if (_save->getTile(i)->getMapData(j) && _save->getTile(i)->getMapData(j)->getSpecialType() == targetType)
+				TilePart tp = (TilePart)j;
+				if (_save->getTile(i)->getMapData(tp) && _save->getTile(i)->getMapData(tp)->getSpecialType() == targetType)
 				{
 					actualCount++;
 				}

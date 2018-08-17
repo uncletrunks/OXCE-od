@@ -68,6 +68,7 @@ Craft::Craft(const RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	{
 		setBase(base);
 	}
+	_speedMaxRadian = calculateRadianSpeed(_rules->getMaxSpeed()) * 120;
 }
 
 /**
@@ -696,14 +697,25 @@ double Craft::getDistanceFromBase() const
 
 /**
  * Returns the amount of fuel the craft uses up
- * while it's on the air, based on its speed.
+ * while it's on the air, based on its current speed.
  * @return Fuel amount.
  */
 int Craft::getFuelConsumption() const
 {
+	return getFuelConsumption(_speed);
+}
+
+/**
+ * Returns the amount of fuel the craft uses up
+ * while it's on the air.
+ * @param speed Craft speed for estimation.
+ * @return Fuel amount.
+ */
+int Craft::getFuelConsumption(int speed) const
+{
 	if (!_rules->getRefuelItem().empty())
 		return 1;
-	return (int)floor(_speed / 100.0);
+	return (int)floor(speed / 100.0);
 }
 
 /**
@@ -724,7 +736,7 @@ int Craft::getFuelLimit() const
  */
 int Craft::getFuelLimit(Base *base) const
 {
-	return (int)floor(getFuelConsumption() * getDistance(base) / (_speedRadian * 120));
+	return (int)floor(getFuelConsumption(_rules->getMaxSpeed()) * getDistance(base) / _speedMaxRadian);
 }
 
 /**

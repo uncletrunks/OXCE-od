@@ -886,6 +886,7 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 {
 	ModScript parser{ _scriptGlobal, this };
 
+	Log(LOG_INFO) << "Loading rulesets...";
 	std::vector<size_t> modOffsets(mods.size());
 	_scriptGlobal->beginLoad();
 	size_t offset = 0;
@@ -1294,10 +1295,10 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		else if ((*i)["delete"])
 		{
 			std::string type = (*i)["delete"].as<std::string>();
-			std::map<std::string, ArticleDefinition*>::iterator i = _ufopaediaArticles.find(type);
-			if (i != _ufopaediaArticles.end())
+			std::map<std::string, ArticleDefinition*>::iterator j = _ufopaediaArticles.find(type);
+			if (j != _ufopaediaArticles.end())
 			{
-				_ufopaediaArticles.erase(i);
+				_ufopaediaArticles.erase(j);
 			}
 			std::vector<std::string>::iterator idx = std::find(_ufopaediaIndex.begin(), _ufopaediaIndex.end(), type);
 			if (idx != _ufopaediaIndex.end())
@@ -2041,10 +2042,20 @@ const std::vector<std::string> &Mod::getSoldiersList() const
 }
 
 /**
- * Gets the list of commendations
+ * Returns the rules for the specified commendation.
+ * @param id Commendation type.
+ * @return Rules for the commendation.
+ */
+RuleCommendations *Mod::getCommendation(const std::string &id, bool error) const
+{
+	return getRule(id, "Commendation", _commendations, error);
+}
+
+/**
+ * Gets the list of commendations provided by the mod.
  * @return The list of commendations.
  */
-std::map<std::string, RuleCommendations *> Mod::getCommendation() const
+const std::map<std::string, RuleCommendations *> &Mod::getCommendationsList() const
 {
 	return _commendations;
 }
@@ -2430,7 +2441,7 @@ MCDPatch *Mod::getMCDPatch(const std::string &id) const
  * Gets the list of external sprites.
  * @return The list of external sprites.
  */
-std::vector<std::pair<std::string, ExtraSprites *> > Mod::getExtraSprites() const
+const std::vector<std::pair<std::string, ExtraSprites *> > &Mod::getExtraSprites() const
 {
 	return _extraSprites;
 }
@@ -2439,7 +2450,7 @@ std::vector<std::pair<std::string, ExtraSprites *> > Mod::getExtraSprites() cons
  * Gets the list of external sounds.
  * @return The list of external sounds.
  */
-std::vector<std::pair<std::string, ExtraSounds *> > Mod::getExtraSounds() const
+const std::vector<std::pair<std::string, ExtraSounds *> > &Mod::getExtraSounds() const
 {
 	return _extraSounds;
 }
@@ -2448,7 +2459,7 @@ std::vector<std::pair<std::string, ExtraSounds *> > Mod::getExtraSounds() const
  * Gets the list of external strings.
  * @return The list of external strings.
  */
-std::map<std::string, ExtraStrings *> Mod::getExtraStrings() const
+const std::map<std::string, ExtraStrings *> &Mod::getExtraStrings() const
 {
 	return _extraStrings;
 }
@@ -2457,7 +2468,7 @@ std::map<std::string, ExtraStrings *> Mod::getExtraStrings() const
  * Gets the list of StatStrings.
  * @return The list of StatStrings.
  */
-std::vector<StatString *> Mod::getStatStrings() const
+const std::vector<StatString *> &Mod::getStatStrings() const
 {
 	return _statStrings;
 }
@@ -2599,7 +2610,7 @@ void Mod::sortLists()
 /**
  * Gets the research-requirements for Psi-Lab (it's a cache for psiStrengthEval)
  */
-std::vector<std::string> Mod::getPsiRequirements() const
+const std::vector<std::string> &Mod::getPsiRequirements() const
 {
 	return _psiRequirements;
 }
@@ -2622,7 +2633,7 @@ Soldier *Mod::genSoldier(SavedGame *save, std::string type) const
 	// Check for duplicates
 	// Original X-COM gives up after 10 tries so might as well do the same here
 	bool duplicate = true;
-	for (int i = 0; i < 10 && duplicate; ++i)
+	for (int tries = 0; tries < 10 && duplicate; ++tries)
 	{
 		delete soldier;
 		soldier = new Soldier(getSoldier(type, true), getArmor(getSoldier(type, true)->getArmor(), true), newId);
@@ -3448,7 +3459,7 @@ void Mod::loadExtraResources()
 		}
 
 		// Try the preferred format first, otherwise use the default priority
-		MusicFormat priority[] = { Options::preferredMusic, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_MIDI };
+		MusicFormat priority[] = { Options::preferredMusic, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_GM, MUSIC_MIDI };
 		for (std::map<std::string, RuleMusic *>::const_iterator i = _musicDefs.begin(); i != _musicDefs.end(); ++i)
 		{
 			Music *music = 0;
@@ -3801,8 +3812,8 @@ bool Mod::isImageFile(std::string extension) const
  */
 Music *Mod::loadMusic(MusicFormat fmt, const std::string &file, int track, float volume, CatFile *adlibcat, CatFile *aintrocat, GMCatFile *gmcat) const
 {
-	/* MUSIC_AUTO, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_MIDI */
-	static const std::string exts[] = { "", ".flac", ".ogg", ".mp3", ".mod", ".wav", "", ".mid" };
+	/* MUSIC_AUTO, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_GM, MUSIC_MIDI */
+	static const std::string exts[] = { "", ".flac", ".ogg", ".mp3", ".mod", ".wav", "", "", ".mid" };
 	Music *music = 0;
 	std::set<std::string> soundContents = FileMap::getVFolderContents("SOUND");
 	try
@@ -3836,23 +3847,14 @@ Music *Mod::loadMusic(MusicFormat fmt, const std::string &file, int track, float
 				}
 			}
 		}
-		// Try MIDI music
-		else if (fmt == MUSIC_MIDI)
+		// Try MIDI music (from GM.CAT)
+		else if (fmt == MUSIC_GM)
 		{
 			// DOS MIDI
 			if (gmcat && track < gmcat->getAmount())
 			{
 				music = gmcat->loadMIDI(track);
-			}
-			// Windows MIDI
-			else
-			{
-				if (soundContents.find(fname) != soundContents.end())
-				{
-					music = new Music();
-					music->load(FileMap::getFilePath("SOUND/" + fname));
-				}
-			}
+			}			
 		}
 		// Try digital tracks
 		else

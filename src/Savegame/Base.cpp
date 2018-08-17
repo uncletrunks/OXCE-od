@@ -1101,9 +1101,9 @@ void Base::addResearch(ResearchProject * project)
 void Base::removeResearch(ResearchProject * project)
 {
 	_scientists += project->getAssigned();
+	const RuleResearch *ruleResearch = project->getRules();
 	if (!project->isFinished())
 	{
-		const RuleResearch *ruleResearch = project->getRules();
 		if (ruleResearch->needItem() && ruleResearch->destroyItem())
 		{
 			getStorageItems()->addItem(ruleResearch->getName(), 1);

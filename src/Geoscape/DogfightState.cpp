@@ -585,14 +585,6 @@ DogfightState::~DogfightState()
 		delete _projectiles.back();
 		_projectiles.pop_back();
 	}
-	if (_craft)
-	{
-		_craft->setInDogfight(false);
-		_craft->setInterceptionOrder(0);
-	}
-	// set the ufo as "free" for the next engagement (as applicable)
-	if (_ufo)
-		_ufo->setInterceptionProcessed(false);
 }
 
 /**
@@ -891,16 +883,13 @@ void DogfightState::update()
 					}
 				}
 				// Check if projectile passed it's maximum range.
-				if (p->getGlobalType() == CWPGT_MISSILE)
+				if (p->getGlobalType() == CWPGT_MISSILE && p->getPosition() / 8 >= p->getRange())
 				{
-					if (p->getPosition() / 8 >= p->getRange())
-					{
-						p->remove();
-					}
-					else if (!_ufo->isCrashed())
-					{
-						projectileInFlight = true;
-					}
+					p->remove();
+				}
+				else if (!_ufo->isCrashed())
+				{
+					projectileInFlight = true;
 				}
 			}
 			// Projectiles fired by UFO.
@@ -952,7 +941,11 @@ void DogfightState::update()
 			if (wTimer == 0 && _currentDist <= w->getRules()->getRange() * 8 && w->getAmmo() > 0 && _mode != _btnStandoff
 				&& _mode != _btnDisengage && !_ufo->isCrashed() && !_craft->isDestroyed())
 			{
-				fireWeapon(i);
+				if (_weaponEnabled[i])
+				{
+					fireWeapon(i);
+					projectileInFlight = true;
+				}
 			}
 			else if (wTimer > 0)
 			{
@@ -1098,12 +1091,12 @@ void DogfightState::update()
 							rule = _game->getMod()->getRandomMission(OBJECTIVE_RETALIATION, _game->getSavedGame()->getMonthsPassed());
 						}
 
-						AlienMission *mission = new AlienMission(*rule);
-						mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
-						mission->setRegion(targetRegion, *_game->getMod());
-						mission->setRace(_ufo->getAlienRace());
-						mission->start(mission->getRules().getWave(0).spawnTimer); // fixed delay for first scout
-						_game->getSavedGame()->getAlienMissions().push_back(mission);
+						AlienMission *newMission = new AlienMission(*rule);
+						newMission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
+						newMission->setRegion(targetRegion, *_game->getMod());
+						newMission->setRace(_ufo->getAlienRace());
+						newMission->start(mission->getRules().getWave(0).spawnTimer); // fixed delay for first scout
+						_game->getSavedGame()->getAlienMissions().push_back(newMission);
 					}
 				}
 			}
@@ -1200,24 +1193,21 @@ void DogfightState::update()
  */
 void DogfightState::fireWeapon(int i)
 {
-	if (_weaponEnabled[i])
+	CraftWeapon *w1 = _craft->getWeapons()->at(i);
+	if (w1->setAmmo(w1->getAmmo() - 1))
 	{
-		CraftWeapon *w1 = _craft->getWeapons()->at(i);
-		if (w1->setAmmo(w1->getAmmo() - 1))
-		{
-			_weaponFireCountdown[i] = _weaponFireInterval[i];
+		_weaponFireCountdown[i] = _weaponFireInterval[i];
 
-			std::wostringstream ss;
-			ss << w1->getAmmo();
-			_txtAmmo[i]->setText(ss.str());
+		std::wostringstream ss;
+		ss << w1->getAmmo();
+		_txtAmmo[i]->setText(ss.str());
 
-			CraftWeaponProjectile *p = w1->fire();
-			p->setDirection(D_UP);
-			p->setHorizontalPosition((i % 2 ? HP_RIGHT : HP_LEFT) * (1 + 2 * (i / 2)));
-			_projectiles.push_back(p);
+		CraftWeaponProjectile *p = w1->fire();
+		p->setDirection(D_UP);
+		p->setHorizontalPosition((i % 2 ? HP_RIGHT : HP_LEFT) * (1 + 2 * (i / 2)));
+		_projectiles.push_back(p);
 
-			_game->getMod()->getSound("GEO.CAT", w1->getRules()->getSound())->play();
-		}
+		_game->getMod()->getSound("GEO.CAT", w1->getRules()->getSound())->play();
 	}
 }
 
@@ -1847,8 +1837,16 @@ Craft *DogfightState::getCraft() const
  */
 void DogfightState::endDogfight()
 {
+	if (_endDogfight)
+		return;
 	if (_craft)
+	{
 		_craft->setInDogfight(false);
+		_craft->setInterceptionOrder(0);
+	}
+	// set the ufo as "free" for the next engagement (as applicable)
+	if (_ufo)
+		_ufo->setInterceptionProcessed(false);
 	_endDogfight = true;
 }
 

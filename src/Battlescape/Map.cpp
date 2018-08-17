@@ -251,7 +251,7 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
  * @param tileBehind Tile behind wall.
  * @return Current shade of wall.
  */
-int Map::getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind)
+int Map::getWallShade(TilePart part, Tile* tileFrot, Tile* tileBehind)
 {
 	int shade;
 	if (tileFrot->isDiscovered(2))
@@ -281,14 +281,14 @@ static bool positionHaveSameXY(Position a, Position b)
 	return a.x == b.x && a.y == b.y;
 }
 
-
 /**
  * Draw part of unit graphic that overlap current tile.
  * @param surface
- * @param bu
- * @param tileNorth
- * @param tileScreenPosition
+ * @param unitTile
+ * @param currTile
+ * @param currTileScreenPosition
  * @param shade
+ * @param topLayer
  */
 void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, int shade, bool topLayer)
 {
@@ -677,7 +677,8 @@ void Map::drawTerrain(Surface *surface)
 									frameNumber = halfAnimFrameRest; // yellow box
 								else
 									frameNumber = 0; // red box
-							}else
+							}
+							else
 							{
 								if (unit && (unit->getVisible() || _save->getDebugMode()))
 									frameNumber = 7 + halfAnimFrame; // yellow animated crosshairs

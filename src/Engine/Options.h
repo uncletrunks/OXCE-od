@@ -33,7 +33,7 @@ enum KeyboardType { KEYBOARD_OFF, KEYBOARD_ON, KEYBOARD_VIRTUAL };
 /// Savegame sorting modes.
 enum SaveSort { SORT_NAME_ASC, SORT_NAME_DESC, SORT_DATE_ASC, SORT_DATE_DESC };
 /// Music format preferences.
-enum MusicFormat { MUSIC_AUTO, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_MIDI };
+enum MusicFormat { MUSIC_AUTO, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_GM, MUSIC_MIDI };
 /// Sound format preferences.
 enum SoundFormat { SOUND_AUTO, SOUND_14, SOUND_10 };
 /// Video format preferences.
@@ -109,6 +109,8 @@ namespace Options
 	const std::map<std::string, ModInfo> &getModInfos();
 	/// Refreshes the mods and filemaps.
 	void updateMods();
+	/// Gets the list of currently active mods.
+	std::vector<const ModInfo*> getActiveMods();
 }
 
 }

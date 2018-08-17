@@ -1024,13 +1024,13 @@ void BattlescapeState::btnPrevSoldierClick(Action *)
  * @param setReselect When true, flag the current unit first.
  * @param checkInventory When true, don't select a unit that has no inventory.
  */
-void BattlescapeState::selectNextPlayerUnit(bool checkReselect, bool setReselect, bool checkInventory)
+void BattlescapeState::selectNextPlayerUnit(bool checkReselect, bool setReselect, bool checkInventory, bool checkFOV)
 {
 	if (allowButtons())
 	{
 		if (_battleGame->getCurrentAction()->type != BA_NONE) return;
 		BattleUnit *unit = _save->selectNextPlayerUnit(checkReselect, setReselect, checkInventory);
-		updateSoldierInfo();
+		updateSoldierInfo(checkFOV);
 		if (unit) _map->getCamera()->centerOnPosition(unit->getPosition());
 		_battleGame->cancelCurrentAction();
 		_battleGame->getCurrentAction()->actor = unit;
@@ -1346,7 +1346,7 @@ void BattlescapeState::drawHandsItems()
 /**
  * Updates a soldier's name/rank/tu/energy/health/morale.
  */
-void BattlescapeState::updateSoldierInfo()
+void BattlescapeState::updateSoldierInfo(bool checkFOV)
 {
 	BattleUnit *battleUnit = _save->getSelectedUnit();
 
@@ -1415,7 +1415,10 @@ void BattlescapeState::updateSoldierInfo()
 
 	drawHandsItems();
 
-	_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
+	if (checkFOV)
+	{
+		_save->getTileEngine()->calculateFOV(_save->getSelectedUnit());
+	}
 	int j = 0;
 	for (std::vector<BattleUnit*>::iterator i = battleUnit->getVisibleUnits()->begin(); i != battleUnit->getVisibleUnits()->end() && j < VISIBLE_MAX; ++i)
 	{
@@ -1692,13 +1695,12 @@ void BattlescapeState::saveAIMap()
 
 	int w = _save->getMapSizeX();
 	int h = _save->getMapSizeY();
-	Position pos(unit->getPosition());
 
 	SDL_Surface *img = SDL_AllocSurface(0, w * 8, h * 8, 24, 0xff, 0xff00, 0xff0000, 0);
 	Log(LOG_INFO) << "unit = " << unit->getId();
 	memset(img->pixels, 0, img->pitch * img->h);
 
-	Position tilePos(pos);
+	Position tilePos(unit->getPosition());
 	SDL_Rect r;
 	r.h = 8;
 	r.w = 8;
@@ -1829,7 +1831,7 @@ void BattlescapeState::saveVoxelView()
 	Position targetVoxel,hitPos;
 	double dist = 0;
 	bool _debug = _save->getDebugMode();
-	double dir = ((float)bu->getDirection()+4)/4*M_PI;
+	double dir = ((double)bu->getDirection()+4)/4*M_PI;
 	image.clear();
 	for (int y = -256+32; y < 256+32; ++y)
 	{
@@ -1905,12 +1907,12 @@ void BattlescapeState::saveVoxelView()
 					dist*=0.9;
 				}
 				if (dist > 1) dist = 1;
-				if (tile) dist *= (16 - (float)tile->getShade())/16;
+				if (tile) dist *= (16 - (double)tile->getShade())/16;
 			}
 
-			image.push_back((int)((float)(pal[test*3+0])*dist));
-			image.push_back((int)((float)(pal[test*3+1])*dist));
-			image.push_back((int)((float)(pal[test*3+2])*dist));
+			image.push_back((int)((double)(pal[test*3+0])*dist));
+			image.push_back((int)((double)(pal[test*3+1])*dist));
+			image.push_back((int)((double)(pal[test*3+2])*dist));
 		}
 	}
 

@@ -39,7 +39,7 @@ class Tile;
 class UnitSprite;
 
 enum CursorType { CT_NONE, CT_NORMAL, CT_AIM, CT_PSI, CT_WAYPOINT, CT_THROW };
-enum MapDataType : int;
+enum TilePart : int;
 
 /**
  * Interactive map of the battlescape.
@@ -75,7 +75,7 @@ private:
 	void drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position tileScreenPosition, int shade, bool topLayer);
 	void drawTerrain(Surface *surface);
 	int getTerrainLevel(const Position& pos, int size) const;
-	int getWallShade(MapDataType part, Tile* tileFrot, Tile* tileBehind);
+	int getWallShade(TilePart part, Tile* tileFrot, Tile* tileBehind);
 	int _iconHeight, _iconWidth, _messageColor;
 	const std::vector<Uint8> *_transparencies;
 public:

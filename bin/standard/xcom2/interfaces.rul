@@ -1263,6 +1263,8 @@ interfaces: #done
         color2: 244
       - id: text2
         color: 1
+      - id: text3
+        color: 1
         color2: 244
       - id: button
         color: 1

@@ -52,6 +52,7 @@ std::vector<std::string> _userList;
 std::map<std::string, std::string> _commandLine;
 std::vector<OptionInfo> _info;
 std::map<std::string, ModInfo> _modInfos;
+std::string _masterMod;
 
 /**
  * Sets up the options by creating their OptionInfo metadata.
@@ -558,7 +559,7 @@ void updateMods()
 			|| (i->first == "xcom1" && !_ufoIsInstalled())
 			|| (i->first == "xcom2" && !_tftdIsInstalled()))
 		{
-			Log(LOG_INFO) << "removing references to missing mod: " << i->first;
+			Log(LOG_VERBOSE) << "removing references to missing mod: " << i->first;
 			i = mods.erase(i);
 			continue;
 		}
@@ -640,7 +641,12 @@ void updateMods()
 		{
 			Log(LOG_INFO) << "no master already active; activating " << inactiveMaster;
 			std::find(mods.begin(), mods.end(), std::pair<std::string, bool>(inactiveMaster, false))->second = true;
+			_masterMod = inactiveMaster;
 		}
+	}
+	else
+	{
+		_masterMod = activeMaster;
 	}
 
 	updateReservedSpace();
@@ -648,31 +654,13 @@ void updateMods()
 	userSplitMasters();
 }
 
+/**
+ * Gets the currently active master mod.
+ * @return Mod id.
+ */
 std::string getActiveMaster()
 {
-	std::string curMaster;
-	for (std::vector< std::pair<std::string, bool> >::const_iterator i = mods.begin(); i != mods.end(); ++i)
-	{
-		if (!i->second)
-		{
-			// we're only looking for active mod
-			continue;
-		}
-
-		ModInfo modInfo = _modInfos.find(i->first)->second;
-		if (!modInfo.isMaster())
-		{
-			continue;
-		}
-
-		curMaster = modInfo.getId();
-		break;
-	}
-	if (curMaster.empty())
-	{
-		Log(LOG_ERROR) << "cannot determine current active master";
-	}
-	return curMaster;
+	return _masterMod;
 }
 
 static void _loadMod(const ModInfo &modInfo, std::set<std::string> circDepCheck)
@@ -721,8 +709,7 @@ void updateReservedSpace()
 {
 	Log(LOG_VERBOSE) << "Updating reservedSpace for master mods if necessary...";
 
-	std::string curMaster = getActiveMaster();
-	Log(LOG_VERBOSE) << "curMaster = " << curMaster;
+	Log(LOG_VERBOSE) << "_masterMod = " << _masterMod;
 
 	int maxSize = 1;
 	for (std::vector< std::pair<std::string, bool> >::reverse_iterator i = mods.rbegin(); i != mods.rend(); ++i)
@@ -734,9 +721,9 @@ void updateReservedSpace()
 		}
 
 		const ModInfo &modInfo = _modInfos.find(i->first)->second;
-		if (!modInfo.isMaster() && !modInfo.getMaster().empty() && modInfo.getMaster() != curMaster)
+		if (!modInfo.canActivate(_masterMod))
 		{
-			Log(LOG_VERBOSE) << "skipping mod for non-current master: " << i->first << "(" << modInfo.getMaster() << " != " << curMaster << ")";
+			Log(LOG_VERBOSE) << "skipping mod for non-current master: " << i->first << "(" << modInfo.getMaster() << " != " << _masterMod << ")";
 			continue;
 		}
 
@@ -749,14 +736,21 @@ void updateReservedSpace()
 	if (maxSize > 1)
 	{
 		// Small hack: update ALL masters, not only active master!
-		// this is because, there can be a hierarchy of multiple masters (e.g. xcom1 master > piratez master > some piratez mod)
+		// this is because, there can be a hierarchy of multiple masters (e.g. xcom1 master > fluffyUnicorns master > some fluffyUnicorns mod)
 		// and the one that needs to be updated is actually the "root", i.e. xcom1 master
 		for (std::map<std::string, ModInfo>::iterator i = _modInfos.begin(); i != _modInfos.end(); ++i)
 		{
 			if (i->second.isMaster())
 			{
-				i->second.setReservedSpace(maxSize);
-				Log(LOG_INFO) << "reservedSpace for: " << i->first << " updated to: " << i->second.getReservedSpace();
+				if (i->second.getReservedSpace() < maxSize)
+				{
+					i->second.setReservedSpace(maxSize);
+					Log(LOG_INFO) << "reservedSpace for: " << i->first << " updated to: " << i->second.getReservedSpace();
+				}
+				else
+				{
+					Log(LOG_INFO) << "reservedSpace for: " << i->first << " is: " << i->second.getReservedSpace();
+				}
 			}
 		}
 	}
@@ -767,7 +761,6 @@ void mapResources()
 	Log(LOG_INFO) << "Mapping resource files...";
 	FileMap::clear();
 
-	std::string curMaster = getActiveMaster();
 	for (std::vector< std::pair<std::string, bool> >::reverse_iterator i = mods.rbegin(); i != mods.rend(); ++i)
 	{
 		if (!i->second)
@@ -777,9 +770,9 @@ void mapResources()
 		}
 
 		const ModInfo &modInfo = _modInfos.find(i->first)->second;
-		if (!modInfo.isMaster() && !modInfo.getMaster().empty() && modInfo.getMaster() != curMaster)
+		if (!modInfo.canActivate(_masterMod))
 		{
-			Log(LOG_VERBOSE) << "skipping mod for non-current master: " << i->first << "(" << modInfo.getMaster() << " != " << curMaster << ")";
+			Log(LOG_VERBOSE) << "skipping mod for non-current master: " << i->first << "(" << modInfo.getMaster() << " != " << _masterMod << ")";
 			continue;
 		}
 
@@ -854,20 +847,13 @@ void setFolders()
  */
 void userSplitMasters()
 {
-	// get list of master mod
-	const std::map<std::string, ModInfo> &modInfos(Options::getModInfos());
-	if (modInfos.empty())
-	{
-		return;
-	}
+	// get list of master mods
 	std::vector<std::string> masters;
-	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)
+	for (std::map<std::string, ModInfo>::const_iterator i = _modInfos.begin(); i != _modInfos.end(); ++i)
 	{
-		std::string modId = i->first;
-		ModInfo modInfo = modInfos.find(modId)->second;
-		if (modInfo.isMaster())
+		if (i->second.isMaster())
 		{
-			masters.push_back(modId);
+			masters.push_back(i->first);
 		}
 	}
 
@@ -890,8 +876,8 @@ void userSplitMasters()
 			{
 				std::string srcFile = _userFolder + (*j);
 				YAML::Node doc = YAML::LoadFile(srcFile);
-				std::vector<std::string> mods = doc["mods"].as<std::vector< std::string> >(std::vector<std::string>());
-				if (std::find(mods.begin(), mods.end(), (*i)) != mods.end())
+				std::vector<std::string> srcMods = doc["mods"].as<std::vector< std::string> >(std::vector<std::string>());
+				if (std::find(srcMods.begin(), srcMods.end(), (*i)) != srcMods.end())
 				{
 					std::string dstFile = masterFolder + CrossPlatform::PATH_SEPARATOR + (*j);
 					CrossPlatform::moveFile(srcFile, dstFile);
@@ -1123,7 +1109,7 @@ std::string getConfigFolder()
  */
 std::string getMasterUserFolder()
 {
-	return _userFolder + getActiveMaster() + CrossPlatform::PATH_SEPARATOR;
+	return _userFolder + _masterMod + CrossPlatform::PATH_SEPARATOR;
 }
 
 /**
@@ -1133,6 +1119,29 @@ std::string getMasterUserFolder()
 const std::vector<OptionInfo> &getOptionInfo()
 {
 	return _info;
+}
+
+/**
+ * Returns a list of currently active mods.
+ * They must be enabled and activable.
+ * @sa ModInfo::canActivate
+ * @return List of info for the active mods.
+ */
+std::vector<const ModInfo *> getActiveMods()
+{
+	std::vector<const ModInfo*> activeMods;
+	for (std::vector< std::pair<std::string, bool> >::iterator i = mods.begin(); i != mods.end(); ++i)
+	{
+		if (i->second)
+		{
+			const ModInfo *info = &_modInfos.at(i->first);
+			if (info->canActivate(_masterMod))
+			{
+				activeMods.push_back(info);
+			}
+		}
+	}
+	return activeMods;
 }
 
 /**

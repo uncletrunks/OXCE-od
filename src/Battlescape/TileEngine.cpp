@@ -35,7 +35,6 @@
 #include "../Engine/GraphSubset.h"
 #include "BattlescapeState.h"
 #include "../Mod/MapDataSet.h"
-#include "../Mod/MapData.h"
 #include "../Mod/Unit.h"
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
@@ -2025,8 +2024,8 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 
 	BattleUnit *bu = tile->getUnit();
 	voxelCheckFlush();
-	const int part = voxelCheck(center, attack.attacker);
-	const int damage = type->getRandomDamage(power);
+	const auto part = voxelCheck(center, attack.attacker);
+	const auto damage = type->getRandomDamage(power);
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
 		bool nothing = true;
@@ -2044,20 +2043,21 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 		}
 		if (nothing)
 		{
-			const int tileDmg = type->getTileDamage(damage);
+			const auto tp = static_cast<TilePart>(part);
+			const auto tileDmg = type->getTileDamage(damage);
 			//Do we need to update the visibility of units due to smoke/fire?
 			effectGenerated = hitTile(tile, damage, type);
 			//If a tile was destroyed we may have revealed new areas for one or more observers
-			if (tileDmg >= tile->getMapData(part)->getArmor()) terrainChanged = true;
+			if (tileDmg >= tile->getMapData(tp)->getArmor()) terrainChanged = true;
 
 			if (part == V_OBJECT && _save->getMissionType() == "STR_BASE_DEFENSE")
 			{
-				if (tileDmg >= tile->getMapData(O_OBJECT)->getArmor() && tile->getMapData(V_OBJECT)->isBaseModule())
+				if (tileDmg >= tile->getMapData(O_OBJECT)->getArmor() && tile->getMapData(O_OBJECT)->isBaseModule())
 				{
 					_save->getModuleMap()[(center.x/16)/10][(center.y/16)/10].second--;
 				}
 			}
-			if (tile->damage(part, tileDmg, _save->getObjectiveType()))
+			if (tile->damage(tp, tileDmg, _save->getObjectiveType()))
 			{
 				_save->addDestroyedObjective();
 			}
@@ -2348,7 +2348,7 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 	if (explosive == 0) return false; // no damage applied for this tile
 	bool objective = false;
 	Tile* tiles[9];
-	static const int parts[9]={0,1,2,0,1,2,3,3,3}; //6th is the object of current
+	static const TilePart parts[9]={O_FLOOR,O_WESTWALL,O_NORTHWALL,O_FLOOR,O_WESTWALL,O_NORTHWALL,O_OBJECT,O_OBJECT,O_OBJECT}; //6th is the object of current
 	Position pos = tile->getPosition();
 
 	tiles[0] = _save->getTile(Position(pos.x, pos.y, pos.z+1)); //ceiling
@@ -2374,7 +2374,8 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 		remainingPower = explosive;
 		destroyed = false;
 		int volume = 0;
-		int currentpart = parts[i], currentpart2, diemcd;
+		TilePart currentpart = parts[i], currentpart2;
+		int diemcd;
 		fireProof = tiles[i]->getFlammability(currentpart);
 		fuel = tiles[i]->getFuel(currentpart) + 1;
 		// get the volume of the object by checking it's loftemps objects.
@@ -2718,7 +2719,7 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
  * @param direction Direction the power travels.
  * @return Amount of blockage.
  */
-int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int direction, bool checkingFromOrigin)
+int TileEngine::blockage(Tile *tile, const TilePart part, ItemDamageType type, int direction, bool checkingFromOrigin)
 {
 	int blockage = 0;
 
@@ -2881,7 +2882,7 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 	{
 		for (int y = 0; y < size && door == -1; y++)
 		{
-			std::vector<std::pair<Position, int> > checkPositions;
+			std::vector<std::pair<Position, TilePart> > checkPositions;
 			tile = _save->getTile(unit->getPosition() + Position(x,y,z));
 			if (!tile) continue;
 
@@ -2957,8 +2958,8 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 				break;
 			}
 
-			int part = 0;
-			for (std::vector<std::pair<Position, int> >::const_iterator i = checkPositions.begin(); i != checkPositions.end() && door == -1; ++i)
+			TilePart part = O_FLOOR;
+			for (std::vector<std::pair<Position, TilePart> >::const_iterator i = checkPositions.begin(); i != checkPositions.end() && door == -1; ++i)
 			{
 				tile = _save->getTile(unit->getPosition() + Position(x,y,z) + i->first);
 				if (tile)
@@ -3025,12 +3026,12 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
  * @param part The part to open, defines which direction to check.
  * @return <The number of adjacent doors opened, Position of door centre>
  */
-std::pair<int, Position> TileEngine::checkAdjacentDoors(Position pos, int part)
+std::pair<int, Position> TileEngine::checkAdjacentDoors(Position pos, TilePart part)
 {
 	Position offset;
 	int adjacentDoorsOpened = 0;
 	int doorOffset = 0;
-	bool westSide = (part == 1);
+	bool westSide = (part == O_WESTWALL);
 	for (int i = 1;; ++i)
 	{
 		offset = westSide ? Position(0,i,0):Position(i,0,0);
@@ -3317,7 +3318,7 @@ bool TileEngine::isVoxelVisible(Position voxel)
  * @param excludeAllBut If set, the only unit to be considered for ray hits.
  * @return The objectnumber(0-3) or unit(4) or out of map (5) or -1 (hit nothing).
  */
-int TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool excludeAllUnits, bool onlyVisible, BattleUnit *excludeAllBut)
+VoxelType TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool excludeAllUnits, bool onlyVisible, BattleUnit *excludeAllBut)
 {
 	if (voxel.x < 0 || voxel.y < 0 || voxel.z < 0) //preliminary out of map
 	{
@@ -3357,10 +3358,11 @@ int TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool exclude
 	}
 
 	// first we check terrain voxel data, not to allow 2x2 units stick through walls
-	for (int i=0; i< 4; ++i)
+	for (int i = V_FLOOR; i <= V_OBJECT; ++i)
 	{
-		MapData *mp = tile->getMapData(i);
-		if (((i==1) || (i==2)) && tile->isUfoDoorOpen(i))
+		TilePart tp = (TilePart)i;
+		MapData *mp = tile->getMapData(tp);
+		if (((tp == O_WESTWALL) || (tp == O_NORTHWALL)) && tile->isUfoDoorOpen(tp))
 			continue;
 		if (mp != 0)
 		{
@@ -3369,7 +3371,7 @@ int TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool exclude
 			int idx = (mp->getLoftID((voxel.z%24)/2)*16) + y;
 			if (_voxelData->at(idx) & (1 << x))
 			{
-				return i;
+				return (VoxelType)i;
 			}
 		}
 	}
@@ -3379,16 +3381,32 @@ int TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool exclude
 		BattleUnit *unit = tile->getUnit();
 		// sometimes there is unit on the tile below, but sticks up to this tile with his head,
 		// in this case we couldn't have unit standing at current tile.
-		if (unit == 0 && tile->hasNoFloor(0))
+		if (unit == 0 && tile->hasNoFloor(tileBelow))
 		{
-			if (tileBelow) unit = tileBelow->getUnit();
+			if (tileBelow)
+			{
+				tile = tileBelow;
+				unit = tile->getUnit();
+			}
 		}
 
 		if (unit != 0 && !unit->isOut() && unit != excludeUnit && (!excludeAllBut || unit == excludeAllBut) && (!onlyVisible || unit->getVisible() ) )
 		{
 			Position tilepos;
 			Position unitpos = unit->getPosition();
-			int tz = unitpos.z*24 + unit->getFloatHeight()+(-tile->getTerrainLevel());//bottom
+			int terrainHeight = 0;
+			for (int x = 0; x < unit->getArmor()->getSize(); ++x)
+			{
+				for (int y = 0; y < unit->getArmor()->getSize(); ++y)
+				{
+					Tile *tempTile = _save->getTile(unitpos + Position(x,y,0));
+					if (tempTile->getTerrainLevel() < terrainHeight)
+					{
+						terrainHeight = tempTile->getTerrainLevel();
+					}
+				}
+			}
+			int tz = unitpos.z*24 + unit->getFloatHeight() - terrainHeight; //bottom most voxel, terrain heights are negative, so we subtract.
 			if ((voxel.z > tz) && (voxel.z <= tz + unit->getHeight()) )
 			{
 				int x = voxel.x%16;

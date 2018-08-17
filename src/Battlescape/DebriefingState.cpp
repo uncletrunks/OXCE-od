@@ -442,7 +442,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 		SoldierRank rank = (*deadUnit)->getGeoscapeSoldier()->getRank();
 		// Rookies don't get this next award. No one likes them.
-		if (rank == 0)
+		if (rank == RANK_ROOKIE) 
 		{
 			continue;
 		}
@@ -505,11 +505,12 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 					soldierAlienStuns++;
 				}
 			}
-			if (aliensKilled && aliensKilled == soldierAlienKills && _missionStatistics->success == true)
+
+			if (aliensKilled != 0 && aliensKilled == soldierAlienKills && _missionStatistics->success == true && aliensStunned == soldierAlienStuns)
 			{
 				(*j)->getStatistics()->nikeCross = true;
 			}
-			if (aliensStunned && aliensStunned == soldierAlienStuns && _missionStatistics->success == true)
+			if (aliensStunned != 0 && aliensStunned == soldierAlienStuns && _missionStatistics->success == true && aliensKilled == 0)
 			{
 				(*j)->getStatistics()->mercyCross = true;
 			}
@@ -985,30 +986,6 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
-	// UFO crash/landing site disappears
-	for (std::vector<Ufo*>::iterator i = save->getUfos()->begin(); i != save->getUfos()->end(); ++i)
-	{
-		if ((*i)->isInBattlescape())
-		{
-			_missionStatistics->ufo = (*i)->getRules()->getType();
-			if (save->getMonthsPassed() != -1)
-			{
-				_missionStatistics->alienRace = (*i)->getAlienRace();
-			}
-			_txtRecovery->setText(tr("STR_UFO_RECOVERY"));
-			(*i)->setInBattlescape(false);
-			if ((*i)->getStatus() == Ufo::LANDED && aborted)
-			{
-				 (*i)->setSecondsRemaining(5);
-			}
-			else if ((*i)->getStatus() == Ufo::CRASHED || !aborted)
-			{
-				delete *i;
-				save->getUfos()->erase(i);
-				break;
-			}
-		}
-	}
 
 	// mission site disappears (even when you abort)
 	for (std::vector<MissionSite*>::iterator i = save->getMissionSites()->begin(); i != save->getMissionSites()->end(); ++i)
@@ -1058,6 +1035,34 @@ void DebriefingState::prepareDebriefing()
 			{
 				(*j)->instaKill();
 			}
+		}
+	}
+
+	// if it's a UFO, let's see what happens to it
+	for (std::vector<Ufo*>::iterator i = save->getUfos()->begin(); i != save->getUfos()->end(); ++i)
+	{
+		if ((*i)->isInBattlescape())
+		{
+			_missionStatistics->ufo = (*i)->getRules()->getType();
+			if (save->getMonthsPassed() != -1)
+			{
+				_missionStatistics->alienRace = (*i)->getAlienRace();
+			}
+			_txtRecovery->setText(tr("STR_UFO_RECOVERY"));
+			(*i)->setInBattlescape(false);
+			// if XCom failed to secure the landing zone, the UFO
+			// takes off immediately and proceeds according to its mission directive
+			if ((*i)->getStatus() == Ufo::LANDED && (aborted || playersSurvived == 0))
+			{
+				 (*i)->setSecondsRemaining(5);
+			}
+			// if XCom succeeds, or it's a crash site, the UFO disappears
+			else
+			{
+				delete *i;
+				save->getUfos()->erase(i);
+			}
+			break;
 		}
 	}
 
@@ -1306,6 +1311,7 @@ void DebriefingState::prepareDebriefing()
 			}
 		}
 	}
+	bool lostCraft = false;
 	if (craft != 0 && ((playersInExitArea == 0 && aborted) || (playersSurvived == 0)))
 	{
 		addStat("STR_XCOM_CRAFT_LOST", 1, -craft->getRules()->getScore());
@@ -1314,8 +1320,8 @@ void DebriefingState::prepareDebriefing()
 		// all vehicle object in the craft is also referenced by base->getVehicles() !!)
 		delete craft;
 		craft = 0; // To avoid a crash down there!!
+		lostCraft = true;
 		base->getCrafts()->erase(craftIterator);
-		_txtTitle->setText(tr("STR_CRAFT_IS_LOST"));
 		playersSurvived = 0; // assuming you aborted and left everyone behind
 		success = false;
 	}
@@ -1381,11 +1387,12 @@ void DebriefingState::prepareDebriefing()
 			for (int i = 0; i < battle->getMapSizeXYZ(); ++i)
 			{
 				// get recoverable map data objects from the battlescape map
-				for (int part = 0; part < 4; ++part)
+				for (int part = O_FLOOR; part <= O_OBJECT; ++part)
 				{
-					if (battle->getTile(i)->getMapData(part))
+					TilePart tp = (TilePart)part;
+					if (battle->getTile(i)->getMapData(tp))
 					{
-						size_t specialType = battle->getTile(i)->getMapData(part)->getSpecialType();
+						size_t specialType = battle->getTile(i)->getMapData(tp)->getSpecialType();
 						if (specialType != nonRecoverType && _recoveryStats.find(specialType) != _recoveryStats.end())
 						{
 							addStat(_recoveryStats[specialType]->name, 1, _recoveryStats[specialType]->value);
@@ -1407,7 +1414,11 @@ void DebriefingState::prepareDebriefing()
 	}
 	else
 	{
-		if (target == "STR_BASE")
+		if (lostCraft)
+		{
+			_txtTitle->setText(tr("STR_CRAFT_IS_LOST"));
+		}
+		else if (target == "STR_BASE")
 		{
 			_txtTitle->setText(tr("STR_BASE_IS_LOST"));
 			_destroyBase = true;

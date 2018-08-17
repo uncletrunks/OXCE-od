@@ -211,8 +211,6 @@ private:
 	void modResources();
 	/// Sorts all our lists according to their weight.
 	void sortLists();
-
-	void exportResources();
 public:
 	static int DOOR_OPEN;
 	static int SLIDING_DOOR_OPEN;
@@ -339,7 +337,9 @@ public:
 	/// Gets the available soldiers.
 	const std::vector<std::string> &getSoldiersList() const;
 	/// Gets commendation rules.
-	std::map<std::string, RuleCommendations *> getCommendation() const;
+	RuleCommendations *getCommendation(const std::string &id, bool error = false) const;
+	/// Gets the available commendations.
+	const std::map<std::string, RuleCommendations *> &getCommendationsList() const;
 	/// Gets generated unit rules.
 	Unit *getUnit(const std::string &name, bool error = false) const;
 	/// Gets alien race rules.
@@ -439,17 +439,17 @@ public:
 	/// Gets the game starting time.
 	const GameTime &getStartingTime() const;
 	/// Gets an MCDPatch.
-	MCDPatch *getMCDPatch(const std::string &name) const;
+	MCDPatch *getMCDPatch(const std::string &id) const;
 	/// Gets the list of external Sprites.
-	std::vector<std::pair<std::string, ExtraSprites *> > getExtraSprites() const;
+	const std::vector<std::pair<std::string, ExtraSprites *> > &getExtraSprites() const;
 	/// Gets the list of external Sounds.
-	std::vector<std::pair<std::string, ExtraSounds *> > getExtraSounds() const;
+	const std::vector<std::pair<std::string, ExtraSounds *> > &getExtraSounds() const;
 	/// Gets the list of external Strings.
-	std::map<std::string, ExtraStrings *> getExtraStrings() const;
+	const std::map<std::string, ExtraStrings *> &getExtraStrings() const;
 	/// Gets the list of StatStrings.
-	std::vector<StatString *> getStatStrings() const;
+	const std::vector<StatString *> &getStatStrings() const;
 	/// Gets the research-requirements for Psi-Lab (it's a cache for psiStrengthEval)
-	std::vector<std::string> getPsiRequirements() const;
+	const std::vector<std::string> &getPsiRequirements() const;
 	/// Returns the sorted list of inventories.
 	const std::vector<std::string> &getInvsList() const;
 	/// Generates a new soldier.

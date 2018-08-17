@@ -227,6 +227,12 @@ void BattlescapeGame::think()
 	// nothing is happening - see if we need some alien AI or units panicking or what have you
 	if (_states.empty())
 	{
+		if (_save->getUnitsFalling())
+		{
+			statePushFront(new UnitFallBState(this));
+			_save->setUnitsFalling(false);
+			return;
+		}
 		// it's a non player side (ALIENS or CIVILIANS)
 		if (_save->getSide() != FACTION_PLAYER)
 		{
@@ -264,11 +270,6 @@ void BattlescapeGame::think()
 				_playerPanicHandled = handlePanickingPlayer();
 				_save->getBattleState()->updateSoldierInfo();
 			}
-		}
-		if (_save->getUnitsFalling())
-		{
-			statePushFront(new UnitFallBState(this));
-			_save->setUnitsFalling(false);
 		}
 	}
 }
@@ -493,6 +494,8 @@ void BattlescapeGame::endTurn()
 		{
 			getMod()->getSoundByDepth(_save->getDepth(), Mod::SLIDING_DOOR_CLOSE)->play(); // ufo door closed
 		}
+		
+		Position p;
 
 		// if all grenades explode we remove items that expire on that turn too.
 		std::vector<BattleItem*> forRemoval;
