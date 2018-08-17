@@ -311,6 +311,7 @@ const RuleCraft *Craft::getRules() const
 void Craft::changeRules(RuleCraft *rules)
 {
 	_rules = rules;
+	_stats = rules->getStats();
 	_weapons.clear();
 	for (int i = 0; i < _rules->getWeapons(); ++i)
 	{
