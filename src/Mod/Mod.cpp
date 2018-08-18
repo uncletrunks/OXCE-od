@@ -337,6 +337,7 @@ Mod::Mod() :
 	dmg->ToTile = 0.0f;
 	dmg->ToStun = 1.0f;
 	dmg->RandomStun = false;
+	dmg->TileDamageMethod = 2;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
@@ -346,6 +347,7 @@ Mod::Mod() :
 	dmg->IgnoreSelfDestruct = true;
 	dmg->RadiusEffectiveness = 0.05f;
 	dmg->ToItem = 1.0f;
+	dmg->TileDamageMethod = 2;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
@@ -362,6 +364,7 @@ Mod::Mod() :
 	dmg->ToItem = 0.0f;
 	dmg->ToTile = 0.0f;
 	dmg->ToStun = 1.0f;
+	dmg->TileDamageMethod = 2;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	dmg = new RuleDamageType();
@@ -380,6 +383,7 @@ Mod::Mod() :
 	dmg->ToItem = 0.0f;
 	dmg->ToTile = 0.0f;
 	dmg->ToStun = 0.0f;
+	dmg->TileDamageMethod = 2;
 	_damageTypes[dmg->ResistType] = dmg;
 
 	for (int itd = DT_10; itd < DAMAGE_TYPES; ++itd)

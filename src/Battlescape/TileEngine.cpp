@@ -2029,6 +2029,7 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 	voxelCheckFlush();
 	const auto part = voxelCheck(center, attack.attacker);
 	const auto damage = type->getRandomDamage(power);
+	const auto tileFinalDamage = type->getTileFinalDamage(type->getRandomDamageForTile(power, damage));
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
 		bool nothing = true;
@@ -2047,20 +2048,19 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 		if (nothing)
 		{
 			const auto tp = static_cast<TilePart>(part);
-			const auto tileDmg = type->getTileDamage(damage);
 			//Do we need to update the visibility of units due to smoke/fire?
 			effectGenerated = hitTile(tile, damage, type);
 			//If a tile was destroyed we may have revealed new areas for one or more observers
-			if (tileDmg >= tile->getMapData(tp)->getArmor()) terrainChanged = true;
+			if (tileFinalDamage >= tile->getMapData(tp)->getArmor()) terrainChanged = true;
 
 			if (part == V_OBJECT && _save->getMissionType() == "STR_BASE_DEFENSE")
 			{
-				if (tileDmg >= tile->getMapData(O_OBJECT)->getArmor() && tile->getMapData(O_OBJECT)->isBaseModule())
+				if (tileFinalDamage >= tile->getMapData(O_OBJECT)->getArmor() && tile->getMapData(O_OBJECT)->isBaseModule())
 				{
 					_save->getModuleMap()[(center.x/16)/10][(center.y/16)/10].second--;
 				}
 			}
-			if (tile->damage(tp, tileDmg, _save->getObjectiveType()))
+			if (tile->damage(tp, tileFinalDamage, _save->getObjectiveType()))
 			{
 				_save->addDestroyedObjective();
 			}
@@ -2198,7 +2198,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 				{
 					ret = tilesAffected.insert(std::make_pair(dest, 0)); // check if we had this tile already affected
 
-					const int tileDmg = type->getTileDamage(power_);
+					const int tileDmg = type->getTileFinalDamage(power_);
 					if (tileDmg > ret.first->second)
 					{
 						ret.first->second = tileDmg;
@@ -2238,7 +2238,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 							{
 								for (std::vector<BattleItem*>::iterator it = bu->getInventory()->begin(); it != bu->getInventory()->end(); ++it)
 								{
-									if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && type->getItemDamage(itemDamage) > (*it)->getRules()->getArmor())
+									if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && type->getItemFinalDamage(itemDamage) > (*it)->getRules()->getArmor())
 									{
 										toRemove.push_back(*it);
 									}
@@ -2248,7 +2248,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 						// Affect all items and units on ground
 						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
 						{
-							if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), damage, type) && type->getItemDamage(damage) > (*it)->getRules()->getArmor())
+							if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), damage, type) && type->getItemFinalDamage(damage) > (*it)->getRules()->getArmor())
 							{
 								toRemove.push_back(*it);
 							}

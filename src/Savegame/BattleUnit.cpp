@@ -1070,22 +1070,22 @@ static inline void setValueMax(int& value, int diff, int min, int max)
 /**
  * Do an amount of damage.
  * @param relative The relative position of which part of armor and/or bodypart is hit.
- * @param power The amount of damage to inflict.
+ * @param damage The amount of damage to inflict.
  * @param type The type of damage being inflicted.
  * @return damage done after adjustment
  */
-int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack)
+int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack)
 {
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
 
 	_hitByAnything = true;
-	if (power <= 0 || _health <= 0)
+	if (damage <= 0 || _health <= 0)
 	{
 		return 0;
 	}
 
-	power = reduceByResistance(power, type->ResistType);
+	damage = reduceByResistance(damage, type->ResistType);
 
 	if (!type->IgnoreDirection)
 	{
@@ -1157,16 +1157,16 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		}
 	}
 
-	const int orgPower = power;
+	const int orgDamage = damage;
 	const int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
 
 	{
-		ModScript::HitUnit::Output args { power, bodypart, side, };
-		ModScript::HitUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgPower, type->ResistType, attack.type, };
+		ModScript::HitUnit::Output args { damage, bodypart, side, };
+		ModScript::HitUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgDamage, type->ResistType, attack.type, };
 
 		work.execute(this->getArmor()->getScript<ModScript::HitUnit>(), args);
 
-		power = args.getFirst();
+		damage = args.getFirst();
 		bodypart = (UnitBodyPart)args.getSecond();
 		side = (UnitSide)args.getThird();
 		if (bodypart >= BODYPART_MAX)
@@ -1201,38 +1201,38 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 			specialDamegeTransform = nullptr;
 		}
 
-		std::get<toArmor>(args.data) += type->getArmorPreDamage(power);
+		std::get<toArmor>(args.data) += type->getArmorPreFinalDamage(damage);
 
 		if (type->ArmorEffectiveness > 0.0f)
 		{
-			power -= getArmor(side) * type->ArmorEffectiveness;
+			damage -= getArmor(side) * type->ArmorEffectiveness;
 		}
 
-		if (power > 0)
+		if (damage > 0)
 		{
 			// stun level change
-			std::get<toStun>(args.data) += type->getStunDamage(power);
+			std::get<toStun>(args.data) += type->getStunFinalDamage(damage);
 
 			// morale change
-			std::get<toMorale>(args.data) += type->getMoraleDamage(power);
+			std::get<toMorale>(args.data) += type->getMoraleFinalDamage(damage);
 
 			// time units change
-			std::get<toTime>(args.data) += type->getTimeDamage(power);
+			std::get<toTime>(args.data) += type->getTimeFinalDamage(damage);
 
 			// health change
-			std::get<toHealth>(args.data) += type->getHealthDamage(power);
+			std::get<toHealth>(args.data) += type->getHealthFinalDamage(damage);
 
 			// energy change
-			std::get<toEnergy>(args.data) += type->getEnergyDamage(power);
+			std::get<toEnergy>(args.data) += type->getEnergyFinalDamage(damage);
 
 			// fatal wounds change
-			std::get<toWound>(args.data) += type->getWoundDamage(power);
+			std::get<toWound>(args.data) += type->getWoundFinalDamage(damage);
 
 			// armor value change
-			std::get<toArmor>(args.data) += type->getArmorDamage(power);
+			std::get<toArmor>(args.data) += type->getArmorFinalDamage(damage);
 		}
 
-		ModScript::DamageUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, power, orgPower, bodypart, side, type->ResistType, attack.type, };
+		ModScript::DamageUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, damage, orgDamage, bodypart, side, type->ResistType, attack.type, };
 
 		work.execute(this->getArmor()->getScript<ModScript::DamageUnit>(), args);
 

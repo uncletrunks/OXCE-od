@@ -105,35 +105,46 @@ struct RuleDamageType
 	/// Damage type use random conversion morale lose.
 	bool RandomMorale;
 
+	/// Which tile damage method should be used?
+	/// A. For AOE (area-of-effect) weapons:
+	///   TileDamageMethod==1: (50%-150% * power * ToTile)
+	///   TileDamageMethod==2: ((power x RandomTile) * ToTile), which defaults to vanilla 50% damage for HE and 0% for stun, smoke and incendiary
+	/// B. For non-AOE (projectile) weapons:
+	///   TileDamageMethod==1: (50%-150% * power * ToTile), which defaults to vanilla 25%-75% damage for AP/laser/plasma/etc.
+	///   TileDamageMethod==2: ((damage x RandomTile) * ToTile)
+	int TileDamageMethod;
+
 	/// Default constructor.
 	RuleDamageType();
 	/// Calculate random value of damage.
 	int getRandomDamage(int power) const;
+	/// Calculate random value of damage for tile attack.
+	int getRandomDamageForTile(int power, int damage) const;
 	/// Do this damage type affect only one target
 	bool isDirect() const;
 	/// Loads item data from YAML.
 	void load(const YAML::Node& node);
 
-	/// Get damage value to health based on power.
-	int getHealthDamage(int power) const;
-	/// Get damage value to armor based on power.
-	int getArmorDamage(int power) const;
-	/// Get damage value to armor based on power before armor reduction.
-	int getArmorPreDamage(int power) const;
-	/// Get numbers of wound based on power.
-	int getWoundDamage(int power) const;
-	/// Get damage value to item based on power.
-	int getItemDamage(int power) const;
-	/// Get damage value to tile based on power.
-	int getTileDamage(int power) const;
-	/// Get stun level change based on power.
-	int getStunDamage(int power) const;
-	/// Get energy change based on power.
-	int getEnergyDamage(int power) const;
-	/// Get time units change based on power.
-	int getTimeDamage(int power) const;
-	/// Get morale change based on power.
-	int getMoraleDamage(int power) const;
+	/// Get final damage value to health based on damage.
+	int getHealthFinalDamage(int damage) const;
+	/// Get final damage value to armor based on damage.
+	int getArmorFinalDamage(int damage) const;
+	/// Get final damage value to armor based on damage before armor reduction.
+	int getArmorPreFinalDamage(int damage) const;
+	/// Get numbers of wound based on damage.
+	int getWoundFinalDamage(int damage) const;
+	/// Get final damage value to item based on damage.
+	int getItemFinalDamage(int damage) const;
+	/// Get final damage value to tile based on damage.
+	int getTileFinalDamage(int damage) const;
+	/// Get stun level change based on damage.
+	int getStunFinalDamage(int damage) const;
+	/// Get energy change based on damage.
+	int getEnergyFinalDamage(int damage) const;
+	/// Get time units change based on damage.
+	int getTimeFinalDamage(int damage) const;
+	/// Get morale change based on damage.
+	int getMoraleFinalDamage(int damage) const;
 };
 
 } //namespace OpenXcom
