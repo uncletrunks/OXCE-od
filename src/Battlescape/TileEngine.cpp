@@ -1765,8 +1765,11 @@ int TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  * @param rangeAtack is ranged attack or not?
  * @return Was experience awarded or not?
  */
-bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUnit *target, bool rangeAtack)
+bool TileEngine::awardExperience(BattleActionAttack attack, BattleUnit *target, bool rangeAtack)
 {
+	auto unit = attack.attacker;
+	auto weapon = attack.weapon_item;
+
 	if (!target)
 	{
 		return false;
@@ -1854,7 +1857,7 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 				expType = ETM_MELEE_100;
 				expFuncA = &BattleUnit::addMeleeExp; // e.g. rifle/shotgun gun butt, ...
 			}
-			else if (weapon->getRules()->getArcingShot())
+			else if (weapon->getArcingShot(attack.type))
 			{
 				expType = ETM_THROWING_100;
 				expFuncA = &BattleUnit::addThrowingExp; // e.g. flamethrower, javelins, combat bow, grenade launcher, molotov, black powder bomb, stick grenade, acid flask, apple, ...
@@ -1946,7 +1949,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 	// single place for firing/throwing/melee experience training
 	if (attack.attacker && attack.attacker->getOriginalFaction() == FACTION_PLAYER)
 	{
-		awardExperience(attack.attacker, attack.weapon_item, target, rangeAtack);
+		awardExperience(attack, target, rangeAtack);
 	}
 
 	if (type->IgnoreNormalMoraleLose == false)

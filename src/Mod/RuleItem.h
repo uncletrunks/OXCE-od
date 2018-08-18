@@ -99,6 +99,7 @@ struct RuleItemAction
 	int ammoSlot = 0;
 	RuleItemUseCost cost;
 	RuleItemUseCost flat;
+	bool arcing = false; // Only overrides arcing: false on a weapon for a specific action
 	std::string name;
 };
 

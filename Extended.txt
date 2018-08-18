@@ -186,6 +186,7 @@ Add access to current difficulty level in scripts.[br/]
 Add base function requirmets to buy items, crafts and solders.[br/]
 Add access to geoscape soldier in scripts.[br/]
 Add script that is run at end of mission.[br/]
+Add arcing shoots per attack type (by ohartenstein23).[br/]
 [br/]
 
 [examples]
@@ -312,6 +313,7 @@ items:
       shots: 1              #number of shots. Defulat `1`.
       name: STR_AIMED_SHOT  #name of attack in action menu.
       ammoSlot: 0           #with ammo slot is used by this attack. Defulat `0`.
+      arcing: false         #if `true` it will change attack to arcing shoot.
     confAuto:
       shots: 3              #number of shots, its alias with `autoShots`.
       #...

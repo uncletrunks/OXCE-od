@@ -751,6 +751,25 @@ const RuleItemAction *BattleItem::getActionConf(BattleActionType action) const
 }
 
 /**
+ * Check if attack shoot in arc.
+ */
+bool BattleItem::getArcingShot(BattleActionType action) const
+{
+	if (_rules->getArcingShot())
+	{
+		return true;
+	}
+
+	auto conf = getActionConf(action);
+	if (conf && conf->arcing)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+/**
  * Determines if this item uses ammo.
  */
 bool BattleItem::needsAmmoForAction(BattleActionType action) const

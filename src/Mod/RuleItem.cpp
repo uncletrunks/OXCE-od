@@ -239,6 +239,7 @@ void RuleItem::loadConfAction(RuleItemAction& a, const YAML::Node& node, const s
 				a.ammoSlot = s;
 			}
 		}
+		a.arcing = conf["arcing"].as<bool>(a.arcing);
 	}
 }
 

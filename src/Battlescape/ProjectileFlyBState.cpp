@@ -324,7 +324,7 @@ bool ProjectileFlyBState::createNewProjectile()
 			return false;
 		}
 	}
-	else if (_action.weapon->getRules()->getArcingShot()) // special code for the "spit" trajectory
+	else if (_action.weapon->getArcingShot(_action.type)) // special code for the "spit" trajectory
 	{
 		_projectileImpact = projectile->calculateThrow(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider);
 		if (_projectileImpact != V_EMPTY && _projectileImpact != V_OUTOFBOUNDS)

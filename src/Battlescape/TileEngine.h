@@ -155,7 +155,7 @@ public:
 	/// Handles tile hit.
 	int hitTile(Tile *tile, int damage, const RuleDamageType* type);
 	/// Handles experience training.
-	bool awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUnit *target, bool rangeAtack);
+	bool awardExperience(BattleActionAttack attack, BattleUnit *target, bool rangeAtack);
 	/// Handles unit hit.
 	bool hitUnit(BattleActionAttack attack, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack = true);
 	/// Handles bullet/weapon hits.
