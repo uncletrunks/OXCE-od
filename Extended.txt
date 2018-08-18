@@ -187,6 +187,8 @@ Add base function requirmets to buy items, crafts and solders.[br/]
 Add access to geoscape soldier in scripts.[br/]
 Add script that is run at end of mission.[br/]
 Add arcing shoots per attack type (by ohartenstein23).[br/]
+Breaking change: Renamed `action` to `battle_action` in reaction scripts.[br/]
+Add battle action to `awardExperience` script.[br/]
 [br/]
 
 [examples]

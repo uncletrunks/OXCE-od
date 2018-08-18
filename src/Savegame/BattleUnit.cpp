@@ -3449,7 +3449,7 @@ void BattleUnit::adjustStats(const StatAdjustment &adjustment)
 	_stats.psiStrength += adjustment.statGrowth.psiStrength * adjustment.growthMultiplier * _stats.psiStrength / 100;
 	_stats.psiSkill += adjustment.statGrowth.psiSkill * adjustment.growthMultiplier * _stats.psiSkill / 100;
 	_stats.melee += adjustment.statGrowth.melee * adjustment.growthMultiplier * _stats.melee / 100;
-	
+
 	_stats.firing *= adjustment.aimAndArmorMultiplier;
 	_maxArmor[0] *= adjustment.aimAndArmorMultiplier;
 	_maxArmor[1] *= adjustment.aimAndArmorMultiplier;
@@ -4481,6 +4481,16 @@ void commonImpl(BindBase& b, Mod* mod)
 	b.addCustomConst("blit_large_turret", BODYPART_LARGE_TURRET);
 }
 
+void battleActionImpl(BindBase& b)
+{
+	b.addCustomConst("battle_action_aimshoot", BA_AIMEDSHOT);
+	b.addCustomConst("battle_action_autoshoot", BA_AUTOSHOT);
+	b.addCustomConst("battle_action_snapshot", BA_SNAPSHOT);
+	b.addCustomConst("battle_action_walk", BA_WALK);
+	b.addCustomConst("battle_action_hit", BA_HIT);
+	b.addCustomConst("battle_action_throw", BA_THROW);
+}
+
 }
 
 /**
@@ -4517,18 +4527,13 @@ ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::s
 /**
  * Constructor of reaction chance script parser.
  */
-ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target", "move" }
+ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "battle_action", "action_target", "move" }
 {
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
 
-	b.addCustomConst("action_aimshoot", BA_AIMEDSHOT);
-	b.addCustomConst("action_autoshoot", BA_AUTOSHOT);
-	b.addCustomConst("action_snapshot", BA_SNAPSHOT);
-	b.addCustomConst("action_walk", BA_WALK);
-	b.addCustomConst("action_hit", BA_HIT);
-	b.addCustomConst("action_throw", BA_THROW);
+	battleActionImpl(b);
 
 	b.addCustomConst("move_normal", BAM_NORMAL);
 	b.addCustomConst("move_run", BAM_RUN);
@@ -4573,6 +4578,8 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 
 	b.addCustomPtr<const Mod>("rules", mod);
 
+	battleActionImpl(b);
+
 	setEmptyReturn();
 }
 
@@ -4586,6 +4593,8 @@ ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string&
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
 }
 
 ModScript::CreateUnitParser::CreateUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", }
@@ -4593,6 +4602,8 @@ ModScript::CreateUnitParser::CreateUnitParser(ScriptGlobal* shared, const std::s
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
 }
 
 ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", "side", }
@@ -4614,11 +4625,16 @@ ModScript::ReturnFromMissionUnitParser::ReturnFromMissionUnitParser(ScriptGlobal
 	setEmptyReturn();
 }
 
-ModScript::AwardExperienceParser::AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "experience_multipler", "experience_type", "attacker", "unit", "weapon", }
+ModScript::AwardExperienceParser::AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"experience_multipler",
+	"experience_type",
+	"attacker", "unit", "weapon", "battle_action", }
 {
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
 }
 
 

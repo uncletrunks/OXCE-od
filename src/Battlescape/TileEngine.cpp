@@ -1897,7 +1897,7 @@ bool TileEngine::awardExperience(BattleActionAttack attack, BattleUnit *target, 
 
 
 	ModScript::AwardExperience::Output arg{ expMultiply, expType, };
-	ModScript::AwardExperience::Worker work{ unit, target, weapon, };
+	ModScript::AwardExperience::Worker work{ unit, target, weapon, attack.type };
 
 	work.execute(target->getArmor()->getScript<ModScript::AwardExperience>(), arg);
 

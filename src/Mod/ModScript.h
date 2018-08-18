@@ -131,7 +131,7 @@ class ModScript
 		NewTurnItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	struct AwardExperienceParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*>
+	struct AwardExperienceParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*, int>
 	{
 		AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
