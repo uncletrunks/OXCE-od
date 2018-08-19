@@ -2727,7 +2727,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = _stats.health - _health;
 
-	auto recovery = RNG::generate((healthLoss*0.5),(healthLoss*1.5));
+	auto recovery = (int)RNG::generate((healthLoss*0.5),(healthLoss*1.5));
 
 	{
 		ModScript::ReturnFromMissionUnit::Output arg{ recovery, healthLoss };
