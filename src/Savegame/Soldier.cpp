@@ -883,7 +883,6 @@ void Soldier::ScriptRegister(ScriptParserBase* parser)
 	parser->registerPointerType<RuleSoldier>();
 
 	Bind<Soldier> so = { parser };
-	BindNested<Soldier, UnitStats, &Soldier::_currentStats> us = { so };
 
 
 	so.addField<&Soldier::_id>("getId");
@@ -893,17 +892,8 @@ void Soldier::ScriptRegister(ScriptParserBase* parser)
 	so.add<&getLookVariantScript>("getLookVariant");
 
 
-	us.addField<&UnitStats::tu>("Stats.getTimeUnits", "Stats.setTimeUnits");
-	us.addField<&UnitStats::stamina>("Stats.getStamina", "Stats.setStamina");
-	us.addField<&UnitStats::health>("Stats.getHealth", "Stats.setHealth");
-	us.addField<&UnitStats::bravery>("Stats.getBravery", "Stats.setBravery");
-	us.addField<&UnitStats::reactions>("Stats.getReactions", "Stats.setReactions");
-	us.addField<&UnitStats::firing>("Stats.getFiring", "Stats.setFiring");
-	us.addField<&UnitStats::throwing>("Stats.getThrowing", "Stats.setThrowing");
-	us.addField<&UnitStats::strength>("Stats.getStrength", "Stats.setStrength");
-	us.addField<&UnitStats::psiStrength>("Stats.getPsiStrength", "Stats.setPsiStrength");
-	us.addField<&UnitStats::psiSkill>("Stats.getPsiSkill", "Stats.setPsiSkill");
-	us.addField<&UnitStats::melee>("Stats.getMelee", "Stats.setMelee");
+	UnitStats::addGetStatsScript<Soldier, &Soldier::_currentStats>(so, "Stats.");
+	UnitStats::addSetStatsScript<Soldier, &Soldier::_currentStats>(so, "Stats.");
 
 
 	so.addFunc<getRuleSoldierScript>("getRuleSoldier");

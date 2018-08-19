@@ -189,6 +189,7 @@ Add script that is run at end of mission.[br/]
 Add arcing shoots per attack type (by ohartenstein23).[br/]
 Breaking change: Renamed `action` to `battle_action` in reaction scripts.[br/]
 Add battle action to `awardExperience` script.[br/]
+Breaking change: Renamed access function to statis in armor (added prefix `Stats.`).[br/]
 [br/]
 
 [examples]

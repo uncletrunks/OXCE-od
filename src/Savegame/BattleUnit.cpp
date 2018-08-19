@@ -4198,29 +4198,6 @@ void setBaseStatScript(BattleUnit *bu, int val)
 	}
 }
 
-template<int BattleUnit::*StatCurr, int BattleUnit::*StatMax>
-void setBaseStatScript(BattleUnit *bu, int val)
-{
-	if (bu)
-	{
-		(bu->*StatCurr) = Clamp(val, 0, (bu->*StatMax));
-	}
-}
-
-template<int BattleUnit::*StatCurr, int UnitStats::*StatMax>
-void setMaxStatScript(BattleUnit *bu, int val)
-{
-	if (bu)
-	{
-		val = Clamp(val, 1, 1000);
-		(bu->getBaseStats()->*StatMax) = val;
-		if ((bu->*StatCurr) > val)
-		{
-			(bu->*StatCurr) = val;
-		}
-	}
-}
-
 template<int BattleUnit::*StatCurr>
 void setStunScript(BattleUnit *bu, int val)
 {
@@ -4236,6 +4213,7 @@ void setMaxStatScript(BattleUnit *bu, int val)
 	if (bu)
 	{
 		val = Clamp(val, 1, 1000);
+		(bu->getBaseStats()->*StatMax) = val;
 	}
 }
 
@@ -4345,38 +4323,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getArmorMaxScript>("getArmorMax");
 
 
-	us.addField<&UnitStats::tu>("Stats.getTimeUnits");
-	bu.add<&setMaxStatScript<&BattleUnit::_tu, &UnitStats::tu>>("Stats.setTimeUnits");
-
-	us.addField<&UnitStats::stamina>("Stats.getStamina");
-	bu.add<&setMaxStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("Stats.setStamina");
-
-	us.addField<&UnitStats::health>("Stats.getHealth");
-	bu.add<&setMaxStatScript<&BattleUnit::_health, &UnitStats::health>>("Stats.setHealth");
-
-	us.addField<&UnitStats::bravery>("Stats.getBravery");
-	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setBravery");
-
-	us.addField<&UnitStats::reactions>("Stats.getReactions");
-	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setReactions");
-
-	us.addField<&UnitStats::firing>("Stats.getFiring");
-	bu.add<&setMaxStatScript<&UnitStats::firing>>("Stats.setFiring");
-
-	us.addField<&UnitStats::throwing>("Stats.getThrowing");
-	bu.add<&setMaxStatScript<&UnitStats::throwing>>("Stats.setThrowing");
-
-	us.addField<&UnitStats::strength>("Stats.getStrength");
-	bu.add<&setMaxStatScript<&UnitStats::strength>>("Stats.setStrength");
-
-	us.addField<&UnitStats::psiStrength>("Stats.getPsiStrength");
-	bu.add<&setMaxStatScript<&UnitStats::psiStrength>>("Stats.setPsiStrength");
-
-	us.addField<&UnitStats::psiSkill>("Stats.getPsiSkill");
-	bu.add<&setMaxStatScript<&UnitStats::psiSkill>>("Stats.setPsiSkill");
-
-	us.addField<&UnitStats::melee>("Stats.getMelee");
-	bu.add<&setMaxStatScript<&UnitStats::melee>>("Stats.setMelee");
+	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_stats>(bu, "Stats.");
+	UnitStats::addSetStatsWithCurrScript<BattleUnit, &BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health>(bu, "Stats.");
 
 
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");

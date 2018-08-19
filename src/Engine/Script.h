@@ -34,8 +34,10 @@
 
 namespace OpenXcom
 {
+//for Surface.h
 class Surface;
 
+//for Script.h
 class ScriptGlobal;
 class ScriptParserBase;
 class ScriptParserEventsBase;
@@ -49,6 +51,11 @@ class ScriptWorkerBlit;
 template<typename, typename...> class ScriptWorker;
 template<typename, typename> struct ScriptTag;
 template<typename, typename> class ScriptValues;
+
+//for ScriptBind.h
+struct BindBase;
+template<typename T> struct Bind;
+template<typename T, typename N, N T::*X> struct BindNested;
 
 namespace helper
 {

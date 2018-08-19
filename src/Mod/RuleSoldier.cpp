@@ -319,24 +319,6 @@ std::string debugDisplayScript(const RuleSoldier* rs)
 	}
 }
 
-template<UnitStats RuleSoldier::* Stats>
-void addStats(Bind<RuleSoldier>& ra, std::string postFix)
-{
-	BindNested<RuleSoldier, UnitStats, Stats> us = { ra };
-
-	us.template addField<&UnitStats::tu>("getTimeUnits" + postFix);
-	us.template addField<&UnitStats::stamina>("getStamina" + postFix);
-	us.template addField<&UnitStats::health>("getHealth" + postFix);
-	us.template addField<&UnitStats::bravery>("getBravery" + postFix);
-	us.template addField<&UnitStats::reactions>("getReactions" + postFix);
-	us.template addField<&UnitStats::firing>("getFiring" + postFix);
-	us.template addField<&UnitStats::throwing>("getThrowing" + postFix);
-	us.template addField<&UnitStats::strength>("getStrength" + postFix);
-	us.template addField<&UnitStats::psiStrength>("getPsiStrength" + postFix);
-	us.template addField<&UnitStats::psiSkill>("getPsiSkill" + postFix);
-	us.template addField<&UnitStats::melee>("getMelee" + postFix);
-}
-
 }
 
 /**
@@ -347,9 +329,9 @@ void RuleSoldier::ScriptRegister(ScriptParserBase* parser)
 {
 	Bind<RuleSoldier> ra = { parser };
 
-	addStats<&RuleSoldier::_statCaps>(ra, "Cap");
-	addStats<&RuleSoldier::_minStats>(ra, "Min");
-	addStats<&RuleSoldier::_maxStats>(ra, "Max");
+	UnitStats::addGetStatsScript<RuleSoldier, &RuleSoldier::_statCaps>(ra, "StatsCap.");
+	UnitStats::addGetStatsScript<RuleSoldier, &RuleSoldier::_minStats>(ra, "StatsMin.");
+	UnitStats::addGetStatsScript<RuleSoldier, &RuleSoldier::_maxStats>(ra, "StatsMax.");
 
 	ra.addScriptValue<&RuleSoldier::_scriptValues>(false);
 	ra.addDebugDisplay<&debugDisplayScript>();
