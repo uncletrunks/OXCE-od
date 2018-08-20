@@ -1208,6 +1208,11 @@ void DebriefingState::prepareDebriefing()
 			// if XCom succeeds, or it's a crash site, the UFO disappears
 			else
 			{
+				// Note: just before removing a landed UFO, check for mission interruption (by setting the UFO damage to max)
+				if ((*i)->getStatus() == Ufo::LANDED)
+				{
+					(*i)->setDamage((*i)->getCraftStats().damageMax, _game->getMod());
+				}
 				delete *i;
 				save->getUfos()->erase(i);
 			}
@@ -1767,6 +1772,7 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((*i)->getMission() == am)
 				{
+					// Note: no need to check for mission interruption here, the mission is over and will be deleted in the next step
 					delete *i;
 					i = _game->getSavedGame()->getUfos()->erase(i);
 				}
