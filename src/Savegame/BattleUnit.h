@@ -108,7 +108,7 @@ private:
 	int _scannedTurn;
 	int _kills;
 	int _faceDirection; // used only during strafeing moves
-	bool _hitByFire, _hitByAnything;
+	bool _hitByFire, _hitByAnything, _alreadyExploded;
 	int _fireMaxHit;
 	int _smokeMaxHit;
 	int _moraleRestored;
@@ -620,6 +620,10 @@ public:
 	bool getHitState();
 	/// reset the unit hit state.
 	void resetHitState();
+	/// Did this unit explode already?
+	bool hasAlreadyExploded() const { return _alreadyExploded; }
+	/// Set the already exploded flag.
+	void setAlreadyExploded(bool alreadyExploded) { _alreadyExploded = alreadyExploded; }
 	/// Gets whether this unit can be captured alive (applies to aliens).
 	bool getCapturable() const;
 	/// Marks this unit as summoned by an item and therefore won't count for recovery or total player units left.
