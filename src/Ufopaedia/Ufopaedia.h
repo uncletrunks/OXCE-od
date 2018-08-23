@@ -35,6 +35,7 @@ namespace OpenXcom
 	// but have no own entry in a list. E.g. Ammunition items.
 	// Maybe others as well, that should just not be selectable.
 	static const std::string UFOPAEDIA_NOT_AVAILABLE = "STR_NOT_AVAILABLE";
+	static const std::string UFOPAEDIA_COMMENDATIONS = "STR_COMMENDATIONS_UC";
 
 	/**
 	 * This static class encapsulates all functions related to Ufopaedia
@@ -70,6 +71,12 @@ namespace OpenXcom
 		/// load a vector with article ids that are currently visible of a given section.
 		static void list(SavedGame *save, Mod *rule, const std::string &section, ArticleDefinitionList &data);
 
+		/// check if the article is hidden.
+		static bool isArticleHidden(SavedGame *save, ArticleDefinition *article, Mod *mod);
+
+		/// check if the article corresponds to an awarded commendation.
+		static bool isAwardedCommendation(SavedGame *save, ArticleDefinition *article);
+
 	protected:
 
 		/// current selected article index (for prev/next navigation).
@@ -77,9 +84,6 @@ namespace OpenXcom
 
 		/// get index of the given article id in the visible list.
 		static size_t getArticleIndex(SavedGame *save, Mod *rule, std::string &article_id);
-
-		/// check if the article is hidden.
-		static bool isArticleHidden(SavedGame *save, ArticleDefinition *article);
 
 		/// get list of researched articles
 		static ArticleDefinitionList getAvailableArticles(SavedGame *save, Mod *rule);

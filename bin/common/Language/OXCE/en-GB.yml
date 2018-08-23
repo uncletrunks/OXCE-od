@@ -202,8 +202,6 @@ en-GB:
   STR_SHOW_ITEM_WEIGHT_IN_INVENTORY_DESC: "Displays item weight after item's name when an item is picked up."
   STR_SHOW_GUN_MELEE_ON_TOP: "Show secondary Melee attack on top"
   STR_SHOW_GUN_MELEE_ON_TOP_DESC: "When this option is enabled, any secondary melee attack mode a weapon has will be displayed as the topmost button. Otherwise it will be displayed at the bottom."
-  STR_SHOW_ALL_COMMENDATIONS: "Show All Commendations"
-  STR_SHOW_ALL_COMMENDATIONS_DESC: "If enabled, all Commendations are displayed in the UFOPaedia. If disabled, only already awarded will be displayed."
   STR_REMOVE_WOUNDED_FROM_TRAINING: "Remove wounded soldiers from training"
   STR_REMOVE_WOUNDED_FROM_TRAINING_DESC: "Wounded soldiers can't benefit from physical training. This option will automatically remove them from the training facility, freeing up space for others."
   STR_FULL_NIGHT_VISION: "Maximized Night Display"
@@ -389,3 +387,5 @@ en-GB:
   STR_SECONDS_LONG: "{0} seconds"
   STR_RACE_BONUS: "Race bonus"
   STR_FOR_DIFFICULTY: "for difficulty: {0}"
+#UfopaediaSelectState.cpp
+  STR_NOT_AWARDED_YET: "Not awarded yet"

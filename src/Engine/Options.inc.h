@@ -57,7 +57,6 @@ OPT bool bleedingIndicator, knockOutIndicator, statisticalBulletConservation;
 
 OPT bool showItemNameAndWeightInInventory;
 OPT bool showGunMeleeOnTop;
-OPT bool showAllCommendations;
 OPT bool removeWoundedFromTraining;
 OPT bool fullNightVision;
 OPT int nightVisionColor;

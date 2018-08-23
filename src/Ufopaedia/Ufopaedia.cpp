@@ -307,17 +307,17 @@ namespace OpenXcom
 	}
 
 	/**
-	* Check if the article is hidden.
-	* @param save Pointer to saved game.
-	* @param article Article to check.
-	*/
-	bool Ufopaedia::isArticleHidden(SavedGame *save, ArticleDefinition *article)
+	 * Check if the article is hidden.
+	 * @param save Pointer to saved game.
+	 * @param article Article to check.
+	 */
+	bool Ufopaedia::isArticleHidden(SavedGame *save, ArticleDefinition *article, Mod *mod)
 	{
 		// show Commendations entries if:
-		if (article->section == "STR_COMMENDATIONS_UC")
+		if (article->section == UFOPAEDIA_COMMENDATIONS)
 		{
 			// 0. hiding feature is disabled
-			if (Options::showAllCommendations)
+			if (mod->getShowAllCommendations())
 			{
 				return false;
 			}
@@ -335,6 +335,27 @@ namespace OpenXcom
 			}
 
 			// 3. or if the medal was awarded at least once
+			if (isAwardedCommendation(save, article))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the article corresponds to an awarded commendation.
+	 * @param save Pointer to saved game.
+	 * @param article Article to check.
+	 */
+	bool Ufopaedia::isAwardedCommendation(SavedGame *save, ArticleDefinition *article)
+	{
+		if (article->section == UFOPAEDIA_COMMENDATIONS)
+		{
+			// 1. check living soldiers
 			for (std::vector<Base*>::iterator i = save->getBases()->begin(); i != save->getBases()->end(); ++i)
 			{
 				for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
@@ -343,25 +364,23 @@ namespace OpenXcom
 					{
 						if ((*k)->getType() == article->title)
 						{
-							return false;
+							return true;
 						}
 					}
 				}
 			}
 
-			// 4. memento mori
+			// 2. check dead soldiers
 			for (std::vector<Soldier*>::reverse_iterator j = save->getDeadSoldiers()->rbegin(); j != save->getDeadSoldiers()->rend(); ++j)
 			{
 				for (std::vector<SoldierCommendations*>::iterator k = (*j)->getDiary()->getSoldierCommendations()->begin(); k != (*j)->getDiary()->getSoldierCommendations()->end(); ++k)
 				{
 					if ((*k)->getType() == article->title)
 					{
-						return false;
+						return true;
 					}
 				}
 			}
-
-			return true;
 		}
 
 		return false;
@@ -380,7 +399,7 @@ namespace OpenXcom
 		for (std::vector<std::string>::const_iterator it=list.begin(); it!=list.end(); ++it)
 		{
 			ArticleDefinition *article = mod->getUfopaediaArticle(*it);
-			if (isArticleAvailable(save, article) && article->section != UFOPAEDIA_NOT_AVAILABLE && !isArticleHidden(save, article))
+			if (isArticleAvailable(save, article) && article->section != UFOPAEDIA_NOT_AVAILABLE && !isArticleHidden(save, article, mod))
 			{
 				articles.push_back(article);
 			}

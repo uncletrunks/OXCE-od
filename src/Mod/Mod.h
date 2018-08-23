@@ -175,7 +175,8 @@ private:
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
-	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory, _extraNerdyPediaInfo;
+	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
+	bool _extraNerdyPediaInfo, _showAllCommendations;
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
@@ -531,6 +532,8 @@ public:
 	bool getShowFullNameInAlienInventory() const { return _showFullNameInAlienInventory; }
 	/// Display extra item info (accuracy modifier and power bonus) in the main pedia article?
 	bool getExtraNerdyPediaInfo() const { return _extraNerdyPediaInfo; }
+	/// Show all commendations pedia articles (or only those for already awarded commendations)?
+	bool getShowAllCommendations() const { return _showAllCommendations; }
 	/// Self-explanatory
 	int getTheMostUselessOptionEver() const { return _theMostUselessOptionEver; }
 	/// Shame on you!

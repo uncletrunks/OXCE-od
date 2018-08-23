@@ -75,7 +75,14 @@ namespace OpenXcom
 		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnOkClick,Options::keyCancel);
 		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaSelectState::btnMarkAllAsSeenClick, Options::keyMarkAllAsSeen);
 
-		_btnShowOnlyNew->setText(tr("STR_SHOW_ONLY_NEW"));
+		if (_section == UFOPAEDIA_COMMENDATIONS)
+		{
+			_btnShowOnlyNew->setText(tr("STR_NOT_AWARDED_YET"));
+		}
+		else
+		{
+			_btnShowOnlyNew->setText(tr("STR_SHOW_ONLY_NEW"));
+		}
 		_btnShowOnlyNew->onMouseClick((ActionHandler)&UfopaediaSelectState::btnShowOnlyNewClick);
 
 		_lstSelection->setColumns(1, 206);
@@ -194,6 +201,8 @@ namespace OpenXcom
 
 	void UfopaediaSelectState::loadSelectionList(bool markAllAsSeen)
 	{
+		bool isCommendationsSection = (_section == UFOPAEDIA_COMMENDATIONS);
+
 		std::locale myLocale = CrossPlatform::testLocale();
 		std::wstring searchString = _btnQuickSearch->getText();
 		CrossPlatform::upperCase(searchString, myLocale);
@@ -212,9 +221,19 @@ namespace OpenXcom
 			// filter
 			if (_btnShowOnlyNew->getPressed())
 			{
-				if (_game->getSavedGame()->getUfopediaRuleStatus((*it)->id) != ArticleDefinition::PEDIA_STATUS_NEW)
+				if (isCommendationsSection)
 				{
-					continue;
+					if (Ufopaedia::isAwardedCommendation(_game->getSavedGame(), (*it)))
+					{
+						continue;
+					}
+				}
+				else
+				{
+					if (_game->getSavedGame()->getUfopediaRuleStatus((*it)->id) != ArticleDefinition::PEDIA_STATUS_NEW)
+					{
+						continue;
+					}
 				}
 			}
 
@@ -246,8 +265,15 @@ namespace OpenXcom
 			row++;
 		}
 
-		std::wstring label = tr("STR_SHOW_ONLY_NEW");
-		_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
+		if (isCommendationsSection)
+		{
+			_btnShowOnlyNew->setText(tr("STR_NOT_AWARDED_YET"));
+		}
+		else
+		{
+			std::wstring label = tr("STR_SHOW_ONLY_NEW");
+			_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
+		}
 		if (_lstScroll > 0)
 		{
 			_lstSelection->scrollTo(_lstScroll);
