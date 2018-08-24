@@ -66,6 +66,8 @@ void MeleeAttackBState::init()
 		return;
 	}
 
+	_unit = _action.actor;
+
 	bool reactionShoot = _unit->getFaction() != _parent->getSave()->getSide();
 	_ammo = _action.weapon->getAmmoForAction(BA_HIT, reactionShoot ? nullptr : &_action.result);
 	if (!_ammo)
@@ -79,8 +81,6 @@ void MeleeAttackBState::init()
 		_parent->popState();
 		return;
 	}
-
-	_unit = _action.actor;
 
 	if (_unit->isOut() || _unit->isOutThresholdExceed())
 	{
