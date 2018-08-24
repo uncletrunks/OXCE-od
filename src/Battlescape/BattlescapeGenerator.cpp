@@ -551,7 +551,7 @@ void BattlescapeGenerator::run()
 			_terrain = _game->getMod()->getTerrain(_worldTexture->getRandomTerrain(target), true);
 		}
 	}
-	
+
 	setDepth(ruleDeploy, false);
 
 	if (ruleDeploy->getShade() != -1)
@@ -3322,7 +3322,7 @@ void BattlescapeGenerator::drillModules(TunnelData* data, const std::vector<SDL_
 		{
 			if (_blocks[i][j] == 0)
 				continue;
-			
+
 			MapData *md;
 
 			if (dir != MD_VERTICAL)

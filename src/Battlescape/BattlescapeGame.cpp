@@ -494,7 +494,7 @@ void BattlescapeGame::endTurn()
 		{
 			getMod()->getSoundByDepth(_save->getDepth(), Mod::SLIDING_DOOR_CLOSE)->play(); // ufo door closed
 		}
-		
+
 		Position p;
 
 		// if all grenades explode we remove items that expire on that turn too.
