@@ -488,32 +488,30 @@ void BattleItem::setPreviousOwner(BattleUnit *owner)
  */
 void BattleItem::moveToOwner(BattleUnit *owner)
 {
-	if (owner == _owner)
-	{
-		return;
-	}
-
-	setOwner(owner);
-
 	if (_tile)
 	{
 		_tile->removeItem(this);
 		_tile = nullptr;
 	}
-	if (_previousOwner)
+	if (owner != _owner)
 	{
-		for (std::vector<BattleItem*>::iterator i = _previousOwner->getInventory()->begin(); i != _previousOwner->getInventory()->end(); ++i)
+		setOwner(owner);
+
+		if (_previousOwner)
 		{
-			if ((*i) == this)
+			for (std::vector<BattleItem*>::iterator i = _previousOwner->getInventory()->begin(); i != _previousOwner->getInventory()->end(); ++i)
 			{
-				_previousOwner->getInventory()->erase(i);
-				break;
+				if ((*i) == this)
+				{
+					_previousOwner->getInventory()->erase(i);
+					break;
+				}
 			}
 		}
-	}
-	if (_owner)
-	{
-		_owner->getInventory()->push_back(this);
+		if (_owner)
+		{
+			_owner->getInventory()->push_back(this);
+		}
 	}
 }
 

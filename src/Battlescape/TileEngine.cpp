@@ -3827,7 +3827,6 @@ void TileEngine::itemMoveInventory(Tile *t, BattleUnit *unit, BattleItem *item, 
 		else if (item->getSlot() == 0 || item->getSlot() == _inventorySlotGround)
 		{
 			item->moveToOwner(unit);
-			t->removeItem(item);
 			item->setTurnFlag(false);
 			if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 			{
