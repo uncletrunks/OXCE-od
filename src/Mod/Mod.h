@@ -176,7 +176,7 @@ private:
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
 	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
-	bool _extraNerdyPediaInfo, _showAllCommendations;
+	bool _hidePediaInfoButton, _extraNerdyPediaInfo, _showAllCommendations;
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
@@ -530,6 +530,8 @@ public:
 	bool getShowDogfightDistanceInKm() const { return _showDogfightDistanceInKm; }
 	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
 	bool getShowFullNameInAlienInventory() const { return _showFullNameInAlienInventory; }
+	/// Show the INFO button (where applicable) or not?
+	bool getShowPediaInfoButton() const { return !_hidePediaInfoButton; }
 	/// Display extra item info (accuracy modifier and power bonus) in the main pedia article?
 	bool getExtraNerdyPediaInfo() const { return _extraNerdyPediaInfo; }
 	/// Show all commendations pedia articles (or only those for already awarded commendations)?

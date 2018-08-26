@@ -33,7 +33,7 @@ namespace OpenXcom
 
 	ArticleStateTFTDFacility::ArticleStateTFTDFacility(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
-		_btnInfo->setVisible(true);
+		_btnInfo->setVisible(_game->getMod()->getShowPediaInfoButton());
 
 		RuleBaseFacility *facility = _game->getMod()->getBaseFacility(defs->id, true);
 

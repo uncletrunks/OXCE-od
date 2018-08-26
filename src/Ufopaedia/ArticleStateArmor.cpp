@@ -62,7 +62,7 @@ namespace OpenXcom
 		_btnPrev->setColor(_buttonColor);
 		_btnNext->setColor(_buttonColor);
 		_btnInfo->setColor(_buttonColor);
-		_btnInfo->setVisible(true);
+		_btnInfo->setVisible(_game->getMod()->getShowPediaInfoButton());
 
 		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();

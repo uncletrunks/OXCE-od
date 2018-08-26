@@ -33,7 +33,7 @@ namespace OpenXcom
 
 	ArticleStateTFTDCraft::ArticleStateTFTDCraft(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
-		_btnInfo->setVisible(true);
+		_btnInfo->setVisible(_game->getMod()->getShowPediaInfoButton());
 
 		RuleCraft *craft = _game->getMod()->getCraft(defs->id, true);
 		_txtStats = new Text(131, 56, 187, 116);

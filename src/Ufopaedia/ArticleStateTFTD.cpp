@@ -113,7 +113,7 @@ namespace OpenXcom
 
 		// Step 3: info button image
 		Surface *button = _game->getMod()->getSurface(ruleInterface->getBackgroundImage() + "-InfoButton", false);
-		if (button)
+		if (button && _game->getMod()->getShowPediaInfoButton())
 		{
 			switch (defs->getType())
 			{
