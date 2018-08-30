@@ -1067,6 +1067,11 @@ void BattleUnit::aim(bool aiming)
 
 /**
  * Returns the direction from this unit to a given point.
+ * 0 <-> y = -1, x = 0
+ * 1 <-> y = -1, x = 1
+ * 3 <-> y = 1, x = 1
+ * 5 <-> y = 1, x = -1
+ * 7 <-> y = -1, x = -1
  * @param point given position.
  * @return direction.
  */
@@ -1170,22 +1175,22 @@ static inline void setValueMax(int& value, int diff, int min, int max)
 /**
  * Do an amount of damage.
  * @param relative The relative position of which part of armor and/or bodypart is hit.
- * @param power The amount of damage to inflict.
+ * @param damage The amount of damage to inflict.
  * @param type The type of damage being inflicted.
  * @return damage done after adjustment
  */
-int BattleUnit::damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack, UnitSide sideOverride, UnitBodyPart bodypartOverride)
+int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack, UnitSide sideOverride, UnitBodyPart bodypartOverride)
 {
 	UnitSide side = SIDE_FRONT;
 	UnitBodyPart bodypart = BODYPART_TORSO;
 
 	_hitByAnything = true;
-	if (power <= 0 || _health <= 0)
+	if (damage <= 0 || _health <= 0)
 	{
 		return 0;
 	}
 
-	power = reduceByResistance(power, type->ResistType);
+	damage = reduceByResistance(damage, type->ResistType);
 
 	if (!type->IgnoreDirection)
 	{
@@ -1257,16 +1262,16 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		}
 	}
 
-	const int orgPower = power;
+	const int orgDamage = damage;
 	const int overKillMinimum = type->IgnoreOverKill ? 0 : -4 * _stats.health;
 
 	{
-		ModScript::HitUnit::Output args { power, bodypart, side, };
-		ModScript::HitUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgPower, type->ResistType, attack.type, };
+		ModScript::HitUnit::Output args { damage, bodypart, side, };
+		ModScript::HitUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgDamage, type->ResistType, attack.type, };
 
 		work.execute(this->getArmor()->getScript<ModScript::HitUnit>(), args);
 
-		power = args.getFirst();
+		damage = args.getFirst();
 		bodypart = (UnitBodyPart)args.getSecond();
 		side = (UnitSide)args.getThird();
 		if (bodypart >= BODYPART_MAX)
@@ -1297,41 +1302,52 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		constexpr int toEnergy = 4;
 		constexpr int toMorale = 5;
 		constexpr int toWound = 6;
+		constexpr int toTransform = 7;
 
 		ModScript::DamageUnit::Output args { };
 
-		std::get<toArmor>(args.data) += type->getArmorPreDamage(power);
+		const RuleItem *specialDamegeTransform = attack.damage_item ? attack.damage_item->getRules() : nullptr;
+		if (specialDamegeTransform && !specialDamegeTransform->getZombieUnit().empty())
+		{
+			std::get<toTransform>(args.data) = getOriginalFaction() != FACTION_HOSTILE ? specialDamegeTransform->getSpecialChance() : 0;
+		}
+		else
+		{
+			specialDamegeTransform = nullptr;
+		}
+
+		std::get<toArmor>(args.data) += type->getArmorPreFinalDamage(damage);
 
 		if (type->ArmorEffectiveness > 0.0f)
 		{
-			power -= getArmor(side) * type->ArmorEffectiveness;
+			damage -= getArmor(side) * type->ArmorEffectiveness;
 		}
 
-		if (power > 0)
+		if (damage > 0)
 		{
 			// stun level change
-			std::get<toStun>(args.data) += type->getStunDamage(power);
+			std::get<toStun>(args.data) += type->getStunFinalDamage(damage);
 
 			// morale change
-			std::get<toMorale>(args.data) += type->getMoraleDamage(power);
+			std::get<toMorale>(args.data) += type->getMoraleFinalDamage(damage);
 
 			// time units change
-			std::get<toTime>(args.data) += type->getTimeDamage(power);
+			std::get<toTime>(args.data) += type->getTimeFinalDamage(damage);
 
 			// health change
-			std::get<toHealth>(args.data) += type->getHealthDamage(power);
+			std::get<toHealth>(args.data) += type->getHealthFinalDamage(damage);
 
 			// energy change
-			std::get<toEnergy>(args.data) += type->getEnergyDamage(power);
+			std::get<toEnergy>(args.data) += type->getEnergyFinalDamage(damage);
 
 			// fatal wounds change
-			std::get<toWound>(args.data) += type->getWoundDamage(power);
+			std::get<toWound>(args.data) += type->getWoundFinalDamage(damage);
 
 			// armor value change
-			std::get<toArmor>(args.data) += type->getArmorDamage(power);
+			std::get<toArmor>(args.data) += type->getArmorFinalDamage(damage);
 		}
 
-		ModScript::DamageUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, power, orgPower, bodypart, side, type->ResistType, attack.type, };
+		ModScript::DamageUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, damage, orgDamage, bodypart, side, type->ResistType, attack.type, };
 
 		work.execute(this->getArmor()->getScript<ModScript::DamageUnit>(), args);
 
@@ -1355,6 +1371,17 @@ int BattleUnit::damage(Position relative, int power, const RuleDamageType *type,
 		}
 
 		setValueMax(_currentArmor[side], - std::get<toArmor>(args.data), 0, _maxArmor[side]);
+
+
+		// check if this unit turns others into zombies
+		if (specialDamegeTransform && RNG::percent(std::get<toTransform>(args.data))
+			&& getArmor()->getZombiImmune() == false
+			&& getSpawnUnit().empty())
+		{
+			// converts the victim to a zombie on death
+			setRespawn(true);
+			setSpawnUnit(specialDamegeTransform->getZombieUnit());
+		}
 
 		setFatalShotInfo(side, bodypart);
 		return std::get<toHealth>(args.data);
@@ -1450,6 +1477,15 @@ int BattleUnit::getFallingPhase() const
 bool BattleUnit::isOut() const
 {
 	return _status == STATUS_DEAD || _status == STATUS_UNCONSCIOUS || _status == STATUS_IGNORE_ME;
+}
+
+/**
+ * Return true when unit stun level is greater that current health or unit have no health.
+ * @return true if unit should be knockout.
+ */
+bool BattleUnit::isOutThresholdExceed() const
+{
+	return getHealth() <= 0 || getHealth() <= getStunlevel();
 }
 
 /**
@@ -2745,7 +2781,6 @@ bool BattleUnit::reloadAmmo()
 		if (ammo && spendTimeUnits(tuCost))
 		{
 			weapon->setAmmoForSlot(slotAmmo, ammo);
-			ammo->moveToOwner(0);
 
 			_lastReloadSound = ruleWeapon->getReloadSound();
 			return true;
@@ -2850,7 +2885,7 @@ void BattleUnit::updateGeoscapeStats(Soldier *soldier) const
  * @param statsDiff (out) The passed UnitStats struct will be filled with the stats differences.
  * @return True if the soldier was eligible for squaddie promotion.
  */
-bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff)
+bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, UnitStats &statsDiff)
 {
 	Soldier *s = geoscape->getSoldier(_id);
 	if (s == 0)
@@ -2865,13 +2900,19 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = _stats.health - _health;
 
-	if (healthLoss < 0)
+	auto recovery = (int)RNG::generate((healthLoss*0.5),(healthLoss*1.5));
+
 	{
-		healthLoss = 0;
+		ModScript::ReturnFromMissionUnit::Output arg{ recovery, healthLoss };
+		ModScript::ReturnFromMissionUnit::Worker work{ this, battle, s };
+
+		work.execute(getArmor()->getScript<ModScript::ReturnFromMissionUnit>(), arg);
+
+		recovery = arg.getFirst();
 	}
 	if (!_armor->getInstantWoundRecovery())
 	{
-		s->setWoundRecovery(RNG::generate((healthLoss*0.5),(healthLoss*1.5)));
+		s->setWoundRecovery(recovery);
 	}
 
 	if (_expBravery && stats->bravery < caps.bravery)
@@ -2921,6 +2962,11 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff
 	}
 
 	statsDiff += *stats; // add new stat
+
+	if (s->getWoundRecoveryInt() > 0)
+	{
+		s->setCraft(nullptr);
+	}
 
 	return hasImproved;
 }
@@ -4187,6 +4233,10 @@ bool BattleUnit::isSummonedPlayerUnit() const
 	return _summonedPlayerUnit;
 }
 
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
 namespace
 {
 
@@ -4243,6 +4293,61 @@ void getLookVariantScript(const BattleUnit *bu, int &ret)
 	}
 	ret = 0;
 }
+
+struct getRuleSoldierScript
+{
+	static RetEnum func(const BattleUnit *bu, const RuleSoldier* &ret)
+	{
+		if (bu)
+		{
+			auto g = bu->getGeoscapeSoldier();
+			if (g)
+			{
+				ret = g->getRules();
+			}
+			else
+			{
+				ret = nullptr;
+			}
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+struct getGeoscapeSoldierScript
+{
+	static RetEnum func(BattleUnit *bu, Soldier* &ret)
+	{
+		if (bu)
+		{
+			ret = bu->getGeoscapeSoldier();
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+struct getGeoscapeSoldierConstScript
+{
+	static RetEnum func(const BattleUnit *bu, const Soldier* &ret)
+	{
+		if (bu)
+		{
+			ret = bu->getGeoscapeSoldier();
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+
 void geReactionScoreScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -4289,10 +4394,7 @@ void getStunMaxScript(const BattleUnit *bu, int &maxStun)
 		maxStun = bu->getBaseStats()->health * 4;
 		return;
 	}
-	else
-	{
-		maxStun = 0;
-	}
+	maxStun = 0;
 }
 
 struct getRightHandWeaponScript
@@ -4450,29 +4552,6 @@ void setBaseStatScript(BattleUnit *bu, int val)
 	}
 }
 
-template<int BattleUnit::*StatCurr, int BattleUnit::*StatMax>
-void setBaseStatScript(BattleUnit *bu, int val)
-{
-	if (bu)
-	{
-		(bu->*StatCurr) = Clamp(val, 0, (bu->*StatMax));
-	}
-}
-
-template<int BattleUnit::*StatCurr, int UnitStats::*StatMax>
-void setMaxStatScript(BattleUnit *bu, int val)
-{
-	if (bu)
-	{
-		val = Clamp(val, 1, 1000);
-		(bu->getBaseStats()->*StatMax) = val;
-		if ((bu->*StatCurr) > val)
-		{
-			(bu->*StatCurr) = val;
-		}
-	}
-}
-
 template<int BattleUnit::*StatCurr>
 void setStunScript(BattleUnit *bu, int val)
 {
@@ -4488,6 +4567,7 @@ void setMaxStatScript(BattleUnit *bu, int val)
 	if (bu)
 	{
 		val = Clamp(val, 1, 1000);
+		(bu->getBaseStats()->*StatMax) = val;
 	}
 }
 
@@ -4546,6 +4626,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 {
 	parser->registerPointerType<Mod>();
 	parser->registerPointerType<Armor>();
+	parser->registerPointerType<RuleSoldier>();
 	parser->registerPointerType<BattleItem>();
 
 	Bind<BattleUnit> bu = { parser };
@@ -4596,44 +4677,17 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getArmorMaxScript>("getArmorMax");
 
 
-	us.addField<&UnitStats::tu>("Stats.getTimeUnits");
-	bu.add<&setMaxStatScript<&BattleUnit::_tu, &UnitStats::tu>>("Stats.setTimeUnits");
-
-	us.addField<&UnitStats::stamina>("Stats.getStamina");
-	bu.add<&setMaxStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("Stats.setStamina");
-
-	us.addField<&UnitStats::health>("Stats.getHealth");
-	bu.add<&setMaxStatScript<&BattleUnit::_health, &UnitStats::health>>("Stats.setHealth");
-
-	us.addField<&UnitStats::bravery>("Stats.getBravery");
-	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setBravery");
-
-	us.addField<&UnitStats::reactions>("Stats.getReactions");
-	bu.add<&setMaxStatScript<&UnitStats::reactions>>("Stats.setReactions");
-
-	us.addField<&UnitStats::firing>("Stats.getFiring");
-	bu.add<&setMaxStatScript<&UnitStats::firing>>("Stats.setFiring");
-
-	us.addField<&UnitStats::throwing>("Stats.getThrowing");
-	bu.add<&setMaxStatScript<&UnitStats::throwing>>("Stats.setThrowing");
-
-	us.addField<&UnitStats::strength>("Stats.getStrength");
-	bu.add<&setMaxStatScript<&UnitStats::strength>>("Stats.setStrength");
-
-	us.addField<&UnitStats::psiStrength>("Stats.getPsiStrength");
-	bu.add<&setMaxStatScript<&UnitStats::psiStrength>>("Stats.setPsiStrength");
-
-	us.addField<&UnitStats::psiSkill>("Stats.getPsiSkill");
-	bu.add<&setMaxStatScript<&UnitStats::psiSkill>>("Stats.setPsiSkill");
-
-	us.addField<&UnitStats::melee>("Stats.getMelee");
-	bu.add<&setMaxStatScript<&UnitStats::melee>>("Stats.setMelee");
+	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_stats>(bu, "Stats.");
+	UnitStats::addSetStatsWithCurrScript<BattleUnit, &BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health>(bu, "Stats.");
 
 
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
 	bu.addRules<Armor, &BattleUnit::getArmor>("getRuleArmor");
+	bu.addFunc<getRuleSoldierScript>("getRuleSoldier");
+	bu.addFunc<getGeoscapeSoldierScript>("getGeosacpeSoldier");
+	bu.addFunc<getGeoscapeSoldierConstScript>("getGeosacpeSoldier");
 	bu.addFunc<getRightHandWeaponScript>("getRightHandWeapon");
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
@@ -4729,6 +4783,16 @@ void commonImpl(BindBase& b, Mod* mod)
 	b.addCustomConst("blit_large_turret", BODYPART_LARGE_TURRET);
 }
 
+void battleActionImpl(BindBase& b)
+{
+	b.addCustomConst("battle_action_aimshoot", BA_AIMEDSHOT);
+	b.addCustomConst("battle_action_autoshoot", BA_AUTOSHOT);
+	b.addCustomConst("battle_action_snapshot", BA_SNAPSHOT);
+	b.addCustomConst("battle_action_walk", BA_WALK);
+	b.addCustomConst("battle_action_hit", BA_HIT);
+	b.addCustomConst("battle_action_throw", BA_THROW);
+}
+
 }
 
 /**
@@ -4765,18 +4829,13 @@ ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::s
 /**
  * Constructor of reaction chance script parser.
  */
-ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "action", "action_target", "move" }
+ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "battle_action", "action_target", "move" }
 {
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
 
-	b.addCustomConst("action_aimshoot", BA_AIMEDSHOT);
-	b.addCustomConst("action_autoshoot", BA_AUTOSHOT);
-	b.addCustomConst("action_snapshot", BA_SNAPSHOT);
-	b.addCustomConst("action_walk", BA_WALK);
-	b.addCustomConst("action_hit", BA_HIT);
-	b.addCustomConst("action_throw", BA_THROW);
+	battleActionImpl(b);
 
 	b.addCustomConst("move_normal", BAM_NORMAL);
 	b.addCustomConst("move_run", BAM_RUN);
@@ -4806,19 +4865,22 @@ void BattleUnit::ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part
 }
 
 ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
-		"to_health",
-		"to_armor",
-		"to_stun",
-		"to_time",
-		"to_energy",
-		"to_morale",
-		"to_wound",
+	"to_health",
+	"to_armor",
+	"to_stun",
+	"to_time",
+	"to_energy",
+	"to_morale",
+	"to_wound",
+	"to_transform",
 	"unit", "damaging_item", "weapon_item", "attacker",
 	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", "battle_action", }
 {
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
 
 	setEmptyReturn();
 }
@@ -4833,6 +4895,8 @@ ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string&
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
 }
 
 ModScript::CreateUnitParser::CreateUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", }
@@ -4840,6 +4904,8 @@ ModScript::CreateUnitParser::CreateUnitParser(ScriptGlobal* shared, const std::s
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
 }
 
 ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "battle_game", "turn", "side", }
@@ -4849,11 +4915,28 @@ ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std:
 	b.addCustomPtr<const Mod>("rules", mod);
 }
 
-ModScript::AwardExperienceParser::AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "experience_multipler", "experience_type", "attacker", "unit", "weapon", }
+ModScript::ReturnFromMissionUnitParser::ReturnFromMissionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"recovery_time",
+	"health_loss",
+	"unit", "battle_game", "soldier", }
 {
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
+
+	setEmptyReturn();
+}
+
+ModScript::AwardExperienceParser::AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"experience_multipler",
+	"experience_type",
+	"attacker", "unit", "weapon", "battle_action", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
 }
 
 

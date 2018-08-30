@@ -20,6 +20,7 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
@@ -126,9 +127,9 @@ void ManufactureDependenciesTreeState::initList()
 	for (std::vector<std::string>::const_iterator i = manufactureItems.begin(); i != manufactureItems.end(); ++i)
 	{
 		RuleManufacture *rule = _game->getMod()->getManufacture((*i));
-		for (std::map<std::string, int>::const_iterator j = rule->getRequiredItems().begin(); j != rule->getRequiredItems().end(); ++j)
+		for (auto& j : rule->getRequiredItems())
 		{
-			deps[j->first].push_back((*i));
+			deps[j.first->getType()].push_back((*i));
 		}
 	}
 

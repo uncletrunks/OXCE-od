@@ -56,7 +56,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_showFullNameInAlienInventory = node["showFullNameInAlienInventory"].as<int>(_showFullNameInAlienInventory);
 	_rank = node["rank"].as<std::string>(_rank);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
-	_armor = node["armor"].as<std::string>(_armor);
+	_armorName = node["armor"].as<std::string>(_armorName);
 	_standHeight = node["standHeight"].as<int>(_standHeight);
 	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
 	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
@@ -108,6 +108,14 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	{
 		_moveSound = mod->getSoundOffset(node["moveSound"].as<int>(_moveSound), "BATTLE.CAT");
 	}
+}
+
+/**
+ * Cross link with other rules
+ */
+void Unit::afterLoad(const Mod* mod)
+{
+	_armor = mod->getArmor(_armorName, true);
 }
 
 /**
@@ -169,7 +177,7 @@ int Unit::getFloatHeight() const
  * Gets the unit's armor type.
  * @return The unit's armor type.
  */
-std::string Unit::getArmor() const
+Armor* Unit::getArmor() const
 {
 	return _armor;
 }

@@ -24,6 +24,7 @@
 #include "RuleDamageType.h"
 #include "Unit.h"
 #include "ModScript.h"
+#include "RuleResearch.h"
 
 namespace OpenXcom
 {
@@ -98,6 +99,7 @@ struct RuleItemAction
 	int ammoSlot = 0;
 	RuleItemUseCost cost;
 	RuleItemUseCost flat;
+	bool arcing = false; // Only overrides arcing: false on a weapon for a specific action
 	std::string name;
 };
 
@@ -128,9 +130,13 @@ public:
 
 private:
 	std::string _type, _name, _nameAsAmmo; // two types of objects can have the same name
-	std::vector<std::string> _requires;
-	std::vector<std::string> _requiresBuy;
+	std::vector<std::string> _requiresName;
+	std::vector<std::string> _requiresBuyName;
 	std::vector<std::string> _categories;
+	std::vector<const RuleResearch *> _requires, _requiresBuy;
+	std::vector<std::string> _requiresBuyBaseFunc;
+
+	Unit* _vehicleUnit;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
 	bool _haveMercy;
@@ -233,6 +239,9 @@ public:
 	void updateCategories(std::map<std::string, std::string> *replacementRules);
 	/// Loads item data from YAML.
 	void load(const YAML::Node& node, Mod *mod, int listIndex, const ModScript& parsers);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets the item's type.
 	const std::string &getType() const;
 	/// Gets the item's name.
@@ -240,13 +249,17 @@ public:
 	/// Gets the item's name when loaded in weapon.
 	const std::string &getNameAsAmmo() const;
 	/// Gets the item's requirements.
-	const std::vector<std::string> &getRequirements() const;
+	const std::vector<const RuleResearch*> &getRequirements() const;
 	/// Gets the item's buy requirements.
-	const std::vector<std::string> &getBuyRequirements() const;
+	const std::vector<const RuleResearch*> &getBuyRequirements() const;
+	/// Gets the base functions required to buy craft.
+	const std::vector<std::string> &getRequiresBuyBaseFunc() const;
 	/// Gets the item's categories.
 	const std::vector<std::string> &getCategories() const;
 	/// Checks if the item belongs to a category.
 	bool belongsToCategory(const std::string &category) const;
+	/// Gets unit rule if the item is vehicle weapon.
+	Unit* getVehicleUnit() const;
 	/// Gets the item's size.
 	double getSize() const;
 	/// Gets the item's purchase cost.

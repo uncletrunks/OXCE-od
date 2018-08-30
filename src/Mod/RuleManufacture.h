@@ -33,6 +33,11 @@ enum ManufacturingFilterType
 	MANU_FILTER_HIDDEN
 };
 	
+class RuleResearch;
+class RuleItem;
+class RuleCraft;
+class Mod;
+
 /**
  * Represents the information needed to manufacture an object.
  */
@@ -41,10 +46,14 @@ class RuleManufacture
 private:
 	std::string _name, _category;
 	std::string _spawnedPersonType, _spawnedPersonName;
-	std::vector<std::string> _requires, _requiresBaseFunc;
+	std::vector<std::string> _requiresName, _requiresBaseFunc;
+	std::vector<const RuleResearch*> _requires;
 	int _space, _time, _cost;
 	bool _refund;
-	std::map<std::string, int> _requiredItems, _producedItems;
+	std::map<std::string, int> _requiredItemsNames, _producedItemsNames;
+	std::map<const RuleItem*, int> _requiredItems, _producedItems;
+	std::map<const RuleCraft*, int> _requiredCrafts;
+	const RuleCraft* _producedCraft;
 	int _listOrder;
 public:
 	static const int MANU_STATUS_NEW = 0;
@@ -53,14 +62,18 @@ public:
 	static const int MANU_STATUSES = 3;
 	/// Creates a new manufacture.
 	RuleManufacture(const std::string &name);
+
 	/// Loads the manufacture from YAML.
 	void load(const YAML::Node& node, int listOrder);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets the manufacture name.
 	const std::string &getName() const;
 	/// Gets the manufacture category.
 	const std::string &getCategory() const;
 	/// Gets the manufacture's requirements.
-	const std::vector<std::string> &getRequirements() const;
+	const std::vector<const RuleResearch*> &getRequirements() const;
 	/// Gets the base requirements.
 	const std::vector<std::string> &getRequireBaseFunc() const;
 	/// Gets the required workshop space.
@@ -72,10 +85,14 @@ public:
 	/// Should all resources of a cancelled project be refunded?
 	bool getRefund() const;
 	/// Gets the list of items required to manufacture one object.
-	const std::map<std::string, int> &getRequiredItems() const;
+	const std::map<const RuleItem*, int> &getRequiredItems() const;
+	/// Gets the list of crafts required to manufacture one object.
+	const std::map<const RuleCraft*, int> &getRequiredCrafts() const;
 	/// Gets the list of items produced by completing "one object" of this project.
 	/// by default: it contains only the "name" item with a value of 1.
-	const std::map<std::string, int> &getProducedItems() const;
+	const std::map<const RuleItem*, int> &getProducedItems() const;
+	/// If this produce craft return its type, otherweasie null.
+	const RuleCraft* getProducedCraft() const;
 	/// Gets the "manufactured person", i.e. person spawned when manufacturing project ends.
 	const std::string &getSpawnedPersonType() const;
 	/// Gets the custom name of the "manufactured person".

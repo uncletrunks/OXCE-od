@@ -128,6 +128,7 @@ public:
 private:
 	std::string _type;
 	std::vector<std::string> _requires;
+	std::vector<std::string> _requiresBuyBaseFunc;
 	int _sprite, _marker;
 	int _weapons, _soldiers, _pilots, _vehicles, _costBuy, _costRent, _costSell;
 	char _weaponTypes[WeaponMax][WeaponTypeMax];
@@ -153,6 +154,8 @@ public:
 	const std::string &getType() const;
 	/// Gets the craft's requirements.
 	const std::vector<std::string> &getRequirements() const;
+	/// Gets the base functions required to buy craft.
+	const std::vector<std::string> &getRequiresBuyBaseFunc() const;
 	/// Gets the craft's sprite.
 	int getSprite() const;
 	/// Gets the craft's globe marker.
@@ -179,6 +182,8 @@ public:
 	int getRentCost() const;
 	/// Gets the craft's value.
 	int getSellCost() const;
+	/// Gets craft type.
+	int getCraftType() const;
 	/// Gets the craft's refuel item.
 	const std::string &getRefuelItem() const;
 	/// Gets the craft's repair rate.
@@ -196,7 +201,7 @@ public:
 	/// Gets the craft's score.
 	int getScore() const;
 	/// Gets the craft's terrain data.
-	RuleTerrain *getBattlescapeTerrainData();
+	RuleTerrain *getBattlescapeTerrainData() const;
 	/// Checks if this craft is lost after a failed mission or not.
 	bool keepCraftAfterFailedMission() const;
 	/// Checks if this craft is capable of landing (on missions).
@@ -210,9 +215,9 @@ public:
 	/// Gets the list weight for this craft.
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.
-	std::vector<std::vector<int> > &getDeployment();
+	const std::vector<std::vector<int> > &getDeployment() const;
 	/// Gets the craft inventory tile position.
-	std::vector<int> &getCraftInventoryTile();
+	const std::vector<int> &getCraftInventoryTile() const;
 	/// Gets the item limit for this craft.
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.

@@ -29,12 +29,15 @@
 #include "HelperMeta.h"
 #include "Logger.h"
 #include "Exception.h"
+#include "GraphSubset.h"
 
 
 namespace OpenXcom
 {
+//for Surface.h
 class Surface;
 
+//for Script.h
 class ScriptGlobal;
 class ScriptParserBase;
 class ScriptParserEventsBase;
@@ -48,6 +51,11 @@ class ScriptWorkerBlit;
 template<typename, typename...> class ScriptWorker;
 template<typename, typename> struct ScriptTag;
 template<typename, typename> class ScriptValues;
+
+//for ScriptBind.h
+struct BindBase;
+template<typename T> struct Bind;
+template<typename T, typename N, N T::*X> struct BindNested;
 
 namespace helper
 {
@@ -677,7 +685,9 @@ public:
 	}
 
 	/// Programmable bliting using script.
-	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, bool half = false);
+	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade);
+	/// Programmable bliting using script.
+	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, GraphSubset mask);
 
 	/// Clear all worker data.
 	void clear()

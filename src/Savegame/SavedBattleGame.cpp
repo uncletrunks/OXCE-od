@@ -282,7 +282,8 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 				{
 					if ((*bu)->getId() == owner)
 					{
-						item->moveToOwner(*bu);
+						item->setOwner(*bu);
+						(*bu)->getInventory()->push_back(item);
 					}
 					if ((*bu)->getId() == unit)
 					{
@@ -302,7 +303,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 				{
 					Position pos = (*i)["position"].as<Position>();
 					if (pos.x != -1)
-						getTile(pos)->addItem(item, mod->getInventory("STR_GROUND", true));
+						getTile(pos)->addItem(item, item->getSlot());
 				}
 				toContainer[pass]->push_back(item);
 			}
@@ -1218,7 +1219,7 @@ void SavedBattleGame::randomizeItemLocations(Tile *t)
 	{
 		for (std::vector<BattleItem*>::iterator it = t->getInventory()->begin(); it != t->getInventory()->end();)
 		{
-			if ((*it)->getSlot()->getId() == "STR_GROUND")
+			if ((*it)->getSlot()->getType() == INV_GROUND)
 			{
 				getTile(_storageSpace.at(RNG::generate(0, _storageSpace.size() -1)))->addItem(*it, (*it)->getSlot());
 				it = t->getInventory()->erase(it);
@@ -1246,48 +1247,42 @@ void SavedBattleGame::deleteList(BattleItem* item)
  */
 void SavedBattleGame::removeItem(BattleItem *item)
 {
-	bool find = false;
-	for (std::vector<BattleItem*>::iterator i = _items.begin(); i != _items.end(); ++i)
+	auto purge = [](std::vector<BattleItem*> &inventory, BattleItem* forDelete)
 	{
-		if (*i == item)
+		auto begin = inventory.begin();
+		auto end = inventory.end();
+		for (auto i = begin; i != end; ++i)
 		{
-			find = true;
-			_items.erase(i);
-			break;
+			if (*i == forDelete)
+			{
+				inventory.erase(i);
+				return true;
+			}
 		}
-	}
-	if (!find)
+		return false;
+	};
+
+	if (!purge(_items, item))
 	{
 		return;
 	}
 
 	// due to strange design, the item has to be removed from the tile it is on too (if it is on a tile)
-	Tile *t = item->getTile();
-	BattleUnit *b = item->getOwner();
-	if (t)
-	{
-		for (std::vector<BattleItem*>::iterator it = t->getInventory()->begin(); it != t->getInventory()->end(); ++it)
-		{
-			if ((*it) == item)
-			{
-				t->getInventory()->erase(it);
-				break;
-			}
-		}
-	}
-	if (b)
-	{
-		for (std::vector<BattleItem*>::iterator it = b->getInventory()->begin(); it != b->getInventory()->end(); ++it)
-		{
-			if ((*it) == item)
-			{
-				b->getInventory()->erase(it);
-				break;
-			}
-		}
-	}
+	item->moveToOwner(nullptr);
 
 	deleteList(item);
+
+	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+	{
+		auto ammo = item->getAmmoForSlot(slot);
+		if (ammo && ammo != item)
+		{
+			if (purge(_items, ammo))
+			{
+				deleteList(ammo);
+			}
+		}
+	}
 }
 
 /**
@@ -1819,7 +1814,7 @@ void SavedBattleGame::reviveUnconsciousUnits(bool noTU)
 					}
 				}
 			}
-			if ((*i)->getStatus() == STATUS_UNCONSCIOUS && (*i)->getStunlevel() < (*i)->getHealth() && (*i)->getHealth() > 0)
+			if ((*i)->getStatus() == STATUS_UNCONSCIOUS && !(*i)->isOutThresholdExceed())
 			{
 				Tile *targetTile = getTile(originalPosition);
 				bool largeUnit =  targetTile && targetTile->getUnit() && targetTile->getUnit() != *i && targetTile->getUnit()->getArmor()->getSize() != 1;
@@ -2248,7 +2243,7 @@ void SavedBattleGame::calculateModuleMap()
  * get a pointer to the geoscape save
  * @return a pointer to the geoscape save.
  */
-SavedGame *SavedBattleGame::getGeoscapeSave()
+SavedGame *SavedBattleGame::getGeoscapeSave() const
 {
 	return _battleState->getGame()->getSavedGame();
 }
@@ -2468,6 +2463,18 @@ void randomRangeScript(SavedBattleGame* sbg, int& val, int min, int max)
 	}
 }
 
+void difficultyLevelScript(const SavedBattleGame* sbg, int& val)
+{
+	if (sbg)
+	{
+		val = sbg->getGeoscapeSave()->getDifficulty();
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
 } // namespace
 
 /**
@@ -2509,7 +2516,16 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 	sbg.add<&randomChanceScript>("randomChance");
 	sbg.add<&randomRangeScript>("randomRange");
 
+	sbg.add<&difficultyLevelScript>("difficultyLevel");
+
 	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
+
+
+	sbg.addCustomConst("DIFF_BEGINNER", DIFF_BEGINNER);
+	sbg.addCustomConst("DIFF_EXPERIENCED", DIFF_EXPERIENCED);
+	sbg.addCustomConst("DIFF_VETERAN", DIFF_VETERAN);
+	sbg.addCustomConst("DIFF_GENIUS", DIFF_GENIUS);
+	sbg.addCustomConst("DIFF_SUPERHUMAN", DIFF_SUPERHUMAN);
 }
 
 /**

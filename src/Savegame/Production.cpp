@@ -18,6 +18,7 @@
  */
 #include "Production.h"
 #include <algorithm>
+#include "../Engine/Collections.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Mod/RuleSoldier.h"
 #include "Base.h"
@@ -112,11 +113,14 @@ bool Production::haveEnoughLivingSpaceForOneMoreUnit(Base * b)
 
 bool Production::haveEnoughMaterialsForOneMoreUnit(Base * b, const Mod *m) const
 {
-	for (std::map<std::string, int>::const_iterator iter = _rules->getRequiredItems().begin(); iter != _rules->getRequiredItems().end(); ++iter)
+	for (auto& i : _rules->getRequiredItems())
 	{
-		if (m->getItem(iter->first) != 0 && b->getStorageItems()->getItem(iter->first) < iter->second)
+		if (b->getStorageItems()->getItem(i.first->getType()) < i.second)
 			return false;
-		else if (m->getCraft(iter->first) != 0 && b->getCraftCount(iter->first) < iter->second)
+	}
+	for (auto& i : _rules->getRequiredCrafts())
+	{
+		if (b->getCraftCountForProduction(i.first) < i.second)
 			return false;
 	}
 	return true;
@@ -141,28 +145,30 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 		int count = 0;
 		do
 		{
-			for (std::map<std::string,int>::const_iterator i = _rules->getProducedItems().begin(); i != _rules->getProducedItems().end(); ++i)
+			auto ruleCraft = _rules->getProducedCraft();
+			if (ruleCraft)
 			{
-				if (_rules->getCategory() == "STR_CRAFT")
+				Craft *craft = new Craft(ruleCraft, b, g->getId(ruleCraft->getType()));
+				craft->setStatus("STR_REFUELLING");
+				b->getCrafts()->push_back(craft);
+			}
+			else
+			{
+				for (auto& i : _rules->getProducedItems())
 				{
-					Craft *craft = new Craft(m->getCraft(i->first, true), b, g->getId(i->first));
-					craft->setStatus("STR_REFUELLING");
-					b->getCrafts()->push_back(craft);
-					break;
-				}
-				else
-				{
-					if (m->getItem(i->first, true)->getBattleType() == BT_NONE)
+					if (getSellItems())
+						g->setFunds(g->getFunds() + (i.first->getSellCost() * i.second));
+					else
 					{
-						for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
+						b->getStorageItems()->addItem(i.first->getType(), i.second);
+						if (i.first->getBattleType() == BT_NONE)
 						{
-							(*c)->reuseItem(i->first);
+							for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
+							{
+								(*c)->reuseItem(i.first->getType());
+							}
 						}
 					}
-					if (getSellItems())
-						g->setFunds(g->getFunds() + (m->getItem(i->first, true)->getSellCost() * i->second));
-					else
-						b->getStorageItems()->addItem(i->first, i->second);
 				}
 			}
 			// Spawn persons (soldiers, engineers, scientists, ...)
@@ -236,54 +242,52 @@ const RuleManufacture * Production::getRules() const
 void Production::startItem(Base * b, SavedGame * g, const Mod *m) const
 {
 	g->setFunds(g->getFunds() - _rules->getManufactureCost());
-	for (std::map<std::string,int>::const_iterator iter = _rules->getRequiredItems().begin(); iter != _rules->getRequiredItems().end(); ++iter)
+	for (auto& i : _rules->getRequiredItems())
 	{
-		if (m->getItem(iter->first) != 0)
-		{
-			b->getStorageItems()->removeItem(iter->first, iter->second);
-		}
-		else if (m->getCraft(iter->first) != 0)
-		{
-			// Find suitable craft
-			for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
+		b->getStorageItems()->removeItem(i.first->getType(), i.second);
+	}
+	for (auto& i : _rules->getRequiredCrafts())
+	{
+		// Find suitable craft
+		Collections::deleteIf(*b->getCrafts(), i.second,
+			[&](Craft* craft)
 			{
-				if ((*c)->getRules()->getType() == iter->first)
+				if (craft->getRules() == i.first)
 				{
 					// Unload craft
-					(*c)->unload(m);
+					craft->unload(m);
 
 					// Clear hangar
 					for (std::vector<BaseFacility*>::iterator f = b->getFacilities()->begin(); f != b->getFacilities()->end(); ++f)
 					{
-						if ((*f)->getCraft() == (*c))
+						if ((*f)->getCraftForDrawing() == craft)
 						{
-							(*f)->setCraft(0);
+							(*f)->setCraftForDrawing(0);
 							break;
 						}
 					}
 
-					// Remove craft
-					b->getCrafts()->erase(c);
-					break;
+					return true;
+				}
+				else
+				{
+					return false;
 				}
 			}
-		}
+		);
 	}
 }
 
 void Production::refundItem(Base * b, SavedGame * g, const Mod *m) const
 {
 	g->setFunds(g->getFunds() + _rules->getManufactureCost());
-	for (std::map<std::string, int>::const_iterator iter = _rules->getRequiredItems().begin(); iter != _rules->getRequiredItems().end(); ++iter)
+	for (auto& iter : _rules->getRequiredItems())
 	{
-		if (m->getItem(iter->first) != 0)
-		{
-			b->getStorageItems()->addItem(iter->first, iter->second);
-		}
-		else if (m->getCraft(iter->first) != 0)
-		{
-			// not supported
-		}
+		b->getStorageItems()->addItem(iter.first->getType(), iter.second);
+	}
+	for (auto& iter : _rules->getRequiredCrafts())
+	{
+		// not supported
 	}
 }
 

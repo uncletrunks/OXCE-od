@@ -323,7 +323,7 @@ void Game::quit()
 	if (_save != 0 && _save->isIronman() && !_save->getName().empty())
 	{
 		std::string filename = CrossPlatform::sanitizeFilename(Language::wstrToFs(_save->getName())) + ".sav";
-		_save->save(filename);
+		_save->save(filename, _mod);
 	}
 	_quit = true;
 }

@@ -20,11 +20,13 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include "Unit.h"
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
 
 class Mod;
+class ModScript;
 class SoldierNamePool;
 class StatString;
 
@@ -35,10 +37,18 @@ class StatString;
  */
 class RuleSoldier
 {
+public:
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "RuleSoldier";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 private:
 	std::string _type;
 	int _listOrder;
 	std::vector<std::string> _requires;
+	std::vector<std::string> _requiresBuyBaseFunc;
 	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps, _dogfightExperience;
 	std::string _armor;
 	int _costBuy, _costSalary, _costSalarySquaddie, _costSalarySergeant, _costSalaryCaptain, _costSalaryColonel, _costSalaryCommander;
@@ -51,6 +61,7 @@ private:
 	std::vector<StatString*> _statStrings;
 	std::vector<std::string> _rankStrings;
 	int _rankSprite, _rankSpriteBattlescape, _rankSpriteTiny;
+	ScriptValues<RuleSoldier> _scriptValues;
 
 	void addSoldierNamePool(const std::string &namFile);
 public:
@@ -59,13 +70,15 @@ public:
 	/// Cleans up the soldier ruleset.
 	~RuleSoldier();
 	/// Loads the soldier data from YAML.
-	void load(const YAML::Node& node, Mod *mod, int listOrder);
+	void load(const YAML::Node& node, Mod *mod, int listOrder, const ModScript &parsers);
 	/// Gets the soldier's type.
 	std::string getType() const;
 	/// Gets the list/sort order of the soldier's type.
 	int getListOrder() const;
 	/// Gets the soldier's requirements.
 	const std::vector<std::string> &getRequirements() const;
+	/// Gets the base functions required to buy solder.
+	const std::vector<std::string> &getRequiresBuyBaseFunc() const;
 	/// Gets the minimum stats for the random stats generator.
 	UnitStats getMinStats() const;
 	/// Gets the maximum stats for the random stats generator.

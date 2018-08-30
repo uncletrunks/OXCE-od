@@ -28,6 +28,7 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Engine/Timer.h"
+#include "../Engine/Collections.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
@@ -308,7 +309,7 @@ void CraftEquipmentState::initList()
 		RuleItem *rule = _game->getMod()->getItem(*i);
 
 		int cQty = 0;
-		if (rule->isFixed())
+		if (rule->getVehicleUnit())
 		{
 			cQty = c->getVehicleCount(*i);
 		}
@@ -545,7 +546,7 @@ void CraftEquipmentState::updateQuantity()
 	Craft *c = _base->getCrafts()->at(_craft);
 	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
 	int cQty = 0;
-	if (item->isFixed())
+	if (item->getVehicleUnit())
 	{
 		cQty = c->getVehicleCount(_items[_sel]);
 	}
@@ -608,12 +609,12 @@ void CraftEquipmentState::moveLeftByValue(int change)
 	Craft *c = _base->getCrafts()->at(_craft);
 	RuleItem *item = _game->getMod()->getItem(_items[_sel], true);
 	int cQty = 0;
-	if (item->isFixed()) cQty = c->getVehicleCount(_items[_sel]);
+	if (item->getVehicleUnit()) cQty = c->getVehicleCount(_items[_sel]);
 	else cQty = c->getItems()->getItem(_items[_sel]);
 	if (change <= 0 || cQty <= 0) return;
 	change = std::min(cQty, change);
 	// Convert vehicle to item
-	if (item->isFixed())
+	if (item->getVehicleUnit())
 	{
 		if (!item->getPrimaryCompatibleAmmo()->empty())
 		{
@@ -635,16 +636,12 @@ void CraftEquipmentState::moveLeftByValue(int change)
 				_base->getStorageItems()->addItem(ammo->getType(), ammoPerVehicle * change);
 			}
 			// now delete the vehicles from the craft.
-			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end() && change > 0; )
-			{
-				if ((*i)->getRules() == item)
+			Collections::deleteIf(*c->getVehicles(), change,
+				[&](Vehicle* v)
 				{
-					delete (*i);
-					i = c->getVehicles()->erase(i);
-					--change;
+					return v->getRules() == item;
 				}
-				else ++i;
-			}
+			);
 		}
 		else
 		{
@@ -652,16 +649,12 @@ void CraftEquipmentState::moveLeftByValue(int change)
 			{
 				_base->getStorageItems()->addItem(_items[_sel], change);
 			}
-			for (std::vector<Vehicle*>::iterator i = c->getVehicles()->begin(); i != c->getVehicles()->end() && change > 0; )
-			{
-				if ((*i)->getRules() == item)
+			Collections::deleteIf(*c->getVehicles(), change,
+				[&](Vehicle* v)
 				{
-					delete (*i);
-					i = c->getVehicles()->erase(i);
-					--change;
+					return v->getRules() == item;
 				}
-				else ++i;
-			}
+			);
 		}
 	}
 	else
@@ -707,14 +700,9 @@ void CraftEquipmentState::moveRightByValue(int change, bool suppressErrors)
 	if (0 >= change || 0 >= bqty) return;
 	change = std::min(bqty, change);
 	// Do we need to convert item to vehicle?
-	if (item->isFixed())
+	if (item->getVehicleUnit())
 	{
-		int size = 4;
-		if (_game->getMod()->getUnit(item->getType()))
-		{
-			size = _game->getMod()->getArmor(_game->getMod()->getUnit(item->getType())->getArmor(), true)->getSize();
-			size *= size;
-		}
+		int size = item->getVehicleUnit()->getArmor()->getTotalSize();
 		// Check if there's enough room
 		int room = std::min(c->getRules()->getVehicles() - c->getNumVehicles(), c->getSpaceAvailable() / size);
 		if (room > 0)

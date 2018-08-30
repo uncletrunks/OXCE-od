@@ -48,9 +48,9 @@ public:
 	/// Cleans up the ItemSprite.
 	~ItemSprite();
 	/// Draws the item.
-	void draw(BattleItem* item, int x, int y, int shade, bool half = false);
+	void draw(BattleItem* item, int x, int y, int shade);
 	/// Draws the item shadow.
-	void drawShadow(BattleItem* item, int x, int y, bool half = false);
+	void drawShadow(BattleItem* item, int x, int y);
 };
 
 } //namespace OpenXcom

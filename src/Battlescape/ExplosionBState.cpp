@@ -400,22 +400,7 @@ void ExplosionBState::explode()
 	}
 	else
 	{
-		BattleUnit *victim = save->getTileEngine()->hit(_attack, _center, _power, _damageType, range);
-
-		const RuleItem *hitItem = _attack.damage_item->getRules();
-
-		// check if this unit turns others into zombies
-		if (!hitItem->getZombieUnit().empty()
-			&& RNG::percent(hitItem->getSpecialChance())
-			&& victim
-			&& victim->getArmor()->getZombiImmune() == false
-			&& victim->getSpawnUnit().empty()
-			&& victim->getOriginalFaction() != FACTION_HOSTILE)
-		{
-			// converts the victim to a zombie on death
-			victim->setRespawn(true);
-			victim->setSpawnUnit(hitItem->getZombieUnit());
-		}
+		save->getTileEngine()->hit(_attack, _center, _power, _damageType, range);
 	}
 
 	if (_tile)

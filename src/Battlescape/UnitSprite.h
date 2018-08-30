@@ -50,12 +50,13 @@ private:
 
 	BattleUnit *_unit;
 	BattleItem *_itemR, *_itemL;
-	SurfaceSet *_unitSurface, *_itemSurface, *_fireSurface;
+	SurfaceSet *_unitSurface, *_itemSurface, *_fireSurface, *_breathSurface;
 	Surface *_dest;
 	Mod *_mod;
 	int _part, _animationFrame, _drawingRoutine;
-	bool _helmet, _half;
+	bool _helmet;
 	int _x, _y, _shade, _burn;
+	GraphSubset _mask;
 
 	/// Drawing routine for XCom soldiers in overalls, sectoids (routine 0),
 	/// mutons (routine 10),
@@ -109,7 +110,7 @@ public:
 	/// Cleans up the UnitSprite.
 	~UnitSprite();
 	/// Draws the unit.
-	void draw(BattleUnit* unit, int part, int x, int y, int shade, bool hald = false);
+	void draw(BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask);
 };
 
 } //namespace OpenXcom

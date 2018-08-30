@@ -29,6 +29,7 @@
 #include "../Interface/ImageButton.h"
 #include "../Interface/Text.h"
 #include "../Engine/Timer.h"
+#include "../Engine/Collections.h"
 #include "Globe.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Soldier.h"
@@ -1187,18 +1188,12 @@ void DogfightState::update()
 		}
 
 		// Remove projectiles that hit or missed their target.
-		for (std::vector<CraftWeaponProjectile*>::iterator it = _projectiles.begin(); it != _projectiles.end();)
-		{
-			if ((*it)->toBeRemoved() == true || ((*it)->getMissed() == true && (*it)->getPosition() <= 0))
+		Collections::deleteIf(_projectiles, _projectiles.size(),
+			[&](CraftWeaponProjectile* cwp)
 			{
-				delete *it;
-				it = _projectiles.erase(it);
+				return cwp->toBeRemoved() == true || (cwp->getMissed() == true && cwp->getPosition() <= 0);
 			}
-			else
-			{
-				++it;
-			}
-		}
+		);
 
 		// Handle weapons and craft distance.
 		for (int i = 0; i < _weaponNum; ++i)

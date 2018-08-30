@@ -18,6 +18,7 @@
  */
 #include <algorithm>
 #include <climits>
+#include "TileEngine.h"
 #include "DebriefingState.h"
 #include "CannotReequipState.h"
 #include "../Engine/Action.h"
@@ -1389,7 +1390,7 @@ void DebriefingState::prepareDebriefing()
 				if ((((*j)->isInExitArea(START_POINT) || (*j)->getStatus() == STATUS_IGNORE_ME) && (battle->getMissionType() != "STR_BASE_DEFENSE" || success)) || !aborted || (aborted && (*j)->isInExitArea(END_POINT)))
 				{ // so game is not aborted or aborted and unit is on exit area
 					UnitStats statIncrease;
-					(*j)->postMissionProcedures(save, statIncrease);
+					(*j)->postMissionProcedures(save, battle, statIncrease);
 					if ((*j)->getGeoscapeSoldier())
 						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease));
 					playersInExitArea++;
@@ -1463,13 +1464,7 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((*j)->getTile())
 				{
-					for (std::vector<BattleItem*>::iterator k = (*j)->getInventory()->begin(); k != (*j)->getInventory()->end(); ++k)
-					{
-						if (!(*k)->getRules()->isFixed())
-						{
-							(*j)->getTile()->addItem(*k, _game->getMod()->getInventory("STR_GROUND", true));
-						}
-					}
+					battle->getTileEngine()->itemDropInventory((*j)->getTile(), (*j));
 				}
 				if (!(*j)->getArmor()->getCorpseBattlescape().empty())
 				{
@@ -1542,7 +1537,6 @@ void DebriefingState::prepareDebriefing()
 			craft = 0; // To avoid a crash down there!!
 			lostCraft = true;
 			base->getCrafts()->erase(craftIterator);
-			_txtTitle->setText(tr("STR_CRAFT_IS_LOST"));
 		}
 		playersSurvived = 0; // assuming you aborted and left everyone behind
 		success = false;
@@ -1745,10 +1739,6 @@ void DebriefingState::prepareDebriefing()
 				if ((*c)->getStatus() != "STR_OUT")
 					reequipCraft(base, *c, false);
 			}
-			// Clear base->getVehicles() objects, they aren't needed anymore.
-			for (std::vector<Vehicle*>::iterator i = base->getVehicles()->begin(); i != base->getVehicles()->end(); ++i)
-				delete (*i);
-			base->getVehicles()->clear();
 		}
 		else if (_game->getSavedGame()->getMonthsPassed() != -1)
 		{
@@ -1886,12 +1876,7 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 	{
 		int qty = base->getStorageItems()->getItem(i->first);
 		RuleItem *tankRule = _game->getMod()->getItem(i->first, true);
-		int size = 4;
-		if (_game->getMod()->getUnit(tankRule->getType()))
-		{
-			size = _game->getMod()->getArmor(_game->getMod()->getUnit(tankRule->getType())->getArmor(), true)->getSize();
-			size *= size;
-		}
+		int size = tankRule->getVehicleUnit()->getArmor()->getTotalSize();
 		int canBeAdded = std::min(qty, i->second);
 		if (qty < i->second)
 		{ // missing tanks
@@ -2242,7 +2227,7 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		RuleResearch *research = _game->getMod()->getResearch(type);
 		bool surrendered = (!from->isOut() || from->getStatus() == STATUS_IGNORE_ME)
 			&& (from->isSurrendering() || _game->getSavedGame()->getSavedBattle()->getChronoTrigger() == FORCE_WIN_SURRENDER);
-		if (research != 0 && !_game->getSavedGame()->isResearched(type))
+		if (research != 0 && !_game->getSavedGame()->isResearched(research))
 		{
 			// more points if it's not researched
 			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);

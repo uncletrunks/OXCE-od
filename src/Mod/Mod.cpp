@@ -41,6 +41,7 @@
 #include "../Engine/Exception.h"
 #include "../Engine/Logger.h"
 #include "../Engine/ScriptBind.h"
+#include "../Engine/Collections.h"
 #include "SoundDefinition.h"
 #include "ExtraSprites.h"
 #include "CustomPalettes.h"
@@ -934,6 +935,7 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 	Log(LOG_INFO) << "Loading rulesets...";
 	ModScript parser{ _scriptGlobal, this };
 
+	Log(LOG_INFO) << "Loading rulesets...";
 	std::vector<size_t> modOffsets(mods.size());
 	_scriptGlobal->beginLoad();
 	size_t offset = 0;
@@ -997,6 +999,22 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 	for (auto j = _items.begin(); j != _items.end(); ++j)
 	{
 		j->second->updateCategories(&replacementRules);
+	}
+	for (auto& rule : _research)
+	{
+		rule.second->afterLoad(this);
+	}
+	for (auto& rule : _items)
+	{
+		rule.second->afterLoad(this);
+	}
+	for (auto& rule : _manufacture)
+	{
+		rule.second->afterLoad(this);
+	}
+	for (auto& rule : _units)
+	{
+		rule.second->afterLoad(this);
 	}
 
 	// fixed user options
@@ -1258,7 +1276,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		if (rule != 0)
 		{
 			_soldierListOrder += 1;
-			rule->load(*i, this, _soldierListOrder);
+			rule->load(*i, this, _soldierListOrder, parsers);
 		}
 	}
 	for (YAML::const_iterator i = doc["units"].begin(); i != doc["units"].end(); ++i)
@@ -1708,11 +1726,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		}
 		if (_mapScripts.find(type) != _mapScripts.end())
 		{
-			for (std::vector<MapScript*>::iterator j = _mapScripts[type].begin(); j != _mapScripts[type].end();)
-			{
-				delete *j;
-				j = _mapScripts[type].erase(j);
-			}
+			Collections::deleteAll(_mapScripts[type]);
 		}
 		for (YAML::const_iterator j = (*i)["commands"].begin(); j != (*i)["commands"].end(); ++j)
 		{
@@ -2506,9 +2520,39 @@ const std::vector<std::string> &Mod::getInvsList() const
  * @param id Research project type.
  * @return Rules for the research project.
  */
-RuleResearch *Mod::getResearch (const std::string &id, bool error) const
+RuleResearch *Mod::getResearch(const std::string &id, bool error) const
 {
 	return getRule(id, "Research", _research, error);
+}
+
+/**
+ * Gets the ruleset list for from reserch list.
+ */
+std::vector<const RuleResearch*> Mod::getResearch(const std::vector<std::string> &id) const
+{
+	std::vector<const RuleResearch*> dest;
+	dest.reserve(id.size());
+	for (auto& n : id)
+	{
+		auto r = getResearch(n, false);
+		if (r)
+		{
+			dest.push_back(r);
+		}
+		else
+		{
+			Log(LOG_ERROR) << "Unknow reserch " + n;
+		}
+	}
+	return dest;
+}
+
+/**
+ * Gets the ruleset for a specific research project.
+ */
+const std::map<std::string, RuleResearch *> &Mod::getResearchMap() const
+{
+	return _research;
 }
 
 /**
@@ -2730,7 +2774,7 @@ template <typename T>
 struct compareRule : public std::binary_function<const std::string&, const std::string&, bool>
 {
 	Mod *_mod;
-	typedef T*(Mod::*RuleLookup)(const std::string &id, bool error);
+	typedef T*(Mod::*RuleLookup)(const std::string &id, bool error) const;
 	RuleLookup _lookup;
 
 	compareRule(Mod *mod, RuleLookup lookup) : _mod(mod), _lookup(lookup)
@@ -3061,9 +3105,9 @@ ScriptGlobal *Mod::getScriptGlobal() const
 	return _scriptGlobal;
 }
 
-std::string Mod::getFinalResearch() const
+RuleResearch *Mod::getFinalResearch() const
 {
-	return _finalResearch;
+	return getResearch(_finalResearch, true);
 }
 
 const std::map<int, std::string> *Mod::getMissionRatings() const

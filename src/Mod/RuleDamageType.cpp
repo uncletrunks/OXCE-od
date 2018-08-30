@@ -136,6 +136,17 @@ int RuleDamageType::getRandomDamage(int power, int mode) const
 }
 
 /**
+ * Calculate random value of damage for tile attack.
+ * @param power Raw power of attack
+ * @param damage Random damage done to units
+ * @return Random damage for tile.
+ */
+int RuleDamageType::getRandomDamageForTile(int power, int damage) const
+{
+	return TileDamageMethod == 1 ? RNG::generate(power / 2, 3 * power / 2) : damage;
+}
+
+/**
  * Is this damage single target.
  * @return True if it can only hit one target.
  */
@@ -194,23 +205,23 @@ void RuleDamageType::load(const YAML::Node& node)
 namespace
 {
 /**
- * Helper function for calculating damage from power.
+ * Helper function for calculating damage from damage.
  * @param random
  * @param multipler
- * @param power
+ * @param damage
  * @return Damage to somthing.
  */
-int getDamageHelper(bool random, float multipler, int power)
+int getDamageHelper(bool random, float multipler, int damage)
 {
-	if (power > 0)
+	if (damage > 0)
 	{
 		if (random)
 		{
-			return (int)std::round(RNG::generate(0, power) * multipler);
+			return (int)std::round(RNG::generate(0, damage) * multipler);
 		}
 		else
 		{
-			return (int)std::round(power * multipler);
+			return (int)std::round(damage * multipler);
 		}
 	}
 	return 0;
@@ -219,102 +230,97 @@ int getDamageHelper(bool random, float multipler, int power)
 }
 
 /**
- * Get damage value to health based on power.
+ * Get final damage value to health based on damage.
  */
-int RuleDamageType::getHealthDamage(int power) const
+int RuleDamageType::getHealthFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomHealth, ToHealth, power);
+	return getDamageHelper(RandomHealth, ToHealth, damage);
 }
 
 /**
- * Get damage value to armor based on power.
+ * Get final damage value to armor based on damage.
  */
-int RuleDamageType::getArmorDamage(int power) const
+int RuleDamageType::getArmorFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomArmor, ToArmor, power);
+	return getDamageHelper(RandomArmor, ToArmor, damage);
 }
 
 /**
- * Get damage value to armor based on power before armor reduction.
+ * Get final damage value to armor based on damage before armor reduction.
  */
-int RuleDamageType::getArmorPreDamage(int power) const
+int RuleDamageType::getArmorPreFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomArmorPre, ToArmorPre, power);
+	return getDamageHelper(RandomArmorPre, ToArmorPre, damage);
 }
 
 /**
- * Get numbers of wound based on power.
+ * Get numbers of wound based on damage.
  */
-int RuleDamageType::getWoundDamage(int power) const
+int RuleDamageType::getWoundFinalDamage(int damage) const
 {
-	if (power > 0)
+	if (damage > 0)
 	{
 		if (RandomWound)
 		{
-			if (RNG::generate(0, 10) < int(power * ToWound))
+			if (RNG::generate(0, 10) < int(damage * ToWound))
 			{
 				return RNG::generate(1,3);
 			}
 		}
 		else
 		{
-			return (int)std::round(power * ToWound);
+			return (int)std::round(damage * ToWound);
 		}
 	}
 	return 0;
 }
 
 /**
- * Get damage value to item based on power.
+ * Get final damage value to item based on damage.
  */
-int RuleDamageType::getItemDamage(int power) const
+int RuleDamageType::getItemFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomItem, ToItem, power);
+	return getDamageHelper(RandomItem, ToItem, damage);
 }
 
 /**
- * Get damage value to tile based on power.
+ * Get final damage value to tile based on damage.
  */
-int RuleDamageType::getTileDamage(int power) const
+int RuleDamageType::getTileFinalDamage(int damage) const
 {
-	if (TileDamageMethod == 1)
-	{
-		return getDamageHelper(false, ToTile, RNG::generate(power / 2, 3 * power / 2));
-	}
-
-	return getDamageHelper(RandomTile, ToTile, power);
+	return getDamageHelper(RandomTile, ToTile, damage);
 }
 
 /**
- * Get stun level change based on power.
+ * Get stun level change based on damage.
  */
-int RuleDamageType::getStunDamage(int power) const
+int RuleDamageType::getStunFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomStun, ToStun, power);
+	return getDamageHelper(RandomStun, ToStun, damage);
 }
 
 /**
- * Get energy change based on power.
+ * Get energy change based on damage.
  */
-int RuleDamageType::getEnergyDamage(int power) const
+int RuleDamageType::getEnergyFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomEnergy, ToEnergy, power);
+	return getDamageHelper(RandomEnergy, ToEnergy, damage);
 }
 
 /**
- * Get time units change based on power.
+ * Get time units change based on damage.
  */
-int RuleDamageType::getTimeDamage(int power) const
+int RuleDamageType::getTimeFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomTime, ToTime, power);
+	return getDamageHelper(RandomTime, ToTime, damage);
 }
 
 /**
- * Get morale change based on power.
+ * Get morale change based on damage.
  */
-int RuleDamageType::getMoraleDamage(int power) const
+int RuleDamageType::getMoraleFinalDamage(int damage) const
 {
-	return getDamageHelper(RandomMorale, ToMorale, power);
+	return getDamageHelper(RandomMorale, ToMorale, damage);
 }
 
 } //namespace OpenXcom

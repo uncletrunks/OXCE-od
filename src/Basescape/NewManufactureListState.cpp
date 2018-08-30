@@ -32,6 +32,7 @@
 #include "../Engine/Options.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
@@ -395,10 +396,9 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 				int byFunds = _game->getSavedGame()->getFunds() / (*it)->getManufactureCost();
 				productionPossible = std::min(productionPossible, byFunds);
 			}
-			const std::map<std::string, int> & requiredItems ((*it)->getRequiredItems());
-			for (std::map<std::string, int>::const_iterator iter = requiredItems.begin(); iter != requiredItems.end(); ++iter)
+			for (auto& iter : (*it)->getRequiredItems())
 			{
-				productionPossible = std::min(productionPossible, itemContainer->getItem(iter->first) / iter->second);
+				productionPossible = std::min(productionPossible, itemContainer->getItem(iter.first->getType()) / iter.second);
 			}
 			std::wostringstream ss;
 			if (productionPossible <= 0)

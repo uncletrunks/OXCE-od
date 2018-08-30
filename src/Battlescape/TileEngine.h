@@ -81,6 +81,7 @@ private:
 	SavedBattleGame *_save;
 	std::vector<Uint16> *_voxelData;
 	std::vector<VisibilityBlockCache> _blockVisibility;
+	RuleInventory *_inventorySlotGround;
 	static const int heightFromCenter[11];
 	bool _personalLighting;
 	Tile *_cacheTile;
@@ -154,7 +155,7 @@ public:
 	/// Handles tile hit.
 	int hitTile(Tile *tile, int damage, const RuleDamageType* type);
 	/// Handles experience training.
-	bool awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUnit *target, bool rangeAtack);
+	bool awardExperience(BattleActionAttack attack, BattleUnit *target, bool rangeAtack);
 	/// Handles unit hit.
 	bool hitUnit(BattleActionAttack attack, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack = true);
 	/// Handles bullet/weapon hits.
@@ -201,8 +202,17 @@ public:
 	void medikitStimulant(BattleAction *action, BattleUnit *target);
 	/// Try using medikit pain killer ability.
 	void medikitPainKiller(BattleAction *action, BattleUnit *target);
+
 	/// Applies gravity to anything that occupy this tile.
 	Tile *applyGravity(Tile *t);
+
+	/// Drop item on ground.
+	void itemDrop(Tile *t, BattleItem *item, bool updateLight);
+	/// Drop all unit items on ground.
+	void itemDropInventory(Tile *t, BattleUnit *unit);
+	/// Move item to other place in inventory or ground.
+	void itemMoveInventory(Tile *t, BattleUnit *unit, BattleItem *item, RuleInventory *slot, int x, int y);
+
 	/// Returns melee validity between two units.
 	bool validMeleeRange(BattleUnit *attacker, BattleUnit *target, int dir);
 	/// Returns validity of a melee attack from a given position.

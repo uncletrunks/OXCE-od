@@ -46,10 +46,12 @@ UnitSprite::UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet) :
 	_unitSurface(0),
 	_itemSurface(mod->getSurfaceSet("HANDOB.PCK")),
 	_fireSurface(mod->getSurfaceSet("SMOKE.PCK")),
+	_breathSurface(mod->getSurfaceSet("BREATH-1.PCK", false)),
 	_dest(dest), _mod(mod),
 	_part(0), _animationFrame(frame), _drawingRoutine(0),
-	_helmet(helmet), _half(false),
-	_x(0), _y(0), _shade(0), _burn(0)
+	_helmet(helmet),
+	_x(0), _y(0), _shade(0), _burn(0),
+	_mask(0, 0)
 {
 
 }
@@ -161,7 +163,7 @@ void UnitSprite::blitItem(Part& item)
 
 	_dest->lock();
 
-	work.executeBlit(item.src, _dest,  _x + item.offX, _y + item.offY, _shade, _half);
+	work.executeBlit(item.src, _dest,  _x + item.offX, _y + item.offY, _shade, _mask);
 
 	_dest->unlock();
 }
@@ -181,7 +183,7 @@ void UnitSprite::blitBody(Part& body)
 
 	_dest->lock();
 
-	work.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _shade, _half);
+	work.executeBlit(body.src, _dest,  _x + body.offX, _y + body.offY, _shade, _mask);
 
 	_dest->unlock();
 }
@@ -190,7 +192,7 @@ void UnitSprite::blitBody(Part& body)
  * Draws a unit, using the drawing rules of the unit.
  * This function is called by Map, for each unit on the screen.
  */
-void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool half)
+void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask)
 {
 	_x = x;
 	_y = y;
@@ -198,7 +200,7 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	_unit = unit;
 	_part = part;
 	_shade = shade;
-	_half = half;
+	_mask = mask;
 
 	if (_unit->isOut())
 	{
@@ -213,13 +215,6 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 
 	_drawingRoutine = _unit->getArmor()->getDrawingRoutine();
 
-	if (_unit->getArmor()->getCanHoldWeapon())
-	{
-		if (_unit->getStatus() == STATUS_AIMING)
-		{
-			_x -= 16;
-		}
-	}
 	_burn = 0;
 	int overkill = _unit->getOverKillDamage();
 	int maxHp = _unit->getBaseStats()->health;
@@ -267,7 +262,16 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, bool 
 	// draw fire
 	if (unit->getFire() > 0)
 	{
-		_fireSurface->getFrame(4 + (_animationFrame / 2) % 4)->blitNShade(_dest, _x, _y, 0);
+		_fireSurface->getFrame(4 + (_animationFrame / 2) % 4)->blitNShade(_dest, _x, _y, 0, _mask);
+	}
+	if (_breathSurface && unit->getBreathFrame() > 0)
+	{
+		auto tmpSurface = _breathSurface->getFrame(unit->getBreathFrame() - 1);
+		if (tmpSurface)
+		{
+			// lower the bubbles for shorter or kneeling units.
+			tmpSurface->blitNShade(_dest, _x, _y- 30 + (22 - unit->getHeight()), shade, _mask);
+		}
 	}
 }
 
@@ -360,7 +364,7 @@ void UnitSprite::drawRoutine0()
 	const int offX7[8] = { 0, 6, 8, 12, 2, -5, -5, -13 }; // for the left handed rifles (muton)
 	const int offY7[8] = { -4, -6, -1, 0, 3, 0, 1, 0 }; // for the left handed rifles (muton)
 	const int offYKneel = 4;
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 	const int soldierHeight = 22;
 
 	const int unitDir = _unit->getDirection();
@@ -654,7 +658,7 @@ void UnitSprite::drawRoutine1()
 	const int offY2[8] = { 1, -4, -1, 0, 3, 3, 5, 0 }; // for the weapons
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
@@ -902,7 +906,7 @@ void UnitSprite::drawRoutine4()
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
 	const int standConvert[8] = { 3, 2, 1, 0, 7, 6, 5, 4 }; // array for converting stand frames for some tftd civilians
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 
 	if (_drawingRoutine == 17) // tftd civilian - first set
 	{
@@ -1051,7 +1055,7 @@ void UnitSprite::drawRoutine6()
 	const int offY2[8] = { 1, -4, -2, 0, 3, 3, 5, 0 }; // for the weapons
 	const int offX3[8] = { 0, 6, 6, 12, -4, -5, -5, -13 }; // for the left handed rifles
 	const int offY3[8] = { -4, -4, -1, 0, 5, 0, 1, 0 }; // for the left handed rifles
-	const int offXAiming = 16;
+	const int offXAiming = 0;
 
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{

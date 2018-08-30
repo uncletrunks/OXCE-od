@@ -104,7 +104,7 @@ class ModScript
 	{
 		HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, int, int, int, int, int, int>
+	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, int, int, int, int, int, int>
 	{
 		DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
@@ -117,6 +117,10 @@ class ModScript
 	{
 		NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
+	struct ReturnFromMissionUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int>, BattleUnit*, SavedBattleGame*, Soldier*>
+	{
+		ReturnFromMissionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
 
 	struct CreateItemParser : ScriptParserEvents<ScriptOutputArgs<>, BattleItem*, SavedBattleGame*, int>
 	{
@@ -127,7 +131,7 @@ class ModScript
 		NewTurnItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
-	struct AwardExperienceParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*>
+	struct AwardExperienceParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*, int>
 	{
 		AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
@@ -155,6 +159,7 @@ public:
 	using DamageUnit = MACRO_NAMED_SCRIPT("damageUnit", DamageUnitParser);
 	using CreateUnit = MACRO_NAMED_SCRIPT("createUnit", CreateUnitParser);
 	using NewTurnUnit = MACRO_NAMED_SCRIPT("newTurnUnit", NewTurnUnitParser);
+	using ReturnFromMissionUnit = MACRO_NAMED_SCRIPT("returnFromMissionUnit", ReturnFromMissionUnitParser);
 
 	using AwardExperience = MACRO_NAMED_SCRIPT("awardExperience", AwardExperienceParser);
 
@@ -187,6 +192,7 @@ public:
 		DamageUnit,
 		CreateUnit,
 		NewTurnUnit,
+		ReturnFromMissionUnit,
 
 		AwardExperience,
 

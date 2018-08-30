@@ -488,23 +488,30 @@ void BattleItem::setPreviousOwner(BattleUnit *owner)
  */
 void BattleItem::moveToOwner(BattleUnit *owner)
 {
-	_previousOwner = _owner ? _owner:owner;
-	_owner = owner;
-	_tile = nullptr;
-	if (_previousOwner != 0)
+	if (_tile)
 	{
-		for (std::vector<BattleItem*>::iterator i = _previousOwner->getInventory()->begin(); i != _previousOwner->getInventory()->end(); ++i)
+		_tile->removeItem(this);
+		_tile = nullptr;
+	}
+	if (owner != _owner)
+	{
+		setOwner(owner);
+
+		if (_previousOwner)
 		{
-			if ((*i) == this)
+			for (std::vector<BattleItem*>::iterator i = _previousOwner->getInventory()->begin(); i != _previousOwner->getInventory()->end(); ++i)
 			{
-				_previousOwner->getInventory()->erase(i);
-				break;
+				if ((*i) == this)
+				{
+					_previousOwner->getInventory()->erase(i);
+					break;
+				}
 			}
 		}
-	}
-	if (_owner != 0)
-	{
-		_owner->getInventory()->push_back(this);
+		if (_owner)
+		{
+			_owner->getInventory()->push_back(this);
+		}
 	}
 }
 
@@ -742,6 +749,25 @@ const RuleItemAction *BattleItem::getActionConf(BattleActionType action) const
 }
 
 /**
+ * Check if attack shoot in arc.
+ */
+bool BattleItem::getArcingShot(BattleActionType action) const
+{
+	if (_rules->getArcingShot())
+	{
+		return true;
+	}
+
+	auto conf = getActionConf(action);
+	if (conf && conf->arcing)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+/**
  * Determines if this item uses ammo.
  */
 bool BattleItem::needsAmmoForAction(BattleActionType action) const
@@ -891,6 +917,7 @@ BattleItem *BattleItem::setAmmoForSlot(int slot, BattleItem* item)
 	_ammoItem[slot] = item;
 	if (item)
 	{
+		item->moveToOwner(nullptr);
 		item->setSlot(nullptr);
 		item->setIsAmmo(true);
 	}

@@ -22,6 +22,7 @@
 #include "../Engine/RNG.h"
 #include "../Engine/Language.h"
 #include "../Engine/Options.h"
+#include "../Engine/ScriptBind.h"
 #include "Craft.h"
 #include "EquipmentLayoutItem.h"
 #include "SoldierDeath.h"
@@ -107,7 +108,7 @@ Soldier::~Soldier()
  * @param mod Game mod.
  * @param save Pointer to savegame.
  */
-void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
+void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, const ScriptGlobal *shared)
 {
 	_id = node["id"].as<int>(_id);
 	_name = Language::utf8ToWstr(node["name"].as<std::string>());
@@ -163,13 +164,14 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save)
 	calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
 	_corpseRecovered = node["corpseRecovered"].as<bool>(_corpseRecovered);
 	_previousTransformations = node["previousTransformations"].as<std::map<std::string, int > >(_previousTransformations);
+	_scriptValues.load(node, shared);
 }
 
 /**
  * Saves the soldier to a YAML file.
  * @return YAML node.
  */
-YAML::Node Soldier::save() const
+YAML::Node Soldier::save(const ScriptGlobal *shared) const
 {
 	YAML::Node node;
 	node["type"] = _rules->getType();
@@ -216,6 +218,7 @@ YAML::Node Soldier::save() const
 	}
 	node["corpseRecovered"] = _corpseRecovered;
 	node["previousTransformations"] = _previousTransformations;
+	_scriptValues.save(node, shared);
 
 	return node;
 }
@@ -671,6 +674,12 @@ bool Soldier::hasFullHealth() const
  * Returns the amount of time until the soldier is healed.
  * @return Number of days.
  */
+int Soldier::getWoundRecoveryInt() const
+{
+	// Note: only for use in Yankes scripts!
+	return (int)(std::ceil(_recovery));
+}
+
 int Soldier::getWoundRecovery(float absBonus, float relBonus) const
 {
 	float hpPerDay = 1.0f + absBonus + (relBonus * _currentStats.health * 0.01f);
@@ -683,17 +692,12 @@ int Soldier::getWoundRecovery(float absBonus, float relBonus) const
  */
 void Soldier::setWoundRecovery(int recovery)
 {
-	_recovery = recovery;
+	_recovery = std::max(recovery, 0);
 
-	// dismiss from craft
-	if (isWounded())
+	// remove from training
+	if (Options::removeWoundedFromTraining && _recovery > 0.0f)
 	{
-		_craft = 0;
-		// remove from training
-		if (Options::removeWoundedFromTraining)
-		{
-			_training = false;
-		}
+		_training = false;
 	}
 }
 
@@ -1247,4 +1251,116 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 	return statChange;
 }
 
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void getGenderScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getGender();
+		return;
+	}
+	ret = 0;
 }
+void getRankScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getRank();
+		return;
+	}
+	ret = 0;
+}
+void getLookScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getLook();
+		return;
+	}
+	ret = 0;
+}
+void getLookVariantScript(const Soldier *so, int &ret)
+{
+	if (so)
+	{
+		ret = so->getLookVariant();
+		return;
+	}
+	ret = 0;
+}
+struct getRuleSoldierScript
+{
+	static RetEnum func(const Soldier *so, const RuleSoldier* &ret)
+	{
+		if (so)
+		{
+			ret = so->getRules();
+		}
+		else
+		{
+			ret = nullptr;
+		}
+		return RetContinue;
+	}
+};
+
+std::string debugDisplayScript(const Soldier* so)
+{
+	if (so)
+	{
+		std::string s;
+		s += Soldier::ScriptName;
+		s += "(type: \"";
+		s += so->getRules()->getType();
+		s += "\" id: ";
+		s += std::to_string(so->getId());
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+} // namespace
+
+/**
+ * Register Soldier in script parser.
+ * @param parser Script parser.
+ */
+void Soldier::ScriptRegister(ScriptParserBase* parser)
+{
+	parser->registerPointerType<RuleSoldier>();
+
+	Bind<Soldier> so = { parser };
+
+
+	so.addField<&Soldier::_id>("getId");
+	so.add<&getRankScript>("getRank");
+	so.add<&getGenderScript>("getGender");
+	so.add<&getLookScript>("getLook");
+	so.add<&getLookVariantScript>("getLookVariant");
+
+
+	UnitStats::addGetStatsScript<Soldier, &Soldier::_currentStats>(so, "Stats.");
+	UnitStats::addSetStatsScript<Soldier, &Soldier::_currentStats>(so, "Stats.");
+
+
+	so.addFunc<getRuleSoldierScript>("getRuleSoldier");
+	so.add<&Soldier::getWoundRecoveryInt>("getWoundRecovery");
+	so.add<&Soldier::setWoundRecovery>("setWoundRecovery");
+
+
+	so.addScriptValue<&Soldier::_scriptValues>();
+	so.addDebugDisplay<&debugDisplayScript>();
+}
+
+} // namespace OpenXcom

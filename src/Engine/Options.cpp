@@ -793,7 +793,7 @@ void updateReservedSpace()
 	if (maxSize > 1)
 	{
 		// Small hack: update ALL masters, not only active master!
-		// this is because, there can be a hierarchy of multiple masters (e.g. xcom1 master > piratez master > some piratez mod)
+		// this is because, there can be a hierarchy of multiple masters (e.g. xcom1 master > fluffyUnicorns master > some fluffyUnicorns mod)
 		// and the one that needs to be updated is actually the "root", i.e. xcom1 master
 		for (std::map<std::string, ModInfo>::iterator i = _modInfos.begin(); i != _modInfos.end(); ++i)
 		{

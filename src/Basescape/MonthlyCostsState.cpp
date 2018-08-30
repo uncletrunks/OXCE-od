@@ -116,9 +116,10 @@ MonthlyCostsState::MonthlyCostsState(Base *base) : _base(base)
 		RuleCraft *craft = _game->getMod()->getCraft(*i);
 		if (craft->getRentCost() != 0 && _game->getSavedGame()->isResearched(craft->getRequirements()))
 		{
+			auto count = _base->getCraftCount(craft);
 			std::wostringstream ss3;
-			ss3 << _base->getCraftCount(*i);
-			_lstCrafts->addRow(4, tr(*i).c_str(), Text::formatFunding(craft->getRentCost()).c_str(), ss3.str().c_str(), Text::formatFunding(_base->getCraftCount(*i) * craft->getRentCost()).c_str());
+			ss3 << count;
+			_lstCrafts->addRow(4, tr(*i).c_str(), Text::formatFunding(craft->getRentCost()).c_str(), ss3.str().c_str(), Text::formatFunding(count * craft->getRentCost()).c_str());
 		}
 	}
 

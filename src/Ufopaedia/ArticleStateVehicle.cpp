@@ -37,9 +37,13 @@ namespace OpenXcom
 
 	ArticleStateVehicle::ArticleStateVehicle(ArticleDefinitionVehicle *defs) : ArticleState(defs->id)
 	{
-		Unit *unit = _game->getMod()->getUnit(defs->id, true);
-		Armor *armor = _game->getMod()->getArmor(unit->getArmor(), true);
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
+		Unit *unit = item->getVehicleUnit();
+		if (!unit)
+		{
+			throw Exception("Item " + defs->id + " do not have vehicle unit defined");
+		}
+		Armor *armor = unit->getArmor();
 
 		// add screen elements
 		_txtTitle = new Text(310, 17, 5, 23);
@@ -87,37 +91,37 @@ namespace OpenXcom
 		_lstStats->setColor(Palette::blockOffset(15)+4);
 		_lstStats->setColumns(2, 175, 145);
 		_lstStats->setDot(true);
-		
+
 		std::wostringstream ss;
 		ss << unit->getStats()->tu;
 		_lstStats->addRow(2, tr("STR_TIME_UNITS").c_str(), ss.str().c_str());
-		
+
 		std::wostringstream ss2;
 		ss2 << unit->getStats()->health;
 		_lstStats->addRow(2, tr("STR_HEALTH").c_str(), ss2.str().c_str());
-		
+
 		std::wostringstream ss3;
 		ss3 << armor->getFrontArmor();
 		_lstStats->addRow(2, tr("STR_FRONT_ARMOR").c_str(), ss3.str().c_str());
-		
+
 		std::wostringstream ss4;
 		ss4 << armor->getLeftSideArmor();
 		_lstStats->addRow(2, tr("STR_LEFT_ARMOR").c_str(), ss4.str().c_str());
-		
+
 		std::wostringstream ss5;
 		ss5 << armor->getRightSideArmor();
 		_lstStats->addRow(2, tr("STR_RIGHT_ARMOR").c_str(), ss5.str().c_str());
-		
+
 		std::wostringstream ss6;
 		ss6 << armor->getRearArmor();
 		_lstStats->addRow(2, tr("STR_REAR_ARMOR").c_str(), ss6.str().c_str());
-		
+
 		std::wostringstream ss7;
 		ss7 << armor->getUnderArmor();
 		_lstStats->addRow(2, tr("STR_UNDER_ARMOR").c_str(), ss7.str().c_str());
-		
+
 		_lstStats->addRow(2, tr("STR_WEAPON").c_str(), tr(defs->weapon).c_str());
-				
+
 		if (!item->getPrimaryCompatibleAmmo()->empty())
 		{
 			RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
@@ -139,7 +143,7 @@ namespace OpenXcom
 			}
 
 			_lstStats->addRow(2, tr("STR_ROUNDS").c_str(), ss9.str().c_str());
-			
+
 			_txtInfo->setY(138);
 		}
 		else

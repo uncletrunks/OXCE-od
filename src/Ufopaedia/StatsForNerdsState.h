@@ -72,6 +72,7 @@ private:
 	void endHeading();
 	void addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId = "", bool translate = true);
 	void addVectorOfStrings(std::wostringstream &ss, const std::vector<std::string> &vec, const std::string &propertyName);
+	void addVectorOfResearch(std::wostringstream &ss, const std::vector<const RuleResearch *> &vec, const std::string &propertyName);
 	void addBoolean(std::wostringstream &ss, const bool &value, const std::string &propertyName, const bool &defaultvalue = false);
 	void addFloat(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue = 0.0f);
 	void addFloatAsPercentage(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue = 0.0f);

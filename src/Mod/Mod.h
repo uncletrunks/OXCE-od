@@ -543,7 +543,11 @@ public:
 	/// Gets whether or not to load base defense terrain from globe texture
 	int getBaseDefenseMapFromLocation() const { return _baseDefenseMapFromLocation; }
 	/// Gets the ruleset for a specific research project.
-	RuleResearch *getResearch (const std::string &id, bool error = false) const;
+	RuleResearch *getResearch(const std::string &id, bool error = false) const;
+	/// Gets the ruleset for a specific research project.
+	std::vector<const RuleResearch*> getResearch(const std::vector<std::string> &id) const;
+	/// Gets the ruleset for a specific research project.
+	const std::map<std::string, RuleResearch *> &getResearchMap() const;
 	/// Gets the list of all research projects.
 	const std::vector<std::string> &getResearchList() const;
 	/// Gets the ruleset for a specific manufacture project.
@@ -618,7 +622,7 @@ public:
 	RuleMissionScript *getMissionScript(const std::string &name, bool error = false) const;
 	/// Get global script data.
 	ScriptGlobal *getScriptGlobal() const;
-	std::string getFinalResearch() const;
+	RuleResearch *getFinalResearch() const;
 	const std::map<int, std::string> *getMissionRatings() const;
 	const std::map<int, std::string> *getMonthlyRatings() const;
 	const std::map<std::string, std::string> &getFixedUserOptions() const;

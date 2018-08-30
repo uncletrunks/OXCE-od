@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 3.10a[/b]
+[b]Mod version 4.0[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -178,6 +178,19 @@ New grenade fuse config.[br/]
 Bug fix.[br/]
 Update nightly.[br/]
 [br/]
+3.10b:[br/]
+[br/]
+4.0:[br/]
+Damage script can now alter zombie transformation chance.[br/]
+Add access to current difficulty level in scripts.[br/]
+Add base function requirmets to buy items, crafts and solders.[br/]
+Add access to geoscape soldier in scripts.[br/]
+Add script that is run at end of mission.[br/]
+Add arcing shoots per attack type (by ohartenstein23).[br/]
+Breaking change: Renamed `action` to `battle_action` in reaction scripts.[br/]
+Add battle action to `awardExperience` script.[br/]
+Breaking change: Renamed access function to statis in armor (added prefix `Stats.`).[br/]
+[br/]
 
 [examples]
 [br/][br/]
@@ -303,6 +316,7 @@ items:
       shots: 1              #number of shots. Defulat `1`.
       name: STR_AIMED_SHOT  #name of attack in action menu.
       ammoSlot: 0           #with ammo slot is used by this attack. Defulat `0`.
+      arcing: false         #if `true` it will change attack to arcing shoot.
     confAuto:
       shots: 3              #number of shots, its alias with `autoShots`.
       #...
@@ -439,6 +453,8 @@ items:
     requiresBuy: #what tech is required for the item to be visible in the Hire/Purchase screen.
       - SOME_TECH
       - SOME_TECH_MK2
+    requiresBuyBaseFunc:  #list of required base functions needed to buy this.
+      - SOME_BASE_FUNC_A
     psiAttackName: STR_HIT_MELEE                      #string id of psi-amp attack name in the pop-up menu. Required to enable special attack.
     primeActionName: STR_PRIME_GRENADE                #string id of grenade prime action name in the pop-up menu. Required to enable prime action. Defulat value `STR_PRIME_GRENADE`;
     primeActionMessage: STR_GRENADE_IS_ACTIVATED      #string id of grenade prime action message.
@@ -544,9 +560,20 @@ armors:
 [/code]
 
 [code]
+soldiers:
+  - type: STR_SOLDIER_A
+    requiresBuyBaseFunc:  #list of required base functions needed to buy this.
+      - SOME_BASE_FUNC_A
+[/code]
+
+[code]
 crafts:
-  - type: STR_CRAFT_TYPE #default config ...
-    radarChance: 100    #how effective craft radar is, default 100.
+  - type: STR_CRAFT_TYPE  #default config ...
+    requiresBuyBaseFunc:  #list of required base functions needed to buy this.
+      - SOME_BASE_FUNC_A
+    radarRange: 672     #craft radar range. Default `672`.
+    radarChance: 100    #craft radar dedection chance. Default `100`.
+    sightRange: 1696    #alien base dedection range. Default `1696`.
     weapons: 4          #weapon number increased to 4.
     weaponTypes:        #definition of allowed weapon types in craft. Max 4 different types per slot.
       - 0               #slot 1 accepts weapons with type 0. This is default.
@@ -585,10 +612,11 @@ craftWeapons:
 [code]
 ufos:
   - type: STR_UFO_TYPE #default config ...
-    hitBonus: 0   #bonus percentage to all weapons hit chance. Range [0, 100].
-    avoidBonus: 0 #bonus percentage to UFO dodge chance. Range [0, 100].
-    powerBonus: 0 #bonus percentage to all weapons damage. Range [0, 100].
-    armor: 0      #amount of blocked damage per hit.
+    sightRange: 268 #xcom base dedection range. Default `268`.
+    hitBonus: 0     #bonus percentage to all weapons hit chance. Range [0, 100].
+    avoidBonus: 0   #bonus percentage to UFO dodge chance. Range [0, 100].
+    powerBonus: 0   #bonus percentage to all weapons damage. Range [0, 100].
+    armor: 0        #amount of blocked damage per hit.
     craftCustomDeploy: STR_BATTLESHIP_1 #override craft default weapon deploy.
     missionCustomDeploy: STR_TERROR_MISSION_2 #override mission defulat weapon deploy.
     raceBonus: #bonus stats per race.

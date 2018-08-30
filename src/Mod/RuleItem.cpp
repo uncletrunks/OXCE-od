@@ -23,6 +23,7 @@
 #include "RuleDamageType.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Engine/Exception.h"
+#include "../Engine/Collections.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
@@ -41,7 +42,7 @@ const float TilesToVexels = 16.0f;
  * @param type String defining the type.
  */
 RuleItem::RuleItem(const std::string &type) :
-	_type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _haveMercy(false),
+	_type(type), _name(type), _vehicleUnit(nullptr), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _haveMercy(false),
 	_bigSprite(-999), _floorSprite(-1), _handSprite(120), _bulletSprite(-1), _specialIconSprite(-1),
 	_hitAnimation(0), _hitMissAnimation(-1),
 	_meleeAnimation(0), _meleeMissAnimation(-1),
@@ -246,6 +247,7 @@ void RuleItem::loadConfAction(RuleItemAction& a, const YAML::Node& node, const s
 				a.ammoSlot = s;
 			}
 		}
+		a.arcing = conf["arcing"].as<bool>(a.arcing);
 	}
 }
 
@@ -316,8 +318,15 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_type = node["type"].as<std::string>(_type);
 	_name = node["name"].as<std::string>(_name);
 	_nameAsAmmo = node["nameAsAmmo"].as<std::string>(_nameAsAmmo);
-	_requires = node["requires"].as< std::vector<std::string> >(_requires);
-	_requiresBuy = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuy);
+
+	//requires
+	_requiresName = node["requires"].as< std::vector<std::string> >(_requiresName);
+	_requiresBuyName = node["requiresBuy"].as< std::vector<std::string> >(_requiresBuyName);
+	_requiresBuyBaseFunc = node["requiresBuyBaseFunc"].as< std::vector<std::string> >(_requiresBuyBaseFunc);
+
+	std::sort(_requiresBuyBaseFunc.begin(), _requiresBuyBaseFunc.end());
+
+
 	_categories = node["categories"].as< std::vector<std::string> >(_categories);
 	_size = node["size"].as<double>(_size);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
@@ -450,9 +459,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		_meleeType.load(alter);
 	}
 
-	if (node["skillApplied"])
+	if (const YAML::Node &skill = node["skillApplied"])
 	{
-		if (node["skillApplied"].as<bool>(false))
+		if (skill.as<bool>(false))
 		{
 			_meleeMulti.setMelee();
 		}
@@ -659,6 +668,22 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 }
 
 /**
+ * Cross link with other Rules.
+ */
+void RuleItem::afterLoad(const Mod* mod)
+{
+	_requires = mod->getResearch(_requiresName);
+	// fixedWeapons can mean vehicle
+	if (_fixedWeapon)
+	{
+		_vehicleUnit = mod->getUnit(_type);
+	}
+
+	//remove not needed data
+	Collections::deleteAll(_requiresName);
+}
+
+/**
  * Gets the item type. Each item has a unique type.
  * @return The item's type.
  */
@@ -691,7 +716,7 @@ const std::string &RuleItem::getNameAsAmmo() const
  * use this item.
  * @return The list of research IDs.
  */
-const std::vector<std::string> &RuleItem::getRequirements() const
+const std::vector<const RuleResearch *> &RuleItem::getRequirements() const
 {
 	return _requires;
 }
@@ -701,9 +726,18 @@ const std::vector<std::string> &RuleItem::getRequirements() const
  * buy this item from market.
  * @return The list of research IDs.
  */
-const std::vector<std::string> &RuleItem::getBuyRequirements() const
+const std::vector<const RuleResearch *> &RuleItem::getBuyRequirements() const
 {
 	return _requiresBuy;
+}
+
+/**
+ * Gets the base functions required to buy item.
+ * @retreturn The sorted list of base functions ID
+ */
+const std::vector<std::string> &RuleItem::getRequiresBuyBaseFunc() const
+{
+	return _requiresBuyBaseFunc;
 }
 
 /**
@@ -724,6 +758,14 @@ const std::vector<std::string> &RuleItem::getCategories() const
 bool RuleItem::belongsToCategory(const std::string &category) const
 {
 	return std::find(_categories.begin(), _categories.end(), category) != _categories.end();
+}
+
+/**
+ * Gets unit rule if the item is vehicle weapon.
+ */
+Unit* RuleItem::getVehicleUnit() const
+{
+	return _vehicleUnit;
 }
 
 /**

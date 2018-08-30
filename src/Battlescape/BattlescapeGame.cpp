@@ -497,6 +497,8 @@ void BattlescapeGame::endTurn()
 			getMod()->getSoundByDepth(_save->getDepth(), Mod::SLIDING_DOOR_CLOSE)->play(); // ufo door closed
 		}
 
+		Position p;
+
 		// if all grenades explode we remove items that expire on that turn too.
 		std::vector<BattleItem*> forRemoval;
 		bool exploded = false;
@@ -1953,45 +1955,7 @@ void BattlescapeGame::setTUReserved(BattleActionType tur)
  */
 void BattlescapeGame::dropItem(Position position, BattleItem *item, bool removeItem, bool updateLight)
 {
-	const Position& p = position;
-
-	// don't spawn anything outside of bounds
-	if (_save->getTile(p) == 0)
-		return;
-
-	// don't ever drop fixed items
-	if (item->getRules()->isFixed())
-		return;
-
-	if (item->getUnit())
-	{
-		item->getUnit()->setPosition(p);
-	}
-
-	else if (_save->getSide() != FACTION_PLAYER)
-	{
-		item->setTurnFlag(true);
-	}
-
-	if (removeItem)
-	{
-		item->moveToOwner(0);
-	}
-	else if (item->getRules()->getBattleType() != BT_GRENADE && item->getRules()->getBattleType() != BT_PROXIMITYGRENADE)
-	{
-		item->setOwner(0);
-	}
-
-	_save->getTile(p)->addItem(item, getMod()->getInventory("STR_GROUND", true));
-
-	getTileEngine()->applyGravity(_save->getTile(p));
-
-	if (updateLight)
-	{
-		getTileEngine()->calculateLighting(LL_ITEMS, position);
-		getTileEngine()->calculateFOV(position, item->getVisibilityUpdateRange(), false);
-	}
-
+	_save->getTileEngine()->itemDrop(_save->getTile(position), item, updateLight);
 }
 
 /**
@@ -2013,13 +1977,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 
 	unit->instaKill();
 
-	for (std::vector<BattleItem*>::iterator i = unit->getInventory()->begin(); i != unit->getInventory()->end(); ++i)
-	{
-		dropItem(unit->getPosition(), (*i));
-		(*i)->setOwner(0);
-	}
-
-	unit->getInventory()->clear();
+	getSave()->getTileEngine()->itemDropInventory(unit->getTile(), unit);
 
 	// remove unit-tile link
 	unit->setTile(0);
@@ -2030,7 +1988,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	BattleUnit *newUnit = new BattleUnit(type,
 		FACTION_HOSTILE,
 		_save->getUnits()->back()->getId() + 1,
-		getMod()->getArmor(type->getArmor(), true),
+		type->getArmor(),
 		getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
 		getDepth(),
 		getMod()->getMaxViewDistance());
@@ -2102,7 +2060,7 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 			newUnit = new BattleUnit(type,
 				faction,
 				_save->getUnits()->back()->getId() + 1,
-				getMod()->getArmor(type->getArmor(), true),
+				type->getArmor(),
 				getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
 				getDepth(),
 				getMod()->getMaxViewDistance());
@@ -2111,7 +2069,7 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 			newUnit = new BattleUnit(type,
 				faction,
 				_save->getUnits()->back()->getId() + 1,
-				getMod()->getArmor(type->getArmor(), true),
+				type->getArmor(),
 				0,
 				getDepth(),
 				getMod()->getMaxViewDistance());
@@ -2487,11 +2445,9 @@ int BattlescapeGame::takeItemFromGround(BattleItem* item, BattleAction *action)
 		}
 		else
 		{
-			Tile *tile = item->getTile();
 			// check that the item will fit in our inventory, and if so, take it
 			if (takeItem(item, action))
 			{
-				tile->removeItem(item);
 				return success;
 			}
 			else
@@ -2705,7 +2661,7 @@ bool BattlescapeGame::convertInfected()
 	bool retVal = false;
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if ((*i)->getHealth() > 0 && (*i)->getHealth() >= (*i)->getStunlevel() && (*i)->getRespawn())
+		if (!(*i)->isOutThresholdExceed() && (*i)->getRespawn())
 		{
 			retVal = true;
 			(*i)->setRespawn(false);

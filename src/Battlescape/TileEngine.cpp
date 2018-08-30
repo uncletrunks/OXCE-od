@@ -223,7 +223,7 @@ constexpr Position TileEngine::invalid;
  * @param maxDarknessToSeeUnits Threshold of darkness for LoS calculation.
  */
 TileEngine::TileEngine(SavedBattleGame *save, Mod *mod) :
-	_save(save), _voxelData(mod->getVoxelData()), _personalLighting(true), _cacheTile(0), _cacheTileBelow(0),
+	_save(save), _voxelData(mod->getVoxelData()), _inventorySlotGround(mod->getInventory("STR_GROUND", true)), _personalLighting(true), _cacheTile(0), _cacheTileBelow(0),
 	_maxViewDistance(mod->getMaxViewDistance()), _maxViewDistanceSq(_maxViewDistance * _maxViewDistance),
 	_maxVoxelViewDistance(_maxViewDistance * 16), _maxDarknessToSeeUnits(mod->getMaxDarknessToSeeUnits()),
 	_maxStaticLightDistance(mod->getMaxStaticLightDistance()), _maxDynamicLightDistance(mod->getMaxDynamicLightDistance()),
@@ -1769,10 +1769,8 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 		{
 				// not dead/unconscious
 			if (!(*i)->isOut() &&
-				// not dying
-				(*i)->getHealth() > 0 &&
-				// not about to pass out
-				(*i)->getStunlevel() < (*i)->getHealth() &&
+				// not dying or not about to pass out
+				!(*i)->isOutThresholdExceed() &&
 				// have any chances for reacting
 				(*i)->getReactionScore() >= threshold &&
 				// not a friend
@@ -2078,8 +2076,11 @@ int TileEngine::hitTile(Tile* tile, int damage, const RuleDamageType* type)
  * @param rangeAtack is ranged attack or not?
  * @return Was experience awarded or not?
  */
-bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUnit *target, bool rangeAtack)
+bool TileEngine::awardExperience(BattleActionAttack attack, BattleUnit *target, bool rangeAtack)
 {
+	auto unit = attack.attacker;
+	auto weapon = attack.weapon_item;
+
 	if (!target)
 	{
 		return false;
@@ -2173,7 +2174,7 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 				expType = ETM_MELEE_100;
 				expFuncA = &BattleUnit::addMeleeExp; // e.g. rifle/shotgun gun butt, ...
 			}
-			else if (weapon->getRules()->getArcingShot())
+			else if (weapon->getArcingShot(attack.type))
 			{
 				expType = ETM_THROWING_100;
 				expFuncA = &BattleUnit::addThrowingExp; // e.g. flamethrower, javelins, combat bow, grenade launcher, molotov, black powder bomb, stick grenade, acid flask, apple, ...
@@ -2214,7 +2215,7 @@ bool TileEngine::awardExperience(BattleUnit *unit, BattleItem *weapon, BattleUni
 	}
 
 	ModScript::AwardExperience::Output arg{ expMultiply, expType, };
-	ModScript::AwardExperience::Worker work{ unit, target, weapon, };
+	ModScript::AwardExperience::Worker work{ unit, target, weapon, attack.type };
 
 	work.execute(target->getArmor()->getScript<ModScript::AwardExperience>(), arg);
 
@@ -2287,7 +2288,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 	// single place for firing/throwing/melee experience training
 	if (attack.attacker && attack.attacker->getOriginalFaction() == FACTION_PLAYER)
 	{
-		awardExperience(attack.attacker, attack.weapon_item, target, rangeAtack);
+		awardExperience(attack, target, rangeAtack);
 	}
 
 	if (type->IgnoreNormalMoraleLose == false)
@@ -2299,7 +2300,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 		target->moraleChange(-morale_loss);
 	}
 
-	if ((target->getSpecialAbility() == SPECAB_EXPLODEONDEATH || target->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !target->isOut() && (target->getHealth() <= 0 || target->getStunlevel() >= target->getHealth()))
+	if ((target->getSpecialAbility() == SPECAB_EXPLODEONDEATH || target->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE) && !target->isOut() && target->isOutThresholdExceed())
 	{
 		if (type->IgnoreSelfDestruct == false && !target->hasAlreadyExploded())
 		{
@@ -2381,8 +2382,9 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 
 	BattleUnit *bu = tile->getUnit();
 	voxelCheckFlush();
-	const int part = voxelCheck(center, attack.attacker);
-	const int damage = type->getRandomDamage(power);
+	const auto part = voxelCheck(center, attack.attacker);
+	const auto damage = type->getRandomDamage(power);
+	const auto tileFinalDamage = type->getTileFinalDamage(type->getRandomDamageForTile(power, damage));
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
 		bool nothing = true;
@@ -2400,20 +2402,20 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 		}
 		if (nothing)
 		{
-			const int tileDmg = type->getTileDamage(type->TileDamageMethod == 1 ? power : damage);
+			const auto tp = static_cast<TilePart>(part);
 			//Do we need to update the visibility of units due to smoke/fire?
 			effectGenerated = hitTile(tile, damage, type);
 			//If a tile was destroyed we may have revealed new areas for one or more observers
-			if (tileDmg >= tile->getMapData((TilePart)part)->getArmor()) terrainChanged = true;
+			if (tileFinalDamage >= tile->getMapData(tp)->getArmor()) terrainChanged = true;
 
 			if (part == V_OBJECT && _save->getMissionType() == "STR_BASE_DEFENSE")
 			{
-				if (tileDmg >= tile->getMapData(O_OBJECT)->getArmor() && tile->getMapData(O_OBJECT)->isBaseModule())
+				if (tileFinalDamage >= tile->getMapData(O_OBJECT)->getArmor() && tile->getMapData(O_OBJECT)->isBaseModule())
 				{
 					_save->getModuleMap()[(center.x/16)/10][(center.y/16)/10].second--;
 				}
 			}
-			if (tile->damage((TilePart)part, tileDmg, _save->getObjectiveType()))
+			if (tile->damage(tp, tileFinalDamage, _save->getObjectiveType()))
 			{
 				_save->addDestroyedObjective();
 			}
@@ -2551,7 +2553,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 				{
 					ret = tilesAffected.insert(std::make_pair(dest, 0)); // check if we had this tile already affected
 
-					const int tileDmg = type->getTileDamage(power_);
+					const int tileDmg = type->getTileFinalDamage(power_);
 					if (tileDmg > ret.first->second)
 					{
 						ret.first->second = tileDmg;
@@ -2591,7 +2593,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 							{
 								for (std::vector<BattleItem*>::iterator it = bu->getInventory()->begin(); it != bu->getInventory()->end(); ++it)
 								{
-									if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && type->getItemDamage(itemDamage) > (*it)->getRules()->getArmor())
+									if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), itemDamage, type, rangeAtack) && type->getItemFinalDamage(itemDamage) > (*it)->getRules()->getArmor())
 									{
 										toRemove.push_back(*it);
 									}
@@ -2601,7 +2603,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 						// Affect all items and units on ground
 						for (std::vector<BattleItem*>::iterator it = dest->getInventory()->begin(); it != dest->getInventory()->end(); ++it)
 						{
-							if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), damage, type) && type->getItemDamage(damage) > (*it)->getRules()->getArmor())
+							if (!hitUnit(attack, (*it)->getUnit(), Position(0, 0, 0), damage, type) && type->getItemFinalDamage(damage) > (*it)->getRules()->getArmor())
 							{
 								toRemove.push_back(*it);
 							}
@@ -2704,7 +2706,7 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 	if (explosive == 0) return false; // no damage applied for this tile
 	bool objective = false;
 	Tile* tiles[9];
-	static const TilePart parts[9] = { O_FLOOR,O_WESTWALL,O_NORTHWALL,O_FLOOR,O_WESTWALL,O_NORTHWALL,O_OBJECT,O_OBJECT,O_OBJECT }; //6th is the object of current
+	static const TilePart parts[9]={O_FLOOR,O_WESTWALL,O_NORTHWALL,O_FLOOR,O_WESTWALL,O_NORTHWALL,O_OBJECT,O_OBJECT,O_OBJECT}; //6th is the object of current
 	Position pos = tile->getPosition();
 
 	tiles[0] = _save->getTile(Position(pos.x, pos.y, pos.z+1)); //ceiling
@@ -3995,7 +3997,13 @@ void TileEngine::medikitHeal(BattleAction *action, BattleUnit *target, int bodyP
 	if (target->getFatalWound(bodyPart))
 	{
 		// award experience only if healed body part has a fatal wound (to prevent abuse)
-		awardExperience(action->actor, action->weapon, target, false);
+		BattleActionAttack attack;
+		attack.type = action->type;
+		attack.attacker = action->actor;
+		attack.weapon_item = action->weapon;
+		attack.damage_item = action->weapon;
+
+		awardExperience(attack, target, false);
 	}
 
 	target->heal(bodyPart, rule->getWoundRecovery(), rule->getHealthRecovery());
@@ -4072,7 +4080,7 @@ Tile *TileEngine::applyGravity(Tile *t)
 		}
 		if (unitpos != occupant->getPosition())
 		{
-			if (occupant->getHealth() > 0 && occupant->getStunlevel() < occupant->getHealth())
+			if (!occupant->isOutThresholdExceed())
 			{
 				if (occupant->getMovementType() == MT_FLY)
 				{
@@ -4120,6 +4128,95 @@ Tile *TileEngine::applyGravity(Tile *t)
 
 	return rt;
 }
+
+/**
+ * Drop item on ground.
+ */
+void TileEngine::itemDrop(Tile *t, BattleItem *item, bool updateLight)
+{
+	// don't spawn anything outside of bounds
+	if (t == 0)
+		return;
+
+	Position p = t->getPosition();
+
+	// don't ever drop fixed items
+	if (item->getRules()->isFixed())
+		return;
+
+	if (_save->getSide() != FACTION_PLAYER)
+	{
+		item->setTurnFlag(true);
+	}
+
+	itemMoveInventory(t, nullptr, item, _inventorySlotGround, 0, 0);
+
+	applyGravity(t);
+
+	if (updateLight)
+	{
+		calculateLighting(LL_ITEMS, p);
+		calculateFOV(p, item->getVisibilityUpdateRange(), false);
+	}
+}
+
+/**
+ * Drop all unit items on ground.
+ */
+void TileEngine::itemDropInventory(Tile *t, BattleUnit *unit)
+{
+	auto &inv = *unit->getInventory();
+	for (std::vector<BattleItem*>::iterator j = inv.begin(); j != inv.end();)
+	{
+		if (!(*j)->getRules()->isFixed())
+		{
+			(*j)->setOwner(nullptr);
+			t->addItem(*j, _inventorySlotGround);
+			if ((*j)->getUnit() && (*j)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+			{
+				(*j)->getUnit()->setPosition(t->getPosition());
+			}
+			j = inv.erase(j);
+		}
+		else
+		{
+			++j;
+		}
+	}
+}
+
+/**
+ * Move item to other place in inventory or ground.
+ */
+void TileEngine::itemMoveInventory(Tile *t, BattleUnit *unit, BattleItem *item, RuleInventory *slot, int x, int y)
+{
+	// Handle dropping from/to ground.
+	if (slot != item->getSlot())
+	{
+		if (slot == _inventorySlotGround)
+		{
+			item->moveToOwner(nullptr);
+			t->addItem(item, slot);
+			if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+			{
+				item->getUnit()->setPosition(t->getPosition());
+			}
+		}
+		else if (item->getSlot() == 0 || item->getSlot() == _inventorySlotGround)
+		{
+			item->moveToOwner(unit);
+			item->setTurnFlag(false);
+			if (item->getUnit() && item->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+			{
+				item->getUnit()->setPosition(Position(-1,-1,-1));
+			}
+		}
+	}
+	item->setSlot(slot);
+	item->setSlotX(x);
+	item->setSlotY(y);
+}
+
 
 /**
  * Validates the melee range between two units.

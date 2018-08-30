@@ -514,6 +514,36 @@ void StatsForNerdsState::addVectorOfStrings(std::wostringstream &ss, const std::
 }
 
 /**
+ * Adds a vector of RuleResearch names to the table.
+ */
+void StatsForNerdsState::addVectorOfResearch(std::wostringstream &ss, const std::vector<const RuleResearch *> &vec, const std::string &propertyName)
+{
+	if (vec.empty() && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	int i = 0;
+	ss << L"{";
+	for (auto &item : vec)
+	{
+		if (i > 0)
+		{
+			ss << L", ";
+		}
+		addTranslation(ss, item->getName());
+		i++;
+	}
+	ss << L"}";
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (!vec.empty())
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
  * Adds a single boolean value to the table.
  */
 void StatsForNerdsState::addBoolean(std::wostringstream &ss, const bool &value, const std::string &propertyName, const bool &defaultvalue)
@@ -1645,8 +1675,8 @@ void StatsForNerdsState::initItemList()
 	addInteger(ss, itemRule->getMoraleRecovery(), "moraleRecovery");
 	addFloatAsPercentage(ss, itemRule->getPainKillerRecovery(), "painKillerRecovery", 1.0f);
 
-	addVectorOfStrings(ss, itemRule->getRequirements(), "requires");
-	addVectorOfStrings(ss, itemRule->getBuyRequirements(), "requiresBuy");
+	addVectorOfResearch(ss, itemRule->getRequirements(), "requires");
+	addVectorOfResearch(ss, itemRule->getBuyRequirements(), "requiresBuy");
 	addVectorOfStrings(ss, itemRule->getCategories(), "categories");
 	addVectorOfStrings(ss, itemRule->getSupportedInventorySections(), "supportedInventorySections");
 

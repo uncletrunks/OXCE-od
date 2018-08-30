@@ -883,6 +883,24 @@ void Surface::blitNShade(Surface *surface, int x, int y, int off, bool half, int
 }
 
 /**
+ * Specific blit function to blit battlescape terrain data in different shades in a fast way.
+ * @param surface destination blit to
+ * @param x
+ * @param y
+ * @param shade shade offset
+ * @param range area that limit draw surface
+ */
+void Surface::blitNShade(Surface *surface, int x, int y, int shade, GraphSubset range)
+{
+	ShaderMove<Uint8> src(this, x, y);
+	ShaderMove<Uint8> dest(surface);
+
+	dest.setDomain(range);
+
+	ShaderDraw<helper::StandardShade>(dest, src, ShaderScalar(shade));
+}
+
+/**
  * Set the surface to be redrawn.
  * @param valid true means redraw.
  */

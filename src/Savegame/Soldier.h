@@ -21,6 +21,7 @@
 #include <yaml-cpp/yaml.h>
 #include "../Mod/Unit.h"
 #include "../Mod/StatString.h"
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
@@ -48,6 +49,13 @@ class RuleSoldierTransformation;
  */
 class Soldier
 {
+public:
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "GeoscapeSoldier";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 private:
 	std::wstring _name;
 	int _id, _nationality, _improvement, _psiStrImprovement;
@@ -70,15 +78,16 @@ private:
 	std::wstring _statString;
 	bool _corpseRecovered;
 	std::map<std::string, int> _previousTransformations;
+	ScriptValues<Soldier> _scriptValues;
 public:
 	/// Creates a new soldier.
 	Soldier(RuleSoldier *rules, Armor *armor, int id = 0);
 	/// Cleans up the soldier.
 	~Soldier();
 	/// Loads the soldier from YAML.
-	void load(const YAML::Node& node, const Mod *mod, SavedGame *save);
+	void load(const YAML::Node& node, const Mod *mod, SavedGame *save, const ScriptGlobal *shared);
 	/// Saves the soldier to YAML.
-	YAML::Node save() const;
+	YAML::Node save(const ScriptGlobal *shared) const;
 	/// Gets the soldier's name.
 	std::wstring getName(bool statstring = false, unsigned int maxLength = 20) const;
 	/// Sets the soldier's name.
@@ -154,6 +163,7 @@ public:
 	/// Is the soldier wounded or not?.
 	bool hasFullHealth() const;
 	/// Gets the soldier's wound recovery time.
+	int getWoundRecoveryInt() const;
 	int getWoundRecovery(float absBonus, float relBonus) const;
 	/// Sets the soldier's wound recovery time.
 	void setWoundRecovery(int recovery);

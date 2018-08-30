@@ -292,10 +292,9 @@ void NewBattleState::load(const std::string &filename)
 				save->getBases()->push_back(base);
 
 				// Add research
-				const std::vector<std::string> &research = mod->getResearchList();
-				for (std::vector<std::string>::const_iterator i = research.begin(); i != research.end(); ++i)
+				for (auto& pair : mod->getResearchMap())
 				{
-					save->addFinishedResearchSimple(mod->getResearch(*i));
+					save->addFinishedResearchSimple(pair.second);
 				}
 
 				// Generate items
@@ -448,10 +447,9 @@ void NewBattleState::initSave()
 	}
 
 	// Add research
-	const std::vector<std::string> &research = mod->getResearchList();
-	for (std::vector<std::string>::const_iterator i = research.begin(); i != research.end(); ++i)
+	for (auto& pair : mod->getResearchMap())
 	{
-		save->addFinishedResearchSimple(mod->getResearch(*i));
+		save->addFinishedResearchSimple(pair.second);
 	}
 
 	_game->setSavedGame(save);
@@ -520,7 +518,7 @@ void NewBattleState::btnOkClick(Action *)
 	{
 		const AlienDeployment *deployment = _game->getMod()->getDeployment(bgame->getMissionType());
 		const RuleAlienMission *mission = _game->getMod()->getAlienMission(_game->getMod()->getAlienMissionList().front()); // doesn't matter
-		MissionSite *m = new MissionSite(mission, deployment);
+		MissionSite *m = new MissionSite(mission, deployment, nullptr);
 		m->setId(1);
 		m->setAlienRace(_alienRaces[_cbxAlienRace->getSelected()]);
 		_craft->setDestination(m);

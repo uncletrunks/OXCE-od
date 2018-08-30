@@ -74,9 +74,9 @@ public:
 	/// Sets the facility's disabled flag.
 	void setDisabled(bool disabled);
 	/// Gets craft, used for drawing facility.
-	Craft *getCraft() const;
+	Craft *getCraftForDrawing() const;
 	/// Sets craft, used for drawing facility.
-	void setCraft(Craft *craft);
+	void setCraftForDrawing(Craft *craft);
 	/// Gets whether this facility was placed over another or was placed by removing another
 	bool getIfHadPreviousFacility() const;
 	/// Sets whether this facility was placed over another or was placed by removing another

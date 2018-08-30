@@ -545,9 +545,9 @@ void TransferItemsState::completeTransfer()
 						// Clear hangar
 						for (std::vector<BaseFacility*>::iterator f = _baseFrom->getFacilities()->begin(); f != _baseFrom->getFacilities()->end(); ++f)
 						{
-							if ((*f)->getCraft() == *c)
+							if ((*f)->getCraftForDrawing() == *c)
 							{
-								(*f)->setCraft(0);
+								(*f)->setCraftForDrawing(0);
 								break;
 							}
 						}

@@ -30,6 +30,7 @@
 #include "../Engine/Screen.h"
 #include "../Engine/Surface.h"
 #include "../Engine/Options.h"
+#include "../Engine/Collections.h"
 #include "Globe.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
@@ -1278,34 +1279,25 @@ void GeoscapeState::time5Seconds()
 	}
 
 	// Clean up dead UFOs and end dogfights which were minimized.
-	for (std::vector<Ufo*>::iterator i = _game->getSavedGame()->getUfos()->begin(); i != _game->getSavedGame()->getUfos()->end();)
-	{
-		if ((*i)->getStatus() == Ufo::DESTROYED)
+	Collections::deleteIf(*_game->getSavedGame()->getUfos(), _game->getSavedGame()->getUfos()->size(),
+		[&](Ufo* ufo)
 		{
-			if (!(*i)->getFollowers()->empty())
+			if (ufo->getStatus() == Ufo::DESTROYED)
 			{
-				// Remove all dogfights with this UFO.
-				for (std::list<DogfightState*>::iterator d = _dogfights.begin(); d != _dogfights.end();)
-				{
-					if ((*d)->getUfo() == (*i))
+				Collections::deleteIf(_dogfights, _dogfights.size(),
+					[&](DogfightState* dogfight)
 					{
-						delete *d;
-						d = _dogfights.erase(d);
+						return dogfight->getUfo() == ufo;
 					}
-					else
-					{
-						++d;
-					}
-				}
+				);
+				return true;
 			}
-			delete *i;
-			i = _game->getSavedGame()->getUfos()->erase(i);
+			else
+			{
+				return false;
+			}
 		}
-		else
-		{
-			++i;
-		}
-	}
+	);
 
 	// Check any dogfights waiting to open
 	for (std::list<DogfightState*>::iterator d = _dogfights.begin(); d != _dogfights.end(); ++d)
@@ -1321,18 +1313,12 @@ void GeoscapeState::time5Seconds()
 	}
 
 	// Clean up unused waypoints
-	for (std::vector<Waypoint*>::iterator i = _game->getSavedGame()->getWaypoints()->begin(); i != _game->getSavedGame()->getWaypoints()->end();)
-	{
-		if ((*i)->getFollowers()->empty())
+	Collections::deleteIf(*_game->getSavedGame()->getWaypoints(), _game->getSavedGame()->getWaypoints()->size(),
+		[&](Waypoint* way)
 		{
-			delete *i;
-			i = _game->getSavedGame()->getWaypoints()->erase(i);
+			return way->getFollowers()->empty();
 		}
-		else
-		{
-			++i;
-		}
-	}
+	);
 }
 
 /**
@@ -2158,7 +2144,7 @@ void GeoscapeState::time1Day()
 			// 3b. handle interrogation and spawned items
 			if (Options::retainCorpses && research->destroyItem() && mod->getUnit(research->getName()))
 			{
-				base->getStorageItems()->addItem(mod->getArmor(mod->getUnit(research->getName())->getArmor(), true)->getCorpseGeoscape());
+				base->getStorageItems()->addItem(mod->getUnit(research->getName())->getArmor()->getCorpseGeoscape());
 			}
 			RuleItem *spawnedItem = _game->getMod()->getItem(research->getSpawnedItem());
 			if (spawnedItem)
@@ -2170,10 +2156,10 @@ void GeoscapeState::time1Day()
 			// 3c. handle getonefrees (topic+lookup)
 			if (!research->getGetOneFree().empty())
 			{
-				std::vector<std::string> possibilities;
-				for (const std::string& free : research->getGetOneFree())
+				std::vector<const RuleResearch *> possibilities;
+				for (auto& free : research->getGetOneFree())
 				{
-					if (saveGame->isResearchRuleStatusDisabled(free))
+					if (saveGame->isResearchRuleStatusDisabled(free->getName()))
 					{
 						continue; // skip disabled topics
 					}
@@ -2182,23 +2168,24 @@ void GeoscapeState::time1Day()
 						possibilities.push_back(free);
 					}
 				}
-				for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = research->getGetOneFreeProtected().begin(); itMap != research->getGetOneFreeProtected().end(); ++itMap)
-				{
-					if (_game->getSavedGame()->isResearched(itMap->first, false))
-					{
-						for (std::vector<std::string>::const_iterator itVector = itMap->second.begin(); itVector != itMap->second.end(); ++itVector)
-						{
-							if (_game->getSavedGame()->isResearchRuleStatusDisabled(*itVector))
-							{
-								continue; // skip disabled topics
-							}
-							if (!_game->getSavedGame()->isResearched(*itVector, false))
-							{
-								possibilities.push_back(*itVector);
-							}
-						}
-					}
-				}
+				// FIXME MERGE
+				//for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = research->getGetOneFreeProtected().begin(); itMap != research->getGetOneFreeProtected().end(); ++itMap)
+				//{
+				//	if (_game->getSavedGame()->isResearched(itMap->first, false))
+				//	{
+				//		for (std::vector<std::string>::const_iterator itVector = itMap->second.begin(); itVector != itMap->second.end(); ++itVector)
+				//		{
+				//			if (_game->getSavedGame()->isResearchRuleStatusDisabled(*itVector))
+				//			{
+				//				continue; // skip disabled topics
+				//			}
+				//			if (!_game->getSavedGame()->isResearched(*itVector, false))
+				//			{
+				//				possibilities.push_back(*itVector);
+				//			}
+				//		}
+				//	}
+				//}
 				if (!possibilities.empty())
 				{
 					size_t pick = 0;
@@ -2206,8 +2193,7 @@ void GeoscapeState::time1Day()
 					{
 						pick = RNG::generate(0, possibilities.size() - 1);
 					}
-					std::string sel = possibilities.at(pick);
-					bonus = mod->getResearch(sel, true);
+					bonus = possibilities.at(pick);
 					saveGame->addFinishedResearch(bonus, mod, base);
 					if (!bonus->getLookup().empty())
 					{
@@ -2251,9 +2237,9 @@ void GeoscapeState::time1Day()
 					RuleManufacture *man = mod->getManufacture(item->getType());
 					if (man && !man->getRequirements().empty())
 					{
-						const std::vector<std::string> &req = man->getRequirements();
+						const auto &req = man->getRequirements();
 						RuleItem *ammo = mod->getItem(item->getPrimaryCompatibleAmmo()->front());
-						if (ammo && std::find(req.begin(), req.end(), ammo->getType()) != req.end() && !saveGame->isResearched(req, true))
+						if (ammo && std::find_if(req.begin(), req.end(), [&](const RuleResearch* r){ return r->getName() == ammo->getType(); }) != req.end() && !saveGame->isResearched(req, true))
 						{
 							popup(new ResearchRequiredState(item));
 						}

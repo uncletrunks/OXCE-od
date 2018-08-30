@@ -148,6 +148,8 @@ public:
 	bool setAmmoPreMission(BattleItem *item);
 	/// Get ammo slot for action.
 	const RuleItemAction *getActionConf(BattleActionType action) const;
+	/// Check if attack shoot in arc.
+	bool getArcingShot(BattleActionType action) const;
 	/// Determines if this item uses ammo.
 	bool needsAmmoForAction(BattleActionType action) const;
 	/// Get ammo for action.

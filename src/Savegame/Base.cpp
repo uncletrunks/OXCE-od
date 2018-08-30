@@ -44,6 +44,7 @@
 #include "../Engine/Options.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Engine/Logger.h"
+#include "../Engine/Collections.h"
 
 namespace OpenXcom
 {
@@ -72,9 +73,6 @@ Base::~Base()
 	}
 	for (std::vector<Craft*>::iterator i = _crafts.begin(); i != _crafts.end(); ++i)
 	{
-		for (std::vector<Vehicle*>::iterator j = (*i)->getVehicles()->begin(); j != (*i)->getVehicles()->end(); ++j)
-			for (std::vector<Vehicle*>::iterator k = _vehicles.begin(); k != _vehicles.end(); ++k)
-				if ((*k)==(*j)) { _vehicles.erase(k); break; } // to avoid calling a vehicle's destructor twice
 		delete *i;
 	}
 	for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); ++i)
@@ -90,10 +88,7 @@ Base::~Base()
 	{
 		delete *i;
 	}
-	for (std::vector<Vehicle*>::iterator i = _vehicles.begin(); i != _vehicles.end(); ++i)
-	{
-		delete *i;
-	}
+	Collections::deleteAll(_vehiclesFromBase);
 }
 
 /**
@@ -146,7 +141,7 @@ void Base::load(const YAML::Node &node, SavedGame *save, bool newGame, bool newB
 		if (_mod->getSoldier(type))
 		{
 			Soldier *s = new Soldier(_mod->getSoldier(type), 0);
-			s->load(*i, _mod, save);
+			s->load(*i, _mod, save, _mod->getScriptGlobal());
 			s->setCraft(0);
 			if (const YAML::Node &craft = (*i)["craft"])
 			{
@@ -279,7 +274,7 @@ YAML::Node Base::save() const
 	}
 	for (std::vector<Soldier*>::const_iterator i = _soldiers.begin(); i != _soldiers.end(); ++i)
 	{
-		node["soldiers"].push_back((*i)->save());
+		node["soldiers"].push_back((*i)->save(_mod->getScriptGlobal()));
 	}
 	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
 	{
@@ -292,7 +287,7 @@ YAML::Node Base::save() const
 		node["inBattlescape"] = _inBattlescape;
 	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 	{
-		node["transfers"].push_back((*i)->save());
+		node["transfers"].push_back((*i)->save(this, _mod));
 	}
 	for (std::vector<ResearchProject*>::const_iterator i = _research.begin(); i != _research.end(); ++i)
 	{
@@ -880,7 +875,7 @@ int Base::getUsedHangars() const
 	}
 	for (std::vector<Production*>::const_iterator i = _productions.begin(); i != _productions.end(); ++i)
 	{
-		if ((*i)->getRules()->getCategory() == "STR_CRAFT")
+		if ((*i)->getRules()->getProducedCraft())
 		{
 			// This should be fixed on the case when (*i)->getInfiniteAmount() == TRUE
 			total += ((*i)->getAmountTotal() - (*i)->getAmountProduced());
@@ -1039,19 +1034,35 @@ int Base::getLongRangeDetection() const
  * @param craft Craft type.
  * @return Number of craft.
  */
-int Base::getCraftCount(const std::string &craft) const
+int Base::getCraftCount(const RuleCraft *craft) const
 {
 	int total = 0;
 	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 	{
-		if ((*i)->getType() == TRANSFER_CRAFT && (*i)->getCraft()->getRules()->getType() == craft)
+		if ((*i)->getType() == TRANSFER_CRAFT && (*i)->getCraft()->getRules() == craft)
 		{
 			total++;
 		}
 	}
 	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
 	{
-		if ((*i)->getRules()->getType() == craft)
+		if ((*i)->getRules() == craft)
+		{
+			total++;
+		}
+	}
+	return total;
+}
+
+/**
+ * Gets the base's crafts of a certain type.
+ */
+int Base::getCraftCountForProduction(const RuleCraft *craft) const
+{
+	int total = 0;
+	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
+	{
+		if ((*i)->getRules() == craft && (*i)->getStatus() != "STR_OUT")
 		{
 			total++;
 		}
@@ -1227,12 +1238,6 @@ void Base::addResearch(ResearchProject * project)
 void Base::removeResearch(ResearchProject * project)
 {
 	_scientists += project->getAssigned();
-	std::vector<ResearchProject *>::iterator iter = std::find (_research.begin(), _research.end(), project);
-	if (iter != _research.end())
-	{
-		_research.erase(iter);
-	}
-
 	const RuleResearch *ruleResearch = project->getRules();
 	if (!project->isFinished())
 	{
@@ -1241,22 +1246,29 @@ void Base::removeResearch(ResearchProject * project)
 			getStorageItems()->addItem(ruleResearch->getName(), 1);
 		}
 	}
-	delete project;
+
+	Collections::deleteIf(_research, 1,
+		[&](ResearchProject* r)
+		{
+			return r == project;
+		}
+	);
 }
 
 /**
  * Remove a Production from the Base
  * @param p A pointer to a Production
  */
-void Base::removeProduction(Production * p)
+void Base::removeProduction(Production* production)
 {
-	_engineers += p->getAssignedEngineers();
-	std::vector<Production *>::iterator iter = std::find (_productions.begin(), _productions.end(), p);
-	if (iter != _productions.end())
-	{
-		_productions.erase(iter);
-	}
-	delete p;
+	_engineers += production->getAssignedEngineers();
+
+	Collections::deleteIf(_productions, 1,
+		[&](Production* r)
+		{
+			return r == production;
+		}
+	);
 }
 
 /**
@@ -1543,16 +1555,8 @@ void Base::setupDefenses()
 		}
 	}
 
-	for (std::vector<Craft*>::iterator i = getCrafts()->begin(); i != getCrafts()->end(); ++i)
-		for (std::vector<Vehicle*>::iterator j = (*i)->getVehicles()->begin(); j != (*i)->getVehicles()->end(); ++j)
-			for (std::vector<Vehicle*>::iterator k = _vehicles.begin(); k != _vehicles.end(); ++k)
-				if ((*k)==(*j)) { _vehicles.erase(k); break; } // to avoid calling a vehicle's destructor for tanks on crafts
-
-	for (std::vector<Vehicle*>::iterator i = _vehicles.begin(); i != _vehicles.end();)
-	{
-		delete *i;
-		i = _vehicles.erase(i);
-	}
+	_vehicles.clear();
+	Collections::deleteAll(_vehiclesFromBase);
 
 	// add vehicles that are in the crafts of the base, if it's not out
 	for (std::vector<Craft*>::iterator c = getCrafts()->begin(); c != getCrafts()->end(); ++c)
@@ -1572,18 +1576,16 @@ void Base::setupDefenses()
 		std::string itemId = (i)->first;
 		int itemQty = (i)->second;
 		RuleItem *rule = _mod->getItem(itemId, true);
-		if (rule->isFixed())
+		if (rule->getVehicleUnit())
 		{
-			int size = 4;
-			if (_mod->getUnit(itemId))
-			{
-				size = _mod->getArmor(_mod->getUnit(itemId)->getArmor(), true)->getSize();
-			}
+			int size = rule->getVehicleUnit()->getArmor()->getTotalSize();
 			if (rule->getPrimaryCompatibleAmmo()->empty()) // so this vehicle does not need ammo
 			{
 				for (int j = 0; j < itemQty; ++j)
 				{
-					_vehicles.push_back(new Vehicle(rule, rule->getClipSize(), size));
+					auto vehicle = new Vehicle(rule, rule->getClipSize(), size);
+					_vehicles.push_back(vehicle);
+					_vehiclesFromBase.push_back(vehicle);
 				}
 				_items->removeItem(itemId, itemQty);
 			}
@@ -1610,7 +1612,9 @@ void Base::setupDefenses()
 				int canBeAdded = std::min(itemQty, baseQty);
 				for (int j=0; j<canBeAdded; ++j)
 				{
-					_vehicles.push_back(new Vehicle(rule, clipSize, size));
+					auto vehicle = new Vehicle(rule, clipSize, size);
+					_vehicles.push_back(vehicle);
+					_vehiclesFromBase.push_back(vehicle);
 					_items->removeItem(ammo->getType(), ammoPerVehicle);
 				}
 				_items->removeItem(itemId, canBeAdded);
@@ -1749,62 +1753,54 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 	{
 		// hangar destruction - destroy crafts and any production of crafts
 		// if this will mean there is no hangar to contain it
-		if ((*facility)->getCraft())
+		if ((*facility)->getCraftForDrawing())
 		{
 			// remove all soldiers
 			for (Soldier *s : _soldiers)
 			{
-				if (s->getCraft() == (*facility)->getCraft())
+				if (s->getCraft() == (*facility)->getCraftForDrawing())
 				{
 					s->setCraft(0);
 				}
 			}
 
 			// remove all items
-			while (!(*facility)->getCraft()->getItems()->getContents()->empty())
+			while (!(*facility)->getCraftForDrawing()->getItems()->getContents()->empty())
 			{
-				std::map<std::string, int>::iterator i = (*facility)->getCraft()->getItems()->getContents()->begin();
+				std::map<std::string, int>::iterator i = (*facility)->getCraftForDrawing()->getItems()->getContents()->begin();
 				_items->addItem(i->first, i->second);
-				(*facility)->getCraft()->getItems()->removeItem(i->first, i->second);
+				(*facility)->getCraftForDrawing()->getItems()->removeItem(i->first, i->second);
 			}
-			for (std::vector<Craft*>::iterator i = _crafts.begin(); i != _crafts.end(); ++i)
-			{
-				if (*i == (*facility)->getCraft())
+			Collections::deleteIf(_crafts, 1,
+				[&](Craft* c)
 				{
-					delete (*i);
-					_crafts.erase(i);
-					break;
+					return c == (*facility)->getCraftForDrawing();
 				}
-			}
+			);
 		}
 		else
 		{
-			bool remove = true;
-			// no craft - check productions.
-			for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end(); ++i)
-			{
-				if (getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts() < 0 && (*i)->getRules()->getCategory() == "STR_CRAFT")
+			auto remove = -(getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts());
+			remove = Collections::deleteIf(_productions, remove,
+				[&](Production* i)
 				{
-					_engineers += (*i)->getAssignedEngineers();
-					delete *i;
-					_productions.erase(i);
-					remove = false;
-					break;
-				}
-			}
-			if (remove && !_transfers.empty())
-			{
-				for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); ++i)
-				{
-					if ((*i)->getType() == TRANSFER_CRAFT)
+					if (i->getRules()->getProducedCraft())
 					{
-						delete (*i)->getCraft();
-						delete *i;
-						_transfers.erase(i);
-						break;
+						_engineers += i->getAssignedEngineers();
+						return true;
+					}
+					else
+					{
+						return false;
 					}
 				}
-			}
+			);
+			remove = Collections::deleteIf(_transfers, remove,
+				[&](Transfer* i)
+				{
+					return i->getType() == TRANSFER_CRAFT;
+				}
+			);
 		}
 	}
 	if ((*facility)->getRules()->getPsiLaboratories() > 0)
@@ -1847,61 +1843,64 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 		// workshop destruction: similar to lab destruction, but we'll lay off engineers instead
 		// in this case, however, production IS cancelled, as it takes up space in the workshop.
 		int toRemove = (*facility)->getRules()->getWorkshops() - getFreeWorkshops();
-		for (std::vector<Production*>::iterator i = _productions.begin(); i != _productions.end() && toRemove > 0;)
-		{
-			if ((*i)->getAssignedEngineers() > toRemove)
+		Collections::deleteIf(_productions, _productions.size(),
+			[&](Production* p)
 			{
-				(*i)->setAssignedEngineers((*i)->getAssignedEngineers() - toRemove);
-				_engineers += toRemove;
-				break;
+				if (p->getAssignedEngineers() > toRemove)
+				{
+					p->setAssignedEngineers(p->getAssignedEngineers() - toRemove);
+					_engineers += toRemove;
+					toRemove = 0;
+					return false;
+				}
+				else
+				{
+					_engineers += p->getAssignedEngineers();
+					toRemove -= p->getAssignedEngineers();
+					return true;
+				}
 			}
-			else
-			{
-				toRemove -= (*i)->getAssignedEngineers();
-				_engineers += (*i)->getAssignedEngineers();
-				delete *i;
-				i = _productions.erase(i);
-			}
-		}
+		);
 	}
 	if ((*facility)->getRules()->getStorage())
 	{
 		// we won't destroy the items physically AT the base,
 		// but any items in transit will end up at the dead letter office.
-		if (storesOverfull((*facility)->getRules()->getStorage()) && !_transfers.empty())
+		if (storesOverfull((*facility)->getRules()->getStorage()))
 		{
-			for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); )
-			{
-				if ((*i)->getType() == TRANSFER_ITEM)
+			Collections::deleteIf(_transfers, _transfers.size(),
+				[&](Transfer* i)
 				{
-					delete *i;
-					i = _transfers.erase(i);
+					if (i->getType() == TRANSFER_ITEM)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
-				else
-				{
-					++i;
-				}
-			}
+			);
 		}
 	}
 	if ((*facility)->getRules()->getPersonnel())
 	{
 		// as above, we won't actually fire people, but we'll block any new ones coming in.
-		if ((getAvailableQuarters() - getUsedQuarters()) - (*facility)->getRules()->getPersonnel() < 0 && !_transfers.empty())
+		if ((getAvailableQuarters() - getUsedQuarters()) - (*facility)->getRules()->getPersonnel() < 0)
 		{
-			for (std::vector<Transfer*>::iterator i = _transfers.begin(); i != _transfers.end(); )
-			{
-				// let soldiers arrive, but block workers.
-				if ((*i)->getType() == TRANSFER_ENGINEER || (*i)->getType() == TRANSFER_SCIENTIST)
+			Collections::deleteIf(_transfers, _transfers.size(),
+				[&](Transfer* i)
 				{
-					delete *i;
-					i = _transfers.erase(i);
+					if (i->getType() == TRANSFER_ENGINEER || i->getType() == TRANSFER_SCIENTIST)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
-				else
-				{
-					++i;
-				}
-			}
+			);
 		}
 	}
 	delete *facility;
@@ -1914,18 +1913,13 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
  */
 void Base::cleanupDefenses(bool reclaimItems)
 {
-	_defenses.clear();
+	Collections::removeAll(_defenses);
 
-	for (std::vector<Craft*>::iterator i = getCrafts()->begin(); i != getCrafts()->end(); ++i)
-		for (std::vector<Vehicle*>::iterator j = (*i)->getVehicles()->begin(); j != (*i)->getVehicles()->end(); ++j)
-			for (std::vector<Vehicle*>::iterator k = _vehicles.begin(); k != _vehicles.end(); ++k)
-				if ((*k)==(*j)) { _vehicles.erase(k); break; } // to avoid calling a vehicle's destructor for tanks on crafts
-
-	for (std::vector<Vehicle*>::iterator i = _vehicles.begin(); i != _vehicles.end();)
+	if (reclaimItems)
 	{
-		if (reclaimItems)
+		for (auto v : _vehiclesFromBase)
 		{
-			RuleItem *rule = (*i)->getRules();
+			RuleItem *rule = v->getRules();
 			std::string type = rule->getType();
 			_items->addItem(type);
 			if (!rule->getPrimaryCompatibleAmmo()->empty())
@@ -1943,9 +1937,10 @@ void Base::cleanupDefenses(bool reclaimItems)
 				_items->addItem(ammo->getType(), ammoPerVehicle);
 			}
 		}
-		delete *i;
-		i = _vehicles.erase(i);
 	}
+
+	Collections::removeAll(_vehicles);
+	Collections::deleteAll(_vehiclesFromBase);
 }
 
 namespace

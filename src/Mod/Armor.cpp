@@ -875,7 +875,6 @@ std::string debugDisplayScript(const Armor* ar)
 void Armor::ScriptRegister(ScriptParserBase* parser)
 {
 	Bind<Armor> ar = { parser };
-	BindNested<Armor, UnitStats, &Armor::_stats> us = { ar };
 
 	ar.addCustomConst("SIDE_FRONT", SIDE_FRONT);
 	ar.addCustomConst("SIDE_LEFT", SIDE_LEFT);
@@ -889,17 +888,8 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 	ar.add<&Armor::getPersonalLight>("getPersonalLight");
 	ar.add<&Armor::getSize>("getSize");
 
-	us.addField<&UnitStats::tu>("getTimeUnits");
-	us.addField<&UnitStats::stamina>("getStamina");
-	us.addField<&UnitStats::health>("getHealth");
-	us.addField<&UnitStats::bravery>("getBravery");
-	us.addField<&UnitStats::reactions>("getReactions");
-	us.addField<&UnitStats::firing>("getFiring");
-	us.addField<&UnitStats::throwing>("getThrowing");
-	us.addField<&UnitStats::strength>("getStrength");
-	us.addField<&UnitStats::psiStrength>("getPsiStrength");
-	us.addField<&UnitStats::psiSkill>("getPsiSkill");
-	us.addField<&UnitStats::melee>("getMelee");
+	UnitStats::addGetStatsScript<Armor, &Armor::_stats>(ar, "Stats.");
+
 	ar.add<&getArmorValueScript>("getArmor");
 
 	ar.addScriptValue<&Armor::_scriptValues>(false);

@@ -281,6 +281,8 @@ public:
 	int getFallingPhase() const;
 	/// The unit is out - either dead or unconscious.
 	bool isOut() const;
+	/// Check if unit stats will cause knock out.
+	bool isOutThresholdExceed() const;
 	/// Get the number of time units a certain action takes.
 	RuleItemUseCost getActionTUs(BattleActionType actionType, const BattleItem *item) const;
 	/// Get the number of time units a certain action takes.
@@ -408,7 +410,7 @@ public:
 	/// Updates the stats of a Geoscape soldier.
 	void updateGeoscapeStats(Soldier *soldier) const;
 	/// Check if unit eligible for squaddie promotion.
-	bool postMissionProcedures(SavedGame *geoscape, UnitStats &statsDiff);
+	bool postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, UnitStats &statsDiff);
 	/// Get the sprite index for the minimap
 	int getMiniMapSpriteIndex() const;
 	/// Set the turret type. -1 is no turret.
@@ -523,8 +525,6 @@ public:
 	int  getTurnsLeftSpottedForSnipers() const;
 	/// Get this unit's original faction
 	UnitFaction getOriginalFaction() const;
-	/// call this after the default copy constructor deletes the cache?
-	void invalidateCache();
 	/// Get alien/HWP unit.
 	Unit *getUnitRules() const { return _unitRules; }
 	Position lastCover;

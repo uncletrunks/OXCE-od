@@ -34,9 +34,13 @@ namespace OpenXcom
 
 	ArticleStateTFTDVehicle::ArticleStateTFTDVehicle(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
-		Unit *unit = _game->getMod()->getUnit(defs->id, true);
-		Armor *armor = _game->getMod()->getArmor(unit->getArmor(), true);
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
+		Unit *unit = item->getVehicleUnit();
+		if (!unit)
+		{
+			throw Exception("Item " + defs->id + " do not have vehicle unit defined");
+		}
+		Armor *armor = unit->getArmor();
 
 		_lstStats = new TextList(150, 65, 168, 106);
 
@@ -57,33 +61,33 @@ namespace OpenXcom
 		std::wostringstream ss;
 		ss << unit->getStats()->tu;
 		_lstStats->addRow(2, tr("STR_TIME_UNITS").c_str(), ss.str().c_str());
-		
+
 		std::wostringstream ss2;
 		ss2 << unit->getStats()->health;
 		_lstStats->addRow(2, tr("STR_HEALTH").c_str(), ss2.str().c_str());
-		
+
 		std::wostringstream ss3;
 		ss3 << armor->getFrontArmor();
 		_lstStats->addRow(2, tr("STR_FRONT_ARMOR").c_str(), ss3.str().c_str());
-		
+
 		std::wostringstream ss4;
 		ss4 << armor->getLeftSideArmor();
 		_lstStats->addRow(2, tr("STR_LEFT_ARMOR").c_str(), ss4.str().c_str());
-		
+
 		std::wostringstream ss5;
 		ss5 << armor->getRightSideArmor();
 		_lstStats->addRow(2, tr("STR_RIGHT_ARMOR").c_str(), ss5.str().c_str());
-		
+
 		std::wostringstream ss6;
 		ss6 << armor->getRearArmor();
 		_lstStats->addRow(2, tr("STR_REAR_ARMOR").c_str(), ss6.str().c_str());
-		
+
 		std::wostringstream ss7;
 		ss7 << armor->getUnderArmor();
 		_lstStats->addRow(2, tr("STR_UNDER_ARMOR").c_str(), ss7.str().c_str());
-		
+
 		_lstStats2->addRow(2, tr("STR_WEAPON").c_str(), tr(defs->weapon).c_str());
-				
+
 		if (!item->getPrimaryCompatibleAmmo()->empty())
 		{
 			RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);

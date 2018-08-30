@@ -237,16 +237,16 @@ void MedikitState::onHealClick(Action *)
 		_medikitView->invalidate();
 		_action->actor->getStatistics()->woundsHealed++;
 		update();
-		
-		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && _targetUnit->getStunlevel() < _targetUnit->getHealth() && _targetUnit->getHealth() > 0)
+
+		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && !_targetUnit->isOutThresholdExceed())
 		{
 			if (!_revivedTarget)
 			{
-				if (_targetUnit->getOriginalFaction() == FACTION_PLAYER)
+				if(_targetUnit->getOriginalFaction() == FACTION_PLAYER)
 				{
 					_action->actor->getStatistics()->revivedSoldier++;
 				}
-				else if (_targetUnit->getOriginalFaction() == FACTION_HOSTILE)
+				else if(_targetUnit->getOriginalFaction() == FACTION_HOSTILE)
 				{
 					_action->actor->getStatistics()->revivedHostile++;
 				}
@@ -287,13 +287,13 @@ void MedikitState::onStimulantClick(Action *)
 		update();
 
 		// if the unit has revived we quit this screen automatically
-		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && _targetUnit->getStunlevel() < _targetUnit->getHealth() && _targetUnit->getHealth() > 0)
+		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && !_targetUnit->isOutThresholdExceed())
 		{
-			if (_targetUnit->getOriginalFaction() == FACTION_PLAYER)
+			if(_targetUnit->getOriginalFaction() == FACTION_PLAYER)
 			{
 				_action->actor->getStatistics()->revivedSoldier++;
 			}
-			else if (_targetUnit->getOriginalFaction() == FACTION_HOSTILE)
+			else if(_targetUnit->getOriginalFaction() == FACTION_HOSTILE)
 			{
 				_action->actor->getStatistics()->revivedHostile++;
 			}

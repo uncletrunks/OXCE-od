@@ -37,8 +37,10 @@ class Camera;
 class Timer;
 class Text;
 class Tile;
+class UnitSprite;
 
 enum CursorType { CT_NONE, CT_NORMAL, CT_AIM, CT_PSI, CT_WAYPOINT, CT_THROW };
+enum TilePart : int;
 
 /**
  * Interactive map of the battlescape.
@@ -83,6 +85,7 @@ private:
 	Text *_txtAccuracy;
 	SurfaceSet *_projectileSet;
 
+	void drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position tileScreenPosition, int shade, bool topLayer);
 	void drawTerrain(Surface *surface);
 	int getTerrainLevel(const Position& pos, int size) const;
 	int getWallShade(TilePart part, Tile* tileFrot, Tile* tileBehind);
@@ -119,7 +122,7 @@ public:
 	/// Gets the currently selected position.
 	void getSelectorPosition(Position *pos) const;
 	/// Calculates the offset of a soldier, when it is walking in the middle of 2 tiles.
-	void calculateWalkingOffset(BattleUnit *unit, Position *offset);
+	void calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeOffset = 0);
 	/// Sets the 3D cursor type.
 	void setCursorType(CursorType type, int size = 1);
 	/// Gets the 3D cursor type.

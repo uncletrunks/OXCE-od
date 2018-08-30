@@ -25,6 +25,7 @@
 namespace OpenXcom
 {
 
+class RuleCraft;
 class Soldier;
 class Craft;
 class ItemContainer;
@@ -58,6 +59,7 @@ private:
 	bool _inBattlescape;
 	bool _retaliationTarget;
 	std::vector<Vehicle*> _vehicles;
+	std::vector<Vehicle*> _vehiclesFromBase;
 	std::vector<BaseFacility*> _defenses;
 
 	/// Determines space taken up by ammo clips about to rearm craft.
@@ -158,7 +160,9 @@ public:
 	/// Gets the base's long range detection.
 	int getLongRangeDetection() const;
 	/// Gets the base's crafts of a certain type.
-	int getCraftCount(const std::string &craft) const;
+	int getCraftCount(const RuleCraft *craft) const;
+	/// Gets the base's crafts of a certain type.
+	int getCraftCountForProduction(const RuleCraft *craft) const;
 	/// Gets the base's craft maintenance.
 	int getCraftMaintenance() const;
 	/// Gets the total count and total salary of soldiers of a certain type stored in the base.

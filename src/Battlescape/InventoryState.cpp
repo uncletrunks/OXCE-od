@@ -30,6 +30,7 @@
 #include "../Engine/Screen.h"
 #include "../Engine/Palette.h"
 #include "../Engine/Surface.h"
+#include "../Engine/Collections.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextEdit.h"
 #include "../Interface/BattlescapeButton.h"
@@ -272,12 +273,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 
 static void _clearInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
 {
-	for (std::vector<EquipmentLayoutItem*>::iterator eraseIt = inventoryTemplate.begin();
-		 eraseIt != inventoryTemplate.end();
-		 eraseIt = inventoryTemplate.erase(eraseIt))
-	{
-		delete *eraseIt;
-	}
+	Collections::deleteAll(inventoryTemplate);
 }
 
 /**
@@ -596,6 +592,12 @@ void InventoryState::saveEquipmentLayout()
 		// note: with using getInventory() we are skipping the ammos loaded, (they're not owned) because we handle the loaded-ammos separately (inside)
 		for (std::vector<BattleItem*>::iterator j = (*i)->getInventory()->begin(); j != (*i)->getInventory()->end(); ++j)
 		{
+			// skip fixed items
+			if ((*j)->getRules()->isFixed())
+			{
+				continue;
+			}
+
 			layoutItems->push_back(new EquipmentLayoutItem((*j)));
 		}
 	}
@@ -972,12 +974,12 @@ void InventoryState::btnCreateTemplateClick(Action *)
 void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
 {
 	BattleUnit               *unit          = _battleGame->getSelectedUnit();
-	std::vector<BattleItem*> *unitInv       = unit->getInventory();
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
-	RuleInventory            *groundRuleInv = _game->getMod()->getInventory("STR_GROUND", true);
 
-	_clearInventory(_game, unitInv, groundTile, false);
+	// FIXME MERGE
+	//_clearInventory(_game, unitInv, groundTile, false);
+	_battleGame->getTileEngine()->itemDropInventory(groundTile, unit);
 
 	// attempt to replicate inventory template by grabbing corresponding items
 	// from the ground.  if any item is not found on the ground, display warning
@@ -1073,13 +1075,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 						BattleItem *loadedAmmo = matchedWeapon->setAmmoForSlot(slot, matchedAmmo[slot]);
 						if (loadedAmmo)
 						{
-							groundTile->addItem(loadedAmmo, groundRuleInv);
-						}
-
-						// load the correct ammo into the weapon
-						if (matchedAmmo[slot])
-						{
-							groundTile->removeItem(matchedAmmo[slot]);
+							_battleGame->getTileEngine()->itemDrop(groundTile, loadedAmmo, false);
 						}
 					}
 				}
@@ -1101,13 +1097,11 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 			(*templateIt)->getSlotY()))
 		{
 			// move matched item from ground to the appropriate inv slot
-			matchedWeapon->setOwner(unit);
+			matchedWeapon->moveToOwner(unit);
 			matchedWeapon->setSlot(_game->getMod()->getInventory((*templateIt)->getSlot()));
 			matchedWeapon->setSlotX((*templateIt)->getSlotX());
 			matchedWeapon->setSlotY((*templateIt)->getSlotY());
 			matchedWeapon->setFuseTimer((*templateIt)->getFuseTimer());
-			unitInv->push_back(matchedWeapon);
-			groundTile->removeItem(matchedWeapon);
 		}
 		else
 		{
@@ -1167,10 +1161,11 @@ void InventoryState::onClearInventory(Action *)
 	}
 
 	BattleUnit               *unit       = _battleGame->getSelectedUnit();
-	std::vector<BattleItem*> *unitInv    = unit->getInventory();
 	Tile                     *groundTile = unit->getTile();
 
-	_clearInventory(_game, unitInv, groundTile, false);
+	// FIXME MERGE
+	//_clearInventory(_game, unitInv, groundTile, false);
+	_battleGame->getTileEngine()->itemDropInventory(groundTile, unit);
 
 	// refresh ui
 	_inv->arrangeGround();
@@ -1191,14 +1186,14 @@ void InventoryState::onAutoequip(Action *)
 
 	BattleUnit               *unit          = _battleGame->getSelectedUnit();
 	Tile                     *groundTile    = unit->getTile();
-	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
+	std::vector<BattleItem*>  groundInv     = *groundTile->getInventory();
 	Mod                      *mod           = _game->getMod();
 	RuleInventory            *groundRuleInv = mod->getInventory("STR_GROUND", true);
 	int                       worldShade    = _battleGame->getGlobalShade();
 
 	std::vector<BattleUnit*> units;
 	units.push_back(unit);
-	BattlescapeGenerator::autoEquip(units, mod, groundInv, groundRuleInv, worldShade, true, true);
+	BattlescapeGenerator::autoEquip(units, mod, &groundInv, groundRuleInv, worldShade, true, true);
 
 	// refresh ui
 	_inv->arrangeGround();
@@ -1611,6 +1606,11 @@ void InventoryState::think()
 				{
 					break;
 				}
+			}
+			else
+			{
+				// this will skip empty slot
+				++seq;
 			}
 		}
 		if (firstAmmo)

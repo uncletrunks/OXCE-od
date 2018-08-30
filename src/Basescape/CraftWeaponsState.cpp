@@ -114,7 +114,7 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 	for (std::vector<std::string>::const_iterator i = weapons.begin(); i != weapons.end(); ++i)
 	{
 		RuleCraftWeapon *w = _game->getMod()->getCraftWeapon(*i);
-		RuleCraft *c = _craft->getRules();
+		const RuleCraft *c = _craft->getRules();
 		if (_base->getStorageItems()->getItem(w->getLauncherItem()) > 0 && c->isValidWeaponSlot(weapon, w->getWeaponType()))
 		{
 			_weapons.push_back(w);

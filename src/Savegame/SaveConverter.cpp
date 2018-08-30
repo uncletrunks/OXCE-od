@@ -653,19 +653,19 @@ void SaveConverter::loadDatLoc()
 			target = waypoint;
 			break;
 		case TARGET_TERROR:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_TERROR_MISSION", true));
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_TERROR_MISSION", true), nullptr);
 			break;
 		case TARGET_PORT:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_PORT_TERROR", true));
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_PORT_TERROR", true), nullptr);
 			break;
 		case TARGET_ISLAND:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_ISLAND_TERROR", true));
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_ISLAND_TERROR", true), nullptr);
 			break;
 		case TARGET_SHIP:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_CARGO_SHIP_P1", true));
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_CARGO_SHIP_P1", true), nullptr);
 			break;
 		case TARGET_ARTEFACT:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_ARTIFACT_SITE_P1", true));
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_ARTIFACT_SITE_P1", true), nullptr);
 			break;
 		}
 		if (mission != 0)
@@ -1057,7 +1057,7 @@ void SaveConverter::loadDatSoldier()
 			node["id"] = _save->getId("STR_SOLDIER");
 
 			Soldier *soldier = new Soldier(_mod->getSoldier(_mod->getSoldiersList().front(), true), 0);
-			soldier->load(node, _mod, _save);
+			soldier->load(node, _mod, _save, _mod->getScriptGlobal());
 			if (base != 0xFFFF)
 			{
 				Base *b = dynamic_cast<Base*>(_targets[base]);
