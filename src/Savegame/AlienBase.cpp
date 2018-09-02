@@ -25,7 +25,7 @@ namespace OpenXcom
 /**
  * Initializes an alien base
  */
-AlienBase::AlienBase(AlienDeployment *deployment) : Target(), _id(0), _inBattlescape(false), _discovered(false), _deployment(deployment), _genMissionCount(0)
+AlienBase::AlienBase(AlienDeployment *deployment) : Target(), _inBattlescape(false), _discovered(false), _deployment(deployment), _genMissionCount(0)
 {
 	// allow spawning hunt missions immediately after the base is created, i.e. no initial delay
 	_minutesSinceLastHuntMissionGeneration = _deployment->getHuntMissionMaxFrequency();
@@ -45,7 +45,6 @@ AlienBase::~AlienBase()
 void AlienBase::load(const YAML::Node &node)
 {
 	Target::load(node);
-	_id = node["id"].as<int>(_id);
 	_pactCountry = node["pactCountry"].as<std::string>(_pactCountry);
 	_race = node["race"].as<std::string>(_race);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
@@ -61,7 +60,6 @@ void AlienBase::load(const YAML::Node &node)
 YAML::Node AlienBase::save() const
 {
 	YAML::Node node = Target::save();
-	node["id"] = _id;
 	node["pactCountry"] = _pactCountry;
 	node["race"] = _race;
 	if (_inBattlescape)
@@ -75,43 +73,13 @@ YAML::Node AlienBase::save() const
 }
 
 /**
- * Saves the alien base's unique identifiers to a YAML file.
- * @return YAML node.
+ * Returns the alien base's unique type used for
+ * savegame purposes.
+ * @return ID.
  */
-YAML::Node AlienBase::saveId() const
+std::string AlienBase::getType() const
 {
-	YAML::Node node = Target::saveId();
-	node["type"] = _deployment->getMarkerName();
-	node["id"] = _id;
-	return node;
-}
-
-/**
- * Returns the alien base's unique ID.
- * @return Unique ID.
- */
-int AlienBase::getId() const
-{
-	return _id;
-}
-
-/**
- * Changes the alien base's unique ID.
- * @param id Unique ID.
- */
-void AlienBase::setId(int id)
-{
-	_id = id;
-}
-
-/**
- * Returns the alien base's unique default name.
- * @param lang Language to get strings from.
- * @return Full name.
- */
-std::wstring AlienBase::getDefaultName(Language *lang) const
-{
-	return lang->getString(_deployment->getMarkerName() + "_").arg(_id);
+	return _deployment->getMarkerName();
 }
 
 /**

@@ -27,8 +27,7 @@ namespace OpenXcom
 /**
  * Initializes a mission site.
  */
-MissionSite::MissionSite(const RuleAlienMission *rules, const AlienDeployment *deployment, const AlienDeployment *alienCustomDeploy) : Target(), _rules(rules), _deployment(deployment), _missionCustomDeploy(alienCustomDeploy), _id(0), _texture(-1), _secondsRemaining(0), _inBattlescape(false), _detected(false)
-
+MissionSite::MissionSite(const RuleAlienMission *rules, const AlienDeployment *deployment, const AlienDeployment *alienCustomDeploy) : Target(), _rules(rules), _deployment(deployment), _missionCustomDeploy(alienCustomDeploy), _texture(-1), _secondsRemaining(0), _inBattlescape(false), _detected(false)
 {
 }
 
@@ -46,7 +45,6 @@ MissionSite::~MissionSite()
 void MissionSite::load(const YAML::Node &node)
 {
 	Target::load(node);
-	_id = node["id"].as<int>(_id);
 	_texture = node["texture"].as<int>(_texture);
 	_secondsRemaining = node["secondsRemaining"].as<size_t>(_secondsRemaining);
 	_race = node["race"].as<std::string>(_race);
@@ -66,7 +64,6 @@ YAML::Node MissionSite::save() const
 	node["deployment"] = _deployment->getType();
 	if (_missionCustomDeploy)
 		node["missionCustomDeploy"] = _missionCustomDeploy->getType();
-	node["id"] = _id;
 	node["texture"] = _texture;
 	if (_secondsRemaining)
 		node["secondsRemaining"] = _secondsRemaining;
@@ -78,15 +75,13 @@ YAML::Node MissionSite::save() const
 }
 
 /**
- * Saves the mission site's unique identifiers to a YAML file.
- * @return YAML node.
+ * Returns the mission site's unique type used for
+ * savegame purposes.
+ * @return ID.
  */
-YAML::Node MissionSite::saveId() const
+std::string MissionSite::getType() const
 {
-	YAML::Node node = Target::saveId();
-	node["type"] = _deployment->getMarkerName();
-	node["id"] = _id;
-	return node;
+	return _deployment->getMarkerName();
 }
 
 /**
@@ -117,31 +112,12 @@ const AlienDeployment *MissionSite::getMissionCustomDeploy() const
 }
 
 /**
- * Returns the mission site's unique ID.
- * @return Unique ID.
+ * Returns the name on the globe for the target.
+ * @return String ID.
  */
-int MissionSite::getId() const
+std::string MissionSite::getMarkerName() const
 {
-	return _id;
-}
-
-/**
- * Changes the mission site's unique ID.
- * @param id Unique ID.
- */
-void MissionSite::setId(int id)
-{
-	_id = id;
-}
-
-/**
- * Returns the mission site's unique default name.
- * @param lang Language to get strings from.
- * @return Full name.
- */
-std::wstring MissionSite::getDefaultName(Language *lang) const
-{
-	return lang->getString(_deployment->getMarkerName()).arg(_id);
+	return getType();
 }
 
 /**

@@ -48,7 +48,7 @@ private:
 	const RuleUfo *_rules;
 	int _uniqueId;
 	int _missionWaveNumber;
-	int _id, _crashId, _landId, _damage;
+	int _crashId, _landId, _damage;
 	std::string _direction, _altitude;
 	enum UfoStatus _status;
 	size_t _secondsRemaining;
@@ -85,8 +85,8 @@ public:
 	void finishLoading(const YAML::Node& node, SavedGame &save);
 	/// Saves the UFO to YAML.
 	YAML::Node save(bool newBattle) const;
-	/// Saves the UFO's ID to YAML.
-	YAML::Node saveId() const;
+	/// Gets the UFO's type.
+	std::string getType() const;
 	/// Gets the UFO's ruleset.
 	const RuleUfo *getRules() const;
 	/// Sets the UFO's ruleset.
@@ -97,13 +97,11 @@ public:
 	int getMissionWaveNumber() const { return _missionWaveNumber; }
 	/// Sets the mission wave number that created this UFO.
 	void setMissionWaveNumber(int missionWaveNumber) { _missionWaveNumber = missionWaveNumber; }
-	/// Gets the (non-unique) UFO's ID.
-	int getId() const;
-	/// Sets the (non-unique) UFO's ID.
-	void setId(int id);
 	/// Gets the UFO's default name.
 	std::wstring getDefaultName(Language *lang) const;
-	/// Gets the UFO's marker.
+	/// Gets the UFO's marker name.
+	std::string getMarkerName() const;
+	/// Gets the UFO's marker sprite.
 	int getMarker() const;
 	/// Gets the UFO's amount of damage.
 	int getDamage() const;

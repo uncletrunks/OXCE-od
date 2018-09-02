@@ -31,7 +31,6 @@ namespace OpenXcom
 class AlienBase : public Target
 {
 private:
-	int _id;
 	std::string _pactCountry;
 	std::string _race;
 	bool _inBattlescape, _discovered;
@@ -47,21 +46,15 @@ public:
 	void load(const YAML::Node& node);
 	/// Saves the alien base to YAML.
 	YAML::Node save() const;
-	/// Saves the alien base's ID to YAML.
-	YAML::Node saveId() const;
-	/// Gets the alien base's ID.
-	int getId() const;
-	/// Sets the alien base's ID.
-	void setId(int id);
-	/// Gets the alien base's default name.
-	std::wstring getDefaultName(Language *lang) const;
-	/// Gets the alien base's marker.
+	/// Gets the alien base's type.
+	std::string getType() const;
+	/// Gets the alien base's marker sprite.
 	int getMarker() const;
 	/// Gets the alien base's pact country.
 	const std::string &getPactCountry() const;
 	/// Sets the alien base's pact country.
 	void setPactCountry(const std::string &pactCountry);
-	/// Gets the alien base's amount of active hours..
+	/// Gets the alien base's amount of active hours.
 	std::string getAlienRace() const;
 	/// Sets the alien base's alien race.
 	void setAlienRace(const std::string &race);
