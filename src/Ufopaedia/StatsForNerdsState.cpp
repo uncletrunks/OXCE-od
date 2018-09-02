@@ -2833,7 +2833,8 @@ void StatsForNerdsState::initUfoList()
 		addInteger(ss, ufoRule->getSprite(), "sprite", -1); // INTERWIN.DAT
 		addSingleString(ss, ufoRule->getModSprite(), "modSprite", "", false);
 		addInteger(ss, ufoRule->getMarker(), "marker", -1);
-		addInteger(ss, ufoRule->getLandedMarker(), "landedMarker", -1);
+		addInteger(ss, ufoRule->getLandMarker(), "markerLand", -1);
+		addInteger(ss, ufoRule->getCrashMarker(), "markerCrash", -1);
 		addBoolean(ss, ufoRule->getBattlescapeTerrainData() != 0, "battlescapeTerrainData", false); // just say if there is any or not
 
 		addSection(L"{Sounds}", L"", _white);
