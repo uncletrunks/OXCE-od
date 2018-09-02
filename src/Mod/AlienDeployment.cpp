@@ -115,7 +115,7 @@ namespace OpenXcom
  * @param type String defining the type.
  */
 AlienDeployment::AlienDeployment(const std::string &type) : _type(type), _bughuntMinTurn(0), _width(0), _length(0), _height(0), _civilians(0), _shade(-1), _minShade(-1), _maxShade(-1), _finalDestination(false), _isAlienBase(false), _alert("STR_ALIENS_TERRORISE"),
-	_alertBackground("BACK03.SCR"), _alertDescription(""), _alertSound(-1), _markerName("STR_TERROR_SITE"), _markerIcon(-1), _durationMin(0), _durationMax(0), _minDepth(0), _maxDepth(0), _minSiteDepth(0), _maxSiteDepth(0), _genMissionFrequency(0), _genMissionLimit(1000),
+	_alertBackground("BACK03.SCR"), _alertDescription(""), _alertSound(-1), _markerName("STR_TERROR_SITE"), _markerIcon(-1), _durationMin(0), _durationMax(0), _minDepth(0), _maxDepth(0), _genMissionFrequency(0), _genMissionLimit(1000),
 	_objectiveType(-1), _objectivesRequired(0), _objectiveCompleteScore(0), _objectiveFailedScore(0), _despawnPenalty(0), _points(0), _turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _keepCraftAfterFailedMission(false), _escapeType(ESCAPE_NONE),
 	_baseDetectionRange(0), _baseDetectionChance(100), _huntMissionMaxFrequency(60)
 {
@@ -183,11 +183,6 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	{
 		_minDepth = node["depth"][0].as<int>(_minDepth);
 		_maxDepth = node["depth"][1].as<int>(_maxDepth);
-	}
-	if (node["siteDepth"])
-	{
-		_minSiteDepth = node["siteDepth"][0].as<int>(_minSiteDepth);
-		_maxSiteDepth = node["siteDepth"][1].as<int>(_maxSiteDepth);
 	}
 	if (node["duration"])
 	{
@@ -529,24 +524,6 @@ int AlienDeployment::getMinDepth() const
 int AlienDeployment::getMaxDepth() const
 {
 	return _maxDepth;
-}
-
-/**
- * Gets The minimum depth for this deployment's mission site.
- * @return The minimum depth.
- */
-int AlienDeployment::getMinSiteDepth() const
-{
-	return _minSiteDepth;
-}
-
-/**
- * Gets The maximum depth for this deployment's mission site.
- * @return The maximum depth.
- */
-int AlienDeployment::getMaxSiteDepth() const
-{
-	return _maxSiteDepth;
 }
 
 /**
