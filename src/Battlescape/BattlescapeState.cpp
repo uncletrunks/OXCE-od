@@ -1662,11 +1662,9 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 	_barMorale->setVisible(playableUnit);
 	_btnLeftHandItem->setVisible(playableUnit);
 	_btnRightHandItem->setVisible(playableUnit);
-	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
-	{
-		_numAmmoLeft[slot]->setVisible(playableUnit);
-		_numAmmoRight[slot]->setVisible(playableUnit);
-	}
+
+	drawHandsItems();
+
 	if (!playableUnit)
 	{
 		_txtName->setText("");
@@ -1788,8 +1786,6 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 	_barMorale->setValue(battleUnit->getMorale());
 
 	toggleKneelButton(battleUnit);
-
-	drawHandsItems();
 
 	if (checkFOV)
 	{
