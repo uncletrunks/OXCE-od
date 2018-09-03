@@ -41,10 +41,11 @@ class RuleResearch
  private:
 	std::string _name, _lookup, _cutscene, _spawnedItem;
 	int _cost, _points;
-	std::vector<std::string> _dependenciesName, _unlocksName, _disables, _getOneFreeName, _requiresName, _requiresBaseFunc;
-	std::vector<const RuleResearch*> _dependencies, _unlocks, _getOneFree, _requires;
+	std::vector<std::string> _dependenciesName, _unlocksName, _disablesName, _getOneFreeName, _requiresName, _requiresBaseFunc;
+	std::vector<const RuleResearch*> _dependencies, _unlocks, _disables, _getOneFree, _requires;
 	bool _sequentialGetOneFree;
-	std::map<std::string, std::vector<std::string> > _getOneFreeProtected;
+	std::map<std::string, std::vector<std::string> > _getOneFreeProtectedName;
+	std::map<const RuleResearch*, std::vector<const RuleResearch*> > _getOneFreeProtected;
 	bool _needItem, _destroyItem;
 	int _listOrder;
 public:
@@ -73,13 +74,13 @@ public:
 	/// Gets the list of ResearchProjects unlocked by this research.
 	const std::vector<const RuleResearch*> &getUnlocked() const;
 	/// Gets the list of ResearchProjects disabled by this research.
-	const std::vector<std::string> &getDisabled() const;
+	const std::vector<const RuleResearch*> &getDisabled() const;
 	/// Gets the points earned for discovering this ResearchProject.
 	int getPoints() const;
 	/// Gets the list of ResearchProjects granted at random for free by this research.
 	const std::vector<const RuleResearch*> &getGetOneFree() const;
 	/// Gets the list(s) of ResearchProjects granted at random for free by this research (if a defined prerequisite is met).
-	const std::map<std::string, std::vector<std::string> > &getGetOneFreeProtected() const;
+	const std::map<const RuleResearch*, std::vector<const RuleResearch*> > &getGetOneFreeProtected() const;
 	/// Gets what to look up in the ufopedia.
 	const std::string &getLookup() const;
 	/// Gets the requirements for this ResearchProject.

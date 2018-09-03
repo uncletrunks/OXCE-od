@@ -2168,24 +2168,23 @@ void GeoscapeState::time1Day()
 						possibilities.push_back(free);
 					}
 				}
-				// FIXME MERGE
-				//for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = research->getGetOneFreeProtected().begin(); itMap != research->getGetOneFreeProtected().end(); ++itMap)
-				//{
-				//	if (_game->getSavedGame()->isResearched(itMap->first, false))
-				//	{
-				//		for (std::vector<std::string>::const_iterator itVector = itMap->second.begin(); itVector != itMap->second.end(); ++itVector)
-				//		{
-				//			if (_game->getSavedGame()->isResearchRuleStatusDisabled(*itVector))
-				//			{
-				//				continue; // skip disabled topics
-				//			}
-				//			if (!_game->getSavedGame()->isResearched(*itVector, false))
-				//			{
-				//				possibilities.push_back(*itVector);
-				//			}
-				//		}
-				//	}
-				//}
+				for (auto& itMap : research->getGetOneFreeProtected())
+				{
+					if (saveGame->isResearched(itMap.first, false))
+					{
+						for (auto& itVector : itMap.second)
+						{
+							if (saveGame->isResearchRuleStatusDisabled(itVector->getName()))
+							{
+								continue; // skip disabled topics
+							}
+							if (!saveGame->isResearched(itVector, false))
+							{
+								possibilities.push_back(itVector);
+							}
+						}
+					}
+				}
 				if (!possibilities.empty())
 				{
 					size_t pick = 0;

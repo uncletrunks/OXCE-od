@@ -297,9 +297,9 @@ void TechTreeViewerState::initLists()
 		std::vector<std::string> requiredByItems;
 		std::vector<std::string> leadsTo;
 		const std::vector<const RuleResearch*> unlocks = rule->getUnlocked();
-		const std::vector<std::string> disables = rule->getDisabled();
+		const std::vector<const RuleResearch*> disables = rule->getDisabled();
 		const std::vector<const RuleResearch*> free = rule->getGetOneFree();
-		const std::map<std::string, std::vector<std::string> > freeProtected = rule->getGetOneFreeProtected();
+		const std::map<const RuleResearch*, std::vector<const RuleResearch*> > freeProtected = rule->getGetOneFreeProtected();
 
 		for (auto& j : manufactureList)
 		{
@@ -356,7 +356,7 @@ void TechTreeViewerState::initLists()
 			}
 			for (auto& i : temp->getDisabled())
 			{
-				if (i == rule->getName())
+				if (i == rule)
 				{
 					disabledBy.push_back(j);
 				}
@@ -372,7 +372,7 @@ void TechTreeViewerState::initLists()
 			{
 				for (auto& i : itMap.second)
 				{
-					if (i == rule->getName())
+					if (i == rule)
 					{
 						getForFreeFrom.push_back(j);
 					}
@@ -709,16 +709,16 @@ void TechTreeViewerState::initLists()
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(TTV_NONE);
 			++row;
-			for (std::vector<std::string>::const_iterator i = disables.begin(); i != disables.end(); ++i)
+			for (auto& i : disables)
 			{
-				std::wstring name = tr((*i));
+				std::wstring name = tr(i->getName());
 				name.insert(0, L"  ");
 				_lstRight->addRow(1, name.c_str());
-				if (!isDiscoveredResearch((*i)))
+				if (!isDiscoveredResearch(i->getName()))
 				{
 					_lstRight->setRowColor(row, _pink);
 				}
-				_rightTopics.push_back((*i));
+				_rightTopics.push_back(i->getName());
 				_rightFlags.push_back(TTV_RESEARCH);
 				++row;
 			}
@@ -752,13 +752,13 @@ void TechTreeViewerState::initLists()
 				_rightFlags.push_back(TTV_RESEARCH);
 				++row;
 			}
-			for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = freeProtected.begin(); itMap != freeProtected.end(); ++itMap)
+			for (auto& itMap : freeProtected)
 			{
-				std::wstring name2 = tr(itMap->first);
+				std::wstring name2 = tr(itMap.first->getName());
 				name2.insert(0, L" ");
 				name2.append(L":");
 				_lstRight->addRow(1, name2.c_str());
-				if (isDiscoveredResearch(itMap->first))
+				if (isDiscoveredResearch(itMap.first->getName()))
 				{
 					_lstRight->setRowColor(row, _white);
 				}
@@ -766,19 +766,19 @@ void TechTreeViewerState::initLists()
 				{
 					_lstRight->setRowColor(row, _gold);
 				}
-				_rightTopics.push_back(itMap->first);
+				_rightTopics.push_back(itMap.first->getName());
 				_rightFlags.push_back(TTV_RESEARCH);
 				++row;
-				for (std::vector<std::string>::const_iterator i = itMap->second.begin(); i != itMap->second.end(); ++i)
+				for (auto& i : itMap.second)
 				{
-					std::wstring name = tr((*i));
+					std::wstring name = tr(i->getName());
 					name.insert(0, L"  ");
 					_lstRight->addRow(1, name.c_str());
-					if (!isDiscoveredResearch((*i)))
+					if (!isDiscoveredResearch(i->getName()))
 					{
 						_lstRight->setRowColor(row, _pink);
 					}
-					_rightTopics.push_back((*i));
+					_rightTopics.push_back(i->getName());
 					_rightFlags.push_back(TTV_RESEARCH);
 					++row;
 				}

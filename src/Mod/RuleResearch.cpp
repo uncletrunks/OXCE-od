@@ -48,12 +48,12 @@ void RuleResearch::load(const YAML::Node &node, int listOrder)
 	_points = node["points"].as<int>(_points);
 	_dependenciesName = node["dependencies"].as< std::vector<std::string> >(_dependenciesName);
 	_unlocksName = node["unlocks"].as< std::vector<std::string> >(_unlocksName);
-	_disables = node["disables"].as< std::vector<std::string> >(_disables);
+	_disablesName = node["disables"].as< std::vector<std::string> >(_disablesName);
 	_getOneFreeName = node["getOneFree"].as< std::vector<std::string> >(_getOneFreeName);
 	_requiresName = node["requires"].as< std::vector<std::string> >(_requiresName);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
 	_sequentialGetOneFree = node["sequentialGetOneFree"].as<bool>(_sequentialGetOneFree);
-	_getOneFreeProtected = node["getOneFreeProtected"].as< std::map<std::string, std::vector<std::string> > >(_getOneFreeProtected);
+	_getOneFreeProtectedName = node["getOneFreeProtected"].as< std::map<std::string, std::vector<std::string> > >(_getOneFreeProtectedName);
 	_needItem = node["needItem"].as<bool>(_needItem);
 	_destroyItem = node["destroyItem"].as<bool>(_destroyItem);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
@@ -76,14 +76,31 @@ void RuleResearch::afterLoad(const Mod* mod)
 {
 	_dependencies = mod->getResearch(_dependenciesName);
 	_unlocks = mod->getResearch(_unlocksName);
+	_disables = mod->getResearch(_disablesName);
 	_getOneFree = mod->getResearch(_getOneFreeName);
 	_requires = mod->getResearch(_requiresName);
+
+	for (auto& n : _getOneFreeProtectedName)
+	{
+		auto left = mod->getResearch(n.first, false);
+		if (left)
+		{
+			auto right = mod->getResearch(n.second);
+			_getOneFreeProtected[left] = right;
+		}
+		else
+		{
+			Log(LOG_ERROR) << "Unknown research " + n.first;
+		}
+	}
 
 	//remove not needed data
 	Collections::deleteAll(_dependenciesName);
 	Collections::deleteAll(_unlocksName);
+	Collections::deleteAll(_disablesName);
 	Collections::deleteAll(_getOneFreeName);
 	Collections::deleteAll(_requiresName);
+	Collections::deleteAll(_getOneFreeProtectedName);
 }
 
 /**
@@ -152,7 +169,7 @@ const std::vector<const RuleResearch*> &RuleResearch::getUnlocked() const
  * Gets the list of ResearchProjects disabled by this research.
  * @return The list of ResearchProjects.
  */
-const std::vector<std::string> &RuleResearch::getDisabled() const
+const std::vector<const RuleResearch*> &RuleResearch::getDisabled() const
 {
 	return _disables;
 }
@@ -179,7 +196,7 @@ const std::vector<const RuleResearch*> &RuleResearch::getGetOneFree() const
  * Gets the list(s) of ResearchProjects granted at random for free by this research (if a defined prerequisite is met).
  * @return The list(s) of ResearchProjects.
  */
-const std::map<std::string, std::vector<std::string> > &RuleResearch::getGetOneFreeProtected() const
+const std::map<const RuleResearch*, std::vector<const RuleResearch*> > &RuleResearch::getGetOneFreeProtected() const
 {
 	return _getOneFreeProtected;
 }

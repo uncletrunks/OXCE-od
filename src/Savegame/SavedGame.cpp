@@ -1439,14 +1439,10 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 				addResearchScore(currentQueueItem->getPoints());
 			}
 			// process "disables"
-			for (std::vector<std::string>::const_iterator dis = currentQueueItem->getDisabled().begin(); dis != currentQueueItem->getDisabled().end(); ++dis)
+			for (auto& dis : currentQueueItem->getDisabled())
 			{
-				RuleResearch *tmp = mod->getResearch((*dis));
-				if (tmp)
-				{
-					removeDiscoveredResearch(tmp); // un-research
-				}
-				setResearchRuleStatus((*dis), RuleResearch::RESEARCH_STATUS_DISABLED); // mark as permanently disabled
+				removeDiscoveredResearch(dis); // un-research
+				setResearchRuleStatus(dis->getName(), RuleResearch::RESEARCH_STATUS_DISABLED); // mark as permanently disabled
 			}
 		}
 		else
@@ -1912,19 +1908,18 @@ bool SavedGame::hasUndiscoveredGetOneFree(const RuleResearch * r, bool checkOnly
 	else
 	{
 		// search through getOneFreeProtected topics too
-		for (std::map<std::string, std::vector<std::string> >::const_iterator itMap = r->getGetOneFreeProtected().begin(); itMap != r->getGetOneFreeProtected().end(); ++itMap)
+		for (auto& itMap : r->getGetOneFreeProtected())
 		{
-			if (checkOnlyAvailableTopics && !isResearched(itMap->first, false))
+			if (checkOnlyAvailableTopics && !isResearched(itMap.first, false))
 			{
 				// skip this group, its prerequisite has not been discovered yet
 			}
 			else
 			{
-				// FIXME MERGE
-				//if (!isResearched(itMap->second, false, true))
-				//{
-				//	return true; // found something undiscovered (and NOT disabled) already, no need to search further
-				//}
+				if (!isResearched(itMap.second, false, true))
+				{
+					return true; // found something undiscovered (and NOT disabled) already, no need to search further
+				}
 			}
 		}
 	}
