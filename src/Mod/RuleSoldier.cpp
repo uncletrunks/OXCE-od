@@ -154,7 +154,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 		}
 		else
 		{
-			if (fileName.substr(fileName.length() - 1, 1) == "/")
+			if (fileName[fileName.length() - 1] == '/')
 			{
 				// load all *.nam files in given directory
 				std::set<std::string> names = FileMap::filterFiles(FileMap::getVFolderContents(fileName), "nam");
