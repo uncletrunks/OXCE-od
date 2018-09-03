@@ -47,6 +47,7 @@ UnitSprite::UnitSprite(Surface* dest, Mod* mod, int frame, bool helmet) :
 	_itemSurface(mod->getSurfaceSet("HANDOB.PCK")),
 	_fireSurface(mod->getSurfaceSet("SMOKE.PCK")),
 	_breathSurface(mod->getSurfaceSet("BREATH-1.PCK", false)),
+	_facingArrowSurface(mod->getSurfaceSet("DETBLOB.DAT")),
 	_dest(dest), _mod(mod),
 	_part(0), _animationFrame(frame), _drawingRoutine(0),
 	_helmet(helmet),
@@ -192,7 +193,7 @@ void UnitSprite::blitBody(Part& body)
  * Draws a unit, using the drawing rules of the unit.
  * This function is called by Map, for each unit on the screen.
  */
-void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask)
+void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask, bool isAltPressed)
 {
 	_x = x;
 	_y = y;
@@ -272,6 +273,12 @@ void UnitSprite::draw(BattleUnit* unit, int part, int x, int y, int shade, Graph
 			// lower the bubbles for shorter or kneeling units.
 			tmpSurface->blitNShade(_dest, _x, _y- 30 + (22 - unit->getHeight()), shade, _mask);
 		}
+	}
+	if (isAltPressed)
+	{
+		// draw unit facing indicator
+		auto tmpSurface = _facingArrowSurface->getFrame(7 + ((unit->getDirection() + 1) % 8));
+		tmpSurface->blitNShade(_dest, _x, _y, 0);
 	}
 }
 

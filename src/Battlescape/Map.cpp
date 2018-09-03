@@ -78,7 +78,7 @@ namespace OpenXcom
  * @param y Y position in pixels.
  * @param visibleMapHeight Current visible map height.
  */
-Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) : InteractiveSurface(width, height, x, y), _game(game), _arrow(0), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _projectile(0), _projectileInFOV(false), _explosionInFOV(false), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _smoothingEngaged(false), _flashScreen(false), _bgColor(15), _showObstacles(false)
+Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) : InteractiveSurface(width, height, x, y), _game(game), _arrow(0), _anyIndicator(false), _isAltPressed(false), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _projectile(0), _projectileInFOV(false), _explosionInFOV(false), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _smoothingEngaged(false), _flashScreen(false), _bgColor(15), _showObstacles(false)
 {
 	_iconHeight = _game->getMod()->getInterface("battlescape")->getElement("icons")->h;
 	_iconWidth = _game->getMod()->getInterface("battlescape")->getElement("icons")->w;
@@ -141,6 +141,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_woundIndicator = _game->getMod()->getSurface("FloorWoundIndicator", false);
 	_burnIndicator = _game->getMod()->getSurface("FloorBurnIndicator", false);
 	_shockIndicator = _game->getMod()->getSurface("FloorShockIndicator", false);
+	_anyIndicator = _stunIndicator || _woundIndicator || _burnIndicator || _shockIndicator;
 
 	const SavedBattleGame *battleSave = _game->getSavedGame()->getSavedBattle();
 	if (battleSave)
@@ -334,9 +335,10 @@ static bool positionHaveSameXY(Position a, Position b)
  * @param currTile
  * @param currTileScreenPosition
  * @param shade
+ * @param obstacleShade
  * @param topLayer
  */
-void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, int shade, bool topLayer)
+void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, int shade, int obstacleShade, bool topLayer)
 {
 	const int tileFoorWidth = 32;
 	const int tileFoorHeight = 16;
@@ -519,9 +521,13 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	Position offset;
 	int shadeOffset;
 	calculateWalkingOffset(bu, &offset, &shadeOffset);
-	int tileShade = currTile->isDiscovered(2) ? currTile->getShade() : 16;
+	int tileShade = currTile->isDiscovered(2) ? reShade(currTile) : 16;
 	int unitShade = (tileShade * (16 - shadeOffset) + shade * shadeOffset) / 16;
-	unitSprite.draw(bu, part, tileScreenPosition.x + offset.x, tileScreenPosition.y + offset.y, unitShade, mask);
+	if (!moving && unitTile->getObstacle(4))
+	{
+		unitShade = obstacleShade;
+	}
+	unitSprite.draw(bu, part, tileScreenPosition.x + offset.x, tileScreenPosition.y + offset.y, unitShade, mask, _isAltPressed);
 }
 
 /**
@@ -531,7 +537,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
  */
 void Map::drawTerrain(Surface *surface)
 {
-	bool isAltPressed = (SDL_GetModState() & KMOD_ALT) != 0;
+	_isAltPressed = (SDL_GetModState() & KMOD_ALT) != 0;
 	int frameNumber = 0;
 	Surface *tmpSurface;
 	Tile *tile;
@@ -770,7 +776,7 @@ void Map::drawTerrain(Surface *surface)
 
 					for (int b = 0; b < backPosSize; ++b)
 					{
-						drawUnit(unitSprite, _save->getTile(mapPosition + backPos[b]), tile, screenPosition, tileShade, topLayer);
+						drawUnit(unitSprite, _save->getTile(mapPosition + backPos[b]), tile, screenPosition, tileShade, obstacleShade, topLayer);
 					}
 
 					// Draw walls
@@ -817,7 +823,7 @@ void Map::drawTerrain(Surface *surface)
 								screenPosition.y + tile->getTerrainLevel(),
 								tileShade
 							);
-							if (_stunIndicator || _woundIndicator || _burnIndicator || _shockIndicator)
+							if (_anyIndicator)
 							{
 								BattleUnit *itemUnit = item->getUnit();
 								if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
@@ -951,7 +957,7 @@ void Map::drawTerrain(Surface *surface)
 					}
 					unit = tile->getUnit();
 					// Draw soldier from this tile or below
-					drawUnit(unitSprite, tile, tile, screenPosition, tileShade, topLayer);
+					drawUnit(unitSprite, tile, tile, screenPosition, tileShade, obstacleShade, topLayer);
 
 					// special handling for a moving unit in forground of tile.
 					const int frontPosSize = 5;
@@ -966,7 +972,7 @@ void Map::drawTerrain(Surface *surface)
 
 					for (int f = 0; f < frontPosSize; ++f)
 					{
-						drawUnit(unitSprite, _save->getTile(mapPosition + frontPos[f]), tile, screenPosition, tileShade, topLayer);
+						drawUnit(unitSprite, _save->getTile(mapPosition + frontPos[f]), tile, screenPosition, tileShade, obstacleShade, topLayer);
 					}
 
 					// Draw smoke/fire
@@ -1185,7 +1191,7 @@ void Map::drawTerrain(Surface *surface)
 								}
 
 								// display additional damage and psi-effectiveness info
-								if (isAltPressed)
+								if (_isAltPressed)
 								{
 									// step 1: determine rule
 									const RuleItem *rule;
@@ -1289,7 +1295,7 @@ void Map::drawTerrain(Surface *surface)
 							tmpSurface = _game->getMod()->getSurfaceSet("CURSOR.PCK")->getFrame(frameNumber);
 							tmpSurface->blitNShade(surface, screenPosition.x, screenPosition.y, 0);
 						}
-						if (!isAltPressed && _cursorType > 2 && _camera->getViewLevel() == itZ)
+						if (!_isAltPressed && _cursorType > 2 && _camera->getViewLevel() == itZ)
 						{
 							int frame[6] = {0, 0, 0, 11, 13, 15};
 							tmpSurface = _game->getMod()->getSurfaceSet("CURSOR.PCK")->getFrame(frame[_cursorType] + (_animFrame / 4) % 2);
@@ -1427,7 +1433,7 @@ void Map::drawTerrain(Surface *surface)
 		}
 	}
 	// Draw motion scanner arrows
-	if (isAltPressed && _save->getSide() == FACTION_PLAYER)
+	if (_isAltPressed && _save->getSide() == FACTION_PLAYER)
 	{
 		for (auto myUnit : *_save->getUnits())
 		{

@@ -61,6 +61,7 @@ private:
 	SavedBattleGame *_save;
 	Surface *_arrow;
 	Surface *_stunIndicator, *_woundIndicator, *_burnIndicator, *_shockIndicator;
+	bool _anyIndicator, _isAltPressed;
 	int _spriteWidth, _spriteHeight;
 	int _selectorX, _selectorY;
 	int _mouseX, _mouseY;
@@ -85,7 +86,7 @@ private:
 	Text *_txtAccuracy;
 	SurfaceSet *_projectileSet;
 
-	void drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position tileScreenPosition, int shade, bool topLayer);
+	void drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position tileScreenPosition, int shade, int obstacleShade, bool topLayer);
 	void drawTerrain(Surface *surface);
 	int getTerrainLevel(const Position& pos, int size) const;
 	int getWallShade(TilePart part, Tile* tileFrot, Tile* tileBehind);
