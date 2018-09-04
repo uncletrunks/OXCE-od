@@ -547,12 +547,22 @@ void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z, bool 
  * Initializes the map utilities.
  * @param mod Pointer to mod.
  */
-void SavedBattleGame::initUtilities(Mod *mod)
+void SavedBattleGame::initUtilities(Mod *mod, bool craftInventory)
 {
 	delete _pathfinding;
 	delete _tileEngine;
-	_pathfinding = new Pathfinding(this);
+	_baseCraftInventory = craftInventory;
+	_pathfinding = craftInventory ? nullptr : new Pathfinding(this);
 	_tileEngine = new TileEngine(this, mod);
+}
+
+/**
+ * Gets if this is craft pre-eqipt phase in base view.
+ * @return True if it in base equpt screen.
+ */
+bool SavedBattleGame::isBaseCraftInventory()
+{
+	return _baseCraftInventory;
 }
 
 /**

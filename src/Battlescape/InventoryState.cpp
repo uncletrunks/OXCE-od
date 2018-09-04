@@ -71,7 +71,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent) : _tu(tu), _li
 		Options::baseYResolution = Screen::ORIGINAL_HEIGHT;
 		_game->getScreen()->resetDisplay(false);
 	}
-	else if (!_battleGame->getTileEngine())
+	else if (_battleGame->isBaseCraftInventory())
 	{
 		Screen::updateScale(Options::battlescapeScale, Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, true);
 		_game->getScreen()->resetDisplay(false);
@@ -246,7 +246,7 @@ InventoryState::~InventoryState()
 {
 	_clearInventoryTemplate(_curInventoryTemplate);
 
-	if (_battleGame->getTileEngine())
+	if (!_battleGame->isBaseCraftInventory())
 	{
 		if (Options::maximizeInfoScreens)
 		{

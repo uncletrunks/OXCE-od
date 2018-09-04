@@ -1775,6 +1775,7 @@ void BattlescapeGenerator::runInventory(Craft *craft)
 	_mapsize_y = 2;
 	_mapsize_z = 1;
 	_save->initMap(_mapsize_x, _mapsize_y, _mapsize_z);
+	_save->initUtilities(_mod, true);
 	MapDataSet *set = new MapDataSet("dummy");
 	MapData *data = new MapData(set);
 	_craftInventoryTile = _save->getTile(0);
