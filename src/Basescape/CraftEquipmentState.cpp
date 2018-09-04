@@ -149,7 +149,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _lstScroll(
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
 		RuleItem *rule = _game->getMod()->getItem(*i);
-		int cQty = rule->isFixed() ? c->getVehicleCount(*i) : c->getItems()->getItem(*i);
+		int cQty = rule->getVehicleUnit() ? c->getVehicleCount(*i) : c->getItems()->getItem(*i);
 
 		if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE &&
 			_game->getSavedGame()->isResearched(rule->getRequirements()) &&
@@ -830,7 +830,7 @@ void CraftEquipmentState::saveGlobalLoadout(int index)
 	{
 		RuleItem *item = _game->getMod()->getItem(itemRule, true);
 		int cQty = 0;
-		if (item->isFixed())
+		if (item->getVehicleUnit())
 		{
 			cQty = c->getVehicleCount(itemRule);
 		}
@@ -878,7 +878,7 @@ void CraftEquipmentState::loadGlobalLoadout(int index)
 		{
 			int tQty = templateItem.second;
 			int cQty = 0;
-			if (item->isFixed())
+			if (item->getVehicleUnit())
 			{
 				// Note: we will also report HWPs as missing:
 				// - if there is not enough ammo to arm them
