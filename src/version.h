@@ -18,7 +18,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define OPENXCOM_VERSION_SHORT "4.0"
+#define OPENXCOM_VERSION_SHORT "4.0a"
 #define OPENXCOM_VERSION_LONG "4.0.0.0"
 #define OPENXCOM_VERSION_NUMBER 4,0,0,0
 
