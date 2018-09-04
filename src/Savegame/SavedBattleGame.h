@@ -73,6 +73,7 @@ private:
 	int _animFrame;
 	bool _debugMode, _bughuntMode;
 	bool _aborted;
+	bool _baseCraftInventory = false;
 	int _itemId;
 	int _objectiveType, _objectivesDestroyed, _objectivesNeeded;
 	std::vector<BattleUnit*> _exposedUnits;
@@ -109,7 +110,9 @@ public:
 	/// Sets the dimensions of the map and initializes it.
 	void initMap(int mapsize_x, int mapsize_y, int mapsize_z, bool resetTerrain = true);
 	/// Initialises the pathfinding and tileengine.
-	void initUtilities(Mod *mod);
+	void initUtilities(Mod *mod, bool craftInventory = false);
+	/// Gets if this is craft pre-eqipt phase in base view.
+	bool isBaseCraftInventory();
 	/// Gets the game's mapdatafiles.
 	std::vector<MapDataSet*> *getMapDataSets();
 	/// Sets the mission type.
