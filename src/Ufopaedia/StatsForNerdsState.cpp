@@ -1585,6 +1585,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getConfigAimed()->shots, "shots", 1);
 		addSingleString(ss, itemRule->getConfigAimed()->name, "name", "STR_AIMED_SHOT");
 		addInteger(ss, itemRule->getConfigAimed()->ammoSlot, "ammoSlot");
+		addBoolean(ss, itemRule->getConfigAimed()->arcing, "arcing");
 		endHeading();
 	}
 
@@ -1593,6 +1594,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getConfigAuto()->shots, "shots", 3);
 		addSingleString(ss, itemRule->getConfigAuto()->name, "name", "STR_AUTO_SHOT");
 		addInteger(ss, itemRule->getConfigAuto()->ammoSlot, "ammoSlot");
+		addBoolean(ss, itemRule->getConfigAuto()->arcing, "arcing");
 		endHeading();
 	}
 
@@ -1601,6 +1603,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getConfigSnap()->shots, "shots", 1);
 		addSingleString(ss, itemRule->getConfigSnap()->name, "name", "STR_SNAP_SHOT");
 		addInteger(ss, itemRule->getConfigSnap()->ammoSlot, "ammoSlot");
+		addBoolean(ss, itemRule->getConfigSnap()->arcing, "arcing");
 		endHeading();
 	}
 
@@ -1619,6 +1622,7 @@ void StatsForNerdsState::initItemList()
 			}
 		}
 		addInteger(ss, ammoSlotCurrent, "ammoSlot", ammoSlotDefault);
+		addBoolean(ss, itemRule->getConfigMelee()->arcing, "arcing");
 		endHeading();
 	}
 
@@ -1677,6 +1681,7 @@ void StatsForNerdsState::initItemList()
 
 	addVectorOfResearch(ss, itemRule->getRequirements(), "requires");
 	addVectorOfResearch(ss, itemRule->getBuyRequirements(), "requiresBuy");
+	addVectorOfStrings(ss, itemRule->getRequiresBuyBaseFunc(), "requiresBuyBaseFunc");
 	addVectorOfStrings(ss, itemRule->getCategories(), "categories");
 	addVectorOfStrings(ss, itemRule->getSupportedInventorySections(), "supportedInventorySections");
 
@@ -2478,6 +2483,7 @@ void StatsForNerdsState::initCraftList()
 	std::wostringstream ss;
 
 	addVectorOfStrings(ss, craftRule->getRequirements(), "requires");
+	addVectorOfStrings(ss, craftRule->getRequiresBuyBaseFunc(), "requiresBuyBaseFunc");
 
 	addInteger(ss, craftRule->getBuyCost(), "costBuy", 0, true);
 	addInteger(ss, craftRule->getRentCost(), "costRent", 0, true);

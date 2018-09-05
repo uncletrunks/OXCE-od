@@ -932,7 +932,6 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
  */
 void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods)
 {
-	Log(LOG_INFO) << "Loading rulesets...";
 	ModScript parser{ _scriptGlobal, this };
 
 	Log(LOG_INFO) << "Loading rulesets...";

@@ -206,6 +206,7 @@ en-US:
   shots: "Shots per action"
   name: "Name"
   ammoSlot: "Ammo slot used"
+  arcing: "Arcing?"
 #
   clipSize: "Clip size"
 #
@@ -234,6 +235,7 @@ en-US:
 #
   requires: "Tech required"
   requiresBuy: "Tech required to buy"
+  requiresBuyBaseFunc: "Services needed to buy"
   categories: "Categories"
   supportedInventorySections: "Inventory slots"
 #
@@ -314,9 +316,9 @@ en-US:
   buildTime: "Build time"
   monthlyCost: "Monthly cost"
   refundValue: "Refund value"
-  requiresBaseFunc: "Requires functionality"
-  provideBaseFunc: "Provides functionality"
-  forbiddenBaseFunc: "Forbids functionality"
+  requiresBaseFunc: "Requires services"
+  provideBaseFunc: "Provides services"
+  forbiddenBaseFunc: "Forbids services"
   lift: "Access lift?"
   hyper: "Hyper-wave decoder?"
   mind: "Mind shield?"
