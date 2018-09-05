@@ -589,6 +589,11 @@ void BattlescapeGenerator::run()
 		}
 	}
 
+	if (_terrain == 0)
+	{
+		throw Exception("Map generator encountered an error: No valid terrain found.");
+	}
+
 	setDepth(ruleDeploy, false);
 
 	if (ruleDeploy->getShade() != -1)
