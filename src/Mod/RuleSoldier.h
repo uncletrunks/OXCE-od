@@ -52,7 +52,8 @@ private:
 	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps, _dogfightExperience;
 	std::string _armor;
 	int _costBuy, _costSalary, _costSalarySquaddie, _costSalarySergeant, _costSalaryCaptain, _costSalaryColonel, _costSalaryCommander;
-	int _standHeight, _kneelHeight, _floatHeight, _femaleFrequency;
+	int _standHeight, _kneelHeight, _floatHeight;
+	int _femaleFrequency, _value;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
@@ -123,6 +124,8 @@ public:
 	const std::vector<int> &getFemaleDeathSounds() const;
 	/// Gets the pool list for soldier names.
 	const std::vector<SoldierNamePool*> &getNames() const;
+	/// Gets the value - for score calculation.
+	int getValue() const;
 	/// Gets the list of StatStrings.
 	const std::vector<StatString *> &getStatStrings() const;
 	/// Gets the list of strings for ranks.

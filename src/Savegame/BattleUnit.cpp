@@ -124,7 +124,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	default:             rankbonus =  0; break;
 	}
 
-	_value = 20 + soldier->getMissions() + rankbonus;
+	_value = soldier->getRules()->getValue() + soldier->getMissions() + rankbonus;
 
 	_tu = _stats.tu;
 	_energy = _stats.stamina;
