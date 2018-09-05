@@ -1210,9 +1210,12 @@ void DebriefingState::prepareDebriefing()
 			else
 			{
 				// Note: just before removing a landed UFO, check for mission interruption (by setting the UFO damage to max)
-				if ((*i)->getStatus() == Ufo::LANDED)
+				if (save->getMonthsPassed() > -1)
 				{
-					(*i)->setDamage((*i)->getCraftStats().damageMax, _game->getMod());
+					if ((*i)->getStatus() == Ufo::LANDED)
+					{
+						(*i)->setDamage((*i)->getCraftStats().damageMax, _game->getMod());
+					}
 				}
 				delete *i;
 				save->getUfos()->erase(i);
