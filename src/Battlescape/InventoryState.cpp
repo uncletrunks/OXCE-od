@@ -303,39 +303,6 @@ InventoryState::~InventoryState()
 	}
 }
 
-static void _clearInventory(Game *game, std::vector<BattleItem*> *unitInv, Tile *groundTile, bool deleteFixedItems)
-{
-	RuleInventory *groundRuleInv = game->getMod()->getInventory("STR_GROUND");
-
-	// clear unit's inventory (i.e. move everything to the ground)
-	for (std::vector<BattleItem*>::iterator i = unitInv->begin(); i != unitInv->end(); )
-	{
-		if ((*i)->getRules()->isFixed())
-		{
-			if (deleteFixedItems)
-			{
-				// delete fixed items completely (e.g. when changing armor)
-				(*i)->setOwner(NULL);
-				BattleItem *item = *i;
-				i = unitInv->erase(i);
-				game->getSavedGame()->getSavedBattle()->removeItem(item);
-			}
-			else
-			{
-				// do nothing, fixed items cannot be moved (individually by the player)!
-				++i;
-			}
-		}
-		else
-		{
-			(*i)->setOwner(NULL);
-			(*i)->setFuseTimer(-1); // unprime explosives before dropping them
-			groundTile->addItem(*i, groundRuleInv);
-			i = unitInv->erase(i);
-		}
-	}
-}
-
 void InventoryState::setGlobalLayoutIndex(int index)
 {
 	_globalLayoutIndex = index;
@@ -401,7 +368,7 @@ void InventoryState::init()
 			// Step 2: drop all items (and delete fixed items!!)
 			std::vector<BattleItem*> *unitInv = unit->getInventory();
 			Tile *groundTile = unit->getTile();
-			_clearInventory(_game, unitInv, groundTile, true);
+			_battleGame->getTileEngine()->itemDropInventory(groundTile, unit, true, true);
 
 			// Step 3: equip fixed items // Note: the inventory must be *completely* empty before this step
 			_battleGame->initUnit(unit);
@@ -977,9 +944,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*> *groundInv     = groundTile->getInventory();
 
-	// FIXME MERGE
-	//_clearInventory(_game, unitInv, groundTile, false);
-	_battleGame->getTileEngine()->itemDropInventory(groundTile, unit);
+	_battleGame->getTileEngine()->itemDropInventory(groundTile, unit, true, false);
 
 	// attempt to replicate inventory template by grabbing corresponding items
 	// from the ground.  if any item is not found on the ground, display warning
@@ -1163,9 +1128,7 @@ void InventoryState::onClearInventory(Action *)
 	BattleUnit               *unit       = _battleGame->getSelectedUnit();
 	Tile                     *groundTile = unit->getTile();
 
-	// FIXME MERGE
-	//_clearInventory(_game, unitInv, groundTile, false);
-	_battleGame->getTileEngine()->itemDropInventory(groundTile, unit);
+	_battleGame->getTileEngine()->itemDropInventory(groundTile, unit, true, false);
 
 	// refresh ui
 	_inv->arrangeGround();

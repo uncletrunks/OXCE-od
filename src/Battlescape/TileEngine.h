@@ -209,7 +209,7 @@ public:
 	/// Drop item on ground.
 	void itemDrop(Tile *t, BattleItem *item, bool updateLight);
 	/// Drop all unit items on ground.
-	void itemDropInventory(Tile *t, BattleUnit *unit);
+	void itemDropInventory(Tile *t, BattleUnit *unit, bool unprimeItems = false, bool deleteFixedItems = false);
 	/// Move item to other place in inventory or ground.
 	void itemMoveInventory(Tile *t, BattleUnit *unit, BattleItem *item, RuleInventory *slot, int x, int y);
 

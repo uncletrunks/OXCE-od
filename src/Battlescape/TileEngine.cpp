@@ -4163,7 +4163,7 @@ void TileEngine::itemDrop(Tile *t, BattleItem *item, bool updateLight)
 /**
  * Drop all unit items on ground.
  */
-void TileEngine::itemDropInventory(Tile *t, BattleUnit *unit)
+void TileEngine::itemDropInventory(Tile *t, BattleUnit *unit, bool unprimeItems, bool deleteFixedItems)
 {
 	auto &inv = *unit->getInventory();
 	for (std::vector<BattleItem*>::iterator j = inv.begin(); j != inv.end();)
@@ -4171,6 +4171,10 @@ void TileEngine::itemDropInventory(Tile *t, BattleUnit *unit)
 		if (!(*j)->getRules()->isFixed())
 		{
 			(*j)->setOwner(nullptr);
+			if (unprimeItems)
+			{
+				(*j)->setFuseTimer(-1); // unprime explosives before dropping them
+			}
 			t->addItem(*j, _inventorySlotGround);
 			if ((*j)->getUnit() && (*j)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
 			{
@@ -4180,7 +4184,19 @@ void TileEngine::itemDropInventory(Tile *t, BattleUnit *unit)
 		}
 		else
 		{
-			++j;
+			if (deleteFixedItems)
+			{
+				// delete fixed items completely (e.g. when changing armor)
+				(*j)->setOwner(nullptr);
+				BattleItem *item = *j;
+				j = inv.erase(j);
+				_save->removeItem(item);
+			}
+			else
+			{
+				// do nothing, fixed items cannot be moved (individually by the player)!
+				++j;
+			}
 		}
 	}
 }
