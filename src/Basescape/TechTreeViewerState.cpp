@@ -421,11 +421,11 @@ void TechTreeViewerState::initLists()
 			++row;
 		}
 
-		// 1b. requires buildings
+		// 1b. requires services (from base facilities)
 		const std::vector<std::string> reqFacilities = rule->getRequireBaseFunc();
 		if (reqFacilities.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_FACILITIES_REQUIRED").c_str());
+			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(TTV_NONE);
@@ -816,11 +816,11 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
-		// 2. requires buildings
+		// 2. requires services (from base facilities)
 		const std::vector<std::string> reqFacilities = rule->getRequireBaseFunc();
 		if (reqFacilities.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_FACILITIES_REQUIRED").c_str());
+			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(TTV_NONE);
@@ -838,14 +838,28 @@ void TechTreeViewerState::initLists()
 		}
 
 		// 3. inputs
+		const std::map<const RuleCraft*, int> craftInputs = rule->getRequiredCrafts();
 		const std::map<const RuleItem*, int> inputs = rule->getRequiredItems();
-		if (inputs.size() > 0)
+		if (inputs.size() > 0 || craftInputs.size() > 0)
 		{
 			_lstLeft->addRow(1, tr("STR_MATERIALS_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(TTV_NONE);
 			++row;
+			for (auto& i : craftInputs)
+			{
+				std::wostringstream name;
+				name << L"  ";
+				name << tr(i.first->getType());
+				name << L": ";
+				name << i.second;
+				_lstLeft->addRow(1, name.str().c_str());
+				_lstLeft->setRowColor(row, _white);
+				_leftTopics.push_back("-");
+				_leftFlags.push_back(TTV_NONE);
+				++row;
+			}
 			for (auto& i : inputs)
 			{
 				std::wostringstream name;
@@ -865,13 +879,25 @@ void TechTreeViewerState::initLists()
 
 		// 4. outputs
 		const std::map<const RuleItem*, int> outputs = rule->getProducedItems();
-		if (outputs.size() > 0)
+		if (outputs.size() > 0 || rule->getProducedCraft())
 		{
 			_lstRight->addRow(1, tr("STR_ITEMS_PRODUCED").c_str());
 			_lstRight->setRowColor(row, _blue);
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(TTV_NONE);
 			++row;
+			if (rule->getProducedCraft())
+			{
+				std::wostringstream name;
+				name << L"  ";
+				name << tr(rule->getProducedCraft()->getType());
+				name << L": 1";
+				_lstRight->addRow(1, name.str().c_str());
+				_lstRight->setRowColor(row, _white);
+				_rightTopics.push_back("-");
+				_rightFlags.push_back(TTV_NONE);
+				++row;
+			}
 			for (auto& i : outputs)
 			{
 				std::wostringstream name;
@@ -938,11 +964,11 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
-		// 2. requires facilities
+		// 2. requires services (from other base facilities)
 		const std::vector<std::string> reqFacilities = rule->getRequireBaseFunc();
 		if (reqFacilities.size() > 0)
 		{
-			_lstLeft->addRow(1, tr("STR_FACILITIES_REQUIRED").c_str());
+			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(TTV_NONE);
@@ -961,11 +987,11 @@ void TechTreeViewerState::initLists()
 
 		row = 0;
 
-		// 3. provides facilities
+		// 3. provides services
 		const std::vector<std::string> providedFacilities = rule->getProvidedBaseFunc();
 		if (providedFacilities.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_FACILITIES_PROVIDED").c_str());
+			_lstRight->addRow(1, tr("STR_SERVICES_PROVIDED").c_str());
 			_lstRight->setRowColor(row, _blue);
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(TTV_NONE);
@@ -982,11 +1008,11 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
-		// 4. forbids facilities
+		// 4. forbids services
 		const std::vector<std::string> forbFacilities = rule->getForbiddenBaseFunc();
 		if (forbFacilities.size() > 0)
 		{
-			_lstRight->addRow(1, tr("STR_FACILITIES_FORBIDDEN").c_str());
+			_lstRight->addRow(1, tr("STR_SERVICES_FORBIDDEN").c_str());
 			_lstRight->setRowColor(row, _blue);
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(TTV_NONE);
