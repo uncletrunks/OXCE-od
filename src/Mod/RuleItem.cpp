@@ -673,6 +673,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 void RuleItem::afterLoad(const Mod* mod)
 {
 	_requires = mod->getResearch(_requiresName);
+	_requiresBuy = mod->getResearch(_requiresBuyName);
 	// fixedWeapons can mean vehicle
 	if (_fixedWeapon)
 	{
@@ -681,6 +682,7 @@ void RuleItem::afterLoad(const Mod* mod)
 
 	//remove not needed data
 	Collections::deleteAll(_requiresName);
+	Collections::deleteAll(_requiresBuyName);
 }
 
 /**
