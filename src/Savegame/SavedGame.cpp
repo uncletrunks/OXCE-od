@@ -1979,9 +1979,11 @@ bool SavedGame::isResearched(const RuleResearch *research, bool considerDebugMod
 	return haveReserchVector(_discovered, research);
 }
 
-bool SavedGame::isResearched(const std::vector<std::string> &research) const
+bool SavedGame::isResearched(const std::vector<std::string> &research, bool considerDebugMode) const
 {
 	if (research.empty())
+		return true;
+	if (considerDebugMode && _debug)
 		return true;
 
 	for (const std::string &r : research)
