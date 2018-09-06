@@ -117,6 +117,7 @@ en-GB:
   STR_RESEARCH_REQUIRED: "Research required:"
   STR_RESEARCH_REQUIRED_USE: "Research required (use):"
   STR_RESEARCH_REQUIRED_BUY: "Research required (buy):"
+  STR_SERVICES_REQUIRED_BUY: "Services required (buy):"
   STR_MATERIALS_REQUIRED: "Materials required:"
   STR_ITEMS_PRODUCED: "Items produced:"
   STR_PERSON_RECRUITED: "Person recruited:"

@@ -1083,6 +1083,27 @@ void TechTreeViewerState::initLists()
 				++row;
 			}
 		}
+
+		// 3. services (from base facilities) required to buy
+		const std::vector<std::string> servicesBuy = rule->getRequiresBuyBaseFunc();
+		if (servicesBuy.size() > 0)
+		{
+			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED_BUY").c_str());
+			_lstLeft->setRowColor(row, _blue);
+			_leftTopics.push_back("-");
+			_leftFlags.push_back(TTV_NONE);
+			++row;
+			for (auto& i : servicesBuy)
+			{
+				std::wstring name = tr(i);
+				name.insert(0, L"  ");
+				_lstLeft->addRow(1, name.c_str());
+				_lstLeft->setRowColor(row, _gold);
+				_leftTopics.push_back("-");
+				_leftFlags.push_back(TTV_NONE);
+				++row;
+			}
+		}
 	}
 }
 
