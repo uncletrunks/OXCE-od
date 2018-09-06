@@ -27,5 +27,5 @@
 #endif
 
 #ifndef OPENXCOM_VERSION_GIT
-#define OPENXCOM_VERSION_GIT " (v2018-08-28)"
+#define OPENXCOM_VERSION_GIT " (v2018-09-06)"
 #endif
