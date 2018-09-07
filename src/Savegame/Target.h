@@ -47,7 +47,7 @@ public:
 	/// Saves the target to YAML.
 	virtual YAML::Node save() const;
 	/// Saves the target's ID to YAML.
-	YAML::Node saveId() const;
+	virtual YAML::Node saveId() const;
 	/// Gets the target's type.
 	virtual std::string getType() const = 0;
 	/// Gets the target's longitude.

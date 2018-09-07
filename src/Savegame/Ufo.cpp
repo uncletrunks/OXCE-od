@@ -357,6 +357,20 @@ YAML::Node Ufo::save(bool newBattle) const
 }
 
 /**
+ * Saves the UFO's unique identifiers to a YAML file.
+ * @return YAML node.
+ */
+YAML::Node Ufo::saveId() const
+{
+	YAML::Node node = MovingTarget::saveId();
+	// this is needed, because _id is NOT unique until the UFO is detected
+	// and UFOs can be referenced by other entities even before they are detected
+	// (e.g. when they escort other UFOs)
+	node["uniqueId"] = _uniqueId;
+	return node;
+}
+
+/**
  * Returns the UFO's unique type used for
  * savegame purposes.
  * @return ID.

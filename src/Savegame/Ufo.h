@@ -85,6 +85,8 @@ public:
 	void finishLoading(const YAML::Node& node, SavedGame &save);
 	/// Saves the UFO to YAML.
 	YAML::Node save(bool newBattle) const;
+	/// Saves the UFO's ID to YAML.
+	YAML::Node saveId() const;
 	/// Gets the UFO's type.
 	std::string getType() const;
 	/// Gets the UFO's ruleset.
