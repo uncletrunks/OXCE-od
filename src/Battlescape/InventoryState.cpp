@@ -366,7 +366,6 @@ void InventoryState::init()
 			_createInventoryTemplate(_tempInventoryTemplate);
 
 			// Step 2: drop all items (and delete fixed items!!)
-			std::vector<BattleItem*> *unitInv = unit->getInventory();
 			Tile *groundTile = unit->getTile();
 			_battleGame->getTileEngine()->itemDropInventory(groundTile, unit, true, true);
 

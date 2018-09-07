@@ -2300,7 +2300,6 @@ void StatsForNerdsState::addVectorOfPositions(std::wostringstream &ss, const std
 void StatsForNerdsState::addBuildCostItem(std::wostringstream &ss, const std::pair<const std::string, std::pair<int, int> > &costItem)
 {
 	resetStream(ss);
-	int i = 0;
 	addTranslation(ss, costItem.first);
 	ss << L": " << tr("STR_COST_BUILD") << ": ";
 	ss << costItem.second.first;
