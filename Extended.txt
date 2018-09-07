@@ -192,6 +192,7 @@ Add battle action to `awardExperience` script.[br/]
 Breaking change: Renamed access function to statis in armor (added prefix `Stats.`).[br/]
 [br/]
 4.0a:[br/]
+Bug fix.[br/]
 [br/]
 
 [examples]
