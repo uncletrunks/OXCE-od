@@ -110,6 +110,8 @@ void NewResearchListState::fillProjectList()
 	_lstResearch->clearList();
 	// Note: this is the *only* place where this method is called with considerDebugMode = true
 	_game->getSavedGame()->getAvailableResearchProjects(_projects, _game->getMod() , _base, true);
+	// sort by list order
+	std::sort(_projects.begin(), _projects.end(), [&](RuleResearch* a, RuleResearch* b) { return a->getListOrder() < b->getListOrder(); });
 	std::vector<RuleResearch*>::iterator it = _projects.begin();
 	while (it != _projects.end())
 	{
