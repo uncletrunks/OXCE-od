@@ -20,6 +20,7 @@
 #include "RuleBaseFacility.h"
 #include "Mod.h"
 #include "MapScript.h"
+#include "../Battlescape/Position.h"
 
 namespace OpenXcom
 {
@@ -29,7 +30,7 @@ namespace OpenXcom
  * type of base facility.
  * @param type String defining the type.
  */
-RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0), _verticalLevels()
+RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f), _prisonType(0), _rightClickActionType(0), _verticalLevels(), _removalTime(0), _canBeBuiltOver(false)
 {
 }
 
@@ -101,6 +102,11 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_mapName = node["mapName"].as<std::string>(_mapName);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_trainingRooms = node["trainingRooms"].as<int>(_trainingRooms);
+	_maxAllowedPerBase = node["maxAllowedPerBase"].as<int>(_maxAllowedPerBase);
+	_sickBayAbsoluteBonus = node["sickBayAbsoluteBonus"].as<float>(_sickBayAbsoluteBonus);
+	_sickBayRelativeBonus = node["sickBayRelativeBonus"].as<float>(_sickBayRelativeBonus);
+	_prisonType = node["prisonType"].as<int>(_prisonType);
+	_rightClickActionType = node["rightClickActionType"].as<int>(_rightClickActionType);
 	if (!_listOrder)
 	{
 		_listOrder = listOrder;
@@ -115,11 +121,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 			cost.first = i->second["build"].as<int>(cost.first);
 			cost.second = i->second["refund"].as<int>(cost.second);
 
-			if (cost.first < cost.second)
-			{
-				cost.second = cost.first;
-			}
-			if (cost.first <= 0)
+			if (cost.first <= 0 && cost.second <= 0)
 			{
 				_buildCostItems.erase(id);
 			}
@@ -140,6 +142,14 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 			}
 		}
 	}
+
+	_leavesBehindOnSell = node["leavesBehindOnSell"].as< std::vector<std::string> >(_leavesBehindOnSell);
+	_removalTime = node["removalTime"].as<int>(_removalTime);
+	_canBeBuiltOver = node["canBeBuiltOver"].as<bool>(_canBeBuiltOver);
+	_buildOverFacilities = node["buildOverFacilities"].as< std::vector<std::string> >(_buildOverFacilities);
+	std::sort(_buildOverFacilities.begin(), _buildOverFacilities.end());
+
+	_storageTiles = node["storageTiles"].as<std::vector<Position> >(_storageTiles);
 }
 
 /**
@@ -465,12 +475,104 @@ int RuleBaseFacility::getTrainingFacilities() const
 }
 
 /**
+* Gets the maximum allowed number of facilities per base.
+* @return The number of facilities.
+*/
+int RuleBaseFacility::getMaxAllowedPerBase() const
+{
+	return _maxAllowedPerBase;
+}
+
+/**
+* Gets the facility's bonus to hp healed.
+* @return Amount of HP healed.
+*/
+float RuleBaseFacility::getSickBayAbsoluteBonus() const
+{
+	return _sickBayAbsoluteBonus;
+}
+
+/**
+* Gets the facility's bonus to hp healed (as percentage of max hp of the soldier).
+* @return Amount of HP healed as percentage of max HP.
+*/
+float RuleBaseFacility::getSickBayRelativeBonus() const
+{
+	return _sickBayRelativeBonus;
+}
+
+/**
+* Gets the prison type.
+* @return 0=alien containment, 1=prison, 2=animal cages, etc.
+*/
+int RuleBaseFacility::getPrisonType() const
+{
+	return _prisonType;
+}
+
+/**
+* Gets the action type to perform on right click.
+* @return 0=default, 1 = prison, 2 = manufacture, 3 = research, 4 = training, 5 = psi training, 6 = soldiers, 7 = sell
+*/
+int RuleBaseFacility::getRightClickActionType() const
+{
+	return _rightClickActionType;
+}
+
+/*
  * Gets the vertical levels for a base facility map
  * @return the vector of VerticalLevels
  */
 const std::vector<VerticalLevel> &RuleBaseFacility::getVerticalLevels() const
 {
 	return _verticalLevels;
+}
+
+/**
+ * Gets the facility/facilities left behind when this one is sold
+ * @return the list of facilities
+ */
+const std::vector<std::string> &RuleBaseFacility::getLeavesBehindOnSell() const
+{
+	return _leavesBehindOnSell;
+}
+
+/**
+ * Gets how long facilities left behind when this one is sold should take to build
+ * @return the number of days, -1 = from other facilities' rulesets, 0 = instant, > 0 is that many days
+ */
+int RuleBaseFacility::getRemovalTime() const
+{
+	return _removalTime;
+}
+
+/**
+ * Gets whether or not this facility can be built over
+ * @return can we build over this?
+ */
+bool RuleBaseFacility::getCanBeBuiltOver() const
+{
+	return _canBeBuiltOver;
+}
+
+/**
+ * Gets the list of other base facilities this one can be built over
+ * If empty, it can be built over anything with canBeBuiltOver: true
+ * @return the list of facilities
+ */
+const std::vector<std::string> &RuleBaseFacility::getBuildOverFacilities() const
+{
+	return _buildOverFacilities;
+}
+
+/**
+ * Gets the list of tile positions where to place items in this facility's storage
+ * If empty, vanilla checkerboard pattern will be used
+ * @return the list of positions
+ */
+const std::vector<Position> &RuleBaseFacility::getStorageTiles() const
+{
+	return _storageTiles;
 }
 
 }

@@ -72,7 +72,7 @@ private:
 	std::string _alienRace;
 	const AlienDeployment *_alienCustomDeploy, *_alienCustomMission;
 	int _alienItemLevel;
-	bool _allowAutoLoadout, _baseInventory, _generateFuel, _craftDeployed;
+	bool _allowAutoLoadout, _baseInventory, _generateFuel, _craftDeployed, _ufoDeployed;
 	int _craftZ;
 	SDL_Rect _craftPos;
 	std::vector<SDL_Rect> _ufoPos;
@@ -125,7 +125,7 @@ private:
 	/// Deploys the aliens, according to the alien deployment rules.
 	void deployAliens(const AlienDeployment *deployment);
 	/// Spawns civilians on a terror mission.
-	void deployCivilians(int max);
+	void deployCivilians(int max, bool roundUp = false, const std::string &civilianType = "");
 	/// Finds a spot near a friend to spawn at.
 	bool placeUnitNearFriend(BattleUnit *unit);
 	/// Load all Xcom weapons.

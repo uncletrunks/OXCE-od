@@ -55,6 +55,42 @@ struct MissionWave
 	 * The UFO executes a special action based on the mission objective.
 	 */
 	bool objective;
+	/// The chance to become a hunter-killer UFO upon spawning.
+	/**
+	 * -1 (default): take the info from RuleUfo
+	 *  0: not a hunter-killer
+	 *  1..99: percentage chance to be flagged as hunter-killer upon spawn
+	 *  100: always a hunter-killer
+	 */
+	int hunterKillerPercentage;
+	/// Algorithm to use when prioritizing xcom targets
+	/**
+	 * -1 (default): take the info from RuleUfo
+	 * 0: prefer hunting xcom interceptors
+	 * 1: prefer hunting xcom transports
+	 * 2: random preference (0 or 1) determined at spawn
+	 */
+	int huntMode;
+	/// Algorithm to use when considering retreating from the dogfight
+	/**
+	* -1 (default): take the info from RuleUfo
+	* 0: flee if you're losing
+	* 1: never flee, never crash (is destroyed instead of crashing)
+	* 2: random preference (0 or 1) determined at spawn
+	*/
+	int huntBehavior;
+	/// Does this wave escort/protect the previous wave(s)?
+	/**
+	* The UFO escorts other UFO(s) from the same mission.
+	*/
+	bool escort;
+	/// The chance to interrupt the alien mission when successfully shooting down a UFO from this wave.
+	/**
+	*  0 (default): cannot interrupt
+	*  1..99: percentage chance to be interrupted
+	*  100: always interrupted
+	*/
+	int interruptPercentage;
 };
 
 enum MissionObjective { OBJECTIVE_SCORE, OBJECTIVE_INFILTRATION, OBJECTIVE_BASE, OBJECTIVE_SITE, OBJECTIVE_RETALIATION, OBJECTIVE_SUPPLY };
@@ -92,6 +128,10 @@ public:
 	int getWeight(const size_t monthsPassed) const;
 	/// Gets the inherent odds of this mission spawning a retaliation mission.
 	int getRetaliationOdds() const;
+	/// Should the infiltration end after first cycle or continue indefinitely?
+	bool isEndlessInfiltration() const;
+	/// Should the mission site despawn even if targeted?
+	bool despawnEvenIfTargeted() const { return _despawnEvenIfTargeted; }
 	/// the type of missionSite to spawn (if any)
 	std::string getSiteType() const { return _siteType; }
 private:
@@ -113,6 +153,10 @@ private:
 	int _spawnZone;
 	/// The odds that this mission will result in retaliation
 	int _retaliationOdds;
+	/// Should the infiltration end after first cycle or continue indefinitely?
+	bool _endlessInfiltration;
+	/// Should the mission site despawn even if targeted?
+	bool _despawnEvenIfTargeted;
 	/// the type of missionSite to spawn (if any)
 	std::string _siteType;
 };

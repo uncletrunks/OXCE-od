@@ -20,6 +20,9 @@
 #include "Ufopaedia.h"
 #include "UfopaediaStartState.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Base.h"
+#include "../Savegame/Soldier.h"
+#include "../Savegame/SoldierDiary.h"
 #include "../Mod/Mod.h"
 #include "../Mod/ArticleDefinition.h"
 #include "ArticleState.h"
@@ -40,6 +43,7 @@
 #include "ArticleStateTFTDCraft.h"
 #include "ArticleStateTFTDCraftWeapon.h"
 #include "ArticleStateTFTDUso.h"
+#include "StatsForNerdsState.h"
 #include "../Engine/Game.h"
 
 namespace OpenXcom
@@ -179,6 +183,22 @@ namespace OpenXcom
 	}
 
 	/**
+	 * Checks if selected article_id is available -> if yes, open its (raw) details.
+	 * @param game Pointer to actual game.
+	 * @param article_id Article id to find.
+	 */
+	void Ufopaedia::openArticleDetail(Game *game, const std::string &article_id)
+	{
+		std::string id = article_id;
+		size_t tmpIndex = getArticleIndex(game->getSavedGame(), game->getMod(), id);
+		if (tmpIndex != (size_t)-1)
+		{
+			ArticleDefinition *article = game->getMod()->getUfopaediaArticle(id);
+			game->pushState(new StatsForNerdsState(article, tmpIndex, false, false, false));
+		}
+	}
+
+	/**
 	 * Open Ufopaedia start state, presenting the section selection buttons.
 	 * @param game Pointer to actual game.
 	 */
@@ -208,13 +228,33 @@ namespace OpenXcom
 	}
 
 	/**
+	 * Open the next article detail (Stats for Nerds) in the list. Loops to the first.
+	 * @param game Pointer to actual game.
+	 */
+	void Ufopaedia::nextDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults)
+	{
+		ArticleDefinitionList articles = getAvailableArticles(game->getSavedGame(), game->getMod());
+		if (currentDetailIndex >= articles.size() - 1)
+		{
+			// goto first
+			currentDetailIndex = 0;
+		}
+		else
+		{
+			currentDetailIndex++;
+		}
+		game->popState();
+		game->pushState(new StatsForNerdsState(articles[currentDetailIndex], currentDetailIndex, debug, ids, defaults));
+	}
+
+	/**
 	 * Open the previous article in the list. Loops to the last.
 	 * @param game Pointer to actual game.
 	 */
 	void Ufopaedia::prev(Game *game)
 	{
 		ArticleDefinitionList articles = getAvailableArticles(game->getSavedGame(), game->getMod());
-		if (_current_index == 0)
+		if (_current_index == 0 || _current_index > articles.size() - 1)
 		{
 			// goto last
 			_current_index = articles.size() - 1;
@@ -225,6 +265,26 @@ namespace OpenXcom
 		}
 		game->popState();
 		game->pushState(createArticleState(articles[_current_index]));
+	}
+
+	/**
+	 * Open the previous article detail (Stats for Nerds) in the list. Loops to the last.
+	 * @param game Pointer to actual game.
+	 */
+	void Ufopaedia::prevDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults)
+	{
+		ArticleDefinitionList articles = getAvailableArticles(game->getSavedGame(), game->getMod());
+		if (currentDetailIndex == 0 || currentDetailIndex > articles.size() - 1)
+		{
+			// goto last
+			currentDetailIndex = articles.size() - 1;
+		}
+		else
+		{
+			currentDetailIndex--;
+		}
+		game->popState();
+		game->pushState(new StatsForNerdsState(articles[currentDetailIndex], currentDetailIndex, debug, ids, defaults));
 	}
 
 	/**
@@ -247,6 +307,86 @@ namespace OpenXcom
 	}
 
 	/**
+	 * Check if the article is hidden.
+	 * @param save Pointer to saved game.
+	 * @param article Article to check.
+	 */
+	bool Ufopaedia::isArticleHidden(SavedGame *save, ArticleDefinition *article, Mod *mod)
+	{
+		// show Commendations entries if:
+		if (article->section == UFOPAEDIA_COMMENDATIONS)
+		{
+			// 0. hiding feature is disabled
+			if (mod->getShowAllCommendations())
+			{
+				return false;
+			}
+
+			// 1. debug mode is on
+			if (save->getDebugMode())
+			{
+				return false;
+			}
+
+			// 2. or if the article was opened already
+			if (save->getUfopediaRuleStatus(article->id) != ArticleDefinition::PEDIA_STATUS_NEW)
+			{
+				return false;
+			}
+
+			// 3. or if the medal was awarded at least once
+			if (isAwardedCommendation(save, article))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the article corresponds to an awarded commendation.
+	 * @param save Pointer to saved game.
+	 * @param article Article to check.
+	 */
+	bool Ufopaedia::isAwardedCommendation(SavedGame *save, ArticleDefinition *article)
+	{
+		if (article->section == UFOPAEDIA_COMMENDATIONS)
+		{
+			// 1. check living soldiers
+			for (std::vector<Base*>::iterator i = save->getBases()->begin(); i != save->getBases()->end(); ++i)
+			{
+				for (std::vector<Soldier*>::iterator j = (*i)->getSoldiers()->begin(); j != (*i)->getSoldiers()->end(); ++j)
+				{
+					for (std::vector<SoldierCommendations*>::iterator k = (*j)->getDiary()->getSoldierCommendations()->begin(); k != (*j)->getDiary()->getSoldierCommendations()->end(); ++k)
+					{
+						if ((*k)->getType() == article->title)
+						{
+							return true;
+						}
+					}
+				}
+			}
+
+			// 2. check dead soldiers
+			for (std::vector<Soldier*>::reverse_iterator j = save->getDeadSoldiers()->rbegin(); j != save->getDeadSoldiers()->rend(); ++j)
+			{
+				for (std::vector<SoldierCommendations*>::iterator k = (*j)->getDiary()->getSoldierCommendations()->begin(); k != (*j)->getDiary()->getSoldierCommendations()->end(); ++k)
+				{
+					if ((*k)->getType() == article->title)
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Return an ArticleList with all the currently visible ArticleIds.
 	 * @param save Pointer to saved game.
 	 * @param mod Pointer to mod.
@@ -259,7 +399,7 @@ namespace OpenXcom
 		for (std::vector<std::string>::const_iterator it=list.begin(); it!=list.end(); ++it)
 		{
 			ArticleDefinition *article = mod->getUfopaediaArticle(*it);
-			if (isArticleAvailable(save, article) && article->section != UFOPAEDIA_NOT_AVAILABLE)
+			if (isArticleAvailable(save, article) && article->section != UFOPAEDIA_NOT_AVAILABLE && !isArticleHidden(save, article, mod))
 			{
 				articles.push_back(article);
 			}

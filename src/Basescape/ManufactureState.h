@@ -39,8 +39,9 @@ private:
 	TextButton *_btnNew, *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtAvailable, *_txtAllocated, *_txtSpace, *_txtFunds, *_txtItem, *_txtEngineers, *_txtProduced, *_txtCost, *_txtTimeLeft;
-	TextList *_lstManufacture;
-	void lstManufactureClick(Action * action);
+	TextList *_lstManufacture;	
+	void lstManufactureClickLeft(Action * action);
+	void lstManufactureClickMiddle(Action * action);
 public:
 	/// Creates the Manufacture state.
 	ManufactureState(Base *base);

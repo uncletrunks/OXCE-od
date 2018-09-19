@@ -18,6 +18,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../Engine/InteractiveSurface.h"
+#include <locale>
 #include <map>
 #include <string>
 
@@ -41,6 +42,7 @@ class Inventory : public InteractiveSurface
 private:
 	Game *_game;
 	Surface *_grid, *_items, *_selection;
+	Uint8 _twoHandedRed, _twoHandedGreen;
 	WarningMessage *_warning;
 	BattleUnit *_selUnit;
 	BattleItem *_selItem;
@@ -48,7 +50,10 @@ private:
 	BattleItem *_mouseOverItem;
 	int _groundOffset, _animFrame;
 	std::map<int, std::map<int, int> > _stackLevel;
+	Surface *_stunIndicator, *_woundIndicator, *_burnIndicator, *_shockIndicator;
 	NumberText *_stackNumber;
+	std::wstring _searchString;
+	std::locale _myLocale;
 	Timer *_animTimer;
 	int _depth;
 	RuleInventory *_inventorySlotRightHand = nullptr;
@@ -70,12 +75,16 @@ public:
 	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Sets the inventory's Time Unit mode.
 	void setTuMode(bool tu);
+	/// Gets the inventory's selected unit.
+	BattleUnit *getSelectedUnit() const;
 	/// Sets the inventory's selected unit.
 	void setSelectedUnit(BattleUnit *unit);
 	/// Draws the inventory.
 	void draw();
 	/// Draws the inventory grid.
 	void drawGrid();
+	/// Draws the inventory grid labels.
+	void drawGridLabels(bool showTuCost = false);
 	/// Draws the inventory items.
 	void drawItems();
 	/// Draws the selected item.
@@ -84,6 +93,8 @@ public:
 	BattleItem *getSelectedItem() const;
 	/// Sets the currently selected item.
 	void setSelectedItem(BattleItem *item);
+	/// Sets the search string.
+	void setSearchString(const std::wstring &searchString);
 	/// Gets the mouse over item.
 	BattleItem *getMouseOverItem() const;
 	/// Sets the mouse over item.
@@ -98,8 +109,10 @@ public:
 	void mouseClick(Action *action, State *state);
 	/// Unloads the selected weapon.
 	bool unload();
+	/// Checks whether the given item is visible with the current search string.
+	bool isInSearchString(BattleItem *item);
 	/// Arranges items on the ground.
-	void arrangeGround(bool alterOffset = true);
+	void arrangeGround(int alterOffset = 0);
 	/// Attempts to place an item in an inventory slot.
 	bool fitItem(RuleInventory *newSlot, BattleItem *item, std::string &warning);
 	/// Checks if two items can be stacked on one another.

@@ -25,9 +25,7 @@
 namespace OpenXcom
 {
 
-class Mod;
 class RuleCraft;
-class BaseFacility;
 class Soldier;
 class Craft;
 class ItemContainer;
@@ -35,6 +33,7 @@ class Transfer;
 class Language;
 class Mod;
 class SavedGame;
+class RuleBaseFacility;
 class BaseFacility;
 class ResearchProject;
 class Production;
@@ -65,8 +64,6 @@ private:
 
 	/// Determines space taken up by ammo clips about to rearm craft.
 	double getIgnoredStores();
-	/// Gets the base's default name (unused).
-	std::wstring getDefaultName(Language *) const { return L""; }
 
 	using Target::load;
 public:
@@ -76,13 +73,15 @@ public:
 	~Base();
 	/// Loads the base from YAML.
 	void load(const YAML::Node& node, SavedGame *save, bool newGame, bool newBattleGame = false);
+	/// Finishes loading the base (more specifically all craft in the base) from YAML.
+	void finishLoading(const YAML::Node& node, SavedGame *save);
 	/// Saves the base to YAML.
 	YAML::Node save() const;
-	/// Saves the base's ID to YAML.
-	YAML::Node saveId() const;
+	/// Gets the base's type.
+	std::string getType() const;
 	/// Gets the base's name.
 	std::wstring getName(Language *lang = 0) const;
-	/// Gets the base's marker.
+	/// Gets the base's marker sprite.
 	int getMarker() const;
 	/// Gets the base's facilities.
 	std::vector<BaseFacility*> *getFacilities();
@@ -107,7 +106,7 @@ public:
 	/// Checks if a target is inside the base's radar range.
 	int insideRadarRange(Target *target) const;
 	/// Gets the base's available soldiers.
-	int getAvailableSoldiers(bool checkCombatReadiness = false) const;
+	int getAvailableSoldiers(bool checkCombatReadiness = false, bool everyoneFightsNobodyQuits = false) const;
 	/// Gets the base's total soldiers.
 	int getTotalSoldiers() const;
 	/// Gets the base's available scientists.
@@ -118,6 +117,10 @@ public:
 	int getAvailableEngineers() const;
 	/// Gets the base's total engineers.
 	int getTotalEngineers() const;
+	/// Gets the base's total other employees.
+	int getTotalOtherEmployees() const;
+	/// Gets the base's total cost of other employees.
+	int getTotalOtherEmployeeCost() const;
 	/// Gets the base's used living quarters.
 	int getUsedQuarters() const;
 	/// Gets the base's available living quarters.
@@ -160,10 +163,12 @@ public:
 	int getCraftCountForProduction(const RuleCraft *craft) const;
 	/// Gets the base's craft maintenance.
 	int getCraftMaintenance() const;
-	/// Gets the base's soldiers of a certain type.
-	int getSoldierCount(const std::string &soldier) const;
+	/// Gets the total count and total salary of soldiers of a certain type stored in the base.
+	std::pair<int, int> getSoldierCountAndSalary(const std::string &soldier) const;
 	/// Gets the base's personnel maintenance.
 	int getPersonnelMaintenance() const;
+	/// Gets the base's item maintenance.
+	int getItemMaintenance() const;
 	/// Gets the base's facility maintenance.
 	int getFacilityMaintenance() const;
 	/// Gets the base's total monthly maintenance.
@@ -194,11 +199,11 @@ public:
 	int getAvailableTraining() const;
 	/// Gets the total amount of Containment Space
 	/// Gets the amount of free Containment space.
-	int getFreeContainment() const;
+	int getFreeContainment(int prisonType) const;
 	/// Gets the total amount of Containment space.
-	int getAvailableContainment() const;
+	int getAvailableContainment(int prisonType) const;
 	/// Gets the total amount of used Containment space.
-	int getUsedContainment() const;
+	int getUsedContainment(int prisonType) const;
 	/// Sets the craft's battlescape status.
 	void setInBattlescape(bool inbattle);
 	/// Gets if the craft is in battlescape.
@@ -233,6 +238,12 @@ public:
 	std::vector<std::string> getForbiddenBaseFunc() const;
 	/// Gets future base functionality.
 	std::vector<std::string> getFutureBaseFunc() const;
+	/// Checks if it is possible to build another facility of a given type.
+	bool isMaxAllowedLimitReached(RuleBaseFacility *rule) const;
+	/// Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
+	float getSickBayAbsoluteBonus() const;
+	/// Gets the amount of additional HP healed in this base due to sick bay facilities (as percentage of max HP per soldier).
+	float getSickBayRelativeBonus() const;
 };
 
 }

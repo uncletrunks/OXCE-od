@@ -27,6 +27,8 @@
 #include "SavedGame.h"
 #include "ItemContainer.h"
 #include "Soldier.h"
+#include "Transfer.h"
+#include "../Mod/RuleSoldier.h"
 #include "Base.h"
 #include "Ufo.h"
 #include "Waypoint.h"
@@ -36,6 +38,7 @@
 #include "../Mod/Armor.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/AlienDeployment.h"
+#include "SerializationHelper.h"
 #include "../Engine/Logger.h"
 
 namespace OpenXcom
@@ -49,10 +52,11 @@ namespace OpenXcom
  * @param id ID to assign to the craft (0 to not assign).
  */
 Craft::Craft(const RuleCraft *rules, Base *base, int id) : MovingTarget(),
-	_rules(rules), _base(base), _id(0), _fuel(0), _damage(0),
+	_rules(rules), _base(base), _fuel(0), _damage(0), _shield(0),
 	_interceptionOrder(0), _takeoff(0), _weapons(),
 	_status("STR_READY"), _lowFuel(false), _mission(false),
-	_inBattlescape(false), _inDogfight(false), _stats()
+	_inBattlescape(false), _inDogfight(false), _stats(),
+	_isAutoPatrolling(false), _lonAuto(0.0), _latAuto(0.0)
 {
 	_stats = rules->getStats();
 	_items = new ItemContainer();
@@ -68,7 +72,15 @@ Craft::Craft(const RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	{
 		setBase(base);
 	}
-	_speedMaxRadian = calculateRadianSpeed(_rules->getMaxSpeed()) * 120;
+	recalcSpeedMaxRadian();
+}
+
+/**
+ * Helper method.
+ */
+void Craft::recalcSpeedMaxRadian()
+{
+	_speedMaxRadian = calculateRadianSpeed(_stats.speedMax) * 120;
 }
 
 /**
@@ -96,9 +108,9 @@ Craft::~Craft()
 void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 {
 	MovingTarget::load(node);
-	_id = node["id"].as<int>(_id);
 	_fuel = node["fuel"].as<int>(_fuel);
 	_damage = node["damage"].as<int>(_damage);
+	_shield = node["shield"].as<int>(_shield);
 
 	int j = 0;
 	for (YAML::const_iterator i = node["weapons"].begin(); i != node["weapons"].end(); ++i)
@@ -224,8 +236,41 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	}
 	_takeoff = node["takeoff"].as<int>(_takeoff);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
+	_isAutoPatrolling = node["isAutoPatrolling"].as<bool>(_isAutoPatrolling);
+	_lonAuto = node["lonAuto"].as<double>(_lonAuto);
+	_latAuto = node["latAuto"].as<double>(_latAuto);
+	_pilots = node["pilots"].as< std::vector<int> >(_pilots);
 	if (_inBattlescape)
 		setSpeed(0);
+
+	recalcSpeedMaxRadian();
+}
+
+/**
+ * Finishes loading the craft from YAML (called after all other XCOM craft are loaded too).
+ * @param node YAML node.
+ * @param save The game data. Used to find the UFO's target (= xcom craft).
+ */
+void Craft::finishLoading(const YAML::Node &node, SavedGame *save)
+{
+	if (const YAML::Node &dest = node["dest"])
+	{
+		std::string type = dest["type"].as<std::string>();
+		int id = dest["id"].as<int>();
+
+		bool found = false;
+		for (std::vector<Base*>::iterator bi = save->getBases()->begin(); bi != save->getBases()->end() && !found; ++bi)
+		{
+			for (std::vector<Craft*>::iterator ci = (*bi)->getCrafts()->begin(); ci != (*bi)->getCrafts()->end() && !found; ++ci)
+			{
+				if ((*ci)->getId() == id && (*ci)->getRules()->getType() == type)
+				{
+					setDestination(*ci);
+					found = true;
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -236,9 +281,9 @@ YAML::Node Craft::save() const
 {
 	YAML::Node node = MovingTarget::save();
 	node["type"] = _rules->getType();
-	node["id"] = _id;
 	node["fuel"] = _fuel;
 	node["damage"] = _damage;
+	node["shield"] = _shield;
 	for (std::vector<CraftWeapon*>::const_iterator i = _weapons.begin(); i != _weapons.end(); ++i)
 	{
 		YAML::Node subnode;
@@ -268,6 +313,14 @@ YAML::Node Craft::save() const
 		node["interceptionOrder"] = _interceptionOrder;
 	if (_takeoff != 0)
 		node["takeoff"] = _takeoff;
+	if (_isAutoPatrolling)
+		node["isAutoPatrolling"] = _isAutoPatrolling;
+	node["lonAuto"] = serializeDouble(_lonAuto);
+	node["latAuto"] = serializeDouble(_latAuto);
+	for (std::vector<int>::const_iterator i = _pilots.begin(); i != _pilots.end(); ++i)
+	{
+		node["pilots"].push_back((*i));
+	}
 	return node;
 }
 
@@ -282,16 +335,13 @@ CraftId Craft::loadId(const YAML::Node &node)
 }
 
 /**
- * Saves the craft's unique identifiers to a YAML file.
- * @return YAML node.
+ * Returns the craft's unique type used for
+ * savegame purposes.
+ * @return ID.
  */
-YAML::Node Craft::saveId() const
+std::string Craft::getType() const
 {
-	YAML::Node node = MovingTarget::saveId();
-	CraftId uniqueId = getUniqueId();
-	node["type"] = uniqueId.first;
-	node["id"] = uniqueId.second;
-	return node;
+	return _rules->getType();
 }
 
 /**
@@ -320,23 +370,13 @@ void Craft::changeRules(RuleCraft *rules)
 }
 
 /**
- * Returns the craft's unique ID. Each craft
- * can be identified by its type and ID.
- * @return Unique ID.
- */
-int Craft::getId() const
-{
-	return _id;
-}
-
-/**
  * Returns the craft's unique default name.
  * @param lang Language to get strings from.
  * @return Full name.
  */
 std::wstring Craft::getDefaultName(Language *lang) const
 {
-	return lang->getString("STR_CRAFTNAME").arg(lang->getString(_rules->getType())).arg(_id);
+	return lang->getString("STR_CRAFTNAME").arg(lang->getString(getType())).arg(_id);
 }
 
 /**
@@ -429,12 +469,42 @@ void Craft::setDestination(Target *dest)
 	MovingTarget::setDestination(dest);
 }
 
+bool Craft::getIsAutoPatrolling() const
+{
+	return _isAutoPatrolling;
+}
+
+void Craft::setIsAutoPatrolling(bool isAuto)
+{
+	_isAutoPatrolling = isAuto;
+}
+
+double Craft::getLongitudeAuto() const
+{
+	return _lonAuto;
+}
+
+void Craft::setLongitudeAuto(double lon)
+{
+	_lonAuto = lon;
+}
+
+double Craft::getLatitudeAuto() const
+{
+	return _latAuto;
+}
+
+void Craft::setLatitudeAuto(double lat)
+{
+	_latAuto = lat;
+}
+
 /**
  * Returns the amount of weapons currently
  * equipped on this craft.
  * @return Number of weapons.
  */
-int Craft::getNumWeapons() const
+int Craft::getNumWeapons(bool onlyLoaded) const
 {
 	if (_rules->getWeapons() == 0)
 	{
@@ -447,6 +517,10 @@ int Craft::getNumWeapons() const
 	{
 		if ((*i) != 0)
 		{
+			if (onlyLoaded && !(*i)->getAmmo())
+			{
+				continue;
+			}
 			total++;
 		}
 	}
@@ -546,6 +620,8 @@ void Craft::addCraftStats(const RuleCraftStats& s)
 		_base->getStorageItems()->addItem(_rules->getRefuelItem(), overflowFuel / _rules->getRefuelRate());
 	}
 	setFuel(_fuel);
+
+	recalcSpeedMaxRadian();
 }
 
 /**
@@ -647,6 +723,42 @@ int Craft::getDamagePercentage() const
 }
 
 /**
+ * Gets the max shield capacity of this craft
+ * @return max shield capacity.
+ */
+int Craft::getShieldCapacity() const
+{
+	return _stats.shieldCapacity;
+}
+
+/**
+ * Gets the amount of shield this craft has remaining
+ * @return shield points remaining.
+ */
+int Craft::getShield() const
+{
+	return _shield;
+}
+
+/**
+ * Sets the amount of shield for this craft, capped at the capacity plus bonuses
+ * @param shield value to set the shield.
+ */
+void Craft::setShield(int shield)
+{
+	_shield = std::max(0, std::min(_stats.shieldCapacity, shield));
+}
+
+/**
+ * Returns the percentage of shields remaining out of the max capacity
+ * @return Percentage of shield
+ */
+int Craft::getShieldPercentage() const
+{
+	return _stats.shieldCapacity != 0 ? _shield * 100 / _stats.shieldCapacity : 0;
+}
+
+/**
  * Returns whether the craft is currently low on fuel
  * (only has enough to head back to base).
  * @return True if it's low, false otherwise.
@@ -698,24 +810,19 @@ double Craft::getDistanceFromBase() const
 
 /**
  * Returns the amount of fuel the craft uses up
- * while it's on the air, based on its current speed.
- * @return Fuel amount.
- */
-int Craft::getFuelConsumption() const
-{
-	return getFuelConsumption(_speed);
-}
-
-/**
- * Returns the amount of fuel the craft uses up
  * while it's on the air.
  * @param speed Craft speed for estimation.
  * @return Fuel amount.
  */
-int Craft::getFuelConsumption(int speed) const
+int Craft::getFuelConsumption(int speed, int escortSpeed) const
 {
 	if (!_rules->getRefuelItem().empty())
 		return 1;
+	if (escortSpeed > 0)
+	{
+		// based on the speed of the escorted craft, but capped between 50% and 100% of escorting craft's speed
+		return std::max(_stats.speedMax / 200, std::min(escortSpeed / 100, _stats.speedMax / 100));
+	}
 	return (int)floor(speed / 100.0);
 }
 
@@ -737,7 +844,7 @@ int Craft::getFuelLimit() const
  */
 int Craft::getFuelLimit(Base *base) const
 {
-	return (int)floor(getFuelConsumption(_rules->getMaxSpeed()) * getDistance(base) / _speedMaxRadian);
+	return (int)floor(getFuelConsumption(_stats.speedMax, 0) * getDistance(base) / _speedMaxRadian);
 }
 
 /**
@@ -749,9 +856,43 @@ void Craft::returnToBase()
 }
 
 /**
+ * Returns the crew to their base (using transfers).
+ */
+void Craft::evacuateCrew(const Mod *mod)
+{
+	for (std::vector<Soldier*>::iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); )
+	{
+		if ((*s)->getCraft() == this)
+		{
+			int survivalChance = isPilot((*s)->getId()) ? mod->getPilotsEmergencyEvacuationSurvivalChance() : mod->getCrewEmergencyEvacuationSurvivalChance();
+			if (RNG::percent(survivalChance))
+			{
+				// remove from craft
+				(*s)->setCraft(0);
+				// transfer to base
+				Transfer *t = new Transfer(mod->getPersonnelTime());
+				t->setSoldier((*s));
+				_base->getTransfers()->push_back(t);
+				// next
+				s = _base->getSoldiers()->erase(s);
+			}
+			else
+			{
+				++s; // will be killed later
+			}
+		}
+		else
+		{
+			++s; // next
+		}
+	}
+	removeAllPilots(); // just in case
+}
+
+/**
  * Moves the craft to its destination.
  */
-void Craft::think()
+bool Craft::think()
 {
 	if (_takeoff == 0)
 	{
@@ -770,7 +911,9 @@ void Craft::think()
 		_lowFuel = false;
 		_mission = false;
 		_takeoff = 0;
+		return true;
 	}
+	return false;
 }
 
 /**
@@ -821,11 +964,11 @@ void Craft::checkup()
  */
 bool Craft::detect(Target *target) const
 {
-	if (_rules->getRadarRange() == 0 || !insideRadarRange(target))
+	if (_stats.radarRange == 0 || !insideRadarRange(target))
 		return false;
 
 	// backward compatibility with vanilla
-	if (_rules->getRadarChance() == 100)
+	if (_stats.radarChance == 100)
 		return true;
 
 	Ufo *u = dynamic_cast<Ufo*>(target);
@@ -849,9 +992,64 @@ bool Craft::insideRadarRange(Target *target) const
  * Consumes the craft's fuel every 10 minutes
  * while it's on the air.
  */
-void Craft::consumeFuel()
+void Craft::consumeFuel(int escortSpeed)
 {
-	setFuel(_fuel - getFuelConsumption());
+	setFuel(_fuel - getFuelConsumption(_speed, escortSpeed));
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is repaired.
+ */
+unsigned int Craft::calcRepairTime()
+{
+	unsigned int repairTime = 0;
+
+	if (_damage > 0)
+	{
+		repairTime = (int)ceil((double)_damage / _rules->getRepairRate());
+	}
+	return repairTime;
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is refuelled (assumes fuel is available).
+ */
+unsigned int Craft::calcRefuelTime()
+{
+	unsigned int refuelTime = 0;
+
+	int needed = _stats.fuelMax - _fuel;
+	if (needed > 0)
+	{
+		refuelTime = (int)ceil((double)(needed) / _rules->getRefuelRate() / 2.0);
+	}
+	return refuelTime;
+}
+
+/**
+ * Returns how long in hours until the
+ * craft is re-armed (assumes ammo is available).
+ */
+unsigned int Craft::calcRearmTime()
+{
+	unsigned int rearmTime = 0;
+
+	for (int idx = 0; idx < _rules->getWeapons(); idx++)
+	{
+		CraftWeapon *w1 = _weapons.at(idx);
+		if (w1 != 0)
+		{
+			int needed = w1->getRules()->getAmmoMax() - w1->getAmmo();
+			if (needed > 0)
+			{
+				rearmTime += (int)ceil((double)(needed) / w1->getRules()->getRearmRate());
+			}
+		}
+	}
+
+	return rearmTime;
 }
 
 /**
@@ -1000,6 +1198,202 @@ int Craft::getSpaceUsed() const
 }
 
 /**
+* Checks if there are enough pilots onboard.
+* @return True if the craft has enough pilots.
+*/
+bool Craft::arePilotsOnboard()
+{
+	if (_rules->getPilots() == 0)
+		return true;
+
+	// refresh the list of pilots (must be performed here, list may be out-of-date!)
+	const std::vector<Soldier*> pilots = getPilotList(true);
+
+	return (int)(pilots.size()) >= _rules->getPilots();
+}
+
+/**
+* Checks if a pilot is already on the list.
+*/
+bool Craft::isPilot(int pilotId)
+{
+	if (std::find(_pilots.begin(), _pilots.end(), pilotId) != _pilots.end())
+	{
+		return true;
+	}
+
+	return false;
+}
+
+/**
+* Adds a pilot to the list.
+*/
+void Craft::addPilot(int pilotId)
+{
+	if (std::find(_pilots.begin(), _pilots.end(), pilotId) == _pilots.end())
+	{
+		_pilots.push_back(pilotId);
+	}
+}
+
+/**
+* Removes all pilots from the list.
+*/
+void Craft::removeAllPilots()
+{
+	_pilots.clear();
+}
+
+/**
+* Gets the list of craft pilots.
+* @return List of pilots.
+*/
+const std::vector<Soldier*> Craft::getPilotList(bool autoAdd)
+{
+	std::vector<Soldier*> result;
+
+	// 1. no pilots needed
+	if (_rules->getPilots() == 0)
+		return result;
+
+	{
+		// 2. just enough pilots or pilot candidates onboard (assign them all automatically)
+		int total = 0;
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+		{
+			if ((*i)->getCraft() == this && (*i)->getRules()->getAllowPiloting())
+			{
+				result.push_back((*i));
+				total++;
+			}
+		}
+		if (total == _rules->getPilots())
+		{
+			// nothing more to do
+		}
+		else
+		{
+			// 3. mix of manually selected pilots and pilot candidates onboard
+			int total2 = 0;
+			result.clear();
+			// 3a. first take all available (manually selected) pilots
+			for (std::vector<int>::iterator i = _pilots.begin(); i != _pilots.end(); ++i)
+			{
+				for (std::vector<Soldier*>::iterator j = _base->getSoldiers()->begin(); j != _base->getSoldiers()->end(); ++j)
+				{
+					if ((*j)->getCraft() == this && (*j)->getRules()->getAllowPiloting() && (*j)->getId() == (*i))
+					{
+						result.push_back((*j));
+						total2++;
+						break; // pilot found, don't search anymore
+					}
+				}
+				if (total2 >= _rules->getPilots())
+				{
+					break; // enough pilots found
+				}
+			}
+			if (autoAdd)
+			{
+				// 3b. if not enough manually selected pilots, take some pilot candidates automatically (take from the rear first)
+				for (std::vector<Soldier*>::reverse_iterator k = _base->getSoldiers()->rbegin(); k != _base->getSoldiers()->rend(); ++k)
+				{
+					if ((*k)->getCraft() == this && (*k)->getRules()->getAllowPiloting() && !isPilot((*k)->getId()))
+					{
+						result.push_back((*k));
+						total2++;
+					}
+					if (total2 >= _rules->getPilots())
+					{
+						break; // enough pilots found
+					}
+				}
+			}
+		}
+	}
+
+	// remember the pilots and return
+	removeAllPilots();
+	for (std::vector<Soldier*>::iterator i = result.begin(); i != result.end(); ++i)
+	{
+		addPilot((*i)->getId());
+	}
+	return result;
+}
+
+/**
+* Calculates the accuracy bonus based on pilot skills.
+* @return Accuracy bonus.
+*/
+int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots, const Mod *mod) const
+{
+	if (pilots.empty())
+		return 0;
+
+	int firingAccuracy = 0;
+	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
+	{
+			firingAccuracy += (*i)->getCurrentStats()->firing;
+	}
+	firingAccuracy = firingAccuracy / pilots.size(); // average firing accuracy of all pilots
+
+	return ((firingAccuracy - mod->getPilotAccuracyZeroPoint()) * mod->getPilotAccuracyRange()) / 100;
+}
+
+/**
+* Calculates the dodge bonus based on pilot skills.
+* @return Dodge bonus.
+*/
+int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots, const Mod *mod) const
+{
+	if (pilots.empty())
+		return 0;
+
+	int reactions = 0;
+	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
+	{
+		reactions += (*i)->getCurrentStats()->reactions;
+	}
+	reactions = reactions / pilots.size(); // average reactions of all pilots
+
+	return ((reactions - mod->getPilotReactionsZeroPoint()) * mod->getPilotReactionsRange()) / 100;
+}
+
+/**
+* Calculates the approach speed modifier based on pilot skills.
+* @return Approach speed modifier.
+*/
+int Craft::getPilotApproachSpeedModifier(const std::vector<Soldier*> &pilots, const Mod *mod) const
+{
+	if (pilots.empty())
+		return 2; // vanilla
+
+	int bravery = 0;
+	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
+	{
+		bravery += (*i)->getCurrentStats()->bravery;
+	}
+	bravery = bravery / pilots.size(); // average bravery of all pilots
+
+	if (bravery >= mod->getPilotBraveryThresholdVeryBold())
+	{
+		return 4; // double the speed
+	}
+	else if (bravery >= mod->getPilotBraveryThresholdBold())
+	{
+		return 3; // 50% speed increase
+	}
+	else if (bravery >= mod->getPilotBraveryThresholdNormal())
+	{
+		return 2; // normal speed
+	}
+	else
+	{
+		return 1; // half the speed
+	}
+}
+
+/**
  * Returns the total amount of vehicles of
  * a certain type stored in the craft.
  * @param vehicle Vehicle type.
@@ -1117,8 +1511,17 @@ void Craft::unload(const Mod *mod)
  */
 void Craft::reuseItem(const std::string& item)
 {
-	if (_status != "STR_READY")
+	// Note: Craft in-base status hierarchy is repair, rearm, refuel, ready.
+	// We only want to interrupt processes that are lower in the hierarachy.
+	// (And we don't want to interrupt any out-of-base status.)
+
+	// The only states we are willing to interrupt are "ready" and "refuelling"
+	if (_status != "STR_READY" &&
+        _status != "STR_REFUELLING")
+	{
 		return;
+	}
+
 	// Check if it's ammo to reload the craft
 	for (std::vector<CraftWeapon*>::iterator w = _weapons.begin(); w != _weapons.end(); ++w)
 	{
@@ -1128,9 +1531,60 @@ void Craft::reuseItem(const std::string& item)
 			_status = "STR_REARMING";
 		}
 	}
+
+	// Only consider refuelling if everything else is complete
+	if (_status != "STR_READY")
+		return;
+
 	// Check if it's fuel to refuel the craft
-	if (item == _rules->getRefuelItem() && _fuel < _rules->getMaxFuel())
+	if (item == _rules->getRefuelItem() && _fuel < _stats.fuelMax)
 		_status = "STR_REFUELLING";
+}
+
+/**
+ * Gets the attraction value of the craft for alien hunter-killers.
+ * @param huntMode Hunt mode ID.
+ * @return Attraction value.
+ */
+int Craft::getHunterKillerAttraction(int huntMode) const
+{
+	int attraction = 0;
+	if (huntMode == 0)
+	{
+		// prefer interceptors...
+		if (_rules->getAllowLanding())
+		{
+			// craft that can land (i.e. transports) are not attractive
+			attraction += 1000000;
+		}
+		if (_rules->getSoldiers() > 0)
+		{
+			// craft with more crew capacity (i.e. transports) are less attractive
+			attraction += 500000 + (_rules->getSoldiers() * 1000);
+		}
+		// faster craft (i.e. interceptors) are more attractive
+		attraction += 100000 - _stats.speedMax;
+		// craft with more damage taken are less attractive
+		// this is just to simplify re-targeting when interceptor is fast enough to disengage
+		// and another identical but healthier interceptor is waiting for its chance
+		attraction += _damage * 100 / _stats.damageMax;
+	}
+	else
+	{
+		// prefer transports...
+		if (!_rules->getAllowLanding())
+		{
+			// craft that cannot land (i.e. interceptors) are not attractive
+			attraction += 1000000;
+		}
+		// craft with more crew capacity (i.e. transports) are more attractive
+		attraction += 500000 - (_rules->getSoldiers() * 1000);
+		// faster craft (i.e. interceptors) are less attractive
+		attraction += 100000 + _stats.speedMax;
+	}
+
+	// the higher the number the less attractive the target is for UFO hunter-killers
+	return attraction;
 }
 
 }

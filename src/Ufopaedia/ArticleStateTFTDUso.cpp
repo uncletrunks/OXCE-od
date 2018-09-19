@@ -25,6 +25,7 @@
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
+#include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 
 namespace OpenXcom
@@ -32,12 +33,14 @@ namespace OpenXcom
 
 	ArticleStateTFTDUso::ArticleStateTFTDUso(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
 	{
+		_btnInfo->setVisible(_game->getMod()->getShowPediaInfoButton());
+
 		RuleUfo *ufo = _game->getMod()->getUfo(defs->id, true);
 
 		_lstInfo = new TextList(150, 50, 168, 142);
 		add(_lstInfo);
 
-		_lstInfo->setColor(Palette::blockOffset(0)+2);
+		_lstInfo->setColor(_listColor1);
 		_lstInfo->setColumns(2, 95, 55);
 		_lstInfo->setDot(true);
 
@@ -50,7 +53,7 @@ namespace OpenXcom
 		_lstInfo->addRow(2, tr("STR_MAXIMUM_SPEED").c_str(), tr("STR_KNOTS").arg(Text::formatNumber(ufo->getStats().speedMax)).c_str());
 		for (int i = 0; i != 4; ++i)
 		{
-			_lstInfo->setCellColor(i, 1, Palette::blockOffset(15)+4);
+			_lstInfo->setCellColor(i, 1, _listColor2);
 		}
 
 		centerAllSurfaces();

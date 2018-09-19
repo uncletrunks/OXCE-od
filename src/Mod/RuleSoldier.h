@@ -28,6 +28,7 @@ namespace OpenXcom
 class Mod;
 class ModScript;
 class SoldierNamePool;
+class StatString;
 
 /**
  * Represents the creation data for an X-COM unit.
@@ -45,13 +46,22 @@ public:
 
 private:
 	std::string _type;
+	int _listOrder;
 	std::vector<std::string> _requires;
 	std::vector<std::string> _requiresBuyBaseFunc;
-	UnitStats _minStats, _maxStats, _statCaps;
+	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps, _dogfightExperience;
 	std::string _armor;
-	int _costBuy, _costSalary, _standHeight, _kneelHeight, _floatHeight, _femaleFrequency;
+	int _costBuy, _costSalary, _costSalarySquaddie, _costSalarySergeant, _costSalaryCaptain, _costSalaryColonel, _costSalaryCommander;
+	int _standHeight, _kneelHeight, _floatHeight;
+	int _femaleFrequency, _value;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<SoldierNamePool*> _names;
+	std::string _armorForAvatar;
+	int _avatarOffsetX, _avatarOffsetY, _flagOffset;
+	bool _allowPromotion, _allowPiloting;
+	std::vector<StatString*> _statStrings;
+	std::vector<std::string> _rankStrings;
+	int _rankSprite, _rankSpriteBattlescape, _rankSpriteTiny;
 	ScriptValues<RuleSoldier> _scriptValues;
 
 	void addSoldierNamePool(const std::string &namFile);
@@ -61,9 +71,11 @@ public:
 	/// Cleans up the soldier ruleset.
 	~RuleSoldier();
 	/// Loads the soldier data from YAML.
-	void load(const YAML::Node& node, Mod *mod, const ModScript &parsers);
+	void load(const YAML::Node& node, Mod *mod, int listOrder, const ModScript &parsers);
 	/// Gets the soldier's type.
 	std::string getType() const;
+	/// Gets the list/sort order of the soldier's type.
+	int getListOrder() const;
 	/// Gets the soldier's requirements.
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the base functions required to buy solder.
@@ -74,10 +86,16 @@ public:
 	UnitStats getMaxStats() const;
 	/// Gets the stat caps.
 	UnitStats getStatCaps() const;
+	/// Gets the training stat caps.
+	UnitStats getTrainingStatCaps() const;
+	/// Gets the improvement chances for pilots (after dogfight).
+	UnitStats getDogfightExperience() const;
 	/// Gets the cost of the soldier.
 	int getBuyCost() const;
-	/// Gets the monthly salary of the soldier.
-	int getSalaryCost() const;
+	/// Does salary depend on rank?
+	bool isSalaryDynamic() const;
+	/// Gets the monthly salary of the soldier (for a given rank).
+	int getSalaryCost(int rank) const;
 	/// Gets the height of the soldier when it's standing.
 	int getStandHeight() const;
 	/// Gets the height of the soldier when it's kneeling.
@@ -86,6 +104,18 @@ public:
 	int getFloatHeight() const;
 	/// Gets the default-equipped armor.
 	std::string getArmor() const;
+	/// Gets the armor for avatar display.
+	std::string getArmorForAvatar() const;
+	/// Gets the X offset used for avatar.
+	int getAvatarOffsetX() const;
+	/// Gets the Y offset used for avatar.
+	int getAvatarOffsetY() const;
+	/// Gets the flag offset.
+	int getFlagOffset() const;
+	/// Gets the allow promotion flag.
+	bool getAllowPromotion() const;
+	/// Gets the allow piloting flag.
+	bool getAllowPiloting() const;
 	/// Gets the female appearance ratio.
 	int getFemaleFrequency() const;
 	/// Gets the soldier's male death sounds.
@@ -94,6 +124,18 @@ public:
 	const std::vector<int> &getFemaleDeathSounds() const;
 	/// Gets the pool list for soldier names.
 	const std::vector<SoldierNamePool*> &getNames() const;
+	/// Gets the value - for score calculation.
+	int getValue() const;
+	/// Gets the list of StatStrings.
+	const std::vector<StatString *> &getStatStrings() const;
+	/// Gets the list of strings for ranks.
+	const std::vector<std::string> &getRankStrings() const;
+	/// Gets the offset of the rank sprite in BASEBITS.PCK.
+	int getRankSprite() const;
+	/// Gets the offset of the rank sprite in SMOKE.PCK.
+	int getRankSpriteBattlescape() const;
+	/// Gets the offset of the rank sprite in TinyRanks.
+	int getRankSpriteTiny() const;
 };
 
 }

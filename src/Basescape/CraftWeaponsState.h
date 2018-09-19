@@ -44,7 +44,7 @@ private:
 
 	TextButton *_btnCancel;
 	Window *_window;
-	Text *_txtTitle, *_txtArmament, *_txtQuantity, *_txtAmmunition;
+	Text *_txtTitle, *_txtArmament, *_txtQuantity, *_txtAmmunition, *_txtCurrentWeapon;
 	TextList *_lstWeapons;
 	std::vector<RuleCraftWeapon*> _weapons;
 public:
@@ -56,6 +56,8 @@ public:
 	void btnCancelClick(Action *action);
 	/// Handler for clicking the Weapons list.
 	void lstWeaponsClick(Action *action);
+	/// Handler for middle clicking the Weapons list.
+	void lstWeaponsMiddleClick(Action *action);
 };
 
 }

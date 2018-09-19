@@ -26,7 +26,8 @@ namespace OpenXcom
 {
 
 const int STANDOFF_DIST = 560;
-enum ColorNames { CRAFT_MIN, CRAFT_MAX, RADAR_MIN, RADAR_MAX, DAMAGE_MIN, DAMAGE_MAX, BLOB_MIN, RANGE_METER, DISABLED_WEAPON, DISABLED_AMMO, DISABLED_RANGE };
+const int AGGRESSIVE_DIST = 64;
+enum ColorNames { CRAFT_MIN, CRAFT_MAX, RADAR_MIN, RADAR_MAX, DAMAGE_MIN, DAMAGE_MAX, BLOB_MIN, RANGE_METER, DISABLED_WEAPON, DISABLED_AMMO, DISABLED_RANGE, SHIELD_MIN, SHIELD_MAX };
 
 class ImageButton;
 class Text;
@@ -47,7 +48,7 @@ class DogfightState : public State
 private:
 	GeoscapeState *_state;
 	Timer *_craftDamageAnimTimer;
-	Surface *_window, *_battle, *_range[RuleCraft::WeaponMax], *_damage;
+	Surface *_window, *_battle, *_range[RuleCraft::WeaponMax], *_damage, *_craftSprite, *_craftShield;
 	InteractiveSurface *_btnMinimize, *_preview, *_weapon[RuleCraft::WeaponMax];
 	ImageButton *_btnStandoff, *_btnCautious, *_btnStandard, *_btnAggressive, *_btnDisengage, *_btnUfo;
 	ImageButton *_mode;
@@ -55,8 +56,9 @@ private:
 	Text *_txtAmmo[RuleCraft::WeaponMax], *_txtDistance, *_txtStatus, *_txtInterceptionNumber;
 	Craft *_craft;
 	Ufo *_ufo;
+	bool _ufoIsAttacking, _disableDisengage, _disableCautious;
 	int _timeout, _currentDist, _targetDist, _weaponFireInterval[RuleCraft::WeaponMax], _weaponFireCountdown[RuleCraft::WeaponMax];
-	bool _end, _endUfoHandled, _endCraftHandled, _ufoBreakingOff, _destroyUfo, _destroyCraft, _weaponEnabled[RuleCraft::WeaponMax];
+	bool _end, _endUfoHandled, _endCraftHandled, _ufoBreakingOff, _hunterKillerBreakingOff, _destroyUfo, _destroyCraft, _weaponEnabled[RuleCraft::WeaponMax];
 	bool _minimized, _endDogfight, _animatingHit, _waitForPoly, _waitForAltitude;
 	std::vector<CraftWeaponProjectile*> _projectiles;
 	static const int _ufoBlobs[8][13][13];
@@ -65,17 +67,21 @@ private:
 	size_t _interceptionsCount;
 	int _x, _y, _minimizedIconX, _minimizedIconY;
 	int _weaponNum;
-
-	// craft min/max, radar min/max, damage min/max
-	int _colors[11];
+	int _pilotAccuracyBonus, _pilotDodgeBonus, _pilotApproachSpeedModifier, _craftAccelerationBonus;
+	bool _firedAtLeastOnce, _experienceAwarded;
+	// craft min/max, radar min/max, damage min/max, shield min/max
+	int _colors[13];
 	// Ends the dogfight.
 	void endDogfight();
+	bool _tractorLockedOn[RuleCraft::WeaponMax];
 
 public:
 	/// Creates the Dogfight state.
-	DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo);
+	DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool ufoIsAttacking = false);
 	/// Cleans up the Dogfight state.
 	~DogfightState();
+	/// Returns true if this is a hunter-killer dogfight.
+	bool isUfoAttacking() const;
 	/// Runs the timers.
 	void think();
 	/// Animates the window.
@@ -90,6 +96,8 @@ public:
 	void minimumDistance();
 	// Sets the craft to maximum distance.
 	void maximumDistance();
+	// Sets the craft to maximum distance or 8 km, whichever is smaller.
+	void aggressiveDistance();
 	/// Changes the status text.
 	void setStatus(const std::string &status);
 	/// Handler for clicking the Minimize button.
@@ -116,6 +124,8 @@ public:
 	void animateCraftDamage();
 	/// Updates craft damage.
 	void drawCraftDamage();
+	/// Draws craft shield on sprite
+	void drawCraftShield();
 	/// Toggles usage of weapons.
 	void weaponClick(Action *action);
 	/// Changes colors of weapon icons, range indicators and ammo texts base on current weapon state.
@@ -150,6 +160,8 @@ public:
 	void setWaitForAltitude(bool wait);
 	/// Waits until the UFO reaches the right altutude.
 	bool getWaitForAltitude() const;
+	/// Award experience to the pilots.
+	void awardExperienceToPilots();
 };
 
 }

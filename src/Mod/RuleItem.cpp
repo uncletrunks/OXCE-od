@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "Unit.h"
 #include "RuleItem.h"
 #include "RuleInventory.h"
@@ -26,6 +27,7 @@
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
+#include "../Engine/RNG.h"
 #include "Mod.h"
 #include <algorithm>
 
@@ -40,30 +42,34 @@ const float TilesToVexels = 16.0f;
  * @param type String defining the type.
  */
 RuleItem::RuleItem(const std::string &type) :
-	_type(type), _name(type), _vehicleUnit(nullptr), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
-	_bigSprite(-1), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
-	_fireSound(-1),
-	_hitSound(-1), _hitAnimation(0), _hitMissSound(-1), _hitMissAnimation(-1),
-	_meleeSound(39), _meleeAnimation(0), _meleeMissSound(-1), _meleeMissAnimation(-1),
-	_meleeHitSound(-1), _explosionHitSound(-1),
-	_psiSound(-1), _psiAnimation(-1), _psiMissSound(-1), _psiMissAnimation(-1),
+	_type(type), _name(type), _vehicleUnit(nullptr), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _haveMercy(false),
+	_bigSprite(-999), _floorSprite(-1), _handSprite(120), _bulletSprite(-1), _specialIconSprite(-1),
+	_hitAnimation(0), _hitMissAnimation(-1),
+	_meleeAnimation(0), _meleeMissAnimation(-1),
+	_psiAnimation(-1), _psiMissAnimation(-1),
 	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0),
-	_accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100),
+	_accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100), _accuracyCloseQuarters(-1),
+	_noLOSAccuracyPenalty(-1),
 	_costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
 	_clipSize(0), _specialChance(100), _tuLoad{ }, _tuUnload{ },
-	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
-	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isExplodingInHands(false), _waypoints(0), _invWidth(1), _invHeight(1),
+	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _hiddenOnMinimap(false), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
+	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _specialUseEmptyHand(false),
+	_waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
-	_recover(true), _liveAlien(false), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
-	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0),
+	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _liveAlien(false), _liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
+	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
+	_spawnUnitFaction(-1),
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
-	_kneelBonus(-1), _oneHandedPenalty(-1)
+	_kneelBonus(-1), _oneHandedPenalty(-1),
+	_monthlySalary(0), _monthlyMaintenance(0),
+	_sprayWaypoints(0)
 {
 	_accuracyMulti.setFiring();
 	_meleeMulti.setMelee();
 	_throwMulti.setThrowing();
+	_closeQuartersMulti.setCloseQuarters();
 
 	for (auto& load : _tuLoad)
 	{
@@ -93,6 +99,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_confAuto.name = "STR_AUTO_SHOT";
 
 	_confAuto.shots = 3;
+
+	_customItemPreviewIndex.push_back(0);
 }
 
 /**
@@ -271,6 +279,31 @@ void RuleItem::updateCategories(std::map<std::string, std::string> *replacementR
 }
 
 /**
+ * Loads a sound vector for a given attribute/node.
+ * @param node YAML node.
+ * @param mod Mod for the item.
+ * @param vector Sound vector to load into.
+ */
+void RuleItem::loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector)
+{
+	if (node)
+	{
+		vector.clear();
+		if (node.IsSequence())
+		{
+			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
+			{
+				vector.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
+			}
+		}
+		else
+		{
+			vector.push_back(mod->getSoundOffset(node.as<int>(), "BATTLE.CAT"));
+		}
+	}
+}
+
+/**
  * Loads the item from a YAML file.
  * @param node YAML node.
  * @param mod Mod for the item.
@@ -300,6 +333,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_costSell = node["costSell"].as<int>(_costSell);
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_weight = node["weight"].as<int>(_weight);
+	_haveMercy = node["haveMercy"].as<bool>(_haveMercy);
 	if (node["bigSprite"])
 	{
 		_bigSprite = mod->getSpriteOffset(node["bigSprite"].as<int>(_bigSprite), "BIGOBS.PCK");
@@ -314,39 +348,21 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	}
 	if (node["bulletSprite"])
 	{
-		// Projectiles: 385 entries ((105*33) / (3*3)) (35 sprites per projectile(0-34), 11 projectiles (0-10))
-		_bulletSprite = node["bulletSprite"].as<int>(_bulletSprite) * 35;
-		if (_bulletSprite >= 385)
-			_bulletSprite += mod->getModOffset();
+		// Projectiles: 0-384 entries ((105*33) / (3*3)) (35 sprites per projectile(0-34), 11 projectiles (0-10))
+		_bulletSprite = mod->getOffset(node["bulletSprite"].as<int>(_bulletSprite) * 35, 384);
 	}
-	if (node["fireSound"])
+	if (node["specialIconSprite"])
 	{
-		_fireSound = mod->getSoundOffset(node["fireSound"].as<int>(_fireSound), "BATTLE.CAT");
+		_specialIconSprite = mod->getSpriteOffset(node["specialIconSprite"].as<int>(_specialIconSprite), "SPICONS.DAT");
 	}
-	if (node["hitSound"])
-	{
-		_hitSound = mod->getSoundOffset(node["hitSound"].as<int>(_hitSound), "BATTLE.CAT");
-	}
-	if (node["hitMissSound"])
-	{
-		_hitMissSound = mod->getSoundOffset(node["hitMissSound"].as<int>(_hitMissSound), "BATTLE.CAT");
-	}
-	if (node["meleeSound"])
-	{
-		_meleeSound = mod->getSoundOffset(node["meleeSound"].as<int>(_meleeSound), "BATTLE.CAT");
-	}
-	if (node["meleeMissSound"])
-	{
-		_meleeMissSound = mod->getSoundOffset(node["meleeMissSound"].as<int>(_meleeMissSound), "BATTLE.CAT");
-	}
-	if (node["psiSound"])
-	{
-		_psiSound = mod->getSoundOffset(node["psiSound"].as<int>(_psiSound), "BATTLE.CAT");
-	}
-	if (node["psiMissSound"])
-	{
-		_psiMissSound = mod->getSoundOffset(node["psiMissSound"].as<int>(_psiMissSound), "BATTLE.CAT");
-	}
+	loadSoundVector(node["reloadSound"], mod, _reloadSound);
+	loadSoundVector(node["fireSound"], mod, _fireSound);
+	loadSoundVector(node["hitSound"], mod, _hitSound);
+	loadSoundVector(node["hitMissSound"], mod, _hitMissSound);
+	loadSoundVector(node["meleeSound"], mod, _meleeSound);
+	loadSoundVector(node["meleeMissSound"], mod, _meleeMissSound);
+	loadSoundVector(node["psiSound"], mod, _psiSound);
+	loadSoundVector(node["psiMissSound"], mod, _psiMissSound);
 	if (node["hitAnimation"])
 	{
 		_hitAnimation = mod->getSpriteOffset(node["hitAnimation"].as<int>(_hitAnimation), "SMOKE.PCK");
@@ -371,14 +387,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	{
 		_psiMissAnimation = mod->getSpriteOffset(node["psiMissAnimation"].as<int>(_psiMissAnimation), "HIT.PCK");
 	}
-	if (node["meleeHitSound"])
-	{
-		_meleeHitSound = mod->getSoundOffset(node["meleeHitSound"].as<int>(_meleeHitSound), "BATTLE.CAT");
-	}
-	if (node["explosionHitSound"])
-	{
-		_explosionHitSound = mod->getSoundOffset(node["explosionHitSound"].as<int>(_explosionHitSound), "BATTLE.CAT");
-	}
+	loadSoundVector(node["meleeHitSound"], mod, _meleeHitSound);
+	loadSoundVector(node["explosionHitSound"], mod, _explosionHitSound);
 
 	if (node["battleType"])
 	{
@@ -456,11 +466,13 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		else
 		{
 			_meleeMulti.setFlatHundred();
+			_meleeMulti.setModded(true); // vanilla default = true
 		}
 	}
 	if (node["strengthApplied"].as<bool>(false))
 	{
 		_damageBonus.setStrength();
+		_damageBonus.setModded(true); // vanilla default = false
 	}
 
 	_power = node["power"].as<int>(_power);
@@ -470,6 +482,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_unprimeActionName = node["unprimeActionName"].as<std::string>(_unprimeActionName);
 	_unprimeActionMessage = node["unprimeActionMessage"].as<std::string>(_unprimeActionMessage);
 	_fuseType = (BattleFuseType)node["fuseType"].as<int>(_fuseType);
+	_hiddenOnMinimap = node["hiddenOnMinimap"].as<bool>(_hiddenOnMinimap);
 	_clipSize = node["clipSize"].as<int>(_clipSize);
 
 	loadConfFuse(_fuseTriggerEvents, node, "fuseTriggerEvents");
@@ -482,6 +495,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_accuracyMind = node["accuracyMindControl"].as<int>(_accuracyMind);
 	_accuracyPanic = node["accuracyPanic"].as<int>(_accuracyPanic);
 	_accuracyThrow = node["accuracyThrow"].as<int>(_accuracyThrow);
+	_accuracyCloseQuarters = node["accuracyCloseQuarters"].as<int>(_accuracyCloseQuarters);
+	_noLOSAccuracyPenalty = node["noLOSAccuracyPenalty"].as<int>(_noLOSAccuracyPenalty);
 
 	loadCost(_confAimed.cost, node, "Aimed");
 	loadCost(_confAuto.cost, node, "Auto");
@@ -546,9 +561,12 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
 	_fixedWeaponShow = node["fixedWeaponShow"].as<bool>(_fixedWeaponShow);
 	_defaultInventorySlot = node["defaultInventorySlot"].as<std::string>(_defaultInventorySlot);
+	_supportedInventorySections = node["supportedInventorySections"].as< std::vector<std::string> >(_supportedInventorySections);
 	_allowSelfHeal = node["allowSelfHeal"].as<bool>(_allowSelfHeal);
 	_isConsumable = node["isConsumable"].as<bool>(_isConsumable);
+	_isFireExtinguisher = node["isFireExtinguisher"].as<bool>(_isFireExtinguisher);
 	_isExplodingInHands = node["isExplodingInHands"].as<bool>(_isExplodingInHands);
+	_specialUseEmptyHand = node["specialUseEmptyHand"].as<bool>(_specialUseEmptyHand);
 	_invWidth = node["invWidth"].as<int>(_invWidth);
 	_invHeight = node["invHeight"].as<int>(_invHeight);
 
@@ -562,6 +580,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_moraleRecovery = node["moraleRecovery"].as<int>(_moraleRecovery);
 	_painKillerRecovery = node["painKillerRecovery"].as<float>(_painKillerRecovery);
 	_medikitType = (BattleMediKitType)node["medikitType"].as<int>(_medikitType);
+	_medikitBackground = node["medikitBackground"].as<std::string>(_medikitBackground);
 
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);
 	_armor = node["armor"].as<int>(_armor);
@@ -572,7 +591,10 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		_aiMeleeHitCount = nodeAI["meleeHitCount"].as<int>(_aiMeleeHitCount);
 	}
 	_recover = node["recover"].as<bool>(_recover);
+	_recoverCorpse = node["recoverCorpse"].as<bool>(_recoverCorpse);
+	_ignoreInBaseDefense = node["ignoreInBaseDefense"].as<bool>(_ignoreInBaseDefense);
 	_liveAlien = node["liveAlien"].as<bool>(_liveAlien);
+	_liveAlienPrisonType = node["prisonType"].as<int>(_liveAlienPrisonType);
 	_attraction = node["attraction"].as<int>(_attraction);
 	_arcingShot = node["arcingShot"].as<bool>(_arcingShot);
 	_experienceTrainingMode = (ExperienceTrainingMode)node["experienceTrainingMode"].as<int>(_experienceTrainingMode);
@@ -587,7 +609,12 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_explosionSpeed = node["explosionSpeed"].as<int>(_explosionSpeed);
 	_confAuto.shots = node["autoShots"].as<int>(_confAuto.shots);
 	_shotgunPellets = node["shotgunPellets"].as<int>(_shotgunPellets);
+	_shotgunBehaviorType = node["shotgunBehavior"].as<int>(_shotgunBehaviorType);
+	_shotgunSpread = node["shotgunSpread"].as<int>(_shotgunSpread);
+	_shotgunChoke = node["shotgunChoke"].as<int>(_shotgunChoke);
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
+	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
+	_spawnUnitFaction = node["spawnUnitFaction"].as<int>(_spawnUnitFaction);
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
@@ -596,14 +623,33 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
+	if (const YAML::Node &cipi = node["customItemPreviewIndex"])
+	{
+		_customItemPreviewIndex.clear();
+		if (cipi.IsScalar())
+		{
+			_customItemPreviewIndex.push_back(mod->getSpriteOffset(cipi.as<int>(), "CustomItemPreviews"));
+		}
+		else
+		{
+			for (YAML::const_iterator i = cipi.begin(); i != cipi.end(); ++i)
+			{
+				_customItemPreviewIndex.push_back(mod->getSpriteOffset(i->as<int>(), "CustomItemPreviews"));
+			}
+		}
+	}
 	_kneelBonus = node["kneelBonus"].as<int>(_kneelBonus);
 	_oneHandedPenalty = node["oneHandedPenalty"].as<int>(_oneHandedPenalty);
+	_monthlySalary = node["monthlySalary"].as<int>(_monthlySalary);
+	_monthlyMaintenance = node["monthlyMaintenance"].as<int>(_monthlyMaintenance);
+	_sprayWaypoints = node["sprayWaypoints"].as<int>(_sprayWaypoints);
 
 	_damageBonus.load(node["damageBonus"]);
 	_meleeBonus.load(node["meleeBonus"]);
 	_accuracyMulti.load(node["accuracyMultiplier"]);
 	_meleeMulti.load(node["meleeMultiplier"]);
 	_throwMulti.load(node["throwMultiplier"]);
+	_closeQuartersMulti.load(node["closeQuartersMultiplier"]);
 
 	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
 	_powerRangeThreshold = node["powerRangeThreshold"].as<float>(_powerRangeThreshold);
@@ -799,6 +845,15 @@ int RuleItem::getHandSprite() const
 }
 
 /**
+ * Gets the reference in SPICONS.DAT for use in battlescape.
+ * @return The sprite reference.
+ */
+int RuleItem::getSpecialIconSprite() const
+{
+	return _specialIconSprite;
+}
+
+/**
  * Returns whether this item is held with two hands.
  * @return True if it is two-handed.
  */
@@ -854,6 +909,34 @@ const std::string &RuleItem::getDefaultInventorySlot() const
 }
 
 /**
+ * Gets the item's supported inventory sections.
+ * @return The list of inventory sections.
+ */
+const std::vector<std::string> &RuleItem::getSupportedInventorySections() const
+{
+	return _supportedInventorySections;
+}
+
+/**
+ * Checks if the item can be placed into a given inventory section.
+ * @param inventorySection Name of the inventory section (RuleInventory->id).
+ * @return True if the item can be placed into a given inventory section.
+ */
+bool RuleItem::canBePlacedIntoInventorySection(const std::string &inventorySection) const
+{
+	// backwards-compatibility
+	if (_supportedInventorySections.empty())
+		return true;
+
+	// always possible to put an item on the ground
+	if (inventorySection == "STR_GROUND")
+		return true;
+
+	// otherwise check allowed inventory sections
+	return std::find(_supportedInventorySections.begin(), _supportedInventorySections.end(), inventorySection) != _supportedInventorySections.end();
+}
+
+/**
  * Gets the item's bullet sprite reference.
  * @return The sprite reference.
  */
@@ -863,12 +946,40 @@ int RuleItem::getBulletSprite() const
 }
 
 /**
+ * Gets a random sound id from a given sound vector.
+ * @param vector The source vector.
+ * @param defaultValue Default value (in case nothing is specified = vector is empty).
+ * @return The sound id.
+ */
+int RuleItem::getRandomSound(const std::vector<int> &vector, int defaultValue) const
+{
+	if (!vector.empty())
+	{
+		return vector[RNG::generate(0, vector.size() - 1)];
+	}
+	return defaultValue;
+}
+
+/**
+ * Gets the item's reload sound.
+ * @return The reload sound id.
+ */
+int RuleItem::getReloadSound() const
+{
+	if (_reloadSound.empty())
+	{
+		return Mod::ITEM_RELOAD;
+	}
+	return getRandomSound(_reloadSound);
+}
+
+/**
  * Gets the item's fire sound.
  * @return The fire sound id.
  */
 int RuleItem::getFireSound() const
 {
-	return _fireSound;
+	return getRandomSound(_fireSound);
 }
 
 /**
@@ -877,7 +988,7 @@ int RuleItem::getFireSound() const
  */
 int RuleItem::getHitSound() const
 {
-	return _hitSound;
+	return getRandomSound(_hitSound);
 }
 
 /**
@@ -895,7 +1006,7 @@ int RuleItem::getHitAnimation() const
  */
 int RuleItem::getHitMissSound() const
 {
-	return _hitMissSound;
+	return getRandomSound(_hitMissSound);
 }
 
 /**
@@ -914,7 +1025,7 @@ int RuleItem::getHitMissAnimation() const
  */
 int RuleItem::getMeleeSound() const
 {
-	return _meleeSound;
+	return getRandomSound(_meleeSound, 39);
 }
 
 /**
@@ -932,7 +1043,7 @@ int RuleItem::getMeleeAnimation() const
  */
 int RuleItem::getMeleeMissSound() const
 {
-	return _meleeMissSound;
+	return getRandomSound(_meleeMissSound);
 }
 
 /**
@@ -950,7 +1061,7 @@ int RuleItem::getMeleeMissAnimation() const
  */
 int RuleItem::getMeleeHitSound() const
 {
-	return _meleeHitSound;
+	return getRandomSound(_meleeHitSound);
 }
 
 /**
@@ -959,7 +1070,7 @@ int RuleItem::getMeleeHitSound() const
  */
 int RuleItem::getExplosionHitSound() const
 {
-	return _explosionHitSound;
+	return getRandomSound(_explosionHitSound);
 }
 
 /**
@@ -968,7 +1079,7 @@ int RuleItem::getExplosionHitSound() const
  */
 int RuleItem::getPsiSound() const
 {
-	return _psiSound;
+	return getRandomSound(_psiSound);
 }
 
 /**
@@ -986,7 +1097,7 @@ int RuleItem::getPsiAnimation() const
  */
 int RuleItem::getPsiMissSound() const
 {
-	return _psiMissSound;
+	return getRandomSound(_psiMissSound);
 }
 
 /**
@@ -1134,6 +1245,24 @@ int RuleItem::getAccuracyThrow() const
 }
 
 /**
+ * Gets the item's accuracy for close quarters combat.
+ * @return The close quarters accuracy.
+ */
+int RuleItem::getAccuracyCloseQuarters(Mod *mod) const
+{
+	return _accuracyCloseQuarters != -1 ? _accuracyCloseQuarters : mod->getCloseQuartersAccuracyGlobal();
+}
+
+/**
+ * Gets the item's accuracy penalty for out-of-LOS targets
+ * @return The no-LOS accuracy penalty.
+ */
+int RuleItem::getNoLOSAccuracyPenalty(Mod *mod) const
+{
+	return _noLOSAccuracyPenalty != -1 ? _noLOSAccuracyPenalty : mod->getNoLOSAccuracyPenaltyGlobal();
+}
+
+/**
  * Gets the item's time unit percentage for aimed shots.
  * @return The aimed shot TU percentage.
  */
@@ -1234,7 +1363,7 @@ RuleItemUseCost RuleItem::getCostPrime() const
  */
 RuleItemUseCost RuleItem::getCostUnprime() const
 {
-	return _costUnprime;
+		return _costUnprime;
 }
 
 /**
@@ -1348,6 +1477,15 @@ int RuleItem::getFuseTimerDefault() const
 	{
 		return -1; //can't prime
 	}
+}
+
+/**
+ * Is this item (e.g. a mine) hidden on the minimap?
+ * @return True if the item should be hidden.
+ */
+bool RuleItem::isHiddenOnMinimap() const
+{
+	return _hiddenOnMinimap;
 }
 
 /**
@@ -1539,12 +1677,30 @@ bool RuleItem::isConsumable() const
 }
 
 /**
+ * Does this item extinguish fire?
+ * @return True if the item extinguishes fire.
+ */
+bool RuleItem::isFireExtinguisher() const
+{
+	return _isFireExtinguisher;
+}
+
+/**
  * Is this item explode in hands?
  * @return True if the item can explode in hand.
  */
 bool RuleItem::isExplodingInHands() const
 {
 	return _isExplodingInHands;
+}
+
+/**
+ * If this item is used as a specialWeapon, can it be accessed by an empty hand?
+ * @return True if accessed by empty hand.
+ */
+bool RuleItem::isSpecialUsingEmptyHand() const
+{
+	return _specialUseEmptyHand;
 }
 
 /**
@@ -1555,6 +1711,16 @@ BattleMediKitType RuleItem::getMediKitType() const
 {
 	return _medikitType;
 }
+
+/**
+ * Gets the medikit custom background.
+ * @return Sprite ID.
+ */
+const std::string &RuleItem::getMediKitCustomBackground() const
+{
+	return _medikitBackground;
+}
+
 /**
  * Returns the item's max explosion radius. Small explosions don't have a restriction.
  * Larger explosions are restricted using a formula, with a maximum of radius 10 no matter how large the explosion is.
@@ -1623,6 +1789,30 @@ bool RuleItem::isRecoverable() const
 
 
 /**
+ * Returns if the corpse item should be recoverable from the battlescape.
+ * @return True if it is recoverable.
+ */
+bool RuleItem::isCorpseRecoverable() const
+{
+	// Explanation:
+	// Since the "recover" flag applies to both live body (prisoner capture) and dead body (corpse recovery) in OXC,
+	// OXCE+ adds this new flag to allow recovery of a live body, but disable recovery of the corpse
+	// (used in mods mostly to ignore dead bodies of killed humans)
+	return _recoverCorpse;
+}
+
+
+/**
+* Checks if the item can be equipped in base defense mission.
+* @return True if it can be equipped.
+*/
+bool RuleItem::canBeEquippedBeforeBaseDefense() const
+{
+	return !_ignoreInBaseDefense;
+}
+
+
+/**
  * Returns the item's Turret Type.
  * @return The turret index (-1 for no turret).
  */
@@ -1686,6 +1876,15 @@ int RuleItem::getAIMeleeHitCount() const
 bool RuleItem::isAlien() const
 {
 	return _liveAlien;
+}
+
+/**
+* Returns to which type of prison does the live alien belong.
+* @return Prison type.
+*/
+int RuleItem::getPrisonType() const
+{
+	return _liveAlienPrisonType;
 }
 
 /**
@@ -1896,12 +2095,58 @@ int RuleItem::getShotgunPellets() const
 }
 
 /**
+* Gets the shotgun behavior type. This is an attribute of shotgun ammo.
+* @return 0 = cone-like spread (vanilla), 1 = grouping.
+*/
+int RuleItem::getShotgunBehaviorType() const
+{
+	return _shotgunBehaviorType;
+}
+
+/**
+* Gets the spread of shotgun projectiles. This is an attribute of shotgun ammo.
+* Can be used in both shotgun behavior types.
+* @return The shotgun spread.
+*/
+int RuleItem::getShotgunSpread() const
+{
+	return _shotgunSpread;
+}
+
+/**
+* Gets the shotgun choke value for modifying pellet spread. This is an attribute of the weapon (not ammo).
+* @return The shotgun choke value.
+*/
+int RuleItem::getShotgunChoke() const
+{
+	return _shotgunChoke;
+}
+
+/**
  * Gets the unit that the victim is morphed into when attacked.
  * @return The weapon's zombie unit.
  */
 const std::string &RuleItem::getZombieUnit() const
 {
 	return _zombieUnit;
+}
+
+/**
+ * Gets the unit that is spawned when this item hits something.
+ * @return The weapon's spawn unit.
+ */
+const std::string &RuleItem::getSpawnUnit() const
+{
+	return _spawnUnit;
+}
+
+/**
+ * Gets which faction the spawned unit should be.
+ * @return The spawned unit's faction.
+ */
+int RuleItem::getSpawnUnitFaction() const
+{
+	return _spawnUnitFaction;
 }
 
 /**
@@ -1997,6 +2242,16 @@ int RuleItem::getAccuracyMultiplier(const BattleUnit *unit) const
 int RuleItem::getThrowMultiplier(const BattleUnit *unit) const
 {
 	return _throwMulti.getBonus(unit);
+}
+
+/**
+ * Compute multiplier of close quarters accuracy based on unit stats.
+ * @param stats unit stats
+ * @return multiplier.
+ */
+int RuleItem::getCloseQuartersMultiplier(const BattleUnit *unit) const
+{
+	return _closeQuartersMulti.getBonus(unit);
 }
 
 /**
@@ -2116,6 +2371,15 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 }
 
 /**
+ * Gets the index of the sprite in the CustomItemPreview sprite set.
+ * @return Sprite index.
+ */
+const std::vector<int> &RuleItem::getCustomItemPreviewIndex() const
+{
+	return _customItemPreviewIndex;
+}
+
+/**
 * Gets the kneel bonus (15% bonus is encoded as 100+15 = 115).
 * @return Kneel bonus.
 */
@@ -2131,6 +2395,33 @@ int RuleItem::getKneelBonus(Mod *mod) const
 int RuleItem::getOneHandedPenalty(Mod *mod) const
 {
 	return _oneHandedPenalty != -1 ? _oneHandedPenalty : mod->getOneHandedPenaltyGlobal();
+}
+
+/**
+* Gets the monthly salary.
+* @return Monthly salary.
+*/
+int RuleItem::getMonthlySalary() const
+{
+	return _monthlySalary;
+}
+
+/**
+* Gets the monthly maintenance.
+* @return Monthly maintenance.
+*/
+int RuleItem::getMonthlyMaintenance() const
+{
+	return _monthlyMaintenance;
+}
+
+/**
+ * Gets how many waypoints are used for a "spray" attack
+ * @return Number of waypoints.
+ */
+int RuleItem::getSprayWaypoints() const
+{
+	return _sprayWaypoints;
 }
 
 }

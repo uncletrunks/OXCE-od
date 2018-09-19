@@ -32,13 +32,14 @@ class Mod;
  */
 struct RuleCraftStats
 {
-	int fuelMax, damageMax, speedMax, accel, radarRange, radarChance, sightRange, hitBonus, avoidBonus, powerBonus, armor;
+	int fuelMax, damageMax, speedMax, accel, radarRange, radarChance, sightRange, hitBonus, avoidBonus, powerBonus, armor, shieldCapacity, shieldRecharge, shieldRechargeInGeoscape, shieldBleedThrough;
 
 	/// Default constructor.
 	RuleCraftStats() :
 		fuelMax(0), damageMax(0), speedMax(0), accel(0),
 		radarRange(0), radarChance(0), sightRange(0),
-		hitBonus(0), avoidBonus(0), powerBonus(0), armor(0)
+		hitBonus(0), avoidBonus(0), powerBonus(0), armor(0),
+		shieldCapacity(0), shieldRecharge(0), shieldRechargeInGeoscape(0), shieldBleedThrough(0)
 	{
 
 	}
@@ -56,6 +57,10 @@ struct RuleCraftStats
 		avoidBonus += r.avoidBonus;
 		powerBonus += r.powerBonus;
 		armor += r.armor;
+		shieldCapacity += r.shieldCapacity;
+		shieldRecharge += r.shieldRecharge;
+		shieldRechargeInGeoscape += r.shieldRechargeInGeoscape;
+		shieldBleedThrough += r.shieldBleedThrough;
 		return *this;
 	}
 	/// Subtract different stats.
@@ -72,6 +77,10 @@ struct RuleCraftStats
 		avoidBonus -= r.avoidBonus;
 		powerBonus -= r.powerBonus;
 		armor -= r.armor;
+		shieldCapacity -= r.shieldCapacity;
+		shieldRecharge -= r.shieldRecharge;
+		shieldRechargeInGeoscape -= r.shieldRechargeInGeoscape;
+		shieldBleedThrough -= r.shieldBleedThrough;
 		return *this;
 	}
 	/// Gets negative values of stats.
@@ -95,6 +104,10 @@ struct RuleCraftStats
 		avoidBonus = node["avoidBonus"].as<int>(avoidBonus);
 		powerBonus = node["powerBonus"].as<int>(powerBonus);
 		armor = node["armor"].as<int>(armor);
+		shieldCapacity = node["shieldCapacity"].as<int>(shieldCapacity);
+		shieldRecharge = node["shieldRecharge"].as<int>(shieldRecharge);
+		shieldRechargeInGeoscape = node["shieldRechargeInGeoscape"].as<int>(shieldRechargeInGeoscape);
+		shieldBleedThrough = node["shieldBleedThrough"].as<int>(shieldBleedThrough);
 	}
 };
 
@@ -117,16 +130,19 @@ private:
 	std::vector<std::string> _requires;
 	std::vector<std::string> _requiresBuyBaseFunc;
 	int _sprite, _marker;
-	int _weapons, _soldiers, _vehicles, _costBuy, _costRent, _costSell;
+	int _weapons, _soldiers, _pilots, _vehicles, _costBuy, _costRent, _costSell;
 	char _weaponTypes[WeaponMax][WeaponTypeMax];
 	std::string _refuelItem;
 	std::string _weaponStrings[WeaponMax];
 	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
-	bool _spacecraft;
+	bool _keepCraftAfterFailedMission, _allowLanding, _spacecraft, _notifyWhenRefueled, _autoPatrol;
 	int _listOrder, _maxItems, _maxAltitude;
 	std::vector<std::vector <int> > _deployment;
+	std::vector<int> _craftInventoryTile;
 	RuleCraftStats _stats;
+	int _shieldRechargeAtBase;
+	bool _mapVisible;
 public:
 	/// Creates a blank craft ruleset.
 	RuleCraft(const std::string &type);
@@ -156,6 +172,8 @@ public:
 	int getWeapons() const;
 	/// Gets the craft's soldier capacity.
 	int getSoldiers() const;
+	/// Gets the craft's pilot capacity/requirement.
+	int getPilots() const;
 	/// Gets the craft's vehicle capacity.
 	int getVehicles() const;
 	/// Gets the craft's cost.
@@ -184,16 +202,27 @@ public:
 	int getScore() const;
 	/// Gets the craft's terrain data.
 	RuleTerrain *getBattlescapeTerrainData() const;
+	/// Checks if this craft is lost after a failed mission or not.
+	bool keepCraftAfterFailedMission() const;
+	/// Checks if this craft is capable of landing (on missions).
+	bool getAllowLanding() const;
 	/// Checks if this craft is capable of travelling to mars.
 	bool getSpacecraft() const;
+	/// Should notification be displayed when the craft is refueled?
+	bool notifyWhenRefueled() const;
+	/// Does this craft support auto patrol?
+	bool canAutoPatrol() const;
 	/// Gets the list weight for this craft.
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.
 	const std::vector<std::vector<int> > &getDeployment() const;
+	/// Gets the craft inventory tile position.
+	const std::vector<int> &getCraftInventoryTile() const;
 	/// Gets the item limit for this craft.
 	int getMaxItems() const;
 	/// Test for possibility of usage of weapon type in weapon slot.
 	bool isValidWeaponSlot(int slot, int weaponType) const;
+	int getWeaponTypesRaw(int slot, int subslot) const;
 	/// Get description string of weapon slot.
 	const std::string &getWeaponSlotString(int slot) const;
 	/// Get basic statistic of craft.
@@ -202,6 +231,12 @@ public:
 	int getMaxAltitude() const;
 	/// Gets if this craft only fights on water.
 	bool isWaterOnly() const;
+	/// Get how many shield points are recharged per hour at base
+	int getShieldRechargeAtBase() const;
+	/// Get whether the craft's map should be visible at the start of a battle
+	bool isMapVisible() const;
+	/// Calculate the theoretical range of the craft in nautical miles
+	int calculateRange(int type);
 };
 
 }

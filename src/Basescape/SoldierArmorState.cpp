@@ -19,10 +19,12 @@
 #include "SoldierArmorState.h"
 #include <sstream>
 #include <algorithm>
+#include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Interface/ArrowButton.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -36,9 +38,23 @@
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
+
+struct compareArmorName : public std::binary_function<ArmorItem&, ArmorItem&, bool>
+{
+	bool _reverse;
+
+	compareArmorName(bool reverse) : _reverse(reverse) {}
+
+	bool operator()(const ArmorItem &a, const ArmorItem &b) const
+	{
+		return CrossPlatform::naturalCompare(a.name, b.name);
+	}
+};
+
 
 /**
  * Initializes all the elements in the Soldier Armor window.
@@ -46,7 +62,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param soldier ID of the selected soldier.
  */
-SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), _soldier(soldier)
+SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOrigin origin) : _base(base), _soldier(soldier), _origin(origin)
 {
 	_screen = false;
 
@@ -57,9 +73,17 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 	_txtType = new Text(90, 9, 80, 52);
 	_txtQuantity = new Text(70, 9, 190, 52);
 	_lstArmor = new TextList(160, 80, 73, 68);
+	_sortName = new ArrowButton(ARROW_NONE, 11, 8, 80, 52);
 
 	// Set palette
-	setInterface("soldierArmor");
+	if (_origin == SA_BATTLESCAPE)
+	{
+		setPalette("PAL_BATTLESCAPE");
+	}
+	else
+	{
+		setInterface("soldierArmor");
+	}
 
 	add(_window, "window", "soldierArmor");
 	add(_btnCancel, "button", "soldierArmor");
@@ -67,6 +91,7 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 	add(_txtType, "text", "soldierArmor");
 	add(_txtQuantity, "text", "soldierArmor");
 	add(_lstArmor, "list", "soldierArmor");
+	add(_sortName, "text", "soldierArmor");
 
 	centerAllSurfaces();
 
@@ -90,6 +115,9 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 	_lstArmor->setBackground(_window);
 	_lstArmor->setMargin(8);
 
+	_sortName->setX(_sortName->getX() + _txtType->getTextWidth() + 4);
+	_sortName->onMouseClick((ActionHandler)&SoldierArmorState::sortNameClick);
+
 	const std::vector<std::string> &armors = _game->getMod()->getArmorsList();
 	for (std::vector<std::string>::const_iterator i = armors.begin(); i != armors.end(); ++i)
 	{
@@ -99,7 +127,6 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 			continue;
 		if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0)
 		{
-			_armors.push_back(a);
 			std::wostringstream ss;
 			if (_game->getSavedGame()->getMonthsPassed() > -1)
 			{
@@ -109,15 +136,26 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 			{
 				ss << "-";
 			}
-			_lstArmor->addRow(2, tr(a->getType()).c_str(), ss.str().c_str());
+			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), ss.str()));
 		}
 		else if (a->getStoreItem() == Armor::NONE)
 		{
-			_armors.push_back(a);
-			_lstArmor->addRow(1, tr(a->getType()).c_str());
+			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), L""));
 		}
 	}
+
+	_armorOrder = ARMOR_SORT_NONE;
+	updateArrows();
+	updateList();
+
 	_lstArmor->onMouseClick((ActionHandler)&SoldierArmorState::lstArmorClick);
+	_lstArmor->onMouseClick((ActionHandler)&SoldierArmorState::lstArmorClickMiddle, SDL_BUTTON_MIDDLE);
+
+	// switch to battlescape theme if called from inventory
+	if (_origin == SA_BATTLESCAPE)
+	{
+		applyBattlescapeTheme();
+	}
 }
 
 /**
@@ -126,6 +164,59 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier) : _base(base), 
 SoldierArmorState::~SoldierArmorState()
 {
 
+}
+
+/**
+* Updates the sorting arrows based
+* on the current setting.
+*/
+void SoldierArmorState::updateArrows()
+{
+	_sortName->setShape(ARROW_NONE);
+	switch (_armorOrder)
+	{
+	case ARMOR_SORT_NAME_ASC:
+		_sortName->setShape(ARROW_SMALL_UP);
+		break;
+	case ARMOR_SORT_NAME_DESC:
+		_sortName->setShape(ARROW_SMALL_DOWN);
+		break;
+	default:
+		break;
+	}
+}
+
+/**
+* Sorts the armor list.
+* @param sort Order to sort the armors in.
+*/
+void SoldierArmorState::sortList()
+{
+	switch (_armorOrder)
+	{
+	case ARMOR_SORT_NAME_ASC:
+		std::sort(_armors.begin(), _armors.end(), compareArmorName(false));
+		break;
+	case ARMOR_SORT_NAME_DESC:
+		std::sort(_armors.rbegin(), _armors.rend(), compareArmorName(true));
+		break;
+	default:
+		break;
+	}
+	updateList();
+}
+
+/**
+* Updates the armor list with the current list
+* of available armors.
+*/
+void SoldierArmorState::updateList()
+{
+	_lstArmor->clearList();
+	for (std::vector<ArmorItem>::const_iterator j = _armors.begin(); j != _armors.end(); ++j)
+	{
+		_lstArmor->addRow(2, (*j).name.c_str(), (*j).quantity.c_str());
+	}
 }
 
 /**
@@ -145,7 +236,7 @@ void SoldierArmorState::lstArmorClick(Action *)
 {
 	Soldier *soldier = _base->getSoldiers()->at(_soldier);
 	Armor *prev = soldier->getArmor();
-	Armor *next = _armors[_lstArmor->getSelectedRow()];
+	Armor *next = _game->getMod()->getArmor(_armors[_lstArmor->getSelectedRow()].type);
 	Craft *craft = soldier->getCraft();
 	if (craft != 0 && next->getSize() > prev->getSize())
 	{
@@ -170,6 +261,34 @@ void SoldierArmorState::lstArmorClick(Action *)
 	_game->getSavedGame()->setLastSelectedArmor(next->getType());
 
 	_game->popState();
+}
+
+/**
+* Shows corresponding Ufopaedia article.
+* @param action Pointer to an action.
+*/
+void SoldierArmorState::lstArmorClickMiddle(Action *action)
+{
+	std::string articleId = _armors[_lstArmor->getSelectedRow()].type;
+	Ufopaedia::openArticle(_game, articleId);
+}
+
+/**
+* Sorts the armors by name.
+* @param action Pointer to an action.
+*/
+void SoldierArmorState::sortNameClick(Action *)
+{
+	if (_armorOrder == ARMOR_SORT_NAME_ASC)
+	{
+		_armorOrder = ARMOR_SORT_NAME_DESC;
+	}
+	else
+	{
+		_armorOrder = ARMOR_SORT_NAME_ASC;
+	}
+	updateArrows();
+	sortList();
 }
 
 }

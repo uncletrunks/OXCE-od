@@ -39,23 +39,23 @@ class Mod;
 class InfoboxOKState;
 class SoldierDiary;
 
-enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_UNPRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK };
+enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_UNPRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK, BA_EXECUTE, BA_CQB };
 enum BattleActionMove { BAM_NORMAL = 0, BAM_RUN = 1, BAM_STRAFE = 2 };
 
 struct BattleActionCost : RuleItemUseCost
 {
 	BattleActionType type;
 	BattleUnit *actor;
-	BattleItem *weapon;
+	BattleItem *weapon, *origWeapon;
 
 	/// Default constructor.
-	BattleActionCost() : type(BA_NONE), actor(0), weapon(0) { }
+	BattleActionCost() : type(BA_NONE), actor(0), weapon(0), origWeapon(0) { }
 
 	/// Constructor from unit.
 	BattleActionCost(BattleUnit *unit) : type(BA_NONE), actor(unit), weapon(0) { }
 
 	/// Constructor with update.
-	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item) { updateTU(); }
+	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item), origWeapon(0) { updateTU(); }
 
 	/// Update value of TU based of actor, weapon and type.
 	void updateTU();
@@ -74,7 +74,7 @@ struct BattleAction : BattleActionCost
 	bool targeting;
 	int value;
 	std::string result;
-	bool strafe, run;
+	bool strafe, run, ignoreSpottedEnemies;
 	int diff;
 	int autoShotCounter;
 	Position cameraPosition;
@@ -82,9 +82,10 @@ struct BattleAction : BattleActionCost
 	int finalFacing;
 	bool finalAction;
 	int number; // first action of turn, second, etc.?
+	bool sprayTargeting; // Used to separate waypoint checks between confirm firing mode and the "spray" autoshot
 
 	/// Default constructor
-	BattleAction() : target(-1, -1, -1), targeting(false), value(0), strafe(false), run(false), diff(0), autoShotCounter(0), cameraPosition(0, 0, -1), desperate(false), finalFacing(-1), finalAction(false), number(0) { }
+	BattleAction() : target(-1, -1, -1), targeting(false), value(0), strafe(false), run(false), diff(0), autoShotCounter(0), cameraPosition(0, 0, -1), desperate(false), finalFacing(-1), finalAction(false), number(0), sprayTargeting(false) { }
 };
 
 struct BattleActionAttack
@@ -121,6 +122,7 @@ private:
 	BattleAction _currentAction;
 	bool _AISecondMove, _playedAggroSound;
 	bool _endTurnRequested, _endTurnProcessed;
+	bool _endConfirmationHandled;
 
 	/// Ends the turn.
 	void endTurn();
@@ -171,6 +173,13 @@ public:
 	void dropItem(Position position, BattleItem *item, bool removeItem = false, bool updateLight = true);
 	/// Converts a unit into a unit of another type.
 	BattleUnit *convertUnit(BattleUnit *unit);
+	/// Spawns a new unit in the middle of battle.
+	void spawnNewUnit(BattleItem *item);
+	void spawnNewUnit(BattleActionAttack attack, Position position);
+	/// Spawns units from items that explode before battle
+	void spawnFromPrimedItems();
+	/// Removes spawned units that belong to the player to avoid dealing with recovery
+	void removeSummonedPlayerUnits();
 	/// Handles kneeling action.
 	bool kneel(BattleUnit *bu);
 	/// Cancels the current action.
@@ -192,7 +201,7 @@ public:
 	/// Moves a unit up or down.
 	void moveUpDown(BattleUnit *unit, int dir);
 	/// Requests the end of the turn (wait for explosions etc to really end the turn).
-	void requestEndTurn();
+	void requestEndTurn(bool askForConfirmation);
 	/// Sets the TU reserved type.
 	void setTUReserved(BattleActionType tur);
 	/// Sets up the cursor taking into account the action.
@@ -222,6 +231,7 @@ public:
 	/// Returns the type of action that is reserved.
 	BattleActionType getReservedAction();
 	/// Tallies the living units, converting them if necessary.
+	bool isSurrendering(BattleUnit* bu);
 	void tallyUnits(int &liveAliens, int &liveSoldiers);
 	bool convertInfected();
 	/// Sets the kneel reservation setting.

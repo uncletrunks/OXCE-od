@@ -692,10 +692,10 @@ bool Globe::targetNear(Target* target, int x, int y) const
  * @param craft Only get craft targets.
  * @return List of pointers to targets.
  */
-std::vector<Target*> Globe::getTargets(int x, int y, bool craft) const
+std::vector<Target*> Globe::getTargets(int x, int y, bool craft, Craft *currentCraft) const
 {
 	std::vector<Target*> v;
-	if (!craft)
+	if (!craft || Options::friendlyCraftEscort)
 	{
 		for (std::vector<Base*>::iterator i = _game->getSavedGame()->getBases()->begin(); i != _game->getSavedGame()->getBases()->end(); ++i)
 		{
@@ -709,6 +709,8 @@ std::vector<Target*> Globe::getTargets(int x, int y, bool craft) const
 
 			for (std::vector<Craft*>::iterator j = (*i)->getCrafts()->begin(); j != (*i)->getCrafts()->end(); ++j)
 			{
+				if ((*j) == currentCraft)
+					continue;
 				if ((*j)->getLongitude() == (*i)->getLongitude() && (*j)->getLatitude() == (*i)->getLatitude() && (*j)->getDestination() == 0)
 					continue;
 
@@ -1058,7 +1060,7 @@ void Globe::XuLine(Surface* surface, Surface* src, double x1, double y1, double 
 }
 
 /**
- * Draws the radar ranges of player bases on the globe.
+ * Draws the radar ranges of player bases, player craft, alien bases and UFO hunter-killers on the globe.
  */
 void Globe::drawRadars()
 {
@@ -1105,7 +1107,7 @@ void Globe::drawRadars()
 					if ((*j)->getBuildTime() == 0)
 					{
 						tr = (*j)->getRules()->getRadarRange();
-						if (tr > range) range = tr;
+						if (tr < MAX_DRAW_RADAR_CIRCLE_RADIUS && tr > range) range = tr;
 					}
 				}
 				range = range * (1 / 60.0) * (M_PI / 180);
@@ -1115,6 +1117,7 @@ void Globe::drawRadars()
 
 		}
 
+		// Draw radars around player craft
 		for (std::vector<Craft*>::iterator j = (*i)->getCrafts()->begin(); j != (*i)->getCrafts()->end(); ++j)
 		{
 			if ((*j)->getStatus()!= "STR_OUT")
@@ -1125,6 +1128,36 @@ void Globe::drawRadars()
 			range = range * (1 / 60.0) * (M_PI / 180);
 
 			if (range>0) drawGlobeCircle(lat,lon,range,24);
+		}
+	}
+
+	if (Options::drawEnemyRadarCircles)
+	{
+		// Draw radars around UFO hunter-killers
+		for (std::vector<Ufo*>::iterator u = _game->getSavedGame()->getUfos()->begin(); u != _game->getSavedGame()->getUfos()->end(); ++u)
+		{
+			if ((*u)->isHunterKiller() && (*u)->getDetected())
+			{
+				lat = (*u)->getLatitude();
+				lon = (*u)->getLongitude();
+				range = (*u)->getCraftStats().radarRange;
+				range = range * (1 / 60.0) * (M_PI / 180);
+
+				if (range > 0) drawGlobeCircle(lat, lon, range, 24);
+			}
+		}
+
+		// Draw radars around alien bases
+		for (std::vector<AlienBase*>::iterator ab = _game->getSavedGame()->getAlienBases()->begin(); ab != _game->getSavedGame()->getAlienBases()->end(); ++ab)
+		{
+			if ((*ab)->getDeployment()->getBaseDetectionRange() > 0 && (*ab)->isDiscovered())
+			{
+				lat = (*ab)->getLatitude();
+				lon = (*ab)->getLongitude();
+				range = (*ab)->getDeployment()->getBaseDetectionRange();
+
+				if (range > 0) drawGlobeCircle(lat, lon, range, 24);
+			}
 		}
 	}
 
@@ -1264,7 +1297,6 @@ void Globe::drawDetail()
 		label->setPalette(getPalette());
 		label->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 		label->setAlign(ALIGN_CENTER);
-		label->setColor(COUNTRY_LABEL_COLOR);
 
 		Sint16 x, y;
 		for (std::vector<Country*>::iterator i = _game->getSavedGame()->getCountries()->begin(); i != _game->getSavedGame()->getCountries()->end(); ++i)
@@ -1279,11 +1311,48 @@ void Globe::drawDetail()
 			label->setX(x - 50);
 			label->setY(y);
 			label->setText(_game->getLanguage()->getString((*i)->getRules()->getType()));
+			label->setColor(COUNTRY_LABEL_COLOR);
+			if ((*i)->getRules()->getLabelColor() > 0)
+			{
+				label->setColor((*i)->getRules()->getLabelColor());
+			}
 			label->blit(_countries);
 		}
 
 		delete label;
 	}
+
+	// Draw extra globe labels
+	Text *label = new Text(120, 18, 0, 0);
+	label->setPalette(getPalette());
+	label->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+	label->setAlign(ALIGN_CENTER);
+
+	Sint16 x, y;
+	for (std::vector<std::string>::const_iterator i = _game->getMod()->getExtraGlobeLabelsList().begin(); i != _game->getMod()->getExtraGlobeLabelsList().end(); ++i)
+	{
+		RuleCountry *rule = _game->getMod()->getExtraGlobeLabel((*i), true);
+		if ((int)(_zoom) >= rule->getZoomLevel())
+		{
+			// Don't draw if label is facing back
+			if (pointBack(rule->getLabelLongitude(), rule->getLabelLatitude()))
+				continue;
+
+			// Convert coordinates
+			polarToCart(rule->getLabelLongitude(), rule->getLabelLatitude(), &x, &y);
+
+			label->setX(x - 60);
+			label->setY(y);
+			label->setText(_game->getLanguage()->getString(rule->getType()));
+			label->setColor(COUNTRY_LABEL_COLOR);
+			if (rule->getLabelColor() > 0)
+			{
+				label->setColor(rule->getLabelColor());
+			}
+			label->blit(_countries);
+		}
+	}
+	delete label;
 
 	// Draw the city and base markers
 	if (_zoom >= 3)
@@ -1450,7 +1519,7 @@ void Globe::drawPath(Surface *surface, double lon1, double lat1, double lon2, do
 }
 
 /**
- * Draws the flight paths of player craft flying on the globe.
+ * Draws the flight paths of player craft (and hunting UFOs) flying on the globe.
  */
 void Globe::drawFlights()
 {
@@ -1475,6 +1544,20 @@ void Globe::drawFlights()
 			double lon2 = (*j)->getDestination()->getLongitude();
 			double lat1 = (*j)->getLatitude();
 			double lat2 = (*j)->getDestination()->getLatitude();
+
+			drawPath(_radars, lon1, lat1, lon2, lat2);
+		}
+	}
+
+	// Draw the hunting UFO flight paths
+	for (std::vector<Ufo*>::iterator u = _game->getSavedGame()->getUfos()->begin(); u != _game->getSavedGame()->getUfos()->end(); ++u)
+	{
+		if ((*u)->isHunting() && (*u)->getDetected())
+		{
+			double lon1 = (*u)->getLongitude();
+			double lon2 = (*u)->getDestination()->getLongitude();
+			double lat1 = (*u)->getLatitude();
+			double lat2 = (*u)->getDestination()->getLatitude();
 
 			drawPath(_radars, lon1, lat1, lon2, lat2);
 		}

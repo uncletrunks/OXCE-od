@@ -76,6 +76,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
 	_rank = new Surface(26, 23, 4, 4);
+	_flag = new InteractiveSurface(40, 20, 275, 6);
 	_btnPrev = new TextButton(28, 14, 0, 33);
 	_btnOk = new TextButton(48, 14, 30, 33);
 	_btnNext = new TextButton(28, 14, 80, 33);
@@ -153,6 +154,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 
 	add(_bg);
 	add(_rank);
+	add(_flag);
 	add(_btnOk, "button", "soldierInfo");
 	add(_btnPrev, "button", "soldierInfo");
 	add(_btnNext, "button", "soldierInfo");
@@ -252,6 +254,17 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	_edtSoldier->onChange((ActionHandler)&SoldierInfoState::edtSoldierChange);
 	_edtSoldier->onMousePress((ActionHandler)&SoldierInfoState::edtSoldierPress);
 
+	// Can't change nationality of dead soldiers
+	if (_base != 0)
+	{
+		// Ignore also if flags are used to indicate number of kills
+		if (_game->getMod()->getFlagByKills().empty())
+		{
+			_flag->onMouseClick((ActionHandler)&SoldierInfoState::btnFlagClick, SDL_BUTTON_LEFT);
+			_flag->onMouseClick((ActionHandler)&SoldierInfoState::btnFlagClick, SDL_BUTTON_RIGHT);
+		}
+	}
+
 	_btnSack->setText(tr("STR_SACK"));
 	_btnSack->onMouseClick((ActionHandler)&SoldierInfoState::btnSackClick);
 
@@ -342,6 +355,34 @@ void SoldierInfoState::init()
 	texture->getFrame(_soldier->getRankSprite())->setX(0);
 	texture->getFrame(_soldier->getRankSprite())->setY(0);
 	texture->getFrame(_soldier->getRankSprite())->blit(_rank);
+
+	std::ostringstream flagId;
+	flagId << "Flag";
+	const std::vector<int> mapping = _game->getMod()->getFlagByKills();
+	if (mapping.empty())
+	{
+		flagId << _soldier->getNationality() + _soldier->getRules()->getFlagOffset();
+	}
+	else
+	{
+		int index = 0;
+		for (auto item : mapping)
+		{
+			if (_soldier->getKills() <= item)
+			{
+				break;
+			}
+			index++;
+		}
+		flagId << index + _soldier->getRules()->getFlagOffset();
+	}
+	Surface *flagTexture = _game->getMod()->getSurface(flagId.str().c_str(), false);
+	_flag->clear();
+	if (flagTexture != 0)
+	{
+		flagTexture->setX(_flag->getWidth()-flagTexture->getWidth()); // align right
+		flagTexture->blit(_flag);
+	}
 
 	std::wostringstream ss;
 	ss << withArmor.tu;
@@ -438,9 +479,14 @@ void SoldierInfoState::init()
 	}
 	_txtCraft->setText(tr("STR_CRAFT_").arg(craft));
 
-	if (_soldier->getWoundRecovery() > 0)
+	if (_soldier->isWounded())
 	{
-		_txtRecovery->setText(tr("STR_WOUND_RECOVERY").arg(tr("STR_DAY", _soldier->getWoundRecovery())));
+		int recoveryTime = 0;
+		if (_base != 0)
+		{
+			recoveryTime = _soldier->getWoundRecovery(_base->getSickBayAbsoluteBonus(), _base->getSickBayRelativeBonus());
+		}
+		_txtRecovery->setText(tr("STR_WOUND_RECOVERY").arg(tr("STR_DAY", recoveryTime)));
 	}
 	else
 	{
@@ -550,7 +596,7 @@ void SoldierInfoState::btnOkClick(Action *)
 	_game->popState();
 	if (_game->getSavedGame()->getMonthsPassed() > -1 && Options::storageLimitsEnforced && _base != 0 && _base->storesOverfull())
 	{
-		_game->pushState(new SellState(_base));
+		_game->pushState(new SellState(_base, 0));
 		_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(_base->getName()), _palette, _game->getMod()->getInterface("soldierInfo")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("soldierInfo")->getElement("errorPalette")->color));
 	}
 }
@@ -588,7 +634,7 @@ void SoldierInfoState::btnArmorClick(Action *)
 {
 	if (!_soldier->getCraft() || (_soldier->getCraft() && _soldier->getCraft()->getStatus() != "STR_OUT"))
 	{
-		_game->pushState(new SoldierArmorState(_base, _soldierId));
+		_game->pushState(new SoldierArmorState(_base, _soldierId, SA_GEOSCAPE));
 	}
 }
 
@@ -608,6 +654,44 @@ void SoldierInfoState::btnSackClick(Action *)
 void SoldierInfoState::btnDiaryClick(Action *)
 {
 	_game->pushState(new SoldierDiaryOverviewState(_base, _soldierId, this));
+}
+
+/**
+* Changes soldier's nationality.
+* @param action Pointer to an action.
+*/
+void SoldierInfoState::btnFlagClick(Action *action)
+{
+	int temp = _soldier->getNationality();
+	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+	{
+		temp += 1;
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+	{
+		temp += -1;
+	}
+
+	const std::vector<SoldierNamePool*> &names = _soldier->getRules()->getNames();
+	if (!names.empty())
+	{
+		const int max = names.size();
+		if (temp > max - 1)
+		{
+			temp = 0;
+		}
+		else if (temp < 0)
+		{
+			temp = max - 1;
+		}
+	}
+	else
+	{
+		temp = 0;
+	}
+
+	_soldier->setNationality(temp);
+	init();
 }
 
 }

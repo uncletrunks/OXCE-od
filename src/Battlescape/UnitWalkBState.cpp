@@ -199,7 +199,7 @@ void UnitWalkBState::think()
 			_terrain->calculateLighting(change ? LL_ITEMS : LL_UNITS, _unit->getPosition(), 2);
 			_terrain->calculateFOV(_unit->getPosition(), 2, false); //update unit visibility for all units which can see last and current position.
 			//tile visibility for this unit is handled later.
-			unitSpotted = (!_falling && !_action.desperate && _parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
+			unitSpotted = (!_action.ignoreSpottedEnemies && !_falling && !_action.desperate && _parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
 
 			if (change > 1)
 			{
@@ -422,7 +422,7 @@ void UnitWalkBState::think()
 		// calculateFOV is unreliable for setting the unitSpotted bool, as it can be called from various other places
 		// in the code, ie: doors opening, and this messes up the result.
 		_terrain->calculateFOV(_unit);
-		unitSpotted = (!_falling && !_action.desperate && _parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
+		unitSpotted = (!_action.ignoreSpottedEnemies && !_falling && !_action.desperate && _parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
 
 		if (unitSpotted && !_action.desperate && !_unit->getCharging() && !_falling)
 		{

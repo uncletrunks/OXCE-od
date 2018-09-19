@@ -27,7 +27,7 @@ namespace OpenXcom
  * Creates a certain type of unit.
  * @param type String defining the type.
  */
-Unit::Unit(const std::string &type) : _type(type), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _capturable(true)
+Unit::Unit(const std::string &type) : _type(type), _showFullNameInAlienInventory(-1), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _capturable(true), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false), _waitIfOutsideWeaponRange(false)
 {
 }
 
@@ -51,7 +51,9 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 		load(parent, mod);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_civilianRecoveryType = node["civilianRecoveryType"].as<std::string>(_civilianRecoveryType);
 	_race = node["race"].as<std::string>(_race);
+	_showFullNameInAlienInventory = node["showFullNameInAlienInventory"].as<int>(_showFullNameInAlienInventory);
 	_rank = node["rank"].as<std::string>(_rank);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
 	_armorName = node["armor"].as<std::string>(_armorName);
@@ -65,10 +67,16 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_value = node["value"].as<int>(_value);
 	_intelligence = node["intelligence"].as<int>(_intelligence);
 	_aggression = node["aggression"].as<int>(_aggression);
+	_spotter = node["spotter"].as<int>(_spotter);
+	_sniper = node["sniper"].as<int>(_sniper);
 	_energyRecovery = node["energyRecovery"].as<int>(_energyRecovery);
 	_specab = (SpecialAbility)node["specab"].as<int>(_specab);
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
 	_livingWeapon = node["livingWeapon"].as<bool>(_livingWeapon);
+	_canSurrender = node["canSurrender"].as<bool>(_canSurrender);
+	_autoSurrender = node["autoSurrender"].as<bool>(_autoSurrender);
+	_isLeeroyJenkins = node["isLeeroyJenkins"].as<bool>(_isLeeroyJenkins);
+	_waitIfOutsideWeaponRange = node["waitIfOutsideWeaponRange"].as<bool>(_waitIfOutsideWeaponRange);
 	_meleeWeapon = node["meleeWeapon"].as<std::string>(_meleeWeapon);
 	_psiWeapon = node["psiWeapon"].as<std::string>(_psiWeapon);
 	_capturable = node["capturable"].as<bool>(_capturable);
@@ -118,6 +126,15 @@ void Unit::afterLoad(const Mod* mod)
 std::string Unit::getType() const
 {
 	return _type;
+}
+
+/**
+* Gets the type of staff (soldier/engineer/scientists) or type of item to be recovered when a civilian is saved.
+* @return The type of staff/item to recover.
+*/
+std::string Unit::getCivilianRecoveryType() const
+{
+	return _civilianRecoveryType;
 }
 
 /**
@@ -229,6 +246,25 @@ int Unit::getAggression() const
 }
 
 /**
+ * Gets the spotter score. Determines how many turns sniper AI units can act on this unit seeing your troops.
+ * @return The unit's spotter value.
+ */
+int Unit::getSpotterDuration() const
+{
+	// Lazy balance - use -1 to make this the same as intelligence value
+	return (_spotter == -1) ? _intelligence : _spotter;
+}
+
+/**
+ * Gets the sniper score. Determines the chances of firing from out of LOS on spotted units.
+ * @return The unit's sniper value.
+ */
+int Unit::getSniperPercentage() const
+{
+	return _sniper;
+}
+
+/**
  * Gets the unit's special ability.
  * @return The unit's specab.
  */
@@ -313,6 +349,37 @@ const std::vector<std::vector<std::string> > &Unit::getBuiltInWeapons() const
 bool Unit::getCapturable() const
 {
 	return _capturable;
+}
+
+/**
+* Checks if this unit can surrender.
+* @return True if this unit can surrender.
+*/
+bool Unit::canSurrender() const
+{
+	return _canSurrender || _autoSurrender;
+}
+
+/**
+* Checks if this unit surrenders automatically, if all other units surrendered too.
+* @return True if this unit auto-surrenders.
+*/
+bool Unit::autoSurrender() const
+{
+	return _autoSurrender;
+}
+
+/**
+ * Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
+ * @return True if full name can be shown.
+ */
+bool Unit::getShowFullNameInAlienInventory(Mod *mod) const
+{
+	if (_showFullNameInAlienInventory != -1)
+	{
+		return _showFullNameInAlienInventory == 0 ? false : true;
+	}
+	return mod->getShowFullNameInAlienInventory();
 }
 
 }

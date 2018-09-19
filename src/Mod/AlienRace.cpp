@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "AlienRace.h"
+#include "../Engine/RNG.h"
 
 namespace OpenXcom
 {
@@ -48,6 +49,7 @@ void AlienRace::load(const YAML::Node &node)
 	_baseCustomMission = node["baseCustomMission"].as<std::string>(_baseCustomMission);
 	_retaliationMission = node["retaliationMission"].as<std::string>(_retaliationMission);
 	_members = node["members"].as< std::vector<std::string> >(_members);
+	_membersRandom = node["membersRandom"].as< std::vector <std::vector<std::string> > >(_membersRandom);
 	_retaliationAggression = node["retaliationAggression"].as<int>(_retaliationAggression);
 }
 
@@ -85,6 +87,11 @@ const std::string &AlienRace::getBaseCustomMission() const
  */
 const std::string &AlienRace::getMember(int id) const
 {
+	if (!_membersRandom.empty())
+	{
+		int rng = RNG::generate(0, _membersRandom[id].size() - 1);
+		return _membersRandom[id][rng];
+	}
 	return _members[id];
 }
 

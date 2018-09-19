@@ -167,7 +167,17 @@ MedikitState::MedikitState (BattleUnit *targetUnit, BattleAction *action, TileEn
 
 	centerAllSurfaces();
 
-	_game->getMod()->getSurface("MEDIBORD.PCK")->blit(_bg);
+	Surface *backgroundSprite = 0;
+	if (!_item->getRules()->getMediKitCustomBackground().empty())
+	{
+		backgroundSprite = _game->getMod()->getSurface(_item->getRules()->getMediKitCustomBackground(), false);
+	}
+	if (!backgroundSprite)
+	{
+		backgroundSprite = _game->getMod()->getSurface("MEDIBORD.PCK");
+	}
+
+	backgroundSprite->blit(_bg);
 	_pkText->setBig();
 	_stimulantTxt->setBig();
 	_healTxt->setBig();
@@ -202,7 +212,7 @@ void MedikitState::onEndClick(Action *)
 {
 	if (Options::maximizeInfoScreens)
 	{
-		Screen::updateScale(Options::battlescapeScale, Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, true);
+		Screen::updateScale(Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, true);
 		_game->getScreen()->resetDisplay(false);
 	}
 	_game->popState();

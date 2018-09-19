@@ -27,6 +27,7 @@ namespace OpenXcom
 
 class Surface;
 class Text;
+class TextEdit;
 class NumberText;
 class InteractiveSurface;
 class Inventory;
@@ -34,6 +35,7 @@ class SavedBattleGame;
 class BattlescapeState;
 class BattleUnit;
 class BattlescapeButton;
+class Base;
 
 /**
  * Screen which displays soldier's inventory.
@@ -42,34 +44,65 @@ class InventoryState : public State
 {
 private:
 	Surface *_bg, *_soldier;
-	Text *_txtName, *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFAcc, *_txtReact, *_txtPSkill, *_txtPStr;
-	BattlescapeButton *_btnOk, *_btnPrev, *_btnNext, *_btnUnload, *_btnGround, *_btnRank;
+	Text *_txtItem, *_txtAmmo, *_txtWeight, *_txtTus, *_txtFiringAcc, *_txtThrowingAcc, *_txtMeleeAcc, *_txtPsi;
+	TextEdit *_txtName;
+	TextEdit *_btnQuickSearch;
+	BattlescapeButton *_btnOk, *_btnPrev, *_btnNext, *_btnUnload, *_btnGround, *_btnRank, *_btnArmor;
 	BattlescapeButton *_btnCreateTemplate, *_btnApplyTemplate;
 	Surface *_selAmmo;
 	Inventory *_inv;
-
-	std::vector<EquipmentLayoutItem*> _curInventoryTemplate;
+	std::vector<EquipmentLayoutItem*> _curInventoryTemplate, _tempInventoryTemplate;
 	SavedBattleGame *_battleGame;
-	const bool _tu;
+	const bool _tu, _noCraft;
 	bool _lightUpdated;
 	BattlescapeState *_parent;
+	Base *_base;
 	std::string _currentTooltip;
+	std::wstring _currentDamageTooltip;
 	int _mouseHoverItemFrame = 0;
 	BattleItem *_mouseHoverItem = nullptr;
-
+	BattleItem *_currentDamageTooltipItem = nullptr;
+	bool _reloadUnit;
+	int _globalLayoutIndex;
+	/// Helper method for Create Template button
+	void _createInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
+	/// Helper method for Apply Template button
+	void _applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate);
 public:
 	/// Creates the Inventory state.
-	InventoryState(bool tu, BattlescapeState *parent);
+	InventoryState(bool tu, BattlescapeState *parent, Base *base, bool noCraft = false);
 	/// Cleans up the Inventory state.
 	~InventoryState();
 	/// Updates all soldier info.
+	void setGlobalLayoutIndex(int index);
 	void init();
+	/// Handler for pressing on the Name edit.
+	void edtSoldierPress(Action *action);
+	/// Handler for changing text on the Name edit.
+	void edtSoldierChange(Action *action);
 	/// Updates the soldier info (Weight, TU).
 	void updateStats();
 	/// Saves the soldiers' equipment-layout.
 	void saveEquipmentLayout();
+	/// Handler for clicking the Armor button.
+	void btnArmorClick(Action *action);
+	void btnArmorClickRight(Action *action);
+	void btnArmorClickMiddle(Action *action);
+	/// Methods for handling the global equipment layout save/load hotkeys.
+	void saveGlobalLayout(int index);
+	void loadGlobalLayout(int index);
+	void btnGlobalEquipmentLayoutClick(Action *action);
+	/// Handler for clicking the Load button.
+	void btnInventoryLoadClick(Action *action);
+	/// Handler for clicking the Save button.
+	void btnInventorySaveClick(Action *action);
+	/// Handler for clicking the Ufopaedia button.
+	void btnUfopaediaClick(Action *action);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handlers for Quick Search.
+	void btnQuickSearchToggle(Action *action);
+	void btnQuickSearchApply(Action *action);
 	/// Handler for clicking the Previous button.
 	void btnPrevClick(Action *action);
 	/// Handler for clicking the Next button.
@@ -91,9 +124,12 @@ public:
 	/// Handler for clicking on the inventory.
 	void invClick(Action *action);
 	/// Handler for showing item info.
+	void calculateCurrentDamageTooltip();
 	void invMouseOver(Action *action);
 	/// Handler for hiding item info.
 	void invMouseOut(Action *action);
+	/// Handler for hitting the [Move Ground Inventory To Base] hotkey.
+	void onMoveGroundInventoryToBase(Action *action);
 	/// Handles keypresses.
 	void handle(Action *action) override;
 	/// Runs state functionality every cycle.
@@ -102,6 +138,10 @@ public:
 	void txtTooltipIn(Action *action);
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
+	/// Handler for showing armor tooltip.
+	void txtArmorTooltipIn(Action *action);
+	/// Handler for hiding armor tooltip.
+	void txtArmorTooltipOut(Action *action);
 
 private:
 	/// Update the visibility and icons for the template buttons.

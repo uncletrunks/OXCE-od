@@ -31,6 +31,8 @@
 #include "../Savegame/Production.h"
 #include "NewManufactureListState.h"
 #include "ManufactureInfoState.h"
+#include "TechTreeViewerState.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -83,6 +85,7 @@ ManufactureState::ManufactureState(Base *base) : _base(base)
 
 	_btnNew->setText(tr("STR_NEW_PRODUCTION"));
 	_btnNew->onMouseClick((ActionHandler)&ManufactureState::btnNewProductionClick);
+	_btnNew->onKeyboardPress((ActionHandler)&ManufactureState::btnNewProductionClick, Options::keyToggleQuickSearch);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&ManufactureState::btnOkClick);
@@ -108,14 +111,15 @@ ManufactureState::ManufactureState(Base *base) : _base(base)
 	_txtTimeLeft->setText(tr("STR_DAYS_HOURS_LEFT"));
 	_txtTimeLeft->setWordWrap(true);
 
-	_lstManufacture->setColumns(5, 115, 15, 52, 56, 48);
+	_lstManufacture->setColumns(5, 114, 16, 52, 56, 48);
 	_lstManufacture->setAlign(ALIGN_RIGHT);
 	_lstManufacture->setAlign(ALIGN_LEFT, 0);
 	_lstManufacture->setSelectable(true);
 	_lstManufacture->setBackground(_window);
 	_lstManufacture->setMargin(2);
 	_lstManufacture->setWordWrap(true);
-	_lstManufacture->onMouseClick((ActionHandler)&ManufactureState::lstManufactureClick);
+	_lstManufacture->onMouseClick((ActionHandler)&ManufactureState::lstManufactureClickLeft, SDL_BUTTON_LEFT);
+	_lstManufacture->onMouseClick((ActionHandler)&ManufactureState::lstManufactureClickMiddle, SDL_BUTTON_MIDDLE);
 	fillProductionList();
 }
 
@@ -204,10 +208,21 @@ void ManufactureState::fillProductionList()
  * Opens the screen displaying production settings.
  * @param action Pointer to an action.
  */
-void ManufactureState::lstManufactureClick(Action *)
+void ManufactureState::lstManufactureClickLeft(Action *)
 {
 	const std::vector<Production*> productions(_base->getProductions());
 	_game->pushState(new ManufactureInfoState(_base, productions[_lstManufacture->getSelectedRow()]));
+}
+
+/**
+* Opens the TechTreeViewer for the corresponding topic.
+* @param action Pointer to an action.
+*/
+void ManufactureState::lstManufactureClickMiddle(Action *)
+{
+	const std::vector<Production*> productions(_base->getProductions());
+	const RuleManufacture *selectedTopic = productions[_lstManufacture->getSelectedRow()]->getRules();
+	_game->pushState(new TechTreeViewerState(0, selectedTopic));
 }
 
 }

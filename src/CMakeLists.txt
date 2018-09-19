@@ -8,14 +8,21 @@ set ( basescape_src
   Basescape/BaseView.cpp
   Basescape/BasescapeState.cpp
   Basescape/BuildFacilitiesState.cpp
+  Basescape/ChangeHeadquartersState.cpp
   Basescape/CraftArmorState.cpp
+  Basescape/CraftEquipmentLoadState.cpp
+  Basescape/CraftEquipmentSaveState.cpp
   Basescape/CraftEquipmentState.cpp
   Basescape/CraftInfoState.cpp
+  Basescape/CraftPilotSelectState.cpp
+  Basescape/CraftPilotsState.cpp
   Basescape/CraftSoldiersState.cpp
   Basescape/CraftWeaponsState.cpp
   Basescape/CraftsState.cpp
   Basescape/DismantleFacilityState.cpp
+  Basescape/GlobalResearchState.cpp
   Basescape/ManageAlienContainmentState.cpp
+  Basescape/ManufactureDependenciesTreeState.cpp
   Basescape/ManufactureInfoState.cpp
   Basescape/ManufactureStartState.cpp
   Basescape/ManufactureState.cpp
@@ -33,13 +40,18 @@ set ( basescape_src
   Basescape/SelectStartFacilityState.cpp
   Basescape/SellState.cpp
   Basescape/SoldierArmorState.cpp
+  Basescape/SoldierAvatarState.cpp
   Basescape/SoldierDiaryMissionState.cpp
   Basescape/SoldierDiaryOverviewState.cpp
   Basescape/SoldierDiaryPerformanceState.cpp
   Basescape/SoldierInfoState.cpp
   Basescape/SoldierMemorialState.cpp
+  Basescape/SoldierSortUtil.cpp
   Basescape/SoldiersState.cpp
+  Basescape/SoldierTransformationState.cpp
   Basescape/StoresState.cpp
+  Basescape/TechTreeSelectState.cpp
+  Basescape/TechTreeViewerState.cpp
   Basescape/TransferBaseState.cpp
   Basescape/TransferConfirmState.cpp
   Basescape/TransferItemsState.cpp
@@ -52,22 +64,28 @@ set ( battlescape_src
   Battlescape/ActionMenuState.cpp
   Battlescape/AliensCrashState.cpp
   Battlescape/AIModule.cpp
+  Battlescape/AlienInventory.cpp
+  Battlescape/AlienInventoryState.cpp
   Battlescape/BattleState.cpp
   Battlescape/BattlescapeGame.cpp
   Battlescape/BattlescapeGenerator.cpp
   Battlescape/BattlescapeMessage.cpp
   Battlescape/BattlescapeState.cpp
+  Battlescape/BriefingLightState.cpp
   Battlescape/BriefingState.cpp
   Battlescape/Camera.cpp
   Battlescape/CannotReequipState.cpp
   Battlescape/CommendationLateState.cpp
   Battlescape/CommendationState.cpp
+  Battlescape/ConfirmEndMissionState.cpp
   Battlescape/DebriefingState.cpp
   Battlescape/Explosion.cpp
   Battlescape/ExplosionBState.cpp
   Battlescape/InfoboxOKState.cpp
   Battlescape/InfoboxState.cpp
   Battlescape/Inventory.cpp
+  Battlescape/InventoryLoadState.cpp
+  Battlescape/InventorySaveState.cpp
   Battlescape/InventoryState.cpp
   Battlescape/ItemSprite.cpp
   Battlescape/Map.cpp
@@ -146,7 +164,6 @@ set ( geoscape_src
   Geoscape/AlienBaseState.cpp
   Geoscape/AllocatePsiTrainingState.cpp
   Geoscape/AllocateTrainingState.cpp
-  Geoscape/TrainingState.cpp
   Geoscape/BaseDefenseState.cpp
   Geoscape/BaseDestroyedState.cpp
   Geoscape/BaseNameState.cpp
@@ -156,6 +173,7 @@ set ( geoscape_src
   Geoscape/ConfirmLandingState.cpp
   Geoscape/ConfirmNewBaseState.cpp
   Geoscape/CraftErrorState.cpp
+  Geoscape/CraftNotEnoughPilotsState.cpp
   Geoscape/CraftPatrolState.cpp
   Geoscape/DogfightErrorState.cpp
   Geoscape/DogfightState.cpp
@@ -170,16 +188,23 @@ set ( geoscape_src
   Geoscape/MissionDetectedState.cpp
   Geoscape/MonthlyReportState.cpp
   Geoscape/MultipleTargetsState.cpp
+  Geoscape/NewPossibleCraftState.cpp
+  Geoscape/NewPossibleFacilityState.cpp
   Geoscape/NewPossibleManufactureState.cpp
+  Geoscape/NewPossiblePurchaseState.cpp
   Geoscape/NewPossibleResearchState.cpp
   Geoscape/ProductionCompleteState.cpp
   Geoscape/PsiTrainingState.cpp
   Geoscape/ResearchCompleteState.cpp
   Geoscape/ResearchRequiredState.cpp
   Geoscape/SelectDestinationState.cpp
+  Geoscape/SelectMusicTrackState.cpp
   Geoscape/TargetInfoState.cpp
+  Geoscape/TrainingFinishedState.cpp
+  Geoscape/TrainingState.cpp
   Geoscape/UfoDetectedState.cpp
   Geoscape/UfoLostState.cpp
+  Geoscape/UfoTrackerState.cpp
 )
 
 set ( interface_src
@@ -208,6 +233,7 @@ set ( menu_src
   Menu/CutsceneState.cpp
   Menu/DeleteGameState.cpp
   Menu/ErrorMessageState.cpp
+  Menu/HelloCommanderState.cpp
   Menu/ListGamesState.cpp
   Menu/ListLoadOriginalState.cpp
   Menu/ListLoadState.cpp
@@ -233,6 +259,7 @@ set ( menu_src
   Menu/SlideshowState.cpp
   Menu/StartState.cpp
   Menu/StatisticsState.cpp
+  Menu/TestPaletteState.cpp
   Menu/TestState.cpp
   Menu/VideoState.cpp
 )
@@ -243,6 +270,7 @@ set ( mod_src
   Mod/Armor.cpp
   Mod/ArticleDefinition.cpp
   Mod/City.cpp
+  Mod/CustomPalettes.cpp
   Mod/ExtraSounds.cpp
   Mod/ExtraSprites.cpp
   Mod/ExtraStrings.cpp
@@ -272,6 +300,7 @@ set ( mod_src
   Mod/RuleRegion.cpp
   Mod/RuleResearch.cpp
   Mod/RuleSoldier.cpp
+  Mod/RuleSoldierTransformation.cpp
   Mod/RuleStatBonus.cpp
   Mod/RuleTerrain.cpp
   Mod/RuleUfo.cpp
@@ -313,6 +342,7 @@ set ( savegame_src
   Savegame/SavedGame.cpp
   Savegame/SerializationHelper.cpp
   Savegame/Soldier.cpp
+  Savegame/SoldierAvatar.cpp
   Savegame/SoldierDeath.cpp
   Savegame/SoldierDiary.cpp
   Savegame/Target.cpp
@@ -343,6 +373,7 @@ set ( ufopedia_src
   Ufopaedia/ArticleStateTextImage.cpp
   Ufopaedia/ArticleStateUfo.cpp
   Ufopaedia/ArticleStateVehicle.cpp
+  Ufopaedia/StatsForNerdsState.cpp
   Ufopaedia/Ufopaedia.cpp
   Ufopaedia/UfopaediaSelectState.cpp
   Ufopaedia/UfopaediaStartState.cpp

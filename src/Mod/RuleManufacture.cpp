@@ -29,7 +29,7 @@ namespace OpenXcom
  * Creates a new Manufacture.
  * @param name The unique manufacture name.
  */
-RuleManufacture::RuleManufacture(const std::string &name) : _name(name), _space(0), _time(0), _cost(0), _producedCraft(0), _listOrder(0)
+RuleManufacture::RuleManufacture(const std::string &name) : _name(name), _space(0), _time(0), _cost(0), _refund(false), _producedCraft(0), _listOrder(0)
 {
 	_producedItemsNames[name] = 1;
 }
@@ -59,8 +59,11 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 	_space = node["space"].as<int>(_space);
 	_time = node["time"].as<int>(_time);
 	_cost = node["cost"].as<int>(_cost);
+	_refund = node["refund"].as<bool>(_refund);
 	_requiredItemsNames = node["requiredItems"].as< std::map<std::string, int> >(_requiredItemsNames);
 	_producedItemsNames = node["producedItems"].as< std::map<std::string, int> >(_producedItemsNames);
+	_spawnedPersonType = node["spawnedPersonType"].as<std::string>(_spawnedPersonType);
+	_spawnedPersonName = node["spawnedPersonName"].as<std::string>(_spawnedPersonName);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
@@ -189,6 +192,15 @@ int RuleManufacture::getManufactureCost() const
 }
 
 /**
+ * Should all resources of a cancelled project be refunded?
+ * @return True, if all resources should be refunded. False otherwise.
+ */
+bool RuleManufacture::getRefund() const
+{
+	return _refund;
+}
+
+/**
  * Gets the list of items required to manufacture one object.
  * @return The list of items required to manufacture one object.
  */
@@ -214,13 +226,31 @@ const std::map<const RuleItem*, int> &RuleManufacture::getProducedItems() const
 	return _producedItems;
 }
 
-/**
+/*
  * Gets craft build by this project. null if is not craft production.
  * @return Craft rule set.
  */
 const RuleCraft* RuleManufacture::getProducedCraft() const
 {
 	return _producedCraft;
+}
+
+/**
+* Gets the "manufactured person", i.e. person spawned when manufacturing project ends.
+* @return The person type ID.
+*/
+const std::string &RuleManufacture::getSpawnedPersonType() const
+{
+	return _spawnedPersonType;
+}
+
+/**
+* Gets the custom name of the "manufactured person".
+* @return The person name translation code.
+*/
+const std::string &RuleManufacture::getSpawnedPersonName() const
+{
+	return _spawnedPersonName;
 }
 
 /**

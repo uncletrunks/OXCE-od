@@ -32,13 +32,17 @@
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/CraftWeapon.h"
+#include "../Mod/Armor.h"
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Vehicle.h"
 #include "CraftSoldiersState.h"
 #include "CraftWeaponsState.h"
 #include "CraftEquipmentState.h"
 #include "CraftArmorState.h"
+#include "CraftPilotsState.h"
+#include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
 {
@@ -70,7 +74,8 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	const int top_row = 41;
 	const int bottom = 125;
 	const int bottom_row = 17;
-	_btnOk = new TextButton(288, 16, 16, 176);
+	bool pilots = _craft->getRules()->getPilots() > 0;
+	_btnOk = new TextButton(pilots ? 218 : 288, 16, pilots ? 86 : 16, 176);
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		const int x = i % 2 ? 282 : 14;
@@ -80,8 +85,10 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	_btnCrew = new TextButton(64, 16, 16, bottom);
 	_btnEquip = new TextButton(64, 16, 16, bottom + bottom_row);
 	_btnArmor = new TextButton(64, 16, 16, bottom + 2 * bottom_row);
+	_btnPilots = new TextButton(64, 16, 16, bottom + 3 * bottom_row);
 	_edtCraft = new TextEdit(this, 140, 16, 80, 8);
 	_txtDamage = new Text(100, 17, 14, 24);
+	_txtShield = new Text(100, 17, 120, 24);
 	_txtFuel = new Text(82, 17, 228, 24);
 	for(int i = 0; i < _weaponNum; ++i)
 	{
@@ -113,8 +120,10 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	add(_btnCrew, "button", "craftInfo");
 	add(_btnEquip, "button", "craftInfo");
 	add(_btnArmor, "button", "craftInfo");
+	add(_btnPilots, "button", "craftInfo");
 	add(_edtCraft, "text1", "craftInfo");
 	add(_txtDamage, "text1", "craftInfo");
+	add(_txtShield, "text1", "craftInfo");
 	add(_txtFuel, "text1", "craftInfo");
 	for(int i = 0; i < _weaponNum; ++i)
 	{
@@ -134,6 +143,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftInfoState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftInfoState::btnOkClick, Options::keyCancel);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftInfoState::btnUfopediaClick, Options::keyGeoUfopedia);
 
 	for(int i = 0; i < _weaponNum; ++i)
 	{
@@ -150,6 +160,10 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 
 	_btnArmor->setText(tr("STR_ARMOR"));
 	_btnArmor->onMouseClick((ActionHandler)&CraftInfoState::btnArmorClick);
+
+	_btnPilots->setText(tr("STR_PILOTS"));
+	_btnPilots->onMouseClick((ActionHandler)&CraftInfoState::btnPilotsClick);
+	_btnPilots->setVisible(pilots);
 
 	_edtCraft->setBig();
 	_edtCraft->setAlign(ALIGN_CENTER);
@@ -203,6 +217,25 @@ void CraftInfoState::init()
 	}
 	_txtFuel->setText(secondLine.str());
 
+	std::wostringstream thirdLine;
+	if (_craft->getShieldCapacity() != 0)
+	{
+		thirdLine << tr("STR_SHIELD").arg(Text::formatPercentage(_craft->getShieldPercentage()));
+		if (_craft->getShield() < _craft->getShieldCapacity())
+		{
+			if (_craft->getRules()->getShieldRechargeAtBase() != 0)
+			{
+				int shieldHours = (int)ceil((double)(_craft->getShieldCapacity() - _craft->getShield()) / _craft->getRules()->getShieldRechargeAtBase());
+				thirdLine << formatTime(shieldHours);
+			}
+		}
+	}
+	else
+	{
+		thirdLine << L"";
+	}
+	_txtShield->setText(thirdLine.str());
+
 	if (_craft->getRules()->getSoldiers() > 0)
 	{
 		_crew->clear();
@@ -210,20 +243,61 @@ void CraftInfoState::init()
 
 		Surface *frame1 = texture->getFrame(38);
 		frame1->setY(0);
-		for (int i = 0, x = 0; i < _craft->getNumSoldiers(); ++i, x += 10)
+
+		SurfaceSet *customArmorPreviews = _game->getMod()->getSurfaceSet("CustomArmorPreviews");
+		int x = 0;
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 		{
-			frame1->setX(x);
-			frame1->blit(_crew);
+			if ((*i)->getCraft() == _craft)
+			{
+				for (auto index : (*i)->getArmor()->getCustomArmorPreviewIndex())
+				{
+					Surface *customFrame1 = customArmorPreviews->getFrame(index);
+					if (customFrame1)
+					{
+						// modded armor previews
+						customFrame1->setY(0);
+						customFrame1->setX(x);
+						customFrame1->blit(_crew);
+					}
+					else
+					{
+						// vanilla
+						frame1->setX(x);
+						frame1->blit(_crew);
+					}
+					x += 10;
+				}
+			}
 		}
 
 		Surface *frame2 = texture->getFrame(40);
 		frame2->setY(0);
-		int x = 0;
-		for (int i = 0; i < _craft->getNumVehicles(); ++i, x += 10)
+
+		SurfaceSet *customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews");
+		x = 0;
+		for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
 		{
-			frame2->setX(x);
-			frame2->blit(_equip);
+			for (auto index : (*i)->getRules()->getCustomItemPreviewIndex())
+			{
+				Surface *customFrame2 = customItemPreviews->getFrame(index);
+				if (customFrame2)
+				{
+					// modded HWP/auxiliary previews
+					customFrame2->setY(0);
+					customFrame2->setX(x);
+					customFrame2->blit(_equip);
+				}
+				else
+				{
+					// vanilla
+					frame2->setX(x);
+					frame2->blit(_equip);
+				}
+				x += 10;
+			}
 		}
+
 		Surface *frame3 = texture->getFrame(39);
 		for (int i = 0; i < _craft->getNumEquipment(); i += 4, x += 10)
 		{
@@ -238,6 +312,7 @@ void CraftInfoState::init()
 		_btnCrew->setVisible(false);
 		_btnEquip->setVisible(false);
 		_btnArmor->setVisible(false);
+		_btnPilots->setVisible(false);
 	}
 
 	for(int i = 0; i < _weaponNum; ++i)
@@ -310,6 +385,19 @@ void CraftInfoState::btnOkClick(Action *)
 }
 
 /**
+ * Opens the corresponding Ufopaedia craft article.
+ * @param action Pointer to an action.
+ */
+void CraftInfoState::btnUfopediaClick(Action *)
+{
+	if (_craft)
+	{
+		std::string articleId = _craft->getRules()->getType();
+		Ufopaedia::openArticle(_game, articleId);
+	}
+}
+
+/**
  * Goes to the Select Armament window
  * for the weapons.
  * @param action Pointer to an action.
@@ -351,6 +439,15 @@ void CraftInfoState::btnEquipClick(Action *)
 void CraftInfoState::btnArmorClick(Action *)
 {
 	_game->pushState(new CraftArmorState(_base, _craftId));
+}
+
+/**
+ * Goes to the Pilots Info screen.
+ * @param action Pointer to an action.
+ */
+void CraftInfoState::btnPilotsClick(Action *)
+{
+	_game->pushState(new CraftPilotsState(_base, _craftId));
 }
 
 /**

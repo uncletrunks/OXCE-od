@@ -25,7 +25,7 @@
 namespace OpenXcom
 {
 
-RuleResearch::RuleResearch(const std::string &name) : _name(name), _cost(0), _points(0), _needItem(false), _destroyItem(false), _listOrder(0)
+RuleResearch::RuleResearch(const std::string &name) : _name(name), _cost(0), _points(0), _sequentialGetOneFree(false), _needItem(false), _destroyItem(false), _listOrder(0)
 {
 }
 
@@ -43,13 +43,17 @@ void RuleResearch::load(const YAML::Node &node, int listOrder)
 	_name = node["name"].as<std::string>(_name);
 	_lookup = node["lookup"].as<std::string>(_lookup);
 	_cutscene = node["cutscene"].as<std::string>(_cutscene);
+	_spawnedItem = node["spawnedItem"].as<std::string>(_spawnedItem);
 	_cost = node["cost"].as<int>(_cost);
 	_points = node["points"].as<int>(_points);
 	_dependenciesName = node["dependencies"].as< std::vector<std::string> >(_dependenciesName);
 	_unlocksName = node["unlocks"].as< std::vector<std::string> >(_unlocksName);
+	_disablesName = node["disables"].as< std::vector<std::string> >(_disablesName);
 	_getOneFreeName = node["getOneFree"].as< std::vector<std::string> >(_getOneFreeName);
 	_requiresName = node["requires"].as< std::vector<std::string> >(_requiresName);
 	_requiresBaseFunc = node["requiresBaseFunc"].as< std::vector<std::string> >(_requiresBaseFunc);
+	_sequentialGetOneFree = node["sequentialGetOneFree"].as<bool>(_sequentialGetOneFree);
+	_getOneFreeProtectedName = node["getOneFreeProtected"].as< std::map<std::string, std::vector<std::string> > >(_getOneFreeProtectedName);
 	_needItem = node["needItem"].as<bool>(_needItem);
 	_destroyItem = node["destroyItem"].as<bool>(_destroyItem);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
@@ -72,14 +76,31 @@ void RuleResearch::afterLoad(const Mod* mod)
 {
 	_dependencies = mod->getResearch(_dependenciesName);
 	_unlocks = mod->getResearch(_unlocksName);
+	_disables = mod->getResearch(_disablesName);
 	_getOneFree = mod->getResearch(_getOneFreeName);
 	_requires = mod->getResearch(_requiresName);
+
+	for (auto& n : _getOneFreeProtectedName)
+	{
+		auto left = mod->getResearch(n.first, false);
+		if (left)
+		{
+			auto right = mod->getResearch(n.second);
+			_getOneFreeProtected[left] = right;
+		}
+		else
+		{
+			Log(LOG_ERROR) << "Unknown research " + n.first;
+		}
+	}
 
 	//remove not needed data
 	Collections::deleteAll(_dependenciesName);
 	Collections::deleteAll(_unlocksName);
+	Collections::deleteAll(_disablesName);
 	Collections::deleteAll(_getOneFreeName);
 	Collections::deleteAll(_requiresName);
+	Collections::deleteAll(_getOneFreeProtectedName);
 }
 
 /**
@@ -110,6 +131,15 @@ const std::vector<const RuleResearch*> &RuleResearch::getDependencies() const
 }
 
 /**
+ * Checks if this ResearchProject gives free topics in sequential order (or random order).
+ * @return True if the ResearchProject gives free topics in sequential order.
+ */
+bool RuleResearch::sequentialGetOneFree() const
+{
+	return _sequentialGetOneFree;
+}
+
+/**
  * Checks if this ResearchProject needs a corresponding Item to be researched.
  *  @return True if the ResearchProject needs a corresponding item.
  */
@@ -136,6 +166,15 @@ const std::vector<const RuleResearch*> &RuleResearch::getUnlocked() const
 }
 
 /**
+ * Gets the list of ResearchProjects disabled by this research.
+ * @return The list of ResearchProjects.
+ */
+const std::vector<const RuleResearch*> &RuleResearch::getDisabled() const
+{
+	return _disables;
+}
+
+/**
  * Get the points earned for this ResearchProject.
  * @return The points earned for this ResearchProject.
  */
@@ -151,6 +190,15 @@ int RuleResearch::getPoints() const
 const std::vector<const RuleResearch*> &RuleResearch::getGetOneFree() const
 {
 	return _getOneFree;
+}
+
+/**
+ * Gets the list(s) of ResearchProjects granted at random for free by this research (if a defined prerequisite is met).
+ * @return The list(s) of ResearchProjects.
+ */
+const std::map<const RuleResearch*, std::vector<const RuleResearch*> > &RuleResearch::getGetOneFreeProtected() const
+{
+	return _getOneFreeProtected;
 }
 
 /**
@@ -196,6 +244,15 @@ int RuleResearch::getListOrder() const
 const std::string & RuleResearch::getCutscene() const
 {
 	return _cutscene;
+}
+
+/**
+ * Gets the item to spawn in the base stores when this topic is researched.
+ * @return The item id.
+ */
+const std::string & RuleResearch::getSpawnedItem() const
+{
+	return _spawnedItem;
 }
 
 }

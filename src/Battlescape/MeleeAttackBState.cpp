@@ -29,6 +29,7 @@
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
+#include "../Engine/Exception.h"
 #include "../Engine/Sound.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
@@ -102,7 +103,7 @@ void MeleeAttackBState::init()
 		_unit->lookAt(_action.target, _unit->getTurretType() != -1);
 		while (_unit->getStatus() == STATUS_TURNING)
 		{
-			_unit->turn();
+			_unit->turn(_unit->getTurretType() != -1);
 		}
 	}
 
@@ -126,6 +127,11 @@ void MeleeAttackBState::init()
 	else
 	{
 		_target = _parent->getSave()->getTile(_action.target)->getUnit();
+	}
+
+	if (!_target)
+	{
+		throw Exception("This is a known (but tricky) bug... still fixing it, sorry. In the meantime, try save scumming option or kill all aliens in debug mode to finish the mission.");
 	}
 
 	int height = _target->getFloatHeight() + (_target->getHeight() / 2) - _parent->getSave()->getTile(_action.target)->getTerrainLevel();

@@ -622,7 +622,7 @@ void SaveConverter::loadDatLoc()
 		case TARGET_UFO:
 		case TARGET_CRASH:
 		case TARGET_LANDED:
-			ufo = new Ufo(_mod->getUfo(_rules->getUfos()[0], true));
+			ufo = new Ufo(_mod->getUfo(_rules->getUfos()[0], true), 0);
 			ufo->setId(id);
 			ufo->setCrashId(id);
 			ufo->setLandId(id);

@@ -44,6 +44,7 @@
 #include "../Engine/Collections.h"
 #include "SoundDefinition.h"
 #include "ExtraSprites.h"
+#include "CustomPalettes.h"
 #include "ExtraSounds.h"
 #include "../Engine/AdlibMusic.h"
 #include "../fmath.h"
@@ -93,6 +94,7 @@
 #include "RuleGlobe.h"
 #include "RuleVideo.h"
 #include "RuleConverter.h"
+#include "RuleSoldierTransformation.h"
 
 namespace OpenXcom
 {
@@ -275,14 +277,28 @@ public:
  * Creates an empty mod.
  */
 Mod::Mod() :
-	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _maxStaticLightDistance(16), _maxDynamicLightDistance(24), _enhancedLighting(7),
+	_maxViewDistance(20), _maxDarknessToSeeUnits(9), _maxStaticLightDistance(16), _maxDynamicLightDistance(24), _enhancedLighting(0),
+	_costHireEngineer(0), _costHireScientist(0),
 	_costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
-	_tooMuchSmokeThreshold(10), _customTrainingFactor(100), _chanceToStopRetaliation(0),
-	_kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80), _defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0),
-	_baseDefenseMapFromLocation(0),
+	_aiFireChoiceIntelCoeff(5), _aiFireChoiceAggroCoeff(5), _aiExtendedFireModeChoice(false), _aiRespectMaxRange(false),
+	_maxLookVariant(0), _tooMuchSmokeThreshold(10), _customTrainingFactor(100), _minReactionAccuracy(0), _chanceToStopRetaliation(0),
+	_allowCountriesToCancelAlienPact(false), _kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80),
+	_enableCloseQuartersCombat(0), _closeQuartersAccuracyGlobal(100), _closeQuartersTuCostGlobal(12), _closeQuartersEnergyCostGlobal(8),
+	_noLOSAccuracyPenaltyGlobal(-1),
+	_surrenderMode(0),
+	_bughuntMinTurn(999), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
+	_ufoGlancingHitThreshold(0), _ufoBeamWidthParameter(1000),
+	_escortRange(20), _escortsJoinFightAgainstHK(true), _crewEmergencyEvacuationSurvivalChance(100), _pilotsEmergencyEvacuationSurvivalChance(100),
+	_soldiersPerSergeant(5), _soldiersPerCaptain(11), _soldiersPerColonel(23), _soldiersPerCommander(30),
+	_pilotAccuracyZeroPoint(55), _pilotAccuracyRange(40), _pilotReactionsZeroPoint(55), _pilotReactionsRange(60),
+	_performanceBonusFactor(0), _useCustomCategories(false), _showDogfightDistanceInKm(false), _showFullNameInAlienInventory(false),
+	_hidePediaInfoButton(false), _extraNerdyPediaInfo(false), _showAllCommendations(true),
+	_theMostUselessOptionEver(0), _theBiggestRipOffEver(0), _shortRadarRange(0),
+	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
+	_baseDefenseMapFromLocation(0), _pediaReplaceCraftFuelWithRangeType(-1),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
-	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
+	_researchListOrder(0),  _manufactureListOrder(0), _transformationListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0)
 {
 	_muteMusic = new Music();
 	_muteSound = new Sound();
@@ -402,6 +418,17 @@ Mod::Mod() :
 		_statAdjustment[i].aimAndArmorMultiplier = 1.0;
 		_statAdjustment[i].growthMultiplier = i;
 	}
+
+	// Setting default value for array
+	_ufoTractorBeamSizeModifiers[0] = 400;
+	_ufoTractorBeamSizeModifiers[1] = 200;
+	_ufoTractorBeamSizeModifiers[2] = 100;
+	_ufoTractorBeamSizeModifiers[3] = 50;
+	_ufoTractorBeamSizeModifiers[4] = 25;
+
+	_pilotBraveryThresholds[0] = 90;
+	_pilotBraveryThresholds[1] = 80;
+	_pilotBraveryThresholds[2] = 30;
 }
 
 /**
@@ -443,6 +470,10 @@ Mod::~Mod()
 		delete *i;
 	}
 	for (std::map<std::string, RuleCountry*>::iterator i = _countries.begin(); i != _countries.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleCountry*>::iterator i = _extraGlobeLabels.begin(); i != _extraGlobeLabels.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -522,6 +553,10 @@ Mod::~Mod()
 	{
 		delete i->second;
 	}
+	for (std::map<std::string, RuleSoldierTransformation *>::const_iterator i = _soldierTransformation.begin(); i != _soldierTransformation.end(); ++i)
+	{
+		delete i->second;
+	}
 	for (std::map<std::string, UfoTrajectory *>::const_iterator i = _ufoTrajectories.begin(); i != _ufoTrajectories.end(); ++i)
 	{
 		delete i->second;
@@ -535,6 +570,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::vector< std::pair<std::string, ExtraSprites *> >::const_iterator i = _extraSprites.begin(); i != _extraSprites.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, CustomPalettes *>::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -658,6 +697,16 @@ Music *Mod::getMusic(const std::string &name, bool error) const
 	{
 		return getRule(name, "Music", _musics, error);
 	}
+}
+
+/**
+ * Returns the list of all music tracks
+ * provided by the mod.
+ * @return List of music tracks.
+ */
+const std::map<std::string, Music*> &Mod::getMusicTrackList() const
+{
+	return _musics;
 }
 
 /**
@@ -794,8 +843,11 @@ void Mod::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	}
 	for (std::map<std::string, Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
 	{
-		if (i->first.substr(i->first.length() - 3, i->first.length()) != "LBM")
-			i->second->setPalette(colors, firstcolor, ncolors);
+		if (i->first.substr(i->first.length() - 3, i->first.length()) == "LBM")
+			continue;
+		if (i->first.find("_CPAL") != std::string::npos)
+			continue;
+		i->second->setPalette(colors, firstcolor, ncolors);
 	}
 	for (std::map<std::string, SurfaceSet*>::iterator i = _sets.begin(); i != _sets.end(); ++i)
 	{
@@ -847,8 +899,8 @@ int Mod::getModOffset() const
 /**
  * Returns the appropriate mod-based offset for a sprite.
  * If the ID is bigger than the surfaceset contents, the mod offset is applied.
- * @param id Numeric ID of the sprite.
- * @param resource Name of the surfaceset to lookup.
+ * @param sprite Numeric ID of the sprite.
+ * @param set Name of the surfaceset to lookup.
  */
 int Mod::getSpriteOffset(int sprite, const std::string& set) const
 {
@@ -862,8 +914,8 @@ int Mod::getSpriteOffset(int sprite, const std::string& set) const
 /**
  * Returns the appropriate mod-based offset for a sound.
  * If the ID is bigger than the soundset contents, the mod offset is applied.
- * @param id Numeric ID of the sound.
- * @param resource Name of the soundset to lookup.
+ * @param sound Numeric ID of the sound.
+ * @param set Name of the soundset to lookup.
  */
 int Mod::getSoundOffset(int sound, const std::string& set) const
 {
@@ -872,6 +924,20 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
 		return sound + _modOffset;
 	else
 		return sound;
+}
+
+/**
+ * Returns the appropriate mod-based offset for a generic ID.
+ * If the ID is bigger than the max, the mod offset is applied.
+ * @param id Numeric ID.
+ * @param max Maximum vanilla value.
+ */
+int Mod::getOffset(int id, int max) const
+{
+	if (id > max)
+		return id + _modOffset;
+	else
+		return id;
 }
 
 /**
@@ -933,6 +999,7 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 		}
 	}
 	_scriptGlobal->endLoad();
+
 	// post-processing item categories
 	std::map<std::string, std::string> replacementRules;
 	for (auto i = _itemCategories.begin(); i != _itemCategories.end(); ++i)
@@ -963,9 +1030,45 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 		rule.second->afterLoad(this);
 	}
 
+	// fixed user options
+	if (!_fixedUserOptions.empty())
+	{
+		const std::vector<OptionInfo> &options = Options::getOptionInfo();
+		for (std::vector<OptionInfo>::const_iterator i = options.begin(); i != options.end(); ++i)
+		{
+			if (i->type() != OPTION_KEY && !i->category().empty())
+			{
+				i->load(_fixedUserOptions, false);
+			}
+		}
+		Options::save();
+	}
+
 	sortLists();
 	loadExtraResources();
 	modResources();
+
+	// FIXME: remove after modders start caring about visual side of their mods
+	for (auto &item : _items)
+	{
+		if (item.second->haveMercy())
+		{
+			Surface *surf = getSurfaceSet("BIGOBS.PCK")->getFrame(item.second->getBigSprite());
+			if (surf)
+			{
+				for (int x = 1; x < item.second->getInventoryWidth() * 16; ++x)
+				{
+					for (int y = 1; y < item.second->getInventoryHeight() * 16; ++y)
+					{
+						if (surf->getPixel(x, y) == 0)
+						{
+							surf->setPixel(x, y, 32);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -1086,6 +1189,14 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 			rule->load(*i);
 		}
 	}
+	for (YAML::const_iterator i = doc["extraGlobeLabels"].begin(); i != doc["extraGlobeLabels"].end(); ++i)
+	{
+		RuleCountry *rule = loadRule(*i, &_extraGlobeLabels, &_extraGlobeLabelsIndex);
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
 	for (YAML::const_iterator i = doc["regions"].begin(); i != doc["regions"].end(); ++i)
 	{
 		RuleRegion *rule = loadRule(*i, &_regions, &_regionsIndex);
@@ -1169,7 +1280,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		Armor *rule = loadRule(*i, &_armors, &_armorsIndex);
 		if (rule != 0)
 		{
-			rule->load(*i, parsers);
+			rule->load(*i, parsers, this);
 		}
 	}
 	for (YAML::const_iterator i = doc["soldiers"].begin(); i != doc["soldiers"].end(); ++i)
@@ -1177,7 +1288,8 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		RuleSoldier *rule = loadRule(*i, &_soldiers, &_soldiersIndex);
 		if (rule != 0)
 		{
-			rule->load(*i, this, parsers);
+			_soldierListOrder += 1;
+			rule->load(*i, this, _soldierListOrder, parsers);
 		}
 	}
 	for (YAML::const_iterator i = doc["units"].begin(); i != doc["units"].end(); ++i)
@@ -1232,6 +1344,15 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		{
 			_manufactureListOrder += 100;
 			rule->load(*i, _manufactureListOrder);
+		}
+	}
+	for (YAML::const_iterator i = doc["soldierTransformation"].begin(); i != doc["soldierTransformation"].end(); ++i)
+	{
+		RuleSoldierTransformation *rule = loadRule(*i, &_soldierTransformation, &_soldierTransformationIndex, "name");
+		if (rule != 0)
+		{
+			_transformationListOrder += 100;
+			rule->load(*i, _transformationListOrder);
 		}
 	}
 	for (YAML::const_iterator i = doc["ufopaedia"].begin(); i != doc["ufopaedia"].end(); ++i)
@@ -1316,14 +1437,18 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	{
 		_startingTime.load(doc["startingTime"]);
 	}
+	_startingDifficulty = doc["startingDifficulty"].as<int>(_startingDifficulty);
 	_maxViewDistance = doc["maxViewDistance"].as<int>(_maxViewDistance);
 	_maxDarknessToSeeUnits = doc["maxDarknessToSeeUnits"].as<int>(_maxDarknessToSeeUnits);
+	_costHireEngineer = doc["costHireEngineer"].as<int>(_costHireEngineer);
+	_costHireScientist = doc["costHireScientist"].as<int>(_costHireScientist);
 	_costEngineer = doc["costEngineer"].as<int>(_costEngineer);
 	_costScientist = doc["costScientist"].as<int>(_costScientist);
 	_timePersonnel = doc["timePersonnel"].as<int>(_timePersonnel);
 	_initialFunding = doc["initialFunding"].as<int>(_initialFunding);
 	_alienFuel = doc["alienFuel"].as<std::pair<std::string, int> >(_alienFuel);
 	_fontName = doc["fontName"].as<std::string>(_fontName);
+	_psiUnlockResearch = doc["psiUnlockResearch"].as<std::string>(_psiUnlockResearch);
 
 	_aiUseDelayGrenade = doc["turnAIUseGrenade"].as<int>(_aiUseDelayGrenade);
 	_aiUseDelayBlaster = doc["turnAIUseBlaster"].as<int>(_aiUseDelayBlaster);
@@ -1334,15 +1459,80 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		_aiUseDelayGrenade = nodeAI["useDelayGrenade"].as<int>(_aiUseDelayGrenade);
 		_aiUseDelayMelee   = nodeAI["useDelayMelee"].as<int>(_aiUseDelayMelee);
 		_aiUseDelayPsionic = nodeAI["useDelayPsionic"].as<int>(_aiUseDelayPsionic);
+
+		_aiFireChoiceIntelCoeff = nodeAI["fireChoiceIntelCoeff"].as<int>(_aiFireChoiceIntelCoeff);
+		_aiFireChoiceAggroCoeff = nodeAI["fireChoiceAggroCoeff"].as<int>(_aiFireChoiceAggroCoeff);
+		_aiExtendedFireModeChoice = nodeAI["extendedFireModeChoice"].as<bool>(_aiExtendedFireModeChoice);
+		_aiRespectMaxRange = nodeAI["respectMaxRange"].as<bool>(_aiRespectMaxRange);
 	}
+	_maxLookVariant = doc["maxLookVariant"].as<int>(_maxLookVariant);
 	_tooMuchSmokeThreshold = doc["tooMuchSmokeThreshold"].as<int>(_tooMuchSmokeThreshold);
 	_customTrainingFactor = doc["customTrainingFactor"].as<int>(_customTrainingFactor);
+	_minReactionAccuracy = doc["minReactionAccuracy"].as<int>(_minReactionAccuracy);
 	_chanceToStopRetaliation = doc["chanceToStopRetaliation"].as<int>(_chanceToStopRetaliation);
+	_allowCountriesToCancelAlienPact = doc["allowCountriesToCancelAlienPact"].as<bool>(_allowCountriesToCancelAlienPact);
 	_kneelBonusGlobal = doc["kneelBonusGlobal"].as<int>(_kneelBonusGlobal);
 	_oneHandedPenaltyGlobal = doc["oneHandedPenaltyGlobal"].as<int>(_oneHandedPenaltyGlobal);
+	_enableCloseQuartersCombat = doc["enableCloseQuartersCombat"].as<int>(_enableCloseQuartersCombat);
+	_closeQuartersAccuracyGlobal = doc["closeQuartersAccuracyGlobal"].as<int>(_closeQuartersAccuracyGlobal);
+	_closeQuartersTuCostGlobal = doc["closeQuartersTuCostGlobal"].as<int>(_closeQuartersTuCostGlobal);
+	_closeQuartersEnergyCostGlobal = doc["closeQuartersEnergyCostGlobal"].as<int>(_closeQuartersEnergyCostGlobal);
+	_noLOSAccuracyPenaltyGlobal = doc["noLOSAccuracyPenaltyGlobal"].as<int>(_noLOSAccuracyPenaltyGlobal);
+	_surrenderMode = doc["surrenderMode"].as<int>(_surrenderMode);
+	_bughuntMinTurn = doc["bughuntMinTurn"].as<int>(_bughuntMinTurn);
+	_bughuntMaxEnemies = doc["bughuntMaxEnemies"].as<int>(_bughuntMaxEnemies);
+	_bughuntRank = doc["bughuntRank"].as<int>(_bughuntRank);
+	_bughuntLowMorale = doc["bughuntLowMorale"].as<int>(_bughuntLowMorale);
+	_bughuntTimeUnitsLeft = doc["bughuntTimeUnitsLeft"].as<int>(_bughuntTimeUnitsLeft);
+	_ufoGlancingHitThreshold = doc["ufoGlancingHitThreshold"].as<int>(_ufoGlancingHitThreshold);
+	_ufoBeamWidthParameter = doc["ufoBeamWidthParameter"].as<int>(_ufoBeamWidthParameter);
+	if (doc["ufoTractorBeamSizeModifiers"])
+	{
+		int index = 0;
+		for (YAML::const_iterator i = doc["ufoTractorBeamSizeModifiers"].begin(); i != doc["ufoTractorBeamSizeModifiers"].end() && index < 5; ++i)
+		{
+			_ufoTractorBeamSizeModifiers[index] = (*i).as<int>(_ufoTractorBeamSizeModifiers[index]);
+			index++;
+		}
+	}
+	_escortRange = doc["escortRange"].as<int>(_escortRange);
+	_escortsJoinFightAgainstHK = doc["escortsJoinFightAgainstHK"].as<bool>(_escortsJoinFightAgainstHK);
+	_crewEmergencyEvacuationSurvivalChance = doc["crewEmergencyEvacuationSurvivalChance"].as<int>(_crewEmergencyEvacuationSurvivalChance);
+	_pilotsEmergencyEvacuationSurvivalChance = doc["pilotsEmergencyEvacuationSurvivalChance"].as<int>(_pilotsEmergencyEvacuationSurvivalChance);
+	_soldiersPerSergeant = doc["soldiersPerSergeant"].as<int>(_soldiersPerSergeant);
+	_soldiersPerCaptain = doc["soldiersPerCaptain"].as<int>(_soldiersPerCaptain);
+	_soldiersPerColonel = doc["soldiersPerColonel"].as<int>(_soldiersPerColonel);
+	_soldiersPerCommander = doc["soldiersPerCommander"].as<int>(_soldiersPerCommander);
+	_pilotAccuracyZeroPoint = doc["pilotAccuracyZeroPoint"].as<int>(_pilotAccuracyZeroPoint);
+	_pilotAccuracyRange = doc["pilotAccuracyRange"].as<int>(_pilotAccuracyRange);
+	_pilotReactionsZeroPoint = doc["pilotReactionsZeroPoint"].as<int>(_pilotReactionsZeroPoint);
+	_pilotReactionsRange = doc["pilotReactionsRange"].as<int>(_pilotReactionsRange);
+	if (doc["pilotBraveryThresholds"])
+	{
+		int index = 0;
+		for (YAML::const_iterator i = doc["pilotBraveryThresholds"].begin(); i != doc["pilotBraveryThresholds"].end() && index < 3; ++i)
+		{
+			_pilotBraveryThresholds[index] = (*i).as<int>(_pilotBraveryThresholds[index]);
+			index++;
+		}
+	}
+	_performanceBonusFactor = doc["performanceBonusFactor"].as<int>(_performanceBonusFactor);
+	_useCustomCategories = doc["useCustomCategories"].as<bool>(_useCustomCategories);
+	_showDogfightDistanceInKm = doc["showDogfightDistanceInKm"].as<bool>(_showDogfightDistanceInKm);
+	_showFullNameInAlienInventory = doc["showFullNameInAlienInventory"].as<bool>(_showFullNameInAlienInventory);
+	_hidePediaInfoButton = doc["hidePediaInfoButton"].as<bool>(_hidePediaInfoButton);
+	_extraNerdyPediaInfo = doc["extraNerdyPediaInfo"].as<bool>(_extraNerdyPediaInfo);
+	_showAllCommendations = doc["showAllCommendations"].as<bool>(_showAllCommendations);
+	_theMostUselessOptionEver = doc["theMostUselessOptionEver"].as<int>(_theMostUselessOptionEver);
+	_theBiggestRipOffEver = doc["theBiggestRipOffEver"].as<int>(_theBiggestRipOffEver);
+	_shortRadarRange = doc["shortRadarRange"].as<int>(_shortRadarRange);
 	_baseDefenseMapFromLocation = doc["baseDefenseMapFromLocation"].as<int>(_baseDefenseMapFromLocation);
+	_pediaReplaceCraftFuelWithRangeType = doc["pediaReplaceCraftFuelWithRangeType"].as<int>(_pediaReplaceCraftFuelWithRangeType);
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
+	_fixedUserOptions = doc["fixedUserOptions"].as<std::map<std::string, std::string> >(_fixedUserOptions);
+	_hiddenMovementBackgrounds = doc["hiddenMovementBackgrounds"].as<std::vector<std::string> >(_hiddenMovementBackgrounds);
+	_flagByKills = doc["flagByKills"].as<std::vector<int> >(_flagByKills);
 
 	_defeatScore = doc["defeatScore"].as<int>(_defeatScore);
 	_defeatFunds = doc["defeatFunds"].as<int>(_defeatFunds);
@@ -1354,6 +1544,15 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		{
 			DIFFICULTY_COEFFICIENT[num] = (*i).as<int>(DIFFICULTY_COEFFICIENT[num]);
 			_statAdjustment[num].growthMultiplier = DIFFICULTY_COEFFICIENT[num];
+			++num;
+		}
+	}
+	if (doc["difficultyBasedRetaliationDelay"])
+	{
+		size_t num = 0;
+		for (YAML::const_iterator i = doc["difficultyBasedRetaliationDelay"].begin(); i != doc["difficultyBasedRetaliationDelay"].end() && num < 5; ++i)
+		{
+			DIFFICULTY_BASED_RETAL_DELAY[num] = (*i).as<int>(DIFFICULTY_BASED_RETAL_DELAY[num]);
 			++num;
 		}
 	}
@@ -1410,6 +1609,14 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		_extraSprites.push_back(std::make_pair(type, extraSprites));
 		_extraSpritesIndex.push_back(type);
 	}
+	for (YAML::const_iterator i = doc["customPalettes"].begin(); i != doc["customPalettes"].end(); ++i)
+	{
+		CustomPalettes *rule = loadRule(*i, &_customPalettes, &_customPalettesIndex);
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
 	for (YAML::const_iterator i = doc["extraSounds"].begin(); i != doc["extraSounds"].end(); ++i)
 	{
 		std::string type = (*i)["type"].as<std::string>();
@@ -1446,7 +1653,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		RuleInterface *rule = loadRule(*i, &_interfaces);
 		if (rule != 0)
 		{
-			rule->load(*i);
+			rule->load(*i, this);
 		}
 	}
 	for (YAML::const_iterator i = doc["soundDefs"].begin(); i != doc["soundDefs"].end(); ++i)
@@ -1559,6 +1766,12 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 			_psiRequirements = rule->getRequirements();
 			break;
 		}
+	}
+	// override the default (used when you want to separate screening and training)
+	if (!_psiUnlockResearch.empty())
+	{
+		_psiRequirements.clear();
+		_psiRequirements.push_back(_psiUnlockResearch);
 	}
 
 	for (YAML::const_iterator i = doc["cutscenes"].begin(); i != doc["cutscenes"].end(); ++i)
@@ -1733,17 +1946,6 @@ SavedGame *Mod::newSave() const
 		save->getId((*i)->getRules()->getType());
 	}
 
-	// Determine starting transport craft
-	Craft *transportCraft = 0;
-	for (std::vector<Craft*>::iterator c = base->getCrafts()->begin(); c != base->getCrafts()->end(); ++c)
-	{
-		if ((*c)->getRules()->getSoldiers() > 0)
-		{
-			transportCraft = (*c);
-			break;
-		}
-	}
-
 	// Determine starting soldier types
 	std::vector<std::string> soldierTypes = _soldiersIndex;
 	for (std::vector<std::string>::iterator i = soldierTypes.begin(); i != soldierTypes.end();)
@@ -1787,10 +1989,6 @@ SavedGame *Mod::newSave() const
 		for (size_t i = 0; i < randomTypes.size(); ++i)
 		{
 			Soldier *soldier = genSoldier(save, randomTypes[i]);
-			if (transportCraft != 0 && i < (unsigned)transportCraft->getRules()->getSoldiers())
-			{
-				soldier->setCraft(transportCraft);
-			}
 			base->getSoldiers()->push_back(soldier);
 			// Award soldier a special 'original eigth' commendation
 			if (_commendations.find("STR_MEDAL_ORIGINAL8_NAME") != _commendations.end())
@@ -1801,6 +1999,46 @@ SavedGame *Mod::newSave() const
 				{
 					(*comm)->makeOld();
 				}
+			}
+		}
+		// Assign pilots to craft (interceptors first, transport last) and non-pilots to transports only
+		for (auto& soldier : *base->getSoldiers())
+		{
+			if (soldier->getArmor()->getSize() > 1)
+			{
+				// "Large soldiers" just stay in the base
+			}
+			else if (soldier->getRules()->getAllowPiloting())
+			{
+				Craft *found = 0;
+				for (auto& craft : *base->getCrafts())
+				{
+					if (!found && craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getSoldiers())
+					{
+						// Remember transporter as fall-back, but search further for interceptors
+						found = craft;
+					}
+					if (!craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getPilots())
+					{
+						// Fill interceptors with minimum amount of pilots necessary
+						found = craft;
+					}
+				}
+				soldier->setCraft(found);
+			}
+			else
+			{
+				Craft *found = 0;
+				for (auto& craft : *base->getCrafts())
+				{
+					if (craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getSoldiers())
+					{
+						// First available transporter will do
+						found = craft;
+						break;
+					}
+				}
+				soldier->setCraft(found);
 			}
 		}
 	}
@@ -1830,6 +2068,26 @@ RuleCountry *Mod::getCountry(const std::string &id, bool error) const
 const std::vector<std::string> &Mod::getCountriesList() const
 {
 	return _countriesIndex;
+}
+
+/**
+ * Returns the rules for the specified extra globe label.
+ * @param id Extra globe label type.
+ * @return Rules for the extra globe label.
+ */
+RuleCountry *Mod::getExtraGlobeLabel(const std::string &id, bool error) const
+{
+	return getRule(id, "Extra Globe Label", _extraGlobeLabels, error);
+}
+
+/**
+ * Returns the list of all extra globe labels
+ * provided by the mod.
+ * @return List of extra globe labels.
+ */
+const std::vector<std::string> &Mod::getExtraGlobeLabelsList() const
+{
+	return _extraGlobeLabelsIndex;
 }
 
 /**
@@ -1917,7 +2175,7 @@ const std::vector<std::string> &Mod::getCraftWeaponsList() const
 * @param id Item category type.
 * @return Rules for the item category, or 0 when the item category is not found.
 */
-RuleItemCategory *Mod::getItemCategory(const std::string &id) const
+RuleItemCategory *Mod::getItemCategory(const std::string &id, bool error) const
 {
 	std::map<std::string, RuleItemCategory*>::const_iterator i = _itemCategories.find(id);
 	if (_itemCategories.end() != i) return i->second; else return 0;
@@ -2148,8 +2406,25 @@ const std::vector<std::string> &Mod::getArmorsList() const
 }
 
 /**
- * Returns the cost of an individual engineer
- * for purchase/maintenance.
+ * Returns the hiring cost of an individual engineer.
+ * @return Cost.
+ */
+int Mod::getHireEngineerCost() const
+{
+	return _costHireEngineer != 0 ? _costHireEngineer : _costEngineer * 2;
+}
+
+/**
+* Returns the hiring cost of an individual scientist.
+* @return Cost.
+*/
+int Mod::getHireScientistCost() const
+{
+	return _costHireScientist != 0 ? _costHireScientist: _costScientist * 2;
+}
+
+/**
+ * Returns the monthly cost of an individual engineer.
  * @return Cost.
  */
 int Mod::getEngineerCost() const
@@ -2158,8 +2433,7 @@ int Mod::getEngineerCost() const
 }
 
 /**
- * Returns the cost of an individual scientist
- * for purchase/maintenance.
+ * Returns the monthly cost of an individual scientist.
  * @return Cost.
  */
 int Mod::getScientistCost() const
@@ -2175,6 +2449,15 @@ int Mod::getScientistCost() const
 int Mod::getPersonnelTime() const
 {
 	return _timePersonnel;
+}
+
+/**
+ * Gets the escort range.
+ * @return Escort range (converted from nautical miles into radians).
+ */
+double Mod::getEscortRange() const
+{
+	return _escortRange * (1 / 60.0) * (M_PI / 180);
 }
 
 /**
@@ -2314,6 +2597,25 @@ const std::vector<std::string> &Mod::getManufactureList() const
 }
 
 /**
+ * Returns the rules for the specified soldier transformation project.
+ * @param id Soldier transformation project type.
+ * @return Rules for the soldier transformation project.
+ */
+RuleSoldierTransformation *Mod::getSoldierTransformation (const std::string &id, bool error) const
+{
+	return getRule(id, "SoldierTransformation", _soldierTransformation, error);
+}
+
+/**
+ * Returns the list of soldier transformation projects.
+ * @return The list of soldier transformation projects.
+ */
+const std::vector<std::string> &Mod::getSoldierTransformationList() const
+{
+	return _soldierTransformationIndex;
+}
+
+/**
  * Generates and returns a list of facilities for custom bases.
  * The list contains all the facilities that are listed in the 'startingBase'
  * part of the ruleset.
@@ -2440,6 +2742,15 @@ MCDPatch *Mod::getMCDPatch(const std::string &id) const
 const std::vector<std::pair<std::string, ExtraSprites *> > &Mod::getExtraSprites() const
 {
 	return _extraSprites;
+}
+
+/**
+ * Gets the list of custom palettes.
+ * @return The list of custom palettes.
+ */
+const std::vector<std::string> &Mod::getCustomPalettes() const
+{
+	return _customPalettesIndex;
 }
 
 /**
@@ -2594,6 +2905,7 @@ void Mod::sortLists()
 	std::sort(_facilitiesIndex.begin(), _facilitiesIndex.end(), compareRule<RuleBaseFacility>(this, (compareRule<RuleBaseFacility>::RuleLookup)&Mod::getBaseFacility));
 	std::sort(_researchIndex.begin(), _researchIndex.end(), compareRule<RuleResearch>(this, (compareRule<RuleResearch>::RuleLookup)&Mod::getResearch));
 	std::sort(_manufactureIndex.begin(), _manufactureIndex.end(), compareRule<RuleManufacture>(this, (compareRule<RuleManufacture>::RuleLookup)&Mod::getManufacture));
+	std::sort(_soldierTransformationIndex.begin(), _soldierTransformationIndex.end(), compareRule<RuleSoldierTransformation>(this,  (compareRule<RuleSoldierTransformation>::RuleLookup)&Mod::getSoldierTransformation));
 	std::sort(_invsIndex.begin(), _invsIndex.end(), compareRule<RuleInventory>(this, (compareRule<RuleInventory>::RuleLookup)&Mod::getInventory));
 	// special cases
 	std::sort(_craftWeaponsIndex.begin(), _craftWeaponsIndex.end(), compareRule<RuleCraftWeapon>(this));
@@ -2687,11 +2999,14 @@ std::string Mod::getFontName() const
 }
 
 /**
- * Returns the minimum facilitie's radar range.
- * @return The minimum range.
+ * Returns the maximum radar range still considered as short.
+ * @return The short radar range threshold.
  */
- int Mod::getMinRadarRange() const
+ int Mod::getShortRadarRange() const
  {
+	if (_shortRadarRange > 0)
+		return _shortRadarRange;
+
 	int minRadarRange = 0;
 
 	{
@@ -2710,6 +3025,16 @@ std::string Mod::getFontName() const
 
 	return minRadarRange;
  }
+
+/**
+ * Returns what should be displayed in craft pedia articles for fuel capacity/range
+ * @return 0 = Max theoretical range, 1 = Min and max theoretical max range, 2 = average of the two
+ * Otherwise (default), just show the fuel capacity
+ */
+int Mod::getPediaReplaceCraftFuelWithRangeType() const
+{
+	return _pediaReplaceCraftFuelWithRangeType;
+}
 
 /**
  * Gets information on an interface.
@@ -2805,6 +3130,21 @@ const std::map<int, std::string> *Mod::getMissionRatings() const
 const std::map<int, std::string> *Mod::getMonthlyRatings() const
 {
 	return &_monthlyRatings;
+}
+
+const std::map<std::string, std::string> &Mod::getFixedUserOptions() const
+{
+	return _fixedUserOptions;
+}
+
+const std::vector<std::string> &Mod::getHiddenMovementBackgrounds() const
+{
+	return _hiddenMovementBackgrounds;
+}
+
+const std::vector<int> &Mod::getFlagByKills() const
+{
+	return _flagByKills;
 }
 
 namespace
@@ -2957,6 +3297,7 @@ void Mod::loadVanillaResources()
 			SDL_Color *color = _palettes[s2]->getColors(Palette::backPos + 16 + i);
 			*color = gradient[i];
 		}
+		//_palettes[s2]->savePalMod("../../../customPalettes.rul", "PAL_BATTLESCAPE_CUSTOM", "PAL_BATTLESCAPE");
 	}
 
 	// Load surfaces
@@ -3119,6 +3460,11 @@ void Mod::loadVanillaResources()
 	Window::soundPopup[2] = getSound("GEO.CAT", Mod::WINDOW_POPUP[2]);
 
 	loadBattlescapeResources(); // TODO load this at battlescape start, unload at battlescape end?
+
+	// dummy resources, that need to be defined in order for mod loading to work correctly
+	_sets["CustomArmorPreviews"] = new SurfaceSet(12, 20);
+	_sets["CustomItemPreviews"] = new SurfaceSet(12, 20);
+	_sets["TinyRanks"] = new SurfaceSet(7, 7);
 }
 
 /**
@@ -3528,7 +3874,7 @@ void Mod::loadExtraResources()
 			{
 				int startFrame = j->first;
 				std::string fileName = j->second;
-				if (fileName.substr(fileName.length() - 1, 1) == "/")
+				if (fileName[fileName.length() - 1] == '/')
 				{
 					Log(LOG_VERBOSE) << "Loading surface set from folder: " << fileName << " starting at frame: " << startFrame;
 					int offset = startFrame;
@@ -3638,7 +3984,7 @@ void Mod::loadExtraResources()
 		{
 			int startSound = j->first;
 			std::string fileName = j->second;
-			if (fileName.substr(fileName.length() - 1, 1) == "/")
+			if (fileName[fileName.length() - 1] == '/')
 			{
 				Log(LOG_VERBOSE) << "Loading sound set from folder: " << fileName << " starting at index: " << startSound;
 				int offset = startSound;
@@ -3680,6 +4026,74 @@ void Mod::loadExtraResources()
 			}
 		}
 	}
+
+	Log(LOG_INFO) << "Loading custom palettes from ruleset...";
+	for (std::map<std::string, CustomPalettes *>::const_iterator i = _customPalettes.begin(); i != _customPalettes.end(); ++i)
+	{
+		CustomPalettes *palDef = i->second;
+		std::string palTargetName = palDef->getTarget();
+		if (_palettes.find(palTargetName) == _palettes.end())
+		{
+			Log(LOG_INFO) << "Creating a new palette: " << palTargetName;
+			_palettes[palTargetName] = new Palette();
+			_palettes[palTargetName]->initBlack();
+		}
+		else
+		{
+			Log(LOG_VERBOSE) << "Replacing items in target palette: " << palTargetName;
+		}
+
+		Palette *target = _palettes[palTargetName];
+		std::string fileName = palDef->getFile();
+		if (fileName.empty())
+		{
+			for (std::map<int, Position>::iterator j = palDef->getPalette()->begin(); j != palDef->getPalette()->end(); ++j)
+			{
+				target->setColor(j->first, j->second.x, j->second.y, j->second.z);
+			}
+		}
+		else
+		{
+			// Load from JASC file
+			const std::string& fullPath = FileMap::getFilePath(fileName);
+			std::ifstream palFile(fullPath);
+			if (palFile.is_open())
+			{
+				std::string line;
+				std::getline(palFile, line); // header
+				std::getline(palFile, line); // file format
+				std::getline(palFile, line); // number of colors
+				int r = 0, g = 0, b = 0;
+				for (int j = 0; j < 256; ++j)
+				{
+					std::getline(palFile, line); // j-th color index
+					std::stringstream ss(line);
+					ss >> r;
+					ss >> g;
+					ss >> b;
+					target->setColor(j, r, g, b);
+				}
+				palFile.close();
+			}
+			else
+			{
+				throw Exception(fullPath + " not found");
+			}
+		}
+	}
+
+	Log(LOG_INFO) << "Making palette backups...";
+	for (auto pal : _palettes)
+	{
+		if (pal.first.find("PAL_") == 0)
+		{
+			Log(LOG_VERBOSE) << "Creating a backup for palette: " << pal.first;
+			std::string newName = "BACKUP_" + pal.first;
+			_palettes[newName] = new Palette();
+			_palettes[newName]->initBlack();
+			_palettes[newName]->copyFrom(pal.second);
+		}
+	}
 }
 
 /**
@@ -3687,28 +4101,32 @@ void Mod::loadExtraResources()
  */
 void Mod::modResources()
 {
-	// bigger geoscape background
-	int newWidth = 320 - 64, newHeight = 200;
-	Surface *newGeo = new Surface(newWidth * 3, newHeight * 3);
-	Surface *oldGeo = _surfaces["GEOBORD.SCR"];
-	for (int x = 0; x < newWidth; ++x)
+	// embiggen the geoscape background by mirroring the contents
+	// modders can provide their own backgrounds via ALTGEOBORD.SCR
+	if (_surfaces.find("ALTGEOBORD.SCR") == _surfaces.end())
 	{
-		for (int y = 0; y < newHeight; ++y)
+		int newWidth = 320 - 64, newHeight = 200;
+		Surface *newGeo = new Surface(newWidth * 3, newHeight * 3);
+		Surface *oldGeo = _surfaces["GEOBORD.SCR"];
+		for (int x = 0; x < newWidth; ++x)
 		{
-			newGeo->setPixel(newWidth + x, newHeight + y, oldGeo->getPixel(x, y));
-			newGeo->setPixel(newWidth - x - 1, newHeight + y, oldGeo->getPixel(x, y));
-			newGeo->setPixel(newWidth * 3 - x - 1, newHeight + y, oldGeo->getPixel(x, y));
+			for (int y = 0; y < newHeight; ++y)
+			{
+				newGeo->setPixel(newWidth + x, newHeight + y, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth - x - 1, newHeight + y, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth * 3 - x - 1, newHeight + y, oldGeo->getPixel(x, y));
 
-			newGeo->setPixel(newWidth + x, newHeight - y - 1, oldGeo->getPixel(x, y));
-			newGeo->setPixel(newWidth - x - 1, newHeight - y - 1, oldGeo->getPixel(x, y));
-			newGeo->setPixel(newWidth * 3 - x - 1, newHeight - y - 1, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth + x, newHeight - y - 1, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth - x - 1, newHeight - y - 1, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth * 3 - x - 1, newHeight - y - 1, oldGeo->getPixel(x, y));
 
-			newGeo->setPixel(newWidth + x, newHeight * 3 - y - 1, oldGeo->getPixel(x, y));
-			newGeo->setPixel(newWidth - x - 1, newHeight * 3 - y - 1, oldGeo->getPixel(x, y));
-			newGeo->setPixel(newWidth * 3 - x - 1, newHeight * 3 - y - 1, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth + x, newHeight * 3 - y - 1, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth - x - 1, newHeight * 3 - y - 1, oldGeo->getPixel(x, y));
+				newGeo->setPixel(newWidth * 3 - x - 1, newHeight * 3 - y - 1, oldGeo->getPixel(x, y));
+			}
 		}
+		_surfaces["ALTGEOBORD.SCR"] = newGeo;
 	}
-	_surfaces["ALTGEOBORD.SCR"] = newGeo;
 
 	// here we create an "alternate" background surface for the base info screen.
 	_surfaces["ALTBACK07.SCR"] = new Surface(320, 200);
@@ -3724,7 +4142,6 @@ void Mod::modResources()
 			_surfaces["ALTBACK07.SCR"]->setPixel(x, y + 10, _surfaces["ALTBACK07.SCR"]->getPixel(x, y));
 
 	// we create extra rows on the soldier stat screens by shrinking them all down one pixel.
-	// this is done after loading them, but BEFORE loading the extraSprites, in case a modder wants to replace them.
 
 	// first, let's do the base info screen
 	// erase the old lines, copying from a +2 offset to account for the dithering

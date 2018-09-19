@@ -49,11 +49,11 @@ TrainingState::TrainingState()
 	_btnOk = new TextButton(160, 14, 80, 174);
 
 	// Set palette
-	setPalette("PAL_BASESCAPE", _game->getMod()->getInterface("psiTraining")->getElement("palette")->color);
+	setInterface("martialTraining");
 
-	add(_window, "window", "psiTraining");
-	add(_btnOk, "button2", "psiTraining");
-	add(_txtTitle, "text", "psiTraining");
+	add(_window, "window", "martialTraining");
+	add(_btnOk, "button2", "martialTraining");
+	add(_txtTitle, "text", "martialTraining");
 
 	// Set up objects
 	_window->setBackground(_game->getMod()->getSurface("BACK02.SCR"));
@@ -75,7 +75,7 @@ TrainingState::TrainingState()
 			btnBase->setColor(Palette::blockOffset(15) + 6);
 			btnBase->onMouseClick((ActionHandler)&TrainingState::btnBaseXClick);
 			btnBase->setText((*b)->getName());
-			add(btnBase, "button1", "psiTraining");
+			add(btnBase, "button1", "martialTraining");
 			_bases.push_back(*b);
 			_btnBases.push_back(btnBase);
 			++buttons;

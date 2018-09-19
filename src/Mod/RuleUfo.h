@@ -59,8 +59,11 @@ class RuleUfo
 {
 private:
 	std::string _type, _size;
-	int _sprite, _marker;
+	int _sprite, _marker, _markerLand, _markerCrash;
 	int _power, _range, _score, _reload, _breakOffTime, _missionScore;
+	int _hunterKillerPercentage, _huntMode, _huntSpeed, _huntBehavior;
+	int _fireSound;
+	int _alertSound;
 	RuleTerrain *_battlescapeTerrainData;
 	RuleUfoStats _stats;
 	std::map<std::string, RuleUfoStats> _statsRaceBonus;
@@ -80,8 +83,12 @@ public:
 	int getRadius() const;
 	/// Gets the UFO's sprite.
 	int getSprite() const;
-	/// Gets the UFO's globe marker.
+	/// Gets the UFO's globe marker when flying.
 	int getMarker() const;
+	/// Gets the UFO's globe marker when landed.
+	int getLandMarker() const;
+	/// Gets the UFO's globe marker when crashed.
+	int getCrashMarker() const;
 	/// Gets the UFO's weapon power.
 	int getWeaponPower() const;
 	/// Gets the UFO's weapon range.
@@ -94,16 +101,27 @@ public:
 	int getWeaponReload() const;
 	/// Gets the UFO's escape time.
 	int getBreakOffTime() const;
+	/// Gets the UFO's fire sound.
+	int getFireSound() const;
+	/// Gets the alert sound for this UFO.
+	int getAlertSound() const;
 	/// Gets the name of the surface that represents this UFO.
 	const std::string &getModSprite() const;
 	/// Get basic statistic of UFO.
 	const RuleUfoStats& getStats() const;
 	/// Get race bonus of statistic of UFO.
 	const RuleUfoStats& getRaceBonus(const std::string& s) const;
-	/// Gets the UFO's radar range.
-	int getSightRange() const;
+	const std::map<std::string, RuleUfoStats> &getRaceBonusRaw() const;
 	/// Gets the UFO's mission score.
 	int getMissionScore() const;
+	/// Gets the UFO's chance to become a hunter-killer.
+	int getHunterKillerPercentage() const;
+	/// Gets the UFO's hunting preferences.
+	int getHuntMode() const;
+	/// Gets the UFO's hunting speed (in percent of maximum speed).
+	int getHuntSpeed() const;
+	/// Gets the UFO's hunting behavior (normal, kamikaze or random).
+	int getHuntBehavior() const;
 };
 
 }

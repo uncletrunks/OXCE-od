@@ -136,6 +136,7 @@ class MapScript
 {
 private:
 	MapScriptCommand _type;
+	bool _canBeSkipped;
 	std::vector<SDL_Rect*> _rects;
 	std::vector<int> _groups, _blocks, _frequencies, _maxUses, _conditionals;
 	std::vector<int> _groupsTemp, _blocksTemp, _frequenciesTemp, _maxUsesTemp;
@@ -160,6 +161,8 @@ public:
 	void initVerticalLevel(VerticalLevel level);
 	/// Gets what type of command this is.
 	MapScriptCommand getType() const {return _type;};
+	/// Can this command be skipped if unsuccessful?
+	bool canBeSkipped() const { return _canBeSkipped; };
 	/// Gets the rects, describing the areas this command applies to.
 	const std::vector<SDL_Rect*> *getRects() const {return &_rects;};
 	/// Gets the X size for this command.

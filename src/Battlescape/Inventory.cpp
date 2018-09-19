@@ -31,6 +31,7 @@
 #include "../Engine/Options.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Savegame/BattleItem.h"
 #include "../Mod/RuleItem.h"
@@ -41,9 +42,10 @@
 #include "WarningMessage.h"
 #include "../Savegame/Tile.h"
 #include "PrimeGrenadeState.h"
-#include <algorithm>
+#include "../Ufopaedia/Ufopaedia.h"
 #include <unordered_map>
 #include "../Engine/Screen.h"
+#include "../Engine/CrossPlatform.h"
 #include "TileEngine.h"
 
 namespace OpenXcom
@@ -60,6 +62,11 @@ namespace OpenXcom
  */
 Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _base(base), _mouseOverItem(0), _groundOffset(0), _animFrame(0)
 {
+	_myLocale = CrossPlatform::testLocale();
+
+	_twoHandedRed = _game->getMod()->getInterface("battlescape")->getElement("twoHandedRed")->color;
+	_twoHandedGreen = _game->getMod()->getInterface("battlescape")->getElement("twoHandedGreen")->color;
+
 	_depth = _game->getSavedGame()->getSavedBattle()->getDepth();
 	_grid = new Surface(width, height, 0, 0);
 	_items = new Surface(width, height, 0, 0);
@@ -75,6 +82,24 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_animTimer = new Timer(100);
 	_animTimer->onTimer((SurfaceHandler)&Inventory::animate);
 	_animTimer->start();
+
+	_stunIndicator = _game->getMod()->getSurface("BigStunIndicator", false);
+	_woundIndicator = _game->getMod()->getSurface("BigWoundIndicator", false);
+	_burnIndicator = _game->getMod()->getSurface("BigBurnIndicator", false);
+	_shockIndicator = _game->getMod()->getSurface("BigShockIndicator", false);
+
+	const SavedBattleGame *battleSave = _game->getSavedGame()->getSavedBattle();
+	if (battleSave)
+	{
+		const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(battleSave->getStartingConditionType());
+		if (startingCondition)
+		{
+			if (!startingCondition->getInventoryShockIndicator().empty())
+			{
+				_shockIndicator = _game->getMod()->getSurface(startingCondition->getInventoryShockIndicator(), false);
+			}
+		}
+	}
 
 	_inventorySlotRightHand = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
 	_inventorySlotLeftHand = _game->getMod()->getInventory("STR_LEFT_HAND", true);
@@ -124,6 +149,15 @@ void Inventory::setTuMode(bool tu)
 }
 
 /**
+ * Returns the currently selected (i.e. displayed) unit.
+ * @return Pointer to selected unit, or 0 if none.
+ */
+BattleUnit *Inventory::getSelectedUnit() const
+{
+	return _selUnit;
+}
+
+/**
  * Changes the unit to display the inventory of.
  * @param unit Pointer to battle unit.
  */
@@ -131,7 +165,7 @@ void Inventory::setSelectedUnit(BattleUnit *unit)
 {
 	_selUnit = unit;
 	_groundOffset = 999;
-	arrangeGround();
+	arrangeGround(1);
 }
 
 /**
@@ -149,15 +183,7 @@ void Inventory::draw()
 void Inventory::drawGrid()
 {
 	_grid->clear();
-	Text text = Text(80, 9, 0, 0);
-	text.setPalette(_grid->getPalette());
-	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-
 	RuleInterface *rule = _game->getMod()->getInterface("inventory");
-
-	text.setColor(rule->getElement("textSlots")->color);
-	text.setHighContrast(true);
-
 	Uint8 color = rule->getElement("grid")->color;
 
 	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
@@ -214,11 +240,41 @@ void Inventory::drawGrid()
 				}
 			}
 		}
+	}
+	drawGridLabels();
+}
 
+/**
+ * Draws the inventory grid labels.
+ */
+void Inventory::drawGridLabels(bool showTuCost)
+{
+	Text text = Text(90, 9, 0, 0);
+	text.setPalette(_grid->getPalette());
+	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+
+	RuleInterface *rule = _game->getMod()->getInterface("inventory");
+
+	text.setColor(rule->getElement("textSlots")->color);
+	text.setHighContrast(true);
+
+	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
+	{
 		// Draw label
 		text.setX(i->second->getX());
 		text.setY(i->second->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
-		text.setText(_game->getLanguage()->getString(i->second->getId()));
+		if (showTuCost && _selItem != 0)
+		{
+			std::wostringstream ss;
+			ss << _game->getLanguage()->getString(i->second->getId());
+			ss << L":";
+			ss << _selItem->getSlot()->getCost(i->second);
+			text.setText(ss.str().c_str());
+		}
+		else
+		{
+			text.setText(_game->getLanguage()->getString(i->second->getId()));
+		}
 		text.blit(_grid);
 	}
 }
@@ -234,10 +290,15 @@ void Inventory::drawItems()
 	{
 		tempSurface->blitNShade(_items, x, y, Pulsate[_animFrame % 8], false, a ? 0 : 32);
 	};
+	auto indicators = [&](Surface *surf, int x, int y)
+	{
+		surf->blitNShade(_items, x, y, Pulsate[_animFrame % 8]);
+	};
 
 	ScriptWorkerBlit work;
 	_items->clear();
 	Uint8 color = _game->getMod()->getInterface("inventory")->getElement("numStack")->color;
+	Uint8 color2 = _game->getMod()->getInterface("inventory")->getElement("numStack")->color2;
 	if (_selUnit != 0)
 	{
 		SurfaceSet *texture = _game->getMod()->getSurfaceSet("BIGOBS.PCK");
@@ -267,6 +328,22 @@ void Inventory::drawItems()
 			BattleItem::ScriptFill(&work, *i, BODYPART_ITEM_INVENTORY, _animFrame, 0);
 			work.executeBlit(frame, _items, x, y, 0);
 
+			// two-handed indicator
+			if (Options::twoHandedIndicatorInventory && (*i)->getSlot()->getType() == INV_HAND)
+			{
+				if ((*i)->getRules()->isTwoHanded() || (*i)->getRules()->isBlockingBothHands())
+				{
+					NumberText text = NumberText(10, 5, 0, 0);
+					text.setPalette(getPalette());
+					text.setColor((*i)->getRules()->isBlockingBothHands() ? _twoHandedRed : _twoHandedGreen);
+					text.setBordered(false);
+					text.setX((*i)->getSlot()->getX() + RuleInventory::HAND_W * RuleInventory::SLOT_W - 5);
+					text.setY((*i)->getSlot()->getY() + RuleInventory::HAND_H * RuleInventory::SLOT_H - 7);
+					text.setValue(2);
+					text.blit(_items);
+				}
+			}
+
 			// grenade primer indicators
 			if ((*i)->getFuseTimer() >= 0)
 			{
@@ -276,6 +353,7 @@ void Inventory::drawItems()
 		Surface stackLayer(getWidth(), getHeight(), 0, 0);
 		stackLayer.setPalette(getPalette());
 		// Ground items
+		int fatalWounds = 0;
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
 			Surface *frame = (*i)->getBigSprite(texture);
@@ -295,6 +373,46 @@ void Inventory::drawItems()
 				primers(x, y, (*i)->isFuseEnabled());
 			}
 
+			// fatal wounds
+			fatalWounds = 0;
+			if ((*i)->getUnit())
+			{
+				// don't show on dead units
+				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+				{
+					fatalWounds = (*i)->getUnit()->getFatalWounds();
+					if (_burnIndicator && (*i)->getUnit()->getFire() > 0)
+					{
+						indicators(_burnIndicator, x, y);
+					}
+					else if (_woundIndicator && fatalWounds > 0)
+					{
+						indicators(_woundIndicator, x, y);
+					}
+					else if (_shockIndicator && (*i)->getUnit()->hasNegativeHealthRegen())
+					{
+						indicators(_shockIndicator, x, y);
+					}
+					else if (_stunIndicator)
+					{
+						indicators(_stunIndicator, x, y);
+					}
+				}
+			}
+			if (fatalWounds > 0)
+			{
+				_stackNumber->setX(((*i)->getSlot()->getX() + (((*i)->getSlotX() + (*i)->getRules()->getInventoryWidth()) - _groundOffset) * RuleInventory::SLOT_W)-4);
+				if (fatalWounds > 9)
+				{
+					_stackNumber->setX(_stackNumber->getX()-4);
+				}
+				_stackNumber->setY(((*i)->getSlot()->getY() + ((*i)->getSlotY() + (*i)->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H)-6);
+				_stackNumber->setValue(fatalWounds);
+				_stackNumber->draw();
+				_stackNumber->setColor(color2);
+				_stackNumber->blit(&stackLayer);
+			}
+
 			// item stacking
 			if (_stackLevel[(*i)->getSlotX()][(*i)->getSlotY()] > 1)
 			{
@@ -311,22 +429,6 @@ void Inventory::drawItems()
 			}
 		}
 
-		// give it a border
-		// this is the "darker" shade that goes in the corners.
-		for (int x = -1; x <= 1; x += 2)
-		{
-			for (int y = -1; y <= 1; y += 2)
-			{
-				stackLayer.blitNShade(_items, x, y, 11);
-			}
-		}
-		// this is the "slightly darker" version that goes in four cardinals.
-		for (int z = -1; z <= 1; z += 2)
-		{
-			stackLayer.blitNShade(_items, z, 0, 8);
-			stackLayer.blitNShade(_items, 0, z, 8);
-		}
-		// and finally the number itself
 		stackLayer.blit(_items);
 	}
 }
@@ -437,7 +539,32 @@ void Inventory::setSelectedItem(BattleItem *item)
 		_selection->clear();
 	}
 	drawSelectedItem();
+
+	// 1. first draw the grid
+	if (_tu)
+	{
+		drawGrid();
+	}
+
+	// 2. then the items
 	drawItems();
+
+	// 3. lastly re-draw the grid labels (so that they are not obscured by the items)
+	if (_tu)
+	{
+		drawGridLabels(true);
+	}
+}
+
+/**
+* Changes the item currently grabbed by the player.
+* @param item Pointer to selected item, or NULL if none.
+*/
+void Inventory::setSearchString(const std::wstring &searchString)
+{
+	_searchString = searchString;
+	CrossPlatform::upperCase(_searchString, _myLocale);
+	arrangeGround(1);
 }
 
 /**
@@ -455,7 +582,7 @@ BattleItem *Inventory::getMouseOverItem() const
  */
 void Inventory::setMouseOverItem(BattleItem *item)
 {
-	_mouseOverItem = (item && !item->getRules()->isFixed()) ? item : 0;
+	_mouseOverItem = (item && !(item->getRules()->isFixed() && item->getRules()->getBattleType() == BT_NONE)) ? item : 0;
 }
 
 /**
@@ -543,13 +670,6 @@ void Inventory::mouseClick(Action *action, State *state)
 				{
 					if ((SDL_GetModState() & KMOD_CTRL))
 					{
-						// cannot move fixed items with Ctrl+click
-						if (item->getRules()->isFixed())
-						{
-							_warning->showMessage(_game->getLanguage()->getString("Fixed items cannot be moved!"));
-							return;
-						}
-
 						RuleInventory *newSlot = _inventorySlotGround;
 						std::string warning = "STR_NOT_ENOUGH_SPACE";
 						bool placed = false;
@@ -610,7 +730,7 @@ void Inventory::mouseClick(Action *action, State *state)
 								placed = true;
 								moveItem(item, newSlot, 0, 0);
 								_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_DROP)->play();
-								arrangeGround(false);
+								arrangeGround();
 							}
 							else
 							{
@@ -650,8 +770,13 @@ void Inventory::mouseClick(Action *action, State *state)
 
 				bool canStack = slot->getType() == INV_GROUND && canBeStacked(item, _selItem);
 
+				// Check if this inventory section supports the item
+				if (!_selItem->getRules()->canBePlacedIntoInventorySection(slot->getId()))
+				{
+					_warning->showMessage(_game->getLanguage()->getString("STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION"));
+				}
 				// Put item in empty slot, or stack it, if possible.
-				if (item == 0 || item == _selItem || canStack)
+				else if (item == 0 || item == _selItem || canStack)
 				{
 					if (!overlapItems(_selUnit, _selItem, slot, x, y) && slot->fitItemInSlot(_selItem->getRules(), x, y))
 					{
@@ -742,10 +867,10 @@ void Inventory::mouseClick(Action *action, State *state)
 									moveItem(oldAmmo, (item == weaponRightHand ? _inventorySlotLeftHand : _inventorySlotRightHand), 0, 0);
 								}
 								setSelectedItem(0);
-								_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_RELOAD)->play();
+								_game->getMod()->getSoundByDepth(_depth, item->getRules()->getReloadSound())->play();
 								if (item->getSlot()->getType() == INV_GROUND)
 								{
-									arrangeGround(false);
+									arrangeGround();
 								}
 							}
 							else
@@ -819,14 +944,14 @@ void Inventory::mouseClick(Action *action, State *state)
 									{
 										_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getPrimeActionMessage()));
 										item->setFuseTimer(item->getRules()->getFuseTimerDefault());
-										arrangeGround(false);
+										arrangeGround();
 									}
 								}
 								else
 								{
 									_warning->showMessage(_game->getLanguage()->getString(item->getRules()->getUnprimeActionMessage()));
 									item->setFuseTimer(-1);  // Unprime the grenade
-									arrangeGround(false);
+									arrangeGround();
 								}
 							}
 						}
@@ -848,12 +973,36 @@ void Inventory::mouseClick(Action *action, State *state)
 			setSelectedItem(0);
 		}
 	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_MIDDLE)
+	{
+		if (_selUnit == 0)
+			return;
+
+		int x = (int)floor(action->getAbsoluteXMouse()) - getX(),
+			y = (int)floor(action->getAbsoluteYMouse()) - getY();
+		RuleInventory *slot = getSlotInPosition(&x, &y);
+		if (slot != 0)
+		{
+			if (slot->getType() == INV_GROUND)
+			{
+				x += _groundOffset;
+			}
+			BattleItem *item = _selUnit->getItem(slot, x, y);
+			if (item != 0)
+			{
+				std::string articleId = item->getRules()->getType();
+				Ufopaedia::openArticle(_game, articleId);
+			}
+		}
+	}
 	InteractiveSurface::mouseClick(action, state);
 }
 
 /**
  * Unloads the selected weapon, placing the gun
  * on the right hand and the ammo on the left hand.
+ * Or if only one hand is free, the gun is placed
+ * in the hand and the ammo is placed on the ground.
  * @return The success of the weapon being unloaded.
  */
 bool Inventory::unload()
@@ -944,14 +1093,42 @@ bool Inventory::unload()
 		return false;
 	}
 
-	// Hands must be free
+	// Check which hands are free.
+	RuleInventory *FirstFreeHand = _inventorySlotRightHand;
+	RuleInventory *SecondFreeHand = _inventorySlotLeftHand;
+
 	for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)
 	{
 		if ((*i)->getSlot()->getType() == INV_HAND && (*i) != _selItem)
 		{
-			_warning->showMessage(_game->getLanguage()->getString("STR_BOTH_HANDS_MUST_BE_EMPTY"));
-			return false;
+			if (!Options::oneHandedUnloading)
+			{
+				_warning->showMessage(_game->getLanguage()->getString("STR_BOTH_HANDS_MUST_BE_EMPTY"));
+				return false;
+			}
+			else
+			{
+				if ((*i)->getSlot() == SecondFreeHand)
+				{
+					SecondFreeHand = nullptr;
+				}
+				if ((*i)->getSlot() == FirstFreeHand)
+				{
+					FirstFreeHand = nullptr;
+				}
+			}
 		}
+	}
+
+	if (FirstFreeHand == nullptr)
+	{
+		FirstFreeHand = SecondFreeHand;
+		SecondFreeHand = nullptr;
+	}
+	if (FirstFreeHand == nullptr)
+	{
+		_warning->showMessage(_game->getLanguage()->getString("STR_ONE_HAND_MUST_BE_EMPTY"));
+		return false;
 	}
 
 	BattleActionCost cost { BA_NONE, _selUnit, _selItem };
@@ -967,13 +1144,13 @@ bool Inventory::unload()
 
 	if (cost.haveTU() && _selItem->getSlot()->getType() != INV_HAND)
 	{
-		cost.Time += _selItem->getSlot()->getCost(_inventorySlotRightHand);
+		cost.Time += _selItem->getSlot()->getCost(FirstFreeHand);
 	}
 
 	std::string err;
 	if (!_tu || cost.spendTU(&err))
 	{
-		moveItem(_selItem, _inventorySlotRightHand, 0, 0);
+		moveItem(_selItem, FirstFreeHand, 0, 0);
 		if (grenade)
 		{
 			_selItem->setFuseTimer(-1);
@@ -982,7 +1159,15 @@ bool Inventory::unload()
 		else
 		{
 			auto oldAmmo = _selItem->setAmmoForSlot(slotForAmmoUnload, nullptr);
-			moveItem(oldAmmo, _inventorySlotLeftHand, 0, 0);
+			if (SecondFreeHand != nullptr)
+			{
+				moveItem(oldAmmo, SecondFreeHand, 0, 0);
+			}
+			else
+			{
+				moveItem(oldAmmo, _inventorySlotGround, 0, 0);
+				arrangeGround();
+			}
 		}
 		setSelectedItem(0);
 		return true;
@@ -998,12 +1183,79 @@ bool Inventory::unload()
 }
 
 /**
+* Checks whether the given item is visible with the current search string.
+* @param item The item to check.
+* @return True if item should be shown. False otherwise.
+*/
+bool Inventory::isInSearchString(BattleItem *item)
+{
+	if (!_searchString.length())
+	{
+		// No active search string.
+		return true;
+	}
+
+	std::wstring itemLocalName;
+	if (!_game->getSavedGame()->isResearched(item->getRules()->getRequirements()))
+	{
+		// Alien artifact, shouldn't match on the real name.
+		itemLocalName = _game->getLanguage()->getString("STR_ALIEN_ARTIFACT");
+	}
+	else
+	{
+		itemLocalName = _game->getLanguage()->getString(item->getRules()->getName());
+	}
+	CrossPlatform::upperCase(itemLocalName, _myLocale);
+	if (itemLocalName.find(_searchString) != std::wstring::npos)
+	{
+		// Name match.
+		return true;
+	}
+
+	// If present in the Ufopaedia, check categories for a match as well.
+	ArticleDefinition *articleID = _game->getMod()->getUfopaediaArticle(item->getRules()->getType());
+	if (articleID && Ufopaedia::isArticleAvailable(_game->getSavedGame(), articleID))
+	{
+		std::vector<std::string> itemCategories = item->getRules()->getCategories();
+		for (std::vector<std::string>::iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
+		{
+			std::wstring catLocalName = _game->getLanguage()->getString((*i));
+			CrossPlatform::upperCase(catLocalName, _myLocale);
+			if (catLocalName.find(_searchString) != std::wstring::npos)
+			{
+				// Category match
+				return true;
+			}
+		}
+
+		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
+		{
+			if (item->getAmmoForSlot(slot))
+			{
+				std::vector<std::string> itemAmmoCategories = item->getAmmoForSlot(slot)->getRules()->getCategories();
+				for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
+				{
+					std::wstring catLocalName = _game->getLanguage()->getString((*i));
+					CrossPlatform::upperCase(catLocalName, _myLocale);
+					if (catLocalName.find(_searchString) != std::wstring::npos)
+					{
+						// Category match
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/**
  * Arranges items on the ground for the inventory display.
  * Since items on the ground aren't assigned to anyone,
  * they don't actually have permanent slot positions.
- * @param alterOffset Whether to alter the ground offset.
+ * @param alterOffset Whether to alter the ground offset and in which direction.
  */
-void Inventory::arrangeGround(bool alterOffset)
+void Inventory::arrangeGround(int alterOffset)
 {
 	RuleInventory *ground = _inventorySlotGround;
 
@@ -1018,122 +1270,154 @@ void Inventory::arrangeGround(bool alterOffset)
 
 	if (_selUnit != 0)
 	{
-		std::unordered_map< std::string, std::vector<BattleItem*> > typeItemLists; // Lists of items of the same type (though not necessarily stackable).
+		std::unordered_map< std::string, std::vector< std::vector<BattleItem*> > > typeItemLists; // Lists of items of the same type
 		std::vector<BattleItem*> itemListOrder; // Placement order of item type stacks.
-		std::map<std::pair<int, int>, int> startIndexCacheX; // Cache for skipping to last known available position of a given size.
+		std::vector< std::vector<int> > startIndexCacheX; // Cache for skipping to last known available position of a given size.
+		// Create chart of free slots for later rapid lookup.
+		std::vector< std::vector<bool> > occupiedSlots;
+		occupiedSlots.resize(slotsY, std::vector<bool>(slotsX * 2, false));
 
-		// first move all items out of the way - a big number in X direction
-		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
+		// Move items out of the way and find which stack they'll end up in within the inventory.
+		for (auto& i : *(_selUnit->getTile()->getInventory()))
 		{
-			(*i)->setSlot(ground);
-			(*i)->setSlotX(1000000);
-			(*i)->setSlotY(0);
+			// first move all items out of the way - a big number in X direction
+			i->setSlot(ground);
+			i->setSlotX(1000000);
+			i->setSlotY(0);
 
-			// Push the item into a list for each item type. We'll handle stacking of different variants later.
-			std::unordered_map<std::string, std::vector<BattleItem*> >::iterator iterItemList = typeItemLists.find((*i)->getRules()->getType());
-			if (iterItemList == typeItemLists.end()) {
-				// New item type, create an empty list for it.
-				iterItemList = typeItemLists.insert(std::pair<std::string, std::vector<BattleItem*> >((*i)->getRules()->getType(), {})).first;
-				itemListOrder.push_back((*i));
-				startIndexCacheX[std::pair<int, int>((*i)->getRules()->getInventoryHeight(), (*i)->getRules()->getInventoryWidth())] = 0;
-			}
-			iterItemList->second.push_back((*i));
-		}
-		// NOTE: If filtering of displayed items is desired one could call a function to remove items from itemListOrder at this point.
-		// Any item not mentioned on the list will remain out of the visible ground inventory area.
-
-		// Now for each item type, find the most topleft position that is not occupied and will fit.
-		for (std::vector<BattleItem*>::iterator i = itemListOrder.begin(); i != itemListOrder.end(); ++i)
-		{
-			BattleItem* itemTypeSample = (*i); //Grab a sample of the item type we're trying to place.
-			//Start searching at the x value where we last placed an item of this size.
-			x = startIndexCacheX[std::pair<int, int>(itemTypeSample->getRules()->getInventoryHeight(), itemTypeSample->getRules()->getInventoryWidth())];
-			y = 0;
-			donePlacing = false;
-			while (!donePlacing)
+			// Only handle visible items from this point on.
+			if (i->getRules()->getInventoryWidth())
 			{
-				canPlace = true; // Assume we can put the item type here, if one of the following checks fails, we can't.
-				for (int xd = 0; xd < itemTypeSample->getRules()->getInventoryWidth() && canPlace; xd++)
-				{
-					if ((x + xd) % slotsX < x % slotsX)
+				// Each item type has a list of stacks. Find / create a suitable one for this item.
+				auto iterItemList = typeItemLists.find(i->getRules()->getType());
+				if (iterItemList == typeItemLists.end()) {
+					// New item type, create a list of item stacks for it.
+					iterItemList = typeItemLists.insert(std::pair<std::string, std::vector< std::vector<BattleItem*> > >(i->getRules()->getType(), { { i } })).first;
+					itemListOrder.push_back(i);
+					// Figure out the largest item size present:
+					x = std::max(x, i->getRules()->getInventoryWidth());
+					y = std::max(y, i->getRules()->getInventoryHeight());
+				}
+				else {
+					// With the item type found. Find which stack of this item type to add the item to.
+					bool stacked = false;
+					for (auto& itemStack : iterItemList->second)
 					{
-						canPlace = false;
-					}
-					else
-					{
-						for (int yd = 0; yd < itemTypeSample->getRules()->getInventoryHeight() && canPlace; yd++)
+						if (canBeStacked(i, itemStack.at(0)))
 						{
-							// If there's room and no item, we can place it here. (No need to check for stackability as nothing stackable has been placed)
-							BattleItem *item = _selUnit->getItem(ground, x + xd, y + yd);
-							canPlace = item == 0;
+							itemStack.push_back(i);
+							stacked = true;
+							break;
 						}
 					}
+					if (!stacked) {
+						// Not able to be stacked with previously placed items of this type. Make a new stack containing only this item.
+						iterItemList->second.push_back({ i });
+					}
 				}
-				if (canPlace) // Found a place for this item stack.
-				{
-					std::vector<BattleItem*> nonStackable;
-					// Place all stackable items of the current type, while taking note of any nonstackable ones.
-					std::unordered_map<std::string, std::vector<BattleItem*> >::iterator itemTypeList = typeItemLists.find(itemTypeSample->getRules()->getType());
-					for (std::vector<BattleItem*>::iterator j = itemTypeList->second.begin(); j != itemTypeList->second.end(); ++j) {
-						if (itemTypeSample == (*j) || canBeStacked((*j), itemTypeSample))
-						{
-							(*j)->setSlotX(x);
-							(*j)->setSlotY(y);
+			}
+		}
+		// Create the cache of last placed index for a given item size.
+		startIndexCacheX.resize(y + 1, std::vector<int>(x + 1, 0));
 
-							// only increase the stack level if the item is actually visible.
-							if ((*j)->getRules()->getInventoryWidth())
-							{
-								_stackLevel[x][y] += 1;
-							}
+		// Before we place the items, we should sort the itemListOrder vector using the 'list order' of the items.
+		std::sort(itemListOrder.begin(), itemListOrder.end(), [](BattleItem* const &a, BattleItem* const &b)
+			{
+				return a->getRules()->getListOrder() < b->getRules()->getListOrder();
+			}
+		);
+
+		// Now for each item type, find the most topleft position that is not occupied and will fit.
+		for (auto& i : itemListOrder)
+		{
+			// Fetch the list of item stacks for this item type. Then place each stack.
+			auto iterItemList = typeItemLists.find(i->getRules()->getType());
+			for (auto& itemStack : iterItemList->second)
+			{
+				BattleItem* itemTypeSample = itemStack.at(0); // Grab a sample of the stack of item type we're trying to place.
+				if (!isInSearchString(itemTypeSample))
+				{
+					// quick search
+					// Not a match with the active search string, skip this item stack. (Will remain outside the visible inventory)
+					break;
+				}
+
+				// Start searching at the x value where we last placed an item of this size.
+				// But also don't let more than half a screen behind the furtherst item (because we want to keep similar items together).
+				x = std::max(xMax - slotsX/2, startIndexCacheX[itemTypeSample->getRules()->getInventoryHeight()][itemTypeSample->getRules()->getInventoryWidth()]);
+				y = 0;
+				donePlacing = false;
+				while (!donePlacing)
+				{
+					canPlace = true; // Assume we can put the item type here, if one of the following checks fails, we can't.
+					for (int xd = 0; xd < itemTypeSample->getRules()->getInventoryWidth() && canPlace; xd++)
+					{
+						if ((x + xd) % slotsX < x % slotsX)
+						{
+							canPlace = false;
 						}
 						else
 						{
-							nonStackable.push_back(*j);
-						}
-					}
-					xMax = std::max(xMax, x + itemTypeSample->getRules()->getInventoryWidth());
-
-					if (nonStackable.size() > 0)
-					{
-						// We have some items remaining which didn't stack. Let us find a different spot to place them in by sending them through once more.
-						itemTypeList->second = nonStackable;
-						itemTypeSample = itemTypeList->second.at(0);
-						canPlace = false;
-					}
-					else {
-						donePlacing = true;
-
-						// Now update the shortcut cache so that items to follow are able to skip a decent chunk of their search,
-						// as there can be no spot before this x-address with available slots for items that are larger in one or more dimensions.
-						std::map<std::pair<int, int>, int>::iterator cacheToUpdate;
-						int offsetX = 0;
-						int offsetY = 0;
-						int firstPossibleX = itemTypeSample->getRules()->getInventoryHeight() * 2 > slotsY ? x + itemTypeSample->getRules()->getInventoryWidth() : x;
-						while ((cacheToUpdate = startIndexCacheX.find(std::pair<int, int>(itemTypeSample->getRules()->getInventoryHeight(), itemTypeSample->getRules()->getInventoryWidth() + offsetX))) != startIndexCacheX.end())
-						{
-							do
+							for (int yd = 0; yd < itemTypeSample->getRules()->getInventoryHeight() && canPlace; yd++)
 							{
-								cacheToUpdate->second = std::max(firstPossibleX, cacheToUpdate->second);
-								++offsetY;
-							} while ((cacheToUpdate = startIndexCacheX.find(std::pair<int, int>(itemTypeSample->getRules()->getInventoryHeight() + offsetY, itemTypeSample->getRules()->getInventoryWidth() + offsetX))) != startIndexCacheX.end());
-							++offsetX;
-							offsetY = 0;
+								// If there's room and no item, we can place it here. (No need to check for stackability as nothing stackable has been placed)
+								canPlace = !occupiedSlots[y + yd][x + xd];
+							}
+						}
+					}
+					if (canPlace) // Found a place for this item stack.
+					{
+						xMax = std::max(xMax, x + itemTypeSample->getRules()->getInventoryWidth());
+						if ( (x + startIndexCacheX[0].size() ) >= occupiedSlots[0].size())
+						{
+							// Filled enough for the widest item to potentially request occupancy checks outside of current cache. Expand slot cache.
+							size_t newCacheSize = occupiedSlots[0].size() * 2;
+							for (std::vector< std::vector<bool> >::iterator j = occupiedSlots.begin(); j != occupiedSlots.end(); ++j) {
+								j->resize(newCacheSize, false);
+							}
+						}
+						// Reserve the slots this item will occupy.
+						for (int xd = 0; xd < itemTypeSample->getRules()->getInventoryWidth() && canPlace; xd++)
+						{
+							for (int yd = 0; yd < itemTypeSample->getRules()->getInventoryHeight() && canPlace; yd++)
+							{
+								occupiedSlots[y + yd][x + xd] = true;
+							}
+						}
+
+						// Place all items from this stack in the location we just reserved.
+						for (auto& j : itemStack)
+						{
+							j->setSlotX(x);
+							j->setSlotY(y);
+							_stackLevel[x][y] += 1;
+						}
+						donePlacing = true;
+					}
+					if (!donePlacing)
+					{
+						y++;
+						if (y > slotsY - itemTypeSample->getRules()->getInventoryHeight())
+						{
+							y = 0;
+							x++;
 						}
 					}
 				}
-				if (!donePlacing)
+				// Now update the shortcut cache so that items to follow are able to skip a decent chunk of their search,
+				// as there can be no spot before this x-address with available slots for items that are larger in one or more dimensions.
+				int firstPossibleX = itemTypeSample->getRules()->getInventoryHeight() * 2 > slotsY ? x + itemTypeSample->getRules()->getInventoryWidth() : x;
+				for (size_t offsetY = itemTypeSample->getRules()->getInventoryHeight(); offsetY < startIndexCacheX.size(); ++offsetY)
 				{
-					y++;
-					if (y > slotsY - itemTypeSample->getRules()->getInventoryHeight())
+					for (size_t offsetX = itemTypeSample->getRules()->getInventoryWidth(); offsetX < startIndexCacheX[offsetY].size(); ++offsetX)
 					{
-						y = 0;
-						x++;
+						startIndexCacheX[offsetY][offsetX] = std::max(firstPossibleX, startIndexCacheX[offsetY][offsetX]);
 					}
 				}
-			}
-		}
+			} // end stacks for this item type
+		} // end of item types
 	}
-	if (alterOffset)
+	if (alterOffset > 0)
 	{
 		if (xMax >= _groundOffset + slotsX)
 		{
@@ -1142,6 +1426,20 @@ void Inventory::arrangeGround(bool alterOffset)
 		else
 		{
 			_groundOffset = 0;
+		}
+	}
+	else if (alterOffset < 0)
+	{
+		// one step back
+		_groundOffset -= slotsX;
+
+		// if too much, as many steps forward as possible
+		if (_groundOffset < 0)
+		{
+			while (xMax >= _groundOffset + slotsX)
+			{
+				_groundOffset += slotsX;
+			}
 		}
 	}
 	drawItems();
@@ -1156,6 +1454,13 @@ void Inventory::arrangeGround(bool alterOffset)
  */
 bool Inventory::fitItem(RuleInventory *newSlot, BattleItem *item, std::string &warning)
 {
+	// Check if this inventory section supports the item
+	if (!item->getRules()->canBePlacedIntoInventorySection(newSlot->getId()))
+	{
+		warning = "STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION";
+		return false;
+	}
+
 	bool placed = false;
 	int maxSlotX = 0;
 	int maxSlotY = 0;

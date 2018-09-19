@@ -27,12 +27,15 @@ namespace OpenXcom
 
 class BattleUnit;
 typedef std::pair<float (*)(const BattleUnit*), float> RuleStatBonusData;
+typedef std::pair<std::string, std::vector<float> > RuleStatBonusDataOrig;
 /**
  * Helper class used for storing unit stat bonuses.
  */
 class RuleStatBonus
 {
 	std::vector<RuleStatBonusData> _bonus;
+	std::vector<RuleStatBonusDataOrig> _bonusOrig;
+	bool _modded;
 public:
 	/// Default constructor.
 	RuleStatBonus();
@@ -44,6 +47,8 @@ public:
 	void setMelee();
 	/// Set default throwing bonus.
 	void setThrowing();
+	/// Set default close quarters combat bonus.
+	void setCloseQuarters();
 	/// Set default psi attack bonus.
 	void setPsiAttack();
 	/// Set default psi defense bonus.
@@ -60,6 +65,10 @@ public:
 	void setStunRecovery();
 	/// Get bonus based on unit stats.
 	int getBonus(const BattleUnit* unit) const;
+	/// Used for "Stats for Nerds".
+	const std::vector<RuleStatBonusDataOrig> *getBonusRaw() const { return &_bonusOrig; }
+	bool isModded() const { return _modded; }
+	void setModded(bool modded) { _modded = modded; }
 };
 
 }

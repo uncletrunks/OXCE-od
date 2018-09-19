@@ -28,7 +28,7 @@ namespace OpenXcom
  * @param rules Pointer to ruleset.
  * @param gen Generate new funding.
  */
-Country::Country(RuleCountry *rules, bool gen) : _rules(rules), _pact(false), _newPact(false), _funding(0), _satisfaction(2)
+Country::Country(RuleCountry *rules, bool gen) : _rules(rules), _pact(false), _newPact(false), _cancelPact(false), _funding(0), _satisfaction(2)
 {
 	if (gen)
 	{
@@ -56,6 +56,7 @@ void Country::load(const YAML::Node &node)
 	_activityAlien = node["activityAlien"].as< std::vector<int> >(_activityAlien);
 	_pact = node["pact"].as<bool>(_pact);
 	_newPact = node["newPact"].as<bool>(_newPact);
+	_cancelPact = node["cancelPact"].as<bool>(_cancelPact);
 }
 
 /**
@@ -72,8 +73,13 @@ YAML::Node Country::save() const
 	if (_pact)
 	{
 		node["pact"] = _pact;
+		if (_cancelPact)
+		{
+			node["cancelPact"] = _cancelPact;
+		}
 	}
-	else if (_newPact)
+	// Note: can have a _newPact flag, even if already has a _pact from earlier (when xcom liberates and aliens retake a country during the same month)
+	if (_newPact)
 	{
 		node["newPact"] = _newPact;
 	}
@@ -161,9 +167,10 @@ std::vector<int> &Country::getActivityAlien()
  * @param xcomTotal the council's xcom score
  * @param alienTotal the council's alien score
  * @param pactScore the penalty for signing a pact
+ * @param averageFunding current average funding across all countries (including withdrawn countries)
  */
 
-void Country::newMonth(int xcomTotal, int alienTotal, int pactScore)
+void Country::newMonth(int xcomTotal, int alienTotal, int pactScore, int averageFunding)
 {
 	_satisfaction = 2;
 	int funding = getFunding().back();
@@ -200,11 +207,24 @@ void Country::newMonth(int xcomTotal, int alienTotal, int pactScore)
 	}
 
 	// about to be in cahoots
-	if (_newPact && !_pact)
+	if (_newPact)
 	{
 		_newPact = false;
 		_pact = true;
+		_cancelPact = false;
 		addActivityAlien(pactScore);
+	}
+	// there's still hope in humanity
+	else if (_cancelPact)
+	{
+		_newPact = false;
+		_pact = false;
+		_cancelPact = false;
+		if (oldFunding <= 0)
+		{
+			_satisfaction = 2; // satisfied, not happy or unhappy
+			funding = averageFunding;
+		}
 	}
 
 	// set the new funding and reset the activity meters
@@ -239,6 +259,34 @@ bool Country::getNewPact() const
 void Country::setNewPact()
 {
 	 _newPact = true;
+	 _cancelPact = false;
+}
+
+/**
+ * @return if we will cancel a pact at month's end.
+ */
+bool Country::getCancelPact() const
+{
+	return _cancelPact;
+}
+
+/**
+ * cancel or prevent a pact.
+ */
+void Country::setCancelPact()
+{
+	if (_pact)
+	{
+		// cancel an existing signed pact
+		_cancelPact = true;
+		_newPact = false;
+	}
+	else
+	{
+		// prevent a not-yet-signed pact
+		_cancelPact = false;
+		_newPact = false;
+	}
 }
 
 /**
@@ -257,6 +305,24 @@ bool Country::getPact() const
 void Country::setPact()
 {
 	 _pact = true;
+}
+
+/**
+ * can be (re)infiltrated?
+ */
+bool Country::canBeInfiltrated()
+{
+	if (!_pact && !_newPact)
+	{
+		// completely new infiltration; or retaking a previously liberated country
+		return true;
+	}
+	if (_pact && _cancelPact)
+	{
+		// xcom tried to liberate them this month, but the aliens were not amused... who shall they listen to at the end?
+		return true;
+	}
+	return false;
 }
 
 }

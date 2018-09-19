@@ -148,8 +148,9 @@ class ModScript;
 class Unit
 {
 private:
-	std::string _type;
+	std::string _type, _civilianRecoveryType;
 	std::string _race;
+	int _showFullNameInAlienInventory;
 	std::string _rank;
 	UnitStats _stats;
 	std::string _armorName;
@@ -157,13 +158,16 @@ private:
 	int _standHeight, _kneelHeight, _floatHeight;
 	std::vector<int> _deathSound;
 	int _value, _aggroSound, _moveSound;
-	int _intelligence, _aggression, _energyRecovery;
+	int _intelligence, _aggression, _spotter, _sniper, _energyRecovery;
 	SpecialAbility _specab;
 	std::string _spawnUnit;
 	bool _livingWeapon;
 	std::string _meleeWeapon, _psiWeapon;
 	std::vector<std::vector<std::string> > _builtInWeapons;
 	bool _capturable;
+	bool _canSurrender, _autoSurrender;
+	bool _isLeeroyJenkins;
+	bool _waitIfOutsideWeaponRange;
 public:
 	/// Creates a blank unit ruleset.
 	Unit(const std::string &type);
@@ -176,6 +180,8 @@ public:
 
 	/// Gets the unit's type.
 	std::string getType() const;
+	/// Gets the type of staff (soldier/engineer/scientists) or type of item to be recovered when a civilian is saved.
+	std::string getCivilianRecoveryType() const;
 	/// Gets the unit's stats.
 	UnitStats *getStats();
 	/// Gets the unit's height when standing.
@@ -200,6 +206,10 @@ public:
 	int getIntelligence() const;
 	/// Gets the aggression. Determines the chance of revenge and taking cover.
 	int getAggression() const;
+	/// Gets the spotter score. This is the number of turns sniper AI units can use spotting info from this unit.
+	int getSpotterDuration() const;
+	/// Gets the sniper score. Determines chance of acting on information gained by spotter units.
+	int getSniperPercentage() const;
 	/// Gets the alien's special ability.
 	int getSpecialAbility() const;
 	/// Gets the unit's spawn unit.
@@ -218,6 +228,15 @@ public:
 	const std::vector<std::vector<std::string> > &getBuiltInWeapons() const;
 	/// Gets whether the alien can be captured alive.
 	bool getCapturable() const;
+	/// Checks if this unit can surrender.
+	bool canSurrender() const;
+	/// Checks if this unit surrenders automatically, if all other units surrendered too.
+	bool autoSurrender() const;
+	bool isLeeroyJenkins() const { return _isLeeroyJenkins; };
+	/// Should the unit get "stuck" trying to fire from outside of weapon range? Vanilla bug, that may serve as "feature" in rare cases.
+	bool waitIfOutsideWeaponRange() { return _waitIfOutsideWeaponRange; };
+	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
+	bool getShowFullNameInAlienInventory(Mod *mod) const;
 };
 
 }

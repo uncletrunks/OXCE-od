@@ -77,4 +77,6 @@ Dependencies/
 #Ignore NetBeans project directory
 nbproject/
 .tx/
+src/OpenXcom.2010.VC.opendb
+bin/user
 /makefile

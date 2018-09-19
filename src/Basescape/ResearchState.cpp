@@ -28,9 +28,11 @@
 #include "../Interface/TextList.h"
 #include "../Savegame/Base.h"
 #include "NewResearchListState.h"
+#include "GlobalResearchState.h"
 #include "../Savegame/ResearchProject.h"
 #include "../Mod/RuleResearch.h"
 #include "ResearchInfoState.h"
+#include "TechTreeViewerState.h"
 
 namespace OpenXcom
 {
@@ -77,6 +79,8 @@ ResearchState::ResearchState(Base *base) : _base(base)
 
 	_btnNew->setText(tr("STR_NEW_PROJECT"));
 	_btnNew->onMouseClick((ActionHandler)&ResearchState::btnNewClick);
+	_btnNew->onKeyboardPress((ActionHandler)&ResearchState::btnNewClick, Options::keyToggleQuickSearch);
+	_btnNew->onKeyboardPress((ActionHandler)&ResearchState::onCurrentGlobalResearchClick, Options::keyGeoGlobalResearch);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&ResearchState::btnOkClick);
@@ -99,7 +103,8 @@ ResearchState::ResearchState(Base *base) : _base(base)
 	_lstResearch->setBackground(_window);
 	_lstResearch->setMargin(2);
 	_lstResearch->setWordWrap(true);
-	_lstResearch->onMouseClick((ActionHandler)&ResearchState::onSelectProject);
+	_lstResearch->onMouseClick((ActionHandler)&ResearchState::onSelectProject, SDL_BUTTON_LEFT);
+	_lstResearch->onMouseClick((ActionHandler)&ResearchState::onOpenTechTreeViewer, SDL_BUTTON_MIDDLE);
 }
 
 /**
@@ -137,6 +142,25 @@ void ResearchState::onSelectProject(Action *)
 	_game->pushState(new ResearchInfoState(_base, baseProjects[_lstResearch->getSelectedRow()]));
 }
 
+/**
+* Opens the TechTreeViewer for the corresponding topic.
+* @param action Pointer to an action.
+*/
+void ResearchState::onOpenTechTreeViewer(Action *)
+{
+	const std::vector<ResearchProject *> & baseProjects(_base->getResearch());
+	const RuleResearch *selectedTopic = baseProjects[_lstResearch->getSelectedRow()]->getRules();
+	_game->pushState(new TechTreeViewerState(selectedTopic, 0));
+}
+
+/**
+ * Opens the Current Global Research UI.
+ * @param action Pointer to an action.
+ */
+void ResearchState::onCurrentGlobalResearchClick(Action *)
+{
+	_game->pushState(new GlobalResearchState(true));
+}
 /**
  * Updates the research list
  * after going to other screens.

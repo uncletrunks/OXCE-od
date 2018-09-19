@@ -54,6 +54,8 @@ namespace OpenXcom
 		_btnOk->setColor(Palette::blockOffset(4));
 		_btnPrev->setColor(Palette::blockOffset(4));
 		_btnNext->setColor(Palette::blockOffset(4));
+		_btnInfo->setColor(Palette::blockOffset(4));
+		_btnInfo->setVisible(_game->getMod()->getShowPediaInfoButton());
 
 		_txtTitle->setColor(Palette::blockOffset(13)+10);
 		_txtTitle->setBig();

@@ -52,7 +52,7 @@ struct GraphButInfo
  * Initializes all the elements in the Graphs screen.
  * @param game Pointer to the core game.
  */
-GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0)
+GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _zoom(100)
 {
 	// Create object
 	_bg = new InteractiveSurface(320, 200, 0, 0);
@@ -290,7 +290,7 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0)
 
 	_txtFactor->setText(tr("STR_FINANCE_THOUSANDS"));
 
-	// Set up button
+	// Set up buttons
 	_btnUfoRegion->onMousePress((ActionHandler)&GraphsState::btnUfoRegionClick);
 	_btnUfoCountry->onMousePress((ActionHandler)&GraphsState::btnUfoCountryClick);
 	_btnXcomRegion->onMousePress((ActionHandler)&GraphsState::btnXcomRegionClick);
@@ -300,6 +300,8 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0)
 	_btnGeoscape->onMousePress((ActionHandler)&GraphsState::btnGeoscapeClick);
 	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnGeoscapeClick, Options::keyCancel);
 	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnGeoscapeClick, Options::keyGeoGraphs);
+	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomInClick, Options::keyGraphsZoomIn);
+	_btnGeoscape->onKeyboardPress((ActionHandler)&GraphsState::btnZoomOutClick, Options::keyGraphsZoomOut);
 
 	centerAllSurfaces();
 }
@@ -329,6 +331,30 @@ GraphsState::~GraphsState()
 	_game->getSavedGame()->setGraphRegionToggles(graphRegionToggles);
 	_game->getSavedGame()->setGraphCountryToggles(graphCountryToggles);
 	_game->getSavedGame()->setGraphFinanceToggles(graphFinanceToggles);
+}
+
+/**
+* Zooms in.
+* @param action Pointer to an action.
+*/
+void GraphsState::btnZoomInClick(Action *)
+{
+	_zoom = _zoom * 2 / 3;
+	if (_zoom < 5) _zoom = 5;
+
+	drawLines();
+}
+
+/**
+* Zooms out.
+* @param action Pointer to an action.
+*/
+void GraphsState::btnZoomOutClick(Action *)
+{
+	_zoom = _zoom * 3 / 2;
+	if (_zoom > 100) _zoom = 100;
+
+	drawLines();
 }
 
 /**
@@ -477,23 +503,41 @@ void GraphsState::btnRegionListClick(Action * action)
 	size_t number = 0;
 	ToggleTextButton *button = dynamic_cast<ToggleTextButton*>(action->getSender());
 
-	if (button == _btnRegionTotal)
-	{
-		number = _regionToggles.size() - 1;
-	}
-	else
+	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
 		for (size_t i = 0; i < _btnRegions.size(); ++i)
 		{
-			if (button == _btnRegions[i])
+			if (button != _btnRegions[i])
 			{
-				number = i + _butRegionsOffset;
-				break;
+				_btnRegions[i]->setPressed(button->getPressed());
 			}
 		}
+		_btnRegionTotal->setPressed(button->getPressed());
+		for (std::vector<GraphButInfo*>::const_iterator i = _regionToggles.begin(); i != _regionToggles.end(); ++i)
+		{
+			(*i)->_pushed = button->getPressed();
+		}
 	}
+	else
+	{
+		if (button == _btnRegionTotal)
+		{
+			number = _regionToggles.size() - 1;
+		}
+		else
+		{
+			for (size_t i = 0; i < _btnRegions.size(); ++i)
+			{
+				if (button == _btnRegions[i])
+				{
+					number = i + _butRegionsOffset;
+					break;
+				}
+			}
+		}
 
-	_regionToggles.at(number)->_pushed = button->getPressed();
+		_regionToggles.at(number)->_pushed = button->getPressed();
+	}
 
 	drawLines();
 }
@@ -507,23 +551,41 @@ void GraphsState::btnCountryListClick(Action * action)
 	size_t number = 0;
 	ToggleTextButton *button = dynamic_cast<ToggleTextButton*>(action->getSender());
 
-	if (button == _btnCountryTotal)
-	{
-		number = _countryToggles.size() - 1;
-	}
-	else
+	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
 		for (size_t i = 0; i < _btnCountries.size(); ++i)
 		{
-			if (button == _btnCountries[i])
+			if (button != _btnCountries[i])
 			{
-				number = i + _butCountriesOffset;
-				break;
+				_btnCountries[i]->setPressed(button->getPressed());
 			}
 		}
+		_btnCountryTotal->setPressed(button->getPressed());
+		for (std::vector<GraphButInfo*>::const_iterator i = _countryToggles.begin(); i != _countryToggles.end(); ++i)
+		{
+			(*i)->_pushed = button->getPressed();
+		}
 	}
+	else
+	{
+		if (button == _btnCountryTotal)
+		{
+			number = _countryToggles.size() - 1;
+		}
+		else
+		{
+			for (size_t i = 0; i < _btnCountries.size(); ++i)
+			{
+				if (button == _btnCountries[i])
+				{
+					number = i + _butCountriesOffset;
+					break;
+				}
+			}
+		}
 
-	_countryToggles.at(number)->_pushed = button->getPressed();
+		_countryToggles.at(number)->_pushed = button->getPressed();
+	}
 
 	drawLines();
 }
@@ -609,10 +671,6 @@ void GraphsState::resetScreen()
 void GraphsState::updateScale(double lowerLimit, double upperLimit)
 {
 	double increment = ((upperLimit - lowerLimit) / 9);
-	if (increment < 10)
-	{
-		increment = 10;
-	}
 	double text = lowerLimit;
 	for (int i = 0; i < 10; ++i)
 	{
@@ -717,6 +775,10 @@ void GraphsState::drawCountryLines()
 		}
 	}
 
+	// custom zoom
+	lowerLimit = (lowerLimit * _zoom) / 100;
+	upperLimit = (upperLimit * _zoom) / 100;
+
 	range = upperLimit - lowerLimit;
 	double units = range / 126;
 
@@ -760,9 +822,11 @@ void GraphsState::drawCountryLines()
 					totals[iter] += country->getActivityXcom().at(country->getActivityXcom().size()-(1+iter));
 				}
 			}
-			if (y >=175)
-				y = 175;
+
+			if (y >=180) y = 180;
+			if (y <= 45) y = 45;
 			newLineVector.push_back(y);
+
 			if (newLineVector.size() > 1 && _alien)
 				_alienCountryLines.at(entry)->drawLine(x, y, x+17, newLineVector.at(newLineVector.size()-2), _countryToggles.at(entry)->_color+4);
 			else if (newLineVector.size() > 1 && _income)
@@ -796,7 +860,11 @@ void GraphsState::drawCountryLines()
 			int reduction = totals[iter] / units;
 			y -= reduction;
 		}
+
+		if (y >=180) y = 180;
+		if (y <= 45) y = 45;
 		newLineVector.push_back(y);
+
 		if (newLineVector.size() > 1)
 		{
 			if (_alien)
@@ -885,9 +953,15 @@ void GraphsState::drawRegionLines()
 			upperLimit -= check;
 		}
 	}
+
+	// custom zoom
+	lowerLimit = (lowerLimit * _zoom) / 100;
+	upperLimit = (upperLimit * _zoom) / 100;
+
 	range = upperLimit - lowerLimit;
 	double units = range / 126;
-	// draw region line
+
+	// draw region lines
 	for (size_t entry = 0; entry != _game->getSavedGame()->getRegions()->size(); ++entry)
 	{
 		Region *region = _game->getSavedGame()->getRegions()->at(entry);
@@ -917,9 +991,11 @@ void GraphsState::drawRegionLines()
 					totals[iter] += region->getActivityXcom().at(region->getActivityXcom().size()-(1+iter));
 				}
 			}
-			if (y >=175)
-				y = 175;
+
+			if (y >=180) y = 180;
+			if (y <= 45) y = 45;
 			newLineVector.push_back(y);
+
 			if (newLineVector.size() > 1 && _alien)
 				_alienRegionLines.at(entry)->drawLine(x, y, x+17, newLineVector.at(newLineVector.size()-2), _regionToggles.at(entry)->_color+4);
 			else if (newLineVector.size() > 1)
@@ -949,7 +1025,11 @@ void GraphsState::drawRegionLines()
 			int reduction = totals[iter] / units;
 			y -= reduction;
 		}
+
+		if (y >=180) y = 180;
+		if (y <= 45) y = 45;
 		newLineVector.push_back(y);
+
 		if (newLineVector.size() > 1)
 		{
 			if (_alien)

@@ -42,15 +42,18 @@
 #include <windows.h>
 #include <shlobj.h>
 #include <shlwapi.h>
-#ifdef _MSC_VER
+#ifndef __NO_DBGHELP
 #include <dbghelp.h>
+#endif
+#ifdef __MINGW32__
+#include <cxxabi.h>
 #endif
 #define EXCEPTION_CODE_CXX 0xe06d7363
 #ifndef __GNUC__
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "shlwapi.lib")
-#ifdef _MSC_VER
+#ifndef __NO_DBGHELP
 #pragma comment(lib, "dbghelp.lib")
 #endif
 #endif
@@ -655,6 +658,52 @@ std::string getLocale()
 }
 
 /**
+ * Tests locale availability and remembers the result in user settings.
+ * @return Locale.
+ */
+std::locale testLocale()
+{
+	std::locale test;
+	try
+	{
+		// Don't try again if you failed once already
+		if (!Options::simpleUppercase)
+		{
+			test = std::locale("");
+		}
+	}
+	catch (const std::runtime_error &e)
+	{
+		Log(LOG_ERROR) << e.what();
+
+		// Workaround for this issue: https://openxcom.org/forum/index.php/topic,5047.msg93780.html#msg93780
+		Options::simpleUppercase = true;
+	}
+	catch (...)
+	{
+		Options::simpleUppercase = true;
+	}
+	return test;
+}
+
+/**
+ * Converts a wide string into upper case.
+ */
+void upperCase(std::wstring &input, std::locale &myLocale)
+{
+	if (!Options::simpleUppercase)
+	{
+		// converts non-English characters too
+		for (auto & c : input) c = toupper(c, myLocale);
+	}
+	else
+	{
+		// fallback, works for English characters only
+		for (auto & c : input) c = towupper(c);
+	}
+}
+
+/**
  * Checks if the system's default quit shortcut was pressed.
  * @param ev SDL event.
  * @return Is quitting necessary?
@@ -888,17 +937,18 @@ void setWindowIcon(int winResource, const std::string &unixPath)
 		SDL_WM_SetIcon(icon, NULL);
 		SDL_FreeSurface(icon);
 	}
-	winResource = 0;
+	winResource = winResource;
 #endif
 }
 
 /**
  * Logs the stack back trace leading up to this function call.
- * @param ex Pointer to stack context (PCONTEXT on Windows), NULL to use current context.
+ * @param ctx Pointer to stack context (PCONTEXT on Windows), NULL to use current context.
  */
 void stackTrace(void *ctx)
 {
-#ifdef _MSC_VER
+#ifdef _WIN32
+#ifndef __NO_DBGHELP
 	const int MAX_SYMBOL_LENGTH = 1024;
 	CONTEXT context;
 	if (ctx != 0)
@@ -907,9 +957,30 @@ void stackTrace(void *ctx)
 	}
 	else
 	{
+#ifdef _M_IX86
 		memset(&context, 0, sizeof(CONTEXT));
-		context.ContextFlags = CONTEXT_FULL;
+		context.ContextFlags = CONTEXT_CONTROL;
+#ifdef __MINGW32__
+		asm("Label:\n\t"
+			"movl %%ebp,%0;\n\t"
+			"movl %%esp,%1;\n\t"
+			"movl $Label,%%eax;\n\t"
+			"movl %%eax,%2;\n\t"
+			: "=r" (context.Ebp), "=r" (context.Esp), "=r" (context.Eip)
+			: //no input
+			: "eax");
+#else
+		_asm {
+		Label:
+			mov[context.Ebp], ebp;
+			mov[context.Esp], esp;
+			mov eax, [Label];
+			mov[context.Eip], eax;
+		}
+#endif
+#else
 		RtlCaptureContext(&context);
+#endif
 	}
 	HANDLE thread = GetCurrentThread();
 	HANDLE process = GetCurrentProcess();
@@ -943,7 +1014,6 @@ void stackTrace(void *ctx)
 	frame.AddrStack.Offset = context.IntSp;
 	frame.AddrStack.Mode = AddrModeFlat;
 #else
-	// TODO: Stack trace not supported on this architecture
 	Log(LOG_FATAL) << "Unfortunately, no stack trace information is available";
 	return;
 #endif
@@ -958,6 +1028,23 @@ void stackTrace(void *ctx)
 	{
 		if (SymFromAddr(process, frame.AddrPC.Offset, NULL, symbol))
 		{
+			std::string symname = symbol->Name;
+#ifdef __MINGW32__
+			symname = "_" + symname;
+			int status = 0;
+			size_t outSz = 0;
+			char* demangled = abi::__cxa_demangle(symname.c_str(), 0, &outSz, &status);
+			if (status == 0)
+			{
+				symname = demangled;
+				if (outSz > 0)
+					free(demangled);
+			}
+			else
+			{
+				symname = symbol->Name;
+			}
+#endif
 			if (SymGetLineFromAddr64(process, frame.AddrPC.Offset, &displacement, line))
 			{
 				std::string filename = line->FileName;
@@ -966,30 +1053,27 @@ void stackTrace(void *ctx)
 				{
 					filename = filename.substr(n + 1);
 				}
-				Log(LOG_FATAL) << "0x" << std::hex << symbol->Address << std::dec << " " << symbol->Name << " (" << filename << ":" << line->LineNumber << ")";
+				Log(LOG_FATAL) << "0x" << std::hex << symbol->Address << std::dec << " " << symname << " (" << filename << ":" << line->LineNumber << ")";
 			}
 			else
 			{
-				Log(LOG_FATAL) << "0x" << std::hex << symbol->Address << std::dec << " " << symbol->Name << " (??: " << GetLastError() << ")";
+				Log(LOG_FATAL) << "0x" << std::hex << symbol->Address << std::dec << " " << symname;
 			}
 		}
 		else
 		{
-			Log(LOG_FATAL) << "??: " << GetLastError();
+			Log(LOG_FATAL) << "??";
 		}
 	}
 	DWORD err = GetLastError();
 	if (err)
 	{
-		Log(LOG_FATAL) << "No stack trace generated: " << err;
+		Log(LOG_FATAL) << "Unfortunately, no stack trace information is available";
 	}
 	SymCleanup(process);
 #else
-	ctx = 0;
-#ifdef _WIN32
-	// TODO: Figure out stack trace on MinGW, use dbg
 	Log(LOG_FATAL) << "Unfortunately, no stack trace information is available";
-	return;
+#endif
 #else
 	const int MAX_STACK_FRAMES = 16;
 	void *array[MAX_STACK_FRAMES];
@@ -1003,7 +1087,7 @@ void stackTrace(void *ctx)
 
 	free(strings);
 #endif
-#endif
+	ctx = (void*)ctx;
 }
 
 /**
@@ -1100,7 +1184,7 @@ void crashDump(void *ex, const std::string &err)
 #endif
 	std::ostringstream msg;
 	msg << "OpenXcom has crashed: " << error.str() << std::endl;
-	msg << "For more details see: " << Logger::logFile() << std::endl;
+	msg << "More details here: " << Logger::logFile() << std::endl;
 	msg << "If this error was unexpected, please report it to the developers.";
 	showError(msg.str());
 }

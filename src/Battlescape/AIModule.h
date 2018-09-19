@@ -53,6 +53,11 @@ private:
 	std::vector<int> _reachable, _reachableWithAttack, _wasHitBy;
 	BattleActionType _reserve;
 	UnitFaction _targetFaction;
+
+	bool selectPointNearTargetLeeroy(BattleUnit *target) const;
+	int selectNearestTargetLeeroy();
+	void meleeActionLeeroy();
+	void dont_think(BattleAction *action);
 public:
 	/// Creates a new AIModule linked to the game and a certain unit.
 	AIModule(SavedBattleGame *save, BattleUnit *unit, Node *node);
@@ -88,6 +93,10 @@ public:
 	bool selectRandomTarget();
 	/// Selects the nearest reachable point relative to a target.
 	bool selectPointNearTarget(BattleUnit *target, int maxTUs) const;
+	/// Selects a target from a list of units seen by spotter units for out-of-LOS actions
+	bool selectSpottedUnitForSniper();
+	/// Scores a firing mode action based on distance to target and accuracy.
+	int scoreFiringMode(BattleAction *action, BattleUnit *target, bool checkLOF);
 	/// re-evaluate our situation, and make a decision from our available options.
 	void evaluateAIMode();
 	/// Selects a suitable position from which to attack.
@@ -99,8 +108,12 @@ public:
 	void meleeAction();
 	/// Attempts to fire a waypoint projectile at an enemy we, or one of our teammates sees.
 	void wayPointAction();
+	/// Attempts to fire at an enemy spotted for us.
+	bool sniperAction();
 	/// Attempts to fire at an enemy we can see.
 	void projectileAction();
+	/// Chooses a firing mode for the AI based on expected number of hits per turn
+	void extendedFireModeChoice(BattleActionCost& costAuto, BattleActionCost& costSnap, BattleActionCost& costAimed, BattleActionCost& costThrow, bool checkLOF = false);
 	/// Attempts to throw a grenade at an enemy (or group of enemies) we can see.
 	void grenadeAction();
 	/// Performs a psionic attack.

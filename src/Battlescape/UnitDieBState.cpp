@@ -217,10 +217,17 @@ void UnitDieBState::think()
 		{
 			_unit->setTurnsSinceSpotted(255);
 		}
+		if (_unit->getTurnsLeftSpottedForSnipers() != 0)
+		{
+			_unit->setTurnsLeftSpottedForSnipers(0);
+		}
 		if (!_unit->getSpawnUnit().empty() && !_overKill)
 		{
-			// converts the dead zombie to a chryssalid
-			_parent->convertUnit(_unit);
+			if (!_unit->getAlreadyRespawned())
+			{
+				// converts the dead zombie to a chryssalid
+				_parent->convertUnit(_unit);
+			}
 		}
 		else
 		{
@@ -255,6 +262,7 @@ void UnitDieBState::convertUnitToCorpse()
 	if (!_noSound)
 	{
 		_parent->getSave()->getBattleState()->showPsiButton(false);
+		_parent->getSave()->getBattleState()->showSpecialButton(false);
 	}
 	// remove the unconscious body item corresponding to this unit, and if it was being carried, keep track of what slot it was in
 	if (lastPosition != Position(-1,-1,-1))

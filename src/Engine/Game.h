@@ -30,6 +30,7 @@ class Cursor;
 class Language;
 class SavedGame;
 class Mod;
+class ModInfo;
 class FpsCounter;
 
 /**
@@ -84,6 +85,8 @@ public:
 	Language *getLanguage() const;
 	/// Loads a new language for the game.
 	void loadLanguage(const std::string &filename);
+	void loadLanguageCommon(const std::string &filename, const std::string &directory, bool checkIfExists);
+	void loadLanguageMods(const ModInfo *modInfo, const std::string &filename, const std::string &directory);
 	/// Gets the currently loaded saved game.
 	SavedGame *getSavedGame() const;
 	/// Sets a new saved game for the game.

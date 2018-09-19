@@ -53,6 +53,8 @@ public:
 	void btnCentreClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
+	/// Handler for pressing/releasing CTRL.
+	void toggleCancel(Action *action);
 };
 
 }

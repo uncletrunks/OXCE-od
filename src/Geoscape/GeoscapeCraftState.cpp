@@ -66,10 +66,12 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	_txtSpeed = new Text(210, 9, 32, offset_upper + 60);
 	_txtMaxSpeed = new Text(210, 9, 32, offset_upper + 68);
 	_txtAltitude = new Text(210, 9, 32, offset_upper + 76);
-	_txtSoldier = new Text(60, 9, 164, offset_upper + 68);
-	_txtHWP = new Text(80, 9, 164, offset_upper + 76);
+	_txtSoldier = new Text(60, 9, 164, offset_upper + 60);
+	_txtHWP = new Text(80, 9, 164, offset_upper + 68);
 	_txtFuel = new Text(130, 9, 32, offset_upper + 84);
 	_txtDamage = new Text(80, 9, 164, offset_upper + 84);
+	_txtShield = new Text(80, 9, 164, offset_upper + 76);
+
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		_txtWeaponName[i] = new Text(130, 9, 32, offset_upper + 92 + 8*i);
@@ -97,6 +99,7 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	add(_txtAltitude, "text3", "geoCraft");
 	add(_txtFuel, "text3", "geoCraft");
 	add(_txtDamage, "text3", "geoCraft");
+	add(_txtShield, "text3", "geoCraft");
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		add(_txtWeaponName[i], "text3", "geoCraft");
@@ -117,7 +120,7 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 	_btnTarget->setText(tr("STR_SELECT_NEW_TARGET"));
 	_btnTarget->onMouseClick((ActionHandler)&GeoscapeCraftState::btnTargetClick);
 
-	_btnPatrol->setText(tr("STR_PATROL"));
+	_btnPatrol->setText(_craft->getRules()->canAutoPatrol() ? tr("STR_AUTO_PATROL") : tr("STR_PATROL"));
 	_btnPatrol->onMouseClick((ActionHandler)&GeoscapeCraftState::btnPatrolClick);
 
 	_btnCancel->setText(tr("STR_CANCEL_UC"));
@@ -200,6 +203,9 @@ GeoscapeCraftState::GeoscapeCraftState(Craft *craft, Globe *globe, Waypoint *way
 
 	_txtDamage->setText(tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage())));
 
+	_txtShield->setText(tr("STR_SHIELD").arg(Text::formatPercentage(_craft->getShieldPercentage())));
+	_txtShield->setVisible(_craft->getShieldCapacity() != 0);
+
 	for(int i = 0; i < _weaponNum; ++i)
 	{
 		const std::string &wName = _craft->getRules()->getWeaponSlotString(i);
@@ -277,6 +283,11 @@ void GeoscapeCraftState::btnBaseClick(Action *)
 	_game->popState();
 	_craft->returnToBase();
 	delete _waypoint;
+	if (_craft->getRules()->canAutoPatrol())
+	{
+		// cancel auto-patrol
+		_craft->setIsAutoPatrolling(false);
+	}
 }
 
 /**
@@ -299,6 +310,13 @@ void GeoscapeCraftState::btnPatrolClick(Action *)
 	_game->popState();
 	_craft->setDestination(0);
 	delete _waypoint;
+	if (_craft->getRules()->canAutoPatrol())
+	{
+		// start auto-patrol
+		_craft->setLatitudeAuto(_craft->getLatitude());
+		_craft->setLongitudeAuto(_craft->getLongitude());
+		_craft->setIsAutoPatrolling(true);
+	}
 }
 
 /**

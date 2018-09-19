@@ -36,6 +36,7 @@ class AlienBase;
 class MissionSite;
 struct MissionArea;
 class AlienDeployment;
+class Country;
 
 /**
  * Represents an ongoing alien mission.
@@ -52,6 +53,7 @@ private:
 	size_t _nextUfoCounter;
 	size_t _spawnCountdown;
 	size_t _liveUfos;
+	bool _interrupted;
 	int _uniqueID, _missionSiteZone;
 	const AlienBase *_base;
 public:
@@ -100,6 +102,8 @@ public:
 	void increaseLiveUfos() { ++_liveUfos; }
 	/// Decrease number of live UFOs.
 	void decreaseLiveUfos() { --_liveUfos; }
+	/// Sets the interrupted flag.
+	void setInterrupted(bool interrupted) { _interrupted = interrupted; }
 	/// Handle UFO reaching a waypoint.
 	void ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe);
 	/// Handle UFO lifting from the ground.
@@ -112,11 +116,11 @@ public:
 	void setMissionSiteZone(int zone);
 private:
 	/// Spawns a UFO, based on mission rules.
-	Ufo *spawnUfo(const SavedGame &game, const Mod &mod, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory);
+	Ufo *spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory);
 	/// Spawn an alien base
-	void spawnAlienBase(Game &engine, const MissionArea &area, std::pair<double, double> pos);
+	void spawnAlienBase(Country *pactCountry, Game &engine, const MissionArea &area, std::pair<double, double> pos);
 	/// Select a destination (lon/lat) based on the criteria of our trajectory and desired waypoint.
-	std::pair<double, double> getWaypoint(const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region);
+	std::pair<double, double> getWaypoint(const MissionWave &wave, const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region);
 	/// Get a random landing point inside the given region zone.
 	std::pair<double, double> getLandPoint(const Globe &globe, const RuleRegion &region, size_t zone);
 	/// Spawns a MissionSite at a specific location.

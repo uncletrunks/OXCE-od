@@ -31,11 +31,18 @@ const std::string Armor::NONE = "STR_NONE";
  * @param type String defining the type.
  */
 Armor::Armor(const std::string &type) :
-	_type(type), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0),
-	_drawingRoutine(0), _movementType(MT_WALK), _size(1), _weight(0), _visibilityAtDark(0), _visibilityAtDay(0), _personalLight(15),
+	_type(type), _frontArmor(0), _sideArmor(0), _leftArmorDiff(0), _rearArmor(0), _underArmor(0),
+	_drawingRoutine(0), _movementType(MT_WALK), _moveSound(-1), _size(1), _weight(0),
+	_visibilityAtDark(0), _visibilityAtDay(0), _personalLight(15),
+	_camouflageAtDay(0), _camouflageAtDark(0), _antiCamouflageAtDay(0), _antiCamouflageAtDark(0), _heatVision(0), _psiVision(0),
 	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
-	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1), _overKill(0.5f), _meleeDodgeBackPenalty(0)
+	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1),
+	_ignoresMeleeThreat(-1), _createsMeleeThreat(-1),
+	_overKill(0.5f), _meleeDodgeBackPenalty(0),
+	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true),
+	_instantWoundRecovery(false),
+	_standHeight(-1), _kneelHeight(-1), _floatHeight(-1)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0f;
@@ -44,6 +51,8 @@ Armor::Armor(const std::string &type) :
 	_timeRecovery.setTimeRecovery();
 	_energyRecovery.setEnergyRecovery();
 	_stunRecovery.setStunRecovery();
+
+	_customArmorPreviewIndex.push_back(0);
 }
 
 /**
@@ -58,11 +67,11 @@ Armor::~Armor()
  * Loads the armor from a YAML file.
  * @param node YAML node.
  */
-void Armor::load(const YAML::Node &node, const ModScript &parsers)
+void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 {
 	if (const YAML::Node &parent = node["refNode"])
 	{
-		load(parent, parsers);
+		load(parent, parsers, mod);
 	}
 	_type = node["type"].as<std::string>(_type);
 	_spriteSheet = node["spriteSheet"].as<std::string>(_spriteSheet);
@@ -85,14 +94,25 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_specWeapon = node["specialWeapon"].as<std::string>(_specWeapon);
 	_frontArmor = node["frontArmor"].as<int>(_frontArmor);
 	_sideArmor = node["sideArmor"].as<int>(_sideArmor);
+	_leftArmorDiff = node["leftArmorDiff"].as<int>(_leftArmorDiff);
 	_rearArmor = node["rearArmor"].as<int>(_rearArmor);
 	_underArmor = node["underArmor"].as<int>(_underArmor);
 	_drawingRoutine = node["drawingRoutine"].as<int>(_drawingRoutine);
 	_movementType = (MovementType)node["movementType"].as<int>(_movementType);
+	if (node["moveSound"])
+	{
+		_moveSound = mod->getSoundOffset(node["moveSound"].as<int>(_moveSound), "BATTLE.CAT");
+	}
 	_weight = node["weight"].as<int>(_weight);
 	_visibilityAtDark = node["visibilityAtDark"].as<int>(_visibilityAtDark);
 	_visibilityAtDay = node["visibilityAtDay"].as<int>(_visibilityAtDay);
 	_personalLight = node["personalLight"].as<int>(_personalLight);
+	_camouflageAtDay = node["camouflageAtDay"].as<int>(_camouflageAtDay);
+	_camouflageAtDark = node["camouflageAtDark"].as<int>(_camouflageAtDark);
+	_antiCamouflageAtDay = node["antiCamouflageAtDay"].as<int>(_antiCamouflageAtDay);
+	_antiCamouflageAtDark = node["antiCamouflageAtDark"].as<int>(_antiCamouflageAtDark);
+	_heatVision = node["heatVision"].as<int>(_heatVision);
+	_psiVision = node["psiVision"].as<int>(_psiVision);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
 	if (const YAML::Node &dmg = node["damageModifier"])
 	{
@@ -107,7 +127,8 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	_deathFrames = node["deathFrames"].as<int>(_deathFrames);
 	_constantAnimation = node["constantAnimation"].as<bool>(_constantAnimation);
 	_forcedTorso = (ForcedTorso)node["forcedTorso"].as<int>(_forcedTorso);
-	if (_drawingRoutine == 0 ||
+	_canHoldWeapon =
+		(_drawingRoutine == 0 ||
 		_drawingRoutine == 1 ||
 		_drawingRoutine == 4 ||
 		_drawingRoutine == 6 ||
@@ -116,14 +137,8 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 		_drawingRoutine == 14 ||
 		_drawingRoutine == 15 ||
 		_drawingRoutine == 17 ||
-		_drawingRoutine == 18)
-	{
-		_canHoldWeapon = true;
-	}
-	else
-	{
-		_canHoldWeapon = false;
-	}
+		_drawingRoutine == 18);
+
 	if (const YAML::Node &size = node["size"])
 	{
 		_size = size.as<int>(_size);
@@ -133,6 +148,8 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 			_bleedImmune = 1;
 			_painImmune = 1;
 			_zombiImmune = 1;
+			_ignoresMeleeThreat = 1;
+			_createsMeleeThreat = 0;
 		}
 	}
 	if (node["fearImmune"])
@@ -150,6 +167,14 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 	if (node["zombiImmune"] && _size == 1) //Big units are always immune, because game we don't have 2x2 unit zombie
 	{
 		_zombiImmune = node["zombiImmune"].as<bool>();
+	}
+	if (node["ignoresMeleeThreat"])
+	{
+		_ignoresMeleeThreat = node["ignoresMeleeThreat"].as<bool>();
+	}
+	if (node["createsMeleeThreat"])
+	{
+		_createsMeleeThreat = node["createsMeleeThreat"].as<bool>();
 	}
 	_overKill = node["overKill"].as<float>(_overKill);
 	_meleeDodgeBackPenalty = node["meleeDodgeBackPenalty"].as<float>(_meleeDodgeBackPenalty);
@@ -178,6 +203,28 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers)
 
 	_units = node["units"].as< std::vector<std::string> >(_units);
 	_scriptValues.load(node, parsers.getShared());
+	if (const YAML::Node &capi = node["customArmorPreviewIndex"])
+	{
+		_customArmorPreviewIndex.clear();
+		if (capi.IsScalar())
+		{
+			_customArmorPreviewIndex.push_back(mod->getSpriteOffset(capi.as<int>(), "CustomArmorPreviews"));
+		}
+		else
+		{
+			for (YAML::const_iterator i = capi.begin(); i != capi.end(); ++i)
+			{
+				_customArmorPreviewIndex.push_back(mod->getSpriteOffset(i->as<int>(), "CustomArmorPreviews"));
+			}
+		}
+	}
+	_allowsRunning = node["allowsRunning"].as<bool>(_allowsRunning);
+	_allowsStrafing = node["allowsStrafing"].as<bool>(_allowsStrafing);
+	_allowsKneeling = node["allowsKneeling"].as<bool>(_allowsKneeling);
+	_instantWoundRecovery = node["instantWoundRecovery"].as<bool>(_instantWoundRecovery);
+	_standHeight = node["standHeight"].as<int>(_standHeight);
+	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
+	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
 }
 
 /**
@@ -218,10 +265,19 @@ int Armor::getFrontArmor() const
 }
 
 /**
- * Gets the side armor level.
- * @return The side armor level.
+ * Gets the left side armor level.
+ * @return The left side armor level.
  */
-int Armor::getSideArmor() const
+int Armor::getLeftSideArmor() const
+{
+	return _sideArmor + _leftArmorDiff;
+}
+
+/**
+* Gets the right side armor level.
+* @return The right side armor level.
+*/
+int Armor::getRightSideArmor() const
 {
 	return _sideArmor;
 }
@@ -254,7 +310,7 @@ int Armor::getArmor(UnitSide side) const
 	switch (side)
 	{
 	case SIDE_FRONT:	return _frontArmor;
-	case SIDE_LEFT:		return _sideArmor;
+	case SIDE_LEFT:		return _sideArmor + _leftArmorDiff;
 	case SIDE_RIGHT:	return _sideArmor;
 	case SIDE_REAR:		return _rearArmor;
 	case SIDE_UNDER:	return _underArmor;
@@ -324,6 +380,15 @@ MovementType Armor::getMovementType() const
 }
 
 /**
+* Gets the armor's move sound.
+* @return The id of the armor's move sound.
+*/
+int Armor::getMoveSound() const
+{
+	return _moveSound;
+}
+
+/**
  * Gets the size of the unit. Normally this is 1 (small) or 2 (big).
  * @return The unit's size.
  */
@@ -348,6 +413,16 @@ int Armor::getTotalSize() const
 float Armor::getDamageModifier(ItemDamageType dt) const
 {
 	return _damageModifier[(int)dt];
+}
+
+const std::vector<float> Armor::getDamageModifiersRaw() const
+{
+	std::vector<float> result;
+	for (int i = 0; i < DAMAGE_TYPES; i++)
+	{
+		result.push_back(_damageModifier[i]);
+	}
+	return result;
 }
 
 /** Gets the loftempSet.
@@ -508,6 +583,60 @@ int Armor::getVisibilityAtDay() const
 }
 
 /**
+* Gets info about camouflage at day.
+* @return The vision distance modifier.
+*/
+int Armor::getCamouflageAtDay() const
+{
+	return _camouflageAtDay;
+}
+
+/**
+* Gets info about camouflage at dark.
+* @return The vision distance modifier.
+*/
+int Armor::getCamouflageAtDark() const
+{
+	return _camouflageAtDark;
+}
+
+/**
+* Gets info about anti camouflage at day.
+* @return The vision distance modifier.
+*/
+int Armor::getAntiCamouflageAtDay() const
+{
+	return _antiCamouflageAtDay;
+}
+
+/**
+* Gets info about anti camouflage at dark.
+* @return The vision distance modifier.
+*/
+int Armor::getAntiCamouflageAtDark() const
+{
+	return _antiCamouflageAtDark;
+}
+
+/**
+* Gets info about heat vision.
+* @return How much smoke is ignored, in percent.
+*/
+int Armor::getHeatVision() const
+{
+	return _heatVision;
+}
+
+/**
+* Gets info about psi vision.
+* @return How many tiles can units be sensed even through solid obstacles (e.g. walls).
+*/
+int Armor::getPsiVision() const
+{
+	return _psiVision;
+}
+
+/**
 * Gets personal light radius created by solders.
 * @return Return light radius.
 */
@@ -554,6 +683,26 @@ bool Armor::getPainImmune(bool def) const
 bool Armor::getZombiImmune(bool def) const
 {
 	return _zombiImmune != -1 ? _zombiImmune : def;
+}
+
+/**
+ * Gets whether or not this unit ignores close quarters threats.
+ * @param def Default value.
+ * @return Ignores CQB check?
+ */
+bool Armor::getIgnoresMeleeThreat(bool def) const
+{
+	return _ignoresMeleeThreat != -1 ? _ignoresMeleeThreat : def;
+}
+
+/**
+ * Gets whether or not this unit is a close quarters threat.
+ * @param def Default value.
+ * @return Creates CQB check for others?
+ */
+bool Armor::getCreatesMeleeThreat(bool def) const
+{
+	return _createsMeleeThreat != -1 ? _createsMeleeThreat : def;
 }
 
 /**
@@ -740,6 +889,78 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 
 	ar.addScriptValue<&Armor::_scriptValues>(false);
 	ar.addDebugDisplay<&debugDisplayScript>();
+}
+
+/**
+ * Gets the index of the sprite in the CustomArmorPreview sprite set.
+ * @return Sprite index.
+ */
+const std::vector<int> &Armor::getCustomArmorPreviewIndex() const
+{
+	return _customArmorPreviewIndex;
+}
+
+/**
+ * Can you run while wearing this armor?
+ * @return True if you are allowed to run.
+ */
+bool Armor::allowsRunning() const
+{
+	return _allowsRunning;
+}
+
+/**
+ * Can you strafe while wearing this armor?
+ * @return True if you are allowed to strafe.
+ */
+bool Armor::allowsStrafing() const
+{
+	return _allowsStrafing;
+}
+
+/**
+ * Can you kneel while wearing this armor?
+ * @return True if you are allowed to kneel.
+ */
+bool Armor::allowsKneeling() const
+{
+	return _allowsKneeling;
+}
+
+/**
+ * Does this armor instantly recover any wounds after the battle?
+ * @return True if soldier should not get any recovery time.
+ */
+bool Armor::getInstantWoundRecovery() const
+{
+	return _instantWoundRecovery;
+}
+
+/**
+ * Returns a unit's height at standing in this armor.
+ * @return The unit's height.
+ */
+int Armor::getStandHeight() const
+{
+	return _standHeight;
+}
+
+/**
+ * Returns a unit's height at kneeling in this armor.
+ * @return The unit's kneeling height.
+ */
+int Armor::getKneelHeight() const
+{
+	return _kneelHeight;
+}
+
+/**
+ * Returns a unit's floating elevation in this armor.
+ * @return The unit's floating height.
+ */
+int Armor::getFloatHeight() const
+{
+	return _floatHeight;
 }
 
 }

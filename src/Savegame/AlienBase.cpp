@@ -25,8 +25,10 @@ namespace OpenXcom
 /**
  * Initializes an alien base
  */
-AlienBase::AlienBase(AlienDeployment *deployment) : Target(), _id(0), _inBattlescape(false), _discovered(false), _deployment(deployment)
+AlienBase::AlienBase(AlienDeployment *deployment) : Target(), _inBattlescape(false), _discovered(false), _deployment(deployment), _genMissionCount(0)
 {
+	// allow spawning hunt missions immediately after the base is created, i.e. no initial delay
+	_minutesSinceLastHuntMissionGeneration = _deployment->getHuntMissionMaxFrequency();
 }
 
 /**
@@ -43,10 +45,12 @@ AlienBase::~AlienBase()
 void AlienBase::load(const YAML::Node &node)
 {
 	Target::load(node);
-	_id = node["id"].as<int>(_id);
+	_pactCountry = node["pactCountry"].as<std::string>(_pactCountry);
 	_race = node["race"].as<std::string>(_race);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
 	_discovered = node["discovered"].as<bool>(_discovered);
+	_minutesSinceLastHuntMissionGeneration = node["minutesSinceLastHuntMissionGeneration"].as<int>(_minutesSinceLastHuntMissionGeneration);
+	_genMissionCount = node["genMissionCount"].as<int>(_genMissionCount);
 }
 
 /**
@@ -56,54 +60,26 @@ void AlienBase::load(const YAML::Node &node)
 YAML::Node AlienBase::save() const
 {
 	YAML::Node node = Target::save();
-	node["id"] = _id;
+	node["pactCountry"] = _pactCountry;
 	node["race"] = _race;
 	if (_inBattlescape)
 		node["inBattlescape"] = _inBattlescape;
 	if (_discovered)
 		node["discovered"] = _discovered;
 	node["deployment"] = _deployment->getType();
+	node["minutesSinceLastHuntMissionGeneration"] = _minutesSinceLastHuntMissionGeneration;
+	node["genMissionCount"] = _genMissionCount;
 	return node;
 }
 
 /**
- * Saves the alien base's unique identifiers to a YAML file.
- * @return YAML node.
+ * Returns the alien base's unique type used for
+ * savegame purposes.
+ * @return ID.
  */
-YAML::Node AlienBase::saveId() const
+std::string AlienBase::getType() const
 {
-	YAML::Node node = Target::saveId();
-	node["type"] = _deployment->getMarkerName();
-	node["id"] = _id;
-	return node;
-}
-
-/**
- * Returns the alien base's unique ID.
- * @return Unique ID.
- */
-int AlienBase::getId() const
-{
-	return _id;
-}
-
-/**
- * Changes the alien base's unique ID.
- * @param id Unique ID.
- */
-void AlienBase::setId(int id)
-{
-	_id = id;
-}
-
-/**
- * Returns the alien base's unique default name.
- * @param lang Language to get strings from.
- * @return Full name.
- */
-std::wstring AlienBase::getDefaultName(Language *lang) const
-{
-	return lang->getString(_deployment->getMarkerName() + "_").arg(_id);
+	return _deployment->getMarkerName();
 }
 
 /**
@@ -115,6 +91,24 @@ int AlienBase::getMarker() const
 	if (!_discovered)
 		return -1;
 	return _deployment->getMarkerIcon();
+}
+
+/**
+ * Returns the country this base has a pact with.
+ * @return Country ID.
+ */
+const std::string &AlienBase::getPactCountry() const
+{
+	return _pactCountry;
+}
+
+/**
+ * Changes the country that has a pact with this alien base.
+ * @param pactCountry Country ID.
+ */
+void AlienBase::setPactCountry(const std::string &pactCountry)
+{
+	_pactCountry = pactCountry;
 }
 
 /**
@@ -174,6 +168,42 @@ void AlienBase::setDiscovered(bool discovered)
 AlienDeployment *AlienBase::getDeployment() const
 {
 	return _deployment;
+}
+
+/**
+ * Gets the number of minutes passed since the last hunt mission was generated.
+ * @return Number of minutes.
+ */
+int AlienBase::getMinutesSinceLastHuntMissionGeneration() const
+{
+	return _minutesSinceLastHuntMissionGeneration;
+}
+
+/**
+ * Sets the number of minutes passed since the last hunt mission was generated.
+ * @param newValue Number of minutes.
+ */
+void AlienBase::setMinutesSinceLastHuntMissionGeneration(int newValue)
+{
+	_minutesSinceLastHuntMissionGeneration = newValue;
+}
+
+/**
+ * Gets the number of genMissions generated so far by this base.
+ * @return Number of missions.
+ */
+int AlienBase::getGenMissionCount() const
+{
+	return _genMissionCount;
+}
+
+/**
+ * Sets the number of genMissions generated so far by this base.
+ * @param newValue Number of missions.
+ */
+void AlienBase::setGenMissionCount(int newValue)
+{
+	_genMissionCount = newValue;
 }
 
 }

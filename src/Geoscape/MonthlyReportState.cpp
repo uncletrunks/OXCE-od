@@ -51,7 +51,7 @@ namespace OpenXcom
  * @param psi Show psi training afterwards?
  * @param globe Pointer to the globe.
  */
-MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _ratingTotal(0), _fundingDiff(0), _lastMonthsRating(0), _happyList(0), _sadList(0), _pactList(0)
+MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _ratingTotal(0), _fundingDiff(0), _lastMonthsRating(0), _happyList(0), _sadList(0), _pactList(0), _cancelPactList(0)
 {
 	_globe = globe;
 	// Create objects
@@ -64,7 +64,8 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	_txtIncome = new Text(300, 9, 16, 32);
 	_txtMaintenance = new Text(130, 9, 16, 40);
 	_txtBalance = new Text(160, 9, 146, 40);
-	_txtDesc = new Text(280, 132, 16, 48);
+	_txtBonus = new Text(300, 9, 16, 48);
+	_txtDesc = new Text(280, 124, 16, 56);
 	_txtFailure = new Text(290, 160, 15, 10);
 
 	// Set palette
@@ -79,6 +80,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	add(_txtIncome, "text1", "monthlyReport");
 	add(_txtMaintenance, "text1", "monthlyReport");
 	add(_txtBalance, "text1", "monthlyReport");
+	add(_txtBonus, "text1", "monthlyReport");
 	add(_txtDesc, "text2", "monthlyReport");
 	add(_txtFailure, "text2", "monthlyReport");
 
@@ -184,6 +186,29 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	ss2 << tr("STR_MAINTENANCE") << L"> \x01" << Text::formatFunding(_game->getSavedGame()->getBaseMaintenance());
 	_txtMaintenance->setText(ss2.str());
 
+	int performanceBonus = _ratingTotal * _game->getMod()->getPerformanceBonusFactor();
+	if (performanceBonus > 0)
+	{
+		// increase funds by performance bonus
+		_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + performanceBonus);
+		// display
+		std::wostringstream ss4;
+		ss4 << tr("STR_PERFORMANCE_BONUS") << L"> \x01" << Text::formatFunding(performanceBonus);
+		_txtBonus->setText(ss4.str());
+		// shuffle the fields a bit for better overview
+		int upper = _txtMaintenance->getY();
+		int lower = _txtBonus->getY();
+		_txtMaintenance->setY(lower);
+		_txtBalance->setY(lower);
+		_txtBonus->setY(upper);
+	}
+	else
+	{
+		// vanilla view
+		_txtBonus->setVisible(false);
+		_txtDesc->setY(_txtBonus->getY());
+	}
+
 	std::wostringstream ss3;
 	ss3 << tr("STR_BALANCE") << L"> \x01" << Text::formatFunding(_game->getSavedGame()->getFunds());
 	_txtBalance->setText(ss3.str());
@@ -206,6 +231,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	{
 		satisFactionString = tr("STR_YOU_HAVE_NOT_SUCCEEDED");
 		_pactList.erase(_pactList.begin(), _pactList.end());
+		_cancelPactList.erase(_cancelPactList.begin(), _cancelPactList.end());
 		_happyList.erase(_happyList.begin(), _happyList.end());
 		_sadList.erase(_sadList.begin(), _sadList.end());
 		_gameOver = true;
@@ -222,6 +248,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 				ss5.str(L"");
 				ss5 << tr("STR_YOU_HAVE_NOT_SUCCEEDED");
 				_pactList.erase(_pactList.begin(), _pactList.end());
+				_cancelPactList.erase(_cancelPactList.begin(), _cancelPactList.end());
 				_happyList.erase(_happyList.begin(), _happyList.end());
 				_sadList.erase(_sadList.begin(), _sadList.end());
 				_gameOver = true;
@@ -242,6 +269,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 	ss5 << countryList(_happyList, "STR_COUNTRY_IS_PARTICULARLY_PLEASED", "STR_COUNTRIES_ARE_PARTICULARLY_HAPPY");
 	ss5 << countryList(_sadList, "STR_COUNTRY_IS_UNHAPPY_WITH_YOUR_ABILITY", "STR_COUNTRIES_ARE_UNHAPPY_WITH_YOUR_ABILITY");
 	ss5 << countryList(_pactList, "STR_COUNTRY_HAS_SIGNED_A_SECRET_PACT", "STR_COUNTRIES_HAVE_SIGNED_A_SECRET_PACT");
+	ss5 << countryList(_cancelPactList, "STR_COUNTRY_HAS_CANCELLED_A_SECRET_PACT", "STR_COUNTRIES_HAVE_CANCELLED_A_SECRET_PACT");
 
 	_txtDesc->setText(ss5.str());
 }
@@ -302,16 +330,13 @@ void MonthlyReportState::btnOkClick(Action *)
 			psi = psi || (*b)->getAvailablePsiLabs();
 			training = training || (*b)->getAvailableTraining();
 		}
-		if (!Options::anytimePsiTraining)
+		if (psi && !Options::anytimePsiTraining)
 		{
-			if (psi)
-			{
-				_game->pushState(new PsiTrainingState);
-			}
-			else if (training)
-			{
-				_game->pushState(new TrainingState);
-			}
+			_game->pushState(new PsiTrainingState);
+		}
+		else if (training && !Options::anytimeMartialTraining)
+		{
+			_game->pushState(new TrainingState);
 		}
 		// Autosave
 		if (_game->getSavedGame()->isIronman())
@@ -342,6 +367,7 @@ void MonthlyReportState::btnOkClick(Action *)
 			_txtIncome->setVisible(false);
 			_txtMaintenance->setVisible(false);
 			_txtBalance->setVisible(false);
+			_txtBonus->setVisible(false);
 			_txtDesc->setVisible(false);
 			_btnOk->setVisible(false);
 			_btnBigOk->setVisible(true);
@@ -398,6 +424,7 @@ void MonthlyReportState::calculateChanges()
 	{
 		pactScore = infiltration->getPoints();
 	}
+	int averageFunding = _game->getSavedGame()->getCountryFunding() / _game->getSavedGame()->getCountries()->size() / 1000 * 1000;
 	for (std::vector<Country*>::iterator k = _game->getSavedGame()->getCountries()->begin(); k != _game->getSavedGame()->getCountries()->end(); ++k)
 	{
 		// add them to the list of new pact members
@@ -408,9 +435,13 @@ void MonthlyReportState::calculateChanges()
 		{
 			_pactList.push_back((*k)->getRules()->getType());
 		}
+		if ((*k)->getCancelPact() && (*k)->getPact())
+		{
+			_cancelPactList.push_back((*k)->getRules()->getType());
+		}
 		// determine satisfaction level, sign pacts, adjust funding
 		// and update activity meters,
-		(*k)->newMonth(xcomTotal, alienTotal, pactScore);
+		(*k)->newMonth(xcomTotal, alienTotal, pactScore, averageFunding);
 		// and after they've made their decisions, calculate the difference, and add
 		// them to the appropriate lists.
 		_fundingDiff += (*k)->getFunding().back()-(*k)->getFunding().at((*k)->getFunding().size()-2);

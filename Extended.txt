@@ -195,6 +195,7 @@ Breaking change: Renamed access function to statis in armor (added prefix `Stats
 Bug fix.[br/]
 [br/]
 5.0:[br/]
+Merge both OXCE and OXCE+ into one.[br/]
 [br/]
 
 [examples]

@@ -135,7 +135,8 @@ int Projectile::calculateTrajectory(double accuracy, const Position& originVoxel
 		_action.autoShotCounter == 1 &&
 		((SDL_GetModState() & KMOD_CTRL) == 0 || !Options::forceFire) &&
 		_save->getBattleGame()->getPanicHandled() &&
-		_action.type != BA_LAUNCH)
+		_action.type != BA_LAUNCH &&
+		!_action.sprayTargeting)
 	{
 		Position hitPos = Position(_trajectory.at(0).x/16, _trajectory.at(0).y/16, _trajectory.at(0).z/24);
 		if (test == V_UNIT && _save->getTile(hitPos) && _save->getTile(hitPos)->getUnit() == 0) //no unit? must be lower
@@ -379,6 +380,33 @@ void Projectile::applyAccuracy(Position origin, Position *target, double accurac
 		zShift = xyShift / 2 + zDist;
 	else
 		zShift = xyShift + zDist / 2;
+
+	// Apply penalty for having no LOS to target
+	int noLOSAccuracyPenalty = _action.weapon->getRules()->getNoLOSAccuracyPenalty(_mod);
+	if (noLOSAccuracyPenalty != -1)
+	{
+		Tile *t = _save->getTile(target->toTile());
+		if (t)
+		{
+			bool hasLOS = false;
+			BattleUnit *bu = _action.actor;
+			BattleUnit *targetUnit = t->getUnit();
+
+			if (targetUnit)
+			{
+				hasLOS = _save->getTileEngine()->visible(bu, t);
+			}
+			else
+			{
+				hasLOS = _save->getTileEngine()->isTileInLOS(&_action, t);
+			}
+
+			if (!hasLOS)
+			{
+				accuracy = accuracy * noLOSAccuracyPenalty / 100;
+			}
+		}
+	}
 
 	int deviation = RNG::generate(0, 100) - (accuracy * 100);
 

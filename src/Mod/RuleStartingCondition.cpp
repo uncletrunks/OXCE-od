@@ -22,6 +22,43 @@
 #include "../Savegame/WeightedOptions.h"
 #include <algorithm>
 
+namespace YAML
+{
+	template<>
+	struct convert<OpenXcom::EnvironmentalCondition>
+	{
+		static Node encode(const OpenXcom::EnvironmentalCondition& rhs)
+		{
+			Node node;
+			node["chancePerTurn"] = rhs.chancePerTurn;
+			node["firstTurn"] = rhs.firstTurn;
+			node["lastTurn"] = rhs.lastTurn;
+			node["message"] = rhs.message;
+			node["color"] = rhs.color;
+			node["weaponOrAmmo"] = rhs.weaponOrAmmo;
+			node["side"] = rhs.side;
+			node["bodyPart"] = rhs.bodyPart;
+			return node;
+		}
+
+		static bool decode(const Node& node, OpenXcom::EnvironmentalCondition& rhs)
+		{
+			if (!node.IsMap())
+				return false;
+
+			rhs.chancePerTurn = node["chancePerTurn"].as<int>(rhs.chancePerTurn);
+			rhs.firstTurn = node["firstTurn"].as<int>(rhs.firstTurn);
+			rhs.lastTurn = node["lastTurn"].as<int>(rhs.lastTurn);
+			rhs.message = node["message"].as<std::string>(rhs.message);
+			rhs.color = node["color"].as<int>(rhs.color);
+			rhs.weaponOrAmmo = node["weaponOrAmmo"].as<std::string>(rhs.weaponOrAmmo);
+			rhs.side = node["side"].as<int>(rhs.side);
+			rhs.bodyPart = node["bodyPart"].as<int>(rhs.bodyPart);
+			return true;
+		}
+	};
+}
+
 namespace OpenXcom
 {
 
@@ -29,7 +66,7 @@ namespace OpenXcom
  * Creates a blank ruleset for a certain type of Starting Condition.
  * @param type String defining the type.
  */
-RuleStartingCondition::RuleStartingCondition(const std::string &type) : _type(type)
+RuleStartingCondition::RuleStartingCondition(const std::string &type) : _type(type), _mapBackgroundColor(15)
 {
 }
 
@@ -51,15 +88,18 @@ void RuleStartingCondition::load(const YAML::Node &node)
 		load(parent);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_paletteTransformations = node["paletteTransformations"].as< std::map<std::string, std::string> >(_paletteTransformations);
+	_environmentalConditions = node["environmentalConditions"].as< std::map<std::string, EnvironmentalCondition> >(_environmentalConditions);
 	_armorTransformations = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformations);
 	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::map<std::string, int> > >(_defaultArmor);
-	_defaultItems = node["defaultItems"].as< std::map<std::string, int> >(_defaultItems);
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
-
+	_mapBackgroundColor = node["mapBackgroundColor"].as<int>(_mapBackgroundColor);
+	_inventoryShockIndicator = node["inventoryShockIndicator"].as<std::string>(_inventoryShockIndicator);
+	_mapShockIndicator = node["mapShockIndicator"].as<std::string>(_mapShockIndicator);
 }
 
 /**
@@ -69,6 +109,52 @@ void RuleStartingCondition::load(const YAML::Node &node)
 std::string RuleStartingCondition::getType() const
 {
 	return _type;
+}
+
+/**
+ * Gets the palette transformations.
+ * @return Map of palette transformations.
+ */
+const std::map<std::string, std::string> *RuleStartingCondition::getPaletteTransformations() const
+{
+	return &_paletteTransformations;
+}
+
+/**
+* Gets the environmental condition for a given faction.
+* @param faction Faction code (STR_FRIENDLY, STR_HOSTILE or STR_NEUTRAL).
+* @return Environmental condition definition.
+*/
+EnvironmentalCondition RuleStartingCondition::getEnvironmetalCondition(const std::string &faction) const
+{
+	if (!_environmentalConditions.empty())
+	{
+		std::map<std::string, EnvironmentalCondition>::const_iterator i = _environmentalConditions.find(faction);
+		if (i != _environmentalConditions.end())
+		{
+			return i->second;
+		}
+	}
+
+	return EnvironmentalCondition();
+}
+
+/**
+* Returns all allowed armor types.
+* @return List of armor types.
+*/
+const std::vector<std::string> *RuleStartingCondition::getAllowedArmors() const
+{
+	return &_allowedArmors;
+}
+
+/**
+* Returns all allowed craft types.
+* @return List of craft types.
+*/
+const std::vector<std::string> *RuleStartingCondition::getAllowedCraft() const
+{
+	return &_allowedCraft;
 }
 
 /**
@@ -178,12 +264,30 @@ bool RuleStartingCondition::isItemAllowed(const std::string &itemType, Mod *mod)
 }
 
 /**
-* Returns all the default items.
-* @return List of items.
+* Returns the battlescape map background color.
+* @return Color code.
 */
-const std::map<std::string, int> *RuleStartingCondition::getDefaultItems() const
+int RuleStartingCondition::getMapBackgroundColor() const
 {
-	return &_defaultItems;
+	return _mapBackgroundColor;
+}
+
+/**
+ * Returns the inventory shock indicator sprite name.
+ * @return Sprite name.
+ */
+const std::string &RuleStartingCondition::getInventoryShockIndicator() const
+{
+	return _inventoryShockIndicator;
+}
+
+/**
+ * Returns the map shock indicator sprite name.
+ * @return Sprite name.
+ */
+const std::string &RuleStartingCondition::getMapShockIndicator() const
+{
+	return _mapShockIndicator;
 }
 
 }

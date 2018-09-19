@@ -58,6 +58,16 @@ float stat2(const BattleUnit *unit)
 	return (stat->*fieldA) * (stat->*fieldB);
 }
 
+float currentFatalWounds(const BattleUnit *unit)
+{
+	return unit->getFatalWounds();
+}
+
+float currentRank(const BattleUnit *unit)
+{
+	return unit->getRankInt();
+}
+
 float curretTimeUnits(const BattleUnit *unit)
 {
 	return unit->getTimeUnits();
@@ -221,6 +231,9 @@ BonusStatData statDataMap[] =
 	{ "strengthThrowing", create2<&UnitStats::strength, &UnitStats::throwing>() },
 	{ "firingReactions", create2<&UnitStats::firing, &UnitStats::reactions>() },
 
+	{ "rank", create<&currentRank>() },
+	{ "fatalWounds", create<&currentFatalWounds>() },
+
 	{ "healthCurrent", create<&curretHealth>() },
 	{ "tuCurrent", create<&curretTimeUnits>() },
 	{ "energyCurrent", create<&curretEnergy>() },
@@ -242,7 +255,7 @@ const size_t statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
 /**
  * Default constructor.
  */
-RuleStatBonus::RuleStatBonus()
+RuleStatBonus::RuleStatBonus() : _modded(false)
 {
 
 }
@@ -255,6 +268,7 @@ void RuleStatBonus::load(const YAML::Node& node)
 	if (node)
 	{
 		_bonus.clear();
+		_bonusOrig.clear();
 		for (size_t i = 0; i < statDataMapSize; ++i)
 		{
 			if (const YAML::Node &dd = node[statDataMap[i].name])
@@ -262,19 +276,29 @@ void RuleStatBonus::load(const YAML::Node& node)
 				if (dd.IsScalar())
 				{
 					_bonus.push_back(std::make_pair(statDataMap[i].func.power[0], dd.as<float>()));
+					std::vector<float> vec = { dd.as<float>() };
+					_bonusOrig.push_back(std::make_pair(statDataMap[i].name, vec));
 				}
 				else
 				{
+					std::vector<float> vec = { };
 					for (size_t j = 0; j < statDataFuncSize && j < dd.size(); ++j)
 					{
 						float val = dd[j].as<float>();
+						vec.push_back(val);
 						if (!AreSame(val, 0.0f))
 						{
 							_bonus.push_back(std::make_pair(statDataMap[i].func.power[j], val));
 						}
 					}
+					_bonusOrig.push_back(std::make_pair(statDataMap[i].name, vec));
 				}
 			}
+		}
+		// let's remember that this was modified by a modder (i.e. is not a default value)
+		if (!_bonusOrig.empty())
+		{
+			_modded = true;
 		}
 	}
 }
@@ -286,6 +310,10 @@ void RuleStatBonus::setFiring()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::firing>, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> firing = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("firing", firing));
 }
 
 /**
@@ -295,6 +323,10 @@ void RuleStatBonus::setMelee()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::melee>, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> melee = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("melee", melee));
 }
 
 /**
@@ -304,6 +336,26 @@ void RuleStatBonus::setThrowing()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::throwing>, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> throwing = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("throwing", throwing));
+}
+
+/**
+ * Set default bonus for close quarters combat
+ */
+void RuleStatBonus::setCloseQuarters()
+{
+	_bonus.clear();
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::melee>, 0.5f));
+	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::reactions>, 0.5f));
+
+	_bonusOrig.clear();
+	std::vector<float> melee = { 0.5f };
+	_bonusOrig.push_back(std::make_pair("melee", melee));
+	std::vector<float> reactions = { 0.5f };
+	_bonusOrig.push_back(std::make_pair("reactions", reactions));
 }
 
 /**
@@ -313,6 +365,10 @@ void RuleStatBonus::setPsiAttack()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat2<&UnitStats::psiSkill, &UnitStats::psiStrength>, 0.02f));
+
+	_bonusOrig.clear();
+	std::vector<float> psi = { 0.02f };
+	_bonusOrig.push_back(std::make_pair("psi", psi));
 }
 
 /**
@@ -323,6 +379,12 @@ void RuleStatBonus::setPsiDefense()
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::psiStrength>, 1.0f));
 	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::psiSkill>, 0.2f));
+
+	_bonusOrig.clear();
+	std::vector<float> psiStrength = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("psiStrength", psiStrength));
+	std::vector<float> psiSkill = { 0.2f };
+	_bonusOrig.push_back(std::make_pair("psiSkill", psiSkill));
 }
 
 /**
@@ -332,6 +394,10 @@ void RuleStatBonus::setFlatHundred()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat0<100>, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> flatHundred = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("flatHundred", flatHundred));
 }
 
 /**
@@ -341,6 +407,10 @@ void RuleStatBonus::setStrength()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::strength>, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> strength = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("strength", strength));
 }
 
 /**
@@ -350,6 +420,10 @@ void RuleStatBonus::setTimeRecovery()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::tu>, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> tu = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("tu", tu));
 }
 
 /**
@@ -359,6 +433,10 @@ void RuleStatBonus::setEnergyRecovery()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&basicEnergyRegeneration, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> energyRegen = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("energyRegen", energyRegen));
 }
 
 /**
@@ -368,6 +446,10 @@ void RuleStatBonus::setStunRecovery()
 {
 	_bonus.clear();
 	_bonus.push_back(RuleStatBonusData(&stat0<1>, 1.0f));
+
+	_bonusOrig.clear();
+	std::vector<float> flatOne = { 1.0f };
+	_bonusOrig.push_back(std::make_pair("flatOne", flatOne));
 }
 
 /**
@@ -378,10 +460,8 @@ int RuleStatBonus::getBonus(const BattleUnit* unit) const
 	float power = 0;
 	for (size_t i = 0; i < _bonus.size(); ++i)
 		power += _bonus[i].first(unit) * _bonus[i].second;
-	if (power >= 0)
-		return power + RNG::generateEx(100) * 0.01f; //Random round up.
-	else
-		return power - RNG::generateEx(100) * 0.01f; //Random round down.
+
+	return (int)floor(power + 0.5f); // no more random flickering!
 }
 
 } //namespace OpenXcom

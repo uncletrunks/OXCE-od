@@ -53,8 +53,8 @@ StartState::StartState() : _anim(0)
 	//updateScale() uses newDisplayWidth/Height and needs to be set ahead of time
 	Options::newDisplayWidth = Options::displayWidth;
 	Options::newDisplayHeight = Options::displayHeight;
-	Screen::updateScale(Options::geoscapeScale, Options::geoscapeScale, Options::baseXGeoscape, Options::baseYGeoscape, false);
-	Screen::updateScale(Options::battlescapeScale, Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, false);
+	Screen::updateScale(Options::geoscapeScale, Options::baseXGeoscape, Options::baseYGeoscape, false);
+	Screen::updateScale(Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, false);
 	Options::baseXResolution = Options::displayWidth;
 	Options::baseYResolution = Options::displayHeight;
 	_game->getScreen()->resetDisplay(false);
@@ -158,8 +158,8 @@ void StartState::think()
 		addLine(L"");
 		addLine(L"ERROR: " + Language::utf8ToWstr(error));
 		addLine(L"");
+		addLine(L"More details here: " + Language::utf8ToWstr(Logger::logFile()));
 		addLine(L"Make sure OpenXcom and any mods are installed correctly.");
-		addLine(L"For more details see: " + Language::utf8ToWstr(Logger::logFile()));
 		addLine(L"");
 		addLine(L"Press any key to continue.");
 		loading = LOADING_DONE;

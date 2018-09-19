@@ -34,7 +34,7 @@ class Country
 {
 private:
 	RuleCountry *_rules;
-	bool _pact, _newPact;
+	bool _pact, _newPact, _cancelPact;
 	std::vector<int> _funding, _activityXcom, _activityAlien;
 	int _satisfaction;
 public:
@@ -63,15 +63,21 @@ public:
 	/// get xcom activity to this country
 	std::vector<int> &getActivityAlien();
 	/// store last month's counters, start new counters, set this month's change.
-	void newMonth(int xcomTotal, int alienTotal, int pactScore);
+	void newMonth(int xcomTotal, int alienTotal, int pactScore, int averageFunding);
 	/// are we signing a new pact?
 	bool getNewPact() const;
 	/// sign a pact at the end of this month.
 	void setNewPact();
+	/// are we cancelling an existing pact?
+	bool getCancelPact() const;
+	/// cancel or prevent a pact.
+	void setCancelPact();
 	/// have we signed a pact?
 	bool getPact() const;
 	/// sign a pact immediately
 	void setPact();
+	/// can be (re)infiltrated?
+	bool canBeInfiltrated();
 };
 
 }

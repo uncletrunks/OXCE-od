@@ -47,7 +47,7 @@ private:
 	size_t _scroll, _visibleRows, _selRow;
 	Uint8 _color, _color2;
 	std::map<int, TextHAlign> _align;
-	bool _dot, _selectable, _condensed, _contrast, _wrap, _flooding;
+	bool _dot, _selectable, _condensed, _contrast, _wrap, _flooding, _ignoreSeparators;
 	Surface *_bg, *_selector;
 	ArrowButton *_up, *_down;
 	ScrollBar *_scrollbar;
@@ -103,6 +103,8 @@ public:
 	size_t getVisibleRows() const;
 	/// Adds a new row to the text list.
 	void addRow(int cols, ...);
+	/// Removes the last row from the text list.
+	void removeLastRow();
 	/// Sets the columns in the text list.
 	void setColumns(int cols, ...);
 	/// Sets the palette of the text list.
@@ -197,6 +199,8 @@ public:
 	int getScrollbarColor();
 	/// Allows the cell to flood into other columns.
 	void setFlooding(bool flooding);
+	/// Treat separators as spaces (false) or as normal text (true)?
+	void setIgnoreSeparators(bool ignoreSeparators);
 };
 
 }

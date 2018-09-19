@@ -84,6 +84,10 @@ OptionsControlsState::OptionsControlsState(OptionsOrigin origin) : OptionsBaseSt
 			{
 				_controlsBattle.push_back(*i);
 			}
+			else if (i->category() == "STR_OXCE")
+			{
+				_controlsOxce.push_back(*i);
+			}
 		}
 	}
 }
@@ -113,6 +117,10 @@ void OptionsControlsState::init()
 	_lstControls->addRow(2, tr("STR_BATTLESCAPE").c_str(), L"");
 	_lstControls->setCellColor(_controlsGeneral.size() + 2 + _controlsGeo.size() + 2, 0, _colorGroup);
 	addControls(_controlsBattle);
+	_lstControls->addRow(2, L"", L"");
+	_lstControls->addRow(2, tr("STR_OXCE").c_str(), L"");
+	_lstControls->setCellColor(_controlsGeneral.size() + 2 + _controlsGeo.size() + 2 + _controlsBattle.size() + 2, 0, _colorGroup);
+	addControls(_controlsOxce);
 }
 
 /**
@@ -175,6 +183,11 @@ OptionInfo *OptionsControlsState::getControl(size_t sel)
 	{
 		return &_controlsBattle[sel - 1 - _controlsGeneral.size() - 2 - _controlsGeo.size() - 2];
 	}
+	else if (sel > _controlsGeneral.size() + 2 + _controlsGeo.size() + 2 + _controlsBattle.size() + 2 &&
+		sel <= _controlsGeneral.size() + 2 + _controlsGeo.size() + 2 + _controlsBattle.size() + 2 + _controlsOxce.size())
+	{
+		return &_controlsOxce[sel - 1 - _controlsGeneral.size() - 2 - _controlsGeo.size() - 2 - _controlsBattle.size() - 2];
+	}
 	else
 	{
 		return 0;
@@ -232,7 +245,9 @@ void OptionsControlsState::lstControlsKeyPress(Action *action)
 	if (_selected != -1)
 	{
 		SDLKey key = action->getDetails()->key.keysym.sym;
-		if (key != 0)
+		if (key != 0 &&
+			key != SDLK_LSHIFT && key != SDLK_LALT && key != SDLK_LCTRL &&
+			key != SDLK_RSHIFT && key != SDLK_RALT && key != SDLK_RCTRL)
 		{
 			*_selKey->asKey() = key;
 			std::wstring name = Language::utf8ToWstr(ucWords(SDL_GetKeyName(*_selKey->asKey())));

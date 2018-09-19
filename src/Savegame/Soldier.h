@@ -40,6 +40,7 @@ class EquipmentLayoutItem;
 class SoldierDeath;
 class SoldierDiary;
 class SavedGame;
+class RuleSoldierTransformation;
 
 /**
  * Represents a soldier hired by the player.
@@ -65,7 +66,8 @@ private:
 	SoldierGender _gender;
 	SoldierLook _look;
 	int _lookVariant;
-	int _missions, _kills, _recovery;
+	int _missions, _kills;
+	float _recovery; // amount of HP missing until full recovery... used to calculate recovery time
 	bool _recentlyPromoted, _psiTraining, _training;
 	Armor *_armor;
 	Armor *_replacedArmor;
@@ -74,6 +76,8 @@ private:
 	SoldierDeath *_death;
 	SoldierDiary *_diary;
 	std::wstring _statString;
+	bool _corpseRecovered;
+	std::map<std::string, int> _previousTransformations;
 	ScriptValues<Soldier> _scriptValues;
 public:
 	/// Creates a new soldier.
@@ -97,11 +101,15 @@ public:
 	/// Sets the soldier's craft.
 	void setCraft(Craft *craft);
 	/// Gets the soldier's craft string.
-	std::wstring getCraftString(Language *lang) const;
+	std::wstring getCraftString(Language *lang, float absBonus, float relBonus) const;
 	/// Gets a string version of the soldier's rank.
 	std::string getRankString() const;
-	/// Gets a sprite version of the soldier's rank.
+	/// Gets a sprite version of the soldier's rank. Used for BASEBITS.PCK.
 	int getRankSprite() const;
+	/// Gets a sprite version of the soldier's rank. Used for SMOKE.PCK.
+	int getRankSpriteBattlescape() const;
+	/// Gets a sprite version of the soldier's rank. Used for TinyRanks.
+	int getRankSpriteTiny() const;
 	/// Gets the soldier's rank.
 	SoldierRank getRank() const;
 	/// Increase the soldier's military rank.
@@ -134,6 +142,8 @@ public:
 	UnitStats *getInitStats();
 	/// Get pointer to current stats.
 	UnitStats *getCurrentStats();
+	/// Set initial and current stats.
+	void setBothStats(UnitStats *stats);
 	/// Get whether the unit was recently promoted.
 	bool isPromoted();
 	/// Gets the soldier armor.
@@ -148,12 +158,17 @@ public:
 	Armor *getTransformedArmor() const;
 	/// Backs up the soldier's original armor (before transformation).
 	void setTransformedArmor(Armor *armor);
+	/// Is the soldier wounded or not?.
+	bool isWounded() const;
+	/// Is the soldier wounded or not?.
+	bool hasFullHealth() const;
 	/// Gets the soldier's wound recovery time.
-	int getWoundRecovery() const;
+	int getWoundRecoveryInt() const;
+	int getWoundRecovery(float absBonus, float relBonus) const;
 	/// Sets the soldier's wound recovery time.
 	void setWoundRecovery(int recovery);
 	/// Heals wound recoveries.
-	void heal();
+	void heal(float absBonus, float relBonus);
 	/// Gets the soldier's equipment-layout.
 	std::vector<EquipmentLayoutItem*> *getEquipmentLayout();
 	/// Trains a soldier's psychic stats
@@ -174,14 +189,29 @@ public:
 	void die(SoldierDeath *death);
 	/// Gets the soldier's diary.
 	SoldierDiary *getDiary();
+	/// Resets the soldier's diary.
+	void resetDiary();
 	/// Calculate statString.
 	void calcStatString(const std::vector<StatString *> &statStrings, bool psiStrengthEval);
 	/// Trains a soldier's physical stats
 	void trainPhys(int customTrainingFactor);
+	/// Is the soldier already fully trained?
+	bool isFullyTrained();
 	/// Returns whether the unit is in training or not
 	bool isInTraining();
 	/// set the training status
 	void setTraining(bool training);
+	/// Sets whether the soldier's body was recovered from a battle
+	void setCorpseRecovered(bool corpseRecovered);
+	/// Gets the previous transformations performed on this soldier
+	std::map<std::string, int> &getPreviousTransformations();
+	/// Returns whether the unit is eligible for a certain transformation
+	bool isEligibleForTransformation(RuleSoldierTransformation *transformationRule);
+	/// Performs a transformation on this soldier
+	void transform(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
+	/// Calculates how this project changes the soldier's stats
+	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
+
 };
 
 }

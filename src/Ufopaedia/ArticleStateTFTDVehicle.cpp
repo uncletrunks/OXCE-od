@@ -46,7 +46,7 @@ namespace OpenXcom
 
 		add(_lstStats);
 
-		_lstStats->setColor(Palette::blockOffset(0)+2);
+		_lstStats->setColor(_listColor1);
 		_lstStats->setColumns(2, 100, 50);
 		_lstStats->setDot(true);
 
@@ -54,7 +54,7 @@ namespace OpenXcom
 
 		add(_lstStats2);
 
-		_lstStats2->setColor(Palette::blockOffset(0) + 2);
+		_lstStats2->setColor(_listColor1);
 		_lstStats2->setColumns(2, 65, 130);
 		_lstStats2->setDot(true);
 
@@ -71,11 +71,11 @@ namespace OpenXcom
 		_lstStats->addRow(2, tr("STR_FRONT_ARMOR").c_str(), ss3.str().c_str());
 
 		std::wostringstream ss4;
-		ss4 << armor->getSideArmor();
+		ss4 << armor->getLeftSideArmor();
 		_lstStats->addRow(2, tr("STR_LEFT_ARMOR").c_str(), ss4.str().c_str());
 
 		std::wostringstream ss5;
-		ss5 << armor->getSideArmor();
+		ss5 << armor->getRightSideArmor();
 		_lstStats->addRow(2, tr("STR_RIGHT_ARMOR").c_str(), ss5.str().c_str());
 
 		std::wostringstream ss6;
@@ -119,11 +119,11 @@ namespace OpenXcom
 
 		for (size_t i = 0; i != _lstStats->getRows(); ++i)
 		{
-			_lstStats->setCellColor(i, 1, Palette::blockOffset(15)+4);
+			_lstStats->setCellColor(i, 1, _listColor2);
 		}
 		for (size_t i = 0; i != _lstStats2->getRows(); ++i)
 		{
-			_lstStats2->setCellColor(i, 1, Palette::blockOffset(15) + 4);
+			_lstStats2->setCellColor(i, 1, _listColor2);
 		}
 
 		centerAllSurfaces();

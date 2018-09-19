@@ -27,6 +27,7 @@
 #include "../Engine/Game.h"
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
+#include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 
 namespace OpenXcom
@@ -34,19 +35,21 @@ namespace OpenXcom
 
 	ArticleStateTFTDArmor::ArticleStateTFTDArmor(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs), _row(0)
 	{
+		_btnInfo->setVisible(_game->getMod()->getShowPediaInfoButton());
+
 		Armor *armor = _game->getMod()->getArmor(defs->id, true);
 
 		_lstInfo = new TextList(150, 64, 168, 110);
 		add(_lstInfo);
 
-		_lstInfo->setColor(Palette::blockOffset(0)+2);
+		_lstInfo->setColor(_listColor1);
 		_lstInfo->setColumns(2, 125, 25);
 		_lstInfo->setDot(true);
 
 		// Add armor values
 		addStat("STR_FRONT_ARMOR", armor->getFrontArmor());
-		addStat("STR_LEFT_ARMOR", armor->getSideArmor());
-		addStat("STR_RIGHT_ARMOR", armor->getSideArmor());
+		addStat("STR_LEFT_ARMOR", armor->getLeftSideArmor());
+		addStat("STR_RIGHT_ARMOR", armor->getRightSideArmor());
 		addStat("STR_REAR_ARMOR", armor->getRearArmor());
 		addStat("STR_UNDER_ARMOR", armor->getUnderArmor());
 
@@ -96,7 +99,7 @@ namespace OpenXcom
 				ss << L"+";
 			ss << stat;
 			_lstInfo->addRow(2, tr(label).c_str(), ss.str().c_str());
-			_lstInfo->setCellColor(_row, 1, Palette::blockOffset(15)+4);
+			_lstInfo->setCellColor(_row, 1, _listColor2);
 			++_row;
 		}
 	}
@@ -104,7 +107,7 @@ namespace OpenXcom
 	void ArticleStateTFTDArmor::addStat(const std::string &label, const std::wstring &stat)
 	{
 		_lstInfo->addRow(2, tr(label).c_str(), stat.c_str());
-		_lstInfo->setCellColor(_row, 1, Palette::blockOffset(15)+4);
+		_lstInfo->setCellColor(_row, 1, _listColor2);
 		++_row;
 	}
 }

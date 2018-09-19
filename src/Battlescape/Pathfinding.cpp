@@ -267,6 +267,7 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 	bool fellDown = false;
 	bool triedStairs = false;
 	int size = _unit->getArmor()->getSize() - 1;
+	bool armorAllowsStrafing = _unit->getArmor()->allowsStrafing();
 	int cost = 0;
 	int numberOfPartsGoingUp = 0;
 	int numberOfPartsGoingDown = 0;
@@ -458,7 +459,12 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 			// Strafing costs +1 for forwards-ish or sidewards, propose +2 for backwards-ish directions
 			// Maybe if flying then it makes no difference?
 			if (Options::strafe && _strafeMove) {
-				if (size) {
+				if (!armorAllowsStrafing)
+				{
+					// Armor doesn't support strafing, turn off strafe move and continue
+					_strafeMove = false;
+				}
+				else if (size) {
 					// 4-tile units not supported.
 					// Turn off strafe move and continue
 					_strafeMove = false;
@@ -909,7 +915,7 @@ bool Pathfinding::previewPath(bool bRemove)
 		_save->getBattleGame()->setTUReserved(BA_AUTOSHOT);
 	}
 	_modifierUsed = (SDL_GetModState() & KMOD_CTRL) != 0;
-	bool running = Options::strafe && _modifierUsed && _unit->getArmor()->getSize() == 1 && _path.size() > 1;
+	bool running = Options::strafe && _modifierUsed && _unit->getArmor()->getSize() == 1 && _unit->getArmor()->allowsRunning() && _path.size() > 1;
 	for (std::vector<int>::reverse_iterator i = _path.rbegin(); i != _path.rend(); ++i)
 	{
 		int dir = *i;

@@ -176,6 +176,8 @@ public:
 	Position getSightOriginVoxel(BattleUnit *currentUnit);
 	/// Checks visibility of a unit on this tile.
 	bool visible(BattleUnit *currentUnit, Tile *tile);
+	/// Checks visibility of a tile.
+	bool isTileInLOS(BattleAction *action, Tile *tile);
 	/// Turn XCom soldier's personal lighting on or off.
 	void togglePersonalLighting();
 	/// Checks the distance between two positions.
@@ -207,7 +209,7 @@ public:
 	/// Drop item on ground.
 	void itemDrop(Tile *t, BattleItem *item, bool updateLight);
 	/// Drop all unit items on ground.
-	void itemDropInventory(Tile *t, BattleUnit *unit);
+	void itemDropInventory(Tile *t, BattleUnit *unit, bool unprimeItems = false, bool deleteFixedItems = false);
 	/// Move item to other place in inventory or ground.
 	void itemMoveInventory(Tile *t, BattleUnit *unit, BattleItem *item, RuleInventory *slot, int x, int y);
 
@@ -220,9 +222,9 @@ public:
 	/// Checks a unit's % exposure on a tile.
 	int checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, BattleUnit *excludeAllBut);
 	/// Checks validity for targetting a unit.
-	bool canTargetUnit(Position *originVoxel, Tile *tile, Position *scanVoxel, BattleUnit *excludeUnit, BattleUnit *potentialUnit = 0);
+	bool canTargetUnit(Position *originVoxel, Tile *tile, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles, BattleUnit *potentialUnit = 0);
 	/// Check validity for targetting a tile.
-	bool canTargetTile(Position *originVoxel, Tile *tile, int part, Position *scanVoxel, BattleUnit *excludeUnit);
+	bool canTargetTile(Position *originVoxel, Tile *tile, int part, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles);
 	/// Calculates the z voxel for shadows.
 	int castedShade(Position voxel);
 	/// Checks the visibility of a given voxel.
@@ -247,6 +249,8 @@ public:
 	Position getOriginVoxel(BattleAction &action, Tile *tile);
 	/// mark a region of the map as "dangerous" for a turn.
 	void setDangerZone(Position pos, int radius, BattleUnit *unit);
+	/// Checks if a position is valid for a unit, used for spawning and forced movement.
+	bool isPositionValidForUnit(Position &position, BattleUnit *unit, bool checkSurrounding = false, int startSurroundingCheckDirection = 0);
 
 };
 

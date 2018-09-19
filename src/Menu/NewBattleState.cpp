@@ -212,6 +212,11 @@ NewBattleState::NewBattleState() : _craft(0)
 		_cbxAlienRace->setOptions(_alienRaces);
 
 	_slrAlienTech->setRange(0, _game->getMod()->getAlienItemLevels().size()-1);
+	if (_game->getMod()->getAlienItemLevels().size() <= 1)
+	{
+		_slrAlienTech->setVisible(false);
+		_txtAlienTech->setVisible(false);
+	}
 
 	_btnEquip->setText(tr("STR_EQUIP_CRAFT"));
 	_btnEquip->onMouseClick((ActionHandler)&NewBattleState::btnEquipClick);
@@ -432,10 +437,11 @@ void NewBattleState::initSave()
 		RuleItem *rule = _game->getMod()->getItem(*i);
 		if (rule->getBattleType() != BT_CORPSE && rule->isRecoverable())
 		{
-			base->getStorageItems()->addItem(*i, 1);
+			int howMany = rule->getBattleType() == BT_AMMO ? 2 : 1;
+			base->getStorageItems()->addItem(*i, howMany);
 			if (rule->getBattleType() != BT_NONE && !rule->isFixed() && rule->getBigSprite() > -1)
 			{
-				_craft->getItems()->addItem(*i, 1);
+				_craft->getItems()->addItem(*i, howMany);
 			}
 		}
 	}
@@ -490,7 +496,7 @@ void NewBattleState::btnOkClick(Action *)
 	// ufo assault
 	else if (_craft && _game->getMod()->getUfo(_missionTypes[_cbxMission->getSelected()]))
 	{
-		Ufo *u = new Ufo(_game->getMod()->getUfo(_missionTypes[_cbxMission->getSelected()]));
+		Ufo *u = new Ufo(_game->getMod()->getUfo(_missionTypes[_cbxMission->getSelected()]), 1);
 		u->setId(1);
 		_craft->setDestination(u);
 		bgen.setUfo(u);

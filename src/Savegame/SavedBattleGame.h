@@ -38,6 +38,7 @@ class TileEngine;
 class BattleItem;
 class Mod;
 class State;
+class ItemContainer;
 class RuleItem;
 
 /**
@@ -68,9 +69,9 @@ private:
 	std::string _missionType, _alienCustomDeploy, _alienCustomMission, _startingConditionType;
 	int _globalShade;
 	UnitFaction _side;
-	int _turn;
+	int _turn, _bughuntMinTurn;
 	int _animFrame;
-	bool _debugMode;
+	bool _debugMode, _bughuntMode;
 	bool _aborted;
 	bool _baseCraftInventory = false;
 	int _itemId;
@@ -82,6 +83,7 @@ private:
 	BattleActionType _tuReserved;
 	bool _kneelReserved;
 	std::vector< std::vector<std::pair<int, int> > > _baseModules;
+	ItemContainer *_baseItems;
 	int _depth, _ambience;
 	double _ambientVolume;
 	std::vector<BattleItem*> _recoverGuaranteed, _recoverConditional;
@@ -89,11 +91,14 @@ private:
 	int _turnLimit, _cheatTurn;
 	ChronoTrigger _chronoTrigger;
 	bool _beforeGame;
+	std::string _hiddenMovementBackground;
 	ScriptValues<SavedBattleGame> _scriptValues;
 	/// Selects a soldier.
 	BattleUnit *selectPlayerUnit(int dir, bool checkReselect = false, bool setReselect = false, bool checkInventory = false);
 
 public:
+    /// FIXME: hit log
+	std::wostringstream hitLog;
 	/// Creates a new battle save, based on the current generic save.
 	SavedBattleGame(Mod *rule);
 	/// Cleans up the saved game.
@@ -114,6 +119,8 @@ public:
 	void setMissionType(const std::string &missionType);
 	/// Gets the mission type.
 	const std::string &getMissionType() const;
+	/// Gets the base's items BEFORE the mission.
+	ItemContainer *getBaseStorageItems();
 	/// Sets the starting condition type.
 	void setStartingConditionType(const std::string &startingConditionType);
 	/// Gets the starting condition type.
@@ -202,6 +209,10 @@ public:
 	bool canUseWeapon(const BattleItem *weapon, const BattleUnit *unit, bool isBerserking) const;
 	/// Gets the turn number.
 	int getTurn() const;
+	/// Sets the bug hunt turn number.
+	void setBughuntMinTurn(int bughuntMinTurn);
+	/// Gets the bug hunt turn number.
+	int getBughuntMinTurn() const;
 	/// Ends the turn.
 	void endTurn();
 	/// Gets animation frame.
@@ -212,6 +223,10 @@ public:
 	void setDebugMode();
 	/// Gets debug mode.
 	bool getDebugMode() const;
+	/// Sets bug hunt mode.
+	void setBughuntMode(bool bughuntMode);
+	/// Gets bug hunt mode.
+	bool getBughuntMode() const;
 	/// Load map resources.
 	void loadMapResources(Mod *mod);
 	/// Resets tiles units are standing on
@@ -350,6 +365,10 @@ public:
 	void setCheatTurn(int turn);
 	/// Check whether the battle has actually commenced or not.
 	bool isBeforeGame() const;
+	/// Randomly chooses hidden movement background.
+	void setRandomHiddenMovementBackground(const Mod *mod);
+	/// Gets the hidden movement background ID.
+	std::string getHiddenMovementBackground() const;
 	/// Reset all the unit hit state flags.
 	void resetUnitHitStates();
 };

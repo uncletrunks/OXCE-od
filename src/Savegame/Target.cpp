@@ -28,7 +28,7 @@ namespace OpenXcom
 /**
  * Initializes a target with blank coordinates.
  */
-Target::Target() : _lon(0.0), _lat(0.0), _depth(0)
+Target::Target() : _lon(0.0), _lat(0.0), _id(0)
 {
 }
 
@@ -56,11 +56,11 @@ void Target::load(const YAML::Node &node)
 {
 	_lon = node["lon"].as<double>(_lon);
 	_lat = node["lat"].as<double>(_lat);
+	_id = node["id"].as<int>(_id);
 	if (const YAML::Node &name = node["name"])
 	{
 		_name = Language::utf8ToWstr(name.as<std::string>());
 	}
-	_depth = node["depth"].as<int>(_depth);
 }
 
 /**
@@ -72,10 +72,10 @@ YAML::Node Target::save() const
 	YAML::Node node;
 	node["lon"] = serializeDouble(_lon);
 	node["lat"] = serializeDouble(_lat);
+	if (_id)
+		node["id"] = _id;
 	if (!_name.empty())
 		node["name"] = Language::wstrToUtf8(_name);
-	if (_depth)
-		node["depth"] = _depth;
 	return node;
 }
 
@@ -88,6 +88,8 @@ YAML::Node Target::saveId() const
 	YAML::Node node;
 	node["lon"] = serializeDouble(_lon);
 	node["lat"] = serializeDouble(_lat);
+	node["type"] = getType();
+	node["id"] = _id;
 	return node;
 }
 
@@ -145,7 +147,25 @@ void Target::setLatitude(double lat)
 }
 
 /**
- * Returns the target's unique identifying name.
+ * Returns the target's unique ID.
+ * @return Unique ID, 0 if none.
+ */
+int Target::getId() const
+{
+	return _id;
+}
+
+/**
+ * Changes the target's unique ID.
+ * @param id Unique ID.
+ */
+void Target::setId(int id)
+{
+	_id = id;
+}
+
+/**
+ * Returns the target's user-readable name.
  * If there's no custom name, the language default is used.
  * @param lang Language to get strings from.
  * @return Full name.
@@ -164,6 +184,25 @@ std::wstring Target::getName(Language *lang) const
 void Target::setName(const std::wstring &newName)
 {
 	_name = newName;
+}
+
+/**
+ * Returns the target's unique default name.
+ * @param lang Language to get strings from.
+ * @return Full name.
+ */
+std::wstring Target::getDefaultName(Language *lang) const
+{
+	return lang->getString(getMarkerName()).arg(_id);
+}
+
+/**
+ * Returns the name on the globe for the target.
+ * @return String ID.
+ */
+std::string Target::getMarkerName() const
+{
+	return getType() + "_";
 }
 
 /**

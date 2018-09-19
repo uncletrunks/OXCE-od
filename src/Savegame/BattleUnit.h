@@ -87,6 +87,7 @@ private:
 	int _verticalDirection;
 	Position _destination;
 	UnitStatus _status;
+	bool _wantsToSurrender, _isSurrendering;
 	int _walkPhase, _fallPhase;
 	std::vector<BattleUnit *> _visibleUnits, _unitsSpottedThisTurn;
 	std::vector<Tile *> _visibleTiles;
@@ -101,17 +102,19 @@ private:
 	AIModule *_currentAIState;
 	bool _visible;
 	int _expBravery, _expReactions, _expFiring, _expThrowing, _expPsiSkill, _expPsiStrength, _expMelee;
+	int _expBraveryTmp, _expReactionsTmp, _expFiringTmp, _expThrowingTmp, _expPsiSkillTmp, _expPsiStrengthTmp, _expMeleeTmp;
 	int improveStat(int exp) const;
 	int _motionPoints;
+	int _scannedTurn;
 	int _kills;
 	int _faceDirection; // used only during strafeing moves
-	bool _hitByFire, _hitByAnything;
+	bool _hitByFire, _hitByAnything, _alreadyExploded;
 	int _fireMaxHit;
 	int _smokeMaxHit;
 	int _moraleRestored;
 	int _coverReserve;
 	BattleUnit *_charging;
-	int _turnsSinceSpotted;
+	int _turnsSinceSpotted, _turnsLeftSpottedForSnipers;
 	std::string _spawnUnit;
 	std::string _activeHand;
 	BattleUnitStatistics* _statistics;
@@ -128,9 +131,11 @@ private:
 	std::wstring _name;
 	UnitStats _stats;
 	int _standHeight, _kneelHeight, _floatHeight;
+	int _lastReloadSound;
 	std::vector<int> _deathSound;
 	int _value, _aggroSound, _moveSound;
-	int _intelligence, _aggression, _maxViewDistanceAtDarkSq, _maxViewDistanceAtDaySq;
+	int _intelligence, _aggression;
+	int _maxViewDistanceAtDark, _maxViewDistanceAtDay;
 	SpecialAbility _specab;
 	Armor *_armor;
 	SoldierGender _gender;
@@ -141,7 +146,9 @@ private:
 	int _turretType;
 	int _breathFrame;
 	bool _breathing;
-	bool _hidingForTurn, _floorAbove, _respawn;
+	bool _hidingForTurn, _floorAbove, _respawn, _alreadyRespawned;
+	bool _isLeeroyJenkins;	// always charges enemy, never retreats.
+	bool _summonedPlayerUnit;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
 	bool _capturable;
@@ -172,6 +179,8 @@ public:
 	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);
 	/// Creates a BattleUnit from unit.
 	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance);
+	/// Updates BattleUnit's armor and related attributes (after a change/transformation of armor).
+	void updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int depth, int maxViewDistance);
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.
@@ -204,6 +213,12 @@ public:
 	int getVerticalDirection() const;
 	/// Gets the unit's status.
 	UnitStatus getStatus() const;
+	/// Does the unit want to surrender?
+	bool wantsToSurrender() const;
+	/// Is the unit surrendering this turn?
+	bool isSurrendering() const;
+	/// Mark the unit as surrendering this turn.
+	void setSurrendering(bool isSurrendering);
 	/// Start the walkingPhase
 	void startWalking(int direction, Position destination, Tile *tileBelowMe, bool cache);
 	/// Increase the walkingPhase
@@ -249,11 +264,13 @@ public:
 	/// Get overkill damage to unit.
 	int getOverKillDamage() const;
 	/// Do damage to the unit.
-	int damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack);
+	int damage(Position relative, int power, const RuleDamageType *type, SavedBattleGame *save, BattleActionAttack attack, UnitSide sideOverride = SIDE_MAX, UnitBodyPart bodypartOverride = BODYPART_MAX);
 	/// Heal stun level of the unit.
 	void healStun(int power);
 	/// Gets the unit's stun level.
 	int getStunlevel() const;
+	/// Is the unit losing HP (due to negative health regeneration)?
+	bool hasNegativeHealthRegen() const;
 	/// Knocks the unit out instantly.
 	void knockOut(BattlescapeGame *battle);
 	/// Start falling sequence.
@@ -388,6 +405,8 @@ public:
 	void addPsiStrengthExp();
 	/// Adds one to the melee exp counter.
 	void addMeleeExp();
+	/// Did the unit gain any experience yet?
+	bool hasGainedAnyExperience();
 	/// Updates the stats of a Geoscape soldier.
 	void updateGeoscapeStats(Soldier *soldier) const;
 	/// Check if unit eligible for squaddie promotion.
@@ -408,8 +427,14 @@ public:
 	void stimulant (int energy, int stun);
 	/// Get motion points for the motion scanner.
 	int getMotionPoints() const;
+	/// Get turn when unit was scanned by the motion scanner.
+	int getScannedTurn() const { return _scannedTurn; }
+	/// Set turn when unit was scanned by the motion scanner.
+	void setScannedTurn(int turn) { _scannedTurn = turn; }
 	/// Gets the unit's armor.
 	const Armor *getArmor() const;
+	/// Sets the unit's name.
+	void setName(const std::wstring &name);
 	/// Gets the unit's name.
 	std::wstring getName(Language *lang, bool debugAppendId = false) const;
 	/// Gets the unit's stats.
@@ -424,6 +449,8 @@ public:
 	int getLoftemps(int entry = 0) const;
 	/// Get the unit's value.
 	int getValue() const;
+	/// Get the reload sound (of the last reloaded weapon).
+	int getReloadSound() const { return _lastReloadSound; }
 	/// Get the unit's death sounds.
 	const std::vector<int> &getDeathSounds() const;
 	/// Get the unit's move sound.
@@ -436,16 +463,22 @@ public:
 	int getIntelligence() const;
 	/// Get the unit's aggression.
 	int getAggression() const;
-	/// Get square of maximum view distance at dark.
-	inline int getMaxViewDistanceAtDarkSq() const {return _maxViewDistanceAtDarkSq;}
-	/// Get square of maximum view distance at day.
-	inline int getMaxViewDistanceAtDaySq() const { return _maxViewDistanceAtDaySq; }
+	/// Helper method.
+	int getMaxViewDistance(int baseVisibility, int nerf, int buff) const;
+	/// Get maximum view distance at dark.
+	int getMaxViewDistanceAtDark(const Armor *otherUnitArmor) const;
+	/// Get maximum view distance at day.
+	int getMaxViewDistanceAtDay(const Armor *otherUnitArmor) const;
 	/// Get the units's special ability.
 	int getSpecialAbility() const;
 	/// Set the units's respawn flag.
 	void setRespawn(bool respawn);
 	/// Get the units's respawn flag.
 	bool getRespawn() const;
+	/// Set the units's alreadyRespawned flag.
+	void setAlreadyRespawned(bool alreadyRespawned);
+	/// Get the units's alreadyRespawned flag.
+	bool getAlreadyRespawned() const;
 	/// Get the units's rank string.
 	std::string getRankString() const;
 	/// Get the geoscape-soldier object.
@@ -486,6 +519,10 @@ public:
 	void setTurnsSinceSpotted (int turns);
 	/// Set how many turns this unit will be exposed for.
 	int getTurnsSinceSpotted() const;
+	/// Set how many turns left snipers know about this target.
+	void setTurnsLeftSpottedForSnipers (int turns);
+	/// Get how many turns left snipers know about this target.
+	int  getTurnsLeftSpottedForSnipers() const;
 	/// Get this unit's original faction
 	UnitFaction getOriginalFaction() const;
 	/// Get alien/HWP unit.
@@ -535,6 +572,8 @@ public:
 	void setSpecialWeapon(SavedBattleGame *save);
 	/// Get special weapon.
 	BattleItem *getSpecialWeapon(BattleType type) const;
+	/// Gets special weapon that uses an icon, if any.
+	BattleItem *getSpecialIconWeapon(BattleType &type) const;
 	/// Checks if this unit is in hiding for a turn.
 	bool isHiding() const {return _hidingForTurn; };
 	/// Sets this unit is in hiding for a turn (or not).
@@ -567,16 +606,30 @@ public:
 	void setMindControllerId(int id);
 	/// Get the unit mind controller's id.
 	int getMindControllerId() const;
-	/// Get the unit's total firing xp for this mission.
-	int getFiringXP() const;
-	/// Artificially alter a unit's firing xp. (used for shotguns)
-	void nerfFiringXP(int newXP);
+	/// Get the unit leeroyJenkins flag
+	bool isLeeroyJenkins() const { return _isLeeroyJenkins; };
+	/// Gets the spotter score. This is the number of turns sniper AI units can use spotting info from this unit.
+	int getSpotterDuration() const;
+	/// Is this unit capable of shooting beyond max. visual range?
+	bool isSniper() const;
+	/// Remembers the unit's XP (used for shotguns).
+	void rememberXP();
+	/// Artificially alter a unit's XP (used for shotguns).
+	void nerfXP();
 	/// Was this unit just hit?
 	bool getHitState();
 	/// reset the unit hit state.
 	void resetHitState();
+	/// Did this unit explode already?
+	bool hasAlreadyExploded() const { return _alreadyExploded; }
+	/// Set the already exploded flag.
+	void setAlreadyExploded(bool alreadyExploded) { _alreadyExploded = alreadyExploded; }
 	/// Gets whether this unit can be captured alive (applies to aliens).
 	bool getCapturable() const;
+	/// Marks this unit as summoned by an item and therefore won't count for recovery or total player units left.
+	void setSummonedPlayerUnit(bool summonedPlayerUnit);
+	/// Was this unit summoned by an item?
+	bool isSummonedPlayerUnit() const;
 };
 
 } //namespace OpenXcom

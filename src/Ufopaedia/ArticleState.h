@@ -62,6 +62,10 @@ namespace OpenXcom
 
 		/// callback for NEXT button
 		void btnNextClick(Action *action);
+
+		/// callback for INFO button
+		void btnInfoClick(Action *action);
+
 		/// the article id
 		std::string _id;
 
@@ -70,5 +74,6 @@ namespace OpenXcom
 		TextButton *_btnOk;
 		TextButton *_btnPrev;
 		TextButton *_btnNext;
+		TextButton *_btnInfo;
 	};
 }

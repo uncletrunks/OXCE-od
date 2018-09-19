@@ -53,9 +53,11 @@ private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
 	std::vector<std::string> _corpseBattle;
 	std::vector<std::string> _builtInWeapons;
-	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
+	int _frontArmor, _sideArmor, _leftArmorDiff, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
+	int _moveSound;
 	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight;
+	int _camouflageAtDay, _camouflageAtDark, _antiCamouflageAtDay, _antiCamouflageAtDark, _heatVision, _psiVision;
 	float _damageModifier[DAMAGE_TYPES];
 	std::vector<int> _loftempsSet;
 	UnitStats _stats;
@@ -65,6 +67,7 @@ private:
 	int _faceColorGroup, _hairColorGroup, _utileColorGroup, _rankColorGroup;
 	std::vector<int> _faceColor, _hairColor, _utileColor, _rankColor;
 	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
+	int _ignoresMeleeThreat, _createsMeleeThreat;
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
@@ -72,13 +75,17 @@ private:
 
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
+	std::vector<int> _customArmorPreviewIndex;
+	bool _allowsRunning, _allowsStrafing, _allowsKneeling;
+	bool _instantWoundRecovery;
+	int _standHeight, _kneelHeight, _floatHeight;
 public:
 	/// Creates a blank armor ruleset.
 	Armor(const std::string &type);
 	/// Cleans up the armor ruleset.
 	~Armor();
 	/// Loads the armor data from YAML.
-	void load(const YAML::Node& node, const ModScript& parsers);
+	void load(const YAML::Node& node, const ModScript& parsers, Mod *mod);
 	/// Gets the armor's type.
 	std::string getType() const;
 	/// Gets the unit's sprite sheet.
@@ -87,8 +94,10 @@ public:
 	std::string getSpriteInventory() const;
 	/// Gets the front armor level.
 	int getFrontArmor() const;
-	/// Gets the side armor level.
-	int getSideArmor() const;
+	/// Gets the left side armor level.
+	int getLeftSideArmor() const;
+	/// Gets the right side armor level.
+	int getRightSideArmor() const;
 	/// Gets the rear armor level.
 	int getRearArmor() const;
 	/// Gets the under armor level.
@@ -107,33 +116,43 @@ public:
 	int getDrawingRoutine() const;
 	/// DO NOT USE THIS FUNCTION OUTSIDE THE BATTLEUNIT CONSTRUCTOR OR I WILL HUNT YOU DOWN.
 	MovementType getMovementType() const;
+	/// Gets the move sound id. Overrides default/unit's move sound. To be used in BattleUnit constructors only too!
+	int getMoveSound() const;
 	/// Gets whether this is a normal or big unit.
 	int getSize() const;
 	/// Gets how big space armor ocupy in craft.
 	int getTotalSize() const;
 	/// Gets damage modifier.
 	float getDamageModifier(ItemDamageType dt) const;
+	const std::vector<float> getDamageModifiersRaw() const;
 	/// Gets loftempSet
 	const std::vector<int> &getLoftempsSet() const;
 	/// Gets the armor's stats.
 	const UnitStats *getStats() const;
 	/// Gets unit psi defense.
 	int getPsiDefence(const BattleUnit* unit) const;
+	const RuleStatBonus *getPsiDefenceRaw() const { return &_psiDefence; }
 	/// Gets unit melee dodge chance.
 	int getMeleeDodge(const BattleUnit* unit) const;
+	const RuleStatBonus *getMeleeDodgeRaw() const { return &_meleeDodge; }
 	/// Gets unit dodge penalty if hit from behind.
 	float getMeleeDodgeBackPenalty() const;
 
 	/// Gets unit TU recovery.
 	int getTimeRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getTimeRecoveryRaw() const { return &_timeRecovery; }
 	/// Gets unit Energy recovery.
 	int getEnergyRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getEnergyRecoveryRaw() const { return &_energyRecovery; }
 	/// Gets unit Morale recovery.
 	int getMoraleRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getMoraleRecoveryRaw() const { return &_moraleRecovery; }
 	/// Gets unit Health recovery.
 	int getHealthRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus *getHealthRecoveryRaw() const { return &_healthRecovery; }
 	/// Gets unit Stun recovery.
 	int getStunRegeneration(const BattleUnit* unit) const;
+	const RuleStatBonus *getStunRegenerationRaw() const { return &_stunRecovery; }
 
 	/// Gets the armor's weight.
 	int getWeight() const;
@@ -151,6 +170,18 @@ public:
 	int getVisibilityAtDark() const;
 	/// Gets max view distance at day in BattleScape.
 	int getVisibilityAtDay() const;
+	/// Gets info about camouflage at day.
+	int getCamouflageAtDay() const;
+	/// Gets info about camouflage at dark.
+	int getCamouflageAtDark() const;
+	/// Gets info about anti camouflage at day.
+	int getAntiCamouflageAtDay() const;
+	/// Gets info about anti camouflage at dark.
+	int getAntiCamouflageAtDark() const;
+	/// Gets info about heat vision.
+	int getHeatVision() const;
+	/// Gets info about psi vision.
+	int getPsiVision() const;
 	/// Gets personal ligth radius;
 	int getPersonalLight() const;
 	/// Gets how armor react to fear.
@@ -161,6 +192,10 @@ public:
 	bool getPainImmune(bool def = false) const;
 	/// Gets how armor react to zombification.
 	bool getZombiImmune(bool def = false) const;
+	/// Gets whether or not this unit ignores close quarters threats.
+	bool getIgnoresMeleeThreat(bool def = false) const;
+	/// Gets whether or not this unit is a close quarters threat.
+	bool getCreatesMeleeThreat(bool def = true) const;
 	/// Gets how much negative hp is require to gib unit.
 	float getOverKill() const;
 	/// Get face base color
@@ -173,19 +208,40 @@ public:
 	int getRankColorGroup() const;
 	/// Get face base color
 	int getFaceColor(int i) const;
+	const std::vector<int> &getFaceColorRaw() const { return _faceColor; }
 	/// Get hair base color
 	int getHairColor(int i) const;
+	const std::vector<int> &getHairColorRaw() const { return _hairColor; }
 	/// Get utile base color
 	int getUtileColor(int i) const;
+	const std::vector<int> &getUtileColorRaw() const { return _utileColor; }
 	/// Get rank base color
 	int getRankColor(int i) const;
+	const std::vector<int> &getRankColorRaw() const { return _rankColor; }
 	/// Can we access this unit's inventory?
 	bool hasInventory() const;
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _battleUnitScripts.get<Script>(); }
+	const ScriptValues<Armor> &getScriptValuesRaw() const { return _scriptValues; }
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;
+	/// Gets the index of the sprite in the CustomArmorPreview sprite set
+	const std::vector<int> &getCustomArmorPreviewIndex() const;
+	/// Can you run while wearing this armor?
+	bool allowsRunning() const;
+	/// Can you strafe while wearing this armor?
+	bool allowsStrafing() const;
+	/// Can you kneel while wearing this armor?
+	bool allowsKneeling() const;
+	/// Does this armor instantly recover any wounds after the battle?
+	bool getInstantWoundRecovery() const;
+	/// Gets a unit's height when standing while wearing this armor.
+	int getStandHeight() const;
+	/// Gets a unit's height when kneeling while wearing this armor.
+	int getKneelHeight() const;
+	/// Gets a unit's float elevation while wearing this armor.
+	int getFloatHeight() const;
 };
 
 }

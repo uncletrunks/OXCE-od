@@ -31,6 +31,7 @@ class AlienMission;
 class UfoTrajectory;
 class SavedGame;
 class Mod;
+class Waypoint;
 
 /**
  * Represents an alien UFO on the map.
@@ -45,7 +46,9 @@ public:
 	enum UfoStatus { FLYING, LANDED, CRASHED, DESTROYED };
 private:
 	const RuleUfo *_rules;
-	int _id, _crashId, _landId, _damage;
+	int _uniqueId;
+	int _missionWaveNumber;
+	int _crashId, _landId, _damage;
 	std::string _direction, _altitude;
 	enum UfoStatus _status;
 	size_t _secondsRemaining;
@@ -59,36 +62,53 @@ private:
 	RuleUfoStats _stats;
 	/// Calculates a new speed vector to the destination.
 	void calculateSpeed();
+	int _shield, _shieldRechargeHandle;
+	int _tractorBeamSlowdown;
+	bool _isHunterKiller, _isEscort;
+	int _huntMode, _huntBehavior;
+	bool _isHunting, _isEscorting;
+	Waypoint *_origWaypoint;
 
 	using MovingTarget::load;
 	using MovingTarget::save;
+
+	void backupOriginalDestination();
+	void resetOriginalDestination();
 public:
 	/// Creates a UFO of the specified type.
-	Ufo(const RuleUfo *rules);
+	Ufo(const RuleUfo *rules, int uniqueId, int hunterKillerPercentage = 0, int huntMode = 0, int huntBehavior = 0);
 	/// Cleans up the UFO.
 	~Ufo();
 	/// Loads the UFO from YAML.
 	void load(const YAML::Node& node, const Mod &ruleset, SavedGame &game);
+	/// Finishes loading the UFO from YAML (called after XCOM craft are loaded).
+	void finishLoading(const YAML::Node& node, SavedGame &save);
 	/// Saves the UFO to YAML.
 	YAML::Node save(bool newBattle) const;
 	/// Saves the UFO's ID to YAML.
 	YAML::Node saveId() const;
+	/// Gets the UFO's type.
+	std::string getType() const;
 	/// Gets the UFO's ruleset.
 	const RuleUfo *getRules() const;
 	/// Sets the UFO's ruleset.
 	void changeRules(const RuleUfo *rules);
-	/// Gets the UFO's ID.
-	int getId() const;
-	/// Sets the UFO's ID.
-	void setId(int id);
+	/// Gets the (unique) UFO's ID.
+	int getUniqueId() const;
+	/// Gets the mission wave number that created this UFO.
+	int getMissionWaveNumber() const { return _missionWaveNumber; }
+	/// Sets the mission wave number that created this UFO.
+	void setMissionWaveNumber(int missionWaveNumber) { _missionWaveNumber = missionWaveNumber; }
 	/// Gets the UFO's default name.
 	std::wstring getDefaultName(Language *lang) const;
-	/// Gets the UFO's marker.
+	/// Gets the UFO's marker name.
+	std::string getMarkerName() const;
+	/// Gets the UFO's marker sprite.
 	int getMarker() const;
 	/// Gets the UFO's amount of damage.
 	int getDamage() const;
 	/// Sets the UFO's amount of damage.
-	void setDamage(int damage);
+	void setDamage(int damage, const Mod *mod);
 	/// Gets the UFO's detection status.
 	bool getDetected() const;
 	/// Sets the UFO's detection status.
@@ -143,6 +163,14 @@ public:
 	const UfoTrajectory &getTrajectory() const { return *_trajectory; }
 	/// Gets the UFO's mission object.
 	AlienMission *getMission() const { return _mission; }
+	/// Gets the Xcom craft targeted by this UFO.
+	Craft *getTargetedXcomCraft() const;
+	/// Resets the original destination if targeting the given craft.
+	void resetOriginalDestination(Craft *target);
+	/// Sets the Xcom craft targeted by this UFO.
+	void setTargetedXcomCraft(Craft *craft);
+	/// Sets the UFO escorted by this UFO.
+	void setEscortedUfo(Ufo *ufo);
 	/// Sets the UFO's destination.
 	void setDestination(Target *dest);
 	/// Get which interceptor this ufo is engaging.
@@ -169,6 +197,34 @@ public:
 	int getEscapeCountdown() const;
 	void setInterceptionProcessed(bool processed);
 	bool getInterceptionProcessed() const;
+	/// Sets the UFO's shield
+	void setShield(int shield);
+	/// Gets the UFO's shield value
+	int getShield() const;
+	/// Sets which _interceptionNumber in a dogfight handles the UFO shield recharge
+	void setShieldRechargeHandle(int shieldRechargeHandle);
+	/// Gets which _interceptionNumber in a dogfight handles the UFO shield recharge
+	int getShieldRechargeHandle() const;
+	/// Sets the number of tractor beams locked on to a UFO
+	void setTractorBeamSlowdown(int tractorBeamSlowdown);
+	/// Gets the number of tractor beams locked on to a UFO
+	int getTractorBeamSlowdown() const;
+	/// Is this UFO a hunter-killer?
+	bool isHunterKiller() const;
+	void setHunterKiller(bool isHunterKiller);
+	/// Is this UFO an escort?
+	bool isEscort() const;
+	void setEscort(bool isEscort);
+	/// Gets the UFO's hunting preferences.
+	int getHuntMode() const;
+	/// Gets the UFO's hunting behavior.
+	int getHuntBehavior() const;
+	/// Is this UFO actively hunting right now?
+	bool isHunting() const;
+	/// Is this UFO escorting other UFO right now?
+	bool isEscorting() const;
+	/// Checks if a target is inside the UFO's radar range.
+	bool insideRadarRange(Target *target) const;
 };
 
 }

@@ -173,8 +173,8 @@ void UnitFallBState::think()
 			if (falling)
 			{
 				Position destination = (*unit)->getPosition() + Position(0,0,-1);
-				Tile *tileBelow = _parent->getSave()->getTile(destination);
-				(*unit)->startWalking(Pathfinding::DIR_DOWN, destination, tileBelow, onScreen);
+				Tile *tileDest = _parent->getSave()->getTile(destination);
+				(*unit)->startWalking(Pathfinding::DIR_DOWN, destination, tileDest, onScreen);
 				++unit;
 			}
 			else

@@ -21,6 +21,7 @@
 #include "Mod.h"
 #include "ModScript.h"
 #include "SoldierNamePool.h"
+#include "StatString.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/ScriptBind.h"
 
@@ -32,7 +33,12 @@ namespace OpenXcom
  * type of soldier.
  * @param type String defining the type.
  */
-RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _costBuy(0), _costSalary(0), _standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50)
+RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _listOrder(0), _costBuy(0), _costSalary(0),
+	_costSalarySquaddie(0), _costSalarySergeant(0), _costSalaryCaptain(0), _costSalaryColonel(0), _costSalaryCommander(0),
+	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _value(20),
+	_avatarOffsetX(67), _avatarOffsetY(48), _flagOffset(0),
+	_allowPromotion(true), _allowPiloting(true),
+	_rankSprite(42), _rankSpriteBattlescape(20), _rankSpriteTiny(0)
 {
 }
 
@@ -45,6 +51,10 @@ RuleSoldier::~RuleSoldier()
 	{
 		delete *i;
 	}
+	for (std::vector<StatString*>::iterator i = _statStrings.begin(); i != _statStrings.end(); ++i)
+	{
+		delete *i;
+	}
 }
 
 /**
@@ -52,11 +62,11 @@ RuleSoldier::~RuleSoldier()
  * @param node YAML node.
  * @param mod Mod for the unit.
  */
-void RuleSoldier::load(const YAML::Node &node, Mod *mod, const ModScript &parsers)
+void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const ModScript &parsers)
 {
 	if (const YAML::Node &parent = node["refNode"])
 	{
-		load(parent, mod, parsers);
+		load(parent, mod, listOrder, parsers);
 	}
 	_type = node["type"].as<std::string>(_type);
 	// Just in case
@@ -73,13 +83,34 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, const ModScript &parser
 	_minStats.merge(node["minStats"].as<UnitStats>(_minStats));
 	_maxStats.merge(node["maxStats"].as<UnitStats>(_maxStats));
 	_statCaps.merge(node["statCaps"].as<UnitStats>(_statCaps));
+	if (node["trainingStatCaps"])
+	{
+		_trainingStatCaps.merge(node["trainingStatCaps"].as<UnitStats>(_trainingStatCaps));
+	}
+	else
+	{
+		_trainingStatCaps.merge(node["statCaps"].as<UnitStats>(_trainingStatCaps));
+	}
+	_dogfightExperience.merge(node["dogfightExperience"].as<UnitStats>(_dogfightExperience));
 	_armor = node["armor"].as<std::string>(_armor);
+	_armorForAvatar = node["armorForAvatar"].as<std::string>(_armorForAvatar);
+	_avatarOffsetX = node["avatarOffsetX"].as<int>(_avatarOffsetX);
+	_avatarOffsetY = node["avatarOffsetY"].as<int>(_avatarOffsetY);
+	_flagOffset = node["flagOffset"].as<int>(_flagOffset);
+	_allowPromotion = node["allowPromotion"].as<bool>(_allowPromotion);
+	_allowPiloting = node["allowPiloting"].as<bool>(_allowPiloting);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costSalary = node["costSalary"].as<int>(_costSalary);
+	_costSalarySquaddie = node["costSalarySquaddie"].as<int>(_costSalarySquaddie);
+	_costSalarySergeant = node["costSalarySergeant"].as<int>(_costSalarySergeant);
+	_costSalaryCaptain = node["costSalaryCaptain"].as<int>(_costSalaryCaptain);
+	_costSalaryColonel = node["costSalaryColonel"].as<int>(_costSalaryColonel);
+	_costSalaryCommander = node["costSalaryCommander"].as<int>(_costSalaryCommander);
 	_standHeight = node["standHeight"].as<int>(_standHeight);
 	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
 	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
 	_femaleFrequency = node["femaleFrequency"].as<int>(_femaleFrequency);
+	_value = node["value"].as<int>(_value);
 
 	if (node["deathMale"])
 	{
@@ -125,7 +156,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, const ModScript &parser
 		}
 		else
 		{
-			if (fileName.substr(fileName.length() - 1, 1) == "/")
+			if (fileName[fileName.length() - 1] == '/')
 			{
 				// load all *.nam files in given directory
 				std::set<std::string> names = FileMap::filterFiles(FileMap::getVFolderContents(fileName), "nam");
@@ -140,6 +171,33 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, const ModScript &parser
 				addSoldierNamePool(fileName);
 			}
 		}
+	}
+
+	for (YAML::const_iterator i = node["statStrings"].begin(); i != node["statStrings"].end(); ++i)
+	{
+		StatString *statString = new StatString();
+		statString->load(*i);
+		_statStrings.push_back(statString);
+	}
+
+	_rankStrings = node["rankStrings"].as< std::vector<std::string> >(_rankStrings);
+	if (node["rankSprite"])
+	{
+		_rankSprite = mod->getSpriteOffset(node["rankSprite"].as<int>(_rankSprite), "BASEBITS.PCK");
+	}
+	if (node["rankBattleSprite"])
+	{
+		_rankSpriteBattlescape = mod->getSpriteOffset(node["rankBattleSprite"].as<int>(_rankSpriteBattlescape), "SMOKE.PCK");
+	}
+	if (node["rankTinySprite"])
+	{
+		_rankSpriteTiny = mod->getSpriteOffset(node["rankTinySprite"].as<int>(_rankSpriteTiny), "TinyRanks");
+	}
+
+	_listOrder = node["listOrder"].as<int>(_listOrder);
+	if (!_listOrder)
+	{
+		_listOrder = listOrder;
 	}
 
 	_scriptValues.load(node, parsers.getShared());
@@ -160,6 +218,15 @@ void RuleSoldier::addSoldierNamePool(const std::string &namFile)
 std::string RuleSoldier::getType() const
 {
 	return _type;
+}
+
+/**
+ * Gets the list/sort order of the soldier's type.
+ * @return The list/sort order.
+ */
+int RuleSoldier::getListOrder() const
+{
+	return _listOrder;
 }
 
 /**
@@ -209,6 +276,24 @@ UnitStats RuleSoldier::getStatCaps() const
 }
 
 /**
+* Gets the training stat caps.
+* @return The training stat caps.
+*/
+UnitStats RuleSoldier::getTrainingStatCaps() const
+{
+	return _trainingStatCaps;
+}
+
+/**
+* Gets the improvement chances for pilots (after dogfight).
+* @return The improvement changes.
+*/
+UnitStats RuleSoldier::getDogfightExperience() const
+{
+	return _dogfightExperience;
+}
+
+/**
  * Gets the cost of hiring this soldier.
  * @return The cost.
  */
@@ -218,12 +303,32 @@ int RuleSoldier::getBuyCost() const
 }
 
 /**
- * Gets the cost of salary for a month.
+* Does salary depend on rank?
+* @return True if salary depends on rank, false otherwise.
+*/
+bool RuleSoldier::isSalaryDynamic() const
+{
+	return _costSalarySquaddie || _costSalarySergeant || _costSalaryCaptain || _costSalaryColonel || _costSalaryCommander;
+}
+
+/**
+ * Gets the cost of salary for a month (for a given rank).
+ * @param rank Soldier rank.
  * @return The cost.
  */
-int RuleSoldier::getSalaryCost() const
+int RuleSoldier::getSalaryCost(int rank) const
 {
-	return _costSalary;
+	int total = _costSalary;
+	switch (rank)
+	{
+		case 1: total += _costSalarySquaddie; break;
+		case 2: total += _costSalarySergeant; break;
+		case 3: total += _costSalaryCaptain; break;
+		case 4: total += _costSalaryColonel; break;
+		case 5: total += _costSalaryCommander; break;
+		default: break;
+	}
+	return total;
 }
 
 /**
@@ -263,6 +368,60 @@ std::string RuleSoldier::getArmor() const
 }
 
 /**
+* Gets the armor for avatar.
+* @return The armor name.
+*/
+std::string RuleSoldier::getArmorForAvatar() const
+{
+	return _armorForAvatar;
+}
+
+/**
+* Gets the avatar's X offset.
+* @return The X offset.
+*/
+int RuleSoldier::getAvatarOffsetX() const
+{
+	return _avatarOffsetX;
+}
+
+/**
+* Gets the avatar's Y offset.
+* @return The Y offset.
+*/
+int RuleSoldier::getAvatarOffsetY() const
+{
+	return _avatarOffsetY;
+}
+
+/**
+* Gets the flag offset.
+* @return The flag offset.
+*/
+int RuleSoldier::getFlagOffset() const
+{
+	return _flagOffset;
+}
+
+/**
+* Gets the allow promotion flag.
+* @return True if promotion is allowed.
+*/
+bool RuleSoldier::getAllowPromotion() const
+{
+	return _allowPromotion;
+}
+
+/**
+* Gets the allow piloting flag.
+* @return True if piloting is allowed.
+*/
+bool RuleSoldier::getAllowPiloting() const
+{
+	return _allowPiloting;
+}
+
+/**
  * Gets the female appearance ratio.
  * @return The percentage ratio.
  */
@@ -290,14 +449,67 @@ const std::vector<int> &RuleSoldier::getFemaleDeathSounds() const
 }
 
 /**
-* Returns the list of soldier name pools.
-* @return Pointer to soldier name pool list.
-*/
+ * Returns the list of soldier name pools.
+ * @return Pointer to soldier name pool list.
+ */
 const std::vector<SoldierNamePool*> &RuleSoldier::getNames() const
 {
 	return _names;
 }
 
+/*
+ * Gets the soldier's base value, without experience modifiers.
+ * @return The soldier's value.
+ */
+int RuleSoldier::getValue() const
+{
+	return _value;
+}
+
+/**
+* Gets the list of StatStrings.
+* @return The list of StatStrings.
+*/
+const std::vector<StatString *> &RuleSoldier::getStatStrings() const
+{
+	return _statStrings;
+}
+
+/**
+ * Gets the list of strings for this soldier's ranks
+ * @return The list rank strings.
+ */
+const std::vector<std::string> &RuleSoldier::getRankStrings() const
+{
+	return _rankStrings;
+}
+
+/**
+ * Gets the index of the sprites to use to represent this soldier's rank in BASEBITS.PCK
+ * @return The sprite index.
+ */
+int RuleSoldier::getRankSprite() const
+{
+	return _rankSprite;
+}
+
+/**
+ * Gets the index of the sprites to use to represent this soldier's rank in SMOKE.PCK
+ * @return The sprite index.
+ */
+int RuleSoldier::getRankSpriteBattlescape() const
+{
+	return _rankSpriteBattlescape;
+}
+
+/**
+ * Gets the index of the sprites to use to represent this soldier's rank in TinyRanks
+ * @return The sprite index.
+ */
+int RuleSoldier::getRankSpriteTiny() const
+{
+	return _rankSpriteTiny;
+}
 
 namespace
 {

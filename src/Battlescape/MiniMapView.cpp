@@ -30,8 +30,10 @@
 #include "../Engine/SurfaceSet.h"
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
+#include "../Mod/RuleInterface.h"
 #include "../Engine/Options.h"
 #include "../Engine/Screen.h"
+#include <algorithm>
 
 namespace OpenXcom
 {
@@ -52,6 +54,7 @@ const int MAX_FRAME = 2;
 MiniMapView::MiniMapView(int w, int h, int x, int y, Game * game, Camera * camera, SavedBattleGame * battleGame) : InteractiveSurface(w, h, x, y), _game(game), _camera(camera), _battleGame(battleGame), _frame(0), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _mouseScrollX(0), _mouseScrollY(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(false)
 {
 	_set = _game->getMod()->getSurfaceSet("SCANG.DAT");
+	_emptySpaceIndex = _game->getMod()->getInterface("minimap")->getElement("emptySpace")->color;
 }
 
 /**
@@ -69,6 +72,7 @@ void MiniMapView::draw()
 	}
 	drawRect(0, 0, getWidth(), getHeight(), 15);
 	this->lock();
+	Surface * emptySpace = _set->getFrame(_emptySpaceIndex);
 	for (int lvl = 0; lvl <= _camera->getCenterPosition().z; lvl++)
 	{
 		int py = _startY;
@@ -83,6 +87,10 @@ void MiniMapView::draw()
 				t = _battleGame->getTile(p);
 				if (!t)
 				{
+					if (Options::minimapBorderIndicator)
+					{
+						emptySpace->blitNShade(this, x, y, 0);
+					}
 					px++;
 					continue;
 				}
@@ -92,7 +100,7 @@ void MiniMapView::draw()
 
 					if (data && data->getMiniMapIndex())
 					{
-						Surface * s = _set->getFrame (data->getMiniMapIndex()+35);
+						Surface * s = _set->getFrame(data->getMiniMapIndex() + 35);
 						if (s)
 						{
 							int shade = 16;
@@ -106,7 +114,7 @@ void MiniMapView::draw()
 					}
 				}
 				// alive units
-				if (t->getUnit() && t->getUnit()->getVisible())
+				if (t->getUnit() && (t->getUnit()->getVisible() || _battleGame->getBughuntMode()))
 				{
 					int frame = t->getUnit()->getMiniMapSpriteIndex();
 					int size = t->getUnit()->getArmor()->getSize();
@@ -128,7 +136,34 @@ void MiniMapView::draw()
 				{
 					int frame = 9 + _frame;
 					Surface * s = _set->getFrame(frame);
-					s->blitNShade(this, x, y, 0);
+					bool allHidden = true;
+					bool atLeastOnePrimed = false;
+					for (auto& item : *t->getInventory())
+					{
+						if (!item->getRules()->isHiddenOnMinimap())
+						{
+							allHidden = false;
+							if (item->getFuseTimer() >= 0)
+							{
+								atLeastOnePrimed = true;
+								break; // no need to search further
+							}
+						}
+					}
+					if (allHidden)
+					{
+						// empty
+					}
+					else if (atLeastOnePrimed)
+					{
+						// dye red
+						s->blitNShade(this, x, y, 0, false, Pathfinding::red);
+					}
+					else
+					{
+						// vanilla
+						s->blitNShade(this, x, y, 0);
+					}
 				}
 
 				px++;

@@ -27,6 +27,7 @@ class Text;
 class TextButton;
 class Craft;
 class Texture;
+class Surface;
 
 /**
  * Window that allows the player
@@ -41,6 +42,7 @@ private:
 	int _shade;
 	Text *_txtMessage, *_txtBegin;
 	TextButton *_btnYes, *_btnNo;
+	Surface *_sprite;
 	// Checks the starting condition
 	bool checkStartingCondition();
 public:

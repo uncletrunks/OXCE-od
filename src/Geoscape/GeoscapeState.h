@@ -75,6 +75,8 @@ public:
 	void time5Seconds();
 	/// Trigger whenever 10 minutes pass.
 	void time10Minutes();
+	void ufoHuntingAndEscorting();
+	void baseHunting();
 	/// Trigger whenever 30 minutes pass.
 	void time30Minutes();
 	/// Trigger whenever 1 hour passes.
@@ -93,6 +95,14 @@ public:
 	void globeClick(Action *action);
 	/// Handler for clicking the Intercept button.
 	void btnInterceptClick(Action *action);
+	/// Handler for clicking the UFO Tracker button.
+	void btnUfoTrackerClick(Action *action);
+	/// Handler for clicking the TechTreeViewer button.
+	void btnTechTreeViewerClick(Action *action);
+	/// Handler for clicking the [SelectMusicTrack] button.
+	void btnSelectMusicTrackClick(Action *action);
+	/// Handler for clicking the [GlobalResearch] key.
+	void btnGlobalResearchClick(Action *action);
 	/// Handler for clicking the Bases button.
 	void btnBasesClick(Action *action);
 	/// Handler for clicking the Graph button.
@@ -135,6 +145,8 @@ public:
 	void zoomOutEffect();
 	/// Multi-dogfights logic handling.
 	void handleDogfights();
+	/// Dogfight experience handling.
+	void handleDogfightExperience();
 	/// Gets the number of minimized dogfights.
 	int minimizedDogfightsCount();
 	/// Starts a new dogfight.
@@ -144,7 +156,7 @@ public:
 	/// Handler for clicking the timer button.
 	void btnTimerClick(Action *action);
 	/// Process a mission site
-	bool processMissionSite(MissionSite *site) const;
+	bool processMissionSite(MissionSite *site);
 	/// Handles base defense
 	void handleBaseDefense(Base *base, Ufo *ufo);
 	/// Update the resolution settings, we just resized the window.

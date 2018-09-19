@@ -39,13 +39,19 @@ namespace OpenXcom
 class RuleResearch
 {
  private:
-	std::string _name, _lookup, _cutscene;
+	std::string _name, _lookup, _cutscene, _spawnedItem;
 	int _cost, _points;
-	std::vector<std::string> _dependenciesName, _unlocksName, _getOneFreeName, _requiresName, _requiresBaseFunc;
-	std::vector<const RuleResearch*> _dependencies, _unlocks, _getOneFree, _requires;
+	std::vector<std::string> _dependenciesName, _unlocksName, _disablesName, _getOneFreeName, _requiresName, _requiresBaseFunc;
+	std::vector<const RuleResearch*> _dependencies, _unlocks, _disables, _getOneFree, _requires;
+	bool _sequentialGetOneFree;
+	std::map<std::string, std::vector<std::string> > _getOneFreeProtectedName;
+	std::map<const RuleResearch*, std::vector<const RuleResearch*> > _getOneFreeProtected;
 	bool _needItem, _destroyItem;
 	int _listOrder;
 public:
+	static const int RESEARCH_STATUS_NEW = 0;
+	static const int RESEARCH_STATUS_NORMAL = 1;
+	static const int RESEARCH_STATUS_DISABLED = 2;
 	RuleResearch(const std::string &name);
 
 	/// Loads the research from YAML.
@@ -59,16 +65,22 @@ public:
 	const std::string &getName() const;
 	/// Gets the research dependencies.
 	const std::vector<const RuleResearch*> &getDependencies() const;
+	/// Checks if this ResearchProject gives free topics in sequential order (or random order).
+	bool sequentialGetOneFree() const;
 	/// Checks if this ResearchProject needs a corresponding Item to be researched.
 	bool needItem() const;
 	/// Checks if this ResearchProject consumes the corresponding Item when research completes.
 	bool destroyItem() const;
 	/// Gets the list of ResearchProjects unlocked by this research.
 	const std::vector<const RuleResearch*> &getUnlocked() const;
+	/// Gets the list of ResearchProjects disabled by this research.
+	const std::vector<const RuleResearch*> &getDisabled() const;
 	/// Gets the points earned for discovering this ResearchProject.
 	int getPoints() const;
 	/// Gets the list of ResearchProjects granted at random for free by this research.
 	const std::vector<const RuleResearch*> &getGetOneFree() const;
+	/// Gets the list(s) of ResearchProjects granted at random for free by this research (if a defined prerequisite is met).
+	const std::map<const RuleResearch*, std::vector<const RuleResearch*> > &getGetOneFreeProtected() const;
 	/// Gets what to look up in the ufopedia.
 	const std::string &getLookup() const;
 	/// Gets the requirements for this ResearchProject.
@@ -79,6 +91,8 @@ public:
 	int getListOrder() const;
 	/// Gets the cutscene to play when this item is researched
 	const std::string & getCutscene() const;
+	/// Gets the item to spawn in the base stores when this topic is researched.
+	const std::string & getSpawnedItem() const;
 };
 
 }

@@ -101,7 +101,7 @@ PsiTrainingState::~PsiTrainingState()
 void PsiTrainingState::btnOkClick(Action *)
 {
 	_game->popState();
-	if (_training)
+	if (_training && !Options::anytimeMartialTraining)
 	{
 		_game->pushState(new TrainingState);
 	}

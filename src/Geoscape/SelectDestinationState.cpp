@@ -128,7 +128,7 @@ SelectDestinationState::SelectDestinationState(Craft *craft, Globe *globe) : _cr
 	_txtTitle->setVerticalAlign(ALIGN_MIDDLE);
 	_txtTitle->setWordWrap(true);
 
-	if (!_craft->getRules()->getSpacecraft() || !_game->getSavedGame()->isResearched(_game->getMod()->getFinalResearch()))
+	if (_craft->getFuelPercentage() < 100 || !_craft->getRules()->getSpacecraft() || !_game->getSavedGame()->isResearched(_game->getMod()->getFinalResearch()))
 	{
 		_btnCydonia->setVisible(false);
 	}
@@ -195,7 +195,7 @@ void SelectDestinationState::globeClick(Action *action)
 	// Clicking on a valid target
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
-		std::vector<Target*> v = _globe->getTargets(mouseX, mouseY, true);
+		std::vector<Target*> v = _globe->getTargets(mouseX, mouseY, true, _craft);
 		if (v.empty())
 		{
 			Waypoint *w = new Waypoint();

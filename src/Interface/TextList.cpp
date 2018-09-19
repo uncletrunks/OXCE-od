@@ -38,7 +38,7 @@ namespace OpenXcom
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-TextList::TextList(int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _big(0), _small(0), _font(0), _scroll(0), _visibleRows(0), _selRow(0), _color(0), _dot(false), _selectable(false), _condensed(false), _contrast(false), _wrap(false), _flooding(false),
+TextList::TextList(int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _big(0), _small(0), _font(0), _scroll(0), _visibleRows(0), _selRow(0), _color(0), _dot(false), _selectable(false), _condensed(false), _contrast(false), _wrap(false), _flooding(false), _ignoreSeparators(false),
 																								   _bg(0), _selector(0), _margin(0), _scrolling(true), _arrowPos(-1), _scrollPos(4), _arrowType(ARROW_VERTICAL),
 																								   _leftClick(0), _leftPress(0), _leftRelease(0), _rightClick(0), _rightPress(0), _rightRelease(0), _arrowsLeftEdge(0), _arrowsRightEdge(0), _comboBox(0)
 {
@@ -325,7 +325,7 @@ void TextList::addRow(int cols, ...)
 		// Wordwrap text if necessary
 		if (_wrap && txt->getTextWidth() > txt->getWidth())
 		{
-			txt->setWordWrap(true, true);
+			txt->setWordWrap(true, true, _ignoreSeparators);
 			rows = std::max(rows, txt->getNumLines());
 		}
 		rowHeight = std::max(rowHeight, txt->getTextHeight() + vmargin);
@@ -339,9 +339,9 @@ void TextList::addRow(int cols, ...)
 			{
 				if (_align[i] != ALIGN_RIGHT)
 				{
-				w += _font->getChar('.')->getCrop()->w + _font->getSpacing();
-				buf += '.';
-			}
+					w += _font->getChar('.')->getCrop()->w + _font->getSpacing();
+					buf += '.';
+				}
 				if (_align[i] != ALIGN_LEFT)
 				{
 					w += _font->getChar('.')->getCrop()->w + _font->getSpacing();
@@ -413,6 +413,38 @@ void TextList::addRow(int cols, ...)
 }
 
 /**
+ * Removes the last row from the text list.
+ */
+void TextList::removeLastRow()
+{
+	if (!_texts.empty())
+	{
+		_texts.pop_back();
+	}
+	if (!_rows.empty())
+	{
+		size_t toRemove = _rows.back();
+		while (!_rows.empty() && _rows.back() == toRemove)
+		{
+			_rows.pop_back();
+		}
+	}
+	if (_arrowPos != -1)
+	{
+		if (!_arrowLeft.empty())
+		{
+			_arrowLeft.pop_back();
+		}
+		if (!_arrowRight.empty())
+		{
+			_arrowRight.pop_back();
+		}
+	}
+	_redraw = true;
+	updateArrows();
+}
+
+/**
  * Changes the columns that the list contains.
  * While rows can be unlimited, columns need to be specified
  * since they can have various widths for lining up the text.
@@ -424,6 +456,7 @@ void TextList::setColumns(int cols, ...)
 	va_list args;
 	va_start(args, cols);
 
+	_columns.clear();
 	for (int i = 0; i < cols; ++i)
 	{
 		_columns.push_back(va_arg(args, int));
@@ -1268,6 +1301,11 @@ int TextList::getScrollbarColor()
 void TextList::setFlooding(bool flooding)
 {
 	_flooding = flooding;
+}
+
+void TextList::setIgnoreSeparators(bool ignoreSeparators)
+{
+	_ignoreSeparators = ignoreSeparators;
 }
 
 }

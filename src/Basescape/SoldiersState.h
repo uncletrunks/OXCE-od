@@ -18,6 +18,8 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../Engine/State.h"
+#include <vector>
+#include "SoldierSortUtil.h"
 
 namespace OpenXcom
 {
@@ -26,7 +28,10 @@ class TextButton;
 class Window;
 class Text;
 class TextList;
+class ComboBox;
 class Base;
+class Soldier;
+struct SortFunctor;
 
 /**
  * Soldiers screen that lets the player
@@ -38,15 +43,32 @@ private:
 	TextButton *_btnOk, *_btnPsiTraining, *_btnTraining, *_btnMemorial;
 	Window *_window;
 	Text *_txtTitle, *_txtName, *_txtRank, *_txtCraft;
+	ComboBox *_cbxSortBy, *_cbxScreenActions;
 	TextList *_lstSoldiers;
 	Base *_base;
+	std::vector<Soldier *> _origSoldierOrder, _filteredListOfSoldiers;
+	std::vector<SortFunctor *> _sortFunctors;
+	getStatFn_t _dynGetter;
+	std::vector<std::string> _availableOptions;
+	///initializes the display list based on the craft soldier's list and the position to display
+	void initList(size_t scrl);
 public:
 	/// Creates the Soldiers state.
 	SoldiersState(Base *base);
 	/// Cleans up the Soldiers state.
 	~SoldiersState();
+	/// Handler for changing the sort by combobox.
+	void cbxSortByChange(Action *action);
 	/// Updates the soldier names.
 	void init();
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsLeftArrowClick(Action *action);
+	/// Moves a soldier up.
+	void moveSoldierUp(Action *action, unsigned int row, bool max = false);
+	/// Handler for clicking the Soldiers reordering button.
+	void lstItemsRightArrowClick(Action *action);
+	/// Moves a soldier down.
+	void moveSoldierDown(Action *action, unsigned int row, bool max = false);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Psi Training button.
@@ -54,6 +76,10 @@ public:
 	void btnTrainingClick(Action *action);
 	/// Handler for clicking the Memorial button.
 	void btnMemorialClick(Action *action);
+	/// Handler for changing the screen actions combo box.
+	void cbxScreenActionsChange(Action *action);
+	/// Handler for clicking the Inventory button.
+	void btnInventoryClick(Action *action);
 	/// Handler for clicking the Soldiers list.
 	void lstSoldiersClick(Action *action);
 };

@@ -31,10 +31,13 @@ namespace OpenXcom
  * @param type String defining the type.
  */
 RuleCraft::RuleCraft(const std::string &type) :
-	_type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _vehicles(0),
+	_type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _pilots(0), _vehicles(0),
 	_costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
-	_transferTime(0), _score(0), _battlescapeTerrainData(0),
-	_spacecraft(false), _listOrder(0), _maxItems(0), _maxAltitude(-1), _stats()
+	_transferTime(24), _score(0), _battlescapeTerrainData(0),
+	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false),
+	_listOrder(0), _maxItems(0), _maxAltitude(-1), _stats(),
+	_shieldRechargeAtBase(1000),
+	_mapVisible(true)
 {
 	for (int i = 0; i < WeaponMax; ++ i)
 	{
@@ -80,15 +83,17 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 
 	if (node["sprite"])
 	{
-		_sprite = node["sprite"].as<int>(_sprite);
 		// this is an offset in BASEBITS.PCK, and two in INTICONS.PCK
-		if (_sprite > 4)
-			_sprite += mod->getModOffset();
+		_sprite = mod->getOffset(node["sprite"].as<int>(_sprite), 4);
 	}
 	_stats.load(node);
-	_marker = node["marker"].as<int>(_marker);
+	if (node["marker"])
+	{
+		_marker = mod->getOffset(node["marker"].as<int>(_marker), 8);
+	}
 	_weapons = node["weapons"].as<int>(_weapons);
 	_soldiers = node["soldiers"].as<int>(_soldiers);
+	_pilots = node["pilots"].as<int>(_pilots);
 	_vehicles = node["vehicles"].as<int>(_vehicles);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
 	_costRent = node["costRent"].as<int>(_costRent);
@@ -103,9 +108,17 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 		RuleTerrain *rule = new RuleTerrain(terrain["name"].as<std::string>());
 		rule->load(terrain, mod);
 		_battlescapeTerrainData = rule;
+		if (const YAML::Node &craftInventoryTile = node["craftInventoryTile"])
+		{
+			_craftInventoryTile = craftInventoryTile.as<std::vector<int> >(_craftInventoryTile);
+		}
 	}
 	_deployment = node["deployment"].as< std::vector< std::vector<int> > >(_deployment);
+	_keepCraftAfterFailedMission = node["keepCraftAfterFailedMission"].as<bool>(_keepCraftAfterFailedMission);
+	_allowLanding = node["allowLanding"].as<bool>(_allowLanding);
 	_spacecraft = node["spacecraft"].as<bool>(_spacecraft);
+	_notifyWhenRefueled = node["notifyWhenRefueled"].as<bool>(_notifyWhenRefueled);
+	_autoPatrol = node["autoPatrol"].as<bool>(_autoPatrol);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
@@ -142,6 +155,8 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 		for (int i = 0; (size_t)i < str.size() &&  i < WeaponMax; ++i)
 			_weaponStrings[i] = str[i].as<std::string>();
 	}
+	_shieldRechargeAtBase = node["shieldRechargedAtBase"].as<int>(_shieldRechargeAtBase);
+	_mapVisible = node["mapVisible"].as<bool>(_mapVisible);
 }
 
 /**
@@ -249,6 +264,15 @@ int RuleCraft::getWeapons() const
 int RuleCraft::getSoldiers() const
 {
 	return _soldiers;
+}
+
+/**
+* Gets the number of pilots that the craft requires in order to take off.
+* @return The number of pilots.
+*/
+int RuleCraft::getPilots() const
+{
+	return _pilots;
 }
 
 /**
@@ -380,12 +404,48 @@ RuleTerrain *RuleCraft::getBattlescapeTerrainData() const
 }
 
 /**
+ * Checks if this craft is lost after a failed mission or not.
+ * @return True if this craft is NOT lost (e.g. paratroopers).
+ */
+bool RuleCraft::keepCraftAfterFailedMission() const
+{
+	return _keepCraftAfterFailedMission;
+}
+
+/**
+ * Checks if this craft is capable of landing (on missions).
+ * @return True if this ship is capable of landing (on missions).
+ */
+bool RuleCraft::getAllowLanding() const
+{
+	return _allowLanding;
+}
+
+/**
  * Checks if this ship is capable of going to mars.
  * @return True if this ship is capable of going to mars.
  */
 bool RuleCraft::getSpacecraft() const
 {
 	return _spacecraft;
+}
+
+/**
+ * Checks if a notification should be displayed when the craft is refueled.
+ * @return True if notification should appear.
+ */
+bool RuleCraft::notifyWhenRefueled() const
+{
+	return _notifyWhenRefueled;
+}
+
+/**
+* Checks if the craft supports auto patrol feature.
+* @return True if auto patrol is supported.
+*/
+bool RuleCraft::canAutoPatrol() const
+{
+	return _autoPatrol;
 }
 
 /**
@@ -404,6 +464,15 @@ int RuleCraft::getListOrder() const
 const std::vector<std::vector<int> > &RuleCraft::getDeployment() const
 {
 	return _deployment;
+}
+
+/**
+* Gets the craft inventory tile position.
+* @return The tile position.
+*/
+const std::vector<int> &RuleCraft::getCraftInventoryTile() const
+{
+	return _craftInventoryTile;
 }
 
 /**
@@ -429,6 +498,11 @@ bool RuleCraft::isValidWeaponSlot(int slot, int weaponType) const
 			return true;
 	}
 	return false;
+}
+
+int RuleCraft::getWeaponTypesRaw(int slot, int subslot) const
+{
+	return _weaponTypes[slot][subslot];
 }
 
 /**
@@ -466,6 +540,66 @@ int RuleCraft::getMaxAltitude() const
 bool RuleCraft::isWaterOnly() const
 {
 	return _maxAltitude > -1;
+}
+
+/**
+ * Gets how many shield points are recharged when landed at base per hour
+ * @return shield recharged per hour
+ */
+int RuleCraft::getShieldRechargeAtBase() const
+{
+	return _shieldRechargeAtBase;
+}
+
+/**
+ * Gets whether or not the craft map should be visible at the beginning of the battlescape
+ * @return visible or not?
+ */
+bool RuleCraft::isMapVisible() const
+{
+	return _mapVisible;
+}
+
+/**
+ * Calculates the theoretical range of the craft
+ * This depends on when you launch the craft as fuel is consumed only on exact 10 minute increments
+ * @param type Which calculation should we do? 0 = maximum, 1 = minimum, 2 = average of the two
+ * @return The calculated range
+ */
+int RuleCraft::calculateRange(int type)
+{
+	// If the craft uses an item to refuel, the tick rate is one fuel unit per 10 minutes
+	int totalFuelTicks = _stats.fuelMax;
+
+	// If no item is used to refuel, the tick rate depends on speed
+	if (_refuelItem.empty())
+	{
+		// Craft with less than 100 speed don't consume fuel and therefore have infinite range
+		if (_stats.speedMax < 100)
+		{
+			return -1;
+		}
+
+		totalFuelTicks = _stats.fuelMax / (_stats.speedMax / 100);
+	}
+
+	// Six ticks per hour, factor return trip and speed for total range
+	int range;
+	switch (type)
+	{
+		// Min range happens when the craft is sent at xx:x9:59, as a unit of fuel is immediately consumed, so we subtract an extra 'tick' of fuel in this case
+		case 1:
+			range = (totalFuelTicks - 1) * _stats.speedMax / 12;
+			break;
+		case 2:
+			range = (2 * totalFuelTicks - 1) * _stats.speedMax / 12 / 2;
+			break;
+		default :
+			range = totalFuelTicks * _stats.speedMax / 12;
+			break;
+	}
+
+	return range;
 }
 
 }

@@ -50,7 +50,7 @@ private:
 
 	BattleUnit *_unit;
 	BattleItem *_itemR, *_itemL;
-	SurfaceSet *_unitSurface, *_itemSurface, *_fireSurface, *_breathSurface;
+	SurfaceSet *_unitSurface, *_itemSurface, *_fireSurface, *_breathSurface, *_facingArrowSurface;
 	Surface *_dest;
 	Mod *_mod;
 	int _part, _animationFrame, _drawingRoutine;
@@ -110,7 +110,7 @@ public:
 	/// Cleans up the UnitSprite.
 	~UnitSprite();
 	/// Draws the unit.
-	void draw(BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask);
+	void draw(BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask, bool isAltPressed);
 };
 
 } //namespace OpenXcom

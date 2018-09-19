@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <vector>
 #include "BattleItem.h"
+#include "ItemContainer.h"
 #include "SavedBattleGame.h"
 #include "SavedGame.h"
 #include "Tile.h"
@@ -51,8 +52,8 @@ namespace OpenXcom
  */
 SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
-	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _animFrame(0),
-	_debugMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
+	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20), _animFrame(0),
+	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
 {
@@ -62,6 +63,9 @@ SavedBattleGame::SavedBattleGame(Mod *rule) :
 		_tileSearch[i].x = ((i%11) - 5);
 		_tileSearch[i].y = ((i/11) - 5);
 	}
+	_baseItems = new ItemContainer();
+
+	setRandomHiddenMovementBackground(0);
 }
 
 /**
@@ -103,6 +107,7 @@ SavedBattleGame::~SavedBattleGame()
 
 	delete _pathfinding;
 	delete _tileEngine;
+	delete _baseItems;
 }
 
 /**
@@ -124,6 +129,8 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_alienCustomMission = node["alienCustomMission"].as<std::string>(_alienCustomMission);
 	_globalShade = node["globalshade"].as<int>(_globalShade);
 	_turn = node["turn"].as<int>(_turn);
+	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
+	_bughuntMode = node["bughuntMode"].as<bool>(_bughuntMode);
 	_depth = node["depth"].as<int>(_depth);
 	_animFrame = node["animFrame"].as<int>(_animFrame);
 	int selectedUnit = node["selectedUnit"].as<int>();
@@ -361,6 +368,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_ambience = node["ambience"].as<int>(_ambience);
 	_ambientVolume = node["ambientVolume"].as<double>(_ambientVolume);
 	_music = node["music"].as<std::string>(_music);
+	_baseItems->load(node["baseItems"]);
 	_turnLimit = node["turnLimit"].as<int>(_turnLimit);
 	_chronoTrigger = ChronoTrigger(node["chronoTrigger"].as<int>(_chronoTrigger));
 	_cheatTurn = node["cheatTurn"].as<int>(_cheatTurn);
@@ -388,7 +396,7 @@ void SavedBattleGame::loadMapResources(Mod *mod)
 	{
 		for (int part = O_FLOOR; part <= O_OBJECT; part++)
 		{
-			TilePart tp = (TilePart) part;
+			TilePart tp = (TilePart)part;
 			_tiles[i].getMapData(&mdID, &mdsID, tp);
 			if (mdID != -1 && mdsID != -1)
 			{
@@ -424,7 +432,9 @@ YAML::Node SavedBattleGame::save() const
 	node["alienCustomMission"] = _alienCustomMission;
 	node["globalshade"] = _globalShade;
 	node["turn"] = _turn;
+	node["bughuntMinTurn"] = _bughuntMinTurn;
 	node["animFrame"] = _animFrame;
+	node["bughuntMode"] = _bughuntMode;
 	node["selectedUnit"] = (_selectedUnit?_selectedUnit->getId():-1);
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
@@ -498,6 +508,7 @@ YAML::Node SavedBattleGame::save() const
 		node["recoverConditional"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
 	}
 	node["music"] = _music;
+	node["baseItems"] = _baseItems->save();
 	node["turnLimit"] = _turnLimit;
 	node["chronoTrigger"] = int(_chronoTrigger);
 	node["cheatTurn"] = _cheatTurn;
@@ -515,12 +526,12 @@ YAML::Node SavedBattleGame::save() const
 void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z, bool resetTerrain)
 {
 	// Clear old map data
-	for (std::vector<Node*>::iterator i = _nodes.begin(); i != _nodes.end(); ++i)
-	{
-		delete *i;
-	}
+		for (std::vector<Node*>::iterator i = _nodes.begin(); i != _nodes.end(); ++i)
+		{
+			delete *i;
+		}
 
-	_nodes.clear();
+		_nodes.clear();
 
 	if (resetTerrain)
 	{
@@ -581,6 +592,16 @@ void SavedBattleGame::setMissionType(const std::string &missionType)
 const std::string &SavedBattleGame::getMissionType() const
 {
 	return _missionType;
+}
+
+/**
+* Returns the list of items in the base storage rooms BEFORE the mission.
+* Does NOT return items assigned to craft or in transfer.
+* @return Pointer to the item list.
+*/
+ItemContainer *SavedBattleGame::getBaseStorageItems()
+{
+	return _baseItems;
 }
 
 /**
@@ -899,7 +920,7 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 
 	const RuleItem *rule = weapon->getRules();
 
-	if (unit->getOriginalFaction() == FACTION_HOSTILE && getTurn() < rule->getAIUseDelay(getMod()))
+	if (unit->getFaction() == FACTION_HOSTILE && getTurn() < rule->getAIUseDelay(getMod()))
 	{
 		return false;
 	}
@@ -936,10 +957,36 @@ int SavedBattleGame::getTurn() const
 }
 
 /**
+* Sets the bug hunt turn number.
+*/
+void SavedBattleGame::setBughuntMinTurn(int bughuntMinTurn)
+{
+	_bughuntMinTurn = bughuntMinTurn;
+}
+
+/**
+* Gets the bug hunt turn number.
+* @return The bug hunt turn.
+*/
+int SavedBattleGame::getBughuntMinTurn() const
+{
+	return _bughuntMinTurn;
+}
+
+/**
  * Ends the current turn and progresses to the next one.
  */
 void SavedBattleGame::endTurn()
 {
+	// reset turret direction for all hostile and neutral units (as it may have been changed during reaction fire)
+	for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
+	{
+		if ((*i)->getOriginalFaction() != FACTION_PLAYER)
+		{
+			(*i)->setDirection((*i)->getDirection()); // this is not pointless, the method sets more than just the direction
+		}
+	}
+
 	if (_side == FACTION_PLAYER)
 	{
 		if (_selectedUnit && _selectedUnit->getOriginalFaction() == FACTION_PLAYER)
@@ -987,7 +1034,7 @@ void SavedBattleGame::endTurn()
 
 	if (_side == FACTION_PLAYER)
 	{
-		// update the "number of turns since last spotted"
+		// update the "number of turns since last spotted" and the number of turns left sniper AI knows about player units
 		for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
 		{
 			if ((*i)->getTurnsSinceSpotted() < 255)
@@ -997,6 +1044,11 @@ void SavedBattleGame::endTurn()
 			if (_cheating && (*i)->getFaction() == FACTION_PLAYER && !(*i)->isOut())
 			{
 				(*i)->setTurnsSinceSpotted(0);
+			}
+
+			if ((*i)->getTurnsLeftSpottedForSnipers() != 0)
+			{
+				(*i)->setTurnsLeftSpottedForSnipers((*i)->getTurnsLeftSpottedForSnipers() - 1);
 			}
 		}
 	}
@@ -1074,6 +1126,23 @@ void SavedBattleGame::setDebugMode()
 bool SavedBattleGame::getDebugMode() const
 {
 	return _debugMode;
+}
+
+/**
+* Sets the bug hunt mode.
+*/
+void SavedBattleGame::setBughuntMode(bool bughuntMode)
+{
+	_bughuntMode = bughuntMode;
+}
+
+/**
+* Gets the current bug hunt mode.
+* @return Bug hunt mode.
+*/
+bool SavedBattleGame::getBughuntMode() const
+{
+	return _bughuntMode;
 }
 
 /**
@@ -1764,6 +1833,7 @@ void SavedBattleGame::reviveUnconsciousUnits(bool noTU)
 					// recover from unconscious
 					(*i)->turn(false); // makes the unit stand up again
 					(*i)->kneel(false);
+					(*i)->setAlreadyExploded(false);
 					if (noTU) (*i)->setTimeUnits(0);
 					removeUnconsciousBodyItem((*i));
 				}
@@ -2416,6 +2486,31 @@ void difficultyLevelScript(const SavedBattleGame* sbg, int& val)
 }
 
 } // namespace
+
+/**
+ * Randomly chooses hidden movement background.
+ */
+void SavedBattleGame::setRandomHiddenMovementBackground(const Mod *mod)
+{
+	if (mod && !mod->getHiddenMovementBackgrounds().empty())
+	{
+		int rng = RNG::generate(0, mod->getHiddenMovementBackgrounds().size() - 1);
+		_hiddenMovementBackground = mod->getHiddenMovementBackgrounds().at(rng);
+	}
+	else
+	{
+		_hiddenMovementBackground = "TAC00.SCR";
+	}
+}
+
+/**
+ * Gets the hidden movement background ID.
+ * @return hidden movement background ID
+ */
+std::string SavedBattleGame::getHiddenMovementBackground() const
+{
+	return _hiddenMovementBackground;
+}
 
 /**
  * Register Armor in script parser.

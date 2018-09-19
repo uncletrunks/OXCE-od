@@ -275,9 +275,6 @@
     <ClCompile Include="Interface\FpsCounter.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
-    <ClCompile Include="Battlescape\ItemSprite.cpp">
-      <Filter>Battlescape</Filter>
-    </ClCompile>
     <ClCompile Include="Battlescape\UnitSprite.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
@@ -958,6 +955,48 @@
     <ClCompile Include="Mod\RuleConverter.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="Basescape\SoldierSortUtil.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\SoldierAvatarState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Savegame\SoldierAvatar.cpp">
+      <Filter>Savegame</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\ChangeHeadquartersState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\ConfirmEndMissionState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\UfoTrackerState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\TechTreeViewerState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\TechTreeSelectState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\ManufactureDependenciesTreeState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\InventoryLoadState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\InventorySaveState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\CraftPilotsState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\CraftPilotSelectState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\CustomPalettes.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
     <ClCompile Include="Menu\StatisticsState.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
@@ -966,6 +1005,57 @@
     </ClCompile>
     <ClCompile Include="Menu\SetWindowedRootState.cpp">
       <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\AlienInventory.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\AlienInventoryState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\BriefingLightState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\CraftNotEnoughPilotsState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\NewPossiblePurchaseState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\NewPossibleCraftState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\NewPossibleFacilityState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\TrainingFinishedState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\CraftEquipmentLoadState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\CraftEquipmentSaveState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\TestPaletteState.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Geoscape\SelectMusicTrackState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Ufopaedia\StatsForNerdsState.cpp">
+      <Filter>Ufopaedia</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\GlobalResearchState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\HelloCommanderState.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\RuleSoldierTransformation.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\SoldierTransformationState.cpp">
+      <Filter>Basescape</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1251,9 +1341,6 @@
     </ClInclude>
     <ClInclude Include="Interface\FpsCounter.h">
       <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Battlescape\ItemSprite.h">
-      <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Battlescape\UnitSprite.h">
       <Filter>Battlescape</Filter>
@@ -1968,6 +2055,48 @@
     <ClInclude Include="Mod\RuleConverter.h">
       <Filter>Mod</Filter>
     </ClInclude>
+    <ClInclude Include="Basescape\SoldierSortUtil.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SoldierAvatarState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Savegame\SoldierAvatar.h">
+      <Filter>Savegame</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\ChangeHeadquartersState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\ConfirmEndMissionState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\UfoTrackerState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\TechTreeViewerState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\TechTreeSelectState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\ManufactureDependenciesTreeState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\InventoryLoadState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\InventorySaveState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftPilotsState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftPilotSelectState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\CustomPalettes.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
     <ClInclude Include="Menu\StatisticsState.h">
       <Filter>Menu</Filter>
     </ClInclude>
@@ -1976,6 +2105,58 @@
     </ClInclude>
     <ClInclude Include="Menu\SetWindowedRootState.h">
       <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\HelperMeta.h" />
+    <ClInclude Include="Battlescape\AlienInventory.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\AlienInventoryState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\BriefingLightState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\CraftNotEnoughPilotsState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\NewPossiblePurchaseState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\NewPossibleCraftState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\NewPossibleFacilityState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\TrainingFinishedState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftEquipmentLoadState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\CraftEquipmentSaveState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\TestPaletteState.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\SelectMusicTrackState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Ufopaedia\StatsForNerdsState.h">
+      <Filter>Ufopaedia</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\GlobalResearchState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\HelloCommanderState.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleSoldierTransformation.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SoldierTransformationState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

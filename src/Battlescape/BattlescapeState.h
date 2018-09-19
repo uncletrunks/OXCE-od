@@ -47,16 +47,17 @@ class BattlescapeGame;
 class BattlescapeState : public State
 {
 private:
-	Surface *_rank;
+	Surface *_rank, *_rankTiny;
 	InteractiveSurface *_icons;
 	Map *_map;
 	BattlescapeButton *_btnUnitUp, *_btnUnitDown, *_btnMapUp, *_btnMapDown, *_btnShowMap, *_btnKneel;
 	BattlescapeButton *_btnInventory, *_btnCenter, *_btnNextSoldier, *_btnNextStop, *_btnShowLayers, *_btnHelp;
-	BattlescapeButton *_btnEndTurn, *_btnAbort, *_btnLaunch, *_btnPsi, *_reserve;
+	BattlescapeButton *_btnEndTurn, *_btnAbort, *_btnLaunch, *_btnPsi, *_btnSpecial, *_reserve;
 	InteractiveSurface *_btnStats;
 	BattlescapeButton *_btnReserveNone, *_btnReserveSnap, *_btnReserveAimed, *_btnReserveAuto, *_btnReserveKneel, *_btnZeroTUs;
 	InteractiveSurface *_btnLeftHandItem, *_btnRightHandItem;
 	static const int VISIBLE_MAX = 10;
+	std::string _txtVisibleUnitTooltip[VISIBLE_MAX+2];
 	InteractiveSurface *_btnVisibleUnit[VISIBLE_MAX];
 	NumberText *_numVisibleUnit[VISIBLE_MAX];
 	BattleUnit *_visibleUnit[VISIBLE_MAX];
@@ -64,13 +65,18 @@ private:
 	Text *_txtName;
 	NumberText *_numTimeUnits, *_numEnergy, *_numHealth, *_numMorale, *_numLayers;
 	std::vector<NumberText*> _numAmmoLeft, _numAmmoRight;
+	std::vector<NumberText*> _numMedikitLeft, _numMedikitRight;
+	NumberText *_numTwoHandedIndicatorLeft, *_numTwoHandedIndicatorRight;
+	Uint8 _twoHandedRed, _twoHandedGreen;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
 	Timer *_animTimer, *_gameTimer;
 	SavedBattleGame *_save;
 	Text *_txtDebug, *_txtTooltip;
+	Uint8 _tooltipDefaultColor;
+	Uint8 _medikitRed, _medikitGreen, _medikitBlue, _medikitOrange;
 	std::vector<State*> _popups;
 	BattlescapeGame *_battleGame;
-	bool _firstInit;
+	bool _firstInit, _paletteResetNeeded, _paletteResetRequested;
 	bool _isMouseScrolling, _isMouseScrolled;
 	int _xBeforeMouseScrolling, _yBeforeMouseScrolling;
 	Position _mapOffsetBeforeMouseScrolling;
@@ -82,12 +88,14 @@ private:
 	Position _cursorPosition;
 	Uint8 _barHealthColor;
 	bool _autosave;
+	int _numberOfDirectlyVisibleUnits, _numberOfEnemiesTotal, _numberOfEnemiesTotalPlusWounded;
+	Uint8 _indicatorTextColor, _indicatorGreen, _indicatorBlue, _indicatorPurple;
 	/// Popups a context sensitive list of actions the user can choose from.
-	void handleItemClick(BattleItem *item);
+	void handleItemClick(BattleItem *item, bool rightClick);
 	/// Shifts the red colors of the visible unit buttons backgrounds.
 	void blinkVisibleUnitButtons();
 	/// Draw hand item with ammo number.
-	void drawItem(BattleItem *item, Surface *hand, std::vector<NumberText*> &ammoText);
+	void drawItem(BattleItem *item, Surface *hand, std::vector<NumberText*> &ammoText, std::vector<NumberText*> &medikitText, NumberText *twoHandedText);
 	/// Draw both hands sprites.
 	void drawHandsItems();
 	/// Shifts the colors of the health bar when unit has fatal wounds.
@@ -104,6 +112,7 @@ public:
 	BattlescapeState();
 	/// Cleans up the Battlescape state.
 	~BattlescapeState();
+	void resetPalettes();
 	/// Initializes the battlescapestate.
 	void init();
 	/// Runs the timers and handles popups.
@@ -140,6 +149,8 @@ public:
 	void btnPrevSoldierClick(Action *action);
 	/// Handler for clicking the Show Layers button.
 	void btnShowLayersClick(Action *action);
+	/// Handler for clicking the Ufopaedia button.
+	void btnUfopaediaClick(Action *action);
 	/// Handler for clicking the Help button.
 	void btnHelpClick(Action *action);
 	/// Handler for clicking the End Turn button.
@@ -158,12 +169,18 @@ public:
 	void btnLaunchClick(Action *action);
 	/// Handler for clicking the use psi button.
 	void btnPsiClick(Action *action);
+	/// Handler for clicking the use special weapon button.
+	void btnSpecialClick(Action *action);
 	/// Handler for clicking a reserved button.
 	void btnReserveClick(Action *action);
 	/// Handler for clicking the reload button.
 	void btnReloadClick(Action *action);
+	/// Handler for clicking the [SelectMusicTrack] button.
+	void btnSelectMusicTrackClick(Action *action);
 	/// Handler for clicking the lighting button.
 	void btnPersonalLightingClick(Action *action);
+	/// Handler for toggling the "night vision" mode.
+	void btnNightVisionClick(Action *action);
 	/// Determines whether a playable unit is selected.
 	bool playableUnitSelected();
 	/// Updates soldier name/rank/tu/energy/health/morale.
@@ -180,8 +197,12 @@ public:
 	Map *getMap() const;
 	/// Show debug message.
 	void debug(const std::wstring &message);
+	/// Show bug hunt message.
+	void bugHuntMessage();
 	/// Show warning message.
 	void warning(const std::string &message);
+	/// Gets melee damage preview.
+	std::wstring getMeleeDamagePreview(BattleUnit *actor, BattleItem *weapon) const;
 	/// Handles keypresses.
 	void handle(Action *action);
 	/// Displays a popup window.
@@ -192,6 +213,8 @@ public:
 	void showLaunchButton(bool show);
 	/// Shows the PSI button.
 	void showPsiButton(bool show);
+	/// Shows the special weapon button.
+	void showSpecialButton(bool show, int sprite = 1);
 	/// Clears mouse-scrolling state.
 	void clearMouseScrollingState();
 	/// Returns a pointer to the battlegame, in case we need its functions.
@@ -216,6 +239,13 @@ public:
 	void btnZeroTUsClick(Action *action);
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
+	/// Handler for showing tooltip with extra information (used for medikit-type equipment)
+	void txtTooltipInExtra(Action *action, bool leftHand, bool special = false);
+	void txtTooltipInExtraLeftHand(Action *action);
+	void txtTooltipInExtraRightHand(Action *action);
+	void txtTooltipInExtraSpecial(Action *action);
+	/// Handler for showing tooltip with extra information (about current turn)
+	void txtTooltipInEndTurn(Action *action);
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
 	/// Update the resolution settings, we just resized the window.
