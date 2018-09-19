@@ -1,5 +1,5 @@
 [b]Extended version of OpenXcom[/b]
-[b]Mod version 4.0a[/b]
+[b]Mod version 5.0[/b]
 OpenXcom date:   Nightly [dateOrigin/][br/]
 OpenXcom commit: [commitOrigin/][br/]
 Extended date:   [date/][br/]
@@ -193,6 +193,8 @@ Breaking change: Renamed access function to statis in armor (added prefix `Stats
 [br/]
 4.0a:[br/]
 Bug fix.[br/]
+[br/]
+5.0:[br/]
 [br/]
 
 [examples]
