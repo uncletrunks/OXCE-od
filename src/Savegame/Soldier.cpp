@@ -617,6 +617,63 @@ void Soldier::setArmor(Armor *armor)
 }
 
 /**
+ * Returns a list of armor layers (sprite names).
+ */
+const std::vector<std::string> Soldier::getArmorLayers(Armor *customArmor) const
+{
+	std::vector<std::string> ret;
+	std::stringstream ss;
+
+	const Armor *armor = customArmor ? customArmor : _armor;
+
+	const std::string gender = _gender == GENDER_MALE ? "M" : "F";
+	auto defaultPrefix = armor->getLayersDefaultPrefix();
+	auto specificPrefix = armor->getLayersSpecificPrefix();
+	auto layoutDefinition = armor->getLayersDefinition();
+	std::vector<std::string> relevantLayer;
+	int layerIndex = 0;
+	bool isDefined = false;
+
+	// find relevant layer
+	for (int i = 0; i <= 4; ++i)
+	{
+		ss.str("");
+		ss << gender;
+		ss << (int)_look + (_lookVariant & (15 >> i)) * 4;
+		isDefined = (layoutDefinition.find(ss.str()) != layoutDefinition.end());
+		if (isDefined)
+		{
+			relevantLayer = layoutDefinition[ss.str()];
+			break;
+		}
+	}
+	if (!isDefined)
+	{
+		throw Exception("Layered armor sprite definition (" + armor->getType() + ") not found!");
+	}
+	for (auto layerItem : relevantLayer)
+	{
+		if (!layerItem.empty())
+		{
+			ss.str("");
+			if (specificPrefix.find(layerIndex) != specificPrefix.end())
+			{
+				ss << specificPrefix[layerIndex];
+			}
+			else
+			{
+				ss << defaultPrefix;
+			}
+			ss << "__" << layerIndex << "__" << layerItem;
+			ret.push_back(ss.str());
+		}
+		layerIndex++;
+	}
+
+	return ret;
+}
+
+/**
 * Gets the soldier's original armor (before replacement).
 * @return Pointer to armor data.
 */

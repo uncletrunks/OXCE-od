@@ -391,32 +391,45 @@ void InventoryState::init()
 		texture->getFrame(s->getRankSpriteBattlescape())->setY(0);
 		texture->getFrame(s->getRankSpriteBattlescape())->blit(_btnRank);
 
-		const std::string look = s->getArmor()->getSpriteInventory();
-		const std::string gender = s->getGender() == GENDER_MALE ? "M" : "F";
-		std::stringstream ss;
-		Surface *surf = 0;
-
-		for (int i = 0; i <= 4; ++i)
+		auto defaultPrefix = s->getArmor()->getLayersDefaultPrefix();
+		if (!defaultPrefix.empty())
 		{
-			ss.str("");
-			ss << look;
-			ss << gender;
-			ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
-			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str(), false);
-			if (surf)
+			auto layers = s->getArmorLayers();
+			for (auto layer : layers)
 			{
-				break;
+				auto surf = _game->getMod()->getSurface(layer, true);
+				surf->blit(_soldier);
 			}
 		}
-		if (!surf)
+		else
 		{
-			ss.str("");
-			ss << look;
-			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str(), true);
+			const std::string look = s->getArmor()->getSpriteInventory();
+			const std::string gender = s->getGender() == GENDER_MALE ? "M" : "F";
+			Surface *surf = 0;
+			std::stringstream ss;
+
+			for (int i = 0; i <= 4; ++i)
+			{
+				ss.str("");
+				ss << look;
+				ss << gender;
+				ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
+				ss << ".SPK";
+				surf = _game->getMod()->getSurface(ss.str(), false);
+				if (surf)
+				{
+					break;
+				}
+			}
+			if (!surf)
+			{
+				ss.str("");
+				ss << look;
+				ss << ".SPK";
+				surf = _game->getMod()->getSurface(ss.str(), true);
+			}
+			surf->blit(_soldier);
 		}
-		surf->blit(_soldier);
 	}
 	else
 	{

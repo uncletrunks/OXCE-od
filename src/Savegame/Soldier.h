@@ -150,6 +150,8 @@ public:
 	Armor *getArmor() const;
 	/// Sets the soldier armor.
 	void setArmor(Armor *armor);
+	/// Gets the armor layers (sprite names).
+	const std::vector<std::string> getArmorLayers(Armor *customArmor = nullptr) const;
 	/// Gets the soldier's original armor (before replacement).
 	Armor *getReplacedArmor() const;
 	/// Backs up the soldier's original armor (before replacement).

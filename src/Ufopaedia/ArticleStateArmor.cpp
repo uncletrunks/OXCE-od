@@ -33,6 +33,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 #include "../Mod/RuleInterface.h"
+#include "../Savegame/Soldier.h"
 
 namespace OpenXcom
 {
@@ -71,17 +72,36 @@ namespace OpenXcom
 		_image = new Surface(320, 200, 0, 0);
 		add(_image);
 
-		std::string look = armor->getSpriteInventory();
-		look += "M0.SPK";
-		if (!CrossPlatform::fileExists(FileMap::getFilePath("UFOGRAPH/" + look)) && !_game->getMod()->getSurface(look, false))
+		auto defaultPrefix = armor->getLayersDefaultPrefix();
+		if (!defaultPrefix.empty())
 		{
-			look = armor->getSpriteInventory() + ".SPK";
+			// dummy default soldier (M0)
+			Soldier *s = new Soldier(_game->getMod()->getSoldier(_game->getMod()->getSoldiersList().front(), true), armor, 0);
+			s->setGender(GENDER_MALE);
+			s->setLook(LOOK_BLONDE);
+			s->setLookVariant(0);
+
+			auto layers = s->getArmorLayers();
+			for (auto layer : layers)
+			{
+				auto surf = _game->getMod()->getSurface(layer, true);
+				surf->blit(_image);
+			}
 		}
-		if (!_game->getMod()->getSurface(look, false))
+		else
 		{
-			look = armor->getSpriteInventory();
+			std::string look = armor->getSpriteInventory();
+			look += "M0.SPK";
+			if (!CrossPlatform::fileExists(FileMap::getFilePath("UFOGRAPH/" + look)) && !_game->getMod()->getSurface(look, false))
+			{
+				look = armor->getSpriteInventory() + ".SPK";
+			}
+			if (!_game->getMod()->getSurface(look, false))
+			{
+				look = armor->getSpriteInventory();
+			}
+			_game->getMod()->getSurface(look, true)->blit(_image);
 		}
-		_game->getMod()->getSurface(look, true)->blit(_image);
 
 
 		_lstInfo = new TextList(150, 96, 150, 46);

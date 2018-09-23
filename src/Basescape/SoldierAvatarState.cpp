@@ -130,7 +130,23 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 void SoldierAvatarState::initPreview(Soldier *s)
 {
 	_soldierSurface->clear();
-	if (s)
+
+	if (!s)
+	{
+		return;
+	}
+
+	auto defaultPrefix = s->getArmor()->getLayersDefaultPrefix();
+	if (!defaultPrefix.empty())
+	{
+		auto layers = s->getArmorLayers();
+		for (auto layer : layers)
+		{
+			auto surf = _game->getMod()->getSurface(layer, true);
+			surf->blit(_soldierSurface);
+		}
+	}
+	else
 	{
 		const std::string look = s->getArmor()->getSpriteInventory();
 		const std::string gender = s->getGender() == GENDER_MALE ? "M" : "F";

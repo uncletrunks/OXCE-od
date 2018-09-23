@@ -51,6 +51,9 @@ public:
 	static const std::string NONE;
 private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
+	std::string _layersDefaultPrefix;
+	std::map<int, std::string> _layersSpecificPrefix;
+	std::map<std::string, std::vector<std::string> > _layersDefinition;
 	std::vector<std::string> _corpseBattle;
 	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _leftArmorDiff, _rearArmor, _underArmor, _drawingRoutine;
@@ -112,6 +115,14 @@ public:
 	std::string getStoreItem() const;
 	/// Gets the special weapon type.
 	std::string getSpecialWeapon() const;
+
+	/// Gets the default prefix for layered armor sprite names.
+	const std::string &getLayersDefaultPrefix() const { return _layersDefaultPrefix; }
+	/// Gets the overrides for layered armor sprite name prefix, per layer.
+	const std::map<int, std::string> &getLayersSpecificPrefix() const { return _layersSpecificPrefix; }
+	/// Gets the layered armor definition.
+	const std::map<std::string, std::vector<std::string> > &getLayersDefinition() const { return _layersDefinition; }
+
 	/// Gets the battlescape drawing routine ID.
 	int getDrawingRoutine() const;
 	/// DO NOT USE THIS FUNCTION OUTSIDE THE BATTLEUNIT CONSTRUCTOR OR I WILL HUNT YOU DOWN.

@@ -2205,6 +2205,9 @@ void StatsForNerdsState::initArmorList()
 		addSection(L"{Inventory}", L"", _white);
 		addSingleString(ss, armorRule->getSpriteInventory(), "spriteInv", "", false);
 		addBoolean(ss, armorRule->hasInventory(), "allowInv", true);
+		addSingleString(ss, armorRule->getLayersDefaultPrefix(), "layersDefaultPrefix", "", false);
+		addBoolean(ss, !armorRule->getLayersSpecificPrefix().empty(), "layersSpecificPrefix*", false); // just say if there are any or not
+		addBoolean(ss, !armorRule->getLayersDefinition().empty(), "layersDefinition*", false); // just say if there are any or not
 
 		addSection(L"{Sprites}", L"", _white);
 		addVectorOfIntegers(ss, armorRule->getCustomArmorPreviewIndex(), "customArmorPreviewIndex");
