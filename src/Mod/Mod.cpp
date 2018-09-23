@@ -1599,7 +1599,12 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	}
 	for (YAML::const_iterator i = doc["extraSprites"].begin(); i != doc["extraSprites"].end(); ++i)
 	{
-		std::string type = (*i)["type"].as<std::string>();
+		std::string type;
+		type = (*i)["type"].as<std::string>(type);
+		if (type.empty())
+		{
+			type = (*i)["typeSingle"].as<std::string>();
+		}
 		ExtraSprites *extraSprites = new ExtraSprites();
 		// doesn't support modIndex
 		if (type != "TEXTURE.DAT")

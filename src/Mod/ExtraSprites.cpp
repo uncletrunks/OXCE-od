@@ -43,6 +43,19 @@ ExtraSprites::~ExtraSprites()
  */
 void ExtraSprites::load(const YAML::Node &node, int modIndex)
 {
+	std::string typeSingle;
+	typeSingle = node["typeSingle"].as<std::string>(typeSingle);
+	if (!typeSingle.empty())
+	{
+		_singleImage = true;
+	}
+	std::string fileSingle;
+	fileSingle = node["fileSingle"].as<std::string>(fileSingle);
+	if (!fileSingle.empty())
+	{
+		_sprites[0] = fileSingle;
+	}
+
 	_sprites = node["files"].as< std::map<int, std::string> >(_sprites);
 	_width = node["width"].as<int>(_width);
 	_height = node["height"].as<int>(_height);
