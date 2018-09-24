@@ -157,7 +157,7 @@ private:
 	Armor* _armor;
 	int _standHeight, _kneelHeight, _floatHeight;
 	std::vector<int> _deathSound;
-	int _value, _aggroSound, _moveSound;
+	int _value, _moraleLossWhenKilled, _aggroSound, _moveSound;
 	int _intelligence, _aggression, _spotter, _sniper, _energyRecovery;
 	SpecialAbility _specab;
 	std::string _spawnUnit;
@@ -198,6 +198,8 @@ public:
 	std::string getRank() const;
 	/// Gets the value - for score calculation.
 	int getValue() const;
+	/// Percentage modifier for morale loss when this unit is killed.
+	int getMoraleLossWhenKilled() { return _moraleLossWhenKilled; };
 	/// Gets the death sound id.
 	const std::vector<int> &getDeathSounds() const;
 	/// Gets the move sound id.

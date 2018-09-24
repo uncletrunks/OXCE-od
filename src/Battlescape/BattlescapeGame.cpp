@@ -792,6 +792,8 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 		{
 			if ((*j)->getHealth() <= 0)
 			{
+				int moraleLossModifierWhenKilled = _save->getMoraleLossModifierWhenKilled(victim);
+
 				if (murderer)
 				{
 					murderer->addKillCount();
@@ -807,13 +809,15 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 					// murderer will get a penalty with friendly fire
 					if (victim->getOriginalFaction() == murderer->getOriginalFaction())
 					{
-						murderer->moraleChange(-(2000 / modifier));
+						// morale loss by friendly fire
+						murderer->moraleChange(-(2000 * moraleLossModifierWhenKilled / modifier / 100));
 					}
 					if (victim->getOriginalFaction() == FACTION_NEUTRAL)
 					{
 						if (murderer->getOriginalFaction() == FACTION_PLAYER)
 						{
-							murderer->moraleChange(-(1000 / modifier));
+							// morale loss by xcom killing civilians
+							murderer->moraleChange(-(1000 * moraleLossModifierWhenKilled / modifier / 100));
 						}
 						else
 						{
@@ -834,8 +838,9 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 							// the losing squad all get a morale loss
 							if ((*i)->getOriginalFaction() == victim->getOriginalFaction())
 							{
+								// morale loss by losing a team member (not counting mind-controlled units)
 								int bravery = (*i)->reduceByBravery(10);
-								(*i)->moraleChange(-(modifier * 200 * bravery / loserMod / 100));
+								(*i)->moraleChange(-(modifier * moraleLossModifierWhenKilled * 200 * bravery / loserMod / 100 / 100));
 
 								if (victim->getFaction() == FACTION_HOSTILE && murderer)
 								{

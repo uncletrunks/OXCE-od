@@ -43,6 +43,7 @@
 #include "../Engine/ScriptBind.h"
 #include "SerializationHelper.h"
 #include "../Mod/RuleItem.h"
+#include "../Mod/RuleSoldier.h"
 
 namespace OpenXcom
 {
@@ -2049,6 +2050,31 @@ int SavedBattleGame::getUnitMoraleModifier(BattleUnit* unit)
 	}
 
 	return result;
+}
+
+/**
+ * Gets the morale loss modifier (by unit type) of the killed unit.
+ * @param unit
+ * @return Morale modifier.
+ */
+int SavedBattleGame::getMoraleLossModifierWhenKilled(BattleUnit* unit)
+{
+	int result = 100;
+
+	if (!unit)
+		return result;
+
+	if (unit->getGeoscapeSoldier())
+	{
+		result = unit->getGeoscapeSoldier()->getRules()->getMoraleLossWhenKilled();
+	}
+	else if (unit->getUnitRules())
+	{
+		result = unit->getUnitRules()->getMoraleLossWhenKilled();
+	}
+
+	// it's a morale loss, there's no way I am allowing modders to make it a morale gain!
+	return std::max(0, result);
 }
 
 /**

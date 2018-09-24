@@ -35,7 +35,7 @@ namespace OpenXcom
  */
 RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _listOrder(0), _costBuy(0), _costSalary(0),
 	_costSalarySquaddie(0), _costSalarySergeant(0), _costSalaryCaptain(0), _costSalaryColonel(0), _costSalaryCommander(0),
-	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _value(20),
+	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _value(20), _moraleLossWhenKilled(100),
 	_avatarOffsetX(67), _avatarOffsetY(48), _flagOffset(0),
 	_allowPromotion(true), _allowPiloting(true),
 	_rankSprite(42), _rankSpriteBattlescape(20), _rankSpriteTiny(0)
@@ -111,6 +111,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
 	_femaleFrequency = node["femaleFrequency"].as<int>(_femaleFrequency);
 	_value = node["value"].as<int>(_value);
+	_moraleLossWhenKilled = node["moraleLossWhenKilled"].as<int>(_moraleLossWhenKilled);
 
 	if (node["deathMale"])
 	{

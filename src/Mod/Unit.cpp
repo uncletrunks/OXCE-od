@@ -27,7 +27,7 @@ namespace OpenXcom
  * Creates a certain type of unit.
  * @param type String defining the type.
  */
-Unit::Unit(const std::string &type) : _type(type), _showFullNameInAlienInventory(-1), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _capturable(true), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false), _waitIfOutsideWeaponRange(false)
+Unit::Unit(const std::string &type) : _type(type), _showFullNameInAlienInventory(-1), _standHeight(0), _kneelHeight(0), _floatHeight(0), _value(0), _moraleLossWhenKilled(100), _aggroSound(-1), _moveSound(-1), _intelligence(0), _aggression(0), _spotter(0), _sniper(0), _energyRecovery(30), _specab(SPECAB_NONE), _livingWeapon(false), _psiWeapon("ALIEN_PSI_WEAPON"), _capturable(true), _canSurrender(false), _autoSurrender(false), _isLeeroyJenkins(false), _waitIfOutsideWeaponRange(false)
 {
 }
 
@@ -65,6 +65,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 		throw Exception("Error with unit "+ _type +": Unit height may not exceed 25");
 	}
 	_value = node["value"].as<int>(_value);
+	_moraleLossWhenKilled = node["moraleLossWhenKilled"].as<int>(_moraleLossWhenKilled);
 	_intelligence = node["intelligence"].as<int>(_intelligence);
 	_aggression = node["aggression"].as<int>(_aggression);
 	_spotter = node["spotter"].as<int>(_spotter);
