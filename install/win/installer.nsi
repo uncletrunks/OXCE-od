@@ -59,9 +59,14 @@
 	Var XDirTFTD
 	Var XBrowseTFTD
 	
+	Var ZDialog
+	Var ZLabelPortable
+	Var ZCheckPortable
+	
 	Var StartMenuFolder
 	Var UFO_DIR
 	Var TFTD_DIR
+	Var PortableMode
 
 ;--------------------------------
 ;Interface Settings
@@ -87,6 +92,8 @@
 	
 	Page custom XcomFolder ValidateXcom
 	
+	Page custom ExtraOptions ExtraOptionsSave
+	
 	;Start Menu Folder Page Configuration
 	!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM"
 	!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\${GAME_NAME}"
@@ -106,6 +113,47 @@
 	!insertmacro MUI_UNPAGE_CONFIRM
 	!insertmacro MUI_UNPAGE_INSTFILES
 
+
+${StrStr}
+Function ExtraOptions
+
+	;Don't allow Portable Mode in Program Files
+	${StrStr} $0 $INSTDIR $PROGRAMFILES32
+	StrCmp $0 "" 0 portable_no
+	${StrStr} $0 $INSTDIR $PROGRAMFILES64
+	StrCmp $0 "" portable_yes portable_no
+	
+	portable_no:
+	StrCpy $PortableMode ${BST_UNCHECKED}
+	Abort
+	
+	portable_yes:
+	!insertmacro MUI_HEADER_TEXT $(SETUP_EXTRA_OPTIONS_TITLE) $(SETUP_EXTRA_OPTIONS_SUBTITLE)
+	
+	nsDialogs::Create 1018
+	Pop $ZDialog
+
+	${If} $ZDialog == error
+		Abort
+	${EndIf}
+	
+	${NSD_CreateCheckBox} 0 0 100% 10u $(SETUP_PORTABLE)
+	Pop $ZCheckPortable
+	${NSD_SetState} $ZCheckPortable $PortableMode
+	
+	${NSD_CreateLabel} 0 15u 100% 20u $(SETUP_PORTABLE_DESC)
+	Pop $ZLabelPortable
+	
+	nsDialogs::Show
+
+FunctionEnd
+
+Function ExtraOptionsSave
+
+	${NSD_GetState} $ZCheckPortable $PortableMode
+
+FunctionEnd
+	
 Function XcomFolder
 
 	!insertmacro MUI_HEADER_TEXT $(SETUP_XCOM_FOLDER_TITLE) $(SETUP_XCOM_FOLDER_SUBTITLE)
@@ -223,9 +271,12 @@ ${EndIf}
 !endif
 	File "..\..\LICENSE.txt"
 	File "..\..\CHANGELOG.txt"
-	File "..\..\README.md"
+	File /oname=README.txt "..\..\README.md"
 	
 	;Copy UFO files
+	SetOutPath "$INSTDIR\UFO"
+	
+	StrCmp $UFO_DIR "" install_ufo_no 0
 	IfFileExists "$UFO_DIR\*.*" 0 install_ufo_no
 	
 	CreateDirectory "$INSTDIR\UFO\GEODATA"
@@ -248,8 +299,12 @@ ${EndIf}
 	CopyFiles /SILENT "$UFO_DIR\UNITS\*.*" "$INSTDIR\UFO\UNITS"
 	
 	install_ufo_no:
+	File "..\..\bin\UFO\README.txt"
 	
 	;Copy TFTD files
+	SetOutPath "$INSTDIR\TFTD"
+	
+	StrCmp $TFTD_DIR "" install_tftd_no 0
 	IfFileExists "$TFTD_DIR\*.*" 0 install_tftd_no
 	
 	CreateDirectory "$INSTDIR\TFTD\ANIMS"
@@ -274,13 +329,16 @@ ${EndIf}
 	CopyFiles /SILENT "$TFTD_DIR\UNITS\*.*" "$INSTDIR\TFTD\UNITS"
 	
 	install_tftd_no:
+	File "..\..\bin\TFTD\README.txt"
 	
 	SetOutPath "$INSTDIR"
 	
-	File "..\..\bin\TFTD\README.txt"
-	File "..\..\bin\UFO\README.txt"
 	File /r "..\..\bin\common"
 	File /r "..\..\bin\standard"
+	
+${If} $PortableMode == ${BST_CHECKED}
+	CreateDirectory "$INSTDIR\user"
+${EndIf}
 	
 	;Store installation folder
 	WriteRegStr HKLM "Software\${GAME_NAME}" "" $INSTDIR
@@ -307,8 +365,12 @@ ${EndIf}
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${GAME_NAME}.lnk" "$INSTDIR\OpenXcom.exe"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_CHANGELOG).lnk" "$INSTDIR\CHANGELOG.txt"
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_README).lnk" "$INSTDIR\README.md"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_README).lnk" "$INSTDIR\README.txt"
+${If} $PortableMode == ${BST_CHECKED}
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_USER).lnk" "$INSTDIR\user"
+${Else}
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_USER).lnk" "$DOCUMENTS\OpenXcom"
+${EndIf}
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_UNINSTALL).lnk" "$INSTDIR\Uninstall.exe"
 	
 	!insertmacro MUI_STARTMENU_WRITE_END
@@ -317,36 +379,59 @@ SectionEnd
 
 Section "$(SETUP_PATCH)" SecPatch
 
+	;Patch UFO files
+	SetOutPath "$INSTDIR\UFO"
+	
+	StrCmp $UFO_DIR "" patch_ufo_no 0
+	IfFileExists "$UFO_DIR\*.*" 0 patch_ufo_no
+	
 	;(uses inetc.dll)
-	inetc::get "https://openxcom.org/download/extras/universal-patch.zip" "$TEMP\universal-patch.zip" /end
+	inetc::get "https://openxcom.org/download/extras/universal-patch-ufo.zip" "$TEMP\universal-patch-ufo.zip" /end
 	Pop $0
-	StrCmp $0 "OK" patch_ok1 patch_fail1
-		
-	patch_ok1:	
+	StrCmp $0 "OK" 0 patch_ufo_fail1
+	
 	;(uses nsisunz.dll)
-	nsisunz::UnzipToLog "$TEMP\universal-patch.zip" "$INSTDIR\UFO"
+	nsisunz::UnzipToLog "$TEMP\universal-patch-ufo.zip" "$INSTDIR\UFO"
 	Pop $0
-	StrCmp $0 "success" patch_ok2 patch_fail1
-		
-	patch_fail1:
-	MessageBox MB_ICONEXCLAMATION|MB_YESNO $(SETUP_WARNING_PATCH) /SD IDYES IDYES patch_ok2 IDNO patch_fail2
-	patch_fail2:
+	StrCmp $0 "success" patch_ufo_yes patch_ufo_fail1
+	
+	patch_ufo_fail1:
+	MessageBox MB_ICONEXCLAMATION|MB_YESNO $(SETUP_WARNING_PATCH) /SD IDYES IDYES patch_ufo_yes IDNO patch_ufo_fail2
+	patch_ufo_fail2:
 	Abort "Error"
-		
-	patch_ok2:	
-	Delete "$TEMP\universal-patch.zip"
-
-SectionEnd
-
-Section /o "$(SETUP_PORTABLE)" SecPortable
-
-	CreateDirectory "$INSTDIR\user"
 	
-	!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+	patch_ufo_yes:	
+	Delete "$TEMP\universal-patch-ufo.zip"
 	
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_USER).lnk" "$INSTDIR\user"
+	patch_ufo_no:
 	
-	!insertmacro MUI_STARTMENU_WRITE_END
+	;Patch TFTD files
+	SetOutPath "$INSTDIR\TFTD"
+	
+	StrCmp $TFTD_DIR "" patch_tftd_no 0
+	IfFileExists "$TFTD_DIR\*.*" 0 patch_tftd_no
+	
+	;(uses inetc.dll)
+	inetc::get "https://openxcom.org/download/extras/universal-patch-tftd.zip" "$TEMP\universal-patch-tftd.zip" /end
+	Pop $0
+	StrCmp $0 "OK" 0 patch_tftd_fail1
+	
+	;(uses nsisunz.dll)
+	nsisunz::UnzipToLog "$TEMP\universal-patch-tftd.zip" "$INSTDIR\TFTD"
+	Pop $0
+	StrCmp $0 "success" patch_tftd_yes patch_tftd_fail1
+	
+	patch_tftd_fail1:
+	MessageBox MB_ICONEXCLAMATION|MB_YESNO $(SETUP_WARNING_PATCH) /SD IDYES IDYES patch_tftd_yes IDNO patch_tftd_fail2
+	patch_tftd_fail2:
+	Abort "Error"
+	
+	patch_tftd_yes:	
+	Delete "$TEMP\universal-patch-tftd.zip"
+	
+	patch_tftd_no:
+	
+	SetOutPath "$INSTDIR"
 
 SectionEnd
 
@@ -365,7 +450,6 @@ SectionEnd
 	!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 		!insertmacro MUI_DESCRIPTION_TEXT ${SecMain} $(SETUP_GAME_DESC)
 		!insertmacro MUI_DESCRIPTION_TEXT ${SecPatch} $(SETUP_PATCH_DESC)
-		!insertmacro MUI_DESCRIPTION_TEXT ${SecPortable} $(SETUP_PORTABLE_DESC)
 		!insertmacro MUI_DESCRIPTION_TEXT ${SecDesktop} $(SETUP_DESKTOP_DESC)
 	!insertmacro MUI_FUNCTION_DESCRIPTION_END
 
@@ -382,6 +466,7 @@ ${Else}
 ${EndIf}
 !endif
 	StrCpy $StartMenuFolder "${GAME_NAME}"
+	StrCpy $PortableMode ${BST_UNCHECKED}
 	
 	; Check for existing X-COM installs
 	StrCpy $UFO_DIR ""
@@ -543,9 +628,8 @@ Section "-un.Main"
 	
 	Delete "$INSTDIR\OpenXcom.exe"
 	Delete "$INSTDIR\*.dll"
-	Delete "$INSTDIR\LICENSE.txt"
-	Delete "$INSTDIR\README.md"
-	Delete "$INSTDIR\CHANGELOG.txt"
+	Delete "$INSTDIR\*.txt"
+	Delete "$INSTDIR\*.md"
 	
 	RMDir /r "$INSTDIR\common"
 	RMDir /r "$INSTDIR\standard"
