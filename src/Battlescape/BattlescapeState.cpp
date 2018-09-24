@@ -974,7 +974,15 @@ void BattlescapeState::mapClick(Action *action)
 			BattleUnit *bu = _save->selectUnit(pos);
 			if (bu && (bu->getVisible() || _save->getDebugMode()))
 			{
-				_game->pushState(new AlienInventoryState(bu));
+				if (_save->getDebugMode() && (SDL_GetModState() & KMOD_CTRL) != 0)
+				{
+					// mind probe
+					popup(new UnitInfoState(bu, this, false, true));
+				}
+				else
+				{
+					_game->pushState(new AlienInventoryState(bu));
+				}
 			}
 		}
 	}
