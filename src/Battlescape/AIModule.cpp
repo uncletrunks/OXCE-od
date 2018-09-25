@@ -2606,22 +2606,29 @@ void AIModule::meleeAttack()
 
 /**
  * Validates a target.
- * @param unit the target we want to validate.
+ * @param target the target we want to validate.
  * @param assessDanger do we care if this unit was previously targetted with a grenade?
  * @param includeCivs do we include civilians in the threat assessment?
  * @return whether this target is someone we would like to kill.
  */
-bool AIModule::validTarget(BattleUnit *unit, bool assessDanger, bool includeCivs) const
+bool AIModule::validTarget(BattleUnit *target, bool assessDanger, bool includeCivs) const
 {
-		// ignore units that are dead/unconscious
-	if (unit->isOut() ||
-		// they must be units that we "know" about
-		// units known by spotters and this one is a sniper count as "known" too
-		(_unit->getFaction() == FACTION_HOSTILE && (_intelligence < unit->getTurnsSinceSpotted() || (_unit->isSniper() && !unit->getTurnsLeftSpottedForSnipers()))) ||
-		// they haven't been grenaded
-		(assessDanger && unit->getTile()->getDangerous()) ||
-		// and they mustn't be on our side
-		unit->getFaction() == _unit->getFaction())
+	// ignore units that:
+	// 1. are dead/unconscious
+	// 2. are dangerous (they have been grenaded)
+	// 3. are on our side
+	if (target->isOut() ||
+		(assessDanger && target->getTile()->getDangerous()) ||
+		target->getFaction() == _unit->getFaction())
+	{
+		return false;
+	}
+
+	// ignore units that we don't "know" about...
+	// ... unless we are a sniper and the spotters know about them
+	if (_unit->getFaction() == FACTION_HOSTILE &&
+		_intelligence < target->getTurnsSinceSpotted() &&
+		(!_unit->isSniper() || !target->getTurnsLeftSpottedForSnipers()))
 	{
 		return false;
 	}
@@ -2631,7 +2638,7 @@ bool AIModule::validTarget(BattleUnit *unit, bool assessDanger, bool includeCivs
 		return true;
 	}
 
-	return unit->getFaction() == _targetFaction;
+	return target->getFaction() == _targetFaction;
 }
 
 /**

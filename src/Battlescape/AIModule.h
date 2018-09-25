@@ -121,7 +121,7 @@ public:
 	/// Performs a melee attack action.
 	void meleeAttack();
 	/// Checks to make sure a target is valid, given the parameters
-	bool validTarget(BattleUnit* unit, bool assessDanger, bool includeCivs) const;
+	bool validTarget(BattleUnit* target, bool assessDanger, bool includeCivs) const;
 	/// Checks the alien's TU reservation setting.
 	BattleActionType getReserveMode();
 	/// Assuming we have both a ranged and a melee weapon, we have to select one.
