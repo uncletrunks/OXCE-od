@@ -1274,22 +1274,21 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
  */
 void StatsForNerdsState::addSpriteResourcePath(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const int &resourceId)
 {
-	// go through all extra sprites from all mods
-	for (auto resourceSet : mod->getExtraSprites())
+	std::map<std::string, std::vector<ExtraSprites *> >::const_iterator i = mod->getExtraSprites().find(resourceSetName);
+	if (i != mod->getExtraSprites().end())
 	{
-		// only check the relevant ones (e.g. "BIGOBS.PCK")
-		if (resourceSet.first == resourceSetName)
+		for (auto extraSprite : i->second)
 		{
 			// strip mod offset from the in-game ID
-			int originalSpriteId = resourceId - (resourceSet.second->getModIndex());
+			int originalSpriteId = resourceId - (extraSprite->getModIndex());
 
-			auto mapOfSprites = resourceSet.second->getSprites();
+			auto mapOfSprites = extraSprite->getSprites();
 			auto individualSprite = mapOfSprites->find(originalSpriteId);
 			if (individualSprite != mapOfSprites->end())
 			{
 				std::wostringstream numbers;
 				resetStream(numbers);
-				numbers << L"  " << originalSpriteId << L" + " << resourceSet.second->getModIndex();
+				numbers << L"  " << originalSpriteId << L" + " << extraSprite->getModIndex();
 
 				resetStream(ss);
 				ss << Language::utf8ToWstr(individualSprite->second);

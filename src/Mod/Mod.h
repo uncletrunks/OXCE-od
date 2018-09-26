@@ -140,7 +140,7 @@ private:
 	std::map<std::string, std::vector<MapScript *> > _mapScripts;
 	std::map<std::string, RuleCommendations *> _commendations;
 	std::map<std::string, RuleMissionScript*> _missionScripts;
-	std::vector<std::pair<std::string, ExtraSprites *> > _extraSprites;
+	std::map<std::string, std::vector<ExtraSprites *> > _extraSprites;
 	std::map<std::string, CustomPalettes *> _customPalettes;
 	std::vector<std::pair<std::string, ExtraSounds *> > _extraSounds;
 	std::map<std::string, ExtraStrings *> _extraStrings;
@@ -201,6 +201,7 @@ private:
 	std::vector<SDL_Color> _transparencies;
 	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _transformationListOrder, _ufopaediaListOrder, _invListOrder, _soldierListOrder;
 	size_t _modOffset;
+	SDL_Color *_statePalette;
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
 	size_t _surfaceOffsetBigobs = 0;
 	size_t _surfaceOffsetFloorob = 0;
@@ -235,6 +236,10 @@ private:
 	void loadVanillaResources();
 	/// Loads resources from extra rulesets.
 	void loadExtraResources();
+
+	void lazyLoadSurface(const std::string &name);
+
+	void loadExtraSprite(const std::string &sheetName, ExtraSprites *spritePack);
 	/// Applies mods to vanilla resources.
 	void modResources();
 	/// Sorts all our lists according to their weight.
@@ -294,9 +299,9 @@ public:
 	/// Gets a particular font.
 	Font *getFont(const std::string &name, bool error = true) const;
 	/// Gets a particular surface.
-	Surface *getSurface(const std::string &name, bool error = true) const;
+	Surface *getSurface(const std::string &name, bool error = true);
 	/// Gets a particular surface set.
-	SurfaceSet *getSurfaceSet(const std::string &name, bool error = true) const;
+	SurfaceSet *getSurfaceSet(const std::string &name, bool error = true);
 	/// Gets a particular music.
 	Music *getMusic(const std::string &name, bool error = true) const;
 	/// Gets the available music tracks.
@@ -581,7 +586,7 @@ public:
 	/// Gets an MCDPatch.
 	MCDPatch *getMCDPatch(const std::string &id) const;
 	/// Gets the list of external Sprites.
-	const std::vector<std::pair<std::string, ExtraSprites *> > &getExtraSprites() const;
+	const std::map<std::string, std::vector<ExtraSprites *> > &getExtraSprites() const;
 	/// Gets the list of custom palettes.
 	const std::vector<std::string> &getCustomPalettes() const;
 	/// Gets the list of external Sounds.

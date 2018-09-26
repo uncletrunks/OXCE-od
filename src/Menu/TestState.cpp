@@ -269,7 +269,8 @@ void TestState::testCase2()
 			continue;
 		}
 
-		ExtraSprites *spritePack = i.second;
+		for (auto spritePack : i.second)
+		{
 		if (spritePack->getSingleImage())
 		{
 			const std::string& fullPath = FileMap::getFilePath((*spritePack->getSprites())[0]);
@@ -313,6 +314,7 @@ void TestState::testCase2()
 					}
 				}
 			}
+		}
 		}
 	}
 
