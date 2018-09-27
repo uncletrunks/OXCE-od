@@ -88,6 +88,7 @@ Game *game = 0;
 // programming license revoked...
 int main(int argc, char *argv[])
 {
+#ifndef DUMP_CORE
 #ifdef _MSC_VER
 	// Uncomment to check memory leaks in VS
 	//_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
 #else
 	signal(SIGSEGV, signalLogger);
 	std::set_terminate(exceptionLogger);
+#endif
 #endif
 
 	CrossPlatform::getErrorDialog();

@@ -451,6 +451,10 @@ if ( MSVC )
   endif ( FATAL_WARNING )
 endif ()
 
+if ( DUMP_CORE )
+  set_source_files_properties ( main.cpp PROPERTIES COMPILE_FLAGS -DDUMP_CORE )
+endif ()
+
 if ( WIN32 )
   set ( application_type WIN32 )
   set ( openxcom_icon OpenXcom.rc )

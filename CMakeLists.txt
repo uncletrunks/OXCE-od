@@ -9,6 +9,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 
 option ( DEV_BUILD "Development Build. Disable this for release builds" ON )
+option ( DUMP_CORE "Disables exception and segfault handling." OFF )
 option ( BUILD_PACKAGE "Prepares build for creation of a package with CPack" ON )
 option ( ENABLE_WARNING "Always show warnings (even for release builds)" OFF )
 option ( FATAL_WARNING "Treat warnings as errors" OFF )
