@@ -560,11 +560,9 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 			auto lightA = currLight;
 			auto lightB = currLight;
 
-			if (startVoxel.z > topVoxel)
-			{
-				//Do not peek out your head outside map
-				startVoxel.z = topVoxel;
-			}
+			//Do not peek out your head outside map
+			startVoxel.z = std::min(startVoxel.z, topVoxel);
+			endVoxel.z = std::min(endVoxel.z, topVoxel);
 
 			auto calculateBlock = [&](Position point, Position &lastPoint, int &light, int &steps)
 			{
