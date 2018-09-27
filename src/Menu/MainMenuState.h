@@ -60,6 +60,7 @@ public:
 	void btnQuitClick(Action *action);
 	/// Update the resolution settings, we just resized the window.
 	void resize(int &dX, int &dY);
+	void init();
 };
 
 }

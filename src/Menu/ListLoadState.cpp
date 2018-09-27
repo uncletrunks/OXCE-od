@@ -22,6 +22,7 @@
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Action.h"
+#include "../Engine/Options.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
@@ -80,25 +81,42 @@ void ListLoadState::lstSavesPress(Action *action)
 	ListGamesState::lstSavesPress(action);
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
-		bool confirm = false;
-		const SaveInfo &saveInfo(_saves[_lstSaves->getSelectedRow()]);
-		for (std::vector<std::string>::const_iterator i = saveInfo.mods.begin(); i != saveInfo.mods.end(); ++i)
+		loadSave(_lstSaves->getSelectedRow());
+	}
+}
+void ListLoadState::loadSave(size_t list_idx)
+{
+	bool confirm = false;
+	const SaveInfo &saveInfo(_saves[list_idx]);
+	for (std::vector<std::string>::const_iterator i = saveInfo.mods.begin(); i != saveInfo.mods.end(); ++i)
+	{
+		std::string name = SavedGame::sanitizeModName(*i);
+		if (std::find(Options::mods.begin(), Options::mods.end(), std::make_pair(name, true)) == Options::mods.end())
 		{
-			std::string name = SavedGame::sanitizeModName(*i);
-			if (std::find(Options::mods.begin(), Options::mods.end(), std::make_pair(name, true)) == Options::mods.end())
-			{
-				confirm = true;
-				break;
-			}
+			confirm = true;
+			break;
 		}
-		if (confirm)
-		{
-			_game->pushState(new ConfirmLoadState(_origin, saveInfo.fileName));
-		}
-		else
-		{
-			_game->pushState(new LoadGameState(_origin, saveInfo.fileName, _palette));
-		}
+	}
+	if (confirm)
+	{
+		_game->pushState(new ConfirmLoadState(_origin, saveInfo.fileName));
+	}
+	else
+	{
+		_game->pushState(new LoadGameState(_origin, saveInfo.fileName, _palette));
+	}
+}
+void ListLoadState::init()
+{
+	ListGamesState::init();
+	if (_saves.size() > 0  && _origin == OPT_MENU && Options::getLoadLastSave())
+	{
+		// make it so that this fires only once
+		Options::expendLoadLastSave();
+		// sort the list so that what we need is at idx=0
+		sortList(SORT_DATE_DESC);
+		// load it
+		loadSave(0);
 	}
 }
 

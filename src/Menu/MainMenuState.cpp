@@ -97,6 +97,16 @@ MainMenuState::MainMenuState()
 	_txtTitle->setText(title.str());
 }
 
+void MainMenuState::init()
+{
+	State::init();
+	if (Options::getLoadLastSave())
+	{
+		Log(LOG_INFO) << "Loading last saved game";
+		btnLoadClick(NULL);
+	}
+}
+
 /**
  *
  */

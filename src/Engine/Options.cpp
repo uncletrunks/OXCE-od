@@ -53,6 +53,8 @@ std::map<std::string, std::string> _commandLine;
 std::vector<OptionInfo> _info;
 std::map<std::string, ModInfo> _modInfos;
 std::string _masterMod;
+bool _loadLastSave = false;
+bool _loadLastSaveExpended = false;
 
 /**
  * Sets up the options by creating their OptionInfo metadata.
@@ -421,6 +423,11 @@ void loadArgs(int argc, char *argv[])
 			else
 				argname = arg.substr(1, arg.length()-1);
 			std::transform(argname.begin(), argname.end(), argname.begin(), ::tolower);
+			if (argname == "cont" || argname == "continue")
+			{
+				_loadLastSave = true;
+				continue;
+			}
 			if (argc > i + 1)
 			{
 				++i; // we'll be consuming the next argument too
@@ -717,6 +724,16 @@ void updateMods()
 std::string getActiveMaster()
 {
 	return _masterMod;
+}
+
+bool getLoadLastSave()
+{
+	return _loadLastSave && !_loadLastSaveExpended;
+}
+
+void expendLoadLastSave()
+{
+	_loadLastSaveExpended = true;
 }
 
 static void _loadMod(const ModInfo &modInfo, std::set<std::string> circDepCheck)

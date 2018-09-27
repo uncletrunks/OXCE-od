@@ -39,6 +39,8 @@ public:
 	void btnOldClick(Action *action);
 	/// Handler for clicking the Saves list.
 	void lstSavesPress(Action *action);
+	void init();
+	void loadSave(size_t list_idx);
 };
 
 }
