@@ -72,8 +72,12 @@ namespace CrossPlatform
 	std::string baseFilename(const std::string &path);
 	/// Sanitizes the characters in a filename.
 	std::string sanitizeFilename(const std::string &filename);
-	/// Removes the extension from a file.
+	/// Removes the extension from a filename.
 	std::string noExt(const std::string &file);
+	/// Gets the extension from a filename.
+	std::string getExt(const std::string &file);
+	/// Compares the extension of a filename.
+	bool compareExt(const std::string &file, const std::string &extension);
 	/// Gets the system locale.
 	std::string getLocale();
 	/// Tests locale availability and remembers the result in user settings.

@@ -287,7 +287,7 @@ void TestState::testCase2()
 					const std::set<std::string>& contents = FileMap::getVFolderContents(fileName);
 					for (std::set<std::string>::iterator k = contents.begin(); k != contents.end(); ++k)
 					{
-						if (!_game->getMod()->isImageFile((*k).substr((*k).length() - 4, (*k).length())))
+						if (!ExtraSprites::isImageFile(*k))
 							continue;
 						try
 						{
