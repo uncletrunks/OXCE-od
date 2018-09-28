@@ -2583,7 +2583,7 @@ std::vector<const RuleResearch*> Mod::getResearch(const std::vector<std::string>
 		}
 		else
 		{
-			Log(LOG_ERROR) << "Unknow reserch " + n;
+			throw Exception("Unknown research " + n);
 		}
 	}
 	return dest;

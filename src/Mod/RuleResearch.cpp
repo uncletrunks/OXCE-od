@@ -90,7 +90,7 @@ void RuleResearch::afterLoad(const Mod* mod)
 		}
 		else
 		{
-			Log(LOG_ERROR) << "Unknown research " + n.first;
+			throw Exception("Unknown research " + n.first);
 		}
 	}
 
