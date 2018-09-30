@@ -24,7 +24,7 @@
 #
 # make -f Makefile.mxe ARCH=x86_64-w64-mingw32.static BIN=OpenXcomExPlusMinus64
 #
-# to get OpenXcomExPlusMinus64.exe and OpenXcomExPlusMinus64Debug.exe (the latter with debug symbols)
+# to get OpenXcomExPlusMinus64.exe and OpenXcomExPlusMinus64DebSym.exe (the latter with debug symbols)
 #
 
 BIN ?= OpenXcomEx
@@ -46,13 +46,13 @@ else
 	YAML_LIB = -lyaml-cpp
 endif
 
-# disable LTO if requested
-ifeq ($(strip $(NO_LTO)),)
-	CC_LTO = -flto
-	LD_LTO = -flto -O3
-else
+# enable LTO if requested
+ifeq ($(strip $(LTO)),)
 	CC_LTO =
 	LD_LTO =
+else
+	CC_LTO = -flto
+	LD_LTO = -flto -O3
 endif
 
 OBJRES = ../obj/OpenXcom_res.o
@@ -77,8 +77,8 @@ LDFLAGS = $(LD_LTO) `$(SDL_CONFIG) --libs` $(YAML_LIB) -lopengl32 -lshlwapi `$(P
 all: $(BINDIR)/$(BIN)
 
 $(BINDIR)/$(BIN): $(OBJS)
-	$(CXX) $(OBJS) $(LDFLAGS) -o $(BINDIR)/$(BIN)Debug.exe
-	$(STRIP) -o $(BINDIR)/$(BIN).exe $(BINDIR)/$(BIN)Debug.exe
+	$(CXX) $(OBJS) $(LDFLAGS) -o $(BINDIR)/$(BIN)DebSym.exe
+	$(STRIP) -o $(BINDIR)/$(BIN).exe $(BINDIR)/$(BIN)DebSym.exe
 
 $(OBJDIR)%.o:: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
