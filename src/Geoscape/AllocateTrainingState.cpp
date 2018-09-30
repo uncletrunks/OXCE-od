@@ -154,6 +154,7 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0), _base(base),
 	_lstSoldiers->onLeftArrowClick((ActionHandler)&AllocateTrainingState::lstItemsLeftArrowClick);
 	_lstSoldiers->onRightArrowClick((ActionHandler)&AllocateTrainingState::lstItemsRightArrowClick);
 	_lstSoldiers->onMouseClick((ActionHandler)&AllocateTrainingState::lstSoldiersClick);
+	_lstSoldiers->onMousePress((ActionHandler)&AllocateTrainingState::lstSoldiersMousePress);
 }
 
 /**
@@ -428,6 +429,36 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 			_space++;
 			_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));
 			_base->getSoldiers()->at(_sel)->setTraining(false);
+		}
+	}
+}
+
+/**
+ * Handles the mouse-wheels on the arrow-buttons.
+ * @param action Pointer to an action.
+ */
+void AllocateTrainingState::lstSoldiersMousePress(Action *action)
+{
+	if (Options::changeValueByMouseWheel == 0)
+		return;
+	unsigned int row = _lstSoldiers->getSelectedRow();
+	size_t numSoldiers = _base->getSoldiers()->size();
+	if (action->getDetails()->button.button == SDL_BUTTON_WHEELUP &&
+		row > 0)
+	{
+		if (action->getAbsoluteXMouse() >= _lstSoldiers->getArrowsLeftEdge() &&
+			action->getAbsoluteXMouse() <= _lstSoldiers->getArrowsRightEdge())
+		{
+			moveSoldierUp(action, row);
+		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_WHEELDOWN &&
+		0 < numSoldiers && INT_MAX >= numSoldiers && row < numSoldiers - 1)
+	{
+		if (action->getAbsoluteXMouse() >= _lstSoldiers->getArrowsLeftEdge() &&
+			action->getAbsoluteXMouse() <= _lstSoldiers->getArrowsRightEdge())
+		{
+			moveSoldierDown(action, row);
 		}
 	}
 }
