@@ -86,46 +86,6 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		}
 	}
 
-	// execute / break neck / cut throat / coup de grace
-	if (Options::executeUnconsciousEnemies && (_action->weapon->getUnit() && _action->weapon->getUnit()->getStatus() == STATUS_UNCONSCIOUS))
-	{
-		BattleItem *otherWeapon = 0;
-
-		// check left hand for secondary weapon
-		BattleItem *leftHandWeapon = _game->getSavedGame()->getSavedBattle()->getSelectedUnit()->getItem("STR_LEFT_HAND");
-		if (leftHandWeapon)
-		{
-			if (leftHandWeapon->getRules()->getCostMelee().Time > 0)
-			{
-				// melee weapons with melee attack (i.e. excl. stun weapons and others)
-				if (leftHandWeapon->getRules()->getBattleType() == BT_MELEE && leftHandWeapon->getRules()->getDamageType()->ResistType == DT_MELEE)
-				{
-					otherWeapon = leftHandWeapon;
-				}
-			}
-		}
-
-		// check right hand for secondary weapon
-		BattleItem *rightHandWeapon = _game->getSavedGame()->getSavedBattle()->getSelectedUnit()->getItem("STR_RIGHT_HAND");
-		if (rightHandWeapon)
-		{
-			if (rightHandWeapon->getRules()->getCostMelee().Time > 0)
-			{
-				// melee weapons with melee attack (i.e. excl. stun weapons and others)
-				if (rightHandWeapon->getRules()->getBattleType() == BT_MELEE && rightHandWeapon->getRules()->getDamageType()->ResistType == DT_MELEE)
-				{
-					otherWeapon = rightHandWeapon;
-				}
-			}
-		}
-
-		if (otherWeapon != 0)
-		{
-			addItem(BA_EXECUTE, "STR_CUT_THROAT", &id, Options::keyBattleActionItem1, otherWeapon);
-			return; // hotkey safety!
-		}
-	}
-
 	if (weapon->isPsiRequired() && _action->actor->getBaseStats()->psiSkill <= 0)
 	{
 		return;
@@ -249,22 +209,13 @@ void ActionMenuState::init()
  * @param name Action description.
  * @param id Pointer to the new item ID.
  */
-void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id, SDLKey key, BattleItem *secondaryWeapon)
+void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id, SDLKey key)
 {
 	std::wstring s1, s2;
 	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon, _game->getMod());
-	if (secondaryWeapon != 0)
-	{
-		// for display only, this action will never miss anyway (alien is unconscious, how could you miss?)
-		acc = 999;
-		// backup the original "weapon" (i.e. unconscious alien) for later use (when we need to execute them)
-		_action->origWeapon = _action->weapon;
-		// this is actually important, so that we spend TUs (and other stats) correctly
-		_action->weapon = secondaryWeapon;
-	}
-	int tu = _action->actor->getActionTUs(ba, (secondaryWeapon == 0) ? _action->weapon : secondaryWeapon).Time;
+	int tu = _action->actor->getActionTUs(ba, _action->weapon).Time;
 
-	if (ba == BA_THROW || ba == BA_AIMEDSHOT || ba == BA_SNAPSHOT || ba == BA_AUTOSHOT || ba == BA_LAUNCH || ba == BA_HIT || ba == BA_EXECUTE)
+	if (ba == BA_THROW || ba == BA_AIMEDSHOT || ba == BA_SNAPSHOT || ba == BA_AUTOSHOT || ba == BA_LAUNCH || ba == BA_HIT)
 		s1 = tr("STR_ACCURACY_SHORT").arg(Text::formatPercentage(acc));
 	s2 = tr("STR_TIME_UNITS_SHORT").arg(tu);
 	_actionMenu[*id]->setAction(ba, tr(name), s1, s2, tu);
@@ -508,28 +459,6 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			else
 			{
 				newHitLog = true;
-			}
-			_game->popState();
-		}
-		else if (_action->type == BA_EXECUTE)
-		{
-			if (_action->spendTU(&_action->result))
-			{
-				if (_action->origWeapon != 0)
-				{
-					// kill unit
-					_action->origWeapon->getUnit()->instaKill();
-					// convert inventory item to corpse
-					RuleItem *corpseRules = _game->getMod()->getItem(_action->origWeapon->getUnit()->getArmor()->getCorpseBattlescape()[0]); // we're in an inventory, so we must be a 1x1 unit
-					_action->origWeapon->convertToCorpse(corpseRules);
-					// inform the player
-					_action->result = "STR_TARGET_WAS_EXECUTED";
-					// audio feedback
-					if (_action->weapon->getRules()->getMeleeHitSound() > -1)
-					{
-						_game->getMod()->getSoundByDepth(_game->getSavedGame()->getSavedBattle()->getDepth(), _action->weapon->getRules()->getMeleeHitSound())->play();
-					}
-				}
 			}
 			_game->popState();
 		}

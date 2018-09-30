@@ -124,8 +124,6 @@ en-US:
 #=================== Battlescape ===================
 #ActionMenuState.cpp
   STR_MUST_USE_BOTH_HANDS: "Both hands are required for this!"
-  STR_CUT_THROAT: "Coup de grâce"
-  STR_TARGET_WAS_EXECUTED: "Target was executed."
   STR_HIT_LOG_WEAPON: "Weapon"
 #BattlescapeGame.cpp
   STR_NOT_ENOUGH_MORALE: "Not Enough Morale!"
@@ -183,8 +181,6 @@ en-US:
 #Options.cpp
   STR_ANYTIMEMARTIALTRAINING: "Martial training at any time"
   STR_ANYTIMEMARTIALTRAINING_DESC: "Allows assigning soldiers to martial training at any time of the month."
-  STR_COUP_DE_GRACE: "Option to execute unconscious enemies"
-  STR_COUP_DE_GRACE_DESC: "Hold an enemy in one hand, and any Melee damage melee weapon in the other, then click on the enemy to kill them instantly."
   STR_TWO_HANDED_INDICATOR: "Display if weapon is two-handed"
   STR_TWO_HANDED_INDICATOR_DESC: "Weapons on the battle UI will have a small number displayed in the lower right corner, 1 for 1-handed, 2 for 2-handed."
   STR_TWO_HANDED_INDICATOR_INV: "Show 2-handed indicator in inventory"
