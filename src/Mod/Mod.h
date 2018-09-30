@@ -177,6 +177,7 @@ private:
 	int _performanceBonusFactor;
 	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	bool _hidePediaInfoButton, _extraNerdyPediaInfo, _showAllCommendations;
+	bool _giveScoreAlsoForResearchedArtifacts;
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
@@ -541,6 +542,8 @@ public:
 	bool getExtraNerdyPediaInfo() const { return _extraNerdyPediaInfo; }
 	/// Show all commendations pedia articles (or only those for already awarded commendations)?
 	bool getShowAllCommendations() const { return _showAllCommendations; }
+	/// In debriefing, give score also for already researched alien artifacts?
+	bool getGiveScoreAlsoForResearchedArtifacts() const { return _giveScoreAlsoForResearchedArtifacts; }
 	/// Self-explanatory
 	int getTheMostUselessOptionEver() const { return _theMostUselessOptionEver; }
 	/// Shame on you!

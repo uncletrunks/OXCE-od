@@ -296,6 +296,7 @@ Mod::Mod() :
 	_pilotAccuracyZeroPoint(55), _pilotAccuracyRange(40), _pilotReactionsZeroPoint(55), _pilotReactionsRange(60),
 	_performanceBonusFactor(0), _useCustomCategories(false), _showDogfightDistanceInKm(false), _showFullNameInAlienInventory(false),
 	_hidePediaInfoButton(false), _extraNerdyPediaInfo(false), _showAllCommendations(true),
+	_giveScoreAlsoForResearchedArtifacts(false),
 	_theMostUselessOptionEver(0), _theBiggestRipOffEver(0), _shortRadarRange(0),
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
 	_baseDefenseMapFromLocation(0), _pediaReplaceCraftFuelWithRangeType(-1),
@@ -1551,6 +1552,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_hidePediaInfoButton = doc["hidePediaInfoButton"].as<bool>(_hidePediaInfoButton);
 	_extraNerdyPediaInfo = doc["extraNerdyPediaInfo"].as<bool>(_extraNerdyPediaInfo);
 	_showAllCommendations = doc["showAllCommendations"].as<bool>(_showAllCommendations);
+	_giveScoreAlsoForResearchedArtifacts = doc["giveScoreAlsoForResearchedArtifacts"].as<bool>(_giveScoreAlsoForResearchedArtifacts);
 	_theMostUselessOptionEver = doc["theMostUselessOptionEver"].as<int>(_theMostUselessOptionEver);
 	_theBiggestRipOffEver = doc["theBiggestRipOffEver"].as<int>(_theBiggestRipOffEver);
 	_shortRadarRange = doc["shortRadarRange"].as<int>(_shortRadarRange);

@@ -2015,6 +2015,10 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 				{
 					addStat("STR_ALIEN_ARTIFACTS_RECOVERED", 1, rule->getRecoveryPoints());
 				}
+				else if (_game->getMod()->getGiveScoreAlsoForResearchedArtifacts())
+				{
+					addStat("STR_ALIEN_ARTIFACTS_RECOVERED", 1, rule->getRecoveryPoints());
+				}
 			}
 
 			// Check if the bodies of our dead soldiers were left, even if we don't recover them
@@ -2230,6 +2234,10 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		if (research != 0 && !_game->getSavedGame()->isResearched(research))
 		{
 			// more points if it's not researched
+			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
+		}
+		else if (_game->getMod()->getGiveScoreAlsoForResearchedArtifacts())
+		{
 			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
 		}
 		else
