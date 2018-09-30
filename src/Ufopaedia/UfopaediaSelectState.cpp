@@ -78,6 +78,11 @@ namespace OpenXcom
 		if (_section == UFOPAEDIA_COMMENDATIONS)
 		{
 			_btnShowOnlyNew->setText(tr("STR_NOT_AWARDED_YET"));
+			if (!_game->getMod()->getShowAllCommendations())
+			{
+				// the not-yet-awarded commendations won't be visible anyway, no need to show the button
+				_btnShowOnlyNew->setVisible(false);
+			}
 		}
 		else
 		{
