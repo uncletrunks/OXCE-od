@@ -71,7 +71,7 @@ CXXFLAGS += -Wall -g $(CC_LTO) -O3 -femit-struct-debug-reduced -std=gnu++11 -I$(
 	`$(SDL_CONFIG) --cflags` `$(PKG_CONFIG) SDL_mixer --cflags ` `$(PKG_CONFIG) SDL_gfx --cflags`
 
 LDFLAGS = $(LD_LTO) `$(SDL_CONFIG) --libs` $(YAML_LIB) -lopengl32 -lshlwapi `$(PKG_CONFIG) SDL_gfx --libs` \
-	-lstdc++ `$(PKG_CONFIG) SDL_mixer --libs` `$(PKG_CONFIG) SDL_image --libs` -ldbghelp
+	-lstdc++ `$(PKG_CONFIG) SDL_mixer --libs` `$(PKG_CONFIG) SDL_image --libs` -ldbghelp -Wl,--export-all-symbols
 
 # Rules
 all: $(BINDIR)/$(BIN)
