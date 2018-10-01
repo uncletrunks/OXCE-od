@@ -114,7 +114,7 @@ void MiniMapView::draw()
 					}
 				}
 				// alive units
-				if (t->getUnit() && (t->getUnit()->getVisible() || _battleGame->getBughuntMode()))
+				if (t->getUnit() && (t->getUnit()->getVisible() || _battleGame->getBughuntMode() || _battleGame->getDebugMode()))
 				{
 					int frame = t->getUnit()->getMiniMapSpriteIndex();
 					int size = t->getUnit()->getArmor()->getSize();
