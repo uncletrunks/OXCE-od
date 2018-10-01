@@ -79,6 +79,13 @@ void UnitWalkBState::init()
  */
 void UnitWalkBState::think()
 {
+	if (!_unit->getArmor()->allowsMoving())
+	{
+		_pf->abortPath();
+		_parent->popState();
+		return;
+	}
+
 	bool unitSpotted = false;
 	int size = _unit->getArmor()->getSize() - 1;
 	bool onScreen = (_unit->getVisible() && _parent->getMap()->getCamera()->isOnScreen(_unit->getPosition(), true, size, false));

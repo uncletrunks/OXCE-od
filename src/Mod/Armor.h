@@ -79,7 +79,7 @@ private:
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
 	std::vector<int> _customArmorPreviewIndex;
-	bool _allowsRunning, _allowsStrafing, _allowsKneeling;
+	bool _allowsRunning, _allowsStrafing, _allowsKneeling, _allowsMoving;
 	bool _instantWoundRecovery;
 	int _standHeight, _kneelHeight, _floatHeight;
 public:
@@ -245,6 +245,8 @@ public:
 	bool allowsStrafing() const;
 	/// Can you kneel while wearing this armor?
 	bool allowsKneeling() const;
+	/// Can you move while wearing this armor?
+	bool allowsMoving() const;
 	/// Does this armor instantly recover any wounds after the battle?
 	bool getInstantWoundRecovery() const;
 	/// Gets a unit's height when standing while wearing this armor.

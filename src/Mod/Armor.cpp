@@ -40,7 +40,7 @@ Armor::Armor(const std::string &type) :
 	_fearImmune(-1), _bleedImmune(-1), _painImmune(-1), _zombiImmune(-1),
 	_ignoresMeleeThreat(-1), _createsMeleeThreat(-1),
 	_overKill(0.5f), _meleeDodgeBackPenalty(0),
-	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true),
+	_allowsRunning(true), _allowsStrafing(true), _allowsKneeling(true), _allowsMoving(true),
 	_instantWoundRecovery(false),
 	_standHeight(-1), _kneelHeight(-1), _floatHeight(-1)
 {
@@ -226,6 +226,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_allowsRunning = node["allowsRunning"].as<bool>(_allowsRunning);
 	_allowsStrafing = node["allowsStrafing"].as<bool>(_allowsStrafing);
 	_allowsKneeling = node["allowsKneeling"].as<bool>(_allowsKneeling);
+	_allowsMoving = node["allowsMoving"].as<bool>(_allowsMoving);
 	_instantWoundRecovery = node["instantWoundRecovery"].as<bool>(_instantWoundRecovery);
 	_standHeight = node["standHeight"].as<int>(_standHeight);
 	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
@@ -930,6 +931,15 @@ bool Armor::allowsStrafing() const
 bool Armor::allowsKneeling() const
 {
 	return _allowsKneeling;
+}
+
+/**
+ * Can you move while wearing this armor?
+ * @return True if you are allowed to move.
+ */
+bool Armor::allowsMoving() const
+{
+	return _allowsMoving;
 }
 
 /**

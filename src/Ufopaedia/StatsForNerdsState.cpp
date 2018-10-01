@@ -2113,6 +2113,7 @@ void StatsForNerdsState::initArmorList()
 	addBoolean(ss, armorRule->allowsRunning(), "allowsRunning", true);
 	addBoolean(ss, armorRule->allowsStrafing(), "allowsStrafing", true);
 	addBoolean(ss, armorRule->allowsKneeling(), "allowsKneeling", true);
+	addBoolean(ss, armorRule->allowsMoving(), "allowsMoving", true);
 
 	bool fearImmuneDefault = false;
 	bool bleedImmuneDefault = false;

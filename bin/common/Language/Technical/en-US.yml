@@ -284,6 +284,7 @@ en-US:
   allowsRunning: "Allow running?"
   allowsStrafing: "Allow strafing?"
   allowsKneeling: "Allow kneeling?"
+  allowsMoving: "Allow moving?"
   fearImmune: "Immune to morale loss?"
   bleedImmune: "Immune to bleeding?"
   painImmune: "Immune to stun?"
