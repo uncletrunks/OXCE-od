@@ -175,7 +175,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	for (std::vector<std::string>::const_iterator i = crafts.begin(); i != crafts.end(); ++i)
 	{
 		RuleCraft *rule = _game->getMod()->getCraft(*i);
-		if (rule->getSoldiers() > 0)
+		if (rule->getSoldiers() > 0 && rule->getAllowLanding())
 		{
 			_crafts.push_back(*i);
 		}
