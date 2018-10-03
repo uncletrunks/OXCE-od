@@ -327,6 +327,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	std::sort(_requiresBuyBaseFunc.begin(), _requiresBuyBaseFunc.end());
 
 
+	_recoveryDividers = node["recoveryDividers"].as< std::map<std::string, int> >(_recoveryDividers);
 	_categories = node["categories"].as< std::vector<std::string> >(_categories);
 	_size = node["size"].as<double>(_size);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
@@ -733,11 +734,20 @@ const std::vector<const RuleResearch *> &RuleItem::getBuyRequirements() const
 
 /**
  * Gets the base functions required to buy item.
- * @retreturn The sorted list of base functions ID
+ * @return The sorted list of base functions ID
  */
 const std::vector<std::string> &RuleItem::getRequiresBuyBaseFunc() const
 {
 	return _requiresBuyBaseFunc;
+}
+
+/**
+ * Gets the dividers used for recovery of special items (specialType > 1).
+ * @return The list of recovery divider rules
+ */
+const std::map<std::string, int> &RuleItem::getRecoveryDividers() const
+{
+	return _recoveryDividers;
 }
 
 /**

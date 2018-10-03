@@ -1670,11 +1670,53 @@ void DebriefingState::prepareDebriefing()
 	// recover all our goodies
 	if (playersSurvived > 0)
 	{
-		int aadivider = (target == "STR_UFO") ? 10 : 150;
 		for (std::vector<DebriefingStat*>::iterator i = _stats.begin(); i != _stats.end(); ++i)
 		{
 			// alien alloys recovery values are divided by 10 or divided by 150 in case of an alien base
+			int aadivider = 1;
 			if ((*i)->item == _recoveryStats[ALIEN_ALLOYS]->name)
+			{
+				// hardcoded vanilla defaults, in case modders or players fail to install OXCE properly
+				aadivider = (target == "STR_UFO") ? 10 : 150;
+			}
+
+			const RuleItem *itemRule = _game->getMod()->getItem((*i)->item, false);
+			if (itemRule)
+			{
+				const std::map<std::string, int> recoveryDividers = itemRule->getRecoveryDividers();
+				if (!recoveryDividers.empty())
+				{
+					bool done = false;
+					if (ruleDeploy)
+					{
+						// step 1: check deployment
+						if (recoveryDividers.find(ruleDeploy->getType()) != recoveryDividers.end())
+						{
+							aadivider = recoveryDividers.at(ruleDeploy->getType());
+							done = true;
+						}
+					}
+					if (!done)
+					{
+						// step 2: check mission type
+						if (recoveryDividers.find(target) != recoveryDividers.end())
+						{
+							aadivider = recoveryDividers.at(target);
+							done = true;
+						}
+					}
+					if (!done)
+					{
+						// step 3: check global default
+						if (recoveryDividers.find("STR_OTHER") != recoveryDividers.end())
+						{
+							aadivider = recoveryDividers.at("STR_OTHER");
+						}
+					}
+				}
+			}
+
+			if (aadivider > 1)
 			{
 				(*i)->qty = (*i)->qty / aadivider;
 				(*i)->score = (*i)->score / aadivider;

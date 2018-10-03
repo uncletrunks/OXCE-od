@@ -1192,6 +1192,9 @@ items:
     costSell: 6500
     specialType: 10
     recoveryPoints: 1
+    recoveryDividers:
+      STR_UFO: 10
+      STR_OTHER: 150
   - type: STR_ALIEN_HABITAT
     size: 0.1
     costSell: 100

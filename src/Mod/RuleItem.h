@@ -132,9 +132,10 @@ private:
 	std::string _type, _name, _nameAsAmmo; // two types of objects can have the same name
 	std::vector<std::string> _requiresName;
 	std::vector<std::string> _requiresBuyName;
-	std::vector<std::string> _categories;
 	std::vector<const RuleResearch *> _requires, _requiresBuy;
 	std::vector<std::string> _requiresBuyBaseFunc;
+	std::map<std::string, int> _recoveryDividers;
+	std::vector<std::string> _categories;
 
 	Unit* _vehicleUnit;
 	double _size;
@@ -254,6 +255,8 @@ public:
 	const std::vector<const RuleResearch*> &getBuyRequirements() const;
 	/// Gets the base functions required to buy craft.
 	const std::vector<std::string> &getRequiresBuyBaseFunc() const;
+	/// Gets the dividers used for recovery of special items.
+	const std::map<std::string, int> &getRecoveryDividers() const;
 	/// Gets the item's categories.
 	const std::vector<std::string> &getCategories() const;
 	/// Checks if the item belongs to a category.
