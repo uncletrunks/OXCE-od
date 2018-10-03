@@ -52,6 +52,7 @@
 #include "../Mod/RuleInterface.h"
 #include "../Battlescape/DebriefingState.h"
 #include "TransferBaseState.h"
+#include "TechTreeViewerState.h"
 #include "../Ufopaedia/Ufopaedia.h"
 
 namespace OpenXcom
@@ -804,7 +805,16 @@ void SellState::lstItemsMousePress(Action *action)
 			if (rule != 0)
 			{
 				std::string articleId = rule->getType();
-				Ufopaedia::openArticle(_game, articleId);
+				const RuleResearch *selectedTopic = _game->getMod()->getResearch(articleId, false);
+				bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;
+				if (selectedTopic && !ctrlPressed)
+				{
+					_game->pushState(new TechTreeViewerState(selectedTopic, 0));
+				}
+				else
+				{
+					Ufopaedia::openArticle(_game, articleId);
+				}
 			}
 		}
 		else if (getRow().type == TRANSFER_CRAFT)
