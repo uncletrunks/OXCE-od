@@ -2085,6 +2085,11 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 	// transition between stages, don't do damage or panic
 	if (!fullProcess)
 	{
+		if (_kneeled)
+		{
+			// stand up if kneeling
+			_kneeled = false;
+		}
 		return;
 	}
 
