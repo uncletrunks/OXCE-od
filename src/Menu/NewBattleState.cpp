@@ -486,7 +486,7 @@ void NewBattleState::btnOkClick(Action *)
 	// alien base
 	else if (_game->getMod()->getDeployment(bgame->getMissionType())->isAlienBase())
 	{
-		AlienBase *b = new AlienBase(_game->getMod()->getDeployment(bgame->getMissionType()));
+		AlienBase *b = new AlienBase(_game->getMod()->getDeployment(bgame->getMissionType()), -1);
 		b->setId(1);
 		b->setAlienRace(_alienRaces[_cbxAlienRace->getSelected()]);
 		_craft->setDestination(b);

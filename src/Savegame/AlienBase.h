@@ -35,11 +35,12 @@ private:
 	std::string _race;
 	bool _inBattlescape, _discovered;
 	AlienDeployment *_deployment;
+	int _startMonth;
 	int _minutesSinceLastHuntMissionGeneration;
 	int _genMissionCount;
 public:
 	/// Creates an alien base.
-	AlienBase(AlienDeployment *deployment);
+	AlienBase(AlienDeployment *deployment, int startMonth);
 	/// Cleans up the alien base.
 	~AlienBase();
 	/// Loads the alien base from YAML.
@@ -68,7 +69,10 @@ public:
 	void setDiscovered(bool discovered);
 
 	AlienDeployment *getDeployment() const;
+	void setDeployment(AlienDeployment *deployment);
  
+	/// Gets the month on which the base spawned.
+	int getStartMonth() const { return _startMonth; }
 	/// Gets the number of minutes passed since the last hunt mission was generated.
 	int getMinutesSinceLastHuntMissionGeneration() const;
 	/// Sets the number of minutes passed since the last hunt mission was generated.

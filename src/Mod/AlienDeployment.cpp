@@ -130,6 +130,10 @@ AlienDeployment::~AlienDeployment()
 	{
 		delete i->second;
 	}
+	for (std::vector<std::pair<size_t, WeightedOptions*> >::iterator i = _alienBaseUpgrades.begin(); i != _alienBaseUpgrades.end(); ++i)
+	{
+		delete i->second;
+	}
 }
 
 /**
@@ -227,6 +231,15 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 			WeightedOptions *nw = new WeightedOptions();
 			nw->load(nn->second);
 			_huntMissionDistribution.push_back(std::make_pair(nn->first.as<size_t>(0), nw));
+		}
+	}
+	if (const YAML::Node &weights = node["alienBaseUpgrades"])
+	{
+		for (YAML::const_iterator nn = weights.begin(); nn != weights.end(); ++nn)
+		{
+			WeightedOptions *nw = new WeightedOptions();
+			nw->load(nn->second);
+			_alienBaseUpgrades.push_back(std::make_pair(nn->first.as<size_t>(0), nw));
 		}
 	}
 }
@@ -692,6 +705,23 @@ int AlienDeployment::getBaseDetectionChance() const
 int AlienDeployment::getHuntMissionMaxFrequency() const
 {
 	return _huntMissionMaxFrequency;
+}
+
+/**
+ * Chooses one of the available deployments.
+ * @param baseAgeInMonths The number of months that have passed in the game world since the alien base spawned.
+ * @return The string id of the deployment.
+ */
+std::string AlienDeployment::generateAlienBaseUpgrade(const size_t baseAgeInMonths) const
+{
+	if (_alienBaseUpgrades.empty())
+		return "";
+
+	std::vector<std::pair<size_t, WeightedOptions*> >::const_reverse_iterator rw;
+	rw = _alienBaseUpgrades.rbegin();
+	while (baseAgeInMonths < rw->first)
+		++rw;
+	return rw->second->choose();
 }
 
 }

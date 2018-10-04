@@ -468,7 +468,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		std::string deployment = (*i)["deployment"].as<std::string>("STR_ALIEN_BASE_ASSAULT");
 		if (mod->getDeployment(deployment))
 		{
-			AlienBase *b = new AlienBase(mod->getDeployment(deployment));
+			AlienBase *b = new AlienBase(mod->getDeployment(deployment), 0);
 			b->load(*i);
 			_alienBases.push_back(b);
 		}

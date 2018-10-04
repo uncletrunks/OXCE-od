@@ -3078,6 +3078,21 @@ void GeoscapeState::determineAlienMissions()
 			conditions[command->getLabel()] = success;
 		}
 	}
+
+	// Alien base upgrades happen only AFTER the first game month
+	if (month > 0)
+	{
+		for (auto alienBase : *save->getAlienBases())
+		{
+			auto baseAgeInMonths = month - alienBase->getStartMonth();
+			auto upgradeId = alienBase->getDeployment()->generateAlienBaseUpgrade(baseAgeInMonths);
+			auto upgrade = mod->getDeployment(upgradeId, false);
+			if (upgrade && upgrade != alienBase->getDeployment())
+			{
+				alienBase->setDeployment(upgrade);
+			}
+		}
+	}
 }
 
 

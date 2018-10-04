@@ -771,7 +771,7 @@ void AlienMission::spawnAlienBase(Country *pactCountry, Game &engine, const Miss
 	{
 		deployment = ruleset.getDeployment("STR_ALIEN_BASE_ASSAULT", true);
 	}
-	AlienBase *ab = new AlienBase(deployment);
+	AlienBase *ab = new AlienBase(deployment, game.getMonthsPassed());
 	if (pactCountry)
 	{
 		ab->setPactCountry(pactCountry->getRules()->getType());

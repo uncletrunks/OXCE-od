@@ -25,7 +25,7 @@ namespace OpenXcom
 /**
  * Initializes an alien base
  */
-AlienBase::AlienBase(AlienDeployment *deployment) : Target(), _inBattlescape(false), _discovered(false), _deployment(deployment), _genMissionCount(0)
+AlienBase::AlienBase(AlienDeployment *deployment, int startMonth) : Target(), _inBattlescape(false), _discovered(false), _deployment(deployment), _startMonth(startMonth), _genMissionCount(0)
 {
 	// allow spawning hunt missions immediately after the base is created, i.e. no initial delay
 	_minutesSinceLastHuntMissionGeneration = _deployment->getHuntMissionMaxFrequency();
@@ -49,6 +49,7 @@ void AlienBase::load(const YAML::Node &node)
 	_race = node["race"].as<std::string>(_race);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
 	_discovered = node["discovered"].as<bool>(_discovered);
+	_startMonth = node["startMonth"].as<int>(_startMonth);
 	_minutesSinceLastHuntMissionGeneration = node["minutesSinceLastHuntMissionGeneration"].as<int>(_minutesSinceLastHuntMissionGeneration);
 	_genMissionCount = node["genMissionCount"].as<int>(_genMissionCount);
 }
@@ -67,6 +68,7 @@ YAML::Node AlienBase::save() const
 	if (_discovered)
 		node["discovered"] = _discovered;
 	node["deployment"] = _deployment->getType();
+	node["startMonth"] = _startMonth;
 	node["minutesSinceLastHuntMissionGeneration"] = _minutesSinceLastHuntMissionGeneration;
 	node["genMissionCount"] = _genMissionCount;
 	return node;
@@ -168,6 +170,14 @@ void AlienBase::setDiscovered(bool discovered)
 AlienDeployment *AlienBase::getDeployment() const
 {
 	return _deployment;
+}
+
+void AlienBase::setDeployment(AlienDeployment *deployment)
+{
+	_deployment = deployment;
+
+	// allow spawning hunt missions immediately after the base is upgraded, i.e. no initial delay
+	_minutesSinceLastHuntMissionGeneration = _deployment->getHuntMissionMaxFrequency();
 }
 
 /**
