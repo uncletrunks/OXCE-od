@@ -297,6 +297,10 @@ en-US:
 #=================== Menu ===================
 #OptionsAdvancedState.cpp
   STR_OXCE: "Extended"
+#OptionsVideoState.cpp
+  STR_FOURTH_DISPLAY: "1/4 Display"
+  STR_FIFTH_DISPLAY: "1/5 Display"
+  STR_SIXTH_DISPLAY: "1/6 Display"
 #TestState.cpp
   STR_TEST_SCREEN: "TEST SCREEN"
   STR_PALETTE: "Palette:"

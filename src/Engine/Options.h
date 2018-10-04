@@ -53,7 +53,10 @@ enum ScaleType
 	SCALE_2X,
 	SCALE_SCREEN_DIV_3,
 	SCALE_SCREEN_DIV_2,
-	SCALE_SCREEN
+	SCALE_SCREEN,
+	SCALE_SCREEN_DIV_4,
+	SCALE_SCREEN_DIV_5,
+	SCALE_SCREEN_DIV_6
 };
 /**
  * Container for all the various global game options

@@ -301,6 +301,9 @@ OptionsVideoState::OptionsVideoState(OptionsOrigin origin) : OptionsBaseState(or
 	scales.push_back("STR_THIRD_DISPLAY");
 	scales.push_back("STR_HALF_DISPLAY");
 	scales.push_back("STR_FULL_DISPLAY");
+	scales.push_back("STR_FOURTH_DISPLAY");
+	scales.push_back("STR_FIFTH_DISPLAY");
+	scales.push_back("STR_SIXTH_DISPLAY");
 
 	_cbxGeoScale->setOptions(scales);
 	_cbxGeoScale->setSelected(Options::geoscapeScale);
