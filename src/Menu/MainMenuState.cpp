@@ -100,7 +100,7 @@ MainMenuState::MainMenuState()
 void MainMenuState::init()
 {
 	State::init();
-	if (Options::getLoadLastSave())
+	if (Options::getLoadLastSave() && _game->getSavedGame()->getList(_game->getLanguage(), true).size() > 0)
 	{
 		Log(LOG_INFO) << "Loading last saved game";
 		btnLoadClick(NULL);
