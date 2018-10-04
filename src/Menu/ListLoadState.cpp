@@ -116,10 +116,18 @@ void ListLoadState::init()
 		hideAll();
 		// make it so that this fires only once
 		Options::expendLoadLastSave();
-		// sort the list so that what we need is at idx=0
-		sortList(SORT_DATE_DESC);
-		// load it
-		loadSave(0);
+		// find the absolutely latest save game including quick and autos
+		time_t timestamp = 0;
+		size_t idx = -1, i = 0;
+		for (auto it = _saves.begin(); it !=_saves.end(); ++it, ++i)
+		{
+			if ((*it).timestamp > timestamp)
+			{
+				idx = i;
+				timestamp = (*it).timestamp;
+			}
+		}
+		loadSave(idx);
 	}
 }
 
