@@ -144,7 +144,7 @@ MonthlyCostsState::MonthlyCostsState(Base *base) : _base(base)
 		for (std::vector<std::string>::const_iterator i = soldiers.begin(); i != soldiers.end(); ++i)
 		{
 			RuleSoldier *soldier = _game->getMod()->getSoldier(*i);
-			if (soldier->getBuyCost() != 0 && _game->getSavedGame()->isResearched(soldier->getRequirements()))
+			if (soldier->getSalaryCost(0) != 0 && _game->getSavedGame()->isResearched(soldier->getRequirements()))
 			{
 				std::pair<int, int> info = _base->getSoldierCountAndSalary(*i);
 				std::wostringstream ss4;

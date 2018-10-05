@@ -1774,7 +1774,7 @@ void GeoscapeState::time30Minutes()
 							w->setLatitude((*j)->getLatitudeAuto());
 							if (w != 0 && w->getId() == 0)
 							{
-								w->setId(_game->getSavedGame()->getId("STR_WAYPOINT"));
+								w->setId(_game->getSavedGame()->getId("STR_WAY_POINT"));
 								_game->getSavedGame()->getWaypoints()->push_back(w);
 							}
 							(*j)->setDestination(w);
@@ -1805,7 +1805,7 @@ void GeoscapeState::time30Minutes()
 								w->setLatitude((*j)->getLatitudeAuto());
 								if (w != 0 && w->getId() == 0)
 								{
-									w->setId(_game->getSavedGame()->getId("STR_WAYPOINT"));
+									w->setId(_game->getSavedGame()->getId("STR_WAY_POINT"));
 									_game->getSavedGame()->getWaypoints()->push_back(w);
 								}
 								(*j)->setDestination(w);
