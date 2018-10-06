@@ -227,7 +227,28 @@ void StatsForNerdsState::cbxAmmoSelect(Action *)
 	size_t selIdx = _cbxRelatedStuff->getSelected();
 	if (selIdx > 0)
 	{
-		_game->pushState(new StatsForNerdsState(UFOPAEDIA_TYPE_ITEM, _filterOptions.at(selIdx), _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed()));
+		if (_typeId == UFOPAEDIA_TYPE_ITEM || _typeId == UFOPAEDIA_TYPE_TFTD_ITEM)
+		{
+			// perform same checks as in ArticleStateItem.cpp
+			auto ammoId = _filterOptions.at(selIdx);
+			auto ammo_article = _game->getMod()->getUfopaediaArticle(ammoId, true);
+			if (Ufopaedia::isArticleAvailable(_game->getSavedGame(), ammo_article))
+			{
+				auto ammo_rule = _game->getMod()->getItem(ammoId, true);
+				_game->pushState(new StatsForNerdsState(UFOPAEDIA_TYPE_ITEM, ammo_rule->getType(), _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed()));
+			}
+		}
+		else if(_typeId == UFOPAEDIA_TYPE_ARMOR || _typeId == UFOPAEDIA_TYPE_TFTD_ARMOR)
+		{
+			// perform similar checks as above, but don't crash if article is not found
+			auto builtInItemId = _filterOptions.at(selIdx);
+			auto builtInItem_article = _game->getMod()->getUfopaediaArticle(builtInItemId, false);
+			if (builtInItem_article && Ufopaedia::isArticleAvailable(_game->getSavedGame(), builtInItem_article))
+			{
+				auto builtInItem_rule = _game->getMod()->getItem(builtInItemId, true);
+				_game->pushState(new StatsForNerdsState(UFOPAEDIA_TYPE_ITEM, builtInItem_rule->getType(), _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed()));
+			}
+		}
 	}
 }
 
