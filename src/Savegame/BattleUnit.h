@@ -101,9 +101,7 @@ private:
 	BattleItem* _specWeapon[SPEC_WEAPON_MAX];
 	AIModule *_currentAIState;
 	bool _visible;
-	int _expBravery, _expReactions, _expFiring, _expThrowing, _expPsiSkill, _expPsiStrength, _expMelee;
-	int _expBraveryTmp, _expReactionsTmp, _expFiringTmp, _expThrowingTmp, _expPsiSkillTmp, _expPsiStrengthTmp, _expMeleeTmp;
-	int improveStat(int exp) const;
+	UnitStats _exp, _expTmp;
 	int _motionPoints;
 	int _scannedTurn;
 	int _kills;
@@ -154,6 +152,8 @@ private:
 	bool _capturable;
 	ScriptValues<BattleUnit> _scriptValues;
 
+	/// Calculate stat improvment.
+	int improveStat(int exp) const;
 	/// Helper function initing recolor vector.
 	void setRecolor(int basicLook, int utileLook, int rankLook);
 	/// Helper function preparing Time Units recovery at beginning of turn.
@@ -410,7 +410,7 @@ public:
 	/// Updates the stats of a Geoscape soldier.
 	void updateGeoscapeStats(Soldier *soldier) const;
 	/// Check if unit eligible for squaddie promotion.
-	bool postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, UnitStats &statsDiff);
+	bool postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, StatAdjustment &statsDiff);
 	/// Get the sprite index for the minimap
 	int getMiniMapSpriteIndex() const;
 	/// Set the turret type. -1 is no turret.

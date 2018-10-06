@@ -59,7 +59,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0), _toDirectionTurret(0),
 	_verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _isSurrendering(false), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
 	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false),
-	_expBravery(0), _expReactions(0), _expFiring(0), _expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0),
+	_exp{ }, _expTmp{ },
 	_motionPoints(0), _scannedTurn(-1), _kills(0), _hitByFire(false), _hitByAnything(false), _alreadyExploded(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255), _turnsLeftSpottedForSnipers(0),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT), _fatalShotBodyPart(BODYPART_HEAD), _armor(0),
 	_geoscapeSoldier(soldier), _unitRules(0), _rankInt(0), _turretType(-1), _hidingForTurn(false), _floorAbove(false), _respawn(false), _alreadyRespawned(false), _isLeeroyJenkins(false), _summonedPlayerUnit(false), _capturable(true)
@@ -236,8 +236,8 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0),
 	_toDirectionTurret(0), _verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _isSurrendering(false), _walkPhase(0),
 	_fallPhase(0), _kneeled(false), _floating(false), _dontReselect(false), _fire(0), _currentAIState(0),
-	_visible(false), _expBravery(0), _expReactions(0), _expFiring(0),
-	_expThrowing(0), _expPsiSkill(0), _expPsiStrength(0), _expMelee(0), _motionPoints(0), _scannedTurn(-1), _kills(0), _hitByFire(false), _hitByAnything(false), _alreadyExploded(false), _fireMaxHit(0), _smokeMaxHit(0),
+	_visible(false), _exp{ }, _expTmp{ },
+	_motionPoints(0), _scannedTurn(-1), _kills(0), _hitByFire(false), _hitByAnything(false), _alreadyExploded(false), _fireMaxHit(0), _smokeMaxHit(0),
 	_moraleRestored(0), _coverReserve(0), _charging(0), _turnsSinceSpotted(255), _turnsLeftSpottedForSnipers(0),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT),
 	_fatalShotBodyPart(BODYPART_HEAD), _armor(armor), _geoscapeSoldier(0),  _unitRules(unit),
@@ -404,13 +404,13 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	for (int i=0; i < BODYPART_MAX; i++)
 		_fatalWounds[i] = node["fatalWounds"][i].as<int>(_fatalWounds[i]);
 	_fire = node["fire"].as<int>(_fire);
-	_expBravery = node["expBravery"].as<int>(_expBravery);
-	_expReactions = node["expReactions"].as<int>(_expReactions);
-	_expFiring = node["expFiring"].as<int>(_expFiring);
-	_expThrowing = node["expThrowing"].as<int>(_expThrowing);
-	_expPsiSkill = node["expPsiSkill"].as<int>(_expPsiSkill);
-	_expPsiStrength = node["expPsiStrength"].as<int>(_expPsiStrength);
-	_expMelee = node["expMelee"].as<int>(_expMelee);
+	_exp.bravery = node["expBravery"].as<int>(_exp.bravery);
+	_exp.reactions = node["expReactions"].as<int>(_exp.reactions);
+	_exp.firing = node["expFiring"].as<int>(_exp.firing);
+	_exp.throwing = node["expThrowing"].as<int>(_exp.throwing);
+	_exp.psiSkill = node["expPsiSkill"].as<int>(_exp.psiSkill);
+	_exp.psiStrength = node["expPsiStrength"].as<int>(_exp.psiStrength);
+	_exp.melee = node["expMelee"].as<int>(_exp.melee);
 	_turretType = node["turretType"].as<int>(_turretType);
 	_visible = node["visible"].as<bool>(_visible);
 	_turnsSinceSpotted = node["turnsSinceSpotted"].as<int>(_turnsSinceSpotted);
@@ -477,13 +477,13 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 	for (int i=0; i < SIDE_MAX; i++) node["armor"].push_back(_currentArmor[i]);
 	for (int i=0; i < BODYPART_MAX; i++) node["fatalWounds"].push_back(_fatalWounds[i]);
 	node["fire"] = _fire;
-	node["expBravery"] = _expBravery;
-	node["expReactions"] = _expReactions;
-	node["expFiring"] = _expFiring;
-	node["expThrowing"] = _expThrowing;
-	node["expPsiSkill"] = _expPsiSkill;
-	node["expPsiStrength"] = _expPsiStrength;
-	node["expMelee"] = _expMelee;
+	node["expBravery"] = _exp.bravery;
+	node["expReactions"] = _exp.reactions;
+	node["expFiring"] = _exp.firing;
+	node["expThrowing"] = _exp.throwing;
+	node["expPsiSkill"] = _exp.psiSkill;
+	node["expPsiStrength"] = _exp.psiStrength;
+	node["expMelee"] = _exp.melee;
 	node["turretType"] = _turretType;
 	node["visible"] = _visible;
 	node["turnsSinceSpotted"] = _turnsSinceSpotted;
@@ -2817,7 +2817,7 @@ int BattleUnit::getHeight() const
  */
 void BattleUnit::addBraveryExp()
 {
-	_expBravery++;
+	_exp.bravery++;
 }
 
 /**
@@ -2825,7 +2825,7 @@ void BattleUnit::addBraveryExp()
  */
 void BattleUnit::addReactionExp()
 {
-	_expReactions++;
+	_exp.reactions++;
 }
 
 /**
@@ -2833,7 +2833,7 @@ void BattleUnit::addReactionExp()
  */
 void BattleUnit::addFiringExp()
 {
-	_expFiring++;
+	_exp.firing++;
 }
 
 /**
@@ -2841,7 +2841,7 @@ void BattleUnit::addFiringExp()
  */
 void BattleUnit::addThrowingExp()
 {
-	_expThrowing++;
+	_exp.throwing++;
 }
 
 /**
@@ -2849,7 +2849,7 @@ void BattleUnit::addThrowingExp()
  */
 void BattleUnit::addPsiSkillExp()
 {
-	_expPsiSkill++;
+	_exp.psiSkill++;
 }
 
 /**
@@ -2857,7 +2857,7 @@ void BattleUnit::addPsiSkillExp()
  */
 void BattleUnit::addPsiStrengthExp()
 {
-	_expPsiStrength++;
+	_exp.psiStrength++;
 }
 
 /**
@@ -2865,7 +2865,7 @@ void BattleUnit::addPsiStrengthExp()
  */
 void BattleUnit::addMeleeExp()
 {
-	_expMelee++;
+	_exp.melee++;
 }
 
 /**
@@ -2873,7 +2873,7 @@ void BattleUnit::addMeleeExp()
  */
 bool BattleUnit::hasGainedAnyExperience()
 {
-	return _expBravery || _expReactions || _expFiring || _expPsiSkill || _expPsiStrength || _expMelee || _expThrowing;
+	return _exp.bravery || _exp.reactions || _exp.firing || _exp.psiSkill || _exp.psiStrength || _exp.melee || _exp.throwing;
 }
 
 void BattleUnit::updateGeoscapeStats(Soldier *soldier) const
@@ -2889,7 +2889,7 @@ void BattleUnit::updateGeoscapeStats(Soldier *soldier) const
  * @param statsDiff (out) The passed UnitStats struct will be filled with the stats differences.
  * @return True if the soldier was eligible for squaddie promotion.
  */
-bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, UnitStats &statsDiff)
+bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, StatAdjustment &statsDiff)
 {
 	Soldier *s = geoscape->getSoldier(_id);
 	if (s == 0)
@@ -2900,52 +2900,41 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 	updateGeoscapeStats(s);
 
 	UnitStats *stats = s->getCurrentStats();
-	statsDiff -= *stats;        // subtract old stat
+	StatAdjustment statsOld = { };
+	statsOld.statGrowth = (*stats);
+	statsDiff.statGrowth = -(*stats);        // subtract old stat
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = _stats.health - _health;
 
 	auto recovery = (int)RNG::generate((healthLoss*0.5),(healthLoss*1.5));
 
+	if (_exp.bravery && stats->bravery < caps.bravery)
 	{
-		ModScript::ReturnFromMissionUnit::Output arg{ recovery, healthLoss };
-		ModScript::ReturnFromMissionUnit::Worker work{ this, battle, s };
-
-		work.execute(getArmor()->getScript<ModScript::ReturnFromMissionUnit>(), arg);
-
-		recovery = arg.getFirst();
+		if (_exp.bravery > RNG::generate(0,10)) stats->bravery += 10;
 	}
-	if (!_armor->getInstantWoundRecovery())
+	if (_exp.reactions && stats->reactions < caps.reactions)
 	{
-		s->setWoundRecovery(recovery);
+		stats->reactions += improveStat(_exp.reactions);
 	}
-
-	if (_expBravery && stats->bravery < caps.bravery)
+	if (_exp.firing && stats->firing < caps.firing)
 	{
-		if (_expBravery > RNG::generate(0,10)) stats->bravery += 10;
+		stats->firing += improveStat(_exp.firing);
 	}
-	if (_expReactions && stats->reactions < caps.reactions)
+	if (_exp.melee && stats->melee < caps.melee)
 	{
-		stats->reactions += improveStat(_expReactions);
+		stats->melee += improveStat(_exp.melee);
 	}
-	if (_expFiring && stats->firing < caps.firing)
+	if (_exp.throwing && stats->throwing < caps.throwing)
 	{
-		stats->firing += improveStat(_expFiring);
+		stats->throwing += improveStat(_exp.throwing);
 	}
-	if (_expMelee && stats->melee < caps.melee)
+	if (_exp.psiSkill && stats->psiSkill < caps.psiSkill)
 	{
-		stats->melee += improveStat(_expMelee);
+		stats->psiSkill += improveStat(_exp.psiSkill);
 	}
-	if (_expThrowing && stats->throwing < caps.throwing)
+	if (_exp.psiStrength && stats->psiStrength < caps.psiStrength)
 	{
-		stats->throwing += improveStat(_expThrowing);
-	}
-	if (_expPsiSkill && stats->psiSkill < caps.psiSkill)
-	{
-		stats->psiSkill += improveStat(_expPsiSkill);
-	}
-	if (_expPsiStrength && stats->psiStrength < caps.psiStrength)
-	{
-		stats->psiStrength += improveStat(_expPsiStrength);
+		stats->psiStrength += improveStat(_exp.psiStrength);
 	}
 
 	bool hasImproved = false;
@@ -2965,11 +2954,37 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 		if (v > 0) stats->stamina += RNG::generate(0, v/10 + 2);
 	}
 
-	statsDiff += *stats; // add new stat
+	statsDiff.statGrowth += *stats; // add new stat
+
+	if (_armor->getInstantWoundRecovery())
+	{
+		recovery = 0;
+	}
+
+	{
+		ModScript::ReturnFromMissionUnit::Output arg{ recovery, healthLoss };
+		ModScript::ReturnFromMissionUnit::Worker work{ this, battle, s, &statsDiff, &statsOld };
+
+		work.execute(getArmor()->getScript<ModScript::ReturnFromMissionUnit>(), arg);
+
+		recovery = arg.getFirst();
+	}
+
+	//after mod excecution this value could change
+	statsDiff.statGrowth = *stats - statsOld.statGrowth;
+
+	s->setWoundRecovery(recovery);
 
 	if (s->getWoundRecoveryInt() > 0)
 	{
+		// remove from craft
 		s->setCraft(nullptr);
+
+		// remove from training
+		if (Options::removeWoundedFromTraining)
+		{
+			s->setTraining(false);
+		}
 	}
 
 	return hasImproved;
@@ -4162,13 +4177,7 @@ bool BattleUnit::isSniper() const
  */
 void BattleUnit::rememberXP()
 {
-	_expBraveryTmp = _expBravery;
-	_expReactionsTmp = _expReactions;
-	_expFiringTmp = _expFiring;
-	_expThrowingTmp = _expThrowing;
-	_expPsiSkillTmp = _expPsiSkill;
-	_expPsiStrengthTmp = _expPsiStrength;
-	_expMeleeTmp = _expMelee;
+	_expTmp = _exp;
 }
 
 /**
@@ -4176,13 +4185,7 @@ void BattleUnit::rememberXP()
  */
 void BattleUnit::nerfXP()
 {
-	if (_expBravery > _expBraveryTmp + 1) _expBravery = _expBraveryTmp + 1;
-	if (_expReactions > _expReactionsTmp + 1) _expReactions = _expReactionsTmp + 1;
-	if (_expFiring > _expFiringTmp + 1) _expFiring = _expFiringTmp + 1;
-	if (_expThrowing > _expThrowingTmp + 1) _expThrowing = _expThrowingTmp + 1;
-	if (_expPsiSkill > _expPsiSkillTmp + 1) _expPsiSkill = _expPsiSkillTmp + 1;
-	if (_expPsiStrength > _expPsiStrengthTmp + 1) _expPsiStrength = _expPsiStrengthTmp + 1;
-	if (_expMelee > _expMeleeTmp + 1) _expMelee = _expMeleeTmp + 1;
+	_exp = UnitStats::min(_exp, _expTmp + UnitStats::scalar(1));
 }
 
 /**
@@ -4663,6 +4666,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_stats>(bu, "Stats.");
 	UnitStats::addSetStatsWithCurrScript<BattleUnit, &BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health>(bu, "Stats.");
 
+	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_exp>(bu, "Exp.", true);
 
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
@@ -4901,7 +4905,7 @@ ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std:
 ModScript::ReturnFromMissionUnitParser::ReturnFromMissionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
 	"recovery_time",
 	"health_loss",
-	"unit", "battle_game", "soldier", }
+	"unit", "battle_game", "soldier", "statChange", "statPrevious" }
 {
 	BindBase b { this };
 

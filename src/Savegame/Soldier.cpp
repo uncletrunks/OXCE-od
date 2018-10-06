@@ -739,12 +739,6 @@ int Soldier::getWoundRecovery(float absBonus, float relBonus) const
 void Soldier::setWoundRecovery(int recovery)
 {
 	_recovery = std::max(recovery, 0);
-
-	// remove from training
-	if (Options::removeWoundedFromTraining && _recovery > 0.0f)
-	{
-		_training = false;
-	}
 }
 
 /**

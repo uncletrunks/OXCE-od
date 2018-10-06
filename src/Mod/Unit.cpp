@@ -18,6 +18,7 @@
  */
 #include "Unit.h"
 #include "../Engine/Exception.h"
+#include "../Engine/ScriptBind.h"
 #include "Mod.h"
 
 namespace OpenXcom
@@ -383,4 +384,19 @@ bool Unit::getShowFullNameInAlienInventory(Mod *mod) const
 	return mod->getShowFullNameInAlienInventory();
 }
 
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+/**
+ * Register StatAdjustment in script parser.
+ * @param parser Script parser.
+ */
+void StatAdjustment::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<StatAdjustment> sa = { parser };
+
+	UnitStats::addGetStatsScript<StatAdjustment, &StatAdjustment::statGrowth>(sa, "", true);
 }
+
+} // namespace OpenXcom

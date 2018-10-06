@@ -192,6 +192,11 @@ struct UnitStats
 
 struct StatAdjustment
 {
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "StatAdjustment";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 	UnitStats statGrowth;
 	int growthMultiplier;
 	double aimAndArmorMultiplier;

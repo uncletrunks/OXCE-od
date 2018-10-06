@@ -53,6 +53,7 @@ class Mod;
 class BattleUnit;
 class BattleUnitVisibility;
 class BattleItem;
+class StatAdjustment;
 
 class SavedBattleGame;
 class SavedGame;
@@ -117,7 +118,7 @@ class ModScript
 	{
 		NewTurnUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct ReturnFromMissionUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int>, BattleUnit*, SavedBattleGame*, Soldier*>
+	struct ReturnFromMissionUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int>, BattleUnit*, SavedBattleGame*, Soldier*, const StatAdjustment*, const StatAdjustment*>
 	{
 		ReturnFromMissionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};

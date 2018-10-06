@@ -513,7 +513,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 		SoldierRank rank = (*deadUnit)->getGeoscapeSoldier()->getRank();
 		// Rookies don't get this next award. No one likes them.
-		if (rank == RANK_ROOKIE) 
+		if (rank == RANK_ROOKIE)
 		{
 			continue;
 		}
@@ -1184,7 +1184,7 @@ void DebriefingState::prepareDebriefing()
 			}
 		}
 	}
-	
+
 	// if it's a UFO, let's see what happens to it
 	for (std::vector<Ufo*>::iterator i = save->getUfos()->begin(); i != save->getUfos()->end(); ++i)
 	{
@@ -1389,10 +1389,10 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((((*j)->isInExitArea(START_POINT) || (*j)->getStatus() == STATUS_IGNORE_ME) && (battle->getMissionType() != "STR_BASE_DEFENSE" || success)) || !aborted || (aborted && (*j)->isInExitArea(END_POINT)))
 				{ // so game is not aborted or aborted and unit is on exit area
-					UnitStats statIncrease;
+					StatAdjustment statIncrease;
 					(*j)->postMissionProcedures(save, battle, statIncrease);
 					if ((*j)->getGeoscapeSoldier())
-						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease));
+						_soldierStats.push_back(std::pair<std::wstring, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease.statGrowth));
 					playersInExitArea++;
 
 					recoverItems((*j)->getInventory(), base);
