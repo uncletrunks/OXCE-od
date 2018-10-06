@@ -41,7 +41,7 @@ float stat0(const BattleUnit *unit)
 /**
  * Getter for one basic stat of unit.
  */
-template<int UnitStats::* field>
+template<UnitStats::Ptr field>
 float stat1(const BattleUnit *unit)
 {
 	const UnitStats *stat = unit->getBaseStats();
@@ -51,7 +51,7 @@ float stat1(const BattleUnit *unit)
 /**
  * Getter for multiply of two basic stat of unit.
  */
-template<int UnitStats::* fieldA, int UnitStats::* fieldB>
+template<UnitStats::Ptr fieldA, UnitStats::Ptr fieldB>
 float stat2(const BattleUnit *unit)
 {
 	const UnitStats *stat = unit->getBaseStats();
@@ -193,7 +193,7 @@ BonusStatDataFunc create0()
 /**
  * Helper function creating BonusStatData with proper functions.
  */
-template<int UnitStats::* fieldA>
+template<UnitStats::Ptr fieldA>
 BonusStatDataFunc create1()
 {
 	return create<&stat1<fieldA> >();
@@ -202,7 +202,7 @@ BonusStatDataFunc create1()
 /**
  * Helper function creating BonusStatData with proper functions.
  */
-template<int UnitStats::* fieldA, int UnitStats::* fieldB>
+template<UnitStats::Ptr fieldA, UnitStats::Ptr fieldB>
 BonusStatDataFunc create2()
 {
 	return create<&stat2<fieldA, fieldB> >();

@@ -3708,17 +3708,7 @@ bool BattleUnit::checkViewSector (Position pos, bool useTurretDirection /* = fal
  */
 void BattleUnit::adjustStats(const StatAdjustment &adjustment)
 {
-	_stats.tu += adjustment.statGrowth.tu * adjustment.growthMultiplier * _stats.tu / 100;
-	_stats.stamina += adjustment.statGrowth.stamina * adjustment.growthMultiplier * _stats.stamina / 100;
-	_stats.health += adjustment.statGrowth.health * adjustment.growthMultiplier * _stats.health / 100;
-	_stats.bravery += adjustment.statGrowth.bravery * adjustment.growthMultiplier * _stats.bravery / 100;
-	_stats.reactions += adjustment.statGrowth.reactions * adjustment.growthMultiplier * _stats.reactions / 100;
-	_stats.firing += adjustment.statGrowth.firing * adjustment.growthMultiplier * _stats.firing / 100;
-	_stats.throwing += adjustment.statGrowth.throwing * adjustment.growthMultiplier * _stats.throwing / 100;
-	_stats.strength += adjustment.statGrowth.strength * adjustment.growthMultiplier * _stats.strength / 100;
-	_stats.psiStrength += adjustment.statGrowth.psiStrength * adjustment.growthMultiplier * _stats.psiStrength / 100;
-	_stats.psiSkill += adjustment.statGrowth.psiSkill * adjustment.growthMultiplier * _stats.psiSkill / 100;
-	_stats.melee += adjustment.statGrowth.melee * adjustment.growthMultiplier * _stats.melee / 100;
+	_stats += UnitStats::percent(_stats, adjustment.statGrowth, adjustment.growthMultiplier);
 
 	_stats.firing *= adjustment.aimAndArmorMultiplier;
 	_maxArmor[0] *= adjustment.aimAndArmorMultiplier;
@@ -4547,12 +4537,12 @@ struct burnShadeScript
 	}
 };
 
-template<int BattleUnit::*StatCurr, int UnitStats::*StatMax>
+template<int BattleUnit::*StatCurr, UnitStats::Ptr StatMax>
 void setBaseStatScript(BattleUnit *bu, int val)
 {
 	if (bu)
 	{
-		(bu->*StatCurr) = Clamp(val, 0, (bu->getBaseStats()->*StatMax));
+		(bu->*StatCurr) = Clamp(val, 0, +(bu->getBaseStats()->*StatMax));
 	}
 }
 
@@ -4562,16 +4552,6 @@ void setStunScript(BattleUnit *bu, int val)
 	if (bu)
 	{
 		(bu->*StatCurr) = Clamp(val, 0, (bu->getBaseStats()->health) * 4);
-	}
-}
-
-template<int UnitStats::*StatMax>
-void setMaxStatScript(BattleUnit *bu, int val)
-{
-	if (bu)
-	{
-		val = Clamp(val, 1, 1000);
-		(bu->getBaseStats()->*StatMax) = val;
 	}
 }
 
@@ -4634,7 +4614,6 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	parser->registerPointerType<BattleItem>();
 
 	Bind<BattleUnit> bu = { parser };
-	BindNested<BattleUnit, UnitStats, &BattleUnit::_stats> us = { bu };
 
 
 	bu.addField<&BattleUnit::_id>("getId");
@@ -4657,15 +4636,15 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 
 	bu.addField<&BattleUnit::_tu>("getTimeUnits");
-	us.addField<&UnitStats::tu>("getTimeUnitsMax");
+	bu.addFunc<UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::tu>>("getTimeUnitsMax");
 	bu.add<&setBaseStatScript<&BattleUnit::_tu, &UnitStats::tu>>("setTimeUnits");
 
 	bu.addField<&BattleUnit::_health>("getHealth");
-	us.addField<&UnitStats::health>("getHealthMax");
+	bu.addFunc<UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::health>>("getHealthMax");
 	bu.add<&setBaseStatScript<&BattleUnit::_health, &UnitStats::health>>("setHealth");
 
 	bu.addField<&BattleUnit::_energy>("getEnergy");
-	us.addField<&UnitStats::stamina>("getEnergyMax");
+	bu.addFunc<UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::stamina>>("getEnergyMax");
 	bu.add<&setBaseStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("setEnergy");
 
 	bu.addField<&BattleUnit::_stunlevel>("getStun");

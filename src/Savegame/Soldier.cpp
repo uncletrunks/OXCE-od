@@ -572,19 +572,8 @@ UnitStats *Soldier::getCurrentStats()
 
 void Soldier::setBothStats(UnitStats *stats)
 {
-	_currentStats.tu = stats->tu;
-	_currentStats.stamina = stats->stamina;
-	_currentStats.health = stats->health;
-	_currentStats.bravery = stats->bravery;
-	_currentStats.reactions = stats->reactions;
-	_currentStats.firing = stats->firing;
-	_currentStats.throwing = stats->throwing;
-	_currentStats.melee = stats->melee;
-	_currentStats.strength = stats->strength;
-	_currentStats.psiStrength = stats->psiStrength;
-	_currentStats.psiSkill = stats->psiSkill;
-
-	_initialStats = _currentStats;
+	_currentStats = *stats;
+	_initialStats = *stats;
 }
 
 /**
@@ -790,8 +779,8 @@ std::vector<EquipmentLayoutItem*> *Soldier::getEquipmentLayout()
  */
 void Soldier::trainPsi()
 {
-	int psiSkillCap = _rules->getStatCaps().psiSkill;
-	int psiStrengthCap = _rules->getStatCaps().psiStrength;
+	UnitStats::Type psiSkillCap = _rules->getStatCaps().psiSkill;
+	UnitStats::Type psiStrengthCap = _rules->getStatCaps().psiStrength;
 
 	_improvement = _psiStrImprovement = 0;
 	// -10 days - tolerance threshold for switch from anytimePsiTraining option.
@@ -814,8 +803,8 @@ void Soldier::trainPsi()
 			else if (_currentStats.psiStrength < psiStrengthCap) _psiStrImprovement = RNG::generate(1, 3);
 		}
 	}
-	_currentStats.psiSkill = std::max(_currentStats.psiSkill, std::min(_currentStats.psiSkill+_improvement, psiSkillCap));
-	_currentStats.psiStrength = std::max(_currentStats.psiStrength, std::min(_currentStats.psiStrength+_psiStrImprovement, psiStrengthCap));
+	_currentStats.psiSkill = std::max(_currentStats.psiSkill, std::min<UnitStats::Type>(_currentStats.psiSkill+_improvement, psiSkillCap));
+	_currentStats.psiStrength = std::max(_currentStats.psiStrength, std::min<UnitStats::Type>(_currentStats.psiStrength+_psiStrImprovement, psiStrengthCap));
 }
 
 /**
@@ -1234,30 +1223,10 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 	statChange += transformationRule->getFlatOverallStatChange();
 
 	// Stat changes based on current stats
-	statChange.tu += transformationRule->getPercentOverallStatChange().tu * currentStats.tu / 100;
-	statChange.stamina += transformationRule->getPercentOverallStatChange().stamina * currentStats.stamina / 100;
-	statChange.health += transformationRule->getPercentOverallStatChange().health * currentStats.health / 100;
-	statChange.bravery += transformationRule->getPercentOverallStatChange().bravery * currentStats.bravery / 100;
-	statChange.reactions += transformationRule->getPercentOverallStatChange().reactions * currentStats.reactions / 100;
-	statChange.firing += transformationRule->getPercentOverallStatChange().firing * currentStats.firing / 100;
-	statChange.throwing += transformationRule->getPercentOverallStatChange().throwing * currentStats.throwing / 100;
-	statChange.strength += transformationRule->getPercentOverallStatChange().strength * currentStats.strength / 100;
-	statChange.psiStrength += transformationRule->getPercentOverallStatChange().psiStrength * currentStats.psiStrength / 100;
-	statChange.psiSkill += transformationRule->getPercentOverallStatChange().psiSkill * currentStats.psiSkill / 100;
-	statChange.melee += transformationRule->getPercentOverallStatChange().melee * currentStats.melee / 100;
+	statChange += UnitStats::percent(currentStats, transformationRule->getPercentOverallStatChange());
 
 	// Stat changes based on gained stats
-	statChange.tu += transformationRule->getPercentGainedStatChange().tu * gainedStats.tu / 100;
-	statChange.stamina += transformationRule->getPercentGainedStatChange().stamina * gainedStats.stamina / 100;
-	statChange.health += transformationRule->getPercentGainedStatChange().health * gainedStats.health / 100;
-	statChange.bravery += transformationRule->getPercentGainedStatChange().bravery * gainedStats.bravery / 100;
-	statChange.reactions += transformationRule->getPercentGainedStatChange().reactions * gainedStats.reactions / 100;
-	statChange.firing += transformationRule->getPercentGainedStatChange().firing * gainedStats.firing / 100;
-	statChange.throwing += transformationRule->getPercentGainedStatChange().throwing * gainedStats.throwing / 100;
-	statChange.strength += transformationRule->getPercentGainedStatChange().strength * gainedStats.strength / 100;
-	statChange.psiStrength += transformationRule->getPercentGainedStatChange().psiStrength * gainedStats.psiStrength / 100;
-	statChange.psiSkill += transformationRule->getPercentGainedStatChange().psiSkill * gainedStats.psiSkill / 100;
-	statChange.melee += transformationRule->getPercentGainedStatChange().melee * gainedStats.melee / 100;
+	statChange += UnitStats::percent(gainedStats, transformationRule->getPercentGainedStatChange());
 
 	// round (mathematically) to whole tens
 	int sign = statChange.bravery < 0 ? -1 : 1;
@@ -1273,17 +1242,8 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 	{
 		UnitStats lowerBound = transformationSoldierType->getMinStats();
 		UnitStats cappedChange = lowerBound - currentStats;
-		statChange.tu = std::max(statChange.tu, cappedChange.tu);
-		statChange.stamina = std::max(statChange.stamina, cappedChange.stamina);
-		statChange.health = std::max(statChange.health, cappedChange.health);
-		statChange.bravery = std::max(statChange.bravery, cappedChange.bravery);
-		statChange.reactions = std::max(statChange.reactions, cappedChange.reactions);
-		statChange.firing = std::max(statChange.firing, cappedChange.firing);
-		statChange.throwing = std::max(statChange.throwing, cappedChange.throwing);
-		statChange.strength = std::max(statChange.strength, cappedChange.strength);
-		statChange.psiStrength = std::max(statChange.psiStrength, cappedChange.psiStrength);
-		statChange.psiSkill = std::max(statChange.psiSkill, cappedChange.psiSkill);
-		statChange.melee = std::max(statChange.melee, cappedChange.melee);
+
+		statChange = UnitStats::max(statChange, cappedChange);
 	}
 
 	if (transformationRule->hasUpperBoundAtMaxStats() || transformationRule->hasUpperBoundAtStatCaps())
@@ -1292,17 +1252,8 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 			? transformationSoldierType->getMaxStats()
 			: transformationSoldierType->getStatCaps();
 		UnitStats cappedChange = upperBound - currentStats;
-		statChange.tu = std::min(statChange.tu, cappedChange.tu);
-		statChange.stamina = std::min(statChange.stamina, cappedChange.stamina);
-		statChange.health = std::min(statChange.health, cappedChange.health);
-		statChange.bravery = std::min(statChange.bravery, cappedChange.bravery);
-		statChange.reactions = std::min(statChange.reactions, cappedChange.reactions);
-		statChange.firing = std::min(statChange.firing, cappedChange.firing);
-		statChange.throwing = std::min(statChange.throwing, cappedChange.throwing);
-		statChange.strength = std::min(statChange.strength, cappedChange.strength);
-		statChange.psiStrength = std::min(statChange.psiStrength, cappedChange.psiStrength);
-		statChange.psiSkill = std::min(statChange.psiSkill, cappedChange.psiSkill);
-		statChange.melee = std::min(statChange.melee, cappedChange.melee);
+
+		statChange = UnitStats::min(statChange, cappedChange);
 	}
 
 	return statChange;

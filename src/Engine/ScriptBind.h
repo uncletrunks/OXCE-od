@@ -1104,26 +1104,6 @@ struct Bind : BindBase
 	#undef MACRO_COPY_HELP_FUNC
 };
 
-template<typename T, typename N, N T::*X>
-struct BindNested
-{
-	Bind<T> *bind;
-	BindNested(Bind<T>& b) : bind{ &b }
-	{
-
-	}
-
-	template<int N::*XX>
-	void addField(const std::string& get, const std::string& set = "")
-	{
-		bind->template addCustomFunc<helper::BindPropNestGet<T, N, int, X, XX>>(bind->getName(get));
-		if (!set.empty())
-		{
-			bind->template addCustomFunc<helper::BindPropNestSet<T, N, int, X, XX>>(bind->getName(get));
-		}
-	}
-};
-
 } //namespace OpenXcom
 
 #endif	/* OPENXCOM_SCRIPTBIND_H */
