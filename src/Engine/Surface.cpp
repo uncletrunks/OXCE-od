@@ -970,7 +970,9 @@ void Surface::blitRaw(SurfaceRaw<Uint8> destSurf, SurfaceRaw<const Uint8> srcSur
 		ShaderDraw<helper::ColorReplace>(ShaderSurface(destSurf), src, ShaderScalar(shade), ShaderScalar(newBaseColor));
 	}
 	else
+	{
 		ShaderDraw<helper::StandardShade>(ShaderSurface(destSurf), src, ShaderScalar(shade));
+	}
 }
 
 /**
