@@ -90,7 +90,7 @@ struct UnitStats
 	template<typename T, UnitStats T::*Stat, Ptr StatMax>
 	struct getMaxStatScript
 	{
-		static RetEnum func(T *t, int& val)
+		static RetEnum func(const T *t, int& val)
 		{
 			if (t)
 			{
