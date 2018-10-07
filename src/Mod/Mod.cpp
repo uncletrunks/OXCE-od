@@ -1185,7 +1185,7 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, M
 	{
 		loadVanillaResources();
 		_surfaceOffsetBasebits = getSurfaceSet("BASEBITS.PCK")->getTotalFrames();
-		_surfaceOffsetBigobs = getSurfaceSet("BIGOBS.PCK")->getTotalFrames();
+		_surfaceOffsetBigobs = getRule("BIGOBS.PCK", "Sprite Set", _sets, true)->getTotalFrames(); // no lazy loading here yet
 		_surfaceOffsetFloorob = getSurfaceSet("FLOOROB.PCK")->getTotalFrames();
 		_surfaceOffsetHandob = getSurfaceSet("HANDOB.PCK")->getTotalFrames();
 		_surfaceOffsetHit = getSurfaceSet("HIT.PCK")->getTotalFrames();
