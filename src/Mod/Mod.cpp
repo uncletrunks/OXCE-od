@@ -969,6 +969,23 @@ int Mod::getOffset(int id, int max) const
 		return id;
 }
 
+
+template<typename T>
+static void afterLoadHelper(const char* name, Mod* mod, std::map<std::string, T*>& list, void (T::* func)(const Mod*))
+{
+	for (auto& rule : list)
+	{
+		try
+		{
+			(rule.second->* func)(mod);
+		}
+		catch (Exception &e)
+		{
+			throw Exception("Error linking '" + rule.first + "' in " + name + ": " + e.what());
+		}
+	}
+}
+
 /**
  * Loads a list of mods specified in the options.
  * @param mods List of <modId, rulesetFiles> pairs.
@@ -1042,22 +1059,11 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 	{
 		j->second->updateCategories(&replacementRules);
 	}
-	for (auto& rule : _research)
-	{
-		rule.second->afterLoad(this);
-	}
-	for (auto& rule : _items)
-	{
-		rule.second->afterLoad(this);
-	}
-	for (auto& rule : _manufacture)
-	{
-		rule.second->afterLoad(this);
-	}
-	for (auto& rule : _units)
-	{
-		rule.second->afterLoad(this);
-	}
+
+	afterLoadHelper("research", this, _research, &RuleResearch::afterLoad);
+	afterLoadHelper("items", this, _items, &RuleItem::afterLoad);
+	afterLoadHelper("manufacture", this, _manufacture, &RuleManufacture::afterLoad);
+	afterLoadHelper("units", this, _units, &Unit::afterLoad);
 
 	// fixed user options
 	if (!_fixedUserOptions.empty())
@@ -2585,7 +2591,7 @@ std::vector<const RuleResearch*> Mod::getResearch(const std::vector<std::string>
 		}
 		else
 		{
-			throw Exception("Unknown research " + n);
+			throw Exception("Unknown research '" + n + "'");
 		}
 	}
 	return dest;

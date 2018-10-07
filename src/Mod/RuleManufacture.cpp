@@ -83,11 +83,11 @@ void RuleManufacture::afterLoad(const Mod* mod)
 		auto item = _producedItemsNames.begin();
 		if (item == _producedItemsNames.end())
 		{
-			throw Exception("No craft defined for production " + _name);
+			throw Exception("No craft defined for production");
 		}
 		else if (item->second != 1)
 		{
-			throw Exception("Only one craft can be build in production " + _name);
+			throw Exception("Only one craft can be build in production");
 		}
 		else
 		{
@@ -115,7 +115,7 @@ void RuleManufacture::afterLoad(const Mod* mod)
 		}
 		else
 		{
-			throw Exception("Unknow require " + i.first + " in production " + _name);
+			throw Exception("Unknow required item '" + i.first + "'");
 		}
 	}
 
