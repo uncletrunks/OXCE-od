@@ -2504,7 +2504,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 		power /= 2;
 	}
 
-	int exHeight = std::max(0, std::min(3, Options::battleExplosionHeight));
+	int exHeight = Clamp(Options::battleExplosionHeight, 0, 3);
 	int vertdec = 1000; //default flat explosion
 
 	switch (exHeight)
@@ -2535,10 +2535,10 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 		// raytrace every 3 degrees makes sure we cover all tiles in a circle.
 		for (int te = 0; te <= 360; te += 3)
 		{
-			double cos_te = cos(te * M_PI / 180.0);
-			double sin_te = sin(te * M_PI / 180.0);
-			double sin_fi = sin(fi * M_PI / 180.0);
-			double cos_fi = cos(fi * M_PI / 180.0);
+			double cos_te = cos(Deg2Rad(te));
+			double sin_te = sin(Deg2Rad(te));
+			double sin_fi = sin(Deg2Rad(fi));
+			double cos_fi = cos(Deg2Rad(fi));
 
 			origin = _save->getTile(centetTile);
 			dest = origin;
@@ -2787,7 +2787,7 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 			if (tiles[i]->getMapData(O_FLOOR) || tiles[i]->getMapData(O_OBJECT))
 			{
 				tiles[i]->setFire(fuel);
-				tiles[i]->setSmoke(std::max(1, std::min(15 - (fireProof / 10), 12)));
+				tiles[i]->setSmoke(Clamp(15 - (fireProof / 10), 1, 12));
 			}
 		}
 		// add some smoke if tile was destroyed and not set on fire
@@ -2803,7 +2803,7 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 				int smoke = RNG::generate(1, (volume / 2) + 3) + (volume / 2);
 				if (smoke > tiles[i]->getSmoke())
 				{
-					tiles[i]->setSmoke(std::max(0, std::min(smoke, 15)));
+					tiles[i]->setSmoke(Clamp(smoke, 0, 15));
 				}
 			}
 		}

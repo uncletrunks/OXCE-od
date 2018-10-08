@@ -2490,11 +2490,11 @@ int Mod::getPersonnelTime() const
 
 /**
  * Gets the escort range.
- * @return Escort range (converted from nautical miles into radians).
+ * @return Escort range.
  */
 double Mod::getEscortRange() const
 {
-	return _escortRange * (1 / 60.0) * (M_PI / 180);
+	return _escortRange;
 }
 
 /**
@@ -3426,7 +3426,7 @@ void Mod::loadVanillaResources()
 			for (size_t i = 0; i < ARRAYLEN(catsId); ++i)
 			{
 				SoundSet *sound = 0;
-				for (size_t j = 0; j < ARRAYLEN(catsId) && sound == 0; ++j)
+				for (size_t j = 0; j < ARRAYLEN(cats) && sound == 0; ++j)
 				{
 					bool wav = true;
 					if (cats[j] == 0)

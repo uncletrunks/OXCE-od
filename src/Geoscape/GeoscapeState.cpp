@@ -864,7 +864,7 @@ void GeoscapeState::time5Seconds()
 									if ((*ci) != c && (*ci)->getStatus() == "STR_OUT" && !(*ci)->isDestroyed())
 									{
 										// craft is close enough and has at least one loaded weapon
-										if ((*ci)->getNumWeapons(true) > 0 && (*ci)->getDistance(c) < _game->getMod()->getEscortRange())
+										if ((*ci)->getNumWeapons(true) > 0 && (*ci)->getDistance(c) < Nautical(_game->getMod()->getEscortRange()))
 										{
 											// only up to 4 dogfights = 1 main + 3 secondary
 											if (secondaryTargets < 3)
@@ -1161,7 +1161,7 @@ void GeoscapeState::time5Seconds()
 										if ((*ci) != (*j) && (*ci)->getStatus() == "STR_OUT" && !(*ci)->isDestroyed())
 										{
 											// craft is close enough and has at least one loaded weapon
-											if ((*ci)->getNumWeapons(true) > 0 && (*ci)->getDistance((*j)) < _game->getMod()->getEscortRange())
+											if ((*ci)->getNumWeapons(true) > 0 && (*ci)->getDistance((*j)) < Nautical(_game->getMod()->getEscortRange()))
 											{
 												// only up to 4 dogfights = 1 main + 3 secondary
 												if (secondaryTargets < 3)
@@ -1344,10 +1344,10 @@ bool DetectXCOMBase::operator()(const Ufo *ufo) const
 {
 	if (ufo->getTrajectoryPoint() <= 1) return false;
 	if (ufo->getTrajectory().getZone(ufo->getTrajectoryPoint()) == 5) return false;
-	if ((ufo->getMission()->getRules().getObjective() != OBJECTIVE_RETALIATION && !Options::aggressiveRetaliation) || // only UFOs on retaliation missions actively scan for bases
-		ufo->getTrajectory().getID() == UfoTrajectory::RETALIATION_ASSAULT_RUN || 									// UFOs attacking a base don't detect!
-		ufo->isCrashed() ||																				// Crashed UFOs don't detect!
-		_base.getDistance(ufo) >= ufo->getCraftStats().sightRange * (1 / 60.0) * (M_PI / 180.0))		// UFOs have a detection range of 80 XCOM units. - we use a great circle fomrula and nautical miles.
+	if ((ufo->getMission()->getRules().getObjective() != OBJECTIVE_RETALIATION && !Options::aggressiveRetaliation) ||	// only UFOs on retaliation missions actively scan for bases
+		ufo->getTrajectory().getID() == UfoTrajectory::RETALIATION_ASSAULT_RUN || 										// UFOs attacking a base don't detect!
+		ufo->isCrashed() ||																								// Crashed UFOs don't detect!
+		_base.getDistance(ufo) >= Nautical(ufo->getCraftStats().sightRange))											// UFOs have a detection range of 80 XCOM units. - we use a great circle fomrula and nautical miles.
 	{
 		return false;
 	}
@@ -1383,7 +1383,7 @@ void GeoscapeState::time10Minutes()
 					Craft *escortee = dynamic_cast<Craft*>((*j)->getDestination());
 					if (escortee != 0)
 					{
-						if ((*j)->getDistance(escortee) < _game->getMod()->getEscortRange())
+						if ((*j)->getDistance(escortee) < Nautical(_game->getMod()->getEscortRange()))
 						{
 							escortSpeed = escortee->getSpeed();
 						}
@@ -1402,7 +1402,7 @@ void GeoscapeState::time10Minutes()
 
 				if ((*j)->getDestination() == 0 && (*j)->getCraftStats().sightRange > 0)
 				{
-					double range = ((*j)->getCraftStats().sightRange * (1 / 60.0) * (M_PI / 180));
+					double range = Nautical((*j)->getCraftStats().sightRange);
 					for (std::vector<AlienBase*>::iterator b = _game->getSavedGame()->getAlienBases()->begin(); b != _game->getSavedGame()->getAlienBases()->end(); b++)
 					{
 						if ((*j)->getDistance(*b) <= range)
@@ -1562,7 +1562,7 @@ void GeoscapeState::baseHunting()
 						if ((*ci)->getStatus() == "STR_OUT" && !(*ci)->isDestroyed())
 						{
 							// Craft is close enough and RNG is in our favour
-							if ((*ci)->getDistance((*ab)) < (*ab)->getDeployment()->getBaseDetectionRange() && RNG::percent((*ab)->getDeployment()->getBaseDetectionChance()))
+							if ((*ci)->getDistance((*ab)) < Nautical((*ab)->getDeployment()->getBaseDetectionRange()) && RNG::percent((*ab)->getDeployment()->getBaseDetectionChance()))
 							{
 								// Generate a hunt mission
 								auto mission = (*ab)->getDeployment()->generateHuntMission(_game->getSavedGame()->getMonthsPassed());

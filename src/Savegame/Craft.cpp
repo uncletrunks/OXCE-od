@@ -984,7 +984,7 @@ bool Craft::detect(Target *target) const
  */
 bool Craft::insideRadarRange(Target *target) const
 {
-	double range = _stats.radarRange * (1 / 60.0) * (M_PI / 180);
+	double range = Nautical(_stats.radarRange);
 	return (getDistance(target) <= range);
 }
 

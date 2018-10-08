@@ -682,11 +682,11 @@ std::string AlienDeployment::generateHuntMission(const size_t monthsPassed) cons
 
 /**
  * Gets the detection range of an alien base.
- * @return Detection range (converted from nautical miles to radians).
+ * @return Detection range.
  */
 double AlienDeployment::getBaseDetectionRange() const
 {
-	return _baseDetectionRange * (1 / 60.0) * (M_PI / 180);
+	return _baseDetectionRange;
 }
 
 /**

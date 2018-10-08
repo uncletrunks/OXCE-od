@@ -1079,8 +1079,7 @@ void Globe::drawRadars()
 		const std::vector<std::string> &facilities = _game->getMod()->getBaseFacilitiesList();
 		for (std::vector<std::string>::const_iterator i = facilities.begin(); i != facilities.end(); ++i)
 		{
-			range=_game->getMod()->getBaseFacility(*i)->getRadarRange();
-			range = range * (1 / 60.0) * (M_PI / 180);
+			range = Nautical(_game->getMod()->getBaseFacility(*i)->getRadarRange());
 			drawGlobeCircle(_hoverLat,_hoverLon,range,48);
 			if (Options::globeAllRadarsOnBaseBuild) ranges.push_back(range);
 		}
@@ -1110,7 +1109,7 @@ void Globe::drawRadars()
 						if (tr < MAX_DRAW_RADAR_CIRCLE_RADIUS && tr > range) range = tr;
 					}
 				}
-				range = range * (1 / 60.0) * (M_PI / 180);
+				range = Nautical(range);
 
 				if (range>0) drawGlobeCircle(lat,lon,range,48);
 			}
@@ -1124,8 +1123,7 @@ void Globe::drawRadars()
 				continue;
 			lat=(*j)->getLatitude();
 			lon=(*j)->getLongitude();
-			range = (*j)->getCraftStats().radarRange;
-			range = range * (1 / 60.0) * (M_PI / 180);
+			range = Nautical((*j)->getCraftStats().radarRange);
 
 			if (range>0) drawGlobeCircle(lat,lon,range,24);
 		}
@@ -1140,8 +1138,7 @@ void Globe::drawRadars()
 			{
 				lat = (*u)->getLatitude();
 				lon = (*u)->getLongitude();
-				range = (*u)->getCraftStats().radarRange;
-				range = range * (1 / 60.0) * (M_PI / 180);
+				range = Nautical((*u)->getCraftStats().radarRange);
 
 				if (range > 0) drawGlobeCircle(lat, lon, range, 24);
 			}
@@ -1154,7 +1151,7 @@ void Globe::drawRadars()
 			{
 				lat = (*ab)->getLatitude();
 				lon = (*ab)->getLongitude();
-				range = (*ab)->getDeployment()->getBaseDetectionRange();
+				range = Nautical((*ab)->getDeployment()->getBaseDetectionRange());
 
 				if (range > 0) drawGlobeCircle(lat, lon, range, 24);
 			}

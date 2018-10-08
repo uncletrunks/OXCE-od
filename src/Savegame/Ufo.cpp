@@ -1258,7 +1258,7 @@ bool Ufo::insideRadarRange(Target *target) const
 	if (_stats.radarRange == 0)
 		return false;
 
-	double range = _stats.radarRange * (1 / 60.0) * (M_PI / 180);
+	double range = Nautical(_stats.radarRange);
 	return (getDistance(target) <= range);
 }
 
