@@ -36,8 +36,6 @@ struct UnitStats
 
 	Type tu, stamina, health, bravery, reactions, firing, throwing, strength, psiStrength, psiSkill, melee;
 
-	constexpr static Ptr AllFields[] = { &UnitStats::tu, &UnitStats::stamina, &UnitStats::health, &UnitStats::bravery, &UnitStats::reactions, &UnitStats::firing, &UnitStats::throwing, &UnitStats::strength, &UnitStats::psiStrength, &UnitStats::psiSkill, &UnitStats::melee };
-
 	UnitStats() : tu(0), stamina(0), health(0), bravery(0), reactions(0), firing(0), throwing(0), strength(0), psiStrength(0), psiSkill(0), melee(0) {};
 	UnitStats(int tu_, int stamina_, int health_, int bravery_, int reactions_, int firing_, int throwing_, int strength_, int psiStrength_, int psiSkill_, int melee_) : tu(tu_), stamina(stamina_), health(health_), bravery(bravery_), reactions(reactions_), firing(firing_), throwing(throwing_), strength(strength_), psiStrength(psiStrength_), psiSkill(psiSkill_), melee(melee_) {};
 	UnitStats& operator+=(const UnitStats& stats) { tu += stats.tu; stamina += stats.stamina; health += stats.health; bravery += stats.bravery; reactions += stats.reactions; firing += stats.firing; throwing += stats.throwing; strength += stats.strength; psiStrength += stats.psiStrength; psiSkill += stats.psiSkill; melee += stats.melee; return *this; }
@@ -47,43 +45,70 @@ struct UnitStats
 	UnitStats operator-() const { return UnitStats(-tu, -stamina, -health, -bravery, -reactions, -firing, -throwing, -strength, -psiStrength, -psiSkill, -melee); }
 	void merge(const UnitStats& stats) { tu = (stats.tu ? stats.tu : tu); stamina = (stats.stamina ? stats.stamina : stamina); health = (stats.health ? stats.health : health); bravery = (stats.bravery ? stats.bravery : bravery); reactions = (stats.reactions ? stats.reactions : reactions); firing = (stats.firing ? stats.firing : firing); throwing = (stats.throwing ? stats.throwing : throwing); strength = (stats.strength ? stats.strength : strength); psiStrength = (stats.psiStrength ? stats.psiStrength : psiStrength); psiSkill = (stats.psiSkill ? stats.psiSkill : psiSkill); melee = (stats.melee ? stats.melee : melee); };
 
+	template<typename Func>
+	static void fieldLoop(Func f)
+	{
+		constexpr static Ptr allFields[] =
+		{
+			&UnitStats::tu, &UnitStats::stamina,
+			&UnitStats::health, &UnitStats::bravery,
+			&UnitStats::reactions, &UnitStats::firing,
+			&UnitStats::throwing, &UnitStats::strength,
+			&UnitStats::psiStrength, &UnitStats::psiSkill,
+			&UnitStats::melee,
+		};
+
+		for (Ptr p : allFields)
+		{
+			f(p);
+		}
+	}
+
 	static UnitStats percent(const UnitStats& base, const UnitStats& percent, int multipler = 1)
 	{
 		UnitStats r;
-		for (Ptr p : AllFields)
-		{
-			(r.*p) = (base.*p) * (percent.*p) * multipler / 100;
-		}
+		fieldLoop(
+			[&](Ptr p)
+			{
+				(r.*p) = (base.*p) * (percent.*p) * multipler / 100;
+			}
+		);
 		return r;
 	}
 
 	static UnitStats scalar(int i)
 	{
 		UnitStats r;
-		for (Ptr p : AllFields)
-		{
-			(r.*p) = i;
-		}
+		fieldLoop(
+			[&](Ptr p)
+			{
+				(r.*p) = i;
+			}
+		);
 		return r;
 	}
 
 	static UnitStats max(const UnitStats& a, const UnitStats& b)
 	{
 		UnitStats r;
-		for (Ptr p : AllFields)
-		{
-			(r.*p) = std::max((a.*p), (b.*p));
-		}
+		fieldLoop(
+			[&](Ptr p)
+			{
+				(r.*p) = std::max((a.*p), (b.*p));
+			}
+		);
 		return r;
 	}
 
 	static UnitStats min(const UnitStats& a, const UnitStats& b)
 	{
 		UnitStats r;
-		for (Ptr p : AllFields)
-		{
-			(r.*p) = std::min((a.*p), (b.*p));
-		}
+		fieldLoop(
+			[&](Ptr p)
+			{
+				(r.*p) = std::min((a.*p), (b.*p));
+			}
+		);
 		return r;
 	}
 
