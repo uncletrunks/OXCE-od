@@ -108,6 +108,11 @@ BaseDefenseState::BaseDefenseState(Base *base, Ufo *ufo, GeoscapeState *state) :
 	_timer->onTimer((StateHandler)&BaseDefenseState::nextStep);
 
 	_explosionCount = 0;
+
+	if (_ufo->getRules()->getMissilePower() != 0)
+	{
+		btnStartClick(0);
+	}
 }
 
 /**

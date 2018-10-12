@@ -2974,7 +2974,56 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 	// Whatever happens in the base defense, the UFO has finished its duty
 	ufo->setStatus(Ufo::DESTROYED);
 
-	if (base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits) > 0 || !base->getVehicles()->empty())
+	if (ufo->getRules()->getMissilePower() != 0)
+	{
+		if (ufo->getRules()->getMissilePower() < 0)
+		{
+			// It's a nuclear warhead... Skynet knows no mercy
+			popup(new BaseDestroyedState(base, true, false));
+		}
+		else
+		{
+			// This is an overkill, since we may not lose any hangar/craft, but doing it properly requires tons of changes
+			_game->getSavedGame()->stopHuntingXcomCrafts(base);
+
+			// It's a saboteur... destroy some facilities
+			for (int i = 0; i < ufo->getRules()->getMissilePower();)
+			{
+				int numberOfFacilities = base->getFacilities()->size();
+				if (numberOfFacilities <= 1)
+				{
+					// only the access lift remains, stop trying
+					break;
+				}
+				int selected = RNG::generate(0, numberOfFacilities - 1);
+				BaseFacility* toBeDestroyed = (*base->getFacilities())[selected];
+				if (!toBeDestroyed->getRules()->isLift())
+				{
+					for (std::vector<BaseFacility*>::iterator k = base->getFacilities()->begin(); k != base->getFacilities()->end();)
+					{
+						if ((*k) == toBeDestroyed)
+						{
+							// properly consider bigger facilities
+							i += toBeDestroyed->getRules()->getSize() * toBeDestroyed->getRules()->getSize();
+							base->destroyFacility(k);
+							break;
+						}
+						else
+						{
+							++k;
+						}
+					}
+				}
+			}
+
+			// this may cause the base to become disjointed, destroy the disconnected parts.
+			base->destroyDisconnectedFacilities();
+
+			// let the player know that some facilities were destroyed, but the base survived
+			popup(new BaseDestroyedState(base, true, true));
+		}
+	}
+	else if (base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits) > 0 || !base->getVehicles()->empty())
 	{
 		SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 		_game->getSavedGame()->setBattleGame(bgame);
@@ -2992,7 +3041,7 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 	else
 	{
 		// Please garrison your bases in future
-		popup(new BaseDestroyedState(base));
+		popup(new BaseDestroyedState(base, false, false));
 	}
 }
 

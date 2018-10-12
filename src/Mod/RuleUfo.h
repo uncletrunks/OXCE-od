@@ -62,6 +62,7 @@ private:
 	int _sprite, _marker, _markerLand, _markerCrash;
 	int _power, _range, _score, _reload, _breakOffTime, _missionScore;
 	int _hunterKillerPercentage, _huntMode, _huntSpeed, _huntBehavior;
+	int _missilePower;
 	int _fireSound;
 	int _alertSound;
 	RuleTerrain *_battlescapeTerrainData;
@@ -122,6 +123,8 @@ public:
 	int getHuntSpeed() const;
 	/// Gets the UFO's hunting behavior (normal, kamikaze or random).
 	int getHuntBehavior() const;
+	/// Gets the missile power (of a UFO that represents one or more missiles).
+	int getMissilePower() const { return _missilePower; }
 };
 
 }

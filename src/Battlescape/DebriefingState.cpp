@@ -1122,6 +1122,10 @@ void DebriefingState::prepareDebriefing()
 			{
 				_destroyBase = true;
 			}
+
+			// This is an overkill, since we may not lose any hangar/craft, but doing it properly requires tons of changes
+			_game->getSavedGame()->stopHuntingXcomCrafts(base);
+
 			for (std::vector<BaseFacility*>::iterator k = base->getFacilities()->begin(); k != base->getFacilities()->end();)
 			{
 				// this facility was demolished

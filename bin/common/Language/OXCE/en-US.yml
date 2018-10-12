@@ -247,6 +247,9 @@ en-US:
 #BaseDefenseState.cpp
   STR_START_FIRING: "Fire!"
   STR_SKIP_FIRING: "Let them in..."
+#BaseDestroyedState.cpp
+  STR_ALIEN_MISSILES_HAVE_DAMAGED_OUR_BASE: "Alien missiles have damaged our base {0}"
+  STR_ALIEN_MISSILES_HAVE_DESTROYED_OUR_BASE: "Alien missiles have destroyed our base {0}"
 #ConfirmDestinationState.cpp
   STR_STARTING_CONDITION_CRAFT: "This craft is unsuitable for this mission.{NEWLINE}{NEWLINE}Allowed craft: {0}"
 #CraftNotEnoughPilotsState.cpp

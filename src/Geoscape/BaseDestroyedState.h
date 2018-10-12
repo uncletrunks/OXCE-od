@@ -38,9 +38,10 @@ private:
 	Text *_txtMessage;
 	TextButton *_btnOk;
 	Base *_base;
+	bool _missiles, _partialDestruction;
 public:
 	/// Creates the Select Destination state.
-	BaseDestroyedState(Base *base);
+	BaseDestroyedState(Base *base, bool missiles, bool partialDestruction);
 	/// Cleans up the Select Destination state.
 	~BaseDestroyedState();
 	/// Handler for clicking the Cydonia mission button.
