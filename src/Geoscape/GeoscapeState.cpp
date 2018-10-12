@@ -1587,7 +1587,7 @@ void GeoscapeState::baseHunting()
 										}
 									}
 									mission->setMissionSiteZone(targetZone);
-									mission->start();
+									mission->start(*_game, *_globe);
 									_game->getSavedGame()->getAlienMissions().push_back(mission);
 
 									// Start immediately
@@ -2043,12 +2043,12 @@ class GenerateSupplyMission: public std::unary_function<const AlienBase *, void>
 {
 public:
 	/// Store rules and game data references for later use.
-	GenerateSupplyMission(const Mod &mod, SavedGame &save) : _mod(mod), _save(save) { /* Empty by design */ }
+	GenerateSupplyMission(Game &engine, const Globe &globe) : _engine(engine), _globe(globe) { /* Empty by design */ }
 	/// Check and spawn mission.
 	void operator()(AlienBase *base) const;
 private:
-	const Mod &_mod;
-	SavedGame &_save;
+	const Globe &_globe;
+	Game &_engine;
 };
 
 /**
@@ -2058,6 +2058,9 @@ private:
  */
 void GenerateSupplyMission::operator()(AlienBase *base) const
 {
+	const Mod &_mod = *_engine.getMod();
+	SavedGame &_save = *_engine.getSavedGame();
+
 	if (_mod.getAlienMission(base->getDeployment()->getGenMissionType()))
 	{
 		if (base->getGenMissionCount() < base->getDeployment()->getGenMissionLimit() && RNG::percent(base->getDeployment()->getGenMissionFrequency()))
@@ -2081,7 +2084,7 @@ void GenerateSupplyMission::operator()(AlienBase *base) const
 				}
 			}
 			mission->setMissionSiteZone(targetZone);
-			mission->start();
+			mission->start(_engine, _globe);
 			base->setGenMissionCount(base->getGenMissionCount() + 1); // increase counter, used to check mission limit
 			_save.getAlienMissions().push_back(mission);
 		}
@@ -2377,7 +2380,7 @@ void GeoscapeState::time1Day()
 
 	// Handle resupply of alien bases.
 	std::for_each(saveGame->getAlienBases()->begin(), saveGame->getAlienBases()->end(),
-			  GenerateSupplyMission(*_game->getMod(), *saveGame));
+			  GenerateSupplyMission(*_game, *_globe));
 
 	// Autosave 3 times a month
 	int day = saveGame->getTime()->getDay();
@@ -3422,7 +3425,7 @@ bool GeoscapeState::processCommand(RuleMissionScript *command)
 	mission->setRegion(targetRegion, *_game->getMod());
 	mission->setMissionSiteZone(targetZone);
 	strategy.addMissionRun(command->getVarName());
-	mission->start(command->getDelay());
+	mission->start(*_game, *_globe, command->getDelay());
 	_game->getSavedGame()->getAlienMissions().push_back(mission);
 	// if this flag is set, we want to delete it from the table so it won't show up again until the schedule resets.
 	if (command->getUseTable())

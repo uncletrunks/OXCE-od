@@ -25,6 +25,16 @@
 namespace OpenXcom
 {
 
+enum AlienMissionOperationType {
+	AMOT_SPACE,
+	AMOT_REGION_EXISTING_BASE,
+	AMOT_REGION_NEW_BASE,
+	AMOT_REGION_NEW_BASE_IF_NECESSARY,
+	AMOT_EARTH_EXISTING_BASE,
+	AMOT_EARTH_NEW_BASE_IF_NECESSARY,
+	AMOT_EXISTING_BASE_HUNT_MISSION
+};
+
 class WeightedOptions;
 
 /**
@@ -134,6 +144,12 @@ public:
 	bool despawnEvenIfTargeted() const { return _despawnEvenIfTargeted; }
 	/// the type of missionSite to spawn (if any)
 	std::string getSiteType() const { return _siteType; }
+	/// From where does this mission operate?
+	AlienMissionOperationType getOperationType() const { return _operationType; }
+	/// Gets the mission zone for spawning the operation base (if necessary).
+	int getOperationSpawnZone() const { return _operationSpawnZone; }
+	/// Gets the type of operation base to spawn (if any).
+	const std::string &getOperationBaseType() const { return _operationBaseType; }
 private:
 	/// The mission's type ID.
 	std::string _type;
@@ -159,6 +175,12 @@ private:
 	bool _despawnEvenIfTargeted;
 	/// the type of missionSite to spawn (if any)
 	std::string _siteType;
+	/// From where does this mission operate?
+	AlienMissionOperationType _operationType;
+	/// The mission zone for spawning the operation base (if necessary).
+	int _operationSpawnZone;
+	/// The type of operation base to spawn (if any).
+	std::string _operationBaseType;
 };
 
 }

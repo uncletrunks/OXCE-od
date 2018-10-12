@@ -63,7 +63,7 @@ namespace YAML
 namespace OpenXcom
 {
 
-RuleAlienMission::RuleAlienMission(const std::string &type) : _type(type), _points(0), _objective(OBJECTIVE_SCORE), _spawnZone(-1), _retaliationOdds(-1), _endlessInfiltration(true), _despawnEvenIfTargeted(false)
+RuleAlienMission::RuleAlienMission(const std::string &type) : _type(type), _points(0), _objective(OBJECTIVE_SCORE), _spawnZone(-1), _retaliationOdds(-1), _endlessInfiltration(true), _despawnEvenIfTargeted(false), _operationType(AMOT_SPACE), _operationSpawnZone(-1)
 {
 }
 
@@ -99,6 +99,10 @@ void RuleAlienMission::load(const YAML::Node &node)
 	_endlessInfiltration = node["endlessInfiltration"].as<bool>(_endlessInfiltration);
 	_despawnEvenIfTargeted = node["despawnEvenIfTargeted"].as<bool>(_despawnEvenIfTargeted);
 	_siteType = node["siteType"].as<std::string>(_siteType);
+	_operationType = (AlienMissionOperationType)node["operationType"].as<int>(_operationType);
+	_operationSpawnZone = node["operationSpawnZone"].as<int>(_operationSpawnZone);
+	_operationBaseType = node["operationBaseType"].as<std::string>(_operationBaseType);
+
 	//Only allow full replacement of mission racial distribution.
 	if (const YAML::Node &weights = node["raceWeights"])
 	{

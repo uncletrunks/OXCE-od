@@ -97,7 +97,7 @@ public:
 	/// Handle UFO spawning for the mission.
 	void think(Game &engine, const Globe &globe);
 	/// Initialize with values from rules.
-	void start(size_t initialCount = 0);
+	void start(Game &engine, const Globe &globe, size_t initialCount = 0);
 	/// Increase number of live UFOs.
 	void increaseLiveUfos() { ++_liveUfos; }
 	/// Decrease number of live UFOs.
@@ -118,7 +118,7 @@ private:
 	/// Spawns a UFO, based on mission rules.
 	Ufo *spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe, const MissionWave &wave, const UfoTrajectory &trajectory);
 	/// Spawn an alien base
-	void spawnAlienBase(Country *pactCountry, Game &engine, const MissionArea &area, std::pair<double, double> pos);
+	AlienBase *spawnAlienBase(Country *pactCountry, Game &engine, const MissionArea &area, std::pair<double, double> pos, AlienDeployment *deploymentOverride);
 	/// Select a destination (lon/lat) based on the criteria of our trajectory and desired waypoint.
 	std::pair<double, double> getWaypoint(const MissionWave &wave, const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region);
 	/// Get a random landing point inside the given region zone.

@@ -919,6 +919,12 @@ void ClearAlienBase::operator()(AlienMission *am) const
 	if (am->getAlienBase() == _base)
 	{
 		am->setAlienBase(0);
+
+		// if this is an Earth-based operation, losing the base means mission cannot continue anymore
+		if (am->getRules().getOperationType() != AMOT_SPACE)
+		{
+			am->setInterrupted(true);
+		}
 	}
 }
 
