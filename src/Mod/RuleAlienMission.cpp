@@ -63,7 +63,11 @@ namespace YAML
 namespace OpenXcom
 {
 
-RuleAlienMission::RuleAlienMission(const std::string &type) : _type(type), _points(0), _objective(OBJECTIVE_SCORE), _spawnZone(-1), _retaliationOdds(-1), _endlessInfiltration(true), _despawnEvenIfTargeted(false), _operationType(AMOT_SPACE), _operationSpawnZone(-1)
+RuleAlienMission::RuleAlienMission(const std::string &type) :
+	_type(type), _points(0), _objective(OBJECTIVE_SCORE), _spawnZone(-1),
+	_retaliationOdds(-1), _endlessInfiltration(true), _despawnEvenIfTargeted(false),
+	_operationType(AMOT_SPACE), _operationSpawnZone(-1),
+	_targetBaseOdds(0)
 {
 }
 
@@ -73,6 +77,10 @@ RuleAlienMission::RuleAlienMission(const std::string &type) : _type(type), _poin
 RuleAlienMission::~RuleAlienMission()
 {
 	for (std::vector<std::pair<size_t, WeightedOptions*> >::const_iterator ii = _raceDistribution.begin(); ii != _raceDistribution.end(); ++ii)
+	{
+		delete ii->second;
+	}
+	for (std::vector<std::pair<size_t, WeightedOptions*> >::const_iterator ii = _regionWeights.begin(); ii != _regionWeights.end(); ++ii)
 	{
 		delete ii->second;
 	}
@@ -102,6 +110,17 @@ void RuleAlienMission::load(const YAML::Node &node)
 	_operationType = (AlienMissionOperationType)node["operationType"].as<int>(_operationType);
 	_operationSpawnZone = node["operationSpawnZone"].as<int>(_operationSpawnZone);
 	_operationBaseType = node["operationBaseType"].as<std::string>(_operationBaseType);
+	_targetBaseOdds = node["targetBaseOdds"].as<int>(_targetBaseOdds);
+
+	if (const YAML::Node &regWeights = node["regionWeights"])
+	{
+		for (YAML::const_iterator nn = regWeights.begin(); nn != regWeights.end(); ++nn)
+		{
+			WeightedOptions *nw = new WeightedOptions();
+			nw->load(nn->second);
+			_regionWeights.push_back(std::make_pair(nn->first.as<size_t>(0), nw));
+		}
+	}
 
 	//Only allow full replacement of mission racial distribution.
 	if (const YAML::Node &weights = node["raceWeights"])
@@ -216,6 +235,29 @@ int RuleAlienMission::getRetaliationOdds() const
 bool RuleAlienMission::isEndlessInfiltration() const
 {
 	return _endlessInfiltration;
+}
+
+/**
+ * Does this mission have region weights?
+ * @return if this mission uses a weighted distribution to pick a region.
+ */
+bool RuleAlienMission::hasRegionWeights() const
+{
+	return !_regionWeights.empty();
+}
+
+/**
+ * Chooses one of the available regions for this mission.
+ * The region distribution may vary based on the current game date.
+ * @param monthsPassed The number of months that have passed in the game world.
+ * @return The string id of the region.
+ */
+std::string RuleAlienMission::generateRegion(const size_t monthsPassed) const
+{
+	std::vector<std::pair<size_t, WeightedOptions*> >::const_reverse_iterator rc = _regionWeights.rbegin();
+	while (monthsPassed < rc->first)
+		++rc;
+	return rc->second->choose();
 }
 
 }

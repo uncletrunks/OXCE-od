@@ -2068,7 +2068,28 @@ void GenerateSupplyMission::operator()(AlienBase *base) const
 			//Spawn supply mission for this base.
 			const RuleAlienMission &rule = *_mod.getAlienMission(base->getDeployment()->getGenMissionType());
 			AlienMission *mission = new AlienMission(rule);
-			mission->setRegion(_save.locateRegion(*base)->getRules()->getType(), _mod);
+			std::string targetRegion;
+			if (RNG::percent(rule.getTargetBaseOdds()))
+			{
+				// 1. target a random xcom base region
+				std::vector<std::string> regionsWithXcomBases;
+				for (std::vector<Base*>::const_iterator i = _save.getBases()->begin(); i != _save.getBases()->end(); ++i)
+				{
+					regionsWithXcomBases.push_back(_save.locateRegion(*(*i))->getRules()->getType());
+				}
+				targetRegion = regionsWithXcomBases[RNG::generate(0, regionsWithXcomBases.size() - 1)];
+			}
+			else if (rule.hasRegionWeights())
+			{
+				// 2. target one of the defined (weighted) regions
+				targetRegion = rule.generateRegion(_save.getMonthsPassed());
+			}
+			else
+			{
+				// 3. target the region of the alien base (vanilla default)
+				targetRegion = _save.locateRegion(*base)->getRules()->getType();
+			}
+			mission->setRegion(targetRegion, _mod);
 			mission->setId(_save.getId("ALIEN_MISSIONS"));
 			mission->setRace(base->getAlienRace());
 			mission->setAlienBase(base);
