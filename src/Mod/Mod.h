@@ -169,7 +169,7 @@ private:
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	int _ufoTractorBeamSizeModifiers[5];
 	int _escortRange;
-	bool _escortsJoinFightAgainstHK;
+	bool _escortsJoinFightAgainstHK, _hunterKillerFastRetarget;
 	int _crewEmergencyEvacuationSurvivalChance, _pilotsEmergencyEvacuationSurvivalChance;
 	int _soldiersPerSergeant, _soldiersPerCaptain, _soldiersPerColonel, _soldiersPerCommander;
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
@@ -501,7 +501,9 @@ public:
 	/// Gets the escort range
 	double getEscortRange() const;
 	/// Should escorts join the fight against HK (automatically)? Or is only fighting one-on-one allowed?
-	int getEscortsJoinFightAgainstHK() const { return _escortsJoinFightAgainstHK; }
+	bool getEscortsJoinFightAgainstHK() const { return _escortsJoinFightAgainstHK; }
+	/// Should hunter-killers be able to retarget every 5 seconds on slow game timers (5Sec / 1Min)?
+	bool getHunterKillerFastRetarget() const { return _hunterKillerFastRetarget; }
 	/// Gets the crew emergency evacuation survival chance
 	int getCrewEmergencyEvacuationSurvivalChance() const { return _crewEmergencyEvacuationSurvivalChance; }
 	/// Gets the pilots emergency evacuation survival chance

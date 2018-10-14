@@ -789,7 +789,7 @@ void GeoscapeState::timeAdvance()
 void GeoscapeState::time5Seconds()
 {
 	// If in "slow mode", handle UFO hunting and escorting logic every 5 seconds, not only every 10 minutes
-	if (_timeSpeed == _btn5Secs || _timeSpeed == _btn1Min)
+	if ((_timeSpeed == _btn5Secs || _timeSpeed == _btn1Min) && _game->getMod()->getHunterKillerFastRetarget())
 	{
 		ufoHuntingAndEscorting();
 	}
