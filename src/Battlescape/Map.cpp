@@ -328,6 +328,14 @@ static bool positionHaveSameXY(Position a, Position b)
 }
 
 /**
+ * Check two positions if have same XY cords
+ */
+static bool positionInRangeXY(Position a, Position b, int diff)
+{
+	return std::abs(a.x - b.x) <= diff && std::abs(a.y - b.y) <= diff;
+}
+
+/**
  * Draw part of unit graphic that overlap current tile.
  * @param surface
  * @param unitTile
@@ -543,10 +551,11 @@ void Map::drawTerrain(Surface *surface)
 	int beginX = 0, endX = _save->getMapSizeX() - 1;
 	int beginY = 0, endY = _save->getMapSizeY() - 1;
 	int beginZ = 0, endZ = _camera->getShowAllLayers()?_save->getMapSizeZ() - 1:_camera->getViewLevel();
-	Position mapPosition, screenPosition, bulletPositionScreen;
+	Position mapPosition, screenPosition, bulletPositionScreen, movingUnitPosition;
 	int bulletLowX=16000, bulletLowY=16000, bulletLowZ=16000, bulletHighX=0, bulletHighY=0, bulletHighZ=0;
 	int dummy;
 	BattleUnit *unit = 0;
+	BattleUnit *movingUnit = _save->getTileEngine()->getMovingUnit();
 	int tileShade, wallShade, tileColor, obstacleShade;
 	UnitSprite unitSprite(surface, _game->getMod(), _animFrame, _save->getDepth() != 0);
 	ItemSprite itemSprite(surface, _game->getMod(), _animFrame);
@@ -679,6 +688,11 @@ void Map::drawTerrain(Surface *surface)
 		_numWaypid->setColor(pathfinderTurnedOn ? _messageColor + 1 : Palette::blockOffset(1));
 	}
 
+	if (movingUnit)
+	{
+		movingUnitPosition = movingUnit->getPosition();
+	}
+
 	surface->lock();
 	for (int itZ = beginZ; itZ <= endZ; itZ++)
 	{
@@ -764,18 +778,21 @@ void Map::drawTerrain(Surface *surface)
 						}
 					}
 
-					// special handling for a moving unit in background of tile.
-					const int backPosSize = 3;
-					Position backPos[backPosSize] =
+					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
 					{
-						Position(0, -1, 0),
-						Position(-1, -1, 0),
-						Position(-1, 0, 0),
-					};
+						// special handling for a moving unit in background of tile.
+						const int backPosSize = 3;
+						Position backPos[backPosSize] =
+						{
+							Position(0, -1, 0),
+							Position(-1, -1, 0),
+							Position(-1, 0, 0),
+						};
 
-					for (int b = 0; b < backPosSize; ++b)
-					{
-						drawUnit(unitSprite, _save->getTile(mapPosition + backPos[b]), tile, screenPosition, tileShade, obstacleShade, topLayer);
+						for (int b = 0; b < backPosSize; ++b)
+						{
+							drawUnit(unitSprite, _save->getTile(mapPosition + backPos[b]), tile, screenPosition, tileShade, obstacleShade, topLayer);
+						}
 					}
 
 					// Draw walls
@@ -958,20 +975,23 @@ void Map::drawTerrain(Surface *surface)
 					// Draw soldier from this tile or below
 					drawUnit(unitSprite, tile, tile, screenPosition, tileShade, obstacleShade, topLayer);
 
-					// special handling for a moving unit in forground of tile.
-					const int frontPosSize = 5;
-					Position frontPos[frontPosSize] =
+					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
 					{
-						Position(-1, +1, 0),
-						Position(0, +1, 0),
-						Position(+1, +1, 0),
-						Position(+1, 0, 0),
-						Position(+1, -1, 0),
-					};
+						// special handling for a moving unit in forground of tile.
+						const int frontPosSize = 5;
+						Position frontPos[frontPosSize] =
+						{
+							Position(-1, +1, 0),
+							Position(0, +1, 0),
+							Position(+1, +1, 0),
+							Position(+1, 0, 0),
+							Position(+1, -1, 0),
+						};
 
-					for (int f = 0; f < frontPosSize; ++f)
-					{
-						drawUnit(unitSprite, _save->getTile(mapPosition + frontPos[f]), tile, screenPosition, tileShade, obstacleShade, topLayer);
+						for (int f = 0; f < frontPosSize; ++f)
+						{
+							drawUnit(unitSprite, _save->getTile(mapPosition + frontPos[f]), tile, screenPosition, tileShade, obstacleShade, topLayer);
+						}
 					}
 
 					// Draw smoke/fire
