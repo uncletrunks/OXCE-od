@@ -1516,6 +1516,12 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 
 	mapFile.close();
 
+	// Add the craft offset to the positions of the items if we're loading a craft map
+	if (craft)
+	{
+		zoff += _craftZ;
+	}
+
 	if (_generateFuel)
 	{
 		// if one of the mapBlocks has an items array defined, don't deploy fuel algorithmically
