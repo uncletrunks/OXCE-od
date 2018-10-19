@@ -72,20 +72,6 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		addItem(BA_THROW, "STR_THROW", &id, Options::keyBattleActionItem5);
 	}
 
-	if (!Options::showGunMeleeOnTop && weapon->getCostMelee().Time > 0)
-	{
-		// stun rod
-		if (weapon->getBattleType() == BT_MELEE && weapon->getDamageType()->ResistType == DT_STUN)
-		{
-			addItem(BA_HIT, "STR_STUN", &id, Options::keyBattleActionItem4);
-		}
-		else
-			// melee weapon
-		{
-			addItem(BA_HIT, "STR_HIT_MELEE", &id, Options::keyBattleActionItem4);
-		}
-	}
-
 	if (weapon->isPsiRequired() && _action->actor->getBaseStats()->psiSkill <= 0)
 	{
 		return;
@@ -133,7 +119,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		}
 	}
 
-	if (Options::showGunMeleeOnTop && weapon->getCostMelee().Time > 0)
+	if (weapon->getCostMelee().Time > 0)
 	{
 		std::string name = weapon->getConfigMelee()->name;
 		if (name.empty())

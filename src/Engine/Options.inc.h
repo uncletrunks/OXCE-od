@@ -56,7 +56,6 @@ OPT bool twoHandedIndicator, twoHandedIndicatorInventory, minimapBorderIndicator
 OPT bool bleedingIndicator, knockOutIndicator, statisticalBulletConservation;
 
 OPT bool showItemNameAndWeightInInventory;
-OPT bool showGunMeleeOnTop;
 OPT bool removeWoundedFromTraining;
 OPT bool fullNightVision;
 OPT int nightVisionColor;
