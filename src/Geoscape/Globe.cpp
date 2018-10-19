@@ -1575,7 +1575,8 @@ void Globe::drawTarget(Target *target, Surface *surface)
 		Sint16 x, y;
 		polarToCart(target->getLongitude(), target->getLatitude(), &x, &y);
 		auto i = target->getMarker();
-		ShaderMove<const Uint8> surf{ _markerSet->getFrame(i), x - 1, y - 1 };
+		auto marker = _markerSet->getFrame(i);
+		ShaderMove<const Uint8> surf{ marker, x - marker->getWidth() / 2, y - marker->getHeight() / 2 };
 		ShaderMove<Uint8> dest{ surface };
 
 		if (i == CITY_MARKER || _blink > 0)

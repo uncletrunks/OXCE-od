@@ -1635,19 +1635,31 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	}
 	for (YAML::const_iterator i = doc["extraSprites"].begin(); i != doc["extraSprites"].end(); ++i)
 	{
-		std::string type;
-		type = (*i)["type"].as<std::string>(type);
-		if (type.empty())
+		if ((*i)["type"] || (*i)["typeSingle"])
 		{
-			type = (*i)["typeSingle"].as<std::string>();
+			std::string type;
+			type = (*i)["type"].as<std::string>(type);
+			if (type.empty())
+			{
+				type = (*i)["typeSingle"].as<std::string>();
+			}
+			ExtraSprites *extraSprites = new ExtraSprites();
+			int modOffset = _modOffset;
+			// doesn't support modIndex
+			if (type == "TEXTURE.DAT")
+				modOffset = 0;
+			extraSprites->load(*i, modOffset);
+			_extraSprites[type].push_back(extraSprites);
 		}
-		ExtraSprites *extraSprites = new ExtraSprites();
-		int modOffset = _modOffset;
-		// doesn't support modIndex
-		if (type == "TEXTURE.DAT")
-			modOffset = 0;
-		extraSprites->load(*i, modOffset);
-		_extraSprites[type].push_back(extraSprites);
+		else if ((*i)["delete"])
+		{
+			std::string type = (*i)["delete"].as<std::string>();
+			std::map<std::string, std::vector<ExtraSprites*> >::iterator j = _extraSprites.find(type);
+			if (j != _extraSprites.end())
+			{
+				_extraSprites.erase(j);
+			}
+		}
 	}
 	for (YAML::const_iterator i = doc["customPalettes"].begin(); i != doc["customPalettes"].end(); ++i)
 	{
