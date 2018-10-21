@@ -2081,6 +2081,10 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 		}
 		return;
 	}
+	else
+	{
+		recoverTimeUnits();
+	}
 
 	// transition between stages, don't do damage or panic
 	if (!fullProcess)
@@ -2093,7 +2097,7 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 		return;
 	}
 
-	updateUnitStats(true, true);
+	updateUnitStats(false, true);
 }
 
 /**
