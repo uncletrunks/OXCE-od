@@ -77,6 +77,12 @@ BaseDestroyedState::BaseDestroyedState(Base *base, bool missiles, bool partialDe
 		}
 	}
 
+	if (_partialDestruction)
+	{
+		// don't remove the alien mission yet, there might be more attacks coming
+		return;
+	}
+
 	std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin();
 	for (; k != _game->getSavedGame()->getRegions()->end(); ++k)
 	{

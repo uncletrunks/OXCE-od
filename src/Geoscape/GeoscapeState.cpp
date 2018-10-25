@@ -928,6 +928,7 @@ void GeoscapeState::time5Seconds()
 					if (!base->getDefenses()->empty())
 					{
 						popup(new BaseDefenseState(base, *i, this));
+						return; // don't allow multiple simultaneous attacks in the same game tick
 					}
 					else
 					{
@@ -3039,6 +3040,9 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 
 			// this may cause the base to become disjointed, destroy the disconnected parts.
 			base->destroyDisconnectedFacilities();
+
+			// don't forget to reset pre-cached stuff
+			base->cleanupDefenses(true);
 
 			// let the player know that some facilities were destroyed, but the base survived
 			popup(new BaseDestroyedState(base, true, true));
