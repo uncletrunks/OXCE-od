@@ -2454,6 +2454,7 @@ void StatsForNerdsState::initFacilityList()
 		addSection(L"{Naming}", L"", _white);
 		addSingleString(ss, facilityRule->getType(), "type");
 		addInteger(ss, facilityRule->getListOrder(), "listOrder");
+		addInteger(ss, facilityRule->getMissileAttraction(), "missileAttraction", 100);
 
 		addSection(L"{Visuals}", L"", _white);
 		addSingleString(ss, facilityRule->getMapName(), "mapName");

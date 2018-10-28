@@ -1484,6 +1484,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_alienFuel = doc["alienFuel"].as<std::pair<std::string, int> >(_alienFuel);
 	_fontName = doc["fontName"].as<std::string>(_fontName);
 	_psiUnlockResearch = doc["psiUnlockResearch"].as<std::string>(_psiUnlockResearch);
+	_destroyedFacility = doc["destroyedFacility"].as<std::string>(_destroyedFacility);
 
 	_aiUseDelayGrenade = doc["turnAIUseGrenade"].as<int>(_aiUseDelayGrenade);
 	_aiUseDelayBlaster = doc["turnAIUseBlaster"].as<int>(_aiUseDelayBlaster);
@@ -3171,6 +3172,19 @@ ScriptGlobal *Mod::getScriptGlobal() const
 RuleResearch *Mod::getFinalResearch() const
 {
 	return getResearch(_finalResearch, true);
+}
+
+RuleBaseFacility *Mod::getDestroyedFacility() const
+{
+	if (_destroyedFacility.empty())
+		return 0;
+
+	auto temp = getBaseFacility(_destroyedFacility, true);
+	if (temp->getSize() != 1)
+	{
+		throw Exception("Destroyed base facility definition must have size: 1");
+	}
+	return temp;
 }
 
 const std::map<int, std::string> *Mod::getMissionRatings() const

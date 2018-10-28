@@ -41,6 +41,7 @@ private:
 	std::string _type;
 	std::vector<std::string> _requires, _requiresBaseFunc, _provideBaseFunc, _forbiddenBaseFunc;
 	int _spriteShape, _spriteFacility;
+	int _missileAttraction;
 	bool _lift, _hyper, _mind, _grav;
 	int _size, _buildCost, _refundValue, _buildTime, _monthlyCost;
 	std::map<std::string, std::pair<int, int> > _buildCostItems;
@@ -81,6 +82,8 @@ public:
 	int getSpriteFacility() const;
 	/// Gets the facility's size.
 	int getSize() const;
+	/// Gets the facility's missile attraction.
+	int getMissileAttraction() const { return _missileAttraction; }
 	/// Gets if the facility is an access lift.
 	bool isLift() const;
 	/// Gets if the facility has hyperwave detection.

@@ -2048,8 +2048,8 @@ public:
 	/// Check and spawn mission.
 	void operator()(AlienBase *base) const;
 private:
-	const Globe &_globe;
 	Game &_engine;
+	const Globe &_globe;
 };
 
 /**
@@ -3008,38 +3008,68 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 			// This is an overkill, since we may not lose any hangar/craft, but doing it properly requires tons of changes
 			_game->getSavedGame()->stopHuntingXcomCrafts(base);
 
+			auto destroyedFacilityRule = _game->getMod()->getDestroyedFacility();
+
 			// It's a saboteur... destroy some facilities
 			for (int i = 0; i < ufo->getRules()->getMissilePower();)
 			{
-				int numberOfFacilities = base->getFacilities()->size();
-				if (numberOfFacilities <= 1)
+				WeightedOptions options;
+				int index = 0;
+				for (auto facility : *base->getFacilities())
 				{
-					// only the access lift remains, stop trying
+					if (facility->getRules()->getMissileAttraction() > 0 && !facility->getRules()->isLift())
+					{
+						options.set(std::to_string(index), facility->getRules()->getMissileAttraction());
+					}
+					++index;
+				}
+				if (options.empty())
+				{
+					// only indestructible stuff remains, stop trying
 					break;
 				}
-				int selected = RNG::generate(0, numberOfFacilities - 1);
+
+				std::string sel = options.choose();
+				int selected = std::stoi(sel);
 				BaseFacility* toBeDestroyed = (*base->getFacilities())[selected];
-				if (!toBeDestroyed->getRules()->isLift())
+
+				for (std::vector<BaseFacility*>::iterator k = base->getFacilities()->begin(); k != base->getFacilities()->end(); ++k)
 				{
-					for (std::vector<BaseFacility*>::iterator k = base->getFacilities()->begin(); k != base->getFacilities()->end();)
+					if ((*k) == toBeDestroyed)
 					{
-						if ((*k) == toBeDestroyed)
+						int backupX = toBeDestroyed->getX();
+						int backupY = toBeDestroyed->getY();
+						int backupSize = toBeDestroyed->getRules()->getSize();
+
+						// properly consider bigger facilities
+						i += toBeDestroyed->getRules()->getSize() * toBeDestroyed->getRules()->getSize();
+						base->destroyFacility(k);
+
+						if (destroyedFacilityRule)
 						{
-							// properly consider bigger facilities
-							i += toBeDestroyed->getRules()->getSize() * toBeDestroyed->getRules()->getSize();
-							base->destroyFacility(k);
-							break;
+							// create rubble
+							for (int x = 0; x < backupSize; ++x)
+							{
+								for (int y = 0; y < backupSize; ++y)
+								{
+									BaseFacility *fac = new BaseFacility(destroyedFacilityRule, base);
+									fac->setX(backupX + x);
+									fac->setY(backupY + y);
+									fac->setBuildTime(0);
+									base->getFacilities()->push_back(fac);
+								}
+							}
 						}
-						else
-						{
-							++k;
-						}
+						break;
 					}
 				}
 			}
 
 			// this may cause the base to become disjointed, destroy the disconnected parts.
-			base->destroyDisconnectedFacilities();
+			if (!destroyedFacilityRule)
+			{
+				base->destroyDisconnectedFacilities();
+			}
 
 			// don't forget to reset pre-cached stuff
 			base->cleanupDefenses(true);

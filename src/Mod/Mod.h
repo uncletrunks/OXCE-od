@@ -182,7 +182,7 @@ private:
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
-	std::string _fontName, _finalResearch, _psiUnlockResearch;
+	std::string _fontName, _finalResearch, _psiUnlockResearch, _destroyedFacility;
 	YAML::Node _startingBase;
 	GameTime _startingTime;
 	int _startingDifficulty;
@@ -633,6 +633,7 @@ public:
 	/// Get global script data.
 	ScriptGlobal *getScriptGlobal() const;
 	RuleResearch *getFinalResearch() const;
+	RuleBaseFacility *getDestroyedFacility() const;
 	const std::map<int, std::string> *getMissionRatings() const;
 	const std::map<int, std::string> *getMonthlyRatings() const;
 	const std::map<std::string, std::string> &getFixedUserOptions() const;
