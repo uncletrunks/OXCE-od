@@ -1817,9 +1817,9 @@ interfaces: #done
       - id: textLoad
         color: 80
       - id: optionLists
-        color: -1
+        color: 48
         color2: 80
-        border: -1
+        border: 48
       - id: disabledUserOption
         color: 240
       - id: medikitRed
