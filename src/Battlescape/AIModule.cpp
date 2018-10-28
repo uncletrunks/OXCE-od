@@ -48,7 +48,7 @@ namespace OpenXcom
  */
 AIModule::AIModule(SavedBattleGame *save, BattleUnit *unit, Node *node) : _save(save), _unit(unit), _aggroTarget(0), _knownEnemies(0), _visibleEnemies(0), _spottingEnemies(0),
 																				_escapeTUs(0), _ambushTUs(0), _rifle(false), _melee(false), _blaster(false), _grenade(false),
-																				_didPsi(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0)
+																				_didPsi(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0), _foundBaseModuleToDestroy(false)
 {
 	_traceAI = Options::traceAI;
 
@@ -200,6 +200,7 @@ void AIModule::think(BattleAction *action)
 	_blaster = false;
 	_reachable = _save->getPathfinding()->findReachable(_unit, BattleActionCost());
 	_wasHitBy.clear();
+	_foundBaseModuleToDestroy = false;
 
 	if (_unit->getCharging() && _unit->getCharging()->isOut())
 	{
@@ -575,6 +576,7 @@ void AIModule::setupPatrol()
 						_patrolAction->weapon = _attackAction->weapon;
 						_patrolAction->type = BA_SNAPSHOT;
 						_patrolAction->updateTU();
+						_foundBaseModuleToDestroy = _save->getBattleGame()->getMod()->getAIDestroyBaseFacilities();
 						return;
 					}
 				}
@@ -1756,7 +1758,7 @@ void AIModule::evaluateAIMode()
 
 	if (_AIMode == AI_PATROL)
 	{
-		if (_toNode)
+		if (_toNode || _foundBaseModuleToDestroy)
 		{
 			return;
 		}
