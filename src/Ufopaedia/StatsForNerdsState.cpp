@@ -2132,6 +2132,8 @@ void StatsForNerdsState::initArmorList()
 
 	addInteger(ss, armorRule->getSize(), "size", 1);
 
+	addMovementType(ss, armorRule->getMovementType(), "movementType");
+
 	addBoolean(ss, armorRule->allowsRunning(), "allowsRunning", true);
 	addBoolean(ss, armorRule->allowsStrafing(), "allowsStrafing", true);
 	addBoolean(ss, armorRule->allowsKneeling(), "allowsKneeling", true);
@@ -2252,7 +2254,6 @@ void StatsForNerdsState::initArmorList()
 		addSection(L"{Animations}", L"", _white);
 		addDrawingRoutine(ss, armorRule->getDrawingRoutine(), "drawingRoutine");
 		addBoolean(ss, armorRule->getConstantAnimation(), "constantAnimation");
-		addMovementType(ss, armorRule->getMovementType(), "movementType");
 		addForcedTorso(ss, armorRule->getForcedTorso(), "forcedTorso");
 		addInteger(ss, armorRule->getDeathFrames(), "deathFrames", 3);
 

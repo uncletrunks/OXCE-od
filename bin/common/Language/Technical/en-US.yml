@@ -281,6 +281,7 @@ en-US:
   DRAWING_ROUTINE_INVERTED_CYBERDISC: "Inverted Cyberdisc (propulsion animation on top)"
 #
   stats: "Stat modifiers"
+  movementType: "Movement type"
   allowsRunning: "Allow running?"
   allowsStrafing: "Allow strafing?"
   allowsKneeling: "Allow kneeling?"
