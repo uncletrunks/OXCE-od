@@ -399,6 +399,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		ss.clear();
 		ss << L"Attack type=" << action.type << " target="<< action.target << " weapon=" << Language::utf8ToWstr(action.weapon->getRules()->getName());
 		_parentState->debug(ss.str());
+		action.updateTU();
 		if (action.type == BA_MINDCONTROL || action.type == BA_PANIC || action.type == BA_USE)
 		{
 			statePushBack(new PsiAttackBState(this, action));
