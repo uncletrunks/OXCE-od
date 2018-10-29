@@ -59,6 +59,8 @@ private:
 	bool _canBeBuiltOver;
 	std::vector<std::string> _buildOverFacilities;
 	std::vector<Position> _storageTiles;
+	std::string _destroyedFacilityName;
+	RuleBaseFacility* _destroyedFacility;
 public:
 	/// Creates a blank facility ruleset.
 	RuleBaseFacility(const std::string &type);
@@ -66,6 +68,8 @@ public:
 	~RuleBaseFacility();
 	/// Loads the facility from YAML.
 	void load(const YAML::Node& node, Mod *mod, int listOrder);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
 	/// Gets the facility's type.
 	std::string getType() const;
 	/// Gets the facility's requirements.
@@ -156,6 +160,8 @@ public:
 	const std::vector<std::string> &getBuildOverFacilities() const;
 	/// Gets a list of which tiles are used to place items stored in this facility
 	const std::vector<Position> &getStorageTiles() const;
+	/// Gets the ruleset for the destroyed version of this facility.
+	RuleBaseFacility* getDestroyedFacility() const;
 };
 
 }

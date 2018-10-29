@@ -30,7 +30,7 @@ namespace OpenXcom
  * type of base facility.
  * @param type String defining the type.
  */
-RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _missileAttraction(100), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f), _prisonType(0), _rightClickActionType(0), _verticalLevels(), _removalTime(0), _canBeBuiltOver(false)
+RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _missileAttraction(100), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f), _prisonType(0), _rightClickActionType(0), _verticalLevels(), _removalTime(0), _canBeBuiltOver(false), _destroyedFacility(0)
 {
 }
 
@@ -151,6 +151,22 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	std::sort(_buildOverFacilities.begin(), _buildOverFacilities.end());
 
 	_storageTiles = node["storageTiles"].as<std::vector<Position> >(_storageTiles);
+	_destroyedFacilityName = node["destroyedFacility"].as<std::string>(_destroyedFacilityName);
+}
+
+/**
+ * Cross link with other Rules.
+ */
+void RuleBaseFacility::afterLoad(const Mod* mod)
+{
+	if (!_destroyedFacilityName.empty())
+	{
+		_destroyedFacility = mod->getBaseFacility(_destroyedFacilityName, true);
+		if (_destroyedFacility->getSize() != _size)
+		{
+			throw Exception("Destroyed version of a facility must have the same size as the original facility.");
+		}
+	}
 }
 
 /**
@@ -574,6 +590,15 @@ const std::vector<std::string> &RuleBaseFacility::getBuildOverFacilities() const
 const std::vector<Position> &RuleBaseFacility::getStorageTiles() const
 {
 	return _storageTiles;
+}
+
+/*
+ * Gets the ruleset for the destroyed version of this facility.
+ * @return Facility ruleset or null.
+ */
+RuleBaseFacility* RuleBaseFacility::getDestroyedFacility() const
+{
+	return _destroyedFacility;
 }
 
 }

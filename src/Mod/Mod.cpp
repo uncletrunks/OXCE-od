@@ -1089,6 +1089,7 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
 	afterLoadHelper("items", this, _items, &RuleItem::afterLoad);
 	afterLoadHelper("manufacture", this, _manufacture, &RuleManufacture::afterLoad);
 	afterLoadHelper("units", this, _units, &Unit::afterLoad);
+	afterLoadHelper("facilities", this, _facilities, &RuleBaseFacility::afterLoad);
 
 	// fixed user options
 	if (!_fixedUserOptions.empty())

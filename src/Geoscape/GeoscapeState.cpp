@@ -3040,14 +3040,23 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 						int backupX = toBeDestroyed->getX();
 						int backupY = toBeDestroyed->getY();
 						int backupSize = toBeDestroyed->getRules()->getSize();
+						auto backupDestroyedFacilityRule = toBeDestroyed->getRules()->getDestroyedFacility();
 
 						// properly consider bigger facilities
 						i += toBeDestroyed->getRules()->getSize() * toBeDestroyed->getRules()->getSize();
 						base->destroyFacility(k);
 
-						if (destroyedFacilityRule)
+						// create rubble
+						if (backupDestroyedFacilityRule)
 						{
-							// create rubble
+							BaseFacility *fac = new BaseFacility(backupDestroyedFacilityRule, base);
+							fac->setX(backupX);
+							fac->setY(backupY);
+							fac->setBuildTime(0);
+							base->getFacilities()->push_back(fac);
+						}
+						else if (destroyedFacilityRule)
+						{
 							for (int x = 0; x < backupSize; ++x)
 							{
 								for (int y = 0; y < backupSize; ++y)
