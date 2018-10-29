@@ -3008,77 +3008,8 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 			// This is an overkill, since we may not lose any hangar/craft, but doing it properly requires tons of changes
 			_game->getSavedGame()->stopHuntingXcomCrafts(base);
 
-			auto destroyedFacilityRule = _game->getMod()->getDestroyedFacility();
-
-			// It's a saboteur... destroy some facilities
-			for (int i = 0; i < ufo->getRules()->getMissilePower();)
-			{
-				WeightedOptions options;
-				int index = 0;
-				for (auto facility : *base->getFacilities())
-				{
-					if (facility->getRules()->getMissileAttraction() > 0 && !facility->getRules()->isLift())
-					{
-						options.set(std::to_string(index), facility->getRules()->getMissileAttraction());
-					}
-					++index;
-				}
-				if (options.empty())
-				{
-					// only indestructible stuff remains, stop trying
-					break;
-				}
-
-				std::string sel = options.choose();
-				int selected = std::stoi(sel);
-				BaseFacility* toBeDestroyed = (*base->getFacilities())[selected];
-
-				for (std::vector<BaseFacility*>::iterator k = base->getFacilities()->begin(); k != base->getFacilities()->end(); ++k)
-				{
-					if ((*k) == toBeDestroyed)
-					{
-						int backupX = toBeDestroyed->getX();
-						int backupY = toBeDestroyed->getY();
-						int backupSize = toBeDestroyed->getRules()->getSize();
-						auto backupDestroyedFacilityRule = toBeDestroyed->getRules()->getDestroyedFacility();
-
-						// properly consider bigger facilities
-						i += toBeDestroyed->getRules()->getSize() * toBeDestroyed->getRules()->getSize();
-						base->destroyFacility(k);
-
-						// create rubble
-						if (backupDestroyedFacilityRule)
-						{
-							BaseFacility *fac = new BaseFacility(backupDestroyedFacilityRule, base);
-							fac->setX(backupX);
-							fac->setY(backupY);
-							fac->setBuildTime(0);
-							base->getFacilities()->push_back(fac);
-						}
-						else if (destroyedFacilityRule)
-						{
-							for (int x = 0; x < backupSize; ++x)
-							{
-								for (int y = 0; y < backupSize; ++y)
-								{
-									BaseFacility *fac = new BaseFacility(destroyedFacilityRule, base);
-									fac->setX(backupX + x);
-									fac->setY(backupY + y);
-									fac->setBuildTime(0);
-									base->getFacilities()->push_back(fac);
-								}
-							}
-						}
-						break;
-					}
-				}
-			}
-
-			// this may cause the base to become disjointed, destroy the disconnected parts.
-			if (!destroyedFacilityRule)
-			{
-				base->destroyDisconnectedFacilities();
-			}
+			// This can either damage facilities (=replace them with some other facilities); or also destroy facilities
+			base->damageFacilities(ufo);
 
 			// don't forget to reset pre-cached stuff
 			base->cleanupDefenses(true);

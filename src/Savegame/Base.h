@@ -38,6 +38,7 @@ class BaseFacility;
 class ResearchProject;
 class Production;
 class Vehicle;
+class Ufo;
 
 /**
  * Represents a player base on the globe.
@@ -222,6 +223,10 @@ public:
 	std::vector<BaseFacility*> *getDefenses();
 	/// Gets the base's vehicles.
 	std::vector<Vehicle*> *getVehicles();
+	/// Damage and/or destroy facilities after a missile impact.
+	void damageFacilities(Ufo *ufo);
+	/// Damage a given facility.
+	int damageFacility(BaseFacility *toBeDamaged);
 	/// Destroys all disconnected facilities in the base.
 	void destroyDisconnectedFacilities();
 	/// Gets a sorted list of the facilities(=iterators) NOT connected to the Access Lift.

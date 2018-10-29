@@ -45,6 +45,7 @@
 #include "../Mod/RuleSoldier.h"
 #include "../Engine/Logger.h"
 #include "../Engine/Collections.h"
+#include "WeightedOptions.h"
 
 namespace OpenXcom
 {
@@ -1637,6 +1638,99 @@ std::vector<BaseFacility*> *Base::getDefenses()
 std::vector<Vehicle*> *Base::getVehicles()
 {
 	return &_vehicles;
+}
+
+/**
+ * Damage and/or destroy facilities after a missile impact.
+ * @param ufo The missile that hit the base.
+ */
+void Base::damageFacilities(Ufo *ufo)
+{
+	for (int i = 0; i < ufo->getRules()->getMissilePower();)
+	{
+		WeightedOptions options;
+		int index = 0;
+		for (auto facility : _facilities)
+		{
+			if (facility->getRules()->getMissileAttraction() > 0 && !facility->getRules()->isLift())
+			{
+				options.set(std::to_string(index), facility->getRules()->getMissileAttraction());
+			}
+			++index;
+		}
+		if (options.empty())
+		{
+			// only indestructible stuff remains, stop trying
+			break;
+		}
+
+		std::string sel = options.choose();
+		int selected = std::stoi(sel);
+		BaseFacility* toBeDamaged = _facilities[selected];
+
+		i += damageFacility(toBeDamaged);
+	}
+
+	// this may cause the base to become disjointed, destroy the disconnected parts
+	if (!_mod->getDestroyedFacility())
+	{
+		destroyDisconnectedFacilities();
+	}
+}
+
+/**
+ * Damage a given facility.
+ * @param toBeDamaged The facility to be damaged.
+ * @return Missile power spent on this facility.
+ */
+int Base::damageFacility(BaseFacility *toBeDamaged)
+{
+	int result = 0;
+
+	// 1. Create the new "damaged facility" first, so that when we destroy the original facility we don't lose "too much"
+	if (toBeDamaged->getRules()->getDestroyedFacility())
+	{
+		BaseFacility *fac = new BaseFacility(toBeDamaged->getRules()->getDestroyedFacility(), this);
+		fac->setX(toBeDamaged->getX());
+		fac->setY(toBeDamaged->getY());
+		fac->setBuildTime(0);
+		_facilities.push_back(fac);
+
+		// move the craft from the original hangar to the damaged hangar
+		if (fac->getRules()->getCrafts() > 0)
+		{
+			fac->setCraftForDrawing(toBeDamaged->getCraftForDrawing());
+			toBeDamaged->setCraftForDrawing(0);
+		}
+	}
+	else if (_mod->getDestroyedFacility())
+	{
+		for (int x = 0; x < toBeDamaged->getRules()->getSize(); ++x)
+		{
+			for (int y = 0; y < toBeDamaged->getRules()->getSize(); ++y)
+			{
+				BaseFacility *fac = new BaseFacility(_mod->getDestroyedFacility(), this);
+				fac->setX(toBeDamaged->getX() + x);
+				fac->setY(toBeDamaged->getY() + y);
+				fac->setBuildTime(0);
+				_facilities.push_back(fac);
+			}
+		}
+	}
+
+	// 2. Now destroy the original
+	for (std::vector<BaseFacility*>::iterator k = _facilities.begin(); k != _facilities.end(); ++k)
+	{
+		if ((*k) == toBeDamaged)
+		{
+			// bigger facilities spend more missile power
+			result = toBeDamaged->getRules()->getSize() * toBeDamaged->getRules()->getSize();
+			destroyFacility(k);
+			break;
+		}
+	}
+
+	return result;
 }
 
 /**

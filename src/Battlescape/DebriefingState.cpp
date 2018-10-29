@@ -1126,17 +1126,18 @@ void DebriefingState::prepareDebriefing()
 			// This is an overkill, since we may not lose any hangar/craft, but doing it properly requires tons of changes
 			_game->getSavedGame()->stopHuntingXcomCrafts(base);
 
-			for (std::vector<BaseFacility*>::iterator k = base->getFacilities()->begin(); k != base->getFacilities()->end();)
+			std::vector<BaseFacility*> toBeDamaged;
+			for (std::vector<BaseFacility*>::iterator k = base->getFacilities()->begin(); k != base->getFacilities()->end(); ++k)
 			{
 				// this facility was demolished
 				if (battle->getModuleMap()[(*k)->getX()][(*k)->getY()].second == 0)
 				{
-					base->destroyFacility(k);
+					toBeDamaged.push_back((*k));
 				}
-				else
-				{
-					++k;
-				}
+			}
+			for (auto fac : toBeDamaged)
+			{
+				base->damageFacility(fac);
 			}
 			// this may cause the base to become disjointed, destroy the disconnected parts.
 			base->destroyDisconnectedFacilities();
