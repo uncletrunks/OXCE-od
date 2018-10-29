@@ -54,6 +54,10 @@ public:
 	static const int SLOT_H = 16;
 	static const int HAND_W = 2;
 	static const int HAND_H = 3;
+	static const int PAPERDOLL_W = 40;
+	static const int PAPERDOLL_H = 70;
+	static const int PAPERDOLL_X = 60;
+	static const int PAPERDOLL_Y = 65;
 	/// Creates a blank inventory ruleset.
 	RuleInventory(const std::string &id);
 	/// Cleans up the inventory ruleset.
