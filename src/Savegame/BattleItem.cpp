@@ -96,9 +96,23 @@ BattleItem::~BattleItem()
 /**
  * Loads the item from a YAML file.
  * @param node YAML node.
+ * @param mod Mod for the item.
  */
-void BattleItem::load(const YAML::Node &node, const ScriptGlobal *shared)
+void BattleItem::load(const YAML::Node &node, Mod *mod, const ScriptGlobal *shared)
 {
+	std::string slot = node["inventoryslot"].as<std::string>("NULL");
+	if (slot != "NULL")
+	{
+		if (mod->getInventory(slot))
+		{
+			_inventorySlot = mod->getInventory(slot);
+
+		}
+		else
+		{
+			_inventorySlot = mod->getInventory("STR_GROUND");
+		}
+	}
 	_inventoryX = node["inventoryX"].as<int>(_inventoryX);
 	_inventoryY = node["inventoryY"].as<int>(_inventoryY);
 	_ammoQuantity = node["ammoqty"].as<int>(_ammoQuantity);
@@ -122,70 +136,42 @@ YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 	node["id"] = _id;
 	node["type"] = _rules->getType();
 	if (_owner)
-	{
 		node["owner"] = _owner->getId();
-	}
-	else
-	{
-		node["owner"] = -1;
-	}
 	if (_previousOwner)
-	{
 		node["previousOwner"] = _previousOwner->getId();
-	}
 	if (_unit)
-	{
 		node["unit"] = _unit->getId();
-	}
-	else
-	{
-		node["unit"] = -1;
-	}
 
 	if (_inventorySlot)
-	{
 		node["inventoryslot"] = _inventorySlot->getId();
-	}
-	else
-	{
-		node["inventoryslot"] = "NULL";
-	}
 	node["inventoryX"] = _inventoryX;
 	node["inventoryY"] = _inventoryY;
 
 	if (_tile)
-	{
 		node["position"] = _tile->getPosition();
-	}
-	else
-	{
-		node["position"] = Position(-1, -1, -1);
-	}
 	node["ammoqty"] = _ammoQuantity;
 	if (_ammoItem[0])
 	{
 		node["ammoItem"] = _ammoItem[0]->getId();
-	}
-	else
-	{
-		node["ammoItem"] = -1;
 	}
 	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 	{
 		node["ammoItemSlots"].push_back(_ammoItem[slot] ? _ammoItem[slot]->getId() : -1);
 	}
 
-	node["painKiller"] = _painKiller;
-	node["heal"] = _heal;
-	node["stimulant"] = _stimulant;
-	node["fuseTimer"] = _fuseTimer;
+	if (_painKiller)
+		node["painKiller"] = _painKiller;
+	if (_heal)
+		node["heal"] = _heal;
+	if (_stimulant)
+		node["stimulant"] = _stimulant;
+	if (_fuseTimer != -1)
+		node["fuseTimer"] = _fuseTimer;
 	node["fuseEnabed"] = _fuseEnabled;
 	if (_droppedOnAlienTurn)
 		node["droppedOnAlienTurn"] = _droppedOnAlienTurn;
 	if (_XCOMProperty)
-	{
 		node["XCOMProperty"] = _XCOMProperty;
-	}
 	_scriptValues.save(node, shared);
 
 	return node;

@@ -919,6 +919,10 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 	out << node;
 	sav << out.c_str();
 	sav.close();
+	if (!sav)
+	{
+		throw Exception("Failed to save " + filename);
+	}
 }
 
 /**

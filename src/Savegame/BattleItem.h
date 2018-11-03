@@ -28,6 +28,7 @@ class RuleItem;
 class RuleInventory;
 class BattleUnit;
 class Tile;
+class Mod;
 class SurfaceSet;
 class Surface;
 class ScriptWorkerBlit;
@@ -78,7 +79,7 @@ public:
 	/// Cleans up the item.
 	~BattleItem();
 	/// Loads the item from YAML.
-	void load(const YAML::Node& node, const ScriptGlobal *shared);
+	void load(const YAML::Node& node, Mod *mod, const ScriptGlobal *shared);
 	/// Saves the item to YAML.
 	YAML::Node save(const ScriptGlobal *shared) const;
 	/// Gets the item's ruleset.

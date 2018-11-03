@@ -256,53 +256,48 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 		for (YAML::const_iterator i = node[fromContainer[pass]].begin(); i != node[fromContainer[pass]].end(); ++i)
 		{
 			std::string type = (*i)["type"].as<std::string>();
-			_itemId = (*i)["id"].as<int>(_itemId);
 			if (mod->getItem(type))
 			{
-				BattleItem *item = new BattleItem(mod->getItem(type), &_itemId);
-				item->load(*i, this->getMod()->getScriptGlobal());
-				type = (*i)["inventoryslot"].as<std::string>("NULL");
-				if (type != "NULL")
-				{
-					if (mod->getInventory(type))
-					{
-						item->setSlot(mod->getInventory(type));
-
-					}
-					else
-					{
-						item->setSlot(mod->getInventory("STR_GROUND"));
-					}
-				}
-				int owner = (*i)["owner"].as<int>();
+				int id = (*i)["id"].as<int>();
+				_itemId = std::max(_itemId, id);
+				BattleItem *item = new BattleItem(mod->getItem(type), &id);
+				item->load(*i, mod, this->getMod()->getScriptGlobal());
+				int owner = (*i)["owner"].as<int>(-1);
 				int prevOwner = (*i)["previousOwner"].as<int>(-1);
-				int unit = (*i)["unit"].as<int>();
+				int unit = (*i)["unit"].as<int>(-1);
 
 				// match up items and units
-				for (std::vector<BattleUnit*>::iterator bu = _units.begin(); bu != _units.end(); ++bu)
+				for (std::vector<BattleUnit*>::iterator bu = _units.begin(); bu != _units.end() && owner != -1; ++bu)
 				{
 					if ((*bu)->getId() == owner)
 					{
 						item->setOwner(*bu);
 						(*bu)->getInventory()->push_back(item);
+						break;
 					}
-					if ((*bu)->getId() == unit)
-					{
-						item->setUnit(*bu);
 					}
 				}
-				for (std::vector<BattleUnit*>::iterator bu = _units.begin(); bu != _units.end(); ++bu)
+				for (std::vector<BattleUnit*>::iterator bu = _units.begin(); bu != _units.end() && prevOwner != -1; ++bu)
 				{
 					if ((*bu)->getId() == prevOwner)
 					{
 						item->setPreviousOwner(*bu);
+						break;
+					}
+				}
+				for (std::vector<BattleUnit*>::iterator bu = _units.begin(); bu != _units.end() && unit != -1; ++bu)
+				{
+					if ((*bu)->getId() == unit)
+					{
+						item->setUnit(*bu);
+						break;
 					}
 				}
 
 				// match up items and tiles
 				if (item->getSlot() && item->getSlot()->getType() == INV_GROUND)
 				{
-					Position pos = (*i)["position"].as<Position>();
+					Position pos = (*i)["position"].as<Position>(Position(-1, -1, -1));
 					if (pos.x != -1)
 						getTile(pos)->addItem(item, item->getSlot());
 				}
@@ -314,6 +309,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			}
 		}
 	}
+	_itemId++;
 
 	// tie ammo items to their weapons, running through the items again
 	std::vector<BattleItem*>::iterator weaponi = _items.begin();
@@ -325,7 +321,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			{
 				if (n)
 				{
-					int ammoId = n.as<int>();
+					int ammoId = n.as<int>(-1);
 					if (ammoId != -1)
 					{
 						if (ammoId == (*weaponi)->getId())
