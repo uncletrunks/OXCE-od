@@ -275,7 +275,6 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 						(*bu)->getInventory()->push_back(item);
 						break;
 					}
-					}
 				}
 				for (std::vector<BattleUnit*>::iterator bu = _units.begin(); bu != _units.end() && prevOwner != -1; ++bu)
 				{
