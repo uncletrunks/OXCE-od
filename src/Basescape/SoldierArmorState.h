@@ -47,11 +47,11 @@ enum ArmorSort
 
 struct ArmorItem
 {
-	ArmorItem(const std::string &_type, const std::wstring &_name, const std::wstring &_quantity) : type(_type), name(_name), quantity(_quantity)
+	ArmorItem(const std::string &_type, const std::string &_name, const std::string &_quantity) : type(_type), name(_name), quantity(_quantity)
 	{
 	}
 	std::string type;
-	std::wstring name, quantity;
+	std::string name, quantity;
 };
 
 /**

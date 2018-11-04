@@ -50,7 +50,7 @@ private:
 	Text *_txtWName[RuleCraft::WeaponMax], *_txtWAmmo[RuleCraft::WeaponMax];
 	Surface *_sprite, *_weapon[RuleCraft::WeaponMax], *_crew, *_equip;
 	/// Formats an amount of time.
-	std::wstring formatTime(int time);
+	std::string formatTime(int time);
 public:
 	/// Creates the Craft Info state.
 	CraftInfoState(Base *base, size_t craftId);

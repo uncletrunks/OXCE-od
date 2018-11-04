@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <vector>
 #include "OptionsBaseState.h"
 
 namespace OpenXcom
@@ -34,7 +33,7 @@ class Slider;
 class OptionsAudioState : public OptionsBaseState
 {
 private:
-	static const std::wstring musFormats[], sndFormats[];
+	static const std::string musFormats[], sndFormats[];
 	Text *_txtMusicVolume, *_txtSoundVolume, *_txtUiVolume;
 	Slider *_slrMusicVolume, *_slrSoundVolume, *_slrUiVolume;
 	Text *_txtMusicFormat, *_txtCurrentMusic, *_txtSoundFormat, *_txtCurrentSound, *_txtVideoFormat;

@@ -57,7 +57,7 @@ struct compareItemName : public std::binary_function<StoredItem&, StoredItem&, b
 
 	bool operator()(const StoredItem &a, const StoredItem &b) const
 	{
-		return CrossPlatform::naturalCompare(a.name, b.name);
+		return Unicode::naturalCompare(a.name, b.name);
 	}
 };
 
@@ -69,7 +69,7 @@ struct compareItemQuantity : public std::binary_function<StoredItem&, StoredItem
 
 	bool operator()(const StoredItem &a, const StoredItem &b) const
 	{
-		return (a.quantity < b.quantity) || ((a.quantity == b.quantity) && CrossPlatform::naturalCompare(a.name, b.name));
+		return (a.quantity < b.quantity) || ((a.quantity == b.quantity) && Unicode::naturalCompare(a.name, b.name));
 	}
 };
 
@@ -81,7 +81,7 @@ struct compareItemSize : public std::binary_function<StoredItem&, StoredItem&, b
 
 	bool operator()(const StoredItem &a, const StoredItem &b) const
 	{
-		return (a.size < b.size) || ((a.size == b.size) && CrossPlatform::naturalCompare(a.name, b.name));
+		return (a.size < b.size) || ((a.size == b.size) && Unicode::naturalCompare(a.name, b.name));
 	}
 };
 
@@ -93,7 +93,7 @@ struct compareItemSpaceUsed : public std::binary_function<StoredItem&, StoredIte
 
 	bool operator()(const StoredItem &a, const StoredItem &b) const
 	{
-		return (a.spaceUsed < b.spaceUsed) || ((a.spaceUsed == b.spaceUsed) && CrossPlatform::naturalCompare(a.name, b.name));
+		return (a.spaceUsed < b.spaceUsed) || ((a.spaceUsed == b.spaceUsed) && Unicode::naturalCompare(a.name, b.name));
 	}
 };
 
@@ -182,7 +182,7 @@ StoresState::StoresState(Base *base) : _base(base)
 	itemOrder = ITEM_SORT_NONE;
 	updateArrows();
 
-	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->setText(""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&StoresState::btnQuickSearchApply);
 	_btnQuickSearch->setVisible(false);
 
@@ -214,7 +214,7 @@ void StoresState::btnQuickSearchToggle(Action *action)
 {
 	if (_btnQuickSearch->getVisible())
 	{
-		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setText("");
 		_btnQuickSearch->setVisible(false);
 		btnQuickSearchApply(action);
 	}
@@ -240,7 +240,7 @@ void StoresState::btnQuickSearchApply(Action *)
 void StoresState::initList(bool grandTotal)
 {
 	std::locale myLocale = CrossPlatform::testLocale();
-	std::wstring searchString = _btnQuickSearch->getText();
+	std::string searchString = _btnQuickSearch->getText();
 	CrossPlatform::upperCase(searchString, myLocale);
 
 	// clear everything
@@ -252,9 +252,9 @@ void StoresState::initList(bool grandTotal)
 	for (std::vector<std::string>::const_iterator item = items.begin(); item != items.end(); ++item)
 	{
 		// quick search
-		if (searchString != L"")
+		if (searchString != "")
 		{
-			std::wstring projectName = tr((*item));
+			std::string projectName = tr((*item));
 			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
@@ -505,7 +505,7 @@ void StoresState::updateList()
 {
 	for (std::vector<StoredItem>::const_iterator j = _itemList.begin(); j != _itemList.end(); ++j)
 	{
-		std::wostringstream ss, ss2, ss3;
+		std::ostringstream ss, ss2, ss3;
 		ss << (*j).quantity;
 		ss2 << (*j).size;
 		ss3 << (*j).spaceUsed;

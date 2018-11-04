@@ -26,6 +26,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
+#include "../Engine/Unicode.h"
 #include "../Interface/TextList.h"
 
 namespace OpenXcom
@@ -44,13 +45,13 @@ namespace OpenXcom
 		_lstInfo->setColumns(2, 95, 55);
 		_lstInfo->setDot(true);
 
-		_lstInfo->addRow(2, tr("STR_DAMAGE_CAPACITY").c_str(), Text::formatNumber(ufo->getStats().damageMax).c_str());
+		_lstInfo->addRow(2, tr("STR_DAMAGE_CAPACITY").c_str(), Unicode::formatNumber(ufo->getStats().damageMax).c_str());
 
-		_lstInfo->addRow(2, tr("STR_WEAPON_POWER").c_str(), Text::formatNumber(ufo->getWeaponPower()).c_str());
+		_lstInfo->addRow(2, tr("STR_WEAPON_POWER").c_str(), Unicode::formatNumber(ufo->getWeaponPower()).c_str());
 
 		_lstInfo->addRow(2, tr("STR_WEAPON_RANGE").c_str(), tr("STR_KILOMETERS").arg(ufo->getWeaponRange()).c_str());
 
-		_lstInfo->addRow(2, tr("STR_MAXIMUM_SPEED").c_str(), tr("STR_KNOTS").arg(Text::formatNumber(ufo->getStats().speedMax)).c_str());
+		_lstInfo->addRow(2, tr("STR_MAXIMUM_SPEED").c_str(), tr("STR_KNOTS").arg(Unicode::formatNumber(ufo->getStats().speedMax)).c_str());
 		for (int i = 0; i != 4; ++i)
 		{
 			_lstInfo->setCellColor(i, 1, _listColor2);

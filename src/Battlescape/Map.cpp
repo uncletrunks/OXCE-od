@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <fstream>
 #include "Map.h"
 #include "Camera.h"
 #include "UnitSprite.h"
@@ -1284,7 +1283,7 @@ void Map::drawTerrain(Surface *surface)
 									}
 								}
 
-								_txtAccuracy->setText(Language::utf8ToWstr(ss.str()));
+								_txtAccuracy->setText(ss.str());
 								_txtAccuracy->draw();
 								_txtAccuracy->blitNShade(surface, screenPosition.x, screenPosition.y, 0);
 							}

@@ -127,7 +127,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			continue;
 		for (std::vector<Craft*>::iterator j = (*i)->getCrafts()->begin(); j != (*i)->getCrafts()->end(); ++j)
 		{
-			std::wostringstream ssStatus;
+			std::ostringstream ssStatus;
 			std::string status = (*j)->getStatus();
 
 			bool hasEnoughPilots = (*j)->arePilotsOnboard();
@@ -200,7 +200,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 
 				int days = maintenanceHours / 24;
 				int hours = maintenanceHours % 24;
-				ssStatus << L" (";
+				ssStatus << " (";
 				if (days > 0)
 				{
 					ssStatus << tr("STR_DAY_SHORT").arg(days);
@@ -209,17 +209,17 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 				{
 					if (days > 0)
 					{
-						ssStatus << L"/";
+						ssStatus << "/";
 					}
 					ssStatus << tr("STR_HOUR_SHORT").arg(hours);
 				}
-				ssStatus << L")";
+				ssStatus << ")";
 			}
 
-			std::wostringstream ss;
+			std::ostringstream ss;
 			if ((*j)->getNumWeapons() > 0)
 			{
-				ss << L'\x01' << (*j)->getNumWeapons() << L'\x01';
+				ss << Unicode::TOK_COLOR_FLIP << (*j)->getNumWeapons() << Unicode::TOK_COLOR_FLIP;
 			}
 			else
 			{
@@ -228,7 +228,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			ss << "/";
 			if ((*j)->getNumSoldiers() > 0)
 			{
-				ss << L'\x01' << (*j)->getNumSoldiers() << L'\x01';
+				ss << Unicode::TOK_COLOR_FLIP << (*j)->getNumSoldiers() << Unicode::TOK_COLOR_FLIP;
 			}
 			else
 			{
@@ -237,7 +237,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			ss << "/";
 			if ((*j)->getNumVehicles() > 0)
 			{
-				ss << L'\x01' << (*j)->getNumVehicles() << L'\x01';
+				ss << Unicode::TOK_COLOR_FLIP << (*j)->getNumVehicles() << Unicode::TOK_COLOR_FLIP;
 			}
 			else
 			{

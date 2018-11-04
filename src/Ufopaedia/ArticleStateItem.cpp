@@ -28,6 +28,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/Surface.h"
 #include "../Engine/LocalizedText.h"
+#include "../Engine/Unicode.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
@@ -43,7 +44,7 @@ namespace OpenXcom
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
 
 		int bottomOffset = 20;
-		std::wstring accuracyModifier;
+		std::string accuracyModifier;
 		bool isAccurracyModded = false;
 		if (item->getBattleType() == BT_MELEE)
 		{
@@ -55,7 +56,7 @@ namespace OpenXcom
 			accuracyModifier = addRuleStatBonus(*item->getAccuracyMultiplierRaw());
 			isAccurracyModded = item->getAccuracyMultiplierRaw()->isModded();
 		}
-		std::wstring powerBonus = addRuleStatBonus(*item->getDamageBonusRaw());
+		std::string powerBonus = addRuleStatBonus(*item->getDamageBonusRaw());
 
 		if (!isAccurracyModded)
 		{
@@ -96,7 +97,7 @@ namespace OpenXcom
 						}
 						else
 						{
-							std::wstring otherPowerBonus = addRuleStatBonus(*ammoItemRule->getDamageBonusRaw());
+							std::string otherPowerBonus = addRuleStatBonus(*ammoItemRule->getDamageBonusRaw());
 							if (powerBonus != otherPowerBonus)
 							{
 								allSame = false;
@@ -129,7 +130,7 @@ namespace OpenXcom
 			else
 			{
 				// display zero instead of empty string
-				powerBonus = L"0";
+				powerBonus = "0";
 			}
 		}
 
@@ -177,14 +178,14 @@ namespace OpenXcom
 		const std::vector<std::string> *ammo_data = item->getPrimaryCompatibleAmmo();
 
 		int weight = item->getWeight();
-		std::wstring weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);
+		std::string weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);
 		if (!ammo_data->empty())
 		{
 			// Note: weight including primary ammo only!
 			RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[0]);
 			weightLabel = tr("STR_WEIGHT_PEDIA2").arg(weight).arg(weight + ammo_rule->getWeight());
 		}
-		_txtWeight->setText(weight > 0 ? weightLabel : L"");
+		_txtWeight->setText(weight > 0 ? weightLabel : "");
 
 		// SHOT STATS TABLE (for firearms and melee only)
 		if (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE)
@@ -220,45 +221,45 @@ namespace OpenXcom
 			int current_row = 0;
 			if (item->getCostAuto().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getCostAuto().Time);
+				std::string tu = Unicode::formatPercentage(item->getCostAuto().Time);
 				if (item->getFlatAuto().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
-								 Text::formatPercentage(item->getAccuracyAuto()).c_str(),
-								 tu.c_str());
+								tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
+								Unicode::formatPercentage(item->getAccuracyAuto()).c_str(),
+								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
 			if (item->getCostSnap().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getCostSnap().Time);
+				std::string tu = Unicode::formatPercentage(item->getCostSnap().Time);
 				if (item->getFlatSnap().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_SNAP").arg(item->getConfigSnap()->shots).c_str(),
-								 Text::formatPercentage(item->getAccuracySnap()).c_str(),
-								 tu.c_str());
+								tr("STR_SHOT_TYPE_SNAP").arg(item->getConfigSnap()->shots).c_str(),
+								Unicode::formatPercentage(item->getAccuracySnap()).c_str(),
+								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
 			if (item->getCostAimed().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getCostAimed().Time);
+				std::string tu = Unicode::formatPercentage(item->getCostAimed().Time);
 				if (item->getFlatAimed().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_AIMED").arg(item->getConfigAimed()->shots).c_str(),
-								 Text::formatPercentage(item->getAccuracyAimed()).c_str(),
-								 tu.c_str());
+								tr("STR_SHOT_TYPE_AIMED").arg(item->getConfigAimed()->shots).c_str(),
+								Unicode::formatPercentage(item->getAccuracyAimed()).c_str(),
+								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
@@ -275,14 +276,14 @@ namespace OpenXcom
 		{
 			if (item->getCostMelee().Time > 0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getCostMelee().Time);
+				std::string tu = Unicode::formatPercentage(item->getCostMelee().Time);
 				if (item->getFlatMelee().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
 					tr("STR_SHOT_TYPE_MELEE").c_str(),
-					Text::formatPercentage(item->getAccuracyMelee()).c_str(),
+					Unicode::formatPercentage(item->getAccuracyMelee()).c_str(),
 					tu.c_str());
 				_lstInfo->setCellColor(0, 0, _listColor1);
 			}
@@ -326,7 +327,7 @@ namespace OpenXcom
 		_txtPowerBonus->setText(tr("STR_POWER_BONUS").arg(powerBonus));
 
 		// AMMO column
-		std::wostringstream ss;
+		std::ostringstream ss;
 
 		for (int i = 0; i<3; ++i)
 		{
@@ -366,11 +367,11 @@ namespace OpenXcom
 				{
 					_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
 
-					ss.str(L"");ss.clear();
+					ss.str("");ss.clear();
 					ss << item->getPower();
 					if (item->getShotgunPellets())
 					{
-						ss << L"x" << item->getShotgunPellets();
+						ss << "x" << item->getShotgunPellets();
 					}
 					_txtAmmoDamage[0]->setText(ss.str());
 					_txtAmmoDamage[0]->setColor(getDamageTypeTextColor(item->getDamageType()->ResistType));
@@ -385,11 +386,11 @@ namespace OpenXcom
 							RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[i], true);
 							_txtAmmoType[i]->setText(tr(getDamageTypeText(ammo_rule->getDamageType()->ResistType)));
 
-							ss.str(L"");ss.clear();
+							ss.str("");ss.clear();
 							ss << ammo_rule->getPower();
 							if (ammo_rule->getShotgunPellets())
 							{
-								ss << L"x" << ammo_rule->getShotgunPellets();
+								ss << "x" << ammo_rule->getShotgunPellets();
 							}
 							_txtAmmoDamage[i]->setText(ss.str());
 							_txtAmmoDamage[i]->setColor(getDamageTypeTextColor(ammo_rule->getDamageType()->ResistType));
@@ -411,11 +412,11 @@ namespace OpenXcom
 
 				_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
 
-				ss.str(L"");ss.clear();
+				ss.str("");ss.clear();
 				ss << item->getPower();
 				if (item->getShotgunPellets())
 				{
-					ss << L"x" << item->getShotgunPellets();
+					ss << "x" << item->getShotgunPellets();
 				}
 				_txtAmmoDamage[0]->setText(ss.str());
 				_txtAmmoDamage[0]->setColor(getDamageTypeTextColor(item->getDamageType()->ResistType));
@@ -429,9 +430,9 @@ namespace OpenXcom
 	ArticleStateItem::~ArticleStateItem()
 	{}
 
-	std::wstring ArticleStateItem::addRuleStatBonus(const RuleStatBonus &value)
+	std::string ArticleStateItem::addRuleStatBonus(const RuleStatBonus &value)
 	{
-		std::wostringstream ss;
+		std::ostringstream ss;
 		bool isFirst = true;
 		for (RuleStatBonusDataOrig item : *value.getBonusRaw())
 		{
@@ -446,11 +447,11 @@ namespace OpenXcom
 					{
 						if (number > 0.0f)
 						{
-							ss << L" + ";
+							ss << " + ";
 						}
 						else
 						{
-							ss << L" - ";
+							ss << " - ";
 							numberAbs = std::abs(number);
 						}
 					}
@@ -466,13 +467,13 @@ namespace OpenXcom
 					{
 						if (!AreSame(numberAbs, 1.0f))
 						{
-							ss << numberAbs << L"*";
+							ss << numberAbs << "*";
 						}
-						
+
 						ss << tr(StatsForNerdsState::translationMap.at(item.first));
 						if (power > 1)
 						{
-							ss << L"^" << power;
+							ss << "^" << power;
 						}
 					}
 					isFirst = false;

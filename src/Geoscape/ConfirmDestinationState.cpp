@@ -105,7 +105,7 @@ ConfirmDestinationState::~ConfirmDestinationState()
 /**
 * Checks the starting condition.
 */
-std::wstring ConfirmDestinationState::checkStartingCondition()
+std::string ConfirmDestinationState::checkStartingCondition()
 {
 	Ufo* u = dynamic_cast<Ufo*>(_target);
 	MissionSite* m = dynamic_cast<MissionSite*>(_target);
@@ -129,31 +129,31 @@ std::wstring ConfirmDestinationState::checkStartingCondition()
 	else
 	{
 		// for example just a waypoint
-		return L"";
+		return "";
 	}
 
 	if (ruleDeploy == 0)
 	{
 		// e.g. UFOs without alien deployment :(
-		return L"";
+		return "";
 	}
 
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
 	if (rule == 0)
 	{
 		// rule doesn't exist (mod upgrades?)
-		return L"";
+		return "";
 	}
 
 	if (rule->isCraftAllowed(_craft->getRules()->getType()))
 	{
 		// craft is allowed
-		return L"";
+		return "";
 	}
 
 	// craft is not allowed
 	const std::vector<std::string> *list = rule->getAllowedCraft();
-	std::wostringstream ss;
+	std::ostringstream ss;
 	int i = 0;
 	for (std::vector<std::string>::const_iterator it = list->begin(); it != list->end(); ++it)
 	{
@@ -161,12 +161,12 @@ std::wstring ConfirmDestinationState::checkStartingCondition()
 		if (article && _game->getSavedGame()->isResearched(article->requires))
 		{
 			if (i > 0)
-				ss << L", ";
+				ss << ", ";
 			ss << tr(*it);
 			i++;
 		}
 	}
-	std::wstring message = ss.str();
+	std::string message = ss.str();
 	if (message.empty())
 	{
 		// no suitable craft yet
@@ -181,7 +181,7 @@ std::wstring ConfirmDestinationState::checkStartingCondition()
  */
 void ConfirmDestinationState::btnOkClick(Action *)
 {
-	std::wstring message = checkStartingCondition();
+	std::string message = checkStartingCondition();
 	if (!message.empty())
 	{
 		_game->popState();

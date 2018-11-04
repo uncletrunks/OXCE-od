@@ -98,7 +98,7 @@ private:
 
 public:
     /// FIXME: hit log
-	std::wostringstream hitLog;
+	std::ostringstream hitLog;
 	/// Creates a new battle save, based on the current generic save.
 	SavedBattleGame(Mod *rule);
 	/// Cleans up the saved game.

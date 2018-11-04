@@ -110,11 +110,11 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	_txtTurn->setBig();
 	_txtTurn->setAlign(ALIGN_CENTER);
 	_txtTurn->setHighContrast(true);
-	std::wstringstream ss;
+	std::stringstream ss;
 	ss << tr("STR_TURN").arg(_battleGame->getTurn());
 	if (battleGame->getTurnLimit() > 0)
 	{
-		ss << L"/" << battleGame->getTurnLimit();
+		ss << "/" << battleGame->getTurnLimit();
 		if (battleGame->getTurnLimit() - _battleGame->getTurn() <= 3)
 		{
 			// gonna borrow the inventory's "over weight" colour when we're down to the last three turns
@@ -138,17 +138,17 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	_txtMessage2->setBig();
 	_txtMessage2->setAlign(ALIGN_CENTER);
 	_txtMessage2->setHighContrast(true);
-	_txtMessage2->setText(L"");
+	_txtMessage2->setText("");
 
 	_txtMessage3->setBig();
 	_txtMessage3->setAlign(ALIGN_CENTER);
 	_txtMessage3->setHighContrast(true);
-	_txtMessage3->setText(L"");
+	_txtMessage3->setText("");
 
 	_state->clearMouseScrollingState();
 
 	// environmental effects
-	std::wstring message;
+	std::string message;
 
 	RuleStartingCondition *sc = _game->getMod()->getStartingCondition(_battleGame->getStartingConditionType());
 	if (sc)
@@ -200,7 +200,7 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 
 				if (showMessage)
 				{
-					std::wostringstream ss;
+					std::ostringstream ss;
 					ss << tr(hostile.message) << tr(neutral.message);
 					message = ss.str();
 				}

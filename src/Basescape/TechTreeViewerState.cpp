@@ -99,7 +99,7 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *r, const RuleManufa
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_TECH_TREE_VIEWER"));
 
-	_txtSelectedTopic->setText(tr("STR_TOPIC").arg(L""));
+	_txtSelectedTopic->setText(tr("STR_TOPIC").arg(""));
 
 	_lstLeft->setColumns(1, 132);
 	_lstLeft->setSelectable(true);
@@ -224,22 +224,22 @@ void TechTreeViewerState::initLists()
 {
 	// Set topic name
 	{
-		std::wostringstream ss;
+		std::ostringstream ss;
 		ss << tr(_selectedTopic);
 		if (_selectedFlag == TTV_MANUFACTURING)
 		{
 			ss << tr("STR_M_FLAG");
-			_txtCostIndicator->setText(L"");
+			_txtCostIndicator->setText("");
 		}
 		else if (_selectedFlag == TTV_FACILITIES)
 		{
 			ss << tr("STR_F_FLAG");
-			_txtCostIndicator->setText(L"");
+			_txtCostIndicator->setText("");
 		}
 		else if (_selectedFlag == TTV_ITEMS)
 		{
 			ss << tr("STR_I_FLAG");
-			_txtCostIndicator->setText(L"");
+			_txtCostIndicator->setText("");
 		}
 		_txtSelectedTopic->setText(tr("STR_TOPIC").arg(ss.str()));
 	}
@@ -265,10 +265,10 @@ void TechTreeViewerState::initLists()
 
 		// Cost indicator
 		{
-			std::wostringstream ss;
+			std::ostringstream ss;
 			int cost = rule->getCost();
-			std::vector<std::pair<int, std::wstring>> symbol_values
-					({{100, L"#"}, {20, L"="}, {5, L"-"}});
+			std::vector<std::pair<int, std::string>> symbol_values
+					({{100, "#"}, {20, "="}, {5, "-"}});
 
 			for (auto& sym : symbol_values)
 			{
@@ -409,8 +409,8 @@ void TechTreeViewerState::initLists()
 			_leftTopics.push_back("-");
 			_leftFlags.push_back(TTV_NONE);
 			++row;
-			std::wstring itemName = tr(_selectedTopic);
-			itemName.insert(0, L"  ");
+			std::string itemName = tr(_selectedTopic);
+			itemName.insert(0, "  ");
 			_lstLeft->addRow(1, itemName.c_str());
 			if (!isDiscoveredResearch(_selectedTopic))
 			{
@@ -432,8 +432,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = reqFacilities.begin(); i != reqFacilities.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				_lstLeft->setRowColor(row, _gold);
 				_leftTopics.push_back("-");
@@ -452,8 +452,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : reqs)
 			{
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -480,8 +480,8 @@ void TechTreeViewerState::initLists()
 					// if the same item is also in the "Unlocked by" section, skip it
 					continue;
 				}
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -503,8 +503,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = unlockedBy.begin(); i != unlockedBy.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch((*i)))
 				{
@@ -526,8 +526,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = disabledBy.begin(); i != disabledBy.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch((*i)))
 				{
@@ -549,8 +549,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = getForFreeFrom.begin(); i != getForFreeFrom.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch((*i)))
 				{
@@ -579,8 +579,8 @@ void TechTreeViewerState::initLists()
 		{
 			for (std::vector<std::string>::const_iterator i = requiredByResearch.begin(); i != requiredByResearch.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstRight->addRow(1, name.c_str());
 				if (!isDiscoveredResearch((*i)))
 				{
@@ -597,8 +597,8 @@ void TechTreeViewerState::initLists()
 		{
 			for (std::vector<std::string>::const_iterator i = requiredByManufacture.begin(); i != requiredByManufacture.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				name.append(tr("STR_M_FLAG"));
 				_lstRight->addRow(1, name.c_str());
 				if (!isDiscoveredManufacture((*i)))
@@ -616,8 +616,8 @@ void TechTreeViewerState::initLists()
 		{
 			for (std::vector<std::string>::const_iterator i = requiredByFacilities.begin(); i != requiredByFacilities.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				name.append(tr("STR_F_FLAG"));
 				_lstRight->addRow(1, name.c_str());
 				if (!isDiscoveredFacility((*i)))
@@ -635,8 +635,8 @@ void TechTreeViewerState::initLists()
 		{
 			for (std::vector<std::string>::const_iterator i = requiredByItems.begin(); i != requiredByItems.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				name.append(tr("STR_I_FLAG"));
 				_lstRight->addRow(1, name.c_str());
 				if (!isProtectedAndDiscoveredItem((*i)))
@@ -665,8 +665,8 @@ void TechTreeViewerState::initLists()
 					// if the same topic is also in the "Unlocks" section, skip it
 					continue;
 				}
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstRight->addRow(1, name.c_str());
 				if (!isDiscoveredResearch((*i)))
 				{
@@ -688,8 +688,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : unlocks)
 			{
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstRight->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -711,8 +711,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : disables)
 			{
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstRight->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -741,8 +741,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : free)
 			{
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstRight->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -754,9 +754,9 @@ void TechTreeViewerState::initLists()
 			}
 			for (auto& itMap : freeProtected)
 			{
-				std::wstring name2 = tr(itMap.first->getName());
-				name2.insert(0, L" ");
-				name2.append(L":");
+				std::string name2 = tr(itMap.first->getName());
+				name2.insert(0, " ");
+				name2.append(":");
 				_lstRight->addRow(1, name2.c_str());
 				if (isDiscoveredResearch(itMap.first->getName()))
 				{
@@ -771,8 +771,8 @@ void TechTreeViewerState::initLists()
 				++row;
 				for (auto& i : itMap.second)
 				{
-					std::wstring name = tr(i->getName());
-					name.insert(0, L"  ");
+					std::string name = tr(i->getName());
+					name.insert(0, "  ");
 					_lstRight->addRow(1, name.c_str());
 					if (!isDiscoveredResearch(i->getName()))
 					{
@@ -803,8 +803,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : reqs)
 			{
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -827,8 +827,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = reqFacilities.begin(); i != reqFacilities.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				_lstLeft->setRowColor(row, _gold);
 				_leftTopics.push_back("-");
@@ -849,10 +849,10 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : craftInputs)
 			{
-				std::wostringstream name;
-				name << L"  ";
+				std::ostringstream name;
+				name << "  ";
 				name << tr(i.first->getType());
-				name << L": ";
+				name << ": ";
 				name << i.second;
 				_lstLeft->addRow(1, name.str().c_str());
 				_lstLeft->setRowColor(row, _white);
@@ -862,10 +862,10 @@ void TechTreeViewerState::initLists()
 			}
 			for (auto& i : inputs)
 			{
-				std::wostringstream name;
-				name << L"  ";
+				std::ostringstream name;
+				name << "  ";
 				name << tr(i.first->getType());
-				name << L": ";
+				name << ": ";
 				name << i.second;
 				_lstLeft->addRow(1, name.str().c_str());
 				_lstLeft->setRowColor(row, _white);
@@ -888,10 +888,10 @@ void TechTreeViewerState::initLists()
 			++row;
 			if (rule->getProducedCraft())
 			{
-				std::wostringstream name;
-				name << L"  ";
+				std::ostringstream name;
+				name << "  ";
 				name << tr(rule->getProducedCraft()->getType());
-				name << L": 1";
+				name << ": 1";
 				_lstRight->addRow(1, name.str().c_str());
 				_lstRight->setRowColor(row, _white);
 				_rightTopics.push_back("-");
@@ -900,10 +900,10 @@ void TechTreeViewerState::initLists()
 			}
 			for (auto& i : outputs)
 			{
-				std::wostringstream name;
-				name << L"  ";
+				std::ostringstream name;
+				name << "  ";
 				name << tr(i.first->getType());
-				name << L": ";
+				name << ": ";
 				name << i.second;
 				_lstRight->addRow(1, name.str().c_str());
 				_lstRight->setRowColor(row, _white);
@@ -923,8 +923,8 @@ void TechTreeViewerState::initLists()
 			++row;
 
 			// person joining
-			std::wostringstream name;
-			name << L"  ";
+			std::ostringstream name;
+			name << "  ";
 			name << tr(rule->getSpawnedPersonName() != "" ? rule->getSpawnedPersonName() : rule->getSpawnedPersonType());
 			_lstRight->addRow(1, name.str().c_str());
 			_lstRight->setRowColor(row, _white);
@@ -951,8 +951,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = reqs.begin(); i != reqs.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch((*i)))
 				{
@@ -975,8 +975,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = reqFacilities.begin(); i != reqFacilities.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				_lstLeft->setRowColor(row, _gold);
 				_leftTopics.push_back("-");
@@ -998,8 +998,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = providedFacilities.begin(); i != providedFacilities.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstRight->addRow(1, name.c_str());
 				_lstRight->setRowColor(row, _gold);
 				_rightTopics.push_back("-");
@@ -1019,8 +1019,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (std::vector<std::string>::const_iterator i = forbFacilities.begin(); i != forbFacilities.end(); ++i)
 			{
-				std::wstring name = tr((*i));
-				name.insert(0, L"  ");
+				std::string name = tr((*i));
+				name.insert(0, "  ");
 				_lstRight->addRow(1, name.c_str());
 				_lstRight->setRowColor(row, _white);
 				_rightTopics.push_back("-");
@@ -1047,8 +1047,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : reqs)
 			{
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -1071,8 +1071,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : reqsBuy)
 			{
-				std::wstring name = tr(i->getName());
-				name.insert(0, L"  ");
+				std::string name = tr(i->getName());
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				if (!isDiscoveredResearch(i->getName()))
 				{
@@ -1095,8 +1095,8 @@ void TechTreeViewerState::initLists()
 			++row;
 			for (auto& i : servicesBuy)
 			{
-				std::wstring name = tr(i);
-				name.insert(0, L"  ");
+				std::string name = tr(i);
+				name.insert(0, "  ");
 				_lstLeft->addRow(1, name.c_str());
 				_lstLeft->setRowColor(row, _gold);
 				_leftTopics.push_back("-");

@@ -134,19 +134,19 @@ UfoTrackerState::UfoTrackerState(GeoscapeState *state, Globe *globe) : _state(st
 		if (!(*iUfo)->getDetected())
 			continue;
 
-		std::wostringstream ss1;
+		std::ostringstream ss1;
 		ss1 << tr((*iUfo)->getRules()->getSize());
 
-		std::wostringstream ss2;
+		std::ostringstream ss2;
 		std::string altitude = (*iUfo)->getAltitude() == "STR_GROUND" ? "STR_GROUNDED" : (*iUfo)->getAltitude();
 		ss2 << tr(altitude);
 
-		std::wostringstream ss3;
+		std::ostringstream ss3;
 		std::string heading = (*iUfo)->getStatus() != Ufo::FLYING ? "STR_NONE_UC" : (*iUfo)->getDirection();
 		ss3 << tr(heading);
 
-		std::wostringstream ss4;
-		ss4 << Text::formatNumber((*iUfo)->getSpeed());
+		std::ostringstream ss4;
+		ss4 << Unicode::formatNumber((*iUfo)->getSpeed());
 
 		_objects.push_back(*iUfo);
 		_lstObjects->addRow(5, (*iUfo)->getName(_game->getLanguage()).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), ss4.str().c_str());

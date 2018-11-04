@@ -40,7 +40,6 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/Craft.h"
 #include "../Savegame/ItemContainer.h"
-#include "../Savegame/Vehicle.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/Armor.h"
 #include "../Mod/RuleCraft.h"
@@ -49,6 +48,7 @@
 #include "../Engine/Timer.h"
 #include "../Engine/Options.h"
 #include "../Engine/CrossPlatform.h"
+#include "../Engine/Unicode.h"
 #include "../Mod/RuleInterface.h"
 #include "../Battlescape/DebriefingState.h"
 #include "TransferBaseState.h"
@@ -129,11 +129,11 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_SELL_ITEMS_SACK_PERSONNEL"));
 
-	_txtFunds->setText(tr("STR_FUNDS").arg(Text::formatFunding(_game->getSavedGame()->getFunds())));
+	_txtFunds->setText(tr("STR_FUNDS").arg(Unicode::formatFunding(_game->getSavedGame()->getFunds())));
 
 	_txtSpaceUsed->setVisible(Options::storageLimitsEnforced);
 
-	std::wostringstream ss;
+	std::ostringstream ss;
 	ss << _base->getUsedStores() << ":" << _base->getAvailableStores();
 	_txtSpaceUsed->setText(ss.str());
 	_txtSpaceUsed->setText(tr("STR_SPACE_USED").arg(ss.str()));
@@ -156,7 +156,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_lstItems->onRightArrowRelease((ActionHandler)&SellState::lstItemsRightArrowRelease);
 	_lstItems->onRightArrowClick((ActionHandler)&SellState::lstItemsRightArrowClick);
 	_lstItems->onMousePress((ActionHandler)&SellState::lstItemsMousePress);
-	
+
 	_cats.push_back("STR_ALL_ITEMS");
 
 	const std::vector<std::string> &cw = _game->getMod()->getCraftWeaponsList();
@@ -291,13 +291,13 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 		}
 	}
 
-	_txtSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
+	_txtSales->setText(tr("STR_VALUE_OF_SALES").arg(Unicode::formatFunding(_total)));
 
-	_cbxCategory->setOptions(_cats);
+	_cbxCategory->setOptions(_cats, true);
 	_cbxCategory->onChange((ActionHandler)&SellState::cbxCategoryChange);
 	_cbxCategory->onKeyboardPress((ActionHandler)&SellState::btnSellAllClick, Options::keySelectAll);
 
-	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->setText(""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&SellState::btnQuickSearchApply);
 	_btnQuickSearch->setVisible(false);
 
@@ -415,7 +415,7 @@ void SellState::btnQuickSearchToggle(Action *action)
 {
 	if (_btnQuickSearch->getVisible())
 	{
-		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setText("");
 		_btnQuickSearch->setVisible(false);
 		btnQuickSearchApply(action);
 	}
@@ -441,7 +441,7 @@ void SellState::btnQuickSearchApply(Action *)
 void SellState::updateList()
 {
 	std::locale myLocale = CrossPlatform::testLocale();
-	std::wstring searchString = _btnQuickSearch->getText();
+	std::string searchString = _btnQuickSearch->getText();
 	CrossPlatform::upperCase(searchString, myLocale);
 
 	_lstItems->clearList();
@@ -466,9 +466,9 @@ void SellState::updateList()
 		}
 
 		// quick search
-		if (searchString != L"")
+		if (searchString != "")
 		{
-			std::wstring projectName = _items[i].name;
+			std::string projectName = _items[i].name;
 			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
@@ -476,7 +476,7 @@ void SellState::updateList()
 			}
 		}
 
-		std::wstring name = _items[i].name;
+		std::string name = _items[i].name;
 		bool ammo = false;
 		if (_items[i].type == TRANSFER_ITEM)
 		{
@@ -484,13 +484,13 @@ void SellState::updateList()
 			ammo = (rule->getBattleType() == BT_AMMO || (rule->getBattleType() == BT_NONE && rule->getClipSize() > 0));
 			if (ammo)
 			{
-				name.insert(0, L"  ");
+				name.insert(0, "  ");
 			}
 		}
-		std::wostringstream ssQty, ssAmount;
+		std::ostringstream ssQty, ssAmount;
 		ssQty << _items[i].qtySrc - _items[i].amount;
 		ssAmount << _items[i].amount;
-		_lstItems->addRow(4, name.c_str(), ssQty.str().c_str(), ssAmount.str().c_str(), Text::formatFunding(_items[i].cost).c_str());
+		_lstItems->addRow(4, name.c_str(), ssQty.str().c_str(), ssAmount.str().c_str(), Unicode::formatFunding(_items[i].cost).c_str());
 		_rows.push_back(i);
 		if (_items[i].amount > 0)
 		{
@@ -916,12 +916,12 @@ void SellState::decrease()
  */
 void SellState::updateItemStrings()
 {
-	std::wostringstream ss, ss2, ss3;
+	std::ostringstream ss, ss2, ss3;
 	ss << getRow().amount;
 	_lstItems->setCellText(_sel, 2, ss.str());
 	ss2 << getRow().qtySrc - getRow().amount;
 	_lstItems->setCellText(_sel, 1, ss2.str());
-	_txtSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
+	_txtSales->setText(tr("STR_VALUE_OF_SALES").arg(Unicode::formatFunding(_total)));
 
 	if (getRow().amount > 0)
 	{

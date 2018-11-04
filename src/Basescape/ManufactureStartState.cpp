@@ -26,6 +26,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Menu/ErrorMessageState.h"
+#include "../Engine/Unicode.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
@@ -92,7 +93,7 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 
 	_txtManHour->setText(tr("STR_ENGINEER_HOURS_TO_PRODUCE_ONE_UNIT").arg(_item->getManufactureTime()));
 
-	_txtCost->setText(tr("STR_COST_PER_UNIT_").arg(Text::formatFunding(_item->getManufactureCost())));
+	_txtCost->setText(tr("STR_COST_PER_UNIT_").arg(Unicode::formatFunding(_item->getManufactureCost())));
 
 	_txtWorkSpace->setText(tr("STR_WORK_SPACE_REQUIRED").arg(_item->getRequiredSpace()));
 
@@ -125,7 +126,7 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 	{
 		auto count = base->getCraftCountForProduction(iter.first);
 
-		std::wostringstream s1, s2;
+		std::ostringstream s1, s2;
 		s1 << iter.second;
 		s2 << count;
 		productionPossible &= (count >= iter.second);
@@ -138,7 +139,7 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 	{
 		auto count = base->getStorageItems()->getItem(iter.first->getType());
 
-		std::wostringstream s1, s2;
+		std::ostringstream s1, s2;
 		s1 << iter.second;
 		s2 << count;
 		productionPossible &= (count >= iter.second);
@@ -160,8 +161,8 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 		row++;
 
 		// person joining
-		std::wostringstream s1;
-		s1 << L'\x01' << 1;
+		std::ostringstream s1;
+		s1 << Unicode::TOK_COLOR_FLIP << 1;
 		_lstRequiredItems->addRow(2, tr(_item->getSpawnedPersonName() != "" ? _item->getSpawnedPersonName() : _item->getSpawnedPersonType()).c_str(), s1.str().c_str());
 		row++;
 	}
@@ -175,8 +176,8 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 		// produced items
 		for (auto& iter : _item->getProducedItems())
 		{
-			std::wostringstream s1;
-			s1 << L'\x01' << iter.second;
+			std::ostringstream s1;
+			s1 << Unicode::TOK_COLOR_FLIP << iter.second;
 			_lstRequiredItems->addRow(2, tr(iter.first->getType()).c_str(), s1.str().c_str());
 			row++;
 		}

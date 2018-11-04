@@ -103,11 +103,11 @@ CraftPilotSelectState::CraftPilotSelectState(Base *base, size_t craft) : _base(b
 			if (!c->isPilot((*i)->getId()))
 			{
 				_pilot.push_back((*i)->getId());
-				std::wostringstream ss1;
+				std::ostringstream ss1;
 				ss1 << (*i)->getCurrentStats()->firing;
-				std::wostringstream ss2;
+				std::ostringstream ss2;
 				ss2 << (*i)->getCurrentStats()->reactions;
-				std::wostringstream ss3;
+				std::ostringstream ss3;
 				ss3 << (*i)->getCurrentStats()->bravery;
 				_lstPilot->addRow(4, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str());
 			}

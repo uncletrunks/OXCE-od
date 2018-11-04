@@ -179,8 +179,8 @@ void GlobalResearchState::fillProjectList()
 		const std::vector<ResearchProject *> & baseProjects(base->getResearch());
 		if (!baseProjects.empty())
 		{
-			std::wstring baseName = base->getName(_game->getLanguage());
-			_lstResearch->addRow(3, baseName.c_str(), L"", L"");
+			std::string baseName = base->getName(_game->getLanguage());
+			_lstResearch->addRow(3, baseName.c_str(), "", "");
 			_lstResearch->setRowColor(_lstResearch->getTexts() - 1, _lstResearch->getSecondaryColor());
 
 			// dummy
@@ -189,11 +189,11 @@ void GlobalResearchState::fillProjectList()
 		}
 		for (std::vector<ResearchProject *>::const_iterator iter = baseProjects.begin(); iter != baseProjects.end(); ++iter)
 		{
-			std::wostringstream sstr;
+			std::ostringstream sstr;
 			sstr << (*iter)->getAssigned();
 			const RuleResearch *r = (*iter)->getRules();
 
-			std::wstring wstr = tr(r->getName());
+			std::string wstr = tr(r->getName());
 			_lstResearch->addRow(3, wstr.c_str(), sstr.str().c_str(), tr((*iter)->getResearchProgress()).c_str());
 
 			_bases.push_back(base);

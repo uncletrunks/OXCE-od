@@ -27,11 +27,9 @@
 #include "ItemContainer.h"
 #include "Soldier.h"
 #include "Craft.h"
-#include "CraftWeapon.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleCraft.h"
-#include "../Mod/RuleCraftWeapon.h"
 #include "../Engine/Language.h"
 #include "../Engine/Options.h"
 #include <climits>

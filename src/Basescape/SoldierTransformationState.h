@@ -51,7 +51,7 @@ private:
 	ComboBox *_cbxTransformationSelect;
 
 	/// Creates a string for the soldier stats table
-	std::wstring formatStat(int stat, bool plus, bool hide);
+	std::string formatStat(int stat, bool plus, bool hide);
 
 public:
 	/// Creates the soldier transformation state

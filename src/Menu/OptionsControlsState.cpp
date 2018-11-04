@@ -19,8 +19,7 @@
 #include "OptionsControlsState.h"
 #include <SDL.h>
 #include "../Engine/Options.h"
-#include "../Engine/Language.h"
-#include "../Interface/TextButton.h"
+#include "../Engine/LocalizedText.h"
 #include "../Interface/Window.h"
 #include "../Interface/TextList.h"
 #include "../Engine/Action.h"
@@ -106,19 +105,19 @@ void OptionsControlsState::init()
 {
 	OptionsBaseState::init();
 	_lstControls->clearList();
-	_lstControls->addRow(2, tr("STR_GENERAL").c_str(), L"");
+	_lstControls->addRow(2, tr("STR_GENERAL").c_str(), "");
 	_lstControls->setCellColor(0, 0, _colorGroup);
 	addControls(_controlsGeneral);
-	_lstControls->addRow(2, L"", L"");
-	_lstControls->addRow(2, tr("STR_GEOSCAPE").c_str(), L"");
+	_lstControls->addRow(2, "", "");
+	_lstControls->addRow(2, tr("STR_GEOSCAPE").c_str(), "");
 	_lstControls->setCellColor(_controlsGeneral.size() + 2, 0, _colorGroup);
 	addControls(_controlsGeo);
-	_lstControls->addRow(2, L"", L"");
-	_lstControls->addRow(2, tr("STR_BATTLESCAPE").c_str(), L"");
+	_lstControls->addRow(2, "", "");
+	_lstControls->addRow(2, tr("STR_BATTLESCAPE").c_str(), "");
 	_lstControls->setCellColor(_controlsGeneral.size() + 2 + _controlsGeo.size() + 2, 0, _colorGroup);
 	addControls(_controlsBattle);
-	_lstControls->addRow(2, L"", L"");
-	_lstControls->addRow(2, tr("STR_OXCE").c_str(), L"");
+	_lstControls->addRow(2, "", "");
+	_lstControls->addRow(2, tr("STR_OXCE").c_str(), "");
 	_lstControls->setCellColor(_controlsGeneral.size() + 2 + _controlsGeo.size() + 2 + _controlsBattle.size() + 2, 0, _colorGroup);
 	addControls(_controlsOxce);
 }
@@ -152,11 +151,11 @@ void OptionsControlsState::addControls(const std::vector<OptionInfo> &keys)
 {
 	for (std::vector<OptionInfo>::const_iterator i = keys.begin(); i != keys.end(); ++i)
 	{
-		std::wstring name = tr(i->description());
+		std::string name = tr(i->description());
 		SDLKey *key = i->asKey();
-		std::wstring keyName = Language::utf8ToWstr(ucWords(SDL_GetKeyName(*key)));
+		std::string keyName = ucWords(SDL_GetKeyName(*key));
 		if (*key == SDLK_UNKNOWN)
-			keyName = L"";
+			keyName = "";
 		_lstControls->addRow(2, name.c_str(), keyName.c_str());
 	}
 }
@@ -229,7 +228,7 @@ void OptionsControlsState::lstControlsClick(Action *action)
 	}
 	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
-		_lstControls->setCellText(_selected, 1, L"");
+		_lstControls->setCellText(_selected, 1, "");
 		*_selKey->asKey() = SDLK_UNKNOWN;
 		_selected = -1;
 		_selKey = 0;
@@ -250,7 +249,7 @@ void OptionsControlsState::lstControlsKeyPress(Action *action)
 			key != SDLK_RSHIFT && key != SDLK_RALT && key != SDLK_RCTRL)
 		{
 			*_selKey->asKey() = key;
-			std::wstring name = Language::utf8ToWstr(ucWords(SDL_GetKeyName(*_selKey->asKey())));
+			std::string name = ucWords(SDL_GetKeyName(*_selKey->asKey()));
 			_lstControls->setCellText(_selected, 1, name);
 		}
 		_lstControls->setCellColor(_selected, 0, _colorNormal);

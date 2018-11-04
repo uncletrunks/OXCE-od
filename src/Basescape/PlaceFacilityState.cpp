@@ -31,6 +31,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Menu/ErrorMessageState.h"
 #include "../Engine/Options.h"
+#include "../Engine/Unicode.h"
 #include "../Mod/RuleInterface.h"
 #include <climits>
 
@@ -95,11 +96,11 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	_txtCost->setText(tr("STR_COST_UC"));
 
 	_numCost->setBig();
-	_numCost->setText(Text::formatFunding(_origFac != nullptr ? _game->getMod()->getTheBiggestRipOffEver() : _rule->getBuildCost()));
+	_numCost->setText(Unicode::formatFunding(_origFac != nullptr ? _game->getMod()->getTheBiggestRipOffEver() : _rule->getBuildCost()));
 
 	if (_origFac == nullptr && !_rule->getBuildCostItems().empty())
 	{
-		std::wostringstream ss;
+		std::ostringstream ss;
 
 		// Currently, the text box will only fit three lines of items.
 		// But I'm going to add everything to the list anyway.
@@ -119,7 +120,7 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	_txtMaintenance->setText(tr("STR_MAINTENANCE_UC"));
 
 	_numMaintenance->setBig();
-	_numMaintenance->setText(Text::formatFunding(_rule->getMonthlyCost()));
+	_numMaintenance->setText(Unicode::formatFunding(_rule->getMonthlyCost()));
 }
 
 /**

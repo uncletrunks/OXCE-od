@@ -23,6 +23,7 @@
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
+#include "../Engine/Unicode.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -147,7 +148,7 @@ CraftInfoState::CraftInfoState(Base *base, size_t craftId) : _base(base), _craft
 
 	for(int i = 0; i < _weaponNum; ++i)
 	{
-		const wchar_t num[] = { wchar_t(L'1' + i), 0 };
+		const char num[] = { char('1' + i), 0 };
 		_btnW[i]->setText(num);
 		_btnW[i]->onMouseClick((ActionHandler)&CraftInfoState::btnWClick);
 	}
@@ -199,8 +200,8 @@ void CraftInfoState::init()
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->setY(0);
 	texture->getFrame(_craft->getRules()->getSprite() + 33)->blit(_sprite);
 
-	std::wostringstream firlsLine;
-	firlsLine << tr("STR_DAMAGE_UC_").arg(Text::formatPercentage(_craft->getDamagePercentage()));
+	std::ostringstream firlsLine;
+	firlsLine << tr("STR_DAMAGE_UC_").arg(Unicode::formatPercentage(_craft->getDamagePercentage()));
 	if (_craft->getStatus() == "STR_REPAIRS" && _craft->getDamage() > 0)
 	{
 		int damageHours = (int)ceil((double)_craft->getDamage() / _craft->getRules()->getRepairRate());
@@ -208,8 +209,8 @@ void CraftInfoState::init()
 	}
 	_txtDamage->setText(firlsLine.str());
 
-	std::wostringstream secondLine;
-	secondLine << tr("STR_FUEL").arg(Text::formatPercentage(_craft->getFuelPercentage()));
+	std::ostringstream secondLine;
+	secondLine << tr("STR_FUEL").arg(Unicode::formatPercentage(_craft->getFuelPercentage()));
 	if (_craft->getStatus() == "STR_REFUELLING" && _craft->getFuelMax() - _craft->getFuel() > 0)
 	{
 		int fuelHours = (int)ceil((double)(_craft->getFuelMax() - _craft->getFuel()) / _craft->getRules()->getRefuelRate() / 2.0);
@@ -217,10 +218,10 @@ void CraftInfoState::init()
 	}
 	_txtFuel->setText(secondLine.str());
 
-	std::wostringstream thirdLine;
+	std::ostringstream thirdLine;
 	if (_craft->getShieldCapacity() != 0)
 	{
-		thirdLine << tr("STR_SHIELD").arg(Text::formatPercentage(_craft->getShieldPercentage()));
+		thirdLine << tr("STR_SHIELD").arg(Unicode::formatPercentage(_craft->getShieldPercentage()));
 		if (_craft->getShield() < _craft->getShieldCapacity())
 		{
 			if (_craft->getRules()->getShieldRechargeAtBase() != 0)
@@ -232,7 +233,7 @@ void CraftInfoState::init()
 	}
 	else
 	{
-		thirdLine << L"";
+		thirdLine << "";
 	}
 	_txtShield->setText(thirdLine.str());
 
@@ -327,13 +328,13 @@ void CraftInfoState::init()
 			frame->setY(0);
 			frame->blit(_weapon[i]);
 
-			std::wostringstream weaponLine;
-			weaponLine << L'\x01' << tr(w1->getRules()->getType());
+			std::ostringstream weaponLine;
+			weaponLine << Unicode::TOK_COLOR_FLIP << tr(w1->getRules()->getType());
 			_txtWName[i]->setText(weaponLine.str());
-			weaponLine.str(L"");
+			weaponLine.str("");
 			if (w1->getRules()->getAmmoMax())
 			{
-				weaponLine << tr("STR_AMMO_").arg(w1->getAmmo()) << L"\n\x01";
+				weaponLine << tr("STR_AMMO_").arg(w1->getAmmo()) << "\n" << Unicode::TOK_COLOR_FLIP;
 				weaponLine << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
 				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())
 				{
@@ -345,8 +346,8 @@ void CraftInfoState::init()
 		}
 		else
 		{
-			_txtWName[i]->setText(L"");
-			_txtWAmmo[i]->setText(L"");
+			_txtWName[i]->setText("");
+			_txtWAmmo[i]->setText("");
 		}
 	}
 
@@ -357,21 +358,21 @@ void CraftInfoState::init()
  * day/hour string.
  * @param total Amount in hours.
  */
-std::wstring CraftInfoState::formatTime(int total)
+std::string CraftInfoState::formatTime(int total)
 {
-	std::wostringstream ss;
+	std::ostringstream ss;
 	int days = total / 24;
 	int hours = total % 24;
-	ss << L"\n(";
+	ss << "\n(";
 	if (days > 0)
 	{
-		ss << tr("STR_DAY", days) << L"/";
+		ss << tr("STR_DAY", days) << "/";
 	}
 	if (hours > 0)
 	{
 		ss << tr("STR_HOUR", hours);
 	}
-	ss << L")";
+	ss << ")";
 	return ss.str();
 }
 
@@ -458,7 +459,7 @@ void CraftInfoState::edtCraftChange(Action *action)
 {
 	if (_edtCraft->getText() == _craft->getDefaultName(_game->getLanguage()))
 	{
-		_craft->setName(L"");
+		_craft->setName("");
 	}
 	else
 	{

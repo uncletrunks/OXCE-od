@@ -148,7 +148,7 @@ void BaseDefenseState::nextStep()
 		case BDA_DESTROY:
 			if (!_explosionCount)
 			{
-				_lstDefenses->addRow(2, tr("STR_UFO_DESTROYED").c_str(),L" ",L" ");
+				_lstDefenses->addRow(2, tr("STR_UFO_DESTROYED").c_str()," "," ");
 				++_row;
 				if (_row > 14)
 				{
@@ -175,7 +175,7 @@ void BaseDefenseState::nextStep()
 		}
 		else if (_attacks == _defenses && _passes < _gravShields)
 		{
-			_lstDefenses->addRow(3, tr("STR_GRAV_SHIELD_REPELS_UFO").c_str(),L" ",L" ");
+			_lstDefenses->addRow(3, tr("STR_GRAV_SHIELD_REPELS_UFO").c_str()," "," ");
 			if (_row > 14)
 			{
 				_lstDefenses->scrollDown(true);
@@ -193,7 +193,7 @@ void BaseDefenseState::nextStep()
 		switch (_action)
 		{
 		case  BDA_NONE:
-			_lstDefenses->addRow(3, tr((def)->getRules()->getType()).c_str(),L" ",L" ");
+			_lstDefenses->addRow(3, tr((def)->getRules()->getType()).c_str()," "," ");
 			++_row;
 			_action = BDA_FIRE;
 			if (_row > 14)

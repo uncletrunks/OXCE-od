@@ -265,9 +265,9 @@ void Inventory::drawGridLabels(bool showTuCost)
 		text.setY(i->second->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
 		if (showTuCost && _selItem != 0)
 		{
-			std::wostringstream ss;
+			std::ostringstream ss;
 			ss << _game->getLanguage()->getString(i->second->getId());
-			ss << L":";
+			ss << ":";
 			ss << _selItem->getSlot()->getCost(i->second);
 			text.setText(ss.str().c_str());
 		}
@@ -560,7 +560,7 @@ void Inventory::setSelectedItem(BattleItem *item)
 * Changes the item currently grabbed by the player.
 * @param item Pointer to selected item, or NULL if none.
 */
-void Inventory::setSearchString(const std::wstring &searchString)
+void Inventory::setSearchString(const std::string &searchString)
 {
 	_searchString = searchString;
 	CrossPlatform::upperCase(_searchString, _myLocale);
@@ -1195,7 +1195,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 		return true;
 	}
 
-	std::wstring itemLocalName;
+	std::string itemLocalName;
 	if (!_game->getSavedGame()->isResearched(item->getRules()->getRequirements()))
 	{
 		// Alien artifact, shouldn't match on the real name.
@@ -1206,7 +1206,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 		itemLocalName = _game->getLanguage()->getString(item->getRules()->getName());
 	}
 	CrossPlatform::upperCase(itemLocalName, _myLocale);
-	if (itemLocalName.find(_searchString) != std::wstring::npos)
+	if (itemLocalName.find(_searchString) != std::string::npos)
 	{
 		// Name match.
 		return true;
@@ -1219,9 +1219,9 @@ bool Inventory::isInSearchString(BattleItem *item)
 		std::vector<std::string> itemCategories = item->getRules()->getCategories();
 		for (std::vector<std::string>::iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
 		{
-			std::wstring catLocalName = _game->getLanguage()->getString((*i));
+			std::string catLocalName = _game->getLanguage()->getString((*i));
 			CrossPlatform::upperCase(catLocalName, _myLocale);
-			if (catLocalName.find(_searchString) != std::wstring::npos)
+			if (catLocalName.find(_searchString) != std::string::npos)
 			{
 				// Category match
 				return true;
@@ -1235,9 +1235,9 @@ bool Inventory::isInSearchString(BattleItem *item)
 				std::vector<std::string> itemAmmoCategories = item->getAmmoForSlot(slot)->getRules()->getCategories();
 				for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
 				{
-					std::wstring catLocalName = _game->getLanguage()->getString((*i));
+					std::string catLocalName = _game->getLanguage()->getString((*i));
 					CrossPlatform::upperCase(catLocalName, _myLocale);
-					if (catLocalName.find(_searchString) != std::wstring::npos)
+					if (catLocalName.find(_searchString) != std::string::npos)
 					{
 						// Category match
 						return true;
@@ -1539,7 +1539,7 @@ bool Inventory::canBeStacked(BattleItem *itemA, BattleItem *itemB)
  * Shows a warning message.
  * @param msg The message to show.
  */
-void Inventory::showWarning(const std::wstring &msg)
+void Inventory::showWarning(const std::string &msg)
 {
 	_warning->showMessage(msg);
 }

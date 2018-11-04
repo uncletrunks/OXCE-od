@@ -169,7 +169,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 		else
 		{
-			_lstTopics->addRow(1, L"***");
+			_lstTopics->addRow(1, "***");
 		}
 		++row;
 
@@ -184,7 +184,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 	}
 
-	_lstTopics->addRow(1, L"");
+	_lstTopics->addRow(1, "");
 	++row;
 	if (secondLevel.empty())
 	{
@@ -207,7 +207,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 		else
 		{
-			_lstTopics->addRow(1, L"***");
+			_lstTopics->addRow(1, "***");
 		}
 		++row;
 
@@ -222,7 +222,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 	}
 
-	_lstTopics->addRow(1, L"");
+	_lstTopics->addRow(1, "");
 	++row;
 	if (thirdLevel.empty())
 	{
@@ -245,7 +245,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 		else
 		{
-			_lstTopics->addRow(1, L"***");
+			_lstTopics->addRow(1, "***");
 		}
 		++row;
 
@@ -260,7 +260,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 	}
 
-	_lstTopics->addRow(1, L"");
+	_lstTopics->addRow(1, "");
 	++row;
 	if (fourthLevel.empty())
 	{
@@ -283,7 +283,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 		else
 		{
-			_lstTopics->addRow(1, L"***");
+			_lstTopics->addRow(1, "***");
 		}
 		++row;
 
@@ -298,7 +298,7 @@ void ManufactureDependenciesTreeState::initList()
 		}
 	}
 
-	_lstTopics->addRow(1, L"");
+	_lstTopics->addRow(1, "");
 	++row;
 	if (fifthLevel.empty())
 	{

@@ -98,7 +98,7 @@ namespace OpenXcom
 		_lstSelection->onMouseClick((ActionHandler)&UfopaediaSelectState::lstSelectionClick, SDL_BUTTON_LEFT);
 		_lstSelection->onMouseClick((ActionHandler)&UfopaediaSelectState::lstSelectionClickRight, SDL_BUTTON_RIGHT);
 
-		_btnQuickSearch->setText(L""); // redraw
+		_btnQuickSearch->setText(""); // redraw
 		_btnQuickSearch->onEnter((ActionHandler)&UfopaediaSelectState::btnQuickSearchApply);
 		_btnQuickSearch->setVisible(false);
 
@@ -166,7 +166,7 @@ namespace OpenXcom
 	{
 		if (_btnQuickSearch->getVisible())
 		{
-			_btnQuickSearch->setText(L"");
+			_btnQuickSearch->setText("");
 			_btnQuickSearch->setVisible(false);
 			btnQuickSearchApply(action);
 		}
@@ -209,7 +209,7 @@ namespace OpenXcom
 		bool isCommendationsSection = (_section == UFOPAEDIA_COMMENDATIONS);
 
 		std::locale myLocale = CrossPlatform::testLocale();
-		std::wstring searchString = _btnQuickSearch->getText();
+		std::string searchString = _btnQuickSearch->getText();
 		CrossPlatform::upperCase(searchString, myLocale);
 
 		ArticleDefinitionList::iterator it;
@@ -243,9 +243,9 @@ namespace OpenXcom
 			}
 
 			// quick search
-			if (searchString != L"")
+			if (searchString != "")
 			{
-				std::wstring projectName = tr((*it)->title);
+				std::string projectName = tr((*it)->title);
 				CrossPlatform::upperCase(projectName, myLocale);
 				if (projectName.find(searchString) == std::string::npos)
 				{
@@ -276,8 +276,8 @@ namespace OpenXcom
 		}
 		else
 		{
-			std::wstring label = tr("STR_SHOW_ONLY_NEW");
-			_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
+			std::string label = tr("STR_SHOW_ONLY_NEW");
+			_btnShowOnlyNew->setText((hasUnseen ? "* " : "") + label);
 		}
 		if (_lstScroll > 0)
 		{

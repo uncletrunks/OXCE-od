@@ -83,7 +83,7 @@ BriefingLightState::BriefingLightState(AlienDeployment *deployment)
 	_txtArmors->setWordWrap(true);
 	_txtArmors->setHidden(true);
 
-	std::wstring message = checkStartingCondition(deployment);
+	std::string message = checkStartingCondition(deployment);
 	if (!message.empty())
 	{
 		_txtArmors->setText(tr("STR_STARTING_CONDITION_ARMORS").arg(message));
@@ -97,13 +97,13 @@ BriefingLightState::BriefingLightState(AlienDeployment *deployment)
 /**
 * Checks the starting condition.
 */
-std::wstring BriefingLightState::checkStartingCondition(AlienDeployment *deployment)
+std::string BriefingLightState::checkStartingCondition(AlienDeployment *deployment)
 {
 	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(deployment->getStartingCondition());
 	if (startingCondition != 0)
 	{
 		const std::vector<std::string> *list = startingCondition->getAllowedArmors();
-		std::wostringstream ss;
+		std::ostringstream ss;
 		int i = 0;
 		for (std::vector<std::string>::const_iterator it = list->begin(); it != list->end(); ++it)
 		{
@@ -111,12 +111,12 @@ std::wstring BriefingLightState::checkStartingCondition(AlienDeployment *deploym
 			if (article && _game->getSavedGame()->isResearched(article->requires))
 			{
 				if (i > 0)
-					ss << L", ";
+					ss << ", ";
 				ss << tr(*it);
 				i++;
 			}
 		}
-		std::wstring message = ss.str();
+		std::string message = ss.str();
 		if (message.empty())
 		{
 			// no suitable armor yet
@@ -127,7 +127,7 @@ std::wstring BriefingLightState::checkStartingCondition(AlienDeployment *deploym
 	else
 	{
 		// everything is allowed
-		return L"";
+		return "";
 	}
 }
 

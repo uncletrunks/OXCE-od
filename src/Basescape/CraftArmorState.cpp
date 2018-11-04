@@ -94,7 +94,7 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_txtArmor->setText(tr("STR_ARMOR"));
 
 	// populate sort options
-	std::vector<std::wstring> sortOptions;
+	std::vector<std::string> sortOptions;
 	sortOptions.push_back(tr("STR_ORIGINAL_ORDER"));
 	_sortFunctors.push_back(NULL);
 
@@ -250,7 +250,7 @@ void CraftArmorState::initList(size_t scrl)
 		{
 			// call corresponding getter
 			int dynStat = (*_dynGetter)(_game, *i);
-			std::wostringstream ss;
+			std::ostringstream ss;
 			ss << dynStat;
 			_lstSoldiers->addRow(4, (*i)->getName(true).c_str(), (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus).c_str(), tr((*i)->getArmor()->getType()).c_str(), ss.str().c_str());
 		}

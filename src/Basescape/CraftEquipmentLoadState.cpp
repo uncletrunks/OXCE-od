@@ -80,7 +80,7 @@ CraftEquipmentLoadState::CraftEquipmentLoadState(CraftEquipmentState *parent) : 
 		}
 		else
 		{
-			const std::wstring &itemName = _game->getSavedGame()->getGlobalCraftLoadoutName(i);
+			const std::string &itemName = _game->getSavedGame()->getGlobalCraftLoadoutName(i);
 			if (itemName.empty())
 			{
 				_lstLoadout->addRow(1, tr("STR_UNNAMED_SLOT_N").arg(i + 1).c_str());

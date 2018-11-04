@@ -24,16 +24,14 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
-#include <locale>
 #include <stdint.h>
 #include <time.h>
-#include <sys/stat.h>
 #include <signal.h>
+#include <sys/stat.h>
 #include "../dirent.h"
 #include "Logger.h"
 #include "Exception.h"
 #include "Options.h"
-#include "Language.h"
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -60,6 +58,7 @@
 #else
 #include <iostream>
 #include <fstream>
+#include <locale>
 #include <SDL_image.h>
 #include <cstring>
 #include <cstdio>
@@ -69,6 +68,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <execinfo.h>
+#include "Unicode.h"
 #endif
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -121,7 +121,7 @@ void showError(const std::string &error)
 	else
 	{
 		std::string nError = '"' + error + '"';
-		Language::replace(nError, "\n", "\\n");
+		Unicode::replace(nError, "\n", "\\n");
 		std::string cmd = errorDlg + nError;
 		if (system(cmd.c_str()) != 0)
 			std::cerr << error << std::endl;
@@ -725,7 +725,7 @@ std::locale testLocale()
 /**
  * Converts a wide string into upper case.
  */
-void upperCase(std::wstring &input, std::locale &myLocale)
+void upperCase(std::string &input, std::locale &myLocale)
 {
 	if (!Options::simpleUppercase)
 	{
@@ -798,9 +798,9 @@ time_t getDateModified(const std::string &path)
  * @param time Value in timestamp format.
  * @return String pair with date and time.
  */
-std::pair<std::wstring, std::wstring> timeToString(time_t time)
+std::pair<std::string, std::string> timeToString(time_t time)
 {
-	wchar_t localDate[25], localTime[25];
+	char localDate[25], localTime[25];
 
 /*#ifdef _WIN32
 	LARGE_INTEGER li;
@@ -817,35 +817,10 @@ std::pair<std::wstring, std::wstring> timeToString(time_t time)
 #endif*/
 
 	struct tm *timeinfo = localtime(&(time));
-	wcsftime(localDate, 25, L"%Y-%m-%d", timeinfo);
-	wcsftime(localTime, 25, L"%H:%M", timeinfo);
+	strftime(localDate, 25, "%Y-%m-%d", timeinfo);
+	strftime(localTime, 25, "%H:%M", timeinfo);
 
 	return std::make_pair(localDate, localTime);
-}
-
-/**
- * Compares two Unicode strings using natural human ordering.
- * @param a String A.
- * @param b String B.
- * @return String A comes before String B.
- */
-bool naturalCompare(const std::wstring &a, const std::wstring &b)
-{
-#if defined(_WIN32) && (!defined(__MINGW32__) || defined(__MINGW64_VERSION_MAJOR))
-	typedef int (WINAPI *WinStrCmp)(PCWSTR, PCWSTR);
-	WinStrCmp pWinStrCmp = (WinStrCmp)GetProcAddress(GetModuleHandleA("shlwapi.dll"), "StrCmpLogicalW");
-	if (pWinStrCmp)
-	{
-		return (pWinStrCmp(a.c_str(), b.c_str()) < 0);
-	}
-	else
-#endif
-	{
-		// sorry unix users you get ASCII sort
-		std::wstring::const_iterator i, j;
-		for (i = a.begin(), j = b.begin(); i != a.end() && j != b.end() && tolower(*i) == tolower(*j); i++, j++);
-		return (i != a.end() && j != b.end() && tolower(*i) < tolower(*j));
-	}
 }
 
 /**
@@ -967,7 +942,7 @@ void setWindowIcon(int winResource, const std::string &)
 #else
 void setWindowIcon(int, const std::string &unixPath)
 {
-	std::string utf8 = Language::fsToUtf8(unixPath);
+	std::string utf8 = Unicode::convPathToUtf8(unixPath);
 	SDL_Surface *icon = IMG_Load(utf8.c_str());
 	if (icon != 0)
 	{

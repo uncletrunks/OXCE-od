@@ -1057,6 +1057,9 @@
     <ClCompile Include="Basescape\SoldierTransformationState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Unicode.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2157,6 +2160,9 @@
     </ClInclude>
     <ClInclude Include="Basescape\SoldierTransformationState.h">
       <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Unicode.h">
+      <Filter>Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

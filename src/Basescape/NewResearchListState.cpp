@@ -88,7 +88,7 @@ NewResearchListState::NewResearchListState(Base *base) : _base(base), _lstScroll
 	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onToggleProjectStatus, SDL_BUTTON_RIGHT);
 	_lstResearch->onMouseClick((ActionHandler)&NewResearchListState::onOpenTechTreeViewer, SDL_BUTTON_MIDDLE);
 
-	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->setText(""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&NewResearchListState::btnQuickSearchApply);
 	_btnQuickSearch->setVisible(false);
 
@@ -164,7 +164,7 @@ void NewResearchListState::btnQuickSearchToggle(Action *action)
 {
 	if (_btnQuickSearch->getVisible())
 	{
-		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setText("");
 		_btnQuickSearch->setVisible(false);
 		btnQuickSearchApply(action);
 	}
@@ -208,7 +208,7 @@ void NewResearchListState::btnMarkAllAsSeenClick(Action *)
 void NewResearchListState::fillProjectList(bool markAllAsSeen)
 {
 	std::locale myLocale = CrossPlatform::testLocale();
-	std::wstring searchString = _btnQuickSearch->getText();
+	std::string searchString = _btnQuickSearch->getText();
 	CrossPlatform::upperCase(searchString, myLocale);
 
 	_projects.clear();
@@ -233,16 +233,16 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 		}
 
 		// quick search
-		if (searchString != L"")
+		if (searchString != "")
 		{
-			std::wstring projectName = tr((*it)->getName());
+			std::string projectName = tr((*it)->getName());
 			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				it = _projects.erase(it);
 				continue;
 			}
-		}	
+		}
 
 		// EXPLANATION
 		// -----------
@@ -280,8 +280,8 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 		}
 	}
 
-	std::wstring label = tr("STR_SHOW_ONLY_NEW");
-	_btnShowOnlyNew->setText((hasUnseen ? L"* " : L"") + label);
+	std::string label = tr("STR_SHOW_ONLY_NEW");
+	_btnShowOnlyNew->setText((hasUnseen ? "* " : "") + label);
 	if (_lstScroll > 0)
 	{
 		_lstResearch->scrollTo(_lstScroll);

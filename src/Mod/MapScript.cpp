@@ -22,6 +22,7 @@
 #include "../Engine/RNG.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Logger.h"
+#include "../Mod/RuleTerrain.h"
 
 
 namespace OpenXcom

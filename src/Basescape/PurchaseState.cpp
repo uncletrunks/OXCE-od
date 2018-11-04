@@ -19,7 +19,6 @@
 #include "PurchaseState.h"
 #include <sstream>
 #include <climits>
-#include <cfloat>
 #include <iomanip>
 #include <algorithm>
 #include <locale>
@@ -30,6 +29,7 @@
 #include "../Engine/Timer.h"
 #include "../Engine/Options.h"
 #include "../Engine/CrossPlatform.h"
+#include "../Engine/Unicode.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -109,12 +109,12 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_PURCHASE_HIRE_PERSONNEL"));
 
-	_txtFunds->setText(tr("STR_CURRENT_FUNDS").arg(Text::formatFunding(_game->getSavedGame()->getFunds())));
+	_txtFunds->setText(tr("STR_CURRENT_FUNDS").arg(Unicode::formatFunding(_game->getSavedGame()->getFunds())));
 
-	_txtPurchases->setText(tr("STR_COST_OF_PURCHASES").arg(Text::formatFunding(_total)));
+	_txtPurchases->setText(tr("STR_COST_OF_PURCHASES").arg(Unicode::formatFunding(_total)));
 
 	_txtSpaceUsed->setVisible(Options::storageLimitsEnforced);
-	std::wostringstream ss;
+	std::ostringstream ss;
 	ss << _base->getUsedStores() << ":" << _base->getAvailableStores();
 	_txtSpaceUsed->setText(tr("STR_SPACE_USED").arg(ss.str()));
 
@@ -252,10 +252,10 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 		}
 	}
 
-	_cbxCategory->setOptions(_cats);
+	_cbxCategory->setOptions(_cats, true);
 	_cbxCategory->onChange((ActionHandler)&PurchaseState::cbxCategoryChange);
 
-	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->setText(""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&PurchaseState::btnQuickSearchApply);
 	_btnQuickSearch->setVisible(false);
 
@@ -413,7 +413,7 @@ void PurchaseState::btnQuickSearchToggle(Action *action)
 {
 	if (_btnQuickSearch->getVisible())
 	{
-		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setText("");
 		_btnQuickSearch->setVisible(false);
 		btnQuickSearchApply(action);
 	}
@@ -439,7 +439,7 @@ void PurchaseState::btnQuickSearchApply(Action *)
 void PurchaseState::updateList()
 {
 	std::locale myLocale = CrossPlatform::testLocale();
-	std::wstring searchString = _btnQuickSearch->getText();
+	std::string searchString = _btnQuickSearch->getText();
 	CrossPlatform::upperCase(searchString, myLocale);
 
 	_lstItems->clearList();
@@ -476,9 +476,9 @@ void PurchaseState::updateList()
 		}
 
 		// quick search
-		if (searchString != L"")
+		if (searchString != "")
 		{
-			std::wstring projectName = _items[i].name;
+			std::string projectName = _items[i].name;
 			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
@@ -486,7 +486,7 @@ void PurchaseState::updateList()
 			}
 		}
 
-		std::wstring name = _items[i].name;
+		std::string name = _items[i].name;
 		bool ammo = false;
 		if (_items[i].type == TRANSFER_ITEM)
 		{
@@ -494,13 +494,13 @@ void PurchaseState::updateList()
 			ammo = (rule->getBattleType() == BT_AMMO || (rule->getBattleType() == BT_NONE && rule->getClipSize() > 0));
 			if (ammo)
 			{
-				name.insert(0, L"  ");
+				name.insert(0, "  ");
 			}
 		}
-		std::wostringstream ssQty, ssAmount;
+		std::ostringstream ssQty, ssAmount;
 		ssQty << _items[i].qtySrc;
 		ssAmount << _items[i].amount;
-		_lstItems->addRow(4, name.c_str(), Text::formatFunding(_items[i].cost).c_str(), ssQty.str().c_str(), ssAmount.str().c_str());
+		_lstItems->addRow(4, name.c_str(), Unicode::formatFunding(_items[i].cost).c_str(), ssQty.str().c_str(), ssAmount.str().c_str());
 		_rows.push_back(i);
 		if (_items[i].amount > 0)
 		{
@@ -768,7 +768,7 @@ void PurchaseState::increase()
 void PurchaseState::increaseByValue(int change)
 {
 	if (0 >= change) return;
-	std::wstring errorMessage;
+	std::string errorMessage;
 
 	if (_total + getRow().cost > _game->getSavedGame()->getFunds())
 	{
@@ -898,8 +898,8 @@ void PurchaseState::decreaseByValue(int change)
  */
 void PurchaseState::updateItemStrings()
 {
-	_txtPurchases->setText(tr("STR_COST_OF_PURCHASES").arg(Text::formatFunding(_total)));
-	std::wostringstream ss, ss5;
+	_txtPurchases->setText(tr("STR_COST_OF_PURCHASES").arg(Unicode::formatFunding(_total)));
+	std::ostringstream ss, ss5;
 	ss << getRow().amount;
 	_lstItems->setCellText(_sel, 3, ss.str());
 	if (getRow().amount > 0)

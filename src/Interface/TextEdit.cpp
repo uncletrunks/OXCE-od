@@ -34,14 +34,14 @@ namespace OpenXcom
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-TextEdit::TextEdit(State *state, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _blink(true), _modal(true), _ascii(L'A'), _caretPos(0), _textEditConstraint(TEC_NONE), _change(0), _enter(0), _state(state)
+TextEdit::TextEdit(State *state, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _blink(true), _modal(true), _ascii('A'), _caretPos(0), _textEditConstraint(TEC_NONE), _change(0), _enter(0), _state(state)
 {
 	_isFocused = false;
 	_text = new Text(width, height, 0, 0);
 	_timer = new Timer(100);
 	_timer->onTimer((SurfaceHandler)&TextEdit::blink);
 	_caret = new Text(16, 17, 0, 0);
-	_caret->setText(L"|");
+	_caret->setText("|");
 }
 
 /**
@@ -142,7 +142,7 @@ void TextEdit::initText(Font *big, Font *small, Language *lang)
  * Changes the string displayed on screen.
  * @param text Text string.
  */
-void TextEdit::setText(const std::wstring &text)
+void TextEdit::setText(const std::string &text)
 {
 	_value = text;
 	_caretPos = _value.length();
@@ -153,7 +153,7 @@ void TextEdit::setText(const std::wstring &text)
  * Returns the string displayed on screen.
  * @return Text string.
  */
-std::wstring TextEdit::getText() const
+std::string TextEdit::getText() const
 {
 	return _value;
 }
@@ -302,7 +302,7 @@ void TextEdit::draw()
 	_text->setText(_value);
 	if (Options::keyboardMode == KEYBOARD_OFF)
 	{
-		std::wstring newValue = _value;
+		std::string newValue = _value;
 		if (_isFocused && _blink)
 		{
 			newValue += _ascii;
@@ -370,13 +370,13 @@ void TextEdit::draw()
  * @param c Character to add.
  * @return True if it exceeds, False if it doesn't.
  */
-bool TextEdit::exceedsMaxWidth(wchar_t c)
+bool TextEdit::exceedsMaxWidth(char c)
 {
 	int w = 0;
-	std::wstring s = _value;
+	std::string s = _value;
 
 	s += c;
-	for (std::wstring::iterator i = s.begin(); i < s.end(); ++i)
+	for (std::string::iterator i = s.begin(); i < s.end(); ++i)
 	{
 		w += _text->getFont()->getCharSize(*i).w;
 	}
@@ -396,7 +396,7 @@ bool TextEdit::isValidChar(Uint16 key)
 	switch (_textEditConstraint)
 	{
 	case TEC_NUMERIC_POSITIVE:
-		return key >= L'0' && key <= L'9';
+		return key >= '0' && key <= '9';
 
 	// If constraint is "(signed) numeric", need to check:
 	// - user does not input a character before '-' or '+'
@@ -404,16 +404,16 @@ bool TextEdit::isValidChar(Uint16 key)
 	case TEC_NUMERIC:
 		if (_caretPos > 0)
 		{
-			return key >= L'0' && key <= L'9';
+			return key >= '0' && key <= '9';
 		}
 		else
 		{
-			return ((key >= L'0' && key <= L'9') || key == L'+' || key == L'-') &&
-				(_value.size() == 0 || (_value[0] != L'+' && _value[0] != L'-'));
+			return ((key >= '0' && key <= '9') || key == '+' || key == '-') &&
+				(_value.size() == 0 || (_value[0] != '+' && _value[0] != '-'));
 		}
 
 	case TEC_NONE:
-		return (key >= L' ' && key <= L'~') || key >= 160;
+		return (key >= ' ' && key <= '~') || key >= 160;
 
 	default:
 		return false;
@@ -439,7 +439,7 @@ void TextEdit::mousePress(Action *action, State *state)
 			double scaleX = action->getXScale();
 			double w = 0;
 			int c = 0;
-			for (std::wstring::iterator i = _value.begin(); i < _value.end(); ++i)
+			for (std::string::iterator i = _value.begin(); i < _value.end(); ++i)
 			{
 				if (mouseX <= w)
 				{
@@ -474,16 +474,16 @@ void TextEdit::keyboardPress(Action *action, State *state)
 		{
 		case SDLK_UP:
 			_ascii++;
-			if (_ascii > L'~')
+			if (_ascii > '~')
 			{
-				_ascii = L' ';
+				_ascii = ' ';
 			}
 			break;
 		case SDLK_DOWN:
 			_ascii--;
-			if (_ascii < L' ')
+			if (_ascii < ' ')
 			{
-				_ascii = L'~';
+				_ascii = '~';
 			}
 			break;
 		case SDLK_LEFT:
@@ -538,7 +538,7 @@ void TextEdit::keyboardPress(Action *action, State *state)
 			break;
 		case SDLK_ESCAPE:
 			{
-				_value = L"";
+				_value = "";
 				_caretPos = 0;
 			}
 			// no break; do the ENTER action too
@@ -552,9 +552,9 @@ void TextEdit::keyboardPress(Action *action, State *state)
 			break;
 		default:
 			Uint16 key = action->getDetails()->key.keysym.unicode;			
-			if (isValidChar(key) && !exceedsMaxWidth((wchar_t)key))
+			if (isValidChar(key) && !exceedsMaxWidth((char)key))
 			{
-				_value.insert(_caretPos, 1, (wchar_t)action->getDetails()->key.keysym.unicode);
+				_value.insert(_caretPos, 1, (char)action->getDetails()->key.keysym.unicode);
 				_caretPos++;
 			}
 		}

@@ -20,7 +20,6 @@
 #include "ManufactureDependenciesTreeState.h"
 #include <sstream>
 #include <climits>
-#include <cfloat>
 #include <algorithm>
 #include <locale>
 #include "../Engine/CrossPlatform.h"
@@ -240,10 +239,10 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 		}
 	}
 
-	_cbxCategory->setOptions(_cats);
+	_cbxCategory->setOptions(_cats, true);
 	_cbxCategory->onChange((ActionHandler)&TransferItemsState::cbxCategoryChange);
 
-	_btnQuickSearch->setText(L""); // redraw
+	_btnQuickSearch->setText(""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&TransferItemsState::btnQuickSearchApply);
 	_btnQuickSearch->setVisible(false);
 
@@ -346,7 +345,7 @@ void TransferItemsState::btnQuickSearchToggle(Action *action)
 {
 	if (_btnQuickSearch->getVisible())
 	{
-		_btnQuickSearch->setText(L"");
+		_btnQuickSearch->setText("");
 		_btnQuickSearch->setVisible(false);
 		btnQuickSearchApply(action);
 	}
@@ -372,7 +371,7 @@ void TransferItemsState::btnQuickSearchApply(Action *)
 void TransferItemsState::updateList()
 {
 	std::locale myLocale = CrossPlatform::testLocale();
-	std::wstring searchString = _btnQuickSearch->getText();
+	std::string searchString = _btnQuickSearch->getText();
 	CrossPlatform::upperCase(searchString, myLocale);
 
 	_lstItems->clearList();
@@ -397,9 +396,9 @@ void TransferItemsState::updateList()
 		}
 
 		// quick search
-		if (searchString != L"")
+		if (searchString != "")
 		{
-			std::wstring projectName = _items[i].name;
+			std::string projectName = _items[i].name;
 			CrossPlatform::upperCase(projectName, myLocale);
 			if (projectName.find(searchString) == std::string::npos)
 			{
@@ -407,7 +406,7 @@ void TransferItemsState::updateList()
 			}
 		}
 
-		std::wstring name = _items[i].name;
+		std::string name = _items[i].name;
 		bool ammo = false;
 		if (_items[i].type == TRANSFER_ITEM)
 		{
@@ -415,10 +414,10 @@ void TransferItemsState::updateList()
 			ammo = (rule->getBattleType() == BT_AMMO || (rule->getBattleType() == BT_NONE && rule->getClipSize() > 0));
 			if (ammo)
 			{
-				name.insert(0, L"  ");
+				name.insert(0, "  ");
 			}
 		}
-		std::wostringstream ssQtySrc, ssQtyDst, ssAmount;
+		std::ostringstream ssQtySrc, ssQtyDst, ssAmount;
 		ssQtySrc << _items[i].qtySrc - _items[i].amount;
 		ssQtyDst << _items[i].qtyDst;
 		ssAmount << _items[i].amount;
@@ -749,7 +748,7 @@ void TransferItemsState::increase()
 void TransferItemsState::increaseByValue(int change)
 {
 	if (0 >= change || getRow().qtySrc <= getRow().amount) return;
-	std::wstring errorMessage;
+	std::string errorMessage;
 	RuleItem *selItem = 0;
 	Craft *craft = 0;
 
@@ -843,7 +842,7 @@ void TransferItemsState::increaseByValue(int change)
 	{
 		_timerInc->stop();
 		RuleInterface *menuInterface = _game->getMod()->getInterface("transferMenu");
-		_game->pushState(new ErrorMessageState(errorMessage, _palette, menuInterface->getElement("errorMessage")->color, "BACK13.SCR", menuInterface->getElement("errorPalette")->color));		
+		_game->pushState(new ErrorMessageState(errorMessage, _palette, menuInterface->getElement("errorMessage")->color, "BACK13.SCR", menuInterface->getElement("errorPalette")->color));
 	}
 }
 
@@ -866,7 +865,7 @@ void TransferItemsState::decreaseByValue(int change)
 	if (0 >= change || 0 >= getRow().amount) return;
 	Craft *craft = 0;
 	change = std::min(getRow().amount, change);
-	
+
 	switch (getRow().type)
 	{
 	case TRANSFER_SOLDIER:
@@ -903,7 +902,7 @@ void TransferItemsState::decreaseByValue(int change)
  */
 void TransferItemsState::updateItemStrings()
 {
-	std::wostringstream ss1, ss2;
+	std::ostringstream ss1, ss2;
 	ss1 << getRow().qtySrc - getRow().amount;
 	ss2 << getRow().amount;
 	_lstItems->setCellText(_sel, 1, ss1.str());

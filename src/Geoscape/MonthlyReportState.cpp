@@ -35,13 +35,13 @@
 #include "../Mod/RuleCountry.h"
 #include "Globe.h"
 #include "../Engine/Options.h"
+#include "../Engine/Unicode.h"
 #include "../Menu/CutsceneState.h"
 #include "../Savegame/Base.h"
 #include "../Battlescape/CommendationState.h"
 #include "../Savegame/SoldierDiary.h"
 #include "../Menu/SaveGameState.h"
 #include "../Mod/RuleInterface.h"
-#include "../fmath.h"
 
 namespace OpenXcom
 {
@@ -139,7 +139,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 
 	// Calculate rating
 	int difficulty_threshold = _game->getMod()->getDefeatScore() + 100 * _game->getSavedGame()->getDifficultyCoefficient();
-	std::wstring rating = tr("STR_RATING_TERRIBLE");
+	std::string rating = tr("STR_RATING_TERRIBLE");
 	if (_ratingTotal > difficulty_threshold - 300)
 	{
 		rating = tr("STR_RATING_POOR");
@@ -159,7 +159,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 
 	if (!_game->getMod()->getMonthlyRatings()->empty())
 	{
-		rating = L"";
+		rating = "";
 		int temp = INT_MIN;
 		const std::map<int, std::string> *monthlyRatings = _game->getMod()->getMonthlyRatings();
 		for (std::map<int, std::string>::const_iterator i = monthlyRatings->begin(); i != monthlyRatings->end(); ++i)
@@ -174,16 +174,16 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 
 	_txtRating->setText(tr("STR_MONTHLY_RATING").arg(_ratingTotal).arg(rating));
 
-	std::wostringstream ss;
-	ss << tr("STR_INCOME") << L"> \x01" << Text::formatFunding(_game->getSavedGame()->getCountryFunding());
-	ss << L" (";
+	std::ostringstream ss;
+	ss << tr("STR_INCOME") << "> " << Unicode::TOK_COLOR_FLIP << Unicode::formatFunding(_game->getSavedGame()->getCountryFunding());
+	ss << " (";
 	if (_fundingDiff > 0)
 		ss << '+';
-	ss << Text::formatFunding(_fundingDiff) << L")";
+	ss << Unicode::formatFunding(_fundingDiff) << ")";
 	_txtIncome->setText(ss.str());
 
-	std::wostringstream ss2;
-	ss2 << tr("STR_MAINTENANCE") << L"> \x01" << Text::formatFunding(_game->getSavedGame()->getBaseMaintenance());
+	std::ostringstream ss2;
+	ss2 << tr("STR_MAINTENANCE") << "> " << Unicode::TOK_COLOR_FLIP << Unicode::formatFunding(_game->getSavedGame()->getBaseMaintenance());
 	_txtMaintenance->setText(ss2.str());
 
 	int performanceBonus = _ratingTotal * _game->getMod()->getPerformanceBonusFactor();
@@ -192,8 +192,8 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 		// increase funds by performance bonus
 		_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + performanceBonus);
 		// display
-		std::wostringstream ss4;
-		ss4 << tr("STR_PERFORMANCE_BONUS") << L"> \x01" << Text::formatFunding(performanceBonus);
+		std::ostringstream ss4;
+		ss4 << tr("STR_PERFORMANCE_BONUS") << "> " << Unicode::TOK_COLOR_FLIP << Unicode::formatFunding(performanceBonus);
 		_txtBonus->setText(ss4.str());
 		// shuffle the fields a bit for better overview
 		int upper = _txtMaintenance->getY();
@@ -209,15 +209,15 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 		_txtDesc->setY(_txtBonus->getY());
 	}
 
-	std::wostringstream ss3;
-	ss3 << tr("STR_BALANCE") << L"> \x01" << Text::formatFunding(_game->getSavedGame()->getFunds());
+	std::ostringstream ss3;
+	ss3 << tr("STR_BALANCE") << "> " << Unicode::TOK_COLOR_FLIP << Unicode::formatFunding(_game->getSavedGame()->getFunds());
 	_txtBalance->setText(ss3.str());
 
 	_txtDesc->setWordWrap(true);
 
 	// calculate satisfaction
-	std::wostringstream ss5;
-	std::wstring satisFactionString = tr("STR_COUNCIL_IS_DISSATISFIED");
+	std::ostringstream ss5;
+	std::string satisFactionString = tr("STR_COUNCIL_IS_DISSATISFIED");
 	bool resetWarning = true;
 	if (_ratingTotal > difficulty_threshold)
 	{
@@ -245,7 +245,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 		{
 			if (_game->getSavedGame()->getWarned())
 			{
-				ss5.str(L"");
+				ss5.str("");
 				ss5 << tr("STR_YOU_HAVE_NOT_SUCCEEDED");
 				_pactList.erase(_pactList.begin(), _pactList.end());
 				_cancelPactList.erase(_cancelPactList.begin(), _cancelPactList.end());
@@ -468,9 +468,9 @@ void MonthlyReportState::calculateChanges()
  * @param singular String ID to append at the end if the list is singular.
  * @param plural String ID to append at the end if the list is plural.
  */
-std::wstring MonthlyReportState::countryList(const std::vector<std::string> &countries, const std::string &singular, const std::string &plural)
+std::string MonthlyReportState::countryList(const std::vector<std::string> &countries, const std::string &singular, const std::string &plural)
 {
-	std::wostringstream ss;
+	std::ostringstream ss;
 	if (!countries.empty())
 	{
 		ss << "\n\n";

@@ -182,11 +182,11 @@ void StatsForNerdsState::buildUI(bool debug, bool ids, bool defaults)
 	_btnOk->onKeyboardPress((ActionHandler)&StatsForNerdsState::btnScrollUpClick, Options::keyGeoUp);
 	_btnOk->onKeyboardPress((ActionHandler)&StatsForNerdsState::btnScrollDownClick, Options::keyGeoDown);
 
-	_btnPrev->setText(L"<<");
+	_btnPrev->setText("<<");
 	_btnPrev->onMouseClick((ActionHandler)&StatsForNerdsState::btnPrevClick);
 	_btnPrev->onKeyboardPress((ActionHandler)&StatsForNerdsState::btnPrevClick, Options::keyGeoLeft);
 
-	_btnNext->setText(L">>");
+	_btnNext->setText(">>");
 	_btnNext->onMouseClick((ActionHandler)&StatsForNerdsState::btnNextClick);
 	_btnNext->onKeyboardPress((ActionHandler)&StatsForNerdsState::btnNextClick, Options::keyGeoRight);
 
@@ -272,10 +272,10 @@ void StatsForNerdsState::btnOkClick(Action *)
 
 	if (ctrlPressed)
 	{
-		Log(LOG_INFO) << Language::wstrToUtf8(_txtArticle->getText());
+		Log(LOG_INFO) << _txtArticle->getText();
 		for (size_t row = 0; row < _lstRawData->getTexts(); ++row)
 		{
-			Log(LOG_INFO) << Language::wstrToUtf8(_lstRawData->getCellText(row, 0)) << "\t\t" << Language::wstrToUtf8(_lstRawData->getCellText(row, 1));
+			Log(LOG_INFO) << _lstRawData->getCellText(row, 0) << "\t\t" << _lstRawData->getCellText(row, 1);
 		}
 		return;
 	}
@@ -361,48 +361,48 @@ void StatsForNerdsState::initLists()
 /**
  * Resets the string stream.
  */
-void StatsForNerdsState::resetStream(std::wostringstream &ss)
+void StatsForNerdsState::resetStream(std::ostringstream &ss)
 {
-	ss.str(L"");
+	ss.str("");
 	ss.clear();
 }
 
 /**
  * Adds a translatable item to the string stream, optionally with string ID.
  */
-void StatsForNerdsState::addTranslation(std::wostringstream &ss, const std::string &id)
+void StatsForNerdsState::addTranslation(std::ostringstream &ss, const std::string &id)
 {
 	ss << tr(id);
 	if (_showIds)
 	{
-		ss << L" [" << Language::utf8ToWstr(id) << L"]";
+		ss << " [" << id << "]";
 	}
 }
 
 /**
  * Translates a property name.
  */
-std::wstring StatsForNerdsState::trp(const std::string &propertyName)
+std::string StatsForNerdsState::trp(const std::string &propertyName)
 {
 	if (_showDebug)
 	{
 		if (_indent)
 		{
-			std::wstring indentation = L" ";
-			std::wstring code = Language::utf8ToWstr(propertyName);
+			std::string indentation = " ";
+			std::string code = propertyName;
 			return indentation + code;
 		}
 		else
 		{
-			return Language::utf8ToWstr(propertyName);
+			return propertyName;
 		}
 	}
 	else
 	{
 		if (_indent)
 		{
-			std::wstring indentation = L" ";
-			std::wstring translation = tr(propertyName);
+			std::string indentation = " ";
+			std::string translation = tr(propertyName);
 			return indentation + translation;
 		}
 		else
@@ -415,7 +415,7 @@ std::wstring StatsForNerdsState::trp(const std::string &propertyName)
 /**
  * Adds a section name to the table.
  */
-void StatsForNerdsState::addSection(const std::wstring &name, const std::wstring &desc, Uint8 color, bool forceShow)
+void StatsForNerdsState::addSection(const std::string &name, const std::string &desc, Uint8 color, bool forceShow)
 {
 	if (_showDefaults || forceShow)
 	{
@@ -434,14 +434,14 @@ void StatsForNerdsState::addHeading(const std::string &propertyName, const std::
 {
 	if (moreDetail.empty())
 	{
-		_lstRawData->addRow(2, trp(propertyName).c_str(), L"");
+		_lstRawData->addRow(2, trp(propertyName).c_str(), "");
 	}
 	else
 	{
-		std::wostringstream ss2;
+		std::ostringstream ss2;
 		if (addDifficulty)
 		{
-			std::wstring diff;
+			std::string diff;
 			switch (_game->getSavedGame()->getDifficulty())
 			{
 				case DIFF_SUPERHUMAN: diff = tr("STR_5_SUPERHUMAN"); break;
@@ -481,7 +481,7 @@ void StatsForNerdsState::endHeading()
 /**
  * Adds a single string value to the table.
  */
-void StatsForNerdsState::addSingleString(std::wostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId, bool translate)
+void StatsForNerdsState::addSingleString(std::ostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId, bool translate)
 {
 	if (id == defaultId && !_showDefaults)
 	{
@@ -494,7 +494,7 @@ void StatsForNerdsState::addSingleString(std::wostringstream &ss, const std::str
 	}
 	else
 	{
-		ss << Language::utf8ToWstr(id);
+		ss << id;
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -507,7 +507,7 @@ void StatsForNerdsState::addSingleString(std::wostringstream &ss, const std::str
 /**
  * Adds a vector of strings to the table.
  */
-void StatsForNerdsState::addVectorOfStrings(std::wostringstream &ss, const std::vector<std::string> &vec, const std::string &propertyName)
+void StatsForNerdsState::addVectorOfStrings(std::ostringstream &ss, const std::vector<std::string> &vec, const std::string &propertyName)
 {
 	if (vec.empty() && !_showDefaults)
 	{
@@ -515,17 +515,17 @@ void StatsForNerdsState::addVectorOfStrings(std::wostringstream &ss, const std::
 	}
 	resetStream(ss);
 	int i = 0;
-	ss << L"{";
+	ss << "{";
 	for (auto &item : vec)
 	{
 		if (i > 0)
 		{
-			ss << L", ";
+			ss << ", ";
 		}
 		addTranslation(ss, item);
 		i++;
 	}
-	ss << L"}";
+	ss << "}";
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
 	if (!vec.empty())
@@ -537,7 +537,7 @@ void StatsForNerdsState::addVectorOfStrings(std::wostringstream &ss, const std::
 /**
  * Adds a vector of RuleResearch names to the table.
  */
-void StatsForNerdsState::addVectorOfResearch(std::wostringstream &ss, const std::vector<const RuleResearch *> &vec, const std::string &propertyName)
+void StatsForNerdsState::addVectorOfResearch(std::ostringstream &ss, const std::vector<const RuleResearch *> &vec, const std::string &propertyName)
 {
 	if (vec.empty() && !_showDefaults)
 	{
@@ -545,17 +545,17 @@ void StatsForNerdsState::addVectorOfResearch(std::wostringstream &ss, const std:
 	}
 	resetStream(ss);
 	int i = 0;
-	ss << L"{";
+	ss << "{";
 	for (auto &item : vec)
 	{
 		if (i > 0)
 		{
-			ss << L", ";
+			ss << ", ";
 		}
 		addTranslation(ss, item->getName());
 		i++;
 	}
-	ss << L"}";
+	ss << "}";
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
 	if (!vec.empty())
@@ -567,7 +567,7 @@ void StatsForNerdsState::addVectorOfResearch(std::wostringstream &ss, const std:
 /**
  * Adds a single boolean value to the table.
  */
-void StatsForNerdsState::addBoolean(std::wostringstream &ss, const bool &value, const std::string &propertyName, const bool &defaultvalue)
+void StatsForNerdsState::addBoolean(std::ostringstream &ss, const bool &value, const std::string &propertyName, const bool &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -593,7 +593,7 @@ void StatsForNerdsState::addBoolean(std::wostringstream &ss, const bool &value, 
 /**
  * Adds a single floating point number to the table.
  */
-void StatsForNerdsState::addFloat(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue)
+void StatsForNerdsState::addFloat(std::ostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue)
 {
 	if (AreSame(value, defaultvalue) && !_showDefaults)
 	{
@@ -612,17 +612,17 @@ void StatsForNerdsState::addFloat(std::wostringstream &ss, const float &value, c
 /**
  * Adds a single floating point number (formatted as percentage) to the table.
  */
-void StatsForNerdsState::addFloatAsPercentage(std::wostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue)
+void StatsForNerdsState::addFloatAsPercentage(std::ostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue)
 {
 	if (AreSame(value, defaultvalue) && !_showDefaults)
 	{
 		return;
 	}
 	resetStream(ss);
-	ss << (value * 100.0f) << L"%";
+	ss << (value * 100.0f) << "%";
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -635,7 +635,7 @@ void StatsForNerdsState::addFloatAsPercentage(std::wostringstream &ss, const flo
 /**
  * Adds a single floating point (double precision) number to the table.
  */
-void StatsForNerdsState::addDouble(std::wostringstream &ss, const double &value, const std::string &propertyName, const double &defaultvalue)
+void StatsForNerdsState::addDouble(std::ostringstream &ss, const double &value, const std::string &propertyName, const double &defaultvalue)
 {
 	if (AreSame(value, defaultvalue) && !_showDefaults)
 	{
@@ -654,7 +654,7 @@ void StatsForNerdsState::addDouble(std::wostringstream &ss, const double &value,
 /**
  * Adds a single integer number to the table.
  */
-void StatsForNerdsState::addInteger(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue, bool formatAsMoney, const std::string &specialTranslation, const int &specialvalue)
+void StatsForNerdsState::addInteger(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue, bool formatAsMoney, const std::string &specialTranslation, const int &specialvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -666,14 +666,14 @@ void StatsForNerdsState::addInteger(std::wostringstream &ss, const int &value, c
 		ss << tr(specialTranslation);
 		if (_showIds)
 		{
-			ss << L" [" << specialvalue << L"]";
+			ss << " [" << specialvalue << "]";
 		}
 	}
 	else
 	{
 		if (formatAsMoney)
 		{
-			ss << Text::formatFunding(value);
+			ss << Unicode::formatFunding(value);
 		}
 		else
 		{
@@ -691,7 +691,7 @@ void StatsForNerdsState::addInteger(std::wostringstream &ss, const int &value, c
 /**
  * Adds a script tag to the table.
  */
-void StatsForNerdsState::addIntegerScriptTag(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addIntegerScriptTag(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -699,7 +699,7 @@ void StatsForNerdsState::addIntegerScriptTag(std::wostringstream &ss, const int 
 	}
 	resetStream(ss);
 	ss << trp(propertyName);
-	ss << L": ";
+	ss << ": ";
 	ss << value;
 	_lstRawData->setFlooding(true);
 	_lstRawData->addRow(1, ss.str().c_str());
@@ -714,7 +714,7 @@ void StatsForNerdsState::addIntegerScriptTag(std::wostringstream &ss, const int 
 /**
  * Adds a single integer number (representing a percentage) to the table.
  */
-void StatsForNerdsState::addIntegerPercent(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addIntegerPercent(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -725,7 +725,7 @@ void StatsForNerdsState::addIntegerPercent(std::wostringstream &ss, const int &v
 	// -1 is not a percentage, usually means "take value from somewhere else"
 	if (value != -1)
 	{
-		ss << L"%";
+		ss << "%";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -738,7 +738,7 @@ void StatsForNerdsState::addIntegerPercent(std::wostringstream &ss, const int &v
 /**
  * Adds a single integer number (representing a distance in nautical miles) to the table.
  */
-void StatsForNerdsState::addIntegerNauticalMiles(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addIntegerNauticalMiles(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -746,7 +746,7 @@ void StatsForNerdsState::addIntegerNauticalMiles(std::wostringstream &ss, const 
 	}
 	resetStream(ss);
 	ss << tr("STR_NAUTICAL_MILES").arg(value);
-	ss << L" = ";
+	ss << " = ";
 	ss << tr("STR_KILOMETERS").arg(value * 1852 / 1000);
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -759,7 +759,7 @@ void StatsForNerdsState::addIntegerNauticalMiles(std::wostringstream &ss, const 
 /**
  * Adds a single integer number (representing a speed in knots = nautical miles per hour) to the table.
  */
-void StatsForNerdsState::addIntegerKnots(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addIntegerKnots(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -767,7 +767,7 @@ void StatsForNerdsState::addIntegerKnots(std::wostringstream &ss, const int &val
 	}
 	resetStream(ss);
 	ss << tr("STR_KNOTS").arg(value);
-	ss << L" = ";
+	ss << " = ";
 	ss << tr("STR_KILOMETERS_PER_HOUR").arg(value * 1852 / 1000);
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -780,7 +780,7 @@ void StatsForNerdsState::addIntegerKnots(std::wostringstream &ss, const int &val
 /**
  * Adds a single integer number (representing a distance in kilometers) to the table.
  */
-void StatsForNerdsState::addIntegerKm(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addIntegerKm(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -799,7 +799,7 @@ void StatsForNerdsState::addIntegerKm(std::wostringstream &ss, const int &value,
 /**
  * Adds one or two integer numbers (representing a duration in seconds) to the table.
  */
-void StatsForNerdsState::addIntegerSeconds(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue, const int &value2)
+void StatsForNerdsState::addIntegerSeconds(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue, const int &value2)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -812,9 +812,9 @@ void StatsForNerdsState::addIntegerSeconds(std::wostringstream &ss, const int &v
 	}
 	else
 	{
-		std::wostringstream ss2;
+		std::ostringstream ss2;
 		ss2 << value;
-		ss2 << L"-";
+		ss2 << "-";
 		ss2 << value2;
 		ss << tr("STR_SECONDS_LONG").arg(ss2.str());
 	}
@@ -829,7 +829,7 @@ void StatsForNerdsState::addIntegerSeconds(std::wostringstream &ss, const int &v
 /**
  * Adds a vector of integer numbers to the table.
  */
-void StatsForNerdsState::addVectorOfIntegers(std::wostringstream &ss, const std::vector<int> &vec, const std::string &propertyName)
+void StatsForNerdsState::addVectorOfIntegers(std::ostringstream &ss, const std::vector<int> &vec, const std::string &propertyName)
 {
 	if (vec.empty() && !_showDefaults)
 	{
@@ -837,17 +837,17 @@ void StatsForNerdsState::addVectorOfIntegers(std::wostringstream &ss, const std:
 	}
 	resetStream(ss);
 	int i = 0;
-	ss << L"{";
+	ss << "{";
 	for (auto &item : vec)
 	{
 		if (i > 0)
 		{
-			ss << L", ";
+			ss << ", ";
 		}
 		ss << item;
 		i++;
 	}
-	ss << L"}";
+	ss << "}";
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
 	if (!vec.empty())
@@ -859,7 +859,7 @@ void StatsForNerdsState::addVectorOfIntegers(std::wostringstream &ss, const std:
 /**
  * Adds a BattleType to the table.
  */
-void StatsForNerdsState::addBattleType(std::wostringstream &ss, const BattleType &value, const std::string &propertyName, const BattleType &defaultvalue)
+void StatsForNerdsState::addBattleType(std::ostringstream &ss, const BattleType &value, const std::string &propertyName, const BattleType &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -884,7 +884,7 @@ void StatsForNerdsState::addBattleType(std::wostringstream &ss, const BattleType
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -897,7 +897,7 @@ void StatsForNerdsState::addBattleType(std::wostringstream &ss, const BattleType
 /**
  * Adds a DamageType to the table.
  */
-void StatsForNerdsState::addDamageType(std::wostringstream &ss, const ItemDamageType &value, const std::string &propertyName, const ItemDamageType &defaultvalue)
+void StatsForNerdsState::addDamageType(std::ostringstream &ss, const ItemDamageType &value, const std::string &propertyName, const ItemDamageType &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -930,7 +930,7 @@ void StatsForNerdsState::addDamageType(std::wostringstream &ss, const ItemDamage
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -943,7 +943,7 @@ void StatsForNerdsState::addDamageType(std::wostringstream &ss, const ItemDamage
 /**
  * Adds a DamageRandomType to the table.
  */
-void StatsForNerdsState::addDamageRandomType(std::wostringstream &ss, const ItemDamageRandomType &value, const std::string &propertyName, const ItemDamageRandomType &defaultvalue)
+void StatsForNerdsState::addDamageRandomType(std::ostringstream &ss, const ItemDamageRandomType &value, const std::string &propertyName, const ItemDamageRandomType &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -964,7 +964,7 @@ void StatsForNerdsState::addDamageRandomType(std::wostringstream &ss, const Item
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -977,7 +977,7 @@ void StatsForNerdsState::addDamageRandomType(std::wostringstream &ss, const Item
 /**
  * Adds a BattleFuseType to the table.
  */
-void StatsForNerdsState::addBattleFuseType(std::wostringstream &ss, const BattleFuseType &value, const std::string &propertyName, const BattleFuseType &defaultvalue)
+void StatsForNerdsState::addBattleFuseType(std::ostringstream &ss, const BattleFuseType &value, const std::string &propertyName, const BattleFuseType &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -1004,7 +1004,7 @@ void StatsForNerdsState::addBattleFuseType(std::wostringstream &ss, const Battle
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -1017,7 +1017,7 @@ void StatsForNerdsState::addBattleFuseType(std::wostringstream &ss, const Battle
 /**
  * Adds a single RuleItemUseCost to the table.
  */
-void StatsForNerdsState::addRuleItemUseCostBasic(std::wostringstream &ss, const RuleItemUseCost &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addRuleItemUseCostBasic(std::ostringstream &ss, const RuleItemUseCost &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value.Time == defaultvalue && !_showDefaults)
 	{
@@ -1036,7 +1036,7 @@ void StatsForNerdsState::addRuleItemUseCostBasic(std::wostringstream &ss, const 
 /**
  * Adds a number to the string stream, optionally formatted as boolean.
  */
-void StatsForNerdsState::addBoolOrInteger(std::wostringstream &ss, const int &value, bool formatAsBoolean)
+void StatsForNerdsState::addBoolOrInteger(std::ostringstream &ss, const int &value, bool formatAsBoolean)
 {
 	if (formatAsBoolean)
 	{
@@ -1056,14 +1056,14 @@ void StatsForNerdsState::addBoolOrInteger(std::wostringstream &ss, const int &va
 /**
  * Adds a number to the string stream, optionally formatted as boolean.
  */
-void StatsForNerdsState::addPercentageSignOrNothing(std::wostringstream &ss, const int &value, bool smartFormat)
+void StatsForNerdsState::addPercentageSignOrNothing(std::ostringstream &ss, const int &value, bool smartFormat)
 {
 	if (smartFormat)
 	{
 		// 1 means flat: true
 		if (value != 1)
 		{
-			ss << L"%";
+			ss << "%";
 		}
 	}
 }
@@ -1071,7 +1071,7 @@ void StatsForNerdsState::addPercentageSignOrNothing(std::wostringstream &ss, con
 /**
  * Adds a full RuleItemUseCost to the table.
  */
-void StatsForNerdsState::addRuleItemUseCostFull(std::wostringstream &ss, const RuleItemUseCost &value, const std::string &propertyName, const RuleItemUseCost &defaultvalue, bool smartFormat, const RuleItemUseCost &formatBy)
+void StatsForNerdsState::addRuleItemUseCostFull(std::ostringstream &ss, const RuleItemUseCost &value, const std::string &propertyName, const RuleItemUseCost &defaultvalue, bool smartFormat, const RuleItemUseCost &formatBy)
 {
 	bool isDefault = false;
 	if (value.Time == defaultvalue.Time &&
@@ -1092,39 +1092,39 @@ void StatsForNerdsState::addRuleItemUseCostFull(std::wostringstream &ss, const R
 	// always show non-zero TUs, even if it's a default value
 	if (value.Time != 0 || _showDefaults)
 	{
-		ss << tr("STR_COST_TIME") << L": ";
+		ss << tr("STR_COST_TIME") << ": ";
 		addBoolOrInteger(ss, value.Time, isFlatAttribute);
 		addPercentageSignOrNothing(ss, formatBy.Time, smartFormat);
 		isFirst = false;
 	}
 	if (value.Energy != defaultvalue.Energy || _showDefaults)
 	{
-		if (!isFirst) ss << L", ";
-		ss << tr("STR_COST_ENERGY") << L": ";
+		if (!isFirst) ss << ", ";
+		ss << tr("STR_COST_ENERGY") << ": ";
 		addBoolOrInteger(ss, value.Energy, isFlatAttribute);
 		addPercentageSignOrNothing(ss, formatBy.Energy, smartFormat);
 		isFirst = false;
 	}
 	if (value.Morale != defaultvalue.Morale || _showDefaults)
 	{
-		if (!isFirst) ss << L", ";
-		ss << tr("STR_COST_MORALE") << L": ";
+		if (!isFirst) ss << ", ";
+		ss << tr("STR_COST_MORALE") << ": ";
 		addBoolOrInteger(ss, value.Morale, isFlatAttribute);
 		addPercentageSignOrNothing(ss, formatBy.Morale, smartFormat);
 		isFirst = false;
 	}
 	if (value.Health != defaultvalue.Health || _showDefaults)
 	{
-		if (!isFirst) ss << L", ";
-		ss << tr("STR_COST_HEALTH") << L": ";
+		if (!isFirst) ss << ", ";
+		ss << tr("STR_COST_HEALTH") << ": ";
 		addBoolOrInteger(ss, value.Health, isFlatAttribute);
 		addPercentageSignOrNothing(ss, formatBy.Health, smartFormat);
 		isFirst = false;
 	}
 	if (value.Stun != defaultvalue.Stun || _showDefaults)
 	{
-		if (!isFirst) ss << L", ";
-		ss << tr("STR_COST_STUN") << L": ";
+		if (!isFirst) ss << ", ";
+		ss << tr("STR_COST_STUN") << ": ";
 		addBoolOrInteger(ss, value.Stun, isFlatAttribute);
 		addPercentageSignOrNothing(ss, formatBy.Stun, smartFormat);
 		isFirst = false;
@@ -1140,7 +1140,7 @@ void StatsForNerdsState::addRuleItemUseCostFull(std::wostringstream &ss, const R
 /**
  * Adds a BattleMediKitType to the table.
  */
-void StatsForNerdsState::addBattleMediKitType(std::wostringstream &ss, const BattleMediKitType &value, const std::string &propertyName, const BattleMediKitType &defaultvalue)
+void StatsForNerdsState::addBattleMediKitType(std::ostringstream &ss, const BattleMediKitType &value, const std::string &propertyName, const BattleMediKitType &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -1157,7 +1157,7 @@ void StatsForNerdsState::addBattleMediKitType(std::wostringstream &ss, const Bat
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -1170,7 +1170,7 @@ void StatsForNerdsState::addBattleMediKitType(std::wostringstream &ss, const Bat
 /**
  * Adds a ExperienceTrainingMode to the table.
  */
-void StatsForNerdsState::addExperienceTrainingMode(std::wostringstream &ss, const ExperienceTrainingMode &value, const std::string &propertyName, const ExperienceTrainingMode &defaultvalue)
+void StatsForNerdsState::addExperienceTrainingMode(std::ostringstream &ss, const ExperienceTrainingMode &value, const std::string &propertyName, const ExperienceTrainingMode &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -1216,7 +1216,7 @@ void StatsForNerdsState::addExperienceTrainingMode(std::wostringstream &ss, cons
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -1229,7 +1229,7 @@ void StatsForNerdsState::addExperienceTrainingMode(std::wostringstream &ss, cons
 /**
  * Adds a RuleStatBonus info to the table.
  */
-void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleStatBonus &value, const std::string &propertyName)
+void StatsForNerdsState::addRuleStatBonus(std::ostringstream &ss, const RuleStatBonus &value, const std::string &propertyName)
 {
 	if (!value.isModded() && !_showDefaults)
 	{
@@ -1250,11 +1250,11 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 				{
 					if (number > 0.0f)
 					{
-						ss << L" + ";
+						ss << " + ";
 					}
 					else
 					{
-						ss << L" - ";
+						ss << " - ";
 						numberAbs = std::abs(number);
 					}
 				}
@@ -1270,12 +1270,12 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 				{
 					if (!AreSame(numberAbs, 1.0f))
 					{
-						ss << numberAbs << L"*";
+						ss << numberAbs << "*";
 					}
 					addTranslation(ss, translationMap.at(item.first));
 					if (power > 1)
 					{
-						ss << L"^" << power;
+						ss << "^" << power;
 					}
 				}
 				isFirst = false;
@@ -1293,7 +1293,7 @@ void StatsForNerdsState::addRuleStatBonus(std::wostringstream &ss, const RuleSta
 /**
  * Adds a sprite resource path to the table.
  */
-void StatsForNerdsState::addSpriteResourcePath(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const int &resourceId)
+void StatsForNerdsState::addSpriteResourcePath(std::ostringstream &ss, Mod *mod, const std::string &resourceSetName, const int &resourceId)
 {
 	std::map<std::string, std::vector<ExtraSprites *> >::const_iterator i = mod->getExtraSprites().find(resourceSetName);
 	if (i != mod->getExtraSprites().end())
@@ -1307,12 +1307,12 @@ void StatsForNerdsState::addSpriteResourcePath(std::wostringstream &ss, Mod *mod
 			auto individualSprite = mapOfSprites->find(originalSpriteId);
 			if (individualSprite != mapOfSprites->end())
 			{
-				std::wostringstream numbers;
+				std::ostringstream numbers;
 				resetStream(numbers);
-				numbers << L"  " << originalSpriteId << L" + " << extraSprite->getModIndex();
+				numbers << "  " << originalSpriteId << " + " << extraSprite->getModIndex();
 
 				resetStream(ss);
-				ss << Language::utf8ToWstr(individualSprite->second);
+				ss << individualSprite->second;
 
 				_lstRawData->addRow(2, numbers.str().c_str(), ss.str().c_str());
 				++_counter;
@@ -1326,7 +1326,7 @@ void StatsForNerdsState::addSpriteResourcePath(std::wostringstream &ss, Mod *mod
 /**
  * Adds sound resource paths to the table.
  */
-void StatsForNerdsState::addSoundVectorResourcePaths(std::wostringstream &ss, Mod *mod, const std::string &resourceSetName, const std::vector<int> &resourceIds)
+void StatsForNerdsState::addSoundVectorResourcePaths(std::ostringstream &ss, Mod *mod, const std::string &resourceSetName, const std::vector<int> &resourceIds)
 {
 	if (resourceIds.empty())
 	{
@@ -1348,12 +1348,12 @@ void StatsForNerdsState::addSoundVectorResourcePaths(std::wostringstream &ss, Mo
 				auto individualSound = mapOfSounds->find(originalSoundId);
 				if (individualSound != mapOfSounds->end())
 				{
-					std::wostringstream numbers;
+					std::ostringstream numbers;
 					resetStream(numbers);
-					numbers << L"  " << originalSoundId << L" + " << resourceSet.second->getModIndex();
+					numbers << "  " << originalSoundId << " + " << resourceSet.second->getModIndex();
 
 					resetStream(ss);
-					ss << Language::utf8ToWstr(individualSound->second);
+					ss << individualSound->second;
 
 					_lstRawData->addRow(2, numbers.str().c_str(), ss.str().c_str());
 					++_counter;
@@ -1372,11 +1372,11 @@ void StatsForNerdsState::initItemList()
 	_lstRawData->clearList();
 	_lstRawData->setIgnoreSeparators(true);
 
-	std::wostringstream ssTopic;
+	std::ostringstream ssTopic;
 	ssTopic << tr(_topicId);
 	if (_showIds)
 	{
-		ssTopic << L" [" << Language::utf8ToWstr(_topicId) << L"]";
+		ssTopic << " [" << _topicId << "]";
 	}
 
 	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
@@ -1402,7 +1402,7 @@ void StatsForNerdsState::initItemList()
 		_txtTitle->setAlign(ALIGN_LEFT);
 	}
 
-	std::wostringstream ss;
+	std::ostringstream ss;
 
 	addBattleType(ss, itemRule->getBattleType(), "battleType");
 	addExperienceTrainingMode(ss, itemRule->getExperienceTrainingMode(), "experienceTrainingMode");
@@ -1714,15 +1714,15 @@ void StatsForNerdsState::initItemList()
 
 	if (_showDebug)
 	{
-		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
+		addSection("{Modding section}", "You don't need this info as a player", _white, true);
 
-		addSection(L"{Naming}", L"", _white);
+		addSection("{Naming}", "", _white);
 		addSingleString(ss, itemRule->getType(), "type");
 		addSingleString(ss, itemRule->getName(), "name", itemRule->getType());
 		addSingleString(ss, itemRule->getNameAsAmmo(), "nameAsAmmo");
 		addInteger(ss, itemRule->getListOrder(), "listOrder");
 
-		addSection(L"{Inventory}", L"", _white);
+		addSection("{Inventory}", "", _white);
 		addVectorOfIntegers(ss, itemRule->getCustomItemPreviewIndex(), "customItemPreviewIndex");
 		addInteger(ss, itemRule->getInventoryWidth(), "invWidth", -1); // always show!
 		addInteger(ss, itemRule->getInventoryHeight(), "invHeight", -1); // always show!
@@ -1730,7 +1730,7 @@ void StatsForNerdsState::initItemList()
 		addBoolean(ss, itemRule->isFixed(), "fixedWeapon");
 		addBoolean(ss, itemRule->isSpecialUsingEmptyHand(), "specialUseEmptyHand");
 
-		addSection(L"{Recovery}", L"", _white);
+		addSection("{Recovery}", "", _white);
 		addBoolean(ss, !itemRule->canBeEquippedBeforeBaseDefense(), "ignoreInBaseDefense"); // negated!
 		addInteger(ss, itemRule->getSpecialType(), "specialType", -1);
 		addBoolean(ss, !itemRule->getRecoveryDividers().empty(), "recoveryDividers*", false); // just say if there are any or not
@@ -1740,7 +1740,7 @@ void StatsForNerdsState::initItemList()
 		addBoolean(ss, itemRule->isAlien(), "liveAlien");
 		addInteger(ss, itemRule->getPrisonType(), "prisonType");
 
-		addSection(L"{Explosives}", L"", _white);
+		addSection("{Explosives}", "", _white);
 		addBoolean(ss, itemRule->isHiddenOnMinimap(), "hiddenOnMinimap");
 		addSingleString(ss, itemRule->getPrimeActionName(), "primeActionName", "STR_PRIME_GRENADE");
 		addSingleString(ss, itemRule->getPrimeActionMessage(), "primeActionMessage", "STR_GRENADE_IS_ACTIVATED");
@@ -1771,7 +1771,7 @@ void StatsForNerdsState::initItemList()
 		addSingleString(ss, itemRule->getSpawnUnit(), "spawnUnit");
 		addInteger(ss, itemRule->getSpawnUnitFaction(), "spawnUnitFaction", -1);
 
-		addSection(L"{Sprites}", L"", _white);
+		addSection("{Sprites}", "", _white);
 		addBoolean(ss, itemRule->getFixedShow(), "fixedWeaponShow");
 		addInteger(ss, itemRule->getTurretType(), "turretType", -1);
 
@@ -1786,7 +1786,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getBulletSprite(), "bulletSprite", -1);
 		addSingleString(ss, itemRule->getMediKitCustomBackground(), "medikitBackground");
 
-		addSection(L"{Sounds}", L"", _white);
+		addSection("{Sounds}", "", _white);
 		addVectorOfIntegers(ss, itemRule->getReloadSoundRaw(), "reloadSound");
 		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getReloadSoundRaw());
 		addVectorOfIntegers(ss, itemRule->getFireSoundRaw(), "fireSound");
@@ -1808,7 +1808,7 @@ void StatsForNerdsState::initItemList()
 		addVectorOfIntegers(ss, itemRule->getExplosionHitSoundRaw(), "explosionHitSound");
 		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", itemRule->getExplosionHitSoundRaw());
 
-		addSection(L"{Animations}", L"", _white);
+		addSection("{Animations}", "", _white);
 		addInteger(ss, itemRule->getHitAnimation(), "hitAnimation");
 		addInteger(ss, itemRule->getHitMissAnimation(), "hitMissAnimation", -1);
 		addInteger(ss, itemRule->getMeleeAnimation(), "meleeAnimation");
@@ -1823,7 +1823,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getVaporDensity(), "vaporDensity");
 		addIntegerPercent(ss, itemRule->getVaporProbability(), "vaporProbability", 15);
 
-		addSection(L"{AI}", L"", _white);
+		addSection("{AI}", "", _white);
 		addInteger(ss, itemRule->getAttraction(), "attraction");
 		addHeading("ai:");
 		{
@@ -1834,7 +1834,7 @@ void StatsForNerdsState::initItemList()
 			endHeading();
 		}
 
-		addSection(L"{TU/flat info}", L"", _white);
+		addSection("{TU/flat info}", "", _white);
 		addRuleItemUseCostBasic(ss, itemRule->getCostAimed(), "tuAimed");
 		addRuleItemUseCostBasic(ss, itemRule->getCostAuto(), "tuAuto");
 		addRuleItemUseCostBasic(ss, itemRule->getCostSnap(), "tuSnap");
@@ -1862,7 +1862,7 @@ void StatsForNerdsState::initItemList()
 		addRuleItemUseCostFull(ss, itemRule->getFlatPrime(), "flatPrime", RuleItemUseCost(0, 1));
 		addRuleItemUseCostFull(ss, itemRule->getFlatUnprime(), "flatUnprime", RuleItemUseCost(0, 1));
 
-		addSection(L"{Script tags}", L"", _white, true);
+		addSection("{Script tags}", "", _white, true);
 		{
 			auto tagValues = itemRule->getScriptValuesRaw().getValuesRaw();
 			ArgEnum index = ScriptParserBase::getArgType<ScriptTag<RuleItem>>();
@@ -1880,12 +1880,12 @@ void StatsForNerdsState::initItemList()
 /**
  * Adds a unit stat to the string stream, formatted with a label.
  */
-void StatsForNerdsState::addUnitStatFormatted(std::wostringstream &ss, const int &value, const std::string &label, bool &isFirst)
+void StatsForNerdsState::addUnitStatFormatted(std::ostringstream &ss, const int &value, const std::string &label, bool &isFirst)
 {
 	if (value != 0 || _showDefaults)
 	{
-		if (!isFirst) ss << L", ";
-		ss << tr(label) << L":" << value;
+		if (!isFirst) ss << ", ";
+		ss << tr(label) << ":" << value;
 		isFirst = false;
 	}
 }
@@ -1893,7 +1893,7 @@ void StatsForNerdsState::addUnitStatFormatted(std::wostringstream &ss, const int
 /**
  * Adds a UnitStats info to the table.
  */
-void StatsForNerdsState::addUnitStatBonus(std::wostringstream &ss, const UnitStats &value, const std::string &propertyName)
+void StatsForNerdsState::addUnitStatBonus(std::ostringstream &ss, const UnitStats &value, const std::string &propertyName)
 {
 	bool isDefault = value.tu == 0 && value.stamina == 0 && value.health == 0 && value.strength == 0
 		&& value.reactions == 0 && value.firing == 0 && value.melee == 0 && value.throwing == 0
@@ -1926,7 +1926,7 @@ void StatsForNerdsState::addUnitStatBonus(std::wostringstream &ss, const UnitSta
 /**
  * Adds a vector of damage modifiers to the table.
  */
-void StatsForNerdsState::addArmorDamageModifiers(std::wostringstream &ss, const std::vector<float> &vec, const std::string &propertyName)
+void StatsForNerdsState::addArmorDamageModifiers(std::ostringstream &ss, const std::vector<float> &vec, const std::string &propertyName)
 {
 	bool isDefault = true;
 	for (auto &item : vec)
@@ -1943,14 +1943,14 @@ void StatsForNerdsState::addArmorDamageModifiers(std::wostringstream &ss, const 
 	resetStream(ss);
 	int index = 0;
 	bool isFirst = true;
-	ss << L"{";
+	ss << "{";
 	for (auto &item : vec)
 	{
 		if (!AreSame(item, 1.0f) || _showDefaults)
 		{
 			if (!isFirst)
 			{
-				ss << L", ";
+				ss << ", ";
 			}
 			switch (index)
 			{
@@ -1976,12 +1976,12 @@ void StatsForNerdsState::addArmorDamageModifiers(std::wostringstream &ss, const 
 				case 19: ss << tr("STR_DAMAGE_19"); break;
 				default: ss << tr("STR_UNKNOWN"); break;
 			}
-			ss << L": " << item * 100 << L"%";
+			ss << ": " << item * 100 << "%";
 			isFirst = false;
 		}
 		index++;
 	}
-	ss << L"}";
+	ss << "}";
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
 	if (!isDefault)
@@ -1993,7 +1993,7 @@ void StatsForNerdsState::addArmorDamageModifiers(std::wostringstream &ss, const 
 /**
  * Adds a MovementType to the table.
  */
-void StatsForNerdsState::addMovementType(std::wostringstream &ss, const MovementType &value, const std::string &propertyName, const MovementType &defaultvalue)
+void StatsForNerdsState::addMovementType(std::ostringstream &ss, const MovementType &value, const std::string &propertyName, const MovementType &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -2011,7 +2011,7 @@ void StatsForNerdsState::addMovementType(std::wostringstream &ss, const Movement
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -2024,7 +2024,7 @@ void StatsForNerdsState::addMovementType(std::wostringstream &ss, const Movement
 /**
  * Adds a ForcedTorso to the table.
  */
-void StatsForNerdsState::addForcedTorso(std::wostringstream &ss, const ForcedTorso &value, const std::string &propertyName, const ForcedTorso &defaultvalue)
+void StatsForNerdsState::addForcedTorso(std::ostringstream &ss, const ForcedTorso &value, const std::string &propertyName, const ForcedTorso &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -2040,7 +2040,7 @@ void StatsForNerdsState::addForcedTorso(std::wostringstream &ss, const ForcedTor
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -2053,7 +2053,7 @@ void StatsForNerdsState::addForcedTorso(std::wostringstream &ss, const ForcedTor
 /**
  * Adds a DrawingRoutine to the table.
  */
-void StatsForNerdsState::addDrawingRoutine(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addDrawingRoutine(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -2089,7 +2089,7 @@ void StatsForNerdsState::addDrawingRoutine(std::wostringstream &ss, const int &v
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -2107,11 +2107,11 @@ void StatsForNerdsState::initArmorList()
 	_lstRawData->clearList();
 	_lstRawData->setIgnoreSeparators(true);
 
-	std::wostringstream ssTopic;
+	std::ostringstream ssTopic;
 	ssTopic << tr(_topicId);
 	if (_showIds)
 	{
-		ssTopic << L" [" << Language::utf8ToWstr(_topicId) << L"]";
+		ssTopic << " [" << _topicId << "]";
 	}
 
 	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
@@ -2124,7 +2124,7 @@ void StatsForNerdsState::initArmorList()
 	_filterOptions.clear();
 	_cbxRelatedStuff->setVisible(false);
 
-	std::wostringstream ss;
+	std::ostringstream ss;
 
 	addUnitStatBonus(ss, *armorRule->getStats(), "stats");
 
@@ -2216,24 +2216,24 @@ void StatsForNerdsState::initArmorList()
 
 	if (_showDebug)
 	{
-		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
+		addSection("{Modding section}", "You don't need this info as a player", _white, true);
 
-		addSection(L"{Naming}", L"", _white);
+		addSection("{Naming}", "", _white);
 		addSingleString(ss, armorRule->getType(), "type");
 
-		addSection(L"{Recovery}", L"", _white);
+		addSection("{Recovery}", "", _white);
 		addVectorOfStrings(ss, armorRule->getCorpseBattlescape(), "corpseBattle");
 		addSingleString(ss, armorRule->getCorpseGeoscape(), "corpseGeo");
 		addSingleString(ss, armorRule->getStoreItem(), "storeItem");
 
-		addSection(L"{Inventory}", L"", _white);
+		addSection("{Inventory}", "", _white);
 		addSingleString(ss, armorRule->getSpriteInventory(), "spriteInv", "", false);
 		addBoolean(ss, armorRule->hasInventory(), "allowInv", true);
 		addSingleString(ss, armorRule->getLayersDefaultPrefix(), "layersDefaultPrefix", "", false);
 		addBoolean(ss, !armorRule->getLayersSpecificPrefix().empty(), "layersSpecificPrefix*", false); // just say if there are any or not
 		addBoolean(ss, !armorRule->getLayersDefinition().empty(), "layersDefinition*", false); // just say if there are any or not
 
-		addSection(L"{Sprites}", L"", _white);
+		addSection("{Sprites}", "", _white);
 		addVectorOfIntegers(ss, armorRule->getCustomArmorPreviewIndex(), "customArmorPreviewIndex");
 		addSingleString(ss, armorRule->getSpriteSheet(), "spriteSheet", "", false);
 		addInteger(ss, armorRule->getFaceColorGroup(), "spriteFaceGroup");
@@ -2245,19 +2245,19 @@ void StatsForNerdsState::initArmorList()
 		addInteger(ss, armorRule->getRankColorGroup(), "spriteRankGroup");
 		addVectorOfIntegers(ss, armorRule->getRankColorRaw(), "spriteRankColor");
 
-		addSection(L"{Sounds}", L"", _white);
+		addSection("{Sounds}", "", _white);
 		addInteger(ss, armorRule->getMoveSound(), "moveSound", -1);
 		std::vector<int> tmpSoundVector;
 		tmpSoundVector.push_back(armorRule->getMoveSound());
 		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", tmpSoundVector);
 
-		addSection(L"{Animations}", L"", _white);
+		addSection("{Animations}", "", _white);
 		addDrawingRoutine(ss, armorRule->getDrawingRoutine(), "drawingRoutine");
 		addBoolean(ss, armorRule->getConstantAnimation(), "constantAnimation");
 		addForcedTorso(ss, armorRule->getForcedTorso(), "forcedTorso");
 		addInteger(ss, armorRule->getDeathFrames(), "deathFrames", 3);
 
-		addSection(L"{Calculations}", L"", _white);
+		addSection("{Calculations}", "", _white);
 		addVectorOfIntegers(ss, armorRule->getLoftempsSet(), "loftempsSet");
 		addInteger(ss, armorRule->getPersonalLight(), "personalLight", 15);
 		addInteger(ss, armorRule->getStandHeight(), "standHeight", -1);
@@ -2266,7 +2266,7 @@ void StatsForNerdsState::initArmorList()
 		addFloat(ss, armorRule->getOverKill(), "overKill", 0.5f);
 		addBoolean(ss, armorRule->getInstantWoundRecovery(), "instantWoundRecovery");
 
-		addSection(L"{Basics}", L"Stuff from the main article", _white, true);
+		addSection("{Basics}", "Stuff from the main article", _white, true);
 		addInteger(ss, armorRule->getFrontArmor(), "frontArmor");
 		addInteger(ss, armorRule->getRightSideArmor(), "sideArmor");
 		addInteger(ss, armorRule->getLeftSideArmor() - armorRule->getRightSideArmor(), "leftArmorDiff");
@@ -2275,7 +2275,7 @@ void StatsForNerdsState::initArmorList()
 
 		addArmorDamageModifiers(ss, armorRule->getDamageModifiersRaw(), "damageModifier");
 
-		addSection(L"{Script tags}", L"", _white, true);
+		addSection("{Script tags}", "", _white, true);
 		{
 			auto tagValues = armorRule->getScriptValuesRaw().getValuesRaw();
 			ArgEnum index = ScriptParserBase::getArgType<ScriptTag<Armor>>();
@@ -2293,7 +2293,7 @@ void StatsForNerdsState::initArmorList()
 /**
  * Adds a vector of Positions to the table.
  */
-void StatsForNerdsState::addVectorOfPositions(std::wostringstream &ss, const std::vector<Position> &vec, const std::string &propertyName)
+void StatsForNerdsState::addVectorOfPositions(std::ostringstream &ss, const std::vector<Position> &vec, const std::string &propertyName)
 {
 	if (vec.empty() && !_showDefaults)
 	{
@@ -2301,17 +2301,17 @@ void StatsForNerdsState::addVectorOfPositions(std::wostringstream &ss, const std
 	}
 	resetStream(ss);
 	int i = 0;
-	ss << L"{";
+	ss << "{";
 	for (auto &item : vec)
 	{
 		if (i > 0)
 		{
-			ss << L", ";
+			ss << ", ";
 		}
-		ss << L"(" << item.x << L"," << item.y << L"," << item.z << L")";
+		ss << "(" << item.x << "," << item.y << "," << item.z << ")";
 		i++;
 	}
-	ss << L"}";
+	ss << "}";
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
 	if (!vec.empty())
@@ -2323,15 +2323,15 @@ void StatsForNerdsState::addVectorOfPositions(std::wostringstream &ss, const std
 /**
  * Adds a build cost item to the table.
  */
-void StatsForNerdsState::addBuildCostItem(std::wostringstream &ss, const std::pair<const std::string, std::pair<int, int> > &costItem)
+void StatsForNerdsState::addBuildCostItem(std::ostringstream &ss, const std::pair<const std::string, std::pair<int, int> > &costItem)
 {
 	resetStream(ss);
 	addTranslation(ss, costItem.first);
-	ss << L": " << tr("STR_COST_BUILD") << ": ";
+	ss << ": " << tr("STR_COST_BUILD") << ": ";
 	ss << costItem.second.first;
-	ss << L", " << tr("STR_COST_REFUND") << ": ";
+	ss << ", " << tr("STR_COST_REFUND") << ": ";
 	ss << costItem.second.second;
-	_lstRawData->addRow(2, L"", ss.str().c_str());
+	_lstRawData->addRow(2, "", ss.str().c_str());
 	++_counter;
 	_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
 }
@@ -2339,7 +2339,7 @@ void StatsForNerdsState::addBuildCostItem(std::wostringstream &ss, const std::pa
 /**
  * Adds a human readable form of base facility right-click action type to the table.
  */
-void StatsForNerdsState::addRightClickActionType(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addRightClickActionType(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -2360,7 +2360,7 @@ void StatsForNerdsState::addRightClickActionType(std::wostringstream &ss, const 
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -2378,11 +2378,11 @@ void StatsForNerdsState::initFacilityList()
 	_lstRawData->clearList();
 	_lstRawData->setIgnoreSeparators(true);
 
-	std::wostringstream ssTopic;
+	std::ostringstream ssTopic;
 	ssTopic << tr(_topicId);
 	if (_showIds)
 	{
-		ssTopic << L" [" << Language::utf8ToWstr(_topicId) << L"]";
+		ssTopic << " [" << _topicId << "]";
 	}
 
 	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
@@ -2395,7 +2395,7 @@ void StatsForNerdsState::initFacilityList()
 	_filterOptions.clear();
 	_cbxRelatedStuff->setVisible(false);
 
-	std::wostringstream ss;
+	std::ostringstream ss;
 
 	addVectorOfStrings(ss, facilityRule->getRequirements(), "requires");
 
@@ -2450,15 +2450,15 @@ void StatsForNerdsState::initFacilityList()
 
 	if (_showDebug)
 	{
-		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
+		addSection("{Modding section}", "You don't need this info as a player", _white, true);
 
-		addSection(L"{Naming}", L"", _white);
+		addSection("{Naming}", "", _white);
 		addSingleString(ss, facilityRule->getType(), "type");
 		addInteger(ss, facilityRule->getListOrder(), "listOrder");
 		addInteger(ss, facilityRule->getMissileAttraction(), "missileAttraction", 100);
 		addSingleString(ss, facilityRule->getDestroyedFacility() == 0 ? "" : facilityRule->getDestroyedFacility()->getType(), "destroyedFacility");
 
-		addSection(L"{Visuals}", L"", _white);
+		addSection("{Visuals}", "", _white);
 		addSingleString(ss, facilityRule->getMapName(), "mapName");
 		addBoolean(ss, !facilityRule->getVerticalLevels().empty(), "verticalLevels*"); // just say if there are any or not
 		addVectorOfPositions(ss, facilityRule->getStorageTiles(), "storageTiles");
@@ -2469,7 +2469,7 @@ void StatsForNerdsState::initFacilityList()
 		addInteger(ss, facilityRule->getSpriteFacility(), "spriteFacility", -1);
 		addSpriteResourcePath(ss, mod, "BASEBITS.PCK", facilityRule->getSpriteFacility());
 
-		addSection(L"{Sounds}", L"", _white);
+		addSection("{Sounds}", "", _white);
 		addInteger(ss, facilityRule->getFireSound(), "fireSound");
 		std::vector<int> tmpSoundVector;
 		tmpSoundVector.push_back(facilityRule->getFireSound());
@@ -2490,11 +2490,11 @@ void StatsForNerdsState::initCraftList()
 	_lstRawData->clearList();
 	_lstRawData->setIgnoreSeparators(true);
 
-	std::wostringstream ssTopic;
+	std::ostringstream ssTopic;
 	ssTopic << tr(_topicId);
 	if (_showIds)
 	{
-		ssTopic << L" [" << Language::utf8ToWstr(_topicId) << L"]";
+		ssTopic << " [" << _topicId << "]";
 	}
 
 	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
@@ -2507,7 +2507,7 @@ void StatsForNerdsState::initCraftList()
 	_filterOptions.clear();
 	_cbxRelatedStuff->setVisible(false);
 
-	std::wostringstream ss;
+	std::ostringstream ss;
 
 	addVectorOfStrings(ss, craftRule->getRequirements(), "requires");
 	addVectorOfStrings(ss, craftRule->getRequiresBuyBaseFunc(), "requiresBuyBaseFunc");
@@ -2636,13 +2636,13 @@ void StatsForNerdsState::initCraftList()
 
 	if (_showDebug)
 	{
-		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
+		addSection("{Modding section}", "You don't need this info as a player", _white, true);
 
-		addSection(L"{Naming}", L"", _white);
+		addSection("{Naming}", "", _white);
 		addSingleString(ss, craftRule->getType(), "type");
 		addInteger(ss, craftRule->getListOrder(), "listOrder");
 
-		addSection(L"{Geoscape}", L"", _white);
+		addSection("{Geoscape}", "", _white);
 		addInteger(ss, craftRule->getSprite(), "sprite (Minimized)", -1);
 		addSpriteResourcePath(ss, mod, "INTICON.PCK", craftRule->getSprite());
 		addInteger(ss, craftRule->getSprite() + 11, "_sprite (Dogfight)", 10);
@@ -2653,7 +2653,7 @@ void StatsForNerdsState::initCraftList()
 		//addSpriteResourcePath(ss, mod, "GlobeMarkers", craftRule->getMarker());
 		addInteger(ss, craftRule->getScore(), "score");
 
-		addSection(L"{Battlescape}", L"", _white);
+		addSection("{Battlescape}", "", _white);
 		addBoolean(ss, craftRule->getBattlescapeTerrainData() != 0, "battlescapeTerrainData", false); // just say if there is any or not
 		addBoolean(ss, craftRule->isMapVisible(), "mapVisible", true);
 		addVectorOfIntegers(ss, craftRule->getCraftInventoryTile(), "craftInventoryTile");
@@ -2679,7 +2679,7 @@ void StatsForNerdsState::initCraftList()
 /**
  * Adds a HuntMode to the table.
  */
-void StatsForNerdsState::addHuntMode(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addHuntMode(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -2695,7 +2695,7 @@ void StatsForNerdsState::addHuntMode(std::wostringstream &ss, const int &value, 
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -2708,7 +2708,7 @@ void StatsForNerdsState::addHuntMode(std::wostringstream &ss, const int &value, 
 /**
  * Adds a HuntBehavior to the table.
  */
-void StatsForNerdsState::addHuntBehavior(std::wostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
+void StatsForNerdsState::addHuntBehavior(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue)
 {
 	if (value == defaultvalue && !_showDefaults)
 	{
@@ -2724,7 +2724,7 @@ void StatsForNerdsState::addHuntBehavior(std::wostringstream &ss, const int &val
 	}
 	if (_showIds)
 	{
-		ss << L" [" << value << L"]";
+		ss << " [" << value << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
@@ -2742,11 +2742,11 @@ void StatsForNerdsState::initUfoList()
 	_lstRawData->clearList();
 	_lstRawData->setIgnoreSeparators(true);
 
-	std::wostringstream ssTopic;
+	std::ostringstream ssTopic;
 	ssTopic << tr(_topicId);
 	if (_showIds)
 	{
-		ssTopic << L" [" << Language::utf8ToWstr(_topicId) << L"]";
+		ssTopic << " [" << _topicId << "]";
 	}
 
 	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
@@ -2759,7 +2759,7 @@ void StatsForNerdsState::initUfoList()
 	_filterOptions.clear();
 	_cbxRelatedStuff->setVisible(false);
 
-	std::wostringstream ss;
+	std::ostringstream ss;
 
 	addSingleString(ss, ufoRule->getSize(), "size");
 
@@ -2851,12 +2851,12 @@ void StatsForNerdsState::initUfoList()
 
 	if (_showDebug)
 	{
-		addSection(L"{Modding section}", L"You don't need this info as a player", _white, true);
+		addSection("{Modding section}", "You don't need this info as a player", _white, true);
 
-		addSection(L"{Naming}", L"", _white);
+		addSection("{Naming}", "", _white);
 		addSingleString(ss, ufoRule->getType(), "type");
 
-		addSection(L"{Visuals}", L"", _white);
+		addSection("{Visuals}", "", _white);
 		addInteger(ss, ufoRule->getSprite(), "sprite", -1); // INTERWIN.DAT
 		addSingleString(ss, ufoRule->getModSprite(), "modSprite", "", false);
 		addInteger(ss, ufoRule->getMarker(), "marker", -1);
@@ -2864,7 +2864,7 @@ void StatsForNerdsState::initUfoList()
 		addInteger(ss, ufoRule->getCrashMarker(), "markerCrash", -1);
 		addBoolean(ss, ufoRule->getBattlescapeTerrainData() != 0, "battlescapeTerrainData", false); // just say if there is any or not
 
-		addSection(L"{Sounds}", L"", _white);
+		addSection("{Sounds}", "", _white);
 		addInteger(ss, ufoRule->getFireSound(), "fireSound", -1);
 		std::vector<int> tmpSoundVector;
 		tmpSoundVector.push_back(ufoRule->getFireSound());

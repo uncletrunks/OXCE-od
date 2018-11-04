@@ -27,7 +27,7 @@
 #include "../Engine/Logger.h"
 #include "../Mod/Mod.h"
 #include "../Engine/RNG.h"
-#include "../Engine/Language.h"
+#include "../Engine/Unicode.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Options.h"
 #include "../Engine/CrossPlatform.h"
@@ -338,38 +338,38 @@ SaveInfo SavedGame::getSaveInfo(const std::string &file, Language *lang)
 	{
 		if (doc["name"])
 		{
-			save.displayName = Language::utf8ToWstr(doc["name"].as<std::string>());
+			save.displayName = doc["name"].as<std::string>();
 		}
 		else
 		{
-			save.displayName = Language::fsToWstr(CrossPlatform::noExt(file));
+			save.displayName = Unicode::convPathToUtf8(CrossPlatform::noExt(file));
 		}
 		save.reserved = false;
 	}
 
 	save.timestamp = CrossPlatform::getDateModified(fullname);
-	std::pair<std::wstring, std::wstring> str = CrossPlatform::timeToString(save.timestamp);
+	std::pair<std::string, std::string> str = CrossPlatform::timeToString(save.timestamp);
 	save.isoDate = str.first;
 	save.isoTime = str.second;
 	save.mods = doc["mods"].as<std::vector< std::string> >(std::vector<std::string>());
 
-	std::wostringstream details;
+	std::ostringstream details;
 	if (doc["turn"])
 	{
-		details << lang->getString("STR_BATTLESCAPE") << L": " << lang->getString(doc["mission"].as<std::string>()) << L", ";
+		details << lang->getString("STR_BATTLESCAPE") << ": " << lang->getString(doc["mission"].as<std::string>()) << ", ";
 		details << lang->getString("STR_TURN").arg(doc["turn"].as<int>());
 	}
 	else
 	{
 		GameTime time = GameTime(6, 1, 1, 1999, 12, 0, 0);
 		time.load(doc["time"]);
-		details << lang->getString("STR_GEOSCAPE") << L": ";
-		details << time.getDayString(lang) << L" " << lang->getString(time.getMonthString()) << L" " << time.getYear() << L", ";
-		details << time.getHour() << L":" << std::setfill(L'0') << std::setw(2) << time.getMinute();
+		details << lang->getString("STR_GEOSCAPE") << ": ";
+		details << time.getDayString(lang) << " " << lang->getString(time.getMonthString()) << " " << time.getYear() << ", ";
+		details << time.getHour() << ":" << std::setfill('0') << std::setw(2) << time.getMinute();
 	}
 	if (doc["ironman"].as<bool>(false))
 	{
-		details << L" (" << lang->getString("STR_IRONMAN") << L")";
+		details << " (" << lang->getString("STR_IRONMAN") << ")";
 	}
 	save.details = details.str();
 
@@ -393,21 +393,14 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 
 	// Get brief save info
 	YAML::Node brief = file[0];
-	/*
-	std::string version = brief["version"].as<std::string>();
-	if (version != OPENXCOM_VERSION_SHORT)
-	{
-		throw Exception("Version mismatch");
-	}
-	*/
 	_time->load(brief["time"]);
 	if (brief["name"])
 	{
-		_name = Language::utf8ToWstr(brief["name"].as<std::string>());
+		_name = brief["name"].as<std::string>();
 	}
 	else
 	{
-		_name = Language::fsToWstr(filename);
+		_name = Unicode::convPathToUtf8(filename);
 	}
 	_ironman = brief["ironman"].as<bool>(_ironman);
 
@@ -587,10 +580,10 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 			// Bases don't have IDs and names are not unique, so need to consider lon/lat too
 			double lon = (*i)["lon"].as<double>(0.0);
 			double lat = (*i)["lat"].as<double>(0.0);
-			std::wstring baseName = L"";
+			std::string baseName = "";
 			if (const YAML::Node &name = (*i)["name"])
 			{
-				baseName = Language::utf8ToWstr(name.as<std::string>());
+				baseName = name.as<std::string>();
 			}
 
 			Base *base = 0;
@@ -705,7 +698,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		std::string key2 = oss2.str();
 		if (doc[key2])
 		{
-			_globalEquipmentLayoutName[j] = Language::utf8ToWstr(doc[key2].as<std::string>());
+			_globalEquipmentLayoutName[j] = doc[key2].as<std::string>();
 		}
 	}
 
@@ -723,7 +716,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		std::string key2 = oss2.str();
 		if (doc[key2])
 		{
-			_globalCraftLoadoutName[j] = Language::utf8ToWstr(doc[key2].as<std::string>());
+			_globalCraftLoadoutName[j] = doc[key2].as<std::string>();
 		}
 	}
 
@@ -768,7 +761,7 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 
 	// Saves the brief game info used in the saves list
 	YAML::Node brief;
-	brief["name"] = Language::wstrToUtf8(_name);
+	brief["name"] = _name;
 	brief["version"] = OPENXCOM_VERSION_SHORT;
 	std::string git_sha = OPENXCOM_VERSION_GIT;
 	if (!git_sha.empty() && git_sha[0] ==  '.')
@@ -881,7 +874,7 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 		std::string key2 = oss2.str();
 		if (!_globalEquipmentLayoutName[j].empty())
 		{
-			node[key2] = Language::wstrToUtf8(_globalEquipmentLayoutName[j]);
+			node[key2] = _globalEquipmentLayoutName[j];
 		}
 	}
 	for (int j = 0; j < MAX_CRAFT_LOADOUT_TEMPLATES; ++j)
@@ -898,7 +891,7 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 		std::string key2 = oss2.str();
 		if (!_globalCraftLoadoutName[j].empty())
 		{
-			node[key2] = Language::wstrToUtf8(_globalCraftLoadoutName[j]);
+			node[key2] = _globalCraftLoadoutName[j];
 		}
 	}
 	if (Options::soldierDiaries)
@@ -929,7 +922,7 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
  * Returns the game's name shown in Save screens.
  * @return Save name.
  */
-std::wstring SavedGame::getName() const
+std::string SavedGame::getName() const
 {
 	return _name;
 }
@@ -938,7 +931,7 @@ std::wstring SavedGame::getName() const
  * Changes the game's name shown in Save screens.
  * @param name New name.
  */
-void SavedGame::setName(const std::wstring &name)
+void SavedGame::setName(const std::string &name)
 {
 	_name = name;
 }
@@ -1357,7 +1350,7 @@ void SavedGame::setResearchRuleStatus(const std::string &researchRule, int newSt
 
 /**
  * Sets the hidden status of a purchase item
- * @param purchase item name 
+ * @param purchase item name
  * @param hidden
  */
 void SavedGame::setHiddenPurchaseItemsStatus(const std::string &itemName, bool hidden)
@@ -2584,7 +2577,7 @@ std::vector<EquipmentLayoutItem*> *SavedGame::getGlobalEquipmentLayout(int index
 * Returns the name of a global equipment layout at specified index.
 * @return A name.
 */
-const std::wstring &SavedGame::getGlobalEquipmentLayoutName(int index) const
+const std::string &SavedGame::getGlobalEquipmentLayoutName(int index) const
 {
 	return _globalEquipmentLayoutName[index];
 }
@@ -2594,7 +2587,7 @@ const std::wstring &SavedGame::getGlobalEquipmentLayoutName(int index) const
 * @param index Array index.
 * @param name New name.
 */
-void SavedGame::setGlobalEquipmentLayoutName(int index, const std::wstring &name)
+void SavedGame::setGlobalEquipmentLayoutName(int index, const std::string &name)
 {
 	_globalEquipmentLayoutName[index] = name;
 }
@@ -2612,7 +2605,7 @@ ItemContainer *SavedGame::getGlobalCraftLoadout(int index)
 * Returns the name of a global craft loadout at specified index.
 * @return A name.
 */
-const std::wstring &SavedGame::getGlobalCraftLoadoutName(int index) const
+const std::string &SavedGame::getGlobalCraftLoadoutName(int index) const
 {
 	return _globalCraftLoadoutName[index];
 }
@@ -2622,7 +2615,7 @@ const std::wstring &SavedGame::getGlobalCraftLoadoutName(int index) const
 * @param index Array index.
 * @param name New name.
 */
-void SavedGame::setGlobalCraftLoadoutName(int index, const std::wstring &name)
+void SavedGame::setGlobalCraftLoadoutName(int index, const std::string &name)
 {
 	_globalCraftLoadoutName[index] = name;
 }

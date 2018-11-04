@@ -122,7 +122,7 @@ BriefingState::BriefingState(Craft *craft, Base *base, bool infoOnly) : _infoOnl
 	_txtTarget->setBig();
 	_txtCraft->setBig();
 
-	std::wstring s;
+	std::string s;
 	if (craft)
 	{
 		if (craft->getDestination())

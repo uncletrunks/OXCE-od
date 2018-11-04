@@ -196,13 +196,13 @@ public:
 	/// Gets map.
 	Map *getMap() const;
 	/// Show debug message.
-	void debug(const std::wstring &message);
+	void debug(const std::string &message);
 	/// Show bug hunt message.
 	void bugHuntMessage();
 	/// Show warning message.
 	void warning(const std::string &message);
 	/// Gets melee damage preview.
-	std::wstring getMeleeDamagePreview(BattleUnit *actor, BattleItem *weapon) const;
+	std::string getMeleeDamagePreview(BattleUnit *actor, BattleItem *weapon) const;
 	/// Handles keypresses.
 	void handle(Action *action);
 	/// Displays a popup window.

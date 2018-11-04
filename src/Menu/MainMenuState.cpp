@@ -21,7 +21,7 @@
 #include "../version.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
-#include "../Engine/Language.h"
+#include "../Engine/LocalizedText.h"
 #include "../Engine/Screen.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -30,7 +30,6 @@
 #include "NewBattleState.h"
 #include "ListLoadState.h"
 #include "OptionsVideoState.h"
-#include "../Engine/Screen.h"
 #include "../Engine/Options.h"
 
 namespace OpenXcom
@@ -91,9 +90,9 @@ MainMenuState::MainMenuState()
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
-	std::wostringstream title;
-	title << tr("STR_OPENXCOM") << L"\x02";
-	title << Language::utf8ToWstr(OPENXCOM_VERSION_SHORT) << Language::utf8ToWstr(OPENXCOM_VERSION_GIT);
+	std::ostringstream title;
+	title << tr("STR_OPENXCOM") << Unicode::TOK_NL_SMALL;
+	title << OPENXCOM_VERSION_SHORT << OPENXCOM_VERSION_GIT;
 	_txtTitle->setText(title.str());
 }
 

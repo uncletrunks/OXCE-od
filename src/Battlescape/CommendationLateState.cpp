@@ -20,7 +20,7 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
-#include "../Engine/Language.h"
+#include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -108,7 +108,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 		// Loop over all commendation
 		for (std::map<std::string, RuleCommendations *>::const_iterator commList = commendationsList.begin(); commList != commendationsList.end();)
 		{
-			std::wostringstream wssCommendation;
+			std::ostringstream wssCommendation;
 			modularCommendation = false;
 			noun = "noNoun";
 
@@ -159,7 +159,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 					{
 						wssCommendation << tr((*commList).first);
 					}
-					_lstSoldiers->addRow(3, wssCommendation.str().c_str(), L"", tr((*soldierComm)->getDecorationLevelName(skipCounter)).c_str());
+					_lstSoldiers->addRow(3, wssCommendation.str().c_str(), "", tr((*soldierComm)->getDecorationLevelName(skipCounter)).c_str());
 					_commendationsNames.push_back((*commList).first);
 					row++;
 					break;
@@ -171,7 +171,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 				++commList;
 			}
 		} // END COMMS LOOPS
-		_lstSoldiers->addRow(3, L"", L"", L""); // Separator
+		_lstSoldiers->addRow(3, "", "", ""); // Separator
 		_commendationsNames.push_back("");
 		row++;
 	} // END SOLDIER LOOP    

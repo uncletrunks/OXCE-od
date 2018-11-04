@@ -2007,10 +2007,10 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 			if (RNG::percent(arg.getFirst()))
 			{
 				// start new hit log
-				_save->hitLog.str(L"");
+				_save->hitLog.str("");
 				_save->hitLog.clear();
 				// log weapon?
-				_save->hitLog << _save->getBattleState()->tr("STR_HIT_LOG_REACTION_FIRE") << L"\n\n";
+				_save->hitLog << _save->getBattleState()->tr("STR_HIT_LOG_REACTION_FIRE") << "\n\n";
 
 				if (action.type == BA_HIT)
 				{

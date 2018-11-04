@@ -96,7 +96,7 @@ DismantleFacilityState::DismantleFacilityState(Base *base, BaseView *view, BaseF
 	}
 
 	_txtRefundValue->setAlign(ALIGN_CENTER);
-	_txtRefundValue->setText(tr("STR_REFUND_VALUE").arg(Text::formatFunding(refundValue)));
+	_txtRefundValue->setText(tr("STR_REFUND_VALUE").arg(Unicode::formatFunding(refundValue)));
 	_txtRefundValue->setVisible(refundValue != 0);
 }
 

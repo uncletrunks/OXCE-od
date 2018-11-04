@@ -42,7 +42,7 @@ private:
 	TextList *_lstLoadout;
 	TextButton *_btnCancel, *_btnSave;
 	TextEdit *_edtSave;
-	std::wstring _selected;
+	std::string _selected;
 	int _previousSelectedRow, _selectedRow;
 public:
 	/// Creates the Save Craft Loadout state.

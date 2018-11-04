@@ -112,7 +112,7 @@ AllocateTrainingState::AllocateTrainingState(Base *base) : _sel(0), _base(base),
 	_txtTraining->setText(tr("STR_IN_TRAINING"));
 
 	// populate sort options
-	std::vector<std::wstring> sortOptions;
+	std::vector<std::string> sortOptions;
 	sortOptions.push_back(tr("STR_ORIGINAL_ORDER"));
 	_sortFunctors.push_back(NULL);
 
@@ -240,26 +240,26 @@ void AllocateTrainingState::initList(size_t scrl)
 	_lstSoldiers->clearList();
 	for (std::vector<Soldier*>::const_iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)
 	{
-		std::wostringstream tu;
+		std::ostringstream tu;
 		tu << (*s)->getCurrentStats()->tu;
-		std::wostringstream stamina;
+		std::ostringstream stamina;
 		stamina << (*s)->getCurrentStats()->stamina;
-		std::wostringstream health;
+		std::ostringstream health;
 		health << (*s)->getCurrentStats()->health;
-		std::wostringstream firing;
+		std::ostringstream firing;
 		firing << (*s)->getCurrentStats()->firing;
-		std::wostringstream throwing;
+		std::ostringstream throwing;
 		throwing << (*s)->getCurrentStats()->throwing;
-		std::wostringstream melee;
+		std::ostringstream melee;
 		melee << (*s)->getCurrentStats()->melee;
-		std::wostringstream strength;
+		std::ostringstream strength;
 		strength << (*s)->getCurrentStats()->strength;
 
 		bool isDone = (*s)->isFullyTrained();
 		bool isWounded = (*s)->isWounded();
 		bool isTraining = (*s)->isInTraining();
 
-		std::wstring status;
+		std::string status;
 		if (isDone)
 			status = tr("STR_NO_DONE");
 		else if (isWounded)

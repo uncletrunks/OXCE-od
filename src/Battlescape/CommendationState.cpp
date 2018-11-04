@@ -20,7 +20,7 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
-#include "../Engine/Language.h"
+#include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -85,9 +85,9 @@ CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 	{
 		modularCommendation = false;
 		noun = "noNoun";
-        if (titleChosen)
-        {
-            _lstSoldiers->addRow(2, L"", L""); // Blank row, will be filled in later
+		if (titleChosen)
+		{
+			_lstSoldiers->addRow(2, "", ""); // Blank row, will be filled in later
 			_commendationsNames.push_back("");
 			row++;
 		}
@@ -110,7 +110,7 @@ CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 					}
 
 					// Soldier name
-					std::wostringstream wssName;
+					std::ostringstream wssName;
 					wssName << "   ";
 					wssName << (*s)->getName();
 					// Decoration level name

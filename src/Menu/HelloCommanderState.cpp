@@ -56,7 +56,7 @@ HelloCommanderState::HelloCommanderState()
 	}
 
 	// Check 3: Base name search
-	const std::wstring hqNameSearch = L"FBI HQ";
+	const std::string hqNameSearch = "FBI HQ";
 	bool found = false;
 	for (auto base : *_game->getSavedGame()->getBases())
 	{
@@ -73,8 +73,8 @@ HelloCommanderState::HelloCommanderState()
 	}
 
 	// Check 4: Dead agents name search
-	const std::wstring soldierNameSearch1 = L"Agent Zargosian";
-	const std::wstring soldierNameSearch2 = L"Agent Bicentius";
+	const std::string soldierNameSearch1 = "Agent Zargosian";
+	const std::string soldierNameSearch2 = "Agent Bicentius";
 	found = false;
 	for (auto dead : *_game->getSavedGame()->getDeadSoldiers())
 	{
@@ -122,16 +122,16 @@ HelloCommanderState::HelloCommanderState()
 	}
 
 	_btnOk->setColor(239);
-	std::wstring backTo = L"Back to saving the world...";
+	std::string backTo = "Back to saving the world...";
 	_btnOk->setText(backTo);
 	_btnOk->onMouseClick((ActionHandler)&HelloCommanderState::btnOkClick);
 
 	_txtMessage->setColor(244);
 	_txtMessage->setWordWrap(true);
-	std::wostringstream ss;
-	ss << L"Hello Lewis and Ben,\n\nthis was your ";
+	std::ostringstream ss;
+	ss << "Hello Lewis and Ben,\n\nthis was your ";
 	ss << missionNumber;
-	ss << L"th mission!\n\nWe are extremely impressed with the progress of the XCOM project thus far, Commanders. Your recent results were beyond our expectations... and that is not a statement this Council makes lightly.\n\nAnd remember, we'll be watching...\n\n          -- Meridian";
+	ss << "th mission!\n\nWe are extremely impressed with the progress of the XCOM project thus far, Commanders. Your recent results were beyond our expectations... and that is not a statement this Council makes lightly.\n\nAnd remember, we'll be watching...\n\n          -- Meridian";
 	_txtMessage->setText(ss.str());
 }
 

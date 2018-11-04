@@ -48,11 +48,11 @@ enum ItemSort
 
 struct StoredItem
 {
-	StoredItem(const std::wstring &_name, int _quantity, double _size, double _spaceUsed)
+	StoredItem(const std::string &_name, int _quantity, double _size, double _spaceUsed)
 		: name(_name), quantity(_quantity), size(_size), spaceUsed(_spaceUsed)
 	{
 	}
-	std::wstring name;
+	std::string name;
 	int quantity;
 	double size;
 	double spaceUsed;

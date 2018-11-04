@@ -23,6 +23,7 @@
 #include <string>
 #include <SDL.h>
 #include <yaml-cpp/yaml.h>
+#include "Unicode.h"
 
 namespace OpenXcom
 {
@@ -46,34 +47,22 @@ class Font
 {
 private:
 	std::vector<FontImage> _images;
-	std::map< wchar_t, std::pair<size_t, SDL_Rect> > _chars;
+	std::map< UCode, std::pair<size_t, SDL_Rect> > _chars;
 	bool _monospace;
 	/// Determines the size and position of each character in the font.
-	void init(size_t index, const std::wstring &str);
+	void init(size_t index, const UString &str);
 public:
-	/* Special text tokens */
-	static const wchar_t TOK_BREAK_SMALLLINE = 2;		// line break and change to small font
-	static const wchar_t TOK_FLIP_COLORS = 1;			// flip color scheme
-	static const wchar_t TOK_NBSP = 0xA0;				// non-breaking space
 
 	/// Creates a blank font.
 	Font();
 	/// Cleans up the font.
 	~Font();
-	/// Checks if a character is a linebreak.
-	static inline bool isLinebreak(wchar_t c) { return (c == L'\n' || c == TOK_BREAK_SMALLLINE); }
-	/// Checks if a character is a blank space (includes non-breaking spaces).
-	static inline bool isSpace(wchar_t c) { return (c == L' ' || c == TOK_NBSP); }
-	/// Checks if a character is a word separator.
-	static inline bool isSeparator(wchar_t c) { return (c == L'-' || c == '/'); }
-	/// Checks if a character is a non-breaking space.
-	static inline bool isNonBreakableSpace(wchar_t c) { return (c == TOK_NBSP); }
 	/// Loads the font from YAML.
 	void load(const YAML::Node& node);
 	/// Generate the terminal font.
 	void loadTerminal();
 	/// Gets a particular character from the font, with its real size.
-	Surface *getChar(wchar_t c);
+	Surface *getChar(UCode c);
 	/// Gets the font's character width.
 	int getWidth() const;
 	/// Gets the font's character height.
@@ -81,7 +70,7 @@ public:
 	/// Gets the spacing between characters.
 	int getSpacing() const;
 	/// Gets the size of a particular character;
-	SDL_Rect getCharSize(wchar_t c);
+	SDL_Rect getCharSize(UCode c);
 	/// Gets the font's palette.
 	SDL_Color *getPalette() const;
 	/// Sets the font's palette.

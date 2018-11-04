@@ -117,7 +117,7 @@ TestPaletteState::TestPaletteState(const std::string &palette, PaletteActionType
 				text.setColor(index);
 				text.setX(column * 13);
 				text.setY(row * 17);
-				std::wostringstream ss;
+				std::ostringstream ss;
 				ss << index % 10;
 				text.setText(ss.str().c_str());
 				text.blit(_bg);
@@ -140,7 +140,7 @@ TestPaletteState::TestPaletteState(const std::string &palette, PaletteActionType
 			text.setColor(index);
 			text.setX(column * 26);
 			text.setY(row * 9);
-			std::wostringstream ss;
+			std::ostringstream ss;
 			ss << index;
 			text.setText(ss.str().c_str());
 			text.blit(_bg);

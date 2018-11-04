@@ -51,7 +51,7 @@ struct compareArmorName : public std::binary_function<ArmorItem&, ArmorItem&, bo
 
 	bool operator()(const ArmorItem &a, const ArmorItem &b) const
 	{
-		return CrossPlatform::naturalCompare(a.name, b.name);
+		return Unicode::naturalCompare(a.name, b.name);
 	}
 };
 
@@ -127,7 +127,7 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 			continue;
 		if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0)
 		{
-			std::wostringstream ss;
+			std::ostringstream ss;
 			if (_game->getSavedGame()->getMonthsPassed() > -1)
 			{
 				ss << _base->getStorageItems()->getItem(a->getStoreItem());
@@ -140,7 +140,7 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 		}
 		else if (a->getStoreItem() == Armor::NONE)
 		{
-			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), L""));
+			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), ""));
 		}
 	}
 

@@ -21,7 +21,7 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
-#include "../Engine/Language.h"
+#include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Interface/TextButton.h"
@@ -114,14 +114,14 @@ SoldierDiaryPerformanceState::SoldierDiaryPerformanceState(Base *base, size_t so
 
 	_btnKills->setText(tr("STR_COMBAT"));
 	_btnKills->onMouseClick((ActionHandler)&SoldierDiaryPerformanceState::btnKillsToggle);
-	
+
 	_btnMissions->setText(tr("STR_PERFORMANCE"));
 	_btnMissions->onMouseClick((ActionHandler)&SoldierDiaryPerformanceState::btnMissionsToggle);
 
 	_btnCommendations->setText(tr("STR_AWARDS"));
 	_btnCommendations->onMouseClick((ActionHandler)&SoldierDiaryPerformanceState::btnCommendationsToggle);
 
-	_btnPrev->setText(L"<<");
+	_btnPrev->setText("<<");
 	if (_base == 0)
 	{
 		_btnPrev->onMouseClick((ActionHandler)&SoldierDiaryPerformanceState::btnNextClick);
@@ -133,7 +133,7 @@ SoldierDiaryPerformanceState::SoldierDiaryPerformanceState(Base *base, size_t so
 		_btnPrev->onKeyboardPress((ActionHandler)&SoldierDiaryPerformanceState::btnPrevClick, Options::keyBattlePrevUnit);
 	}
 
-	_btnNext->setText(L">>");
+	_btnNext->setText(">>");
 	if (_base == 0)
 	{
 		_btnNext->onMouseClick((ActionHandler)&SoldierDiaryPerformanceState::btnPrevClick);
@@ -255,13 +255,13 @@ void SoldierDiaryPerformanceState::init()
 			_lstPerformance->setRowColor(_lstPerformance->getRows() - 1, _lstPerformance->getSecondaryColor());
 			for (std::map<std::string, int>::const_iterator j = mapArray[i].begin(); j != mapArray[i].end(); ++j)
 			{
-				std::wostringstream ss;
+				std::ostringstream ss;
 				ss << (*j).second;
 				_lstPerformance->addRow(2, tr((*j).first).c_str(), ss.str().c_str());
 			}
 			if (i != 2)
 			{
-				_lstPerformance->addRow(1, L"");
+				_lstPerformance->addRow(1, "");
 			}
 		}
 
@@ -286,21 +286,21 @@ void SoldierDiaryPerformanceState::init()
 		std::string titleArray[] = { "STR_MISSIONS_BY_LOCATION", "STR_MISSIONS_BY_TYPE", "STR_MISSIONS_BY_UFO" };
 
 		for (int i = 0; i != 3; ++i)
-	{
+		{
 			_lstPerformance->addRow(1, tr(titleArray[i]).c_str());
 			_lstPerformance->setRowColor(_lstPerformance->getRows() - 1, _lstPerformance->getSecondaryColor());
-		for (std::map<std::string, int>::const_iterator j = mapArray[i].begin() ; j != mapArray[i].end() ; ++j)
-		{
-			if ((*j).first == "NO_UFO") continue;
-			std::wostringstream ss;
-			ss << (*j).second;
+			for (std::map<std::string, int>::const_iterator j = mapArray[i].begin() ; j != mapArray[i].end() ; ++j)
+			{
+				if ((*j).first == "NO_UFO") continue;
+				std::ostringstream ss;
+				ss << (*j).second;
 				_lstPerformance->addRow(2, tr((*j).first).c_str(), ss.str().c_str());
 			}
 			if (i != 2)
 			{
-				_lstPerformance->addRow(1, L"");
+				_lstPerformance->addRow(1, "");
+			}
 		}
-	}
 
 		_lstMissionTotals->addRow(4, tr("STR_MISSIONS").arg(_soldier->getDiary()->getMissionTotal()).c_str(),
 									tr("STR_WINS").arg(_soldier->getDiary()->getWinTotal(_game->getSavedGame()->getMissionStatistics())).c_str(),
@@ -452,7 +452,7 @@ void SoldierDiaryPerformanceState::lstInfoMouseOver(Action *)
 
 	if ( _commendationsListEntry.empty() || _sel > _commendationsListEntry.size() - 1)
 	{
-		_txtMedalInfo->setText(L"");
+		_txtMedalInfo->setText("");
 	}
 	else
 	{
@@ -465,7 +465,7 @@ void SoldierDiaryPerformanceState::lstInfoMouseOver(Action *)
  */
 void SoldierDiaryPerformanceState::lstInfoMouseOut(Action *)
 {
-	_txtMedalInfo->setText(L"");
+	_txtMedalInfo->setText("");
 }
 
 /*

@@ -82,10 +82,10 @@ enum GameEnding { END_NONE, END_WIN, END_LOSE };
 struct SaveInfo
 {
 	std::string fileName;
-	std::wstring displayName;
+	std::string displayName;
 	time_t timestamp;
-	std::wstring isoDate, isoTime;
-	std::wstring details;
+	std::string isoDate, isoTime;
+	std::string details;
 	std::vector<std::string> mods;
 	bool reserved;
 };
@@ -111,7 +111,7 @@ public:
 	static const int MAX_EQUIPMENT_LAYOUT_TEMPLATES = 20;
 	static const int MAX_CRAFT_LOADOUT_TEMPLATES = 10;
 private:
-	std::wstring _name;
+	std::string _name;
 	GameDifficulty _difficulty;
 	GameEnding _end;
 	bool _ironman;
@@ -145,9 +145,9 @@ private:
 	std::vector<Soldier*> _deadSoldiers;
 	size_t _selectedBase;
 	std::string _lastselectedArmor; //contains the last selected armour
-	std::wstring _globalEquipmentLayoutName[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
+	std::string _globalEquipmentLayoutName[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
-	std::wstring _globalCraftLoadoutName[MAX_CRAFT_LOADOUT_TEMPLATES];
+	std::string _globalCraftLoadoutName[MAX_CRAFT_LOADOUT_TEMPLATES];
 	ItemContainer *_globalCraftLoadout[MAX_CRAFT_LOADOUT_TEMPLATES];
 	std::vector<MissionStatistics*> _missionStatistics;
 	std::set<int> _ignoredUfos;
@@ -169,9 +169,9 @@ public:
 	/// Saves a saved game to YAML.
 	void save(const std::string &filename, Mod *mod) const;
 	/// Gets the game name.
-	std::wstring getName() const;
+	std::string getName() const;
 	/// Sets the game name.
-	void setName(const std::wstring &name);
+	void setName(const std::string &name);
 	/// Gets the game difficulty.
 	GameDifficulty getDifficulty() const;
 	/// Sets the game difficulty.
@@ -373,15 +373,15 @@ public:
 	/// Returns the craft corresponding to the specified unique id.
 	Craft *findCraftByUniqueId(const CraftId& craftId) const;
 	/// Gets the name of a global equipment layout at specified index.
-	const std::wstring &getGlobalEquipmentLayoutName(int index) const;
+	const std::string &getGlobalEquipmentLayoutName(int index) const;
 	/// Sets the name of a global equipment layout at specified index.
-	void setGlobalEquipmentLayoutName(int index, const std::wstring &name);
+	void setGlobalEquipmentLayoutName(int index, const std::string &name);
 	/// Gets the global equipment layout at specified index.
 	std::vector<EquipmentLayoutItem*> *getGlobalEquipmentLayout(int index);
 	/// Gets the name of a global craft loadout at specified index.
-	const std::wstring &getGlobalCraftLoadoutName(int index) const;
+	const std::string &getGlobalCraftLoadoutName(int index) const;
 	/// Sets the name of a global craft loadout at specified index.
-	void setGlobalCraftLoadoutName(int index, const std::wstring &name);
+	void setGlobalCraftLoadoutName(int index, const std::string &name);
 	/// Gets the global craft loadout at specified index.
 	ItemContainer *getGlobalCraftLoadout(int index);
 	/// Gets the list of missions statistics

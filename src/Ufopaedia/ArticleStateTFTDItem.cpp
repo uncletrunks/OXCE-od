@@ -28,6 +28,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
+#include "../Engine/Unicode.h"
 #include "../Interface/TextList.h"
 #include <algorithm>
 
@@ -72,52 +73,52 @@ namespace OpenXcom
 			int current_row = 0;
 			if (item->getCostAuto().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getCostAuto().Time);
+				std::string tu = Unicode::formatPercentage(item->getCostAuto().Time);
 				if (item->getFlatAuto().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
-								 Text::formatPercentage(item->getAccuracyAuto()).c_str(),
-								 tu.c_str());
+								tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
+								Unicode::formatPercentage(item->getAccuracyAuto()).c_str(),
+								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
 			if (item->getCostSnap().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getCostSnap().Time);
+				std::string tu = Unicode::formatPercentage(item->getCostSnap().Time);
 				if (item->getFlatSnap().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_SNAP").c_str(),
-								 Text::formatPercentage(item->getAccuracySnap()).c_str(),
-								 tu.c_str());
+								tr("STR_SHOT_TYPE_SNAP").c_str(),
+								Unicode::formatPercentage(item->getAccuracySnap()).c_str(),
+								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 
 			if (item->getCostAimed().Time>0)
 			{
-				std::wstring tu = Text::formatPercentage(item->getCostAimed().Time);
+				std::string tu = Unicode::formatPercentage(item->getCostAimed().Time);
 				if (item->getFlatAimed().Time)
 				{
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								 tr("STR_SHOT_TYPE_AIMED").c_str(),
-								 Text::formatPercentage(item->getAccuracyAimed()).c_str(),
-								 tu.c_str());
+								tr("STR_SHOT_TYPE_AIMED").c_str(),
+								Unicode::formatPercentage(item->getAccuracyAimed()).c_str(),
+								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
 				current_row++;
 			}
 		}
 
 		// AMMO column
-		std::wostringstream ss;
+		std::ostringstream ss;
 
 		for (int i = 0; i<3; ++i)
 		{
@@ -138,11 +139,11 @@ namespace OpenXcom
 				{
 					_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
 
-					ss.str(L"");ss.clear();
+					ss.str("");ss.clear();
 					ss << item->getPower();
 					if (item->getShotgunPellets())
 					{
-						ss << L"x" << item->getShotgunPellets();
+						ss << "x" << item->getShotgunPellets();
 					}
 					_txtAmmoDamage[0]->setText(ss.str());
 				}
@@ -156,11 +157,11 @@ namespace OpenXcom
 							RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[i], true);
 							_txtAmmoType[i]->setText(tr(getDamageTypeText(ammo_rule->getDamageType()->ResistType)));
 
-							ss.str(L"");ss.clear();
+							ss.str("");ss.clear();
 							ss << ammo_rule->getPower();
 							if (ammo_rule->getShotgunPellets())
 							{
-								ss << L"x" << ammo_rule->getShotgunPellets();
+								ss << "x" << ammo_rule->getShotgunPellets();
 							}
 							_txtAmmoDamage[i]->setText(ss.str());
 						}
@@ -173,7 +174,7 @@ namespace OpenXcom
 			case BT_MELEE:
 				_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
 
-				ss.str(L"");ss.clear();
+				ss.str("");ss.clear();
 				ss << item->getPower();
 				_txtAmmoDamage[0]->setText(ss.str());
 				break;

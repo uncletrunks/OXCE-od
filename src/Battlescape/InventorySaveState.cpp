@@ -98,7 +98,7 @@ InventorySaveState::InventorySaveState(InventoryState *parent) : _parent(parent)
 		}
 		else
 		{
-			const std::wstring &itemName = _game->getSavedGame()->getGlobalEquipmentLayoutName(i);
+			const std::string &itemName = _game->getSavedGame()->getGlobalEquipmentLayoutName(i);
 			if (itemName.empty())
 			{
 				_lstLayout->addRow(1, tr("STR_UNNAMED_SLOT_N").arg(i + 1).c_str());
@@ -159,14 +159,14 @@ void InventorySaveState::lstLayoutPress(Action *action)
 		_previousSelectedRow = -1;
 		_selectedRow = -1;
 
-		_edtSave->setText(L"");
+		_edtSave->setText("");
 		_edtSave->setVisible(false);
 		_edtSave->setFocus(false, false);
 		_lstLayout->setScrolling(true);
 	}
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
-		_lstLayout->setCellText(_selectedRow, 0, L"");
+		_lstLayout->setCellText(_selectedRow, 0, "");
 
 		_edtSave->setText(_selected);
 		_edtSave->setX(_lstLayout->getColumnX(0));

@@ -40,7 +40,7 @@ private:
 	Window *_window;
 	Text *_txtTitle, *_txtBriefing, *_txtArmors;
 	// Checks the starting condition
-	std::wstring checkStartingCondition(AlienDeployment *deployment);
+	std::string checkStartingCondition(AlienDeployment *deployment);
 public:
 	/// Creates the BriefingLight state.
 	BriefingLightState(AlienDeployment *deployment);

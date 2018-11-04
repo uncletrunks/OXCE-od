@@ -156,26 +156,26 @@ void CraftPilotsState::updateUI()
 	const std::vector<Soldier*> pilots = c->getPilotList(false);
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
-		std::wostringstream ss1;
+		std::ostringstream ss1;
 		ss1 << (*i)->getCurrentStats()->firing;
-		std::wostringstream ss2;
+		std::ostringstream ss2;
 		ss2 << (*i)->getCurrentStats()->reactions;
-		std::wostringstream ss3;
+		std::ostringstream ss3;
 		ss3 << (*i)->getCurrentStats()->bravery;
-		_lstPilots->addRow(5, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), L"");
+		_lstPilots->addRow(5, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), "");
 	}
 
-	std::wostringstream ss1;
+	std::ostringstream ss1;
 	int accBonus = c->getPilotAccuracyBonus(pilots, _game->getMod());
-	ss1 << (accBonus > 0 ? L"+" : L"") << accBonus << L"%";
+	ss1 << (accBonus > 0 ? "+" : "") << accBonus << "%";
 	_txtAccuracyBonusValue->setText(ss1.str().c_str());
 
-	std::wostringstream ss2;
+	std::ostringstream ss2;
 	int dodgeBonus = c->getPilotDodgeBonus(pilots, _game->getMod());
-	ss2 << (dodgeBonus > 0 ? L"+" : L"") << dodgeBonus << L"%";
+	ss2 << (dodgeBonus > 0 ? "+" : "") << dodgeBonus << "%";
 	_txtDodgeBonusValue->setText(ss2.str().c_str());
 
-	std::wostringstream ss3;
+	std::ostringstream ss3;
 	int approachSpeed = c->getPilotApproachSpeedModifier(pilots, _game->getMod());
 	switch (approachSpeed)
 	{

@@ -82,7 +82,7 @@ InventoryLoadState::InventoryLoadState(InventoryState *parent) : _parent(parent)
 		}
 		else
 		{
-			const std::wstring &itemName = _game->getSavedGame()->getGlobalEquipmentLayoutName(i);
+			const std::string &itemName = _game->getSavedGame()->getGlobalEquipmentLayoutName(i);
 			if (itemName.empty())
 			{
 				_lstLayout->addRow(1, tr("STR_UNNAMED_SLOT_N").arg(i + 1).c_str());

@@ -29,7 +29,6 @@
 #include "../Engine/ShaderMove.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Options.h"
-#include "../fmath.h"
 
 namespace OpenXcom
 {

@@ -100,7 +100,7 @@ public:
 	/// Sets the mission wave number that created this UFO.
 	void setMissionWaveNumber(int missionWaveNumber) { _missionWaveNumber = missionWaveNumber; }
 	/// Gets the UFO's default name.
-	std::wstring getDefaultName(Language *lang) const;
+	std::string getDefaultName(Language *lang) const;
 	/// Gets the UFO's marker name.
 	std::string getMarkerName() const;
 	/// Gets the UFO's marker sprite.

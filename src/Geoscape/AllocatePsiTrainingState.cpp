@@ -98,7 +98,7 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	_txtTraining->setText(tr("STR_IN_TRAINING"));
 
 	// populate sort options
-	std::vector<std::wstring> sortOptions;
+	std::vector<std::string> sortOptions;
 	sortOptions.push_back(tr("STR_ORIGINAL_ORDER"));
 	_sortFunctors.push_back(NULL);
 
@@ -230,12 +230,12 @@ void AllocatePsiTrainingState::initList(size_t scrl)
 	_lstSoldiers->clearList();
 	for (std::vector<Soldier*>::const_iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)
 	{
-		std::wostringstream ssStr;
-		std::wostringstream ssSkl;
+		std::ostringstream ssStr;
+		std::ostringstream ssSkl;
 		_soldiers.push_back(*s);
 		if ((*s)->getCurrentStats()->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 		{
-			ssStr << L"   " << (*s)->getCurrentStats()->psiStrength;
+			ssStr << "   " << (*s)->getCurrentStats()->psiStrength;
 			if (Options::allowPsiStrengthImprovement) ssStr << "/+" << (*s)->getPsiStrImprovement();
 		}
 		else

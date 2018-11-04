@@ -57,7 +57,7 @@ public:
 	static void ScriptRegister(ScriptParserBase* parser);
 
 private:
-	std::wstring _name;
+	std::string _name;
 	int _id, _nationality, _improvement, _psiStrImprovement;
 	RuleSoldier *_rules;
 	UnitStats _initialStats, _currentStats;
@@ -75,7 +75,7 @@ private:
 	std::vector<EquipmentLayoutItem*> _equipmentLayout;
 	SoldierDeath *_death;
 	SoldierDiary *_diary;
-	std::wstring _statString;
+	std::string _statString;
 	bool _corpseRecovered;
 	std::map<std::string, int> _previousTransformations;
 	ScriptValues<Soldier> _scriptValues;
@@ -89,9 +89,9 @@ public:
 	/// Saves the soldier to YAML.
 	YAML::Node save(const ScriptGlobal *shared) const;
 	/// Gets the soldier's name.
-	std::wstring getName(bool statstring = false, unsigned int maxLength = 20) const;
+	std::string getName(bool statstring = false, unsigned int maxLength = 20) const;
 	/// Sets the soldier's name.
-	void setName(const std::wstring &name);
+	void setName(const std::string &name);
 	/// Gets the soldier's nationality.
 	int getNationality() const;
 	/// Sets the soldier's nationality.
@@ -101,7 +101,7 @@ public:
 	/// Sets the soldier's craft.
 	void setCraft(Craft *craft);
 	/// Gets the soldier's craft string.
-	std::wstring getCraftString(Language *lang, float absBonus, float relBonus) const;
+	std::string getCraftString(Language *lang, float absBonus, float relBonus) const;
 	/// Gets a string version of the soldier's rank.
 	std::string getRankString() const;
 	/// Gets a sprite version of the soldier's rank. Used for BASEBITS.PCK.

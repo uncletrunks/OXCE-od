@@ -149,7 +149,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 
 	if (Options::canSellLiveAliens)
 	{
-		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
+		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Unicode::formatFunding(_total)));
 	}
 
 	_lstAliens->setArrowColumn(184, ARROW_HORIZONTAL);
@@ -178,28 +178,28 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 		{
 			_qtys.push_back(0);
 			_aliens.push_back(*i);
-			std::wostringstream ss;
+			std::ostringstream ss;
 			ss << qty;
-			std::wstring rqty;
+			std::string rqty;
 			std::vector<std::string>::iterator research = std::find(researchList.begin(), researchList.end(), *i);
 			if (research != researchList.end())
 			{
-				rqty = L"1";
+				rqty = "1";
 				researchList.erase(research);
 			}
 			else
 			{
-				rqty = L"0";
+				rqty = "0";
 			}
 
-			std::wstring formattedCost = L"";
+			std::string formattedCost = "";
 			if (Options::canSellLiveAliens)
 			{
 				int sellCost = rule->getSellCost();
-				formattedCost = Text::formatFunding(sellCost / 1000).append(L"K");
+				formattedCost = Unicode::formatFunding(sellCost / 1000).append("K");
 			}
 
-			_lstAliens->addRow(5, tr(*i).c_str(), formattedCost.c_str(), ss.str().c_str(), L"0", rqty.c_str());
+			_lstAliens->addRow(5, tr(*i).c_str(), formattedCost.c_str(), ss.str().c_str(), "0", rqty.c_str());
 		}
 	}
 
@@ -207,7 +207,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	{
 		_aliens.push_back(*i);
 		_qtys.push_back(0);
-		_lstAliens->addRow(5, tr(*i).c_str(), Options::canSellLiveAliens ? L"-" : L"", L"0", L"0", L"1");
+		_lstAliens->addRow(5, tr(*i).c_str(), Options::canSellLiveAliens ? "-" : "", "0", "0", "1");
 		_lstAliens->setRowColor(_qtys.size() -1, _lstAliens->getSecondaryColor());
 	}
 	_timerInc = new Timer(250);
@@ -489,7 +489,7 @@ void ManageAlienContainmentState::decreaseByValue(int change)
  */
 void ManageAlienContainmentState::updateStrings()
 {
-	std::wostringstream ss, ss2, ss3;
+	std::ostringstream ss, ss2, ss3;
 	int qty = getQuantity() - _qtys[_sel];
 	ss << qty;
 	ss2 << _qtys[_sel];
@@ -519,7 +519,7 @@ void ManageAlienContainmentState::updateStrings()
 				_total += _game->getMod()->getItem(_aliens[i])->getSellCost() * _qtys[i];
 			}
 		}
-		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Text::formatFunding(_total)));
+		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Unicode::formatFunding(_total)));
 	}
 }
 

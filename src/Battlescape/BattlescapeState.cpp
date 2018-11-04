@@ -704,7 +704,7 @@ void BattlescapeState::init()
 		_btnReserveAimed->setGroup(&_reserve);
 		_btnReserveAuto->setGroup(&_reserve);
 	}
-	_txtTooltip->setText(L"");
+	_txtTooltip->setText("");
 	_btnReserveKneel->toggle(_save->getKneelReserved());
 	_battleGame->setKneelReserved(_save->getKneelReserved());
 	if (_autosave)
@@ -953,8 +953,8 @@ void BattlescapeState::mapClick(Action *action)
 
 	if (_save->getDebugMode())
 	{
-		std::wostringstream ss;
-		ss << L"Clicked " << pos;
+		std::ostringstream ss;
+		ss << "Clicked " << pos;
 		debug(ss.str());
 	}
 
@@ -1253,7 +1253,7 @@ void BattlescapeState::btnEndTurnClick(Action *)
 {
 	if (allowButtons())
 	{
-		_txtTooltip->setText(L"");
+		_txtTooltip->setText("");
 		_battleGame->requestEndTurn(false);
 	}
 }
@@ -1669,7 +1669,7 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 	}
 	if (!playableUnit)
 	{
-		_txtName->setText(L"");
+		_txtName->setText("");
 		showPsiButton(false);
 		showSpecialButton(false);
 		toggleKneelButton(0);
@@ -2025,7 +2025,7 @@ Map *BattlescapeState::getMap() const
  * Shows a debug message in the topleft corner.
  * @param message Debug message.
  */
-void BattlescapeState::debug(const std::wstring &message)
+void BattlescapeState::debug(const std::string &message)
 {
 	if (_save->getDebugMode())
 	{
@@ -2058,10 +2058,10 @@ void BattlescapeState::warning(const std::string &message)
  * @param actor Selected unit.
  * @param weapon Weapon to use for calculation.
  */
-std::wstring BattlescapeState::getMeleeDamagePreview(BattleUnit *actor, BattleItem *weapon) const
+std::string BattlescapeState::getMeleeDamagePreview(BattleUnit *actor, BattleItem *weapon) const
 {
 	if (!weapon)
-		return L"";
+		return "";
 
 	bool discovered = false;
 	if (_game->getSavedGame()->getMonthsPassed() == -1)
@@ -2077,7 +2077,7 @@ std::wstring BattlescapeState::getMeleeDamagePreview(BattleUnit *actor, BattleIt
 		}
 	}
 
-	std::wostringstream ss;
+	std::ostringstream ss;
 	if (discovered)
 	{
 		int totalDamage = 0;
@@ -2094,17 +2094,17 @@ std::wstring BattlescapeState::getMeleeDamagePreview(BattleUnit *actor, BattleIt
 		}
 
 		ss << tr(weapon->getRules()->getType());
-		ss << L"\n";
+		ss << "\n";
 		ss << dmgType->getRandomDamage(totalDamage, 1);
-		ss << L"-";
+		ss << "-";
 		ss << dmgType->getRandomDamage(totalDamage, 2);
 		if (dmgType->RandomType == DRT_UFO_WITH_TWO_DICE)
-			ss << L"*";
+			ss << "*";
 	}
 	else
 	{
 		ss << tr(weapon->getRules()->getType());
-		ss << L"\n?-?";
+		ss << "\n?-?";
 	}
 
 	return ss.str();
@@ -2169,9 +2169,9 @@ inline void BattlescapeState::handle(Action *action)
 				// "ctrl-e" - experience log
 				else if (key == SDLK_e && ctrlPressed)
 				{
-					std::wostringstream ss;
+					std::ostringstream ss;
 					ss << tr("STR_NO_EXPERIENCE_YET");
-					ss << L"\n\n";
+					ss << "\n\n";
 					bool first = true;
 					for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 					{
@@ -2179,7 +2179,7 @@ inline void BattlescapeState::handle(Action *action)
 						{
 							if ((*i)->getGeoscapeSoldier() && !(*i)->hasGainedAnyExperience())
 							{
-								if (!first) ss << L", ";
+								if (!first) ss << ", ";
 								ss << (*i)->getName(_game->getLanguage());
 								first = false;
 							}
@@ -2216,7 +2216,7 @@ inline void BattlescapeState::handle(Action *action)
 							anotherSpecialWeapon = 0;
 						}
 
-						std::wostringstream ss;
+						std::ostringstream ss;
 						bool first = true;
 						if (leftWeapon)
 						{
@@ -2225,19 +2225,19 @@ inline void BattlescapeState::handle(Action *action)
 						}
 						if (rightWeapon)
 						{
-							if (!first) ss << L"\n\n";
+							if (!first) ss << "\n\n";
 							ss << getMeleeDamagePreview(actor, rightWeapon);
 							first = false;
 						}
 						if (specialWeapon)
 						{
-							if (!first) ss << L"\n\n";
+							if (!first) ss << "\n\n";
 							ss << getMeleeDamagePreview(actor, specialWeapon);
 							first = false;
 						}
 						if (anotherSpecialWeapon)
 						{
-							if (!first) ss << L"\n\n";
+							if (!first) ss << "\n\n";
 							ss << getMeleeDamagePreview(actor, anotherSpecialWeapon);
 							first = false;
 						}
@@ -2251,12 +2251,12 @@ inline void BattlescapeState::handle(Action *action)
 					if (key == SDLK_d && ctrlPressed)
 					{
 						_save->setDebugMode();
-						debug(L"Debug Mode");
+						debug("Debug Mode");
 					}
 					// "ctrl-v" - reset tile visibility
 					else if (_save->getDebugMode() && key == SDLK_v && ctrlPressed)
 					{
-						debug(L"Resetting tile visibility");
+						debug("Resetting tile visibility");
 						_save->resetTiles();
 					}
 					else if (_save->getDebugMode() && (key == SDLK_k || key == SDLK_j) && ctrlPressed)
@@ -2273,7 +2273,7 @@ inline void BattlescapeState::handle(Action *action)
 								BattleUnit *unit = tile->getUnit();
 								if (unit && !unit->isOut())
 								{
-									debug(L"Bingo!");
+									debug("Bingo!");
 									unit->damage(Position(0, 0, 0), 1000, _game->getMod()->getDamageType(stunOnly ? DT_STUN : DT_AP), _save, {});
 								}
 							}
@@ -2283,12 +2283,12 @@ inline void BattlescapeState::handle(Action *action)
 							if (stunOnly)
 							{
 								// "ctrl-j" - stun all aliens
-								debug(L"Deploying Celine Dion album");
+								debug("Deploying Celine Dion album");
 							}
 							else
 							{
 								// "ctrl-k" - kill all aliens
-								debug(L"Influenza bacterium dispersed");
+								debug("Influenza bacterium dispersed");
 							}
 							for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 							{
@@ -2312,7 +2312,7 @@ inline void BattlescapeState::handle(Action *action)
 							Tile *tile = _save->getTile(newPos);
 							if (tile)
 							{
-								debug(L"Beam me up Scotty");
+								debug("Beam me up Scotty");
 								_save->getPathfinding()->removePreview();
 
 								unit->getTile()->setUnit(0);
@@ -2772,7 +2772,7 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 			}
 			else if (cutscene == CutsceneState::LOSE_GAME)
 			{
-				_game->getSavedGame()->setEnding(END_LOSE);				
+				_game->getSavedGame()->setEnding(END_LOSE);
 			}
 			// Autosave if game is over
 			if (_game->getSavedGame()->getEnding() != END_NONE && _game->getSavedGame()->isIronman())
@@ -2998,7 +2998,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 			}
 
 			_currentTooltip = action->getSender()->getTooltip();
-			std::wostringstream tooltipExtra;
+			std::ostringstream tooltipExtra;
 			tooltipExtra << tr(_currentTooltip);
 
 			// target unit found
@@ -3036,7 +3036,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 				}
 			}
 		}
-		else 
+		else
 		{
 			// weapon is not of medi-kit battle type
 			_currentTooltip = action->getSender()->getTooltip();
@@ -3082,9 +3082,9 @@ void BattlescapeState::txtTooltipInEndTurn(Action *action)
 	{
 		_currentTooltip = action->getSender()->getTooltip();
 
-		std::wostringstream ss;
+		std::ostringstream ss;
 		ss << tr(_currentTooltip);
-		ss << L" ";
+		ss << " ";
 		ss << _save->getTurn();
 		_txtTooltip->setText(ss.str().c_str());
 	}
@@ -3116,7 +3116,7 @@ void BattlescapeState::txtTooltipOut(Action *action)
 	{
 		if (_currentTooltip == action->getSender()->getTooltip())
 		{
-			_txtTooltip->setText(L"");
+			_txtTooltip->setText("");
 		}
 	}
 }

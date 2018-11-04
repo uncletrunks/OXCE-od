@@ -110,11 +110,11 @@ SoldierTransformationState::SoldierTransformationState(RuleSoldierTransformation
 
 	if (_filteredListOfSoldiers->size() > 1)
 	{
-		_btnLeftArrow->setText(L"<<");
+		_btnLeftArrow->setText("<<");
 		_btnLeftArrow->onMouseClick((ActionHandler)&SoldierTransformationState::btnLeftArrowClick);
 		_btnLeftArrow->onKeyboardPress((ActionHandler)&SoldierTransformationState::btnLeftArrowClick, Options::keyGeoLeft);
 
-		_btnRightArrow->setText(L">>");
+		_btnRightArrow->setText(">>");
 		_btnRightArrow->onMouseClick((ActionHandler)&SoldierTransformationState::btnRightArrowClick);
 		_btnRightArrow->onKeyboardPress((ActionHandler)&SoldierTransformationState::btnRightArrowClick, Options::keyGeoRight);
 	}
@@ -159,15 +159,15 @@ SoldierTransformationState::~SoldierTransformationState()
 /**
  * Creates a string for the soldier stats table
  */
-std::wstring SoldierTransformationState::formatStat(int stat, bool plus, bool hide)
+std::string SoldierTransformationState::formatStat(int stat, bool plus, bool hide)
 {
-	if (hide) return L"\x01?\x01";
-	if (stat == 0) return L"";
+	if (hide) return "\x01?\x01"; //Unicode::TOK_COLOR_FLIP
+	if (stat == 0) return "";
 
-	std::wostringstream ss;
-	ss << L'\x01';
-	if (plus && stat > 0) ss << L'+';
-	ss << stat << L'\x01';
+	std::ostringstream ss;
+	ss << Unicode::TOK_COLOR_FLIP;
+	if (plus && stat > 0) ss << '+';
+	ss << stat << Unicode::TOK_COLOR_FLIP;
 	return ss.str();
 }
 
@@ -190,7 +190,7 @@ void SoldierTransformationState::initTransformationData()
 		transformationPossible = false;
 	}
 
-	_txtCost->setText(tr("STR_COST_").arg(Text::formatFunding(_transformationRule->getCost())));
+	_txtCost->setText(tr("STR_COST_").arg(Unicode::formatFunding(_transformationRule->getCost())));
 
 	int transferTime = 0;
 	if (_transformationRule->getTransferTime() > 0 || _transformationRule->isCreatingClone() || _sourceSoldier->getDeath())
@@ -205,7 +205,7 @@ void SoldierTransformationState::initTransformationData()
 	int row = 0;
 	for (std::map<std::string, int>::const_iterator iter = requiredItems.begin(); iter != requiredItems.end(); ++iter)
 	{
-		std::wostringstream s1, s2;
+		std::ostringstream s1, s2;
 		s1 << iter->second;
 		if (_game->getMod()->getItem(iter->first) != 0)
 		{
@@ -222,7 +222,7 @@ void SoldierTransformationState::initTransformationData()
 	UnitStats currentStats = *_sourceSoldier->getCurrentStats();
 	UnitStats changedStats = _sourceSoldier->calculateStatChanges(_game->getMod(), _transformationRule, _sourceSoldier);
 
-	_lstStatChanges->addRow(13, L"",
+	_lstStatChanges->addRow(13, "",
 		tr("STR_TIME_UNITS_ABBREVIATION").c_str(),
 		tr("STR_STAMINA_ABBREVIATION").c_str(),
 		tr("STR_HEALTH_ABBREVIATION").c_str(),
@@ -234,7 +234,7 @@ void SoldierTransformationState::initTransformationData()
 		tr("STR_STRENGTH_ABBREVIATION").c_str(),
 		tr("STR_PSIONIC_STRENGTH_ABBREVIATION").c_str(),
 		tr("STR_PSIONIC_SKILL_ABBREVIATION").c_str(),
-		L"");
+		"");
 
 	bool showPsi = currentStats.psiSkill > 0
 		|| (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
@@ -252,7 +252,7 @@ void SoldierTransformationState::initTransformationData()
 		formatStat(currentStats.strength, false, false).c_str(),
 		formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
 		formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
-		L"");
+		"");
 
 	_lstStatChanges->addRow(13, tr("STR_CHANGES").c_str(),
 		formatStat(changedStats.tu, true, isRandom).c_str(),
@@ -266,7 +266,7 @@ void SoldierTransformationState::initTransformationData()
 		formatStat(changedStats.strength, true, isRandom).c_str(),
 		formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
 		formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
-		L"");
+		"");
 
 	_btnStart->setVisible(transformationPossible);
 }

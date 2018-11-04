@@ -58,7 +58,7 @@ private:
 	BattlescapeState *_parent;
 	Base *_base;
 	std::string _currentTooltip;
-	std::wstring _currentDamageTooltip;
+	std::string _currentDamageTooltip;
 	int _mouseHoverItemFrame = 0;
 	BattleItem *_mouseHoverItem = nullptr;
 	BattleItem *_currentDamageTooltipItem = nullptr;

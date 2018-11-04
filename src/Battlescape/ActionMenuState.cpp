@@ -22,6 +22,7 @@
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Action.h"
 #include "../Engine/Sound.h"
+#include "../Engine/Unicode.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleItem.h"
 #include "../Mod/Mod.h"
@@ -197,12 +198,12 @@ void ActionMenuState::init()
  */
 void ActionMenuState::addItem(BattleActionType ba, const std::string &name, int *id, SDLKey key)
 {
-	std::wstring s1, s2;
+	std::string s1, s2;
 	int acc = _action->actor->getFiringAccuracy(ba, _action->weapon, _game->getMod());
 	int tu = _action->actor->getActionTUs(ba, _action->weapon).Time;
 
 	if (ba == BA_THROW || ba == BA_AIMEDSHOT || ba == BA_SNAPSHOT || ba == BA_AUTOSHOT || ba == BA_LAUNCH || ba == BA_HIT)
-		s1 = tr("STR_ACCURACY_SHORT").arg(Text::formatPercentage(acc));
+		s1 = tr("STR_ACCURACY_SHORT").arg(Unicode::formatPercentage(acc));
 	s2 = tr("STR_TIME_UNITS_SHORT").arg(tu);
 	_actionMenu[*id]->setAction(ba, tr(name), s1, s2, tu);
 	_actionMenu[*id]->setVisible(true);
@@ -458,10 +459,10 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 		if (newHitLog)
 		{
 			// start new hit log
-			_game->getSavedGame()->getSavedBattle()->hitLog.str(L"");
+			_game->getSavedGame()->getSavedBattle()->hitLog.str("");
 			_game->getSavedGame()->getSavedBattle()->hitLog.clear();
 			// log weapon
-			_game->getSavedGame()->getSavedBattle()->hitLog << tr("STR_HIT_LOG_WEAPON") << L": " << tr(weapon->getType()) << L"\n\n";
+			_game->getSavedGame()->getSavedBattle()->hitLog << tr("STR_HIT_LOG_WEAPON") << ": " << tr(weapon->getType()) << "\n\n";
 		}
 	}
 }

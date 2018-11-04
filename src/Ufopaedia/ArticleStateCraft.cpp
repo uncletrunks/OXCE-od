@@ -26,6 +26,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/Surface.h"
 #include "../Engine/LocalizedText.h"
+#include "../Engine/Unicode.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 
@@ -80,9 +81,9 @@ namespace OpenXcom
 		_txtStats->setColor(Palette::blockOffset(14)+15);
 		_txtStats->setSecondaryColor(Palette::blockOffset(15)+4);
 
-		std::wostringstream ss;
-		ss << tr("STR_MAXIMUM_SPEED_UC").arg(Text::formatNumber(craft->getMaxSpeed())) << L'\n';
-		ss << tr("STR_ACCELERATION").arg(craft->getAcceleration()) << L'\n';
+		std::ostringstream ss;
+		ss << tr("STR_MAXIMUM_SPEED_UC").arg(Unicode::formatNumber(craft->getMaxSpeed())) << '\n';
+		ss << tr("STR_ACCELERATION").arg(craft->getAcceleration()) << '\n';
 		switch (_game->getMod()->getPediaReplaceCraftFuelWithRangeType())
 		{
 			int range;
@@ -93,7 +94,7 @@ namespace OpenXcom
 				range = craft->calculateRange(_game->getMod()->getPediaReplaceCraftFuelWithRangeType());
 				if (range == -1)
 				{
-					ss << tr("STR_MAXIMUM_RANGE").arg(tr("STR_INFINITE_RANGE")) << L'\n';
+					ss << tr("STR_MAXIMUM_RANGE").arg(tr("STR_INFINITE_RANGE")) << '\n';
 					break;
 				}
 
@@ -115,29 +116,29 @@ namespace OpenXcom
 					range -= range % 100;
 				}
 
-				ss << tr("STR_MAXIMUM_RANGE").arg(Text::formatNumber(range)) << L'\n';
+				ss << tr("STR_MAXIMUM_RANGE").arg(Unicode::formatNumber(range)) << '\n';
 				break;
 			// Min-maxxers can fret over exact numbers
 			case 1:
 				if (craft->calculateRange(0) == -1)
 				{
-					ss << tr("STR_MAXIMUM_RANGE").arg(tr("STR_INFINITE_RANGE")) << L'\n';
+					ss << tr("STR_MAXIMUM_RANGE").arg(tr("STR_INFINITE_RANGE")) << '\n';
 					break;
 				}
 
-				ss << tr("STR_MINIMUM_RANGE").arg(Text::formatNumber(craft->calculateRange(1))) << L'\n';
-				ss << tr("STR_MAXIMUM_RANGE").arg(Text::formatNumber(craft->calculateRange(0))) << L'\n';
+				ss << tr("STR_MINIMUM_RANGE").arg(Unicode::formatNumber(craft->calculateRange(1))) << '\n';
+				ss << tr("STR_MAXIMUM_RANGE").arg(Unicode::formatNumber(craft->calculateRange(0))) << '\n';
 				break;
 			default :
-				ss << tr("STR_FUEL_CAPACITY").arg(Text::formatNumber(craft->getMaxFuel())) << L'\n';
+				ss << tr("STR_FUEL_CAPACITY").arg(Unicode::formatNumber(craft->getMaxFuel())) << '\n';
 				break;
 		}
-		ss << tr("STR_WEAPON_PODS").arg(craft->getWeapons()) << L'\n';
-		ss << tr("STR_DAMAGE_CAPACITY_UC").arg(Text::formatNumber(craft->getMaxDamage())) << L'\n';
-		ss << tr("STR_CARGO_SPACE").arg(craft->getSoldiers()) << L'\n';
+		ss << tr("STR_WEAPON_PODS").arg(craft->getWeapons()) << '\n';
+		ss << tr("STR_DAMAGE_CAPACITY_UC").arg(Unicode::formatNumber(craft->getMaxDamage())) << '\n';
+		ss << tr("STR_CARGO_SPACE").arg(craft->getSoldiers()) << '\n';
 		if (craft->getPilots() > 0)
 		{
-			ss << tr("STR_COCKPIT_CAPACITY").arg(craft->getPilots()) << L'\n';
+			ss << tr("STR_COCKPIT_CAPACITY").arg(craft->getPilots()) << '\n';
 		}
 		ss << tr("STR_HWP_CAPACITY").arg(craft->getVehicles());
 		_txtStats->setText(ss.str());

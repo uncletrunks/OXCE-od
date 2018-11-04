@@ -83,15 +83,13 @@ namespace CrossPlatform
 	/// Tests locale availability and remembers the result in user settings.
 	std::locale testLocale();
 	/// Converts a wide string into upper case.
-	void upperCase(std::wstring &input, std::locale &myLocale);
+	void upperCase(std::string &input, std::locale &myLocale);
 	/// Checks if an event is a quit shortcut.
 	bool isQuitShortcut(const SDL_Event &ev);
 	/// Gets the modified date of a file.
 	time_t getDateModified(const std::string &path);
 	/// Converts a timestamp to a string.
-	std::pair<std::wstring, std::wstring> timeToString(time_t time);
-	/// Compares two strings by natural order.
-	bool naturalCompare(const std::wstring &a, const std::wstring &b);
+	std::pair<std::string, std::string> timeToString(time_t time);
 	/// Move/rename a file between paths.
 	bool moveFile(const std::string &src, const std::string &dest);
 	/// Flashes the game window.
