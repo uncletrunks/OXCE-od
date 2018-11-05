@@ -150,7 +150,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 			_availableOptions.push_back(transformationRule->getName());
 		}
 
-		_cbxScreenActions->setOptions(_availableOptions);
+		_cbxScreenActions->setOptions(_availableOptions, true);
 		_cbxScreenActions->setSelected(0);
 		_cbxScreenActions->onChange((ActionHandler)&SoldiersState::cbxScreenActionsChange);
 	}

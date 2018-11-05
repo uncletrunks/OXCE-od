@@ -184,7 +184,7 @@ CraftEquipmentState::CraftEquipmentState(Base *base, size_t craft) : _lstScroll(
 		_categoryStrings.push_back("STR_UNASSIGNED");
 	}
 
-	_cbxFilterBy->setOptions(_categoryStrings);
+	_cbxFilterBy->setOptions(_categoryStrings, true);
 	_cbxFilterBy->setSelected(0);
 	_cbxFilterBy->onChange((ActionHandler)&CraftEquipmentState::cbxFilterByChange);
 

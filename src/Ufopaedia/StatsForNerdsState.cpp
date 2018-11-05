@@ -198,7 +198,7 @@ void StatsForNerdsState::buildUI(bool debug, bool ids, bool defaults)
 
 	_filterOptions.clear();
 	_filterOptions.push_back("STR_UNKNOWN");
-	_cbxRelatedStuff->setOptions(_filterOptions);
+	_cbxRelatedStuff->setOptions(_filterOptions, true);
 	_cbxRelatedStuff->onChange((ActionHandler)&StatsForNerdsState::cbxAmmoSelect);
 	_cbxRelatedStuff->setVisible(_filterOptions.size() > 1);
 }
@@ -1395,7 +1395,7 @@ void StatsForNerdsState::initItemList()
 			_filterOptions.push_back(ammo);
 		}
 	}
-	_cbxRelatedStuff->setOptions(_filterOptions);
+	_cbxRelatedStuff->setOptions(_filterOptions, true);
 	_cbxRelatedStuff->setVisible(_filterOptions.size() > 1);
 	if (_filterOptions.size() > 1)
 	{
@@ -2181,7 +2181,7 @@ void StatsForNerdsState::initArmorList()
 	}
 
 	_filterOptions.insert(_filterOptions.begin(), "STR_BUILT_IN_ITEMS");
-	_cbxRelatedStuff->setOptions(_filterOptions);
+	_cbxRelatedStuff->setOptions(_filterOptions, true);
 	_cbxRelatedStuff->setVisible(_filterOptions.size() > 1);
 	if (_filterOptions.size() > 1)
 	{

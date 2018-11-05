@@ -122,7 +122,7 @@ TestState::TestState()
 		}
 	}
 
-	_cbxPalette->setOptions(_paletteList);
+	_cbxPalette->setOptions(_paletteList, true);
 
 	std::vector<std::string> _actionList;
 	_actionList.push_back("STR_PREVIEW");
@@ -133,7 +133,7 @@ TestState::TestState()
 	_actionList.push_back("STR_BIG_LOW_CONTRAST");
 	_actionList.push_back("STR_BIG_HIGH_CONTRAST");
 
-	_cbxPaletteAction->setOptions(_actionList);
+	_cbxPaletteAction->setOptions(_actionList, true);
 	_cbxPaletteAction->onChange((ActionHandler)&TestState::cbxPaletteAction);
 
 	_txtTestCase->setText(tr("STR_TEST_CASE"));
@@ -142,7 +142,7 @@ TestState::TestState()
 	_testCases.push_back("STR_ZERO_COST_MOVEMENT");
 	_testCases.push_back("STR_PALETTE_CHECK");
 
-	_cbxTestCase->setOptions(_testCases);
+	_cbxTestCase->setOptions(_testCases, true);
 	_cbxTestCase->onChange((ActionHandler)&TestState::cbxTestCaseChange);
 
 	_txtDescription->setWordWrap(true);

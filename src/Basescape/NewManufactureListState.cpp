@@ -114,7 +114,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 	filterOptions.push_back("STR_FILTER_DEFAULT_NO_SUPPLIES");
 	filterOptions.push_back("STR_FILTER_FACILITY_REQUIRED");
 	filterOptions.push_back("STR_FILTER_HIDDEN");
-	_cbxFilter->setOptions(filterOptions);
+	_cbxFilter->setOptions(filterOptions, true);
 	_cbxFilter->onChange((ActionHandler)&NewManufactureListState::cbxFilterChange);
 
 	_catStrings.push_back("STR_ALL_ITEMS");
@@ -479,7 +479,7 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 			}
 		}
 
-		_cbxCategory->setOptions(_catStrings);
+		_cbxCategory->setOptions(_catStrings, true);
 		_cbxCategory->onChange((ActionHandler)&NewManufactureListState::cbxCategoryChange);
 	}
 }
