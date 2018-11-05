@@ -62,8 +62,6 @@ namespace OpenXcom
  */
 Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _base(base), _mouseOverItem(0), _groundOffset(0), _animFrame(0)
 {
-	_myLocale = CrossPlatform::testLocale();
-
 	_twoHandedRed = _game->getMod()->getInterface("battlescape")->getElement("twoHandedRed")->color;
 	_twoHandedGreen = _game->getMod()->getInterface("battlescape")->getElement("twoHandedGreen")->color;
 
@@ -563,7 +561,7 @@ void Inventory::setSelectedItem(BattleItem *item)
 void Inventory::setSearchString(const std::string &searchString)
 {
 	_searchString = searchString;
-	CrossPlatform::upperCase(_searchString, _myLocale);
+	Unicode::upperCase(_searchString);
 	arrangeGround(1);
 }
 
@@ -1205,7 +1203,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 	{
 		itemLocalName = _game->getLanguage()->getString(item->getRules()->getName());
 	}
-	CrossPlatform::upperCase(itemLocalName, _myLocale);
+	Unicode::upperCase(itemLocalName);
 	if (itemLocalName.find(_searchString) != std::string::npos)
 	{
 		// Name match.
@@ -1220,7 +1218,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 		for (std::vector<std::string>::iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
 		{
 			std::string catLocalName = _game->getLanguage()->getString((*i));
-			CrossPlatform::upperCase(catLocalName, _myLocale);
+			Unicode::upperCase(catLocalName);
 			if (catLocalName.find(_searchString) != std::string::npos)
 			{
 				// Category match
@@ -1236,7 +1234,7 @@ bool Inventory::isInSearchString(BattleItem *item)
 				for (std::vector<std::string>::iterator i = itemAmmoCategories.begin(); i != itemAmmoCategories.end(); ++i)
 				{
 					std::string catLocalName = _game->getLanguage()->getString((*i));
-					CrossPlatform::upperCase(catLocalName, _myLocale);
+					Unicode::upperCase(catLocalName);
 					if (catLocalName.find(_searchString) != std::string::npos)
 					{
 						// Category match

@@ -332,9 +332,8 @@ void NewManufactureListState::btnMarkAllAsSeenClick(Action *)
  */
 void NewManufactureListState::fillProductionList(bool refreshCategories)
 {
-	std::locale myLocale = CrossPlatform::testLocale();
 	std::string searchString = _btnQuickSearch->getText();
-	CrossPlatform::upperCase(searchString, myLocale);
+	Unicode::upperCase(searchString);
 
 	if (refreshCategories)
 	{
@@ -379,10 +378,10 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 			}
 
 			// quick search
-			if (searchString != "")
+			if (!searchString.empty())
 			{
 				std::string projectName = tr((*it)->getName());
-				CrossPlatform::upperCase(projectName, myLocale);
+				Unicode::upperCase(projectName);
 				if (projectName.find(searchString) == std::string::npos)
 				{
 					continue;

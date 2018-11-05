@@ -68,9 +68,6 @@ OPT bool friendlyCraftEscort;
 OPT bool drawEnemyRadarCircles;
 OPT bool oneHandedUnloading;
 
-// Extra hidden flags (Meridian's build)
-OPT bool simpleUppercase;
-
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter, newRootWindowedMode, newFullscreen, newAllowResize, newBorderless;
 OPT int newDisplayWidth, newDisplayHeight, newBattlescapeScale, newGeoscapeScale, newWindowedModePositionX, newWindowedModePositionY;

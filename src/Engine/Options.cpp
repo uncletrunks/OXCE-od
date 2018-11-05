@@ -227,8 +227,6 @@ void create()
 	_info.push_back(OptionInfo("drawEnemyRadarCircles", &drawEnemyRadarCircles, true, "STR_DRAW_ENEMY_RADAR_CIRCLES", "STR_OXCE"));
 	_info.push_back(OptionInfo("oneHandedUnloading", &oneHandedUnloading, false, "STR_ALLOW_ONE_HANDED_UNLOADING", "STR_OXCE"));
 
-	_info.push_back(OptionInfo("simpleUppercase", &simpleUppercase, false));
-
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
 	_info.push_back(OptionInfo("keyCancel", &keyCancel, SDLK_ESCAPE, "STR_CANCEL", "STR_GENERAL"));

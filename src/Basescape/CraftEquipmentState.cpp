@@ -284,9 +284,8 @@ void CraftEquipmentState::btnQuickSearchApply(Action *)
  */
 void CraftEquipmentState::initList()
 {
-	std::locale myLocale = CrossPlatform::testLocale();
 	std::string searchString = _btnQuickSearch->getText();
-	CrossPlatform::upperCase(searchString, myLocale);
+	Unicode::upperCase(searchString);
 
 	size_t selIdx = _cbxFilterBy->getSelected();
 	if (selIdx == (size_t)-1)
@@ -343,10 +342,10 @@ void CraftEquipmentState::initList()
 		}
 
 		// quick search
-		if (searchString != "")
+		if (!searchString.empty())
 		{
 			std::string projectName = tr((*i));
-			CrossPlatform::upperCase(projectName, myLocale);
+			Unicode::upperCase(projectName);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;

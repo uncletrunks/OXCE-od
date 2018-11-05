@@ -239,9 +239,8 @@ void StoresState::btnQuickSearchApply(Action *)
  */
 void StoresState::initList(bool grandTotal)
 {
-	std::locale myLocale = CrossPlatform::testLocale();
 	std::string searchString = _btnQuickSearch->getText();
-	CrossPlatform::upperCase(searchString, myLocale);
+	Unicode::upperCase(searchString);
 
 	// clear everything
 	_lstStores->clearList();
@@ -252,10 +251,10 @@ void StoresState::initList(bool grandTotal)
 	for (std::vector<std::string>::const_iterator item = items.begin(); item != items.end(); ++item)
 	{
 		// quick search
-		if (searchString != "")
+		if (!searchString.empty())
 		{
 			std::string projectName = tr((*item));
-			CrossPlatform::upperCase(projectName, myLocale);
+			Unicode::upperCase(projectName);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;

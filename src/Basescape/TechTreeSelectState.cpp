@@ -139,9 +139,8 @@ void TechTreeSelectState::btnQuickSearchApply(Action *)
 */
 void TechTreeSelectState::initLists()
 {
-	std::locale myLocale = CrossPlatform::testLocale();
 	std::string searchString = _btnQuickSearch->getText();
-	CrossPlatform::upperCase(searchString, myLocale);
+	Unicode::upperCase(searchString);
 
 	_firstManufacturingTopicIndex = 0;
 	_firstFacilitiesTopicIndex = 0;
@@ -165,7 +164,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::string projectName = tr((*i));
-		CrossPlatform::upperCase(projectName, myLocale);
+		Unicode::upperCase(projectName);
 		if (searchString == "SHAZAM")
 		{
 			if (_parent->isDiscoveredResearch(*i))
@@ -194,7 +193,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::string projectName = tr((*i));
-		CrossPlatform::upperCase(projectName, myLocale);
+		Unicode::upperCase(projectName);
 		if (searchString == "SHAZAM")
 		{
 			if (_parent->isDiscoveredManufacture(*i))
@@ -226,7 +225,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::string facilityName = tr((*i));
-		CrossPlatform::upperCase(facilityName, myLocale);
+		Unicode::upperCase(facilityName);
 		if (searchString == "SHAZAM")
 		{
 			if (_parent->isDiscoveredFacility(*i))
@@ -263,7 +262,7 @@ void TechTreeSelectState::initLists()
 				continue;
 		}
 		std::string itemName = tr((*i));
-		CrossPlatform::upperCase(itemName, myLocale);
+		Unicode::upperCase(itemName);
 		if (searchString == "SHAZAM")
 		{
 			if (_parent->isProtectedAndDiscoveredItem(*i))

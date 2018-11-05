@@ -53,7 +53,6 @@ private:
 	Surface *_stunIndicator, *_woundIndicator, *_burnIndicator, *_shockIndicator;
 	NumberText *_stackNumber;
 	std::string _searchString;
-	std::locale _myLocale;
 	Timer *_animTimer;
 	int _depth;
 	RuleInventory *_inventorySlotRightHand = nullptr;

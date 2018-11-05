@@ -80,10 +80,6 @@ namespace CrossPlatform
 	bool compareExt(const std::string &file, const std::string &extension);
 	/// Gets the system locale.
 	std::string getLocale();
-	/// Tests locale availability and remembers the result in user settings.
-	std::locale testLocale();
-	/// Converts a wide string into upper case.
-	void upperCase(std::string &input, std::locale &myLocale);
 	/// Checks if an event is a quit shortcut.
 	bool isQuitShortcut(const SDL_Event &ev);
 	/// Gets the modified date of a file.

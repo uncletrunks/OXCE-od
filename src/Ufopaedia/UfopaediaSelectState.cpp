@@ -208,9 +208,8 @@ namespace OpenXcom
 	{
 		bool isCommendationsSection = (_section == UFOPAEDIA_COMMENDATIONS);
 
-		std::locale myLocale = CrossPlatform::testLocale();
 		std::string searchString = _btnQuickSearch->getText();
-		CrossPlatform::upperCase(searchString, myLocale);
+		Unicode::upperCase(searchString);
 
 		ArticleDefinitionList::iterator it;
 
@@ -243,10 +242,10 @@ namespace OpenXcom
 			}
 
 			// quick search
-			if (searchString != "")
+			if (!searchString.empty())
 			{
 				std::string projectName = tr((*it)->title);
-				CrossPlatform::upperCase(projectName, myLocale);
+				Unicode::upperCase(projectName);
 				if (projectName.find(searchString) == std::string::npos)
 				{
 					continue;

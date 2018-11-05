@@ -207,9 +207,8 @@ void NewResearchListState::btnMarkAllAsSeenClick(Action *)
  */
 void NewResearchListState::fillProjectList(bool markAllAsSeen)
 {
-	std::locale myLocale = CrossPlatform::testLocale();
 	std::string searchString = _btnQuickSearch->getText();
-	CrossPlatform::upperCase(searchString, myLocale);
+	Unicode::upperCase(searchString);
 
 	_projects.clear();
 	_lstResearch->clearList();
@@ -233,10 +232,10 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 		}
 
 		// quick search
-		if (searchString != "")
+		if (!searchString.empty())
 		{
 			std::string projectName = tr((*it)->getName());
-			CrossPlatform::upperCase(projectName, myLocale);
+			Unicode::upperCase(projectName);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				it = _projects.erase(it);

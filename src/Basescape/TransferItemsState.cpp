@@ -370,9 +370,8 @@ void TransferItemsState::btnQuickSearchApply(Action *)
 */
 void TransferItemsState::updateList()
 {
-	std::locale myLocale = CrossPlatform::testLocale();
 	std::string searchString = _btnQuickSearch->getText();
-	CrossPlatform::upperCase(searchString, myLocale);
+	Unicode::upperCase(searchString);
 
 	_lstItems->clearList();
 	_rows.clear();
@@ -396,10 +395,10 @@ void TransferItemsState::updateList()
 		}
 
 		// quick search
-		if (searchString != "")
+		if (!searchString.empty())
 		{
 			std::string projectName = _items[i].name;
-			CrossPlatform::upperCase(projectName, myLocale);
+			Unicode::upperCase(projectName);
 			if (projectName.find(searchString) == std::string::npos)
 			{
 				continue;
