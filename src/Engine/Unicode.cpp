@@ -20,12 +20,16 @@
 #include <sstream>
 #include <locale>
 #include <stdexcept>
+#include "Logger.h"
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <shlwapi.h>
+#else
+#include <cassert>
 #endif
 
 namespace OpenXcom
@@ -45,7 +49,7 @@ void getUtf8Locale()
 	// Try a fixed UTF-8 locale
 	try
 	{
-		utf8 = std::locale("en_US.UTF8");
+		utf8 = std::locale("C.UTF-8");
 	}
 	catch (const std::runtime_error &)
 #endif
@@ -60,6 +64,7 @@ void getUtf8Locale()
 			// Well we're stuck with the C locale, hope for the best
 		}
 	}
+	Log(LOG_INFO) << "Detected locale: " << utf8.name();
 }
 
 /**
@@ -161,9 +166,9 @@ std::string convWcToMb(const std::wstring &src, unsigned int cp)
 	return str;
 #else
 	(void)cp;
-	std::string str(src.size()+1, 0);
-	std::use_facet< std::ctype<wchar_t> >(utf8).narrow(&src[0], &src[src.size()], '?', &str[0]);
-	return str;
+	assert(sizeof(wchar_t) == sizeof(UCode));
+	const UString *ustr = reinterpret_cast<const UString*>(&src);
+	return convUtf32ToUtf8(*ustr);
 #endif
 }
 
@@ -186,9 +191,10 @@ std::wstring convMbToWc(const std::string &src, unsigned int cp)
 	return wstr;
 #else
 	(void)cp;
-	std::wstring wstr(src.size()+1, 0);
-	std::use_facet< std::ctype<wchar_t> >(utf8).widen(&src[0], &src[src.size()], &wstr[0]);
-	return wstr;
+	assert(sizeof(wchar_t) == sizeof(UCode));
+	UString ustr = convUtf8ToUtf32(src);
+	const std::wstring *wstr = reinterpret_cast<const std::wstring*>(&ustr);
+	return *wstr;
 #endif
 }
 
@@ -244,11 +250,47 @@ bool naturalCompare(const std::string &a, const std::string &b)
 	else
 #endif
 	{
-		// sorry unix users you get ASCII sort
-		std::string::const_iterator i, j;
-		for (i = a.begin(), j = b.begin(); i != a.end() && j != b.end() && std::tolower(*i, utf8) == std::tolower(*j, utf8); ++i, ++j);
-		return (i != a.end() && j != b.end() && std::tolower(*i, utf8) < tolower(*j, utf8));
+		// fallback to lexographical sort
+		return caseCompare(a, b);
 	}
+}
+
+/**
+ * Compares two UTF-8 strings ignoring case.
+ * @param a String A.
+ * @param b String B.
+ * @return String A comes before String B.
+ */
+bool caseCompare(const std::string &a, const std::string &b)
+{
+#ifdef _WIN32
+	std::wstring wa = convMbToWc(a, CP_UTF8);
+	std::wstring wb = convMbToWc(b, CP_UTF8);
+	return (StrCmpIW(wa.c_str(), wb.c_str()) < 0);
+#else
+	return (std::use_facet< std::collate<char> >(utf8).compare(&a[0], &a[a.size()], &b[0], &b[b.size()]) < 0);
+#endif
+}
+
+/**
+ * Searches for a substring in another string ignoring case.
+ * @param haystack String to search.
+ * @param needle String to find.
+ * @return True if the needle is in the haystack.
+ */
+bool caseFind(const std::string &haystack, const std::string &needle)
+{
+#ifdef _WIN32
+	std::wstring wa = convMbToWc(haystack, CP_UTF8);
+	std::wstring wb = convMbToWc(needle, CP_UTF8);
+	return (StrStrIW(wa.c_str(), wb.c_str()) != NULL);
+#else
+	std::wstring wa = convMbToWc(haystack, 0);
+	std::wstring wb = convMbToWc(needle, 0);
+	std::use_facet< std::ctype<wchar_t> >(utf8).toupper(&wa[0], &wb[wb.size()]);
+	std::use_facet< std::ctype<wchar_t> >(utf8).toupper(&wb[0], &wb[wb.size()]);
+	return (wa.find(wb) != std::wstring::npos);
+#endif
 }
 
 /**
@@ -265,7 +307,29 @@ void upperCase(std::string &s)
 	CharUpperW(&ws[0]);
 	s = convWcToMb(ws, CP_UTF8);
 #else
-	std::use_facet< std::ctype<char> >(utf8).toupper(&s[0], &s[s.size()]);
+	std::wstring ws = convMbToWc(s, 0);
+	std::use_facet< std::ctype<wchar_t> >(utf8).toupper(&ws[0], &ws[ws.size()]);
+	s = convWcToMb(ws, 0);
+#endif
+}
+
+/**
+ * Lowercases a UTF-8 string, modified in place.
+ * Used for case-insensitive comparisons.
+ * @param s Source string.
+ */
+void lowerCase(std::string &s)
+{
+	if (s.empty())
+		return;
+#ifdef _WIN32
+	std::wstring ws = convMbToWc(s, CP_UTF8);
+	CharLowerW(&ws[0]);
+	s = convWcToMb(ws, CP_UTF8);
+#else
+	std::wstring ws = convMbToWc(s, 0);
+	std::use_facet< std::ctype<wchar_t> >(utf8).tolower(&ws[0], &ws[ws.size()]);
+	s = convWcToMb(ws, 0);
 #endif
 }
 
