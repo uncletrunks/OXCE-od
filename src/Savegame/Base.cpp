@@ -1371,6 +1371,15 @@ int Base::getUsedTraining() const
 }
 
 /**
+ * Returns training space not in use
+ * @return training space not in use
+ */
+int Base::getFreeTrainingSpace() const
+{
+	return getAvailableTraining() - getUsedTraining();
+}
+
+/**
  * Returns the total amount of used
  * Containment Space in the base.
  * @return Containment Lab space.
@@ -1904,6 +1913,19 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 			if ((*i)->isInPsiTraining())
 			{
 				(*i)->setPsiTraining();
+				--toRemove;
+			}
+		}
+	}
+	if ((*facility)->getRules()->getTrainingFacilities() > 0)
+	{
+		// gym destruction: remove any soldiers over the maximum allowable from martial training.
+		int toRemove = (*facility)->getRules()->getTrainingFacilities() - getFreeTrainingSpace();
+		for (std::vector<Soldier*>::iterator i = _soldiers.begin(); i != _soldiers.end() && toRemove > 0; ++i)
+		{
+			if ((*i)->isInTraining())
+			{
+				(*i)->setTraining(false);
 				--toRemove;
 			}
 		}

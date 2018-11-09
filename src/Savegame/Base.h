@@ -198,7 +198,8 @@ public:
 	int getUsedTraining() const;
 	/// Gets the base's total available training space.
 	int getAvailableTraining() const;
-	/// Gets the total amount of Containment Space
+	/// Gets the base's total free training space.
+	int getFreeTrainingSpace() const;
 	/// Gets the amount of free Containment space.
 	int getFreeContainment(int prisonType) const;
 	/// Gets the total amount of Containment space.
