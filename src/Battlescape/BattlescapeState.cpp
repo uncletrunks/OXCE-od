@@ -243,13 +243,13 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	}
 
 	// there is some cropping going on here, because the icons image is 320x200 while we only need the bottom of it.
-	SDL_Rect *r = icons->getCrop();
-	r->x = 0;
-	r->y = 200 - iconsHeight;
-	r->w = iconsWidth;
-	r->h = iconsHeight;
+	auto crop = icons->getCrop();
+	crop.getCrop()->x = 0;
+	crop.getCrop()->y = 200 - iconsHeight;
+	crop.getCrop()->w = iconsWidth;
+	crop.getCrop()->h = iconsHeight;
 	// we need to blit the icons before we add the battlescape buttons, as they copy the underlying parent surface.
-	icons->blit(_icons);
+	crop.blit(_icons);
 
 	// this is a hack to fix the single transparent pixel on TFTD's icon panel.
 	if (_game->getMod()->getInterface("battlescape")->getElement("icons")->TFTDMode)
@@ -1716,19 +1716,13 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 				{
 					auto surf = _game->getMod()->getSurface(layer, true);
 
-					// crop
-					surf->getCrop()->x = soldier->getRules()->getAvatarOffsetX();
-					surf->getCrop()->y = soldier->getRules()->getAvatarOffsetY();
-					surf->getCrop()->w = 26;
-					surf->getCrop()->h = 23;
+					auto crop = surf->getCrop();
+					crop.getCrop()->x = soldier->getRules()->getAvatarOffsetX();
+					crop.getCrop()->y = soldier->getRules()->getAvatarOffsetY();
+					crop.getCrop()->w = 26;
+					crop.getCrop()->h = 23;
 
-					surf->blit(_rank);
-
-					// reset crop
-					surf->getCrop()->x = 0;
-					surf->getCrop()->y = 0;
-					surf->getCrop()->w = surf->getWidth();
-					surf->getCrop()->h = surf->getHeight();
+					crop.blit(_rank);
 				}
 			}
 			else
@@ -1764,18 +1758,13 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 				}
 
 				// crop
-				surf->getCrop()->x = soldier->getRules()->getAvatarOffsetX();
-				surf->getCrop()->y = soldier->getRules()->getAvatarOffsetY();
-				surf->getCrop()->w = 26;
-				surf->getCrop()->h = 23;
+				auto crop = surf->getCrop();
+				crop.getCrop()->x = soldier->getRules()->getAvatarOffsetX();
+				crop.getCrop()->y = soldier->getRules()->getAvatarOffsetY();
+				crop.getCrop()->w = 26;
+				crop.getCrop()->h = 23;
 
-				surf->blit(_rank);
-
-				// reset crop
-				surf->getCrop()->x = 0;
-				surf->getCrop()->y = 0;
-				surf->getCrop()->w = surf->getWidth();
-				surf->getCrop()->h = surf->getHeight();
+				crop.blit(_rank);
 			}
 		}
 	}

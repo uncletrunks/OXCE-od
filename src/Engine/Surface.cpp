@@ -229,7 +229,7 @@ Surface::Surface() : _x{ }, _y{ }, _width{ }, _height{ }, _pitch{ }, _visible(tr
  * @param y Y position in pixels.
  * @param bpp Bits-per-pixel depth.
  */
-Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _visible(true), _hidden(false), _redraw(false), _tftdMode(false)
+Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _visible(true), _hidden(false), _redraw(false)
 {
 	_alignedBuffer = NewAligned(bpp, width, height);
 	_surface = NewSurface(_alignedBuffer, bpp, width, height);
@@ -237,15 +237,6 @@ Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _
 	_height = _surface->h;
 	_pitch = _surface->pitch;
 	SDL_SetColorKey(_surface.get(), SDL_SRCCOLORKEY, 0);
-
-	_crop.w = 0;
-	_crop.h = 0;
-	_crop.x = 0;
-	_crop.y = 0;
-	_clear.x = 0;
-	_clear.y = 0;
-	_clear.w = getWidth();
-	_clear.h = getHeight();
 }
 
 /**
@@ -269,14 +260,6 @@ Surface::Surface(const Surface& other) : Surface{ }
 
 	_x = other._x;
 	_y = other._y;
-	_crop.w = other._crop.w;
-	_crop.h = other._crop.h;
-	_crop.x = other._crop.x;
-	_crop.y = other._crop.y;
-	_clear.w = other._clear.w;
-	_clear.h = other._clear.h;
-	_clear.x = other._clear.x;
-	_clear.y = other._clear.y;
 	_visible = other._visible;
 	_hidden = other._hidden;
 	_redraw = other._redraw;
@@ -440,9 +423,6 @@ void Surface::loadImage(const std::string &filename)
 		RawCopySurf(_surface, surface);
 		FixTransparent(_surface, surface->format->colorkey);
 	}
-
-	_clear.w = getWidth();
-	_clear.h = getHeight();
 }
 
 /**
@@ -566,7 +546,15 @@ void Surface::loadBdy(const std::string &filename)
 void Surface::clear(Uint32 color)
 {
 	if (_surface->flags & SDL_SWSURFACE) memset(_surface->pixels, color, _surface->h*_surface->pitch);
-	else SDL_FillRect(_surface.get(), &_clear, color);
+	else
+	{
+		SDL_Rect c;
+		c.x = 0;
+		c.y = 0;
+		c.w = getWidth();
+		c.h = getHeight();
+		SDL_FillRect(_surface.get(), &c, color);
+	}
 }
 
 /**
@@ -735,19 +723,10 @@ void Surface::blit(Surface *surface)
 		if (_redraw)
 			draw();
 
-		SDL_Rect* cropper;
-		SDL_Rect target;
-		if (_crop.w == 0 && _crop.h == 0)
-		{
-			cropper = 0;
-		}
-		else
-		{
-			cropper = &_crop;
-		}
+		SDL_Rect target {};
 		target.x = getX();
 		target.y = getY();
-		SDL_BlitSurface(_surface.get(), cropper, surface->getSurface(), &target);
+		SDL_BlitSurface(_surface.get(), nullptr, surface->getSurface(), &target);
 	}
 }
 
@@ -919,24 +898,12 @@ bool Surface::getVisible() const
 }
 
 /**
- * Resets the cropping rectangle set for this surface,
- * so the whole surface is blitted.
- */
-void Surface::resetCrop()
-{
-	_crop.w = 0;
-	_crop.h = 0;
-	_crop.x = 0;
-	_crop.y = 0;
-}
-
-/**
  * Returns the cropping rectangle for this surface.
  * @return Pointer to the cropping rectangle.
  */
-SDL_Rect *Surface::getCrop()
+SurfaceCrop Surface::getCrop()
 {
-	return &_crop;
+	return SurfaceCrop{ this };
 }
 
 /**
@@ -1050,26 +1017,6 @@ void Surface::invalidate(bool valid)
 }
 
 /**
- * Returns the help description of this surface,
- * for example for showing in tooltips.
- * @return String ID.
- */
-std::string Surface::getTooltip() const
-{
-	return _tooltip;
-}
-
-/**
- * Changes the help description of this surface,
- * for example for showing in tooltips.
- * @param tooltip String ID.
- */
-void Surface::setTooltip(const std::string &tooltip)
-{
-	_tooltip = tooltip;
-}
-
-/**
  * Recreates the surface with a new size.
  * Old contents will not be altered, and may be
  * cropped to fit the new size.
@@ -1095,9 +1042,6 @@ void Surface::resize(int width, int height)
 	_width = _surface->w;
 	_height = _surface->h;
 	_pitch = _surface->pitch;
-
-	_clear.w = getWidth();
-	_clear.h = getHeight();
 }
 
 /**
@@ -1125,21 +1069,27 @@ void Surface::setHeight(int height)
 }
 
 /**
- * TFTD mode: much like click inversion, but does a colour swap rather than a palette shift.
- * @param mode set TFTD mode to this.
+ * Blit surface with crop
+ * @param dest
  */
-void Surface::setTFTDMode(bool mode)
+void SurfaceCrop::blit(Surface* dest)
 {
-	_tftdMode = mode;
-}
-
-/**
- * checks TFTD mode.
- * @return TFTD mode.
- */
-bool Surface::isTFTDMode() const
-{
-	return _tftdMode;
+	SDL_Rect* cropper;
+	SDL_Rect target{ };
+	if (_crop.w == 0 && _crop.h == 0)
+	{
+		cropper = 0;
+	}
+	else
+	{
+		cropper = &_crop;
+	}
+	if (_surface)
+	{
+		target.x = _x;
+		target.y = _y;
+		SDL_BlitSurface(_surface->getSurface(), cropper, dest->getSurface(), &target);
+	}
 }
 
 }
