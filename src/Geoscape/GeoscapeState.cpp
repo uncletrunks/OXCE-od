@@ -2180,7 +2180,7 @@ void GeoscapeState::time1Day()
 				base->getTransfers()->push_back(t);
 			}
 			// 3c. handle getonefrees (topic+lookup)
-			if (!research->getGetOneFree().empty())
+			if (!research->getGetOneFree().empty() || !research->getGetOneFreeProtected().empty())
 			{
 				std::vector<const RuleResearch *> possibilities;
 				for (auto& free : research->getGetOneFree())
