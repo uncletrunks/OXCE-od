@@ -75,6 +75,7 @@ void getUtf8Locale()
 	// Try a UTF-8 locale (or default if none was found)
 	try
 	{
+		Log(LOG_INFO) << "Attempted locale: " << loc.c_str();
 		utf8 = std::locale(loc.c_str());
 	}
 	catch (const std::runtime_error &)
