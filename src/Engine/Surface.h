@@ -255,7 +255,7 @@ public:
 	}
 	/// Sets the height of the surface.
 	virtual void setHeight(int height);
-	/// Get surface pitch
+	/// Get surface pitch in bytes.
 	int getPitch() const
 	{
 		return _pitch;
@@ -361,21 +361,21 @@ public:
 
 	/// Constructor, SFINAE enable it only for non const `PixelType`
 	template<typename = std::enable_if<std::is_const<Pixel>::value == false, void>>
-	SurfaceRaw(std::vector<Pixel>& vec, int width, int height) : SurfaceRaw{ vec.data(), width, height, width }
+	SurfaceRaw(std::vector<Pixel>& vec, int width, int height) : SurfaceRaw{ vec.data(), width, height, static_cast<Uint16>(width*sizeof(Pixel)) }
 	{
 		assert((size_t)(width*height) <= vec.size() && "Incorrect dimensions compared to vector size");
 	}
 
 	/// Constructor, SFINAE enable it only for `const PixelType`
 	template<typename = std::enable_if<std::is_const<Pixel>::value, void>>
-	SurfaceRaw(const std::vector<typename std::remove_const<Pixel>::type>& vec, int width, int height) : SurfaceRaw{ vec.data(), width, height, width }
+	SurfaceRaw(const std::vector<typename std::remove_const<Pixel>::type>& vec, int width, int height) : SurfaceRaw{ vec.data(), width, height, static_cast<Uint16>(width*sizeof(Pixel)) }
 	{
 		assert((size_t)(width*height) <= vec.size() && "Incorrect dimensions compared to vector size");
 	}
 
 	/// Constructor
 	template<int I>
-	SurfaceRaw(Pixel (&buffer)[I], int width, int height) : SurfaceRaw{ buffer, width, height, width }
+	SurfaceRaw(Pixel (&buffer)[I], int width, int height) : SurfaceRaw{ buffer, width, height, static_cast<Uint16>(width*sizeof(Pixel)) }
 	{
 		assert(width*height <= I && "Incorrect dimensions compared to array size");
 	}
@@ -408,7 +408,7 @@ public:
 		return _height;
 	}
 
-	/// Get surface pitch
+	/// Get surface pitch in bytes.
 	int getPitch() const
 	{
 		return _pitch;
