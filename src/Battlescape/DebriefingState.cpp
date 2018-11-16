@@ -1614,7 +1614,7 @@ void DebriefingState::prepareDebriefing()
 			for (int i = 0; i < battle->getMapSizeXYZ(); ++i)
 			{
 				// get recoverable map data objects from the battlescape map
-				for (int part = O_FLOOR; part <= O_OBJECT; ++part)
+				for (int part = O_FLOOR; part < O_MAX; ++part)
 				{
 					TilePart tp = (TilePart)part;
 					if (battle->getTile(i)->getMapData(tp))

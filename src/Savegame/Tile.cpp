@@ -663,7 +663,7 @@ void Tile::ignite(int power)
 void Tile::animate()
 {
 	int newframe;
-	for (int i=0; i < 4; ++i)
+	for (int i = O_FLOOR; i < O_MAX; ++i)
 	{
 		if (_objects[i])
 		{

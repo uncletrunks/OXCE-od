@@ -1475,7 +1475,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 
 	while (mapFile.read((char*)&value, sizeof(value)))
 	{
-		for (int part = O_FLOOR; part <= O_OBJECT; ++part)
+		for (int part = O_FLOOR; part < O_MAX; ++part)
 		{
 			terrainObjectID = ((unsigned char)value[part]);
 			if (terrainObjectID>0)
@@ -2980,7 +2980,7 @@ void BattlescapeGenerator::clearModule(int x, int y, int sizeX, int sizeY)
 			for (int dy = y; dy != y + sizeY; ++dy)
 			{
 				Tile *tile = _save->getTile(Position(dx,dy,z));
-				for (int i = O_FLOOR; i <= O_OBJECT; i++)
+				for (int i = O_FLOOR; i < O_MAX; i++)
 					tile->setMapData(0, -1, -1, (TilePart)i);
 			}
 		}
@@ -3722,7 +3722,7 @@ void BattlescapeGenerator::setupObjectives(const AlienDeployment *ruleDeploy)
 
 		for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 		{
-			for (int j = O_FLOOR; j <= O_OBJECT; ++j)
+			for (int j = O_FLOOR; j < O_MAX; ++j)
 			{
 				TilePart tp = (TilePart)j;
 				if (_save->getTile(i)->getMapData(tp) && _save->getTile(i)->getMapData(tp)->getSpecialType() == targetType)
