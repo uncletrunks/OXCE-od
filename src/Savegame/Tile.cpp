@@ -364,6 +364,7 @@ int Tile::openDoor(TilePart part, BattleUnit *unit, BattleActionType reserve)
 		if (unit && cost.Time && !cost.haveTU())
 			return 4;
 		_currentFrame[part] = 1; // start opening door
+		updateSprite((TilePart)part);
 		return 1;
 	}
 	if (_objects[part]->isUFODoor() && _currentFrame[part] != 7) // ufo door != part 7 - door is still opening
@@ -383,6 +384,7 @@ int Tile::closeUfoDoor()
 		{
 			_currentFrame[part] = 0;
 			retval = 1;
+			updateSprite((TilePart)part);
 		}
 	}
 
