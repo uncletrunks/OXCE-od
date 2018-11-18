@@ -76,10 +76,10 @@ void MiniMapView::draw()
 	for (int lvl = 0; lvl <= _camera->getCenterPosition().z; lvl++)
 	{
 		int py = _startY;
-		for (int y = Surface::getY(); y < getHeight() + Surface::getY(); y += CELL_HEIGHT)
+		for (int y = 0; y < getHeight(); y += CELL_HEIGHT)
 		{
 			int px = _startX;
-			for (int x = Surface::getX(); x < getWidth() + Surface::getX(); x += CELL_WIDTH)
+			for (int x = 0; x < getWidth(); x += CELL_WIDTH)
 			{
 				MapData * data = 0;
 				Tile * t = 0;
