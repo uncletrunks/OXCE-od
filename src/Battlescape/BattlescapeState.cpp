@@ -574,7 +574,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	// Set music
 	if (!Options::playBriefingMusicDuringEquipment)
 	{
-		if (_save->getMusic() == "")
+		if (_save->getMusic().empty())
 		{
 			_game->getMod()->playMusic("GMTACTIC");
 		}
