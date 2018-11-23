@@ -320,7 +320,7 @@ void TextEdit::draw()
 		drawRect(&square, getColor());
 	}
 
-	_text->blit(this);
+	_text->blit(this->getSurface());
 	if (Options::keyboardMode == KEYBOARD_ON)
 	{
 		if (_isFocused && _blink)
@@ -357,7 +357,7 @@ void TextEdit::draw()
 				break;
 			}
 			_caret->setY(y);
-			_caret->blit(this);
+			_caret->blit(this->getSurface());
 		}
 	}
 }

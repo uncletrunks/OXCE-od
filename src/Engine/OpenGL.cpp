@@ -119,9 +119,10 @@ void OpenGL::resize(unsigned width, unsigned height)
 
 	iwidth = width;
 	iheight = height;
-	if (buffer_surface) delete buffer_surface;
-	buffer_surface = new Surface(iwidth, iheight, 0, 0, ibpp); // use OpenXcom's Surface class to get an aligned buffer with bonus SDL_Surface
-	buffer = (uint32_t*) buffer_surface->getSurface()->pixels;
+
+	std::tie(buffer_surface, surface) =  Surface::NewPair32Bit(iwidth, iheight);
+
+	buffer = (uint32_t*) buffer_surface.get();
 
 	glBindTexture(GL_TEXTURE_2D, gltexture);
 	glErrorCheck();
@@ -190,7 +191,7 @@ void OpenGL::refresh(bool smooth, unsigned inwidth, unsigned inheight, unsigned 
 
 	glErrorCheck();
 
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, buffer_surface->getSurface()->pitch / buffer_surface->getSurface()->format->BytesPerPixel);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, iwidth);
 
 	glErrorCheck();
 
@@ -497,12 +498,10 @@ void OpenGL::term()
 		iwidth = 0;
 		iheight = 0;
 	}
-
-	delete buffer_surface;
 }
 
   OpenGL::OpenGL() : gltexture(0), glprogram(0), linear(false),
-                     buffer(NULL), buffer_surface(NULL), iwidth(0), iheight(0),
+                     buffer(NULL), iwidth(0), iheight(0),
                      iformat(GL_UNSIGNED_INT_8_8_8_8_REV), // this didn't seem to be set anywhere before...
                      ibpp(32)                              // ...nor this
   { }

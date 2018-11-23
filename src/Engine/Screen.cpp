@@ -105,7 +105,7 @@ void Screen::makeVideoFlags()
  * Initializes a new display screen for the game to render contents to.
  * The screen is set up based on the current options.
  */
-Screen::Screen() : _baseWidth(ORIGINAL_WIDTH), _baseHeight(ORIGINAL_HEIGHT), _scaleX(1.0), _scaleY(1.0), _flags(0), _numColors(0), _firstColor(0), _pushPalette(false), _surface(0)
+Screen::Screen() : _baseWidth(ORIGINAL_WIDTH), _baseHeight(ORIGINAL_HEIGHT), _scaleX(1.0), _scaleY(1.0), _flags(0), _numColors(0), _firstColor(0), _pushPalette(false)
 {
 	resetDisplay();
 	memset(deferredPalette, 0, 256*sizeof(SDL_Color));
@@ -117,7 +117,7 @@ Screen::Screen() : _baseWidth(ORIGINAL_WIDTH), _baseHeight(ORIGINAL_HEIGHT), _sc
  */
 Screen::~Screen()
 {
-	delete _surface;
+
 }
 
 /**
@@ -125,10 +125,10 @@ Screen::~Screen()
  * contents that need to be shown will be blitted to this.
  * @return Pointer to the buffer surface.
  */
-Surface *Screen::getSurface()
+SDL_Surface *Screen::getSurface()
 {
 	_pushPalette = true;
-	return _surface;
+	return _surface.get();
 }
 
 /**
@@ -183,11 +183,11 @@ void Screen::flip()
 {
 	if (getWidth() != _baseWidth || getHeight() != _baseHeight || useOpenGL())
 	{
-		Zoom::flipWithZoom(_surface->getSurface(), _screen, _topBlackBand, _bottomBlackBand, _leftBlackBand, _rightBlackBand, &glOutput);
+		Zoom::flipWithZoom(_surface.get(), _screen, _topBlackBand, _bottomBlackBand, _leftBlackBand, _rightBlackBand, &glOutput);
 	}
 	else
 	{
-		SDL_BlitSurface(_surface->getSurface(), 0, _screen, 0);
+		SDL_BlitSurface(_surface.get(), 0, _screen, 0);
 	}
 
 	// perform any requested palette update
@@ -214,9 +214,8 @@ void Screen::flip()
  */
 void Screen::clear()
 {
-	_surface->clear();
-	if (_screen->flags & SDL_SWSURFACE) memset(_screen->pixels, 0, _screen->h*_screen->pitch);
-	else SDL_FillRect(_screen, &_clear, 0);
+	Surface::CleanSdlSurface(_surface.get());
+	Surface::CleanSdlSurface(_screen);
 }
 
 /**
@@ -235,14 +234,15 @@ void Screen::setPalette(SDL_Color* colors, int firstcolor, int ncolors, bool imm
 		memmove(&(deferredPalette[firstcolor]), colors, sizeof(SDL_Color)*ncolors);
 		_numColors = 256; // all the use cases are just a full palette with 16-color follow-ups
 		_firstColor = 0;
-	} else
+	}
+	else
 	{
 		memmove(&(deferredPalette[firstcolor]), colors, sizeof(SDL_Color) * ncolors);
 		_numColors = ncolors;
 		_firstColor = firstcolor;
 	}
 
-	_surface->setPalette(colors, firstcolor, ncolors);
+	SDL_SetColors(_surface.get(), colors, firstcolor, ncolors);
 
 	// defer actual update of screen until SDL_Flip()
 	if (immediately && _screen->format->BitsPerPixel == 8 && SDL_SetColors(_screen, colors, firstcolor, ncolors) == 0)
@@ -309,15 +309,25 @@ void Screen::resetDisplay(bool resetVideo)
 #endif
 	makeVideoFlags();
 
-	if (!_surface || (_surface->getSurface()->format->BitsPerPixel != _bpp ||
-		_surface->getSurface()->w != _baseWidth ||
-		_surface->getSurface()->h != _baseHeight)) // don't reallocate _surface if not necessary, it's a waste of CPU cycles
+	if (!_surface || (_surface->format->BitsPerPixel != _bpp ||
+		_surface->w != _baseWidth ||
+		_surface->h != _baseHeight)) // don't reallocate _surface if not necessary, it's a waste of CPU cycles
 	{
-		if (_surface) delete _surface;
-		_surface = new Surface(_baseWidth, _baseHeight, 0, 0, Screen::use32bitScaler() ? 32 : 8); // only HQX/XBRZ needs 32bpp for this surface; the OpenGL class has its own 32bpp buffer
-		if (_surface->getSurface()->format->BitsPerPixel == 8) _surface->setPalette(deferredPalette);
+		if (_bpp == 32)
+		{
+			std::tie(_buffer, _surface) = Surface::NewPair32Bit(_baseWidth, _baseHeight);
+		}
+		else
+		{
+			std::tie(_buffer, _surface) = Surface::NewPair8Bit(_baseWidth, _baseHeight);
+		}
+
+		if (_surface->format->BitsPerPixel == 8)
+		{
+			SDL_SetColors(_surface.get(), deferredPalette, 0, 255);
+		}
 	}
-	SDL_SetColorKey(_surface->getSurface(), 0, 0); // turn off color key!
+	SDL_SetColorKey(_surface.get(), 0, 0); // turn off color key!
 
 	if (resetVideo || _screen->format->BitsPerPixel != _bpp)
 	{
@@ -364,10 +374,6 @@ void Screen::resetDisplay(bool resetVideo)
 	Options::displayHeight = getHeight();
 	_scaleX = getWidth() / (double)_baseWidth;
 	_scaleY = getHeight() / (double)_baseHeight;
-	_clear.x = 0;
-	_clear.y = 0;
-	_clear.w = getWidth();
-	_clear.h = getHeight();
 
 	double pixelRatioY = 1.0;
 	if (Options::nonSquarePixelRatio && !Options::allowResize)

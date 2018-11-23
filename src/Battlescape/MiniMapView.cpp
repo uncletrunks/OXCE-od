@@ -446,7 +446,7 @@ void MiniMapView::stopScrolling(Action *action)
 	if (!Options::battleDragScrollInvert)
 	{
 		SDL_WarpMouse(_cursorPosition.x, _cursorPosition.y);
-		action->setMouseAction(_cursorPosition.x/action->getXScale(), _cursorPosition.y/action->getYScale(), _game->getScreen()->getSurface()->getX(), _game->getScreen()->getSurface()->getY());
+		action->setMouseAction(_cursorPosition.x/action->getXScale(), _cursorPosition.y/action->getYScale(), 0, 0);
 	}
 	// reset our "mouse position stored" flag
 	_cursorPosition.z = 0;

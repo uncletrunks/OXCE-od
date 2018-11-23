@@ -189,7 +189,7 @@ public:
 	/// Draws all the markers over the globe.
 	void drawMarkers();
 	/// Blits the globe onto another surface.
-	void blit(Surface *surface);
+	void blit(SDL_Surface *surface) override;
 	/// Special handling for mouse hover.
 	void mouseOver(Action *action, State *state);
 	/// Special handling for mouse presses.

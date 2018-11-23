@@ -1321,7 +1321,7 @@ void Globe::drawDetail()
 			{
 				label->setColor((*i)->getRules()->getLabelColor());
 			}
-			label->blit(_countries);
+			label->blit(_countries->getSurface());
 		}
 
 		delete label;
@@ -1354,7 +1354,7 @@ void Globe::drawDetail()
 			{
 				label->setColor(rule->getLabelColor());
 			}
-			label->blit(_countries);
+			label->blit(_countries->getSurface());
 		}
 	}
 	delete label;
@@ -1385,7 +1385,7 @@ void Globe::drawDetail()
 				label->setX(x - 50);
 				label->setY(y + 2);
 				label->setText((*j)->getName(_game->getLanguage()));
-				label->blit(_countries);
+				label->blit(_countries->getSurface());
 			}
 		}
 		// Draw bases names
@@ -1398,7 +1398,7 @@ void Globe::drawDetail()
 			label->setY(y + 2);
 			label->setColor(BASE_LABEL_COLOR);
 			label->setText((*j)->getName());
-			label->blit(_countries);
+			label->blit(_countries->getSurface());
 		}
 
 		delete label;
@@ -1671,7 +1671,7 @@ void Globe::drawMarkers()
  * Blits the globe onto another surface.
  * @param surface Pointer to another surface.
  */
-void Globe::blit(Surface *surface)
+void Globe::blit(SDL_Surface *surface)
 {
 	Surface::blit(surface);
 	_radars->blit(surface);

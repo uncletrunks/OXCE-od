@@ -80,7 +80,7 @@ static int zoomSurface2X_64bit(SDL_Surface *src, SDL_Surface *dst)
 	Uint8 *pixelDstRow = (Uint8*)dst->pixels;
 	int sx, sy;
 	static bool proclaimed = false;
-	
+
 	if (!proclaimed)
 	{
 		proclaimed = true;
@@ -668,7 +668,7 @@ void Zoom::flipWithZoom(SDL_Surface *src, SDL_Surface *dst, int topBlackBand, in
 #ifndef __NO_OPENGL
 		if (glOut->buffer_surface)
 		{
-			SDL_BlitSurface(src, 0, glOut->buffer_surface->getSurface(), 0); // TODO; this is less than ideal...
+			SDL_BlitSurface(src, 0, glOut->surface.get(), 0); // TODO; this is less than ideal...
 
 			glOut->refresh(glOut->linear, glOut->iwidth, glOut->iheight, dst->w, dst->h, topBlackBand, bottomBlackBand, leftBlackBand, rightBlackBand);
 			SDL_GL_SwapBuffers();

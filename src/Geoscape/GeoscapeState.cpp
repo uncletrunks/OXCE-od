@@ -234,7 +234,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	geobord->setX(_sidebar->getX() - geobord->getWidth() + _sidebar->getWidth());
 	geobord->setY(_sidebar->getY());
 	_sidebar->copy(geobord);
-	_game->getMod()->getSurface("ALTGEOBORD.SCR")->blit(_bg);
+	_game->getMod()->getSurface("ALTGEOBORD.SCR")->blitNShade(_bg, 0, 0);
 
 	_sideLine->drawRect(0, 0, _sideLine->getWidth(), _sideLine->getHeight(), 15);
 

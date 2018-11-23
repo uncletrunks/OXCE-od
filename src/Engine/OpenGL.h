@@ -14,6 +14,8 @@
 #include <SDL_opengl.h>
 #include <string>
 
+#include "Surface.h"
+
 namespace OpenXcom
 {
 
@@ -44,7 +46,8 @@ public:
   bool shader_support;
 
   uint32_t *buffer;
-  Surface *buffer_surface;
+  Surface::UniqueBufferPtr buffer_surface;
+  Surface::UniqueSurfacePtr surface;
   unsigned iwidth, iheight, iformat, ibpp;
 
   static bool checkErrors;
