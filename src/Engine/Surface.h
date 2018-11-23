@@ -358,30 +358,42 @@ public:
 
 	/// Constructor, SFINAE enable it only for `Uint8`
 	template<typename = std::enable_if<std::is_same<Uint8, Pixel>::value, void>>
-	SurfaceRaw(Surface* surf) : SurfaceRaw{ surf->getBuffer(), surf->getWidth(), surf->getHeight(), surf->getPitch() }
+	SurfaceRaw(Surface* surf) : SurfaceRaw{ }
 	{
-
+		if (surf)
+		{
+			*this = SurfaceRaw{ surf->getBuffer(), surf->getWidth(), surf->getHeight(), surf->getPitch() };
+		}
 	}
 
 	/// Constructor, SFINAE enable it only for `Uint8`
 	template<typename = std::enable_if<std::is_same<const Uint8, Pixel>::value, void>>
-	SurfaceRaw(const Surface* surf) : SurfaceRaw{ surf->getBuffer(), surf->getWidth(), surf->getHeight(), surf->getPitch() }
+	SurfaceRaw(const Surface* surf) : SurfaceRaw{ }
 	{
-
+		if (surf)
+		{
+			*this = SurfaceRaw{ surf->getBuffer(), surf->getWidth(), surf->getHeight(), surf->getPitch() };
+		}
 	}
 
 	/// Constructor, SFINAE enable it only for `Uint8`
 	template<typename = std::enable_if<std::is_same<Uint8, Pixel>::value, void>>
-	SurfaceRaw(SDL_Surface* surf) : SurfaceRaw{ (Pixel*)surf->pixels, surf->w, surf->h, surf->pitch }
+	SurfaceRaw(SDL_Surface* surf) : SurfaceRaw{ }
 	{
-
+		if (surf)
+		{
+			*this = SurfaceRaw{ (Pixel*)surf->pixels, surf->w, surf->h, surf->pitch };
+		}
 	}
 
 	/// Constructor, SFINAE enable it only for `const Uint8`
 	template<typename = std::enable_if<std::is_same<const Uint8, Pixel>::value, void>>
-	SurfaceRaw(const SDL_Surface* surf) : SurfaceRaw{ (Pixel*)surf->pixels, surf->w, surf->h, surf->pitch }
+	SurfaceRaw(const SDL_Surface* surf) : SurfaceRaw{ }
 	{
-
+		if (surf)
+		{
+			*this = SurfaceRaw{ (Pixel*)surf->pixels, surf->w, surf->h, surf->pitch };
+		}
 	}
 
 	/// Constructor, SFINAE enable it only for non const `PixelType`
