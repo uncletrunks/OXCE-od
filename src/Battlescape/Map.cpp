@@ -34,6 +34,8 @@
 #include "../Engine/Palette.h"
 #include "../Engine/Game.h"
 #include "../Engine/Screen.h"
+#include "../Engine/ShaderDraw.h"
+#include "../Engine/ShaderMove.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
 #include "../Savegame/BattleUnit.h"
@@ -234,7 +236,14 @@ void Map::draw()
 	// we use colour 15 because that actually corresponds to the colour we DO want in all variations of the xcom and tftd palettes.
 	// Note: un-hardcoded the color from 15 to ruleset value, default 15
 	_redraw = false;
-	clear(Palette::blockOffset(0) + _bgColor);
+	ShaderDrawFunc(
+		[](Uint8& dest, Uint8 color)
+		{
+			dest = color;
+		},
+		ShaderSurface(this),
+		ShaderScalar<Uint8>(Palette::blockOffset(0) + _bgColor)
+	);
 
 	Tile *t;
 

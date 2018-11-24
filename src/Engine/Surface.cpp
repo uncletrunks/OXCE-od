@@ -561,7 +561,7 @@ void Surface::loadBdy(const std::string &filename)
  * in a blank image of the specified color. (0 for transparent)
  * @param color the colour for the background of the surface.
  */
-void Surface::clear(Uint32 color)
+void Surface::clear()
 {
 	CleanSdlSurface(_surface.get());
 }
