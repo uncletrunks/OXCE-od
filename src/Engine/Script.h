@@ -1355,12 +1355,12 @@ struct ScriptTag
 	/// Test if tag have valid value.
 	constexpr explicit operator bool() const { return this->index; }
 	/// Equal operator.
-	constexpr bool operator==(ScriptTag t)
+	constexpr bool operator==(ScriptTag t) const
 	{
 		return index == t.index;
 	}
 	/// Notequal operator.
-	constexpr bool operator!=(ScriptTag t)
+	constexpr bool operator!=(ScriptTag t) const
 	{
 		return !(*this == t);
 	}
