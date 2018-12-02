@@ -54,9 +54,9 @@ private:
 	static const double ROTATE_LATITUDE;
 
 	RuleGlobe *_rules;
+	Sint16 _cenX, _cenY;
 	double _cenLon, _cenLat, _rotLon, _rotLat, _hoverLon, _hoverLat;
 	double _craftLon, _craftLat, _craftRange;
-	Sint16 _cenX, _cenY;
 	size_t _zoom, _zoomOld, _zoomTexture;
 	SurfaceSet *_texture, *_markerSet;
 	Game *_game;
