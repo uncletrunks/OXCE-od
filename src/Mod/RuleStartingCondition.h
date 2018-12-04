@@ -55,6 +55,8 @@ private:
 	std::vector<std::string> _allowedItems;
 	std::vector<std::string> _allowedItemCategories;
 	std::vector<std::string> _allowedCraft;
+	std::map<std::string, int> _requiredItems;
+	bool _destroyRequiredItems;
 	int _mapBackgroundColor;
 	std::string _inventoryShockIndicator;
 	std::string _mapShockIndicator;
@@ -75,6 +77,10 @@ public:
 	const std::vector<std::string> *getAllowedArmors() const;
 	/// Gets the allowed craft types.
 	const std::vector<std::string> *getAllowedCraft() const;
+	/// Gets the required items.
+	const std::map<std::string, int> *getRequiredItems() const;
+	/// Should the required items be destroyed when the mission starts?
+	bool getDestroyRequiredItems() const { return _destroyRequiredItems; }
 	/// Checks if the craft type is allowed.
 	bool isCraftAllowed(const std::string &craftType) const;
 	/// Gets the replacement armor.

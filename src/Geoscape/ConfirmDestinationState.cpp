@@ -145,6 +145,23 @@ std::string ConfirmDestinationState::checkStartingCondition()
 		return "";
 	}
 
+	// check required item(s)
+	const std::map<std::string, int> *requiredItems = rule->getRequiredItems();
+	if (!_craft->areRequiredItemsOnboard(requiredItems))
+	{
+		std::ostringstream ss2;
+		int i2 = 0;
+		for (std::map<std::string, int>::const_iterator it2 = requiredItems->begin(); it2 != requiredItems->end(); ++it2)
+		{
+			if (i2 > 0)
+				ss2 << ", ";
+			ss2 << tr((*it2).first) << ": " << (*it2).second;
+			i2++;
+		}
+		std::string argument2 = ss2.str();
+		return tr("STR_STARTING_CONDITION_ITEM").arg(argument2);
+	}
+
 	if (rule->isCraftAllowed(_craft->getRules()->getType()))
 	{
 		// craft is allowed
@@ -166,13 +183,13 @@ std::string ConfirmDestinationState::checkStartingCondition()
 			i++;
 		}
 	}
-	std::string message = ss.str();
-	if (message.empty())
+	std::string argument = ss.str();
+	if (argument.empty())
 	{
 		// no suitable craft yet
-		return tr("STR_UNKNOWN");
+		argument = tr("STR_UNKNOWN");
 	}
-	return ss.str();
+	return tr("STR_STARTING_CONDITION_CRAFT").arg(argument);
 }
 
 /**
@@ -186,7 +203,7 @@ void ConfirmDestinationState::btnOkClick(Action *)
 	{
 		_game->popState();
 		_game->popState();
-		_game->pushState(new CraftErrorState(0, tr("STR_STARTING_CONDITION_CRAFT").arg(message)));
+		_game->pushState(new CraftErrorState(0, message));
 		return;
 	}
 

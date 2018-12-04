@@ -44,7 +44,7 @@ private:
 	TextButton *_btnYes, *_btnNo;
 	Surface *_sprite;
 	// Checks the starting condition
-	bool checkStartingCondition();
+	std::string checkStartingCondition();
 public:
 	/// Creates the Confirm Landing state.
 	ConfirmLandingState(Craft *craft, Texture *texture, int shade);

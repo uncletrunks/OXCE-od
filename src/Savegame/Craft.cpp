@@ -1208,6 +1208,33 @@ int Craft::getSpaceUsed() const
 }
 
 /**
+ * Checks if there are enough required items onboard.
+ * @return True if the craft has enough required items.
+ */
+bool Craft::areRequiredItemsOnboard(const std::map<std::string, int> *requiredItems)
+{
+	for (auto mapItem : *requiredItems)
+	{
+		if (_items->getItem(mapItem.first) < mapItem.second)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Destroys given required items.
+ */
+void Craft::destroyRequiredItems(const std::map<std::string, int> *requiredItems)
+{
+	for (auto mapItem : *requiredItems)
+	{
+		_items->removeItem(mapItem.first, mapItem.second);
+	}
+}
+
+/**
 * Checks if there are enough pilots onboard.
 * @return True if the craft has enough pilots.
 */

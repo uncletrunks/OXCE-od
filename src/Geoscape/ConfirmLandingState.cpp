@@ -143,7 +143,7 @@ void ConfirmLandingState::init()
 /**
 * Checks the starting condition.
 */
-bool ConfirmLandingState::checkStartingCondition()
+std::string ConfirmLandingState::checkStartingCondition()
 {
 	Ufo* u = dynamic_cast<Ufo*>(_craft->getDestination());
 	MissionSite* m = dynamic_cast<MissionSite*>(_craft->getDestination());
@@ -167,17 +167,36 @@ bool ConfirmLandingState::checkStartingCondition()
 	else
 	{
 		// irrelevant for this check
-		return true;
+		return "";
 	}
 
 	if (ruleDeploy == 0)
 	{
 		// just in case
-		return true;
+		return "";
 	}
 
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
-	return rule == 0 || rule->isCraftAllowed(_craft->getRules()->getType());
+	if (rule != 0)
+	{
+		if (!rule->isCraftAllowed(_craft->getRules()->getType()))
+		{
+			return tr("STR_STARTING_CONDITION_CRAFT"); // simple message without details/argument
+		}
+
+		if (!_craft->areRequiredItemsOnboard(rule->getRequiredItems()))
+		{
+			return tr("STR_STARTING_CONDITION_ITEM"); // simple message without details/argument
+		}
+		else
+		{
+			if (rule->getDestroyRequiredItems())
+			{
+				_craft->destroyRequiredItems(rule->getRequiredItems());
+			}
+		}
+	}
+	return "";
 }
 
 /**
@@ -186,11 +205,12 @@ bool ConfirmLandingState::checkStartingCondition()
  */
 void ConfirmLandingState::btnYesClick(Action *)
 {
-	if (!checkStartingCondition())
+	std::string message = checkStartingCondition();
+	if (!message.empty())
 	{
 		_craft->returnToBase();
 		_game->popState();
-		_game->pushState(new CraftErrorState(0, tr("STR_STARTING_CONDITION_CRAFT")));
+		_game->pushState(new CraftErrorState(0, message));
 		return;
 	}
 

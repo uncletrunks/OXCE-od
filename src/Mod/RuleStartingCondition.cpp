@@ -66,7 +66,7 @@ namespace OpenXcom
  * Creates a blank ruleset for a certain type of Starting Condition.
  * @param type String defining the type.
  */
-RuleStartingCondition::RuleStartingCondition(const std::string &type) : _type(type), _mapBackgroundColor(15)
+RuleStartingCondition::RuleStartingCondition(const std::string &type) : _type(type), _destroyRequiredItems(false), _mapBackgroundColor(15)
 {
 }
 
@@ -97,6 +97,8 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
+	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
+	_destroyRequiredItems = node["destroyRequiredItems"].as<bool>(_destroyRequiredItems);
 	_mapBackgroundColor = node["mapBackgroundColor"].as<int>(_mapBackgroundColor);
 	_inventoryShockIndicator = node["inventoryShockIndicator"].as<std::string>(_inventoryShockIndicator);
 	_mapShockIndicator = node["mapShockIndicator"].as<std::string>(_mapShockIndicator);
@@ -155,6 +157,15 @@ const std::vector<std::string> *RuleStartingCondition::getAllowedArmors() const
 const std::vector<std::string> *RuleStartingCondition::getAllowedCraft() const
 {
 	return &_allowedCraft;
+}
+
+/**
+ * Returns the required items.
+ * @return List of required items.
+ */
+const std::map<std::string, int> *RuleStartingCondition::getRequiredItems() const
+{
+	return &_requiredItems;
 }
 
 /**
