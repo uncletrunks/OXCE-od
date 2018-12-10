@@ -602,12 +602,12 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set, int animFrame, int shade) c
 		ModScript::SelectItemSprite::Worker work{ this, BODYPART_ITEM_FLOOR, animFrame, shade };
 		work.execute(_rules->getScript<ModScript::SelectItemSprite>(), arg);
 
-		surf = set->getFrame(arg.getFirst());
-		if (surf == nullptr)
+		auto newSurf = set->getFrame(arg.getFirst());
+		if (newSurf == nullptr)
 		{
-			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enough frames");
+			newSurf = surf;
 		}
-		return surf;
+		return newSurf;
 	}
 	else
 	{
@@ -635,12 +635,12 @@ Surface *BattleItem::getBigSprite(SurfaceSet *set, int animFrame) const
 		ModScript::SelectItemSprite::Worker work{ this, BODYPART_ITEM_INVENTORY, animFrame, 0 };
 		work.execute(_rules->getScript<ModScript::SelectItemSprite>(), arg);
 
-		surf = set->getFrame(arg.getFirst());
-		if (surf == nullptr)
+		auto newSurf = set->getFrame(arg.getFirst());
+		if (newSurf == nullptr)
 		{
-			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enough frames");
+			newSurf = surf;
 		}
-		return surf;
+		return newSurf;
 	}
 	else
 	{
