@@ -4677,8 +4677,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
 	bu.addRules<Armor, &BattleUnit::getArmor>("getRuleArmor");
 	bu.addFunc<getRuleSoldierScript>("getRuleSoldier");
-	bu.addFunc<getGeoscapeSoldierScript>("getGeosacpeSoldier");
-	bu.addFunc<getGeoscapeSoldierConstScript>("getGeosacpeSoldier");
+	bu.addFunc<getGeoscapeSoldierScript>("getGeoscapeSoldier");
+	bu.addFunc<getGeoscapeSoldierConstScript>("getGeoscapeSoldier");
 	bu.addFunc<getRightHandWeaponScript>("getRightHandWeapon");
 	bu.addFunc<getRightHandWeaponConstScript>("getRightHandWeapon");
 	bu.addFunc<getLeftHandWeaponScript>("getLeftHandWeapon");
