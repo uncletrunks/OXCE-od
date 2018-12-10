@@ -63,7 +63,7 @@ ItemSprite::~ItemSprite()
  */
 void ItemSprite::draw(BattleItem* item, int x, int y, int shade)
 {
-	Surface* sprite = item->getFloorSprite(_itemSurface);
+	Surface* sprite = item->getFloorSprite(_itemSurface, _animationFrame, shade);
 	if (sprite)
 	{
 		ScriptWorkerBlit work;
@@ -77,7 +77,7 @@ void ItemSprite::draw(BattleItem* item, int x, int y, int shade)
  */
 void ItemSprite::drawShadow(BattleItem* item, int x, int y)
 {
-	Surface* sprite = item->getFloorSprite(_itemSurface);
+	Surface* sprite = item->getFloorSprite(_itemSurface, _animationFrame, 16);
 	if (sprite)
 	{
 		sprite->blitNShade(_dest, x, y, 16);

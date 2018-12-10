@@ -1552,7 +1552,7 @@ void RuleItem::drawHandSprite(SurfaceSet *texture, Surface *surface, BattleItem 
 	Surface *frame = nullptr;
 	if (item)
 	{
-		frame = item->getBigSprite(texture);
+		frame = item->getBigSprite(texture, animFrame);
 		if (frame)
 		{
 			ScriptWorkerBlit scr;

@@ -303,7 +303,7 @@ void Inventory::drawItems()
 		// Soldier items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)
 		{
-			Surface *frame = (*i)->getBigSprite(texture);
+			Surface *frame = (*i)->getBigSprite(texture, _animFrame);
 
 			if ((*i) == _selItem || !frame)
 				continue;
@@ -354,7 +354,7 @@ void Inventory::drawItems()
 		int fatalWounds = 0;
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
-			Surface *frame = (*i)->getBigSprite(texture);
+			Surface *frame = (*i)->getBigSprite(texture, _animFrame);
 			// note that you can make items invisible by setting their width or height to 0 (for example used with tank corpse items)
 			if ((*i) == _selItem || (*i)->getSlotX() < _groundOffset || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0 || !frame)
 				continue;
