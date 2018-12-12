@@ -94,7 +94,7 @@ namespace OpenXcom
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_SNAP").c_str(),
+								tr("STR_SHOT_TYPE_SNAP").arg(item->getConfigSnap()->shots).c_str(),
 								Unicode::formatPercentage(item->getAccuracySnap()).c_str(),
 								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
@@ -109,7 +109,7 @@ namespace OpenXcom
 					tu.erase(tu.end() - 1);
 				}
 				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_AIMED").c_str(),
+								tr("STR_SHOT_TYPE_AIMED").arg(item->getConfigAimed()->shots).c_str(),
 								Unicode::formatPercentage(item->getAccuracyAimed()).c_str(),
 								tu.c_str());
 				_lstInfo->setCellColor(current_row, 0, _listColor1);
