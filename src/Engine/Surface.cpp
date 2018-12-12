@@ -415,6 +415,10 @@ void Surface::loadImage(const std::string &filename)
 						}
 					}
 					FixTransparent(_surface, transparent);
+					if (transparent != 0)
+					{
+						Log(LOG_WARNING) << "Image " << filename << " (from lodepng) have set incorrect transparent color index " << transparent << " instead of 0";
+					}
 				}
 			}
 		}
@@ -440,6 +444,10 @@ void Surface::loadImage(const std::string &filename)
 		setPalette(surface->format->palette->colors, 0, surface->format->palette->ncolors);
 		RawCopySurf(_surface, surface);
 		FixTransparent(_surface, surface->format->colorkey);
+		if (surface->format->colorkey != 0)
+		{
+			Log(LOG_WARNING) << "Image " << filename << " (from SDL) have set incorrect transparent color index " << surface->format->colorkey << " instead of 0";
+		}
 	}
 }
 
