@@ -79,6 +79,7 @@ inline void RawCopySurf(const Surface::UniqueSurfacePtr& dest, const Surface::Un
 }
 
 /**
+ * TODO: function for purge, we should accept only "standard" surfaces
  * Helper function correcting graphic that should have index 0 as transparent,
  * but some do not have, we swap correcnt with incorecct
  * for maintain 0 as correct transparent index.
@@ -92,11 +93,7 @@ inline void FixTransparent(const Surface::UniqueSurfacePtr& dest, int currentTra
 		ShaderDrawFunc(
 			[&](Uint8& dest)
 			{
-				if (dest == 0)
-				{
-					dest = currentTransColor;
-				}
-				else if (dest == currentTransColor)
+				if (dest == currentTransColor)
 				{
 					dest = 0;
 				}
