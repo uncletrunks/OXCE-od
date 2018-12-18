@@ -55,7 +55,8 @@ private:
 	Timer *_scrollMouseTimer, *_scrollKeyTimer, *_obstacleTimer;
 	Timer *_fadeTimer;
 	int _fadeShade;
-	bool _nightVisionOn, _maxBrightnessVisionOn;
+	bool _nightVisionOn;
+	int _debugVisionMode;
 	int _nvColor;
 	Game *_game;
 	SavedBattleGame *_save;
@@ -172,7 +173,7 @@ public:
 	int reShade(Tile *tile);
 	/// toggle the night-vision mode
 	void toggleNightVision();
-	void toggleMaxBrightnessVision();
+	void toggleDebugVisionMode();
 	/// Resets obstacle markers.
 	void resetObstacles();
 	/// Enables obstacle markers.

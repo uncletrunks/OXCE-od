@@ -125,7 +125,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_cacheHasLOS = -1;
 
 	_nightVisionOn = false;
-	_maxBrightnessVisionOn = false;
+	_debugVisionMode = 0;
 	_fadeShade = 16;
 	_nvColor = 0;
 	_fadeTimer = new Timer(FADE_INTERVAL);
@@ -1583,9 +1583,9 @@ void Map::toggleNightVision()
 	_nightVisionOn = !_nightVisionOn;
 }
 
-void Map::toggleMaxBrightnessVision()
+void Map::toggleDebugVisionMode()
 {
-	_maxBrightnessVisionOn = !_maxBrightnessVisionOn;
+	_debugVisionMode = (_debugVisionMode + 1) % 3;
 }
 
 /**
@@ -1596,8 +1596,13 @@ void Map::toggleMaxBrightnessVision()
 int Map::reShade(Tile *tile)
 {
 	// when modders just don't know where to stop...
-	if (_maxBrightnessVisionOn)
+	if (_debugVisionMode > 0)
 	{
+		if (_debugVisionMode == 2)
+		{
+			// Reaver's tests
+			return tile->getShade() / 2;
+		}
 		return 0;
 	}
 

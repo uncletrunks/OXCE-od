@@ -2144,10 +2144,10 @@ inline void BattlescapeState::handle(Action *action)
 					_paletteResetRequested = true;
 					init();
 				}
-				// "ctrl-End" - toggle max brightness
+				// "ctrl-End" - toggle between various debug vision/brightness modes
 				else if (key == SDLK_END && ctrlPressed)
 				{
-					_map->toggleMaxBrightnessVision();
+					_map->toggleDebugVisionMode();
 				}
 				// "ctrl-e" - experience log
 				else if (key == SDLK_e && ctrlPressed)
