@@ -455,7 +455,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 bool BattlescapeGame::kneel(BattleUnit *bu)
 {
 	int tu = bu->isKneeled() ? 8 : 4;
-	if (bu->getType() == "SOLDIER" && bu->getArmor()->allowsKneeling() && !bu->isFloating() && ((!bu->isKneeled() && _save->getKneelReserved()) || checkReservedTU(bu, tu, 0)))
+	if (bu->getArmor()->allowsKneeling(bu->getType() == "SOLDIER") && !bu->isFloating() && ((!bu->isKneeled() && _save->getKneelReserved()) || checkReservedTU(bu, tu, 0)))
 	{
 		BattleAction kneel;
 		kneel.type = BA_KNEEL;
@@ -1348,7 +1348,7 @@ bool BattlescapeGame::checkReservedTU(BattleUnit *bu, int tu, int energy, bool j
 		cost.type = BA_AIMEDSHOT;
 		cost.updateTU();
 	}
-	const int tuKneel = (_save->getKneelReserved() && !bu->isKneeled()  && bu->getType() == "SOLDIER" && bu->getArmor()->allowsKneeling()) ? 4 : 0;
+	const int tuKneel = (_save->getKneelReserved() && !bu->isKneeled()  && bu->getArmor()->allowsKneeling(bu->getType() == "SOLDIER")) ? 4 : 0;
 	// no aimed shot available? revert to none.
 	if (cost.Time == 0 && cost.type == BA_AIMEDSHOT)
 	{
@@ -1761,15 +1761,15 @@ void BattlescapeGame::primaryAction(Position pos)
 
 			_currentAction.strafe = false;
 			_currentAction.run = false;
-			if (Options::strafe && isCtrlPressed && _save->getSelectedUnit()->getArmor()->getSize() == 1)
+			if (Options::strafe && isCtrlPressed)
 			{
 				if (_save->getPathfinding()->getPath().size() > 1)
 				{
-					_currentAction.run = _save->getSelectedUnit()->getArmor()->allowsRunning();
+					_currentAction.run = _save->getSelectedUnit()->getArmor()->allowsRunning(_save->getSelectedUnit()->getArmor()->getSize() == 1);
 				}
 				else
 				{
-					_currentAction.strafe = _save->getSelectedUnit()->getArmor()->allowsStrafing();
+					_currentAction.strafe = _save->getSelectedUnit()->getArmor()->allowsStrafing(_save->getSelectedUnit()->getArmor()->getSize() == 1);
 				}
 			}
 			// if running or shifting, ignore spotted enemies (i.e. don't stop)

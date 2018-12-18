@@ -69,8 +69,8 @@ private:
 	ForcedTorso _forcedTorso;
 	int _faceColorGroup, _hairColorGroup, _utileColorGroup, _rankColorGroup;
 	std::vector<int> _faceColor, _hairColor, _utileColor, _rankColor;
-	int _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
-	int _ignoresMeleeThreat, _createsMeleeThreat;
+	Sint8  _fearImmune, _bleedImmune, _painImmune, _zombiImmune;
+	Sint8 _ignoresMeleeThreat, _createsMeleeThreat;
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
@@ -79,7 +79,7 @@ private:
 	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
 	std::vector<int> _customArmorPreviewIndex;
-	bool _allowsRunning, _allowsStrafing, _allowsKneeling, _allowsMoving;
+	Sint8 _allowsRunning, _allowsStrafing, _allowsKneeling, _allowsMoving;
 	bool _instantWoundRecovery;
 	int _standHeight, _kneelHeight, _floatHeight;
 public:
@@ -240,11 +240,11 @@ public:
 	/// Gets the index of the sprite in the CustomArmorPreview sprite set
 	const std::vector<int> &getCustomArmorPreviewIndex() const;
 	/// Can you run while wearing this armor?
-	bool allowsRunning() const;
+	bool allowsRunning(bool def = true) const;
 	/// Can you strafe while wearing this armor?
-	bool allowsStrafing() const;
+	bool allowsStrafing(bool def = true) const;
 	/// Can you kneel while wearing this armor?
-	bool allowsKneeling() const;
+	bool allowsKneeling(bool def = true) const;
 	/// Can you move while wearing this armor?
 	bool allowsMoving() const;
 	/// Does this armor instantly recover any wounds after the battle?
