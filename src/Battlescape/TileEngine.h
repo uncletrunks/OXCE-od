@@ -95,6 +95,7 @@ private:
 	const int _maxDynamicLightDistance;
 	const int _enhancedLighting;
 	Position _eventVisibilitySectorL, _eventVisibilitySectorR, _eventVisibilityObserverPos;
+	std::vector<BattleUnit*> _movingUnitPrev;
 	BattleUnit* _movingUnit = nullptr;
 
 	/// Add light source.
