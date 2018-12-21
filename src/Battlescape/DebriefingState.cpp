@@ -2117,6 +2117,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						// It's a weapon, count any rounds left in the clip.
 						recoveryAmmoInWeapon(*it);
 						// Fall-through, to recover the weapon itself.
+						[[gnu::fallthrough]];
 					default:
 						if (recoverWeapon)
 						{

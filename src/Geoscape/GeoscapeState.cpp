@@ -764,14 +764,19 @@ void GeoscapeState::timeAdvance()
 		{
 		case TIME_1MONTH:
 			time1Month();
+			[[gnu::fallthrough]];
 		case TIME_1DAY:
 			time1Day();
+			[[gnu::fallthrough]];
 		case TIME_1HOUR:
 			time1Hour();
+			[[gnu::fallthrough]];
 		case TIME_30MIN:
 			time30Minutes();
+			[[gnu::fallthrough]];
 		case TIME_10MIN:
 			time10Minutes();
+			[[gnu::fallthrough]];
 		case TIME_5SEC:
 			time5Seconds();
 		}
@@ -1836,6 +1841,7 @@ void GeoscapeState::time30Minutes()
 		{
 		case Ufo::LANDED:
 			points *= 2;
+			[[gnu::fallthrough]];
 		case Ufo::FLYING:
 			// Get area
 			for (std::vector<Region*>::iterator k = _game->getSavedGame()->getRegions()->begin(); k != _game->getSavedGame()->getRegions()->end(); ++k)
@@ -1865,6 +1871,7 @@ void GeoscapeState::time30Minutes()
 					case 2:	// hyper-wave decoder
 						(*u)->setHyperDetected(true);
 						hyperdetected = true;
+						[[gnu::fallthrough]];
 					case 1: // conventional radar
 						detected = true;
 					}
