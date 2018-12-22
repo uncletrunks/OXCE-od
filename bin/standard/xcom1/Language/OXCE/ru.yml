@@ -8,6 +8,7 @@ ru:
   STR_AVATAR_NAME_7: "#07 Жен, Азиатка"
   STR_AVATAR_NAME_8: "#08 Жен, Негр"
   STR_PSI_SHORT: "ПСИ>{ALT}{0}/{1}"
+  STR_EVASIVE_MANEUVERS: "УКЛОНЕНИЕ"
   STR_UFO_HAS_LANDED: "НЛО приземлился в{NEWLINE}{0}"
   GMGEO1: "Трек #1 в такт. режиме"
   GMGEO2: "Трек #2 в такт. режиме"

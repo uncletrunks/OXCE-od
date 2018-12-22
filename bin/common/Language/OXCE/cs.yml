@@ -137,8 +137,6 @@ cs:
   STR_BULLET_SAVING_DESC: "Na konci mise je na základě počtu zbývajících nábojů statistická šance, že se zásobník obnoví do plna, "
   STR_SHOW_ITEM_WEIGHT_IN_INVENTORY: "Zobraz váhu předmětu v inventáři"
   STR_SHOW_ITEM_WEIGHT_IN_INVENTORY_DESC: "Po sebrání předmětu zobrazuje vedle jeho názvu i váhu."
-  STR_SHOW_GUN_MELEE_ON_TOP: "Zobraz sekundární útok zblízka u zbraně jako první akci nahoře."
-  STR_SHOW_GUN_MELEE_ON_TOP_DESC: "Při zapnutí se u zbraně, kterou jde mimo jiné útočit i zblízka, zobrazí její sekundární útok jako první akce nahoře. Jinak se zobrazuje jako poslední dole."
   STR_REMOVE_WOUNDED_FROM_TRAINING: "Vyjmi raněné jednotky z tréninku"
   STR_REMOVE_WOUNDED_FROM_TRAINING_DESC: "Raněné jednotky se netrénují. Tato volba je automaticky vyjme z tréninkového zařízení, čímž se uvolní místo pro zdravé."
   STR_FULL_NIGHT_VISION: "Maximalizuj noční vidění"

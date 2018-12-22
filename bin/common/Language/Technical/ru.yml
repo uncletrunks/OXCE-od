@@ -281,10 +281,11 @@ ru:
   DRAWING_ROUTINE_INVERTED_CYBERDISC: "Инвертированный кибердиск (сначала анимация перемещения)"
 #
   stats: "Модификаторы показателей"
+  movementType: "Способ перемещения"
   allowsRunning: "Позволяет бегать?"
   allowsStrafing: "Позволяет двиг. вбок?"
   allowsKneeling: "Позволяет приседать?"
-  allowsMoving: ""
+  allowsMoving: "Позволяет двигаться?"
   fearImmune: "Иммунитет к снижению морали?"
   bleedImmune: "Иммунитет к кровотечению?"
   painImmune: "Иммунитет к оглушению?"

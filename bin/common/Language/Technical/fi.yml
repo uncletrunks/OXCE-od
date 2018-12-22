@@ -281,10 +281,11 @@ fi:
   DRAWING_ROUTINE_INVERTED_CYBERDISC: "Käänteinen kyberlautanen (työntöanimaatio ylhäällä)"
 #
   stats: "Ominaisuuskertoimet"
+  movementType: "Liikkumistapa"
   allowsRunning: "Salli juoksu?"
   allowsStrafing: "Salli sivuttaisastunta?"
   allowsKneeling: "Salli polvistuminen?"
-  allowsMoving: ""
+  allowsMoving: "Salli liikkuminen?"
   fearImmune: "Immuuni taistelutahdon laskulle?"
   bleedImmune: "Immuuni verenvuodolle?"
   painImmune: "Immuuni tainnutukselle?"

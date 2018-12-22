@@ -281,10 +281,11 @@ ja:
   DRAWING_ROUTINE_INVERTED_CYBERDISC: "サイバーディスクの反転（推進機関を上面に）"
 #
   stats: "ステータス修正"
+  movementType: "移動方法"
   allowsRunning: "走ることを許可"
   allowsStrafing: "水平移動を許可"
   allowsKneeling: "膝付きを許可"
-  allowsMoving: ""
+  allowsMoving: "移送を許可"
   fearImmune: "士気減衰なしにするか"
   bleedImmune: "出血なしにするか"
   painImmune: "スタンなしにするか"

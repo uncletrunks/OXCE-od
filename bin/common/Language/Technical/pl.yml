@@ -281,6 +281,7 @@ pl:
   DRAWING_ROUTINE_INVERTED_CYBERDISC: "Odwrócony cyberdysk (animacja napędu na górze)"
 #
   stats: "Modyfikatory statystyk"
+  movementType: "Typ ruchu"
   allowsRunning: "Pozwala biegać?"
   allowsStrafing: "Pozwala chodzić na boki?"
   allowsKneeling: "Pozwala klękać?"

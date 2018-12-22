@@ -281,6 +281,7 @@ cs:
   DRAWING_ROUTINE_INVERTED_CYBERDISC: ""
 #
   stats: ""
+  movementType: ""
   allowsRunning: "Umožňuje běh?"
   allowsStrafing: "Umožňuje úkrok?"
   allowsKneeling: "Umožňuje zakleknutí?"

@@ -136,8 +136,6 @@ ro:
   STR_BULLET_SAVING_DESC: "Există o șansă de a recupera un clip intreg în funcție de câtă amuniție este rămasă."
   STR_SHOW_ITEM_WEIGHT_IN_INVENTORY: "Afișează greutatea echipamentului în inventar."
   STR_SHOW_ITEM_WEIGHT_IN_INVENTORY_DESC: "Afișează greutatea echipamentului sub eqchipament când este ridicat."
-  STR_SHOW_GUN_MELEE_ON_TOP: "Afișează atacul secundar de Corp la Corp deasupra"
-  STR_SHOW_GUN_MELEE_ON_TOP_DESC: "Când aceasta optiune este activată, orice atac secundar cu arme tip corp la corp va fi afișat peste butonul cel mai de sus. Sau va fi afișat cel mai jos."
   STR_REMOVE_WOUNDED_FROM_TRAINING: "Scoate toti soldații răniți din antrenament"
   STR_REMOVE_WOUNDED_FROM_TRAINING_DESC: "Când soltații nu pot beneficia de antrenament fizic. Aceasta opțiune îi va scoate din antrenament in mod automat, eliberând spațiu pentru altii."
   STR_FULL_NIGHT_VISION: "Maximizeaza afișarea de noapte"
