@@ -81,6 +81,10 @@ class ModScript
 	{
 		SelectUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
+	struct SelectMoveSoundUnitParser : ScriptParserEvents<ScriptOutputArgs<int&>, const BattleUnit*, int, int, int, int, int, int>
+	{
+		SelectMoveSoundUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
 
 	struct ReactionUnitParser : ScriptParserEvents<Output, const BattleUnit*, const BattleUnit*, const BattleItem*, int, const BattleUnit*, int>
 	{
@@ -152,6 +156,7 @@ public:
 
 	using RecolorUnitSprite = MACRO_NAMED_SCRIPT("recolorUnitSprite", RecolorUnitParser);
 	using SelectUnitSprite = MACRO_NAMED_SCRIPT("selectUnitSprite", SelectUnitParser);
+	using SelectMoveSoundUnit = MACRO_NAMED_SCRIPT("selectMoveSoundUnit", SelectMoveSoundUnitParser);
 
 	using ReactionUnitAction = MACRO_NAMED_SCRIPT("reactionUnitAction", ReactionUnitParser);
 	using ReactionUnitReaction = MACRO_NAMED_SCRIPT("reactionUnitReaction", ReactionUnitParser);
@@ -185,6 +190,7 @@ public:
 	using BattleUnitScripts = ScriptGroup<Mod,
 		RecolorUnitSprite,
 		SelectUnitSprite,
+		SelectMoveSoundUnit,
 
 		ReactionUnitAction,
 		ReactionUnitReaction,

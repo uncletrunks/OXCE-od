@@ -4920,6 +4920,18 @@ ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::s
 }
 
 /**
+ * Constructor of select sound script parser.
+ */
+ModScript::SelectMoveSoundUnitParser::SelectMoveSoundUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"sound_index",
+	"unit", "walking_phase", "unit_sound_index", "tile_sound_index", "base_tile_sound_index", "base_tile_sound_offset", "base_fly_sound_index", }
+{
+	BindBase b { this };
+
+	commonImpl(b, mod);
+}
+
+/**
  * Constructor of reaction chance script parser.
  */
 ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "battle_action", "action_target", "move" }
