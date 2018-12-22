@@ -85,10 +85,12 @@ cs:
   STR_DAY:
     one: "{N} den"
     few: "{N} dny"
+    many: "{N} dnů"
     other: "{N} dnů"
   STR_HOUR:
     one: "{N} hodina"
     few: "{N} hodiny"
+    many: "{N} hodin"
     other: "{N} hodin"
   STR_MAINTENANCE_UC: "ÚDRŽBA>"
   STR_OK: "OK"
@@ -155,7 +157,7 @@ cs:
   STR_DEFENSE_STRENGTH: "Síla obrany"
   STR_TRANSFERS_UC: "PŘESUNY"
   STR_TRANSFERS: "Přesuny"
-  STR_ARRIVAL_TIME_HOURS: "Doba dodávky (hodiny)"
+  STR_ARRIVAL_TIME_HOURS: "Doba dodání (hodiny)"
   STR_COST_: "Cena>{ALT}{0}"
   STR_AREA_: "Oblast>{ALT}{0}"
   STR_BASE_NAME: "Jméno základny?"
@@ -1109,18 +1111,22 @@ cs:
   STR_UNITS_IN_CRAFT:
     one: "{N} jednotka ve stroji X-Com"
     few: "{N} jednotky ve stroji X-Com"
+    many: "{N} jednotek ve stroji X-Com"
     other: "{N} jednotek ve stroji X-Com"
   STR_UNITS_OUTSIDE:
     one: "{N} jednotka zanecháno venku"
     few: "{N} jednotky zanecháno venku"
+    many: "{N} jednotek zanecháno venku"
     other: "{N} jednotek zanecháno venku"
   STR_UNITS_IN_ENTRANCE:
     one: "{N} jednotka ve vchodu"
     few: "{N} jednotky ve vchodu"
+    many: "{N} jednotek ve vchodu"
     other: "{N} jednotek ve vchodu"
   STR_UNITS_IN_EXIT:
     one: "{N} jednotka v cílovém východu"
     few: "{N} jednotky v cílovém východu"
+    many: "{N} jednotek v cílovém východu"
     other: "{N} jednotek v cílovém východu"
   STR_ABORT_MISSION_QUESTION: "Přerušit misi?"
   STR_CORPSE: "Mrtvola"
@@ -1154,6 +1160,7 @@ cs:
   STR_NO_MORE_EQUIPMENT_ALLOWED:
     one: "ŽÁDNÉ DALŠÍ VYBAVENÍ NELZE VZÍT NA PALUBU!{SMALLLINE}Můžete vzít pouze nejvíc {N} kus vybavení na tuto ponorku."
     few: "ŽÁDNÉ DALŠÍ VYBAVENÍ NELZE VZÍT NA PALUBU!{SMALLLINE}Můžete vzít pouze nejvíc {N} kusů vybavení na tuto ponorku."
+    many: "ŽÁDNÉ DALŠÍ VYBAVENÍ NELZE VZÍT NA PALUBU!{SMALLLINE}Můžete vzít pouze nejvíc {N} kusů vybavení na tuto ponorku."
     other: "ŽÁDNÉ DALŠÍ VYBAVENÍ NELZE VZÍT NA PALUBU!{SMALLLINE}Můžete vzít pouze nejvíc {N} kusů vybavení na tuto ponorku."
   STR_CONTROL_CENTER_DESTROYED: "{SMALLLINE}KONTROLNÍ CENTRUM ZNIČENO{NEWLINE}Dostaň se ke vstupu a zruš misi."
   STR_XCOM_BASE_CANNOT_BE_BUILT: "Vodní zařízení X-Com nelze vybudovat na povrchu"

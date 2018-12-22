@@ -85,10 +85,12 @@ sk:
   STR_DAY:
     one: "{N} deň"
     few: "{N} dni"
+    many: "{N} dní"
     other: "{N} dní"
   STR_HOUR:
     one: "{N} hodina"
     few: "{N} hodiny"
+    many: "{N} hodín"
     other: "{N} hodín"
   STR_MAINTENANCE_UC: "ÚDRŽBA>"
   STR_OK: "OK"
@@ -1109,18 +1111,22 @@ sk:
   STR_UNITS_IN_CRAFT:
     one: "{N} jednotka v X-Com transportéri"
     few: "{N} jednotky v X-Com transportéri"
+    many: "{N} jednotiek v X-Com transportéri"
     other: "{N} jednotiek v X-Com transportéri"
   STR_UNITS_OUTSIDE:
     one: "{N} jednotka ostala vonku"
     few: "{N} jednotky ostali vonku"
+    many: "{N} jednotiek ostalo vonku"
     other: "{N} jednotiek ostalo vonku"
   STR_UNITS_IN_ENTRANCE:
     one: "{N} jednotka pri vstupe"
     few: "{N} jednotky pri vstupe"
+    many: "{N} jednotiek pri vstupe"
     other: "{N} jednotiek pri vstupe"
   STR_UNITS_IN_EXIT:
     one: "{N} jednotka v cieľovej oblasti"
     few: "{N} jednotky v cieľovej oblasti"
+    many: "{N} jednotiek v cieľovej oblasti"
     other: "{N} jednotiek v cieľovej oblasti"
   STR_ABORT_MISSION_QUESTION: "Ukončiť misiu?"
   STR_CORPSE: "Mŕtvola"
@@ -1154,6 +1160,7 @@ sk:
   STR_NO_MORE_EQUIPMENT_ALLOWED:
     one: "NA PALUBU SA NEZMESTÍ VIAC VYBAVENIA!{SMALLLINE}Máte povolených maximálne {N} položku vybavenia na palube tohto stroja."
     few: "NA PALUBU SA NEZMESTÍ VIAC VYBAVENIA!{SMALLLINE}Máte povolených maximálne {N} položky vybavenia na palube tohto stroja."
+    many: "NA PALUBU SA NEZMESTÍ VIAC VYBAVENIA!{SMALLLINE}Máte povolených maximálne {N} položiek vybavenia na palube tohto stroja."
     other: "NA PALUBU SA NEZMESTÍ VIAC VYBAVENIA!{SMALLLINE}Máte povolených maximálne {N} položiek vybavenia na palube tohto stroja."
   STR_CONTROL_CENTER_DESTROYED: "{SMALLLINE}RIADIACE CENTRUM BOLO ZNIČENÉ{NEWLINE}Dostaňte sa do vstupnej oblasti a ukončite misiu."
   STR_XCOM_BASE_CANNOT_BE_BUILT: "X-Com nemôže budovať podmorské základne na pevnine"
