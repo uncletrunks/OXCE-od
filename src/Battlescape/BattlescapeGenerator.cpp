@@ -256,7 +256,7 @@ void BattlescapeGenerator::nextStage()
 			{
 				for (int y = 0; y != size; ++y)
 				{
-					_save->getTile(pos + Position(x,y,0))->setUnit(0);
+					_save->getTile(pos + Position(x,y,0))->clearUnit();
 				}
 			}
 		}
@@ -476,7 +476,7 @@ void BattlescapeGenerator::nextStage()
 					{
 						_craftInventoryTile = (*j)->getTile();
 					}
-					_craftInventoryTile->setUnit(*j);
+					_craftInventoryTile->setUnit(*j, _save);
 					(*j)->setVisible(false);
 					if ((*j)->getId() > highestSoldierID)
 					{
@@ -503,7 +503,7 @@ void BattlescapeGenerator::nextStage()
 			_craftInventoryTile->addItem(*i, ground);
 			if ((*i)->getUnit())
 			{
-				_craftInventoryTile->setUnit((*i)->getUnit());
+				_craftInventoryTile->setUnit((*i)->getUnit(), _save);
 				(*i)->getUnit()->setPosition(_craftInventoryTile->getPosition());
 			}
 		}
@@ -800,7 +800,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 	{
 		if ((*i)->getFaction() == FACTION_PLAYER)
 		{
-			_craftInventoryTile->setUnit(*i);
+			_craftInventoryTile->setUnit(*i, _save);
 			(*i)->setVisible(false);
 		}
 	}

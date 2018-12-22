@@ -308,7 +308,7 @@ void UnitDieBState::convertUnitToCorpse()
 			{
 				if (_parent->getSave()->getTile(lastPosition + Position(x,y,0))->getUnit() == _unit) // check in case unit was displaced by another unit
 				{
-					_parent->getSave()->getTile(lastPosition + Position(x,y,0))->setUnit(0);
+					_parent->getSave()->getTile(lastPosition + Position(x,y,0))->clearUnit();
 				}
 				if (!_overKill)
 				{

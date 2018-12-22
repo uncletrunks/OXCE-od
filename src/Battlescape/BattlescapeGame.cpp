@@ -1991,7 +1991,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	unit->setTile(0);
 
 	Unit* type = getMod()->getUnit(unit->getSpawnUnit(), true);
-	getSave()->getTile(unit->getPosition())->setUnit(0);
+	getSave()->getTile(unit->getPosition())->clearUnit();
 
 	BattleUnit *newUnit = new BattleUnit(type,
 		FACTION_HOSTILE,
@@ -2002,7 +2002,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 		getMod()->getMaxViewDistance());
 
 	getSave()->initUnit(newUnit);
-	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
+	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save);
 	newUnit->setPosition(unit->getPosition());
 	newUnit->setDirection(unit->getDirection());
 	newUnit->setTimeUnits(0);
@@ -2122,7 +2122,7 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 			for (int y = newUnit->getArmor()->getSize() - 1; y >= 0; y--)
 			{
 				Tile* tile = getSave()->getTile(position + Position(x, y, 0));
-				tile->setUnit(newUnit, getSave()->getTile(position + Position(x, y, -1)));
+				tile->setUnit(newUnit, getSave());
 			}
 		}
 		newUnit->setPosition(position);
@@ -2192,7 +2192,7 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 				for (int y = (*unit)->getArmor()->getSize() - 1; y >= 0; y--)
 				{
 					Tile *tile = getSave()->getTile((*unit)->getPosition() + Position(x, y, 0));
-					tile->setUnit(0);
+					tile->clearUnit();
 				}
 			}
 

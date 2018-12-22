@@ -110,11 +110,7 @@ void ExplosionBState::init()
 		if (type == BT_PSIAMP || _hit)
 		{
 			Position targetPos = _center.toTile();
-			_targetPsiOrHit = _parent->getSave()->getTile(targetPos)->getUnit();
-			if (!_targetPsiOrHit && targetPos.z > 0)
-			{
-				_targetPsiOrHit = _parent->getSave()->getTile(targetPos - Position(0, 0, 1))->getUnit();
-			}
+			_targetPsiOrHit = _parent->getSave()->getTile(targetPos)->getOverlappingUnit(_parent->getSave());
 		}
 
 		//testing if we hit target

@@ -1348,7 +1348,7 @@ void DebriefingState::prepareDebriefing()
 					}
 				}
 			}
-			(*j)->setTile(battle->getTile(pos));
+			(*j)->setTile(battle->getTile(pos), battle);
 		}
 
 		if (status == STATUS_DEAD)

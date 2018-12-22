@@ -722,10 +722,9 @@ void BattleUnit::setSurrendering(bool isSurrendering)
  * Initialises variables to start walking.
  * @param direction Which way to walk.
  * @param destination The position we should end up on.
- * @param tileBelowMe Which tile is currently below the unit.
- * @param cache Update cache?
+ * @param savedBattleGame Which is used to get tile is currently below the unit.
  */
-void BattleUnit::startWalking(int direction, Position destination, Tile *tileBelowMe, bool cache)
+void BattleUnit::startWalking(int direction, Position destination, SavedBattleGame *savedBattleGame)
 {
 	if (direction >= Pathfinding::DIR_UP)
 	{
@@ -738,7 +737,7 @@ void BattleUnit::startWalking(int direction, Position destination, Tile *tileBel
 		_status = STATUS_WALKING;
 	}
 	bool floorFound = false;
-	if (!_tile->hasNoFloor(tileBelowMe))
+	if (!_tile->hasNoFloor(savedBattleGame))
 	{
 		floorFound = true;
 	}
@@ -765,10 +764,10 @@ void BattleUnit::startWalking(int direction, Position destination, Tile *tileBel
 
 /**
  * This will increment the walking phase.
- * @param tileBelowMe Pointer to tile currently below the unit.
- * @param cache Refresh the unit cache.
+ * @param savedBattleGame Pointer to save to get tile currently below the unit.
+ * @param fullWalkCycle Do full walk cycle or short one when unit is offscreen.
  */
-void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
+void BattleUnit::keepWalking(SavedBattleGame *savedBattleGame, bool fullWalkCycle)
 {
 	int middle, end;
 	if (_verticalDirection)
@@ -793,7 +792,7 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 				middle = 1;
 		}
 	}
-	if (!cache)
+	if (!fullWalkCycle)
 	{
 		_pos = _destination;
 		end = 2;
@@ -810,7 +809,7 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 
 	if (_walkPhase >= end)
 	{
-		if (_floating && !_tile->hasNoFloor(tileBelowMe))
+		if (_floating && !_tile->hasNoFloor(savedBattleGame))
 		{
 			_floating = false;
 		}
@@ -2498,9 +2497,9 @@ bool BattleUnit::getVisible() const
 /**
  * Sets the unit's tile it's standing on
  * @param tile Pointer to tile.
- * @param tileBelow Pointer to tile below.
+ * @param saveBattleGame Pointer to save to get tile below.
  */
-void BattleUnit::setTile(Tile *tile, Tile *tileBelow)
+void BattleUnit::setTile(Tile *tile, SavedBattleGame *saveBattleGame)
 {
 	_tile = tile;
 	if (!_tile)
@@ -2509,19 +2508,19 @@ void BattleUnit::setTile(Tile *tile, Tile *tileBelow)
 		return;
 	}
 	// unit could have changed from flying to walking or vice versa
-	if (_status == STATUS_WALKING && _tile->hasNoFloor(tileBelow) && _movementType == MT_FLY)
+	if (_status == STATUS_WALKING && _tile->hasNoFloor(saveBattleGame) && _movementType == MT_FLY)
 	{
 		_status = STATUS_FLYING;
 		_floating = true;
 	}
-	else if (_status == STATUS_FLYING && !_tile->hasNoFloor(tileBelow) && _verticalDirection == 0)
+	else if (_status == STATUS_FLYING && !_tile->hasNoFloor(saveBattleGame) && _verticalDirection == 0)
 	{
 		_status = STATUS_WALKING;
 		_floating = false;
 	}
 	else if (_status == STATUS_UNCONSCIOUS)
 	{
-		_floating = _movementType == MT_FLY && _tile->hasNoFloor(tileBelow);
+		_floating = _movementType == MT_FLY && _tile->hasNoFloor(saveBattleGame);
 	}
 }
 

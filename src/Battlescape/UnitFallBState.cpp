@@ -84,14 +84,11 @@ void UnitFallBState::think()
 			unit = _parent->getSave()->getFallingUnits()->erase(unit);
 			continue;
 		}
-		bool onScreen = ((*unit)->getVisible() && _parent->getMap()->getCamera()->isOnScreen((*unit)->getPosition(), true, size, false));
-		Tile *tileBelow = _parent->getSave()->getTile((*unit)->getPosition() + Position(0,0,-1));
 		for (int x = size; x >= 0; x--)
 		{
 			for (int y = size; y >= 0; y--)
 			{
-				Tile *otherTileBelow = _parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,-1));
-				if (!_parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,0))->hasNoFloor(otherTileBelow) || (*unit)->getMovementType() == MT_FLY)
+				if (!_parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,0))->hasNoFloor(_parent->getSave()) || (*unit)->getMovementType() == MT_FLY)
 				{
 					largeCheck = false;
 				}
@@ -100,7 +97,7 @@ void UnitFallBState::think()
 
 		if ((*unit)->getStatus() == STATUS_WALKING || (*unit)->getStatus() == STATUS_FLYING)
 		{
-			(*unit)->keepWalking(tileBelow, true); 	// advances the phase
+			(*unit)->keepWalking(_parent->getSave(), true); 	// advances the phase
 
 			if ((*unit)->getPosition() != (*unit)->getLastPosition())
 			{
@@ -112,7 +109,7 @@ void UnitFallBState::think()
 						// A falling unit might have already taken up this position so check that this unit is still here.
 						if (_parent->getSave()->getTile((*unit)->getLastPosition() + Position(x,y,0))->getUnit() == (*unit))
 						{
-							_parent->getSave()->getTile((*unit)->getLastPosition() + Position(x,y,0))->setUnit(0);
+							_parent->getSave()->getTile((*unit)->getLastPosition() + Position(x,y,0))->clearUnit();
 						}
 					}
 				}
@@ -121,7 +118,7 @@ void UnitFallBState::think()
 				{
 					for (int y = size; y >= 0; y--)
 					{
-						_parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,0))->setUnit((*unit), _parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,-1)));
+						_parent->getSave()->getTile((*unit)->getPosition() + Position(x,y,0))->setUnit((*unit), _parent->getSave());
 					}
 				}
 			}
@@ -132,7 +129,7 @@ void UnitFallBState::think()
 
 		falling = largeCheck
 			&& (*unit)->getPosition().z != 0
-			&& (*unit)->getTile()->hasNoFloor(tileBelow)
+			&& (*unit)->getTile()->hasNoFloor(_parent->getSave())
 			&& (*unit)->getMovementType() != MT_FLY
 			&& (*unit)->getWalkingPhase() == 0;
 
@@ -163,7 +160,7 @@ void UnitFallBState::think()
 
 		falling = largeCheck
 			&& (*unit)->getPosition().z != 0
-			&& (*unit)->getTile()->hasNoFloor(tileBelow)
+			&& (*unit)->getTile()->hasNoFloor(_parent->getSave())
 			&& (*unit)->getMovementType() != MT_FLY
 			&& (*unit)->getWalkingPhase() == 0;
 
@@ -173,8 +170,7 @@ void UnitFallBState::think()
 			if (falling)
 			{
 				Position destination = (*unit)->getPosition() + Position(0,0,-1);
-				Tile *tileDest = _parent->getSave()->getTile(destination);
-				(*unit)->startWalking(Pathfinding::DIR_DOWN, destination, tileDest, onScreen);
+				(*unit)->startWalking(Pathfinding::DIR_DOWN, destination, _parent->getSave());
 				++unit;
 			}
 			else
@@ -220,8 +216,6 @@ void UnitFallBState::think()
 		for (auto ub = unitsToMove.begin(); ub < unitsToMove.end(); )
 		{
 			BattleUnit *unitBelow = (*ub);
-			int size = unitBelow->getArmor()->getSize() - 1;
-			bool onScreen = (unitBelow->getVisible() && _parent->getMap()->getCamera()->isOnScreen(unitBelow->getPosition(), true, size, false));
 			bool escapeFound = false;
 
 			// We need to move all sections of the unit out of the way.
@@ -246,13 +240,12 @@ void UnitFallBState::think()
 					Position originalPosition = (*bs);
 					Position endPosition = originalPosition + offset;
 					Tile *t = _parent->getSave()->getTile(endPosition);
-					Tile *bt = _parent->getSave()->getTile(endPosition + Position(0,0,-1));
 
 					bool aboutToBeOccupiedFromAbove = t && std::find(tilesToFallInto.begin(), tilesToFallInto.end(), t) != tilesToFallInto.end();
 					bool alreadyTaken = t && std::find(escapeTiles.begin(), escapeTiles.end(), t) != escapeTiles.end();
 					bool alreadyOccupied = t && t->getUnit() && (t->getUnit() != unitBelow);
 					bool movementBlocked = _parent->getSave()->getPathfinding()->getTUCost(originalPosition, dir, &endPosition, *ub, 0, false) == 255;
-					bool hasFloor = t && !t->hasNoFloor(bt);
+					bool hasFloor = t && !t->hasNoFloor(_parent->getSave());
 					bool unitCanFly = unitBelow->getMovementType() == MT_FLY;
 
 					bool canMoveToTile = t && !alreadyOccupied && !alreadyTaken && !aboutToBeOccupiedFromAbove && !movementBlocked && (hasFloor || unitCanFly);
@@ -283,8 +276,7 @@ void UnitFallBState::think()
 								}
 							}
 
-							Tile *bu = _parent->getSave()->getTile(originalPosition + Position(0,0,-1));
-							unitBelow->startWalking(dir, unitBelow->getPosition() + offset, bu, onScreen);
+							unitBelow->startWalking(dir, unitBelow->getPosition() + offset, _parent->getSave());
 							ub = unitsToMove.erase(ub);
 						}
 					}

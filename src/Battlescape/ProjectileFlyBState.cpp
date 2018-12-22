@@ -219,7 +219,7 @@ void ProjectileFlyBState::init()
 					closeQuartersTargetList.push_back(closeQuartersTarget);
 				}
 			}
-		}	
+		}
 
 		if (!closeQuartersTargetList.empty())
 		{
@@ -565,8 +565,7 @@ void ProjectileFlyBState::think()
 	if (_parent->getMap()->getProjectile() == 0)
 	{
 		Tile *t = _parent->getSave()->getTile(_action.actor->getPosition());
-		Tile *bt = _parent->getSave()->getTile(_action.actor->getPosition() + Position(0,0,-1));
-		bool hasFloor = t && !t->hasNoFloor(bt);
+		bool hasFloor = t && !t->hasNoFloor(_parent->getSave());
 		bool unitCanFly = _action.actor->getMovementType() == MT_FLY;
 
 		if (_action.weapon->haveNextShotsForAction(_action.type, _action.autoShotCounter)
@@ -881,7 +880,7 @@ void ProjectileFlyBState::targetFloor()
 
 void ProjectileFlyBState::projectileHitUnit(Position pos)
 {
-	BattleUnit *victim = _parent->getSave()->getTile(pos / Position(16,16,24))->getUnit();
+	BattleUnit *victim = _parent->getSave()->getTile(pos / Position(16,16,24))->getOverlappingUnit(_parent->getSave());
 	BattleUnit *targetVictim = _parent->getSave()->getTile(_action.target)->getUnit(); // Who we were aiming at (not necessarily who we hit)
 	if (victim && !victim->isOut())
 	{

@@ -220,9 +220,9 @@ public:
 	/// Mark the unit as surrendering this turn.
 	void setSurrendering(bool isSurrendering);
 	/// Start the walkingPhase
-	void startWalking(int direction, Position destination, Tile *tileBelowMe, bool cache);
+	void startWalking(int direction, Position destination, SavedBattleGame *savedBattleGame);
 	/// Increase the walkingPhase
-	void keepWalking(Tile *tileBelowMe, bool cache);
+	void keepWalking(SavedBattleGame *savedBattleGame, bool fullWalkCycle);
 	/// Gets the walking phase for animation and sound
 	int getWalkingPhase() const;
 	/// Gets the walking phase for diagonal walking
@@ -368,7 +368,7 @@ public:
 	/// Get whether this unit is visible
 	bool getVisible() const;
 	/// Sets the unit's tile it's standing on
-	void setTile(Tile *tile, Tile *tileBelow = 0);
+	void setTile(Tile *tile, SavedBattleGame *saveBattleGame = 0);
 	/// Gets the unit's tile.
 	Tile *getTile() const;
 	/// Gets the item in the specified slot.

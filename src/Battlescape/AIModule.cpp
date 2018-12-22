@@ -1876,7 +1876,7 @@ int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, i
 	Tile *targetTile = _save->getTile(targetPos);
 
 	// don't throw grenades at flying enemies.
-	if (grenade && targetPos.z > 0 && targetTile->hasNoFloor(_save->getTile(targetPos - Position(0,0,1))))
+	if (grenade && targetPos.z > 0 && targetTile->hasNoFloor(_save))
 	{
 		return false;
 	}
@@ -2137,7 +2137,7 @@ void AIModule::wayPointAction()
 			}
 			else if (CollidesWith == V_UNIT)
 			{
-				BattleUnit* target = _save->getTile(CurrentPosition)->getUnit();
+				BattleUnit* target = _save->getTile(CurrentPosition)->getOverlappingUnit(_save);
 				if (target == _aggroTarget)
 				{
 					_attackAction->waypoints.push_back(CurrentPosition);

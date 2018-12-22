@@ -2254,7 +2254,7 @@ inline void BattlescapeState::handle(Action *action)
 							Tile *tile = _save->getTile(newPos);
 							if (tile)
 							{
-								BattleUnit *unit = tile->getUnit();
+								BattleUnit *unit = tile->getOverlappingUnit(_save);
 								if (unit && !unit->isOut())
 								{
 									debug("Bingo!");
@@ -2299,9 +2299,9 @@ inline void BattlescapeState::handle(Action *action)
 								debug("Beam me up Scotty");
 								_save->getPathfinding()->removePreview();
 
-								unit->getTile()->setUnit(0);
+								unit->getTile()->clearUnit();
 								unit->setPosition(newPos);
-								tile->setUnit(unit);
+								tile->setUnit(unit, _save);
 								_save->getTileEngine()->calculateLighting(LL_UNITS);
 								_save->getBattleGame()->handleState();
 							}
@@ -2422,7 +2422,7 @@ void BattlescapeState::saveAIMap()
 					break;
 				}
 				pos.z--;
-				if (z > 0 && !t->hasNoFloor(_save->getTile(pos))) break; // no seeing through floors
+				if (z > 0 && !t->hasNoFloor(_save)) break; // no seeing through floors
 			}
 
 			if (t->getMapData(O_NORTHWALL) && t->getMapData(O_NORTHWALL)->getTUCost(MT_FLY) == 255)

@@ -364,25 +364,19 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	{
 		return;
 	}
-	BattleUnit* bu = unitTile->getUnit();
+	BattleUnit* bu = unitTile->getOverlappingUnit(_save, TUO_ALWAYS);
 	Position unitOffset;
 	bool unitFromBelow = false;
-	if (!bu)
+	if (bu)
 	{
-		Tile *below = _save->getTile(unitTile->getPosition() + Position(0,0,-1));
-		if (below && unitTile->hasNoFloor(below))
+		if (bu != unitTile->getUnit())
 		{
-			bu = below->getUnit();
-			if (!bu)
-			{
-				return;
-			}
 			unitFromBelow = true;
 		}
-		else
-		{
-			return;
-		}
+	}
+	else
+	{
+		return;
 	}
 
 	if (!(bu->getVisible() || _save->getDebugMode()))
@@ -411,8 +405,8 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	}
 	else
 	{
-		Tile *top = _save->getTile(unitTile->getPosition() + Position(0, 0, +1));
-		if (top && top->hasNoFloor(unitTile))
+		const Tile *top = _save->getAboveTile(unitTile);
+		if (top && top->hasNoFloor(_save))
 		{
 			topMargin = -tileFoorHeight / 2;
 		}
@@ -1062,7 +1056,7 @@ void Map::drawTerrain(Surface *surface)
 					// Draw Path Preview
 					if (tile->getPreview() != -1 && tile->isDiscovered(0) && (_previewSetting & PATH_ARROWS))
 					{
-						if (itZ > 0 && tile->hasNoFloor(_save->getTile(tile->getPosition() + Position(0,0,-1))))
+						if (itZ > 0 && tile->hasNoFloor(_save))
 						{
 							tmpSurface = _game->getMod()->getSurfaceSet("Pathfinding")->getFrame(11);
 							if (tmpSurface)
@@ -1389,13 +1383,12 @@ void Map::drawTerrain(Surface *surface)
 						screenPosition.y > -_spriteHeight && screenPosition.y < surface->getHeight() + _spriteHeight )
 					{
 						tile = _save->getTile(mapPosition);
-						Tile *tileBelow = _save->getTile(mapPosition - Position(0,0,1));
 						if (!tile || !tile->isDiscovered(0) || tile->getPreview() == -1)
 							continue;
 						int adjustment = -tile->getTerrainLevel();
 						if (_previewSetting & PATH_ARROWS)
 						{
-							if (itZ > 0 && tile->hasNoFloor(tileBelow))
+							if (itZ > 0 && tile->hasNoFloor(_save))
 							{
 								tmpSurface = _game->getMod()->getSurfaceSet("Pathfinding")->getFrame(23);
 								if (tmpSurface)

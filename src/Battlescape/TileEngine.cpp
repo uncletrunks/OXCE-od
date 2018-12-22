@@ -2373,9 +2373,8 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
  * @param type The damage type of the explosion.
  * @param unit The unit that caused the explosion.
  * @param clipOrWeapon clip or weapon causing the damage.
- * @return The Unit that got hit.
  */
-BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, bool rangeAtack)
+void TileEngine::hit(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, bool rangeAtack)
 {
 	bool terrainChanged = false; //did the hit destroy a tile thereby changing line of sight?
 	int effectGenerated = 0; //did the hit produce smoke (1), fire/light (2) or disabled a unit (3) ?
@@ -2383,10 +2382,9 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 	Tile *tile = _save->getTile(tilePos);
 	if (!tile || power <= 0)
 	{
-		return 0;
+		return;
 	}
 
-	BattleUnit *bu = tile->getUnit();
 	voxelCheckFlush();
 	const auto part = voxelCheck(center, attack.attacker);
 	const auto damage = type->getRandomDamage(power);
@@ -2429,23 +2427,14 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 	}
 	else if (part == V_UNIT)
 	{
-		int verticaloffset = 0;
-		if (!bu)
-		{
-			// it's possible we have a unit below the actual tile, when he stands on a stairs and sticks his head out to the next tile
-			Tile *below = _save->getTile(tilePos - Position(0, 0, 1));
-			if (below)
-			{
-				BattleUnit *buBelow = below->getUnit();
-				if (buBelow)
-				{
-					bu = buBelow;
-					verticaloffset = 24;
-				}
-			}
-		}
+		BattleUnit *bu = tile->getOverlappingUnit(_save);
 		if (bu && bu->getHealth() > 0)
 		{
+			int verticaloffset = 0;
+			if (bu != tile->getUnit())
+			{
+				verticaloffset = 24;
+			}
 			const int sz = bu->getArmor()->getSize() * 8;
 			const Position target = bu->getPosition().toVexel() + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
 			const Position relative = (center - target) - Position(0,0,verticaloffset);
@@ -2480,8 +2469,6 @@ BattleUnit *TileEngine::hit(BattleActionAttack attack, Position center, int powe
 	}
 	//Note: If bu was knocked out this will have no effect on unit visibility quite yet, as it is not marked as out
 	//and will continue to block visibility at this point in time.
-
-	return bu;
 }
 
 /**
@@ -2567,16 +2554,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 					if (ret.second)
 					{
 						const int damage = type->getRandomDamage(power_);
-						BattleUnit *bu = dest->getUnit();
-						Tile *tileBelow = _save->getTile(dest->getPosition() - Position(0,0,1));
-						if (!bu && dest->getPosition().z > 0 && dest->hasNoFloor(tileBelow))
-						{
-							bu = tileBelow->getUnit();
-							if (bu && bu->getHeight() + bu->getFloatHeight() - tileBelow->getTerrainLevel() <= 24)
-							{
-								bu = 0; // if the unit below has no voxels poking into the tile, don't damage it.
-							}
-						}
+						BattleUnit *bu = dest->getOverlappingUnit(_save);
 
 						toRemove.clear();
 						if (bu)
@@ -3702,7 +3680,7 @@ VoxelType TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool e
 		{
 			return V_OUTOFBOUNDS; //not even cache
 		}
-		tileBelow = _save->getTile(pos + Position(0,0,-1));
+		tileBelow = _save->getBelowTile(tile);
 		_cacheTilePos = pos;
 		_cacheTile = tile;
 		_cacheTileBelow = tileBelow;
@@ -3742,17 +3720,7 @@ VoxelType TileEngine::voxelCheck(Position voxel, BattleUnit *excludeUnit, bool e
 
 	if (!excludeAllUnits)
 	{
-		BattleUnit *unit = tile->getUnit();
-		// sometimes there is unit on the tile below, but sticks up to this tile with his head,
-		// in this case we couldn't have unit standing at current tile.
-		if (unit == 0 && tile->hasNoFloor(tileBelow))
-		{
-			if (tileBelow)
-			{
-				tile = tileBelow;
-				unit = tile->getUnit();
-			}
-		}
+		BattleUnit *unit = tile->getOverlappingUnit(_save);
 
 		if (unit != 0 && !unit->isOut() && unit != excludeUnit && (!excludeAllBut || unit == excludeAllBut) && (!onlyVisible || unit->getVisible() ) )
 		{
@@ -4057,9 +4025,6 @@ Tile *TileEngine::applyGravity(Tile *t)
 {
 	if (!t || (t->getInventory()->empty() && !t->getUnit())) return t; // skip this if there are no items
 
-	Position p = t->getPosition();
-	Tile *rt = t;
-	Tile *rtb;
 	BattleUnit *occupant = t->getUnit();
 
 	if (occupant)
@@ -4072,9 +4037,8 @@ Tile *TileEngine::applyGravity(Tile *t)
 			{
 				for (int x = 0; x < occupant->getArmor()->getSize() && canFall; ++x)
 				{
-					rt = _save->getTile(Position(unitpos.x+x, unitpos.y+y, unitpos.z));
-					rtb = _save->getTile(Position(unitpos.x+x, unitpos.y+y, unitpos.z-1)); //below
-					if (!rt->hasNoFloor(rtb))
+					auto rt = _save->getTile(Position(unitpos.x+x, unitpos.y+y, unitpos.z));
+					if (!rt->hasNoFloor(_save))
 					{
 						canFall = false;
 					}
@@ -4091,7 +4055,7 @@ Tile *TileEngine::applyGravity(Tile *t)
 				if (occupant->getMovementType() == MT_FLY)
 				{
 					// move to the position you're already in. this will unset the kneeling flag, set the floating flag, etc.
-					occupant->startWalking(occupant->getDirection(), occupant->getPosition(), _save->getTile(occupant->getPosition() + Position(0,0,-1)), true);
+					occupant->startWalking(occupant->getDirection(), occupant->getPosition(), _save);
 					// and set our status to standing (rather than walking or flying) to avoid weirdness.
 					occupant->abortTurn();
 				}
@@ -4103,15 +4067,11 @@ Tile *TileEngine::applyGravity(Tile *t)
 			}
 		}
 	}
-	rt = t;
-	bool canFall = true;
-	while (p.z >= 0 && canFall)
+
+	Tile *rt = t;
+	while (rt->getPosition().z > 0 && rt->hasNoFloor(_save))
 	{
-		rt = _save->getTile(p);
-		rtb = _save->getTile(Position(p.x, p.y, p.z-1)); //below
-		if (!rt->hasNoFloor(rtb))
-			canFall = false;
-		p.z--;
+		rt = _save->getBelowTile(rt);
 	}
 
 	for (std::vector<BattleItem*>::iterator it = t->getInventory()->begin(); it != t->getInventory()->end(); ++it)
@@ -4317,16 +4277,17 @@ bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attack
 		{
 			Tile *origin (_save->getTile(Position(pos + Position(x, y, 0))));
 			Tile *targetTile (_save->getTile(Position(pos + Position(x, y, 0) + p)));
-			Tile *aboveTargetTile (_save->getTile(Position(pos + Position(x, y, 1) + p)));
-			Tile *belowTargetTile (_save->getTile(Position(pos + Position(x, y, -1) + p)));
 
 			if (targetTile && origin)
 			{
-				if (origin->getTerrainLevel() <= -16 && aboveTargetTile && !aboveTargetTile->hasNoFloor(targetTile))
+				Tile *aboveTargetTile = _save->getAboveTile(targetTile);
+				Tile *belowTargetTile = _save->getBelowTile(targetTile);
+
+				if (origin->getTerrainLevel() <= -16 && aboveTargetTile && !aboveTargetTile->hasNoFloor(_save))
 				{
 					targetTile = aboveTargetTile;
 				}
-				else if (belowTargetTile && targetTile->hasNoFloor(belowTargetTile) && !targetTile->getUnit() && belowTargetTile->getTerrainLevel() <= -16)
+				else if (belowTargetTile && targetTile->hasNoFloor(_save) && !targetTile->getUnit() && belowTargetTile->getTerrainLevel() <= -16)
 				{
 					targetTile = belowTargetTile;
 				}

@@ -1184,7 +1184,7 @@ void SavedBattleGame::resetUnitTiles()
 				{
 					for (int y = size; y >= 0; y--)
 					{
-						getTile((*i)->getTile()->getPosition() + Position(x,y,0))->setUnit(0);
+						getTile((*i)->getTile()->getPosition() + Position(x,y,0))->clearUnit();
 					}
 				}
 			}
@@ -1193,7 +1193,7 @@ void SavedBattleGame::resetUnitTiles()
 				for (int y = size; y >= 0; y--)
 				{
 					Tile *t = getTile((*i)->getPosition() + Position(x,y,0));
-					t->setUnit((*i), getTile(t->getPosition() + Position(0,0,-1)));
+					t->setUnit((*i), this);
 				}
 			}
 
@@ -1755,7 +1755,7 @@ void SavedBattleGame::prepareNewTurn()
 			// smoke from fire spreads upwards one level if there's no floor blocking it.
 			Position pos = Position(0,0,1);
 			Tile *t = getTile((*i)->getPosition() + pos);
-			if (t && t->hasNoFloor(*i))
+			if (t && t->hasNoFloor(this))
 			{
 				// only add smoke equal to half the intensity of the fire
 				t->addSmoke((*i)->getSmoke()/2);
@@ -1877,11 +1877,10 @@ bool SavedBattleGame::setUnitPosition(BattleUnit *bu, Position position, bool te
 		for (int y = size; y >= 0; y--)
 		{
 			Tile *t = getTile(position + Position(x,y,0) + zOffset);
-			Tile *tb = getTile(position + Position(x,y,-1) + zOffset);
 			if (t == 0 ||
 				(t->getUnit() != 0 && t->getUnit() != bu) ||
 				t->getTUCost(O_OBJECT, bu->getMovementType()) == 255 ||
-				(t->hasNoFloor(tb) && bu->getMovementType() != MT_FLY) ||
+				(t->hasNoFloor(this) && bu->getMovementType() != MT_FLY) ||
 				(t->getMapData(O_OBJECT) && t->getMapData(O_OBJECT)->getBigWall() && t->getMapData(O_OBJECT)->getBigWall() <= 3))
 			{
 				return false;
@@ -1916,7 +1915,7 @@ bool SavedBattleGame::setUnitPosition(BattleUnit *bu, Position position, bool te
 			{
 				bu->setPosition(position + zOffset);
 			}
-			getTile(position + Position(x,y,0) + zOffset)->setUnit(bu, getTile(position + Position(x,y,-1) + zOffset));
+			getTile(position + Position(x,y,0) + zOffset)->setUnit(bu, this);
 		}
 	}
 
@@ -2155,7 +2154,7 @@ bool SavedBattleGame::placeUnitNearPosition(BattleUnit *unit, const Position& en
 	if (unit->getMovementType() == MT_FLY)
 	{
 		Tile *t = getTile(entryPoint + Position(0, 0, 1));
-		if (t && t->hasNoFloor(getTile(entryPoint)) && setUnitPosition(unit, entryPoint + Position(0, 0, 1)))
+		if (t && t->hasNoFloor(this) && setUnitPosition(unit, entryPoint + Position(0, 0, 1)))
 		{
 			return true;
 		}

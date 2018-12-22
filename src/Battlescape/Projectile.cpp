@@ -227,11 +227,9 @@ int Projectile::calculateThrow(double accuracy)
 	{
 		targets.push_back(targetVoxel);
 	}
-	else 
+	else
 	{
-		BattleUnit *tu = targetTile->getUnit();
-		if (!tu && _action.target.z > 0 && targetTile->hasNoFloor(0))
-			tu = _save->getTile(_action.target - Position(0, 0, 1))->getUnit();
+		BattleUnit *tu = targetTile->getOverlappingUnit(_save);
 		if (Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && _save->getSide() == FACTION_PLAYER)
 		{
 			targets.push_back(_action.target * Position(16,16,24) + Position(0, 0, 12));
@@ -315,7 +313,7 @@ int Projectile::calculateThrow(double accuracy)
 			&& endTile->getMapData(O_OBJECT)->getTUCost(MT_WALK) == 255
 			&& !(endTile->isBigWall() && (endTile->getMapData(O_OBJECT)->getBigWall()<1 || endTile->getMapData(O_OBJECT)->getBigWall()>3)))
 		{
-			test = V_OUTOFBOUNDS; 
+			test = V_OUTOFBOUNDS;
 		}
 	}
 	return test;
@@ -390,7 +388,7 @@ void Projectile::applyAccuracy(Position origin, Position *target, double accurac
 		{
 			bool hasLOS = false;
 			BattleUnit *bu = _action.actor;
-			BattleUnit *targetUnit = t->getUnit();
+			BattleUnit *targetUnit = t->getOverlappingUnit(_save);
 
 			if (targetUnit)
 			{

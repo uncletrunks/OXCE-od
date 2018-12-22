@@ -38,6 +38,16 @@ class Particle;
 
 enum LightLayers : Uint8 { LL_AMBIENT, LL_FIRE, LL_ITEMS, LL_UNITS, LL_MAX };
 
+enum TileUnitOverlapping : int
+{
+	/// Any unit overlapping tile will be returned
+	TUO_NORMAL = 24,
+	/// Only units that overlap by 2 or more voxel will be returned
+	TUO_IGNORE_SMALL = 26,
+	/// Take unit from lower even if it not overlap
+	TUO_ALWAYS = 0,
+};
+
 /**
  * Basic element of which a battle map is build.
  * @sa http://www.ufopaedia.org/index.php?title=MAPS
@@ -116,7 +126,7 @@ public:
 	/// Get the TU cost to walk over a certain part of the tile.
 	int getTUCost(int part, MovementType movementType) const;
 	/// Checks if this tile has a floor.
-	bool hasNoFloor(Tile *tileBelow) const;
+	bool hasNoFloor(const SavedBattleGame *savedBattleGame = nullptr) const;
 	/// Checks if this tile is a big wall.
 	bool isBigWall() const;
 	/// Get terrain level.
@@ -185,8 +195,13 @@ public:
 	{
 		return _currentSurface[part];
 	}
+	/// Clear unit from tile.
+	void clearUnit()
+	{
+		setUnit(nullptr, nullptr);
+	}
 	/// Set a unit on this tile.
-	void setUnit(BattleUnit *unit, Tile *tileBelow = 0);
+	void setUnit(BattleUnit *unit, SavedBattleGame *saveBattleGame);
 	/**
 	 * Get the (alive) unit on this tile.
 	 * @return BattleUnit.
@@ -195,6 +210,8 @@ public:
 	{
 		return _unit;
 	}
+	/// Get unit from this tile or from tile below.
+	BattleUnit *getOverlappingUnit(const SavedBattleGame *saveBattleGame, TileUnitOverlapping range = TUO_NORMAL) const;
 	/// Set fire, does not increment overlaps.
 	void setFire(int fire);
 	/// Get fire.

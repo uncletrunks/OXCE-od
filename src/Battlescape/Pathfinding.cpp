@@ -281,12 +281,11 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 			Position offset = Position (x, y, 0);
 			Tile *startTile = _save->getTile(startPosition + offset);
 			Tile *destinationTile = _save->getTile(*endPosition + offset);
-			Tile *belowDestination = _save->getTile(*endPosition + offset + Position(0,0,-1));
-			Tile *aboveDestination = _save->getTile(*endPosition + offset + Position(0,0,1));
 
 			// this means the destination is probably outside the map
 			if (startTile == 0 || destinationTile == 0)
 				return 255;
+
 			if (!x && !y && _movementType != MT_FLY && canFallDown(startTile, size+1))
 			{
 				if (direction != DIR_DOWN)
@@ -310,9 +309,12 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 			// this will later be used to re-cast the start tile again.
 			Position verticalOffset (0, 0, 0);
 
-			// if we are on a stairs try to go up a level
-			if (direction < DIR_UP && startTile->getTerrainLevel() <= -16 && aboveDestination && !aboveDestination->hasNoFloor(destinationTile))
 			{
+				Tile *aboveDestination = _save->getAboveTile(destinationTile);
+				Tile *belowDestination = _save->getBelowTile(destinationTile);
+				// if we are on a stairs try to go up a level
+				if (direction < DIR_UP && startTile->getTerrainLevel() <= -16 && aboveDestination && !aboveDestination->hasNoFloor(_save))
+				{
 					numberOfPartsGoingUp++;
 					verticalOffset.z++;
 
@@ -320,28 +322,28 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 					{
 						endPosition->z++;
 						destinationTile = _save->getTile(*endPosition + offset);
-						belowDestination = _save->getTile(*endPosition + Position(x,y,-1));
 						triedStairs = true;
 					}
-			}
-			else if (direction < DIR_UP && !fellDown && _movementType != MT_FLY && belowDestination && canFallDown(destinationTile) && belowDestination->getTerrainLevel() <= -12)
-			{
+				}
+				else if (direction < DIR_UP && !fellDown && _movementType != MT_FLY && belowDestination && canFallDown(destinationTile) && belowDestination->getTerrainLevel() <= -12)
+				{
 					numberOfPartsGoingDown++;
 
 					if (numberOfPartsGoingDown == (size + 1)*(size + 1))
 					{
 						endPosition->z--;
 						destinationTile = _save->getTile(*endPosition + offset);
-						belowDestination = _save->getTile(*endPosition + Position(x,y,-1));
 						fellDown = true;
 					}
-			}
-			else if (!missile && _movementType == MT_FLY && belowDestination && belowDestination->getUnit() && belowDestination->getUnit() != unit)
-			{
-				// 2 or more voxels poking into this tile = no go
-				if (belowDestination->getUnit()->getHeight() + belowDestination->getUnit()->getFloatHeight() - belowDestination->getTerrainLevel() > 26)
+				}
+				else if (!missile && _movementType == MT_FLY && destinationTile)
 				{
-					return 255;
+					// 2 or more voxels poking into this tile = no go
+					auto overlaping = destinationTile->getOverlappingUnit(_save, TUO_IGNORE_SMALL);
+					if (overlaping && overlaping != unit)
+					{
+						return 255;
+					}
 				}
 			}
 
@@ -734,9 +736,8 @@ bool Pathfinding::canFallDown(Tile *here) const
 {
 	if (here->getPosition().z == 0)
 		return false;
-	Tile* tileBelow = _save->getTile(here->getPosition() - Position (0,0,1));
 
-	return here->hasNoFloor(tileBelow);
+	return here->hasNoFloor(_save);
 }
 
 /**
@@ -843,7 +844,6 @@ bool Pathfinding::validateUpDown(BattleUnit *bu, const Position& startPosition, 
 	directionToVector(direction, &endPosition);
 	endPosition += startPosition;
 	Tile *startTile = _save->getTile(startPosition);
-	Tile *belowStart = _save->getTile(startPosition + Position(0,0,-1));
 	Tile *destinationTile = _save->getTile(endPosition);
 	if (startTile->getMapData(O_FLOOR) && destinationTile && destinationTile->getMapData(O_FLOOR) &&
 		(startTile->getMapData(O_FLOOR)->isGravLift() && destinationTile->getMapData(O_FLOOR)->isGravLift()))
@@ -866,8 +866,8 @@ bool Pathfinding::validateUpDown(BattleUnit *bu, const Position& startPosition, 
 	{
 		if (bu->getMovementType() == MT_FLY)
 		{
-			if ((direction == DIR_UP && destinationTile && destinationTile->hasNoFloor(startTile)) // flying up only possible when there is no roof
-				|| (direction == DIR_DOWN && destinationTile && startTile->hasNoFloor(belowStart)) // falling down only possible when there is no floor
+			if ((direction == DIR_UP && destinationTile && destinationTile->hasNoFloor(_save)) // flying up only possible when there is no roof
+				|| (direction == DIR_DOWN && destinationTile && startTile->hasNoFloor(_save)) // falling down only possible when there is no floor
 				)
 			{
 				return true;

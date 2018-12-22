@@ -189,6 +189,71 @@ public:
 	{
 		return &_tiles[i];
 	}
+
+	/**
+	 * Get tile that is below current one (const version).
+	 * @param tile
+	 * @return Tile below
+	 */
+	inline const Tile *getBelowTile(const Tile* tile) const
+	{
+		if (!tile || tile->getPosition().z == 0)
+		{
+			return nullptr;
+		}
+		// diffrence of pointers between layers is equal `_mapsize_y * _mapsize_x`
+		// when we subtrack this value from valid tile we get valid tile from lower layer.
+		return tile - _mapsize_y * _mapsize_x;
+	}
+
+	/**
+	 * Get tile that is below current one.
+	 * @param tile
+	 * @return Tile below
+	 */
+	inline Tile *getBelowTile(Tile* tile)
+	{
+		if (!tile || tile->getPosition().z == 0)
+		{
+			return nullptr;
+		}
+		// diffrence of pointers between layers is equal `_mapsize_y * _mapsize_x`
+		// when we subtrack this value from valid tile we get valid tile from lower layer.
+		return tile - _mapsize_y * _mapsize_x;
+	}
+
+	/**
+	 * Get tile that is over current one (const version).
+	 * @param tile
+	 * @return Tile over
+	 */
+	inline const Tile *getAboveTile(const Tile* tile) const
+	{
+		if (!tile || tile->getPosition().z == _mapsize_z - 1)
+		{
+			return nullptr;
+		}
+		// diffrence of pointers between layers is equal `_mapsize_y * _mapsize_x`
+		// when we add this value from valid tile we get valid tile from upper layer.
+		return tile + _mapsize_y * _mapsize_x;
+	}
+
+	/**
+	 * Get tile that is over current one.
+	 * @param tile
+	 * @return Tile over
+	 */
+	inline Tile *getAboveTile(Tile* tile)
+	{
+		if (!tile || tile->getPosition().z == _mapsize_z - 1)
+		{
+			return nullptr;
+		}
+		// diffrence of pointers between layers is equal `_mapsize_y * _mapsize_x`
+		// when we add this value from valid tile we get valid tile from upper layer.
+		return tile + _mapsize_y * _mapsize_x;
+	}
+
 	/// Gets the currently selected unit.
 	BattleUnit *getSelectedUnit() const;
 	/// Sets the currently selected unit.
