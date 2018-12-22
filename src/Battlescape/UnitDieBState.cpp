@@ -264,7 +264,7 @@ void UnitDieBState::convertUnitToCorpse()
 		_parent->getSave()->getBattleState()->showSpecialButton(false);
 	}
 	// remove the unconscious body item corresponding to this unit, and if it was being carried, keep track of what slot it was in
-	if (lastPosition != Position(-1,-1,-1))
+	if (lastPosition != TileEngine::invalid)
 	{
 		_parent->getSave()->removeUnconsciousBodyItem(_unit);
 	}
@@ -278,7 +278,7 @@ void UnitDieBState::convertUnitToCorpse()
 	// remove unit-tile link
 	_unit->setTile(0);
 
-	if (lastPosition == Position(-1,-1,-1)) // we're being carried
+	if (lastPosition == TileEngine::invalid) // we're being carried
 	{
 		if (_overKill)
 		{

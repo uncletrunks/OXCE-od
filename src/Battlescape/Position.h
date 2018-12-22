@@ -66,17 +66,16 @@ public:
 		return x != pos.x || y != pos.y || z != pos.z;
 	}
 
-	/// Convert tile position to vexel position.
-	Position toVexel() const
+	/// Convert tile position to voxel position.
+	constexpr Position toVoxel() const
 	{
 		return Position(x * 16, y * 16, z * 24);
 	}
-	/// Convert vexel position to tile position.
-	Position toTile() const
+	/// Convert voxel position to tile position.
+	constexpr Position toTile() const
 	{
 		return Position(x / 16, y / 16, z / 24);
 	}
-
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Position& pos)

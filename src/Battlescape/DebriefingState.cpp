@@ -1331,7 +1331,7 @@ void DebriefingState::prepareDebriefing()
 		if (!(*j)->getTile())
 		{
 			Position pos = (*j)->getPosition();
-			if (pos == Position(-1, -1, -1))
+			if (pos == TileEngine::invalid)
 			{
 				for (std::vector<BattleItem*>::iterator k = battle->getItems()->begin(); k != battle->getItems()->end(); ++k)
 				{

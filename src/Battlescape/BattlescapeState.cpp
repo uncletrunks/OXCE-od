@@ -2506,7 +2506,7 @@ void BattlescapeState::saveVoxelView()
 			black = true;
 			if (test!=0 && test!=6)
 			{
-				tile = _save->getTile(Position(_trajectory.at(0).x/16, _trajectory.at(0).y/16, _trajectory.at(0).z/24));
+				tile = _save->getTile(_trajectory.at(0).toTile());
 				if (_debug
 					|| (tile->isDiscovered(0) && test == 2)
 					|| (tile->isDiscovered(1) && test == 3)
@@ -2524,7 +2524,7 @@ void BattlescapeState::saveVoxelView()
 						}
 						else
 						{
-							tile = _save->getTile(Position(_trajectory.at(0).x/16, _trajectory.at(0).y/16, _trajectory.at(0).z/24-1));
+							tile = _save->getBelowTile(tile);
 							if (tile && tile->getUnit())
 							{
 								if (tile->getUnit()->getFaction()==FACTION_NEUTRAL) test=9;
@@ -2533,7 +2533,7 @@ void BattlescapeState::saveVoxelView()
 							}
 						}
 					}
-					hitPos = Position(_trajectory.at(0).x, _trajectory.at(0).y, _trajectory.at(0).z);
+					hitPos =_trajectory.at(0);
 					dist = sqrt((double)((hitPos.x-originVoxel.x)*(hitPos.x-originVoxel.x)
 						+ (hitPos.y-originVoxel.y)*(hitPos.y-originVoxel.y)
 						+ (hitPos.z-originVoxel.z)*(hitPos.z-originVoxel.z)) );
@@ -2634,7 +2634,7 @@ void BattlescapeState::saveVoxelMap()
 					}
 					else
 					{
-						tile = _save->getTile(Position(x/16, y/16, z/12-1));
+						tile = _save->getBelowTile(tile);
 						if (tile && tile->getUnit())
 						{
 							if (tile->getUnit()->getFaction()==FACTION_NEUTRAL) test=9;

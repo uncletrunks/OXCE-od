@@ -30,6 +30,7 @@
 #include "../Battlescape/BattlescapeGame.h"
 #include "../Battlescape/AIModule.h"
 #include "../Battlescape/Inventory.h"
+#include "../Battlescape/TileEngine.h"
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Unit.h"
@@ -164,7 +165,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 
 	_activeHand = "STR_RIGHT_HAND";
 
-	lastCover = Position(-1, -1, -1);
+	lastCover = TileEngine::invalid;
 
 	_statistics = new BattleUnitStatistics();
 
@@ -329,7 +330,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, St
 	_activeHand = "STR_RIGHT_HAND";
 	_gender = GENDER_MALE;
 
-	lastCover = Position(-1, -1, -1);
+	lastCover = TileEngine::invalid;
 
 	_statistics = new BattleUnitStatistics();
 
@@ -599,7 +600,7 @@ Position BattleUnit::getLastPosition() const
  */
 Position BattleUnit::getPositionVexels() const
 {
-	Position center = _pos.toVexel();
+	Position center = _pos.toVoxel();
 	center += Position(8, 8, 0) * _armor->getSize();
 	return center;
 }

@@ -262,7 +262,7 @@ void BattlescapeGenerator::nextStage()
 		}
 		(*i)->setFire(0);
 		(*i)->setTile(0);
-		(*i)->setPosition(Position(-1,-1,-1), false);
+		(*i)->setPosition(TileEngine::invalid, false);
 	}
 
 	// remove all items not belonging to our soldiers from the map.
@@ -1756,7 +1756,7 @@ void BattlescapeGenerator::explodePowerSources()
 	{
 		int power = t->getExplosive();
 		t->setExplosive(0, 0, true);
-		Position p = t->getPosition().toVexel() + Position(8,8,0);
+		Position p = t->getPosition().toVoxel() + Position(8,8,0);
 		_save->getTileEngine()->explode({ }, p, power, _game->getMod()->getDamageType(DT_HE), power / 10);
 		t = _save->getTileEngine()->checkForTerrainExplosions();
 	}
@@ -1838,13 +1838,13 @@ bool BattlescapeGenerator::placeUnitNearFriend(BattleUnit *unit)
 	}
 	for (int i = 0; i != 10; ++i)
 	{
-		Position entryPoint = Position(-1, -1, -1);
+		Position entryPoint = TileEngine::invalid;
 		int tries = 100;
 		bool largeUnit = false;
-		while (entryPoint == Position(-1, -1, -1) && tries)
+		while (entryPoint == TileEngine::invalid && tries)
 		{
 			BattleUnit* k = _save->getUnits()->at(RNG::generate(0, _save->getUnits()->size()-1));
-			if (k->getFaction() == unit->getFaction() && k->getPosition() != Position(-1, -1, -1) && k->getArmor()->getSize() >= unit->getArmor()->getSize())
+			if (k->getFaction() == unit->getFaction() && k->getPosition() != TileEngine::invalid && k->getArmor()->getSize() >= unit->getArmor()->getSize())
 			{
 				entryPoint = k->getPosition();
 				largeUnit = (k->getArmor()->getSize() != 1);

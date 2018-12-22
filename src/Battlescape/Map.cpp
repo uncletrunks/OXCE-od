@@ -121,7 +121,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_txtAccuracy->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 	_cacheActiveWeaponUfopediaArticleUnlocked = -1;
 	_cacheIsCtrlPressed = false;
-	_cacheCursorPosition = Position(-1, -1, -1);
+	_cacheCursorPosition = TileEngine::invalid;
 	_cacheHasLOS = -1;
 
 	_nightVisionOn = false;
@@ -250,7 +250,7 @@ void Map::draw()
 	_projectileInFOV = _save->getDebugMode();
 	if (_projectile)
 	{
-		t = _save->getTile(Position(_projectile->getPosition(0).x/16, _projectile->getPosition(0).y/16, _projectile->getPosition(0).z/24));
+		t = _save->getTile(_projectile->getPosition(0).toTile());
 		if (_save->getSide() == FACTION_PLAYER || (t && t->getVisible()))
 		{
 			_projectileInFOV = true;
@@ -261,7 +261,7 @@ void Map::draw()
 	{
 		for (std::list<Explosion*>::iterator i = _explosions.begin(); i != _explosions.end(); ++i)
 		{
-			t = _save->getTile(Position((*i)->getPosition().x/16, (*i)->getPosition().y/16, (*i)->getPosition().z/24));
+			t = _save->getTile((*i)->getPosition().toTile());
 			if (t && ((*i)->isBig() || t->getVisible()))
 			{
 				_explosionInFOV = true;
@@ -1275,7 +1275,7 @@ void Map::drawTerrain(Surface *surface)
 											float attackStrength = action->actor->getPsiAccuracy(action->type, action->weapon);
 											float defenseStrength = 30.0f; // indicator ignores: +victim->getArmor()->getPsiDefence(victim);
 
-											Position p = action->actor->getPosition().toVexel() - Position(itX, itY, itZ).toVexel();
+											Position p = action->actor->getPosition().toVoxel() - Position(itX, itY, itZ).toVoxel();
 											p *= p;
 											int min = attackStrength - defenseStrength - rule->getPsiAccuracyRangeReduction(sqrt(float(p.x + p.y + p.z)));
 											int max = min + 55;
@@ -1865,7 +1865,7 @@ void Map::setCursorType(CursorType type, int size)
 	// reset cursor indicator cache
 	_cacheActiveWeaponUfopediaArticleUnlocked = -1;
 	_cacheIsCtrlPressed = false;
-	_cacheCursorPosition = Position(-1, -1, -1);
+	_cacheCursorPosition = TileEngine::invalid;
 	_cacheHasLOS = -1;
 
 	_cursorType = type;

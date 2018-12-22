@@ -520,7 +520,7 @@ void BattlescapeGame::endTurn()
 				{
 					if (rule->getBattleType() == BT_GRENADE) // it's a grenade to explode now
 					{
-						Position p = tile->getPosition().toVexel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
+						Position p = tile->getPosition().toVoxel() + Position(8, 8, - tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
 						statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, unit, item, item, }));
 						exploded = true;
 					}
@@ -545,7 +545,7 @@ void BattlescapeGame::endTurn()
 	Tile *t = _save->getTileEngine()->checkForTerrainExplosions();
 	if (t)
 	{
-		Position p = t->getPosition().toVexel();
+		Position p = t->getPosition().toVoxel();
 		statePushNext(new ExplosionBState(this, p, BattleActionAttack{ }, t));
 		statePushBack(0);
 		return;
@@ -1625,8 +1625,8 @@ void BattlescapeGame::primaryAction(Position pos)
 					// Use voxel positions to get more uniform spacing
 					// We add Position(8, 8, 12) to target middle of tile
 					int waypointIndex = std::max(0, std::min(numberOfWaypoints - 1, i * (numberOfWaypoints - 1) / (numberOfShots - 1)));
-					Position previousWaypoint = getMap()->getWaypoints()->at(waypointIndex).toVexel() + Position(8, 8, 12);
-					Position nextWaypoint = getMap()->getWaypoints()->at(std::min((int)getMap()->getWaypoints()->size() - 1, waypointIndex + 1)).toVexel() + Position(8, 8, 12);
+					Position previousWaypoint = getMap()->getWaypoints()->at(waypointIndex).toVoxel() + TileEngine::voxelTileCenter;
+					Position nextWaypoint = getMap()->getWaypoints()->at(std::min((int)getMap()->getWaypoints()->size() - 1, waypointIndex + 1)).toVoxel() + TileEngine::voxelTileCenter;
 					Position targetPos;
 					targetPos.x = previousWaypoint.x + (nextWaypoint.x - previousWaypoint.x) * (i * (numberOfWaypoints - 1) % (numberOfShots - 1)) / (numberOfShots - 1);
 					targetPos.y = previousWaypoint.y + (nextWaypoint.y - previousWaypoint.y) * (i * (numberOfWaypoints - 1) % (numberOfShots - 1)) / (numberOfShots - 1);
@@ -1634,7 +1634,7 @@ void BattlescapeGame::primaryAction(Position pos)
 
 					_currentAction.waypoints.push_back(targetPos);
 				}
-				_currentAction.waypoints.push_back(getMap()->getWaypoints()->front().toVexel() + Position(8, 8, 12));
+				_currentAction.waypoints.push_back(getMap()->getWaypoints()->front().toVoxel() + TileEngine::voxelTileCenter);
 				_currentAction.target = _currentAction.waypoints.back().toTile();
 
 				getMap()->getWaypoints()->clear();
@@ -2732,7 +2732,7 @@ int BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 					{
 						if (ruleItem->getBattleType() == BT_GRENADE || ruleItem->getBattleType() == BT_PROXIMITYGRENADE)
 						{
-							Position p = t->getPosition().toVexel() + Position(8, 8, t->getTerrainLevel());
+							Position p = t->getPosition().toVoxel() + Position(8, 8, t->getTerrainLevel());
 							statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, nullptr, item, item, }));
 							exploded = true;
 						}

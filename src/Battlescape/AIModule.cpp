@@ -1510,7 +1510,7 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 
 		if (action->weapon->getRules()->getArcingShot() || action->type == BA_THROW)
 		{
-			targetPosition = target->getPosition().toVexel() + Position (8,8, (2 + -target->getTile()->getTerrainLevel()));
+			targetPosition = target->getPosition().toVoxel() + Position (8,8, (2 + -target->getTile()->getTerrainLevel()));
 			if (!_save->getTileEngine()->validateThrow((*action), origin, targetPosition))
 			{
 				return 0;
@@ -1802,7 +1802,7 @@ bool AIModule::findFirePoint()
 			continue;
 		int score = 0;
 		// i should really make a function for this
-		Position origin = (pos * Position(16,16,24)) +
+		Position origin = pos.toVoxel() +
 			// 4 because -2 is eyes and 2 below that is the rifle (or at least that's my understanding)
 			Position(8,8, _unit->getHeight() + _unit->getFloatHeight() - tile->getTerrainLevel() - 4);
 
@@ -1931,12 +1931,12 @@ int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, i
 				continue;
 
 			// trace a line from the grenade origin to the unit we're checking against
-			Position voxelPosA = Position ((targetPos.x * 16)+8, (targetPos.y * 16)+8, (targetPos.z * 24)+12);
-			Position voxelPosB = Position (((*i)->getPosition().x * 16)+8, ((*i)->getPosition().y * 16)+8, ((*i)->getPosition().z * 24)+12);
+			Position voxelPosA = Position (targetPos.toVoxel() + TileEngine::voxelTileCenter);
+			Position voxelPosB = Position ((*i)->getPosition().toVoxel() + TileEngine::voxelTileCenter);
 			std::vector<Position> traj;
 			int collidesWith = _save->getTileEngine()->calculateLine(voxelPosA, voxelPosB, false, &traj, target, true, false, *i);
 
-			if (collidesWith == V_UNIT && traj.front() / Position(16,16,24) == (*i)->getPosition())
+			if (collidesWith == V_UNIT && traj.front().toTile() == (*i)->getPosition())
 			{
 				if ((*i)->getFaction() == _targetFaction)
 				{
@@ -2378,7 +2378,7 @@ void AIModule::grenadeAction()
 			return;
 		}
 		Position originVoxel = _save->getTileEngine()->getOriginVoxel(action, 0);
-		Position targetVoxel = action.target.toVexel() + Position (8,8, (2 + -_save->getTile(action.target)->getTerrainLevel()));
+		Position targetVoxel = action.target.toVoxel() + Position (8,8, (2 + -_save->getTile(action.target)->getTerrainLevel()));
 		// are we within range?
 		if (_save->getTileEngine()->validateThrow(action, originVoxel, targetVoxel))
 		{

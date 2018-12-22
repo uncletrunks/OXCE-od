@@ -48,6 +48,11 @@ public:
 	/// Value represent not exisiting position.
 	static constexpr Position invalid = { -1, -1, -1 };
 
+	/// Size of tile in voxels
+	static constexpr Position voxelTileSize = { 16, 16, 24 };
+	/// Half of size of tile in voxels
+	static constexpr Position voxelTileCenter = { 8, 8, 12 };
+
 private:
 	/**
 	 * Helper class storing cached visibility blockage data.

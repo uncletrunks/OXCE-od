@@ -288,7 +288,7 @@ void ProjectileFlyBState::init()
 	if (_action.type == BA_LAUNCH || (Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && isPlayer) || !_parent->getPanicHandled())
 	{
 		// target nothing, targets the middle of the tile
-		_targetVoxel = _action.target.toVexel() + Position(8, 8, 12);
+		_targetVoxel = _action.target.toVoxel() + TileEngine::voxelTileCenter;
 		if (_action.type == BA_LAUNCH)
 		{
 			if (_targetFloor)
@@ -318,13 +318,13 @@ void ProjectileFlyBState::init()
 			if (_origin == _action.target || targetTile->getUnit() == _unit)
 			{
 				// don't shoot at yourself but shoot at the floor
-				_targetVoxel = Position(_action.target.x*16 + 8, _action.target.y*16 + 8, _action.target.z*24);
+				_targetVoxel = _action.target.toVoxel() + Position(8, 8, 0);
 			}
 			else
 			{
 				if (!_parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer))
 				{
-					_targetVoxel = Position(-16,-16,-24); // out of bounds, even after voxel to tile calculation.
+					_targetVoxel = TileEngine::invalid.toVoxel(); // out of bounds, even after voxel to tile calculation.
 					if (isPlayer)
 					{
 						forceEnableObstacles = true;
@@ -336,28 +336,28 @@ void ProjectileFlyBState::init()
 		{
 			if (!_parent->getTileEngine()->canTargetTile(&originVoxel, targetTile, O_OBJECT, &_targetVoxel, _unit, isPlayer))
 			{
-				_targetVoxel = Position(_action.target.x*16 + 8, _action.target.y*16 + 8, _action.target.z*24 + 10);
+				_targetVoxel = _action.target.toVoxel() + Position(8, 8, 10);
 			}
 		}
 		else if (targetTile->getMapData(O_NORTHWALL) != 0)
 		{
 			if (!_parent->getTileEngine()->canTargetTile(&originVoxel, targetTile, O_NORTHWALL, &_targetVoxel, _unit, isPlayer))
 			{
-				_targetVoxel = Position(_action.target.x*16 + 8, _action.target.y*16, _action.target.z*24 + 9);
+				_targetVoxel = _action.target.toVoxel() + Position(8, 0, 9);
 			}
 		}
 		else if (targetTile->getMapData(O_WESTWALL) != 0)
 		{
 			if (!_parent->getTileEngine()->canTargetTile(&originVoxel, targetTile, O_WESTWALL, &_targetVoxel, _unit, isPlayer))
 			{
-				_targetVoxel = Position(_action.target.x*16, _action.target.y*16 + 8, _action.target.z*24 + 9);
+				_targetVoxel = _action.target.toVoxel() + Position(0, 8, 9);
 			}
 		}
 		else if (targetTile->getMapData(O_FLOOR) != 0)
 		{
 			if (!_parent->getTileEngine()->canTargetTile(&originVoxel, targetTile, O_FLOOR, &_targetVoxel, _unit, isPlayer))
 			{
-				_targetVoxel = Position(_action.target.x*16 + 8, _action.target.y*16 + 8, _action.target.z*24 + 2);
+				_targetVoxel = _action.target.toVoxel() + Position(8, 8, 2);
 			}
 		}
 		else
@@ -366,7 +366,7 @@ void ProjectileFlyBState::init()
 			_parent->getTileEngine()->canTargetTile(&originVoxel, targetTile, MapData::O_DUMMY, &_targetVoxel, _unit, isPlayer);
 
 			// target nothing, targets the middle of the tile
-			_targetVoxel = Position(_action.target.x*16 + 8, _action.target.y*16 + 8, _action.target.z*24 + 12);
+			_targetVoxel = _action.target.toVoxel() + TileEngine::voxelTileCenter;
 		}
 	}
 
@@ -405,7 +405,7 @@ bool ProjectileFlyBState::createNewProjectile()
 		int distance = _parent->getTileEngine()->distance(actorPosition, targetPosition);
 		if (distance > maxRange)
 		{
-			_targetVoxel = (actorPosition + (targetPosition - actorPosition) * maxRange / distance).toVexel() + Position(8, 8, 12);
+			_targetVoxel = (actorPosition + (targetPosition - actorPosition) * maxRange / distance).toVoxel() + TileEngine::voxelTileCenter;
 			targetPosition = _targetVoxel.toTile();
 		}
 
@@ -506,7 +506,7 @@ bool ProjectileFlyBState::createNewProjectile()
 	}
 	else
 	{
-		if (_originVoxel != Position(-1,-1,-1))
+		if (_originVoxel != TileEngine::invalid)
 		{
 			_projectileImpact = projectile->calculateTrajectory(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider, _originVoxel, false);
 		}
@@ -514,7 +514,7 @@ bool ProjectileFlyBState::createNewProjectile()
 		{
 			_projectileImpact = projectile->calculateTrajectory(_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) / accuracyDivider);
 		}
-		if (_targetVoxel != Position(-16,-16,-24) && (_projectileImpact != V_EMPTY || _action.type == BA_LAUNCH))
+		if (_targetVoxel != TileEngine::invalid.toVoxel() && (_projectileImpact != V_EMPTY || _action.type == BA_LAUNCH))
 		{
 			// set the soldier in an aiming position
 			_unit->aim(true);
@@ -880,7 +880,7 @@ void ProjectileFlyBState::targetFloor()
 
 void ProjectileFlyBState::projectileHitUnit(Position pos)
 {
-	BattleUnit *victim = _parent->getSave()->getTile(pos / Position(16,16,24))->getOverlappingUnit(_parent->getSave());
+	BattleUnit *victim = _parent->getSave()->getTile(pos.toTile())->getOverlappingUnit(_parent->getSave());
 	BattleUnit *targetVictim = _parent->getSave()->getTile(_action.target)->getUnit(); // Who we were aiming at (not necessarily who we hit)
 	if (victim && !victim->isOut())
 	{

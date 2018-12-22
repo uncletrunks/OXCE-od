@@ -138,7 +138,7 @@ int Projectile::calculateTrajectory(double accuracy, const Position& originVoxel
 		_action.type != BA_LAUNCH &&
 		!_action.sprayTargeting)
 	{
-		Position hitPos = Position(_trajectory.at(0).x/16, _trajectory.at(0).y/16, _trajectory.at(0).z/24);
+		Position hitPos = _trajectory.at(0).toTile();
 		if (test == V_UNIT && _save->getTile(hitPos) && _save->getTile(hitPos)->getUnit() == 0) //no unit? must be lower
 		{
 			hitPos = Position(hitPos.x, hitPos.y, hitPos.z-1);
@@ -219,7 +219,7 @@ int Projectile::calculateThrow(double accuracy)
 	Position targetVoxel;
 	std::vector<Position> targets;
 	double curvature;
-	targetVoxel = _action.target * Position(16,16,24) + Position(8,8, (1 + -targetTile->getTerrainLevel()));
+	targetVoxel = _action.target.toVoxel() + Position(8,8, (1 + -targetTile->getTerrainLevel()));
 	targets.clear();
 	bool forced = false;
 
@@ -232,7 +232,7 @@ int Projectile::calculateThrow(double accuracy)
 		BattleUnit *tu = targetTile->getOverlappingUnit(_save);
 		if (Options::forceFire && (SDL_GetModState() & KMOD_CTRL) != 0 && _save->getSide() == FACTION_PLAYER)
 		{
-			targets.push_back(_action.target * Position(16,16,24) + Position(0, 0, 12));
+			targets.push_back(_action.target.toVoxel() + Position(0, 0, 12));
 			forced = true;
 		}
 		else if (tu && ((_action.actor->getFaction() != FACTION_PLAYER) ||
@@ -245,7 +245,7 @@ int Projectile::calculateThrow(double accuracy)
 		}
 		else if (targetTile->getMapData(O_OBJECT) != 0)
 		{
-			targetVoxel = _action.target * Position(16,16,24) + Position(8,8,0);
+			targetVoxel = _action.target.toVoxel() + Position(8,8,0);
 			targets.push_back(targetVoxel + Position(0, 0, 13));
 			targets.push_back(targetVoxel + Position(0, 0, 8));
 			targets.push_back(targetVoxel + Position(0, 0, 23));
@@ -253,7 +253,7 @@ int Projectile::calculateThrow(double accuracy)
 		}
 		else if (targetTile->getMapData(O_NORTHWALL) != 0)
 		{
-			targetVoxel = _action.target * Position(16,16,24) + Position(8,0,0);
+			targetVoxel = _action.target.toVoxel() + Position(8,0,0);
 			targets.push_back(targetVoxel + Position(0, 0, 13));
 			targets.push_back(targetVoxel + Position(0, 0, 8));
 			targets.push_back(targetVoxel + Position(0, 0, 20));
@@ -261,7 +261,7 @@ int Projectile::calculateThrow(double accuracy)
 		}
 		else if (targetTile->getMapData(O_WESTWALL) != 0)
  		{
-			targetVoxel = _action.target * Position(16,16,24) + Position(0,8,0);
+			targetVoxel = _action.target.toVoxel() + Position(0,8,0);
 			targets.push_back(targetVoxel + Position(0, 0, 13));
 			targets.push_back(targetVoxel + Position(0, 0, 8));
 			targets.push_back(targetVoxel + Position(0, 0, 20));
@@ -558,11 +558,11 @@ bool Projectile::isReversed() const
  */
 void Projectile::addVaporCloud()
 {
-	Tile *tile = _save->getTile(_trajectory.at(_position) / Position(16,16,24));
+	Tile *tile = _save->getTile(_trajectory.at(_position).toTile());
 	if (tile)
 	{
 		Position tilePos, voxelPos;
-		_save->getBattleGame()->getMap()->getCamera()->convertMapToScreen(_trajectory.at(_position) / Position(16,16,24), &tilePos);
+		_save->getBattleGame()->getMap()->getCamera()->convertMapToScreen(_trajectory.at(_position).toTile(), &tilePos);
 		tilePos += _save->getBattleGame()->getMap()->getCamera()->getMapOffset();
 		_save->getBattleGame()->getMap()->getCamera()->convertVoxelToScreen(_trajectory.at(_position), &voxelPos);
 		for (int i = 0; i != _vaporDensity; ++i)

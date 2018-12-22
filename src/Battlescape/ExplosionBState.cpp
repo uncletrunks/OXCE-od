@@ -430,7 +430,7 @@ void ExplosionBState::explode()
 	Tile *t = save->getTileEngine()->checkForTerrainExplosions();
 	if (t)
 	{
-		Position p = t->getPosition().toVexel();
+		Position p = t->getPosition().toVoxel();
 		p += Position(8,8,0);
 		_parent->statePushFront(new ExplosionBState(_parent, p, BattleActionAttack{ BA_NONE, _attack.attacker, }, t));
 	}

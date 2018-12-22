@@ -179,7 +179,7 @@ void UnitFallBState::think()
 				if ((*unit)->getSpecialAbility() == SPECAB_BURNFLOOR || (*unit)->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
 				{
 					(*unit)->getTile()->ignite(1);
-					Position groundVoxel = ((*unit)->getPosition() * Position(16,16,24)) + Position(8,8,-((*unit)->getTile()->getTerrainLevel()));
+					Position groundVoxel = ((*unit)->getPosition().toVoxel()) + Position(8,8,-((*unit)->getTile()->getTerrainLevel()));
 					_parent->getTileEngine()->hit(BattleActionAttack{ BA_NONE, (*unit), }, groundVoxel, (*unit)->getBaseStats()->strength, _parent->getMod()->getDamageType(DT_IN), false);
 
 					if ((*unit)->getStatus() != STATUS_STANDING) // ie: we burned a hole in the floor and fell through it

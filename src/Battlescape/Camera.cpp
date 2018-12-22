@@ -472,7 +472,7 @@ void Camera::convertMapToScreen(Position mapPos, Position *screenPos) const
  */
 void Camera::convertVoxelToScreen(Position voxelPos, Position *screenPos) const
 {
-	Position mapPosition = Position(voxelPos.x / 16, voxelPos.y / 16, voxelPos.z / 24);
+	Position mapPosition = voxelPos.toTile();
 	convertMapToScreen(mapPosition, screenPos);
 	double dx = voxelPos.x - (mapPosition.x * 16);
 	double dy = voxelPos.y - (mapPosition.y * 16);
