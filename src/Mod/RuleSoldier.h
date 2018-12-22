@@ -53,7 +53,7 @@ private:
 	std::string _armor;
 	int _costBuy, _costSalary, _costSalarySquaddie, _costSalarySergeant, _costSalaryCaptain, _costSalaryColonel, _costSalaryCommander;
 	int _standHeight, _kneelHeight, _floatHeight;
-	int _femaleFrequency, _value, _moraleLossWhenKilled;
+	int _femaleFrequency, _value, _transferTime, _moraleLossWhenKilled;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
@@ -126,6 +126,8 @@ public:
 	const std::vector<SoldierNamePool*> &getNames() const;
 	/// Gets the value - for score calculation.
 	int getValue() const;
+	/// Gets the soldier's transfer time.
+	int getTransferTime() const;
 	/// Percentage modifier for morale loss when this unit is killed.
 	int getMoraleLossWhenKilled() { return _moraleLossWhenKilled; };
 	/// Gets the list of StatStrings.
