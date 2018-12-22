@@ -120,6 +120,18 @@ void State::setInterface(const std::string& category, bool alterPal, SavedBattle
 }
 
 /**
+ * Set window background from the ruleset.
+ * @param window Window handle.
+ * @param s ID of the interface ruleset entry.
+ */
+void State::setWindowBackground(Window *window, const std::string &s)
+{
+	auto bgImageName = _game->getMod()->getInterface(s)->getBackgroundImage();
+	auto bgImage = _game->getMod()->getSurface(bgImageName);
+	window->setBackground(bgImage);
+}
+
+/**
  * Adds a new child surface for the state to take care of,
  * giving it the game's display palette. Once associated,
  * the state handles all of the surface's behaviour

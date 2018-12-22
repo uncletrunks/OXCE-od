@@ -1,5 +1,6 @@
 interfaces: #done
   - type: mainMenu
+    backgroundImage: BACK01.SCR
     music: GMWAITLO
     elements:
       - id: palette

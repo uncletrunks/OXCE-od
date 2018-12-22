@@ -1,5 +1,6 @@
 interfaces:
   - type: mainMenu
+    backgroundImage: BACK01.SCR
     music: GMSTORY
     elements:
       - id: palette

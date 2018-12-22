@@ -64,6 +64,8 @@ public:
 	virtual ~State();
 	/// Set interface rules.
 	void setInterface(const std::string &s, bool alterPal = false, SavedBattleGame *battleGame = 0);
+	/// Set window background.
+	void setWindowBackground(Window *window, const std::string &s);
 	/// Adds a child element to the state.
 	void add(Surface *surface);
 	/// Adds a child element to the state.
