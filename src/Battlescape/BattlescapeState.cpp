@@ -1457,6 +1457,7 @@ void BattlescapeState::btnSpecialClick(Action *action)
 		bool middleClick = action->getDetails()->button.button == SDL_BUTTON_MIDDLE;
 		handleItemClick(specialItem, middleClick);
 	}
+	action->getDetails()->type = SDL_NOEVENT; // consume the event
 }
 
 /**
@@ -3157,7 +3158,7 @@ void BattlescapeState::resize(int &dX, int &dY)
 
 	for (std::vector<Surface*>::const_iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
 	{
-		if (*i != _map && (*i) != _btnPsi && *i != _btnLaunch && *i != _txtDebug)
+		if (*i != _map && (*i) != _btnPsi && *i != _btnLaunch && *i != _btnSpecial && *i != _txtDebug)
 		{
 			(*i)->setX((*i)->getX() + dX / 2);
 			(*i)->setY((*i)->getY() + dY);
