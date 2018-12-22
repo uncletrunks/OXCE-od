@@ -291,7 +291,6 @@ void TileEngine::calculateTerrainBackground(GraphSubset gs)
 		{
 			auto currLight = 0;
 
-			// only floors and objects can light up
 			if (tile->getMapData(O_FLOOR))
 			{
 				currLight = std::max(currLight, tile->getMapData(O_FLOOR)->getLightSource());
@@ -299,6 +298,14 @@ void TileEngine::calculateTerrainBackground(GraphSubset gs)
 			if (tile->getMapData(O_OBJECT))
 			{
 				currLight = std::max(currLight, tile->getMapData(O_OBJECT)->getLightSource());
+			}
+			if (tile->getMapData(O_WESTWALL))
+			{
+				currLight = std::max(currLight, tile->getMapData(O_WESTWALL)->getLightSource());
+			}
+			if (tile->getMapData(O_NORTHWALL))
+			{
+				currLight = std::max(currLight, tile->getMapData(O_NORTHWALL)->getLightSource());
 			}
 
 			// fires
