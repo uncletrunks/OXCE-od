@@ -543,9 +543,7 @@ void SavedBattleGame::initMap(int mapsize_x, int mapsize_y, int mapsize_z, bool 
 	_tiles.reserve(_mapsize_z * _mapsize_y * _mapsize_x);
 	for (int i = 0; i < _mapsize_z * _mapsize_y * _mapsize_x; ++i)
 	{
-		Position pos;
-		getTileCoords(i, &pos.x, &pos.y, &pos.z);
-		_tiles.push_back(Tile(pos));
+		_tiles.push_back(Tile(getTileCoords(i)));
 	}
 
 }
@@ -704,11 +702,13 @@ int SavedBattleGame::getMapSizeXYZ() const
  * @param y Pointer to the Y coordinate.
  * @param z Pointer to the Z coordinate.
  */
-void SavedBattleGame::getTileCoords(int index, int *x, int *y, int *z) const
+Position SavedBattleGame::getTileCoords(int index) const
 {
-	*z = index / (_mapsize_y * _mapsize_x);
-	*y = (index % (_mapsize_y * _mapsize_x)) / _mapsize_x;
-	*x = (index % (_mapsize_y * _mapsize_x)) % _mapsize_x;
+	Position p;
+	p.z = index / (_mapsize_y * _mapsize_x);
+	p.y = (index % (_mapsize_y * _mapsize_x)) / _mapsize_x;
+	p.x = (index % (_mapsize_y * _mapsize_x)) % _mapsize_x;
+	return p;
 }
 
 /**

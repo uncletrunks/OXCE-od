@@ -47,11 +47,9 @@ Pathfinding::Pathfinding(SavedBattleGame *save) : _save(save), _unit(0), _pathPr
 	_size = _save->getMapSizeXYZ();
 	// Initialize one node per tile
 	_nodes.reserve(_size);
-	Position p;
 	for (int i = 0; i < _size; ++i)
 	{
-		_save->getTileCoords(i, &p.x, &p.y, &p.z);
-		_nodes.push_back(PathfindingNode(p));
+		_nodes.push_back(PathfindingNode(_save->getTileCoords(i)));
 	}
 }
 

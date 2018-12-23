@@ -330,7 +330,11 @@ void Camera::scrollXY(int x, int y, bool redraw)
 
 	do
 	{
-		convertScreenToMap((_screenWidth / 2), (_visibleMapHeight / 2), &_center.x, &_center.y);
+		int xx = 0;
+		int yy = 0;
+		convertScreenToMap((_screenWidth / 2), (_visibleMapHeight / 2), &xx, &yy);
+		_center.x = xx;
+		_center.y = yy;
 
 		// Handling map bounds...
 		// Ok, this is a prototype, it should be optimized.
@@ -357,7 +361,11 @@ void Camera::jumpXY(int x, int y)
 {
 	_mapOffset.x += x;
 	_mapOffset.y += y;
-	convertScreenToMap((_screenWidth / 2), (_visibleMapHeight / 2), &_center.x, &_center.y);
+	int xx = 0;
+	int yy = 0;
+	convertScreenToMap((_screenWidth / 2), (_visibleMapHeight / 2), &xx, &yy);
+	_center.x = xx;
+	_center.y = yy;
 }
 
 
@@ -407,8 +415,8 @@ void Camera::centerOnPosition(Position mapPos, bool redraw)
 {
 	Position screenPos;
 	_center = mapPos;
-	_center.x = Clamp(_center.x, -1, _mapsize_x);
-	_center.y = Clamp(_center.y, -1, _mapsize_y);
+	_center.x = Clamp<int>(_center.x, -1, _mapsize_x);
+	_center.y = Clamp<int>(_center.y, -1, _mapsize_y);
 	convertMapToScreen(_center, &screenPos);
 
 	_mapOffset.x = -(screenPos.x - (_screenWidth / 2));
