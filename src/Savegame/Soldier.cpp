@@ -638,6 +638,17 @@ const std::vector<std::string> Soldier::getArmorLayers(Armor *customArmor) const
 	}
 	if (!isDefined)
 	{
+		// try also gender + hardcoded look 0
+		ss.str("");
+		ss << gender << "0";
+		isDefined = (layoutDefinition.find(ss.str()) != layoutDefinition.end());
+		if (isDefined)
+		{
+			relevantLayer = layoutDefinition[ss.str()];
+		}
+	}
+	if (!isDefined)
+	{
 		throw Exception("Layered armor sprite definition (" + armor->getType() + ") not found!");
 	}
 	for (auto layerItem : relevantLayer)
