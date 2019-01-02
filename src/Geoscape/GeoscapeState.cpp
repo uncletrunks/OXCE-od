@@ -1405,7 +1405,7 @@ void GeoscapeState::time10Minutes()
 				if ((*j)->getDestination() == 0 && (*j)->getCraftStats().sightRange > 0)
 				{
 					double range = Nautical((*j)->getCraftStats().sightRange);
-					for (std::vector<AlienBase*>::iterator b = _game->getSavedGame()->getAlienBases()->begin(); b != _game->getSavedGame()->getAlienBases()->end(); b++)
+					for (std::vector<AlienBase*>::iterator b = _game->getSavedGame()->getAlienBases()->begin(); b != _game->getSavedGame()->getAlienBases()->end(); ++b)
 					{
 						if ((*j)->getDistance(*b) <= range)
 						{
@@ -1650,18 +1650,10 @@ bool GeoscapeState::processMissionSite(MissionSite *site)
 		bool noFollowers = site->getFollowers()->empty();
 		if (site->getRules()->despawnEvenIfTargeted())
 		{
-			for (std::vector<Target*>::iterator k = site->getFollowers()->begin(); k != site->getFollowers()->end();)
+			std::vector<Craft*> followers = site->getCraftFollowers();
+			for (std::vector<Craft*>::iterator k = followers.begin(); k != followers.end(); ++k)
 			{
-				Craft* c = dynamic_cast<Craft*>(*k);
-				if (c != 0)
-				{
-					c->returnToBase();
-					k = site->getFollowers()->begin();
-				}
-				else
-				{
-					++k;
-				}
+				(*k)->returnToBase();
 			}
 			if (!noFollowers)
 			{

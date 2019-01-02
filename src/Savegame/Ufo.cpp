@@ -79,45 +79,21 @@ Ufo::Ufo(const RuleUfo *rules, int uniqueId, int hunterKillerPercentage, int hun
  */
 Ufo::~Ufo()
 {
-	for (std::vector<Target*>::iterator i = _followers.begin(); i != _followers.end();)
-	{
-		Craft *c = dynamic_cast<Craft*>(*i);
-		Ufo *u = dynamic_cast<Ufo*>(*i);
-		if (c)
-		{
-			c->returnToBase();
-			i = _followers.begin();
-		}
-		else if (u)
-		{
-			u->resetOriginalDestination();
-			i = _followers.begin();
-		}
-		else
-		{
-			++i;
-		}
-	}
 	if (_mission)
 	{
 		_mission->decreaseLiveUfos();
 	}
+
+	resetOriginalDestination(false);
+
 	if (_dest)
 	{
-		if (!_isHunting && !_isEscorting)
+		Waypoint *wp = dynamic_cast<Waypoint*>(_dest);
+		if (wp != 0)
 		{
-			Waypoint *wp = dynamic_cast<Waypoint*>(_dest);
-			if (wp != 0)
-			{
-				delete _dest;
-				_dest = 0;
-			}
+			delete _dest;
+			_dest = 0;
 		}
-	}
-	if (_origWaypoint)
-	{
-		delete _origWaypoint;
-		_origWaypoint = 0;
 	}
 }
 
@@ -887,14 +863,14 @@ void Ufo::resetOriginalDestination(Craft *target)
 {
 	if (target == getTargetedXcomCraft())
 	{
-		resetOriginalDestination();
+		resetOriginalDestination(true);
 	}
 }
 
 /**
  * Resets the original destination.
  */
-void Ufo::resetOriginalDestination()
+void Ufo::resetOriginalDestination(bool debugHelper)
 {
 	if (_origWaypoint)
 	{
@@ -907,7 +883,7 @@ void Ufo::resetOriginalDestination()
 		delete _origWaypoint;
 		_origWaypoint = 0;
 	}
-	else
+	else if (debugHelper)
 	{
 		throw Exception("Corrupt state: Unknown original UFO destination.");
 	}

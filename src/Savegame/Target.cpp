@@ -18,6 +18,7 @@
  */
 #include "Target.h"
 #include "Craft.h"
+#include "Ufo.h"
 #include "SerializationHelper.h"
 #include "../fmath.h"
 #include "../Engine/Language.h"
@@ -37,14 +38,16 @@ Target::Target() : _lon(0.0), _lat(0.0), _id(0)
  */
 Target::~Target()
 {
-	std::vector<Target*> followers = _followers; // We need to copy this as it's gonna be modified
-	for (std::vector<Target*>::iterator i = followers.begin(); i != followers.end(); ++i)
+	std::vector<Craft*> followers = getCraftFollowers();
+	for (std::vector<Craft*>::iterator i = followers.begin(); i != followers.end(); ++i)
 	{
-		Craft *craft = dynamic_cast<Craft*>(*i);
-		if (craft)
-		{
-			craft->returnToBase();
-		}
+		(*i)->returnToBase();
+	}
+
+	std::vector<Ufo*> ufoFollowers = getUfoFollowers();
+	for (std::vector<Ufo*>::iterator j = ufoFollowers.begin(); j != ufoFollowers.end(); ++j)
+	{
+		(*j)->resetOriginalDestination(false);
 	}
 }
 
@@ -206,13 +209,51 @@ std::string Target::getMarkerName() const
 }
 
 /**
- * Returns the list of crafts currently
+ * Returns the list of targets currently
  * following this target.
- * @return Pointer to list of crafts.
+ * @return Pointer to list of targets.
  */
-std::vector<Target*> *Target::getFollowers()
+std::vector<MovingTarget*> *Target::getFollowers()
 {
 	return &_followers;
+}
+
+/**
+ * Returns the list of crafts currently
+ * following this target.
+ * @return List of crafts.
+ */
+std::vector<Craft*> Target::getCraftFollowers() const
+{
+	std::vector<Craft*> crafts;
+	for (std::vector<MovingTarget*>::const_iterator i = _followers.begin(); i != _followers.end(); ++i)
+	{
+		Craft *craft = dynamic_cast<Craft*>(*i);
+		if (craft)
+		{
+			crafts.push_back(craft);
+		}
+	}
+	return crafts;
+}
+
+/**
+ * Returns the list of UFOs currently
+ * following this target.
+ * @return List of UFOs.
+ */
+std::vector<Ufo*> Target::getUfoFollowers() const
+{
+	std::vector<Ufo*> ufos;
+	for (std::vector<MovingTarget*>::const_iterator i = _followers.begin(); i != _followers.end(); ++i)
+	{
+		Ufo *ufo = dynamic_cast<Ufo*>(*i);
+		if (ufo)
+		{
+			ufos.push_back(ufo);
+		}
+	}
+	return ufos;
 }
 
 /**

@@ -73,7 +73,6 @@ private:
 	using MovingTarget::save;
 
 	void backupOriginalDestination();
-	void resetOriginalDestination();
 public:
 	/// Creates a UFO of the specified type.
 	Ufo(const RuleUfo *rules, int uniqueId, int hunterKillerPercentage = 0, int huntMode = 0, int huntBehavior = 0);
@@ -167,6 +166,7 @@ public:
 	Craft *getTargetedXcomCraft() const;
 	/// Resets the original destination if targeting the given craft.
 	void resetOriginalDestination(Craft *target);
+	void resetOriginalDestination(bool debugHelper);
 	/// Sets the Xcom craft targeted by this UFO.
 	void setTargetedXcomCraft(Craft *craft);
 	/// Sets the UFO escorted by this UFO.

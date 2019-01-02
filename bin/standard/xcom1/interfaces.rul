@@ -11,10 +11,6 @@ interfaces:
         color: 138   # yellow
       - id: button
         color: 133   # minty green
-      - id: confirmDefaults
-        color: 138   # yellow
-      - id: confirmVideo
-        color: 239   # bright green
       - id: battlescapeTheme
         color: -1
         color2: -1
@@ -88,6 +84,10 @@ interfaces:
         color: 133   # minty green
       - id: button
         color: 133   # minty green
+      - id: confirmDefaults
+        color: 138   # yellow
+      - id: confirmVideo
+        color: 239   # bright green
   - type: videoMenu
     elements:
       - id: text

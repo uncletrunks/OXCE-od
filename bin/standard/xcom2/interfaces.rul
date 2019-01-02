@@ -11,10 +11,6 @@ interfaces: #done
         color: 1
       - id: button
         color: 1
-      - id: confirmDefaults
-        color: 1
-      - id: confirmVideo
-        color: 1
       - id: battlescapeTheme
         color: 48
         color2: 48
@@ -87,6 +83,10 @@ interfaces: #done
       - id: tooltip
         color: 239
       - id: button
+        color: 1
+      - id: confirmDefaults
+        color: 1
+      - id: confirmVideo
         color: 1
   - type: videoMenu
     elements:

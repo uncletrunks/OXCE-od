@@ -25,6 +25,9 @@ namespace OpenXcom
 {
 
 class Language;
+class MovingTarget;
+class Craft;
+class Ufo;
 
 /**
  * Base class for targets on the globe
@@ -36,7 +39,7 @@ protected:
 	double _lon, _lat;
 	int _id;
 	std::string _name;
-	std::vector<Target*> _followers;
+	std::vector<MovingTarget*> _followers;
 	/// Creates a target.
 	Target();
 public:
@@ -73,7 +76,11 @@ public:
 	/// Gets the target's marker sprite.
 	virtual int getMarker() const = 0;
 	/// Gets the target's followers.
-	std::vector<Target*> *getFollowers();
+	std::vector<MovingTarget*> *getFollowers();
+	/// Gets the target's craft followers.
+	std::vector<Craft*> getCraftFollowers() const;
+	/// Gets the target's UFO followers.
+	std::vector<Ufo*> getUfoFollowers() const;
 	/// Gets the distance to another target.
 	double getDistance(const Target *target) const;
 };
