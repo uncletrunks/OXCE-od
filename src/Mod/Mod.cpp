@@ -1620,15 +1620,6 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 			++num;
 		}
 	}
-	if (doc["difficultyBasedRetaliationDelay"])
-	{
-		size_t num = 0;
-		for (YAML::const_iterator i = doc["difficultyBasedRetaliationDelay"].begin(); i != doc["difficultyBasedRetaliationDelay"].end() && num < 5; ++i)
-		{
-			DIFFICULTY_BASED_RETAL_DELAY[num] = (*i).as<int>(DIFFICULTY_BASED_RETAL_DELAY[num]);
-			++num;
-		}
-	}
 	for (YAML::const_iterator i = doc["ufoTrajectories"].begin(); i != doc["ufoTrajectories"].end(); ++i)
 	{
 		UfoTrajectory *rule = loadRule(*i, &_ufoTrajectories, 0, "id");
