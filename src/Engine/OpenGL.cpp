@@ -126,7 +126,7 @@ void OpenGL::resize(unsigned width, unsigned height)
 
 	glBindTexture(GL_TEXTURE_2D, gltexture);
 	glErrorCheck();
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, iwidth);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, surface->pitch / surface->format->BytesPerPixel);
 	glErrorCheck();
 	glTexImage2D(GL_TEXTURE_2D,
 		/* mip-map level = */ 0, /* internal format = */ GL_RGB16_EXT,
@@ -191,7 +191,7 @@ void OpenGL::refresh(bool smooth, unsigned inwidth, unsigned inheight, unsigned 
 
 	glErrorCheck();
 
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, iwidth);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, surface->pitch / surface->format->BytesPerPixel);
 
 	glErrorCheck();
 
