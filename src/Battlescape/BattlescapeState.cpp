@@ -2289,21 +2289,38 @@ inline void BattlescapeState::handle(Action *action)
 					else if (_save->getDebugMode() && key == SDLK_w && ctrlPressed)
 					{
 						BattleUnit *unit = _save->getSelectedUnit();
-						if (unit && unit->getArmor()->getSize() < 2)
+						if (unit)
 						{
 							Position newPos;
 							_map->getSelectorPosition(&newPos);
-							Tile *tile = _save->getTile(newPos);
-							if (tile)
+							if (_save->getBattleGame()->getTileEngine()->isPositionValidForUnit(newPos, unit))
 							{
 								debug("Beam me up Scotty");
 								_save->getPathfinding()->removePreview();
 
-								unit->getTile()->clearUnit();
+								int armorSize = unit->getArmor()->getSize() - 1;
+								auto prevPos = unit->getPosition();
+								for (int x = armorSize; x >= 0; --x)
+								{
+									for (int y = armorSize; y >= 0; --y)
+									{
+										_save->getTile(prevPos + Position(x,y, 0))->clearUnit();
+									}
+								}
 								unit->setPosition(newPos);
-								tile->setUnit(unit, _save);
+								for (int x = armorSize; x >= 0; --x)
+								{
+									for (int y = armorSize; y >= 0; --y)
+									{
+										_save->getTile(newPos + Position(x,y, 0))->setUnit(unit, _save);
+									}
+								}
+								//free refreash as bonus
+								unit->setTimeUnits(unit->getBaseStats()->tu);
+								unit->setEnergy(unit->getBaseStats()->stamina);
 								_save->getTileEngine()->calculateLighting(LL_UNITS);
 								_save->getBattleGame()->handleState();
+								updateSoldierInfo(true);
 							}
 						}
 					}
