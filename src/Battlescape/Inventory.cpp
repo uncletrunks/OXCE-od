@@ -664,9 +664,22 @@ void Inventory::mouseClick(Action *action, State *state)
 					x += _groundOffset;
 				}
 				BattleItem *item = _selUnit->getItem(slot, x, y);
-				if (item != 0 && !item->getRules()->isFixed())
+				if (item != 0)
 				{
-					if ((SDL_GetModState() & KMOD_CTRL))
+					if ((SDL_GetModState() & KMOD_SHIFT))
+					{
+						_selItem = item; // don't worry, we'll unselect it later!
+						if (unload())
+						{
+							_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_DROP)->play();
+						}
+						_selItem = 0; // see, I told you!
+					}
+					else if (item->getRules()->isFixed())
+					{
+						// do nothing!
+					}
+					else if ((SDL_GetModState() & KMOD_CTRL))
 					{
 						RuleInventory *newSlot = _inventorySlotGround;
 						std::string warning = "STR_NOT_ENOUGH_SPACE";
@@ -1011,6 +1024,12 @@ bool Inventory::unload()
 		return false;
 	}
 
+	// Fixed weapons can be unloaded only when (already) in hand
+	if (_selItem->getRules()->isFixed() && _selItem->getSlot()->getType() != INV_HAND)
+	{
+		return false;
+	}
+
 	const auto type = _selItem->getRules()->getBattleType();
 	const bool grenade = type == BT_GRENADE || type == BT_PROXIMITYGRENADE;
 	const bool weapon = type == BT_FIREARM || type == BT_MELEE;
@@ -1129,18 +1148,26 @@ bool Inventory::unload()
 	}
 	else
 	{
+		// 2. unload (= move the ammo to the second free hand)
 		cost.Time += toForAmmoUnload;
+
+		if (SecondFreeHand == nullptr)
+		{
+			// 3. drop the ammo on the ground (if the second hand is not free)
+			cost.Time += FirstFreeHand->getCost(_inventorySlotGround);
+		}
 	}
 
 	if (cost.haveTU() && _selItem->getSlot()->getType() != INV_HAND)
 	{
+		// 1. move the weapon to the first free hand
 		cost.Time += _selItem->getSlot()->getCost(FirstFreeHand);
 	}
 
 	std::string err;
 	if (!_tu || cost.spendTU(&err))
 	{
-		moveItem(_selItem, FirstFreeHand, 0, 0);
+		moveItem(_selItem, FirstFreeHand, 0, 0); // 1.
 		if (grenade)
 		{
 			_selItem->setFuseTimer(-1);
@@ -1151,11 +1178,11 @@ bool Inventory::unload()
 			auto oldAmmo = _selItem->setAmmoForSlot(slotForAmmoUnload, nullptr);
 			if (SecondFreeHand != nullptr)
 			{
-				moveItem(oldAmmo, SecondFreeHand, 0, 0);
+				moveItem(oldAmmo, SecondFreeHand, 0, 0); // 2.
 			}
 			else
 			{
-				moveItem(oldAmmo, _inventorySlotGround, 0, 0);
+				moveItem(oldAmmo, _inventorySlotGround, 0, 0); // 2. + 3.
 				arrangeGround();
 			}
 		}
