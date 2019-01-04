@@ -139,24 +139,7 @@ void UnitWalkBState::think()
 		// unit moved from one tile to the other, update the tiles
 		if (_unit->getPosition() != _unit->getLastPosition())
 		{
-			bool largeCheck = true;
-			for (int x = size; x >= 0; x--)
-			{
-				for (int y = size; y >= 0; y--)
-				{
-					if (!_parent->getSave()->getTile(_unit->getPosition() + Position(x,y,0))->hasNoFloor(_parent->getSave()) || _unit->getMovementType() == MT_FLY)
-						largeCheck = false;
-					_parent->getSave()->getTile(_unit->getLastPosition() + Position(x,y,0))->clearUnit();
-				}
-			}
-			for (int x = size; x >= 0; x--)
-			{
-				for (int y = size; y >= 0; y--)
-				{
-					_parent->getSave()->getTile(_unit->getPosition() + Position(x,y,0))->setUnit(_unit, _parent->getSave());
-				}
-			}
-			_falling = largeCheck && _unit->getPosition().z != 0 && _unit->getTile()->hasNoFloor(_parent->getSave()) && _unit->getMovementType() != MT_FLY && _unit->getWalkingPhase() == 0;
+			_falling = _unit->haveNoFloorBelow() && _unit->getPosition().z != 0 && _unit->getMovementType() != MT_FLY && _unit->getWalkingPhase() == 0;
 
 			if (_falling)
 			{

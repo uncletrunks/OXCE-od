@@ -793,6 +793,7 @@ void BattleUnit::keepWalking(SavedBattleGame *savedBattleGame, bool fullWalkCycl
 				middle = 1;
 		}
 	}
+
 	if (!fullWalkCycle)
 	{
 		_pos = _destination;
@@ -808,9 +809,14 @@ void BattleUnit::keepWalking(SavedBattleGame *savedBattleGame, bool fullWalkCycl
 		_pos = _destination;
 	}
 
+	if (!fullWalkCycle || (_walkPhase == middle))
+	{
+		setTile(savedBattleGame->getTile(_destination), savedBattleGame);
+	}
+
 	if (_walkPhase >= end)
 	{
-		if (_floating && !_tile->hasNoFloor(savedBattleGame))
+		if (_floating && !_haveNoFloorBelow)
 		{
 			_floating = false;
 		}
@@ -2502,27 +2508,78 @@ bool BattleUnit::getVisible() const
  */
 void BattleUnit::setTile(Tile *tile, SavedBattleGame *saveBattleGame)
 {
+	if (_tile == tile)
+	{
+		return;
+	}
+
+	auto armorSize = _armor->getSize() - 1;
+	// Reset tiles moved from.
+	if (_tile)
+	{
+		auto prevPos = _tile->getPosition();
+		for (int x = armorSize; x >= 0; --x)
+		{
+			for (int y = armorSize; y >= 0; --y)
+			{
+				auto t = saveBattleGame->getTile(prevPos + Position(x,y, 0));
+				if (t && t->getUnit() == this)
+				{
+					t->setUnit(nullptr);
+				}
+			}
+		}
+	}
+
 	_tile = tile;
 	if (!_tile)
 	{
 		_floating = false;
+		_haveNoFloorBelow = false;
 		return;
 	}
+
+	// Update tiles moved to.
+	auto newPos = _tile->getPosition();
+	_haveNoFloorBelow = true;
+	for (int x = armorSize; x >= 0; --x)
+	{
+		for (int y = armorSize; y >= 0; --y)
+		{
+			auto t = saveBattleGame->getTile(newPos + Position(x, y, 0));
+			if (t)
+			{
+				_haveNoFloorBelow &= t->hasNoFloor(saveBattleGame);
+				t->setUnit(this);
+			}
+		}
+	}
 	// unit could have changed from flying to walking or vice versa
-	if (_status == STATUS_WALKING && _tile->hasNoFloor(saveBattleGame) && _movementType == MT_FLY)
+	if (_status == STATUS_WALKING && _haveNoFloorBelow && _movementType == MT_FLY)
 	{
 		_status = STATUS_FLYING;
 		_floating = true;
 	}
-	else if (_status == STATUS_FLYING && !_tile->hasNoFloor(saveBattleGame) && _verticalDirection == 0)
+	else if (_status == STATUS_FLYING && !_haveNoFloorBelow && _verticalDirection == 0)
 	{
 		_status = STATUS_WALKING;
 		_floating = false;
 	}
 	else if (_status == STATUS_UNCONSCIOUS)
 	{
-		_floating = _movementType == MT_FLY && _tile->hasNoFloor(saveBattleGame);
+		_floating = _movementType == MT_FLY && _haveNoFloorBelow;
 	}
+}
+
+/**
+ * Set only unit tile without any addtional logic.
+ * Used only in before battle, other wise will break game.
+ * Need call setTile after to fix links
+ * @param tile
+ */
+void BattleUnit::setInventoryTile(Tile *tile)
+{
+	_tile = tile;
 }
 
 /**

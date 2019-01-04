@@ -195,13 +195,15 @@ public:
 	{
 		return _currentSurface[part];
 	}
-	/// Clear unit from tile.
-	void clearUnit()
+
+	/**
+	 * Set a unit on this tile.
+	 */
+	void setUnit(BattleUnit *unit)
 	{
-		setUnit(nullptr, nullptr);
+		_unit = unit;
 	}
-	/// Set a unit on this tile.
-	void setUnit(BattleUnit *unit, SavedBattleGame *saveBattleGame);
+
 	/**
 	 * Get the (alive) unit on this tile.
 	 * @return BattleUnit.
@@ -210,6 +212,7 @@ public:
 	{
 		return _unit;
 	}
+
 	/// Get unit from this tile or from tile below.
 	BattleUnit *getOverlappingUnit(const SavedBattleGame *saveBattleGame, TileUnitOverlapping range = TUO_NORMAL) const;
 	/// Set fire, does not increment overlaps.

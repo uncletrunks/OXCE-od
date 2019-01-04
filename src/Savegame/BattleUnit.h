@@ -94,6 +94,7 @@ private:
 	std::unordered_set<Tile *> _visibleTilesLookup;
 	int _tu, _energy, _health, _morale, _stunlevel;
 	bool _kneeled, _floating, _dontReselect;
+	bool _haveNoFloorBelow = false;
 	int _currentArmor[SIDE_MAX], _maxArmor[SIDE_MAX];
 	int _fatalWounds[BODYPART_MAX];
 	int _fire;
@@ -249,6 +250,9 @@ public:
 	bool isKneeled() const;
 	/// Is floating?
 	bool isFloating() const;
+	/// Have unit floor below?
+	bool haveNoFloorBelow() const { return _haveNoFloorBelow; }
+
 	/// Aim.
 	void aim(bool aiming);
 	/// Get direction to a certain point
@@ -369,6 +373,8 @@ public:
 	bool getVisible() const;
 	/// Sets the unit's tile it's standing on
 	void setTile(Tile *tile, SavedBattleGame *saveBattleGame = 0);
+	/// Set only unit tile without any addtional logic.
+	void setInventoryTile(Tile *tile);
 	/// Gets the unit's tile.
 	Tile *getTile() const;
 	/// Gets the item in the specified slot.

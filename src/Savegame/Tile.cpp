@@ -721,20 +721,6 @@ void Tile::updateSprite(TilePart part)
 }
 
 /**
- * Set a unit on this tile.
- * @param unit
- * @param saveBattleGame
- */
-void Tile::setUnit(BattleUnit *unit, SavedBattleGame *saveBattleGame)
-{
-	if (unit != 0)
-	{
-		unit->setTile(this, saveBattleGame);
-	}
-	_unit = unit;
-}
-
-/**
  * Get unit from this tile or from tile below if unit poke out.
  * @param saveBattleGame
  * @return BattleUnit.

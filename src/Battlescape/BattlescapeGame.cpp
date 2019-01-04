@@ -1985,13 +1985,14 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 
 	unit->instaKill();
 
-	getSave()->getTileEngine()->itemDropInventory(unit->getTile(), unit);
+	auto tile = unit->getTile();
+
+	getSave()->getTileEngine()->itemDropInventory(tile, unit);
 
 	// remove unit-tile link
-	unit->setTile(0);
+	unit->setTile(nullptr, _save);
 
 	Unit* type = getMod()->getUnit(unit->getSpawnUnit(), true);
-	getSave()->getTile(unit->getPosition())->clearUnit();
 
 	BattleUnit *newUnit = new BattleUnit(type,
 		FACTION_HOSTILE,
@@ -2002,7 +2003,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 		getMod()->getMaxViewDistance());
 
 	getSave()->initUnit(newUnit);
-	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save);
+	newUnit->setTile(tile, _save);
 	newUnit->setPosition(unit->getPosition());
 	newUnit->setDirection(unit->getDirection());
 	newUnit->setTimeUnits(0);
@@ -2117,14 +2118,7 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 		}
 
 		getSave()->initUnit(newUnit);
-		for (int x = newUnit->getArmor()->getSize() - 1; x >= 0; x--)
-		{
-			for (int y = newUnit->getArmor()->getSize() - 1; y >= 0; y--)
-			{
-				Tile* tile = getSave()->getTile(position + Position(x, y, 0));
-				tile->setUnit(newUnit, getSave());
-			}
-		}
+		newUnit->setTile(_save->getTile(position), _save);
 		newUnit->setPosition(position);
 		newUnit->setDirection(unitDirection);
 		newUnit->setTimeUnits(0);
@@ -2187,15 +2181,7 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 			if ((*unit)->getStatus() == STATUS_UNCONSCIOUS || (*unit)->getStatus() == STATUS_DEAD)
 				_save->removeUnconsciousBodyItem((*unit));
 
-			for (int x = (*unit)->getArmor()->getSize() - 1; x >= 0; x--)
-			{
-				for (int y = (*unit)->getArmor()->getSize() - 1; y >= 0; y--)
-				{
-					Tile *tile = getSave()->getTile((*unit)->getPosition() + Position(x, y, 0));
-					tile->clearUnit();
-				}
-			}
-
+			(*unit)->setTile(nullptr, _save);
 			delete (*unit);
 			unit = _save->getUnits()->erase(unit);
 		}

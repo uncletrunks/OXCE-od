@@ -1177,26 +1177,7 @@ void SavedBattleGame::resetUnitTiles()
 	{
 		if (!(*i)->isOut())
 		{
-			int size = (*i)->getArmor()->getSize() - 1;
-			if ((*i)->getTile() && (*i)->getTile()->getUnit() == (*i))
-			{
-				for (int x = size; x >= 0; x--)
-				{
-					for (int y = size; y >= 0; y--)
-					{
-						getTile((*i)->getTile()->getPosition() + Position(x,y,0))->clearUnit();
-					}
-				}
-			}
-			for (int x = size; x >= 0; x--)
-			{
-				for (int y = size; y >= 0; y--)
-				{
-					Tile *t = getTile((*i)->getPosition() + Position(x,y,0));
-					t->setUnit((*i), this);
-				}
-			}
-
+			(*i)->setTile(getTile((*i)->getPosition()), this);
 		}
 		if ((*i)->getFaction() == FACTION_PLAYER)
 		{
@@ -1907,17 +1888,8 @@ bool SavedBattleGame::setUnitPosition(BattleUnit *bu, Position position, bool te
 
 	if (testOnly) return true;
 
-	for (int x = size; x >= 0; x--)
-	{
-		for (int y = size; y >= 0; y--)
-		{
-			if (x==0 && y==0)
-			{
-				bu->setPosition(position + zOffset);
-			}
-			getTile(position + Position(x,y,0) + zOffset)->setUnit(bu, this);
-		}
-	}
+	bu->setTile(getTile(position + zOffset), this);
+	bu->setPosition(position + zOffset);
 
 	return true;
 }

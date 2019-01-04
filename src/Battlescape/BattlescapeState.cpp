@@ -2298,23 +2298,9 @@ inline void BattlescapeState::handle(Action *action)
 								debug("Beam me up Scotty");
 								_save->getPathfinding()->removePreview();
 
-								int armorSize = unit->getArmor()->getSize() - 1;
-								auto prevPos = unit->getPosition();
-								for (int x = armorSize; x >= 0; --x)
-								{
-									for (int y = armorSize; y >= 0; --y)
-									{
-										_save->getTile(prevPos + Position(x,y, 0))->clearUnit();
-									}
-								}
+								unit->setTile(_save->getTile(newPos), _save);
 								unit->setPosition(newPos);
-								for (int x = armorSize; x >= 0; --x)
-								{
-									for (int y = armorSize; y >= 0; --y)
-									{
-										_save->getTile(newPos + Position(x,y, 0))->setUnit(unit, _save);
-									}
-								}
+
 								//free refreash as bonus
 								unit->setTimeUnits(unit->getBaseStats()->tu);
 								unit->setEnergy(unit->getBaseStats()->stamina);

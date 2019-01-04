@@ -276,7 +276,7 @@ void UnitDieBState::convertUnitToCorpse()
 	}
 
 	// remove unit-tile link
-	_unit->setTile(0);
+	_unit->setTile(nullptr, _parent->getSave());
 
 	if (lastPosition == TileEngine::invalid) // we're being carried
 	{
@@ -301,16 +301,12 @@ void UnitDieBState::convertUnitToCorpse()
 	}
 	else
 	{
-		int i = size * size - 1;
-		for (int y = size - 1; y >= 0; --y)
+		if (!_overKill)
 		{
-			for (int x = size - 1; x >= 0; --x)
+			int i = size * size - 1;
+			for (int y = size - 1; y >= 0; --y)
 			{
-				if (_parent->getSave()->getTile(lastPosition + Position(x,y,0))->getUnit() == _unit) // check in case unit was displaced by another unit
-				{
-					_parent->getSave()->getTile(lastPosition + Position(x,y,0))->clearUnit();
-				}
-				if (!_overKill)
+				for (int x = size - 1; x >= 0; --x)
 				{
 					BattleItem *corpse = _parent->getSave()->createItemForTile(_unit->getArmor()->getCorpseBattlescape()[i], nullptr);
 					corpse->setUnit(_unit);
