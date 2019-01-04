@@ -737,12 +737,7 @@ void BattleUnit::startWalking(int direction, Position destination, SavedBattleGa
 		_direction = direction;
 		_status = STATUS_WALKING;
 	}
-	bool floorFound = false;
-	if (!_tile->hasNoFloor(savedBattleGame))
-	{
-		floorFound = true;
-	}
-	if (!floorFound || direction >= Pathfinding::DIR_UP)
+	if (_haveNoFloorBelow || direction >= Pathfinding::DIR_UP)
 	{
 		_status = STATUS_FLYING;
 		_floating = true;
