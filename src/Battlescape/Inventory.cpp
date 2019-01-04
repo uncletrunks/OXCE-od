@@ -831,35 +831,42 @@ void Inventory::mouseClick(Action *action, State *state)
 					}
 					else
 					{
+						// 4. the cost of loading the weapon with the new ammo (from the offhand)
 						int tuCost = item->getRules()->getTULoad(slotAmmo);
 
 						if (_selItem->getSlot()->getType() != INV_HAND)
 						{
+							// 3. the cost of moving the new ammo from the current slot to the offhand
+							// Note: the cost for left/right hand might *NOT* be the same, but using the right hand "by definition"
 							tuCost += _selItem->getSlot()->getCost(_inventorySlotRightHand);
 						}
 
 						BattleItem *weaponRightHand = _selUnit->getRightHandWeapon();
 						BattleItem *weaponLeftHand = _selUnit->getLeftHandWeapon();
 
+						auto oldAmmoGoesTo = _inventorySlotGround;
+						if (!weaponRightHand || _selItem == weaponRightHand)
+						{
+							oldAmmoGoesTo = _inventorySlotRightHand;
+						}
+						else if (!weaponLeftHand || _selItem == weaponLeftHand)
+						{
+							oldAmmoGoesTo = _inventorySlotLeftHand;
+						}
+
 						auto canLoad = true;
 						if (item->getAmmoForSlot(slotAmmo) != 0)
 						{
 							auto tuUnload = item->getRules()->getTUUnload(slotAmmo);
-							if ((SDL_GetModState() & KMOD_SHIFT) && (!_tu || tuUnload) && (item == weaponRightHand || item == weaponLeftHand))
+							if ((SDL_GetModState() & KMOD_SHIFT) && (!_tu || tuUnload))
 							{
-								auto checkBoth = [&](BattleItem *i)
+								// 1. the cost of unloading the old ammo (to the offhand)
+								tuCost += tuUnload;
+								if (oldAmmoGoesTo == _inventorySlotGround)
 								{
-									return nullptr == i || item == i || _selItem == i;
-								};
-
-								if (checkBoth(weaponRightHand) && checkBoth(weaponLeftHand))
-								{
-									tuCost += tuUnload;
-								}
-								else
-								{
-									canLoad = false;
-									_warning->showMessage(_game->getLanguage()->getString("STR_BOTH_HANDS_MUST_BE_EMPTY"));
+									// 2. the cost of dropping the old ammo on the ground (from the offhand)
+									// Note: the cost for left/right hand is (should be) the same, so just using the right hand
+									tuCost += _inventorySlotRightHand->getCost(_inventorySlotGround);
 								}
 							}
 							else
@@ -875,7 +882,11 @@ void Inventory::mouseClick(Action *action, State *state)
 								auto oldAmmo = item->setAmmoForSlot(slotAmmo, _selItem);
 								if (oldAmmo)
 								{
-									moveItem(oldAmmo, (item == weaponRightHand ? _inventorySlotLeftHand : _inventorySlotRightHand), 0, 0);
+									moveItem(oldAmmo, oldAmmoGoesTo, 0, 0);
+									if (oldAmmoGoesTo == _inventorySlotGround)
+									{
+										arrangeGround();
+									}
 								}
 								setSelectedItem(0);
 								_game->getMod()->getSoundByDepth(_depth, item->getRules()->getReloadSound())->play();
