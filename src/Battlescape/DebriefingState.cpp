@@ -2056,11 +2056,6 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						{
 							recoverAlien(corpseUnit, base);
 						}
-						else if (corpseUnit->getOriginalFaction() == FACTION_NEUTRAL)
-						{
-							addStat("STR_CIVILIANS_SAVED", 1, corpseUnit->getValue());
-							recoverCivilian((*it)->getUnit(), base);
-						}
 					}
 				}
 				// only add recovery points for unresearched items
