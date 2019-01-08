@@ -1997,6 +1997,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	BattleUnit *newUnit = new BattleUnit(type,
 		FACTION_HOSTILE,
 		_save->getUnits()->back()->getId() + 1,
+		_save->getStartingCondition(),
 		type->getArmor(),
 		getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
 		getDepth(),
@@ -2035,7 +2036,6 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 
 	const RuleItem *item = attack.damage_item->getRules();
 	Unit *type = getMod()->getUnit(item->getSpawnUnit(), true);
-	BattleUnit *newUnit = 0;
 
 	// Check which faction the new unit will be
 	UnitFaction faction;
@@ -2063,27 +2063,14 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 	}
 
 	// Create the unit
-	switch (faction)
-	{
-		case FACTION_HOSTILE: // Enemy units get stat adjustments based on difficulty
-			newUnit = new BattleUnit(type,
-				faction,
-				_save->getUnits()->back()->getId() + 1,
-				type->getArmor(),
-				getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
-				getDepth(),
-				getMod()->getMaxViewDistance());
-			break;
-		default: // Everybody else doesn't
-			newUnit = new BattleUnit(type,
-				faction,
-				_save->getUnits()->back()->getId() + 1,
-				type->getArmor(),
-				0,
-				getDepth(),
-				getMod()->getMaxViewDistance());
-			break;
-	}
+	BattleUnit *newUnit = new BattleUnit(type,
+		faction,
+		_save->getUnits()->back()->getId() + 1,
+		faction != FACTION_PLAYER ? _save->getStartingCondition() : nullptr,
+		type->getArmor(),
+		faction == FACTION_HOSTILE ? getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()) : nullptr,
+		getDepth(),
+		getMod()->getMaxViewDistance());
 
 	// Validate the position for the unit, checking if there's a surrounding tile if necessary
 	int checkDirection = attack.attacker ? (attack.attacker->getDirection() + 4) % 8 : 0;

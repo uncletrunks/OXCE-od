@@ -967,7 +967,7 @@ void BattlescapeGenerator::autoEquip(std::vector<BattleUnit*> units, Mod *mod, s
 BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 {
 	Unit *rule = v->getRules()->getVehicleUnit();
-	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, rule->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
+	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, nullptr, rule->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
 	if (unit)
 	{
 		_save->createItemForUnit(v->getRules(), unit, true);
@@ -1207,7 +1207,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
  */
 BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outside)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, rules->getArmor(), _game->getMod()->getStatAdjustment(_game->getSavedGame()->getDifficulty()), _save->getDepth(), _game->getMod()->getMaxViewDistance());
+	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _save->getStartingCondition(), rules->getArmor(), _game->getMod()->getStatAdjustment(_game->getSavedGame()->getDifficulty()), _save->getDepth(), _game->getMod()->getMaxViewDistance());
 	Node *node = 0;
 
 	// safety to avoid index out of bounds errors
@@ -1279,7 +1279,7 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
  */
 BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, rules->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance());
+	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _save->getStartingCondition(), rules->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance());
 	Node *node = _save->getSpawnNode(0, unit);
 
 	if (node)

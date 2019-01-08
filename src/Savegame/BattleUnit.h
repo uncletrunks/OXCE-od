@@ -179,7 +179,7 @@ public:
 	/// Creates a BattleUnit from solder.
 	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);
 	/// Creates a BattleUnit from unit.
-	BattleUnit(Unit *unit, UnitFaction faction, int id, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance);
+	BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleStartingCondition* sc, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance);
 	/// Updates BattleUnit's armor and related attributes (after a change/transformation of armor).
 	void updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int depth, int maxViewDistance);
 	/// Cleans up the BattleUnit.
