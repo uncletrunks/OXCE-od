@@ -35,6 +35,7 @@ class BattlescapeState;
 class Position;
 class Pathfinding;
 class TileEngine;
+class RuleStartingCondition;
 class BattleItem;
 class Mod;
 class State;
@@ -66,7 +67,8 @@ private:
 	std::vector<BattleItem*> _items, _deleted;
 	Pathfinding *_pathfinding;
 	TileEngine *_tileEngine;
-	std::string _missionType, _alienCustomDeploy, _alienCustomMission, _startingConditionType;
+	std::string _missionType, _alienCustomDeploy, _alienCustomMission;
+	const RuleStartingCondition *_startingCondition;
 	int _globalShade;
 	UnitFaction _side;
 	int _turn, _bughuntMinTurn;
@@ -121,10 +123,10 @@ public:
 	const std::string &getMissionType() const;
 	/// Gets the base's items BEFORE the mission.
 	ItemContainer *getBaseStorageItems();
-	/// Sets the starting condition type.
-	void setStartingConditionType(const std::string &startingConditionType);
-	/// Gets the starting condition type.
-	const std::string &getStartingConditionType() const;
+	/// Sets the starting condition.
+	void setStartingCondition(const RuleStartingCondition* startingCondition);
+	/// Gets the starting condition.
+	const RuleStartingCondition *getStartingCondition() const;
 	/// Sets the custom alien data.
 	void setAlienCustom(const std::string &deploy, const std::string &mission);
 	/// Gets the custom alien deploy.

@@ -89,7 +89,7 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	const SavedBattleGame *battleSave = _game->getSavedGame()->getSavedBattle();
 	if (battleSave)
 	{
-		const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(battleSave->getStartingConditionType());
+		auto startingCondition = battleSave->getStartingCondition();
 		if (startingCondition)
 		{
 			if (!startingCondition->getInventoryShockIndicator().empty())

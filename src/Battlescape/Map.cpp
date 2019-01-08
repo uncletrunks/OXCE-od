@@ -132,8 +132,8 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_fadeTimer->onTimer((SurfaceHandler)&Map::fadeShade);
 	_fadeTimer->start();
 
-	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(_save->getStartingConditionType());
-	if (startingCondition != 0)
+	auto startingCondition = _save->getStartingCondition();
+	if (startingCondition)
 	{
 		_bgColor = startingCondition->getMapBackgroundColor();
 	}
@@ -144,16 +144,11 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_shockIndicator = _game->getMod()->getSurface("FloorShockIndicator", false);
 	_anyIndicator = _stunIndicator || _woundIndicator || _burnIndicator || _shockIndicator;
 
-	const SavedBattleGame *battleSave = _game->getSavedGame()->getSavedBattle();
-	if (battleSave)
+	if (startingCondition)
 	{
-		const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(battleSave->getStartingConditionType());
-		if (startingCondition)
+		if (!startingCondition->getMapShockIndicator().empty())
 		{
-			if (!startingCondition->getMapShockIndicator().empty())
-			{
-				_shockIndicator = _game->getMod()->getSurface(startingCondition->getMapShockIndicator(), false);
-			}
+			_shockIndicator = _game->getMod()->getSurface(startingCondition->getMapShockIndicator(), false);
 		}
 	}
 }

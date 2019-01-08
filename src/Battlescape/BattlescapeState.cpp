@@ -201,8 +201,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_txtTooltip = new Text(300, 10, x + 2, y - 10);
 
 	// Palette transformations
-	std::string startingConditionType = _game->getSavedGame()->getSavedBattle()->getStartingConditionType();
-	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(startingConditionType);
+	auto startingCondition = _game->getSavedGame()->getSavedBattle()->getStartingCondition();
 	if (startingCondition)
 	{
 		for (auto change : *startingCondition->getPaletteTransformations())

@@ -80,10 +80,10 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 
 	// Note: un-hardcoded the color from 15 to ruleset value, default 15
 	int bgColor = 15;
-	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(_battleGame->getStartingConditionType());
-	if (startingCondition != 0)
+	auto sc = _battleGame->getStartingCondition();
+	if (sc)
 	{
-		bgColor = startingCondition->getMapBackgroundColor();
+		bgColor = sc->getMapBackgroundColor();
 	}
 	_bg->drawRect(&rect, Palette::blockOffset(0) + bgColor);
 	// make this screen line up with the hidden movement screen
@@ -150,7 +150,6 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	// environmental effects
 	std::string message;
 
-	RuleStartingCondition *sc = _game->getMod()->getStartingCondition(_battleGame->getStartingConditionType());
 	if (sc)
 	{
 		if (_battleGame->getSide() == FACTION_PLAYER)

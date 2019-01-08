@@ -44,6 +44,7 @@
 #include "SerializationHelper.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleStartingCondition.h"
 
 namespace OpenXcom
 {
@@ -125,7 +126,11 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	initMap(mapsize_x, mapsize_y, mapsize_z);
 
 	_missionType = node["missionType"].as<std::string>(_missionType);
-	_startingConditionType = node["startingConditionType"].as<std::string>(_startingConditionType);
+	if (node["startingConditionType"])
+	{
+		std::string startingConditionType = node["startingConditionType"].as<std::string>();
+		_startingCondition = mod->getStartingCondition(startingConditionType);
+	}
 	_alienCustomDeploy = node["alienCustomDeploy"].as<std::string>(_alienCustomDeploy);
 	_alienCustomMission = node["alienCustomMission"].as<std::string>(_alienCustomMission);
 	_globalShade = node["globalshade"].as<int>(_globalShade);
@@ -423,7 +428,10 @@ YAML::Node SavedBattleGame::save() const
 	node["length"] = _mapsize_y;
 	node["height"] = _mapsize_z;
 	node["missionType"] = _missionType;
-	node["startingConditionType"] = _startingConditionType;
+	if (_startingCondition)
+	{
+		node["startingConditionType"] = _startingCondition->getType();
+	}
 	node["alienCustomDeploy"] = _alienCustomDeploy;
 	node["alienCustomMission"] = _alienCustomMission;
 	node["globalshade"] = _globalShade;
@@ -599,21 +607,21 @@ ItemContainer *SavedBattleGame::getBaseStorageItems()
 }
 
 /**
- * Sets the starting condition type.
- * @param startingConditionType The starting condition type.
+ * Sets the starting condition.
+ * @param startingCondition The starting condition.
  */
-void SavedBattleGame::setStartingConditionType(const std::string &startingConditionType)
+void SavedBattleGame::setStartingCondition(const RuleStartingCondition* startingCondition)
 {
-	_startingConditionType = startingConditionType;
+	_startingCondition = startingCondition;
 }
 
 /**
- * Gets the starting condition type.
- * @return The starting condition type.
+ * Gets the starting condition.
+ * @return The starting condition.
  */
-const std::string &SavedBattleGame::getStartingConditionType() const
+const RuleStartingCondition* SavedBattleGame::getStartingCondition() const
 {
-	return _startingConditionType;
+	return _startingCondition;
 }
 
 /**
