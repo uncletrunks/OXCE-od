@@ -26,6 +26,7 @@
 namespace OpenXcom
 {
 class Mod;
+class Armor;
 
 struct EnvironmentalCondition
 {
@@ -48,7 +49,8 @@ private:
 	std::string _type;
 	std::map<std::string, std::string> _paletteTransformations;
 	std::map<std::string, EnvironmentalCondition> _environmentalConditions;
-	std::map<std::string, std::string> _armorTransformations;
+	std::map<std::string, std::string> _armorTransformationsName;
+	std::map<const Armor*, Armor*> _armorTransformations;
 	std::map<std::string, std::map<std::string, int> > _defaultArmor;
 	std::vector<std::string> _allowedArmors;
 	std::vector<std::string> _allowedVehicles;
@@ -67,6 +69,8 @@ public:
 	~RuleStartingCondition();
 	/// Loads Starting Conditions data from YAML.
 	void load(const YAML::Node& node);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
 	/// Gets the Starting Conditions's type.
 	std::string getType() const;
 	/// Gets the palette transformations.
@@ -86,7 +90,7 @@ public:
 	/// Gets the replacement armor.
 	std::string getArmorReplacement(const std::string &soldierType, const std::string &armorType) const;
 	/// Gets the transformed armor.
-	std::string getArmorTransformation(const std::string &armorType) const;
+	Armor* getArmorTransformation(const Armor* sourceArmor) const;
 	/// Checks if the vehicle type is allowed.
 	bool isVehicleAllowed(const std::string &vehicleType) const;
 	/// Checks if the item type is allowed.

@@ -396,8 +396,8 @@ void BattlescapeGenerator::nextStage()
 		{
 			if ((*j)->getOriginalFaction() == FACTION_PLAYER && (*j)->getGeoscapeSoldier())
 			{
-				std::string transformedArmor = startingCondition->getArmorTransformation((*j)->getArmor()->getType());
-				if (!transformedArmor.empty())
+				auto transformedArmor = startingCondition->getArmorTransformation((*j)->getArmor());
+				if (transformedArmor)
 				{
 					// remember the original armor (i.e. only if there were no transformations in earlier stage(s)!)
 					if (!(*j)->getGeoscapeSoldier()->getTransformedArmor())
@@ -405,9 +405,9 @@ void BattlescapeGenerator::nextStage()
 						(*j)->getGeoscapeSoldier()->setTransformedArmor(_game->getMod()->getArmor((*j)->getArmor()->getType()));
 					}
 					// change soldier's armor (needed for inventory view!)
-					(*j)->getGeoscapeSoldier()->setArmor(_game->getMod()->getArmor(transformedArmor));
+					(*j)->getGeoscapeSoldier()->setArmor(transformedArmor);
 					// change battleunit's armor
-					(*j)->updateArmorFromSoldier((*j)->getGeoscapeSoldier(), _game->getMod()->getArmor(transformedArmor), _save->getDepth(), _game->getMod()->getMaxViewDistance());
+					(*j)->updateArmorFromSoldier((*j)->getGeoscapeSoldier(), transformedArmor, _save->getDepth(), _game->getMod()->getMaxViewDistance());
 				}
 			}
 		}
@@ -756,11 +756,11 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 			// starting conditions - armor transformation or replacement
 			if (startingCondition != 0)
 			{
-				std::string transformedArmor = startingCondition->getArmorTransformation((*i)->getArmor()->getType());
-				if (!transformedArmor.empty())
+				auto transformedArmor = startingCondition->getArmorTransformation((*i)->getArmor());
+				if (transformedArmor)
 				{
 					(*i)->setTransformedArmor((*i)->getArmor());
-					(*i)->setArmor(_game->getMod()->getArmor(transformedArmor));
+					(*i)->setArmor(transformedArmor);
 				}
 				else
 				{

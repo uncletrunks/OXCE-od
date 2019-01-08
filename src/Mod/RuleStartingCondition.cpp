@@ -18,6 +18,7 @@
  */
 #include "RuleStartingCondition.h"
 #include "RuleItem.h"
+#include "../Engine/Collections.h"
 #include "../Mod/Mod.h"
 #include "../Savegame/WeightedOptions.h"
 #include <algorithm>
@@ -90,7 +91,7 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_type = node["type"].as<std::string>(_type);
 	_paletteTransformations = node["paletteTransformations"].as< std::map<std::string, std::string> >(_paletteTransformations);
 	_environmentalConditions = node["environmentalConditions"].as< std::map<std::string, EnvironmentalCondition> >(_environmentalConditions);
-	_armorTransformations = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformations);
+	_armorTransformationsName = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformationsName);
 	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::map<std::string, int> > >(_defaultArmor);
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
@@ -102,6 +103,22 @@ void RuleStartingCondition::load(const YAML::Node &node)
 	_mapBackgroundColor = node["mapBackgroundColor"].as<int>(_mapBackgroundColor);
 	_inventoryShockIndicator = node["inventoryShockIndicator"].as<std::string>(_inventoryShockIndicator);
 	_mapShockIndicator = node["mapShockIndicator"].as<std::string>(_mapShockIndicator);
+}
+
+/**
+ * Cross link with other rules.
+ */
+void RuleStartingCondition::afterLoad(const Mod* mod)
+{
+	for (auto& pair : _armorTransformationsName)
+	{
+		auto src = mod->getArmor(pair.first, true);
+		auto dest = mod->getArmor(pair.second, true);
+		_armorTransformations[src] = dest;
+	}
+
+	//remove not needed data
+	Collections::deleteAll(_armorTransformationsName);
 }
 
 /**
@@ -206,21 +223,21 @@ std::string RuleStartingCondition::getArmorReplacement(const std::string &soldie
 
 /**
 * Gets the transformed armor.
-* @param armorType Existing/old armor type name.
-* @return Transformed armor type name (or empty string if there is no transformation).
+* @param sourceArmor Existing/old armor type.
+* @return Transformed armor type (or null if there is no transformation).
 */
-std::string RuleStartingCondition::getArmorTransformation(const std::string &armorType) const
+Armor* RuleStartingCondition::getArmorTransformation(const Armor* sourceArmor) const
 {
 	if (!_armorTransformations.empty())
 	{
-		std::map<std::string, std::string>::const_iterator i = _armorTransformations.find(armorType);
+		std::map<const Armor*, Armor*>::const_iterator i = _armorTransformations.find(sourceArmor);
 		if (i != _armorTransformations.end())
 		{
 			return i->second;
 		}
 	}
 
-	return "";
+	return nullptr;
 }
 
 /**
