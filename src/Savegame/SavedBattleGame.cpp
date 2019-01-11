@@ -54,7 +54,7 @@ namespace OpenXcom
  */
 SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
-	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20), _animFrame(0),
+	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _startingCondition(nullptr), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20), _animFrame(0),
 	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
