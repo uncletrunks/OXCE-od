@@ -1476,7 +1476,7 @@ void GeoscapeState::ufoHuntingAndEscorting()
 			{
 				originalTarget = (*ufo)->getTargetedXcomCraft();
 			}
-			if (originalTarget)
+			if (originalTarget && !originalTarget->getMissionComplete())
 			{
 				if ((*ufo)->insideRadarRange(originalTarget))
 				{
@@ -1489,7 +1489,7 @@ void GeoscapeState::ufoHuntingAndEscorting()
 			{
 				for (std::vector<Craft*>::iterator craft = (*base)->getCrafts()->begin(); craft != (*base)->getCrafts()->end(); ++craft)
 				{
-					if ((*craft)->getStatus() == "STR_OUT")
+					if ((*craft)->getStatus() == "STR_OUT" && !(*craft)->getMissionComplete())
 					{
 						int tmpAttraction = (*craft)->getHunterKillerAttraction((*ufo)->getHuntMode());
 						if (tmpAttraction < newAttraction && (*ufo)->insideRadarRange(*craft))
