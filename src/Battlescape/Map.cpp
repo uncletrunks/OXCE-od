@@ -1589,11 +1589,12 @@ int Map::reShade(Tile *tile)
 	// when modders just don't know where to stop...
 	if (_debugVisionMode > 0)
 	{
-		if (_debugVisionMode == 2)
+		if (_debugVisionMode == 1)
 		{
 			// Reaver's tests
 			return tile->getShade() / 2;
 		}
+		// Meridian's debug helper
 		return 0;
 	}
 
