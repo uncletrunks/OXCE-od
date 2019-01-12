@@ -67,7 +67,7 @@ UfoTrackerState::UfoTrackerState(GeoscapeState *state, Globe *globe) : _state(st
 	x += WIDTH_ALTITUDE;
 	_txtHeading = new Text(WIDTH_HEADING, 9, x, 70);
 	x += WIDTH_HEADING;
-	_txtSpeed = new Text(WIDTH_SPEED, 17, x, 70);
+	_txtSpeed = new Text(WIDTH_SPEED+16, 17, x-16, 70); // 16 pixels overlap for translators
 	_lstObjects = new TextList(290, 64, 12, 78);
 
 	// Set palette
