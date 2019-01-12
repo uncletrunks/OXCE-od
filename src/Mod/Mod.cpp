@@ -300,7 +300,7 @@ Mod::Mod() :
 	_giveScoreAlsoForResearchedArtifacts(false),
 	_theMostUselessOptionEver(0), _theBiggestRipOffEver(0), _shortRadarRange(0),
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
-	_baseDefenseMapFromLocation(0), _pediaReplaceCraftFuelWithRangeType(-1),
+	_baseDefenseMapFromLocation(0), _pediaReplaceCraftFuelWithRangeType(-1), _disableUnderwaterSounds(false),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _transformationListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0), _statePalette(0)
 {
@@ -902,7 +902,7 @@ std::vector<Uint16> *Mod::getVoxelData()
  */
 Sound *Mod::getSoundByDepth(unsigned int depth, unsigned int sound, bool error) const
 {
-	if (depth == 0)
+	if (depth == 0 || _disableUnderwaterSounds)
 		return getSound("BATTLE.CAT", sound, error);
 	else
 		return getSound("BATTLE2.CAT", sound, error);
@@ -1606,6 +1606,7 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 	_fixedUserOptions = doc["fixedUserOptions"].as<std::map<std::string, std::string> >(_fixedUserOptions);
 	_hiddenMovementBackgrounds = doc["hiddenMovementBackgrounds"].as<std::vector<std::string> >(_hiddenMovementBackgrounds);
+	_disableUnderwaterSounds = doc["disableUnderwaterSounds"].as<bool>(_disableUnderwaterSounds);
 	_flagByKills = doc["flagByKills"].as<std::vector<int> >(_flagByKills);
 
 	_defeatScore = doc["defeatScore"].as<int>(_defeatScore);
