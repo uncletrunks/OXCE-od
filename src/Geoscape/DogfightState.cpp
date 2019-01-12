@@ -242,7 +242,7 @@ const int DogfightState::_projectileBlobs[4][6][3] =
  */
 DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool ufoIsAttacking) :
 	_state(state), _craft(craft), _ufo(ufo),
-	_ufoIsAttacking(ufoIsAttacking), _disableDisengage(false), _disableCautious(false), _craftIsDefenseless(false),
+	_ufoIsAttacking(ufoIsAttacking), _disableDisengage(false), _disableCautious(false), _craftIsDefenseless(false), _selfDestructPressed(false),
 	_timeout(50), _currentDist(640), _targetDist(560),
 	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _hunterKillerBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _waitForAltitude(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0),
@@ -1148,7 +1148,7 @@ void DogfightState::update()
 						// HK's chance to hit is halved, but craft's reload time is doubled too
 						chancetoHit = chancetoHit / 2;
 					}
-					if (RNG::percent(chancetoHit) || _craftIsDefenseless)
+					if (RNG::percent(chancetoHit) || _selfDestructPressed)
 					{
 						// Formula delivered by Volutar, altered by Extended version.
 						int power = p->getDamage() * (_ufo->getCraftStats().powerBonus + 100) / 100;
@@ -1166,9 +1166,9 @@ void DogfightState::update()
 						damage = std::max(0, damage - _craft->getCraftStats().armor);
 
 						// if a totally crappy HK is attacking a completely defenseless craft, avoid endless fight
-						if (_craftIsDefenseless)
+						if (_selfDestructPressed)
 						{
-							damage = std::max(damage, _craft->getCraftStats().damageMax / 7);
+							damage = _craft->getCraftStats().damageMax;
 						}
 
 						if (damage)
@@ -1214,6 +1214,11 @@ void DogfightState::update()
 				if (hasNoAmmo)
 				{
 					_craftIsDefenseless = true;
+
+					// self-destruct button
+					int offset = _game->getMod()->getInterface("dogfight")->getElement("minimizeButtonDummy")->TFTDMode ? 1 : 0;
+					_btnMinimize->drawRect(1 + offset, 1, _btnMinimize->getWidth() - 2 - offset, _btnMinimize->getHeight() - 2, _colors[DAMAGE_MAX]);
+					_btnMinimize->setVisible(true);
 				}
 			}
 		}
@@ -1702,6 +1707,19 @@ void DogfightState::setStatus(const std::string &status)
  */
 void DogfightState::btnMinimizeClick(Action *)
 {
+	if (_craftIsDefenseless)
+	{
+		_selfDestructPressed = !_selfDestructPressed;
+		if (_selfDestructPressed)
+			setStatus("STR_SELF_DESTRUCT_ACTIVATED");
+		else
+			setStatus("STR_SELF_DESTRUCT_CANCELLED");
+		int offset = _game->getMod()->getInterface("dogfight")->getElement("minimizeButtonDummy")->TFTDMode ? 1 : 0;
+		int color = _selfDestructPressed ? DAMAGE_MIN : DAMAGE_MAX;
+		_btnMinimize->drawRect(1 + offset, 1, _btnMinimize->getWidth() - 2 - offset, _btnMinimize->getHeight() - 2, _colors[color]);
+		return;
+	}
+
 	if (!_ufo->isCrashed() && !_craft->isDestroyed() && !_ufoBreakingOff)
 	{
 		if (_currentDist >= STANDOFF_DIST)
