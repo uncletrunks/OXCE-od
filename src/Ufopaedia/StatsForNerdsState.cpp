@@ -2253,6 +2253,7 @@ void StatsForNerdsState::initArmorList()
 
 		addSection("{Animations}", "", _white);
 		addDrawingRoutine(ss, armorRule->getDrawingRoutine(), "drawingRoutine");
+		addBoolean(ss, armorRule->drawBubbles(), "drawBubbles");
 		addBoolean(ss, armorRule->getConstantAnimation(), "constantAnimation");
 		addForcedTorso(ss, armorRule->getForcedTorso(), "forcedTorso");
 		addInteger(ss, armorRule->getDeathFrames(), "deathFrames", 3);
