@@ -57,6 +57,7 @@ private:
 	std::vector<std::string> _corpseBattle;
 	std::vector<std::string> _builtInWeapons;
 	int _frontArmor, _sideArmor, _leftArmorDiff, _rearArmor, _underArmor, _drawingRoutine;
+	bool _drawBubbles;
 	MovementType _movementType;
 	int _moveSound;
 	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight;
@@ -125,6 +126,8 @@ public:
 
 	/// Gets the battlescape drawing routine ID.
 	int getDrawingRoutine() const;
+	/// Gets whether or not to draw bubbles (breathing animation).
+	bool drawBubbles() const;
 	/// DO NOT USE THIS FUNCTION OUTSIDE THE BATTLEUNIT CONSTRUCTOR OR I WILL HUNT YOU DOWN.
 	MovementType getMovementType() const;
 	/// Gets the move sound id. Overrides default/unit's move sound. To be used in BattleUnit constructors only too!

@@ -111,7 +111,11 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_loftempsSet = _armor->getLoftempsSet();
 	_gender = soldier->getGender();
 	_faceDirection = -1;
-	_breathFrame = 0;
+	_breathFrame = -1;
+	if (_armor->drawBubbles())
+	{
+		_breathFrame = 0;
+	}
 	_floorAbove = false;
 	_breathing = false;
 
@@ -304,7 +308,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleStarti
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids
-	if (armor->getDrawingRoutine() == 14)
+	if (armor->drawBubbles())
 	{
 		_breathFrame = 0;
 	}

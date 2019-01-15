@@ -51,7 +51,7 @@ const double Game::VOLUME_GRADIENT = 10.0;
  * creates the display screen and sets up the cursor.
  * @param title Title of the game window.
  */
-Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0), _mod(0), _quit(false), _init(false), _mouseActive(true), _timeUntilNextFrame(0)
+Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0), _mod(0), _quit(false), _init(false), _mouseActive(true)
 {
 	Options::reload = false;
 	Options::mute = false;
@@ -106,8 +106,6 @@ Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0
 
 	// Create blank language
 	_lang = new Language();
-
-	_timeOfLastFrame = 0;
 }
 
 /**
@@ -151,6 +149,7 @@ void Game::run()
 	bool startupEvent = Options::allowResize;
 	while (!_quit)
 	{
+		Uint32 timeFrameStarted = SDL_GetTicks();
 		// Clean up states
 		while (!_deleted.empty())
 		{
@@ -271,22 +270,8 @@ void Game::run()
 			// Process logic
 			_states.back()->think();
 			_fpsCounter->think();
-			if (Options::FPS > 0 && !(Options::useOpenGL && Options::vSyncForOpenGL))
+			if (_init)
 			{
-				// Update our FPS delay time based on the time of the last draw.
-				int fps = SDL_GetAppState() & SDL_APPINPUTFOCUS ? Options::FPS : Options::FPSInactive;
-
-				_timeUntilNextFrame = (1000.0f / fps) - (SDL_GetTicks() - _timeOfLastFrame);
-			}
-			else
-			{
-				_timeUntilNextFrame = 0;
-			}
-
-			if (_init && _timeUntilNextFrame <= 0)
-			{
-				// make a note of when this frame update occurred.
-				_timeOfLastFrame = SDL_GetTicks();
 				_fpsCounter->addFrame();
 				_screen->clear();
 				std::list<State*>::iterator i = _states.end();
@@ -306,14 +291,29 @@ void Game::run()
 			}
 		}
 
+		// Calculate how long we are to sleep
+		Uint32 idleTime = 0;
+		if (Options::FPS > 0 && !(Options::useOpenGL && Options::vSyncForOpenGL))
+		{
+			// Uint32 milliseconds do wrap around in about 49.7 days
+			Uint32 timeFrameEnded = SDL_GetTicks();
+			Uint32 elapsedFrameTime =  timeFrameEnded > timeFrameStarted ? timeFrameEnded - timeFrameStarted : 0;
+			Uint32 nominalFPS = SDL_GetAppState() & SDL_APPINPUTFOCUS ? Options::FPS : Options::FPSInactive;
+			Uint32 nominalFrameTime = Options::FPS > 0 ? 1000.0f / nominalFPS : 1;
+			idleTime = elapsedFrameTime > nominalFrameTime ? 0 : nominalFrameTime - elapsedFrameTime;
+			idleTime = idleTime > 100 ? 100 : idleTime;
+		}
+
 		// Save on CPU
 		switch (runningState)
 		{
 			case RUNNING:
-				SDL_Delay(1); //Save CPU from going 100%
+				SDL_Delay(idleTime); 	// Save CPU from going 100%
 				break;
-			case SLOWED: case PAUSED:
-				SDL_Delay(100); break; //More slowing down.
+			case SLOWED:
+			case PAUSED:
+				SDL_Delay(100); 		// More slowing down.
+				break;
 		}
 	}
 
