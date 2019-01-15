@@ -6,7 +6,7 @@ interfaces: #done
       - id: palette
         color: 4
       - id: window
-        color: 1 
+        color: 1
       - id: text
         color: 1
       - id: button
@@ -363,7 +363,7 @@ interfaces: #done
         color2: 244  # minty green
       - id: button
         color: 1     # white
-        color2: 1    # white  
+        color2: 1    # white
   - type: UFOLost
     elements:
       - id: palette
@@ -376,7 +376,7 @@ interfaces: #done
         color2: 244  # minty green
       - id: button
         color: 1     # white
-        color2: 1    # white  
+        color2: 1    # white
   - type: multipleTargets
     elements:
       - id: palette
@@ -389,7 +389,7 @@ interfaces: #done
         color2: 244  # minty green
       - id: button
         color: 1     # white
-        color2: 1    # white  
+        color2: 1    # white
   - type: baseDestroyed
     elements:
       - id: palette
@@ -402,7 +402,7 @@ interfaces: #done
         color2: 244  # minty green
       - id: button
         color: 1     # white
-        color2: 1    # white  
+        color2: 1    # white
   - type: dogfightInfo
     elements:
       - id: palette

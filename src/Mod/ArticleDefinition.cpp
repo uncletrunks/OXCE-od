@@ -201,7 +201,7 @@ namespace OpenXcom
 		text_width = node["text_width"].as<int>(text_width);
 		rect_text = node["rect_text"].as<ArticleDefinitionRect>(rect_text);
 	}
-	
+
 	/**
 	 * Constructor (only setting type of base class).
 	 */

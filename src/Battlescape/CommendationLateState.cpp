@@ -76,16 +76,16 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 	_lstSoldiers->onMouseClick((ActionHandler)&CommendationLateState::lstSoldiersMouseClick);
 
     /***
-    
+
                                             LOST IN SERVICE
-                
-    SOLDIER NAME, RANK: ___, SCORE: ___, KILLS: ___, NUMBER OF MISSIONS: ___, DAYS WOUNDED: ___, TIMES HIT: ___    
+
+    SOLDIER NAME, RANK: ___, SCORE: ___, KILLS: ___, NUMBER OF MISSIONS: ___, DAYS WOUNDED: ___, TIMES HIT: ___
       COMMENDATION
       COMMENDATION
       COMMENDATION
       CAUSE OF DEATH: KILLED BY ALIEN_RACE ALIEN_RANK, USING WEAPON
-    
-    
+
+
     ***/
 
 	const std::map<std::string, RuleCommendations *> commendationsList = _game->getMod()->getCommendationsList();
@@ -165,7 +165,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 					break;
 				}
 			} // END SOLDIER COMMS LOOP
-	  
+
 			if (noun == "noNoun")
 			{
 				++commList;

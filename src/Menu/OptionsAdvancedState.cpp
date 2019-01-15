@@ -122,7 +122,7 @@ OptionsAdvancedState::OptionsAdvancedState(OptionsOrigin origin) : OptionsBaseSt
  */
 OptionsAdvancedState::~OptionsAdvancedState()
 {
-	
+
 }
 
 /**
