@@ -20,7 +20,6 @@
 #include "Music.h"
 #include <map>
 #include <string>
-#include <SDL_mixer.h>
 
 namespace OpenXcom
 {
@@ -44,8 +43,8 @@ public:
 	~AdlibMusic();
 	/// Loads music from the specified file.
 	void load(const std::string &filename);
-	/// Loads music from a chunk of memory.
-	void load(const void *data, int size);
+	/// Loads music from the specified rwops.
+	void load(SDL_RWops *rwops);
 	/// Plays the music.
 	void play(int loop = -1) const;
 	/// Adlib music player.

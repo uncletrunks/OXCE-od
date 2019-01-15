@@ -19,7 +19,6 @@
 
 #include "Language.h"
 #include <algorithm>
-#include <fstream>
 #include <cassert>
 #include <set>
 #include <climits>
@@ -30,6 +29,7 @@
 #include "LanguagePlurality.h"
 #include "Unicode.h"
 #include "../Mod/ExtraStrings.h"
+#include "FileMap.h"
 
 namespace OpenXcom
 {
@@ -104,30 +104,45 @@ Language::~Language()
 }
 
 /**
+ * Extracts language id from a filename
+ * @param  fileName some filename
+ * @return 'pt' or 'en-US' or the like
+ */
+static std::string fileNameToId(const std::string& fileName) {
+	auto noExtName = CrossPlatform::noExt(CrossPlatform::baseFilename(fileName));
+	auto found = noExtName.find_first_of('-');
+	if (found != noExtName.npos) {
+		// uppercase it after dash
+		for (found += 1; found < noExtName.size(); ++found) {
+			noExtName[found] = toupper(noExtName[found]);
+		}
+	}
+	return noExtName;
+}
+
+/**
  * Gets all the languages found in the
  * Data folder and returns their properties.
- * @param files List of language filenames.
+ * @param ids List of language ids.
  * @param names List of language human-readable names.
  */
-void Language::getList(std::vector<std::string> &files, std::vector<std::string> &names)
+void Language::getList(std::vector<std::string> &ids, std::vector<std::string> &names)
 {
-	files = CrossPlatform::getFolderContents(CrossPlatform::searchDataFolder("common/Language"), "yml");
+	auto nset = FileMap::filterFiles(FileMap::getVFolderContents("Language", 0), "yml");
+	ids.clear();
+	for (auto filename : nset) {
+		ids.push_back(fileNameToId(filename));
+	}
+	std::sort(ids.begin(), ids.end());
 	names.clear();
 
-	for (std::vector<std::string>::iterator i = files.begin(); i != files.end(); ++i)
+	for (auto id: ids)
 	{
-		*i = CrossPlatform::noExt(*i);
-		std::string name;
-		std::map<std::string, std::string>::iterator lang = _names.find(*i);
-		if (lang != _names.end())
-		{
-			name = lang->second;
+		if (_names.find(id) != _names.end()) {
+			names.push_back(_names[id]);
+		} else {
+			names.push_back(id);
 		}
-		else
-		{
-			name = *i;
-		}
-		names.push_back(name);
 	}
 }
 
@@ -137,9 +152,9 @@ void Language::getList(std::vector<std::string> &files, std::vector<std::string>
  * widely-supported format and we already have YAML, it was convenient.
  * @param filename Filename of the YAML file.
  */
-void Language::load(const std::string &filename)
+void Language::load(const FileMap::FileRecord *frec)
 {
-	YAML::Node doc = YAML::LoadFile(filename);
+	YAML::Node doc = frec->getYAML();
 	YAML::Node lang;
 	if (doc.begin()->second.IsMap())
 	{
@@ -149,7 +164,7 @@ void Language::load(const std::string &filename)
 	// Fallback when file is missing language specifier
 	else
 	{
-		_id = CrossPlatform::noExt(CrossPlatform::baseFilename(filename));
+		_id = fileNameToId(frec->fullpath);
 		lang = doc;
 	}
 	for (YAML::const_iterator i = lang.begin(); i != lang.end(); ++i)
@@ -359,7 +374,7 @@ const LocalizedText &Language::getString(const std::string &id, SoldierGender ge
  */
 void Language::toHtml(const std::string &filename) const
 {
-	std::ofstream htmlFile (filename.c_str(), std::ios::out);
+	std::stringstream htmlFile;
 	htmlFile << "<table border=\"1\" width=\"100%\">" << std::endl;
 	htmlFile << "<tr><th>ID String</th><th>English String</th></tr>" << std::endl;
 	for (std::map<std::string, LocalizedText>::const_iterator i = _strings.begin(); i != _strings.end(); ++i)
@@ -380,7 +395,7 @@ void Language::toHtml(const std::string &filename) const
 		htmlFile << "</td></tr>" << std::endl;
 	}
 	htmlFile << "</table>" << std::endl;
-	htmlFile.close();
+	CrossPlatform::writeFile(filename, htmlFile.str());
 }
 
 /**

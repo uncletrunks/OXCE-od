@@ -216,8 +216,8 @@ OptionsVideoState::OptionsVideoState(OptionsOrigin origin) : OptionsBaseState(or
 	_filters.push_back("");
 
 #ifndef __NO_OPENGL
-	std::set<std::string> filters = FileMap::filterFiles(FileMap::getVFolderContents(GL_FOLDER), GL_EXT);
-	for (std::set<std::string>::iterator i = filters.begin(); i != filters.end(); ++i)
+	auto filters = FileMap::filterFiles(FileMap::getVFolderContents(GL_FOLDER), GL_EXT);
+	for (auto i = filters.begin(); i != filters.end(); ++i)
 	{
 		std::string file = (*i);
 		std::string path = GL_FOLDER + file;

@@ -19,6 +19,7 @@
 
 #include "ModInfo.h"
 #include "CrossPlatform.h"
+#include "Exception.h"
 #include <yaml-cpp/yaml.h>
 
 namespace OpenXcom
@@ -32,10 +33,8 @@ ModInfo::ModInfo(const std::string &path) :
 	// empty
 }
 
-void ModInfo::load(const std::string &filename)
+void ModInfo::load(const YAML::Node& doc)
 {
-	YAML::Node doc = YAML::LoadFile(filename);
-
 	_name     = doc["name"].as<std::string>(_name);
 	_desc     = doc["description"].as<std::string>(_desc);
 	_version  = doc["version"].as<std::string>(_version);

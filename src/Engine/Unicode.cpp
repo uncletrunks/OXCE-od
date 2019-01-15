@@ -217,35 +217,54 @@ std::wstring convMbToWc(const std::string &src, unsigned int cp)
 }
 
 /**
- * Takes a filesystem path and converts it to a UTF-8 string.
- * On Windows the C paths use the local ANSI codepage.
- * Used for SDL APIs.
- * @param src Filesystem path.
- * @return UTF-8 string.
+ * Checks if UTF-8 string is well-formed.
+ * @param ss candidate string
+ * @return true if valid
+ * @note based on https://www.cl.cam.ac.uk/~mgk25/ucs/utf8_check.c
  */
-std::string convPathToUtf8(const std::string &src)
-{
-#ifdef _WIN32
-	return convWcToMb(convMbToWc(src, CP_ACP), CP_UTF8);
-#else
-	return src;
-#endif
-}
-
-/**
- * Takes a UTF-8 string and converts it to a filesystem path.
- * On Windows the C paths use the local ANSI codepage.
- * Used for SDL APIs.
- * @param src UTF-8 string.
- * @return Filesystem path.
- */
-std::string convUtf8ToPath(const std::string &src)
-{
-#ifdef _WIN32
-	return convWcToMb(convMbToWc(src, CP_UTF8), CP_ACP);
-#else
-	return src;
-#endif
+bool isValidUTF8(const std::string& ss) {
+	std::basic_string<unsigned char> s((unsigned char *)ss.c_str());
+	s.append(4, 0); // we need to slap 4 bytes on the end of s or we can overrun it
+	size_t i = 0;
+	while ((i < ss.length()) && (s[i] != 0)) {
+		if (s[i] < 0x80) {
+			/* 0xxxxxxx */
+			i++;
+		} else if ((s[i+0] & 0xe0) == 0xc0) {
+			/* 110XXXXx 10xxxxxx */
+			if ((s[i+1] & 0xc0) != 0x80 || (s[i+0] & 0xfe) == 0xc0)	{	/* overlong? */
+				return false;
+			} else {
+				i += 2;
+			}
+		} else if ((s[i] & 0xf0) == 0xe0) {
+			/* 1110XXXX 10Xxxxxx 10xxxxxx */
+			if ((s[i+1] & 0xc0) != 0x80 ||
+				(s[i+2] & 0xc0) != 0x80 ||
+				(s[i+0] == 0xe0 && (s[i+1] & 0xe0) == 0x80) ||		/* overlong? */
+				(s[i+0] == 0xed && (s[i+1] & 0xe0) == 0xa0) ||		/* surrogate? */
+				(s[i+0] == 0xef && s[i+1] == 0xbf &&
+				(s[i+2] & 0xfe) == 0xbe)) {							/* U+FFFE or U+FFFF? */
+					return false;
+			} else {
+				i += 3;
+			}
+		} else if ((s[0] & 0xf8) == 0xf0) {
+			/* 11110XXX 10XXxxxx 10xxxxxx 10xxxxxx */
+			if ((s[i+1] & 0xc0) != 0x80 ||
+				(s[i+2] & 0xc0) != 0x80 ||
+				(s[i+3] & 0xc0) != 0x80 ||
+				(s[i+0] == 0xf0 && (s[i+1] & 0xf0) == 0x80) ||		/* overlong? */
+				(s[i+0] == 0xf4 && s[i+1] > 0x8f) || s[i+0] > 0xf4) { 	/* > U+10FFFF? */
+					return false;
+			} else {
+				i += 4;
+			}
+		} else {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**

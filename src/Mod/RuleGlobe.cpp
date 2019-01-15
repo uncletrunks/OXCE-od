@@ -18,7 +18,6 @@
  */
 #include "RuleGlobe.h"
 #include <SDL_endian.h>
-#include <fstream>
 #include "../Engine/Exception.h"
 #include "Polygon.h"
 #include "Polyline.h"
@@ -70,7 +69,7 @@ void RuleGlobe::load(const YAML::Node &node)
 			delete *i;
 		}
 		_polygons.clear();
-		loadDat(FileMap::getFilePath(node["data"].as<std::string>()));
+		loadDat(node["data"].as<std::string>());
 	}
 	if (node["polygons"])
 	{
@@ -166,16 +165,10 @@ std::list<Polyline*> *RuleGlobe::getPolylines()
  */
 void RuleGlobe::loadDat(const std::string &filename)
 {
-	// Load file
-	std::ifstream mapFile (filename.c_str(), std::ios::in | std::ios::binary);
-	if (!mapFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
+	auto mapFile = FileMap::getIStream(filename);
 	short value[10];
 
-	while (mapFile.read((char*)&value, sizeof(value)))
+	while (mapFile->read((char*)&value, sizeof(value)))
 	{
 		Polygon* poly;
 		int points;
@@ -209,12 +202,10 @@ void RuleGlobe::loadDat(const std::string &filename)
 		_polygons.push_back(poly);
 	}
 
-	if (!mapFile.eof())
+	if (!mapFile->eof())
 	{
 		throw Exception("Invalid globe map");
 	}
-
-	mapFile.close();
 }
 
 /**

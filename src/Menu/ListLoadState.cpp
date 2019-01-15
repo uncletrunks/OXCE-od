@@ -115,7 +115,7 @@ void ListLoadState::init()
 		Options::expendLoadLastSave();
 		// find the absolutely latest save game including quick and autos
 		time_t timestamp = 0;
-		size_t idx = -1, i = 0;
+		int idx = -1, i = 0;
 		for (auto it = _saves.begin(); it !=_saves.end(); ++it, ++i)
 		{
 			if ((*it).timestamp > timestamp)

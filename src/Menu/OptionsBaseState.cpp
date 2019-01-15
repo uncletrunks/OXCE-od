@@ -210,10 +210,6 @@ void OptionsBaseState::btnOkClick(Action *)
 	dY = Options::baseYResolution - dY;
 	recenter(dX, dY);
 	Options::save();
-	if (Options::reload && _origin == OPT_MENU)
-	{
-		Options::mapResources();
-	}
 	_game->loadLanguages();
 	SDL_WM_GrabInput(Options::captureMouse);
 	_game->getScreen()->resetDisplay();

@@ -22,6 +22,7 @@
 #include <string>
 #include "LocalizedText.h"
 #include "../Savegame/Soldier.h"
+#include "FileMap.h"
 
 namespace OpenXcom
 {
@@ -55,10 +56,10 @@ public:
 	Language();
 	/// Cleans up the language.
 	~Language();
-	/// Gets list of languages in the data directory.
-	static void getList(std::vector<std::string> &files, std::vector<std::string> &names);
+	/// Gets list of available languages.
+	static void getList(std::vector<std::string> &ids, std::vector<std::string> &names);
 	/// Loads the language from a YAML file.
-	void load(const std::string &filename);
+	void load(const FileMap::FileRecord *frec);
 	/// Loads the language from a ruleset file.
 	void load(ExtraStrings *strings);
 	/// Gets the language's ID.

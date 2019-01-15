@@ -20,6 +20,7 @@
 #include <SDL.h>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include "OptionInfo.h"
 #include "ModInfo.h"
 
@@ -73,7 +74,7 @@ namespace Options
 	/// Restores default options.
 	void resetDefault();
 	/// Initializes the options settings.
-	bool init(int argc, char *argv[]);
+	bool init();
 	/// Loads options from YAML.
 	bool load(const std::string &filename = "options");
 	/// Saves options to YAML.
@@ -94,8 +95,6 @@ namespace Options
 	const std::vector<OptionInfo> &getOptionInfo();
 	/// Sets the game's data, user and config folders.
 	void setFolders();
-	/// Sets the game's user master folders.
-	void userSplitMasters();
 	/// Update game options from config file and command line.
 	void updateOptions();
 	/// Backup display options.
@@ -106,10 +105,8 @@ namespace Options
 	std::string getActiveMaster();
 	/// Updates the reservedSpace for master mods if necessary
 	void updateReservedSpace();
-	/// Maps resources in active mods to the virtual file system
-	void mapResources();
 	/// Gets the map of mod ids to mod infos
-	const std::map<std::string, ModInfo> &getModInfos();
+	const std::unordered_map<std::string, ModInfo> &getModInfos();
 	/// Refreshes the mods and filemaps.
 	void updateMods();
 	/// Gets the list of currently active mods.

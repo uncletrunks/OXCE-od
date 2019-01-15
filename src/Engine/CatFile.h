@@ -17,40 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <fstream>
+#include <vector>
+#include <string>
+#include <tuple>
+#include <SDL_rwops.h>
+
 
 namespace OpenXcom
 {
 
 /**
- * Subclass of std::ifstream to handle CAT files
+ * Handles CAT files
  */
-class CatFile : protected std::ifstream
+class CatFile
 {
 private:
-	unsigned int _amount, *_offset, *_size;
+	std::string _filename;
+	Uint8 *_data;
+	std::vector<std::tuple<void *, size_t>> _items;
+
 public:
 	/// Creates a CAT file stream.
-	CatFile(const char *path);
+	CatFile(const std::string& filename);
 	/// Cleans up the stream.
 	~CatFile();
-	/// Inherit operator.
-	bool operator !() const
-	{
-		return std::ifstream::operator!();
-	}
 	/// Get amount of objects.
-	int getAmount() const
-	{
-		return _amount;
-	}
-	/// Get object size.
-	unsigned int getObjectSize(unsigned int i) const
-	{
-		return (i < _amount) ? _size[i] : 0;
-	}
-	/// Load an object into memory.
-	char *load(unsigned int i, bool name = false);
+	size_t size() const { return _items.size(); }
+	/// Return a pointer to the object data.
+	SDL_RWops *getRWops(Uint32 i);
+	/// Return the original file name
+	const std::string& fileName() const { return _filename; }
 };
 
 }

@@ -18,7 +18,9 @@
  */
 
 #include "CatFile.h"
-#include <SDL.h>
+#include "Logger.h"
+#include "FileMap.h"
+#include "SDL2Helpers.h"
 
 namespace OpenXcom
 {
@@ -27,29 +29,48 @@ namespace OpenXcom
  * Creates a CAT file stream. A CAT file starts with an index of the
  * offset and size of every file contained within. Each file consists
  * of a filename followed by its contents.
- * @param path Full path to CAT file.
+ * @param rw SDL_RWops of the CAT file.
  */
-CatFile::CatFile(const char *path) : std::ifstream(path, std::ios::in | std::ios::binary), _amount(0), _offset(0), _size(0)
+CatFile::CatFile(const std::string& filename) : _data(0), _items()
 {
 	// Get amount of files
-	read((char*)&_amount, sizeof(_amount));
 
-	_amount = (unsigned int)SDL_SwapLE32(_amount);
-	_amount /= 2 * sizeof(_amount);
+	/* file format is: {offset_le32, size_le32}[N] ;  bytes[]
+	 * the first offset effectively determines the offset/size table size
+	 * which is N = offset/8 units.
+	 *
+	 * Given an rwops object, this reads it and sets up rwops instances
+	 * for each chunk.
+	 *
+	 * The original rwops object is consumed here.
+	 */
+	_filename = filename;
+	auto rwops = FileMap::getRWops(filename);
+	auto offset0 = SDL_ReadLE32(rwops); // read the first offset; 8 is the sizeof(item) of the header
+	SDL_RWseek(rwops, 0, RW_SEEK_SET);  // reset the rwops pointer back
+	size_t filesize;
+	_data = (Uint8 *)SDL_LoadFile_RW(rwops, &filesize, SDL_FALSE); // read all of the file
+	SDL_RWseek(rwops, 0, RW_SEEK_SET);  // and again reset the rwops pointer back
 
-	// Get object offsets
-	seekg(0, std::ios::beg);
-
-	_offset = new unsigned int[_amount];
-	_size   = new unsigned int[_amount];
-
-	for (unsigned int i = 0; i < _amount; ++i)
-	{
-		read((char*)&_offset[i], sizeof(*_offset));
-		_offset[i] = (unsigned int)SDL_SwapLE32(_offset[i]);
-		read((char*)&_size[i],   sizeof(*_size));
-		_size[i] = (unsigned int)SDL_SwapLE32(_size[i]);
+	if (offset0 >= filesize) {
+		Log(LOG_WARNING) << "Catfile(" << filename << "): first offset " << offset0 << ">= file size " << filesize << ", not parsing.";
+		SDL_RWclose(rwops);
+		return;
 	}
+	for (Uint32 i = 0; i < offset0 / 8; ++i) {
+		auto offset = SDL_ReadLE32(rwops);
+		auto size = SDL_ReadLE32(rwops);
+		if (offset + size >= filesize) {
+			// reject bad data
+			if (offset >= filesize) {
+				Log(LOG_WARNING) << "Catfile("<<filename<<"): item "<<i<<" outside of the file: offset="<<offset<<" size="<<size<<"filesize="<<filesize;
+				continue;
+			}
+			//
+		}
+		_items.push_back(std::make_tuple(_data + offset, size));
+	}
+	SDL_RWclose(rwops);
 }
 
 /**
@@ -57,44 +78,21 @@ CatFile::CatFile(const char *path) : std::ifstream(path, std::ios::in | std::ios
  */
 CatFile::~CatFile()
 {
-	delete[] _offset;
-	delete[] _size;
-
-	close();
+	if (_data) { SDL_free(_data); }
 }
 
 /**
- * Loads an object into memory.
+ * Creates and returns an rwops for an item.
  * @param i Object number to load.
- * @param name Preserve internal file name.
- * @return Pointer to the loaded object.
+ * @param keepname Don't strip internal file name (needed for adlib).
+ * @return SDL_RWops for the object data.
  */
-char *CatFile::load(unsigned int i, bool name)
-{
-	if (i >= _amount)
-		return 0;
-
-	seekg(_offset[i], std::ios::beg);
-
-	unsigned char namesize = peek();
-	// Skip filename (if there's any)
-	if (namesize<=56)
-	{
-		if (!name)
-		{
-			seekg(namesize + 1, std::ios::cur);
-		}
-		else
-		{
-			_size[i] += namesize + 1;
-		}
+SDL_RWops *CatFile::getRWops(Uint32 i) {
+	if (i >= _items.size()) {
+		Log(LOG_ERROR) << "Catfile<" << _filename << ">::getRWops("<<i<<"): >= size " << _items.size();
+		return NULL;
 	}
-
-	// Read object
-	char *object = new char[_size[i]];
-	read(object, _size[i]);
-
-	return object;
+	return SDL_RWFromConstMem(std::get<0>(_items[i]), std::get<1>(_items[i]));
 }
 
 }

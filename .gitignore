@@ -80,3 +80,5 @@ nbproject/
 src/OpenXcom.2010.VC.opendb
 bin/user
 /makefile
+/.kdev4/
+/*.kdev4

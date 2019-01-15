@@ -26,7 +26,6 @@
 #include "../Interface/TextList.h"
 #include "../Interface/Window.h"
 #include "../Mod/Mod.h"
-#include <fstream>
 #include "../Engine/Exception.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/Logger.h"
@@ -232,29 +231,27 @@ void TestState::testCase2()
 			_vanillaPalettes[item.first]->initBlack();
 
 			// Load from JASC file
-			const std::string& fullPath = FileMap::getFilePath(item.second.palettePath);
-			std::ifstream palFile(fullPath);
-			if (palFile.is_open())
+			auto palFile = FileMap::getIStream(item.second.palettePath);
+			if (palFile)
 			{
 				std::string line;
-				std::getline(palFile, line); // header
-				std::getline(palFile, line); // file format
-				std::getline(palFile, line); // number of colors
+				std::getline(*palFile, line); // header
+				std::getline(*palFile, line); // file format
+				std::getline(*palFile, line); // number of colors
 				int r = 0, g = 0, b = 0;
 				for (int j = 0; j < 256; ++j)
 				{
-					std::getline(palFile, line); // j-th color index
+					std::getline(*palFile, line); // j-th color index
 					std::stringstream ss(line);
 					ss >> r;
 					ss >> g;
 					ss >> b;
 					_vanillaPalettes[item.first]->copyColor(j, r, g, b); // raw RGB copy, no side effects!
 				}
-				palFile.close();
 			}
 			else
 			{
-				throw Exception(fullPath + " not found");
+				throw Exception(item.second.palettePath + " not found");
 			}
 		}
 	}
@@ -273,8 +270,8 @@ void TestState::testCase2()
 		{
 		if (spritePack->getSingleImage())
 		{
-			const std::string& fullPath = FileMap::getFilePath((*spritePack->getSprites())[0]);
-			total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+			const std::string& relPath = (*spritePack->getSprites())[0];
+			total += checkPalette(relPath, spritePack->getWidth(), spritePack->getHeight());
 		}
 		else
 		{
@@ -284,15 +281,15 @@ void TestState::testCase2()
 				std::string fileName = j.second;
 				if (fileName.substr(fileName.length() - 1, 1) == "/")
 				{
-					const std::set<std::string>& contents = FileMap::getVFolderContents(fileName);
-					for (std::set<std::string>::iterator k = contents.begin(); k != contents.end(); ++k)
+					auto contents = FileMap::getVFolderContents(fileName);
+					for (auto k = contents.begin(); k != contents.end(); ++k)
 					{
 						if (!ExtraSprites::isImageFile(*k))
 							continue;
 						try
 						{
-							const std::string& fullPath = FileMap::getFilePath(fileName + *k);
-							total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+							const std::string& relPath = fileName + *k;
+							total += checkPalette(relPath, spritePack->getWidth(), spritePack->getHeight());
 						}
 						catch (Exception &e)
 						{
@@ -304,13 +301,12 @@ void TestState::testCase2()
 				{
 					if (spritePack->getSubX() == 0 && spritePack->getSubY() == 0)
 					{
-						const std::string& fullPath = FileMap::getFilePath(fileName);
-						total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+						total += checkPalette(fileName, spritePack->getWidth(), spritePack->getHeight());
 					}
 					else
 					{
-						const std::string& fullPath = FileMap::getFilePath((*spritePack->getSprites())[startFrame]);
-						total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+						const std::string& relPath = (*spritePack->getSprites())[startFrame];
+						total += checkPalette(relPath, spritePack->getWidth(), spritePack->getHeight());
 					}
 				}
 			}
@@ -589,7 +585,7 @@ int TestState::checkRMP(MapBlock *mapblock)
 	filename << "ROUTES/" << mapblock->getName() << ".RMP";
 
 	// Load file
-	std::ifstream mapFile(FileMap::getFilePath(filename.str()).c_str(), std::ios::in | std::ios::binary);
+	auto mapFile = FileMap::getIStream(filename.str());
 	if (!mapFile)
 	{
 		throw Exception(filename.str() + " not found");
@@ -597,7 +593,7 @@ int TestState::checkRMP(MapBlock *mapblock)
 
 	int nodesAdded = 0;
 	int errors = 0;
-	while (mapFile.read((char*)&value, sizeof(value)))
+	while (mapFile->read((char*)&value, sizeof(value)))
 	{
 		int pos_x = value[1];
 		int pos_y = value[0];
@@ -616,12 +612,10 @@ int TestState::checkRMP(MapBlock *mapblock)
 		nodesAdded++;
 	}
 
-	if (!mapFile.eof())
+	if (!mapFile->eof())
 	{
 		throw Exception("Invalid RMP file: " + filename.str());
 	}
-
-	mapFile.close();
 
 	return errors;
 }
@@ -634,20 +628,18 @@ int TestState::loadMAP(MapBlock *mapblock)
 	filename << "MAPS/" << mapblock->getName() << ".MAP";
 
 	// Load file
-	std::ifstream mapFile(FileMap::getFilePath(filename.str()).c_str(), std::ios::in | std::ios::binary);
+	auto mapFile = FileMap::getIStream(filename.str());
 	if (!mapFile)
 	{
 		throw Exception(filename.str() + " not found");
 	}
 
-	mapFile.read((char*)&size, sizeof(size));
+	mapFile->read((char*)&size, sizeof(size));
 	//sizey = (int)size[0];
 	//sizex = (int)size[1];
 	sizez = (int)size[2];
 
 	//mapblock->setSizeZ(sizez); // commented out, for testing purposes we don't need to HACK it like in real code
-
-	mapFile.close();
 
 	return sizez;
 }

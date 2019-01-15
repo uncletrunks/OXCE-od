@@ -17,7 +17,6 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "SavedGame.h"
-#include <fstream>
 #include <sstream>
 #include <set>
 #include <iomanip>
@@ -273,18 +272,19 @@ std::vector<SaveInfo> SavedGame::getList(Language *lang, bool autoquick)
 {
 	std::vector<SaveInfo> info;
 	std::string curMaster = Options::getActiveMaster();
-	std::vector<std::string> saves = CrossPlatform::getFolderContents(Options::getMasterUserFolder(), "sav");
+	auto saves = CrossPlatform::getFolderContents(Options::getMasterUserFolder(), "sav");
 
 	if (autoquick)
 	{
-		std::vector<std::string> asaves = CrossPlatform::getFolderContents(Options::getMasterUserFolder(), "asav");
+		auto asaves = CrossPlatform::getFolderContents(Options::getMasterUserFolder(), "asav");
 		saves.insert(saves.begin(), asaves.begin(), asaves.end());
 	}
-	for (std::vector<std::string>::iterator i = saves.begin(); i != saves.end(); ++i)
+	for (auto i = saves.begin(); i != saves.end(); ++i)
 	{
+		auto filename = std::get<0>(*i);
 		try
 		{
-			SaveInfo saveInfo = getSaveInfo(*i, lang);
+			SaveInfo saveInfo = getSaveInfo(filename, lang);
 			if (!_isCurrentGameType(saveInfo, curMaster))
 			{
 				continue;
@@ -293,12 +293,12 @@ std::vector<SaveInfo> SavedGame::getList(Language *lang, bool autoquick)
 		}
 		catch (Exception &e)
 		{
-			Log(LOG_ERROR) << (*i) << ": " << e.what();
+			Log(LOG_ERROR) << filename << ": " << e.what();
 			continue;
 		}
 		catch (YAML::Exception &e)
 		{
-			Log(LOG_ERROR) << (*i) << ": " << e.what();
+			Log(LOG_ERROR) << filename << ": " << e.what();
 			continue;
 		}
 	}
@@ -314,7 +314,7 @@ std::vector<SaveInfo> SavedGame::getList(Language *lang, bool autoquick)
 SaveInfo SavedGame::getSaveInfo(const std::string &file, Language *lang)
 {
 	std::string fullname = Options::getMasterUserFolder() + file;
-	YAML::Node doc = YAML::LoadFile(fullname);
+	YAML::Node doc = YAML::Load(*CrossPlatform::readFile(fullname));
 	SaveInfo save;
 
 	save.fileName = file;
@@ -342,7 +342,7 @@ SaveInfo SavedGame::getSaveInfo(const std::string &file, Language *lang)
 		}
 		else
 		{
-			save.displayName = Unicode::convPathToUtf8(CrossPlatform::noExt(file));
+			save.displayName = CrossPlatform::noExt(file);
 		}
 		save.reserved = false;
 	}
@@ -384,13 +384,8 @@ SaveInfo SavedGame::getSaveInfo(const std::string &file, Language *lang)
  */
 void SavedGame::load(const std::string &filename, Mod *mod)
 {
-	std::string s = Options::getMasterUserFolder() + filename;
-	std::vector<YAML::Node> file = YAML::LoadAllFromFile(s);
-	if (file.empty())
-	{
-		throw Exception(filename + " is not a vaild save file");
-	}
-
+	std::string filepath = Options::getMasterUserFolder() + filename;
+	std::vector<YAML::Node> file = YAML::LoadAll(*CrossPlatform::readFile(filepath));
 	// Get brief save info
 	YAML::Node brief = file[0];
 	_time->load(brief["time"]);
@@ -400,7 +395,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 	}
 	else
 	{
-		_name = Unicode::convPathToUtf8(filename);
+		_name = filename;
 	}
 	_ironman = brief["ironman"].as<bool>(_ironman);
 
@@ -750,13 +745,6 @@ void SavedGame::load(const std::string &filename, Mod *mod)
  */
 void SavedGame::save(const std::string &filename, Mod *mod) const
 {
-	std::string s = Options::getMasterUserFolder() + filename;
-	std::ofstream sav(s.c_str());
-	if (!sav)
-	{
-		throw Exception("Failed to save " + filename);
-	}
-
 	YAML::Emitter out;
 
 	// Saves the brief game info used in the saves list
@@ -910,11 +898,12 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 		node["battleGame"] = _battleGame->save();
 	}
 	out << node;
-	sav << out.c_str();
-	sav.close();
-	if (!sav)
+
+
+	std::string filepath = Options::getMasterUserFolder() + filename;
+	if (!CrossPlatform::writeFile(filepath, out.c_str()))
 	{
-		throw Exception("Failed to save " + filename);
+		throw Exception("Failed to save " + filepath);
 	}
 }
 

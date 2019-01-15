@@ -77,13 +77,11 @@ void CutsceneState::init()
 	bool fmv = false, slide = false;
 	if (!videoRule->getVideos()->empty())
 	{
-		const std::string& file = FileMap::getFilePath(videoRule->getVideos()->front());
-		fmv = CrossPlatform::fileExists(file);
+		fmv = FileMap::fileExists(videoRule->getVideos()->front());
 	}
 	if (!videoRule->getSlides()->empty())
 	{
-		const std::string& file = FileMap::getFilePath(videoRule->getSlides()->front().imagePath);
-		slide = CrossPlatform::fileExists(file);
+		slide = FileMap::fileExists(videoRule->getSlides()->front().imagePath);
 	}
 
 	if (fmv && (!slide || Options::preferredVideo == VIDEO_FMV))

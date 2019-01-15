@@ -457,9 +457,9 @@ void Screen::resetDisplay(bool resetVideo)
 		OpenGL::checkErrors = Options::checkOpenGLErrors;
 		glOutput.init(_baseWidth, _baseHeight);
 		glOutput.linear = Options::useOpenGLSmoothing; // setting from shader file will override this, though
-		if (!FileMap::isResourcesEmpty())
+		if (FileMap::fileExists(Options::useOpenGLShader))
 		{
-			if (!glOutput.set_shader(FileMap::getFilePath(Options::useOpenGLShader).c_str()))
+			if (!glOutput.set_shader(Options::useOpenGLShader.c_str()))
 			{
 				Options::useOpenGLShader = "";
 			}

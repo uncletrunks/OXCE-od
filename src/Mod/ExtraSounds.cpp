@@ -104,8 +104,8 @@ SoundSet *ExtraSounds::loadSoundSet(SoundSet *set) const
 		{
 			Log(LOG_VERBOSE) << "Loading sound set from folder: " << fileName << " starting at index: " << startSound;
 			int offset = startSound;
-			const std::set<std::string> &contents = FileMap::getVFolderContents(fileName);
-			for (std::set<std::string>::iterator k = contents.begin(); k != contents.end(); ++k)
+			auto contents = FileMap::getVFolderContents(fileName);
+			for (auto k = contents.begin(); k != contents.end(); ++k)
 			{
 				try
 				{
@@ -128,7 +128,6 @@ SoundSet *ExtraSounds::loadSoundSet(SoundSet *set) const
 
 void ExtraSounds::loadSound(SoundSet *set, int index, const std::string &fileName) const
 {
-	const std::string &fullPath = FileMap::getFilePath(fileName);
 	Sound *sound = set->getSound(index);
 	if (sound)
 	{
@@ -139,7 +138,7 @@ void ExtraSounds::loadSound(SoundSet *set, int index, const std::string &fileNam
 		Log(LOG_VERBOSE) << "Adding index: " << index;
 		sound = set->addSound(index + _modIndex);
 	}
-	sound->load(fullPath);
+	sound->load(fileName);
 }
 
 }

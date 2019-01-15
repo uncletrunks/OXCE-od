@@ -17,8 +17,10 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Palette.h"
-#include <fstream>
+#include <sstream>
+#include "CrossPlatform.h"
 #include "Exception.h"
+#include "FileMap.h"
 
 namespace OpenXcom
 {
@@ -49,25 +51,19 @@ Palette::~Palette()
  */
 void Palette::loadDat(const std::string &filename, int ncolors, int offset)
 {
+	auto palFile = FileMap::getIStream(filename);
 	if (_colors != 0)
 		throw Exception("loadDat can be run only once");
 	_count = ncolors;
 	_colors = new SDL_Color[_count];
 	memset(_colors, 0, sizeof(SDL_Color) * _count);
 
-	// Load file and put colors in palette
-	std::ifstream palFile (filename.c_str(), std::ios::in | std::ios::binary);
-	if (!palFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
 	// Move pointer to proper palette
-	palFile.seekg(offset, std::ios::beg);
+	palFile->seekg(offset, std::ios::beg);
 
 	Uint8 value[3];
 
-	for (int i = 0; i < _count && palFile.read((char*)value, 3); ++i)
+	for (int i = 0; i < _count && palFile->read((char*)value, 3); ++i)
 	{
 		// Correct X-Com colors to RGB colors
 		_colors[i].r = value[0] * 4;
@@ -76,8 +72,6 @@ void Palette::loadDat(const std::string &filename, int ncolors, int offset)
 		_colors[i].unused = 255;
 	}
 	_colors[0].unused = 0;
-
-	palFile.close();
 }
 
 /**
@@ -136,7 +130,7 @@ Uint32 Palette::getRGBA(SDL_Color* pal, Uint8 color)
 
 void Palette::savePal(const std::string &file) const
 {
-	std::ofstream out(file.c_str(), std::ios::out | std::ios::binary);
+	std::stringstream out;
 	short count = _count;
 
 	// RIFF header
@@ -164,12 +158,12 @@ void Palette::savePal(const std::string &file) const
 		out.write(&c, 1);
 		color++;
 	}
-	out.close();
+	CrossPlatform::writeFile(file, out.str());
 }
 
 void Palette::savePalMod(const std::string &file, const std::string &type, const std::string &target) const
 {
-	std::ofstream out(file.c_str());
+	std::stringstream out;
 	short count = _count;
 
 	// header
@@ -191,12 +185,12 @@ void Palette::savePalMod(const std::string &file, const std::string &type, const
 		out << std::to_string(_colors[i].b);
 		out << "]\n";
 	}
-	out.close();
+	CrossPlatform::writeFile(file, out.str());
 }
 
 void Palette::savePalJasc(const std::string &file) const
 {
-	std::ofstream out(file.c_str());
+	std::stringstream out;
 	short count = _count;
 
 	// header
@@ -214,7 +208,7 @@ void Palette::savePalJasc(const std::string &file) const
 		out << std::to_string(_colors[i].b);
 		out << "\n";
 	}
-	out.close();
+	CrossPlatform::writeFile(file, out.str());
 }
 
 void Palette::setColors(SDL_Color* pal, int ncolors)
@@ -245,7 +239,7 @@ void Palette::setColors(SDL_Color* pal, int ncolors)
 			_colors[i].b++;
 		}
 	}
-	_colors[0].unused = 0;	
+	_colors[0].unused = 0;
 }
 
 void Palette::setColor(int index, int r, int g, int b)

@@ -18,7 +18,6 @@
  */
 #include "MapDataSet.h"
 #include "MapData.h"
-#include <fstream>
 #include <SDL_endian.h>
 #include "../Engine/Exception.h"
 #include "../Engine/SurfaceSet.h"
@@ -158,14 +157,9 @@ void MapDataSet::loadData()
 	MCD mcd;
 
 	// Load Terrain Data from MCD file
-	std::string fname = "TERRAIN/" + _name + ".MCD";
-	std::ifstream mapFile(FileMap::getFilePath(fname).c_str(), std::ios::in | std::ios::binary);
-	if (!mapFile)
-	{
-		throw Exception(fname + " not found");
-	}
+	auto mapFile = FileMap::getIStream("TERRAIN/" + _name + ".MCD");
 
-	while (mapFile.read((char*)&mcd, sizeof(MCD)))
+	while (mapFile->read((char*)&mcd, sizeof(MCD)))
 	{
 		MapData *to = new MapData(this);
 		_objects.push_back(to);
@@ -210,18 +204,14 @@ void MapDataSet::loadData()
 		objNumber++;
 	}
 
-
-	if (!mapFile.eof())
+	if (!mapFile->eof())
 	{
 		throw Exception("Invalid MCD file");
 	}
 
-	mapFile.close();
-
 	// Load terrain sprites/surfaces/PCK files into a surfaceset
 	_surfaceSet = new SurfaceSet(32, 40);
-	_surfaceSet->loadPck(FileMap::getFilePath("TERRAIN/" + _name + ".PCK"),
-			     FileMap::getFilePath("TERRAIN/" + _name + ".TAB"));
+	_surfaceSet->loadPck("TERRAIN/" + _name + ".PCK", "TERRAIN/" + _name + ".TAB");
 }
 
 /**
@@ -248,27 +238,19 @@ void MapDataSet::unloadData()
  */
 void MapDataSet::loadLOFTEMPS(const std::string &filename, std::vector<Uint16> *voxelData)
 {
-	// Load file
-	std::ifstream mapFile (filename.c_str(), std::ios::in | std::ios::binary);
-	if (!mapFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
+	auto mapFile = FileMap::getIStream(filename);
 	Uint16 value;
 
-	while (mapFile.read((char*)&value, sizeof(value)))
+	while (mapFile->read((char*)&value, sizeof(value)))
 	{
 		value = SDL_SwapLE16(value);
 		voxelData->push_back(value);
 	}
 
-	if (!mapFile.eof())
+	if (!mapFile->eof())
 	{
 		throw Exception("Invalid LOFTEMPS");
 	}
-
-	mapFile.close();
 }
 
 /**

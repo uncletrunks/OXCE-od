@@ -23,6 +23,7 @@
 #include <SDL.h>
 #include <yaml-cpp/yaml.h>
 #include "../Engine/Options.h"
+#include "../Engine/FileMap.h"
 #include "../Savegame/GameTime.h"
 #include "RuleDamageType.h"
 #include "Unit.h"
@@ -216,7 +217,7 @@ private:
 	size_t _soundOffsetGeo = 0;
 
 	/// Loads a ruleset from a YAML file.
-	void loadFile(const std::string &filename, ModScript &parsers);
+	void loadFile(const FileMap::FileRecord &filerec, ModScript &parsers);
 	/// Loads a ruleset element.
 	template <typename T>
 	T *loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::vector<std::string> *index = 0, const std::string &key = "type") const;
@@ -230,11 +231,11 @@ private:
 	/// Loads battlescape specific resources.
 	void loadBattlescapeResources();
 	/// Loads a specified music file.
-	Music *loadMusic(MusicFormat fmt, const std::string &file, int track, float volume, CatFile *adlibcat, CatFile *aintrocat, GMCatFile *gmcat) const;
+	Music* loadMusic(MusicFormat fmt, const std::string& file, size_t track, float volume, CatFile* adlibcat, CatFile* aintrocat, GMCatFile* gmcat) const;
 	/// Creates a transparency lookup table for a given palette.
 	void createTransparencyLUT(Palette *pal);
 	/// Loads a specified mod content.
-	void loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, ModScript &parsers);
+	void loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, size_t modIdx, ModScript &parsers);
 	/// Loads resources from vanilla.
 	void loadVanillaResources();
 	/// Loads resources from extra rulesets.
@@ -333,7 +334,7 @@ public:
 	int getOffset(int id, int max) const;
 
 	/// Loads a list of mods.
-	void loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods);
+	void loadAll();
 	/// Generates the starting saved game.
 	SavedGame *newSave() const;
 	/// Gets the ruleset for a country type.

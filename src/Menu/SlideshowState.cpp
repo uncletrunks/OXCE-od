@@ -43,7 +43,7 @@ SlideshowState::SlideshowState(const SlideshowHeader &slideshowHeader,
 	{
 		InteractiveSurface *slide =
 			new InteractiveSurface(Screen::ORIGINAL_WIDTH, Screen::ORIGINAL_HEIGHT, 0, 0);
-		slide->loadImage(FileMap::getFilePath(it->imagePath));
+		slide->loadImage(it->imagePath);
 		slide->onMouseClick((ActionHandler)&SlideshowState::screenClick);
 		slide->onKeyboardPress((ActionHandler)&SlideshowState::screenClick, Options::keyOk);
 		slide->onKeyboardPress((ActionHandler)&SlideshowState::screenSkip, Options::keyCancel);

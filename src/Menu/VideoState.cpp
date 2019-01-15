@@ -405,7 +405,7 @@ void VideoState::init()
 	int prevSoundVol = Options::soundVolume;
 	if (_useUfoAudioSequence)
 	{
-		const std::set<std::string> &soundDir = FileMap::getVFolderContents("SOUND");
+		auto soundDir = FileMap::getVFolderContents("SOUND");
 		ufoIntroSoundFileDosExists = soundDir.end() != soundDir.find("intro.cat");
 		ufoIntroSoundFileWinExists = soundDir.end() != soundDir.find("sample3.cat");
 
@@ -437,9 +437,9 @@ void VideoState::init()
 			useInternalAudio = false;
 		}
 		audioCounter++;
-		const std::string& videoFileName = FileMap::getFilePath(*it);
+		const std::string& videoFileName = *it;
 
-		if (!CrossPlatform::fileExists(videoFileName))
+		if (!FileMap::fileExists(videoFileName))
 		{
 			continue;
 		}

@@ -17,12 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
 #include <sstream>
 #include <string>
-#include <stdio.h>
 #include "CrossPlatform.h"
 
 namespace OpenXcom
@@ -39,7 +35,9 @@ enum SeverityLevel
 	LOG_WARNING,	/**< Something weird happened, nothing special but it's good to know. */
 	LOG_INFO,		/**< Useful information for users/developers to help debug and figure stuff out. */
 	LOG_DEBUG,		/**< Purely test stuff to help developers implement, not really relevant to users. */
-	LOG_VERBOSE     /**< Extra details that even developers won't really need 90% of the time. */
+	LOG_VERBOSE,	/**< Extra details that even developers won't really need 90% of the time. */
+
+	LOG_UNCENSORED  /**< Makes sure everything makes it into log buffer until there's a logfile set up */
 };
 
 /**
@@ -50,68 +48,24 @@ enum SeverityLevel
 class Logger
 {
 public:
-	Logger();
-	virtual ~Logger();
-	std::ostringstream& get(SeverityLevel level = LOG_INFO);
-	
-	static SeverityLevel& reportingLevel();
-	static std::string& logFile();
-	static std::string toString(SeverityLevel level);
-protected:
-	std::ostringstream os;
+	Logger() { };
+	virtual ~Logger() { CrossPlatform::log(_level, os); };
+	std::ostringstream& get(SeverityLevel level = LOG_INFO) { _level = level; return os; };
+
+	static SeverityLevel& reportingLevel() {
+		static SeverityLevel reportingLevel = LOG_UNCENSORED;
+		return reportingLevel;
+	};
+	static const std::string& toString(int level) {
+		static const std::string buffer[] = { "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "VERB", "ALL" };
+		return buffer[level];
+	};
 private:
 	Logger(const Logger&);
+	SeverityLevel _level;
+	std::ostringstream os;
 };
 
-inline Logger::Logger()
-{
-}
-
-inline std::ostringstream& Logger::get(SeverityLevel level)
-{
-	os << "[" << toString(level) << "]" << "\t";
-	return os;
-}
-
-inline Logger::~Logger()
-{
-	os << std::endl;
-	std::ostringstream ss;
-	ss << "[" << CrossPlatform::now() << "]" << "\t" << os.str();
-	FILE *file = fopen(logFile().c_str(), "a");
-	if (file)
-	{
-		fprintf(file, "%s", ss.str().c_str());
-		fflush(file);
-		fclose(file);
-	}
-	if (!file || reportingLevel() == LOG_DEBUG || reportingLevel() == LOG_VERBOSE)
-	{
-		fprintf(stderr, "%s", os.str().c_str());
-		fflush(stderr);
-	}
-}
-
-inline SeverityLevel& Logger::reportingLevel()
-{
-	static SeverityLevel reportingLevel = LOG_DEBUG;
-	return reportingLevel;
-}
-
-inline std::string& Logger::logFile()
-{
-	static std::string logFile = "openxcom.log";
-	return logFile;
-}
-
-inline std::string Logger::toString(SeverityLevel level)
-{
-	static const char* const buffer[] = {"FATAL", "ERROR", "WARN", "INFO", "DEBUG", "VERB"};
-	return buffer[level];
-}
-
-#define Log(level) \
-	if (level > Logger::reportingLevel()) ; \
-	else Logger().get(level)
+#define Log(level) if (level > Logger::reportingLevel()) { } else Logger().get(level)
 
 }

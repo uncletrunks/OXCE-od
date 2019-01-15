@@ -19,6 +19,7 @@
 #include <sstream>
 #include <exception>
 #include "version.h"
+#include "Engine/Exception.h"
 #include "Engine/Logger.h"
 #include "Engine/CrossPlatform.h"
 #include "Engine/Game.h"
@@ -107,18 +108,11 @@ int main(int argc, char *argv[])
 #endif
 
 	CrossPlatform::getErrorDialog();
-
-#ifdef _DEBUG
-	Logger::reportingLevel() = LOG_DEBUG;
-#else
-	Logger::reportingLevel() = LOG_INFO;
-#endif
-	if (!Options::init(argc, argv))
+	CrossPlatform::processArgs(argc, argv);
+	if (!Options::init())
 		return EXIT_SUCCESS;
 	std::ostringstream title;
 	title << "OpenXcom " << OPENXCOM_VERSION_SHORT << OPENXCOM_VERSION_GIT;
-	if (Options::verboseLogging)
-		Logger::reportingLevel() = LOG_VERBOSE;
 	Options::baseXResolution = Options::displayWidth;
 	Options::baseYResolution = Options::displayHeight;
 
@@ -132,6 +126,14 @@ int main(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
+namespace OpenXcom
+{
+	Exception::Exception(const std::string &msg) : runtime_error(msg) {
+#ifdef DUMP_CORE
+		__builtin_trap();
+#endif
+	}
+}
 
 #ifdef __MORPHOS__
 const char Version[] = "$VER: OpenXCom " OPENXCOM_VERSION_SHORT " (" __AMIGADATE__  ")";

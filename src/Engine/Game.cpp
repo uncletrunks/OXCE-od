@@ -81,7 +81,7 @@ Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0
 	SDL_WM_GrabInput(Options::captureMouse);
 
 	// Set the window icon
-	CrossPlatform::setWindowIcon(103, FileMap::getFilePath("openxcom.png"));
+	CrossPlatform::setWindowIcon(103, "openxcom.png");
 
 	// Set the window caption
 	SDL_WM_SetCaption(title.c_str(), 0);
@@ -328,7 +328,7 @@ void Game::quit()
 	// Always save ironman
 	if (_save != 0 && _save->isIronman() && !_save->getName().empty())
 	{
-		std::string filename = CrossPlatform::sanitizeFilename(Unicode::convUtf8ToPath(_save->getName())) + ".sav";
+		std::string filename = CrossPlatform::sanitizeFilename(_save->getName()) + ".sav";
 		_save->save(filename, _mod);
 	}
 	_quit = true;
@@ -460,35 +460,24 @@ Language *Game::getLanguage() const
  */
 void Game::loadLanguage(const std::string &filename)
 {
-	const std::string dirLanguage = "/Language/";
-	const std::string dirLanguageAndroid = "/Language/Android/";
-	const std::string dirLanguageOXCE = "/Language/OXCE/";
-	const std::string dirLanguageTechnical = "/Language/Technical/";
+	const std::string dirLanguage = "Language/";
+	const std::string dirLanguageAndroid = "Language/Android/";
+	const std::string dirLanguageOXCE = "Language/OXCE/";
+	const std::string dirLanguageTechnical = "Language/Technical/";
 
-	// Step 1: openxcom "common" strings
-	loadLanguageCommon(filename, dirLanguage, false);
-	loadLanguageCommon(filename, dirLanguageAndroid, true);
-	loadLanguageCommon(filename, dirLanguageOXCE, true);
-	loadLanguageCommon(filename, dirLanguageTechnical, true);
+	// get vertical VFS map slices for the four filenames,
+	// then submit frecs in lockstep to the _lang->load().
 
-	// Step 2: mod strings (note: xcom1 and xcom2 are also "standard" mods)
-	std::vector<const ModInfo*> activeMods = Options::getActiveMods();
-	for (std::vector<const ModInfo*>::const_iterator i = activeMods.begin(); i != activeMods.end(); ++i)
-	{
-		// if a master mod (e.g. piratez) has a master (e.g. xcom1), load it too (even though technically it is not enabled)
-		if ((*i)->isMaster() && (*i)->getMaster().length() > 1)
-		{
-			const ModInfo *masterModInfo = &Options::getModInfos().at((*i)->getMaster());
-			loadLanguageMods(masterModInfo, filename, dirLanguage);
-			loadLanguageMods(masterModInfo, filename, dirLanguageAndroid);
-			loadLanguageMods(masterModInfo, filename, dirLanguageOXCE);
-			loadLanguageMods(masterModInfo, filename, dirLanguageTechnical);
-		}
-		// now load the mod itself
-		loadLanguageMods((*i), filename, dirLanguage);
-		loadLanguageMods((*i), filename, dirLanguageAndroid);
-		loadLanguageMods((*i), filename, dirLanguageOXCE);
-		loadLanguageMods((*i), filename, dirLanguageTechnical);
+	auto slice = FileMap::getSlice(dirLanguage + filename + ".yml");
+	auto sliceAndroid = FileMap::getSlice(dirLanguageAndroid + filename + ".yml");
+	auto sliceOXCE = FileMap::getSlice(dirLanguageOXCE + filename + ".yml");
+	auto sliceTechnical = FileMap::getSlice(dirLanguageTechnical + filename + ".yml");
+
+	for (size_t i = 0; i < slice.size(); ++i) {
+		if (slice[i]) 			{ _lang->load(slice[i]); }
+		if (sliceAndroid[i]) 	{ _lang->load(sliceAndroid[i]); }
+		if (sliceOXCE[i]) 		{ _lang->load(sliceOXCE[i]); }
+		if (sliceTechnical[i]) 	{ _lang->load(sliceTechnical[i]); }
 	}
 
 	// Step 3: mod extra-strings (from all mods at once)
@@ -497,36 +486,6 @@ void Game::loadLanguage(const std::string &filename)
 	if (it != extraStrings.end())
 	{
 		_lang->load(it->second);
-	}
-}
-
-void Game::loadLanguageCommon(const std::string &filename, const std::string &directory, bool checkIfExists)
-{
-	std::ostringstream ss;
-	ss << directory << filename << ".yml";
-	std::string path = CrossPlatform::searchDataFile("common" + ss.str());
-	try
-	{
-		if (checkIfExists && !CrossPlatform::fileExists(path))
-		{
-			return;
-		}
-		_lang->load(path);
-	}
-	catch (YAML::Exception &e)
-	{
-		throw Exception(path + ": " + std::string(e.what()));
-	}
-}
-
-void Game::loadLanguageMods(const ModInfo *modInfo, const std::string &filename, const std::string &directory)
-{
-	std::ostringstream ss;
-	ss << directory << filename << ".yml";
-	std::string file = modInfo->getPath() + ss.str();
-	if (CrossPlatform::fileExists(file))
-	{
-		_lang->load(file);
 	}
 }
 
@@ -566,7 +525,7 @@ void Game::loadMods()
 	Mod::resetGlobalStatics();
 	delete _mod;
 	_mod = new Mod();
-	_mod->loadAll(FileMap::getRulesets());
+	_mod->loadAll();
 }
 
 /**
@@ -612,27 +571,20 @@ void Game::loadLanguages()
 	delete _lang;
 	_lang = new Language();
 
-	std::ostringstream ss;
-	ss << "common/Language/" << defaultLang << ".yml";
-	std::string defaultPath = CrossPlatform::searchDataFile(ss.str());
-	std::string path = defaultPath;
-
 	// No language set, detect based on system
 	if (Options::language.empty())
 	{
 		std::string locale = CrossPlatform::getLocale();
 		std::string lang = locale.substr(0, locale.find_first_of('-'));
 		// Try to load full locale
-		Unicode::replace(path, defaultLang, locale);
-		if (CrossPlatform::fileExists(path))
+		if (FileMap::fileExists("Language/" + locale + ".yml"))
 		{
 			currentLang = locale;
 		}
 		else
 		{
 			// Try to load language locale
-			Unicode::replace(path, locale, lang);
-			if (CrossPlatform::fileExists(path))
+			if (FileMap::fileExists("Language/" + lang + ".yml"))
 			{
 				currentLang = lang;
 			}
@@ -646,8 +598,7 @@ void Game::loadLanguages()
 	else
 	{
 		// Use options language
-		Unicode::replace(path, defaultLang, Options::language);
-		if (CrossPlatform::fileExists(path))
+		if (FileMap::fileExists("Language/" + Options::language + ".yml"))
 		{
 			currentLang = Options::language;
 		}

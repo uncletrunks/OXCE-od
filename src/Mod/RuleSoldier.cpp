@@ -161,8 +161,8 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 			if (fileName[fileName.length() - 1] == '/')
 			{
 				// load all *.nam files in given directory
-				std::set<std::string> names = FileMap::filterFiles(FileMap::getVFolderContents(fileName), "nam");
-				for (std::set<std::string>::iterator j = names.begin(); j != names.end(); ++j)
+				auto names = FileMap::filterFiles(FileMap::getVFolderContents(fileName), "nam");
+				for (auto j = names.begin(); j != names.end(); ++j)
 				{
 					addSoldierNamePool(fileName + *j);
 				}
@@ -208,7 +208,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 void RuleSoldier::addSoldierNamePool(const std::string &namFile)
 {
 	SoldierNamePool *pool = new SoldierNamePool();
-	pool->load(FileMap::getFilePath(namFile));
+	pool->load(namFile);
 	_names.push_back(pool);
 }
 

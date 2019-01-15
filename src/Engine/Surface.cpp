@@ -19,7 +19,6 @@
 #include "Surface.h"
 #include "ShaderDraw.h"
 #include <vector>
-#include <fstream>
 #include <algorithm>
 #include <SDL_gfxPrimitives.h>
 #include <SDL_image.h>
@@ -31,6 +30,8 @@
 #include "ShaderMove.h"
 #include "Unicode.h"
 #include <stdlib.h>
+#include "SDL2Helpers.h"
+#include "FileMap.h"
 #ifdef _WIN32
 #include <malloc.h>
 #endif
@@ -346,19 +347,13 @@ void Surface::loadRaw(const std::vector<char> &bytes)
  * @param filename Filename of the SCR image.
  * @sa http://www.ufopaedia.org/index.php?title=Image_Formats#SCR_.26_DAT
  */
-void Surface::loadScr(const std::string &filename)
+void Surface::loadScr(const std::string& filename)
 {
 	// Load file and put pixels in surface
-	std::ifstream imgFile(filename.c_str(), std::ios::binary);
-	if (!imgFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
-	std::vector<char> buffer((std::istreambuf_iterator<char>(imgFile)), (std::istreambuf_iterator<char>()));
+	auto istream = FileMap::getIStream(filename);
+	std::vector<char> buffer((std::istreambuf_iterator<char>(*(istream))), (std::istreambuf_iterator<char>()));
 	loadRaw(buffer);
 }
-
 /**
  * Loads the contents of an image file of a
  * known format into the surface.
@@ -371,19 +366,25 @@ void Surface::loadImage(const std::string &filename)
 	_surface = nullptr;
 
 	Log(LOG_VERBOSE) << "Loading image: " << filename;
+	auto rw = FileMap::getRWops(filename);
+	if (!rw) { return; } // relevant message gets logged in FileMap.
 
 	// Try loading with LodePNG first
 	if (CrossPlatform::compareExt(filename, "png"))
 	{
-		std::vector<unsigned char> png;
-		unsigned error = lodepng::load_file(png, filename);
-		if (!error)
+		size_t size;
+		void *data = SDL_LoadFile_RW(rw, &size, SDL_TRUE);
+		if ((data != NULL) && (size > 8 + 12 + 12)) // minimal PNG file size: header and two empty chunks
 		{
+			std::vector<unsigned char> png;
+			png.resize(size);
+			memcpy(&png[0], data, size);
+
 			std::vector<unsigned char> image;
 			unsigned width, height;
 			lodepng::State state;
 			state.decoder.color_convert = 0;
-			error = lodepng::decode(image, width, height, state, png);
+			unsigned error = lodepng::decode(image, width, height, state, png);
 			if (!error)
 			{
 				LodePNGColorMode *color = &state.info_png.color;
@@ -417,15 +418,17 @@ void Surface::loadImage(const std::string &filename)
 						Log(LOG_WARNING) << "Image " << filename << " (from lodepng) have set incorrect transparent color index " << transparent << " instead of 0";
 					}
 				}
+			} else {
+				Log(LOG_ERROR) << "lodepng failed:" << lodepng_error_text(error);
 			}
 		}
+		if (data) { SDL_free(data); }
 	}
-
 	// Otherwise default to SDL_Image
 	if (!_surface)
 	{
-		std::string utf8 = Unicode::convPathToUtf8(filename);
-		auto surface = NewSdlSurface(IMG_Load(utf8.c_str()));
+		SDL_RWseek(rw, RW_SEEK_SET, 0); // rewind in case .png was no PNG at all
+		auto surface = NewSdlSurface(IMG_Load_RW(rw, SDL_TRUE));
 		if (!surface)
 		{
 			std::string err = filename + ":" + IMG_GetError();
@@ -455,53 +458,27 @@ void Surface::loadImage(const std::string &filename)
  * @param filename Filename of the SPK image.
  * @sa http://www.ufopaedia.org/index.php?title=Image_Formats#SPK
  */
-void Surface::loadSpk(const std::string &filename)
+void Surface::loadSpk(const std::string& filename)
 {
-	// Load file and put pixels in surface
-	std::ifstream imgFile (filename.c_str(), std::ios::in | std::ios::binary);
-	if (!imgFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
+	Uint16 flag;
+	int x = 0, y = 0;
+	auto rw = FileMap::getRWops(filename);
+	auto rwsize = SDL_RWsize(rw);
 	// Lock the surface
 	lock();
-
-	Uint16 flag;
-	Uint8 value;
-	int x = 0, y = 0;
-
-	while (imgFile.read((char*)&flag, sizeof(flag)))
-	{
-		flag = SDL_SwapLE16(flag);
-
-		if (flag == 65535)
-		{
-			imgFile.read((char*)&flag, sizeof(flag));
-			flag = SDL_SwapLE16(flag);
-
-			for (int i = 0; i < flag * 2; ++i)
-			{
-				setPixelIterative(&x, &y, 0);
-			}
-		}
-		else if (flag == 65534)
-		{
-			imgFile.read((char*)&flag, sizeof(flag));
-			flag = SDL_SwapLE16(flag);
-
-			for (int i = 0; i < flag * 2; ++i)
-			{
-				imgFile.read((char*)&value, 1);
-				setPixelIterative(&x, &y, value);
-			}
+	while(SDL_RWtell(rw) < rwsize - 1) {
+		flag = SDL_ReadLE16(rw);
+		if (flag == 65535) {
+			flag = SDL_ReadLE16(rw);
+			for (int i = 0; i < flag * 2; ++i) { setPixelIterative(&x, &y, 0); }
+		} else if (flag == 65534) {
+			flag = SDL_ReadLE16(rw);
+			for (int i = 0; i < flag * 2; ++i) { setPixelIterative(&x, &y, SDL_ReadU8(rw)); }
 		}
 	}
-
 	// Unlock the surface
 	unlock();
-
-	imgFile.close();
+	SDL_RWclose(rw);
 }
 
 /**
@@ -513,27 +490,20 @@ void Surface::loadSpk(const std::string &filename)
  */
 void Surface::loadBdy(const std::string &filename)
 {
-	// Load file and put pixels in surface
-	std::ifstream imgFile (filename.c_str(), std::ios::in | std::ios::binary);
-	if (!imgFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
-	// Lock the surface
-	lock();
-
 	Uint8 dataByte;
 	int pixelCnt;
 	int x = 0, y = 0;
 	int currentRow = 0;
-
-	while (imgFile.read((char*)&dataByte, sizeof(dataByte)))
-	{
+	auto rw = FileMap::getRWops(filename);
+	auto rwsize = SDL_RWsize(rw);
+	// Lock the surface
+	lock();
+	while (SDL_RWtell(rw) < rwsize) {
+		dataByte = SDL_ReadU8(rw);
 		if (dataByte >= 129)
 		{
 			pixelCnt = 257 - (int)dataByte;
-			imgFile.read((char*)&dataByte, sizeof(dataByte));
+			dataByte = SDL_ReadU8(rw);
 			currentRow = y;
 			for (int i = 0; i < pixelCnt; ++i)
 			{
@@ -548,17 +518,15 @@ void Surface::loadBdy(const std::string &filename)
 			currentRow = y;
 			for (int i = 0; i < pixelCnt; ++i)
 			{
-				imgFile.read((char*)&dataByte, sizeof(dataByte));
+				dataByte = SDL_ReadU8(rw);
 				if (currentRow == y) // avoid overscan into next row
 					setPixelIterative(&x, &y, dataByte);
 			}
 		}
 	}
-
 	// Unlock the surface
 	unlock();
-
-	imgFile.close();
+	SDL_RWclose(rw);
 }
 
 /**

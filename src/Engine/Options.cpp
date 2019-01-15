@@ -22,11 +22,10 @@
 #include <SDL.h>
 #include <SDL_keysym.h>
 #include <SDL_mixer.h>
-#include <stdio.h>
-#include <iostream>
 #include <map>
+#include <unordered_map>
 #include <sstream>
-#include <fstream>
+#include <iostream>
 #include <algorithm>
 #include <yaml-cpp/yaml.h>
 #include "Exception.h"
@@ -51,7 +50,7 @@ std::string _configFolder;
 std::vector<std::string> _userList;
 std::map<std::string, std::string> _commandLine;
 std::vector<OptionInfo> _info;
-std::map<std::string, ModInfo> _modInfos;
+std::unordered_map<std::string, ModInfo> _modInfos;
 std::string _masterMod;
 bool _loadLastSave = false;
 bool _loadLastSaveExpended = false;
@@ -78,6 +77,7 @@ void create()
 	_info.push_back(OptionInfo("maxFrameSkip", &maxFrameSkip, 0));
 	_info.push_back(OptionInfo("traceAI", &traceAI, false));
 	_info.push_back(OptionInfo("verboseLogging", &verboseLogging, false));
+	_info.push_back(OptionInfo("listVFSContents", &listVFSContents, false));
 	_info.push_back(OptionInfo("StereoSound", &StereoSound, true));
 	//_info.push_back(OptionInfo("baseXResolution", &baseXResolution, Screen::ORIGINAL_WIDTH));
 	//_info.push_back(OptionInfo("baseYResolution", &baseYResolution, Screen::ORIGINAL_HEIGHT));
@@ -353,9 +353,13 @@ static bool _gameIsInstalled(const std::string &gameName)
 {
 	// look for game data in either the data or user directorie
 	std::string dataGameFolder = CrossPlatform::searchDataFolder(gameName);
+	std::string dataGameZipFile = CrossPlatform::searchDataFile(gameName + ".zip");
 	std::string userGameFolder = _userFolder + gameName;
+	std::string userGameZipFile = _userFolder + gameName + ".zip";
 	return (CrossPlatform::folderExists(dataGameFolder)	&& CrossPlatform::getFolderContents(dataGameFolder).size() > 8)
-	    || (CrossPlatform::folderExists(userGameFolder)	&& CrossPlatform::getFolderContents(userGameFolder).size() > 8);
+	    || (CrossPlatform::folderExists(userGameFolder)	&& CrossPlatform::getFolderContents(userGameFolder).size() > 8)
+		||  CrossPlatform::fileExists( dataGameZipFile )
+		||  CrossPlatform::fileExists( userGameZipFile );
 }
 
 static bool _ufoIsInstalled()
@@ -406,12 +410,13 @@ void resetDefault()
  * @param argc Number of arguments.
  * @param argv Array of argument strings.
  */
-void loadArgs(int argc, char *argv[])
+static void loadArgs()
 {
-	for (int i = 1; i < argc; ++i)
+	auto argv = CrossPlatform::getArgs();
+	for (size_t i = 1; i < argv.size(); ++i)
 	{
-		std::string arg = argv[i];
-		if ((arg[0] == '-' || arg[0] == '/') && arg.length() > 1)
+		auto arg = argv[i];
+		if (arg.size() > 1 && arg[0] == '-')
 		{
 			std::string argname;
 			if (arg[1] == '-' && arg.length() > 2)
@@ -424,21 +429,30 @@ void loadArgs(int argc, char *argv[])
 				_loadLastSave = true;
 				continue;
 			}
-			if (argc > i + 1)
+			if (argv.size() > i + 1)
 			{
 				++i; // we'll be consuming the next argument too
-
+				Log(LOG_DEBUG) << "loadArgs(): "<< argname <<" -> " << argv[i];
 				if (argname == "data")
 				{
-					_dataFolder = CrossPlatform::endPath(argv[i]);
+					_dataFolder = argv[i];
+					if (_dataFolder.size() > 1 && _dataFolder[_dataFolder.size() - 1] != '/') {
+						_dataFolder.push_back('/');
+					}
 				}
 				else if (argname == "user")
 				{
-					_userFolder = CrossPlatform::endPath(argv[i]);
+					_userFolder = argv[i];
+					if (_userFolder.size() > 1 && _userFolder[_userFolder.size() - 1] != '/') {
+						_userFolder.push_back('/');
+					}
 				}
 				else if (argname == "cfg" || argname == "config")
 				{
-					_configFolder = CrossPlatform::endPath(argv[i]);
+					_configFolder = argv[i];
+					if (_configFolder.size() > 1 && _configFolder[_configFolder.size() - 1] != '/') {
+						_configFolder.push_back('/');
+					}
 				}
 				else
 				{
@@ -459,7 +473,7 @@ void loadArgs(int argc, char *argv[])
  * @param argc Number of arguments.
  * @param argv Array of argument strings.
  */
-bool showHelp(int argc, char *argv[])
+static bool showHelp()
 {
 	std::ostringstream help;
 	help << "OpenXcom v" << OPENXCOM_VERSION_SHORT << std::endl;
@@ -475,9 +489,8 @@ bool showHelp(int argc, char *argv[])
 	help << "-help" << std::endl;
 	help << "-?" << std::endl;
 	help << "        show command-line help" << std::endl;
-	for (int i = 1; i < argc; ++i)
+	for (auto arg: CrossPlatform::getArgs())
 	{
-		std::string arg = argv[i];
 		if ((arg[0] == '-' || arg[0] == '/') && arg.length() > 1)
 		{
 			std::string argname;
@@ -496,61 +509,23 @@ bool showHelp(int argc, char *argv[])
 	return false;
 }
 
-const std::map<std::string, ModInfo> &getModInfos() { return _modInfos; }
+const std::unordered_map<std::string, ModInfo> &getModInfos() { return _modInfos; }
 
-static void _scanMods(const std::string &modsDir)
+/**
+ * Splits the game's User folder by master mod,
+ * creating a subfolder for each one.
+ * Moving the saves from userFolder into subfolders
+ * has been removed.
+ */
+static void userSplitMasters()
 {
-	if (!CrossPlatform::folderExists(modsDir))
-	{
-		Log(LOG_VERBOSE) << "skipping non-existent mod directory: '" << modsDir << "'";
-		return;
-	}
-
-	std::vector<std::string> contents = CrossPlatform::getFolderContents(modsDir);
-	for (std::vector<std::string>::iterator i = contents.begin(); i != contents.end(); ++i)
-	{
-		std::string modPath = modsDir + CrossPlatform::PATH_SEPARATOR + *i;
-		if (!CrossPlatform::folderExists(modPath))
-		{
-			// skip non-directories (e.g. README.txt)
-			continue;
+	for (auto i : _modInfos) {
+		if (i.second.isMaster()) {
+			std::string masterFolder = _userFolder + i.first;
+			if (!CrossPlatform::folderExists(masterFolder)) {
+				CrossPlatform::createFolder(masterFolder);
+			}
 		}
-
-		Log(LOG_VERBOSE) << "- " << modPath;
-		ModInfo modInfo(modPath);
-
-		std::string metadataPath = modPath + "/metadata.yml";
-		if (!CrossPlatform::fileExists(metadataPath))
-		{
-			Log(LOG_VERBOSE) << metadataPath << " not found; using default values for mod: " << *i;
-		}
-		else
-		{
-			modInfo.load(metadataPath);
-		}
-
-		Log(LOG_VERBOSE) << "  id: " << modInfo.getId();
-		Log(LOG_VERBOSE) << "  name: " << modInfo.getName();
-		Log(LOG_VERBOSE) << "  version: " << modInfo.getVersion();
-		Log(LOG_VERBOSE) << "  description: " << modInfo.getDescription();
-		Log(LOG_VERBOSE) << "  author: " << modInfo.getAuthor();
-		Log(LOG_VERBOSE) << "  master: " << modInfo.getMaster();
-		Log(LOG_VERBOSE) << "  isMaster: " << modInfo.isMaster();
-		Log(LOG_VERBOSE) << "  loadResources:";
-		std::vector<std::string> externals = modInfo.getExternalResourceDirs();
-		for (std::vector<std::string>::iterator j = externals.begin(); j != externals.end(); ++j)
-		{
-			Log(LOG_VERBOSE) << "    " << *j;
-		}
-
-		if (("xcom1" == modInfo.getId() && !_ufoIsInstalled())
-		 || ("xcom2" == modInfo.getId() && !_tftdIsInstalled()))
-		{
-			Log(LOG_VERBOSE) << "skipping " << modInfo.getId() << " since related game data isn't installed";
-			continue;
-		}
-
-		_modInfos.insert(std::pair<std::string, ModInfo>(modInfo.getId(), modInfo));
 	}
 }
 
@@ -561,38 +536,41 @@ static void _scanMods(const std::string &modsDir)
  * @param argv Array of argument strings.
  * @return Do we start the game?
  */
-bool init(int argc, char *argv[])
+bool init()
 {
-	if (showHelp(argc, argv))
+	if (showHelp())
 		return false;
 	create();
 	resetDefault();
-	loadArgs(argc, argv);
+	loadArgs();
 	setFolders();
 	_setDefaultMods();
 	updateOptions();
 
-	std::string s = getUserFolder();
-	s += "openxcom.log";
-	Logger::logFile() = s;
-	FILE *file = fopen(Logger::logFile().c_str(), "w");
-	if (file)
-	{
-		fflush(file);
-		fclose(file);
-	}
-	else
-	{
-		Log(LOG_WARNING) << "Couldn't create log file, switching to stderr";
-	}
+	// set up the logging reportingLevel
+#ifdef _DEBUG
+	Logger::reportingLevel() = LOG_DEBUG;
+#else
+	Logger::reportingLevel() = LOG_INFO;
+#endif
+
+	if (Options::verboseLogging)
+		Logger::reportingLevel() = LOG_VERBOSE;
+
+	// this enables writes to the log file and filters already emitted messages
+	CrossPlatform::setLogFileName(getUserFolder() + "openxcom.log");
 
 	Log(LOG_INFO) << "OpenXcom Version: " << OPENXCOM_VERSION_SHORT << OPENXCOM_VERSION_GIT;
-#ifdef _WIN32
-	Log(LOG_INFO) << "Platform: Windows";
+#ifdef _WIN64
+	Log(LOG_INFO) << "Platform: Windows 64 bit";
+#elif _WIN32
+	Log(LOG_INFO) << "Platform: Windows 32 bit";
 #elif __APPLE__
 	Log(LOG_INFO) << "Platform: OSX";
 #elif  __ANDROID_API__
 	Log(LOG_INFO) << "Platform: Android";
+#elif __linux__
+	Log(LOG_INFO) << "Platform: Linux";
 #else
 	Log(LOG_INFO) << "Platform: Unix-like";
 #endif
@@ -607,28 +585,32 @@ bool init(int argc, char *argv[])
 	Log(LOG_INFO) << "Config folder is: " << _configFolder;
 	Log(LOG_INFO) << "Options loaded successfully.";
 
+	FileMap::clear();
 	return true;
 }
 
+// called from the dos screen state (StartState)
 void updateMods()
 {
-	// pick up stuff in common before-hand
-	FileMap::load("common", CrossPlatform::searchDataFolder("common"), true);
+	FileMap::clear();
+	Log(LOG_INFO) << "Scanning standard mods in '" << getDataFolder() << "'...";
+	FileMap::scanModDir(getDataFolder(), "standard");
+	Log(LOG_INFO) << "Scanning user mods in '" << getUserFolder() << "'...";
+	FileMap::scanModDir(getUserFolder(), "mods");
 
-	std::string modPath = CrossPlatform::searchDataFolder("standard");
-	Log(LOG_INFO) << "Scanning standard mods in '" << modPath << "'...";
-	_scanMods(modPath);
-	modPath = _userFolder + "mods";
-	Log(LOG_INFO) << "Scanning user mods in '" << modPath << "'...";
-	_scanMods(modPath);
+	// Check mods' dependencies on other mods and extResources (UFO, TFTD, etc),
+	// also breaks circular dependency loops.
+	FileMap::checkModsDependencies();
+
+	// Now we can get the list of ModInfos from the FileMap -
+	// those are the mods that can possibly be loaded.
+	_modInfos = FileMap::getModInfos();
 
 	// remove mods from list that no longer exist
-	for (std::vector< std::pair<std::string, bool> >::iterator i = mods.begin(); i != mods.end(); )
+	for (auto i = mods.begin(); i != mods.end();)
 	{
-		std::map<std::string, ModInfo>::const_iterator modIt = _modInfos.find(i->first);
-		if (_modInfos.end() == modIt
-			|| (i->first == "xcom1" && !_ufoIsInstalled())
-			|| (i->first == "xcom2" && !_tftdIsInstalled()))
+		auto modIt = _modInfos.find(i->first);
+		if (_modInfos.end() == modIt)
 		{
 			Log(LOG_VERBOSE) << "removing references to missing mod: " << i->first;
 			i = mods.erase(i);
@@ -641,7 +623,7 @@ void updateMods()
 	// master active
 	std::string activeMaster;
 	std::string inactiveMaster;
-	for (std::map<std::string, ModInfo>::const_iterator i = _modInfos.begin(); i != _modInfos.end(); ++i)
+	for (auto i = _modInfos.cbegin(); i != _modInfos.cend(); ++i)
 	{
 		bool found = false;
 		for (std::vector< std::pair<std::string, bool> >::iterator j = mods.begin(); j != mods.end(); ++j)
@@ -655,7 +637,7 @@ void updateMods()
 					{
 						if (!activeMaster.empty())
 						{
-							Log(LOG_WARNING) << "too many active masters detected; turning off " << j->first;
+							Log(LOG_WARNING) << "Too many active masters detected; turning off " << j->first;
 							j->second = false;
 						}
 						else
@@ -721,7 +703,7 @@ void updateMods()
 	}
 
 	updateReservedSpace();
-	mapResources();
+	FileMap::setup(getActiveMods());
 	userSplitMasters();
 }
 
@@ -744,48 +726,6 @@ void expendLoadLastSave()
 	_loadLastSaveExpended = true;
 }
 
-static void _loadMod(const ModInfo &modInfo, std::set<std::string> circDepCheck)
-{
-	if (circDepCheck.end() != circDepCheck.find(modInfo.getId()))
-	{
-		Log(LOG_WARNING) << "circular dependency found in master chain: " << modInfo.getId();
-		return;
-	}
-
-	FileMap::load(modInfo.getId(), modInfo.getPath(), false);
-	for (std::vector<std::string>::const_iterator i = modInfo.getExternalResourceDirs().begin(); i != modInfo.getExternalResourceDirs().end(); ++i)
-	{
-		// use external resource folders from the user dir if they exist
-		// and if not, fall back to searching the data dir
-		std::string extResourceFolder = _userFolder + *i;
-		if (!CrossPlatform::folderExists(extResourceFolder))
-		{
-			extResourceFolder = CrossPlatform::searchDataFolder(*i);
-		}
-
-		// always ignore ruleset files in external resource dir
-		FileMap::load(modInfo.getId(), extResourceFolder, true);
-	}
-
-	// if this is a master but it has a master of its own, allow it to
-	// chainload the "super" master, including its ruleset
-	if (modInfo.isMaster() && !modInfo.getMaster().empty())
-	{
-		// add self to circDepCheck so we can avoid circular dependencie
-		circDepCheck.insert(modInfo.getId());
-		std::map<std::string, ModInfo>::const_iterator it = _modInfos.find(modInfo.getMaster());
-		if (it != _modInfos.end())
-		{
-			const ModInfo &masterInfo = it->second;
-			_loadMod(masterInfo, circDepCheck);
-		}
-		else
-		{
-			throw Exception(modInfo.getId() + " mod requires " + modInfo.getMaster() + " master");
-		}
-	}
-}
-
 void updateReservedSpace()
 {
 	Log(LOG_VERBOSE) << "Updating reservedSpace for master mods if necessary...";
@@ -793,7 +733,7 @@ void updateReservedSpace()
 	Log(LOG_VERBOSE) << "_masterMod = " << _masterMod;
 
 	int maxSize = 1;
-	for (std::vector< std::pair<std::string, bool> >::reverse_iterator i = mods.rbegin(); i != mods.rend(); ++i)
+	for (auto i = mods.rbegin(); i != mods.rend(); ++i)
 	{
 		if (!i->second)
 		{
@@ -819,7 +759,7 @@ void updateReservedSpace()
 		// Small hack: update ALL masters, not only active master!
 		// this is because, there can be a hierarchy of multiple masters (e.g. xcom1 master > fluffyUnicorns master > some fluffyUnicorns mod)
 		// and the one that needs to be updated is actually the "root", i.e. xcom1 master
-		for (std::map<std::string, ModInfo>::iterator i = _modInfos.begin(); i != _modInfos.end(); ++i)
+		for (auto i = _modInfos.begin(); i != _modInfos.end(); ++i)
 		{
 			if (i->second.isMaster())
 			{
@@ -837,34 +777,6 @@ void updateReservedSpace()
 	}
 }
 
-void mapResources()
-{
-	Log(LOG_INFO) << "Mapping resource files...";
-	FileMap::clear();
-
-	for (std::vector< std::pair<std::string, bool> >::reverse_iterator i = mods.rbegin(); i != mods.rend(); ++i)
-	{
-		if (!i->second)
-		{
-			Log(LOG_VERBOSE) << "skipping inactive mod: " << i->first;
-			continue;
-		}
-
-		const ModInfo &modInfo = _modInfos.find(i->first)->second;
-		if (!modInfo.canActivate(_masterMod))
-		{
-			Log(LOG_VERBOSE) << "skipping mod for non-current master: " << i->first << "(" << modInfo.getMaster() << " != " << _masterMod << ")";
-			continue;
-		}
-
-		std::set<std::string> circDepCheck;
-		_loadMod(modInfo, circDepCheck);
-	}
-	// TODO: Figure out why we still need to check common here
-	FileMap::load("common", CrossPlatform::searchDataFolder("common"), true);
-	Log(LOG_INFO) << "Resources files mapped successfully.";
-}
-
 /**
  * Sets up the game's Data folder where the data file
  * are loaded from and the User folder and Config
@@ -876,6 +788,7 @@ void setFolders()
 	if (!_dataFolder.empty())
 	{
 		_dataList.insert(_dataList.begin(), _dataFolder);
+		Log(LOG_DEBUG) << "setFolders(): inserting " << _dataFolder;
 	}
 	if (_userFolder.empty())
 	{
@@ -922,58 +835,6 @@ void setFolders()
 }
 
 /**
- * Splits the game's User folder by master mod,
- * creating a subfolder for each one and moving
- * the apppropriate user data among them.
- */
-void userSplitMasters()
-{
-	// get list of master mods
-	std::vector<std::string> masters;
-	for (std::map<std::string, ModInfo>::const_iterator i = _modInfos.begin(); i != _modInfos.end(); ++i)
-	{
-		if (i->second.isMaster())
-		{
-			masters.push_back(i->first);
-		}
-	}
-
-	// create master subfolders if they don't already exist
-	std::vector<std::string> saves;
-	for (std::vector<std::string>::const_iterator i = masters.begin(); i != masters.end(); ++i)
-	{
-		std::string masterFolder = _userFolder + (*i);
-		if (!CrossPlatform::folderExists(masterFolder))
-		{
-			CrossPlatform::createFolder(masterFolder);
-			// move any old saves to the appropriate folder
-			if (saves.empty())
-			{
-				saves = CrossPlatform::getFolderContents(_userFolder, "sav");
-				std::vector<std::string> autosaves = CrossPlatform::getFolderContents(_userFolder, "asav");
-				saves.insert(saves.end(), autosaves.begin(), autosaves.end());
-			}
-			for (std::vector<std::string>::iterator j = saves.begin(); j != saves.end();)
-			{
-				std::string srcFile = _userFolder + (*j);
-				YAML::Node doc = YAML::LoadFile(srcFile);
-				std::vector<std::string> srcMods = doc["mods"].as<std::vector< std::string> >(std::vector<std::string>());
-				if (std::find(srcMods.begin(), srcMods.end(), (*i)) != srcMods.end())
-				{
-					std::string dstFile = masterFolder + CrossPlatform::PATH_SEPARATOR + (*j);
-					CrossPlatform::moveFile(srcFile, dstFile);
-					j = saves.erase(j);
-				}
-				else
-				{
-					++j;
-				}
-			}
-		}
-	}
-}
-
-/**
  * Updates the game's options with those in the configuration
  * file, if it exists yet, and any supplied on the command line.
  */
@@ -1016,7 +877,7 @@ bool load(const std::string &filename)
 	std::string s = _configFolder + filename + ".cfg";
 	try
 	{
-		YAML::Node doc = YAML::LoadFile(s);
+		YAML::Node doc = YAML::Load(*CrossPlatform::readFile(s));
 		// Ignore old options file
 		if (doc["options"]["NewBattleMission"])
 		{
@@ -1100,17 +961,9 @@ void writeNode(const YAML::Node& node, YAML::Emitter& emitter)
  */
 bool save(const std::string &filename)
 {
-	std::string s = _configFolder + filename + ".cfg";
-	std::ofstream sav(s.c_str());
-	if (!sav)
-	{
-		Log(LOG_WARNING) << "Failed to save " << filename << ".cfg";
-		return false;
-	}
+	YAML::Emitter out;
 	try
 	{
-		YAML::Emitter out;
-
 		YAML::Node doc, node;
 		for (std::vector<OptionInfo>::iterator i = _info.begin(); i != _info.end(); ++i)
 		{
@@ -1127,18 +980,18 @@ bool save(const std::string &filename)
 		}
 
 		writeNode(doc, out);
-
-		sav << out.c_str() << std::endl;
 	}
 	catch (YAML::Exception &e)
 	{
 		Log(LOG_WARNING) << e.what();
 		return false;
 	}
-	sav.close();
-	if (!sav)
+	std::string filepath = _configFolder + filename + ".cfg";
+	std::string data(out.c_str());
+
+	if (!CrossPlatform::writeFile(filepath, data + "\n" ))
 	{
-		Log(LOG_WARNING) << "Failed to save " << filename << ".cfg";
+		Log(LOG_WARNING) << "Failed to save " << filepath;
 		return false;
 	}
 	return true;
@@ -1162,6 +1015,7 @@ std::string getDataFolder()
 void setDataFolder(const std::string &folder)
 {
 	_dataFolder = folder;
+	Log(LOG_DEBUG) << "setDataFolder(" << folder <<");";
 }
 
 /**
@@ -1201,7 +1055,7 @@ std::string getConfigFolder()
  */
 std::string getMasterUserFolder()
 {
-	return _userFolder + _masterMod + CrossPlatform::PATH_SEPARATOR;
+	return _userFolder + _masterMod + "/";
 }
 
 /**

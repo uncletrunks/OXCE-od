@@ -32,7 +32,7 @@ class GMCatFile : public CatFile
 {
 public:
 	/// Inherit constructor.
-	GMCatFile(const char *path) : CatFile(path) { }
+	GMCatFile(const std::string& filename) : CatFile(filename) { }
 	/// Loads a stream as a MIDI file.
 	Music *loadMIDI(unsigned int i);
 };

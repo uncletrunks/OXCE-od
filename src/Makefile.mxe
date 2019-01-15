@@ -35,6 +35,7 @@ PATH := $(MXE_DIR)/usr/bin:$(PATH)
 OBJDIR = ../obj/
 BINDIR = ../bin/
 SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp)
+CXXOPT ?= -O3
 
 # if YAML_DIR is set, use the supplied yaml-cpp, else MXE yaml-cpp
 ifneq ($(strip $(YAML_DIR)),)
@@ -56,7 +57,7 @@ else
 endif
 
 OBJRES = ../obj/OpenXcom_res.o
-OBJS = $(OBJRES) $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS)))
+OBJS = $(OBJRES) $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) ../obj/miniz.o
 RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/openxcomex.ico
 
 # Arch-specific settings
@@ -67,7 +68,7 @@ PKG_CONFIG = $(ARCH)-pkg-config
 SDL_CONFIG = $(ARCH)-sdl-config
 
 # Compiler settings
-CXXFLAGS += -Wall -g $(CC_LTO) -O3 -femit-struct-debug-reduced -std=gnu++11 -I$(YAML_INC) \
+CXXFLAGS += -Wall -g $(CC_LTO) $(CXXOPT) -femit-struct-debug-reduced -std=gnu++11 -I$(YAML_INC) \
 	`$(SDL_CONFIG) --cflags` `$(PKG_CONFIG) SDL_mixer --cflags ` `$(PKG_CONFIG) SDL_gfx --cflags`
 
 LDFLAGS = $(LD_LTO) `$(SDL_CONFIG) --libs` $(YAML_LIB) -lopengl32 -lshlwapi `$(PKG_CONFIG) SDL_gfx --libs` \
@@ -120,6 +121,9 @@ $(OBJDIR)%.o:: $(YAML_DIR)/src/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJDIR)%.o:: $(YAML_DIR)/src/contrib/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+../obj/miniz.o: ../libs/miniz/miniz.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJRES):$(RES)

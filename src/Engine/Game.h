@@ -56,8 +56,6 @@ private:
 
 	/// Loads a new language for the game.
 	void loadLanguage(const std::string &filename);
-	void loadLanguageCommon(const std::string &filename, const std::string &directory, bool checkIfExists);
-	void loadLanguageMods(const ModInfo *modInfo, const std::string &filename, const std::string &directory);
 public:
 	/// Creates a new game and initializes SDL.
 	Game(const std::string &title);

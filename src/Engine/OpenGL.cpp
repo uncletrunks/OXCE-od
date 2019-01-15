@@ -13,11 +13,11 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <yaml-cpp/yaml.h>
-#include <fstream>
 
 #include "OpenGL.h"
 #include "Logger.h"
 #include "Surface.h"
+#include "FileMap.h"
 
 namespace OpenXcom
 {
@@ -262,9 +262,8 @@ bool OpenGL::set_shader(const char *source_yaml_filename)
 			Log(LOG_ERROR) << "Failed to create GLSL shader program";
 			return false;
 		}
-		try
 		{
-			YAML::Node document = YAML::LoadFile(source_yaml_filename);
+			auto document = FileMap::getYAML(source_yaml_filename);
 
 			bool is_glsl;
 			std::string language = document["language"].as<std::string>();
@@ -286,14 +285,6 @@ bool OpenGL::set_shader(const char *source_yaml_filename)
 					document["language"].as<std::string>() << "\"";
 			}
 		}
-		catch (YAML::Exception &e)
-		{
-			Log(LOG_ERROR) << source_yaml_filename << ": " << e.what();
-			glDeleteProgram(glprogram);
-			glprogram = 0;
-			return false;
-		}
-
 		glLinkProgram(glprogram);
 		glErrorCheck();
 		GLint linkStatus;

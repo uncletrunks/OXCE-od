@@ -17,9 +17,9 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "SurfaceSet.h"
-#include <fstream>
 #include "Surface.h"
 #include "Exception.h"
+#include "FileMap.h"
 
 namespace OpenXcom
 {
@@ -78,17 +78,13 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 	// Load TAB and get image offsets
 	if (!tab.empty())
 	{
-		std::ifstream offsetFile(tab.c_str(), std::ios::in | std::ios::binary);
-		if (!offsetFile)
-		{
-			throw Exception(tab + " not found");
-		}
+		auto offsetFile = FileMap::getIStream(tab);
 		std::streampos begin, end;
-		begin = offsetFile.tellg();
+		begin = offsetFile->tellg();
 		int off;
-		offsetFile.read((char*)&off, sizeof(off));
-		offsetFile.seekg(0, std::ios::end);
-		end = offsetFile.tellg();
+		offsetFile->read((char*)&off, sizeof(off));
+		offsetFile->seekg(0, std::ios::end);
+		end = offsetFile->tellg();
 		int size = end - begin;
 		// 16-bit offsets
 		if (off != 0)
@@ -100,7 +96,6 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 		{
 			nframes = size / 4;
 		}
-		offsetFile.close();
 		for (int frame = 0; frame < nframes; ++frame)
 		{
 			_frames.push_back(Surface(_width, _height));
@@ -112,13 +107,7 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 		_frames.push_back(Surface(_width, _height));
 	}
 
-	// Load PCK and put pixels in surfaces
-	std::ifstream imgFile (pck.c_str(), std::ios::in | std::ios::binary);
-	if (!imgFile)
-	{
-		throw Exception(pck + " not found");
-	}
-
+	auto imgFile = FileMap::getIStream(pck);
 	Uint8 value;
 
 	for (int frame = 0; frame < nframes; ++frame)
@@ -128,7 +117,7 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 		// Lock the surface
 		_frames[frame].lock();
 
-		imgFile.read((char*)&value, 1);
+		imgFile->read((char*)&value, 1);
 		for (int i = 0; i < value; ++i)
 		{
 			for (int j = 0; j < _width; ++j)
@@ -137,11 +126,11 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 			}
 		}
 
-		while (imgFile.read((char*)&value, 1) && value != 255)
+		while (imgFile->read((char*)&value, 1) && value != 255)
 		{
 			if (value == 254)
 			{
-				imgFile.read((char*)&value, 1);
+				imgFile->read((char*)&value, 1);
 				for (int i = 0; i < value; ++i)
 				{
 					_frames[frame].setPixelIterative(&x, &y, 0);
@@ -156,8 +145,6 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 		// Unlock the surface
 		_frames[frame].unlock();
 	}
-
-	imgFile.close();
 }
 
 /**
@@ -172,16 +159,10 @@ void SurfaceSet::loadDat(const std::string &filename)
 {
 	int nframes = 0;
 
-	// Load file and put pixels in surface
-	std::ifstream imgFile (filename.c_str(), std::ios::in | std::ios::binary);
-	if (!imgFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
-	imgFile.seekg(0, std::ios::end);
-	std::streamoff size = imgFile.tellg();
-	imgFile.seekg(0, std::ios::beg);
+	auto imgFile = FileMap::getIStream(filename);
+	imgFile->seekg(0, std::ios::end);
+	std::streamoff size = imgFile->tellg();
+	imgFile->seekg(0, std::ios::beg);
 
 	nframes = (int)size / (_width * _height);
 
@@ -197,7 +178,7 @@ void SurfaceSet::loadDat(const std::string &filename)
 	// Lock the surface
 	_frames[frame].lock();
 
-	while (imgFile.read((char*)&value, 1))
+	while (imgFile->read((char*)&value, 1))
 	{
 		_frames[frame].setPixelIterative(&x, &y, value);
 
@@ -216,8 +197,6 @@ void SurfaceSet::loadDat(const std::string &filename)
 				_frames[frame].lock();
 		}
 	}
-
-	imgFile.close();
 }
 
 /**

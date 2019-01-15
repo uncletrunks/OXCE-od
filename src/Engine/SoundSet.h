@@ -19,12 +19,12 @@
  */
 #include <SDL_mixer.h>
 #include <map>
-#include <string>
 
 namespace OpenXcom
 {
 
 class Sound;
+class CatFile;
 
 /**
  * Container of a set of sounds.
@@ -36,14 +36,16 @@ class SoundSet
 private:
 	std::map<int, Sound*> _sounds;
 
-	int convertSampleRate(Uint8 *oldsound, unsigned int oldsize, Uint8 *newsound) const;
+	int convertSampleRate(Uint8 *oldsound, size_t oldsize, Uint8 *newsound) const;
+	void writeWAV(SDL_RWops *dest, Uint8 *sound, size_t size, bool resample) const;
+
 public:
 	/// Crates a sound set.
 	SoundSet();
 	/// Cleans up the sound set.
 	~SoundSet();
 	/// Loads an X-Com CAT set of sound files.
-	void loadCat(const std::string &filename, bool wav = true);
+	void loadCat(CatFile& sndFile);
 	/// Gets a particular sound from the set.
 	Sound *getSound(unsigned int i);
 	/// Creates a new sound and returns a pointer to it.
@@ -51,7 +53,7 @@ public:
 	/// Gets the total sounds in the set.
 	size_t getTotalSounds() const;
 	/// Loads a specific entry from a CAT file into the soundset.
-	void loadCatbyIndex(const std::string &filename, int index);
+	void loadCatByIndex(CatFile &sndFile, int index, bool tftd = false);
 };
 
 }

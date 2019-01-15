@@ -21,6 +21,7 @@
 #include "Options.h"
 #include "Logger.h"
 #include "Unicode.h"
+#include "FileMap.h"
 
 namespace OpenXcom
 {
@@ -44,17 +45,24 @@ Sound::~Sound()
  * Loads a sound file from a specified filename.
  * @param filename Filename of the sound file.
  */
-void Sound::load(const std::string &filename)
-{
-	std::string utf8 = Unicode::convPathToUtf8(filename);
-	_sound = Mix_LoadWAV(utf8.c_str());
-	if (_sound == 0)
-	{
-		std::string err = filename + ":" + Mix_GetError();
-		throw Exception(err);
+void Sound::load(const std::string &filename) {
+	auto rw = FileMap::getRWops(filename);
+	_sound = Mix_LoadWAV_RW(rw, SDL_TRUE);
+	if (_sound == 0) {
+		Log(LOG_ERROR) << "Sound::load(" << filename << "): mixerr=" << Mix_GetError();
 	}
 }
 
+/**
+ * Loads a sound file from a specified rwops.
+ * @param rw SDL_RWops of the sound data.
+ */
+void Sound::load(SDL_RWops *rw) {
+	_sound = Mix_LoadWAV_RW(rw, SDL_TRUE);
+	if (_sound == 0) {
+		Log(LOG_ERROR) << "Sound::load(data): mixerr=" << Mix_GetError();
+	}
+}
 /**
  * Loads a sound file from a specified memory chunk.
  * @param data Pointer to the sound file in memory
@@ -63,10 +71,9 @@ void Sound::load(const std::string &filename)
 void Sound::load(const void *data, unsigned int size)
 {
 	SDL_RWops *rw = SDL_RWFromConstMem(data, size);
-	_sound = Mix_LoadWAV_RW(rw, 1);
-	if (_sound == 0)
-	{
-		throw Exception(Mix_GetError());
+	_sound = Mix_LoadWAV_RW(rw, SDL_TRUE);
+	if (_sound == 0) {
+		Log(LOG_ERROR) << "Sound::load(data): mixerr=" << Mix_GetError();
 	}
 }
 

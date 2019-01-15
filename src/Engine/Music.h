@@ -31,6 +31,7 @@ class Music
 {
 private:
 	Mix_Music *_music;
+	SDL_RWops *_rwops;
 public:
 	/// Creates a blank music track.
 	Music();
@@ -38,8 +39,8 @@ public:
 	virtual ~Music();
 	/// Loads music from the specified file.
 	virtual void load(const std::string &filename);
-	/// Loads music from a chunk of memory.
-	virtual void load(const void *data, int size);
+	/// Loads music from the specified rwops.
+	virtual void load(SDL_RWops *rwops);
 	/// Plays the music.
 	virtual void play(int loop = -1) const;
 	/// Stops all music.

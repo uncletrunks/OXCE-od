@@ -18,7 +18,6 @@
  */
 #include "NewBattleState.h"
 #include <cmath>
-#include <fstream>
 #include <algorithm>
 #include <yaml-cpp/yaml.h>
 #include "../Engine/Game.h"
@@ -272,7 +271,7 @@ void NewBattleState::load(const std::string &filename)
 	{
 		try
 		{
-			YAML::Node doc = YAML::LoadFile(s);
+			YAML::Node doc = YAML::Load(*CrossPlatform::readFile(s));
 			_cbxMission->setSelected(std::min(doc["mission"].as<size_t>(0), _missionTypes.size() - 1));
 			cbxMissionChange(0);
 			_cbxCraft->setSelected(std::min(doc["craft"].as<size_t>(0), _crafts.size() - 1));
@@ -351,15 +350,7 @@ void NewBattleState::load(const std::string &filename)
  */
 void NewBattleState::save(const std::string &filename)
 {
-	std::string s = Options::getMasterUserFolder() + filename + ".cfg";
-	std::ofstream sav(s.c_str());
-	if (!sav)
-	{
-		Log(LOG_WARNING) << "Failed to save " << filename << ".cfg";
-		return;
-	}
 	YAML::Emitter out;
-
 	YAML::Node node;
 	node["mission"] = _cbxMission->getSelected();
 	node["craft"] = _cbxCraft->getSelected();
@@ -371,11 +362,11 @@ void NewBattleState::save(const std::string &filename)
 	node["base"] = _game->getSavedGame()->getBases()->front()->save();
 	out << node;
 
-	sav << out.c_str();
-	sav.close();
-	if (!sav)
+	std::string filepath = Options::getMasterUserFolder() + filename + ".cfg";
+	if (!CrossPlatform::writeFile(filepath, out.c_str()))
 	{
-		Log(LOG_WARNING) << "Failed to save " << filename << ".cfg";
+		Log(LOG_WARNING) << "Failed to save " << filepath;
+		return;
 	}
 }
 

@@ -21,8 +21,10 @@
 #include <algorithm>
 #include <sstream>
 #include <climits>
+#include <unordered_map>
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/FileMap.h"
+#include "../Engine/SDL2Helpers.h"
 #include "../Engine/Palette.h"
 #include "../Engine/Font.h"
 #include "../Engine/Surface.h"
@@ -46,6 +48,7 @@
 #include "CustomPalettes.h"
 #include "ExtraSounds.h"
 #include "../Engine/AdlibMusic.h"
+#include "../Engine/CatFile.h"
 #include "../fmath.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Options.h"
@@ -829,21 +832,21 @@ Sound *Mod::getSound(const std::string &set, unsigned int sound, bool error) con
 	}
 	else
 	{
-		SoundSet *ss = getSoundSet(set, error);
+		SoundSet *ss = getSoundSet(set, false);
 		if (ss != 0)
 		{
 			Sound *s = ss->getSound(sound);
-			if (s == 0 && error)
+			if (s == 0)
 			{
-				std::ostringstream err;
-				err << "Sound " << sound << " in " << set << " not found";
-				throw Exception(err.str());
+				Log(LOG_VERBOSE) << "Sound " << sound << " in " << set << " not found";
+				return _muteSound;
 			}
 			return s;
 		}
 		else
 		{
-			return 0;
+			Log(LOG_VERBOSE) << "SoundSet " << set << " not found";
+			return _muteSound;
 		}
 	}
 }
@@ -870,7 +873,7 @@ void Mod::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	for (std::map<std::string, Font*>::iterator i = _fonts.begin(); i != _fonts.end(); ++i)
 	{
 		i->second->setPalette(colors, firstcolor, ncolors);
-	}	
+	}
 	for (std::map<std::string, Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
 	{
 		if (CrossPlatform::compareExt(i->first, "LBM"))
@@ -882,7 +885,7 @@ void Mod::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	for (std::map<std::string, SurfaceSet*>::iterator i = _sets.begin(); i != _sets.end(); ++i)
 	{
 		i->second->setPalette(colors, firstcolor, ncolors);
-	}	
+	}
 }
 
 /**
@@ -989,11 +992,13 @@ static void afterLoadHelper(const char* name, Mod* mod, std::map<std::string, T*
 
 /**
  * Loads a list of mods specified in the options.
- * @param mods List of <modId, rulesetFiles> pairs.
+ * List of <modId, rulesetFiles> pairs is fetched from the FileMap / VFS
+ * being set up in options updateMods
  */
-void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::string> > > &mods)
+void Mod::loadAll()
 {
 	ModScript parser{ _scriptGlobal, this };
+	auto mods = FileMap::getRulesets();
 
 	Log(LOG_INFO) << "Loading rulesets...";
 	std::vector<size_t> modOffsets(mods.size());
@@ -1148,20 +1153,20 @@ void Mod::loadAll(const std::vector< std::pair< std::string, std::vector<std::st
  * @param modIdx Mod index number.
  * @param parsers Object with all avaiable parser.
  */
-void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, ModScript &parsers)
+void Mod::loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, size_t modIdx, ModScript &parsers)
 {
 	_modOffset = 1000 * modIdx;
 
-	for (std::vector<std::string>::const_iterator i = rulesetFiles.begin(); i != rulesetFiles.end(); ++i)
+	for (auto i = rulesetFiles.begin(); i != rulesetFiles.end(); ++i)
 	{
-		Log(LOG_VERBOSE) << "- " << *i;
+		Log(LOG_VERBOSE) << "- " << i->fullpath;
 		try
 		{
 			loadFile(*i, parsers);
 		}
 		catch (YAML::Exception &e)
 		{
-			throw Exception((*i) + ": " + std::string(e.what()));
+			throw Exception(i->fullpath + ": " + std::string(e.what()));
 		}
 	}
 
@@ -1243,9 +1248,9 @@ void Mod::loadMod(const std::vector<std::string> &rulesetFiles, size_t modIdx, M
  * @param filename YAML filename.
  * @param parsers Object with all avaiable parser.
  */
-void Mod::loadFile(const std::string &filename, ModScript &parsers)
+void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 {
-	YAML::Node doc = YAML::LoadFile(filename);
+	auto doc = filerec.getYAML();
 
 	if (const YAML::Node &extended = doc["extended"])
 	{
@@ -1437,6 +1442,10 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 			}
 			else
 			{
+				if (!(*i)["type_id"].IsDefined()) { // otherwise it throws and I wasted hours
+					Log(LOG_ERROR) << "ufopaedia item misses type_id attr.";
+					continue;
+				}
 				UfopaediaTypeId type = (UfopaediaTypeId)(*i)["type_id"].as<int>();
 				switch (type)
 				{
@@ -3351,13 +3360,13 @@ void Mod::loadVanillaResources()
 	{
 		std::string s = "GEODATA/PALETTES.DAT";
 		_palettes[pal[i]] = new Palette();
-		_palettes[pal[i]]->loadDat(FileMap::getFilePath(s), 256, Palette::palOffset(i));
+		_palettes[pal[i]]->loadDat(s, 256, Palette::palOffset(i));
 	}
 	{
 		std::string s1 = "GEODATA/BACKPALS.DAT";
 		std::string s2 = "BACKPALS.DAT";
 		_palettes[s2] = new Palette();
-		_palettes[s2]->loadDat(FileMap::getFilePath(s1), 128);
+		_palettes[s2]->loadDat(s1, 128);
 	}
 
 	// Correct Battlescape palette
@@ -3365,7 +3374,7 @@ void Mod::loadVanillaResources()
 		std::string s1 = "GEODATA/PALETTES.DAT";
 		std::string s2 = "PAL_BATTLESCAPE";
 		_palettes[s2] = new Palette();
-		_palettes[s2]->loadDat(FileMap::getFilePath(s1), 256, Palette::palOffset(4));
+		_palettes[s2]->loadDat(s1, 256, Palette::palOffset(4));
 
 		// Last 16 colors are a greyish gradient
 		SDL_Color gradient[] = { { 140, 152, 148, 255 },
@@ -3397,34 +3406,34 @@ void Mod::loadVanillaResources()
 		std::string s1 = "GEODATA/INTERWIN.DAT";
 		std::string s2 = "INTERWIN.DAT";
 		_surfaces[s2] = new Surface(160, 600);
-		_surfaces[s2]->loadScr(FileMap::getFilePath(s1));
+		_surfaces[s2]->loadScr(s1);
 	}
 
-	const std::set<std::string> &geographFiles(FileMap::getVFolderContents("GEOGRAPH"));
-	std::set<std::string> scrs = FileMap::filterFiles(geographFiles, "SCR");
-	for (std::set<std::string>::iterator i = scrs.begin(); i != scrs.end(); ++i)
+	auto geographFiles = FileMap::getVFolderContents("GEOGRAPH");
+	auto scrs = FileMap::filterFiles(geographFiles, "SCR");
+	for (auto i = scrs.begin(); i != scrs.end(); ++i)
 	{
 		std::string fname = *i;
 		std::transform(i->begin(), i->end(), fname.begin(), toupper);
 		_surfaces[fname] = new Surface(320, 200);
-		_surfaces[fname]->loadScr(FileMap::getFilePath("GEOGRAPH/" + fname));
+		_surfaces[fname]->loadScr("GEOGRAPH/" + fname);
 	}
-	std::set<std::string> bdys = FileMap::filterFiles(geographFiles, "BDY");
-	for (std::set<std::string>::iterator i = bdys.begin(); i != bdys.end(); ++i)
+	auto bdys = FileMap::filterFiles(geographFiles, "BDY");
+	for (auto i = bdys.begin(); i != bdys.end(); ++i)
 	{
 		std::string fname = *i;
 		std::transform(i->begin(), i->end(), fname.begin(), toupper);
 		_surfaces[fname] = new Surface(320, 200);
-		_surfaces[fname]->loadBdy(FileMap::getFilePath("GEOGRAPH/" + fname));
+		_surfaces[fname]->loadBdy("GEOGRAPH/" + fname);
 	}
 
-	std::set<std::string> spks = FileMap::filterFiles(geographFiles, "SPK");
-	for (std::set<std::string>::iterator i = spks.begin(); i != spks.end(); ++i)
+	auto spks = FileMap::filterFiles(geographFiles, "SPK");
+	for (auto i = spks.begin(); i != spks.end(); ++i)
 	{
 		std::string fname = *i;
 		std::transform(i->begin(), i->end(), fname.begin(), toupper);
 		_surfaces[fname] = new Surface(320, 200);
-		_surfaces[fname]->loadSpk(FileMap::getFilePath("GEOGRAPH/" + fname));
+		_surfaces[fname]->loadSpk("GEOGRAPH/" + fname);
 	}
 
 	// Load surface sets
@@ -3444,26 +3453,26 @@ void Mod::loadVanillaResources()
 			std::ostringstream s2;
 			s2 << "GEOGRAPH/" << tab;
 			_sets[sets[i]] = new SurfaceSet(32, 40);
-			_sets[sets[i]]->loadPck(FileMap::getFilePath(s.str()), FileMap::getFilePath(s2.str()));
+			_sets[sets[i]]->loadPck(s.str(), s2.str());
 		}
 		else
 		{
 			_sets[sets[i]] = new SurfaceSet(32, 32);
-			_sets[sets[i]]->loadDat(FileMap::getFilePath(s.str()));
+			_sets[sets[i]]->loadDat(s.str());
 		}
 	}
 	{
 		std::string s1 = "GEODATA/SCANG.DAT";
 		std::string s2 = "SCANG.DAT";
 		_sets[s2] = new SurfaceSet(4, 4);
-		_sets[s2]->loadDat(FileMap::getFilePath(s1));
+		_sets[s2]->loadDat(s1);
 	}
 
-	if (!Options::mute)
+	if (!Options::mute) // TBD: ain't it wrong? can Options::mute be reset without a reload?
 	{
 		// Load sounds
-		const std::set<std::string> &soundFiles(FileMap::getVFolderContents("SOUND"));
-
+		auto contents = FileMap::getVFolderContents("SOUND");
+		auto soundFiles = FileMap::filterFiles(contents, "CAT");
 		if (_soundDefs.empty())
 		{
 			std::string catsId[] = { "GEO.CAT", "BATTLE.CAT" };
@@ -3480,71 +3489,75 @@ void Mod::loadVanillaResources()
 			Options::currentSound = SOUND_AUTO;
 			for (size_t i = 0; i < ARRAYLEN(catsId); ++i)
 			{
-				SoundSet *sound = 0;
-				for (size_t j = 0; j < ARRAYLEN(cats) && sound == 0; ++j)
+				SoundSet *sound = new SoundSet();
+				for (size_t j = 0; j < ARRAYLEN(cats); ++j)
 				{
 					bool wav = true;
 					if (cats[j] == 0)
 						continue;
 					else if (cats[j] == catsDos)
 						wav = false;
-					std::string fname = cats[j][i];
-					std::transform(fname.begin(), fname.end(), fname.begin(), tolower);
-					std::set<std::string>::iterator file = soundFiles.find(fname);
-					if (file != soundFiles.end())
+					std::string fname = "SOUND/" + cats[j][i];
+					if (FileMap::fileExists(fname))
 					{
-						sound = new SoundSet();
-						sound->loadCat(FileMap::getFilePath("SOUND/" + cats[j][i]), wav);
+						Log(LOG_VERBOSE) << catsId[i] << ": loading sound "<<fname;
+						CatFile catfile(fname);
+						sound->loadCat(catfile);
 						Options::currentSound = (wav) ? SOUND_14 : SOUND_10;
+						break;
+					} else {
+						Log(LOG_VERBOSE) << catsId[i] << ": sound file not found: "<<fname;
 					}
 				}
-				if (sound == 0)
+				_sounds[catsId[i]] = sound;
+				if (sound->getTotalSounds() == 0)
 				{
-					throw Exception(catsWin[i] + " not found");
-				}
-				else
-				{
-					_sounds[catsId[i]] = sound;
+					Log(LOG_ERROR) << "No sound files found for " << catsId[i];
 				}
 			}
 		}
 		else
 		{
-			for (std::map<std::string, SoundDefinition*>::const_iterator i = _soundDefs.begin(); i != _soundDefs.end(); ++i)
+			// we're here if and only if this is the first mod loading
+			// and it got soundDefs in the ruleset, which basically means it's xcom2.
+			for (auto i : _soundDefs)
 			{
-				std::string fname = i->second->getCATFile();
-				std::transform(fname.begin(), fname.end(), fname.begin(), tolower);
-				std::set<std::string>::iterator file = soundFiles.find(fname);
-				if (file != soundFiles.end())
+				if (_sounds.find(i.first) == _sounds.end())
 				{
-					if (_sounds.find((*i).first) == _sounds.end())
+					_sounds[i.first] = new SoundSet();
+					Log(LOG_VERBOSE) << "TFTD: adding soundset" << i.first;
+				}
+				std::string fname = "SOUND/" + i.second->getCATFile();
+				if (FileMap::fileExists(fname))
+				{
+					CatFile catfile(fname);
+					for (auto j : i.second->getSoundList())
 					{
-						_sounds[(*i).first] = new SoundSet();
-					}
-					for (std::vector<int>::const_iterator j = (*i).second->getSoundList().begin(); j != (*i).second->getSoundList().end(); ++j)
-					{
-						_sounds[(*i).first]->loadCatbyIndex(FileMap::getFilePath("SOUND/" + fname), *j);
+						_sounds[i.first]->loadCatByIndex(catfile, j, true);
+						Log(LOG_VERBOSE) << "TFTD: adding sound " << j << " to " << i.first;
 					}
 				}
 				else
 				{
-					throw Exception(fname + " not found");
+					Log(LOG_ERROR) << "TFTD sound file not found:" << fname;
 				}
 			}
 		}
 
-		std::set<std::string>::iterator file = soundFiles.find("intro.cat");
+		auto file = soundFiles.find("intro.cat");
 		if (file != soundFiles.end())
 		{
 			SoundSet *s = _sounds["INTRO.CAT"] = new SoundSet();
-			s->loadCat(FileMap::getFilePath("SOUND/INTRO.CAT"), false);
+			auto catfile = CatFile("SOUND/INTRO.CAT");
+			s->loadCat(catfile);
 		}
 
 		file = soundFiles.find("sample3.cat");
 		if (file != soundFiles.end())
 		{
 			SoundSet *s = _sounds["SAMPLE3.CAT"] = new SoundSet();
-			s->loadCat(FileMap::getFilePath("SOUND/SAMPLE3.CAT"), true);
+			auto catfile = CatFile("SOUND/SAMPLE3.CAT");
+			s->loadCat(catfile);
 		}
 	}
 
@@ -3568,38 +3581,36 @@ void Mod::loadBattlescapeResources()
 {
 	// Load Battlescape ICONS
 	_sets["SPICONS.DAT"] = new SurfaceSet(32, 24);
-	_sets["SPICONS.DAT"]->loadDat(FileMap::getFilePath("UFOGRAPH/SPICONS.DAT"));
+	_sets["SPICONS.DAT"]->loadDat("UFOGRAPH/SPICONS.DAT");
 	_sets["CURSOR.PCK"] = new SurfaceSet(32, 40);
-	_sets["CURSOR.PCK"]->loadPck(FileMap::getFilePath("UFOGRAPH/CURSOR.PCK"), FileMap::getFilePath("UFOGRAPH/CURSOR.TAB"));
+	_sets["CURSOR.PCK"]->loadPck("UFOGRAPH/CURSOR.PCK", "UFOGRAPH/CURSOR.TAB");
 	_sets["SMOKE.PCK"] = new SurfaceSet(32, 40);
-	_sets["SMOKE.PCK"]->loadPck(FileMap::getFilePath("UFOGRAPH/SMOKE.PCK"), FileMap::getFilePath("UFOGRAPH/SMOKE.TAB"));
+	_sets["SMOKE.PCK"]->loadPck("UFOGRAPH/SMOKE.PCK", "UFOGRAPH/SMOKE.TAB");
 	_sets["HIT.PCK"] = new SurfaceSet(32, 40);
-	_sets["HIT.PCK"]->loadPck(FileMap::getFilePath("UFOGRAPH/HIT.PCK"), FileMap::getFilePath("UFOGRAPH/HIT.TAB"));
+	_sets["HIT.PCK"]->loadPck("UFOGRAPH/HIT.PCK", "UFOGRAPH/HIT.TAB");
 	_sets["X1.PCK"] = new SurfaceSet(128, 64);
-	_sets["X1.PCK"]->loadPck(FileMap::getFilePath("UFOGRAPH/X1.PCK"), FileMap::getFilePath("UFOGRAPH/X1.TAB"));
+	_sets["X1.PCK"]->loadPck("UFOGRAPH/X1.PCK", "UFOGRAPH/X1.TAB");
 	_sets["MEDIBITS.DAT"] = new SurfaceSet(52, 58);
-	_sets["MEDIBITS.DAT"]->loadDat(FileMap::getFilePath("UFOGRAPH/MEDIBITS.DAT"));
+	_sets["MEDIBITS.DAT"]->loadDat("UFOGRAPH/MEDIBITS.DAT");
 	_sets["DETBLOB.DAT"] = new SurfaceSet(16, 16);
-	_sets["DETBLOB.DAT"]->loadDat(FileMap::getFilePath("UFOGRAPH/DETBLOB.DAT"));
+	_sets["DETBLOB.DAT"]->loadDat("UFOGRAPH/DETBLOB.DAT");
 
 	// Load Battlescape Terrain (only blanks are loaded, others are loaded just in time)
 	_sets["BLANKS.PCK"] = new SurfaceSet(32, 40);
-	_sets["BLANKS.PCK"]->loadPck(FileMap::getFilePath("TERRAIN/BLANKS.PCK"), FileMap::getFilePath("TERRAIN/BLANKS.TAB"));
+	_sets["BLANKS.PCK"]->loadPck("TERRAIN/BLANKS.PCK", "TERRAIN/BLANKS.TAB");
 
 	// Load Battlescape units
-	std::set<std::string> unitsContents = FileMap::getVFolderContents("UNITS");
-	std::set<std::string> usets = FileMap::filterFiles(unitsContents, "PCK");
-	for (std::set<std::string>::iterator i = usets.begin(); i != usets.end(); ++i)
+	auto unitsContents = FileMap::getVFolderContents("UNITS");
+	auto usets = FileMap::filterFiles(unitsContents, "PCK");
+	for (auto i = usets.begin(); i != usets.end(); ++i)
 	{
-		std::string path = FileMap::getFilePath("UNITS/" + *i);
-		std::string tab = FileMap::getFilePath("UNITS/" + CrossPlatform::noExt(*i) + ".TAB");
 		std::string fname = *i;
 		std::transform(i->begin(), i->end(), fname.begin(), toupper);
 		if (fname != "BIGOBS.PCK")
 			_sets[fname] = new SurfaceSet(32, 40);
 		else
 			_sets[fname] = new SurfaceSet(32, 48);
-		_sets[fname]->loadPck(path, tab);
+		_sets[fname]->loadPck("UNITS/" + *i, "UNITS/" + CrossPlatform::noExt(*i) + ".TAB");
 	}
 	// incomplete chryssalid set: 1.0 data: stop loading.
 	if (_sets.find("CHRYS.PCK") != _sets.end() && !_sets["CHRYS.PCK"]->getFrame(225))
@@ -3608,14 +3619,14 @@ void Mod::loadBattlescapeResources()
 		throw Exception("Invalid CHRYS.PCK, please patch your X-COM data to the latest version");
 	}
 	// TFTD uses the loftemps dat from the terrain folder, but still has enemy unknown's version in the geodata folder, which is short by 2 entries.
-	std::set<std::string> terrainContents = FileMap::getVFolderContents("TERRAIN");
+	auto terrainContents = FileMap::getVFolderContents("TERRAIN");
 	if (terrainContents.find("loftemps.dat") != terrainContents.end())
 	{
-		MapDataSet::loadLOFTEMPS(FileMap::getFilePath("TERRAIN/LOFTEMPS.DAT"), &_voxelData);
+		MapDataSet::loadLOFTEMPS("TERRAIN/LOFTEMPS.DAT", &_voxelData);
 	}
 	else
 	{
-		MapDataSet::loadLOFTEMPS(FileMap::getFilePath("GEODATA/LOFTEMPS.DAT"), &_voxelData);
+		MapDataSet::loadLOFTEMPS("GEODATA/LOFTEMPS.DAT", &_voxelData);
 	}
 
 	std::string scrs[] = { "TAC00.SCR" };
@@ -3623,7 +3634,7 @@ void Mod::loadBattlescapeResources()
 	for (size_t i = 0; i < ARRAYLEN(scrs); ++i)
 	{
 		_surfaces[scrs[i]] = new Surface(320, 200);
-		_surfaces[scrs[i]]->loadScr(FileMap::getFilePath("UFOGRAPH/" + scrs[i]));
+		_surfaces[scrs[i]]->loadScr("UFOGRAPH/" + scrs[i]);
 	}
 
 	// lower case so we can find them in the contents map
@@ -3641,7 +3652,7 @@ void Mod::loadBattlescapeResources()
 	{ 2, 9, 24, 255 },
 	{ 2, 0, 24, 255 } };
 
-	std::set<std::string> ufographContents = FileMap::getVFolderContents("UFOGRAPH");
+	auto ufographContents = FileMap::getVFolderContents("UFOGRAPH");
 	for (size_t i = 0; i < ARRAYLEN(lbms); ++i)
 	{
 		if (ufographContents.find(lbms[i]) == ufographContents.end())
@@ -3653,9 +3664,9 @@ void Mod::loadBattlescapeResources()
 		{
 			delete _palettes["PAL_BATTLESCAPE"];
 		}
-
+		// TODO: if we need only the palette, say so.
 		Surface *tempSurface = new Surface(1, 1);
-		tempSurface->loadImage(FileMap::getFilePath("UFOGRAPH/" + lbms[i]));
+		tempSurface->loadImage("UFOGRAPH/" + lbms[i]);
 		_palettes[pals[i]] = new Palette();
 		SDL_Color *colors = tempSurface->getPalette();
 		colors[255] = backPal[i];
@@ -3682,12 +3693,11 @@ void Mod::loadBattlescapeResources()
 		}
 
 		_surfaces[spks[i]] = new Surface(320, 200);
-		_surfaces[spks[i]]->loadSpk(FileMap::getFilePath("UFOGRAPH/" + spks[i]));
+		_surfaces[spks[i]]->loadSpk("UFOGRAPH/" + spks[i]);
 	}
 
-
-	std::set<std::string> bdys = FileMap::filterFiles(ufographContents, "BDY");
-	for (std::set<std::string>::iterator i = bdys.begin(); i != bdys.end(); ++i)
+	auto bdys = FileMap::filterFiles(ufographContents, "BDY");
+	for (auto i = bdys.begin(); i != bdys.end(); ++i)
 	{
 		std::string idxName = *i;
 		std::transform(i->begin(), i->end(), idxName.begin(), toupper);
@@ -3705,17 +3715,17 @@ void Mod::loadBattlescapeResources()
 			idxName = idxName + "PCK";
 		}
 		_surfaces[idxName] = new Surface(320, 200);
-		_surfaces[idxName]->loadBdy(FileMap::getFilePath("UFOGRAPH/" + *i));
+		_surfaces[idxName]->loadBdy("UFOGRAPH/" + *i);
 	}
 
 	// Load Battlescape inventory
-	std::set<std::string> invs = FileMap::filterFiles(ufographContents, "SPK");
-	for (std::set<std::string>::iterator i = invs.begin(); i != invs.end(); ++i)
+	auto invs = FileMap::filterFiles(ufographContents, "SPK");
+	for (auto i = invs.begin(); i != invs.end(); ++i)
 	{
 		std::string fname = *i;
 		std::transform(i->begin(), i->end(), fname.begin(), toupper);
 		_surfaces[fname] = new Surface(320, 200);
-		_surfaces[fname]->loadSpk(FileMap::getFilePath("UFOGRAPH/" + fname));
+		_surfaces[fname]->loadSpk("UFOGRAPH/" + fname);
 	}
 
 	//"fix" of color index in original solders sprites
@@ -3858,7 +3868,7 @@ void Mod::loadBattlescapeResources()
 void Mod::loadExtraResources()
 {
 	// Load fonts
-	YAML::Node doc = YAML::LoadFile(FileMap::getFilePath("Language/" + _fontName));
+	YAML::Node doc = FileMap::getYAML("Language/" + _fontName);
 	Log(LOG_INFO) << "Loading fonts... " << _fontName;
 	for (YAML::const_iterator i = doc["fonts"].begin(); i != doc["fonts"].end(); ++i)
 	{
@@ -3872,25 +3882,25 @@ void Mod::loadExtraResources()
 	// Load musics
 	if (!Options::mute)
 	{
-		const std::set<std::string> &soundFiles(FileMap::getVFolderContents("SOUND"));
+		auto soundFiles = FileMap::getVFolderContents("SOUND");
 
 		// Check which music version is available
 		CatFile *adlibcat = 0, *aintrocat = 0;
 		GMCatFile *gmcat = 0;
 
-		for (std::set<std::string>::iterator i = soundFiles.begin(); i != soundFiles.end(); ++i)
+		for (auto i = soundFiles.begin(); i != soundFiles.end(); ++i)
 		{
 			if (0 == i->compare("adlib.cat"))
 			{
-				adlibcat = new CatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
+				adlibcat = new CatFile("SOUND/" + *i);
 			}
 			else if (0 == i->compare("aintro.cat"))
 			{
-				aintrocat = new CatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
+				aintrocat = new CatFile("SOUND/" + *i);
 			}
 			else if (0 == i->compare("gm.cat"))
 			{
-				gmcat = new GMCatFile(FileMap::getFilePath("SOUND/" + *i).c_str());
+				gmcat = new GMCatFile("SOUND/" + *i);
 			}
 		}
 
@@ -3970,38 +3980,30 @@ void Mod::loadExtraResources()
 		else
 		{
 			// Load from JASC file
-			const std::string& fullPath = FileMap::getFilePath(fileName);
-			std::ifstream palFile(fullPath);
-			if (palFile.is_open())
+			auto palFile = FileMap::getIStream(fileName);
+			std::string line;
+			std::getline(*palFile, line); // header
+			std::getline(*palFile, line); // file format
+			std::getline(*palFile, line); // number of colors
+			int r = 0, g = 0, b = 0;
+			for (int j = 0; j < 256; ++j)
 			{
-				std::string line;
-				std::getline(palFile, line); // header
-				std::getline(palFile, line); // file format
-				std::getline(palFile, line); // number of colors
-				int r = 0, g = 0, b = 0;
-				for (int j = 0; j < 256; ++j)
-				{
-					std::getline(palFile, line); // j-th color index
-					std::stringstream ss(line);
-					ss >> r;
-					ss >> g;
-					ss >> b;
-					target->setColor(j, r, g, b);
-				}
-				palFile.close();
-			}
-			else
-			{
-				throw Exception(fullPath + " not found");
+				std::getline(*palFile, line); // j-th color index
+				std::stringstream ss(line);
+				ss >> r;
+				ss >> g;
+				ss >> b;
+				target->setColor(j, r, g, b);
 			}
 		}
 	}
 
-	Log(LOG_INFO) << "Making palette backups...";
+	bool backup_logged = false;
 	for (auto pal : _palettes)
 	{
 		if (pal.first.find("PAL_") == 0)
 		{
+			if (!backup_logged) { Log(LOG_INFO) << "Making palette backups..."; backup_logged = true; }
 			Log(LOG_VERBOSE) << "Creating a backup for palette: " << pal.first;
 			std::string newName = "BACKUP_" + pal.first;
 			_palettes[newName] = new Palette();
@@ -4101,7 +4103,7 @@ void Mod::modResources()
 	if (_surfaces.find("ALTBACK07.SCR") == _surfaces.end())
 	{
 		_surfaces["ALTBACK07.SCR"] = new Surface(320, 200);
-		_surfaces["ALTBACK07.SCR"]->loadScr(FileMap::getFilePath("GEOGRAPH/BACK07.SCR"));
+		_surfaces["ALTBACK07.SCR"]->loadScr("GEOGRAPH/BACK07.SCR");
 		for (int y = 172; y >= 152; --y)
 			for (int x = 5; x <= 314; ++x)
 				_surfaces["ALTBACK07.SCR"]->setPixel(x, y + 4, _surfaces["ALTBACK07.SCR"]->getPixel(x, y));
@@ -4160,12 +4162,12 @@ void Mod::modResources()
  * @param gmcat Pointer to GM.CAT if available.
  * @return Pointer to the music file, or NULL if it couldn't be loaded.
  */
-Music *Mod::loadMusic(MusicFormat fmt, const std::string &file, int track, float volume, CatFile *adlibcat, CatFile *aintrocat, GMCatFile *gmcat) const
+Music *Mod::loadMusic(MusicFormat fmt, const std::string &file, size_t track, float volume, CatFile *adlibcat, CatFile *aintrocat, GMCatFile *gmcat) const
 {
 	/* MUSIC_AUTO, MUSIC_FLAC, MUSIC_OGG, MUSIC_MP3, MUSIC_MOD, MUSIC_WAV, MUSIC_ADLIB, MUSIC_GM, MUSIC_MIDI */
 	static const std::string exts[] = { "", ".flac", ".ogg", ".mp3", ".mod", ".wav", "", "", ".mid" };
 	Music *music = 0;
-	std::set<std::string> soundContents = FileMap::getVFolderContents("SOUND");
+	auto soundContents = FileMap::getVFolderContents("SOUND");
 	try
 	{
 		// Try Adlib music
@@ -4173,18 +4175,19 @@ Music *Mod::loadMusic(MusicFormat fmt, const std::string &file, int track, float
 		{
 			if (adlibcat && Options::audioBitDepth == 16)
 			{
-				music = new AdlibMusic(volume);
-				if (track < adlibcat->getAmount())
+				if (track < adlibcat->size())
 				{
-					music->load(adlibcat->load(track, true), adlibcat->getObjectSize(track));
+					music = new AdlibMusic(volume);
+					music->load(adlibcat->getRWops(track));
 				}
 				// separate intro music
 				else if (aintrocat)
 				{
-					track -= adlibcat->getAmount();
-					if (track < aintrocat->getAmount())
+					track -= adlibcat->size();
+					if (track < aintrocat->size())
 					{
-						music->load(aintrocat->load(track, true), aintrocat->getObjectSize(track));
+						music = new AdlibMusic(volume);
+						music->load(aintrocat->getRWops(track));
 					}
 					else
 					{
@@ -4198,10 +4201,10 @@ Music *Mod::loadMusic(MusicFormat fmt, const std::string &file, int track, float
 		else if (fmt == MUSIC_GM)
 		{
 			// DOS MIDI
-			if (gmcat && track < gmcat->getAmount())
+			if (gmcat && track < gmcat->size())
 			{
 				music = gmcat->loadMIDI(track);
-			}			
+			}
 		}
 		// Try digital tracks
 		else
@@ -4212,7 +4215,7 @@ Music *Mod::loadMusic(MusicFormat fmt, const std::string &file, int track, float
 			if (soundContents.find(fname) != soundContents.end())
 			{
 				music = new Music();
-				music->load(FileMap::getFilePath("SOUND/" + fname));
+				music->load("SOUND/" + fname);
 			}
 		}
 	}

@@ -20,7 +20,9 @@
 #include "CatFile.h"
 #include "Sound.h"
 #include "Exception.h"
-#include <sstream>
+#include "Logger.h"
+#include "SDL2Helpers.h"
+
 namespace OpenXcom
 {
 
@@ -37,10 +39,7 @@ SoundSet::SoundSet()
  */
 SoundSet::~SoundSet()
 {
-	for (std::map<int, Sound*>::iterator i = _sounds.begin(); i != _sounds.end(); ++i)
-	{
-		delete i->second;
-	}
+	for (auto i : _sounds)	{ delete i.second; }
 }
 
 /**
@@ -50,7 +49,7 @@ SoundSet::~SoundSet()
  * @param newsound Pointer to converted sample buffer.
  * @return Converted buffer size.
  */
-int SoundSet::convertSampleRate(Uint8 *oldsound, unsigned int oldsize, Uint8 *newsound) const
+int SoundSet::convertSampleRate(Uint8 *oldsound, size_t oldsize, Uint8 *newsound) const
 {
 	const Uint32 step16 = (8000 << 16) / 11025;
 	int newsize = 0;
@@ -61,107 +60,49 @@ int SoundSet::convertSampleRate(Uint8 *oldsound, unsigned int oldsize, Uint8 *ne
 	return newsize;
 }
 
+static const Uint8 header[] = {  'R',  'I',  'F',  'F', 0x00, 0x00, 0x00, 0x00,  'W',  'A',  'V',  'E',
+								 'f',  'm',  't',  ' ', 0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,
+								0x11, 0x2b, 0x00, 0x00, 0x11, 0x2b, 0x00, 0x00, 0x01, 0x00, 0x08, 0x00,
+								 'd',  'a',  't',  'a', 0x00, 0x00, 0x00, 0x00                           };
+/**
+ * Write out a WAV. Resample if needed.
+ * @param dest where to write
+ * @param sound sound data
+ * @param size  size of sound data
+ * @param resample if resampling is needed.
+ */
+void SoundSet::writeWAV(SDL_RWops *dest, Uint8 *sound, size_t size, bool resample) const {
+	SDL_RWwrite(dest, header, sizeof(header), 1);
+	int newsize = size;
+
+	if (resample) {
+		auto newsound = SDL_malloc(2*size);
+		auto newsize = convertSampleRate(sound, size, (Uint8 *)newsound);
+		SDL_RWwrite(dest, newsound, newsize, 1);
+		SDL_free(newsound);
+	} else {
+		SDL_RWwrite(dest, sound, size, 1);
+	}
+
+	// update the header
+	SDL_RWseek(dest, 4, RW_SEEK_SET);	// write WAVE chunk size
+	SDL_WriteLE32(dest, newsize + 36);
+	SDL_RWseek(dest, 40, RW_SEEK_SET); 	// write data subchunk size
+	SDL_WriteLE32(dest, newsize);
+}
+
 /**
  * Loads the contents of an X-Com CAT file which usually contains
  * a set of sound files. The CAT starts with an index of the offset
  * and size of every file contained within. Each file consists of a
  * filename followed by its contents.
- * @param filename Filename of the CAT set.
+ * @param rw RWops of the CAT set.
  * @param wav Are the sounds in WAV format?
  * @sa http://www.ufopaedia.org/index.php?title=SOUND
  */
-void SoundSet::loadCat(const std::string &filename, bool wav)
+void SoundSet::loadCat(CatFile &catFile)
 {
-	// Load CAT file
-	CatFile sndFile (filename.c_str());
-	if (!sndFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
-	// Load each sound file
-	for (int i = 0; i < sndFile.getAmount(); ++i)
-	{
-		// Read WAV chunk
-		unsigned char *sound = (unsigned char*) sndFile.load(i);
-		unsigned int size = sndFile.getObjectSize(i);
-
-		// If there's no WAV header (44 bytes), add it
-		// Assuming sounds are 6-bit 8000Hz (DOS version)
-		unsigned char *newsound = 0;
-		const int headerSize = 44;
-		if (!wav)
-		{
-			if (size > 5) size -= 5; // skip 5 garbage name bytes at beginning
-			if (size) size--; // omit trailing null byte
-			if (size != 0)
-			{
-				char header[] = {'R', 'I', 'F', 'F', 0x00, 0x00, 0x00, 0x00, 'W', 'A', 'V', 'E', 'f', 'm', 't', ' ',
-								 0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x11, 0x2b, 0x00, 0x00, 0x11, 0x2b, 0x00, 0x00, 0x01, 0x00, 0x08, 0x00,
-								 'd', 'a', 't', 'a', 0x00, 0x00, 0x00, 0x00};
-
-				// scale to 8 bits
-				for (unsigned int n = 0; n < size; ++n) sound[5 + n] *= 4;
-
-				// copy and do the conversion...
-				newsound = new unsigned char[headerSize + size*2];
-				memcpy(newsound, header, headerSize);
-				memcpy(newsound + headerSize, sound + 5, size);
-				int newsize = convertSampleRate(sound + 5, size, newsound + headerSize);
-				size = newsize + headerSize;
-
-				// Rewrite the number of samples in the WAV file
-				int headersize = newsize + 36;
-				int soundsize = newsize;
-				memcpy(newsound + 4, &headersize, sizeof(headersize));
-				memcpy(newsound + 40, &soundsize, sizeof(soundsize));
-			}
-		}
-		// so it's WAV, but in 8 khz, we have to convert it to 11 khz sound
-		else if (0x40 == sound[0x18] && 0x1F == sound[0x19] && 0x00 == sound[0x1A] && 0x00 == sound[0x1B])
-		{
-			unsigned char *sound2 = new unsigned char[size*2];
-
-			// rewrite the samplerate in the header to 11 khz
-			sound[0x18]=0x11; sound[0x19]=0x2B; sound[0x1C]=0x11; sound[0x1D]=0x2B;
-
-			// copy and do the conversion...
-			memcpy(sound2, sound, size);
-			int newsize = convertSampleRate(sound + headerSize, size - headerSize, sound2 + headerSize);
-			size = newsize + headerSize;
-
-			// Rewrite the number of samples in the WAV file
-			memcpy(sound2 + 0x28, &newsize, sizeof(newsize));
-
-			// Ok, now replace the original with the converted:
-			delete[] sound;
-			sound = sound2;
-		}
-
-		Sound *s = new Sound();
-		try
-		{
-			if (size == 0)
-			{
-				throw Exception("Invalid sound file");
-			}
-			if (wav)
-				s->load(sound, size);
-			else
-				s->load(newsound, size);
-		}
-		catch (const Exception &)
-		{
-			// Ignore junk in the file
-		}
-		_sounds[i] = s;
-
-		delete[] sound;
-		if (!wav)
-		{
-			delete[] newsound;
-		}
-	}
+	for (size_t i = 0; i < catFile.size(); ++i) { loadCatByIndex(catFile, i); }
 }
 
 /**
@@ -177,7 +118,6 @@ Sound *SoundSet::getSound(unsigned int i)
 	}
 	return 0;
 }
-
 
 /**
  * Creates and returns a particular wave in the sound set.
@@ -201,83 +141,88 @@ size_t SoundSet::getTotalSounds() const
 }
 
 /**
- * Loads individual contents of a TFTD CAT file by index.
+ * Loads individual contents of a sound CAT file by index.
  * a set of sound files. The CAT starts with an index of the offset
  * and size of every file contained within. Each file consists of a
  * filename followed by its contents.
  * @param filename Filename of the CAT set.
  * @param index which index in the cat file do we load?
+ * @param tftd if to expect signed 8bit 11Khz instead of unsigned 6bit 8KHz in the data.
+ *             and also under which ID to put the sound
  * @sa http://www.ufopaedia.org/index.php?title=SOUND
  */
-void SoundSet::loadCatbyIndex(const std::string &filename, int index)
+void SoundSet::loadCatByIndex(CatFile &catFile, int index, bool tftd)
 {
-	// Load CAT file
-	CatFile sndFile (filename.c_str());
-	if (!sndFile)
-	{
-		throw Exception(filename + " not found");
+	int set_index = tftd ? getTotalSounds() : index;
+	_sounds[set_index] = new Sound(); // in case everything else fails, an empty Sound.
+	auto rwops = catFile.getRWops(index);
+	int namesize = SDL_ReadU8(rwops);
+	SDL_RWseek(rwops, namesize, RW_SEEK_CUR); // skip "name".
+	// NB: the original code after ce548c29d5742e26a442a44ef2a5fcce3f80dace
+	// did not adjust the size for the namesize byte when skipping the name
+	// and thus submitted one trailing byte of garbage.
+	// The original code before that commit did not adjust the size at all
+	// when skipping the name and thus submitted at least one trailing byte of garbage.
+	// v1.4 sounds do miss namesize+1 bytes as they are in the catfile -
+	// comparing what's in the WAV header to cat item size without name.
+
+	size_t size;
+	Uint8 *sound = (Uint8 *)SDL_LoadFile_RW(rwops, &size, SDL_TRUE);
+
+	// Skip short data
+	if (size < 12) {
+		Log(LOG_VERBOSE) << "SoundSet::loadCatByIndex(" << catFile.fileName() << ", " << index << ") size=" << size <<" , skipping.";
+		SDL_free(sound);
+		return;
 	}
-	if (index >= sndFile.getAmount())
-	{
-		std::ostringstream err;
-		err << filename << " does not contain " << index << " sound files.";
-		throw Exception(err.str());
-	}
 
-	// Read WAV chunk
-	unsigned char *sound = (unsigned char*) sndFile.load(index);
-	unsigned int size = sndFile.getObjectSize(index);
+	// See if we've got RIFF header here.
+	bool wav = ((sound[0] == 'R') && (sound[1] == 'I') && (sound[2]  == 'F') && (sound[3]  == 'F')
+			 && (sound[8] == 'W') && (sound[9] == 'A') && (sound[10] == 'V') && (sound[11] == 'E'));
 
-	// there's no WAV header (44 bytes), add it
-	// sounds are 8-bit 11025Hz, signed
-	unsigned char *newsound = 0;
-
-	if (size != 0)
-	{
-		char header[] = {'R', 'I', 'F', 'F', 0x00, 0x00, 0x00, 0x00, 'W', 'A', 'V', 'E', 'f', 'm', 't', ' ',
-							0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x11, 0x2b, 0x00, 0x00, 0x11, 0x2b, 0x00, 0x00, 0x01, 0x00, 0x08, 0x00,
-							'd', 'a', 't', 'a', 0x00, 0x00, 0x00, 0x00};
-
-
-		if (size > 5) size -= 5; // skip 5 garbage name bytes at beginning
-		if (size) size--; // omit trailing null byte
-
-		int headersize = size + 36;
-		int soundsize = size;
-		memcpy(header + 4, &headersize, sizeof(headersize));
-		memcpy(header + 40, &soundsize, sizeof(soundsize));
-
-		newsound = new unsigned char[44 + size];
-		memcpy(newsound, header, 44);
-
-		// TFTD sounds are signed, so we need to convert them.
-		for (unsigned int n = 5; n < size + 5; ++n)
-		{
-			int value = (int)sound[n] + 128;
-			sound[n] = (uint8_t)value;
+	Uint8 *samples;
+	size_t samplecount;
+	bool do_resample = true;
+	if (wav) { // skip WAV header
+		int expected_size = *(Sint32 *)(sound +0x04) + 8;
+		int delta = ((int)size) - expected_size;
+		// fix the header if we miss some data.
+		if (delta < 0) {
+			*(Sint32 *)(sound +0x04) += delta; // WAVE chunk size
+			*(Sint32 *)(sound +0x28) += delta; // data chunk size
 		}
+		int samplerate = *(Sint32 *)(sound + 0x18);
+		do_resample  = (samplerate != 11025);
+		samples = sound + 44;
+		samplecount = size - 44;
+	} else { // skip DOS header
+		// UFO2000 style
+		samples = sound + 6;
+		samplecount = size - 6;
 
-		if (size) memcpy(newsound + 44, sound+5, size);
-		size = size + 44;
-	}
+		// OpenXcom style
+		samples = sound + 5;
+		samplecount = size - 6;
 
-	Sound *s = new Sound();
-	try
-	{
-		if (size == 0)
-		{
-			throw Exception("Invalid sound file");
+		// scale to 8 bits (UFO) or get rid of signedness (TFTD)
+		for (size_t n = 0; n < samplecount; ++n) {
+			int sample = samples[n];
+			samples[n] = (Uint8) (tftd ? sample + 128 : sample * 4);
 		}
-		s->load(newsound, size);
 	}
-	catch (const Exception &)
-	{
-		// Ignore junk in the file
-	}
-	_sounds[getTotalSounds()] = s;
+	size_t dest_size = 44 + 2 * size; // worst-case estimation
+	auto dest_mem = SDL_malloc(dest_size);
+	auto dest_rwops = SDL_RWFromMem(dest_mem, dest_size);
 
-	delete[] sound;
-	delete[] newsound;
+	if (do_resample) {
+		writeWAV(dest_rwops, samples, samplecount, !tftd);
+	} else { // nothing to do.
+		SDL_RWwrite(dest_rwops, sound, size, 1);
+	}
+	SDL_RWseek(dest_rwops, 0, RW_SEEK_SET);
+	_sounds[set_index]->load(dest_rwops);  // this frees the dest_rwops
+	SDL_free(dest_mem);
+	SDL_free(sound);
 }
 
 }

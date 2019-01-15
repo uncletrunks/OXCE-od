@@ -19,6 +19,7 @@
  */
 #include <string>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 namespace OpenXcom
 {
@@ -38,7 +39,7 @@ public:
 	/// Creates default metadata for a mod at the specified path.
 	ModInfo(const std::string &path);
 	/// Loads the metadata from YAML.
-	void load(const std::string &filename);
+	void load(const YAML::Node &doc);
 	/// Gets the path where this mod resides on disk.
 	const std::string &getPath() const;
 	/// Gets the name of this mod.
@@ -52,7 +53,7 @@ public:
 	/// Gets the id for this mod.
 	const std::string &getId() const;
 	/// Gets the master this mod can load under.  If it can load under any
-	/// master (or if this mod is a master itself), the return value is empty.
+	/// master (or if this mod is a master itself FIXME: this is wrong), the return value is empty.
 	const std::string &getMaster() const;
 	/// Gets whether this mod is a master (i.e. a vanilla game/total conversion)
 	bool isMaster() const;

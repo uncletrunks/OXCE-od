@@ -76,14 +76,8 @@ template <> std::string load(char* data) { return data; }
 
 char *SaveConverter::binaryBuffer(const std::string &filename, std::vector<char> &buffer) const
 {
-	std::string s = _savePath + CrossPlatform::PATH_SEPARATOR + filename;
-	std::ifstream datFile(s.c_str(), std::ios::in | std::ios::binary);
-	if (!datFile)
-	{
-		throw Exception(filename + " not found");
-	}
-	buffer = std::vector<char>((std::istreambuf_iterator<char>(datFile)), (std::istreambuf_iterator<char>()));
-	datFile.close();
+	auto datFile = CrossPlatform::readFile(_savePath + "/" + filename);
+	buffer = std::vector<char>((std::istreambuf_iterator<char>(*datFile)), (std::istreambuf_iterator<char>()));
 	return &buffer[0];
 }
 
@@ -119,41 +113,37 @@ void SaveConverter::getList(Language *lang, SaveOriginal info[NUM_SAVES])
 {
 	for (int i = 0; i < NUM_SAVES; ++i)
 	{
-		SaveOriginal save;
+		SaveOriginal &save = info[i];
 		save.id = 0;
 
-		int id = i + 1;
-		std::ostringstream ss;
-		ss << Options::getMasterUserFolder() << "GAME_" << id << CrossPlatform::PATH_SEPARATOR << "SAVEINFO.DAT";
-		std::ifstream datFile(ss.str().c_str(), std::ios::in | std::ios::binary);
-		if (datFile)
-		{
-			std::vector<char> buffer((std::istreambuf_iterator<char>(datFile)), (std::istreambuf_iterator<char>()));
-			char *data = &buffer[0];
-
-			std::string name = load<std::string>(data + 0x02);
-			int year = load<Uint16>(data + 0x1C);
-			int month = load<Uint16>(data + 0x1E);
-			int day = load<Uint16>(data + 0x20);
-			int hour = load<Uint16>(data + 0x22);
-			int minute = load<Uint16>(data + 0x24);
-			bool tactical = load<char>(data + 0x26) != 0;
-
-			GameTime time = GameTime(0, day, month + 1, year, hour, minute, 0);
-
-			std::ostringstream ssDate, ssTime;
-			ssDate << time.getDayString(lang) << "  " << lang->getString(time.getMonthString()) << "  " << time.getYear();
-			ssTime << time.getHour() << ":" << std::setfill('0') << std::setw(2) << time.getMinute();
-
-			save.id = id;
-			save.name = name;
-			save.date = ssDate.str();
-			save.time = ssTime.str();
-			save.tactical = tactical;
-
-			datFile.close();
+		const int id = i + 1;
+		std::string datname = Options::getMasterUserFolder() + "GAME_" + std::to_string(id) + "/SAVEINFO.DAT";
+		if (!CrossPlatform::fileExists(datname)) {
+			continue;
 		}
-		info[i] = save;
+		auto datFile = CrossPlatform::readFile(datname);
+		std::vector<char> buffer((std::istreambuf_iterator<char>(*datFile)), (std::istreambuf_iterator<char>()));
+		char *data = &buffer[0];
+
+		std::string name = load<std::string>(data + 0x02);
+		int year = load<Uint16>(data + 0x1C);
+		int month = load<Uint16>(data + 0x1E);
+		int day = load<Uint16>(data + 0x20);
+		int hour = load<Uint16>(data + 0x22);
+		int minute = load<Uint16>(data + 0x24);
+		bool tactical = load<char>(data + 0x26) != 0;
+
+		GameTime time = GameTime(0, day, month + 1, year, hour, minute, 0);
+
+		std::ostringstream ssDate, ssTime;
+		ssDate << time.getDayString(lang) << "  " << lang->getString(time.getMonthString()) << "  " << time.getYear();
+		ssTime << time.getHour() << ":" << std::setfill('0') << std::setw(2) << time.getMinute();
+
+		save.id = id;
+		save.name = name;
+		save.date = ssDate.str();
+		save.time = ssTime.str();
+		save.tactical = tactical;
 	}
 }
 

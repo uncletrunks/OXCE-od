@@ -1,6 +1,7 @@
 set ( root_src
   lodepng.cpp
   main.cpp
+  ../libs/miniz/miniz.c
 )
 
 set ( basescape_src
@@ -454,6 +455,8 @@ endif ()
 if ( DUMP_CORE )
   set_source_files_properties ( main.cpp PROPERTIES COMPILE_FLAGS -DDUMP_CORE )
 endif ()
+
+set_source_files_properties ( ../libs/miniz/miniz.c PROPERTIES COMPILE_FLAGS -DMINIZ_NO_STDIO )
 
 if ( WIN32 )
   set ( application_type WIN32 )

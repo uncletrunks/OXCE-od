@@ -68,7 +68,7 @@ OptionsModsState::OptionsModsState(OptionsOrigin origin) : OptionsBaseState(orig
 	_txtMaster->setText(tr("STR_GAME_TYPE"));
 
 	// scan for masters
-	const std::map<std::string, ModInfo> &modInfos(Options::getModInfos());
+	const std::unordered_map<std::string, ModInfo> &modInfos(Options::getModInfos());
 	size_t curMasterIdx = 0;
 	std::vector<std::string> masterNames;
 	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)

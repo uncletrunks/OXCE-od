@@ -17,9 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <set>
 #include <string>
 #include <vector>
+#include <istream>
+#include <unordered_map>
+#include <unordered_set>
+#include <yaml-cpp/yaml.h>
+#include <SDL_rwops.h>
+#include "ModInfo.h"
 
 namespace OpenXcom
 {
@@ -30,35 +37,78 @@ namespace OpenXcom
  */
 namespace FileMap
 {
-	/// Gets the real filesystem path for a data file when given a relative (case insensitive) path,
-	/// like "units/zombie.pck".  If the file has not been mapped via the load() function, the input
-	/// path is returned verbatim (for use in error messages when the file is ultimately not found).
-	const std::string &getFilePath(const std::string &relativeFilePath);
+	struct FileRecord {
+		std::string fullpath; 	// includes zip file name if any
+
+		void *zip; 				// borrowed reference/weakref. NOTNULL:
+		size_t findex;       	// file index in the zipfile.
+
+		FileRecord();
+		SDL_RWops *getRWops() const;
+		std::unique_ptr<std::istream>getIStream() const;
+		YAML::Node getYAML() const;
+		std::vector<YAML::Node> getAllYAML() const;
+	};
+
+	/// For common operations on bunches of filenames
+	typedef std::unordered_set<std::string> NameSet;
+
+	/// Get FileRecord for the fullpath ..
+	const FileRecord *at(const std::string &relativeFilePath);
+
+	/// Gets SDL_RWops for the file data of a data file blah blah read above.
+	SDL_RWops *getRWops(const std::string &relativeFilePath);
+
+	/// Gets an std::istream interface to the file data. Has to be deleted on the caller's end.
+	std::unique_ptr<std::istream>getIStream(const std::string &relativeFilePath);
+
+	/// Gets a 'vertical slice' through all the VFS layers for a given file name. (used for langs)
+	/// Beware of NULLs for the layers that miss the relpath.
+	const std::vector<const FileRecord *> getSlice(const std::string &relativeFilePath);
+
+	/// Returns parsed YAML for a filename
+	YAML::Node getYAML(const std::string &relativeFilePath);
+	std::vector<YAML::Node> getAllYAML(const std::string &relativeFilePath);
+
+	/// if we have the file
+	bool fileExists(const std::string &relativeFilePath);
 
 	/// Returns the set of files in a virtual folder.  The virtual folder contains files from all active mods
-	/// that are in similarly-named subdirectories.  The returned file names can then be translated to real
-	/// filesystem paths via getFilePath()
-	const std::set<std::string> &getVFolderContents(const std::string &relativePath);
+	/// that are in similarly-named subdirectories.
+	/// level select the layer in the VFS cake. Useful value is 0 for the bottommost aka 'dataFolder/common'
+	/// Does not include rulesets (*.rul).
+	const NameSet &getVFolderContents(const std::string &relativePath);
+	const NameSet &getVFolderContents(const std::string &relativePath, size_t level);
 
 	/// Returns the subset of the given files that matches the given extension
-	std::set<std::string> filterFiles(const std::vector<std::string> &files, const std::string &ext);
-	std::set<std::string> filterFiles(const std::set<std::string>    &files, const std::string &ext);
+	NameSet filterFiles(const std::vector<std::string> &files, const std::string &ext);
+	NameSet filterFiles(const std::set<std::string>    &files, const std::string &ext);
+	NameSet filterFiles(const NameSet &files, const std::string &ext);
 
 	/// Returns the ruleset files found, grouped by mod, while mapping resources.  The highest-priority mod
 	/// will be last in the returned vector.
-	const std::vector<std::pair<std::string, std::vector<std::string> > > &getRulesets();
 
-	/// clears FileMap state
+	typedef std::vector<std::pair<std::string, std::vector<FileRecord>>> RSOrder;
+	const RSOrder &getRulesets();
+
+	/// absolutely clears FileMap state and maps common resources (dataDir/common)
 	void clear();
 
-	/// Scans a directory tree rooted at the specified filesystem path.  Any files it encounters that have already
-	/// been mapped will be ignored.  Therefore, load files from mods with the highest priority first.  If
-	/// ignoreMods is false, it will add any rulesets it finds to the front of the vector
-	/// returned by getMods().
-	void load(const std::string &modId, const std::string &path, bool ignoreMods);
+	/// sets up VFS according to the modsequence given (rescans common resources). does call clear().
+	void setup(const std::vector<const ModInfo *>& active);
 
-	/// Determines if _resources set is empty
-	bool isResourcesEmpty(void);
+	/// lowercase it
+	std::string canonicalize(const std::string& fname);
+
+	/// scans a moddir for mods, (privately) maps them.
+	void scanModDir(const std::string& dirname, const std::string& basename);
+
+	/// removes mods that lack extResourses, depend on missing mods
+	/// or participate in dependency loops
+	void checkModsDependencies();
+
+	/// returns a list of mods that are loadable.
+	std::unordered_map<std::string, ModInfo> getModInfos();
 }
 
 }

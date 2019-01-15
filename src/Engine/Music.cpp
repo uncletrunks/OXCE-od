@@ -21,6 +21,8 @@
 #include "Options.h"
 #include "Logger.h"
 #include "Unicode.h"
+#include "FileMap.h"
+#include "SDL2Helpers.h"
 #include "Adlib/adlplayer.h"
 #include "AdlibMusic.h"
 
@@ -30,7 +32,7 @@ namespace OpenXcom
 /**
  * Initializes a new music track.
  */
-Music::Music() : _music(0)
+Music::Music() : _music(0), _rwops(0)
 {
 }
 
@@ -41,7 +43,8 @@ Music::~Music()
 {
 #ifndef __NO_MUSIC
 	stop();
-	Mix_FreeMusic(_music);
+	if (_music)	Mix_FreeMusic(_music);
+	if (_rwops) SDL_RWclose(_rwops);
 #endif
 }
 
@@ -52,26 +55,20 @@ Music::~Music()
 void Music::load(const std::string &filename)
 {
 #ifndef __NO_MUSIC
-	std::string utf8 = Unicode::convPathToUtf8(filename);
-	_music = Mix_LoadMUS(utf8.c_str());
-	if (_music == 0)
-	{
-		throw Exception(Mix_GetError());
-	}
+	load(FileMap::getRWops(filename));
 #endif
 }
 
 /**
- * Loads a music file from a specified memory chunk.
- * @param data Pointer to the music file in memory
- * @param size Size of the music file in bytes.
+ * Loads a music file from a specified rwops.
+ * @param filename Filename of the music file.
  */
-void Music::load(const void *data, int size)
+void Music::load(SDL_RWops *rwops)
 {
 #ifndef __NO_MUSIC
-	SDL_RWops *rwops = SDL_RWFromConstMem(data, size);
-	_music = Mix_LoadMUS_RW(rwops);
-	SDL_FreeRW(rwops);
+	_rwops = rwops;
+	_music = Mix_LoadMUS_RW(_rwops);
+
 	if (_music == 0)
 	{
 		throw Exception(Mix_GetError());

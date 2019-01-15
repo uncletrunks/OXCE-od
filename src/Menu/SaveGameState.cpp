@@ -70,7 +70,7 @@ SaveGameState::SaveGameState(OptionsOrigin origin, SaveType type, SDL_Color *pal
 		break;
 	case SAVE_IRONMAN:
 	case SAVE_IRONMAN_END:
-		_filename = CrossPlatform::sanitizeFilename(Unicode::convUtf8ToPath(_game->getSavedGame()->getName())) + ".sav";
+		_filename = CrossPlatform::sanitizeFilename(_game->getSavedGame()->getName()) + ".sav";
 		break;
 	default:
 		break;
@@ -195,7 +195,7 @@ void SaveGameState::error(const std::string &msg)
 {
 	Log(LOG_ERROR) << msg;
 	std::ostringstream error;
-	error << tr("STR_SAVE_UNSUCCESSFUL") << Unicode::TOK_NL_SMALL << Unicode::convPathToUtf8(msg);
+	error << tr("STR_SAVE_UNSUCCESSFUL") << Unicode::TOK_NL_SMALL << msg;
 	if (_origin != OPT_BATTLESCAPE)
 		_game->pushState(new ErrorMessageState(error.str(), _palette, _game->getMod()->getInterface("errorMessages")->getElement("geoscapeColor")->color, "BACK01.SCR", _game->getMod()->getInterface("errorMessages")->getElement("geoscapePalette")->color));
 	else

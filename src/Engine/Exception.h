@@ -30,7 +30,7 @@ namespace OpenXcom
 class Exception : public std::runtime_error
 {
 public:
-	Exception(const std::string &msg) : runtime_error(msg) {}
+	Exception(const std::string &msg);
 };
 
 }

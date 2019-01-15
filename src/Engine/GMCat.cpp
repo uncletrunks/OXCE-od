@@ -20,6 +20,8 @@
 #include "GMCat.h"
 #include <vector>
 #include "Music.h"
+#include "Logger.h"
+#include "SDL2Helpers.h"
 
 namespace OpenXcom
 {
@@ -361,33 +363,30 @@ static int gmext_write_midi (const struct gmstream *stream,
 Music *GMCatFile::loadMIDI(unsigned int i)
 {
 	Music *music = new Music;
+	auto cat_rwops = getRWops(i);
 
-	unsigned char *raw = static_cast<unsigned char*> ((void*)load(i));
-
-	if (!raw)
-		return music;
+	if (!cat_rwops) { throw("Can't get GMcat object"); }
 
 	// stream info
 	struct gmstream stream;
-	if (gmext_read_stream(&stream, getObjectSize(i), raw) == -1) {
-		delete[] raw;
+	size_t size;
+	auto data = (unsigned char *)SDL_LoadFile_RW(cat_rwops, &size, SDL_TRUE);
+	if (gmext_read_stream(&stream, size, data) == -1) {
+		Log(LOG_ERROR) << "Error reading MIDI stream";
 		return music;
 	}
 
 	std::vector<unsigned char> midi;
-	midi.reserve(65536);
+	midi.reserve(65536);	// FIXME: well... what is this
 
 	// fields in stream still point into raw
 	if (gmext_write_midi(&stream, midi) == -1) {
-		delete[] raw;
-		return music;
+		Log(LOG_ERROR) << "Error writing MIDI stream";
+	} else {
+		music->load(SDL_RWFromConstMem(midi.data(), midi.size()));
 	}
 
-	delete[] raw;
-
-	music->load(&midi[0], midi.size());
-
+	SDL_free(data);
 	return music;
 }
-
 }

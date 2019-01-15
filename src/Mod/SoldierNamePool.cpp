@@ -21,6 +21,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Language.h"
+#include "../Engine/FileMap.h"
 
 namespace OpenXcom
 {
@@ -45,7 +46,7 @@ SoldierNamePool::~SoldierNamePool()
  */
 void SoldierNamePool::load(const std::string &filename)
 {
-	YAML::Node doc = YAML::LoadFile(filename);
+	YAML::Node doc = FileMap::getYAML(filename);
 
 	for (YAML::const_iterator i = doc["maleFirst"].begin(); i != doc["maleFirst"].end(); ++i)
 	{

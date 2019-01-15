@@ -1060,6 +1060,7 @@
     <ClCompile Include="Engine\Unicode.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\libs\miniz\miniz.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2164,6 +2165,7 @@
     <ClInclude Include="Engine\Unicode.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\libs\miniz\miniz.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">

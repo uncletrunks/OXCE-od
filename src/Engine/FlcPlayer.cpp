@@ -19,6 +19,7 @@
 
 /*
  * Based on http://www.libsdl.org/projects/flxplay/
+ * See also https://github.com/aseprite/flic
  */
 #ifdef _MSC_VER
 #ifndef _SCL_SECURE_NO_WARNINGS
@@ -30,7 +31,7 @@
 #include <cassert>
 #include <string.h>
 #include <SDL_mixer.h>
-#include <fstream>
+#include "FileMap.h"
 #include "Logger.h"
 #include "Screen.h"
 #include "Surface.h"
@@ -120,22 +121,13 @@ bool FlcPlayer::init(const char *filename, void(*frameCallBack)(), Game *game, b
 	_audioData.loadingBuffer = 0;
 	_audioData.playingBuffer = 0;
 
-	std::ifstream file;
-	file.open(filename, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
-	if (!file.is_open())
-	{
-		Log(LOG_ERROR) << "Could not open FLI/FLC file: " << filename;
-		return false;
-	}
-
-	std::streamoff size = file.tellg();
-	file.seekg(0, std::ifstream::beg);
-
-	// TODO: substitute with a cross-platform memory mapped file?
+	auto file = FileMap::getIStream(filename);
+	file->seekg(0, std::istream::end);
+	auto size = file->tellg();
+	file->seekg(0, std::istream::beg);
 	_fileBuf = new Uint8[size];
 	_fileSize = size;
-	file.read((char *)_fileBuf, size);
-	file.close();
+	file->read((char *)_fileBuf, size);
 
 	_audioFrameData = _fileBuf + 128;
 

@@ -17,7 +17,6 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
-#include <fstream>
 #include <sstream>
 #include "BattlescapeGenerator.h"
 #include "TileEngine.h"
@@ -1411,18 +1410,13 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 	int x = xoff, y = yoff, z = zoff;
 	char size[3];
 	unsigned char value[4];
-	std::ostringstream filename;
-	filename << "MAPS/" << mapblock->getName() << ".MAP";
+	std::string filename = "MAPS/" + mapblock->getName() + ".MAP";
 	unsigned int terrainObjectID;
 
 	// Load file
-	std::ifstream mapFile (FileMap::getFilePath(filename.str()).c_str(), std::ios::in| std::ios::binary);
-	if (!mapFile)
-	{
-		throw Exception(filename.str() + " not found");
-	}
+	auto mapFile = FileMap::getIStream(filename);
 
-	mapFile.read((char*)&size, sizeof(size));
+	mapFile->read((char*)&size, sizeof(size));
 	sizey = (int)size[0];
 	sizex = (int)size[1];
 	sizez = (int)size[2];
@@ -1432,14 +1426,14 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 	std::ostringstream ss;
 	if (sizez > _save->getMapSizeZ())
 	{
-		ss << "Height of map " + filename.str() + " too big for this mission, block is " << sizez << ", expected: " << _save->getMapSizeZ();
+		ss << "Height of map " + filename + " too big for this mission, block is " << sizez << ", expected: " << _save->getMapSizeZ();
 		throw Exception(ss.str());
 	}
 
 	if (sizex != mapblock->getSizeX() ||
 		sizey != mapblock->getSizeY())
 	{
-		ss << "Map block is not of the size specified " + filename.str() + " is " << sizex << "x" << sizey << " , expected: " << mapblock->getSizeX() << "x" << mapblock->getSizeY();
+		ss << "Map block is not of the size specified " + filename + " is " << sizex << "x" << sizey << " , expected: " << mapblock->getSizeX() << "x" << mapblock->getSizeY();
 		throw Exception(ss.str());
 	}
 
@@ -1465,7 +1459,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 		throw Exception("Something is wrong in your map definitions, craft/ufo map is too tall?");
 	}
 
-	while (mapFile.read((char*)&value, sizeof(value)))
+	while (mapFile->read((char*)&value, sizeof(value)))
 	{
 		for (int part = O_FLOOR; part < O_MAX; ++part)
 		{
@@ -1500,12 +1494,10 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 		}
 	}
 
-	if (!mapFile.eof())
+	if (!mapFile->eof())
 	{
-		throw Exception("Invalid MAP file: " + filename.str());
+		throw Exception("Invalid MAP file: " + filename);
 	}
-
-	mapFile.close();
 
 	// Add the craft offset to the positions of the items if we're loading a craft map
 	if (craft)
@@ -1617,20 +1609,14 @@ void BattlescapeGenerator::addSegmentVertical(MapBlock *mapblock, int x, int y, 
 void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int zoff, int segment)
 {
 	unsigned char value[24];
-	std::ostringstream filename;
-	filename << "ROUTES/" << mapblock->getName() << ".RMP";
-
+	std::string filename = "ROUTES/" + mapblock->getName() +".RMP";
 	// Load file
-	std::ifstream mapFile (FileMap::getFilePath(filename.str()).c_str(), std::ios::in| std::ios::binary);
-	if (!mapFile)
-	{
-		throw Exception(filename.str() + " not found");
-	}
+	auto mapFile = FileMap::getIStream(filename);
 
 	size_t nodeOffset = _save->getNodes()->size();
 	std::vector<int> badNodes;
 	int nodesAdded = 0;
-	while (mapFile.read((char*)&value, sizeof(value)))
+	while (mapFile->read((char*)&value, sizeof(value)))
 	{
 		int pos_x = value[1];
 		int pos_y = value[0];
@@ -1672,7 +1658,7 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int z
 			// that way, all the connections will still line up properly in the array.
 			node = new Node();
 			node->setDummy(true);
-			Log(LOG_INFO) << "Bad node in RMP file: " << filename.str() << " Node #" << nodesAdded << " is outside map boundaries at X:" << pos_x << " Y:" << pos_y << " Z:" << pos_z << ". Culling Node.";
+			Log(LOG_INFO) << "Bad node in RMP file: " << filename << " Node #" << nodesAdded << " is outside map boundaries at X:" << pos_x << " Y:" << pos_y << " Z:" << pos_z << ". Culling Node.";
 			badNodes.push_back(nodesAdded);
 		}
 		_save->getNodes()->push_back(node);
@@ -1690,7 +1676,7 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int z
 				{
 					if (*k - nodeOffset == (unsigned)*i)
 					{
-						Log(LOG_INFO) << "RMP file: " << filename.str() << " Node #" << nodeCounter - 1 << " is linked to Node #" << *i << ", which was culled. Terminating Link.";
+						Log(LOG_INFO) << "RMP file: " << filename << " Node #" << nodeCounter - 1 << " is linked to Node #" << *i << ", which was culled. Terminating Link.";
 						*k = -1;
 					}
 				}
@@ -1699,12 +1685,10 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int z
 		}
 	}
 
-	if (!mapFile.eof())
+	if (!mapFile->eof())
 	{
-		throw Exception("Invalid RMP file: " + filename.str());
+		throw Exception("Invalid RMP file: " + filename);
 	}
-
-	mapFile.close();
 }
 
 /**
