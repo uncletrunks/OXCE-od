@@ -1204,7 +1204,7 @@ void DogfightState::update()
 				bool hasNoAmmo = true;
 				for (auto cw : *_craft->getWeapons())
 				{
-					if (cw->getAmmo() > 0)
+					if (cw && cw->getAmmo() > 0)
 					{
 						hasNoAmmo = false;
 						break;
