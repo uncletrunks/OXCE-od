@@ -207,12 +207,34 @@ std::unique_ptr<std::istream>FileRecord::getIStream() const {
 		return CrossPlatform::readFile(fullpath);
 	}
 }
-YAML::Node FileRecord::getYAML() const {
-	return YAML::Load(*getIStream());
+
+YAML::Node FileRecord::getYAML() const
+{
+	try
+	{
+		return YAML::Load(*getIStream());
+	}
+	catch(...)
+	{
+		Log(LOG_FATAL) << "Error loading file '" << fullpath << "'";
+		throw;
+	}
 }
-std::vector<YAML::Node> FileRecord::getAllYAML() const {
-	return YAML::LoadAll(*getIStream());
+
+std::vector<YAML::Node> FileRecord::getAllYAML() const
+{
+	try
+	{
+		return YAML::LoadAll(*getIStream());
+	}
+	catch(...)
+	{
+		Log(LOG_FATAL) << "Error loading file '" << fullpath << "'";
+		throw;
+	}
 }
+
+
 /**
  * Find out somehow if it's well-formed UTF8.
  * Since we can't know the code page used at compression time, we just return false,
