@@ -21,6 +21,8 @@
 #include <iomanip>
 #include <tuple>
 #include <algorithm>
+#include <cmath>
+#include <bitset>
 
 #include "Logger.h"
 #include "Options.h"
@@ -157,6 +159,17 @@ static inline RetEnum call_func_h(ScriptWorkerBase& c, FuncCommon func, const Ui
 	return r;
 }
 
+[[gnu::always_inline]]
+static inline RetEnum bit_popcount_h(int& reg)
+{
+	constexpr size_t minBitsetSize = 8*sizeof(std::bitset<1>);
+	constexpr size_t minRequiredSize = 8*sizeof(int);
+	constexpr size_t optimalSize = minRequiredSize < minBitsetSize ? minRequiredSize : minBitsetSize;
+	std::bitset<optimalSize> set = reg; //bitset with optimal size and without overhead
+	reg = set.count();
+	return RetContinue;
+}
+
 
 /**
  * Main macro defining all available operation in script engine.
@@ -190,6 +203,14 @@ static inline RetEnum call_func_h(ScriptWorkerBase& c, FuncCommon func, const Ui
 	\
 	IMPL(shl,		MACRO_QUOTE({ Reg0 <<= Data1;									return RetContinue; }),		(int& Reg0, int Data1),		"Left bit shift of arg1 by arg2") \
 	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;									return RetContinue; }),		(int& Reg0, int Data1),		"Rigth bit shift of arg1 by arg2") \
+	\
+	IMPL(bit_and,		MACRO_QUOTE({ Reg0 = Reg0 & Data1;								return RetContinue; }),		(int& Reg0, int Data1),		"Bit And of arg1 and arg2") \
+	IMPL(bit_or,		MACRO_QUOTE({ Reg0 = Reg0 | Data1;								return RetContinue; }),		(int& Reg0, int Data1),		"Bit Or of arg1 and arg2") \
+	IMPL(bit_xor,		MACRO_QUOTE({ Reg0 = Reg0 ^ Data1;								return RetContinue; }),		(int& Reg0, int Data1),		"Bit Xor of arg1 and arg2") \
+	IMPL(bit_not,		MACRO_QUOTE({ Reg0 = ~Reg0;										return RetContinue; }),		(int& Reg0),				"Bit Not of arg1") \
+	IMPL(bit_count,		MACRO_QUOTE({ return bit_popcount_h(Reg0);											 }),	(int& Reg0),				"Count number of set bits of arg1") \
+	\
+	IMPL(pow,			MACRO_QUOTE({ Reg0 = std::pow(Reg0, std::max(0, Data1));		return RetContinue; }),		(int& Reg0, int Data1),		"Power of arg1 to arg2") \
 	\
 	IMPL(abs,			MACRO_QUOTE({ Reg0 = std::abs(Reg0);							return RetContinue; }),		(int& Reg0),						"Absolute value of arg1") \
 	IMPL(limit,			MACRO_QUOTE({ Reg0 = std::max(std::min(Reg0, Data2), Data1);	return RetContinue; }),		(int& Reg0, int Data1, int Data2),	"Correct value in arg1 that is always betwean arg2 and arg3") \
