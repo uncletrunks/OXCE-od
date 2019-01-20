@@ -20,6 +20,7 @@
 #include <sstream>
 #include <locale>
 #include <stdexcept>
+#include <algorithm>
 #include "Logger.h"
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -182,6 +183,25 @@ std::string convWcToMb(const std::wstring &src, unsigned int cp)
 	std::string str(size, 0);
 	WideCharToMultiByte(cp, 0, &src[0], (int)src.size(), &str[0], size, NULL, NULL);
 	return str;
+#elif defined(__CYGWIN__)
+	(void)cp;
+	assert(sizeof(wchar_t) == sizeof(Uint16));
+	UString ustr(src.size(), 0);
+    std::transform(src.begin(), src.end(), ustr.begin(),
+		[](wchar_t c) -> UCode
+		{
+			//TODO: droping surrogates, do proper implemetation when someone will need that range
+			if (c <= 0xD7FF || c >= 0xE000)
+			{
+				return c;
+			}
+			else
+			{
+				return '?';
+			}
+		}
+	);
+	return convUtf32ToUtf8(ustr);
 #else
 	(void)cp;
 	assert(sizeof(wchar_t) == sizeof(UCode));
@@ -206,6 +226,27 @@ std::wstring convMbToWc(const std::string &src, unsigned int cp)
 	int size = MultiByteToWideChar(cp, 0, &src[0], (int)src.size(), NULL, 0);
 	std::wstring wstr(size, 0);
 	MultiByteToWideChar(cp, 0, &src[0], (int)src.size(), &wstr[0], size);
+	return wstr;
+#elif defined(__CYGWIN__)
+	(void)cp;
+	assert(sizeof(wchar_t) == sizeof(Uint16));
+	const UString ustr = convUtf8ToUtf32(src);
+
+	std::wstring wstr(ustr.size(), 0);
+    std::transform(ustr.begin(), ustr.end(), wstr.begin(),
+		[](UCode c) -> wchar_t
+		{
+			//TODO: droping surrogates, do proper implemetation when someone will need that range
+			if (c <= 0xD7FF || (c >= 0xE000 && c <= 0xFFFF))
+			{
+				return c;
+			}
+			else
+			{
+				return '?';
+			}
+		}
+	);
 	return wstr;
 #else
 	(void)cp;
