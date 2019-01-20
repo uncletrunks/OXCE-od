@@ -72,7 +72,8 @@ void UnitFallBState::think()
 {
 	for (std::list<BattleUnit*>::iterator unit = _parent->getSave()->getFallingUnits()->begin(); unit != _parent->getSave()->getFallingUnits()->end();)
 	{
-		if ((*unit)->getStatus() == STATUS_TURNING)
+		// I ain't got time to panic
+		if ((*unit)->getStatus() == STATUS_TURNING || (*unit)->getStatus() == STATUS_PANICKING || (*unit)->getStatus() == STATUS_BERSERK)
 		{
 			(*unit)->abortTurn();
 		}
