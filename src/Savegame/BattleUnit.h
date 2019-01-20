@@ -371,12 +371,16 @@ public:
 	void setVisible(bool flag);
 	/// Get whether this unit is visible
 	bool getVisible() const;
+
+	/// Check if unit can fall down.
+	void updateTileFloorState(SavedBattleGame *saveBattleGame);
 	/// Sets the unit's tile it's standing on
 	void setTile(Tile *tile, SavedBattleGame *saveBattleGame = 0);
 	/// Set only unit tile without any addtional logic.
 	void setInventoryTile(Tile *tile);
 	/// Gets the unit's tile.
 	Tile *getTile() const;
+
 	/// Gets the item in the specified slot.
 	BattleItem *getItem(RuleInventory *slot, int x = 0, int y = 0) const;
 	/// Gets the item in the specified slot.

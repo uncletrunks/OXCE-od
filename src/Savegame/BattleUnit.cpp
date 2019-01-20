@@ -2511,6 +2511,38 @@ bool BattleUnit::getVisible() const
 }
 
 /**
+ * Check if unit can fall down.
+ * @param saveBattleGame
+ */
+void BattleUnit::updateTileFloorState(SavedBattleGame *saveBattleGame)
+{
+	if (_tile)
+	{
+		auto armorSize = _armor->getSize() - 1;
+		auto newPos = _tile->getPosition();
+		_haveNoFloorBelow = true;
+		for (int x = armorSize; x >= 0; --x)
+		{
+			for (int y = armorSize; y >= 0; --y)
+			{
+				auto t = saveBattleGame->getTile(newPos + Position(x, y, 0));
+				if (t)
+				{
+					if (!t->hasNoFloor(saveBattleGame))
+					{
+						_haveNoFloorBelow = false;
+						return;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		_haveNoFloorBelow = false;
+	}
+}
+/**
  * Sets the unit's tile it's standing on
  * @param tile Pointer to tile.
  * @param saveBattleGame Pointer to save to get tile below.
@@ -2563,6 +2595,7 @@ void BattleUnit::setTile(Tile *tile, SavedBattleGame *saveBattleGame)
 			}
 		}
 	}
+
 	// unit could have changed from flying to walking or vice versa
 	if (_status == STATUS_WALKING && _haveNoFloorBelow && _movementType == MT_FLY)
 	{
