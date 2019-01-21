@@ -251,8 +251,6 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			}
 		}
 	}
-	// matches up tiles and units
-	resetUnitTiles();
 
 	std::string fromContainer[3] = { "items", "recoverConditional", "recoverGuaranteed" };
 	std::vector<BattleItem*> *toContainer[3] = {&_items, &_recoverConditional, &_recoverGuaranteed};
@@ -407,6 +405,8 @@ void SavedBattleGame::loadMapResources(Mod *mod)
 	}
 
 	initUtilities(mod);
+	// matches up tiles and units
+	resetUnitTiles();
 	getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
 	getTileEngine()->recalculateFOV();
 }
