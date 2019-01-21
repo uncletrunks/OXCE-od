@@ -1320,7 +1320,7 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item, const std::vector
 		for (auto unit : *_save->getUnits())
 		{
 			// skip the vehicles, we need only X-Com soldiers WITH equipment-layout
-			if (unit->getArmor()->getSize() > 1 || !unit->getGeoscapeSoldier() || unit->getGeoscapeSoldier()->getEquipmentLayout()->empty())
+			if (!unit->getGeoscapeSoldier() || unit->getGeoscapeSoldier()->getEquipmentLayout()->empty())
 			{
 				continue;
 			}
