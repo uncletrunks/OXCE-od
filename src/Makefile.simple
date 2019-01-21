@@ -11,7 +11,7 @@ endif
 OBJDIR = ../obj/
 BINDIR = ../bin/
 SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp)
-OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS)))
+OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) ../obj/miniz.o
 
 # Target-specific settings
 ifeq ($(TARGET),DINGOO)
@@ -80,6 +80,9 @@ $(OBJDIR)%.o:: Savegame/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJDIR)%.o:: Ufopaedia/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+../obj/miniz.o: ../libs/miniz/miniz.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
