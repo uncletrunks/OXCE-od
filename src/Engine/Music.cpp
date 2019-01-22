@@ -56,6 +56,7 @@ void Music::load(const std::string &filename)
 {
 #ifndef __NO_MUSIC
 	load(FileMap::getRWops(filename));
+	Log(LOG_VERBOSE)<<"Music::load('" << filename << "')";
 #endif
 }
 

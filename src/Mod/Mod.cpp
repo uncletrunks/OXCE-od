@@ -805,6 +805,7 @@ void Mod::playMusic(const std::string &name, int id)
 		{
 			_playingMusic = name;
 		}
+		Log(LOG_VERBOSE)<<"Mod::playMusic('" << name << "'): playing " << _playingMusic;
 	}
 }
 

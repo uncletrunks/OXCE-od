@@ -35,9 +35,31 @@ CatFile::CatFile(const std::string& filename) : _data(0), _items()
 {
 	// Get amount of files
 
-	/* file format is: {offset_le32, size_le32}[N] ;  bytes[]
+	/* File format is: {offset_le32, size_le32}[N] ;  bytes[]
 	 * the first offset effectively determines the offset/size table size
 	 * which is N = offset/8 units.
+	 *
+	 * Size may or may not include the name "chunk" size, or there might
+	 * not be such a chunk. True item size has to be calculated based
+	 * on offsets only.
+	 *
+	 * The "name" chunk format is { int8_t size, char[size] name }
+	 *
+	 * 		SOUND/INTRO.CAT  : records do not contain names : offset+size = next offset or EOF
+	 *		SOUND/RINTRO.CAT
+	 * 		SOUND/ROLAND.CAT
+	 * 		SOUND/AINTRO.CAT
+	 *		SOUND/ADLIB.CAT
+	 *
+	 * 		SOUND/SOUND.CAT  : size does include name : offset+size = next offset or EOF
+	 * 		SOUND/SOUND1.CAT
+	 * 		SOUND/SOUND2.CAT
+	 *
+	 * 		SOUND/GM.CAT     : size does not include name : offset+size+namelen+1 = next offset or EOF
+	 * 		SOUND/SAMPLE.CAT
+	 * 		SOUND/SAMPLE2.CAT
+	 * 		SOUND/SAMPLE2.CAT
+	 *		TFTD/SOUND/SAMPLE.CAT
 	 *
 	 * Given an rwops object, this reads it and sets up rwops instances
 	 * for each chunk.
@@ -59,16 +81,19 @@ CatFile::CatFile(const std::string& filename) : _data(0), _items()
 	}
 	for (Uint32 i = 0; i < offset0 / 8; ++i) {
 		auto offset = SDL_ReadLE32(rwops);
-		auto size = SDL_ReadLE32(rwops);
-		if (offset + size >= filesize) {
-			// reject bad data
-			if (offset >= filesize) {
-				Log(LOG_WARNING) << "Catfile("<<filename<<"): item "<<i<<" outside of the file: offset="<<offset<<" size="<<size<<"filesize="<<filesize;
-				continue;
-			}
-			//
+		SDL_ReadLE32(rwops); // ignore size;
+		// reject bad data
+		if (offset >= filesize) {
+			Log(LOG_WARNING) << "Catfile("<<filename<<"): item "<<i<<" outside of the file: offset="<<offset<<" "<<" filesize="<<filesize;
+			continue;
 		}
-		_items.push_back(std::make_tuple(_data + offset, size));
+		_items.push_back(std::make_tuple(_data + offset, offset));
+	}
+	Uint32 last_offset = filesize;
+	for ( auto it = _items.rbegin(); it != _items.rend(); ++it) {
+		auto this_offset = std::get<1>(*it);
+		std::get<1>(*it) = last_offset - this_offset;
+		last_offset = this_offset;
 	}
 	SDL_RWclose(rwops);
 }

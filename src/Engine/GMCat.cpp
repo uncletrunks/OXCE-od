@@ -369,23 +369,25 @@ Music *GMCatFile::loadMIDI(unsigned int i)
 
 	// stream info
 	struct gmstream stream;
+	memset(&stream, 0, sizeof(stream));
 	size_t size;
+	auto nameskip = SDL_ReadU8(cat_rwops) + 1;
+	SDL_RWseek(cat_rwops, RW_SEEK_SET, 0);
 	auto data = (unsigned char *)SDL_LoadFile_RW(cat_rwops, &size, SDL_TRUE);
-	if (gmext_read_stream(&stream, size, data) == -1) {
-		Log(LOG_ERROR) << "Error reading MIDI stream";
+	if (gmext_read_stream(&stream, size - nameskip, data + nameskip) == -1) {
+		Log(LOG_ERROR) << "GMCatFile::loadMIDI("<<fileName()<<", "<<i<<"): Error reading MIDI stream";
 		return music;
 	}
 
 	std::vector<unsigned char> midi;
 	midi.reserve(65536);	// FIXME: well... what is this
 
-	// fields in stream still point into raw
 	if (gmext_write_midi(&stream, midi) == -1) {
-		Log(LOG_ERROR) << "Error writing MIDI stream";
+		Log(LOG_ERROR) << "GMCatFile::loadMIDI("<<fileName()<<", "<<i<<"): Error writing MIDI stream";
 	} else {
 		music->load(SDL_RWFromConstMem(midi.data(), midi.size()));
 	}
-
+	Log(LOG_VERBOSE) << "GMCatFile::loadMIDI("<<fileName()<<", "<<i<<"): loaded ok.";
 	SDL_free(data);
 	return music;
 }

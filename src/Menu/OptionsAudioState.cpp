@@ -144,7 +144,8 @@ OptionsAudioState::OptionsAudioState(OptionsOrigin origin) : OptionsBaseState(or
 	_cbxMusicFormat->onMouseIn((ActionHandler)&OptionsAudioState::txtTooltipIn);
 	_cbxMusicFormat->onMouseOut((ActionHandler)&OptionsAudioState::txtTooltipOut);
 
-	std::string curMusic = musFormats[Mix_GetMusicType(0)];
+	std::string curMusic = musFormats[Mix_GetMusicType(0)]; // this is confusing
+	// since  both GM (GM.CAT) and MIDI (*.mid) are the same from SDL_mixer POV.
 	_txtCurrentMusic->setText(tr("STR_CURRENT_FORMAT").arg(curMusic));
 
 	_txtSoundFormat->setText(tr("STR_PREFERRED_SFX_FORMAT"));
