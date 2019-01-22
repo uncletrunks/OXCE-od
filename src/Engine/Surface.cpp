@@ -373,7 +373,7 @@ void Surface::loadImage(const std::string &filename)
 	if (CrossPlatform::compareExt(filename, "png"))
 	{
 		size_t size;
-		void *data = SDL_LoadFile_RW(rw, &size, SDL_TRUE);
+		void *data = SDL_LoadFile_RW(rw, &size, SDL_FALSE);
 		if ((data != NULL) && (size > 8 + 12 + 12)) // minimal PNG file size: header and two empty chunks
 		{
 			std::vector<unsigned char> png;
@@ -424,8 +424,11 @@ void Surface::loadImage(const std::string &filename)
 		}
 		if (data) { SDL_free(data); }
 	}
-	// Otherwise default to SDL_Image
-	if (!_surface)
+	if (_surface)
+	{
+		SDL_RWclose(rw);
+	}
+	else // Otherwise default to SDL_Image
 	{
 		SDL_RWseek(rw, RW_SEEK_SET, 0); // rewind in case .png was no PNG at all
 		auto surface = NewSdlSurface(IMG_Load_RW(rw, SDL_TRUE));
