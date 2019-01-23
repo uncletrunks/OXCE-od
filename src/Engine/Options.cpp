@@ -33,6 +33,7 @@
 #include "CrossPlatform.h"
 #include "FileMap.h"
 #include "Screen.h"
+#include "Unicode.h"
 
 namespace OpenXcom
 {
@@ -619,7 +620,15 @@ void updateMods()
 		}
 		++i;
 	}
-
+	// sort mods if that's the first time we see any (one or two are added in _setDefaultMods())
+	if (mods.size() <= 2) {
+		for (const auto& i: _modInfos) {
+			mods.push_back(std::make_pair(i.first, false));
+		}
+		std::sort(mods.begin(), mods.end(),
+			[](const std::pair<std::string, bool>& a, const std::pair<std::string, bool> &b)
+				{ return Unicode::naturalCompare(a.first, b.first); });
+	}
 	// add in any new mods picked up from the scan and ensure there is but a single
 	// master active
 	std::string activeMaster;
