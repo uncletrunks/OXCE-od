@@ -574,7 +574,9 @@ struct VFS {
 			delete mrec;
 			return;
 		}
-		stack.push_front(mrec->stack.layers[0]);
+		for (auto layer: mrec->stack.layers) {
+			stack.push_back(layer);
+		}
 		delete mrec;
 	}
 	void clear() {
@@ -602,6 +604,9 @@ void clear() {
 	MappedVFSLayers.clear();
 	Log(LOG_VERBOSE) << "FileMap::clear(): mapping 'common'";
 	TheVFS.map_common();
+	if (LOG_VERBOSE <= Logger::reportingLevel()) {
+		TheVFS.dump(Logger().get(LOG_VERBOSE), "\nFileMap::clear():", Options::listVFSContents);
+	}
 }
 /**
  * This maps mods and their dependencies.
