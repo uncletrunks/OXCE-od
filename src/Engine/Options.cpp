@@ -206,7 +206,8 @@ void create()
 	_info.push_back(OptionInfo("noAlienPanicMessages", &noAlienPanicMessages, false, "STR_NOALIENPANICMESSAGES", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo("alienBleeding", &alienBleeding, false, "STR_ALIENBLEEDING", "STR_BATTLESCAPE"));
 
-	// OXCE+
+	// OXCE
+	_info.push_back(OptionInfo("startTextMode", &startTextMode, 0, "", "HIDDEN"));
 	_info.push_back(OptionInfo("twoHandedIndicator", &twoHandedIndicator, true, "STR_TWO_HANDED_INDICATOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("twoHandedIndicatorInventory", &twoHandedIndicatorInventory, false, "STR_TWO_HANDED_INDICATOR_INV", "STR_OXCE"));
 	_info.push_back(OptionInfo("minimapBorderIndicator", &minimapBorderIndicator, true, "STR_MINIMAP_BORDER_INDICATOR", "STR_OXCE"));

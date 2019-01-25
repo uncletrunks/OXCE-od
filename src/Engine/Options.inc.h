@@ -52,6 +52,7 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch,
 	keyNightVisionToggle, keyNightVisionHold, keySelectMusicTrack;
 
 // Extra options (Meridian's build)
+OPT int startTextMode;
 OPT bool twoHandedIndicator, twoHandedIndicatorInventory, minimapBorderIndicator, everyoneFightsNobodyQuits;
 OPT bool bleedingIndicator, knockOutIndicator, statisticalBulletConservation;
 

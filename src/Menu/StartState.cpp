@@ -95,12 +95,18 @@ StartState::StartState() : _anim(0)
 
 	if (Options::reload)
 	{
-		addLine("Restarting...");
-		addLine("");
+		if (Options::startTextMode < 2)
+		{
+			addLine("Restarting...");
+			addLine("");
+		}
 	}
 	else
 	{
-		addLine(CrossPlatform::getDosPath() + ">openxcom");
+		if (Options::startTextMode < 2)
+		{
+			addLine(CrossPlatform::getDosPath() + ">openxcom");
+		}
 	}
 }
 
@@ -215,40 +221,58 @@ void StartState::animate()
 		ss << "Loading OpenXcom " << OPENXCOM_VERSION_SHORT << OPENXCOM_VERSION_GIT << "...";
 		if (Options::reload)
 		{
-			if (_anim == 2)
-				addLine(ss.str());
+			if (Options::startTextMode < 2)
+			{
+				if (_anim == 2)
+					addLine(ss.str());
+			}
 		}
 		else
 		{
 			switch (_anim)
 			{
 			case 1:
-				addLine("DOS/4GW Protected Mode Run-time  Version 1.9");
-				addLine("Copyright (c) Rational Systems, Inc. 1990-1993");
+				if (Options::startTextMode < 1)
+				{
+					addLine("DOS/4GW Protected Mode Run-time  Version 1.9");
+					addLine("Copyright (c) Rational Systems, Inc. 1990-1993");
+				}
 				break;
 			case 6:
-				addLine("");
-				addLine("OpenXcom initialisation");
+				if (Options::startTextMode < 2)
+				{
+					addLine("");
+					addLine("OpenXcom initialisation");
+				}
 				break;
 			case 7:
-				addLine("");
-				if (Options::mute)
+				if (Options::startTextMode < 1)
 				{
-					addLine("No Sound Detected");
-				}
-				else
-				{
-					addLine("SoundBlaster Sound Effects");
-					if (Options::preferredMusic == MUSIC_MIDI)
-						addLine("General MIDI Music");
+					addLine("");
+					if (Options::mute)
+					{
+						addLine("No Sound Detected");
+					}
 					else
-						addLine("SoundBlaster Music");
-					addLine("Base Port 220  Irq 7  Dma 1");
+					{
+						addLine("SoundBlaster Sound Effects");
+						if (Options::preferredMusic == MUSIC_MIDI)
+							addLine("General MIDI Music");
+						else
+							addLine("SoundBlaster Music");
+						addLine("Base Port 220  Irq 7  Dma 1");
+					}
 				}
-				addLine("");
+				if (Options::startTextMode < 2)
+				{
+					addLine("");
+				}
 				break;
 			case 9:
-				addLine(ss.str());
+				if (Options::startTextMode < 2)
+				{
+					addLine(ss.str());
+				}
 				break;
 			}
 		}

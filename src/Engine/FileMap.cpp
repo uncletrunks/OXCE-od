@@ -258,7 +258,7 @@ typedef std::vector<std::pair<std::string, std::string>> dirlist_t; // <dirname,
 static bool ls_r(const std::string &basePath, const std::string &relPath, dirlist_t& dlist) {
 	auto fullDir = basePath + (relPath.length() ? "/" + relPath : "");
 	auto files = CrossPlatform::getFolderContents(fullDir);
-	Log(LOG_VERBOSE) << "ls_r: listing "<<fullDir<<" count="<<files.size();
+	//Log(LOG_VERBOSE) << "ls_r: listing "<<fullDir<<" count="<<files.size();
 	for (auto i = files.begin(); i != files.end(); ++i) {
 		if (std::get<1>(*i)) { // it's a subfolder
 			auto fullpath = fullDir + "/" + std::get<0>(*i);
