@@ -122,11 +122,11 @@ int Projectile::calculateTrajectory(double accuracy, const Position& originVoxel
 	int test;
 	if (excludeUnit)
 	{
-		test = _save->getTileEngine()->calculateLine(originVoxel, _targetVoxel, false, &_trajectory, bu);
+		test = _save->getTileEngine()->calculateLineVoxel(originVoxel, _targetVoxel, false, &_trajectory, bu);
 	}
 	else
 	{
-		test = _save->getTileEngine()->calculateLine(originVoxel, _targetVoxel, false, &_trajectory, 0);
+		test = _save->getTileEngine()->calculateLineVoxel(originVoxel, _targetVoxel, false, &_trajectory, nullptr);
 	}
 
 	if (test != V_EMPTY &&
@@ -203,7 +203,7 @@ int Projectile::calculateTrajectory(double accuracy, const Position& originVoxel
 	applyAccuracy(originVoxel, &_targetVoxel, accuracy, false, extendLine);
 
 	// finally do a line calculation and store this trajectory.
-	return _save->getTileEngine()->calculateLine(originVoxel, _targetVoxel, true, &_trajectory, bu);
+	return _save->getTileEngine()->calculateLineVoxel(originVoxel, _targetVoxel, true, &_trajectory, bu);
 }
 
 /**
@@ -302,7 +302,7 @@ int Projectile::calculateThrow(double accuracy)
 			applyAccuracy(originVoxel, &targetVoxel, accuracy, true, false); //arcing shot deviation
 			deltas = Position(0,0,0);
 		}
-		test = _save->getTileEngine()->calculateParabola(originVoxel, targetVoxel, true, &_trajectory, _action.actor, curvature, deltas);
+		test = _save->getTileEngine()->calculateParabolaVoxel(originVoxel, targetVoxel, true, &_trajectory, _action.actor, curvature, deltas);
 		if (forced) return O_OBJECT; //fake hit
 		Position endPoint = _trajectory.back().toTile();
 		Tile *endTile = _save->getTile(endPoint);

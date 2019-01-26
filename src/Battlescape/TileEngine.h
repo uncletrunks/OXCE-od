@@ -175,10 +175,12 @@ public:
 	int unitOpensDoor(BattleUnit *unit, bool rClick = false, int dir = -1);
 	/// Closes ufo doors.
 	int closeUfoDoors();
-	/// Calculates a line trajectory.
-	int calculateLine(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, bool doVoxelCheck = true, bool onlyVisible = false, BattleUnit *excludeAllBut = 0);
+	/// Calculates a line trajectory in tile space.
+	int calculateLineTile(Position origin, Position target, std::vector<Position> &trajectory);
+	/// Calculates a line trajectory in voxel space.
+	VoxelType calculateLineVoxel(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, BattleUnit *excludeAllBut = 0, bool onlyVisible = false);
 	/// Calculates a parabola trajectory.
-	int calculateParabola(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta);
+	int calculateParabolaVoxel(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta);
 	/// Gets the origin voxel of a unit's eyesight.
 	Position getSightOriginVoxel(BattleUnit *currentUnit);
 	/// Checks visibility of a unit on this tile.

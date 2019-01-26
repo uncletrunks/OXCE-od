@@ -1934,7 +1934,7 @@ int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, i
 			Position voxelPosA = Position (targetPos.toVoxel() + TileEngine::voxelTileCenter);
 			Position voxelPosB = Position ((*i)->getPosition().toVoxel() + TileEngine::voxelTileCenter);
 			std::vector<Position> traj;
-			int collidesWith = _save->getTileEngine()->calculateLine(voxelPosA, voxelPosB, false, &traj, target, true, false, *i);
+			int collidesWith = _save->getTileEngine()->calculateLineVoxel(voxelPosA, voxelPosB, false, &traj, target, *i);
 
 			if (collidesWith == V_UNIT && traj.front().toTile() == (*i)->getPosition())
 			{
@@ -2129,7 +2129,7 @@ void AIModule::wayPointAction()
 			CurrentPosition = CurrentPosition + DirectionVector;
 			Position voxelPosA ((CurrentPosition.x * 16)+8, (CurrentPosition.y * 16)+8, (CurrentPosition.z * 24)+16);
 			Position voxelPosb ((LastWayPoint.x * 16)+8, (LastWayPoint.y * 16)+8, (LastWayPoint.z * 24)+16);
-			CollidesWith = _save->getTileEngine()->calculateLine(voxelPosA, voxelPosb, false, 0, _unit, true);
+			CollidesWith = _save->getTileEngine()->calculateLineVoxel(voxelPosA, voxelPosb, false, nullptr, _unit);
 			if (CollidesWith > V_EMPTY && CollidesWith < V_UNIT)
 			{
 				_attackAction->waypoints.push_back(LastPosition);
