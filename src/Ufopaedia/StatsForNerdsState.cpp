@@ -1734,6 +1734,7 @@ void StatsForNerdsState::initItemList()
 		addBoolean(ss, !itemRule->canBeEquippedBeforeBaseDefense(), "ignoreInBaseDefense"); // negated!
 		addInteger(ss, itemRule->getSpecialType(), "specialType", -1);
 		addBoolean(ss, !itemRule->getRecoveryDividers().empty(), "recoveryDividers*", false); // just say if there are any or not
+		addBoolean(ss, !itemRule->getRecoveryTransformations().empty(), "recoveryTransformations*", false); // just say if there are any or not
 		addBoolean(ss, itemRule->isRecoverable(), "recover", true);
 		addBoolean(ss, itemRule->isCorpseRecoverable(), "recoverCorpse", true);
 		addInteger(ss, itemRule->getRecoveryPoints(), "recoveryPoints");

@@ -328,6 +328,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 
 
 	_recoveryDividers = node["recoveryDividers"].as< std::map<std::string, int> >(_recoveryDividers);
+	_recoveryTransformationsName = node["recoveryTransformations"].as< std::map<std::string, std::vector<int> > >(_recoveryTransformationsName);
 	_categories = node["categories"].as< std::vector<std::string> >(_categories);
 	_size = node["size"].as<double>(_size);
 	_costBuy = node["costBuy"].as<int>(_costBuy);
@@ -679,9 +680,30 @@ void RuleItem::afterLoad(const Mod* mod)
 		_vehicleUnit = mod->getUnit(_type);
 	}
 
+	for (auto& pair : _recoveryTransformationsName)
+	{
+		auto item = mod->getItem(pair.first, true);
+		if (!item->isAlien())
+		{
+			if (!pair.second.empty())
+			{
+				_recoveryTransformations[item] = pair.second;
+			}
+			else
+			{
+				throw Exception("Right-hand value of recovery transformations definition cannot be empty!");
+			}
+		}
+		else
+		{
+			throw Exception("Sorry modders, cannot recover live aliens from random unorganic junk '" + pair.first + "'!");
+		}
+	}
+
 	//remove not needed data
 	Collections::deleteAll(_requiresName);
 	Collections::deleteAll(_requiresBuyName);
+	Collections::deleteAll(_recoveryTransformationsName);
 }
 
 /**
@@ -748,6 +770,15 @@ const std::vector<std::string> &RuleItem::getRequiresBuyBaseFunc() const
 const std::map<std::string, int> &RuleItem::getRecoveryDividers() const
 {
 	return _recoveryDividers;
+}
+
+/**
+ * Gets the item(s) to be recovered instead of this item.
+ * @return The list of recovery transformation rules
+ */
+const std::map<const RuleItem*, std::vector<int> > &RuleItem::getRecoveryTransformations() const
+{
+	return _recoveryTransformations;
 }
 
 /**
