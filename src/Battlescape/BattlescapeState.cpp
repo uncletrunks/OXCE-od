@@ -2454,8 +2454,8 @@ void BattlescapeState::saveAIMap()
 	}
 	while (CrossPlatform::fileExists(ss.str()));
 
-
-	unsigned error = lodepng::encode(ss.str(), (const unsigned char*)img->pixels, img->w, img->h, LCT_RGB);
+	std::vector<unsigned char> out;
+	unsigned error = lodepng::encode(out, (const unsigned char*)img->pixels, img->w, img->h, LCT_RGB);
 	if (error)
 	{
 		Log(LOG_ERROR) << "Saving to PNG failed: " << lodepng_error_text(error);
@@ -2463,6 +2463,7 @@ void BattlescapeState::saveAIMap()
 
 	SDL_FreeSurface(img);
 
+	CrossPlatform::writeFile(ss.str(), out);
 	Log(LOG_INFO) << "saveAIMap() completed in " << SDL_GetTicks() - start << "ms.";
 }
 
@@ -2584,13 +2585,13 @@ void BattlescapeState::saveVoxelView()
 	}
 	while (CrossPlatform::fileExists(ss.str()));
 
-
-	unsigned error = lodepng::encode(ss.str(), image, 512, 512, LCT_RGB);
+    std::vector<unsigned char> out;
+	unsigned error = lodepng::encode(out, image, 512, 512, LCT_RGB);
 	if (error)
 	{
 		Log(LOG_ERROR) << "Saving to PNG failed: " << lodepng_error_text(error);
 	}
-
+	CrossPlatform::writeFile(ss.str(), out);
 	return;
 }
 
@@ -2654,12 +2655,13 @@ void BattlescapeState::saveVoxelMap()
 
 		ss.str("");
 		ss << Options::getMasterUserFolder() << "voxel" << std::setfill('0') << std::setw(2) << z << ".png";
-
-		unsigned error = lodepng::encode(ss.str(), image, _save->getMapSizeX()*16, _save->getMapSizeY()*16, LCT_RGB);
+		std::vector<unsigned char> out;
+		unsigned error = lodepng::encode(out, image, _save->getMapSizeX()*16, _save->getMapSizeY()*16, LCT_RGB);
 		if (error)
 		{
 			Log(LOG_ERROR) << "Saving to PNG failed: " << lodepng_error_text(error);
 		}
+		CrossPlatform::writeFile(ss.str(), out);
 	}
 	return;
 }

@@ -963,6 +963,28 @@ bool writeFile(const std::string& filename, const std::string& data) {
 }
 
 /**
+ * Writes a file.
+ * @param filename - where to writeFile
+ * @param data - what to writeFile
+ * @return if we did write it.
+ */
+bool writeFile(const std::string& filename, const std::vector<unsigned char>& data) {
+	// Even SDL1 file IO accepts UTF-8 file names on windows.
+	SDL_RWops *rwops = SDL_RWFromFile(filename.c_str(), "wb");
+	if (!rwops) {
+		Log(LOG_ERROR) << "Failed to write " << filename << ": " << SDL_GetError();
+		return false;
+	}
+	if (1 != SDL_RWwrite(rwops, data.data(), data.size(), 1)) {
+		Log(LOG_ERROR) << "Failed to write " << filename << ": " << SDL_GetError();
+		SDL_RWclose(rwops);
+		return false;
+	}
+	SDL_RWclose(rwops);
+	return true;
+}
+
+/**
  * Gets an istream to a file
  * @param filename - what to readFile
  * @return the istream
