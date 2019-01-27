@@ -444,7 +444,7 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_activeHand = node["activeHand"].as<std::string>(_activeHand);
 	if (node["tempUnitStatistics"])
 	{
-	_statistics->load(node["tempUnitStatistics"]);
+		_statistics->load(node["tempUnitStatistics"]);
 	}
 	_murdererId = node["murdererId"].as<int>(_murdererId);
 	_fatalShotSide = (UnitSide)node["fatalShotSide"].as<int>(_fatalShotSide);
