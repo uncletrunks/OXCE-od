@@ -426,6 +426,7 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_exp.psiSkill = node["expPsiSkill"].as<int>(_exp.psiSkill);
 	_exp.psiStrength = node["expPsiStrength"].as<int>(_exp.psiStrength);
 	_exp.melee = node["expMelee"].as<int>(_exp.melee);
+	_stats = node["currStats"].as<UnitStats>(_stats);
 	_turretType = node["turretType"].as<int>(_turretType);
 	_visible = node["visible"].as<bool>(_visible);
 	_turnsSinceSpotted = node["turnsSinceSpotted"].as<int>(_turnsSinceSpotted);
@@ -499,6 +500,7 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 	node["expPsiSkill"] = _exp.psiSkill;
 	node["expPsiStrength"] = _exp.psiStrength;
 	node["expMelee"] = _exp.melee;
+	node["currStats"] = _stats;
 	node["turretType"] = _turretType;
 	node["visible"] = _visible;
 	node["turnsSinceSpotted"] = _turnsSinceSpotted;
