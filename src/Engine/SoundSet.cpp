@@ -156,6 +156,10 @@ void SoundSet::loadCatByIndex(CatFile &catFile, int index, bool tftd)
 	int set_index = tftd ? getTotalSounds() : index;
 	_sounds[set_index] = new Sound(); // in case everything else fails, an empty Sound.
 	auto rwops = catFile.getRWops(index);
+	if (!rwops) {
+		Log(LOG_VERBOSE) << "SoundSet::loadCatByIndex(" << catFile.fileName() << ", " << index << "): got NULL.";
+		return;
+	}
 	int namesize = SDL_ReadU8(rwops);
 	SDL_RWseek(rwops, namesize, RW_SEEK_CUR); // skip "name".
 	// NB: the original code after ce548c29d5742e26a442a44ef2a5fcce3f80dace
