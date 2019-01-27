@@ -1343,7 +1343,6 @@ static bool logToFile(const std::string& filename, const std::string& data) {
 		SDL_RWclose(rwops);
 		return rv == 1;
 	}
-	SDL_RWclose(rwops);
 	return false;
 }
 
