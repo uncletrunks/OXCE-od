@@ -1913,7 +1913,7 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 			int missing = i->second - qty;
 			base->getStorageItems()->removeItem(i->first, qty);
 			craft->getItems()->removeItem(i->first, missing);
-			ReequipStat stat = {i->first, missing, craft->getName(_game->getLanguage())};
+			ReequipStat stat = {i->first, missing, craft->getName(_game->getLanguage()), 0};
 			_missingItems.push_back(stat);
 		}
 	}
@@ -1938,7 +1938,7 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 		if (qty < i->second)
 		{ // missing tanks
 			int missing = i->second - qty;
-			ReequipStat stat = {i->first, missing, craft->getName(_game->getLanguage())};
+			ReequipStat stat = {i->first, missing, craft->getName(_game->getLanguage()), 0};
 			_missingItems.push_back(stat);
 		}
 		if (tankRule->getPrimaryCompatibleAmmo()->empty())
@@ -1965,7 +1965,7 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 			if (baqty < i->second * ammoPerVehicle)
 			{ // missing ammo
 				int missing = (i->second * ammoPerVehicle) - baqty;
-				ReequipStat stat = {ammo->getType(), missing, craft->getName(_game->getLanguage())};
+				ReequipStat stat = {ammo->getType(), missing, craft->getName(_game->getLanguage()), 0};
 				_missingItems.push_back(stat);
 			}
 			canBeAdded = std::min(canBeAdded, baqty / ammoPerVehicle);
