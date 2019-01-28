@@ -89,7 +89,7 @@ public:
 	/// Gets the text edit's secondary color.
 	Uint8 getSecondaryColor() const;
 	/// Sets the text edit's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Handles the timers.
 	void think() override;
 	/// Plays the blinking animation.

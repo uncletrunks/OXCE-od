@@ -114,7 +114,7 @@ void BattlescapeMessage::initText(Font *big, Font *small, Language *lang)
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void BattlescapeMessage::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void BattlescapeMessage::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	_window->setPalette(colors, firstcolor, ncolors);

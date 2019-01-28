@@ -166,7 +166,7 @@ public:
 	/// Caches visible globe polygons.
 	void cachePolygons();
 	/// Sets the palette of the globe.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Handles the timers.
 	void think() override;
 	/// Blinks the markers.

@@ -48,7 +48,7 @@ public:
 	/// Gets the number text's color.
 	Uint8 getColor() const;
 	/// Sets the number text's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Draws the number text.
 	void draw() override;
 	/// sets this numbertext to have a border or not

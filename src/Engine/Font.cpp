@@ -255,7 +255,7 @@ SDL_Color *Font::getPalette() const
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void Font::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void Font::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	for (std::vector<FontImage>::iterator i = _images.begin(); i != _images.end(); ++i)
 	{

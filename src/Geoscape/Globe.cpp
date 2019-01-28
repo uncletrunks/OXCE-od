@@ -825,7 +825,7 @@ void Globe::cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache)
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void Globe::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void Globe::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 

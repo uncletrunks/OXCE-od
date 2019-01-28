@@ -508,7 +508,7 @@ void State::setModal(InteractiveSurface *surface)
  * @param ncolors Amount of colors to replace.
  * @param immediately Apply changes immediately, otherwise wait in case of multiple setPalettes.
  */
-void State::setPalette(SDL_Color *colors, int firstcolor, int ncolors, bool immediately)
+void State::setPalette(const SDL_Color *colors, int firstcolor, int ncolors, bool immediately)
 {
 	if (colors)
 	{

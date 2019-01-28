@@ -155,7 +155,7 @@ Uint8 Slider::getColor() const
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void Slider::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void Slider::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	_txtMinus->setPalette(colors, firstcolor, ncolors);

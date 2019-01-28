@@ -60,7 +60,7 @@ FpsCounter::~FpsCounter()
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void FpsCounter::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void FpsCounter::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	_text->setPalette(colors, firstcolor, ncolors);

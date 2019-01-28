@@ -267,7 +267,7 @@ Uint8 TextEdit::getSecondaryColor() const
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void TextEdit::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void TextEdit::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	_text->setPalette(colors, firstcolor, ncolors);

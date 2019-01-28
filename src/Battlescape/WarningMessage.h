@@ -48,7 +48,7 @@ public:
 	/// Initializes the warning message's resources.
 	void initText(Font *big, Font *small, Language *lang) override;
 	/// Sets the warning message's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Shows the warning message.
 	void showMessage(const std::string &msg);
 	/// Handles the timers.

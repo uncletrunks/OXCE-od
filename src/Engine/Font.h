@@ -76,7 +76,7 @@ public:
 	/// Gets the font's palette.
 	SDL_Color *getPalette() const;
 	/// Sets the font's palette.
-	void setPalette(SDL_Color *colors, int firstcolor, int ncolors);
+	void setPalette(const SDL_Color *colors, int firstcolor, int ncolors);
 };
 
 }

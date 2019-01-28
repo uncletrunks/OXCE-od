@@ -71,7 +71,7 @@ public:
 	/// Cleans up the inventory.
 	~Inventory();
 	/// Sets the inventory's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Sets the inventory's Time Unit mode.
 	void setTuMode(bool tu);
 	/// Gets the inventory's selected unit.

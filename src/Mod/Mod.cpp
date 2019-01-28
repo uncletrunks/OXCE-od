@@ -868,7 +868,7 @@ Palette *Mod::getPalette(const std::string &name, bool error) const
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void Mod::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void Mod::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	_statePalette = colors;
 	for (std::map<std::string, Font*>::iterator i = _fonts.begin(); i != _fonts.end(); ++i)

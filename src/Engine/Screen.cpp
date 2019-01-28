@@ -225,7 +225,7 @@ void Screen::clear()
  * @param ncolors Amount of colors to replace.
  * @param immediately Apply palette changes immediately, otherwise wait for next blit.
  */
-void Screen::setPalette(SDL_Color* colors, int firstcolor, int ncolors, bool immediately)
+void Screen::setPalette(const SDL_Color* colors, int firstcolor, int ncolors, bool immediately)
 {
 	if (_numColors && (_numColors != ncolors) && (_firstColor != firstcolor))
 	{
@@ -242,10 +242,10 @@ void Screen::setPalette(SDL_Color* colors, int firstcolor, int ncolors, bool imm
 		_firstColor = firstcolor;
 	}
 
-	SDL_SetColors(_surface.get(), colors, firstcolor, ncolors);
+	SDL_SetColors(_surface.get(), const_cast<SDL_Color *>(colors), firstcolor, ncolors);
 
 	// defer actual update of screen until SDL_Flip()
-	if (immediately && _screen->format->BitsPerPixel == 8 && SDL_SetColors(_screen, colors, firstcolor, ncolors) == 0)
+	if (immediately && _screen->format->BitsPerPixel == 8 && SDL_SetColors(_screen, const_cast<SDL_Color *>(colors), firstcolor, ncolors) == 0)
 	{
 		Log(LOG_DEBUG) << "Display palette doesn't match requested palette";
 	}

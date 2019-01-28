@@ -63,7 +63,7 @@ public:
 	/// Gets the slider's color.
 	Uint8 getColor() const;
 	/// Sets the slider's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Sets the slider's range.
 	void setRange(int min, int max);
 	/// Sets the slider's value.

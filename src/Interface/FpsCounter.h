@@ -42,7 +42,7 @@ public:
 	/// Cleans up all the FPS counter resources.
 	~FpsCounter();
 	/// Sets the FPS counter's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Sets the FpsCounter's color.
 	void setColor(Uint8 color) override;
 	/// Handles keyboard events.

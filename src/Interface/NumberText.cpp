@@ -257,7 +257,7 @@ Uint8 NumberText::getColor() const
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void NumberText::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void NumberText::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	for (int i = 0; i < 10; ++i)

@@ -60,7 +60,7 @@ public:
 	/// Gets the total frames in the set.
 	size_t getTotalFrames() const;
 	/// Sets the surface set's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 };
 
 }

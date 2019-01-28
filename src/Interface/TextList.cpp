@@ -473,7 +473,7 @@ void TextList::setColumns(int cols, ...)
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void TextList::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void TextList::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	for (std::vector< std::vector<Text*> >::iterator u = _texts.begin(); u < _texts.end(); ++u)

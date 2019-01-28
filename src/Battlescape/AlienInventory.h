@@ -46,7 +46,7 @@ public:
 	/// Cleans up the inventory.
 	~AlienInventory();
 	/// Sets the inventory's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Gets the inventory's selected unit.
 	BattleUnit *getSelectedUnit() const;
 	/// Sets the inventory's selected unit.

@@ -897,10 +897,10 @@ SurfaceCrop Surface::getCrop()
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void Surface::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void Surface::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	if (_surface->format->BitsPerPixel == 8)
-		SDL_SetColors(_surface.get(), colors, firstcolor, ncolors);
+		SDL_SetColors(_surface.get(), const_cast<SDL_Color *>(colors), firstcolor, ncolors);
 }
 
 /**

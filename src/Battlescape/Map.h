@@ -106,7 +106,7 @@ public:
 	/// Draws the surface.
 	void draw() override;
 	/// Sets the palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Special handling for mouse press.
 	void mousePress(Action *action, State *state) override;
 	/// Special handling for mouse release.

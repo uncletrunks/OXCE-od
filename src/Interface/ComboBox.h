@@ -67,7 +67,7 @@ public:
 	/// Sets the Y position of the surface.
 	void setY(int y) override;
 	/// Sets the palette of the text list.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
+	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Initializes the resources for the text list.
 	void initText(Font *big, Font *small, Language *lang) override;
 	/// Sets the background surface.

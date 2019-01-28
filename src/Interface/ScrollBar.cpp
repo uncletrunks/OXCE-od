@@ -139,7 +139,7 @@ void ScrollBar::setBackground(Surface *bg)
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
  */
-void ScrollBar::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+void ScrollBar::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	_track->setPalette(colors, firstcolor, ncolors);
