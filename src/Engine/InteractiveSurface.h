@@ -60,7 +60,7 @@ public:
 	/// Cleans up the interactive surface.
 	virtual ~InteractiveSurface();
 	/// Sets the surface's visibility.
-	void setVisible(bool visible);
+	void setVisible(bool visible) override;
 	/// Processes any pending events.
 	virtual void handle(Action *action, State *state);
 	/// Sets the focus of this surface.

@@ -69,9 +69,9 @@ public:
 	/// Handler for changing the filter by combobox.
 	void cbxFilterByChange(Action *action);
 	/// Resets state.
-	void init();
+	void init() override;
 	/// Runs the timers.
-	void think();
+	void think() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handlers for Quick Search.

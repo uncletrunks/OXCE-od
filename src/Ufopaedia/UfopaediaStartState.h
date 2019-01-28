@@ -56,7 +56,7 @@ namespace OpenXcom
 		const std::vector<std::string> &_cats;
 
 		// navigation callbacks
-		void think();
+		void think() override;
 		void btnSectionClick(Action *action);
 		void btnOkClick(Action *action);
 

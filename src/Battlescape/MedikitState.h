@@ -58,6 +58,6 @@ public:
 	/// Creates the MedikitState.
 	MedikitState(BattleUnit *targetUnit, BattleAction *action, TileEngine *tile);
 	/// Handler for right-clicking anything.
-	void handle(Action *action);
+	void handle(Action *action) override;
 };
 }

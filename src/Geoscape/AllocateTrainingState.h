@@ -63,7 +63,7 @@ public:
 	/// Handler for changing the sort by combobox.
 	void cbxSortByChange(Action *action);
 	/// Updates the soldier info.
-	void init();
+	void init() override;
 	/// Handler for clicking the Soldiers reordering button.
 	void lstItemsLeftArrowClick(Action *action);
 	/// Moves a soldier up.

@@ -77,13 +77,13 @@ public:
 	/// Finishes loading the base (more specifically all craft in the base) from YAML.
 	void finishLoading(const YAML::Node& node, SavedGame *save);
 	/// Saves the base to YAML.
-	YAML::Node save() const;
+	YAML::Node save() const override;
 	/// Gets the base's type.
-	std::string getType() const;
+	std::string getType() const override;
 	/// Gets the base's name.
-	std::string getName(Language *lang = 0) const;
+	std::string getName(Language *lang = 0) const override;
 	/// Gets the base's marker sprite.
-	int getMarker() const;
+	int getMarker() const override;
 	/// Gets the base's facilities.
 	std::vector<BaseFacility*> *getFacilities();
 	/// Gets the base's soldiers.

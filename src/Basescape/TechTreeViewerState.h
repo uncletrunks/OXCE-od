@@ -64,7 +64,7 @@ public:
 	/// Cleans up the Tech Tree Viewer state.
 	~TechTreeViewerState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the New button.

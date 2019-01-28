@@ -35,9 +35,9 @@ public:
 	/// Cleans up the waypoint.
 	~Waypoint();
 	/// Gets the waypoint's type.
-	std::string getType() const;
+	std::string getType() const override;
 	/// Gets the waypoint's marker sprite.
-	int getMarker() const;
+	int getMarker() const override;
 };
 
 }

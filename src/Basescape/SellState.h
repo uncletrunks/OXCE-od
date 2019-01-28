@@ -75,9 +75,9 @@ public:
 	/// Cleans up the Sell state.
 	~SellState();
 	/// Resets state.
-	void init();
+	void init() override;
 	/// Runs the timers.
-	void think();
+	void think() override;
 	/// Updates the item list.
 	void updateList();
 	/// Handler for clicking the OK button.

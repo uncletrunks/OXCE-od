@@ -37,20 +37,20 @@ public:
 	/// Cleans up the frame.
 	~Frame();
 	/// Sets the border color.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the border color.
 	Uint8 getColor() const;
-	void setBorderColor(Uint8 color);
+	void setBorderColor(Uint8 color) override;
 	/// Sets the background color.
-	void setSecondaryColor(Uint8 bg);
+	void setSecondaryColor(Uint8 bg) override;
 	/// Gets the background color.
 	Uint8 getSecondaryColor() const;
 	/// Sets the high contrast color setting.
-	void setHighContrast(bool contrast);
+	void setHighContrast(bool contrast) override;
 	/// Sets the border thickness.
 	void setThickness(int thickness);
 	/// Draws the frame.
-	void draw();
+	void draw() override;
 };
 
 }

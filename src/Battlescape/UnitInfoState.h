@@ -65,9 +65,9 @@ public:
 	/// Cleans up the Unit Info state.
 	~UnitInfoState();
 	/// Updates the unit info.
-	void init();
+	void init() override;
 	/// Handler for clicking the button.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Handler for clicking the Previous button.
 	void btnPrevClick(Action *action);
 	/// Handler for clicking the Next button.

@@ -107,7 +107,7 @@ private:
 	/// Updates display of assigned/available engineers and workshop space.
 	void setAssignedEngineer();
 	/// Runs state functionality every cycle.
-	void think();
+	void think() override;
 	/// Builds the User Interface.
 	void buildUi();
 	/// Helper to exit the State.

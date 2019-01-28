@@ -52,7 +52,7 @@ public:
 	/// Handler for clicking the Cancel button.
 	void btnOkClick(Action *action);
 	/// Updates the mission info.
-	void init();
+	void init() override;
 	/// Handler for clicking the Previous button.
 	void btnPrevClick(Action *action);
 	/// Handler for clicking the Next button.

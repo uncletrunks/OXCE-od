@@ -53,8 +53,8 @@ public:
 	/// Handler for the one level down button.
 	void btnLevelDownClick (Action * action);
 	/// Handler for right-clicking anything.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Handles timers.
-	void think();
+	void think() override;
 };
 }

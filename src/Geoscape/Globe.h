@@ -166,15 +166,15 @@ public:
 	/// Caches visible globe polygons.
 	void cachePolygons();
 	/// Sets the palette of the globe.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Handles the timers.
-	void think();
+	void think() override;
 	/// Blinks the markers.
 	void blink();
 	/// Rotates the globe.
 	void rotate();
 	/// Draws the whole globe.
-	void draw();
+	void draw() override;
 	/// Draws the ocean of the globe.
 	void drawOcean();
 	/// Draws the land of the globe.
@@ -192,15 +192,15 @@ public:
 	/// Blits the globe onto another surface.
 	void blit(SDL_Surface *surface) override;
 	/// Special handling for mouse hover.
-	void mouseOver(Action *action, State *state);
+	void mouseOver(Action *action, State *state) override;
 	/// Special handling for mouse presses.
-	void mousePress(Action *action, State *state);
+	void mousePress(Action *action, State *state) override;
 	/// Special handling for mouse releases.
-	void mouseRelease(Action *action, State *state);
+	void mouseRelease(Action *action, State *state) override;
 	/// Special handling for mouse clicks.
-	void mouseClick(Action *action, State *state);
+	void mouseClick(Action *action, State *state) override;
 	/// Special handling for key presses.
-	void keyboardPress(Action *action, State *state);
+	void keyboardPress(Action *action, State *state) override;
 	/// Get the polygons texture and shade at the given point.
 	void getPolygonTextureAndShade(double lon, double lat, int *texture, int *shade) const;
 	/// Sets hover base position.

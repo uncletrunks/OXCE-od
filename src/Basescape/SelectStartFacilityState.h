@@ -42,7 +42,7 @@ public:
 	/// Handler for clicking the Reset button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Facilities list.
-	void lstFacilitiesClick(Action *action);
+	void lstFacilitiesClick(Action *action) override;
 	/// Handler for when the facility is actually built.
 	void facilityBuilt();
 };

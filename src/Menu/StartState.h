@@ -53,11 +53,11 @@ public:
 	/// Cleans up the Start state.
 	~StartState();
 	/// Reset everything.
-	void init();
+	void init() override;
 	/// Displays messages.
-	void think();
+	void think() override;
 	/// Handles key clicks.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Animates the terminal.
 	void animate();
 	/// Adds a line of text.

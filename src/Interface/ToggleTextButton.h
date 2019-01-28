@@ -34,11 +34,11 @@ private:
 
 public:
 
-    void draw();
-    void mousePress(Action *action, State *state);
+    void draw() override;
+    void mousePress(Action *action, State *state) override;
     void setPressed(bool pressed);
     bool getPressed() const { return _isPressed; }
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
     void setInvertColor(Uint8 color);
     ToggleTextButton(int width, int height, int x, int y);
     ~ToggleTextButton(void);

@@ -49,7 +49,7 @@ public:
 	/// Creates the interface.
 	void buildUi(SDL_Color *palette);
 	/// Saves the game.
-	void think();
+	void think() override;
 	/// Shows an error message.
 	void error(const std::string &msg);
 };

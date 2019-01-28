@@ -44,13 +44,13 @@ public:
 	/// Cleans up the alien base.
 	~AlienBase();
 	/// Loads the alien base from YAML.
-	void load(const YAML::Node& node);
+	void load(const YAML::Node& node) override;
 	/// Saves the alien base to YAML.
-	YAML::Node save() const;
+	YAML::Node save() const override;
 	/// Gets the alien base's type.
-	std::string getType() const;
+	std::string getType() const override;
 	/// Gets the alien base's marker sprite.
-	int getMarker() const;
+	int getMarker() const override;
 	/// Gets the alien base's pact country.
 	const std::string &getPactCountry() const;
 	/// Sets the alien base's pact country.
@@ -70,7 +70,7 @@ public:
 
 	AlienDeployment *getDeployment() const;
 	void setDeployment(AlienDeployment *deployment);
- 
+
 	/// Gets the month on which the base spawned.
 	int getStartMonth() const { return _startMonth; }
 	/// Gets the number of minutes passed since the last hunt mission was generated.

@@ -58,17 +58,17 @@ public:
 	/// Sets the background surface.
 	void setBackground(Surface *bg);
 	/// Sets the border color.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the border color.
 	Uint8 getColor() const;
 	/// Sets the high contrast color setting.
-	void setHighContrast(bool contrast);
+	void setHighContrast(bool contrast) override;
 	/// Handles the timers.
-	void think();
+	void think() override;
 	/// Popups the window.
 	void popup();
 	/// Draws the window.
-	void draw();
+	void draw() override;
 	/// sets the X delta.
 	void setDX(int dx);
 	/// sets the Y delta.

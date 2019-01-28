@@ -57,7 +57,7 @@ public:
 	/// Cleans up the Craft Info state.
 	~CraftInfoState();
 	/// Updates the craft info.
-	void init();
+	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Ufopedia button.

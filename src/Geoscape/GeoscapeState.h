@@ -62,11 +62,11 @@ public:
 	/// Cleans up the Geoscape state.
 	~GeoscapeState();
 	/// Handle keypresses.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Updates the palette and timer.
-	void init();
+	void init() override;
 	/// Runs the timer.
-	void think();
+	void think() override;
 	/// Displays the game time/date. (+Funds)
 	void timeDisplay();
 	/// Advances the game timer.
@@ -138,7 +138,7 @@ public:
 	/// Handler for right-clicking the Zoom Out icon.
 	void btnZoomOutRightClick(Action *action);
 	/// Blit method - renders the state and dogfights.
-	void blit();
+	void blit() override;
 	/// Globe zoom in effect for dogfights.
 	void zoomInEffect();
 	/// Globe zoom out effect for dogfights.
@@ -160,7 +160,7 @@ public:
 	/// Handles base defense
 	void handleBaseDefense(Base *base, Ufo *ufo);
 	/// Update the resolution settings, we just resized the window.
-	void resize(int &dX, int &dY);
+	void resize(int &dX, int &dY) override;
 private:
 	/// Handle alien mission generation.
 	void determineAlienMissions();

@@ -75,7 +75,7 @@ public:
 	~InventoryState();
 	/// Updates all soldier info.
 	void setGlobalLayoutIndex(int index);
-	void init();
+	void init() override;
 	/// Handler for pressing on the Name edit.
 	void edtSoldierPress(Action *action);
 	/// Handler for changing text on the Name edit.

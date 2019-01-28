@@ -50,7 +50,7 @@ public:
 	/// Cleans up the Saved Game state.
 	~ListLoadOriginalState();
 	/// Sets up the saves list.
-	void init();
+	void init() override;
 	/// Handler for clicking a Save Slot button.
 	void btnSlotClick(Action *action);
 	/// Handler for clicking the OpenXcom button.

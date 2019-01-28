@@ -56,7 +56,7 @@ public:
 	/// Cleans up the Monthly Report state.
 	~MonthlyReportState();
 	/// Updates the ending.
-	void init();
+	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Calculate monthly scores.

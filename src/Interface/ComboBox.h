@@ -63,21 +63,21 @@ public:
 	/// Cleans up the combo box.
 	~ComboBox();
 	/// Sets the X position of the surface.
-	void setX(int x);
+	void setX(int x) override;
 	/// Sets the Y position of the surface.
-	void setY(int y);
+	void setY(int y) override;
 	/// Sets the palette of the text list.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Initializes the resources for the text list.
-	void initText(Font *big, Font *small, Language *lang);
+	void initText(Font *big, Font *small, Language *lang) override;
 	/// Sets the background surface.
 	void setBackground(Surface *bg);
 	/// Sets the border color.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the border color.
 	Uint8 getColor() const;
 	/// Sets the high contrast color setting.
-	void setHighContrast(bool contrast);
+	void setHighContrast(bool contrast) override;
 	/// Sets the arrow color of the text list.
 	void setArrowColor(Uint8 color);
 	/// Gets the selected option in the list.
@@ -94,9 +94,9 @@ public:
 	/// Blits the combo box onto another surface.
 	void blit(SDL_Surface *surface) override;
 	/// Thinks arrow buttons.
-	void think();
+	void think() override;
 	/// Handle arrow buttons.
-	void handle(Action *action, State *state);
+	void handle(Action *action, State *state) override;
 	/// Toggles the combo box state.
 	void toggle(bool first = false);
 	/// Hooks an action handler to when the slider changes.

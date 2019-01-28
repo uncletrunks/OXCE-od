@@ -46,9 +46,9 @@ public:
 	/// Cleans up the MeleeAttackBState.
 	~MeleeAttackBState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Runs state functionality every cycle.
-	void think();
+	void think() override;
 	/// Performs a melee attack
 	void performMeleeAttack();
 	/// Determine if the attack hit, and if so, do stuff.

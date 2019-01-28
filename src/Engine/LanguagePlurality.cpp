@@ -29,7 +29,7 @@ namespace OpenXcom
 class OneSingular: public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new OneSingular; }
 };
 
@@ -50,7 +50,7 @@ const char *OneSingular::getSuffix(unsigned n) const
 class ZeroOneSingular : public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new ZeroOneSingular; }
 };
 
@@ -71,7 +71,7 @@ const char *ZeroOneSingular::getSuffix(unsigned n) const
 class NoSingular : public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new NoSingular; }
 };
 
@@ -87,7 +87,7 @@ const char *NoSingular::getSuffix(unsigned) const
 class CyrillicPlurality : public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new CyrillicPlurality; }
 };
 
@@ -118,7 +118,7 @@ const char *CyrillicPlurality::getSuffix(unsigned n) const
 class CzechPlurality : public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new CzechPlurality; }
 };
 
@@ -142,7 +142,7 @@ const char *CzechPlurality::getSuffix(unsigned n) const
 class PolishPlurality : public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new PolishPlurality; }
 };
 
@@ -173,7 +173,7 @@ const char *PolishPlurality::getSuffix(unsigned n) const
 class RomanianPlurality : public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new RomanianPlurality; }
 };
 
@@ -198,7 +198,7 @@ const char *RomanianPlurality::getSuffix(unsigned n) const
 class CroatianPlurality : public LanguagePlurality
 {
 public:
-	virtual const char *getSuffix(unsigned n) const;
+	virtual const char *getSuffix(unsigned n) const override;
 	static LanguagePlurality *create() { return new CroatianPlurality; }
 };
 

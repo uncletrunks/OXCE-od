@@ -51,7 +51,7 @@ public:
 	/// Cleans up the Multiple Targets state.
 	~MultipleTargetsState();
 	/// Updates the window.
-	void init();
+	void init() override;
 	/// Popup for a target.
 	void popupTarget(Target *target);
 	/// Handler for clicking the Cancel button.

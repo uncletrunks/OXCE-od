@@ -56,7 +56,7 @@ public:
 	/// Cleans up the Saved Game state.
 	virtual ~ListGamesState();
 	/// Sets up the saves list.
-	void init();
+	void init() override;
 	/// Sorts the savegame list.
 	void sortList(SaveSort sort);
 	/// Updates the savegame list.

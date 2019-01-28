@@ -49,11 +49,11 @@ public:
 	/// Cleans up the ProjectileFly.
 	~ProjectileFlyBState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Handles a cancel request.
-	void cancel();
+	void cancel() override;
 	/// Runs state functionality every cycle.
-	void think();
+	void think() override;
 	/// Validates the throwing range.
 	static bool validThrowRange(BattleAction *action, Position origin, Tile *target);
 	/// Calculates the maximum throwing range.

@@ -46,7 +46,7 @@ public:
 	/// Cleans up the Briefing state.
 	~BriefingState();
 	/// Initialization
-	void init();
+	void init() override;
 	/// Handler for clicking the Ok button.
 	void btnOkClick(Action *action);
 };

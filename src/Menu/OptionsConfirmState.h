@@ -47,7 +47,7 @@ public:
 	/// Cleans up the Confirm Display Options state.
 	~OptionsConfirmState();
 	/// Handle timers.
-	void think();
+	void think() override;
 	/// Countdown for reverting options.
 	void countdown();
 	/// Handler for clicking the Yes button.

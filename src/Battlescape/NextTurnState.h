@@ -54,12 +54,12 @@ public:
 	/// Cleans up the Next Turn state.
 	~NextTurnState();
 	/// Handler for clicking anything.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Handles the timer.
-	void think();
+	void think() override;
 	/// Closes the window.
 	void close();
-	void resize(int &dX, int &dY);
+	void resize(int &dX, int &dY) override;
 };
 
 }

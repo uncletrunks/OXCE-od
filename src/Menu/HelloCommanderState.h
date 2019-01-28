@@ -42,7 +42,7 @@ public:
 	/// Cleans up the HelloCommander state.
 	~HelloCommanderState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 };

@@ -44,13 +44,13 @@ public:
 	/// Gets the number text's value.
 	unsigned int getValue() const;
 	/// Sets the number text's color.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the number text's color.
 	Uint8 getColor() const;
 	/// Sets the number text's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Draws the number text.
-	void draw();
+	void draw() override;
 	/// sets this numbertext to have a border or not
 	void setBordered(bool bordered);
 

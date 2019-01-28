@@ -55,7 +55,7 @@ public:
 	/// Cleans up the New Battle state.
 	~NewBattleState();
 	/// Resets state.
-	void init();
+	void init() override;
 	/// Loads New Battle settings.
 	void load(const std::string &filename = "battle");
 	/// Saves New Battle settings.

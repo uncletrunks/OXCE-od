@@ -46,13 +46,13 @@ public:
 	/// Cleans up the inventory.
 	~AlienInventory();
 	/// Sets the inventory's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Gets the inventory's selected unit.
 	BattleUnit *getSelectedUnit() const;
 	/// Sets the inventory's selected unit.
 	void setSelectedUnit(BattleUnit *unit);
 	/// Draws the inventory.
-	void draw();
+	void draw() override;
 	/// Draws the inventory grid.
 	void drawGrid();
 	/// Draws the inventory items.
@@ -60,7 +60,7 @@ public:
 	/// Blits the inventory onto another surface.
 	void blit(SDL_Surface *surface) override;
 	/// Special handling for mouse clicks.
-	void mouseClick(Action *action, State *state);
+	void mouseClick(Action *action, State *state) override;
 };
 
 }

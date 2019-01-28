@@ -102,21 +102,21 @@ public:
 	/// Initializes the map.
 	void init();
 	/// Handles timers.
-	void think();
+	void think() override;
 	/// Draws the surface.
-	void draw();
+	void draw() override;
 	/// Sets the palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Special handling for mouse press.
-	void mousePress(Action *action, State *state);
+	void mousePress(Action *action, State *state) override;
 	/// Special handling for mouse release.
-	void mouseRelease(Action *action, State *state);
+	void mouseRelease(Action *action, State *state) override;
 	/// Special handling for mouse over
-	void mouseOver(Action *action, State *state);
+	void mouseOver(Action *action, State *state) override;
 	/// Special handling for key presses.
-	void keyboardPress(Action *action, State *state);
+	void keyboardPress(Action *action, State *state) override;
 	/// Special handling for key releases.
-	void keyboardRelease(Action *action, State *state);
+	void keyboardRelease(Action *action, State *state) override;
 	/// Rotates the tileframes 0-7
 	void animate(bool redraw);
 	/// Sets the battlescape selector position relative to mouseposition.
@@ -152,9 +152,9 @@ public:
 	/// Refreshes the battlescape selector after scrolling.
 	void refreshSelectorPosition();
 	/// Special handling for updating map height.
-	void setHeight(int height);
+	void setHeight(int height) override;
 	/// Special handling for updating map width.
-	void setWidth(int width);
+	void setWidth(int width) override;
 	/// Get the vertical position of the hidden movement screen.
 	int getMessageY() const;
 	/// Get the icon height.

@@ -55,7 +55,7 @@ public:
 	/// Cleans up the Soldier Diary state.
 	~SoldierDiaryOverviewState();
 	/// Updates the soldier info.
-	void init();
+	void init() override;
 	/// Set the soldier's Id.
 	void setSoldierId(size_t soldierId);
 	/// Handler for clicking the OK button.

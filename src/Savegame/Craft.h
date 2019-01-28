@@ -73,19 +73,19 @@ public:
 	/// Finishes loading the craft from YAML (called after all other XCOM craft are loaded too).
 	void finishLoading(const YAML::Node& node, SavedGame *save);
 	/// Saves the craft to YAML.
-	YAML::Node save() const;
+	YAML::Node save() const override;
 	/// Loads a craft ID from YAML.
 	static CraftId loadId(const YAML::Node &node);
 	/// Gets the craft's type.
-	std::string getType() const;
+	std::string getType() const override;
 	/// Gets the craft's ruleset.
 	const RuleCraft *getRules() const;
 	/// Sets the craft's ruleset.
 	void changeRules(RuleCraft *rules);
 	/// Gets the craft's default name.
-	std::string getDefaultName(Language *lang) const;
+	std::string getDefaultName(Language *lang) const override;
 	/// Gets the craft's marker sprite.
-	int getMarker() const;
+	int getMarker() const override;
 	/// Gets the craft's base.
 	Base *getBase() const;
 	/// Sets the craft's base.
@@ -97,7 +97,7 @@ public:
 	/// Gets the craft's altitude.
 	std::string getAltitude() const;
 	/// Sets the craft's destination.
-	void setDestination(Target *dest);
+	void setDestination(Target *dest) override;
 	/// Gets whether the craft is on auto patrol.
 	bool getIsAutoPatrolling() const;
 	/// Sets whether the craft is on auto patrol.

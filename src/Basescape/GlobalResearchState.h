@@ -57,7 +57,7 @@ public:
 	/// Fills the list with ResearchProjects from all bases.
 	void fillProjectList();
 	/// Updates the research list.
-	void init();
+	void init() override;
 };
 
 }

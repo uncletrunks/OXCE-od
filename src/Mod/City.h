@@ -35,16 +35,16 @@ private:
 	std::string _name;
 
 	/// Gets the city's type (unused).
-	std::string getType() const { return ""; }
+	std::string getType() const  override { return ""; }
 public:
 	/// Creates a new city at a certain position.
 	City(const std::string &name, double lon, double lat);
 	/// Cleans up the city.
 	~City();
 	/// Gets the city's name.
-	std::string getName(Language *lang) const;
+	std::string getName(Language *lang) const override;
 	/// Gets the city's marker.
-	int getMarker() const;
+	int getMarker() const override;
 };
 
 }

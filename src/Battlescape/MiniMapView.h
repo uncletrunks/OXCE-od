@@ -49,18 +49,18 @@ class MiniMapView : public InteractiveSurface
 	int _totalMouseMoveX, _totalMouseMoveY;
 	bool _mouseMovedOverThreshold;
 	/// Handles pressing on the MiniMap.
-	void mousePress(Action *action, State *state);
+	void mousePress(Action *action, State *state) override;
 	/// Handles clicking on the MiniMap.
-	void mouseClick(Action *action, State *state);
+	void mouseClick(Action *action, State *state) override;
 	/// Handles moving mouse over the MiniMap.
-	void mouseOver(Action *action, State *state);
+	void mouseOver(Action *action, State *state) override;
 	/// Handles moving the mouse into the MiniMap surface.
-	void mouseIn(Action *action, State *state);
+	void mouseIn(Action *action, State *state) override;
 public:
 	/// Creates the MiniMapView.
 	MiniMapView(int w, int h, int x, int y, Game * game, Camera * camera, SavedBattleGame * battleGame);
 	/// Draws the minimap.
-	void draw();
+	void draw() override;
 	/// Changes the displayed minimap level.
 	int up();
 	/// Changes the displayed minimap level.

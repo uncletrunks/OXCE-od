@@ -70,15 +70,15 @@ public:
 	/// Cleans up the text list.
 	~TextList();
 	/// Sets the X position of the surface.
-	void setX(int x);
+	void setX(int x) override;
 	/// Sets the Y position of the surface.
-	void setY(int y);
+	void setY(int y) override;
 	/// Gets the arrowsLeftEdge.
 	int getArrowsLeftEdge();
 	/// Gets the arrowsRightEdge.
 	int getArrowsRightEdge();
 	/// Unpresses the surface.
-	void unpress(State *state);
+	void unpress(State *state) override;
 	/// Sets the text color of a certain cell.
 	void setCellColor(size_t row, size_t column, Uint8 color);
 	/// Sets the text color of a certain row.
@@ -108,23 +108,23 @@ public:
 	/// Sets the columns in the text list.
 	void setColumns(int cols, ...);
 	/// Sets the palette of the text list.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Initializes the resources for the text list.
-	void initText(Font *big, Font *small, Language *lang);
+	void initText(Font *big, Font *small, Language *lang) override;
 	/// Sets the height of the surface.
-	void setHeight(int height);
+	void setHeight(int height) override;
 	/// Sets the text color of the text list.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the text color of the text list.
 	Uint8 getColor() const;
 	/// Sets the secondary color of the text list.
-	void setSecondaryColor(Uint8 color);
+	void setSecondaryColor(Uint8 color) override;
 	/// Gets the secondary color of the text list.
 	Uint8 getSecondaryColor() const;
 	/// Sets the text list's wordwrap setting.
 	void setWordWrap(bool wrap);
 	/// Sets the text list's high contrast color setting.
-	void setHighContrast(bool contrast);
+	void setHighContrast(bool contrast) override;
 	/// Sets the text horizontal alignment of the text list.
 	void setAlign(TextHAlign align, int col = -1);
 	/// Sets whether to separate columns with dots.
@@ -170,23 +170,23 @@ public:
 	/// Sets the list scrolling.
 	void setScrolling(bool scrolling, int scrollPos = 4);
 	/// Draws the text onto the text list.
-	void draw();
+	void draw() override;
 	/// Blits the text list onto another surface.
 	void blit(SDL_Surface *surface) override;
 	/// Thinks arrow buttons.
-	void think();
+	void think() override;
 	/// Handles arrow buttons.
-	void handle(Action *action, State *state);
+	void handle(Action *action, State *state) override;
 	/// Special handling for mouse presses.
-	void mousePress(Action *action, State *state);
+	void mousePress(Action *action, State *state) override;
 	/// Special handling for mouse releases.
-	void mouseRelease(Action *action, State *state);
+	void mouseRelease(Action *action, State *state) override;
 	/// Special handling for mouse clicks.
-	void mouseClick(Action *action, State *state);
+	void mouseClick(Action *action, State *state) override;
 	/// Special handling for mouse hovering.
-	void mouseOver(Action *action, State *state);
+	void mouseOver(Action *action, State *state) override;
 	/// Special handling for mouse hovering out.
-	void mouseOut(Action *action, State *state);
+	void mouseOut(Action *action, State *state) override;
 	/// get the scroll depth
 	size_t getScroll();
 	/// set the scroll depth
@@ -195,7 +195,7 @@ public:
 	void setComboBox(ComboBox *comboBox);
 	/// Check for a combobox.
 	ComboBox *getComboBox() const;
-	void setBorderColor(Uint8 color);
+	void setBorderColor(Uint8 color) override;
 	int getScrollbarColor();
 	/// Allows the cell to flood into other columns.
 	void setFlooding(bool flooding);

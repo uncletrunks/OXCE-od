@@ -38,11 +38,11 @@ public:
 	/// Cleans up the UnitTurnBState.
 	~UnitTurnBState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Handles a cancels request.
-	void cancel();
+	void cancel() override;
 	/// Runs state functionality every cycle.
-	void think();
+	void think() override;
 };
 
 }

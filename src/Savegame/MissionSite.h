@@ -46,11 +46,11 @@ public:
 	/// Cleans up the mission site.
 	~MissionSite();
 	/// Loads the mission site from YAML.
-	void load(const YAML::Node& node);
+	void load(const YAML::Node& node) override;
 	/// Saves the mission site to YAML.
-	YAML::Node save() const;
+	YAML::Node save() const override;
 	/// Gets the waypoint's type.
-	std::string getType() const;
+	std::string getType() const override;
 	/// Gets the mission site's ruleset.
 	const RuleAlienMission *getRules() const;
 	/// Gets the mission site's deployment.
@@ -58,9 +58,9 @@ public:
 	/// Gets the optional alien weapon deployment for site.
 	const AlienDeployment *getMissionCustomDeploy() const;
 	/// Gets the mission site's marker name.
-	std::string getMarkerName() const;
+	std::string getMarkerName() const override;
 	/// Gets the mission site's marker sprite.
-	int getMarker() const;
+	int getMarker() const override;
 	/// Gets the seconds until this mission site expires.
 	size_t getSecondsRemaining() const;
 	/// Sets the seconds until this mission site expires.

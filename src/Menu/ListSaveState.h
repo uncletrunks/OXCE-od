@@ -43,13 +43,13 @@ public:
 	/// Cleans up the Save Game state.
 	~ListSaveState();
 	/// Updates the savegame list.
-	void updateList();
+	void updateList() override;
 	/// Handler for pressing a key on the Save edit.
 	void edtSaveKeyPress(Action *action);
 	/// Handler for clicking on the Save Game button.
 	void btnSaveGameClick(Action *action);
 	/// Handler for clicking the Saves list.
-	void lstSavesPress(Action *action);
+	void lstSavesPress(Action *action) override;
 	/// Save game.
 	void saveGame();
 };

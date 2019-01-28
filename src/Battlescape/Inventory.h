@@ -71,7 +71,7 @@ public:
 	/// Cleans up the inventory.
 	~Inventory();
 	/// Sets the inventory's palette.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256) override;
 	/// Sets the inventory's Time Unit mode.
 	void setTuMode(bool tu);
 	/// Gets the inventory's selected unit.
@@ -79,7 +79,7 @@ public:
 	/// Sets the inventory's selected unit.
 	void setSelectedUnit(BattleUnit *unit);
 	/// Draws the inventory.
-	void draw();
+	void draw() override;
 	/// Draws the inventory grid.
 	void drawGrid();
 	/// Draws the inventory grid labels.
@@ -99,13 +99,13 @@ public:
 	/// Sets the mouse over item.
 	void setMouseOverItem(BattleItem *item);
 	/// Handles timers.
-	void think();
+	void think() override;
 	/// Blits the inventory onto another surface.
 	void blit(SDL_Surface *surface) override;
 	/// Special handling for mouse hovers.
-	void mouseOver(Action *action, State *state);
+	void mouseOver(Action *action, State *state) override;
 	/// Special handling for mouse clicks.
-	void mouseClick(Action *action, State *state);
+	void mouseClick(Action *action, State *state) override;
 	/// Unloads the selected weapon.
 	bool unload();
 	/// Checks whether the given item is visible with the current search string.

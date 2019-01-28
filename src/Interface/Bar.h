@@ -40,11 +40,11 @@ public:
 	/// Cleans up the bar.
 	~Bar();
 	/// Sets the bar's color.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the bar's color.
 	Uint8 getColor() const;
 	/// Sets the bar's second color.
-	void setSecondaryColor(Uint8 color);
+	void setSecondaryColor(Uint8 color) override;
 	/// Gets the bar's second color.
 	Uint8 getSecondaryColor() const;
 	/// Sets the bar's scale.
@@ -66,9 +66,9 @@ public:
 	/// Defines whether the second value should be drawn on top.
 	void setSecondValueOnTop(bool onTop);
 	/// Draws the bar.
-	void draw();
+	void draw() override;
 	/// set the outline color for the bar.
-	void setBorderColor(Uint8 bc);
+	void setBorderColor(Uint8 bc) override;
 };
 
 }

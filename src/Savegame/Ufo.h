@@ -61,7 +61,7 @@ private:
 	int _shootingAt, _hitFrame, _fireCountdown, _escapeCountdown;
 	RuleUfoStats _stats;
 	/// Calculates a new speed vector to the destination.
-	void calculateSpeed();
+	void calculateSpeed() override;
 	int _shield, _shieldRechargeHandle;
 	int _tractorBeamSlowdown;
 	bool _isHunterKiller, _isEscort;
@@ -85,9 +85,9 @@ public:
 	/// Saves the UFO to YAML.
 	YAML::Node save(bool newBattle) const;
 	/// Saves the UFO's ID to YAML.
-	YAML::Node saveId() const;
+	YAML::Node saveId() const override;
 	/// Gets the UFO's type.
-	std::string getType() const;
+	std::string getType() const override;
 	/// Gets the UFO's ruleset.
 	const RuleUfo *getRules() const;
 	/// Sets the UFO's ruleset.
@@ -99,11 +99,11 @@ public:
 	/// Sets the mission wave number that created this UFO.
 	void setMissionWaveNumber(int missionWaveNumber) { _missionWaveNumber = missionWaveNumber; }
 	/// Gets the UFO's default name.
-	std::string getDefaultName(Language *lang) const;
+	std::string getDefaultName(Language *lang) const override;
 	/// Gets the UFO's marker name.
-	std::string getMarkerName() const;
+	std::string getMarkerName() const override;
 	/// Gets the UFO's marker sprite.
-	int getMarker() const;
+	int getMarker() const override;
 	/// Gets the UFO's amount of damage.
 	int getDamage() const;
 	/// Sets the UFO's amount of damage.
@@ -172,7 +172,7 @@ public:
 	/// Sets the UFO escorted by this UFO.
 	void setEscortedUfo(Ufo *ufo);
 	/// Sets the UFO's destination.
-	void setDestination(Target *dest);
+	void setDestination(Target *dest) override;
 	/// Get which interceptor this ufo is engaging.
 	int getShootingAt() const;
 	/// Set which interceptor this ufo is engaging.

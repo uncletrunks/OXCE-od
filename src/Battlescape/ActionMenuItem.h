@@ -54,13 +54,13 @@ public:
 	/// Gets the assigned action TUs.
 	int getTUs() const;
 	/// Sets the palettes.
-	void setPalette(SDL_Color *colors, int firstcolor, int ncolors);
+	void setPalette(SDL_Color *colors, int firstcolor, int ncolors) override;
 	/// Redraws it.
-	void draw();
+	void draw() override;
 	/// Processes a mouse hover in event.
-	void mouseIn(Action *action, State *state);
+	void mouseIn(Action *action, State *state) override;
 	/// Processes a mouse hover out event.
-	void mouseOut(Action *action, State *state);
+	void mouseOut(Action *action, State *state) override;
 
 };
 

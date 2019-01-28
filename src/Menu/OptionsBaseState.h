@@ -56,7 +56,7 @@ public:
 	/// Restarts the game states.
 	static void restart(OptionsOrigin origin);
 	/// Initializes palettes.
-	void init();
+	void init() override;
 	/// Presses a certain category button.
 	void setCategory(TextButton *button);
 	/// Handler for clicking the OK button.
@@ -72,7 +72,7 @@ public:
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
 	/// Update the resolution settings, we just resized the window.
-	void resize(int &dX, int &dY);
+	void resize(int &dX, int &dY) override;
 };
 
 }

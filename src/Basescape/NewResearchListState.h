@@ -65,6 +65,6 @@ public:
 	/// Fills the ResearchProject list with possible ResearchProjects.
 	void fillProjectList(bool markAllAsSeen);
 	/// Initializes the state.
-	void init();
+	void init() override;
 };
 }

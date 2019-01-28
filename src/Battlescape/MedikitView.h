@@ -32,7 +32,7 @@ class MedikitView : public InteractiveSurface
 {
 	Game * _game;
 	/// Handles clicking on the body view.
-	void mouseClick (Action *action, State *state);
+	void mouseClick (Action *action, State *state) override;
 	int _selectedPart;
 	BattleUnit *_unit;
 	Text *_partTxt, *_woundTxt;
@@ -40,7 +40,7 @@ public:
 	/// Creates the MedikitView.
 	MedikitView (int w, int h, int x, int y, Game * game, BattleUnit *unit, Text *partTxt, Text *woundTxt);
 	/// Draws the body view.
-	void draw();
+	void draw() override;
 	/// Gets the selected body part.
 	int getSelectedPart() const;
 	/// Updates the seleted body part.

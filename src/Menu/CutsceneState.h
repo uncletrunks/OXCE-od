@@ -36,7 +36,7 @@ public:
 	/// Cleans up the CutsceneState.
 	~CutsceneState();
 	/// Replace this state on the stack with the real player state.
-	void init();
+	void init() override;
 
 	static const std::string WIN_GAME;
 	static const std::string LOSE_GAME;

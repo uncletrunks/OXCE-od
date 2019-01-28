@@ -46,7 +46,7 @@ public:
 	/// Cleans up the Slideshow state.
 	~SlideshowState();
 	/// Handle timers.
-	void think();
+	void think() override;
 	/// Handler for waiting the screen.
 	void screenTimer();
 	/// Handler for clicking the screen.

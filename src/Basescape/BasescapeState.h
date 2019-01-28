@@ -50,7 +50,7 @@ public:
 	/// Cleans up the Basescape state.
 	~BasescapeState();
 	/// Updates the base stats.
-	void init();
+	void init() override;
 	/// Sets a new base to display.
 	void setBase(Base *base);
 	/// Handler for clicking the Build New Base button.

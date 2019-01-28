@@ -111,7 +111,7 @@ public:
 	~DebriefingState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
-	void init();
+	void init() override;
 	/// Handler for clicking the STATS button.
 	void btnStatsClick(Action *action);
 	/// Handler for clicking the SELL button.

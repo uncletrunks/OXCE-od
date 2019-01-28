@@ -73,7 +73,7 @@ public:
 	/// Cleans up the Transfer Items state.
 	~TransferItemsState();
 	/// Runs the timers.
-	void think();
+	void think() override;
 	/// Updates the item list.
 	void updateList();
 	/// Handler for clicking the OK button.

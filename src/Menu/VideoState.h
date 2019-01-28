@@ -36,7 +36,7 @@ public:
 	/// Cleans up the Intro state.
 	~VideoState();
 	/// Plays the video
-	void init();
+	void init() override;
 };
 
 }

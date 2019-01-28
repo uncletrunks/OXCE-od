@@ -49,7 +49,7 @@ public:
 	/// Cleans up the Controls state.
 	~OptionsControlsState();
 	/// Fills controls list.
-	void init();
+	void init() override;
 	/// Handler for clicking the Controls list.
 	void lstControlsClick(Action *action);
 	/// Handler for pressing a key in the Controls list.

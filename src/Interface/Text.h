@@ -66,7 +66,7 @@ public:
 	/// Gets the text's current font.
 	Font *getFont() const;
 	/// Initializes the resources for the text.
-	void initText(Font *big, Font *small, Language *lang);
+	void initText(Font *big, Font *small, Language *lang) override;
 	/// Sets the text's string.
 	void setText(const std::string &text);
 	/// Gets the text's string.
@@ -76,7 +76,7 @@ public:
 	/// Sets the text's color invert setting.
 	void setInvert(bool invert);
 	/// Sets the text's high contrast color setting.
-	void setHighContrast(bool contrast);
+	void setHighContrast(bool contrast) override;
 	/// Sets the text's horizontal alignment.
 	void setAlign(TextHAlign align);
 	/// Gets the text's horizontal alignment.
@@ -86,11 +86,11 @@ public:
 	/// Gets the text's vertical alignment.
 	TextVAlign getVerticalAlign() const;
 	/// Sets the text's color.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the text's color.
 	Uint8 getColor() const;
 	/// Sets the text's secondary color.
-	void setSecondaryColor(Uint8 color);
+	void setSecondaryColor(Uint8 color) override;
 	/// Gets the text's secondary color.
 	Uint8 getSecondaryColor() const;
 	/// Gets the number of lines in the (wrapped, if wrapping is enabled) text
@@ -100,7 +100,7 @@ public:
 	/// Gets the rendered text's height.
 	int getTextHeight(int line = -1) const;
 	/// Draws the text.
-	void draw();
+	void draw() override;
 };
 
 }

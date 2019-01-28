@@ -42,9 +42,9 @@ public:
 	/// Cleans up the Infobox state.
 	~InfoboxState();
 	/// Handler for clicking anything.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Handles the timers.
-	void think();
+	void think() override;
 	/// Closes the window.
 	void close();
 

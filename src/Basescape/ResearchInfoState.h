@@ -83,7 +83,7 @@ public:
 	/// Handler for clicking the Less button.
 	void lessClick(Action *action);
 	/// Runs state functionality every cycle(used to update the timer).
-	void think();
+	void think() override;
 };
 
 }

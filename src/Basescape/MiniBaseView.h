@@ -55,12 +55,12 @@ public:
 	/// Sets the selected base for the mini base view.
 	void setSelectedBase(size_t base);
 	/// Draws the mini base view.
-	void draw();
+	void draw() override;
 	/// Special handling for mouse hovers.
-	void mouseOver(Action *action, State *state);
-	void setColor(Uint8 color);
-	void setSecondaryColor(Uint8 color);
-	void setBorderColor(Uint8 color);
+	void mouseOver(Action *action, State *state) override;
+	void setColor(Uint8 color) override;
+	void setSecondaryColor(Uint8 color) override;
+	void setBorderColor(Uint8 color) override;
 };
 
 }

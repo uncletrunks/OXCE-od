@@ -41,7 +41,7 @@ namespace OpenXcom
 	public:
 		UfopaediaSelectState(const std::string &section);
 		virtual ~UfopaediaSelectState();
-		void init();
+		void init() override;
 	protected:
 		std::string _section;
 		Window *_window;

@@ -42,9 +42,9 @@ public:
 	/// Cleans up the PsiAttack.
 	~PsiAttackBState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Runs state functionality every cycle.
-	void think();
+	void think() override;
 };
 
 }

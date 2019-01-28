@@ -60,7 +60,7 @@ public:
 	/// Cleans up the Soldier Info state.
 	~SoldierInfoState();
 	/// Updates the soldier info.
-	void init();
+	void init() override;
 	/// Set the soldier Id.
 	void setSoldierId(size_t soldier);
 	/// Handler for pressing on the Name edit.

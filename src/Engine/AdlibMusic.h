@@ -42,11 +42,11 @@ public:
 	/// Cleans up the music track.
 	~AdlibMusic();
 	/// Loads music from the specified file.
-	void load(const std::string &filename);
+	void load(const std::string &filename) override;
 	/// Loads music from the specified rwops.
-	void load(SDL_RWops *rwops);
+	void load(SDL_RWops *rwops) override;
 	/// Plays the music.
-	void play(int loop = -1) const;
+	void play(int loop = -1) const override;
 	/// Adlib music player.
 	static void player(void *udata, Uint8 *stream, int len);
 	bool isPlaying();

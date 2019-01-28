@@ -88,9 +88,9 @@ public:
 	/// Handler for updating the selected geoscape scale.
 	void updateGeoscapeScale(Action *action);
 	/// Update the resolution settings, we just resized the window.
-	void resize(int &, int &);
+	void resize(int &, int &) override;
 	/// Handles keypresses.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Unpresses Root Window Pos button.
 	void unpressRootWindowedMode();
 };

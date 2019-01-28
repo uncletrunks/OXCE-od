@@ -44,11 +44,11 @@ public:
 	/// Init function.
 	void init() override;
 	/// Handler for right-clicking anything.
-	void handle(Action *action);
+	void handle(Action *action) override;
 	/// Handler for clicking a action menu item.
 	void btnActionMenuItemClick(Action *action);
 	/// Update the resolution settings, we just resized the window.
-	void resize(int &dX, int &dY);
+	void resize(int &dX, int &dY) override;
 };
 
 }

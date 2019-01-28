@@ -41,15 +41,15 @@ public:
 	/// Cleans up the image button.
 	virtual ~ImageButton();
 	/// Sets the image button's color.
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 	/// Gets the image button's color.
 	Uint8 getColor() const;
 	/// Sets the image button's group.
 	void setGroup(ImageButton **group);
 	/// Special handling for mouse presses.
-	void mousePress(Action *action, State *state);
+	void mousePress(Action *action, State *state) override;
 	/// Special handling for mouse releases.
-	void mouseRelease(Action *action, State *state);
+	void mouseRelease(Action *action, State *state) override;
 	/// Invert a button explicitly either ON or OFF.
 	void toggle(bool invert);
 };

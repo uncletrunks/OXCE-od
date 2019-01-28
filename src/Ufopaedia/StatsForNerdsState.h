@@ -122,7 +122,7 @@ public:
 	/// Cleans up the StatsForNerdsState state.
 	~StatsForNerdsState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Handler for selecting an item from the [Compatible ammo] combobox.
 	void cbxAmmoSelect(Action *action);
 	/// Handler for clicking the toggle buttons.

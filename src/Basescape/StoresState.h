@@ -92,7 +92,7 @@ public:
 	/// Handler for clicking the Grand Total button.
 	void btnGrandTotalClick(Action *action);
 	/// Sets up the item list.
-	void init();
+	void init() override;
 	/// Sorts the item list.
 	void sortList(ItemSort sort);
 	/// Updates the item list.

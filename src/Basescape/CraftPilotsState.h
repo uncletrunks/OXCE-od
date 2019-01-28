@@ -55,7 +55,7 @@ public:
 	/// Cleans up the Craft Pilots state.
 	~CraftPilotsState();
 	/// Initializes the state.
-	void init();
+	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Add button.

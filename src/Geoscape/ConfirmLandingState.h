@@ -51,7 +51,7 @@ public:
 	/// Cleans up the Confirm Landing state.
 	~ConfirmLandingState();
 	/// initialize the state, make a sanity check.
-	void init();
+	void init() override;
 	/// Handler for clicking the Yes button.
 	void btnYesClick(Action *action);
 	/// Handler for clicking the No button.

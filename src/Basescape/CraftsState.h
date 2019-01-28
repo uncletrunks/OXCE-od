@@ -46,7 +46,7 @@ public:
 	/// Cleans up the Crafts state.
 	~CraftsState();
 	/// Updates the craft info.
-	void init();
+	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Crafts list.

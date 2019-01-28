@@ -67,7 +67,7 @@ public:
 	/// Cleans up the Soldier Diary Totals state.
 	~SoldierDiaryPerformanceState();
 	/// Updates the soldier info.
-	void init();
+	void init() override;
 	/// Draw sprites.
 	void drawSprites();
 	/// Handler for clicking the OK button.
@@ -89,7 +89,7 @@ public:
 	/// Handler for clicking on a medal.
 	void lstInfoMouseClick(Action *action);
 	/// Runs state functionality every cycle.
-	void think();
+	void think() override;
 };
 
 }

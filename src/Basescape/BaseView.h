@@ -59,7 +59,7 @@ public:
 	/// Cleans up the base view.
 	~BaseView();
 	/// Initializes the base view's various resources.
-	void initText(Font *big, Font *small, Language *lang);
+	void initText(Font *big, Font *small, Language *lang) override;
 	/// Sets the base to display.
 	void setBase(Base *base);
 	/// Sets the texture for this base view.
@@ -81,21 +81,21 @@ public:
 	/// ReCalculates the remaining build-time of all queued buildings.
 	void reCalcQueuedBuildings();
 	/// Handles the timers.
-	void think();
+	void think() override;
 	/// Blinks the selector.
 	void blink();
 	/// Draws the base view.
-	void draw();
+	void draw() override;
 	/// Blits the base view onto another surface.
 	void blit(SDL_Surface *surface) override;
 	/// Special handling for mouse hovers.
-	void mouseOver(Action *action, State *state);
+	void mouseOver(Action *action, State *state) override;
 	/// Special handling for mouse hovering out.
-	void mouseOut(Action *action, State *state);
+	void mouseOut(Action *action, State *state) override;
 
-	void setColor(Uint8 color);
+	void setColor(Uint8 color) override;
 
-	void setSecondaryColor(Uint8 color);
+	void setSecondaryColor(Uint8 color) override;
 };
 
 }
