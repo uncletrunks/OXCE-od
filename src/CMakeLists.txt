@@ -442,6 +442,7 @@ if ( DUMP_CORE )
   set_source_files_properties ( main.cpp PROPERTIES COMPILE_FLAGS -DDUMP_CORE )
 endif ()
 
+remove_definitions( ../libs/miniz/miniz.c -Wsuggest-override )
 set_source_files_properties ( ../libs/miniz/miniz.c PROPERTIES COMPILE_FLAGS -DMINIZ_NO_STDIO )
 set_source_files_properties ( Engine/Scalers/xbrz.cpp PROPERTIES COMPILE_FLAGS -Wno-unused )
 
