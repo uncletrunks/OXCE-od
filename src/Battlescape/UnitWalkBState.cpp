@@ -571,7 +571,7 @@ void UnitWalkBState::playMovementSound()
 	}
 	const auto &scr = _unit->getArmor()->getScript<ModScript::SelectMoveSoundUnit>();
 	ModScript::SelectMoveSoundUnit::Output arg{ sound };
-	ModScript::SelectMoveSoundUnit::Worker work{ _unit, _unit->getWalkingPhase(), unitSound, tileSound, Mod::WALK_OFFSET, tileSoundOffset, Mod::FLYING_SOUND };
+	ModScript::SelectMoveSoundUnit::Worker work{ _unit, _unit->getWalkingPhase(), unitSound, tileSound, Mod::WALK_OFFSET, tileSoundOffset, Mod::FLYING_SOUND, _action.getMoveType() };
 	work.execute(scr, arg);
 	sound = arg.getFirst();
 	if (sound >= 0)

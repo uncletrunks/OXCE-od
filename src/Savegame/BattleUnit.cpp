@@ -4897,6 +4897,13 @@ void battleActionImpl(BindBase& b)
 	b.addCustomConst("battle_action_throw", BA_THROW);
 }
 
+void moveTypesImpl(BindBase& b)
+{
+	b.addCustomConst("move_normal", BAM_NORMAL);
+	b.addCustomConst("move_run", BAM_RUN);
+	b.addCustomConst("move_strafe", BAM_STRAFE);
+}
+
 }
 
 /**
@@ -4935,17 +4942,25 @@ ModScript::SelectUnitParser::SelectUnitParser(ScriptGlobal* shared, const std::s
  */
 ModScript::SelectMoveSoundUnitParser::SelectMoveSoundUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
 	"sound_index",
-	"unit", "walking_phase", "unit_sound_index", "tile_sound_index", "base_tile_sound_index", "base_tile_sound_offset", "base_fly_sound_index", }
+	"unit", "walking_phase", "unit_sound_index", "tile_sound_index",
+	"base_tile_sound_index", "base_tile_sound_offset", "base_fly_sound_index",
+	"move", }
 {
 	BindBase b { this };
 
 	commonImpl(b, mod);
+
+	moveTypesImpl(b);
 }
 
 /**
  * Constructor of reaction chance script parser.
  */
-ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "reaction_chance", "distance", "action_unit", "reaction_unit", "weapon", "battle_action", "action_target", "move" }
+ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"reaction_chance",
+	"distance",
+	"action_unit", "reaction_unit", "weapon", "battle_action", "action_target",
+	"move", }
 {
 	BindBase b { this };
 
@@ -4953,9 +4968,7 @@ ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const st
 
 	battleActionImpl(b);
 
-	b.addCustomConst("move_normal", BAM_NORMAL);
-	b.addCustomConst("move_run", BAM_RUN);
-	b.addCustomConst("move_strafe", BAM_STRAFE);
+	moveTypesImpl(b);
 }
 
 /**
