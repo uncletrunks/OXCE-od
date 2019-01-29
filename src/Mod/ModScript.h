@@ -33,7 +33,7 @@ class RuleBaseFacility;
 class RuleCraft;
 class RuleCraftWeapon;
 class RuleItem;
-class RuleDamageType;
+struct RuleDamageType;
 class RuleUfo;
 class RuleTerrain;
 class MapDataSet;
@@ -53,7 +53,7 @@ class Mod;
 class BattleUnit;
 class BattleUnitVisibility;
 class BattleItem;
-class StatAdjustment;
+struct StatAdjustment;
 
 class SavedBattleGame;
 class SavedGame;

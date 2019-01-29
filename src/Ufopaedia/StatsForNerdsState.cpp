@@ -1840,7 +1840,7 @@ void StatsForNerdsState::initItemList()
 		addRuleItemUseCostBasic(ss, itemRule->getCostAuto(), "tuAuto");
 		addRuleItemUseCostBasic(ss, itemRule->getCostSnap(), "tuSnap");
 		addRuleItemUseCostBasic(ss, itemRule->getCostMelee(), "tuMelee");
-		int tuUseDefault = (itemRule->getBattleType() == BT_PSIAMP/* && itemRule->getPsiAttackName().empty()*/) ? 0 : 25;
+		tuUseDefault = (itemRule->getBattleType() == BT_PSIAMP/* && itemRule->getPsiAttackName().empty()*/) ? 0 : 25;
 		addRuleItemUseCostBasic(ss, itemRule->getCostUse(), "tuUse", tuUseDefault);
 		if (itemRule->getBattleType() == BT_PSIAMP || _showDebug)
 		{

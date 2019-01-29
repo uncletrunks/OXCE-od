@@ -63,7 +63,7 @@ struct ParserWriter
 			return _pos;
 		}
 
-		friend class ParserWriter;
+		friend struct ParserWriter;
 	};
 
 	class ProcOp { };

@@ -1382,7 +1382,7 @@ BattleItem *SavedBattleGame::createItemForUnit(const std::string& type, BattleUn
 /**
  * Create new item for unit.
  */
-BattleItem *SavedBattleGame::createItemForUnit(RuleItem *rule, BattleUnit *unit, bool fixedWeapon)
+BattleItem *SavedBattleGame::createItemForUnit(const RuleItem *rule, BattleUnit *unit, bool fixedWeapon)
 {
 	BattleItem *item = new BattleItem(rule, getCurrentItemId());
 	if (!unit->addItem(item, _rule, false, fixedWeapon, fixedWeapon))

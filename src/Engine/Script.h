@@ -44,7 +44,7 @@ class ScriptParserEventsBase;
 class ScriptContainerBase;
 class ScriptContainerEventsBase;
 
-class ParserWriter;
+struct ParserWriter;
 class SelectedToken;
 class ScriptWorkerBase;
 class ScriptWorkerBlit;
@@ -256,7 +256,7 @@ using FuncCommon = RetEnum (*)(ScriptWorkerBase&, const Uint8*, ProgPos&);
  */
 class ScriptContainerBase
 {
-	friend class ParserWriter;
+	friend struct ParserWriter;
 	std::vector<Uint8> _proc;
 
 public:

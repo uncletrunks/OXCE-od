@@ -917,8 +917,8 @@ bool moveFile(const std::string &src, const std::string &dest)
 	auto dstW = pathToWindows(dest);
 	return (MoveFileExW(srcW.c_str(), dstW.c_str(), MOVEFILE_REPLACE_EXISTING) != 0);
 #else
-	// TODO In fact all remaining uses of this are renaming files inside
-	// a single directory, so we may as well uncomment the rename() and drop the rest.
+	// TODO In fact all remaining uses of this are renaming files inside a single directory
+	// so we may as well uncomment the rename() and drop the rest.
 	//return (rename(src.c_str(), dest.c_str()) == 0);
 	std::ifstream srcStream;
 	std::ofstream destStream;

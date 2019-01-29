@@ -34,7 +34,7 @@ class Surface;
 class ScriptWorkerBlit;
 class ScriptParserBase;
 class SavedBattleGame;
-class RuleItemAction;
+struct RuleItemAction;
 
 enum BattleActionType : Uint8;
 
@@ -48,7 +48,7 @@ class BattleItem
 {
 private:
 	int _id;
-	RuleItem *_rules;
+	const RuleItem *_rules;
 	BattleUnit *_owner, *_previousOwner;
 	BattleUnit *_unit;
 	Tile *_tile;
@@ -75,7 +75,7 @@ public:
 	static void ScriptFill(ScriptWorkerBlit* w, BattleItem* item, int part, int anim_frame, int shade);
 
 	/// Creates a item of the specified type.
-	BattleItem(RuleItem *rules, int *id);
+	BattleItem(const RuleItem *rules, int *id);
 	/// Cleans up the item.
 	~BattleItem();
 	/// Loads the item from YAML.

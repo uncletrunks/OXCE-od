@@ -472,19 +472,19 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 	if (size)
 	{
 		totalCost /= numberOfParts;
-		Tile *startTile = _save->getTile(*endPosition + Position(1,1,0));
-		Tile *destinationTile = _save->getTile(*endPosition);
+		Tile *originTile = _save->getTile(*endPosition + Position(1,1,0));
+		Tile *finalTile = _save->getTile(*endPosition);
 		int tmpDirection = 7;
-		if (isBlockedDirection(startTile, tmpDirection, target))
+		if (isBlockedDirection(originTile, tmpDirection, target))
 			return 255;
-		if (!fellDown && abs(startTile->getTerrainLevel() - destinationTile->getTerrainLevel()) > 10)
+		if (!fellDown && abs(originTile->getTerrainLevel() - finalTile->getTerrainLevel()) > 10)
 			return 255;
-		startTile = _save->getTile(*endPosition + Position(1,0,0));
-		destinationTile = _save->getTile(*endPosition + Position(0,1,0));
+		originTile = _save->getTile(*endPosition + Position(1,0,0));
+		finalTile = _save->getTile(*endPosition + Position(0,1,0));
 		tmpDirection = 5;
-		if (isBlockedDirection(startTile, tmpDirection, target))
+		if (isBlockedDirection(originTile, tmpDirection, target))
 			return 255;
-		if (!fellDown && abs(startTile->getTerrainLevel() - destinationTile->getTerrainLevel()) > 10)
+		if (!fellDown && abs(originTile->getTerrainLevel() - finalTile->getTerrainLevel()) > 10)
 			return 255;
 	}
 

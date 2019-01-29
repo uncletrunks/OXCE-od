@@ -303,7 +303,7 @@ Mod::Mod() :
 	_giveScoreAlsoForResearchedArtifacts(false),
 	_theMostUselessOptionEver(0), _theBiggestRipOffEver(0), _shortRadarRange(0),
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
-	_baseDefenseMapFromLocation(0), _pediaReplaceCraftFuelWithRangeType(-1), _disableUnderwaterSounds(false),
+	_baseDefenseMapFromLocation(0), _disableUnderwaterSounds(false), _pediaReplaceCraftFuelWithRangeType(-1),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
 	_researchListOrder(0),  _manufactureListOrder(0), _transformationListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0), _statePalette(0)
 {

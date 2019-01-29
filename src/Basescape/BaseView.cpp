@@ -248,9 +248,9 @@ int BaseView::getPlacementError(RuleBaseFacility *rule, BaseFacility *facilityBe
 
 						const std::vector<std::string> &buildOverFacilities = rule->getBuildOverFacilities();
 						// If the list of base facilities we can build over is empty, then we can build over anything that allows it
-						if (!buildOverFacilities.size() == 0)
+						// otherwise we need to check if the facility we're trying to build over is on the list
+						if (!buildOverFacilities.empty())
 						{
-							// Otherwise, we need to check if the facility we're trying to build over is on the list
 							if (!std::binary_search(buildOverFacilities.begin(), buildOverFacilities.end(), _facilities[x][y]->getRules()->getType()))
 								return 5;
 						}

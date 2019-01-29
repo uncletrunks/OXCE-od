@@ -498,8 +498,6 @@ void BattlescapeGame::endTurn()
 			getMod()->getSoundByDepth(_save->getDepth(), Mod::SLIDING_DOOR_CLOSE)->play(); // ufo door closed
 		}
 
-		Position p;
-
 		// if all grenades explode we remove items that expire on that turn too.
 		std::vector<BattleItem*> forRemoval;
 		bool exploded = false;
@@ -2081,18 +2079,18 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 		// If this is a tank, arm it with its weapon
 		if (getMod()->getItem(newUnit->getType()) && getMod()->getItem(newUnit->getType())->isFixed())
 		{
-			RuleItem *item = getMod()->getItem(newUnit->getType());
-			_save->createItemForUnit(item, newUnit, true);
-			if (!item->getPrimaryCompatibleAmmo()->empty())
+			const RuleItem *newUnitWeapon = getMod()->getItem(newUnit->getType());
+			_save->createItemForUnit(newUnitWeapon, newUnit, true);
+			if (!newUnitWeapon->getPrimaryCompatibleAmmo()->empty())
 			{
-				RuleItem *ammo = getMod()->getItem(item->getPrimaryCompatibleAmmo()->front());
+				RuleItem *ammo = getMod()->getItem(newUnitWeapon->getPrimaryCompatibleAmmo()->front());
 				BattleItem *ammoItem = _save->createItemForUnit(ammo, newUnit);
 				if (ammoItem)
 				{
 					int clipSize;
-					if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
+					if (ammo->getClipSize() > 0 && newUnitWeapon->getClipSize() > 0)
 					{
-						clipSize = item->getClipSize();
+						clipSize = newUnitWeapon->getClipSize();
 					}
 					else
 					{
@@ -2101,7 +2099,7 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 					ammoItem->setAmmoQuantity(clipSize);
 				}
 			}
-			newUnit->setTurretType(item->getTurretType());
+			newUnit->setTurretType(newUnitWeapon->getTurretType());
 		}
 
 		getSave()->initUnit(newUnit);

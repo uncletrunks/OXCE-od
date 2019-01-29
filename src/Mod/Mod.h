@@ -52,7 +52,7 @@ class RuleCraft;
 class RuleCraftWeapon;
 class RuleItemCategory;
 class RuleItem;
-class RuleDamageType;
+struct RuleDamageType;
 class RuleUfo;
 class RuleTerrain;
 class MapDataSet;

@@ -2036,8 +2036,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			int zOff;
 
 			// Variables for holding alternate terrains in script commands
-			std::string terrainName = "";
-			RuleTerrain *terrain;
+			terrainName = "";
 
 			// Variable for holding positions of blocks in addLine and fillArea commands for vertical levels
 			_placedBlockRects.clear();

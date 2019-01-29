@@ -199,7 +199,7 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 
 				if (showMessage)
 				{
-					std::ostringstream ss;
+					ss.clear();
 					ss << tr(hostile.message) << tr(neutral.message);
 					message = ss.str();
 				}

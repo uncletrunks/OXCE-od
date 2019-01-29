@@ -309,7 +309,7 @@ public:
 	/// Init new created item.
 	void initItem(BattleItem *item);
 	/// Create new item for unit.
-	BattleItem *createItemForUnit(RuleItem *rule, BattleUnit *unit, bool fixedWeapon = false);
+	BattleItem *createItemForUnit(const RuleItem *rule, BattleUnit *unit, bool fixedWeapon = false);
 	/// Create new item for unit.
 	BattleItem *createItemForUnit(const std::string& type, BattleUnit *unit, bool fixedWeapon = false);
 	/// Create new buildin item for unit.

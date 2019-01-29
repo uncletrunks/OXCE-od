@@ -46,10 +46,9 @@ namespace OpenXcom
 		std::ostringstream ss;
 		ss << tr("STR_MAXIMUM_SPEED_UC").arg(Unicode::formatNumber(craft->getMaxSpeed())) << '\n';
 		ss << tr("STR_ACCELERATION").arg(craft->getAcceleration()) << '\n';
+		int range;
 		switch (_game->getMod()->getPediaReplaceCraftFuelWithRangeType())
 		{
-			int range;
-
 			// Both max range alone and average range get rounded
 			case 0:
 			case 2:

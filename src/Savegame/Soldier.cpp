@@ -433,7 +433,7 @@ void Soldier::promoteRank()
 	if (!rankStrings.empty())
 	{
 		// stop if the soldier already has the maximum possible rank for his soldier type
-		if ((int)_rank >= rankStrings.size() - 1)
+		if ((size_t)_rank >= rankStrings.size() - 1)
 		{
 			return;
 		}
@@ -1066,15 +1066,15 @@ bool Soldier::isEligibleForTransformation(RuleSoldierTransformation *transformat
 	// Does this soldier's transformation history preclude this new project?
 	const std::vector<std::string> &requiredTransformations = transformationRule->getRequiredPreviousTransformations();
 	const std::vector<std::string> &forbiddenTransformations = transformationRule->getForbiddenPreviousTransformations();
-	for (auto it : requiredTransformations)
+	for (auto reqd_trans : requiredTransformations)
 	{
-		if (_previousTransformations.find(it) == _previousTransformations.end())
+		if (_previousTransformations.find(reqd_trans) == _previousTransformations.end())
 			return false;
 	}
 
-	for (auto it : forbiddenTransformations)
+	for (auto forb_trans : forbiddenTransformations)
 	{
-		if (_previousTransformations.find(it) != _previousTransformations.end())
+		if (_previousTransformations.find(forb_trans) != _previousTransformations.end())
 			return false;
 	}
 
@@ -1140,7 +1140,7 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 			{
 				_rank = RANK_ROOKIE;
 			}
-			else if (!_rules->getRankStrings().empty() && (int)_rank > _rules->getRankStrings().size() - 1)
+			else if (!_rules->getRankStrings().empty() && (size_t)_rank > _rules->getRankStrings().size() - 1)
 			{
 				switch (_rules->getRankStrings().size() - 1)
 				{

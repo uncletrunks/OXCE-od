@@ -1516,6 +1516,7 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 			//start of number
 			case digitSign:
 				--off; //skipping +- sign
+				[[gnu::fallthrough]];
 			case digit:
 				hex = c == '0'; //expecting hex number
 				type = TokenNumber;
@@ -1536,8 +1537,10 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 			case charRest:
 				if (off != 1) break;
 				if (c != 'x' && c != 'X') break; //X in "0x1"
+				[[gnu::fallthrough]];
 			case charHex:
 				if (!hex) break;
+				[[gnu::fallthrough]];
 			case digit:
 				if (off == 0) hex = c == '0'; //expecting hex number
 				continue;
@@ -2883,11 +2886,11 @@ void ScriptGlobal::load(const YAML::Node& node)
 					auto name = i.first.as<std::string>();
 					auto invalidType = _tagValueTypes.size();
 					auto valueType = invalidType;
-					for (size_t t = 0; t < invalidType; ++t)
+					for (size_t typei = 0; typei < invalidType; ++typei)
 					{
-						if (ScriptRef::tempFrom(type) == _tagValueTypes[t].name)
+						if (ScriptRef::tempFrom(type) == _tagValueTypes[typei].name)
 						{
-							valueType = t;
+							valueType = typei;
 							break;
 						}
 					}

@@ -77,7 +77,7 @@ void SoundSet::writeWAV(SDL_RWops *dest, Uint8 *sound, size_t size, bool resampl
 
 	if (resample) {
 		auto newsound = SDL_malloc(2*size);
-		auto newsize = convertSampleRate(sound, size, (Uint8 *)newsound);
+		newsize = convertSampleRate(sound, size, (Uint8 *)newsound);
 		SDL_RWwrite(dest, newsound, newsize, 1);
 		SDL_free(newsound);
 	} else {

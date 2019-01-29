@@ -57,7 +57,7 @@ public:
 	/// Handle focus.
 	void handle(Action *action, State *state) override;
 	/// Sets focus on this text edit.
-	void setFocus(bool focus, bool modal = true); // FIXME? HOW?
+	void setFocus(bool focus, bool modal = true); // "hides overloaded virtual function" FIXME? HOW?
 	/// Sets the text size to big.
 	void setBig();
 	/// Sets the text size to small.

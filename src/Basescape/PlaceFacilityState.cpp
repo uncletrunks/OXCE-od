@@ -228,14 +228,13 @@ void PlaceFacilityState::viewClick(Action *)
 		}
 		else
 		{
-			const std::map<std::string, std::pair<int, int> > &itemCost = _rule->getBuildCostItems();
-			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+			for (const auto& i: _rule->getBuildCostItems())
 			{
-				int needed = i->second.first - _base->getStorageItems()->getItem(i->first);
+				int needed = i.second.first - _base->getStorageItems()->getItem(i.first);
 				if (needed > 0)
 				{
 					_game->popState();
-					_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_ITEMS").arg(tr(i->first)).arg(needed), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
+					_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_ITEMS").arg(tr(i.first)).arg(needed), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
 					return;
 				}
 			}
@@ -301,9 +300,9 @@ void PlaceFacilityState::viewClick(Action *)
 			}
 			_view->setBase(_base);
 			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _rule->getBuildCost());
-			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
+			for (const auto& i: _rule->getBuildCostItems())
 			{
-				_base->getStorageItems()->removeItem(i->first, i->second.first);
+				_base->getStorageItems()->removeItem(i.first, i.second.first);
 			}
 			_game->popState();
 		}

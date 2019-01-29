@@ -343,30 +343,31 @@ struct VFSLayer {
 	}
 	/** maps a zipped moddir
 	* @param mrec - module record
-	* @param fullpath - path to the .zip
+	* @param zippath - path to the .zip
 	* @param prefix - prefix in the .zip in case there are multiple mods in a single .zip. Has to have the trailing slash.
 	* @param ignore_ruls - skip rulesets
 	* @return - did we map anything (false, i.e if failed to unzip)
 	*/
-	bool mapZipFile(const std::string& fullpath, const std::string& prefix, bool ignore_ruls = false) {
-		std::string log_ctx = "mapZipFile(" + fullpath + ",  '" + prefix + "',  '" + (ignore_ruls ? "true" : "false") + "'): ";
+	bool mapZipFile(const std::string& zippath, const std::string& prefix, bool ignore_ruls = false) {
+		std::string log_ctx = "mapZipFile(" + zippath + ",  '" + prefix + "',  '" + (ignore_ruls ? "true" : "false") + "'): ";
 		if (mapped) {
 			auto err=  log_ctx + "Fatal: already mapped.";
 			Log(LOG_FATAL) << err;
 			throw Exception(err);
 		}
-		mapped = true;
 		auto prefixlen = prefix.size();
 		if ((prefixlen) > 0 && (prefix[prefixlen-1] != '/')) {
 			auto err = log_ctx + "Bogus prefix of '" + prefix;
 			Log(LOG_FATAL) << err;
 			throw Exception(err);
 		}
-		if (!mz_zip_reader_init_rwops(&zip, fullpath.c_str())) {
+		if (!mz_zip_reader_init_rwops(&zip, zippath.c_str())) {
 			// whoa, no opening the file
-			Log(LOG_WARNING) << log_ctx << "Ignoring zip: can't open '"<<fullpath<<"': " << mz_zip_get_error_string(mz_zip_get_last_error(&zip));
+			Log(LOG_WARNING) << log_ctx << "Ignoring zip: can't open '"<<zippath<<"': " << mz_zip_get_error_string(mz_zip_get_last_error(&zip));
 			return false;
 		}
+		mapped = true;
+		fullpath = zippath;
 		zip_open = true;
 		mz_uint filecount = mz_zip_reader_get_num_files(&zip);
 
@@ -380,7 +381,7 @@ struct VFSLayer {
 
 			std::string fname = fistat.m_filename;
 			if (!sanitizeZipEntryName(fname)) {
-				Log(LOG_WARNING) << "Bogus filename " << hexDumpBogusData(fname) << " in " << fullpath << ", ignoring.";
+				Log(LOG_WARNING) << "Bogus filename " << hexDumpBogusData(fname) << " in " << zippath << ", ignoring.";
 				continue;
 			}
 			std::string relfname = fname;
@@ -402,17 +403,18 @@ struct VFSLayer {
 		Log(LOG_VERBOSE) << log_ctx << "mapped_count=" << mapped_count;
 		return mapped_count > 1;
 	}
-	bool mapPlainDir(const std::string& fullpath, bool ignore_ruls = false) {
-		std::string log_ctx = "mapPlainDir(" + fullpath + ", " + (ignore_ruls ? "true" : "false") + "): ";
+	bool mapPlainDir(const std::string& dirpath, bool ignore_ruls = false) {
+		std::string log_ctx = "mapPlainDir(" + dirpath + ", " + (ignore_ruls ? "true" : "false") + "): ";
 		if (mapped) {
 			auto err = log_ctx + "fatal: already mapped.";
 			Log(LOG_FATAL) << err;
 			throw Exception(err);
 		}
 		dirlist_t dlist;
-		if (!ls_r(fullpath, "", dlist)) {
+		if (!ls_r(dirpath, "", dlist)) {
 			return false;
 		}
+		fullpath = dirpath;
 		FileRecord frec;
 		frec.zip = NULL;
 		std::string relpath;
@@ -653,6 +655,7 @@ void setup(const std::vector<const ModInfo* >& active)
 		TheVFS.dump(Logger().get(LOG_VERBOSE), "\n" + log_ctx, Options::listVFSContents);
 	}
 }
+[[gnu::unused]]
 static void dump_mods_layers(std::ostream &out, const std::string& prefix, bool verbose) {
 	out << prefix << ModsAvailable.size() << " mods mapped:";
 	for (auto i = ModsAvailable.begin(); i != ModsAvailable.end(); ++i) {

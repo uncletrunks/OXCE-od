@@ -540,6 +540,7 @@ void TextEdit::keyboardPress(Action *action, State *state)
 				_value = Unicode::convUtf8ToUtf32("");
 				_caretPos = 0;
 			}
+			[[gnu::fallthrough]];
 			// no break; do the ENTER action too
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER:
