@@ -443,6 +443,7 @@ if ( DUMP_CORE )
 endif ()
 
 set_source_files_properties ( ../libs/miniz/miniz.c PROPERTIES COMPILE_FLAGS -DMINIZ_NO_STDIO )
+set_source_files_properties ( Engine/Scalers/xbrz.cpp PROPERTIES COMPILE_FLAGS -Wno-unused )
 
 if ( WIN32 )
   set ( application_type WIN32 )
