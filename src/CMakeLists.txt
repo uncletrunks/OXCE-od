@@ -401,10 +401,10 @@ if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES 
       -Wuninitialized
       -Wignored-qualifiers
       -Wno-unused-parameter
-# These warning options actually generate way too many warnings. Should be enabled later.
-#      -Weffc++
       -Winline
       -Wshadow
+# These warning options actually generate way too many warnings. Should be enabled later.
+#      -Weffc++
       )
     if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
       # add warning flags recognized by g++ but not by clang
