@@ -70,9 +70,9 @@ inline int GetPitch(int bpp, int width)
 inline void RawCopySurf(const Surface::UniqueSurfacePtr& dest, const Surface::UniqueSurfacePtr& src)
 {
 	ShaderDrawFunc(
-		[](Uint8& dest, Uint8& src)
+		[](Uint8& destStuff, Uint8& srcStuff)
 		{
-			dest = src;
+			destStuff = srcStuff;
 		},
 		ShaderMove<Uint8>(dest.get()),
 		ShaderMove<Uint8>(src.get())
@@ -92,11 +92,11 @@ inline void FixTransparent(const Surface::UniqueSurfacePtr& dest, int currentTra
 	if (currentTransColor != 0)
 	{
 		ShaderDrawFunc(
-			[&](Uint8& dest)
+			[&](Uint8& destStuff)
 			{
-				if (dest == currentTransColor)
+				if (destStuff == currentTransColor)
 				{
-					dest = 0;
+					destStuff = 0;
 				}
 			},
 			ShaderMove<Uint8>(dest.get())

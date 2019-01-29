@@ -1326,36 +1326,38 @@ void Globe::drawDetail()
 	}
 
 	// Draw extra globe labels
-	Text *label = new Text(120, 18, 0, 0);
-	label->setPalette(getPalette());
-	label->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
-	label->setAlign(ALIGN_CENTER);
-
-	Sint16 x, y;
-	for (std::vector<std::string>::const_iterator i = _game->getMod()->getExtraGlobeLabelsList().begin(); i != _game->getMod()->getExtraGlobeLabelsList().end(); ++i)
 	{
-		RuleCountry *rule = _game->getMod()->getExtraGlobeLabel((*i), true);
-		if ((int)(_zoom) >= rule->getZoomLevel())
+		Text *label = new Text(120, 18, 0, 0);
+		label->setPalette(getPalette());
+		label->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
+		label->setAlign(ALIGN_CENTER);
+
+		Sint16 x, y;
+		for (std::vector<std::string>::const_iterator i = _game->getMod()->getExtraGlobeLabelsList().begin(); i != _game->getMod()->getExtraGlobeLabelsList().end(); ++i)
 		{
-			// Don't draw if label is facing back
-			if (pointBack(rule->getLabelLongitude(), rule->getLabelLatitude()))
-				continue;
-
-			// Convert coordinates
-			polarToCart(rule->getLabelLongitude(), rule->getLabelLatitude(), &x, &y);
-
-			label->setX(x - 60);
-			label->setY(y);
-			label->setText(_game->getLanguage()->getString(rule->getType()));
-			label->setColor(COUNTRY_LABEL_COLOR);
-			if (rule->getLabelColor() > 0)
+			RuleCountry *rule = _game->getMod()->getExtraGlobeLabel((*i), true);
+			if ((int)(_zoom) >= rule->getZoomLevel())
 			{
-				label->setColor(rule->getLabelColor());
+				// Don't draw if label is facing back
+				if (pointBack(rule->getLabelLongitude(), rule->getLabelLatitude()))
+					continue;
+
+				// Convert coordinates
+				polarToCart(rule->getLabelLongitude(), rule->getLabelLatitude(), &x, &y);
+
+				label->setX(x - 60);
+				label->setY(y);
+				label->setText(_game->getLanguage()->getString(rule->getType()));
+				label->setColor(COUNTRY_LABEL_COLOR);
+				if (rule->getLabelColor() > 0)
+				{
+					label->setColor(rule->getLabelColor());
+				}
+				label->blit(_countries->getSurface());
 			}
-			label->blit(_countries->getSurface());
 		}
+		delete label;
 	}
-	delete label;
 
 	// Draw the city and base markers
 	if (_zoom >= 3)
@@ -1601,11 +1603,11 @@ void Globe::drawTarget(Target *target, Surface *surface)
 		if (i == CITY_MARKER || _blink > 0)
 		{
 			ShaderDrawFunc(
-				[](Uint8& dest, Uint8 src)
+				[](Uint8& destStuff, Uint8 srcStuff)
 				{
-					if (src)
+					if (srcStuff)
 					{
-						dest = src;
+						destStuff = srcStuff;
 					}
 				},
 				dest,
@@ -1615,11 +1617,11 @@ void Globe::drawTarget(Target *target, Surface *surface)
 		else
 		{
 			ShaderDrawFunc(
-				[](Uint8& dest, Uint8 src)
+				[](Uint8& destStuff, Uint8 srcStuff)
 				{
-					if (src)
+					if (srcStuff)
 					{
-						dest = src + 1;
+						destStuff = srcStuff + 1;
 					}
 				},
 				dest,

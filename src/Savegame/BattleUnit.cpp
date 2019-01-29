@@ -2872,17 +2872,17 @@ bool BattleUnit::reloadAmmo()
 		auto tuCost = getTimeUnits();
 		auto slotAmmo = 0;
 
-		for (BattleItem* i : *getInventory())
+		for (BattleItem* bi : *getInventory())
 		{
-			int slot = ruleWeapon->getSlotForAmmo(i->getRules()->getType());
+			int slot = ruleWeapon->getSlotForAmmo(bi->getRules()->getType());
 			if (slot != -1)
 			{
-				int tuTemp = i->getSlot()->getType() != INV_HAND ? i->getSlot()->getCost(weapon->getSlot()) : 0;
+				int tuTemp = bi->getSlot()->getType() != INV_HAND ? bi->getSlot()->getCost(weapon->getSlot()) : 0;
 				tuTemp += ruleWeapon->getTULoad(slot);
 				if (tuTemp < tuCost)
 				{
 					tuCost = tuTemp;
-					ammo = i;
+					ammo = bi;
 					slotAmmo = slot;
 				}
 			}

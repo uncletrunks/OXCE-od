@@ -1572,11 +1572,11 @@ void GeoscapeState::baseHunting()
 							if ((*ci)->getDistance((*ab)) < Nautical((*ab)->getDeployment()->getBaseDetectionRange()) && RNG::percent((*ab)->getDeployment()->getBaseDetectionChance()))
 							{
 								// Generate a hunt mission
-								auto mission = (*ab)->getDeployment()->generateHuntMission(_game->getSavedGame()->getMonthsPassed());
-								if (_game->getMod()->getAlienMission(mission))
+								auto huntMission = (*ab)->getDeployment()->generateHuntMission(_game->getSavedGame()->getMonthsPassed());
+								if (_game->getMod()->getAlienMission(huntMission))
 								{
 									// Spawn hunt mission for this base.
-									const RuleAlienMission &rule = *_game->getMod()->getAlienMission(mission);
+									const RuleAlienMission &rule = *_game->getMod()->getAlienMission(huntMission);
 									AlienMission *mission = new AlienMission(rule);
 									mission->setRegion(_game->getSavedGame()->locateRegion(*(*ab))->getRules()->getType(), *_game->getMod());
 									mission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
@@ -1605,9 +1605,9 @@ void GeoscapeState::baseHunting()
 									started = true;
 									break;
 								}
-								else if (mission != "")
+								else if (huntMission != "")
 								{
-									throw Exception("Alien Base tried to generate undefined hunt mission: " + mission);
+									throw Exception("Alien Base tried to generate undefined hunt mission: " + huntMission);
 								}
 							}
 						}
