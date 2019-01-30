@@ -397,6 +397,7 @@ public:
 	bool reloadAmmo();
 	/// Check if this unit is in the exit area
 	bool isInExitArea(SpecialTileType stt = START_POINT) const;
+	bool liesInExitArea(Tile *tile, SpecialTileType stt = START_POINT) const;
 	/// Gets the unit height taking into account kneeling/standing.
 	int getHeight() const;
 	/// Gets the unit floating elevation.
