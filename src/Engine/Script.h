@@ -554,15 +554,15 @@ public:
 
 	/// Get value from reg.
 	template<typename T>
-	T& ref(size_t offset)
+	T& ref(size_t off)
 	{
-		return *reinterpret_cast<typename std::decay<T>::type*>(reinterpret_cast<char*>(&reg) + offset);
+		return *reinterpret_cast<typename std::decay<T>::type*>(reinterpret_cast<char*>(&reg) + off);
 	}
 	/// Get value from proc vector.
 	template<typename T>
-	const T& const_val(const Uint8 *ptr, size_t offset = 0)
+	const T& const_val(const Uint8 *ptr, size_t off = 0)
 	{
-		return *reinterpret_cast<const T*>(ptr + offset);
+		return *reinterpret_cast<const T*>(ptr + off);
 	}
 
 	/// Add text to log buffer.
