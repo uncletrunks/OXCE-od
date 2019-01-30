@@ -622,8 +622,14 @@ void updateMods()
 	}
 	// sort mods if that's the first time we see any (one or two are added in _setDefaultMods())
 	if (mods.size() <= 2) {
+		std::unordered_set<std::string> seen_modrefs;
+		for (const auto& seen_modref: mods) {
+			seen_modrefs.insert(seen_modref.first);
+		}
 		for (const auto& i: _modInfos) {
-			mods.push_back(std::make_pair(i.first, false));
+			if (seen_modrefs.find(i.first) == seen_modrefs.end()) {
+				mods.push_back(std::make_pair(i.first, false));
+			}
 		}
 		std::sort(mods.begin(), mods.end(),
 			[](const std::pair<std::string, bool>& a, const std::pair<std::string, bool> &b)
