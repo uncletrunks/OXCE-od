@@ -411,11 +411,11 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 		if (_events)
 		{
 			ShaderDrawFunc(
-				[&](Uint8& destStuff, const Uint8& srcStuff)
+				[&](Uint8& dest, const Uint8& src)
 				{
 					if (src)
 					{
-						ScriptWorkerBlit::Output arg = { destStuff, srcStuff };
+						ScriptWorkerBlit::Output arg = { src, dest };
 						set(arg);
 						auto ptr = _events;
 						while (*ptr)
@@ -438,7 +438,7 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 						++ptr;
 
 						get(arg);
-						if (arg.getFirst()) destStuff = arg.getFirst();
+						if (arg.getFirst()) dest = arg.getFirst();
 					}
 				},
 				destShader,
@@ -448,15 +448,15 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 		else
 		{
 			ShaderDrawFunc(
-				[&](Uint8& destStuff, const Uint8& srcStuff)
+				[&](Uint8& dest, const Uint8& src)
 				{
-					if (srcStuff)
+					if (src)
 					{
-						ScriptWorkerBlit::Output arg = { srcStuff, destStuff };
+						ScriptWorkerBlit::Output arg = { src, dest };
 						set(arg);
 						scriptExe(*this, _proc);
 						get(arg);
-						if (arg.getFirst()) destStuff = arg.getFirst();
+						if (arg.getFirst()) dest = arg.getFirst();
 					}
 				},
 				destShader,
@@ -2473,8 +2473,8 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 		}
 		else
 		{
-			auto tmp = _procList;
-			std::sort(tmp.begin(), tmp.end(),
+			auto temp = _procList;
+			std::sort(temp.begin(), temp.end(),
 				[](const ScriptProcData& a, const ScriptProcData& b)
 				{
 					return std::lexicographical_compare(a.name.begin(), a.name.end(), b.name.begin(), b.name.end());
@@ -2483,7 +2483,7 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 
 			refLog.get(LOG_DEBUG) << "\n";
 			refLog.get(LOG_DEBUG) << "Script operations:\n";
-			for (const auto& p : tmp)
+			for (auto& p : temp)
 			{
 				if (p.parserArg != nullptr && p.overloadArg && p.description.size() != 0)
 				{

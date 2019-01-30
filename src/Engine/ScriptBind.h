@@ -737,8 +737,8 @@ struct FuncVer<Func, Ver, ListTag<Pos...>>
 	[[gnu::always_inline]]
 	static typename GetTypeAt<CurrPos>::ReturnType get(ScriptWorkerBase& sw, const Uint8* procArgs, ProgPos& curr)
 	{
-		constexpr int offs = Args::offset(Ver, CurrPos);
-		return GetTypeAt<CurrPos>::get(sw, procArgs + offs, curr);
+		constexpr int offset = Args::offset(Ver, CurrPos);
+		return GetTypeAt<CurrPos>::get(sw, procArgs + offset, curr);
 	}
 
 	[[gnu::always_inline]]
