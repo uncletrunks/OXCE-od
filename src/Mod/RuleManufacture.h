@@ -54,6 +54,8 @@ private:
 	std::map<const RuleItem*, int> _requiredItems, _producedItems;
 	std::map<const RuleCraft*, int> _requiredCrafts;
 	const RuleCraft* _producedCraft;
+	std::vector<std::pair<int, std::map<std::string, int> > > _randomProducedItemsNames;
+	std::vector<std::pair<int, std::map<const RuleItem*, int> > > _randomProducedItems;
 	int _listOrder;
 public:
 	static const int MANU_STATUS_NEW = 0;
@@ -93,10 +95,14 @@ public:
 	const std::map<const RuleItem*, int> &getProducedItems() const;
 	/// If this produce craft return its type, otherweasie null.
 	const RuleCraft* getProducedCraft() const;
+	/// Gets the random manufacture rules.
+	const std::vector<std::pair<int, std::map<const RuleItem*, int> > > &getRandomProducedItems() const;
 	/// Gets the "manufactured person", i.e. person spawned when manufacturing project ends.
 	const std::string &getSpawnedPersonType() const;
 	/// Gets the custom name of the "manufactured person".
 	const std::string &getSpawnedPersonName() const;
+	/// Is it possible to use auto-sell feature for this manufacturing project?
+	bool canAutoSell() const;
 	/// Gets the list weight for this manufacture item.
 	int getListOrder() const;
 };

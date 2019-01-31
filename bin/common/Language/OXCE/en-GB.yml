@@ -62,6 +62,7 @@ en-GB:
   STR_REFUND_PRODUCTION: "REFUND!"
 #ManufactureStartState.cpp
   STR_PERSON_JOINING: "Person Joining"
+  STR_RANDOM_PRODUCTION_DISCLAIMER: "Random production!"
 #MonthlyCostsState.cpp
   STR_OTHER_EMPLOYEES: "Other Staff & Inventory"
 #NewManufactureListState.cpp

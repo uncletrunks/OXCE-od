@@ -32,6 +32,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Engine/Language.h"
 #include "../Engine/Options.h"
+#include "../Engine/RNG.h"
 #include <climits>
 #include "BaseFacility.h"
 
@@ -166,6 +167,38 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 								(*c)->reuseItem(i.first->getType());
 							}
 						}
+					}
+				}
+			}
+			// Random manufacture
+			if (!_rules->getRandomProducedItems().empty())
+			{
+				int totalWeight = 0;
+				for (auto& itemSet : _rules->getRandomProducedItems())
+				{
+					totalWeight += itemSet.first;
+				}
+				// RNG
+				int roll = RNG::generate(1, totalWeight);
+				int runningTotal = 0;
+				for (auto& itemSet : _rules->getRandomProducedItems())
+				{
+					runningTotal += itemSet.first;
+					if (runningTotal >= roll)
+					{
+						for (auto& i : itemSet.second)
+						{
+							b->getStorageItems()->addItem(i.first->getType(), i.second);
+							if (i.first->getBattleType() == BT_NONE)
+							{
+								for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
+								{
+									(*c)->reuseItem(i.first->getType());
+								}
+							}
+						}
+						// break outer loop
+						break;
 					}
 				}
 			}

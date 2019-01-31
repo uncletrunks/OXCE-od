@@ -62,6 +62,7 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
 	_refund = node["refund"].as<bool>(_refund);
 	_requiredItemsNames = node["requiredItems"].as< std::map<std::string, int> >(_requiredItemsNames);
 	_producedItemsNames = node["producedItems"].as< std::map<std::string, int> >(_producedItemsNames);
+	_randomProducedItemsNames = node["randomProducedItems"].as< std::vector<std::pair<int, std::map<std::string, int> > > >(_randomProducedItemsNames);
 	_spawnedPersonType = node["spawnedPersonType"].as<std::string>(_spawnedPersonType);
 	_spawnedPersonName = node["spawnedPersonName"].as<std::string>(_spawnedPersonName);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
@@ -119,10 +120,21 @@ void RuleManufacture::afterLoad(const Mod* mod)
 		}
 	}
 
+	for (auto& itemSet : _randomProducedItemsNames)
+	{
+		std::map<const RuleItem*, int> tmp;
+		for (auto& i : itemSet.second)
+		{
+			tmp[mod->getItem(i.first, true)] = i.second;
+		}
+		_randomProducedItems.push_back(std::make_pair(itemSet.first, tmp));
+	}
+
 	//remove not needed data
 	Collections::deleteAll(_requiresName);
 	Collections::deleteAll(_producedItemsNames);
 	Collections::deleteAll(_requiredItemsNames);
+	Collections::deleteAll(_randomProducedItemsNames);
 }
 
 /**
@@ -236,6 +248,15 @@ const RuleCraft* RuleManufacture::getProducedCraft() const
 }
 
 /**
+ * Gets the random manufacture rules.
+ * @return The random manufacture rules.
+ */
+const std::vector<std::pair<int, std::map<const RuleItem*, int> > > &RuleManufacture::getRandomProducedItems() const
+{
+	return _randomProducedItems;
+}
+
+/**
 * Gets the "manufactured person", i.e. person spawned when manufacturing project ends.
 * @return The person type ID.
 */
@@ -251,6 +272,25 @@ const std::string &RuleManufacture::getSpawnedPersonType() const
 const std::string &RuleManufacture::getSpawnedPersonName() const
 {
 	return _spawnedPersonName;
+}
+
+/**
+ * Is it possible to use auto-sell feature for this manufacturing project?
+ * @return True for normal projects, false for special projects.
+ */
+bool RuleManufacture::canAutoSell() const
+{
+	if (!_spawnedPersonType.empty())
+	{
+		// can't sell people
+		return false;
+	}
+	if (!_randomProducedItems.empty())
+	{
+		// sell profit label can't show reasonable info
+		return false;
+	}
+	return true;
 }
 
 /**

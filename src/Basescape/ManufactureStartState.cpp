@@ -166,6 +166,13 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 		_lstRequiredItems->addRow(2, tr(_item->getSpawnedPersonName() != "" ? _item->getSpawnedPersonName() : _item->getSpawnedPersonType()).c_str(), s1.str().c_str());
 		row++;
 	}
+	if (!_item->getRandomProducedItems().empty())
+	{
+		// separator line
+		_lstRequiredItems->addRow(1, tr("STR_RANDOM_PRODUCTION_DISCLAIMER").c_str());
+		_lstRequiredItems->setCellColor(row, 0, _lstRequiredItems->getSecondaryColor());
+		row++;
+	}
 	if (!_item->getProducedItems().empty())
 	{
 		// separator line
