@@ -236,7 +236,11 @@ void BattlescapeGenerator::nextStage()
 			for (std::vector<BattleItem*>::iterator corpseItem = unitsToDrop.begin(); corpseItem != unitsToDrop.end(); ++corpseItem)
 			{
 				(*corpseItem)->moveToOwner(0);
-				(*unit)->getTile()->addItem(*corpseItem, (*corpseItem)->getSlot());
+				(*unit)->getTile()->addItem(*corpseItem, _inventorySlotGround);
+				if ((*corpseItem)->getUnit() && (*corpseItem)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+				{
+					(*corpseItem)->getUnit()->setPosition((*unit)->getTile()->getPosition());
+				}
 			}
 		}
 	}
