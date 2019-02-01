@@ -583,12 +583,9 @@ std::vector<std::tuple<std::string, bool, time_t>> getFolderContents(const std::
 		std::string filename = dirp->d_name;
 		if (filename == "." || filename == "..") { continue; }
 		if (!compareExt(filename, ext))	{ continue; }
-		bool is_directory = dirp->d_type & DT_DIR;
 		std::string fullpath = path + "/" + filename;
-		if (dirp->d_type & DT_LNK) {
-			is_directory = folderExists(fullpath);
-		}
-		time_t mtime = getDateModified(fullpath.c_str());
+		bool is_directory = folderExists(fullpath);
+		time_t mtime = getDateModified(fullpath);
 		files.push_back(std::make_tuple(filename, is_directory, mtime));
 	}
 	closedir(dp);
