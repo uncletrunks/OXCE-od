@@ -174,6 +174,13 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	{
 		tmp->blitNShade(_soldier, 32, 32);
 	}
+
+	// Burning indicator
+	tmp = _game->getMod()->getSurface("BigBurnIndicator", false);
+	if (tmp && unit->getFire() > 0)
+	{
+		tmp->blitNShade(_soldier, 112, 32);
+	}
 }
 
 /**
