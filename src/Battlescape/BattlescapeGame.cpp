@@ -2154,6 +2154,8 @@ void BattlescapeGame::spawnFromPrimedItems()
  */
 void BattlescapeGame::removeSummonedPlayerUnits()
 {
+	std::vector<Unit*> resummonAsCivilians;
+
 	std::vector<BattleUnit*>::iterator unit = _save->getUnits()->begin();
 	while (unit != _save->getUnits()->end())
 	{
@@ -2163,6 +2165,14 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 		}
 		else
 		{
+			if ((*unit)->getStatus() != STATUS_DEAD && (*unit)->getUnitRules())
+			{
+				if (!(*unit)->getUnitRules()->getCivilianRecoveryType().empty())
+				{
+					resummonAsCivilians.push_back((*unit)->getUnitRules());
+				}
+			}
+
 			if ((*unit)->getStatus() == STATUS_UNCONSCIOUS || (*unit)->getStatus() == STATUS_DEAD)
 				_save->removeUnconsciousBodyItem((*unit));
 
@@ -2170,6 +2180,24 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 			delete (*unit);
 			unit = _save->getUnits()->erase(unit);
 		}
+	}
+
+	for (auto& type : resummonAsCivilians)
+	{
+		BattleUnit *newUnit = new BattleUnit(type,
+			FACTION_NEUTRAL,
+			_save->getUnits()->back()->getId() + 1,
+			_save->getStartingCondition(),
+			type->getArmor(),
+			nullptr,
+			getDepth(),
+			getMod()->getMaxViewDistance());
+
+		// just bare minimum, this unit will never be used for anything except recovery
+		newUnit->setTile(nullptr, _save);
+		newUnit->setPosition(TileEngine::invalid);
+		newUnit->setAIModule(new AIModule(_save, newUnit, 0));
+		_save->getUnits()->push_back(newUnit);
 	}
 }
 
