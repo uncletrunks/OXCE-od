@@ -1331,6 +1331,17 @@ int Base::getUsedPsiLabs() const
 			total ++;
 		}
 	}
+	// Only soldiers returning home after being shot down by a HK can ever be in psi training while in transfer
+	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+	{
+		if ((*i)->getType() == TRANSFER_SOLDIER)
+		{
+			if ((*i)->getSoldier()->isInPsiTraining())
+			{
+				total++;
+			}
+		}
+	}
 	return total;
 }
 
@@ -1365,6 +1376,17 @@ int Base::getUsedTraining() const
 		if ((*s)->isInTraining())
 		{
 			total ++;
+		}
+	}
+	// Only soldiers returning home after being shot down by a HK can ever be in martial training while in transfer
+	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+	{
+		if ((*i)->getType() == TRANSFER_SOLDIER)
+		{
+			if ((*i)->getSoldier()->isInTraining())
+			{
+				total++;
+			}
 		}
 	}
 	return total;
