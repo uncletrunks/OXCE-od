@@ -139,7 +139,7 @@ void Screen::handle(Action *action)
 {
 	if (Options::debug)
 	{
-		if (action->getDetails()->type == SDL_KEYDOWN && action->getDetails()->key.keysym.sym == SDLK_F8)
+		if (action->getDetails()->type == SDL_KEYDOWN && action->getDetails()->key.keysym.sym == SDLK_F8 && (SDL_GetModState() & KMOD_ALT) != 0)
 		{
 			switch(Timer::gameSlowSpeed)
 			{
