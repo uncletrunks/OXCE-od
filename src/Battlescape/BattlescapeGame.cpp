@@ -363,12 +363,28 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 
 	_AIActionCounter = action.number;
 	BattleItem *weapon = unit->getMainHandWeapon();
+	bool pickUpWeaponsMoreActively = false;
+	bool weaponPickedUp = false;
 	if (!weapon || !weapon->haveAnyAmmo())
 	{
-		if (unit->getOriginalFaction() == FACTION_HOSTILE && unit->getVisibleUnits()->empty())
+		if (unit->getOriginalFaction() == FACTION_HOSTILE)
 		{
-			findItem(&action);
+			if (unit->getUnitRules())
+			{
+				pickUpWeaponsMoreActively = unit->getUnitRules()->pickUpWeaponsMoreActively(getMod());
+			}
+			if (unit->getVisibleUnits()->empty() || pickUpWeaponsMoreActively)
+			{
+				weaponPickedUp = findItem(&action, pickUpWeaponsMoreActively);
+			}
 		}
+	}
+	if (pickUpWeaponsMoreActively && weaponPickedUp)
+	{
+		// you have just picked up a weapon ffs... use it if you can!
+		_parentState->debug("Re-Rethink");
+		unit->getAIModule()->setWeaponPickedUp();
+		unit->think(&action);
 	}
 
 	if (unit->getCharging() != 0)
@@ -2249,16 +2265,17 @@ Mod *BattlescapeGame::getMod()
 
 /**
  * Tries to find an item and pick it up if possible.
+ * @return True if an item was picked up, false otherwise.
  */
-void BattlescapeGame::findItem(BattleAction *action)
+bool BattlescapeGame::findItem(BattleAction *action, bool pickUpWeaponsMoreActively)
 {
 	// terrorists don't have hands.
-	if (action->actor->getRankString() != "STR_LIVE_TERRORIST")
+	if (action->actor->getRankString() != "STR_LIVE_TERRORIST" || pickUpWeaponsMoreActively)
 	{
 		// pick the best available item
-		BattleItem *targetItem = surveyItems(action);
+		BattleItem *targetItem = surveyItems(action, pickUpWeaponsMoreActively);
 		// make sure it's worth taking
-		if (targetItem && worthTaking(targetItem, action))
+		if (targetItem && worthTaking(targetItem, action, pickUpWeaponsMoreActively))
 		{
 			// if we're already standing on it...
 			if (targetItem->getTile()->getPosition() == action->actor->getPosition())
@@ -2277,6 +2294,7 @@ void BattlescapeGame::findItem(BattleAction *action)
 						_save->getTileEngine()->calculateLighting(LL_ITEMS, action->actor->getPosition());
 						_save->getTileEngine()->calculateFOV(action->actor->getPosition(), targetItem->getVisibilityUpdateRange(), false);
 					}
+					return true;
 				}
 			}
 			else if (!targetItem->getTile()->getUnit() || targetItem->getTile()->getUnit()->isOut())
@@ -2284,9 +2302,17 @@ void BattlescapeGame::findItem(BattleAction *action)
 				// if we're not standing on it, we should try to get to it.
 				action->target = targetItem->getTile()->getPosition();
 				action->type = BA_WALK;
+				if (pickUpWeaponsMoreActively)
+				{
+					// don't end the turn after walking 1-2 tiles... pick up a weapon and shoot!
+					action->finalAction = false;
+					action->desperate = false;
+					action->actor->setHiding(false);
+				}
 			}
 		}
 	}
+	return false;
 }
 
 
@@ -2295,16 +2321,22 @@ void BattlescapeGame::findItem(BattleAction *action)
  * @param action A pointer to the action being performed.
  * @return The item to attempt to take.
  */
-BattleItem *BattlescapeGame::surveyItems(BattleAction *action)
+BattleItem *BattlescapeGame::surveyItems(BattleAction *action, bool pickUpWeaponsMoreActively)
 {
 	std::vector<BattleItem*> droppedItems;
 
 	// first fill a vector with items on the ground that were dropped on the alien turn, and have an attraction value.
 	for (std::vector<BattleItem*>::iterator i = _save->getItems()->begin(); i != _save->getItems()->end(); ++i)
 	{
-		if ((*i)->getSlot() && (*i)->getSlot()->getId() == "STR_GROUND" && (*i)->getTile() && (*i)->getTurnFlag() && (*i)->getRules()->getAttraction())
+		if ((*i)->getRules()->getAttraction())
 		{
-			droppedItems.push_back(*i);
+			if ((*i)->getTurnFlag() || pickUpWeaponsMoreActively)
+			{
+				if ((*i)->getSlot() && (*i)->getSlot()->getId() == "STR_GROUND" && (*i)->getTile())
+				{
+					droppedItems.push_back(*i);
+				}
+			}
 		}
 	}
 
@@ -2337,13 +2369,13 @@ BattleItem *BattlescapeGame::surveyItems(BattleAction *action)
  * @param action A pointer to the action being performed.
  * @return false.
  */
-bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
+bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action, bool pickUpWeaponsMoreActively)
 {
 	int worthToTake = 0;
 
 	// don't even think about making a move for that gun if you can see a target, for some reason
 	// (maybe this should check for enemies spotting the tile the item is on?)
-	if (action->actor->getVisibleUnits()->empty())
+	if (action->actor->getVisibleUnits()->empty() || pickUpWeaponsMoreActively)
 	{
 		// retrieve an insignificantly low value from the ruleset.
 		worthToTake = item->getRules()->getAttraction();
@@ -2409,6 +2441,12 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action)
 		{
 			return false;
 		}
+	}
+
+	if (pickUpWeaponsMoreActively)
+	{
+		// Note: always true, the item must have passed this test already in surveyItems()
+		return worthToTake > 0;
 	}
 
 	// return false for any item that we aren't standing directly on top of with an attraction value less than 6 (aka always)

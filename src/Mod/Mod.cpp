@@ -288,6 +288,7 @@ Mod::Mod() :
 	_costEngineer(0), _costScientist(0), _timePersonnel(0), _initialFunding(0),
 	_aiUseDelayBlaster(3), _aiUseDelayFirearm(0), _aiUseDelayGrenade(3), _aiUseDelayMelee(0), _aiUseDelayPsionic(0),
 	_aiFireChoiceIntelCoeff(5), _aiFireChoiceAggroCoeff(5), _aiExtendedFireModeChoice(false), _aiRespectMaxRange(false), _aiDestroyBaseFacilities(false),
+	_aiPickUpWeaponsMoreActively(false),
 	_maxLookVariant(0), _tooMuchSmokeThreshold(10), _customTrainingFactor(100), _minReactionAccuracy(0), _chanceToStopRetaliation(0),
 	_allowCountriesToCancelAlienPact(false), _kneelBonusGlobal(115), _oneHandedPenaltyGlobal(80),
 	_enableCloseQuartersCombat(0), _closeQuartersAccuracyGlobal(100), _closeQuartersTuCostGlobal(12), _closeQuartersEnergyCostGlobal(8),
@@ -1546,6 +1547,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		_aiExtendedFireModeChoice = nodeAI["extendedFireModeChoice"].as<bool>(_aiExtendedFireModeChoice);
 		_aiRespectMaxRange = nodeAI["respectMaxRange"].as<bool>(_aiRespectMaxRange);
 		_aiDestroyBaseFacilities = nodeAI["destroyBaseFacilities"].as<bool>(_aiDestroyBaseFacilities);
+		_aiPickUpWeaponsMoreActively = nodeAI["pickUpWeaponsMoreActively"].as<bool>(_aiPickUpWeaponsMoreActively);
 	}
 	_maxLookVariant = doc["maxLookVariant"].as<int>(_maxLookVariant);
 	_tooMuchSmokeThreshold = doc["tooMuchSmokeThreshold"].as<int>(_tooMuchSmokeThreshold);

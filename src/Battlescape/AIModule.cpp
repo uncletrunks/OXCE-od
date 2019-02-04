@@ -46,9 +46,10 @@ namespace OpenXcom
  * @param unit Pointer to the unit.
  * @param node Pointer to the node the unit originates from.
  */
-AIModule::AIModule(SavedBattleGame *save, BattleUnit *unit, Node *node) : _save(save), _unit(unit), _aggroTarget(0), _knownEnemies(0), _visibleEnemies(0), _spottingEnemies(0),
-																				_escapeTUs(0), _ambushTUs(0), _rifle(false), _melee(false), _blaster(false), _grenade(false),
-																				_didPsi(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0), _foundBaseModuleToDestroy(false)
+AIModule::AIModule(SavedBattleGame *save, BattleUnit *unit, Node *node) :
+	_save(save), _unit(unit), _aggroTarget(0), _knownEnemies(0), _visibleEnemies(0), _spottingEnemies(0),
+	_escapeTUs(0), _ambushTUs(0), _weaponPickedUp(false), _rifle(false), _melee(false), _blaster(false), _grenade(false),
+	_didPsi(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0), _foundBaseModuleToDestroy(false)
 {
 	_traceAI = Options::traceAI;
 
@@ -89,6 +90,7 @@ void AIModule::load(const YAML::Node &node)
 	toNodeID = node["toNode"].as<int>(-1);
 	_AIMode = node["AIMode"].as<int>(AI_PATROL);
 	_wasHitBy = node["wasHitBy"].as<std::vector<int> >(_wasHitBy);
+	_weaponPickedUp = node["weaponPickedUp"].as<bool>(_weaponPickedUp);
 	// TODO: Figure out why AI are sometimes left with junk nodes
 	if (fromNodeID >= 0 && (size_t)fromNodeID < _save->getNodes()->size())
 	{
@@ -117,6 +119,8 @@ YAML::Node AIModule::save() const
 	node["toNode"] = toNodeID;
 	node["AIMode"] = _AIMode;
 	node["wasHitBy"] = _wasHitBy;
+	if (_weaponPickedUp)
+		node["weaponPickedUp"] = _weaponPickedUp;
 	return node;
 }
 
@@ -322,7 +326,12 @@ void AIModule::think(BattleAction *action)
 			break;
 			}
 
-	if (_spottingEnemies > 2
+	if (_weaponPickedUp)
+	{
+		evaluate = true;
+		_weaponPickedUp = false;
+	}
+	else if (_spottingEnemies > 2
 		|| _unit->getHealth() < 2 * _unit->getBaseStats()->health / 3)
 	{
 		evaluate = true;
@@ -465,6 +474,14 @@ void AIModule::setWasHitBy(BattleUnit *attacker)
 {
 	if (attacker->getFaction() != _unit->getFaction() && !getWasHitBy(attacker->getId()))
 		_wasHitBy.push_back(attacker->getId());
+}
+
+/*
+ * Sets the "unit picked up a weapon" flag.
+ */
+void AIModule::setWeaponPickedUp()
+{
+	_weaponPickedUp = true;
 }
 
 /*

@@ -225,11 +225,11 @@ public:
 	/// Returns whether panic has been handled.
 	bool getPanicHandled() const { return _playerPanicHandled; }
 	/// Tries to find an item and pick it up if possible.
-	void findItem(BattleAction *action);
+	bool findItem(BattleAction *action, bool pickUpWeaponsMoreActively);
 	/// Checks through all the items on the ground and picks one.
-	BattleItem *surveyItems(BattleAction *action);
+	BattleItem *surveyItems(BattleAction *action, bool pickUpWeaponsMoreActively);
 	/// Evaluates if it's worthwhile to take this item.
-	bool worthTaking(BattleItem* item, BattleAction *action);
+	bool worthTaking(BattleItem* item, BattleAction *action, bool pickUpWeaponsMoreActively);
 	/// Picks the item up from the ground.
 	int takeItemFromGround(BattleItem* item, BattleAction *action);
 	/// Assigns the item to a slot (stolen from battlescapeGenerator::addItem()).

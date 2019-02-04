@@ -45,6 +45,7 @@ private:
 	BattleUnit *_aggroTarget;
 	int _knownEnemies, _visibleEnemies, _spottingEnemies;
 	int _escapeTUs, _ambushTUs;
+	bool _weaponPickedUp;
 	BattleAction *_escapeAction, *_ambushAction, *_attackAction, *_patrolAction, *_psiAction;
 	bool _rifle, _melee, _blaster, _grenade;
 	bool _traceAI, _didPsi;
@@ -72,6 +73,8 @@ public:
 	void think(BattleAction *action);
 	/// Sets the "unit was hit" flag true.
 	void setWasHitBy(BattleUnit *attacker);
+	/// Sets the "unit picked up a weapon" flag.
+	void setWeaponPickedUp();
 	/// Gets whether the unit was hit.
 	bool getWasHitBy(int attacker) const;
 	/// setup a patrol objective.
