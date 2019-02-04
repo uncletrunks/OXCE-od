@@ -419,7 +419,7 @@ void Surface::loadImage(const std::string &filename)
 					}
 				}
 			} else {
-				Log(LOG_ERROR) << "lodepng failed:" << lodepng_error_text(error);
+				Log(LOG_ERROR) << "Image " << filename << " lodepng failed:" << lodepng_error_text(error);
 			}
 		}
 		if (data) { SDL_free(data); }
