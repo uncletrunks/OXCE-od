@@ -72,6 +72,7 @@ namespace OpenXcom
 		add(_txtInfo);
 
 		_txtInfo->setColor(Palette::blockOffset(14)+15);
+		_txtInfo->setSecondaryColor(Palette::blockOffset(15) + 4);
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 

@@ -142,6 +142,7 @@ namespace OpenXcom
 		_txtTitle->setText(tr(defs->title));
 
 		_txtInfo->setColor(_textColor);
+		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 

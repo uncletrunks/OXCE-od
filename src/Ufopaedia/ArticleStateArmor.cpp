@@ -51,6 +51,7 @@ namespace OpenXcom
 
 		_buttonColor = _game->getMod()->getInterface("articleArmor")->getElement("button")->color;
 		_textColor = _game->getMod()->getInterface("articleArmor")->getElement("text")->color;
+		_textColor2 = _game->getMod()->getInterface("articleArmor")->getElement("text")->color2;
 		_listColor1 = _game->getMod()->getInterface("articleArmor")->getElement("list")->color;
 		_listColor2 = _game->getMod()->getInterface("articleArmor")->getElement("list")->color2;
 
@@ -116,6 +117,7 @@ namespace OpenXcom
 		add(_txtInfo);
 
 		_txtInfo->setColor(_textColor);
+		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 

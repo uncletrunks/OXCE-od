@@ -54,6 +54,7 @@ namespace OpenXcom
 
 		_buttonColor = _game->getMod()->getInterface("articleCraftWeapon")->getElement("button")->color;
 		_textColor = _game->getMod()->getInterface("articleCraftWeapon")->getElement("text")->color;
+		_textColor2 = _game->getMod()->getInterface("articleCraftWeapon")->getElement("text")->color2;
 		_listColor1 = _game->getMod()->getInterface("articleCraftWeapon")->getElement("list")->color;
 		_listColor2 = _game->getMod()->getInterface("articleCraftWeapon")->getElement("list")->color2;
 
@@ -77,6 +78,7 @@ namespace OpenXcom
 		add(_txtInfo);
 
 		_txtInfo->setColor(_textColor);
+		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
 		_txtInfo->setText(tr(defs->text));
 
