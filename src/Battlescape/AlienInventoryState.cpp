@@ -65,7 +65,11 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	centerAllSurfaces();
 
 	// Set up objects
-	Surface *tmp = _game->getMod()->getSurface("AlienInventory", false);
+	Surface *tmp = _game->getMod()->getSurface("AlienInventory2", false);
+	if (!tmp || !unit->getGeoscapeSoldier())
+	{
+		tmp = _game->getMod()->getSurface("AlienInventory", false);
+	}
 	if (tmp)
 	{
 		tmp->blitNShade(_bg, 0, 0);
