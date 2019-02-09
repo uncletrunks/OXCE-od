@@ -184,8 +184,6 @@ en-US:
   STR_EVERYONE_FIGHTS_NOBODY_QUITS_DESC: "...But they will start with HP reduced by the number of their remaining days to heal *1.5."
   STR_BULLET_SAVING: "Statistical Bullet Saving"
   STR_BULLET_SAVING_DESC: "There's a chance to recover a full clip depending on how much ammo has remained."
-  STR_REMOVE_WOUNDED_FROM_TRAINING: "Remove wounded soldiers from training"
-  STR_REMOVE_WOUNDED_FROM_TRAINING_DESC: "Wounded soldiers can't benefit from physical training. This option will automatically remove them from the training facility, freeing up space for others."
   STR_NIGHT_VISION_COLOR: "Select Night Vision color"
   STR_NIGHT_VISION_COLOR_DESC: "Values from 1 to 15, each representing a different shade color. Default is 8."
   STR_AUTO_NIGHT_VISION: "Automatic Night Vision"

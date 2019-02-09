@@ -879,6 +879,14 @@ void Craft::evacuateCrew(const Mod *mod)
 			{
 				// remove from craft
 				(*s)->setCraft(0);
+				// remove from training, but remember to return to training when back in the base
+				{
+					if ((*s)->isInTraining())
+					{
+						(*s)->setReturnToTrainingWhenHealed(true);
+					}
+					(*s)->setTraining(false);
+				}
 				// transfer to base
 				Transfer *t = new Transfer(mod->getPersonnelTime());
 				t->setSoldier((*s));

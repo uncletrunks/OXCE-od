@@ -2345,6 +2345,18 @@ void GeoscapeState::time1Day()
 					trainingFinishedList.push_back(*j);
 				}
 			}
+			else
+			{
+				if ((*j)->getReturnToTrainingWhenHealed() && !(*j)->isWounded())
+				{
+					if (!(*j)->isFullyTrained() && base->getFreeTrainingSpace() > 0)
+					{
+						(*j)->setTraining(true);
+					}
+					// only ever try to return once
+					(*j)->setReturnToTrainingWhenHealed(false);
+				}
+			}
 		}
 		if (!trainingFinishedList.empty())
 		{

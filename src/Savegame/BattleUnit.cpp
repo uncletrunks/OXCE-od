@@ -3095,14 +3095,17 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 
 	s->setWoundRecovery(recovery);
 
-	if (s->getWoundRecoveryInt() > 0)
+	if (s->isWounded())
 	{
 		// remove from craft
 		s->setCraft(nullptr);
 
-		// remove from training
-		if (Options::removeWoundedFromTraining)
+		// remove from training, but remember to return to training when healed
 		{
+			if (s->isInTraining())
+			{
+				s->setReturnToTrainingWhenHealed(true);
+			}
 			s->setTraining(false);
 		}
 	}

@@ -47,7 +47,7 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 	_id(id), _nationality(0),
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
 	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0.0f),
-	_recentlyPromoted(false), _psiTraining(false), _training(false),
+	_recentlyPromoted(false), _psiTraining(false), _training(false), _returnToTrainingWhenHealed(false),
 	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary()),
 	_corpseRecovered(false)
 {
@@ -134,6 +134,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 		_transformedArmor = mod->getArmor(node["transformedArmor"].as<std::string>());;
 	_psiTraining = node["psiTraining"].as<bool>(_psiTraining);
 	_training = node["training"].as<bool>(_training);
+	_returnToTrainingWhenHealed = node["returnToTrainingWhenHealed"].as<bool>(_returnToTrainingWhenHealed);
 	_improvement = node["improvement"].as<int>(_improvement);
 	_psiStrImprovement = node["psiStrImprovement"].as<int>(_psiStrImprovement);
 	if (const YAML::Node &layout = node["equipmentLayout"])
@@ -201,6 +202,8 @@ YAML::Node Soldier::save(const ScriptGlobal *shared) const
 		node["psiTraining"] = _psiTraining;
 	if (_training)
 		node["training"] = _training;
+	if (_returnToTrainingWhenHealed)
+		node["returnToTrainingWhenHealed"] = _returnToTrainingWhenHealed;
 	node["improvement"] = _improvement;
 	node["psiStrImprovement"] = _psiStrImprovement;
 	if (!_equipmentLayout.empty())
@@ -909,6 +912,7 @@ void Soldier::die(SoldierDeath *death)
 	_craft = 0;
 	_psiTraining = false;
 	_training = false;
+	_returnToTrainingWhenHealed = false;
 	_recentlyPromoted = false;
 	_recovery = 0.0f;
 	for (std::vector<EquipmentLayoutItem*>::iterator i = _equipmentLayout.begin(); i != _equipmentLayout.end(); ++i)
@@ -1019,6 +1023,22 @@ void Soldier::setTraining(bool training)
 }
 
 /**
+ * Should the soldier return to martial training automatically when fully healed?
+ */
+bool Soldier::getReturnToTrainingWhenHealed() const
+{
+	return _returnToTrainingWhenHealed;
+}
+
+/**
+ * Sets whether the soldier should return to martial training automatically when fully healed.
+ */
+void Soldier::setReturnToTrainingWhenHealed(bool returnToTrainingWhenHealed)
+{
+	_returnToTrainingWhenHealed = returnToTrainingWhenHealed;
+}
+
+/**
  * Sets whether or not the unit's corpse was recovered from a battle
  */
 void Soldier::setCorpseRecovered(bool corpseRecovered)
@@ -1113,6 +1133,7 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 		_recovery = transformationRule->getRecoveryTime();
 	}
 	_training = false;
+	_returnToTrainingWhenHealed = false;
 	_psiTraining = false;
 
 	// needed, because the armor size may change (also, it just makes sense)

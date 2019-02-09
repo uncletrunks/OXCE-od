@@ -56,7 +56,6 @@ OPT int startTextMode;
 OPT bool everyoneFightsNobodyQuits;
 OPT bool statisticalBulletConservation;
 
-OPT bool removeWoundedFromTraining;
 OPT int nightVisionColor;
 OPT bool autoNightVision;
 OPT bool autoSell;
