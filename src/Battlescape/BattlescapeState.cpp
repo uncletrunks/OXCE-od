@@ -1830,7 +1830,6 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 	// remember where green indicators turn blue
 	_numberOfEnemiesTotal = j;
 
-	if (Options::bleedingIndicator)
 	{
 		// go through all wounded units under player's control (incl. unconscious)
 		for (std::vector<BattleUnit*>::iterator i = _battleGame->getSave()->getUnits()->begin(); i != _battleGame->getSave()->getUnits()->end() && j < VISIBLE_MAX; ++i)
@@ -1849,7 +1848,6 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 	// remember where blue indicators turn purple
 	_numberOfEnemiesTotalPlusWounded = j;
 
-	if (Options::knockOutIndicator)
 	{
 		// go through all units under player's control (excl. unconscious)
 		for (std::vector<BattleUnit*>::iterator i = _battleGame->getSave()->getUnits()->begin(); i != _battleGame->getSave()->getUnits()->end() && j < VISIBLE_MAX; ++i)

@@ -210,8 +210,6 @@ void create()
 	_info.push_back(OptionInfo("startTextMode", &startTextMode, 0, "", "HIDDEN"));
 	_info.push_back(OptionInfo("minimapBorderIndicator", &minimapBorderIndicator, true, "STR_MINIMAP_BORDER_INDICATOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("everyoneFightsNobodyQuits", &everyoneFightsNobodyQuits, false, "STR_EVERYONE_FIGHTS_NOBODY_QUITS", "STR_OXCE"));
-	_info.push_back(OptionInfo("bleedingIndicator", &bleedingIndicator, false, "STR_BLEEDING_INDICATOR", "STR_OXCE"));
-	_info.push_back(OptionInfo("knockOutIndicator", &knockOutIndicator, false, "STR_KNOCK_OUT_INDICATOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_OXCE"));
 	_info.push_back(OptionInfo("showItemNameAndWeightInInventory", &showItemNameAndWeightInInventory, false, "STR_SHOW_ITEM_WEIGHT_IN_INVENTORY", "STR_OXCE"));
 	_info.push_back(OptionInfo("removeWoundedFromTraining", &removeWoundedFromTraining, false, "STR_REMOVE_WOUNDED_FROM_TRAINING", "STR_OXCE"));

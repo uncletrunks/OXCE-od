@@ -54,7 +54,7 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch,
 // Extra options (Meridian's build)
 OPT int startTextMode;
 OPT bool minimapBorderIndicator, everyoneFightsNobodyQuits;
-OPT bool bleedingIndicator, knockOutIndicator, statisticalBulletConservation;
+OPT bool statisticalBulletConservation;
 
 OPT bool showItemNameAndWeightInInventory;
 OPT bool removeWoundedFromTraining;
