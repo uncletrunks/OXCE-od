@@ -63,7 +63,6 @@ OPT bool autoSell;
 OPT bool playBriefingMusicDuringEquipment;
 OPT bool ufoLandingAlert;
 OPT bool drawEnemyRadarCircles;
-OPT bool oneHandedUnloading;
 
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter, newRootWindowedMode, newFullscreen, newAllowResize, newBorderless;
