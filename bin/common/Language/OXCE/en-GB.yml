@@ -198,8 +198,6 @@ en-GB:
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT_DESC: "Briefing music will continue playing during equipment phase until the Battlescape is displayed."
   STR_UFO_LANDING_ALERT: "UFO landing alert"
   STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
-  STR_FRIENDLY_CRAFT_ESCORT: "Friendly craft escort"
-  STR_FRIENDLY_CRAFT_ESCORT_DESC: "Allows your craft to follow and provide air defence for other craft in the Geoscape."
   STR_DRAW_ENEMY_RADAR_CIRCLES: "Draw enemy radar circles"
   STR_DRAW_ENEMY_RADAR_CIRCLES_DESC: "If enabled, radar range of enemy interceptors (HKs) and defense perimeter of enemy bases will be visible."
   STR_ALLOW_ONE_HANDED_UNLOADING: "Single-handed weapon unloading"

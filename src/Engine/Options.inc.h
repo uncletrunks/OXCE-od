@@ -62,7 +62,6 @@ OPT bool autoNightVision;
 OPT bool autoSell;
 OPT bool playBriefingMusicDuringEquipment;
 OPT bool ufoLandingAlert;
-OPT bool friendlyCraftEscort;
 OPT bool drawEnemyRadarCircles;
 OPT bool oneHandedUnloading;
 

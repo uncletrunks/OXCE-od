@@ -1385,7 +1385,6 @@ void GeoscapeState::time10Minutes()
 			if ((*j)->getStatus() == "STR_OUT")
 			{
 				int escortSpeed = 0;
-				if (Options::friendlyCraftEscort)
 				{
 					Craft *escortee = dynamic_cast<Craft*>((*j)->getDestination());
 					if (escortee != 0)
