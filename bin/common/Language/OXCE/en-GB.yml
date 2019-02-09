@@ -180,8 +180,6 @@ en-GB:
   STR_HIT_LOG_REACTION_FIRE: "Reaction fire..."
 #=================== Engine ===================
 #Options.cpp
-  STR_MINIMAP_BORDER_INDICATOR: "Display map borders on the Minimap"
-  STR_MINIMAP_BORDER_INDICATOR_DESC: "Easily see the size of the map by having the black void surrounding it replaced by coloured."
   STR_EVERYONE_FIGHTS_NOBODY_QUITS: "Wounded fight if base attacked"
   STR_EVERYONE_FIGHTS_NOBODY_QUITS_DESC: "...But they will start with HP reduced by the number of their remaining days to heal *1.5."
   STR_BULLET_SAVING: "Statistical Bullet Saving"

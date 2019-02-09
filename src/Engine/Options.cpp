@@ -208,7 +208,6 @@ void create()
 
 	// OXCE
 	_info.push_back(OptionInfo("startTextMode", &startTextMode, 0, "", "HIDDEN"));
-	_info.push_back(OptionInfo("minimapBorderIndicator", &minimapBorderIndicator, true, "STR_MINIMAP_BORDER_INDICATOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("everyoneFightsNobodyQuits", &everyoneFightsNobodyQuits, false, "STR_EVERYONE_FIGHTS_NOBODY_QUITS", "STR_OXCE"));
 	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_OXCE"));
 	_info.push_back(OptionInfo("removeWoundedFromTraining", &removeWoundedFromTraining, false, "STR_REMOVE_WOUNDED_FROM_TRAINING", "STR_OXCE"));

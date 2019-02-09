@@ -73,6 +73,7 @@ void MiniMapView::draw()
 	drawRect(0, 0, getWidth(), getHeight(), 15);
 	this->lock();
 	Surface * emptySpace = _set->getFrame(_emptySpaceIndex);
+	bool isAltPressed = (SDL_GetModState() & KMOD_ALT) != 0;
 	for (int lvl = 0; lvl <= _camera->getCenterPosition().z; lvl++)
 	{
 		int py = _startY;
@@ -87,7 +88,7 @@ void MiniMapView::draw()
 				t = _battleGame->getTile(p);
 				if (!t)
 				{
-					if (Options::minimapBorderIndicator)
+					if (isAltPressed)
 					{
 						emptySpace->blitNShade(this, x, y, 0);
 					}
