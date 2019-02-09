@@ -186,8 +186,6 @@ en-GB:
   STR_EVERYONE_FIGHTS_NOBODY_QUITS_DESC: "...But they will start with HP reduced by the number of their remaining days to heal *1.5."
   STR_BULLET_SAVING: "Statistical Bullet Saving"
   STR_BULLET_SAVING_DESC: "There's a chance to recover a full clip depending on how much ammo has remained."
-  STR_SHOW_ITEM_WEIGHT_IN_INVENTORY: "Show item weight in inventory"
-  STR_SHOW_ITEM_WEIGHT_IN_INVENTORY_DESC: "Displays item weight after item's name when an item is picked up."
   STR_REMOVE_WOUNDED_FROM_TRAINING: "Remove wounded soldiers from training"
   STR_REMOVE_WOUNDED_FROM_TRAINING_DESC: "Wounded soldiers can't benefit from physical training. This option will automatically remove them from the training facility, freeing up space for others."
   STR_NIGHT_VISION_COLOR: "Select Night Vision colour"

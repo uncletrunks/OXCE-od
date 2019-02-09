@@ -56,7 +56,6 @@ OPT int startTextMode;
 OPT bool minimapBorderIndicator, everyoneFightsNobodyQuits;
 OPT bool statisticalBulletConservation;
 
-OPT bool showItemNameAndWeightInInventory;
 OPT bool removeWoundedFromTraining;
 OPT int nightVisionColor;
 OPT bool autoNightVision;

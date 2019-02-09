@@ -1367,7 +1367,7 @@ void InventoryState::invMouseOver(Action *)
 			}
 		}
 
-		if (!altPressed && Options::showItemNameAndWeightInInventory)
+		if (!altPressed)
 		{
 			std::ostringstream ss;
 			ss << itemName;
@@ -1654,18 +1654,16 @@ void InventoryState::txtArmorTooltipIn(Action *action)
 		{
 			action->getSender()->setTooltip(unit->getArmor()->getType());
 			_currentTooltip = action->getSender()->getTooltip();
-			if (Options::showItemNameAndWeightInInventory)
 			{
 				std::ostringstream ss;
 				ss << tr(_currentTooltip);
-				ss << " [";
-				ss << unit->getArmor()->getWeight();
-				ss << "]";
+				if (unit->getArmor()->getWeight() != 0)
+				{
+					ss << " [";
+					ss << unit->getArmor()->getWeight();
+					ss << "]";
+				}
 				_txtItem->setText(ss.str().c_str());
-			}
-			else
-			{
-				_txtItem->setText(tr(_currentTooltip));
 			}
 		}
 	}
