@@ -327,7 +327,7 @@ void Inventory::drawItems()
 			work.executeBlit(frame, _items, x, y, 0);
 
 			// two-handed indicator
-			if (Options::twoHandedIndicatorInventory && (*i)->getSlot()->getType() == INV_HAND)
+			if ((*i)->getSlot()->getType() == INV_HAND)
 			{
 				if ((*i)->getRules()->isTwoHanded() || (*i)->getRules()->isBlockingBothHands())
 				{

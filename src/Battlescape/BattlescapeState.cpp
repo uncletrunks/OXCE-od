@@ -1582,11 +1582,8 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<Num
 				}
 			}
 		}
-		if (Options::twoHandedIndicator)
-		{
-			twoHandedText->setVisible(rule->isTwoHanded());
-			twoHandedText->setColor(rule->isBlockingBothHands() ? _twoHandedRed : _twoHandedGreen);
-		}
+		twoHandedText->setVisible(rule->isTwoHanded());
+		twoHandedText->setColor(rule->isBlockingBothHands() ? _twoHandedRed : _twoHandedGreen);
 		if (rule->getBattleType() == BT_MEDIKIT)
 		{
 			medikitText[0]->setVisible(true);
