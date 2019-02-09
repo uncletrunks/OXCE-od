@@ -107,6 +107,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	}
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
+	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
 	_loftempsSet = _armor->getLoftempsSet();
 	_gender = soldier->getGender();
@@ -207,6 +208,7 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int 
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
+	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
 	_loftempsSet = _armor->getLoftempsSet();
 
@@ -305,6 +307,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleStarti
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? maxViewDistance : 9;
+	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids
@@ -3457,6 +3460,11 @@ int BattleUnit::getMaxViewDistanceAtDark(const Armor *otherUnitArmor) const
 	{
 		return _maxViewDistanceAtDark;
 	}
+}
+
+int BattleUnit::getMaxViewDistanceAtDarkSquared() const
+{
+	return _maxViewDistanceAtDarkSquared;
 }
 
 int BattleUnit::getMaxViewDistanceAtDay(const Armor *otherUnitArmor) const

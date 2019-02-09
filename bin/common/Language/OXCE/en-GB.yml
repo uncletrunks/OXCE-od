@@ -200,8 +200,6 @@ en-GB:
   STR_SHOW_ITEM_WEIGHT_IN_INVENTORY_DESC: "Displays item weight after item's name when an item is picked up."
   STR_REMOVE_WOUNDED_FROM_TRAINING: "Remove wounded soldiers from training"
   STR_REMOVE_WOUNDED_FROM_TRAINING_DESC: "Wounded soldiers can't benefit from physical training. This option will automatically remove them from the training facility, freeing up space for others."
-  STR_FULL_NIGHT_VISION: "Maximized Night Display"
-  STR_FULL_NIGHT_VISION_DESC: "If enabled, the Night Display will show all explored terrain, not only what your units see."
   STR_NIGHT_VISION_COLOR: "Select Night Vision colour"
   STR_NIGHT_VISION_COLOR_DESC: "Values from 1 to 15, each representing a different shade colour. Default is 8."
   STR_AUTO_NIGHT_VISION: "Automatic Night Vision"

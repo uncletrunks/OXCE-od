@@ -135,6 +135,7 @@ private:
 	int _value, _aggroSound, _moveSound;
 	int _intelligence, _aggression;
 	int _maxViewDistanceAtDark, _maxViewDistanceAtDay;
+	int _maxViewDistanceAtDarkSquared;
 	SpecialAbility _specab;
 	Armor *_armor;
 	SoldierGender _gender;
@@ -478,6 +479,7 @@ public:
 	int getMaxViewDistance(int baseVisibility, int nerf, int buff) const;
 	/// Get maximum view distance at dark.
 	int getMaxViewDistanceAtDark(const Armor *otherUnitArmor) const;
+	int getMaxViewDistanceAtDarkSquared() const;
 	/// Get maximum view distance at day.
 	int getMaxViewDistanceAtDay(const Armor *otherUnitArmor) const;
 	/// Get the units's special ability.
