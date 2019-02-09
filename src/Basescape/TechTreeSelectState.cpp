@@ -158,11 +158,6 @@ void TechTreeSelectState::initLists()
 	const std::vector<std::string> &researchItems = _game->getMod()->getResearchList();
 	for (std::vector<std::string>::const_iterator i = researchItems.begin(); i != researchItems.end(); ++i)
 	{
-		if (Options::techTreeViewerSpoilerProtection)
-		{
-			if (!_parent->isDiscoveredResearch(*i))
-				continue;
-		}
 		std::string projectName = tr((*i));
 		Unicode::upperCase(projectName);
 		if (searchString == "SHAZAM")
@@ -187,11 +182,6 @@ void TechTreeSelectState::initLists()
 	const std::vector<std::string> &manufacturingItems = _game->getMod()->getManufactureList();
 	for (std::vector<std::string>::const_iterator i = manufacturingItems.begin(); i != manufacturingItems.end(); ++i)
 	{
-		if (Options::techTreeViewerSpoilerProtection)
-		{
-			if (!_parent->isDiscoveredManufacture(*i))
-				continue;
-		}
 		std::string projectName = tr((*i));
 		Unicode::upperCase(projectName);
 		if (searchString == "SHAZAM")
@@ -219,11 +209,6 @@ void TechTreeSelectState::initLists()
 	const std::vector<std::string> &facilityItems = _game->getMod()->getBaseFacilitiesList();
 	for (std::vector<std::string>::const_iterator i = facilityItems.begin(); i != facilityItems.end(); ++i)
 	{
-		if (Options::techTreeViewerSpoilerProtection)
-		{
-			if (!_parent->isDiscoveredFacility(*i))
-				continue;
-		}
 		std::string facilityName = tr((*i));
 		Unicode::upperCase(facilityName);
 		if (searchString == "SHAZAM")
@@ -255,11 +240,6 @@ void TechTreeSelectState::initLists()
 		{
 			// items that are not protected at all are irrelevant for the Tech Tree Viewer!
 			continue;
-		}
-		if (Options::techTreeViewerSpoilerProtection)
-		{
-			if (!_parent->isProtectedAndDiscoveredItem(*i))
-				continue;
 		}
 		std::string itemName = tr((*i));
 		Unicode::upperCase(itemName);

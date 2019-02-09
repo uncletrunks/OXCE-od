@@ -206,8 +206,6 @@ en-GB:
   STR_AUTO_NIGHT_VISION_DESC: "Before night missions, turn personal lights off and turn night vision on."
   STR_AUTO_SELL: "Auto-Sell Manager"
   STR_AUTO_SELL_DESC: "In the battle debriefing sell screen, any item types you sold in previous battles will be automatically marked for selling."
-  STR_TECH_SPOILER_PROTECTION: "No-Spoilers Tech Tree Viewer"
-  STR_TECH_SPOILER_PROTECTION_DESC: "With this option on, you won't be able to check where the yet-unresearched topics lead to."
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT: "Play Briefing music longer"
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT_DESC: "Briefing music will continue playing during equipment phase until the Battlescape is displayed."
   STR_UFO_LANDING_ALERT: "UFO landing alert"

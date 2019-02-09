@@ -61,7 +61,6 @@ OPT bool removeWoundedFromTraining;
 OPT int nightVisionColor;
 OPT bool autoNightVision;
 OPT bool autoSell;
-OPT bool techTreeViewerSpoilerProtection;
 OPT bool playBriefingMusicDuringEquipment;
 OPT bool ufoLandingAlert;
 OPT bool friendlyCraftEscort;

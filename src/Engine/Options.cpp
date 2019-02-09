@@ -221,7 +221,6 @@ void create()
 	_info.push_back(OptionInfo("nightVisionColor", &nightVisionColor, 8, "STR_NIGHT_VISION_COLOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("autoNightVision", &autoNightVision, false, "STR_AUTO_NIGHT_VISION", "STR_OXCE"));
 	_info.push_back(OptionInfo("autoSell", &autoSell, false, "STR_AUTO_SELL", "STR_OXCE"));
-	_info.push_back(OptionInfo("techTreeViewerSpoilerProtection", &techTreeViewerSpoilerProtection, false, "STR_TECH_SPOILER_PROTECTION", "STR_OXCE"));
 	_info.push_back(OptionInfo("playBriefingMusicDuringEquipment", &playBriefingMusicDuringEquipment, false, "STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT", "STR_OXCE"));
 	_info.push_back(OptionInfo("ufoLandingAlert", &ufoLandingAlert, false, "STR_UFO_LANDING_ALERT", "STR_OXCE"));
 	_info.push_back(OptionInfo("friendlyCraftEscort", &friendlyCraftEscort, false, "STR_FRIENDLY_CRAFT_ESCORT", "STR_OXCE"));

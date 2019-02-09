@@ -1116,25 +1116,6 @@ void TechTreeViewerState::onSelectLeftTopic(Action *)
 	int index = _lstLeft->getSelectedRow();
 	if (_leftFlags[index] > TTV_NONE)
 	{
-		if (Options::techTreeViewerSpoilerProtection)
-		{
-			if (_leftFlags[index] == TTV_RESEARCH && !isDiscoveredResearch(_leftTopics[index]))
-			{
-				return;
-			}
-			else if (_leftFlags[index] == TTV_MANUFACTURING && !isDiscoveredManufacture(_leftTopics[index]))
-			{
-				return;
-			}
-			else if (_leftFlags[index] == TTV_FACILITIES && !isDiscoveredFacility(_leftTopics[index]))
-			{
-				return;
-			}
-			else if (_leftFlags[index] == TTV_ITEMS && !isProtectedAndDiscoveredItem(_leftTopics[index]))
-			{
-				return;
-			}
-		}
 		_selectedFlag = _leftFlags[index];
 		_selectedTopic = _leftTopics[index];
 		initLists();
@@ -1150,25 +1131,6 @@ void TechTreeViewerState::onSelectRightTopic(Action *)
 	int index = _lstRight->getSelectedRow();
 	if (_rightFlags[index] > TTV_NONE)
 	{
-		if (Options::techTreeViewerSpoilerProtection)
-		{
-			if (_rightFlags[index] == TTV_RESEARCH && !isDiscoveredResearch(_rightTopics[index]))
-			{
-				return;
-			}
-			else if (_rightFlags[index] == TTV_MANUFACTURING && !isDiscoveredManufacture(_rightTopics[index]))
-			{
-				return;
-			}
-			else if (_rightFlags[index] == TTV_FACILITIES && !isDiscoveredFacility(_rightTopics[index]))
-			{
-				return;
-			}
-			else if (_rightFlags[index] == TTV_ITEMS && !isProtectedAndDiscoveredItem(_rightTopics[index]))
-			{
-				return;
-			}
-		}
 		_selectedFlag = _rightFlags[index];
 		_selectedTopic = _rightTopics[index];
 		initLists();
