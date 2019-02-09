@@ -323,20 +323,14 @@ void MonthlyReportState::btnOkClick(Action *)
 			_game->pushState(new CommendationState(_soldiersMedalled));
 		}
 
-		bool training = false;
 		bool psi = false;
 		for (std::vector<Base*>::const_iterator b = _game->getSavedGame()->getBases()->begin(); b != _game->getSavedGame()->getBases()->end(); ++b)
 		{
 			psi = psi || (*b)->getAvailablePsiLabs();
-			training = training || (*b)->getAvailableTraining();
 		}
 		if (psi && !Options::anytimePsiTraining)
 		{
 			_game->pushState(new PsiTrainingState);
-		}
-		else if (training && !Options::anytimeMartialTraining)
-		{
-			_game->pushState(new TrainingState);
 		}
 		// Autosave
 		if (_game->getSavedGame()->isIronman())

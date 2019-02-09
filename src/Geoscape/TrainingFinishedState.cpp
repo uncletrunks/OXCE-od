@@ -66,7 +66,6 @@ TrainingFinishedState::TrainingFinishedState(Base *base, const std::vector<Soldi
 	_btnOpen->setText(tr("STR_TRAINING"));
 	_btnOpen->onMouseClick((ActionHandler)&TrainingFinishedState::btnOpenClick);
 	_btnOpen->onKeyboardPress((ActionHandler)&TrainingFinishedState::btnOpenClick, Options::keyOk);
-	_btnOpen->setVisible(Options::anytimeMartialTraining);
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_TRAINING_FINISHED"));

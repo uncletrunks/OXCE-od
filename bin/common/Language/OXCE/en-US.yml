@@ -180,8 +180,6 @@ en-US:
   STR_HIT_LOG_REACTION_FIRE: "Reaction fire..."
 #=================== Engine ===================
 #Options.cpp
-  STR_ANYTIMEMARTIALTRAINING: "Martial training at any time"
-  STR_ANYTIMEMARTIALTRAINING_DESC: "Allows assigning soldiers to martial training at any time of the month."
   STR_TWO_HANDED_INDICATOR: "Display if weapon is two-handed"
   STR_TWO_HANDED_INDICATOR_DESC: "Weapons on the battle UI will have a small number displayed in the lower right corner, 1 for 1-handed, 2 for 2-handed."
   STR_TWO_HANDED_INDICATOR_INV: "Show 2-handed indicator in inventory"

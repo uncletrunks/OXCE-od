@@ -38,7 +38,6 @@ private:
 	Text *_txtTitle;
 	std::vector<TextButton*> _btnBases;
 	std::vector<Base*> _bases;
-	bool _training;
 public:
 	/// Creates the Psi Training state.
 	PsiTrainingState();
