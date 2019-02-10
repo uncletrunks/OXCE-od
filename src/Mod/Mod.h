@@ -180,7 +180,7 @@ private:
 	int _performanceBonusFactor;
 	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	bool _hidePediaInfoButton, _extraNerdyPediaInfo, _showAllCommendations;
-	bool _giveScoreAlsoForResearchedArtifacts;
+	bool _giveScoreAlsoForResearchedArtifacts, _statisticalBulletConservation;
 	int _theMostUselessOptionEver, _theBiggestRipOffEver;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
@@ -556,6 +556,8 @@ public:
 	bool getShowAllCommendations() const { return _showAllCommendations; }
 	/// In debriefing, give score also for already researched alien artifacts?
 	bool getGiveScoreAlsoForResearchedArtifacts() const { return _giveScoreAlsoForResearchedArtifacts; }
+	/// When recovering ammo, should partially spent clip have a chance to recover as full?
+	bool getStatisticalBulletConservation() const { return _statisticalBulletConservation; }
 	/// Self-explanatory
 	int getTheMostUselessOptionEver() const { return _theMostUselessOptionEver; }
 	/// Shame on you!

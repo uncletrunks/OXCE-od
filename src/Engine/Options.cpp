@@ -209,7 +209,6 @@ void create()
 	// OXCE
 	_info.push_back(OptionInfo("startTextMode", &startTextMode, 0, "", "HIDDEN"));
 	_info.push_back(OptionInfo("everyoneFightsNobodyQuits", &everyoneFightsNobodyQuits, false, "STR_EVERYONE_FIGHTS_NOBODY_QUITS", "STR_OXCE"));
-	_info.push_back(OptionInfo("statisticalBulletConservation", &statisticalBulletConservation, false, "STR_BULLET_SAVING", "STR_OXCE"));
 	_info.push_back(OptionInfo("nightVisionColor", &nightVisionColor, 8, "STR_NIGHT_VISION_COLOR", "STR_OXCE"));
 	_info.push_back(OptionInfo("autoSell", &autoSell, false, "STR_AUTO_SELL", "STR_OXCE"));
 	_info.push_back(OptionInfo("playBriefingMusicDuringEquipment", &playBriefingMusicDuringEquipment, false, "STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT", "STR_OXCE"));

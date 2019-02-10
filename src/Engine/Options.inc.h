@@ -54,7 +54,6 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch,
 // Extra options (Meridian's build)
 OPT int startTextMode;
 OPT bool everyoneFightsNobodyQuits;
-OPT bool statisticalBulletConservation;
 
 OPT int nightVisionColor;
 OPT bool autoSell;

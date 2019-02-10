@@ -1771,7 +1771,7 @@ void DebriefingState::prepareDebriefing()
 	for (std::map<const RuleItem*, int>::const_iterator i = _rounds.begin(); i != _rounds.end(); ++i)
 	{
 		int total_clips = 0;
-		if (Options::statisticalBulletConservation)
+		if (_game->getMod()->getStatisticalBulletConservation())
 		{
 			total_clips = (i->second + RNG::generate(0, (i->first->getClipSize() - 1))) / i->first->getClipSize();
 		}
