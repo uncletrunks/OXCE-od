@@ -731,12 +731,22 @@ bool Soldier::hasFullHealth() const
 }
 
 /**
+ * Is the soldier capable of defending a base?.
+ * @return False if wounded too much.
+ */
+bool Soldier::canDefendBase() const
+{
+	int currentHealthPercentage = std::max(0, _currentStats.health - getWoundRecoveryInt()) * 100 / _currentStats.health;
+	return currentHealthPercentage >= Options::oxceWoundedDefendBaseIf;
+}
+
+/**
  * Returns the amount of time until the soldier is healed.
  * @return Number of days.
  */
 int Soldier::getWoundRecoveryInt() const
 {
-	// Note: only for use in Yankes scripts!
+	// Note: only for use in Yankes scripts! ...and in base defense HP calculations :/
 	return (int)(std::ceil(_recovery));
 }
 

@@ -3029,7 +3029,7 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 			popup(new BaseDestroyedState(base, true, true));
 		}
 	}
-	else if (base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits) > 0 || !base->getVehicles()->empty())
+	else if (base->getAvailableSoldiers(true, true) > 0 || !base->getVehicles()->empty())
 	{
 		SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 		_game->getSavedGame()->setBattleGame(bgame);

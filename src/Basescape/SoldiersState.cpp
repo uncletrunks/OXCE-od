@@ -566,7 +566,7 @@ void SoldiersState::cbxScreenActionsChange(Action *action)
 */
 void SoldiersState::btnInventoryClick(Action *)
 {
-	if (_base->getAvailableSoldiers(true, Options::everyoneFightsNobodyQuits) > 0)
+	if (_base->getAvailableSoldiers(true, true) > 0)
 	{
 		SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 		_game->getSavedGame()->setBattleGame(bgame);

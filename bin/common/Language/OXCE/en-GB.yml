@@ -182,8 +182,8 @@ en-GB:
 #Options.cpp
   STR_UFO_LANDING_ALERT: "UFO landing alert"
   STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
-  STR_EVERYONE_FIGHTS_NOBODY_QUITS: "Wounded fight if base attacked"
-  STR_EVERYONE_FIGHTS_NOBODY_QUITS_DESC: "...But they will start with HP reduced by the number of their remaining days to heal *1.5."
+  STR_WOUNDED_DEFEND_BASE_IF: "Wounded defend (if HP above x%)"
+  STR_WOUNDED_DEFEND_BASE_IF_DESC: "Wounded soldiers defend the base too, if their health is above the given percentage threshold."
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT: "Play Briefing music longer"
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT_DESC: "Briefing music will continue playing during equipment phase until the Battlescape is displayed."
   STR_NIGHT_VISION_COLOR: "Select Night Vision colour"

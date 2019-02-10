@@ -137,20 +137,12 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_energy = _stats.stamina;
 	_health = _stats.health;
 	_morale = 100;
-	if (Options::everyoneFightsNobodyQuits)
+	// wounded soldiers (defending the base) start with lowered morale
 	{
-		// wounded soldiers start with half the energy and lowered morale
 		if (soldier->isWounded())
 		{
-			_energy = _stats.stamina / 2;
 			_morale = 75;
-		}
-		// statistically worse than average
-		_health = _health - ((soldier->getWoundRecovery(0.0f, 0.0f) * 3) / 2);
-		if (_health < 1)
-		{
-			// this is actually a punishment, strategically it is better to leave them behind :)
-			_health = 1;
+			_health = std::max(1, _health - soldier->getWoundRecoveryInt());
 		}
 	}
 	_stunlevel = 0;

@@ -164,6 +164,8 @@ public:
 	bool isWounded() const;
 	/// Is the soldier wounded or not?.
 	bool hasFullHealth() const;
+	/// Is the soldier capable of defending a base?.
+	bool canDefendBase() const;
 	/// Gets the soldier's wound recovery time.
 	int getWoundRecoveryInt() const;
 	int getWoundRecovery(float absBonus, float relBonus) const;

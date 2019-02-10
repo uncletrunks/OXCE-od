@@ -248,7 +248,7 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 		int *i = setting->asInt();
 
 		int increment = (button == SDL_BUTTON_LEFT) ? 1 : -1; // left-click increases, right-click decreases
-		if (i == &Options::changeValueByMouseWheel || i == &Options::FPS || i == &Options::FPSInactive)
+		if (i == &Options::changeValueByMouseWheel || i == &Options::FPS || i == &Options::FPSInactive || i == &Options::oxceWoundedDefendBaseIf)
 		{
 			increment *= 10;
 		}
@@ -283,6 +283,10 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 		{
 			min = 1;
 			max = 5;
+		}
+		else if (i == &Options::oxceWoundedDefendBaseIf) {
+			min = 0;
+			max = 100;
 		}
 		else if (i == &Options::oxceNightVisionColor)
 		{
