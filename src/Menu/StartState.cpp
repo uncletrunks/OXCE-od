@@ -95,7 +95,7 @@ StartState::StartState() : _anim(0)
 
 	if (Options::reload)
 	{
-		if (Options::startTextMode < 2)
+		if (Options::oxceStartUpTextMode < 2)
 		{
 			addLine("Restarting...");
 			addLine("");
@@ -103,7 +103,7 @@ StartState::StartState() : _anim(0)
 	}
 	else
 	{
-		if (Options::startTextMode < 2)
+		if (Options::oxceStartUpTextMode < 2)
 		{
 			addLine(CrossPlatform::getDosPath() + ">openxcom");
 		}
@@ -221,7 +221,7 @@ void StartState::animate()
 		ss << "Loading OpenXcom " << OPENXCOM_VERSION_SHORT << OPENXCOM_VERSION_GIT << "...";
 		if (Options::reload)
 		{
-			if (Options::startTextMode < 2)
+			if (Options::oxceStartUpTextMode < 2)
 			{
 				if (_anim == 2)
 					addLine(ss.str());
@@ -232,21 +232,21 @@ void StartState::animate()
 			switch (_anim)
 			{
 			case 1:
-				if (Options::startTextMode < 1)
+				if (Options::oxceStartUpTextMode < 1)
 				{
 					addLine("DOS/4GW Protected Mode Run-time  Version 1.9");
 					addLine("Copyright (c) Rational Systems, Inc. 1990-1993");
 				}
 				break;
 			case 6:
-				if (Options::startTextMode < 2)
+				if (Options::oxceStartUpTextMode < 2)
 				{
 					addLine("");
 					addLine("OpenXcom initialisation");
 				}
 				break;
 			case 7:
-				if (Options::startTextMode < 1)
+				if (Options::oxceStartUpTextMode < 1)
 				{
 					addLine("");
 					if (Options::mute)
@@ -263,13 +263,13 @@ void StartState::animate()
 						addLine("Base Port 220  Irq 7  Dma 1");
 					}
 				}
-				if (Options::startTextMode < 2)
+				if (Options::oxceStartUpTextMode < 2)
 				{
 					addLine("");
 				}
 				break;
 			case 9:
-				if (Options::startTextMode < 2)
+				if (Options::oxceStartUpTextMode < 2)
 				{
 					addLine(ss.str());
 				}

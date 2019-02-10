@@ -594,7 +594,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_btnReserveAuto->setGroup(&_reserve);
 
 	// Set music
-	if (!Options::playBriefingMusicDuringEquipment)
+	if (!Options::oxcePlayBriefingMusicDuringEquipment)
 	{
 		if (_save->getMusic().empty())
 		{
@@ -699,7 +699,7 @@ void BattlescapeState::init()
 	if (_firstInit)
 	{
 		// Set music
-		if (Options::playBriefingMusicDuringEquipment)
+		if (Options::oxcePlayBriefingMusicDuringEquipment)
 		{
 			if (_save->getMusic() == "")
 			{

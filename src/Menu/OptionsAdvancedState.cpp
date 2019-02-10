@@ -284,7 +284,7 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 			min = 1;
 			max = 5;
 		}
-		else if (i == &Options::nightVisionColor)
+		else if (i == &Options::oxceNightVisionColor)
 		{
 			// UFO: 1-15, TFTD: 2-15 except 10
 			if (_isTFTD && (*i) == 10)

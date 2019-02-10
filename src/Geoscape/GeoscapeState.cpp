@@ -906,7 +906,7 @@ void GeoscapeState::time5Seconds()
 				AlienMission *mission = (*i)->getMission();
 				bool detected = (*i)->getDetected();
 				mission->ufoReachedWaypoint(**i, *_game, *_globe);
-				if (Options::ufoLandingAlert && (*i)->getStatus() == Ufo::LANDED && (*i)->getDetected() && (*i)->getLandId() != 0)
+				if (Options::oxceUfoLandingAlert && (*i)->getStatus() == Ufo::LANDED && (*i)->getDetected() && (*i)->getLandId() != 0)
 				{
 					std::string msg = tr("STR_UFO_HAS_LANDED").arg((*i)->getName(_game->getLanguage()));
 					popup(new CraftErrorState(this, msg));

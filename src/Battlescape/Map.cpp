@@ -1939,7 +1939,7 @@ void Map::fadeShade()
 	bool hold = SDL_GetKeyState(NULL)[Options::keyNightVisionHold];
 	if ((_nightVisionOn && !hold) || (!_nightVisionOn && hold))
 	{
-		_nvColor = Options::nightVisionColor;
+		_nvColor = Options::oxceNightVisionColor;
 		if (_fadeShade > NIGHT_VISION_SHADE) // 0 = max brightness
 		{
 			--_fadeShade;

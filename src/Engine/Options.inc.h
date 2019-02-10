@@ -40,7 +40,7 @@ keyBattleReserveKneel, keyBattleReload, keyBattlePersonalLighting, keyBattleRese
 keyBattleCenterEnemy1, keyBattleCenterEnemy2, keyBattleCenterEnemy3, keyBattleCenterEnemy4, keyBattleCenterEnemy5, keyBattleCenterEnemy6, keyBattleCenterEnemy7, keyBattleCenterEnemy8,
 keyBattleCenterEnemy9, keyBattleCenterEnemy10, keyBattleVoxelView, keyBattleZeroTUs, keyInvCreateTemplate, keyInvApplyTemplate, keyInvClear, keyInvAutoEquip;
 
-// Extra hotkeys (Meridian's build)
+// Extra hotkeys (OXCE)
 OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch,
 	keyGraphsZoomIn, keyGraphsZoomOut,
 	keyToggleQuickSearch,
@@ -51,14 +51,13 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch,
 	keyBattleActionItem1, keyBattleActionItem2, keyBattleActionItem3, keyBattleActionItem4, keyBattleActionItem5,
 	keyNightVisionToggle, keyNightVisionHold, keySelectMusicTrack;
 
-// Extra options (Meridian's build)
-OPT int startTextMode;
+// Extra options (OXCE)
+OPT int oxceStartUpTextMode;
+OPT bool oxceUfoLandingAlert;
 OPT bool everyoneFightsNobodyQuits;
-
-OPT int nightVisionColor;
-OPT bool autoSell;
-OPT bool playBriefingMusicDuringEquipment;
-OPT bool ufoLandingAlert;
+OPT bool oxcePlayBriefingMusicDuringEquipment;
+OPT int oxceNightVisionColor;
+OPT bool oxceAutoSell;
 
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter, newRootWindowedMode, newFullscreen, newAllowResize, newBorderless;

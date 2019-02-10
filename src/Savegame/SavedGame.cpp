@@ -2680,7 +2680,7 @@ void SavedGame::setAutosell(const RuleItem *itype, const bool enabled)
  */
 bool SavedGame::getAutosell(const RuleItem *itype) const
 {
-	if (!Options::autoSell)
+	if (!Options::oxceAutoSell)
 	{
 		return false;
 	}
