@@ -1142,13 +1142,17 @@ void Globe::drawRadars()
 		}
 	}
 
-	if (Options::drawEnemyRadarCircles)
+	if (_game->getMod()->getDrawEnemyRadarCircles() > 0)
 	{
 		// Draw radars around UFO hunter-killers
 		for (std::vector<Ufo*>::iterator u = _game->getSavedGame()->getUfos()->begin(); u != _game->getSavedGame()->getUfos()->end(); ++u)
 		{
 			if ((*u)->isHunterKiller() && (*u)->getDetected())
 			{
+				if (_game->getMod()->getDrawEnemyRadarCircles() == 1 && !(*u)->getHyperDetected())
+				{
+					continue;
+				}
 				lat = (*u)->getLatitude();
 				lon = (*u)->getLongitude();
 				range = Nautical((*u)->getCraftStats().radarRange);

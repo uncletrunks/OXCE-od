@@ -171,7 +171,7 @@ private:
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	int _ufoTractorBeamSizeModifiers[5];
-	int _escortRange;
+	int _escortRange, _drawEnemyRadarCircles;
 	bool _escortsJoinFightAgainstHK, _hunterKillerFastRetarget;
 	int _crewEmergencyEvacuationSurvivalChance, _pilotsEmergencyEvacuationSurvivalChance;
 	int _soldiersPerSergeant, _soldiersPerCaptain, _soldiersPerColonel, _soldiersPerCommander;
@@ -510,6 +510,8 @@ public:
 	int getUfoTractorBeamSizeModifier(int ufoSize) const { return _ufoTractorBeamSizeModifiers[ufoSize]; }
 	/// Gets the escort range
 	double getEscortRange() const;
+	/// Gets the setting for drawing alien base/UFO radar circles.
+	int getDrawEnemyRadarCircles() const { return _drawEnemyRadarCircles; }
 	/// Should escorts join the fight against HK (automatically)? Or is only fighting one-on-one allowed?
 	bool getEscortsJoinFightAgainstHK() const { return _escortsJoinFightAgainstHK; }
 	/// Should hunter-killers be able to retarget every 5 seconds on slow game timers (5Sec / 1Min)?
