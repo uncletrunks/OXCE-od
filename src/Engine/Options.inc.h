@@ -57,7 +57,6 @@ OPT bool everyoneFightsNobodyQuits;
 OPT bool statisticalBulletConservation;
 
 OPT int nightVisionColor;
-OPT bool autoNightVision;
 OPT bool autoSell;
 OPT bool playBriefingMusicDuringEquipment;
 OPT bool ufoLandingAlert;

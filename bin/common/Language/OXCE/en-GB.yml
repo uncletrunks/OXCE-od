@@ -186,8 +186,6 @@ en-GB:
   STR_BULLET_SAVING_DESC: "There's a chance to recover a full clip depending on how much ammo has remained."
   STR_NIGHT_VISION_COLOR: "Select Night Vision colour"
   STR_NIGHT_VISION_COLOR_DESC: "Values from 1 to 15, each representing a different shade colour. Default is 8."
-  STR_AUTO_NIGHT_VISION: "Automatic Night Vision"
-  STR_AUTO_NIGHT_VISION_DESC: "Before night missions, turn personal lights off and turn night vision on."
   STR_AUTO_SELL: "Auto-Sell Manager"
   STR_AUTO_SELL_DESC: "In the battle debriefing sell screen, any item types you sold in previous battles will be automatically marked for selling."
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT: "Play Briefing music longer"

@@ -501,14 +501,39 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnSelectMusicTrackClick, Options::keySelectMusicTrack);
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnPersonalLightingClick, Options::keyBattlePersonalLighting);
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnNightVisionClick, Options::keyNightVisionToggle);
-	if (Options::autoNightVision)
+
+	// automatic night vision
 	{
-		// during the night
-		if (_save->getGlobalShade() > _game->getMod()->getMaxDarknessToSeeUnits())
+		bool completeDarkness = true;
+		for (auto& unit : *_save->getUnits())
 		{
-			// turn personal lighting off
-			_save->getTileEngine()->togglePersonalLighting();
-			// turn night vision on
+			if (unit->getOriginalFaction() == FACTION_PLAYER && !unit->isOut())
+			{
+				if (unit->getTile() && unit->getTile()->getShade() < 12)
+				{
+					completeDarkness = false;
+					break;
+				}
+			}
+		}
+		if (!completeDarkness && _save->getGlobalShade() >= 12)
+		{
+			bool noPersonalLights = true;
+			for (auto& unit : *_save->getUnits())
+			{
+				if (unit->getOriginalFaction() == FACTION_PLAYER && !unit->isOut())
+				{
+					if (unit->getArmor()->getPersonalLight() > 5)
+					{
+						noPersonalLights = false;
+						break;
+					}
+				}
+			}
+			completeDarkness = noPersonalLights;
+		}
+		if (completeDarkness)
+		{
 			_map->toggleNightVision();
 		}
 	}
