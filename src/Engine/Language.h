@@ -58,10 +58,10 @@ public:
 	~Language();
 	/// Gets list of available languages.
 	static void getList(std::vector<std::string> &ids, std::vector<std::string> &names);
-	/// Loads the language from a YAML file.
-	void load(const FileMap::FileRecord *frec);
+	/// Loads the language from an external file.
+	void loadFile(const FileMap::FileRecord *frec);
 	/// Loads the language from a ruleset file.
-	void load(ExtraStrings *strings);
+	void loadRule(const std::map<std::string, ExtraStrings*> &extraStrings, const std::string &id);
 	/// Gets the language's ID.
 	std::string getId() const;
 	/// Gets the language's name.

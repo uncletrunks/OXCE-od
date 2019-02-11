@@ -152,7 +152,7 @@ void Language::getList(std::vector<std::string> &ids, std::vector<std::string> &
  * widely-supported format and we already have YAML, it was convenient.
  * @param filename Filename of the YAML file.
  */
-void Language::load(const FileMap::FileRecord *frec)
+void Language::loadFile(const FileMap::FileRecord *frec)
 {
 	YAML::Node doc = frec->getYAML();
 	YAML::Node lang;
@@ -215,12 +215,15 @@ void Language::load(const FileMap::FileRecord *frec)
 
 /**
  * Loads a language file from a mod's ExtraStrings.
- * @param extras Pointer to extra strings from ruleset.
+ * @param extraStrings List of ExtraStrings.
+ * @param id Language ID.
  */
-void Language::load(ExtraStrings *extras)
+void Language::loadRule(const std::map<std::string, ExtraStrings*> &extraStrings, const std::string &id)
 {
-	if (extras)
+	std::map<std::string, ExtraStrings*>::const_iterator it = extraStrings.find(id);
+	if (it != extraStrings.end())
 	{
+		ExtraStrings *extras = it->second;
 		for (std::map<std::string, std::string>::const_iterator i = extras->getStrings()->begin(); i != extras->getStrings()->end(); ++i)
 		{
 			_strings[i->first] = loadString(i->second);
@@ -383,7 +386,7 @@ void Language::toHtml(const std::string &filename) const
 		std::string s = i->second;
 		for (std::string::const_iterator j = s.begin(); j != s.end(); ++j)
 		{
-			if (*j == 2 || *j == '\n')
+			if (*j == Unicode::TOK_NL_SMALL || *j == '\n')
 			{
 				htmlFile << "<br />";
 			}
