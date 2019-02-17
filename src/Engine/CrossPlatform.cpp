@@ -122,7 +122,7 @@ static std::string pathFromWindows(const wchar_t *pathW) {
 	int sizeW = lstrlenW(pathW);
 	wchar_t *pathWLC = (wchar_t *)malloc(sizeof(wchar_t) * (sizeW + 1));
 	memcpy(pathWLC, pathW, sizeof(wchar_t) * (sizeW + 1));
-	CharLowerW(pathWLC);
+	//CharLowerW(pathWLC);
 	int sizeU8 = WideCharToMultiByte(CP_UTF8, 0, pathWLC, sizeW, NULL, 0, NULL, NULL);
 	std::string pathU8(sizeU8, 0);
 	WideCharToMultiByte(CP_UTF8, 0, pathWLC, sizeW, &pathU8[0], sizeU8, NULL, NULL);
