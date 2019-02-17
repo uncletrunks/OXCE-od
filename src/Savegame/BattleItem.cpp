@@ -159,12 +159,12 @@ YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 		node["ammoItemSlots"].push_back(_ammoItem[slot] ? _ammoItem[slot]->getId() : -1);
 	}
 
-	if (_painKiller)
+	if (_rules && _rules->getBattleType() == BT_MEDIKIT)
+	{
 		node["painKiller"] = _painKiller;
-	if (_heal)
 		node["heal"] = _heal;
-	if (_stimulant)
 		node["stimulant"] = _stimulant;
+	}
 	if (_fuseTimer != -1)
 		node["fuseTimer"] = _fuseTimer;
 	node["fuseEnabed"] = _fuseEnabled;
