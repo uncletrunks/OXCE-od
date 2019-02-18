@@ -246,7 +246,7 @@ private:
 	std::string _armorName;
 	Armor* _armor;
 	int _standHeight, _kneelHeight, _floatHeight;
-	std::vector<int> _deathSound;
+	std::vector<int> _deathSound, _panicSound, _berserkSound;
 	int _value, _moraleLossWhenKilled, _aggroSound, _moveSound;
 	int _intelligence, _aggression, _spotter, _sniper, _energyRecovery;
 	SpecialAbility _specab;
@@ -259,6 +259,9 @@ private:
 	bool _isLeeroyJenkins;
 	bool _waitIfOutsideWeaponRange;
 	int _pickUpWeaponsMoreActively;
+
+	/// Load sound vector from YAML.
+	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
 public:
 	/// Creates a blank unit ruleset.
 	Unit(const std::string &type);
@@ -293,6 +296,10 @@ public:
 	int getMoraleLossWhenKilled() { return _moraleLossWhenKilled; };
 	/// Gets the death sound id.
 	const std::vector<int> &getDeathSounds() const;
+	/// Gets the unit's panic sounds.
+	const std::vector<int> &getPanicSounds() const;
+	/// Gets the unit's berserk sounds.
+	const std::vector<int> &getBerserkSounds() const;
 	/// Gets the move sound id.
 	int getMoveSound() const;
 	/// Gets the intelligence. This is the number of turns AI remembers your troop positions.

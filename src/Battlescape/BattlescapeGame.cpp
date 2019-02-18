@@ -48,6 +48,7 @@
 #include "../Savegame/BattleItem.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Mod/Armor.h"
 #include "../Engine/Options.h"
 #include "../Engine/RNG.h"
@@ -1442,6 +1443,44 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 	if (status != STATUS_PANICKING && status != STATUS_BERSERK) return false;
 	_save->setSelectedUnit(unit);
 	_parentState->getMap()->setCursorType(CT_NONE);
+
+	// play panic/berserk sounds first
+	{
+		std::vector<int> sounds;
+		if (unit->getUnitRules())
+		{
+			// aliens, civilians, xcom HWPs
+			if (status == STATUS_PANICKING)
+				sounds = unit->getUnitRules()->getPanicSounds();
+			else
+				sounds = unit->getUnitRules()->getBerserkSounds();
+		}
+		else if (unit->getGeoscapeSoldier())
+		{
+			// xcom soldiers (male/female)
+			if (unit->getGeoscapeSoldier()->getGender() == GENDER_MALE)
+			{
+				if (status == STATUS_PANICKING)
+					sounds = unit->getGeoscapeSoldier()->getRules()->getMalePanicSounds();
+				else
+					sounds = unit->getGeoscapeSoldier()->getRules()->getMaleBerserkSounds();
+			}
+			else
+			{
+				if (status == STATUS_PANICKING)
+					sounds = unit->getGeoscapeSoldier()->getRules()->getFemalePanicSounds();
+				else
+					sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleBerserkSounds();
+			}
+		}
+		if (!sounds.empty())
+		{
+			if (sounds.size() > 1)
+				playSound(sounds[RNG::generate(0, sounds.size() - 1)]);
+			else
+				playSound(sounds.front());
+		}
+	}
 
 	// show a little infobox with the name of the unit and "... is panicking"
 	Game *game = _parentState->getGame();

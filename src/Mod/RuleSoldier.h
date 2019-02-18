@@ -55,6 +55,7 @@ private:
 	int _standHeight, _kneelHeight, _floatHeight;
 	int _femaleFrequency, _value, _transferTime, _moraleLossWhenKilled;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
+	std::vector<int> _panicSoundMale, _panicSoundFemale, _berserkSoundMale, _berserkSoundFemale;
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
 	int _avatarOffsetX, _avatarOffsetY, _flagOffset;
@@ -65,6 +66,8 @@ private:
 	ScriptValues<RuleSoldier> _scriptValues;
 
 	void addSoldierNamePool(const std::string &namFile);
+	/// Load sound vector from YAML.
+	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
 public:
 	/// Creates a blank soldier ruleset.
 	RuleSoldier(const std::string &type);
@@ -122,6 +125,14 @@ public:
 	const std::vector<int> &getMaleDeathSounds() const;
 	/// Gets the soldier's female death sounds.
 	const std::vector<int> &getFemaleDeathSounds() const;
+	/// Gets the soldier's male panic sounds.
+	const std::vector<int> &getMalePanicSounds() const;
+	/// Gets the soldier's female panic sounds.
+	const std::vector<int> &getFemalePanicSounds() const;
+	/// Gets the soldier's male berserk sounds.
+	const std::vector<int> &getMaleBerserkSounds() const;
+	/// Gets the soldier's female berserk sounds.
+	const std::vector<int> &getFemaleBerserkSounds() const;
 	/// Gets the pool list for soldier names.
 	const std::vector<SoldierNamePool*> &getNames() const;
 	/// Gets the value - for score calculation.

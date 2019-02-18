@@ -58,6 +58,31 @@ RuleSoldier::~RuleSoldier()
 }
 
 /**
+ * Loads a sound vector for a given attribute/node.
+ * @param node YAML node.
+ * @param mod Mod for the item.
+ * @param vector Sound vector to load into.
+ */
+void RuleSoldier::loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector)
+{
+	if (node)
+	{
+		vector.clear();
+		if (node.IsSequence())
+		{
+			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
+			{
+				vector.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
+			}
+		}
+		else
+		{
+			vector.push_back(mod->getSoundOffset(node.as<int>(), "BATTLE.CAT"));
+		}
+	}
+}
+
+/**
  * Loads the soldier from a YAML file.
  * @param node YAML node.
  * @param mod Mod for the unit.
@@ -114,36 +139,12 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_moraleLossWhenKilled = node["moraleLossWhenKilled"].as<int>(_moraleLossWhenKilled);
 
-	if (node["deathMale"])
-	{
-		_deathSoundMale.clear();
-		if (node["deathMale"].IsSequence())
-		{
-			for (YAML::const_iterator i = node["deathMale"].begin(); i != node["deathMale"].end(); ++i)
-			{
-				_deathSoundMale.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
-			}
-		}
-		else
-		{
-			_deathSoundMale.push_back(mod->getSoundOffset(node["deathMale"].as<int>(), "BATTLE.CAT"));
-		}
-	}
-	if (node["deathFemale"])
-	{
-		_deathSoundFemale.clear();
-		if (node["deathFemale"].IsSequence())
-		{
-			for (YAML::const_iterator i = node["deathFemale"].begin(); i != node["deathFemale"].end(); ++i)
-			{
-				_deathSoundFemale.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
-			}
-		}
-		else
-		{
-			_deathSoundFemale.push_back(mod->getSoundOffset(node["deathFemale"].as<int>(), "BATTLE.CAT"));
-		}
-	}
+	loadSoundVector(node["deathMale"], mod, _deathSoundMale);
+	loadSoundVector(node["deathFemale"], mod, _deathSoundFemale);
+	loadSoundVector(node["panicMale"], mod, _panicSoundMale);
+	loadSoundVector(node["panicFemale"], mod, _panicSoundFemale);
+	loadSoundVector(node["berserkMale"], mod, _berserkSoundMale);
+	loadSoundVector(node["berserkFemale"], mod, _berserkSoundFemale);
 
 	for (YAML::const_iterator i = node["soldierNames"].begin(); i != node["soldierNames"].end(); ++i)
 	{
@@ -448,6 +449,42 @@ const std::vector<int> &RuleSoldier::getMaleDeathSounds() const
 const std::vector<int> &RuleSoldier::getFemaleDeathSounds() const
 {
 	return _deathSoundFemale;
+}
+
+/**
+ * Gets the panic sounds for male soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getMalePanicSounds() const
+{
+	return _panicSoundMale;
+}
+
+/**
+ * Gets the panic sounds for female soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getFemalePanicSounds() const
+{
+	return _panicSoundFemale;
+}
+
+/**
+ * Gets the berserk sounds for male soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getMaleBerserkSounds() const
+{
+	return _berserkSoundMale;
+}
+
+/**
+ * Gets the berserk sounds for female soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getFemaleBerserkSounds() const
+{
+	return _berserkSoundFemale;
 }
 
 /**
