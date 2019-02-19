@@ -216,11 +216,6 @@ void PlaceFacilityState::viewClick(Action *)
 					break;
 			}
 		}
-		else if (_base->isMaxAllowedLimitReached(_rule))
-		{
-			_game->popState();
-			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_MORE_OF_THIS_FACILITY_TYPE_AT_BASE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
-		}
 		else if (_game->getSavedGame()->getFunds() < _rule->getBuildCost())
 		{
 			_game->popState();

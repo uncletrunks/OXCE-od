@@ -133,6 +133,8 @@ void BuildFacilitiesState::populateBuildList()
 	_facilities.clear();
 	_lstFacilities->clearList();
 
+	std::vector<RuleBaseFacility*> _disabledFacilities;
+
 	const std::vector<std::string> &providedBaseFunc = _base->getProvidedBaseFunc();
 	const std::vector<std::string> &forbiddenBaseFunc = _base->getForbiddenBaseFunc();
 	const std::vector<std::string> &futureBaseFunc = _base->getFutureBaseFunc();
@@ -141,28 +143,52 @@ void BuildFacilitiesState::populateBuildList()
 	for (std::vector<std::string>::const_iterator i = facilities.begin(); i != facilities.end(); ++i)
 	{
 		RuleBaseFacility *rule = _game->getMod()->getBaseFacility(*i);
+		if (rule->isLift() || !_game->getSavedGame()->isResearched(rule->getRequirements()))
+		{
+			continue;
+		}
+		if (_base->isMaxAllowedLimitReached(rule))
+		{
+			_disabledFacilities.push_back(rule);
+			continue;
+		}
 		const std::vector<std::string> &req = rule->getRequireBaseFunc();
 		const std::vector<std::string> &forb = rule->getForbiddenBaseFunc();
 		const std::vector<std::string> &prov = rule->getProvidedBaseFunc();
 		if (!std::includes(providedBaseFunc.begin(), providedBaseFunc.end(), req.begin(), req.end()))
 		{
+			_disabledFacilities.push_back(rule);
 			continue;
 		}
 		if (intersection(forbiddenBaseFunc, prov))
 		{
+			_disabledFacilities.push_back(rule);
 			continue;
 		}
 		if (intersection(futureBaseFunc, forb))
 		{
+			_disabledFacilities.push_back(rule);
 			continue;
 		}
-		if (_game->getSavedGame()->isResearched(rule->getRequirements()) && !rule->isLift())
-			_facilities.push_back(rule);
+		_facilities.push_back(rule);
 	}
 
+	int row = 0;
 	for (std::vector<RuleBaseFacility*>::iterator i = _facilities.begin(); i != _facilities.end(); ++i)
 	{
 		_lstFacilities->addRow(1, tr((*i)->getType()).c_str());
+		++row;
+	}
+
+	if (!_disabledFacilities.empty())
+	{
+		auto disabledColor = _txtTitle->getColor();
+		for (std::vector<RuleBaseFacility*>::iterator i = _disabledFacilities.begin(); i != _disabledFacilities.end(); ++i)
+		{
+			_lstFacilities->addRow(1, tr((*i)->getType()).c_str());
+			_lstFacilities->setRowColor(row, disabledColor);
+			++row;
+		}
 	}
 }
 
@@ -193,7 +219,12 @@ void BuildFacilitiesState::btnOkClick(Action *)
  */
 void BuildFacilitiesState::lstFacilitiesClick(Action *)
 {
-	_game->pushState(new PlaceFacilityState(_base, _facilities[_lstFacilities->getSelectedRow()]));
+	auto index = _lstFacilities->getSelectedRow();
+	if (index >= _facilities.size())
+	{
+		return;
+	}
+	_game->pushState(new PlaceFacilityState(_base, _facilities[index]));
 }
 
 }
