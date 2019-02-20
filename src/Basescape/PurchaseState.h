@@ -57,6 +57,7 @@ private:
 	size_t _sel;
 	int _total, _pQty, _cQty;
 	double _iQty;
+	std::map<int, int> _iPrisonQty;
 	Uint8 _ammoColor;
 	Timer *_timerInc, *_timerDec;
 	/// Gets the category of the current selection.

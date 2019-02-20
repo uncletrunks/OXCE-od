@@ -801,6 +801,14 @@ void PurchaseState::increaseByValue(int change)
 			{
 				errorMessage = tr("STR_NOT_ENOUGH_STORE_SPACE");
 			}
+			else if (rule->isAlien())
+			{
+				int p = rule->getPrisonType();
+				if (_iPrisonQty[p] + 1 > _base->getAvailableContainment(p) - _base->getUsedContainment(p))
+				{
+					errorMessage = trAlt("STR_NOT_ENOUGH_PRISON_SPACE", p);
+				}
+			}
 			break;
 		}
 	}
@@ -831,6 +839,12 @@ void PurchaseState::increaseByValue(int change)
 		case TRANSFER_ITEM:
 		{
 			RuleItem *rule = (RuleItem*)getRow().rule;
+			int p = rule->getPrisonType();
+			if (rule->isAlien())
+			{
+				int maxByPrisons = _base->getAvailableContainment(p) - _base->getUsedContainment(p) - _iPrisonQty[p];
+				change = std::min(maxByPrisons, change);
+			}
 			double storesNeededPerItem = rule->getSize();
 			double freeStores = _base->getAvailableStores() - _base->getUsedStores() - _iQty;
 			double maxByStores = (double)(INT_MAX);
@@ -840,6 +854,7 @@ void PurchaseState::increaseByValue(int change)
 			}
 			change = std::min((int)maxByStores, change);
 			_iQty += change * storesNeededPerItem;
+			_iPrisonQty[p] += change;
 		}
 			break;
 		}
@@ -888,6 +903,7 @@ void PurchaseState::decreaseByValue(int change)
 	case TRANSFER_ITEM:
 		rule = (RuleItem*)getRow().rule;
 		_iQty -= rule->getSize() * change;
+		_iPrisonQty[rule->getPrisonType()] -= change;
 		break;
 	}
 	getRow().amount -= change;
