@@ -1622,7 +1622,7 @@ int Map::reShade(Tile *tile)
 	}
 
 	// hybrid night vision (global)
-	return std::min(NIGHT_VISION_MAX_SHADE, tile->getShade());
+	return std::min(+NIGHT_VISION_MAX_SHADE, tile->getShade());
 }
 
 /**
