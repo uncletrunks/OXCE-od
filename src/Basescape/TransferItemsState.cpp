@@ -778,13 +778,16 @@ void TransferItemsState::increaseByValue(int change)
 		break;
 	case TRANSFER_ITEM:
 		selItem = (RuleItem*)getRow().rule;
-		if (!selItem->isAlien() && _baseTo->storesOverfull(selItem->getSize() + _iQty))
+		if (_baseTo->storesOverfull(selItem->getSize() + _iQty))
 		{
 			errorMessage = tr("STR_NOT_ENOUGH_STORE_SPACE");
 		}
-			else if (selItem->isAlien() && Options::storageLimitsEnforced * _aQty + 1 > _baseTo->getAvailableContainment(selItem->getPrisonType()) - Options::storageLimitsEnforced * _baseTo->getUsedContainment(selItem->getPrisonType()))
+		else if (selItem->isAlien())
 		{
-			errorMessage = trAlt("STR_NO_ALIEN_CONTAINMENT_FOR_TRANSFER", selItem->getPrisonType());
+			if (Options::storageLimitsEnforced * _aQty + 1 > _baseTo->getAvailableContainment(selItem->getPrisonType()) - Options::storageLimitsEnforced * _baseTo->getUsedContainment(selItem->getPrisonType()))
+			{
+				errorMessage = trAlt("STR_NO_ALIEN_CONTAINMENT_FOR_TRANSFER", selItem->getPrisonType());
+			}
 		}
 		break;
 	}
@@ -811,7 +814,12 @@ void TransferItemsState::increaseByValue(int change)
 				_total += getRow().cost;
 			break;
 		case TRANSFER_ITEM:
-			if (!selItem->isAlien())
+			if (selItem->isAlien())
+			{
+				int freeContainment = Options::storageLimitsEnforced ? _baseTo->getAvailableContainment(selItem->getPrisonType()) - _baseTo->getUsedContainment(selItem->getPrisonType()) - _aQty : INT_MAX;
+				change = std::min(std::min(freeContainment, getRow().qtySrc - getRow().amount), change);
+			}
+			// both aliens and items
 			{
 				double storesNeededPerItem = ((RuleItem*)getRow().rule)->getSize();
 				double freeStores = _baseTo->getAvailableStores() - _baseTo->getUsedStores() - _iQty;
@@ -822,17 +830,13 @@ void TransferItemsState::increaseByValue(int change)
 				}
 				change = std::min(std::min((int)freeStoresForItem, getRow().qtySrc - getRow().amount), change);
 				_iQty += change * storesNeededPerItem;
-				getRow().amount += change;
-				_total += getRow().cost * change;
 			}
-			else
+			if (selItem->isAlien())
 			{
-				int freeContainment = Options::storageLimitsEnforced ? _baseTo->getAvailableContainment(selItem->getPrisonType()) - _baseTo->getUsedContainment(selItem->getPrisonType()) - _aQty : INT_MAX;
-				change = std::min(std::min(freeContainment, getRow().qtySrc - getRow().amount), change);
 				_aQty += change;
-				getRow().amount += change;
-				_total += getRow().cost * change;
 			}
+			getRow().amount += change;
+			_total += getRow().cost * change;
 			break;
 		}
 		updateItemStrings();
@@ -880,11 +884,8 @@ void TransferItemsState::decreaseByValue(int change)
 		break;
 	case TRANSFER_ITEM:
 		const RuleItem *selItem = (RuleItem*)getRow().rule;
-		if (!selItem->isAlien())
-		{
-			_iQty -= selItem->getSize() * change;
-		}
-		else
+		_iQty -= selItem->getSize() * change;
+		if (selItem->isAlien())
 		{
 			_aQty -= change;
 		}
