@@ -1018,6 +1018,12 @@ struct Bind : BindBase
 	{
 		addCustomFunc<X>(getName(name));
 	}
+	template<typename X>
+	void addFunc(const std::string& name, const std::string& description)
+	{
+		addCustomFunc<X>(getName(name), description);
+	}
+
 	template<int T::*X>
 	void addField(const std::string& get, const std::string& set = "")
 	{

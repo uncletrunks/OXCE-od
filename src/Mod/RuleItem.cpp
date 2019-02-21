@@ -645,12 +645,12 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_monthlyMaintenance = node["monthlyMaintenance"].as<int>(_monthlyMaintenance);
 	_sprayWaypoints = node["sprayWaypoints"].as<int>(_sprayWaypoints);
 
-	_damageBonus.load(node["damageBonus"]);
-	_meleeBonus.load(node["meleeBonus"]);
-	_accuracyMulti.load(node["accuracyMultiplier"]);
-	_meleeMulti.load(node["meleeMultiplier"]);
-	_throwMulti.load(node["throwMultiplier"]);
-	_closeQuartersMulti.load(node["closeQuartersMultiplier"]);
+	_damageBonus.load(_type, node, parsers.bonusStatsScripts.get<ModScript::DamageBonusStatBonus>());
+	_meleeBonus.load(_type, node, parsers.bonusStatsScripts.get<ModScript::MeleeBonusStatBonus>());
+	_accuracyMulti.load(_type, node, parsers.bonusStatsScripts.get<ModScript::AccuracyMultiplierStatBonus>());
+	_meleeMulti.load(_type, node, parsers.bonusStatsScripts.get<ModScript::MeleeMultiplierStatBonus>());
+	_throwMulti.load(_type, node, parsers.bonusStatsScripts.get<ModScript::ThrowMultiplierStatBonus>());
+	_closeQuartersMulti.load(_type, node, parsers.bonusStatsScripts.get<ModScript::CloseQuarterMultiplierStatBonus>());
 
 	_powerRangeReduction = node["powerRangeReduction"].as<float>(_powerRangeReduction);
 	_powerRangeThreshold = node["powerRangeThreshold"].as<float>(_powerRangeThreshold);
@@ -2331,6 +2331,64 @@ int RuleItem::getVaporProbability() const
 	return _vaporProbability;
 }
 
+/**
+ * Gets the index of the sprite in the CustomItemPreview sprite set.
+ * @return Sprite index.
+ */
+const std::vector<int> &RuleItem::getCustomItemPreviewIndex() const
+{
+	return _customItemPreviewIndex;
+}
+
+/**
+* Gets the kneel bonus (15% bonus is encoded as 100+15 = 115).
+* @return Kneel bonus.
+*/
+int RuleItem::getKneelBonus(Mod *mod) const
+{
+	return _kneelBonus != -1 ? _kneelBonus : mod->getKneelBonusGlobal();
+}
+
+/**
+* Gets the one-handed penalty (20% penalty is encoded as 100-20 = 80).
+* @return One-handed penalty.
+*/
+int RuleItem::getOneHandedPenalty(Mod *mod) const
+{
+	return _oneHandedPenalty != -1 ? _oneHandedPenalty : mod->getOneHandedPenaltyGlobal();
+}
+
+/**
+* Gets the monthly salary.
+* @return Monthly salary.
+*/
+int RuleItem::getMonthlySalary() const
+{
+	return _monthlySalary;
+}
+
+/**
+* Gets the monthly maintenance.
+* @return Monthly maintenance.
+*/
+int RuleItem::getMonthlyMaintenance() const
+{
+	return _monthlyMaintenance;
+}
+
+/**
+ * Gets how many waypoints are used for a "spray" attack
+ * @return Number of waypoints.
+ */
+int RuleItem::getSprayWaypoints() const
+{
+	return _sprayWaypoints;
+}
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
 namespace
 {
 
@@ -2406,60 +2464,6 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 
 	ri.addScriptValue<&RuleItem::_scriptValues>(false);
 	ri.addDebugDisplay<&debugDisplayScript>();
-}
-
-/**
- * Gets the index of the sprite in the CustomItemPreview sprite set.
- * @return Sprite index.
- */
-const std::vector<int> &RuleItem::getCustomItemPreviewIndex() const
-{
-	return _customItemPreviewIndex;
-}
-
-/**
-* Gets the kneel bonus (15% bonus is encoded as 100+15 = 115).
-* @return Kneel bonus.
-*/
-int RuleItem::getKneelBonus(Mod *mod) const
-{
-	return _kneelBonus != -1 ? _kneelBonus : mod->getKneelBonusGlobal();
-}
-
-/**
-* Gets the one-handed penalty (20% penalty is encoded as 100-20 = 80).
-* @return One-handed penalty.
-*/
-int RuleItem::getOneHandedPenalty(Mod *mod) const
-{
-	return _oneHandedPenalty != -1 ? _oneHandedPenalty : mod->getOneHandedPenaltyGlobal();
-}
-
-/**
-* Gets the monthly salary.
-* @return Monthly salary.
-*/
-int RuleItem::getMonthlySalary() const
-{
-	return _monthlySalary;
-}
-
-/**
-* Gets the monthly maintenance.
-* @return Monthly maintenance.
-*/
-int RuleItem::getMonthlyMaintenance() const
-{
-	return _monthlyMaintenance;
-}
-
-/**
- * Gets how many waypoints are used for a "spray" attack
- * @return Number of waypoints.
- */
-int RuleItem::getSprayWaypoints() const
-{
-	return _sprayWaypoints;
 }
 
 }

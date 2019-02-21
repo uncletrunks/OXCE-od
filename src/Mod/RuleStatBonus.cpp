@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include "Unit.h"
 #include "RuleStatBonus.h"
 #include "../Engine/RNG.h"
+#include "../Engine/ScriptBind.h"
 #include "../Savegame/BattleUnit.h"
 #include "../fmath.h"
 
@@ -140,21 +142,33 @@ float basicEnergyRegeneration(const BattleUnit *unit)
 	}
 }
 
-template<BonusStatFunc func, int p>
-float power(const BattleUnit *unit)
-{
-	return std::pow(func(unit), p);
-}
+constexpr size_t statDataFuncSize = 4;
+constexpr size_t statMultiper = 1000;
+constexpr const char* statNamePostfix = "BonusStats";
 
-const size_t statDataFuncSize = 3;
+template<BonusStatFunc Func>
+struct getBonusStatsScript
+{
+	static RetEnum func(const BattleUnit *bu, int &ret, int pow1, int pow2, int pow3, int pow4)
+	{
+		if (bu)
+		{
+			const float stat = Func(bu);
+			float bonus = 0;
+			bonus += pow4; bonus *= stat;
+			bonus += pow3; bonus *= stat;
+			bonus += pow2; bonus *= stat;
+			bonus += pow1; bonus *= stat;
+			ret += bonus / statMultiper;
+		}
+		return RetContinue;
+	}
+};
 
 /**
  * Data describing same functions but with different exponent.
  */
-struct BonusStatDataFunc
-{
-	BonusStatFunc power[statDataFuncSize];
-};
+using BonusStatDataFunc = void (*)(Bind<BattleUnit>& b, const std::string& name);
 /**
  * Data describing basic stat getter.
  */
@@ -167,18 +181,13 @@ struct BonusStatData
 /**
  * Helper function creating BonusStatData with proper functions.
  */
-template<BonusStatFunc func>
+template<BonusStatFunc Func>
 BonusStatDataFunc create()
 {
-	BonusStatDataFunc data =
+	return [](Bind<BattleUnit>& b, const std::string& name)
 	{
-		{
-			&power< func, 1>,
-			&power< func, 2>,
-			&power< func, 3>,
-		}
+		b.addFunc<getBonusStatsScript<Func>>(name + statNamePostfix, "add stat '" + name + "' transformed by polynomial (const arguments are coefficients), final result of polynomial is divided by " + std::to_string(statMultiper));
 	};
-	return data;
 }
 
 /**
@@ -248,14 +257,13 @@ BonusStatData statDataMap[] =
 
 	{ "energyRegen", create<&basicEnergyRegeneration>() },
 };
-const size_t statDataMapSize = sizeof(statDataMap) / sizeof(statDataMap[0]);
 
 } //namespace
 
 /**
  * Default constructor.
  */
-RuleStatBonus::RuleStatBonus() : _modded(false)
+RuleStatBonus::RuleStatBonus()
 {
 
 }
@@ -263,57 +271,101 @@ RuleStatBonus::RuleStatBonus() : _modded(false)
  * Loads the item from a YAML file.
  * @param node YAML node.
  */
-void RuleStatBonus::load(const YAML::Node& node)
+void RuleStatBonus::load(const std::string& parentName, const YAML::Node& node, const ModScript::BonusStatsCommon& parser)
 {
 	if (node)
 	{
-		_bonus.clear();
-		_bonusOrig.clear();
-		for (size_t i = 0; i < statDataMapSize; ++i)
+		if (const YAML::Node& stats = node[parser.getPropertyNodeName()])
 		{
-			if (const YAML::Node &dd = node[statDataMap[i].name])
+			_bonusOrig.clear();
+			if (stats.IsMap())
 			{
-				if (dd.IsScalar())
+				for (const auto& stat : statDataMap)
 				{
-					_bonus.push_back(std::make_pair(statDataMap[i].func.power[0], dd.as<float>()));
-					std::vector<float> vec = { dd.as<float>() };
-					_bonusOrig.push_back(std::make_pair(statDataMap[i].name, vec));
-				}
-				else
-				{
-					std::vector<float> vec = { };
-					for (size_t j = 0; j < statDataFuncSize && j < dd.size(); ++j)
+					if (const YAML::Node &dd = stats[stat.name])
 					{
-						float val = dd[j].as<float>();
-						vec.push_back(val);
-						if (!AreSame(val, 0.0f))
+						std::vector<float> vec;
+						if (dd.IsScalar())
 						{
-							_bonus.push_back(std::make_pair(statDataMap[i].func.power[j], val));
+							float val = dd.as<float>();
+							vec.push_back(val);
 						}
+						else
+						{
+							for (size_t j = 0; j < statDataFuncSize; ++j)
+							{
+								if (j < dd.size())
+								{
+									float val = dd[j].as<float>();
+									vec.push_back(val);
+								}
+							}
+						}
+						_bonusOrig.push_back(std::make_pair(stat.name, std::move(vec)));
 					}
-					_bonusOrig.push_back(std::make_pair(statDataMap[i].name, vec));
 				}
+				_refresh = true;
 			}
-		}
-		// let's remember that this was modified by a modder (i.e. is not a default value)
-		if (!_bonusOrig.empty())
-		{
+			else if (stats.IsScalar())
+			{
+				_container.load(parentName, stats.as<std::string>(), parser);
+				_refresh = false;
+			}
+			// let's remember that this was modified by a modder (i.e. is not a default value)
 			_modded = true;
 		}
 	}
+
+	//convert bonus vector to script
+	if (_refresh)
+	{
+		auto script = std::string{ };
+		script.reserve(1024);
+		for (const auto& p : _bonusOrig)
+		{
+			script += "unit.";
+			script += p.first;
+			script += statNamePostfix;
+			script += " bonus";
+			for (size_t j = 0; j < statDataFuncSize; ++j)
+			{
+				if (j < p.second.size())
+				{
+					script += " ";
+					script += std::to_string((int)(p.second[j] * statMultiper));
+				}
+				else
+				{
+					script += " 0";
+				}
+			}
+			script += ";\n";
+		}
+		script += "return bonus;";
+		_container.load(parentName, script, parser);
+		_refresh = false;
+	}
 }
 
+/**
+ * Set new values of bonus vector
+ * @param bonuses
+ */
+void RuleStatBonus::setValues(std::vector<RuleStatBonusDataOrig>&& bonuses)
+{
+	_bonusOrig = std::move(bonuses);
+	_refresh = true;
+}
 /**
  * Set default bonus for firing accuracy.
  */
 void RuleStatBonus::setFiring()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::firing>, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> firing = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("firing", firing));
+	setValues(
+		{
+			{ "firing", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -321,12 +373,11 @@ void RuleStatBonus::setFiring()
  */
 void RuleStatBonus::setMelee()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::melee>, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> melee = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("melee", melee));
+	setValues(
+		{
+			{ "melee", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -334,12 +385,11 @@ void RuleStatBonus::setMelee()
  */
 void RuleStatBonus::setThrowing()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::throwing>, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> throwing = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("throwing", throwing));
+	setValues(
+		{
+			{ "throwing", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -347,15 +397,12 @@ void RuleStatBonus::setThrowing()
  */
 void RuleStatBonus::setCloseQuarters()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::melee>, 0.5f));
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::reactions>, 0.5f));
-
-	_bonusOrig.clear();
-	std::vector<float> melee = { 0.5f };
-	_bonusOrig.push_back(std::make_pair("melee", melee));
-	std::vector<float> reactions = { 0.5f };
-	_bonusOrig.push_back(std::make_pair("reactions", reactions));
+	setValues(
+		{
+			{ "melee", { 0.5f } },
+			{ "reactions", { 0.5f } },
+		}
+	);
 }
 
 /**
@@ -363,12 +410,11 @@ void RuleStatBonus::setCloseQuarters()
  */
 void RuleStatBonus::setPsiAttack()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat2<&UnitStats::psiSkill, &UnitStats::psiStrength>, 0.02f));
-
-	_bonusOrig.clear();
-	std::vector<float> psi = { 0.02f };
-	_bonusOrig.push_back(std::make_pair("psi", psi));
+	setValues(
+		{
+			{ "psi", { 0.02f } },
+		}
+	);
 }
 
 /**
@@ -376,15 +422,12 @@ void RuleStatBonus::setPsiAttack()
  */
 void RuleStatBonus::setPsiDefense()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::psiStrength>, 1.0f));
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::psiSkill>, 0.2f));
-
-	_bonusOrig.clear();
-	std::vector<float> psiStrength = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("psiStrength", psiStrength));
-	std::vector<float> psiSkill = { 0.2f };
-	_bonusOrig.push_back(std::make_pair("psiSkill", psiSkill));
+	setValues(
+		{
+			{ "psiStrength", { 1.0f } },
+			{ "psiSkill", { 0.2f } },
+		}
+	);
 }
 
 /**
@@ -392,12 +435,11 @@ void RuleStatBonus::setPsiDefense()
  */
 void RuleStatBonus::setFlatHundred()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat0<100>, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> flatHundred = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("flatHundred", flatHundred));
+	setValues(
+		{
+			{ "flatHundred", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -405,12 +447,11 @@ void RuleStatBonus::setFlatHundred()
  */
 void RuleStatBonus::setStrength()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::strength>, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> strength = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("strength", strength));
+	setValues(
+		{
+			{ "strength", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -418,12 +459,11 @@ void RuleStatBonus::setStrength()
  */
 void RuleStatBonus::setTimeRecovery()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat1<&UnitStats::tu>, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> tu = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("tu", tu));
+	setValues(
+		{
+			{ "tu", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -431,12 +471,11 @@ void RuleStatBonus::setTimeRecovery()
  */
 void RuleStatBonus::setEnergyRecovery()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&basicEnergyRegeneration, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> energyRegen = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("energyRegen", energyRegen));
+	setValues(
+		{
+			{ "energyRegen", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -444,12 +483,11 @@ void RuleStatBonus::setEnergyRecovery()
  */
 void RuleStatBonus::setStunRecovery()
 {
-	_bonus.clear();
-	_bonus.push_back(RuleStatBonusData(&stat0<1>, 1.0f));
-
-	_bonusOrig.clear();
-	std::vector<float> flatOne = { 1.0f };
-	_bonusOrig.push_back(std::make_pair("flatOne", flatOne));
+	setValues(
+		{
+			{ "flatOne", { 1.0f } },
+		}
+	);
 }
 
 /**
@@ -457,11 +495,27 @@ void RuleStatBonus::setStunRecovery()
  */
 int RuleStatBonus::getBonus(const BattleUnit* unit) const
 {
-	float power = 0;
-	for (size_t i = 0; i < _bonus.size(); ++i)
-		power += _bonus[i].first(unit) * _bonus[i].second;
+	assert(!_refresh && "RuleStatBonus not loaded correcly");
 
-	return (int)floor(power + 0.5f); // no more random flickering!
+	ModScript::BonusStatsCommon::Output arg{ 0 };
+	ModScript::BonusStatsCommon::Worker work{ unit };
+	work.execute(_container, arg);
+
+	return arg.getFirst();
+}
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+ModScript::BonusStatsBaseParser::BonusStatsBaseParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "bonus", "unit" }
+{
+	Bind<BattleUnit> bu = { this };
+
+	for (const auto& stat : statDataMap)
+	{
+		stat.func(bu, stat.name);
+	}
 }
 
 } //namespace OpenXcom

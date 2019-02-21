@@ -198,16 +198,16 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_overKill = node["overKill"].as<float>(_overKill);
 	_meleeDodgeBackPenalty = node["meleeDodgeBackPenalty"].as<float>(_meleeDodgeBackPenalty);
 
-	_psiDefence.load(node["psiDefence"]);
-	_meleeDodge.load(node["meleeDodge"]);
+	_psiDefence.load(_type, node, parsers.bonusStatsScripts.get<ModScript::PsiDefenceStatBonus>());
+	_meleeDodge.load(_type, node, parsers.bonusStatsScripts.get<ModScript::MeleeDodgeStatBonus>());
 
-	if (const YAML::Node &rec = node["recovery"])
+	const YAML::Node &rec = node["recovery"];
 	{
-		_timeRecovery.load(rec["time"]);
-		_energyRecovery.load(rec["energy"]);
-		_moraleRecovery.load(rec["morale"]);
-		_healthRecovery.load(rec["health"]);
-		_stunRecovery.load(rec["stun"]);
+		_timeRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::TimeRecoveryStatBonus>());
+		_energyRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::EnergyRecoveryStatBonus>());
+		_moraleRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::MoraleRecoveryStatBonus>());
+		_healthRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::HealthRecoveryStatBonus>());
+		_stunRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::StunRecoveryStatBonus>());
 	}
 	_faceColorGroup = node["spriteFaceGroup"].as<int>(_faceColorGroup);
 	_hairColorGroup = node["spriteHairGroup"].as<int>(_hairColorGroup);

@@ -2352,20 +2352,35 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 }
 
 /**
- * Prase string and return new script.
+ * Prase node and return new script.
  */
-void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::string& type, const YAML::Node& node) const
+void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::string& parentName, const YAML::Node& node) const
 {
 	if(const YAML::Node& scripts = node["scripts"])
 	{
 		if (const YAML::Node& curr = scripts[getName()])
 		{
-			parseBase(container, type, curr.as<std::string>());
+			parseBase(container, parentName, curr.as<std::string>());
 		}
 	}
 	if (!container && !getDefault().empty())
 	{
-		parseBase(container, type, getDefault());
+		parseBase(container, parentName, getDefault());
+	}
+}
+
+/**
+ * Prase string and return new script.
+ */
+void ScriptParserBase::parseCode(ScriptContainerBase& container, const std::string& parentName, const std::string& srcCode) const
+{
+	if (!srcCode.empty())
+	{
+		parseBase(container, parentName, srcCode);
+	}
+	if (!container && !getDefault().empty())
+	{
+		parseBase(container, parentName, getDefault());
 	}
 }
 
@@ -2508,11 +2523,20 @@ ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::
 }
 
 /**
- *  Prase string and return new script.
+ * Prase node and return new script.
  */
 void ScriptParserEventsBase::parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::Node& node) const
 {
 	ScriptParserBase::parseNode(container._current, type, node);
+	container._events = getEvents();
+}
+
+/**
+ * Prase string and return new script.
+ */
+void ScriptParserEventsBase::parseCode(ScriptContainerEventsBase& container, const std::string& type, const std::string& srcCode) const
+{
+	ScriptParserBase::parseCode(container._current, type, srcCode);
 	container._events = getEvents();
 }
 

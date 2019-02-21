@@ -19,8 +19,9 @@
 #ifndef OPENXCOM_RULESTATBONUS_H
 #define	OPENXCOM_RULESTATBONUS_H
 
-#include<vector>
-#include<string>
+#include <vector>
+#include <string>
+#include "ModScript.h"
 
 namespace OpenXcom
 {
@@ -33,14 +34,18 @@ typedef std::pair<std::string, std::vector<float> > RuleStatBonusDataOrig;
  */
 class RuleStatBonus
 {
-	std::vector<RuleStatBonusData> _bonus;
+	ModScript::BonusStatsCommon::Container _container;
 	std::vector<RuleStatBonusDataOrig> _bonusOrig;
-	bool _modded;
+	bool _modded = false;
+	bool _refresh = true;
+
+	void setValues(std::vector<RuleStatBonusDataOrig>&& bonuses);
+
 public:
 	/// Default constructor.
 	RuleStatBonus();
 	/// Loads item data from YAML.
-	void load(const YAML::Node& node);
+	void load(const std::string& parentName, const YAML::Node& node, const ModScript::BonusStatsCommon& parser);
 	/// Set default firing bonus.
 	void setFiring();
 	/// Set default melee bonus.

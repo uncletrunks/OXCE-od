@@ -295,10 +295,15 @@ template<typename Parent, typename... Args>
 class ScriptContainer : public ScriptContainerBase
 {
 public:
-	/// Load data string from YAML.
-	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
+	/// Load code from string in YAML node.
+	void load(const std::string& parentName, const YAML::Node& node, const Parent& parent)
 	{
-		parent.parseNode(*this, type, node);
+		parent.parseNode(*this, parentName, node);
+	}
+	/// Load data from string.
+	void load(const std::string& parentName, const std::string& srcCode, const Parent& parent)
+	{
+		parent.parseCode(*this, parentName, srcCode);
 	}
 };
 
@@ -337,10 +342,15 @@ template<typename Parent, typename... Args>
 class ScriptContainerEvents : public ScriptContainerEventsBase
 {
 public:
-	/// Load data string form YAML.
-	void load(const std::string& type, const YAML::Node& node, const Parent& parent)
+	/// Load code from string in YAML node.
+	void load(const std::string& parentName, const YAML::Node& node, const Parent& parent)
 	{
-		parent.parseNode(*this, type, node);
+		parent.parseNode(*this, parentName, node);
+	}
+	/// Load data from string.
+	void load(const std::string& parentName, const std::string& srcCode, const Parent& parent)
+	{
+		parent.parseCode(*this, parentName, srcCode);
 	}
 };
 
@@ -1054,10 +1064,13 @@ protected:
 	~ScriptParserBase();
 
 	/// Common typeless part of parsing string.
-	bool parseBase(ScriptContainerBase& scr, const std::string& parentName, const std::string& code) const;
+	bool parseBase(ScriptContainerBase& scr, const std::string& parentName, const std::string& srcCode) const;
+
+	/// Prase node and return new script.
+	void parseNode(ScriptContainerBase& container, const std::string& parentName, const YAML::Node& node) const;
 
 	/// Prase string and return new script.
-	void parseNode(ScriptContainerBase& container, const std::string& type, const YAML::Node& node) const;
+	void parseCode(ScriptContainerBase& container, const std::string& parentName, const std::string& srcCode) const;
 
 	/// Test if name is free.
 	bool haveNameRef(const std::string& s) const;
@@ -1283,8 +1296,10 @@ class ScriptParserEventsBase : public ScriptParserBase
 	std::vector<EventData> _eventsData;
 
 protected:
-	/// Prase string and return new script.
+	/// Prase node and return new script.
 	void parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::Node& node) const;
+	/// Prase string and return new script.
+	void parseCode(ScriptContainerEventsBase& container, const std::string& type, const std::string& srcCode) const;
 
 public:
 	/// Constructor.
@@ -1684,7 +1699,7 @@ public:
     MACRO_GET_STRING_4(str, i+8),   \
     MACRO_GET_STRING_4(str, i+12)
 
-#define MACRO_NAMED_SCRIPT(nameString, type) ScriptGroupNamedParser<type, MACRO_GET_STRING_16(nameString, 0), MACRO_GET_STRING_16(nameString, 16)>
+#define MACRO_NAMED_SCRIPT(nameString, type) ScriptGroupNamedParser<type, MACRO_GET_STRING_16(nameString, 0), MACRO_GET_STRING_16(nameString, 16), MACRO_GET_STRING_16(nameString, 32)>
 
 } //namespace OpenXcom
 

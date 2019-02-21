@@ -141,6 +141,35 @@ class ModScript
 		AwardExperienceParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
+	struct BonusStatsBaseParser : ScriptParserEvents<ScriptOutputArgs<int&>, const BattleUnit*>
+	{
+		BonusStatsBaseParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+
+		/// Get name of YAML node where config is stored.
+		const std::string& getPropertyNodeName() const { return _propertyNodeName; }
+
+	protected:
+
+		/// Name of YAML node where config is stored.
+		std::string _propertyNodeName;
+	};
+
+	struct BonusStatsParser : BonusStatsBaseParser
+	{
+		BonusStatsParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : BonusStatsBaseParser{ shared, name + "BonusStats", mod }
+		{
+			_propertyNodeName = name;
+		}
+	};
+
+	struct BonusStatsRecoveryParser : BonusStatsBaseParser
+	{
+		BonusStatsRecoveryParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : BonusStatsBaseParser{ shared, name + "RecoveryBonusStats", mod }
+		{
+			_propertyNodeName = name;
+		}
+	};
+
 public:
 	/// Get shared state.
 	const ScriptGlobal* getShared() const
@@ -149,6 +178,7 @@ public:
 	}
 
 	using ReactionCommon = ReactionUnitParser;
+	using BonusStatsCommon = BonusStatsBaseParser;
 
 	////////////////////////////////////////////////////////////
 	//					unit script
@@ -184,6 +214,25 @@ public:
 	using NewTurnItem = MACRO_NAMED_SCRIPT("newTurnItem", NewTurnItemParser);
 
 	////////////////////////////////////////////////////////////
+	//					bonus stat script
+	////////////////////////////////////////////////////////////
+
+	using PsiDefenceStatBonus = MACRO_NAMED_SCRIPT("psiDefence", BonusStatsParser);
+	using MeleeDodgeStatBonus = MACRO_NAMED_SCRIPT("meleeDodge", BonusStatsParser);
+	using TimeRecoveryStatBonus = MACRO_NAMED_SCRIPT("time", BonusStatsRecoveryParser);
+	using EnergyRecoveryStatBonus = MACRO_NAMED_SCRIPT("energy", BonusStatsRecoveryParser);
+	using MoraleRecoveryStatBonus = MACRO_NAMED_SCRIPT("morale", BonusStatsRecoveryParser);
+	using HealthRecoveryStatBonus = MACRO_NAMED_SCRIPT("health", BonusStatsRecoveryParser);
+	using StunRecoveryStatBonus = MACRO_NAMED_SCRIPT("stun", BonusStatsRecoveryParser);
+
+	using DamageBonusStatBonus = MACRO_NAMED_SCRIPT("damageBonus", BonusStatsParser);
+	using MeleeBonusStatBonus = MACRO_NAMED_SCRIPT("meleeBonus", BonusStatsParser);
+	using AccuracyMultiplierStatBonus = MACRO_NAMED_SCRIPT("accuracyMultiplier", BonusStatsParser);
+	using MeleeMultiplierStatBonus = MACRO_NAMED_SCRIPT("meleeMultiplier", BonusStatsParser);
+	using ThrowMultiplierStatBonus = MACRO_NAMED_SCRIPT("throwMultiplier", BonusStatsParser);
+	using CloseQuarterMultiplierStatBonus = MACRO_NAMED_SCRIPT("closeQuartersMultiplier", BonusStatsParser);
+
+	////////////////////////////////////////////////////////////
 	//					groups
 	////////////////////////////////////////////////////////////
 
@@ -216,11 +265,29 @@ public:
 		NewTurnItem
 	>;
 
+	using BonusStatsScripts = ScriptGroup<Mod,
+		PsiDefenceStatBonus,
+		MeleeDodgeStatBonus,
+		TimeRecoveryStatBonus,
+		EnergyRecoveryStatBonus,
+		MoraleRecoveryStatBonus,
+		HealthRecoveryStatBonus,
+		StunRecoveryStatBonus,
+
+		DamageBonusStatBonus,
+		MeleeBonusStatBonus,
+		AccuracyMultiplierStatBonus,
+		MeleeMultiplierStatBonus,
+		ThrowMultiplierStatBonus,
+		CloseQuarterMultiplierStatBonus
+	>;
+
 	////////////////////////////////////////////////////////////
 	//					members
 	////////////////////////////////////////////////////////////
 	BattleUnitScripts battleUnitScripts = { _shared, _mod, };
 	BattleItemScripts battleItemScripts = { _shared, _mod, };
+	BonusStatsScripts bonusStatsScripts = { _shared, _mod, };
 };
 
 }
