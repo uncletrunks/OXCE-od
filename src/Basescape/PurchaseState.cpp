@@ -837,25 +837,31 @@ void PurchaseState::increaseByValue(int change)
 			}
 			break;
 		case TRANSFER_ITEM:
-		{
-			RuleItem *rule = (RuleItem*)getRow().rule;
-			int p = rule->getPrisonType();
-			if (rule->isAlien())
 			{
-				int maxByPrisons = _base->getAvailableContainment(p) - _base->getUsedContainment(p) - _iPrisonQty[p];
-				change = std::min(maxByPrisons, change);
+				RuleItem *rule = (RuleItem*)getRow().rule;
+				int p = rule->getPrisonType();
+				if (rule->isAlien())
+				{
+					int maxByPrisons = _base->getAvailableContainment(p) - _base->getUsedContainment(p) - _iPrisonQty[p];
+					change = std::min(maxByPrisons, change);
+				}
+				// both aliens and items
+				{
+					double storesNeededPerItem = rule->getSize();
+					double freeStores = _base->getAvailableStores() - _base->getUsedStores() - _iQty;
+					double maxByStores = (double)(INT_MAX);
+					if (!AreSame(storesNeededPerItem, 0.0) && storesNeededPerItem > 0.0)
+					{
+						maxByStores = (freeStores + 0.05) / storesNeededPerItem;
+					}
+					change = std::min((int)maxByStores, change);
+					_iQty += change * storesNeededPerItem;
+				}
+				if (rule->isAlien())
+				{
+					_iPrisonQty[p] += change;
+				}
 			}
-			double storesNeededPerItem = rule->getSize();
-			double freeStores = _base->getAvailableStores() - _base->getUsedStores() - _iQty;
-			double maxByStores = (double)(INT_MAX);
-			if (!AreSame(storesNeededPerItem, 0.0) && storesNeededPerItem > 0.0)
-			{
-				maxByStores = (freeStores + 0.05) / storesNeededPerItem;
-			}
-			change = std::min((int)maxByStores, change);
-			_iQty += change * storesNeededPerItem;
-			_iPrisonQty[p] += change;
-		}
 			break;
 		}
 		getRow().amount += change;
@@ -903,7 +909,10 @@ void PurchaseState::decreaseByValue(int change)
 	case TRANSFER_ITEM:
 		rule = (RuleItem*)getRow().rule;
 		_iQty -= rule->getSize() * change;
-		_iPrisonQty[rule->getPrisonType()] -= change;
+		if (rule->isAlien())
+		{
+			_iPrisonQty[rule->getPrisonType()] -= change;
+		}
 		break;
 	}
 	getRow().amount -= change;
