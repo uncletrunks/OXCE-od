@@ -1108,7 +1108,7 @@ void Map::drawTerrain(Surface *surface)
 								BattleAction *action = _save->getBattleGame()->getCurrentAction();
 								const RuleItem *weapon = action->weapon->getRules();
 								std::ostringstream ss;
-								int distance = _save->getTileEngine()->distance(Position(itX, itY, itZ), action->actor->getPosition());
+								int distance = Position::distance2d(Position(itX, itY, itZ), action->actor->getPosition());
 
 								if (_cursorType == CT_AIM)
 								{
@@ -1270,9 +1270,8 @@ void Map::drawTerrain(Surface *surface)
 											float attackStrength = action->actor->getPsiAccuracy(action->type, action->weapon);
 											float defenseStrength = 30.0f; // indicator ignores: +victim->getArmor()->getPsiDefence(victim);
 
-											Position p = action->actor->getPosition().toVoxel() - Position(itX, itY, itZ).toVoxel();
-											int squared = p.x * p.x + p.y * p.y + p.z * p.z;
-											int min = attackStrength - defenseStrength - rule->getPsiAccuracyRangeReduction(sqrt(float(squared)));
+											float dis = Position::distance(action->actor->getPosition().toVoxel(), Position(itX, itY, itZ).toVoxel());
+											int min = attackStrength - defenseStrength - rule->getPsiAccuracyRangeReduction(dis);
 											int max = min + 55;
 											if (max <= 0)
 											{
@@ -1615,7 +1614,7 @@ int Map::reShade(Tile *tile)
 	{
 		if ((*i)->getFaction() == FACTION_PLAYER && !(*i)->isOut())
 		{
-			if (_save->getTileEngine()->distanceSq(tile->getPosition(), (*i)->getPosition(), false) <= (*i)->getMaxViewDistanceAtDarkSquared())
+			if (Position::distance2dSq(tile->getPosition(), (*i)->getPosition()) <= (*i)->getMaxViewDistanceAtDarkSquared())
 			{
 				return tile->getShade() > _fadeShade ? _fadeShade : tile->getShade();
 			}

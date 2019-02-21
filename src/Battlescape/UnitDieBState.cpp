@@ -101,7 +101,7 @@ UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const Ru
 
 		for (std::vector<Node*>::iterator  n = nodes->begin(); n != nodes->end(); ++n)
 		{
-			if (!(*n)->isDummy() && _parent->getSave()->getTileEngine()->distanceSq((*n)->getPosition(), _unit->getPosition()) < 4)
+			if (!(*n)->isDummy() && Position::distanceSq((*n)->getPosition(), _unit->getPosition()) < 4)
 			{
 				(*n)->setType((*n)->getType() | Node::TYPE_DANGEROUS);
 			}

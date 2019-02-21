@@ -79,7 +79,7 @@ void PsiAttackBState::init()
 
 	_unit = _action.actor;
 
-	if (_parent->getTileEngine()->distance(_action.actor->getPosition(), _action.target) > _action.weapon->getRules()->getMaxRange())
+	if (Position::distance2d(_action.actor->getPosition(), _action.target) > _action.weapon->getRules()->getMaxRange())
 	{
 		// out of range
 		_action.result = "STR_OUT_OF_RANGE";

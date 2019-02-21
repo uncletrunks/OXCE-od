@@ -537,7 +537,7 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 		{
 			const auto target = tile->getPosition();
 			const auto diff = target - center;
-			const auto distance = (int)Round(sqrt(distanceSq(target, center, true)));
+			const auto distance = (int)Round(Position::distance(target, center));
 			const auto targetLight = tile->getLightMulti(layer);
 			auto currLight = power - distance;
 
@@ -686,7 +686,7 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 */
 bool TileEngine::setupEventVisibilitySector(const Position &observerPos, const Position &eventPos, const int &eventRadius)
 {
-	if (eventRadius == 0 || eventPos == Position(-1, -1, -1) || distanceSq(observerPos, eventPos, false) <= eventRadius * eventRadius)
+	if (eventRadius == 0 || eventPos == Position(-1, -1, -1) || Position::distance2dSq(observerPos, eventPos) <= eventRadius * eventRadius)
 	{
 		_eventVisibilityObserverPos = Position{ -1, -1, -1 };
 		return true;
@@ -861,7 +861,7 @@ void TileEngine::calculateTilesInFOV(BattleUnit *unit, const Position eventPos, 
 	}
 
 	//Only recalculate bresenham lines to tiles that are at the event or further away.
-	const int distanceSqrMin = skipNarrowArcTest ? 0 : std::max(distanceSq(posSelf, eventPos, false) - eventRadius * eventRadius, 0);
+	const int distanceSqrMin = skipNarrowArcTest ? 0 : std::max(Position::distance2dSq(posSelf, eventPos) - eventRadius * eventRadius, 0);
 
 	//Variables for finding the tiles to test based on the view direction.
 	Position posTest;
@@ -1014,7 +1014,7 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	if (currentUnit->getFaction() == tile->getUnit()->getFaction()) return true;
 
 	// if beyond global max. range, nobody can see anyone
-	int currentDistanceSq = distanceSq(currentUnit->getPosition(), tile->getPosition(), false);
+	int currentDistanceSq = Position::distance2dSq(currentUnit->getPosition(), tile->getPosition());
 	if (currentDistanceSq > getMaxViewDistanceSq())
 	{
 		return false;
@@ -1123,7 +1123,7 @@ bool TileEngine::isTileInLOS(BattleAction *action, Tile *tile)
 	BattleUnit *currentUnit = action->actor;
 
 	// if beyond global max. range, nobody can see anything
-	int currentDistanceSq = distanceSq(currentUnit->getPosition(), tile->getPosition(), false);
+	int currentDistanceSq = Position::distance2dSq(currentUnit->getPosition(), tile->getPosition());
 	if (currentDistanceSq > getMaxViewDistanceSq())
 	{
 		return false;
@@ -1693,7 +1693,7 @@ void TileEngine::calculateFOV(Position position, int eventRadius, const bool upd
 	}
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if (distanceSq(position, (*i)->getPosition(), false) <= updateRadius) //could this unit have observed the event?
+		if (Position::distance2dSq(position, (*i)->getPosition()) <= updateRadius) //could this unit have observed the event?
 		{
 			if (updateTiles)
 			{
@@ -1786,7 +1786,7 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 				// not a civilian, or a civilian shooting at bad guys
 				((*i)->getFaction() != FACTION_NEUTRAL || unit->getFaction() == FACTION_HOSTILE) &&
 				// closer than 20 tiles
-				distanceSq(unit->getPosition(), (*i)->getPosition(), false) <= getMaxViewDistanceSq())
+				Position::distance2dSq(unit->getPosition(), (*i)->getPosition()) <= getMaxViewDistanceSq())
 			{
 				BattleAction falseAction;
 				falseAction.type = BA_SNAPSHOT;
@@ -1832,7 +1832,7 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 						{
 							BattleItem *weapon = (*i)->getMainHandWeapon((*i)->getFaction() != FACTION_PLAYER);
 							int accuracy = (*i)->getFiringAccuracy(rs.attackType, weapon, _save->getBattleGame()->getMod());
-							int distance = _save->getTileEngine()->distance((*i)->getPosition(), unit->getPosition());
+							int distance = Position::distance2d((*i)->getPosition(), unit->getPosition());
 							int upperLimit = weapon->getRules()->getSnapRange();
 							int lowerLimit = weapon->getRules()->getMinRange();
 							if (distance > upperLimit)
@@ -1923,7 +1923,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	// has a weapon
 	BattleItem *weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
 	if (_save->canUseWeapon(weapon, unit, false) &&
-		distance(unit->getPosition(), target->getPosition()) < weapon->getRules()->getMaxRange() &&
+		Position::distance2d(unit->getPosition(), target->getPosition()) < weapon->getRules()->getMaxRange() &&
 		(	// has a melee weapon and is in melee range
 			(weapon->getRules()->getBattleType() == BT_MELEE &&
 				weapon->getAmmoForAction(BA_HIT) &&
@@ -1999,7 +1999,7 @@ bool TileEngine::tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionT
 		{
 			int moveType = originalAction.getMoveType();
 			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
-			int dist = distance(unit->getPositionVexels(), target->getPositionVexels());
+			int dist = Position::distance2d(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
 			ModScript::ReactionCommon::Output arg{ reactionChance, dist };
@@ -2561,7 +2561,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 						toRemove.clear();
 						if (bu)
 						{
-							if (distance(dest->getPosition(), centetTile) < 2)
+							if (Position::distance2d(dest->getPosition(), centetTile) < 2)
 							{
 								// ground zero effect is in effect
 								hitUnit(attack, bu, Position(0, 0, 0), damage, type, rangeAtack);
@@ -2674,7 +2674,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 	}
 	calculateLighting(LL_AMBIENT, centetTile, maxRadius + 1, true); // roofs could have been destroyed and fires could have been started
 	calculateFOV(centetTile, maxRadius + 1, true, true);
-	if (attack.attacker && distance(centetTile, attack.attacker->getPosition()) > maxRadius + 1)
+	if (attack.attacker && Position::distance2d(centetTile, attack.attacker->getPosition()) > maxRadius + 1)
 	{
 		// unit is away form blast but its visibility can be affected by scripts.
 		calculateFOV(centetTile, 1, false);
@@ -3566,7 +3566,7 @@ VoxelType TileEngine::calculateLineVoxel(Position origin, Position target, bool 
  */
 int TileEngine::calculateParabolaVoxel(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta)
 {
-	double ro = sqrt((double)((target.x - origin.x) * (target.x - origin.x) + (target.y - origin.y) * (target.y - origin.y) + (target.z - origin.z) * (target.z - origin.z)));
+	double ro = Position::distance(target, origin);
 
 	if (AreSame(ro, 0.0)) return V_EMPTY;//just in case
 
@@ -3800,39 +3800,6 @@ void TileEngine::togglePersonalLighting()
 }
 
 /**
- * Calculates the distance between 2 points. Rounded up to first INT.
- * @param pos1 Position of first square.
- * @param pos2 Position of second square.
- * @return Distance.
- */
-int TileEngine::distance(Position pos1, Position pos2) const
-{
-	int x = pos1.x - pos2.x;
-	int y = pos1.y - pos2.y;
-	return (int)std::ceil(sqrt(float(x*x + y*y)));
-}
-
-/**
- * Calculates the distance squared between 2 points. No sqrt(), not floating point math, and sometimes it's all you need.
- * @param pos1 Position of first square.
- * @param pos2 Position of second square.
- * @param considerZ Whether to consider the z coordinate.
- * @return Distance.
- */
-int TileEngine::distanceSq(Position pos1, Position pos2, bool considerZ) const
-{
-	int x = pos1.x - pos2.x;
-	int y = pos1.y - pos2.y;
-	int sq = x*x + y*y;
-	if (considerZ)
-	{
-		int z = pos1.z - pos2.z;
-		sq += z*z;
-	}
-	return sq;
-}
-
-/**
  * Calculate strength of psi attack based on range and victim.
  * @param type Type of attack.
  * @param attacker Unit attacking.
@@ -3848,9 +3815,8 @@ int TileEngine::psiAttackCalculate(BattleActionType type, BattleUnit *attacker, 
 	float attackStrength = attacker->getPsiAccuracy(type, weapon);
 	float defenseStrength = 30.0f + victim->getArmor()->getPsiDefence(victim);
 
-	Position p = attacker->getPosition().toVoxel() - victim->getPosition().toVoxel();
-	int squared = p.x * p.x + p.y * p.y + p.z * p.z;
-	attackStrength -= weapon->getRules()->getPsiAccuracyRangeReduction(sqrt(float(squared)));
+	auto dis = Position::distance(attacker->getPosition().toVoxel(), victim->getPosition().toVoxel());
+	attackStrength -= weapon->getRules()->getPsiAccuracyRangeReduction(dis);
 	attackStrength += RNG::generate(0,55);
 
 	return attackStrength - defenseStrength;

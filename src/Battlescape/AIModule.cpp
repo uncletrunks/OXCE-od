@@ -536,7 +536,7 @@ void AIModule::setupPatrol()
 				continue;
 			}
 			node = *i;
-			int d = _save->getTileEngine()->distanceSq(_unit->getPosition(), node->getPosition());
+			int d = Position::distanceSq(_unit->getPosition(), node->getPosition());
 			if (_unit->getPosition().z == node->getPosition().z
 				&& d < closest
 				&& (!(node->getType() & Node::TYPE_SMALL) || _unit->getArmor()->getSize() == 1))
@@ -611,7 +611,7 @@ void AIModule::setupPatrol()
 					if ((*i)->isTarget() && !(*i)->isAllocated())
 					{
 						node = *i;
-						int d = _save->getTileEngine()->distanceSq(_unit->getPosition(), node->getPosition());
+						int d = Position::distanceSq(_unit->getPosition(), node->getPosition());
 						if (!_toNode ||  (d < closest && node != _fromNode))
 						{
 							_toNode = node;
@@ -685,7 +685,7 @@ void AIModule::setupAmbush()
 			}
 			Position pos = (*i)->getPosition();
 			Tile *tile = _save->getTile(pos);
-			if (tile == 0 || _save->getTileEngine()->distance(pos, _unit->getPosition()) > 10 || pos.z != _unit->getPosition().z || tile->getDangerous() ||
+			if (tile == 0 || Position::distance2d(pos, _unit->getPosition()) > 10 || pos.z != _unit->getPosition().z || tile->getDangerous() ||
 				std::find(_reachableWithAttack.begin(), _reachableWithAttack.end(), _save->getTileIndex(pos))  == _reachableWithAttack.end())
 				continue; // just ignore unreachable tiles
 
@@ -738,7 +738,7 @@ void AIModule::setupAmbush()
 		{
 			_ambushAction->type = BA_WALK;
 			// i should really make a function for this
-			origin = (_ambushAction->target * Position(16,16,24)) +
+			origin = _ambushAction->target.toVoxel() +
 				// 4 because -2 is eyes and 2 below that is the rifle (or at least that's my understanding)
 				Position(8,8, _unit->getHeight() + _unit->getFloatHeight() - _save->getTile(_ambushAction->target)->getTerrainLevel() - 4);
 			Position currentPos = _aggroTarget->getPosition();
@@ -881,7 +881,7 @@ void AIModule::setupEscape()
 	selectNearestTarget();
 	_escapeTUs = 0;
 
-	int dist = _aggroTarget ? _save->getTileEngine()->distance(_unit->getPosition(), _aggroTarget->getPosition()) : 0;
+	int dist = _aggroTarget ? Position::distance2d(_unit->getPosition(), _aggroTarget->getPosition()) : 0;
 
 	int bestTileScore = -100000;
 	int score = -100000;
@@ -968,7 +968,7 @@ void AIModule::setupEscape()
 
 		// THINK, DAMN YOU
 		tile = _save->getTile(_escapeAction->target);
-		int distanceFromTarget = _aggroTarget ? _save->getTileEngine()->distance(_aggroTarget->getPosition(), _escapeAction->target) : 0;
+		int distanceFromTarget = _aggroTarget ? Position::distance2d(_aggroTarget->getPosition(), _escapeAction->target) : 0;
 		if (dist >= distanceFromTarget)
 		{
 			score -= (distanceFromTarget - dist) * 10;
@@ -1060,7 +1060,7 @@ void AIModule::setupEscape()
 	{
 		if (_traceAI)
 		{
-			Log(LOG_INFO) << "Escape estimation completed after " << tries << " tries, " << _save->getTileEngine()->distance(_unit->getPosition(), bestTile) << " squares or so away.";
+			Log(LOG_INFO) << "Escape estimation completed after " << tries << " tries, " << Position::distance2d(_unit->getPosition(), bestTile) << " squares or so away.";
 		}
 		_escapeAction->type = BA_WALK;
 	}
@@ -1101,7 +1101,7 @@ int AIModule::getSpottingUnits(const Position& pos) const
 	{
 		if (validTarget(*i, false, false))
 		{
-			int dist = _save->getTileEngine()->distance(pos, (*i)->getPosition());
+			int dist = Position::distance2d(pos, (*i)->getPosition());
 			if (dist > 20) continue;
 			Position originVoxel = _save->getTileEngine()->getSightOriginVoxel(*i);
 			originVoxel.z -= 2;
@@ -1142,7 +1142,7 @@ int AIModule::selectNearestTarget()
 			_save->getTileEngine()->visible(_unit, (*i)->getTile()))
 		{
 			tally++;
-			int dist = _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
+			int dist = Position::distance2d(_unit->getPosition(), (*i)->getPosition());
 			if (dist < _closestDist)
 			{
 				bool valid = false;
@@ -1197,7 +1197,7 @@ int AIModule::selectNearestTargetLeeroy()
 			_save->getTileEngine()->visible(_unit, (*i)->getTile()))
 		{
 			tally++;
-			int dist = _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
+			int dist = Position::distance2d(_unit->getPosition(), (*i)->getPosition());
 			if (dist < _closestDist)
 			{
 				bool valid = false;
@@ -1235,7 +1235,7 @@ bool AIModule::selectClosestKnownEnemy()
 	{
 		if (validTarget(*i, true, false))
 		{
-			int dist = _save->getTileEngine()->distance((*i)->getPosition(), _unit->getPosition());
+			int dist = Position::distance2d((*i)->getPosition(), _unit->getPosition());
 			if (dist < minDist)
 			{
 				minDist = dist;
@@ -1259,7 +1259,7 @@ bool AIModule::selectRandomTarget()
 	{
 		if (validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE))
 		{
-			int dist = RNG::generate(0,20) - _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
+			int dist = RNG::generate(0,20) - Position::distance2d(_unit->getPosition(), (*i)->getPosition());
 			if (dist > farthest)
 			{
 				farthest = dist;
@@ -1458,7 +1458,7 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 
 	// Get base accuracy for the action
 	int accuracy = _unit->getFiringAccuracy(action->type, action->weapon, _save->getBattleGame()->getMod());
-	int distance = _save->getTileEngine()->distance(_unit->getPosition(), target->getPosition());
+	int distance = Position::distance2d(_unit->getPosition(), target->getPosition());
 
 	if (Options::battleUFOExtenderAccuracy && action->type != BA_THROW)
 	{
@@ -1839,10 +1839,10 @@ bool AIModule::findFirePoint()
 				// Extended behavior: if we have a limited-range weapon, bump up the score for getting closer to the target, down for further
 				if (!waitIfOutsideWeaponRange && extendedFireModeChoiceEnabled)
 				{
-					int distanceToTarget = _save->getTileEngine()->distance(_unit->getPosition(), _aggroTarget->getPosition());
+					int distanceToTarget = Position::distance2d(_unit->getPosition(), _aggroTarget->getPosition());
 					if (_attackAction->weapon && distanceToTarget > _attackAction->weapon->getRules()->getMaxRange()) // make sure we can get the ruleset before checking the range
 					{
-						int proposedDistance = _save->getTileEngine()->distance(pos, _aggroTarget->getPosition());
+						int proposedDistance = Position::distance2d(pos, _aggroTarget->getPosition());
 						proposedDistance = std::max(proposedDistance, 1);
 						score = score * distanceToTarget / proposedDistance;
 					}
@@ -1902,7 +1902,7 @@ int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, i
 	{
 		diff = _save->getBattleState()->getGame()->getSavedGame()->getDifficultyCoefficient();
 	}
-	int distance = _save->getTileEngine()->distance(attackingUnit->getPosition(), targetPos);
+	int distance = Position::distance2d(attackingUnit->getPosition(), targetPos);
 	int injurylevel = attackingUnit->getBaseStats()->health - attackingUnit->getHealth();
 	int desperation = (100 - attackingUnit->getMorale()) / 10;
 	int enemiesAffected = 0;
@@ -1939,7 +1939,7 @@ int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, i
 			(*i) != target &&
 			// don't count units that probably won't be affected cause they're out of range
 			abs((*i)->getPosition().z - targetPos.z) <= Options::battleExplosionHeight &&
-			_save->getTileEngine()->distance((*i)->getPosition(), targetPos) <= radius)
+			Position::distance2d((*i)->getPosition(), targetPos) <= radius)
 		{
 				// don't count people who were already grenaded this turn
 			if ((*i)->getTile()->getDangerous() ||
@@ -2013,7 +2013,7 @@ void AIModule::meleeAction()
 	_aggroTarget = 0;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		int newDistance = _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
+		int newDistance = Position::distance2d(_unit->getPosition(), (*i)->getPosition());
 		if (newDistance > 20 ||
 			!validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE))
 			continue;
@@ -2060,7 +2060,7 @@ void AIModule::meleeActionLeeroy()
 	_aggroTarget = 0;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		int newDistance = _save->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
+		int newDistance = Position::distance2d(_unit->getPosition(), (*i)->getPosition());
 		if (!validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE))
 			continue;
 		//pick closest living unit
@@ -2211,7 +2211,7 @@ void AIModule::projectileAction()
 		}
 	};
 
-	int distance = _save->getTileEngine()->distance(_unit->getPosition(), _attackAction->target);
+	int distance = Position::distance2d(_unit->getPosition(), _attackAction->target);
 	_attackAction->type = BA_RETHINK;
 
 	BattleActionCost costAuto(BA_AUTOSHOT, _attackAction->actor, _attackAction->weapon);
@@ -2465,7 +2465,7 @@ bool AIModule::psiAction()
 				std::find(_unit->getVisibleUnits()->begin(), _unit->getVisibleUnits()->end(), *i) != _unit->getVisibleUnits()->end()))
 			{
 				BattleUnit *victim = (*i);
-				if (_save->getTileEngine()->distance(victim->getPosition(), _unit->getPosition()) > item->getRules()->getMaxRange())
+				if (Position::distance2d(victim->getPosition(), _unit->getPosition()) > item->getRules()->getMaxRange())
 				{
 					continue;
 				}
@@ -2743,14 +2743,14 @@ bool AIModule::getNodeOfBestEfficacy(BattleAction *action)
 		{
 			continue;
 		}
-		int dist = _save->getTileEngine()->distance((*i)->getPosition(), _unit->getPosition());
+		int dist = Position::distance2d((*i)->getPosition(), _unit->getPosition());
 		if (dist <= 20 && dist > action->weapon->getRules()->getExplosionRadius(_unit) &&
 			_save->getTileEngine()->canTargetTile(&originVoxel, _save->getTile((*i)->getPosition()), O_FLOOR, &targetVoxel, _unit, false))
 		{
 			int nodePoints = 0;
 			for (std::vector<BattleUnit*>::const_iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 			{
-				dist = _save->getTileEngine()->distance((*i)->getPosition(), (*j)->getPosition());
+				dist = Position::distance2d((*i)->getPosition(), (*j)->getPosition());
 				if (!(*j)->isOut() && dist < action->weapon->getRules()->getExplosionRadius(_unit))
 				{
 					Position targetOriginVoxel = _save->getTileEngine()->getSightOriginVoxel(*j);

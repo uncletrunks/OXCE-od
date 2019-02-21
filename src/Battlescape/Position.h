@@ -19,6 +19,7 @@
  */
 #include <yaml-cpp/yaml.h>
 #include <SDL_types.h>
+#include <cmath>
 
 namespace OpenXcom
 {
@@ -77,6 +78,50 @@ public:
 	constexpr Position toTile() const
 	{
 		return Position(x / 16, y / 16, z / 24);
+	}
+
+	/// Calculates the distance in 3d.
+	static float distance(Position pos1, Position pos2)
+	{
+		return std::sqrt(distanceSq(pos1, pos2));
+	}
+
+	/**
+	 * Calculates the distance squared between 2 points in 3d. No sqrt(), not floating point math, and sometimes it's all you need.
+	 * @param pos1 Position of first square.
+	 * @param pos2 Position of second square.
+	 * @return Distance.
+	 */
+	static int distanceSq(Position pos1, Position pos2)
+	{
+		int x = pos1.x - pos2.x;
+		int y = pos1.y - pos2.y;
+		int z = pos1.z - pos2.z;
+		return x*x + y*y + z*z;
+	}
+
+	/**
+	 * Calculates the distance between 2 points in 2d. Rounded up to first INT.
+	 * @param pos1 Position of first square.
+	 * @param pos2 Position of second square.
+	 * @return Distance.
+	 */
+	static int distance2d(Position pos1, Position pos2)
+	{
+		return (int)std::ceil(std::sqrt(distance2dSq(pos1, pos2)));
+	}
+
+	/**
+	 * Calculates the distance squared between 2 points in 2d. No sqrt(), not floating point math, and sometimes it's all you need.
+	 * @param pos1 Position of first square.
+	 * @param pos2 Position of second square.
+	 * @return Distance.
+	 */
+	static int distance2dSq(Position pos1, Position pos2)
+	{
+		int x = pos1.x - pos2.x;
+		int y = pos1.y - pos2.y;
+		return x*x + y*y;
 	}
 };
 

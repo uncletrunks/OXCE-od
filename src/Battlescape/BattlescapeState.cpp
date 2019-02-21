@@ -2557,9 +2557,7 @@ void BattlescapeState::saveVoxelView()
 						}
 					}
 					hitPos =_trajectory.at(0);
-					dist = sqrt((double)((hitPos.x-originVoxel.x)*(hitPos.x-originVoxel.x)
-						+ (hitPos.y-originVoxel.y)*(hitPos.y-originVoxel.y)
-						+ (hitPos.z-originVoxel.z)*(hitPos.z-originVoxel.z)) );
+					dist = Position::distance(hitPos, originVoxel);
 					black = false;
 				}
 			}

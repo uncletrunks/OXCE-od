@@ -129,7 +129,7 @@ void ProjectileFlyBState::init()
 	}
 
 	Tile *endTile = _parent->getSave()->getTile(_action.target);
-	int distance = _parent->getTileEngine()->distance(_action.actor->getPosition(), _action.target);
+	int distance = Position::distance2d(_action.actor->getPosition(), _action.target);
 	bool isPlayer = _parent->getSave()->getSide() == FACTION_PLAYER;
 	if (isPlayer) _parent->getMap()->resetObstacles();
 	switch (_action.type)
@@ -402,7 +402,7 @@ bool ProjectileFlyBState::createNewProjectile()
 		int maxRange = _action.weapon->getRules()->getMaxRange();
 
 		// The waypoint targeting is possibly out of range of the gun, so move the voxel to the max range of the gun if it is
-		int distance = _parent->getTileEngine()->distance(actorPosition, targetPosition);
+		int distance = Position::distance2d(actorPosition, targetPosition);
 		if (distance > maxRange)
 		{
 			_targetVoxel = (actorPosition + (targetPosition - actorPosition) * maxRange / distance).toVoxel() + TileEngine::voxelTileCenter;
@@ -893,11 +893,11 @@ void ProjectileFlyBState::projectileHitUnit(Position pos)
 		if (victim == targetVictim) // Hit our target
 		{
 			_unit->getStatistics()->shotsLandedCounter++;
-			if (_parent->getTileEngine()->distance(_action.actor->getPosition(), victim->getPosition()) > 30)
+			if (Position::distance2d(_action.actor->getPosition(), victim->getPosition()) > 30)
 			{
 				_unit->getStatistics()->longDistanceHitCounter++;
 			}
-			if (_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) < _parent->getTileEngine()->distance(_action.actor->getPosition(), victim->getPosition()))
+			if (_unit->getFiringAccuracy(_action.type, _action.weapon, _parent->getMod()) < Position::distance2d(_action.actor->getPosition(), victim->getPosition()))
 			{
 				_unit->getStatistics()->lowAccuracyHitCounter++;
 			}

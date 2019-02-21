@@ -97,7 +97,7 @@ void UnitPanicBState::think()
 						int dist = 255;
 						for (std::vector<BattleUnit*>::const_iterator i = _unit->getVisibleUnits()->begin(); i != _unit->getVisibleUnits()->end(); ++i)
 						{
-							int newDist = _parent->getTileEngine()->distance(_unit->getPosition(), (*i)->getPosition());
+							int newDist = Position::distance2d(_unit->getPosition(), (*i)->getPosition());
 							if (newDist < dist)
 							{
 								ba.target = (*i)->getPosition();

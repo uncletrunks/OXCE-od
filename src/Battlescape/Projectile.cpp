@@ -453,9 +453,7 @@ bool Projectile::move()
 		}
 		else if (_position > 0)
 		{
-			Position p = _trajectory[_position] - _trajectory[_position - 1];
-			p *= p;
-			_distance += sqrt(float(p.x + p.y + p.z));
+			_distance += Position::distance(_trajectory[_position], _trajectory[_position - 1]);
 		}
 		if (_save->getDepth() > 0 && _vaporColor != -1 && _action.type != BA_THROW && RNG::percent(_vaporProbability))
 		{

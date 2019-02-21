@@ -189,10 +189,6 @@ public:
 	bool isTileInLOS(BattleAction *action, Tile *tile);
 	/// Turn XCom soldier's personal lighting on or off.
 	void togglePersonalLighting();
-	/// Checks the distance between two positions.
-	int distance(Position pos1, Position pos2) const;
-	/// Checks the distance squared between two positions.
-	int distanceSq(Position pos1, Position pos2, bool considerZ = true) const;
 	/// Checks the horizontal blockage of a tile.
 	int horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageType type, bool skipObject = false);
 	/// Checks the vertical blockage of a tile.
