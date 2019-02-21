@@ -1271,8 +1271,8 @@ void Map::drawTerrain(Surface *surface)
 											float defenseStrength = 30.0f; // indicator ignores: +victim->getArmor()->getPsiDefence(victim);
 
 											Position p = action->actor->getPosition().toVoxel() - Position(itX, itY, itZ).toVoxel();
-											p *= p;
-											int min = attackStrength - defenseStrength - rule->getPsiAccuracyRangeReduction(sqrt(float(p.x + p.y + p.z)));
+											int squared = p.x * p.x + p.y * p.y + p.z * p.z;
+											int min = attackStrength - defenseStrength - rule->getPsiAccuracyRangeReduction(sqrt(float(squared)));
 											int max = min + 55;
 											if (max <= 0)
 											{
