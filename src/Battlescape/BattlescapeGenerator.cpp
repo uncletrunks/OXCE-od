@@ -3197,7 +3197,7 @@ void BattlescapeGenerator::attachNodeLinks()
 		for (std::map<int, std::vector<int> >::iterator j = neighbourDirections.begin(); j != neighbourDirections.end(); j++)
 		{
 			std::vector<int>::iterator linkDirection;
-			linkDirection = find(node->getNodeLinks()->begin(), node->getNodeLinks()->end(), (*j).first);
+			linkDirection = std::find(node->getNodeLinks()->begin(), node->getNodeLinks()->end(), (*j).first);
 			if (linkDirection != node->getNodeLinks()->end() || (*j).first == -1 || (*j).first == -6)
 			{
 				for (std::vector<Node*>::iterator k = _save->getNodes()->begin(); k != _save->getNodes()->end(); ++k)
@@ -3231,7 +3231,7 @@ void BattlescapeGenerator::attachNodeLinks()
 							int yDistance = abs(node->getPosition().y - (*k)->getPosition().y);
 							int xyDistance = xDistance + yDistance;
 							std::vector<int>::iterator l;
-							l = find((*k)->getNodeLinks()->begin(), (*k)->getNodeLinks()->end(), node->getID());
+							l = std::find((*k)->getNodeLinks()->begin(), (*k)->getNodeLinks()->end(), node->getID());
 							if (xyDistance <= 3 && l == (*k)->getNodeLinks()->end())
 							{
 								(*k)->getNodeLinks()->push_back(node->getID());
