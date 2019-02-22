@@ -788,8 +788,14 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 	}
 
 	// add soldiers that are in the craft or base
+	for (int armorSize = 2; armorSize > 0; --armorSize)
+	{
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
+		if ((*i)->getArmor()->getSize() != armorSize)
+		{
+			continue;
+		}
 		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
 			(_craft == 0 && ((*i)->hasFullHealth() || (*i)->canDefendBase()) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 		{
@@ -816,6 +822,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 			if (unit && !_save->getSelectedUnit())
 				_save->setSelectedUnit(unit);
 		}
+	}
 	}
 
 	if (_save->getUnits()->empty())
