@@ -1139,7 +1139,7 @@ it:
   STR_MANAGE_CONTAINMENT: "Gestisci Contenimento Alieni"
   STR_STORAGE_EXCEEDED: "SPAZIO DEI MAGAZZINI SUPERATO!{SMALLLINE}Spazio nei magazzini insufficente nella base {0}. Devi vendere gli oggetti in eccesso."
   STR_GO_TO_BASE: "Vai alla Base"
-  STR_MELEE_ACCURACY: "PRECISIONE CORPO A CORPO"
+  STR_MELEE_ACCURACY: "PRECISIONE MELEE"
   STR_SELL_PRODUCTION: "VENDI"
   STR_BOTH_HANDS_MUST_BE_EMPTY: "Entrambe le mani devono essere libere!"
   STR_NOT_ENOUGH_ITEMS_FOR_TEMPLATE: "Oggetti insufficienti per copiare il modello!"

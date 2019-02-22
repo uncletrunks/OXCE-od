@@ -241,7 +241,7 @@ ru:
   STR_MAP_OPTIONS: "ПАРАМЕТРЫ КАРТЫ"
   STR_ALIEN_OPTIONS: "ПАРАМЕТРЫ ПРИШЕЛЬЦЕВ"
   STR_MAP_TERRAIN: "Местность"
-  STR_MAP_DARKNESS: "Освещение"
+  STR_MAP_DARKNESS: "Затемнение"
   STR_MAP_DEPTH: "Глубина"
   STR_DIFFICULTY: "Сложность"
   STR_ALIEN_RACE: "Раса"
