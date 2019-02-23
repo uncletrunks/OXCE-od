@@ -41,8 +41,9 @@ namespace OpenXcom
  * Initializes all the elements in the Research list screen.
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
+ * @param sortByCost Should the list be sorted by cost or listOrder?
  */
-NewResearchListState::NewResearchListState(Base *base) : _base(base), _lstScroll(0)
+NewResearchListState::NewResearchListState(Base *base, bool sortByCost) : _base(base), _sortByCost(sortByCost), _lstScroll(0)
 {
 	_screen = false;
 
@@ -214,8 +215,15 @@ void NewResearchListState::fillProjectList(bool markAllAsSeen)
 	_lstResearch->clearList();
 	// Note: this is the *only* place where this method is called with considerDebugMode = true
 	_game->getSavedGame()->getAvailableResearchProjects(_projects, _game->getMod() , _base, true);
-	// sort by list order
-	std::sort(_projects.begin(), _projects.end(), [&](RuleResearch* a, RuleResearch* b) { return a->getListOrder() < b->getListOrder(); });
+	if (_sortByCost)
+	{
+		std::sort(_projects.begin(), _projects.end(), [&](RuleResearch* a, RuleResearch* b) { return a->getCost() < b->getCost(); });
+	}
+	else
+	{
+		// sort by list order
+		std::sort(_projects.begin(), _projects.end(), [&](RuleResearch* a, RuleResearch* b) { return a->getListOrder() < b->getListOrder(); });
+	}
 	std::vector<RuleResearch*>::iterator it = _projects.begin();
 	int row = 0;
 	bool hasUnseen = false;

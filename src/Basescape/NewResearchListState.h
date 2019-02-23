@@ -39,6 +39,7 @@ class NewResearchListState : public State
 {
 private:
 	Base *_base;
+	bool _sortByCost;
 	TextButton *_btnOK;
 	ToggleTextButton *_btnShowOnlyNew;
 	TextEdit *_btnQuickSearch;
@@ -52,7 +53,7 @@ private:
 	std::vector<RuleResearch *> _projects;
 public:
 	/// Creates the New research list state.
-	NewResearchListState(Base *base);
+	NewResearchListState(Base *base, bool sortByCost);
 	/// Handler for clicking the OK button.
 	void btnOKClick(Action *action);
 	/// Handlers for Quick Search.

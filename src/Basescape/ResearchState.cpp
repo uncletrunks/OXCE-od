@@ -129,7 +129,8 @@ void ResearchState::btnOkClick(Action *)
  */
 void ResearchState::btnNewClick(Action *)
 {
-	_game->pushState(new NewResearchListState(_base));
+	bool sortByCost = (SDL_GetModState() & KMOD_CTRL) && (SDL_GetModState() & KMOD_ALT);
+	_game->pushState(new NewResearchListState(_base, sortByCost));
 }
 
 /**
