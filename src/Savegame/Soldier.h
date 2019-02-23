@@ -191,6 +191,8 @@ public:
 	SoldierDeath *getDeath() const;
 	/// Kills the soldier.
 	void die(SoldierDeath *death);
+	/// Clears the equipment layout.
+	void clearEquipmentLayout();
 	/// Gets the soldier's diary.
 	SoldierDiary *getDiary();
 	/// Resets the soldier's diary.

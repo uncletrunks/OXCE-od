@@ -925,6 +925,14 @@ void Soldier::die(SoldierDeath *death)
 	_returnToTrainingWhenHealed = false;
 	_recentlyPromoted = false;
 	_recovery = 0.0f;
+	clearEquipmentLayout();
+}
+
+/**
+ * Clears the equipment layout.
+ */
+void Soldier::clearEquipmentLayout()
+{
 	for (std::vector<EquipmentLayoutItem*>::iterator i = _equipmentLayout.begin(); i != _equipmentLayout.end(); ++i)
 	{
 		delete *i;

@@ -77,6 +77,10 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _blocksToDo(0), _dummy(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
+	if (_game->getSavedGame()->getDisableSoldierEquipment())
+	{
+		_allowAutoLoadout = false;
+	}
 	_inventorySlotGround = _game->getMod()->getInventory("STR_GROUND", true);
 }
 
@@ -826,12 +830,20 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 			if ((_craft != 0 && (*i)->getCraft() == _craft) ||
 				(_craft == 0 && ((*i)->hasFullHealth() || (*i)->canDefendBase()) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 			{
+				// clear the soldier's equipment layout, we want to start fresh
+				if (_game->getSavedGame()->getDisableSoldierEquipment())
+				{
+					(*i)->clearEquipmentLayout();
+				}
 				BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
 				if (unit && !_save->getSelectedUnit())
 					_save->setSelectedUnit(unit);
 			}
 		}
 	}
+
+	// job's done
+	_game->getSavedGame()->setDisableSoldierEquipment(false);
 
 	if (_save->getUnits()->empty())
 	{

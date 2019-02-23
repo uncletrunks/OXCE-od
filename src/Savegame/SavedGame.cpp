@@ -135,7 +135,7 @@ bool haveReserchVector(const std::vector<const RuleResearch*> &vec,  const std::
  */
 SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _end(END_NONE), _ironman(false), _globeLon(0.0),
 						 _globeLat(0.0), _globeZoom(0), _battleGame(0), _debug(false),
-						 _warned(false), _monthsPassed(-1), _selectedBase(0), _autosales()
+						 _warned(false), _monthsPassed(-1), _selectedBase(0), _autosales(), _disableSoldierEquipment(false)
 {
 	_time = new GameTime(6, 1, 1, 1999, 12, 0, 0);
 	_alienStrategy = new AlienStrategy();
@@ -2727,6 +2727,22 @@ void SavedGame::stopHuntingXcomCrafts(Base *base)
 			(*u)->resetOriginalDestination((*c));
 		}
 	}
+}
+
+/**
+ * Should all xcom soldiers have completely empty starting inventory when doing base equipment?
+ */
+bool SavedGame::getDisableSoldierEquipment() const
+{
+	return _disableSoldierEquipment;
+}
+
+/**
+ * Sets the corresponding flag.
+ */
+void SavedGame::setDisableSoldierEquipment(bool disableSoldierEquipment)
+{
+	_disableSoldierEquipment = disableSoldierEquipment;
 }
 
 }

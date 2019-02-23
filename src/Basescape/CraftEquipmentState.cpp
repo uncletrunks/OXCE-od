@@ -809,6 +809,10 @@ void CraftEquipmentState::btnInventoryClick(Action *)
 		SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 		_game->getSavedGame()->setBattleGame(bgame);
 
+		if ((SDL_GetModState() & KMOD_CTRL) && (SDL_GetModState() & KMOD_ALT))
+		{
+			_game->getSavedGame()->setDisableSoldierEquipment(true);
+		}
 		BattlescapeGenerator bgen = BattlescapeGenerator(_game);
 		bgen.runInventory(craft);
 

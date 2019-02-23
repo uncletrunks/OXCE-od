@@ -152,6 +152,7 @@ private:
 	std::vector<MissionStatistics*> _missionStatistics;
 	std::set<int> _ignoredUfos;
 	std::set<const RuleItem *> _autosales;
+	bool _disableSoldierEquipment;
 
 	static SaveInfo getSaveInfo(const std::string &file, Language *lang);
 public:
@@ -402,6 +403,10 @@ public:
 	void stopHuntingXcomCraft(Craft *target);
 	/// Stop hunting all xcom craft from a given xcom base.
 	void stopHuntingXcomCrafts(Base *base);
+	/// Should all xcom soldiers have completely empty starting inventory when doing base equipment?
+	bool getDisableSoldierEquipment() const;
+	/// Sets the corresponding flag.
+	void setDisableSoldierEquipment(bool disableSoldierEquipment);
 };
 
 }

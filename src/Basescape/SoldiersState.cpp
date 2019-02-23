@@ -572,6 +572,10 @@ void SoldiersState::btnInventoryClick(Action *)
 		_game->getSavedGame()->setBattleGame(bgame);
 		bgame->setMissionType("STR_BASE_DEFENSE");
 
+		if ((SDL_GetModState() & KMOD_CTRL) && (SDL_GetModState() & KMOD_ALT))
+		{
+			_game->getSavedGame()->setDisableSoldierEquipment(true);
+		}
 		BattlescapeGenerator bgen = BattlescapeGenerator(_game);
 		bgen.setBase(_base);
 		bgen.runInventory(0);
