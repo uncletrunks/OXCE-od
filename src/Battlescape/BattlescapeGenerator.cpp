@@ -787,20 +787,13 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 		}
 	}
 
-	// add soldiers that are in the craft or base
-	for (int armorSize = 2; armorSize > 0; --armorSize)
+	// starting conditions - armor transformation or replacement
+	if (startingCondition != 0)
 	{
-	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
-	{
-		if ((*i)->getArmor()->getSize() != armorSize)
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 		{
-			continue;
-		}
-		if ((_craft != 0 && (*i)->getCraft() == _craft) ||
-			(_craft == 0 && ((*i)->hasFullHealth() || (*i)->canDefendBase()) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
-		{
-			// starting conditions - armor transformation or replacement
-			if (startingCondition != 0)
+			if ((_craft != 0 && (*i)->getCraft() == _craft) ||
+				(_craft == 0 && ((*i)->hasFullHealth() || (*i)->canDefendBase()) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 			{
 				auto transformedArmor = startingCondition->getArmorTransformation((*i)->getArmor());
 				if (transformedArmor)
@@ -818,11 +811,26 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 					}
 				}
 			}
-			BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
-			if (unit && !_save->getSelectedUnit())
-				_save->setSelectedUnit(unit);
 		}
 	}
+
+	// add soldiers that are in the craft or base (all 2x2 soldiers first, only then 1x1 soldiers)
+	for (int armorSize = 2; armorSize > 0; --armorSize)
+	{
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+		{
+			if ((*i)->getArmor()->getSize() != armorSize)
+			{
+				continue;
+			}
+			if ((_craft != 0 && (*i)->getCraft() == _craft) ||
+				(_craft == 0 && ((*i)->hasFullHealth() || (*i)->canDefendBase()) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
+			{
+				BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
+				if (unit && !_save->getSelectedUnit())
+					_save->setSelectedUnit(unit);
+			}
+		}
 	}
 
 	if (_save->getUnits()->empty())
