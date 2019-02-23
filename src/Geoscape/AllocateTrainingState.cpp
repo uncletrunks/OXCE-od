@@ -257,11 +257,14 @@ void AllocateTrainingState::initList(size_t scrl)
 
 		bool isDone = (*s)->isFullyTrained();
 		bool isWounded = (*s)->isWounded();
+		bool isQueued = isWounded && (*s)->getReturnToTrainingWhenHealed();
 		bool isTraining = (*s)->isInTraining();
 
 		std::string status;
 		if (isDone)
 			status = tr("STR_NO_DONE");
+		else if (isQueued)
+			status = tr("STR_NO_QUEUED");
 		else if (isWounded)
 			status = tr("STR_NO_WOUNDED");
 		else if (isTraining)
@@ -407,28 +410,46 @@ void AllocateTrainingState::lstSoldiersClick(Action *action)
 	_sel = _lstSoldiers->getSelectedRow();
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
-		// can't put fully trained soldiers back into training
-		if (_base->getSoldiers()->at(_sel)->isFullyTrained()) return;
+		auto soldier = _base->getSoldiers()->at(_sel);
 
-		bool isWounded = _base->getSoldiers()->at(_sel)->isWounded();
-		if (!_base->getSoldiers()->at(_sel)->isInTraining())
+		// can't put fully trained soldiers back into training
+		if (soldier->isFullyTrained()) return;
+
+		// wounded soldiers can be queued/dequeued
+		if (soldier->isWounded())
+		{
+			if (soldier->getReturnToTrainingWhenHealed())
+			{
+				_lstSoldiers->setCellText(_sel, 8, tr("STR_NO_WOUNDED").c_str());
+				soldier->setReturnToTrainingWhenHealed(false);
+			}
+			else
+			{
+				_lstSoldiers->setCellText(_sel, 8, tr("STR_NO_QUEUED").c_str());
+				soldier->setReturnToTrainingWhenHealed(true);
+			}
+			return;
+		}
+
+		// healthy soldiers can be assigned/deassigned
+		if (!soldier->isInTraining())
 		{
 			if (_base->getUsedTraining() < _base->getAvailableTraining())
 			{
-				_lstSoldiers->setCellText(_sel, 8, tr(isWounded ? "STR_NO_WOUNDED" : "STR_YES").c_str());
+				_lstSoldiers->setCellText(_sel, 8, tr("STR_YES").c_str());
 				_lstSoldiers->setRowColor(_sel, _lstSoldiers->getSecondaryColor());
 				_space--;
 				_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));
-				_base->getSoldiers()->at(_sel)->setTraining(true);
+				soldier->setTraining(true);
 			}
 		}
 		else
 		{
-			_lstSoldiers->setCellText(_sel, 8, tr(isWounded ? "STR_NO_WOUNDED" : "STR_NO").c_str());
+			_lstSoldiers->setCellText(_sel, 8, tr("STR_NO").c_str());
 			_lstSoldiers->setRowColor(_sel, _lstSoldiers->getColor());
 			_space++;
 			_txtRemaining->setText(tr("STR_REMAINING_TRAINING_FACILITY_CAPACITY").arg(_space));
-			_base->getSoldiers()->at(_sel)->setTraining(false);
+			soldier->setTraining(false);
 		}
 	}
 }
