@@ -836,6 +836,10 @@ void DebriefingState::btnOkClick(Action *)
 					{
 						_containmentStateInfo[i->first] = 0; // 0 = OK
 					}
+					else if (usedContainment == 0)
+					{
+						_containmentStateInfo[i->first] = 0; // 0 = OK
+					}
 				}
 			}
 

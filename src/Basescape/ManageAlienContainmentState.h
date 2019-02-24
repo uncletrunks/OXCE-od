@@ -51,7 +51,6 @@ private:
 	std::vector<std::string> _aliens;
 	size_t _sel;
 	int _aliensSold, _total;
-	bool _reset;
 	/// Gets selected quantity.
 	int getQuantity();
 public:
@@ -61,6 +60,8 @@ public:
 	~ManageAlienContainmentState();
 	/// Resets state.
 	void init() override;
+	/// Resets the list and the totals, updates button visibility.
+	void resetListAndTotals();
 	/// Runs the timers.
 	void think() override;
 	/// Handler for clicking the OK button.

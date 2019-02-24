@@ -52,19 +52,8 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0), _reset(false)
+ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) : _base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0)
 {
-	std::vector<std::string> researchList;
-	for (std::vector<ResearchProject*>::const_iterator iter = _base->getResearch().begin(); iter != _base->getResearch().end(); ++iter)
-	{
-		const RuleResearch *research = (*iter)->getRules();
-		RuleItem *item = _game->getMod()->getItem(research->getName());
-		if (item && item->isAlien() && item->getPrisonType() == _prisonType)
-		{
-			researchList.push_back(research->getName());
-		}
-	}
-
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(148, 16, 8, 176);
@@ -113,18 +102,6 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	_btnTransfer->setText(tr("STR_GO_TO_TRANSFERS"));
 	_btnTransfer->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnTransferClick);
 
-	int availableContainment = _base->getAvailableContainment(_prisonType);
-	int freeContainment = availableContainment - _base->getUsedContainment(_prisonType);
-	bool overCrowded = false;
-	if (availableContainment == 0 || Options::storageLimitsEnforced)
-	{
-		overCrowded = (freeContainment < 0);
-	}
-
-	_btnCancel->setVisible(!overCrowded);
-	_btnOk->setVisible(!overCrowded);
-	_btnTransfer->setVisible(overCrowded);
-
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(trAlt("STR_MANAGE_CONTAINMENT", _prisonType));
@@ -143,15 +120,6 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	_txtInterrogatedAliens->setWordWrap(true);
 	_txtInterrogatedAliens->setVerticalAlign(ALIGN_BOTTOM);
 
-	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(_base->getFreeContainment(_prisonType)));
-
-	_txtUsed->setText(tr("STR_SPACE_USED").arg( _base->getUsedContainment(_prisonType)));
-
-	if (Options::canSellLiveAliens)
-	{
-		_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Unicode::formatFunding(_total)));
-	}
-
 	_lstAliens->setArrowColumn(184, ARROW_HORIZONTAL);
 	if (Options::canSellLiveAliens) {
 		_lstAliens->setColumns(5, 120, 40, 64, 46, 46);
@@ -168,6 +136,55 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	_lstAliens->onRightArrowRelease((ActionHandler)&ManageAlienContainmentState::lstItemsRightArrowRelease);
 	_lstAliens->onRightArrowClick((ActionHandler)&ManageAlienContainmentState::lstItemsRightArrowClick);
 	_lstAliens->onMousePress((ActionHandler)&ManageAlienContainmentState::lstItemsMousePress);
+
+	_timerInc = new Timer(250);
+	_timerInc->onTimer((StateHandler)&ManageAlienContainmentState::increase);
+	_timerDec = new Timer(250);
+	_timerDec->onTimer((StateHandler)&ManageAlienContainmentState::decrease);
+}
+
+/**
+ *
+ */
+ManageAlienContainmentState::~ManageAlienContainmentState()
+{
+	delete _timerInc;
+	delete _timerDec;
+}
+
+/**
+* Resets stuff when coming back from other screens.
+*/
+void ManageAlienContainmentState::init()
+{
+	State::init();
+
+	resetListAndTotals();
+}
+
+/**
+ * Resets the list and the totals, updates button visibility.
+ */
+void ManageAlienContainmentState::resetListAndTotals()
+{
+	_qtys.clear();
+	_aliens.clear();
+	_sel = 0;
+	_aliensSold = 0;
+	_total = 0;
+
+	_lstAliens->clearList();
+
+	std::vector<std::string> researchList;
+	for (std::vector<ResearchProject*>::const_iterator iter = _base->getResearch().begin(); iter != _base->getResearch().end(); ++iter)
+	{
+		const RuleResearch *research = (*iter)->getRules();
+		RuleItem *item = _game->getMod()->getItem(research->getName());
+		if (item && item->isAlien() && item->getPrisonType() == _prisonType)
+		{
+			researchList.push_back(research->getName());
+		}
+	}
 
 	const std::vector<std::string> &items = _game->getMod()->getItemsList();
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
@@ -210,32 +227,33 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 		_lstAliens->addRow(5, tr(*i).c_str(), Options::canSellLiveAliens ? "-" : "", "0", "0", "1");
 		_lstAliens->setRowColor(_qtys.size() -1, _lstAliens->getSecondaryColor());
 	}
-	_timerInc = new Timer(250);
-	_timerInc->onTimer((StateHandler)&ManageAlienContainmentState::increase);
-	_timerDec = new Timer(250);
-	_timerDec->onTimer((StateHandler)&ManageAlienContainmentState::decrease);
-}
 
-/**
- *
- */
-ManageAlienContainmentState::~ManageAlienContainmentState()
-{
-	delete _timerInc;
-	delete _timerDec;
-}
-
-/**
-* Resets stuff when coming back from other screens.
-*/
-void ManageAlienContainmentState::init()
-{
-	State::init();
-
-	if (_reset)
+	// update totals
+	int availableContainment = _base->getAvailableContainment(_prisonType);
+	int usedContainment = _base->getUsedContainment(_prisonType);
+	int freeContainment = availableContainment - usedContainment;
 	{
-		_game->popState();
-		_game->pushState(new ManageAlienContainmentState(_base, _prisonType, _origin));
+		_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(freeContainment));
+
+		_txtUsed->setText(tr("STR_SPACE_USED").arg(usedContainment));
+
+		if (Options::canSellLiveAliens)
+		{
+			_txtValueOfSales->setText(tr("STR_VALUE_OF_SALES").arg(Unicode::formatFunding(_total)));
+		}
+	}
+
+	// update buttons
+	{
+		bool overCrowded = false;
+		if (availableContainment == 0 || Options::storageLimitsEnforced)
+		{
+			overCrowded = (freeContainment < 0);
+		}
+
+		_btnCancel->setVisible(!overCrowded);
+		_btnOk->setVisible(!overCrowded);
+		_btnTransfer->setVisible(overCrowded);
 	}
 }
 
@@ -310,7 +328,6 @@ void ManageAlienContainmentState::btnCancelClick(Action *)
 */
 void ManageAlienContainmentState::btnTransferClick(Action *)
 {
-	_reset = true;
 	_game->pushState(new TransferBaseState(_base));
 }
 
