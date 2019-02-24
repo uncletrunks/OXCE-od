@@ -142,7 +142,6 @@ private:
 	Unit* _vehicleUnit;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
-	bool _haveMercy;
 	int _bigSprite;
 	int _floorSprite;
 	int _handSprite, _bulletSprite;
@@ -278,7 +277,6 @@ public:
 	/// Gets the item's weight.
 	int getWeight() const;
 	/// Gets the item's reference in BIGOBS.PCK for use in inventory.
-	bool haveMercy() const { return _haveMercy; }
 	int getBigSprite() const;
 	/// Gets the item's reference in FLOOROB.PCK for use in battlescape.
 	int getFloorSprite() const;

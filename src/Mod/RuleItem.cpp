@@ -42,7 +42,7 @@ const float TilesToVexels = 16.0f;
  * @param type String defining the type.
  */
 RuleItem::RuleItem(const std::string &type) :
-	_type(type), _name(type), _vehicleUnit(nullptr), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3), _haveMercy(false),
+	_type(type), _name(type), _vehicleUnit(nullptr), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
 	_bigSprite(-999), _floorSprite(-1), _handSprite(120), _bulletSprite(-1), _specialIconSprite(-1),
 	_hitAnimation(0), _hitMissAnimation(-1),
 	_meleeAnimation(0), _meleeMissAnimation(-1),
@@ -335,7 +335,6 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_costSell = node["costSell"].as<int>(_costSell);
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_weight = node["weight"].as<int>(_weight);
-	_haveMercy = node["haveMercy"].as<bool>(_haveMercy);
 	if (node["bigSprite"])
 	{
 		_bigSprite = mod->getSpriteOffset(node["bigSprite"].as<int>(_bigSprite), "BIGOBS.PCK");

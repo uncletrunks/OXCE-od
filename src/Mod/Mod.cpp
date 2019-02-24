@@ -1125,28 +1125,6 @@ void Mod::loadAll()
 	sortLists();
 	loadExtraResources();
 	modResources();
-
-	// FIXME: remove after modders start caring about visual side of their mods
-	for (auto &item : _items)
-	{
-		if (item.second->haveMercy())
-		{
-			Surface *surf = getSurfaceSet("BIGOBS.PCK")->getFrame(item.second->getBigSprite());
-			if (surf)
-			{
-				for (int x = 1; x < item.second->getInventoryWidth() * 16; ++x)
-				{
-					for (int y = 1; y < item.second->getInventoryHeight() * 16; ++y)
-					{
-						if (surf->getPixel(x, y) == 0)
-						{
-							surf->setPixel(x, y, 32);
-						}
-					}
-				}
-			}
-		}
-	}
 }
 
 /**
