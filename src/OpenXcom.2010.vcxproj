@@ -462,6 +462,7 @@
     <ClCompile Include="Menu\OptionsBaseState.cpp" />
     <ClCompile Include="Menu\OptionsBattlescapeState.cpp" />
     <ClCompile Include="Menu\OptionsControlsState.cpp" />
+    <ClCompile Include="Menu\OptionsInformExtendedState.cpp" />
     <ClCompile Include="Menu\OptionsModsState.cpp" />
     <ClCompile Include="Menu\OptionsNoAudioState.cpp" />
     <ClCompile Include="Menu\OptionsVideoState.cpp" />
@@ -836,6 +837,7 @@
     <ClInclude Include="Menu\OptionsBaseState.h" />
     <ClInclude Include="Menu\OptionsBattlescapeState.h" />
     <ClInclude Include="Menu\OptionsControlsState.h" />
+    <ClInclude Include="Menu\OptionsInformExtendedState.h" />
     <ClInclude Include="Menu\OptionsModsState.h" />
     <ClInclude Include="Menu\OptionsNoAudioState.h" />
     <ClInclude Include="Menu\OptionsVideoState.h" />
