@@ -778,6 +778,7 @@ void scanModZip(const std::string& fullpath) {
 	if (mz_zip_reader_locate_file_v2(&mzip, "metadata.yml", NULL, 0, NULL)) {
 		Log(LOG_VERBOSE) << log_ctx << "retrying as a single-mod .zip";
 		mapZippedMod(fullpath, "");
+		mz_zip_reader_end_rwops(&mzip);
 		return;
 	}
 	mz_uint filecount = mz_zip_reader_get_num_files(&mzip);
@@ -795,6 +796,7 @@ void scanModZip(const std::string& fullpath) {
 		if (slashpos != prefix.size() - 1) { continue; } // not top-level: skip.
 		mapZippedMod(fullpath, prefix);
 	}
+	mz_zip_reader_end_rwops(&mzip);
 }
 /**
  * this scans a mod dir.
