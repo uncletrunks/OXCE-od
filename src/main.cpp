@@ -24,6 +24,7 @@
 #include "Engine/CrossPlatform.h"
 #include "Engine/Game.h"
 #include "Engine/Options.h"
+#include "Engine/FileMap.h"
 #include "Menu/StartState.h"
 
 /** @mainpage
@@ -121,8 +122,9 @@ int main(int argc, char *argv[])
 	game->setState(new StartState);
 	game->run();
 
-	// Comment this for faster exit.
+	// Comment those two for faster exit.
 	delete game;
+	FileMap::clear(); // make valgrind happy
 	return EXIT_SUCCESS;
 }
 
