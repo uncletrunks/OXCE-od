@@ -997,6 +997,7 @@ std::unique_ptr<std::istream> readFile(const std::string& filename) {
 		throw Exception(err);
 	}
 	std::string datastr(data, size);
+	SDL_free(data);
 	return std::unique_ptr<std::istream>(new std::istringstream(datastr));
 }
 
