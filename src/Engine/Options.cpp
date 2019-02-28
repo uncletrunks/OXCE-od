@@ -706,6 +706,15 @@ void updateMods()
 	updateReservedSpace();
 	FileMap::setup(getActiveMods());
 	userSplitMasters();
+
+	// report active mods that don't meet the minimum OXCE requirements
+	for (auto& modInf : getActiveMods())
+	{
+		if (!modInf->isVersionOk())
+		{
+			Log(LOG_ERROR) << "Mod '" << modInf->getName() << "' requires at least OXCE v" << modInf->getRequiredExtendedVersion();
+		}
+	}
 }
 
 /**

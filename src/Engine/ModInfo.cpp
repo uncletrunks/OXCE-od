@@ -21,6 +21,8 @@
 #include "CrossPlatform.h"
 #include "Exception.h"
 #include <yaml-cpp/yaml.h>
+#include <sstream>
+#include "../version.h"
 
 namespace OpenXcom
 {
@@ -28,7 +30,7 @@ namespace OpenXcom
 ModInfo::ModInfo(const std::string &path) :
 	 _path(path), _name(CrossPlatform::baseFilename(path)),
 	_desc("No description."), _version("1.0"), _author("unknown author"),
-	_id(_name), _master("xcom1"), _isMaster(false), _reservedSpace(1)
+	_id(_name), _master("xcom1"), _isMaster(false), _reservedSpace(1), _versionOk(true)
 {
 	// empty
 }
@@ -43,6 +45,40 @@ void ModInfo::load(const YAML::Node& doc)
 	_isMaster = doc["isMaster"].as<bool>(_isMaster);
 	_reservedSpace = doc["reservedSpace"].as<int>(_reservedSpace);
 	_requiredExtendedVersion = doc["requiredExtendedVersion"].as<std::string>(_requiredExtendedVersion);
+
+	if (!_requiredExtendedVersion.empty())
+	{
+		std::vector<int> requiredVersion;
+		std::string each;
+		char split_char = '.';
+		std::istringstream ss(_requiredExtendedVersion);
+		while (std::getline(ss, each, split_char)) {
+			try {
+				int i = std::stoi(each);
+				requiredVersion.push_back(i);
+			} catch (...) {
+				requiredVersion.push_back(0);
+			}
+		}
+		std::vector<int> oxceVersion = { OPENXCOM_VERSION_NUMBER };
+		int diff = oxceVersion.size() - requiredVersion.size();
+		for (int j = 0; j < diff; ++j)
+		{
+			requiredVersion.push_back(0);
+		}
+		for (int k = 0; k < oxceVersion.size(); ++k)
+		{
+			if (requiredVersion[k] > oxceVersion[k])
+			{
+				_versionOk = false;
+				break;
+			}
+			else if (requiredVersion[k] < oxceVersion[k])
+			{
+				break;
+			}
+		}
+	}
 
 	if (_reservedSpace < 1)
 	{
@@ -100,4 +136,14 @@ bool ModInfo::canActivate(const std::string &curMaster) const
 
 
 const std::vector<std::string> &ModInfo::getExternalResourceDirs() const { return _externalResourceDirs; }
+
+/**
+ * Gets whether the current OXCE version is equal to (or higher than) the required OXCE version.
+ * @return True if the version is OK.
+*/
+bool ModInfo::isVersionOk() const
+{
+	return _versionOk;
+}
+
 }

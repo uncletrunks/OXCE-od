@@ -41,7 +41,7 @@ namespace OpenXcom
 		Text *_txtTitle;
 	public:
 		/// Creates the Confirm OXCE state.
-		OptionsInformExtendedState(OptionsModsState *state, bool isMaster);
+		OptionsInformExtendedState(OptionsModsState *state, bool isMaster, const std::string &versionRequired);
 		/// Cleans up the Confirm OXCE state.
 		~OptionsInformExtendedState();
 		/// Handler for clicking the Yes button.

@@ -34,6 +34,7 @@ private:
 	std::string _name, _desc, _version, _author, _url, _id, _master;
 	bool _isMaster;
 	int _reservedSpace;
+	bool _versionOk;
 	std::string _requiredExtendedVersion;
 	std::vector<std::string> _externalResourceDirs;
 public:
@@ -66,6 +67,8 @@ public:
 	void setReservedSpace(int reservedSpace);
 	/// Gets the OXCE version required by this mod.
 	const std::string &getRequiredExtendedVersion() const;
+	/// Gets whether the current OXCE version is equal to (or higher than) the required OXCE version.
+	bool isVersionOk() const;
 	/// Gets the list of external resource dirs to load for this mod.
 	const std::vector<std::string> &getExternalResourceDirs() const;
 };

@@ -273,6 +273,8 @@ en-GB:
 #=================== Menu ===================
 #OptionsAdvancedState.cpp
   STR_OXCE: "Extended"
+#OptionsInformExtendedState.cpp
+  STR_VERSION_REQUIRED_QUESTION: "This mod requires OXCE v{0} to run correctly. Enable this mod?"
 #OptionsVideoState.cpp
   STR_FOURTH_DISPLAY: "1/4 Display"
   STR_FIFTH_DISPLAY: "1/5 Display"

@@ -32,8 +32,9 @@ namespace OpenXcom
 	 * Initializes all the elements in the Confirm OXCE screen.
 	 * @param state Pointer to the Options|Mod state.
 	 * @param isMaster Are we enabling a standard mod or a master mod?
+	 * @param versionRequired Minimum OXCE version required.
 	 */
-	OptionsInformExtendedState::OptionsInformExtendedState(OptionsModsState *state, bool isMaster) : _state(state), _isMaster(isMaster)
+	OptionsInformExtendedState::OptionsInformExtendedState(OptionsModsState *state, bool isMaster, const std::string &versionRequired) : _state(state), _isMaster(isMaster)
 	{
 		_screen = false;
 
@@ -65,7 +66,7 @@ namespace OpenXcom
 		_txtTitle->setAlign(ALIGN_CENTER);
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
-		_txtTitle->setText(tr("STR_OXCE_REQUIRED_QUESTION"));
+		_txtTitle->setText(tr("STR_VERSION_REQUIRED_QUESTION").arg(versionRequired));
 	}
 
 	/**

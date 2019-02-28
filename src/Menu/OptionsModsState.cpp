@@ -136,16 +136,16 @@ void OptionsModsState::cbxMasterHover(Action *)
 void OptionsModsState::cbxMasterChange(Action *)
 {
 	const ModInfo *masterModInfo = _masters[_cbxMasters->getSelected()];
-#if 0
+
 	// when changing a master mod, check if it requires OXCE
 	{
-		if (!masterModInfo->getRequiredExtendedVersion().empty())
+		if (!masterModInfo->isVersionOk())
 		{
-			_game->pushState(new OptionsInformExtendedState(this, true));
+			_game->pushState(new OptionsInformExtendedState(this, true, masterModInfo->getRequiredExtendedVersion()));
 			return;
 		}
 	}
-#endif
+
 	changeMasterMod();
 }
 
@@ -217,18 +217,18 @@ void OptionsModsState::lstModsClick(Action *action)
 	}
 
 	std::pair<std::string, bool> &mod(_mods.at(_lstMods->getSelectedRow()));
-#if 0
+
 	// when activating a mod, check if it requires OXCE
 	if (!mod.second)
 	{
 		const ModInfo *modInfo = &Options::getModInfos().at(mod.first);
-		if (!modInfo->getRequiredExtendedVersion().empty())
+		if (!modInfo->isVersionOk())
 		{
-			_game->pushState(new OptionsInformExtendedState(this, false));
+			_game->pushState(new OptionsInformExtendedState(this, false, modInfo->getRequiredExtendedVersion()));
 			return;
 		}
 	}
-#endif
+
 	// if deactivating, or if not OXCE mod
 	toggleMod();
 }
