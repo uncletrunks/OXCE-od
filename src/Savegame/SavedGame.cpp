@@ -314,7 +314,7 @@ std::vector<SaveInfo> SavedGame::getList(Language *lang, bool autoquick)
 SaveInfo SavedGame::getSaveInfo(const std::string &file, Language *lang)
 {
 	std::string fullname = Options::getMasterUserFolder() + file;
-	YAML::Node doc = YAML::Load(*CrossPlatform::readFirstDoc(fullname));
+	YAML::Node doc = YAML::Load(*CrossPlatform::getYamlSaveHeader(fullname));
 	SaveInfo save;
 
 	save.fileName = file;

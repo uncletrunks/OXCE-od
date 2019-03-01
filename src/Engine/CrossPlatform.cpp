@@ -1003,10 +1003,11 @@ std::unique_ptr<std::istream> readFile(const std::string& filename) {
 
 /**
  * Gets an istream to a file's bytes at least up to and including first "\n---" sequence.
+ * To be used only for savegames.
  * @param filename - what to read
  * @return the istream
  */
-std::unique_ptr<std::istream> readFirstDoc(const std::string& filename) {
+std::unique_ptr<std::istream> getYamlSaveHeader(const std::string& filename) {
 	SDL_RWops *rwops = SDL_RWFromFile(filename.c_str(), "r");
 	if (!rwops) {
 		std::string err = "Failed to read " + filename + ": " + SDL_GetError();
