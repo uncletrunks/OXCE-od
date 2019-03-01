@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 	// Comment those two for faster exit.
 	delete game;
-	FileMap::clear(); // make valgrind happy
+	FileMap::clear(true); // make valgrind happy
 	return EXIT_SUCCESS;
 }
 

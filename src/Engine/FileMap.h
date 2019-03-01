@@ -92,7 +92,7 @@ namespace FileMap
 	const RSOrder &getRulesets();
 
 	/// absolutely clears FileMap state and maps common resources (dataDir/common)
-	void clear();
+	void clear(bool clearOnly = false);
 
 	/// sets up VFS according to the modsequence given (rescans common resources). does call clear().
 	void setup(const std::vector<const ModInfo *>& active);

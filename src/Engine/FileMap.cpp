@@ -598,16 +598,19 @@ static VFS TheVFS;
 
 const RSOrder &getRulesets() { return TheVFS.get_rulesets(); }
 
-void clear() {
+void clear(bool clearOnly) {
 	TheVFS.clear();
 	for(auto i : ModsAvailable ) { delete i.second; }
 	ModsAvailable.clear();
 	for (auto i : MappedVFSLayers ) { delete i; }
 	MappedVFSLayers.clear();
-	Log(LOG_VERBOSE) << "FileMap::clear(): mapping 'common'";
-	TheVFS.map_common();
-	if (LOG_VERBOSE <= Logger::reportingLevel()) {
-		TheVFS.dump(Logger().get(LOG_VERBOSE), "\nFileMap::clear():", Options::listVFSContents);
+	if (!clearOnly)
+	{
+		Log(LOG_VERBOSE) << "FileMap::clear(): mapping 'common'";
+		TheVFS.map_common();
+		if (LOG_VERBOSE <= Logger::reportingLevel()) {
+			TheVFS.dump(Logger().get(LOG_VERBOSE), "\nFileMap::clear():", Options::listVFSContents);
+		}
 	}
 }
 /**
