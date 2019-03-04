@@ -3910,6 +3910,7 @@ void Mod::loadExtraResources()
 	}
 #endif
 
+	Log(LOG_INFO) << "Lazy loading: " << Options::lazyLoadResources;
 	if (!Options::lazyLoadResources)
 	{
 		Log(LOG_INFO) << "Loading extra resources from ruleset...";
