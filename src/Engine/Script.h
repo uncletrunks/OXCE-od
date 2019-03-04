@@ -23,6 +23,7 @@
 #include <limits>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <yaml-cpp/yaml.h>
 #include <SDL_stdinc.h>
 
@@ -570,9 +571,11 @@ public:
 	}
 	/// Get value from proc vector.
 	template<typename T>
-	const T& const_val(const Uint8 *ptr, size_t off = 0)
+	T const_val(const Uint8 *ptr, size_t off = 0)
 	{
-		return *reinterpret_cast<const T*>(ptr + off);
+		T ret;
+		std::memcpy(&ret, ptr + off, sizeof(T));
+		return ret;
 	}
 
 	/// Add text to log buffer.
