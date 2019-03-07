@@ -1521,7 +1521,10 @@ void InventoryState::handle(Action *action)
 		// "1..9" - load equipment
 		if (action->getDetails()->key.keysym.sym >= SDLK_1 && action->getDetails()->key.keysym.sym <= SDLK_9)
 		{
-			btnGlobalEquipmentLayoutClick(action);
+			if (!_btnQuickSearch->isFocused())
+			{
+				btnGlobalEquipmentLayoutClick(action);
+			}
 		}
 		if (action->getDetails()->key.keysym.sym == Options::keyInvClear)
 		{
