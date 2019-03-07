@@ -76,8 +76,8 @@ SDL_RWops *SDL_RWFromMZ(mz_zip_archive *zip, mz_uint file_index) {
 	return rv;
 }
 
-#if SDL_MAJOR_VERSION == 1
 /* helpers that are already present in SDL2 */
+#if !SDL_VERSION_ATLEAST(2,0,0)
 Uint8 SDL_ReadU8(SDL_RWops *src) {
 	Uint8 px = 0;
 	SDL_RWread(src, &px, 1, 1);
@@ -89,6 +89,8 @@ Sint64 SDL_RWsize(SDL_RWops *src) {
 	SDL_RWseek(src, curpos, RW_SEEK_SET);
 	return rv;
 }
+#endif
+#if !SDL_VERSION_ATLEAST(2,0,6)
 void *SDL_LoadFile_RW(SDL_RWops *src, size_t *datasize, int freesrc)
 {
 	const int FILE_CHUNK_SIZE = 1024;
@@ -140,9 +142,8 @@ void *SDL_LoadFile_RW(SDL_RWops *src, size_t *datasize, int freesrc)
 		SDL_RWclose(src);
 	}
 	return data;
-	}
-
-#endif /* SDL_MAJOR_VERSION */
+}
+#endif
 
 /* miniz to SDL_rwops helpers */
 
