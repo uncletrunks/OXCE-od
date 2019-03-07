@@ -181,6 +181,30 @@ public:
 		}
 		return numberToRemove;
 	}
+
+	template<typename C, typename Predicate, typename Callback>
+	static void untilLastIf(C& colection, Predicate&& p, Callback&& f)
+	{
+		int countLimit = 0;
+		int curr = 0;
+		for (auto &v : colection)
+		{
+			++curr;
+			if (p(v)) countLimit = curr;
+		}
+		for (auto &v : colection)
+		{
+			if (countLimit)
+			{
+				f(v);
+				--countLimit;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
 };
 
 }

@@ -18,6 +18,7 @@
  */
 #include "EquipmentLayoutItem.h"
 #include "../Mod/RuleInventory.h"
+#include "../Engine/Collections.h"
 #include "BattleItem.h"
 
 namespace OpenXcom
@@ -140,7 +141,10 @@ void EquipmentLayoutItem::load(const YAML::Node &node)
 	{
 		for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
 		{
-			_ammoItem[slot] = ammoSlots[slot].as<std::string>(_ammoItem[slot]);
+			if (ammoSlots[slot])
+			{
+				_ammoItem[slot] = ammoSlots[slot].as<std::string>();
+			}
 		}
 	}
 	_fuseTimer = node["fuseTimer"].as<int>(-1);
@@ -168,10 +172,17 @@ YAML::Node EquipmentLayoutItem::save() const
 	{
 		node["ammoItem"] = _ammoItem[0];
 	}
-	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
-	{
-		node["ammoItemSlots"].push_back(_ammoItem[slot]);
-	}
+	Collections::untilLastIf(
+		_ammoItem,
+		[](const std::string& s)
+		{
+			return s != "NONE";
+		},
+		[&](const std::string& s)
+		{
+			node["ammoItemSlots"].push_back(s);
+		}
+	);
 	if (_fuseTimer >= 0)
 	{
 		node["fuseTimer"] = _fuseTimer;

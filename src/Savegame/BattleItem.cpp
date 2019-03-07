@@ -25,6 +25,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
+#include "../Engine/Collections.h"
 #include "../Engine/Surface.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Script.h"
@@ -154,11 +155,17 @@ YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 	{
 		node["ammoItem"] = _ammoItem[0]->getId();
 	}
-	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
-	{
-		node["ammoItemSlots"].push_back(_ammoItem[slot] ? _ammoItem[slot]->getId() : -1);
-	}
-
+	Collections::untilLastIf(
+		_ammoItem,
+		[](BattleItem *i)
+		{
+			return i != nullptr;
+		},
+		[&](BattleItem *i)
+		{
+			node["ammoItemSlots"].push_back(i ? i->getId() : -1);
+		}
+	);
 	if (_rules && _rules->getBattleType() == BT_MEDIKIT)
 	{
 		node["painKiller"] = _painKiller;
