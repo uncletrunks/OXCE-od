@@ -131,6 +131,9 @@ YAML::Node AIModule::save() const
  */
 void AIModule::dont_think(BattleAction *action)
 {
+	_melee = false;
+	action->weapon = _unit->getUtilityWeapon(BT_MELEE);
+
 	if (_traceAI)
 	{
 		Log(LOG_INFO) << "LEEROY: Unit " << _unit->getId() << " of type " << _unit->getType() << " is Leeroy...";
