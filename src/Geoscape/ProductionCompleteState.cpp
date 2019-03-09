@@ -20,10 +20,12 @@
 #include "ProductionCompleteState.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleManufacture.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextList.h"
 #include "GeoscapeState.h"
 #include "../Engine/Options.h"
 #include "../Basescape/BasescapeState.h"
@@ -40,8 +42,9 @@ namespace OpenXcom
  * @param item Item that finished producing.
  * @param state Pointer to the Geoscape state.
  * @param endType What ended the production.
+ * @param production Pointer to the production details.
  */
-ProductionCompleteState::ProductionCompleteState(Base *base, const std::string &item, GeoscapeState *state, productionProgress_e endType) : _base(base), _state(state), _endType(endType)
+ProductionCompleteState::ProductionCompleteState(Base *base, const std::string &item, GeoscapeState *state, productionProgress_e endType, Production *production) : _base(base), _state(state), _endType(endType)
 {
 	_screen = false;
 
@@ -49,7 +52,11 @@ ProductionCompleteState::ProductionCompleteState(Base *base, const std::string &
 	_window = new Window(this, 256, 160, 32, 20, POPUP_BOTH);
 	_btnOk = new TextButton(118, 18, 40, 154);
 	_btnGotoBase = new TextButton(118, 18, 162, 154);
+	_btnSummary = new TextButton(118, 18, 162, 154);
 	_txtMessage = new Text(246, 110, 37, 35);
+	_txtItem = new Text(160, 9, 47, 35);
+	_txtQuantity = new Text(70, 9, 209, 35);
+	_lstSummary = new TextList(224, 96, 39, 45);
 
 	// Set palette
 	setInterface("geoManufactureComplete");
@@ -57,7 +64,11 @@ ProductionCompleteState::ProductionCompleteState(Base *base, const std::string &
 	add(_window, "window", "geoManufactureComplete");
 	add(_btnOk, "button", "geoManufactureComplete");
 	add(_btnGotoBase, "button", "geoManufactureComplete");
+	add(_btnSummary, "button", "geoManufactureComplete");
 	add(_txtMessage, "text1", "geoManufactureComplete");
+	add(_txtItem, "text1", "geoManufactureComplete");
+	add(_txtQuantity, "text1", "geoManufactureComplete");
+	add(_lstSummary, "list", "geoManufactureComplete");
 
 	centerAllSurfaces();
 
@@ -77,6 +88,36 @@ ProductionCompleteState::ProductionCompleteState(Base *base, const std::string &
 		_btnGotoBase->setText(tr("STR_GO_TO_BASE"));
 	}
 	_btnGotoBase->onMouseClick((ActionHandler)&ProductionCompleteState::btnGotoBaseClick);
+
+	_btnSummary->setText(tr("STR_RANDOM_PRODUCTION_SUMMARY"));
+	_btnSummary->onMouseClick((ActionHandler)&ProductionCompleteState::btnSummaryClick);
+
+	_txtItem->setText(tr("STR_ITEM"));
+	_txtItem->setVisible(false);
+
+	_txtQuantity->setText(tr("STR_QUANTITY_UC"));
+	_txtQuantity->setVisible(false);
+
+	_lstSummary->setColumns(2, 162, 46);
+	_lstSummary->setBackground(_window);
+	_lstSummary->setSelectable(true);
+	_lstSummary->setMargin(8);
+	_lstSummary->setVisible(false);
+
+	if (production && !production->getRules()->getRandomProducedItems().empty())
+	{
+		_btnGotoBase->setVisible(false);
+		for (auto& each : production->getRandomProductionInfo())
+		{
+			std::ostringstream ss;
+			ss << each.second;
+			_lstSummary->addRow(2, tr(each.first).c_str(), ss.str().c_str());
+		}
+	}
+	else
+	{
+		_btnSummary->setVisible(false);
+	}
 
 	_txtMessage->setAlign(ALIGN_CENTER);
 	_txtMessage->setVerticalAlign(ALIGN_MIDDLE);
@@ -139,6 +180,21 @@ void ProductionCompleteState::btnGotoBaseClick(Action *)
 	{
 		_game->pushState(new BasescapeState(_base, _state->getGlobe()));
 	}
+}
+
+/**
+ * Displays the random production info.
+ * @param action Pointer to an action.
+ */
+void ProductionCompleteState::btnSummaryClick(Action *)
+{
+	_btnSummary->setVisible(false);
+	_txtMessage->setVisible(false);
+
+	_btnGotoBase->setVisible(true);
+	_txtItem->setVisible(true);
+	_txtQuantity->setVisible(true);
+	_lstSummary->setVisible(true);
 }
 
 }

@@ -72,6 +72,8 @@ en-US:
   STR_FILTER_DEFAULT_NO_SUPPLIES: "Default (no supplies)"
   STR_FILTER_FACILITY_REQUIRED: "Facility Missing"
   STR_FILTER_HIDDEN: "Hidden"
+#ProductionCompleteState.cpp
+  STR_RANDOM_PRODUCTION_SUMMARY: "Summary"
 #PurchaseState.cpp
   STR_NOT_ENOUGH_PRISON_SPACE: "NOT ENOUGH ALIEN CONTAINMENT!{SMALLLINE}Build new alien containment or transfer aliens to other bases."
 #SoldierArmorState.cpp

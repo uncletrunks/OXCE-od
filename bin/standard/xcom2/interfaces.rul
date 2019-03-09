@@ -565,6 +565,10 @@ interfaces: #done
         color: 1   # yellow
       - id: button
         color: 1   # minty green
+      - id: list
+        color: 239
+        color2: 1
+        border: 1
   - type: dogfight
     elements:
       - id: button1

@@ -27,6 +27,7 @@ namespace OpenXcom
 class TextButton;
 class Window;
 class Text;
+class TextList;
 class Base;
 class GeoscapeState;
 
@@ -40,19 +41,22 @@ private:
 	Base *_base;
 	GeoscapeState *_state;
 
-	TextButton *_btnOk, *_btnGotoBase;
+	TextButton *_btnOk, *_btnGotoBase, *_btnSummary;
 	Window *_window;
-	Text *_txtMessage;
+	Text *_txtMessage, *_txtItem, *_txtQuantity;
+	TextList *_lstSummary;
 	productionProgress_e _endType;
 public:
 	/// Creates the Production Complete state.
-	ProductionCompleteState(Base *base, const std::string &item, GeoscapeState *state, productionProgress_e endType = PROGRESS_COMPLETE);
+	ProductionCompleteState(Base *base, const std::string &item, GeoscapeState *state, productionProgress_e endType = PROGRESS_COMPLETE, Production *production = nullptr);
 	/// Cleans up the Production Complete state.
 	~ProductionCompleteState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the Go To Base button.
 	void btnGotoBaseClick(Action *action);
+	/// Handler for clicking the Summary button.
+	void btnSummaryClick(Action *action);
 };
 
 }

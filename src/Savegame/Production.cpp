@@ -160,6 +160,10 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 					else
 					{
 						b->getStorageItems()->addItem(i.first->getType(), i.second);
+						if (!_rules->getRandomProducedItems().empty())
+						{
+							_randomProductionInfo[i.first->getType()] += i.second;
+						}
 						if (i.first->getBattleType() == BT_NONE)
 						{
 							for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
@@ -189,6 +193,7 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 						for (auto& i : itemSet.second)
 						{
 							b->getStorageItems()->addItem(i.first->getType(), i.second);
+							_randomProductionInfo[i.first->getType()] += i.second;
 							if (i.first->getBattleType() == BT_NONE)
 							{
 								for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
@@ -332,6 +337,10 @@ YAML::Node Production::save() const
 	node["infinite"] = getInfiniteAmount();
 	if (getSellItems())
 		node["sell"] = getSellItems();
+	if (!_rules->getRandomProducedItems().empty())
+	{
+		node["randomProductionInfo"] = _randomProductionInfo;
+	}
 	return node;
 }
 
@@ -342,6 +351,10 @@ void Production::load(const YAML::Node &node)
 	setAmountTotal(node["amount"].as<int>(getAmountTotal()));
 	setInfiniteAmount(node["infinite"].as<bool>(getInfiniteAmount()));
 	setSellItems(node["sell"].as<bool>(getSellItems()));
+	if (!_rules->getRandomProducedItems().empty())
+	{
+		_randomProductionInfo = node["randomProductionInfo"].as< std::map<std::string, int> >(_randomProductionInfo);
+	}
 	// backwards compatibility
 	if (getAmountTotal() == INT_MAX)
 	{

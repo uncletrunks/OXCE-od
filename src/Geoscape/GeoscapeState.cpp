@@ -2012,7 +2012,7 @@ void GeoscapeState::time1Hour()
 		{
 			if (j->second > PROGRESS_NOT_COMPLETE)
 			{
-				popup(new ProductionCompleteState((*i),  tr(j->first->getRules()->getName()), this, j->second));
+				popup(new ProductionCompleteState((*i),  tr(j->first->getRules()->getName()), this, j->second, j->first));
 				(*i)->removeProduction(j->first);
 			}
 		}

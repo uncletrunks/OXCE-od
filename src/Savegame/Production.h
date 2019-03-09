@@ -50,6 +50,7 @@ public:
 	void refundItem(Base * b, SavedGame * g, const Mod *m) const;
 	YAML::Node save() const;
 	void load(const YAML::Node &node);
+	const std::map<std::string, int> &getRandomProductionInfo() const { return _randomProductionInfo; }
 private:
 	const RuleManufacture * _rules;
 	int _amount;
@@ -57,6 +58,7 @@ private:
 	int _timeSpent;
 	int _engineers;
 	bool _sell;
+	std::map<std::string, int> _randomProductionInfo;
 	bool haveEnoughMoneyForOneMoreUnit(SavedGame * g) const;
 	bool haveEnoughLivingSpaceForOneMoreUnit(Base * b);
 	bool haveEnoughMaterialsForOneMoreUnit(Base * b, const Mod *m) const;
