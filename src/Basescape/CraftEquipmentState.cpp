@@ -293,6 +293,9 @@ void CraftEquipmentState::initList()
 		return;
 	}
 	const std::string selectedCategory = _categoryStrings[selIdx];
+	bool categoryFilterEnabled = (selectedCategory != "STR_ALL");
+	bool categoryUnassigned = (selectedCategory == "STR_UNASSIGNED");
+	bool categoryEquipped = (selectedCategory == "STR_EQUIPPED");
 
 	Craft *c = _base->getCrafts()->at(_craft);
 
@@ -318,44 +321,49 @@ void CraftEquipmentState::initList()
 			_totalItems += cQty;
 		}
 
-		// filter by category
-		if (selectedCategory != "STR_ALL")
-		{
-			if (selectedCategory == "STR_UNASSIGNED")
-			{
-				if (!rule->getCategories().empty())
-				{
-					continue;
-				}
-			}
-			else if (selectedCategory == "STR_EQUIPPED")
-			{
-				if (!(cQty > 0))
-				{
-					continue;
-				}
-			}
-			else if (!rule->belongsToCategory(selectedCategory))
-			{
-				continue;
-			}
-		}
-
-		// quick search
-		if (!searchString.empty())
-		{
-			std::string projectName = tr((*i));
-			Unicode::upperCase(projectName);
-			if (projectName.find(searchString) == std::string::npos)
-			{
-				continue;
-			}
-		}
-
 		if (rule->getBigSprite() > -1 && rule->getBattleType() != BT_NONE && rule->getBattleType() != BT_CORPSE &&
-			_game->getSavedGame()->isResearched(rule->getRequirements()) &&
 			(_base->getStorageItems()->getItem(*i) > 0 || cQty > 0))
 		{
+			// check research requirements
+			if (!_game->getSavedGame()->isResearched(rule->getRequirements()))
+			{
+				continue;
+			}
+
+			// filter by category
+			if (categoryFilterEnabled)
+			{
+				if (categoryUnassigned)
+				{
+					if (!rule->getCategories().empty())
+					{
+						continue;
+					}
+				}
+				else if (categoryEquipped)
+				{
+					if (!(cQty > 0))
+					{
+						continue;
+					}
+				}
+				else if (!rule->belongsToCategory(selectedCategory))
+				{
+					continue;
+				}
+			}
+
+			// quick search
+			if (!searchString.empty())
+			{
+				std::string projectName = tr((*i));
+				Unicode::upperCase(projectName);
+				if (projectName.find(searchString) == std::string::npos)
+				{
+					continue;
+				}
+			}
+
 			_items.push_back(*i);
 			std::ostringstream ss, ss2;
 			if (_game->getSavedGame()->getMonthsPassed() > -1)
