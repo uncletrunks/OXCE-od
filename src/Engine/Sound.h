@@ -39,8 +39,6 @@ public:
 	~Sound();
 	/// Loads sound from the specified file.
 	void load(const std::string &filename);
-	/// Loads sound from a chunk of memory.
-	void load(const void *data, unsigned int size);
 	/// Loads sound from SDL_RWops
 	void load(SDL_RWops *rw);
 	/// Plays the sound.

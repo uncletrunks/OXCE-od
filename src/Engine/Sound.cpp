@@ -63,19 +63,6 @@ void Sound::load(SDL_RWops *rw) {
 		Log(LOG_ERROR) << "Sound::load(data): mixerr=" << Mix_GetError();
 	}
 }
-/**
- * Loads a sound file from a specified memory chunk.
- * @param data Pointer to the sound file in memory
- * @param size Size of the sound file in bytes.
- */
-void Sound::load(const void *data, unsigned int size)
-{
-	SDL_RWops *rw = SDL_RWFromConstMem(data, size);
-	_sound = Mix_LoadWAV_RW(rw, SDL_TRUE);
-	if (_sound == 0) {
-		Log(LOG_ERROR) << "Sound::load(data): mixerr=" << Mix_GetError();
-	}
-}
 
 /**
  * Plays the contained sound effect.
