@@ -609,7 +609,7 @@ void Game::loadLanguages()
  */
 void Game::initAudio()
 {
-	if ( true or SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
 	{
 		Log(LOG_ERROR) << SDL_GetError();
 		Log(LOG_WARNING) << "No sound device detected, audio disabled.";

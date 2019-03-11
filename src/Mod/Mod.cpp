@@ -3452,6 +3452,12 @@ void Mod::loadVanillaResources()
 		_sets[s2]->loadDat(s1);
 	}
 
+	// construct sound sets
+	_sounds["GEO.CAT"] = new SoundSet();
+	_sounds["BATTLE.CAT"] = new SoundSet();
+	_sounds["SAMPLE3.CAT"] = new SoundSet();
+	_sounds["INTRO.CAT"] = new SoundSet();
+
 	if (!Options::mute) // TBD: ain't it wrong? can Options::mute be reset without a reload?
 	{
 		// Load sounds
@@ -3473,7 +3479,7 @@ void Mod::loadVanillaResources()
 			Options::currentSound = SOUND_AUTO;
 			for (size_t i = 0; i < ARRAYLEN(catsId); ++i)
 			{
-				SoundSet *sound = new SoundSet();
+				SoundSet *sound = _sounds[catsId[i]];
 				for (size_t j = 0; j < ARRAYLEN(cats); ++j)
 				{
 					bool wav = true;
@@ -3493,7 +3499,6 @@ void Mod::loadVanillaResources()
 						Log(LOG_VERBOSE) << catsId[i] << ": sound file not found: "<<fname;
 					}
 				}
-				_sounds[catsId[i]] = sound;
 				if (sound->getTotalSounds() == 0)
 				{
 					Log(LOG_ERROR) << "No sound files found for " << catsId[i];
@@ -3531,17 +3536,15 @@ void Mod::loadVanillaResources()
 		auto file = soundFiles.find("intro.cat");
 		if (file != soundFiles.end())
 		{
-			SoundSet *s = _sounds["INTRO.CAT"] = new SoundSet();
 			auto catfile = CatFile("SOUND/INTRO.CAT");
-			s->loadCat(catfile);
+			_sounds["INTRO.CAT"]->loadCat(catfile);
 		}
 
 		file = soundFiles.find("sample3.cat");
 		if (file != soundFiles.end())
 		{
-			SoundSet *s = _sounds["SAMPLE3.CAT"] = new SoundSet();
 			auto catfile = CatFile("SOUND/SAMPLE3.CAT");
-			s->loadCat(catfile);
+			_sounds["SAMPLE3.CAT"]->loadCat(catfile);
 		}
 	}
 
