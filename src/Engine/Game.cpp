@@ -66,16 +66,7 @@ Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0
 	Log(LOG_INFO) << "SDL initialized successfully.";
 
 	// Initialize SDL_mixer
-	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
-	{
-		Log(LOG_ERROR) << SDL_GetError();
-		Log(LOG_WARNING) << "No sound device detected, audio disabled.";
-		Options::mute = true;
-	}
-	else
-	{
-		initAudio();
-	}
+	initAudio();
 
 	// trap the mouse inside the window
 	SDL_WM_GrabInput(Options::captureMouse);
@@ -618,6 +609,14 @@ void Game::loadLanguages()
  */
 void Game::initAudio()
 {
+	if ( true or SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+	{
+		Log(LOG_ERROR) << SDL_GetError();
+		Log(LOG_WARNING) << "No sound device detected, audio disabled.";
+		Options::mute = true;
+		return;
+	}
+
 	Uint16 format = MIX_DEFAULT_FORMAT;
 	if (Options::audioBitDepth == 8)
 		format = AUDIO_S8;
@@ -633,7 +632,7 @@ void Game::initAudio()
 	if (Mix_OpenAudio(Options::audioSampleRate, format, MIX_DEFAULT_CHANNELS, Options::audioChunkSize) != 0)
 	{
 		Log(LOG_ERROR) << Mix_GetError();
-		Log(LOG_WARNING) << "No sound device detected, audio disabled.";
+		Log(LOG_WARNING) << "Sound device failed, audio disabled.";
 		Options::mute = true;
 	}
 	else
