@@ -57,7 +57,7 @@ StartState::StartState() : _anim(0)
 	Screen::updateScale(Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, false);
 	Options::baseXResolution = Options::displayWidth;
 	Options::baseYResolution = Options::displayHeight;
-	_game->getScreen()->resetDisplay(false);
+	_game->getScreen()->resetDisplay(false, true);
 
 	// Create objects
 	_thread = 0;

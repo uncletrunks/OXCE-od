@@ -300,7 +300,7 @@ int Screen::getHeight() const
  * as they don't automatically take effect.
  * @param resetVideo Reset display surface.
  */
-void Screen::resetDisplay(bool resetVideo)
+void Screen::resetDisplay(bool resetVideo, bool noShaders)
 {
 	int width = Options::displayWidth;
 	int height = Options::displayHeight;
@@ -457,7 +457,7 @@ void Screen::resetDisplay(bool resetVideo)
 		OpenGL::checkErrors = Options::checkOpenGLErrors;
 		glOutput.init(_baseWidth, _baseHeight);
 		glOutput.linear = Options::useOpenGLSmoothing; // setting from shader file will override this, though
-		if (FileMap::fileExists(Options::useOpenGLShader))
+		if (!noShaders && FileMap::fileExists(Options::useOpenGLShader))
 		{
 			if (!glOutput.set_shader(Options::useOpenGLShader.c_str()))
 			{

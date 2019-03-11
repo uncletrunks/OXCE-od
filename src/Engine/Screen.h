@@ -82,7 +82,7 @@ public:
 	/// Gets the screen's height.
 	int getHeight() const;
 	/// Resets the screen display.
-	void resetDisplay(bool resetVideo = true);
+	void resetDisplay(bool resetVideo = true, bool noShaders = false);
 	/// Gets the screen's X scale.
 	double getXScale() const;
 	/// Gets the screen's Y scale.
