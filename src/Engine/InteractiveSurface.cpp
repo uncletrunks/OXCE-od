@@ -204,7 +204,7 @@ void InteractiveSurface::handle(Action *action, State *state)
  * keyboard events if focused.
  * @param focus Is it focused?
  */
-void InteractiveSurface::setFocus(bool focus)
+void InteractiveSurface::setFocus(bool focus, bool modal)
 {
 	_isFocused = focus;
 }

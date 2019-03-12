@@ -64,7 +64,7 @@ public:
 	/// Processes any pending events.
 	virtual void handle(Action *action, State *state);
 	/// Sets the focus of this surface.
-	virtual void setFocus(bool focus);
+	virtual void setFocus(bool focus, bool modal = false);
 	/// Gets the focus of this surface.
 	bool isFocused() const;
 	/// Unpresses the surface.
