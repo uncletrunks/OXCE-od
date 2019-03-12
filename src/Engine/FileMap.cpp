@@ -907,7 +907,7 @@ static void drop_mods(const std::string& log_ctx, std::unordered_set<std::string
 			}
 			auto masterId = mrec->modInfo.getMaster();
 			if (drop_list.find(masterId) != drop_list.end()) {
-				Log(LOG_WARNING) << log_ctx << "Dropping mod " << modId << ": depends " << masterId;
+				Log(LOG_DEBUG) << log_ctx << "Dropping mod " << modId << ": depends " << masterId;
 				drop_list.insert(modId);
 				dropped_something = true;
 			}
@@ -962,7 +962,7 @@ void checkModsDependencies() {
 		auto resdirs = mrec->modInfo.getExternalResourceDirs();
 		for (auto eri = resdirs.begin(); eri != resdirs.end(); ++eri) {
 			if (!mapExtResources(mrec, *eri)) {
-				Log(LOG_WARNING) << log_ctx << "dropping mod " << modId << ": extResources '" << *eri << "' not found.";
+				Log(LOG_DEBUG) << log_ctx << "dropping mod " << modId << ": extResources '" << *eri << "' not found.";
 				drop_list.insert(modId);
 				break;
 			}
