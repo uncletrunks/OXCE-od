@@ -28,7 +28,6 @@ class Window;
 class Text;
 class TextEdit;
 class TextList;
-class ComboBox;
 class Base;
 class Soldier;
 class RuleSoldierTransformation;
@@ -48,7 +47,6 @@ private:
 	Text *_txtCost, *_txtTransferTime, *_txtRecoveryTime, *_txtRequiredItems, *_txtItemNameColumn, *_txtUnitRequiredColumn, *_txtUnitAvailableColumn;
 	TextList *_lstRequiredItems, *_lstStatChanges;
 	TextButton *_btnCancel, *_btnLeftArrow, *_btnRightArrow, *_btnStart;
-	ComboBox *_cbxTransformationSelect;
 
 	/// Creates a string for the soldier stats table
 	std::string formatStat(int stat, bool plus, bool hide);

@@ -38,7 +38,6 @@ class ItemSprite
 {
 private:
 	SurfaceSet *_itemSurface;
-	Mod *_mod;
 	int _animationFrame;
 	Surface *_dest;
 

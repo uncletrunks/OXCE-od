@@ -42,7 +42,7 @@ namespace OpenXcom
  * @param y Y position in pixels.
  */
 ItemSprite::ItemSprite(Surface* dest, Mod* mod, int frame) :
-	_itemSurface(mod->getSurfaceSet("FLOOROB.PCK")), _mod(mod),
+	_itemSurface(mod->getSurfaceSet("FLOOROB.PCK")),
 	_animationFrame(frame),
 	_dest(dest)
 {

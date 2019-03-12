@@ -54,7 +54,6 @@ private:
 	std::vector<EquipmentLayoutItem*> _curInventoryTemplate, _tempInventoryTemplate;
 	SavedBattleGame *_battleGame;
 	const bool _tu, _noCraft;
-	bool _lightUpdated;
 	BattlescapeState *_parent;
 	Base *_base;
 	std::string _currentTooltip;
