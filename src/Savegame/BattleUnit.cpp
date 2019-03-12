@@ -47,6 +47,7 @@
 #include "../Engine/Options.h"
 #include "BattleUnitStatistics.h"
 #include "../fmath.h"
+#include "../fallthrough.h"
 
 namespace OpenXcom
 {
@@ -2413,7 +2414,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 			{
 				break;
 			}
-			[[gnu::fallthrough]];
+			FALLTHROUGH;
 		}
 	default:
 		if (rule->getBattleType() == BT_PSIAMP && getFaction() == FACTION_HOSTILE)

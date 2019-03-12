@@ -45,6 +45,7 @@
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Mod/RuleStartingCondition.h"
+#include "../fallthrough.h"
 
 namespace OpenXcom
 {
@@ -2012,16 +2013,16 @@ int SavedBattleGame::getUnitMoraleModifier(BattleUnit* unit)
 		{
 		case 5:
 			result += 25;
-			[[gnu::fallthrough]];
+			FALLTHROUGH;
 		case 4:
 			result += 20;
-			[[gnu::fallthrough]];
+			FALLTHROUGH;
 		case 3:
 			result += 10;
-			[[gnu::fallthrough]];
+			FALLTHROUGH;
 		case 2:
 			result += 20;
-			[[gnu::fallthrough]];
+			FALLTHROUGH;
 		default:
 			break;
 		}
@@ -2073,16 +2074,16 @@ int SavedBattleGame::getFactionMoraleModifier(bool player)
 			{
 			case 5:
 				result += 25;
-				[[gnu::fallthrough]];
+				FALLTHROUGH;
 			case 4:
 				result += 10;
-				[[gnu::fallthrough]];
+				FALLTHROUGH;
 			case 3:
 				result += 5;
-				[[gnu::fallthrough]];
+				FALLTHROUGH;
 			case 2:
 				result += 10;
-				[[gnu::fallthrough]];
+				FALLTHROUGH;
 			default:
 				break;
 			}

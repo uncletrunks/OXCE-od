@@ -32,7 +32,7 @@
 #include "ShaderDraw.h"
 #include "ShaderMove.h"
 #include "Exception.h"
-
+#include "../fallthrough.h"
 
 namespace OpenXcom
 {
@@ -1516,7 +1516,7 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 			//start of number
 			case digitSign:
 				--off; //skipping +- sign
-				[[gnu::fallthrough]];
+				FALLTHROUGH;
 			case digit:
 				hex = c == '0'; //expecting hex number
 				type = TokenNumber;
@@ -1537,10 +1537,10 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 			case charRest:
 				if (off != 1) break;
 				if (c != 'x' && c != 'X') break; //X in "0x1"
-				[[gnu::fallthrough]];
+				FALLTHROUGH;
 			case charHex:
 				if (!hex) break;
-				[[gnu::fallthrough]];
+				FALLTHROUGH;
 			case digit:
 				if (off == 0) hex = c == '0'; //expecting hex number
 				continue;
