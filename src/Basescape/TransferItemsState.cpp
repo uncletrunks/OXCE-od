@@ -439,13 +439,13 @@ void TransferItemsState::updateList()
  */
 void TransferItemsState::btnOkClick(Action *)
 {
-	if (Options::storageLimitsEnforced)
+	if (Options::storageLimitsEnforced && !AreSame(_iQty, 0.0))
 	{
 		// check again (because of items with negative size)
 		// But only check the base whose available space is decreasing.
 		double freeStoresTo = _baseTo->getAvailableStores() - _baseTo->getUsedStores() - _iQty;
 		double freeStoresFrom = _baseFrom->getAvailableStores() - _baseFrom->getUsedStores() + _iQty;
-		if (_iQty > 0 ? freeStoresTo < 0.0 : freeStoresFrom < 0.0)
+		if (_iQty > 0.0 ? freeStoresTo < 0.0 : freeStoresFrom < 0.0)
 		{
 			RuleInterface *menuInterface = _game->getMod()->getInterface("transferMenu");
 			_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_STORE_SPACE"), _palette, menuInterface->getElement("errorMessage")->color, "BACK13.SCR", menuInterface->getElement("errorPalette")->color));
@@ -778,7 +778,8 @@ void TransferItemsState::increaseByValue(int change)
 		break;
 	case TRANSFER_ITEM:
 		selItem = (RuleItem*)getRow().rule;
-		if (_baseTo->storesOverfull(selItem->getSize() + _iQty))
+		bool zeroSize = AreSame(selItem->getSize(), 0.0);
+		if (!zeroSize && _baseTo->storesOverfull(selItem->getSize() + _iQty))
 		{
 			errorMessage = tr("STR_NOT_ENOUGH_STORE_SPACE");
 		}
