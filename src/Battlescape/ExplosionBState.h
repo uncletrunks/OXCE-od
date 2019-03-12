@@ -27,7 +27,7 @@ class BattlescapeGame;
 class BattleUnit;
 class BattleItem;
 class Tile;
-class RuleDamageType;
+struct RuleDamageType;
 
 /**
  * Explosion state not only handles explosions, but also bullet impacts!
