@@ -66,7 +66,7 @@ void ModInfo::load(const YAML::Node& doc)
 		{
 			requiredVersion.push_back(0);
 		}
-		for (int k = 0; k < oxceVersion.size(); ++k)
+		for (size_t k = 0; k < oxceVersion.size(); ++k)
 		{
 			if (requiredVersion[k] > oxceVersion[k])
 			{
