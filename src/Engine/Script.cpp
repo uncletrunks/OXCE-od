@@ -631,7 +631,7 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc,
 	{
 		return false;
 	}
-	if (std::distance(begin, end) > ScriptMaxArg)
+	if ((size_t)std::distance(begin, end) > ScriptMaxArg)
 	{
 		return false;
 	}
@@ -973,7 +973,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
 	auto type_curr = ph.parser.getType(begin[0].name);
 	if (type_curr)
 	{
-		if (type_curr->size == 0 && !(spec & ArgSpecPtr))
+		if (type_curr->meta.size == 0 && !(spec & ArgSpecPtr))
 		{
 			Log(LOG_ERROR) << "Can't create variable of type '" << begin->name.toString() << "'";
 			return false;
@@ -1277,18 +1277,18 @@ R* findSortHelper(std::vector<R>& vec, ScriptRef prefix, ScriptRef postfix = {})
  * Calculate space used by reg of that type.
  * @param parser
  * @param type
- * @return Size in bytes.
+ * @return Type meta data.
  */
-size_t getRegSize(const ScriptParserBase& parser, ArgEnum type)
+TypeInfo getRegMeta(const ScriptParserBase& parser, ArgEnum type)
 {
 	auto t = parser.getType(type);
 	if (t == nullptr)
 	{
-		return 0;
+		return { };
 	}
 	else
 	{
-		return ArgIsPtr(type) ? sizeof(void*) : t->size;
+		return ArgIsPtr(type) ? TypeInfo::getPtrTypeInfo() : t->meta;
 	}
 }
 
@@ -1822,17 +1822,17 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 	{
 		return false;
 	}
-	auto size = getRegSize(parser, type);
-	if (size == 0)
+	auto meta = getRegMeta(parser, type);
+	if (!meta)
 	{
 		return false;
 	}
-	if (regIndexUsed + size > ScriptMaxReg)
+	if (meta.needRegSpace(regIndexUsed) > ScriptMaxReg)
 	{
 		return false;
 	}
-	ScriptRefData data = { s, type, static_cast<RegEnum>(regIndexUsed) };
-	regIndexUsed += size;
+	ScriptRefData data = { s, type, static_cast<RegEnum>(meta.nextRegPos(regIndexUsed)) };
+	regIndexUsed = meta.needRegSpace(regIndexUsed);
 	addReferece(data);
 	return true;
 }
@@ -1973,14 +1973,14 @@ void ScriptParserBase::addParserBase(const std::string& s, const std::string& de
  * @param type
  * @param size
  */
-void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type, size_t size)
+void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type, TypeInfo meta)
 {
 	if (haveNameRef(s))
 	{
 		throw Exception("Type name '" + s + "' already used");
 	}
 
-	addSortHelper(_typeList, { addNameRef(s), ArgBase(type), size });
+	addSortHelper(_typeList, { addNameRef(s), ArgBase(type), meta });
 }
 
 /**
@@ -2024,12 +2024,12 @@ void ScriptParserBase::addScriptReg(const std::string& s, ArgEnum type, bool wri
 	{
 		throw Exception("Invalid type for reg: '" + s + "'");
 	}
-	auto size = getRegSize(*this, type);
-	if (size == 0)
+	auto meta = getRegMeta(*this, type);
+	if (!meta)
 	{
 		throw Exception("Invalid use of type '" + t->name.toString() + "' for reg: '" + s + "'");
 	}
-	if (_regUsed + size <= ScriptMaxReg)
+	if (meta.needRegSpace(_regUsed) <= ScriptMaxReg)
 	{
 		if (haveNameRef(s))
 		{
@@ -2041,8 +2041,8 @@ void ScriptParserBase::addScriptReg(const std::string& s, ArgEnum type, bool wri
 		{
 			_regOutName[_regOutSize++] = name;
 		}
-		auto old = _regUsed;
-		_regUsed += size;
+		auto old = meta.nextRegPos(_regUsed);
+		_regUsed = meta.needRegSpace(_regUsed);
 		addSortHelper(_refList, { name, type, static_cast<RegEnum>(old) });
 	}
 	else
@@ -2265,7 +2265,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 				}
 			}
 		}
-		for (int i = (args[1] ? 2 : 1); i < ScriptMaxArg; ++i)
+		for (size_t i = (args[1] ? 2 : 1); i < ScriptMaxArg; ++i)
 			args[i] = range.getNextToken();
 		SelectedToken f = range.getNextToken(TokenSemicolon);
 
@@ -2273,7 +2273,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		bool valid = true;
 		valid &= label.getType() == TokenSymbol || label.getType() == TokenNone;
 		valid &= op.getType() == TokenSymbol;
-		for (int i = 0; i < ScriptMaxArg; ++i)
+		for (size_t i = 0; i < ScriptMaxArg; ++i)
 			valid &= args[i].getType() == TokenSymbol || args[i].getType() == TokenNumber || args[i].getType() == TokenNone;
 		valid &= f.getType() == TokenSemicolon;
 
@@ -2329,7 +2329,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 
 
 		// matching args form operation definition with args avaliable in string
-		int i = 0;
+		size_t i = 0;
 		while (i < ScriptMaxArg && args[i].getType() != TokenNone)
 		{
 			argData[i] = args[i].parse(help);

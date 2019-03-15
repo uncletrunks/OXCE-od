@@ -74,9 +74,9 @@ struct ArgName
 
 }
 
-constexpr int ScriptMaxOut = 8;
-constexpr int ScriptMaxArg = 16;
-constexpr int ScriptMaxReg = 64*sizeof(void*);
+constexpr size_t ScriptMaxOut = 8;
+constexpr size_t ScriptMaxArg = 16;
+constexpr size_t ScriptMaxReg = 64*sizeof(void*);
 
 ////////////////////////////////////////////////////////////
 //					enum definitions
@@ -246,6 +246,39 @@ enum RetEnum : Uint8
 	RetError = 2,
 };
 
+/**
+ * Common type meta data.
+ */
+struct TypeInfo
+{
+	size_t size;
+	size_t alignment;
+
+	/// is type valid?
+	constexpr explicit operator bool() { return size; }
+
+	/// get next valid position for type
+	constexpr size_t nextRegPos(size_t prev)
+	{
+		return ((prev + alignment - 1) & ~(alignment - 1));
+	}
+	/// get total space used by this type with considing alignment
+	constexpr size_t needRegSpace(size_t prev)
+	{
+		return nextRegPos(prev) + size;
+	}
+
+	/// defualt value for pointers
+	constexpr static TypeInfo getPtrTypeInfo()
+	{
+		return TypeInfo
+		{
+			sizeof(void*),
+			alignof(void*),
+		};
+	}
+};
+
 ////////////////////////////////////////////////////////////
 //				containers definitions
 ////////////////////////////////////////////////////////////
@@ -382,6 +415,10 @@ using GetTupleType = typename GetTupleImpl<I, Tuple>::type;
 template<int I, typename Tuple>
 GetTupleType<I, Tuple> GetTupleValue(Tuple& t) { return GetTupleImpl<I, Tuple>::get(t); }
 
+
+/**
+ * Helper class extracting needed data from type T
+ */
 template<typename T>
 struct TypeInfoImpl
 {
@@ -394,10 +431,27 @@ struct TypeInfoImpl
 	static constexpr bool isPtr = std::is_pointer<t1>::value;
 	static constexpr bool isEditable = isPtr && !std::is_const<t2>::value;
 
-	static constexpr size_t size = std::is_pod<t3>::value ? sizeof(t3) : 0;
+	/// meta data of destiantion type (without pointer), invaild if type is not POD
+	static constexpr TypeInfo metaDest =
+	{
+		std::is_pod<t3>::value ? sizeof(t3) : 0,
+		std::is_pod<t3>::value ? alignof(t3) : 0,
+	};
+	/// meta data of base type (with pointer if it is)
+	static constexpr TypeInfo metaBase =
+	{
+		sizeof(t1),
+		alignof(t1),
+	};
 
-	static_assert(size || isPtr, "Type need to be POD to be used as reg or const value.");
+	static_assert(metaDest.size || isPtr, "Type need to be POD to be used as reg or const value.");
+	static_assert((metaBase.alignment & (metaBase.alignment - 1)) == 0, "Type alignment is not power of two");
 };
+
+template<typename T>
+constexpr TypeInfo TypeInfoImpl<T>::metaDest;
+template<typename T>
+constexpr TypeInfo TypeInfoImpl<T>::metaBase;
 
 } //namespace helper
 
@@ -472,29 +526,29 @@ class ScriptWorkerBase
 	template<typename T>
 	using SetReadonlyRegs = helper::PosTag<!helper::TypeInfoImpl<T>::isOutput ? RegSet : RegNone>;
 
-	template<int BaseOffset, int I, typename... Args, typename T>
+	template<size_t BaseOffset, int I, typename... Args, typename T>
 	void forRegImplLoop(helper::PosTag<RegSet>, const T& arg)
 	{
 		using CurrentType =helper::Decay<typename std::tuple_element<I, T>::type>;
-		constexpr int CurrentOffset = BaseOffset + offset<void, Args...>(I);
+		constexpr int CurrentOffset = offset<void, Args...>(I, BaseOffset);
 
 		ref<CurrentType>(CurrentOffset) = std::get<I>(arg);
 	}
-	template<int BaseOffset, int I, typename... Args, typename T>
+	template<size_t BaseOffset, int I, typename... Args, typename T>
 	void forRegImplLoop(helper::PosTag<RegNone>, const T& arg)
 	{
 		// nothing
 	}
-	template<int BaseOffset, int I, typename... Args, typename T>
+	template<size_t BaseOffset, int I, typename... Args, typename T>
 	void forRegImplLoop(helper::PosTag<RegGet>, T& arg)
 	{
 		using CurrentType = helper::Decay<typename std::tuple_element<I, T>::type>;
-		constexpr int CurrentOffset = BaseOffset + offset<void, Args...>(I);
+		constexpr size_t CurrentOffset = offset<void, Args...>(I, BaseOffset);
 
 		std::get<I>(arg) = ref<CurrentType>(CurrentOffset);
 	}
 
-	template<int BaseOffset, template<typename> class Filter, typename... Args, typename T, int... I>
+	template<size_t BaseOffset, template<typename> class Filter, typename... Args, typename T, int... I>
 	void forRegImpl(T&& arg, helper::ListTag<I...>)
 	{
 		(void)helper::DummySeq
@@ -503,7 +557,7 @@ class ScriptWorkerBase
 		};
 	}
 
-	template<int BaseOffset, template<typename> class Filter, typename... Args, typename T>
+	template<size_t BaseOffset, template<typename> class Filter, typename... Args, typename T>
 	void forReg(T&& arg)
 	{
 		forRegImpl<BaseOffset, Filter, Args...>(std::forward<T>(arg), helper::MakeListTag<sizeof...(Args)>{});
@@ -511,21 +565,27 @@ class ScriptWorkerBase
 
 	/// Count offset.
 	template<typename, typename First, typename... Rest>
-	static constexpr int offset(int i)
+	static constexpr size_t offset(int i, size_t prevOffset)
 	{
-		return (i > 0 ? sizeof(First) : 0) + (i > 1 ? offset<void, Rest...>(i - 1) : 0);
+		using typeInfoImp = typename helper::TypeInfoImpl<First>;
+		return offset<void, Rest...>(
+			i - 1,
+			(i > 0 ? typeInfoImp::metaBase.needRegSpace(prevOffset) :
+			i == 0 ? typeInfoImp::metaBase.nextRegPos(prevOffset) :
+				prevOffset)
+		);
 	}
 	/// Final function of counting offset.
 	template<typename>
-	static constexpr int offset(int i)
+	static constexpr size_t offset(int i, size_t prevOffset)
 	{
-		return 0;
+		return prevOffset;
 	}
 
 	template<typename... Args>
-	static constexpr int offsetOutput(helper::TypeTag<ScriptOutputArgs<Args...>>)
+	static constexpr size_t offsetOutput(helper::TypeTag<ScriptOutputArgs<Args...>>)
 	{
-		return offset<void, Args...>(sizeof...(Args));
+		return offset<void, Args...>(sizeof...(Args), 0);
 	}
 
 protected:
@@ -876,7 +936,7 @@ struct ScriptTypeData
 {
 	ScriptRef name;
 	ArgEnum type;
-	size_t size;
+	TypeInfo meta;
 };
 
 /**
@@ -1085,7 +1145,7 @@ protected:
 	/// Add parsing fuction.
 	void addParserBase(const std::string& s, const std::string& description, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc parserArg, ScriptProcData::getFunc parserGet);
 	/// Add new type impl.
-	void addTypeBase(const std::string& s, ArgEnum type, size_t size);
+	void addTypeBase(const std::string& s, ArgEnum type, TypeInfo meta);
 	/// Test if type was added impl.
 	bool haveTypeBase(ArgEnum type);
 	/// Set defulat script for type.
@@ -1132,7 +1192,7 @@ public:
 		using info = helper::TypeInfoImpl<T>;
 		using t3 = typename info::t3;
 
-		addTypeBase(s, registeTypeImpl<t3>(), info::size);
+		addTypeBase(s, registeTypeImpl<t3>(), info::metaDest);
 	}
 	/// Regised type in parser.
 	template<typename P>
