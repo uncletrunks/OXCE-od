@@ -255,21 +255,21 @@ struct TypeInfo
 	size_t alignment;
 
 	/// is type valid?
-	constexpr explicit operator bool() { return size; }
+	constexpr explicit operator bool() { return size; } const
 
 	/// get next valid position for type
-	constexpr size_t nextRegPos(size_t prev)
+	constexpr size_t nextRegPos(size_t prev) const
 	{
 		return ((prev + alignment - 1) & ~(alignment - 1));
 	}
 	/// get total space used by this type with considing alignment
-	constexpr size_t needRegSpace(size_t prev)
+	constexpr size_t needRegSpace(size_t prev) const
 	{
 		return nextRegPos(prev) + size;
 	}
 
 	/// defualt value for pointers
-	constexpr static TypeInfo getPtrTypeInfo()
+	constexpr static TypeInfo getPtrTypeInfo() const
 	{
 		return TypeInfo
 		{
