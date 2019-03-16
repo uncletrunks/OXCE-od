@@ -269,7 +269,7 @@ struct TypeInfo
 	}
 
 	/// defualt value for pointers
-	constexpr static TypeInfo getPtrTypeInfo() const
+	constexpr static TypeInfo getPtrTypeInfo()
 	{
 		return TypeInfo
 		{
