@@ -255,7 +255,7 @@ struct TypeInfo
 	size_t alignment;
 
 	/// is type valid?
-	constexpr explicit operator bool() { return size; } const
+	constexpr explicit operator bool() const { return size; }
 
 	/// get next valid position for type
 	constexpr size_t nextRegPos(size_t prev) const
