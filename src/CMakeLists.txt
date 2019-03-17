@@ -517,7 +517,7 @@ if ( FORCE_INSTALL_DATA_TO_BIN )
   set ( data_install_dir bin )
 endif ()
 
-if ( APPLE AND CREATE_BUNDLE AND BUILD_DMG )
+if ( APPLE AND CREATE_BUNDLE )
   set ( CMAKE_INSTALL_BINDIR "." )
 endif ()
 
