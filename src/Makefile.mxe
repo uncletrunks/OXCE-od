@@ -91,7 +91,7 @@ $(OBJDIR)%.o:: Battlescape/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJDIR)%.o:: Engine/%.cpp
-	$(CXX) $(CXXFLAGS) -DWIN32_STYLE_ASSETS -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJDIR)%.o:: Engine/Scalers/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -126,14 +126,8 @@ $(OBJDIR)%.o:: $(YAML_DIR)/src/contrib/%.cpp
 $(OBJDIR)miniz.o: ../libs/miniz/miniz.c
 	$(CXX) $(CXXFLAGS) -DMINIZ_NO_STDIO -c -o $@ $<
 
-$(BINDIR)common.zip:
-	( cd $(BINDIR)/common ; zip -r -FS ../common.zip . )
-
-$(BINDIR)standard.zip:
-	( cd $(BINDIR)/standard ; zip -r -FS ../standard.zip . )
-
 $(OBJRES):$(RES)
-	$(RC) -DWIN32_STYLE_ASSETS -o $@ $<
+	$(RC) -o $@ $<
 
 clean:
 	rm -f $(BINDIR)$(BIN).exe $(BINDIR)$(BIN)Debug.exe $(OBJDIR)*.o $(BINDIR)common.zip $(BINDIR)standard.zip
