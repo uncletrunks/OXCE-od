@@ -1885,8 +1885,8 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 	auto labelName = addNameRef("label");
 	auto nullName = addNameRef("null");
 
-	addSortHelper(_typeList, { labelName, ArgLabel, 0 });
-	addSortHelper(_typeList, { nullName, ArgNull, 0 });
+	addSortHelper(_typeList, { labelName, ArgLabel, { } });
+	addSortHelper(_typeList, { nullName, ArgNull, { } });
 	addSortHelper(_refList, { nullName, ArgNull });
 }
 
