@@ -99,24 +99,28 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 
 	if (weapon->getBattleType() == BT_FIREARM)
 	{
-		if (_action->weapon->getCurrentWaypoints() != 0)
+		auto isLauncher = _action->weapon->getCurrentWaypoints() != 0;
+		auto slotLauncher = _action->weapon->getActionConf(BA_LAUNCH)->ammoSlot;
+		auto slotSnap = _action->weapon->getActionConf(BA_SNAPSHOT)->ammoSlot;
+		auto slotAuto = _action->weapon->getActionConf(BA_AUTOSHOT)->ammoSlot;
+
+		if ((!isLauncher || slotLauncher != slotAuto) && weapon->getCostAuto().Time > 0)
+		{
+			addItem(BA_AUTOSHOT, weapon->getConfigAuto()->name, &id, Options::keyBattleActionItem3);
+		}
+
+		if ((!isLauncher || slotLauncher != slotSnap) && weapon->getCostSnap().Time > 0)
+		{
+			addItem(BA_SNAPSHOT,  weapon->getConfigSnap()->name, &id, Options::keyBattleActionItem2);
+		}
+
+		if (isLauncher)
 		{
 			addItem(BA_LAUNCH, "STR_LAUNCH_MISSILE", &id, Options::keyBattleActionItem1);
 		}
-		else
+		else if (weapon->getCostAimed().Time > 0)
 		{
-			if (weapon->getCostAuto().Time > 0)
-			{
-				addItem(BA_AUTOSHOT, weapon->getConfigAuto()->name, &id, Options::keyBattleActionItem3);
-			}
-			if (weapon->getCostSnap().Time > 0)
-			{
-				addItem(BA_SNAPSHOT,  weapon->getConfigSnap()->name, &id, Options::keyBattleActionItem2);
-			}
-			if (weapon->getCostAimed().Time > 0)
-			{
-				addItem(BA_AIMEDSHOT,  weapon->getConfigAimed()->name, &id, Options::keyBattleActionItem1);
-			}
+			addItem(BA_AIMEDSHOT,  weapon->getConfigAimed()->name, &id, Options::keyBattleActionItem1);
 		}
 	}
 
