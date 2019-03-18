@@ -14,3 +14,6 @@
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
+
+#define IDZ_COMMON_ZIP                  256
+#define IDZ_STANDARD_ZIP                257

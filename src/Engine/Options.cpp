@@ -79,6 +79,7 @@ void create()
 	_info.push_back(OptionInfo("traceAI", &traceAI, false));
 	_info.push_back(OptionInfo("verboseLogging", &verboseLogging, false));
 	_info.push_back(OptionInfo("listVFSContents", &listVFSContents, false));
+	_info.push_back(OptionInfo("modStandardMods", &modStandardMods, false));
 	_info.push_back(OptionInfo("StereoSound", &StereoSound, true));
 	//_info.push_back(OptionInfo("baseXResolution", &baseXResolution, Screen::ORIGINAL_WIDTH));
 	//_info.push_back(OptionInfo("baseYResolution", &baseYResolution, Screen::ORIGINAL_HEIGHT));
@@ -572,16 +573,26 @@ bool init()
 	Log(LOG_INFO) << "Config folder is: " << _configFolder;
 	Log(LOG_INFO) << "Options loaded successfully.";
 
-	FileMap::clear();
+	FileMap::clear(false, !Options::modStandardMods);
 	return true;
 }
 
 // called from the dos screen state (StartState)
 void updateMods()
 {
-	FileMap::clear();
-	Log(LOG_INFO) << "Scanning standard mods in '" << getDataFolder() << "'...";
-	FileMap::scanModDir(getDataFolder(), "standard");
+	bool embeddedOnly = !Options::modStandardMods;
+	FileMap::clear(false, embeddedOnly);
+	SDL_RWops *rwops = CrossPlatform::getEmbeddedAsset("standard.zip");
+	if (rwops) {
+		Log(LOG_INFO) << "Scanning embedded standard mods...";
+		FileMap::scanModZipRW(rwops, "exe:standard.zip");
+	}
+	if (embeddedOnly && rwops) {
+		Log(LOG_INFO) << "Modding standard mods is disabled, set modStandardMods option in options.cfg to enable";
+	} else {
+		Log(LOG_INFO) << "Scanning standard mods in '" << getDataFolder() << "'...";
+		FileMap::scanModDir(getDataFolder(), "standard");
+	}
 	Log(LOG_INFO) << "Scanning user mods in '" << getUserFolder() << "'...";
 	FileMap::scanModDir(getUserFolder(), "mods");
 
@@ -704,7 +715,7 @@ void updateMods()
 	}
 
 	updateReservedSpace();
-	FileMap::setup(getActiveMods());
+	FileMap::setup(getActiveMods(), embeddedOnly);
 	userSplitMasters();
 
 	// report active mods that don't meet the minimum OXCE requirements
@@ -856,6 +867,9 @@ void updateOptions()
 		if (CrossPlatform::fileExists(_configFolder + "options.cfg"))
 		{
 			load();
+#ifndef EMBED_ASSETS
+			Options::modStandardMods = true;
+#endif
 		}
 		else
 		{

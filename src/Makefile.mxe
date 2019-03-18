@@ -56,9 +56,9 @@ else
 	LD_LTO = -flto -O3
 endif
 
-OBJRES = ../obj/OpenXcom_res.o
-OBJS = $(OBJRES) $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) ../obj/miniz.o
-RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/openxcomex.ico
+OBJRES = $(OBJDIR)OpenXcom_res.o
+OBJS = $(OBJRES) $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) $(OBJDIR)miniz.o
+RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/openxcomex.ico $(BINDIR)common.zip $(BINDIR)standard.zip
 
 # Arch-specific settings
 CXX = $(ARCH)-gcc
@@ -91,7 +91,7 @@ $(OBJDIR)%.o:: Battlescape/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJDIR)%.o:: Engine/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -DWIN32_STYLE_ASSETS -c -o $@ $<
 
 $(OBJDIR)%.o:: Engine/Scalers/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -123,14 +123,20 @@ $(OBJDIR)%.o:: $(YAML_DIR)/src/%.cpp
 $(OBJDIR)%.o:: $(YAML_DIR)/src/contrib/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-../obj/miniz.o: ../libs/miniz/miniz.c
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(OBJDIR)miniz.o: ../libs/miniz/miniz.c
+	$(CXX) $(CXXFLAGS) -DMINIZ_NO_STDIO -c -o $@ $<
+
+$(BINDIR)common.zip:
+	( cd $(BINDIR)/common ; zip -r -FS ../common.zip . )
+
+$(BINDIR)standard.zip:
+	( cd $(BINDIR)/standard ; zip -r -FS ../standard.zip . )
 
 $(OBJRES):$(RES)
-	$(RC) -o $@ $<
+	$(RC) -DWIN32_STYLE_ASSETS -o $@ $<
 
 clean:
-	rm -f $(BINDIR)$(BIN).exe $(BINDIR)$(BIN)Debug.exe $(OBJDIR)*.o
+	rm -f $(BINDIR)$(BIN).exe $(BINDIR)$(BIN)Debug.exe $(OBJDIR)*.o $(BINDIR)common.zip $(BINDIR)standard.zip
 
 .PHONY: all clean
 

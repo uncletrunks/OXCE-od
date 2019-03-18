@@ -1464,6 +1464,77 @@ void log(int level, const std::ostringstream& baremsgstream) {
 	}
 }
 
+#if defined(EMBED_ASSETS)
+# if defined(_WIN32)
+# include "../resource.h"
+static void *CommonZipAssetPtr = 0;
+static size_t CommonZipAssetSize = 0;
+static void *StandardZipAssetPtr = 0;
+static size_t StandardZipAssetSize = 0;
+static void *getWindowsResource(int res_id, size_t *size) {
+    HMODULE handle = GetModuleHandle(NULL);
+    HRSRC rc = FindResource(handle, MAKEINTRESOURCE(res_id), MAKEINTRESOURCE(10));
+	if (!rc) { return NULL; }
+    HGLOBAL rcData = LoadResource(handle, rc);
+	if (!rcData) { return NULL; }
+    *size = SizeofResource(handle, rc);
+    return LockResource(rcData);
+}
+# elif defined(__MOBILE__)
+/* This space is intentionally left blank */
+# else
+extern "C" {
+	extern uint8_t common_zip[];
+	extern int common_zip_size;
+	extern uint8_t standard_zip[];
+	extern int standard_zip_size;
+}
+# endif
+#endif
+SDL_RWops *getEmbeddedAsset(const std::string& assetName) {
+	SDL_RWops *rv = NULL;
+	std::string log_ctx = "getEmbeddedAsset('" + assetName + "'): ";
+	if (assetName.size() == 0 || assetName[0] == '/') {
+		Log(LOG_WARNING) << log_ctx << "ignoring bogus asset name";
+		return NULL;
+	}
+#if defined(EMBED_ASSETS)
+# if defined(_WIN32)
+	if (assetName == "common.zip") {
+		if (!CommonZipAssetPtr) {
+			CommonZipAssetPtr = getWindowsResource(IDZ_COMMON_ZIP, &CommonZipAssetSize);
+		}
+		if (CommonZipAssetPtr) {
+			rv = SDL_RWFromConstMem(CommonZipAssetPtr, CommonZipAssetSize);
+		}
+	} else if (assetName == "standard.zip") {
+		if (!StandardZipAssetPtr) {
+			StandardZipAssetPtr = getWindowsResource(IDZ_STANDARD_ZIP, &StandardZipAssetSize);
+		}
+		if (StandardZipAssetPtr) {
+			rv = SDL_RWFromConstMem(StandardZipAssetPtr, StandardZipAssetSize);
+		}
+	}
+# elif defined(__MOBILE__)
+	rv = SDL_RWFromFile(assetName, "rb");
+# else
+	if (assetName == "common.zip") {
+		rv = SDL_RWFromConstMem(common_zip, common_zip_size);
+	} else if (assetName == "standard.zip") {
+		rv = SDL_RWFromConstMem(standard_zip, standard_zip_size);
+	}
+# endif
+	if (rv == NULL) {
+		Log(LOG_ERROR) << log_ctx << "embedded asset not found: "<< SDL_GetError();
+	}
+	return rv;
+#else
+	/* Asset embedding disabled. */
+	Log(LOG_DEBUG) << log_ctx << "assets were not embedded.";
+	return NULL;
+#endif
+}
+
 }
 
 }

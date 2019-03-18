@@ -11,7 +11,7 @@ endif
 OBJDIR = ../obj/
 BINDIR = ../bin/
 SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp)
-OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) ../obj/miniz.o
+OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) $(OBJDIR)miniz.o $(OBJDIR)OpenXcomEx.o
 
 # Target-specific settings
 ifeq ($(TARGET),DINGOO)
@@ -56,7 +56,7 @@ $(OBJDIR)%.o:: Battlescape/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJDIR)%.o:: Engine/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS)  -DUNIX_STYLE_ASSETS -c -o $@ $<
 
 $(OBJDIR)%.o:: Engine/Scalers/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -82,10 +82,19 @@ $(OBJDIR)%.o:: Savegame/%.cpp
 $(OBJDIR)%.o:: Ufopaedia/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-../obj/miniz.o: ../libs/miniz/miniz.c
+$(OBJDIR)miniz.o: ../libs/miniz/miniz.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+$(BINDIR)common.zip:
+	( cd $(BINDIR)/common ; zip -r -FS ../common.zip . )
+
+$(BINDIR)standard.zip:
+	( cd $(BINDIR)/standard ; zip -r -FS ../standard.zip . )
+
+$(OBJDIR)OpenXcomEx.o: OpenXcomEx.s $(BINDIR)common.zip $(BINDIR)standard.zip
+	$(CXX) -I$(BINDIR) -c -o $@ OpenXcomEx.s
+
 clean:
-	rm -f $(BINDIR)$(BIN) $(OBJDIR)*.o
+	rm -f $(BINDIR)$(BIN) $(OBJDIR)*.o $(BINDIR)common.zip $(BINDIR)standard.zip
 
 .PHONY: all clean
