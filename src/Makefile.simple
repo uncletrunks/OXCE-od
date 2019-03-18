@@ -11,7 +11,7 @@ endif
 OBJDIR = ../obj/
 BINDIR = ../bin/
 SRCS = $(wildcard *.cpp */*.cpp */*/*.cpp)
-OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) $(OBJDIR)miniz.o $(OBJDIR)OpenXcomEx.o
+OBJS = $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) $(OBJDIR)miniz.o
 
 # Target-specific settings
 ifeq ($(TARGET),DINGOO)
@@ -86,6 +86,6 @@ $(OBJDIR)miniz.o: ../libs/miniz/miniz.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(BINDIR)$(BIN) $(OBJDIR)*.o $(BINDIR)common.zip $(BINDIR)standard.zip
+	rm -f $(BINDIR)$(BIN) $(OBJDIR)*.o
 
 .PHONY: all clean

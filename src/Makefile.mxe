@@ -58,7 +58,7 @@ endif
 
 OBJRES = $(OBJDIR)OpenXcom_res.o
 OBJS = $(OBJRES) $(patsubst %.cpp, $(OBJDIR)%.o, $(notdir $(SRCS))) $(OBJDIR)miniz.o
-RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/openxcomex.ico $(BINDIR)common.zip $(BINDIR)standard.zip
+RES = ../src/OpenXcomEx.rc ../src/resource.h ../src/version.h ../res/windows/openxcomex.ico
 
 # Arch-specific settings
 CXX = $(ARCH)-gcc
@@ -130,7 +130,7 @@ $(OBJRES):$(RES)
 	$(RC) -o $@ $<
 
 clean:
-	rm -f $(BINDIR)$(BIN).exe $(BINDIR)$(BIN)Debug.exe $(OBJDIR)*.o $(BINDIR)common.zip $(BINDIR)standard.zip
+	rm -f $(BINDIR)$(BIN).exe $(BINDIR)$(BIN)Debug.exe $(OBJDIR)*.o
 
 .PHONY: all clean
 
