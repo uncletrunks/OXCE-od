@@ -79,7 +79,7 @@ void create()
 	_info.push_back(OptionInfo("traceAI", &traceAI, false));
 	_info.push_back(OptionInfo("verboseLogging", &verboseLogging, false));
 	_info.push_back(OptionInfo("listVFSContents", &listVFSContents, false));
-	_info.push_back(OptionInfo("modStandardMods", &modStandardMods, false));
+	_info.push_back(OptionInfo("embeddedOnly", &embeddedOnly, true));
 	_info.push_back(OptionInfo("StereoSound", &StereoSound, true));
 	//_info.push_back(OptionInfo("baseXResolution", &baseXResolution, Screen::ORIGINAL_WIDTH));
 	//_info.push_back(OptionInfo("baseYResolution", &baseYResolution, Screen::ORIGINAL_HEIGHT));
@@ -573,14 +573,14 @@ bool init()
 	Log(LOG_INFO) << "Config folder is: " << _configFolder;
 	Log(LOG_INFO) << "Options loaded successfully.";
 
-	FileMap::clear(false, !Options::modStandardMods);
+	FileMap::clear(false, Options::embeddedOnly);
 	return true;
 }
 
 // called from the dos screen state (StartState)
 void updateMods()
 {
-	bool embeddedOnly = !Options::modStandardMods;
+	bool embeddedOnly = Options::embeddedOnly;
 	FileMap::clear(false, embeddedOnly);
 	SDL_RWops *rwops = CrossPlatform::getEmbeddedAsset("standard.zip");
 	if (rwops) {
@@ -588,7 +588,7 @@ void updateMods()
 		FileMap::scanModZipRW(rwops, "exe:standard.zip");
 	}
 	if (embeddedOnly && rwops) {
-		Log(LOG_INFO) << "Modding standard mods is disabled, set modStandardMods option in options.cfg to enable";
+		Log(LOG_INFO) << "Modding embedded resources is disabled, set 'embeddedOnly: false' in options.cfg to enable.";
 	} else {
 		Log(LOG_INFO) << "Scanning standard mods in '" << getDataFolder() << "'...";
 		FileMap::scanModDir(getDataFolder(), "standard");
@@ -868,7 +868,7 @@ void updateOptions()
 		{
 			load();
 #ifndef EMBED_ASSETS
-			Options::modStandardMods = true;
+			Options::embeddedOnly = false;
 #endif
 		}
 		else
