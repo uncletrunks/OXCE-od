@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <algorithm>
 #include "RuleSoldier.h"
 #include "Mod.h"
@@ -24,6 +25,7 @@
 #include "StatString.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/ScriptBind.h"
+#include "../Engine/Unicode.h"
 
 namespace OpenXcom
 {
@@ -162,7 +164,9 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 			if (fileName[fileName.length() - 1] == '/')
 			{
 				// load all *.nam files in given directory
-				auto names = FileMap::filterFiles(FileMap::getVFolderContents(fileName), "nam");
+				std::vector<std::string> names;
+				for (auto f: FileMap::filterFiles(FileMap::getVFolderContents(fileName), "nam")) { names.push_back(f); }
+				std::sort(names.begin(), names.end(), Unicode::naturalCompare);
 				for (auto j = names.begin(); j != names.end(); ++j)
 				{
 					addSoldierNamePool(fileName + *j);

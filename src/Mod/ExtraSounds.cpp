@@ -17,12 +17,14 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include "ExtraSounds.h"
 #include "../Engine/SoundSet.h"
 #include "../Engine/Sound.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/Logger.h"
 #include "../Engine/Exception.h"
+#include "../Engine/Unicode.h"
 
 namespace OpenXcom
 {
@@ -104,7 +106,9 @@ SoundSet *ExtraSounds::loadSoundSet(SoundSet *set) const
 		{
 			Log(LOG_VERBOSE) << "Loading sound set from folder: " << fileName << " starting at index: " << startSound;
 			int offset = startSound;
-			auto contents = FileMap::getVFolderContents(fileName);
+			std::vector<std::string> contents;
+			for (auto f: FileMap::getVFolderContents(fileName)) { contents.push_back(f); }
+			std::sort(contents.begin(), contents.end(), Unicode::naturalCompare);
 			for (auto k = contents.begin(); k != contents.end(); ++k)
 			{
 				try
