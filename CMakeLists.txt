@@ -19,7 +19,7 @@ option ( CHECK_CCACHE "Check if ccache is installed and use it" OFF )
 set ( MSVC_WARNING_LEVEL 3 CACHE STRING "Visual Studio warning levels" )
 option ( FORCE_INSTALL_DATA_TO_BIN "Force installation of data to binary directory" OFF )
 set ( DATADIR "" CACHE STRING "Where to place datafiles" )
-set ( OPENXCOM_VERSION_STRING "" CACHE STRING "Version string (after x.x)" )
+set ( OPENXCOM_VERSION_GIT "" CACHE STRING "Git version string (after x.x.x)" )
 
 if ( CHECK_CCACHE )
   find_program( CCACHE_PROGRAM ccache )
@@ -108,10 +108,10 @@ endif()
 # Read version number
 set ( file "${CMAKE_SOURCE_DIR}/src/version.h" )
 file ( READ ${file} lines )
-string ( REGEX MATCH ".*OPENXCOM_VERSION_LONG \"([0-9]).([0-9])" version_line "${lines}" )
+string ( REGEX MATCH ".*OPENXCOM_VERSION_LONG \"([0-9]+)\\.([0-9]+)\\.([0-9]+)" version_line "${lines}" )
 set ( CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_MATCH_1} )
 set ( CPACK_PACKAGE_VERSION_MINOR ${CMAKE_MATCH_2} )
-set ( CPACK_PACKAGE_VERSION_PATCH "" )
+set ( CPACK_PACKAGE_VERSION_PATCH "${CMAKE_MATCH_3}" )
 
 find_package ( Git )
 if ( GIT_FOUND )
@@ -133,21 +133,23 @@ if ( GIT_FOUND )
     RESULT_VARIABLE git_show_result
   )
   string ( REGEX MATCH "[0-9-]+" git_date "${git_show_out}" )
+  set ( GIT_STATE "${git_commit}-${git_date}${git_dirty}" )
 else ()
   message( WARNING "Git not found.")
 endif()
 
-if ( "${OPENXCOM_VERSION_STRING}" STREQUAL "" )
-  set ( OPENXCOM_VERSION_STRING ".${git_commit}${git_dirty}" )
+if ( "${OPENXCOM_VERSION_GIT}" STREQUAL "" )
+  set ( OPENXCOM_VERSION_GIT ${GIT_STATE} )
 endif()
+
+message ( STATUS "OPENXCOM_VERSION_GIT=${OPENXCOM_VERSION_GIT}" )
+message ( STATUS "CPACK_PACKAGE_VERSION=${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${GIT_STATE}" )
 
 configure_file("${CMAKE_SOURCE_DIR}/src/git_version.h.in" "${CMAKE_CURRENT_BINARY_DIR}/git_version.h" )
 include_directories ( "${CMAKE_CURRENT_BINARY_DIR}" )
 
 if ( BUILD_PACKAGE )
-  # Always append the commit to version number
-  set ( CPACK_PACKAGE_VERSION_PATCH "${git_commit}${git_dirty}" )
-  set ( CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}-${CPACK_PACKAGE_VERSION_PATCH}-${git_date}" )
+  set ( CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${GIT_STATE}" )
   set ( CPACK_SOURCE_PACKAGE_FILE_NAME "Extended-${CPACK_PACKAGE_VERSION}-src" )
   set ( CPACK_PACKAGE_FILE_NAME "Extended-${CPACK_PACKAGE_VERSION}-unknown" ) # TODO: determine package suffix (osrelease+arch)
 
