@@ -1492,13 +1492,13 @@ extern "C" {
 # endif
 #endif
 SDL_RWops *getEmbeddedAsset(const std::string& assetName) {
-	SDL_RWops *rv = NULL;
 	std::string log_ctx = "getEmbeddedAsset('" + assetName + "'): ";
 	if (assetName.size() == 0 || assetName[0] == '/') {
 		Log(LOG_WARNING) << log_ctx << "ignoring bogus asset name";
 		return NULL;
 	}
 #if defined(EMBED_ASSETS)
+	SDL_RWops *rv = NULL;
 # if defined(_WIN32)
 	if (assetName == "common.zip") {
 		if (!CommonZipAssetPtr) {
