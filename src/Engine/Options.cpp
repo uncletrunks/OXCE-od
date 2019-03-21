@@ -580,7 +580,6 @@ bool init()
 // called from the dos screen state (StartState)
 void updateMods()
 {
-	bool embeddedOnly = Options::embeddedOnly;
 	FileMap::clear(false, embeddedOnly);
 	SDL_RWops *rwops = CrossPlatform::getEmbeddedAsset("standard.zip");
 	if (rwops) {
