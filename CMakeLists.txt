@@ -11,6 +11,7 @@ set (CMAKE_CXX_STANDARD 11)
 option ( DEV_BUILD "Development Build. Disable this for release builds" ON )
 option ( DUMP_CORE "Disables exception and segfault handling." OFF )
 option ( BUILD_PACKAGE "Prepares build for creation of a package with CPack" ON )
+set ( TARGET_PLATFORM CACHE STRING "Target platform to include in the package name (win32, etc)" )
 option ( EMBED_ASSETS "Embed common and standard into the executable" OFF )
 option ( FATAL_WARNING "Treat warnings as errors" OFF )
 option ( ENABLE_CLANG_ANALYSIS "When building with clang, enable the static analyzer" OFF )
@@ -18,7 +19,6 @@ option ( CHECK_CCACHE "Check if ccache is installed and use it" OFF )
 set ( MSVC_WARNING_LEVEL 3 CACHE STRING "Visual Studio warning levels" )
 option ( FORCE_INSTALL_DATA_TO_BIN "Force installation of data to binary directory" OFF )
 set ( DATADIR "" CACHE STRING "Where to place datafiles" )
-set ( OPENXCOM_VERSION_GIT "" CACHE STRING "Git version string (after x.x.x)" )
 
 if ( CHECK_CCACHE )
   find_program( CCACHE_PROGRAM ccache )
@@ -137,12 +137,7 @@ else ()
   message( WARNING "Git not found.")
 endif()
 
-if ( "${OPENXCOM_VERSION_GIT}" STREQUAL "" )
-  set ( OPENXCOM_VERSION_GIT ${GIT_STATE} )
-endif()
-
-message ( STATUS "OPENXCOM_VERSION_GIT=${OPENXCOM_VERSION_GIT}" )
-message ( STATUS "CPACK_PACKAGE_VERSION=${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${GIT_STATE}" )
+set ( OPENXCOM_VERSION_GIT "${GIT_STATE}" CACHE STRING "Git version string (after x.x.x)" )
 
 configure_file("${CMAKE_SOURCE_DIR}/src/git_version.h.in" "${CMAKE_CURRENT_BINARY_DIR}/git_version.h" )
 include_directories ( "${CMAKE_CURRENT_BINARY_DIR}" )
@@ -166,7 +161,7 @@ if ( BUILD_PACKAGE )
   set ( CPACK_PACKAGE_CONTACT "The OpenXcom project (http://www.openxcom.org)" )
   # DMG-specific -- sets CPACK_GENERATOR to DragNDrop itself
   if (APPLE)
-    set ( CPACK_PACKAGE_FILE_NAME "Extended-${CPACK_PACKAGE_VERSION}-macos" )
+    set ( TARGET_PLATFORM "macos" )
     set ( CPACK_BUNDLE_NAME "OpenXcom Extended" )
     set ( CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/res/mac/AppIcon.icns" )
     set ( CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/openxcom.app/Contents/Info.plist" )
@@ -176,6 +171,14 @@ if ( BUILD_PACKAGE )
   else()
     set ( CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt" )
   endif()
+
+  string ( LENGTH "${TARGET_PLATFORM}" has_target )
+  if ( ${has_target} GREATER 0 )
+    set ( CPACK_PACKAGE_FILE_NAME "Extended-${CPACK_PACKAGE_VERSION}-${TARGET_PLATFORM}" )
+  else ()
+    message ( FATAL_ERROR "Missing OPENXCOM_TARGET for package naming. Please set it." )
+  endif()
+
   # DEB-specific -- set -DCPACK_GENERATOR=DEB
   if ( "${CPACK_GENERATOR}" MATCHES "^(.*;)?DEB(;.*)?$" )
     set ( CPACK_DEBIAN_PACKAGE_MAINTAINER "The OpenXcom project" )
@@ -209,7 +212,7 @@ if ( BUILD_PACKAGE )
   message ( STATUS "OpenXcom version: ${CPACK_PACKAGE_VERSION}")
 endif()
 
-if ( NOT WIN32 )
+if ( NOT WIN32 OR NOT CPACK_GENERATOR STREQUAL "7Z" ) # FIXME: that's to exclude DEB and RPM, but hacky.
   install(FILES "${CMAKE_SOURCE_DIR}/res/linux/openxcom.desktop"
     DESTINATION "${CMAKE_INSTALL_FULL_DATAROOTDIR}/applications")
   install(FILES "${CMAKE_SOURCE_DIR}/res/linux/icons/openxcom_48x48.png"

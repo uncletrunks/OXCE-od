@@ -527,7 +527,7 @@ if ( FORCE_INSTALL_DATA_TO_BIN )
   set ( data_install_dir bin )
 endif ()
 
-if ( APPLE AND CREATE_BUNDLE )
+if (( APPLE AND CREATE_BUNDLE ) OR CPACK_GENERATOR STREQUAL "7Z" )
   set ( CMAKE_INSTALL_BINDIR "." )
 endif ()
 
