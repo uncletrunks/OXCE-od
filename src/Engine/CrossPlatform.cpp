@@ -1296,7 +1296,7 @@ void stackTrace(void *ctx)
 			if ( mangled != NULL) {
 				sym_offset = (char *)frames[i] - (char *)dl_info.dli_saddr;
 				demangled = abi::__cxa_demangle( dl_info.dli_sname, NULL, 0, &status);
-				snprintf(buf, sizeof(buf), "%s(%s+0x%zx) [0x%p]",
+				snprintf(buf, sizeof(buf), "%s(%s+0x%zx) [%p]",
 						dl_info.dli_fname,
 						status == 0 ? demangled : mangled,
 						sym_offset, frames[i] );
