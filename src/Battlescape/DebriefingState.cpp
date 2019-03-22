@@ -1903,7 +1903,7 @@ void DebriefingState::prepareDebriefing()
 		const RuleItem *bountyItem = _game->getMod()->getItem(ruleDeploy->getMissionBountyItem());
 		if (bountyItem)
 		{
-			addItemsToBaseStores(bountyItem, base, 1, false);
+			addItemsToBaseStores(bountyItem, base, 1, true);
 			auto specialType = bountyItem->getSpecialType();
 			if (specialType > 1)
 			{
