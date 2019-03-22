@@ -30,7 +30,6 @@
 #include <time.h>
 #include <signal.h>
 #include <sys/stat.h>
-#include "../dirent.h"
 #include "Logger.h"
 #include "Exception.h"
 #include "Options.h"
@@ -58,7 +57,7 @@
 #pragma comment(lib, "dbghelp.lib")
 #endif
 #endif
-#else
+#else		/* #ifdef _WIN32 */
 #include <iostream>
 #include <fstream>
 #include <locale>
@@ -73,8 +72,9 @@
 #include <execinfo.h>
 #include <cxxabi.h>
 #include <dlfcn.h>
+#include <dirent.h>
 #include "Unicode.h"
-#endif
+#endif		/* #ifdef _WIN32 */
 #include <SDL.h>
 #include <SDL_syswm.h>
 #ifdef __HAIKU__

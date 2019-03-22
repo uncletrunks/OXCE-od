@@ -118,7 +118,6 @@
 #include <SDL_types.h>
 #include <SDL_video.h>
 #include <yaml-cpp/yaml.h>
-#include "./dirent.h"
 #include "./lodepng.h"
 
 // uncomment to check memory leaks in VS

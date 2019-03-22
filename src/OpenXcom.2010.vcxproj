@@ -699,7 +699,6 @@
     <ClInclude Include="Battlescape\UnitWalkBState.h" />
     <ClInclude Include="Battlescape\Particle.h" />
     <ClInclude Include="Battlescape\WarningMessage.h" />
-    <ClInclude Include="dirent.h" />
     <ClInclude Include="Engine\Action.h" />
     <ClInclude Include="Engine\AdlibMusic.h" />
     <ClInclude Include="Engine\Adlib\adlplayer.h" />
