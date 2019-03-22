@@ -403,7 +403,7 @@ set_property ( SOURCE Engine/Scalers/xbrz.cpp APPEND_STRING PROPERTY COMPILE_FLA
 set ( data_install_dir bin )
 if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
   set_property ( SOURCE Engine/Options.cpp APPEND PROPERTY COMPILE_DEFINITIONS _DEBUG )
-  set_property ( SOURCE OpenXcomEx.rc APPEND PROPERTY COMPILE_DEFINITIONS _DEBUG )
+  set_property ( SOURCE OpenXcom.rc APPEND PROPERTY COMPILE_DEFINITIONS _DEBUG )
 endif ()
 if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
   # attempt to limit the executable size
@@ -462,7 +462,7 @@ if ( DUMP_CORE )
 endif ()
 
 if ( EMBED_ASSETS )
-  set_property ( SOURCE OpenXcomEx.rc APPEND PROPERTY COMPILE_DEFINITIONS EMBED_ASSETS )
+  set_property ( SOURCE OpenXcom.rc APPEND PROPERTY COMPILE_DEFINITIONS EMBED_ASSETS )
   set_property ( SOURCE Engine/CrossPlatform.cpp APPEND PROPERTY COMPILE_DEFINITIONS EMBED_ASSETS )
   set_property ( SOURCE Engine/Options.cpp APPEND PROPERTY COMPILE_DEFINITIONS EMBED_ASSETS )
   add_custom_command ( OUTPUT "${CMAKE_BINARY_DIR}/common.zip" COMMAND zip -r -FS "${CMAKE_BINARY_DIR}/common.zip" .
@@ -474,13 +474,13 @@ endif ()
 
 if ( WIN32 )
   set ( application_type WIN32 )
-  set ( openxcom_icon OpenXcomEx.rc )
+  set ( openxcom_icon OpenXcom.rc )
 endif ()
 
 if ( UNIX AND EMBED_ASSETS )
   enable_language(ASM)
-  set ( embed_src OpenXcomEx.s )
-  set_property ( SOURCE OpenXcomEx.s PROPERTY COMPILE_FLAGS -I${CMAKE_BINARY_DIR} )
+  set ( embed_src OpenXcom.s )
+  set_property ( SOURCE OpenXcom.s PROPERTY COMPILE_FLAGS -I${CMAKE_BINARY_DIR} )
 endif ()
 
 set ( openxcom_src ${c_src} ${cxx_src} ${embed_src} )

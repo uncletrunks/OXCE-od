@@ -8,9 +8,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-//#include "afxres.h"
-#include "winresrc.h"
-#define IDC_STATIC  -1
+#include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -34,7 +32,7 @@ END
 
 2 TEXTINCLUDE
 BEGIN
-    "#include ""winresrc.h""\r\n"
+    "#include ""afxres.h""\r\n"
     "\0"
 END
 
@@ -70,12 +68,12 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "CompanyName", "OpenXcom Developers"
-            VALUE "FileDescription", "OpenXcom"
+            VALUE "FileDescription", "OpenXcomExtended"
             VALUE "FileVersion", OPENXCOM_VERSION_LONG
             VALUE "InternalName", "OpenXcom.exe"
-            VALUE "LegalCopyright", "Copyright 2010-2015 OpenXcom Developers"
+            VALUE "LegalCopyright", "Copyright 2010-2014 OpenXcom Developers"
             VALUE "OriginalFilename", "OpenXcom.exe"
-            VALUE "ProductName", "OpenXcom"
+            VALUE "ProductName", "OpenXcomExtended"
             VALUE "ProductVersion", OPENXCOM_VERSION_LONG
         END
     END
@@ -93,7 +91,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "..\\res\\windows\\openxcom.ico"
+IDI_ICON1               ICON                    "../res/windows/openxcomex.ico"
 #endif    // Portuguese (Portugal) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -109,3 +107,9 @@ IDI_ICON1               ICON                    "..\\res\\windows\\openxcom.ico"
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
+#ifdef EMBED_ASSETS
+
+IDZ_COMMON_ZIP           RCDATA                  "../common.zip"
+IDZ_STANDARD_ZIP         RCDATA                  "../standard.zip"
+
+#endif
