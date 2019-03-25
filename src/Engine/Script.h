@@ -26,6 +26,7 @@
 #include <cstring>
 #include <yaml-cpp/yaml.h>
 #include <SDL_stdinc.h>
+#include <cassert>
 
 #include "HelperMeta.h"
 #include "Logger.h"
@@ -895,8 +896,12 @@ public:
 	{
 		const auto size_a = a.size();
 		const auto size_b = b.size();
+
 		if (size_a == size_b)
 		{
+			//check for GCC warnings, it thinks that we try use extrime long strings there...
+			assert(size_a < SIZE_MAX/2);
+
 			return memcmp(a._begin, b._begin, size_a);
 		}
 		else if (size_a < size_b)
