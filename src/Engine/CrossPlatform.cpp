@@ -1153,7 +1153,7 @@ void setWindowIcon(int, const std::string &unixPath)
 void stackTrace(void *ctx)
 {
 #ifdef _WIN32
-#ifndef __NO_DBGHELP
+# ifndef __NO_DBGHELP
 	const int MAX_SYMBOL_LENGTH = 1024;
 	CONTEXT context;
 	if (ctx != 0)
@@ -1162,10 +1162,10 @@ void stackTrace(void *ctx)
 	}
 	else
 	{
-#ifdef _M_IX86
+#  ifdef _M_IX86
 		memset(&context, 0, sizeof(CONTEXT));
 		context.ContextFlags = CONTEXT_CONTROL;
-#ifdef __MINGW32__
+#   ifdef __MINGW32__
 		asm("Label:\n\t"
 			"movl %%ebp,%0;\n\t"
 			"movl %%esp,%1;\n\t"
@@ -1174,7 +1174,7 @@ void stackTrace(void *ctx)
 			: "=r" (context.Ebp), "=r" (context.Esp), "=r" (context.Eip)
 			: //no input
 			: "eax");
-#else
+#   else
 		_asm {
 		Label:
 			mov[context.Ebp], ebp;
@@ -1182,17 +1182,17 @@ void stackTrace(void *ctx)
 			mov eax, [Label];
 			mov[context.Eip], eax;
 		}
-#endif
-#else
+#   endif
+#  else /* no  _M_IX86 */
 		RtlCaptureContext(&context);
-#endif
+#  endif
 	}
 	HANDLE thread = GetCurrentThread();
 	HANDLE process = GetCurrentProcess();
 	STACKFRAME64 frame;
 	memset(&frame, 0, sizeof(STACKFRAME64));
 	DWORD image;
-#ifdef _M_IX86
+#  ifdef _M_IX86
 	image = IMAGE_FILE_MACHINE_I386;
 	frame.AddrPC.Offset = context.Eip;
 	frame.AddrPC.Mode = AddrModeFlat;
@@ -1200,7 +1200,7 @@ void stackTrace(void *ctx)
 	frame.AddrFrame.Mode = AddrModeFlat;
 	frame.AddrStack.Offset = context.Esp;
 	frame.AddrStack.Mode = AddrModeFlat;
-#elif _M_X64
+#  elif _M_X64
 	image = IMAGE_FILE_MACHINE_AMD64;
 	frame.AddrPC.Offset = context.Rip;
 	frame.AddrPC.Mode = AddrModeFlat;
@@ -1208,7 +1208,7 @@ void stackTrace(void *ctx)
 	frame.AddrFrame.Mode = AddrModeFlat;
 	frame.AddrStack.Offset = context.Rsp;
 	frame.AddrStack.Mode = AddrModeFlat;
-#elif _M_IA64
+#  elif _M_IA64
 	image = IMAGE_FILE_MACHINE_IA64;
 	frame.AddrPC.Offset = context.StIIP;
 	frame.AddrPC.Mode = AddrModeFlat;
@@ -1218,10 +1218,10 @@ void stackTrace(void *ctx)
 	frame.AddrBStore.Mode = AddrModeFlat;
 	frame.AddrStack.Offset = context.IntSp;
 	frame.AddrStack.Mode = AddrModeFlat;
-#else
+#  else
 	Log(LOG_FATAL) << "Unfortunately, no stack trace information is available";
 	return;
-#endif
+#  endif
 	SYMBOL_INFO *symbol = (SYMBOL_INFO *)malloc(sizeof(SYMBOL_INFO) + (MAX_SYMBOL_LENGTH - 1) * sizeof(TCHAR));
 	symbol->MaxNameLen = MAX_SYMBOL_LENGTH;
 	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
@@ -1234,7 +1234,7 @@ void stackTrace(void *ctx)
 		if (SymFromAddr(process, frame.AddrPC.Offset, NULL, symbol))
 		{
 			std::string symname = symbol->Name;
-#ifdef __MINGW32__
+#  ifdef __MINGW32__
 			symname = "_" + symname;
 			int status = 0;
 			size_t outSz = 0;
@@ -1249,7 +1249,7 @@ void stackTrace(void *ctx)
 			{
 				symname = symbol->Name;
 			}
-#endif
+#  endif
 			if (SymGetLineFromAddr64(process, frame.AddrPC.Offset, &displacement, line))
 			{
 				std::string filename = line->FileName;
@@ -1276,10 +1276,12 @@ void stackTrace(void *ctx)
 		Log(LOG_FATAL) << "Unfortunately, no stack trace information is available";
 	}
 	SymCleanup(process);
-#else
+# else /* __NO_DBGHELP */
 	Log(LOG_FATAL) << "Unfortunately, no stack trace information is available";
-#endif
-#else
+# endif
+#elif __CYGWIN__
+	Log(LOG_FATAL) << "Unfortunately, no stack trace information is available";
+#else    /* not _WIN32 or __CYGWIN__ */
 	void *frames[32];
 	char buf[1024];
 	int  frame_count = backtrace(frames, 32);
