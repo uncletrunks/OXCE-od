@@ -127,33 +127,43 @@ BasescapeState::BasescapeState(Base *base, Globe *globe) : _base(base), _globe(g
 
 	_btnNewBase->setText(tr("STR_BUILD_NEW_BASE_UC"));
 	_btnNewBase->onMouseClick((ActionHandler)&BasescapeState::btnNewBaseClick);
+	_btnNewBase->onKeyboardPress((ActionHandler)&BasescapeState::btnNewBaseClick, Options::keyBasescapeBuildNewBase);
 
 	_btnBaseInfo->setText(tr("STR_BASE_INFORMATION"));
 	_btnBaseInfo->onMouseClick((ActionHandler)&BasescapeState::btnBaseInfoClick);
+	_btnBaseInfo->onKeyboardPress((ActionHandler)&BasescapeState::btnBaseInfoClick, Options::keyBasescapeBaseInfo);
 
 	_btnSoldiers->setText(tr("STR_SOLDIERS_UC"));
 	_btnSoldiers->onMouseClick((ActionHandler)&BasescapeState::btnSoldiersClick);
+	_btnSoldiers->onKeyboardPress((ActionHandler)&BasescapeState::btnSoldiersClick, Options::keyBasescapeSoldiers);
 
 	_btnCrafts->setText(tr("STR_EQUIP_CRAFT"));
 	_btnCrafts->onMouseClick((ActionHandler)&BasescapeState::btnCraftsClick);
+	_btnCrafts->onKeyboardPress((ActionHandler)&BasescapeState::btnCraftsClick, Options::keyBasescapeCrafts);
 
 	_btnFacilities->setText(tr("STR_BUILD_FACILITIES"));
 	_btnFacilities->onMouseClick((ActionHandler)&BasescapeState::btnFacilitiesClick);
+	_btnFacilities->onKeyboardPress((ActionHandler)&BasescapeState::btnFacilitiesClick, Options::keyBasescapeFacilities);
 
 	_btnResearch->setText(tr("STR_RESEARCH"));
 	_btnResearch->onMouseClick((ActionHandler)&BasescapeState::btnResearchClick);
+	_btnResearch->onKeyboardPress((ActionHandler)&BasescapeState::btnResearchClick, Options::keyBasescapeResearch);
 
 	_btnManufacture->setText(tr("STR_MANUFACTURE"));
 	_btnManufacture->onMouseClick((ActionHandler)&BasescapeState::btnManufactureClick);
+	_btnManufacture->onKeyboardPress((ActionHandler)&BasescapeState::btnManufactureClick, Options::keyBasescapeManufacture);
 
 	_btnTransfer->setText(tr("STR_TRANSFER_UC"));
 	_btnTransfer->onMouseClick((ActionHandler)&BasescapeState::btnTransferClick);
+	_btnTransfer->onKeyboardPress((ActionHandler)&BasescapeState::btnTransferClick, Options::keyBasescapeTransfer);
 
 	_btnPurchase->setText(tr("STR_PURCHASE_RECRUIT"));
 	_btnPurchase->onMouseClick((ActionHandler)&BasescapeState::btnPurchaseClick);
+	_btnPurchase->onKeyboardPress((ActionHandler)&BasescapeState::btnPurchaseClick, Options::keyBasescapePurchase);
 
 	_btnSell->setText(tr("STR_SELL_SACK_UC"));
 	_btnSell->onMouseClick((ActionHandler)&BasescapeState::btnSellClick);
+	_btnSell->onKeyboardPress((ActionHandler)&BasescapeState::btnSellClick, Options::keyBasescapeSell);
 
 	_btnGeoscape->setText(tr("STR_GEOSCAPE_UC"));
 	_btnGeoscape->onMouseClick((ActionHandler)&BasescapeState::btnGeoscapeClick);

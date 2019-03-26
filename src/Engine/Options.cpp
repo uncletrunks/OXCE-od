@@ -304,6 +304,17 @@ void create()
 	_info.push_back(OptionInfo("keyInvAutoEquip", &keyInvAutoEquip, SDLK_z, "STR_AUTO_EQUIP", "STR_BATTLESCAPE"));
 
 	// OXCE
+	_info.push_back(OptionInfo("keyBasescapeBuildNewBase", &keyBasescapeBuildNewBase, SDLK_n, "STR_BUILD_NEW_BASE_UC", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeBaseInformation", &keyBasescapeBaseInfo, SDLK_i, "STR_BASE_INFORMATION", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeSoldiers", &keyBasescapeSoldiers, SDLK_s, "STR_SOLDIERS_UC", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeEquipCraft", &keyBasescapeCrafts, SDLK_e, "STR_EQUIP_CRAFT", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeBuildFacilities", &keyBasescapeFacilities, SDLK_f, "STR_BUILD_FACILITIES", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeResearch", &keyBasescapeResearch, SDLK_r, "STR_RESEARCH", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeManufacture", &keyBasescapeManufacture, SDLK_m, "STR_MANUFACTURE", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeTransfer", &keyBasescapeTransfer, SDLK_t, "STR_TRANSFER_UC", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapePurchase", &keyBasescapePurchase, SDLK_p, "STR_PURCHASE_RECRUIT", "STR_OXCE"));
+	_info.push_back(OptionInfo("keyBasescapeSell", &keyBasescapeSell, SDLK_l, "STR_SELL_SACK_UC", "STR_OXCE"));
+
 	_info.push_back(OptionInfo("keyGeoUfoTracker", &keyGeoUfoTracker, SDLK_t, "STR_UFO_TRACKER", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyGeoTechTreeViewer", &keyGeoTechTreeViewer, SDLK_q, "STR_TECH_TREE_VIEWER", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyGeoGlobalProduction", &keyGeoGlobalProduction, SDLK_p, "STR_PRODUCTION_OVERVIEW", "STR_OXCE"));
