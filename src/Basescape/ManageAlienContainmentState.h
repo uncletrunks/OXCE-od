@@ -51,6 +51,8 @@ private:
 	std::vector<std::string> _aliens;
 	size_t _sel;
 	int _aliensSold, _total;
+	bool _doNotReset;
+
 	/// Gets selected quantity.
 	int getQuantity();
 public:
