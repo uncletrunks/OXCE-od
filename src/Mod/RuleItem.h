@@ -160,6 +160,7 @@ private:
 	std::vector<int> _psiMissSound;
 	int _psiMissAnimation;
 	int _power;
+	bool _hidePower;
 	float _powerRangeReduction;
 	float _powerRangeThreshold;
 	std::vector<std::string> _compatibleAmmo[AmmoSlotMax];
@@ -350,6 +351,8 @@ public:
 
 	/// Gets the item's power.
 	int getPower() const;
+	/// Should the item's power be displayed in Ufopedia or not?
+	bool getHidePower() const { return _hidePower; }
 	/// Get additional power from unit statistics
 	int getPowerBonus(const BattleUnit *unit) const;
 	const RuleStatBonus *getDamageBonusRaw() const { return &_damageBonus; }

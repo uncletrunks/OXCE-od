@@ -353,6 +353,7 @@ namespace OpenXcom
 		switch (item->getBattleType())
 		{
 			case BT_FIREARM:
+				if (item->getHidePower()) break;
 				_txtDamage = new Text(82, 10, 194, 7);
 				add(_txtDamage);
 				_txtDamage->setColor(_textColor);
@@ -406,6 +407,7 @@ namespace OpenXcom
 			case BT_GRENADE:
 			case BT_PROXIMITYGRENADE:
 			case BT_MELEE:
+				if (item->getHidePower()) break;
 				_txtDamage = new Text(82, 10, 194, 7);
 				add(_txtDamage);
 				_txtDamage->setColor(_textColor);

@@ -47,7 +47,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_hitAnimation(0), _hitMissAnimation(-1),
 	_meleeAnimation(0), _meleeMissAnimation(-1),
 	_psiAnimation(-1), _psiMissAnimation(-1),
-	_power(0), _powerRangeReduction(0), _powerRangeThreshold(0),
+	_power(0), _hidePower(false), _powerRangeReduction(0), _powerRangeThreshold(0),
 	_accuracyUse(0), _accuracyMind(0), _accuracyPanic(20), _accuracyThrow(100), _accuracyCloseQuarters(-1),
 	_noLOSAccuracyPenalty(-1),
 	_costUse(25), _costMind(-1, -1), _costPanic(-1, -1), _costThrow(25), _costPrime(50), _costUnprime(25),
@@ -477,6 +477,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	}
 
 	_power = node["power"].as<int>(_power);
+	_hidePower = node["hidePower"].as<bool>(_hidePower);
 	_psiAttackName = node["psiAttackName"].as<std::string>(_psiAttackName);
 	_primeActionName = node["primeActionName"].as<std::string>(_primeActionName);
 	_primeActionMessage = node["primeActionMessage"].as<std::string>(_primeActionMessage);

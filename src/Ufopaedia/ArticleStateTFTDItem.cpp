@@ -135,6 +135,7 @@ namespace OpenXcom
 		switch (item->getBattleType())
 		{
 			case BT_FIREARM:
+				if (item->getHidePower()) break;
 				if (ammo_data->empty())
 				{
 					_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
@@ -172,6 +173,7 @@ namespace OpenXcom
 			case BT_GRENADE:
 			case BT_PROXIMITYGRENADE:
 			case BT_MELEE:
+				if (item->getHidePower()) break;
 				_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
 
 				ss.str("");ss.clear();
