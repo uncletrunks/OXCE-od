@@ -128,6 +128,28 @@ RuleItemUseCost RuleItem::getDefault(const RuleItemUseCost& a, const RuleItemUse
 }
 
 /**
+ * Load ammo slot with checking correct range.
+ * @param result
+ * @param node
+ * @param parentName
+ */
+void RuleItem::loadAmmoSlotChecked(int& result, const YAML::Node& node, const std::string& parentName)
+{
+	if (node)
+	{
+		auto s = node.as<int>(result);
+		if (s < AmmoSlotSelfUse || s >= AmmoSlotMax)
+		{
+			Log(LOG_ERROR) << "ammoSlot outside of allowed range in '" << parentName << "'";
+		}
+		else
+		{
+			result = s;
+		}
+	}
+}
+
+/**
  * Load nullable bool value and store it in int (with null as -1).
  * @param a value to set.
  * @param node YAML node.
@@ -235,18 +257,7 @@ void RuleItem::loadConfAction(RuleItemAction& a, const YAML::Node& node, const s
 	{
 		a.shots = conf["shots"].as<int>(a.shots);
 		a.name = conf["name"].as<std::string>(a.name);
-		if (const YAML::Node& slot = conf["ammoSlot"])
-		{
-			auto s = slot.as<int>(a.ammoSlot);
-			if (s < -1 || s >= AmmoSlotMax)
-			{
-				Log(LOG_ERROR) << "ammoSlot outside of allowed range for " << "conf" + name << " in '" << _name << "'";
-			}
-			else
-			{
-				a.ammoSlot = s;
-			}
-		}
+		loadAmmoSlotChecked(a.ammoSlot, conf["ammoSlot"], _name);
 		a.arcing = conf["arcing"].as<bool>(a.arcing);
 	}
 }
@@ -426,7 +437,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 		}
 		else
 		{
-			_confMelee.ammoSlot = -1;
+			_confMelee.ammoSlot = RuleItem::AmmoSlotSelfUse;
 		}
 
 		if (_battleType == BT_CORPSE)
@@ -550,7 +561,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	{
 		for (RuleItemAction* conf : { &_confAimed, &_confAuto, &_confSnap, &_confMelee, })
 		{
-			if (conf->ammoSlot != -1 && _compatibleAmmo[conf->ammoSlot].empty())
+			if (conf->ammoSlot != RuleItem::AmmoSlotSelfUse && _compatibleAmmo[conf->ammoSlot].empty())
 			{
 				throw Exception("Weapon " + _type + " has clip size 0 and no ammo defined. Please use 'clipSize: -1' for unlimited ammo, or allocate a compatibleAmmo item.");
 			}

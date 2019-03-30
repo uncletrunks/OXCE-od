@@ -126,7 +126,12 @@ class RuleItem
 public:
 	/// Maximum number of ammo slots on weapon.
 	static const int AmmoSlotMax = 4;
+	/// Special ammo slot that represent usage of weapon itself as ammo.
+	static const int AmmoSlotSelfUse = -1;
 	static const int MedikitSlots = 3;
+
+	/// Load ammo slot with checking correct range.
+	static void loadAmmoSlotChecked(int& result, const YAML::Node& node, const std::string& parentName);
 
 private:
 	std::string _type, _name, _nameAsAmmo; // two types of objects can have the same name

@@ -766,7 +766,7 @@ bool BattleItem::getArcingShot(BattleActionType action) const
 bool BattleItem::needsAmmoForAction(BattleActionType action) const
 {
 	auto conf = getActionConf(action);
-	if (!conf || conf->ammoSlot == -1)
+	if (!conf || conf->ammoSlot == RuleItem::AmmoSlotSelfUse)
 	{
 		return false;
 	}
@@ -786,7 +786,7 @@ const BattleItem *BattleItem::getAmmoForAction(BattleActionType action) const
 	{
 		return nullptr;
 	}
-	if (conf->ammoSlot == -1)
+	if (conf->ammoSlot == RuleItem::AmmoSlotSelfUse)
 	{
 		return this;
 	}
@@ -812,7 +812,7 @@ BattleItem *BattleItem::getAmmoForAction(BattleActionType action, std::string* m
 	{
 		return nullptr;
 	}
-	if (conf->ammoSlot == -1)
+	if (conf->ammoSlot == RuleItem::AmmoSlotSelfUse)
 	{
 		return this;
 	}
@@ -838,7 +838,7 @@ BattleItem *BattleItem::getAmmoForAction(BattleActionType action, std::string* m
  */
 void BattleItem::spendAmmoForAction(BattleActionType action, SavedBattleGame* save)
 {
-	if (save->getDebugMode() || getActionConf(action)->ammoSlot == -1)
+	if (save->getDebugMode() || getActionConf(action)->ammoSlot == RuleItem::AmmoSlotSelfUse)
 	{
 		return;
 	}

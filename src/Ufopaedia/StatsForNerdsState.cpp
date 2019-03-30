@@ -1631,7 +1631,7 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getConfigMelee()->shots, "shots", 1);
 		addSingleString(ss, itemRule->getConfigMelee()->name, "name");
 		int ammoSlotCurrent = itemRule->getConfigMelee()->ammoSlot;
-		int ammoSlotDefault = itemRule->getBattleType() == BT_MELEE ? 0 : -1;
+		int ammoSlotDefault = itemRule->getBattleType() == BT_MELEE ? 0 : RuleItem::AmmoSlotSelfUse;
 		if (itemRule->getBattleType() == BT_NONE)
 		{
 			// exception for unspecified battle type, e.g. Elerium-115 in vanilla
