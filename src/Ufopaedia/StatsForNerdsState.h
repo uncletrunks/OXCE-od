@@ -34,7 +34,7 @@ class ComboBox;
 class TextList;
 class ToggleTextButton;
 class TextButton;
-class ArticleCommonState;
+struct ArticleCommonState;
 
 /**
  * A screen, where you can see the (almost) raw ruleset corresponding to the given Ufopedia article.
