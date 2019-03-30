@@ -34,6 +34,7 @@ class ComboBox;
 class TextList;
 class ToggleTextButton;
 class TextButton;
+class ArticleCommonState;
 
 /**
  * A screen, where you can see the (almost) raw ruleset corresponding to the given Ufopedia article.
@@ -55,8 +56,8 @@ private:
 	UfopaediaTypeId _typeId;
 	std::string _topicId;
 	bool _mainArticle;
-	size_t _currentDetailIndex;
 
+	std::shared_ptr<ArticleCommonState> _state;
 	std::vector<std::string> _filterOptions;
 	bool _showDebug, _showIds, _showDefaults;
 	int _counter;
@@ -117,7 +118,7 @@ private:
 public:
 	static const std::map<std::string, std::string> translationMap;
 	/// Creates the StatsForNerdsState state.
-	StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex, bool debug, bool ids, bool defaults);
+	StatsForNerdsState(std::shared_ptr<ArticleCommonState> state, bool debug, bool ids, bool defaults);
 	StatsForNerdsState(const UfopaediaTypeId typeId, const std::string topicId, bool debug, bool ids, bool defaults);
 	/// Cleans up the StatsForNerdsState state.
 	~StatsForNerdsState();

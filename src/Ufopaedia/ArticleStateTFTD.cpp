@@ -31,7 +31,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateTFTD::ArticleStateTFTD(ArticleDefinitionTFTD *defs) : ArticleState(defs->id)
+	ArticleStateTFTD::ArticleStateTFTD(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state) : ArticleState(defs->id, std::move(state))
 	{
 		RuleInterface *ruleInterface;
 		switch (defs->getType())
@@ -139,12 +139,12 @@ namespace OpenXcom
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
 		_txtTitle->setAlign(ALIGN_CENTER);
-		_txtTitle->setText(tr(defs->title));
+		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
 
 		_txtInfo->setColor(_textColor);
 		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->text));
+		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
 
 		// all of the above are common to the TFTD articles.
 

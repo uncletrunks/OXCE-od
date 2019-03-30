@@ -27,7 +27,7 @@ namespace OpenXcom
 	class ArticleStateTFTDUso : public ArticleStateTFTD
 	{
 	public:
-		ArticleStateTFTDUso(ArticleDefinitionTFTD *defs);
+		ArticleStateTFTDUso(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateTFTDUso();
 
 	protected:

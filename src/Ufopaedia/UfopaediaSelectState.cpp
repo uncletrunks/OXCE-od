@@ -244,7 +244,7 @@ namespace OpenXcom
 			// quick search
 			if (!searchString.empty())
 			{
-				std::string projectName = tr((*it)->title);
+				std::string projectName = tr((*it)->getMainTitle());
 				Unicode::upperCase(projectName);
 				if (projectName.find(searchString) == std::string::npos)
 				{
@@ -253,7 +253,7 @@ namespace OpenXcom
 			}
 
 			_filtered_article_list.push_back((*it));
-			_lstSelection->addRow(1, tr((*it)->title).c_str());
+			_lstSelection->addRow(1, tr((*it)->getMainTitle()).c_str());
 
 			if (markAllAsSeen)
 			{

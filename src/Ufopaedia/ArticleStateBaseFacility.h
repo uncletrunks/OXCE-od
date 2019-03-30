@@ -35,7 +35,7 @@ namespace OpenXcom
 	class ArticleStateBaseFacility : public ArticleState
 	{
 	public:
-		ArticleStateBaseFacility(ArticleDefinitionBaseFacility *article_defs);
+		ArticleStateBaseFacility(ArticleDefinitionBaseFacility *article_defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateBaseFacility();
 
 	protected:

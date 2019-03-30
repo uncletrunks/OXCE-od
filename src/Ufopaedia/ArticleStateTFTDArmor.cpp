@@ -34,7 +34,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateTFTDArmor::ArticleStateTFTDArmor(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs), _row(0)
+	ArticleStateTFTDArmor::ArticleStateTFTDArmor(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state) : ArticleStateTFTD(defs, std::move(state)), _row(0)
 	{
 		_btnInfo->setVisible(_game->getMod()->getShowPediaInfoButton());
 

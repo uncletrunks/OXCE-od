@@ -35,7 +35,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateCraftWeapon::ArticleStateCraftWeapon(ArticleDefinitionCraftWeapon *defs) : ArticleState(defs->id)
+	ArticleStateCraftWeapon::ArticleStateCraftWeapon(ArticleDefinitionCraftWeapon *defs, std::shared_ptr<ArticleCommonState> state) : ArticleState(defs->id, std::move(state))
 	{
 		RuleCraftWeapon *weapon = _game->getMod()->getCraftWeapon(defs->id, true);
 
@@ -72,7 +72,7 @@ namespace OpenXcom
 		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
-		_txtTitle->setText(tr(defs->title));
+		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
 
 		_txtInfo = new Text(310, 32, 5, 160);
 		add(_txtInfo);
@@ -80,7 +80,7 @@ namespace OpenXcom
 		_txtInfo->setColor(_textColor);
 		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->text));
+		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
 
 		_lstInfo = new TextList(250, 111, 5, 80);
 		add(_lstInfo);

@@ -31,7 +31,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateTFTDCraftWeapon::ArticleStateTFTDCraftWeapon(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
+	ArticleStateTFTDCraftWeapon::ArticleStateTFTDCraftWeapon(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state) : ArticleStateTFTD(defs, std::move(state))
 	{
 		RuleCraftWeapon *weapon = _game->getMod()->getCraftWeapon(defs->id, true);
 

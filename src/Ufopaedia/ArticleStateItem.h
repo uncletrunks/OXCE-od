@@ -35,7 +35,7 @@ namespace OpenXcom
 	class ArticleStateItem : public ArticleState
 	{
 	public:
-		ArticleStateItem(ArticleDefinitionItem *article_defs);
+		ArticleStateItem(ArticleDefinitionItem *article_defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateItem();
 
 	protected:

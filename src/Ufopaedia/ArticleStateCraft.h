@@ -34,7 +34,7 @@ namespace OpenXcom
 	class ArticleStateCraft : public ArticleState
 	{
 	public:
-		ArticleStateCraft(ArticleDefinitionCraft *article_defs);
+		ArticleStateCraft(ArticleDefinitionCraft *article_defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateCraft();
 
 	protected:

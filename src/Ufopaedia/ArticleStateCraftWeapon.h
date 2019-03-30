@@ -33,7 +33,7 @@ namespace OpenXcom
 	class ArticleStateCraftWeapon : public ArticleState
 	{
 	public:
-		ArticleStateCraftWeapon(ArticleDefinitionCraftWeapon *article_defs);
+		ArticleStateCraftWeapon(ArticleDefinitionCraftWeapon *article_defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateCraftWeapon();
 
 	protected:

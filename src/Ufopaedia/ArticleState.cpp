@@ -31,13 +31,82 @@
 
 namespace OpenXcom
 {
+	/**
+	 * Change index position to next article.
+	 */
+	void ArticleCommonState::nextArticle()
+	{
+		if (current_index >= articleList.size() - 1)
+		{
+			// goto first
+			current_index = 0;
+		}
+		else
+		{
+			current_index++;
+		}
+	}
+
+	/**
+	 * Change page to next in article or move to next index position.
+	 * Each article can have multiple pages, if we are on last page we will move to first page of next article.
+	 */
+	void ArticleCommonState::nextArticlePage()
+	{
+		auto curr = getCurrentArticle();
+		if (current_page >= curr->getNumberOfPages() - 1)
+		{
+			// goto to first page of next article
+			nextArticle();
+			current_page = 0;
+		}
+		else
+		{
+			current_page++;
+		}
+	}
+
+	/**
+	 * Change index position to prev article.
+	 */
+	void ArticleCommonState::prevArticle()
+	{
+		if (current_index == 0 || current_index > articleList.size() - 1)
+		{
+			// goto last
+			current_index = articleList.size() - 1;
+		}
+		else
+		{
+			current_index--;
+		}
+	}
+
+	/**
+	 * Change page to prev in article or move to prev index position.
+	 * Each article can have multiple pages, if we are on first page we will move to last page of previous article.
+	 */
+	void ArticleCommonState::prevArticlePage()
+	{
+		auto curr = getCurrentArticle();
+		if (current_page == 0 || current_page > curr->getNumberOfPages() - 1)
+		{
+			// goto last page of previosu article
+			prevArticle();
+			current_page = getCurrentArticle()->getNumberOfPages() - 1;
+		}
+		else
+		{
+			current_page--;
+		}
+	}
 
 	/**
 	 * Constructor
 	 * @param game Pointer to current game.
 	 * @param article_id The article id of this article state instance.
 	 */
-	ArticleState::ArticleState(const std::string &article_id) : _id(article_id)
+	ArticleState::ArticleState(const std::string &article_id, std::shared_ptr<ArticleCommonState> state) : _id(article_id)
 	{
 		// init background and navigation elements
 		_bg = new Surface(320, 200, 0, 0);
@@ -45,6 +114,8 @@ namespace OpenXcom
 		_btnPrev = new TextButton(30, 14, 40, 5);
 		_btnNext = new TextButton(30, 14, 75, 5);
 		_btnInfo = new TextButton(40, 14, 110, 5);
+
+		_state = std::move(state);
 
 		// remember this article as seen/normal
 		_game->getSavedGame()->setUfopediaRuleStatus(_id, ArticleDefinition::PEDIA_STATUS_NORMAL);
@@ -170,7 +241,7 @@ namespace OpenXcom
 	 */
 	void ArticleState::btnPrevClick(Action *)
 	{
-		Ufopaedia::prev(_game);
+		Ufopaedia::prev(_game, _state);
 	}
 
 	/**
@@ -179,7 +250,7 @@ namespace OpenXcom
 	 */
 	void ArticleState::btnNextClick(Action *)
 	{
-		Ufopaedia::next(_game);
+		Ufopaedia::next(_game, _state);
 	}
 
 	/**

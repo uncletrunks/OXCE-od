@@ -35,7 +35,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateBaseFacility::ArticleStateBaseFacility(ArticleDefinitionBaseFacility *defs) : ArticleState(defs->id)
+	ArticleStateBaseFacility::ArticleStateBaseFacility(ArticleDefinitionBaseFacility *defs, std::shared_ptr<ArticleCommonState> state) : ArticleState(defs->id, std::move(state))
 	{
 		RuleBaseFacility *facility = _game->getMod()->getBaseFacility(defs->id, true);
 
@@ -60,7 +60,7 @@ namespace OpenXcom
 
 		_txtTitle->setColor(Palette::blockOffset(13)+10);
 		_txtTitle->setBig();
-		_txtTitle->setText(tr(defs->title));
+		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
 
 		// build preview image
 		int tile_size = 32;
@@ -110,7 +110,7 @@ namespace OpenXcom
 		_txtInfo->setColor(Palette::blockOffset(13)+10);
 		_txtInfo->setSecondaryColor(Palette::blockOffset(13));
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->text));
+		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
 
 		_lstInfo = new TextList(200, 42, 10, 42);
 		add(_lstInfo);

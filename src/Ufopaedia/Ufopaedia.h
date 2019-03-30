@@ -19,6 +19,9 @@
  */
 #include <vector>
 #include <string>
+#include <memory>
+
+#include "ArticleState.h"
 
 namespace OpenXcom
 {
@@ -61,12 +64,12 @@ namespace OpenXcom
 		static void open(Game *game);
 
 		/// article navigation to next article.
-		static void next(Game *game);
-		static void nextDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults);
+		static void next(Game *game, std::shared_ptr<ArticleCommonState> state);
+		static void nextDetail(Game *game, std::shared_ptr<ArticleCommonState> state, bool debug, bool ids, bool defaults);
 
 		/// article navigation to previous article.
-		static void prev(Game *game);
-		static void prevDetail(Game *game, size_t currentDetailIndex, bool debug, bool ids, bool defaults);
+		static void prev(Game *game, std::shared_ptr<ArticleCommonState> state);
+		static void prevDetail(Game *game, std::shared_ptr<ArticleCommonState> state, bool debug, bool ids, bool defaults);
 
 		/// load a vector with article ids that are currently visible of a given section.
 		static void list(SavedGame *save, Mod *rule, const std::string &section, ArticleDefinitionList &data);
@@ -79,16 +82,13 @@ namespace OpenXcom
 
 	protected:
 
-		/// current selected article index (for prev/next navigation).
-		static size_t _current_index;
-
 		/// get index of the given article id in the visible list.
-		static size_t getArticleIndex(SavedGame *save, Mod *rule, std::string &article_id);
+		static size_t getArticleIndex(const ArticleDefinitionList& article, const std::string &article_id);
 
 		/// get list of researched articles
-		static ArticleDefinitionList getAvailableArticles(SavedGame *save, Mod *rule);
+		static std::shared_ptr<ArticleCommonState> createCommonArticleState(SavedGame *save, Mod *rule);
 
 		/// create a new state object from article definition.
-		static ArticleState *createArticleState(ArticleDefinition *article);
+		static ArticleState *createArticleState(std::shared_ptr<ArticleCommonState> state);
 	};
 }

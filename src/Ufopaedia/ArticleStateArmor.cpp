@@ -39,7 +39,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateArmor::ArticleStateArmor(ArticleDefinitionArmor *defs) : ArticleState(defs->id), _row(0)
+	ArticleStateArmor::ArticleStateArmor(ArticleDefinitionArmor *defs, std::shared_ptr<ArticleCommonState> state) : ArticleState(defs->id, std::move(state)), _row(0)
 	{
 		Armor *armor = _game->getMod()->getArmor(defs->id, true);
 
@@ -69,7 +69,7 @@ namespace OpenXcom
 
 		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();
-		_txtTitle->setText(tr(defs->title));
+		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
 
 		_image = new Surface(320, 200, 0, 0);
 		add(_image);
@@ -119,7 +119,7 @@ namespace OpenXcom
 		_txtInfo->setColor(_textColor);
 		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->text));
+		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
 
 		// Add armor values
 		addStat("STR_FRONT_ARMOR", armor->getFrontArmor());

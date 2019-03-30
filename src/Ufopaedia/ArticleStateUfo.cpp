@@ -35,7 +35,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateUfo::ArticleStateUfo(ArticleDefinitionUfo *defs) : ArticleState(defs->id)
+	ArticleStateUfo::ArticleStateUfo(ArticleDefinitionUfo *defs, std::shared_ptr<ArticleCommonState> state) : ArticleState(defs->id, std::move(state))
 	{
 		RuleUfo *ufo = _game->getMod()->getUfo(defs->id, true);
 
@@ -61,7 +61,7 @@ namespace OpenXcom
 		_txtTitle->setColor(Palette::blockOffset(8)+5);
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
-		_txtTitle->setText(tr(defs->title));
+		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
 
 		_image = new Surface(160, 52, 160, 6);
 		add(_image);
@@ -97,7 +97,7 @@ namespace OpenXcom
 		_txtInfo->setColor(Palette::blockOffset(8)+5);
 		_txtInfo->setSecondaryColor(Palette::blockOffset(8) + 10);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->text));
+		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
 
 		_lstInfo = new TextList(310, 64, 10, 68);
 		add(_lstInfo);

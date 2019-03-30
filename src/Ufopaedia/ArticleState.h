@@ -20,6 +20,7 @@
 #include "../Engine/State.h"
 #include "../Mod/RuleItem.h"
 #include <string>
+#include <memory>
 
 namespace OpenXcom
 {
@@ -27,6 +28,42 @@ namespace OpenXcom
 	class Action;
 	class Surface;
 	class TextButton;
+	class ArticleDefinition;
+
+
+	/// Current state of ufopedia
+	struct ArticleCommonState
+	{
+		/// Invaild index.
+		static constexpr size_t invaild = -1;
+
+		/// Current selected article index (for prev/next navigation).
+		size_t current_index = invaild;
+
+		/// Current sub page of article.
+		size_t current_page = 0;
+
+		/// List of all avaiable atricles.
+		std::vector<ArticleDefinition *> articleList;
+
+		/// Get current Atritcle defintion for current index position.
+		ArticleDefinition* getCurrentArticle() const
+		{
+			return articleList[current_index];
+		}
+
+		/// Change index position to next article
+		void nextArticle();
+
+		/// Change page to next in article or move to next index position.
+		void nextArticlePage();
+
+		/// Change index position to prev article.
+		void prevArticle();
+
+		/// Change page to prev in article or move to prev index position.
+		void prevArticlePage();
+	};
 
 	/**
 	 * UfopaediaArticle is the base class for all articles of various types.
@@ -38,7 +75,7 @@ namespace OpenXcom
 	{
 	protected:
 		/// constructor (protected, so it can only be instantiated by derived classes)
-		ArticleState(const std::string &article_id);
+		ArticleState(const std::string &article_id, std::shared_ptr<ArticleCommonState> state);
 		/// destructor
 		virtual ~ArticleState();
 
@@ -75,5 +112,8 @@ namespace OpenXcom
 		TextButton *_btnPrev;
 		TextButton *_btnNext;
 		TextButton *_btnInfo;
+
+		/// Shared state.
+		std::shared_ptr<ArticleCommonState> _state;
 	};
 }

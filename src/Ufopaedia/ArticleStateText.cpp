@@ -30,7 +30,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateText::ArticleStateText(ArticleDefinitionText *defs) : ArticleState(defs->id)
+	ArticleStateText::ArticleStateText(ArticleDefinitionText *defs, std::shared_ptr<ArticleCommonState> state) : ArticleState(defs->id, std::move(state))
 	{
 		// add screen elements
 		_txtTitle = new Text(296, 17, 5, 23);
@@ -55,12 +55,12 @@ namespace OpenXcom
 
 		_txtTitle->setColor(Palette::blockOffset(15)+4);
 		_txtTitle->setBig();
-		_txtTitle->setText(tr(defs->title));
+		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
 
 		_txtInfo->setColor(Palette::blockOffset(15)-1);
 		_txtInfo->setSecondaryColor(Palette::blockOffset(15) + 4);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->text));
+		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
 	}
 
 	ArticleStateText::~ArticleStateText()

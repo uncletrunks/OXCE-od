@@ -86,12 +86,12 @@ const std::map<std::string, std::string> StatsForNerdsState::translationMap =
 /**
  * Initializes all the elements on the UI.
  */
-StatsForNerdsState::StatsForNerdsState(const ArticleDefinition *article, size_t currentDetailIndex, bool debug, bool ids, bool defaults) : _counter(0), _indent(false)
+StatsForNerdsState::StatsForNerdsState(std::shared_ptr<ArticleCommonState> state, bool debug, bool ids, bool defaults) : _state{ std::move(state) }, _counter(0), _indent(false)
 {
+	auto article = _state->getCurrentArticle();
 	_typeId = article->getType();
 	_topicId = article->id;
 	_mainArticle = true;
-	_currentDetailIndex = currentDetailIndex;
 
 	buildUI(debug, ids, defaults);
 }
@@ -104,7 +104,6 @@ StatsForNerdsState::StatsForNerdsState(const UfopaediaTypeId typeId, const std::
 	_typeId = typeId;
 	_topicId = topicId;
 	_mainArticle = false;
-	_currentDetailIndex = 0; // dummy
 
 	buildUI(debug, ids, defaults);
 }
@@ -289,7 +288,7 @@ void StatsForNerdsState::btnOkClick(Action *)
  */
 void StatsForNerdsState::btnPrevClick(Action *)
 {
-	Ufopaedia::prevDetail(_game, _currentDetailIndex, _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed());
+	Ufopaedia::prevDetail(_game, _state, _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed());
 }
 
 /**
@@ -298,7 +297,7 @@ void StatsForNerdsState::btnPrevClick(Action *)
  */
 void StatsForNerdsState::btnNextClick(Action *)
 {
-	Ufopaedia::nextDetail(_game, _currentDetailIndex, _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed());
+	Ufopaedia::nextDetail(_game, _state, _btnIncludeDebug->getPressed(), _btnIncludeIds->getPressed(), _btnIncludeDefaults->getPressed());
 }
 
 /**

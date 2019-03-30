@@ -27,7 +27,7 @@ namespace OpenXcom
 	class ArticleStateTFTDCraft : public ArticleStateTFTD
 	{
 	public:
-		ArticleStateTFTDCraft(ArticleDefinitionTFTD *defs);
+		ArticleStateTFTDCraft(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateTFTDCraft();
 
 	protected:

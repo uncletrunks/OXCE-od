@@ -33,7 +33,7 @@ namespace OpenXcom
 	class ArticleStateTextImage : public ArticleState
 	{
 	public:
-		ArticleStateTextImage(ArticleDefinitionTextImage *defs);
+		ArticleStateTextImage(ArticleDefinitionTextImage *defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateTextImage();
 
 	protected:

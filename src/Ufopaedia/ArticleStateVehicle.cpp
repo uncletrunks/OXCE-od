@@ -35,7 +35,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateVehicle::ArticleStateVehicle(ArticleDefinitionVehicle *defs) : ArticleState(defs->id)
+	ArticleStateVehicle::ArticleStateVehicle(ArticleDefinitionVehicle *defs, std::shared_ptr<ArticleCommonState> state) : ArticleState(defs->id, std::move(state))
 	{
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
 		Unit *unit = item->getVehicleUnit();
@@ -82,12 +82,12 @@ namespace OpenXcom
 
 		_txtTitle->setColor(Palette::blockOffset(15)+4);
 		_txtTitle->setBig();
-		_txtTitle->setText(tr(defs->title));
+		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
 
 		_txtInfo->setColor(Palette::blockOffset(15)-1);
 		_txtInfo->setSecondaryColor(Palette::blockOffset(15) + 4);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->text));
+		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
 
 		_lstStats->setColor(Palette::blockOffset(15)+4);
 		_lstStats->setColumns(2, 175, 145);

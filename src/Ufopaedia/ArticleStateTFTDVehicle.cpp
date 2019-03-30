@@ -32,7 +32,7 @@
 namespace OpenXcom
 {
 
-	ArticleStateTFTDVehicle::ArticleStateTFTDVehicle(ArticleDefinitionTFTD *defs) : ArticleStateTFTD(defs)
+	ArticleStateTFTDVehicle::ArticleStateTFTDVehicle(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state) : ArticleStateTFTD(defs, std::move(state))
 	{
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
 		Unit *unit = item->getVehicleUnit();

@@ -27,7 +27,7 @@ namespace OpenXcom
 	class ArticleStateTFTDVehicle : public ArticleStateTFTD
 	{
 	public:
-		ArticleStateTFTDVehicle(ArticleDefinitionTFTD *defs);
+		ArticleStateTFTDVehicle(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateTFTDVehicle();
 
 	protected:

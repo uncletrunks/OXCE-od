@@ -27,7 +27,7 @@ namespace OpenXcom
 	class ArticleStateTFTDArmor : public ArticleStateTFTD
 	{
 	public:
-		ArticleStateTFTDArmor(ArticleDefinitionTFTD *defs);
+		ArticleStateTFTDArmor(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state);
 		virtual ~ArticleStateTFTDArmor();
 
 	protected:
