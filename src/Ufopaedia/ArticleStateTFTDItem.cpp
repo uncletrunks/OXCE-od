@@ -41,7 +41,10 @@ namespace OpenXcom
 
 		RuleItem *item = _game->getMod()->getItem(defs->id, true);
 
-		const std::vector<std::string> *ammo_data = item->getPrimaryCompatibleAmmo();
+		auto ammoSlot = defs->getAmmoSlotForPage(_state->current_page);
+		auto ammoSlotPrevUsage = defs->getAmmoSlotPrevUsageForPage(_state->current_page);
+		const std::vector<std::string> dummy;
+		const std::vector<std::string> *ammo_data = ammoSlot != RuleItem::AmmoSlotSelfUse ? item->getCompatibleAmmoForSlot(ammoSlot) : &dummy;
 
 		// SHOT STATS TABLE (for firearms only)
 		if (item->getBattleType() == BT_FIREARM)
@@ -70,51 +73,35 @@ namespace OpenXcom
 			_lstInfo->setColor(_listColor2); // color for %-data!
 			_lstInfo->setColumns(3, 70, 40, 30);
 
+
+			auto addAttack = [&](int& row, const std::string& name, const RuleItemUseCost& cost, const RuleItemUseCost& flat, const RuleItemAction *config)
+			{
+				if (row < 2 && cost.Time > 0 && config->ammoSlot == ammoSlot)
+				{
+					std::string tu = Unicode::formatPercentage(cost.Time);
+					if (flat.Time)
+					{
+						tu.erase(tu.end() - 1);
+					}
+					_lstInfo->addRow(3,
+						tr(name).arg(config->shots).c_str(),
+						Unicode::formatPercentage(config->accuracy).c_str(),
+						tu.c_str());
+					_lstInfo->setCellColor(row, 0, _listColor1);
+					row++;
+				}
+			};
+
 			int current_row = 0;
-			if (item->getCostAuto().Time>0)
-			{
-				std::string tu = Unicode::formatPercentage(item->getCostAuto().Time);
-				if (item->getFlatAuto().Time)
-				{
-					tu.erase(tu.end() - 1);
-				}
-				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
-								Unicode::formatPercentage(item->getAccuracyAuto()).c_str(),
-								tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, _listColor1);
-				current_row++;
-			}
 
-			if (item->getCostSnap().Time>0)
-			{
-				std::string tu = Unicode::formatPercentage(item->getCostSnap().Time);
-				if (item->getFlatSnap().Time)
-				{
-					tu.erase(tu.end() - 1);
-				}
-				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_SNAP").arg(item->getConfigSnap()->shots).c_str(),
-								Unicode::formatPercentage(item->getAccuracySnap()).c_str(),
-								tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, _listColor1);
-				current_row++;
-			}
+			addAttack(current_row, "STR_SHOT_TYPE_AUTO", item->getCostAuto(), item->getFlatAuto(), item->getConfigAuto());
 
-			if (item->getCostAimed().Time>0)
-			{
-				std::string tu = Unicode::formatPercentage(item->getCostAimed().Time);
-				if (item->getFlatAimed().Time)
-				{
-					tu.erase(tu.end() - 1);
-				}
-				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_AIMED").arg(item->getConfigAimed()->shots).c_str(),
-								Unicode::formatPercentage(item->getAccuracyAimed()).c_str(),
-								tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, _listColor1);
-				current_row++;
-			}
+			addAttack(current_row, "STR_SHOT_TYPE_SNAP", item->getCostSnap(), item->getFlatSnap(), item->getConfigSnap());
+
+			addAttack(current_row, "STR_SHOT_TYPE_AIMED", item->getCostAimed(), item->getFlatAimed(), item->getConfigAimed());
+
+			//optional melee
+			addAttack(current_row, "STR_SHOT_TYPE_MELEE", item->getCostMelee(), item->getFlatMelee(), item->getConfigMelee());
 		}
 
 		// AMMO column
@@ -132,39 +119,51 @@ namespace OpenXcom
 			_txtAmmoDamage[i]->setColor(_ammoColor);
 		}
 
+		auto addAmmoDamagePower = [&](int pos, const RuleItem *rule)
+		{
+			_txtAmmoType[pos]->setText(tr(getDamageTypeText(rule->getDamageType()->ResistType)));
+
+			ss.str("");ss.clear();
+			ss << rule->getPower();
+			if (rule->getShotgunPellets())
+			{
+				ss << "x" << rule->getShotgunPellets();
+			}
+			_txtAmmoDamage[pos]->setText(ss.str());
+		};
+
 		switch (item->getBattleType())
 		{
 			case BT_FIREARM:
 				if (item->getHidePower()) break;
 				if (ammo_data->empty())
 				{
-					_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
-
-					ss.str("");ss.clear();
-					ss << item->getPower();
-					if (item->getShotgunPellets())
-					{
-						ss << "x" << item->getShotgunPellets();
-					}
-					_txtAmmoDamage[0]->setText(ss.str());
+					addAmmoDamagePower(0, item);
 				}
 				else
 				{
-					for (size_t i = 0; i < std::min(ammo_data->size(), (size_t)3); ++i)
+					int maxShow = 3;
+					int skipShow = maxShow * ammoSlotPrevUsage;
+					int currShow = 0;
+					for (auto& type : *ammo_data)
 					{
-						ArticleDefinition *ammo_article = _game->getMod()->getUfopaediaArticle((*ammo_data)[i], true);
+						ArticleDefinition *ammo_article = _game->getMod()->getUfopaediaArticle(type, true);
 						if (Ufopaedia::isArticleAvailable(_game->getSavedGame(), ammo_article))
 						{
-							RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[i], true);
-							_txtAmmoType[i]->setText(tr(getDamageTypeText(ammo_rule->getDamageType()->ResistType)));
-
-							ss.str("");ss.clear();
-							ss << ammo_rule->getPower();
-							if (ammo_rule->getShotgunPellets())
+							if (skipShow > 0)
 							{
-								ss << "x" << ammo_rule->getShotgunPellets();
+								--skipShow;
+								continue;
 							}
-							_txtAmmoDamage[i]->setText(ss.str());
+							RuleItem *ammo_rule = _game->getMod()->getItem(type, true);
+
+							addAmmoDamagePower(currShow, ammo_rule);
+
+							++currShow;
+							if (currShow == maxShow)
+							{
+								break;
+							}
 						}
 					}
 				}
@@ -174,11 +173,7 @@ namespace OpenXcom
 			case BT_PROXIMITYGRENADE:
 			case BT_MELEE:
 				if (item->getHidePower()) break;
-				_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
-
-				ss.str("");ss.clear();
-				ss << item->getPower();
-				_txtAmmoDamage[0]->setText(ss.str());
+				addAmmoDamagePower(0, item);
 				break;
 			default: break;
 		}

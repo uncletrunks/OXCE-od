@@ -176,7 +176,11 @@ namespace OpenXcom
 
 		item->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _image);
 
-		const std::vector<std::string> *ammo_data = item->getPrimaryCompatibleAmmo();
+
+		auto ammoSlot = defs->getAmmoSlotForPage(_state->current_page);
+		auto ammoSlotPrevUsage = defs->getAmmoSlotPrevUsageForPage(_state->current_page);
+		const std::vector<std::string> dummy;
+		const std::vector<std::string> *ammo_data = ammoSlot != RuleItem::AmmoSlotSelfUse ? item->getCompatibleAmmoForSlot(ammoSlot) : &dummy;
 
 		int weight = item->getWeight();
 		std::string weightLabel = tr("STR_WEIGHT_PEDIA1").arg(weight);
@@ -217,53 +221,36 @@ namespace OpenXcom
 			_lstInfo->setBig();
 		}
 
+		auto addAttack = [&](int& row, const std::string& name, const RuleItemUseCost& cost, const RuleItemUseCost& flat, const RuleItemAction *config)
+		{
+			if (row < 2 && cost.Time > 0 && config->ammoSlot == ammoSlot)
+			{
+				std::string tu = Unicode::formatPercentage(cost.Time);
+				if (flat.Time)
+				{
+					tu.erase(tu.end() - 1);
+				}
+				_lstInfo->addRow(3,
+					tr(name).arg(config->shots).c_str(),
+					Unicode::formatPercentage(config->accuracy).c_str(),
+					tu.c_str());
+				_lstInfo->setCellColor(row, 0, _listColor1);
+				row++;
+			}
+		};
+
 		if (item->getBattleType() == BT_FIREARM)
 		{
 			int current_row = 0;
-			if (item->getCostAuto().Time>0)
-			{
-				std::string tu = Unicode::formatPercentage(item->getCostAuto().Time);
-				if (item->getFlatAuto().Time)
-				{
-					tu.erase(tu.end() - 1);
-				}
-				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_AUTO").arg(item->getConfigAuto()->shots).c_str(),
-								Unicode::formatPercentage(item->getAccuracyAuto()).c_str(),
-								tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, _listColor1);
-				current_row++;
-			}
 
-			if (item->getCostSnap().Time>0)
-			{
-				std::string tu = Unicode::formatPercentage(item->getCostSnap().Time);
-				if (item->getFlatSnap().Time)
-				{
-					tu.erase(tu.end() - 1);
-				}
-				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_SNAP").arg(item->getConfigSnap()->shots).c_str(),
-								Unicode::formatPercentage(item->getAccuracySnap()).c_str(),
-								tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, _listColor1);
-				current_row++;
-			}
+			addAttack(current_row, "STR_SHOT_TYPE_AUTO", item->getCostAuto(), item->getFlatAuto(), item->getConfigAuto());
 
-			if (item->getCostAimed().Time>0)
-			{
-				std::string tu = Unicode::formatPercentage(item->getCostAimed().Time);
-				if (item->getFlatAimed().Time)
-				{
-					tu.erase(tu.end() - 1);
-				}
-				_lstInfo->addRow(3,
-								tr("STR_SHOT_TYPE_AIMED").arg(item->getConfigAimed()->shots).c_str(),
-								Unicode::formatPercentage(item->getAccuracyAimed()).c_str(),
-								tu.c_str());
-				_lstInfo->setCellColor(current_row, 0, _listColor1);
-				current_row++;
-			}
+			addAttack(current_row, "STR_SHOT_TYPE_SNAP", item->getCostSnap(), item->getFlatSnap(), item->getConfigSnap());
+
+			addAttack(current_row, "STR_SHOT_TYPE_AIMED", item->getCostAimed(), item->getFlatAimed(), item->getConfigAimed());
+
+			//optional melee
+			addAttack(current_row, "STR_SHOT_TYPE_MELEE", item->getCostMelee(), item->getFlatMelee(), item->getConfigMelee());
 
 			// text_info is BELOW the info table (table can have 0-3 rows)
 			int shift = (3 - current_row) * 16;
@@ -275,19 +262,9 @@ namespace OpenXcom
 		}
 		else if (item->getBattleType() == BT_MELEE)
 		{
-			if (item->getCostMelee().Time > 0)
-			{
-				std::string tu = Unicode::formatPercentage(item->getCostMelee().Time);
-				if (item->getFlatMelee().Time)
-				{
-					tu.erase(tu.end() - 1);
-				}
-				_lstInfo->addRow(3,
-					tr("STR_SHOT_TYPE_MELEE").c_str(),
-					Unicode::formatPercentage(item->getAccuracyMelee()).c_str(),
-					tu.c_str());
-				_lstInfo->setCellColor(0, 0, _listColor1);
-			}
+			int current_row = 0;
+
+			addAttack(current_row, "STR_SHOT_TYPE_MELEE", item->getCostMelee(), item->getFlatMelee(), item->getConfigMelee());
 
 			// text_info is BELOW the info table (with 1 row only)
 			_txtInfo = new Text(300, 88 - bottomOffset, 8, 106);
@@ -350,6 +327,20 @@ namespace OpenXcom
 			add(_imageAmmo[i]);
 		}
 
+		auto addAmmoDamagePower = [&](int pos, const RuleItem *rule)
+		{
+			_txtAmmoType[pos]->setText(tr(getDamageTypeText(rule->getDamageType()->ResistType)));
+
+			ss.str("");ss.clear();
+			ss << rule->getPower();
+			if (rule->getShotgunPellets())
+			{
+				ss << "x" << rule->getShotgunPellets();
+			}
+			_txtAmmoDamage[pos]->setText(ss.str());
+			_txtAmmoDamage[pos]->setColor(getDamageTypeTextColor(rule->getDamageType()->ResistType));
+		};
+
 		switch (item->getBattleType())
 		{
 			case BT_FIREARM:
@@ -368,37 +359,34 @@ namespace OpenXcom
 
 				if (ammo_data->empty())
 				{
-					_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
-
-					ss.str("");ss.clear();
-					ss << item->getPower();
-					if (item->getShotgunPellets())
-					{
-						ss << "x" << item->getShotgunPellets();
-					}
-					_txtAmmoDamage[0]->setText(ss.str());
-					_txtAmmoDamage[0]->setColor(getDamageTypeTextColor(item->getDamageType()->ResistType));
+					addAmmoDamagePower(0, item);
 				}
 				else
 				{
-					for (size_t i = 0; i < std::min(ammo_data->size(), (size_t)3); ++i)
+					int maxShow = 3;
+					int skipShow = maxShow * ammoSlotPrevUsage;
+					int currShow = 0;
+					for (auto& type : *ammo_data)
 					{
-						ArticleDefinition *ammo_article = _game->getMod()->getUfopaediaArticle((*ammo_data)[i], true);
+						ArticleDefinition *ammo_article = _game->getMod()->getUfopaediaArticle(type, true);
 						if (Ufopaedia::isArticleAvailable(_game->getSavedGame(), ammo_article))
 						{
-							RuleItem *ammo_rule = _game->getMod()->getItem((*ammo_data)[i], true);
-							_txtAmmoType[i]->setText(tr(getDamageTypeText(ammo_rule->getDamageType()->ResistType)));
-
-							ss.str("");ss.clear();
-							ss << ammo_rule->getPower();
-							if (ammo_rule->getShotgunPellets())
+							if (skipShow > 0)
 							{
-								ss << "x" << ammo_rule->getShotgunPellets();
+								--skipShow;
+								continue;
 							}
-							_txtAmmoDamage[i]->setText(ss.str());
-							_txtAmmoDamage[i]->setColor(getDamageTypeTextColor(ammo_rule->getDamageType()->ResistType));
+							RuleItem *ammo_rule = _game->getMod()->getItem(type, true);
 
-							ammo_rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _imageAmmo[i]);
+							addAmmoDamagePower(currShow, ammo_rule);
+
+							ammo_rule->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _imageAmmo[currShow]);
+
+							++currShow;
+							if (currShow == maxShow)
+							{
+								break;
+							}
 						}
 					}
 				}
@@ -414,16 +402,7 @@ namespace OpenXcom
 				_txtDamage->setAlign(ALIGN_CENTER);
 				_txtDamage->setText(tr("STR_DAMAGE_UC"));
 
-				_txtAmmoType[0]->setText(tr(getDamageTypeText(item->getDamageType()->ResistType)));
-
-				ss.str("");ss.clear();
-				ss << item->getPower();
-				if (item->getShotgunPellets())
-				{
-					ss << "x" << item->getShotgunPellets();
-				}
-				_txtAmmoDamage[0]->setText(ss.str());
-				_txtAmmoDamage[0]->setColor(getDamageTypeTextColor(item->getDamageType()->ResistType));
+				addAmmoDamagePower(0, item);
 				break;
 			default: break;
 		}

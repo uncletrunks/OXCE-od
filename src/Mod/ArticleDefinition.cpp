@@ -19,6 +19,7 @@
 
 #include "ArticleDefinition.h"
 #include "../Engine/Exception.h"
+#include "../Mod/RuleItem.h"
 
 namespace YAML
 {
@@ -99,6 +100,7 @@ namespace OpenXcom
 			{
 				_pages[offset].title = n["title"].as<std::string>(_pages[offset].title);
 				_pages[offset].text = n["text"].as<std::string>(_pages[offset].text);
+				RuleItem::loadAmmoSlotChecked(_pages[offset].ammoSlot, n["ammoSlot"], id);
 			}
 		};
 

@@ -53,6 +53,7 @@ namespace OpenXcom
 	{
 		std::string title;
 		std::string text;
+		int ammoSlot = 0;
 	};
 
 	/**
@@ -95,7 +96,7 @@ namespace OpenXcom
 			return _pages.size();
 		}
 
-		const std::string& getTitleForPage(size_t page)
+		const std::string& getTitleForPage(size_t page) const
 		{
 			if (page >= _pages.size())
 			{
@@ -104,13 +105,36 @@ namespace OpenXcom
 			return _pages[page].title;
 		}
 
-		const std::string& getTextForPage(size_t page)
+		const std::string& getTextForPage(size_t page) const
 		{
 			if (page >= _pages.size())
 			{
 				throw Exception("Access to wrong page for article '" + id + "'");
 			}
 			return _pages[page].text;
+		}
+
+		int getAmmoSlotForPage(size_t page) const
+		{
+			if (page >= _pages.size())
+			{
+				throw Exception("Access to wrong page for article '" + id + "'");
+			}
+			return _pages[page].ammoSlot;
+		}
+
+		int getAmmoSlotPrevUsageForPage(size_t page) const
+		{
+			auto ammoSlot = getAmmoSlotForPage(page);
+			int used = 0;
+			for (size_t i = 0; i < page; ++i)
+			{
+				if (_pages[i].ammoSlot == ammoSlot)
+				{
+					++used;
+				}
+			}
+			return used;
 		}
 
 	protected:
