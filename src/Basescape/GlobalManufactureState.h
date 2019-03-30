@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright 2010-2016 OpenXcom Developers.
+ * Copyright 2010-2019 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -27,35 +27,36 @@ class Window;
 class Text;
 class TextList;
 class Base;
+class RuleManufacture;
 
 /**
- * Manufacture screen that lets the player manage
- * all the manufacturing operations of a base.
+ * Global Manufacture screen that provides overview
+ * of the ongoing manufacturing operations in all the bases.
  */
-class ManufactureState : public State
+class GlobalManufactureState : public State
 {
 private:
-	Base *_base;
-	TextButton *_btnNew, *_btnOk;
+	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtAvailable, *_txtAllocated, *_txtSpace, *_txtFunds, *_txtItem, *_txtEngineers, *_txtProduced, *_txtCost, *_txtTimeLeft;
 	TextList *_lstManufacture;
-	void lstManufactureClickLeft(Action * action);
-	void lstManufactureClickMiddle(Action * action);
+
+	std::vector<Base*> _bases;
+	std::vector<RuleManufacture*> _topics;
+	bool _openedFromBasescape;
 public:
-	/// Creates the Manufacture state.
-	ManufactureState(Base *base);
-	/// Cleans up the Manufacture state.
-	~ManufactureState();
+	/// Creates the GlobalManufacture state.
+	GlobalManufactureState(bool openedFromBasescape);
+	/// Cleans up the GlobalManufacture state.
+	~GlobalManufactureState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
-	/// Handler for opening the Global Production UI.
-	void onCurrentGlobalProductionClick(Action *action);
+	/// Handler for clicking the Production list.
+	void onSelectBase(Action *action);
+	void onOpenTechTreeViewer(Action *action);
 	/// Updates the production list.
 	void init() override;
-	/// Handler for the New Production button.
-	void btnNewProductionClick(Action * action);
-	/// Fills the list of base productions.
+	/// Fills the list with Productions from all bases.
 	void fillProductionList();
 };
 

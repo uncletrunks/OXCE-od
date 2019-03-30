@@ -31,6 +31,7 @@
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/Production.h"
 #include "NewManufactureListState.h"
+#include "GlobalManufactureState.h"
 #include "ManufactureInfoState.h"
 #include "TechTreeViewerState.h"
 #include <algorithm>
@@ -87,6 +88,7 @@ ManufactureState::ManufactureState(Base *base) : _base(base)
 	_btnNew->setText(tr("STR_NEW_PRODUCTION"));
 	_btnNew->onMouseClick((ActionHandler)&ManufactureState::btnNewProductionClick);
 	_btnNew->onKeyboardPress((ActionHandler)&ManufactureState::btnNewProductionClick, Options::keyToggleQuickSearch);
+	_btnNew->onKeyboardPress((ActionHandler)&ManufactureState::onCurrentGlobalProductionClick, Options::keyGeoGlobalProduction);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&ManufactureState::btnOkClick);
@@ -149,6 +151,15 @@ void ManufactureState::init()
 void ManufactureState::btnOkClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+ * Opens the Global Production UI.
+ * @param action Pointer to an action.
+ */
+void ManufactureState::onCurrentGlobalProductionClick(Action *)
+{
+	_game->pushState(new GlobalManufactureState(true));
 }
 
 /**

@@ -101,6 +101,8 @@ public:
 	void btnTechTreeViewerClick(Action *action);
 	/// Handler for clicking the [SelectMusicTrack] button.
 	void btnSelectMusicTrackClick(Action *action);
+	/// Handler for clicking the [GlobalProduction] key.
+	void btnGlobalProductionClick(Action *action);
 	/// Handler for clicking the [GlobalResearch] key.
 	void btnGlobalResearchClick(Action *action);
 	/// Handler for clicking the Bases button.

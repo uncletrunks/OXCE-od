@@ -57,6 +57,7 @@
 #include "../Basescape/BasescapeState.h"
 #include "../Basescape/SellState.h"
 #include "../Basescape/TechTreeViewerState.h"
+#include "../Basescape/GlobalManufactureState.h"
 #include "../Basescape/GlobalResearchState.h"
 #include "../Menu/CutsceneState.h"
 #include "../Menu/ErrorMessageState.h"
@@ -246,6 +247,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfoTrackerClick, Options::keyGeoUfoTracker);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnTechTreeViewerClick, Options::keyGeoTechTreeViewer);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnSelectMusicTrackClick, Options::keySelectMusicTrack);
+	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalProductionClick, Options::keyGeoGlobalProduction);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalResearchClick, Options::keyGeoGlobalResearch);
 	_btnIntercept->setGeoscapeButton(true);
 
@@ -2627,6 +2629,15 @@ void GeoscapeState::btnTechTreeViewerClick(Action *)
 void GeoscapeState::btnSelectMusicTrackClick(Action *)
 {
 	_game->pushState(new SelectMusicTrackState(SMT_GEOSCAPE));
+}
+
+/**
+ * Opens the Current Global Production.
+ * @param action Pointer to an action.
+ */
+void GeoscapeState::btnGlobalProductionClick(Action *)
+{
+	_game->pushState(new GlobalManufactureState(false));
 }
 
 /**

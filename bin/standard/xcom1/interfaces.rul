@@ -1063,6 +1063,24 @@ interfaces:
         border: 246  # purple
       - id: button
         color: 218   # blue
+  - type: globalManufactureMenu
+    palette: PAL_BASESCAPE
+    elements:
+      - id: palette
+        color: 6     # oxide
+      - id: window
+        color: 246   # purple
+      - id: text1
+        color: 246   # purple
+        color2: 208  # white
+      - id: text2
+        color: 241   # pink
+      - id: list
+        color: 218   # blue
+        color2: 208  # white
+        border: 246  # purple
+      - id: button
+        color: 218   # blue
   - type: selectNewManufacture
     parent: manufactureMenu
     elements:
