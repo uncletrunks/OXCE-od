@@ -95,7 +95,7 @@ namespace OpenXcom
 			return _pages.size();
 		}
 
-		const std::string& getTitleOfPage(size_t page)
+		const std::string& getTitleForPage(size_t page)
 		{
 			if (page >= _pages.size())
 			{
@@ -104,7 +104,7 @@ namespace OpenXcom
 			return _pages[page].title;
 		}
 
-		const std::string& getTextOfPage(size_t page)
+		const std::string& getTextForPage(size_t page)
 		{
 			if (page >= _pages.size())
 			{

@@ -165,7 +165,7 @@ namespace OpenXcom
 		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
-		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
+		_txtTitle->setText(tr(defs->getTitleForPage(_state->current_page)));
 
 		_txtWeight->setColor(_textColor);
 		_txtWeight->setAlign(ALIGN_RIGHT);
@@ -303,7 +303,7 @@ namespace OpenXcom
 		_txtInfo->setColor(_textColor);
 		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
+		_txtInfo->setText(tr(defs->getTextForPage(_state->current_page)));
 
 		// STATS FOR NERDS extract
 		_txtAccuracyModifier = new Text(300, 9, 8, 174);

@@ -66,7 +66,7 @@ namespace OpenXcom
 		_txtTitle->setColor(Palette::blockOffset(14)+15);
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
-		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
+		_txtTitle->setText(tr(defs->getTitleForPage(_state->current_page)));
 
 		_txtInfo = new Text(defs->rect_text.width, defs->rect_text.height, defs->rect_text.x, defs->rect_text.y);
 		add(_txtInfo);
@@ -74,7 +74,7 @@ namespace OpenXcom
 		_txtInfo->setColor(Palette::blockOffset(14)+15);
 		_txtInfo->setSecondaryColor(Palette::blockOffset(15) + 4);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
+		_txtInfo->setText(tr(defs->getTextForPage(_state->current_page)));
 
 		_txtStats = new Text(defs->rect_stats.width, defs->rect_stats.height, defs->rect_stats.x, defs->rect_stats.y);
 		add(_txtStats);

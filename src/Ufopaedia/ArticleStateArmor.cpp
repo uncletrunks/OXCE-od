@@ -69,7 +69,7 @@ namespace OpenXcom
 
 		_txtTitle->setColor(_textColor);
 		_txtTitle->setBig();
-		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
+		_txtTitle->setText(tr(defs->getTitleForPage(_state->current_page)));
 
 		_image = new Surface(320, 200, 0, 0);
 		add(_image);
@@ -119,7 +119,7 @@ namespace OpenXcom
 		_txtInfo->setColor(_textColor);
 		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
+		_txtInfo->setText(tr(defs->getTextForPage(_state->current_page)));
 
 		// Add armor values
 		addStat("STR_FRONT_ARMOR", armor->getFrontArmor());

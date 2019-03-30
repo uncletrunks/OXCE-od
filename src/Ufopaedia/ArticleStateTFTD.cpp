@@ -139,12 +139,12 @@ namespace OpenXcom
 		_txtTitle->setBig();
 		_txtTitle->setWordWrap(true);
 		_txtTitle->setAlign(ALIGN_CENTER);
-		_txtTitle->setText(tr(defs->getTitleOfPage(_state->current_page)));
+		_txtTitle->setText(tr(defs->getTitleForPage(_state->current_page)));
 
 		_txtInfo->setColor(_textColor);
 		_txtInfo->setSecondaryColor(_textColor2);
 		_txtInfo->setWordWrap(true);
-		_txtInfo->setText(tr(defs->getTextOfPage(_state->current_page)));
+		_txtInfo->setText(tr(defs->getTextForPage(_state->current_page)));
 
 		// all of the above are common to the TFTD articles.
 
