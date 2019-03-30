@@ -41,6 +41,7 @@
 #include <cmath>
 //#include "driver.h"		/* use M.A.M.E. */
 #include "fmopl.h"
+#include "../RNG.h"
 
 #ifndef PI
 #define PI 3.14159265358979323846
@@ -503,7 +504,7 @@ INLINE void OPL_CALC_CH( OPL_CH *CH )
 INLINE void OPL_CALC_RH( OPL_CH *CH )
 {
 	UINT32 env_tam,env_sd,env_top,env_hh;
-	int whitenoise = (rand()&1)*(WHITE_NOISE_db/EG_STEP);
+	int whitenoise = (OpenXcom::RNG::seedless(0, 1))*(WHITE_NOISE_db/EG_STEP);
 	INT32 tone8;
 
 	OPL_SLOT *SLOT;

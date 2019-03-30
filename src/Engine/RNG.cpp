@@ -41,14 +41,21 @@ See <http://creativecommons.org/publicdomain/zero/1.0/>. */
    rather suggest to use a xorshift128+ (for maximum speed) or
    xorshift1024* (for speed and very long period) generator. */
 
+static uint64_t nextImpl(uint64_t& state)
+{
+	state ^= state >> 12; // a
+	state ^= state << 25; // b
+	state ^= state >> 27; // c
+	return state * 2685821657736338717ULL;
+}
+
 uint64_t x = time(0); /* The state must be seeded with a nonzero value. */
+uint64_t x_seedless = time(0) ^ 0x2aafed63c68b2255; //apply some random number to reduce similarity with `x`.
+
 
 uint64_t next()
 {
-	x ^= x >> 12; // a
-	x ^= x << 25; // b
-	x ^= x >> 27; // c
-	return x * 2685821657736338717ULL;
+	return nextImpl(x);
 }
 
 /**
@@ -102,7 +109,7 @@ double generate(double min, double max)
  */
 int seedless(int min, int max)
 {
-	return (rand() % (max - min + 1) + min);
+	return (int)(nextImpl(x_seedless) % (max - min + 1) + min);
 }
 
 

@@ -113,7 +113,7 @@ void Tile::load(const YAML::Node &node)
 	}
 	if (_fire || _smoke)
 	{
-		_animationOffset = std::rand() % 4;
+		_animationOffset = RNG::seedless(0, 3);
 	}
 }
 
@@ -144,7 +144,7 @@ void Tile::loadBinary(Uint8 *buffer, Tile::SerializationKey& serKey)
 	_currentFrame[2] = (boolFields & 0x10) ? 7 : 0;
 	if (_fire || _smoke)
 	{
-		_animationOffset = std::rand() % 4;
+		_animationOffset = RNG::seedless(0, 3);
 	}
 }
 

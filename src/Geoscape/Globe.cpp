@@ -27,6 +27,7 @@
 #include "../Mod/Polyline.h"
 #include "../Engine/FastLineClip.h"
 #include "../Engine/Game.h"
+#include "../Engine/RNG.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/GameTime.h"
 #include "../Savegame/Base.h"
@@ -287,7 +288,7 @@ Globe::Globe(Game* game, int cenX, int cenY, int width, int height, int x, int y
 	//filling random noise "texture"
 	_randomNoiseData.resize(static_data.random_surf_size * static_data.random_surf_size);
 	for (size_t i=0; i<_randomNoiseData.size(); ++i)
-		_randomNoiseData[i] = rand()%4;
+		_randomNoiseData[i] = RNG::seedless(0, 3);
 
 	cachePolygons();
 }
