@@ -55,7 +55,8 @@ namespace OpenXcom
  */
 SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
-	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _startingCondition(nullptr), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20), _animFrame(0),
+	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _startingCondition(nullptr), _ecEnabledFriendly(false), _ecEnabledHostile(false), _ecEnabledNeutral(false),
+	_globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20), _animFrame(0),
 	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
@@ -132,6 +133,9 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 		std::string startingConditionType = node["startingConditionType"].as<std::string>();
 		_startingCondition = mod->getStartingCondition(startingConditionType);
 	}
+	_ecEnabledFriendly = node["ecEnabledFriendly"].as<bool>(_ecEnabledFriendly);
+	_ecEnabledHostile = node["ecEnabledHostile"].as<bool>(_ecEnabledHostile);
+	_ecEnabledNeutral = node["ecEnabledNeutral"].as<bool>(_ecEnabledNeutral);
 	_alienCustomDeploy = node["alienCustomDeploy"].as<std::string>(_alienCustomDeploy);
 	_alienCustomMission = node["alienCustomMission"].as<std::string>(_alienCustomMission);
 	_globalShade = node["globalshade"].as<int>(_globalShade);
@@ -433,6 +437,9 @@ YAML::Node SavedBattleGame::save() const
 	{
 		node["startingConditionType"] = _startingCondition->getType();
 	}
+	node["ecEnabledFriendly"] = _ecEnabledFriendly;
+	node["ecEnabledHostile"] = _ecEnabledHostile;
+	node["ecEnabledNeutral"] = _ecEnabledNeutral;
 	node["alienCustomDeploy"] = _alienCustomDeploy;
 	node["alienCustomMission"] = _alienCustomMission;
 	node["globalshade"] = _globalShade;
@@ -608,12 +615,23 @@ ItemContainer *SavedBattleGame::getBaseStorageItems()
 }
 
 /**
- * Sets the starting condition.
+ * Applies the starting condition.
  * @param startingCondition The starting condition.
  */
-void SavedBattleGame::setStartingCondition(const RuleStartingCondition* startingCondition)
+void SavedBattleGame::applyStartingCondition(const RuleStartingCondition* startingCondition)
 {
 	_startingCondition = startingCondition;
+
+	_ecEnabledFriendly = false;
+	_ecEnabledHostile = false;
+	_ecEnabledNeutral = false;
+
+	if (_startingCondition)
+	{
+		_ecEnabledFriendly = RNG::percent(_startingCondition->getEnvironmetalCondition("STR_FRIENDLY").globalChance);
+		_ecEnabledHostile = RNG::percent(_startingCondition->getEnvironmetalCondition("STR_HOSTILE").globalChance);
+		_ecEnabledNeutral = RNG::percent(_startingCondition->getEnvironmetalCondition("STR_NEUTRAL").globalChance);
+	}
 }
 
 /**
@@ -623,6 +641,28 @@ void SavedBattleGame::setStartingCondition(const RuleStartingCondition* starting
 const RuleStartingCondition* SavedBattleGame::getStartingCondition() const
 {
 	return _startingCondition;
+}
+
+/**
+ * Are environmental conditions (for a given faction) enabled?
+ * @param faction The relevant faction.
+ * @return True, if enabled.
+ */
+bool SavedBattleGame::getEnvironmentalConditionsEnabled(UnitFaction faction) const
+{
+	if (faction == FACTION_PLAYER)
+	{
+		return _ecEnabledFriendly;
+	}
+	else if (faction == FACTION_HOSTILE)
+	{
+		return _ecEnabledHostile;
+	}
+	else if (faction == FACTION_NEUTRAL)
+	{
+		return _ecEnabledNeutral;
+	}
+	return false;
 }
 
 /**

@@ -431,7 +431,7 @@ void BattlescapeGenerator::nextStage()
 	{
 		startingCondition = temp;
 	}
-	_save->setStartingCondition(startingCondition);
+	_save->applyStartingCondition(startingCondition);
 
 	// starting conditions - armor transformation (no armor replacement! that is done only before the 1st stage)
 	if (startingCondition != 0)
@@ -707,7 +707,7 @@ void BattlescapeGenerator::run()
  */
 void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondition)
 {
-	_save->setStartingCondition(startingCondition);
+	_save->applyStartingCondition(startingCondition);
 
 	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
 

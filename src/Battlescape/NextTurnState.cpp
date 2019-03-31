@@ -292,6 +292,11 @@ void NextTurnState::checkBugHuntMode()
 */
 bool NextTurnState::applyEnvironmentalConditionToFaction(UnitFaction faction, EnvironmentalCondition condition)
 {
+	if (!_battleGame->getEnvironmentalConditionsEnabled(faction))
+	{
+		return false;
+	}
+
 	// Killing people before battle starts causes a crash
 	// Panicking people before battle starts causes endless loop
 	// Let's just avoid this instead of reworking everything

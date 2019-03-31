@@ -31,6 +31,7 @@ namespace YAML
 		static Node encode(const OpenXcom::EnvironmentalCondition& rhs)
 		{
 			Node node;
+			node["globalChance"] = rhs.globalChance;
 			node["chancePerTurn"] = rhs.chancePerTurn;
 			node["firstTurn"] = rhs.firstTurn;
 			node["lastTurn"] = rhs.lastTurn;
@@ -47,6 +48,7 @@ namespace YAML
 			if (!node.IsMap())
 				return false;
 
+			rhs.globalChance = node["globalChance"].as<int>(rhs.globalChance);
 			rhs.chancePerTurn = node["chancePerTurn"].as<int>(rhs.chancePerTurn);
 			rhs.firstTurn = node["firstTurn"].as<int>(rhs.firstTurn);
 			rhs.lastTurn = node["lastTurn"].as<int>(rhs.lastTurn);

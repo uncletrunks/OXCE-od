@@ -69,6 +69,7 @@ private:
 	TileEngine *_tileEngine;
 	std::string _missionType, _alienCustomDeploy, _alienCustomMission;
 	const RuleStartingCondition *_startingCondition;
+	bool _ecEnabledFriendly, _ecEnabledHostile, _ecEnabledNeutral;
 	int _globalShade;
 	UnitFaction _side;
 	int _turn, _bughuntMinTurn;
@@ -123,10 +124,12 @@ public:
 	const std::string &getMissionType() const;
 	/// Gets the base's items BEFORE the mission.
 	ItemContainer *getBaseStorageItems();
-	/// Sets the starting condition.
-	void setStartingCondition(const RuleStartingCondition* startingCondition);
+	/// Applies the starting condition.
+	void applyStartingCondition(const RuleStartingCondition* startingCondition);
 	/// Gets the starting condition.
 	const RuleStartingCondition *getStartingCondition() const;
+	/// Are environmental conditions (for a given faction) enabled?
+	bool getEnvironmentalConditionsEnabled(UnitFaction faction) const;
 	/// Sets the custom alien data.
 	void setAlienCustom(const std::string &deploy, const std::string &mission);
 	/// Gets the custom alien deploy.

@@ -30,6 +30,7 @@ class Armor;
 
 struct EnvironmentalCondition
 {
+	int globalChance;
 	int chancePerTurn;
 	int firstTurn, lastTurn;
 	std::string message;
@@ -37,7 +38,7 @@ struct EnvironmentalCondition
 	std::string weaponOrAmmo;
 	int side;
 	int bodyPart;
-	EnvironmentalCondition() : chancePerTurn(0), firstTurn(1), lastTurn(1000), color(29), side(-1), bodyPart(-1) { /*Empty by Design*/ };
+	EnvironmentalCondition() : globalChance(100), chancePerTurn(0), firstTurn(1), lastTurn(1000), color(29), side(-1), bodyPart(-1) { /*Empty by Design*/ };
 };
 
 /**
