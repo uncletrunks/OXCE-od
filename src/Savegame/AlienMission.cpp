@@ -215,20 +215,52 @@ void AlienMission::think(Game &engine, const Globe &globe)
 			if ((*c)->canBeInfiltrated() && region->insideRegion((*c)->getRules()->getLabelLongitude(), (*c)->getRules()->getLabelLatitude()))
 			{
 				(*c)->setNewPact();
-				std::vector<MissionArea> areas = region->getMissionZones().at(_rule.getSpawnZone()).areas;
 				MissionArea area;
 				std::pair<double, double> pos;
 				int tries = 0;
-				do
+				if (!mod.getBuildInfiltrationBaseCloseToTheCountry())
 				{
-					area = areas.at(RNG::generate(0, areas.size()-1));
-					pos.first = RNG::generate(std::min(area.lonMin, area.lonMax), std::max(area.lonMin, area.lonMax));
-					pos.second = RNG::generate(std::min(area.latMin, area.latMax), std::max(area.latMin, area.latMax));
-					++tries;
+					std::vector<MissionArea> areas = region->getMissionZones().at(_rule.getSpawnZone()).areas;
+					do
+					{
+						area = areas.at(RNG::generate(0, areas.size() - 1));
+						pos.first = RNG::generate(std::min(area.lonMin, area.lonMax), std::max(area.lonMin, area.lonMax));
+						pos.second = RNG::generate(std::min(area.latMin, area.latMax), std::max(area.latMin, area.latMax));
+						++tries;
+					} while (!(globe.insideLand(pos.first, pos.second)
+						&& region->insideRegion(pos.first, pos.second))
+						&& tries < 100);
 				}
-				while (!(globe.insideLand(pos.first, pos.second)
-					&& region->insideRegion(pos.first, pos.second))
-					&& tries < 100);
+				else
+				{
+					RuleCountry* cRule = (*c)->getRules();
+					int pick = 0;
+					double lonMini, lonMaxi, latMini, latMaxi;
+					do
+					{
+						pick = RNG::generate(0, cRule->getLonMin().size() - 1);
+						lonMini = cRule->getLonMin()[pick];
+						lonMaxi = cRule->getLonMax()[pick];
+						if (lonMini > lonMaxi)
+						{
+							// UK, France, Spain, or anything crossed by the prime meridian
+							if (RNG::percent(50)) { lonMini = Deg2Rad(0.0); } else { lonMaxi = Deg2Rad(359.99); }
+						}
+						latMini = cRule->getLatMin()[pick];
+						latMaxi = cRule->getLatMax()[pick];
+						pos.first = RNG::generate(std::min(lonMini, lonMaxi), std::max(lonMini, lonMaxi));
+						pos.second = RNG::generate(std::min(latMini, latMaxi), std::max(latMini, latMaxi));
+						++tries;
+					} while (!(globe.insideLand(pos.first, pos.second)
+						&& cRule->insideCountry(pos.first, pos.second))
+						&& tries < 100);
+					// dummy
+					area.texture = 0;
+					area.lonMin = pos.first;
+					area.lonMax = pos.first;
+					area.latMin = pos.second;
+					area.latMax = pos.second;
+				}
 				spawnAlienBase((*c), engine, area, pos, 0);
 				break;
 			}
