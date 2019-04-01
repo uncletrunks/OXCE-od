@@ -1408,6 +1408,8 @@ interfaces:
       - id: text2
         color: 241   # pink
         color2: 218  # blue
+      - id: text3
+        color: 218   # blue
       - id: list
         color: 218   # blue
         color2: 241   # pink

@@ -31,9 +31,11 @@
 #include "../Interface/TextList.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Soldier.h"
+#include "../Savegame/SoldierDeath.h"
 #include "../Savegame/SoldierDiary.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/MissionStatistics.h"
+#include "../Savegame/BattleUnitStatistics.h"
 
 namespace OpenXcom
 {
@@ -64,10 +66,17 @@ SoldierDiaryOverviewState::SoldierDiaryOverviewState(Base *base, size_t soldierI
 	_btnPrev = new TextButton(28, 14, 8, 8);
 	_btnNext = new TextButton(28, 14, 284, 8);
 	_txtTitle = new Text(310, 16, 5, 8);
-	_txtMission = new Text(114, 9, 16, 36);
-	_txtRating = new Text(102, 9, 120, 36);
-	_txtDate = new Text(90, 9, 218, 36);
-	_lstDiary = new TextList(288, 120, 8, 44);
+	if (!_base)
+	{
+		_txtDeathTitle = new Text(150, 9, 16, 36);
+		_txtDeathDate = new Text(90, 9, 218, 36);
+		_txtDeathInfo = new Text(292, 9, 16, 44);
+	}
+	int offset = (!_base) ? 24 : 0;
+	_txtMission = new Text(114, 9, 16, 36 + offset);
+	_txtRating = new Text(102, 9, 120, 36 + offset);
+	_txtDate = new Text(90, 9, 218, 36 + offset);
+	_lstDiary = new TextList(288, 120 - offset, 8, 44 + offset);
 
 	// Set palette
 	setInterface("soldierDiary");
@@ -80,6 +89,12 @@ SoldierDiaryOverviewState::SoldierDiaryOverviewState(Base *base, size_t soldierI
 	add(_btnPrev, "button", "soldierDiary");
 	add(_btnNext, "button", "soldierDiary");
 	add(_txtTitle, "text1", "soldierDiary");
+	if (!_base)
+	{
+		add(_txtDeathTitle, "text2", "soldierDiary");
+		add(_txtDeathInfo, "text3", "soldierDiary");
+		add(_txtDeathDate, "text3", "soldierDiary");
+	}
 	add(_txtMission, "text2", "soldierDiary");
 	add(_txtRating, "text2", "soldierDiary");
 	add(_txtDate, "text2", "soldierDiary");
@@ -173,6 +188,32 @@ void SoldierDiaryOverviewState::init()
 	}
 	_soldier = _list->at(_soldierId);
 	_txtTitle->setText(_soldier->getName());
+
+	if (!_base && _soldier->getDeath())
+	{
+		std::string deathTitleText, deathInfoText;
+		const BattleUnitKills *cause = _soldier->getDeath()->getCause();
+		if (cause)
+		{
+			deathTitleText = _game->getLanguage()->getString("STR_KILLED_IN_ACTION", _soldier->getGender());
+			deathInfoText = tr("STR_KILLER_AND_WEAPON")
+				.arg(cause->getUnitName(_game->getLanguage()))
+				.arg(tr(cause->weapon));
+		}
+		else
+		{
+			deathTitleText = _game->getLanguage()->getString("STR_MISSING_IN_ACTION", _soldier->getGender());
+		}
+
+		std::ostringstream deathDateText;
+		const GameTime *t = _soldier->getDeath()->getTime();
+		deathDateText << t->getDayString(_game->getLanguage()) << " " << _game->getLanguage()->getString(t->getMonthString()) << " " << t->getYear();
+
+		_txtDeathTitle->setText(deathTitleText);
+		_txtDeathDate->setText(deathDateText.str());
+		_txtDeathInfo->setText(deathInfoText);
+	}
+
 	_lstDiary->clearList();
 
 	std::vector<MissionStatistics*> *missionStatistics = _game->getSavedGame()->getMissionStatistics();

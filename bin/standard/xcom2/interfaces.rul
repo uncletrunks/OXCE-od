@@ -1442,6 +1442,8 @@ interfaces: #done
       - id: text2
         color: 1
         color2: 244
+      - id: text3
+        color: 244
       - id: list
         color: 244
         color2: 1
