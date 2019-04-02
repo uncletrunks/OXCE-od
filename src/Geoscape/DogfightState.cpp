@@ -1424,12 +1424,15 @@ void DogfightState::update()
 							rule = _game->getMod()->getRandomMission(OBJECTIVE_RETALIATION, _game->getSavedGame()->getMonthsPassed());
 						}
 
-						AlienMission *newMission = new AlienMission(*rule);
-						newMission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
-						newMission->setRegion(targetRegion, *_game->getMod());
-						newMission->setRace(_ufo->getAlienRace());
-						newMission->start(*_game, *_state->getGlobe(), newMission->getRules().getWave(0).spawnTimer); // fixed delay for first scout
-						_game->getSavedGame()->getAlienMissions().push_back(newMission);
+						if (rule)
+						{
+							AlienMission *newMission = new AlienMission(*rule);
+							newMission->setId(_game->getSavedGame()->getId("ALIEN_MISSIONS"));
+							newMission->setRegion(targetRegion, *_game->getMod());
+							newMission->setRace(_ufo->getAlienRace());
+							newMission->start(*_game, *_state->getGlobe(), newMission->getRules().getWave(0).spawnTimer); // fixed delay for first scout
+							_game->getSavedGame()->getAlienMissions().push_back(newMission);
+						}
 					}
 				}
 			}
