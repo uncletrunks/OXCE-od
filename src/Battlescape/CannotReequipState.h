@@ -28,6 +28,7 @@ class TextButton;
 class Window;
 class Text;
 class TextList;
+class Base;
 
 /**
  * Screen shown when there's not enough equipment
@@ -36,17 +37,22 @@ class TextList;
 class CannotReequipState : public State
 {
 private:
-	TextButton *_btnOk;
+	Base *_base;
+	TextButton *_btnOk, *_btnManufacture, *_btnPurchase;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtQuantity, *_txtCraft;
 	TextList *_lstItems;
 public:
 	/// Creates the Cannot Reequip state.
-	CannotReequipState(std::vector<ReequipStat> missingItems);
+	CannotReequipState(std::vector<ReequipStat> missingItems, Base *base);
 	/// Cleans up the Cannot Reequip state.
 	~CannotReequipState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the Manufacture button.
+	void btnManufactureClick(Action *action);
+	/// Handler for clicking the Purchase/Hire button.
+	void btnPurchaseClick(Action *action);
 };
 
 }

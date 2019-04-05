@@ -822,7 +822,7 @@ void DebriefingState::btnOkClick(Action *)
 			}
 			if (!_missingItems.empty())
 			{
-				_game->pushState(new CannotReequipState(_missingItems));
+				_game->pushState(new CannotReequipState(_missingItems, _base));
 			}
 
 			// refresh! (we may have sold some prisoners in the meantime; directly from Debriefing)

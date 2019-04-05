@@ -916,7 +916,7 @@ void CraftEquipmentState::loadGlobalLoadout(int index)
 				return a.listOrder < b.listOrder;
 			}
 		);
-		_game->pushState(new CannotReequipState(_missingItems));
+		_game->pushState(new CannotReequipState(_missingItems, _base));
 		_reload = false;
 	}
 }
