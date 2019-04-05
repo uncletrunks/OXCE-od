@@ -74,6 +74,7 @@ private:
 	std::vector<std::string> _terrains, _music;
 	int _shade, _minShade, _maxShade;
 	std::string _nextStage, _race, _script;
+	std::vector<std::string> _randomRaces;
 	bool _finalDestination, _isAlienBase;
 	std::string _winCutscene, _loseCutscene, _abortCutscene;
 	std::string _alert, _alertBackground, _alertDescription;

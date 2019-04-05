@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "AlienDeployment.h"
+#include "../Engine/RNG.h"
 #include "../fmath.h"
 
 namespace YAML
@@ -164,6 +165,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_maxShade = node["maxShade"].as<int>(_maxShade);
 	_nextStage = node["nextStage"].as<std::string>(_nextStage);
 	_race = node["race"].as<std::string>(_race);
+	_randomRaces = node["randomRace"].as<std::vector<std::string> >(_randomRaces);
 	_finalDestination = node["finalDestination"].as<bool>(_finalDestination);
 	_winCutscene = node["winCutscene"].as<std::string>(_winCutscene);
 	_loseCutscene = node["loseCutscene"].as<std::string>(_loseCutscene);
@@ -382,6 +384,10 @@ std::string AlienDeployment::getNextStage() const
  */
 std::string AlienDeployment::getRace() const
 {
+	if (!_randomRaces.empty())
+	{
+		return _randomRaces[RNG::generate(0, _randomRaces.size() - 1)];
+	}
 	return _race;
 }
 

@@ -1185,9 +1185,10 @@ bool BattlescapeGenerator::canPlaceXCOMUnit(Tile *tile)
 void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 {
 	// race defined by deployment if there is one.
-	if (!deployment->getRace().empty() && _game->getSavedGame()->getMonthsPassed() > -1)
+	auto tmpRace = deployment->getRace();
+	if (!tmpRace.empty() && _game->getSavedGame()->getMonthsPassed() > -1)
 	{
-		_alienRace = deployment->getRace();
+		_alienRace = tmpRace;
 	}
 
 	if (_save->getDepth() > 0 && _alienRace.find("_UNDERWATER") == std::string::npos)
