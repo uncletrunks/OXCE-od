@@ -38,20 +38,7 @@ GET_ATTRIB_STAT_FN(melee)
 GET_SOLDIER_STAT_FN(id, Id)
 int OpenXcom::nameStat(Game *game, Soldier *s)
 {
-	const std::string text = s->getName();
-	if (text.empty()) return 0;
-	std::size_t length = 1;
-	unsigned char ret = text[0];
-	while ((text[length] & 0b11000000) == 0b10000000) {
-		ret = text[length];
-		++length;
-	}
-	return ret;
-	//if (s->getName().size() < 1)
-	//{
-	//	return 0;
-	//}
-	//return s->getName().at(0);
+	return 0;
 }
 int OpenXcom::typeStat(Game *game, Soldier *s)
 {

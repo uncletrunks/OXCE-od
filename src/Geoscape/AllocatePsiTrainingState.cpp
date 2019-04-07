@@ -36,6 +36,7 @@
 #include "../Mod/Mod.h"
 #include "../Basescape/SoldierSortUtil.h"
 #include <algorithm>
+#include "../Engine/Unicode.h"
 
 namespace OpenXcom
 {
@@ -107,7 +108,7 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	_sortFunctors.push_back(new SortFunctor(_game, functor));
 
 	PUSH_IN("STR_ID", idStat);
-	PUSH_IN("STR_FIRST_LETTER", nameStat);
+	PUSH_IN("STR_NAME_UC", nameStat);
 	PUSH_IN("STR_SOLDIER_TYPE", typeStat);
 	PUSH_IN("STR_RANK", rankStat);
 	PUSH_IN("STR_MISSIONS2", missionsStat);
@@ -169,7 +170,19 @@ void AllocatePsiTrainingState::cbxSortByChange(Action *action)
 	SortFunctor *compFunc = _sortFunctors[selIdx];
 	if (compFunc)
 	{
-		std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+		if (selIdx == 2)
+		{
+			std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(),
+				[](const Soldier* a, const Soldier* b)
+				{
+					return Unicode::naturalCompare(a->getName(), b->getName());
+				}
+			);
+		}
+		else
+		{
+			std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
+		}
 		bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
 		if (shiftPressed)
 		{
