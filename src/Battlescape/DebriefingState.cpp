@@ -403,6 +403,17 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 		_country->addActivityXcom(total);
 	}
 
+	// Resize (if needed)
+	if (statsY > 80) statsY = 80;
+	if (recoveryY > 80) recoveryY = 80;
+	if (statsY + recoveryY > 120)
+	{
+		recoveryY = 120 - statsY;
+		if (recoveryY < 80) _lstRecovery->setHeight(recoveryY);
+		if (recoveryY > 80) recoveryY = 80;
+	}
+
+	// Reposition to fit the screen
 	if (recoveryY > 0)
 	{
 		if (_txtRecovery->getText().empty())
