@@ -54,6 +54,7 @@ namespace YAML
 			node["extraQty"] = rhs.extraQty;
 			node["percentageOutsideUfo"] = rhs.percentageOutsideUfo;
 			node["itemSets"] = rhs.itemSets;
+			node["extraRandomItems"] = rhs.extraRandomItems;
 			return node;
 		}
 
@@ -69,6 +70,7 @@ namespace YAML
 			rhs.extraQty = node["extraQty"].as<int>(0); // give this a default, as it's not 100% needed, unlike the others.
 			rhs.percentageOutsideUfo = node["percentageOutsideUfo"].as<int>(rhs.percentageOutsideUfo);
 			rhs.itemSets = node["itemSets"].as< std::vector<OpenXcom::ItemSet> >(rhs.itemSets);
+			rhs.extraRandomItems = node["extraRandomItems"].as< std::vector<OpenXcom::ItemSet> >(rhs.extraRandomItems);
 			return true;
 		}
 	};

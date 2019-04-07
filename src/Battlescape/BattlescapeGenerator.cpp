@@ -1258,6 +1258,17 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 							_save->createItemForUnit(ruleItem, unit);
 						}
 					}
+					for (auto& iset : (*d).extraRandomItems)
+					{
+						if (iset.items.empty())
+							continue;
+						auto pick = RNG::generate(0, iset.items.size() - 1);
+						RuleItem *ruleItem = _game->getMod()->getItem(iset.items[pick]);
+						if (ruleItem)
+						{
+							_save->createItemForUnit(ruleItem, unit);
+						}
+					}
 				}
 			}
 		}

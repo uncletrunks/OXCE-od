@@ -40,7 +40,7 @@ struct DeploymentData
 	int alienRank;
 	int lowQty, highQty, dQty, extraQty;
 	int percentageOutsideUfo;
-	std::vector<ItemSet> itemSets;
+	std::vector<ItemSet> itemSets, extraRandomItems;
 };
 struct BriefingData
 {
