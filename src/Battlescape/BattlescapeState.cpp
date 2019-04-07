@@ -2147,6 +2147,7 @@ inline void BattlescapeState::handle(Action *action)
 				SDLKey key = action->getDetails()->key.keysym.sym;
 				bool ctrlPressed = (SDL_GetModState() & KMOD_CTRL) != 0;
 				bool shiftPressed = (SDL_GetModState() & KMOD_SHIFT) != 0;
+				bool altPressed = (SDL_GetModState() & KMOD_ALT) != 0;
 
 				// "ctrl-b" - reopen briefing
 				if (key == SDLK_b && ctrlPressed)
@@ -2265,20 +2266,24 @@ inline void BattlescapeState::handle(Action *action)
 					else if (_save->getDebugMode() && (key == SDLK_k || key == SDLK_j) && ctrlPressed)
 					{
 						bool stunOnly = (key == SDLK_j);
-						if (shiftPressed)
+						BattleUnit *unitUnderTheCursor = nullptr;
+						if (shiftPressed || altPressed)
 						{
-							// kill (ctrl-shift-k) or stun (ctrl-shift-j) just a single unit (under the cursor)
 							Position newPos;
 							_map->getSelectorPosition(&newPos);
 							Tile *tile = _save->getTile(newPos);
 							if (tile)
 							{
-								BattleUnit *unit = tile->getOverlappingUnit(_save);
-								if (unit && !unit->isOut())
-								{
-									debug("Bingo!");
-									unit->damage(Position(0, 0, 0), 1000, _game->getMod()->getDamageType(stunOnly ? DT_STUN : DT_AP), _save, {});
-								}
+								unitUnderTheCursor = tile->getOverlappingUnit(_save);
+							}
+						}
+						if (shiftPressed)
+						{
+							// kill (ctrl-shift-k) or stun (ctrl-shift-j) just a single unit (under the cursor)
+							if (unitUnderTheCursor && !unitUnderTheCursor->isOut())
+							{
+								debug("Bingo!");
+								unitUnderTheCursor->damage(Position(0, 0, 0), 1000, _game->getMod()->getDamageType(stunOnly ? DT_STUN : DT_AP), _save, {});
 							}
 						}
 						else
@@ -2295,6 +2300,11 @@ inline void BattlescapeState::handle(Action *action)
 							}
 							for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 							{
+								if (unitUnderTheCursor && unitUnderTheCursor == (*i))
+								{
+									// kill (ctrl-alt-k) or stun (ctrl-alt-j) all aliens EXCEPT the one under the cursor
+									continue;
+								}
 								if ((*i)->getOriginalFaction() == FACTION_HOSTILE && !(*i)->isOut())
 								{
 									(*i)->damage(Position(0, 0, 0), 1000, _game->getMod()->getDamageType(stunOnly ? DT_STUN : DT_AP), _save, { });
