@@ -1,11 +1,11 @@
-# OpenXcom [![Build Status](https://travis-ci.org/SupSuper/OpenXcom.svg)](https://travis-ci.org/SupSuper/OpenXcom)
+# OpenXcom [![Build Status](https://travis-ci.org/OpenXcom/OpenXcom.svg)](https://travis-ci.org/OpenXcom/OpenXcom)
 
 OpenXcom is an open-source clone of the popular "UFO: Enemy Unknown" ("X-COM:
 UFO Defense" in the USA release) and "X-COM: Terror From the Deep" videogames
 by Microprose, licensed under the GPL and written in C++ / SDL.
 
 See more info at the [website](https://openxcom.org)
-and the [wiki](http://ufopaedia.org/index.php?title=OpenXcom).
+and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
 
 Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
@@ -30,7 +30,7 @@ data or user folder (see below for folder locations).
 
 Mods are an important and exciting part of the game.  OpenXcom comes with a set
 of standard mods based on traditional XcomUtil and UFOExtender functionality.
-There is also a [mod portal website](http://www.openxcom.com) with a thriving
+There is also a [mod portal website](https://openxcom.mod.io/) with a thriving
 mod community with hundreds of innovative mods to choose from.
 
 To install a mod, go to the mods subdirectory in your user directory (see below
@@ -146,7 +146,7 @@ OpenXcom has a variety of game settings and extras that can be customized, both
 in-game and out-game. These options are global and affect any old or new
 savegame.
 
-For more details please check the [wiki](http://ufopaedia.org/index.php?title=Options_(OpenXcom)).
+For more details please check the [wiki](https://ufopaedia.org/index.php/Options_(OpenXcom)).
 
 ## Development
 
@@ -168,5 +168,5 @@ The source code includes files for the following build tools:
 
 It's also been tested on a variety of other tools on Windows/Mac/Linux. More
 detailed compiling instructions are available at the
-[wiki](http://ufopaedia.org/index.php?title=Compiling_(OpenXcom)), along with
+[wiki](https://ufopaedia.org/index.php/Compiling_(OpenXcom)), along with
 pre-compiled dependency packages.
