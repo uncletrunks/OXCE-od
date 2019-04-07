@@ -118,9 +118,12 @@ MonthlyCostsState::MonthlyCostsState(Base *base) : _base(base)
 		if (craft->getRentCost() != 0 && _game->getSavedGame()->isResearched(craft->getRequirements()))
 		{
 			auto count = _base->getCraftCount(craft);
-			std::ostringstream ss3;
-			ss3 << count;
-			_lstCrafts->addRow(4, tr(*i).c_str(), Unicode::formatFunding(craft->getRentCost()).c_str(), ss3.str().c_str(), Unicode::formatFunding(count * craft->getRentCost()).c_str());
+			if (count > 0 || craft->forceShowInMonthlyCosts())
+			{
+				std::ostringstream ss3;
+				ss3 << count;
+				_lstCrafts->addRow(4, tr(*i).c_str(), Unicode::formatFunding(craft->getRentCost()).c_str(), ss3.str().c_str(), Unicode::formatFunding(count * craft->getRentCost()).c_str());
+			}
 		}
 	}
 
@@ -156,7 +159,10 @@ MonthlyCostsState::MonthlyCostsState(Base *base) : _base(base)
 					name = "STR_SOLDIERS";
 				}
 				std::string costPerUnit = Unicode::formatFunding(soldier->getSalaryCost(0)); // 0 = default rookie salary
-				_lstSalaries->addRow(4, tr(name).c_str(), costPerUnit.c_str(), ss4.str().c_str(), Unicode::formatFunding(info.second).c_str());
+				if (info.first > 0 || soldiers.size() == 1)
+				{
+					_lstSalaries->addRow(4, tr(name).c_str(), costPerUnit.c_str(), ss4.str().c_str(), Unicode::formatFunding(info.second).c_str());
+				}
 			}
 		}
 	}

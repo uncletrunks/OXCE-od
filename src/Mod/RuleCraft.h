@@ -142,7 +142,7 @@ private:
 	std::vector<int> _craftInventoryTile;
 	RuleCraftStats _stats;
 	int _shieldRechargeAtBase;
-	bool _mapVisible;
+	bool _mapVisible, _forceShowInMonthlyCosts;
 public:
 	/// Creates a blank craft ruleset.
 	RuleCraft(const std::string &type);
@@ -235,6 +235,8 @@ public:
 	int getShieldRechargeAtBase() const;
 	/// Get whether the craft's map should be visible at the start of a battle
 	bool isMapVisible() const;
+	/// Gets whether or not the craft type should be displayed in Monthly Costs even if not present in the base.
+	bool forceShowInMonthlyCosts() const;
 	/// Calculate the theoretical range of the craft in nautical miles
 	int calculateRange(int type);
 };
