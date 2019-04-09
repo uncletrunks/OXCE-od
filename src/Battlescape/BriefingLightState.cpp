@@ -103,6 +103,11 @@ std::string BriefingLightState::checkStartingCondition(AlienDeployment *deployme
 	if (startingCondition != 0)
 	{
 		const std::vector<std::string> *list = startingCondition->getAllowedArmors();
+		if (list->empty())
+		{
+			// everything is allowed
+			return "";
+		}
 		std::ostringstream ss;
 		int i = 0;
 		for (std::vector<std::string>::const_iterator it = list->begin(); it != list->end(); ++it)
