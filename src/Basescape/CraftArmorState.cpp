@@ -169,6 +169,11 @@ void CraftArmorState::cbxSortByChange(Action *action)
 	_dynGetter = NULL;
 	if (compFunc)
 	{
+		if (selIdx != 2)
+		{
+			_dynGetter = compFunc->getGetter();
+		}
+
 		// if CTRL is pressed, we only want to show the dynamic column, without actual sorting
 		if (!ctrlPressed)
 		{
@@ -183,7 +188,6 @@ void CraftArmorState::cbxSortByChange(Action *action)
 			}
 			else
 			{
-				_dynGetter = compFunc->getGetter();
 				std::stable_sort(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), *compFunc);
 			}
 			bool shiftPressed = SDL_GetModState() & KMOD_SHIFT;
