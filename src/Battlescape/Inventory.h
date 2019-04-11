@@ -107,7 +107,7 @@ public:
 	/// Special handling for mouse clicks.
 	void mouseClick(Action *action, State *state) override;
 	/// Unloads the selected weapon.
-	bool unload();
+	bool unload(bool quickUnload = false);
 	/// Checks whether the given item is visible with the current search string.
 	bool isInSearchString(BattleItem *item);
 	/// Arranges items on the ground.

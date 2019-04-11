@@ -668,12 +668,33 @@ void Inventory::mouseClick(Action *action, State *state)
 				{
 					if ((SDL_GetModState() & KMOD_SHIFT))
 					{
-						_selItem = item; // don't worry, we'll unselect it later!
-						if (unload())
+						bool quickUnload = false;
+						bool allowed = true;
+						// Quick-unload check
+						if (!_tu)
 						{
-							_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_DROP)->play();
+							// Outside of the battlescape, quick-unload:
+							// - the weapon is never moved from its original slot
+							// - the ammo always drops on the ground
+							quickUnload = true;
 						}
-						_selItem = 0; // see, I told you!
+						else
+						{
+							if (item->getSlot()->getType() != INV_HAND)
+							{
+								// During the battle, only weapons held in hand can be shift-unloaded
+								allowed = false;
+							}
+						}
+						if (allowed)
+						{
+							_selItem = item; // don't worry, we'll unselect it later!
+							if (unload(quickUnload))
+							{
+								_game->getMod()->getSoundByDepth(_depth, Mod::ITEM_DROP)->play();
+							}
+							_selItem = 0; // see, I told you!
+						}
 					}
 					else if (item->getRules()->isFixed())
 					{
@@ -860,6 +881,21 @@ void Inventory::mouseClick(Action *action, State *state)
 							auto tuUnload = item->getRules()->getTUUnload(slotAmmo);
 							if ((SDL_GetModState() & KMOD_SHIFT) && (!_tu || tuUnload))
 							{
+								// Quick-swap check
+								if (!_tu)
+								{
+									// Outside of the battlescape, the old ammo always drops on the ground
+									oldAmmoGoesTo = _inventorySlotGround;
+								}
+								else
+								{
+									// During the battle, only weapons held in hand can use ammo quick-swap
+									if (item->getSlot()->getType() != INV_HAND)
+									{
+										canLoad = false;
+									}
+								}
+
 								// 1. the cost of unloading the old ammo (to the offhand)
 								tuCost += tuUnload;
 								if (oldAmmoGoesTo == _inventorySlotGround)
@@ -879,18 +915,19 @@ void Inventory::mouseClick(Action *action, State *state)
 						{
 							if (!_tu || _selUnit->spendTimeUnits(tuCost))
 							{
+								auto arrangeFloor = false;
 								auto oldAmmo = item->setAmmoForSlot(slotAmmo, _selItem);
 								if (oldAmmo)
 								{
 									moveItem(oldAmmo, oldAmmoGoesTo, 0, 0);
 									if (oldAmmoGoesTo == _inventorySlotGround)
 									{
-										arrangeGround();
+										arrangeFloor = true;
 									}
 								}
 								setSelectedItem(0);
 								_game->getMod()->getSoundByDepth(_depth, item->getRules()->getReloadSound())->play();
-								if (item->getSlot()->getType() == INV_GROUND)
+								if (arrangeFloor || item->getSlot()->getType() == INV_GROUND)
 								{
 									arrangeGround();
 								}
@@ -1025,18 +1062,13 @@ void Inventory::mouseClick(Action *action, State *state)
  * on the right hand and the ammo on the left hand.
  * Or if only one hand is free, the gun is placed
  * in the hand and the ammo is placed on the ground.
+ * @param quickUnload Quick unload using specific rules (the rules are different in and outside of the battlescape)
  * @return The success of the weapon being unloaded.
  */
-bool Inventory::unload()
+bool Inventory::unload(bool quickUnload)
 {
 	// Must be holding an item
 	if (_selItem == 0)
-	{
-		return false;
-	}
-
-	// Fixed weapons can be unloaded only when (already) in hand
-	if (_selItem->getRules()->isFixed() && _selItem->getSlot()->getType() != INV_HAND)
 	{
 		return false;
 	}
@@ -1086,19 +1118,11 @@ bool Inventory::unload()
 				return false;
 			}
 		};
-		if (!(SDL_GetModState() & KMOD_SHIFT))
+		// History lesson:
+		// The old shift-unload logic by Yankes (i.e. unload ammo slots in reverse order) was removed from here,
+		// because the new shift-unload logic by Fonzo/Ohartenstein now has a completely different meaning (i.e. quick-unload)
 		{
 			for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
-			{
-				if (checkSlot(slot))
-				{
-					break;
-				}
-			}
-		}
-		else
-		{
-			for (int slot = RuleItem::AmmoSlotMax - 1; slot >= 0; --slot)
 			{
 				if (checkSlot(slot))
 				{
@@ -1119,6 +1143,25 @@ bool Inventory::unload()
 	{
 		// not weapon or grenade, can't use unload button
 		return false;
+	}
+
+	// Simplified logic for quick-unload outside of the battlescape
+	if (quickUnload && !_tu)
+	{
+		// noop(); // 1. do not move the weapon at all!
+		if (grenade)
+		{
+			_selItem->setFuseTimer(-1);
+			_warning->showMessage(_game->getLanguage()->getString(_selItem->getRules()->getUnprimeActionMessage()));
+		}
+		else
+		{
+			auto oldAmmo = _selItem->setAmmoForSlot(slotForAmmoUnload, nullptr);
+			moveItem(oldAmmo, _inventorySlotGround, 0, 0); // 2. + 3. always drop the ammo on the ground
+			arrangeGround();
+		}
+		setSelectedItem(0);
+		return true;
 	}
 
 	// Check which hands are free.

@@ -843,7 +843,7 @@ void InventoryState::btnNextClick(Action *)
  */
 void InventoryState::btnUnloadClick(Action *)
 {
-	if (_inv->unload())
+	if (_inv->unload(false))
 	{
 		_txtItem->setText("");
 		_txtAmmo->setText("");
