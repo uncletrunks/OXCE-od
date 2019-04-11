@@ -3308,7 +3308,7 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 				tile = _save->getTile(unit->getPosition() + Position(x,y,z) + i->first);
 				if (tile)
 				{
-					door = tile->openDoor(i->second, unit, _save->getBattleGame()->getReservedAction());
+					door = tile->openDoor(i->second, unit, _save->getBattleGame()->getReservedAction(), rClick);
 					if (door != -1)
 					{
 						part = i->second;

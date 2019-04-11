@@ -338,9 +338,10 @@ int Tile::getFootstepSound(Tile *tileBelow) const
  * @param part
  * @param unit
  * @param reserve
+ * @param rClick
  * @return a value: 0(normal door), 1(ufo door) or -1 if no door opened or 3 if ufo door(=animated) is still opening 4 if not enough TUs
  */
-int Tile::openDoor(TilePart part, BattleUnit *unit, BattleActionType reserve)
+int Tile::openDoor(TilePart part, BattleUnit *unit, BattleActionType reserve, bool rClick)
 {
 	if (!_objects[part]) return -1;
 
@@ -350,7 +351,10 @@ int Tile::openDoor(TilePart part, BattleUnit *unit, BattleActionType reserve)
 		int tuCost = _objects[part]->getTUCost(unit->getMovementType());
 		cost = BattleActionCost(reserve, unit, unit->getMainHandWeapon(false));
 		cost.Time += tuCost;
-		cost.Energy += tuCost / 2;
+		if (!rClick)
+		{
+			cost.Energy += tuCost / 2;
+		}
 	}
 
 	if (_objects[part]->isDoor() && unit->getArmor()->getSize() == 1) // don't allow double-wide units to open swinging doors due to engine limitations
