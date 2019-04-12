@@ -43,6 +43,7 @@ private:
 	RuleCraftStats _stats;
 	bool _underwaterOnly;
 	int _tractorBeamPower;
+	bool _hidePediaInfo;
 public:
 	/// Creates a blank craft weapon ruleset.
 	RuleCraftWeapon(const std::string &type);
@@ -58,6 +59,8 @@ public:
 	int getSound() const;
 	/// Gets the craft weapon's damage.
 	int getDamage() const;
+	/// Should the weapon's stats be displayed in Ufopedia or not?
+	bool getHidePediaInfo() const { return _hidePediaInfo; }
 	/// Gets the craft weapon's effectiveness against shields.
 	int getShieldDamageModifier() const;
 	/// Gets the craft weapon's range.

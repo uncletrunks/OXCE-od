@@ -37,6 +37,7 @@ namespace OpenXcom
 
 		_lstInfo = new TextList(150, 50, 168, 126);
 		add(_lstInfo);
+		_lstInfo->setVisible(!weapon->getHidePediaInfo());
 
 		_lstInfo->setColor(_listColor1);
 		_lstInfo->setColumns(2, 100, 68); // deliberately making this wider than the original to account for finnish.

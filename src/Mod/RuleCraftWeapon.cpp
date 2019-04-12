@@ -31,7 +31,7 @@ RuleCraftWeapon::RuleCraftWeapon(const std::string &type) :
 	_reloadCautious(0), _reloadStandard(0), _reloadAggressive(0), _ammoMax(0),
 	_rearmRate(1), _projectileSpeed(0), _weaponType(0), _projectileType(CWPT_CANNON_ROUND),
 	_stats(), _underwaterOnly(false),
-	_tractorBeamPower(0)
+	_tractorBeamPower(0), _hidePediaInfo(false)
 {
 }
 
@@ -83,6 +83,7 @@ void RuleCraftWeapon::load(const YAML::Node &node, Mod *mod)
 	_weaponType = node["weaponType"].as<int>(_weaponType);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
 	_tractorBeamPower = node["tractorBeamPower"].as<int>(_tractorBeamPower);
+	_hidePediaInfo = node["hidePediaInfo"].as<bool>(_hidePediaInfo);
 }
 
 /**
