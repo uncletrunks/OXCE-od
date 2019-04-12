@@ -271,7 +271,7 @@ en-US:
 #TargetInfoState.cpp
   STR_INFO: "INFO"
 #TrainingFinishedState.cpp
-  STR_TRAINING_FINISHED: "Training Finished"
+  STR_TRAINING_FINISHED: "Training Finished{NEWLINE}at {0}"
 #UfoDetectedState.cpp
   STR_CANCEL_AND_IGNORE_UC: "CANCEL & IGNORE"
 #UfoTrackerState.cpp

@@ -24,6 +24,7 @@
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextList.h"
+#include "../Savegame/Base.h"
 #include "../Savegame/Soldier.h"
 #include "AllocateTrainingState.h"
 #include "../Engine/Options.h"
@@ -43,8 +44,8 @@ TrainingFinishedState::TrainingFinishedState(Base *base, const std::vector<Soldi
 	_window = new Window(this, 288, 180, 16, 10);
 	_btnOk = new TextButton(160, 14, 80, 149);
 	_btnOpen = new TextButton(160, 14, 80, 165);
-	_txtTitle = new Text(288, 40, 16, 20);
-	_lstPossibilities = new TextList(250, 80, 35, 50);
+	_txtTitle = new Text(288, 33, 16, 20);
+	_lstPossibilities = new TextList(250, 80, 35, 60);
 
 	// Set palette
 	setInterface("trainingFinished");
@@ -68,7 +69,7 @@ TrainingFinishedState::TrainingFinishedState(Base *base, const std::vector<Soldi
 	_btnOpen->onKeyboardPress((ActionHandler)&TrainingFinishedState::btnOpenClick, Options::keyOk);
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setText(tr("STR_TRAINING_FINISHED"));
+	_txtTitle->setText(tr("STR_TRAINING_FINISHED").arg(base->getName()));
 
 	_lstPossibilities->setColumns(1, 250);
 	_lstPossibilities->setBig();
