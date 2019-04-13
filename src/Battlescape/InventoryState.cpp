@@ -266,6 +266,17 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_inv->onMouseOver((ActionHandler)&InventoryState::invMouseOver);
 	_inv->onMouseOut((ActionHandler)&InventoryState::invMouseOut);
 
+	if (_battleGame->getDebugMode() && ((SDL_GetModState() & KMOD_SHIFT) != 0))
+	{
+		// replenish TUs
+		auto unit = _inv->getSelectedUnit();
+		if (unit)
+		{
+			auto missingTUs = unit->getBaseStats()->tu - unit->getTimeUnits();
+			unit->spendTimeUnits(-missingTUs);
+		}
+	}
+
 	_txtTus->setVisible(_tu);
 	_txtWeight->setVisible(Options::showMoreStatsInInventoryView);
 	_txtFiringAcc->setVisible(Options::showMoreStatsInInventoryView && !_tu);

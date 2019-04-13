@@ -1121,13 +1121,15 @@ void BattlescapeState::btnKneelClick(Action *)
  */
 void BattlescapeState::btnInventoryClick(Action *)
 {
+#if 0
 	if (_save->getDebugMode())
 	{
 		for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
-			if ((*i)->getFaction() == _save->getSide())
+			if ((*i)->getOriginalFaction() == _save->getSide())
 				(*i)->prepareNewTurn();
 		updateSoldierInfo();
 	}
+#endif
 	if (playableUnitSelected()
 		&& (_save->getSelectedUnit()->hasInventory() || _save->getDebugMode()))
 	{
@@ -1142,7 +1144,7 @@ void BattlescapeState::btnInventoryClick(Action *)
 		_battleGame->getPathfinding()->removePreview();
 		_battleGame->cancelCurrentAction(true);
 
-		_game->pushState(new InventoryState(!_save->getDebugMode(), this, 0));
+		_game->pushState(new InventoryState(true, this, 0));
 	}
 }
 
