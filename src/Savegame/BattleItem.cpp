@@ -240,6 +240,17 @@ bool BattleItem::isFuseEnabled() const
 }
 
 /**
+ * Set fuse trigger.
+ */
+void BattleItem::setFuseEnabled(bool enable)
+{
+	if (getFuseTimer() > -1)
+	{
+		_fuseEnabled = enable;
+	}
+}
+
+/**
  * Called at end of turn.
  */
 void BattleItem::fuseTimerEvent()
@@ -1301,11 +1312,23 @@ std::string debugDisplayScript(const BattleItem* bt)
 	}
 }
 
+void getFuseTimerDefaultScript(const BattleItem* bt, int& i)
+{
+	if (bt)
+	{
+		i = bt->getRules()->getFuseTimerDefault();
+	}
+	else
+	{
+		i = -1;
+	}
+}
+
 void setFuseTimerScript(BattleItem* bt, int i)
 {
 	if (bt)
 	{
-		bt->setFuseTimer(Clamp(i, 1, 100));
+		bt->setFuseTimer(Clamp(i, -1, 100));
 	}
 }
 
@@ -1374,9 +1397,11 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&setAmmoQuantityScript>("setAmmoQuantity");
 
 	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
-	bi.add<&setFuseTimerScript>("setFuseTimer");
+	bi.add<&getFuseTimerDefaultScript>("getFuseTimerDefault", "get defualt fuse timer");
+	bi.add<&setFuseTimerScript>("setFuseTimer", "set item fuse timer, -1 mean disable it");
 
-	bi.add<&BattleItem::isFuseEnabled>("isFuseEnabled");
+	bi.add<&BattleItem::isFuseEnabled>("isFuseEnabled", "check if fuse is triggered (like throw or proxy unit)");
+	bi.add<&BattleItem::setFuseEnabled>("setFuseEnabled", "force set or unset fuse trigger state");
 
 	bi.add<&BattleItem::getHealQuantity>("getHealQuantity");
 	bi.add<&setHealQuantityScript>("setHealQuantity");

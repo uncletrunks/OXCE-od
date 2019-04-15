@@ -95,6 +95,8 @@ public:
 	void setFuseTimer(int turns);
 	/// Gets if fuse was triggered.
 	bool isFuseEnabled() const;
+	/// Set fuse trigger.
+	void setFuseEnabled(bool enable);
 	/// Called on end of turn is triggered.
 	void fuseTimerEvent();
 	/// Get if item can trigger end of turn effect.
