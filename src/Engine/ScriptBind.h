@@ -633,6 +633,12 @@ struct ArgSelector<const int&> : ArgSelector<int>
 
 };
 
+template<>
+struct ArgSelector<bool>
+{
+	using type = Arg<ArgValueDef<int>, ArgRegDef<int>>;
+};
+
 template<typename T, typename I>
 struct ArgSelector<ScriptTag<T, I>>
 {
@@ -971,6 +977,9 @@ struct BindFunc<P *(T::*)(Args...) const, X>
 
 struct BindBase
 {
+	constexpr static const char* functionWithoutDescription = "-";
+	constexpr static const char* functionInvisible = "";
+
 	ScriptParserBase* parser;
 	BindBase(ScriptParserBase* p) : parser{ p }
 	{
@@ -978,7 +987,7 @@ struct BindBase
 	}
 
 	template<typename X>
-	void addCustomFunc(const std::string& name, const std::string& description = "-")
+	void addCustomFunc(const std::string& name, const std::string& description = functionWithoutDescription)
 	{
 		parser->addParser<helper::FuncGroup<X>>(name, description);
 	}
@@ -1005,7 +1014,7 @@ struct Bind : BindBase
 		parser->addParser<helper::FuncGroup<helper::BindSwap<const T*>>>("swap", "Swap value of arg1 and arg2");
 		parser->addParser<helper::FuncGroup<helper::BindClear<T*>>>("clear", "arg1 = null");
 		parser->addParser<helper::FuncGroup<helper::BindClear<const T*>>>("clear", "arg1 = null");
-		parser->addParser<helper::FuncGroup<helper::BindEq<const T*>>>("test_eq", "");
+		parser->addParser<helper::FuncGroup<helper::BindEq<const T*>>>("test_eq", BindBase::functionInvisible);
 	}
 
 	std::string getName(const std::string& s)
@@ -1043,7 +1052,7 @@ struct Bind : BindBase
 			parser->addParser<helper::FuncGroup<helper::BindSet<Tag>>>("set", "arg1 = arg2");
 			parser->addParser<helper::FuncGroup<helper::BindSwap<Tag>>>("swap", "Swap value of arg1 and arg2");
 			parser->addParser<helper::FuncGroup<helper::BindClear<Tag>>>("clear", "arg1 = null");
-			parser->addParser<helper::FuncGroup<helper::BindEq<Tag>>>("test_eq", "");
+			parser->addParser<helper::FuncGroup<helper::BindEq<Tag>>>("test_eq", BindBase::functionInvisible);
 		}
 	}
 	template<ScriptValues<T> T::*X>
@@ -1059,7 +1068,7 @@ struct Bind : BindBase
 	template<std::string (*X)(const T*)>
 	void addDebugDisplay()
 	{
-		addCustomFunc<helper::BindDebugDisplay<T, X>>("debug_impl", "");
+		addCustomFunc<helper::BindDebugDisplay<T, X>>("debug_impl", BindBase::functionInvisible);
 	}
 	template<int X>
 	void addFake(const std::string& get)
@@ -1082,27 +1091,35 @@ struct Bind : BindBase
 
 	#define MACRO_COPY_HELP_FUNC(Name, ...) \
 		template<__VA_ARGS__> \
-		void add(const std::string& func) \
+		void add(const std::string& func, const std::string& description = BindBase::functionWithoutDescription) \
 		{ \
-			addCustomFunc<helper::BindFunc<decltype(Name), Name>>(getName(func));\
+			addCustomFunc<helper::BindFunc<decltype(Name), Name>>(getName(func), description);\
 		}
 
 	MACRO_COPY_HELP_FUNC(X, bool (T::*X)() const)
+
+	MACRO_COPY_HELP_FUNC(X, void (T::*X)(bool))
+	MACRO_COPY_HELP_FUNC(X, void (T::*X)(bool, bool))
+
 
 	MACRO_COPY_HELP_FUNC(X, int (T::*X)() const)
 	MACRO_COPY_HELP_FUNC(X, int (T::*X)())
 	MACRO_COPY_HELP_FUNC(X, int (T::*X)(int) const)
 
+	MACRO_COPY_HELP_FUNC(X, void (T::*X)())
 	MACRO_COPY_HELP_FUNC(X, void (T::*X)(int))
+	MACRO_COPY_HELP_FUNC(X, void (*X)(T*))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(T*, int&, int, int))
 
+
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int))
 	MACRO_COPY_HELP_FUNC(X, void (*X)(const T*, int&, int, int))
+
 
 	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)())
 	MACRO_COPY_HELP_FUNC(X, typename P, P* (T::*X)() const)
