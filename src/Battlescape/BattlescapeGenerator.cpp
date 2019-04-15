@@ -1626,9 +1626,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 					rule = _game->getMod()->getItem(i->itemList[index]);
 				}
 
-				BattleItem *item = new BattleItem(rule, _save->getCurrentItemId());
-				_save->getItems()->push_back(item);
-				_save->getTile(i->position + Position(xoff, yoff, zoff))->addItem(item, _game->getMod()->getInventory("STR_GROUND"));
+				_save->createItemForTile(rule, _save->getTile(i->position + Position(xoff, yoff, zoff)));
 			}
 		}
 	}
