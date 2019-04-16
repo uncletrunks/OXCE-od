@@ -57,7 +57,8 @@ RuleItem::RuleItem(const std::string &type) :
 	_waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
-	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _liveAlien(false), _liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
+	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _ignoreInCraftEquip(false), _liveAlien(false),
+	_liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
 	_spawnUnitFaction(-1),
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
@@ -405,6 +406,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	if (node["battleType"])
 	{
 		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
+		_ignoreInCraftEquip = (_battleType == BT_CORPSE || _battleType == BT_NONE);
 
 		if (_battleType == BT_PSIAMP)
 		{
@@ -606,6 +608,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_recover = node["recover"].as<bool>(_recover);
 	_recoverCorpse = node["recoverCorpse"].as<bool>(_recoverCorpse);
 	_ignoreInBaseDefense = node["ignoreInBaseDefense"].as<bool>(_ignoreInBaseDefense);
+	_ignoreInCraftEquip = node["ignoreInCraftEquip"].as<bool>(_ignoreInCraftEquip);
 	_liveAlien = node["liveAlien"].as<bool>(_liveAlien);
 	_liveAlienPrisonType = node["prisonType"].as<int>(_liveAlienPrisonType);
 	_attraction = node["attraction"].as<int>(_attraction);
@@ -1861,6 +1864,14 @@ bool RuleItem::canBeEquippedBeforeBaseDefense() const
 	return !_ignoreInBaseDefense;
 }
 
+/**
+ * Check if the item can be equipped to craft invnetory.
+ * @return True if it can be equipped.
+ */
+bool RuleItem::canBeEquippedToCraftInventory() const
+{
+	return !_ignoreInCraftEquip;
+}
 
 /**
  * Returns the item's Turret Type.

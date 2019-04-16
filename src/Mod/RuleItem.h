@@ -192,7 +192,7 @@ private:
 	int _armor;
 	int _turretType;
 	int _aiUseDelay, _aiMeleeHitCount;
-	bool _recover, _recoverCorpse, _ignoreInBaseDefense, _liveAlien;
+	bool _recover, _recoverCorpse, _ignoreInBaseDefense, _ignoreInCraftEquip, _liveAlien;
 	int _liveAlienPrisonType;
 	int _attraction;
 	RuleItemUseCost _flatUse, _flatThrow, _flatPrime, _flatUnprime;
@@ -537,6 +537,8 @@ public:
 	bool isCorpseRecoverable() const;
 	/// Checks if the item can be equipped in base defense mission.
 	bool canBeEquippedBeforeBaseDefense() const;
+	/// Checks if the item can be equipped to craft inventrory.
+	bool canBeEquippedToCraftInventory() const;
 	/// Gets the item's turret type.
 	int getTurretType() const;
 	/// Gets first turn when AI can use item.
