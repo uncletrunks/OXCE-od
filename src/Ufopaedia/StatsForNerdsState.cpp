@@ -1401,9 +1401,10 @@ void StatsForNerdsState::initItemList()
 		_txtTitle->setAlign(ALIGN_LEFT);
 	}
 
+	const auto itemBattleType = itemRule->getBattleType();
 	std::ostringstream ss;
 
-	addBattleType(ss, itemRule->getBattleType(), "battleType");
+	addBattleType(ss, itemBattleType, "battleType");
 	addExperienceTrainingMode(ss, itemRule->getExperienceTrainingMode(), "experienceTrainingMode");
 	addBoolean(ss, itemRule->getArcingShot(), "arcingShot");
 	addBoolean(ss, itemRule->isFireExtinguisher(), "isFireExtinguisher");
@@ -1417,19 +1418,19 @@ void StatsForNerdsState::initItemList()
 
 	addBoolean(ss, itemRule->isWaterOnly(), "underwaterOnly");
 	addBoolean(ss, itemRule->isLandOnly(), "landOnly");
-	int psiRequiredDefault = itemRule->getBattleType() == BT_PSIAMP ? true : false;
+	int psiRequiredDefault = itemBattleType == BT_PSIAMP ? true : false;
 	addBoolean(ss, itemRule->isPsiRequired(), "psiRequired", psiRequiredDefault);
 	addBoolean(ss, itemRule->isLOSRequired(), "LOSRequired");
 
-	if (itemRule->getBattleType() == BT_FIREARM
-		|| itemRule->getBattleType() == BT_GRENADE
-		|| itemRule->getBattleType() == BT_PROXIMITYGRENADE
-		|| itemRule->getBattleType() == BT_FLARE
+	if (itemBattleType == BT_FIREARM
+		|| itemBattleType == BT_GRENADE
+		|| itemBattleType == BT_PROXIMITYGRENADE
+		|| itemBattleType == BT_FLARE
 		|| _showDebug)
 	{
 		addIntegerPercent(ss, itemRule->getNoLOSAccuracyPenalty(mod), "noLOSAccuracyPenalty", -1); // not raw!
 	}
-	if (itemRule->getBattleType() == BT_FIREARM || _showDebug)
+	if (itemBattleType == BT_FIREARM || _showDebug)
 	{
 		addIntegerPercent(ss, itemRule->getKneelBonus(mod), "kneelBonus", 115); // not raw!
 	}
@@ -1441,11 +1442,11 @@ void StatsForNerdsState::initItemList()
 
 	addInteger(ss, itemRule->getMinRange(), "minRange");
 	addInteger(ss, itemRule->getMaxRange(), "maxRange", 200);
-	int aimRangeDefault = itemRule->getBattleType() == BT_PSIAMP ? 0 : 200;
+	int aimRangeDefault = itemBattleType == BT_PSIAMP ? 0 : 200;
 	addInteger(ss, itemRule->getAimRange(), "aimRange", aimRangeDefault);
 	addInteger(ss, itemRule->getAutoRange(), "autoRange", 7);
 	addInteger(ss, itemRule->getSnapRange(), "snapRange", 15);
-	int dropoffDefault = itemRule->getBattleType() == BT_PSIAMP ? 1 : 2;
+	int dropoffDefault = itemBattleType == BT_PSIAMP ? 1 : 2;
 	addInteger(ss, itemRule->getDropoff(), "dropoff", dropoffDefault);
 
 	addRuleStatBonus(ss, *itemRule->getAccuracyMultiplierRaw(), "accuracyMultiplier");
@@ -1462,14 +1463,14 @@ void StatsForNerdsState::initItemList()
 
 	addSingleString(ss, itemRule->getPsiAttackName(), "psiAttackName");
 	addIntegerPercent(ss, itemRule->getAccuracyUse(), "accuracyUse");
-	if (itemRule->getBattleType() == BT_PSIAMP || _showDebug)
+	if (itemBattleType == BT_PSIAMP || _showDebug)
 	{
 		addIntegerPercent(ss, itemRule->getAccuracyMind(), "accuracyMindControl");
 		addIntegerPercent(ss, itemRule->getAccuracyPanic(), "accuracyPanic", 20);
 	}
-	int tuUseDefault = (itemRule->getBattleType() == BT_PSIAMP/* && itemRule->getPsiAttackName().empty()*/) ? 0 : 25;
+	int tuUseDefault = (itemBattleType == BT_PSIAMP/* && itemRule->getPsiAttackName().empty()*/) ? 0 : 25;
 	addRuleItemUseCostFull(ss, itemRule->getCostUse(), "costUse", RuleItemUseCost(tuUseDefault), true, itemRule->getFlatUse());
-	if (itemRule->getBattleType() == BT_PSIAMP || _showDebug)
+	if (itemBattleType == BT_PSIAMP || _showDebug)
 	{
 		// using flatUse! there are no flatMindcontrol and flatPanic
 		// always show! as if default was 0 instead of 25
@@ -1492,7 +1493,7 @@ void StatsForNerdsState::initItemList()
 	addRuleItemUseCostFull(ss, itemRule->getCostPrime(), "costPrime", RuleItemUseCost(50), true, itemRule->getFlatPrime());
 	addRuleItemUseCostFull(ss, itemRule->getCostUnprime(), "costUnprime", RuleItemUseCost(25), true, itemRule->getFlatUnprime());
 
-	if ((mod->getEnableCloseQuartersCombat() && itemRule->getBattleType() == BT_FIREARM) || _showDebug)
+	if ((mod->getEnableCloseQuartersCombat() && itemBattleType == BT_FIREARM) || _showDebug)
 	{
 		addRuleStatBonus(ss, *itemRule->getCloseQuartersMultiplierRaw(), "closeQuartersMultiplier");
 		addIntegerPercent(ss, itemRule->getAccuracyCloseQuarters(mod), "accuracyCloseQuarters", 100); // not raw!
@@ -1506,14 +1507,14 @@ void StatsForNerdsState::initItemList()
 			ItemDamageType damageTypeDefault = DT_NONE;
 			if (rule->ResistType == DT_NONE)
 			{
-				if (itemRule->getBattleType() == BT_FIREARM || itemRule->getBattleType() == BT_AMMO || itemRule->getBattleType() == BT_MELEE)
+				if (itemBattleType == BT_FIREARM || itemBattleType == BT_AMMO || itemBattleType == BT_MELEE)
 				{
 					if (itemRule->getClipSize() != 0)
 					{
 						damageTypeDefault = DAMAGE_TYPES;
 					}
 				}
-				else if (itemRule->getBattleType() == BT_PSIAMP)
+				else if (itemBattleType == BT_PSIAMP)
 				{
 					if (!itemRule->getPsiAttackName().empty())
 					{
@@ -1631,8 +1632,8 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getConfigMelee()->shots, "shots", 1);
 		addSingleString(ss, itemRule->getConfigMelee()->name, "name");
 		int ammoSlotCurrent = itemRule->getConfigMelee()->ammoSlot;
-		int ammoSlotDefault = itemRule->getBattleType() == BT_MELEE ? 0 : RuleItem::AmmoSlotSelfUse;
-		if (itemRule->getBattleType() == BT_NONE)
+		int ammoSlotDefault = itemBattleType == BT_MELEE ? 0 : RuleItem::AmmoSlotSelfUse;
+		if (itemBattleType == BT_NONE)
 		{
 			// exception for unspecified battle type, e.g. Elerium-115 in vanilla
 			if (ammoSlotCurrent <= 0)
@@ -1748,11 +1749,11 @@ void StatsForNerdsState::initItemList()
 		addSingleString(ss, itemRule->getUnprimeActionName(), "unprimeActionName");
 		addSingleString(ss, itemRule->getUnprimeActionMessage(), "unprimeActionMessage", "STR_GRENADE_IS_DEACTIVATED");
 		BattleFuseType fuseTypeDefault = BFT_NONE;
-		if (itemRule->getBattleType() == BT_PROXIMITYGRENADE)
+		if (itemBattleType == BT_PROXIMITYGRENADE)
 		{
 			fuseTypeDefault = BFT_INSTANT;
 		}
-		else if (itemRule->getBattleType() == BT_GRENADE)
+		else if (itemBattleType == BT_GRENADE)
 		{
 			fuseTypeDefault = BFT_SET;
 		}
@@ -1840,9 +1841,9 @@ void StatsForNerdsState::initItemList()
 		addRuleItemUseCostBasic(ss, itemRule->getCostAuto(), "tuAuto");
 		addRuleItemUseCostBasic(ss, itemRule->getCostSnap(), "tuSnap");
 		addRuleItemUseCostBasic(ss, itemRule->getCostMelee(), "tuMelee");
-		tuUseDefault = (itemRule->getBattleType() == BT_PSIAMP/* && itemRule->getPsiAttackName().empty()*/) ? 0 : 25;
+		tuUseDefault = (itemBattleType == BT_PSIAMP/* && itemRule->getPsiAttackName().empty()*/) ? 0 : 25;
 		addRuleItemUseCostBasic(ss, itemRule->getCostUse(), "tuUse", tuUseDefault);
-		if (itemRule->getBattleType() == BT_PSIAMP || _showDebug)
+		if (itemBattleType == BT_PSIAMP || _showDebug)
 		{
 			// always show! as if default was 0 instead of 25
 			addRuleItemUseCostBasic(ss, itemRule->getCostMind(), "tuMindcontrol", 0);
