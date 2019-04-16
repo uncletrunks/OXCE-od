@@ -1831,6 +1831,14 @@ int RuleItem::getArmor() const
 }
 
 /**
+ * Check if item is normal inventory item.
+ */
+bool RuleItem::isInventoryItem() const
+{
+	return getBigSprite() > -1 && isFixed() == false;
+}
+
+/**
  * Returns if the item should be recoverable
  * from the battlescape.
  * @return True if it is recoverable.

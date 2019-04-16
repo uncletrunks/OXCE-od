@@ -435,7 +435,7 @@ void NewBattleState::initSave()
 		{
 			int howMany = rule->getBattleType() == BT_AMMO ? 2 : 1;
 			base->getStorageItems()->addItem(*i, howMany);
-			if (rule->getBattleType() != BT_NONE && !rule->isFixed() && rule->getBigSprite() > -1)
+			if (rule->getBattleType() != BT_NONE && rule->isInventoryItem())
 			{
 				_craft->getItems()->addItem(*i, howMany);
 			}

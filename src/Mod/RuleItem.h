@@ -531,6 +531,8 @@ public:
 	int getRecoveryPoints() const;
 	/// Gets the item's armor.
 	int getArmor() const;
+	/// Check if item is normal inventory item.
+	bool isInventoryItem() const;
 	/// Gets the item's recoverability.
 	bool isRecoverable() const;
 	/// Gets the corpse item's recoverability.
