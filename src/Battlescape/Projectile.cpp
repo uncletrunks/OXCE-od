@@ -286,9 +286,11 @@ int Projectile::calculateThrow(double accuracy)
 	if (!forced && test == V_OUTOFBOUNDS) return test; //no line of fire
 
 	test = V_OUTOFBOUNDS;
+	int tries = 0;
 	// finally do a line calculation and store this trajectory, make sure it's valid.
-	while (test == V_OUTOFBOUNDS)
+	while (test == V_OUTOFBOUNDS && tries < 100)
 	{
+		++tries;
 		Position deltas = targetVoxel;
 		// apply some accuracy modifiers
 		_trajectory.clear();
