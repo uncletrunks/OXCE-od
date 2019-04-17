@@ -42,7 +42,7 @@ private:
 	Base *_base;
 	int _prisonType;
 	OptionsOrigin _origin;
-	TextButton *_btnOk, *_btnCancel, *_btnTransfer;
+	TextButton *_btnOk, *_btnSell, *_btnCancel, *_btnTransfer;
 	Window *_window;
 	Text *_txtTitle, *_txtUsed, *_txtAvailable, *_txtValueOfSales, *_txtItem, *_txtLiveAliens, *_txtDeadAliens, *_txtInterrogatedAliens;
 	TextList *_lstAliens;
@@ -55,6 +55,8 @@ private:
 
 	/// Gets selected quantity.
 	int getQuantity();
+	/// Deals with the selected aliens.
+	void dealWithSelectedAliens(bool sell);
 public:
 	/// Creates the ManageAlienContainment state.
 	ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin);
@@ -68,6 +70,8 @@ public:
 	void think() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the Sell button.
+	void btnSellClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
 	/// Handler for clicking the Transfer button.

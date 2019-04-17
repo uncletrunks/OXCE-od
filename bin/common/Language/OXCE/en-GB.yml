@@ -49,6 +49,8 @@ en-GB:
 #GlobalResearchState.cpp
   STR_RESEARCH_OVERVIEW: "RESEARCH OVERVIEW"
 #ManageAlienContainmentState.cpp
+  STR_KILL_SELECTED: "Kill"
+  STR_SELL_SELECTED: "Sell"
   STR_GO_TO_TRANSFERS: "Transfer..."
 #ManufactureDependenciesTreeState.cpp
   STR_TOPIC: "Topic>{ALT} {0}"
