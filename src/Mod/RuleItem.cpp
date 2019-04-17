@@ -406,7 +406,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	if (node["battleType"])
 	{
 		_battleType = (BattleType)node["battleType"].as<int>(_battleType);
-		_ignoreInCraftEquip = (_battleType == BT_CORPSE || _battleType == BT_NONE);
+		_ignoreInCraftEquip = !isUsefulBattlescapeItem();
 
 		if (_battleType == BT_PSIAMP)
 		{
@@ -1836,6 +1836,14 @@ int RuleItem::getArmor() const
 bool RuleItem::isInventoryItem() const
 {
 	return getBigSprite() > -1 && isFixed() == false;
+}
+
+/**
+ * Checks if item have some use in battlescape.
+ */
+bool RuleItem::isUsefulBattlescapeItem() const
+{
+	return (_battleType != BT_CORPSE && _battleType != BT_NONE);
 }
 
 /**

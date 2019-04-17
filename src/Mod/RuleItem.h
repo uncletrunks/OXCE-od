@@ -533,6 +533,8 @@ public:
 	int getArmor() const;
 	/// Check if item is normal inventory item.
 	bool isInventoryItem() const;
+	/// Checks if item have some use in battlescape.
+	bool isUsefulBattlescapeItem() const;
 	/// Gets the item's recoverability.
 	bool isRecoverable() const;
 	/// Gets the corpse item's recoverability.
