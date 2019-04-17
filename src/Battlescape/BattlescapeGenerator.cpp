@@ -888,9 +888,17 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition *startingCondi
 			// add items that are in the base
 			for (std::map<std::string, int>::iterator i = _base->getStorageItems()->getContents()->begin(); i != _base->getStorageItems()->getContents()->end();)
 			{
-				// only put items in the battlescape that make sense (when the item got a sprite, it's probably ok)
 				RuleItem *rule = _game->getMod()->getItem(i->first, true);
-				if (rule->canBeEquippedBeforeBaseDefense() && rule->isInventoryItem() && rule->canBeEquippedToCraftInventory() && _game->getSavedGame()->isResearched(rule->getRequirements()))
+				if (
+					// is item allowed in base defense?
+					rule->canBeEquippedBeforeBaseDefense() &&
+					// only put items in the battlescape that make sense (when the item got a sprite, it's probably ok)
+					rule->isInventoryItem() &&
+					// if item can be equip to craft then you should be able to use it in base defense
+					// in some cases we forbid some items from craft but still allow them in base defense if normaly they were avaiable.
+					(rule->isUsefulBattlescapeItem() || rule->canBeEquippedToCraftInventory()) &&
+					// we know how to use this item
+					_game->getSavedGame()->isResearched(rule->getRequirements()))
 				{
 					for (int count = 0; count < i->second; count++)
 					{
