@@ -2655,6 +2655,10 @@ void ScriptValuesBase::loadBase(const YAML::Node &node, const ScriptGlobal* shar
 					shared->getTagValueTypeData(data.valueType).load(shared, temp, pair.second);
 					setBase(i, temp);
 				}
+				else
+				{
+					Log(LOG_ERROR) << "Error in tags: '" << pair.first << "' unknown tag name not defined in current file";
+				}
 			}
 		}
 	}
