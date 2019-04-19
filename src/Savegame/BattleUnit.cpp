@@ -4064,6 +4064,23 @@ MovementType BattleUnit::getMovementType() const
 void BattleUnit::goToTimeOut()
 {
 	_status = STATUS_IGNORE_ME;
+
+	// 1. Problem:
+	// Take 2 rookies to an alien colony, leave 1 behind, and teleport the other to the exit and abort.
+	// Then let the aliens kill the rookie in the second stage.
+	// The mission will be a success, alien colony destroyed and everything recovered! (which is unquestionably wrong)
+	// ------------
+	// 2. Solution:
+	// Proper solution would be to fix this in the Debriefing, but (as far as I can say)
+	// that would require a lot of changes, Debriefing simply is not prepared for this scenario.
+	// ------------
+	// 3. Workaround:
+	// Knock out all the player units left behind in the earlier stages
+	// so that they don't count as survivors when all player units in the later stage are killed.
+	if (_originalFaction == FACTION_PLAYER)
+	{
+		_stunlevel = _health;
+	}
 }
 
 /**
