@@ -504,35 +504,31 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 
 	// automatic night vision
 	{
-		bool completeDarkness = true;
+		bool allPlayerUnitTilesVisible = true;
 		for (auto& unit : *_save->getUnits())
 		{
 			if (unit->getOriginalFaction() == FACTION_PLAYER && !unit->isOut())
 			{
-				if (unit->getTile() && unit->getTile()->getShade() < 12)
+				if (unit->getTile() && unit->getTile()->getShade() >= 12)
 				{
-					completeDarkness = false;
+					allPlayerUnitTilesVisible = false;
 					break;
 				}
 			}
 		}
-		if (!completeDarkness && _save->getGlobalShade() >= 12)
+		bool atLeastOneStrongPersonalLightAvailable = false;
+		for (auto& unit : *_save->getUnits())
 		{
-			bool noPersonalLights = true;
-			for (auto& unit : *_save->getUnits())
+			if (unit->getOriginalFaction() == FACTION_PLAYER && !unit->isOut())
 			{
-				if (unit->getOriginalFaction() == FACTION_PLAYER && !unit->isOut())
+				if (unit->getArmor()->getPersonalLight() > 5)
 				{
-					if (unit->getArmor()->getPersonalLight() > 5)
-					{
-						noPersonalLights = false;
-						break;
-					}
+					atLeastOneStrongPersonalLightAvailable = true;
+					break;
 				}
 			}
-			completeDarkness = noPersonalLights;
 		}
-		if (completeDarkness)
+		if (!allPlayerUnitTilesVisible && !atLeastOneStrongPersonalLightAvailable)
 		{
 			_map->toggleNightVision();
 		}
