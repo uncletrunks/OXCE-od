@@ -1605,6 +1605,14 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 		RuleItem *rule = _game->getMod()->getItem((*i).first, true);
 		for (std::vector<Position>::const_iterator j = (*i).second.begin(); j != (*i).second.end(); ++j)
 		{
+			if ((*j).x >= mapblock->getSizeX() || (*j).y >= mapblock->getSizeY() || (*j).z >= mapblock->getSizeZ())
+			{
+				std::ostringstream ss;
+				ss << "Item " << rule->getName() << " is outside of map block " << mapblock->getName() << ", position: [";
+				ss << (*j).x << "," << (*j).y << "," << (*j).z << "], block size: [";
+				ss << mapblock->getSizeX() << "," << mapblock->getSizeY() << "," << mapblock->getSizeZ() << "]";
+				throw Exception(ss.str());
+			}
 			BattleItem *item = _save->createItemForTile(rule, _save->getTile((*j) + Position(xoff, yoff, zoff)));
 			if (prime != primeEnd)
 			{
@@ -1634,6 +1642,14 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 					rule = _game->getMod()->getItem(i->itemList[index]);
 				}
 
+				if (i->position.x >= mapblock->getSizeX() || i->position.y >= mapblock->getSizeY() || i->position.z >= mapblock->getSizeZ())
+				{
+					std::ostringstream ss;
+					ss << "Random item " << rule->getName() << " is outside of map block " << mapblock->getName() << ", position: [";
+					ss << i->position.x << "," << i->position.y << "," << i->position.z << "], block size: [";
+					ss << mapblock->getSizeX() << "," << mapblock->getSizeY() << "," << mapblock->getSizeZ() << "]";
+					throw Exception(ss.str());
+				}
 				_save->createItemForTile(rule, _save->getTile(i->position + Position(xoff, yoff, zoff)));
 			}
 		}
