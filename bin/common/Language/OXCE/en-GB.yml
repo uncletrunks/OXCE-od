@@ -195,7 +195,7 @@ en-GB:
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT: "Play Briefing music longer"
   STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT_DESC: "Briefing music will continue playing during equipment phase until the Battlescape is displayed."
   STR_NIGHT_VISION_COLOR: "Select Night Vision colour"
-  STR_NIGHT_VISION_COLOR_DESC: "Values from 1 to 15, each representing a different shade colour. Default is 8."
+  STR_NIGHT_VISION_COLOR_DESC: "Values from 1 to 15, each representing a different shade colour."
   STR_AUTO_SELL: "Auto-Sell Manager"
   STR_AUTO_SELL_DESC: "In the battle debriefing sell screen, any item types you sold in previous battles will be automatically marked for selling."
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
