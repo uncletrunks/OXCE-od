@@ -1362,7 +1362,7 @@ void crashDump(void *ex, const std::string &err)
 		error << cppException->what();
 		break;
 	case EXCEPTION_ACCESS_VIOLATION:
-		error << "Memory access violation. This usually indicates something missing in a mod.";
+		error << "Memory access violation.";
 		break;
 	default:
 		error << "code 0x" << std::hex << exception->ExceptionRecord->ExceptionCode;
@@ -1399,7 +1399,7 @@ void crashDump(void *ex, const std::string &err)
 		switch (signal)
 		{
 		case SIGSEGV:
-			error << "Segmentation fault. This usually indicates something missing in a mod.";
+			error << "Segmentation fault.";
 			break;
 		default:
 			error << "signal " << signal;
