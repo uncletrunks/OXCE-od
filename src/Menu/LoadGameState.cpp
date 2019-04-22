@@ -194,6 +194,13 @@ void LoadGameState::think()
 					_game->getSavedGame()->getSavedBattle()->setBattleState(bs);
 				}
 			}
+
+			// Clear the SDL event queue (i.e. ignore input from impatient users)
+			SDL_Event e;
+			while (SDL_PollEvent(&e))
+			{
+				// do nothing
+			}
 		}
 		catch (Exception &e)
 		{

@@ -175,6 +175,13 @@ void SaveGameState::think()
 				_game->setState(new MainMenuState);
 				_game->setSavedGame(0);
 			}
+
+			// Clear the SDL event queue (i.e. ignore input from impatient users)
+			SDL_Event e;
+			while (SDL_PollEvent(&e))
+			{
+				// do nothing
+			}
 		}
 		catch (Exception &e)
 		{
