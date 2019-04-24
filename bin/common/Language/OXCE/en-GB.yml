@@ -188,6 +188,8 @@ en-GB:
   STR_HIT_LOG_REACTION_FIRE: "Reaction fire..."
 #=================== Engine ===================
 #Options.cpp
+  STR_LAZY_LOADING: "Lazy loading"
+  STR_LAZY_LOADING_DESC: "If enabled, graphic resources are loaded on-demand. Otherwise everything is loaded at start-up."
   STR_UFO_LANDING_ALERT: "UFO landing alert"
   STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
   STR_WOUNDED_DEFEND_BASE_IF: "Wounded defend (if HP above x%)"
