@@ -256,8 +256,6 @@ en-US:
   STR_INCLUDE_PRIMESTATE_IN_SAVED_LAYOUT_DESC: "Saves grenades primed during pre-battle inventory in the soldier's equipment layout."
   STR_NEWSEEDONLOAD: "Save scumming"
   STR_NEWSEEDONLOAD_DESC: "Loading a game will reset the random number seed, so taking the same action can yield different results. Doesn't apply to Ironman Mode."
-  STR_LAZY_LOADING: "Lazy loading"
-  STR_LAZY_LOADING_DESC: "If enabled, graphic resources are loaded on-demand. Otherwise everything is loaded at start-up."
   STR_CHANGEVALUEBYMOUSEWHEEL: "Change values with mouse wheel"
   STR_CHANGEVALUEBYMOUSEWHEEL_DESC: "Allows you to use the mouse wheel to increase/decrease values by this amount."
   STR_BATTLEHAIRBLEACH: "Enhanced soldier sprites"
