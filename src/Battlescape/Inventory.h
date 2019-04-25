@@ -77,7 +77,7 @@ public:
 	/// Gets the inventory's selected unit.
 	BattleUnit *getSelectedUnit() const;
 	/// Sets the inventory's selected unit.
-	void setSelectedUnit(BattleUnit *unit);
+	void setSelectedUnit(BattleUnit *unit, bool resetGroundOffset);
 	/// Draws the inventory.
 	void draw() override;
 	/// Draws the inventory grid.

@@ -159,11 +159,14 @@ BattleUnit *Inventory::getSelectedUnit() const
  * Changes the unit to display the inventory of.
  * @param unit Pointer to battle unit.
  */
-void Inventory::setSelectedUnit(BattleUnit *unit)
+void Inventory::setSelectedUnit(BattleUnit *unit, bool resetGroundOffset)
 {
 	_selUnit = unit;
-	_groundOffset = 999;
-	arrangeGround(1);
+	if (resetGroundOffset)
+	{
+		_groundOffset = 999;
+		arrangeGround(1);
+	}
 }
 
 /**
