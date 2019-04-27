@@ -286,6 +286,7 @@ set ( mod_src
   Mod/Polygon.cpp
   Mod/Polyline.cpp
   Mod/RuleAlienMission.cpp
+  Mod/RuleArcScript.cpp
   Mod/RuleBaseFacility.cpp
   Mod/RuleCommendations.cpp
   Mod/RuleConverter.cpp

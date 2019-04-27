@@ -84,6 +84,7 @@ class SoundDefinition;
 class MapScript;
 class RuleVideo;
 class RuleMusic;
+class RuleArcScript;
 class RuleMissionScript;
 class ModScript;
 class ModScriptGlobal;
@@ -141,6 +142,7 @@ private:
 	std::map<std::string, MCDPatch *> _MCDPatches;
 	std::map<std::string, std::vector<MapScript *> > _mapScripts;
 	std::map<std::string, RuleCommendations *> _commendations;
+	std::map<std::string, RuleArcScript*> _arcScripts;
 	std::map<std::string, RuleMissionScript*> _missionScripts;
 	std::map<std::string, std::vector<ExtraSprites *> > _extraSprites;
 	std::map<std::string, CustomPalettes *> _customPalettes;
@@ -201,7 +203,7 @@ private:
 	std::map<std::string, int> _ufopaediaSections;
 	std::vector<std::string> _countriesIndex, _extraGlobeLabelsIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
 	std::vector<std::string> _soldiersIndex, _aliensIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _ufopaediaCatIndex, _researchIndex, _manufactureIndex, _soldierTransformationIndex;
-	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _customPalettesIndex, _missionScriptIndex;
+	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _customPalettesIndex, _arcScriptIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
 	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _transformationListOrder, _ufopaediaListOrder, _invListOrder, _soldierListOrder;
@@ -644,6 +646,8 @@ public:
 	/// Gets a video for intro/outro etc.
 	RuleVideo *getVideo(const std::string &id, bool error = false) const;
 	const std::map<std::string, RuleMusic *> *getMusic() const;
+	const std::vector<std::string>* getArcScriptList() const;
+	RuleArcScript* getArcScript(const std::string& name, bool error = false) const;
 	const std::vector<std::string> *getMissionScriptList() const;
 	RuleMissionScript *getMissionScript(const std::string &name, bool error = false) const;
 	/// Get global script data.

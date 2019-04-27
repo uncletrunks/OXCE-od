@@ -75,6 +75,7 @@
 #include "RuleManufacture.h"
 #include "ExtraStrings.h"
 #include "RuleInterface.h"
+#include "RuleArcScript.h"
 #include "RuleMissionScript.h"
 #include "../Geoscape/Globe.h"
 #include "../Savegame/SavedGame.h"
@@ -613,6 +614,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, RuleMusic *>::const_iterator i = _musicDefs.begin(); i != _musicDefs.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleArcScript*>::const_iterator i = _arcScripts.begin(); i != _arcScripts.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1819,6 +1824,14 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 			MapScript *mapScript = new MapScript();
 			mapScript->load(*j);
 			_mapScripts[type].push_back(mapScript);
+		}
+	}
+	for (YAML::const_iterator i = doc["arcScripts"].begin(); i != doc["arcScripts"].end(); ++i)
+	{
+		RuleArcScript* rule = loadRule(*i, &_arcScripts, &_arcScriptIndex, "type");
+		if (rule != 0)
+		{
+			rule->load(*i);
 		}
 	}
 	for (YAML::const_iterator i = doc["missionScripts"].begin(); i != doc["missionScripts"].end(); ++i)
@@ -3173,6 +3186,16 @@ RuleVideo *Mod::getVideo(const std::string &id, bool error) const
 const std::map<std::string, RuleMusic *> *Mod::getMusic() const
 {
 	return &_musicDefs;
+}
+
+const std::vector<std::string>* Mod::getArcScriptList() const
+{
+	return &_arcScriptIndex;
+}
+
+RuleArcScript* Mod::getArcScript(const std::string& name, bool error) const
+{
+	return getRule(name, "Arc Script", _arcScripts, error);
 }
 
 const std::vector<std::string> *Mod::getMissionScriptList() const

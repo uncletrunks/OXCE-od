@@ -477,6 +477,7 @@
     <ClCompile Include="Menu\TestState.cpp" />
     <ClCompile Include="Menu\VideoState.cpp" />
     <ClCompile Include="Mod\CustomPalettes.cpp" />
+    <ClCompile Include="Mod\RuleArcScript.cpp" />
     <ClCompile Include="Mod\RuleDamageType.cpp" />
     <ClCompile Include="Mod\RuleItemCategory.cpp" />
     <ClCompile Include="Mod\RuleSoldierTransformation.cpp" />
@@ -852,6 +853,7 @@
     <ClInclude Include="Menu\TestState.h" />
     <ClInclude Include="Menu\VideoState.h" />
     <ClInclude Include="Mod\CustomPalettes.h" />
+    <ClInclude Include="Mod\RuleArcScript.h" />
     <ClInclude Include="Mod\RuleDamageType.h" />
     <ClInclude Include="Mod\RuleItemCategory.h" />
     <ClInclude Include="Mod\RuleSoldierTransformation.h" />

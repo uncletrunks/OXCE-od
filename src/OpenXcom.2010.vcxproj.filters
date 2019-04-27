@@ -1067,6 +1067,9 @@
     <ClCompile Include="Basescape\GlobalManufactureState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Mod\RuleArcScript.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2176,6 +2179,9 @@
     <ClInclude Include="..\libs\miniz\miniz.h" />
     <ClInclude Include="Basescape\GlobalManufactureState.h">
       <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleArcScript.h">
+      <Filter>Mod</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

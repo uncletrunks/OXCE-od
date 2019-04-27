@@ -45,6 +45,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/Ufo.h"
 #include "../Mod/RuleUfo.h"
+#include "../Mod/RuleArcScript.h"
 #include "../Mod/RuleMissionScript.h"
 #include "../Savegame/Waypoint.h"
 #include "../Savegame/Transfer.h"
@@ -3074,6 +3075,108 @@ void GeoscapeState::determineAlienMissions()
 	int month = _game->getSavedGame()->getMonthsPassed();
 	std::vector<RuleMissionScript*> availableMissions;
 	std::map<int, bool> conditions;
+
+	// sorry to interrupt, but before we start determining the actual monthly missions, let's determine and/or adjust our overall game plan
+	{
+		std::vector<RuleArcScript*> relevantArcScripts;
+
+		// first we need to build a list of "valid" commands
+		for (auto& scriptName : *mod->getArcScriptList())
+		{
+			RuleArcScript* arcScript = mod->getArcScript(scriptName);
+
+			// level one condition check: make sure we're within our time constraints
+			if (arcScript->getFirstMonth() <= month &&
+				(arcScript->getLastMonth() >= month || arcScript->getLastMonth() == -1) &&
+				// and make sure we satisfy the difficulty restrictions
+				arcScript->getMinDifficulty() <= save->getDifficulty() &&
+				arcScript->getMaxDifficulty() >= save->getDifficulty())
+			{
+				// level two condition check: make sure we meet any research requirements, if any.
+				bool triggerHappy = true;
+				for (auto& trigger : arcScript->getResearchTriggers())
+				{
+					triggerHappy = (save->isResearched(trigger.first) == trigger.second);
+					if (!triggerHappy)
+						break;
+				}
+				// level three condition check: does random chance favour this command's execution?
+				if (triggerHappy && RNG::percent(arcScript->getExecutionOdds()))
+				{
+					relevantArcScripts.push_back(arcScript);
+				}
+			}
+		}
+
+		// start processing command array
+		for (auto& arcCommand : relevantArcScripts)
+		{
+			// to remember stuff we can still enable
+			std::vector<std::string> disabledSeqArcs;
+			WeightedOptions disabledRngArcs;
+
+			int arcsEnabled = 0;
+			// level four condition check: check maxArcs (duplicates count, arcs enabled by other commands or in any other way count too!)
+			{
+				for (auto& seqArc : arcCommand->getSequentialArcs())
+				{
+					if (save->isResearched(seqArc))
+						++arcsEnabled;
+					else
+						disabledSeqArcs.push_back(seqArc);
+				}
+				WeightedOptions tmp = arcCommand->getRandomArcs(); // copy for the iterator, because of getNames()
+				disabledRngArcs = tmp; // copy for us to modify
+				for (auto& rngArc : tmp.getNames())
+				{
+					if (save->isResearched(rngArc))
+					{
+						++arcsEnabled;
+						disabledRngArcs.set(rngArc, 0); // delete
+					}
+				}
+			}
+			Base* hq = save->getBases()->front();
+			bool canAddOneMore = arcCommand->getMaxArcs() == -1 || arcCommand->getMaxArcs() > arcsEnabled;
+			if (canAddOneMore && !disabledSeqArcs.empty())
+			{
+				auto ruleResearchSeq = mod->getResearch(disabledSeqArcs.front(), true); // take first
+				save->addFinishedResearch(ruleResearchSeq, mod, hq, true);
+				++arcsEnabled;
+				if (ruleResearchSeq)
+				{
+					if (ruleResearchSeq->getLookup().empty())
+					{
+						Ufopaedia::openArticle(_game, ruleResearchSeq->getName());
+					}
+					else
+					{
+						save->addFinishedResearch(mod->getResearch(ruleResearchSeq->getLookup(), true), mod, hq, true);
+						Ufopaedia::openArticle(_game, ruleResearchSeq->getLookup());
+					}
+				}
+			}
+			canAddOneMore = arcCommand->getMaxArcs() == -1 || arcCommand->getMaxArcs() > arcsEnabled;
+			if (canAddOneMore && !disabledRngArcs.empty())
+			{
+				auto ruleResearchRng = mod->getResearch(disabledRngArcs.choose(), true); // take random
+				save->addFinishedResearch(ruleResearchRng, mod, hq, true);
+				++arcsEnabled; // for good measure :)
+				if (ruleResearchRng)
+				{
+					if (ruleResearchRng->getLookup().empty())
+					{
+						Ufopaedia::openArticle(_game, ruleResearchRng->getName());
+					}
+					else
+					{
+						save->addFinishedResearch(mod->getResearch(ruleResearchRng->getLookup(), true), mod, hq, true);
+						Ufopaedia::openArticle(_game, ruleResearchRng->getLookup());
+					}
+				}
+			}
+		}
+	}
 
 	// well, here it is, ladies and gents, the nuts and bolts behind the geoscape mission scheduling.
 
