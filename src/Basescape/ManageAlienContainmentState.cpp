@@ -53,11 +53,13 @@ namespace OpenXcom
  * @param origin Game section that originated this state.
  */
 ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonType, OptionsOrigin origin) :
-	_base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0), _doNotReset(false)
+	_base(base), _prisonType(prisonType), _origin(origin), _sel(0), _aliensSold(0), _total(0), _doNotReset(false), _threeButtons(false)
 {
+	_threeButtons = Options::canSellLiveAliens && Options::retainCorpses;
+
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	if (Options::canSellLiveAliens)
+	if (_threeButtons)
 	{
 		// 3 buttons
 		_btnOk = new TextButton(96, 16, 8, 176);
@@ -106,7 +108,7 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	// Set up objects
 	_window->setBackground(_game->getMod()->getSurface((origin == OPT_BATTLESCAPE)? "BACK01.SCR" : "BACK05.SCR"));
 
-	_btnOk->setText(trAlt(Options::canSellLiveAliens ? "STR_KILL_SELECTED" : "STR_REMOVE_SELECTED", _prisonType));
+	_btnOk->setText(trAlt(_threeButtons ? "STR_KILL_SELECTED" : "STR_REMOVE_SELECTED", _prisonType));
 	_btnOk->onMouseClick((ActionHandler)&ManageAlienContainmentState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&ManageAlienContainmentState::btnOkClick, Options::keyOk);
 
@@ -278,7 +280,7 @@ void ManageAlienContainmentState::resetListAndTotals()
 
 		_btnCancel->setVisible(!overCrowded);
 		_btnOk->setVisible(!overCrowded);
-		_btnSell->setVisible(!overCrowded && Options::canSellLiveAliens);
+		_btnSell->setVisible(!overCrowded && _threeButtons);
 		_btnTransfer->setVisible(overCrowded);
 	}
 }
@@ -300,7 +302,8 @@ void ManageAlienContainmentState::think()
  */
 void ManageAlienContainmentState::btnOkClick(Action *)
 {
-	dealWithSelectedAliens(false);
+	bool sell = Options::canSellLiveAliens && !Options::retainCorpses; // in all other cases, it's kill, not sell
+	dealWithSelectedAliens(sell);
 }
 
 /**
@@ -309,7 +312,7 @@ void ManageAlienContainmentState::btnOkClick(Action *)
  */
 void ManageAlienContainmentState::btnSellClick(Action *)
 {
-	dealWithSelectedAliens(true);
+	dealWithSelectedAliens(true); // this one is always sell
 }
 
 /**
@@ -569,7 +572,7 @@ void ManageAlienContainmentState::updateStrings()
 	if (availableContainment == 0 || Options::storageLimitsEnforced)
 	{
 		_btnOk->setVisible(spaces >= 0);
-		_btnSell->setVisible(spaces >= 0 && Options::canSellLiveAliens);
+		_btnSell->setVisible(spaces >= 0 && _threeButtons);
 	}
 	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(spaces));
 	_txtUsed->setText(tr("STR_SPACE_USED").arg(aliens));
