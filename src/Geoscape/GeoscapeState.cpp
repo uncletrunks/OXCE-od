@@ -2170,9 +2170,17 @@ void GeoscapeState::time1Day()
 			project = nullptr;
 
 			// 3b. handle interrogation and spawned items
-			if (Options::retainCorpses && research->destroyItem() && mod->getUnit(research->getName()))
+			if (Options::retainCorpses && research->destroyItem())
 			{
-				base->getStorageItems()->addItem(mod->getUnit(research->getName())->getArmor()->getCorpseGeoscape());
+				auto ruleUnit = mod->getUnit(research->getName(), false);
+				if (ruleUnit)
+				{
+					auto ruleCorpse = mod->getItem(ruleUnit->getArmor()->getCorpseGeoscape(), false);
+					if (ruleCorpse && ruleCorpse->isRecoverable() && ruleCorpse->isCorpseRecoverable())
+					{
+						base->getStorageItems()->addItem(ruleUnit->getArmor()->getCorpseGeoscape());
+					}
+				}
 			}
 			RuleItem *spawnedItem = _game->getMod()->getItem(research->getSpawnedItem());
 			if (spawnedItem)
