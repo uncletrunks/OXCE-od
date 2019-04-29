@@ -143,9 +143,9 @@ it:
   costPanic: "Costo panico"
 #
   weight: "Peso"
-  throwMultiplier: "Molt. precisione lancio"
-  accuracyThrow: "Precisione lancio"
-  costThrow: "Costo lancio"
+  throwMultiplier: "Molt. precisione tiro"
+  accuracyThrow: "Precisione tiro"
+  costThrow: "Costo tiro"
   costPrime: "Costo innesco"
   costUnprime: "Costo disinnesco"
 #
@@ -281,7 +281,7 @@ it:
   DRAWING_ROUTINE_INVERTED_CYBERDISC: "Cyberdisco Inverso (animazione propulsione sopra)"
 #
   stats: "Modificatori stat"
-  movementType: ""
+  movementType: "Tipo movimento"
   allowsRunning: "Permetti corsa?"
   allowsStrafing: "Permetti strafe?"
   allowsKneeling: "Permetti inginocchio?"
