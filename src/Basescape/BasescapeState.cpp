@@ -357,9 +357,7 @@ void BasescapeState::viewLeftClick(Action *)
 	BaseFacility *fac = _view->getSelectedFacility();
 	if (fac != 0)
 	{
-		bool allowed = _game->getMod()->getTheMostUselessOptionEver() == 0
-			|| (_game->getMod()->getTheMostUselessOptionEver() == 1 && !_game->getSavedGame()->isIronman());
-		if (allowed && (SDL_GetModState() & KMOD_CTRL))
+		if (SDL_GetModState() & KMOD_CTRL)
 		{
 			// Ctrl + left click on a base facility allows moving it
 			_game->pushState(new PlaceFacilityState(_base, fac->getRules(), fac));

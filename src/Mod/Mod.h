@@ -183,7 +183,6 @@ private:
 	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	bool _hidePediaInfoButton, _extraNerdyPediaInfo, _showAllCommendations;
 	bool _giveScoreAlsoForResearchedArtifacts, _statisticalBulletConservation;
-	int _theMostUselessOptionEver;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
@@ -564,8 +563,6 @@ public:
 	bool getGiveScoreAlsoForResearchedArtifacts() const { return _giveScoreAlsoForResearchedArtifacts; }
 	/// When recovering ammo, should partially spent clip have a chance to recover as full?
 	bool getStatisticalBulletConservation() const { return _statisticalBulletConservation; }
-	/// Self-explanatory
-	int getTheMostUselessOptionEver() const { return _theMostUselessOptionEver; }
 	/// Gets whether or not to load base defense terrain from globe texture
 	int getBaseDefenseMapFromLocation() const { return _baseDefenseMapFromLocation; }
 	/// Gets the ruleset for a specific research project.
