@@ -96,7 +96,7 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 	_txtCost->setText(tr("STR_COST_UC"));
 
 	_numCost->setBig();
-	_numCost->setText(Unicode::formatFunding(_origFac != nullptr ? _game->getMod()->getTheBiggestRipOffEver() : _rule->getBuildCost()));
+	_numCost->setText(Unicode::formatFunding(_origFac != nullptr ? 0 : _rule->getBuildCost()));
 
 	if (_origFac == nullptr && !_rule->getBuildCostItems().empty())
 	{
@@ -161,11 +161,6 @@ void PlaceFacilityState::viewClick(Action *)
 		{
 			_game->pushState(new ErrorMessageState(tr("STR_CANNOT_BUILD_HERE"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
 		}
-		else if (_game->getSavedGame()->getFunds() < _game->getMod()->getTheBiggestRipOffEver())
-		{
-			_game->popState();
-			_game->pushState(new ErrorMessageState(tr("STR_NOT_ENOUGH_MONEY"), _palette, _game->getMod()->getInterface("placeFacility")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("placeFacility")->getElement("errorPalette")->color));
-		}
 		else
 		{
 			_origFac->setX(_view->getGridX());
@@ -178,7 +173,6 @@ void PlaceFacilityState::viewClick(Action *)
 				if (_origFac->getBuildTime() > 0 && _view->isQueuedBuilding(_rule)) _origFac->setBuildTime(INT_MAX);
 				_view->reCalcQueuedBuildings();
 			}
-			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _game->getMod()->getTheBiggestRipOffEver());
 			_game->popState();
 		}
 	}
