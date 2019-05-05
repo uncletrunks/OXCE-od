@@ -19,6 +19,7 @@
 
 #include "Options.h"
 #include "../version.h"
+#include "../md5.h"
 #include <SDL.h>
 #include <SDL_keysym.h>
 #include <SDL_mixer.h>
@@ -53,6 +54,7 @@ std::map<std::string, std::string> _commandLine;
 std::vector<OptionInfo> _info;
 std::unordered_map<std::string, ModInfo> _modInfos;
 std::string _masterMod;
+int _passwordCheck = -1;
 bool _loadLastSave = false;
 bool _loadLastSaveExpended = false;
 
@@ -97,6 +99,7 @@ void create()
 	_info.push_back(OptionInfo("useOpenGLShader", &useOpenGLShader, "Shaders/Raw.OpenGL.shader"));
 	_info.push_back(OptionInfo("vSyncForOpenGL", &vSyncForOpenGL, true));
 	_info.push_back(OptionInfo("useOpenGLSmoothing", &useOpenGLSmoothing, true));
+	_info.push_back(OptionInfo("password", &password, "secret"));
 	_info.push_back(OptionInfo("debug", &debug, false));
 	_info.push_back(OptionInfo("debugUi", &debugUi, false));
 	_info.push_back(OptionInfo("soundVolume", &soundVolume, 2*(MIX_MAX_VOLUME/3)));
@@ -726,6 +729,24 @@ void updateMods()
 			Log(LOG_ERROR) << "Mod '" << modInf->getName() << "' requires at least OXCE v" << modInf->getRequiredExtendedVersion();
 		}
 	}
+}
+
+/**
+ * Is the password correct?
+ * @return Mostly false.
+ */
+bool isPasswordCorrect()
+{
+	if (_passwordCheck < 0)
+	{
+		std::string md5hash = md5(Options::password);
+		if (md5hash == "52bd8e15118862c40fc0d6107e197f42")
+			_passwordCheck = 1;
+		else
+			_passwordCheck = 0;
+	}
+
+	return _passwordCheck > 0;
 }
 
 /**

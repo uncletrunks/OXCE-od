@@ -357,7 +357,7 @@ void BasescapeState::viewLeftClick(Action *)
 	BaseFacility *fac = _view->getSelectedFacility();
 	if (fac != 0)
 	{
-		if (SDL_GetModState() & KMOD_CTRL)
+		if ((SDL_GetModState() & KMOD_CTRL) && Options::isPasswordCorrect())
 		{
 			// Ctrl + left click on a base facility allows moving it
 			_game->pushState(new PlaceFacilityState(_base, fac->getRules(), fac));

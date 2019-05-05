@@ -2,6 +2,7 @@
 set ( root_src
   lodepng.cpp
   main.cpp
+  md5.cpp
 )
 set ( basescape_src
   Basescape/BaseInfoState.cpp

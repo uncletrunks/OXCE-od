@@ -1070,6 +1070,7 @@
     <ClCompile Include="Mod\RuleArcScript.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="md5.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2183,6 +2184,7 @@
     <ClInclude Include="Mod\RuleArcScript.h">
       <Filter>Mod</Filter>
     </ClInclude>
+    <ClInclude Include="md5.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">

@@ -58,6 +58,7 @@ OPT int oxceWoundedDefendBaseIf;
 OPT bool oxcePlayBriefingMusicDuringEquipment;
 OPT int oxceNightVisionColor;
 OPT bool oxceAutoSell;
+OPT std::string password;
 
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter, newRootWindowedMode, newFullscreen, newAllowResize, newBorderless;
