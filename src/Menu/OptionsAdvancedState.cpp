@@ -292,6 +292,10 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 			min = 0;
 			max = 100;
 		}
+		else if (i == &Options::oxceNightVisionButtonThreshold) {
+			min = 0;
+			max = 15;
+		}
 		else if (i == &Options::oxceNightVisionColor)
 		{
 			// UFO: 1-15, TFTD: 2-15 except 10

@@ -216,6 +216,11 @@ void create()
 	_info.push_back(OptionInfo("oxceWoundedDefendBaseIf", &oxceWoundedDefendBaseIf, 100, "STR_WOUNDED_DEFEND_BASE_IF", "STR_OXCE"));
 	_info.push_back(OptionInfo("oxcePlayBriefingMusicDuringEquipment", &oxcePlayBriefingMusicDuringEquipment, false, "STR_PLAY_BRIEFING_MUSIC_DURING_EQUIPMENT", "STR_OXCE"));
 	_info.push_back(OptionInfo("oxceNightVisionColor", &oxceNightVisionColor, 5, "STR_NIGHT_VISION_COLOR", "STR_OXCE"));
+#ifdef __ANDROID__
+	_info.push_back(OptionInfo("oxceNightVisionButtonThreshold", &oxceNightVisionButtonThreshold, 15, "STR_NV_BUTTON_THRESHOLD", "STR_OXCE"));
+#else
+	_info.push_back(OptionInfo("oxceNightVisionButtonThreshold", &oxceNightVisionButtonThreshold, 15));
+#endif
 	_info.push_back(OptionInfo("oxceAutoSell", &oxceAutoSell, false, "STR_AUTO_SELL", "STR_OXCE"));
 
 	// controls

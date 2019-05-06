@@ -173,6 +173,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 		_numVisibleUnit[i] = new NumberText(15, 12, _btnVisibleUnit[i]->getX() + 6 , _btnVisibleUnit[i]->getY() + 4);
 	}
 	_numVisibleUnit[9]->setX(_numVisibleUnit[9]->getX() - 2); // center number 10
+	_btnToggleNV = new InteractiveSurface(12, 12, x + 2, y - 23);
 	_warning = new WarningMessage(224, 24, x + 48, y + 32);
 	_btnLaunch = new BattlescapeButton(32, 24, screenWidth - 32, 0); // we need screenWidth, because that is independent of the black bars on the screen
 	_btnLaunch->setVisible(false);
@@ -316,6 +317,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 		add(_btnVisibleUnit[i]);
 		add(_numVisibleUnit[i]);
 	}
+	add(_btnToggleNV);
 	add(_warning, "warning", "battlescape", _icons);
 	add(_txtDebug);
 	add(_txtTooltip, "textTooltip", "battlescape", _icons);
@@ -559,6 +561,14 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	}
 	_txtVisibleUnitTooltip[VISIBLE_MAX] = "STR_CENTER_ON_WOUNDED_FRIEND";
 	_txtVisibleUnitTooltip[VISIBLE_MAX+1] = "STR_CENTER_ON_SHOCKED_FRIEND";
+
+	_btnToggleNV->onMouseClick((ActionHandler)& BattlescapeState::btnToggleNightVisionAndPersonalLightsClick);
+	_btnToggleNV->setTooltip("STR_TOGGLE_NIGHT_VISION");
+	_btnToggleNV->onMouseIn((ActionHandler)& BattlescapeState::txtTooltipIn);
+	_btnToggleNV->onMouseOut((ActionHandler)& BattlescapeState::txtTooltipOut);
+	_btnToggleNV->drawRect(0, 0, 12, 12, 15);
+	_btnToggleNV->drawRect(1, 1, 10, 10, _indicatorBlue);
+	_btnToggleNV->setVisible(_save->getGlobalShade() > Options::oxceNightVisionButtonThreshold);
 
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
@@ -1424,6 +1434,21 @@ void BattlescapeState::btnVisibleUnitClick(Action *action)
 	if (btnID != -1)
 	{
 		_map->getCamera()->centerOnPosition(_visibleUnit[btnID]->getPosition());
+	}
+
+	action->getDetails()->type = SDL_NOEVENT; // consume the event
+}
+
+/**
+ * Toggles night vision (purely cosmetic) and personal lights (NOT cosmetic!).
+ * @param action Pointer to an action.
+ */
+void BattlescapeState::btnToggleNightVisionAndPersonalLightsClick(Action* action)
+{
+	if (allowButtons())
+	{
+		_map->toggleNightVision();
+		_save->getTileEngine()->togglePersonalLighting();
 	}
 
 	action->getDetails()->type = SDL_NOEVENT; // consume the event
