@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "AlienRace.h"
+#include "../Engine/Exception.h"
 #include "../Engine/RNG.h"
 
 namespace OpenXcom
@@ -89,8 +90,17 @@ const std::string &AlienRace::getMember(int id) const
 {
 	if (!_membersRandom.empty())
 	{
+		if (id >= _membersRandom.size())
+		{
+			throw Exception("Race " + _id + " does not have a random member at position/rank " + std::to_string(id));
+		}
 		int rng = RNG::generate(0, _membersRandom[id].size() - 1);
 		return _membersRandom[id][rng];
+	}
+
+	if (id >= _members.size())
+	{
+		throw Exception("Race " + _id + " does not have a member at position/rank " + std::to_string(id));
 	}
 	return _members[id];
 }
