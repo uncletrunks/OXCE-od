@@ -1607,7 +1607,6 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 		{
 			if ((*j).x >= mapblock->getSizeX() || (*j).y >= mapblock->getSizeY() || (*j).z >= mapblock->getSizeZ())
 			{
-				std::ostringstream ss;
 				ss << "Item " << rule->getName() << " is outside of map block " << mapblock->getName() << ", position: [";
 				ss << (*j).x << "," << (*j).y << "," << (*j).z << "], block size: [";
 				ss << mapblock->getSizeX() << "," << mapblock->getSizeY() << "," << mapblock->getSizeZ() << "]";
@@ -1644,7 +1643,6 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 
 				if (i->position.x >= mapblock->getSizeX() || i->position.y >= mapblock->getSizeY() || i->position.z >= mapblock->getSizeZ())
 				{
-					std::ostringstream ss;
 					ss << "Random item " << rule->getName() << " is outside of map block " << mapblock->getName() << ", position: [";
 					ss << i->position.x << "," << i->position.y << "," << i->position.z << "], block size: [";
 					ss << mapblock->getSizeX() << "," << mapblock->getSizeY() << "," << mapblock->getSizeZ() << "]";
