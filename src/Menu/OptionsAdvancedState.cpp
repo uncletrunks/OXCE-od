@@ -298,8 +298,8 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 		}
 		else if (i == &Options::oxceNightVisionColor)
 		{
-			// UFO: 1-15, TFTD: 2-15 except 10
-			if (_isTFTD && (*i) == 10)
+			// UFO: 1-15, TFTD: 2-15 except 8 and 10
+			if (_isTFTD && ((*i) == 8 || (*i) == 10))
 			{
 				*i += increment;
 			}
