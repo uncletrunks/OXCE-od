@@ -499,7 +499,9 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	for (int i = 0; i < _weaponNum; ++i)
 	{
 		CraftWeapon *w = _craft->getWeapons()->at(i);
-		if (w == 0 || (w->getRules()->getAmmoMax() == 0 && w->getRules()->getTractorBeamPower() == 0))
+
+		// Slot empty or no sprite, skip!
+		if (w == 0 || w->getRules()->getSprite() < 0)
 			continue;
 
 		Surface *weapon = _weapon[i], *range = _range[i];
@@ -517,16 +519,29 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 			x2 = 20 - x_off;
 		}
 
-		// Draw weapon icon
+		// Draw icon
 		frame = set->getFrame(w->getRules()->getSprite() + 5);
 		frame->blitNShade(weapon, 0, 0);
 
-		// Draw ammo
-		std::ostringstream ss;
-		ss << w->getAmmo();
-		ammo->setText(ss.str());
+		// Just an equipment, it doesn't have any ammo (weapon) or range (tractor beam), skip!
+		if (w->getRules()->getAmmoMax() == 0 && w->getRules()->getTractorBeamPower() == 0)
+			continue;
+
+		// Used for weapon toggling.
+		// Only relevant for weapons and tractor beams, not for equipment.
+		_weapon[i]->onMouseClick((ActionHandler)& DogfightState::weaponClick);
+
+		// Draw ammo.
+		// Only relevant for weapons, not for tractor beams.
+		if (w->getRules()->getAmmoMax() > 0)
+		{
+			std::ostringstream ss;
+			ss << w->getAmmo();
+			ammo->setText(ss.str());
+		}
 
 		// Draw range (1 km = 1 pixel)
+		// Only relevant for weapons and tractor beams.
 		Uint8 color = _colors[RANGE_METER];
 		range->lock();
 
@@ -636,13 +651,6 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 
 	drawCraftDamage();
 	drawCraftShield();
-
-	// Used for weapon toggling.
-
-	for (int i = 0; i < _weaponNum; ++i)
-	{
-		_weapon[i]->onMouseClick((ActionHandler)&DogfightState::weaponClick);
-	}
 
 	// Set this as the interception handling UFO shield recharge if no other is doing it
 	if (_ufo->getShieldRechargeHandle() == 0)
