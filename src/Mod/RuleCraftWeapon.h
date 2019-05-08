@@ -27,6 +27,8 @@ namespace OpenXcom
 
 class Mod;
 
+enum CraftWeaponCategory { CWC_WEAPON, CWC_TRACTOR_BEAM, CWC_EQUIPMENT };
+
 /**
  * Represents a specific type of craft weapon.
  * Contains constant info about a craft weapon like

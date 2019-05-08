@@ -35,28 +35,55 @@ namespace OpenXcom
 	{
 		RuleCraftWeapon *weapon = _game->getMod()->getCraftWeapon(defs->id, true);
 
-		_lstInfo = new TextList(150, 50, 168, 126);
+		CraftWeaponCategory category = CWC_WEAPON;
+		int offset = 0;
+		if (weapon->getHidePediaInfo())
+		{
+			if (weapon->getTractorBeamPower() > 0)
+			{
+				category = CWC_TRACTOR_BEAM;
+				offset = 24; // 3 * 8
+			}
+			else
+			{
+				category = CWC_EQUIPMENT;
+				offset = 0;
+			}
+		}
+
+		_lstInfo = new TextList(150, 50 - offset, 168, 126 + offset);
 		add(_lstInfo);
-		_lstInfo->setVisible(!weapon->getHidePediaInfo());
+		_lstInfo->setVisible(category != CWC_EQUIPMENT);
 
 		_lstInfo->setColor(_listColor1);
 		_lstInfo->setColumns(2, 100, 68); // deliberately making this wider than the original to account for finnish.
 		_lstInfo->setDot(true);
 
-		_lstInfo->addRow(2, tr("STR_DAMAGE").c_str(), Unicode::formatNumber(weapon->getDamage()).c_str());
-		_lstInfo->setCellColor(0, 1, _listColor2);
+		if (category == CWC_WEAPON)
+		{
+			_lstInfo->addRow(2, tr("STR_DAMAGE").c_str(), Unicode::formatNumber(weapon->getDamage()).c_str());
+			_lstInfo->setCellColor(0, 1, _listColor2);
 
-		_lstInfo->addRow(2, tr("STR_RANGE").c_str(), tr("STR_KILOMETERS").arg(weapon->getRange()).c_str());
-		_lstInfo->setCellColor(1, 1, _listColor2);
+			_lstInfo->addRow(2, tr("STR_RANGE").c_str(), tr("STR_KILOMETERS").arg(weapon->getRange()).c_str());
+			_lstInfo->setCellColor(1, 1, _listColor2);
 
-		_lstInfo->addRow(2, tr("STR_ACCURACY").c_str(), Unicode::formatPercentage(weapon->getAccuracy()).c_str());
-		_lstInfo->setCellColor(2, 1, _listColor2);
+			_lstInfo->addRow(2, tr("STR_ACCURACY").c_str(), Unicode::formatPercentage(weapon->getAccuracy()).c_str());
+			_lstInfo->setCellColor(2, 1, _listColor2);
 
-		_lstInfo->addRow(2, tr("STR_RE_LOAD_TIME").c_str(), tr("STR_SECONDS").arg(weapon->getStandardReload()).c_str());
-		_lstInfo->setCellColor(3, 1, _listColor2);
+			_lstInfo->addRow(2, tr("STR_RE_LOAD_TIME").c_str(), tr("STR_SECONDS").arg(weapon->getStandardReload()).c_str());
+			_lstInfo->setCellColor(3, 1, _listColor2);
 
-		_lstInfo->addRow(2, tr("STR_ROUNDS").c_str(), Unicode::formatNumber(weapon->getAmmoMax()).c_str());
-		_lstInfo->setCellColor(4, 1, _listColor2);
+			_lstInfo->addRow(2, tr("STR_ROUNDS").c_str(), Unicode::formatNumber(weapon->getAmmoMax()).c_str());
+			_lstInfo->setCellColor(4, 1, _listColor2);
+		}
+		else if (category == CWC_TRACTOR_BEAM)
+		{
+			_lstInfo->addRow(2, tr("STR_TRACTOR_BEAM_POWER").c_str(), Unicode::formatNumber(weapon->getTractorBeamPower()).c_str());
+			_lstInfo->setCellColor(0, 1, _listColor2);
+
+			_lstInfo->addRow(2, tr("STR_RANGE").c_str(), tr("STR_KILOMETERS").arg(weapon->getRange()).c_str());
+			_lstInfo->setCellColor(1, 1, _listColor2);
+		}
 
 		centerAllSurfaces();
 	}

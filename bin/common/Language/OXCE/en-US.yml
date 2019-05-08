@@ -318,6 +318,8 @@ en-US:
   STR_MAXIMUM_RANGE: "MAX RANGE>{ALT}{0}{ALT}"
   STR_MINIMUM_RANGE: "MIN RANGE>{ALT}{0}{ALT}"
   STR_INFINITE_RANGE: "N/A"
+#ArticleStateCraftWeapon.cpp
+  STR_TRACTOR_BEAM_POWER: "Power"
 #ArticleStateItem.cpp
   STR_WEIGHT_PEDIA1: "Wt: {0}"
   STR_WEIGHT_PEDIA2: "Wt: {0}/{1}"
