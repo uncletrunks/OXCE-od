@@ -33,7 +33,7 @@ namespace OpenXcom
  * @param rules Pointer to ruleset.
  * @param ammo Initial ammo.
  */
-CraftWeapon::CraftWeapon(RuleCraftWeapon *rules, int ammo) : _rules(rules), _ammo(ammo), _rearming(false)
+CraftWeapon::CraftWeapon(RuleCraftWeapon *rules, int ammo) : _rules(rules), _ammo(ammo), _rearming(false), _disabled(false)
 {
 }
 
@@ -52,6 +52,7 @@ void CraftWeapon::load(const YAML::Node &node)
 {
 	_ammo = node["ammo"].as<int>(_ammo);
 	_rearming = node["rearming"].as<bool>(_rearming);
+	_disabled = node["disabled"].as<bool>(_disabled);
 }
 
 /**
@@ -65,6 +66,8 @@ YAML::Node CraftWeapon::save() const
 	node["ammo"] = _ammo;
 	if (_rearming)
 		node["rearming"] = _rearming;
+	if (_disabled)
+		node["disabled"] = _disabled;
 	return node;
 }
 
@@ -112,6 +115,9 @@ bool CraftWeapon::setAmmo(int ammo)
  */
 bool CraftWeapon::isRearming() const
 {
+	if (_disabled)
+		return false;
+
 	return _rearming;
 }
 
@@ -123,6 +129,24 @@ bool CraftWeapon::isRearming() const
 void CraftWeapon::setRearming(bool rearming)
 {
 	_rearming = rearming;
+}
+
+/**
+ * Returns whether this craft weapon is disabled.
+ * @return Disabled status.
+ */
+bool CraftWeapon::isDisabled() const
+{
+	return _disabled;
+}
+
+/**
+ * Sets whether this craft weapon is disabled or not.
+ * @param disabled Disabled status.
+ */
+void CraftWeapon::setDisabled(bool disabled)
+{
+	_disabled = disabled;
 }
 
 /**

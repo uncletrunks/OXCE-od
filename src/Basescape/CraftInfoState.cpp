@@ -316,6 +316,7 @@ void CraftInfoState::init()
 			frame->blitNShade(_weapon[i], 0, 0);
 
 			std::ostringstream weaponLine;
+			if (w1->isDisabled()) weaponLine << "*";
 			weaponLine << Unicode::TOK_COLOR_FLIP << tr(w1->getRules()->getType());
 			_txtWName[i]->setText(weaponLine.str());
 			weaponLine.str("");
@@ -323,7 +324,7 @@ void CraftInfoState::init()
 			{
 				weaponLine << tr("STR_AMMO_").arg(w1->getAmmo()) << "\n" << Unicode::TOK_COLOR_FLIP;
 				weaponLine << tr("STR_MAX").arg(w1->getRules()->getAmmoMax());
-				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax())
+				if (_craft->getStatus() == "STR_REARMING" && w1->getAmmo() < w1->getRules()->getAmmoMax() && !w1->isDisabled())
 				{
 					int rearmHours = (int)ceil((double)(w1->getRules()->getAmmoMax() - w1->getAmmo()) / w1->getRules()->getRearmRate());
 					weaponLine << formatTime(rearmHours);

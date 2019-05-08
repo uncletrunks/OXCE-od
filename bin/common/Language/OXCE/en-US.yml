@@ -200,6 +200,8 @@ en-US:
   STR_NIGHT_VISION_COLOR_DESC: "Values from 1 to 15, each representing a different shade color."
   STR_AUTO_SELL: "Auto-Sell Manager"
   STR_AUTO_SELL_DESC: "In the battle debriefing sell screen, any item types you sold in previous battles will be automatically marked for selling."
+  STR_REMEMBER_DISABLED_CRAFT_WEAPONS: "Remember disabled craft weapons"
+  STR_REMEMBER_DISABLED_CRAFT_WEAPONS_DESC: "Craft weapons disabled during a dogfight will stay disabled. They will also not be rearmed at the base."
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"

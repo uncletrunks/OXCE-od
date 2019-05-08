@@ -246,7 +246,8 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	_timeout(50), _currentDist(640), _targetDist(560),
 	_end(false), _endUfoHandled(false), _endCraftHandled(false), _ufoBreakingOff(false), _hunterKillerBreakingOff(false), _destroyUfo(false), _destroyCraft(false),
 	_minimized(false), _endDogfight(false), _animatingHit(false), _waitForPoly(false), _waitForAltitude(false), _ufoSize(0), _craftHeight(0), _currentCraftDamageColor(0),
-	_interceptionNumber(0), _interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false), _experienceAwarded(false)
+	_interceptionNumber(0), _interceptionsCount(0), _x(0), _y(0), _minimizedIconX(0), _minimizedIconY(0), _firedAtLeastOnce(false), _experienceAwarded(false),
+	_delayedRecolorDone(false)
 {
 	_screen = false;
 	_craft->setInDogfight(true);
@@ -259,6 +260,12 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 		_weaponEnabled[i] = true;
 		_weaponFireCountdown[i] = 0;
 		_tractorLockedOn[i] = false;
+
+		CraftWeapon* w = _craft->getWeapons()->at(i);
+		if (w)
+		{
+			_weaponEnabled[i] = !w->isDisabled();
+		}
 	}
 
 	// pilot modifiers
@@ -686,6 +693,18 @@ bool DogfightState::isUfoAttacking() const
  */
 void DogfightState::think()
 {
+	if (!_delayedRecolorDone)
+	{
+		// can't be done in the constructor (recoloring the ammo text doesn't work)
+		for (int i = 0; i < _weaponNum; ++i)
+		{
+			if (_craft->getWeapons()->at(i) && !_weaponEnabled[i])
+			{
+				recolor(i, _weaponEnabled[i]);
+			}
+		}
+		_delayedRecolorDone = true;
+	}
 	if (!_endDogfight)
 	{
 		update();
@@ -2039,6 +2058,15 @@ void DogfightState::weaponClick(Action * a)
 		{
 			_weaponEnabled[i] = !_weaponEnabled[i];
 			recolor(i, _weaponEnabled[i]);
+
+			if (Options::oxceRememberDisabledCraftWeapons)
+			{
+				CraftWeapon* w = _craft->getWeapons()->at(i);
+				if (w)
+				{
+					w->setDisabled(!_weaponEnabled[i]);
+				}
+			}
 			return;
 		}
 	}
