@@ -1911,7 +1911,7 @@ void DogfightState::previewClick(Action *)
 	_btnAggressive->setVisible(true);
 	_btnDisengage->setVisible(!_disableDisengage);
 	_btnUfo->setVisible(true);
-	_btnMinimize->setVisible(!_ufoIsAttacking);
+	_btnMinimize->setVisible(!_ufoIsAttacking || _craftIsDefenseless);
 	for (int i = 0; i < _weaponNum; ++i)
 	{
 		_weapon[i]->setVisible(true);
