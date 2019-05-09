@@ -30,7 +30,12 @@ namespace OpenXcom
  * type of base facility.
  * @param type String defining the type.
  */
-RuleBaseFacility::RuleBaseFacility(const std::string &type) : _type(type), _spriteShape(-1), _spriteFacility(-1), _missileAttraction(100), _lift(false), _hyper(false), _mind(false), _grav(false), _size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0), _trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f), _prisonType(0), _rightClickActionType(0), _verticalLevels(), _removalTime(0), _canBeBuiltOver(false), _destroyedFacility(0)
+RuleBaseFacility::RuleBaseFacility(const std::string &type) :
+	_type(type), _spriteShape(-1), _spriteFacility(-1), _missileAttraction(100), _lift(false), _hyper(false), _mind(false), _grav(false), _mindPower(1),
+	_size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0),
+	_labs(0), _workshops(0), _psiLabs(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _listOrder(0),
+	_trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f),
+	_prisonType(0), _rightClickActionType(0), _verticalLevels(), _removalTime(0), _canBeBuiltOver(false), _destroyedFacility(0)
 {
 }
 
@@ -76,6 +81,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_hyper = node["hyper"].as<bool>(_hyper);
 	_mind = node["mind"].as<bool>(_mind);
 	_grav = node["grav"].as<bool>(_grav);
+	_mindPower = node["mindPower"].as<int>(_mindPower);
 	_size = node["size"].as<int>(_size);
 	_buildCost = node["buildCost"].as<int>(_buildCost);
 	_refundValue = node["refundValue"].as<int>(_refundValue);
@@ -274,6 +280,15 @@ bool RuleBaseFacility::isHyperwave() const
 bool RuleBaseFacility::isMindShield() const
 {
 	return _mind;
+}
+
+/**
+ * Gets the mind shield power.
+ * @return Mind shield power.
+ */
+int RuleBaseFacility::getMindShieldPower() const
+{
+	return _mindPower;
 }
 
 /**

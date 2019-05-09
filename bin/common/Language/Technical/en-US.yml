@@ -324,6 +324,7 @@ en-US:
   lift: "Access lift?"
   hyper: "Hyper-wave decoder?"
   mind: "Mind shield?"
+  mindPower: "Mind shield power"
   grav: "Grav shield?"
   storage: "Storage space"
   personnel: "Living space"

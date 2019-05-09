@@ -1488,49 +1488,6 @@ bool Base::getRetaliationTarget() const
 }
 
 /**
- * Functor to check for mind shield capability.
- */
-struct isMindShield: public std::unary_function<BaseFacility*, bool>
-{
-	/// Check isMindShield() for @a facility.
-	bool operator()(const BaseFacility *facility) const;
-};
-
-/**
- * Only fully operational facilities are checked.
- * @param facility Pointer to the facility to check.
- * @return If @a facility can act as a mind shield.
- */
-bool isMindShield::operator()(const BaseFacility *facility) const
-{
-	if (facility->getBuildTime() != 0 || facility->getDisabled())
-	{
-		// Still building this (or is temporarily disabled)
-		return false;
-	}
-	return (facility->getRules()->isMindShield());
-}
-
-/**
- * Functor to check for completed facilities.
- */
-struct isCompleted: public std::unary_function<BaseFacility*, bool>
-{
-	/// Check isCompleted() for @a facility.
-	bool operator()(const BaseFacility *facility) const;
-};
-
-/**
- * Facilities are checked for construction completion.
- * @param facility Pointer to the facility to check.
- * @return If @a facility has completed construction.
- */
-bool isCompleted::operator()(const BaseFacility *facility) const
-{
-	return (facility->getBuildTime() == 0);
-}
-
-/**
  * Calculate the detection chance of this base.
  * Big bases without mindshields are easier to detect.
  * @param difficulty The savegame difficulty.
@@ -1538,13 +1495,17 @@ bool isCompleted::operator()(const BaseFacility *facility) const
  */
 size_t Base::getDetectionChance() const
 {
-	size_t mindShields = std::count_if (_facilities.begin(), _facilities.end(), isMindShield());
+	size_t mindShields = 0;
 	size_t completedFacilities = 0;
 	for (std::vector<BaseFacility*>::const_iterator i = _facilities.begin(); i != _facilities.end(); ++i)
 	{
 		if ((*i)->getBuildTime() == 0)
 		{
 			completedFacilities += (*i)->getRules()->getSize() * (*i)->getRules()->getSize();
+			if ((*i)->getRules()->isMindShield() && !(*i)->getDisabled())
+			{
+				mindShields += (*i)->getRules()->getMindShieldPower();
+			}
 		}
 	}
 	return ((completedFacilities / 6 + 15) / (mindShields + 1));
