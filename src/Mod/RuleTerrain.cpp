@@ -78,7 +78,7 @@ void RuleTerrain::load(const YAML::Node &node, Mod *mod)
 		}
 	}
 	_name = node["name"].as<std::string>(_name);
-	_startingCondition = node["startingCondition"].as<std::string>(_startingCondition);
+	_enviroEffects = node["enviroEffects"].as<std::string>(_enviroEffects);
 	if (const YAML::Node &civs = node["civilianTypes"])
 	{
 		_civilianTypes = civs.as<std::vector<std::string> >(_civilianTypes);
@@ -133,12 +133,12 @@ std::string RuleTerrain::getName() const
 }
 
 /**
-* Returns the starting condition name for this terrain.
-* @return String ID for starting condition.
-*/
-std::string RuleTerrain::getStartingCondition() const
+ * Returns the enviro effects name for this terrain.
+ * @return String ID for the enviro effects.
+ */
+const std::string& RuleTerrain::getEnviroEffects() const
 {
-	return _startingCondition;
+	return _enviroEffects;
 }
 
 /**

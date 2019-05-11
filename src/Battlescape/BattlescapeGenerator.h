@@ -37,6 +37,7 @@ class RuleInventory;
 class RuleItem;
 class Unit;
 class AlienRace;
+class RuleEnviroEffects;
 class RuleStartingCondition;
 class AlienDeployment;
 class Game;
@@ -119,7 +120,7 @@ private:
 	/// Possibly explodes ufo powersources.
 	void explodePowerSources();
 	/// Deploys the XCOM units on the mission.
-	void deployXCOM(const RuleStartingCondition *startingCondition);
+	void deployXCOM(const RuleStartingCondition* startingCondition, const RuleEnviroEffects* enviro);
 	/// Runs necessary checks before physically setting the position.
 	bool canPlaceXCOMUnit(Tile *tile);
 	/// Deploys the aliens, according to the alien deployment rules.

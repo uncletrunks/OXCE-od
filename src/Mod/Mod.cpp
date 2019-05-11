@@ -66,6 +66,7 @@
 #include "RuleSoldier.h"
 #include "RuleCommendations.h"
 #include "AlienRace.h"
+#include "RuleEnviroEffects.h"
 #include "RuleStartingCondition.h"
 #include "AlienDeployment.h"
 #include "Armor.h"
@@ -532,6 +533,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, AlienRace*>::iterator i = _alienRaces.begin(); i != _alienRaces.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleEnviroEffects*>::iterator i = _enviroEffects.begin(); i != _enviroEffects.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1111,7 +1116,7 @@ void Mod::loadAll()
 	afterLoadHelper("manufacture", this, _manufacture, &RuleManufacture::afterLoad);
 	afterLoadHelper("units", this, _units, &Unit::afterLoad);
 	afterLoadHelper("facilities", this, _facilities, &RuleBaseFacility::afterLoad);
-	afterLoadHelper("startingConditions", this, _startingConditions, &RuleStartingCondition::afterLoad);
+	afterLoadHelper("enviroEffects", this, _enviroEffects, &RuleEnviroEffects::afterLoad);
 
 	// fixed user options
 	if (!_fixedUserOptions.empty())
@@ -1364,6 +1369,14 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	for (YAML::const_iterator i = doc["alienRaces"].begin(); i != doc["alienRaces"].end(); ++i)
 	{
 		AlienRace *rule = loadRule(*i, &_alienRaces, &_aliensIndex, "id");
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
+	for (YAML::const_iterator i = doc["enviroEffects"].begin(); i != doc["enviroEffects"].end(); ++i)
+	{
+		RuleEnviroEffects* rule = loadRule(*i, &_enviroEffects, &_enviroEffectsIndex);
 		if (rule != 0)
 		{
 			rule->load(*i);
@@ -2429,22 +2442,43 @@ const std::vector<std::string> &Mod::getAlienRacesList() const
 }
 
 /**
-* Returns the info about a specific starting condition.
-* @param name Starting condition name.
-* @return Rules for the starting condition.
-*/
-RuleStartingCondition *Mod::getStartingCondition(const std::string &name) const
+ * Returns specific EnviroEffects.
+ * @param name EnviroEffects name.
+ * @return Rules for the EnviroEffects.
+ */
+RuleEnviroEffects* Mod::getEnviroEffects(const std::string& name) const
+{
+	std::map<std::string, RuleEnviroEffects*>::const_iterator i = _enviroEffects.find(name);
+	if (_enviroEffects.end() != i) return i->second; else return 0;
+}
+
+/**
+ * Returns the list of all EnviroEffects
+ * provided by the mod.
+ * @return List of EnviroEffects.
+ */
+const std::vector<std::string>& Mod::getEnviroEffectsList() const
+{
+	return _enviroEffectsIndex;
+}
+
+/**
+ * Returns the info about a specific starting condition.
+ * @param name Starting condition name.
+ * @return Rules for the starting condition.
+ */
+RuleStartingCondition* Mod::getStartingCondition(const std::string& name) const
 {
 	std::map<std::string, RuleStartingCondition*>::const_iterator i = _startingConditions.find(name);
 	if (_startingConditions.end() != i) return i->second; else return 0;
 }
 
 /**
-* Returns the list of all starting conditions
-* provided by the mod.
-* @return List of starting conditions.
-*/
-const std::vector<std::string> &Mod::getStartingConditionsList() const
+ * Returns the list of all starting conditions
+ * provided by the mod.
+ * @return List of starting conditions.
+ */
+const std::vector<std::string>& Mod::getStartingConditionsList() const
 {
 	return _startingConditionsIndex;
 }

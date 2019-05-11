@@ -1219,9 +1219,9 @@ int Craft::getSpaceUsed() const
  * Checks if there are enough required items onboard.
  * @return True if the craft has enough required items.
  */
-bool Craft::areRequiredItemsOnboard(const std::map<std::string, int> *requiredItems)
+bool Craft::areRequiredItemsOnboard(const std::map<std::string, int>& requiredItems)
 {
-	for (auto mapItem : *requiredItems)
+	for (auto& mapItem : requiredItems)
 	{
 		if (_items->getItem(mapItem.first) < mapItem.second)
 		{
@@ -1234,9 +1234,9 @@ bool Craft::areRequiredItemsOnboard(const std::map<std::string, int> *requiredIt
 /**
  * Destroys given required items.
  */
-void Craft::destroyRequiredItems(const std::map<std::string, int> *requiredItems)
+void Craft::destroyRequiredItems(const std::map<std::string, int>& requiredItems)
 {
-	for (auto mapItem : *requiredItems)
+	for (auto& mapItem : requiredItems)
 	{
 		_items->removeItem(mapItem.first, mapItem.second);
 	}

@@ -1,5 +1,6 @@
+#pragma once
 /*
- * Copyright 2010-2015 OpenXcom Developers.
+ * Copyright 2010-2019 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,9 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_RULESTARTINGCONDITION_H
-#define OPENXCOM_RULESTARTINGCONDITION_H
-
+#include <map>
 #include <vector>
 #include <string>
 #include <yaml-cpp/yaml.h>
@@ -28,19 +27,6 @@ namespace OpenXcom
 class Mod;
 class Armor;
 
-struct EnvironmentalCondition
-{
-	int globalChance;
-	int chancePerTurn;
-	int firstTurn, lastTurn;
-	std::string message;
-	int color;
-	std::string weaponOrAmmo;
-	int side;
-	int bodyPart;
-	EnvironmentalCondition() : globalChance(100), chancePerTurn(0), firstTurn(1), lastTurn(1000), color(29), side(-1), bodyPart(-1) { /*Empty by Design*/ };
-};
-
 /**
  * Represents a specific Starting Condition.
  */
@@ -48,10 +34,6 @@ class RuleStartingCondition
 {
 private:
 	std::string _type;
-	std::map<std::string, std::string> _paletteTransformations;
-	std::map<std::string, EnvironmentalCondition> _environmentalConditions;
-	std::map<std::string, std::string> _armorTransformationsName;
-	std::map<const Armor*, Armor*> _armorTransformations;
 	std::map<std::string, std::map<std::string, int> > _defaultArmor;
 	std::vector<std::string> _allowedArmors;
 	std::vector<std::string> _allowedVehicles;
@@ -60,49 +42,31 @@ private:
 	std::vector<std::string> _allowedCraft;
 	std::map<std::string, int> _requiredItems;
 	bool _destroyRequiredItems;
-	int _mapBackgroundColor;
-	std::string _inventoryShockIndicator;
-	std::string _mapShockIndicator;
 public:
 	/// Creates a blank Starting Conditions ruleset.
-	RuleStartingCondition(const std::string &type);
+	RuleStartingCondition(const std::string& type);
 	/// Cleans up the Starting Conditions ruleset.
 	~RuleStartingCondition();
 	/// Loads Starting Conditions data from YAML.
 	void load(const YAML::Node& node);
-	/// Cross link with other rules.
-	void afterLoad(const Mod* mod);
 	/// Gets the Starting Conditions's type.
-	std::string getType() const;
-	/// Gets the palette transformations.
-	const std::map<std::string, std::string> *getPaletteTransformations() const;
-	/// Gets the environmental condition for a given faction.
-	EnvironmentalCondition getEnvironmetalCondition(const std::string &faction) const;
+	const std::string& getType() const { return _type; }
 	/// Gets the allowed armor types.
-	const std::vector<std::string> *getAllowedArmors() const;
+	const std::vector<std::string>& getAllowedArmors() const { return _allowedArmors; }
 	/// Gets the allowed craft types.
-	const std::vector<std::string> *getAllowedCraft() const;
+	const std::vector<std::string>& getAllowedCraft() const { return _allowedCraft; }
 	/// Gets the required items.
-	const std::map<std::string, int> *getRequiredItems() const;
+	const std::map<std::string, int>& getRequiredItems() const { return _requiredItems; }
 	/// Should the required items be destroyed when the mission starts?
 	bool getDestroyRequiredItems() const { return _destroyRequiredItems; }
 	/// Checks if the craft type is allowed.
-	bool isCraftAllowed(const std::string &craftType) const;
+	bool isCraftAllowed(const std::string& craftType) const;
 	/// Gets the replacement armor.
-	std::string getArmorReplacement(const std::string &soldierType, const std::string &armorType) const;
-	/// Gets the transformed armor.
-	Armor* getArmorTransformation(const Armor* sourceArmor) const;
+	std::string getArmorReplacement(const std::string& soldierType, const std::string& armorType) const;
 	/// Checks if the vehicle type is allowed.
-	bool isVehicleAllowed(const std::string &vehicleType) const;
+	bool isVehicleAllowed(const std::string& vehicleType) const;
 	/// Checks if the item type is allowed.
-	bool isItemAllowed(const std::string &itemType, Mod *mod) const;
-	/// Gets the battlescape map background color.
-	int getMapBackgroundColor() const;
-	/// Gets the inventory shock indicator sprite name.
-	const std::string &getInventoryShockIndicator() const;
-	/// Gets the map shock indicator sprite name.
-	const std::string &getMapShockIndicator() const;
+	bool isItemAllowed(const std::string& itemType, Mod* mod) const;
 };
 
 }
-#endif

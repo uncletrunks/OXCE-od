@@ -65,7 +65,7 @@ class AlienDeployment
 {
 private:
 	std::string _type;
-	std::string _startingCondition;
+	std::string _enviroEffects, _startingCondition;
 	std::string _unlockedResearch, _missionBountyItem;
 	int _bughuntMinTurn;
 	std::vector<DeploymentData> _data;
@@ -99,8 +99,10 @@ public:
 	void load(const YAML::Node& node, Mod *mod);
 	/// Gets the Alien Deployment's type.
 	std::string getType() const;
+	/// Gets the Alien Deployment's enviro effects.
+	const std::string& getEnviroEffects() const;
 	/// Gets the Alien Deployment's starting condition.
-	std::string getStartingCondition() const;
+	const std::string& getStartingCondition() const;
 	/// Gets the research topic to be unlocked after a successful mission.
 	std::string getUnlockedResearch() const;
 	/// Gets the item to be recovered/given after a successful mission.

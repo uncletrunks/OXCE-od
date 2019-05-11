@@ -151,6 +151,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 		load(parent, mod);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_enviroEffects = node["enviroEffects"].as<std::string>(_enviroEffects);
 	_startingCondition = node["startingCondition"].as<std::string>(_startingCondition);
 	_unlockedResearch = node["unlockedResearch"].as<std::string>(_unlockedResearch);
 	_missionBountyItem = node["missionBountyItem"].as<std::string>(_missionBountyItem);
@@ -260,10 +261,19 @@ std::string AlienDeployment::getType() const
 }
 
 /**
-* Returns the starting condition name for this mission.
-* @return String ID for starting condition.
-*/
-std::string AlienDeployment::getStartingCondition() const
+ * Returns the enviro effects name for this mission.
+ * @return String ID for the enviro effects.
+ */
+const std::string& AlienDeployment::getEnviroEffects() const
+{
+	return _enviroEffects;
+}
+
+/**
+ * Returns the starting condition name for this mission.
+ * @return String ID for starting condition.
+ */
+const std::string& AlienDeployment::getStartingCondition() const
 {
 	return _startingCondition;
 }

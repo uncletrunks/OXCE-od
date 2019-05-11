@@ -46,7 +46,7 @@
 #include "../Mod/MapDataSet.h"
 #include "../Mod/MapData.h"
 #include "../Mod/Armor.h"
-#include "../Mod/RuleStartingCondition.h"
+#include "../Mod/RuleEnviroEffects.h"
 #include "BattlescapeMessage.h"
 #include "../Savegame/SavedGame.h"
 #include "../Interface/NumberText.h"
@@ -133,10 +133,10 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_fadeTimer->onTimer((SurfaceHandler)&Map::fadeShade);
 	_fadeTimer->start();
 
-	auto startingCondition = _save->getStartingCondition();
-	if (startingCondition)
+	auto enviro = _save->getEnviroEffects();
+	if (enviro)
 	{
-		_bgColor = startingCondition->getMapBackgroundColor();
+		_bgColor = enviro->getMapBackgroundColor();
 	}
 
 	_stunIndicator = _game->getMod()->getSurface("FloorStunIndicator", false);
@@ -145,11 +145,11 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_shockIndicator = _game->getMod()->getSurface("FloorShockIndicator", false);
 	_anyIndicator = _stunIndicator || _woundIndicator || _burnIndicator || _shockIndicator;
 
-	if (startingCondition)
+	if (enviro)
 	{
-		if (!startingCondition->getMapShockIndicator().empty())
+		if (!enviro->getMapShockIndicator().empty())
 		{
-			_shockIndicator = _game->getMod()->getSurface(startingCondition->getMapShockIndicator(), false);
+			_shockIndicator = _game->getMod()->getSurface(enviro->getMapShockIndicator(), false);
 		}
 	}
 }

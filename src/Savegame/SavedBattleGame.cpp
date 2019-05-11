@@ -42,9 +42,9 @@
 #include "../Engine/Logger.h"
 #include "../Engine/ScriptBind.h"
 #include "SerializationHelper.h"
+#include "../Mod/RuleEnviroEffects.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleSoldier.h"
-#include "../Mod/RuleStartingCondition.h"
 #include "../fallthrough.h"
 
 namespace OpenXcom
@@ -55,7 +55,7 @@ namespace OpenXcom
  */
 SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_battleState(0), _rule(rule), _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _selectedUnit(0),
-	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _startingCondition(nullptr), _ecEnabledFriendly(false), _ecEnabledHostile(false), _ecEnabledNeutral(false),
+	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _enviroEffects(nullptr), _ecEnabledFriendly(false), _ecEnabledHostile(false), _ecEnabledNeutral(false),
 	_globalShade(0), _side(FACTION_PLAYER), _turn(1), _bughuntMinTurn(20), _animFrame(0),
 	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
 	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
@@ -128,10 +128,10 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	initMap(mapsize_x, mapsize_y, mapsize_z);
 
 	_missionType = node["missionType"].as<std::string>(_missionType);
-	if (node["startingConditionType"])
+	if (node["enviroEffectsType"])
 	{
-		std::string startingConditionType = node["startingConditionType"].as<std::string>();
-		_startingCondition = mod->getStartingCondition(startingConditionType);
+		std::string enviroEffectsType = node["enviroEffectsType"].as<std::string>();
+		_enviroEffects = mod->getEnviroEffects(enviroEffectsType);
 	}
 	_ecEnabledFriendly = node["ecEnabledFriendly"].as<bool>(_ecEnabledFriendly);
 	_ecEnabledHostile = node["ecEnabledHostile"].as<bool>(_ecEnabledHostile);
@@ -433,9 +433,9 @@ YAML::Node SavedBattleGame::save() const
 	node["length"] = _mapsize_y;
 	node["height"] = _mapsize_z;
 	node["missionType"] = _missionType;
-	if (_startingCondition)
+	if (_enviroEffects)
 	{
-		node["startingConditionType"] = _startingCondition->getType();
+		node["enviroEffectsType"] = _enviroEffects->getType();
 	}
 	node["ecEnabledFriendly"] = _ecEnabledFriendly;
 	node["ecEnabledHostile"] = _ecEnabledHostile;
@@ -615,32 +615,32 @@ ItemContainer *SavedBattleGame::getBaseStorageItems()
 }
 
 /**
- * Applies the starting condition.
- * @param startingCondition The starting condition.
+ * Applies the enviro effects.
+ * @param enviroEffects The enviro effects.
  */
-void SavedBattleGame::applyStartingCondition(const RuleStartingCondition* startingCondition)
+void SavedBattleGame::applyEnviroEffects(const RuleEnviroEffects* enviroEffects)
 {
-	_startingCondition = startingCondition;
+	_enviroEffects = enviroEffects;
 
 	_ecEnabledFriendly = false;
 	_ecEnabledHostile = false;
 	_ecEnabledNeutral = false;
 
-	if (_startingCondition)
+	if (_enviroEffects)
 	{
-		_ecEnabledFriendly = RNG::percent(_startingCondition->getEnvironmetalCondition("STR_FRIENDLY").globalChance);
-		_ecEnabledHostile = RNG::percent(_startingCondition->getEnvironmetalCondition("STR_HOSTILE").globalChance);
-		_ecEnabledNeutral = RNG::percent(_startingCondition->getEnvironmetalCondition("STR_NEUTRAL").globalChance);
+		_ecEnabledFriendly = RNG::percent(_enviroEffects->getEnvironmetalCondition("STR_FRIENDLY").globalChance);
+		_ecEnabledHostile = RNG::percent(_enviroEffects->getEnvironmetalCondition("STR_HOSTILE").globalChance);
+		_ecEnabledNeutral = RNG::percent(_enviroEffects->getEnvironmetalCondition("STR_NEUTRAL").globalChance);
 	}
 }
 
 /**
- * Gets the starting condition.
- * @return The starting condition.
+ * Gets the enviro effects.
+ * @return The enviro effects.
  */
-const RuleStartingCondition* SavedBattleGame::getStartingCondition() const
+const RuleEnviroEffects* SavedBattleGame::getEnviroEffects() const
 {
-	return _startingCondition;
+	return _enviroEffects;
 }
 
 /**

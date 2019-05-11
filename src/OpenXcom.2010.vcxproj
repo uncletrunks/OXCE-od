@@ -480,6 +480,7 @@
     <ClCompile Include="Mod\CustomPalettes.cpp" />
     <ClCompile Include="Mod\RuleArcScript.cpp" />
     <ClCompile Include="Mod\RuleDamageType.cpp" />
+    <ClCompile Include="Mod\RuleEnviroEffects.cpp" />
     <ClCompile Include="Mod\RuleItemCategory.cpp" />
     <ClCompile Include="Mod\RuleSoldierTransformation.cpp" />
     <ClCompile Include="Mod\RuleStartingCondition.cpp" />
@@ -857,6 +858,7 @@
     <ClInclude Include="Mod\CustomPalettes.h" />
     <ClInclude Include="Mod\RuleArcScript.h" />
     <ClInclude Include="Mod\RuleDamageType.h" />
+    <ClInclude Include="Mod\RuleEnviroEffects.h" />
     <ClInclude Include="Mod\RuleItemCategory.h" />
     <ClInclude Include="Mod\RuleSoldierTransformation.h" />
     <ClInclude Include="Mod\RuleStartingCondition.h" />

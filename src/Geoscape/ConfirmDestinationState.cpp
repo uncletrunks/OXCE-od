@@ -146,12 +146,12 @@ std::string ConfirmDestinationState::checkStartingCondition()
 	}
 
 	// check required item(s)
-	const std::map<std::string, int> *requiredItems = rule->getRequiredItems();
+	auto requiredItems = rule->getRequiredItems();
 	if (!_craft->areRequiredItemsOnboard(requiredItems))
 	{
 		std::ostringstream ss2;
 		int i2 = 0;
-		for (std::map<std::string, int>::const_iterator it2 = requiredItems->begin(); it2 != requiredItems->end(); ++it2)
+		for (std::map<std::string, int>::const_iterator it2 = requiredItems.begin(); it2 != requiredItems.end(); ++it2)
 		{
 			if (i2 > 0)
 				ss2 << ", ";
@@ -169,10 +169,10 @@ std::string ConfirmDestinationState::checkStartingCondition()
 	}
 
 	// craft is not allowed
-	const std::vector<std::string> *list = rule->getAllowedCraft();
+	auto list = rule->getAllowedCraft();
 	std::ostringstream ss;
 	int i = 0;
-	for (std::vector<std::string>::const_iterator it = list->begin(); it != list->end(); ++it)
+	for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
 		ArticleDefinition *article = _game->getMod()->getUfopaediaArticle((*it), false);
 		if (article && _game->getSavedGame()->isResearched(article->requires))

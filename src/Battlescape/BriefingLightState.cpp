@@ -102,15 +102,15 @@ std::string BriefingLightState::checkStartingCondition(AlienDeployment *deployme
 	const RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(deployment->getStartingCondition());
 	if (startingCondition != 0)
 	{
-		const std::vector<std::string> *list = startingCondition->getAllowedArmors();
-		if (list->empty())
+		auto list = startingCondition->getAllowedArmors();
+		if (list.empty())
 		{
 			// everything is allowed
 			return "";
 		}
 		std::ostringstream ss;
 		int i = 0;
-		for (std::vector<std::string>::const_iterator it = list->begin(); it != list->end(); ++it)
+		for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
 			ArticleDefinition *article = _game->getMod()->getUfopaediaArticle((*it), false);
 			if (article && _game->getSavedGame()->isResearched(article->requires))

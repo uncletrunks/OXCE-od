@@ -35,7 +35,7 @@ class BattlescapeState;
 class Position;
 class Pathfinding;
 class TileEngine;
-class RuleStartingCondition;
+class RuleEnviroEffects;
 class BattleItem;
 class Mod;
 class State;
@@ -68,7 +68,7 @@ private:
 	Pathfinding *_pathfinding;
 	TileEngine *_tileEngine;
 	std::string _missionType, _alienCustomDeploy, _alienCustomMission;
-	const RuleStartingCondition *_startingCondition;
+	const RuleEnviroEffects *_enviroEffects;
 	bool _ecEnabledFriendly, _ecEnabledHostile, _ecEnabledNeutral;
 	int _globalShade;
 	UnitFaction _side;
@@ -124,10 +124,10 @@ public:
 	const std::string &getMissionType() const;
 	/// Gets the base's items BEFORE the mission.
 	ItemContainer *getBaseStorageItems();
-	/// Applies the starting condition.
-	void applyStartingCondition(const RuleStartingCondition* startingCondition);
-	/// Gets the starting condition.
-	const RuleStartingCondition *getStartingCondition() const;
+	/// Applies the enviro effects.
+	void applyEnviroEffects(const RuleEnviroEffects* enviroEffects);
+	/// Gets the enviro effects.
+	const RuleEnviroEffects* getEnviroEffects() const;
 	/// Are environmental conditions (for a given faction) enabled?
 	bool getEnvironmentalConditionsEnabled(UnitFaction faction) const;
 	/// Sets the custom alien data.

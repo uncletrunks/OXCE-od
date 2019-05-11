@@ -75,10 +75,10 @@
 #include "../Savegame/BattleItem.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../Savegame/Ufo.h"
+#include "../Mod/RuleEnviroEffects.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleSoldier.h"
-#include "../Mod/RuleStartingCondition.h"
 #include <algorithm>
 
 namespace OpenXcom
@@ -202,10 +202,10 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_txtTooltip = new Text(300, 10, x + 2, y - 10);
 
 	// Palette transformations
-	auto startingCondition = _game->getSavedGame()->getSavedBattle()->getStartingCondition();
-	if (startingCondition)
+	auto enviro = _game->getSavedGame()->getSavedBattle()->getEnviroEffects();
+	if (enviro)
 	{
-		for (auto change : *startingCondition->getPaletteTransformations())
+		for (auto& change : enviro->getPaletteTransformations())
 		{
 			Palette *origPal = _game->getMod()->getPalette(change.first, false);
 			Palette *newPal = _game->getMod()->getPalette(change.second, false);

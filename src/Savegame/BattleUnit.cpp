@@ -34,9 +34,9 @@
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Unit.h"
+#include "../Mod/RuleEnviroEffects.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleSoldier.h"
-#include "../Mod/RuleStartingCondition.h"
 #include "../Mod/Mod.h"
 #include "Soldier.h"
 #include "Tile.h"
@@ -228,12 +228,12 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int 
  * @param unit Pointer to Unit object.
  * @param faction Which faction the units belongs to.
  * @param id Unique unit ID.
- * @param sc Pointer to a battle starting condition.
+ * @param enviro Pointer to battle enviro effects.
  * @param armor Pointer to unit Armor.
  * @param diff difficulty level (for stat adjustment).
  * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
  */
-BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleStartingCondition* sc, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance) :
+BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleEnviroEffects* enviro, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance) :
 	_faction(faction), _originalFaction(faction), _killedBy(faction), _id(id),
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0),
 	_toDirectionTurret(0), _verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _isSurrendering(false), _walkPhase(0),
@@ -245,9 +245,9 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleStarti
 	_fatalShotBodyPart(BODYPART_HEAD), _armor(armor), _geoscapeSoldier(0),  _unitRules(unit),
 	_rankInt(0), _turretType(-1), _hidingForTurn(false), _respawn(false), _alreadyRespawned(false), _isLeeroyJenkins(false), _summonedPlayerUnit(false)
 {
-	if (sc)
+	if (enviro)
 	{
-		auto newArmor = sc->getArmorTransformation(_armor);
+		auto newArmor = enviro->getArmorTransformation(_armor);
 		if (newArmor)
 		{
 			_armor = newArmor;

@@ -19,7 +19,7 @@
  */
 #include "../Engine/State.h"
 #include "../Savegame/BattleUnit.h"
-#include "../Mod/RuleStartingCondition.h"
+#include "../Mod/RuleEnviroEffects.h"
 
 namespace OpenXcom
 {
