@@ -122,6 +122,8 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 	for (std::vector<std::string>::const_iterator i = armors.begin(); i != armors.end(); ++i)
 	{
 		Armor *a = _game->getMod()->getArmor(*i);
+		if (!a->getRequiredResearch().empty() && !_game->getSavedGame()->isResearched(a->getRequiredResearch()))
+			continue;
 		if (!a->getUnits().empty() &&
 			std::find(a->getUnits().begin(), a->getUnits().end(), s->getRules()->getType()) == a->getUnits().end())
 			continue;

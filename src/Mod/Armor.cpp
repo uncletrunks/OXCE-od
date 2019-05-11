@@ -119,6 +119,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_corpseGeo = node["corpseGeo"].as<std::string>(_corpseGeo);
 	_storeItem = node["storeItem"].as<std::string>(_storeItem);
 	_specWeapon = node["specialWeapon"].as<std::string>(_specWeapon);
+	_requires = node["requires"].as<std::string>(_requires);
 
 	_layersDefaultPrefix = node["layersDefaultPrefix"].as<std::string>(_layersDefaultPrefix);
 	_layersSpecificPrefix = node["layersSpecificPrefix"].as< std::map<int, std::string> >(_layersSpecificPrefix);
@@ -375,6 +376,15 @@ std::string Armor::getStoreItem() const
 std::string Armor::getSpecialWeapon() const
 {
 	return _specWeapon;
+}
+
+/**
+ * Gets the research required to be able to equip this armor.
+ * @return The name of the research topic.
+ */
+const std::string &Armor::getRequiredResearch() const
+{
+	return _requires;
 }
 
 /**

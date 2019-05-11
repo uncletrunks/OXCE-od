@@ -51,6 +51,7 @@ public:
 	static const std::string NONE;
 private:
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
+	std::string _requires;
 	std::string _layersDefaultPrefix;
 	std::map<int, std::string> _layersSpecificPrefix;
 	std::map<std::string, std::vector<std::string> > _layersDefinition;
@@ -116,6 +117,8 @@ public:
 	std::string getStoreItem() const;
 	/// Gets the special weapon type.
 	std::string getSpecialWeapon() const;
+	/// Gets the research required to be able to equip this armor.
+	const std::string &getRequiredResearch() const;
 
 	/// Gets the default prefix for layered armor sprite names.
 	const std::string &getLayersDefaultPrefix() const { return _layersDefaultPrefix; }
