@@ -1698,6 +1698,14 @@ void DogfightState::maximumDistance()
 			min = (*i)->getRules()->getRange();
 		}
 	}
+	if (_ufoIsAttacking)
+	{
+		// If the UFO is actively hunting us, consider its weapon range too
+		if (_ufo->getRules()->getWeaponRange() > 0 && _ufo->getRules()->getWeaponRange() < min)
+		{
+			min = _ufo->getRules()->getWeaponRange();
+		}
+	}
 	if (min == 1000)
 	{
 		_targetDist = STANDOFF_DIST;
