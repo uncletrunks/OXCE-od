@@ -20,6 +20,7 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleBaseFacility.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Engine/LocalizedText.h"
@@ -148,7 +149,21 @@ void ManufactureDependenciesTreeState::initList()
 		alreadyVisited.insert((*i));
 	}
 
-	if (firstLevel.empty())
+	std::vector<const RuleBaseFacility*> facilitiesLevel;
+	for (auto& facilityId : _game->getMod()->getBaseFacilitiesList())
+	{
+		RuleBaseFacility* facilityRule = _game->getMod()->getBaseFacility(facilityId);
+		for (auto& itemRequired : facilityRule->getBuildCostItems())
+		{
+			if (itemRequired.first == _selectedItem)
+			{
+				facilitiesLevel.push_back(facilityRule);
+				break;
+			}
+		}
+	}
+
+	if (firstLevel.empty() && facilitiesLevel.empty())
 	{
 		_lstTopics->addRow(1, tr("STR_NO_DEPENDENCIES").c_str());
 		_lstTopics->setRowColor(row, _lstTopics->getSecondaryColor());
@@ -160,6 +175,20 @@ void ManufactureDependenciesTreeState::initList()
 	_lstTopics->addRow(1, tr("STR_DIRECT_DEPENDENCIES").c_str());
 	_lstTopics->setRowColor(row, _lstTopics->getSecondaryColor());
 	++row;
+
+	// first list all the dependent base facilities
+	for (auto& i : facilitiesLevel)
+	{
+		if (_showAll || _game->getSavedGame()->isResearched(i->getRequirements()))
+		{
+			_lstTopics->addRow(1, tr(i->getType()).c_str());
+		}
+		else
+		{
+			_lstTopics->addRow(1, "***");
+		}
+		++row;
+	}
 
 	for (std::vector<std::string>::const_iterator i = firstLevel.begin(); i != firstLevel.end(); ++i)
 	{
