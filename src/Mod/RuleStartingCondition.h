@@ -39,7 +39,7 @@ private:
 	std::vector<std::string> _allowedVehicles;
 	std::vector<std::string> _allowedItems;
 	std::vector<std::string> _allowedItemCategories;
-	std::vector<std::string> _allowedCraft;
+	std::vector<std::string> _allowedCraft, _forbiddenCraft;
 	std::map<std::string, int> _requiredItems;
 	bool _destroyRequiredItems;
 public:
@@ -55,12 +55,14 @@ public:
 	const std::vector<std::string>& getAllowedArmors() const { return _allowedArmors; }
 	/// Gets the allowed craft types.
 	const std::vector<std::string>& getAllowedCraft() const { return _allowedCraft; }
+	/// Gets the forbidden craft types.
+	const std::vector<std::string>& getForbiddenCraft() const { return _forbiddenCraft; }
 	/// Gets the required items.
 	const std::map<std::string, int>& getRequiredItems() const { return _requiredItems; }
 	/// Should the required items be destroyed when the mission starts?
 	bool getDestroyRequiredItems() const { return _destroyRequiredItems; }
-	/// Checks if the craft type is allowed.
-	bool isCraftAllowed(const std::string& craftType) const;
+	/// Checks if the craft type is permitted.
+	bool isCraftPermitted(const std::string& craftType) const;
 	/// Gets the replacement armor.
 	std::string getArmorReplacement(const std::string& soldierType, const std::string& armorType) const;
 	/// Checks if the vehicle type is allowed.

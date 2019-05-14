@@ -58,6 +58,7 @@ void RuleStartingCondition::load(const YAML::Node& node)
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
+	_forbiddenCraft = node["forbiddenCraft"].as< std::vector<std::string> >(_forbiddenCraft);
 	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
 	_destroyRequiredItems = node["destroyRequiredItems"].as<bool>(_destroyRequiredItems);
 
@@ -69,13 +70,21 @@ void RuleStartingCondition::load(const YAML::Node& node)
 }
 
 /**
- * Checks if the craft type is allowed.
+ * Checks if the craft type is permitted.
  * @param craftType Craft type name.
- * @return True if allowed, false otherwise.
+ * @return True if permitted, false otherwise.
  */
-bool RuleStartingCondition::isCraftAllowed(const std::string& craftType) const
+bool RuleStartingCondition::isCraftPermitted(const std::string& craftType) const
 {
-	return _allowedCraft.empty() || (std::find(_allowedCraft.begin(), _allowedCraft.end(), craftType) != _allowedCraft.end());
+	if (!_forbiddenCraft.empty())
+	{
+		return (std::find(_forbiddenCraft.begin(), _forbiddenCraft.end(), craftType) == _forbiddenCraft.end());
+	}
+	else if (!_allowedCraft.empty())
+	{
+		return (std::find(_allowedCraft.begin(), _allowedCraft.end(), craftType) != _allowedCraft.end());
+	}
+	return true;
 }
 
 /**

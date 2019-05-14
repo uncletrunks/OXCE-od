@@ -179,7 +179,7 @@ std::string ConfirmLandingState::checkStartingCondition()
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
 	if (rule != 0)
 	{
-		if (!rule->isCraftAllowed(_craft->getRules()->getType()))
+		if (!rule->isCraftPermitted(_craft->getRules()->getType()))
 		{
 			return tr("STR_STARTING_CONDITION_CRAFT"); // simple message without details/argument
 		}

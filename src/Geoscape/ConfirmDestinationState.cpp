@@ -162,14 +162,21 @@ std::string ConfirmDestinationState::checkStartingCondition()
 		return tr("STR_STARTING_CONDITION_ITEM").arg(argument2);
 	}
 
-	if (rule->isCraftAllowed(_craft->getRules()->getType()))
+	if (rule->isCraftPermitted(_craft->getRules()->getType()))
 	{
-		// craft is allowed
+		// craft is permitted
 		return "";
 	}
 
-	// craft is not allowed
-	auto list = rule->getAllowedCraft();
+	// craft is not permitted (= either forbidden or not allowed)
+	auto list = rule->getForbiddenCraft();
+	std::string messageCode = "STR_STARTING_CONDITION_CRAFT_FORBIDDEN";
+	if (list.empty())
+	{
+		list = rule->getAllowedCraft();
+		messageCode = "STR_STARTING_CONDITION_CRAFT_ALLOWED";
+	}
+
 	std::ostringstream ss;
 	int i = 0;
 	for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it)
@@ -189,7 +196,7 @@ std::string ConfirmDestinationState::checkStartingCondition()
 		// no suitable craft yet
 		argument = tr("STR_UNKNOWN");
 	}
-	return tr("STR_STARTING_CONDITION_CRAFT").arg(argument);
+	return tr(messageCode).arg(argument);
 }
 
 /**
