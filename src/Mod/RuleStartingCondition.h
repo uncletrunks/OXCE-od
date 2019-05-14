@@ -35,7 +35,7 @@ class RuleStartingCondition
 private:
 	std::string _type;
 	std::map<std::string, std::map<std::string, int> > _defaultArmor;
-	std::vector<std::string> _allowedArmors;
+	std::vector<std::string> _allowedArmors, _forbiddenArmors;
 	std::vector<std::string> _allowedVehicles;
 	std::vector<std::string> _allowedItems;
 	std::vector<std::string> _allowedItemCategories;
@@ -53,6 +53,8 @@ public:
 	const std::string& getType() const { return _type; }
 	/// Gets the allowed armor types.
 	const std::vector<std::string>& getAllowedArmors() const { return _allowedArmors; }
+	/// Gets the forbidden armor types.
+	const std::vector<std::string>& getForbiddenArmors() const { return _forbiddenArmors; }
 	/// Gets the allowed craft types.
 	const std::vector<std::string>& getAllowedCraft() const { return _allowedCraft; }
 	/// Gets the forbidden craft types.

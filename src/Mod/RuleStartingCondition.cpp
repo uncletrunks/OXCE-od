@@ -54,6 +54,7 @@ void RuleStartingCondition::load(const YAML::Node& node)
 	_type = node["type"].as<std::string>(_type);
 	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::map<std::string, int> > >(_defaultArmor);
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
+	_forbiddenArmors = node["forbiddenArmors"].as< std::vector<std::string> >(_forbiddenArmors);
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
@@ -95,7 +96,17 @@ bool RuleStartingCondition::isCraftPermitted(const std::string& craftType) const
  */
 std::string RuleStartingCondition::getArmorReplacement(const std::string& soldierType, const std::string& armorType) const
 {
-	if (!_allowedArmors.empty() && (std::find(_allowedArmors.begin(), _allowedArmors.end(), armorType) == _allowedArmors.end()))
+	bool allowed = true;
+	if (!_forbiddenArmors.empty())
+	{
+		allowed = (std::find(_forbiddenArmors.begin(), _forbiddenArmors.end(), armorType) == _forbiddenArmors.end());
+	}
+	else if (!_allowedArmors.empty())
+	{
+		allowed = (std::find(_allowedArmors.begin(), _allowedArmors.end(), armorType) != _allowedArmors.end());
+	}
+
+	if (!allowed)
 	{
 		std::map<std::string, std::map<std::string, int> >::const_iterator j = _defaultArmor.find(soldierType);
 		if (j != _defaultArmor.end())
