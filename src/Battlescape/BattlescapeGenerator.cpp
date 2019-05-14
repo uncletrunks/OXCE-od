@@ -737,7 +737,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 			for (std::vector<Vehicle*>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
 			{
 				RuleItem *item = (*i)->getRules();
-				if (startingCondition != 0 && !startingCondition->isVehicleAllowed(item->getType()))
+				if (startingCondition != 0 && !startingCondition->isVehiclePermitted(item->getType()))
 				{
 					// send disabled vehicles back to base
 					_base->getStorageItems()->addItem(item->getType(), 1);

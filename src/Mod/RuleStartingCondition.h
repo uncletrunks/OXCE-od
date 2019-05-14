@@ -36,7 +36,7 @@ private:
 	std::string _type;
 	std::map<std::string, std::map<std::string, int> > _defaultArmor;
 	std::vector<std::string> _allowedArmors, _forbiddenArmors;
-	std::vector<std::string> _allowedVehicles;
+	std::vector<std::string> _allowedVehicles, _forbiddenVehicles;
 	std::vector<std::string> _allowedItems;
 	std::vector<std::string> _allowedItemCategories;
 	std::vector<std::string> _allowedCraft, _forbiddenCraft;
@@ -67,8 +67,8 @@ public:
 	bool isCraftPermitted(const std::string& craftType) const;
 	/// Gets the replacement armor.
 	std::string getArmorReplacement(const std::string& soldierType, const std::string& armorType) const;
-	/// Checks if the vehicle type is allowed.
-	bool isVehicleAllowed(const std::string& vehicleType) const;
+	/// Checks if the vehicle type is permitted.
+	bool isVehiclePermitted(const std::string& vehicleType) const;
 	/// Checks if the item type is allowed.
 	bool isItemAllowed(const std::string& itemType, Mod* mod) const;
 };

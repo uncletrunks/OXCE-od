@@ -56,6 +56,7 @@ void RuleStartingCondition::load(const YAML::Node& node)
 	_allowedArmors = node["allowedArmors"].as< std::vector<std::string> >(_allowedArmors);
 	_forbiddenArmors = node["forbiddenArmors"].as< std::vector<std::string> >(_forbiddenArmors);
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
+	_forbiddenVehicles = node["forbiddenVehicles"].as< std::vector<std::string> >(_forbiddenVehicles);
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
@@ -125,13 +126,21 @@ std::string RuleStartingCondition::getArmorReplacement(const std::string& soldie
 }
 
 /**
- * Checks if the vehicle type is allowed.
+ * Checks if the vehicle type is permitted.
  * @param vehicleType Vehicle type name.
- * @return True if allowed, false otherwise.
+ * @return True if permitted, false otherwise.
  */
-bool RuleStartingCondition::isVehicleAllowed(const std::string& vehicleType) const
+bool RuleStartingCondition::isVehiclePermitted(const std::string& vehicleType) const
 {
-	return _allowedVehicles.empty() || (std::find(_allowedVehicles.begin(), _allowedVehicles.end(), vehicleType) != _allowedVehicles.end());
+	if (!_forbiddenVehicles.empty())
+	{
+		return (std::find(_forbiddenVehicles.begin(), _forbiddenVehicles.end(), vehicleType) == _forbiddenVehicles.end());
+	}
+	else if (!_allowedVehicles.empty())
+	{
+		return (std::find(_allowedVehicles.begin(), _allowedVehicles.end(), vehicleType) != _allowedVehicles.end());
+	}
+	return true;
 }
 
 /**
