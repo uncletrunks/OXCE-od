@@ -1319,6 +1319,7 @@ void GeoscapeState::time5Seconds()
 				((*d)->getWaitForAltitude() && (*d)->getUfo()->getAltitudeInt() <= (*d)->getCraft()->getRules()->getMaxAltitude()))
 			{
 				_pause = true; // the USO reached the sea during this interval period, stop the timer and let handleDogfights() take it from there.
+				timerReset();
 			}
 		}
 	}
