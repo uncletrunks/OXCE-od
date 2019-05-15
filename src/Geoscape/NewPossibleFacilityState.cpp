@@ -27,6 +27,7 @@
 #include "../Mod/RuleBaseFacility.h"
 #include "../Basescape/BasescapeState.h"
 #include "../Engine/Options.h"
+#include <unordered_set>
 
 namespace OpenXcom
 {
@@ -46,6 +47,7 @@ NewPossibleFacilityState::NewPossibleFacilityState(Base *base, Globe *globe, con
 	_btnOpen = new TextButton(160, 14, 80, 165);
 	_txtTitle = new Text(288, 40, 16, 20);
 	_lstPossibilities = new TextList(250, 80, 35, 50);
+	_txtCaveat = new Text(250, 16, 35, 131);
 
 	// Set palette
 	setInterface("geoNewFacility");
@@ -55,6 +57,7 @@ NewPossibleFacilityState::NewPossibleFacilityState(Base *base, Globe *globe, con
 	add(_btnOpen, "button", "geoNewFacility");
 	add(_txtTitle, "text1", "geoNewFacility");
 	add(_lstPossibilities, "text2", "geoNewFacility");
+	add(_txtCaveat, "text1", "geoNewFacility");
 
 	centerAllSurfaces();
 
@@ -70,6 +73,32 @@ NewPossibleFacilityState::NewPossibleFacilityState(Base *base, Globe *globe, con
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_WE_CAN_NOW_BUILD"));
+
+	// Caveat
+	{
+		std::unordered_set<std::string> requiredServices;
+		for (auto& it : possibilities)
+		{
+			for (auto& srv : it->getRequireBaseFunc())
+			{
+				requiredServices.insert(srv);
+			}
+		}
+		std::ostringstream ss;
+		int i = 0;
+		for (auto& it : requiredServices)
+		{
+			if (i > 0)
+				ss << ", ";
+			ss << tr(it);
+			i++;
+		}
+		std::string argument = ss.str();
+
+		_txtCaveat->setAlign(ALIGN_CENTER);
+		_txtCaveat->setText(tr("STR_REQUIRED_BASE_SERVICES").arg(argument));
+		_txtCaveat->setVisible(!requiredServices.empty());
+	}
 
 	_lstPossibilities->setColumns(1, 250);
 	_lstPossibilities->setBig();

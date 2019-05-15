@@ -40,6 +40,7 @@ private:
 	Window *_window;
 	Text *_txtTitle;
 	TextList * _lstPossibilities;
+	Text* _txtCaveat;
 	TextButton *_btnManufacture, *_btnOk;
 	Base * _base;
 public:

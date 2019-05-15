@@ -27,6 +27,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Basescape/PurchaseState.h"
 #include "../Engine/Options.h"
+#include <unordered_set>
 
 namespace OpenXcom
 {
@@ -45,6 +46,7 @@ NewPossibleCraftState::NewPossibleCraftState(Base * base, const std::vector<Rule
 	_btnPurchase = new TextButton(160, 14, 80, 165);
 	_txtTitle = new Text(288, 40, 16, 20);
 	_lstPossibilities = new TextList(250, 80, 35, 50);
+	_txtCaveat = new Text(250, 16, 35, 131);
 
 	// Set palette
 	setInterface("geoNewCraft");
@@ -54,6 +56,7 @@ NewPossibleCraftState::NewPossibleCraftState(Base * base, const std::vector<Rule
 	add(_btnPurchase, "button", "geoNewCraft");
 	add(_txtTitle, "text1", "geoNewCraft");
 	add(_lstPossibilities, "text2", "geoNewCraft");
+	add(_txtCaveat, "text1", "geoNewCraft");
 
 	centerAllSurfaces();
 
@@ -69,6 +72,32 @@ NewPossibleCraftState::NewPossibleCraftState(Base * base, const std::vector<Rule
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_WE_CAN_NOW_RENT"));
+
+	// Caveat
+	{
+		std::unordered_set<std::string> requiredServices;
+		for (auto& it : possibilities)
+		{
+			for (auto& srv : it->getRequiresBuyBaseFunc())
+			{
+				requiredServices.insert(srv);
+			}
+		}
+		std::ostringstream ss;
+		int i = 0;
+		for (auto& it : requiredServices)
+		{
+			if (i > 0)
+				ss << ", ";
+			ss << tr(it);
+			i++;
+		}
+		std::string argument = ss.str();
+
+		_txtCaveat->setAlign(ALIGN_CENTER);
+		_txtCaveat->setText(tr("STR_REQUIRED_BASE_SERVICES").arg(argument));
+		_txtCaveat->setVisible(!requiredServices.empty());
+	}
 
 	_lstPossibilities->setColumns(1, 250);
 	_lstPossibilities->setBig();

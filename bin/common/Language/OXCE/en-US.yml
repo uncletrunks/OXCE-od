@@ -275,6 +275,7 @@ en-US:
 #NewPossibleCraftState.cpp
   STR_WE_CAN_NOW_RENT: "We can now rent"
 #NewPossibleFacilityState.cpp
+  STR_REQUIRED_BASE_SERVICES: "Required base services: {0}"
   STR_WE_CAN_NOW_BUILD: "We can now build"
 #NewPossiblePurchaseState.cpp
   STR_WE_CAN_NOW_PURCHASE: "We can now purchase"
