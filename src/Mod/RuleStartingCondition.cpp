@@ -58,7 +58,9 @@ void RuleStartingCondition::load(const YAML::Node& node)
 	_allowedVehicles = node["allowedVehicles"].as< std::vector<std::string> >(_allowedVehicles);
 	_forbiddenVehicles = node["forbiddenVehicles"].as< std::vector<std::string> >(_forbiddenVehicles);
 	_allowedItems = node["allowedItems"].as< std::vector<std::string> >(_allowedItems);
+	_forbiddenItems = node["forbiddenItems"].as< std::vector<std::string> >(_forbiddenItems);
 	_allowedItemCategories = node["allowedItemCategories"].as< std::vector<std::string> >(_allowedItemCategories);
+	_forbiddenItemCategories = node["forbiddenItemCategories"].as< std::vector<std::string> >(_forbiddenItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
 	_forbiddenCraft = node["forbiddenCraft"].as< std::vector<std::string> >(_forbiddenCraft);
 	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
@@ -144,25 +146,49 @@ bool RuleStartingCondition::isVehiclePermitted(const std::string& vehicleType) c
 }
 
 /**
- * Checks if the item type is allowed.
+ * Checks if the item type is permitted.
  * @param itemType Item type name.
- * @return True if allowed, false otherwise.
+ * @return True if permitted, false otherwise.
  */
-bool RuleStartingCondition::isItemAllowed(const std::string& itemType, Mod* mod) const
+bool RuleStartingCondition::isItemPermitted(const std::string& itemType, Mod* mod) const
 {
-	if (_allowedItems.empty() && _allowedItemCategories.empty())
-	{
-		return true; // if nothing is specified, everything is allowed
-	}
-	else if (std::find(_allowedItems.begin(), _allowedItems.end(), itemType) != _allowedItems.end())
-	{
-		return true; // item is explicitly allowed
-	}
-	else
-	{
-		if (_allowedItemCategories.empty())
-			return false; // no categories are allowed, stop looking
+	bool itemCheckSubResult = true; // if both item lists are empty, item is OK
 
+	if (!_forbiddenItems.empty())
+	{
+		if (std::find(_forbiddenItems.begin(), _forbiddenItems.end(), itemType) != _forbiddenItems.end())
+		{
+			return false; // item explicitly forbidden
+		}
+		else
+		{
+			itemCheckSubResult = true; // item is OK, unless category rules below say otherwise
+		}
+	}
+	else if (!_allowedItems.empty())
+	{
+		if (std::find(_allowedItems.begin(), _allowedItems.end(), itemType) != _allowedItems.end())
+		{
+			return true; // item explicitly allowed
+		}
+		else
+		{
+			itemCheckSubResult = false; // item is NOT OK, unless category rules below say otherwise
+		}
+	}
+
+	bool checkForbiddenCategories = !_forbiddenItemCategories.empty();
+	bool checkAllowedCategories = !checkForbiddenCategories && !_allowedItemCategories.empty();
+
+	bool categoryCheckSubResult = true;
+
+	if (checkForbiddenCategories)
+		categoryCheckSubResult = true;
+	else if (checkAllowedCategories)
+		categoryCheckSubResult = false;
+
+	if (checkForbiddenCategories || checkAllowedCategories)
+	{
 		RuleItem* item = mod->getItem(itemType);
 		if (item)
 		{
@@ -172,16 +198,26 @@ bool RuleStartingCondition::isItemAllowed(const std::string& itemType, Mod* mod)
 				// check all categories of the item
 				for (std::vector<std::string>::iterator i = itemCategories.begin(); i != itemCategories.end(); ++i)
 				{
-					if (std::find(_allowedItemCategories.begin(), _allowedItemCategories.end(), (*i)) != _allowedItemCategories.end())
+					if (checkForbiddenCategories)
 					{
-						return true; // found a category that is allowed
+						if (std::find(_forbiddenItemCategories.begin(), _forbiddenItemCategories.end(), (*i)) != _forbiddenItemCategories.end())
+						{
+							return false; // found a category that is forbidden
+						}
+					}
+					else if (checkAllowedCategories)
+					{
+						if (std::find(_allowedItemCategories.begin(), _allowedItemCategories.end(), (*i)) != _allowedItemCategories.end())
+						{
+							return true; // found a category that is allowed
+						}
 					}
 				}
 			}
 		}
 	}
 
-	return false; // if everything fails, item is not allowed
+	return itemCheckSubResult && categoryCheckSubResult;
 }
 
 }
