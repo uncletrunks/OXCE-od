@@ -23,6 +23,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/AlienRace.h"
 #include "../Mod/RuleStartingCondition.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/ArticleDefinition.h"
 #include "../Engine/LocalizedText.h"
@@ -160,6 +161,39 @@ std::string ConfirmDestinationState::checkStartingCondition()
 		}
 		std::string argument2 = ss2.str();
 		return tr("STR_STARTING_CONDITION_ITEM").arg(argument2);
+	}
+
+	// check permitted soldiers
+	if (!_craft->areOnlyPermittedSoldierTypesOnboard(rule))
+	{
+		auto list = rule->getForbiddenSoldierTypes();
+		std::string messageCode = "STR_STARTING_CONDITION_SOLDIER_TYPE_FORBIDDEN";
+		if (list.empty())
+		{
+			list = rule->getAllowedSoldierTypes();
+			messageCode = "STR_STARTING_CONDITION_SOLDIER_TYPE_ALLOWED";
+		}
+
+		std::ostringstream ss;
+		int i = 0;
+		for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it)
+		{
+			RuleSoldier* soldierTypeRule = _game->getMod()->getSoldier((*it), false);
+			if (soldierTypeRule && _game->getSavedGame()->isResearched(soldierTypeRule->getRequirements()))
+			{
+				if (i > 0)
+					ss << ", ";
+				ss << tr(*it);
+				i++;
+			}
+		}
+		std::string argument = ss.str();
+		if (argument.empty())
+		{
+			// no suitable soldier type yet?
+			argument = tr("STR_UNKNOWN");
+		}
+		return tr(messageCode).arg(argument);
 	}
 
 	if (rule->isCraftPermitted(_craft->getRules()->getType()))

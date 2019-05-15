@@ -37,6 +37,7 @@
 #include "Vehicle.h"
 #include "../Mod/Armor.h"
 #include "../Mod/RuleItem.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Mod/AlienDeployment.h"
 #include "SerializationHelper.h"
 #include "../Engine/Logger.h"
@@ -1213,6 +1214,22 @@ int Craft::getSpaceUsed() const
 		}
 	}
 	return vehicleSpaceUsed;
+}
+
+/**
+ * Checks if there are only permitted soldier types onboard.
+ * @return True if all soldiers onboard are permitted.
+ */
+bool Craft::areOnlyPermittedSoldierTypesOnboard(const RuleStartingCondition* sc)
+{
+	for (Soldier* s : *_base->getSoldiers())
+	{
+		if (s->getCraft() == this && !sc->isSoldierTypePermitted(s->getRules()->getType()))
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 /**

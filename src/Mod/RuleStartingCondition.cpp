@@ -63,6 +63,8 @@ void RuleStartingCondition::load(const YAML::Node& node)
 	_forbiddenItemCategories = node["forbiddenItemCategories"].as< std::vector<std::string> >(_forbiddenItemCategories);
 	_allowedCraft = node["allowedCraft"].as< std::vector<std::string> >(_allowedCraft);
 	_forbiddenCraft = node["forbiddenCraft"].as< std::vector<std::string> >(_forbiddenCraft);
+	_allowedSoldierTypes = node["allowedSoldierTypes"].as< std::vector<std::string> >(_allowedSoldierTypes);
+	_forbiddenSoldierTypes = node["forbiddenSoldierTypes"].as< std::vector<std::string> >(_forbiddenSoldierTypes);
 	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
 	_destroyRequiredItems = node["destroyRequiredItems"].as<bool>(_destroyRequiredItems);
 
@@ -87,6 +89,24 @@ bool RuleStartingCondition::isCraftPermitted(const std::string& craftType) const
 	else if (!_allowedCraft.empty())
 	{
 		return (std::find(_allowedCraft.begin(), _allowedCraft.end(), craftType) != _allowedCraft.end());
+	}
+	return true;
+}
+
+/**
+ * Checks if the soldier type is permitted.
+ * @param soldierType Soldier type name.
+ * @return True if permitted, false otherwise.
+ */
+bool RuleStartingCondition::isSoldierTypePermitted(const std::string& soldierType) const
+{
+	if (!_forbiddenSoldierTypes.empty())
+	{
+		return (std::find(_forbiddenSoldierTypes.begin(), _forbiddenSoldierTypes.end(), soldierType) == _forbiddenSoldierTypes.end());
+	}
+	else if (!_allowedSoldierTypes.empty())
+	{
+		return (std::find(_allowedSoldierTypes.begin(), _allowedSoldierTypes.end(), soldierType) != _allowedSoldierTypes.end());
 	}
 	return true;
 }

@@ -36,6 +36,7 @@ class ItemContainer;
 class Mod;
 class SavedGame;
 class Vehicle;
+class RuleStartingCondition;
 
 /**
  * Represents a craft stored in a base.
@@ -206,6 +207,8 @@ public:
 	int getSpaceAvailable() const;
 	/// Gets the amount of space used inside a craft.
 	int getSpaceUsed() const;
+	/// Checks if there are only permitted soldier types onboard.
+	bool areOnlyPermittedSoldierTypesOnboard(const RuleStartingCondition* sc);
 	/// Checks if there are enough required items onboard.
 	bool areRequiredItemsOnboard(const std::map<std::string, int>& requiredItems);
 	/// Destroys given required items.

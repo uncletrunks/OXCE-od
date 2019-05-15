@@ -237,6 +237,9 @@ en-GB:
   STR_STARTING_CONDITION_CRAFT: "This craft is unsuitable for this mission."
   STR_STARTING_CONDITION_CRAFT_ALLOWED: "This craft is unsuitable for this mission.{NEWLINE}{NEWLINE}Allowed craft: {0}"
   STR_STARTING_CONDITION_CRAFT_FORBIDDEN: "This craft is unsuitable for this mission.{NEWLINE}{NEWLINE}Forbidden craft: {0}"
+  STR_STARTING_CONDITION_SOLDIER_TYPE: "Some soldiers cannot participate on this mission."
+  STR_STARTING_CONDITION_SOLDIER_TYPE_ALLOWED: "Some soldiers cannot participate on this mission.{NEWLINE}{NEWLINE}Allowed soldier types: {0}"
+  STR_STARTING_CONDITION_SOLDIER_TYPE_FORBIDDEN: "Some soldiers cannot participate on this mission.{NEWLINE}{NEWLINE}Forbidden soldier types: {0}"
   STR_STARTING_CONDITION_ITEM: "This mission requires specific item(s):{NEWLINE}{NEWLINE}{0}"
 #CraftNotEnoughPilotsState.cpp
   STR_ASSIGN_PILOTS: "Assign pilots..."

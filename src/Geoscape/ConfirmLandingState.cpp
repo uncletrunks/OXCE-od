@@ -183,6 +183,10 @@ std::string ConfirmLandingState::checkStartingCondition()
 		{
 			return tr("STR_STARTING_CONDITION_CRAFT"); // simple message without details/argument
 		}
+		if (!_craft->areOnlyPermittedSoldierTypesOnboard(rule))
+		{
+			return tr("STR_STARTING_CONDITION_SOLDIER_TYPE"); // simple message without details/argument
+		}
 
 		if (!_craft->areRequiredItemsOnboard(rule->getRequiredItems()))
 		{
