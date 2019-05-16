@@ -250,6 +250,8 @@ public:
 	float getSickBayAbsoluteBonus() const;
 	/// Gets the amount of additional HP healed in this base due to sick bay facilities (as percentage of max HP per soldier).
 	float getSickBayRelativeBonus() const;
+	/// Removes a craft from the base.
+	std::vector<Craft*>::iterator removeCraft(Craft *craft, bool unload);
 };
 
 }

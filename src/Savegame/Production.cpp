@@ -285,32 +285,16 @@ void Production::startItem(Base * b, SavedGame * g, const Mod *m) const
 	for (auto& i : _rules->getRequiredCrafts())
 	{
 		// Find suitable craft
-		Collections::deleteIf(*b->getCrafts(), i.second,
-			[&](Craft* craft)
+		for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
+		{
+			if ((*c)->getRules() == i.first)
 			{
-				if (craft->getRules() == i.first)
-				{
-					// Unload craft
-					craft->unload(m);
-
-					// Clear hangar
-					for (std::vector<BaseFacility*>::iterator f = b->getFacilities()->begin(); f != b->getFacilities()->end(); ++f)
-					{
-						if ((*f)->getCraftForDrawing() == craft)
-						{
-							(*f)->setCraftForDrawing(0);
-							break;
-						}
-					}
-
-					return true;
-				}
-				else
-				{
-					return false;
-				}
+				Craft *craft = *c;
+				b->removeCraft(craft, true);
+				delete craft;
+				break;
 			}
-		);
+		}
 	}
 }
 

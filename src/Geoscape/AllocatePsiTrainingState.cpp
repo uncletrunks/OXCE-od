@@ -409,7 +409,7 @@ void AllocatePsiTrainingState::lstSoldiersClick(Action *action)
 				_lstSoldiers->setRowColor(_sel, _lstSoldiers->getSecondaryColor());
 				_labSpace--;
 				_txtRemaining->setText(tr("STR_REMAINING_PSI_LAB_CAPACITY").arg(_labSpace));
-				_base->getSoldiers()->at(_sel)->setPsiTraining();
+				_base->getSoldiers()->at(_sel)->setPsiTraining(true);
 			}
 		}
 		else
@@ -418,7 +418,7 @@ void AllocatePsiTrainingState::lstSoldiersClick(Action *action)
 			_lstSoldiers->setRowColor(_sel, _lstSoldiers->getColor());
 			_labSpace++;
 			_txtRemaining->setText(tr("STR_REMAINING_PSI_LAB_CAPACITY").arg(_labSpace));
-			_base->getSoldiers()->at(_sel)->setPsiTraining();
+			_base->getSoldiers()->at(_sel)->setPsiTraining(false);
 		}
 	}
 }

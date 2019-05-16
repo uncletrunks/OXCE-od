@@ -529,6 +529,7 @@ void BaseView::draw()
 		}
 
 		// Draw crafts
+		(*i)->setCraftForDrawing(0);
 		if ((*i)->getBuildTime() == 0 && (*i)->getRules()->getCrafts() > 0)
 		{
 			if (craft != _base->getCrafts()->end())
@@ -541,15 +542,7 @@ void BaseView::draw()
 					frame->blitNShade(this, fx, fy);
 					(*i)->setCraftForDrawing(*craft);
 				}
-				else
-				{
-					(*i)->setCraftForDrawing(0);
-				}
 				++craft;
-			}
-			else
-			{
-				(*i)->setCraftForDrawing(0);
 			}
 		}
 

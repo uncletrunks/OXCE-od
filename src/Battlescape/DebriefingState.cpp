@@ -991,7 +991,6 @@ void DebriefingState::prepareDebriefing()
 	bool aborted = battle->isAborted();
 	bool success = !aborted || battle->allObjectivesDestroyed();
 	Craft *craft = 0;
-	std::vector<Craft*>::iterator craftIterator;
 	Base *base = 0;
 	std::string target;
 
@@ -1066,7 +1065,6 @@ void DebriefingState::prepareDebriefing()
 				}
 				craft = (*j);
 				base = (*i);
-				craftIterator = j;
 				if (craft->getDestination() != 0)
 				{
 					_missionStatistics->markerName = craft->getDestination()->getMarkerName();
@@ -1582,10 +1580,10 @@ void DebriefingState::prepareDebriefing()
 			// all vehicle object in the craft is also referenced by base->getVehicles() !!)
 			_game->getSavedGame()->stopHuntingXcomCraft(craft); // lost during ground mission
 			_game->getSavedGame()->removeAllSoldiersFromXcomCraft(craft); // needed in case some soldiers couldn't spawn
+			base->removeCraft(craft, false);
 			delete craft;
 			craft = 0; // To avoid a crash down there!!
 			lostCraft = true;
-			base->getCrafts()->erase(craftIterator);
 		}
 		playersSurvived = 0; // assuming you aborted and left everyone behind
 		success = false;
