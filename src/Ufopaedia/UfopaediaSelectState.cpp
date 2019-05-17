@@ -62,6 +62,9 @@ namespace OpenXcom
 		add(_btnShowOnlyNew, "button2", "ufopaedia");
 		add(_lstSelection, "list", "ufopaedia");
 
+		_colorNormal = _lstSelection->getColor();
+		_colorNew = Options::oxceHighlightNewTopics ? _lstSelection->getSecondaryColor() : _colorNormal;
+
 		centerAllSurfaces();
 
 		_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
@@ -142,6 +145,9 @@ namespace OpenXcom
 	 */
 	void UfopaediaSelectState::lstSelectionClickRight(Action *)
 	{
+		if (!Options::oxceHighlightNewTopics)
+			return;
+
 		// change status
 		const std::string rule = _filtered_article_list[_lstSelection->getSelectedRow()]->id;
 		int oldState = _game->getSavedGame()->getUfopediaRuleStatus(rule);
@@ -150,11 +156,11 @@ namespace OpenXcom
 
 		if (newState == ArticleDefinition::PEDIA_STATUS_NEW)
 		{
-			_lstSelection->setRowColor(_lstSelection->getSelectedRow(), _lstSelection->getSecondaryColor());
+			_lstSelection->setRowColor(_lstSelection->getSelectedRow(), _colorNew);
 		}
 		else
 		{
-			_lstSelection->setRowColor(_lstSelection->getSelectedRow(), _lstSelection->getColor());
+			_lstSelection->setRowColor(_lstSelection->getSelectedRow(), _colorNormal);
 		}
 	}
 
@@ -263,7 +269,7 @@ namespace OpenXcom
 			else if (_game->getSavedGame()->getUfopediaRuleStatus((*it)->id) == ArticleDefinition::PEDIA_STATUS_NEW)
 			{
 				// highlight as new
-				_lstSelection->setCellColor(row, 0, _lstSelection->getSecondaryColor());
+				_lstSelection->setCellColor(row, 0, _colorNew);
 				hasUnseen = true;
 			}
 			row++;
