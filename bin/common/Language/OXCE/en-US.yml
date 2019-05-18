@@ -141,7 +141,7 @@ en-US:
   STR_LINE_OF_SIGHT_REQUIRED: "Line of sight (LoS) required."
 #BattlescapeState.cpp
   STR_CENTER_ON_WOUNDED_FRIEND: "Center on Wounded Friend"
-  STR_CENTER_ON_SHOCKED_FRIEND: "Center on Shocked Friend"
+  STR_CENTER_ON_DIZZY_FRIEND: "Center on Dizzy Friend"
   STR_BUG_HUNT_ACTIVATED: "Bug Hunt mode activated: enemies are visible on the minimap!"
   STR_TARGET_ENEMY: "; Target = ENEMY"
   STR_TARGET_NEUTRAL: "; Target = NEUTRAL"

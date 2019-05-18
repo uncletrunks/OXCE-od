@@ -560,7 +560,7 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 		_numVisibleUnit[i]->setValue(i+1);
 	}
 	_txtVisibleUnitTooltip[VISIBLE_MAX] = "STR_CENTER_ON_WOUNDED_FRIEND";
-	_txtVisibleUnitTooltip[VISIBLE_MAX+1] = "STR_CENTER_ON_SHOCKED_FRIEND";
+	_txtVisibleUnitTooltip[VISIBLE_MAX+1] = "STR_CENTER_ON_DIZZY_FRIEND";
 
 	_btnToggleNV->onMouseClick((ActionHandler)& BattlescapeState::btnToggleNightVisionAndPersonalLightsClick);
 	_btnToggleNV->setTooltip("STR_TOGGLE_NIGHT_VISION");
