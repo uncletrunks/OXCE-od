@@ -74,6 +74,11 @@ OptionsModsState::OptionsModsState(OptionsOrigin origin) : OptionsBaseState(orig
 	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)
 	{
 		std::string modId = i->first;
+		auto search = modInfos.find(modId);
+		if (search == modInfos.end())
+		{
+			continue;
+		}
 		const ModInfo *modInfo = &modInfos.at(modId);
 		if (!modInfo->isMaster())
 		{
@@ -183,7 +188,12 @@ void OptionsModsState::lstModsRefresh(size_t scrollLoc)
 	// only show mods that work with the current master
 	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)
 	{
-		ModInfo modInfo = Options::getModInfos().find(i->first)->second;
+		auto search = Options::getModInfos().find(i->first);
+		if (search == Options::getModInfos().end())
+		{
+			continue;
+		}
+		ModInfo modInfo = search->second;
 		if (modInfo.isMaster() || !modInfo.canActivate(_curMasterId))
 		{
 			continue;
