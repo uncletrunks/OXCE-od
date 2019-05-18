@@ -1433,7 +1433,28 @@ void BattlescapeState::btnVisibleUnitClick(Action *action)
 
 	if (btnID != -1)
 	{
-		_map->getCamera()->centerOnPosition(_visibleUnit[btnID]->getPosition());
+		auto position = _visibleUnit[btnID]->getPosition();
+		if (position == TileEngine::invalid)
+		{
+			bool found = false;
+			for (auto& unit : *_save->getUnits())
+			{
+				if (!unit->isOut())
+				{
+					for (auto& invItem : *unit->getInventory())
+					{
+						if (invItem->getUnit() && invItem->getUnit() == _visibleUnit[btnID])
+						{
+							position = unit->getPosition(); // position of a unit that has the wounded unit in the inventory
+							found = true;
+							break;
+						}
+					}
+				}
+				if (found) break;
+			}
+		}
+		_map->getCamera()->centerOnPosition(position);
 	}
 
 	action->getDetails()->type = SDL_NOEVENT; // consume the event
