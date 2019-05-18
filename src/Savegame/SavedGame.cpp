@@ -760,6 +760,8 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 	if (_battleGame != 0)
 	{
 		brief["mission"] = _battleGame->getMissionType();
+		brief["target"] = _battleGame->getMissionTarget();
+		brief["craftOrBase"] = _battleGame->getMissionCraftOrBase();
 		brief["turn"] = _battleGame->getTurn();
 	}
 

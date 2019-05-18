@@ -128,6 +128,8 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	initMap(mapsize_x, mapsize_y, mapsize_z);
 
 	_missionType = node["missionType"].as<std::string>(_missionType);
+	_strTarget = node["strTarget"].as<std::string>(_strTarget);
+	_strCraftOrBase = node["strCraftOrBase"].as<std::string>(_strCraftOrBase);
 	if (node["enviroEffectsType"])
 	{
 		std::string enviroEffectsType = node["enviroEffectsType"].as<std::string>();
@@ -433,6 +435,8 @@ YAML::Node SavedBattleGame::save() const
 	node["length"] = _mapsize_y;
 	node["height"] = _mapsize_z;
 	node["missionType"] = _missionType;
+	node["strTarget"] = _strTarget;
+	node["strCraftOrBase"] = _strCraftOrBase;
 	if (_enviroEffects)
 	{
 		node["enviroEffectsType"] = _enviroEffects->getType();

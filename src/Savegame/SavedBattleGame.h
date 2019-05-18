@@ -67,7 +67,7 @@ private:
 	std::vector<BattleItem*> _items, _deleted;
 	Pathfinding *_pathfinding;
 	TileEngine *_tileEngine;
-	std::string _missionType, _alienCustomDeploy, _alienCustomMission;
+	std::string _missionType, _strTarget, _strCraftOrBase, _alienCustomDeploy, _alienCustomMission;
 	const RuleEnviroEffects *_enviroEffects;
 	bool _ecEnabledFriendly, _ecEnabledHostile, _ecEnabledNeutral;
 	int _globalShade;
@@ -122,6 +122,14 @@ public:
 	void setMissionType(const std::string &missionType);
 	/// Gets the mission type.
 	const std::string &getMissionType() const;
+	/// Sets the mission target.
+	void setMissionTarget(const std::string& missionTarget) { _strTarget = missionTarget; }
+	/// Gets the mission target.
+	const std::string& getMissionTarget() const { return _strTarget; }
+	/// Sets the mission craft/base.
+	void setMissionCraftOrBase(const std::string& missionCraftOrBase) { _strCraftOrBase = missionCraftOrBase; }
+	/// Gets the mission craft/base.
+	const std::string& getMissionCraftOrBase() const { return _strCraftOrBase; }
 	/// Gets the base's items BEFORE the mission.
 	ItemContainer *getBaseStorageItems();
 	/// Applies the enviro effects.

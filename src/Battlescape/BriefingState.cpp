@@ -60,9 +60,10 @@ BriefingState::BriefingState(Craft *craft, Base *base, bool infoOnly) : _infoOnl
 	_txtBriefing = new Text(274, 94, 16, 72);
 
 	// set random hidden movement/next turn background for this mission
-	_game->getSavedGame()->getSavedBattle()->setRandomHiddenMovementBackground(_game->getMod());
+	auto battleSave = _game->getSavedGame()->getSavedBattle();
+	battleSave->setRandomHiddenMovementBackground(_game->getMod());
 
-	std::string mission = _game->getSavedGame()->getSavedBattle()->getMissionType();
+	std::string mission = battleSave->getMissionType();
 	AlienDeployment *deployment = _game->getMod()->getDeployment(mission);
 	Ufo * ufo = 0;
 	if (!deployment && craft)
@@ -127,16 +128,20 @@ BriefingState::BriefingState(Craft *craft, Base *base, bool infoOnly) : _infoOnl
 	{
 		if (craft->getDestination())
 		{
-			_txtTarget->setText(craft->getDestination()->getName(_game->getLanguage()));
+			s = craft->getDestination()->getName(_game->getLanguage());
+			battleSave->setMissionTarget(s);
 		}
 
 		s = tr("STR_CRAFT_").arg(craft->getName(_game->getLanguage()));
+		battleSave->setMissionCraftOrBase(s);
 	}
 	else if (base)
 	{
 		s = tr("STR_BASE_UC_").arg(base->getName());
+		battleSave->setMissionCraftOrBase(s);
 	}
-	_txtCraft->setText(s);
+	_txtTarget->setText(battleSave->getMissionTarget());
+	_txtCraft->setText(battleSave->getMissionCraftOrBase());
 
 	_txtTitle->setText(tr(title));
 
