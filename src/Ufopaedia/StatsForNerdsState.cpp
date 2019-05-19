@@ -2223,6 +2223,7 @@ void StatsForNerdsState::initArmorList()
 
 		addSection("{Naming}", "", _white);
 		addSingleString(ss, armorRule->getType(), "type");
+		addSingleString(ss, armorRule->getRequiredResearch(), "requires");
 
 		addSection("{Recovery}", "", _white);
 		addVectorOfStrings(ss, armorRule->getCorpseBattlescape(), "corpseBattle");
