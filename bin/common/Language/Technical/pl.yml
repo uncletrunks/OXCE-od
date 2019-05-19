@@ -324,6 +324,7 @@ pl:
   lift: "Szyb wejściowy?"
   hyper: "Dekoder hiperfal?"
   mind: "Tarcza umysłowa?"
+  mindPower: "Siła tarczy umysłowej"
   grav: "Tarcza grawitacyjna?"
   storage: "Przestrzeń magazynowa"
   personnel: "Przestrzeń mieszkalna"
