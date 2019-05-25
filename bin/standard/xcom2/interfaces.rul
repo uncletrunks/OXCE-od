@@ -1244,7 +1244,8 @@ interfaces: #done
         color: 1   # gold
         color2: 1  # white
       - id: list
-        color: 239   # purple
+        color: 3
+        color2: 239
         border: 1  # blue
       - id: button
         color: 1   # blue

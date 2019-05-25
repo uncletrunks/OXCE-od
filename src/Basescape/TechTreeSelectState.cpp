@@ -22,6 +22,7 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleMissionScript.h"
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
@@ -144,6 +145,8 @@ void TechTreeSelectState::initLists()
 
 	_firstManufacturingTopicIndex = 0;
 	_firstFacilitiesTopicIndex = 0;
+	_firstItemTopicIndex = 0;
+
 	_availableTopics.clear();
 	_lstTopics->clearList();
 
@@ -155,7 +158,37 @@ void TechTreeSelectState::initLists()
 	}
 
 	int row = 0;
-	const std::vector<std::string> &researchItems = _game->getMod()->getResearchList();
+	if (searchString == "SIMSALABIM")
+	{
+		std::unordered_set<std::string> tmpList;
+		for (auto& missionScriptId : *_game->getMod()->getMissionScriptList())
+		{
+			auto missionScript = _game->getMod()->getMissionScript(missionScriptId, false);
+			if (missionScript)
+			{
+				for (auto& trigger : missionScript->getResearchTriggers())
+				{
+					tmpList.insert(trigger.first);
+				}
+			}
+		}
+		for (auto& tmp : tmpList)
+		{
+			_availableTopics.push_back(tmp);
+			_lstTopics->addRow(1, tr(tmp).c_str());
+			if (!_parent->isDiscoveredResearch(tmp))
+			{
+				_lstTopics->setRowColor(row, _lstTopics->getSecondaryColor());
+			}
+			++row;
+		}
+		_firstManufacturingTopicIndex = row;
+		_firstFacilitiesTopicIndex = row;
+		_firstItemTopicIndex = row;
+		return;
+	}
+
+	const std::vector<std::string>& researchItems = _game->getMod()->getResearchList();
 	for (std::vector<std::string>::const_iterator i = researchItems.begin(); i != researchItems.end(); ++i)
 	{
 		std::string projectName = tr((*i));
@@ -174,6 +207,10 @@ void TechTreeSelectState::initLists()
 
 		_availableTopics.push_back(*i);
 		_lstTopics->addRow(1, tr((*i)).c_str());
+		if (!_parent->isDiscoveredResearch(*i))
+		{
+			_lstTopics->setRowColor(row, _lstTopics->getSecondaryColor());
+		}
 		++row;
 	}
 
@@ -201,6 +238,10 @@ void TechTreeSelectState::initLists()
 		ss << tr((*i));
 		ss << tr("STR_M_FLAG");
 		_lstTopics->addRow(1, ss.str().c_str());
+		if (!_parent->isDiscoveredManufacture(*i))
+		{
+			_lstTopics->setRowColor(row, _lstTopics->getSecondaryColor());
+		}
 		++row;
 	}
 
@@ -228,6 +269,10 @@ void TechTreeSelectState::initLists()
 		ss << tr((*i));
 		ss << tr("STR_F_FLAG");
 		_lstTopics->addRow(1, ss.str().c_str());
+		if (!_parent->isDiscoveredFacility(*i))
+		{
+			_lstTopics->setRowColor(row, _lstTopics->getSecondaryColor());
+		}
 		++row;
 	}
 
@@ -260,6 +305,10 @@ void TechTreeSelectState::initLists()
 		ss << tr((*i));
 		ss << tr("STR_I_FLAG");
 		_lstTopics->addRow(1, ss.str().c_str());
+		if (!_parent->isProtectedAndDiscoveredItem(*i))
+		{
+			_lstTopics->setRowColor(row, _lstTopics->getSecondaryColor());
+		}
 		++row;
 	}
 }

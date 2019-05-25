@@ -25,6 +25,7 @@
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
+#include "../Mod/RuleMissionScript.h"
 #include "../Mod/RuleResearch.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
@@ -782,6 +783,76 @@ void TechTreeViewerState::initLists()
 					_rightFlags.push_back(TTV_RESEARCH);
 					++row;
 				}
+			}
+		}
+
+		// 10. unlocks/disables alien missions
+		std::unordered_set<std::string> unlocksMissions, disablesMissions;
+		for (auto& missionScriptId : *_game->getMod()->getMissionScriptList())
+		{
+			auto missionScript = _game->getMod()->getMissionScript(missionScriptId, false);
+			if (missionScript)
+			{
+				for (auto& trigger : missionScript->getResearchTriggers())
+				{
+					if (trigger.first == _selectedTopic)
+					{
+						if (trigger.second)
+							unlocksMissions.insert(missionScriptId);
+						else
+							disablesMissions.insert(missionScriptId);
+					}
+				}
+			}
+		}
+		if (_game->getSavedGame()->getDebugMode())
+		{
+			if (!unlocksMissions.empty())
+			{
+				_lstRight->addRow(1, tr("STR_UNLOCKS_MISSIONS").c_str());
+				_lstRight->setRowColor(row, _blue);
+				_rightTopics.push_back("-");
+				_rightFlags.push_back(TTV_NONE);
+				++row;
+				for (auto& i : unlocksMissions)
+				{
+					std::ostringstream name;
+					name << "  " << tr(i);
+					_lstRight->addRow(1, name.str().c_str());
+					_lstRight->setRowColor(row, _white);
+					_rightTopics.push_back("-");
+					_rightFlags.push_back(TTV_NONE);
+					++row;
+				}
+			}
+			if (!disablesMissions.empty())
+			{
+				_lstRight->addRow(1, tr("STR_DISABLES_MISSIONS").c_str());
+				_lstRight->setRowColor(row, _blue);
+				_rightTopics.push_back("-");
+				_rightFlags.push_back(TTV_NONE);
+				++row;
+				for (auto& i : disablesMissions)
+				{
+					std::ostringstream name;
+					name << "  " << tr(i);
+					_lstRight->addRow(1, name.str().c_str());
+					_lstRight->setRowColor(row, _white);
+					_rightTopics.push_back("-");
+					_rightFlags.push_back(TTV_NONE);
+					++row;
+				}
+			}
+		}
+		else
+		{
+			if (!unlocksMissions.empty() || !disablesMissions.empty())
+			{
+				_lstRight->addRow(1, tr("STR_AFFECTS_GAME_PROGRESSION").c_str());
+				_lstRight->setRowColor(row, _gold);
+				_rightTopics.push_back("-");
+				_rightFlags.push_back(TTV_NONE);
+				++row;
 			}
 		}
 	}
