@@ -913,6 +913,45 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
+		// 4b. random outputs
+		auto randomOutputs = rule->getRandomProducedItems();
+		if (randomOutputs.size() > 0)
+		{
+			_lstRight->addRow(1, tr("STR_RANDOM_PRODUCTION_DISCLAIMER").c_str());
+			_lstRight->setRowColor(row, _blue);
+			_rightTopics.push_back("-");
+			_rightFlags.push_back(TTV_NONE);
+			++row;
+			int total = 0;
+			for (auto& n : randomOutputs)
+			{
+				total += n.first;
+			}
+			for (auto& randomOutput : randomOutputs)
+			{
+				std::ostringstream chance;
+				chance << " " << randomOutput.first * 100 / total << "%";
+				_lstRight->addRow(1, chance.str().c_str());
+				_lstRight->setRowColor(row, _gold);
+				_rightTopics.push_back("-");
+				_rightFlags.push_back(TTV_NONE);
+				++row;
+				for (auto& i : randomOutput.second)
+				{
+					std::ostringstream name;
+					name << "  ";
+					name << tr(i.first->getType());
+					name << ": ";
+					name << i.second;
+					_lstRight->addRow(1, name.str().c_str());
+					_lstRight->setRowColor(row, _white);
+					_rightTopics.push_back("-");
+					_rightFlags.push_back(TTV_NONE);
+					++row;
+				}
+			}
+		}
+
 		// 5. person joining
 		if (rule->getSpawnedPersonType() != "")
 		{
