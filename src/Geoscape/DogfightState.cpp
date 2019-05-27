@@ -1365,7 +1365,7 @@ void DogfightState::update()
 			std::vector<Craft*> followers = _ufo->getCraftFollowers();
 			for (std::vector<Craft*>::iterator i = followers.begin(); i != followers.end(); ++i)
 			{
-				if ((*i)->getNumSoldiers() == 0 && (*i)->getNumVehicles() == 0)
+				if (((*i)->getNumSoldiers() == 0 && (*i)->getNumVehicles() == 0) || !(*i)->getRules()->getAllowLanding())
 				{
 					(*i)->returnToBase();
 				}
