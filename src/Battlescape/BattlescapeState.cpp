@@ -72,6 +72,7 @@
 #include "../Savegame/Tile.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/Soldier.h"
+#include "../Savegame/Base.h"
 #include "../Savegame/BattleItem.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../Savegame/Ufo.h"
@@ -2791,6 +2792,26 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 		_popups.clear();
 		_save->setMissionType(nextStage);
 		BattlescapeGenerator bgen = BattlescapeGenerator(_game);
+		// EXPERIMENTAL: make the craft available in the next stage, for cosmetic purposes only (e.g. addCraft map script command)
+		// craft deployment is ignored, xcom spawn points are still needed in the next stage!
+		// craft inventory tile is ignored
+		// craft equipment from the first stage is not in the craft anymore (it's either on the first xcom spawn point or in nirvana)
+		{
+			bool found = false;
+			for (auto& base : *_game->getSavedGame()->getBases())
+			{
+				for (auto& craft : *base->getCrafts())
+				{
+					if (craft->isInBattlescape())
+					{
+						bgen.setCraft(craft);
+						found = true;
+						break;
+					}
+				}
+				if (found) break;
+			}
+		}
 		bgen.nextStage();
 		_game->popState();
 		_game->pushState(new BriefingState(0, 0));
