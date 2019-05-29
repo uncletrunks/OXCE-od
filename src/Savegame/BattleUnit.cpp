@@ -2163,7 +2163,7 @@ void BattleUnit::moraleChange(int change)
  */
 int BattleUnit::reduceByBravery(int moraleChange) const
 {
-	return std::max(0, 110 - _stats.bravery) * moraleChange / 100;
+	return (110 - _stats.bravery) * moraleChange / 100;
 }
 
 /**
