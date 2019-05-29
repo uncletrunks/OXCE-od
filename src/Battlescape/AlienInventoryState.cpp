@@ -27,6 +27,7 @@
 #include "../Interface/BattlescapeButton.h"
 #include "../Interface/Text.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../Savegame/BattleUnit.h"
 
@@ -129,12 +130,12 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 			std::stringstream ss;
 			Surface *surf = 0;
 
-			for (int i = 0; i <= 4; ++i)
+			for (int i = 0; i <= RuleSoldier::LookVariantBits; ++i)
 			{
 				ss.str("");
 				ss << look;
 				ss << gender;
-				ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
+				ss << (int)s->getLook() + (s->getLookVariant() & (RuleSoldier::LookVariantMask >> i)) * 4;
 				ss << ".SPK";
 				surf = _game->getMod()->getSurface(ss.str(), false);
 				if (surf)

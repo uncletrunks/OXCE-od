@@ -19,6 +19,7 @@
 #include "Armor.h"
 #include "../Engine/ScriptBind.h"
 #include "Mod.h"
+#include "RuleSoldier.h"
 
 namespace OpenXcom
 {
@@ -803,9 +804,9 @@ int findWithFallback(const std::vector<int> &vec, size_t pos)
 	//if pos == 31 then we test for 31, 15, 7
 	//if pos == 36 then we test for 36, 4
 	//we stop on p < 8 for comatibility reasons.
-	for (int i = 0; i <= 4; ++i)
+	for (int i = 0; i <= RuleSoldier::LookVariantBits; ++i)
 	{
-		size_t p = (pos & (127 >> i));
+		size_t p = (pos & (RuleSoldier::LookTotalMask >> i));
 		if (p < vec.size())
 		{
 			return vec[p];

@@ -1798,12 +1798,12 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 				std::stringstream ss;
 				Surface *surf = 0;
 
-				for (int i = 0; i <= 4; ++i)
+				for (int i = 0; i <= RuleSoldier::LookVariantBits; ++i)
 				{
 					ss.str("");
 					ss << look;
 					ss << gender;
-					ss << (int)soldier->getLook() + (soldier->getLookVariant() & (15 >> i)) * 4;
+					ss << (int)soldier->getLook() + (soldier->getLookVariant() & (RuleSoldier::LookVariantMask >> i)) * 4;
 					ss << ".SPK";
 					surf = _game->getMod()->getSurface(ss.str(), false);
 					if (surf)

@@ -39,6 +39,19 @@ class RuleSoldier
 {
 public:
 
+	/// Number of bits for soldier gender.
+	static constexpr int LookGenderBits = 1;
+	/// Number of bits for soldier look.
+	static constexpr int LookBaseBits = 2;
+	/// Number of bits for soldier lookVariants.
+	static constexpr int LookVariantBits = 4;
+	/// Max number of soldier lookVariant.s
+	static constexpr int LookVariantMax = (1 << (LookVariantBits + 1));
+	/// Mask for soldier lookVariants.
+	static constexpr int LookVariantMask = LookVariantMax - 1;
+	/// Mask for all possible looks types for soldier.
+	static constexpr int LookTotalMask = (1 << (LookVariantBits + LookBaseBits + LookGenderBits + 1)) - 1;
+
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "RuleSoldier";
 	/// Register all useful function used by script.

@@ -48,6 +48,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleInventory.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Mod/Armor.h"
 #include "../Engine/Options.h"
 #include "UnitInfoState.h"
@@ -419,12 +420,12 @@ void InventoryState::init()
 			Surface *surf = 0;
 			std::stringstream ss;
 
-			for (int i = 0; i <= 4; ++i)
+			for (int i = 0; i <= RuleSoldier::LookVariantBits; ++i)
 			{
 				ss.str("");
 				ss << look;
 				ss << gender;
-				ss << (int)s->getLook() + (s->getLookVariant() & (15 >> i)) * 4;
+				ss << (int)s->getLook() + (s->getLookVariant() & (RuleSoldier::LookVariantMask >> i)) * 4;
 				ss << ".SPK";
 				surf = _game->getMod()->getSurface(ss.str(), false);
 				if (surf)
