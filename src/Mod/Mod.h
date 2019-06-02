@@ -83,6 +83,7 @@ class RuleGlobe;
 class RuleConverter;
 class SoundDefinition;
 class MapScript;
+class ModInfo;
 class RuleVideo;
 class RuleMusic;
 class RuleArcScript;
@@ -92,6 +93,21 @@ class ModScriptGlobal;
 class ScriptParserBase;
 class ScriptGlobal;
 struct StatAdjustment;
+
+/**
+ * Mod data used when loading resources
+ */
+struct ModData
+{
+	/// Mod name
+	std::string name;
+	/// Optional info about mod
+	const ModInfo* info;
+	/// Offset that mod use is common sets
+	size_t offset;
+	/// Maximum size allowed by mod in common sets
+	size_t size;
+};
 
 /**
  * Contains all the game-specific static data that never changes
@@ -208,7 +224,8 @@ private:
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
 	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _transformationListOrder, _ufopaediaListOrder, _invListOrder, _soldierListOrder;
-	size_t _modOffset;
+	std::vector<ModData> _modData;
+	ModData* _modCurrent;
 	const SDL_Color *_statePalette;
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
 	size_t _surfaceOffsetBigobs = 0;
@@ -220,6 +237,8 @@ private:
 	size_t _soundOffsetBattle = 0;
 	size_t _soundOffsetGeo = 0;
 
+	/// Loads a ruleset from a YAML file that have basic resources configuration.
+	void loadResourceConfigFile(const std::string &filename);
 	/// Loads a ruleset from a YAML file.
 	void loadFile(const FileMap::FileRecord &filerec, ModScript &parsers);
 	/// Loads a ruleset element.
@@ -239,7 +258,7 @@ private:
 	/// Creates a transparency lookup table for a given palette.
 	void createTransparencyLUT(Palette *pal);
 	/// Loads a specified mod content.
-	void loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, size_t modIdx, ModScript &parsers);
+	void loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, ModScript &parsers);
 	/// Loads resources from vanilla.
 	void loadVanillaResources();
 	/// Loads resources from extra rulesets.
@@ -328,12 +347,19 @@ public:
 	Sound *getSoundByDepth(unsigned int depth, unsigned int sound, bool error = true) const;
 	/// Gets list of LUT data.
 	const std::vector<std::vector<Uint8> > *getLUTs() const;
+
 	/// Gets the mod offset.
 	int getModOffset() const;
+	/// Get offset and index for sound set or sprite set.
+	void loadOffsetNode(const std::string &parent, int& offset, const YAML::Node &node, int shared, const std::string &set, size_t multipler) const;
 	/// Gets the mod offset for a certain sprite.
-	int getSpriteOffset(int sprite, const std::string &set) const;
+	void loadSpriteOffset(const std::string &parent, int& sprite, const YAML::Node &node, const std::string &set, int multipler = 1) const;
+	/// Gets the mod offset array for a certain sprite.
+	void loadSpriteOffset(const std::string &parent, std::vector<int>& sprites, const YAML::Node &node, const std::string &set) const;
 	/// Gets the mod offset for a certain sound.
-	int getSoundOffset(int sound, const std::string &set) const;
+	void loadSoundOffset(const std::string &parent, int& sound, const YAML::Node &node, const std::string &set) const;
+	/// Gets the mod offset array for a certain sound.
+	void loadSoundOffset(const std::string &parent, std::vector<int>& sounds, const YAML::Node &node, const std::string &set) const;
 	/// Gets the mod offset for a generic value.
 	int getOffset(int id, int max) const;
 

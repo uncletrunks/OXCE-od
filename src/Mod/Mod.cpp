@@ -22,6 +22,7 @@
 #include <sstream>
 #include <climits>
 #include <unordered_map>
+#include <cassert>
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/SDL2Helpers.h"
@@ -139,6 +140,11 @@ std::string Mod::DEBRIEF_MUSIC_BAD;
 int Mod::DIFFICULTY_COEFFICIENT[5];
 int Mod::DIFFICULTY_BASED_RETAL_DELAY[5];
 
+/// Predefined name for first loaded mod that have all original data
+const std::string ModNameMaster = "master";
+/// Predefined name for current mod that is loading rulesets.
+const std::string ModNameCurrent = "current";
+
 void Mod::resetGlobalStatics()
 {
 	DOOR_OPEN = 3;
@@ -219,11 +225,11 @@ class ModScriptGlobal : public ScriptGlobal
 		if (node)
 		{
 			auto name = node.as<std::string>();
-			if (name == "master")
+			if (name == ModNameMaster)
 			{
 				value = 0;
 			}
-			else if (name == "current")
+			else if (name == ModNameCurrent)
 			{
 				value = _modCurr;
 			}
@@ -256,8 +262,8 @@ public:
 		ScriptGlobal::beginLoad();
 
 		addTagValueType<ModScriptGlobal, &ModScriptGlobal::loadRuleList, &ModScriptGlobal::saveRuleList>("RuleList");
-		addConst("RuleList.master", (int)0);
-		addConst("RuleList.current", (int)0);
+		addConst("RuleList." + ModNameMaster, (int)0);
+		addConst("RuleList." + ModNameCurrent, (int)0);
 	}
 	/// Finishing loading data.
 	void endLoad() override
@@ -275,7 +281,7 @@ public:
 	/// Set current mod id.
 	void setMod(int i)
 	{
-		updateConst("RuleList.current", (int)i);
+		updateConst("RuleList." + ModNameCurrent, (int)i);
 		_modCurr = i;
 	}
 };
@@ -309,7 +315,7 @@ Mod::Mod() :
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
 	_baseDefenseMapFromLocation(0), _disableUnderwaterSounds(false), _pediaReplaceCraftFuelWithRangeType(-1),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
-	_researchListOrder(0),  _manufactureListOrder(0), _transformationListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0), _statePalette(0)
+	_researchListOrder(0),  _manufactureListOrder(0), _transformationListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modCurrent(0), _statePalette(0)
 {
 	_muteMusic = new Music();
 	_muteSound = new Sound();
@@ -939,37 +945,178 @@ const std::vector<std::vector<Uint8> > *Mod::getLUTs() const
  */
 int Mod::getModOffset() const
 {
-	return _modOffset;
+	return _modCurrent->offset;
+}
+
+/**
+ * Get offset and index for sound set or sprite set.
+ * @param parent Name of parent node, used for better error message
+ * @param offset Member to load new value.
+ * @param node Node with data
+ * @param shared Max offset limit that is shared for every mod
+ * @param multipler Value used by `projectle` surface set to convert projectle offset to index offset in surface.
+ */
+void Mod::loadOffsetNode(const std::string &parent, int& offset, const YAML::Node &node, int shared, const std::string &set, size_t multipler) const
+{
+	assert(_modCurrent);
+	const ModData* curr = _modCurrent;
+	if (node.IsScalar())
+	{
+		offset = node.as<int>();
+	}
+	else if (node.IsMap())
+	{
+		offset = node["index"].as<int>();
+		std::string mod = node["mod"].as<std::string>();
+		if (mod == ModNameMaster)
+		{
+			curr = &_modData.at(0);
+		}
+		else if (mod == ModNameCurrent)
+		{
+			//nothing
+		}
+		else
+		{
+			const ModData* n = 0;
+			for (size_t i = 0; i < _modData.size(); ++i)
+			{
+				const ModData& d = _modData[i];
+				if (d.name == mod)
+				{
+					n = &d;
+					break;
+				}
+			}
+
+			if (n)
+			{
+				curr = n;
+			}
+			else
+			{
+				std::ostringstream err;
+				err << "Error for '" << parent << "': unknown mod '" << mod << "' used";
+				throw Exception(err.str());
+			}
+		}
+	}
+
+	if (offset < -1)
+	{
+		std::ostringstream err;
+		err << "Error for '" << parent << "': offset '" << offset << "' have incorrect value in set '" << set << "'";
+		throw Exception(err.str());
+	}
+	else if (offset == -1)
+	{
+		//ok
+	}
+	else
+	{
+		int f = offset;
+		f *= multipler;
+		if ((size_t)f > curr->size)
+		{
+			std::ostringstream err;
+			err << "Error for '" << parent << "': offset '" << offset << "' exceeds mod size limit " << (curr->size / multipler) << " in set '" << set << "'";
+			throw Exception(err.str());
+		}
+		if (f >= shared)
+			f += curr->offset;
+		offset = f;
+	}
 }
 
 /**
  * Returns the appropriate mod-based offset for a sprite.
  * If the ID is bigger than the surfaceset contents, the mod offset is applied.
- * @param sprite Numeric ID of the sprite.
+ * @param parent Name of parent node, used for better error message
+ * @param sprite Member to load new sprite ID index.
+ * @param node Node with data
+ * @param set Name of the surfaceset to lookup.
+ * @param multipler Value used by `projectle` surface set to convert projectle offset to index offset in surface.
+ */
+void Mod::loadSpriteOffset(const std::string &parent, int& sprite, const YAML::Node &node, const std::string &set, int multipler) const
+{
+	if (node)
+	{
+		loadOffsetNode(parent, sprite, node, getRule(set, "Sprite Set", _sets, true)->getMaxSharedFrames(), set, multipler);
+	}
+}
+
+/**
+ * Gets the mod offset array for a certain sprite.
+ * @param parent Name of parent node, used for better error message
+ * @param sprites Member to load new arrat of sprite ID index.
+ * @param node Node with data
  * @param set Name of the surfaceset to lookup.
  */
-int Mod::getSpriteOffset(int sprite, const std::string& set) const
+void Mod::loadSpriteOffset(const std::string &parent, std::vector<int>& sprites, const YAML::Node &node, const std::string &set) const
 {
-	std::map<std::string, SurfaceSet*>::const_iterator i = _sets.find(set);
-	if (i != _sets.end() && sprite >= (int)i->second->getTotalFrames())
-		return sprite + _modOffset;
-	else
-		return sprite;
+	if (node)
+	{
+		int maxShared = getRule(set, "Sprite Set", _sets, true)->getMaxSharedFrames();
+		sprites.clear();
+		if (node.IsSequence())
+		{
+			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
+			{
+				sprites.push_back(-1);
+				loadOffsetNode(parent, sprites.back(), *i, maxShared, set, 1);
+			}
+		}
+		else
+		{
+			sprites.push_back(-1);
+			loadOffsetNode(parent, sprites.back(), node, maxShared, set, 1);
+		}
+	}
 }
 
 /**
  * Returns the appropriate mod-based offset for a sound.
  * If the ID is bigger than the soundset contents, the mod offset is applied.
- * @param sound Numeric ID of the sound.
+ * @param parent Name of parent node, used for better error message
+ * @param sound Member to load new sound ID index.
+ * @param node Node with data
  * @param set Name of the soundset to lookup.
  */
-int Mod::getSoundOffset(int sound, const std::string& set) const
+void Mod::loadSoundOffset(const std::string &parent, int& sound, const YAML::Node &node, const std::string &set) const
 {
-	std::map<std::string, SoundSet*>::const_iterator i = _sounds.find(set);
-	if (i != _sounds.end() && sound >= (int)i->second->getTotalSounds())
-		return sound + _modOffset;
-	else
-		return sound;
+	if (node)
+	{
+		loadOffsetNode(parent, sound, node, getSoundSet(set)->getMaxSharedSounds(), set, 1);
+	}
+}
+
+/**
+ * Gets the mod offset array for a certain sound.
+ * @param parent Name of parent node, used for better error message
+ * @param sounds Member to load new list of sound ID indexes.
+ * @param node Node with data
+ * @param set Name of the soundset to lookup.
+ */
+void Mod::loadSoundOffset(const std::string &parent, std::vector<int>& sounds, const YAML::Node &node, const std::string &set) const
+{
+	if (node)
+	{
+		int maxShared = getSoundSet(set)->getMaxSharedSounds();
+		sounds.clear();
+		if (node.IsSequence())
+		{
+			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
+			{
+				sounds.push_back(-1);
+				loadOffsetNode(parent, sounds.back(), *i, maxShared, set, 1);
+			}
+		}
+		else
+		{
+			sounds.push_back(-1);
+			loadOffsetNode(parent, sounds.back(), node, maxShared, set, 1);
+		}
+	}
 }
 
 /**
@@ -980,8 +1127,9 @@ int Mod::getSoundOffset(int sound, const std::string& set) const
  */
 int Mod::getOffset(int id, int max) const
 {
+	assert(_modCurrent);
 	if (id > max)
-		return id + _modOffset;
+		return id + _modCurrent->offset;
 	else
 		return id;
 }
@@ -1004,6 +1152,44 @@ static void afterLoadHelper(const char* name, Mod* mod, std::map<std::string, T*
 }
 
 /**
+ * Helper function used to disable buged mod and throw exception to quit game
+ * @param modId Mod id
+ * @param error Error message
+ */
+static void throwModOnErrorHelper(const std::string& modId, const std::string& error)
+{
+	std::ostringstream errorStream;
+
+	errorStream << "failed to load '"
+		<< Options::getModInfos().at(modId).getName()
+		<< "'";
+
+	if (!Options::debug)
+	{
+		Log(LOG_WARNING) << "disabling mod with invalid ruleset: " << modId;
+		std::vector<std::pair<std::string, bool> >::iterator it =
+			std::find(Options::mods.begin(), Options::mods.end(),
+				std::pair<std::string, bool>(modId, true));
+		if (it == Options::mods.end())
+		{
+			Log(LOG_ERROR) << "cannot find broken mod in mods list: " << modId;
+			Log(LOG_ERROR) << "clearing mods list";
+			Options::mods.clear();
+		}
+		else
+		{
+			it->second = false;
+		}
+		Options::save();
+
+		errorStream << "; mod disabled";
+	}
+	errorStream << std::endl << error;
+
+	throw Exception(errorStream.str());
+}
+
+/**
  * Loads a list of mods specified in the options.
  * List of <modId, rulesetFiles> pairs is fetched from the FileMap / VFS
  * being set up in options updateMods
@@ -1014,63 +1200,79 @@ void Mod::loadAll()
 	auto mods = FileMap::getRulesets();
 
 	Log(LOG_INFO) << "Loading rulesets...";
-	std::vector<size_t> modOffsets(mods.size());
 	_scriptGlobal->beginLoad();
+	_modData.clear();
+	_modData.resize(mods.size());
+
+	std::set<std::string> usedModNames;
+	usedModNames.insert(ModNameMaster);
+	usedModNames.insert(ModNameCurrent);
+
+
+	// calculated offsets and other things for all mods
 	size_t offset = 0;
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
-		modOffsets[i] = offset;
-		_scriptGlobal->addMod(mods[i].first, (int)offset);
-		auto it = Options::getModInfos().find(mods[i].first);
-		if (it != Options::getModInfos().end())
+		const std::string& modId = mods[i].first;
+		if (usedModNames.insert(modId).second == false)
 		{
-			offset += it->second.getReservedSpace();
+			throwModOnErrorHelper(modId, "this mod name is already used");
 		}
-		else
+		_scriptGlobal->addMod(mods[i].first, (int)offset);
+		const ModInfo *modInfo = &Options::getModInfos().at(modId);
+		size_t size = modInfo->getReservedSpace();
+		_modData[i].name = modId;
+		_modData[i].offset = 1000 * offset;
+		_modData[i].info = modInfo;
+		_modData[i].size = 1000 * size;
+		offset += size;
+	}
+
+	// load rulesets that can affect loading vanilla resources
+	for (size_t i = 0; _modData.size() > i; ++i)
+	{
+		_modCurrent = &_modData.at(0);
+		if (_modCurrent->info->isMaster())
 		{
-			offset += 1;
+			std::string path = _modCurrent->info->getResourceConfigFile();
+			if (CrossPlatform::fileExists(path))
+			{
+				loadResourceConfigFile(path);
+			}
 		}
 	}
+
+	// vanilla resources load
+	_modCurrent = &_modData.at(0);
+	loadVanillaResources();
+	_surfaceOffsetBasebits = getSurfaceSet("BASEBITS.PCK")->getTotalFrames();
+	_surfaceOffsetBigobs = getRule("BIGOBS.PCK", "Sprite Set", _sets, true)->getTotalFrames(); // no lazy loading here yet
+	_surfaceOffsetFloorob = getSurfaceSet("FLOOROB.PCK")->getTotalFrames();
+	_surfaceOffsetHandob = getSurfaceSet("HANDOB.PCK")->getTotalFrames();
+	_surfaceOffsetHit = getSurfaceSet("HIT.PCK")->getTotalFrames();
+	_surfaceOffsetSmoke = getSurfaceSet("SMOKE.PCK")->getTotalFrames();
+
+	_soundOffsetBattle = getSoundSet("BATTLE.CAT")->getTotalSounds();
+	_soundOffsetGeo = getSoundSet("GEO.CAT")->getTotalSounds();
+
+	// load rest rulesets
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
-		_scriptGlobal->setMod((int)modOffsets[i]);
 		try
 		{
-			loadMod(mods[i].second, modOffsets[i], parser);
+			_modCurrent = &_modData.at(i);
+			_scriptGlobal->setMod((int)_modCurrent->offset);
+			loadMod(mods[i].second, parser);
 		}
 		catch (Exception &e)
 		{
 			const std::string &modId = mods[i].first;
-			std::ostringstream ss;
-			ss << "failed to load '"
-				<< Options::getModInfos().at(modId).getName()
-				<< "'";
-
-			if (!Options::debug)
-			{
-				Log(LOG_WARNING) << "disabling mod with invalid ruleset: " << modId;
-				std::vector<std::pair<std::string, bool> >::iterator it =
-					std::find(Options::mods.begin(), Options::mods.end(),
-						std::pair<std::string, bool>(modId, true));
-				if (it == Options::mods.end())
-				{
-					Log(LOG_ERROR) << "cannot find broken mod in mods list: " << modId;
-					Log(LOG_ERROR) << "clearing mods list";
-					Options::mods.clear();
-				}
-				else
-				{
-					it->second = false;
-				}
-				Options::save();
-
-				ss << "; mod disabled";
-			}
-
-			ss << std::endl << e.what();
-			throw Exception(ss.str());
+			throwModOnErrorHelper(modId, e.what());
 		}
 	}
+
+	//back master
+	_modCurrent = &_modData.at(0);
 	_scriptGlobal->endLoad();
 
 	// post-processing item categories
@@ -1132,6 +1334,7 @@ void Mod::loadAll()
 		Options::save();
 	}
 
+
 	sortLists();
 	loadExtraResources();
 	modResources();
@@ -1141,13 +1344,10 @@ void Mod::loadAll()
  * Loads a list of rulesets from YAML files for the mod at the specified index. The first
  * mod loaded should be the master at index 0, then 1, and so on.
  * @param rulesetFiles List of rulesets to load.
- * @param modIdx Mod index number.
  * @param parsers Object with all avaiable parser.
  */
-void Mod::loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, size_t modIdx, ModScript &parsers)
+void Mod::loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, ModScript &parsers)
 {
-	_modOffset = 1000 * modIdx;
-
 	for (auto i = rulesetFiles.begin(); i != rulesetFiles.end(); ++i)
 	{
 		Log(LOG_VERBOSE) << "- " << i->fullpath;
@@ -1217,19 +1417,35 @@ void Mod::loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, size_t m
 			}
 		}
 	}
+}
 
-	if (modIdx == 0)
+/**
+ * Loads a ruleset from a YAML file that have basic resources configuration.
+ * @param filename YAML filename.
+ */
+void Mod::loadResourceConfigFile(const std::string &filename)
+{
+	YAML::Node doc = YAML::LoadFile(filename);
+
+	for (YAML::const_iterator i = doc["soundDefs"].begin(); i != doc["soundDefs"].end(); ++i)
 	{
-		loadVanillaResources();
-		_surfaceOffsetBasebits = getSurfaceSet("BASEBITS.PCK")->getTotalFrames();
-		_surfaceOffsetBigobs = getRule("BIGOBS.PCK", "Sprite Set", _sets, true)->getTotalFrames(); // no lazy loading here yet
-		_surfaceOffsetFloorob = getSurfaceSet("FLOOROB.PCK")->getTotalFrames();
-		_surfaceOffsetHandob = getSurfaceSet("HANDOB.PCK")->getTotalFrames();
-		_surfaceOffsetHit = getSurfaceSet("HIT.PCK")->getTotalFrames();
-		_surfaceOffsetSmoke = getSurfaceSet("SMOKE.PCK")->getTotalFrames();
-
-		_soundOffsetBattle = getSoundSet("BATTLE.CAT")->getTotalSounds();
-		_soundOffsetGeo = getSoundSet("GEO.CAT")->getTotalSounds();
+		SoundDefinition *rule = loadRule(*i, &_soundDefs);
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
+	for (YAML::const_iterator i = doc["transparencyLUTs"].begin(); i != doc["transparencyLUTs"].end(); ++i)
+	{
+		for (YAML::const_iterator j = (*i)["colors"].begin(); j != (*i)["colors"].end(); ++j)
+		{
+			SDL_Color color;
+			color.r = (*j)[0].as<int>(0);
+			color.g = (*j)[1].as<int>(0);
+			color.b = (*j)[2].as<int>(0);
+			color.unused = (*j)[3].as<int>(2);;
+			_transparencies.push_back(color);
+		}
 	}
 }
 
@@ -1683,11 +1899,11 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 				type = (*i)["typeSingle"].as<std::string>();
 			}
 			ExtraSprites *extraSprites = new ExtraSprites();
-			int modOffset = _modOffset;
+			const ModData* data = _modCurrent;
 			// doesn't support modIndex
 			if (type == "TEXTURE.DAT")
-				modOffset = 0;
-			extraSprites->load(*i, modOffset);
+				data = &_modData.at(0);
+			extraSprites->load(*i, data);
 			_extraSprites[type].push_back(extraSprites);
 		}
 		else if ((*i)["delete"])
@@ -1712,7 +1928,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	{
 		std::string type = (*i)["type"].as<std::string>();
 		ExtraSounds *extraSounds = new ExtraSounds();
-		extraSounds->load(*i, _modOffset);
+		extraSounds->load(*i, _modCurrent);
 		_extraSounds.push_back(std::make_pair(type, extraSounds));
 	}
 	for (YAML::const_iterator i = doc["extraStrings"].begin(); i != doc["extraStrings"].end(); ++i)
@@ -1743,14 +1959,6 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		if (rule != 0)
 		{
 			rule->load(*i, this);
-		}
-	}
-	for (YAML::const_iterator i = doc["soundDefs"].begin(); i != doc["soundDefs"].end(); ++i)
-	{
-		SoundDefinition *rule = loadRule(*i, &_soundDefs);
-		if (rule != 0)
-		{
-			rule->load(*i);
 		}
 	}
 	if (doc["globe"])
@@ -1806,18 +2014,6 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		}
 		DEBRIEF_MUSIC_GOOD = (*i)["goodDebriefingMusic"].as<std::string>(DEBRIEF_MUSIC_GOOD);
 		DEBRIEF_MUSIC_BAD = (*i)["badDebriefingMusic"].as<std::string>(DEBRIEF_MUSIC_BAD);
-	}
-	for (YAML::const_iterator i = doc["transparencyLUTs"].begin(); i != doc["transparencyLUTs"].end(); ++i)
-	{
-		for (YAML::const_iterator j = (*i)["colors"].begin(); j != (*i)["colors"].end(); ++j)
-		{
-			SDL_Color color;
-			color.r = (*j)[0].as<int>(0);
-			color.g = (*j)[1].as<int>(0);
-			color.b = (*j)[2].as<int>(0);
-			color.unused = (*j)[3].as<int>(2);;
-			_transparencies.push_back(color);
-		}
 	}
 	for (YAML::const_iterator i = doc["mapScripts"].begin(); i != doc["mapScripts"].end(); ++i)
 	{
@@ -3394,6 +3590,13 @@ namespace
  */
 void Mod::loadVanillaResources()
 {
+	// Create Geoscape surface
+	_sets["GlobeMarkers"] = new SurfaceSet(3, 3);
+	// dummy resources, that need to be defined in order for mod loading to work correctly
+	_sets["CustomArmorPreviews"] = new SurfaceSet(12, 20);
+	_sets["CustomItemPreviews"] = new SurfaceSet(12, 20);
+	_sets["TinyRanks"] = new SurfaceSet(7, 7);
+
 	// Load palettes
 	const char *pal[] = { "PAL_GEOSCAPE", "PAL_BASESCAPE", "PAL_GRAPHS", "PAL_UFOPAEDIA", "PAL_BATTLEPEDIA" };
 	for (size_t i = 0; i < ARRAYLEN(pal); ++i)
@@ -3604,17 +3807,66 @@ void Mod::loadVanillaResources()
 		}
 	}
 
-	TextButton::soundPress = getSound("GEO.CAT", Mod::BUTTON_PRESS);
-	Window::soundPopup[0] = getSound("GEO.CAT", Mod::WINDOW_POPUP[0]);
-	Window::soundPopup[1] = getSound("GEO.CAT", Mod::WINDOW_POPUP[1]);
-	Window::soundPopup[2] = getSound("GEO.CAT", Mod::WINDOW_POPUP[2]);
-
 	loadBattlescapeResources(); // TODO load this at battlescape start, unload at battlescape end?
 
-	// dummy resources, that need to be defined in order for mod loading to work correctly
-	_sets["CustomArmorPreviews"] = new SurfaceSet(12, 20);
-	_sets["CustomItemPreviews"] = new SurfaceSet(12, 20);
-	_sets["TinyRanks"] = new SurfaceSet(7, 7);
+
+	//update number of shared indexes in surface sets and sound sets
+	{
+		std::string surfaceNames[] =
+		{
+			"BIGOBS.PCK",
+			"FLOOROB.PCK",
+			"HANDOB.PCK",
+			"SMOKE.PCK",
+			"HIT.PCK",
+			"BASEBITS.PCK",
+			"X1.PCK",
+			"INTICON.PCK",
+			"CustomArmorPreviews",
+			"CustomItemPreviews",
+			"TinyRanks",
+		};
+
+		for (size_t i = 0; i < ARRAYLEN(surfaceNames); ++i)
+		{
+			SurfaceSet* s = _sets[surfaceNames[i]];
+			s->setMaxSharedFrames((int)s->getTotalFrames());
+		}
+		//special case for surface set that is loaded later
+		{
+			SurfaceSet* s = _sets["Projectiles"];
+			s->setMaxSharedFrames(385);
+		}
+		{
+			SurfaceSet* s = _sets["UnderwaterProjectiles"];
+			s->setMaxSharedFrames(385);
+		}
+		{
+			SurfaceSet* s = _sets["GlobeMarkers"];
+			s->setMaxSharedFrames(8);
+		}
+	}
+	{
+		std::string soundNames[] =
+		{
+			"BATTLE.CAT",
+			"GEO.CAT",
+		};
+
+		for (size_t i = 0; i < ARRAYLEN(soundNames); ++i)
+		{
+			SoundSet* s = _sounds[soundNames[i]];
+			s->setMaxSharedSounds((int)s->getTotalSounds());
+		}
+		//case for underwater surface
+		{
+			SoundSet* s = _sounds["BATTLE2.CAT"];
+			if (s)
+			{
+				s->setMaxSharedSounds((int)s->getTotalSounds());
+			}
+		}
+	}
 }
 
 /**
@@ -3637,6 +3889,8 @@ void Mod::loadBattlescapeResources()
 	_sets["MEDIBITS.DAT"]->loadDat("UFOGRAPH/MEDIBITS.DAT");
 	_sets["DETBLOB.DAT"] = new SurfaceSet(16, 16);
 	_sets["DETBLOB.DAT"]->loadDat("UFOGRAPH/DETBLOB.DAT");
+	_sets["Projectiles"] = new SurfaceSet(3, 3);
+	_sets["UnderwaterProjectiles"] = new SurfaceSet(3, 3);
 
 	// Load Battlescape Terrain (only blanks are loaded, others are loaded just in time)
 	_sets["BLANKS.PCK"] = new SurfaceSet(32, 40);
@@ -4055,6 +4309,11 @@ void Mod::loadExtraResources()
 			_palettes[newName]->copyFrom(pal.second);
 		}
 	}
+
+	TextButton::soundPress = getSound("GEO.CAT", Mod::BUTTON_PRESS);
+	Window::soundPopup[0] = getSound("GEO.CAT", Mod::WINDOW_POPUP[0]);
+	Window::soundPopup[1] = getSound("GEO.CAT", Mod::WINDOW_POPUP[1]);
+	Window::soundPopup[2] = getSound("GEO.CAT", Mod::WINDOW_POPUP[2]);
 }
 
 void Mod::loadExtraSprite(ExtraSprites *spritePack)

@@ -106,14 +106,8 @@ void RuleUfo::load(const YAML::Node &node, Mod *mod)
 		}
 	}
 
-	if (node["fireSound"])
-	{
-		_fireSound = mod->getSoundOffset(node["fireSound"].as<int>(_fireSound), "GEO.CAT");
-	}
-	if (node["alertSound"])
-	{
-		_alertSound = mod->getSoundOffset(node["alertSound"].as<int>(_alertSound), "GEO.CAT");
-	}
+	mod->loadSoundOffset(_type, _fireSound, node["fireSound"], "GEO.CAT");
+	mod->loadSoundOffset(_type, _alertSound, node["alertSound"], "GEO.CAT");
 }
 
 /**

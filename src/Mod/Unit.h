@@ -260,8 +260,6 @@ private:
 	bool _waitIfOutsideWeaponRange;
 	int _pickUpWeaponsMoreActively;
 
-	/// Load sound vector from YAML.
-	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
 public:
 	/// Creates a blank unit ruleset.
 	Unit(const std::string &type);

@@ -60,31 +60,6 @@ RuleSoldier::~RuleSoldier()
 }
 
 /**
- * Loads a sound vector for a given attribute/node.
- * @param node YAML node.
- * @param mod Mod for the item.
- * @param vector Sound vector to load into.
- */
-void RuleSoldier::loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector)
-{
-	if (node)
-	{
-		vector.clear();
-		if (node.IsSequence())
-		{
-			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
-			{
-				vector.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
-			}
-		}
-		else
-		{
-			vector.push_back(mod->getSoundOffset(node.as<int>(), "BATTLE.CAT"));
-		}
-	}
-}
-
-/**
  * Loads the soldier from a YAML file.
  * @param node YAML node.
  * @param mod Mod for the unit.
@@ -141,12 +116,12 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_moraleLossWhenKilled = node["moraleLossWhenKilled"].as<int>(_moraleLossWhenKilled);
 
-	loadSoundVector(node["deathMale"], mod, _deathSoundMale);
-	loadSoundVector(node["deathFemale"], mod, _deathSoundFemale);
-	loadSoundVector(node["panicMale"], mod, _panicSoundMale);
-	loadSoundVector(node["panicFemale"], mod, _panicSoundFemale);
-	loadSoundVector(node["berserkMale"], mod, _berserkSoundMale);
-	loadSoundVector(node["berserkFemale"], mod, _berserkSoundFemale);
+	mod->loadSoundOffset(_type, _deathSoundMale, node["deathMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _deathSoundFemale, node["deathFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _panicSoundMale, node["panicMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _panicSoundFemale, node["panicFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _berserkSoundMale, node["berserkMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _berserkSoundFemale, node["berserkFemale"], "BATTLE.CAT");
 
 	for (YAML::const_iterator i = node["soldierNames"].begin(); i != node["soldierNames"].end(); ++i)
 	{
@@ -188,18 +163,9 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	}
 
 	_rankStrings = node["rankStrings"].as< std::vector<std::string> >(_rankStrings);
-	if (node["rankSprite"])
-	{
-		_rankSprite = mod->getSpriteOffset(node["rankSprite"].as<int>(_rankSprite), "BASEBITS.PCK");
-	}
-	if (node["rankBattleSprite"])
-	{
-		_rankSpriteBattlescape = mod->getSpriteOffset(node["rankBattleSprite"].as<int>(_rankSpriteBattlescape), "SMOKE.PCK");
-	}
-	if (node["rankTinySprite"])
-	{
-		_rankSpriteTiny = mod->getSpriteOffset(node["rankTinySprite"].as<int>(_rankSpriteTiny), "TinyRanks");
-	}
+	mod->loadSpriteOffset(_type, _rankSprite, node["rankSprite"], "BASEBITS.PCK");
+	mod->loadSpriteOffset(_type, _rankSpriteBattlescape, node["rankBattleSprite"], "SMOKE.PCK");
+	mod->loadSpriteOffset(_type, _rankSpriteTiny, node["rankTinySprite"], "TinyRanks");
 
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)

@@ -68,15 +68,10 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	std::sort(_provideBaseFunc.begin(), _provideBaseFunc.end());
 	std::sort(_forbiddenBaseFunc.begin(), _forbiddenBaseFunc.end());
 
-	if (node["spriteShape"])
-	{
-		_spriteShape = mod->getSpriteOffset(node["spriteShape"].as<int>(_spriteShape), "BASEBITS.PCK");
-	}
-	if (node["spriteFacility"])
-	{
-		_spriteFacility = mod->getSpriteOffset(node["spriteFacility"].as<int>(_spriteFacility), "BASEBITS.PCK");
-	}
-	_missileAttraction = node["missileAttraction"].as<int>(_missileAttraction);
+
+	mod->loadSpriteOffset(_type, _spriteShape, node["spriteShape"], "BASEBITS.PCK");
+	mod->loadSpriteOffset(_type, _spriteFacility, node["spriteFacility"], "BASEBITS.PCK");
+
 	_lift = node["lift"].as<bool>(_lift);
 	_hyper = node["hyper"].as<bool>(_hyper);
 	_mind = node["mind"].as<bool>(_mind);
@@ -98,14 +93,10 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_radarChance = node["radarChance"].as<int>(_radarChance);
 	_defense = node["defense"].as<int>(_defense);
 	_hitRatio = node["hitRatio"].as<int>(_hitRatio);
-	if (node["fireSound"])
-	{
-		_fireSound = mod->getSoundOffset(node["fireSound"].as<int>(_fireSound), "GEO.CAT");
-	}
-	if (node["hitSound"])
-	{
-		_hitSound = mod->getSoundOffset(node["hitSound"].as<int>(_hitSound), "GEO.CAT");
-	}
+
+	mod->loadSoundOffset(_type, _fireSound, node["fireSound"], "GEO.CAT");
+	mod->loadSoundOffset(_type, _hitSound, node["hitSound"], "GEO.CAT");
+
 	_mapName = node["mapName"].as<std::string>(_mapName);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_trainingRooms = node["trainingRooms"].as<int>(_trainingRooms);

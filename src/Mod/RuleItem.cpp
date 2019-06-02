@@ -43,7 +43,7 @@ const float TilesToVexels = 16.0f;
  */
 RuleItem::RuleItem(const std::string &type) :
 	_type(type), _name(type), _vehicleUnit(nullptr), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(3),
-	_bigSprite(-999), _floorSprite(-1), _handSprite(120), _bulletSprite(-1), _specialIconSprite(-1),
+	_bigSprite(-1), _floorSprite(-1), _handSprite(120), _bulletSprite(-1), _specialIconSprite(-1),
 	_hitAnimation(0), _hitMissAnimation(-1),
 	_meleeAnimation(0), _meleeMissAnimation(-1),
 	_psiAnimation(-1), _psiMissAnimation(-1),
@@ -291,31 +291,6 @@ void RuleItem::updateCategories(std::map<std::string, std::string> *replacementR
 }
 
 /**
- * Loads a sound vector for a given attribute/node.
- * @param node YAML node.
- * @param mod Mod for the item.
- * @param vector Sound vector to load into.
- */
-void RuleItem::loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector)
-{
-	if (node)
-	{
-		vector.clear();
-		if (node.IsSequence())
-		{
-			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
-			{
-				vector.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
-			}
-		}
-		else
-		{
-			vector.push_back(mod->getSoundOffset(node.as<int>(), "BATTLE.CAT"));
-		}
-	}
-}
-
-/**
  * Loads the item from a YAML file.
  * @param node YAML node.
  * @param mod Mod for the item.
@@ -347,61 +322,31 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_costSell = node["costSell"].as<int>(_costSell);
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_weight = node["weight"].as<int>(_weight);
-	if (node["bigSprite"])
-	{
-		_bigSprite = mod->getSpriteOffset(node["bigSprite"].as<int>(_bigSprite), "BIGOBS.PCK");
-	}
-	if (node["floorSprite"])
-	{
-		_floorSprite = mod->getSpriteOffset(node["floorSprite"].as<int>(_floorSprite), "FLOOROB.PCK");
-	}
-	if (node["handSprite"])
-	{
-		_handSprite = mod->getSpriteOffset(node["handSprite"].as<int>(_handSprite), "HANDOB.PCK");
-	}
-	if (node["bulletSprite"])
-	{
-		// Projectiles: 0-384 entries ((105*33) / (3*3)) (35 sprites per projectile(0-34), 11 projectiles (0-10))
-		_bulletSprite = mod->getOffset(node["bulletSprite"].as<int>(_bulletSprite) * 35, 384);
-	}
-	if (node["specialIconSprite"])
-	{
-		_specialIconSprite = mod->getSpriteOffset(node["specialIconSprite"].as<int>(_specialIconSprite), "SPICONS.DAT");
-	}
-	loadSoundVector(node["reloadSound"], mod, _reloadSound);
-	loadSoundVector(node["fireSound"], mod, _fireSound);
-	loadSoundVector(node["hitSound"], mod, _hitSound);
-	loadSoundVector(node["hitMissSound"], mod, _hitMissSound);
-	loadSoundVector(node["meleeSound"], mod, _meleeSound);
-	loadSoundVector(node["meleeMissSound"], mod, _meleeMissSound);
-	loadSoundVector(node["psiSound"], mod, _psiSound);
-	loadSoundVector(node["psiMissSound"], mod, _psiMissSound);
-	if (node["hitAnimation"])
-	{
-		_hitAnimation = mod->getSpriteOffset(node["hitAnimation"].as<int>(_hitAnimation), "SMOKE.PCK");
-	}
-	if (node["hitMissAnimation"])
-	{
-		_hitMissAnimation = mod->getSpriteOffset(node["hitMissAnimation"].as<int>(_hitMissAnimation), "SMOKE.PCK");
-	}
-	if (node["meleeAnimation"])
-	{
-		_meleeAnimation = mod->getSpriteOffset(node["meleeAnimation"].as<int>(_meleeAnimation), "HIT.PCK");
-	}
-	if (node["meleeMissAnimation"])
-	{
-		_meleeMissAnimation = mod->getSpriteOffset(node["meleeMissAnimation"].as<int>(_meleeMissAnimation), "HIT.PCK");
-	}
-	if (node["psiAnimation"])
-	{
-		_psiAnimation = mod->getSpriteOffset(node["psiAnimation"].as<int>(_psiAnimation), "HIT.PCK");
-	}
-	if (node["psiMissAnimation"])
-	{
-		_psiMissAnimation = mod->getSpriteOffset(node["psiMissAnimation"].as<int>(_psiMissAnimation), "HIT.PCK");
-	}
-	loadSoundVector(node["meleeHitSound"], mod, _meleeHitSound);
-	loadSoundVector(node["explosionHitSound"], mod, _explosionHitSound);
+
+	mod->loadSpriteOffset(_type, _bigSprite, node["bigSprite"], "BIGOBS.PCK");
+	mod->loadSpriteOffset(_type, _floorSprite, node["floorSprite"], "FLOOROB.PCK");
+	mod->loadSpriteOffset(_type, _handSprite, node["handSprite"], "HANDOB.PCK");
+	// Projectiles: 0-384 entries ((105*33) / (3*3)) (35 sprites per projectile(0-34), 11 projectiles (0-10))
+	mod->loadSpriteOffset(_type, _bulletSprite, node["bulletSprite"], "Projectiles", 35);
+	mod->loadSpriteOffset(_type, _specialIconSprite, node["specialIconSprite"], "SPICONS.DAT");
+
+	mod->loadSoundOffset(_type, _reloadSound, node["reloadSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _fireSound, node["fireSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _hitSound, node["hitSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _hitMissSound, node["hitMissSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _meleeSound, node["meleeSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _meleeMissSound, node["meleeMissSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _psiSound, node["psiSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _psiMissSound, node["psiMissSound"], "BATTLE.CAT");
+
+	mod->loadSpriteOffset(_type, _hitAnimation, node["hitAnimation"], "SMOKE.PCK");
+	mod->loadSoundOffset(_type, _hitMissAnimation, node["hitMissAnimation"], "SMOKE.PCK");
+	mod->loadSpriteOffset(_type, _meleeAnimation, node["meleeAnimation"], "HIT.PCK");
+	mod->loadSoundOffset(_type, _meleeMissAnimation, node["meleeMissAnimation"], "HIT.PCK");
+	mod->loadSoundOffset(_type, _psiAnimation, node["psiAnimation"], "HIT.PCK");
+	mod->loadSoundOffset(_type, _psiMissAnimation, node["psiMissAnimation"], "HIT.PCK");
+	mod->loadSoundOffset(_type, _meleeHitSound, node["meleeHitSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _explosionHitSound, node["explosionHitSound"], "BATTLE.CAT");
 
 	if (node["battleType"])
 	{
@@ -639,21 +584,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
-	if (const YAML::Node &cipi = node["customItemPreviewIndex"])
-	{
-		_customItemPreviewIndex.clear();
-		if (cipi.IsScalar())
-		{
-			_customItemPreviewIndex.push_back(mod->getSpriteOffset(cipi.as<int>(), "CustomItemPreviews"));
-		}
-		else
-		{
-			for (YAML::const_iterator i = cipi.begin(); i != cipi.end(); ++i)
-			{
-				_customItemPreviewIndex.push_back(mod->getSpriteOffset(i->as<int>(), "CustomItemPreviews"));
-			}
-		}
-	}
+	mod->loadSpriteOffset(_type, _customItemPreviewIndex, node["customItemPreviewIndex"], "CustomItemPreviews");
 	_kneelBonus = node["kneelBonus"].as<int>(_kneelBonus);
 	_oneHandedPenalty = node["oneHandedPenalty"].as<int>(_oneHandedPenalty);
 	_monthlySalary = node["monthlySalary"].as<int>(_monthlySalary);

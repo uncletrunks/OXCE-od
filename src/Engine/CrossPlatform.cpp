@@ -579,7 +579,11 @@ std::vector<std::tuple<std::string, bool, time_t>> getFolderContents(const std::
 	struct dirent *dirp;
 	while ((dirp = readdir(dp)) != 0) {
 		std::string filename = dirp->d_name;
-		if (filename == "." || filename == "..") { continue; }
+		if (filename[0] == '.') //allowed by C++11 for empty string as it equal '\0'
+		{
+			//skip ".", "..", ".git", ".svn", ".bashrc", ".ssh" etc.
+			continue;
+		}
 		if (!compareExt(filename, ext))	{ continue; }
 		std::string fullpath = path + "/" + filename;
 		bool is_directory = folderExists(fullpath);

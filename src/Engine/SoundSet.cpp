@@ -22,6 +22,7 @@
 #include "Exception.h"
 #include "Logger.h"
 #include "SDL2Helpers.h"
+#include <climits>
 
 namespace OpenXcom
 {
@@ -29,7 +30,7 @@ namespace OpenXcom
 /**
  * Sets up a new empty sound set.
  */
-SoundSet::SoundSet()
+SoundSet::SoundSet() : _sharedSounds(INT_MAX)
 {
 
 }
@@ -128,6 +129,29 @@ Sound *SoundSet::addSound(unsigned int i)
 {
 	_sounds[i] = new Sound();
 	return _sounds[i];
+}
+
+/**
+ * Set number of shared sound indexs that are accessible for all mods.
+ */
+void SoundSet::setMaxSharedSounds(int i)
+{
+	if (i >= 0)
+	{
+		_sharedSounds = i;
+	}
+	else
+	{
+		_sharedSounds = 0;
+	}
+}
+
+/**
+ * Gets number of shared sound indexs that are accessible for all mods.
+ */
+int SoundSet::getMaxSharedSounds() const
+{
+	return _sharedSounds;
 }
 
 /**

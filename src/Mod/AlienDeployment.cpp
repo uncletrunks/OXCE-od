@@ -177,10 +177,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_alert = node["alert"].as<std::string>(_alert);
 	_alertBackground = node["alertBackground"].as<std::string>(_alertBackground);
 	_alertDescription = node["alertDescription"].as<std::string>(_alertDescription);
-	if (node["alertSound"])
-	{
-		_alertSound = mod->getSoundOffset(node["alertSound"].as<int>(_alertSound), "GEO.CAT");
-	}
+	mod->loadSoundOffset(_type, _alertSound, node["alertSound"], "GEO.CAT");
 	_briefingData = node["briefing"].as<BriefingData>(_briefingData);
 	_markerName = node["markerName"].as<std::string>(_markerName);
 	if (node["markerIcon"])

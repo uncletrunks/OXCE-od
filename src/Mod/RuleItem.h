@@ -226,8 +226,6 @@ private:
 	void loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const;
 	/// Load RuleItemAction from yaml.
 	void loadConfAction(RuleItemAction& a, const YAML::Node& node, const std::string& name) const;
-	/// Load sound vector from YAML.
-	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
 	/// Gets a random sound from a given vector.
 	int getRandomSound(const std::vector<int> &vector, int defaultValue = -1) const;
 	/// Load RuleItemFuseTrigger from yaml.

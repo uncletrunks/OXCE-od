@@ -1300,7 +1300,7 @@ void StatsForNerdsState::addSpriteResourcePath(std::ostringstream &ss, Mod *mod,
 		for (auto extraSprite : i->second)
 		{
 			// strip mod offset from the in-game ID
-			int originalSpriteId = resourceId - (extraSprite->getModIndex());
+			int originalSpriteId = resourceId - (extraSprite->getModOwner()->offset);
 
 			auto mapOfSprites = extraSprite->getSprites();
 			auto individualSprite = mapOfSprites->find(originalSpriteId);
@@ -1308,7 +1308,7 @@ void StatsForNerdsState::addSpriteResourcePath(std::ostringstream &ss, Mod *mod,
 			{
 				std::ostringstream numbers;
 				resetStream(numbers);
-				numbers << "  " << originalSpriteId << " + " << extraSprite->getModIndex();
+				numbers << "  " << originalSpriteId << " + " << extraSprite->getModOwner()->offset;
 
 				resetStream(ss);
 				ss << individualSprite->second;
@@ -1341,7 +1341,7 @@ void StatsForNerdsState::addSoundVectorResourcePaths(std::ostringstream &ss, Mod
 			for (auto resourceId : resourceIds)
 			{
 				// strip mod offset from the in-game ID
-				int originalSoundId = resourceId - (resourceSet.second->getModIndex());
+				int originalSoundId = resourceId - (resourceSet.second->getModOwner()->offset);
 
 				auto mapOfSounds = resourceSet.second->getSounds();
 				auto individualSound = mapOfSounds->find(originalSoundId);
@@ -1349,7 +1349,7 @@ void StatsForNerdsState::addSoundVectorResourcePaths(std::ostringstream &ss, Mod
 				{
 					std::ostringstream numbers;
 					resetStream(numbers);
-					numbers << "  " << originalSoundId << " + " << resourceSet.second->getModIndex();
+					numbers << "  " << originalSoundId << " + " << resourceSet.second->getModOwner()->offset;
 
 					resetStream(ss);
 					ss << individualSound->second;
@@ -1778,7 +1778,7 @@ void StatsForNerdsState::initItemList()
 		addBoolean(ss, itemRule->getFixedShow(), "fixedWeaponShow");
 		addInteger(ss, itemRule->getTurretType(), "turretType", -1);
 
-		addInteger(ss, itemRule->getBigSprite(), "bigSprite", -999);
+		addInteger(ss, itemRule->getBigSprite(), "bigSprite", -1);
 		addSpriteResourcePath(ss, mod, "BIGOBS.PCK", itemRule->getBigSprite());
 		addInteger(ss, itemRule->getFloorSprite(), "floorSprite", -1);
 		addSpriteResourcePath(ss, mod, "FLOOROB.PCK", itemRule->getFloorSprite());

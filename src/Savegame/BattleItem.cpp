@@ -640,7 +640,7 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set, int animFrame, int shade) c
 Surface *BattleItem::getBigSprite(SurfaceSet *set, int animFrame) const
 {
 	int i = _rules->getBigSprite();
-	if (i != -999)
+	if (i != -1)
 	{
 		Surface *surf = set->getFrame(i);
 		//enforce compatibility with basic version

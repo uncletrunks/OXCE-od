@@ -96,6 +96,8 @@ void ModInfo::load(const YAML::Node& doc)
 		_master = "";
 		// only masters can load external resource dirs
 		_externalResourceDirs = doc["loadResources"].as< std::vector<std::string> >(_externalResourceDirs);
+		// or basic resource definition
+		_resourceConfigFile = doc["resourceConfig"].as<std::string>(_resourceConfigFile);
 	}
 
 	_master = doc["master"].as<std::string>(_master);
@@ -114,11 +116,8 @@ const std::string &ModInfo::getId()          const { return _id;       }
 const std::string &ModInfo::getMaster()      const { return _master;   }
 bool               ModInfo::isMaster()       const { return _isMaster; }
 const std::string &ModInfo::getRequiredExtendedVersion() const { return _requiredExtendedVersion; }
+std::string        ModInfo::getResourceConfigFile() const { return _path + "/" + _resourceConfigFile; }
 int                ModInfo::getReservedSpace()        const { return _reservedSpace;     }
-void ModInfo::setReservedSpace(int reservedSpace)
-{
-	_reservedSpace = reservedSpace;
-}
 
 /**
  * Checks if a given mod can be activated.

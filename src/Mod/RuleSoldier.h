@@ -79,8 +79,6 @@ private:
 	ScriptValues<RuleSoldier> _scriptValues;
 
 	void addSoldierNamePool(const std::string &namFile);
-	/// Load sound vector from YAML.
-	void loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector);
 public:
 	/// Creates a blank soldier ruleset.
 	RuleSoldier(const std::string &type);

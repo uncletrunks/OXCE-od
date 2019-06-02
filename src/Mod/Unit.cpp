@@ -46,31 +46,6 @@ Unit::~Unit()
 }
 
 /**
- * Loads a sound vector for a given attribute/node.
- * @param node YAML node.
- * @param mod Mod for the item.
- * @param vector Sound vector to load into.
- */
-void Unit::loadSoundVector(const YAML::Node &node, Mod *mod, std::vector<int> &vector)
-{
-	if (node)
-	{
-		vector.clear();
-		if (node.IsSequence())
-		{
-			for (YAML::const_iterator i = node.begin(); i != node.end(); ++i)
-			{
-				vector.push_back(mod->getSoundOffset(i->as<int>(), "BATTLE.CAT"));
-			}
-		}
-		else
-		{
-			vector.push_back(mod->getSoundOffset(node.as<int>(), "BATTLE.CAT"));
-		}
-	}
-}
-
-/**
  * Loads the unit from a YAML file.
  * @param node YAML node.
  * @param mod Mod for the unit.
@@ -118,17 +93,12 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	{
 		_builtInWeapons.push_back(node["builtInWeapons"].as<std::vector<std::string> >());
 	}
-	loadSoundVector(node["deathSound"], mod, _deathSound);
-	loadSoundVector(node["panicSound"], mod, _panicSound);
-	loadSoundVector(node["berserkSound"], mod, _berserkSound);
-	if (node["aggroSound"])
-	{
-		_aggroSound = mod->getSoundOffset(node["aggroSound"].as<int>(_aggroSound), "BATTLE.CAT");
-	}
-	if (node["moveSound"])
-	{
-		_moveSound = mod->getSoundOffset(node["moveSound"].as<int>(_moveSound), "BATTLE.CAT");
-	}
+
+	mod->loadSoundOffset(_type, _deathSound, node["deathSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _panicSound, node["panicSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _berserkSound, node["berserkSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _aggroSound, node["aggroSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _moveSound, node["moveSound"], "BATTLE.CAT");
 }
 
 /**
