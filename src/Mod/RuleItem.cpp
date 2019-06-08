@@ -340,11 +340,11 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	mod->loadSoundOffset(_type, _psiMissSound, node["psiMissSound"], "BATTLE.CAT");
 
 	mod->loadSpriteOffset(_type, _hitAnimation, node["hitAnimation"], "SMOKE.PCK");
-	mod->loadSoundOffset(_type, _hitMissAnimation, node["hitMissAnimation"], "SMOKE.PCK");
+	mod->loadSpriteOffset(_type, _hitMissAnimation, node["hitMissAnimation"], "SMOKE.PCK");
 	mod->loadSpriteOffset(_type, _meleeAnimation, node["meleeAnimation"], "HIT.PCK");
-	mod->loadSoundOffset(_type, _meleeMissAnimation, node["meleeMissAnimation"], "HIT.PCK");
-	mod->loadSoundOffset(_type, _psiAnimation, node["psiAnimation"], "HIT.PCK");
-	mod->loadSoundOffset(_type, _psiMissAnimation, node["psiMissAnimation"], "HIT.PCK");
+	mod->loadSpriteOffset(_type, _meleeMissAnimation, node["meleeMissAnimation"], "HIT.PCK");
+	mod->loadSpriteOffset(_type, _psiAnimation, node["psiAnimation"], "HIT.PCK");
+	mod->loadSpriteOffset(_type, _psiMissAnimation, node["psiMissAnimation"], "HIT.PCK");
 	mod->loadSoundOffset(_type, _meleeHitSound, node["meleeHitSound"], "BATTLE.CAT");
 	mod->loadSoundOffset(_type, _explosionHitSound, node["explosionHitSound"], "BATTLE.CAT");
 
