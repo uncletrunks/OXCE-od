@@ -44,7 +44,7 @@ public:
 	/// Number of bits for soldier look.
 	static constexpr int LookBaseBits = 2;
 	/// Number of bits for soldier lookVariants.
-	static constexpr int LookVariantBits = 4;
+	static constexpr int LookVariantBits = 6;
 	/// Max number of soldier lookVariant.s
 	static constexpr int LookVariantMax = (1 << LookVariantBits);
 	/// Mask for soldier lookVariants.
