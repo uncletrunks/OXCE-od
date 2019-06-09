@@ -238,7 +238,7 @@ private:
 	size_t _soundOffsetGeo = 0;
 
 	/// Loads a ruleset from a YAML file that have basic resources configuration.
-	void loadResourceConfigFile(const std::string &filename);
+	void loadResourceConfigFile(const FileMap::FileRecord &filerec);
 	/// Loads a ruleset from a YAML file.
 	void loadFile(const FileMap::FileRecord &filerec, ModScript &parsers);
 	/// Loads a ruleset element.

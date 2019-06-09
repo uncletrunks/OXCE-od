@@ -933,7 +933,7 @@ void scanModDir(const std::string& dirname, const std::string& basename) {
 			delete layer;
 			return;
 		}
-		auto mrec = new ModRecord(mp_basename);
+		auto mrec = new ModRecord(modpath);
 		mrec->modInfo.load(doc);
 		auto mri = ModsAvailable.find(mrec->modInfo.getId());
 		if (mri != ModsAvailable.end()) {
@@ -1042,6 +1042,20 @@ std::unordered_map<std::string, ModInfo> getModInfos() {
 	}
 	return rv;
 }
+
+const FileRecord* getModRuleFile(const ModInfo* modInfo, const std::string& relpath)
+{
+	auto fullPath = modInfo->getPath() + "/" + relpath;
+	for (auto& r : ModsAvailable.at(modInfo->getId())->stack.rulesets)
+	{
+		if (r.fullpath == fullPath)
+		{
+			return &r;
+		}
+	}
+	return nullptr;
+}
+
 std::string canonicalize(const std::string &in)
 {
 	std::string ret = in;

@@ -1234,10 +1234,10 @@ void Mod::loadAll()
 		_modCurrent = &_modData.at(0);
 		if (_modCurrent->info->isMaster())
 		{
-			std::string path = _modCurrent->info->getResourceConfigFile();
-			if (CrossPlatform::fileExists(path))
+			auto file = FileMap::getModRuleFile(_modCurrent->info, _modCurrent->info->getResourceConfigFile());
+			if (file)
 			{
-				loadResourceConfigFile(path);
+				loadResourceConfigFile(*file);
 			}
 		}
 	}
@@ -1423,9 +1423,9 @@ void Mod::loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, ModScrip
  * Loads a ruleset from a YAML file that have basic resources configuration.
  * @param filename YAML filename.
  */
-void Mod::loadResourceConfigFile(const std::string &filename)
+void Mod::loadResourceConfigFile(const FileMap::FileRecord &filerec)
 {
-	YAML::Node doc = YAML::LoadFile(filename);
+	YAML::Node doc = filerec.getYAML();
 
 	for (YAML::const_iterator i = doc["soundDefs"].begin(); i != doc["soundDefs"].end(); ++i)
 	{

@@ -116,7 +116,7 @@ const std::string &ModInfo::getId()          const { return _id;       }
 const std::string &ModInfo::getMaster()      const { return _master;   }
 bool               ModInfo::isMaster()       const { return _isMaster; }
 const std::string &ModInfo::getRequiredExtendedVersion() const { return _requiredExtendedVersion; }
-std::string        ModInfo::getResourceConfigFile() const { return _path + "/" + _resourceConfigFile; }
+std::string        ModInfo::getResourceConfigFile() const { return _resourceConfigFile; }
 int                ModInfo::getReservedSpace()        const { return _reservedSpace;     }
 
 /**
