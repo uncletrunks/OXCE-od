@@ -86,7 +86,7 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 			_name += " Doe";
 		}
 	}
-	_lookVariant = RNG::seedless(0, 15);
+	_lookVariant = RNG::seedless(0, RuleSoldier::LookVariantMax - 1);
 }
 
 /**
@@ -634,11 +634,11 @@ const std::vector<std::string> Soldier::getArmorLayers(Armor *customArmor) const
 	bool isDefined = false;
 
 	// find relevant layer
-	for (int i = 0; i <= 4; ++i)
+	for (int i = 0; i <= RuleSoldier::LookVariantBits; ++i)
 	{
 		ss.str("");
 		ss << gender;
-		ss << (int)_look + (_lookVariant & (15 >> i)) * 4;
+		ss << (int)_look + (_lookVariant & (RuleSoldier::LookVariantMask >> i)) * 4;
 		isDefined = (layoutDefinition.find(ss.str()) != layoutDefinition.end());
 		if (isDefined)
 		{

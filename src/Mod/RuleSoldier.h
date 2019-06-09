@@ -46,11 +46,11 @@ public:
 	/// Number of bits for soldier lookVariants.
 	static constexpr int LookVariantBits = 4;
 	/// Max number of soldier lookVariant.s
-	static constexpr int LookVariantMax = (1 << (LookVariantBits + 1));
+	static constexpr int LookVariantMax = (1 << LookVariantBits);
 	/// Mask for soldier lookVariants.
 	static constexpr int LookVariantMask = LookVariantMax - 1;
 	/// Mask for all possible looks types for soldier.
-	static constexpr int LookTotalMask = (1 << (LookVariantBits + LookBaseBits + LookGenderBits + 1)) - 1;
+	static constexpr int LookTotalMask = (1 << (LookVariantBits + LookBaseBits + LookGenderBits)) - 1;
 
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "RuleSoldier";
