@@ -69,7 +69,7 @@ public:
 	/// Gets whether the current OXCE version is equal to (or higher than) the required OXCE version.
 	bool isVersionOk() const;
 	/// Gets ruleset file where are defined based resources like required original game data.
-	std::string getResourceConfigFile() const;
+	const std::string &getResourceConfigFile() const;
 	/// Gets the list of external resource dirs to load for this mod.
 	const std::vector<std::string> &getExternalResourceDirs() const;
 };
