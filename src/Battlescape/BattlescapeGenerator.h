@@ -46,6 +46,7 @@ class MissionSite;
 class AlienBase;
 class BattleUnit;
 class Texture;
+class Position;
 
 /**
  * A utility class that generates the initial battlescape data. Taking into account mission type, craft and ufo involved, terrain type,...
@@ -82,16 +83,11 @@ private:
 	std::vector< std::vector<MapBlock*> > _blocks;
 	std::vector< std::vector<bool> > _landingzone;
 	std::vector< std::vector<int> > _segments, _drillMap;
-	std::vector<MapBlock*> _alternateTerrainMaps;
-	std::vector<RuleTerrain*> _alternateTerrains;
-	std::vector<SDL_Rect> _alternateTerrainRects;
-	std::vector<int> _alternateTerrainHeights;
-	std::vector<MapBlock*> _notInBlocks;
-	std::vector<SDL_Rect> _notInBlocksRects;
-	std::vector<int> _notInBlocksOffsets;
 	MapBlock *_dummy;
 	std::vector<SDL_Rect> _placedBlockRects;
 	std::vector<VerticalLevel> _verticalLevels;
+	std::map<RuleTerrain*, int> _loadedTerrains;
+	std::vector<std::pair<MapBlock*, Position> > _verticalLevelSegments;
 
 	/// sets the map size and associated vars
 	void init(bool resetTerrain);
@@ -109,12 +105,10 @@ private:
 	bool placeItemByLayout(BattleItem *item, const std::vector<BattleItem*> &itemList);
 	/// Loads an XCom MAP file.
 	int loadMAP(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false);
-	/// Sets an XCom MAP file to be loaded after mapscript is processed.
-	void addMAPAlternate(MapBlock *mapblock, int x, int y, int z, RuleTerrain *terrain);
-	/// Add information to connect nodes from a verticalLevels MapBlock.
-	void addSegmentVertical(MapBlock *mapblock, int x, int y, int z);
 	/// Loads an XCom RMP file.
 	void loadRMP(MapBlock *mapblock, int xoff, int yoff, int zoff, int segment);
+	/// Checks a terrain requested by a command and loads it if necessary
+	int loadExtraTerrain(RuleTerrain *terrain);
 	/// Fills power sources with an alien fuel object.
 	void fuelPowerSources();
 	/// Possibly explodes ufo powersources.
@@ -134,9 +128,9 @@ private:
 	/// Adds a craft (either a ufo or an xcom craft) somewhere on the map.
 	bool addCraft(MapBlock *craftMap, MapScript *command, SDL_Rect &craftPos, RuleTerrain *terrain);
 	/// Adds a line (generally a road) to the map.
-	bool addLine(MapDirection lineType, const std::vector<SDL_Rect*> *rects, RuleTerrain *terrain, int zOff);
+	bool addLine(MapDirection lineType, const std::vector<SDL_Rect*> *rects, RuleTerrain *terrain);
 	/// Adds a single block at a given position.
-	bool addBlock(int x, int y, MapBlock *block, bool placeMap);
+	bool addBlock(int x, int y, MapBlock *block, RuleTerrain *terrain);
 	/// Load the nodes from the associated map blocks.
 	void loadNodes();
 	/// Connects all the nodes together.
@@ -145,12 +139,16 @@ private:
 	bool selectPosition(const std::vector<SDL_Rect *> *rects, int &X, int &Y, int sizeX, int sizeY);
 	/// Generates a map from base modules.
 	void generateBaseMap();
-	/// Populates _verticalLevels vector according to map and command size.
+	/// Populates _verticalLevels vector according to a mapscript command and sorts them for use
 	bool populateVerticalLevels(MapScript *command);
+	/// Gets a terrain from a terrain name for a command or a vertical level
+	RuleTerrain* pickTerrain(std::string terrainName);
+	/// Loads the maps from the _verticalLevels vector
+	void loadVerticalLevels(MapScript *command, bool repopulate = false, MapBlock *craftMap = 0);
 	/// Clears a module from the map.
 	void clearModule(int x, int y, int sizeX, int sizeY);
 	/// Drills some tunnels between map blocks.
-	void drillModules(TunnelData* data, const std::vector<SDL_Rect *> *rects, MapDirection dir);
+	void drillModules(TunnelData* data, const std::vector<SDL_Rect *> *rects, MapDirection dir, RuleTerrain* terrain);
 	/// Clears all modules in a rect from a command.
 	bool removeBlocks(MapScript *command);
 	/// Sets the depth based on the terrain or the provided AlienDeployment rule.

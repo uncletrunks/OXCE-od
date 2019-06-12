@@ -22,6 +22,7 @@
 #include <yaml-cpp/yaml.h>
 #include <SDL_video.h>
 #include "MapBlock.h"
+#include "../Engine/Logger.h"
 
 namespace OpenXcom
 {
@@ -48,18 +49,18 @@ class MapBlock;
 class RuleTerrain;
 
 // Structure for containing multiple levels of map blocks inside a command
+enum VerticalLevelType {VLT_GROUND, VLT_MIDDLE, VLT_CEILING, VLT_EMPTY, VLT_DECORATION, VLT_CRAFT, VLT_LINE};
 struct VerticalLevel
 {
-	std::string levelType;
+	VerticalLevelType levelType;
 	std::vector<int> levelGroups, levelBlocks;
 	int levelSizeX, levelSizeY, levelSizeZ;
 	int maxRepeats;
-	int zoff;
 	std::string levelTerrain;
 
 	// Default constructor
 	VerticalLevel() :
-		levelSizeX(1), levelSizeY(1), levelSizeZ(1), maxRepeats(-1), zoff(0), levelTerrain("")
+		levelSizeX(1), levelSizeY(1), levelSizeZ(-1), maxRepeats(-1), levelTerrain("")
 	{
 
 	}
@@ -67,7 +68,41 @@ struct VerticalLevel
 	// Load in the data for a VerticalLevel from a YAML file, has to load similar data to a full mapscript command
 	void load(const YAML::Node &node)
 	{
-		levelType = node["type"].as<std::string>(levelType);
+		std::string type = node["type"].as<std::string>("");
+		if (type == "ground")
+		{
+			levelType = VLT_GROUND;
+		}
+		else if (type == "middle")
+		{
+			levelType = VLT_MIDDLE;
+		}
+		else if (type == "ceiling")
+		{
+			levelType = VLT_CEILING;
+		}
+		else if (type == "empty")
+		{
+			levelType = VLT_EMPTY;
+		}
+		else if (type == "decoration")
+		{
+			levelType = VLT_DECORATION;
+			levelSizeZ = 0;
+		}
+		else if (type == "craft")
+		{
+			levelType = VLT_CRAFT;
+		}
+		else if (type == "line")
+		{
+			levelType = VLT_LINE;
+		}
+		else
+		{
+			Log(LOG_WARNING) << "'" << type << "'" << " does not resolve into a valid verticalLevel type, loading as 'middle'.";
+			levelType = VLT_MIDDLE;
+		}
 
 		if (const YAML::Node &map = node["size"])
 		{
