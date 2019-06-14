@@ -215,7 +215,7 @@ SurfaceSet *ExtraSprites::loadSurfaceSet(SurfaceSet *set)
 	else
 	{
 		Log(LOG_VERBOSE) << "Adding/Replacing items in surface set: " << _type;
-		if (set->getTotalFrames() == 0 && set->getWidth() != surfaceSetX && set->getHeight() != surfaceSetY)
+		if (set->getTotalFrames() == 0 && (set->getWidth() != surfaceSetX || set->getHeight() != surfaceSetY))
 		{
 			Log(LOG_VERBOSE) << "Resize empty set to: " << surfaceSetX << " x " << surfaceSetY;
 			auto shared = set->getMaxSharedFrames();
