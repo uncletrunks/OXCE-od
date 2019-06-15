@@ -56,6 +56,8 @@ public:
 	void btnYesClick(Action *action);
 	/// Handler for clicking the No button.
 	void btnNoClick(Action *action);
+	/// Handler for pressing/releasing CTRL.
+	void togglePatrolButton(Action *action);
 };
 
 }
