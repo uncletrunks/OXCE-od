@@ -89,8 +89,8 @@ ManageAlienContainmentState::ManageAlienContainmentState(Base *base, int prisonT
 	setInterface("manageContainment");
 
 	add(_window, "window", "manageContainment");
-	add(_btnOk, "button", "manageContainment");
 	add(_btnSell, "button", "manageContainment");
+	add(_btnOk, "button", "manageContainment");
 	add(_btnCancel, "button", "manageContainment");
 	add(_btnTransfer, "button", "manageContainment");
 	add(_txtTitle, "text", "manageContainment");
