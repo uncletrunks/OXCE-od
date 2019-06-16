@@ -3845,6 +3845,10 @@ void Mod::loadVanillaResources()
 			SurfaceSet* s = _sets["GlobeMarkers"];
 			s->setMaxSharedFrames(9);
 		}
+		{
+			SurfaceSet* s = _sets["TinyRanks"];
+			s->setMaxSharedFrames(6);
+		}
 	}
 	{
 		std::string soundNames[] =
