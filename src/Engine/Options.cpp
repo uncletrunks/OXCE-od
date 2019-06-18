@@ -453,6 +453,10 @@ static void loadArgs()
 						_configFolder.push_back('/');
 					}
 				}
+				else if (argname == "master")
+				{
+					_masterMod = argv[i];
+				}
 				else
 				{
 					//save this command line option for now, we will apply it later
@@ -483,8 +487,10 @@ static bool showHelp()
 	help << "        use PATH as the default User Folder instead of auto-detecting" << std::endl << std::endl;
 	help << "-cfg PATH  or  -config PATH" << std::endl;
 	help << "        use PATH as the default Config Folder instead of auto-detecting" << std::endl << std::endl;
+	help << "-master MOD" << std::endl;
+	help << "        set MOD to the current master mod (eg. -master xcom2)" << std::endl << std::endl;
 	help << "-KEY VALUE" << std::endl;
-	help << "        set option KEY to VALUE instead of default/loaded value (eg. -displayWidth 640)" << std::endl << std::endl;
+	help << "        override option KEY with VALUE (eg. -displayWidth 640)" << std::endl << std::endl;
 	help << "-help" << std::endl;
 	help << "-?" << std::endl;
 	help << "        show command-line help" << std::endl;
@@ -591,6 +597,11 @@ bool init()
 // called from the dos screen state (StartState)
 void updateMods()
 {
+	if (reload)
+	{
+		_masterMod = "";
+	}
+
 	FileMap::clear(false, embeddedOnly);
 	SDL_RWops *rwops = CrossPlatform::getEmbeddedAsset("standard.zip");
 	if (rwops) {
@@ -655,6 +666,10 @@ void updateMods()
 				found = true;
 				if (i->second.isMaster())
 				{
+					if (!_masterMod.empty())
+					{
+						j->second = (_masterMod == j->first);
+					}
 					if (j->second)
 					{
 						if (!activeMaster.empty())
