@@ -312,7 +312,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 				// IGNORE vehicles and their ammo
 				// Note: because their number in base has been messed up by Base::setupDefenses() already in geoscape :(
-				if (_game->getMod()->getUnit(*i) && !rule->isAlien())
+				if (rule->getVehicleUnit())
 				{
 					// if this vehicle requires ammo, remember to ignore it later too
 					if (!rule->getPrimaryCompatibleAmmo()->empty())
