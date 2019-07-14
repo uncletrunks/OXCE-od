@@ -487,7 +487,7 @@ void TextEdit::keyboardPress(Action *action, State *state)
 			}
 			break;
 		case SDLK_LEFT:
-			if (_value.length() > 0)
+			if (!_value.empty())
 			{
 				_value.resize(_value.length() - 1);
 			}
@@ -498,7 +498,8 @@ void TextEdit::keyboardPress(Action *action, State *state)
 				_value += _char;
 			}
 			break;
-		default: break;
+		default:
+			break;
 		}
 	}
 	else if (Options::keyboardMode == KEYBOARD_ON)
@@ -558,6 +559,7 @@ void TextEdit::keyboardPress(Action *action, State *state)
 				_value.insert(_caretPos, 1, c);
 				_caretPos++;
 			}
+			break;
 		}
 	}
 	_redraw = true;
