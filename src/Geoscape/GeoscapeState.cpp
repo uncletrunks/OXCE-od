@@ -2404,6 +2404,20 @@ void GeoscapeState::time1Day()
 		}
 	}
 
+	// check and interrupt alien missions if necessary (based on discovered research)
+	for (auto am : saveGame->getAlienMissions())
+	{
+		auto researchName = am->getRules().getInterruptResearch();
+		if (!researchName.empty())
+		{
+			auto research = mod->getResearch(researchName, true);
+			if (saveGame->isResearched(research, false)) // ignore debug mode
+			{
+				am->setInterrupted(true);
+			}
+		}
+	}
+
 	// handle regional and country points for alien bases
 	for (std::vector<AlienBase*>::const_iterator b = saveGame->getAlienBases()->begin(); b != saveGame->getAlienBases()->end(); ++b)
 	{

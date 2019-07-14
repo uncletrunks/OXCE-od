@@ -106,6 +106,7 @@ void RuleAlienMission::load(const YAML::Node &node)
 	_retaliationOdds = node["retaliationOdds"].as<int>(_retaliationOdds);
 	_endlessInfiltration = node["endlessInfiltration"].as<bool>(_endlessInfiltration);
 	_despawnEvenIfTargeted = node["despawnEvenIfTargeted"].as<bool>(_despawnEvenIfTargeted);
+	_interruptResearch = node["interruptResearch"].as<std::string>(_interruptResearch);
 	_siteType = node["siteType"].as<std::string>(_siteType);
 	_operationType = (AlienMissionOperationType)node["operationType"].as<int>(_operationType);
 	_operationSpawnZone = node["operationSpawnZone"].as<int>(_operationSpawnZone);
