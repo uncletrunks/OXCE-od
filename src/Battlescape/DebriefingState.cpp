@@ -1906,6 +1906,19 @@ void DebriefingState::prepareDebriefing()
 		if (research)
 		{
 			_game->getSavedGame()->addFinishedResearch(research, _game->getMod(), base, true);
+
+			// check and interrupt alien missions if necessary (based on unlocked research)
+			for (auto am : _game->getSavedGame()->getAlienMissions())
+			{
+				auto interruptResearchName = am->getRules().getInterruptResearch();
+				if (!interruptResearchName.empty())
+				{
+					if (interruptResearchName == research->getName())
+					{
+						am->setInterrupted(true);
+					}
+				}
+			}
 		}
 
 		// Give bounty item defined in alien deployment, if the mission was a success
