@@ -2418,6 +2418,30 @@ void GeoscapeState::time1Day()
 		}
 	}
 
+	// check and self-destruct alien bases if necessary (based on discovered research)
+	std::vector<AlienBase*>::iterator ab = saveGame->getAlienBases()->begin();
+	while (ab != saveGame->getAlienBases()->end())
+	{
+		auto selfDestructCode = (*ab)->getDeployment()->getBaseSelfDestructCode();
+		if (!selfDestructCode.empty())
+		{
+			auto research = mod->getResearch(selfDestructCode, true);
+			if (saveGame->isResearched(research, false)) // ignore debug mode
+			{
+				delete (*ab);
+				ab = saveGame->getAlienBases()->erase(ab);
+			}
+			else
+			{
+				++ab;
+			}
+		}
+		else
+		{
+			++ab;
+		}
+	}
+
 	// handle regional and country points for alien bases
 	for (std::vector<AlienBase*>::const_iterator b = saveGame->getAlienBases()->begin(); b != saveGame->getAlienBases()->end(); ++b)
 	{

@@ -224,6 +224,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_genMissionFrequency = node["genMissionFreq"].as<int>(_genMissionFrequency);
 	_genMissionLimit = node["genMissionLimit"].as<int>(_genMissionLimit);
 
+	_baseSelfDestructCode = node["baseSelfDestructCode"].as<std::string>(_baseSelfDestructCode);
 	_baseDetectionRange = node["baseDetectionRange"].as<int>(_baseDetectionRange);
 	_baseDetectionChance = node["baseDetectionChance"].as<int>(_baseDetectionChance);
 	_huntMissionMaxFrequency = node["huntMissionMaxFrequency"].as<int>(_huntMissionMaxFrequency);
@@ -694,6 +695,15 @@ std::string AlienDeployment::generateHuntMission(const size_t monthsPassed) cons
 	while (monthsPassed < rw->first)
 		++rw;
 	return rw->second->choose();
+}
+
+/**
+ * Returns the Alien Base self destruct code.
+ * @return String ID of the corresponding research topic.
+ */
+const std::string& AlienDeployment::getBaseSelfDestructCode() const
+{
+	return _baseSelfDestructCode;
 }
 
 /**

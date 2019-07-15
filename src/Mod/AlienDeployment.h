@@ -87,6 +87,7 @@ private:
 	ChronoTrigger _chronoTrigger;
 	bool _keepCraftAfterFailedMission;
 	EscapeType _escapeType;
+	std::string _baseSelfDestructCode;
 	int _baseDetectionRange, _baseDetectionChance, _huntMissionMaxFrequency;
 	std::vector<std::pair<size_t, WeightedOptions*> > _huntMissionDistribution;
 	std::vector<std::pair<size_t, WeightedOptions*> > _alienBaseUpgrades;
@@ -201,6 +202,8 @@ public:
 
 	/// Generates a hunt mission based on the given month.
 	std::string generateHuntMission(const size_t monthsPassed) const;
+	/// Gets the Alien Base self destruct code.
+	const std::string& getBaseSelfDestructCode() const;
 	/// Gets the detection range of an alien base.
 	double getBaseDetectionRange() const;
 	/// Gets the chance of an alien base to detect a player's craft (once every 10 minutes).
