@@ -109,7 +109,7 @@ class ModScript
 	{
 		HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, int, int, int, int, int, int>
+	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, int, int, int, int, int, int>
 	{
 		DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
@@ -223,6 +223,7 @@ public:
 	using EnergyRecoveryStatBonus = MACRO_NAMED_SCRIPT("energy", BonusStatsRecoveryParser);
 	using MoraleRecoveryStatBonus = MACRO_NAMED_SCRIPT("morale", BonusStatsRecoveryParser);
 	using HealthRecoveryStatBonus = MACRO_NAMED_SCRIPT("health", BonusStatsRecoveryParser);
+	using ManaRecoveryStatBonus = MACRO_NAMED_SCRIPT("mana", BonusStatsRecoveryParser);
 	using StunRecoveryStatBonus = MACRO_NAMED_SCRIPT("stun", BonusStatsRecoveryParser);
 
 	using DamageBonusStatBonus = MACRO_NAMED_SCRIPT("damageBonus", BonusStatsParser);
@@ -272,6 +273,7 @@ public:
 		EnergyRecoveryStatBonus,
 		MoraleRecoveryStatBonus,
 		HealthRecoveryStatBonus,
+		ManaRecoveryStatBonus,
 		StunRecoveryStatBonus,
 
 		DamageBonusStatBonus,

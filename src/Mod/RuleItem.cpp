@@ -58,10 +58,11 @@ RuleItem::RuleItem(const std::string &type) :
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
 	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _ignoreInCraftEquip(true), _liveAlien(false),
-	_liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false), _experienceTrainingMode(ETM_DEFAULT), _listOrder(0),
+	_liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false),
+	_experienceTrainingMode(ETM_DEFAULT), _manaExperience(0), _listOrder(0),
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
 	_spawnUnitFaction(-1),
-	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false),
+	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false), _manaRequired(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_kneelBonus(-1), _oneHandedPenalty(-1),
 	_monthlySalary(0), _monthlyMaintenance(0),
@@ -125,6 +126,7 @@ RuleItemUseCost RuleItem::getDefault(const RuleItemUseCost& a, const RuleItemUse
 	n.Morale = a.Morale >= 0 ? a.Morale : b.Morale;
 	n.Health = a.Health >= 0 ? a.Health : b.Health;
 	n.Stun = a.Stun >= 0 ? a.Stun : b.Stun;
+	n.Mana = a.Mana >= 0 ? a.Mana : b.Mana;
 	return n;
 }
 
@@ -223,6 +225,7 @@ void RuleItem::loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std
 			loadTriBool(a.Morale, cost["morale"]);
 			loadTriBool(a.Health, cost["health"]);
 			loadTriBool(a.Stun, cost["stun"]);
+			loadTriBool(a.Mana, cost["mana"]);
 		}
 	}
 }
@@ -243,6 +246,7 @@ void RuleItem::loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::s
 		loadInt(a.Morale, cost["morale"]);
 		loadInt(a.Health, cost["health"]);
 		loadInt(a.Stun, cost["stun"]);
+		loadInt(a.Mana, cost["mana"]);
 	}
 }
 
@@ -559,6 +563,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_attraction = node["attraction"].as<int>(_attraction);
 	_arcingShot = node["arcingShot"].as<bool>(_arcingShot);
 	_experienceTrainingMode = (ExperienceTrainingMode)node["experienceTrainingMode"].as<int>(_experienceTrainingMode);
+	_manaExperience = node["manaExperience"].as<int>(_manaExperience);
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_maxRange = node["maxRange"].as<int>(_maxRange);
 	_confAimed.range = node["aimRange"].as<int>(_confAimed.range);
@@ -602,6 +607,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_powerRangeThreshold = node["powerRangeThreshold"].as<float>(_powerRangeThreshold);
 
 	_psiReqiured = node["psiRequired"].as<bool>(_psiReqiured);
+	_manaRequired = node["manaRequired"].as<bool>(_manaRequired);
 	_scriptValues.load(node, parsers.getShared());
 
 	_battleItemScripts.load(_type, node, parsers.battleItemScripts);
@@ -2200,6 +2206,15 @@ bool RuleItem::isLandOnly() const
 bool RuleItem::isPsiRequired() const
 {
 	return _psiReqiured;
+}
+
+/**
+ * Is mana required to use this weapon?
+ * @return If mana is required.
+ */
+bool RuleItem::isManaRequired() const
+{
+	return _manaRequired;
 }
 
 /**

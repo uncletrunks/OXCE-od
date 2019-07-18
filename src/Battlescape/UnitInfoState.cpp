@@ -64,6 +64,10 @@ UnitInfoState::UnitInfoState(BattleUnit *unit, BattlescapeState *parent, bool fr
 
 	int yPos = 38;
 	int step = 9;
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		yPos = 30;
+	}
 
 	_txtTimeUnits = new Text(140, 9, 8, yPos);
 	_numTimeUnits = new Text(18, 9, 150, yPos);
@@ -119,6 +123,14 @@ UnitInfoState::UnitInfoState(BattleUnit *unit, BattlescapeState *parent, bool fr
 	_numStrength = new Text(18, 9, 150, yPos);
 	_barStrength = new Bar(150, 5, 170, yPos + 1);
 	yPos += step;
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		_txtMana = new Text(140, 9, 8, yPos);
+		_numMana = new Text(18, 9, 150, yPos);
+		_barMana = new Bar(150, 5, 170, yPos + 1);
+		yPos += step;
+	}
 
 	_txtPsiStrength = new Text(140, 9, 8, yPos);
 	_numPsiStrength = new Text(18, 9, 150, yPos);
@@ -210,6 +222,13 @@ UnitInfoState::UnitInfoState(BattleUnit *unit, BattlescapeState *parent, bool fr
 	add(_txtStrength);
 	add(_numStrength);
 	add(_barStrength, "barStrength", "stats", 0);
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		add(_txtMana);
+		add(_numMana);
+		add(_barMana, "barMana", "stats", 0);
+	}
 
 	add(_txtPsiStrength);
 	add(_numPsiStrength);
@@ -359,6 +378,18 @@ UnitInfoState::UnitInfoState(BattleUnit *unit, BattlescapeState *parent, bool fr
 	_numStrength->setHighContrast(true);
 
 	_barStrength->setScale(1.0);
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		_txtMana->setColor(color);
+		_txtMana->setHighContrast(true);
+		_txtMana->setText(tr("STR_MANA"));
+
+		_numMana->setColor(color2);
+		_numMana->setHighContrast(true);
+
+		_barMana->setScale(1.0);
+	}
 
 	_txtPsiStrength->setColor(color);
 	_txtPsiStrength->setHighContrast(true);
@@ -531,6 +562,28 @@ void UnitInfoState::init()
 	_numStrength->setText(ss.str());
 	_barStrength->setMax(_unit->getBaseStats()->strength);
 	_barStrength->setValue(_unit->getBaseStats()->strength);
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		if (_game->getSavedGame()->isManaUnlocked(_game->getMod()))
+		{
+			ss.str("");
+			ss << _unit->getMana();
+			_numMana->setText(ss.str());
+			_barMana->setMax(_unit->getBaseStats()->mana);
+			_barMana->setValue(_unit->getMana());
+
+			_txtMana->setVisible(true);
+			_numMana->setVisible(true);
+			_barMana->setVisible(true);
+		}
+		else
+		{
+			_txtMana->setVisible(false);
+			_numMana->setVisible(false);
+			_barMana->setVisible(false);
+		}
+	}
 
 	if (_unit->getBaseStats()->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 	{

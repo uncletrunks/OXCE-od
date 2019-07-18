@@ -246,6 +246,8 @@ public:
 	std::vector<std::string> getFutureBaseFunc() const;
 	/// Checks if it is possible to build another facility of a given type.
 	bool isMaxAllowedLimitReached(RuleBaseFacility *rule) const;
+	/// Gets the base's mana recovery rate.
+	int getManaRecoveryPerDay() const;
 	/// Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
 	float getSickBayAbsoluteBonus() const;
 	/// Gets the amount of additional HP healed in this base due to sick bay facilities (as percentage of max HP per soldier).

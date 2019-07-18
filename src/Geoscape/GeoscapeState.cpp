@@ -2343,12 +2343,17 @@ void GeoscapeState::time1Day()
 		// Handle soldier wounds and martial training
 		float absBonus = base->getSickBayAbsoluteBonus();
 		float relBonus = base->getSickBayRelativeBonus();
+		int manaRecoveryPerDay = base->getManaRecoveryPerDay();
 		std::vector<Soldier *> trainingFinishedList;
 		for (std::vector<Soldier*>::iterator j = base->getSoldiers()->begin(); j != base->getSoldiers()->end(); ++j)
 		{
 			if ((*j)->isWounded())
 			{
 				(*j)->heal(absBonus, relBonus);
+			}
+			else if ((*j)->getManaMissing() > 0)
+			{
+				(*j)->replenishMana(manaRecoveryPerDay);
 			}
 			if ((*j)->isInTraining())
 			{

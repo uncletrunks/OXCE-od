@@ -11,6 +11,15 @@ GET_ATTRIB_STAT_FN(reactions)
 GET_ATTRIB_STAT_FN(firing)
 GET_ATTRIB_STAT_FN(throwing)
 GET_ATTRIB_STAT_FN(strength)
+int OpenXcom::manaStat(Game* game, Soldier* s)
+{
+	// don't reveal mana before it would otherwise be known
+	if (game->getSavedGame()->isManaUnlocked(game->getMod()))
+	{
+		return s->getCurrentStats()->mana;
+	}
+	return 0;
+}
 int OpenXcom::psiStrengthStat(Game *game, Soldier *s)
 {
 	// don't reveal psi strength before it would otherwise be known
@@ -52,4 +61,5 @@ int OpenXcom::woundRecoveryStat(Game *game, Soldier *s)
 {
 	return s->getWoundRecovery(0.0f, 0.0f);
 }
+GET_SOLDIER_STAT_FN(manaMissing, ManaMissing)
 #undef GET_SOLDIER_STAT_FN

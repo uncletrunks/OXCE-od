@@ -51,6 +51,7 @@ private:
 	std::string _mapName;
 	int _listOrder, _trainingRooms;
 	int _maxAllowedPerBase;
+	int _manaRecoveryPerDay;
 	float _sickBayAbsoluteBonus, _sickBayRelativeBonus;
 	int _prisonType;
 	int _rightClickActionType;
@@ -143,6 +144,8 @@ public:
 	int getTrainingFacilities() const;
 	/// Gets the maximum allowed number of facilities per base.
 	int getMaxAllowedPerBase() const;
+	/// Gets the facility's mana recovery rate.
+	int getManaRecoveryPerDay() const;
 	/// Gets the facility's bonus to hp healed.
 	float getSickBayAbsoluteBonus() const;
 	/// Gets the facility's bonus to hp healed (as percentage of max hp of the soldier).

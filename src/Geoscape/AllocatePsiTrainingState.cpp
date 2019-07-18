@@ -115,6 +115,10 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	PUSH_IN("STR_MISSIONS2", missionsStat);
 	PUSH_IN("STR_KILLS2", killsStat);
 	PUSH_IN("STR_WOUND_RECOVERY2", woundRecoveryStat);
+	if (_game->getMod()->isManaFeatureEnabled() && !_game->getMod()->getReplenishManaAfterMission())
+	{
+		PUSH_IN("STR_MANA_MISSING", manaMissingStat);
+	}
 	PUSH_IN("STR_TIME_UNITS", tuStat);
 	PUSH_IN("STR_STAMINA", staminaStat);
 	PUSH_IN("STR_HEALTH", healthStat);
@@ -124,6 +128,11 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	PUSH_IN("STR_THROWING_ACCURACY", throwingStat);
 	PUSH_IN("STR_MELEE_ACCURACY", meleeStat);
 	PUSH_IN("STR_STRENGTH", strengthStat);
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		// "unlock" is checked later
+		PUSH_IN("STR_MANA_POOL", manaStat);
+	}
 	PUSH_IN("STR_PSIONIC_STRENGTH", psiStrengthStat);
 	PUSH_IN("STR_PSIONIC_SKILL", psiSkillStat);
 

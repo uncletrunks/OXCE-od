@@ -33,8 +33,8 @@ RuleDamageType::RuleDamageType() :
 	IgnoreDirection(false), IgnoreSelfDestruct(false), IgnorePainImmunity(false), IgnoreNormalMoraleLose(false), IgnoreOverKill(false),
 	ArmorEffectiveness(1.0f), RadiusEffectiveness(0.0f), RadiusReduction(10.0f),
 	FireThreshold(1000), SmokeThreshold(1000),
-	ToHealth(1.0f), ToArmor(0.1f), ToArmorPre(0.0f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f),
-	RandomHealth(false), RandomArmor(false), RandomArmorPre(false), RandomWound(true), RandomItem(false), RandomTile(false), RandomStun(true), RandomEnergy(false), RandomTime(false), RandomMorale(false),
+	ToHealth(1.0f), ToMana(0.0f), ToArmor(0.1f), ToArmorPre(0.0f), ToWound(1.0f), ToItem(0.0f), ToTile(0.5f), ToStun(0.25f), ToEnergy(0.0f), ToTime(0.0f), ToMorale(0.0f),
+	RandomHealth(false), RandomMana(false), RandomArmor(false), RandomArmorPre(false), RandomWound(true), RandomItem(false), RandomTile(false), RandomStun(true), RandomEnergy(false), RandomTime(false), RandomMorale(false),
 	TileDamageMethod(1)
 {
 
@@ -178,6 +178,7 @@ void RuleDamageType::load(const YAML::Node& node)
 	SmokeThreshold = node["SmokeThreshold"].as<float>(SmokeThreshold);
 
 	ToHealth = node["ToHealth"].as<float>(ToHealth);
+	ToMana = node["ToMana"].as<float>(ToMana);
 	ToArmor = node["ToArmor"].as<float>(ToArmor);
 	ToArmorPre = node["ToArmorPre"].as<float>(ToArmorPre);
 	ToWound = node["ToWound"].as<float>(ToWound);
@@ -189,6 +190,7 @@ void RuleDamageType::load(const YAML::Node& node)
 	ToMorale = node["ToMorale"].as<float>(ToMorale);
 
 	RandomHealth = node["RandomHealth"].as<bool>(RandomHealth);
+	RandomMana = node["RandomMana"].as<bool>(RandomMana);
 	RandomArmor = node["RandomArmor"].as<bool>(RandomArmor);
 	RandomArmorPre = node["RandomArmorPre"].as<bool>(RandomArmorPre);
 	RandomWound = node["RandomWound"].as<bool>(RandomWound);
@@ -235,6 +237,14 @@ int getDamageHelper(bool random, float multipler, int damage)
 int RuleDamageType::getHealthFinalDamage(int damage) const
 {
 	return getDamageHelper(RandomHealth, ToHealth, damage);
+}
+
+/**
+ * Get final damage value to mana based on damage.
+ */
+int RuleDamageType::getManaFinalDamage(int damage) const
+{
+	return getDamageHelper(RandomMana, ToMana, damage);
 }
 
 /**

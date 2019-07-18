@@ -189,6 +189,8 @@ private:
 	int _noLOSAccuracyPenaltyGlobal;
 	int _surrenderMode;
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
+	bool _manaEnabled, _manaBattleUI, _manaTrainingPrimary, _manaTrainingSecondary, _manaReplenishAfterMission;
+	std::string _manaUnlockResearch;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	int _ufoTractorBeamSizeModifiers[5];
 	int _escortRange, _drawEnemyRadarCircles;
@@ -538,6 +540,18 @@ public:
 	int getBughuntLowMorale() const { return _bughuntLowMorale; }
 	/// Gets the bug hunt mode time units % parameter (default = 60).
 	int getBughuntTimeUnitsLeft() const { return _bughuntTimeUnitsLeft; }
+	/// Is the mana feature enabled (default false)?
+	bool isManaFeatureEnabled() const { return _manaEnabled; }
+	/// Is the mana bar enabled for the Battlescape UI (default false)?
+	bool isManaBarEnabled() const { return _manaBattleUI; }
+	/// Is the mana trained as a primary skill (e.g. like firing accuracy)?
+	bool isManaTrainingPrimary() const { return _manaTrainingPrimary; }
+	/// Is the mana trained as a secondary skill (e.g. like strength)?
+	bool isManaTrainingSecondary() const { return _manaTrainingSecondary; }
+	/// Should a soldier's mana be fully replenished after a mission?
+	bool getReplenishManaAfterMission() const { return _manaReplenishAfterMission; }
+	/// Gets the mana unlock research topic (default empty)?
+	const std::string &getManaUnlockResearch() const { return _manaUnlockResearch; }
 	/// Gets the threshold for defining a glancing hit on a ufo during interception
 	int getUfoGlancingHitThreshold() const { return _ufoGlancingHitThreshold; }
 	/// Gets the parameter for drawing the width of a ufo's beam weapon based on power

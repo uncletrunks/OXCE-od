@@ -1365,6 +1365,10 @@ interfaces: #done
         color: 254
         color2: 2
         border: 4
+      - id: barMana
+        color: 240
+        color2: 241
+        border: 243
       - id: barPsiStrength
         color: 1
         color2: 2
@@ -1755,6 +1759,9 @@ interfaces: #done
       - id: barMorale
         color: 157
         border: 158
+      - id: barMana
+        color: 244
+        border: 248
       - id: buttonReserveNone
         pos: [54, 33]
         size: [20, 11]
@@ -1953,6 +1960,8 @@ interfaces: #done
         border: 4
       - id: barStrength
         color: 48
+      - id: barMana
+        color: 243
       - id: barPsiStrength
         color: 192
       - id: barPsiSkill

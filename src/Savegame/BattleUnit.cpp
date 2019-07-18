@@ -137,6 +137,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_tu = _stats.tu;
 	_energy = _stats.stamina;
 	_health = _stats.health;
+	_mana = std::max(0, _stats.mana - soldier->getManaMissing());
 	_morale = 100;
 	// wounded soldiers (defending the base) start with lowered morale
 	{
@@ -208,6 +209,7 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int 
 	_tu = _stats.tu;
 	_energy = _stats.stamina;
 	_health = _stats.health;
+	_mana = std::max(0, _stats.mana - soldier->getManaMissing());
 	_maxArmor[SIDE_FRONT] = _armor->getFrontArmor();
 	_maxArmor[SIDE_LEFT] = _armor->getLeftSideArmor();
 	_maxArmor[SIDE_RIGHT] = _armor->getRightSideArmor();
@@ -325,6 +327,7 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleEnviro
 	_tu = _stats.tu;
 	_energy = _stats.stamina;
 	_health = _stats.health;
+	_mana = _stats.mana;
 	_morale = 100;
 	_stunlevel = 0;
 	_currentArmor[SIDE_FRONT] = _maxArmor[SIDE_FRONT];
@@ -405,6 +408,7 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_directionTurret = _toDirectionTurret = node["directionTurret"].as<int>(_directionTurret);
 	_tu = node["tu"].as<int>(_tu);
 	_health = node["health"].as<int>(_health);
+	_mana = node["mana"].as<int>(_mana);
 	_stunlevel = node["stunlevel"].as<int>(_stunlevel);
 	_energy = node["energy"].as<int>(_energy);
 	_morale = node["morale"].as<int>(_morale);
@@ -421,6 +425,7 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_exp.throwing = node["expThrowing"].as<int>(_exp.throwing);
 	_exp.psiSkill = node["expPsiSkill"].as<int>(_exp.psiSkill);
 	_exp.psiStrength = node["expPsiStrength"].as<int>(_exp.psiStrength);
+	_exp.mana = node["expMana"].as<int>(_exp.mana);
 	_exp.melee = node["expMelee"].as<int>(_exp.melee);
 	_stats = node["currStats"].as<UnitStats>(_stats);
 	_turretType = node["turretType"].as<int>(_turretType);
@@ -481,6 +486,7 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 	node["directionTurret"] = _directionTurret;
 	node["tu"] = _tu;
 	node["health"] = _health;
+	node["mana"] = _mana;
 	node["stunlevel"] = _stunlevel;
 	node["energy"] = _energy;
 	node["morale"] = _morale;
@@ -495,6 +501,7 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 	node["expThrowing"] = _exp.throwing;
 	node["expPsiSkill"] = _exp.psiSkill;
 	node["expPsiStrength"] = _exp.psiStrength;
+	node["expMana"] = _exp.mana;
 	node["expMelee"] = _exp.melee;
 	node["currStats"] = _stats;
 	node["turretType"] = _turretType;
@@ -1160,6 +1167,15 @@ int BattleUnit::getHealth() const
 }
 
 /**
+ * Returns the soldier's amount of mana.
+ * @return Mana.
+ */
+int BattleUnit::getMana() const
+{
+	return _mana;
+}
+
+/**
  * Returns the soldier's amount of morale.
  * @return Morale.
  */
@@ -1316,6 +1332,7 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 		constexpr int toMorale = 5;
 		constexpr int toWound = 6;
 		constexpr int toTransform = 7;
+		constexpr int toMana = 8;
 
 		ModScript::DamageUnit::Output args { };
 
@@ -1350,6 +1367,9 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 			// health change
 			std::get<toHealth>(args.data) += type->getHealthFinalDamage(damage);
 
+			// mana change
+			std::get<toMana>(args.data) += type->getManaFinalDamage(damage);
+
 			// energy change
 			std::get<toEnergy>(args.data) += type->getEnergyFinalDamage(damage);
 
@@ -1374,6 +1394,8 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 		setValueMax(_tu, - std::get<toTime>(args.data), 0, _stats.tu);
 
 		setValueMax(_health, - std::get<toHealth>(args.data), overKillMinimum, _stats.health);
+
+		setValueMax(_mana, - std::get<toMana>(args.data), 0, _stats.mana);
 
 		setValueMax(_energy, - std::get<toEnergy>(args.data), 0, _stats.stamina);
 
@@ -1591,6 +1613,11 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Rule
 		{
 			cost.Stun = std::max(1, (int)floor(getBaseStats()->health * cost.Stun / 100.0f));
 		}
+		// if it's a percentage, apply it to unit Mana
+		if (!flat.Mana && cost.Mana)
+		{
+			cost.Mana = std::max(1, (int)floor(getBaseStats()->mana * cost.Mana / 100.0f));
+		}
 	}
 	return cost;
 }
@@ -1642,6 +1669,7 @@ void BattleUnit::spendCost(const RuleItemUseCost& cost)
 	_morale -= cost.Morale;
 	_health -= cost.Health;
 	_stunlevel += cost.Stun;
+	_mana -= cost.Mana;
 }
 
 /**
@@ -2025,6 +2053,18 @@ void BattleUnit::prepareHealth(int health)
 }
 
 /**
+ * Helper function preparing Mana recovery at beginning of turn.
+ * @param mana Mana gain this turn.
+ */
+void BattleUnit::prepareMana(int mana)
+{
+	if (!isOut())
+	{
+		setValueMax(_mana, mana, 0, getBaseStats()->mana);
+	}
+}
+
+/**
  * Helper function preparing Stun recovery at beginning of turn.
  * @param stun Stun damage reduction this turn.
  */
@@ -2126,6 +2166,7 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 	int TURecovery = _armor->getTimeRecovery(this);
 	int ENRecovery = _armor->getEnergyRecovery(this);
 	int HPRecovery = _armor->getHealthRecovery(this);
+	int MNRecovery = _armor->getManaRecovery(this);
 	int MRRecovery = _armor->getMoraleRecovery(this);
 	int STRecovery = _armor->getStunRegeneration(this);
 
@@ -2138,6 +2179,7 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 	if (rest)
 	{
 		prepareHealth(HPRecovery);
+		prepareMana(MNRecovery);
 		prepareStun(STRecovery);
 		prepareMorale(MRRecovery);
 	}
@@ -2350,6 +2392,12 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 	// we equip item only if we have skill to use it.
 	if (getBaseStats()->psiSkill <= 0 && rule->isPsiRequired())
 	{
+		return false;
+	}
+
+	if (rule->isManaRequired() && getOriginalFaction() == FACTION_PLAYER)
+	{
+		// don't auto-equip items that require mana for now, maybe reconsider in the future
 		return false;
 	}
 
@@ -2976,6 +3024,14 @@ void BattleUnit::addPsiStrengthExp()
 }
 
 /**
+ * Adds one to the mana exp counter.
+ */
+void BattleUnit::addManaExp()
+{
+	_exp.mana++;
+}
+
+/**
  * Adds one to the melee exp counter.
  */
 void BattleUnit::addMeleeExp()
@@ -2988,7 +3044,7 @@ void BattleUnit::addMeleeExp()
  */
 bool BattleUnit::hasGainedAnyExperience()
 {
-	return _exp.bravery || _exp.reactions || _exp.firing || _exp.psiSkill || _exp.psiStrength || _exp.melee || _exp.throwing;
+	return _exp.bravery || _exp.reactions || _exp.firing || _exp.psiSkill || _exp.psiStrength || _exp.melee || _exp.throwing || _exp.mana;
 }
 
 void BattleUnit::updateGeoscapeStats(Soldier *soldier) const
@@ -3004,7 +3060,7 @@ void BattleUnit::updateGeoscapeStats(Soldier *soldier) const
  * @param statsDiff (out) The passed UnitStats struct will be filled with the stats differences.
  * @return True if the soldier was eligible for squaddie promotion.
  */
-bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, StatAdjustment &statsDiff)
+bool BattleUnit::postMissionProcedures(const Mod *mod, SavedGame *geoscape, SavedBattleGame *battle, StatAdjustment &statsDiff)
 {
 	Soldier *s = geoscape->getSoldier(_id);
 	if (s == 0)
@@ -3020,6 +3076,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 	statsDiff.statGrowth = -(*stats);        // subtract old stat
 	const UnitStats caps = s->getRules()->getStatCaps();
 	int healthLoss = _stats.health - _health;
+	int manaLoss = mod->getReplenishManaAfterMission() ? 0 : _stats.mana - _mana;
 
 	auto recovery = (int)RNG::generate((healthLoss*0.5),(healthLoss*1.5));
 
@@ -3051,6 +3108,13 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 	{
 		stats->psiStrength += improveStat(_exp.psiStrength);
 	}
+	if (mod->isManaTrainingPrimary())
+	{
+		if (_exp.mana && stats->mana < caps.mana)
+		{
+			stats->mana += improveStat(_exp.mana);
+		}
+	}
 
 	bool hasImproved = false;
 	if (hasGainedAnyExperience())
@@ -3063,6 +3127,11 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 		if (v > 0) stats->tu += RNG::generate(0, v/10 + 2);
 		v = caps.health - stats->health;
 		if (v > 0) stats->health += RNG::generate(0, v/10 + 2);
+		if (mod->isManaTrainingSecondary())
+		{
+			v = caps.mana - stats->mana;
+			if (v > 0) stats->mana += RNG::generate(0, v/10 + 2);
+		}
 		v = caps.strength - stats->strength;
 		if (v > 0) stats->strength += RNG::generate(0, v/10 + 2);
 		v = caps.stamina - stats->stamina;
@@ -3089,6 +3158,7 @@ bool BattleUnit::postMissionProcedures(SavedGame *geoscape, SavedBattleGame *bat
 	statsDiff.statGrowth = *stats - statsOld.statGrowth;
 
 	s->setWoundRecovery(recovery);
+	s->setManaMissing(manaLoss);
 
 	if (s->isWounded())
 	{
@@ -4786,6 +4856,10 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addFunc<UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::health>>("getHealthMax");
 	bu.add<&setBaseStatScript<&BattleUnit::_health, &UnitStats::health>>("setHealth");
 
+	bu.addField<&BattleUnit::_mana>("getMana");
+	bu.addFunc<UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::mana>>("getManaMax");
+	bu.add<&setBaseStatScript<&BattleUnit::_mana, &UnitStats::mana>>("setMana");
+
 	bu.addField<&BattleUnit::_energy>("getEnergy");
 	bu.addFunc<UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::stamina>>("getEnergyMax");
 	bu.add<&setBaseStatScript<&BattleUnit::_energy, &UnitStats::stamina>>("setEnergy");
@@ -4804,7 +4878,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 
 	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_stats>(bu, "Stats.");
-	UnitStats::addSetStatsWithCurrScript<BattleUnit, &BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health>(bu, "Stats.");
+	UnitStats::addSetStatsWithCurrScript<BattleUnit, &BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health, &BattleUnit::_mana>(bu, "Stats.");
 
 	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_exp>(bu, "Exp.", true);
 
@@ -5025,6 +5099,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	"to_morale",
 	"to_wound",
 	"to_transform",
+	"to_mana",
 	"unit", "damaging_item", "weapon_item", "attacker",
 	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", "battle_action", }
 {

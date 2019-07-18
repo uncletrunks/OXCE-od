@@ -57,6 +57,7 @@ const std::map<std::string, std::string> StatsForNerdsState::translationMap =
 	{ "bravery", "STR_BRAVERY" },
 	{ "firing", "STR_FIRING_ACCURACY" },
 	{ "health", "STR_HEALTH" },
+	{ "mana", "STR_MANA_POOL" },
 	{ "tu", "STR_TIME_UNITS" },
 	{ "reactions", "STR_REACTIONS" },
 	{ "stamina", "STR_STAMINA" },
@@ -69,12 +70,14 @@ const std::map<std::string, std::string> StatsForNerdsState::translationMap =
 	{ "fatalWounds", "STR_FATAL_WOUNDS" },
 
 	{ "healthCurrent", "STR_HEALTH_CURRENT" }, // new, current HP (i.e. not max HP)
+	{ "manaCurrent", "STR_MANA_CURRENT" },
 	{ "tuCurrent", "STR_TIME_UNITS_CURRENT" }, // new
 	{ "energyCurrent", "STR_ENERGY" },
 	{ "moraleCurrent", "STR_MORALE" },
 	{ "stunCurrent", "STR_STUN_LEVEL_CURRENT" }, // new
 
 	{ "healthNormalized", "STR_HEALTH_NORMALIZED" }, // new, current HP normalized to [0, 1] interval
+	{ "manaNormalized", "STR_MANA_NORMALIZED" },
 	{ "tuNormalized", "STR_TIME_UNITS_NORMALIZED" }, // new
 	{ "energyNormalized", "STR_ENERGY_NORMALIZED" }, // new
 	{ "moraleNormalized", "STR_MORALE_NORMALIZED" }, // new
@@ -1077,7 +1080,8 @@ void StatsForNerdsState::addRuleItemUseCostFull(std::ostringstream &ss, const Ru
 		value.Energy == defaultvalue.Energy &&
 		value.Morale == defaultvalue.Morale &&
 		value.Health == defaultvalue.Health &&
-		value.Stun == defaultvalue.Stun)
+		value.Stun == defaultvalue.Stun &&
+		value.Mana == defaultvalue.Mana)
 	{
 		isDefault = true;
 	}
@@ -1126,6 +1130,14 @@ void StatsForNerdsState::addRuleItemUseCostFull(std::ostringstream &ss, const Ru
 		ss << tr("STR_COST_STUN") << ": ";
 		addBoolOrInteger(ss, value.Stun, isFlatAttribute);
 		addPercentageSignOrNothing(ss, formatBy.Stun, smartFormat);
+		isFirst = false;
+	}
+	if (value.Mana != defaultvalue.Mana || _showDefaults)
+	{
+		if (!isFirst) ss << ", ";
+		ss << tr("STR_COST_MANA") << ": ";
+		addBoolOrInteger(ss, value.Mana, isFlatAttribute);
+		addPercentageSignOrNothing(ss, formatBy.Mana, smartFormat);
 		isFirst = false;
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
@@ -1406,6 +1418,7 @@ void StatsForNerdsState::initItemList()
 
 	addBattleType(ss, itemBattleType, "battleType");
 	addExperienceTrainingMode(ss, itemRule->getExperienceTrainingMode(), "experienceTrainingMode");
+	addInteger(ss, itemRule->getManaExperience(), "manaExperience");
 	addBoolean(ss, itemRule->getArcingShot(), "arcingShot");
 	addBoolean(ss, itemRule->isFireExtinguisher(), "isFireExtinguisher");
 	addInteger(ss, itemRule->getWaypoints(), "waypoints");
@@ -1420,6 +1433,7 @@ void StatsForNerdsState::initItemList()
 	addBoolean(ss, itemRule->isLandOnly(), "landOnly");
 	int psiRequiredDefault = itemBattleType == BT_PSIAMP ? true : false;
 	addBoolean(ss, itemRule->isPsiRequired(), "psiRequired", psiRequiredDefault);
+	addBoolean(ss, itemRule->isManaRequired(), "manaRequired");
 	addBoolean(ss, itemRule->isLOSRequired(), "LOSRequired");
 
 	if (itemBattleType == BT_FIREARM
@@ -1588,6 +1602,9 @@ void StatsForNerdsState::initItemList()
 
 		addFloatAsPercentage(ss, rule->ToItem, "ToItem", mod->getDamageType(rule->ResistType)->ToItem);
 		addBoolean(ss, rule->RandomItem, "RandomItem", mod->getDamageType(rule->ResistType)->RandomItem);
+
+		addFloatAsPercentage(ss, rule->ToMana, "ToMana", mod->getDamageType(rule->ResistType)->ToMana);
+		addBoolean(ss, rule->RandomMana, "RandomMana", mod->getDamageType(rule->ResistType)->RandomMana);
 
 		addFloatAsPercentage(ss, rule->ToTile, "ToTile", mod->getDamageType(rule->ResistType)->ToTile);
 		addBoolean(ss, rule->RandomTile, "RandomTile", mod->getDamageType(rule->ResistType)->RandomTile);
@@ -1900,7 +1917,7 @@ void StatsForNerdsState::addUnitStatBonus(std::ostringstream &ss, const UnitStat
 {
 	bool isDefault = value.tu == 0 && value.stamina == 0 && value.health == 0 && value.strength == 0
 		&& value.reactions == 0 && value.firing == 0 && value.melee == 0 && value.throwing == 0
-		&& value.psiSkill == 0 && value.psiStrength == 0 && value.bravery == 0;
+		&& value.psiSkill == 0 && value.psiStrength == 0 && value.bravery == 0 && value.mana == 0;
 	if (isDefault && !_showDefaults)
 	{
 		return;
@@ -1915,6 +1932,7 @@ void StatsForNerdsState::addUnitStatBonus(std::ostringstream &ss, const UnitStat
 	addUnitStatFormatted(ss, value.firing, "STR_FIRING_ACCURACY_ABBREVIATION", isFirst);
 	addUnitStatFormatted(ss, value.melee, "STR_MELEE_ACCURACY_ABBREVIATION", isFirst);
 	addUnitStatFormatted(ss, value.throwing, "STR_THROWING_ACCURACY_ABBREVIATION", isFirst);
+	addUnitStatFormatted(ss, value.mana, "STR_MANA_ABBREVIATION", isFirst);
 	addUnitStatFormatted(ss, value.psiStrength, "STR_PSIONIC_STRENGTH_ABBREVIATION", isFirst);
 	addUnitStatFormatted(ss, value.psiSkill, "STR_PSIONIC_SKILL_ABBREVIATION", isFirst);
 	addUnitStatFormatted(ss, value.bravery, "STR_BRAVERY_ABBREVIATION", isFirst);
@@ -2212,6 +2230,7 @@ void StatsForNerdsState::initArmorList()
 		addRuleStatBonus(ss, *armorRule->getMoraleRecoveryRaw(), "morale");
 		addRuleStatBonus(ss, *armorRule->getHealthRecoveryRaw(), "health");
 		addRuleStatBonus(ss, *armorRule->getStunRegenerationRaw(), "stun");
+		addRuleStatBonus(ss, *armorRule->getManaRecoveryRaw(), "mana");
 		endHeading();
 	}
 
@@ -2444,6 +2463,7 @@ void StatsForNerdsState::initFacilityList()
 	addIntegerPercent(ss, facilityRule->getHitRatio(), "hitRatio");
 
 	addInteger(ss, facilityRule->getMaxAllowedPerBase(), "maxAllowedPerBase");
+	addInteger(ss, facilityRule->getManaRecoveryPerDay(), "manaRecoveryPerDay");
 	addFloat(ss, facilityRule->getSickBayAbsoluteBonus(), "sickBayAbsoluteBonus");
 	addFloat(ss, facilityRule->getSickBayRelativeBonus(), "sickBayRelativeBonus");
 

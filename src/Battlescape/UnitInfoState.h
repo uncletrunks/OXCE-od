@@ -49,11 +49,11 @@ private:
 	Text *_txtName;
 
 	Text *_txtTimeUnits, *_txtEnergy, *_txtHealth, *_txtFatalWounds, *_txtBravery, *_txtMorale, *_txtReactions, *_txtFiring, *_txtThrowing, *_txtMelee, *_txtStrength;
-	Text *_txtPsiStrength,  *_txtPsiSkill;
+	Text *_txtPsiStrength,  *_txtPsiSkill, *_txtMana;
 	Text *_numTimeUnits, *_numEnergy, *_numHealth, *_numFatalWounds, *_numBravery, *_numMorale, *_numReactions, *_numFiring, *_numThrowing, *_numMelee, *_numStrength;
-	Text *_numPsiStrength, *_numPsiSkill;
+	Text *_numPsiStrength, *_numPsiSkill, *_numMana;
 	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barFatalWounds, *_barBravery, *_barMorale, *_barReactions, *_barFiring, *_barThrowing, *_barMelee, *_barStrength;
-	Bar *_barPsiStrength, *_barPsiSkill;
+	Bar *_barPsiStrength, *_barPsiSkill, *_barMana;
 
 	Text *_txtFrontArmor, *_txtLeftArmor, *_txtRightArmor, *_txtRearArmor, *_txtUnderArmor;
 	Text *_numFrontArmor, *_numLeftArmor, *_numRightArmor, *_numRearArmor, *_numUnderArmor;

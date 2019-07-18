@@ -67,6 +67,7 @@ private:
 	SoldierLook _look;
 	int _lookVariant;
 	int _missions, _kills;
+	int _manaMissing; // amount of mana missing until full mana recovery
 	float _recovery; // amount of HP missing until full recovery... used to calculate recovery time
 	bool _recentlyPromoted, _psiTraining, _training, _returnToTrainingWhenHealed;
 	Armor *_armor;
@@ -166,6 +167,12 @@ public:
 	bool hasFullHealth() const;
 	/// Is the soldier capable of defending a base?.
 	bool canDefendBase() const;
+	/// Gets the amount of missing mana.
+	int getManaMissing() const;
+	/// Sets the amount of missing mana.
+	void setManaMissing(int manaMissing);
+	/// Gets the soldier's mana recovery time.
+	int getManaRecovery(int manaRecoveryPerDay) const;
 	/// Gets the soldier's wound recovery time.
 	int getWoundRecoveryInt() const;
 	int getWoundRecovery(float absBonus, float relBonus) const;
@@ -173,6 +180,8 @@ public:
 	void setWoundRecovery(int recovery);
 	/// Heals wound recoveries.
 	void heal(float absBonus, float relBonus);
+	/// Replenishes mana.
+	void replenishMana(int manaRecoveryPerDay);
 	/// Gets the soldier's equipment-layout.
 	std::vector<EquipmentLayoutItem*> *getEquipmentLayout();
 	/// Trains a soldier's psychic stats

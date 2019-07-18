@@ -93,6 +93,11 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 
 	int yPos = 80;
 	int step = 11;
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		yPos = 81;
+		step = 10;
+	}
 
 	_txtTimeUnits = new Text(120, 9, 6, yPos);
 	_numTimeUnits = new Text(18, 9, 131, yPos);
@@ -138,6 +143,14 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	_numStrength = new Text(18, 9, 131, yPos);
 	_barStrength = new Bar(170, 7, 150, yPos);
 	yPos += step;
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		_txtMana = new Text(120, 9, 6, yPos);
+		_numMana = new Text(18, 9, 131, yPos);
+		_barMana = new Bar(170, 7, 150, yPos);
+		yPos += step;
+	}
 
 	_txtPsiStrength = new Text(120, 9, 6, yPos);
 	_numPsiStrength = new Text(18, 9, 131, yPos);
@@ -204,6 +217,13 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	add(_txtStrength, "text2", "soldierInfo");
 	add(_numStrength, "numbers", "soldierInfo");
 	add(_barStrength, "barStrength", "soldierInfo");
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		add(_txtMana, "text2", "soldierInfo");
+		add(_numMana, "numbers", "soldierInfo");
+		add(_barMana, "barMana", "soldierInfo");
+	}
 
 	add(_txtPsiStrength, "text2", "soldierInfo");
 	add(_numPsiStrength, "numbers", "soldierInfo");
@@ -307,6 +327,12 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	_txtStrength->setText(tr("STR_STRENGTH"));
 
 	_barStrength->setScale(1.0);
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		_txtMana->setText(tr("STR_MANA_POOL"));
+		_barMana->setScale(1.0);
+	}
 
 	_txtPsiStrength->setText(tr("STR_PSIONIC_STRENGTH"));
 
@@ -486,10 +512,46 @@ void SoldierInfoState::init()
 	}
 	else
 	{
-		_txtRecovery->setText("");
+		if (_soldier->getManaMissing() > 0)
+		{
+			int manaRecoveryPerDay = 0;
+			if (_base != 0)
+			{
+				manaRecoveryPerDay = _base->getManaRecoveryPerDay();
+			}
+			int manaRecoveryTime = _soldier->getManaRecovery(manaRecoveryPerDay);
+			_txtRecovery->setText(tr("STR_MANA_RECOVERY").arg(tr("STR_DAY", manaRecoveryTime)));
+		}
+		else
+		{
+			_txtRecovery->setText("");
+		}
 	}
 
 	_txtPsionic->setVisible(_soldier->isInPsiTraining());
+
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		if (_game->getSavedGame()->isManaUnlocked(_game->getMod()))
+		{
+			std::ostringstream ss16;
+			ss16 << withArmor.mana;
+			_numMana->setText(ss16.str());
+			_barMana->setMax(current->mana);
+			_barMana->setValue(withArmor.mana);
+			_barMana->setValue2(std::min(withArmor.mana, initial->mana));
+
+			_txtMana->setVisible(true);
+			_numMana->setVisible(true);
+			_barMana->setVisible(true);
+		}
+		else
+		{
+			_txtMana->setVisible(false);
+			_numMana->setVisible(false);
+			_barMana->setVisible(false);
+		}
+	}
 
 	if (current->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 	{

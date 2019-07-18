@@ -80,6 +80,11 @@ float curretHealth(const BattleUnit *unit)
 	return unit->getHealth();
 }
 
+float curretMana(const BattleUnit* unit)
+{
+	return unit->getMana();
+}
+
 float curretEnergy(const BattleUnit *unit)
 {
 	return unit->getEnergy();
@@ -104,6 +109,11 @@ float normalizedTimeUnits(const BattleUnit *unit)
 float normalizedHealth(const BattleUnit *unit)
 {
 	return 1.0f * unit->getHealth() / unit->getBaseStats()->health;
+}
+
+float normalizedMana(const BattleUnit* unit)
+{
+	return 1.0f * unit->getMana() / unit->getBaseStats()->mana;
 }
 
 float normalizedEnergy(const BattleUnit *unit)
@@ -232,6 +242,7 @@ BonusStatData statDataMap[] =
 	{ "bravery", create1<&UnitStats::bravery>() },
 	{ "firing", create1<&UnitStats::firing>() },
 	{ "health", create1<&UnitStats::health>() },
+	{ "mana", create1<&UnitStats::mana>() },
 	{ "tu", create1<&UnitStats::tu>() },
 	{ "reactions", create1<&UnitStats::reactions>() },
 	{ "stamina", create1<&UnitStats::stamina>() },
@@ -244,12 +255,14 @@ BonusStatData statDataMap[] =
 	{ "fatalWounds", create<&currentFatalWounds>() },
 
 	{ "healthCurrent", create<&curretHealth>() },
+	{ "manaCurrent", create<&curretMana>() },
 	{ "tuCurrent", create<&curretTimeUnits>() },
 	{ "energyCurrent", create<&curretEnergy>() },
 	{ "moraleCurrent", create<&curretMorale>() },
 	{ "stunCurrent", create<&curretStun>() },
 
 	{ "healthNormalized", create<&normalizedHealth>() },
+	{ "manaNormalized", create<&normalizedMana>() },
 	{ "tuNormalized", create<&normalizedTimeUnits>() },
 	{ "energyNormalized", create<&normalizedEnergy>() },
 	{ "moraleNormalized", create<&normalizedMorale>() },

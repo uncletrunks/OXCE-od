@@ -46,7 +46,7 @@ namespace OpenXcom
 Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 	_id(id), _nationality(0),
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
-	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _recovery(0.0f),
+	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _manaMissing(0), _recovery(0.0f),
 	_recentlyPromoted(false), _psiTraining(false), _training(false), _returnToTrainingWhenHealed(false),
 	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary()),
 	_corpseRecovered(false)
@@ -59,6 +59,7 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 		_initialStats.tu = RNG::generate(minStats.tu, maxStats.tu);
 		_initialStats.stamina = RNG::generate(minStats.stamina, maxStats.stamina);
 		_initialStats.health = RNG::generate(minStats.health, maxStats.health);
+		_initialStats.mana = RNG::generate(minStats.mana, maxStats.mana);
 		_initialStats.bravery = RNG::generate(minStats.bravery/10, maxStats.bravery/10)*10;
 		_initialStats.reactions = RNG::generate(minStats.reactions, maxStats.reactions);
 		_initialStats.firing = RNG::generate(minStats.firing, maxStats.firing);
@@ -121,6 +122,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 	_lookVariant = node["lookVariant"].as<int>(_lookVariant);
 	_missions = node["missions"].as<int>(_missions);
 	_kills = node["kills"].as<int>(_kills);
+	_manaMissing = node["manaMissing"].as<int>(_manaMissing);
 	_recovery = node["recovery"].as<float>(_recovery);
 	Armor *armor = mod->getArmor(node["armor"].as<std::string>());
 	if (armor == 0)
@@ -198,6 +200,8 @@ YAML::Node Soldier::save(const ScriptGlobal *shared) const
 	node["lookVariant"] = _lookVariant;
 	node["missions"] = _missions;
 	node["kills"] = _kills;
+	if (_manaMissing > 0)
+		node["manaMissing"] = _manaMissing;
 	if (_recovery > 0.0f)
 		node["recovery"] = _recovery;
 	node["armor"] = _armor->getType();
@@ -748,6 +752,41 @@ bool Soldier::canDefendBase() const
 }
 
 /**
+ * Returns the amount of missing mana.
+ * @return Missing mana.
+ */
+int Soldier::getManaMissing() const
+{
+	return _manaMissing;
+}
+
+/**
+ * Sets the amount of missing mana.
+ * @param manaMissing Missing mana.
+ */
+void Soldier::setManaMissing(int manaMissing)
+{
+	_manaMissing = std::max(manaMissing, 0);
+}
+
+/**
+ * Returns the amount of time until the soldier's mana is fully replenished.
+ * @return Number of days.
+ */
+int Soldier::getManaRecovery(int manaRecoveryPerDay) const
+{
+	// modders always try to break things! let's be one step ahead of them
+	if (manaRecoveryPerDay <= 0)
+		return 0;
+
+	int days = _manaMissing / manaRecoveryPerDay;
+	if (_manaMissing % manaRecoveryPerDay > 0)
+		++days;
+
+	return days;
+}
+
+/**
  * Returns the amount of time until the soldier is healed.
  * @return Number of days.
  */
@@ -788,6 +827,17 @@ void Soldier::heal(float absBonus, float relBonus)
 
 	if (_recovery < 0.0f)
 		_recovery = 0.0f;
+}
+
+/**
+ * Replenishes the soldier's mana.
+ */
+void Soldier::replenishMana(int manaRecoveryPerDay)
+{
+	_manaMissing -= manaRecoveryPerDay;
+
+	if (_manaMissing < 0)
+		_manaMissing = 0;
 }
 
 /**
@@ -931,6 +981,7 @@ void Soldier::die(SoldierDeath *death)
 	_training = false;
 	_returnToTrainingWhenHealed = false;
 	_recentlyPromoted = false;
+	_manaMissing = 0;
 	_recovery = 0.0f;
 	clearEquipmentLayout();
 }
@@ -1416,6 +1467,8 @@ void Soldier::ScriptRegister(ScriptParserBase* parser)
 	so.addFunc<getRuleSoldierScript>("getRuleSoldier");
 	so.add<&Soldier::getWoundRecoveryInt>("getWoundRecovery");
 	so.add<&Soldier::setWoundRecovery>("setWoundRecovery");
+	so.add<&Soldier::getManaMissing>("getManaMissing");
+	so.add<&Soldier::setManaMissing>("setManaMissing");
 
 
 	so.addScriptValue<&Soldier::_scriptValues>();

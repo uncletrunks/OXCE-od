@@ -92,7 +92,7 @@ private:
 	std::vector<BattleUnit *> _visibleUnits, _unitsSpottedThisTurn;
 	std::vector<Tile *> _visibleTiles;
 	std::unordered_set<Tile *> _visibleTilesLookup;
-	int _tu, _energy, _health, _morale, _stunlevel;
+	int _tu, _energy, _health, _morale, _stunlevel, _mana;
 	bool _kneeled, _floating, _dontReselect;
 	bool _haveNoFloorBelow = false;
 	int _currentArmor[SIDE_MAX], _maxArmor[SIDE_MAX];
@@ -164,6 +164,8 @@ private:
 	void prepareEnergy(int energy);
 	/// Helper function preparing Health recovery at beginning of turn.
 	void prepareHealth(int helath);
+	/// Helper function preparing Mana recovery at beginning of turn.
+	void prepareMana(int mana);
 	/// Helper function preparing Stun recovery at beginning of turn.
 	void prepareStun(int strun);
 	/// Helper function preparing Morale recovery at beginning of turn.
@@ -264,6 +266,8 @@ public:
 	int getEnergy() const;
 	/// Gets the unit's health.
 	int getHealth() const;
+	/// Gets the unit's mana.
+	int getMana() const;
 	/// Gets the unit's bravery.
 	int getMorale() const;
 	/// Get overkill damage to unit.
@@ -415,6 +419,8 @@ public:
 	void addPsiSkillExp();
 	/// Adds one to the psi strength exp counter.
 	void addPsiStrengthExp();
+	/// Adds one to the mana exp counter.
+	void addManaExp();
 	/// Adds one to the melee exp counter.
 	void addMeleeExp();
 	/// Did the unit gain any experience yet?
@@ -422,7 +428,7 @@ public:
 	/// Updates the stats of a Geoscape soldier.
 	void updateGeoscapeStats(Soldier *soldier) const;
 	/// Check if unit eligible for squaddie promotion.
-	bool postMissionProcedures(SavedGame *geoscape, SavedBattleGame *battle, StatAdjustment &statsDiff);
+	bool postMissionProcedures(const Mod *mod, SavedGame *geoscape, SavedBattleGame *battle, StatAdjustment &statsDiff);
 	/// Get the sprite index for the minimap
 	int getMiniMapSpriteIndex() const;
 	/// Set the turret type. -1 is no turret.

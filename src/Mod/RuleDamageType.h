@@ -65,6 +65,8 @@ struct RuleDamageType
 
 	/// Conversion form power to unit damage.
 	float ToHealth;
+	/// Conversion from power to mana loss.
+	float ToMana;
 	/// Conversion form power to unit armor damage.
 	float ToArmor;
 	/// Conversion form power to unit armor damage before applying armor protection.
@@ -86,6 +88,8 @@ struct RuleDamageType
 
 	/// Damage type use random conversion to health damage.
 	bool RandomHealth;
+	/// Damage type use random conversion mana loss.
+	bool RandomMana;
 	///Damage type use random conversion armor damage.
 	bool RandomArmor;
 	/// Damage type use random conversion armor pre damage.
@@ -127,6 +131,8 @@ struct RuleDamageType
 
 	/// Get final damage value to health based on damage.
 	int getHealthFinalDamage(int damage) const;
+	/// Get final damage value to mana based on damage.
+	int getManaFinalDamage(int damage) const;
 	/// Get final damage value to armor based on damage.
 	int getArmorFinalDamage(int damage) const;
 	/// Get final damage value to armor based on damage before armor reduction.

@@ -88,7 +88,14 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteResetNeeded(false), _paletteResetRequested(false), _isMouseScrolling(false), _isMouseScrolled(false), _xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0), _totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false), _autosave(false), _numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
+BattlescapeState::BattlescapeState() :
+	_reserve(0), _manaBarVisible(false),
+	_firstInit(true), _paletteResetNeeded(false), _paletteResetRequested(false),
+	_isMouseScrolling(false), _isMouseScrolled(false),
+	_xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0),
+	_totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false),
+	_autosave(false),
+	_numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
 {
 	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
 
@@ -186,17 +193,27 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_rankTiny = new Surface(7, 7, x + 135, y + 33);
 	_txtName = new Text(136, 10, x + 135, y + 32);
 
+	_manaBarVisible = _game->getMod()->isManaFeatureEnabled()
+		&& _game->getMod()->isManaBarEnabled()
+		&& _game->getSavedGame()->isManaUnlocked(_game->getMod());
+	int step = _manaBarVisible ? 3 : 4;
+
 	_numTimeUnits = new NumberText(15, 5, x + 136, y + 42);
 	_barTimeUnits = new Bar(102, 3, x + 170, y + 41);
 
 	_numEnergy = new NumberText(15, 5, x + 154, y + 42);
-	_barEnergy = new Bar(102, 3, x + 170, y + 45);
+	_barEnergy = new Bar(102, 3, x + 170, y + 41 + step);
 
 	_numHealth = new NumberText(15, 5, x + 136, y + 50);
-	_barHealth= new Bar(102, 3, x + 170, y + 49);
+	_barHealth= new Bar(102, 3, x + 170, y + 41 + step*2);
 
 	_numMorale = new NumberText(15, 5, x + 154, y + 50);
-	_barMorale = new Bar(102, 3, x + 170, y + 53);
+	_barMorale = new Bar(102, 3, x + 170, y + 41 + step*3);
+
+	if (_manaBarVisible)
+	{
+		_barMana = new Bar(102, 3, x + 170, y + 41 + step*4);
+	}
 
 	_txtDebug = new Text(300, 10, 20, 0);
 	_txtTooltip = new Text(300, 10, x + 2, y - 10);
@@ -292,6 +309,10 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	add(_barEnergy, "barEnergy", "battlescape", _icons);
 	add(_barHealth, "barHealth", "battlescape", _icons);
 	add(_barMorale, "barMorale", "battlescape", _icons);
+	if (_manaBarVisible)
+	{
+		add(_barMana, "barMana", "battlescape", _icons);
+	}
 	add(_btnReserveNone, "buttonReserveNone", "battlescape", _icons);
 	add(_btnReserveSnap, "buttonReserveSnap", "battlescape", _icons);
 	add(_btnReserveAimed, "buttonReserveAimed", "battlescape", _icons);
@@ -588,6 +609,10 @@ BattlescapeState::BattlescapeState() : _reserve(0), _firstInit(true), _paletteRe
 	_barEnergy->setScale(1.0);
 	_barHealth->setScale(1.0);
 	_barMorale->setScale(1.0);
+	if (_manaBarVisible)
+	{
+		_barMana->setScale(1.0);
+	}
 
 	_txtDebug->setColor(Palette::blockOffset(8));
 	_txtDebug->setHighContrast(true);
@@ -1723,6 +1748,10 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 	_numMorale->setVisible(playableUnit);
 	_barMorale->setVisible(playableUnit);
 	_barMorale->setVisible(playableUnit);
+	if (_manaBarVisible)
+	{
+		_barMana->setVisible(playableUnit);
+	}
 	_btnLeftHandItem->setVisible(playableUnit);
 	_btnRightHandItem->setVisible(playableUnit);
 
@@ -1847,6 +1876,11 @@ void BattlescapeState::updateSoldierInfo(bool checkFOV)
 	_numMorale->setValue(battleUnit->getMorale());
 	_barMorale->setMax(100);
 	_barMorale->setValue(battleUnit->getMorale());
+	if (_manaBarVisible)
+	{
+		_barMana->setMax(battleUnit->getBaseStats()->mana);
+		_barMana->setValue(battleUnit->getMana());
+	}
 
 	toggleKneelButton(battleUnit);
 

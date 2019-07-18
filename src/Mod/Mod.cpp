@@ -303,6 +303,7 @@ Mod::Mod() :
 	_noLOSAccuracyPenaltyGlobal(-1),
 	_surrenderMode(0),
 	_bughuntMinTurn(999), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
+	_manaEnabled(false), _manaBattleUI(false), _manaTrainingPrimary(false), _manaTrainingSecondary(false), _manaReplenishAfterMission(true),
 	_ufoGlancingHitThreshold(0), _ufoBeamWidthParameter(1000),
 	_escortRange(20), _drawEnemyRadarCircles(1), _escortsJoinFightAgainstHK(true), _hunterKillerFastRetarget(true),
 	_crewEmergencyEvacuationSurvivalChance(100), _pilotsEmergencyEvacuationSurvivalChance(100),
@@ -1835,6 +1836,15 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	_bughuntRank = doc["bughuntRank"].as<int>(_bughuntRank);
 	_bughuntLowMorale = doc["bughuntLowMorale"].as<int>(_bughuntLowMorale);
 	_bughuntTimeUnitsLeft = doc["bughuntTimeUnitsLeft"].as<int>(_bughuntTimeUnitsLeft);
+	if (const YAML::Node &nodeMana = doc["mana"])
+	{
+		_manaEnabled = nodeMana["enabled"].as<bool>(_manaEnabled);
+		_manaBattleUI = nodeMana["battleUI"].as<bool>(_manaBattleUI);
+		_manaUnlockResearch = nodeMana["unlockResearch"].as<std::string>(_manaUnlockResearch);
+		_manaTrainingPrimary = nodeMana["trainingPrimary"].as<bool>(_manaTrainingPrimary);
+		_manaTrainingSecondary = nodeMana["trainingSecondary"].as<bool>(_manaTrainingSecondary);
+		_manaReplenishAfterMission = nodeMana["replenishAfterMission"].as<bool>(_manaReplenishAfterMission);
+	}
 	_ufoGlancingHitThreshold = doc["ufoGlancingHitThreshold"].as<int>(_ufoGlancingHitThreshold);
 	_ufoBeamWidthParameter = doc["ufoBeamWidthParameter"].as<int>(_ufoBeamWidthParameter);
 	if (doc["ufoTractorBeamSizeModifiers"])
@@ -4445,7 +4455,9 @@ void Mod::modResources()
 				_surfaces["ALTBACK07.SCR"]->setPixel(x, y + 10, _surfaces["ALTBACK07.SCR"]->getPixel(x, y));
 	}
 
-	// we create extra rows on the soldier stat screens by shrinking them all down one pixel.
+	// we create extra rows on the soldier stat screens by shrinking them all down one pixel/two pixels.
+	int rowHeight = _manaEnabled ? 10 : 11;
+	bool moveOnePixelUp = _manaEnabled ? false : true;
 
 	// first, let's do the base info screen
 	// erase the old lines, copying from a +2 offset to account for the dithering
@@ -4453,32 +4465,48 @@ void Mod::modResources()
 		for (int x = 0; x < 149; ++x)
 			_surfaces["BACK06.SCR"]->setPixel(x, y, _surfaces["BACK06.SCR"]->getPixel(x, y + 2));
 	// drawn new lines, use the bottom row of pixels as a basis
-	for (int y = 89; y < 199; y += 11)
+	for (int y = 89; y < 199; y += rowHeight)
 		for (int x = 0; x < 149; ++x)
 			_surfaces["BACK06.SCR"]->setPixel(x, y, _surfaces["BACK06.SCR"]->getPixel(x, 199));
 	// finally, move the top of the graph up by one pixel, offset for the last iteration again due to dithering.
-	for (int y = 72; y < 80; ++y)
-		for (int x = 0; x < 320; ++x)
-		{
-			_surfaces["BACK06.SCR"]->setPixel(x, y, _surfaces["BACK06.SCR"]->getPixel(x, y + (y == 79 ? 2 : 1)));
-		}
+	if (moveOnePixelUp)
+	{
+		for (int y = 72; y < 80; ++y)
+			for (int x = 0; x < 320; ++x)
+			{
+				_surfaces["BACK06.SCR"]->setPixel(x, y, _surfaces["BACK06.SCR"]->getPixel(x, y + (y == 79 ? 2 : 1)));
+			}
+	}
 
 	// now, let's adjust the battlescape info screen.
+	int startHere = _manaEnabled ? 191 : 190;
+	int stopHere = _manaEnabled ? 28 : 37;
+	bool moveDown = _manaEnabled ? false : true;
+
 	// erase the old lines, no need to worry about dithering on this one.
 	for (int y = 39; y < 199; y += 10)
 		for (int x = 0; x < 169; ++x)
 			_surfaces["UNIBORD.PCK"]->setPixel(x, y, _surfaces["UNIBORD.PCK"]->getPixel(x, 30));
 	// drawn new lines, use the bottom row of pixels as a basis
-	for (int y = 190; y > 37; y -= 9)
+	for (int y = startHere; y > stopHere; y -= 9)
 		for (int x = 0; x < 169; ++x)
 			_surfaces["UNIBORD.PCK"]->setPixel(x, y, _surfaces["UNIBORD.PCK"]->getPixel(x, 199));
 	// move the top of the graph down by eight pixels to erase the row we don't need (we actually created ~1.8 extra rows earlier)
-	for (int y = 37; y > 29; --y)
+	if (moveDown)
+	{
+		for (int y = 37; y > 29; --y)
+			for (int x = 0; x < 320; ++x)
+			{
+				_surfaces["UNIBORD.PCK"]->setPixel(x, y, _surfaces["UNIBORD.PCK"]->getPixel(x, y - 8));
+				_surfaces["UNIBORD.PCK"]->setPixel(x, y - 8, 0);
+			}
+	}
+	else
+	{
+		// remove bottom line of the (entire) last row
 		for (int x = 0; x < 320; ++x)
-		{
-			_surfaces["UNIBORD.PCK"]->setPixel(x, y, _surfaces["UNIBORD.PCK"]->getPixel(x, y - 8));
-			_surfaces["UNIBORD.PCK"]->setPixel(x, y - 8, 0);
-		}
+			_surfaces["UNIBORD.PCK"]->setPixel(x, 199, _surfaces["UNIBORD.PCK"]->getPixel(x, 30));
+	}
 }
 
 /**

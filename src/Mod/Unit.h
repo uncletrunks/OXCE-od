@@ -34,16 +34,16 @@ struct UnitStats
 	using Type = Sint16;
 	using Ptr = Type UnitStats::*;
 
-	Type tu, stamina, health, bravery, reactions, firing, throwing, strength, psiStrength, psiSkill, melee;
+	Type tu, stamina, health, bravery, reactions, firing, throwing, strength, psiStrength, psiSkill, melee, mana;
 
-	UnitStats() : tu(0), stamina(0), health(0), bravery(0), reactions(0), firing(0), throwing(0), strength(0), psiStrength(0), psiSkill(0), melee(0) {};
-	UnitStats(int tu_, int stamina_, int health_, int bravery_, int reactions_, int firing_, int throwing_, int strength_, int psiStrength_, int psiSkill_, int melee_) : tu(tu_), stamina(stamina_), health(health_), bravery(bravery_), reactions(reactions_), firing(firing_), throwing(throwing_), strength(strength_), psiStrength(psiStrength_), psiSkill(psiSkill_), melee(melee_) {};
-	UnitStats& operator+=(const UnitStats& stats) { tu += stats.tu; stamina += stats.stamina; health += stats.health; bravery += stats.bravery; reactions += stats.reactions; firing += stats.firing; throwing += stats.throwing; strength += stats.strength; psiStrength += stats.psiStrength; psiSkill += stats.psiSkill; melee += stats.melee; return *this; }
-	UnitStats operator+(const UnitStats& stats) const { return UnitStats(tu + stats.tu, stamina + stats.stamina, health + stats.health, bravery + stats.bravery, reactions + stats.reactions, firing + stats.firing, throwing + stats.throwing, strength + stats.strength, psiStrength + stats.psiStrength, psiSkill + stats.psiSkill, melee + stats.melee); }
-	UnitStats& operator-=(const UnitStats& stats) { tu -= stats.tu; stamina -= stats.stamina; health -= stats.health; bravery -= stats.bravery; reactions -= stats.reactions; firing -= stats.firing; throwing -= stats.throwing; strength -= stats.strength; psiStrength -= stats.psiStrength; psiSkill -= stats.psiSkill; melee -= stats.melee; return *this; }
-	UnitStats operator-(const UnitStats& stats) const { return UnitStats(tu - stats.tu, stamina - stats.stamina, health - stats.health, bravery - stats.bravery, reactions - stats.reactions, firing - stats.firing, throwing - stats.throwing, strength - stats.strength, psiStrength - stats.psiStrength, psiSkill - stats.psiSkill, melee - stats.melee); }
-	UnitStats operator-() const { return UnitStats(-tu, -stamina, -health, -bravery, -reactions, -firing, -throwing, -strength, -psiStrength, -psiSkill, -melee); }
-	void merge(const UnitStats& stats) { tu = (stats.tu ? stats.tu : tu); stamina = (stats.stamina ? stats.stamina : stamina); health = (stats.health ? stats.health : health); bravery = (stats.bravery ? stats.bravery : bravery); reactions = (stats.reactions ? stats.reactions : reactions); firing = (stats.firing ? stats.firing : firing); throwing = (stats.throwing ? stats.throwing : throwing); strength = (stats.strength ? stats.strength : strength); psiStrength = (stats.psiStrength ? stats.psiStrength : psiStrength); psiSkill = (stats.psiSkill ? stats.psiSkill : psiSkill); melee = (stats.melee ? stats.melee : melee); };
+	UnitStats() : tu(0), stamina(0), health(0), bravery(0), reactions(0), firing(0), throwing(0), strength(0), psiStrength(0), psiSkill(0), melee(0), mana(0) {};
+	UnitStats(int tu_, int stamina_, int health_, int bravery_, int reactions_, int firing_, int throwing_, int strength_, int psiStrength_, int psiSkill_, int melee_, int mana_) : tu(tu_), stamina(stamina_), health(health_), bravery(bravery_), reactions(reactions_), firing(firing_), throwing(throwing_), strength(strength_), psiStrength(psiStrength_), psiSkill(psiSkill_), melee(melee_), mana(mana_) {};
+	UnitStats& operator+=(const UnitStats& stats) { tu += stats.tu; stamina += stats.stamina; health += stats.health; bravery += stats.bravery; reactions += stats.reactions; firing += stats.firing; throwing += stats.throwing; strength += stats.strength; psiStrength += stats.psiStrength; psiSkill += stats.psiSkill; melee += stats.melee; mana += stats.mana; return *this; }
+	UnitStats operator+(const UnitStats& stats) const { return UnitStats(tu + stats.tu, stamina + stats.stamina, health + stats.health, bravery + stats.bravery, reactions + stats.reactions, firing + stats.firing, throwing + stats.throwing, strength + stats.strength, psiStrength + stats.psiStrength, psiSkill + stats.psiSkill, melee + stats.melee, mana + stats.mana); }
+	UnitStats& operator-=(const UnitStats& stats) { tu -= stats.tu; stamina -= stats.stamina; health -= stats.health; bravery -= stats.bravery; reactions -= stats.reactions; firing -= stats.firing; throwing -= stats.throwing; strength -= stats.strength; psiStrength -= stats.psiStrength; psiSkill -= stats.psiSkill; melee -= stats.melee; mana -= stats.mana; return *this; }
+	UnitStats operator-(const UnitStats& stats) const { return UnitStats(tu - stats.tu, stamina - stats.stamina, health - stats.health, bravery - stats.bravery, reactions - stats.reactions, firing - stats.firing, throwing - stats.throwing, strength - stats.strength, psiStrength - stats.psiStrength, psiSkill - stats.psiSkill, melee - stats.melee, mana - stats.mana); }
+	UnitStats operator-() const { return UnitStats(-tu, -stamina, -health, -bravery, -reactions, -firing, -throwing, -strength, -psiStrength, -psiSkill, -melee, -mana); }
+	void merge(const UnitStats& stats) { tu = (stats.tu ? stats.tu : tu); stamina = (stats.stamina ? stats.stamina : stamina); health = (stats.health ? stats.health : health); bravery = (stats.bravery ? stats.bravery : bravery); reactions = (stats.reactions ? stats.reactions : reactions); firing = (stats.firing ? stats.firing : firing); throwing = (stats.throwing ? stats.throwing : throwing); strength = (stats.strength ? stats.strength : strength); psiStrength = (stats.psiStrength ? stats.psiStrength : psiStrength); psiSkill = (stats.psiSkill ? stats.psiSkill : psiSkill); melee = (stats.melee ? stats.melee : melee); mana = (stats.mana ? stats.mana : mana); };
 
 	template<typename Func>
 	static void fieldLoop(Func f)
@@ -55,7 +55,7 @@ struct UnitStats
 			&UnitStats::reactions, &UnitStats::firing,
 			&UnitStats::throwing, &UnitStats::strength,
 			&UnitStats::psiStrength, &UnitStats::psiSkill,
-			&UnitStats::melee,
+			&UnitStats::melee, &UnitStats::mana,
 		};
 
 		for (Ptr p : allFields)
@@ -171,6 +171,7 @@ struct UnitStats
 			b.template addFunc<getMaxStatScript<T, Stat, &UnitStats::tu>>(prefix + "getTimeUnits");
 			b.template addFunc<getMaxStatScript<T, Stat, &UnitStats::stamina>>(prefix + "getStamina");
 			b.template addFunc<getMaxStatScript<T, Stat, &UnitStats::health>>(prefix + "getHealth");
+			b.template addFunc<getMaxStatScript<T, Stat, & UnitStats::mana>>(prefix + "getManaPool");
 		}
 
 		b.template addFunc<getMaxStatScript<T, Stat, &UnitStats::bravery>>(prefix + "getBravery");
@@ -191,6 +192,7 @@ struct UnitStats
 			b.template addFunc<setMaxStatScript<T, Stat, &UnitStats::tu>>(prefix + "setTimeUnits");
 			b.template addFunc<setMaxStatScript<T, Stat, &UnitStats::stamina>>(prefix + "setStamina");
 			b.template addFunc<setMaxStatScript<T, Stat, &UnitStats::health>>(prefix + "setHealth");
+			b.template addFunc<setMaxStatScript<T, Stat, & UnitStats::mana>>(prefix + "setManaPool");
 		}
 
 		b.template addFunc<setMaxStatScript<T, Stat, &UnitStats::bravery>>(prefix + "setBravery");
@@ -203,13 +205,14 @@ struct UnitStats
 		b.template addFunc<setMaxStatScript<T, Stat, &UnitStats::melee>>(prefix + "setMelee");
 	}
 
-	template<typename T, UnitStats T::*Stat, int T::*CurrTu, int T::*CurrEnergy, int T::*CurrHealth, typename TBind>
+	template<typename T, UnitStats T::*Stat, int T::*CurrTu, int T::*CurrEnergy, int T::*CurrHealth, int T::* CurrMana, typename TBind>
 	static void addSetStatsWithCurrScript(TBind& b, std::string prefix)
 	{
 		// when we change stats of BattleUnit its resoreces should be adjust.
 		b.template addFunc<setMaxAndCurrStatScript<T, Stat, CurrTu, &UnitStats::tu>>(prefix + "setTimeUnits");
 		b.template addFunc<setMaxAndCurrStatScript<T, Stat, CurrEnergy, &UnitStats::stamina>>(prefix + "setStamina");
 		b.template addFunc<setMaxAndCurrStatScript<T, Stat, CurrHealth, &UnitStats::health>>(prefix + "setHealth");
+		b.template addFunc<setMaxAndCurrStatScript<T, Stat, CurrMana, & UnitStats::mana>>(prefix + "setManaPool");
 
 		addSetStatsScript<T, Stat>(b, prefix, true);
 	}
@@ -360,6 +363,7 @@ namespace YAML
 			node["psiStrength"] = rhs.psiStrength;
 			node["psiSkill"] = rhs.psiSkill;
 			node["melee"] = rhs.melee;
+			node["mana"] = rhs.mana;
 			return node;
 		}
 
@@ -379,6 +383,7 @@ namespace YAML
 			rhs.psiStrength = node["psiStrength"].as<int>(rhs.psiStrength);
 			rhs.psiSkill = node["psiSkill"].as<int>(rhs.psiSkill);
 			rhs.melee = node["melee"].as<int>(rhs.melee);
+			rhs.mana = node["mana"].as<int>(rhs.mana);
 			return true;
 		}
 	};

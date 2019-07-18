@@ -256,8 +256,16 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_txtStrength->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
 	_txtPsiStrength->setAlign(ALIGN_CENTER);
-	_txtPsiStrength->setText(tr("STR_PSIONIC_STRENGTH_ABBREVIATION"));
-	_txtPsiStrength->setTooltip("STR_PSIONIC_STRENGTH");
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		_txtPsiStrength->setText(tr("STR_MANA_ABBREVIATION"));
+		_txtPsiStrength->setTooltip("STR_MANA_POOL");
+	}
+	else
+	{
+		_txtPsiStrength->setText(tr("STR_PSIONIC_STRENGTH_ABBREVIATION"));
+		_txtPsiStrength->setTooltip("STR_PSIONIC_STRENGTH");
+	}
 	_txtPsiStrength->onMouseIn((ActionHandler)&DebriefingState::txtTooltipIn);
 	_txtPsiStrength->onMouseOut((ActionHandler)&DebriefingState::txtTooltipOut);
 
@@ -281,6 +289,11 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 	for (std::vector<SoldierStatsEntry>::iterator i = _soldierStats.begin(); i != _soldierStats.end(); ++i)
 	{
+		auto tmp = (*i).second.psiStrength;
+		if (_game->getMod()->isManaFeatureEnabled())
+		{
+			tmp = (*i).second.mana;
+		}
 		_lstSoldierStats->addRow(13, (*i).first.c_str(),
 				makeSoldierString((*i).second.tu).c_str(),
 				makeSoldierString((*i).second.stamina).c_str(),
@@ -291,7 +304,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 				makeSoldierString((*i).second.throwing).c_str(),
 				makeSoldierString((*i).second.melee).c_str(),
 				makeSoldierString((*i).second.strength).c_str(),
-				makeSoldierString((*i).second.psiStrength).c_str(),
+				makeSoldierString(tmp).c_str(),
 				makeSoldierString((*i).second.psiSkill).c_str(),
 				"");
 		// note: final dummy element to cause dot filling until the end of the line
@@ -1437,7 +1450,7 @@ void DebriefingState::prepareDebriefing()
 				if ((((*j)->isInExitArea(START_POINT) || (*j)->getStatus() == STATUS_IGNORE_ME) && (battle->getMissionType() != "STR_BASE_DEFENSE" || success)) || !aborted || (aborted && (*j)->isInExitArea(END_POINT)))
 				{ // so game is not aborted or aborted and unit is on exit area
 					StatAdjustment statIncrease;
-					(*j)->postMissionProcedures(save, battle, statIncrease);
+					(*j)->postMissionProcedures(_game->getMod(), save, battle, statIncrease);
 					if ((*j)->getGeoscapeSoldier())
 						_soldierStats.push_back(std::pair<std::string, UnitStats>((*j)->getGeoscapeSoldier()->getName(), statIncrease.statGrowth));
 					playersInExitArea++;

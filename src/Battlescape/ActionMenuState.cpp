@@ -78,6 +78,14 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 		return;
 	}
 
+	if (weapon->isManaRequired() && _action->actor->getOriginalFaction() == FACTION_PLAYER)
+	{
+		if (!_game->getMod()->isManaFeatureEnabled() || !_game->getSavedGame()->isManaUnlocked(_game->getMod()))
+		{
+			return;
+		}
+	}
+
 	// priming
 	if (weapon->getFuseTimerDefault() >= 0 )
 	{

@@ -206,6 +206,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 		_energyRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::EnergyRecoveryStatBonus>());
 		_moraleRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::MoraleRecoveryStatBonus>());
 		_healthRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::HealthRecoveryStatBonus>());
+		_manaRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::ManaRecoveryStatBonus>());
 		_stunRecovery.load(_type, rec, parsers.bonusStatsScripts.get<ModScript::StunRecoveryStatBonus>());
 	}
 	_faceColorGroup = node["spriteFaceGroup"].as<int>(_faceColorGroup);
@@ -519,6 +520,14 @@ int Armor::getMoraleRecovery(const BattleUnit* unit) const
 int Armor::getHealthRecovery(const BattleUnit* unit) const
 {
 	return _healthRecovery.getBonus(unit);
+}
+
+/**
+ *  Gets unit Mana recovery.
+ */
+int Armor::getManaRecovery(const BattleUnit* unit) const
+{
+	return _manaRecovery.getBonus(unit);
 }
 
 /**

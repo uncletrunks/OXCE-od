@@ -69,7 +69,8 @@ private:
 	std::vector<NumberText*> _numMedikitLeft, _numMedikitRight;
 	NumberText *_numTwoHandedIndicatorLeft, *_numTwoHandedIndicatorRight;
 	Uint8 _twoHandedRed, _twoHandedGreen;
-	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale;
+	Bar *_barTimeUnits, *_barEnergy, *_barHealth, *_barMorale, *_barMana;
+	bool _manaBarVisible;
 	Timer *_animTimer, *_gameTimer;
 	SavedBattleGame *_save;
 	Text *_txtDebug, *_txtTooltip;

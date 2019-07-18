@@ -94,6 +94,7 @@ en-GB:
 #
   battleType: "Item type"
   experienceTrainingMode: "Experience mode"
+  manaExperience: "Mana experience"
   arcingShot: "Arcing?"
   isFireExtinguisher: "Fire exinguisher?"
   waypoints: "Max waypoints"
@@ -107,6 +108,7 @@ en-GB:
   underwaterOnly: "Underwater only?"
   landOnly: "Land only?"
   psiRequired: "Psi skill required?"
+  manaRequired: "Mana required?"
   LOSRequired: "Sight required?"
 #
   noLOSAccuracyPenalty: "No-sight penalty mult."
@@ -195,6 +197,8 @@ en-GB:
   RandomMorale: "Morale dmg RNG?"
   ToItem: "Item damage multiplier"
   RandomItem: "Item damage RNG?"
+  ToMana: "Mana dmg multiplier"
+  RandomMana: "Mana dmg RNG?"
   ToTile: "Terrain dmg multiplier"
   RandomTile: "Terrain dmg RNG?"
   TileDamageMethod: "Tile Damage Method"
@@ -311,6 +315,7 @@ en-GB:
   morale: "Morale"
   health: "Health"
   stun: "Stun"
+  mana: "Mana"
   units: "Compatible units"
 #
   buildCost: "Build cost"
@@ -339,6 +344,7 @@ en-GB:
   defense: "Defense value"
   hitRatio: "Hit chance"
   maxAllowedPerBase: "Max allowed per base"
+  manaRecoveryPerDay: "Mana per day"
   sickBayAbsoluteBonus: "Sickbay abs. bonus"
   sickBayRelativeBonus: "Sickbay rel. bonus"
   prisonType: "Prison type"

@@ -981,6 +981,13 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 	{
 		return false;
 	}
+	if (rule->isManaRequired() && unit->getOriginalFaction() == FACTION_PLAYER)
+	{
+		if (!_rule->isManaFeatureEnabled() || !_battleState->getGame()->getSavedGame()->isManaUnlocked(_rule))
+		{
+			return false;
+		}
+	}
 	if (getDepth() == 0 && rule->isWaterOnly())
 	{
 		return false;

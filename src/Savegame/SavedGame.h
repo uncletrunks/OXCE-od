@@ -407,6 +407,8 @@ public:
 	bool getDisableSoldierEquipment() const;
 	/// Sets the corresponding flag.
 	void setDisableSoldierEquipment(bool disableSoldierEquipment);
+	/// Is the mana feature already unlocked?
+	bool isManaUnlocked(Mod *mod) const;
 };
 
 }

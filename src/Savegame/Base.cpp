@@ -2160,6 +2160,25 @@ bool Base::isMaxAllowedLimitReached(RuleBaseFacility *rule) const
 }
 
 /**
+ * Gets the base's mana recovery rate.
+ * @return Mana per day.
+ */
+int Base::getManaRecoveryPerDay() const
+{
+	int result = 0;
+
+	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	{
+		if ((*bf)->getBuildTime() == 0)
+		{
+			result = std::max(result, (*bf)->getRules()->getManaRecoveryPerDay());
+		}
+	}
+
+	return result;
+}
+
+/**
 * Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
 * @return Additional HP healed.
 */

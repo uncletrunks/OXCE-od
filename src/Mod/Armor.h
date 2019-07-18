@@ -75,7 +75,7 @@ private:
 	Sint8 _ignoresMeleeThreat, _createsMeleeThreat;
 	float _overKill, _meleeDodgeBackPenalty;
 	RuleStatBonus _psiDefence, _meleeDodge;
-	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery;
+	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery, _manaRecovery;
 	ModScript::BattleUnitScripts::Container _battleUnitScripts;
 
 	std::vector<std::string> _units;
@@ -167,6 +167,9 @@ public:
 	/// Gets unit Health recovery.
 	int getHealthRecovery(const BattleUnit* unit) const;
 	const RuleStatBonus *getHealthRecoveryRaw() const { return &_healthRecovery; }
+	/// Gets unit Mana recovery.
+	int getManaRecovery(const BattleUnit* unit) const;
+	const RuleStatBonus* getManaRecoveryRaw() const { return &_manaRecovery; }
 	/// Gets unit Stun recovery.
 	int getStunRegeneration(const BattleUnit* unit) const;
 	const RuleStatBonus *getStunRegenerationRaw() const { return &_stunRecovery; }

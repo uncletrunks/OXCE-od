@@ -2747,4 +2747,17 @@ void SavedGame::setDisableSoldierEquipment(bool disableSoldierEquipment)
 	_disableSoldierEquipment = disableSoldierEquipment;
 }
 
+/**
+ * Is the mana feature already unlocked?
+ */
+bool SavedGame::isManaUnlocked(Mod *mod) const
+{
+	auto researchName = mod->getManaUnlockResearch();
+	if (researchName.empty() || isResearched(researchName))
+	{
+		return true;
+	}
+	return false;
+}
+
 }

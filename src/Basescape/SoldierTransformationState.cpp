@@ -141,7 +141,14 @@ SoldierTransformationState::SoldierTransformationState(RuleSoldierTransformation
 
 	_lstRequiredItems->setColumns(3, 140, 75, 55);
 
-	_lstStatChanges->setColumns(13, 90, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 0);
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		_lstStatChanges->setColumns(14, 72, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 0);
+	}
+	else
+	{
+		_lstStatChanges->setColumns(13, 90, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 0);
+	}
 	_lstStatChanges->setAlign(ALIGN_RIGHT);
 	_lstStatChanges->setAlign(ALIGN_LEFT, 0);
 
@@ -222,51 +229,99 @@ void SoldierTransformationState::initTransformationData()
 	UnitStats currentStats = *_sourceSoldier->getCurrentStats();
 	UnitStats changedStats = _sourceSoldier->calculateStatChanges(_game->getMod(), _transformationRule, _sourceSoldier);
 
-	_lstStatChanges->addRow(13, "",
-		tr("STR_TIME_UNITS_ABBREVIATION").c_str(),
-		tr("STR_STAMINA_ABBREVIATION").c_str(),
-		tr("STR_HEALTH_ABBREVIATION").c_str(),
-		tr("STR_BRAVERY_ABBREVIATION").c_str(),
-		tr("STR_REACTIONS_ABBREVIATION").c_str(),
-		tr("STR_FIRING_ACCURACY_ABBREVIATION").c_str(),
-		tr("STR_THROWING_ACCURACY_ABBREVIATION").c_str(),
-		tr("STR_MELEE_ACCURACY_ABBREVIATION").c_str(),
-		tr("STR_STRENGTH_ABBREVIATION").c_str(),
-		tr("STR_PSIONIC_STRENGTH_ABBREVIATION").c_str(),
-		tr("STR_PSIONIC_SKILL_ABBREVIATION").c_str(),
-		"");
-
 	bool showPsi = currentStats.psiSkill > 0
 		|| (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
 	bool isRandom = _transformationRule->isUsingRandomStats();
 
-	_lstStatChanges->addRow(13, tr("STR_CURRENT_STATS").c_str(),
-		formatStat(currentStats.tu, false, false).c_str(),
-		formatStat(currentStats.stamina, false, false).c_str(),
-		formatStat(currentStats.health, false, false).c_str(),
-		formatStat(currentStats.bravery, false, false).c_str(),
-		formatStat(currentStats.reactions, false, false).c_str(),
-		formatStat(currentStats.firing, false, false).c_str(),
-		formatStat(currentStats.throwing, false, false).c_str(),
-		formatStat(currentStats.melee, false, false).c_str(),
-		formatStat(currentStats.strength, false, false).c_str(),
-		formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
-		formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
-		"");
+	if (_game->getMod()->isManaFeatureEnabled())
+	{
+		bool showMana = _game->getSavedGame()->isManaUnlocked(_game->getMod());
 
-	_lstStatChanges->addRow(13, tr("STR_CHANGES").c_str(),
-		formatStat(changedStats.tu, true, isRandom).c_str(),
-		formatStat(changedStats.stamina, true, isRandom).c_str(),
-		formatStat(changedStats.health, true, isRandom).c_str(),
-		formatStat(changedStats.bravery, true, isRandom).c_str(),
-		formatStat(changedStats.reactions, true, isRandom).c_str(),
-		formatStat(changedStats.firing, true, isRandom).c_str(),
-		formatStat(changedStats.throwing, true, isRandom).c_str(),
-		formatStat(changedStats.melee, true, isRandom).c_str(),
-		formatStat(changedStats.strength, true, isRandom).c_str(),
-		formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
-		formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
-		"");
+		_lstStatChanges->addRow(14, "",
+			tr("STR_TIME_UNITS_ABBREVIATION").c_str(),
+			tr("STR_STAMINA_ABBREVIATION").c_str(),
+			tr("STR_HEALTH_ABBREVIATION").c_str(),
+			tr("STR_BRAVERY_ABBREVIATION").c_str(),
+			tr("STR_REACTIONS_ABBREVIATION").c_str(),
+			tr("STR_FIRING_ACCURACY_ABBREVIATION").c_str(),
+			tr("STR_THROWING_ACCURACY_ABBREVIATION").c_str(),
+			tr("STR_MELEE_ACCURACY_ABBREVIATION").c_str(),
+			tr("STR_STRENGTH_ABBREVIATION").c_str(),
+			tr("STR_MANA_ABBREVIATION").c_str(),
+			tr("STR_PSIONIC_STRENGTH_ABBREVIATION").c_str(),
+			tr("STR_PSIONIC_SKILL_ABBREVIATION").c_str(),
+			"");
+		_lstStatChanges->addRow(14, tr("STR_CURRENT_STATS").c_str(),
+			formatStat(currentStats.tu, false, false).c_str(),
+			formatStat(currentStats.stamina, false, false).c_str(),
+			formatStat(currentStats.health, false, false).c_str(),
+			formatStat(currentStats.bravery, false, false).c_str(),
+			formatStat(currentStats.reactions, false, false).c_str(),
+			formatStat(currentStats.firing, false, false).c_str(),
+			formatStat(currentStats.throwing, false, false).c_str(),
+			formatStat(currentStats.melee, false, false).c_str(),
+			formatStat(currentStats.strength, false, false).c_str(),
+			formatStat(currentStats.mana, false, !showMana).c_str(),
+			formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
+			formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
+			"");
+		_lstStatChanges->addRow(14, tr("STR_CHANGES").c_str(),
+			formatStat(changedStats.tu, true, isRandom).c_str(),
+			formatStat(changedStats.stamina, true, isRandom).c_str(),
+			formatStat(changedStats.health, true, isRandom).c_str(),
+			formatStat(changedStats.bravery, true, isRandom).c_str(),
+			formatStat(changedStats.reactions, true, isRandom).c_str(),
+			formatStat(changedStats.firing, true, isRandom).c_str(),
+			formatStat(changedStats.throwing, true, isRandom).c_str(),
+			formatStat(changedStats.melee, true, isRandom).c_str(),
+			formatStat(changedStats.strength, true, isRandom).c_str(),
+			formatStat(changedStats.mana, true, !showMana || isRandom).c_str(),
+			formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
+			formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
+			"");
+	}
+	else
+	{
+		_lstStatChanges->addRow(13, "",
+			tr("STR_TIME_UNITS_ABBREVIATION").c_str(),
+			tr("STR_STAMINA_ABBREVIATION").c_str(),
+			tr("STR_HEALTH_ABBREVIATION").c_str(),
+			tr("STR_BRAVERY_ABBREVIATION").c_str(),
+			tr("STR_REACTIONS_ABBREVIATION").c_str(),
+			tr("STR_FIRING_ACCURACY_ABBREVIATION").c_str(),
+			tr("STR_THROWING_ACCURACY_ABBREVIATION").c_str(),
+			tr("STR_MELEE_ACCURACY_ABBREVIATION").c_str(),
+			tr("STR_STRENGTH_ABBREVIATION").c_str(),
+			tr("STR_PSIONIC_STRENGTH_ABBREVIATION").c_str(),
+			tr("STR_PSIONIC_SKILL_ABBREVIATION").c_str(),
+			"");
+		_lstStatChanges->addRow(13, tr("STR_CURRENT_STATS").c_str(),
+			formatStat(currentStats.tu, false, false).c_str(),
+			formatStat(currentStats.stamina, false, false).c_str(),
+			formatStat(currentStats.health, false, false).c_str(),
+			formatStat(currentStats.bravery, false, false).c_str(),
+			formatStat(currentStats.reactions, false, false).c_str(),
+			formatStat(currentStats.firing, false, false).c_str(),
+			formatStat(currentStats.throwing, false, false).c_str(),
+			formatStat(currentStats.melee, false, false).c_str(),
+			formatStat(currentStats.strength, false, false).c_str(),
+			formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
+			formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
+			"");
+		_lstStatChanges->addRow(13, tr("STR_CHANGES").c_str(),
+			formatStat(changedStats.tu, true, isRandom).c_str(),
+			formatStat(changedStats.stamina, true, isRandom).c_str(),
+			formatStat(changedStats.health, true, isRandom).c_str(),
+			formatStat(changedStats.bravery, true, isRandom).c_str(),
+			formatStat(changedStats.reactions, true, isRandom).c_str(),
+			formatStat(changedStats.firing, true, isRandom).c_str(),
+			formatStat(changedStats.throwing, true, isRandom).c_str(),
+			formatStat(changedStats.melee, true, isRandom).c_str(),
+			formatStat(changedStats.strength, true, isRandom).c_str(),
+			formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
+			formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
+			"");
+	}
 
 	_btnStart->setVisible(transformationPossible);
 }

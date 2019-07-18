@@ -75,7 +75,7 @@ struct ArgName
 
 }
 
-constexpr size_t ScriptMaxOut = 8;
+constexpr size_t ScriptMaxOut = 9;
 constexpr size_t ScriptMaxArg = 16;
 constexpr size_t ScriptMaxReg = 64*sizeof(void*);
 
