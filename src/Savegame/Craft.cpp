@@ -982,7 +982,7 @@ void Craft::checkup()
  * @param target Pointer to target to compare.
  * @return True if it's detected, False otherwise.
  */
-bool Craft::detect(Target *target) const
+bool Craft::detect(const Ufo *target) const
 {
 	if (_stats.radarRange == 0 || !insideRadarRange(target))
 		return false;
@@ -991,8 +991,7 @@ bool Craft::detect(Target *target) const
 	if (_stats.radarChance == 100)
 		return true;
 
-	Ufo *u = dynamic_cast<Ufo*>(target);
-	int chance = _stats.radarChance * (100 + u->getVisibility()) / 100;
+	int chance = _stats.radarChance * (100 + target->getVisibility()) / 100;
 	return RNG::percent(chance);
 }
 
@@ -1002,7 +1001,7 @@ bool Craft::detect(Target *target) const
  * @param target Pointer to target to compare.
  * @return True if inside radar range.
  */
-bool Craft::insideRadarRange(Target *target) const
+bool Craft::insideRadarRange(const Ufo *target) const
 {
 	double range = Nautical(_stats.radarRange);
 	return (getDistance(target) <= range);
