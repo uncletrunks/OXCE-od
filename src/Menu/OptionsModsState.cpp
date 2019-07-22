@@ -487,7 +487,6 @@ void OptionsModsState::btnOkClick(Action *)
 	Options::save();
 	if (Options::reload)
 	{
-		Options::mapResources();
 		_game->loadLanguages();
 		_game->setState(new StartState);
 }
