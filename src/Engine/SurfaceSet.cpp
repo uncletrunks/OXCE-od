@@ -44,6 +44,7 @@ SurfaceSet::SurfaceSet(const SurfaceSet& other)
 	_width = other._width;
 	_height = other._height;
 	_offset = other._offset;
+	_sharedFrames = other._sharedFrames;
 
 	_frames.resize(other._frames.size());
 	for (size_t i = 0; i < _frames.size(); ++i)
