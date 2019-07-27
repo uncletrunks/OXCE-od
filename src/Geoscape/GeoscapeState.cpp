@@ -3070,6 +3070,12 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 	double baseLat = ufo->getLatitude();
 	_globe->getPolygonTextureAndShade(baseLon, baseLat, &texture, &shade);
 
+	int ufoDamagePercentage = 0;
+	if (_game->getMod()->getLessAliensDuringBaseDefense())
+	{
+		ufoDamagePercentage = ufo->getDamage() * 100 / ufo->getCraftStats().damageMax;
+	}
+
 	// Whatever happens in the base defense, the UFO has finished its duty
 	ufo->setStatus(Ufo::DESTROYED);
 
@@ -3106,6 +3112,7 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 		bgen.setAlienRace(ufo->getAlienRace());
 		bgen.setWorldShade(shade);
 		bgen.setWorldTexture(_game->getMod()->getGlobe()->getTexture(texture));
+		bgen.setUfoDamagePercentage(ufoDamagePercentage);
 		bgen.run();
 		_pause = true;
 		_game->pushState(new BriefingState(0, base));

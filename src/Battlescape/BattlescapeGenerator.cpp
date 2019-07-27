@@ -74,7 +74,7 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_game(game), _save(game->getSavedGame()->getSavedBattle()), _mod(_game->getMod()),
 	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
-	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0),
+	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0), _ufoDamagePercentage(0),
 	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _blocksToDo(0), _dummy(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
@@ -178,6 +178,15 @@ void BattlescapeGenerator::setAlienRace(const std::string &alienRace)
 void BattlescapeGenerator::setAlienItemlevel(int alienItemLevel)
 {
 	_alienItemLevel = alienItemLevel;
+}
+
+/**
+ * Sets the UFO damage percentage. Used to spawn less aliens during base defense.
+ * @param ufoDamagePercentage Damage percentage.
+ */
+void BattlescapeGenerator::setUfoDamagePercentage(int ufoDamagePercentage)
+{
+	_ufoDamagePercentage = ufoDamagePercentage;
 }
 
 /**
@@ -1237,6 +1246,15 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 
 		for (int i = 0; i < quantity; ++i)
 		{
+			// if the UFO was damaged, each alien (after the first) has a chance to not spawn (during base defense)
+			if (_ufoDamagePercentage > 0)
+			{
+				if (i > 0 && RNG::percent(_ufoDamagePercentage))
+				{
+					continue;
+				}
+			}
+
 			std::string alienName = race->getMember((*d).alienRank);
 
 			bool outside = RNG::generate(0,99) < (*d).percentageOutsideUfo;

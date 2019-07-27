@@ -74,6 +74,7 @@ private:
 	std::string _alienRace;
 	const AlienDeployment *_alienCustomDeploy, *_alienCustomMission;
 	int _alienItemLevel;
+	int _ufoDamagePercentage;
 	bool _allowAutoLoadout, _baseInventory, _generateFuel, _craftDeployed, _ufoDeployed;
 	int _craftZ;
 	SDL_Rect _craftPos;
@@ -172,6 +173,8 @@ public:
 	void setAlienRace(const std::string &alienRace);
 	/// Sets the alien item level.
 	void setAlienItemlevel(int alienItemLevel);
+	/// Sets the UFO damage percentage.
+	void setUfoDamagePercentage(int ufoDamagePercentage);
 	/// Sets the alien weapon deploy items.
 	void setAlienCustomDeploy(const AlienDeployment *alienCustomDeploy = 0, const AlienDeployment* alienCustomBase = 0);
 	/// Sets the XCom base.
