@@ -48,8 +48,8 @@ OptionsModsState::OptionsModsState() : _curMasterIdx(0)
 	_cbxMasters = new ComboBox(this, 305, 16, 8, 18);
 	_lstMods = new TextList(288, 104, 8, 40);
 
-	_btnOk = new TextButton(100, 16, 8, 176);
-	_btnCancel = new TextButton(100, 16, 212, 176);
+	_btnOk = new TextButton(148, 16, 8, 176);
+	_btnCancel = new TextButton(148, 16, 164, 176);
 
 	_txtTooltip = new Text(305, 25, 8, 148);
 
