@@ -148,7 +148,6 @@ bg:
   STR_VIDEO: "ГРАФИКА"
   STR_AUDIO: "ЗВУК"
   STR_BATTLESCAPE_UC: "БОЙНА КАРТА"
-  STR_MODS: "МОДОВЕ"
   STR_DISPLAY_RESOLUTION: "Размер на екрана"
   STR_DISPLAY_MODE: "Режим на показване"
   STR_WINDOWED: "В прозорец"
