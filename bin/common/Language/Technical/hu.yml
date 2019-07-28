@@ -94,6 +94,7 @@ hu:
 #
   battleType: "Tárgy típusa"
   experienceTrainingMode: "Tapasztalatszerzés"
+  manaExperience: ""
   arcingShot: "Ívelt?"
   isFireExtinguisher: "Tüzet olt?"
   waypoints: "Max útpontok"
@@ -107,6 +108,7 @@ hu:
   underwaterOnly: "Csak víz alatti?"
   landOnly: "Csak szárazföldi?"
   psiRequired: "Pszi ügyesség szükséges?"
+  manaRequired: ""
   LOSRequired: "Tűzvonal szükséges?"
 #
   noLOSAccuracyPenalty: "Nincs LoS célzásromlás"
@@ -195,6 +197,8 @@ hu:
   RandomMorale: "Morálsebz. RNG?"
   ToItem: "Tárgysebzés szorzó"
   RandomItem: "Tárgysebzés RNG?"
+  ToMana: ""
+  RandomMana: ""
   ToTile: "Terepsebzés szorzó"
   RandomTile: "Terepsebzés RNG?"
   TileDamageMethod: "Mezősebzés módja"
@@ -311,6 +315,7 @@ hu:
   morale: ""
   health: ""
   stun: ""
+  mana: ""
   units: ""
 #
   buildCost: ""
@@ -324,6 +329,7 @@ hu:
   lift: ""
   hyper: ""
   mind: ""
+  mindPower: ""
   grav: ""
   storage: ""
   personnel: ""
@@ -338,6 +344,7 @@ hu:
   defense: ""
   hitRatio: ""
   maxAllowedPerBase: ""
+  manaRecoveryPerDay: ""
   sickBayAbsoluteBonus: ""
   sickBayRelativeBonus: ""
   prisonType: ""

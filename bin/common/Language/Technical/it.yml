@@ -94,6 +94,7 @@ it:
 #
   battleType: "Tipo oggetto"
   experienceTrainingMode: "Modalità Esperienza"
+  manaExperience: ""
   arcingShot: "Archi?"
   isFireExtinguisher: "Estintore?"
   waypoints: "Waypoint massimi"
@@ -107,6 +108,7 @@ it:
   underwaterOnly: "Solo subacqueo?"
   landOnly: "Solo terreno?"
   psiRequired: "Richiesta abilità Psi?"
+  manaRequired: ""
   LOSRequired: "Vista richiesta?"
 #
   noLOSAccuracyPenalty: "mult. penalità non visiva"
@@ -195,6 +197,8 @@ it:
   RandomMorale: "RNG danno morale"
   ToItem: "Molt. danno oggetto"
   RandomItem: "RNG danno oggetto?"
+  ToMana: ""
+  RandomMana: ""
   ToTile: "Molt. danno terreno"
   RandomTile: "RNG danno terreno?"
   TileDamageMethod: "Metodo Danno Tile"
@@ -311,6 +315,7 @@ it:
   morale: "Morale"
   health: "Salute"
   stun: "Stordimento"
+  mana: ""
   units: "Unità compatibili"
 #
   buildCost: "Costo costruzione"
@@ -324,6 +329,7 @@ it:
   lift: "Ascensore accesso?"
   hyper: "Hyper-wave decoder?"
   mind: "Scudo mentale?"
+  mindPower: "Potenza scudo mentale"
   grav: "Scudo grav?"
   storage: "Spazio magazzino"
   personnel: "Spazio abitativo"
@@ -338,6 +344,7 @@ it:
   defense: "Valore difesa"
   hitRatio: "% di colpire"
   maxAllowedPerBase: "Massimo per base"
+  manaRecoveryPerDay: ""
   sickBayAbsoluteBonus: "Bonus abs. Sickbay"
   sickBayRelativeBonus: "Bonus rel. Sickbay"
   prisonType: "Tipo prigione"

@@ -94,6 +94,7 @@ cs:
 #
   battleType: "Typ předmětu"
   experienceTrainingMode: "Mód zkušeností"
+  manaExperience: ""
   arcingShot: "Oblouková?"
   isFireExtinguisher: "Hasí oheň?"
   waypoints: ""
@@ -107,6 +108,7 @@ cs:
   underwaterOnly: "Jen podvodní?"
   landOnly: "Jen pozemské?"
   psiRequired: "Vyžaduje psi dovednost?"
+  manaRequired: ""
   LOSRequired: "Musí vidět cíl?"
 #
   noLOSAccuracyPenalty: "Postih bez vidění cíle"
@@ -195,6 +197,8 @@ cs:
   RandomMorale: ""
   ToItem: ""
   RandomItem: ""
+  ToMana: ""
+  RandomMana: ""
   ToTile: ""
   RandomTile: ""
   TileDamageMethod: ""
@@ -311,6 +315,7 @@ cs:
   morale: "Morálku"
   health: "Zdraví"
   stun: "Omráčení"
+  mana: ""
   units: "Kompatibilní jednotky"
 #
   buildCost: "Cena postavení"
@@ -324,6 +329,7 @@ cs:
   lift: "Přístupový výtah?"
   hyper: ""
   mind: ""
+  mindPower: ""
   grav: ""
   storage: "Úložného místa"
   personnel: "Ubikací"
@@ -338,6 +344,7 @@ cs:
   defense: "Obranná hodnota"
   hitRatio: "Šance na zásah"
   maxAllowedPerBase: "Maximum na základnu"
+  manaRecoveryPerDay: ""
   sickBayAbsoluteBonus: ""
   sickBayRelativeBonus: ""
   prisonType: "Druh vězení"

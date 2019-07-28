@@ -94,6 +94,7 @@ ja:
 #
   battleType: "アイテムの種類"
   experienceTrainingMode: "経験モード"
+  manaExperience: ""
   arcingShot: "アーク放電を使用するか"
   isFireExtinguisher: "消化器を使用するか"
   waypoints: "最大ウェイポイント"
@@ -107,6 +108,7 @@ ja:
   underwaterOnly: "水中のみにするか"
   landOnly: "陸上のみにするか"
   psiRequired: "Psiスキル必須にするか"
+  manaRequired: ""
   LOSRequired: "視認状態を必須にするか"
 #
   noLOSAccuracyPenalty: "視界外対象へのペナルティ"
@@ -195,6 +197,8 @@ ja:
   RandomMorale: "士気ダメージをランダム化するか"
   ToItem: "アイテムへのダメージ倍率"
   RandomItem: "アイテムへのダメージをランダム化するか"
+  ToMana: ""
+  RandomMana: ""
   ToTile: "地形ダメージ倍率"
   RandomTile: "地形ダメージをランダム化するか"
   TileDamageMethod: "マス目に対するダメージの算出法"
@@ -311,6 +315,7 @@ ja:
   morale: "士気"
   health: "HP"
   stun: "気絶"
+  mana: ""
   units: "互換ユニット"
 #
   buildCost: "建造費"
@@ -324,6 +329,7 @@ ja:
   lift: "アクセスリフトの有無"
   hyper: "ハイパーウェーブ解読器の有無"
   mind: "マインドシールドの有無"
+  mindPower: ""
   grav: "重力シールドの有無"
   storage: "倉庫の容量"
   personnel: "居住区の容量"
@@ -338,6 +344,7 @@ ja:
   defense: "防御力"
   hitRatio: "命中率"
   maxAllowedPerBase: "基地毎の最大数"
+  manaRecoveryPerDay: ""
   sickBayAbsoluteBonus: "医療ベイの空きボーナス"
   sickBayRelativeBonus: "医療ベイの連結ボーナス"
   prisonType: "収監タイプ"

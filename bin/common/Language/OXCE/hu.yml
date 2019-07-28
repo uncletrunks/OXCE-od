@@ -100,7 +100,6 @@ hu:
   STR_NOT_ENOUGH_STUN: "Túl magas a kábítás mértéke!"
   STR_LINE_OF_SIGHT_REQUIRED: "Tűzvonal (LoS) szükséges."
   STR_CENTER_ON_WOUNDED_FRIEND: "Sérült Barát Középre"
-  STR_CENTER_ON_SHOCKED_FRIEND: "Sokkolt Barát Középre"
   STR_BUG_HUNT_ACTIVATED: "Csótányirtás mód aktiválva: az ellenfelek láthatók a minitérképen!"
   STR_TARGET_ENEMY: "; Célpont = ELLENSÉG"
   STR_TARGET_NEUTRAL: "; Célpont = SEMLEGES"
@@ -110,7 +109,6 @@ hu:
   STR_USE_SPECIAL_ITEM: "Spec. Tárgy Használata"
   STR_NO_EXPERIENCE_YET: "Nincs tapasztalat még:"
   STR_WHAT_CAN_I_WEAR: "Mit viselhetek?"
-  STR_STARTING_CONDITION_ARMORS: "Spec. felszerelés szükséges ehhez a küldetéshez.{NEWLINE}{NEWLINE}A megengedett páncél típusok: {0}"
   STR_MISSION_OVER: "Küldetés végrehajtva."
   STR_UNITS_WITH_FATAL_WOUNDS:
     one: "{N} emberünk még súlyosan sérült"
@@ -165,7 +163,6 @@ hu:
   STR_NO_DONE: "KÉSZ"
   STR_START_FIRING: "Tűz!"
   STR_SKIP_FIRING: "Hadd jöjjenek..."
-  STR_STARTING_CONDITION_CRAFT: "Ez a gép alkalmatlan erre a küldetésre.{NEWLINE}{NEWLINE}Alkalmas gépek:{0}"
   STR_ASSIGN_PILOTS: "Pilóták kinevezése..."
   STR_NOT_ENOUGH_PILOTS: "Nincs elég pilóta!{NEWLINE}Minimum:{0}"
   STR_UFO_SHIELD_HIT: "PAJZSOT TALÁLT!"

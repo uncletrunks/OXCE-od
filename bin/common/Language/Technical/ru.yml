@@ -94,6 +94,7 @@ ru:
 #
   battleType: "Тип предмета"
   experienceTrainingMode: "Режим тренировки"
+  manaExperience: "Опыт для маны"
   arcingShot: "Навесная стрельба?"
   isFireExtinguisher: "Тушение огня?"
   waypoints: "Макс. точек траектории"
@@ -107,6 +108,7 @@ ru:
   underwaterOnly: "Только подводное?"
   landOnly: "Только атмосферное?"
   psiRequired: "Требует пси-навыка?"
+  manaRequired: "Требует маны?"
   LOSRequired: "Нужна прям. видимость?"
 #
   noLOSAccuracyPenalty: "Множит. штрафа за отсут. прямой видимости"
@@ -195,6 +197,8 @@ ru:
   RandomMorale: "Разброс урона морали?"
   ToItem: "Множитель урона предметам"
   RandomItem: "Разброс урона предметам?"
+  ToMana: "Множит. урона мане"
+  RandomMana: "Разброс урона мане?"
   ToTile: "Множит. урона местности"
   RandomTile: "Разброс урона местности?"
   TileDamageMethod: "Нанесение повреждений окружению"
@@ -311,6 +315,7 @@ ru:
   morale: "Мораль"
   health: "Здоровье"
   stun: "Оглушение"
+  mana: "Мана"
   units: "Могут использовать"
 #
   buildCost: "Цена постройки"
@@ -324,6 +329,7 @@ ru:
   lift: "Входной лифт?"
   hyper: "Гиперволновой декодер?"
   mind: "Ментальный щит?"
+  mindPower: "Энергия ментального щита"
   grav: "Гравитационный щит?"
   storage: "Объем хранилища"
   personnel: "Жилая площадь"
@@ -338,6 +344,7 @@ ru:
   defense: "Мощность защиты"
   hitRatio: "Вероятность попадания"
   maxAllowedPerBase: "Максимум на базе"
+  manaRecoveryPerDay: "Маны в день"
   sickBayAbsoluteBonus: "Абс. бонус к скорости лечения"
   sickBayRelativeBonus: "Отн. бонус к скорости лечения"
   prisonType: "Вид камер"

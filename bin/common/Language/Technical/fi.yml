@@ -12,7 +12,7 @@ fi:
 #
   STR_CHECKING_TERRAIN: "Tarkistetaan maastoa..."
   STR_CHECKING_UFOS: "Tarkistetaan ufoja..."
-  STR_CHECKING_CRAFT: "Tarkistetaan aluksia..."
+  STR_CHECKING_CRAFT: "Tarkistetaan alusta..."
 #
   BACKPALS.DAT: "BACKPALS.DAT"
   PAL_GEOSCAPE: "PAL_GEOSCAPE"
@@ -94,6 +94,7 @@ fi:
 #
   battleType: "Esinetyyppi"
   experienceTrainingMode: "Koulutustapa"
+  manaExperience: "Manakokemus"
   arcingShot: "Kaareva?"
   isFireExtinguisher: "Sammuttaa tulta?"
   waypoints: "Enimmäisvälietapit"
@@ -107,6 +108,7 @@ fi:
   underwaterOnly: "Vain vedessä?"
   landOnly: "Vain maalla?"
   psiRequired: "Vaatiiko psi-taitoa?"
+  manaRequired: "Vaatiiko manaa?"
   LOSRequired: "Vaatiiko näköyhteyttä?"
 #
   noLOSAccuracyPenalty: "Puuttuvan näköyhteyden sakkokerroin"
@@ -195,6 +197,8 @@ fi:
   RandomMorale: "Taistelutahtovahingon SLG (RNG)?"
   ToItem: "Esinevahinkokerroin"
   RandomItem: "Esinevahingon SLG (RNG)?"
+  ToMana: "Manavahingon kerroin"
+  RandomMana: "Manavahingon SLG (RNG)?"
   ToTile: "Maastovahinkokerroin"
   RandomTile: "Maastovahingon SLG (RNG)?"
   TileDamageMethod: "Ruudun vahingoitustapa"
@@ -311,6 +315,7 @@ fi:
   morale: "Taistelutahto"
   health: "Terveys"
   stun: "Tainnutus"
+  mana: "Mana"
   units: "Yhteensopivat yksiköt"
 #
   buildCost: "Rakennushinta"
@@ -324,6 +329,7 @@ fi:
   lift: "Laitoshissi?"
   hyper: "Hyperaaltotulkitsin?"
   mind: "EEG-suoja?"
+  mindPower: "EEG-suojan tehokkuus"
   grav: "Painovoimasuoja?"
   storage: "Varastotila"
   personnel: "Asuintila"
@@ -338,6 +344,7 @@ fi:
   defense: "Puolustusarvo"
   hitRatio: "Osumatarkkuus"
   maxAllowedPerBase: "Suurin sallittu määrä tukikohdassa"
+  manaRecoveryPerDay: "Mana per päivä"
   sickBayAbsoluteBonus: "Sairasosaston absoluuttinen vaikutus"
   sickBayRelativeBonus: "Sairasosaston suhteellinen vaikutus"
   prisonType: "Vankilatyyppi"

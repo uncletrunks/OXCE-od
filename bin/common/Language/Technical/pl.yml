@@ -94,6 +94,7 @@ pl:
 #
   battleType: "typ przedmiotu"
   experienceTrainingMode: "Tryb doświadczenia"
+  manaExperience: ""
   arcingShot: "Trajektoria artyleryjska?"
   isFireExtinguisher: "Gaśnica?"
   waypoints: "Limit punktów kontrolnych"
@@ -107,6 +108,7 @@ pl:
   underwaterOnly: "Tylko podwodne?"
   landOnly: "Tylko lądowe?"
   psiRequired: "Wymaga zdolności psi?"
+  manaRequired: ""
   LOSRequired: "Wymaga linii wzroku?"
 #
   noLOSAccuracyPenalty: "Mnożnik kary za brak linii widzenia"
@@ -195,6 +197,8 @@ pl:
   RandomMorale: "Losowe obrażenia na morale?"
   ToItem: "Mnożnik obrażeń dla przedmiotów"
   RandomItem: "Losowe obrażenia na przedmioty?"
+  ToMana: ""
+  RandomMana: ""
   ToTile: "Mnożnik obrażeń dla terenu"
   RandomTile: "Losowe obrażenia na teren?"
   TileDamageMethod: "Tryb uszkadzania pól"
@@ -311,6 +315,7 @@ pl:
   morale: "Morale"
   health: "Zdrowie"
   stun: "oszołomienie"
+  mana: ""
   units: "Kompatybilne jednostki"
 #
   buildCost: "Koszt budowy"
@@ -339,6 +344,7 @@ pl:
   defense: "Wartość obronna"
   hitRatio: "Szansa trafienia"
   maxAllowedPerBase: "Maksymalna liczba w bazie"
+  manaRecoveryPerDay: ""
   sickBayAbsoluteBonus: "Abs. premia do leczenia"
   sickBayRelativeBonus: "Wzgl. premia do leczenia"
   prisonType: "Typ więzienia"

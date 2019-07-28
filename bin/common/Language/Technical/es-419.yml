@@ -94,6 +94,7 @@ es-419:
 #
   battleType: ""
   experienceTrainingMode: ""
+  manaExperience: ""
   arcingShot: ""
   isFireExtinguisher: ""
   waypoints: ""
@@ -107,6 +108,7 @@ es-419:
   underwaterOnly: ""
   landOnly: ""
   psiRequired: ""
+  manaRequired: ""
   LOSRequired: ""
 #
   noLOSAccuracyPenalty: ""
@@ -195,6 +197,8 @@ es-419:
   RandomMorale: ""
   ToItem: ""
   RandomItem: ""
+  ToMana: ""
+  RandomMana: ""
   ToTile: ""
   RandomTile: ""
   TileDamageMethod: ""
@@ -311,6 +315,7 @@ es-419:
   morale: ""
   health: ""
   stun: ""
+  mana: ""
   units: ""
 #
   buildCost: ""
@@ -324,6 +329,7 @@ es-419:
   lift: ""
   hyper: ""
   mind: ""
+  mindPower: ""
   grav: ""
   storage: ""
   personnel: ""
@@ -338,6 +344,7 @@ es-419:
   defense: ""
   hitRatio: ""
   maxAllowedPerBase: ""
+  manaRecoveryPerDay: ""
   sickBayAbsoluteBonus: ""
   sickBayRelativeBonus: ""
   prisonType: ""

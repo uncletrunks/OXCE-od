@@ -102,7 +102,6 @@ ja:
   STR_NOT_ENOUGH_STUN: "スタン耐性が高すぎる！"
   STR_LINE_OF_SIGHT_REQUIRED: "LOS(射線)が通りません"
   STR_CENTER_ON_WOUNDED_FRIEND: "負傷者をセンターに表示"
-  STR_CENTER_ON_SHOCKED_FRIEND: "ショック中の者をセンターに表示"
   STR_BUG_HUNT_ACTIVATED: "害虫駆除モード発動：ミニマップ上に敵が表示されます！"
   STR_TARGET_ENEMY: "; 標的 = 敵"
   STR_TARGET_NEUTRAL: "; 標的 = 中立"
@@ -112,7 +111,6 @@ ja:
   STR_USE_SPECIAL_ITEM: "特殊アイテムを使用"
   STR_NO_EXPERIENCE_YET: "未経験："
   STR_WHAT_CAN_I_WEAR: "装備可能なもの"
-  STR_STARTING_CONDITION_ARMORS: "この任務には装備制限あり：{NEWLINE}{NEWLINE}使用できるアーマー：{0}"
   STR_MISSION_OVER: "ミッション完了"
   STR_UNITS_WITH_FATAL_WOUNDS:
     other: "{N} 名が致命傷を負った"
@@ -171,7 +169,6 @@ ja:
   STR_SKIP_FIRING: "搭乗させる・・"
   STR_ALIEN_MISSILES_HAVE_DAMAGED_OUR_BASE: "敵ミサイルにより基地にダメージ {0}"
   STR_ALIEN_MISSILES_HAVE_DESTROYED_OUR_BASE: "敵ミサイルにより基地が潰滅 {0}"
-  STR_STARTING_CONDITION_CRAFT: "この乗り物はこの任務では使えません。{NEWLINE}{NEWLINE}許可された乗り物:{0}"
   STR_STARTING_CONDITION_ITEM: "特殊アイテムが必要なミッション:{NEWLINE}{NEWLINE}{0}"
   STR_ASSIGN_PILOTS: "パイロットを任命・・"
   STR_NOT_ENOUGH_PILOTS: "パイロットが足りません！{NEWLINE}最低人数: {0}"

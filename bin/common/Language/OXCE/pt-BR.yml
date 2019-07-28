@@ -102,7 +102,6 @@ pt-BR:
   STR_NOT_ENOUGH_STUN: "Nível de atordoamento é muito alto!"
   STR_LINE_OF_SIGHT_REQUIRED: "Linha de visão (LoS) necessária."
   STR_CENTER_ON_WOUNDED_FRIEND: "Centrar-se no Amigo Ferido"
-  STR_CENTER_ON_SHOCKED_FRIEND: "Centrar-se no Amigo Chocado"
   STR_BUG_HUNT_ACTIVATED: "Modo de caça aos bugs ativado: os inimigos são visíveis no minimapa!"
   STR_TARGET_ENEMY: "; Alvo = INIMIGO"
   STR_TARGET_NEUTRAL: "; Alvo = NEUTRO"
@@ -112,7 +111,6 @@ pt-BR:
   STR_USE_SPECIAL_ITEM: "Use Item Especial"
   STR_NO_EXPERIENCE_YET: "Nenhuma experiência ainda:"
   STR_WHAT_CAN_I_WEAR: "O que eu posso vestir?"
-  STR_STARTING_CONDITION_ARMORS: "Esta missão requer equipamento específico.{NEWLINE}{NEWLINE}Tipos de armadura permitidos são: {0}"
   STR_MISSION_OVER: "Missão completa."
   STR_UNITS_WITH_FATAL_WOUNDS:
     one: "{N} de nós ainda está fatalmente ferido"
@@ -172,7 +170,6 @@ pt-BR:
   STR_SKIP_FIRING: "Deixe-os entrar..."
   STR_ALIEN_MISSILES_HAVE_DAMAGED_OUR_BASE: "Mísseis alienígenas danificaram nossa base {0}"
   STR_ALIEN_MISSILES_HAVE_DESTROYED_OUR_BASE: "Mísseis alienígenas destruíram nossa base {0}"
-  STR_STARTING_CONDITION_CRAFT: "Esta nave não é adequada para esta missão.{NEWLINE}{NEWLINE}Nave permitida: {0}"
   STR_STARTING_CONDITION_ITEM: "Esta missão requer item(s) específico:{NEWLINE}{NEWLINE}{0}"
   STR_ASSIGN_PILOTS: "Atribuir pilotos..."
   STR_NOT_ENOUGH_PILOTS: "Pilotos insuficientes!{NEWLINE}Mínimo: {0}"

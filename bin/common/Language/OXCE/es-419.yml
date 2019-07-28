@@ -101,7 +101,6 @@ es-419:
   STR_NOT_ENOUGH_STUN: "Nivel de aturdimiento es demasiado alto!"
   STR_LINE_OF_SIGHT_REQUIRED: "Linea de vista (LdV) requerida."
   STR_CENTER_ON_WOUNDED_FRIEND: "Centrar en amigo herido"
-  STR_CENTER_ON_SHOCKED_FRIEND: "Centrar en amigo noqueado"
   STR_BUG_HUNT_ACTIVATED: "Modo de caza de errores activado: los enemigos son visibles en el minimapa!"
   STR_TARGET_ENEMY: "; Objetivo = ENEMIGO"
   STR_TARGET_NEUTRAL: "; Objetivo = NEUTRAL"
@@ -111,7 +110,6 @@ es-419:
   STR_USE_SPECIAL_ITEM: "Usar objeto especial"
   STR_NO_EXPERIENCE_YET: "Sin experiencia todavía"
   STR_WHAT_CAN_I_WEAR: "Que puedo vestir?"
-  STR_STARTING_CONDITION_ARMORS: "Esta misión requiere equipo especifico.{NEWLINE}{NEWLINE}Los tipos de armadura permitida son: {0}"
   STR_MISSION_OVER: "Misión completada."
   STR_UNITS_WITH_FATAL_WOUNDS:
     one: "{N} de nosotros seguimos fatalmente lastimados"
@@ -170,7 +168,6 @@ es-419:
   STR_SKIP_FIRING: "Dejenlos pasar..."
   STR_ALIEN_MISSILES_HAVE_DAMAGED_OUR_BASE: "Misiles alienígenas han dañado nuestra base [0]"
   STR_ALIEN_MISSILES_HAVE_DESTROYED_OUR_BASE: "Misiles alienígenas han destruido nuestra base [0]"
-  STR_STARTING_CONDITION_CRAFT: "Este navio es inadecuado para esta misión.{NEWLINE}{NEWLINE}Navio permitido: {0}"
   STR_STARTING_CONDITION_ITEM: "Esta misión requiere un(os) ítem(s) específico(s):[NEWLINE][NEWLINE][0]"
   STR_ASSIGN_PILOTS: "Asignar pilotos..."
   STR_NOT_ENOUGH_PILOTS: "No hay pilotos suficientes!{NEWLINE}Minimo: {0}"

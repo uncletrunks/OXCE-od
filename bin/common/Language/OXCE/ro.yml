@@ -85,7 +85,6 @@ ro:
   STR_NOT_ENOUGH_STUN: "Nivelul de Paralizare e prea ridicat!"
   STR_LINE_OF_SIGHT_REQUIRED: "Linie de Vedere (LoS) necesară."
   STR_CENTER_ON_WOUNDED_FRIEND: "Centrează pe Prieten Rănit"
-  STR_CENTER_ON_SHOCKED_FRIEND: "Centrează pe Prieten Paralizat"
   STR_BUG_HUNT_ACTIVATED: "Modul de vânatoare de bug-uri activat: inamicii sunt vizibili pe minimap!"
   STR_TARGET_ENEMY: "; Țintă = INAMIC"
   STR_TARGET_NEUTRAL: "; Țintă = NEUTRĂ"
@@ -93,7 +92,6 @@ ro:
   STR_TARGET_YOURSELF: "; Țintă = TU"
   STR_TARGET_ON_THE_GROUND: "(la pământ)"
   STR_WHAT_CAN_I_WEAR: "Ce pot purta?"
-  STR_STARTING_CONDITION_ARMORS: "Aceasta misiune necesită echipament specific.{NEWLINE}{NEWLINE}Tipuri de armură permise sunt: {0}"
   STR_MISSION_OVER: "Misiune completă."
   STR_UNITS_WITH_FATAL_WOUNDS:
     one: "{N} din noi încă sunt rănit fatal"
@@ -147,7 +145,6 @@ ro:
   STR_NO_DONE: "TERMINAT"
   STR_START_FIRING: "Trage!"
   STR_SKIP_FIRING: "Lasă-i inăuntru..."
-  STR_STARTING_CONDITION_CRAFT: "Această navă nu este potrivită pentru această misiune.{NEWLINE}{NEWLINE}Nave permise: {0}"
   STR_ASSIGN_PILOTS: "Atribuie piloți..."
   STR_NOT_ENOUGH_PILOTS: "Nu sunt destui piloți!{NEWLINE}Minimum: {0}"
   STR_UFO_SHIELD_HIT: "ATACĂ SCUTURILE!"

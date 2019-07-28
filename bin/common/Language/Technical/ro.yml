@@ -94,6 +94,7 @@ ro:
 #
   battleType: ""
   experienceTrainingMode: ""
+  manaExperience: ""
   arcingShot: ""
   isFireExtinguisher: ""
   waypoints: ""
@@ -107,6 +108,7 @@ ro:
   underwaterOnly: ""
   landOnly: ""
   psiRequired: ""
+  manaRequired: ""
   LOSRequired: ""
 #
   noLOSAccuracyPenalty: ""
@@ -195,6 +197,8 @@ ro:
   RandomMorale: ""
   ToItem: ""
   RandomItem: ""
+  ToMana: ""
+  RandomMana: ""
   ToTile: ""
   RandomTile: ""
   TileDamageMethod: ""
@@ -311,6 +315,7 @@ ro:
   morale: ""
   health: ""
   stun: ""
+  mana: ""
   units: ""
 #
   buildCost: ""
@@ -324,6 +329,7 @@ ro:
   lift: ""
   hyper: ""
   mind: ""
+  mindPower: ""
   grav: ""
   storage: ""
   personnel: ""
@@ -338,6 +344,7 @@ ro:
   defense: ""
   hitRatio: ""
   maxAllowedPerBase: ""
+  manaRecoveryPerDay: ""
   sickBayAbsoluteBonus: ""
   sickBayRelativeBonus: ""
   prisonType: ""

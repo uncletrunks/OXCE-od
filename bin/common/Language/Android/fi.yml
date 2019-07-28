@@ -36,3 +36,5 @@ fi:
   STR_SHOW_CURSOR_DESC: "Piirtää keltaisen osoitinnuolen. Hyödyllinen hiiren kanssa."
   STR_FRAMESKIP: "Kuvia ohitettu enintään"
   STR_FRAMESKIP_DESC: "Suurin sallittu kuvamäärä, jonka piirtokoodin annetaan ohittaa pelin ollessa käynnissä."
+  STR_NV_BUTTON_THRESHOLD: "Lisäpimeänäköpainikkeen kynnys"
+  STR_NV_BUTTON_THRESHOLD_DESC: "Tätä kynnystä pimeämmässä taistelukentän käyttöliittymään lisätään painike pimeänäön ja henkilökohtaisten valaisinten päälle/pois kytkemiseksi."
