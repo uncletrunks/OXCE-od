@@ -57,8 +57,11 @@ AlienMission::~AlienMission()
 	// Empty by design.
 }
 
-class matchById: public std::unary_function<const AlienBase *, bool>
+class matchById
 {
+	typedef const AlienBase* argument_type;
+	typedef bool result_type;
+
 public:
 	/// Remember ID.
 	matchById(int id, std::string type) : _id(id), _type(type) { /* Empty by design. */ }
@@ -158,8 +161,11 @@ bool AlienMission::isOver() const
 /**
  * Find an XCOM base in this region that is marked for retaliation.
  */
-class FindMarkedXCOMBase: public std::unary_function<const Base *, bool>
+class FindMarkedXCOMBase
 {
+	typedef const Base* argument_type;
+	typedef bool result_type;
+
 public:
 	FindMarkedXCOMBase(const RuleRegion &region) : _region(region) { /* Empty by design. */ }
 	bool operator()(const Base *base) const { return (_region.insideRegion(base->getLongitude(), base->getLatitude()) && base->getRetaliationTarget()); }
@@ -600,8 +606,11 @@ void AlienMission::start(Game &engine, const Globe &globe, size_t initialCount)
 /** @brief Match a base from it's coordinates.
  * This function object uses coordinates to match a base.
  */
-class MatchBaseCoordinates: public std::unary_function<const Base *, bool>
+class MatchBaseCoordinates
 {
+	typedef const Base* argument_type;
+	typedef bool result_type;
+
 public:
 	/// Remember the query coordinates.
 	MatchBaseCoordinates(double lon, double lat) : _lon(lon), _lat(lat) { /* Empty by design. */ }

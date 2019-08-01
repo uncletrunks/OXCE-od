@@ -71,9 +71,11 @@ const std::string SavedGame::AUTOSAVE_GEOSCAPE = "_autogeo_.asav",
 namespace
 {
 
-struct findRuleResearch : public std::unary_function<ResearchProject *,
-								bool>
+struct findRuleResearch
 {
+	typedef ResearchProject* argument_type;
+	typedef bool result_type;
+
 	RuleResearch * _toFind;
 	findRuleResearch(RuleResearch * toFind);
 	bool operator()(const ResearchProject *r) const;
@@ -88,9 +90,11 @@ bool findRuleResearch::operator()(const ResearchProject *r) const
 	return _toFind == r->getRules();
 }
 
-struct equalProduction : public std::unary_function<Production *,
-							bool>
+struct equalProduction
 {
+	typedef Production* argument_type;
+	typedef bool result_type;
+
 	RuleManufacture * _item;
 	equalProduction(RuleManufacture * item);
 	bool operator()(const Production * p) const;
@@ -2273,8 +2277,11 @@ bool SavedGame::getDebugMode() const
 /** @brief Match a mission based on region and type.
  * This function object will match alien missions based on region and type.
  */
-class matchRegionAndType: public std::unary_function<AlienMission *, bool>
+class matchRegionAndType
 {
+	typedef AlienMission* argument_type;
+	typedef bool result_type;
+
 public:
 	/// Store the region and type.
 	matchRegionAndType(const std::string &region, MissionObjective objective) : _region(region), _objective(objective) { }
@@ -2370,8 +2377,11 @@ void SavedGame::setWarned(bool warned)
 /** @brief Check if a point is contained in a region.
  * This function object checks if a point is contained inside a region.
  */
-class ContainsPoint: public std::unary_function<const Region *, bool>
+class ContainsPoint
 {
+	typedef const Region* argument_type;
+	typedef bool result_type;
+
 public:
 	/// Remember the coordinates.
 	ContainsPoint(double lon, double lat) : _lon(lon), _lat(lat) { /* Empty by design. */ }

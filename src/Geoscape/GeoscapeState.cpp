@@ -1337,8 +1337,11 @@ void GeoscapeState::time5Seconds()
 /**
  * Functor that attempt to detect an XCOM base.
  */
-class DetectXCOMBase: public std::unary_function<Ufo *, bool>
+class DetectXCOMBase
 {
+	typedef Ufo* argument_type;
+	typedef bool result_type;
+
 public:
 	/// Create a detector for the given base.
 	DetectXCOMBase(const Base &base) : _base(base) { /* Empty by design.  */ }
@@ -1371,8 +1374,11 @@ bool DetectXCOMBase::operator()(const Ufo *ufo) const
  * Functor that marks an XCOM base for retaliation.
  * This is required because of the iterator type.
  */
-struct SetRetaliationTarget: public std::unary_function<std::map<const Region *, Base *>::value_type, void>
+struct SetRetaliationTarget
 {
+	typedef std::map<const Region*, Base*>::value_type argument_type;
+	typedef void result_type;
+
 	/// Mark as a valid retaliation target.
 	void operator()(const argument_type &iter) const { iter.second->setRetaliationTarget(true); }
 };
@@ -1627,8 +1633,11 @@ void GeoscapeState::baseHunting()
 /** @brief Call AlienMission::think() with proper parameters.
  * This function object calls AlienMission::think() with the proper parameters.
  */
-class callThink: public std::unary_function<AlienMission*, void>
+class callThink
 {
+	typedef AlienMission* argument_type;
+	typedef void result_type;
+
 public:
 	/// Store the parameters.
 	/**
@@ -1702,8 +1711,11 @@ bool GeoscapeState::processMissionSite(MissionSite *site)
 /** @brief Advance time for crashed UFOs.
  * This function object will decrease the expiration timer for crashed UFOs.
  */
-struct expireCrashedUfo: public std::unary_function<Ufo*, void>
+struct expireCrashedUfo
 {
+	typedef Ufo* argument_type;
+	typedef void result_type;
+
 	/// Decrease UFO expiration timer.
 	void operator()(Ufo *ufo) const
 	{
@@ -2045,8 +2057,11 @@ void GeoscapeState::time1Hour()
  * This class will attempt to generate a supply mission for a base.
  * Each alien base has a 6/101 chance to generate a supply mission.
  */
-class GenerateSupplyMission: public std::unary_function<const AlienBase *, void>
+class GenerateSupplyMission
 {
+	typedef const AlienBase* argument_type;
+	typedef void result_type;
+
 public:
 	/// Store rules and game data references for later use.
 	GenerateSupplyMission(Game &engine, const Globe &globe) : _engine(engine), _globe(globe) { /* Empty by design */ }

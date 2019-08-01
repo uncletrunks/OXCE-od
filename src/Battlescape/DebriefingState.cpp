@@ -927,8 +927,11 @@ void DebriefingState::addStat(const std::string &name, int quantity, int score)
 /**
  * Clears the alien base from supply missions that use it.
  */
-class ClearAlienBase: public std::unary_function<AlienMission *, void>
+class ClearAlienBase
 {
+	typedef AlienMission* argument_type;
+	typedef void result_type;
+
 public:
 	/// Remembers the base.
 	ClearAlienBase(const AlienBase *base) : _base(base) { /* Empty by design. */ }

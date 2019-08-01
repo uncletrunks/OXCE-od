@@ -43,8 +43,12 @@
 namespace OpenXcom
 {
 
-struct compareArmorName : public std::binary_function<ArmorItem&, ArmorItem&, bool>
+struct compareArmorName
 {
+	typedef ArmorItem& first_argument_type;
+	typedef ArmorItem& second_argument_type;
+	typedef bool result_type;
+
 	bool _reverse;
 
 	compareArmorName(bool reverse) : _reverse(reverse) {}

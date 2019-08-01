@@ -11,8 +11,12 @@ namespace OpenXcom
 
 typedef int (*getStatFn_t)(Game *, Soldier *);
 
-struct SortFunctor : public std::binary_function<Soldier *, Soldier *, bool>
+struct SortFunctor
 {
+	typedef Soldier* first_argument_type;
+	typedef Soldier* second_argument_type;
+	typedef bool result_type;
+
 	Game *_game;
 	getStatFn_t _getStatFn;
 	SortFunctor(Game *game, getStatFn_t getStatFn) : _game(game), _getStatFn(getStatFn) { }
