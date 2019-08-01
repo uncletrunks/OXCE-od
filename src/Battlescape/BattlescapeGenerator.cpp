@@ -2959,7 +2959,7 @@ void BattlescapeGenerator::loadVerticalLevels(MapScript *command, bool repopulat
 		{
 			// Since our goal is filling the space between the bottom and the max height, we repeat the list of levels until we're done
 			if (currentLevel == _verticalLevels.end())
-				currentLevel == _verticalLevels.begin();
+				currentLevel = _verticalLevels.begin();
 
 			// Determine what we're doing with the current level
 			RuleTerrain *levelTerrain = terrain;
