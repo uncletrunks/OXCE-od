@@ -20,6 +20,7 @@
 #include <algorithm>
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
+#include <random>
 
 namespace OpenXcom
 {
@@ -45,8 +46,6 @@ namespace RNG
 	double boxMuller(double m = 0, double s = 1);
 	/// Generates a percentage chance.
 	bool percent(int value);
-	/// Generates a random integer number, exclusive.
-	int generateEx(int max);
 	/// Shuffles a list randomly.
 	/**
 	 * Randomly changes the orders of the elements in a list.
@@ -55,7 +54,9 @@ namespace RNG
 	template <typename T>
 	void shuffle(T &list)
 	{
-		std::random_shuffle(list.begin(), list.end(), generateEx);
+		std::random_device rd;
+		std::mt19937 g(rd());
+		std::shuffle(list.begin(), list.end(), g);
 	}
 }
 
