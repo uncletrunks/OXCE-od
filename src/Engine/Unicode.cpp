@@ -328,7 +328,7 @@ bool naturalCompare(const std::string &a, const std::string &b)
 	else
 #endif
 	{
-		// fallback to lexographical sort
+		// fallback to lexical sort
 		return caseCompare(a, b);
 	}
 }

@@ -1824,7 +1824,7 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 
 
 /**
-  * Terrainlevel goes from 0 to -24. For a larger sized unit, we need to pick the heighest terrain level, which is the lowest number...
+  * Terrainlevel goes from 0 to -24. For a larger sized unit, we need to pick the highest terrain level, which is the lowest number...
   * @param pos Position.
   * @param size Size of the unit we want to get the level from.
   * @return terrainlevel.

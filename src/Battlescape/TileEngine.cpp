@@ -2495,7 +2495,7 @@ void TileEngine::hit(BattleActionAttack attack, Position center, int power, cons
  * @param center Center of the explosion in voxelspace.
  * @param power Power of the explosion.
  * @param type The damage type of the explosion.
- * @param maxRadius The maximum radius othe explosion.
+ * @param maxRadius The maximum radius of the explosion.
  * @param unit The unit that caused the explosion.
  * @param clipOrWeapon The clip or weapon that caused the explosion.
  */

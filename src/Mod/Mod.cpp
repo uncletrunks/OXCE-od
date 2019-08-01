@@ -2035,7 +2035,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	}
 	if (const YAML::Node& constants = doc["constants"])
 	{
-		//backward compatiblity version
+		//backward compatibility version
 		if (constants.IsSequence())
 		{
 			for (YAML::const_iterator i = constants.begin(); i != constants.end(); ++i)
@@ -2316,7 +2316,7 @@ SavedGame *Mod::newSave() const
 		{
 			Soldier *soldier = genSoldier(save, randomTypes[i]);
 			base->getSoldiers()->push_back(soldier);
-			// Award soldier a special 'original eigth' commendation
+			// Award soldier a special 'original eight' commendation
 			if (_commendations.find("STR_MEDAL_ORIGINAL8_NAME") != _commendations.end())
 			{
 				SoldierDiary *diary = soldier->getDiary();

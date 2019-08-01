@@ -1434,7 +1434,7 @@ const RuleDamageType *RuleItem::getMeleeType() const
 }
 
 /**
- * Gets the item's battlye type.
+ * Gets the item's battle type.
  * @return The battle type.
  */
 BattleType RuleItem::getBattleType() const
@@ -2028,7 +2028,7 @@ int RuleItem::getAimRange() const
 }
 
 /**
- * Gets the maximim effective range of this weapon for Snap Shot.
+ * Gets the maximum effective range of this weapon for Snap Shot.
  * @return The maximum range.
  */
 int RuleItem::getSnapRange() const
@@ -2037,7 +2037,7 @@ int RuleItem::getSnapRange() const
 }
 
 /**
- * Gets the maximim effective range of this weapon for Auto Shot.
+ * Gets the maximum effective range of this weapon for Auto Shot.
  * @return The maximum range.
  */
 int RuleItem::getAutoRange() const

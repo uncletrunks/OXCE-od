@@ -159,7 +159,7 @@ public:
 	bool getWaitForPoly() const;
 	/// Waits until the UFO reaches the right altitude.
 	void setWaitForAltitude(bool wait);
-	/// Waits until the UFO reaches the right altutude.
+	/// Waits until the UFO reaches the right altitude.
 	bool getWaitForAltitude() const;
 	/// Award experience to the pilots.
 	void awardExperienceToPilots();
