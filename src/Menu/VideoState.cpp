@@ -426,6 +426,11 @@ void VideoState::init()
 	int dx = (Options::baseXResolution - Screen::ORIGINAL_WIDTH) / 2;
 	int dy = (Options::baseYResolution - Screen::ORIGINAL_HEIGHT) / 2;
 
+	// We can only do a fade out in 8bpp, otherwise instantly end it
+	bool fade = (_game->getScreen()->getSurface()->format->BitsPerPixel == 8);
+	const int FADE_DELAY = 45;
+	const int FADE_STEPS = 20;
+
 	FlcPlayer *flcPlayer = NULL;
 	size_t audioCounter = 0;
 	for (std::vector<std::string>::const_iterator it = _videos->begin(); it != _videos->end(); ++it)
@@ -468,6 +473,7 @@ void VideoState::init()
 
 		if (flcPlayer->wasSkipped())
 		{
+			fade = false;
 			break;
 		}
 	}
@@ -476,11 +482,6 @@ void VideoState::init()
 	{
 		delete flcPlayer;
 	}
-
-	// We can only do a fade out in 8bpp, otherwise instantly end it
-	bool fade = (_game->getScreen()->getSurface()->format->BitsPerPixel == 8);
-	const int FADE_DELAY = 45;
-	const int FADE_STEPS = 20;
 
 #ifndef __NO_MUSIC
 	// fade out!

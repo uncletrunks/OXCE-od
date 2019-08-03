@@ -595,7 +595,7 @@ bool init()
 }
 
 // called from the dos screen state (StartState)
-void updateMods()
+void refreshMods()
 {
 	if (reload)
 	{
@@ -738,13 +738,20 @@ void updateMods()
 	{
 		_masterMod = activeMaster;
 	}
+	save();
+}
 
+void updateMods()
+{
+	refreshMods();
 	FileMap::setup(getActiveMods(), embeddedOnly);
 	userSplitMasters();
 
 	// report active mods that don't meet the minimum OXCE requirements
+	Log(LOG_INFO) << "Active mods:";
 	for (auto& modInf : getActiveMods())
 	{
+		Log(LOG_INFO) << "- " << modInf->getId() << " v" << modInf->getVersion();
 		if (!modInf->isVersionOk())
 		{
 			Log(LOG_ERROR) << "Mod '" << modInf->getName() << "' requires at least OXCE v" << modInf->getRequiredExtendedVersion();
