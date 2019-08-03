@@ -1035,8 +1035,8 @@ void checkModsDependencies() {
 	drop_mods(log_ctx, drop_list);
 }
 // returns currently mapped bunch of mods.
-std::unordered_map<std::string, ModInfo> getModInfos() {
-	std::unordered_map<std::string, ModInfo> rv;
+std::map<std::string, ModInfo> getModInfos() {
+	std::map<std::string, ModInfo> rv;
 	for (auto mri = ModsAvailable.begin(); mri != ModsAvailable.end(); ++mri) {
 		rv.insert(std::make_pair(mri->first, mri->second->modInfo));
 	}

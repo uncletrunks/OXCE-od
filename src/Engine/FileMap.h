@@ -111,7 +111,7 @@ namespace FileMap
 	void checkModsDependencies();
 
 	/// returns a list of mods that are loadable.
-	std::unordered_map<std::string, ModInfo> getModInfos();
+	std::map<std::string, ModInfo> getModInfos();
 
 	/// Get mod file based on mod info.
 	const FileRecord* getModRuleFile(const ModInfo* modInfo, const std::string& relpath);

@@ -20,7 +20,6 @@
 #include <SDL.h>
 #include <string>
 #include <vector>
-#include <unordered_map>
 #include "OptionInfo.h"
 #include "ModInfo.h"
 
@@ -106,7 +105,7 @@ namespace Options
 	/// returns the id of the active master mod
 	std::string getActiveMaster();
 	/// Gets the map of mod ids to mod infos
-	const std::unordered_map<std::string, ModInfo> &getModInfos();
+	const std::map<std::string, ModInfo> &getModInfos();
 	/// Refreshes the mods.
 	void refreshMods();
 	/// Refreshes the mods and filemaps.

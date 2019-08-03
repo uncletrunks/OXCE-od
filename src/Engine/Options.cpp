@@ -24,7 +24,6 @@
 #include <SDL_keysym.h>
 #include <SDL_mixer.h>
 #include <map>
-#include <unordered_map>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -51,7 +50,7 @@ std::string _configFolder;
 std::vector<std::string> _userList;
 std::map<std::string, std::string> _commandLine;
 std::vector<OptionInfo> _info;
-std::unordered_map<std::string, ModInfo> _modInfos;
+std::map<std::string, ModInfo> _modInfos;
 std::string _masterMod;
 int _passwordCheck = -1;
 bool _loadLastSave = false;
@@ -513,7 +512,7 @@ static bool showHelp()
 	return false;
 }
 
-const std::unordered_map<std::string, ModInfo> &getModInfos() { return _modInfos; }
+const std::map<std::string, ModInfo> &getModInfos() { return _modInfos; }
 
 /**
  * Splits the game's User folder by master mod,
