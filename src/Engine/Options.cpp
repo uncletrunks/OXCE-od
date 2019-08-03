@@ -625,6 +625,8 @@ void refreshMods()
 	_modInfos = FileMap::getModInfos();
 
 	// remove mods from list that no longer exist
+	bool nonMasterModFound = false;
+	std::map<std::string, bool> corruptedMasters;
 	for (auto i = mods.begin(); i != mods.end();)
 	{
 		auto modIt = _modInfos.find(i->first);
@@ -634,7 +636,30 @@ void refreshMods()
 			i = mods.erase(i);
 			continue;
 		}
+		else
+		{
+			if ((*modIt).second.isMaster())
+			{
+				if (nonMasterModFound)
+				{
+					Log(LOG_ERROR) << "Removing master mod '" << i->first << "' from the list, because it is on a wrong position. It will be re-added automatically.";
+					corruptedMasters[i->first] = i->second;
+					i = mods.erase(i);
+					continue;
+				}
+			}
+			else
+			{
+				nonMasterModFound = true;
+			}
+		}
 		++i;
+	}
+	// re-insert corrupted masters at the beginning of the list
+	for (auto j : corruptedMasters)
+	{
+		std::pair<std::string, bool> newMod(j.first, j.second);
+		mods.insert(mods.begin(), newMod);
 	}
 
 	// add in any new mods picked up from the scan and ensure there is but a single
