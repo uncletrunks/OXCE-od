@@ -496,6 +496,7 @@ bool createFolder(const std::string &path)
 #ifdef _WIN32
 	auto pathW = pathToWindows(path);
 	int result = CreateDirectoryW(pathW.c_str(), 0);
+	Log(LOG_VERBOSE) << "createFolder() windows version.";
 	if (result == 0)
 		return false;
 	else
@@ -504,6 +505,7 @@ bool createFolder(const std::string &path)
 	mode_t process_mask = umask(0);
 	int result = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	umask(process_mask);
+	Log(LOG_VERBOSE) << "createFolder() non-win version.";
 	if (result == 0)
 		return true;
 	else
