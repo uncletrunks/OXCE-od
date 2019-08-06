@@ -1484,9 +1484,7 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item, const std::vector
 					item->setSlot(inventorySlot);
 					item->setSlotX(layoutItem->getSlotX());
 					item->setSlotY(layoutItem->getSlotY());
-					if (Options::includePrimeStateInSavedLayout &&
-						(item->getRules()->getBattleType() == BT_GRENADE ||
-						item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))
+					if (Options::includePrimeStateInSavedLayout && item->getRules()->getFuseTimerType() != BFT_NONE)
 					{
 						item->setFuseTimer(layoutItem->getFuseTimer());
 					}
