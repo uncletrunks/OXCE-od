@@ -18,7 +18,6 @@
  */
 #include "MainMenuState.h"
 #include <sstream>
-#include <filesystem>
 #include "../version.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
@@ -127,14 +126,6 @@ MainMenuState::~MainMenuState()
  */
 void MainMenuState::btnNewGameClick(Action *)
 {
-	std::filesystem::path path = Options::getDataFolder() + "common-old";
-	bool test = std::filesystem::exists(path);
-	Log(LOG_INFO) << path << " -> " << test;
-
-	path = Options::getDataFolder() + "common";
-	test = std::filesystem::exists(path);
-	Log(LOG_INFO) << path << " -> " << test;
-
 	_game->pushState(new NewGameState);
 }
 
