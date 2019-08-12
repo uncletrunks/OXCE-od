@@ -600,7 +600,7 @@ void refreshMods()
 		_masterMod = "";
 	}
 
-	FileMap::clear(false, embeddedOnly);
+	_modInfos.clear();
 	SDL_RWops *rwops = CrossPlatform::getEmbeddedAsset("standard.zip");
 	if (rwops) {
 		Log(LOG_INFO) << "Scanning embedded standard mods...";
@@ -752,13 +752,17 @@ void refreshMods()
 
 void updateMods()
 {
+	// pick up stuff in common before-hand
+	FileMap::clear(false, embeddedOnly);
+
 	refreshMods();
 	FileMap::setup(getActiveMods(), embeddedOnly);
 	userSplitMasters();
 
 	// report active mods that don't meet the minimum OXCE requirements
 	Log(LOG_INFO) << "Active mods:";
-	for (auto& modInf : getActiveMods())
+	auto activeMods = getActiveMods();
+	for (auto modInf : activeMods)
 	{
 		Log(LOG_INFO) << "- " << modInf->getId() << " v" << modInf->getVersion();
 		if (!modInf->isVersionOk())

@@ -86,8 +86,7 @@ OptionsModsState::OptionsModsState() : _curMasterIdx(0)
 	_txtMaster->setText(tr("STR_BASE_GAME"));
 
 	// scan for masters
-	// FIXME: doesn't work in OXCE, because unlike OXC it also clears the FileMap
-	//Options::refreshMods();
+	Options::refreshMods();
 	const std::map<std::string, ModInfo> &modInfos(Options::getModInfos());
 	std::vector<std::string> masterNames;
 	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)

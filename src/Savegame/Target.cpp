@@ -264,7 +264,12 @@ std::vector<Ufo*> Target::getUfoFollowers() const
  */
 double Target::getDistance(const Target *target) const
 {
-	return acos(cos(_lat) * cos(target->getLatitude()) * cos(target->getLongitude() - _lon) + sin(_lat) * sin(target->getLatitude()));
+	return getDistance(target->getLongitude(), target->getLatitude());
+}
+
+double Target::getDistance(double lon, double lat) const
+{
+	return acos(cos(_lat) * cos(lat) * cos(lon - _lon) + sin(_lat) * sin(lat));
 }
 
 }

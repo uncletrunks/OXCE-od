@@ -1124,7 +1124,7 @@ void GeoscapeState::time5Seconds()
 							continue;
 						}
 						// Can we actually fight it
-						if (!(*j)->isInDogfight() && !(*j)->getDistance(u))
+						if (!(*j)->isInDogfight())
 						{
 							if (u->isHunterKiller())
 							{

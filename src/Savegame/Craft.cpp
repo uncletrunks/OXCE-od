@@ -920,6 +920,7 @@ bool Craft::think()
 	else
 	{
 		_takeoff--;
+		resetMeetPoint();
 	}
 	if (reachedDestination() && _dest == (Target*)_base)
 	{
