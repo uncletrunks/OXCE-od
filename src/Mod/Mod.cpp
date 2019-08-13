@@ -2339,12 +2339,12 @@ SavedGame *Mod::newSave() const
 				Craft *found = 0;
 				for (auto& craft : *base->getCrafts())
 				{
-					if (!found && craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getSoldiers())
+					if (!found && craft->getRules()->getAllowLanding() && craft->getSpaceUsed() < craft->getRules()->getSoldiers())
 					{
 						// Remember transporter as fall-back, but search further for interceptors
 						found = craft;
 					}
-					if (!craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getPilots())
+					if (!craft->getRules()->getAllowLanding() && craft->getSpaceUsed() < craft->getRules()->getPilots())
 					{
 						// Fill interceptors with minimum amount of pilots necessary
 						found = craft;
@@ -2357,7 +2357,7 @@ SavedGame *Mod::newSave() const
 				Craft *found = 0;
 				for (auto& craft : *base->getCrafts())
 				{
-					if (craft->getRules()->getAllowLanding() && craft->getNumSoldiers() < craft->getRules()->getSoldiers())
+					if (craft->getRules()->getAllowLanding() && craft->getSpaceUsed() < craft->getRules()->getSoldiers())
 					{
 						// First available transporter will do
 						found = craft;
