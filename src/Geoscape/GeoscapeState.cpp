@@ -1124,7 +1124,7 @@ void GeoscapeState::time5Seconds()
 							continue;
 						}
 						// Can we actually fight it
-						if (!(*j)->isInDogfight())
+						if (!(*j)->isInDogfight() && u->getSpeed() <= (*j)->getCraftStats().speedMax)
 						{
 							if (u->isHunterKiller())
 							{
@@ -1159,7 +1159,8 @@ void GeoscapeState::time5Seconds()
 							}
 
 							// Main target
-							_dogfightsToBeStarted.push_back(new DogfightState(this, (*j), u, u->isHunterKiller()));
+							DogfightState* dogfight = new DogfightState(this, (*j), u, u->isHunterKiller());
+							_dogfightsToBeStarted.push_back(dogfight);
 
 							if (u->isHunterKiller() && _game->getMod()->getEscortsJoinFightAgainstHK())
 							{
@@ -1194,14 +1195,14 @@ void GeoscapeState::time5Seconds()
 								if ((*j)->getRules()->isWaterOnly() && u->getAltitudeInt() > (*j)->getRules()->getMaxAltitude())
 								{
 									popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_DEPTH")));
-									_dogfightsToBeStarted.back()->setMinimized(true);
-									_dogfightsToBeStarted.back()->setWaitForAltitude(true);
+									dogfight->setMinimized(true);
+									dogfight->setWaitForAltitude(true);
 								}
 								else if ((*j)->getRules()->isWaterOnly() && !_globe->insideLand((*j)->getLongitude(), (*j)->getLatitude()))
 								{
 									popup(new DogfightErrorState((*j), tr("STR_UNABLE_TO_ENGAGE_AIRBORNE")));
-									_dogfightsToBeStarted.back()->setMinimized(true);
-									_dogfightsToBeStarted.back()->setWaitForPoly(true);
+									dogfight->setMinimized(true);
+									dogfight->setWaitForPoly(true);
 								}
 							}
 

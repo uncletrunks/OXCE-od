@@ -930,7 +930,7 @@ void DogfightState::update()
 				}
 			}
 
-			if (escapeCounter > 0 )
+			if (escapeCounter > 0)
 			{
 				escapeCounter--;
 				_ufo->setEscapeCountdown(escapeCounter);

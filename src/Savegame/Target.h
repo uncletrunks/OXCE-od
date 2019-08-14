@@ -82,7 +82,8 @@ public:
 	/// Gets the target's UFO followers.
 	std::vector<Ufo*> getUfoFollowers() const;
 	/// Gets the distance to another target.
-	double getDistance(const Target *target) const;
+	double getDistance(const Target *target) const { return getDistance(target->getLongitude(), target->getLatitude()); }
+	/// Gets the distance to another position.
 	double getDistance(double lon, double lat) const;
 };
 

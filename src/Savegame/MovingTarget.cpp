@@ -219,8 +219,16 @@ void MovingTarget::move()
 		}
 		else
 		{
-			setLongitude(_dest->getLongitude());
-			setLatitude(_dest->getLatitude());
+			if (getDistance(_dest) > _speedRadian)
+			{
+				setLongitude(_meetPointLon);
+				setLatitude(_meetPointLat);
+			}
+			else
+			{
+				setLongitude(_dest->getLongitude());
+				setLatitude(_dest->getLatitude());
+			}
 			resetMeetPoint();
 		}
 	}
@@ -231,8 +239,11 @@ void MovingTarget::move()
  */
 void MovingTarget::calculateMeetPoint()
 {
+#if 0
 	if (!Options::meetingPoint) _meetCalculated = false;
 	if (_meetCalculated) return;
+#endif
+	_meetCalculated = false;
 
 	// Initialize
 	if (_dest != 0)
