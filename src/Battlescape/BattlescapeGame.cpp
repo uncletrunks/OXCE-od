@@ -203,7 +203,7 @@ BattleActionAttack::BattleActionAttack(const BattleActionCost& action, BattleIte
  * @param save Pointer to the save game.
  * @param parentState Pointer to the parent battlescape state.
  */
-BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false), _endTurnRequested(false), _endTurnProcessed(false), _endConfirmationHandled(false)
+BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false), _endTurnRequested(false), _endConfirmationHandled(false)
 {
 
 	_currentAction.actor = 0;
@@ -516,7 +516,7 @@ void BattlescapeGame::endTurn()
 	_currentAction.targeting = false;
 	_AISecondMove = false;
 
-	if (!_endTurnProcessed)
+	if (_triggerProcessed.tryRun())
 	{
 		if (_save->getTileEngine()->closeUfoDoors() && Mod::SLIDING_DOOR_CLOSE != -1)
 		{
@@ -564,6 +564,7 @@ void BattlescapeGame::endTurn()
 			return;
 		}
 	}
+
 	// check for terrain explosions
 	Tile *t = _save->getTileEngine()->checkForTerrainExplosions();
 	if (t)
@@ -574,7 +575,7 @@ void BattlescapeGame::endTurn()
 		return;
 	}
 
-	if (!_endTurnProcessed)
+	if (_endTurnProcessed.tryRun())
 	{
 		if (_save->getSide() != FACTION_NEUTRAL)
 		{
@@ -589,15 +590,15 @@ void BattlescapeGame::endTurn()
 		t = _save->getTileEngine()->checkForTerrainExplosions();
 		if (t)
 		{
-			Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
+			Position p = t->getPosition().toVoxel();
 			statePushNext(new ExplosionBState(this, p, BattleActionAttack{ }, t));
 			statePushBack(0);
-			_endTurnProcessed = true;
 			return;
 		}
 	}
 
-	_endTurnProcessed = false;
+	_triggerProcessed.reset();
+	_endTurnProcessed.reset();
 
 	if (_save->getSide() == FACTION_PLAYER)
 	{

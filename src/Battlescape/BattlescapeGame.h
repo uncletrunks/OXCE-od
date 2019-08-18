@@ -119,6 +119,36 @@ struct BattleActionAttack
  */
 class BattlescapeGame
 {
+	class SingleRun
+	{
+		bool _done = false;
+
+	public:
+
+		/**
+		 * Check if this function was already ran.
+		 * @return True if this is first time, False if any other until reseted.
+		 */
+		bool tryRun()
+		{
+			if (_done)
+			{
+				return false;
+			}
+
+			_done = true;
+			return true;
+		}
+
+		/**
+		 * Reset stat to starting condition.
+		 */
+		void reset()
+		{
+			_done = false;
+		}
+	};
+
 private:
 	SavedBattleGame *_save;
 	BattlescapeState *_parentState;
@@ -127,8 +157,11 @@ private:
 	int _AIActionCounter;
 	BattleAction _currentAction;
 	bool _AISecondMove, _playedAggroSound;
-	bool _endTurnRequested, _endTurnProcessed;
+	bool _endTurnRequested;
 	bool _endConfirmationHandled;
+
+	SingleRun _endTurnProcessed;
+	SingleRun _triggerProcessed;
 
 	/// Ends the turn.
 	void endTurn();
