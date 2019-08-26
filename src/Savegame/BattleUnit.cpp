@@ -4825,6 +4825,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	parser->registerPointerType<Armor>();
 	parser->registerPointerType<RuleSoldier>();
 	parser->registerPointerType<BattleItem>();
+	parser->registerPointerType<Soldier>();
 
 	Bind<BattleUnit> bu = { parser };
 
