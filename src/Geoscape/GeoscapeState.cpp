@@ -1852,24 +1852,33 @@ void GeoscapeState::time30Minutes()
 
 			// Detection ufo state
 			{
+				auto maskTest = [](UfoDetection value, UfoDetection mask)
+				{
+					return (value & mask) == mask;
+				};
+				auto maskBitOr = [](UfoDetection value, UfoDetection mask)
+				{
+					return (UfoDetection)(value | mask);
+				};
+
 				auto detected = DETECTION_NONE;
 				auto alreadyTracked = ufo->getDetected();
 
 				for (auto base : *_game->getSavedGame()->getBases())
 				{
-					detected = std::max(detected, base->detect(ufo, alreadyTracked));
+					detected = maskBitOr(detected, base->detect(ufo, alreadyTracked));
 				}
 
 				for (auto craft : *crafts)
 				{
-					detected = std::max(detected, craft->detect(ufo, alreadyTracked));
+					detected = maskBitOr(detected, craft->detect(ufo, alreadyTracked));
 				}
 
 				if (!alreadyTracked)
 				{
-					if (detected)
+					if (maskTest(detected, DETECTION_RADAR))
 					{
-						if (detected == DETECTION_HYPERWAVE)
+						if (maskTest(detected, DETECTION_HYPERWAVE))
 						{
 							ufo->setHyperDetected(true);
 						}
@@ -1883,12 +1892,12 @@ void GeoscapeState::time30Minutes()
 				}
 				else
 				{
-					if (detected == DETECTION_HYPERWAVE)
+					if (maskTest(detected, DETECTION_HYPERWAVE))
 					{
 						ufo->setHyperDetected(true);
 					}
 					// TODO: rethink: hunting UFOs stay visible even outside of radar range?
-					if (!detected && !ufo->isHunting())
+					if (!maskTest(detected, DETECTION_RADAR) && !ufo->isHunting())
 					{
 						ufo->setDetected(false);
 						ufo->setHyperDetected(false);

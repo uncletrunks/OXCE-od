@@ -35,9 +35,9 @@ class Waypoint;
 
 enum UfoDetection : int
 {
-	DETECTION_NONE = 0,
-	DETECTION_RADAR = 1,
-	DETECTION_HYPERWAVE = 2,
+	DETECTION_NONE = 0x00,
+	DETECTION_RADAR = 0x01,
+	DETECTION_HYPERWAVE = 0x03,
 };
 
 /**
