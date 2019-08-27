@@ -104,6 +104,10 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_inventorySlotBackPack = _game->getMod()->getInventory("STR_BACK_PACK", true);
 	_inventorySlotBelt = _game->getMod()->getInventory("STR_BELT", true);
 	_inventorySlotGround = _game->getMod()->getInventory("STR_GROUND", true);
+
+	_groundSlotsX = (Screen::ORIGINAL_WIDTH - _inventorySlotGround->getX()) / RuleInventory::SLOT_W;
+	_groundSlotsY = (Screen::ORIGINAL_HEIGHT - _inventorySlotGround->getY()) / RuleInventory::SLOT_H;
+	_occupiedSlotsCache.resize(_groundSlotsY, std::vector<char>(_groundSlotsX * 2, false));
 }
 
 /**
@@ -355,12 +359,28 @@ void Inventory::drawItems()
 		stackLayer.setPalette(getPalette());
 		// Ground items
 		int fatalWounds = 0;
+		auto& occupiedSlots = *clearOccupiedSlotsCache();
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
 			Surface *frame = (*i)->getBigSprite(texture, _animFrame);
 			// note that you can make items invisible by setting their width or height to 0 (for example used with tank corpse items)
-			if ((*i) == _selItem || (*i)->getSlotX() < _groundOffset || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0 || !frame)
+			if ((*i) == _selItem || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0 || !frame)
 				continue;
+
+			// check if item is in visible range
+			if ((*i)->getSlotX() < _groundOffset || (*i)->getSlotX() >= _groundOffset + _groundSlotsX)
+				continue;
+
+			// check if something was draw here before
+			auto& pos = occupiedSlots[(*i)->getSlotY()][(*i)->getSlotX() - _groundOffset];
+			if (pos)
+			{
+				continue;
+			}
+			else
+			{
+				pos = true;
+			}
 
 			int x, y;
 			x = ((*i)->getSlot()->getX() + ((*i)->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
@@ -444,6 +464,21 @@ void Inventory::drawSelectedItem()
 		_selection->clear();
 		_selItem->getRules()->drawHandSprite(_game->getMod()->getSurfaceSet("BIGOBS.PCK"), _selection, _selItem, _animFrame);
 	}
+}
+
+/**
+ * Clear all occupied slots markers.
+ */
+std::vector<std::vector<char>>* Inventory::clearOccupiedSlotsCache()
+{
+	for (auto& v : _occupiedSlotsCache)
+	{
+		for (auto& b : v)
+		{
+			b = false;
+		}
+	}
+	return &_occupiedSlotsCache;
 }
 
 /**
@@ -1333,8 +1368,8 @@ void Inventory::arrangeGround(int alterOffset)
 {
 	RuleInventory *ground = _inventorySlotGround;
 
-	int slotsX = (Screen::ORIGINAL_WIDTH - ground->getX()) / RuleInventory::SLOT_W;
-	int slotsY = (Screen::ORIGINAL_HEIGHT - ground->getY()) / RuleInventory::SLOT_H;
+	int slotsX = _groundSlotsX;
+	int slotsY = _groundSlotsY;
 	int x = 0;
 	int y = 0;
 	bool donePlacing = false;
@@ -1348,8 +1383,7 @@ void Inventory::arrangeGround(int alterOffset)
 		std::vector<BattleItem*> itemListOrder; // Placement order of item type stacks.
 		std::vector< std::vector<int> > startIndexCacheX; // Cache for skipping to last known available position of a given size.
 		// Create chart of free slots for later rapid lookup.
-		std::vector< std::vector<bool> > occupiedSlots;
-		occupiedSlots.resize(slotsY, std::vector<bool>(slotsX * 2, false));
+		auto& occupiedSlots = *clearOccupiedSlotsCache();
 
 		// Move items out of the way and find which stack they'll end up in within the inventory.
 		for (auto& i : *(_selUnit->getTile()->getInventory()))
@@ -1446,8 +1480,8 @@ void Inventory::arrangeGround(int alterOffset)
 						{
 							// Filled enough for the widest item to potentially request occupancy checks outside of current cache. Expand slot cache.
 							size_t newCacheSize = occupiedSlots[0].size() * 2;
-							for (std::vector< std::vector<bool> >::iterator j = occupiedSlots.begin(); j != occupiedSlots.end(); ++j) {
-								j->resize(newCacheSize, false);
+							for (auto j = occupiedSlots.begin(); j != occupiedSlots.end(); ++j) {
+								j->resize(newCacheSize, 0);
 							}
 						}
 						// Reserve the slots this item will occupy.
@@ -1455,7 +1489,7 @@ void Inventory::arrangeGround(int alterOffset)
 						{
 							for (int yd = 0; yd < itemTypeSample->getRules()->getInventoryHeight() && canPlace; yd++)
 							{
-								occupiedSlots[y + yd][x + xd] = true;
+								occupiedSlots[y + yd][x + xd] = 1;
 							}
 						}
 
