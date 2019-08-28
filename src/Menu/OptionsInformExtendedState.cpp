@@ -81,7 +81,7 @@ namespace OpenXcom
 	 * Closes the window. Enables the mod.
 	 * @param action Pointer to an action.
 	 */
-	void OptionsInformExtendedState::btnYesClick(Action *action)
+	void OptionsInformExtendedState::btnYesClick(Action *)
 	{
 		_game->popState();
 
