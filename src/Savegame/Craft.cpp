@@ -991,21 +991,24 @@ UfoDetection Craft::detect(const Ufo *target, bool alreadyTracked) const
 
 	if (distance < _stats.radarRange)
 	{
-		detectionType = DETECTION_RADAR;
-		if (alreadyTracked)
+		// backward compatibility with vanilla
+		if (_stats.radarChance == 100)
 		{
+			detectionType = DETECTION_RADAR;
 			detectionChance = 100;
 		}
 		else
 		{
-			detectionChance = _stats.radarChance * (100 + target->getVisibility()) / 100;
+			detectionType = DETECTION_RADAR;
+			if (alreadyTracked)
+			{
+				detectionChance = 100;
+			}
+			else
+			{
+				detectionChance = _stats.radarChance * (100 + target->getVisibility()) / 100;
+			}
 		}
-	}
-	// backward compatibility with vanilla
-	else if (_stats.radarChance == 100)
-	{
-		detectionType = DETECTION_RADAR;
-		detectionChance = 100;
 	}
 
 	ModScript::DetectUfoFromCraft::Output args { detectionType, detectionChance, };

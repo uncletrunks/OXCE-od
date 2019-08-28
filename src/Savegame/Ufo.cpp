@@ -1278,7 +1278,7 @@ std::string debugDisplayScript(const Ufo* u)
 		s += "(type: \"";
 		s += u->getRules()->getType();
 		s += "\" id: ";
-		s += u->getId();
+		s += std::to_string(u->getId());
 		s += "\")";
 		return s;
 	}
