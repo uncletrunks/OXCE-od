@@ -291,6 +291,8 @@ public:
 	void setBughuntMinTurn(int bughuntMinTurn);
 	/// Gets the bug hunt turn number.
 	int getBughuntMinTurn() const;
+	/// Start first turn of battle.
+	void startFirstTurn();
 	/// Ends the turn.
 	void endTurn();
 	/// Gets animation frame.

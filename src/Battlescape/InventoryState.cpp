@@ -778,30 +778,12 @@ void InventoryState::btnOkClick(Action *)
 	if (_inv->getSelectedItem() != 0)
 		return;
 	_game->popState();
-	Tile *inventoryTile = _battleGame->getSelectedUnit()->getTile();
 	if (!_tu)
 	{
 		saveEquipmentLayout();
-		_battleGame->resetUnitTiles();
-		if (_battleGame->getTurn() == 1)
+		if (_parent)
 		{
-			_battleGame->randomizeItemLocations(inventoryTile);
-			if (inventoryTile->getUnit())
-			{
-				// make sure we select the unit closest to the ramp.
-				_battleGame->setSelectedUnit(inventoryTile->getUnit());
-			}
-		}
-
-		// initialize xcom units for battle
-		for (std::vector<BattleUnit*>::iterator j = _battleGame->getUnits()->begin(); j != _battleGame->getUnits()->end(); ++j)
-		{
-			if ((*j)->getOriginalFaction() != FACTION_PLAYER || (*j)->isOut())
-			{
-				continue;
-			}
-
-			(*j)->prepareNewTurn(false);
+			_battleGame->startFirstTurn();
 		}
 	}
 }
