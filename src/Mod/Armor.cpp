@@ -866,7 +866,7 @@ const std::vector<std::string> &Armor::getUnits() const
 namespace
 {
 
-void getArmorValueScript(Armor *ar, int &ret, int side)
+void getArmorValueScript(const Armor *ar, int &ret, int side)
 {
 	if (ar && 0 <= side && side < SIDE_MAX)
 	{
