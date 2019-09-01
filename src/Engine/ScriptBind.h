@@ -985,7 +985,7 @@ struct BindFunc<X>
 template<typename T, typename P, typename... Args, P*(T::*X)(Args...)>
 struct BindFunc<X>
 {
-	static RetEnum func(T* t, const P*& r, Args... a)
+	static RetEnum func(T* t, P*& r, Args... a)
 	{
 		if (t) r = (t->*X)(std::forward<Args>(a)...); else r = {};
 		return RetContinue;
