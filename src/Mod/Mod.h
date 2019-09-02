@@ -216,6 +216,7 @@ private:
 	std::map<std::string, std::string> _fixedUserOptions;
 	std::vector<std::string> _hiddenMovementBackgrounds;
 	bool _disableUnderwaterSounds;
+	bool _enableUnitResponseSounds;
 	std::vector<int> _flagByKills;
 	int _pediaReplaceCraftFuelWithRangeType;
 	StatAdjustment _statAdjustment[5];
@@ -703,6 +704,7 @@ public:
 	const std::map<int, std::string> *getMonthlyRatings() const;
 	const std::map<std::string, std::string> &getFixedUserOptions() const;
 	const std::vector<std::string> &getHiddenMovementBackgrounds() const;
+	bool getEnableUnitResponseSounds() const { return _enableUnitResponseSounds; }
 	const std::vector<int> &getFlagByKills() const;
 	StatAdjustment *getStatAdjustment(int difficulty);
 	int getDefeatScore() const;

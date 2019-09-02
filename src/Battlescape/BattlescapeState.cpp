@@ -2050,6 +2050,10 @@ void BattlescapeState::handleItemClick(BattleItem *item, bool middleClick)
 		{
 			_battleGame->getCurrentAction()->weapon = item;
 			popup(new ActionMenuState(_battleGame->getCurrentAction(), _icons->getX(), _icons->getY() + 16));
+			if (item->getRules()->getBattleType() == BT_FIREARM)
+			{
+				_battleGame->playUnitResponseSound(_battleGame->getCurrentAction()->actor, 2); // "select weapon" sound
+			}
 		}
 	}
 }

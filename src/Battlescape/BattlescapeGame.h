@@ -287,6 +287,8 @@ public:
 	void playSound(int sound, const Position &pos);
 	/// Play sound on battlefield.
 	void playSound(int sound);
+	/// Play unit response sound on battlefield.
+	void playUnitResponseSound(BattleUnit *unit, int type);
 	/// Sets up a mission complete notification.
 	void missionComplete();
 	std::list<BattleState*> getStates();

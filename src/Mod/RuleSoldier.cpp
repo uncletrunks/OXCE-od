@@ -123,6 +123,15 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	mod->loadSoundOffset(_type, _berserkSoundMale, node["berserkMale"], "BATTLE.CAT");
 	mod->loadSoundOffset(_type, _berserkSoundFemale, node["berserkFemale"], "BATTLE.CAT");
 
+	mod->loadSoundOffset(_type, _selectUnitSoundMale, node["selectUnitMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _selectUnitSoundFemale, node["selectUnitFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _startMovingSoundMale, node["startMovingMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _startMovingSoundFemale, node["startMovingFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _selectWeaponSoundMale, node["selectWeaponMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _selectWeaponSoundFemale, node["selectWeaponFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _annoyedSoundMale, node["annoyedMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _annoyedSoundFemale, node["annoyedFemale"], "BATTLE.CAT");
+
 	for (YAML::const_iterator i = node["soldierNames"].begin(); i != node["soldierNames"].end(); ++i)
 	{
 		std::string fileName = (*i).as<std::string>();
@@ -455,6 +464,78 @@ const std::vector<int> &RuleSoldier::getMaleBerserkSounds() const
 const std::vector<int> &RuleSoldier::getFemaleBerserkSounds() const
 {
 	return _berserkSoundFemale;
+}
+
+/**
+ * Gets the "select unit" sounds for male soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getMaleSelectUnitSounds() const
+{
+	return _selectUnitSoundMale;
+}
+
+/**
+ * Gets the "select unit" sounds for female soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getFemaleSelectUnitSounds() const
+{
+	return _selectUnitSoundFemale;
+}
+
+/**
+ * Gets the "start moving" sounds for male soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getMaleStartMovingSounds() const
+{
+	return _startMovingSoundMale;
+}
+
+/**
+ * Gets the "start moving" sounds for female soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getFemaleStartMovingSounds() const
+{
+	return _startMovingSoundFemale;
+}
+
+/**
+ * Gets the "select weapon" sounds for male soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getMaleSelectWeaponSounds() const
+{
+	return _selectWeaponSoundMale;
+}
+
+/**
+ * Gets the "select weapon" sounds for female soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getFemaleSelectWeaponSounds() const
+{
+	return _selectWeaponSoundFemale;
+}
+
+/**
+ * Gets the "annoyed" sounds for male soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getMaleAnnoyedSounds() const
+{
+	return _annoyedSoundMale;
+}
+
+/**
+ * Gets the "annoyed" sounds for female soldiers.
+ * @return List of sound IDs.
+ */
+const std::vector<int> &RuleSoldier::getFemaleAnnoyedSounds() const
+{
+	return _annoyedSoundFemale;
 }
 
 /**

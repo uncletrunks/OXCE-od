@@ -1797,6 +1797,13 @@ void BattlescapeGame::primaryAction(Position pos)
 	{
 		_currentAction.actor = _save->getSelectedUnit();
 		BattleUnit *unit = _save->selectUnit(pos);
+		if (unit && unit == _save->getSelectedUnit() && (unit->getVisible() || _debugPlay))
+		{
+			if (RNG::seedless(0, 99) < 20)
+			{
+				playUnitResponseSound(unit, 3); // "annoyed" sound
+			}
+		}
 		if (unit && unit != _save->getSelectedUnit() && (unit->getVisible() || _debugPlay))
 		{
 		//  -= select unit =-
@@ -1807,6 +1814,7 @@ void BattlescapeGame::primaryAction(Position pos)
 				cancelCurrentAction();
 				setupCursor();
 				_currentAction.actor = unit;
+				playUnitResponseSound(unit, 0); // "select unit" sound
 			}
 		}
 		else if (playableUnitSelected())
@@ -1849,6 +1857,7 @@ void BattlescapeGame::primaryAction(Position pos)
 				getMap()->setCursorType(CT_NONE);
 				_parentState->getGame()->getCursor()->setVisible(false);
 				statePushBack(new UnitWalkBState(this, _currentAction));
+				playUnitResponseSound(_currentAction.actor, 1); // "start moving" sound
 			}
 		}
 	}
@@ -2911,6 +2920,61 @@ void BattlescapeGame::playSound(int sound)
 	if (sound != -1)
 	{
 		_parentState->getGame()->getMod()->getSoundByDepth(_save->getDepth(), sound)->play();
+	}
+}
+
+/**
+ * Play unit response sound on battlefield.
+ */
+void BattlescapeGame::playUnitResponseSound(BattleUnit *unit, int type)
+{
+	if (!getMod()->getEnableUnitResponseSounds())
+		return;
+
+	if (!Options::oxceEnableUnitResponseSounds)
+		return;
+
+	if (unit && unit->getGeoscapeSoldier())
+	{
+		std::vector<int> sounds;
+		if (unit->getGeoscapeSoldier()->getGender() == GENDER_MALE)
+		{
+			if (type == 0)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleSelectUnitSounds();
+			else if (type == 1)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleStartMovingSounds();
+			else if (type == 2)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleSelectWeaponSounds();
+			else if (type == 3)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleAnnoyedSounds();
+		}
+		else
+		{
+			if (type == 0)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleSelectUnitSounds();
+			else if (type == 1)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleStartMovingSounds();
+			else if (type == 2)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleSelectWeaponSounds();
+			else if (type == 3)
+				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleAnnoyedSounds();
+		}
+		int sound = -1;
+		if (!sounds.empty())
+		{
+			if (sounds.size() > 1)
+				sound = sounds[RNG::seedless(0, sounds.size() - 1)];
+			else
+				sound = sounds.front();
+		}
+		if (sound != -1)
+		{
+			if (!Mix_Playing(3))
+			{
+				// use fixed channel, so that we can check if the unit isn't already/still talking
+				getMod()->getSoundByDepth(_save->getDepth(), sound)->play(3);
+			}
+		}
 	}
 }
 

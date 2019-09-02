@@ -69,6 +69,10 @@ private:
 	int _femaleFrequency, _value, _transferTime, _moraleLossWhenKilled;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<int> _panicSoundMale, _panicSoundFemale, _berserkSoundMale, _berserkSoundFemale;
+	std::vector<int> _selectUnitSoundMale, _selectUnitSoundFemale;
+	std::vector<int> _startMovingSoundMale, _startMovingSoundFemale;
+	std::vector<int> _selectWeaponSoundMale, _selectWeaponSoundFemale;
+	std::vector<int> _annoyedSoundMale, _annoyedSoundFemale;
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
 	int _avatarOffsetX, _avatarOffsetY, _flagOffset;
@@ -144,6 +148,22 @@ public:
 	const std::vector<int> &getMaleBerserkSounds() const;
 	/// Gets the soldier's female berserk sounds.
 	const std::vector<int> &getFemaleBerserkSounds() const;
+	/// Gets the soldier's male "select unit" sounds.
+	const std::vector<int> &getMaleSelectUnitSounds() const;
+	/// Gets the soldier's female "select unit" sounds.
+	const std::vector<int> &getFemaleSelectUnitSounds() const;
+	/// Gets the soldier's male "start moving" sounds.
+	const std::vector<int> &getMaleStartMovingSounds() const;
+	/// Gets the soldier's female "start moving" sounds.
+	const std::vector<int> &getFemaleStartMovingSounds() const;
+	/// Gets the soldier's male "select weapon" sounds.
+	const std::vector<int> &getMaleSelectWeaponSounds() const;
+	/// Gets the soldier's female "select weapon" sounds.
+	const std::vector<int> &getFemaleSelectWeaponSounds() const;
+	/// Gets the soldier's male "annoyed" sounds.
+	const std::vector<int> &getMaleAnnoyedSounds() const;
+	/// Gets the soldier's female "annoyed" sounds.
+	const std::vector<int> &getFemaleAnnoyedSounds() const;
 	/// Gets the pool list for soldier names.
 	const std::vector<SoldierNamePool*> &getNames() const;
 	/// Gets the value - for score calculation.

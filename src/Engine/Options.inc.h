@@ -61,6 +61,7 @@ OPT bool oxceAutoSell;
 OPT int oxceNightVisionButtonThreshold;
 OPT bool oxceRememberDisabledCraftWeapons;
 OPT bool oxceHighlightNewTopics;
+OPT bool oxceEnableUnitResponseSounds;
 OPT std::string password;
 
 // Flags and other stuff that don't need OptionInfo's.
