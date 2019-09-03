@@ -455,7 +455,7 @@ void BattlescapeGenerator::nextStage()
 					// change soldier's armor (needed for inventory view!)
 					(*j)->getGeoscapeSoldier()->setArmor(transformedArmor);
 					// change battleunit's armor
-					(*j)->updateArmorFromSoldier((*j)->getGeoscapeSoldier(), transformedArmor, _save->getDepth(), _game->getMod()->getMaxViewDistance());
+					(*j)->updateArmorFromSoldier(_game->getMod(), (*j)->getGeoscapeSoldier(), transformedArmor, _save->getDepth());
 				}
 			}
 		}
@@ -844,7 +844,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 				{
 					(*i)->clearEquipmentLayout();
 				}
-				BattleUnit *unit = addXCOMUnit(new BattleUnit(*i, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
+				BattleUnit *unit = addXCOMUnit(new BattleUnit(_game->getMod() , *i, _save->getDepth()));
 				if (unit && !_save->getSelectedUnit())
 					_save->setSelectedUnit(unit);
 			}
@@ -1051,7 +1051,7 @@ void BattlescapeGenerator::autoEquip(std::vector<BattleUnit*> units, Mod *mod, s
 BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 {
 	Unit *rule = v->getRules()->getVehicleUnit();
-	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, nullptr, rule->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance()));
+	BattleUnit *unit = addXCOMUnit(new BattleUnit(_game->getMod(), rule, FACTION_PLAYER, _unitSequence++, nullptr, rule->getArmor(), 0, _save->getDepth()));
 	if (unit)
 	{
 		_save->createItemForUnit(v->getRules(), unit, true);
@@ -1312,7 +1312,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
  */
 BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outside)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _save->getEnviroEffects(), rules->getArmor(), _game->getMod()->getStatAdjustment(_game->getSavedGame()->getDifficulty()), _save->getDepth(), _game->getMod()->getMaxViewDistance());
+	BattleUnit *unit = new BattleUnit(_game->getMod(), rules, FACTION_HOSTILE, _unitSequence++, _save->getEnviroEffects(), rules->getArmor(), _game->getMod()->getStatAdjustment(_game->getSavedGame()->getDifficulty()), _save->getDepth());
 	Node *node = 0;
 
 	// safety to avoid index out of bounds errors
@@ -1384,7 +1384,7 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
  */
 BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _save->getEnviroEffects(), rules->getArmor(), 0, _save->getDepth(), _game->getMod()->getMaxViewDistance());
+	BattleUnit *unit = new BattleUnit(_game->getMod(), rules, FACTION_NEUTRAL, _unitSequence++, _save->getEnviroEffects(), rules->getArmor(), 0, _save->getDepth());
 	Node *node = _save->getSpawnNode(0, unit);
 
 	if (node)

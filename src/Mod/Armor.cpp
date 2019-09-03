@@ -134,7 +134,18 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_drawingRoutine = node["drawingRoutine"].as<int>(_drawingRoutine);
 	_drawBubbles = node["drawBubbles"].as<bool>(_drawBubbles);
 	_movementType = (MovementType)node["movementType"].as<int>(_movementType);
+
 	mod->loadSoundOffset(_type, _moveSound, node["moveSound"], "BATTLE.CAT");
+
+	mod->loadSoundOffset(_type, _selectUnitSoundMale, node["selectUnitMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _selectUnitSoundFemale, node["selectUnitFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _startMovingSoundMale, node["startMovingMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _startMovingSoundFemale, node["startMovingFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _selectWeaponSoundMale, node["selectWeaponMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _selectWeaponSoundFemale, node["selectWeaponFemale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _annoyedSoundMale, node["annoyedMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _annoyedSoundFemale, node["annoyedFemale"], "BATTLE.CAT");
+
 	_weight = node["weight"].as<int>(_weight);
 	_visibilityAtDark = node["visibilityAtDark"].as<int>(_visibilityAtDark);
 	_visibilityAtDay = node["visibilityAtDay"].as<int>(_visibilityAtDay);

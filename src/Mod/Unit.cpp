@@ -98,6 +98,12 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	mod->loadSoundOffset(_type, _panicSound, node["panicSound"], "BATTLE.CAT");
 	mod->loadSoundOffset(_type, _berserkSound, node["berserkSound"], "BATTLE.CAT");
 	mod->loadSoundOffset(_type, _aggroSound, node["aggroSound"], "BATTLE.CAT");
+
+	mod->loadSoundOffset(_type, _selectUnitSound, node["selectUnitSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _startMovingSound, node["startMovingSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _selectWeaponSound, node["selectWeaponSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _annoyedSound, node["annoyedSound"], "BATTLE.CAT");
+
 	mod->loadSoundOffset(_type, _moveSound, node["moveSound"], "BATTLE.CAT");
 }
 

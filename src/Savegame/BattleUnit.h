@@ -132,6 +132,7 @@ private:
 	int _standHeight, _kneelHeight, _floatHeight;
 	int _lastReloadSound;
 	std::vector<int> _deathSound;
+	std::vector<int> _selectUnitSound, _startMovingSound, _selectWeaponSound, _annoyedSound;
 	int _value, _aggroSound, _moveSound;
 	int _intelligence, _aggression;
 	int _maxViewDistanceAtDark, _maxViewDistanceAtDay;
@@ -170,6 +171,8 @@ private:
 	void prepareStun(int strun);
 	/// Helper function preparing Morale recovery at beginning of turn.
 	void prepareMorale(int morale);
+	/// Helper function preparing unit response sounds.
+	void prepareUnitResponseSounds(const Mod *mod);
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
 	/// Name of class used in script.
@@ -180,11 +183,11 @@ public:
 	static void ScriptFill(ScriptWorkerBlit* w, BattleUnit* unit, int body_part, int anim_frame, int shade, int burn);
 
 	/// Creates a BattleUnit from solder.
-	BattleUnit(Soldier *soldier, int depth, int maxViewDistance);
+	BattleUnit(const Mod *mod, Soldier *soldier, int depth);
 	/// Creates a BattleUnit from unit.
-	BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleEnviroEffects* enviro, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance);
+	BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, const RuleEnviroEffects* enviro, Armor *armor, StatAdjustment *adjustment, int depth);
 	/// Updates BattleUnit's armor and related attributes (after a change/transformation of armor).
-	void updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int depth, int maxViewDistance);
+	void updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor *ruleArmor, int depth);
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.
@@ -471,6 +474,14 @@ public:
 	int getReloadSound() const { return _lastReloadSound; }
 	/// Get the unit's death sounds.
 	const std::vector<int> &getDeathSounds() const;
+	/// Gets the unit's "select unit" sounds.
+	const std::vector<int> &getSelectUnitSounds() const { return _selectUnitSound; }
+	/// Gets the unit's "start moving" sounds.
+	const std::vector<int> &getStartMovingSounds() const { return _startMovingSound; }
+	/// Gets the unit's "select weapon" sounds.
+	const std::vector<int> &getSelectWeaponSounds() const { return _selectWeaponSound; }
+	/// Gets the unit's "annoyed" sounds.
+	const std::vector<int> &getAnnoyedSounds() const { return _annoyedSound; }
 	/// Get the unit's move sound.
 	int getMoveSound() const;
 	/// Get whether the unit is affected by fatal wounds.

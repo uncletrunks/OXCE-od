@@ -57,7 +57,7 @@ namespace OpenXcom
  * @param soldier Pointer to the Soldier.
  * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
  */
-BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
+BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 	_faction(FACTION_PLAYER), _originalFaction(FACTION_PLAYER), _killedBy(FACTION_PLAYER), _id(0), _tile(0),
 	_lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0), _toDirectionTurret(0),
 	_verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _isSurrendering(false), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
@@ -109,7 +109,7 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
-	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
+	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : mod->getMaxViewDistance();
 	_loftempsSet = _armor->getLoftempsSet();
 	_gender = soldier->getGender();
 	_faceDirection = -1;
@@ -173,6 +173,8 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
 
 	int look = soldier->getGender() + 2 * soldier->getLook() + 8 * soldier->getLookVariant();
 	setRecolor(look, look, _rankInt);
+
+	prepareUnitResponseSounds(mod);
 }
 
 /**
@@ -180,9 +182,8 @@ BattleUnit::BattleUnit(Soldier *soldier, int depth, int maxViewDistance) :
  * @param soldier Pointer to the Geoscape Soldier.
  * @param ruleArmor Pointer to the new Armor ruleset.
  * @param depth The depth of the battlefield.
- * @param maxViewDistance Maximum default view distance during the day.
  */
-void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int depth, int maxViewDistance)
+void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor *ruleArmor, int depth)
 {
 	_stats = *soldier->getCurrentStats();
 	_armor = ruleArmor;
@@ -203,7 +204,7 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int 
 	_stats += *_armor->getStats();	// armors may modify effective stats
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
-	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
+	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : mod->getMaxViewDistance();
 	_loftempsSet = _armor->getLoftempsSet();
 
 	_tu = _stats.tu;
@@ -223,6 +224,94 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int 
 
 	int look = soldier->getGender() + 2 * soldier->getLook() + 8 * soldier->getLookVariant();
 	setRecolor(look, look, _rankInt);
+
+	prepareUnitResponseSounds(mod);
+}
+
+/**
+ * Helper function preparing unit response sounds.
+ */
+void BattleUnit::prepareUnitResponseSounds(const Mod *mod)
+{
+	if (!mod->getEnableUnitResponseSounds())
+		return;
+
+	// custom sounds by soldier name
+	bool custom = false;
+	if (mod->getSelectUnitSounds().find(_name) != mod->getSelectUnitSounds().end())
+	{
+		custom = true;
+		_selectUnitSound = mod->getSelectUnitSounds().find(_name)->second;
+	}
+	if (mod->getStartMovingSounds().find(_name) != mod->getStartMovingSounds().end())
+	{
+		custom = true;
+		_startMovingSound = mod->getStartMovingSounds().find(_name)->second;
+	}
+	if (mod->getSelectWeaponSounds().find(_name) != mod->getSelectWeaponSounds().end())
+	{
+		custom = true;
+		_selectWeaponSound = mod->getSelectWeaponSounds().find(_name)->second;
+	}
+	if (mod->getAnnoyedSounds().find(_name) != mod->getAnnoyedSounds().end())
+	{
+		custom = true;
+		_annoyedSound = mod->getAnnoyedSounds().find(_name)->second;
+	}
+
+	if (custom)
+		return;
+
+	// lower priority: soldier type / unit type
+	if (_geoscapeSoldier)
+	{
+		auto soldierRules = _geoscapeSoldier->getRules();
+		if (_gender == GENDER_MALE)
+		{
+			_selectUnitSound = soldierRules->getMaleSelectUnitSounds();
+			_startMovingSound = soldierRules->getMaleStartMovingSounds();
+			_selectWeaponSound = soldierRules->getMaleSelectWeaponSounds();
+			_annoyedSound = soldierRules->getMaleAnnoyedSounds();
+		}
+		else
+		{
+			_selectUnitSound = soldierRules->getFemaleSelectUnitSounds();
+			_startMovingSound = soldierRules->getFemaleStartMovingSounds();
+			_selectWeaponSound = soldierRules->getFemaleSelectWeaponSounds();
+			_annoyedSound = soldierRules->getFemaleAnnoyedSounds();
+		}
+	}
+	else if (_unitRules)
+	{
+		_selectUnitSound = _unitRules->getSelectUnitSounds();
+		_startMovingSound = _unitRules->getStartMovingSounds();
+		_selectWeaponSound = _unitRules->getSelectWeaponSounds();
+		_annoyedSound = _unitRules->getAnnoyedSounds();
+	}
+
+	// higher priority: armor
+	if (_gender == GENDER_MALE)
+	{
+		if (!_armor->getMaleSelectUnitSounds().empty())
+			_selectUnitSound = _armor->getMaleSelectUnitSounds();
+		if (!_armor->getMaleStartMovingSounds().empty())
+			_startMovingSound = _armor->getMaleStartMovingSounds();
+		if (!_armor->getMaleSelectWeaponSounds().empty())
+			_selectWeaponSound = _armor->getMaleSelectWeaponSounds();
+		if (!_armor->getMaleAnnoyedSounds().empty())
+			_annoyedSound = _armor->getMaleAnnoyedSounds();
+	}
+	else
+	{
+		if (!_armor->getFemaleSelectUnitSounds().empty())
+			_selectUnitSound = _armor->getFemaleSelectUnitSounds();
+		if (!_armor->getFemaleStartMovingSounds().empty())
+			_startMovingSound = _armor->getFemaleStartMovingSounds();
+		if (!_armor->getFemaleSelectWeaponSounds().empty())
+			_selectWeaponSound = _armor->getFemaleSelectWeaponSounds();
+		if (!_armor->getFemaleAnnoyedSounds().empty())
+			_annoyedSound = _armor->getFemaleAnnoyedSounds();
+	}
 }
 
 /**
@@ -235,7 +324,7 @@ void BattleUnit::updateArmorFromSoldier(Soldier *soldier, Armor *ruleArmor, int 
  * @param diff difficulty level (for stat adjustment).
  * @param depth the depth of the battlefield (used to determine movement type in case of MT_FLOAT).
  */
-BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleEnviroEffects* enviro, Armor *armor, StatAdjustment *adjustment, int depth, int maxViewDistance) :
+BattleUnit::BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, const RuleEnviroEffects* enviro, Armor *armor, StatAdjustment *adjustment, int depth) :
 	_faction(faction), _originalFaction(faction), _killedBy(faction), _id(id),
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0),
 	_toDirectionTurret(0), _verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _isSurrendering(false), _walkPhase(0),
@@ -301,9 +390,9 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleEnviro
 	}
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
-	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? maxViewDistance : 9;
+	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? mod->getMaxViewDistance() : 9;
 	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
-	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : maxViewDistance;
+	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : mod->getMaxViewDistance();
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids
 	if (armor->drawBubbles())
@@ -376,6 +465,8 @@ BattleUnit::BattleUnit(Unit *unit, UnitFaction faction, int id, const RuleEnviro
 	}
 
 	setRecolor(RNG::seedless(0, 127), RNG::seedless(0, 127), generalRank);
+
+	prepareUnitResponseSounds(mod);
 }
 
 

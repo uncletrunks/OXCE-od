@@ -374,7 +374,7 @@ void InventoryState::init()
 		if (_reloadUnit)
 		{
 			// Step 0: update unit's armor
-			unit->updateArmorFromSoldier(s, s->getArmor(), _battleGame->getDepth(), _game->getMod()->getMaxViewDistance());
+			unit->updateArmorFromSoldier(_game->getMod(), s, s->getArmor(), _battleGame->getDepth());
 
 			// Step 1: remember the unit's equipment (excl. fixed items)
 			_clearInventoryTemplate(_tempInventoryTemplate);

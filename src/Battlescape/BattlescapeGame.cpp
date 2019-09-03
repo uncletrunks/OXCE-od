@@ -2065,14 +2065,14 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 
 	Unit* type = getMod()->getUnit(unit->getSpawnUnit(), true);
 
-	BattleUnit *newUnit = new BattleUnit(type,
+	BattleUnit *newUnit = new BattleUnit(getMod(),
+		type,
 		FACTION_HOSTILE,
 		_save->getUnits()->back()->getId() + 1,
 		_save->getEnviroEffects(),
 		type->getArmor(),
 		getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()),
-		getDepth(),
-		getMod()->getMaxViewDistance());
+		getDepth());
 
 	getSave()->initUnit(newUnit);
 	newUnit->setTile(tile, _save);
@@ -2134,14 +2134,14 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 	}
 
 	// Create the unit
-	BattleUnit *newUnit = new BattleUnit(type,
+	BattleUnit *newUnit = new BattleUnit(getMod(),
+		type,
 		faction,
 		_save->getUnits()->back()->getId() + 1,
 		faction != FACTION_PLAYER ? _save->getEnviroEffects() : nullptr,
 		type->getArmor(),
 		faction == FACTION_HOSTILE ? getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()) : nullptr,
-		getDepth(),
-		getMod()->getMaxViewDistance());
+		getDepth());
 
 	// Validate the position for the unit, checking if there's a surrounding tile if necessary
 	int checkDirection = attack.attacker ? (attack.attacker->getDirection() + 4) % 8 : 0;
@@ -2280,14 +2280,14 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 
 	for (auto& type : resummonAsCivilians)
 	{
-		BattleUnit *newUnit = new BattleUnit(type,
+		BattleUnit *newUnit = new BattleUnit(getMod(),
+			type,
 			FACTION_NEUTRAL,
 			_save->getUnits()->back()->getId() + 1,
 			_save->getEnviroEffects(),
 			type->getArmor(),
 			nullptr,
-			getDepth(),
-			getMod()->getMaxViewDistance());
+			getDepth());
 
 		// just bare minimum, this unit will never be used for anything except recovery
 		newUnit->setTile(nullptr, _save);
@@ -2934,46 +2934,34 @@ void BattlescapeGame::playUnitResponseSound(BattleUnit *unit, int type)
 	if (!Options::oxceEnableUnitResponseSounds)
 		return;
 
-	if (unit && unit->getGeoscapeSoldier())
+	if (!unit)
+		return;
+
+	std::vector<int> sounds;
+	if (type == 0)
+		sounds = unit->getSelectUnitSounds();
+	else if (type == 1)
+		sounds = unit->getStartMovingSounds();
+	else if (type == 2)
+		sounds = unit->getSelectWeaponSounds();
+	else if (type == 3)
+		sounds = unit->getAnnoyedSounds();
+
+	int sound = -1;
+	if (!sounds.empty())
 	{
-		std::vector<int> sounds;
-		if (unit->getGeoscapeSoldier()->getGender() == GENDER_MALE)
-		{
-			if (type == 0)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleSelectUnitSounds();
-			else if (type == 1)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleStartMovingSounds();
-			else if (type == 2)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleSelectWeaponSounds();
-			else if (type == 3)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getMaleAnnoyedSounds();
-		}
+		if (sounds.size() > 1)
+			sound = sounds[RNG::seedless(0, sounds.size() - 1)];
 		else
+			sound = sounds.front();
+	}
+
+	if (sound != -1)
+	{
+		if (!Mix_Playing(3))
 		{
-			if (type == 0)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleSelectUnitSounds();
-			else if (type == 1)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleStartMovingSounds();
-			else if (type == 2)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleSelectWeaponSounds();
-			else if (type == 3)
-				sounds = unit->getGeoscapeSoldier()->getRules()->getFemaleAnnoyedSounds();
-		}
-		int sound = -1;
-		if (!sounds.empty())
-		{
-			if (sounds.size() > 1)
-				sound = sounds[RNG::seedless(0, sounds.size() - 1)];
-			else
-				sound = sounds.front();
-		}
-		if (sound != -1)
-		{
-			if (!Mix_Playing(3))
-			{
-				// use fixed channel, so that we can check if the unit isn't already/still talking
-				getMod()->getSoundByDepth(_save->getDepth(), sound)->play(3);
-			}
+			// use fixed channel, so that we can check if the unit isn't already/still talking
+			getMod()->getSoundByDepth(_save->getDepth(), sound)->play(3);
 		}
 	}
 }

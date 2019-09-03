@@ -239,6 +239,7 @@ private:
 	Armor* _armor;
 	int _standHeight, _kneelHeight, _floatHeight;
 	std::vector<int> _deathSound, _panicSound, _berserkSound;
+	std::vector<int> _selectUnitSound, _startMovingSound, _selectWeaponSound, _annoyedSound;
 	int _value, _moraleLossWhenKilled, _aggroSound, _moveSound;
 	int _intelligence, _aggression, _spotter, _sniper, _energyRecovery;
 	SpecialAbility _specab;
@@ -290,6 +291,14 @@ public:
 	const std::vector<int> &getPanicSounds() const;
 	/// Gets the unit's berserk sounds.
 	const std::vector<int> &getBerserkSounds() const;
+	/// Gets the unit's "select unit" sounds.
+	const std::vector<int> &getSelectUnitSounds() const { return _selectUnitSound; }
+	/// Gets the unit's "start moving" sounds.
+	const std::vector<int> &getStartMovingSounds() const { return _startMovingSound; }
+	/// Gets the unit's "select weapon" sounds.
+	const std::vector<int> &getSelectWeaponSounds() const { return _selectWeaponSound; }
+	/// Gets the unit's "annoyed" sounds.
+	const std::vector<int> &getAnnoyedSounds() const { return _annoyedSound; }
 	/// Gets the move sound id.
 	int getMoveSound() const;
 	/// Gets the intelligence. This is the number of turns AI remembers your troop positions.

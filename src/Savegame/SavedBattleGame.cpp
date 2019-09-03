@@ -222,7 +222,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 		if (id < BattleUnit::MAX_SOLDIER_ID) // Unit is linked to a geoscape soldier
 		{
 			// look up the matching soldier
-			unit = new BattleUnit(savedGame->getSoldier(id), _depth, mod->getMaxViewDistance());
+			unit = new BattleUnit(mod, savedGame->getSoldier(id), _depth);
 		}
 		else
 		{
@@ -230,7 +230,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			std::string armor = (*i)["genUnitArmor"].as<std::string>();
 			// create a new Unit.
 			if(!mod->getUnit(type) || !mod->getArmor(armor)) continue;
-			unit = new BattleUnit(mod->getUnit(type), originalFaction, id, nullptr, mod->getArmor(armor), mod->getStatAdjustment(savedGame->getDifficulty()), _depth, mod->getMaxViewDistance());
+			unit = new BattleUnit(mod, mod->getUnit(type), originalFaction, id, nullptr, mod->getArmor(armor), mod->getStatAdjustment(savedGame->getDifficulty()), _depth);
 		}
 		unit->load(*i, this->getMod()->getScriptGlobal());
 		unit->setSpecialWeapon(this);

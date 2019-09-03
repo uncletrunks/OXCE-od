@@ -1898,6 +1898,18 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	_hiddenMovementBackgrounds = doc["hiddenMovementBackgrounds"].as<std::vector<std::string> >(_hiddenMovementBackgrounds);
 	_disableUnderwaterSounds = doc["disableUnderwaterSounds"].as<bool>(_disableUnderwaterSounds);
 	_enableUnitResponseSounds = doc["enableUnitResponseSounds"].as<bool>(_enableUnitResponseSounds);
+	for (YAML::const_iterator i = doc["unitResponseSounds"].begin(); i != doc["unitResponseSounds"].end(); ++i)
+	{
+		std::string type = (*i)["name"].as<std::string>();
+		if ((*i)["selectUnitSound"])
+			loadSoundOffset(type, _selectUnitSound[type], (*i)["selectUnitSound"], "BATTLE.CAT");
+		if ((*i)["startMovingSound"])
+			loadSoundOffset(type, _startMovingSound[type], (*i)["startMovingSound"], "BATTLE.CAT");
+		if ((*i)["selectWeaponSound"])
+			loadSoundOffset(type, _selectWeaponSound[type], (*i)["selectWeaponSound"], "BATTLE.CAT");
+		if ((*i)["annoyedSound"])
+			loadSoundOffset(type, _annoyedSound[type], (*i)["annoyedSound"], "BATTLE.CAT");
+	}
 	_flagByKills = doc["flagByKills"].as<std::vector<int> >(_flagByKills);
 
 	_defeatScore = doc["defeatScore"].as<int>(_defeatScore);

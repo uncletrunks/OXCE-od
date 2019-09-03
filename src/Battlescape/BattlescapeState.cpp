@@ -2251,6 +2251,14 @@ inline void BattlescapeState::handle(Action *action)
 				{
 					_map->toggleDebugVisionMode();
 				}
+				// "ctrl-x" - mute/unmute unit response sounds
+				else if (key == SDLK_x && ctrlPressed)
+				{
+					if (_game->getMod()->getEnableUnitResponseSounds())
+					{
+						Options::oxceEnableUnitResponseSounds = !Options::oxceEnableUnitResponseSounds;
+					}
+				}
 				// "ctrl-e" - experience log
 				else if (key == SDLK_e && ctrlPressed)
 				{

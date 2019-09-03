@@ -149,21 +149,21 @@ public:
 	/// Gets the soldier's female berserk sounds.
 	const std::vector<int> &getFemaleBerserkSounds() const;
 	/// Gets the soldier's male "select unit" sounds.
-	const std::vector<int> &getMaleSelectUnitSounds() const;
+	const std::vector<int> &getMaleSelectUnitSounds() const { return _selectUnitSoundMale; }
 	/// Gets the soldier's female "select unit" sounds.
-	const std::vector<int> &getFemaleSelectUnitSounds() const;
+	const std::vector<int> &getFemaleSelectUnitSounds() const { return _selectUnitSoundFemale; }
 	/// Gets the soldier's male "start moving" sounds.
-	const std::vector<int> &getMaleStartMovingSounds() const;
+	const std::vector<int> &getMaleStartMovingSounds() const { return _startMovingSoundMale; }
 	/// Gets the soldier's female "start moving" sounds.
-	const std::vector<int> &getFemaleStartMovingSounds() const;
+	const std::vector<int> &getFemaleStartMovingSounds() const { return _startMovingSoundFemale; }
 	/// Gets the soldier's male "select weapon" sounds.
-	const std::vector<int> &getMaleSelectWeaponSounds() const;
+	const std::vector<int> &getMaleSelectWeaponSounds() const { return _selectWeaponSoundMale; }
 	/// Gets the soldier's female "select weapon" sounds.
-	const std::vector<int> &getFemaleSelectWeaponSounds() const;
+	const std::vector<int> &getFemaleSelectWeaponSounds() const { return _selectWeaponSoundFemale; }
 	/// Gets the soldier's male "annoyed" sounds.
-	const std::vector<int> &getMaleAnnoyedSounds() const;
+	const std::vector<int> &getMaleAnnoyedSounds() const { return _annoyedSoundMale; }
 	/// Gets the soldier's female "annoyed" sounds.
-	const std::vector<int> &getFemaleAnnoyedSounds() const;
+	const std::vector<int> &getFemaleAnnoyedSounds() const { return _annoyedSoundFemale; }
 	/// Gets the pool list for soldier names.
 	const std::vector<SoldierNamePool*> &getNames() const;
 	/// Gets the value - for score calculation.

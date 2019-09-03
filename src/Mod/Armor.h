@@ -61,6 +61,10 @@ private:
 	bool _drawBubbles;
 	MovementType _movementType;
 	int _moveSound;
+	std::vector<int> _selectUnitSoundMale, _selectUnitSoundFemale;
+	std::vector<int> _startMovingSoundMale, _startMovingSoundFemale;
+	std::vector<int> _selectWeaponSoundMale, _selectWeaponSoundFemale;
+	std::vector<int> _annoyedSoundMale, _annoyedSoundFemale;
 	int _size, _weight, _visibilityAtDark, _visibilityAtDay, _personalLight;
 	int _camouflageAtDay, _camouflageAtDark, _antiCamouflageAtDay, _antiCamouflageAtDark, _heatVision, _psiVision;
 	float _damageModifier[DAMAGE_TYPES];
@@ -135,6 +139,22 @@ public:
 	MovementType getMovementType() const;
 	/// Gets the move sound id. Overrides default/unit's move sound. To be used in BattleUnit constructors only too!
 	int getMoveSound() const;
+	/// Gets the male "select unit" sounds.
+	const std::vector<int> &getMaleSelectUnitSounds() const { return _selectUnitSoundMale; }
+	/// Gets the female "select unit" sounds.
+	const std::vector<int> &getFemaleSelectUnitSounds() const { return _selectUnitSoundFemale; }
+	/// Gets the male "start moving" sounds.
+	const std::vector<int> &getMaleStartMovingSounds() const { return _startMovingSoundMale; }
+	/// Gets the female "start moving" sounds.
+	const std::vector<int> &getFemaleStartMovingSounds() const { return _startMovingSoundFemale; }
+	/// Gets the male "select weapon" sounds.
+	const std::vector<int> &getMaleSelectWeaponSounds() const { return _selectWeaponSoundMale; }
+	/// Gets the female "select weapon" sounds.
+	const std::vector<int> &getFemaleSelectWeaponSounds() const { return _selectWeaponSoundFemale; }
+	/// Gets the male "annoyed" sounds.
+	const std::vector<int> &getMaleAnnoyedSounds() const { return _annoyedSoundMale; }
+	/// Gets the female "annoyed" sounds.
+	const std::vector<int> &getFemaleAnnoyedSounds() const { return _annoyedSoundFemale; }
 	/// Gets whether this is a normal or big unit.
 	int getSize() const;
 	/// Gets how big space armor ocupy in craft.
