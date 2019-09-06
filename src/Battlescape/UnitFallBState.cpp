@@ -134,7 +134,7 @@ void UnitFallBState::think()
 			}
 			else
 			{
-				// if the unit burns floortiles, burn floortiles
+				// if the unit burns floor tiles, burn floor tiles
 				if ((*unit)->getSpecialAbility() == SPECAB_BURNFLOOR || (*unit)->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
 				{
 					(*unit)->getTile()->ignite(1);

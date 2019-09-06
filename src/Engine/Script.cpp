@@ -173,10 +173,10 @@ static inline RetEnum bit_popcount_h(int& reg)
 
 /**
  * Main macro defining all available operation in script engine.
- * @param IMPL macro function that access data. Take 3 args: Name, definition of operation and delcaration of it's arguments.
+ * @param IMPL macro function that access data. Take 3 args: Name, definition of operation and declaration of it's arguments.
  */
 #define MACRO_PROC_DEFINITION(IMPL) \
-	/*	Name,		Implementation,													End excecution,				Args,					Description */ \
+	/*	Name,		Implementation,													End execution,				Args,					Description */ \
 	IMPL(exit,		MACRO_QUOTE({													return RetEnd;		}),		(ScriptWorkerBase&),	"") \
 	\
 	IMPL(goto,		MACRO_QUOTE({ Prog = Label1;									return RetContinue; }),		(ScriptWorkerBase& c, ProgPos& Prog, ProgPos Label1),	"") \
@@ -202,7 +202,7 @@ static inline RetEnum bit_popcount_h(int& reg)
 	IMPL(mod,		MACRO_QUOTE({ if (!Data1) return RetError; Reg0 %= Data1;		return RetContinue; }),		(int& Reg0, int Data1),		"arg1 = arg1 % arg2") \
 	\
 	IMPL(shl,		MACRO_QUOTE({ Reg0 <<= Data1;									return RetContinue; }),		(int& Reg0, int Data1),		"Left bit shift of arg1 by arg2") \
-	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;									return RetContinue; }),		(int& Reg0, int Data1),		"Rigth bit shift of arg1 by arg2") \
+	IMPL(shr,		MACRO_QUOTE({ Reg0 >>= Data1;									return RetContinue; }),		(int& Reg0, int Data1),		"Right bit shift of arg1 by arg2") \
 	\
 	IMPL(bit_and,		MACRO_QUOTE({ Reg0 = Reg0 & Data1;								return RetContinue; }),		(int& Reg0, int Data1),		"Bit And of arg1 and arg2") \
 	IMPL(bit_or,		MACRO_QUOTE({ Reg0 = Reg0 | Data1;								return RetContinue; }),		(int& Reg0, int Data1),		"Bit Or of arg1 and arg2") \
@@ -213,13 +213,13 @@ static inline RetEnum bit_popcount_h(int& reg)
 	IMPL(pow,			MACRO_QUOTE({ Reg0 = std::pow(Reg0, std::max(0, Data1));		return RetContinue; }),		(int& Reg0, int Data1),		"Power of arg1 to arg2") \
 	\
 	IMPL(abs,			MACRO_QUOTE({ Reg0 = std::abs(Reg0);							return RetContinue; }),		(int& Reg0),						"Absolute value of arg1") \
-	IMPL(limit,			MACRO_QUOTE({ Reg0 = std::max(std::min(Reg0, Data2), Data1);	return RetContinue; }),		(int& Reg0, int Data1, int Data2),	"Correct value in arg1 that is always betwean arg2 and arg3") \
+	IMPL(limit,			MACRO_QUOTE({ Reg0 = std::max(std::min(Reg0, Data2), Data1);	return RetContinue; }),		(int& Reg0, int Data1, int Data2),	"Correct value in arg1 that is always between arg2 and arg3") \
 	IMPL(limit_upper,	MACRO_QUOTE({ Reg0 = std::min(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1),				"Correct value in arg1 that is always lesser than arg2") \
 	IMPL(limit_lower,	MACRO_QUOTE({ Reg0 = std::max(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1),				"Correct value in arg1 that is always greater than arg2") \
 	\
-	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Period1, Size2, Max3);				}),		(int& Reg0, int Period1, int Size2, int Max3),		"Square wave function, arg1 - argument and result, arg2 - pieriod, arg3 - legth of square, arg4 - heigth of square") \
-	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3),		"Saw wave function, arg1 - argument and result, arg2 - pieriod, arg3 - size of saw, arg4 - cap value") \
-	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3),		"Triangle wave function, arg1 - argument and result, arg2 - pieriod, arg3 - size of triangle, arg4 - cap value") \
+	IMPL(wavegen_rect,	MACRO_QUOTE({ return wavegen_rect_h(Reg0, Period1, Size2, Max3);				}),		(int& Reg0, int Period1, int Size2, int Max3),		"Square wave function, arg1 - argument and result, arg2 - period, arg3 - length of square, arg4 - height of square") \
+	IMPL(wavegen_saw,	MACRO_QUOTE({ return wavegen_saw_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3),		"Saw wave function, arg1 - argument and result, arg2 - period, arg3 - size of saw, arg4 - cap value") \
+	IMPL(wavegen_tri,	MACRO_QUOTE({ return wavegen_tri_h(Reg0, Period1, Size2, Max3);					}),		(int& Reg0, int Period1, int Size2, int Max3),		"Triangle wave function, arg1 - argument and result, arg2 - period, arg3 - size of triangle, arg4 - cap value") \
 	\
 	IMPL(get_color,		MACRO_QUOTE({ Reg0 = Data1 >> 4;							return RetContinue; }),		(int& Reg0, int Data1),		"Get color part to arg1 of pixel color in arg2") \
 	IMPL(set_color,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF) | (Data1 << 4);			return RetContinue; }),		(int& Reg0, int Data1),		"Set color part to pixel color in arg1") \
@@ -307,7 +307,7 @@ struct Func_debug_flush
 	Proc_##NAME##_end = MACRO_PROC_ID(NAME) + helper::FuncGroup<MACRO_FUNC_ID(NAME)>::ver() - 1,
 
 /**
- * Enum storing id of all avaliable operations in script engine
+ * Enum storing id of all available operations in script engine
  */
 enum ProcEnum : Uint8
 {
@@ -376,7 +376,7 @@ static inline void scriptExe(ScriptWorkerBase& data, const Uint8* proc)
 	static int bugCount = 0;
 	if (++bugCount < 100)
 	{
-		Log(LOG_ERROR) << "Invaild script operation for OpId: " << std::hex << std::showbase << (int)proc[(int)curr] <<" at "<< (int)curr;
+		Log(LOG_ERROR) << "Invalid script operation for OpId: " << std::hex << std::showbase << (int)proc[(int)curr] <<" at "<< (int)curr;
 	}
 
 	endLabel:
@@ -393,7 +393,7 @@ void ScriptWorkerBlit::executeBlit(Surface* src, Surface* dest, int x, int y, in
 	executeBlit(src, dest, x, y, shade, GraphSubset{ dest->getWidth(), dest->getHeight() } );
 }
 /**
- * Bliting one surface to another using script.
+ * Blitting one surface to another using script.
  * @param src source surface.
  * @param dest destination surface.
  * @param x x offset of source surface.
@@ -522,7 +522,7 @@ namespace
 {
 
 /**
- * Test for validaty of arguments.
+ * Test for validity of arguments.
  */
 bool validOverloadProc(const ScriptRange<ScriptRange<ArgEnum>>& overload)
 {
@@ -623,7 +623,7 @@ int overloadCustomProc(const ScriptProcData& spd, const ScriptRefData* begin, co
 	return tempSorce;
 }
 /**
- * Helper choosing corrct overload function to call.
+ * Helper choosing correct overload function to call.
  */
 bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc, const ScriptRefData* begin, const ScriptRefData* end)
 {
@@ -660,7 +660,7 @@ bool callOverloadProc(ParserWriter& ph, const ScriptRange<ScriptProcData>& proc,
 		{
 			if ((*bestValue)(ph, begin, end) == false)
 			{
-				Log(LOG_ERROR) << "Error in maching arguments for operator '" + proc.begin()->name.toString() + "'";
+				Log(LOG_ERROR) << "Error in matching arguments for operator '" + proc.begin()->name.toString() + "'";
 				return false;
 			}
 			else
@@ -750,7 +750,7 @@ bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const ScriptRe
 		size_t off = argRaw::offset(i);
 		if (off >= diff)
 		{
-			//aligin proc to fit fixed size.
+			//align proc to fit fixed size.
 			ph.push(off-diff);
 			ph.updateProc(opPos, i);
 			return true;
@@ -776,7 +776,7 @@ const ScriptRef ConditionSpecNames[ConditionSpecialSize] =
 
 
 /**
- * Helper used of condintion opearations.
+ * Helper used of condition operations.
  */
 bool parseConditionImpl(ParserWriter& ph, ScriptRefData truePos, ScriptRefData falsePos, const ScriptRefData* begin, const ScriptRefData* end)
 {
@@ -784,7 +784,7 @@ bool parseConditionImpl(ParserWriter& ph, ScriptRefData truePos, ScriptRefData f
 
 	if (std::distance(begin, end) != 3)
 	{
-		Log(LOG_ERROR) << "Invaild length of condition arguments";
+		Log(LOG_ERROR) << "Invalid length of condition arguments";
 		return false;
 	}
 
@@ -831,7 +831,7 @@ bool parseFullConditionImpl(ParserWriter& ph, ScriptRefData falsePos, const Scri
 {
 	if (std::distance(begin, end) <= 1)
 	{
-		Log(LOG_ERROR) << "Invaild length of condition arguments";
+		Log(LOG_ERROR) << "Invalid length of condition arguments";
 		return false;
 	}
 	const auto truePos = ph.addLabel();
@@ -965,7 +965,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
 	auto size = std::distance(begin, end);
 	if (size < 2 || 3 < size)
 	{
-		Log(LOG_ERROR) << "Invaild length of 'var' definition";
+		Log(LOG_ERROR) << "Invalid length of 'var' definition";
 		return false;
 	}
 
@@ -1014,7 +1014,7 @@ bool parseVar(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
 }
 
 /**
- * Parse return statment.
+ * Parse return statement.
  */
 bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
@@ -1022,7 +1022,7 @@ bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefDat
 	const auto returnSize = ph.parser.haveEmptyReturn() ? 0 : ph.parser.getParamSize();
 	if (returnSize != size)
 	{
-		Log(LOG_ERROR) << "Invaild length of returns arguments";
+		Log(LOG_ERROR) << "Invalid length of returns arguments";
 		return false;
 	}
 
@@ -1035,7 +1035,7 @@ bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefDat
 		outputRegsData[i] = *ph.parser.getParamData(i);
 		if (begin[i].isValueType<RegEnum>() && !ArgCompatible(outputRegsData[i].type, begin[i].type, 1))
 		{
-			Log(LOG_ERROR) << "Invaild return argument '" + begin[i].name.toString() + "'";
+			Log(LOG_ERROR) << "Invalid return argument '" + begin[i].name.toString() + "'";
 			return false;
 		}
 		currValueIndex[i] = outputRegsData[i].getValue<RegEnum>();
@@ -1047,8 +1047,8 @@ bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefDat
 	}
 
 	// matching return arguments to return register,
-	// sometimes curret value in one register is needed in another.
-	// we need find order of assigments that will not lose any value.
+	// sometimes current value in one register is needed in another.
+	// we need find order of assignments that will not lose any value.
 	auto any_changed = true;
 	auto all_free = false;
 	while (!all_free && any_changed)
@@ -1079,7 +1079,7 @@ bool parseReturn(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefDat
 				const auto proc = ph.parser.getProc(ScriptRef{ "set" });
 				if (!callOverloadProc(ph, proc, std::begin(temp), std::end(temp)))
 				{
-					Log(LOG_ERROR) << "Invaild return argument '" + begin[i].name.toString() + "'";
+					Log(LOG_ERROR) << "Invalid return argument '" + begin[i].name.toString() + "'";
 					return false;
 				}
 			}
@@ -1141,7 +1141,7 @@ bool parseDebugLog(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefD
 		const auto proc = ph.parser.getProc(ScriptRef{ "debug_impl" });
 		if (!callOverloadProc(ph, proc, i, std::next(i)))
 		{
-			Log(LOG_ERROR) << "Invaild debug argument '" + i->name.toString() + "'";
+			Log(LOG_ERROR) << "Invalid debug argument '" + i->name.toString() + "'";
 			return false;
 		}
 	}
@@ -1173,12 +1173,12 @@ void addSortHelper(std::vector<R>& vec, R value)
 }
 
 /**
- * Get bound of value, upper od lower based on template parameter.
+ * Get bound of value, upper or lower based on template parameter.
  * @param begin begin of sorted range.
  * @param end end of sorted range.
  * @param prefix First part of name.
  * @param postfix Second part of name.
- * @return Finded iterator or end iterator.
+ * @return Found iterator or end iterator.
  */
 template<bool upper, typename R>
 R* boundSortHelper(R* begin, R* end, ScriptRef prefix, ScriptRef postfix = {})
@@ -1220,7 +1220,7 @@ R* boundSortHelper(R* begin, R* end, ScriptRef prefix, ScriptRef postfix = {})
  * @param end end of sorted range.
  * @param prefix First part of name.
  * @param postfix Second part of name.
- * @return Finded data or null.
+ * @return Found data or null.
  */
 template<typename R>
 R* findSortHelper(R* begin, R* end, ScriptRef prefix, ScriptRef postfix = {})
@@ -1252,7 +1252,7 @@ R* findSortHelper(R* begin, R* end, ScriptRef prefix, ScriptRef postfix = {})
  * @param vec Vector with values.
  * @param prefix First part of name.
  * @param postfix Second part of name.
- * @return Finded data or null.
+ * @return Found data or null.
  */
 template<typename R>
 const R* findSortHelper(const std::vector<R>& vec, ScriptRef prefix, ScriptRef postfix = {})
@@ -1265,7 +1265,7 @@ const R* findSortHelper(const std::vector<R>& vec, ScriptRef prefix, ScriptRef p
  * @param vec Vector with values.
  * @param prefix First part of name.
  * @param postfix Second part of name.
- * @return Finded data or null.
+ * @return Found data or null.
  */
 template<typename R>
 R* findSortHelper(std::vector<R>& vec, ScriptRef prefix, ScriptRef postfix = {})
@@ -1293,10 +1293,10 @@ TypeInfo getRegMeta(const ScriptParserBase& parser, ArgEnum type)
 }
 
 /**
- * Add new string to colection and return reference to it.
+ * Add new string to collection and return reference to it.
  * @param list List where strings are stored.
  * @param s New string to add.
- * @return Reference to strored string.
+ * @return Reference to stored string.
  */
 ScriptRef addString(std::vector<std::vector<char>>& list, const std::string& s)
 {
@@ -1304,7 +1304,7 @@ ScriptRef addString(std::vector<std::vector<char>>& list, const std::string& s)
 	refData.assign(s.begin(), s.end());
 	ScriptRef ref{ refData.data(), refData.data() + refData.size() };
 
-	//we need use char vector becasue its guarante that pointer in ref will not get invalidated when names list grown.
+	//we need use char vector because its guaranteed that pointer in ref will not get invalidated when names list grown.
 	list.push_back(std::move(refData));
 	return ref;
 }
@@ -1607,8 +1607,8 @@ void ParserWriter::relese()
 
 /**
  * Returns reference based on name.
- * @param s name of referece.
- * @return referece data.
+ * @param s name of reference.
+ * @return reference data.
  */
 ScriptRefData ParserWriter::getReferece(const ScriptRef& s) const
 {
@@ -1629,8 +1629,8 @@ ScriptRefData ParserWriter::getReferece(const ScriptRef& s) const
 }
 
 /**
- * Add new referece definition.
- * @param s Name of referece.
+ * Add new reference definition.
+ * @param s Name of reference.
  * @param data Data of reference.
  * @return pointer to new created reference.
  */
@@ -1650,13 +1650,13 @@ ProgPos ParserWriter::getCurrPos() const
 }
 
 /**
- * Get distance betwean two positions in proc vector.
+ * Get distance between two positions in proc vector.
  */
 size_t ParserWriter::getDiffPos(ProgPos begin, ProgPos end) const
 {
 	if (begin > end)
 	{
-		throw Exception("Invaild ProgPos distance");
+		throw Exception("Invalid ProgPos distance");
 	}
 	return static_cast<size_t>(end) - static_cast<size_t>(begin);
 }
@@ -1704,7 +1704,7 @@ ParserWriter::ReservedPos<ParserWriter::ProcOp> ParserWriter::pushProc(Uint8 pro
 }
 
 /**
- * Updating previosoly added proc operation id.
+ * Updating previously added proc operation id.
  * @param pos Position of operation.
  * @param procOffset Offset value.
  */
@@ -1716,7 +1716,7 @@ void ParserWriter::updateProc(ReservedPos<ProcOp> pos, int procOffset)
 /**
  * Try pushing label arg on proc vector. Can't use this to create loop back label.
  * @param s name of label.
- * @return true if label was succefuly added.
+ * @return true if label was successfully added.
  */
 bool ParserWriter::pushLabelTry(const ScriptRefData& data)
 {
@@ -1934,7 +1934,7 @@ bool ScriptParserBase::haveNameRef(const std::string& s) const
 }
 
 /**
- * Strore new name reference for future use.
+ * Store new name reference for future use.
  */
 ScriptRef ScriptParserBase::addNameRef(const std::string& s)
 {
@@ -1944,7 +1944,7 @@ ScriptRef ScriptParserBase::addNameRef(const std::string& s)
 /**
  * Add new function parsing arguments of script operation.
  * @param s function name
- * @param parser parsing fu
+ * @param parser parsing function
  */
 void ScriptParserBase::addParserBase(const std::string& s, const std::string& description, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc arg, ScriptProcData::getFunc get)
 {
@@ -1984,7 +1984,7 @@ void ScriptParserBase::addTypeBase(const std::string& s, ArgEnum type, TypeInfo 
 }
 
 /**
- * Test if type is alredy used.
+ * Test if type is already used.
  */
 bool ScriptParserBase::haveTypeBase(ArgEnum type)
 {
@@ -2000,7 +2000,7 @@ bool ScriptParserBase::haveTypeBase(ArgEnum type)
 }
 
 /**
- * Set name for custom script param.
+ * Set name for custom script parameter.
  * @param s name for custom parameter.
  * @param type type of custom parameter.
  * @param outputReg is this reg used for script output.
@@ -2146,7 +2146,7 @@ const ScriptTypeData* ScriptParserBase::getType(ArgEnum type) const
 
 /**
  * Get type data with name equal prefix + postfix.
- * @param prefix Beginig of name.
+ * @param prefix Beginning of name.
  * @param postfix End of name.
  * @return Pointer to data or null if not find.
  */
@@ -2157,7 +2157,7 @@ const ScriptTypeData* ScriptParserBase::getType(ScriptRef prefix, ScriptRef post
 
 /**
  * Get function data with name equal prefix + postfix.
- * @param prefix Beginig of name.
+ * @param prefix Beginning of name.
  * @param postfix End of name.
  * @return Pointer to data or null if not find.
  */
@@ -2173,7 +2173,7 @@ ScriptRange<ScriptProcData> ScriptParserBase::getProc(ScriptRef prefix, ScriptRe
 
 /**
  * Get arguments data with name equal prefix + postfix.
- * @param prefix Beginig of name.
+ * @param prefix Beginning of name.
  * @param postfix End of name.
  * @return Pointer to data or null if not find.
  */
@@ -2303,7 +2303,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		ScriptRef line = ScriptRef{ line_begin, range.begin() };
 		ScriptRefData argData[ScriptMaxArg] = { };
 
-		// test validty of operation positions
+		// test validity of operation positions
 		auto isReturn = (op == ScriptRef{ "return" });
 		auto isVarDef = (op == ScriptRef{ "var" });
 		auto isEnd = (op == ScriptRef{ "end" }) || (op == ScriptRef{ "else" });
@@ -2328,7 +2328,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		haveCodeNormal = !isVarDef;
 
 
-		// matching args form operation definition with args avaliable in string
+		// matching args form operation definition with args available in string
 		size_t i = 0;
 		while (i < ScriptMaxArg && args[i].getType() != TokenNone)
 		{
@@ -2352,7 +2352,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 }
 
 /**
- * Prase node and return new script.
+ * Parse node and return new script.
  */
 void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::string& parentName, const YAML::Node& node) const
 {
@@ -2370,7 +2370,7 @@ void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::stri
 }
 
 /**
- * Prase string and return new script.
+ * Parse string and return new script.
  */
 void ScriptParserBase::parseCode(ScriptContainerBase& container, const std::string& parentName, const std::string& srcCode) const
 {
@@ -2523,7 +2523,7 @@ ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::
 }
 
 /**
- * Prase node and return new script.
+ * Parse node and return new script.
  */
 void ScriptParserEventsBase::parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::Node& node) const
 {
@@ -2532,7 +2532,7 @@ void ScriptParserEventsBase::parseNode(ScriptContainerEventsBase& container, con
 }
 
 /**
- * Prase string and return new script.
+ * Parse string and return new script.
  */
 void ScriptParserEventsBase::parseCode(ScriptContainerEventsBase& container, const std::string& type, const std::string& srcCode) const
 {
@@ -2579,7 +2579,7 @@ const ScriptContainerBase* ScriptParserEventsBase::getEvents() const
 }
 
 /**
- * Relese event data.
+ * Release event data.
  */
 std::vector<ScriptContainerBase> ScriptParserEventsBase::releseEvents()
 {
@@ -2818,7 +2818,7 @@ size_t ScriptGlobal::addTag(ArgEnum type, ScriptRef s, size_t valueType)
 }
 
 /**
- * Strore new name reference for future use.
+ * Store new name reference for future use.
  */
 ScriptRef ScriptGlobal::addNameRef(const std::string& s)
 {
@@ -2944,13 +2944,13 @@ void ScriptGlobal::load(const YAML::Node& node)
 						tag = addTag(p.first, addNameRef(namePrefix), valueType);
 						if (!tag)
 						{
-							Log(LOG_ERROR) << "Script variable '" + name + "' exceeds limit of " << (int)p.second.limit << " avaiable variables in '" + nodeName + "'.";
+							Log(LOG_ERROR) << "Script variable '" + name + "' exceeds limit of " << (int)p.second.limit << " available variables in '" + nodeName + "'.";
 							continue;
 						}
 					}
 					else
 					{
-						Log(LOG_ERROR) << "Invaild type def '" + type + "' for script variable '" + name + "' in '" + nodeName +"'.";
+						Log(LOG_ERROR) << "Invalid type def '" + type + "' for script variable '" + name + "' in '" + nodeName +"'.";
 					}
 				}
 			}

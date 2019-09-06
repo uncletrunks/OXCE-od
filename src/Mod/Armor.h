@@ -162,7 +162,7 @@ public:
 	const std::vector<int> &getFemaleAnnoyedSounds() const { return _annoyedSoundFemale; }
 	/// Gets whether this is a normal or big unit.
 	int getSize() const;
-	/// Gets how big space armor ocupy in craft.
+	/// Gets how much space the armor occupies in a craft.
 	int getTotalSize() const;
 	/// Gets damage modifier.
 	float getDamageModifier(ItemDamageType dt) const;
@@ -209,7 +209,7 @@ public:
 	bool getCanHoldWeapon() const;
 	/// Checks if this armor ignores gender (power suit/flying suit).
 	ForcedTorso getForcedTorso() const;
-	/// Gets buildin weapons of armor.
+	/// Gets built-in weapons of armor.
 	const std::vector<std::string> &getBuiltInWeapons() const;
 	/// Gets max view distance at dark in BattleScape.
 	int getVisibilityAtDark() const;
@@ -227,7 +227,7 @@ public:
 	int getHeatVision() const;
 	/// Gets info about psi vision.
 	int getPsiVision() const;
-	/// Gets personal ligth radius;
+	/// Gets personal light radius;
 	int getPersonalLight() const;
 	/// Gets how armor react to fear.
 	bool getFearImmune(bool def = false) const;
@@ -241,7 +241,7 @@ public:
 	bool getIgnoresMeleeThreat(bool def = false) const;
 	/// Gets whether or not this unit is a close quarters threat.
 	bool getCreatesMeleeThreat(bool def = true) const;
-	/// Gets how much negative hp is require to gib unit.
+	/// Gets how much damage (over the maximum HP) is needed to vaporize/disintegrate a unit.
 	float getOverKill() const;
 	/// Get face base color
 	int getFaceColorGroup() const;

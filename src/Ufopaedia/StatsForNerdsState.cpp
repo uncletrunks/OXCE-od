@@ -256,7 +256,7 @@ void StatsForNerdsState::cbxAmmoSelect(Action *)
 
 
 /**
- * Refresh the displayed data including/exluding the raw IDs.
+ * Refresh the displayed data including/excluding the raw IDs.
  * @param action Pointer to an action.
  */
 void StatsForNerdsState::btnRefreshClick(Action *)
@@ -2676,7 +2676,6 @@ void StatsForNerdsState::initCraftList()
 		addInteger(ss, craftRule->getSprite() + 33, "_sprite (Base)", 32);
 		addSpriteResourcePath(ss, mod, "BASEBITS.PCK", craftRule->getSprite() + 33);
 		addInteger(ss, craftRule->getMarker(), "marker", -1);
-		//addSpriteResourcePath(ss, mod, "GlobeMarkers", craftRule->getMarker());
 		addInteger(ss, craftRule->getScore(), "score");
 
 		addSection("{Battlescape}", "", _white);

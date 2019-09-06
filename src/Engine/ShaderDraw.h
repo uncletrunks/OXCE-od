@@ -144,7 +144,7 @@ struct ColorReplace
 	* @param dest destination pixel
 	* @param src source pixel
 	* @param shade value of shade of this surface
-	* @param newColor new color to set (it should be offseted by 4)
+	* @param newColor new color to set (it should be offset by 4)
 	*/
 	static inline void func(Uint8& dest, const Uint8& src, const int& shade, const int& newColor)
 	{
@@ -172,8 +172,8 @@ struct StandardShade
 	* @param dest destination pixel
 	* @param src source pixel
 	* @param shade value of shade of this surface
-	* @param notused
-	* @param notused
+	* @param not used
+	* @param not used
 	*/
 	static inline void func(Uint8& dest, const Uint8& src, const int& shade)
 	{
@@ -190,7 +190,7 @@ struct StandardShade
 
 };
 /**
- * helper class used for bliting dying unit with overkill
+ * helper class used for blitting dying unit with overkill
  */
 struct BurnShade
 {

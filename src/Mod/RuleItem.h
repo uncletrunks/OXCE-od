@@ -542,7 +542,7 @@ public:
 	bool isCorpseRecoverable() const;
 	/// Checks if the item can be equipped in base defense mission.
 	bool canBeEquippedBeforeBaseDefense() const;
-	/// Checks if the item can be equipped to craft inventrory.
+	/// Checks if the item can be equipped to craft inventory.
 	bool canBeEquippedToCraftInventory() const;
 	/// Gets the item's turret type.
 	int getTurretType() const;

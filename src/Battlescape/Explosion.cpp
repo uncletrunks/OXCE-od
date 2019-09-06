@@ -27,7 +27,7 @@ const int Explosion::BULLET_FRAMES = 10;
 /**
  * Sets up a Explosion sprite with the specified size and position.
  * @param position Explosion center position in voxel x/y/z.
- * @param startFrame A startframe - can be used to offset different explosions at different frames.
+ * @param startFrame A start frame - can be used to offset different explosions at different frames.
  * @param big Flag to indicate it is a bullet hit (false), or a real explosion (true).
  * @param hit True for melee and psi attacks.
  */

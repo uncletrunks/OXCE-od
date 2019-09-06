@@ -31,7 +31,7 @@ namespace OpenXcom
 {
 
 /**
- * Creates a blank ruleunit for a certain
+ * Creates a blank RuleSoldier for a certain
  * type of soldier.
  * @param type String defining the type.
  */

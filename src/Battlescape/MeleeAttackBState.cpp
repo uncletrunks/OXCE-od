@@ -161,7 +161,7 @@ void MeleeAttackBState::think()
 		}
 	}
 
-	// if the unit burns floortiles, burn floortiles
+	// if the unit burns floor tiles, burn floor tiles
 	if (_unit->getSpecialAbility() == SPECAB_BURNFLOOR || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE)
 	{
 		_parent->getSave()->getTile(_action.target)->ignite(15);

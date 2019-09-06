@@ -143,7 +143,7 @@ namespace OpenXcom
 			case UFOPAEDIA_TYPE_TFTD_USO:
 				return new ArticleStateTFTDUso(dynamic_cast<ArticleDefinitionTFTD *>(article), std::move(state));
 			default:
-				throw new Exception("Unknow type for article '" + article->id + "'");
+				throw new Exception("Unknown type for article '" + article->id + "'");
 		}
 	}
 

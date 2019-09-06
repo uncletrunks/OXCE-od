@@ -67,7 +67,7 @@ namespace OpenXcom
 	}
 
 	/**
-	 * Change index position to prev article.
+	 * Change index position to previous article.
 	 */
 	void ArticleCommonState::prevArticle()
 	{
@@ -83,7 +83,7 @@ namespace OpenXcom
 	}
 
 	/**
-	 * Change page to prev in article or move to prev index position.
+	 * Change page to previous in article or move to previous index position.
 	 * Each article can have multiple pages, if we are on first page we will move to last page of previous article.
 	 */
 	void ArticleCommonState::prevArticlePage()
@@ -91,7 +91,7 @@ namespace OpenXcom
 		auto curr = getCurrentArticle();
 		if (current_page == 0 || current_page > curr->getNumberOfPages() - 1)
 		{
-			// goto last page of previosu article
+			// goto last page of previous article
 			prevArticle();
 			current_page = getCurrentArticle()->getNumberOfPages() - 1;
 		}

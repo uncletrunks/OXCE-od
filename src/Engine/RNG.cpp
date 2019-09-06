@@ -53,7 +53,7 @@ static uint64_t nextImpl(uint64_t& state)
 
 
 /**
- * Default constructor intializy seed by time and this type address.
+ * Default constructor initializing the seed by time and this type address.
  */
 RandomState::RandomState()
 {
@@ -79,7 +79,7 @@ uint64_t RandomState::getSeed() const
 
 /**
  * Get next random number.
- * @return Ramdom number.
+ * @return Random number.
  */
 uint64_t RandomState::next()
 {
@@ -97,12 +97,12 @@ int RandomState::generate(int min, int max)
 
 
 /**
- * State for game random number generator. Do not use during other variable static intalization becasue: https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members
+ * State for game random number generator. Do not use during other variable static initialization because: https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members
  */
 RandomState x;
 
 /**
- * Seperate state for some auxiliary random nubmers that do not affect game state. Do not use during other variable static intalization becasue: https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members
+ * Separate state for some auxiliary random numbers that do not affect game state. Do not use during other variable static initialization because: https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members
  */
 RandomState x_seedless;
 

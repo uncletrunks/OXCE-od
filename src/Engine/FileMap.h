@@ -94,7 +94,7 @@ namespace FileMap
 	/// absolutely clears FileMap state and maps common resources (dataDir/common)
 	void clear(bool clearOnly, bool embeddedOnly);
 
-	/// sets up VFS according to the modsequence given (rescans common resources). does call clear().
+	/// sets up VFS according to the mod sequence given (rescans common resources). does call clear().
 	void setup(const std::vector<const ModInfo *>& active, bool embeddedOnly);
 
 	/// lowercase it

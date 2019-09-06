@@ -221,7 +221,7 @@ void BattlescapeGenerator::setMissionSite(MissionSite *mission)
 
 
 /**
- * Switches an existing battlescapesavegame to a new stage.
+ * Switches an existing battlescape savegame to a new stage.
  */
 void BattlescapeGenerator::nextStage()
 {
@@ -591,7 +591,7 @@ void BattlescapeGenerator::nextStage()
 }
 
 /**
- * Starts the generator; it fills up the battlescapesavegame with data.
+ * Starts the generator; it fills up the battlescape savegame with data.
  */
 void BattlescapeGenerator::run()
 {
@@ -701,7 +701,7 @@ void BattlescapeGenerator::run()
 	}
 
 	setMusic(ruleDeploy, false);
-	// set shade (alien bases are a little darker, sites depend on worldshade)
+	// set shade (alien bases are a little darker, sites depend on world shade)
 	_save->setGlobalShade(_worldShade);
 
 	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
@@ -904,7 +904,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 					// only put items in the battlescape that make sense (when the item got a sprite, it's probably ok)
 					rule->isInventoryItem() &&
 					// if item can be equip to craft then you should be able to use it in base defense
-					// in some cases we forbid some items from craft but still allow them in base defense if normaly they were avaiable.
+					// in some cases we forbid some items from craft but still allow them in base defense if normally they were available.
 					(rule->isUsefulBattlescapeItem() || rule->canBeEquippedToCraftInventory()) &&
 					// we know how to use this item
 					_game->getSavedGame()->isResearched(rule->getRequirements()))
@@ -1072,7 +1072,7 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 /**
  * Adds a soldier to the game and places him on a free spawnpoint.
  * Spawnpoints are either tiles in case of an XCom craft that landed.
- * Or they are mapnodes in case there's no craft.
+ * Or they are map nodes in case there's no craft.
  * @param soldier Pointer to the Soldier.
  * @return Pointer to the spawned unit.
  */
@@ -1503,8 +1503,8 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item, const std::vector
  * @param yoff Mapblock offset in Y direction.
  * @param save Pointer to the current SavedBattleGame.
  * @param terrain Pointer to the Terrain rule.
- * @param discovered Whether or not this mapblock is discovered (eg. landingsite of the XCom plane).
- * @return int Height of the loaded mapblock (this is needed for spawpoint calculation...)
+ * @param discovered Whether or not this mapblock is discovered (eg. landing site of the XCom plane).
+ * @return int Height of the loaded mapblock (this is needed for spawnpoint calculation...)
  * @sa http://www.ufopaedia.org/index.php?title=MAPS
  * @note Y-axis is in reverse order.
  */
@@ -1779,7 +1779,7 @@ int BattlescapeGenerator::loadExtraTerrain(RuleTerrain *terrain)
 	std::map<RuleTerrain*, int>::iterator it = _loadedTerrains.find(terrain);
 	if (it != _loadedTerrains.end())
 	{
-		// Found the terrain in the alread-loaded list, get the offset
+		// Found the terrain in the already-loaded list, get the offset
 		mapDataSetIDOffset = it->second;
 	}
 	else
@@ -1820,7 +1820,7 @@ void BattlescapeGenerator::fuelPowerSources()
 
 
 /**
- * When a UFO crashes, there is a 75% chance for each powersource to explode.
+ * When a UFO crashes, there is a 75% chance for each power source to explode.
  */
 void BattlescapeGenerator::explodePowerSources()
 {
@@ -1963,7 +1963,7 @@ void BattlescapeGenerator::runInventory(Craft *craft)
 	MapData *data = new MapData(set);
 	_craftInventoryTile = _save->getTile(0);
 
-	// ok now generate the battleitems for inventory
+	// ok now generate the battle items for inventory
 	if (craft != 0) setCraft(craft);
 	deployXCOM(nullptr, nullptr);
 	delete data;
@@ -2838,7 +2838,7 @@ RuleTerrain* BattlescapeGenerator::pickTerrain(std::string terrainName)
 		if (!terrain)
 		{
 			// make sure we get a terrain, and put an error in the log, continuing with generation
-			Log(LOG_ERROR) << "Map generator could not find alternate terrain " << terrainName << ", proceding with terrain from alienDeployments or Geoscape texture.";
+			Log(LOG_ERROR) << "Map generator could not find alternate terrain " << terrainName << ", proceeding with terrain from alienDeployments or Geoscape texture.";
 			terrain = _terrain;
 		}
 	}

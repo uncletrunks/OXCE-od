@@ -28,7 +28,7 @@ namespace helper
 {
 
 /***
- * Calcualte pointer offset using bytes
+ * Calculate pointer offset using bytes
  */
 template<typename Ptr>
 Ptr* pointerByteOffset(Ptr* base, int offset)
@@ -37,7 +37,7 @@ Ptr* pointerByteOffset(Ptr* base, int offset)
 }
 
 /***
- * Calcualte pointer offset using bytes
+ * Calculate pointer offset using bytes
  */
 template<typename Ptr>
 const Ptr* pointerByteOffset(const Ptr* base, int offset)
@@ -117,13 +117,13 @@ public:
 
 	}
 
-	/// Get pointer to begining of surface
+	/// Get pointer to beginning of surface
 	inline PixelPtr ptr() const
 	{
 		return _orgin;
 	}
 
-	/// Get real distance betwean lines in bytes
+	/// Get real distance between lines in bytes
 	inline int pitch() const
 	{
 		return _pitch;
@@ -159,7 +159,7 @@ struct controler
 
 	/**
 	 * function used only when `SurfaceType` can be used as destination surface
-	 * if that type should not be used as `dest` dont implements this.
+	 * if that type should not be used as `dest` don't implement this.
 	 * @return start drawing range
 	 */
 	inline const GraphSubset& get_range() = delete;

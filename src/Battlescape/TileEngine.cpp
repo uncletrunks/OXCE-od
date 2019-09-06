@@ -627,7 +627,7 @@ void TileEngine::addLight(GraphSubset gs, Position center, int power, LightLayer
 				}
 				if (steps > 1)
 				{
-					if (cache.fire && fire && light <= maxFirePower) //some tile on path have fire, skip further calculation because destionation tile should be lighted by this fire.
+					if (cache.fire && fire && light <= maxFirePower) //some tile on path have fire, skip further calculation because destination tile should be lighted by this fire.
 					{
 						result = true;
 					}
@@ -694,7 +694,7 @@ bool TileEngine::setupEventVisibilitySector(const Position &observerPos, const P
 	else
 	{
 		//Use search space reduction by updating within a narrow circle sector covering the event and any
-		//units beyond it (they can now be hidden or revealed based on what occured at the event position)
+		//units beyond it (they can now be hidden or revealed based on what occurred at the event position)
 		//So, with a circle at eventPos of radius eventRadius, define its tangent points as viewed from this unit.
 		Position posDiff = eventPos - observerPos;
 		float a = asinf(eventRadius / sqrtf(posDiff.x * posDiff.x + posDiff.y * posDiff.y));
@@ -713,7 +713,7 @@ bool TileEngine::setupEventVisibilitySector(const Position &observerPos, const P
 
 /**
  * Checks whether toCheck is within a previously setup eventVisibilitySector. See setupEventVisibilitySector(...).
- * May be used to rapidly reduce the searchspace when updating unit and tile visibility.
+ * May be used to rapidly reduce the search space when updating unit and tile visibility.
  * @param toCheck The position to check.
  * @return true if within the circle sector.
  */
@@ -736,7 +736,7 @@ inline bool TileEngine::inEventVisibilitySector(const Position &toCheck) const
 * Updates line of sight of a single soldier in a narrow arc around a given event position.
 * @param unit Unit to check line of sight of.
 * @param eventPos The centre of the event which necessitated the FOV update. Used to optimize which tiles to update.
-* @param eventRadius The radius of a circle able to fully encompass the event, in tiles. Hence: 1 for a singletile event.
+* @param eventRadius The radius of a circle able to fully encompass the event, in tiles. Hence: 1 for a single tile event.
 * @return True when new aliens are spotted.
 */
 bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, const int eventRadius)
@@ -827,7 +827,7 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 * calculate tiles within a narrow arc.
 * @param unit Unit to check line of sight of.
 * @param eventPos The centre of the event which necessitated the FOV update. Used to optimize which tiles to update.
-* @param eventRadius The radius of a circle able to fully encompass the event, in tiles. Hence: 1 for a singletile event.
+* @param eventRadius The radius of a circle able to fully encompass the event, in tiles. Hence: 1 for a single tile event.
 */
 void TileEngine::calculateTilesInFOV(BattleUnit *unit, const Position eventPos, const int eventRadius)
 {
@@ -2173,7 +2173,7 @@ bool TileEngine::awardExperience(BattleActionAttack attack, BattleUnit *target, 
 		if (weapon->getRules()->getBattleType() == BT_GRENADE || weapon->getRules()->getBattleType() == BT_PROXIMITYGRENADE)
 		{
 			expType = ETM_THROWING_100;
-			expFuncA = &BattleUnit::addThrowingExp; // e.g. willie pete, acid grenade, stun grenade, HE grenade, smoke grenade, proxy grenade, ...
+			expFuncA = &BattleUnit::addThrowingExp; // e.g. acid grenade, stun grenade, HE grenade, smoke grenade, proxy grenade, ...
 		}
 		// MELEE
 		else if (weapon->getRules()->getBattleType() == BT_MELEE)
@@ -2198,7 +2198,7 @@ bool TileEngine::awardExperience(BattleActionAttack attack, BattleUnit *target, 
 			else if (weapon->getArcingShot(attack.type))
 			{
 				expType = ETM_THROWING_100;
-				expFuncA = &BattleUnit::addThrowingExp; // e.g. flamethrower, javelins, combat bow, grenade launcher, molotov, black powder bomb, stick grenade, acid flask, apple, ...
+				expFuncA = &BattleUnit::addThrowingExp; // e.g. flamethrower, javelins, combat bow, grenade launcher, black powder bomb, stick grenade, acid flask, apple, ...
 			}
 			else
 			{
@@ -2206,12 +2206,12 @@ bool TileEngine::awardExperience(BattleActionAttack attack, BattleUnit *target, 
 				if (maxRange > 10)
 				{
 					expType = ETM_FIRING_100;
-					expFuncA = &BattleUnit::addFiringExp; // e.g. panzerfaust, harpoon gun, shotgun, assault rifle, rocket launcher, small launcher, heavy cannon, blaster launcher, ...
+					expFuncA = &BattleUnit::addFiringExp; // e.g. harpoon gun, shotgun, assault rifle, rocket launcher, small launcher, heavy cannon, blaster launcher, ...
 				}
 				else if (maxRange > 1)
 				{
 					expType = ETM_THROWING_100;
-					expFuncA = &BattleUnit::addThrowingExp; // e.g. fuso knives, zapper, ...
+					expFuncA = &BattleUnit::addThrowingExp; // e.g. throwing knives, zapper, ...
 				}
 				else if (maxRange == 1)
 				{
@@ -2531,7 +2531,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 
 	Tile *origin = _save->getTile(Position(centetTile));
 	Tile *dest = nullptr;
-	if (origin->isBigWall()) //precalculations for bigwall deflection
+	if (origin->isBigWall()) //pre-calculations for bigwall deflection
 	{
 		diagonalWall = origin->getMapData(O_OBJECT)->getBigWall();
 		if (diagonalWall == Pathfinding::BIGWALLNWSE) //  3 |
@@ -3378,7 +3378,7 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 
 /**
  * Opens any doors connected to this part at this position,
- * Keeps processing til it hits a non-ufo-door.
+ * Keeps processing till it hits a non-ufo-door.
  * @param pos The starting position
  * @param part The part to open, defines which direction to check.
  * @return <The number of adjacent doors opened, Position of door centre>
@@ -3457,7 +3457,7 @@ int TileEngine::closeUfoDoors()
  * @param origin Origin tile.
  * @param target Target tile.
  * @param trajectory A vector of positions in which the trajectory is stored.
- * @return 0 or some value greter than .
+ * @return 0 or some value greater than .
  */
 int TileEngine::calculateLineTile(Position origin, Position target, std::vector<Position> &trajectory)
 {

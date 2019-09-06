@@ -40,7 +40,7 @@ public:
 	virtual ~BattleState();
 	/// Initializes the state.
 	virtual void init();
-	/// Call when state get popout.
+	/// Called when the state gets popped out.
 	virtual void deinit();
 	/// Handles a cancel request.
 	virtual void cancel();

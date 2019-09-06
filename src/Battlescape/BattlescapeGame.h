@@ -101,7 +101,7 @@ struct BattleActionAttack
 	BattleItem *weapon_item;
 	BattleItem *damage_item;
 
-	/// Defulat constructor.
+	/// Default constructor.
 	BattleActionAttack(BattleActionType action = BA_NONE, BattleUnit *unit = nullptr) : type{ action }, attacker{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
 	{
 
@@ -167,7 +167,7 @@ private:
 	void endTurn();
 	/// Picks the first soldier that is panicking.
 	bool handlePanickingPlayer();
-	/// Common function for hanlding panicking units.
+	/// Common function for handling panicking units.
 	bool handlePanickingUnit(BattleUnit *unit);
 	/// Determines whether there are any actions pending for the given unit.
 	bool noActionsPending(BattleUnit *bu);
@@ -249,7 +249,7 @@ public:
 	Map *getMap();
 	/// Gets the save.
 	SavedBattleGame *getSave();
-	/// Gets the tilengine.
+	/// Gets the tile engine.
 	TileEngine *getTileEngine();
 	/// Gets the pathfinding.
 	Pathfinding *getPathfinding();

@@ -350,7 +350,7 @@ void create()
 // that the *correct* files are there complex.
 static bool _gameIsInstalled(const std::string &gameName)
 {
-	// look for game data in either the data or user directorie
+	// look for game data in either the data or user directories
 	std::string dataGameFolder = CrossPlatform::searchDataFolder(gameName);
 	std::string dataGameZipFile = CrossPlatform::searchDataFile(gameName + ".zip");
 	std::string userGameFolder = _userFolder + gameName;

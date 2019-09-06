@@ -751,7 +751,7 @@ bool Armor::getCreatesMeleeThreat(bool def) const
 }
 
 /**
- * Gets how much negative hp is require to gib unit.
+ * Gets how much damage (over the maximum HP) is needed to vaporize/disintegrate a unit.
  * @return Percent of require hp.
  */
 float Armor::getOverKill() const
@@ -808,7 +808,7 @@ int findWithFallback(const std::vector<int> &vec, size_t pos)
 {
 	//if pos == 31 then we test for 31, 15, 7
 	//if pos == 36 then we test for 36, 4
-	//we stop on p < 8 for comatibility reasons.
+	//we stop on p < 8 for compatibility reasons.
 	for (int i = 0; i <= RuleSoldier::LookVariantBits; ++i)
 	{
 		size_t p = (pos & (RuleSoldier::LookTotalMask >> i));

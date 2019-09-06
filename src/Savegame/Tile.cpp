@@ -917,7 +917,7 @@ void Tile::prepareNewTurn(bool smokeDamage)
 
 /**
  * Get the inventory on this tile.
- * @return pointer to a vector of battleitems.
+ * @return pointer to a vector of battle items.
  */
 std::vector<BattleItem *> *Tile::getInventory()
 {

@@ -1449,7 +1449,7 @@ bool AIModule::selectSpottedUnitForSniper()
  * @param action Pointer to the BattleAction determining the firing mode
  * @param target Pointer to the BattleUnit we're trying to target
  * @param checkLOF Set to true if you want to check for a valid line of fire
- * @return The calulated score
+ * @return The calculated score
  */
 int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool checkLOF)
 {
@@ -1889,7 +1889,7 @@ bool AIModule::findFirePoint()
  * @param radius How big the explosion will be.
  * @param diff Game difficulty.
  * @param grenade Is the explosion coming from a grenade?
- * @return Value greter than zero if it is worthwhile creating an explosion in the target position. Bigger value better target.
+ * @return Value greater than zero if it is worthwhile creating an explosion in the target position. Bigger value better target.
  */
 int AIModule::explosiveEfficacy(Position targetPos, BattleUnit *attackingUnit, int radius, int diff, bool grenade) const
 {
@@ -2225,7 +2225,7 @@ void AIModule::projectileAction()
 	testEffect(costSnap, BA_SNAPSHOT);
 	testEffect(costAimed, BA_AIMEDSHOT);
 
-	// Is the unit willigly waiting outside of weapon's range (e.g. ninja camouflaged in ambush)?
+	// Is the unit willingly waiting outside of weapon's range (e.g. ninja camouflaged in ambush)?
 	bool waitIfOutsideWeaponRange = _unit->getGeoscapeSoldier() ? false : _unit->getUnitRules()->waitIfOutsideWeaponRange();
 
 	// Do we want to use the extended firing mode scoring?
@@ -2350,7 +2350,7 @@ void AIModule::extendedFireModeChoice(BattleActionCost& costAuto, BattleActionCo
 		newScore = newScore * (100 + RNG::generate(-intelligenceModifier, intelligenceModifier)) / 100;
 
 		// More aggressive units get a modifier to the score for auto shots
-		// Aggresion = 0 lowers the score, aggro = 1 is no modifier, aggro > 1 bumps up the score by 5% (configurable) for each increment over 1
+		// Aggression = 0 lowers the score, aggro = 1 is no modifier, aggro > 1 bumps up the score by 5% (configurable) for each increment over 1
 		if (i == BA_AUTOSHOT)
 		{
 			newScore = newScore * (100 + (_unit->getAggression() - 1) * _save->getBattleGame()->getMod()->getAIFireChoiceAggroCoeff()) / 100;
@@ -2585,7 +2585,7 @@ bool AIModule::psiAction()
 				}
 				else
 				{
-					// prefer machineguns
+					// prefer machine guns
 					weightPower *= _attackAction->weapon->getActionConf(action)->shots;
 				}
 				if (weightPower >= weightToAttack)

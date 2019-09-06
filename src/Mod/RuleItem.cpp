@@ -647,7 +647,7 @@ void RuleItem::afterLoad(const Mod* mod)
 		}
 		else
 		{
-			throw Exception("Sorry modders, cannot recover live aliens from random unorganic junk '" + pair.first + "'!");
+			throw Exception("Sorry modders, cannot recover live aliens from random inorganic junk '" + pair.first + "'!");
 		}
 	}
 
@@ -677,7 +677,7 @@ const std::string &RuleItem::getName() const
 }
 
 /**
- * Gets name id to use when displaing in loaded weapon.
+ * Gets name id to use when displaying in loaded weapon.
  * @return Translation StringId.
  */
 const std::string &RuleItem::getNameAsAmmo() const
@@ -1650,7 +1650,7 @@ float RuleItem::getPainKillerRecovery() const
 
 /**
  * Gets the medikit morale recovered based on missing health.
- * @return True if you can use medkit on self.
+ * @return True if you can use medikit on self.
  */
 bool RuleItem::getAllowSelfHeal() const
 {
@@ -1818,7 +1818,7 @@ bool RuleItem::canBeEquippedBeforeBaseDefense() const
 }
 
 /**
- * Check if the item can be equipped to craft invnetory.
+ * Check if the item can be equipped to craft inventory.
  * @return True if it can be equipped.
  */
 bool RuleItem::canBeEquippedToCraftInventory() const
@@ -1875,7 +1875,7 @@ int RuleItem::getAIUseDelay(const Mod *mod) const
 }
 
 /**
- * Resturns number of melee hits AI should do when attacking enemy.
+ * Returns number of melee hits AI should do when attacking enemy.
  * @return Number of hits.
  */
 int RuleItem::getAIMeleeHitCount() const

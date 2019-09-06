@@ -148,7 +148,7 @@ CommendationLateState::CommendationLateState(std::vector<Soldier*> soldiersMedal
 						}
 						vectorIterator++;
 					}
-					// Establish comms name
+					// Establish commendation's name
 					// Medal name
 					wssCommendation << "   ";
 					if (modularCommendation)

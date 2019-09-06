@@ -48,10 +48,10 @@ void Sound::load(const std::string &filename) {
 	auto s = NewSound(Mix_LoadWAV_RW(rw, SDL_TRUE));
 	if (!s)
 	{
-		Log(LOG_ERROR) << "Sound::load(" << filename << "): mixerr=" << Mix_GetError();
+		Log(LOG_ERROR) << "Sound::load(" << filename << "): mix error=" << Mix_GetError();
 	}
 
-	//allways overwritte
+	//always overwrite
 	_sound = std::move(s);
 }
 
@@ -63,10 +63,10 @@ void Sound::load(SDL_RWops *rw) {
 	auto s = NewSound(Mix_LoadWAV_RW(rw, SDL_TRUE));
 	if (!s)
 	{
-		Log(LOG_ERROR) << "Sound::load(data): mixerr=" << Mix_GetError();
+		Log(LOG_ERROR) << "Sound::load(data): mix error=" << Mix_GetError();
 	}
 
-	//allways overwritte
+	//always overwrite
 	_sound = std::move(s);
 }
 

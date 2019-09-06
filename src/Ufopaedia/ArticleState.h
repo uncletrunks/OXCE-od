@@ -34,19 +34,19 @@ namespace OpenXcom
 	/// Current state of ufopedia
 	struct ArticleCommonState
 	{
-		/// Invaild index.
+		/// Invalid index.
 		static constexpr size_t invaild = -1;
 
-		/// Current selected article index (for prev/next navigation).
+		/// Current selected article index (for previous/next navigation).
 		size_t current_index = invaild;
 
 		/// Current sub page of article.
 		size_t current_page = 0;
 
-		/// List of all avaiable atricles.
+		/// List of all available articles.
 		std::vector<ArticleDefinition *> articleList;
 
-		/// Get current Atritcle defintion for current index position.
+		/// Get current Article definition for current index position.
 		ArticleDefinition* getCurrentArticle() const
 		{
 			return articleList[current_index];
@@ -58,10 +58,10 @@ namespace OpenXcom
 		/// Change page to next in article or move to next index position.
 		void nextArticlePage();
 
-		/// Change index position to prev article.
+		/// Change index position to previous article.
 		void prevArticle();
 
-		/// Change page to prev in article or move to prev index position.
+		/// Change page to previous in article or move to previous index position.
 		void prevArticlePage();
 	};
 

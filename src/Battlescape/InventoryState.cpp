@@ -1020,7 +1020,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 				if (!skipWeapon)
 				{
 					matchedWeapon = groundItem;
-					found = true; // found = true, even if not equiped
+					found = true; // found = true, even if not equipped
 					break;
 				}
 			}
@@ -1067,7 +1067,7 @@ void InventoryState::_applyInventoryTemplate(std::vector<EquipmentLayoutItem*> &
 			(*templateIt)->getSlotX(),
 			(*templateIt)->getSlotY()))
 		{
-			// move matched item from ground to the appropriate inv slot
+			// move matched item from ground to the appropriate inventory slot
 			matchedWeapon->moveToOwner(unit);
 			matchedWeapon->setSlot(_game->getMod()->getInventory((*templateIt)->getSlot()));
 			matchedWeapon->setSlotX((*templateIt)->getSlotX());
@@ -1442,7 +1442,7 @@ void InventoryState::onMoveGroundInventoryToBase(Action *)
 
 	if (_noCraft)
 	{
-		// pre-equippping in the base, but *without* a craft
+		// pre-equipping in the base, but *without* a craft
 		return;
 	}
 
@@ -1545,7 +1545,7 @@ void InventoryState::handle(Action *action)
 }
 
 /**
- * Cycle throug loaded ammo in hover over item.
+ * Cycle through loaded ammo in hover over item.
  */
 void InventoryState::think()
 {

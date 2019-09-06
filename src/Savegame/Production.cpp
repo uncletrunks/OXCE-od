@@ -305,7 +305,7 @@ void Production::refundItem(Base * b, SavedGame * g, const Mod *m) const
 	{
 		b->getStorageItems()->addItem(iter.first->getType(), iter.second);
 	}
-	//for (auto& iter : _rules->getRequiredCrafts())
+	//for (auto& it : _rules->getRequiredCrafts())
 	//{
 	//	// not supported
 	//}

@@ -116,7 +116,7 @@ void RuleManufacture::afterLoad(const Mod* mod)
 		}
 		else
 		{
-			throw Exception("Unknow required item '" + i.first + "'");
+			throw Exception("Unknown required item '" + i.first + "'");
 		}
 	}
 

@@ -52,9 +52,9 @@ public:
 	/// Creates a new sound and returns a pointer to it.
 	Sound *addSound(int i);
 
-	/// Set number of shared sound indexs that are accessible for all mods.
+	/// Set number of shared sound indexes that are accessible for all mods.
 	void setMaxSharedSounds(int i);
-	/// Gets number of shared sound indexs that are accessible for all mods.
+	/// Gets number of shared sound indexes that are accessible for all mods.
 	int getMaxSharedSounds() const;
 
 	/// Gets the total sounds in the set.

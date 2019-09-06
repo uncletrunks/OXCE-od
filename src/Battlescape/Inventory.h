@@ -125,7 +125,7 @@ public:
 	void showWarning(const std::string &msg);
 	/// Animate surface.
 	void animate();
-	/// Get current animation frame for invenotry.
+	/// Get current animation frame for inventory.
 	int getAnimFrame() const { return _animFrame; }
 };
 

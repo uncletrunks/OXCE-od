@@ -164,7 +164,7 @@ void MapDataSet::loadData()
 		MapData *to = new MapData(this);
 		_objects.push_back(to);
 
-		// set all the terrainobject properties:
+		// set all the terrain object properties:
 		for (int frame = 0; frame < 8; frame++)
 		{
 			to->setSprite(frame,(int)mcd.Frame[frame]);

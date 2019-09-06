@@ -613,7 +613,7 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set, int animFrame, int shade) c
 		//enforce compatibility with basic version
 		if (surf == nullptr)
 		{
-			throw Exception("Invlid surface set 'FLOOROB.PCK' for item '" + _rules->getType() + "': not enough frames");
+			throw Exception("Image missing in 'FLOOROB.PCK' for item '" + _rules->getType() + "'");
 		}
 
 		ModScript::SelectItemSprite::Output arg{ i, 0 };
@@ -646,7 +646,7 @@ Surface *BattleItem::getBigSprite(SurfaceSet *set, int animFrame) const
 		//enforce compatibility with basic version
 		if (surf == nullptr)
 		{
-			throw Exception("Invlid surface set 'BIGOBS.PCK' for item '" + _rules->getType() + "': not enough frames");
+			throw Exception("Image missing in 'BIGOBS.PCK' for item '" + _rules->getType() + "'");
 		}
 
 		ModScript::SelectItemSprite::Output arg{ i, 0 };
@@ -676,8 +676,8 @@ bool BattleItem::isWeaponWithAmmo() const
 }
 
 /**
- * Check if weapon have enought ammo to shoot.
- * @return True if have ammo.
+ * Check if weapon has enough ammo to shoot.
+ * @return True if has enough ammo.
  */
 bool BattleItem::haveAnyAmmo() const
 {
@@ -843,7 +843,7 @@ BattleItem *BattleItem::getAmmoForAction(BattleActionType action, std::string* m
 }
 
 /**
- * Spend weapon ammo, if depleded remove clip.
+ * Spend weapon ammo, if depleted remove clip.
  * @param action Battle Action done using this item.
  * @param save Save game.
  */
@@ -972,7 +972,7 @@ int BattleItem::getTotalWeight() const
 }
 
 /**
- * Get wayponts count of weapon or from ammo.
+ * Get waypoints count of weapon or from ammo.
  * @return Maximum waypoints count or -1 if unlimited.
  */
 int BattleItem::getCurrentWaypoints() const
@@ -1397,7 +1397,7 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&setAmmoQuantityScript>("setAmmoQuantity");
 
 	bi.add<&BattleItem::getFuseTimer>("getFuseTimer");
-	bi.add<&getFuseTimerDefaultScript>("getFuseTimerDefault", "get defualt fuse timer");
+	bi.add<&getFuseTimerDefaultScript>("getFuseTimerDefault", "get default fuse timer");
 	bi.add<&setFuseTimerScript>("setFuseTimer", "set item fuse timer, -1 mean disable it");
 
 	bi.add<&BattleItem::isFuseEnabled>("isFuseEnabled", "check if fuse is triggered (like throw or proxy unit)");

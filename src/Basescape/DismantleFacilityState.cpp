@@ -121,7 +121,7 @@ void DismantleFacilityState::btnOkClick(Action *)
 
 		if (_fac->getBuildTime() > _fac->getRules()->getBuildTime())
 		{
-			// Give full refund if this is an unstarted, queued build.
+			// Give full refund if this is a (not yet started) queued build.
 			_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _fac->getRules()->getBuildCost());
 			for (std::map<std::string, std::pair<int, int> >::const_iterator i = itemCost.begin(); i != itemCost.end(); ++i)
 			{

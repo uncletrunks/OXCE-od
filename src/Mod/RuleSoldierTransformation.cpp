@@ -110,7 +110,7 @@ const std::vector<std::string > &RuleSoldierTransformation::getRequiredResearch(
 
 /**
  * Gets the list of required base functions for this project
- * @return The list of required base funcs
+ * @return The list of required base functions
  */
 const std::vector<std::string > &RuleSoldierTransformation::getRequiredBaseFuncs() const
 {

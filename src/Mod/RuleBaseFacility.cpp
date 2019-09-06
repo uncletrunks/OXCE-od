@@ -209,7 +209,7 @@ const std::vector<std::string> &RuleBaseFacility::getProvidedBaseFunc() const
 }
 
 /**
- * Gets the list of forbiden functions by this building.
+ * Gets the list of forbidden functions by this building.
  * @return List of function IDs.
  */
 const std::vector<std::string> &RuleBaseFacility::getForbiddenBaseFunc() const

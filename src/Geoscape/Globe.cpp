@@ -251,7 +251,7 @@ struct CreateShadow
 		temp.x += GlobeStaticData::shade_gradient_max / 2;
 		//random noise that go in any direction
 		temp.x -= static_data.getDistanceNoise(noise);
-		//random moise than increase with distance from middle of twilight
+		//random noise than increase with distance from middle of twilight
 		temp.x += static_data.getMultiplierNoise(noise) * 4 * (temp.x - GlobeStaticData::shade_gradient_max / 2) / GlobeStaticData::shade_gradient_max;
 
 		double full = 0;

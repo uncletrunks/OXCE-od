@@ -23,7 +23,7 @@
  * 1. mods are either directories under standard / user/mods
  *    or zip files in those directories.
  * 2. metadata.yml is required.
- * 3. zipfiles can either countain a single mod (metadata.yml at top level) or
+ * 3. zipfiles can either contain a single mod (metadata.yml at top level) or
  *    multiple mods (metadata.yml one level down).
  * 4. in both cases zipfile [sub]directory structure is what a mod dir structure is.
  * 5. mod directory can not contain zip files.
@@ -708,7 +708,7 @@ static void dump_mods_layers(std::ostream &out, const std::string& prefix, bool 
 	}
 }
 /**
- * Attempts to map extResources and insert the resulting layes into a mod
+ * Attempts to map extResources and insert the resulting layers into a mod
  * @param mrec - ModRec of a mod
  * @param basename - extRes name to map (from userDir/dataDir)
  */

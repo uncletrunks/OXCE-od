@@ -1637,7 +1637,7 @@ bool Inventory::canBeStacked(BattleItem *itemA, BattleItem *itemB)
 		itemA->getFuseTimer() == -1 && itemB->getFuseTimer() == -1 &&
 		// and neither is a corpse or unconscious unit
 		itemA->getUnit() == 0 && itemB->getUnit() == 0 &&
-		// and if it's a medkit, it has the same number of charges
+		// and if it's a medikit, it has the same number of charges
 		itemA->getPainKillerQuantity() == itemB->getPainKillerQuantity() &&
 		itemA->getHealQuantity() == itemB->getHealQuantity() &&
 		itemA->getStimulantQuantity() == itemB->getStimulantQuantity());

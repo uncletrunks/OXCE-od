@@ -743,8 +743,8 @@ Position BattleUnit::getLastPosition() const
 }
 
 /**
- * Gets position of unit center in vexels.
- * @return position in vexels
+ * Gets position of unit center in voxels.
+ * @return position in voxels
  */
 Position BattleUnit::getPositionVexels() const
 {
@@ -909,7 +909,7 @@ void BattleUnit::startWalking(int direction, Position destination, SavedBattleGa
 /**
  * This will increment the walking phase.
  * @param savedBattleGame Pointer to save to get tile currently below the unit.
- * @param fullWalkCycle Do full walk cycle or short one when unit is offscreen.
+ * @param fullWalkCycle Do full walk cycle or short one when unit is off screen.
  */
 void BattleUnit::keepWalking(SavedBattleGame *savedBattleGame, bool fullWalkCycle)
 {
@@ -948,7 +948,7 @@ void BattleUnit::keepWalking(SavedBattleGame *savedBattleGame, bool fullWalkCycl
 	if (_walkPhase == middle)
 	{
 		// we assume we reached our destination tile
-		// this is actually a drawing hack, so soldiers are not overlapped by floortiles
+		// this is actually a drawing hack, so soldiers are not overlapped by floor tiles
 		_pos = _destination;
 	}
 
@@ -1802,7 +1802,7 @@ void BattleUnit::spendCost(const RuleItemUseCost& cost)
 }
 
 /**
- * Clear number of timeunits.
+ * Clear number of time units.
  */
 void BattleUnit::clearTimeUnits()
 {
@@ -1966,7 +1966,7 @@ int BattleUnit::getPsiAccuracy(BattleActionType actionType, BattleItem *item)
 
 /**
  * Calculate firing accuracy.
- * Formula = accuracyStat * weaponAccuracy * kneelingbonus(1.15) * one-handPenalty(0.8) * woundsPenalty(% health) * critWoundsPenalty (-10%/wound)
+ * Formula = accuracyStat * weaponAccuracy * kneeling bonus(1.15) * one-handPenalty(0.8) * woundsPenalty(% health) * critWoundsPenalty (-10%/wound)
  * @param actionType
  * @param item
  * @return firing Accuracy
@@ -2126,7 +2126,7 @@ void BattleUnit::prepareTimeUnits(int tu)
 {
 	if (!isOut())
 	{
-		// Add to prev turn TU, if regen is less than normal unit need couple of turns to regen full bar
+		// Add to previous turn TU, if regen is less than normal unit need couple of turns to regen full bar
 		setValueMax(_tu, tu, 0, getBaseStats()->tu);
 
 		// Apply reductions, if new TU == 0 then it could make not spend TU decay
@@ -2403,7 +2403,7 @@ std::vector<BattleItem*> *BattleUnit::getInventory()
  * Fit item into inventory slot.
  * @param slot Slot to fit.
  * @param item Item to fit.
- * @return True if succeded, false otherwise.
+ * @return True if succeeded, false otherwise.
  */
 bool BattleUnit::fitItemToInventory(RuleInventory *slot, BattleItem *item)
 {
@@ -2791,7 +2791,7 @@ void BattleUnit::setTile(Tile *tile, SavedBattleGame *saveBattleGame)
 }
 
 /**
- * Set only unit tile without any addtional logic.
+ * Set only unit tile without any additional logic.
  * Used only in before battle, other wise will break game.
  * Need call setTile after to fix links
  * @param tile
@@ -3283,7 +3283,7 @@ bool BattleUnit::postMissionProcedures(const Mod *mod, SavedGame *geoscape, Save
 		recovery = arg.getFirst();
 	}
 
-	//after mod excecution this value could change
+	//after mod execution this value could change
 	statsDiff.statGrowth = *stats - statsOld.statGrowth;
 
 	s->setWoundRecovery(recovery);
@@ -3470,7 +3470,7 @@ void BattleUnit::setName(const std::string &name)
  * hence the language pointer needed.
  * @param lang Pointer to language.
  * @param debugAppendId Append unit ID to name for debug purposes.
- * @return name Widecharstring of the unit's name.
+ * @return name String of the unit's name.
  */
 std::string BattleUnit::getName(Language *lang, bool debugAppendId) const
 {

@@ -462,9 +462,9 @@ public:
 	int getMaxViewDistance() const { return _maxViewDistance; }
 	/// Gets threshold of darkness for LoS calculation.
 	int getMaxDarknessToSeeUnits() const { return _maxDarknessToSeeUnits; }
-	/// Gets max static (tiles & fire) ligth distance in BattleScape.
+	/// Gets max static (tiles & fire) light distance in BattleScape.
 	int getMaxStaticLightDistance() const { return _maxStaticLightDistance; }
-	/// Gets max dynamic (items & units) ligth distance in BattleScape.
+	/// Gets max dynamic (items & units) light distance in BattleScape.
 	int getMaxDynamicLightDistance() const { return _maxDynamicLightDistance; }
 	/// Get flags for enhanced lighting, 0x1 - tiles and fire, 0x2 - items, 0x4 - units.
 	int getEnhancedLighting() const { return _enhancedLighting; }

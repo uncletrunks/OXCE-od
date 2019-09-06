@@ -976,7 +976,7 @@ void Map::drawTerrain(Surface *surface)
 
 					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
 					{
-						// special handling for a moving unit in forground of tile.
+						// special handling for a moving unit in foreground of tile.
 						const int frontPosSize = 5;
 						Position frontPos[frontPosSize] =
 						{
@@ -1868,7 +1868,7 @@ void Map::setCursorType(CursorType type, int size)
 
 /**
  * Gets the cursor type.
- * @return cursortype.
+ * @return cursor type.
  */
 CursorType Map::getCursorType() const
 {

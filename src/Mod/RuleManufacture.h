@@ -93,7 +93,7 @@ public:
 	/// Gets the list of items produced by completing "one object" of this project.
 	/// by default: it contains only the "name" item with a value of 1.
 	const std::map<const RuleItem*, int> &getProducedItems() const;
-	/// If this produce craft return its type, otherweasie null.
+	/// If this produce craft return its type, otherwise null.
 	const RuleCraft* getProducedCraft() const;
 	/// Gets the random manufacture rules.
 	const std::vector<std::pair<int, std::map<const RuleItem*, int> > > &getRandomProducedItems() const;

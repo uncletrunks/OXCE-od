@@ -45,7 +45,7 @@ enum LightLayers : Uint8;
 class TileEngine
 {
 public:
-	/// Value represent not exisiting position.
+	/// Value representing non-existing position.
 	static constexpr Position invalid = { -1, -1, -1 };
 
 	/// Size of tile in voxels
@@ -157,7 +157,7 @@ public:
 	void calculateFOV(Position position, int eventRadius = -1, const bool updateTiles = true, const bool appendToTileVisibility = false);
 	/// Checks reaction fire.
 	bool checkReactionFire(BattleUnit *unit, const BattleAction &originalAction);
-	/// Recalcualte all lighting in some area.
+	/// Recalculate all lighting in some area.
 	void calculateLighting(LightLayers layer, Position position = invalid, int eventRadius = 0, bool terrianChanged = false);
 	/// Handles tile hit.
 	int hitTile(Tile *tile, int damage, const RuleDamageType* type);

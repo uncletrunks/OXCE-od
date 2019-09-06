@@ -117,7 +117,7 @@ int Node::getID() const
 
 /**
  * Get the rank of units that can spawn on this node.
- * @return noderank
+ * @return node rank
  */
 NodeRank Node::getRank() const
 {

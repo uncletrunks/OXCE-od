@@ -535,7 +535,7 @@ void Soldier::setLookVariant(int lookVariant)
 
 /**
  * Returns the soldier's rules.
- * @return rulesoldier
+ * @return rule soldier
  */
 RuleSoldier *Soldier::getRules() const
 {
@@ -859,7 +859,7 @@ void Soldier::trainPsi()
 
 	_improvement = _psiStrImprovement = 0;
 	// -10 days - tolerance threshold for switch from anytimePsiTraining option.
-	// If soldier has psiskill -10..-1, he was trained 20..59 days. 81.7% probability, he was trained more that 30 days.
+	// If soldier has psi skill -10..-1, he was trained 20..59 days. 81.7% probability, he was trained more that 30 days.
 	if (_currentStats.psiSkill < -10 + _rules->getMinStats().psiSkill)
 		_currentStats.psiSkill = _rules->getMinStats().psiSkill;
 	else if (_currentStats.psiSkill <= _rules->getMaxStats().psiSkill)

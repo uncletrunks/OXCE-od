@@ -118,9 +118,9 @@ public:
 	void keyboardPress(Action *action, State *state) override;
 	/// Special handling for key releases.
 	void keyboardRelease(Action *action, State *state) override;
-	/// Rotates the tileframes 0-7
+	/// Rotates the tile frames 0-7
 	void animate(bool redraw);
-	/// Sets the battlescape selector position relative to mouseposition.
+	/// Sets the battlescape selector position relative to mouse position.
 	void setSelectorPosition(int mx, int my);
 	/// Gets the currently selected position.
 	void getSelectorPosition(Position *pos) const;

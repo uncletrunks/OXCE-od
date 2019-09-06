@@ -216,7 +216,7 @@ namespace OpenXcom
 			_lstInfo = new TextList(204, 55, 8, 82);
 			add(_lstInfo);
 
-			_lstInfo->setColor(_listColor2); // color for %-data!
+			_lstInfo->setColor(_listColor2); // color for % data!
 			_lstInfo->setColumns(3, 100, 52, 52);
 			_lstInfo->setBig();
 		}

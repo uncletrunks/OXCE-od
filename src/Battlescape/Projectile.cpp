@@ -40,7 +40,7 @@ namespace OpenXcom
 /**
  * Sets up a UnitSprite with the specified size and position.
  * @param mod Pointer to mod.
- * @param save Pointer to battlesavegame.
+ * @param save Pointer to battle savegame.
  * @param action An action.
  * @param origin Position the projectile originates from.
  * @param targetVoxel Position the projectile is targeting.
@@ -323,7 +323,7 @@ int Projectile::calculateThrow(double accuracy)
 
 /**
  * Calculates the new target in voxel space, based on the given accuracy modifier.
- * @param origin Startposition of the trajectory in voxels.
+ * @param origin Start position of the trajectory in voxels.
  * @param target Endpoint of the trajectory in voxels.
  * @param accuracy Accuracy modifier.
  * @param keepRange Whether range affects accuracy.

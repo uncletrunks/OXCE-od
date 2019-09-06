@@ -70,7 +70,7 @@ namespace OpenXcom
 			_lstInfo = new TextList(140, 55, 8, 170);
 			add(_lstInfo);
 
-			_lstInfo->setColor(_listColor2); // color for %-data!
+			_lstInfo->setColor(_listColor2); // color for % data!
 			_lstInfo->setColumns(3, 70, 40, 30);
 
 

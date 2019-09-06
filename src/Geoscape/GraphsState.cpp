@@ -136,7 +136,7 @@ GraphsState::GraphsState() : _butRegionsOffset(0), _butCountriesOffset(0), _zoom
 	offset = 0;
 	for (std::vector<Country *>::iterator iter = _game->getSavedGame()->getCountries()->begin(); iter != _game->getSavedGame()->getCountries()->end(); ++iter)
 	{
-		// always save in toggles all the countrie
+		// always save in toggles all the countries
 		Uint8 color = 13 + 8 * (offset % GRAPH_MAX_BUTTONS);
 		_countryToggles.push_back(new GraphButInfo(tr((*iter)->getRules()->getType()), color));
 		// initially add the GRAPH_MAX_BUTTONS having the first countries information
@@ -1201,7 +1201,7 @@ void GraphsState::shiftButtons(Action *action)
 	// only if active 'screen' is other than finance
 	if (_finance)
 		return;
-	// select the data's we'll processing - regions or countrie
+	// select the data's we'll processing - regions or countries
 	if (_country)
 	{
 		// too few countries? - return

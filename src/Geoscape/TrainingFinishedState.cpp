@@ -82,7 +82,7 @@ TrainingFinishedState::TrainingFinishedState(Base *base, const std::vector<Soldi
 }
 
 /**
- * Closes the screeen.
+ * Closes the screen.
  * @param action Pointer to an action.
  */
 void TrainingFinishedState::btnOkClick(Action *)

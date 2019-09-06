@@ -32,7 +32,7 @@ class Mod;
 
 /**
  * A class that represents a projectile. Map is the owner of an instance of this class during its short life.
- * It calculates its own trajectory and then moves along this precalculated trajectory in voxel space.
+ * It calculates its own trajectory and then moves along this pre-calculated trajectory in voxel space.
  */
 class Projectile
 {

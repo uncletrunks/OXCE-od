@@ -2137,7 +2137,7 @@ void DebriefingState::addItemsToBaseStores(const std::string &itemType, Base *ba
 /**
  * Recovers items from the battlescape.
  *
- * Converts the battlescape inventory into a geoscape itemcontainer.
+ * Converts the battlescape inventory into a geoscape item container.
  * @param from Items recovered from the battlescape.
  * @param base Base to add items to.
  */
@@ -2284,7 +2284,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 				}
 			}
 			// special case of fixed weapons on a soldier's armor, but not HWPs
-			// makes sure we recover the ammuntion from this weapon
+			// makes sure we recover the ammunition from this weapon
 			else if (rule->isFixed() && (*it)->getOwner()->getOriginalFaction() == FACTION_PLAYER && (*it)->getOwner()->getGeoscapeSoldier())
 			{
 				switch (rule->getBattleType())

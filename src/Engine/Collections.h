@@ -26,19 +26,19 @@ namespace OpenXcom
 {
 
 /**
- * Helper class for managing object colections
+ * Helper class for managing object collections
  */
 class Collections
 {
 public:
 	/**
-	 * Delete can be only used on owning pointers, to make clear diffrence to removeAll we reject case when it is used on colection without pointers.
+	 * Delete can be only used on owning pointers, to make clear difference to removeAll we reject case when it is used on collection without pointers.
 	 * @param p
 	 */
 	template<typename T>
 	static void deleteAll(const T& p)
 	{
-		static_assert(sizeof(T) == 0, "deleteAll can be only used on pointers and colection of pointers");
+		static_assert(sizeof(T) == 0, "deleteAll can be only used on pointers and collection of pointers");
 	}
 	template<typename T>
 	static void deleteAll(T* p)
@@ -66,10 +66,10 @@ public:
 	}
 
 	/**
-	 * Remove and delete (if pointer) items from colection with limit.
-	 * @param colection Ccolection from witch remove items
+	 * Remove and delete (if pointer) items from collection with limit.
+	 * @param collection Collection from which to remove items
 	 * @param numberToRemove Limit of removal
-	 * @param func Test what should be removed, can modyfy everyting except this colection
+	 * @param func Test what should be removed, can modify everything except this collection
 	 * @return Number of values left to remove
 	 */
 	template<typename C, typename F>
@@ -92,10 +92,10 @@ public:
 	}
 
 	/**
-	 * Remove and delete (if pointer) items from colection.
-	 * @param colection Ccolection from witch remove items
-	 * @param func Test what should be removed, can modyfy everyting except this colection
-	 * @return Number of values left in colection
+	 * Remove and delete (if pointer) items from collection.
+	 * @param collection Collection from which to remove items
+	 * @param func Test what should be removed, can modify everything except this collection
+	 * @return Number of values left in collection
 	 */
 	template<typename C, typename F>
 	static int deleteIf(C& colection, F&& func)
@@ -115,7 +115,7 @@ public:
 
 	/**
 	 * Clear container.
-	 * @param colection
+	 * @param collection
 	 */
 	template<typename C>
 	static void removeAll(C& colection)
@@ -127,7 +127,7 @@ public:
 	 * Remove items from vector with limit.
 	 * @param vec Vector from witch remove items
 	 * @param numberToRemove Limit of removal
-	 * @param func Test what should be removed, can modyfy everyting except this vector
+	 * @param func Test what should be removed, can modify everything except this vector
 	 * @return Number of values left to remove
 	 */
 	template<typename T, typename F>
@@ -139,7 +139,7 @@ public:
 		}
 		auto begin = vec.begin();
 		auto newEnd = vec.begin();
-		//similar to `std::remove_if` but it do not allow modyfy anything in `func`
+		//similar to `std::remove_if` but it do not allow modify anything in `func`
 		for (auto it = begin; it != vec.end(); ++it)
 		{
 			auto& value = *it;
@@ -158,10 +158,10 @@ public:
 	}
 
 	/**
-	 * Remove items from colection with limit.
+	 * Remove items from collection with limit.
 	 * @param list List from witch remove items
 	 * @param numberToRemove Limit of removal
-	 * @param func Test what should be removed, can modyfy everyting except this colection
+	 * @param func Test what should be removed, can modify everything except this collection
 	 * @return Number of values left to remove
 	 */
 	template<typename C, typename F>
@@ -191,10 +191,10 @@ public:
 	}
 
 	/**
-	 * Remove items from colection.
+	 * Remove items from collection.
 	 * @param list List from witch remove items
-	 * @param func Test what should be removed, can modyfy everyting except this colection
-	 * @return Number of values left in colection
+	 * @param func Test what should be removed, can modify everything except this collection
+	 * @return Number of values left in collection
 	 */
 	template<typename C, typename F>
 	static int removeIf(C& colection, F&& func)

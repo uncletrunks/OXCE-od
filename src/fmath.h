@@ -93,7 +93,7 @@ inline double Nautical(double x)
 }
 
 /**
- * Inversion of Nautical distance, use same value as in rulesets defintions
+ * Inversion of Nautical distance, use same value as in rulesets definitions
  */
 inline int XcomDistance(double nautical)
 {

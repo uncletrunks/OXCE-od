@@ -111,7 +111,7 @@ NewPossibleFacilityState::NewPossibleFacilityState(Base *base, Globe *globe, con
 }
 
 /**
- * Closes the screeen.
+ * Closes the screen.
  * @param action Pointer to an action.
  */
 void NewPossibleFacilityState::btnOkClick(Action *)

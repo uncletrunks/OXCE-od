@@ -1586,7 +1586,7 @@ void Craft::unload(const Mod *mod)
 void Craft::reuseItem(const std::string& item)
 {
 	// Note: Craft in-base status hierarchy is repair, rearm, refuel, ready.
-	// We only want to interrupt processes that are lower in the hierarachy.
+	// We only want to interrupt processes that are lower in the hierarchy.
 	// (And we don't want to interrupt any out-of-base status.)
 
 	// The only states we are willing to interrupt are "ready" and "refuelling"

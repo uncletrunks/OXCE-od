@@ -524,7 +524,7 @@ void Ufo::setDetected(bool detected)
 
 /**
  * Returns the amount of remaining seconds the UFO has left on the ground.
- * After this many seconds thet UFO will take off, if landed, or disappear, if
+ * After this many seconds the UFO will take off, if landed, or disappear, if
  * crashed.
  * @return Amount of seconds.
  */
@@ -535,7 +535,7 @@ size_t Ufo::getSecondsRemaining() const
 
 /**
  * Changes the amount of remaining seconds the UFO has left on the ground.
- * After this many seconds thet UFO will take off, if landed, or disappear, if
+ * After this many seconds the UFO will take off, if landed, or disappear, if
  * crashed.
  * @param seconds Amount of seconds.
  */

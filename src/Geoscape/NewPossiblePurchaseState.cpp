@@ -110,7 +110,7 @@ NewPossiblePurchaseState::NewPossiblePurchaseState(Base * base, const std::vecto
 }
 
 /**
- * Closes the screeen.
+ * Closes the screen.
  * @param action Pointer to an action.
  */
 void NewPossiblePurchaseState::btnOkClick(Action *)

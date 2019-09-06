@@ -37,7 +37,7 @@ namespace RNG
 		 uint64_t _seedState;
 
 	public:
-		/// Default constructor intializy seed by time and this type address.
+		/// Default constructor initializing the seed by time and this type address.
 		RandomState();
 		/// Constructor from predefined seed.
 		RandomState(uint64_t seed);

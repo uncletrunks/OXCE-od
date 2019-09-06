@@ -23,7 +23,7 @@ namespace OpenXcom
 
 /**
  * RuleArcScript: the (optional) rules for the high-level game progression.
- * Each script element is independant, and the saved game will probe the list of these each month to determine what's going to happen.
+ * Each script element is independent, and the saved game will probe the list of these each month to determine what's going to happen.
  * Arc scripts are executed just before the mission scripts and unlock research topics that can then be used by mission scripts.
  */
 RuleArcScript::RuleArcScript(const std::string& type) :

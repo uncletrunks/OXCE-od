@@ -2419,7 +2419,7 @@ inline void BattlescapeState::handle(Action *action)
 								unit->setTile(_save->getTile(newPos), _save);
 								unit->setPosition(newPos);
 
-								//free refreash as bonus
+								//free refresh as bonus
 								unit->updateUnitStats(true, false);
 								_save->getTileEngine()->calculateLighting(LL_UNITS);
 								_save->getBattleGame()->handleState();
@@ -2591,7 +2591,7 @@ void BattlescapeState::saveAIMap()
 void BattlescapeState::saveVoxelView()
 {
 	static const unsigned char pal[30]=
-	//			ground		west wall	north wall		object		enem unit						xcom unit	neutr unit
+	//			ground		west wall	north wall		object		enemy unit						xcom unit	neutral unit
 	{0,0,0, 224,224,224,  192,224,255,  255,224,192, 128,255,128, 192,0,255,  0,0,0, 255,255,255,  224,192,0,  255,64,128 };
 
 	BattleUnit * bu = _save->getSelectedUnit();
@@ -3134,7 +3134,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 				}
 				else
 				{
-					// cannot use the weapon (medi-kit) on anyone
+					// cannot use the weapon (medikit) on anyone
 					_currentTooltip = action->getSender()->getTooltip();
 					_txtTooltip->setText(tr(_currentTooltip));
 				}
@@ -3142,7 +3142,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 		}
 		else
 		{
-			// weapon is not of medi-kit battle type
+			// weapon is not of medikit battle type
 			_currentTooltip = action->getSender()->getTooltip();
 			_txtTooltip->setText(tr(_currentTooltip));
 		}

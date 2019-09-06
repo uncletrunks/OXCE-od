@@ -240,7 +240,7 @@ public:
 	std::vector<std::string> getProvidedBaseFunc(const BaseFacility *skip = 0) const;
 	/// Gets used base functionality.
 	std::vector<std::string> getRequireBaseFunc(const BaseFacility *skip = 0) const;
-	/// Gets forbiden base functionality.
+	/// Gets forbidden base functionality.
 	std::vector<std::string> getForbiddenBaseFunc() const;
 	/// Gets future base functionality.
 	std::vector<std::string> getFutureBaseFunc() const;

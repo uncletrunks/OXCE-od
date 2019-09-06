@@ -47,7 +47,7 @@ namespace OpenXcom
 	};
 
 	/**
-	 * Defintion of one sub page of ufopedia article
+	 * Definition of one sub page of ufopedia article
 	 */
 	struct ArticlePage
 	{

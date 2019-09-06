@@ -100,7 +100,7 @@ private:
 	BattleUnit *addXCOMUnit(BattleUnit *unit);
 	/// Adds an alien to the game.
 	BattleUnit *addAlien(Unit *rules, int alienRank, bool outside);
-	/// Adds a civlian to the game.
+	/// Adds a civilian to the game.
 	BattleUnit *addCivilian(Unit *rules);
 	/// Places an item on a soldier based on equipment layout.
 	bool placeItemByLayout(BattleItem *item, const std::vector<BattleItem*> &itemList);
@@ -112,7 +112,7 @@ private:
 	int loadExtraTerrain(RuleTerrain *terrain);
 	/// Fills power sources with an alien fuel object.
 	void fuelPowerSources();
-	/// Possibly explodes ufo powersources.
+	/// Possibly explodes ufo power sources.
 	void explodePowerSources();
 	/// Deploys the XCOM units on the mission.
 	void deployXCOM(const RuleStartingCondition* startingCondition, const RuleEnviroEffects* enviro);
@@ -193,7 +193,7 @@ public:
 	void runInventory(Craft *craft);
 	/// Sets up the objectives for the map.
 	void setupObjectives(const AlienDeployment *ruleDeploy);
-	// Autoequip a set of units
+	// Auto-equip a set of units
 	static void autoEquip(std::vector<BattleUnit*> units, Mod *mod, std::vector<BattleItem*> *craftInv,
 		RuleInventory *groundRuleInv, int worldShade, bool allowAutoLoadout, bool overrideEquipmentLayout);
 };

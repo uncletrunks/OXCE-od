@@ -1376,7 +1376,7 @@ bool DetectXCOMBase::operator()(const Ufo *ufo) const
 	if ((ufo->getMission()->getRules().getObjective() != OBJECTIVE_RETALIATION && !Options::aggressiveRetaliation) ||	// only UFOs on retaliation missions actively scan for bases
 		ufo->getTrajectory().getID() == UfoTrajectory::RETALIATION_ASSAULT_RUN || 										// UFOs attacking a base don't detect!
 		ufo->isCrashed() ||																								// Crashed UFOs don't detect!
-		_base.getDistance(ufo) >= Nautical(ufo->getCraftStats().sightRange))											// UFOs have a detection range of 80 XCOM units. - we use a great circle fomrula and nautical miles.
+		_base.getDistance(ufo) >= Nautical(ufo->getCraftStats().sightRange))											// UFOs have a detection range of 80 XCOM units. - we use a great circle formula and nautical miles.
 	{
 		return false;
 	}
@@ -1818,7 +1818,7 @@ void GeoscapeState::time30Minutes()
 		}
 	}
 
-	// can be updated by previons loop
+	// can be updated by previous loop
 	auto crafts = updateActiveCrafts();
 
 	// Handle UFO detection and give aliens points
@@ -3302,7 +3302,7 @@ void GeoscapeState::determineAlienMissions()
 
 
 /**
- * Proccesses a directive to start up a mission, if possible.
+ * Processes a directive to start up a mission, if possible.
  * @param command the directive from which to read information.
  * @return whether the command successfully produced a new mission.
  */
@@ -3571,7 +3571,7 @@ bool GeoscapeState::processCommand(RuleMissionScript *command)
 	// that way, the modder can fix their mistake
 	if (mod->getRegion(targetRegion) == 0)
 	{
-		throw Exception("Error proccessing mission script named: " + command->getType() + ", region named: " + targetRegion + " is not defined");
+		throw Exception("Error processing mission script named: " + command->getType() + ", region named: " + targetRegion + " is not defined");
 	}
 
 	if (missionType.empty()) // ie: not a terror mission, not targetting a base, or otherwise not already chosen
@@ -3600,7 +3600,7 @@ bool GeoscapeState::processCommand(RuleMissionScript *command)
 	// that way, the modder can fix their mistake
 	if (missionRules == 0)
 	{
-		throw Exception("Error proccessing mission script named: " + command->getType() + ", mission type: " + missionType + " is not defined");
+		throw Exception("Error processing mission script named: " + command->getType() + ", mission type: " + missionType + " is not defined");
 	}
 
 	// do i really need to comment this? shouldn't it be obvious what's happening here?
@@ -3615,14 +3615,14 @@ bool GeoscapeState::processCommand(RuleMissionScript *command)
 
 	if (missionRace.empty())
 	{
-		throw Exception("Error proccessing mission script named: " + command->getType() + ", mission type: " + missionType + " has no available races");
+		throw Exception("Error processing mission script named: " + command->getType() + ", mission type: " + missionType + " has no available races");
 	}
 
 	// we're bound to end up with typos, so let's throw an exception instead of simply returning false
 	// that way, the modder can fix their mistake
 	if (mod->getAlienRace(missionRace) == 0)
 	{
-		throw Exception("Error proccessing mission script named: " + command->getType() + ", race: " + missionRace + " is not defined");
+		throw Exception("Error processing mission script named: " + command->getType() + ", race: " + missionRace + " is not defined");
 	}
 
 	// ok, we've derived all the variables we need to start up our mission, let's do magic to turn those values into a mission

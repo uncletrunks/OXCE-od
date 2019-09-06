@@ -56,7 +56,7 @@ namespace OpenXcom
 		_lstInfo->setVisible(category != CWC_EQUIPMENT);
 
 		_lstInfo->setColor(_listColor1);
-		_lstInfo->setColumns(2, 100, 68); // deliberately making this wider than the original to account for finnish.
+		_lstInfo->setColumns(2, 100, 68); // deliberately making this wider than the original to account for finish.
 		_lstInfo->setDot(true);
 
 		if (category == CWC_WEAPON)

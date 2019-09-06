@@ -190,7 +190,7 @@ std::string convWcToMb(const std::wstring &src, unsigned int cp)
     std::transform(src.begin(), src.end(), ustr.begin(),
 		[](wchar_t c) -> UCode
 		{
-			//TODO: droping surrogates, do proper implemetation when someone will need that range
+			//TODO: dropping surrogates, do proper implementation when someone will need that range
 			if (c <= 0xD7FF || c >= 0xE000)
 			{
 				return c;
@@ -236,7 +236,7 @@ std::wstring convMbToWc(const std::string &src, unsigned int cp)
     std::transform(ustr.begin(), ustr.end(), wstr.begin(),
 		[](UCode c) -> wchar_t
 		{
-			//TODO: droping surrogates, do proper implemetation when someone will need that range
+			//TODO: dropping surrogates, do proper implementation when someone will need that range
 			if (c <= 0xD7FF || (c >= 0xE000 && c <= 0xFFFF))
 			{
 				return c;

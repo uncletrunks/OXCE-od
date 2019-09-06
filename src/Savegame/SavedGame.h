@@ -144,7 +144,7 @@ private:
 	std::vector<const RuleResearch*> _poppedResearch;
 	std::vector<Soldier*> _deadSoldiers;
 	size_t _selectedBase;
-	std::string _lastselectedArmor; //contains the last selected armour
+	std::string _lastselectedArmor; //contains the last selected armor
 	std::string _globalEquipmentLayoutName[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::string _globalCraftLoadoutName[MAX_CRAFT_LOADOUT_TEMPLATES];
@@ -367,9 +367,9 @@ public:
 	void setSelectedBase(size_t base);
 	/// Evaluate the score of a soldier based on all of his stats, missions and kills.
 	int getSoldierScore(Soldier *soldier);
-	/// Sets the last selected armour
+	/// Sets the last selected armor
 	void setLastSelectedArmor(const std::string &value);
-	/// Gets the last selected armour
+	/// Gets the last selected armor
 	std::string getLastSelectedArmor() const;
 	/// Returns the craft corresponding to the specified unique id.
 	Craft *findCraftByUniqueId(const CraftId& craftId) const;

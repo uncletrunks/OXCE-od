@@ -337,7 +337,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		return;
 	}
 
-	unit->setVisible(false); //Possible TODO: check nr of player unit observers, then hide the unit if noone can see it. Should then be able to skip the next FOV call.
+	unit->setVisible(false); //Possible TODO: check number of player unit observers, then hide the unit if no one can see it. Should then be able to skip the next FOV call.
 
 	_save->getTileEngine()->calculateFOV(unit->getPosition(), 1, false); // might need this populate _visibleUnit for a newly-created alien.
 		// it might also help chryssalids realize they've zombified someone and need to move on
@@ -390,7 +390,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 	}
 	if (pickUpWeaponsMoreActively && weaponPickedUp)
 	{
-		// you have just picked up a weapon ffs... use it if you can!
+		// you have just picked up a weapon... use it if you can!
 		_parentState->debug("Re-Rethink");
 		unit->getAIModule()->setWeaponPickedUp();
 		unit->think(&action);
@@ -703,8 +703,8 @@ void BattlescapeGame::endTurn()
 
 /**
  * Checks for casualties and adjusts morale accordingly.
- * @param murderweapon Need to know this, for a HE explosion there is an instant death.
- * @param origMurderer This is needed for credits for the kill.
+ * @param damageType Need to know this, for a HE explosion there is an instant death.
+ * @param attack This is needed for credits for the kill.
  * @param hiddenExplosion Set to true for the explosions of UFO Power sources at start of battlescape.
  * @param terrainExplosion Set to true for the explosions of terrain.
  */
@@ -770,7 +770,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 
 		// Assume that, in absence of a murderer and an explosion, the laster unit to hit the victim is the murderer.
 		// Possible causes of death: bleed out, fire.
-		// Possible causes of unconciousness: wounds, smoke.
+		// Possible causes of unconsciousness: wounds, smoke.
 		// Assumption : The last person to hit the victim is the murderer.
 		if (!murderer && !terrainExplosion)
 		{
@@ -888,7 +888,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 				{
 					if (hiddenExplosion)
 					{
-						// this is instant death from UFO powersources, without screaming sounds
+						// this is instant death from UFO power sources, without screaming sounds
 						noSound = true;
 						statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_HE), noSound));
 					}
@@ -1915,7 +1915,7 @@ void BattlescapeGame::psiButtonAction()
 }
 
 /**
- * Handler for the psi atack result message.
+ * Handler for the psi attack result message.
  */
 void BattlescapeGame::psiAttackMessage(BattleActionAttack attack, BattleUnit *victim)
 {
@@ -2014,7 +2014,7 @@ void BattlescapeGame::requestEndTurn(bool askForConfirmation)
 
 /**
  * Sets the TU reserved type.
- * @param tur A battleactiontype.
+ * @param tur A BattleActionType.
  * @param player is this requested by the player?
  */
 void BattlescapeGame::setTUReserved(BattleActionType tur)
@@ -2313,8 +2313,8 @@ SavedBattleGame *BattlescapeGame::getSave()
 }
 
 /**
- * Gets the tilengine.
- * @return tilengine.
+ * Gets the tile engine.
+ * @return tile engine.
  */
 TileEngine *BattlescapeGame::getTileEngine()
 {

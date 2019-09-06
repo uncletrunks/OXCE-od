@@ -1055,7 +1055,7 @@ void Mod::loadSpriteOffset(const std::string &parent, int& sprite, const YAML::N
 /**
  * Gets the mod offset array for a certain sprite.
  * @param parent Name of parent node, used for better error message
- * @param sprites Member to load new arrat of sprite ID index.
+ * @param sprites Member to load new array of sprite ID index.
  * @param node Node with data
  * @param set Name of the surfaceset to lookup.
  */
@@ -1351,7 +1351,7 @@ void Mod::loadAll()
  * Loads a list of rulesets from YAML files for the mod at the specified index. The first
  * mod loaded should be the master at index 0, then 1, and so on.
  * @param rulesetFiles List of rulesets to load.
- * @param parsers Object with all avaiable parser.
+ * @param parsers Object with all available parsers.
  */
 void Mod::loadMod(const std::vector<FileMap::FileRecord> &rulesetFiles, ModScript &parsers)
 {
@@ -1513,7 +1513,7 @@ void Mod::loadConstants(const YAML::Node &node)
  * Loads a ruleset's contents from a YAML file.
  * Rules that match pre-existing rules overwrite them.
  * @param filename YAML filename.
- * @param parsers Object with all avaiable parser.
+ * @param parsers Object with all available parsers.
  */
 void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 {
@@ -1718,7 +1718,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 			else
 			{
 				if (!(*i)["type_id"].IsDefined()) { // otherwise it throws and I wasted hours
-					Log(LOG_ERROR) << "ufopaedia item misses type_id attr.";
+					Log(LOG_ERROR) << "ufopaedia item misses type_id attribute.";
 					continue;
 				}
 				UfopaediaTypeId type = (UfopaediaTypeId)(*i)["type_id"].as<int>();
@@ -2174,10 +2174,10 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 }
 
 /**
- * Helper function protecting from circual references in node definition.
+ * Helper function protecting from circular references in node definition.
  * @param node Node to test
  * @param name Name of original node.
- * @param limit Current deepth.
+ * @param limit Current depth.
  */
 static void refNodeTestDeepth(const YAML::Node &node, const std::string &name, int limit)
 {
@@ -2190,7 +2190,7 @@ static void refNodeTestDeepth(const YAML::Node &node, const std::string &name, i
 		if (!nested.IsMap())
 		{
 			std::stringstream ss;
-			ss << "Invaild refNode at nest level of ";
+			ss << "Invalid refNode at nest level of ";
 			ss << limit;
 			ss << " in ";
 			ss << name;
@@ -2230,7 +2230,7 @@ T *Mod::loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::ve
 			}
 		}
 
-		// protection from self referecing refNode node
+		// protection from self referencing refNode node
 		refNodeTestDeepth(node, type, 0);
 	}
 	else if (node["delete"])
@@ -2914,7 +2914,7 @@ RuleResearch *Mod::getResearch(const std::string &id, bool error) const
 }
 
 /**
- * Gets the ruleset list for from reserch list.
+ * Gets the ruleset list for from research list.
  */
 std::vector<const RuleResearch*> Mod::getResearch(const std::vector<std::string> &id) const
 {
@@ -3925,7 +3925,7 @@ void Mod::loadVanillaResources()
 			SurfaceSet* s = _sets["GlobeMarkers"];
 			s->setMaxSharedFrames(9);
 		}
-		//HACK: because of value "hitAnimation" from item that is used as offet in "X1.PCK", this set need have same number of shared frames as "SMOKE.PCK".
+		//HACK: because of value "hitAnimation" from item that is used as offset in "X1.PCK", this set need have same number of shared frames as "SMOKE.PCK".
 		{
 			SurfaceSet* s = _sets["X1.PCK"];
 			s->setMaxSharedFrames((int)_sets["SMOKE.PCK"]->getMaxSharedFrames());

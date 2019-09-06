@@ -213,7 +213,7 @@ void BaseView::setSelectable(int size)
  */
 int BaseView::getPlacementError(RuleBaseFacility *rule, BaseFacility *facilityBeingMoved) const
 {
-	// We'll need to know for the final check if we're upgrading an exisiting facility
+	// We'll need to know for the final check if we're upgrading an existing facility
 	bool buildingOverExisting = false;
 
 	// Check if square isn't occupied

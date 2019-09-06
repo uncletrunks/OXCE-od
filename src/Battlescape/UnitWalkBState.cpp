@@ -171,7 +171,7 @@ void UnitWalkBState::think()
 		{
 			// update the TU display
 			_parent->getSave()->getBattleState()->updateSoldierInfo();
-			// if the unit burns floortiles, burn floortiles as long as we're not falling
+			// if the unit burns floor tiles, burn floor tiles as long as we're not falling
 			if (!_falling && (_unit->getSpecialAbility() == SPECAB_BURNFLOOR || _unit->getSpecialAbility() == SPECAB_BURN_AND_EXPLODE))
 			{
 				_unit->getTile()->ignite(1);

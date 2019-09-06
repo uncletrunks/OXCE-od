@@ -1432,7 +1432,7 @@ void SavedGame::addFinishedResearch(const RuleResearch * research, const Mod * m
 			// process "disables"
 			for (auto& dis : currentQueueItem->getDisabled())
 			{
-				removeDiscoveredResearch(dis); // un-research
+				removeDiscoveredResearch(dis); // unresearch
 				setResearchRuleStatus(dis->getName(), RuleResearch::RESEARCH_STATUS_DISABLED); // mark as permanently disabled
 			}
 		}
@@ -1626,7 +1626,7 @@ void SavedGame::getAvailableResearchProjects(std::vector<RuleResearch *> &projec
 			}
 		}
 
-		// Haleluja, all checks passed, add the research topic to the list
+		// Hallelujah, all checks passed, add the research topic to the list
 		projects.push_back(research);
 	}
 }
@@ -2393,7 +2393,7 @@ private:
 
 /**
  * Find the region containing this location.
- * @param lon The longtitude.
+ * @param lon The longitude.
  * @param lat The latitude.
  * @return Pointer to the region, or 0.
  */
@@ -2527,7 +2527,7 @@ std::vector<Soldier*> *SavedGame::getDeadSoldiers()
 }
 
 /**
- * Sets the last selected armour.
+ * Sets the last selected armor.
  * @param value The new value for last selected armor - Armor type string.
  */
 
@@ -2537,7 +2537,7 @@ void SavedGame::setLastSelectedArmor(const std::string &value)
 }
 
 /**
- * Gets the last selected armour
+ * Gets the last selected armor
  * @return last used armor type string
  */
 std::string SavedGame::getLastSelectedArmor() const

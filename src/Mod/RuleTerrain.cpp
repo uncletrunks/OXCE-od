@@ -34,7 +34,7 @@ RuleTerrain::RuleTerrain(const std::string &name) : _name(name), _script("DEFAUL
 }
 
 /**
- * Ruleterrain only holds mapblocks. Map datafiles are referenced.
+ * RuleTerrain only holds mapblocks. Map datafiles are referenced.
  */
 RuleTerrain::~RuleTerrain()
 {

@@ -118,7 +118,7 @@ public:
 	void btnApplyTemplateClick(Action *action);
 	/// Handler for hitting the Clear Inventory hotkey.
 	void onClearInventory(Action *action);
-	/// Handler for hitting the Autoequip hotkey.
+	/// Handler for hitting the Auto-equip hotkey.
 	void onAutoequip(Action *action);
 	/// Handler for clicking on the inventory.
 	void invClick(Action *action);

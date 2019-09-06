@@ -110,7 +110,7 @@ NewPossibleCraftState::NewPossibleCraftState(Base * base, const std::vector<Rule
 }
 
 /**
- * Closes the screeen.
+ * Closes the screen.
  * @param action Pointer to an action.
  */
 void NewPossibleCraftState::btnOkClick(Action *)

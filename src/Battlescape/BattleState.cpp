@@ -60,7 +60,7 @@ void BattleState::init()
 }
 
 /**
- * Call when state get popout.
+ * Called when the state gets popped out.
  */
 void BattleState::deinit()
 {

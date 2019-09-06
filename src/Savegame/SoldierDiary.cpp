@@ -448,7 +448,7 @@ bool SoldierDiary::manageCommendations(Mod *mod, std::vector<MissionStatistics*>
 								}
 							}
 							// Skip kill-groups that we already got an award for.
-							// Skip kills that are inbetween turns.
+							// Skip kills that are in-between turns.
 							if ( thisTime == lastTime && goToNextTime && (*j).first != "killsWithCriteriaCareer")
 							{
 								continue;
@@ -900,7 +900,7 @@ void SoldierDiary::awardOriginalEightCommendation()
 }
 
 /**
- * Award post-humous best-of commendation.
+ * Award posthumous best-of commendation.
  */
 void SoldierDiary::awardBestOfRank(int score)
 {
@@ -908,7 +908,7 @@ void SoldierDiary::awardBestOfRank(int score)
 }
 
 /**
- * Award post-humous best-of commendation.
+ * Award posthumous best-of commendation.
  */
 void SoldierDiary::awardBestOverall(int score)
 {
@@ -916,7 +916,7 @@ void SoldierDiary::awardBestOverall(int score)
 }
 
 /**
- * Award post-humous kills commendation.
+ * Award posthumous kills commendation.
  */
 void SoldierDiary::awardPostMortemKill(int kills)
 {
@@ -1161,7 +1161,7 @@ int SoldierDiary::getScoreTotal(std::vector<MissionStatistics*> *missionStatisti
 }
 
 /**
- *  Get the Valient Crux total.
+ *  Get the Valiant Crux total.
  *  @param Mission Statistics
  */
 int SoldierDiary::getValiantCruxTotal(std::vector<MissionStatistics*> *missionStatistics) const

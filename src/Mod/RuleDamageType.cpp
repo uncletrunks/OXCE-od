@@ -209,9 +209,9 @@ namespace
 /**
  * Helper function for calculating damage from damage.
  * @param random
- * @param multipler
+ * @param multiplier
  * @param damage
- * @return Damage to somthing.
+ * @return Damage to something.
  */
 int getDamageHelper(bool random, float multipler, int damage)
 {

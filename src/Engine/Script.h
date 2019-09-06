@@ -84,7 +84,7 @@ constexpr size_t ScriptMaxReg = 64*sizeof(void*);
 ////////////////////////////////////////////////////////////
 
 /**
- * Script execution cunter.
+ * Script execution counter.
  */
 enum class ProgPos : size_t
 {
@@ -153,7 +153,7 @@ enum ArgEnum : ArgEnumBase
 };
 
 /**
- * Next avaiable value for arg type.
+ * Next available value for arg type.
  */
 constexpr ArgEnum ArgNext(ArgEnum arg)
 {
@@ -182,35 +182,35 @@ constexpr ArgEnum ArgSpecRemove(ArgEnum arg, ArgSpecEnum spec)
 	return ArgBase(arg) != ArgInvalid ? static_cast<ArgEnum>(static_cast<ArgEnumBase>(arg) & ~static_cast<ArgEnumBase>(spec)) : arg;
 }
 /**
- * Test if argumet type is register (readonly or writeable).
+ * Test if argument type is register (readonly or writeable).
  */
 constexpr bool ArgIsReg(ArgEnum arg)
 {
 	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecReg)) == static_cast<ArgEnumBase>(ArgSpecReg);
 }
 /**
- * Test if argumet type is variable (writeable register).
+ * Test if argument type is variable (writeable register).
  */
 constexpr bool ArgIsVar(ArgEnum arg)
 {
 	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecVar)) == static_cast<ArgEnumBase>(ArgSpecVar);
 }
 /**
- * Test if argumet type is pointer.
+ * Test if argument type is pointer.
  */
 constexpr bool ArgIsPtr(ArgEnum arg)
 {
 	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecPtr)) == static_cast<ArgEnumBase>(ArgSpecPtr);
 }
 /**
- * Test if argumet type is editable pointer.
+ * Test if argument type is editable pointer.
  */
 constexpr bool ArgIsPtrE(ArgEnum arg)
 {
 	return (static_cast<ArgEnumBase>(arg) & static_cast<ArgEnumBase>(ArgSpecPtrE)) == static_cast<ArgEnumBase>(ArgSpecPtrE);
 }
 /**
- * Compatibility betwean operation argument type and variable type. Greater numbers mean bigger comatibility.
+ * Compatibility between operation argument type and variable type. Greater numbers mean bigger compatibility.
  * @param argType Type of operation argument.
  * @param varType Type of variable/value we try pass to operation.
  * @return Zero if incompatible, 255 if both types are same.
@@ -228,7 +228,7 @@ constexpr int ArgCompatible(ArgEnum argType, ArgEnum varType, size_t overloadSiz
 }
 
 /**
- * Avaiable regs.
+ * Available regs.
  */
 enum RegEnum : Uint8
 {
@@ -263,13 +263,13 @@ struct TypeInfo
 	{
 		return ((prev + alignment - 1) & ~(alignment - 1));
 	}
-	/// get total space used by this type with considing alignment
+	/// get total space used by this type with considering alignment
 	constexpr size_t needRegSpace(size_t prev) const
 	{
 		return nextRegPos(prev) + size;
 	}
 
-	/// defualt value for pointers
+	/// default value for pointers
 	constexpr static TypeInfo getPtrTypeInfo()
 	{
 		return TypeInfo
@@ -432,7 +432,7 @@ struct TypeInfoImpl
 	static constexpr bool isPtr = std::is_pointer<t1>::value;
 	static constexpr bool isEditable = isPtr && !std::is_const<t2>::value;
 
-	/// meta data of destiantion type (without pointer), invaild if type is not POD
+	/// meta data of destination type (without pointer), invalid if type is not POD
 	static constexpr TypeInfo metaDest =
 	{
 		std::is_pod<t3>::value ? sizeof(t3) : 0,
@@ -463,7 +463,7 @@ template<int size>
 using ScriptRawMemory = typename std::aligned_storage<size, alignof(void*)>::type;
 
 /**
- * Script output and input aguments.
+ * Script output and input arguments.
  */
 template<typename... OutputArgs>
 struct ScriptOutputArgs
@@ -491,7 +491,7 @@ struct ScriptOutputArgs
 };
 
 /**
- * Specialization of script output and input aguments.
+ * Specialization of script output and input arguments.
  */
 template<>
 struct ScriptOutputArgs<>
@@ -506,7 +506,7 @@ struct ScriptOutputArgs<>
 };
 
 /**
- * Class execute scripts and strore its data.
+ * Class execute scripts and store its data.
  */
 class ScriptWorkerBase
 {
@@ -758,9 +758,9 @@ public:
 		}
 	}
 
-	/// Programmable bliting using script.
+	/// Programmable blitting using script.
 	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade);
-	/// Programmable bliting using script.
+	/// Programmable blitting using script.
 	void executeBlit(Surface* src, Surface* dest, int x, int y, int shade, GraphSubset mask);
 
 	/// Clear all worker data.
@@ -784,13 +784,13 @@ class ScriptRange
 protected:
 	using ptr = const T*;
 
-	/// Pointer pointing place of first elemet.
+	/// Pointer pointing place of first element.
 	ptr _begin;
-	/// pointer pointing place past of last elemet.
+	/// pointer pointing place past of last element.
 	ptr _end;
 
 public:
-	/// Defualt constructor.
+	/// Default constructor.
 	ScriptRange() : _begin{ nullptr }, _end{ nullptr }
 	{
 
@@ -801,7 +801,7 @@ public:
 
 	}
 
-	/// Begining of string range.
+	/// Beginning of string range.
 	ptr begin() const
 	{
 		return _begin;
@@ -846,7 +846,7 @@ public:
 
 	}
 
-	/// Find first orrucace of character in string range.
+	/// Find first occurrence of character in string range.
 	size_t find(char c) const
 	{
 		for (auto &curr : *this)
@@ -899,7 +899,7 @@ public:
 
 		if (size_a == size_b)
 		{
-			//check for GCC warnings, it thinks that we try use extrime long strings there...
+			//check for GCC warnings, it thinks that we try use extremely long strings there...
 			assert(size_a < SIZE_MAX/2);
 
 			return memcmp(a._begin, b._begin, size_a);
@@ -918,7 +918,7 @@ public:
 	{
 		return compare(*this, s) == 0;
 	}
-	/// Notequal operator.
+	/// Not-equal operator.
 	bool operator!=(const ScriptRef& s) const
 	{
 		return compare(*this, s) != 0;
@@ -991,7 +991,7 @@ struct ScriptRefData
 	/// Constructor.
 	ScriptRefData(ScriptRef n, ArgEnum t, ScriptValueData v) : name{ n }, type{ t }, value{ v } {  }
 
-	/// Get true if this vaild reference.
+	/// Get true if this valid reference.
 	explicit operator bool() const
 	{
 		return type != ArgInvalid;
@@ -1008,7 +1008,7 @@ struct ScriptRefData
 	{
 		return value.getValue<T>();
 	}
-	/// Get current stored value if have that type or defulat value otherwise.
+	/// Get current stored value if have that type or default value otherwise.
 	template<typename T>
 	const T& getValueOrDefulat(const T& def) const
 	{
@@ -1017,7 +1017,7 @@ struct ScriptRefData
 };
 
 /**
- * Struct storing avaliable operation to scripts.
+ * Struct storing available operation to scripts.
  */
 struct ScriptProcData
 {
@@ -1134,10 +1134,10 @@ protected:
 	/// Common typeless part of parsing string.
 	bool parseBase(ScriptContainerBase& scr, const std::string& parentName, const std::string& srcCode) const;
 
-	/// Prase node and return new script.
+	/// Parse node and return new script.
 	void parseNode(ScriptContainerBase& container, const std::string& parentName, const YAML::Node& node) const;
 
-	/// Prase string and return new script.
+	/// Parse string and return new script.
 	void parseCode(ScriptContainerBase& container, const std::string& parentName, const std::string& srcCode) const;
 
 	/// Test if name is free.
@@ -1147,15 +1147,15 @@ protected:
 
 	/// Add name for custom parameter.
 	void addScriptReg(const std::string& s, ArgEnum type, bool writableReg, bool outputReg);
-	/// Add parsing fuction.
+	/// Add parsing function.
 	void addParserBase(const std::string& s, const std::string& description, ScriptProcData::overloadFunc overload, ScriptRange<ScriptRange<ArgEnum>> overloadArg, ScriptProcData::parserFunc parser, ScriptProcData::argFunc parserArg, ScriptProcData::getFunc parserGet);
-	/// Add new type impl.
+	/// Add new type implementation.
 	void addTypeBase(const std::string& s, ArgEnum type, TypeInfo meta);
-	/// Test if type was added impl.
+	/// Test if type was added implementation.
 	bool haveTypeBase(ArgEnum type);
-	/// Set defulat script for type.
+	/// Set default script for type.
 	void setDefault(const std::string& s) { _defaultScript = s; }
-	/// Set mode where return donot accept any value.
+	/// Set mode where return does not accept any value.
 	void setEmptyReturn() { _emptyReturn = true; }
 
 public:
@@ -1199,7 +1199,7 @@ public:
 
 		addTypeBase(s, registeTypeImpl<t3>(), info::metaDest);
 	}
-	/// Regised type in parser.
+	/// Register type in parser.
 	template<typename P>
 	void registerPointerType()
 	{
@@ -1218,12 +1218,12 @@ public:
 
 	/// Get name of script.
 	const std::string& getName() const { return _name; }
-	/// Get defulat script.
+	/// Get default script.
 	const std::string& getDefault() const { return _defaultScript; }
 
-	/// Get number of param.
+	/// Get number of parameters.
 	Uint8 getParamSize() const { return _regOutSize; }
-	/// Get param data.
+	/// Get parameter data.
 	const ScriptRefData* getParamData(Uint8 i) const { return getRef(_regOutName[i]); }
 
 	/// Get name of type.
@@ -1242,7 +1242,7 @@ public:
 	ScriptGlobal* getGlobal() { return _shared; }
 	/// Get script shared data.
 	const ScriptGlobal* getGlobal() const { return _shared; }
-	/// Get true if retun do not accept any argument.
+	/// Get true if return does not accept any arguments.
 	bool haveEmptyReturn() const { return _emptyReturn; }
 };
 
@@ -1364,9 +1364,9 @@ class ScriptParserEventsBase : public ScriptParserBase
 	std::vector<EventData> _eventsData;
 
 protected:
-	/// Prase node and return new script.
+	/// Parse node and return new script.
 	void parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::Node& node) const;
-	/// Prase string and return new script.
+	/// Parse string and return new script.
 	void parseCode(ScriptContainerEventsBase& container, const std::string& type, const std::string& srcCode) const;
 
 public:
@@ -1377,7 +1377,7 @@ public:
 	virtual void load(const YAML::Node& node) override;
 	/// Get pointer to events.
 	const ScriptContainerBase* getEvents() const;
-	/// Relese event data.
+	/// Release event data.
 	std::vector<ScriptContainerBase> releseEvents();
 };
 
@@ -1407,7 +1407,7 @@ public:
 	using Worker = ScriptWorker<Output, Args...>;
 	friend Container;
 
-	/// Constructor.
+	// Constructor.
 	ScriptParserEvents(ScriptGlobal* shared, const std::string& name, helper::ArgName<OutputArgs>... argOutputNames, helper::ArgName<Args>... argNames) : ScriptParserEventsBase(shared, name)
 	{
 		addRegImpl(true, argOutputNames...);
@@ -1442,7 +1442,7 @@ struct ScriptTag
 	{
 		return index == t.index;
 	}
-	/// Notequal operator.
+	/// Not-equal operator.
 	constexpr bool operator!=(ScriptTag t) const
 	{
 		return !(*this == t);
@@ -1454,7 +1454,7 @@ struct ScriptTag
 	static constexpr bool isValid(size_t i) { return i && i <= limit(); }
 	/// Fake constructor.
 	static constexpr ScriptTag make(size_t i) { return { static_cast<I>(i) }; }
-	/// Max supprted value.
+	/// Max supported value.
 	static constexpr size_t limit() { return static_cast<size_t>(std::numeric_limits<I>::max()); }
 	/// Null value.
 	static constexpr ScriptTag getNullTag() { return make(0); }
@@ -1605,11 +1605,11 @@ public:
 };
 
 /**
- * Colection of values for script usage.
+ * Collection of values for script usage.
  */
 class ScriptValuesBase
 {
-	/// Vector with all avaiable values for script.
+	/// Vector with all available values for script.
 	std::vector<int> values;
 
 protected:
@@ -1626,7 +1626,7 @@ protected:
 };
 
 /**
- * Strong typed colection of values for srcipt.
+ * Strong typed collection of values for script.
  */
 template<typename T, typename I = Uint8>
 class ScriptValues : ScriptValuesBase
@@ -1701,7 +1701,7 @@ class ScriptGroupNamedParser : public Parser
     }
     static constexpr unsigned length(unsigned curr, char head)
     {
-        return head ? throw "Script name to long!" : curr;
+        return head ? throw "Script name too long!" : curr;
     }
 
 	static constexpr unsigned nameLenght = length(0, NameChars...);

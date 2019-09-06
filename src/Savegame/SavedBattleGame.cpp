@@ -582,8 +582,8 @@ void SavedBattleGame::initUtilities(Mod *mod, bool craftInventory)
 }
 
 /**
- * Gets if this is craft pre-eqipt phase in base view.
- * @return True if it in base equpt screen.
+ * Gets if this is craft pre-equip phase in base view.
+ * @return True if it in base equip screen.
  */
 bool SavedBattleGame::isBaseCraftInventory()
 {
@@ -750,7 +750,7 @@ int SavedBattleGame::getMapSizeXYZ() const
 
 /**
  * Converts a tile index to coordinates.
- * @param index The (unique) tileindex.
+ * @param index The (unique) tile index.
  * @param x Pointer to the X coordinate.
  * @param y Pointer to the Y coordinate.
  * @param z Pointer to the Z coordinate.
@@ -1176,7 +1176,7 @@ void SavedBattleGame::endTurn()
 
 /**
  * Get current animation frame number.
- * @return Numer of frame.
+ * @return Frame number.
  */
 int SavedBattleGame::getAnimFrame() const
 {
@@ -1184,7 +1184,7 @@ int SavedBattleGame::getAnimFrame() const
 }
 
 /**
- * Increase animation frame with warparound 705600.
+ * Increase animation frame with wrap around 705600.
  */
 void SavedBattleGame::nextAnimFrame()
 {
@@ -1362,9 +1362,9 @@ void SavedBattleGame::removeItem(BattleItem *item)
 }
 
 /**
- * Add buildin items from list to unit.
+ * Add built-in items from list to unit.
  * @param unit Unit that should get weapon.
- * @param fixed List of buildin items.
+ * @param fixed List of built-in items.
  */
 void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed)
 {
@@ -1480,7 +1480,7 @@ BattleItem *SavedBattleGame::createItemForUnit(const RuleItem *rule, BattleUnit 
 }
 
 /**
- * Create new buildin item for unit.
+ * Create new built-in item for unit.
  */
 BattleItem *SavedBattleGame::createItemForUnitBuildin(RuleItem *rule, BattleUnit *unit)
 {
@@ -1602,7 +1602,7 @@ Node *SavedBattleGame::getSpawnNode(int nodeRank, BattleUnit *unit)
 				|| unit->getArmor()->getSize() == 1)				// the small unit bit is not set or the unit is small
 			&& (!((*i)->getType() & Node::TYPE_FLYING)
 				|| unit->getMovementType() == MT_FLY)				// the flying unit bit is not set or the unit can fly
-			&& (*i)->getPriority() > 0								// priority 0 is no spawnplace
+			&& (*i)->getPriority() > 0								// priority 0 is no spawn place
 			&& setUnitPosition(unit, (*i)->getPosition(), true))	// check if not already occupied
 		{
 			if ((*i)->getPriority() > highestPriority)
@@ -2248,7 +2248,7 @@ void SavedBattleGame::resetTiles()
 }
 
 /**
- * @return the tilesearch vector for use in AI functions.
+ * @return the tile search vector for use in AI functions.
  */
 const std::vector<Position> &SavedBattleGame::getTileSearch() const
 {
@@ -2266,7 +2266,7 @@ bool SavedBattleGame::isCheating() const
 
 /**
  * Gets the TU reserved type.
- * @return A battleactiontype.
+ * @return A battle action type.
  */
 BattleActionType SavedBattleGame::getTUReserved() const
 {
@@ -2275,7 +2275,7 @@ BattleActionType SavedBattleGame::getTUReserved() const
 
 /**
  * Sets the TU reserved type.
- * @param reserved A battleactiontype.
+ * @param reserved A battle action type.
  */
 void SavedBattleGame::setTUReserved(BattleActionType reserved)
 {

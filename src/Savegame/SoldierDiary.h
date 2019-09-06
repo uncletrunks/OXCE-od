@@ -84,7 +84,7 @@ private:
 public:
 	/// Construct a diary.
 	SoldierDiary();
-	/// Deconstruct a diary.
+	/// Cleans up a diary.
 	~SoldierDiary();
 	/// Load a diary.
 	void load(const YAML::Node& node, const Mod *mod);
@@ -116,7 +116,7 @@ public:
 	int getWinTotal(std::vector<MissionStatistics*>*) const;
 	/// Get the total number of stuns.
 	int getStunTotal() const;
-	/// Get the total number of psi panicks.
+	/// Get the total number of psi panics.
 	int getPanickTotal() const;
 	/// Get the total number of psi mind controls.
 	int getControlTotal() const;
@@ -136,11 +136,11 @@ public:
 	std::vector<BattleUnitKills*> &getKills();
 	/// Award special commendation to the original 8 soldiers.
 	void awardOriginalEightCommendation();
-	/// Award post-humous best-of rank commendation.
+	/// Award posthumous best-of rank commendation.
 	void awardBestOfRank(int score);
-	/// Award post-humous best overall commendation.
+	/// Award posthumous best overall commendation.
 	void awardBestOverall(int score);
-	/// Award post-humous kills commendation.
+	/// Award posthumous kills commendation.
 	void awardPostMortemKill(int kills);
 	/// Get the total number of shots fired.
 	int getShotsFiredTotal() const;

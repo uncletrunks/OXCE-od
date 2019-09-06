@@ -27,7 +27,7 @@ class ComboBox;
 class Slider;
 
 /**
- * Screen that lets the user configure variou
+ * Screen that lets the user configure various
  * Audio options.
  */
 class OptionsAudioState : public OptionsBaseState

@@ -508,7 +508,7 @@ void RuleStatBonus::setStunRecovery()
  */
 int RuleStatBonus::getBonus(const BattleUnit* unit) const
 {
-	assert(!_refresh && "RuleStatBonus not loaded correcly");
+	assert(!_refresh && "RuleStatBonus not loaded correctly");
 
 	ModScript::BonusStatsCommon::Output arg{ 0 };
 	ModScript::BonusStatsCommon::Worker work{ unit };

@@ -52,7 +52,7 @@ public:
 	~Sound() = default;
 	/// Move sound to another place.
 	Sound(Sound&& other) = default;
-	/// Move assigment
+	/// Move assignment
 	Sound& operator=(Sound&& other) = default;
 
 	/// Loads sound from the specified file.

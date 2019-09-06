@@ -142,7 +142,7 @@ class RuleCraft
 public:
 	/// Maximum number of weapon slots on craft.
 	static const int WeaponMax = 4;
-	/// Maximum of diffrernt types in one weapon slot.
+	/// Maximum of different types in one weapon slot.
 	static const int WeaponTypeMax = 4;
 
 private:

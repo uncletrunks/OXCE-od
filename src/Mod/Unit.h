@@ -201,7 +201,7 @@ struct UnitStats
 	template<typename T, UnitStats T::*Stat, int T::*CurrTu, int T::*CurrEnergy, int T::*CurrHealth, int T::* CurrMana, typename TBind>
 	static void addSetStatsWithCurrScript(TBind& b, std::string prefix)
 	{
-		// when we change stats of BattleUnit its resoreces should be adjust.
+		// when we change stats of BattleUnit its resources should be adjust.
 		b.template add<&setMaxAndCurrStatScript<T, Stat, CurrTu, &UnitStats::tu>>(prefix + "setTimeUnits");
 		b.template add<&setMaxAndCurrStatScript<T, Stat, CurrEnergy, &UnitStats::stamina>>(prefix + "setStamina");
 		b.template add<&setMaxAndCurrStatScript<T, Stat, CurrHealth, &UnitStats::health>>(prefix + "setHealth");

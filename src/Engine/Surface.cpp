@@ -63,9 +63,9 @@ inline int GetPitch(int bpp, int width)
 
 
 /**
- * Raw copy witout any change of pixel index value between two SDL surface, palette is ignored
+ * Raw copy without any change of pixel index value between two SDL surface, palette is ignored
  * @param dest Destination surface
- * @param src Soruce surface
+ * @param src Source surface
  */
 inline void RawCopySurf(const Surface::UniqueSurfacePtr& dest, const Surface::UniqueSurfacePtr& src)
 {
@@ -82,7 +82,7 @@ inline void RawCopySurf(const Surface::UniqueSurfacePtr& dest, const Surface::Un
 /**
  * TODO: function for purge, we should accept only "standard" surfaces
  * Helper function correcting graphic that should have index 0 as transparent,
- * but some do not have, we swap correcnt with incorecct
+ * but some do not have, we swap correct with incorrect
  * for maintain 0 as correct transparent index.
  * @param dest Surface to fix
  * @param currentTransColor current transparent color index
@@ -201,7 +201,7 @@ void Surface::CleanSdlSurface(SDL_Surface* surface)
 	}
 }
 /**
- * Default deleter for aligment buffer
+ * Default deleter for alignment buffer
  * @param buffer
  */
 void Surface::UniqueBufferDeleter::operator ()(Uint8* buffer)
@@ -270,7 +270,7 @@ Surface::Surface(const Surface& other) : Surface{ }
 	int height = other.getHeight();
 	//move copy
 	*this = Surface(width, height, other._x, other._y);
-	//cant call `setPalette` because its virtual function and it dont work correctly in constructor
+	//cant call `setPalette` because its virtual function and it doesn't work correctly in constructor
 	SDL_SetColors(_surface.get(), other.getPalette(), 0, 255);
 	RawCopySurf(_surface, other._surface);
 
@@ -415,7 +415,7 @@ void Surface::loadImage(const std::string &filename)
 					FixTransparent(_surface, transparent);
 					if (transparent != 0)
 					{
-						Log(LOG_WARNING) << "Image " << filename << " (from lodepng) have set incorrect transparent color index " << transparent << " instead of 0";
+						Log(LOG_WARNING) << "Image " << filename << " (from lodepng) has incorrect transparent color index " << transparent << " (instead of 0).";
 					}
 				}
 			} else {
@@ -439,7 +439,7 @@ void Surface::loadImage(const std::string &filename)
 		}
 		if (surface->format->BitsPerPixel != 8)
 		{
-			std::string err = filename + ": OpenXcom is supporting only 8bit graphic";
+			std::string err = filename + ": OpenXcom supports only 8bit images.";
 			throw Exception(err);
 		}
 
@@ -449,7 +449,7 @@ void Surface::loadImage(const std::string &filename)
 		FixTransparent(_surface, surface->format->colorkey);
 		if (surface->format->colorkey != 0)
 		{
-			Log(LOG_WARNING) << "Image " << filename << " (from SDL) have set incorrect transparent color index " << surface->format->colorkey << " instead of 0";
+			Log(LOG_WARNING) << "Image " << filename << " (from SDL) has incorrect transparent color index " << surface->format->colorkey << " (instead of 0).";
 		}
 	}
 }

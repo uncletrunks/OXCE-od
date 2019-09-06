@@ -106,7 +106,7 @@ private:
 	int _motionPoints;
 	int _scannedTurn;
 	int _kills;
-	int _faceDirection; // used only during strafeing moves
+	int _faceDirection; // used only during strafing moves
 	bool _hitByFire, _hitByAnything, _alreadyExploded;
 	int _fireMaxHit;
 	int _smokeMaxHit;
@@ -155,9 +155,9 @@ private:
 	bool _capturable;
 	ScriptValues<BattleUnit> _scriptValues;
 
-	/// Calculate stat improvment.
+	/// Calculate stat improvement.
 	int improveStat(int exp) const;
-	/// Helper function initing recolor vector.
+	/// Helper function initializing recolor vector.
 	void setRecolor(int basicLook, int utileLook, int rankLook);
 	/// Helper function preparing Time Units recovery at beginning of turn.
 	void prepareTimeUnits(int tu);
@@ -204,7 +204,7 @@ public:
 	Position getPosition() const;
 	/// Gets the unit's position.
 	Position getLastPosition() const;
-	/// Gets the unit's position of center in vexels.
+	/// Gets the unit's position of center in voxels.
 	Position getPositionVexels() const;
 	/// Sets the unit's direction 0-7.
 	void setDirection(int direction);
@@ -349,7 +349,7 @@ public:
 	void updateUnitStats(bool tuAndEnergy, bool rest);
 	/// Morale change
 	void moraleChange(int change);
-	/// Calculate value of morale change based on breavy.
+	/// Calculate value of morale change based on bravery.
 	int reduceByBravery(int moraleChange) const;
 	/// Calculate power reduction by resistances.
 	int reduceByResistance(int power, ItemDamageType resistType) const;
@@ -386,7 +386,7 @@ public:
 	void updateTileFloorState(SavedBattleGame *saveBattleGame);
 	/// Sets the unit's tile it's standing on
 	void setTile(Tile *tile, SavedBattleGame *saveBattleGame = 0);
-	/// Set only unit tile without any addtional logic.
+	/// Set only unit tile without any additional logic.
 	void setInventoryTile(Tile *tile);
 	/// Gets the unit's tile.
 	Tile *getTile() const;
@@ -403,7 +403,7 @@ public:
 	BattleItem *getRightHandWeapon() const;
 	/// Gets the item from left hand.
 	BattleItem *getLeftHandWeapon() const;
-	/// Reloads righthand weapon if needed.
+	/// Reloads a weapon if needed.
 	bool reloadAmmo();
 	/// Check if this unit is in the exit area
 	bool isInExitArea(SpecialTileType stt = START_POINT) const;

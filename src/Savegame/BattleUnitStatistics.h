@@ -305,7 +305,7 @@ struct BattleUnitKills
 struct BattleUnitStatistics
 {
 	// Variables
-	bool wasUnconcious;                  ///< Tracks if the soldier fell unconcious
+	bool wasUnconcious;                  ///< Tracks if the soldier fell unconscious
 	int shotAtCounter;                   ///< Tracks how many times the unit was shot at
 	int hitCounter;                      ///< Tracks how many times the unit was hit
 	int shotByFriendlyCounter;           ///< Tracks how many times the unit was hit by a friendly

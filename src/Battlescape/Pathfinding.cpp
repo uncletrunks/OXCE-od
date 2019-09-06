@@ -359,7 +359,7 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 		}
 	}
 
-	// calcualte cost and some final checks
+	// calculate cost and some final checks
 	auto totalCost = 0;
 	for (int i = 0; i < numberOfParts; ++i)
 	{
@@ -454,7 +454,7 @@ int Pathfinding::getTUCost(Position startPosition, int direction, Position *endP
 		totalCost += cost;
 	}
 
-	// becasue unit move up or down we adjust final position
+	// because unit move up or down we adjust final position
 	if (triedStairs)
 	{
 		endPosition->z++;
@@ -990,7 +990,7 @@ bool Pathfinding::removePreview()
 }
 
 /**
- * Calculates the shortest path using Brensenham path algorithm.
+ * Calculates the shortest path using Bresenham path algorithm.
  * @note This only works in the X/Y plane.
  * @param origin The position to start from.
  * @param target The position we want to reach.

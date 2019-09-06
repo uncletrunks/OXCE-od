@@ -66,7 +66,7 @@ private:
 public:
 	/// Determines whether the unit is going up a stairs.
 	bool isOnStairs(Position startPosition, Position endPosition) const;
-	/// Determines whether or not movement between starttile and endtile is possible in the direction.
+	/// Determines whether or not movement between start tile and end tile is possible in the direction.
 	bool isBlockedDirection(Tile *startTile, const int direction, BattleUnit *missileTarget);
 	static const int DIR_UP = 8;
 	static const int DIR_DOWN = 9;
