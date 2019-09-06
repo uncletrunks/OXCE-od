@@ -139,6 +139,7 @@ std::string Mod::DEBRIEF_MUSIC_GOOD;
 std::string Mod::DEBRIEF_MUSIC_BAD;
 int Mod::DIFFICULTY_COEFFICIENT[5];
 int Mod::DIFFICULTY_BASED_RETAL_DELAY[5];
+int Mod::UNIT_RESPONSE_SOUNDS_FREQUENCY[4];
 
 /// Predefined name for first loaded mod that have all original data
 const std::string ModNameMaster = "master";
@@ -210,6 +211,11 @@ void Mod::resetGlobalStatics()
 	DIFFICULTY_BASED_RETAL_DELAY[2] = 0;
 	DIFFICULTY_BASED_RETAL_DELAY[3] = 0;
 	DIFFICULTY_BASED_RETAL_DELAY[4] = 0;
+
+	UNIT_RESPONSE_SOUNDS_FREQUENCY[0] = 100; // select unit
+	UNIT_RESPONSE_SOUNDS_FREQUENCY[1] = 100; // start moving
+	UNIT_RESPONSE_SOUNDS_FREQUENCY[2] = 100; // select weapon
+	UNIT_RESPONSE_SOUNDS_FREQUENCY[3] = 20;  // annoyed
 }
 
 /**
@@ -1931,6 +1937,15 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		for (YAML::const_iterator i = doc["difficultyBasedRetaliationDelay"].begin(); i != doc["difficultyBasedRetaliationDelay"].end() && num < 5; ++i)
 		{
 			DIFFICULTY_BASED_RETAL_DELAY[num] = (*i).as<int>(DIFFICULTY_BASED_RETAL_DELAY[num]);
+			++num;
+		}
+	}
+	if (doc["unitResponseSoundsFrequency"])
+	{
+		size_t num = 0;
+		for (YAML::const_iterator i = doc["unitResponseSoundsFrequency"].begin(); i != doc["unitResponseSoundsFrequency"].end() && num < 4; ++i)
+		{
+			UNIT_RESPONSE_SOUNDS_FREQUENCY[num] = (*i).as<int>(UNIT_RESPONSE_SOUNDS_FREQUENCY[num]);
 			++num;
 		}
 	}

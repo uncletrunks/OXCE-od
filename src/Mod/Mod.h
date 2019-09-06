@@ -311,6 +311,7 @@ public:
 	static std::string DEBRIEF_MUSIC_BAD;
 	static int DIFFICULTY_COEFFICIENT[5];
 	static int DIFFICULTY_BASED_RETAL_DELAY[5];
+	static int UNIT_RESPONSE_SOUNDS_FREQUENCY[4];
 	// reset all the statics in all classes to default values
 	static void resetGlobalStatics();
 

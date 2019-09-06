@@ -1799,10 +1799,7 @@ void BattlescapeGame::primaryAction(Position pos)
 		BattleUnit *unit = _save->selectUnit(pos);
 		if (unit && unit == _save->getSelectedUnit() && (unit->getVisible() || _debugPlay))
 		{
-			if (RNG::seedless(0, 99) < 20)
-			{
-				playUnitResponseSound(unit, 3); // "annoyed" sound
-			}
+			playUnitResponseSound(unit, 3); // "annoyed" sound
 		}
 		if (unit && unit != _save->getSelectedUnit() && (unit->getVisible() || _debugPlay))
 		{
@@ -2936,6 +2933,12 @@ void BattlescapeGame::playUnitResponseSound(BattleUnit *unit, int type)
 
 	if (!unit)
 		return;
+
+	int chance = Mod::UNIT_RESPONSE_SOUNDS_FREQUENCY[type];
+	if (chance < 100 && RNG::seedless(0, 99) >= chance)
+	{
+		return;
+	}
 
 	std::vector<int> sounds;
 	if (type == 0)
