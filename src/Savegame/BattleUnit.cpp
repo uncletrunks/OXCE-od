@@ -76,10 +76,6 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 	_standHeight = _armor->getStandHeight() == -1 ? soldier->getRules()->getStandHeight() : _armor->getStandHeight();
 	_kneelHeight = _armor->getKneelHeight() == -1 ? soldier->getRules()->getKneelHeight() : _armor->getKneelHeight();
 	_floatHeight = _armor->getFloatHeight() == -1 ? soldier->getRules()->getFloatHeight() : _armor->getFloatHeight();
-	_lastReloadSound = Mod::ITEM_RELOAD;
-	_deathSound = std::vector<int>(); // this one is hardcoded
-	_aggroSound = -1;
-	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : -1; // there's no unit move sound, thus hardcoded -1
 	_intelligence = 2;
 	_aggression = 1;
 	_specab = SPECAB_NONE;
@@ -174,6 +170,7 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 	int look = soldier->getGender() + 2 * soldier->getLook() + 8 * soldier->getLookVariant();
 	setRecolor(look, look, _rankInt);
 
+	prepareUnitSounds();
 	prepareUnitResponseSounds(mod);
 }
 
@@ -191,8 +188,6 @@ void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor 
 	_standHeight = _armor->getStandHeight() == -1 ? soldier->getRules()->getStandHeight() : _armor->getStandHeight();
 	_kneelHeight = _armor->getKneelHeight() == -1 ? soldier->getRules()->getKneelHeight() : _armor->getKneelHeight();
 	_floatHeight = _armor->getFloatHeight() == -1 ? soldier->getRules()->getFloatHeight() : _armor->getFloatHeight();
-
-	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : -1; // there's no unit move sound, thus hardcoded -1
 
 	_movementType = _armor->getMovementType();
 	if (_movementType == MT_FLOAT) {
@@ -225,7 +220,53 @@ void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor 
 	int look = soldier->getGender() + 2 * soldier->getLook() + 8 * soldier->getLookVariant();
 	setRecolor(look, look, _rankInt);
 
+	prepareUnitSounds();
 	prepareUnitResponseSounds(mod);
+}
+
+/**
+ * Helper function preparing unit sounds.
+ */
+void BattleUnit::prepareUnitSounds()
+{
+	_lastReloadSound = Mod::ITEM_RELOAD;
+
+	if (_geoscapeSoldier)
+	{
+		_aggroSound = -1;
+		_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : -1; // there's no soldier move sound, thus hardcoded -1
+	}
+	else if (_unitRules)
+	{
+		_aggroSound = _unitRules->getAggroSound();
+		_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : _unitRules->getMoveSound();
+	}
+
+	// lower priority: soldier type / unit type
+	if (_geoscapeSoldier)
+	{
+		auto soldierRules = _geoscapeSoldier->getRules();
+		if (_gender == GENDER_MALE)
+			_deathSound = soldierRules->getMaleDeathSounds();
+		else
+			_deathSound = soldierRules->getFemaleDeathSounds();
+	}
+	else if (_unitRules)
+	{
+		_deathSound = _unitRules->getDeathSounds();
+	}
+
+	// higher priority: armor
+	if (_gender == GENDER_MALE)
+	{
+		if (!_armor->getMaleDeathSounds().empty())
+			_deathSound = _armor->getMaleDeathSounds();
+	}
+	else
+	{
+		if (!_armor->getFemaleDeathSounds().empty())
+			_deathSound = _armor->getFemaleDeathSounds();
+	}
 }
 
 /**
@@ -352,10 +393,6 @@ BattleUnit::BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, 
 	_kneelHeight = _armor->getKneelHeight() == -1 ? unit->getKneelHeight() : _armor->getKneelHeight();
 	_floatHeight = _armor->getFloatHeight() == -1 ? unit->getFloatHeight() : _armor->getFloatHeight();
 	_loftempsSet = _armor->getLoftempsSet();
-	_lastReloadSound = Mod::ITEM_RELOAD;
-	_deathSound = unit->getDeathSounds();
-	_aggroSound = unit->getAggroSound();
-	_moveSound = _armor->getMoveSound() != -1 ? _armor->getMoveSound() : unit->getMoveSound();
 	_intelligence = unit->getIntelligence();
 	_aggression = unit->getAggression();
 	_specab = (SpecialAbility) unit->getSpecialAbility();
@@ -466,6 +503,7 @@ BattleUnit::BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, 
 
 	setRecolor(RNG::seedless(0, 127), RNG::seedless(0, 127), generalRank);
 
+	prepareUnitSounds();
 	prepareUnitResponseSounds(mod);
 }
 
@@ -3528,13 +3566,6 @@ int BattleUnit::getValue() const
  */
 const std::vector<int> &BattleUnit::getDeathSounds() const
 {
-	if (_deathSound.empty() && _geoscapeSoldier != 0)
-	{
-		if (_gender == GENDER_MALE)
-			return _geoscapeSoldier->getRules()->getMaleDeathSounds();
-		else
-			return _geoscapeSoldier->getRules()->getFemaleDeathSounds();
-	}
 	return _deathSound;
 }
 

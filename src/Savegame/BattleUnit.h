@@ -171,6 +171,8 @@ private:
 	void prepareStun(int strun);
 	/// Helper function preparing Morale recovery at beginning of turn.
 	void prepareMorale(int morale);
+	/// Helper function preparing unit sounds.
+	void prepareUnitSounds();
 	/// Helper function preparing unit response sounds.
 	void prepareUnitResponseSounds(const Mod *mod);
 public:

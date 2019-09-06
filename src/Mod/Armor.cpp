@@ -136,6 +136,8 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_movementType = (MovementType)node["movementType"].as<int>(_movementType);
 
 	mod->loadSoundOffset(_type, _moveSound, node["moveSound"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _deathSoundMale, node["deathMale"], "BATTLE.CAT");
+	mod->loadSoundOffset(_type, _deathSoundFemale, node["deathFemale"], "BATTLE.CAT");
 
 	mod->loadSoundOffset(_type, _selectUnitSoundMale, node["selectUnitMale"], "BATTLE.CAT");
 	mod->loadSoundOffset(_type, _selectUnitSoundFemale, node["selectUnitFemale"], "BATTLE.CAT");

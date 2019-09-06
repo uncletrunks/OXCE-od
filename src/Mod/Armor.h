@@ -61,6 +61,7 @@ private:
 	bool _drawBubbles;
 	MovementType _movementType;
 	int _moveSound;
+	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<int> _selectUnitSoundMale, _selectUnitSoundFemale;
 	std::vector<int> _startMovingSoundMale, _startMovingSoundFemale;
 	std::vector<int> _selectWeaponSoundMale, _selectWeaponSoundFemale;
@@ -139,6 +140,10 @@ public:
 	MovementType getMovementType() const;
 	/// Gets the move sound id. Overrides default/unit's move sound. To be used in BattleUnit constructors only too!
 	int getMoveSound() const;
+	/// Gets the male death sounds.
+	const std::vector<int> &getMaleDeathSounds() const { return _deathSoundMale; }
+	/// Gets the female death sounds.
+	const std::vector<int> &getFemaleDeathSounds() const { return _deathSoundFemale; }
 	/// Gets the male "select unit" sounds.
 	const std::vector<int> &getMaleSelectUnitSounds() const { return _selectUnitSoundMale; }
 	/// Gets the female "select unit" sounds.
