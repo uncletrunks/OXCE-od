@@ -107,7 +107,7 @@ PlaceFacilityState::PlaceFacilityState(Base *base, RuleBaseFacility *rule, BaseF
 		for (auto& item : _rule->getBuildCostItems())
 		{
 			// Note: `item` is of the form (item name, (cost number, refund number))
-			int max = 19;
+			size_t max = 19;
 			if (item.second.first > 9) --max;
 			if (item.second.first > 99) --max;
 			std::string name = tr(item.first);
