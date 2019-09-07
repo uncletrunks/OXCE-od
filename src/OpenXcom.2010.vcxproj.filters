@@ -2122,7 +2122,6 @@
     <ClInclude Include="Menu\SetWindowedRootState.h">
       <Filter>Menu</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\HelperMeta.h" />
     <ClInclude Include="Battlescape\AlienInventory.h">
       <Filter>Battlescape</Filter>
     </ClInclude>
@@ -2191,6 +2190,19 @@
     <ClInclude Include="Mod\RuleEnviroEffects.h">
       <Filter>Mod</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Collections.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\HelperMeta.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\SDL2Helpers.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\ModScript.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="fallthrough.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">
