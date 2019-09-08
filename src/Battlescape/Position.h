@@ -39,7 +39,7 @@ public:
 	/// Copy constructor.
 	constexpr Position(const Position& pos) = default;
 
-	/// Assigment
+	/// Assignment
 	Position& operator=(const Position& pos) = default;
 
 	Position operator+(const Position& pos) const { return Position(x + pos.x, y + pos.y, z + pos.z); }
