@@ -51,8 +51,6 @@ public:
 	void think() override;
 	/// Performs a melee attack
 	void performMeleeAttack();
-	/// Determine if the attack hit, and if so, do stuff.
-	void resolveHit();
 
 };
 

@@ -470,8 +470,6 @@ public:
 	int getEnhancedLighting() const { return _enhancedLighting; }
 	/// Get basic damage type
 	const RuleDamageType *getDamageType(ItemDamageType type) const;
-	/// Gets the cost of a soldier.
-	int getSoldierCost() const;
 	/// Gets the cost of hiring an engineer.
 	int getHireEngineerCost() const;
 	/// Gets the cost of hiring a scientist.
