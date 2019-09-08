@@ -48,7 +48,7 @@ enum SeverityLevel
 class Logger
 {
 public:
-	Logger() { };
+	Logger() : _level(LOG_INFO) { };
 	virtual ~Logger() { CrossPlatform::log(_level, os); };
 	std::ostringstream& get(SeverityLevel level = LOG_INFO) { _level = level; return os; };
 

@@ -6,7 +6,7 @@ namespace OpenXcom
 /**
  * Initializes a new empty soldier avatar.
  */
-SoldierAvatar::SoldierAvatar()
+SoldierAvatar::SoldierAvatar() : _gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0)
 {
 }
 

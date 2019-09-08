@@ -33,7 +33,7 @@ struct SaveOriginal
 	int id;
 	std::string name, date, time;
 	bool tactical;
-	SaveOriginal() : tactical(false)
+	SaveOriginal() : id(0), tactical(false)
 	{
 	}
 };

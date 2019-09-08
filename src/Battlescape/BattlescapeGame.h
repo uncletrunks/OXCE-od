@@ -85,7 +85,7 @@ struct BattleAction : BattleActionCost
 	bool sprayTargeting; // Used to separate waypoint checks between confirm firing mode and the "spray" autoshot
 
 	/// Default constructor
-	BattleAction() : target(-1, -1, -1), targeting(false), value(0), strafe(false), run(false), diff(0), autoShotCounter(0), cameraPosition(0, 0, -1), desperate(false), finalFacing(-1), finalAction(false), number(0), sprayTargeting(false) { }
+	BattleAction() : target(-1, -1, -1), targeting(false), value(0), strafe(false), run(false), ignoreSpottedEnemies(false), diff(0), autoShotCounter(0), cameraPosition(0, 0, -1), desperate(false), finalFacing(-1), finalAction(false), number(0), sprayTargeting(false) { }
 
 	/// Get move type
 	BattleActionMove getMoveType() const

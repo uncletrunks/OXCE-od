@@ -23,7 +23,7 @@
 namespace OpenXcom
 {
 
-RuleVideo::RuleVideo(const std::string &id) : _id(id)
+RuleVideo::RuleVideo(const std::string &id) : _id(id), _useUfoAudioSequence(false)
 {
 }
 

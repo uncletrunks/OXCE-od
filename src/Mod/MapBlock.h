@@ -34,7 +34,7 @@ struct RandomizedItems
 	int amount;
 	bool mixed;
 	std::vector<std::string> itemList;
-	RandomizedItems() : amount(1) { /*Empty by Design*/ };
+	RandomizedItems() : amount(1), mixed(false) { /*Empty by Design*/ };
 };
 
 /**

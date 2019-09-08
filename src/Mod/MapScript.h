@@ -33,6 +33,7 @@ struct TunnelData
  {
 	std::map<std::string, MCDReplacement> replacements;
 	int level;
+	TunnelData() : level(0) { }
 	MCDReplacement *getMCDReplacement(const std::string& type)
 	{
 		if (replacements.find(type) == replacements.end())
@@ -60,7 +61,7 @@ struct VerticalLevel
 
 	// Default constructor
 	VerticalLevel() :
-		levelSizeX(1), levelSizeY(1), levelSizeZ(-1), maxRepeats(-1), levelTerrain("")
+		levelType(VLT_MIDDLE), levelSizeX(1), levelSizeY(1), levelSizeZ(-1), maxRepeats(-1), levelTerrain("")
 	{
 
 	}

@@ -36,6 +36,8 @@ struct MissionArea
 	int texture;
 	std::string name;
 
+	MissionArea() : lonMin(0.0), lonMax(360.0), latMin(-90.0), latMax(90.0), texture(0) { }
+
 	bool operator== (const MissionArea& ma) const
 	{
 		return AreSame(lonMax, ma.lonMax) && AreSame(lonMin, ma.lonMin) && AreSame(latMax, ma.latMax) && AreSame(latMin, ma.latMin);
