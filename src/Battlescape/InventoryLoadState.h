@@ -1,3 +1,4 @@
+#pragma once
 /*
 * Copyright 2010-2015 OpenXcom Developers.
 *
@@ -16,9 +17,6 @@
 * You should have received a copy of the GNU General Public License
 * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef OPENXCOM_INVENTORYLOADSTATE_H
-#define OPENXCOM_INVENTORYLOADSTATE_H
-
 #include "../Engine/State.h"
 
 namespace OpenXcom
@@ -54,5 +52,3 @@ public:
 };
 
 }
-
-#endif

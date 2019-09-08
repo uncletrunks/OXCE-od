@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright 2010-2015 OpenXcom Developers.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_SCRIPT_H
-#define	OPENXCOM_SCRIPT_H
-
 #include <map>
 #include <limits>
 #include <vector>
@@ -1771,6 +1769,3 @@ public:
 #define MACRO_NAMED_SCRIPT(nameString, type) ScriptGroupNamedParser<type, MACRO_GET_STRING_16(nameString, 0), MACRO_GET_STRING_16(nameString, 16), MACRO_GET_STRING_16(nameString, 32)>
 
 } //namespace OpenXcom
-
-#endif	/* OPENXCOM_SCRIPT_H */
-

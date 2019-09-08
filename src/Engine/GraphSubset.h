@@ -17,10 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef OPENXCOM_GRAPHSUBSET_H
-#define	OPENXCOM_GRAPHSUBSET_H
-
 #include <utility>
 #include <algorithm>
 
@@ -117,5 +113,3 @@ struct GraphSubset
 };
 
 }//namespace OpenXcom
-
-#endif	/* OPENXCOM_GRAPHSUBSET_H */

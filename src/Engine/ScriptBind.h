@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright 2010-2015 OpenXcom Developers.
  *
@@ -16,9 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_SCRIPTBIND_H
-#define	OPENXCOM_SCRIPTBIND_H
-
 #include "Script.h"
 #include "Exception.h"
 #include "Logger.h"
@@ -1146,6 +1144,3 @@ struct Bind : BindBase
 };
 
 } //namespace OpenXcom
-
-#endif	/* OPENXCOM_SCRIPTBIND_H */
-

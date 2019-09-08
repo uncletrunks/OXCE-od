@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright 2010-2015 OpenXcom Developers.
  *
@@ -16,10 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef OPENXCOM_HELPERMETA_H
-#define OPENXCOM_HELPERMETA_H
-
 #include <initializer_list>
 
 namespace OpenXcom
@@ -123,7 +120,3 @@ struct StaticError
 } //namespace helper
 
 } //namespace OpenXcom
-
-
-#endif /* OPENXCOM_HELPERMETA_H */
-
