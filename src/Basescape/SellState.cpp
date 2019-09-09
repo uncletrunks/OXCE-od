@@ -64,7 +64,7 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin) : _base(base), _debriefingState(debriefingState), _sel(0), _total(0), _spaceChange(0), _origin(origin), _reset(false)
+SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin) : _base(base), _debriefingState(debriefingState), _sel(0), _total(0), _spaceChange(0), _origin(origin), _reset(false), _sellAllButOne(false)
 {
 	bool overfull = _debriefingState == 0 && Options::storageLimitsEnforced && _base->storesOverfull();
 
@@ -296,6 +296,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_cbxCategory->setOptions(_cats, true);
 	_cbxCategory->onChange((ActionHandler)&SellState::cbxCategoryChange);
 	_cbxCategory->onKeyboardPress((ActionHandler)&SellState::btnSellAllClick, Options::keySelectAll);
+	_cbxCategory->onKeyboardPress((ActionHandler)&SellState::btnSellAllButOneClick, Options::keySelectAllButOne);
 
 	_btnQuickSearch->setText(""); // redraw
 	_btnQuickSearch->onEnter((ActionHandler)&SellState::btnQuickSearchApply);
@@ -656,6 +657,17 @@ void SellState::btnSellAllClick(Action *)
 }
 
 /**
+* Increase all items to max - 1, i.e. sell everything but one.
+* @param action Pointer to an action.
+*/
+void SellState::btnSellAllButOneClick(Action *)
+{
+	_sellAllButOne = true;
+	btnSellAllClick(nullptr);
+	_sellAllButOne = false;
+}
+
+/**
  * Starts increasing the item.
  * @param action Pointer to an action.
  */
@@ -827,6 +839,10 @@ void SellState::changeByValue(int change, int dir)
 	{
 		if (0 >= change || getRow().qtySrc <= getRow().amount) return;
 		change = std::min(getRow().qtySrc - getRow().amount, change);
+		if (_sellAllButOne && change > 0)
+		{
+			--change;
+		}
 	}
 	else
 	{

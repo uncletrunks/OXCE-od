@@ -45,7 +45,7 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch, keyGeoG
 	keyGraphsZoomIn, keyGraphsZoomOut,
 	keyToggleQuickSearch,
 	keyCraftLoadoutSave, keyCraftLoadoutLoad,
-	keyMarkAllAsSeen, keySelectAll, keyDeselectAll, keyResetAll,
+	keyMarkAllAsSeen, keySelectAll, keySelectAllButOne, keyDeselectAll, keyResetAll,
 	keyInventoryArmor, keyInventoryAvatar, keyInventorySave, keyInventoryLoad,
 	keyBattleUseSpecial,
 	keyBattleActionItem1, keyBattleActionItem2, keyBattleActionItem3, keyBattleActionItem4, keyBattleActionItem5,

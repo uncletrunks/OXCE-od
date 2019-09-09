@@ -317,6 +317,7 @@ void create()
 
 	_info.push_back(OptionInfo("keyMarkAllAsSeen", &keyMarkAllAsSeen, SDLK_x, "STR_MARK_ALL_AS_SEEN", "STR_OXCE"));
 	_info.push_back(OptionInfo("keySelectAll", &keySelectAll, SDLK_x, "STR_SELECT_ALL", "STR_OXCE"));
+	_info.push_back(OptionInfo("keySelectAllButOne", &keySelectAllButOne, SDLK_z, "STR_SELECT_ALL_BUT_ONE", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyDeselectAll", &keyDeselectAll, SDLK_x, "STR_DESELECT_ALL", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyResetAll", &keyResetAll, SDLK_x, "STR_RESET_ALL", "STR_OXCE"));
 

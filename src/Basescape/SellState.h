@@ -63,6 +63,7 @@ private:
 	Uint8 _ammoColor;
 	OptionsOrigin _origin;
 	bool _reset;
+	bool _sellAllButOne;
 	/// Gets the category of the current selection.
 	std::string getCategory(int sel) const;
 	/// Determines if the current selection belongs to a given category.
@@ -91,6 +92,8 @@ public:
 	void btnQuickSearchApply(Action *action);
 	/// Handler for pressing the "Sell all" hotkey.
 	void btnSellAllClick(Action *action);
+	/// Handler for pressing the "Sell all but one" hotkey.
+	void btnSellAllButOneClick(Action *action);
 	/// Handler for pressing an Increase arrow in the list.
 	void lstItemsLeftArrowPress(Action *action);
 	/// Handler for releasing an Increase arrow in the list.
