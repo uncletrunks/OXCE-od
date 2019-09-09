@@ -115,7 +115,7 @@ std::string ConfirmDestinationState::checkStartingCondition()
 	AlienDeployment *ruleDeploy = 0;
 	if (u != 0)
 	{
-		ruleDeploy = _game->getMod()->getDeployment(u->getRules()->getType());
+		ruleDeploy = _game->getMod()->getDeployment(u->getRules()->getType()); // no need to check for fake underwater UFOs here
 	}
 	else if (m != 0)
 	{

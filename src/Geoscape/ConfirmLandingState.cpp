@@ -41,6 +41,7 @@
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/AlienRace.h"
 #include "../Mod/Mod.h"
+#include "../Mod/Texture.h"
 
 namespace OpenXcom
 {
@@ -163,7 +164,12 @@ std::string ConfirmLandingState::checkStartingCondition()
 	AlienDeployment *ruleDeploy = 0;
 	if (u != 0)
 	{
-		ruleDeploy = _game->getMod()->getDeployment(u->getRules()->getType());
+		std::string ufoMissionName = u->getRules()->getType();
+		if (_texture->isFakeUnderwater())
+		{
+			ufoMissionName = u->getRules()->getType() + "_UNDERWATER";
+		}
+		ruleDeploy = _game->getMod()->getDeployment(ufoMissionName);
 	}
 	else if (m != 0)
 	{
@@ -247,7 +253,17 @@ void ConfirmLandingState::btnYesClick(Action *)
 		else
 			bgame->setMissionType("STR_UFO_GROUND_ASSAULT");
 		bgen.setUfo(u);
-		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(u->getCraftStats().craftCustomDeploy));
+		const AlienDeployment *customWeaponDeploy = _game->getMod()->getDeployment(u->getCraftStats().craftCustomDeploy);
+		if (_texture->isFakeUnderwater())
+		{
+			const std::string ufoUnderwaterMissionName = u->getRules()->getType() + "_UNDERWATER";
+			const AlienDeployment *ufoUnderwaterMission = _game->getMod()->getDeployment(ufoUnderwaterMissionName, true);
+			bgen.setAlienCustomDeploy(customWeaponDeploy, ufoUnderwaterMission);
+		}
+		else
+		{
+			bgen.setAlienCustomDeploy(customWeaponDeploy);
+		}
 		bgen.setAlienRace(u->getAlienRace());
 	}
 	else if (m != 0)

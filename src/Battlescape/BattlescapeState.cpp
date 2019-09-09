@@ -2800,7 +2800,13 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 		{
 			if ((*ufo)->isInBattlescape())
 			{
-				ruleDeploy = _game->getMod()->getDeployment((*ufo)->getRules()->getType());
+				std::string ufoMissionName = (*ufo)->getRules()->getType();
+				if (!_save->getAlienCustomMission().empty())
+				{
+					// fake underwater UFO
+					ufoMissionName = _save->getAlienCustomMission();
+				}
+				ruleDeploy = _game->getMod()->getDeployment(ufoMissionName);
 				break;
 			}
 		}

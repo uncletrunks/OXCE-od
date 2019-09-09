@@ -987,13 +987,14 @@ void DebriefingState::prepareDebriefing()
 	{
 		ruleDeploy = alienCustomMission;
 	}
-	// OXCE+: Don't forget about UFO landings/crash sites
+	// OXCE: Don't forget about UFO landings/crash sites
 	if (!ruleDeploy)
 	{
 		for (std::vector<Ufo*>::iterator ufo = _game->getSavedGame()->getUfos()->begin(); ufo != _game->getSavedGame()->getUfos()->end(); ++ufo)
 		{
 			if ((*ufo)->isInBattlescape())
 			{
+				// Note: fake underwater UFO deployment was already considered above (via alienCustomMission)
 				ruleDeploy = _game->getMod()->getDeployment((*ufo)->getRules()->getType());
 				break;
 			}
@@ -1140,7 +1141,7 @@ void DebriefingState::prepareDebriefing()
 			{
 				if (AreSame((*k)->getLongitude(), base->getLongitude()) && AreSame((*k)->getLatitude(), base->getLatitude()))
 				{
-					_missionStatistics->ufo = (*k)->getRules()->getType();
+					_missionStatistics->ufo = (*k)->getRules()->getType(); // no need to check for fake underwater UFOs here
 					_missionStatistics->alienRace = (*k)->getAlienRace();
 					break;
 				}
@@ -1249,7 +1250,7 @@ void DebriefingState::prepareDebriefing()
 	{
 		if ((*i)->isInBattlescape())
 		{
-			_missionStatistics->ufo = (*i)->getRules()->getType();
+			_missionStatistics->ufo = (*i)->getRules()->getType(); // no need to check for fake underwater UFOs here
 			if (save->getMonthsPassed() != -1)
 			{
 				_missionStatistics->alienRace = (*i)->getAlienRace();

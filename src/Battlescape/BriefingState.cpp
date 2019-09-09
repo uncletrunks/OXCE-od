@@ -75,7 +75,13 @@ BriefingState::BriefingState(Craft *craft, Base *base, bool infoOnly) : _infoOnl
 		ufo = dynamic_cast <Ufo*> (craft->getDestination());
 		if (ufo) // landing site or crash site.
 		{
-			deployment = _game->getMod()->getDeployment(ufo->getRules()->getType());
+			std::string ufoMissionName = ufo->getRules()->getType();
+			if (!battleSave->getAlienCustomMission().empty())
+			{
+				// fake underwater UFO
+				ufoMissionName = battleSave->getAlienCustomMission();
+			}
+			deployment = _game->getMod()->getDeployment(ufoMissionName);
 		}
 	}
 

@@ -27,7 +27,7 @@ namespace OpenXcom
  * Initializes a globe texture.
  * @param id Texture identifier.
  */
-Texture::Texture(int id) : _id(id)
+Texture::Texture(int id) : _id(id), _fakeUnderwater(false)
 {
 }
 
@@ -45,6 +45,7 @@ Texture::~Texture()
 void Texture::load(const YAML::Node &node)
 {
 	_id = node["id"].as<int>(_id);
+	_fakeUnderwater = node["fakeUnderwater"].as<bool>(_fakeUnderwater);
 	_deployments = node["deployments"].as< std::map<std::string, int> >(_deployments);
 	_terrain = node["terrain"].as< std::vector<TerrainCriteria> >(_terrain);
 	_baseTerrain = node["baseTerrain"].as< std::vector<TerrainCriteria> >(_baseTerrain);
