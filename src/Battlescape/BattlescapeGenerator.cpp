@@ -667,12 +667,15 @@ void BattlescapeGenerator::run()
 
 	setupObjectives(ruleDeploy);
 
-	RuleStartingCondition* startingCondition = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
-	RuleEnviroEffects* enviro = _game->getMod()->getEnviroEffects(_terrain->getEnviroEffects());
-	RuleEnviroEffects* temp = _game->getMod()->getEnviroEffects(ruleDeploy->getEnviroEffects());
-	if (temp != 0)
+	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	if (!startingCondition && _worldTexture)
 	{
-		enviro = temp;
+		startingCondition = _game->getMod()->getStartingCondition(_worldTexture->getStartingCondition());
+	}
+	RuleEnviroEffects *enviro = _game->getMod()->getEnviroEffects(ruleDeploy->getEnviroEffects());
+	if (!enviro && _terrain)
+	{
+		enviro = _game->getMod()->getEnviroEffects(_terrain->getEnviroEffects());
 	}
 	deployXCOM(startingCondition, enviro);
 

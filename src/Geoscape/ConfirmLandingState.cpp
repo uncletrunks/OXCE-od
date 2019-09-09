@@ -194,6 +194,10 @@ std::string ConfirmLandingState::checkStartingCondition()
 	}
 
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	if (!rule && _texture)
+	{
+		rule = _game->getMod()->getStartingCondition(_texture->getStartingCondition());
+	}
 	if (rule != 0)
 	{
 		if (!rule->isCraftPermitted(_craft->getRules()->getType()))
