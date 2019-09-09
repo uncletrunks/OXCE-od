@@ -84,7 +84,7 @@ private:
 	std::string _markerName, _objectivePopup, _objectiveCompleteText, _objectiveFailedText;
 	WeightedOptions _genMission;
 	int _markerIcon, _durationMin, _durationMax, _minDepth, _maxDepth, _genMissionFrequency, _genMissionLimit;
-	int _objectiveType, _objectivesRequired, _objectiveCompleteScore, _objectiveFailedScore, _despawnPenalty, _points, _turnLimit, _cheatTurn;
+	int _objectiveType, _objectivesRequired, _objectiveCompleteScore, _objectiveFailedScore, _despawnPenalty, _abortPenalty, _points, _turnLimit, _cheatTurn;
 	ChronoTrigger _chronoTrigger;
 	bool _keepCraftAfterFailedMission;
 	EscapeType _escapeType;
@@ -177,6 +177,8 @@ public:
 	bool getObjectiveFailedInfo(std::string &text, int &score) const;
 	/// Gets the score penalty XCom receives for ignoring this site.
 	int getDespawnPenalty() const;
+	/// Gets the score penalty XCom receives for aborting this mission.
+	int getAbortPenalty() const { return _abortPenalty; }
 	/// Gets the (half hourly) score penalty XCom receives for this site existing.
 	int getPoints() const;
 	/// Gets the turn limit for this deployment.

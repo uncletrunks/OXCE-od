@@ -1031,6 +1031,11 @@ void DebriefingState::prepareDebriefing()
 		{
 			_stats.push_back(new DebriefingStat(objectiveFailedText, false));
 		}
+		if (aborted && ruleDeploy->getAbortPenalty() != 0)
+		{
+			_stats.push_back(new DebriefingStat("STR_MISSION_ABORTED", false));
+			addStat("STR_MISSION_ABORTED", 1, -ruleDeploy->getAbortPenalty());
+		}
 	}
 
 	_stats.push_back(new DebriefingStat("STR_CIVILIANS_KILLED_BY_ALIENS", false));
