@@ -65,7 +65,7 @@ NewResearchListState::NewResearchListState(Base *base, bool sortByCost) : _base(
 	add(_lstResearch, "list", "selectNewResearch");
 
 	_colorNormal = _lstResearch->getColor();
-	_colorNew = Options::oxceHighlightNewTopics ? _lstResearch->getSecondaryColor() : _colorNormal;
+	_colorNew = Options::oxceHighlightNewTopicsHidden ? _lstResearch->getSecondaryColor() : _colorNormal;
 
 	centerAllSurfaces();
 
@@ -124,7 +124,7 @@ void NewResearchListState::onSelectProject(Action *)
 */
 void NewResearchListState::onToggleProjectStatus(Action *)
 {
-	if (!Options::oxceHighlightNewTopics)
+	if (!Options::oxceHighlightNewTopicsHidden)
 		return;
 
 	// change status

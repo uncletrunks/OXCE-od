@@ -60,7 +60,7 @@ OPT int oxceNightVisionColor;
 OPT bool oxceAutoSell;
 OPT int oxceNightVisionButtonThreshold;
 OPT bool oxceRememberDisabledCraftWeapons;
-OPT bool oxceHighlightNewTopics;
+OPT bool oxceHighlightNewTopicsHidden;
 OPT bool oxceEnableUnitResponseSounds;
 OPT std::string password;
 
