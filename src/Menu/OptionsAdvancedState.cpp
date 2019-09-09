@@ -292,7 +292,7 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 			min = 0;
 			max = 100;
 		}
-		else if (i == &Options::oxceNightVisionButtonThreshold) {
+		else if (i == &Options::oxceAutoNightVisionThreshold) {
 			min = 0;
 			max = 15;
 		}

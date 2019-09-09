@@ -526,35 +526,12 @@ BattlescapeState::BattlescapeState() :
 	_btnStats->onKeyboardPress((ActionHandler)&BattlescapeState::btnNightVisionClick, Options::keyNightVisionToggle);
 
 	// automatic night vision
+	if (_save->getGlobalShade() > Options::oxceAutoNightVisionThreshold)
 	{
-		bool allPlayerUnitTilesVisible = true;
-		for (auto& unit : *_save->getUnits())
-		{
-			if (unit->getOriginalFaction() == FACTION_PLAYER && !unit->isOut())
-			{
-				if (unit->getTile() && unit->getTile()->getShade() >= 12)
-				{
-					allPlayerUnitTilesVisible = false;
-					break;
-				}
-			}
-		}
-		bool atLeastOneStrongPersonalLightAvailable = false;
-		for (auto& unit : *_save->getUnits())
-		{
-			if (unit->getOriginalFaction() == FACTION_PLAYER && !unit->isOut())
-			{
-				if (unit->getArmor()->getPersonalLight() > 5)
-				{
-					atLeastOneStrongPersonalLightAvailable = true;
-					break;
-				}
-			}
-		}
-		if (!allPlayerUnitTilesVisible && !atLeastOneStrongPersonalLightAvailable)
-		{
-			_map->toggleNightVision();
-		}
+		// turn personal lights off
+		_save->getTileEngine()->togglePersonalLighting();
+		// turn night vision on
+		_map->toggleNightVision();
 	}
 
 	SDLKey buttons[] = {Options::keyBattleCenterEnemy1,
@@ -589,7 +566,11 @@ BattlescapeState::BattlescapeState() :
 	_btnToggleNV->onMouseOut((ActionHandler)& BattlescapeState::txtTooltipOut);
 	_btnToggleNV->drawRect(0, 0, 12, 12, 15);
 	_btnToggleNV->drawRect(1, 1, 10, 10, _indicatorBlue);
-	_btnToggleNV->setVisible(_save->getGlobalShade() > Options::oxceNightVisionButtonThreshold);
+#ifdef __ANDROID__
+	_btnToggleNV->setVisible(_save->getGlobalShade() > Options::oxceAutoNightVisionThreshold);
+#else
+	_btnToggleNV->setVisible(false);
+#endif
 
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
