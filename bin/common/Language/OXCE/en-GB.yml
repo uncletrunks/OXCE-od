@@ -200,6 +200,8 @@ en-GB:
   STR_HIT_LOG_REACTION_FIRE: "Reaction fire..."
 #=================== Engine ===================
 #Options.cpp
+  STR_UPDATE_CHECK: "Automatic update check"
+  STR_UPDATE_CHECK_DESC: "If enabled, OpenXcom will automatically check for updates and give you an option to update itself by a single button click."
   STR_LAZY_LOADING: "Lazy loading"
   STR_LAZY_LOADING_DESC: "If enabled, graphic resources are loaded on-demand. Otherwise everything is loaded at start-up."
   STR_UFO_LANDING_ALERT: "UFO landing alert"
@@ -304,6 +306,9 @@ en-GB:
 #UfoTrackerState.cpp
   STR_UFO_TRACKER: "UFO Tracker"
 #=================== Menu ===================
+#MainMenuState.cpp
+  STR_UPDATE: "Update"
+  STR_LATEST_VERSION_INFO: "You are using the latest OpenXcom version."
 #OptionsAdvancedState.cpp
   STR_OXCE: "Extended"
 #OptionsInformExtendedState.cpp

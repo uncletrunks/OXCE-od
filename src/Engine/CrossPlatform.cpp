@@ -42,6 +42,8 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <shellapi.h>
+#include <wininet.h>
+#include <urlmon.h>
 #ifndef __NO_DBGHELP
 #include <dbghelp.h>
 #endif
@@ -53,6 +55,8 @@
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "wininet.lib")
+#pragma comment(lib, "urlmon.lib")
 #ifndef __NO_DBGHELP
 #pragma comment(lib, "dbghelp.lib")
 #endif
@@ -83,6 +87,7 @@
 #endif
 #include "FileMap.h"
 #include "SDL2Helpers.h"
+#include "../version.h"
 
 namespace OpenXcom
 {
@@ -942,6 +947,23 @@ bool moveFile(const std::string &src, const std::string &dest)
 }
 
 /**
+ * Copies a file from one path to another,
+ * replacing any existing file.
+ * @param src Source path.
+ * @param dest Destination path.
+ * @return True if the operation succeeded, False otherwise.
+ */
+bool copyFile(const std::string& src, const std::string& dest)
+{
+#ifdef _WIN32
+	auto srcW = pathToWindows(src);
+	auto dstW = pathToWindows(dest);
+	return (CopyFileW(srcW.c_str(), dstW.c_str(), false) != 0);
+#endif
+	return false;
+}
+
+/**
  * Writes a file.
  * @param filename - where to writeFile
  * @param data - what to writeFile
@@ -1567,6 +1589,142 @@ SDL_RWops *getEmbeddedAsset(const std::string& assetName) {
 	/* Asset embedding disabled. */
 	Log(LOG_DEBUG) << log_ctx << "assets were not embedded.";
 	return NULL;
+#endif
+}
+
+/**
+ * Tests the internet connection.
+ * @param url URL to test.
+ * @return True if the operation succeeded, False otherwise.
+ */
+bool testInternetConnection(const std::string& url)
+{
+#ifdef _WIN32
+	auto urlW = pathToWindows(url, false);
+	bool bConnect = InternetCheckConnectionW(urlW.c_str(), FLAG_ICC_FORCE_CONNECTION, 0);
+	return bConnect;
+#else
+	return false;
+#endif
+}
+
+/**
+ * Downloads a file from a given URL to the filesystem.
+ * @param url Source URL.
+ * @param filename Destination file name.
+ * @return True if the operation succeeded, False otherwise.
+ */
+bool downloadFile(const std::string& url, const std::string& filename)
+{
+#ifdef _WIN32
+	auto urlW = pathToWindows(url, false);
+	auto filenameW = pathToWindows(filename, true);
+	DeleteUrlCacheEntryW(urlW.c_str());
+	HRESULT hr = URLDownloadToFileW(NULL, urlW.c_str(), filenameW.c_str(), 0, NULL);
+	return SUCCEEDED(hr);
+#else
+	return false;
+#endif
+}
+
+/**
+ * Is the given version number higher than the current version number?
+ * @param newVersion Version to compare.
+ * @return True if given version is higher than current version.
+ */
+bool isHigherThanCurrentVersion(const std::string& newVersion)
+{
+	bool isHigher = false;
+
+	std::vector<int> newOxceVersion;
+	std::string each;
+	char split_char = '.';
+	std::istringstream ss(newVersion);
+	while (std::getline(ss, each, split_char)) {
+		try {
+			int i = std::stoi(each);
+			newOxceVersion.push_back(i);
+		}
+		catch (...) {
+			newOxceVersion.push_back(0);
+		}
+	}
+	std::vector<int> currentOxceVersion = { OPENXCOM_VERSION_NUMBER };
+	int diff = currentOxceVersion.size() - newOxceVersion.size();
+	for (int j = 0; j < diff; ++j)
+	{
+		newOxceVersion.push_back(0);
+	}
+	for (size_t k = 0; k < currentOxceVersion.size(); ++k)
+	{
+		if (newOxceVersion[k] > currentOxceVersion[k])
+		{
+			isHigher = true;
+			break;
+		}
+		else if (newOxceVersion[k] < currentOxceVersion[k])
+		{
+			break;
+		}
+	}
+
+	return isHigher;
+}
+
+/**
+ * Gets the path to the executable file.
+ * @return Path to the EXE file.
+ */
+std::string getExeFolder()
+{
+#ifdef _WIN32
+	wchar_t dest[MAX_PATH + 1];
+	if (GetModuleFileNameW(NULL, dest, MAX_PATH) != 0)
+	{
+		PathRemoveFileSpecW(dest);
+		auto ret = pathFromWindows(dest) + "/";
+		return ret;
+	}
+#endif
+	return std::string();
+}
+
+/**
+ * Gets the file name of the executable file.
+ * @param includingPath Including full path or just the file name?
+ * @return Name of the EXE file.
+ */
+std::string getExeFilename(bool includingPath)
+{
+#ifdef _WIN32
+	wchar_t dest[MAX_PATH + 1];
+	if (GetModuleFileNameW(NULL, dest, MAX_PATH) != 0)
+	{
+		if (includingPath)
+		{
+			auto ret = pathFromWindows(dest);
+			return ret;
+		}
+		else
+		{
+			auto filename = PathFindFileNameW(dest);
+			auto ret = pathFromWindows(filename);
+			return ret;
+		}
+	}
+#endif
+	return std::string();
+}
+
+/**
+ * Starts the update process.
+ */
+void startUpdateProcess()
+{
+#ifdef _WIN32
+	auto operationW = pathToWindows("open", false);
+	auto fileW = pathToWindows("oxce-upd.bat", false);
+	ShellExecuteW(NULL, operationW.c_str(), fileW.c_str(), NULL, NULL, SW_SHOWNORMAL);
 #endif
 }
 

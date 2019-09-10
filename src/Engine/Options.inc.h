@@ -53,6 +53,8 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch, keyGeoG
 
 // Extra options (OXCE)
 OPT int oxceStartUpTextMode;
+OPT bool oxceUpdateCheck;
+
 OPT bool oxceUfoLandingAlert;
 OPT int oxceWoundedDefendBaseIf;
 OPT bool oxcePlayBriefingMusicDuringEquipment;

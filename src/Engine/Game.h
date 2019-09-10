@@ -49,7 +49,7 @@ private:
 	std::list<State*> _states, _deleted;
 	SavedGame *_save;
 	Mod *_mod;
-	bool _quit, _init;
+	bool _quit, _init, _update;
 	FpsCounter *_fpsCounter;
 	bool _mouseActive;
 	static const double VOLUME_GRADIENT;
@@ -99,6 +99,10 @@ public:
 	void loadLanguages();
 	/// Sets up the audio.
 	void initAudio();
+	/// Sets the update flag.
+	void setUpdateFlag(bool update) { _update = update; }
+	/// Returns the update flag.
+	bool getUpdateFlag() const { return _update; }
 };
 
 }

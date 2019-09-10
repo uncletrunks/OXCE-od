@@ -1330,6 +1330,8 @@ void Mod::loadAll()
 	// fixed user options
 	if (!_fixedUserOptions.empty())
 	{
+		_fixedUserOptions.erase("oxceUpdateCheck");
+
 		const std::vector<OptionInfo> &options = Options::getOptionInfo();
 		for (std::vector<OptionInfo>::const_iterator i = options.begin(); i != options.end(); ++i)
 		{

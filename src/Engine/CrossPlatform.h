@@ -86,6 +86,8 @@ namespace CrossPlatform
 	std::pair<std::string, std::string> timeToString(time_t time);
 	/// Move/rename a file between paths.
 	bool moveFile(const std::string &src, const std::string &dest);
+	/// Copy a file between paths.
+	bool copyFile(const std::string &src, const std::string &dest);
 	/// Writes out a file
 	bool writeFile(const std::string& filename, const std::string& data);
 	bool writeFile(const std::string& filename, const std::vector<unsigned char>& data);
@@ -112,6 +114,18 @@ namespace CrossPlatform
 	const std::string& getLogFileName();
 	/// Get an SDL_RWops to an embedded asset. NULL if not there.
 	SDL_RWops *getEmbeddedAsset(const std::string& assetName);
+	/// Tests the internet connection.
+	bool testInternetConnection(const std::string& url);
+	/// Downloads a file from a given URL to the filesystem.
+	bool downloadFile(const std::string& url, const std::string& filename);
+	/// Is the given version number higher than the current version number?
+	bool isHigherThanCurrentVersion(const std::string& newVersion);
+	/// Gets the path to the executable file.
+	std::string getExeFolder();
+	/// Gets the file name of the executable file.
+	std::string getExeFilename(bool includingPath);
+	/// Starts the update process.
+	void startUpdateProcess();
 }
 
 }

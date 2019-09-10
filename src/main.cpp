@@ -122,9 +122,17 @@ int main(int argc, char *argv[])
 	game->setState(new StartState);
 	game->run();
 
+	bool startUpdate = game->getUpdateFlag();
+
 	// Comment those two for faster exit.
 	delete game;
 	FileMap::clear(true, false); // make valgrind happy
+
+	if (startUpdate)
+	{
+		CrossPlatform::startUpdateProcess();
+	}
+
 	return EXIT_SUCCESS;
 }
 
