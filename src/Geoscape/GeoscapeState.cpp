@@ -870,17 +870,8 @@ void GeoscapeState::time5Seconds()
 					}
 
 					// If not, interrupt all other (regular) interceptions to prevent a dead-lock (and other possible side effects)
-					std::list<DogfightState*>::iterator it = _dogfights.begin();
-					for (; it != _dogfights.end();)
-					{
-						delete *it;
-						it = _dogfights.erase(it);
-					}
-					for (it = _dogfightsToBeStarted.begin(); it != _dogfightsToBeStarted.end();)
-					{
-						delete *it;
-						it = _dogfightsToBeStarted.erase(it);
-					}
+					Collections::deleteAll(_dogfights);
+					Collections::deleteAll(_dogfightsToBeStarted);
 					_minimizedDogfights = 0;
 
 					// Start the dogfight
@@ -1160,17 +1151,8 @@ void GeoscapeState::time5Seconds()
 								}
 
 								// If not, interrupt all other (regular) interceptions to prevent a dead-lock (and other possible side effects)
-								std::list<DogfightState*>::iterator it = _dogfights.begin();
-								for (; it != _dogfights.end();)
-								{
-									delete *it;
-									it = _dogfights.erase(it);
-								}
-								for (it = _dogfightsToBeStarted.begin(); it != _dogfightsToBeStarted.end();)
-								{
-									delete *it;
-									it = _dogfightsToBeStarted.erase(it);
-								}
+								Collections::deleteAll(_dogfights);
+								Collections::deleteAll(_dogfightsToBeStarted);
 								_minimizedDogfights = 0;
 
 								// Don't process certain craft logic (moving and reaching destination)
