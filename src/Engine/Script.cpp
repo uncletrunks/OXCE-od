@@ -151,7 +151,7 @@ static inline RetEnum wavegen_tri_h(int& reg, const int& period, const int& size
 }
 
 [[gnu::always_inline]]
-static inline RetEnum call_func_h(ScriptWorkerBase& c, FuncCommon func, const Uint8* d, ProgPos& p)
+static inline RetEnum call_func_h(ScriptWorkerBase& c, ScriptFunc func, const Uint8* d, ProgPos& p)
 {
 	auto t = p;
 	auto r = func(c, d, t);
@@ -227,7 +227,7 @@ static inline RetEnum bit_popcount_h(int& reg)
 	IMPL(set_shade,		MACRO_QUOTE({ Reg0 = (Reg0 & 0xF0) | (Data1 & 0xF);			return RetContinue; }),		(int& Reg0, int Data1),		"Set color part to pixel color in arg1") \
 	IMPL(add_shade,		MACRO_QUOTE({ addShade_h(Reg0, Data1);						return RetContinue; }),		(int& Reg0, int Data1),		"Add value of shade to pixel color in arg1") \
 	\
-	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(FuncCommon func, const Uint8* d, ScriptWorkerBase& c, ProgPos& p),		"") \
+	IMPL(call,			MACRO_QUOTE({ return call_func_h(c, func, d, p);								}),		(ScriptFunc func, const Uint8* d, ScriptWorkerBase& c, ProgPos& p),		"") \
 
 
 ////////////////////////////////////////////////////////////
@@ -274,6 +274,16 @@ struct Func_debug_impl_int
 	static RetEnum func (ScriptWorkerBase& c, int i)
 	{
 		c.log_buffer_add(std::to_string(i));
+		return RetContinue;
+	}
+};
+
+struct Func_debug_impl_text
+{
+	[[gnu::always_inline]]
+	static RetEnum func (ScriptWorkerBase& c, ScriptText p)
+	{
+		c.log_buffer_add(p);
 		return RetContinue;
 	}
 };
@@ -539,6 +549,16 @@ bool validOverloadProc(const ScriptRange<ScriptRange<ArgEnum>>& overload)
 	return true;
 }
 
+std::string displayType(const ScriptParserBase* spb, ArgEnum type)
+{
+	std::string result = "";
+	result += "[";
+	result += spb->getTypePrefix(type);
+	result += spb->getTypeName(type).toString();
+	result += "]";
+	return result;
+}
+
 /**
  * Display arguments
  */
@@ -723,7 +743,7 @@ bool parseBuildinProc(const ScriptProcData& spd, ParserWriter& ph, const ScriptR
  */
 bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end)
 {
-	using argFunc = typename helper::ArgSelector<FuncCommon>::type;
+	using argFunc = typename helper::ArgSelector<ScriptFunc>::type;
 	using argRaw = typename helper::ArgSelector<const Uint8*>::type;
 	static_assert(helper::FuncGroup<Func_call>::ver() == argRaw::ver(), "Invalid size");
 	static_assert(std::is_same<helper::GetType<helper::FuncGroup<Func_call>, 0>, argFunc>::value, "Invalid first argument");
@@ -731,7 +751,7 @@ bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const ScriptRe
 
 	auto opPos = ph.pushProc(Proc_call);
 
-	auto funcPos = ph.pushReserved<FuncCommon>();
+	auto funcPos = ph.pushReserved<ScriptFunc>();
 	auto argPosBegin = ph.getCurrPos();
 
 	auto argType = spd.parserArg(ph, begin, end);
@@ -742,7 +762,7 @@ bool parseCustomProc(const ScriptProcData& spd, ParserWriter& ph, const ScriptRe
 	}
 
 	auto argPosEnd = ph.getCurrPos();
-	ph.updateReserved<FuncCommon>(funcPos, spd.parserGet(argType));
+	ph.updateReserved<ScriptFunc>(funcPos, spd.parserGet(argType));
 
 	size_t diff = ph.getDiffPos(argPosBegin, argPosEnd);
 	for (int i = 0; i < argRaw::ver(); ++i)
@@ -929,7 +949,7 @@ bool parseEnd(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* 
 	ParserWriter::Block block = ph.codeBlocks.back();
 	ph.codeBlocks.pop_back();
 
-	if (block.nextLabel.getValue<int>() != block.finalLabel.getValue<int>())
+	if (block.nextLabel.value != block.finalLabel.value)
 	{
 		ph.setLabel(block.nextLabel, ph.getCurrPos());
 	}
@@ -1326,6 +1346,7 @@ enum TokenEnum
 	TokenSemicolon,
 	TokenSymbol,
 	TokenNumber,
+	TokenText,
 };
 
 /**
@@ -1378,6 +1399,10 @@ public:
 			if (ref)
 				return ref;
 		}
+		else if (getType() == TokenText)
+		{
+			return ScriptRefData{ *this, ArgText, };
+		}
 		return ScriptRefData{ *this, ArgInvalid };
 	}
 
@@ -1402,167 +1427,257 @@ public:
 SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 {
 	//groups of different types of ASCII characters
-	const Uint8 none = 1;
-	const Uint8 spec = 2;
-	const Uint8 digit = 3;
-	const Uint8 charHex = 4;
-	const Uint8 charRest = 5;
-	const Uint8 digitSign = 6;
+	using CharClasses = Uint8;
+	constexpr CharClasses none = 0x1;
+	constexpr CharClasses spec = 0x2;
+	constexpr CharClasses digit = 0x4;
+	constexpr CharClasses digitHex = 0x8;
+	constexpr CharClasses charRest = 0x10;
+	constexpr CharClasses digitSign = 0x20;
+	constexpr CharClasses digitHexX = 0x40;
+	constexpr CharClasses quote = 0x80;
 
 	//array storing data about every ASCII character
-	static Uint8 charDecoder[256] = { 0 };
+	static CharClasses charDecoder[256] = { 0 };
 	static bool init = true;
 	if (init)
 	{
 		init = false;
 		for(int i = 0; i < 256; ++i)
 		{
-			if (i == '#' || isspace(i))	charDecoder[i] = none;
-			if (i == ':' || i == ';')	charDecoder[i] = spec;
+			if (i == '#' || isspace(i))	charDecoder[i] |= none;
+			if (i == ':' || i == ';')	charDecoder[i] |= spec;
 
-			if (i == '+' || i == '-')	charDecoder[i] = digitSign;
-			if (i >= '0' && i <= '9')	charDecoder[i] = digit;
-			if (i >= 'A' && i <= 'F')	charDecoder[i] = charHex;
-			if (i >= 'a' && i <= 'f')	charDecoder[i] = charHex;
+			if (i == '+' || i == '-')	charDecoder[i] |= digitSign;
+			if (i >= '0' && i <= '9')	charDecoder[i] |= digit;
+			if (i >= 'A' && i <= 'F')	charDecoder[i] |= digitHex;
+			if (i >= 'a' && i <= 'f')	charDecoder[i] |= digitHex;
+			if (i == 'x' || i == 'X')	charDecoder[i] |= digitHexX;
 
-			if (i >= 'G' && i <= 'Z')	charDecoder[i] = charRest;
-			if (i >= 'g' && i <= 'z')	charDecoder[i] = charRest;
-			if (i == '_' || i == '.')	charDecoder[i] = charRest;
+			if (i >= 'A' && i <= 'Z')	charDecoder[i] |= charRest;
+			if (i >= 'a' && i <= 'z')	charDecoder[i] |= charRest;
+			if (i == '_' || i == '.')	charDecoder[i] |= charRest;
+
+			if (i == '"')				charDecoder[i] |= quote;
 		}
 	}
 
-	//find first nowithe character.
-	bool coment = false;
-	for(; _begin != _end; ++_begin)
+	struct NextSymbol
 	{
-		const char c = *_begin;
-		if (coment)
+		char c;
+		CharClasses decode;
+
+		/// Is vaild symbol
+		operator bool() const { return c; }
+
+		/// Check type of symbol
+		bool is(CharClasses t) const { return decode & t; }
+
+		/// Is this symbol starting next token?
+		bool isStartOfNextToken() const { return is(spec | none); }
+	};
+
+	auto peekCharacter = [&]() -> NextSymbol const
+	{
+		if (_begin != _end)
 		{
-			if (c == '\n')
+			return NextSymbol{ *_begin, charDecoder[(Uint8)*_begin] };
+		}
+		else
+		{
+			return NextSymbol{ 0, 0 };
+		}
+	};
+
+	auto readCharacter = [&]() -> NextSymbol const
+	{
+		auto curr = peekCharacter();
+		//it will stop on `\0` character
+		if (curr)
+		{
+			++_begin;
+		}
+		return curr;
+	};
+
+	auto backCharacter = [&]()
+	{
+		--_begin;
+	};
+
+	//find first no whitespace character.
+	if (peekCharacter().is(none))
+	{
+		while(const auto next = readCharacter())
+		{
+			if (next.c == '#')
 			{
-				coment = false;
+				while(const auto comment = readCharacter())
+				{
+					if (comment.c == '\n')
+					{
+						break;
+					}
+				}
+				continue;
 			}
-			continue;
-		}
-		else if (isspace(c))
-		{
-			continue;
-		}
-		else if (c == '#')
-		{
-			coment = true;
-			continue;
-		}
-		break;
-	}
-	if (_begin == _end)
-	{
-		return SelectedToken{ };
-	}
-
-	auto type = TokenNone;
-	auto begin = _begin;
-	bool hex = false;
-	int off = 0;
-
-	for (; _begin != _end; ++_begin, ++off)
-	{
-		const Uint8 c = *_begin;
-		const Uint8 decode = charDecoder[c];
-
-		//end of string
-		if (decode == none)
-		{
-			break;
-		}
-		else if (decode == spec)
-		{
-			if (c == ':')
+			else if (next.is(none))
 			{
-				//colon start new token, skip if we are in another one
-				if (type != TokenNone)
-					break;
-
-				++_begin;
-				type = excepted == TokenColon ? TokenColon : TokenInvaild;
+				continue;
+			}
+			else
+			{
+				//not empy character, put it back
+				backCharacter();
 				break;
 			}
-			else if (c == ';')
-			{
-				//semicolon start new token, skip if we are in another one
-				if (type != TokenNone)
-					break;
-				//semicolon wait for his turn, returning empty token
-				if (excepted != TokenSemicolon)
-					break;
+		}
+		if (!peekCharacter())
+		{
+			return SelectedToken{ };
+		}
+	}
 
-				++_begin;
-				type = TokenSemicolon;
+
+	//start of new token of unknow type
+	auto type = TokenInvaild;
+	auto begin = _begin;
+	const auto first = readCharacter();
+
+	//text like `"abcdef"`
+	if (first.is(quote))
+	{
+		type = TokenText;
+		while (const auto next = readCharacter())
+		{
+			if (next.c == first.c)
+			{
+				break;
+			}
+			else if (next.c == '\\')
+			{
+				const auto escapedChar = readCharacter();
+				if (escapedChar.c == first.c)
+				{
+					continue;
+				}
+				else if (escapedChar.c == '\\')
+				{
+					continue;
+				}
+				else
+				{
+					type = TokenInvaild;
+					break;
+				}
+				continue;
+			}
+			else if (next.c == '\n')
+			{
+				type = TokenInvaild;
 				break;
 			}
 			else
+			{
+				//eat all other chars
+				continue;
+			}
+		}
+		if (!peekCharacter().isStartOfNextToken())
+		{
+			type = TokenInvaild;
+		}
+
+	}
+	//special symbol like `;` or `:`
+	else if (first.is(spec))
+	{
+		if (first.c == ':')
+		{
+			type = excepted == TokenColon ? TokenColon : TokenInvaild;
+		}
+		else if (first.c == ';')
+		{
+			//semicolon wait for his turn, returning empty token
+			if (excepted != TokenSemicolon)
+			{
+				backCharacter();
+				type = TokenNone;
+			}
+			else
+			{
+				type = TokenSemicolon;
+			}
+		}
+		else
+		{
+			type = TokenInvaild;
+		}
+	}
+	//number like `0x1234` or `5432` or `+232`
+	else if (first.is(digitSign | digit))
+	{
+		auto firstDigit = first;
+		//sign
+		if (firstDigit.is(digitSign))
+		{
+			firstDigit = readCharacter();
+		}
+		if (firstDigit.is(digit))
+		{
+			const auto hex = firstDigit.c == '0' && peekCharacter().is(digitHexX);
+			if (hex)
+			{
+				//eat `x`
+				readCharacter();
+			}
+			else
+			{
+				//at least we have already one digit
+				type = TokenNumber;
+			}
+
+			const CharClasses serachClass = hex ? (digitHex | digit) : digit;
+
+			while (const auto next = readCharacter())
+			{
+				//end of symbol
+				if (next.isStartOfNextToken())
+				{
+					backCharacter();
+					break;
+				}
+				else if (next.is(serachClass))
+				{
+					type = TokenNumber;
+				}
+				else
+				{
+					type = TokenInvaild;
+					break;
+				}
+			}
+		}
+	}
+	//symbol like `abcd` or `p12345`
+	else if (first.is(charRest))
+	{
+		type = TokenSymbol;
+		while (const auto next = readCharacter())
+		{
+			//end of symbol
+			if (next.isStartOfNextToken())
+			{
+				backCharacter();
+				break;
+			}
+			else if (!next.is(charRest | digit))
 			{
 				type = TokenInvaild;
 				break;
 			}
 		}
 
-		switch (type)
-		{
-		//begin of string
-		case TokenNone:
-			switch(decode)
-			{
-			//start of number
-			case digitSign:
-				--off; //skipping +- sign
-				FALLTHROUGH;
-			case digit:
-				hex = c == '0'; //expecting hex number
-				type = TokenNumber;
-				continue;
-
-			//start of symbol
-			case charHex:
-			case charRest:
-				type = TokenSymbol;
-				continue;
-			}
-			break;
-
-		//middle of number
-		case TokenNumber:
-			switch (decode)
-			{
-			case charRest:
-				if (off != 1) break;
-				if (c != 'x' && c != 'X') break; //X in "0x1"
-				FALLTHROUGH;
-			case charHex:
-				if (!hex) break;
-				FALLTHROUGH;
-			case digit:
-				if (off == 0) hex = c == '0'; //expecting hex number
-				continue;
-			}
-			break;
-
-		//middle of symbol
-		case TokenSymbol:
-			switch (decode)
-			{
-			case charRest:
-			case charHex:
-			case digit:
-				continue;
-			}
-			break;
-		default:
-			break;
-		}
-		//when decode == 0 or we find unexpected char we should end there
-		type = TokenInvaild;
-		break;
 	}
 	auto end = _begin;
 	return SelectedToken{ type, ScriptRef{ begin, end } };
@@ -1585,8 +1700,6 @@ ParserWriter::ParserWriter(
 	container(c),
 	parser(d),
 	refListCurr(),
-	refLabelsUses(),
-	refLabelsList(),
 	regIndexUsed(regUsed),
 	constIndexUsed(-1)
 {
@@ -1599,10 +1712,71 @@ ParserWriter::ParserWriter(
 void ParserWriter::relese()
 {
 	pushProc(Proc_exit);
-	for (auto& p : refLabelsUses)
+	refLabels.forEachPosition(
+		[&](auto pos, ProgPos value)
+		{
+			updateReserved<ProgPos>(pos, value);
+		}
+	);
+
+	auto textTotalSize = 0u;
+	refTexts.forEachPosition(
+		[&](auto pos, ScriptRef value)
+		{
+			textTotalSize += value.size() + 1;
+		}
+	);
+	auto charPtr = [&](ProgPos pos)
 	{
-		updateReserved<ProgPos>(p.first, refLabelsList[p.second]);
-	}
+		return (char*)&container._proc[static_cast<size_t>(pos)];
+	};
+	//prealocate space in vector to have stable pointers to strings
+	auto currentText = push(textTotalSize);
+	refTexts.forEachPosition(
+		[&](auto pos, ScriptRef value)
+		{
+			auto start = currentText;
+
+			//check begining of string
+			auto begin = value.begin();
+			if (begin == value.end() || *begin != '"')
+			{
+				throw Exception("Invaild Text: >>" + value.toString() + "<<");
+			}
+
+			//check end of string
+			auto end = value.end() - 1;
+			if (begin == end || *end != '"')
+			{
+				throw Exception("Invaild Text: >>" + value.toString() + "<<");
+			}
+
+			++begin;
+			bool escape = false;
+			while (begin != end)
+			{
+				if (escape == true)
+				{
+					escape = false;
+				}
+				else
+				{
+					if (*begin == '\\')
+					{
+						escape = true;
+						++begin;
+						continue;
+					}
+				}
+				*charPtr(currentText) = *begin;
+				++currentText;
+				++begin;
+			}
+			++currentText;
+
+			updateReserved<ScriptText>(pos, ScriptText{ charPtr(start) });
+		}
+	);
 }
 
 /**
@@ -1730,12 +1904,11 @@ bool ParserWriter::pushLabelTry(const ScriptRefData& data)
 		return false;
 	}
 
-	auto index = temp.getValue<int>();
-	if ((!data.name && refLabelsList[index] != ProgPos::Unknown))
+	if ((!data.name && refLabels.getValue(temp.value) != ProgPos::Unknown))
 	{
 		return false;
 	}
-	refLabelsUses.push_back(std::make_pair(pushReserved<ProgPos>(), index));
+	refLabels.pushPosition(*this, temp.value);
 	return true;
 }
 
@@ -1745,9 +1918,7 @@ bool ParserWriter::pushLabelTry(const ScriptRefData& data)
  */
 ScriptRefData ParserWriter::addLabel(const ScriptRef& name)
 {
-	int pos = refLabelsList.size();
-	refLabelsList.push_back(ProgPos::Unknown);
-	return ScriptRefData{ name, ArgLabel, pos };
+	return ScriptRefData{ name, ArgLabel, refLabels.addValue(ProgPos::Unknown) };
 }
 
 /**
@@ -1768,13 +1939,25 @@ bool ParserWriter::setLabel(const ScriptRefData& data, ProgPos offset)
 		return false;
 	}
 
-	auto index = temp.getValue<int>();
-	if (refLabelsList[index] != ProgPos::Unknown)
+	if (refLabels.getValue(temp.value) != ProgPos::Unknown)
 	{
 		return false;
 	}
-	refLabelsList[index] = offset;
+	refLabels.setValue(temp.value, offset);
 	return true;
+}
+
+/**
+ * Try pushing text literal arg on proc vector.
+ */
+bool ParserWriter::pushTextTry(const ScriptRefData& data)
+{
+	if (data && data.type == ArgText)
+	{
+		refTexts.pushPosition(*this, refTexts.addValue(data.name));
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -1837,6 +2020,19 @@ bool ParserWriter::addReg(const ScriptRef& s, ArgEnum type)
 	return true;
 }
 
+/// Dump to log error info about ref.
+void ParserWriter::logDump(const ScriptRefData& ref) const
+{
+	if (ref)
+	{
+		Log(LOG_ERROR) << "Incorrect type of argument '"<< ref.name.toString() <<"' of type "<< displayType(&parser, ref.type);
+	}
+	else
+	{
+		Log(LOG_ERROR) << "Unknown argument '"<< ref.name.toString() <<"'";
+	}
+}
+
 ////////////////////////////////////////////////////////////
 //				ScriptParserBase class
 ////////////////////////////////////////////////////////////
@@ -1878,9 +2074,11 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 
 	addParser<helper::FuncGroup<Func_test_eq_null>>("test_eq", "");
 	addParser<helper::FuncGroup<Func_debug_impl_int>>("debug_impl", "");
+	addParser<helper::FuncGroup<Func_debug_impl_text>>("debug_impl", "");
 	addParser<helper::FuncGroup<Func_debug_flush>>("debug_flush", "");
 
-	addType<int>("int");
+	addType<ScriptInt>("int");
+	addType<ScriptText>("text");
 
 	auto labelName = addNameRef("label");
 	auto nullName = addNameRef("null");
@@ -2213,7 +2411,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		{
 			for (auto i = help.refListCurr.begin(); i != help.refListCurr.end(); ++i)
 			{
-				if (i->type == ArgLabel && i->value.getValue<int>() == -1)
+				if (i->type == ArgLabel && help.refLabels.getValue(i->value) == ProgPos::Unknown)
 				{
 					Log(LOG_ERROR) << err << "invalid use of label: '" << i->name.toString() << "' without declaration";
 					return false;
@@ -2274,7 +2472,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		valid &= label.getType() == TokenSymbol || label.getType() == TokenNone;
 		valid &= op.getType() == TokenSymbol;
 		for (size_t i = 0; i < ScriptMaxArg; ++i)
-			valid &= args[i].getType() == TokenSymbol || args[i].getType() == TokenNumber || args[i].getType() == TokenNone;
+			valid &= args[i].getType() == TokenSymbol || args[i].getType() == TokenNumber || args[i].getType() == TokenNone || args[i].getType() == TokenText;
 		valid &= f.getType() == TokenSemicolon;
 
 		if (!valid)
@@ -2292,11 +2490,19 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 			if (args[ScriptMaxArg - 1].getType() != TokenNone)
 			{
 				Log(LOG_ERROR) << err << "too many arguments in line: '" << std::string(line_begin, line_end) << "'";
+				return false;
 			}
-			else
+
+			for (size_t i = 0; i < ScriptMaxArg; ++i)
 			{
-				Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
+				if (args[i].getType() == TokenInvaild)
+				{
+					Log(LOG_ERROR) << err << "invalid argument '"<<  args[i].toString() <<"' in line: '" << std::string(line_begin, line_end) << "'";
+					return false;
+				}
 			}
+
+			Log(LOG_ERROR) << err << "invalid line: '" << std::string(line_begin, line_end) << "'";
 			return false;
 		}
 

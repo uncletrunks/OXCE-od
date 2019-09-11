@@ -52,6 +52,10 @@ template<typename, typename...> class ScriptWorker;
 template<typename, typename> struct ScriptTag;
 template<typename, typename> class ScriptValues;
 
+enum RegEnum : Uint8;
+enum RetEnum : Uint8;
+enum class ProgPos : size_t;
+
 //for ScriptBind.h
 struct BindBase;
 template<typename T> struct Bind;
@@ -78,8 +82,34 @@ constexpr size_t ScriptMaxArg = 16;
 constexpr size_t ScriptMaxReg = 64*sizeof(void*);
 
 ////////////////////////////////////////////////////////////
-//					enum definitions
+//					script base types
 ////////////////////////////////////////////////////////////
+
+/**
+ * Script null type, alias to std nullptr.
+ */
+using ScriptNull = std::nullptr_t;
+
+/**
+ * Script numeric type, alias to int.
+ */
+using ScriptInt = int;
+
+/**
+ * Script const text, always zero terminated.
+ */
+struct ScriptText
+{
+	const char* ptr;
+
+	operator std::string()
+	{
+		return ptr ? ptr : "";
+	}
+};
+
+
+using ScriptFunc = RetEnum (*)(ScriptWorkerBase&, const Uint8*, ProgPos&);
 
 /**
  * Script execution counter.
@@ -106,6 +136,10 @@ inline ProgPos operator++(ProgPos& pos, int)
 	++pos;
 	return old;
 }
+
+////////////////////////////////////////////////////////////
+//					enum definitions
+////////////////////////////////////////////////////////////
 
 /**
  * Base type for Arg enum.
@@ -147,7 +181,9 @@ enum ArgEnum : ArgEnumBase
 	ArgNull = ArgSpecSize * 1,
 	ArgInt = ArgSpecSize * 2,
 	ArgLabel = ArgSpecSize * 3,
-	ArgMax = ArgSpecSize * 4,
+	ArgText = ArgSpecSize * 4,
+
+	ArgMax = ArgSpecSize * 5,
 };
 
 /**
@@ -226,6 +262,48 @@ constexpr int ArgCompatible(ArgEnum argType, ArgEnum varType, size_t overloadSiz
 }
 
 /**
+ * Function returing next unique value for ArgEnum.
+ */
+inline ArgEnum ArgNextUniqueValue()
+{
+	static ArgEnum curr = ArgMax;
+	ArgEnum old = curr;
+	curr = ArgNext(curr);
+	return old;
+}
+
+/**
+ * Fuction matching some Type to ArgEnum.
+ */
+template<typename T>
+inline ArgEnum ArgRegisteType()
+{
+	static_assert(std::is_same<T, std::remove_pointer_t<std::decay_t<T>>>::value, "Only simple types are allowed");
+
+	if (std::is_same<T, ScriptInt>::value)
+	{
+		return ArgInt;
+	}
+	else if (std::is_same<T, ScriptNull>::value)
+	{
+		return ArgNull;
+	}
+	else if (std::is_same<T, ScriptText>::value)
+	{
+		return ArgText;
+	}
+	else if (std::is_same<T, ProgPos>::value)
+	{
+		return ArgLabel;
+	}
+	else
+	{
+		static ArgEnum curr = ArgNextUniqueValue();
+		return curr;
+	}
+}
+
+/**
  * Available regs.
  */
 enum RegEnum : Uint8
@@ -281,8 +359,6 @@ struct TypeInfo
 ////////////////////////////////////////////////////////////
 //				containers definitions
 ////////////////////////////////////////////////////////////
-
-using FuncCommon = RetEnum (*)(ScriptWorkerBase&, const Uint8*, ProgPos&);
 
 /**
  * Common base of script execution.
@@ -968,6 +1044,15 @@ struct ScriptValueData
 	/// Get current stored value.
 	template<typename T>
 	inline const T& getValue() const;
+
+	bool operator==(const ScriptValueData& other) const
+	{
+		return type == other.type && memcmp(&data, &other.data, size) == 0;
+	}
+	bool operator!=(const ScriptValueData& other) const
+	{
+		return !(*this == other);
+	}
 };
 
 /**
@@ -1017,7 +1102,7 @@ struct ScriptRefData
 struct ScriptProcData
 {
 	using argFunc = int (*)(ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end);
-	using getFunc = FuncCommon (*)(int version);
+	using getFunc = ScriptFunc (*)(int version);
 	using parserFunc = bool (*)(const ScriptProcData& spd, ParserWriter& ph, const ScriptRefData* begin, const ScriptRefData* end);
 	using overloadFunc = int (*)(const ScriptProcData& spd, const ScriptRefData* begin, const ScriptRefData* end);
 
@@ -1092,35 +1177,6 @@ protected:
 		//nothing to do for rest
 	}
 
-	static ArgEnum registeTypeImplNextValue()
-	{
-		static ArgEnum curr = ArgMax;
-		ArgEnum old = curr;
-		curr = ArgNext(curr);
-		return old;
-	}
-	template<typename T>
-	static ArgEnum registeTypeImpl()
-	{
-		if (std::is_same<T, int>::value)
-		{
-			return ArgInt;
-		}
-		else if (std::is_same<T, std::nullptr_t>::value)
-		{
-			return ArgNull;
-		}
-		else if (std::is_same<T, ProgPos>::value)
-		{
-			return ArgLabel;
-		}
-		else
-		{
-			static ArgEnum curr = registeTypeImplNextValue();
-			return curr;
-		}
-	}
-
 	/// Default constructor.
 	ScriptParserBase(ScriptGlobal* shared, const std::string& name);
 	/// Destructor.
@@ -1167,7 +1223,7 @@ public:
 		if (info::isPtr) spec = spec | ArgSpecPtr;
 		if (info::isEditable) spec = spec | ArgSpecPtrE;
 
-		return ArgSpecAdd(registeTypeImpl<t3>(), spec);
+		return ArgSpecAdd(ArgRegisteType<t3>(), spec);
 	}
 	/// Add const value.
 	void addConst(const std::string& s, ScriptValueData i);
@@ -1192,7 +1248,7 @@ public:
 		using info = helper::TypeInfoImpl<T>;
 		using t3 = typename info::t3;
 
-		addTypeBase(s, registeTypeImpl<t3>(), info::metaDest);
+		addTypeBase(s, ArgRegisteType<t3>(), info::metaDest);
 	}
 	/// Register type in parser.
 	template<typename P>

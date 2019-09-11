@@ -21,6 +21,7 @@
 #include "Exception.h"
 #include "Logger.h"
 #include <functional>
+#include <utility>
 
 namespace OpenXcom
 {
@@ -67,7 +68,7 @@ struct ParserWriter
 		ScriptRefData finalLabel;
 	};
 
-	template<typename T, typename = typename std::enable_if<std::is_pod<T>::value>::type>
+	template<typename T, typename = typename std::enable_if_t<std::is_pod<T>::value>>
 	class ReservedPos
 	{
 		ProgPos _pos;
@@ -83,7 +84,57 @@ struct ParserWriter
 		friend struct ParserWriter;
 	};
 
+	/// Tag type representing position script operation id in proc vector.
 	class ProcOp { };
+
+	/// List of all places in proc vector where we need have same values
+	template<typename T, typename CompType = T>
+	class ReservedCrossRefrenece
+	{
+		enum Ref : std::size_t { };
+
+		/// list of places of usage.
+		std::vector<std::pair<ReservedPos<T>, Ref>> positions;
+		/// list of final values.
+		std::vector<CompType> values;
+	public:
+
+		ReservedCrossRefrenece() {}
+
+		ScriptValueData addValue(CompType defualtValue)
+		{
+			auto index = static_cast<Ref>(values.size());
+			values.push_back(defualtValue);
+			return index;
+		}
+
+		CompType getValue(ScriptValueData data)
+		{
+			auto index = data.getValue<Ref>();
+			return values[index];
+		}
+
+		void setValue(ScriptValueData data, CompType value)
+		{
+			auto index = data.getValue<Ref>();
+			values[index] = value;
+		}
+
+		void pushPosition(ParserWriter& pw, ScriptValueData data)
+		{
+			auto index = data.getValue<Ref>();
+			positions.push_back(std::make_pair(pw.pushReserved<T>(), index));
+		}
+
+		template<typename Func>
+		void forEachPosition(Func&& f)
+		{
+			for (const auto& pos : positions)
+			{
+				f(pos.first, values[static_cast<std::size_t>(pos.second)]);
+			}
+		}
+	};
 
 	/// member pointer accessing script operations.
 	ScriptContainerBase& container;
@@ -91,10 +142,10 @@ struct ParserWriter
 	const ScriptParserBase& parser;
 	/// temporary script data.
 	std::vector<ScriptRefData> refListCurr;
-	/// list of labels places of usage.
-	std::vector<std::pair<ReservedPos<ProgPos>, int>> refLabelsUses;
-	/// list of labels positions.
-	std::vector<ProgPos> refLabelsList;
+	/// list of labels.
+	ReservedCrossRefrenece<ProgPos> refLabels;
+	/// list of texts.
+	ReservedCrossRefrenece<ScriptText, ScriptRef> refTexts;
 
 	/// index of used script registers.
 	Uint8 regIndexUsed;
@@ -159,6 +210,9 @@ struct ParserWriter
 	/// Setting offset of label on proc vector.
 	bool setLabel(const ScriptRefData& data, ProgPos offset);
 
+	/// Try pushing text literal arg on proc vector.
+	bool pushTextTry(const ScriptRefData& data);
+
 	/// Try pushing reg arg on proc vector.
 	template<typename T>
 	bool pushConstTry(const ScriptRefData& data)
@@ -188,6 +242,10 @@ struct ParserWriter
 
 	/// Add new reg arg.
 	bool addReg(const ScriptRef& s, ArgEnum type);
+
+
+	/// Dump to log error info about ref.
+	void logDump(const ScriptRefData&) const;
 }; //struct ParserWriter
 
 
@@ -213,7 +271,7 @@ struct SumListIndexImpl<MaxSize, T1, T...> : SumListIndexImpl<MaxSize, T...>
 	using SumListIndexImpl<MaxSize, T...>::typeFunc;
 	static T1 typeFunc(tag);
 
-	static constexpr FuncCommon getDynamic(int i)
+	static constexpr ScriptFunc getDynamic(int i)
 	{
 		return tag::value == i ? T1::func : SumListIndexImpl<MaxSize, T...>::getDynamic(i);
 	}
@@ -233,7 +291,7 @@ struct SumListIndexImpl<MaxSize>
 		}
 	};
 	static End typeFunc(...);
-	static constexpr FuncCommon getDynamic(int i)
+	static constexpr ScriptFunc getDynamic(int i)
 	{
 		return End::func;
 	}
@@ -300,14 +358,7 @@ struct Arg<A1, A2...> : public Arg<A2...>
 			int curr = parse(ph, *begin);
 			if (curr < 0)
 			{
-				if (**begin)
-				{
-					Log(LOG_ERROR) << "Incorrect type of argument '"<< (*begin)->name.toString() <<"'";
-				}
-				else
-				{
-					Log(LOG_ERROR) << "Unknown argument '"<< (*begin)->name.toString() <<"'";
-				}
+				ph.logDump(**begin);
 				return -1;
 			}
 			++*begin;
@@ -546,7 +597,7 @@ struct ArgLabelDef
 	static constexpr size_t size = sizeof(ReturnType);
 	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
-		return sw.const_val<ProgPos>(arg);
+		return sw.const_val<ReturnType>(arg);
 	}
 
 	static bool parse(ParserWriter& ph, const ScriptRefData& t)
@@ -560,13 +611,33 @@ struct ArgLabelDef
 	}
 };
 
+struct ArgTextDef
+{
+	using ReturnType = ScriptText;
+	static constexpr size_t size = sizeof(ReturnType);
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
+	{
+		return sw.const_val<ReturnType>(arg);
+	}
+
+	static bool parse(ParserWriter& ph, const ScriptRefData& t)
+	{
+		return ph.pushTextTry(t);
+	}
+
+	static ArgEnum type()
+	{
+		return ArgText;
+	}
+};
+
 struct ArgFuncDef
 {
-	using ReturnType = FuncCommon;
+	using ReturnType = ScriptFunc;
 	static constexpr size_t size = sizeof(ReturnType);
-	static FuncCommon get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
+	static ReturnType get(ScriptWorkerBase& sw, const Uint8* arg, ProgPos& curr)
 	{
-		return sw.const_val<FuncCommon>(arg);
+		return sw.const_val<ReturnType>(arg);
 	}
 
 	static bool parse(ParserWriter& ph, const ScriptRefData& t)
@@ -632,20 +703,22 @@ struct ArgSelector<ScriptWorkerBase&>
 	using type = ArgContextDef;
 };
 
+
+
 template<>
-struct ArgSelector<int&>
+struct ArgSelector<ScriptInt&>
 {
-	using type = Arg<ArgRegDef<int&>>;
+	using type = Arg<ArgRegDef<ScriptInt&>>;
 };
 
 template<>
-struct ArgSelector<int>
+struct ArgSelector<ScriptInt>
 {
-	using type = Arg<ArgValueDef<int>, ArgRegDef<int>>;
+	using type = Arg<ArgValueDef<ScriptInt>, ArgRegDef<ScriptInt>>;
 };
 
 template<>
-struct ArgSelector<const int&> : ArgSelector<int>
+struct ArgSelector<const ScriptInt&> : ArgSelector<ScriptInt>
 {
 
 };
@@ -653,8 +726,30 @@ struct ArgSelector<const int&> : ArgSelector<int>
 template<>
 struct ArgSelector<bool>
 {
-	using type = Arg<ArgValueDef<int>, ArgRegDef<int>>;
+	using type = Arg<ArgValueDef<ScriptInt>, ArgRegDef<ScriptInt>>;
 };
+
+
+
+template<>
+struct ArgSelector<ScriptText&>
+{
+	using type = Arg<ArgRegDef<ScriptText&>>;
+};
+
+template<>
+struct ArgSelector<ScriptText>
+{
+	using type = Arg<ArgTextDef, ArgRegDef<ScriptText>>;
+};
+
+template<>
+struct ArgSelector<const std::string&>
+{
+	using type = Arg<ArgTextDef, ArgRegDef<ScriptText>>;
+};
+
+
 
 template<typename T, typename I>
 struct ArgSelector<ScriptTag<T, I>>
@@ -674,6 +769,9 @@ struct ArgSelector<const ScriptTag<T, I>&> : ArgSelector<ScriptTag<T, I>>
 
 };
 
+
+
+
 template<>
 struct ArgSelector<ProgPos&>
 {
@@ -686,8 +784,11 @@ struct ArgSelector<ProgPos>
 	using type = Arg<ArgLabelDef>;
 };
 
+
+
+
 template<>
-struct ArgSelector<FuncCommon>
+struct ArgSelector<ScriptFunc>
 {
 	using type = Arg<ArgFuncDef>;
 };
@@ -723,9 +824,9 @@ struct ArgSelector<const T*&>
 };
 
 template<>
-struct ArgSelector<std::nullptr_t>
+struct ArgSelector<ScriptNull>
 {
-	using type = Arg<ArgNullDef<std::nullptr_t>>;
+	using type = Arg<ArgNullDef<ScriptNull>>;
 };
 
 template<typename T>
@@ -783,7 +884,7 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 	using GetArgs<Func>::parse;
 	using GetArgs<Func>::overloadType;
 
-	static constexpr FuncCommon getDynamic(int i) { return FuncList::getDynamic(i); }
+	static constexpr ScriptFunc getDynamic(int i) { return FuncList::getDynamic(i); }
 };
 
 ////////////////////////////////////////////////////////////
