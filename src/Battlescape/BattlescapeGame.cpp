@@ -2961,10 +2961,10 @@ void BattlescapeGame::playUnitResponseSound(BattleUnit *unit, int type)
 
 	if (sound != -1)
 	{
-		if (!Mix_Playing(3))
+		if (!Mix_Playing(4))
 		{
 			// use fixed channel, so that we can check if the unit isn't already/still talking
-			getMod()->getSoundByDepth(_save->getDepth(), sound)->play(3);
+			getMod()->getSoundByDepth(_save->getDepth(), sound)->play(4);
 		}
 	}
 }

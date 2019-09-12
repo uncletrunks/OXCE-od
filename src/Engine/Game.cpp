@@ -351,6 +351,8 @@ void Game::setVolume(int sound, int music, int ui)
 				// channel 3: reserved for ambient sound effect.
 				Mix_Volume(3, sound / 2);
 			}
+			// channel 4: reserved for unit responses
+			Mix_Volume(4, sound);
 		}
 		if (music >= 0)
 		{
@@ -640,8 +642,12 @@ void Game::initAudio()
 	else
 	{
 		Mix_AllocateChannels(16);
-		// Set up UI channels
-		Mix_ReserveChannels(4);
+		// Set up reserved channels:
+		// 0 = not used?
+		// 1-2 = UI
+		// 3 = ambient
+		// 4 = unit responses (OXCE only)
+		Mix_ReserveChannels(5);
 		Mix_GroupChannels(1, 2, 0);
 		Log(LOG_INFO) << "SDL_mixer initialized successfully.";
 		setVolume(Options::soundVolume, Options::musicVolume, Options::uiVolume);
