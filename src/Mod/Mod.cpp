@@ -4444,6 +4444,22 @@ void Mod::loadExtraResources()
 		}
 	}
 
+	// Hack for hybrid UFO-based games
+	if (_transparencyLUTs.empty() && !_transparencies.empty())
+	{
+		if (_palettes["PAL_BATTLESCAPE"] &&
+			_palettes["PAL_BATTLESCAPE_1"] &&
+			_palettes["PAL_BATTLESCAPE_2"] &&
+			_palettes["PAL_BATTLESCAPE_3"])
+		{
+			Log(LOG_INFO) << "Creating transparency LUTs for custom palettes...";
+			createTransparencyLUT(_palettes["PAL_BATTLESCAPE"]);
+			createTransparencyLUT(_palettes["PAL_BATTLESCAPE_1"]);
+			createTransparencyLUT(_palettes["PAL_BATTLESCAPE_2"]);
+			createTransparencyLUT(_palettes["PAL_BATTLESCAPE_3"]);
+		}
+	}
+
 	TextButton::soundPress = getSound("GEO.CAT", Mod::BUTTON_PRESS);
 	Window::soundPopup[0] = getSound("GEO.CAT", Mod::WINDOW_POPUP[0]);
 	Window::soundPopup[1] = getSound("GEO.CAT", Mod::WINDOW_POPUP[1]);
