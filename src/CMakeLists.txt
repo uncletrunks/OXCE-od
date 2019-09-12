@@ -6,8 +6,8 @@ set ( root_src
 )
 set ( basescape_src
   Basescape/BaseInfoState.cpp
-  Basescape/BaseView.cpp
   Basescape/BasescapeState.cpp
+  Basescape/BaseView.cpp
   Basescape/BuildFacilitiesState.cpp
   Basescape/ChangeHeadquartersState.cpp
   Basescape/CraftArmorState.cpp
@@ -18,8 +18,8 @@ set ( basescape_src
   Basescape/CraftPilotSelectState.cpp
   Basescape/CraftPilotsState.cpp
   Basescape/CraftSoldiersState.cpp
-  Basescape/CraftWeaponsState.cpp
   Basescape/CraftsState.cpp
+  Basescape/CraftWeaponsState.cpp
   Basescape/DismantleFacilityState.cpp
   Basescape/GlobalManufactureState.cpp
   Basescape/GlobalResearchState.cpp
@@ -64,15 +64,15 @@ set ( battlescape_src
   Battlescape/AbortMissionState.cpp
   Battlescape/ActionMenuItem.cpp
   Battlescape/ActionMenuState.cpp
-  Battlescape/AliensCrashState.cpp
   Battlescape/AIModule.cpp
   Battlescape/AlienInventory.cpp
   Battlescape/AlienInventoryState.cpp
-  Battlescape/BattleState.cpp
+  Battlescape/AliensCrashState.cpp
   Battlescape/BattlescapeGame.cpp
   Battlescape/BattlescapeGenerator.cpp
   Battlescape/BattlescapeMessage.cpp
   Battlescape/BattlescapeState.cpp
+  Battlescape/BattleState.cpp
   Battlescape/BriefingLightState.cpp
   Battlescape/BriefingState.cpp
   Battlescape/Camera.cpp
@@ -130,8 +130,8 @@ set ( engine_src
   Engine/FileMap.cpp
   Engine/FlcPlayer.cpp
   Engine/Font.cpp
-  Engine/GMCat.cpp
   Engine/Game.cpp
+  Engine/GMCat.cpp
   Engine/InteractiveSurface.cpp
   Engine/Language.cpp
   Engine/LanguagePlurality.cpp
@@ -182,6 +182,7 @@ set ( geoscape_src
   Geoscape/DogfightState.cpp
   Geoscape/FundingState.cpp
   Geoscape/GeoscapeCraftState.cpp
+  Geoscape/GeoscapeEventState.cpp
   Geoscape/GeoscapeState.cpp
   Geoscape/Globe.cpp
   Geoscape/GraphsState.cpp
@@ -277,11 +278,11 @@ set ( mod_src
   Mod/ExtraSounds.cpp
   Mod/ExtraSprites.cpp
   Mod/ExtraStrings.cpp
-  Mod/MCDPatch.cpp
   Mod/MapBlock.cpp
   Mod/MapData.cpp
   Mod/MapDataSet.cpp
   Mod/MapScript.cpp
+  Mod/MCDPatch.cpp
   Mod/Mod.cpp
   Mod/Polygon.cpp
   Mod/Polyline.cpp
@@ -293,12 +294,15 @@ set ( mod_src
   Mod/RuleCountry.cpp
   Mod/RuleCraft.cpp
   Mod/RuleCraftWeapon.cpp
+  Mod/RuleDamageType.cpp
+  Mod/RuleEnviroEffects.cpp
+  Mod/RuleEvent.cpp
+  Mod/RuleEventScript.cpp
   Mod/RuleGlobe.cpp
   Mod/RuleInterface.cpp
   Mod/RuleInventory.cpp
   Mod/RuleItem.cpp
-  Mod/RuleDamageType.cpp
-  Mod/RuleEnviroEffects.cpp
+  Mod/RuleItemCategory.cpp
   Mod/RuleManufacture.cpp
   Mod/RuleMissionScript.cpp
   Mod/RuleMusic.cpp
@@ -306,12 +310,11 @@ set ( mod_src
   Mod/RuleResearch.cpp
   Mod/RuleSoldier.cpp
   Mod/RuleSoldierTransformation.cpp
+  Mod/RuleStartingCondition.cpp
   Mod/RuleStatBonus.cpp
   Mod/RuleTerrain.cpp
   Mod/RuleUfo.cpp
   Mod/RuleVideo.cpp
-  Mod/RuleStartingCondition.cpp
-  Mod/RuleItemCategory.cpp
   Mod/SoldierNamePool.cpp
   Mod/SoundDefinition.cpp
   Mod/StatString.cpp
@@ -335,6 +338,7 @@ set ( savegame_src
   Savegame/CraftWeaponProjectile.cpp
   Savegame/EquipmentLayoutItem.cpp
   Savegame/GameTime.cpp
+  Savegame/GeoscapeEvent.cpp
   Savegame/ItemContainer.cpp
   Savegame/MissionSite.cpp
   Savegame/MovingTarget.cpp
@@ -366,6 +370,8 @@ set ( ufopedia_src
   Ufopaedia/ArticleStateCraft.cpp
   Ufopaedia/ArticleStateCraftWeapon.cpp
   Ufopaedia/ArticleStateItem.cpp
+  Ufopaedia/ArticleStateText.cpp
+  Ufopaedia/ArticleStateTextImage.cpp
   Ufopaedia/ArticleStateTFTD.cpp
   Ufopaedia/ArticleStateTFTDArmor.cpp
   Ufopaedia/ArticleStateTFTDCraft.cpp
@@ -374,8 +380,6 @@ set ( ufopedia_src
   Ufopaedia/ArticleStateTFTDItem.cpp
   Ufopaedia/ArticleStateTFTDUso.cpp
   Ufopaedia/ArticleStateTFTDVehicle.cpp
-  Ufopaedia/ArticleStateText.cpp
-  Ufopaedia/ArticleStateTextImage.cpp
   Ufopaedia/ArticleStateUfo.cpp
   Ufopaedia/ArticleStateVehicle.cpp
   Ufopaedia/StatsForNerdsState.cpp

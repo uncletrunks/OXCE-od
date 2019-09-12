@@ -711,6 +711,20 @@ interfaces:
         color2: 138  # yellow
       - id: button
         color: 239   # bright green
+  - type: geoscapeEvent
+    elements:
+      - id: palette
+        color: 0     # brown
+      - id: window
+        color: 239   # bright green
+      - id: text1
+        color: 138   # yellow
+        color2: 239  # bright green
+      - id: text2
+        color: 239   # bright green
+        color2: 133  # minty green
+      - id: button
+        color: 239   # bright green
   - type: graphs
     palette: PAL_GRAPHS
     elements:

@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include "GameTime.h"
 #include "../Mod/RuleAlienMission.h"
+#include "../Mod/RuleEvent.h"
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Mod/RuleBaseFacility.h"
@@ -52,6 +53,7 @@ class MissionSite;
 class AlienBase;
 class AlienStrategy;
 class AlienMission;
+class GeoscapeEvent;
 class Target;
 class Soldier;
 class Craft;
@@ -136,6 +138,7 @@ private:
 	std::map<std::string, int> _researchRuleStatus;
 	std::map<std::string, bool> _hiddenPurchaseItemsMap;
 	std::vector<AlienMission*> _activeMissions;
+	std::vector<GeoscapeEvent*> _geoscapeEvents;
 	bool _debug, _warned;
 	int _monthsPassed;
 	std::string _graphRegionToggles;
@@ -333,6 +336,10 @@ public:
 	const std::vector<AlienMission*> &getAlienMissions() const { return _activeMissions; }
 	/// Finds a mission by region and objective.
 	AlienMission *findAlienMission(const std::string &region, MissionObjective objective) const;
+	/// Full access to the current geoscape events.
+	std::vector<GeoscapeEvent*> &getGeoscapeEvents() { return _geoscapeEvents; }
+	/// Read-only access to the current geoscape events.
+	const std::vector<GeoscapeEvent*> &getGeoscapeEvents() const { return _geoscapeEvents; }
 	/// Locate a region containing a position.
 	Region *locateRegion(double lon, double lat) const;
 	/// Locate a region containing a Target.

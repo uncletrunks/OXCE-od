@@ -1071,6 +1071,18 @@
     <ClCompile Include="Mod\RuleEnviroEffects.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="Geoscape\GeoscapeEventState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\RuleEvent.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\RuleEventScript.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Savegame\GeoscapeEvent.cpp">
+      <Filter>Savegame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2197,6 +2209,18 @@
       <Filter>Mod</Filter>
     </ClInclude>
     <ClInclude Include="fallthrough.h" />
+    <ClInclude Include="Geoscape\GeoscapeEventState.h">
+      <Filter>Geoscape</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleEvent.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleEventScript.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Savegame\GeoscapeEvent.h">
+      <Filter>Savegame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">

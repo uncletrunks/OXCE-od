@@ -78,6 +78,8 @@
 #include "ExtraStrings.h"
 #include "RuleInterface.h"
 #include "RuleArcScript.h"
+#include "RuleEventScript.h"
+#include "RuleEvent.h"
 #include "RuleMissionScript.h"
 #include "../Geoscape/Globe.h"
 #include "../Savegame/SavedGame.h"
@@ -636,6 +638,14 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, RuleArcScript*>::const_iterator i = _arcScripts.begin(); i != _arcScripts.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleEventScript*>::const_iterator i = _eventScripts.begin(); i != _eventScripts.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -2104,6 +2114,22 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 			rule->load(*i);
 		}
 	}
+	for (YAML::const_iterator i = doc["eventScripts"].begin(); i != doc["eventScripts"].end(); ++i)
+	{
+		RuleEventScript* rule = loadRule(*i, &_eventScripts, &_eventScriptIndex, "type");
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
+	for (YAML::const_iterator i = doc["events"].begin(); i != doc["events"].end(); ++i)
+	{
+		RuleEvent* rule = loadRule(*i, &_events, &_eventIndex, "name");
+		if (rule != 0)
+		{
+			rule->load(*i);
+		}
+	}
 	for (YAML::const_iterator i = doc["missionScripts"].begin(); i != doc["missionScripts"].end(); ++i)
 	{
 		RuleMissionScript *rule = loadRule(*i, &_missionScripts, &_missionScriptIndex, "type");
@@ -3507,6 +3533,26 @@ const std::vector<std::string>* Mod::getArcScriptList() const
 RuleArcScript* Mod::getArcScript(const std::string& name, bool error) const
 {
 	return getRule(name, "Arc Script", _arcScripts, error);
+}
+
+const std::vector<std::string>* Mod::getEventScriptList() const
+{
+	return &_eventScriptIndex;
+}
+
+RuleEventScript* Mod::getEventScript(const std::string& name, bool error) const
+{
+	return getRule(name, "Event Script", _eventScripts, error);
+}
+
+const std::vector<std::string>* Mod::getEventList() const
+{
+	return &_eventIndex;
+}
+
+RuleEvent* Mod::getEvent(const std::string& name, bool error) const
+{
+	return getRule(name, "Event", _events, error);
 }
 
 const std::vector<std::string> *Mod::getMissionScriptList() const

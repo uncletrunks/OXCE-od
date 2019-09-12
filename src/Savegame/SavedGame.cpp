@@ -55,6 +55,7 @@
 #include "AlienBase.h"
 #include "AlienStrategy.h"
 #include "AlienMission.h"
+#include "GeoscapeEvent.h"
 #include "../Mod/RuleRegion.h"
 #include "../Mod/RuleSoldier.h"
 #include "BaseFacility.h"
@@ -192,6 +193,10 @@ SavedGame::~SavedGame()
 	}
 	delete _alienStrategy;
 	for (std::vector<AlienMission*>::iterator i = _activeMissions.begin(); i != _activeMissions.end(); ++i)
+	{
+		delete *i;
+	}
+	for (std::vector<GeoscapeEvent*>::iterator i = _geoscapeEvents.begin(); i != _geoscapeEvents.end(); ++i)
 	{
 		delete *i;
 	}
@@ -500,6 +505,23 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		else
 		{
 			Log(LOG_ERROR) << "Failed to load UFO " << type;
+		}
+	}
+
+	const YAML::Node &geoEvents = doc["geoscapeEvents"];
+	for (YAML::const_iterator it = geoEvents.begin(); it != geoEvents.end(); ++it)
+	{
+		std::string eventName = (*it)["name"].as<std::string>();
+		if (mod->getEvent(eventName))
+		{
+			const RuleEvent &eventRule = *mod->getEvent(eventName);
+			GeoscapeEvent *event = new GeoscapeEvent(eventRule);
+			event->load(*it);
+			_geoscapeEvents.push_back(event);
+		}
+		else
+		{
+			Log(LOG_ERROR) << "Failed to load geoscape event " << eventName;
 		}
 	}
 
@@ -834,6 +856,10 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 	for (std::vector<Ufo*>::const_iterator i = _ufos.begin(); i != _ufos.end(); ++i)
 	{
 		node["ufos"].push_back((*i)->save(getMonthsPassed() == -1));
+	}
+	for (std::vector<GeoscapeEvent *>::const_iterator i = _geoscapeEvents.begin(); i != _geoscapeEvents.end(); ++i)
+	{
+		node["geoscapeEvents"].push_back((*i)->save());
 	}
 	for (std::vector<const RuleResearch *>::const_iterator i = _discovered.begin(); i != _discovered.end(); ++i)
 	{

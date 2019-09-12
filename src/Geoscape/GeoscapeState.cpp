@@ -46,6 +46,8 @@
 #include "../Savegame/Ufo.h"
 #include "../Mod/RuleUfo.h"
 #include "../Mod/RuleArcScript.h"
+#include "../Mod/RuleEventScript.h"
+#include "../Mod/RuleEvent.h"
 #include "../Mod/RuleMissionScript.h"
 #include "../Savegame/Waypoint.h"
 #include "../Savegame/Transfer.h"
@@ -102,6 +104,8 @@
 #include "../Mod/RuleAlienMission.h"
 #include "../Savegame/AlienStrategy.h"
 #include "../Savegame/AlienMission.h"
+#include "../Savegame/GeoscapeEvent.h"
+#include "GeoscapeEventState.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Battlescape/BriefingState.h"
@@ -1924,6 +1928,38 @@ void GeoscapeState::time30Minutes()
 			return processMissionSite(site);
 		}
 	);
+
+	// Decrease event countdowns and pop up if needed
+	for (auto ge : _game->getSavedGame()->getGeoscapeEvents())
+	{
+		ge->think();
+
+		if (ge->isOver())
+		{
+			bool interrupted = false;
+			if (!ge->getRules().getInterruptResearch().empty())
+			{
+				if (_game->getSavedGame()->isResearched(ge->getRules().getInterruptResearch(), false))
+				{
+					interrupted = true;
+				}
+			}
+			if (!interrupted)
+			{
+				timerReset();
+				popup(new GeoscapeEventState(ge));
+			}
+		}
+	}
+
+	// Remove finished events
+	Collections::deleteIf(
+		_game->getSavedGame()->getGeoscapeEvents(),
+		[](GeoscapeEvent *ge)
+		{
+			return ge->isOver();
+		}
+	);
 }
 
 /**
@@ -3281,6 +3317,58 @@ void GeoscapeState::determineAlienMissions()
 			}
 			// keep track of what happened to this command, so others may reference it.
 			conditions[command->getLabel()] = success;
+		}
+	}
+
+	// after the mission scripts, it's time for the event scripts
+	{
+		std::vector<RuleEventScript *> relevantEventScripts;
+
+		// first we need to build a list of "valid" commands
+		for (auto& scriptName : *mod->getEventScriptList())
+		{
+			RuleEventScript *eventScript = mod->getEventScript(scriptName);
+
+			// level one condition check: make sure we're within our time constraints
+			if (eventScript->getFirstMonth() <= month &&
+				(eventScript->getLastMonth() >= month || eventScript->getLastMonth() == -1) &&
+				// and make sure we satisfy the difficulty restrictions
+				eventScript->getMinDifficulty() <= save->getDifficulty() &&
+				eventScript->getMaxDifficulty() >= save->getDifficulty())
+			{
+				// level two condition check: make sure we meet any research requirements, if any.
+				bool triggerHappy = true;
+				for (auto& trigger : eventScript->getResearchTriggers())
+				{
+					triggerHappy = (save->isResearched(trigger.first) == trigger.second);
+					if (!triggerHappy)
+						break;
+				}
+				// level three condition check: does random chance favour this command's execution?
+				if (triggerHappy && RNG::percent(eventScript->getExecutionOdds()))
+				{
+					relevantEventScripts.push_back(eventScript);
+				}
+			}
+		}
+
+		// now, let's process the relevant event scripts
+		for (auto& eventCommand : relevantEventScripts)
+		{
+			auto eventName = eventCommand->generate(save->getMonthsPassed());
+			auto eventRules = mod->getEvent(eventName);
+			if (eventRules)
+			{
+				GeoscapeEvent *newEvent = new GeoscapeEvent(*eventRules);
+				int minutes = (eventRules->getTimer() + (RNG::generate(0, eventRules->getTimerRandom()))) / 30 * 30;
+				if (minutes < 60) minutes = 60; // just in case
+				newEvent->setSpawnCountdown(minutes);
+				_game->getSavedGame()->getGeoscapeEvents().push_back(newEvent);
+			}
+			else
+			{
+				throw Exception("Error processing event script named: " + eventCommand->getType() + ", event name: " + eventName + " is not defined");
+			}
 		}
 	}
 
