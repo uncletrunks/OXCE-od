@@ -1248,7 +1248,7 @@ void Mod::loadAll()
 	// load rulesets that can affect loading vanilla resources
 	for (size_t i = 0; _modData.size() > i; ++i)
 	{
-		_modCurrent = &_modData.at(0);
+		_modCurrent = &_modData.at(i);
 		if (_modCurrent->info->isMaster())
 		{
 			auto file = FileMap::getModRuleFile(_modCurrent->info, _modCurrent->info->getResourceConfigFile());
