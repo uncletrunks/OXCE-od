@@ -66,9 +66,8 @@ void ModInfo::load(const YAML::Node& doc)
 		_master = "";
 		// only masters can load external resource dirs
 		_externalResourceDirs = doc["loadResources"].as< std::vector<std::string> >(_externalResourceDirs);
-		// or basic resource definition
-		_resourceConfigFile = doc["resourceConfig"].as<std::string>(_resourceConfigFile);
 	}
+	_resourceConfigFile = doc["resourceConfig"].as<std::string>(_resourceConfigFile);
 
 	_master = doc["master"].as<std::string>(_master);
 	if (_master == "*")
