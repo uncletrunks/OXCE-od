@@ -42,6 +42,7 @@ private:
 	std::vector<std::string> _requires, _requiresBaseFunc, _provideBaseFunc, _forbiddenBaseFunc;
 	int _spriteShape, _spriteFacility;
 	int _missileAttraction;
+	int _fakeUnderwater;
 	bool _lift, _hyper, _mind, _grav;
 	int _mindPower;
 	int _size, _buildCost, _refundValue, _buildTime, _monthlyCost;
@@ -90,6 +91,8 @@ public:
 	int getSize() const;
 	/// Gets the facility's missile attraction.
 	int getMissileAttraction() const { return _missileAttraction; }
+	/// Is this facility allowed for a given type of base?
+	bool isAllowedForBaseType(bool fakeUnderwaterBase) const;
 	/// Gets if the facility is an access lift.
 	bool isLift() const;
 	/// Gets if the facility has hyperwave detection.

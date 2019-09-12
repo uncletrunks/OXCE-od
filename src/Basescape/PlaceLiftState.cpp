@@ -56,11 +56,12 @@ PlaceLiftState::PlaceLiftState(Base *base, Globe *globe, bool first) : _base(bas
 	// Set up objects
 	_view->setTexture(_game->getMod()->getSurfaceSet("BASEBITS.PCK"));
 	_view->setBase(_base);
-	for (std::vector<std::string>::const_iterator i = _game->getMod()->getBaseFacilitiesList().begin(); i != _game->getMod()->getBaseFacilitiesList().end(); ++i)
+	for (auto facilityName : _game->getMod()->getBaseFacilitiesList())
 	{
-		if (_game->getMod()->getBaseFacility(*i)->isLift())
+		auto facilityRule = _game->getMod()->getBaseFacility(facilityName);
+		if (facilityRule->isLift() && facilityRule->isAllowedForBaseType(_base->isFakeUnderwater()))
 		{
-			_lift = _game->getMod()->getBaseFacility(*i);
+			_lift = facilityRule;
 			break;
 		}
 	}

@@ -54,7 +54,7 @@ namespace OpenXcom
  * Initializes an empty base.
  * @param mod Pointer to mod.
  */
-Base::Base(const Mod *mod) : Target(), _mod(mod), _scientists(0), _engineers(0), _inBattlescape(false), _retaliationTarget(false)
+Base::Base(const Mod *mod) : Target(), _mod(mod), _scientists(0), _engineers(0), _inBattlescape(false), _retaliationTarget(false), _fakeUnderwater(false)
 {
 	_items = new ItemContainer();
 }
@@ -226,6 +226,7 @@ void Base::load(const YAML::Node &node, SavedGame *save, bool newGame, bool newB
 	}
 
 	_retaliationTarget = node["retaliationTarget"].as<bool>(_retaliationTarget);
+	_fakeUnderwater = node["fakeUnderwater"].as<bool>(_fakeUnderwater);
 }
 
 /**
@@ -299,7 +300,9 @@ YAML::Node Base::save() const
 		node["productions"].push_back((*i)->save());
 	}
 	if (_retaliationTarget)
-	node["retaliationTarget"] = _retaliationTarget;
+		node["retaliationTarget"] = _retaliationTarget;
+	if (_fakeUnderwater)
+		node["fakeUnderwater"] = _fakeUnderwater;
 	return node;
 }
 

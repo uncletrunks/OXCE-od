@@ -36,6 +36,8 @@
 #include "../Engine/Options.h"
 #include "../Menu/ErrorMessageState.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleGlobe.h"
+#include "../Mod/Texture.h"
 
 namespace OpenXcom
 {
@@ -234,20 +236,42 @@ void BuildNewBaseState::globeClick(Action *action)
 	{
 		if (_globe->insideLand(lon, lat))
 		{
-			_base->setLongitude(lon);
-			_base->setLatitude(lat);
-			for (std::vector<Craft*>::iterator i = _base->getCrafts()->begin(); i != _base->getCrafts()->end(); ++i)
+			// look up polygons texture
+			bool fakeUnderwaterTexture = false;
+			int texture, shade;
+			_globe->getPolygonTextureAndShade(lon, lat, &texture, &shade);
+			if (texture >= 0)
 			{
-				(*i)->setLongitude(lon);
-				(*i)->setLatitude(lat);
+				Texture *textureRule = _game->getMod()->getGlobe()->getTexture(texture);
+				if (textureRule && textureRule->isFakeUnderwater())
+				{
+					fakeUnderwaterTexture = true;
+				}
 			}
-			if (_first)
+
+			if (_first && fakeUnderwaterTexture)
 			{
-				_game->pushState(new BaseNameState(_base, _globe, _first));
+				// first (starting) base can't be fake underwater base
+				_game->pushState(new ErrorMessageState(tr("STR_XCOM_BASE_CANNOT_BE_BUILT"), _palette, _game->getMod()->getInterface("geoscape")->getElement("genericWindow")->color, "BACK01.SCR", _game->getMod()->getInterface("geoscape")->getElement("palette")->color));
 			}
 			else
 			{
-				_game->pushState(new ConfirmNewBaseState(_base, _globe));
+				_base->setFakeUnderwater(fakeUnderwaterTexture);
+				_base->setLongitude(lon);
+				_base->setLatitude(lat);
+				for (std::vector<Craft *>::iterator i = _base->getCrafts()->begin(); i != _base->getCrafts()->end(); ++i)
+				{
+					(*i)->setLongitude(lon);
+					(*i)->setLatitude(lat);
+				}
+				if (_first)
+				{
+					_game->pushState(new BaseNameState(_base, _globe, _first));
+				}
+				else
+				{
+					_game->pushState(new ConfirmNewBaseState(_base, _globe));
+				}
 			}
 		}
 		else
