@@ -203,6 +203,7 @@ private:
 	int _manaExperience;
 	int _listOrder, _maxRange, _minRange, _dropoff, _bulletSpeed, _explosionSpeed, _shotgunPellets;
 	int _shotgunBehaviorType, _shotgunSpread, _shotgunChoke;
+	std::map<std::string, std::string> _zombieUnitByType;
 	std::string _zombieUnit, _spawnUnit;
 	int _spawnUnitFaction;
 	bool _LOSRequired, _underwaterOnly, _landOnly, _psiReqiured, _manaRequired;
@@ -604,7 +605,8 @@ public:
 	/// Get the shotgun choke value.
 	int getShotgunChoke() const;
 	/// Gets the weapon's zombie unit.
-	const std::string &getZombieUnit() const;
+	const std::string &getZombieUnit(const std::string &victimType) const;
+	const std::map<std::string, std::string> &getZombieUnitByTypeRaw() const { return _zombieUnitByType; }
 	/// Gets the weapon's spawn unit.
 	const std::string &getSpawnUnit() const;
 	/// Gets which faction the spawned unit should have.

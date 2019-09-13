@@ -1465,8 +1465,9 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 
 		ModScript::DamageUnit::Output args { };
 
+		const std::string victimType = _unitRules ? _unitRules->getType() : _geoscapeSoldier->getRules()->getType();
 		const RuleItem *specialDamegeTransform = attack.damage_item ? attack.damage_item->getRules() : nullptr;
-		if (specialDamegeTransform && !specialDamegeTransform->getZombieUnit().empty())
+		if (specialDamegeTransform && !specialDamegeTransform->getZombieUnit(victimType).empty())
 		{
 			std::get<toTransform>(args.data) = getOriginalFaction() != FACTION_HOSTILE ? specialDamegeTransform->getSpecialChance() : 0;
 		}
@@ -1544,7 +1545,7 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 		{
 			// converts the victim to a zombie on death
 			setRespawn(true);
-			setSpawnUnit(specialDamegeTransform->getZombieUnit());
+			setSpawnUnit(specialDamegeTransform->getZombieUnit(victimType));
 		}
 
 		setFatalShotInfo(side, bodypart);

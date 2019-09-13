@@ -578,6 +578,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_shotgunBehaviorType = node["shotgunBehavior"].as<int>(_shotgunBehaviorType);
 	_shotgunSpread = node["shotgunSpread"].as<int>(_shotgunSpread);
 	_shotgunChoke = node["shotgunChoke"].as<int>(_shotgunChoke);
+	_zombieUnitByType = node["zombieUnitByType"].as< std::map<std::string, std::string> >(_zombieUnitByType);
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
 	_spawnUnitFaction = node["spawnUnitFaction"].as<int>(_spawnUnitFaction);
@@ -2140,8 +2141,13 @@ int RuleItem::getShotgunChoke() const
  * Gets the unit that the victim is morphed into when attacked.
  * @return The weapon's zombie unit.
  */
-const std::string &RuleItem::getZombieUnit() const
+const std::string &RuleItem::getZombieUnit(const std::string &victimType) const
 {
+	std::map<std::string, std::string>::const_iterator i = _zombieUnitByType.find(victimType);
+	if (i != _zombieUnitByType.end())
+	{
+		return i->second;
+	}
 	return _zombieUnit;
 }
 
