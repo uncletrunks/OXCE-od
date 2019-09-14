@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright 2010-2016 OpenXcom Developers.
+ * Copyright 2010-2019 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -17,11 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "../Engine/State.h"
 
-#define OPENXCOM_VERSION_SHORT "Extended 5.6.4"
-#define OPENXCOM_VERSION_LONG "5.6.4.0"
-#define OPENXCOM_VERSION_NUMBER 5,6,4,0
+namespace OpenXcom
+{
 
-#ifndef OPENXCOM_VERSION_GIT
-#define OPENXCOM_VERSION_GIT " (v2019-09-15)"
-#endif
+class Base;
+class TextButton;
+class Window;
+class Text;
+class TextList;
+
+/**
+ * SoldierBonus window displays all soldier bonuses.
+ */
+class SoldierBonusState : public State
+{
+private:
+	Base *_base;
+	size_t _soldier;
+
+	TextButton *_btnCancel;
+	Window *_window;
+	Text *_txtTitle, *_txtType;
+	TextList *_lstBonuses;
+public:
+	/// Creates the SoldierBonus state.
+	SoldierBonusState(Base *base, size_t soldier);
+	/// Cleans up the SoldierBonus state.
+	~SoldierBonusState();
+	/// Handler for clicking the Cancel button.
+	void btnCancelClick(Action *action);
+};
+
+}

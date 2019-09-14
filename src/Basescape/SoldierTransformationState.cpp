@@ -32,6 +32,7 @@
 #include "../Interface/Window.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleSoldierBonus.h"
 #include "../Mod/RuleSoldierTransformation.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/ItemContainer.h"
@@ -68,9 +69,9 @@ SoldierTransformationState::SoldierTransformationState(RuleSoldierTransformation
 	_txtItemNameColumn = new Text(60, 16, 30, 72);
 	_txtUnitRequiredColumn = new Text(60, 16, 155, 72);
 	_txtUnitAvailableColumn = new Text(60, 16, 230, 72);
-	_lstRequiredItems = new TextList(270, 48, 30, 88);
+	_lstRequiredItems = new TextList(270, 40, 30, 88);
 
-	_lstStatChanges = new TextList(288, 144, 16, 146);
+	_lstStatChanges = new TextList(288, 32, 16, 138);
 
 	// Set palette
 	setInterface("soldierTransformation");
@@ -228,6 +229,12 @@ void SoldierTransformationState::initTransformationData()
 
 	UnitStats currentStats = *_sourceSoldier->getCurrentStats();
 	UnitStats changedStats = _sourceSoldier->calculateStatChanges(_game->getMod(), _transformationRule, _sourceSoldier);
+	UnitStats bonusStats;
+	auto bonusRule = _game->getMod()->getSoldierBonus(_transformationRule->getSoldierBonusType(), false);
+	if (bonusRule)
+	{
+		bonusStats += *bonusRule->getStats();
+	}
 
 	bool showPsi = currentStats.psiSkill > 0
 		|| (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
@@ -279,6 +286,23 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
 			formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
 			"");
+		if (bonusRule)
+		{
+			_lstStatChanges->addRow(14, tr("STR_BONUS_STATS").c_str(),
+				formatStat(bonusStats.tu, true, false).c_str(),
+				formatStat(bonusStats.stamina, true, false).c_str(),
+				formatStat(bonusStats.health, true, false).c_str(),
+				formatStat(bonusStats.bravery, true, false).c_str(),
+				formatStat(bonusStats.reactions, true, false).c_str(),
+				formatStat(bonusStats.firing, true, false).c_str(),
+				formatStat(bonusStats.throwing, true, false).c_str(),
+				formatStat(bonusStats.melee, true, false).c_str(),
+				formatStat(bonusStats.strength, true, false).c_str(),
+				formatStat(bonusStats.mana, true, false).c_str(),
+				formatStat(bonusStats.psiStrength, true, false).c_str(),
+				formatStat(bonusStats.psiSkill, true, false).c_str(),
+				"");
+		}
 	}
 	else
 	{
@@ -321,6 +345,22 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
 			formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
 			"");
+		if (bonusRule)
+		{
+			_lstStatChanges->addRow(13, tr("STR_BONUS_STATS").c_str(),
+				formatStat(bonusStats.tu, true, false).c_str(),
+				formatStat(bonusStats.stamina, true, false).c_str(),
+				formatStat(bonusStats.health, true, false).c_str(),
+				formatStat(bonusStats.bravery, true, false).c_str(),
+				formatStat(bonusStats.reactions, true, false).c_str(),
+				formatStat(bonusStats.firing, true, false).c_str(),
+				formatStat(bonusStats.throwing, true, false).c_str(),
+				formatStat(bonusStats.melee, true, false).c_str(),
+				formatStat(bonusStats.strength, true, false).c_str(),
+				formatStat(bonusStats.psiStrength, true, false).c_str(),
+				formatStat(bonusStats.psiSkill, true, false).c_str(),
+				"");
+		}
 	}
 
 	_btnStart->setVisible(transformationPossible);

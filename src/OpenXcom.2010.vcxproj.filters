@@ -1083,6 +1083,12 @@
     <ClCompile Include="Savegame\GeoscapeEvent.cpp">
       <Filter>Savegame</Filter>
     </ClCompile>
+    <ClCompile Include="Mod\RuleSoldierBonus.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\SoldierBonusState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2220,6 +2226,12 @@
     </ClInclude>
     <ClInclude Include="Savegame\GeoscapeEvent.h">
       <Filter>Savegame</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleSoldierBonus.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SoldierBonusState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

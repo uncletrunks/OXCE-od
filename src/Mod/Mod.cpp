@@ -102,6 +102,7 @@
 #include "RuleVideo.h"
 #include "RuleConverter.h"
 #include "RuleSoldierTransformation.h"
+#include "RuleSoldierBonus.h"
 
 #define ARRAYLEN(x) (sizeof(x) / sizeof(x[0]))
 
@@ -580,6 +581,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, RuleManufacture *>::const_iterator i = _manufacture.begin(); i != _manufacture.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleSoldierBonus *>::const_iterator i = _soldierBonus.begin(); i != _soldierBonus.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1706,6 +1711,14 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		{
 			_manufactureListOrder += 100;
 			rule->load(*i, _manufactureListOrder);
+		}
+	}
+	for (YAML::const_iterator i = doc["soldierBonuses"].begin(); i != doc["soldierBonuses"].end(); ++i)
+	{
+		RuleSoldierBonus *rule = loadRule(*i, &_soldierBonus, &_soldierBonusIndex, "name");
+		if (rule != 0)
+		{
+			rule->load(*i, parsers);
 		}
 	}
 	for (YAML::const_iterator i = doc["soldierTransformation"].begin(); i != doc["soldierTransformation"].end(); ++i)
@@ -2997,6 +3010,25 @@ RuleManufacture *Mod::getManufacture (const std::string &id, bool error) const
 const std::vector<std::string> &Mod::getManufactureList() const
 {
 	return _manufactureIndex;
+}
+
+/**
+ * Returns the rules for the specified soldier bonus type.
+ * @param id Soldier bonus type.
+ * @return Rules for the soldier bonus type.
+ */
+RuleSoldierBonus *Mod::getSoldierBonus(const std::string &id, bool error) const
+{
+	return getRule(id, "SoldierBonus", _soldierBonus, error);
+}
+
+/**
+ * Returns the list of soldier bonus types.
+ * @return The list of soldier bonus types.
+ */
+const std::vector<std::string> &Mod::getSoldierBonusList() const
+{
+	return _soldierBonusIndex;
 }
 
 /**

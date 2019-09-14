@@ -37,6 +37,7 @@
 #include "../Mod/RuleEnviroEffects.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleSoldierBonus.h"
 #include "../Mod/Mod.h"
 #include "Soldier.h"
 #include "Tile.h"
@@ -103,7 +104,16 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 		}
 	}
 	_stats += *_armor->getStats();	// armors may modify effective stats
+	// calculate and apply soldier bonuses
+	int visibilityBonus = 0;
+	for (auto bonusRule : *soldier->getBonuses(mod, true))
+	{
+		visibilityBonus += bonusRule.first->getVisibilityAtDark();
+		_stats += *(bonusRule.first->getStats());
+	}
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
+	_maxViewDistanceAtDark += visibilityBonus;
+	_maxViewDistanceAtDark = Clamp(_maxViewDistanceAtDark, 1, mod->getMaxViewDistance());
 	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : mod->getMaxViewDistance();
 	_loftempsSet = _armor->getLoftempsSet();
@@ -197,7 +207,16 @@ void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor 
 	}
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
+	// apply soldier bonuses
+	int visibilityBonus = 0;
+	for (auto bonusRule : *soldier->getBonuses(nullptr, false))
+	{
+		visibilityBonus += bonusRule.first->getVisibilityAtDark();
+		_stats += *(bonusRule.first->getStats());
+	}
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
+	_maxViewDistanceAtDark += visibilityBonus;
+	_maxViewDistanceAtDark = Clamp(_maxViewDistanceAtDark, 1, mod->getMaxViewDistance());
 	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : mod->getMaxViewDistance();
 	_loftempsSet = _armor->getLoftempsSet();
@@ -2292,22 +2311,54 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
  */
 void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 {
-	// snapshot of current stats
-	int TURecovery = _armor->getTimeRecovery(this);
-	int ENRecovery = _armor->getEnergyRecovery(this);
-	int HPRecovery = _armor->getHealthRecovery(this);
-	int MNRecovery = _armor->getManaRecovery(this);
-	int MRRecovery = _armor->getMoraleRecovery(this);
-	int STRecovery = _armor->getStunRegeneration(this);
-
-	// update stats
 	if (tuAndEnergy)
 	{
+		// snapshot of current stats
+		int TURecovery = _armor->getTimeRecovery(this);
+		int ENRecovery = _armor->getEnergyRecovery(this);
+
+		// apply soldier bonuses
+		if (_geoscapeSoldier)
+		{
+			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
+			{
+				if (bonusRule.first->getTimeRecoveryRaw()->isModded())
+					TURecovery += bonusRule.first->getTimeRecovery(this);
+				if (bonusRule.first->getEnergyRecoveryRaw()->isModded())
+					ENRecovery += bonusRule.first->getEnergyRecovery(this);
+			}
+		}
+
+		// update stats
 		prepareTimeUnits(TURecovery);
 		prepareEnergy(ENRecovery);
 	}
+
 	if (rest)
 	{
+		// snapshot of current stats
+		int HPRecovery = _armor->getHealthRecovery(this);
+		int MNRecovery = _armor->getManaRecovery(this);
+		int MRRecovery = _armor->getMoraleRecovery(this);
+		int STRecovery = _armor->getStunRegeneration(this);
+
+		// apply soldier bonuses
+		if (_geoscapeSoldier)
+		{
+			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
+			{
+				if (bonusRule.first->getHealthRecoveryRaw()->isModded())
+					HPRecovery += bonusRule.first->getHealthRecovery(this);
+				if (bonusRule.first->getManaRecoveryRaw()->isModded())
+					MNRecovery += bonusRule.first->getManaRecovery(this);
+				if (bonusRule.first->getMoraleRecoveryRaw()->isModded())
+					MRRecovery += bonusRule.first->getMoraleRecovery(this);
+				if (bonusRule.first->getStunRegenerationRaw()->isModded())
+					STRecovery += bonusRule.first->getStunRegeneration(this);
+			}
+		}
+
+		// update stats
 		prepareHealth(HPRecovery);
 		prepareMana(MNRecovery);
 		prepareStun(STRecovery);

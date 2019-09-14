@@ -41,6 +41,7 @@ class SoldierDeath;
 class SoldierDiary;
 class SavedGame;
 class RuleSoldierTransformation;
+class RuleSoldierBonus;
 
 /**
  * Represents a soldier hired by the player.
@@ -78,7 +79,8 @@ private:
 	SoldierDiary *_diary;
 	std::string _statString;
 	bool _corpseRecovered;
-	std::map<std::string, int> _previousTransformations;
+	std::map<std::string, int> _previousTransformations, _transformationBonuses;
+	std::map<RuleSoldierBonus*, int> _bonusCache;
 	ScriptValues<Soldier> _scriptValues;
 public:
 	/// Creates a new soldier.
@@ -230,6 +232,8 @@ public:
 	void transform(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
 	/// Calculates how this project changes the soldier's stats
 	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
+	/// Gets all the soldier bonuses
+	std::map<RuleSoldierBonus*, int> *getBonuses(const Mod *mod, bool rebuild);
 
 };
 

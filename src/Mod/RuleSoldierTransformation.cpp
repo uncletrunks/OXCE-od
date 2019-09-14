@@ -31,7 +31,8 @@ RuleSoldierTransformation::RuleSoldierTransformation(const std::string &name) :
 	_keepSoldierArmor(false), _createsClone(false), _needsCorpseRecovered(true),
 	_allowsDeadSoldiers(false), _allowsLiveSoldiers(false), _allowsWoundedSoldiers(false),
 	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0),
-	_useRandomStats(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false)
+	_useRandomStats(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false),
+	_reset(false)
 {
 }
 
@@ -77,6 +78,8 @@ void RuleSoldierTransformation::load(const YAML::Node &node, int listOrder)
 	_lowerBoundAtMinStats = node["lowerBoundAtMinStats"].as<bool >(_lowerBoundAtMinStats);
 	_upperBoundAtMaxStats = node["upperBoundAtMaxStats"].as<bool >(_upperBoundAtMaxStats);
 	_upperBoundAtStatCaps = node["upperBoundAtStatCaps"].as<bool >(_upperBoundAtStatCaps);
+	_reset = node["reset"].as<bool >(_reset);
+	_soldierBonusType = node["soldierBonusType"].as<std::string >(_soldierBonusType);
 
 	std::sort(_requiresBaseFunc.begin(), _requiresBaseFunc.end());
 }
@@ -322,6 +325,24 @@ bool RuleSoldierTransformation::hasUpperBoundAtMaxStats() const
 bool RuleSoldierTransformation::hasUpperBoundAtStatCaps() const
 {
 	return _upperBoundAtStatCaps;
+}
+
+/**
+ * Gets whether or not this project should reset info about all previous transformations and all previously assigned soldier bonuses
+ * @return Reset previous transformation info and soldier bonuses?
+ */
+bool RuleSoldierTransformation::getReset() const
+{
+	return _reset;
+}
+
+/**
+ * Gets the type of soldier bonus assigned by this project
+ * @return The soldier bonus type
+ */
+const std::string &RuleSoldierTransformation::getSoldierBonusType() const
+{
+	return _soldierBonusType;
 }
 
 }

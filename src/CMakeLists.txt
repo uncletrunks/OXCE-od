@@ -43,6 +43,7 @@ set ( basescape_src
   Basescape/SellState.cpp
   Basescape/SoldierArmorState.cpp
   Basescape/SoldierAvatarState.cpp
+  Basescape/SoldierBonusState.cpp
   Basescape/SoldierDiaryMissionState.cpp
   Basescape/SoldierDiaryOverviewState.cpp
   Basescape/SoldierDiaryPerformanceState.cpp
@@ -309,6 +310,7 @@ set ( mod_src
   Mod/RuleRegion.cpp
   Mod/RuleResearch.cpp
   Mod/RuleSoldier.cpp
+  Mod/RuleSoldierBonus.cpp
   Mod/RuleSoldierTransformation.cpp
   Mod/RuleStartingCondition.cpp
   Mod/RuleStatBonus.cpp

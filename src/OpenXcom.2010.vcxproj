@@ -269,6 +269,7 @@
     <ClCompile Include="Basescape\SackSoldierState.cpp" />
     <ClCompile Include="Basescape\SellState.cpp" />
     <ClCompile Include="Basescape\SoldierArmorState.cpp" />
+    <ClCompile Include="Basescape\SoldierBonusState.cpp" />
     <ClCompile Include="Basescape\SoldierDiaryMissionState.cpp" />
     <ClCompile Include="Basescape\SoldierDiaryOverviewState.cpp" />
     <ClCompile Include="Basescape\SoldierDiaryPerformanceState.cpp" />
@@ -488,6 +489,7 @@
     <ClCompile Include="Mod\RuleEvent.cpp" />
     <ClCompile Include="Mod\RuleEventScript.cpp" />
     <ClCompile Include="Mod\RuleItemCategory.cpp" />
+    <ClCompile Include="Mod\RuleSoldierBonus.cpp" />
     <ClCompile Include="Mod\RuleSoldierTransformation.cpp" />
     <ClCompile Include="Mod\RuleStartingCondition.cpp" />
     <ClCompile Include="Mod\RuleStatBonus.cpp" />
@@ -638,6 +640,7 @@
     <ClInclude Include="Basescape\SackSoldierState.h" />
     <ClInclude Include="Basescape\SellState.h" />
     <ClInclude Include="Basescape\SoldierArmorState.h" />
+    <ClInclude Include="Basescape\SoldierBonusState.h" />
     <ClInclude Include="Basescape\SoldierDiaryMissionState.h" />
     <ClInclude Include="Basescape\SoldierDiaryOverviewState.h" />
     <ClInclude Include="Basescape\SoldierDiaryPerformanceState.h" />
@@ -873,6 +876,7 @@
     <ClInclude Include="Mod\RuleEvent.h" />
     <ClInclude Include="Mod\RuleEventScript.h" />
     <ClInclude Include="Mod\RuleItemCategory.h" />
+    <ClInclude Include="Mod\RuleSoldierBonus.h" />
     <ClInclude Include="Mod\RuleSoldierTransformation.h" />
     <ClInclude Include="Mod\RuleStartingCondition.h" />
     <ClInclude Include="Mod\RuleStatBonus.h" />

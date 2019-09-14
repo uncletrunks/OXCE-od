@@ -39,9 +39,11 @@
 #include "../Menu/ErrorMessageState.h"
 #include "SellState.h"
 #include "SoldierArmorState.h"
+#include "SoldierBonusState.h"
 #include "SackSoldierState.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleSoldierBonus.h"
 #include "../Savegame/SoldierDeath.h"
 
 namespace OpenXcom
@@ -80,6 +82,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	_btnOk = new TextButton(48, 14, 30, 33);
 	_btnNext = new TextButton(28, 14, 80, 33);
 	_btnArmor = new TextButton(110, 14, 130, 33);
+	_btnBonuses = new TextButton(16, 14, 242, 33);
 	_edtSoldier = new TextEdit(this, 210, 16, 40, 9);
 	_btnSack = new TextButton(60, 14, 260, 33);
 	_btnDiary = new TextButton(60, 14, 260, 48);
@@ -171,6 +174,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	add(_btnPrev, "button", "soldierInfo");
 	add(_btnNext, "button", "soldierInfo");
 	add(_btnArmor, "button", "soldierInfo");
+	add(_btnBonuses, "button", "soldierInfo");
 	add(_edtSoldier, "text1", "soldierInfo");
 	add(_btnSack, "button", "soldierInfo");
 	add(_btnDiary, "button", "soldierInfo");
@@ -268,6 +272,9 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 
 	_btnArmor->setText(tr("STR_ARMOR"));
 	_btnArmor->onMouseClick((ActionHandler)&SoldierInfoState::btnArmorClick);
+
+	_btnBonuses->setText(""); // tiny button, no label
+	_btnBonuses->onMouseClick((ActionHandler)&SoldierInfoState::btnBonusesClick);
 
 	_edtSoldier->setBig();
 	_edtSoldier->onChange((ActionHandler)&SoldierInfoState::edtSoldierChange);
@@ -375,6 +382,14 @@ void SoldierInfoState::init()
 
 	UnitStats withArmor(*current);
 	withArmor += *(_soldier->getArmor()->getStats());
+	// calculate and apply soldier bonuses
+	bool hasBonus = false;
+	for (auto bonusRule : *_soldier->getBonuses(_game->getMod(), true))
+	{
+		hasBonus = true;
+		withArmor += *(bonusRule.first->getStats());
+	}
+	_btnBonuses->setVisible(hasBonus);
 
 	SurfaceSet *texture = _game->getMod()->getSurfaceSet("BASEBITS.PCK");
 	texture->getFrame(_soldier->getRankSprite())->blitNShade(_rank, 0, 0);
@@ -692,6 +707,15 @@ void SoldierInfoState::btnArmorClick(Action *)
 	{
 		_game->pushState(new SoldierArmorState(_base, _soldierId, SA_GEOSCAPE));
 	}
+}
+
+/**
+ * Shows the SoldierBonus window.
+ * @param action Pointer to an action.
+ */
+void SoldierInfoState::btnBonusesClick(Action *)
+{
+	_game->pushState(new SoldierBonusState(_base, _soldierId));
 }
 
 /**

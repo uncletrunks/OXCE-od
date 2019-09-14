@@ -35,6 +35,7 @@ private:
 	std::vector<std::vector<std::pair<int, std::vector<std::string> > > > _killCriteria;
 	std::string _description;
 	int _sprite;
+	std::vector<std::string> _soldierBonusTypes;
 public:
 	/// Creates a blank commendation ruleset.
 	RuleCommendations();
@@ -50,6 +51,8 @@ public:
 	std::vector<std::vector<std::pair<int, std::vector<std::string> > > > *getKillCriteria();
 	/// Get the commendation's sprite.
 	int getSprite() const;
+	/// Gets the soldier bonus type corresponding to the commendation's decoration level.
+	const std::string *getSoldierBonus(int decorationLevel) const;
 
 };
 
