@@ -1678,6 +1678,19 @@ void Map::animate(bool redraw)
 	_save->nextAnimFrame();
 	_animFrame = _save->getAnimFrame();
 
+	// random ambient sounds
+	{
+		if (!_save->getAmbienceRandom().empty())
+		{
+			_save->decreaseCurrentAmbienceDelay();
+			if (_save->getCurrentAmbienceDelay() <= 0)
+			{
+				_save->resetCurrentAmbienceDelay();
+				_save->playRandomAmbientSound();
+			}
+		}
+	}
+
 	// animate tiles
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 	{

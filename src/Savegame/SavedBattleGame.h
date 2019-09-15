@@ -89,6 +89,8 @@ private:
 	ItemContainer *_baseItems;
 	int _depth, _ambience;
 	double _ambientVolume;
+	std::vector<int> _ambienceRandom;
+	int _minAmbienceRandomDelay, _maxAmbienceRandomDelay, _currentAmbienceDelay;
 	std::vector<BattleItem*> _recoverGuaranteed, _recoverConditional;
 	std::string _music;
 	int _turnLimit, _cheatTurn;
@@ -417,6 +419,23 @@ public:
 	void setAmbientSound(int sound);
 	/// gets the ambient sound effect;
 	int getAmbientSound() const;
+	/// Gets/sets the random ambient sound effects.
+	const std::vector<int> &getAmbienceRandom() const { return _ambienceRandom; };
+	void setAmbienceRandom(const std::vector<int> &ambienceRandom) { _ambienceRandom = ambienceRandom; }
+	/// Gets/sets the minimum delay for the random ambient sound effect.
+	int getMinAmbienceRandomDelay() const { return _minAmbienceRandomDelay; }
+	void setMinAmbienceRandomDelay(int minAmbienceRandomDelay) { _minAmbienceRandomDelay = minAmbienceRandomDelay; }
+	/// Gets/sets the maximum delay for the random ambient sound effect.
+	int getMaxAmbienceRandomDelay() const { return _maxAmbienceRandomDelay; }
+	void setMaxAmbienceRandomDelay(int maxAmbienceRandomDelay) { _maxAmbienceRandomDelay = maxAmbienceRandomDelay; }
+	/// Gets/sets the current delay for the random ambient sound effect.
+	int getCurrentAmbienceDelay() const { return _currentAmbienceDelay; }
+	void setCurrentAmbienceDelay(int currentAmbienceDelay) { _currentAmbienceDelay = currentAmbienceDelay; }
+	void decreaseCurrentAmbienceDelay() { _currentAmbienceDelay--; }
+	/// Reset the current random ambient sound delay.
+	void resetCurrentAmbienceDelay();
+	/// Play a random ambient sound.
+	void playRandomAmbientSound();
 	// gets ruleset.
 	const Mod *getMod() const;
 	/// gets the list of items we're guaranteed.

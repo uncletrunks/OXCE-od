@@ -2007,7 +2007,17 @@ void BattlescapeGenerator::loadWeapons(const std::vector<BattleItem*> &itemList)
 void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 {
 	// set our ambient sound
-	_save->setAmbientSound(_terrain->getAmbience());
+	if (_terrain->getAmbience() != -1)
+	{
+		_save->setAmbientSound(_terrain->getAmbience());
+	}
+	else
+	{
+		_save->setAmbienceRandom(_terrain->getAmbienceRandom());
+		_save->setMinAmbienceRandomDelay(_terrain->getMinAmbienceRandomDelay());
+		_save->setMaxAmbienceRandomDelay(_terrain->getMaxAmbienceRandomDelay());
+		_save->resetCurrentAmbienceDelay();
+	}
 	_save->setAmbientVolume(_terrain->getAmbientVolume());
 
 	// set up our map generation vars

@@ -46,6 +46,8 @@ private:
 	std::vector<std::string> _civilianTypes, _music;
 	int _minDepth, _maxDepth, _ambience;
 	double _ambientVolume;
+	std::vector<int> _ambienceRandom;
+	int _minAmbienceRandomDelay, _maxAmbienceRandomDelay;
 public:
 	RuleTerrain(const std::string &name);
 	~RuleTerrain();
@@ -73,6 +75,12 @@ public:
 	 int getMaxDepth() const;
 	/// Gets the ambient sound effect.
 	int getAmbience() const;
+	/// Gets the random ambient sound effects.
+	const std::vector<int> &getAmbienceRandom() const { return _ambienceRandom; }
+	/// Gets the minimum delay for the random ambient sound effect.
+	int getMinAmbienceRandomDelay() const { return _minAmbienceRandomDelay; }
+	/// Gets the maximum delay for the random ambient sound effect.
+	int getMaxAmbienceRandomDelay() const { return _maxAmbienceRandomDelay; }
 	/// Gets the generation script name.
 	std::string getScript() const;
 	/// Gets the list of music to pick from.

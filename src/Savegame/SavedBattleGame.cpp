@@ -35,6 +35,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Engine/Game.h"
+#include "../Engine/Sound.h"
 #include "../Mod/RuleInventory.h"
 #include "../Battlescape/AIModule.h"
 #include "../Engine/RNG.h"
@@ -58,7 +59,8 @@ SavedBattleGame::SavedBattleGame(Mod *rule) :
 	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0), _enviroEffects(nullptr), _ecEnabledFriendly(false), _ecEnabledHostile(false), _ecEnabledNeutral(false),
 	_globalShade(0), _side(FACTION_PLAYER), _turn(0), _bughuntMinTurn(20), _animFrame(0),
 	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
-	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0), _ambience(-1), _ambientVolume(0.5),
+	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0),
+	_ambience(-1), _ambientVolume(0.5), _minAmbienceRandomDelay(20), _maxAmbienceRandomDelay(60), _currentAmbienceDelay(0),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
 {
 	_tileSearch.resize(11*11);
@@ -373,6 +375,10 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_kneelReserved = node["kneelReserved"].as<bool>(_kneelReserved);
 	_ambience = node["ambience"].as<int>(_ambience);
 	_ambientVolume = node["ambientVolume"].as<double>(_ambientVolume);
+	_ambienceRandom = node["ambienceRandom"].as<std::vector<int> >(_ambienceRandom);
+	_minAmbienceRandomDelay = node["minAmbienceRandomDelay"].as<int>(_minAmbienceRandomDelay);
+	_maxAmbienceRandomDelay = node["maxAmbienceRandomDelay"].as<int>(_maxAmbienceRandomDelay);
+	_currentAmbienceDelay = node["currentAmbienceDelay"].as<int>(_currentAmbienceDelay);
 	_music = node["music"].as<std::string>(_music);
 	_baseItems->load(node["baseItems"]);
 	_turnLimit = node["turnLimit"].as<int>(_turnLimit);
@@ -515,6 +521,10 @@ YAML::Node SavedBattleGame::save() const
 	node["depth"] = _depth;
 	node["ambience"] = _ambience;
 	node["ambientVolume"] = _ambientVolume;
+	node["ambienceRandom"] = _ambienceRandom;
+	node["minAmbienceRandomDelay"] = _minAmbienceRandomDelay;
+	node["maxAmbienceRandomDelay"] = _maxAmbienceRandomDelay;
+	node["currentAmbienceDelay"] = _currentAmbienceDelay;
 	for (std::vector<BattleItem*>::const_iterator i = _recoverGuaranteed.begin(); i != _recoverGuaranteed.end(); ++i)
 	{
 		node["recoverGuaranteed"].push_back((*i)->save(this->getMod()->getScriptGlobal()));
@@ -2399,6 +2409,28 @@ void SavedBattleGame::setAmbientSound(int sound)
 int SavedBattleGame::getAmbientSound() const
 {
 	return _ambience;
+}
+
+/**
+ * Reset the current random ambient sound delay.
+ */
+void SavedBattleGame::resetCurrentAmbienceDelay()
+{
+	_currentAmbienceDelay = RNG::seedless(_minAmbienceRandomDelay * 10, _maxAmbienceRandomDelay * 10);
+	if (_currentAmbienceDelay < 10)
+		_currentAmbienceDelay = 10; // at least 1 second
+}
+
+/**
+ * Play a random ambient sound.
+ */
+void SavedBattleGame::playRandomAmbientSound()
+{
+	if (!_ambienceRandom.empty())
+	{
+		int soundIndex = RNG::seedless(0, _ambienceRandom.size() - 1);
+		getMod()->getSoundByDepth(_depth, _ambienceRandom.at(soundIndex))->play(3); // use fixed ambience channel; don't check if previous sound is still playing or not
+	}
 }
 
 /**
