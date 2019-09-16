@@ -21,6 +21,7 @@
 #include "RuleItem.h"
 #include "RuleInventory.h"
 #include "RuleDamageType.h"
+#include "RuleSoldier.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Collections.h"
@@ -578,6 +579,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_shotgunBehaviorType = node["shotgunBehavior"].as<int>(_shotgunBehaviorType);
 	_shotgunSpread = node["shotgunSpread"].as<int>(_shotgunSpread);
 	_shotgunChoke = node["shotgunChoke"].as<int>(_shotgunChoke);
+	_zombieUnitByArmorMale = node["zombieUnitByArmorMale"].as< std::map<std::string, std::string> >(_zombieUnitByArmorMale);
+	_zombieUnitByArmorFemale = node["zombieUnitByArmorFemale"].as< std::map<std::string, std::string> >(_zombieUnitByArmorFemale);
 	_zombieUnitByType = node["zombieUnitByType"].as< std::map<std::string, std::string> >(_zombieUnitByType);
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
@@ -2141,13 +2144,36 @@ int RuleItem::getShotgunChoke() const
  * Gets the unit that the victim is morphed into when attacked.
  * @return The weapon's zombie unit.
  */
-const std::string &RuleItem::getZombieUnit(const std::string &victimType) const
+const std::string &RuleItem::getZombieUnit(const BattleUnit* victim) const
 {
-	std::map<std::string, std::string>::const_iterator i = _zombieUnitByType.find(victimType);
-	if (i != _zombieUnitByType.end())
+	if (victim)
 	{
-		return i->second;
+		// by armor and gender
+		if (victim->getGender() == GENDER_MALE)
+		{
+			std::map<std::string, std::string>::const_iterator i = _zombieUnitByArmorMale.find(victim->getArmor()->getType());
+			if (i != _zombieUnitByArmorMale.end())
+			{
+				return i->second;
+			}
+		}
+		else
+		{
+			std::map<std::string, std::string>::const_iterator j = _zombieUnitByArmorFemale.find(victim->getArmor()->getType());
+			if (j != _zombieUnitByArmorFemale.end())
+			{
+				return j->second;
+			}
+		}
+		// by type
+		const std::string victimType = victim->getUnitRules() ? victim->getUnitRules()->getType() : victim->getGeoscapeSoldier()->getRules()->getType();
+		std::map<std::string, std::string>::const_iterator k = _zombieUnitByType.find(victimType);
+		if (k != _zombieUnitByType.end())
+		{
+			return k->second;
+		}
 	}
+	// fall back
 	return _zombieUnit;
 }
 

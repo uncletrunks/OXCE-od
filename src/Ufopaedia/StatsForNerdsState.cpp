@@ -1787,8 +1787,10 @@ void StatsForNerdsState::initItemList()
 			endHeading();
 		}
 		addIntegerPercent(ss, itemRule->getSpecialChance(), "specialChance", 100);
+		addBoolean(ss, !itemRule->getZombieUnitByArmorMaleRaw().empty(), "zombieUnitByArmorMale*", false); // just say if there are any or not
+		addBoolean(ss, !itemRule->getZombieUnitByArmorFemaleRaw().empty(), "zombieUnitByArmorFemale*", false); // just say if there are any or not
 		addBoolean(ss, !itemRule->getZombieUnitByTypeRaw().empty(), "zombieUnitByType*", false); // just say if there are any or not
-		addSingleString(ss, itemRule->getZombieUnit(""), "zombieUnit");
+		addSingleString(ss, itemRule->getZombieUnit(nullptr), "zombieUnit");
 		addSingleString(ss, itemRule->getSpawnUnit(), "spawnUnit");
 		addInteger(ss, itemRule->getSpawnUnitFaction(), "spawnUnitFaction", -1);
 
