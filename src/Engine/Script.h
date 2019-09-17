@@ -1640,7 +1640,7 @@ public:
 	/// Save values to yaml file.
 	void save(YAML::Node &node, const ScriptGlobal* shared) const
 	{
-		saveBase(node, shared, Tag::type());;
+		saveBase(node, shared, Tag::type());
 	}
 
 	/// Get value.

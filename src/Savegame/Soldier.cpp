@@ -132,9 +132,9 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 	}
 	_armor = armor;
 	if (node["replacedArmor"])
-		_replacedArmor = mod->getArmor(node["replacedArmor"].as<std::string>());;
+		_replacedArmor = mod->getArmor(node["replacedArmor"].as<std::string>());
 	if (node["transformedArmor"])
-		_transformedArmor = mod->getArmor(node["transformedArmor"].as<std::string>());;
+		_transformedArmor = mod->getArmor(node["transformedArmor"].as<std::string>());
 	_psiTraining = node["psiTraining"].as<bool>(_psiTraining);
 	_training = node["training"].as<bool>(_training);
 	_returnToTrainingWhenHealed = node["returnToTrainingWhenHealed"].as<bool>(_returnToTrainingWhenHealed);

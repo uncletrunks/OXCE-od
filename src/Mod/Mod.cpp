@@ -1467,7 +1467,7 @@ void Mod::loadResourceConfigFile(const FileMap::FileRecord &filerec)
 			color.r = (*j)[0].as<int>(0);
 			color.g = (*j)[1].as<int>(0);
 			color.b = (*j)[2].as<int>(0);
-			color.unused = (*j)[3].as<int>(2);;
+			color.unused = (*j)[3].as<int>(2);
 			_transparencies.push_back(color);
 		}
 	}
