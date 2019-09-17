@@ -25,10 +25,12 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 #include "../Interface/Window.h"
+#include "../Mod/ArticleDefinition.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleSoldierBonus.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Soldier.h"
+#include "../Ufopaedia/StatsForNerdsState.h"
 
 namespace OpenXcom
 {
@@ -78,11 +80,15 @@ SoldierBonusState::SoldierBonusState(Base *base, size_t soldier) : _base(base), 
 	_lstBonuses->setBackground(_window);
 	_lstBonuses->setMargin(8);
 
+	_bonuses.clear();
 	_lstBonuses->clearList();
 	for (auto bonusRule : *s->getBonuses(nullptr, false))
 	{
+		_bonuses.push_back(bonusRule.first->getName());
 		_lstBonuses->addRow(1, tr(bonusRule.first->getName()).c_str());
 	}
+
+	_lstBonuses->onMouseClick((ActionHandler)& SoldierBonusState::lstBonusesClick);
 }
 
 /**
@@ -100,6 +106,16 @@ SoldierBonusState::~SoldierBonusState()
 void SoldierBonusState::btnCancelClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+ * Shows corresponding Stats for Nerds article.
+ * @param action Pointer to an action.
+ */
+void SoldierBonusState::lstBonusesClick(Action *)
+{
+	std::string articleId = _bonuses[_lstBonuses->getSelectedRow()];
+	_game->pushState(new StatsForNerdsState(UFOPAEDIA_TYPE_UNKNOWN, articleId, false, false, false));
 }
 
 }

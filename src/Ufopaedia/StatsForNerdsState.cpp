@@ -37,6 +37,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleItem.h"
+#include "../Mod/RuleSoldierBonus.h"
 #include "../Mod/RuleUfo.h"
 #include "../Savegame/SavedGame.h"
 #include "../fmath.h"
@@ -355,6 +356,8 @@ void StatsForNerdsState::initLists()
 	case UFOPAEDIA_TYPE_TFTD_USO:
 		initUfoList();
 		break;
+	case UFOPAEDIA_TYPE_UNKNOWN:
+		initSoldierBonusList();
 	default:
 		break;
 	}
@@ -1273,7 +1276,7 @@ void StatsForNerdsState::addRuleStatBonus(std::ostringstream &ss, const RuleStat
 				{
 					ss << numberAbs * 1;
 				}
-				if (item.first == "flatHundred")
+				else if (item.first == "flatHundred")
 				{
 					ss << numberAbs * pow(100, power);
 				}
@@ -2314,6 +2317,49 @@ void StatsForNerdsState::initArmorList()
 			}
 			endHeading();
 		}
+	}
+}
+
+/**
+ * Shows the "raw" RuleSoldierBonus data.
+ */
+void StatsForNerdsState::initSoldierBonusList()
+{
+	_lstRawData->clearList();
+	_lstRawData->setIgnoreSeparators(true);
+
+	std::ostringstream ssTopic;
+	ssTopic << tr(_topicId);
+	if (_showIds)
+	{
+		ssTopic << " [" << _topicId << "]";
+	}
+
+	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
+
+	Mod *mod = _game->getMod();
+	RuleSoldierBonus *bonusRule = mod->getSoldierBonus(_topicId);
+	if (!bonusRule)
+		return;
+
+	_filterOptions.clear();
+	_cbxRelatedStuff->setVisible(false);
+
+	std::ostringstream ss;
+
+	addUnitStatBonus(ss, *bonusRule->getStats(), "stats");
+
+	addInteger(ss, bonusRule->getVisibilityAtDark(), "visibilityAtDark");
+
+	addHeading("recovery");
+	{
+		addRuleStatBonus(ss, *bonusRule->getTimeRecoveryRaw(), "time");
+		addRuleStatBonus(ss, *bonusRule->getEnergyRecoveryRaw(), "energy");
+		addRuleStatBonus(ss, *bonusRule->getMoraleRecoveryRaw(), "morale");
+		addRuleStatBonus(ss, *bonusRule->getHealthRecoveryRaw(), "health");
+		addRuleStatBonus(ss, *bonusRule->getStunRegenerationRaw(), "stun");
+		addRuleStatBonus(ss, *bonusRule->getManaRecoveryRaw(), "mana");
+		endHeading();
 	}
 }
 

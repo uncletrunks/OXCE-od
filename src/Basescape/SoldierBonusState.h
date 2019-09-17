@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <vector>
+#include <string>
 #include "../Engine/State.h"
 
 namespace OpenXcom
@@ -36,6 +38,7 @@ class SoldierBonusState : public State
 private:
 	Base *_base;
 	size_t _soldier;
+	std::vector<std::string> _bonuses;
 
 	TextButton *_btnCancel;
 	Window *_window;
@@ -48,6 +51,8 @@ public:
 	~SoldierBonusState();
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
+	/// Handler for clicking the Bonuses list.
+	void lstBonusesClick(Action *action);
 };
 
 }

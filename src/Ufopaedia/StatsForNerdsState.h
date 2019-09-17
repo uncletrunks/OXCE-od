@@ -107,6 +107,7 @@ private:
 	void addForcedTorso(std::ostringstream &ss, const ForcedTorso &value, const std::string &propertyName, const ForcedTorso &defaultvalue = TORSO_USE_GENDER);
 	void addDrawingRoutine(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void initArmorList();
+	void initSoldierBonusList();
 	void addVectorOfPositions(std::ostringstream &ss, const std::vector<Position> &vec, const std::string &propertyName);
 	void addBuildCostItem(std::ostringstream &ss, const std::pair<const std::string, std::pair<int, int> > &costItem);
 	void addRightClickActionType(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
