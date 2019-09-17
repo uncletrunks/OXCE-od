@@ -1927,6 +1927,9 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 	_fixedUserOptions = doc["fixedUserOptions"].as<std::map<std::string, std::string> >(_fixedUserOptions);
 	_hiddenMovementBackgrounds = doc["hiddenMovementBackgrounds"].as<std::vector<std::string> >(_hiddenMovementBackgrounds);
+	_baseNamesFirst = doc["baseNamesFirst"].as<std::vector<std::string> >(_baseNamesFirst);
+	_baseNamesMiddle = doc["baseNamesMiddle"].as<std::vector<std::string> >(_baseNamesMiddle);
+	_baseNamesLast = doc["baseNamesLast"].as<std::vector<std::string> >(_baseNamesLast);
 	_disableUnderwaterSounds = doc["disableUnderwaterSounds"].as<bool>(_disableUnderwaterSounds);
 	_enableUnitResponseSounds = doc["enableUnitResponseSounds"].as<bool>(_enableUnitResponseSounds);
 	for (YAML::const_iterator i = doc["unitResponseSounds"].begin(); i != doc["unitResponseSounds"].end(); ++i)

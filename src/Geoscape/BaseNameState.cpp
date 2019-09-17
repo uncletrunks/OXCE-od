@@ -28,6 +28,7 @@
 #include "../Savegame/Base.h"
 #include "../Basescape/PlaceLiftState.h"
 #include "../Engine/Options.h"
+#include "../Engine/RNG.h"
 
 namespace OpenXcom
 {
@@ -75,6 +76,25 @@ BaseNameState::BaseNameState(Base *base, Globe *globe, bool first) : _base(base)
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
 	_txtTitle->setText(tr("STR_BASE_NAME"));
+
+	if (!_game->getMod()->getBaseNamesFirst().empty())
+	{
+		std::ostringstream ss;
+		int pickFirst = RNG::seedless(0, _game->getMod()->getBaseNamesFirst().size() - 1);
+		ss << _game->getMod()->getBaseNamesFirst().at(pickFirst);
+		if (!_game->getMod()->getBaseNamesMiddle().empty())
+		{
+			int pickMiddle = RNG::seedless(0, _game->getMod()->getBaseNamesMiddle().size() - 1);
+			ss << " " << _game->getMod()->getBaseNamesMiddle().at(pickMiddle);
+		}
+		if (!_game->getMod()->getBaseNamesLast().empty())
+		{
+			int pickLast = RNG::seedless(0, _game->getMod()->getBaseNamesLast().size() - 1);
+			ss << " " << _game->getMod()->getBaseNamesLast().at(pickLast);
+		}
+		_edtName->setText(ss.str());
+		_btnOk->setVisible(true);
+	}
 
 	_edtName->setBig();
 	_edtName->setFocus(true, false);
