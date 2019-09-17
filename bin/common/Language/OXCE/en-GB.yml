@@ -162,6 +162,8 @@ en-GB:
   STR_TARGET_ON_THE_GROUND: " (on the ground)"
   STR_USE_SPECIAL_ITEM: "Use Special Item"
   STR_NO_EXPERIENCE_YET: "No experience yet:"
+#BriefingState.cpp
+  STR_OPERATION_UC: "OPERATION> {0}"
 #BriefingLightState.cpp
   STR_WHAT_CAN_I_WEAR: "What can I wear?"
   STR_STARTING_CONDITION_ARMORS_FORBIDDEN: "This mission requires specific gear.{NEWLINE}{NEWLINE}Forbidden armour types are: {0}"

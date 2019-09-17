@@ -35,6 +35,7 @@
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/RuleUfo.h"
 #include "../Engine/Options.h"
+#include "../Engine/RNG.h"
 #include "../Engine/Screen.h"
 #include "../Menu/CutsceneState.h"
 
@@ -150,6 +151,25 @@ BriefingState::BriefingState(Craft *craft, Base *base, bool infoOnly) : _infoOnl
 		s = tr("STR_BASE_UC_").arg(base->getName());
 		battleSave->setMissionCraftOrBase(s);
 	}
+
+	// random operation names
+	if (craft || base)
+	{
+		if (!_game->getMod()->getOperationNamesFirst().empty())
+		{
+			std::ostringstream ss;
+			int pickFirst = RNG::seedless(0, _game->getMod()->getOperationNamesFirst().size() - 1);
+			ss << _game->getMod()->getOperationNamesFirst().at(pickFirst);
+			if (!_game->getMod()->getOperationNamesLast().empty())
+			{
+				int pickLast = RNG::seedless(0, _game->getMod()->getOperationNamesLast().size() - 1);
+				ss << " " << _game->getMod()->getOperationNamesLast().at(pickLast);
+			}
+			s = tr("STR_OPERATION_UC").arg(ss.str());
+			battleSave->setMissionTarget(s);
+		}
+	}
+
 	_txtTarget->setText(battleSave->getMissionTarget());
 	_txtCraft->setText(battleSave->getMissionCraftOrBase());
 

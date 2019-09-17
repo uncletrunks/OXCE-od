@@ -1930,6 +1930,8 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	_baseNamesFirst = doc["baseNamesFirst"].as<std::vector<std::string> >(_baseNamesFirst);
 	_baseNamesMiddle = doc["baseNamesMiddle"].as<std::vector<std::string> >(_baseNamesMiddle);
 	_baseNamesLast = doc["baseNamesLast"].as<std::vector<std::string> >(_baseNamesLast);
+	_operationNamesFirst = doc["operationNamesFirst"].as<std::vector<std::string> >(_operationNamesFirst);
+	_operationNamesLast = doc["operationNamesLast"].as<std::vector<std::string> >(_operationNamesLast);
 	_disableUnderwaterSounds = doc["disableUnderwaterSounds"].as<bool>(_disableUnderwaterSounds);
 	_enableUnitResponseSounds = doc["enableUnitResponseSounds"].as<bool>(_enableUnitResponseSounds);
 	for (YAML::const_iterator i = doc["unitResponseSounds"].begin(); i != doc["unitResponseSounds"].end(); ++i)

@@ -222,6 +222,7 @@ private:
 	std::map<std::string, std::string> _fixedUserOptions;
 	std::vector<std::string> _hiddenMovementBackgrounds;
 	std::vector<std::string> _baseNamesFirst, _baseNamesMiddle, _baseNamesLast;
+	std::vector<std::string> _operationNamesFirst, _operationNamesLast;
 	bool _disableUnderwaterSounds;
 	bool _enableUnitResponseSounds;
 	std::map<std::string, std::vector<int> > _selectUnitSound, _startMovingSound, _selectWeaponSound, _annoyedSound;
@@ -723,6 +724,8 @@ public:
 	const std::vector<std::string> &getBaseNamesFirst() const { return _baseNamesFirst; }
 	const std::vector<std::string> &getBaseNamesMiddle() const { return _baseNamesMiddle; }
 	const std::vector<std::string> &getBaseNamesLast() const { return _baseNamesLast; }
+	const std::vector<std::string> &getOperationNamesFirst() const { return _operationNamesFirst; }
+	const std::vector<std::string> &getOperationNamesLast() const { return _operationNamesLast; }
 	bool getEnableUnitResponseSounds() const { return _enableUnitResponseSounds; }
 	const std::map<std::string, std::vector<int> > &getSelectUnitSounds() const { return _selectUnitSound; }
 	const std::map<std::string, std::vector<int> > &getStartMovingSounds() const { return _startMovingSound; }
