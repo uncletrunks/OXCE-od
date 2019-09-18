@@ -116,7 +116,6 @@ BaseNameState::~BaseNameState()
  */
 void BaseNameState::edtNameChange(Action *action)
 {
-	_base->setName(_edtName->getText());
 	if (action->getDetails()->key.keysym.sym == SDLK_RETURN ||
 		action->getDetails()->key.keysym.sym == SDLK_KP_ENTER)
 	{
@@ -139,6 +138,7 @@ void BaseNameState::btnOkClick(Action *)
 {
 	if (!_edtName->getText().empty())
 	{
+		_base->setName(_edtName->getText());
 		_game->popState();
 		_game->popState();
 		if (!_first || Options::customInitialBase)
