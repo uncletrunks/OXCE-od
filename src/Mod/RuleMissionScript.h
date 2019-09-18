@@ -32,6 +32,7 @@ class RuleMissionScript
 private:
 	std::string _type, _varName;
 	int _firstMonth, _lastMonth, _label, _executionOdds, _targetBaseOdds, _minDifficulty, _maxRuns, _avoidRepeats, _delay, _randomDelay;
+	int _minScore, _maxScore;
 	std::vector<int> _conditionals;
 	std::vector<std::pair<size_t, WeightedOptions*> > _regionWeights, _missionWeights, _raceWeights;
 	std::map<std::string, bool> _researchTriggers;
@@ -72,6 +73,10 @@ public:
 	int getRepeatAvoidance() const;
 	/// Gets the number of minutes to delay spawning of the first wave of this mission, overrides the spawn delay defined in the mission waves.
 	int getDelay() const;
+	/// Gets the minimum score (from last month) for this command to run.
+	int getMinScore() const { return _minScore; }
+	/// Gets the maximum score (from last month) for this command to run.
+	int getMaxScore() const { return _maxScore; }
 	/// Gets the list of conditions this command requires in order to run.
 	const std::vector<int> &getConditionals() const;
 	/// Does this command have raceWeights?

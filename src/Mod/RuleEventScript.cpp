@@ -27,7 +27,7 @@ namespace OpenXcom
  * Event scripts are executed just after the mission scripts.
  */
 RuleEventScript::RuleEventScript(const std::string &type) :
-	_type(type), _firstMonth(0), _lastMonth(-1), _executionOdds(100), _minDifficulty(0), _maxDifficulty(4)
+	_type(type), _firstMonth(0), _lastMonth(-1), _executionOdds(100), _minDifficulty(0), _maxDifficulty(4), _minScore(-999999), _maxScore(999999)
 {
 }
 
@@ -67,6 +67,8 @@ void RuleEventScript::load(const YAML::Node &node)
 	_executionOdds = node["executionOdds"].as<int>(_executionOdds);
 	_minDifficulty = node["minDifficulty"].as<int>(_minDifficulty);
 	_maxDifficulty = node["maxDifficulty"].as<int>(_maxDifficulty);
+	_minScore = node["minScore"].as<int>(_minScore);
+	_maxScore = node["maxScore"].as<int>(_maxScore);
 	_researchTriggers = node["researchTriggers"].as<std::map<std::string, bool> >(_researchTriggers);
 	_itemTriggers = node["itemTriggers"].as<std::map<std::string, bool> >(_itemTriggers);
 }

@@ -418,6 +418,8 @@ public:
 	void setDisableSoldierEquipment(bool disableSoldierEquipment);
 	/// Is the mana feature already unlocked?
 	bool isManaUnlocked(Mod *mod) const;
+	/// Gets the current score based on research score and xcom/alien activity in regions.
+	int getCurrentScore() const;
 };
 
 }

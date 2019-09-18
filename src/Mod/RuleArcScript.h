@@ -33,6 +33,7 @@ private:
 	std::vector<std::string> _sequentialArcs;
 	WeightedOptions _randomArcs;
 	int _firstMonth, _lastMonth, _executionOdds, _maxArcs, _minDifficulty, _maxDifficulty;
+	int _minScore, _maxScore;
 	std::map<std::string, bool> _researchTriggers;
 	std::map<std::string, bool> _itemTriggers;
 public:
@@ -60,6 +61,10 @@ public:
 	int getMinDifficulty() const { return _minDifficulty; }
 	/// Gets the maximum difficulty for this command to run.
 	int getMaxDifficulty() const { return _maxDifficulty; }
+	/// Gets the minimum score (from last month) for this command to run.
+	int getMinScore() const { return _minScore; }
+	/// Gets the maximum score (from last month) for this command to run.
+	int getMaxScore() const { return _maxScore; }
 	/// Gets the research triggers that may apply to this command.
 	const std::map<std::string, bool> &getResearchTriggers() const { return _researchTriggers; }
 	/// Gets the item triggers that may apply to this command.
