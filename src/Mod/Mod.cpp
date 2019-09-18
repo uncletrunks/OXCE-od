@@ -3373,6 +3373,7 @@ void Mod::sortLists()
 	_ufopaediaSections[UFOPAEDIA_NOT_AVAILABLE] = 0;
 	std::sort(_ufopaediaIndex.begin(), _ufopaediaIndex.end(), compareRule<ArticleDefinition>(this));
 	std::sort(_ufopaediaCatIndex.begin(), _ufopaediaCatIndex.end(), compareSection(this));
+	std::sort(_soldiersIndex.begin(), _soldiersIndex.end(), compareRule<RuleSoldier>(this, (compareRule<RuleSoldier>::RuleLookup) & Mod::getSoldier));
 }
 
 /**
