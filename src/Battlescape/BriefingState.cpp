@@ -165,12 +165,16 @@ BriefingState::BriefingState(Craft *craft, Base *base, bool infoOnly) : _infoOnl
 				int pickLast = RNG::seedless(0, _game->getMod()->getOperationNamesLast().size() - 1);
 				ss << " " << _game->getMod()->getOperationNamesLast().at(pickLast);
 			}
-			s = tr("STR_OPERATION_UC").arg(ss.str());
+			s = ss.str();
 			battleSave->setMissionTarget(s);
 		}
 	}
 
-	_txtTarget->setText(battleSave->getMissionTarget());
+	if (!_game->getMod()->getOperationNamesFirst().empty())
+		_txtTarget->setText(tr("STR_OPERATION_UC").arg(battleSave->getMissionTarget()));
+	else
+		_txtTarget->setText(battleSave->getMissionTarget());
+
 	_txtCraft->setText(battleSave->getMissionCraftOrBase());
 
 	_txtTitle->setText(tr(title));
