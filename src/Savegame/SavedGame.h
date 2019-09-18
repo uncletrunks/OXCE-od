@@ -298,6 +298,8 @@ public:
 	bool isResearched(const std::vector<std::string> &research, bool considerDebugMode = true) const;
 	/// Gets if a certain list of research topics has been completed.
 	bool isResearched(const std::vector<const RuleResearch *> &research, bool considerDebugMode = true, bool skipDisabled = false) const;
+	/// Gets if a certain item has been obtained.
+	bool isItemObtained(const std::string &itemType) const;
 	/// Gets the soldier matching this ID.
 	Soldier *getSoldier(int id) const;
 	/// Handles the higher promotions.

@@ -34,6 +34,7 @@ private:
 	WeightedOptions _randomArcs;
 	int _firstMonth, _lastMonth, _executionOdds, _maxArcs, _minDifficulty, _maxDifficulty;
 	std::map<std::string, bool> _researchTriggers;
+	std::map<std::string, bool> _itemTriggers;
 public:
 	/// Creates a new arc script.
 	RuleArcScript(const std::string& type);
@@ -61,6 +62,8 @@ public:
 	int getMaxDifficulty() const { return _maxDifficulty; }
 	/// Gets the research triggers that may apply to this command.
 	const std::map<std::string, bool> &getResearchTriggers() const { return _researchTriggers; }
+	/// Gets the item triggers that may apply to this command.
+	const std::map<std::string, bool> &getItemTriggers() const { return _itemTriggers; }
 
 };
 

@@ -61,6 +61,7 @@ void RuleArcScript::load(const YAML::Node& node)
 	_minDifficulty = node["minDifficulty"].as<int>(_minDifficulty);
 	_maxDifficulty = node["maxDifficulty"].as<int>(_maxDifficulty);
 	_researchTriggers = node["researchTriggers"].as<std::map<std::string, bool> >(_researchTriggers);
+	_itemTriggers = node["itemTriggers"].as<std::map<std::string, bool> >(_itemTriggers);
 }
 
 }

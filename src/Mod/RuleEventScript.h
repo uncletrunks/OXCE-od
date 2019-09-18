@@ -33,6 +33,7 @@ private:
 	std::vector<std::pair<size_t, WeightedOptions*> > _eventWeights;
 	int _firstMonth, _lastMonth, _executionOdds, _minDifficulty, _maxDifficulty;
 	std::map<std::string, bool> _researchTriggers;
+	std::map<std::string, bool> _itemTriggers;
 public:
 	/// Creates a blank RuleEventScript.
 	RuleEventScript(const std::string &type);
@@ -54,6 +55,8 @@ public:
 	int getMaxDifficulty() const { return _maxDifficulty; }
 	/// Gets the research triggers that may apply to this command.
 	const std::map<std::string, bool> &getResearchTriggers() const { return _researchTriggers; }
+	/// Gets the item triggers that may apply to this command.
+	const std::map<std::string, bool> &getItemTriggers() const { return _itemTriggers; }
 	/// Generates an event based on the month.
 	std::string generate(const size_t monthsPassed) const;
 };

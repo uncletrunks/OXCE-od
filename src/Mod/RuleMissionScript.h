@@ -35,6 +35,7 @@ private:
 	std::vector<int> _conditionals;
 	std::vector<std::pair<size_t, WeightedOptions*> > _regionWeights, _missionWeights, _raceWeights;
 	std::map<std::string, bool> _researchTriggers;
+	std::map<std::string, bool> _itemTriggers;
 	bool _useTable, _siteType;
 public:
 	/// Creates a new mission script.
@@ -81,6 +82,8 @@ public:
 	bool hasRegionWeights() const;
 	/// Gets the research triggers that may apply to this command.
 	const std::map<std::string, bool> &getResearchTriggers() const;
+	/// Gets the item triggers that may apply to this command.
+	const std::map<std::string, bool> &getItemTriggers() const;
 	/// Delete this mission from the table? stops it coming up again in random selection, but NOT if a missionScript calls it by name.
 	bool getUseTable() const;
 	/// Sets this script to a terror mission type command or not.

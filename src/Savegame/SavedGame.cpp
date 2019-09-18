@@ -2056,6 +2056,22 @@ bool SavedGame::isResearched(const std::vector<const RuleResearch *> &research, 
 }
 
 /**
+ * Returns if a certain item has been obtained, i.e. is present directly in the base stores.
+ * Items in and on craft, in transfer, worn by soldiers, etc. are ignored!!
+ * @param itemType Item ID.
+ * @return Whether it's obtained or not.
+ */
+bool SavedGame::isItemObtained(const std::string &itemType) const
+{
+	for (auto base : _bases)
+	{
+		if (base->getStorageItems()->getItem(itemType) > 0)
+			return true;
+	}
+	return false;
+}
+
+/**
  * Returns pointer to the Soldier given it's unique ID.
  * @param id A soldier's unique id.
  * @return Pointer to Soldier.

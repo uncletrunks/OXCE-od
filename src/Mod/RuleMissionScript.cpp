@@ -102,6 +102,7 @@ void RuleMissionScript::load(const YAML::Node& node)
 		}
 	}
 	_researchTriggers = node["researchTriggers"].as<std::map<std::string, bool> >(_researchTriggers);
+	_itemTriggers = node["itemTriggers"].as<std::map<std::string, bool> >(_itemTriggers);
 	_useTable = node["useTable"].as<bool>(_useTable);
 	if (_varName.empty() && (_maxRuns > 0 || _avoidRepeats > 0))
 	{
@@ -232,6 +233,14 @@ bool RuleMissionScript::hasRegionWeights() const
 const std::map<std::string, bool> &RuleMissionScript::getResearchTriggers() const
 {
 	return _researchTriggers;
+}
+
+/**
+ * @return a list of item triggers that govern execution of this script.
+ */
+const std::map<std::string, bool> &RuleMissionScript::getItemTriggers() const
+{
+	return _itemTriggers;
 }
 
 /**

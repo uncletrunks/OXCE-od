@@ -3168,6 +3168,16 @@ void GeoscapeState::determineAlienMissions()
 					if (!triggerHappy)
 						break;
 				}
+				if (triggerHappy)
+				{
+					// item requirements
+					for (auto &triggerItem : arcScript->getItemTriggers())
+					{
+						triggerHappy = (save->isItemObtained(triggerItem.first) == triggerItem.second);
+						if (!triggerHappy)
+							break;
+					}
+				}
 				// level three condition check: does random chance favour this command's execution?
 				if (triggerHappy && RNG::percent(arcScript->getExecutionOdds()))
 				{
@@ -3267,6 +3277,16 @@ void GeoscapeState::determineAlienMissions()
 			{
 				triggerHappy = (save->isResearched(j->first) == j->second);
 			}
+			if (triggerHappy)
+			{
+				// item requirements
+				for (auto &triggerItem : command->getItemTriggers())
+				{
+					triggerHappy = (save->isItemObtained(triggerItem.first) == triggerItem.second);
+					if (!triggerHappy)
+						break;
+				}
+			}
 			// levels one and two passed: insert this command into the array.
 			if (triggerHappy)
 			{
@@ -3343,6 +3363,16 @@ void GeoscapeState::determineAlienMissions()
 					triggerHappy = (save->isResearched(trigger.first) == trigger.second);
 					if (!triggerHappy)
 						break;
+				}
+				if (triggerHappy)
+				{
+					// item requirements
+					for (auto &triggerItem : eventScript->getItemTriggers())
+					{
+						triggerHappy = (save->isItemObtained(triggerItem.first) == triggerItem.second);
+						if (!triggerHappy)
+							break;
+					}
 				}
 				// level three condition check: does random chance favour this command's execution?
 				if (triggerHappy && RNG::percent(eventScript->getExecutionOdds()))
