@@ -62,7 +62,7 @@ NewPossibleFacilityState::NewPossibleFacilityState(Base *base, Globe *globe, con
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK13.SCR"));
+	setWindowBackground(_window, "geoNewFacility");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewPossibleFacilityState::btnOkClick);

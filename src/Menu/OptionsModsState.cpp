@@ -81,7 +81,7 @@ OptionsModsState::OptionsModsState() : _curMasterIdx(0)
 	int leftcol = _lstMods->getWidth() - (rightcol + arrowCol);
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
+	setWindowBackground(_window, "modsMenu");
 
 	_txtMaster->setText(tr("STR_BASE_GAME"));
 

@@ -94,7 +94,7 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *r, const RuleManufa
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK05.SCR"));
+	setWindowBackground(_window, "techTreeViewer");
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);

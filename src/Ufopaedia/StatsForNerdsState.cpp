@@ -154,7 +154,7 @@ void StatsForNerdsState::buildUI(bool debug, bool ids, bool defaults)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK05.SCR"));
+	setWindowBackground(_window, "statsForNerds");
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);

@@ -52,7 +52,7 @@ PsiTrainingState::PsiTrainingState()
 	add(_txtTitle, "text", "psiTraining");
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
+	setWindowBackground(_window, "psiTraining");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&PsiTrainingState::btnOkClick);

@@ -61,7 +61,7 @@ ManufactureDependenciesTreeState::ManufactureDependenciesTreeState(const std::st
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK13.SCR"));
+	setWindowBackground(_window, "dependencyTree");
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_TOPIC").arg(tr(_selectedItem)));

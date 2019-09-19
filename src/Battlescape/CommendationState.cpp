@@ -57,7 +57,7 @@ CommendationState::CommendationState(std::vector<Soldier*> soldiersMedalled)
 	centerAllSurfaces();
 
 	// Set up object
-	_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
+	setWindowBackground(_window, "commendations");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CommendationState::btnOkClick);

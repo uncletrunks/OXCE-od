@@ -61,7 +61,7 @@ NewPossibleCraftState::NewPossibleCraftState(Base * base, const std::vector<Rule
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK13.SCR"));
+	setWindowBackground(_window, "geoNewCraft");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewPossibleCraftState::btnOkClick);

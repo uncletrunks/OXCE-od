@@ -73,7 +73,7 @@ ProductionCompleteState::ProductionCompleteState(Base *base, const std::string &
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK17.SCR"));
+	setWindowBackground(_window, "geoManufactureComplete");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&ProductionCompleteState::btnOkClick);

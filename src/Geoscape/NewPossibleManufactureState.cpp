@@ -62,7 +62,7 @@ NewPossibleManufactureState::NewPossibleManufactureState(Base * base, const std:
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK17.SCR"));
+	setWindowBackground(_window, "geoManufacture");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewPossibleManufactureState::btnOkClick);

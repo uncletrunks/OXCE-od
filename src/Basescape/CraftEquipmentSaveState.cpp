@@ -63,7 +63,7 @@ CraftEquipmentSaveState::CraftEquipmentSaveState(CraftEquipmentState *parent) : 
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK04.SCR"));
+	setWindowBackground(_window, "craftEquipmentSave");
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_SAVE_CRAFT_LOADOUT_TEMPLATE"));

@@ -77,7 +77,7 @@ GlobalManufactureState::GlobalManufactureState(bool openedFromBasescape) : _open
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK17.SCR"));
+	setWindowBackground(_window, "globalManufactureMenu");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&GlobalManufactureState::btnOkClick);

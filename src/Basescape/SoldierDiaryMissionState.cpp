@@ -80,7 +80,7 @@ SoldierDiaryMissionState::SoldierDiaryMissionState(Soldier *soldier, int rowEntr
 	centerAllSurfaces();
 
 	// Set up object
-	_window->setBackground(_game->getMod()->getSurface("BACK16.SCR"));
+	setWindowBackground(_window, "soldierDiaryMission");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&SoldierDiaryMissionState::btnOkClick);

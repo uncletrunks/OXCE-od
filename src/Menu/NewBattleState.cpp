@@ -136,7 +136,7 @@ NewBattleState::NewBattleState() : _craft(0)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
+	setWindowBackground(_window, "newBattleMenu");
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();

@@ -52,7 +52,7 @@ UfoLostState::UfoLostState(const std::string &id) : _id(id)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK15.SCR"));
+	setWindowBackground(_window, "UFOLost");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&UfoLostState::btnOkClick);

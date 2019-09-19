@@ -111,7 +111,7 @@ UfoDetectedState::UfoDetectedState(Ufo *ufo, GeoscapeState *state, bool detected
 	add(_lstInfo2, "text", "UFOInfo");
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK15.SCR"));
+	setWindowBackground(_window, "UFOInfo");
 
 	centerAllSurfaces();
 

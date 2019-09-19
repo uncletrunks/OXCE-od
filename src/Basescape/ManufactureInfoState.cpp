@@ -126,7 +126,7 @@ void ManufactureInfoState::buildUi()
 
 	centerAllSurfaces();
 
-	_window->setBackground(_game->getMod()->getSurface("BACK17.SCR"));
+	setWindowBackground(_window, "manufactureInfo");
 
 	_txtTitle->setText(tr(_item ? _item->getName() : _production->getRules()->getName()));
 	_txtTitle->setBig();

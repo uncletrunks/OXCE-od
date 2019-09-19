@@ -56,7 +56,7 @@ CraftNotEnoughPilotsState::CraftNotEnoughPilotsState(Craft *craft) : _craft(craf
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK12.SCR"));
+	setWindowBackground(_window, "craftPilotError");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftNotEnoughPilotsState::btnOkClick);

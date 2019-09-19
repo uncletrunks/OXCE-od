@@ -89,7 +89,7 @@ namespace OpenXcom
 
 		centerAllSurfaces();
 
-		_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
+		setWindowBackground(_window, "ufopaedia");
 
 		_txtTitle->setBig();
 		_txtTitle->setAlign(ALIGN_CENTER);

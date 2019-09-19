@@ -39,7 +39,7 @@ ChangeHeadquartersState::ChangeHeadquartersState(Base *base) : _base(base)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK13.SCR"));
+	setWindowBackground(_window, "changeHeadquarters");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&ChangeHeadquartersState::btnOkClick);

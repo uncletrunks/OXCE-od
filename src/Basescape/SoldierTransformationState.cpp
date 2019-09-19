@@ -99,7 +99,7 @@ SoldierTransformationState::SoldierTransformationState(RuleSoldierTransformation
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK02.SCR"));
+	setWindowBackground(_window, "soldierTransformation");
 
 	_btnCancel->setText(tr("STR_CANCEL_UC"));
 	_btnCancel->onMouseClick((ActionHandler)&SoldierTransformationState::btnCancelClick);

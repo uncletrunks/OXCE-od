@@ -56,7 +56,7 @@ TrainingState::TrainingState()
 	add(_txtTitle, "text", "martialTraining");
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK02.SCR"));
+	setWindowBackground(_window, "martialTraining");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&TrainingState::btnOkClick);

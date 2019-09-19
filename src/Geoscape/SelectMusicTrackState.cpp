@@ -67,7 +67,7 @@ SelectMusicTrackState::SelectMusicTrackState(SelectMusicTrackOrigin origin) : _o
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
+	setWindowBackground(_window, "selectMusicTrack");
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();

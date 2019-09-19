@@ -55,7 +55,7 @@ namespace OpenXcom
 		centerAllSurfaces();
 
 		// Set up objects
-		_window->setBackground(_game->getMod()->getSurface("BACK01.SCR"));
+		setWindowBackground(_window, "optionsMenu");
 
 		_btnYes->setText(tr("STR_YES"));
 		_btnYes->onMouseClick((ActionHandler)&OptionsInformExtendedState::btnYesClick);

@@ -70,7 +70,7 @@ GlobalResearchState::GlobalResearchState(bool openedFromBasescape) : _openedFrom
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK05.SCR"));
+	setWindowBackground(_window, "globalResearchMenu");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&GlobalResearchState::btnOkClick);

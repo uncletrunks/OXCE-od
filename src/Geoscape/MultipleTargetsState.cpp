@@ -63,7 +63,7 @@ MultipleTargetsState::MultipleTargetsState(std::vector<Target*> targets, Craft *
 		add(_window, "window", "multipleTargets");
 
 		// Set up objects
-		_window->setBackground(_game->getMod()->getSurface("BACK15.SCR"));
+		setWindowBackground(_window, "multipleTargets");
 
 		int y = btnY;
 		for (size_t i = 0; i < _targets.size(); ++i)

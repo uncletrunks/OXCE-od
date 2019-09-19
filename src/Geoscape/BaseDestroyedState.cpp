@@ -53,7 +53,7 @@ BaseDestroyedState::BaseDestroyedState(Base *base, bool missiles, bool partialDe
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK15.SCR"));
+	setWindowBackground(_window, "baseDestroyed");
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&BaseDestroyedState::btnOkClick);

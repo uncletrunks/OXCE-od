@@ -56,7 +56,7 @@ CraftEquipmentLoadState::CraftEquipmentLoadState(CraftEquipmentState *parent) : 
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK04.SCR"));
+	setWindowBackground(_window, "craftEquipmentLoad");
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setText(tr("STR_LOAD_CRAFT_LOADOUT_TEMPLATE"));

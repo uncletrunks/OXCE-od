@@ -16,6 +16,7 @@ interfaces: #done
         color2: 48
         border: 48
   - type: tests
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 6
@@ -32,6 +33,7 @@ interfaces: #done
       - id: button2
         color: 1
   - type: newBattleMenu
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 6
@@ -48,6 +50,7 @@ interfaces: #done
       - id: button2
         color: 1
   - type: newGameMenu
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4
@@ -60,6 +63,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: endGameStatistics
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4
@@ -75,6 +79,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: optionsMenu
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 6
@@ -129,6 +134,7 @@ interfaces: #done
       - id: disabledUserOption
         color: 3
   - type: modsMenu
+    backgroundImage: BACK01.SCR
     elements:
       - id: optionLists
         color: 1
@@ -138,6 +144,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: saveMenus
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4
@@ -157,6 +164,7 @@ interfaces: #done
       - id: confirmDelete
         color: 1
   - type: pauseMenu
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4
@@ -177,6 +185,7 @@ interfaces: #done
       - id: battlescapeColor
         color: 0
   - type: geoCraft
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1
@@ -202,6 +211,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: selectMusicTrack
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4
@@ -215,6 +225,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: intercept
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1
@@ -236,6 +247,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: ufoTracker
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1
@@ -257,6 +269,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftPatrol
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1
@@ -270,6 +283,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftError
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1
@@ -283,6 +297,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftPilotError
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1
@@ -296,6 +311,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: targetInfo
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 1     # brown
@@ -308,6 +324,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: confirmDestination
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1     # aqua
@@ -321,6 +338,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: confirmCydonia
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 2     # red
@@ -331,6 +349,7 @@ interfaces: #done
       - id: text
         color: 1   # yellow
   - type: confirmLanding
+    backgroundImage: BACK15.SCR
     elements:
       - id: palette
         color: 1
@@ -342,6 +361,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: lowFuel
+    backgroundImage: BACK12.SCR
     elements:
       - id: palette
         color: 1
@@ -352,6 +372,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: UFOInfo
+    backgroundImage: BACK15.SCR
     elements:
       - id: palette
         color: 1     # aqua
@@ -365,6 +386,7 @@ interfaces: #done
         color: 1     # white
         color2: 1    # white
   - type: UFOLost
+    backgroundImage: BACK15.SCR
     elements:
       - id: palette
         color: 1     # aqua
@@ -378,6 +400,7 @@ interfaces: #done
         color: 1     # white
         color2: 1    # white
   - type: multipleTargets
+    backgroundImage: BACK15.SCR
     elements:
       - id: palette
         color: 1     # aqua
@@ -391,6 +414,7 @@ interfaces: #done
         color: 1     # white
         color2: 1    # white
   - type: baseDestroyed
+    backgroundImage: BACK15.SCR
     elements:
       - id: palette
         color: 1     # aqua
@@ -404,6 +428,7 @@ interfaces: #done
         color: 1     # white
         color2: 1    # white
   - type: dogfightInfo
+    backgroundImage: BACK15.SCR
     elements:
       - id: palette
         color: 4
@@ -414,6 +439,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: baseDefense
+    backgroundImage: BACK04.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -435,6 +461,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: alienBase
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 1     # pink
@@ -445,6 +472,7 @@ interfaces: #done
       - id: button
         color: 1   # yellow
   - type: itemsArriving
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 3     # yellow
@@ -458,6 +486,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoResearch
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0     # green
@@ -470,6 +499,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoResearchComplete
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0     # green
@@ -482,6 +512,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoResearchRequired
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0     # green
@@ -494,6 +525,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: trainingFinished
+    backgroundImage: BACK02.SCR
     elements:
       - id: palette
         color: 2     # oxide
@@ -506,6 +538,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoNewCraft
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 2     # oxide
@@ -518,6 +551,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoNewFacility
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 2     # oxide
@@ -530,6 +564,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoNewItem
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 2     # oxide
@@ -542,6 +577,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoManufacture
+    backgroundImage: BACK17.SCR
     elements:
       - id: palette
         color: 2     # oxide
@@ -554,6 +590,7 @@ interfaces: #done
       - id: button
         color: 1   # minty green
   - type: geoManufactureComplete
+    backgroundImage: BACK17.SCR
     elements:
       - id: palette
         color: 2     # oxide
@@ -646,6 +683,7 @@ interfaces: #done
         pos: [0, 134]
         size: [160, 58]
   - type: baseNaming
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4
@@ -656,6 +694,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: monthlyReport
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 3
@@ -670,6 +709,7 @@ interfaces: #done
       - id: button
         color: 1   # bright green
   - type: psiTraining
+    backgroundImage: BACK01.SCR
     palette: PAL_GEOSCAPE
     elements:
       - id: palette
@@ -683,6 +723,7 @@ interfaces: #done
       - id: button2
         color: 1   # light blue
   - type: martialTraining
+    backgroundImage: BACK02.SCR
     palette: PAL_GEOSCAPE
     elements:
       - id: palette
@@ -696,6 +737,7 @@ interfaces: #done
       - id: button2
         color: 1   # light blue
   - type: allocatePsi
+    backgroundImage: BACK01.SCR
     palette: PAL_GEOSCAPE
     elements:
       - id: palette
@@ -712,6 +754,7 @@ interfaces: #done
       - id: button
         color: 1   # blue
   - type: allocateMartial
+    backgroundImage: BACK02.SCR
     palette: PAL_GEOSCAPE
     elements:
       - id: palette
@@ -728,6 +771,7 @@ interfaces: #done
       - id: button
         color: 1   # blue
   - type: fundingWindow
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 3
@@ -775,6 +819,7 @@ interfaces: #done
         color: 141    # magenta (inverted button offset)
         color2: 144  # also magenta (the line itself)
   - type: ufopaedia
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4
@@ -790,17 +835,8 @@ interfaces: #done
         color: 1
       - id: button2
         color: 1
-  - type: noContainment
-    elements:
-      - id: palette
-        color: 4     # green
-      - id: window
-        color: 1   # bright green
-      - id: text
-        color: 1   # minty green
-      - id: button
-        color: 1   # minty green
   - type: promotions
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4     # green
@@ -815,6 +851,7 @@ interfaces: #done
       - id: button
         color: 1   # bright green
   - type: cannotReequip
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4     # green
@@ -829,6 +866,7 @@ interfaces: #done
       - id: button
         color: 1   # bright green
   - type: debriefing
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4     # green
@@ -850,6 +888,7 @@ interfaces: #done
       - id: errorMessage
         color: 1     # white
   - type: commendations
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4     # green
@@ -863,6 +902,7 @@ interfaces: #done
       - id: button
         color: 1   # bright green
   - type: commendationsLate
+    backgroundImage: BACK02.SCR
     music: GMDEBPOR
     palette: PAL_BASESCAPE
     elements:
@@ -880,6 +920,7 @@ interfaces: #done
       - id: button
         color: 1   # blue
   - type: geoscape
+    backgroundImage: BACK01.SCR
     elements:
       - id: palette
         color: 4     # brown
@@ -906,13 +947,8 @@ interfaces: #done
         color: 6     # brown
       - id: errorMessage
         color: 1   # even lighter blue
-  - type: gameOver
-    elements:
-      - id: defeatText
-        color: 244
-      - id: victoryText
-        color: 244
   - type: sellMenu
+    backgroundImage: BACK13.SCR
     palette: PAL_GEOSCAPE
     elements:
       - id: palette
@@ -931,6 +967,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: dependencyTree
+    backgroundImage: BACK13.SCR
     palette: PAL_GEOSCAPE
     elements:
       - id: palette
@@ -947,6 +984,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: buyMenu
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 6     # blue
@@ -968,6 +1006,7 @@ interfaces: #done
       - id: errorMessage
         color: 1   # pink
   - type: manageContainment
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0     # burgundy
@@ -987,6 +1026,7 @@ interfaces: #done
       - id: errorMessage
         color: 1   # pink
   - type: transferBaseSelect
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 6     # blue
@@ -1002,6 +1042,7 @@ interfaces: #done
         color2: 244  # gold
         border: 1
   - type: transferMenu
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 6     # brown
@@ -1022,6 +1063,7 @@ interfaces: #done
       - id: errorMessage
         color: 1   # pink
   - type: transferConfirm
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 6     # oxide
@@ -1033,6 +1075,7 @@ interfaces: #done
         color: 1   # blue
         color2: 1  # pink
   - type: transferInfo
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 6
@@ -1046,6 +1089,7 @@ interfaces: #done
         color: 244
         border: 1
   - type: selectFacility
+    backgroundImage: BACK05.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -1059,6 +1103,7 @@ interfaces: #done
       - id: list
         color: 1
   - type: placeFacility
+    backgroundImage: BACK01.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -1076,6 +1121,7 @@ interfaces: #done
       - id: errorMessage
         color: 1
   - type: dismantleFacility
+    backgroundImage: BACK13.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -1088,6 +1134,7 @@ interfaces: #done
         color: 1
         color2: 81
   - type: changeHeadquarters
+    backgroundImage: BACK13.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -1099,6 +1146,7 @@ interfaces: #done
       - id: text
         color: 1
   - type: manufactureMenu
+    backgroundImage: BACK17.SCR
     elements:
       - id: palette
         color: 2     # oxide
@@ -1115,6 +1163,7 @@ interfaces: #done
       - id: button
         color: 1   # blue
   - type: globalManufactureMenu
+    backgroundImage: BACK17.SCR
     elements:
       - id: palette
         color: 2
@@ -1132,6 +1181,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: selectNewManufacture
+    backgroundImage: BACK17.SCR
     parent: manufactureMenu
     elements:
       - id: window
@@ -1150,6 +1200,7 @@ interfaces: #done
       - id: catBox
         color: 1   # pink
   - type: allocateManufacture
+    backgroundImage: BACK17.SCR
     parent: manufactureMenu
     elements:
       - id: window
@@ -1163,6 +1214,7 @@ interfaces: #done
       - id: button
         color: 1   # blue
   - type: manufactureInfo
+    backgroundImage: BACK17.SCR
     parent: manufactureMenu
     elements:
       - id: window
@@ -1178,6 +1230,7 @@ interfaces: #done
       - id: button2
         color: 1   # purple
   - type: researchMenu
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0     # green
@@ -1192,6 +1245,7 @@ interfaces: #done
       - id: button
         color: 1   # purple
   - type: globalResearchMenu
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0
@@ -1207,6 +1261,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: selectNewResearch
+    backgroundImage: BACK05.SCR
     parent: researchMenu
     elements:
       - id: window
@@ -1220,6 +1275,7 @@ interfaces: #done
       - id: button
         color: 1   # purple
   - type: allocateResearch
+    backgroundImage: BACK05.SCR
     parent: researchMenu
     elements:
       - id: window
@@ -1232,6 +1288,7 @@ interfaces: #done
       - id: button2
         color: 1   # blue
   - type: techTreeViewer
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0     # green
@@ -1250,6 +1307,7 @@ interfaces: #done
       - id: button
         color: 1   # purple
   - type: techTreeSelect
+    backgroundImage: BACK05.SCR
     parent: techTreeViewer
     elements:
       - id: window
@@ -1287,6 +1345,7 @@ interfaces: #done
         color: 128
         border: 129
   - type: storesInfo
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 6
@@ -1300,6 +1359,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: costsInfo
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 3
@@ -1316,6 +1376,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: soldierList
+    backgroundImage: BACK02.SCR
     elements:
       - id: palette
         color: 2
@@ -1396,6 +1457,7 @@ interfaces: #done
       - id: errorMessage
         color: 1   # pink
   - type: sackSoldier
+    backgroundImage: BACK13.SCR
     elements:
       - id: palette
         color: 6     # oxide
@@ -1406,6 +1468,7 @@ interfaces: #done
       - id: button
         color: 1   # purple
   - type: soldierArmor
+    backgroundImage: BACK14.SCR
     elements:
       - id: palette
         color: 4     # green
@@ -1420,6 +1483,7 @@ interfaces: #done
       - id: button
         color: 1   # white
   - type: soldierAvatar
+    backgroundImage: BACK14.SCR
     elements:
       - id: palette
         color: 4     # green
@@ -1434,6 +1498,7 @@ interfaces: #done
       - id: button
         color: 1   # white
   - type: soldierBonus
+    backgroundImage: BACK14.SCR
     elements:
       - id: palette
         color: 4     # green
@@ -1448,6 +1513,7 @@ interfaces: #done
       - id: button
         color: 1   # white
   - type: soldierMemorial
+    backgroundImage: BACK02.SCR
     music: GMDEBPOR
     palette: PAL_BASESCAPE
     elements:
@@ -1465,6 +1531,7 @@ interfaces: #done
       - id: button
         color: 1   # blue
   - type: soldierDiary
+    backgroundImage: BACK02.SCR
     elements:
       - id: palette
         color: 6
@@ -1484,6 +1551,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: soldierDiaryPerformance
+    backgroundImage: BACK02.SCR
     elements:
       - id: palette
         color: 6
@@ -1501,6 +1569,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: soldierDiaryMission
+    backgroundImage: BACK16.SCR
     elements:
       - id: palette
         color: 4     # burgundy
@@ -1515,6 +1584,7 @@ interfaces: #done
       - id: button
         color: 1   # gold
   - type: craftEquipment
+    backgroundImage: BACK04.SCR
     elements:
       - id: palette
         color: 2
@@ -1536,6 +1606,7 @@ interfaces: #done
       - id: errorMessage
         color: 1
   - type: craftEquipmentSave
+    backgroundImage: BACK04.SCR
     parent: craftEquipment
     elements:
       - id: window
@@ -1550,6 +1621,7 @@ interfaces: #done
         color2: 239
         border: 1
   - type: craftEquipmentLoad
+    backgroundImage: BACK04.SCR
     parent: craftEquipment
     elements:
       - id: window
@@ -1564,6 +1636,7 @@ interfaces: #done
         color2: 239
         border: 1
   - type: craftArmor
+    backgroundImage: BACK14.SCR
     elements:
       - id: palette
         color: 4     # aqua
@@ -1579,6 +1652,7 @@ interfaces: #done
       - id: otherCraft
         color: 239   # blue
   - type: craftInfo
+    backgroundImage: BACK14.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -1596,6 +1670,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftWeapons
+    backgroundImage: BACK14.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -1610,6 +1685,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftSoldiers
+    backgroundImage: BACK02.SCR
     elements:
       - id: palette
         color: 2
@@ -1627,6 +1703,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftPilots
+    backgroundImage: BACK02.SCR
     elements:
       - id: palette
         color: 3
@@ -1643,6 +1720,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftPilotsSelect
+    backgroundImage: BACK02.SCR
     parent: craftPilots
     elements:
       - id: window
@@ -1658,6 +1736,7 @@ interfaces: #done
       - id: button
         color: 1
   - type: craftSelect
+    backgroundImage: BACK14.SCR
     palette: PAL_BASESCAPE
     elements:
       - id: palette
@@ -2168,6 +2247,7 @@ interfaces: #done
         color: 2       # light grey
         color2: 244    # blue
   - type: statsForNerds
+    backgroundImage: BACK05.SCR
     elements:
       - id: palette
         color: 0
@@ -2188,6 +2268,7 @@ interfaces: #done
       - id: comboBox
         color: 239
   - type: soldierTransformation
+    backgroundImage: BACK02.SCR
     elements:
       - id: palette
         color: 2

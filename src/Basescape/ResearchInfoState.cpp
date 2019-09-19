@@ -103,7 +103,7 @@ void ResearchInfoState::buildUi()
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface("BACK05.SCR"));
+	setWindowBackground(_window, "allocateResearch");
 
 	_txtTitle->setBig();
 

@@ -84,7 +84,7 @@ NewManufactureListState::NewManufactureListState(Base *base) : _base(base), _sho
 
 	centerAllSurfaces();
 
-	_window->setBackground(_game->getMod()->getSurface("BACK17.SCR"));
+	setWindowBackground(_window, "selectNewManufacture");
 
 	_txtTitle->setText(tr("STR_PRODUCTION_ITEMS"));
 	_txtTitle->setBig();
