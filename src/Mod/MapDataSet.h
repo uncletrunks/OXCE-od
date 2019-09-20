@@ -59,7 +59,7 @@ public:
 	/// Gets the surfaces in this dataset.
 	SurfaceSet *getSurfaceset() const;
 	/// Loads the objects from an MCD file.
-	void loadData();
+	void loadData(bool validate = true);
 	///	Unloads to free memory.
 	void unloadData();
 	/// Gets a blank floor tile.

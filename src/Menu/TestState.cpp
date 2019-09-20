@@ -138,7 +138,7 @@ TestState::TestState()
 	_txtTestCase->setText(tr("STR_TEST_CASE"));
 
 	_testCases.push_back("STR_BAD_NODES");
-	_testCases.push_back("STR_ZERO_COST_MOVEMENT");
+	_testCases.push_back("STR_MCD_CHECK");
 	_testCases.push_back("STR_PALETTE_CHECK");
 
 	_cbxTestCase->setOptions(_testCases, true);
@@ -486,9 +486,30 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 	for (auto myMapDataSet : *terrainRule->getMapDataSets())
 	{
 		int index = 0;
-		myMapDataSet->loadData();
+		myMapDataSet->loadData(false);
+		auto size = myMapDataSet->getObjectsRaw()->size();
 		for (auto myMapData : *myMapDataSet->getObjectsRaw())
 		{
+			// Validate MCD references
+			if (myMapData->getDieMCD() >= size)
+			{
+				std::ostringstream ss;
+				ss << "terrain: " << terrainRule->getName() << " dataset: " << myMapDataSet->getName() << " object " << index << " has invalid DieMCD: " << myMapData->getDieMCD();
+				std::string str = ss.str();
+				Log(LOG_ERROR) << "Error in " << str << ". Found using OXCE test cases.";
+				errors++;
+				uniqueResults[myMapDataSet->getName()].insert(index);
+			}
+			if (myMapData->getAltMCD() >= size)
+			{
+				std::ostringstream ss;
+				ss << "terrain: " << terrainRule->getName() << " dataset: " << myMapDataSet->getName() << " object " << index << " has invalid AltMCD: " << myMapData->getAltMCD();
+				std::string str = ss.str();
+				Log(LOG_ERROR) << "Error in " << str << ". Found using OXCE test cases.";
+				errors++;
+				uniqueResults[myMapDataSet->getName()].insert(index);
+			}
+
 			if (myMapData->getObjectType() == O_FLOOR)
 			{
 				if (myMapData->getTUCost(MT_WALK) < 1)

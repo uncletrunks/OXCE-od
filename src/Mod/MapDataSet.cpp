@@ -101,7 +101,7 @@ SurfaceSet *MapDataSet::getSurfaceset() const
  * Loads terrain data in XCom format (MCD & PCK files).
  * @sa http://www.ufopaedia.org/index.php?title=MCD
  */
-void MapDataSet::loadData()
+void MapDataSet::loadData(bool validate)
 {
 	// prevents loading twice
 	if (_loaded) return;
@@ -216,19 +216,22 @@ void MapDataSet::loadData()
 	}
 
 	// Validate MCD references
-	for (size_t i = 0; i < _objects.size(); ++i)
+	if (validate)
 	{
-		if (_objects[i]->getDieMCD() >= _objects.size())
+		for (size_t i = 0; i < _objects.size(); ++i)
 		{
-			std::ostringstream ss;
-			ss << "MCD " << _name << " object " << i << " has invalid DieMCD: " << _objects[i]->getDieMCD();
-			throw Exception(ss.str());
-		}
-		if (_objects[i]->getAltMCD() >= _objects.size())
-		{
-			std::ostringstream ss;
-			ss << "MCD " << _name << " object " << i << " has invalid AltMCD: " << _objects[i]->getAltMCD();
-			throw Exception(ss.str());
+			if (_objects[i]->getDieMCD() >= _objects.size())
+			{
+				std::ostringstream ss;
+				ss << "MCD " << _name << " object " << i << " has invalid DieMCD: " << _objects[i]->getDieMCD();
+				throw Exception(ss.str());
+			}
+			if (_objects[i]->getAltMCD() >= _objects.size())
+			{
+				std::ostringstream ss;
+				ss << "MCD " << _name << " object " << i << " has invalid AltMCD: " << _objects[i]->getAltMCD();
+				throw Exception(ss.str());
+			}
 		}
 	}
 
