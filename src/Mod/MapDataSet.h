@@ -46,8 +46,6 @@ private:
 public:
 	MapDataSet(const std::string &name);
 	~MapDataSet();
-	/// Loads the map data set from YAML.
-	void load(const YAML::Node& node);
 	/// Loads voxeldata from a DAT file.
 	static void loadLOFTEMPS(const std::string &filename, std::vector<Uint16> *voxelData);
 	/// Gets the dataset name (used for MAP generation).
@@ -55,7 +53,9 @@ public:
 	/// Gets the dataset size.
 	size_t getSize() const;
 	/// Gets the objects in this dataset.
-	std::vector<MapData*> *getObjects();
+	std::vector<MapData*> *getObjectsRaw();
+	/// Gets an object in this dataset.
+	MapData *getObject(size_t i);
 	/// Gets the surfaces in this dataset.
 	SurfaceSet *getSurfaceset() const;
 	/// Loads the objects from an MCD file.

@@ -10,11 +10,10 @@
 
 #ifndef __NO_OPENGL
 
+#include "OpenGL.h"
 #include <SDL.h>
-#include <SDL_opengl.h>
 #include <yaml-cpp/yaml.h>
 
-#include "OpenGL.h"
 #include "Logger.h"
 #include "Surface.h"
 #include "FileMap.h"

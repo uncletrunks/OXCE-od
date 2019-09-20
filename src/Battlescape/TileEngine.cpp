@@ -2770,7 +2770,7 @@ bool TileEngine::detonate(Tile* tile, int explosive)
 			//this trick is to follow transformed object parts (object can become a ground)
 			diemcd = tiles[i]->getMapData(currentpart)->getDieMCD();
 			if (diemcd!=0)
-				currentpart2 = tiles[i]->getMapData(currentpart)->getDataset()->getObjects()->at(diemcd)->getObjectType();
+				currentpart2 = tiles[i]->getMapData(currentpart)->getDataset()->getObject(diemcd)->getObjectType();
 			else
 				currentpart2 = currentpart;
 			if (tiles[i]->destroy(currentpart, _save->getObjectiveType()))

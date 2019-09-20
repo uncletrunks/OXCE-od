@@ -487,7 +487,7 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 	{
 		int index = 0;
 		myMapDataSet->loadData();
-		for (auto myMapData : *myMapDataSet->getObjects())
+		for (auto myMapData : *myMapDataSet->getObjectsRaw())
 		{
 			if (myMapData->getObjectType() == O_FLOOR)
 			{
