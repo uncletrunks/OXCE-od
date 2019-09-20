@@ -270,6 +270,7 @@ void MainMenuState::btnQuitClick(Action *)
  */
 void MainMenuState::btnUpdateClick(Action*)
 {
+#ifdef _WIN32
 	const std::string relativeExeZipFileName = _debugInVisualStudio ? "Debug/exe.zip" : "exe.zip";
 	const std::string relativeExeNewFileName = _debugInVisualStudio ? "Debug/OpenXcomEx.exe.new" : "OpenXcomEx.exe.new";
 
@@ -462,6 +463,7 @@ void MainMenuState::btnUpdateClick(Action*)
 	Log(LOG_INFO) << "Update prepared, restarting.";
 	_game->setUpdateFlag(true);
 	_game->quit();
+#endif
 }
 
 /**
