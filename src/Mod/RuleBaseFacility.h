@@ -93,6 +93,7 @@ public:
 	int getMissileAttraction() const { return _missileAttraction; }
 	/// Is this facility allowed for a given type of base?
 	bool isAllowedForBaseType(bool fakeUnderwaterBase) const;
+	int getFakeUnderwaterRaw() const { return _fakeUnderwater; }
 	/// Gets if the facility is an access lift.
 	bool isLift() const;
 	/// Gets if the facility has hyperwave detection.

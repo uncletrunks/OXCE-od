@@ -2279,6 +2279,26 @@ void StatsForNerdsState::initArmorList()
 		std::vector<int> tmpSoundVector;
 		tmpSoundVector.push_back(armorRule->getMoveSound());
 		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", tmpSoundVector);
+		addVectorOfIntegers(ss, armorRule->getMaleDeathSounds(), "deathMale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getMaleDeathSounds());
+		addVectorOfIntegers(ss, armorRule->getFemaleDeathSounds(), "deathFemale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getFemaleDeathSounds());
+		addVectorOfIntegers(ss, armorRule->getMaleSelectUnitSounds(), "selectUnitMale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getMaleSelectUnitSounds());
+		addVectorOfIntegers(ss, armorRule->getFemaleSelectUnitSounds(), "selectUnitFemale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getFemaleSelectUnitSounds());
+		addVectorOfIntegers(ss, armorRule->getMaleStartMovingSounds(), "startMovingMale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getMaleStartMovingSounds());
+		addVectorOfIntegers(ss, armorRule->getFemaleStartMovingSounds(), "startMovingFemale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getFemaleStartMovingSounds());
+		addVectorOfIntegers(ss, armorRule->getMaleSelectWeaponSounds(), "selectWeaponMale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getMaleSelectWeaponSounds());
+		addVectorOfIntegers(ss, armorRule->getFemaleSelectWeaponSounds(), "selectWeaponFemale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getFemaleSelectWeaponSounds());
+		addVectorOfIntegers(ss, armorRule->getMaleAnnoyedSounds(), "annoyedMale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getMaleAnnoyedSounds());
+		addVectorOfIntegers(ss, armorRule->getFemaleAnnoyedSounds(), "annoyedFemale");
+		addSoundVectorResourcePaths(ss, mod, "BATTLE.CAT", armorRule->getFemaleAnnoyedSounds());
 
 		addSection("{Animations}", "", _white);
 		addDrawingRoutine(ss, armorRule->getDrawingRoutine(), "drawingRoutine");
@@ -2534,6 +2554,7 @@ void StatsForNerdsState::initFacilityList()
 		addSingleString(ss, facilityRule->getDestroyedFacility() == 0 ? "" : facilityRule->getDestroyedFacility()->getType(), "destroyedFacility");
 
 		addSection("{Visuals}", "", _white);
+		addInteger(ss, facilityRule->getFakeUnderwaterRaw(), "fakeUnderwater", -1);
 		addSingleString(ss, facilityRule->getMapName(), "mapName");
 		addBoolean(ss, !facilityRule->getVerticalLevels().empty(), "verticalLevels*"); // just say if there are any or not
 		addVectorOfPositions(ss, facilityRule->getStorageTiles(), "storageTiles");
