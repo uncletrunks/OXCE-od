@@ -108,7 +108,7 @@ static inline void ShaderDrawImpl(Func&& f, helper::controler<SrcType>... src)
 template<typename ColorFunc, typename... SrcType>
 static inline void ShaderDraw(const SrcType&... src_frame)
 {
-	ShaderDrawImpl(ColorFunc::func, helper::controler<SrcType>(src_frame)...);
+	ShaderDrawImpl([](auto&&... a){ ColorFunc::func(std::forward<decltype(a)>(a)...); }, helper::controler<SrcType>(src_frame)...);
 }
 
 /**
