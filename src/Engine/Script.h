@@ -550,10 +550,7 @@ class ScriptWorkerBase
 	template<size_t BaseOffset, template<typename> class Filter, typename... Args, typename T, int... I>
 	void forRegImpl(T&& arg, helper::ListTag<I...>)
 	{
-		(void)helper::DummySeq
-		{
-			(forRegImplLoop<BaseOffset, I, Args...>(Filter<Args>{}, std::forward<T>(arg)), 0)...,
-		};
+		(forRegImplLoop<BaseOffset, I, Args...>(Filter<Args>{}, std::forward<T>(arg)), ...);
 	}
 
 	template<size_t BaseOffset, template<typename> class Filter, typename... Args, typename T>
@@ -1682,10 +1679,7 @@ public:
 	/// Load scripts.
 	void load(const std::string& type, const YAML::Node& node, const Parent& parsers)
 	{
-		(void)helper::DummySeq
-		{
-			(get<Parsers>().load(type, node, parsers.template get<Parsers>()), 0)...,
-		};
+		(get<Parsers>().load(type, node, parsers.template get<Parsers>()), ...);
 	}
 };
 
@@ -1730,10 +1724,7 @@ public:
 	ScriptGroup(ScriptGlobal* shared, Master* master) : Parsers{ shared, master, }...
 	{
 		(void)master;
-		(void)helper::DummySeq
-		{
-			(shared->pushParser(&get<Parsers>()), 0)...,
-		};
+		(shared->pushParser(&get<Parsers>()), ...);
 	}
 
 	/// Get parser by type.

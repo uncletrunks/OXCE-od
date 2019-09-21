@@ -25,16 +25,6 @@ namespace OpenXcom
 namespace helper
 {
 
-
-/**
- * Dummy object used to exploit argument order evaluation in std::initializer_list.
- * @param Ignored
- */
-struct DummySeq
-{
-	DummySeq(std::initializer_list<int>) { };
-};
-
 /**
  * Tag class used for function tag dispatch based on type.
  */

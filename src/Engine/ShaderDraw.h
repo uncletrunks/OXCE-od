@@ -24,6 +24,12 @@
 namespace OpenXcom
 {
 
+template<typename First, typename... Rest>
+static inline First&& GetFirst(First&& f, Rest&&... r)
+{
+	return std::forward<First>(f);
+}
+
 /**
  * Universal blit function implementation.
  * @param f called function.
@@ -33,72 +39,61 @@ template<typename Func, typename... SrcType>
 static inline void ShaderDrawImpl(Func&& f, helper::controler<SrcType>... src)
 {
 	//get basic draw range in 2d space
-	GraphSubset end_temp = std::get<0>(std::tie(src...)).get_range();
+	GraphSubset end_temp = GetFirst(src...).get_range();
 
 	//intersections with src ranges
-	(void)helper::DummySeq
-	{
-		(src.mod_range(end_temp), 0)...
-	};
+	(src.mod_range(end_temp), ...);
 
 	const GraphSubset end = end_temp;
 	if (end.size_x() == 0 || end.size_y() == 0)
 		return;
+
 	//set final draw range in 2d space
-	(void)helper::DummySeq
-	{
-		(src.set_range(end), 0)...
-	};
+	(src.set_range(end), ...);
 
 
 	int begin_y = 0, end_y = end.size_y();
+
 	//determining iteration range in y-axis
-	(void)helper::DummySeq
-	{
-		(src.mod_y(begin_y, end_y), 0)...
-	};
+	(src.mod_y(begin_y, end_y), ...);
+
 	if(begin_y>=end_y)
 		return;
+
 	//set final iteration range
-	(void)helper::DummySeq
-	{
-		(src.set_y(begin_y, end_y), 0)...
-	};
+	(src.set_y(begin_y, end_y), ...);
 
 	//iteration on y-axis
-	for (int y = end_y-begin_y; y>0; --y, (void)helper::DummySeq{ (src.inc_y(), 0)... })
+	for (int y = end_y-begin_y; y>0; --y, (src.inc_y(), ...))
 	{
 		int begin_x = 0, end_x = end.size_x();
+
 		//determining iteration range in x-axis
-		(void)helper::DummySeq
-		{
-			(src.mod_x(begin_x, end_x), 0)...
-		};
+		(src.mod_x(begin_x, end_x), ...);
+
 		if (begin_x>=end_x)
 			continue;
+
 		//set final iteration range
-		(void)helper::DummySeq
-		{
-			(src.set_x(begin_x, end_x), 0)...
-		};
+		(src.set_x(begin_x, end_x), ...);
 
 		int size_x = end_x-begin_x;
 		//iteration on x-axis
 		for (int x = size_x / 4; x>0; --x)
 		{
-			f(src.get_ref()...); (void)helper::DummySeq{ (src.inc_x(), 0)... };
-			f(src.get_ref()...); (void)helper::DummySeq{ (src.inc_x(), 0)... };
-			f(src.get_ref()...); (void)helper::DummySeq{ (src.inc_x(), 0)... };
-			f(src.get_ref()...); (void)helper::DummySeq{ (src.inc_x(), 0)... };
+			f(src.get_ref()...); (src.inc_x(), ...);
+			f(src.get_ref()...); (src.inc_x(), ...);
+			f(src.get_ref()...); (src.inc_x(), ...);
+			f(src.get_ref()...); (src.inc_x(), ...);
 		}
 		if (size_x & 2)
 		{
-			f(src.get_ref()...); (void)helper::DummySeq{ (src.inc_x(), 0)... };
-			f(src.get_ref()...); (void)helper::DummySeq{ (src.inc_x(), 0)... };
+			f(src.get_ref()...); (src.inc_x(), ...);
+			f(src.get_ref()...); (src.inc_x(), ...);
 		}
 		if (size_x & 1)
 		{
-			f(src.get_ref()...); (void)helper::DummySeq{ (src.inc_x(), 0)... };
+			f(src.get_ref()...); (src.inc_x(), ...);
 		}
 	}
 
