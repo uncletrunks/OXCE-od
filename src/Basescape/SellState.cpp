@@ -175,7 +175,8 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
-		if ((*i)->getCraft() == 0 && _debriefingState == 0)
+		if (_debriefingState) break;
+		if ((*i)->getCraft() == 0)
 		{
 			TransferRow row = { TRANSFER_SOLDIER, (*i), (*i)->getName(true), 0, 1, 0, 0 };
 			_items.push_back(row);
@@ -188,7 +189,8 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	}
 	for (std::vector<Craft*>::iterator i = _base->getCrafts()->begin(); i != _base->getCrafts()->end(); ++i)
 	{
-		if ((*i)->getStatus() != "STR_OUT" && _debriefingState == 0)
+		if (_debriefingState) break;
+		if ((*i)->getStatus() != "STR_OUT")
 		{
 			TransferRow row = { TRANSFER_CRAFT, (*i), (*i)->getName(_game->getLanguage()), (*i)->getRules()->getSellCost(), 1, 0, 0 };
 			_items.push_back(row);
@@ -619,7 +621,7 @@ void SellState::btnOkClick(Action *)
 	}
 	if (_debriefingState != 0 && _debriefingState->getTotalRecoveredItemCount() <= 0)
 	{
-		_debriefingState->setShowSellButton(false);
+		_debriefingState->hideSellTransferButtons();
 	}
 	_game->popState();
 }
@@ -641,7 +643,7 @@ void SellState::btnCancelClick(Action *)
 void SellState::btnTransferClick(Action *)
 {
 	_reset = true;
-	_game->pushState(new TransferBaseState(_base));
+	_game->pushState(new TransferBaseState(_base, nullptr));
 }
 
 /**

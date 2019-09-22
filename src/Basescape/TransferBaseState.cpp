@@ -32,6 +32,7 @@
 #include "../Savegame/Region.h"
 #include "../Mod/RuleRegion.h"
 #include "TransferItemsState.h"
+#include "../Battlescape/DebriefingState.h"
 
 namespace OpenXcom
 {
@@ -41,7 +42,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-TransferBaseState::TransferBaseState(Base *base) : _base(base)
+TransferBaseState::TransferBaseState(Base *base, DebriefingState *debriefingState) : _base(base), _debriefingState(debriefingState)
 {
 	// Create objects
 	_window = new Window(this, 280, 140, 20, 30);
@@ -136,7 +137,7 @@ void TransferBaseState::btnCancelClick(Action *)
  */
 void TransferBaseState::lstBasesClick(Action *)
 {
-	_game->pushState(new TransferItemsState(_base, _bases[_lstBases->getSelectedRow()]));
+	_game->pushState(new TransferItemsState(_base, _bases[_lstBases->getSelectedRow()], _debriefingState));
 }
 
 }

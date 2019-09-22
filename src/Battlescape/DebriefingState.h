@@ -66,7 +66,7 @@ private:
 	Base *_base;
 	std::vector<DebriefingStat*> _stats;
 	std::vector<SoldierStatsEntry> _soldierStats;
-	TextButton *_btnOk, *_btnStats, *_btnSell;
+	TextButton *_btnOk, *_btnStats, *_btnSell, *_btnTransfer;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtQuantity, *_txtScore, *_txtRecovery, *_txtRating,
 	     *_txtSoldier, *_txtTU, *_txtStamina, *_txtHealth, *_txtBravery, *_txtReactions,
@@ -116,6 +116,8 @@ public:
 	void btnStatsClick(Action *action);
 	/// Handler for clicking the SELL button.
 	void btnSellClick(Action *action);
+	/// Handler for clicking the TRANSFER button.
+	void btnTransferClick(Action *action);
 	/// Handler for showing tooltip.
 	void txtTooltipIn(Action *action);
 	/// Handler for hiding tooltip.
@@ -126,8 +128,8 @@ public:
 	int getTotalRecoveredItemCount();
 	// Decreases the number of recovered items by the sold/transferred amount.
 	void decreaseRecoveredItemCount(RuleItem *rule, int amount);
-	// Sets the visibility of the SELL button.
-	void setShowSellButton(bool showSellButton);
+	// Hides the SELL and TRANSFER buttons.
+	void hideSellTransferButtons();
 };
 
 }

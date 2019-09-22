@@ -62,6 +62,7 @@
 #include "../Engine/Options.h"
 #include "../Engine/RNG.h"
 #include "../Basescape/ManageAlienContainmentState.h"
+#include "../Basescape/TransferBaseState.h"
 #include "../Engine/Screen.h"
 #include "../Basescape/SellState.h"
 #include "../Menu/SaveGameState.h"
@@ -95,6 +96,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	_btnOk = new TextButton(40, 12, 16, 180);
 	_btnStats = new TextButton(60, 12, 244, 180);
 	_btnSell = new TextButton(60, 12, 176, 180);
+	_btnTransfer = new TextButton(80, 12, 88, 180);
 	_txtTitle = new Text(300, 17, 16, 8);
 	_txtItem = new Text(180, 9, 16, 24);
 	_txtQuantity = new Text(60, 9, 200, 24);
@@ -137,6 +139,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 	add(_btnOk, "button", "debriefing");
 	add(_btnStats, "button", "debriefing");
 	add(_btnSell, "button", "debriefing");
+	add(_btnTransfer, "button", "debriefing");
 	add(_txtTitle, "heading", "debriefing");
 	add(_txtItem, "text", "debriefing");
 	add(_txtQuantity, "text", "debriefing");
@@ -178,6 +181,8 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 	_btnSell->setText(tr("STR_SELL"));
 	_btnSell->onMouseClick((ActionHandler)&DebriefingState::btnSellClick);
+	_btnTransfer->setText(tr("STR_TRANSFER_UC"));
+	_btnTransfer->onMouseClick((ActionHandler)&DebriefingState::btnTransferClick);
 
 	_txtTitle->setBig();
 
@@ -733,6 +738,7 @@ void DebriefingState::applyVisibility()
 
 	// Set text on toggle button accordingly
 	_btnSell->setVisible(showItems && _showSellButton);
+	_btnTransfer->setVisible(showItems && _showSellButton && _game->getSavedGame()->getBases()->size() > 1);
 	if (showScore)
 	{
 		_btnStats->setText(tr("STR_STATS"));
@@ -801,6 +807,18 @@ void DebriefingState::btnSellClick(Action *)
 	if (!_destroyBase)
 	{
 		_game->pushState(new SellState(_base, this, OPT_BATTLESCAPE));
+	}
+}
+
+/**
+ * Opens the Transfer UI (for recovered items ONLY).
+ * @param action Pointer to an action.
+ */
+void DebriefingState::btnTransferClick(Action *)
+{
+	if (!_destroyBase)
+	{
+		_game->pushState(new TransferBaseState(_base, this));
 	}
 }
 
@@ -2507,13 +2525,13 @@ void DebriefingState::decreaseRecoveredItemCount(RuleItem *rule, int amount)
 }
 
 /**
- * Sets the visibility of the SELL button.
- * @param showSellButton New value.
+ * Hides the SELL and TRANSFER buttons.
  */
-void DebriefingState::setShowSellButton(bool showSellButton)
+void DebriefingState::hideSellTransferButtons()
 {
-	_showSellButton = showSellButton;
+	_showSellButton = false;
 	_btnSell->setVisible(_showSellButton);
+	_btnTransfer->setVisible(_showSellButton);
 }
 
 }

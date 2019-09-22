@@ -34,6 +34,7 @@ class TextList;
 class ComboBox;
 class Timer;
 class Base;
+class DebriefingState;
 
 /**
  * Transfer screen that lets the player pick
@@ -43,6 +44,7 @@ class TransferItemsState : public State
 {
 private:
 	Base *_baseFrom, *_baseTo;
+	DebriefingState *_debriefingState;
 	TextButton *_btnOk, *_btnCancel;
 	TextEdit *_btnQuickSearch;
 	Window *_window;
@@ -69,7 +71,7 @@ private:
 	double getDistance() const;
 public:
 	/// Creates the Transfer Items state.
-	TransferItemsState(Base *baseFrom, Base *baseTo);
+	TransferItemsState(Base *baseFrom, Base *baseTo, DebriefingState *debriefingState);
 	/// Cleans up the Transfer Items state.
 	~TransferItemsState();
 	/// Runs the timers.

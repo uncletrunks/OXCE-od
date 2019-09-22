@@ -49,6 +49,7 @@
 #include "../Mod/Armor.h"
 #include "../Interface/ComboBox.h"
 #include "../Ufopaedia/Ufopaedia.h"
+#include "../Battlescape/DebriefingState.h"
 
 namespace OpenXcom
 {
@@ -59,7 +60,9 @@ namespace OpenXcom
  * @param baseFrom Pointer to the source base.
  * @param baseTo Pointer to the destination base.
  */
-TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom(baseFrom), _baseTo(baseTo), _sel(0), _total(0), _pQty(0), _cQty(0), _aQty(0), _iQty(0.0), _distance(0.0), _ammoColor(0)
+TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo, DebriefingState *debriefingState) :
+	_baseFrom(baseFrom), _baseTo(baseTo), _debriefingState(debriefingState),
+	_sel(0), _total(0), _pQty(0), _cQty(0), _aQty(0), _iQty(0.0), _distance(0.0), _ammoColor(0)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -148,6 +151,7 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 
 	for (std::vector<Soldier*>::iterator i = _baseFrom->getSoldiers()->begin(); i != _baseFrom->getSoldiers()->end(); ++i)
 	{
+		if (_debriefingState) break;
 		if ((*i)->getCraft() == 0)
 		{
 			TransferRow row = { TRANSFER_SOLDIER, (*i), (*i)->getName(true), (int)(5 * _distance), 1, 0, 0 };
@@ -161,6 +165,7 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 	}
 	for (std::vector<Craft*>::iterator i = _baseFrom->getCrafts()->begin(); i != _baseFrom->getCrafts()->end(); ++i)
 	{
+		if (_debriefingState) break;
 		if ((*i)->getStatus() != "STR_OUT" || (Options::canTransferCraftsWhileAirborne && (*i)->getFuel() >= (*i)->getFuelLimit(_baseTo)))
 		{
 			TransferRow row = { TRANSFER_CRAFT, (*i), (*i)->getName(_game->getLanguage()),  (int)(25 * _distance), 1, 0, 0 };
@@ -172,7 +177,7 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 			}
 		}
 	}
-	if (_baseFrom->getAvailableScientists() > 0)
+	if (_baseFrom->getAvailableScientists() > 0 && _debriefingState == 0)
 	{
 		TransferRow row = { TRANSFER_SCIENTIST, 0, tr("STR_SCIENTIST"),  (int)(5 * _distance), _baseFrom->getAvailableScientists(), _baseTo->getAvailableScientists(), 0 };
 		_items.push_back(row);
@@ -182,7 +187,7 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 			_cats.push_back(cat);
 		}
 	}
-	if (_baseFrom->getAvailableEngineers() > 0)
+	if (_baseFrom->getAvailableEngineers() > 0 && _debriefingState == 0)
 	{
 		TransferRow row = { TRANSFER_ENGINEER, 0, tr("STR_ENGINEER"),  (int)(5 * _distance), _baseFrom->getAvailableEngineers(), _baseTo->getAvailableEngineers(), 0 };
 		_items.push_back(row);
@@ -196,9 +201,13 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo) : _baseFrom
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
 		int qty = _baseFrom->getStorageItems()->getItem(*i);
+		RuleItem *rule = _game->getMod()->getItem(*i, true);
+		if (_debriefingState != 0)
+		{
+			qty = _debriefingState->getRecoveredItemCount(rule);
+		}
 		if (qty > 0)
 		{
-			RuleItem *rule = _game->getMod()->getItem(*i);
 			TransferRow row = { TRANSFER_ITEM, rule, tr(*i),  (int)(1 * _distance), qty, _baseTo->getStorageItems()->getItem(*i), 0 };
 			_items.push_back(row);
 			std::string cat = getCategory(_items.size() - 1);
@@ -564,13 +573,24 @@ void TransferItemsState::completeTransfer()
 				_baseTo->getTransfers()->push_back(t);
 				break;
 			case TRANSFER_ITEM:
-				_baseFrom->getStorageItems()->removeItem(((RuleItem*)i->rule)->getType(), i->amount);
+				RuleItem *item = (RuleItem*)i->rule;
+				_baseFrom->getStorageItems()->removeItem(item->getType(), i->amount);
 				t = new Transfer(time);
-				t->setItems(((RuleItem*)i->rule)->getType(), i->amount);
+				t->setItems(item->getType(), i->amount);
 				_baseTo->getTransfers()->push_back(t);
+				if (_debriefingState != 0)
+				{
+					// remember the decreased amount for next sell/transfer
+					_debriefingState->decreaseRecoveredItemCount(item, i->amount);
+				}
 				break;
 			}
 		}
+	}
+
+	if (_debriefingState != 0 && _debriefingState->getTotalRecoveredItemCount() <= 0)
+	{
+		_debriefingState->hideSellTransferButtons();
 	}
 }
 
