@@ -1497,7 +1497,7 @@ void DebriefingState::prepareDebriefing()
 								const RuleItem *primaryRule = weapon->getRules();
 								const BattleItem *ammoItem = weapon->getAmmoForSlot(0);
 								const auto *compatible = primaryRule->getPrimaryCompatibleAmmo();
-								if (!compatible->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
+								if (primaryRule->getVehicleUnit() && !compatible->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 								{
 									int total = ammoItem->getAmmoQuantity();
 
