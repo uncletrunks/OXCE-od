@@ -187,7 +187,7 @@ MainMenuState::MainMenuState(bool updateCheck) : _debugInVisualStudio(false)
 	_txtTitle->setBig();
 	std::ostringstream title;
 	title << tr("STR_OPENXCOM") << Unicode::TOK_NL_SMALL;
-	title << OPENXCOM_VERSION_SHORT << OPENXCOM_VERSION_GIT;
+	title << "OpenXcom " << OPENXCOM_VERSION_SHORT << OPENXCOM_VERSION_GIT;
 	_txtTitle->setText(title.str());
 }
 
