@@ -35,6 +35,7 @@ private:
 	std::vector<std::string> _regionList;
 	bool _city;
 	int _points, _funds;
+	bool _randomItem;
 	std::vector<std::string> _itemList, _researchList;
 	std::string _interruptResearch;
 	int _timer, _timerRandom;
@@ -59,7 +60,9 @@ public:
 	int getPoints() const { return _points; }
 	/// Gets the amount of funds awarded when this event pops up.
 	int getFunds() const { return _funds; }
-	/// Gets a list of items; one of them will be randomly transferred to HQ stores when this event pops up.
+	/// Should all items be awarded or only one randomly?
+	bool isRandomItem() const { return _randomItem; }
+	/// Gets a list of items; they are transferred to HQ stores when this event pops up.
 	const std::vector<std::string> &getItemList() const { return _itemList; }
 	/// Gets a list of research projects; one of them will be randomly discovered when this event pops up.
 	const std::vector<std::string> &getResearchList() const { return _researchList; }

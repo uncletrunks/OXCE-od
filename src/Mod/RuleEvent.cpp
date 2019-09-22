@@ -21,7 +21,7 @@
 namespace OpenXcom
 {
 
-RuleEvent::RuleEvent(const std::string &name) : _name(name), _background("BACK13.SCR"), _city(false), _points(0), _funds(0), _timer(30), _timerRandom(0)
+RuleEvent::RuleEvent(const std::string &name) : _name(name), _background("BACK13.SCR"), _city(false), _points(0), _funds(0), _randomItem(false), _timer(30), _timerRandom(0)
 {
 }
 
@@ -42,6 +42,7 @@ void RuleEvent::load(const YAML::Node &node)
 	_city = node["city"].as<bool>(_city);
 	_points = node["points"].as<int>(_points);
 	_funds = node["funds"].as<int>(_funds);
+	_randomItem = node["randomItem"].as<bool>(_randomItem);
 	_itemList = node["itemList"].as<std::vector<std::string> >(_itemList);
 	_researchList = node["researchList"].as<std::vector<std::string> >(_researchList);
 	_interruptResearch = node["interruptResearch"].as<std::string>(_interruptResearch);

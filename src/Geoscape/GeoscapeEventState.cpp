@@ -139,13 +139,29 @@ void GeoscapeEventState::eventLogic(GeoscapeEvent *geoEvent)
 	// 3. spawn/transfer item into the HQ
 	if (!rule.getItemList().empty())
 	{
-		size_t pickItem = RNG::generate(0, rule.getItemList().size() - 1);
-		const RuleItem *eventSpawnedItem = mod->getItem(rule.getItemList().at(pickItem), true);
-		if (eventSpawnedItem)
+		if (rule.isRandomItem())
 		{
-			Transfer *transferSpwanedItem = new Transfer(1);
-			transferSpwanedItem->setItems(eventSpawnedItem->getType(), 1);
-			hq->getTransfers()->push_back(transferSpwanedItem);
+			size_t pickItem = RNG::generate(0, rule.getItemList().size() - 1);
+			const RuleItem *randomItem = mod->getItem(rule.getItemList().at(pickItem), true);
+			if (randomItem)
+			{
+				Transfer *t = new Transfer(1);
+				t->setItems(randomItem->getType(), 1);
+				hq->getTransfers()->push_back(t);
+			}
+		}
+		else
+		{
+			for (auto itemName : rule.getItemList())
+			{
+				const RuleItem *itemRule = mod->getItem(itemName, true);
+				if (itemRule)
+				{
+					Transfer *tr = new Transfer(1);
+					tr->setItems(itemRule->getType(), 1);
+					hq->getTransfers()->push_back(tr);
+				}
+			}
 		}
 	}
 
