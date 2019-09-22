@@ -122,6 +122,10 @@ public:
 	void txtTooltipOut(Action *action);
 	// Gets the number of recovered items of certain type.
 	int getRecoveredItemCount(RuleItem *rule);
+	// Gets the total number of recovered items.
+	int getTotalRecoveredItemCount();
+	// Decreases the number of recovered items by the sold/transferred amount.
+	void decreaseRecoveredItemCount(RuleItem *rule, int amount);
 	// Sets the visibility of the SELL button.
 	void setShowSellButton(bool showSellButton);
 };

@@ -335,9 +335,10 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 				}
 
 				qty -= origBaseItems->getItem(*i);
-				_recoveredItems[rule] = qty;
 				if (qty > 0)
 				{
+					_recoveredItems[rule] = qty;
+
 					std::ostringstream ss;
 					ss << Unicode::TOK_COLOR_FLIP << qty << Unicode::TOK_COLOR_FLIP;
 					std::string item = tr(*i);
@@ -2466,18 +2467,49 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 }
 
 /**
-* Gets the number of recovered items of certain type.
-* @param rule Type of item.
-*/
+ * Gets the number of recovered items of certain type.
+ * @param rule Type of item.
+ */
 int DebriefingState::getRecoveredItemCount(RuleItem *rule)
 {
-	return _recoveredItems[rule];
+	auto it = _recoveredItems.find(rule);
+	if (it != _recoveredItems.end())
+		return it->second;
+
+	return 0;
 }
 
 /**
-* Sets the visibility of the SELL button.
-* @param showSellButton New value.
-*/
+ * Gets the total number of recovered items.
+ */
+int DebriefingState::getTotalRecoveredItemCount()
+{
+	int total = 0;
+	for (auto item : _recoveredItems)
+	{
+		total += item.second;
+	}
+	return total;
+}
+
+/**
+ * Decreases the number of recovered items by the sold/transferred amount.
+ * @param rule Type of item.
+ * @param amount Number of items sold or transferred.
+ */
+void DebriefingState::decreaseRecoveredItemCount(RuleItem *rule, int amount)
+{
+	auto it = _recoveredItems.find(rule);
+	if (it != _recoveredItems.end())
+	{
+		_recoveredItems[rule] = std::max(0, _recoveredItems[rule] - amount);
+	}
+}
+
+/**
+ * Sets the visibility of the SELL button.
+ * @param showSellButton New value.
+ */
 void DebriefingState::setShowSellButton(bool showSellButton)
 {
 	_showSellButton = showSellButton;

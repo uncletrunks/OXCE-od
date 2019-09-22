@@ -598,6 +598,9 @@ void SellState::btnOkClick(Action *)
 				}
 				if (_debriefingState != 0)
 				{
+					// remember the decreased amount for next sell/transfer
+					_debriefingState->decreaseRecoveredItemCount(item, i->amount);
+
 					// set autosell status if we sold all of the item
 					_game->getSavedGame()->setAutosell(item, (i->qtySrc == i->amount));
 				}
@@ -614,7 +617,7 @@ void SellState::btnOkClick(Action *)
 			}
 		}
 	}
-	if (_debriefingState != 0)
+	if (_debriefingState != 0 && _debriefingState->getTotalRecoveredItemCount() <= 0)
 	{
 		_debriefingState->setShowSellButton(false);
 	}
