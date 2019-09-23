@@ -63,6 +63,11 @@ void RuleUfo::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	}
 	_type = node["type"].as<std::string>(_type);
 	_size = node["size"].as<std::string>(_size);
+	// sigh
+	if (_size == "STR_MEDIUM")
+	{
+		_size = "STR_MEDIUM_UC";
+	}
 	_sprite = node["sprite"].as<int>(_sprite);
 	if (node["marker"])
 	{
