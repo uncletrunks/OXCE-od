@@ -1512,7 +1512,7 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item, const std::vector
  * @sa http://www.ufopaedia.org/index.php?title=MAPS
  * @note Y-axis is in reverse order.
  */
-int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int mapDataSetOffset, bool discovered, bool craft)
+int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int mapDataSetOffset, bool discovered, bool craft, int ufoIndex)
 {
 	int sizex, sizey, sizez;
 	int x = xoff, y = yoff, z = zoff;
@@ -1557,6 +1557,10 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 			if (craft && _craftZ == 0)
 			{
 				_craftZ = i;
+			}
+			if (ufoIndex >= 0 && _ufoZ[ufoIndex] == 0)
+			{
+				_ufoZ[ufoIndex] = i;
 			}
 			break;
 		}
@@ -1612,6 +1616,12 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 	if (craft && zoff == 0)
 	{
 		zoff += _craftZ;
+	}
+	// Add the ufo offset to the positions of the items if we're loading a ufo map
+	// But don't do so if loading a verticalLevel, since the z offset of the ufo is handled by that code
+	if (ufoIndex >= 0 && zoff == 0)
+	{
+		zoff += _ufoZ[ufoIndex];
 	}
 
 	if (_generateFuel)
@@ -2471,7 +2481,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 
 		for (size_t i = 0; i < ufoMaps.size(); ++i)
 		{
-			loadMAP(ufoMaps[i], _ufoPos[i].x * 10, _ufoPos[i].y * 10, _ufoZ[i], ufoTerrain, mapDataSetIDOffset);
+			loadMAP(ufoMaps[i], _ufoPos[i].x * 10, _ufoPos[i].y * 10, _ufoZ[i], ufoTerrain, mapDataSetIDOffset, false, false, i);
 			loadRMP(ufoMaps[i], _ufoPos[i].x * 10, _ufoPos[i].y * 10, _ufoZ[i], Node::UFOSEGMENT);
 			for (int j = 0; j < ufoMaps[i]->getSizeX() / 10; ++j)
 			{
