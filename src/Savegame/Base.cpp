@@ -2188,17 +2188,24 @@ bool Base::isMaxAllowedLimitReached(RuleBaseFacility *rule) const
  */
 int Base::getManaRecoveryPerDay() const
 {
-	int result = 0;
+	int minimum = 0;
+	int maximum = 0;
 
 	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
 	{
 		if ((*bf)->getBuildTime() == 0)
 		{
-			result = std::max(result, (*bf)->getRules()->getManaRecoveryPerDay());
+			minimum = std::min(minimum, (*bf)->getRules()->getManaRecoveryPerDay());
+			maximum = std::max(maximum, (*bf)->getRules()->getManaRecoveryPerDay());
 		}
 	}
 
-	return result;
+	if (maximum > 0)
+		return maximum;
+	else if (minimum < 0)
+		return minimum;
+
+	return 0;
 }
 
 /**

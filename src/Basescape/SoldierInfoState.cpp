@@ -535,7 +535,10 @@ void SoldierInfoState::init()
 				manaRecoveryPerDay = _base->getManaRecoveryPerDay();
 			}
 			int manaRecoveryTime = _soldier->getManaRecovery(manaRecoveryPerDay);
-			_txtRecovery->setText(tr("STR_MANA_RECOVERY").arg(tr("STR_DAY", manaRecoveryTime)));
+			if (manaRecoveryTime < 0)
+				_txtRecovery->setText(tr("STR_MANA_RECOVERY").arg("∞"));
+			else
+				_txtRecovery->setText(tr("STR_MANA_RECOVERY").arg(tr("STR_DAY", manaRecoveryTime)));
 		}
 		else
 		{
