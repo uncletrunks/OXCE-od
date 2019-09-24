@@ -921,10 +921,27 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 			}
 			else if ((*j)->getStunlevel() >= (*j)->getHealth() && (*j)->getStatus() != STATUS_UNCONSCIOUS)
 			{
-				if (victim->getGeoscapeSoldier())
+				// morale change when an enemy is stunned (only for the first time!)
+				if (getMod()->getStunningImprovesMorale() && murderer && !victim->getStatistics()->wasUnconcious)
 				{
-					victim->getStatistics()->wasUnconcious = true;
+					if ((victim->getOriginalFaction() == FACTION_PLAYER && murderer->getFaction() == FACTION_HOSTILE) ||
+						(victim->getOriginalFaction() == FACTION_HOSTILE && murderer->getFaction() == FACTION_PLAYER))
+					{
+						// the murderer gets a morale bonus if he is of a different faction (excluding neutrals)
+						murderer->moraleChange(20);
+
+						for (auto winner : *_save->getUnits())
+						{
+							if (!winner->isOut() && winner->getArmor()->getSize() == 1 && winner->getOriginalFaction() == murderer->getOriginalFaction())
+							{
+								// the winning squad gets a morale increase (the losing squad is NOT affected)
+								winner->moraleChange(10);
+							}
+						}
+					}
 				}
+
+				victim->getStatistics()->wasUnconcious = true;
 				noSound = true;
 				statePushNext(new UnitDieBState(this, (*j), getMod()->getDamageType(DT_NONE), noSound)); // no damage type used there
 			}
