@@ -1728,7 +1728,7 @@ void GeoscapeState::time30Minutes()
 			if (ufo->getSecondsRemaining() >= 30 * 60)
 			{
 				ufo->setSecondsRemaining(ufo->getSecondsRemaining() - 30 * 60);
-				return;
+				continue;
 			}
 			// Marked expired UFOs for removal.
 			ufo->setStatus(Ufo::DESTROYED);
