@@ -3996,7 +3996,7 @@ void TileEngine::medikitStimulant(BattleAction *action, BattleUnit *target)
 {
 	const RuleItem *rule = action->weapon->getRules();
 
-	target->stimulant(rule->getEnergyRecovery(), rule->getStunRecovery());
+	target->stimulant(rule->getEnergyRecovery(), rule->getStunRecovery(), rule->getManaRecovery());
 	action->weapon->setStimulantQuantity(action->weapon->getStimulantQuantity() - 1);
 
 	_save->getBattleGame()->playSound(action->weapon->getRules()->getHitSound());

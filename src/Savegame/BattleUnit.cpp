@@ -3474,16 +3474,18 @@ void BattleUnit::painKillers(int moraleAmount, float painKillersStrength)
 }
 
 /**
- * Restore soldier energy and reduce stun level
+ * Restore soldier energy and reduce stun level, can restore mana too
  * @param energy The amount of energy to add
- * @param s The amount of stun level to reduce
+ * @param stun The amount of stun level to reduce
+ * @param mana The amount of mana to add
  */
-void BattleUnit::stimulant (int energy, int s)
+void BattleUnit::stimulant(int energy, int stun, int mana)
 {
 	_energy += energy;
 	if (_energy > getBaseStats()->stamina)
 		_energy = getBaseStats()->stamina;
-	healStun (s);
+	healStun(stun);
+	setValueMax(_mana, mana, 0, getBaseStats()->mana);
 }
 
 

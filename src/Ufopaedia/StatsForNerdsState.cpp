@@ -1716,6 +1716,7 @@ void StatsForNerdsState::initItemList()
 	addInteger(ss, itemRule->getHealthRecovery(), "healthRecovery");
 	addInteger(ss, itemRule->getStunRecovery(), "stunRecovery");
 	addInteger(ss, itemRule->getEnergyRecovery(), "energyRecovery");
+	addInteger(ss, itemRule->getManaRecovery(), "manaRecovery");
 	addInteger(ss, itemRule->getMoraleRecovery(), "moraleRecovery");
 	addFloatAsPercentage(ss, itemRule->getPainKillerRecovery(), "painKillerRecovery", 1.0f);
 

@@ -447,7 +447,7 @@ public:
 	/// Give pain killers to this unit
 	void painKillers(int moraleAmount, float painKillersStrength);
 	/// Give stimulant to this unit
-	void stimulant (int energy, int stun);
+	void stimulant (int energy, int stun, int mana);
 	/// Get motion points for the motion scanner.
 	int getMotionPoints() const;
 	/// Get turn when unit was scanned by the motion scanner.

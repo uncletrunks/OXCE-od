@@ -56,7 +56,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _hiddenOnMinimap(false), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
 	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _specialUseEmptyHand(false),
 	_waypoints(0), _invWidth(1), _invHeight(1),
-	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
+	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _manaRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
 	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _ignoreInCraftEquip(true), _liveAlien(false),
 	_liveAlienPrisonType(0), _attraction(0), _flatUse(0, 1), _flatThrow(0, 1), _flatPrime(0, 1), _flatUnprime(0, 1), _arcingShot(false),
@@ -542,6 +542,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_healthRecovery = node["healthRecovery"].as<int>(_healthRecovery);
 	_stunRecovery = node["stunRecovery"].as<int>(_stunRecovery);
 	_energyRecovery = node["energyRecovery"].as<int>(_energyRecovery);
+	_manaRecovery = node["manaRecovery"].as<int>(_manaRecovery);
 	_moraleRecovery = node["moraleRecovery"].as<int>(_moraleRecovery);
 	_painKillerRecovery = node["painKillerRecovery"].as<float>(_painKillerRecovery);
 	_medikitType = (BattleMediKitType)node["medikitType"].as<int>(_medikitType);
