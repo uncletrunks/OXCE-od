@@ -210,6 +210,7 @@ private:
 	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	bool _hidePediaInfoButton, _extraNerdyPediaInfo;
 	bool _giveScoreAlsoForResearchedArtifacts, _statisticalBulletConservation, _stunningImprovesMorale;
+	int _tuRecoveryWakeUpNewTurn;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
 	std::pair<std::string, int> _alienFuel;
@@ -623,6 +624,8 @@ public:
 	bool getStatisticalBulletConservation() const { return _statisticalBulletConservation; }
 	/// Does stunning an enemy improve unit and squad morale?
 	bool getStunningImprovesMorale() const { return _stunningImprovesMorale; }
+	/// Gets how much TU (in percent) should be given to a unit waking up from stun at the beginning of a new turn.
+	int getTURecoveryWakeUpNewTurn() const { return _tuRecoveryWakeUpNewTurn; }
 	/// Gets whether or not to load base defense terrain from globe texture
 	int getBaseDefenseMapFromLocation() const { return _baseDefenseMapFromLocation; }
 	/// Gets the ruleset for a specific research project.

@@ -1167,6 +1167,16 @@ void SavedBattleGame::endTurn()
 		ModScript::NewTurnUnit::Worker work{ (*i), this, this->getTurn(), _side };
 
 		work.execute((*i)->getArmor()->getScript<ModScript::NewTurnUnit>(), arg);
+
+		if ((*i)->isJustRevivedByNewTurn())
+		{
+			(*i)->setJustRevivedByNewTurn(false);
+			if (getMod()->getTURecoveryWakeUpNewTurn() < 100)
+			{
+				int newTU = (*i)->getBaseStats()->tu * getMod()->getTURecoveryWakeUpNewTurn() / 100;
+				(*i)->setTimeUnits(newTU);
+			}
+		}
 	}
 
 	for (auto& item : _items)
@@ -1910,7 +1920,15 @@ void SavedBattleGame::reviveUnconsciousUnits(bool noTU)
 					(*i)->turn(false); // makes the unit stand up again
 					(*i)->kneel(false);
 					(*i)->setAlreadyExploded(false);
-					if (noTU) (*i)->clearTimeUnits();
+					if (noTU)
+					{
+						(*i)->clearTimeUnits();
+					}
+					else
+					{
+						// changing TUs here would have no effect as they are modified later during the new turn preparation
+						(*i)->setJustRevivedByNewTurn(true);
+					}
 					removeUnconsciousBodyItem((*i));
 				}
 			}

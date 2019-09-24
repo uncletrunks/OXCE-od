@@ -87,6 +87,7 @@ private:
 	int _verticalDirection;
 	Position _destination;
 	UnitStatus _status;
+	bool _justRevivedByNewTurn;
 	bool _wantsToSurrender, _isSurrendering;
 	int _walkPhase, _fallPhase;
 	std::vector<BattleUnit *> _visibleUnits, _unitsSpottedThisTurn;
@@ -222,6 +223,10 @@ public:
 	int getVerticalDirection() const;
 	/// Gets the unit's status.
 	UnitStatus getStatus() const;
+	/// Has the unit just been revived by a new turn?
+	bool isJustRevivedByNewTurn() const { return _justRevivedByNewTurn; }
+	/// Sets if the unit has just been revived by a new turn.
+	void setJustRevivedByNewTurn(bool justRevivedByNewTurn) { _justRevivedByNewTurn = justRevivedByNewTurn; }
 	/// Does the unit want to surrender?
 	bool wantsToSurrender() const;
 	/// Is the unit surrendering this turn?
@@ -535,6 +540,8 @@ public:
 	void setSpawnUnit(const std::string &spawnUnit);
 	/// Gets the unit's aggro sound.
 	int getAggroSound() const;
+	/// Sets the unit's time units.
+	void setTimeUnits(int tu);
 	/// Sets the unit's energy level.
 	void setEnergy(int energy);
 	/// Get the faction that killed this unit.
