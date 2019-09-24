@@ -271,15 +271,9 @@ namespace OpenXcom
 	 */
 	bool Ufopaedia::isArticleHidden(SavedGame *save, ArticleDefinition *article, Mod *mod)
 	{
-		// show Commendations entries if:
-		if (article->section == UFOPAEDIA_COMMENDATIONS)
+		// show hidden Commendations entries if:
+		if (article->hiddenCommendation)
 		{
-			// 0. hiding feature is disabled
-			if (mod->getShowAllCommendations())
-			{
-				return false;
-			}
-
 			// 1. debug mode is on
 			if (save->getDebugMode())
 			{

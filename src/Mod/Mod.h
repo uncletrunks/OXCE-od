@@ -208,7 +208,7 @@ private:
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
 	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
-	bool _hidePediaInfoButton, _extraNerdyPediaInfo, _showAllCommendations;
+	bool _hidePediaInfoButton, _extraNerdyPediaInfo;
 	bool _giveScoreAlsoForResearchedArtifacts, _statisticalBulletConservation;
 	int _shortRadarRange;
 	int _defeatScore, _defeatFunds;
@@ -617,8 +617,6 @@ public:
 	bool getShowPediaInfoButton() const { return !_hidePediaInfoButton; }
 	/// Display extra item info (accuracy modifier and power bonus) in the main pedia article?
 	bool getExtraNerdyPediaInfo() const { return _extraNerdyPediaInfo; }
-	/// Show all commendations pedia articles (or only those for already awarded commendations)?
-	bool getShowAllCommendations() const { return _showAllCommendations; }
 	/// In debriefing, give score also for already researched alien artifacts?
 	bool getGiveScoreAlsoForResearchedArtifacts() const { return _giveScoreAlsoForResearchedArtifacts; }
 	/// When recovering ammo, should partially spent clip have a chance to recover as full?

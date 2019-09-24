@@ -83,6 +83,7 @@ namespace OpenXcom
 		std::string section;
 		std::vector<std::string> requires;
 		bool customPalette;
+		bool hiddenCommendation;
 
 		/// Get main title of page in ufopedia.
 		const std::string& getMainTitle()

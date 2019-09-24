@@ -57,7 +57,7 @@ namespace OpenXcom
 	 * Constructor.
 	 * @param type_id Article type of this instance.
 	 */
-	ArticleDefinition::ArticleDefinition(UfopaediaTypeId type_id) : customPalette(false), _type_id(type_id), _listOrder(0)
+	ArticleDefinition::ArticleDefinition(UfopaediaTypeId type_id) : customPalette(false), hiddenCommendation(false), _type_id(type_id), _listOrder(0)
 	{
 		_pages.resize(1);
 	}
@@ -87,6 +87,7 @@ namespace OpenXcom
 		id = _pages[0].title = node["id"].as<std::string>(id);
 		section = node["section"].as<std::string>(section);
 		requires = node["requires"].as< std::vector<std::string> >(requires);
+		hiddenCommendation = node["hiddenCommendation"].as<bool>(hiddenCommendation);
 		//_type_id = (UfopaediaTypeId)node["type_id"].as<int>(_type_id);
 		_listOrder = node["listOrder"].as<int>(_listOrder);
 		if (!_listOrder)
