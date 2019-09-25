@@ -1329,10 +1329,10 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 	// Award a soldier bonus, if defined
 	if (!transformationRule->getSoldierBonusType().empty())
 	{
-		auto it = _transformationBonuses.find(transformationRule->getSoldierBonusType());
-		if (it != _transformationBonuses.end())
+		auto it2 = _transformationBonuses.find(transformationRule->getSoldierBonusType());
+		if (it2 != _transformationBonuses.end())
 		{
-			it->second += 1;
+			it2->second += 1;
 		}
 		else
 		{

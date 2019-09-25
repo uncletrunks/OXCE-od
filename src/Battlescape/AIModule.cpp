@@ -1193,7 +1193,6 @@ int AIModule::selectNearestTargetLeeroy()
 	int tally = 0;
 	_closestDist = 100;
 	_aggroTarget = 0;
-	Position target;
 	for (std::vector<BattleUnit*>::const_iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
 		if (validTarget(*i, true, _unit->getFaction() == FACTION_HOSTILE) &&

@@ -60,8 +60,12 @@ void GoToMainMenuState::init()
  * Initializes all the elements in the Main Menu window.
  * @param updateCheck Perform update check?
  */
-MainMenuState::MainMenuState(bool updateCheck) : _debugInVisualStudio(false)
+MainMenuState::MainMenuState(bool updateCheck)
 {
+#ifdef _WIN32
+	_debugInVisualStudio = false;
+#endif
+
 	// Create objects
 	_window = new Window(this, 256, 160, 32, 20, POPUP_BOTH);
 	_btnNewGame = new TextButton(92, 20, 64, 90);

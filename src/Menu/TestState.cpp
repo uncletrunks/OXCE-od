@@ -487,7 +487,7 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 	{
 		int index = 0;
 		myMapDataSet->loadData(false);
-		auto size = myMapDataSet->getObjectsRaw()->size();
+		int size = (int)(myMapDataSet->getObjectsRaw()->size());
 		for (auto myMapData : *myMapDataSet->getObjectsRaw())
 		{
 			// Validate MCD references

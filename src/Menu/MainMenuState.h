@@ -47,7 +47,9 @@ private:
 	TextButton *_btnNewGame, *_btnNewBattle, *_btnLoad, *_btnOptions, *_btnMods, *_btnQuit, *_btnUpdate;
 	Window *_window;
 	Text *_txtTitle, *_txtUpdateInfo;
+#ifdef _WIN32
 	bool _debugInVisualStudio;
+#endif
 public:
 	/// Creates the Main Menu state.
 	MainMenuState(bool updateCheck = false);

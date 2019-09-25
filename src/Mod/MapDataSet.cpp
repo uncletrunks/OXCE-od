@@ -221,11 +221,11 @@ void MapDataSet::loadData(bool validate)
 	{
 		for (size_t i = 0; i < _objects.size(); ++i)
 		{
-			if (_objects[i]->getDieMCD() >= _objects.size())
+			if (_objects[i]->getDieMCD() >= (int)(_objects.size()))
 			{
 				Log(LOG_INFO) << "MCD " << _name << " object " << i << " has invalid DieMCD: " << _objects[i]->getDieMCD();
 			}
-			if (_objects[i]->getAltMCD() >= _objects.size())
+			if (_objects[i]->getAltMCD() >= (int)(_objects.size()))
 			{
 				Log(LOG_INFO) << "MCD " << _name << " object " << i << " has invalid AltMCD: " << _objects[i]->getAltMCD();
 			}

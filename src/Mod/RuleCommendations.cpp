@@ -93,7 +93,8 @@ const std::string *RuleCommendations::getSoldierBonus(int decorationLevel) const
 {
 	if (!_soldierBonusTypes.empty())
 	{
-		int index = decorationLevel > _soldierBonusTypes.size() - 1 ? _soldierBonusTypes.size() - 1 : decorationLevel;
+		int lastIndex = (int)(_soldierBonusTypes.size()) - 1;
+		int index = decorationLevel > lastIndex ? lastIndex : decorationLevel;
 		return &_soldierBonusTypes.at(index);
 	}
 	return nullptr;
