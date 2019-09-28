@@ -1779,18 +1779,6 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 			}
 			_ufopaediaListOrder += 100;
 			rule->load(*i, _ufopaediaListOrder);
-			if (rule->section != UFOPAEDIA_NOT_AVAILABLE)
-			{
-				if (_ufopaediaSections.find(rule->section) == _ufopaediaSections.end())
-				{
-					_ufopaediaSections[rule->section] = rule->getListOrder();
-					_ufopaediaCatIndex.push_back(rule->section);
-				}
-				else
-				{
-					_ufopaediaSections[rule->section] = std::min(_ufopaediaSections[rule->section], rule->getListOrder());
-				}
-			}
 		}
 		else if ((*i)["delete"])
 		{
@@ -3364,6 +3352,23 @@ struct compareSection
  */
 void Mod::sortLists()
 {
+	for (auto rulePair : _ufopaediaArticles)
+	{
+		auto rule = rulePair.second;
+		if (rule->section != UFOPAEDIA_NOT_AVAILABLE)
+		{
+			if (_ufopaediaSections.find(rule->section) == _ufopaediaSections.end())
+			{
+				_ufopaediaSections[rule->section] = rule->getListOrder();
+				_ufopaediaCatIndex.push_back(rule->section);
+			}
+			else
+			{
+				_ufopaediaSections[rule->section] = std::min(_ufopaediaSections[rule->section], rule->getListOrder());
+			}
+		}
+	}
+
 	std::sort(_itemCategoriesIndex.begin(), _itemCategoriesIndex.end(), compareRule<RuleItemCategory>(this, (compareRule<RuleItemCategory>::RuleLookup)&Mod::getItemCategory));
 	std::sort(_itemsIndex.begin(), _itemsIndex.end(), compareRule<RuleItem>(this, (compareRule<RuleItem>::RuleLookup)&Mod::getItem));
 	std::sort(_craftsIndex.begin(), _craftsIndex.end(), compareRule<RuleCraft>(this, (compareRule<RuleCraft>::RuleLookup)&Mod::getCraft));
