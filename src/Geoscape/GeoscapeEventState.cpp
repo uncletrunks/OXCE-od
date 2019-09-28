@@ -96,7 +96,7 @@ void GeoscapeEventState::eventLogic(GeoscapeEvent *geoEvent)
 		size_t pickRegion = RNG::generate(0, rule.getRegionList().size() - 1);
 		auto regionName = rule.getRegionList().at(pickRegion);
 		regionRule = _game->getMod()->getRegion(regionName, true);
-		std::string place = regionName;
+		std::string place = tr(regionName);
 
 		if (rule.isCitySpecific())
 		{
