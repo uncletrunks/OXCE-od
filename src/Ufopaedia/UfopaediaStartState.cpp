@@ -30,18 +30,34 @@
 #include "../Mod/Mod.h"
 #include "../Engine/Timer.h"
 #include "../fmath.h"
+#include "../Engine/Screen.h"
 
 namespace OpenXcom
 {
-	const size_t UfopaediaStartState::CAT_MIN_BUTTONS = 9;
-	const size_t UfopaediaStartState::CAT_MAX_BUTTONS = 10;
-
-	UfopaediaStartState::UfopaediaStartState() : _offset(0), _scroll(0), _cats(_game->getMod()->getUfopaediaCategoryList())
+	UfopaediaStartState::UfopaediaStartState() : _offset(0), _scroll(0), _maxButtons(0), _heightOffset(0), _windowOffset(0), _cats(_game->getMod()->getUfopaediaCategoryList())
 	{
+		const int MAX_VANILLA_BUTTONS = 10;
+		const int SPACE_PER_BUTTON = 13;
+		const int HALF_SPACE_PER_BUTTON = 7;
+
 		_screen = false;
 
+		int extraSpace = (_game->getScreen()->getDY() * 2) + 20; // upper extra + lower extra + 20 pixels from the original
+		int maxButtons = (extraSpace / SPACE_PER_BUTTON) + MAX_VANILLA_BUTTONS;
+		_maxButtons = std::min(_cats.size(), (size_t)maxButtons);
+		maxButtons = (int)_maxButtons;
+
+		int buttonOffset = 0;
+		if (maxButtons >= MAX_VANILLA_BUTTONS)
+		{
+			_heightOffset = (maxButtons - MAX_VANILLA_BUTTONS) * SPACE_PER_BUTTON;
+			_windowOffset = ((maxButtons - MAX_VANILLA_BUTTONS) / 2 * SPACE_PER_BUTTON) + ((maxButtons - MAX_VANILLA_BUTTONS) % 2 * HALF_SPACE_PER_BUTTON);
+			buttonOffset = _windowOffset + SPACE_PER_BUTTON;
+		}
+
 		// set background window
-		_window = new Window(this, 256, 180, 32, 10, POPUP_BOTH);
+		_window = new Window(this, 256, 180 + _heightOffset, 32, 10 - _windowOffset, POPUP_BOTH);
+		_window->setInnerColor(239); // almost black = darkest index from backpals.dat
 
 		// set title
 		_txtTitle = new Text(220, 17, 50, 33);
@@ -52,21 +68,13 @@ namespace OpenXcom
 		add(_window, "window", "ufopaedia");
 		add(_txtTitle, "text", "ufopaedia");
 
-		_btnOk = new TextButton(220, 12, 50, 167);
-		add(_btnOk, "button1", "ufopaedia");
-
 		// set buttons
-		int y = 50;
-		size_t numButtons = std::min(_cats.size(), CAT_MAX_BUTTONS);
-		if (numButtons > CAT_MIN_BUTTONS)
-			y -= 13 * (numButtons - CAT_MIN_BUTTONS);
+		int y = 50 - buttonOffset;
 
 		_btnScrollUp = new ArrowButton(ARROW_BIG_UP, 13, 14, 270, y);
 		add(_btnScrollUp, "button1", "ufopaedia");
-		_btnScrollDown = new ArrowButton(ARROW_BIG_DOWN, 13, 14, 270, 152);
-		add(_btnScrollDown, "button1", "ufopaedia");
 
-		for (size_t i = 0; i < numButtons; ++i)
+		for (size_t i = 0; i < _maxButtons; ++i)
 		{
 			TextButton *button = new TextButton(220, 12, 50, y);
 			y += 13;
@@ -79,6 +87,13 @@ namespace OpenXcom
 
 			_btnSections.push_back(button);
 		}
+
+		_btnOk = new TextButton(220, 12, 50, y);
+		add(_btnOk, "button1", "ufopaedia");
+
+		_btnScrollDown = new ArrowButton(ARROW_BIG_DOWN, 13, 14, 270, y - 15);
+		add(_btnScrollDown, "button1", "ufopaedia");
+
 		updateButtons();
 		if (!_btnSections.empty())
 		{
@@ -100,10 +115,10 @@ namespace OpenXcom
 		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaStartState::btnOkClick, Options::keyCancel);
 		_btnOk->onKeyboardPress((ActionHandler)&UfopaediaStartState::btnOkClick, Options::keyGeoUfopedia);
 
-		_btnScrollUp->setVisible(_cats.size() > CAT_MAX_BUTTONS);
+		_btnScrollUp->setVisible(_cats.size() > _maxButtons);
 		_btnScrollUp->onMousePress((ActionHandler)&UfopaediaStartState::btnScrollUpPress);
 		_btnScrollUp->onMouseRelease((ActionHandler)&UfopaediaStartState::btnScrollRelease);
-		_btnScrollDown->setVisible(_cats.size() > CAT_MAX_BUTTONS);
+		_btnScrollDown->setVisible(_cats.size() > _maxButtons);
 		_btnScrollDown->onMousePress((ActionHandler)&UfopaediaStartState::btnScrollDownPress);
 		_btnScrollDown->onMouseRelease((ActionHandler)&UfopaediaStartState::btnScrollRelease);
 
@@ -147,7 +162,7 @@ namespace OpenXcom
 		{
 			if (action->getSender() == _btnSections[i])
 			{
-				_game->pushState(new UfopaediaSelectState(_cats[_offset + i]));
+				_game->pushState(new UfopaediaSelectState(_cats[_offset + i], _heightOffset, _windowOffset));
 				break;
 			}
 		}
@@ -207,9 +222,9 @@ namespace OpenXcom
 	 */
 	void UfopaediaStartState::scroll()
 	{
-		if (_cats.size() > CAT_MAX_BUTTONS)
+		if (_cats.size() > _maxButtons)
 		{
-			_offset = Clamp(_offset + _scroll, 0, int(_cats.size() - CAT_MAX_BUTTONS));
+			_offset = Clamp(_offset + _scroll, 0, int(_cats.size() - _maxButtons));
 			updateButtons();
 		}
 	}

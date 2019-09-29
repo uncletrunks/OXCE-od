@@ -39,7 +39,7 @@ namespace OpenXcom
 	class UfopaediaSelectState : public State
 	{
 	public:
-		UfopaediaSelectState(const std::string &section);
+		UfopaediaSelectState(const std::string &section, int heightOffset, int windowOffset);
 		virtual ~UfopaediaSelectState();
 		void init() override;
 	protected:

@@ -43,8 +43,6 @@ namespace OpenXcom
 		virtual ~UfopaediaStartState();
 
 	protected:
-		static const size_t CAT_MIN_BUTTONS;
-		static const size_t CAT_MAX_BUTTONS;
 		Window *_window;
 		Text *_txtTitle;
 		TextButton *_btnOk;
@@ -53,6 +51,8 @@ namespace OpenXcom
 		Timer *_timerScroll;
 
 		int _offset, _scroll;
+		size_t _maxButtons;
+		int _heightOffset, _windowOffset;
 		const std::vector<std::string> &_cats;
 
 		// navigation callbacks

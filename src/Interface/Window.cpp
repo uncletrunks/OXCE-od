@@ -40,7 +40,8 @@ Sound *Window::soundPopup[3];
  * @param y Y position in pixels.
  * @param popup Popup animation.
  */
-Window::Window(State *state, int width, int height, int x, int y, WindowPopup popup) : Surface(width, height, x, y), _dx(-x), _dy(-y), _bg(0), _color(0), _popup(popup), _popupStep(0.0), _state(state), _contrast(false), _screen(false), _thinBorder(false)
+Window::Window(State *state, int width, int height, int x, int y, WindowPopup popup) : Surface(width, height, x, y),
+	_dx(-x), _dy(-y), _bg(0), _color(0), _popup(popup), _popupStep(0.0), _state(state), _contrast(false), _screen(false), _thinBorder(false), _innerColor(0)
 {
 	_timer = new Timer(10);
 	_timer->onTimer((SurfaceHandler)&Window::popup);
@@ -248,6 +249,10 @@ void Window::draw()
 			else
 				square.h = 1;
 		}
+		if (_innerColor != 0)
+		{
+			drawRect(&square, _innerColor);
+		}
 	}
 
 	if (_bg != 0)
@@ -287,6 +292,14 @@ void Window::setDY(int dy)
 void Window::setThinBorder()
 {
 	_thinBorder = true;
+}
+
+/**
+ * Changes the window to have a custom inner color.
+ */
+void Window::setInnerColor(Uint8 innerColor)
+{
+	_innerColor = innerColor;
 }
 
 }
