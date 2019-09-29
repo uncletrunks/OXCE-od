@@ -177,19 +177,64 @@ namespace FileMap
 {
 
 FileRecord::FileRecord() : fullpath(""), zip(NULL), findex(0) { }
-SDL_RWops *FileRecord::getRWops() const {
+
+SDL_RWops *FileRecord::getRWops() const
+{
 	SDL_RWops *rv;
 	if (zip != NULL) {
-		//Log(LOG_VERBOSE) << "FileRecord::getRWops(): miniz rwops for " << fullpath;
 		rv = SDL_RWFromMZ((mz_zip_archive *)zip, findex);
 	} else {
-		//Log(LOG_VERBOSE) << "FileRecord::getRWops(): stdio rwops for " << fullpath;
 		rv = SDL_RWFromFile(fullpath.c_str(), "rb");
 	}
 	if (!rv) { Log(LOG_ERROR) << "FileRecord::getRWops(): err=" << SDL_GetError(); }
 	return rv;
 }
-std::unique_ptr<std::istream>FileRecord::getIStream() const {
+
+SDL_RWops *FileRecord::getRWopsReadAll() const
+{
+	SDL_RWops *rv;
+	if (zip != NULL)
+	{
+		rv = SDL_RWFromMZ((mz_zip_archive *)zip, findex);
+	}
+	else
+	{
+		rv = SDL_RWFromFile(fullpath.c_str(), "rb");
+		if (rv)
+		{
+			size_t size = 0;
+			auto data = SDL_LoadFile_RW(rv, &size, SDL_TRUE);
+			if (data)
+			{
+				rv = SDL_RWFromConstMem(data, size);
+
+				//close callback
+				rv->close = +[](struct SDL_RWops *context)
+				{
+					if (context)
+					{
+						//HACK: technically speaking `hidden` is implemation detial but we need use it to dealocate memory similar to `mzops_close`
+						if (context->hidden.mem.base)
+						{
+							SDL_free(context->hidden.mem.base);
+						}
+						SDL_FreeRW(context);
+					}
+					return 0;
+				};
+			}
+			else
+			{
+				rv = nullptr;
+			}
+		}
+	}
+	if (!rv) { Log(LOG_ERROR) << "FileRecord::getRWopsReadAll(): err=" << SDL_GetError(); }
+	return rv;
+}
+
+std::unique_ptr<std::istream>FileRecord::getIStream() const
+{
 	if (zip != NULL) {
 		size_t size;
 		void *data = mz_zip_reader_extract_to_heap((mz_zip_archive *)zip, findex, &size, 0);
@@ -1074,9 +1119,16 @@ const FileRecord *at(const std::string &relativeFilePath) {
 	}
 	return frec;
 }
-SDL_RWops *getRWops(const std::string &relativeFilePath) {
+
+SDL_RWops *getRWops(const std::string &relativeFilePath)
+{
 	return at(relativeFilePath)->getRWops();
 }
+SDL_RWops *getRWopsReadAll(const std::string &relativeFilePath)
+{
+	return at(relativeFilePath)->getRWopsReadAll();
+}
+
 std::unique_ptr<std::istream> getIStream(const std::string &relativeFilePath) {
 	return at(relativeFilePath)->getIStream();
 }

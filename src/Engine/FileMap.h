@@ -44,8 +44,13 @@ namespace FileMap
 		size_t findex;       	// file index in the zipfile.
 
 		FileRecord();
+
+		/// Open file warped in RWops.
 		SDL_RWops *getRWops() const;
-		std::unique_ptr<std::istream>getIStream() const;
+		/// Read whole file to memory and warpin in RWops.
+		SDL_RWops *getRWopsReadAll() const;
+
+		std::unique_ptr<std::istream> getIStream() const;
 		YAML::Node getYAML() const;
 		std::vector<YAML::Node> getAllYAML() const;
 	};
@@ -58,6 +63,9 @@ namespace FileMap
 
 	/// Gets SDL_RWops for the file data of a data file blah blah read above.
 	SDL_RWops *getRWops(const std::string &relativeFilePath);
+
+	/// Gets SDL_RWops for the file data of a data file blah blah read above. It read whole file to memory.
+	SDL_RWops *getRWopsReadAll(const std::string &relativeFilePath);
 
 	/// Gets an std::istream interface to the file data. Has to be deleted on the caller's end.
 	std::unique_ptr<std::istream>getIStream(const std::string &relativeFilePath);

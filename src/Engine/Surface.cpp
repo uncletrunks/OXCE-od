@@ -366,7 +366,7 @@ void Surface::loadImage(const std::string &filename)
 	_surface = nullptr;
 
 	Log(LOG_VERBOSE) << "Loading image: " << filename;
-	auto rw = FileMap::getRWops(filename);
+	auto rw = FileMap::getRWopsReadAll(filename);
 	if (!rw) { return; } // relevant message gets logged in FileMap.
 
 	// Try loading with LodePNG first
@@ -465,7 +465,7 @@ void Surface::loadSpk(const std::string& filename)
 {
 	Uint16 flag;
 	int x = 0, y = 0;
-	auto rw = FileMap::getRWops(filename);
+	auto rw = FileMap::getRWopsReadAll(filename);
 	auto rwsize = SDL_RWsize(rw);
 	// Lock the surface
 	lock();
@@ -497,7 +497,7 @@ void Surface::loadBdy(const std::string &filename)
 	int pixelCnt;
 	int x = 0, y = 0;
 	int currentRow = 0;
-	auto rw = FileMap::getRWops(filename);
+	auto rw = FileMap::getRWopsReadAll(filename);
 	auto rwsize = SDL_RWsize(rw);
 	// Lock the surface
 	lock();
