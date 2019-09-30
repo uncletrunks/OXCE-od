@@ -174,7 +174,8 @@ YAML::Node BattleItem::save(const ScriptGlobal *shared) const
 	}
 	if (_fuseTimer != -1)
 		node["fuseTimer"] = _fuseTimer;
-	node["fuseEnabed"] = _fuseEnabled;
+	if (_fuseEnabled)
+		node["fuseEnabed"] = _fuseEnabled;
 	if (_droppedOnAlienTurn)
 		node["droppedOnAlienTurn"] = _droppedOnAlienTurn;
 	if (_XCOMProperty)

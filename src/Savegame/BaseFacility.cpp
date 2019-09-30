@@ -65,8 +65,10 @@ YAML::Node BaseFacility::save() const
 	node["y"] = _y;
 	if (_buildTime != 0)
 		node["buildTime"] = _buildTime;
-	node["disabled"] = _disabled;
-	node["hadPreviousFacility"] = _hadPreviousFacility;
+	if (_disabled)
+		node["disabled"] = _disabled;
+	if (_hadPreviousFacility)
+		node["hadPreviousFacility"] = _hadPreviousFacility;
 	return node;
 }
 

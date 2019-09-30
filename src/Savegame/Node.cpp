@@ -100,9 +100,11 @@ YAML::Node Node::save() const
 	node["flags"] = _flags;
 	node["reserved"] = _reserved;
 	node["priority"] = _priority;
-	node["allocated"] = _allocated;
+	if (_allocated)
+		node["allocated"] = _allocated;
 	node["links"] = _nodeLinks;
-	node["dummy"] = _dummy;
+	if (_dummy)
+		node["dummy"] = _dummy;
 	return node;
 }
 
