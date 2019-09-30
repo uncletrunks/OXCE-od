@@ -2556,6 +2556,10 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
  */
 void BattlescapeGenerator::generateBaseMap()
 {
+	if (_base->isOverlappingOrOverflowing())
+	{
+		throw Exception("The base is corrupted, can't continue. For more details, please see the openxcom.log file.");
+	}
 	// add modules based on the base's layout
 	for (std::vector<BaseFacility*>::const_iterator i = _base->getFacilities()->begin(); i != _base->getFacilities()->end(); ++i)
 	{

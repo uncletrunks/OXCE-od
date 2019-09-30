@@ -227,6 +227,8 @@ void Base::load(const YAML::Node &node, SavedGame *save, bool newGame, bool newB
 
 	_retaliationTarget = node["retaliationTarget"].as<bool>(_retaliationTarget);
 	_fakeUnderwater = node["fakeUnderwater"].as<bool>(_fakeUnderwater);
+
+	isOverlappingOrOverflowing(); // don't crash, just report in the log file...
 }
 
 /**
@@ -261,6 +263,55 @@ void Base::finishLoading(const YAML::Node &node, SavedGame *save)
 			Log(LOG_ERROR) << "Failed to load craft " << type;
 		}
 	}
+}
+
+/**
+ * Tests whether the base facilities are within the base boundaries and not overlapping.
+ * @return True if the base has a problem.
+ */
+bool Base::isOverlappingOrOverflowing()
+{
+	bool result = false;
+	bool grid[BASE_SIZE][BASE_SIZE];
+
+	for (int x = 0; x < BASE_SIZE; ++x)
+	{
+		for (int y = 0; y < BASE_SIZE; ++y)
+		{
+			grid[x][y] = false;
+		}
+	}
+
+	for (auto f : _facilities)
+	{
+		auto rules = f->getRules();
+		if (f->getX() < 0 || f->getY() < 0)
+		{
+			Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << f->getX() << "," << f->getY() << "] (size " << rules->getSize() << ") is outside of base boundaries.";
+			result = true;
+			continue;
+		}
+		if (f->getX() + (f->getRules()->getSize() - 1) >= BASE_SIZE || f->getY() + (f->getRules()->getSize() - 1) >= BASE_SIZE)
+		{
+			Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << f->getX() << "," << f->getY() << "] (size " << rules->getSize() << ") is outside of base boundaries.";
+			result = true;
+			continue;
+		}
+		for (int x = f->getX(); x < f->getX() + rules->getSize(); ++x)
+		{
+			for (int y = f->getY(); y < f->getY() + rules->getSize(); ++y)
+			{
+				if (grid[x][y])
+				{
+					Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << f->getX() << "," << f->getY() << "] (size " << rules->getSize() << ") overlaps with another facility.";
+					result = true;
+				}
+				grid[x][y] = true;
+			}
+		}
+	}
+
+	return result;
 }
 
 /**
