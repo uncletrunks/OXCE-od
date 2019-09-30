@@ -158,8 +158,6 @@ SoldierDiaryOverviewState::SoldierDiaryOverviewState(Base *base, size_t soldierI
 	_lstDiary->setBackground(_window);
 	_lstDiary->setMargin(8);
 	_lstDiary->onMouseClick((ActionHandler)&SoldierDiaryOverviewState::lstDiaryInfoClick);
-
-	init(); // Populate the list
 }
 
 /**

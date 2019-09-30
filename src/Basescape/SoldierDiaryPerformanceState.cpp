@@ -185,8 +185,6 @@ SoldierDiaryPerformanceState::SoldierDiaryPerformanceState(Base *base, size_t so
 	_btnKills->setGroup(&_group);
 	_btnMissions->setGroup(&_group);
 	_btnCommendations->setGroup(&_group);
-
-	init(); // Populate the list
 }
 
 /**

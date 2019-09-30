@@ -99,8 +99,6 @@ SoldierDiaryMissionState::SoldierDiaryMissionState(Soldier *soldier, int rowEntr
 	_txtUFO->setAlign(ALIGN_CENTER);
 
 	_lstKills->setColumns(3, 60, 110, 100);
-
-	init(); // Populate the list
 }
 
 /**
