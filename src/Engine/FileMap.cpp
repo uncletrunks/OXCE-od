@@ -213,7 +213,7 @@ SDL_RWops *FileRecord::getRWopsReadAll() const
 				{
 					if (context)
 					{
-						//HACK: technically speaking `hidden` is implemation detial but we need use it to dealocate memory similar to `mzops_close`
+						//HACK: technically speaking `hidden` is an implementation detail, but we need to use it to deallocate memory (similar to `mzops_close`)
 						if (context->hidden.mem.base)
 						{
 							SDL_free(context->hidden.mem.base);
@@ -233,7 +233,7 @@ SDL_RWops *FileRecord::getRWopsReadAll() const
 	return rv;
 }
 
-std::unique_ptr<std::istream>FileRecord::getIStream() const
+std::unique_ptr<std::istream> FileRecord::getIStream() const
 {
 	if (zip != NULL) {
 		size_t size;

@@ -47,7 +47,7 @@ namespace FileMap
 
 		/// Open file warped in RWops.
 		SDL_RWops *getRWops() const;
-		/// Read whole file to memory and warpin in RWops.
+		/// Read the whole file to memory and warp in RWops.
 		SDL_RWops *getRWopsReadAll() const;
 
 		std::unique_ptr<std::istream> getIStream() const;
@@ -64,7 +64,7 @@ namespace FileMap
 	/// Gets SDL_RWops for the file data of a data file blah blah read above.
 	SDL_RWops *getRWops(const std::string &relativeFilePath);
 
-	/// Gets SDL_RWops for the file data of a data file blah blah read above. It read whole file to memory.
+	/// Gets SDL_RWops for the file data of a data file blah blah read above. Reads the whole file to memory.
 	SDL_RWops *getRWopsReadAll(const std::string &relativeFilePath);
 
 	/// Gets an std::istream interface to the file data. Has to be deleted on the caller's end.

@@ -366,7 +366,7 @@ void Surface::loadImage(const std::string &filename)
 	_surface = nullptr;
 
 	Log(LOG_VERBOSE) << "Loading image: " << filename;
-	auto rw = FileMap::getRWopsReadAll(filename);
+	auto rw = FileMap::getRWops(filename);
 	if (!rw) { return; } // relevant message gets logged in FileMap.
 
 	// Try loading with LodePNG first
