@@ -88,7 +88,8 @@ struct MissionStatistics
 		node["rating"] = rating;
 		node["alienRace"] = alienRace;
 		node["daylight"] = daylight;
-		node["injuryList"] = injuryList;
+		if (!injuryList.empty())
+			node["injuryList"] = injuryList;
 		if (valiantCrux) node["valiantCrux"] = valiantCrux;
 		if (lootValue) node["lootValue"] = lootValue;
 		return node;

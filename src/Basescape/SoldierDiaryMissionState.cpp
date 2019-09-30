@@ -129,20 +129,27 @@ void SoldierDiaryMissionState::init()
 	{
 		missionId = 0;
 	}
-	int daysWounded = missionStatistics->at(missionId)->injuryList[_soldier->getId()];
+	MissionStatistics *ms = missionStatistics->at(missionId);
+
+	int daysWounded = 0;
+	auto injuryIt = ms->injuryList.find(_soldier->getId());
+	if (injuryIt != ms->injuryList.end())
+	{
+		daysWounded = (*injuryIt).second;
+	}
 
 	_lstKills->clearList();
-	_txtTitle->setText(tr(missionStatistics->at(missionId)->type));
-	if (missionStatistics->at(missionId)->isUfoMission())
+	_txtTitle->setText(tr(ms->type));
+	if (ms->isUfoMission())
 	{
-		_txtUFO->setText(tr(missionStatistics->at(missionId)->ufo));
+		_txtUFO->setText(tr(ms->ufo));
 	}
-	_txtUFO->setVisible(missionStatistics->at(missionId)->isUfoMission());
-	_txtScore->setText(tr("STR_SCORE_VALUE").arg(missionStatistics->at(missionId)->score));
-	_txtLocation->setText(tr("STR_LOCATION").arg(tr(missionStatistics->at(missionId)->getLocationString())));
-	_txtRace->setText(tr("STR_RACE_TYPE").arg(tr(missionStatistics->at(missionId)->alienRace)));
-	_txtRace->setVisible(missionStatistics->at(missionId)->alienRace != "STR_UNKNOWN");
-	_txtDaylight->setText(tr("STR_DAYLIGHT_TYPE").arg(tr(missionStatistics->at(missionId)->getDaylightString())));
+	_txtUFO->setVisible(ms->isUfoMission());
+	_txtScore->setText(tr("STR_SCORE_VALUE").arg(ms->score));
+	_txtLocation->setText(tr("STR_LOCATION").arg(tr(ms->getLocationString())));
+	_txtRace->setText(tr("STR_RACE_TYPE").arg(tr(ms->alienRace)));
+	_txtRace->setVisible(ms->alienRace != "STR_UNKNOWN");
+	_txtDaylight->setText(tr("STR_DAYLIGHT_TYPE").arg(tr(ms->getDaylightString())));
 	_txtDaysWounded->setText(tr("STR_DAYS_WOUNDED").arg(daysWounded));
 	_txtDaysWounded->setVisible(daysWounded != 0);
 
