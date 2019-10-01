@@ -901,7 +901,7 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 		std::ostringstream oss;
 		oss << "globalCraftLoadout" << j;
 		std::string key = oss.str();
-		if (_globalCraftLoadout[j])
+		if (!_globalCraftLoadout[j]->getContents()->empty())
 		{
 			node[key] = _globalCraftLoadout[j]->save();
 		}
