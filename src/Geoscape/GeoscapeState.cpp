@@ -3150,6 +3150,8 @@ void GeoscapeState::determineAlienMissions()
 	Mod *mod = _game->getMod();
 	int month = _game->getSavedGame()->getMonthsPassed();
 	int currentScore = save->getCurrentScore(); // _monthsPassed was already increased by 1
+	int64_t currentFunds = save->getFunds();
+	currentFunds += save->getCountryFunding() - save->getBaseMaintenance(); // peek into the next month
 	std::vector<RuleMissionScript*> availableMissions;
 	std::map<int, bool> conditions;
 
@@ -3168,6 +3170,8 @@ void GeoscapeState::determineAlienMissions()
 				// and make sure we satisfy the difficulty restrictions
 				(month < 1 || arcScript->getMinScore() <= currentScore) &&
 				(month < 1 || arcScript->getMaxScore() >= currentScore) &&
+				(month < 1 || arcScript->getMinFunds() <= currentFunds) &&
+				(month < 1 || arcScript->getMaxFunds() >= currentFunds) &&
 				arcScript->getMinDifficulty() <= save->getDifficulty() &&
 				arcScript->getMaxDifficulty() >= save->getDifficulty())
 			{
@@ -3282,6 +3286,8 @@ void GeoscapeState::determineAlienMissions()
 			// and make sure we satisfy the difficulty restrictions
 			(month < 1 || command->getMinScore() <= currentScore) &&
 			(month < 1 || command->getMaxScore() >= currentScore) &&
+			(month < 1 || command->getMinFunds() <= currentFunds) &&
+			(month < 1 || command->getMaxFunds() >= currentFunds) &&
 			command->getMinDifficulty() <= save->getDifficulty())
 		{
 			// level two condition check: make sure we meet any research requirements, if any.
@@ -3368,6 +3374,8 @@ void GeoscapeState::determineAlienMissions()
 				// and make sure we satisfy the difficulty restrictions
 				(month < 1 || eventScript->getMinScore() <= currentScore) &&
 				(month < 1 || eventScript->getMaxScore() >= currentScore) &&
+				(month < 1 || eventScript->getMinFunds() <= currentFunds) &&
+				(month < 1 || eventScript->getMaxFunds() >= currentFunds) &&
 				eventScript->getMinDifficulty() <= save->getDifficulty() &&
 				eventScript->getMaxDifficulty() >= save->getDifficulty())
 			{

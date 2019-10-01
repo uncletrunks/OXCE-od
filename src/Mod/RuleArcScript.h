@@ -34,6 +34,7 @@ private:
 	WeightedOptions _randomArcs;
 	int _firstMonth, _lastMonth, _executionOdds, _maxArcs, _minDifficulty, _maxDifficulty;
 	int _minScore, _maxScore;
+	int64_t _minFunds, _maxFunds;
 	std::map<std::string, bool> _researchTriggers;
 	std::map<std::string, bool> _itemTriggers;
 public:
@@ -65,6 +66,10 @@ public:
 	int getMinScore() const { return _minScore; }
 	/// Gets the maximum score (from last month) for this command to run.
 	int getMaxScore() const { return _maxScore; }
+	/// Gets the minimum funds (from current month) for this command to run.
+	int64_t getMinFunds() const { return _minFunds; }
+	/// Gets the maximum funds (from current month) for this command to run.
+	int64_t getMaxFunds() const { return _maxFunds; }
 	/// Gets the research triggers that may apply to this command.
 	const std::map<std::string, bool> &getResearchTriggers() const { return _researchTriggers; }
 	/// Gets the item triggers that may apply to this command.
