@@ -1597,8 +1597,7 @@ bool BattleUnit::hasNegativeHealthRegen() const
 		{
 			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
 			{
-				if (bonusRule.first->getHealthRecoveryRaw()->isModded())
-					HPRecovery += bonusRule.first->getHealthRecovery(this);
+				HPRecovery += bonusRule.first->getHealthRecovery(this);
 			}
 		}
 
@@ -2333,10 +2332,8 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 		{
 			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
 			{
-				if (bonusRule.first->getTimeRecoveryRaw()->isModded())
-					TURecovery += bonusRule.first->getTimeRecovery(this);
-				if (bonusRule.first->getEnergyRecoveryRaw()->isModded())
-					ENRecovery += bonusRule.first->getEnergyRecovery(this);
+				TURecovery += bonusRule.first->getTimeRecovery(this);
+				ENRecovery += bonusRule.first->getEnergyRecovery(this);
 			}
 		}
 
@@ -2358,14 +2355,10 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 		{
 			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
 			{
-				if (bonusRule.first->getHealthRecoveryRaw()->isModded())
-					HPRecovery += bonusRule.first->getHealthRecovery(this);
-				if (bonusRule.first->getManaRecoveryRaw()->isModded())
-					MNRecovery += bonusRule.first->getManaRecovery(this);
-				if (bonusRule.first->getMoraleRecoveryRaw()->isModded())
-					MRRecovery += bonusRule.first->getMoraleRecovery(this);
-				if (bonusRule.first->getStunRegenerationRaw()->isModded())
-					STRecovery += bonusRule.first->getStunRegeneration(this);
+				HPRecovery += bonusRule.first->getHealthRecovery(this);
+				MNRecovery += bonusRule.first->getManaRecovery(this);
+				MRRecovery += bonusRule.first->getMoraleRecovery(this);
+				STRecovery += bonusRule.first->getStunRegeneration(this);
 			}
 		}
 
