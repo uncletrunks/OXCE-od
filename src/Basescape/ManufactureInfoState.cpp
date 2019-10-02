@@ -34,6 +34,8 @@
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Production.h"
+#include "../Savegame/SavedGame.h"
+#include "../Savegame/ItemContainer.h"
 #include "../Engine/Timer.h"
 #include "../Menu/ErrorMessageState.h"
 #include "../Mod/RuleInterface.h"
@@ -552,6 +554,7 @@ void ManufactureInfoState::lessUnitClick(Action *action)
 	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT
 	||  action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
+		bool wasInfinite = _production->getInfiniteAmount();
 		_production->setInfiniteAmount(false);
 		if (action->getDetails()->button.button == SDL_BUTTON_RIGHT
 		|| _production->getAmountTotal() <= _production->getAmountProduced())
@@ -559,7 +562,33 @@ void ManufactureInfoState::lessUnitClick(Action *action)
 			_production->setAmountTotal(_production->getAmountProduced()+1);
 			setAssignedEngineer();
 		}
-		if (action->getDetails()->button.button == SDL_BUTTON_LEFT) lessUnit(1);
+		if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+		{
+			if (wasInfinite)
+			{
+				// when infinite amount is decreased by 1, set the amount to maximum possible considering current funds and store supplies
+				int productionPossible = INT_MAX;
+				auto manufRule = _production->getRules();
+				if (manufRule->getManufactureCost() > 0)
+				{
+					int byFunds = _game->getSavedGame()->getFunds() / manufRule->getManufactureCost();
+					productionPossible = std::min(productionPossible, byFunds);
+				}
+				for (auto &item : manufRule->getRequiredItems())
+				{
+					productionPossible = std::min(productionPossible, _base->getStorageItems()->getItem(item.first->getType()) / item.second);
+				}
+				productionPossible = std::max(0, productionPossible);
+
+				int newTotal = _production->getAmountProduced() + productionPossible;
+				if (!_item)
+				{
+					newTotal += 1; // +1 for the item being produced currently
+				}
+				_production->setAmountTotal(newTotal + 1); // +1 because of lessUnit(1) call below
+			}
+			lessUnit(1);
+		}
 	}
 }
 
