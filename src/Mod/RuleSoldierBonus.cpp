@@ -40,12 +40,12 @@ void RuleSoldierBonus::load(const YAML::Node &node, const ModScript &parsers)
 	_stats.merge(node["stats"].as<UnitStats>(_stats));
 	const YAML::Node &rec = node["recovery"];
 	{
-		_timeRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::TimeRecoveryStatBonus>());
-		_energyRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::EnergyRecoveryStatBonus>());
-		_moraleRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::MoraleRecoveryStatBonus>());
-		_healthRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::HealthRecoveryStatBonus>());
-		_manaRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::ManaRecoveryStatBonus>());
-		_stunRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::StunRecoveryStatBonus>());
+		_timeRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::TimeSoldierRecoveryStatBonus>());
+		_energyRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::EnergySoldierRecoveryStatBonus>());
+		_moraleRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::MoraleSoldierRecoveryStatBonus>());
+		_healthRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::HealthSoldierRecoveryStatBonus>());
+		_manaRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::ManaSoldierRecoveryStatBonus>());
+		_stunRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::StunSoldierRecoveryStatBonus>());
 	}
 }
 

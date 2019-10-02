@@ -506,49 +506,49 @@ float Armor::getMeleeDodgeBackPenalty() const
 /**
  *  Gets unit TU recovery.
  */
-int Armor::getTimeRecovery(const BattleUnit* unit) const
+int Armor::getTimeRecovery(const BattleUnit* unit, int externalBonuses) const
 {
-	return _timeRecovery.getBonus(unit);
+	return _timeRecovery.getBonus(unit, externalBonuses);
 }
 
 /**
  *  Gets unit Energy recovery.
  */
-int Armor::getEnergyRecovery(const BattleUnit* unit) const
+int Armor::getEnergyRecovery(const BattleUnit* unit, int externalBonuses) const
 {
-	return _energyRecovery.getBonus(unit);
+	return _energyRecovery.getBonus(unit, externalBonuses);
 }
 
 /**
  *  Gets unit Morale recovery.
  */
-int Armor::getMoraleRecovery(const BattleUnit* unit) const
+int Armor::getMoraleRecovery(const BattleUnit* unit, int externalBonuses) const
 {
-	return _moraleRecovery.getBonus(unit);
+	return _moraleRecovery.getBonus(unit, externalBonuses);
 }
 
 /**
  *  Gets unit Health recovery.
  */
-int Armor::getHealthRecovery(const BattleUnit* unit) const
+int Armor::getHealthRecovery(const BattleUnit* unit, int externalBonuses) const
 {
-	return _healthRecovery.getBonus(unit);
+	return _healthRecovery.getBonus(unit, externalBonuses);
 }
 
 /**
  *  Gets unit Mana recovery.
  */
-int Armor::getManaRecovery(const BattleUnit* unit) const
+int Armor::getManaRecovery(const BattleUnit* unit, int externalBonuses) const
 {
-	return _manaRecovery.getBonus(unit);
+	return _manaRecovery.getBonus(unit, externalBonuses);
 }
 
 /**
  *  Gets unit Stun recovery.
  */
-int Armor::getStunRegeneration(const BattleUnit* unit) const
+int Armor::getStunRegeneration(const BattleUnit* unit, int externalBonuses) const
 {
-	return _stunRecovery.getBonus(unit);
+	return _stunRecovery.getBonus(unit, externalBonuses);
 }
 
 /**

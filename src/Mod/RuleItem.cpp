@@ -2257,7 +2257,7 @@ bool RuleItem::isManaRequired() const
  */
 int RuleItem::getPowerBonus(const BattleUnit *unit) const
 {
-	return _power + _damageBonus.getBonus(unit);
+	return _damageBonus.getBonus(unit, _power);
 }
 
 /**
@@ -2267,7 +2267,7 @@ int RuleItem::getPowerBonus(const BattleUnit *unit) const
  */
 int RuleItem::getMeleeBonus(const BattleUnit *unit) const
 {
-	return _meleePower + _meleeBonus.getBonus(unit);
+	return _meleeBonus.getBonus(unit, _meleePower);
 }
 
 /**

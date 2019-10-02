@@ -67,7 +67,7 @@ public:
 	/// Set default for Stun recovery.
 	void setStunRecovery();
 	/// Get bonus based on unit stats.
-	int getBonus(const BattleUnit* unit) const;
+	int getBonus(const BattleUnit* unit, int externalBonuses = 0) const;
 	/// Used for "Stats for Nerds".
 	const std::vector<RuleStatBonusDataOrig> *getBonusRaw() const { return &_bonusOrig; }
 	bool isModded() const { return _modded; }

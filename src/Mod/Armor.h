@@ -181,22 +181,22 @@ public:
 	float getMeleeDodgeBackPenalty() const;
 
 	/// Gets unit TU recovery.
-	int getTimeRecovery(const BattleUnit* unit) const;
+	int getTimeRecovery(const BattleUnit* unit, int externalBonuses) const;
 	const RuleStatBonus *getTimeRecoveryRaw() const { return &_timeRecovery; }
 	/// Gets unit Energy recovery.
-	int getEnergyRecovery(const BattleUnit* unit) const;
+	int getEnergyRecovery(const BattleUnit* unit, int externalBonuses) const;
 	const RuleStatBonus *getEnergyRecoveryRaw() const { return &_energyRecovery; }
 	/// Gets unit Morale recovery.
-	int getMoraleRecovery(const BattleUnit* unit) const;
+	int getMoraleRecovery(const BattleUnit* unit, int externalBonuses) const;
 	const RuleStatBonus *getMoraleRecoveryRaw() const { return &_moraleRecovery; }
 	/// Gets unit Health recovery.
-	int getHealthRecovery(const BattleUnit* unit) const;
+	int getHealthRecovery(const BattleUnit* unit, int externalBonuses) const;
 	const RuleStatBonus *getHealthRecoveryRaw() const { return &_healthRecovery; }
 	/// Gets unit Mana recovery.
-	int getManaRecovery(const BattleUnit* unit) const;
+	int getManaRecovery(const BattleUnit* unit, int externalBonuses) const;
 	const RuleStatBonus* getManaRecoveryRaw() const { return &_manaRecovery; }
 	/// Gets unit Stun recovery.
-	int getStunRegeneration(const BattleUnit* unit) const;
+	int getStunRegeneration(const BattleUnit* unit, int externalBonuses) const;
 	const RuleStatBonus *getStunRegenerationRaw() const { return &_stunRecovery; }
 
 	/// Gets the armor's weight.

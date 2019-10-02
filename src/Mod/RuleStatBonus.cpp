@@ -506,12 +506,12 @@ void RuleStatBonus::setStunRecovery()
 /**
  * Calculate bonus based on unit stats.
  */
-int RuleStatBonus::getBonus(const BattleUnit* unit) const
+int RuleStatBonus::getBonus(const BattleUnit* unit, int externalBonuses) const
 {
 	assert(!_refresh && "RuleStatBonus not loaded correctly");
 
-	ModScript::BonusStatsCommon::Output arg{ 0 };
-	ModScript::BonusStatsCommon::Worker work{ unit };
+	ModScript::BonusStatsCommon::Output arg{ externalBonuses };
+	ModScript::BonusStatsCommon::Worker work{ unit, externalBonuses };
 	work.execute(_container, arg);
 
 	return arg.getFirst();
@@ -521,7 +521,7 @@ int RuleStatBonus::getBonus(const BattleUnit* unit) const
 //					Script binding
 ////////////////////////////////////////////////////////////
 
-ModScript::BonusStatsBaseParser::BonusStatsBaseParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "bonus", "unit" }
+ModScript::BonusStatsBaseParser::BonusStatsBaseParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "bonus", "unit", "external_bonuses" }
 {
 	Bind<BattleUnit> bu = { this };
 
