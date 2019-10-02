@@ -1038,6 +1038,7 @@ void BattlescapeState::mapIn(Action *)
  */
 void BattlescapeState::btnUnitUpClick(Action *)
 {
+	if (_battleGame->getCurrentAction()->type == BA_LAUNCH) return;
 	if (playableUnitSelected() && _save->getPathfinding()->validateUpDown(_save->getSelectedUnit(), _save->getSelectedUnit()->getPosition(), Pathfinding::DIR_UP))
 	{
 		_battleGame->cancelCurrentAction();
@@ -1051,6 +1052,7 @@ void BattlescapeState::btnUnitUpClick(Action *)
  */
 void BattlescapeState::btnUnitDownClick(Action *)
 {
+	if (_battleGame->getCurrentAction()->type == BA_LAUNCH) return;
 	if (playableUnitSelected() && _save->getPathfinding()->validateUpDown(_save->getSelectedUnit(), _save->getSelectedUnit()->getPosition(), Pathfinding::DIR_DOWN))
 	{
 		_battleGame->cancelCurrentAction();
@@ -1217,6 +1219,7 @@ void BattlescapeState::btnPrevSoldierClick(Action *)
  */
 void BattlescapeState::selectNextPlayerUnit(bool checkReselect, bool setReselect, bool checkInventory, bool checkFOV)
 {
+	if (_battleGame->getCurrentAction()->type == BA_LAUNCH) return;
 	if (allowButtons())
 	{
 		BattleUnit *unit = _save->selectNextPlayerUnit(checkReselect, setReselect, checkInventory);
