@@ -1402,7 +1402,7 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
  * Gets all the soldier bonuses
  * @return The map of soldier bonuses
  */
-std::map<RuleSoldierBonus*, int> *Soldier::getBonuses(const Mod *mod, bool rebuild)
+std::map<const RuleSoldierBonus*, int> *Soldier::getBonuses(const Mod *mod, bool rebuild)
 {
 	if (rebuild && mod)
 	{
@@ -1417,15 +1417,10 @@ std::map<RuleSoldierBonus*, int> *Soldier::getBonuses(const Mod *mod, bool rebui
 		}
 		for (auto commendation : *_diary->getSoldierCommendations())
 		{
-			auto commendationRule = commendation->getRule();
-			auto bonusName = commendationRule->getSoldierBonus(commendation->getDecorationLevelInt());
-			if (bonusName)
+			auto bonusRule = commendation->getRule()->getSoldierBonus(commendation->getDecorationLevelInt());
+			if (bonusRule)
 			{
-				auto bonusRule = mod->getSoldierBonus(*bonusName, false);
-				if (bonusRule)
-				{
-					_bonusCache[bonusRule] += 1;
-				}
+				_bonusCache[bonusRule] += 1;
 			}
 		}
 	}

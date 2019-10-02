@@ -22,6 +22,9 @@
 namespace OpenXcom
 {
 
+class Mod;
+class RuleSoldierBonus;
+
 /**
  * Represents a specific type of commendation.
  * Contains constant info about a commendation like
@@ -35,7 +38,9 @@ private:
 	std::vector<std::vector<std::pair<int, std::vector<std::string> > > > _killCriteria;
 	std::string _description;
 	int _sprite;
-	std::vector<std::string> _soldierBonusTypes;
+	std::vector<std::string> _soldierBonusTypesNames;
+	std::vector<const RuleSoldierBonus*> _soldierBonusTypes;
+
 public:
 	/// Creates a blank commendation ruleset.
 	RuleCommendations();
@@ -43,6 +48,8 @@ public:
 	~RuleCommendations();
 	/// Loads commendation data from YAML.
 	void load(const YAML::Node& node);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
 	/// Get the commendation's description.
 	std::string getDescription() const;
 	/// Get the commendation's award criteria.
@@ -52,7 +59,7 @@ public:
 	/// Get the commendation's sprite.
 	int getSprite() const;
 	/// Gets the soldier bonus type corresponding to the commendation's decoration level.
-	const std::string *getSoldierBonus(int decorationLevel) const;
+	const RuleSoldierBonus *getSoldierBonus(int decorationLevel) const;
 
 };
 

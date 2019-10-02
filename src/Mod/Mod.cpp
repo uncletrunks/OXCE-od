@@ -1345,6 +1345,7 @@ void Mod::loadAll()
 	afterLoadHelper("units", this, _units, &Unit::afterLoad);
 	afterLoadHelper("facilities", this, _facilities, &RuleBaseFacility::afterLoad);
 	afterLoadHelper("enviroEffects", this, _enviroEffects, &RuleEnviroEffects::afterLoad);
+	afterLoadHelper("commendations", this, _commendations, &RuleCommendations::afterLoad);
 
 	// fixed user options
 	if (!_fixedUserOptions.empty())
