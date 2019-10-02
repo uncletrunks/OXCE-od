@@ -1417,17 +1417,14 @@ std::map<RuleSoldierBonus*, int> *Soldier::getBonuses(const Mod *mod, bool rebui
 		}
 		for (auto commendation : *_diary->getSoldierCommendations())
 		{
-			auto commendationRule = mod->getCommendation(commendation->getType(), false);
-			if (commendationRule)
+			auto commendationRule = commendation->getRule();
+			auto bonusName = commendationRule->getSoldierBonus(commendation->getDecorationLevelInt());
+			if (bonusName)
 			{
-				auto bonusName = commendationRule->getSoldierBonus(commendation->getDecorationLevelInt());
-				if (bonusName)
+				auto bonusRule = mod->getSoldierBonus(*bonusName, false);
+				if (bonusRule)
 				{
-					auto bonusRule = mod->getSoldierBonus(*bonusName, false);
-					if (bonusRule)
-					{
-						_bonusCache[bonusRule] += 1;
-					}
+					_bonusCache[bonusRule] += 1;
 				}
 			}
 		}

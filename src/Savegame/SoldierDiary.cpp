@@ -65,9 +65,8 @@ void SoldierDiary::load(const YAML::Node& node, const Mod *mod)
 	{
 		for (YAML::const_iterator i = commendations.begin(); i != commendations.end(); ++i)
 		{
-			SoldierCommendations *sc = new SoldierCommendations(*i);
-			RuleCommendations *commendation = mod->getCommendation(sc->getType());
-			if (commendation)
+			SoldierCommendations *sc = new SoldierCommendations(*i, mod);
+			if (sc->getRule())
 			{
 				_commendations.push_back(sc);
 			}
@@ -548,7 +547,7 @@ bool SoldierDiary::manageCommendations(Mod *mod, std::vector<MissionStatistics*>
 				}
 				if (newCommendation)
 				{
-					_commendations.push_back(new SoldierCommendations((*i).first, (*j)));
+					_commendations.push_back(new SoldierCommendations((*i).first, (*j), mod));
 				}
 			}
 			awardedCommendation = true;
@@ -574,29 +573,6 @@ void SoldierDiary::manageModularCommendations(std::map<std::string, int> &nextCo
 	if ((modularCommendations.count(statTotal.first) == 0 && statTotal.second >= criteria) || (modularCommendations.count(statTotal.first) != 0 && nextCommendationLevel.at(statTotal.first) >= criteria))
 	{
 		modularCommendations[statTotal.first]++;
-	}
-}
-
-/**
- * Award commendations to the soldier.
- * @param type string
- * @param noun string
- */
-void SoldierDiary::awardCommendation(const std::string& type, const std::string& noun)
-{
-	bool newCommendation = true;
-	for (std::vector<SoldierCommendations*>::iterator i = _commendations.begin() ; i != _commendations.end() ; ++i)
-	{
-		if ( (*i)->getType() == type && (*i)->getNoun() == noun)
-		{
-			(*i)->addDecoration();
-			newCommendation = false;
-			break;
-		}
-	}
-	if (newCommendation)
-	{
-		_commendations.push_back(new SoldierCommendations(type, noun));
 	}
 }
 
@@ -893,10 +869,10 @@ int SoldierDiary::getMonthsService() const
 /**
  * Award special commendation to the original 8 soldiers.
  */
-void SoldierDiary::awardOriginalEightCommendation()
+void SoldierDiary::awardOriginalEightCommendation(const Mod* mod)
 {
 	// TODO: Unhardcode this
-	_commendations.push_back(new SoldierCommendations("STR_MEDAL_ORIGINAL8_NAME", "NoNoun"));
+	_commendations.push_back(new SoldierCommendations("STR_MEDAL_ORIGINAL8_NAME", "NoNoun", mod));
 }
 
 /**
@@ -1208,16 +1184,18 @@ int SoldierDiary::getLootValueTotal(std::vector<MissionStatistics*> *missionStat
  * Initializes a new commendation entry from YAML.
  * @param node YAML node.
  */
-SoldierCommendations::SoldierCommendations(const YAML::Node &node)
+SoldierCommendations::SoldierCommendations(const YAML::Node &node, const Mod* mod)
 {
 	load(node);
+	_rule = mod->getCommendation(_type, false); //TODO: during load we can load obsolete value, some else need clenup
 }
 
 /**
  * Initializes a soldier commendation.
  */
-SoldierCommendations::SoldierCommendations(std::string commendationName, std::string noun) : _type(commendationName), _noun(noun), _decorationLevel(0), _isNew(true)
+SoldierCommendations::SoldierCommendations(std::string commendationName, std::string noun, const Mod* mod) : _type(commendationName), _noun(noun), _decorationLevel(0), _isNew(true)
 {
+	_rule = mod->getCommendation(_type, true); //if there is no commedation rule then someome messup
 }
 
 /**

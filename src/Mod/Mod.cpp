@@ -2387,7 +2387,7 @@ SavedGame *Mod::newSave() const
 			if (_commendations.find("STR_MEDAL_ORIGINAL8_NAME") != _commendations.end())
 			{
 				SoldierDiary *diary = soldier->getDiary();
-				diary->awardOriginalEightCommendation();
+				diary->awardOriginalEightCommendation(this);
 				for (std::vector<SoldierCommendations*>::iterator comm = diary->getSoldierCommendations()->begin(); comm != diary->getSoldierCommendations()->end(); ++comm)
 				{
 					(*comm)->makeOld();
