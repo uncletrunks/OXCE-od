@@ -350,7 +350,7 @@ void Inventory::drawItems()
 			}
 
 			// grenade primer indicators
-			if ((*i)->getFuseTimer() >= 0)
+			if ((*i)->getFuseTimer() >= 0 && (*i)->getRules()->getInventoryWidth() > 0)
 			{
 				primers(x, y, (*i)->isFuseEnabled());
 			}
@@ -389,7 +389,7 @@ void Inventory::drawItems()
 			work.executeBlit(frame, _items, x, y, 0);
 
 			// grenade primer indicators
-			if ((*i)->getFuseTimer() >= 0)
+			if ((*i)->getFuseTimer() >= 0 && (*i)->getRules()->getInventoryWidth() > 0)
 			{
 				primers(x, y, (*i)->isFuseEnabled());
 			}
