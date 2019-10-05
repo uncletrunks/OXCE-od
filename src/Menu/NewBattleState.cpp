@@ -422,6 +422,9 @@ void NewBattleState::initSave()
 		UnitStats* stats = soldier->getCurrentStats();
 		stats->bravery = (int)ceil(stats->bravery / 10.0) * 10; // keep it a multiple of 10
 
+		// update again, could have been changed since soldier creation
+		soldier->calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
+
 		base->getSoldiers()->push_back(soldier);
 		if (i < _craft->getRules()->getSoldiers())
 			soldier->setCraft(_craft);
