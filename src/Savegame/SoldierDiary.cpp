@@ -1187,7 +1187,7 @@ int SoldierDiary::getLootValueTotal(std::vector<MissionStatistics*> *missionStat
 SoldierCommendations::SoldierCommendations(const YAML::Node &node, const Mod* mod)
 {
 	load(node);
-	_rule = mod->getCommendation(_type, false); //TODO: during load we can load obsolete value, some else need clenup
+	_rule = mod->getCommendation(_type, false); //TODO: during load we can load obsolete value, some else need cleanup
 }
 
 /**
@@ -1195,7 +1195,7 @@ SoldierCommendations::SoldierCommendations(const YAML::Node &node, const Mod* mo
  */
 SoldierCommendations::SoldierCommendations(std::string commendationName, std::string noun, const Mod* mod) : _type(commendationName), _noun(noun), _decorationLevel(0), _isNew(true)
 {
-	_rule = mod->getCommendation(_type, true); //if there is no commedation rule then someome messup
+	_rule = mod->getCommendation(_type, true); //if there is no commendation rule then someone messed up
 }
 
 /**

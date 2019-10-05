@@ -58,7 +58,7 @@ void RuleCommendations::afterLoad(const Mod* mod)
 {
 	for (auto& name : _soldierBonusTypesNames)
 	{
-		_soldierBonusTypes.push_back(mod->getSoldierBonus(name, false)); //can be null.
+		_soldierBonusTypes.push_back(mod->getSoldierBonus(name, true));
 	}
 
 	//remove not needed data
