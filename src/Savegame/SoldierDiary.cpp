@@ -235,6 +235,7 @@ void SoldierDiary::updateDiary(BattleUnitStatistics *unitStatistics, std::vector
 	_statGainTotal += unitStatistics->delta.firing;
 	_statGainTotal += unitStatistics->delta.throwing;
 	_statGainTotal += unitStatistics->delta.strength;
+	_statGainTotal += unitStatistics->delta.mana;
 	_statGainTotal += unitStatistics->delta.psiStrength;
 	_statGainTotal += unitStatistics->delta.melee;
 	_statGainTotal += unitStatistics->delta.psiSkill;
