@@ -262,7 +262,7 @@ constexpr int ArgCompatible(ArgEnum argType, ArgEnum varType, size_t overloadSiz
 }
 
 /**
- * Function returing next unique value for ArgEnum.
+ * Function returning next unique value for ArgEnum.
  */
 inline ArgEnum ArgNextUniqueValue()
 {
@@ -273,7 +273,7 @@ inline ArgEnum ArgNextUniqueValue()
 }
 
 /**
- * Fuction matching some Type to ArgEnum.
+ * Function matching some Type to ArgEnum.
  */
 template<typename T>
 inline ArgEnum ArgRegisteType()

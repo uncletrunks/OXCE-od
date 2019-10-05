@@ -1467,7 +1467,7 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 		char c;
 		CharClasses decode;
 
-		/// Is vaild symbol
+		/// Is valid symbol
 		operator bool() const { return c; }
 
 		/// Check type of symbol
@@ -1527,7 +1527,7 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 			}
 			else
 			{
-				//not empy character, put it back
+				//not empty character, put it back
 				backCharacter();
 				break;
 			}
@@ -1539,7 +1539,7 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 	}
 
 
-	//start of new token of unknow type
+	//start of new token of unknown type
 	auto type = TokenInvaild;
 	auto begin = _begin;
 	const auto first = readCharacter();
@@ -1730,25 +1730,25 @@ void ParserWriter::relese()
 	{
 		return (char*)&container._proc[static_cast<size_t>(pos)];
 	};
-	//prealocate space in vector to have stable pointers to strings
+	//preallocate space in vector to have stable pointers to strings
 	auto currentText = push(textTotalSize);
 	refTexts.forEachPosition(
 		[&](auto pos, ScriptRef value)
 		{
 			auto start = currentText;
 
-			//check begining of string
+			//check beginning of string
 			auto begin = value.begin();
 			if (begin == value.end() || *begin != '"')
 			{
-				throw Exception("Invaild Text: >>" + value.toString() + "<<");
+				throw Exception("Invalid Text: >>" + value.toString() + "<<");
 			}
 
 			//check end of string
 			auto end = value.end() - 1;
 			if (begin == end || *end != '"')
 			{
-				throw Exception("Invaild Text: >>" + value.toString() + "<<");
+				throw Exception("Invalid Text: >>" + value.toString() + "<<");
 			}
 
 			++begin;
@@ -2627,7 +2627,7 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 					<< "\n"; \
 				offset += helper::FuncGroup<MACRO_FUNC_ID(NAME)>::ver();
 
-			opLog.get(LOG_DEBUG) << "Available buildin script operations:\n" << std::left << std::hex << std::showbase;
+			opLog.get(LOG_DEBUG) << "Available built-in script operations:\n" << std::left << std::hex << std::showbase;
 			MACRO_PROC_DEFINITION(MACRO_ALL_LOG)
 
 			#undef MACRO_ALL_LOG
@@ -2644,7 +2644,7 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 		}
 		if (!_defaultScript.empty())
 		{
-			refLog.get(LOG_DEBUG) << "Script defualt implementation:\n";
+			refLog.get(LOG_DEBUG) << "Script default implementation:\n";
 			refLog.get(LOG_DEBUG) << _defaultScript << "\n";
 			refLog.get(LOG_DEBUG) << "\n";
 		}
@@ -2661,7 +2661,7 @@ void ScriptParserBase::logScriptMetadata(bool haveEvents) const
 			}
 			if (_emptyReturn)
 			{
-				refLog.get(LOG_DEBUG) << "In this script 'return' statment is empty, script returining values are edited directly\n";
+				refLog.get(LOG_DEBUG) << "In this script 'return' statement is empty, script returning values are edited directly\n";
 			}
 			refLog.get(LOG_DEBUG) << "\n";
 		}
