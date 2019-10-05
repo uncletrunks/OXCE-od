@@ -38,6 +38,7 @@ private:
 	std::vector<std::string > _allowedSoldierTypes;
 	std::map<std::string, int> _requiredItems;
 	int _listOrder, _cost, _transferTime, _recoveryTime;
+	int _minRank;
 	UnitStats _requiredMinStats, _flatOverallStatChange, _percentOverallStatChange, _percentGainedStatChange;
 	bool _useRandomStats, _lowerBoundAtMinStats, _upperBoundAtMaxStats, _upperBoundAtStatCaps;
 	bool _reset;
@@ -88,6 +89,8 @@ public:
 	int getTransferTime() const;
 	/// Gets how long the transformed soldier should take to recover after completion
 	int getRecoveryTime() const;
+	/// Gets the minimum rank a soldier needs to be eligible for this project
+	int getMinRank() const;
 	/// Gets the flat change to a soldier's overall stats when undergoing this project
 	const UnitStats &getFlatOverallStatChange() const;
 	/// Gets the percent change to a soldier's overall stats when undergoing this project

@@ -1147,6 +1147,10 @@ std::map<std::string, int> &Soldier::getPreviousTransformations()
  */
 bool Soldier::isEligibleForTransformation(RuleSoldierTransformation *transformationRule)
 {
+	// rank check
+	if ((int)_rank < transformationRule->getMinRank())
+		return false;
+
 	// alive and well
 	if (!_death && !isWounded() && !transformationRule->isAllowingAliveSoldiers())
 		return false;

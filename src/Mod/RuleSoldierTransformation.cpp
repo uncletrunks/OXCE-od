@@ -30,7 +30,7 @@ RuleSoldierTransformation::RuleSoldierTransformation(const std::string &name) :
 	_name(name),
 	_keepSoldierArmor(false), _createsClone(false), _needsCorpseRecovered(true),
 	_allowsDeadSoldiers(false), _allowsLiveSoldiers(false), _allowsWoundedSoldiers(false),
-	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0),
+	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0), _minRank(0),
 	_useRandomStats(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false),
 	_reset(false)
 {
@@ -71,6 +71,7 @@ void RuleSoldierTransformation::load(const YAML::Node &node, int listOrder)
 	_cost = node["cost"].as<int>(_cost);
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_recoveryTime = node["recoveryTime"].as<int>(_recoveryTime);
+	_minRank = node["minRank"].as<int>(_minRank);
 	_flatOverallStatChange = node["flatOverallStatChange"].as<UnitStats >(_flatOverallStatChange);
 	_percentOverallStatChange = node["percentOverallStatChange"].as<UnitStats >(_percentOverallStatChange);
 	_percentGainedStatChange = node["percentGainedStatChange"].as<UnitStats >(_percentGainedStatChange);
@@ -262,6 +263,15 @@ int RuleSoldierTransformation::getTransferTime() const
 int RuleSoldierTransformation::getRecoveryTime() const
 {
 	return _recoveryTime;
+}
+
+/**
+ * Gets the minimum rank a soldier needs to be eligible for this project
+ * @return The rank requirement
+ */
+int RuleSoldierTransformation::getMinRank() const
+{
+	return _minRank;
 }
 
 /**
