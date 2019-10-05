@@ -886,7 +886,7 @@ void GeoscapeState::time5Seconds()
 							for (auto craft : *crafts)
 							{
 								// craft is close enough and has at least one loaded weapon
-								if (craft->getNumWeapons(true) > 0 && craft->getDistance(c) < Nautical(_game->getMod()->getEscortRange()))
+								if (craft != c && craft->getNumWeapons(true) > 0 && craft->getDistance(c) < Nautical(_game->getMod()->getEscortRange()))
 								{
 									// only up to 4 dogfights = 1 main + 3 secondary
 									if (secondaryTargets < 3)
