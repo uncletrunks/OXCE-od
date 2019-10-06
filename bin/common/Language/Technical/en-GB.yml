@@ -10,6 +10,9 @@ en-GB:
   STR_PALETTE_CHECK: "Palette matching"
   STR_PALETTE_CHECK_DESC: "Tries to match palettes of modded images to official palettes and reports any images that don't have a 100% match."
 #
+  STR_SCRIPT_TAGS: "Script tag export"
+  STR_SCRIPT_TAGS_DESC: "Exports script tags in CSV format."
+#
   STR_CHECKING_TERRAIN: "Checking terrain..."
   STR_CHECKING_UFOS: "Checking UFOs..."
   STR_CHECKING_CRAFT: "Checking craft..."
