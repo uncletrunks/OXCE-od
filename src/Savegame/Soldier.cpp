@@ -1205,6 +1205,22 @@ bool Soldier::isEligibleForTransformation(RuleSoldierTransformation *transformat
 		(_currentStats.psiSkill < minStats.psiSkill && minStats.psiSkill != 0)) // The != 0 is required for the "psi training at any time" option, as it sets skill to negative in training
 		return false;
 
+	// Does the soldier have the required commendations?
+	for (auto reqd_comm : transformationRule->getRequiredCommendations())
+	{
+		bool found = false;
+		for (auto comm : *_diary->getSoldierCommendations())
+		{
+			if (comm->getDecorationLevelInt() >= reqd_comm.second && comm->getType() == reqd_comm.first)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			return false;
+	}
+
 	return true;
 }
 

@@ -68,6 +68,7 @@ void RuleSoldierTransformation::load(const YAML::Node &node, int listOrder)
 	_forbiddenPreviousTransformations = node["forbiddenPreviousTransformations"].as<std::vector<std::string > >(_forbiddenPreviousTransformations);
 	_requiredMinStats = node["requiredMinStats"].as<UnitStats >(_requiredMinStats);
 	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
+	_requiredCommendations = node["requiredCommendations"].as< std::map<std::string, int> >(_requiredCommendations);
 	_cost = node["cost"].as<int>(_cost);
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_recoveryTime = node["recoveryTime"].as<int>(_recoveryTime);
@@ -236,6 +237,15 @@ const UnitStats &RuleSoldierTransformation::getRequiredMinStats() const
 const std::map<std::string, int> &RuleSoldierTransformation::getRequiredItems() const
 {
 	return _requiredItems;
+}
+
+/**
+ * Gets the list of commendations necessary to complete this project
+ * @return The list of required commendations
+ */
+const std::map<std::string, int> &RuleSoldierTransformation::getRequiredCommendations() const
+{
+	return _requiredCommendations;
 }
 
 /**

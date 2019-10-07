@@ -37,6 +37,7 @@ private:
 	bool _keepSoldierArmor, _createsClone, _needsCorpseRecovered, _allowsDeadSoldiers, _allowsLiveSoldiers, _allowsWoundedSoldiers;
 	std::vector<std::string > _allowedSoldierTypes;
 	std::map<std::string, int> _requiredItems;
+	std::map<std::string, int> _requiredCommendations;
 	int _listOrder, _cost, _transferTime, _recoveryTime;
 	int _minRank;
 	UnitStats _requiredMinStats, _flatOverallStatChange, _percentOverallStatChange, _percentGainedStatChange;
@@ -83,6 +84,8 @@ public:
 	const UnitStats &getRequiredMinStats() const;
 	/// Gets the list of items necessary to complete this project
 	const std::map<std::string, int> &getRequiredItems() const;
+	/// Gets the list of commendations necessary to complete this project
+	const std::map<std::string, int> &getRequiredCommendations() const;
 	/// Gets the cash cost of the project
 	int getCost() const;
 	/// Gets how long the transformed soldier should be in transit to the base after completion
