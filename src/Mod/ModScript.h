@@ -181,6 +181,14 @@ class ModScript
 		}
 	};
 
+	struct BonusSoldierStatsRecoveryParser : BonusStatsBaseParser
+	{
+		BonusSoldierStatsRecoveryParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : BonusStatsBaseParser{ shared, name + "SoldierRecoveryBonusStats", mod }
+		{
+			_propertyNodeName = name;
+		}
+	};
+
 	////////////////////////////////////////////////////////////
 	//					ufo script
 	////////////////////////////////////////////////////////////
@@ -253,12 +261,12 @@ public:
 	using ManaRecoveryStatBonus = MACRO_NAMED_SCRIPT("mana", BonusStatsRecoveryParser);
 	using StunRecoveryStatBonus = MACRO_NAMED_SCRIPT("stun", BonusStatsRecoveryParser);
 
-	using TimeSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("timeSoldier", BonusStatsRecoveryParser);
-	using EnergySoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("energySoldier", BonusStatsRecoveryParser);
-	using MoraleSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("moraleSoldier", BonusStatsRecoveryParser);
-	using HealthSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("healthSoldier", BonusStatsRecoveryParser);
-	using ManaSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("manaSoldier", BonusStatsRecoveryParser);
-	using StunSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("stunSoldier", BonusStatsRecoveryParser);
+	using TimeSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("time", BonusSoldierStatsRecoveryParser);
+	using EnergySoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("energy", BonusSoldierStatsRecoveryParser);
+	using MoraleSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("morale", BonusSoldierStatsRecoveryParser);
+	using HealthSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("health", BonusSoldierStatsRecoveryParser);
+	using ManaSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("mana", BonusSoldierStatsRecoveryParser);
+	using StunSoldierRecoveryStatBonus = MACRO_NAMED_SCRIPT("stun", BonusSoldierStatsRecoveryParser);
 
 	using DamageBonusStatBonus = MACRO_NAMED_SCRIPT("damageBonus", BonusStatsParser);
 	using MeleeBonusStatBonus = MACRO_NAMED_SCRIPT("meleeBonus", BonusStatsParser);
