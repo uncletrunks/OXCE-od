@@ -63,6 +63,7 @@ public:
 	/// Handler for pressing the Start button
 	void btnStartClick(Action *action);
 	void performTransformation();
+	void retire();
 	/// Handler for pressing the Left arrow button
 	void btnLeftArrowClick(Action *action);
 	/// Handler for pressing the Right arrow button

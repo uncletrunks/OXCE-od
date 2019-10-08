@@ -33,6 +33,7 @@ class RuleSoldierTransformation
 private:
 	std::string _name;
 	std::vector<std::string > _requires, _requiredPreviousTransformations, _forbiddenPreviousTransformations, _requiresBaseFunc;
+	std::string _producedItem;
 	std::string _producedSoldierType, _producedSoldierArmor;
 	bool _keepSoldierArmor, _createsClone, _needsCorpseRecovered, _allowsDeadSoldiers, _allowsLiveSoldiers, _allowsWoundedSoldiers;
 	std::vector<std::string > _allowedSoldierTypes;
@@ -61,6 +62,8 @@ public:
 	const std::vector<std::string > &getRequiredResearch() const;
 	/// Gets the list of required base functions for this project
 	const std::vector<std::string > &getRequiredBaseFuncs() const;
+	/// Gets the type of item produced by this project (the soldier stops existing completely and is fully replaced by the item)
+	const std::string &getProducedItem() const { return _producedItem; }
 	/// Gets the type of soldier produced by this project
 	const std::string &getProducedSoldierType() const;
 	/// Gets the armor that the produced soldier should be wearing

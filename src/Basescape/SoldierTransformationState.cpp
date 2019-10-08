@@ -201,7 +201,11 @@ void SoldierTransformationState::initTransformationData()
 	_txtCost->setText(tr("STR_COST_").arg(Unicode::formatFunding(_transformationRule->getCost())));
 
 	int transferTime = 0;
-	if (_transformationRule->getTransferTime() > 0 || _transformationRule->isCreatingClone() || _sourceSoldier->getDeath())
+	if (!_transformationRule->getProducedItem().empty())
+	{
+		transferTime = _transformationRule->getTransferTime() > 0 ? _transformationRule->getTransferTime() : 1;
+	}
+	else if (_transformationRule->getTransferTime() > 0 || _transformationRule->isCreatingClone() || _sourceSoldier->getDeath())
 	{
 		transferTime = _transformationRule->getTransferTime() > 0 ? _transformationRule->getTransferTime() : 24;
 	}
@@ -225,6 +229,16 @@ void SoldierTransformationState::initTransformationData()
 		_lstRequiredItems->setCellColor(row, 1, _lstRequiredItems->getSecondaryColor());
 		_lstRequiredItems->setCellColor(row, 2, _lstRequiredItems->getSecondaryColor());
 		row++;
+	}
+
+	_btnStart->setVisible(transformationPossible);
+
+	if (!_transformationRule->getProducedItem().empty())
+	{
+		_txtRecoveryTime->setVisible(false);
+
+		// no need to show the rest, the soldier will be removed from existence after this project
+		return;
 	}
 
 	UnitStats currentStats = *_sourceSoldier->getCurrentStats();
@@ -406,8 +420,6 @@ void SoldierTransformationState::initTransformationData()
 				"");
 		}
 	}
-
-	_btnStart->setVisible(transformationPossible);
 }
 
 /**
@@ -437,7 +449,14 @@ void SoldierTransformationState::btnStartClick(Action *action)
 	}
 
 	// Here we go
-	performTransformation();
+	if (!_transformationRule->getProducedItem().empty())
+	{
+		retire();
+	}
+	else
+	{
+		performTransformation();
+	}
 
 	_game->popState();
 }
@@ -506,6 +525,40 @@ void SoldierTransformationState::performTransformation()
 	}
 
 	destinationSoldier->transform(_game->getMod(), _transformationRule, _sourceSoldier);
+}
+
+void SoldierTransformationState::retire()
+{
+	// remove the soldier from existence
+	{
+		if (_sourceSoldier->getDeath())
+		{
+			// I wonder if anyone will ever use THIS option
+			std::vector<Soldier *>::iterator it = find(_game->getSavedGame()->getDeadSoldiers()->begin(), _game->getSavedGame()->getDeadSoldiers()->end(), _sourceSoldier);
+			if (it != _game->getSavedGame()->getDeadSoldiers()->end())
+			{
+				delete (*it);
+				_game->getSavedGame()->getDeadSoldiers()->erase(it);
+			}
+		}
+		else
+		{
+			std::vector<Soldier *>::iterator it = find(_base->getSoldiers()->begin(), _base->getSoldiers()->end(), _sourceSoldier);
+			if (it != _base->getSoldiers()->end())
+			{
+				delete (*it);
+				_base->getSoldiers()->erase(it);
+			}
+		}
+	}
+
+	// create the item
+	{
+		int transferTime = _transformationRule->getTransferTime() > 0 ? _transformationRule->getTransferTime() : 1;
+		Transfer *transfer = new Transfer(transferTime);
+		transfer->setItems(_transformationRule->getProducedItem(), 1);
+		_base->getTransfers()->push_back(transfer);
+	}
 }
 
 /**

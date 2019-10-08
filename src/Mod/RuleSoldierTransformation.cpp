@@ -55,6 +55,7 @@ void RuleSoldierTransformation::load(const YAML::Node &node, int listOrder)
 
 	_requires = node["requires"].as<std::vector<std::string > >(_requires);
 	_requiresBaseFunc = node["requiresBaseFunc"].as<std::vector<std::string > >(_requiresBaseFunc);
+	_producedItem = node["producedItem"].as<std::string >(_producedItem);
 	_producedSoldierType = node["producedSoldierType"].as<std::string >(_producedSoldierType);
 	_producedSoldierArmor = node["producedSoldierArmor"].as<std::string >(_producedSoldierArmor);
 	_keepSoldierArmor = node["keepSoldierArmor"].as<bool >(_keepSoldierArmor);
