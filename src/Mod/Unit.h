@@ -21,6 +21,7 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 #include <SDL_types.h>
+#include "../Engine/RNG.h"
 
 namespace OpenXcom
 {
@@ -67,6 +68,66 @@ struct UnitStats
 		{
 			f(p);
 		}
+	}
+
+	static UnitStats combine(const UnitStats &mask, const UnitStats &keep, const UnitStats &reroll)
+	{
+		UnitStats r;
+		fieldLoop(
+			[&](Ptr p)
+			{
+				if ((mask.*p))
+				{
+					(r.*p) = (reroll.*p);
+				}
+				else
+				{
+					(r.*p) = (keep.*p);
+				}
+			}
+		);
+		return r;
+	}
+
+	static UnitStats random(const UnitStats &a, const UnitStats &b)
+	{
+		UnitStats r;
+		fieldLoop(
+			[&](Ptr p)
+			{
+				Sint16 min = std::min((a.*p), (b.*p));
+				Sint16 max = std::max((a.*p), (b.*p));
+				if (min == max)
+				{
+					(r.*p) = max;
+				}
+				else
+				{
+					Sint16 rnd = RNG::generate(min, max);
+					(r.*p) = rnd;
+				}
+			}
+		);
+		return r;
+	}
+
+	static UnitStats isRandom(const UnitStats &a, const UnitStats &b)
+	{
+		UnitStats r;
+		fieldLoop(
+			[&](Ptr p)
+			{
+				if ( ((a.*p) != 0 || (b.*p) != 0) && (a.*p) != (b.*p))
+				{
+					(r.*p) = 1;
+				}
+				else
+				{
+					(r.*p) = 0;
+				}
+			}
+		);
+		return r;
 	}
 
 	static UnitStats percent(const UnitStats& base, const UnitStats& percent, int multipler = 1)

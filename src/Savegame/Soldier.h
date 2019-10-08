@@ -231,7 +231,7 @@ public:
 	/// Performs a transformation on this soldier
 	void transform(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
 	/// Calculates how this project changes the soldier's stats
-	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
+	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier, int mode);
 	/// Gets all the soldier bonuses
 	std::map<const RuleSoldierBonus*, int> *getBonuses(const Mod *mod, bool rebuild);
 

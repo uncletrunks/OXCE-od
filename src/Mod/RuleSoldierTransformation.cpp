@@ -31,7 +31,7 @@ RuleSoldierTransformation::RuleSoldierTransformation(const std::string &name) :
 	_keepSoldierArmor(false), _createsClone(false), _needsCorpseRecovered(true),
 	_allowsDeadSoldiers(false), _allowsLiveSoldiers(false), _allowsWoundedSoldiers(false),
 	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0), _minRank(0),
-	_useRandomStats(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false),
+	_showMinMax(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false),
 	_reset(false)
 {
 }
@@ -76,7 +76,14 @@ void RuleSoldierTransformation::load(const YAML::Node &node, int listOrder)
 	_flatOverallStatChange = node["flatOverallStatChange"].as<UnitStats >(_flatOverallStatChange);
 	_percentOverallStatChange = node["percentOverallStatChange"].as<UnitStats >(_percentOverallStatChange);
 	_percentGainedStatChange = node["percentGainedStatChange"].as<UnitStats >(_percentGainedStatChange);
-	_useRandomStats = node["useRandomStats"].as<bool >(_useRandomStats);
+	_flatMin = node["flatMin"].as<UnitStats >(_flatMin);
+	_flatMax = node["flatMax"].as<UnitStats >(_flatMax);
+	_percentMin = node["percentMin"].as<UnitStats >(_percentMin);
+	_percentMax = node["percentMax"].as<UnitStats >(_percentMax);
+	_percentGainedMin = node["percentGainedMin"].as<UnitStats >(_percentGainedMin);
+	_percentGainedMax = node["percentGainedMax"].as<UnitStats >(_percentGainedMax);
+	_showMinMax = node["showMinMax"].as<bool >(_showMinMax);
+	_rerollStats = node["rerollStats"].as<UnitStats >(_rerollStats);
 	_lowerBoundAtMinStats = node["lowerBoundAtMinStats"].as<bool >(_lowerBoundAtMinStats);
 	_upperBoundAtMaxStats = node["upperBoundAtMaxStats"].as<bool >(_upperBoundAtMaxStats);
 	_upperBoundAtStatCaps = node["upperBoundAtStatCaps"].as<bool >(_upperBoundAtStatCaps);
@@ -309,15 +316,6 @@ const UnitStats &RuleSoldierTransformation::getPercentOverallStatChange() const
 const UnitStats &RuleSoldierTransformation::getPercentGainedStatChange() const
 {
 	return _percentGainedStatChange;
-}
-
-/**
- * Gets whether or not this project should use randomized stats from the produced RuleSoldier or the input soldier's stats
- * @return Use random stat generation?
- */
-bool RuleSoldierTransformation::isUsingRandomStats() const
-{
-	return _useRandomStats;
 }
 
 /**

@@ -1251,11 +1251,9 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 	{
 		// a clone already has the correct soldier type, but random stats
 		// if we don't want random stats, let's copy them from the source soldier
-		if (!transformationRule->isUsingRandomStats())
-		{
-			UnitStats newStats = *sourceSoldier->getCurrentStats() + calculateStatChanges(mod, transformationRule, sourceSoldier);
-			setBothStats(&newStats);
-		}
+		UnitStats sourceStats = *sourceSoldier->getCurrentStats() + calculateStatChanges(mod, transformationRule, sourceSoldier, 0);
+		UnitStats mergedStats = UnitStats::combine(transformationRule->getRerollStats(), sourceStats, _currentStats);
+		setBothStats(&mergedStats);
 	}
 	else
 	{
@@ -1296,16 +1294,14 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 		}
 
 		// change stats
-		if (transformationRule->isUsingRandomStats())
+		_currentStats += calculateStatChanges(mod, transformationRule, sourceSoldier, 0);
+
+		// and randomize stats where needed
 		{
 			Soldier *tmpSoldier = new Soldier(_rules, 0, _id);
-			setBothStats(tmpSoldier->getCurrentStats());
+			_currentStats = UnitStats::combine(transformationRule->getRerollStats(), _currentStats, *tmpSoldier->getCurrentStats());
 			delete tmpSoldier;
 			tmpSoldier = 0;
-		}
-		else
-		{
-			_currentStats += calculateStatChanges(mod, transformationRule, sourceSoldier);
 		}
 	}
 
@@ -1365,15 +1361,12 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 /**
  * Calculates the stat changes a soldier undergoes from this project
  * @param mod Pointer to the mod
+ * @param mode 0 = final, 1 = min, 2 = max
  * @return The stat changes
  */
-UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier)
+UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier, int mode)
 {
 	UnitStats statChange;
-
-	// If this project uses random stats from the produced soldier type's rules, we don't need calculations!
-	if (transformationRule->isUsingRandomStats())
-		return statChange;
 
 	UnitStats initialStats = *sourceSoldier->getInitStats();
 	UnitStats currentStats = *sourceSoldier->getCurrentStats();
@@ -1381,12 +1374,36 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 
 	// Flat stat changes
 	statChange += transformationRule->getFlatOverallStatChange();
+	UnitStats rnd0;
+	if (mode == 2)
+		rnd0 = UnitStats::max(transformationRule->getFlatMin(), transformationRule->getFlatMax());
+	else if (mode == 1)
+		rnd0 = UnitStats::min(transformationRule->getFlatMin(), transformationRule->getFlatMax());
+	else
+		rnd0 = UnitStats::random(transformationRule->getFlatMin(), transformationRule->getFlatMax());
+	statChange += rnd0;
 
 	// Stat changes based on current stats
 	statChange += UnitStats::percent(currentStats, transformationRule->getPercentOverallStatChange());
+	UnitStats rnd1;
+	if (mode == 2)
+		rnd1 = UnitStats::max(transformationRule->getPercentMin(), transformationRule->getPercentMax());
+	else if (mode == 1)
+		rnd1 = UnitStats::min(transformationRule->getPercentMin(), transformationRule->getPercentMax());
+	else
+		rnd1 = UnitStats::random(transformationRule->getPercentMin(), transformationRule->getPercentMax());
+	statChange += UnitStats::percent(currentStats, rnd1);
 
 	// Stat changes based on gained stats
 	statChange += UnitStats::percent(gainedStats, transformationRule->getPercentGainedStatChange());
+	UnitStats rnd2;
+	if (mode == 2)
+		rnd2 = UnitStats::max(transformationRule->getPercentGainedMin(), transformationRule->getPercentGainedMax());
+	else if (mode == 1)
+		rnd2 = UnitStats::min(transformationRule->getPercentGainedMin(), transformationRule->getPercentGainedMax());
+	else
+		rnd2 = UnitStats::random(transformationRule->getPercentGainedMin(), transformationRule->getPercentGainedMax());
+	statChange += UnitStats::percent(gainedStats, rnd2);
 
 	// round (mathematically) to whole tens
 	int sign = statChange.bravery < 0 ? -1 : 1;

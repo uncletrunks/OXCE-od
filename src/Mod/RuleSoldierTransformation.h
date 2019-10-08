@@ -41,7 +41,10 @@ private:
 	int _listOrder, _cost, _transferTime, _recoveryTime;
 	int _minRank;
 	UnitStats _requiredMinStats, _flatOverallStatChange, _percentOverallStatChange, _percentGainedStatChange;
-	bool _useRandomStats, _lowerBoundAtMinStats, _upperBoundAtMaxStats, _upperBoundAtStatCaps;
+	UnitStats _flatMin, _flatMax, _percentMin, _percentMax, _percentGainedMin, _percentGainedMax;
+	bool _showMinMax;
+	UnitStats _rerollStats;
+	bool _lowerBoundAtMinStats, _upperBoundAtMaxStats, _upperBoundAtStatCaps;
 	bool _reset;
 	std::string _soldierBonusType;
 
@@ -100,8 +103,25 @@ public:
 	const UnitStats &getPercentOverallStatChange() const;
 	/// Gets the percent change to a soldier's gained stats when undergoing this project
 	const UnitStats &getPercentGainedStatChange() const;
-	/// Gets whether or not this project should use randomized stats from the produced RuleSoldier or the input soldier's stats
-	bool isUsingRandomStats() const;
+
+	/// Gets the min flat change to a soldier's overall stats when undergoing this project
+	const UnitStats &getFlatMin() const { return _flatMin; }
+	/// Gets the max flat change to a soldier's overall stats when undergoing this project
+	const UnitStats &getFlatMax() const { return _flatMax; }
+	/// Gets the min percent change to a soldier's overall stats when undergoing this project
+	const UnitStats &getPercentMin() const { return _percentMin; }
+	/// Gets the max percent change to a soldier's overall stats when undergoing this project
+	const UnitStats &getPercentMax() const { return _percentMax; }
+	/// Gets the min percent change to a soldier's gained stats when undergoing this project
+	const UnitStats &getPercentGainedMin() const { return _percentGainedMin; }
+	/// Gets the max percent change to a soldier's gained stats when undergoing this project
+	const UnitStats &getPercentGainedMax() const { return _percentGainedMax; }
+	/// Gets whether to display min/max changes in two lines; or just one line with randomized changes replaced with a question mark
+	bool getShowMinMax() const { return _showMinMax; }
+
+	/// Gets information about which soldier stats should be re-rolled when undergoing this project
+	const UnitStats &getRerollStats() const { return _rerollStats; }
+
 	/// Gets whether or not this project should bound stat penalties at the produced RuleSoldier's minStats
 	bool hasLowerBoundAtMinStats() const;
 	/// Gets whether or not this project should cap stats at the produced RuleSoldier's maxStats

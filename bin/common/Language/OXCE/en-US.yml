@@ -101,6 +101,8 @@ en-US:
   STR_RECOVERY_TIME: "Recovery Time>{ALT}{0}"
   STR_CURRENT_STATS: "Current stats"
   STR_CHANGES: "Changes"
+  STR_CHANGES_MIN: "Changes (min)"
+  STR_CHANGES_MAX: "Changes (max)"
   STR_BONUS_STATS: "Bonus stats"
 #StoresState.cpp
   STR_GRAND_TOTAL: "Grand Total"

@@ -69,9 +69,9 @@ SoldierTransformationState::SoldierTransformationState(RuleSoldierTransformation
 	_txtItemNameColumn = new Text(60, 16, 30, 72);
 	_txtUnitRequiredColumn = new Text(60, 16, 155, 72);
 	_txtUnitAvailableColumn = new Text(60, 16, 230, 72);
-	_lstRequiredItems = new TextList(270, 40, 30, 88);
+	_lstRequiredItems = new TextList(270, 32, 30, 88);
 
-	_lstStatChanges = new TextList(288, 32, 16, 138);
+	_lstStatChanges = new TextList(288, 40, 16, 130);
 
 	// Set palette
 	setInterface("soldierTransformation");
@@ -228,7 +228,8 @@ void SoldierTransformationState::initTransformationData()
 	}
 
 	UnitStats currentStats = *_sourceSoldier->getCurrentStats();
-	UnitStats changedStats = _sourceSoldier->calculateStatChanges(_game->getMod(), _transformationRule, _sourceSoldier);
+	UnitStats changedStatsMin = _sourceSoldier->calculateStatChanges(_game->getMod(), _transformationRule, _sourceSoldier, 1);
+	UnitStats changedStatsMax = _sourceSoldier->calculateStatChanges(_game->getMod(), _transformationRule, _sourceSoldier, 2);
 	UnitStats bonusStats;
 	auto bonusRule = _game->getMod()->getSoldierBonus(_transformationRule->getSoldierBonusType(), false);
 	if (bonusRule)
@@ -238,7 +239,17 @@ void SoldierTransformationState::initTransformationData()
 
 	bool showPsi = currentStats.psiSkill > 0
 		|| (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
-	bool isRandom = _transformationRule->isUsingRandomStats();
+
+	UnitStats rerollFlags = _transformationRule->getRerollStats();
+
+	UnitStats randomFlags;
+	bool twoRows = _transformationRule->getShowMinMax();
+	if (!twoRows)
+	{
+		randomFlags += UnitStats::isRandom(_transformationRule->getFlatMin(), _transformationRule->getFlatMax());
+		randomFlags += UnitStats::isRandom(_transformationRule->getPercentMin(), _transformationRule->getPercentMax());
+		randomFlags += UnitStats::isRandom(_transformationRule->getPercentGainedMin(), _transformationRule->getPercentGainedMax());
+	}
 
 	if (_game->getMod()->isManaFeatureEnabled())
 	{
@@ -272,20 +283,37 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
 			formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
 			"");
-		_lstStatChanges->addRow(14, tr("STR_CHANGES").c_str(),
-			formatStat(changedStats.tu, true, isRandom).c_str(),
-			formatStat(changedStats.stamina, true, isRandom).c_str(),
-			formatStat(changedStats.health, true, isRandom).c_str(),
-			formatStat(changedStats.bravery, true, isRandom).c_str(),
-			formatStat(changedStats.reactions, true, isRandom).c_str(),
-			formatStat(changedStats.firing, true, isRandom).c_str(),
-			formatStat(changedStats.throwing, true, isRandom).c_str(),
-			formatStat(changedStats.melee, true, isRandom).c_str(),
-			formatStat(changedStats.strength, true, isRandom).c_str(),
-			formatStat(changedStats.mana, true, !showMana || isRandom).c_str(),
-			formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
-			formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
+		_lstStatChanges->addRow(14, tr(twoRows ? "STR_CHANGES_MIN" : "STR_CHANGES").c_str(),
+			formatStat(changedStatsMin.tu, true, rerollFlags.tu || randomFlags.tu).c_str(),
+			formatStat(changedStatsMin.stamina, true, rerollFlags.stamina || randomFlags.stamina).c_str(),
+			formatStat(changedStatsMin.health, true, rerollFlags.health || randomFlags.health).c_str(),
+			formatStat(changedStatsMin.bravery, true, rerollFlags.bravery || randomFlags.bravery).c_str(),
+			formatStat(changedStatsMin.reactions, true, rerollFlags.reactions || randomFlags.reactions).c_str(),
+			formatStat(changedStatsMin.firing, true, rerollFlags.firing || randomFlags.firing).c_str(),
+			formatStat(changedStatsMin.throwing, true, rerollFlags.throwing || randomFlags.throwing).c_str(),
+			formatStat(changedStatsMin.melee, true, rerollFlags.melee || randomFlags.melee).c_str(),
+			formatStat(changedStatsMin.strength, true, rerollFlags.strength || randomFlags.strength).c_str(),
+			formatStat(changedStatsMin.mana, true, !showMana || rerollFlags.mana || randomFlags.mana).c_str(),
+			formatStat(changedStatsMin.psiStrength, true, !showPsi || rerollFlags.psiStrength || randomFlags.psiStrength).c_str(),
+			formatStat(changedStatsMin.psiSkill, true, !showPsi || rerollFlags.psiSkill || randomFlags.psiSkill).c_str(),
 			"");
+		if (twoRows)
+		{
+			_lstStatChanges->addRow(14, tr("STR_CHANGES_MAX").c_str(),
+				formatStat(changedStatsMax.tu, true, rerollFlags.tu).c_str(),
+				formatStat(changedStatsMax.stamina, true, rerollFlags.stamina).c_str(),
+				formatStat(changedStatsMax.health, true, rerollFlags.health).c_str(),
+				formatStat(changedStatsMax.bravery, true, rerollFlags.bravery).c_str(),
+				formatStat(changedStatsMax.reactions, true, rerollFlags.reactions).c_str(),
+				formatStat(changedStatsMax.firing, true, rerollFlags.firing).c_str(),
+				formatStat(changedStatsMax.throwing, true, rerollFlags.throwing).c_str(),
+				formatStat(changedStatsMax.melee, true, rerollFlags.melee).c_str(),
+				formatStat(changedStatsMax.strength, true, rerollFlags.strength).c_str(),
+				formatStat(changedStatsMax.mana, true, !showMana || rerollFlags.mana).c_str(),
+				formatStat(changedStatsMax.psiStrength, true, !showPsi || rerollFlags.psiStrength).c_str(),
+				formatStat(changedStatsMax.psiSkill, true, !showPsi || rerollFlags.psiSkill).c_str(),
+				"");
+		}
 		if (bonusRule)
 		{
 			_lstStatChanges->addRow(14, tr("STR_BONUS_STATS").c_str(),
@@ -332,19 +360,35 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
 			formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
 			"");
-		_lstStatChanges->addRow(13, tr("STR_CHANGES").c_str(),
-			formatStat(changedStats.tu, true, isRandom).c_str(),
-			formatStat(changedStats.stamina, true, isRandom).c_str(),
-			formatStat(changedStats.health, true, isRandom).c_str(),
-			formatStat(changedStats.bravery, true, isRandom).c_str(),
-			formatStat(changedStats.reactions, true, isRandom).c_str(),
-			formatStat(changedStats.firing, true, isRandom).c_str(),
-			formatStat(changedStats.throwing, true, isRandom).c_str(),
-			formatStat(changedStats.melee, true, isRandom).c_str(),
-			formatStat(changedStats.strength, true, isRandom).c_str(),
-			formatStat(changedStats.psiStrength, true, !showPsi || isRandom).c_str(),
-			formatStat(changedStats.psiSkill, true, !showPsi || isRandom).c_str(),
+		_lstStatChanges->addRow(13, tr(twoRows ? "STR_CHANGES_MIN" : "STR_CHANGES").c_str(),
+			formatStat(changedStatsMin.tu, true, rerollFlags.tu || randomFlags.tu).c_str(),
+			formatStat(changedStatsMin.stamina, true, rerollFlags.stamina || randomFlags.stamina).c_str(),
+			formatStat(changedStatsMin.health, true, rerollFlags.health || randomFlags.health).c_str(),
+			formatStat(changedStatsMin.bravery, true, rerollFlags.bravery || randomFlags.bravery).c_str(),
+			formatStat(changedStatsMin.reactions, true, rerollFlags.reactions || randomFlags.reactions).c_str(),
+			formatStat(changedStatsMin.firing, true, rerollFlags.firing || randomFlags.firing).c_str(),
+			formatStat(changedStatsMin.throwing, true, rerollFlags.throwing || randomFlags.throwing).c_str(),
+			formatStat(changedStatsMin.melee, true, rerollFlags.melee || randomFlags.melee).c_str(),
+			formatStat(changedStatsMin.strength, true, rerollFlags.strength || randomFlags.strength).c_str(),
+			formatStat(changedStatsMin.psiStrength, true, !showPsi || rerollFlags.psiStrength || randomFlags.psiStrength).c_str(),
+			formatStat(changedStatsMin.psiSkill, true, !showPsi || rerollFlags.psiSkill || randomFlags.psiSkill).c_str(),
 			"");
+		if (twoRows)
+		{
+			_lstStatChanges->addRow(13, tr("STR_CHANGES").c_str(),
+				formatStat(changedStatsMax.tu, true, rerollFlags.tu).c_str(),
+				formatStat(changedStatsMax.stamina, true, rerollFlags.stamina).c_str(),
+				formatStat(changedStatsMax.health, true, rerollFlags.health).c_str(),
+				formatStat(changedStatsMax.bravery, true, rerollFlags.bravery).c_str(),
+				formatStat(changedStatsMax.reactions, true, rerollFlags.reactions).c_str(),
+				formatStat(changedStatsMax.firing, true, rerollFlags.firing).c_str(),
+				formatStat(changedStatsMax.throwing, true, rerollFlags.throwing).c_str(),
+				formatStat(changedStatsMax.melee, true, rerollFlags.melee).c_str(),
+				formatStat(changedStatsMax.strength, true, rerollFlags.strength).c_str(),
+				formatStat(changedStatsMax.psiStrength, true, !showPsi || rerollFlags.psiStrength).c_str(),
+				formatStat(changedStatsMax.psiSkill, true, !showPsi || rerollFlags.psiSkill).c_str(),
+				"");
+		}
 		if (bonusRule)
 		{
 			_lstStatChanges->addRow(13, tr("STR_BONUS_STATS").c_str(),
