@@ -11,7 +11,6 @@
 
 #ifndef __NO_OPENGL
 
-#define __gl_glext_h_
 #include <SDL_opengl.h>
 #include <string>
 

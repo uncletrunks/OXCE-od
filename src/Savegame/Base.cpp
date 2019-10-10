@@ -272,41 +272,42 @@ void Base::finishLoading(const YAML::Node &node, SavedGame *save)
 bool Base::isOverlappingOrOverflowing()
 {
 	bool result = false;
-	bool grid[BASE_SIZE][BASE_SIZE];
+	BaseFacility* grid[BASE_SIZE][BASE_SIZE];
 
+	// i don't think i NEED to do this for a pointer array, but who knows what might happen on weird archaic linux distros if i don't?
 	for (int x = 0; x < BASE_SIZE; ++x)
 	{
 		for (int y = 0; y < BASE_SIZE; ++y)
 		{
-			grid[x][y] = false;
+			grid[x][y] = 0;
 		}
 	}
 
-	for (auto f : _facilities)
+	for (std::vector<BaseFacility*>::iterator f = _facilities.begin(); f != _facilities.end(); ++f)
 	{
-		auto rules = f->getRules();
-		if (f->getX() < 0 || f->getY() < 0)
+		RuleBaseFacility *rules = (*f)->getRules();
+		int facilityX = (*f)->getX();
+		int facilityY = (*f)->getY();
+		int facilitySize = rules->getSize();
+
+		if (facilityX < 0 || facilityY < 0 || facilityX + (facilitySize - 1) >= BASE_SIZE || facilityY + (facilitySize - 1) >= BASE_SIZE)
 		{
-			Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << f->getX() << "," << f->getY() << "] (size " << rules->getSize() << ") is outside of base boundaries.";
+			Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << facilityX << ", " << facilityY << "] (size " << facilitySize << ") is outside of base boundaries.";
 			result = true;
 			continue;
 		}
-		if (f->getX() + (f->getRules()->getSize() - 1) >= BASE_SIZE || f->getY() + (f->getRules()->getSize() - 1) >= BASE_SIZE)
+
+		for (int x = facilityX; x < facilityX + facilitySize; ++x)
 		{
-			Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << f->getX() << "," << f->getY() << "] (size " << rules->getSize() << ") is outside of base boundaries.";
-			result = true;
-			continue;
-		}
-		for (int x = f->getX(); x < f->getX() + rules->getSize(); ++x)
-		{
-			for (int y = f->getY(); y < f->getY() + rules->getSize(); ++y)
+			for (int y = facilityY; y < facilityY + facilitySize; ++y)
 			{
-				if (grid[x][y])
+				if (grid[x][y] != 0)
 				{
-					Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << f->getX() << "," << f->getY() << "] (size " << rules->getSize() << ") overlaps with another facility.";
+					Log(LOG_ERROR) << "Facility " << rules->getType() << " at [" << facilityX << ", " << facilityY << "] (size " << facilitySize
+						<< ") overlaps with " << grid[x][y]->getRules()->getType() << " at [" << x << ", " << y << "] (size " << grid[x][y]->getRules()->getSize() << ")";
 					result = true;
 				}
-				grid[x][y] = true;
+				grid[x][y] = *f;
 			}
 		}
 	}
