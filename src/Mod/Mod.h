@@ -198,6 +198,7 @@ private:
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
 	bool _manaEnabled, _manaBattleUI, _manaTrainingPrimary, _manaTrainingSecondary, _manaReplenishAfterMission;
 	std::string _manaUnlockResearch;
+	std::string _loseMoney, _loseRating, _loseDefeat;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	int _ufoTractorBeamSizeModifiers[5];
 	int _escortRange, _drawEnemyRadarCircles;
@@ -566,6 +567,14 @@ public:
 	bool getReplenishManaAfterMission() const { return _manaReplenishAfterMission; }
 	/// Gets the mana unlock research topic (default empty)?
 	const std::string &getManaUnlockResearch() const { return _manaUnlockResearch; }
+
+	/// Gets the cutscene ID that should be played when the player loses due to poor economy management.
+	const std::string &getLoseMoneyCutscene() const { return _loseMoney; }
+	/// Gets the cutscene ID that should be played when the player loses due to poor rating.
+	const std::string &getLoseRatingCutscene() const { return _loseRating; }
+	/// Gets the cutscene ID that should be played when the player loses the last base.
+	const std::string &getLoseDefeatCutscene() const { return _loseDefeat; }
+
 	/// Gets the threshold for defining a glancing hit on a ufo during interception
 	int getUfoGlancingHitThreshold() const { return _ufoGlancingHitThreshold; }
 	/// Gets the parameter for drawing the width of a ufo's beam weapon based on power

@@ -317,6 +317,7 @@ Mod::Mod() :
 	_surrenderMode(0),
 	_bughuntMinTurn(999), _bughuntMaxEnemies(2), _bughuntRank(0), _bughuntLowMorale(40), _bughuntTimeUnitsLeft(60),
 	_manaEnabled(false), _manaBattleUI(false), _manaTrainingPrimary(false), _manaTrainingSecondary(false), _manaReplenishAfterMission(true),
+	_loseMoney("loseGame"), _loseRating("loseGame"), _loseDefeat("loseGame"),
 	_ufoGlancingHitThreshold(0), _ufoBeamWidthParameter(1000),
 	_escortRange(20), _drawEnemyRadarCircles(1), _escortsJoinFightAgainstHK(true), _hunterKillerFastRetarget(true),
 	_crewEmergencyEvacuationSurvivalChance(100), _pilotsEmergencyEvacuationSurvivalChance(100),
@@ -1869,6 +1870,12 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		_manaTrainingPrimary = nodeMana["trainingPrimary"].as<bool>(_manaTrainingPrimary);
 		_manaTrainingSecondary = nodeMana["trainingSecondary"].as<bool>(_manaTrainingSecondary);
 		_manaReplenishAfterMission = nodeMana["replenishAfterMission"].as<bool>(_manaReplenishAfterMission);
+	}
+	if (const YAML::Node &nodeGameOver = doc["gameOver"])
+	{
+		_loseMoney = nodeGameOver["loseMoney"].as<std::string>(_loseMoney);
+		_loseRating = nodeGameOver["loseRating"].as<std::string>(_loseRating);
+		_loseDefeat = nodeGameOver["loseDefeat"].as<std::string>(_loseDefeat);
 	}
 	_ufoGlancingHitThreshold = doc["ufoGlancingHitThreshold"].as<int>(_ufoGlancingHitThreshold);
 	_ufoBeamWidthParameter = doc["ufoBeamWidthParameter"].as<int>(_ufoBeamWidthParameter);

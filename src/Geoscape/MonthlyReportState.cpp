@@ -42,6 +42,7 @@
 #include "../Savegame/SoldierDiary.h"
 #include "../Menu/SaveGameState.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleVideo.h"
 
 namespace OpenXcom
 {
@@ -51,7 +52,7 @@ namespace OpenXcom
  * @param psi Show psi training afterwards?
  * @param globe Pointer to the globe.
  */
-MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _ratingTotal(0), _fundingDiff(0), _lastMonthsRating(0), _happyList(0), _sadList(0), _pactList(0), _cancelPactList(0)
+MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(0), _ratingTotal(0), _fundingDiff(0), _lastMonthsRating(0), _happyList(0), _sadList(0), _pactList(0), _cancelPactList(0)
 {
 	_globe = globe;
 	// Create objects
@@ -234,7 +235,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 		_cancelPactList.erase(_cancelPactList.begin(), _cancelPactList.end());
 		_happyList.erase(_happyList.begin(), _happyList.end());
 		_sadList.erase(_sadList.begin(), _sadList.end());
-		_gameOver = true;
+		_gameOver = 1;
 	}
 
 	ss5 << satisFactionString;
@@ -251,7 +252,7 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
 				_cancelPactList.erase(_cancelPactList.begin(), _cancelPactList.end());
 				_happyList.erase(_happyList.begin(), _happyList.end());
 				_sadList.erase(_sadList.begin(), _sadList.end());
-				_gameOver = true;
+				_gameOver = 2;
 			}
 			else
 			{
@@ -279,18 +280,6 @@ MonthlyReportState::MonthlyReportState(Globe *globe) : _gameOver(false), _rating
  */
 MonthlyReportState::~MonthlyReportState()
 {
-}
-
-/**
- * Make sure the game is over.
- */
-void MonthlyReportState::init()
-{
-	State::init();
-	if (_gameOver)
-	{
-		_game->getSavedGame()->setEnding(END_LOSE);
-	}
 }
 
 /**
@@ -346,7 +335,21 @@ void MonthlyReportState::btnOkClick(Action *)
 	{
 		if (_txtFailure->getVisible())
 		{
-			_game->pushState(new CutsceneState(CutsceneState::LOSE_GAME));
+			_game->popState(); // in case the cutscene is not marked as "game over" (by accident or not) let's return to the geoscape
+
+			std::string cutsceneId;
+			if (_gameOver == 1)
+				cutsceneId = _game->getMod()->getLoseRatingCutscene();
+			else
+				cutsceneId = _game->getMod()->getLoseMoneyCutscene();
+
+			const RuleVideo *videoRule = _game->getMod()->getVideo(cutsceneId, true);
+			if (videoRule->getLoseGame())
+			{
+				_game->getSavedGame()->setEnding(END_LOSE);
+			}
+
+			_game->pushState(new CutsceneState(cutsceneId));
 			if (_game->getSavedGame()->isIronman())
 			{
 				_game->pushState(new SaveGameState(OPT_GEOSCAPE, SAVE_IRONMAN, _palette));

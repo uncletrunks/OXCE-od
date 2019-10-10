@@ -79,6 +79,7 @@
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleVideo.h"
 #include <algorithm>
 
 namespace OpenXcom
@@ -2860,11 +2861,12 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 			// it will get shown after the cutscene.
 			_game->pushState(new CutsceneState(cutscene));
 
-			if (cutscene == CutsceneState::WIN_GAME)
+			const RuleVideo *videoRule = _game->getMod()->getVideo(cutscene, true);
+			if (videoRule->getWinGame())
 			{
 				_game->getSavedGame()->setEnding(END_WIN);
 			}
-			else if (cutscene == CutsceneState::LOSE_GAME)
+			else if (videoRule->getLoseGame())
 			{
 				_game->getSavedGame()->setEnding(END_LOSE);
 			}

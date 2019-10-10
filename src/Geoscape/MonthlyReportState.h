@@ -43,7 +43,7 @@ private:
 	Text *_txtTitle, *_txtMonth, *_txtRating;
 	Text *_txtIncome, *_txtMaintenance, *_txtBalance, *_txtBonus;
 	Text *_txtDesc, *_txtFailure;
-	bool _gameOver;
+	int _gameOver;
 	int _ratingTotal, _fundingDiff, _lastMonthsRating;
 	std::vector<std::string> _happyList, _sadList, _pactList, _cancelPactList;
 	Globe *_globe;
@@ -55,8 +55,6 @@ public:
 	MonthlyReportState(Globe *globe);
 	/// Cleans up the Monthly Report state.
 	~MonthlyReportState();
-	/// Updates the ending.
-	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Calculate monthly scores.

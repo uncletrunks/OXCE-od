@@ -34,9 +34,6 @@
 namespace OpenXcom
 {
 
-const std::string CutsceneState::WIN_GAME = "winGame";
-const std::string CutsceneState::LOSE_GAME = "loseGame";
-
 CutsceneState::CutsceneState(const std::string &cutsceneId)
 	: _cutsceneId(cutsceneId)
 {
@@ -55,7 +52,8 @@ void CutsceneState::init()
 	// pop self off stack and replace with actual player state
 	_game->popState();
 
-	if (_cutsceneId == WIN_GAME || _cutsceneId == LOSE_GAME)
+	const RuleVideo *videoRule = _game->getMod()->getVideo(_cutsceneId, true);
+	if (videoRule->getWinGame() || videoRule->getLoseGame() || _game->getSavedGame()->getEnding() == END_LOSE)
 	{
 		if (_game->getSavedGame()->getMonthsPassed() > -1)
 		{
@@ -66,12 +64,6 @@ void CutsceneState::init()
 			_game->setSavedGame(0);
 			_game->setState(new GoToMainMenuState);
 		}
-	}
-
-	const RuleVideo *videoRule = _game->getMod()->getVideo(_cutsceneId);
-	if (videoRule == 0)
-	{
-		return;
 	}
 
 	bool fmv = false, slide = false;

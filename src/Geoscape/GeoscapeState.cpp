@@ -835,7 +835,7 @@ void GeoscapeState::time5Seconds()
 	}
 	if (_game->getSavedGame()->getEnding() == END_LOSE)
 	{
-		_game->pushState(new CutsceneState(CutsceneState::LOSE_GAME));
+		_game->pushState(new CutsceneState(_game->getMod()->getLoseDefeatCutscene()));
 		if (_game->getSavedGame()->isIronman())
 		{
 			_game->pushState(new SaveGameState(OPT_GEOSCAPE, SAVE_IRONMAN, _palette));
