@@ -53,7 +53,7 @@ void CutsceneState::init()
 	_game->popState();
 
 	const RuleVideo *videoRule = _game->getMod()->getVideo(_cutsceneId, true);
-	if (videoRule->getWinGame() || videoRule->getLoseGame() || _game->getSavedGame()->getEnding() == END_LOSE)
+	if (_game->getSavedGame()->getEnding() != END_NONE)
 	{
 		if (_game->getSavedGame()->getMonthsPassed() > -1)
 		{
