@@ -133,6 +133,7 @@ private:
 	AlienStrategy *_alienStrategy;
 	SavedBattleGame *_battleGame;
 	std::vector<const RuleResearch*> _discovered;
+	std::map<std::string, int> _generatedEvents;
 	std::map<std::string, int> _ufopediaRuleStatus;
 	std::map<std::string, int> _manufactureRuleStatus;
 	std::map<std::string, int> _researchRuleStatus;
@@ -368,6 +369,10 @@ public:
 	bool wasResearchPopped(const RuleResearch* research);
 	/// remove a research from the "popped up" array
 	void removePoppedResearch(const RuleResearch* research);
+	/// remembers that this event has been generated
+	void addGeneratedEvent(const RuleEvent* event);
+	/// checks if an event has been generated previously
+	bool wasEventGenerated(const std::string& eventName);
 	/// Gets the list of dead soldiers.
 	std::vector<Soldier*> *getDeadSoldiers();
 	/// Gets the last selected player base.

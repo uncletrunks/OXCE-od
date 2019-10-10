@@ -30,6 +30,8 @@ class RuleEventScript
 {
 private:
 	std::string _type;
+	std::vector<std::string> _oneTimeSequentialEvents;
+	WeightedOptions _oneTimeRandomEvents;
 	std::vector<std::pair<size_t, WeightedOptions*> > _eventWeights;
 	int _firstMonth, _lastMonth, _executionOdds, _minDifficulty, _maxDifficulty;
 	int _minScore, _maxScore;
@@ -45,6 +47,10 @@ public:
 	void load(const YAML::Node &node);
 	/// Gets the name of the script command.
 	const std::string &getType() const { return _type; }
+	/// Gets the list of one time sequential events.
+	const std::vector<std::string> &getOneTimeSequentialEvents() const { return _oneTimeSequentialEvents; }
+	/// Gets the list of one time random events (with weights).
+	const WeightedOptions &getOneTimeRandomEvents() const { return _oneTimeRandomEvents; }
 	/// Gets the first month this command will run.
 	int getFirstMonth() const { return _firstMonth; }
 	/// Gets the last month this command will run.

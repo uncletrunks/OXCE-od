@@ -55,6 +55,11 @@ void RuleEventScript::load(const YAML::Node &node)
 		load(parent);
 	}
 	_type = node["type"].as<std::string>(_type);
+	_oneTimeSequentialEvents = node["oneTimeSequentialEvents"].as<std::vector<std::string> >(_oneTimeSequentialEvents);
+	if (node["oneTimeRandomEvents"])
+	{
+		_oneTimeRandomEvents.load(node["oneTimeRandomEvents"]);
+	}
 	if (const YAML::Node &weights = node["eventWeights"])
 	{
 		for (YAML::const_iterator nn = weights.begin(); nn != weights.end(); ++nn)

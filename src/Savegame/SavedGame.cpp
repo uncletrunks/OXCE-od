@@ -581,6 +581,7 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 	}
 	sortReserchVector(_discovered);
 
+	_generatedEvents = doc["generatedEvents"].as< std::map<std::string, int> >(_generatedEvents);
 	_ufopediaRuleStatus = doc["ufopediaRuleStatus"].as< std::map<std::string, int> >(_ufopediaRuleStatus);
 	_manufactureRuleStatus = doc["manufactureRuleStatus"].as< std::map<std::string, int> >(_manufactureRuleStatus);
 	_researchRuleStatus = doc["researchRuleStatus"].as< std::map<std::string, int> >(_researchRuleStatus);
@@ -869,6 +870,7 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 	{
 		node["poppedResearch"].push_back((*i)->getName());
 	}
+	node["generatedEvents"] = _generatedEvents;
 	node["ufopediaRuleStatus"] = _ufopediaRuleStatus;
 	node["manufactureRuleStatus"] = _manufactureRuleStatus;
 	node["researchRuleStatus"] = _researchRuleStatus;
@@ -2557,6 +2559,25 @@ void SavedGame::removePoppedResearch(const RuleResearch* research)
 	{
 		_poppedResearch.erase(r);
 	}
+}
+
+/*
+ * remembers that this event has been generated
+ * @param event is the event we want to remember
+ */
+void SavedGame::addGeneratedEvent(const RuleEvent* event)
+{
+	_generatedEvents[event->getName()] += 1;
+}
+
+/*
+ * checks if an event has been generated previously
+ * @param eventName is the event we are checking for
+ * @return whether or not it has been generated previously
+ */
+bool SavedGame::wasEventGenerated(const std::string& eventName)
+{
+	return (_generatedEvents.find(eventName) != _generatedEvents.end());
 }
 
 /**

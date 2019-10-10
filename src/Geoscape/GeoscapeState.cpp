@@ -3390,19 +3390,57 @@ void GeoscapeState::determineAlienMissions()
 		// now, let's process the relevant event scripts
 		for (auto& eventCommand : relevantEventScripts)
 		{
-			auto eventName = eventCommand->generate(save->getMonthsPassed());
-			auto eventRules = mod->getEvent(eventName);
-			if (eventRules)
+			std::vector<const RuleEvent*> toBeGenerated;
+
+			// 1. sequentially generated one-time events (cannot repeat)
+			{
+				std::vector<std::string> possibleSeqEvents;
+				for (auto& seqEvent : eventCommand->getOneTimeSequentialEvents())
+				{
+					if (!save->wasEventGenerated(seqEvent))
+						possibleSeqEvents.push_back(seqEvent); // insert
+				}
+				if (!possibleSeqEvents.empty())
+				{
+					auto eventRules = mod->getEvent(possibleSeqEvents.front(), true); // take first
+					toBeGenerated.push_back(eventRules);
+				}
+			}
+
+			// 2. randomly generated one-time events (cannot repeat)
+			{
+				WeightedOptions possibleRngEvents;
+				WeightedOptions tmp = eventCommand->getOneTimeRandomEvents(); // copy for the iterator, because of getNames()
+				possibleRngEvents = tmp; // copy for us to modify
+				for (auto& rngEvent : tmp.getNames())
+				{
+					if (save->wasEventGenerated(rngEvent))
+						possibleRngEvents.set(rngEvent, 0); // delete
+				}
+				if (!possibleRngEvents.empty())
+				{
+					auto eventRules = mod->getEvent(possibleRngEvents.choose(), true); // take random
+					toBeGenerated.push_back(eventRules);
+				}
+			}
+
+			// 3. randomly generated repeatable events
+			{
+				auto eventRules = mod->getEvent(eventCommand->generate(save->getMonthsPassed()), true);
+				toBeGenerated.push_back(eventRules);
+			}
+
+			// 4. generate
+			for (auto eventRules : toBeGenerated)
 			{
 				GeoscapeEvent *newEvent = new GeoscapeEvent(*eventRules);
 				int minutes = (eventRules->getTimer() + (RNG::generate(0, eventRules->getTimerRandom()))) / 30 * 30;
 				if (minutes < 60) minutes = 60; // just in case
 				newEvent->setSpawnCountdown(minutes);
 				_game->getSavedGame()->getGeoscapeEvents().push_back(newEvent);
-			}
-			else
-			{
-				throw Exception("Error processing event script named: " + eventCommand->getType() + ", event name: " + eventName + " is not defined");
+
+				// remember that it has been generated
+				save->addGeneratedEvent(eventRules);
 			}
 		}
 	}
