@@ -387,7 +387,7 @@ void SoldierInfoState::init()
 	for (auto bonusRule : *_soldier->getBonuses(_game->getMod(), true))
 	{
 		hasBonus = true;
-		withArmor += *(bonusRule.first->getStats());
+		withArmor += *(bonusRule->getStats());
 	}
 	_btnBonuses->setVisible(hasBonus);
 

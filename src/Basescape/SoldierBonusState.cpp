@@ -85,8 +85,8 @@ SoldierBonusState::SoldierBonusState(Base *base, size_t soldier) : _base(base), 
 	_lstBonuses->clearList();
 	for (auto bonusRule : *s->getBonuses(nullptr, false))
 	{
-		_bonuses.push_back(bonusRule.first->getName());
-		_lstBonuses->addRow(1, tr(bonusRule.first->getName()).c_str());
+		_bonuses.push_back(bonusRule->getName());
+		_lstBonuses->addRow(1, tr(bonusRule->getName()).c_str());
 	}
 
 	_lstBonuses->onMouseClick((ActionHandler)& SoldierBonusState::lstBonusesClick);

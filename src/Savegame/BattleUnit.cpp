@@ -108,8 +108,8 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 	int visibilityBonus = 0;
 	for (auto bonusRule : *soldier->getBonuses(mod, true))
 	{
-		visibilityBonus += bonusRule.first->getVisibilityAtDark();
-		_stats += *(bonusRule.first->getStats());
+		visibilityBonus += bonusRule->getVisibilityAtDark();
+		_stats += *(bonusRule->getStats());
 	}
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDark += visibilityBonus;
@@ -211,8 +211,8 @@ void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor 
 	int visibilityBonus = 0;
 	for (auto bonusRule : *soldier->getBonuses(nullptr, false))
 	{
-		visibilityBonus += bonusRule.first->getVisibilityAtDark();
-		_stats += *(bonusRule.first->getStats());
+		visibilityBonus += bonusRule->getVisibilityAtDark();
+		_stats += *(bonusRule->getStats());
 	}
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDark += visibilityBonus;
@@ -1597,7 +1597,7 @@ bool BattleUnit::hasNegativeHealthRegen() const
 		{
 			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
 			{
-				HPRecovery += bonusRule.first->getHealthRecovery(this);
+				HPRecovery += bonusRule->getHealthRecovery(this);
 			}
 		}
 
@@ -2332,8 +2332,8 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 		{
 			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
 			{
-				TURecovery += bonusRule.first->getTimeRecovery(this);
-				ENRecovery += bonusRule.first->getEnergyRecovery(this);
+				TURecovery += bonusRule->getTimeRecovery(this);
+				ENRecovery += bonusRule->getEnergyRecovery(this);
 			}
 		}
 
@@ -2355,10 +2355,10 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 		{
 			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
 			{
-				HPRecovery += bonusRule.first->getHealthRecovery(this);
-				MNRecovery += bonusRule.first->getManaRecovery(this);
-				MRRecovery += bonusRule.first->getMoraleRecovery(this);
-				STRecovery += bonusRule.first->getStunRegeneration(this);
+				HPRecovery += bonusRule->getHealthRecovery(this);
+				MNRecovery += bonusRule->getManaRecovery(this);
+				MRRecovery += bonusRule->getMoraleRecovery(this);
+				STRecovery += bonusRule->getStunRegeneration(this);
 			}
 		}
 
