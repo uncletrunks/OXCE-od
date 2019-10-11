@@ -569,9 +569,9 @@ void RuleSoldier::ScriptRegister(ScriptParserBase* parser)
 {
 	Bind<RuleSoldier> ra = { parser };
 
-	UnitStats::addGetStatsScript<RuleSoldier, &RuleSoldier::_statCaps>(ra, "StatsCap.");
-	UnitStats::addGetStatsScript<RuleSoldier, &RuleSoldier::_minStats>(ra, "StatsMin.");
-	UnitStats::addGetStatsScript<RuleSoldier, &RuleSoldier::_maxStats>(ra, "StatsMax.");
+	UnitStats::addGetStatsScript<&RuleSoldier::_statCaps>(ra, "StatsCap.");
+	UnitStats::addGetStatsScript<&RuleSoldier::_minStats>(ra, "StatsMin.");
+	UnitStats::addGetStatsScript<&RuleSoldier::_maxStats>(ra, "StatsMax.");
 
 	ra.addScriptValue<&RuleSoldier::_scriptValues>(false);
 	ra.addDebugDisplay<&debugDisplayScript>();

@@ -422,7 +422,7 @@ void StatAdjustment::ScriptRegister(ScriptParserBase* parser)
 {
 	Bind<StatAdjustment> sa = { parser };
 
-	UnitStats::addGetStatsScript<StatAdjustment, &StatAdjustment::statGrowth>(sa, "", true);
+	UnitStats::addGetStatsScript<&StatAdjustment::statGrowth>(sa, "", true);
 }
 
 } // namespace OpenXcom

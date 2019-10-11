@@ -1147,6 +1147,7 @@ struct BindBase
 template<typename T>
 struct Bind : BindBase
 {
+	using Type = T;
 
 	Bind(ScriptParserBase* p) : BindBase{ p }
 	{
@@ -1187,7 +1188,7 @@ struct Bind : BindBase
 	template<auto MemPtr0, auto MemPtr1, auto... MemPtrR>
 	void addField(const std::string& get)
 	{
-		addCustomFunc<helper::BindPropGet<T, MACRO_CLANG_AUTO_HACK(MemPtr0), MACRO_CLANG_AUTO_HACK(MemPtr1), MACRO_CLANG_AUTO_HACK(MemPtrR)...>>(getName(get), "Get int field of " + std::string{ T::ScriptName });
+		addCustomFunc<helper::BindPropGet<T, MACRO_CLANG_AUTO_HACK(MemPtr0), MACRO_CLANG_AUTO_HACK(MemPtr1), MACRO_CLANG_AUTO_HACK(MemPtrR)...>>(getName(get), "Get inner field of " + std::string{ T::ScriptName });
 	}
 
 	void addScriptTag()

@@ -928,7 +928,7 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 	ar.add<&Armor::getPersonalLight>("getPersonalLight");
 	ar.add<&Armor::getSize>("getSize");
 
-	UnitStats::addGetStatsScript<Armor, &Armor::_stats>(ar, "Stats.");
+	UnitStats::addGetStatsScript<&Armor::_stats>(ar, "Stats.");
 
 	ar.add<&getArmorValueScript>("getArmor");
 

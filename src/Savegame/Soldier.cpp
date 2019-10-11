@@ -1565,8 +1565,8 @@ void Soldier::ScriptRegister(ScriptParserBase* parser)
 	so.add<&getLookVariantScript>("getLookVariant");
 
 
-	UnitStats::addGetStatsScript<Soldier, &Soldier::_currentStats>(so, "Stats.");
-	UnitStats::addSetStatsScript<Soldier, &Soldier::_currentStats>(so, "Stats.");
+	UnitStats::addGetStatsScript<&Soldier::_currentStats>(so, "Stats.");
+	UnitStats::addSetStatsScript<&Soldier::_currentStats>(so, "Stats.");
 
 
 	so.addFunc<getRuleSoldierScript>("getRuleSoldier");

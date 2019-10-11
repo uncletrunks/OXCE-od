@@ -217,58 +217,58 @@ struct UnitStats
 		}
 	}
 
-	template<typename T, UnitStats T::*Stat, typename TBind>
+	template<auto Stat, typename TBind>
 	static void addGetStatsScript(TBind& b, std::string prefix, bool skipResorcesStats = false)
 	{
 		if (!skipResorcesStats)
 		{
-			b.template add<&getMaxStatScript<T, Stat, &UnitStats::tu>>(prefix + "getTimeUnits");
-			b.template add<&getMaxStatScript<T, Stat, &UnitStats::stamina>>(prefix + "getStamina");
-			b.template add<&getMaxStatScript<T, Stat, &UnitStats::health>>(prefix + "getHealth");
-			b.template add<&getMaxStatScript<T, Stat, &UnitStats::mana>>(prefix + "getManaPool");
+			b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::tu>>(prefix + "getTimeUnits");
+			b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::stamina>>(prefix + "getStamina");
+			b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::health>>(prefix + "getHealth");
+			b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::mana>>(prefix + "getManaPool");
 		}
 
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::bravery>>(prefix + "getBravery");
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::reactions>>(prefix + "getReactions");
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::firing>>(prefix + "getFiring");
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::throwing>>(prefix + "getThrowing");
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::strength>>(prefix + "getStrength");
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::psiStrength>>(prefix + "getPsiStrength");
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::psiSkill>>(prefix + "getPsiSkill");
-		b.template add<&getMaxStatScript<T, Stat, &UnitStats::melee>>(prefix + "getMelee");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::bravery>>(prefix + "getBravery");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::reactions>>(prefix + "getReactions");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::firing>>(prefix + "getFiring");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::throwing>>(prefix + "getThrowing");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::strength>>(prefix + "getStrength");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::psiStrength>>(prefix + "getPsiStrength");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::psiSkill>>(prefix + "getPsiSkill");
+		b.template add<&getMaxStatScript<typename TBind::Type, Stat, &UnitStats::melee>>(prefix + "getMelee");
 	}
 
-	template<typename T, UnitStats T::*Stat, typename TBind>
+	template<auto Stat, typename TBind>
 	static void addSetStatsScript(TBind& b, std::string prefix, bool skipResorcesStats = false)
 	{
 		if (!skipResorcesStats)
 		{
-			b.template add<&setMaxStatScript<T, Stat, &UnitStats::tu>>(prefix + "setTimeUnits");
-			b.template add<&setMaxStatScript<T, Stat, &UnitStats::stamina>>(prefix + "setStamina");
-			b.template add<&setMaxStatScript<T, Stat, &UnitStats::health>>(prefix + "setHealth");
-			b.template add<&setMaxStatScript<T, Stat, &UnitStats::mana>>(prefix + "setManaPool");
+			b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::tu>>(prefix + "setTimeUnits");
+			b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::stamina>>(prefix + "setStamina");
+			b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::health>>(prefix + "setHealth");
+			b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::mana>>(prefix + "setManaPool");
 		}
 
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::bravery>>(prefix + "setBravery");
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::reactions>>(prefix + "setReactions");
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::firing>>(prefix + "setFiring");
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::throwing>>(prefix + "setThrowing");
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::strength>>(prefix + "setStrength");
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::psiStrength>>(prefix + "setPsiStrength");
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::psiSkill>>(prefix + "setPsiSkill");
-		b.template add<&setMaxStatScript<T, Stat, &UnitStats::melee>>(prefix + "setMelee");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::bravery>>(prefix + "setBravery");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::reactions>>(prefix + "setReactions");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::firing>>(prefix + "setFiring");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::throwing>>(prefix + "setThrowing");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::strength>>(prefix + "setStrength");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::psiStrength>>(prefix + "setPsiStrength");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::psiSkill>>(prefix + "setPsiSkill");
+		b.template add<&setMaxStatScript<typename TBind::Type, Stat, &UnitStats::melee>>(prefix + "setMelee");
 	}
 
-	template<typename T, UnitStats T::*Stat, int T::*CurrTu, int T::*CurrEnergy, int T::*CurrHealth, int T::* CurrMana, typename TBind>
+	template<auto Stat, auto CurrTu, auto CurrEnergy, auto CurrHealth, auto CurrMana, typename TBind>
 	static void addSetStatsWithCurrScript(TBind& b, std::string prefix)
 	{
 		// when we change stats of BattleUnit its resources should be adjust.
-		b.template add<&setMaxAndCurrStatScript<T, Stat, CurrTu, &UnitStats::tu>>(prefix + "setTimeUnits");
-		b.template add<&setMaxAndCurrStatScript<T, Stat, CurrEnergy, &UnitStats::stamina>>(prefix + "setStamina");
-		b.template add<&setMaxAndCurrStatScript<T, Stat, CurrHealth, &UnitStats::health>>(prefix + "setHealth");
-		b.template add<&setMaxAndCurrStatScript<T, Stat, CurrMana, &UnitStats::mana>>(prefix + "setManaPool");
+		b.template add<&setMaxAndCurrStatScript<typename TBind::Type, Stat, CurrTu, &UnitStats::tu>>(prefix + "setTimeUnits");
+		b.template add<&setMaxAndCurrStatScript<typename TBind::Type, Stat, CurrEnergy, &UnitStats::stamina>>(prefix + "setStamina");
+		b.template add<&setMaxAndCurrStatScript<typename TBind::Type, Stat, CurrHealth, &UnitStats::health>>(prefix + "setHealth");
+		b.template add<&setMaxAndCurrStatScript<typename TBind::Type, Stat, CurrMana, &UnitStats::mana>>(prefix + "setManaPool");
 
-		addSetStatsScript<T, Stat>(b, prefix, true);
+		addSetStatsScript<Stat>(b, prefix, true);
 	}
 };
 

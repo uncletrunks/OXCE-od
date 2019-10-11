@@ -5067,10 +5067,10 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getArmorMaxScript>("getArmorMax");
 
 
-	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_stats>(bu, "Stats.");
-	UnitStats::addSetStatsWithCurrScript<BattleUnit, &BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health, &BattleUnit::_mana>(bu, "Stats.");
+	UnitStats::addGetStatsScript<&BattleUnit::_stats>(bu, "Stats.");
+	UnitStats::addSetStatsWithCurrScript<&BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health, &BattleUnit::_mana>(bu, "Stats.");
 
-	UnitStats::addGetStatsScript<BattleUnit, &BattleUnit::_exp>(bu, "Exp.", true);
+	UnitStats::addGetStatsScript<&BattleUnit::_exp>(bu, "Exp.", true);
 
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
