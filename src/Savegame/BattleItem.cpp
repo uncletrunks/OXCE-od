@@ -617,11 +617,7 @@ Surface *BattleItem::getFloorSprite(SurfaceSet *set, int animFrame, int shade) c
 			throw Exception("Image missing in 'FLOOROB.PCK' for item '" + _rules->getType() + "'");
 		}
 
-		ModScript::SelectItemSprite::Output arg{ i, 0 };
-		ModScript::SelectItemSprite::Worker work{ this, BODYPART_ITEM_FLOOR, animFrame, shade };
-		work.execute(_rules->getScript<ModScript::SelectItemSprite>(), arg);
-
-		auto newSurf = set->getFrame(arg.getFirst());
+		auto newSurf = set->getFrame(ModScript::scriptFunc<ModScript::SelectItemSprite>(_rules, i, 0, this, BODYPART_ITEM_FLOOR, animFrame, shade));
 		if (newSurf == nullptr)
 		{
 			newSurf = surf;

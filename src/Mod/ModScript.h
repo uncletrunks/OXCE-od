@@ -353,6 +353,40 @@ public:
 	BattleItemScripts battleItemScripts = { _shared, _mod, };
 	BonusStatsScripts bonusStatsScripts = { _shared, _mod, };
 	UfoScripts ufoScripts = { _shared, _mod, };
+
+
+	////////////////////////////////////////////////////////////
+	//					helper functions
+	////////////////////////////////////////////////////////////
+
+	template<typename ScriptType, typename T, typename... Args>
+	static auto scriptCallback(T* t, Args... args) -> std::enable_if_t<std::is_same<typename ScriptType::Output, ScriptOutputArgs<>>::value, void>
+	{
+		typename ScriptType::Output arg{};
+		typename ScriptType::Worker work{ std::forward<Args>(args)... };
+
+		work.execute(t->template getScript<ScriptType>(), arg);
+	}
+	template<typename ScriptType, typename T, typename... Args>
+	static auto scriptFunc(T* t, int first, int second, Args... args) -> std::enable_if_t<std::is_same<typename ScriptType::Output, Output>::value, int>
+	{
+		typename ScriptType::Output arg{ first, second };
+		typename ScriptType::Worker work{ std::forward<Args>(args)... };
+
+		work.execute(t->template getScript<ScriptType>(), arg);
+
+		return arg.getFirst();
+	}
+	template<typename ScriptType, typename T, typename... Args>
+	static auto scriptFunc(T* t, int first, Args... args) -> std::enable_if_t<std::is_same<typename ScriptType::Output, ScriptOutputArgs<int&>>::value, int>
+	{
+		typename ScriptType::Output arg{ first };
+		typename ScriptType::Worker work{ std::forward<Args>(args)... };
+
+		work.execute(t->template getScript<ScriptType>(), arg);
+
+		return arg.getFirst();
+	}
 };
 
 }

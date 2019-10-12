@@ -1163,10 +1163,7 @@ void SavedBattleGame::endTurn()
 			(*i)->setVisible(false);
 		}
 
-		ModScript::NewTurnUnit::Output arg{};
-		ModScript::NewTurnUnit::Worker work{ (*i), this, this->getTurn(), _side };
-
-		work.execute((*i)->getArmor()->getScript<ModScript::NewTurnUnit>(), arg);
+		ModScript::scriptCallback<ModScript::NewTurnUnit>((*i)->getArmor(), (*i), this, this->getTurn(), _side);
 
 		if ((*i)->isJustRevivedByNewTurn())
 		{
@@ -1181,10 +1178,7 @@ void SavedBattleGame::endTurn()
 
 	for (auto& item : _items)
 	{
-		ModScript::NewTurnItem::Output arg{};
-		ModScript::NewTurnItem::Worker work{ item, this, this->getTurn(), _side };
-
-		work.execute(item->getRules()->getScript<ModScript::NewTurnItem>(), arg);
+		ModScript::scriptCallback<ModScript::NewTurnItem>(item->getRules(), item, this, this->getTurn(), _side);
 	}
 
 	// re-run calculateFOV() *after* all aliens have been set not-visible
@@ -1454,10 +1448,8 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 		}
 	}
 
-	ModScript::CreateUnit::Output arg{};
-	ModScript::CreateUnit::Worker work{ unit, this, this->getTurn(), };
+	ModScript::scriptCallback<ModScript::CreateUnit>(armor, unit, this, this->getTurn());
 
-	work.execute(armor->getScript<ModScript::CreateUnit>(), arg);
 }
 
 /**
@@ -1466,10 +1458,7 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
  */
 void SavedBattleGame::initItem(BattleItem *item)
 {
-	ModScript::CreateItem::Output arg{};
-	ModScript::CreateItem::Worker work{ item, this, this->getTurn(), };
-
-	work.execute(item->getRules()->getScript<ModScript::CreateItem>(), arg);
+	ModScript::scriptCallback<ModScript::CreateItem>(item->getRules(), item, this, this->getTurn());
 }
 
 /**
