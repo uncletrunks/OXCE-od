@@ -2410,7 +2410,7 @@ int RuleItem::getSprayWaypoints() const
 namespace
 {
 
-void getBattleTypeScript(RuleItem *ri, int &ret)
+void getBattleTypeScript(const RuleItem *ri, int &ret)
 {
 	if (ri)
 	{
