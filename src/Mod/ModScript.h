@@ -35,6 +35,7 @@ struct RuleDamageType;
 class RuleTerrain;
 class MapDataSet;
 class RuleSoldier;
+class RuleSoldierBonus;
 class Unit;
 class Armor;
 class RuleInventory;
@@ -203,6 +204,14 @@ class ModScript
 		DetectUfoFromCraftParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
+	////////////////////////////////////////////////////////////
+	//				soldier bonus stat script
+	////////////////////////////////////////////////////////////
+
+	struct ApplySoldierBonusesParser : ScriptParserEvents<ScriptOutputArgs<>, BattleUnit*, SavedBattleGame*, const RuleSoldierBonus*>
+	{
+		ApplySoldierBonusesParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
 
 public:
 	/// Get shared state.
@@ -283,6 +292,12 @@ public:
 	using DetectUfoFromCraft = MACRO_NAMED_SCRIPT("detectUfoFromCraft", DetectUfoFromCraftParser);
 
 	////////////////////////////////////////////////////////////
+	//					soldier bonus stat script
+	////////////////////////////////////////////////////////////
+
+	using ApplySoldierBonuses = MACRO_NAMED_SCRIPT("applySoldierBonuses", ApplySoldierBonusesParser);
+
+	////////////////////////////////////////////////////////////
 	//					groups
 	////////////////////////////////////////////////////////////
 
@@ -346,6 +361,10 @@ public:
 		DetectUfoFromCraft
 	>;
 
+	using SoldierBonusScripts = ScriptGroup<Mod,
+		ApplySoldierBonuses
+	>;
+
 	////////////////////////////////////////////////////////////
 	//					members
 	////////////////////////////////////////////////////////////
@@ -353,6 +372,7 @@ public:
 	BattleItemScripts battleItemScripts = { _shared, _mod, };
 	BonusStatsScripts bonusStatsScripts = { _shared, _mod, };
 	UfoScripts ufoScripts = { _shared, _mod, };
+	SoldierBonusScripts soldierBonusScripts = { _shared, _mod, };
 
 
 	////////////////////////////////////////////////////////////

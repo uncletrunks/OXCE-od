@@ -46,6 +46,7 @@
 #include "../Mod/RuleEnviroEffects.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleSoldierBonus.h"
 #include "../fallthrough.h"
 
 namespace OpenXcom
@@ -1450,6 +1451,13 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 
 	ModScript::scriptCallback<ModScript::CreateUnit>(armor, unit, this, this->getTurn());
 
+	if (auto solder = unit->getGeoscapeSoldier())
+	{
+		for (auto bonus : *solder->getBonuses(nullptr, false))
+		{
+			ModScript::scriptCallback<ModScript::ApplySoldierBonuses>(bonus, unit, this, bonus);
+		}
+	}
 }
 
 /**

@@ -34,11 +34,21 @@ class BattleUnit;
  */
 class RuleSoldierBonus
 {
+public:
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "RuleSoldierBonus";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 private:
 	std::string _name;
 	int _visibilityAtDark;
 	UnitStats _stats;
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery, _manaRecovery;
+	ScriptValues<RuleSoldierBonus> _scriptValues;
+	ModScript::SoldierBonusScripts::Container _soldierBonusScripts;
+
 public:
 	/// Creates a blank RuleSoldierBonus.
 	RuleSoldierBonus(const std::string &name);
@@ -71,6 +81,10 @@ public:
 	/// Gets the bonus Stun recovery.
 	int getStunRegeneration(const BattleUnit *unit) const;
 	const RuleStatBonus *getStunRegenerationRaw() const { return &_stunRecovery; }
+	/// Gets script.
+	template<typename Script>
+	const typename Script::Container &getScript() const { return _soldierBonusScripts.get<Script>(); }
+	const ScriptValues<RuleSoldierBonus> &getScriptValuesRaw() const { return _scriptValues; }
 };
 
 }

@@ -17,6 +17,11 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "RuleSoldierBonus.h"
+#include "Mod.h"
+#include "../Engine/ScriptBind.h"
+#include "../Savegame/BattleUnit.h"
+#include "../Savegame/SavedBattleGame.h"
+
 
 namespace OpenXcom
 {
@@ -47,6 +52,9 @@ void RuleSoldierBonus::load(const YAML::Node &node, const ModScript &parsers)
 		_manaRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::ManaSoldierRecoveryStatBonus>());
 		_stunRecovery.load(_name, rec, parsers.bonusStatsScripts.get<ModScript::StunSoldierRecoveryStatBonus>());
 	}
+
+	_soldierBonusScripts.load(_name, node, parsers.soldierBonusScripts);
+	_scriptValues.load(node, parsers.getShared());
 }
 
 /**
@@ -95,6 +103,55 @@ int RuleSoldierBonus::getManaRecovery(const BattleUnit *unit) const
 int RuleSoldierBonus::getStunRegeneration(const BattleUnit *unit) const
 {
 	return _stunRecovery.getBonus(unit);
+}
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+std::string debugDisplayScript(const RuleSoldierBonus* ri)
+{
+	if (ri)
+	{
+		std::string s;
+		s += RuleSoldierBonus::ScriptName;
+		s += "(name: \"";
+		s += ri->getName();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+}
+
+/**
+ * Register RuleSoldierBonus in script parser.
+ * @param parser Script parser.
+ */
+void RuleSoldierBonus::ScriptRegister(ScriptParserBase* parser)
+{
+	parser->registerPointerType<Mod>();
+
+	Bind<RuleSoldierBonus> rsb = { parser };
+
+	UnitStats::addGetStatsScript<&RuleSoldierBonus::_stats>(rsb, "Stats.");
+	rsb.addScriptValue<&RuleSoldierBonus::_scriptValues>(false);
+	rsb.addDebugDisplay<&debugDisplayScript>();
+}
+
+
+ModScript::ApplySoldierBonusesParser::ApplySoldierBonusesParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name, "unit", "save_game", "soldier_bonus", }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
 }
 
 }

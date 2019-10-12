@@ -2382,6 +2382,19 @@ void StatsForNerdsState::initSoldierBonusList()
 		addRuleStatBonus(ss, *bonusRule->getManaRecoveryRaw(), "mana");
 		endHeading();
 	}
+
+	addSection("{Script tags}", "", _white, true);
+	{
+		auto tagValues = bonusRule->getScriptValuesRaw().getValuesRaw();
+		ArgEnum index = ScriptParserBase::getArgType<ScriptTag<RuleSoldierBonus>>();
+		auto tagNames = mod->getScriptGlobal()->getTagNames().at(index);
+		for (size_t i = 0; i < tagValues.size(); ++i)
+		{
+			auto nameAsString = tagNames.values[i].name.toString().substr(4);
+			addIntegerScriptTag(ss, tagValues.at(i), nameAsString);
+		}
+		endHeading();
+	}
 }
 
 /**
