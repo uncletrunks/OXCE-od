@@ -102,19 +102,12 @@ void UnitSprite::selectItem(Part& p, BattleItem *item, int dir)
 		throw Exception("Frame(s) missing in 'HANDOB.PCK' for item '" + item->getRules()->getName() + "'");
 	}
 
-	const auto &scr = rule->getScript<ModScript::SelectItemSprite>();
-	auto result = 0;
-	if(scr)
-	{
-		ModScript::SelectItemSprite::Output arg{ index, dir };
-		ModScript::SelectItemSprite::Worker work{ item, p.bodyPart, _animationFrame, _shade };
-		work.execute(scr, arg);
-		result = arg.getFirst();
-	}
-	else
-	{
-		result = index + dir;
-	}
+	auto result = ModScript::scriptFunc2<ModScript::SelectItemSprite>(
+		rule,
+		index, dir,
+		item, p.bodyPart, _animationFrame, _shade
+	);
+
 	p.src = _itemSurface->getFrame(result);
 }
 
@@ -132,19 +125,13 @@ void UnitSprite::selectUnit(Part& p, int index, int dir)
 	{
 		throw Exception("Frame(s) missing in '" + armor->getSpriteSheet() + "' for armor '" + armor->getType() + "'");
 	}
-	const auto &scr = armor->getScript<ModScript::SelectUnitSprite>();
-	auto result = 0;
-	if(scr)
-	{
-		ModScript::SelectUnitSprite::Output arg{ index, dir };
-		ModScript::SelectUnitSprite::Worker work{ _unit, p.bodyPart, _animationFrame, _shade };
-		work.execute(scr, arg);
-		result = arg.getFirst();
-	}
-	else
-	{
-		result = index + dir;
-	}
+
+	auto result = ModScript::scriptFunc2<ModScript::SelectUnitSprite>(
+		armor,
+		index, dir,
+		_unit, p.bodyPart, _animationFrame, _shade
+	);
+
 	p.src = _unitSurface->getFrame(result);
 }
 

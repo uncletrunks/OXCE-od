@@ -3331,7 +3331,11 @@ bool BattleUnit::postMissionProcedures(const Mod *mod, SavedGame *geoscape, Save
 	}
 
 	{
-		recovery = ModScript::scriptFunc<ModScript::ReturnFromMissionUnit>(getArmor(), recovery, healthLoss, this, battle, s, &statsDiff, &statsOld );
+		recovery = ModScript::scriptFunc2<ModScript::ReturnFromMissionUnit>(
+			getArmor(),
+			recovery, healthLoss,
+			this, battle, s, &statsDiff, &statsOld
+		);
 	}
 
 	//after mod execution this value could change

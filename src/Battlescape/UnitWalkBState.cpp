@@ -570,7 +570,11 @@ void UnitWalkBState::playMovementSound()
 		}
 	}
 
-	sound = ModScript::scriptFunc<ModScript::SelectMoveSoundUnit>(_unit->getArmor(), sound, _unit, _unit->getWalkingPhase(), unitSound, tileSound, Mod::WALK_OFFSET, tileSoundOffset, Mod::FLYING_SOUND, _action.getMoveType());
+	sound = ModScript::scriptFunc1<ModScript::SelectMoveSoundUnit>(
+		_unit->getArmor(),
+		sound,
+		_unit, _unit->getWalkingPhase(), unitSound, tileSound, Mod::WALK_OFFSET, tileSoundOffset, Mod::FLYING_SOUND, _action.getMoveType()
+	);
 	if (sound >= 0)
 	{
 		_parent->getMod()->getSoundByDepth(_parent->getDepth(), sound)->play(-1, _parent->getMap()->getSoundAngle(_unit->getPosition()));
