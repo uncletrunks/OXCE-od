@@ -164,6 +164,7 @@ hu:
   STR_VIDEO: "VIDEÓ"
   STR_AUDIO: "HANG"
   STR_BATTLESCAPE_UC: "CSATAMEZŐ"
+  STR_MODS_UC: "MODOK"
   STR_DISPLAY_RESOLUTION: "Kijelző Felbontása"
   STR_DISPLAY_RESOLUTION_DESC: "A megjelenítés felbontását változtatja meg, a játék felbontása átméretezésre kerül, hogy egyezzen. A nyilak váltanak a támogatott felbontások között. Egyéni felbontáshoz kattints rá."
   STR_ORIGINAL: "Eredeti"

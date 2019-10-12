@@ -164,6 +164,7 @@ es-419:
   STR_VIDEO: "VIDEO"
   STR_AUDIO: "AUDIO"
   STR_BATTLESCAPE_UC: "BATALLA"
+  STR_MODS_UC: "MODS"
   STR_DISPLAY_RESOLUTION: "Resolución de pantalla"
   STR_DISPLAY_RESOLUTION_DESC: "Cambia la resolución de la pantalla, la resolución del juego será redimensionada para que coincida. Las flechas cambiar entre las resoluciones soportadas. Haga clic para introducir una resolución personalizada."
   STR_ORIGINAL: "Original"

@@ -79,3 +79,5 @@ lv:
   STR_NO_AUDIO_HARDWARE_DETECTED: "Nekāda aparatūra netika konstatēta"
   STR_MAXIMIZE_INFO_SCREENS: "Maksimizēt informācijas ekrānus"
   STR_MAXIMIZE_INFO_SCREENS_DESC: "Inventāris un dažādi citi ekrāni tiks rādīti pilnā ekrānā, neatkarīgi no mēroga iestatījumiem."
+  STR_UNKNOWN: "Nezināms"
+  STR_AWARD_DECOR_0: "Nekāds"

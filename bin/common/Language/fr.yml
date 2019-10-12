@@ -164,6 +164,7 @@ fr:
   STR_VIDEO: "VIDEO"
   STR_AUDIO: "AUDIO"
   STR_BATTLESCAPE_UC: "MODE TACTIQUE"
+  STR_MODS_UC: "MODs"
   STR_DISPLAY_RESOLUTION: "Résolution d'écran"
   STR_DISPLAY_RESOLUTION_DESC: "Modifie la taille d'affichage, la résolution du jeu sera redéfinie en fonction. Les flèches font défiler les tailles prédéfinies. Cliquez pour saisir une taille personnalisée."
   STR_ORIGINAL: "Originale"

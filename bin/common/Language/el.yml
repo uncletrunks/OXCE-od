@@ -175,6 +175,7 @@ el:
   STR_MAP_TERRAIN: "Πεδίο"
   STR_MAP_DARKNESS: "Σκοτεινότητα"
   STR_MAP_DEPTH: "Βάθος"
+  STR_DIFFICULTY: "Δυσκολία"
   STR_ALIEN_RACE: "Φυλή"
   STR_RANDOMIZE: "Τυχαία Επιλογή"
   STR_DISPLAY_OPTIONS_REVERT: "Επαναφορά σε 0:{0}"
@@ -202,3 +203,5 @@ el:
   STR_NO_AUDIO_HARDWARE_DETECTED: "Δεν εντοπίστηκε συσκευή ήχου"
   STR_DISABLED: "Απενεργοποιημένο"
   STR_MAXIMIZE_INFO_SCREENS: "Μεγιστοποίηση πληροφοριών οθόνης"
+  STR_UNKNOWN: "Άγνωστο"
+  STR_AWARD_DECOR_0: "Τίποτα"

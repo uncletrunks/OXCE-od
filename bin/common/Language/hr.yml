@@ -216,6 +216,7 @@ hr:
   STR_MAP_TERRAIN: "Teren"
   STR_MAP_DARKNESS: "Mrak"
   STR_MAP_DEPTH: "Dubina"
+  STR_DIFFICULTY: "Težina"
   STR_ALIEN_RACE: "Rasa"
   STR_ALIEN_TECH_LEVEL: "Tehnološka razina"
   STR_RANDOMIZE: "Randomiziraj / izaberi nasumce"
@@ -246,3 +247,4 @@ hr:
   STR_MOUSEWHEEL_SPEED: "Brzina klizanja pomoću kotačića miša"
   STR_MAXIMIZE_INFO_SCREENS: "Uvećaj zaslone s informacijama"
   STR_MAXIMIZE_INFO_SCREENS_DESC: "Zaslon za opremanje i drugi zasloni bit će prikazani na punom zaslonu bez obzira na postavke skale."
+  STR_AWARD_DECOR_0: "Ništa"

@@ -164,6 +164,7 @@ de:
   STR_VIDEO: "GRAFIK"
   STR_AUDIO: "SOUND"
   STR_BATTLESCAPE_UC: "GEFECHTSKARTE"
+  STR_MODS_UC: "MODS"
   STR_DISPLAY_RESOLUTION: "Bildschirmauflösung"
   STR_DISPLAY_RESOLUTION_DESC: "Ändert die Bildschirmauflösung.{SMALLLINE}Für eine benutzerdefinierte Eingabe, direkt anklicken."
   STR_ORIGINAL: "Original"

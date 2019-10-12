@@ -164,6 +164,7 @@ da:
   STR_VIDEO: "VIDEO"
   STR_AUDIO: "LYD"
   STR_BATTLESCAPE_UC: "Kampscene"
+  STR_MODS_UC: "MOD'er"
   STR_DISPLAY_RESOLUTION: "Skærmopløsning"
   STR_DISPLAY_RESOLUTION_DESC: "Ændrer skærmens opløsning, spilopløsningen vil ændre størrelse for at matche. Piletasterne skifter mellem understøttede opløsninger. Klik for at indtaste en tilpasset opløsning."
   STR_ORIGINAL: "Original"

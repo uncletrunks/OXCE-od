@@ -164,6 +164,7 @@ pt-PT:
   STR_VIDEO: "VÍDEO"
   STR_AUDIO: "ÁUDIO"
   STR_BATTLESCAPE_UC: "COMBATE"
+  STR_MODS_UC: "MODIFICAÇÕES"
   STR_DISPLAY_RESOLUTION: "Resolução de ecrã"
   STR_DISPLAY_RESOLUTION_DESC: "Alterar a resolução da janela utilizando as setas ou inserindo valores. A resolução da tela de jogo será automaticamente redimensionada de acordo com o valor selecionado. "
   STR_ORIGINAL: "Original"
