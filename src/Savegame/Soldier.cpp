@@ -1549,7 +1549,9 @@ std::string debugDisplayScript(const Soldier* so)
 		s += so->getRules()->getType();
 		s += "\" id: ";
 		s += std::to_string(so->getId());
-		s += ")";
+		s += " name: \"";
+		s += so->getName(false, 0);
+		s += "\")";
 		return s;
 	}
 	else
