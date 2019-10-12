@@ -1471,6 +1471,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 	_parentState->getMap()->setCursorType(CT_NONE);
 
 	// play panic/berserk sounds first
+	bool soundPlayed = false;
 	{
 		std::vector<int> sounds;
 		if (unit->getUnitRules())
@@ -1501,6 +1502,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 		}
 		if (!sounds.empty())
 		{
+			soundPlayed = true;
 			if (sounds.size() > 1)
 				playSound(sounds[RNG::generate(0, sounds.size() - 1)]);
 			else
@@ -1521,6 +1523,11 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 		{
 			game->pushState(new InfoboxState(game->getLanguage()->getString("STR_HAS_GONE_BERSERK", unit->getGender()).arg(unit->getName(game->getLanguage()))));
 		}
+	}
+	else if (soundPlayed)
+	{
+		// simulate a small pause by using an invisible infobox
+		game->pushState(new InfoboxState(""));
 	}
 
 

@@ -59,7 +59,15 @@ InfoboxState::InfoboxState(const std::string &msg)
 	_text->setText(msg);
 	_text->setHighContrast(true);
 
-	_timer = new Timer(INFOBOX_DELAY);
+	int delay = INFOBOX_DELAY;
+	if (msg.empty())
+	{
+		delay = 500;
+		_frame->setVisible(false);
+		_text->setVisible(false);
+	}
+
+	_timer = new Timer(delay);
 	_timer->onTimer((StateHandler)&InfoboxState::close);
 	_timer->start();
 }
