@@ -36,5 +36,3 @@ it:
   STR_SHOW_CURSOR_DESC: "Disegna il cursore giallo. Utile con mouse."
   STR_FRAMESKIP: "Massimo di frame saltati"
   STR_FRAMESKIP_DESC: "Questo è il numero massimo di frame che possono essere saltati durante il gioco."
-  STR_NV_BUTTON_THRESHOLD: "Bottone per la soglia della Visione Notturna extra"
-  STR_NV_BUTTON_THRESHOLD_DESC: "Se più buio di questa soglia, aggiunge un bottone al Battlescape per attivare la Visione Notturna e le Luci Individuali."

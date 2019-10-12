@@ -4,11 +4,14 @@ hu:
   STR_BAD_NODES: "Rossz pontok az RMP fájlokban"
   STR_BAD_NODES_DESC: "Ellenőrzi az RMP fájlokat pályahatáron kívüli pontokért.{NEWLINE}Ezek NEM okoznak összeomlást, de a játék nem fogja érzékelni őket."
 #
-  STR_ZERO_COST_MOVEMENT: "Költségtelen lépések az MCD fájlokban"
-  STR_ZERO_COST_MOVEMENT_DESC: "Ellenőrzi az MCD fájlokat floor object-ekért költségtelen lépéssel.{NEWLINE}Ezek nem okoznak összeomlást, de végtelen ciklust okozhatnak (Az MI körbe-körbe mozog)."
+  STR_MCD_CHECK: ""
+  STR_MCD_CHECK_DESC: ""
 #
   STR_PALETTE_CHECK: "Színpaletta egyezés"
   STR_PALETTE_CHECK_DESC: "Megpróbálja egyeztetni a modolt és az eredeti színpalettát és jelent minden képet ami nem egyezik 100% -osan."
+#
+  STR_SCRIPT_TAGS: ""
+  STR_SCRIPT_TAGS_DESC: ""
 #
   STR_CHECKING_TERRAIN: "Terep ellenőrzése..."
   STR_CHECKING_UFOS: "UFO-k ellenőrzése..."
@@ -234,6 +237,7 @@ hu:
   healthRecovery: "Egészség visszatöltés"
   stunRecovery: "Kábuláscsökkentés"
   energyRecovery: "Energiavisszatöltés"
+  manaRecovery: ""
   moraleRecovery: "Morálvisszatöltés"
   painKillerRecovery: "Fájdalomcsillapító ereje"
 #
@@ -354,7 +358,7 @@ hu:
   canBeBuiltOver: ""
   buildOverFacilities: ""
 #
-  BFRCT_DEFAULT: ""
+  BFRCT_DEFAULT: "vanilla alapérték"
   BFRCT_PRISON: ""
   BFRCT_ENGINEERING: ""
   BFRCT_RESEARCH: ""
@@ -395,8 +399,8 @@ hu:
   autoPatrol: ""
   keepCraftAfterFailedMission: ""
   _calculatedValues: ""
-  _maxRange: ""
-  _minRange: ""
+  _maxRange: "Max. hatótáv"
+  _minRange: "Min. hatótáv"
   _avgRange: ""
 #
   hunterKillerPercentage: ""

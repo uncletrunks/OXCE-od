@@ -36,5 +36,3 @@ pl:
   STR_SHOW_CURSOR_DESC: "Rysuje żółtą strzałkę kursora. Przydatne wraz z myszą."
   STR_FRAMESKIP: "Maksymalna liczba pominiętych klatek"
   STR_FRAMESKIP_DESC: "Maksymalna liczba klatek, które podczas gry mogą zostać pominięte przez kod wyświetlający"
-  STR_NV_BUTTON_THRESHOLD: "Zwiększony próg dodatkowego widzenia w ciemności"
-  STR_NV_BUTTON_THRESHOLD_DESC: "Jeśli jasność mapy jest poniżej tego progu, dodaje do interfejsu bitwy przycisk przełączania nocnego widzenia i osobistego światła."

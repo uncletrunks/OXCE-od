@@ -4,11 +4,14 @@ ja:
   STR_BAD_NODES: "RMPファイルの中にノード不良発見"
   STR_BAD_NODES_DESC: "マップの境界外に不適切なノードが存在しないかRMPファイルをチェックします。{NEWLINE}この不具合が存在してもゲームをクラッシュさせる事は有りませんが、そのままでは意図通りに動作しなくなる可能性があります。"
 #
-  STR_ZERO_COST_MOVEMENT: "MCDファイルの中に移動コスト０あり"
-  STR_ZERO_COST_MOVEMENT_DESC: "MCDファイルの中に移動コストがゼロの物が無いかチェックします。{NEWLINE}この不具合が存在してもゲームをクラッシュさせる事は有りませんが、処理が延々と終わらない結果になる場合があります(AIの移動の際、移動コスト不在で永続化)。"
+  STR_MCD_CHECK: "MCDチェック"
+  STR_MCD_CHECK_DESC: "移動コストゼロの床面に対応するMCDファイル、さらに無効なDieMCD/AltMCDへの参照先をチェックします"
 #
   STR_PALETTE_CHECK: "色パレットの整合チェック"
   STR_PALETTE_CHECK_DESC: "Modによって変更されたタイルグラフィックをオリジナルの色パレットと比較し、100％適合しない物を全て報告します。"
+#
+  STR_SCRIPT_TAGS: ""
+  STR_SCRIPT_TAGS_DESC: ""
 #
   STR_CHECKING_TERRAIN: "地形をチェック中・・・"
   STR_CHECKING_UFOS: "UFOをチェック中・・・"
@@ -94,7 +97,7 @@ ja:
 #
   battleType: "アイテムの種類"
   experienceTrainingMode: "経験モード"
-  manaExperience: ""
+  manaExperience: "MP経験値"
   arcingShot: "アーク放電を使用するか"
   isFireExtinguisher: "消化器を使用するか"
   waypoints: "最大ウェイポイント"
@@ -108,7 +111,7 @@ ja:
   underwaterOnly: "水中のみにするか"
   landOnly: "陸上のみにするか"
   psiRequired: "Psiスキル必須にするか"
-  manaRequired: ""
+  manaRequired: "MPを必要とするか"
   LOSRequired: "視認状態を必須にするか"
 #
   noLOSAccuracyPenalty: "視界外対象へのペナルティ"
@@ -197,8 +200,8 @@ ja:
   RandomMorale: "士気ダメージをランダム化するか"
   ToItem: "アイテムへのダメージ倍率"
   RandomItem: "アイテムへのダメージをランダム化するか"
-  ToMana: ""
-  RandomMana: ""
+  ToMana: "使用MP量によるダメージX倍加"
+  RandomMana: "使用MP量によってダメージのランダム化"
   ToTile: "地形ダメージ倍率"
   RandomTile: "地形ダメージをランダム化するか"
   TileDamageMethod: "マス目に対するダメージの算出法"
@@ -234,6 +237,7 @@ ja:
   healthRecovery: "HPの回復"
   stunRecovery: "スタン解除"
   energyRecovery: "スタミナ回復"
+  manaRecovery: "MP回復量"
   moraleRecovery: "士気回復"
   painKillerRecovery: "鎮痛剤の強度"
 #
@@ -315,7 +319,7 @@ ja:
   morale: "士気"
   health: "HP"
   stun: "気絶"
-  mana: ""
+  mana: "MP"
   units: "互換ユニット"
 #
   buildCost: "建造費"
@@ -329,7 +333,7 @@ ja:
   lift: "アクセスリフトの有無"
   hyper: "ハイパーウェーブ解読器の有無"
   mind: "マインドシールドの有無"
-  mindPower: ""
+  mindPower: "マインドシールドの強度"
   grav: "重力シールドの有無"
   storage: "倉庫の容量"
   personnel: "居住区の容量"
@@ -344,7 +348,7 @@ ja:
   defense: "防御力"
   hitRatio: "命中率"
   maxAllowedPerBase: "基地毎の最大数"
-  manaRecoveryPerDay: ""
+  manaRecoveryPerDay: "一日のMP回復量"
   sickBayAbsoluteBonus: "医療ベイの空きボーナス"
   sickBayRelativeBonus: "医療ベイの連結ボーナス"
   prisonType: "収監タイプ"

@@ -166,8 +166,6 @@ fi:
   STR_AUTO_SELL_DESC: "Taisteluraportin myyntiruudulla esinetyypit, jotka myit edellisissä taisteluissa, automaattisesti merkitään myytäviksi."
   STR_REMEMBER_DISABLED_CRAFT_WEAPONS: "Muista pois päältä kytketyt alusten aseet"
   STR_REMEMBER_DISABLED_CRAFT_WEAPONS_DESC: "Ilmataistelun aikana pois päältä kytketyt aseet pysyvät pois päältä. Niitä ei myöskään aseisteta tukikohdassa."
-  STR_HIGHLIGHT_NEW_TOPICS: "Korosta uudet aiheet"
-  STR_HIGHLIGHT_NEW_TOPICS_DESC: "Käyttöön otettuna uudet tutkimus-, tuotanto- ja ufopedia-aiheet korostetaan eri värillä."
   STR_GRAPHS_ZOOM_IN: "Lähennä (kuvaajat)"
   STR_GRAPHS_ZOOM_OUT: "Loitonna (kuvaajat)"
   STR_MARK_ALL_AS_SEEN: "Merkitse kaikki nähdyiksi"

@@ -110,6 +110,7 @@ es-419:
   STR_USE_SPECIAL_ITEM: "Usar objeto especial"
   STR_NO_EXPERIENCE_YET: "Sin experiencia todavía"
   STR_WHAT_CAN_I_WEAR: "Que puedo vestir?"
+  STR_STARTING_CONDITION_ARMORS_ALLOWED: "Esta misión requiere equipo especifico.{NEWLINE}{NEWLINE}Los tipos de armadura permitida son: {0}"
   STR_MISSION_OVER: "Misión completada."
   STR_UNITS_WITH_FATAL_WOUNDS:
     one: "{N} de nosotros seguimos fatalmente lastimados"

@@ -4,11 +4,14 @@ cs:
   STR_BAD_NODES: ""
   STR_BAD_NODES_DESC: ""
 #
-  STR_ZERO_COST_MOVEMENT: ""
-  STR_ZERO_COST_MOVEMENT_DESC: ""
+  STR_MCD_CHECK: ""
+  STR_MCD_CHECK_DESC: ""
 #
   STR_PALETTE_CHECK: ""
   STR_PALETTE_CHECK_DESC: ""
+#
+  STR_SCRIPT_TAGS: ""
+  STR_SCRIPT_TAGS_DESC: ""
 #
   STR_CHECKING_TERRAIN: "Kontroluji terén..."
   STR_CHECKING_UFOS: "Kontroluji UFA..."
@@ -234,6 +237,7 @@ cs:
   healthRecovery: "Obnova zdraví"
   stunRecovery: "Obnova omráčení"
   energyRecovery: "Obnova výdrže"
+  manaRecovery: ""
   moraleRecovery: "Obnova morálky"
   painKillerRecovery: "Síla utišení bolesti"
 #
@@ -395,8 +399,8 @@ cs:
   autoPatrol: ""
   keepCraftAfterFailedMission: ""
   _calculatedValues: "Vypočítané hodnoty"
-  _maxRange: ""
-  _minRange: ""
+  _maxRange: "Maximální dosah"
+  _minRange: "Minimální dosah"
   _avgRange: ""
 #
   hunterKillerPercentage: ""

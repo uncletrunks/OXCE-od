@@ -4,11 +4,14 @@ fi:
   STR_BAD_NODES: "Huonot solmut (noodit) RMP-tiedostoissa"
   STR_BAD_NODES_DESC: "Tarkistaa RMP-tiedostoista kentän rajojen ulkopuoliset solmut.{NEWLINE}Nämä EIVÄT aiheuta kaatumisia, mutta peli jättää ne huomiotta eivätkä siis toimi tarkoitetulla tavalla."
 #
-  STR_ZERO_COST_MOVEMENT: "Maksuttoman liikkumisen lattiat MCD-tiedostoissa"
-  STR_ZERO_COST_MOVEMENT_DESC: "Tarkistaa MCD-tiedostoista lattiaobjektit, joilla liikkuminen ei maksa mitään.{NEWLINE}Nämä eivät aiheuta kaatumisia mutta saattavat aiheuttaa päättymättömiä silmukoita (kun tekoäly liikkuu maksuttomassa kehässä)."
+  STR_MCD_CHECK: ""
+  STR_MCD_CHECK_DESC: ""
 #
   STR_PALETTE_CHECK: "Palettisovitus"
   STR_PALETTE_CHECK_DESC: "Pyrkii sovittamaan muunneltujen kuvien paletit virallisiin paletteihin ja antaa selon kaikista kuvista, joilla ei ole 100 % vastaavuutta."
+#
+  STR_SCRIPT_TAGS: ""
+  STR_SCRIPT_TAGS_DESC: ""
 #
   STR_CHECKING_TERRAIN: "Tarkistetaan maastoa..."
   STR_CHECKING_UFOS: "Tarkistetaan ufoja..."
@@ -234,6 +237,7 @@ fi:
   healthRecovery: "Terveyden palautuminen"
   stunRecovery: "Tainnutusvahingon vähentyminen"
   energyRecovery: "Energian palautuminen"
+  manaRecovery: ""
   moraleRecovery: "Taistelutahdon palautuminen"
   painKillerRecovery: "Kipulääkkeen voimakkuus"
 #

@@ -4,11 +4,14 @@ pl:
   STR_BAD_NODES: "Błędne węzły w plikach RMP"
   STR_BAD_NODES_DESC: "Sprawdź pliki RMP pod kątem węzłów leżących poza granicami mapy.{NEWLINE}Takie węzły NIE spowodują zawieszenia gry, ale nie będą brane pod uwagę przez grę, a więc nie będą działały."
 #
-  STR_ZERO_COST_MOVEMENT: "Podłoga z zerowym kosztem ruchu w plikach MCD"
-  STR_ZERO_COST_MOVEMENT_DESC: "Wyszukuje w plikach MCD obiekty podłogowe o zerowym koszcie ruchu.{NEWLINE}Nie spowodują one zawieszenia gry, ale mogą powodować nieskończone zapętlenie (SI chodząca w kółko bez straty TU)."
+  STR_MCD_CHECK: "Testy MCD"
+  STR_MCD_CHECK_DESC: "Przeszukuje pliki MCD pod kątem obiektów podłogowych o zerowym koszcie ruchu; wykrywa też nieprawidłowe odniesienia DieMCD/AltMCD."
 #
   STR_PALETTE_CHECK: "Dopasowanie palet"
   STR_PALETTE_CHECK_DESC: "Sprawdza dopasowanie palet obrazów w modach do oficjalnych palet gry i zgłasza wszystkie obrazy, które nie są w 100% zgodne."
+#
+  STR_SCRIPT_TAGS: "Eksport znaczników skryptów"
+  STR_SCRIPT_TAGS_DESC: "Eksportuje znaczniki skryptów w formacie CSV."
 #
   STR_CHECKING_TERRAIN: "Sprawdzam teren..."
   STR_CHECKING_UFOS: "Sprawdzam UFA..."
@@ -234,6 +237,7 @@ pl:
   healthRecovery: "Odzyskanie zdrowia"
   stunRecovery: "Obniżanie oszołomienia"
   energyRecovery: "Odzyskanie energii"
+  manaRecovery: "Odzyskanie many"
   moraleRecovery: "Odzyskanie morale"
   painKillerRecovery: "Siła środków przeciwbólowych"
 #

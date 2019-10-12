@@ -4,11 +4,14 @@ it:
   STR_BAD_NODES: "Nodi errati nei file RMP"
   STR_BAD_NODES_DESC: "Controlla i file RMP per i nodi al di fuori dei limiti della mappa.{NEWLINE}Questi NON causeranno arresti anomali, ma saranno ignorati dal gioco, quindi non funzioneranno come previsto."
 #
-  STR_ZERO_COST_MOVEMENT: "Movimenti a costo zero nei file MCD"
-  STR_ZERO_COST_MOVEMENT_DESC: "Controlla i file MCD per oggetti sul pavimento con zero costo di movimento.{NEWLINE}Questi non causeranno arresti anomali, ma potrebbero causare loop infiniti (quando l'IA si muove in un cerchio a costo zero)."
+  STR_MCD_CHECK: ""
+  STR_MCD_CHECK_DESC: ""
 #
   STR_PALETTE_CHECK: "Concordanza Palette"
   STR_PALETTE_CHECK_DESC: "Cerca di abbinare palette di immagini modificate alle tavolozze ufficiali e riporta le immagini che non hanno una corrispondenza del 100%."
+#
+  STR_SCRIPT_TAGS: ""
+  STR_SCRIPT_TAGS_DESC: ""
 #
   STR_CHECKING_TERRAIN: "Verifica terreno..."
   STR_CHECKING_UFOS: "Verifica UFO..."
@@ -94,7 +97,7 @@ it:
 #
   battleType: "Tipo oggetto"
   experienceTrainingMode: "Modalità Esperienza"
-  manaExperience: ""
+  manaExperience: "Esperienza mana"
   arcingShot: "Archi?"
   isFireExtinguisher: "Estintore?"
   waypoints: "Waypoint massimi"
@@ -108,7 +111,7 @@ it:
   underwaterOnly: "Solo subacqueo?"
   landOnly: "Solo terreno?"
   psiRequired: "Richiesta abilità Psi?"
-  manaRequired: ""
+  manaRequired: "Mana richiesto?"
   LOSRequired: "Vista richiesta?"
 #
   noLOSAccuracyPenalty: "mult. penalità non visiva"
@@ -197,8 +200,8 @@ it:
   RandomMorale: "RNG danno morale"
   ToItem: "Molt. danno oggetto"
   RandomItem: "RNG danno oggetto?"
-  ToMana: ""
-  RandomMana: ""
+  ToMana: "Moltiplicatore danno mana"
+  RandomMana: "RNG danno mana?"
   ToTile: "Molt. danno terreno"
   RandomTile: "RNG danno terreno?"
   TileDamageMethod: "Metodo Danno Tile"
@@ -234,6 +237,7 @@ it:
   healthRecovery: "Recupero salute"
   stunRecovery: "Recupero stordimento"
   energyRecovery: "Recupero energia"
+  manaRecovery: ""
   moraleRecovery: "Recupero morale"
   painKillerRecovery: "Forza antidolorifico"
 #
@@ -315,7 +319,7 @@ it:
   morale: "Morale"
   health: "Salute"
   stun: "Stordimento"
-  mana: ""
+  mana: "Mana"
   units: "Unità compatibili"
 #
   buildCost: "Costo costruzione"
@@ -344,7 +348,7 @@ it:
   defense: "Valore difesa"
   hitRatio: "% di colpire"
   maxAllowedPerBase: "Massimo per base"
-  manaRecoveryPerDay: ""
+  manaRecoveryPerDay: "Mana al giorno"
   sickBayAbsoluteBonus: "Bonus abs. Sickbay"
   sickBayRelativeBonus: "Bonus rel. Sickbay"
   prisonType: "Tipo prigione"

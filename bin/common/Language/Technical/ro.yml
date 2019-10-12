@@ -2,28 +2,31 @@ ro:
 #=================== Menu ===================
 #TestState.cpp
   STR_BAD_NODES: ""
-  STR_BAD_NODES_DESC: ""
+  STR_BAD_NODES_DESC: "Verifică fișiere RMP de noduri dinafara marginilor hărții.{NEWLINE} Acestea NU vor cauza crash-uri, dar vor fii ignorate de joc, deci nu vor function corect. "
 #
-  STR_ZERO_COST_MOVEMENT: ""
-  STR_ZERO_COST_MOVEMENT_DESC: ""
+  STR_MCD_CHECK: ""
+  STR_MCD_CHECK_DESC: ""
 #
   STR_PALETTE_CHECK: ""
   STR_PALETTE_CHECK_DESC: ""
 #
-  STR_CHECKING_TERRAIN: ""
-  STR_CHECKING_UFOS: ""
-  STR_CHECKING_CRAFT: ""
+  STR_SCRIPT_TAGS: ""
+  STR_SCRIPT_TAGS_DESC: ""
+#
+  STR_CHECKING_TERRAIN: "Verficare teren..."
+  STR_CHECKING_UFOS: "Verificare OZN-uri..."
+  STR_CHECKING_CRAFT: "Verificare navă..."
 #
   BACKPALS.DAT: ""
-  PAL_GEOSCAPE: ""
-  PAL_BASESCAPE: ""
-  PAL_GRAPHS: ""
-  PAL_UFOPAEDIA: ""
-  PAL_BATTLEPEDIA: ""
-  PAL_BATTLESCAPE: ""
-  PAL_BATTLESCAPE_1: ""
-  PAL_BATTLESCAPE_2: ""
-  PAL_BATTLESCAPE_3: ""
+  PAL_GEOSCAPE: "PAL_GEOSCAPE"
+  PAL_BASESCAPE: "PAL_BASESCAPE"
+  PAL_GRAPHS: "PAL_GRAPHS"
+  PAL_UFOPAEDIA: "PAL_UFOPAEDIA"
+  PAL_BATTLEPEDIA: "PAL_BATTLEPEDIA"
+  PAL_BATTLESCAPE: "PAL_BATTLESCAPE"
+  PAL_BATTLESCAPE_1: "PAL_BATTLESCAPE_1"
+  PAL_BATTLESCAPE_2: "PAL_BATTLESCAPE_2"
+  PAL_BATTLESCAPE_3: "PAL_BATTLESCAPE_3"
 #=================== Ufopaedia ===================
 #StatsForNerdsState.cpp
   BT_NONE: ""
@@ -234,6 +237,7 @@ ro:
   healthRecovery: ""
   stunRecovery: ""
   energyRecovery: ""
+  manaRecovery: ""
   moraleRecovery: ""
   painKillerRecovery: ""
 #
