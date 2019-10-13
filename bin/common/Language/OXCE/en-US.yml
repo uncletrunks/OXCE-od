@@ -114,6 +114,17 @@ en-US:
   STR_CHANGES_MIN: "Changes (min)"
   STR_CHANGES_MAX: "Changes (max)"
   STR_BONUS_STATS: "Bonus stats"
+#SoldierTransformationListState.cpp
+  STR_TRANSFORMATIONS_OVERVIEW: "Transformations Overview"
+  STR_PROJECT_NAME: "PROJECT NAME"
+  STR_AVAILABLE_MATERIALS: "AVAILABLE MATERIALS"
+  STR_ELIGIBLE_SOLDIERS: "ELIGIBLE SOLDIERS"
+  STR_SHOW_ONLY_ELIGIBLE: "Show Only Eligible"
+  STR_ALL_SOLDIER_TYPES: "All Soldier Types"
+  STR_ALL_SOLDIERS: "All Soldiers"
+  STR_HEALTHY_SOLDIERS: "Healthy Soldiers"
+  STR_WOUNDED_SOLDIERS: "Wounded Soldiers"
+  STR_DEAD_SOLDIERS: "Dead Soldiers"
 #StoresState.cpp
   STR_GRAND_TOTAL: "Grand Total"
 #TechTreeSelectState.cpp
