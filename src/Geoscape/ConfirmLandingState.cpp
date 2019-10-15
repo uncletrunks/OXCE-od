@@ -165,7 +165,7 @@ std::string ConfirmLandingState::checkStartingCondition()
 	if (u != 0)
 	{
 		std::string ufoMissionName = u->getRules()->getType();
-		if (_texture->isFakeUnderwater())
+		if (_texture && _texture->isFakeUnderwater())
 		{
 			ufoMissionName = u->getRules()->getType() + "_UNDERWATER";
 		}
@@ -258,7 +258,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 			bgame->setMissionType("STR_UFO_GROUND_ASSAULT");
 		bgen.setUfo(u);
 		const AlienDeployment *customWeaponDeploy = _game->getMod()->getDeployment(u->getCraftStats().craftCustomDeploy);
-		if (_texture->isFakeUnderwater())
+		if (_texture && _texture->isFakeUnderwater())
 		{
 			const std::string ufoUnderwaterMissionName = u->getRules()->getType() + "_UNDERWATER";
 			const AlienDeployment *ufoUnderwaterMission = _game->getMod()->getDeployment(ufoUnderwaterMissionName, true);
