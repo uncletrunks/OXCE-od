@@ -2282,24 +2282,40 @@ void GeoscapeState::time1Day()
 			// 3i. inform about new possible manufacture, purchase, craft and facilities
 			std::vector<RuleManufacture *> newPossibleManufacture;
 			saveGame->getDependableManufacture(newPossibleManufacture, research, mod, base);
+			if (bonus)
+			{
+				saveGame->getDependableManufacture(newPossibleManufacture, bonus, mod, base);
+			}
 			if (!newPossibleManufacture.empty())
 			{
 				popup(new NewPossibleManufactureState(base, newPossibleManufacture));
 			}
 			std::vector<RuleItem *> newPossiblePurchase;
 			_game->getSavedGame()->getDependablePurchase(newPossiblePurchase, research, _game->getMod());
+			if (bonus)
+			{
+				_game->getSavedGame()->getDependablePurchase(newPossiblePurchase, bonus, _game->getMod());
+			}
 			if (!newPossiblePurchase.empty())
 			{
 				popup(new NewPossiblePurchaseState(base, newPossiblePurchase));
 			}
 			std::vector<RuleCraft *> newPossibleCraft;
 			_game->getSavedGame()->getDependableCraft(newPossibleCraft, research, _game->getMod());
+			if (bonus)
+			{
+				_game->getSavedGame()->getDependableCraft(newPossibleCraft, bonus, _game->getMod());
+			}
 			if (!newPossibleCraft.empty())
 			{
 				popup(new NewPossibleCraftState(base, newPossibleCraft));
 			}
 			std::vector<RuleBaseFacility *> newPossibleFacilities;
 			_game->getSavedGame()->getDependableFacilities(newPossibleFacilities, research, _game->getMod());
+			if (bonus)
+			{
+				_game->getSavedGame()->getDependableFacilities(newPossibleFacilities, bonus, _game->getMod());
+			}
 			if (!newPossibleFacilities.empty())
 			{
 				popup(new NewPossibleFacilityState(base, _globe, newPossibleFacilities));
