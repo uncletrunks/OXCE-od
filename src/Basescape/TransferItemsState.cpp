@@ -794,12 +794,11 @@ void TransferItemsState::increaseByValue(int change)
 		break;
 	case TRANSFER_ITEM:
 		selItem = (RuleItem*)getRow().rule;
-		bool zeroSize = AreSame(selItem->getSize(), 0.0);
-		if (!zeroSize && _baseTo->storesOverfull(selItem->getSize() + _iQty))
+		if (selItem->getSize() > 0.0 && _baseTo->storesOverfull(selItem->getSize() + _iQty))
 		{
 			errorMessage = tr("STR_NOT_ENOUGH_STORE_SPACE");
 		}
-		else if (selItem->isAlien())
+		if (selItem->isAlien())
 		{
 			if (Options::storageLimitsEnforced * _aQty + 1 > _baseTo->getAvailableContainment(selItem->getPrisonType()) - Options::storageLimitsEnforced * _baseTo->getUsedContainment(selItem->getPrisonType()))
 			{
