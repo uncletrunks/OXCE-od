@@ -45,6 +45,11 @@ namespace OpenXcom
  */
 NewResearchListState::NewResearchListState(Base *base, bool sortByCost) : _base(base), _sortByCost(sortByCost), _lstScroll(0)
 {
+	if (Options::isPasswordCorrect())
+	{
+		_sortByCost = true;
+	}
+
 	_screen = false;
 
 	_window = new Window(this, 230, 140, 45, 30, POPUP_BOTH);
