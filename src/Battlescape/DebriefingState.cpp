@@ -1844,12 +1844,24 @@ void DebriefingState::prepareDebriefing()
 	for (std::map<const RuleItem*, int>::const_iterator i = _roundsPainKiller.begin(); i != _roundsPainKiller.end(); ++i)
 	{
 		int totalRecovered = INT_MAX;
-		if (i->first->getPainKillerQuantity() > 0)
-			totalRecovered = std::min(totalRecovered, i->second / i->first->getPainKillerQuantity());
-		if (i->first->getStimulantQuantity() > 0)
-			totalRecovered = std::min(totalRecovered, _roundsStimulant[i->first] / i->first->getStimulantQuantity());
-		if (i->first->getHealQuantity() > 0)
-			totalRecovered = std::min(totalRecovered, _roundsHeal[i->first] / i->first->getHealQuantity());
+		if (_game->getMod()->getStatisticalBulletConservation())
+		{
+			if (i->first->getPainKillerQuantity() > 0)
+				totalRecovered = std::min(totalRecovered, (i->second + RNG::generate(0, (i->first->getPainKillerQuantity() - 1))) / i->first->getPainKillerQuantity());
+			if (i->first->getStimulantQuantity() > 0)
+				totalRecovered = std::min(totalRecovered, (_roundsStimulant[i->first] + RNG::generate(0, (i->first->getStimulantQuantity() - 1))) / i->first->getStimulantQuantity());
+			if (i->first->getHealQuantity() > 0)
+				totalRecovered = std::min(totalRecovered, (_roundsHeal[i->first] + RNG::generate(0, (i->first->getHealQuantity() - 1))) / i->first->getHealQuantity());
+		}
+		else
+		{
+			if (i->first->getPainKillerQuantity() > 0)
+				totalRecovered = std::min(totalRecovered, i->second / i->first->getPainKillerQuantity());
+			if (i->first->getStimulantQuantity() > 0)
+				totalRecovered = std::min(totalRecovered, _roundsStimulant[i->first] / i->first->getStimulantQuantity());
+			if (i->first->getHealQuantity() > 0)
+				totalRecovered = std::min(totalRecovered, _roundsHeal[i->first] / i->first->getHealQuantity());
+		}
 
 		if (totalRecovered > 0)
 		{
