@@ -101,7 +101,7 @@ private:
 	/// Adds an alien to the game.
 	BattleUnit *addAlien(Unit *rules, int alienRank, bool outside);
 	/// Adds a civilian to the game.
-	BattleUnit *addCivilian(Unit *rules);
+	BattleUnit *addCivilian(Unit *rules, int nodeRank);
 	/// Places an item on a soldier based on equipment layout.
 	bool placeItemByLayout(BattleItem *item, const std::vector<BattleItem*> &itemList);
 	/// Loads an XCom MAP file.
@@ -121,7 +121,7 @@ private:
 	/// Deploys the aliens, according to the alien deployment rules.
 	void deployAliens(const AlienDeployment *deployment);
 	/// Spawns civilians on a terror mission.
-	void deployCivilians(int max, bool roundUp = false, const std::string &civilianType = "");
+	void deployCivilians(int nodeRank, int max, bool roundUp = false, const std::string &civilianType = "");
 	/// Finds a spot near a friend to spawn at.
 	bool placeUnitNearFriend(BattleUnit *unit);
 	/// Load all Xcom weapons.

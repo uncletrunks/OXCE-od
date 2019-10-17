@@ -548,8 +548,6 @@ void BattlescapeGenerator::nextStage()
 
 	_unitSequence = _save->getUnits()->back()->getId() + 1;
 
-	size_t unitCount = _save->getUnits()->size();
-
 	// Let's figure out what race we're up against.
 	_alienRace = ruleDeploy->getRace();
 
@@ -571,6 +569,20 @@ void BattlescapeGenerator::nextStage()
 		}
 	}
 
+	int civilianSpawnNodeRank = ruleDeploy->getCivilianSpawnNodeRank();
+
+	// Special case: deploy civilians before aliens
+	if (civilianSpawnNodeRank > 0)
+	{
+		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+		{
+			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+		}
+	}
+
+	size_t unitCount = _save->getUnits()->size();
+
 	deployAliens(_alienCustomDeploy ? _alienCustomDeploy : ruleDeploy);
 
 	if (unitCount == _save->getUnits()->size())
@@ -578,10 +590,14 @@ void BattlescapeGenerator::nextStage()
 		throw Exception("Map generator encountered an error: no alien units could be placed on the map.");
 	}
 
-	deployCivilians(ruleDeploy->getCivilians());
-	for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+	// Normal case: deploy civilians after aliens
+	if (civilianSpawnNodeRank == 0)
 	{
-		deployCivilians(i->second, true, i->first);
+		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+		{
+			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+		}
 	}
 
 	_save->setAborted(false);
@@ -679,6 +695,18 @@ void BattlescapeGenerator::run()
 	}
 	deployXCOM(startingCondition, enviro);
 
+	int civilianSpawnNodeRank = ruleDeploy->getCivilianSpawnNodeRank();
+
+	// Special case: deploy civilians before aliens
+	if (civilianSpawnNodeRank > 0)
+	{
+		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+		{
+			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+		}
+	}
+
 	size_t unitCount = _save->getUnits()->size();
 
 	deployAliens(_alienCustomDeploy ? _alienCustomDeploy : ruleDeploy);
@@ -688,10 +716,14 @@ void BattlescapeGenerator::run()
 		throw Exception("Map generator encountered an error: no alien units could be placed on the map.");
 	}
 
-	deployCivilians(ruleDeploy->getCivilians());
-	for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+	// Normal case: deploy civilians after aliens
+	if (civilianSpawnNodeRank == 0)
 	{
-		deployCivilians(i->second, true, i->first);
+		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
+		{
+			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+		}
 	}
 
 	if (_generateFuel)
@@ -1386,10 +1418,10 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
  * @param rules Pointer to the Unit which holds info about the civilian.
  * @return Pointer to the created unit.
  */
-BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
+BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules, int nodeRank)
 {
 	BattleUnit *unit = new BattleUnit(_game->getMod(), rules, FACTION_NEUTRAL, _unitSequence++, _save->getEnviroEffects(), rules->getArmor(), 0, _save->getDepth());
-	Node *node = _save->getSpawnNode(0, unit);
+	Node *node = _save->getSpawnNode(nodeRank, unit);
 
 	if (node)
 	{
@@ -1871,7 +1903,7 @@ void BattlescapeGenerator::explodePowerSources()
  * Spawns civilians on a terror mission.
  * @param max Maximum number of civilians to spawn.
  */
-void BattlescapeGenerator::deployCivilians(int max, bool roundUp, const std::string &civilianType)
+void BattlescapeGenerator::deployCivilians(int nodeRank, int max, bool roundUp, const std::string &civilianType)
 {
 	if (max)
 	{
@@ -1907,7 +1939,7 @@ void BattlescapeGenerator::deployCivilians(int max, bool roundUp, const std::str
 					size_t pick = RNG::generate(0, _terrain->getCivilianTypes().size() - 1);
 					rule = _game->getMod()->getUnit(_terrain->getCivilianTypes().at(pick), true);
 				}
-				BattleUnit* civ = addCivilian(rule);
+				BattleUnit* civ = addCivilian(rule, nodeRank);
 				if (civ)
 				{
 					size_t itemLevel = (size_t)(_game->getMod()->getAlienItemLevels().at(month).at(RNG::generate(0,9)));

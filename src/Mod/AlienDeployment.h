@@ -71,6 +71,7 @@ private:
 	int _bughuntMinTurn;
 	std::vector<DeploymentData> _data;
 	int _width, _length, _height, _civilians;
+	int _civilianSpawnNodeRank;
 	std::map<std::string, int> _civiliansByType;
 	std::vector<std::string> _terrains, _music;
 	int _shade, _minShade, _maxShade;
@@ -117,6 +118,8 @@ public:
 	void getDimensions(int *width, int *length, int *height) const;
 	/// Gets civilians.
 	int getCivilians() const;
+	/// Gets the civilian spawn node rank.
+	int getCivilianSpawnNodeRank() const { return _civilianSpawnNodeRank; }
 	/// Gets civilians by type.
 	const std::map<std::string, int> &getCiviliansByType() const;
 	/// Gets the terrain for battlescape generation.
