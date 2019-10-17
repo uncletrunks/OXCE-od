@@ -118,6 +118,15 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 	_nationality = node["nationality"].as<int>(_nationality);
 	_initialStats = node["initialStats"].as<UnitStats>(_initialStats);
 	_currentStats = node["currentStats"].as<UnitStats>(_currentStats);
+
+	// re-roll mana stats when upgrading saves
+	if (_currentStats.mana == 0 && _rules->getMaxStats().mana > 0)
+	{
+		int reroll = RNG::generate(_rules->getMinStats().mana, _rules->getMaxStats().mana);
+		_currentStats.mana = reroll;
+		_initialStats.mana = reroll;
+	}
+
 	_rank = (SoldierRank)node["rank"].as<int>();
 	_gender = (SoldierGender)node["gender"].as<int>();
 	_look = (SoldierLook)node["look"].as<int>();
