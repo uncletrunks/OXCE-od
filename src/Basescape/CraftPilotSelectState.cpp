@@ -32,6 +32,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/Soldier.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleSoldierBonus.h"
 
 namespace OpenXcom
 {
@@ -103,12 +104,25 @@ CraftPilotSelectState::CraftPilotSelectState(Base *base, size_t craft) : _base(b
 			if (!c->isPilot((*i)->getId()))
 			{
 				_pilot.push_back((*i)->getId());
+
+				auto firingPlusBonus = (*i)->getCurrentStats()->firing;
+				auto reactionsPlusBonus = (*i)->getCurrentStats()->reactions;
+				auto braveryPlusBonus = (*i)->getCurrentStats()->bravery;
+
+				auto bonuses = (*i)->getBonuses(nullptr, false);
+				for (auto bonusRule : *bonuses)
+				{
+					firingPlusBonus += bonusRule->getStats()->firing;
+					reactionsPlusBonus += bonusRule->getStats()->reactions;
+					braveryPlusBonus += bonusRule->getStats()->bravery;
+				}
+
 				std::ostringstream ss1;
-				ss1 << (*i)->getCurrentStats()->firing;
+				ss1 << firingPlusBonus;
 				std::ostringstream ss2;
-				ss2 << (*i)->getCurrentStats()->reactions;
+				ss2 << reactionsPlusBonus;
 				std::ostringstream ss3;
-				ss3 << (*i)->getCurrentStats()->bravery;
+				ss3 << braveryPlusBonus;
 				_lstPilot->addRow(4, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str());
 			}
 		}

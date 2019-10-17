@@ -29,6 +29,7 @@
 #include "Soldier.h"
 #include "Transfer.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleSoldierBonus.h"
 #include "Base.h"
 #include "Ufo.h"
 #include "Waypoint.h"
@@ -1408,6 +1409,11 @@ int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots, const Mod 
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
 			firingAccuracy += (*i)->getCurrentStats()->firing;
+			auto bonuses = (*i)->getBonuses(nullptr, false);
+			for (auto bonusRule : *bonuses)
+			{
+				firingAccuracy += bonusRule->getStats()->firing;
+			}
 	}
 	firingAccuracy = firingAccuracy / pilots.size(); // average firing accuracy of all pilots
 
@@ -1427,6 +1433,11 @@ int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots, const Mod *mo
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
 		reactions += (*i)->getCurrentStats()->reactions;
+		auto bonuses = (*i)->getBonuses(nullptr, false);
+		for (auto bonusRule : *bonuses)
+		{
+			reactions += bonusRule->getStats()->reactions;
+		}
 	}
 	reactions = reactions / pilots.size(); // average reactions of all pilots
 
@@ -1446,6 +1457,11 @@ int Craft::getPilotApproachSpeedModifier(const std::vector<Soldier*> &pilots, co
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
 		bravery += (*i)->getCurrentStats()->bravery;
+		auto bonuses = (*i)->getBonuses(nullptr, false);
+		for (auto bonusRule : *bonuses)
+		{
+			bravery += bonusRule->getStats()->bravery;
+		}
 	}
 	bravery = bravery / pilots.size(); // average bravery of all pilots
 

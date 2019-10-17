@@ -32,6 +32,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Savegame/Soldier.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleSoldierBonus.h"
 
 namespace OpenXcom
 {
@@ -125,6 +126,15 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	_txtAccuracyBonus->setText(tr("STR_ACCURACY_BONUS"));
 	_txtDodgeBonus->setText(tr("STR_DODGE_BONUS"));
 	_txtApproachSpeed->setText(tr("STR_APPROACH_SPEED"));
+
+	// refresh soldier bonuses
+	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+	{
+		if ((*i)->getCraft() == c)
+		{
+			(*i)->getBonuses(_game->getMod(), true);
+		}
+	}
 }
 
 /**
@@ -156,12 +166,24 @@ void CraftPilotsState::updateUI()
 	const std::vector<Soldier*> pilots = c->getPilotList(false);
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
+		auto firingPlusBonus = (*i)->getCurrentStats()->firing;
+		auto reactionsPlusBonus = (*i)->getCurrentStats()->reactions;
+		auto braveryPlusBonus = (*i)->getCurrentStats()->bravery;
+
+		auto bonuses = (*i)->getBonuses(nullptr, false);
+		for (auto bonusRule : *bonuses)
+		{
+			firingPlusBonus += bonusRule->getStats()->firing;
+			reactionsPlusBonus += bonusRule->getStats()->reactions;
+			braveryPlusBonus += bonusRule->getStats()->bravery;
+		}
+
 		std::ostringstream ss1;
-		ss1 << (*i)->getCurrentStats()->firing;
+		ss1 << firingPlusBonus;
 		std::ostringstream ss2;
-		ss2 << (*i)->getCurrentStats()->reactions;
+		ss2 << reactionsPlusBonus;
 		std::ostringstream ss3;
-		ss3 << (*i)->getCurrentStats()->bravery;
+		ss3 << braveryPlusBonus;
 		_lstPilots->addRow(5, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), "");
 	}
 
