@@ -349,9 +349,25 @@ void CraftEquipmentState::initList()
 						continue;
 					}
 				}
-				else if (!rule->belongsToCategory(selectedCategory))
+				else
 				{
-					continue;
+					bool isOK = rule->belongsToCategory(selectedCategory);
+					if (!isOK && rule->getBattleType() == BT_FIREARM)
+					{
+						for (auto& compatibleAmmoName : *rule->getPrimaryCompatibleAmmo())
+						{
+							if (c->getItems()->getItem(compatibleAmmoName) > 0)
+							{
+								RuleItem *ammoRule = _game->getMod()->getItem(compatibleAmmoName);
+								if (ammoRule)
+								{
+									isOK = ammoRule->belongsToCategory(selectedCategory);
+									if (isOK) break;
+								}
+							}
+						}
+					}
+					if (!isOK) continue;
 				}
 			}
 
