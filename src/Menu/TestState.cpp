@@ -556,6 +556,17 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 		int size = (int)(myMapDataSet->getObjectsRaw()->size());
 		for (auto myMapData : *myMapDataSet->getObjectsRaw())
 		{
+			// Check for 0 armor
+			if (myMapData->getArmor() == 0)
+			{
+				std::ostringstream ss;
+				ss << "terrain: " << terrainRule->getName() << " dataset: " << myMapDataSet->getName() << " object " << index << " has armor: " << myMapData->getArmor();
+				std::string str = ss.str();
+				Log(LOG_ERROR) << "Error in " << str << ". Found using OXCE test cases.";
+				errors++;
+				uniqueResults[myMapDataSet->getName()].insert(index);
+			}
+
 			// Validate MCD references
 			if (myMapData->getDieMCD() >= size)
 			{
