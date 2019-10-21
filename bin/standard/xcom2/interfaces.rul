@@ -1992,16 +1992,20 @@ interfaces: #done
       - id: textWeight
         color: 48
         color2: 16
-      - id: textFiring
+      - id: textStatLine1
+        custom: 1
         color: 48
         color2: 16
-      - id: textReaction
+      - id: textStatLine2
+        custom: 2
         color: 48
         color2: 16
-      - id: textPsiSkill
+      - id: textStatLine3
+        custom: 3
         color: 48
         color2: 16
-      - id: textPsiStrength
+      - id: textStatLine4
+        custom: 4
         color: 48
         color2: 16
       - id: textItem

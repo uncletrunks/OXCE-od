@@ -29,7 +29,7 @@ class Mod;
 struct Element
 {
 	/// basic rect info, and 3 colors.
-	int x, y, w, h, color, color2, border;
+	int x, y, w, h, color, color2, border, custom;
 	/// defines inversion behaviour
 	bool TFTDMode;
 };
