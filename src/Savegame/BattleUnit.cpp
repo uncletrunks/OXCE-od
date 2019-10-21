@@ -3110,7 +3110,7 @@ bool BattleUnit::reloadAmmo()
 			{
 				int tuTemp = bi->getSlot()->getType() != INV_HAND ? bi->getSlot()->getCost(weapon->getSlot()) : 0;
 				tuTemp += ruleWeapon->getTULoad(slot);
-				if (tuTemp < tuCost)
+				if (tuTemp <= tuCost)
 				{
 					tuCost = tuTemp;
 					ammo = bi;
