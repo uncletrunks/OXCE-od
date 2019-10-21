@@ -488,12 +488,15 @@ void BattlescapeGenerator::nextStage()
 
 	int highestSoldierID = 0;
 	bool selectedFirstSoldier = false;
+	int soldiersTotal = 0;
+	int soldiersPlaced = 0;
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
 		if ((*j)->getOriginalFaction() == FACTION_PLAYER)
 		{
 			if (!(*j)->isOut())
 			{
+				++soldiersTotal;
 				(*j)->setTurnsSinceSpotted(255);
 				(*j)->setTurnsLeftSpottedForSnipers(0);
 				if (!selectedFirstSoldier && (*j)->getGeoscapeSoldier())
@@ -504,6 +507,7 @@ void BattlescapeGenerator::nextStage()
 				Node* node = _save->getSpawnNode(NR_XCOM, (*j));
 				if (node || placeUnitNearFriend(*j))
 				{
+					++soldiersPlaced;
 					if (node)
 					{
 						_save->setUnitPosition((*j), node->getPosition());
@@ -525,6 +529,16 @@ void BattlescapeGenerator::nextStage()
 				}
 			}
 		}
+	}
+	if (soldiersPlaced == 0)
+	{
+		throw Exception("Map generator encountered an error: no xcom units could be placed on the map.");
+	}
+	else if (soldiersPlaced < soldiersTotal)
+	{
+		std::ostringstream oss;
+		oss << "Map generator encountered an error: not all xcom units could be placed on the map. Placed: " << soldiersPlaced << " of " << soldiersTotal << ".";
+		throw Exception(oss.str());
 	}
 
 	if (_save->getSelectedUnit() == 0 || _save->getSelectedUnit()->isOut() || _save->getSelectedUnit()->getFaction() != FACTION_PLAYER)
