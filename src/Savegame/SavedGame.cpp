@@ -1119,12 +1119,14 @@ void SavedGame::setGlobeZoom(int zoom)
  */
 void SavedGame::monthlyFunding()
 {
-	_funds.back() += getCountryFunding() - getBaseMaintenance();
+	auto countryFunding = getCountryFunding();
+	auto baseMaintenance = getBaseMaintenance();
+	_funds.back() += (countryFunding - baseMaintenance);
 	_funds.push_back(_funds.back());
-	_maintenance.back() = getBaseMaintenance();
+	_maintenance.back() = baseMaintenance;
 	_maintenance.push_back(0);
-	_incomes.push_back(getCountryFunding());
-	_expenditures.push_back(getBaseMaintenance());
+	_incomes.push_back(countryFunding);
+	_expenditures.push_back(baseMaintenance);
 	_researchScores.push_back(0);
 
 	if (_incomes.size() > 12)
