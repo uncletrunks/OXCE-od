@@ -1301,6 +1301,22 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 					break;
 				}
 			}
+
+			// clamp (and randomize) nationality if needed
+			{
+				const std::vector<SoldierNamePool *> &names = _rules->getNames();
+				if (!names.empty())
+				{
+					if ((size_t)_nationality >= _rules->getNames().size())
+					{
+						_nationality = RNG::generate(0, names.size() - 1);
+					}
+				}
+				else
+				{
+					_nationality = 0;
+				}
+			}
 		}
 
 		// change stats
