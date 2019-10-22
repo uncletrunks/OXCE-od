@@ -188,13 +188,15 @@ MonthlyCostsState::MonthlyCostsState(Base *base) : _base(base)
 	ss6 << _base->getTotalScientists();
 	_lstSalaries->addRow(4, tr("STR_SCIENTISTS").c_str(), Unicode::formatFunding(_game->getMod()->getScientistCost()).c_str(), ss6.str().c_str(), Unicode::formatFunding(_base->getTotalScientists() * _game->getMod()->getScientistCost()).c_str());
 	std::ostringstream ss6b;
-	ss6b << _base->getTotalOtherEmployees();
-	_lstSalaries->addRow(4, tr("STR_OTHER_EMPLOYEES").c_str(), "", ss6b.str().c_str(), Unicode::formatFunding(_base->getTotalOtherEmployeeCost()).c_str());
+	int staffCount, inventoryCount;
+	int totalOtherCost = _base->getTotalOtherStaffAndInventoryCost(staffCount, inventoryCount);
+	ss6b << staffCount << "/" << inventoryCount;
+	_lstSalaries->addRow(4, tr("STR_OTHER_EMPLOYEES").c_str(), "", ss6b.str().c_str(), Unicode::formatFunding(totalOtherCost).c_str());
 
 	_lstMaintenance->setColumns(2, 239, 60);
 	_lstMaintenance->setDot(true);
 	std::ostringstream ss7;
-	ss7 << Unicode::TOK_COLOR_FLIP << Unicode::formatFunding(_base->getFacilityMaintenance() + _base->getItemMaintenance());
+	ss7 << Unicode::TOK_COLOR_FLIP << Unicode::formatFunding(_base->getFacilityMaintenance());
 	_lstMaintenance->addRow(2, tr("STR_BASE_MAINTENANCE").c_str(), ss7.str().c_str());
 
 	_lstTotal->setColumns(2, 44, 55);

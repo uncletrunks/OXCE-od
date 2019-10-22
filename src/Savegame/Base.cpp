@@ -668,62 +668,93 @@ int Base::getTotalEngineers() const
 }
 
 /**
-* Returns the total amount of other employees contained in the base.
-* @return Number of employees.
-*/
-int Base::getTotalOtherEmployees() const
+ * Returns the total cost of other staff & inventory contained in the base.
+ * @return Total cost.
+ */
+int Base::getTotalOtherStaffAndInventoryCost(int& staffCount, int& inventoryCount) const
 {
-	int total = 0;
-	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
-	{
-		if ((*i)->getType() == TRANSFER_ITEM)
-		{
-			int salary = _mod->getItem((*i)->getItems())->getMonthlySalary();
-			if (salary != 0)
-			{
-				total += (*i)->getQuantity();
-			}
-		}
-	}
-	for (std::map<std::string, int>::const_iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
-	{
-		int salary = _mod->getItem(i->first)->getMonthlySalary();
-		if (salary != 0)
-		{
-			total += i->second;
-		}
-	}
-	return total;
-}
+	staffCount = 0;
+	inventoryCount = 0;
+	int totalCost = 0;
 
-/**
-* Returns the total cost of other employees contained
-* in the base.
-* @return Cost of employees.
-*/
-int Base::getTotalOtherEmployeeCost() const
-{
-	int total = 0;
-	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+	for (auto transfer : _transfers)
 	{
-		if ((*i)->getType() == TRANSFER_ITEM)
+		if (transfer->getType() == TRANSFER_ITEM)
 		{
-			int salary = _mod->getItem((*i)->getItems())->getMonthlySalary();
-			if (salary != 0)
+			auto ruleItem = _mod->getItem(transfer->getItems(), true);
+			if (ruleItem->getMonthlySalary() != 0)
 			{
-				total += salary * (*i)->getQuantity();
+				staffCount += transfer->getQuantity();
+				totalCost += ruleItem->getMonthlySalary() * transfer->getQuantity();
+			}
+			if (ruleItem->getMonthlyMaintenance() != 0)
+			{
+				inventoryCount += transfer->getQuantity();
+				totalCost += ruleItem->getMonthlyMaintenance() * transfer->getQuantity();
 			}
 		}
 	}
-	for (std::map<std::string, int>::const_iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
+	for (const auto& storeItem : *_items->getContents())
 	{
-		int salary = _mod->getItem(i->first)->getMonthlySalary();
-		if (salary != 0)
+		auto ruleItem = _mod->getItem(storeItem.first, true);
+		if (ruleItem->getMonthlySalary() != 0)
 		{
-			total += salary * i->second;
+			staffCount += storeItem.second;
+			totalCost += ruleItem->getMonthlySalary() * storeItem.second;
+		}
+		if (ruleItem->getMonthlyMaintenance() != 0)
+		{
+			inventoryCount += storeItem.second;
+			totalCost += ruleItem->getMonthlyMaintenance() * storeItem.second;
 		}
 	}
-	return total;
+	for (auto craft : _crafts)
+	{
+		for (const auto &craftItem : *craft->getItems()->getContents())
+		{
+			auto ruleItem = _mod->getItem(craftItem.first, true);
+			if (ruleItem->getMonthlySalary() != 0)
+			{
+				staffCount += craftItem.second;
+				totalCost += ruleItem->getMonthlySalary() * craftItem.second;
+			}
+			if (ruleItem->getMonthlyMaintenance() != 0)
+			{
+				inventoryCount += craftItem.second;
+				totalCost += ruleItem->getMonthlyMaintenance() * craftItem.second;
+			}
+		}
+		for (auto vehicle : *craft->getVehicles())
+		{
+			auto ruleItem = vehicle->getRules();
+			if (ruleItem->getMonthlySalary() != 0)
+			{
+				staffCount += 1;
+				totalCost += ruleItem->getMonthlySalary();
+			}
+			if (ruleItem->getMonthlyMaintenance() != 0)
+			{
+				inventoryCount += 1;
+				totalCost += ruleItem->getMonthlyMaintenance();
+			}
+		}
+	}
+	for (auto soldier : _soldiers)
+	{
+		auto ruleItem = _mod->getItem(soldier->getArmor()->getStoreItem(), false);
+		if (ruleItem && ruleItem->getMonthlySalary() != 0)
+		{
+			staffCount += 1;
+			totalCost += ruleItem->getMonthlySalary();
+		}
+		if (ruleItem && ruleItem->getMonthlyMaintenance() != 0)
+		{
+			inventoryCount += 1;
+			totalCost += ruleItem->getMonthlyMaintenance();
+		}
+	}
+
+	return totalCost;
 }
 
 /**
@@ -1216,37 +1247,8 @@ int Base::getPersonnelMaintenance() const
 	}
 	total += getTotalEngineers() * _mod->getEngineerCost();
 	total += getTotalScientists() * _mod->getScientistCost();
-	total += getTotalOtherEmployeeCost(); // other employees
-	return total;
-}
-
-/**
-* Returns the total amount of monthly costs
-* for maintaining the items in the base.
-* @return Maintenance costs.
-*/
-int Base::getItemMaintenance() const
-{
-	int total = 0;
-	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
-	{
-		if ((*i)->getType() == TRANSFER_ITEM)
-		{
-			int maintenance = _mod->getItem((*i)->getItems())->getMonthlyMaintenance();
-			if (maintenance != 0)
-			{
-				total += maintenance * (*i)->getQuantity();
-			}
-		}
-	}
-	for (std::map<std::string, int>::const_iterator i = _items->getContents()->begin(); i != _items->getContents()->end(); ++i)
-	{
-		int maintenance = _mod->getItem(i->first)->getMonthlyMaintenance();
-		if (maintenance != 0)
-		{
-			total += maintenance * i->second;
-		}
-	}
+	int dummy1, dummy2;
+	total += getTotalOtherStaffAndInventoryCost(dummy1, dummy2); // other staff & inventory
 	return total;
 }
 
@@ -1275,7 +1277,7 @@ int Base::getFacilityMaintenance() const
  */
 int Base::getMonthlyMaintenace() const
 {
-	return getCraftMaintenance() + getPersonnelMaintenance() + getFacilityMaintenance() + getItemMaintenance();
+	return getCraftMaintenance() + getPersonnelMaintenance() + getFacilityMaintenance();
 }
 
 /**
