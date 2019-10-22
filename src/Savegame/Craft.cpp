@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Craft.h"
+#include <algorithm>
 #include "../fmath.h"
 #include "../Engine/Language.h"
 #include "../Engine/RNG.h"
@@ -1408,12 +1409,14 @@ int Craft::getPilotAccuracyBonus(const std::vector<Soldier*> &pilots, const Mod 
 	int firingAccuracy = 0;
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
-			firingAccuracy += (*i)->getCurrentStats()->firing;
+			int firingIndividual = (*i)->getCurrentStats()->firing;
 			auto bonuses = (*i)->getBonuses(nullptr, false);
 			for (auto bonusRule : *bonuses)
 			{
-				firingAccuracy += bonusRule->getStats()->firing;
+				firingIndividual += bonusRule->getStats()->firing;
 			}
+			firingIndividual = std::max(0, firingIndividual);
+			firingAccuracy += firingIndividual;
 	}
 	firingAccuracy = firingAccuracy / pilots.size(); // average firing accuracy of all pilots
 
@@ -1432,12 +1435,14 @@ int Craft::getPilotDodgeBonus(const std::vector<Soldier*> &pilots, const Mod *mo
 	int reactions = 0;
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
-		reactions += (*i)->getCurrentStats()->reactions;
+		int reactionsIndividual = (*i)->getCurrentStats()->reactions;
 		auto bonuses = (*i)->getBonuses(nullptr, false);
 		for (auto bonusRule : *bonuses)
 		{
-			reactions += bonusRule->getStats()->reactions;
+			reactionsIndividual += bonusRule->getStats()->reactions;
 		}
+		reactionsIndividual = std::max(0, reactionsIndividual);
+		reactions += reactionsIndividual;
 	}
 	reactions = reactions / pilots.size(); // average reactions of all pilots
 
@@ -1456,12 +1461,14 @@ int Craft::getPilotApproachSpeedModifier(const std::vector<Soldier*> &pilots, co
 	int bravery = 0;
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
-		bravery += (*i)->getCurrentStats()->bravery;
+		int braveryIndividual = (*i)->getCurrentStats()->bravery;
 		auto bonuses = (*i)->getBonuses(nullptr, false);
 		for (auto bonusRule : *bonuses)
 		{
-			bravery += bonusRule->getStats()->bravery;
+			braveryIndividual += bonusRule->getStats()->bravery;
 		}
+		braveryIndividual = std::max(0, braveryIndividual);
+		bravery += braveryIndividual;
 	}
 	bravery = bravery / pilots.size(); // average bravery of all pilots
 

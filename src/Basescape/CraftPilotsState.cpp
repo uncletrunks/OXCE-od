@@ -19,6 +19,7 @@
 #include "CraftPilotsState.h"
 #include "CraftPilotSelectState.h"
 #include <sstream>
+#include <algorithm>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
@@ -166,9 +167,9 @@ void CraftPilotsState::updateUI()
 	const std::vector<Soldier*> pilots = c->getPilotList(false);
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
-		auto firingPlusBonus = (*i)->getCurrentStats()->firing;
-		auto reactionsPlusBonus = (*i)->getCurrentStats()->reactions;
-		auto braveryPlusBonus = (*i)->getCurrentStats()->bravery;
+		int firingPlusBonus = (*i)->getCurrentStats()->firing;
+		int reactionsPlusBonus = (*i)->getCurrentStats()->reactions;
+		int braveryPlusBonus = (*i)->getCurrentStats()->bravery;
 
 		auto bonuses = (*i)->getBonuses(nullptr, false);
 		for (auto bonusRule : *bonuses)
@@ -179,11 +180,11 @@ void CraftPilotsState::updateUI()
 		}
 
 		std::ostringstream ss1;
-		ss1 << firingPlusBonus;
+		ss1 << std::max(0, firingPlusBonus);
 		std::ostringstream ss2;
-		ss2 << reactionsPlusBonus;
+		ss2 << std::max(0, reactionsPlusBonus);
 		std::ostringstream ss3;
-		ss3 << braveryPlusBonus;
+		ss3 << std::max(0, braveryPlusBonus);
 		_lstPilots->addRow(5, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), "");
 	}
 

@@ -19,6 +19,7 @@
 #include "BattleUnit.h"
 #include "BattleItem.h"
 #include <sstream>
+#include <algorithm>
 #include "../Engine/Surface.h"
 #include "../Engine/Script.h"
 #include "../Engine/ScriptBind.h"
@@ -111,6 +112,7 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 		visibilityBonus += bonusRule->getVisibilityAtDark();
 		_stats += *(bonusRule->getStats());
 	}
+	_stats = UnitStats::obeyFixedMinimum(_stats); // don't allow to go into minus!
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDark += visibilityBonus;
 	_maxViewDistanceAtDark = Clamp(_maxViewDistanceAtDark, 1, mod->getMaxViewDistance());
@@ -214,6 +216,7 @@ void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor 
 		visibilityBonus += bonusRule->getVisibilityAtDark();
 		_stats += *(bonusRule->getStats());
 	}
+	_stats = UnitStats::obeyFixedMinimum(_stats); // don't allow to go into minus!
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDark += visibilityBonus;
 	_maxViewDistanceAtDark = Clamp(_maxViewDistanceAtDark, 1, mod->getMaxViewDistance());
@@ -446,6 +449,7 @@ BattleUnit::BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, 
 	}
 
 	_stats += *_armor->getStats();	// armors may modify effective stats
+	_stats = UnitStats::obeyFixedMinimum(_stats); // don't allow to go into minus!
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : faction==FACTION_HOSTILE ? mod->getMaxViewDistance() : 9;
 	_maxViewDistanceAtDarkSquared = _maxViewDistanceAtDark * _maxViewDistanceAtDark;
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : mod->getMaxViewDistance();

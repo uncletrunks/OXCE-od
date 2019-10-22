@@ -154,6 +154,13 @@ struct UnitStats
 		return r;
 	}
 
+	static UnitStats obeyFixedMinimum(const UnitStats &a)
+	{
+		// minimum 1 for health, minimum 0 for other stats (note to self: it might be worth considering minimum 10 for bravery in the future)
+		static const UnitStats fixedMinimum = UnitStats(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		return max(a, fixedMinimum);
+	}
+
 	static UnitStats max(const UnitStats& a, const UnitStats& b)
 	{
 		UnitStats r;

@@ -105,9 +105,9 @@ CraftPilotSelectState::CraftPilotSelectState(Base *base, size_t craft) : _base(b
 			{
 				_pilot.push_back((*i)->getId());
 
-				auto firingPlusBonus = (*i)->getCurrentStats()->firing;
-				auto reactionsPlusBonus = (*i)->getCurrentStats()->reactions;
-				auto braveryPlusBonus = (*i)->getCurrentStats()->bravery;
+				int firingPlusBonus = (*i)->getCurrentStats()->firing;
+				int reactionsPlusBonus = (*i)->getCurrentStats()->reactions;
+				int braveryPlusBonus = (*i)->getCurrentStats()->bravery;
 
 				auto bonuses = (*i)->getBonuses(nullptr, false);
 				for (auto bonusRule : *bonuses)
@@ -118,11 +118,11 @@ CraftPilotSelectState::CraftPilotSelectState(Base *base, size_t craft) : _base(b
 				}
 
 				std::ostringstream ss1;
-				ss1 << firingPlusBonus;
+				ss1 << std::max(0, firingPlusBonus);
 				std::ostringstream ss2;
-				ss2 << reactionsPlusBonus;
+				ss2 << std::max(0, reactionsPlusBonus);
 				std::ostringstream ss3;
-				ss3 << braveryPlusBonus;
+				ss3 << std::max(0, braveryPlusBonus);
 				_lstPilot->addRow(4, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str());
 			}
 		}

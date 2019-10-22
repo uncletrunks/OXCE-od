@@ -389,6 +389,7 @@ void SoldierInfoState::init()
 		hasBonus = true;
 		withArmor += *(bonusRule->getStats());
 	}
+	withArmor = UnitStats::obeyFixedMinimum(withArmor); // don't allow to go into minus!
 	_btnBonuses->setVisible(hasBonus);
 
 	SurfaceSet *texture = _game->getMod()->getSurfaceSet("BASEBITS.PCK");
