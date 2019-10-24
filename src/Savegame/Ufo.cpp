@@ -1068,7 +1068,7 @@ const RuleUfoStats& Ufo::getCraftStats() const
  */
 void Ufo::setEscapeCountdown(int time)
 {
-	_escapeCountdown = std::max(1, time);
+	_escapeCountdown = time;
 }
 
 /**
