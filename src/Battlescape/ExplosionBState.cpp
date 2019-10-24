@@ -45,8 +45,11 @@ namespace OpenXcom
  * @param tile Tile the explosion is on.
  * @param lowerWeapon Whether the unit causing this explosion should now lower their weapon.
  * @param range Distance between weapon and target.
+ * @param explosionCounter Counter for chain terrain explosions.
  */
-ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleActionAttack attack, Tile *tile, bool lowerWeapon, int range) : BattleState(parent), _attack(attack), _center(center), _damageType(), _tile(tile), _targetPsiOrHit(nullptr), _power(0), _radius(6), _range(range), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _hit(false), _psi(false)
+ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleActionAttack attack, Tile *tile, bool lowerWeapon, int range, int explosionCounter) : BattleState(parent),
+	_explosionCounter(explosionCounter), _attack(attack), _center(center), _damageType(), _tile(tile), _targetPsiOrHit(nullptr),
+	_power(0), _radius(6), _range(range), _areaOfEffect(false), _lowerWeapon(lowerWeapon), _hit(false), _psi(false)
 {
 
 }
@@ -236,6 +239,10 @@ void ExplosionBState::init()
 			if (itemRule)
 			{
 				explosionSpeed -= (10 * itemRule->getExplosionSpeed());
+			}
+			if (_explosionCounter > 6)
+			{
+				explosionSpeed = 1; // maximum animation speed for long chain terrain explosions
 			}
 			_parent->setStateInterval(std::max(1, explosionSpeed));
 			// explosion sound
@@ -433,7 +440,7 @@ void ExplosionBState::explode()
 	{
 		Position p = t->getPosition().toVoxel();
 		p += Position(8,8,0);
-		_parent->statePushFront(new ExplosionBState(_parent, p, BattleActionAttack{ BA_NONE, _attack.attacker, }, t));
+		_parent->statePushFront(new ExplosionBState(_parent, p, BattleActionAttack{ BA_NONE, _attack.attacker, }, t, false, 0, _explosionCounter + 1));
 	}
 
 	// Spawn a unit if the item does that
