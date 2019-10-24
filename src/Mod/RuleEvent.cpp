@@ -21,7 +21,7 @@
 namespace OpenXcom
 {
 
-RuleEvent::RuleEvent(const std::string &name) : _name(name), _background("BACK13.SCR"), _city(false), _points(0), _funds(0), _randomItem(false), _timer(30), _timerRandom(0)
+RuleEvent::RuleEvent(const std::string &name) : _name(name), _background("BACK13.SCR"), _city(false), _points(0), _funds(0), _timer(30), _timerRandom(0)
 {
 }
 
@@ -38,12 +38,29 @@ void RuleEvent::load(const YAML::Node &node)
 	_name = node["name"].as<std::string>(_name);
 	_description = node["description"].as<std::string>(_description);
 	_background = node["background"].as<std::string>(_background);
+	_music = node["music"].as<std::string>(_music);
 	_regionList = node["regionList"].as<std::vector<std::string> >(_regionList);
 	_city = node["city"].as<bool>(_city);
 	_points = node["points"].as<int>(_points);
 	_funds = node["funds"].as<int>(_funds);
-	_randomItem = node["randomItem"].as<bool>(_randomItem);
-	_itemList = node["itemList"].as<std::vector<std::string> >(_itemList);
+	{
+		// backwards-compatibility, FIXME: remove after 6 months
+		bool randomItem = node["randomItem"].as<bool>(false);
+		if (randomItem)
+		{
+			_randomItemList = node["itemList"].as<std::vector<std::string> >(_randomItemList);
+		}
+		else
+		{
+			_everyItemList = node["itemList"].as<std::vector<std::string> >(_everyItemList);
+		}
+	}
+	_everyItemList = node["everyItemList"].as<std::vector<std::string> >(_everyItemList);
+	_randomItemList = node["randomItemList"].as<std::vector<std::string> >(_randomItemList);
+	if (node["weightedItemList"])
+	{
+		_weightedItemList.load(node["weightedItemList"]);
+	}
 	_researchList = node["researchList"].as<std::vector<std::string> >(_researchList);
 	_interruptResearch = node["interruptResearch"].as<std::string>(_interruptResearch);
 	_timer = node["timer"].as<int>(_timer);

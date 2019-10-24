@@ -26,6 +26,7 @@ class TextButton;
 class Window;
 class Text;
 class GeoscapeEvent;
+class RuleEvent;
 
 /**
  * Displays info about a custom Geoscape event.
@@ -38,14 +39,17 @@ private:
 	TextButton *_btnOk;
 
 	std::string _researchName;
+	const RuleEvent &_eventRule;
 
 	/// Helper performing event logic.
-	void eventLogic(GeoscapeEvent *geoEvent);
+	void eventLogic();
 public:
 	/// Creates the GeoscapeEventState.
 	GeoscapeEventState(GeoscapeEvent *geoEvent);
 	/// Cleans up the GeoscapeEventState.
 	~GeoscapeEventState();
+	/// Initializes the state.
+	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 };

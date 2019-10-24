@@ -41,7 +41,7 @@ namespace OpenXcom
  * Initializes all the elements in the Geoscape Event window.
  * @param geoEvent Pointer to the event.
  */
-GeoscapeEventState::GeoscapeEventState(GeoscapeEvent *geoEvent)
+GeoscapeEventState::GeoscapeEventState(GeoscapeEvent *geoEvent) : _eventRule(geoEvent->getRules())
 {
 	_screen = false;
 
@@ -62,33 +62,32 @@ GeoscapeEventState::GeoscapeEventState(GeoscapeEvent *geoEvent)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setBackground(_game->getMod()->getSurface(geoEvent->getRules().getBackground()));
+	_window->setBackground(_game->getMod()->getSurface(_eventRule.getBackground()));
 
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
 	_txtTitle->setWordWrap(true);
-	_txtTitle->setText(tr(geoEvent->getRules().getName()));
+	_txtTitle->setText(tr(_eventRule.getName()));
 
 	_txtMessage->setVerticalAlign(ALIGN_TOP);
 	_txtMessage->setWordWrap(true);
-	_txtMessage->setText(tr(geoEvent->getRules().getDescription()));
+	_txtMessage->setText(tr(_eventRule.getDescription()));
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)& GeoscapeEventState::btnOkClick);
 
-	eventLogic(geoEvent);
+	eventLogic();
 }
 
 /**
  * Helper performing event logic.
- * @param geoEvent Pointer to the event.
  */
-void GeoscapeEventState::eventLogic(GeoscapeEvent *geoEvent)
+void GeoscapeEventState::eventLogic()
 {
 	SavedGame *save = _game->getSavedGame();
 	Base *hq = save->getBases()->front();
 	const Mod *mod = _game->getMod();
-	const RuleEvent &rule = geoEvent->getRules();
+	const RuleEvent &rule = _eventRule;
 
 	RuleRegion *regionRule = nullptr;
 	if (!rule.getRegionList().empty())
@@ -109,10 +108,10 @@ void GeoscapeEventState::eventLogic(GeoscapeEvent *geoEvent)
 			}
 		}
 
-		std::string titlePlus = tr(geoEvent->getRules().getName()).arg(place);
+		std::string titlePlus = tr(rule.getName()).arg(place);
 		_txtTitle->setText(titlePlus);
 
-		std::string messagePlus = tr(geoEvent->getRules().getDescription()).arg(place);
+		std::string messagePlus = tr(rule.getDescription()).arg(place);
 		_txtMessage->setText(messagePlus);
 	}
 
@@ -136,32 +135,43 @@ void GeoscapeEventState::eventLogic(GeoscapeEvent *geoEvent)
 	// 2. give/take funds
 	save->setFunds(save->getFunds() + rule.getFunds());
 
-	// 3. spawn/transfer item into the HQ
-	if (!rule.getItemList().empty())
+	// 3a. spawn/transfer item into the HQ
+	if (!rule.getEveryItemList().empty())
 	{
-		if (rule.isRandomItem())
+		for (auto itemName : rule.getEveryItemList())
 		{
-			size_t pickItem = RNG::generate(0, rule.getItemList().size() - 1);
-			const RuleItem *randomItem = mod->getItem(rule.getItemList().at(pickItem), true);
-			if (randomItem)
+			const RuleItem *itemRule = mod->getItem(itemName, true);
+			if (itemRule)
 			{
-				Transfer *t = new Transfer(1);
-				t->setItems(randomItem->getType(), 1);
-				hq->getTransfers()->push_back(t);
+				Transfer *tr = new Transfer(1);
+				tr->setItems(itemRule->getType(), 1);
+				hq->getTransfers()->push_back(tr);
 			}
 		}
-		else
+	}
+
+	// 3b. spawn/transfer item into the HQ
+	if (!rule.getRandomItemList().empty())
+	{
+		size_t pickItem = RNG::generate(0, rule.getRandomItemList().size() - 1);
+		const RuleItem *randomItem = mod->getItem(rule.getRandomItemList().at(pickItem), true);
+		if (randomItem)
 		{
-			for (auto itemName : rule.getItemList())
-			{
-				const RuleItem *itemRule = mod->getItem(itemName, true);
-				if (itemRule)
-				{
-					Transfer *tr = new Transfer(1);
-					tr->setItems(itemRule->getType(), 1);
-					hq->getTransfers()->push_back(tr);
-				}
-			}
+			Transfer *t = new Transfer(1);
+			t->setItems(randomItem->getType(), 1);
+			hq->getTransfers()->push_back(t);
+		}
+	}
+
+	// 3c. spawn/transfer item into the HQ
+	if (!rule.getWeightedItemList().empty())
+	{
+		const RuleItem *randomItem = mod->getItem(rule.getWeightedItemList().choose(), true);
+		if (randomItem)
+		{
+			Transfer *t = new Transfer(1);
+			t->setItems(randomItem->getType(), 1);
+			hq->getTransfers()->push_back(t);
 		}
 	}
 
@@ -199,6 +209,19 @@ void GeoscapeEventState::eventLogic(GeoscapeEvent *geoEvent)
 GeoscapeEventState::~GeoscapeEventState()
 {
 	// Empty by design
+}
+
+/**
+ * Initializes the state.
+ */
+void GeoscapeEventState::init()
+{
+	State::init();
+
+	if (!_eventRule.getMusic().empty())
+	{
+		_game->getMod()->playMusic(_eventRule.getMusic());
+	}
 }
 
 /**

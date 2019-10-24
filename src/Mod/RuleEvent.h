@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
+#include "../Savegame/WeightedOptions.h"
 
 namespace OpenXcom
 {
@@ -31,12 +32,13 @@ namespace OpenXcom
 class RuleEvent
 {
 private:
-	std::string _name, _description, _background;
+	std::string _name, _description, _background, _music;
 	std::vector<std::string> _regionList;
 	bool _city;
 	int _points, _funds;
-	bool _randomItem;
-	std::vector<std::string> _itemList, _researchList;
+	std::vector<std::string> _everyItemList, _randomItemList;
+	WeightedOptions _weightedItemList;
+	std::vector<std::string> _researchList;
 	std::string _interruptResearch;
 	int _timer, _timerRandom;
 public:
@@ -52,6 +54,8 @@ public:
 	const std::string &getDescription() const { return _description; }
 	/// Gets the event's background sprite name.
 	const std::string &getBackground() const { return _background; }
+	/// Gets the event's music.
+	const std::string &getMusic() const { return _music; }
 	/// Gets a list of regions where this event can occur.
 	const std::vector<std::string> &getRegionList() const { return _regionList; }
 	/// Is this event city specific?
@@ -60,10 +64,12 @@ public:
 	int getPoints() const { return _points; }
 	/// Gets the amount of funds awarded when this event pops up.
 	int getFunds() const { return _funds; }
-	/// Should all items be awarded or only one randomly?
-	bool isRandomItem() const { return _randomItem; }
-	/// Gets a list of items; they are transferred to HQ stores when this event pops up.
-	const std::vector<std::string> &getItemList() const { return _itemList; }
+	/// Gets a list of items; they are all transferred to HQ stores when this event pops up.
+	const std::vector<std::string> &getEveryItemList() const { return _everyItemList; }
+	/// Gets a list of items; one of them is randomly selected and transferred to HQ stores when this event pops up.
+	const std::vector<std::string> &getRandomItemList() const { return _randomItemList; }
+	/// Gets a list of items; one of them is randomly selected (considering weights) and transferred to HQ stores when this event pops up.
+	const WeightedOptions &getWeightedItemList() const { return _weightedItemList; }
 	/// Gets a list of research projects; one of them will be randomly discovered when this event pops up.
 	const std::vector<std::string> &getResearchList() const { return _researchList; }
 	/// Gets the research project that will interrupt/terminate an already generated (but not yet popped up) event.
