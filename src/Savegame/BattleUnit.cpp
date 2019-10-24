@@ -2557,6 +2557,8 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 			{
 				item->moveToOwner(this);
 				item->setSlot(defaultSlot);
+				item->setSlotX(rule->getDefaultInventorySlotX());
+				item->setSlotY(rule->getDefaultInventorySlotY());
 				placed = true;
 				item->setXCOMProperty(getFaction() == FACTION_PLAYER);
 				if (item->getRules()->getTurretType() > -1)

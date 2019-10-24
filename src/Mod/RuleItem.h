@@ -184,6 +184,7 @@ private:
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
 	std::string _defaultInventorySlot;
+	int _defaultInvSlotX, _defaultInvSlotY;
 	std::vector<std::string> _supportedInventorySections;
 	int _waypoints, _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
@@ -302,6 +303,8 @@ public:
 	bool getFixedShow() const;
 	/// Get name of the default inventory slot.
 	const std::string &getDefaultInventorySlot() const;
+	int getDefaultInventorySlotX() const { return _defaultInvSlotX; }
+	int getDefaultInventorySlotY() const { return _defaultInvSlotY; }
 	/// Gets the item's supported inventory sections.
 	const std::vector<std::string> &getSupportedInventorySections() const;
 	/// Checks if the item can be placed into a given inventory section.

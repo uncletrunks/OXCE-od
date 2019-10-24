@@ -55,7 +55,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_clipSize(0), _specialChance(100), _tuLoad{ }, _tuUnload{ },
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _hiddenOnMinimap(false), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
 	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _allowSelfHeal(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _specialUseEmptyHand(false),
-	_waypoints(0), _invWidth(1), _invHeight(1),
+	_defaultInvSlotX(0), _defaultInvSlotY(0), _waypoints(0), _invWidth(1), _invHeight(1),
 	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _manaRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f), _recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
 	_recover(true), _recoverCorpse(true), _ignoreInBaseDefense(false), _ignoreInCraftEquip(true), _liveAlien(false),
@@ -526,6 +526,8 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
 	_fixedWeaponShow = node["fixedWeaponShow"].as<bool>(_fixedWeaponShow);
 	_defaultInventorySlot = node["defaultInventorySlot"].as<std::string>(_defaultInventorySlot);
+	_defaultInvSlotX = node["defaultInvSlotX"].as<int>(_defaultInvSlotX);
+	_defaultInvSlotY = node["defaultInvSlotY"].as<int>(_defaultInvSlotY);
 	_supportedInventorySections = node["supportedInventorySections"].as< std::vector<std::string> >(_supportedInventorySections);
 	_allowSelfHeal = node["allowSelfHeal"].as<bool>(_allowSelfHeal);
 	_isConsumable = node["isConsumable"].as<bool>(_isConsumable);

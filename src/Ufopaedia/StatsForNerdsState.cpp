@@ -1749,6 +1749,8 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getInventoryWidth(), "invWidth", -1); // always show!
 		addInteger(ss, itemRule->getInventoryHeight(), "invHeight", -1); // always show!
 		addSingleString(ss, itemRule->getDefaultInventorySlot(), "defaultInventorySlot");
+		addInteger(ss, itemRule->getDefaultInventorySlotX(), "defaultInvSlotX");
+		addInteger(ss, itemRule->getDefaultInventorySlotY(), "defaultInvSlotY");
 		addBoolean(ss, itemRule->isFixed(), "fixedWeapon");
 		addBoolean(ss, itemRule->isSpecialUsingEmptyHand(), "specialUseEmptyHand");
 
