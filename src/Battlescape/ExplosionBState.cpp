@@ -232,7 +232,12 @@ void ExplosionBState::init()
 					frameDelay++;
 				}
 			}
-			_parent->setStateInterval(BattlescapeState::DEFAULT_ANIM_SPEED/2);
+			int explosionSpeed = BattlescapeState::DEFAULT_ANIM_SPEED/2;
+			if (itemRule)
+			{
+				explosionSpeed -= (10 * itemRule->getExplosionSpeed());
+			}
+			_parent->setStateInterval(std::max(1, explosionSpeed));
 			// explosion sound
 			_parent->playSound(sound);
 			_parent->getMap()->getCamera()->centerOnPosition(_center.toTile(), false);
