@@ -334,6 +334,10 @@ void RuleStatBonus::load(const std::string& parentName, const YAML::Node& node, 
 	{
 		auto script = std::string{ };
 		script.reserve(1024);
+
+		//scale up for rounding
+		script += "mul bonus 1000;\n";
+
 		for (const auto& p : _bonusOrig)
 		{
 			script += "unit.";
@@ -345,7 +349,7 @@ void RuleStatBonus::load(const std::string& parentName, const YAML::Node& node, 
 				if (j < p.second.size())
 				{
 					script += " ";
-					script += std::to_string((int)(p.second[j] * statMultiper));
+					script += std::to_string((int)(p.second[j] * statMultiper * 1000));
 				}
 				else
 				{
@@ -354,6 +358,11 @@ void RuleStatBonus::load(const std::string& parentName, const YAML::Node& node, 
 			}
 			script += ";\n";
 		}
+
+		//rounding to the nearest
+		script += "add bonus 500;\n";
+		script += "div bonus 1000;\n";
+
 		script += "return bonus;";
 		_container.load(parentName, script, parser);
 		_refresh = false;
