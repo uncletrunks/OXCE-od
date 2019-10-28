@@ -1226,7 +1226,8 @@ void GeoscapeState::time5Seconds()
 								int texture, shade;
 								_globe->getPolygonTextureAndShade(u->getLongitude(), u->getLatitude(), &texture, &shade);
 								timerReset();
-								popup(new ConfirmLandingState(*j, _game->getMod()->getGlobe()->getTexture(texture), shade));
+								auto globeTexture = _game->getMod()->getGlobe()->getTexture(texture);
+								popup(new ConfirmLandingState(*j, globeTexture, globeTexture, shade));
 							}
 						}
 						else if (u->getStatus() != Ufo::LANDED)
@@ -1251,9 +1252,14 @@ void GeoscapeState::time5Seconds()
 						// look up polygons texture
 						int texture, shade;
 						_globe->getPolygonTextureAndShade(m->getLongitude(), m->getLatitude(), &texture, &shade);
-						texture = m->getTexture();
 						timerReset();
-						popup(new ConfirmLandingState(*j, _game->getMod()->getGlobe()->getTexture(texture), shade));
+						auto globeTexture = _game->getMod()->getGlobe()->getTexture(texture);
+						auto missionTexture = _game->getMod()->getGlobe()->getTexture(m->getTexture());
+						if (!missionTexture)
+						{
+							missionTexture = globeTexture;
+						}
+						popup(new ConfirmLandingState(*j, missionTexture, globeTexture, shade));
 					}
 					else
 					{
@@ -1269,7 +1275,8 @@ void GeoscapeState::time5Seconds()
 							int texture, shade;
 							_globe->getPolygonTextureAndShade(b->getLongitude(), b->getLatitude(), &texture, &shade);
 							timerReset();
-							popup(new ConfirmLandingState(*j, _game->getMod()->getGlobe()->getTexture(texture), shade));
+							auto globeTexture = _game->getMod()->getGlobe()->getTexture(texture);
+							popup(new ConfirmLandingState(*j, globeTexture, globeTexture, shade));
 						}
 						else
 						{
@@ -3125,7 +3132,8 @@ void GeoscapeState::handleBaseDefense(Base *base, Ufo *ufo)
 		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(ufo->getCraftStats().missionCustomDeploy));
 		bgen.setAlienRace(ufo->getAlienRace());
 		bgen.setWorldShade(shade);
-		bgen.setWorldTexture(_game->getMod()->getGlobe()->getTexture(texture));
+		auto globeTexture = _game->getMod()->getGlobe()->getTexture(texture);
+		bgen.setWorldTexture(globeTexture, globeTexture);
 		bgen.setUfoDamagePercentage(ufoDamagePercentage);
 		bgen.run();
 		_pause = true;

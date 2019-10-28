@@ -72,8 +72,8 @@ namespace OpenXcom
  */
 BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_game(game), _save(game->getSavedGame()->getSavedBattle()), _mod(_game->getMod()),
-	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0),
-	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0),
+	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0), _globeTerrain(0),
+	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _missionTexture(0), _globeTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0), _ufoDamagePercentage(0),
 	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _craftPos(), _blocksToDo(0), _dummy(0)
 {
@@ -140,11 +140,13 @@ void BattlescapeGenerator::setUfo(Ufo *ufo)
 
 /**
  * Sets the world texture where a ufo crashed. This is used to determine the terrain.
- * @param texture Texture id of the polygon on the globe.
+ * @param missionTexture Texture id of the polygon on the globe (for UFOs). For mission sites, alien bases, etc. can be something else.
+ * @param globeTexture Texture id of the polygon on the globe.
  */
-void BattlescapeGenerator::setWorldTexture(Texture *texture)
+void BattlescapeGenerator::setWorldTexture(Texture *missionTexture, Texture *globeTexture)
 {
-	_worldTexture = texture;
+	_missionTexture = missionTexture;
+	_globeTexture = globeTexture;
 }
 
 /**
@@ -639,7 +641,7 @@ void BattlescapeGenerator::run()
 
 	if (_terrain == 0)
 	{
-		if (_worldTexture == 0 || _worldTexture->getTerrain()->empty() || !ruleDeploy->getTerrains().empty())
+		if (_missionTexture == 0 || _missionTexture->getTerrain()->empty() || !ruleDeploy->getTerrains().empty())
 		{
 			if (!ruleDeploy->getTerrains().empty())
 			{
@@ -655,7 +657,7 @@ void BattlescapeGenerator::run()
 		{
 			Target *target = _ufo;
 			if (_mission) target = _mission;
-			_terrain = _game->getMod()->getTerrain(_worldTexture->getRandomTerrain(target), true);
+			_terrain = _game->getMod()->getTerrain(_missionTexture->getRandomTerrain(target), true);
 		}
 	}
 
@@ -698,9 +700,9 @@ void BattlescapeGenerator::run()
 	setupObjectives(ruleDeploy);
 
 	RuleStartingCondition *startingCondition = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
-	if (!startingCondition && _worldTexture)
+	if (!startingCondition && _missionTexture)
 	{
-		startingCondition = _game->getMod()->getStartingCondition(_worldTexture->getStartingCondition());
+		startingCondition = _game->getMod()->getStartingCondition(_missionTexture->getStartingCondition());
 	}
 	RuleEnviroEffects *enviro = _game->getMod()->getEnviroEffects(ruleDeploy->getEnviroEffects());
 	if (!enviro && _terrain)
@@ -2113,6 +2115,18 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 	RuleTerrain* ufoTerrain = 0;
 	// lets generate the map now and store it inside the tile objects
 
+	// determine globe terrain from globe texture
+	_globeTerrain = _terrain;
+	if (_globeTexture && _craft)
+	{
+		// TODO (cosmetic): multiple attempts (e.g. several attacks on the same alien base) may generate different terrains from the same globe texture
+		auto tmpTerrain  = _game->getMod()->getTerrain(_globeTexture->getRandomTerrain(_craft), false);
+		if (tmpTerrain)
+		{
+			_globeTerrain = tmpTerrain;
+		}
+	}
+
 	// this mission type is "hard-coded" in terms of map layout
 	uint64_t seed = RNG::getSeed();
 	_baseTerrain = _terrain;
@@ -2136,7 +2150,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 			uint64_t baseSeed = baseLon * baseLat * 1e6;
 			RNG::setSeed(baseSeed);
 
-			_baseTerrain = _game->getMod()->getTerrain(_worldTexture->getRandomBaseTerrain(target), true);
+			_baseTerrain = _game->getMod()->getTerrain(_missionTexture->getRandomBaseTerrain(target), true);
 			generateBaseMap();
 		}
 		else
@@ -2905,6 +2919,10 @@ RuleTerrain* BattlescapeGenerator::pickTerrain(std::string terrainName)
 	if (terrainName == "baseTerrain")
 	{
 		terrain = _baseTerrain;
+	}
+	else if (terrainName == "globeTerrain")
+	{
+		terrain = _globeTerrain;
 	}
 	else if (terrainName != "")
 	{

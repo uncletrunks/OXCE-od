@@ -48,12 +48,12 @@ namespace OpenXcom
 
 /**
  * Initializes all the elements in the Confirm Landing window.
- * @param game Pointer to the core game.
  * @param craft Pointer to the craft to confirm.
- * @param texture Texture of the landing site.
+ * @param missionTexture Texture specific to the mission (can be either specific/fixed or taken from the globe).
+ * @param globeTexture Globe texture of the landing site.
  * @param shade Shade of the landing site.
  */
-ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *texture, int shade) : _craft(craft), _texture(texture), _shade(shade)
+ConfirmLandingState::ConfirmLandingState(Craft *craft, Texture *missionTexture, Texture *globeTexture, int shade) : _craft(craft), _missionTexture(missionTexture), _globeTexture(globeTexture), _shade(shade)
 {
 	_screen = false;
 
@@ -165,7 +165,7 @@ std::string ConfirmLandingState::checkStartingCondition()
 	if (u != 0)
 	{
 		std::string ufoMissionName = u->getRules()->getType();
-		if (_texture && _texture->isFakeUnderwater())
+		if (_missionTexture && _missionTexture->isFakeUnderwater())
 		{
 			ufoMissionName = u->getRules()->getType() + "_UNDERWATER";
 		}
@@ -194,9 +194,9 @@ std::string ConfirmLandingState::checkStartingCondition()
 	}
 
 	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
-	if (!rule && _texture)
+	if (!rule && _missionTexture)
 	{
-		rule = _game->getMod()->getStartingCondition(_texture->getStartingCondition());
+		rule = _game->getMod()->getStartingCondition(_missionTexture->getStartingCondition());
 	}
 	if (rule != 0)
 	{
@@ -247,7 +247,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 	SavedBattleGame *bgame = new SavedBattleGame(_game->getMod());
 	_game->getSavedGame()->setBattleGame(bgame);
 	BattlescapeGenerator bgen(_game);
-	bgen.setWorldTexture(_texture);
+	bgen.setWorldTexture(_missionTexture, _globeTexture);
 	bgen.setWorldShade(_shade);
 	bgen.setCraft(_craft);
 	if (u != 0)
@@ -258,7 +258,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 			bgame->setMissionType("STR_UFO_GROUND_ASSAULT");
 		bgen.setUfo(u);
 		const AlienDeployment *customWeaponDeploy = _game->getMod()->getDeployment(u->getCraftStats().craftCustomDeploy);
-		if (_texture && _texture->isFakeUnderwater())
+		if (_missionTexture && _missionTexture->isFakeUnderwater())
 		{
 			const std::string ufoUnderwaterMissionName = u->getRules()->getType() + "_UNDERWATER";
 			const AlienDeployment *ufoUnderwaterMission = _game->getMod()->getDeployment(ufoUnderwaterMissionName, true);
@@ -284,7 +284,7 @@ void ConfirmLandingState::btnYesClick(Action *)
 		bgen.setAlienBase(b);
 		bgen.setAlienRace(b->getAlienRace());
 		bgen.setAlienCustomDeploy(_game->getMod()->getDeployment(race->getBaseCustomDeploy()), _game->getMod()->getDeployment(race->getBaseCustomMission()));
-		bgen.setWorldTexture(0);
+		bgen.setWorldTexture(0, _globeTexture);
 	}
 	else
 	{

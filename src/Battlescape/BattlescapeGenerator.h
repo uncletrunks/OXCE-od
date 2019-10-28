@@ -64,10 +64,9 @@ private:
 	Base *_base;
 	MissionSite *_mission;
 	AlienBase *_alienBase;
-	RuleTerrain *_terrain;
-	RuleTerrain *_baseTerrain;
+	RuleTerrain *_terrain, *_baseTerrain, *_globeTerrain;
 	int _mapsize_x, _mapsize_y, _mapsize_z;
-	Texture *_worldTexture;
+	Texture *_missionTexture, *_globeTexture;
 	int _worldShade;
 	int _unitSequence;
 	Tile *_craftInventoryTile;
@@ -166,7 +165,7 @@ public:
 	/// Sets the ufo.
 	void setUfo(Ufo* ufo);
 	/// Sets the polygon texture.
-	void setWorldTexture(Texture *texture);
+	void setWorldTexture(Texture *missionTexture, Texture *globeTexture);
 	/// Sets the polygon shade.
 	void setWorldShade(int shade);
 	/// Sets the alien race.

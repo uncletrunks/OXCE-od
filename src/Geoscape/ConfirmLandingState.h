@@ -38,7 +38,7 @@ class ConfirmLandingState : public State
 private:
 	Craft *_craft;
 	Window *_window;
-	Texture *_texture;
+	Texture *_missionTexture, *_globeTexture;
 	int _shade;
 	Text *_txtMessage, *_txtBegin;
 	TextButton *_btnYes, *_btnNo;
@@ -47,7 +47,7 @@ private:
 	std::string checkStartingCondition();
 public:
 	/// Creates the Confirm Landing state.
-	ConfirmLandingState(Craft *craft, Texture *texture, int shade);
+	ConfirmLandingState(Craft *craft, Texture *missionTexture, Texture *globeTexture, int shade);
 	/// Cleans up the Confirm Landing state.
 	~ConfirmLandingState();
 	/// initialize the state, make a sanity check.
