@@ -2,7 +2,7 @@
 #include "../Mod/RuleSoldier.h"
 
 #define GET_ATTRIB_STAT_FN(attrib) \
-	int OpenXcom::attrib##Stat(Game *game, Soldier *s) { return s->getCurrentStats()->attrib; }
+	int OpenXcom::attrib##Stat(Game *game, Soldier *s) { return s->getStatsWithAllBonuses()->attrib; }
 GET_ATTRIB_STAT_FN(tu)
 GET_ATTRIB_STAT_FN(stamina)
 GET_ATTRIB_STAT_FN(health)
@@ -16,7 +16,7 @@ int OpenXcom::manaStat(Game* game, Soldier* s)
 	// don't reveal mana before it would otherwise be known
 	if (game->getSavedGame()->isManaUnlocked(game->getMod()))
 	{
-		return s->getCurrentStats()->mana;
+		return s->getStatsWithAllBonuses()->mana;
 	}
 	return 0;
 }
@@ -27,7 +27,7 @@ int OpenXcom::psiStrengthStat(Game *game, Soldier *s)
 		|| (Options::psiStrengthEval
 		&& game->getSavedGame()->isResearched(game->getMod()->getPsiRequirements())))
 	{
-		return s->getCurrentStats()->psiStrength;
+		return s->getStatsWithAllBonuses()->psiStrength;
 	}
 	return 0;
 }
@@ -36,7 +36,7 @@ int OpenXcom::psiSkillStat(Game *game, Soldier *s)
 	// when Options::anytimePsiTraining is turned on, psiSkill can actually have a negative value
 	if (s->getCurrentStats()->psiSkill > 0)
 	{
-		return s->getCurrentStats()->psiSkill;
+		return s->getStatsWithAllBonuses()->psiSkill;
 	}
 	return 0;
 }

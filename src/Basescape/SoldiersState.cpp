@@ -312,6 +312,7 @@ void SoldiersState::init()
 	_game->getSavedGame()->setBattleGame(0);
 	_base->setInBattlescape(false);
 
+	_base->prepareSoldierStatsWithBonuses(); // refresh stats for sorting
 	initList(0);
 }
 

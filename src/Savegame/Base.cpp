@@ -409,6 +409,17 @@ std::vector<Soldier*> *Base::getSoldiers()
 }
 
 /**
+ * Pre-calculates soldier stats with various bonuses.
+ */
+void Base::prepareSoldierStatsWithBonuses()
+{
+	for (auto soldier : _soldiers)
+	{
+		soldier->prepareStatsWithBonuses(_mod);
+	}
+}
+
+/**
  * Returns the list of crafts in the base.
  * @return Pointer to the craft list.
  */

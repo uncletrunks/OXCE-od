@@ -241,6 +241,7 @@ void AllocatePsiTrainingState::btnOkClick(Action *)
 void AllocatePsiTrainingState::init()
 {
 	State::init();
+	_base->prepareSoldierStatsWithBonuses(); // refresh stats for sorting
 	initList(0);
 }
 
