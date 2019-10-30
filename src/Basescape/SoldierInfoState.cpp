@@ -380,16 +380,8 @@ void SoldierInfoState::init()
 	UnitStats *initial = _soldier->getInitStats();
 	UnitStats *current = _soldier->getCurrentStats();
 
-	UnitStats withArmor(*current);
-	withArmor += *(_soldier->getArmor()->getStats());
-	// calculate and apply soldier bonuses
-	bool hasBonus = false;
-	for (auto bonusRule : *_soldier->getBonuses(_game->getMod(), true))
-	{
-		hasBonus = true;
-		withArmor += *(bonusRule->getStats());
-	}
-	withArmor = UnitStats::obeyFixedMinimum(withArmor); // don't allow to go into minus!
+	bool hasBonus = _soldier->prepareStatsWithBonuses(_game->getMod()); // refresh all bonuses
+	UnitStats withArmor = *_soldier->getStatsWithAllBonuses();
 	_btnBonuses->setVisible(hasBonus);
 
 	SurfaceSet *texture = _game->getMod()->getSurfaceSet("BASEBITS.PCK");

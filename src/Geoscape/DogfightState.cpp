@@ -271,10 +271,9 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	// pilot modifiers
 	const std::vector<Soldier*> pilots = _craft->getPilotList(false);
 
-	// refresh soldier bonuses
 	for (std::vector<Soldier*>::const_iterator p = pilots.begin(); p != pilots.end(); ++p)
 	{
-		(*p)->getBonuses(_game->getMod(), true);
+		(*p)->prepareStatsWithBonuses(_game->getMod()); // refresh soldier bonuses
 	}
 	_pilotAccuracyBonus = _craft->getPilotAccuracyBonus(pilots, _game->getMod());
 	_pilotDodgeBonus = _craft->getPilotDodgeBonus(pilots, _game->getMod());

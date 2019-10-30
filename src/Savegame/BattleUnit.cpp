@@ -104,15 +104,16 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 			_movementType = MT_WALK;
 		}
 	}
-	_stats += *_armor->getStats();	// armors may modify effective stats
-	// calculate and apply soldier bonuses
+	// armor and soldier bonuses may modify effective stats
+	{
+		soldier->prepareStatsWithBonuses(mod); // refresh all bonuses
+		_stats = *soldier->getStatsWithAllBonuses();
+	}
 	int visibilityBonus = 0;
-	for (auto bonusRule : *soldier->getBonuses(mod, true))
+	for (auto bonusRule : *soldier->getBonuses(nullptr))
 	{
 		visibilityBonus += bonusRule->getVisibilityAtDark();
-		_stats += *(bonusRule->getStats());
 	}
-	_stats = UnitStats::obeyFixedMinimum(_stats); // don't allow to go into minus!
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDark += visibilityBonus;
 	_maxViewDistanceAtDark = Clamp(_maxViewDistanceAtDark, 1, mod->getMaxViewDistance());
@@ -208,15 +209,16 @@ void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor 
 		if (depth == 0) { _movementType = MT_FLY; } else { _movementType = MT_WALK; }
 	}
 
-	_stats += *_armor->getStats();	// armors may modify effective stats
-	// apply soldier bonuses
+	// armor and soldier bonuses may modify effective stats
+	{
+		soldier->prepareStatsWithBonuses(mod); // refresh needed, because of armor stats
+		_stats = *soldier->getStatsWithAllBonuses();
+	}
 	int visibilityBonus = 0;
-	for (auto bonusRule : *soldier->getBonuses(nullptr, false))
+	for (auto bonusRule : *soldier->getBonuses(nullptr))
 	{
 		visibilityBonus += bonusRule->getVisibilityAtDark();
-		_stats += *(bonusRule->getStats());
 	}
-	_stats = UnitStats::obeyFixedMinimum(_stats); // don't allow to go into minus!
 	_maxViewDistanceAtDark = _armor->getVisibilityAtDark() ? _armor->getVisibilityAtDark() : 9;
 	_maxViewDistanceAtDark += visibilityBonus;
 	_maxViewDistanceAtDark = Clamp(_maxViewDistanceAtDark, 1, mod->getMaxViewDistance());
@@ -1599,7 +1601,7 @@ bool BattleUnit::hasNegativeHealthRegen() const
 		// apply soldier bonuses
 		if (_geoscapeSoldier)
 		{
-			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
+			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr))
 			{
 				HPRecovery += bonusRule->getHealthRecovery(this);
 			}
@@ -2334,7 +2336,7 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 		// apply soldier bonuses
 		if (_geoscapeSoldier)
 		{
-			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
+			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr))
 			{
 				TURecovery += bonusRule->getTimeRecovery(this);
 				ENRecovery += bonusRule->getEnergyRecovery(this);
@@ -2357,7 +2359,7 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 		// apply soldier bonuses
 		if (_geoscapeSoldier)
 		{
-			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr, false))
+			for (auto bonusRule : *_geoscapeSoldier->getBonuses(nullptr))
 			{
 				HPRecovery += bonusRule->getHealthRecovery(this);
 				MNRecovery += bonusRule->getManaRecovery(this);

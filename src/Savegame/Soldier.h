@@ -61,7 +61,7 @@ private:
 	std::string _name;
 	int _id, _nationality, _improvement, _psiStrImprovement;
 	RuleSoldier *_rules;
-	UnitStats _initialStats, _currentStats;
+	UnitStats _initialStats, _currentStats, _tmpStatsWithSoldierBonuses, _tmpStatsWithAllBonuses;
 	SoldierRank _rank;
 	Craft *_craft;
 	SoldierGender _gender;
@@ -233,7 +233,13 @@ public:
 	/// Calculates how this project changes the soldier's stats
 	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier, int mode);
 	/// Gets all the soldier bonuses
-	const std::vector<const RuleSoldierBonus*> *getBonuses(const Mod *mod, bool rebuild);
+	const std::vector<const RuleSoldierBonus*> *getBonuses(const Mod *mod);
+	/// Get pointer to current stats with soldier bonuses, but without armor bonuses.
+	UnitStats *getStatsWithSoldierBonusesOnly();
+	/// Get pointer to current stats with armor and soldier bonuses.
+	UnitStats *getStatsWithAllBonuses();
+	/// Pre-calculates soldier stats with various bonuses.
+	bool prepareStatsWithBonuses(const Mod *mod);
 
 };
 

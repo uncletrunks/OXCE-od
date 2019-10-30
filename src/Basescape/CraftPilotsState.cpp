@@ -128,12 +128,11 @@ CraftPilotsState::CraftPilotsState(Base *base, size_t craft) : _base(base), _cra
 	_txtDodgeBonus->setText(tr("STR_DODGE_BONUS"));
 	_txtApproachSpeed->setText(tr("STR_APPROACH_SPEED"));
 
-	// refresh soldier bonuses
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if ((*i)->getCraft() == c)
 		{
-			(*i)->getBonuses(_game->getMod(), true);
+			(*i)->prepareStatsWithBonuses(_game->getMod()); // refresh soldier bonuses
 		}
 	}
 }
@@ -167,24 +166,12 @@ void CraftPilotsState::updateUI()
 	const std::vector<Soldier*> pilots = c->getPilotList(false);
 	for (std::vector<Soldier*>::const_iterator i = pilots.begin(); i != pilots.end(); ++i)
 	{
-		int firingPlusBonus = (*i)->getCurrentStats()->firing;
-		int reactionsPlusBonus = (*i)->getCurrentStats()->reactions;
-		int braveryPlusBonus = (*i)->getCurrentStats()->bravery;
-
-		auto bonuses = (*i)->getBonuses(nullptr, false);
-		for (auto bonusRule : *bonuses)
-		{
-			firingPlusBonus += bonusRule->getStats()->firing;
-			reactionsPlusBonus += bonusRule->getStats()->reactions;
-			braveryPlusBonus += bonusRule->getStats()->bravery;
-		}
-
 		std::ostringstream ss1;
-		ss1 << std::max(0, firingPlusBonus);
+		ss1 << (*i)->getStatsWithSoldierBonusesOnly()->firing;
 		std::ostringstream ss2;
-		ss2 << std::max(0, reactionsPlusBonus);
+		ss2 << (*i)->getStatsWithSoldierBonusesOnly()->reactions;
 		std::ostringstream ss3;
-		ss3 << std::max(0, braveryPlusBonus);
+		ss3 << (*i)->getStatsWithSoldierBonusesOnly()->bravery;
 		_lstPilots->addRow(5, (*i)->getName(false).c_str(), ss1.str().c_str(), ss2.str().c_str(), ss3.str().c_str(), "");
 	}
 

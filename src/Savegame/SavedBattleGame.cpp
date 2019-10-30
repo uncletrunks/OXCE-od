@@ -1453,7 +1453,7 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
 
 	if (auto solder = unit->getGeoscapeSoldier())
 	{
-		for (auto bonus : *solder->getBonuses(nullptr, false))
+		for (auto bonus : *solder->getBonuses(nullptr))
 		{
 			ModScript::scriptCallback<ModScript::ApplySoldierBonuses>(bonus, unit, this, bonus);
 		}
