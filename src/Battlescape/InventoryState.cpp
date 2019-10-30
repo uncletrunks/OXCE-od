@@ -541,7 +541,12 @@ void InventoryState::updateStats()
 		_txtWeight->setSecondaryColor(_game->getMod()->getInterface("inventory")->getElement("weight")->color);
 	}
 
-	bool showPsiStrength = (unit->getBaseStats()->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())));
+	auto psiSkillWithoutAnyBonuses = unit->getBaseStats()->psiSkill;
+	if (unit->getGeoscapeSoldier())
+	{
+		psiSkillWithoutAnyBonuses = unit->getGeoscapeSoldier()->getCurrentStats()->psiSkill;
+	}
+	bool showPsiStrength = (psiSkillWithoutAnyBonuses > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())));
 
 	auto updateStatLine = [&](Text* txtField, const std::string& elementId)
 	{
@@ -557,7 +562,7 @@ void InventoryState::updateStats()
 					txtField->setText(tr("STR_REACTIONS_SHORT").arg(unit->getBaseStats()->reactions));
 					break;
 				case 3:
-					if (unit->getBaseStats()->psiSkill > 0)
+					if (psiSkillWithoutAnyBonuses > 0)
 						txtField->setText(tr("STR_PSIONIC_SKILL_SHORT").arg(unit->getBaseStats()->psiSkill));
 					else
 						txtField->setText("");

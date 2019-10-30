@@ -585,7 +585,12 @@ void UnitInfoState::init()
 		}
 	}
 
-	if (_unit->getBaseStats()->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
+	auto psiSkillWithoutAnyBonuses = _unit->getBaseStats()->psiSkill;
+	if (_unit->getGeoscapeSoldier())
+	{
+		psiSkillWithoutAnyBonuses = _unit->getGeoscapeSoldier()->getCurrentStats()->psiSkill;
+	}
+	if (psiSkillWithoutAnyBonuses > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 	{
 		ss.str("");
 		ss << _unit->getBaseStats()->psiStrength;
@@ -604,7 +609,7 @@ void UnitInfoState::init()
 		_barPsiStrength->setVisible(false);
 	}
 
-	if (_unit->getBaseStats()->psiSkill > 0)
+	if (psiSkillWithoutAnyBonuses > 0)
 	{
 		ss.str("");
 		ss << _unit->getBaseStats()->psiSkill;
