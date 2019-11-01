@@ -310,7 +310,7 @@ void Map::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 int Map::getWallShade(TilePart part, Tile* tileFrot)
 {
 	int shade;
-	if (tileFrot->isDiscovered(2))
+	if (tileFrot->isDiscovered(O_FLOOR))
 	{
 		shade = reShade(tileFrot);
 	}
@@ -320,7 +320,7 @@ int Map::getWallShade(TilePart part, Tile* tileFrot)
 	}
 	if (part)
 	{
-		if ((tileFrot->isDoor(part) || tileFrot->isUfoDoor(part)) && tileFrot->isDiscovered(part - 1))
+		if ((tileFrot->isDoor(part) || tileFrot->isUfoDoor(part)) && tileFrot->isDiscovered(part))
 		{
 			Position offset =
 				part == O_NORTHWALL ? Position(1,0,0) :
@@ -538,7 +538,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	Position offset;
 	int shadeOffset;
 	calculateWalkingOffset(bu, &offset, &shadeOffset);
-	int tileShade = currTile->isDiscovered(2) ? reShade(currTile) : 16;
+	int tileShade = currTile->isDiscovered(O_FLOOR) ? reShade(currTile) : 16;
 	int unitShade = (tileShade * (16 - shadeOffset) + shade * shadeOffset) / 16;
 	if (_debugVisionMode == 1)
 	{
@@ -725,7 +725,7 @@ void Map::drawTerrain(Surface *surface)
 					screenPosition.y > -_spriteHeight && screenPosition.y < surface->getHeight() + _spriteHeight )
 				{
 
-					if (tile->isDiscovered(2))
+					if (tile->isDiscovered(O_FLOOR))
 					{
 						tileShade = reShade(tile);
 						obstacleShade = tileShade;
@@ -1004,7 +1004,7 @@ void Map::drawTerrain(Surface *surface)
 					}
 
 					// Draw smoke/fire
-					if (tile->getSmoke() && tile->isDiscovered(2))
+					if (tile->getSmoke() && tile->isDiscovered(O_FLOOR))
 					{
 						frameNumber = 0;
 						int shade = 0;
@@ -1060,7 +1060,7 @@ void Map::drawTerrain(Surface *surface)
 					}
 
 					// Draw Path Preview
-					if (tile->getPreview() != -1 && tile->isDiscovered(0) && (_previewSetting & PATH_ARROWS))
+					if (tile->getPreview() != -1 && tile->isDiscovered(O_FLOOR) && (_previewSetting & PATH_ARROWS))
 					{
 						if (itZ > 0 && tile->hasNoFloor(_save))
 						{
@@ -1388,7 +1388,7 @@ void Map::drawTerrain(Surface *surface)
 						screenPosition.y > -_spriteHeight && screenPosition.y < surface->getHeight() + _spriteHeight )
 					{
 						tile = _save->getTile(mapPosition);
-						if (!tile || !tile->isDiscovered(0) || tile->getPreview() == -1)
+						if (!tile || !tile->isDiscovered(O_FLOOR) || tile->getPreview() == -1)
 							continue;
 						int adjustment = -tile->getTerrainLevel();
 						if (_previewSetting & PATH_ARROWS)
