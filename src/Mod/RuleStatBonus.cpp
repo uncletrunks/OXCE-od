@@ -335,34 +335,36 @@ void RuleStatBonus::load(const std::string& parentName, const YAML::Node& node, 
 		auto script = std::string{ };
 		script.reserve(1024);
 
-		//scale up for rounding
-		script += "mul bonus 1000;\n";
-
-		for (const auto& p : _bonusOrig)
+		if (!_bonusOrig.empty())
 		{
-			script += "unit.";
-			script += p.first;
-			script += statNamePostfix;
-			script += " bonus";
-			for (size_t j = 0; j < statDataFuncSize; ++j)
+			//scale up for rounding
+			script += "mul bonus 1000;\n";
+
+			for (const auto& p : _bonusOrig)
 			{
-				if (j < p.second.size())
+				script += "unit.";
+				script += p.first;
+				script += statNamePostfix;
+				script += " bonus";
+				for (size_t j = 0; j < statDataFuncSize; ++j)
 				{
-					script += " ";
-					script += std::to_string((int)(p.second[j] * statMultiper * 1000));
+					if (j < p.second.size())
+					{
+						script += " ";
+						script += std::to_string((int)(p.second[j] * statMultiper * 1000));
+					}
+					else
+					{
+						script += " 0";
+					}
 				}
-				else
-				{
-					script += " 0";
-				}
+				script += ";\n";
 			}
-			script += ";\n";
+
+			//rounding to the nearest
+			script += "if ge bonus 0; add bonus 500; else; sub bonus 500; end;\n";
+			script += "div bonus 1000;\n";
 		}
-
-		//rounding to the nearest
-		script += "add bonus 500;\n";
-		script += "div bonus 1000;\n";
-
 		script += "return bonus;";
 		_container.load(parentName, script, parser);
 		_refresh = false;
