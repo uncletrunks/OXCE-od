@@ -1451,7 +1451,7 @@ void Map::drawTerrain(Surface *surface)
 		{
 			offset.y += 4;
 		}
-		offset.y += 24 - unit->getHeight();
+		offset.y += Position::TileZ - unit->getHeight();
 		if (unit->isKneeled())
 		{
 			offset.y -= 2;
@@ -1795,12 +1795,12 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 			if (unit->getPosition().z > unit->getDestination().z)
 			{
 				// going down a level, so toLevel 0 becomes +24, -8 becomes  16
-				toLevel += 24*(unit->getPosition().z - unit->getDestination().z);
+				toLevel += Position::TileZ*(unit->getPosition().z - unit->getDestination().z);
 			}
 			else if (unit->getPosition().z < unit->getDestination().z)
 			{
 				// going up a level, so toLevel 0 becomes -24, -8 becomes -16
-				toLevel = -24*(unit->getDestination().z - unit->getPosition().z) + abs(toLevel);
+				toLevel = -Position::TileZ*(unit->getDestination().z - unit->getPosition().z) + abs(toLevel);
 			}
 			offset->y += ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
 		}
@@ -1813,12 +1813,12 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 			if (unit->getLastPosition().z > unit->getDestination().z)
 			{
 				// going down a level, so fromLevel 0 becomes -24, -8 becomes -32
-				fromLevel -= 24*(unit->getLastPosition().z - unit->getDestination().z);
+				fromLevel -= Position::TileZ*(unit->getLastPosition().z - unit->getDestination().z);
 			}
 			else if (unit->getLastPosition().z < unit->getDestination().z)
 			{
 				// going up a level, so fromLevel 0 becomes +24, -8 becomes 16
-				fromLevel = 24*(unit->getDestination().z - unit->getLastPosition().z) - abs(fromLevel);
+				fromLevel = Position::TileZ*(unit->getDestination().z - unit->getLastPosition().z) - abs(fromLevel);
 			}
 			offset->y += ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
 		}
