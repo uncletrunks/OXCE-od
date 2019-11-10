@@ -273,7 +273,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	_btnArmor->setText(tr("STR_ARMOR"));
 	_btnArmor->onMouseClick((ActionHandler)&SoldierInfoState::btnArmorClick);
 
-	_btnBonuses->setText(""); // tiny button, no label
+	_btnBonuses->setText(tr("STR_BONUSES_BUTTON")); // tiny button, default translation is " "
 	_btnBonuses->onMouseClick((ActionHandler)&SoldierInfoState::btnBonusesClick);
 
 	_edtSoldier->setBig();
