@@ -138,6 +138,11 @@ void MeleeAttackBState::init()
 	int height = _target->getFloatHeight() + (_target->getHeight() / 2) - _parent->getSave()->getTile(_action.target)->getTerrainLevel();
 	_voxel = _action.target.toVoxel() + Position(8, 8, height);
 
+	if (!_parent->getSave()->getTile(_voxel.toTile()))
+	{
+		throw Exception("Melee attack animation overflow: target voxel is outside of the map boundaries.");
+	}
+
 	if (_unit->getFaction() == FACTION_HOSTILE)
 	{
 		_hitNumber = _weapon->getRules()->getAIMeleeHitCount() - 1;
