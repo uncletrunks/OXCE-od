@@ -78,6 +78,7 @@ public:
 	void lstSoldiersMousePress(Action *action);
 	/// Handler for clicking the De-equip All Armor button.
 	void btnDeequipAllArmorClick(Action *action);
+	void btnDeequipCraftArmorClick(Action *action);
 };
 
 }

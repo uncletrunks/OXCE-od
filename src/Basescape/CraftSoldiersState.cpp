@@ -88,7 +88,8 @@ CraftSoldiersState::CraftSoldiersState(Base *base, size_t craft)
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftSoldiersState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftSoldiersState::btnOkClick, Options::keyCancel);
-	_btnOk->onKeyboardPress((ActionHandler)&CraftSoldiersState::btnDeassignAllSoldiersClick, Options::keyResetAll);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftSoldiersState::btnDeassignAllSoldiersClick, Options::keyRemoveSoldiersFromAllCrafts);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftSoldiersState::btnDeassignCraftSoldiersClick, Options::keyRemoveSoldiersFromCraft);
 
 	_txtTitle->setBig();
 	Craft *c = _base->getCrafts()->at(_craft);
@@ -528,6 +529,29 @@ void CraftSoldiersState::btnDeassignAllSoldiersClick(Action *action)
 	}
 
 	Craft *c = _base->getCrafts()->at(_craft);
+	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(c->getSpaceAvailable()));
+	_txtUsed->setText(tr("STR_SPACE_USED").arg(c->getSpaceUsed()));
+}
+
+/**
+ * De-assign all soldiers from the current craft.
+ * @param action Pointer to an action.
+ */
+void CraftSoldiersState::btnDeassignCraftSoldiersClick(Action *action)
+{
+	Craft *c = _base->getCrafts()->at(_craft);
+	int row = 0;
+	for (auto s : *_base->getSoldiers())
+	{
+		if (s->getCraft() == c)
+		{
+			s->setCraft(0);
+			_lstSoldiers->setCellText(row, 2, tr("STR_NONE_UC"));
+			_lstSoldiers->setRowColor(row, _lstSoldiers->getColor());
+		}
+		row++;
+	}
+
 	_txtAvailable->setText(tr("STR_SPACE_AVAILABLE").arg(c->getSpaceAvailable()));
 	_txtUsed->setText(tr("STR_SPACE_USED").arg(c->getSpaceUsed()));
 }

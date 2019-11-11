@@ -83,7 +83,8 @@ CraftArmorState::CraftArmorState(Base *base, size_t craft) : _base(base), _craft
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CraftArmorState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CraftArmorState::btnOkClick, Options::keyCancel);
-	_btnOk->onKeyboardPress((ActionHandler)&CraftArmorState::btnDeequipAllArmorClick, Options::keyResetAll);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftArmorState::btnDeequipAllArmorClick, Options::keyRemoveArmorFromAllCrafts);
+	_btnOk->onKeyboardPress((ActionHandler)&CraftArmorState::btnDeequipCraftArmorClick, Options::keyRemoveArmorFromCraft);
 
 	_txtTitle->setBig();
 	_txtTitle->setText(tr("STR_SELECT_ARMOR"));
@@ -535,6 +536,40 @@ void CraftArmorState::btnDeequipAllArmorClick(Action *action)
 
 				(*i)->setArmor(a);
 				(*i)->prepareStatsWithBonuses(_game->getMod()); // refresh stats for sorting
+				_lstSoldiers->setCellText(row, 2, tr(a->getType()));
+			}
+		}
+		row++;
+	}
+}
+
+/**
+ * De-equip armor of all soldiers on the current craft.
+ * @param action Pointer to an action.
+ */
+void CraftArmorState::btnDeequipCraftArmorClick(Action *action)
+{
+	Craft *c = _base->getCrafts()->at(_craft);
+	int row = 0;
+	for (auto s : *_base->getSoldiers())
+	{
+		if (s->getCraft() == c)
+		{
+			Armor *a = _game->getMod()->getArmor(s->getRules()->getArmor());
+
+			if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
+			{
+				if (s->getArmor()->getStoreItem() != Armor::NONE)
+				{
+					_base->getStorageItems()->addItem(s->getArmor()->getStoreItem());
+				}
+				if (a->getStoreItem() != Armor::NONE)
+				{
+					_base->getStorageItems()->removeItem(a->getStoreItem());
+				}
+
+				s->setArmor(a);
+				s->prepareStatsWithBonuses(_game->getMod()); // refresh stats for sorting
 				_lstSoldiers->setCellText(row, 2, tr(a->getType()));
 			}
 		}

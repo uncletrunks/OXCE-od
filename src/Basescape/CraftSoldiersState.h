@@ -79,6 +79,7 @@ public:
 	void lstSoldiersMousePress(Action *action);
 	/// Handler for clicking the De-assign All Soldiers button.
 	void btnDeassignAllSoldiersClick(Action *action);
+	void btnDeassignCraftSoldiersClick(Action *action);
 };
 
 }
