@@ -2838,11 +2838,11 @@ bool SavedGame::isManaUnlocked(Mod *mod) const
 /**
  * Gets the current score based on research score and xcom/alien activity in regions.
  */
-int SavedGame::getCurrentScore() const
+int SavedGame::getCurrentScore(int monthsPassed) const
 {
 	size_t invertedEntry = _funds.size() - 1;
 	int scoreTotal = _researchScores.at(invertedEntry);
-	if (_monthsPassed > 1)
+	if (monthsPassed > 1)
 		scoreTotal += 400;
 	for (auto region : _regions)
 	{

@@ -2510,19 +2510,9 @@ void GeoscapeState::time1Day()
 	// pay attention to your maintenance player!
 	if (_game->getSavedGame()->getTime()->isLastDayOfMonth())
 	{
-		// approximate score at the end of the month
-		size_t invertedEntry = _game->getSavedGame()->getFundsList().size() - 1;
-		int scoreTotal = _game->getSavedGame()->getResearchScores().at(invertedEntry);
-		if (_game->getSavedGame()->getMonthsPassed() > 1)
-		{
-			// the council is more lenient after the first month
-			scoreTotal += 400;
-		}
-		for (std::vector<Region*>::iterator iter = _game->getSavedGame()->getRegions()->begin(); iter != _game->getSavedGame()->getRegions()->end(); ++iter)
-		{
-			scoreTotal += (*iter)->getActivityXcom().at(invertedEntry) - (*iter)->getActivityAlien().at(invertedEntry);
-		}
-		int performanceBonus = scoreTotal * _game->getMod()->getPerformanceBonusFactor();
+		int month = _game->getSavedGame()->getMonthsPassed();
+		int currentScore = _game->getSavedGame()->getCurrentScore(month + 1);
+		int performanceBonus = currentScore * mod->getPerformanceBonusFactor();
 		if (performanceBonus < 0)
 		{
 			performanceBonus = 0; // bonus only, no malus
@@ -3155,9 +3145,14 @@ void GeoscapeState::determineAlienMissions()
 	AlienStrategy &strategy = save->getAlienStrategy();
 	Mod *mod = _game->getMod();
 	int month = _game->getSavedGame()->getMonthsPassed();
-	int currentScore = save->getCurrentScore(); // _monthsPassed was already increased by 1
+	int currentScore = save->getCurrentScore(month); // _monthsPassed was already increased by 1
+	int performanceBonus = currentScore * mod->getPerformanceBonusFactor();
+	if (performanceBonus < 0)
+	{
+		performanceBonus = 0; // bonus only, no malus
+	}
 	int64_t currentFunds = save->getFunds();
-	currentFunds += save->getCountryFunding() - save->getBaseMaintenance(); // peek into the next month
+	currentFunds += save->getCountryFunding() + performanceBonus - save->getBaseMaintenance(); // peek into the next month
 	std::vector<RuleMissionScript*> availableMissions;
 	std::map<int, bool> conditions;
 
