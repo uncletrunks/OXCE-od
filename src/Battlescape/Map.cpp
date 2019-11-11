@@ -529,6 +529,10 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	calculateWalkingOffset(bu, &offset, &shadeOffset);
 	int tileShade = currTile->isDiscovered(2) ? reShade(currTile) : 16;
 	int unitShade = (tileShade * (16 - shadeOffset) + shade * shadeOffset) / 16;
+	if (_debugVisionMode == 1)
+	{
+		unitShade = std::min(NIGHT_VISION_SHADE, unitShade);
+	}
 	if (!moving && unitTile->getObstacle(4))
 	{
 		unitShade = obstacleShade;
@@ -1572,11 +1576,13 @@ void Map::keyboardPress(Action *action, State *state)
 void Map::toggleNightVision()
 {
 	_nightVisionOn = !_nightVisionOn;
+	_debugVisionMode = 0;
 }
 
 void Map::toggleDebugVisionMode()
 {
 	_debugVisionMode = (_debugVisionMode + 1) % 3;
+	_nightVisionOn = false;
 }
 
 /**
