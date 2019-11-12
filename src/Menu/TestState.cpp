@@ -552,7 +552,7 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 	for (auto myMapDataSet : *terrainRule->getMapDataSets())
 	{
 		int index = 0;
-		myMapDataSet->loadData(false);
+		myMapDataSet->loadData(_game->getMod()->getMCDPatch(myMapDataSet->getName()), false);
 		int size = (int)(myMapDataSet->getObjectsRaw()->size());
 		for (auto myMapData : *myMapDataSet->getObjectsRaw())
 		{
