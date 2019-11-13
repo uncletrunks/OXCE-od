@@ -143,6 +143,20 @@ struct ColorReplace
 	*/
 	static inline void func(Uint8& dest, const Uint8& src, const int& shade, const int& newColor)
 	{
+#ifdef __x86_64__
+		//more vectorization friendly code
+		auto n = dest;
+		if (src)
+		{
+			const Uint8 newShade = (src & ColorShade) + shade;
+			if (newShade & ColorGroup)
+				// so dark it would flip over to another color - make it black instead
+				n = ColorShade;
+			else
+				n = newColor | newShade;
+		}
+		dest = n;
+#else
 		if (src)
 		{
 			const Uint8 newShade = (src & ColorShade) + shade;
@@ -152,6 +166,7 @@ struct ColorReplace
 			else
 				dest = newColor | newShade;
 		}
+#endif
 	}
 
 };
@@ -172,6 +187,20 @@ struct StandardShade
 	*/
 	static inline void func(Uint8& dest, const Uint8& src, const int& shade)
 	{
+#ifdef __x86_64__
+		//more vectorization friendly code
+		auto n = dest;
+		if (src)
+		{
+			const Uint8 newShade = src + shade;
+			if ((newShade ^ src) & ColorGroup)
+				// so dark it would flip over to another color - make it black instead
+				n = ColorShade;
+			else
+				n = newShade;
+		}
+		dest = n;
+#else
 		if (src)
 		{
 			const Uint8 newShade = src + shade;
@@ -181,6 +210,7 @@ struct StandardShade
 			else
 				dest = newShade;
 		}
+#endif
 	}
 
 };
@@ -191,6 +221,7 @@ struct BurnShade
 {
 	static inline void func(Uint8& dest, const Uint8& src, const int& burn, const int& shade)
 	{
+		auto n = dest;
 		if (src)
 		{
 			if (burn)
@@ -202,18 +233,19 @@ struct BurnShade
 				}
 				else if (tempBurn > 15)
 				{
-					StandardShade::func(dest, ColorShade, shade);
+					StandardShade::func(n, ColorShade, shade);
 				}
 				else
 				{
-					StandardShade::func(dest, (src & ColorGroup) + tempBurn, shade);
+					StandardShade::func(n, (src & ColorGroup) + tempBurn, shade);
 				}
 			}
 			else
 			{
-				StandardShade::func(dest, src, shade);
+				StandardShade::func(n, src, shade);
 			}
 		}
+		dest = n;
 	}
 };
 
