@@ -49,7 +49,8 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
-	_soldier = new Surface(240, 200, 80, 0);
+	int offsetX = _game->getMod()->getAlienInventoryOffsetX();
+	_soldier = new Surface(320 - offsetX, 200, offsetX, 0);
 	_txtName = new Text(308, 17, 6, 6);
 	_btnArmor = new BattlescapeButton(40, 70, 140, 65);
 	_inv = new AlienInventory(_game, 320, 200, 0, 0);

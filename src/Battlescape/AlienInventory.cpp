@@ -90,7 +90,7 @@ void AlienInventory::setSelectedUnit(BattleUnit *unit)
 	_dynamicOffset = 0;
 	if (unit && unit->getArmor()->getSize() > 1)
 	{
-		_dynamicOffset = 32;
+		_dynamicOffset = _game->getMod()->getAlienInventoryOffsetBigUnit();
 	}
 }
 
@@ -118,7 +118,7 @@ void AlienInventory::drawGrid()
 		{
 			SDL_Rect r;
 			r.x = i->second->getX();
-			r.x += ALIEN_INVENTORY_STATIC_OFFSET;
+			r.x += _game->getMod()->getAlienInventoryOffsetX();
 
 			if (i->second->getId() == "STR_RIGHT_HAND")
 				r.x -= _dynamicOffset;
@@ -157,7 +157,7 @@ void AlienInventory::drawItems()
 			{
 				Surface *frame = texture->getFrame((*i)->getRules()->getBigSprite());
 				int x = (*i)->getSlot()->getX() + (*i)->getRules()->getHandSpriteOffX();
-				x += ALIEN_INVENTORY_STATIC_OFFSET;
+				x += _game->getMod()->getAlienInventoryOffsetX();
 
 				if ((*i)->getSlot()->getId() == "STR_RIGHT_HAND")
 					x -= _dynamicOffset;
@@ -232,7 +232,7 @@ void AlienInventory::mouseClick(Action *action, State *state)
 		else
 			x += _dynamicOffset;
 
-		x -= ALIEN_INVENTORY_STATIC_OFFSET;
+		x -= _game->getMod()->getAlienInventoryOffsetX();
 
 		RuleInventory *slot = getSlotInPosition(&x, &y);
 		if (slot != 0)
