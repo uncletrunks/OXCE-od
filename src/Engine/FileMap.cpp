@@ -925,7 +925,53 @@ void scanModZip(const std::string& fullpath) {
  * and yes this has to parse the metadata.yml for the modId.
  *
  */
-void scanModDir(const std::string& dirname, const std::string& basename) {
+void scanModDir(const std::string& dirname, const std::string& basename, bool protectedLocation) {
+
+	// "standard" directory is for built-in mods only! otherwise automatic updates would delete user data
+	const std::set<std::string> standardMods = {
+		"Aliens_Pick_Up_Weapons",
+		"Aliens_Pick_Up_Weapons_TFTD",
+		"Limit_Craft_Item_Capacities",
+		"Limit_Craft_Item_Capacities_TFTD",
+		"OpenXCom_Unlimited_Waypoints",
+		"OpenXCom_Unlimited_Waypoints_TFTD",
+		"PSX_Static_Cydonia_Map",
+		"StrategyCore_Swap_Small_USOs_TFTD",
+		"TFTD_Damage",
+		"UFOextender_Gun_Melee",
+		"UFOextender_Gun_Melee_TFTD",
+		"UFOextender_Psionic_Line_Of_Fire",
+		"UFOextender_Psionic_Line_Of_Fire_TFTD",
+		"UFOextender_Starting_Avalanches",
+		"xcom1",
+		"xcom2",
+		"XcomUtil_Always_Daytime",
+		"XcomUtil_Always_Daytime_TFTD",
+		"XcomUtil_Always_Nighttime",
+		"XcomUtil_Always_Nighttime_TFTD",
+		"XcomUtil_Fighter_Transports",
+		"XcomUtil_High_Explosive_Damage",
+		"XcomUtil_High_Explosive_Damage_TFTD",
+		"XcomUtil_Improved_Gauss",
+		"XcomUtil_Improved_Ground_Tanks",
+		"XcomUtil_Improved_Heavy_Laser",
+		"XcomUtil_Infinite_Gauss",
+		"XcomUtil_No_Psionics",
+		"XcomUtil_No_Psionics_TFTD",
+		"XcomUtil_Pistol_Auto_Shot",
+		"XcomUtil_Pistol_Auto_Shot_TFTD",
+		"XcomUtil_Skyranger_Weapon_Slot",
+		"XcomUtil_Starting_Defensive_Base",
+		"XcomUtil_Starting_Defensive_Base_TFTD",
+		"XcomUtil_Starting_Defensive_Improved_Base",
+		"XcomUtil_Starting_Defensive_Improved_Base_TFTD",
+		"XcomUtil_Starting_Improved_Base",
+		"XcomUtil_Starting_Improved_Base_TFTD",
+		"XcomUtil_Statstrings",
+		"XcomUtil_Statstrings_TFTD",
+		"XCOM_Damage"
+	};
+
 	std::string log_ctx = "scanModDir('" + dirname + "', '" + basename + "'): ";
  	// first check for a .zip
 	std::string fullname = dirname + basename + ".zip";
@@ -950,7 +996,20 @@ void scanModDir(const std::string& dirname, const std::string& basename) {
 	for (auto zi = contents.begin(); zi != contents.end(); ++zi) {
 		auto is_dir =  std::get<1>(*zi);
 		if (is_dir) {
+			if (protectedLocation)
+			{
+				if (standardMods.find(std::get<0>(*zi)) == standardMods.end())
+				{
+					Log(LOG_ERROR) << "Invalid standard mod '" << std::get<0>(*zi) << "', skipping.";
+					continue;
+				}
+			}
 			dirlist.push_back(std::get<0>(*zi)); // stash for later
+			continue;
+		}
+		if (protectedLocation)
+		{
+			Log(LOG_ERROR) << "Invalid standard mod '" << std::get<0>(*zi) << "', skipping.";
 			continue;
 		}
 		auto subpath =  fullname + "/" + std::get<0>(*zi);

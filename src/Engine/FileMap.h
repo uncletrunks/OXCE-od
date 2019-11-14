@@ -109,7 +109,7 @@ namespace FileMap
 	std::string canonicalize(const std::string& fname);
 
 	/// scans a moddir for mods, (privately) maps them.
-	void scanModDir(const std::string& dirname, const std::string& basename);
+	void scanModDir(const std::string& dirname, const std::string& basename, bool protectedLocation);
 
 	/// scans a .zip from the rwops for mods
 	void scanModZipRW(SDL_RWops *rwops, const std::string& fullpath);

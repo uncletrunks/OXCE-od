@@ -616,10 +616,10 @@ void refreshMods()
 		Log(LOG_INFO) << "Modding embedded resources is disabled, set 'embeddedOnly: false' in options.cfg to enable.";
 	} else {
 		Log(LOG_INFO) << "Scanning standard mods in '" << getDataFolder() << "'...";
-		FileMap::scanModDir(getDataFolder(), "standard");
+		FileMap::scanModDir(getDataFolder(), "standard", true);
 	}
 	Log(LOG_INFO) << "Scanning user mods in '" << getUserFolder() << "'...";
-	FileMap::scanModDir(getUserFolder(), "mods");
+	FileMap::scanModDir(getUserFolder(), "mods", false);
 
 	// Check mods' dependencies on other mods and extResources (UFO, TFTD, etc),
 	// also breaks circular dependency loops.
