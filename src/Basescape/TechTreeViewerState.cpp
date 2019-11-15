@@ -279,6 +279,14 @@ void TechTreeViewerState::initLists()
 					ss << std::get<1>(sym);
 				}
 			}
+			if (rule->getCost() < 10)
+			{
+				while (cost >= 1)
+				{
+					cost -= 1;
+					ss << ".";
+				}
+			}
 			_txtCostIndicator->setText(ss.str());
 		}
 		//
