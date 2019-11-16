@@ -1851,24 +1851,6 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 	else
 	{
 		offset->y += getTerrainLevel(unit->getPosition(), size);
-
-		if (_save->getDepth() > 0)
-		{
-			unit->setFloorAbove(false);
-
-			// make sure this unit isn't obscured by the floor above him, otherwise it looks weird.
-			if (_camera->getViewLevel() > unit->getPosition().z)
-			{
-				for (int z = std::min(_camera->getViewLevel(), _save->getMapSizeZ() - 1); z != unit->getPosition().z; --z)
-				{
-					if (!_save->getTile(Position(unit->getPosition().x, unit->getPosition().y, z))->hasNoFloor(0))
-					{
-						unit->setFloorAbove(true);
-						break;
-					}
-				}
-			}
-		}
 	}
 }
 
