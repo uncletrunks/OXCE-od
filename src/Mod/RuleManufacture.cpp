@@ -78,6 +78,11 @@ void RuleManufacture::load(const YAML::Node &node, int listOrder)
  */
 void RuleManufacture::afterLoad(const Mod* mod)
 {
+	if (_time <= 0)
+	{
+		throw Exception("Manufacturing time must be greater than zero.");
+	}
+
 	_requires = mod->getResearch(_requiresName);
 	if (_category == "STR_CRAFT")
 	{

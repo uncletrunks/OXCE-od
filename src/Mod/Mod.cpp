@@ -1174,7 +1174,7 @@ static void afterLoadHelper(const char* name, Mod* mod, std::map<std::string, T*
 		}
 		catch (Exception &e)
 		{
-			throw Exception("Error linking '" + rule.first + "' in " + name + ": " + e.what());
+			throw Exception("Error processing '" + rule.first + "' in " + name + ": " + e.what());
 		}
 	}
 }
