@@ -47,7 +47,7 @@ NewResearchListState::NewResearchListState(Base *base, bool sortByCost) : _base(
 {
 	if (Options::isPasswordCorrect())
 	{
-		_sortByCost = true;
+		_sortByCost = !_sortByCost;
 	}
 
 	_screen = false;
