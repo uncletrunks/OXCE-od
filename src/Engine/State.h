@@ -21,6 +21,7 @@
 #include <string>
 #include <SDL.h>
 #include "../Savegame/Soldier.h"
+#include "LocalizedText.h"
 
 namespace OpenXcom
 {
@@ -30,7 +31,6 @@ class Surface;
 class InteractiveSurface;
 class Window;
 class Action;
-class LocalizedText;
 class SavedBattleGame;
 class RuleInterface;
 
@@ -89,13 +89,13 @@ public:
 	/// Resets all the state surfaces.
 	void resetAll();
 	/// Get the localized text.
-	const LocalizedText &tr(const std::string &id) const;
+	LocalizedText tr(const std::string &id) const;
 	/// Get the localized text.
-	const LocalizedText &trAlt(const std::string &id, int alt) const;
+	LocalizedText trAlt(const std::string &id, int alt) const;
 	/// Get the localized text.
 	LocalizedText tr(const std::string &id, unsigned n) const;
 	/// Get the localized text.
-	const LocalizedText &tr(const std::string &id, SoldierGender gender) const;
+	LocalizedText tr(const std::string &id, SoldierGender gender) const;
 	/// redraw all the text-type surfaces.
 	void redrawText();
 	/// center all surfaces relative to the screen.
