@@ -325,6 +325,18 @@ en-US:
   STR_LATEST_VERSION_INFO: "You are using the latest OpenXcom version."
 #OptionsAdvancedState.cpp
   STR_OXCE: "Extended"
+#OptionsBaseState.cpp
+  STR_FOLDERS: "FOLDERS"
+#OptionsFoldersState.cpp
+  STR_CURRENT_WORKING_DIRECTORY: "<current working directory>"
+  STR_DATA_FOLDER: "Data Folder (original resources)"
+  STR_USER_FOLDER: "User Folder (mods, openxcom.log)"
+  STR_SAVE_FOLDER: "Save Folder (saved games)"
+  STR_CONFIG_FOLDER: "Config Folder (options.cfg)"
+  STR_DATA_FOLDER_DESC: "This is where OpenXcom looks for the original game resources (UFO and/or TFTD) and also where the OpenXcom built-in mods are stored."
+  STR_USER_FOLDER_DESC: "The log file ('openxcom.log') is stored here. All custom mods belong here too (in the 'mods' sub-folder)."
+  STR_SAVE_FOLDER_DESC: "Your saved games are located here. Also, the mission generator settings ('battle.cfg') can be found here."
+  STR_CONFIG_FOLDER_DESC: "This is where OpenXcom settings ('option.cfg') are stored. Normally the same as the User Folder."
 #OptionsInformExtendedState.cpp
   STR_VERSION_REQUIRED_QUESTION: "This mod requires OXCE v{0} to run correctly. Enable this mod?"
 #OptionsVideoState.cpp

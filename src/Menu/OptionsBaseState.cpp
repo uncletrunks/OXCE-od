@@ -34,6 +34,7 @@
 #include "../Battlescape/BattlescapeState.h"
 #include "OptionsVideoState.h"
 #include "OptionsAudioState.h"
+#include "OptionsFoldersState.h"
 #include "OptionsNoAudioState.h"
 #include "OptionsControlsState.h"
 #include "OptionsGeoscapeState.h"
@@ -63,6 +64,7 @@ OptionsBaseState::OptionsBaseState(OptionsOrigin origin) : _origin(origin), _gro
 	_btnGeoscape = new TextButton(80, 16, 8, 68);
 	_btnBattlescape = new TextButton(80, 16, 8, 88);
 	_btnAdvanced = new TextButton(80, 16, 8, 108);
+	_btnFolders = new TextButton(80, 16, 8, 128);
 
 	_btnOk = new TextButton(100, 16, 8, 176);
 	_btnCancel = new TextButton(100, 16, 110, 176);
@@ -81,6 +83,7 @@ OptionsBaseState::OptionsBaseState(OptionsOrigin origin) : _origin(origin), _gro
 	add(_btnGeoscape, "button", "optionsMenu");
 	add(_btnBattlescape, "button", "optionsMenu");
 	add(_btnAdvanced, "button", "optionsMenu");
+	add(_btnFolders, "button", "optionsMenu");
 
 	add(_btnOk, "button", "optionsMenu");
 	add(_btnCancel, "button", "optionsMenu");
@@ -108,6 +111,9 @@ OptionsBaseState::OptionsBaseState(OptionsOrigin origin) : _origin(origin), _gro
 
 	_btnAdvanced->setText(tr("STR_ADVANCED"));
 	_btnAdvanced->onMousePress((ActionHandler)&OptionsBaseState::btnGroupPress, SDL_BUTTON_LEFT);
+
+	_btnFolders->setText(tr("STR_FOLDERS"));
+	_btnFolders->onMousePress((ActionHandler)&OptionsBaseState::btnGroupPress, SDL_BUTTON_LEFT);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&OptionsBaseState::btnOkClick);
@@ -186,6 +192,7 @@ void OptionsBaseState::setCategory(TextButton *button)
 	_btnGeoscape->setGroup(&_group);
 	_btnBattlescape->setGroup(&_group);
 	_btnAdvanced->setGroup(&_group);
+	_btnFolders->setGroup(&_group);
 }
 
 /**
@@ -290,6 +297,10 @@ void OptionsBaseState::btnGroupPress(Action *action)
 		else if (sender == _btnAdvanced)
 		{
 			_game->pushState(new OptionsAdvancedState(_origin));
+		}
+		else if (sender == _btnFolders)
+		{
+			_game->pushState(new OptionsFoldersState(_origin));
 		}
 	}
 }

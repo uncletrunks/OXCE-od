@@ -1089,6 +1089,9 @@
     <ClCompile Include="Basescape\SoldierBonusState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Menu\OptionsFoldersState.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2232,6 +2235,9 @@
     </ClInclude>
     <ClInclude Include="Basescape\SoldierBonusState.h">
       <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\OptionsFoldersState.h">
+      <Filter>Menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

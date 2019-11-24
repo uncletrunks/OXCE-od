@@ -253,6 +253,7 @@ set ( menu_src
   Menu/OptionsConfirmState.cpp
   Menu/OptionsControlsState.cpp
   Menu/OptionsDefaultsState.cpp
+  Menu/OptionsFoldersState.cpp
   Menu/OptionsGeoscapeState.cpp
   Menu/OptionsInformExtendedState.cpp
   Menu/OptionsModsState.cpp

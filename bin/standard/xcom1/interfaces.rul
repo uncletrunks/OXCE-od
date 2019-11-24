@@ -133,6 +133,12 @@ interfaces:
         border: 133  # minty green
       - id: disabledUserOption
         color: 100   # grey
+  - type: foldersMenu
+    elements:
+      - id: text1
+        color: 239   # bright green
+      - id: text2
+        color: 138   # yellow
   - type: modsMenu
     backgroundImage: BACK01.SCR
     elements:

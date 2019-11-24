@@ -133,6 +133,12 @@ interfaces: #done
         border: 239
       - id: disabledUserOption
         color: 3
+  - type: foldersMenu
+    elements:
+      - id: text1
+        color: 239
+      - id: text2
+        color: 1
   - type: modsMenu
     backgroundImage: BACK01.SCR
     elements:
