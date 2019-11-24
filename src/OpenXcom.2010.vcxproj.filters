@@ -2282,6 +2282,6 @@
     <None Include="..\res\windows\openxcom.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="..\deps\yaml-cpp.natvis" />
+    <Natvis Include="yaml-cpp.natvis" />
   </ItemGroup>
 </Project>
