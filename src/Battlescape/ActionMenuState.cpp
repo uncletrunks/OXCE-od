@@ -327,12 +327,17 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 			for (std::vector<BattleUnit*>::const_iterator i = units->begin(); i != units->end() && !targetUnit; ++i)
 			{
 				// we can heal a unit that is at the same position, unconscious and healable(=woundable)
-				if ((*i)->getPosition() == _action->actor->getPosition() && *i != _action->actor && (*i)->getStatus() == STATUS_UNCONSCIOUS && (*i)->isWoundable())
+				if ((*i)->getPosition() == _action->actor->getPosition() && *i != _action->actor && (*i)->getStatus() == STATUS_UNCONSCIOUS && ((*i)->isWoundable() || weapon->getAllowTargetImmune()) && weapon->getAllowTargetGround())
 				{
-					targetUnit = *i;
+					if ((weapon->getAllowTargetFriend() && (*i)->getOriginalFaction() == FACTION_PLAYER) ||
+						(weapon->getAllowTargetNeutral() && (*i)->getOriginalFaction() == FACTION_NEUTRAL) ||
+						(weapon->getAllowTargetHostile() && (*i)->getOriginalFaction() == FACTION_HOSTILE))
+					{
+						targetUnit = *i;
+					}
 				}
 			}
-			if (!targetUnit)
+			if (!targetUnit && weapon->getAllowTargetStanding())
 			{
 				if (tileEngine->validMeleeRange(
 					_action->actor->getPosition(),
@@ -341,13 +346,18 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 					0, &_action->target, false))
 				{
 					Tile *tile = _game->getSavedGame()->getSavedBattle()->getTile(_action->target);
-					if (tile != 0 && tile->getUnit() && tile->getUnit()->isWoundable())
+					if (tile != 0 && tile->getUnit() && (tile->getUnit()->isWoundable() || weapon->getAllowTargetImmune()))
 					{
-						targetUnit = tile->getUnit();
+						if ((weapon->getAllowTargetFriend() && tile->getUnit()->getOriginalFaction() == FACTION_PLAYER) ||
+							(weapon->getAllowTargetNeutral() && tile->getUnit()->getOriginalFaction() == FACTION_NEUTRAL) ||
+							(weapon->getAllowTargetHostile() && tile->getUnit()->getOriginalFaction() == FACTION_HOSTILE))
+						{
+							targetUnit = tile->getUnit();
+						}
 					}
 				}
 			}
-			if (!targetUnit && weapon->getAllowSelfHeal())
+			if (!targetUnit && weapon->getAllowTargetSelf())
 			{
 				targetUnit = _action->actor;
 			}

@@ -182,13 +182,15 @@ private:
 	RuleItemFuseTrigger _fuseTriggerEvents;
 	bool _hiddenOnMinimap;
 	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
-	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _allowSelfHeal, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
+	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
 	std::string _defaultInventorySlot;
 	int _defaultInvSlotX, _defaultInvSlotY;
 	std::vector<std::string> _supportedInventorySections;
 	int _waypoints, _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
+	bool _medikitTargetSelf, _medikitTargetImmune;
+	int _medikitTargetFactions, _medikitTargetPositions;
 	std::string _medikitBackground;
 	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery, _manaRecovery, _moraleRecovery, _painKillerRecovery;
 	int _recoveryPoints;
@@ -518,8 +520,16 @@ public:
 	int getMoraleRecovery() const;
 	/// Gets the medikit morale recovered based on missing health.
 	float getPainKillerRecovery() const;
-	/// Gets the medikit ability to self heal.
-	bool getAllowSelfHeal() const;
+	/// Gets the medikit's allowed targets.
+	bool getAllowTargetSelf() const { return _medikitTargetSelf; }
+	bool getAllowTargetImmune() const { return _medikitTargetImmune; }
+	bool getAllowTargetFriend() const { return _medikitTargetFactions & 1; }
+	bool getAllowTargetNeutral() const { return _medikitTargetFactions & 2; }
+	bool getAllowTargetHostile() const { return _medikitTargetFactions & 4; }
+	bool getAllowTargetStanding() const { return _medikitTargetPositions & 1; }
+	bool getAllowTargetGround() const { return _medikitTargetPositions & 2; }
+	int getMedikitTargetFactionsRaw() const { return _medikitTargetFactions; }
+	int getMedikitTargetPositionsRaw() const { return _medikitTargetPositions; }
 	/// Is this (medikit-type & items with prime) item consumable?
 	bool isConsumable() const;
 	/// Does this item extinguish fire?

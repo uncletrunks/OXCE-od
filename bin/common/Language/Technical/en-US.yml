@@ -228,7 +228,10 @@ en-US:
   armor: "Armor"
 #
   medikitType: "Medikit type"
-  allowSelfHeal: "Apply to self?"
+  medikitTargetSelf: "Medikit on self?"
+  medikitTargetImmune: "Medikit on bleed immune?"
+  medikitTargetFactions: "Medikit factions"
+  medikitTargetPositions: "Medikit positions"
   isConsumable: "Consumable?"
   painKiller: "Painkiller uses"
   heal: "Heal uses"

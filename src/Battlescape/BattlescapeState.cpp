@@ -3056,8 +3056,10 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 			return;
 		}
 
+		auto weaponRule = weapon->getRules();
+
 		// find the target unit
-		if (weapon->getRules()->getBattleType() == BT_MEDIKIT)
+		if (weaponRule->getBattleType() == BT_MEDIKIT)
 		{
 			BattleUnit *targetUnit = 0;
 			TileEngine *tileEngine = _game->getSavedGame()->getSavedBattle()->getTileEngine();
@@ -3068,15 +3070,20 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 			for (std::vector<BattleUnit*>::const_iterator i = units->begin(); i != units->end() && !targetUnit; ++i)
 			{
 				// we can heal a unit that is at the same position, unconscious and healable(=woundable)
-				if ((*i)->getPosition() == selectedUnit->getPosition() && *i != selectedUnit && (*i)->getStatus() == STATUS_UNCONSCIOUS && (*i)->isWoundable())
+				if ((*i)->getPosition() == selectedUnit->getPosition() && *i != selectedUnit && (*i)->getStatus() == STATUS_UNCONSCIOUS && ((*i)->isWoundable() || weaponRule->getAllowTargetImmune()) && weaponRule->getAllowTargetGround())
 				{
-					targetUnit = *i;
-					onGround = true;
+					if ((weaponRule->getAllowTargetFriend() && (*i)->getOriginalFaction() == FACTION_PLAYER) ||
+						(weaponRule->getAllowTargetNeutral() && (*i)->getOriginalFaction() == FACTION_NEUTRAL) ||
+						(weaponRule->getAllowTargetHostile() && (*i)->getOriginalFaction() == FACTION_HOSTILE))
+					{
+						targetUnit = *i;
+						onGround = true;
+					}
 				}
 			}
 
 			// search for target in front of the selected unit
-			if (!targetUnit)
+			if (!targetUnit && weaponRule->getAllowTargetStanding())
 			{
 				Position dest;
 				if (tileEngine->validMeleeRange(
@@ -3086,9 +3093,14 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 					0, &dest, false))
 				{
 					Tile *tile = _game->getSavedGame()->getSavedBattle()->getTile(dest);
-					if (tile != 0 && tile->getUnit() && tile->getUnit()->isWoundable())
+					if (tile != 0 && tile->getUnit() && (tile->getUnit()->isWoundable() || weaponRule->getAllowTargetImmune()))
 					{
-						targetUnit = tile->getUnit();
+						if ((weaponRule->getAllowTargetFriend() && tile->getUnit()->getOriginalFaction() == FACTION_PLAYER) ||
+							(weaponRule->getAllowTargetNeutral() && tile->getUnit()->getOriginalFaction() == FACTION_NEUTRAL) ||
+							(weaponRule->getAllowTargetHostile() && tile->getUnit()->getOriginalFaction() == FACTION_HOSTILE))
+						{
+							targetUnit = tile->getUnit();
+						}
 					}
 				}
 			}
@@ -3116,7 +3128,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 			else
 			{
 				// target unit not found => selected unit is the target (if self-heal is possible)
-				if (weapon->getRules()->getAllowSelfHeal())
+				if (weaponRule->getAllowTargetSelf())
 				{
 					targetUnit = selectedUnit;
 					_txtTooltip->setColor(Palette::blockOffset(_medikitBlue));
