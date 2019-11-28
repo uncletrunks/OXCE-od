@@ -20,6 +20,8 @@
 #include "RuleItem.h"
 #include "../Engine/Logger.h"
 #include "../Mod/Mod.h"
+#include "../Savegame/Craft.h"
+#include "../Savegame/ItemContainer.h"
 #include "../Savegame/WeightedOptions.h"
 #include <algorithm>
 
@@ -170,7 +172,7 @@ bool RuleStartingCondition::isVehiclePermitted(const std::string& vehicleType) c
  * @param itemType Item type name.
  * @return True if permitted, false otherwise.
  */
-bool RuleStartingCondition::isItemPermitted(const std::string& itemType, Mod* mod) const
+bool RuleStartingCondition::isItemPermitted(const std::string& itemType, Mod* mod, Craft* craft) const
 {
 	bool itemCheckSubResult = true; // if both item lists are empty, item is OK
 
@@ -212,7 +214,28 @@ bool RuleStartingCondition::isItemPermitted(const std::string& itemType, Mod* mo
 		RuleItem* item = mod->getItem(itemType);
 		if (item)
 		{
+			// primary categories
 			std::vector<std::string> itemCategories = item->getCategories();
+
+			// secondary categories ("inherited" from equipped ammo)
+			if (item->getBattleType() == BT_FIREARM)
+			{
+				for (auto& compatibleAmmoName : *item->getPrimaryCompatibleAmmo())
+				{
+					if (craft->getItems()->getItem(compatibleAmmoName) > 0)
+					{
+						RuleItem *ammoRule = mod->getItem(compatibleAmmoName);
+						if (ammoRule)
+						{
+							for (auto& cat : ammoRule->getCategories())
+							{
+								itemCategories.push_back(cat);
+							}
+						}
+					}
+				}
+			}
+
 			if (!itemCategories.empty())
 			{
 				// check all categories of the item

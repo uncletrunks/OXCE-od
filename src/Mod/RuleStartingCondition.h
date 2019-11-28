@@ -26,6 +26,7 @@ namespace OpenXcom
 {
 class Mod;
 class Armor;
+class Craft;
 
 /**
  * Represents a specific Starting Condition.
@@ -77,7 +78,7 @@ public:
 	/// Checks if the vehicle type is permitted.
 	bool isVehiclePermitted(const std::string& vehicleType) const;
 	/// Checks if the item type is permitted.
-	bool isItemPermitted(const std::string& itemType, Mod* mod) const;
+	bool isItemPermitted(const std::string& itemType, Mod* mod, Craft* craft) const;
 };
 
 }

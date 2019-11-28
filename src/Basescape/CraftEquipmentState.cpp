@@ -356,10 +356,10 @@ void CraftEquipmentState::initList()
 					{
 						for (auto& compatibleAmmoName : *rule->getPrimaryCompatibleAmmo())
 						{
-							if (c->getItems()->getItem(compatibleAmmoName) > 0)
+							if (_base->getStorageItems()->getItem(compatibleAmmoName) > 0 || c->getItems()->getItem(compatibleAmmoName) > 0)
 							{
 								RuleItem *ammoRule = _game->getMod()->getItem(compatibleAmmoName);
-								if (ammoRule)
+								if (ammoRule && ammoRule->isInventoryItem() && ammoRule->canBeEquippedToCraftInventory() && _game->getSavedGame()->isResearched(ammoRule->getRequirements()))
 								{
 									isOK = ammoRule->belongsToCategory(selectedCategory);
 									if (isOK) break;
