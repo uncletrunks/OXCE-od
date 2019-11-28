@@ -56,7 +56,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_battleType(BT_NONE), _fuseType(BFT_NONE), _fuseTriggerEvents{ }, _hiddenOnMinimap(false), _psiAttackName(), _primeActionName("STR_PRIME_GRENADE"), _unprimeActionName(), _primeActionMessage("STR_GRENADE_IS_ACTIVATED"), _unprimeActionMessage("STR_GRENADE_IS_DEACTIVATED"),
 	_twoHanded(false), _blockBothHands(false), _fixedWeapon(false), _fixedWeaponShow(false), _isConsumable(false), _isFireExtinguisher(false), _isExplodingInHands(false), _specialUseEmptyHand(false),
 	_defaultInvSlotX(0), _defaultInvSlotY(0), _waypoints(0), _invWidth(1), _invHeight(1),
-	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _medikitTargetSelf(false), _medikitTargetImmune(false), _medikitTargetFactions(7), _medikitTargetPositions(3),
+	_painKiller(0), _heal(0), _stimulant(0), _medikitType(BMT_NORMAL), _medikitTargetSelf(false), _medikitTargetImmune(false), _medikitTargetMatrix(63),
 	_woundRecovery(0), _healthRecovery(0), _stunRecovery(0), _energyRecovery(0), _manaRecovery(0), _moraleRecovery(0), _painKillerRecovery(1.0f),
 	_recoveryPoints(0), _armor(20), _turretType(-1),
 	_aiUseDelay(-1), _aiMeleeHitCount(25),
@@ -555,8 +555,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	}
 	_medikitTargetSelf = node["medikitTargetSelf"].as<bool>(_medikitTargetSelf);
 	_medikitTargetImmune = node["medikitTargetImmune"].as<bool>(_medikitTargetImmune);
-	_medikitTargetFactions = node["medikitTargetFactions"].as<int>(_medikitTargetFactions);
-	_medikitTargetPositions = node["medikitTargetPositions"].as<int>(_medikitTargetPositions);
+	_medikitTargetMatrix = node["medikitTargetMatrix"].as<int>(_medikitTargetMatrix);
 	_medikitBackground = node["medikitBackground"].as<std::string>(_medikitBackground);
 
 	_recoveryPoints = node["recoveryPoints"].as<int>(_recoveryPoints);

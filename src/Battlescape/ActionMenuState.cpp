@@ -329,9 +329,14 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 				// we can heal a unit that is at the same position, unconscious and healable(=woundable)
 				if ((*i)->getPosition() == _action->actor->getPosition() && *i != _action->actor && (*i)->getStatus() == STATUS_UNCONSCIOUS && ((*i)->isWoundable() || weapon->getAllowTargetImmune()) && weapon->getAllowTargetGround())
 				{
-					if ((weapon->getAllowTargetFriend() && (*i)->getOriginalFaction() == FACTION_PLAYER) ||
-						(weapon->getAllowTargetNeutral() && (*i)->getOriginalFaction() == FACTION_NEUTRAL) ||
-						(weapon->getAllowTargetHostile() && (*i)->getOriginalFaction() == FACTION_HOSTILE))
+					if ((*i)->getArmor()->getSize() != 1)
+					{
+						// never EVER apply anything to 2x2 units on the ground
+						continue;
+					}
+					if ((weapon->getAllowTargetFriendGround() && (*i)->getOriginalFaction() == FACTION_PLAYER) ||
+						(weapon->getAllowTargetNeutralGround() && (*i)->getOriginalFaction() == FACTION_NEUTRAL) ||
+						(weapon->getAllowTargetHostileGround() && (*i)->getOriginalFaction() == FACTION_HOSTILE))
 					{
 						targetUnit = *i;
 					}
@@ -348,9 +353,9 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 					Tile *tile = _game->getSavedGame()->getSavedBattle()->getTile(_action->target);
 					if (tile != 0 && tile->getUnit() && (tile->getUnit()->isWoundable() || weapon->getAllowTargetImmune()))
 					{
-						if ((weapon->getAllowTargetFriend() && tile->getUnit()->getOriginalFaction() == FACTION_PLAYER) ||
-							(weapon->getAllowTargetNeutral() && tile->getUnit()->getOriginalFaction() == FACTION_NEUTRAL) ||
-							(weapon->getAllowTargetHostile() && tile->getUnit()->getOriginalFaction() == FACTION_HOSTILE))
+						if ((weapon->getAllowTargetFriendStanding() && tile->getUnit()->getOriginalFaction() == FACTION_PLAYER) ||
+							(weapon->getAllowTargetNeutralStanding() && tile->getUnit()->getOriginalFaction() == FACTION_NEUTRAL) ||
+							(weapon->getAllowTargetHostileStanding() && tile->getUnit()->getOriginalFaction() == FACTION_HOSTILE))
 						{
 							targetUnit = tile->getUnit();
 						}

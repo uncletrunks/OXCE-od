@@ -190,7 +190,7 @@ private:
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
 	bool _medikitTargetSelf, _medikitTargetImmune;
-	int _medikitTargetFactions, _medikitTargetPositions;
+	int _medikitTargetMatrix;
 	std::string _medikitBackground;
 	int _woundRecovery, _healthRecovery, _stunRecovery, _energyRecovery, _manaRecovery, _moraleRecovery, _painKillerRecovery;
 	int _recoveryPoints;
@@ -523,13 +523,15 @@ public:
 	/// Gets the medikit's allowed targets.
 	bool getAllowTargetSelf() const { return _medikitTargetSelf; }
 	bool getAllowTargetImmune() const { return _medikitTargetImmune; }
-	bool getAllowTargetFriend() const { return _medikitTargetFactions & 1; }
-	bool getAllowTargetNeutral() const { return _medikitTargetFactions & 2; }
-	bool getAllowTargetHostile() const { return _medikitTargetFactions & 4; }
-	bool getAllowTargetStanding() const { return _medikitTargetPositions & 1; }
-	bool getAllowTargetGround() const { return _medikitTargetPositions & 2; }
-	int getMedikitTargetFactionsRaw() const { return _medikitTargetFactions; }
-	int getMedikitTargetPositionsRaw() const { return _medikitTargetPositions; }
+	bool getAllowTargetGround() const { return _medikitTargetMatrix & 21; } // 1 + 4 + 16
+	bool getAllowTargetStanding() const { return _medikitTargetMatrix & 42; } // 2 + 8 + 32
+	bool getAllowTargetFriendGround() const { return _medikitTargetMatrix & 1; }
+	bool getAllowTargetFriendStanding() const { return _medikitTargetMatrix & 2; }
+	bool getAllowTargetNeutralGround() const { return _medikitTargetMatrix & 4; }
+	bool getAllowTargetNeutralStanding() const { return _medikitTargetMatrix & 8; }
+	bool getAllowTargetHostileGround() const { return _medikitTargetMatrix & 16; }
+	bool getAllowTargetHostileStanding() const { return _medikitTargetMatrix & 32; }
+	int getMedikitTargetMatrixRaw() const { return _medikitTargetMatrix; }
 	/// Is this (medikit-type & items with prime) item consumable?
 	bool isConsumable() const;
 	/// Does this item extinguish fire?

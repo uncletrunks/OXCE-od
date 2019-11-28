@@ -3072,9 +3072,14 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 				// we can heal a unit that is at the same position, unconscious and healable(=woundable)
 				if ((*i)->getPosition() == selectedUnit->getPosition() && *i != selectedUnit && (*i)->getStatus() == STATUS_UNCONSCIOUS && ((*i)->isWoundable() || weaponRule->getAllowTargetImmune()) && weaponRule->getAllowTargetGround())
 				{
-					if ((weaponRule->getAllowTargetFriend() && (*i)->getOriginalFaction() == FACTION_PLAYER) ||
-						(weaponRule->getAllowTargetNeutral() && (*i)->getOriginalFaction() == FACTION_NEUTRAL) ||
-						(weaponRule->getAllowTargetHostile() && (*i)->getOriginalFaction() == FACTION_HOSTILE))
+					if ((*i)->getArmor()->getSize() != 1)
+					{
+						// never EVER apply anything to 2x2 units on the ground
+						continue;
+					}
+					if ((weaponRule->getAllowTargetFriendGround() && (*i)->getOriginalFaction() == FACTION_PLAYER) ||
+						(weaponRule->getAllowTargetNeutralGround() && (*i)->getOriginalFaction() == FACTION_NEUTRAL) ||
+						(weaponRule->getAllowTargetHostileGround() && (*i)->getOriginalFaction() == FACTION_HOSTILE))
 					{
 						targetUnit = *i;
 						onGround = true;
@@ -3095,9 +3100,9 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 					Tile *tile = _game->getSavedGame()->getSavedBattle()->getTile(dest);
 					if (tile != 0 && tile->getUnit() && (tile->getUnit()->isWoundable() || weaponRule->getAllowTargetImmune()))
 					{
-						if ((weaponRule->getAllowTargetFriend() && tile->getUnit()->getOriginalFaction() == FACTION_PLAYER) ||
-							(weaponRule->getAllowTargetNeutral() && tile->getUnit()->getOriginalFaction() == FACTION_NEUTRAL) ||
-							(weaponRule->getAllowTargetHostile() && tile->getUnit()->getOriginalFaction() == FACTION_HOSTILE))
+						if ((weaponRule->getAllowTargetFriendStanding() && tile->getUnit()->getOriginalFaction() == FACTION_PLAYER) ||
+							(weaponRule->getAllowTargetNeutralStanding() && tile->getUnit()->getOriginalFaction() == FACTION_NEUTRAL) ||
+							(weaponRule->getAllowTargetHostileStanding() && tile->getUnit()->getOriginalFaction() == FACTION_HOSTILE))
 						{
 							targetUnit = tile->getUnit();
 						}

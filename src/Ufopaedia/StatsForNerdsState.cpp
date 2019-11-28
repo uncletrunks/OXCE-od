@@ -1709,8 +1709,7 @@ void StatsForNerdsState::initItemList()
 	addBattleMediKitType(ss, itemRule->getMediKitType(), "medikitType");
 	addBoolean(ss, itemRule->getAllowTargetSelf(), "medikitTargetSelf");
 	addBoolean(ss, itemRule->getAllowTargetImmune(), "medikitTargetImmune");
-	addInteger(ss, itemRule->getMedikitTargetFactionsRaw(), "medikitTargetFactions", 7);
-	addInteger(ss, itemRule->getMedikitTargetPositionsRaw(), "medikitTargetPositions", 3);
+	addInteger(ss, itemRule->getMedikitTargetMatrixRaw(), "medikitTargetMatrix", 63);
 	addBoolean(ss, itemRule->isConsumable(), "isConsumable");
 	addInteger(ss, itemRule->getPainKillerQuantity(), "painKiller");
 	addInteger(ss, itemRule->getHealQuantity(), "heal");
