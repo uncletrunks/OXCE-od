@@ -228,7 +228,9 @@ pl:
   armor: "Wytrzymałość"
 #
   medikitType: "Typ apteczki"
-  allowSelfHeal: "Użycie na sobie?"
+  medikitTargetSelf: "Użycie apteczki na sobie?"
+  medikitTargetImmune: "Użycie apteczki na celach niewrażliwich na krwawienie?"
+  medikitTargetMatrix: "Dozwolone cele dla apteczki"
   isConsumable: "Zużywa się?"
   painKiller: "Dawek środków przeciwbólowych"
   heal: "Dawek lekarstw"

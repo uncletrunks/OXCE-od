@@ -228,7 +228,9 @@ ru:
   armor: "Броня"
 #
   medikitType: "Тип медкомплекта"
-  allowSelfHeal: "Применим на себе?"
+  medikitTargetSelf: "Применение медкомплекта на себе?"
+  medikitTargetImmune: "Применение  медкомплекта на истекающем кровью?"
+  medikitTargetMatrix: ""
   isConsumable: "Расходуется?"
   painKiller: "Кол-во обезболивающих"
   heal: "Количество перевязок"
