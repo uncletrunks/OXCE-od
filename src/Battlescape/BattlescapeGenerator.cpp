@@ -484,7 +484,7 @@ void BattlescapeGenerator::nextStage()
 		unit->clearVisibleUnits();
 	}
 
-	generateMap(script);
+	generateMap(script, ruleDeploy->getCustomUfoName());
 
 	setupObjectives(ruleDeploy);
 
@@ -695,7 +695,7 @@ void BattlescapeGenerator::run()
 		throw Exception("Map generator encountered an error: " + _terrain->getScript() + " script not found.");
 	}
 
-	generateMap(script);
+	generateMap(script, ruleDeploy->getCustomUfoName());
 
 	setupObjectives(ruleDeploy);
 
@@ -2063,8 +2063,9 @@ void BattlescapeGenerator::loadWeapons(const std::vector<BattleItem*> &itemList)
 /**
  * Generates a map (set of tiles) for a new battlescape game.
  * @param script the script to use to build the map.
+ * @param customUfoName custom UFO name to use for the dummy/blank 'addUFO' mapscript command.
  */
-void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
+void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, const std::string &customUfoName)
 {
 	// set our ambient sound
 	if (_terrain->getAmbience() != -1)
@@ -2349,6 +2350,11 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script)
 					else if (_ufo)
 					{
 						ufoTerrain = _ufo->getRules()->getBattlescapeTerrainData();
+					}
+					else if (!customUfoName.empty())
+					{
+						auto customUfoRule = _game->getMod()->getUfo(customUfoName, true); // crash if it doesn't exist, let the modder know what's going on
+						ufoTerrain = customUfoRule->getBattlescapeTerrainData();
 					}
 
 					if (ufoTerrain)

@@ -66,6 +66,7 @@ class AlienDeployment
 {
 private:
 	std::string _type;
+	std::string _customUfo;
 	std::string _enviroEffects, _startingCondition;
 	std::string _unlockedResearch, _missionBountyItem;
 	int _bughuntMinTurn;
@@ -102,6 +103,8 @@ public:
 	void load(const YAML::Node& node, Mod *mod);
 	/// Gets the Alien Deployment's type.
 	std::string getType() const;
+	/// Gets the custom UFO name to use for the dummy/blank 'addUFO' mapscript command.
+	const std::string& getCustomUfoName() const { return _customUfo; }
 	/// Gets the Alien Deployment's enviro effects.
 	const std::string& getEnviroEffects() const;
 	/// Gets the Alien Deployment's starting condition.
