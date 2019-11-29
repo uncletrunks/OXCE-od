@@ -353,6 +353,26 @@ static bool positionInRangeXY(Position a, Position b, int diff)
 	return std::abs(a.x - b.x) <= diff && std::abs(a.y - b.y) <= diff;
 }
 
+namespace
+{
+
+static const int ArrowBobOffsets[8] = {0,1,2,1,0,1,2,1};
+
+int getArrowBobForFrame(int frame)
+{
+	return ArrowBobOffsets[frame % 8];
+}
+
+int getShadePulseForFrame(int shade, int frame)
+{
+	if (shade > 7) shade = 7;
+	if (shade < 2) shade = 2;
+	shade += (ArrowBobOffsets[frame % 8] * 2 - 2);
+	return shade;
+}
+
+}
+
 /**
  * Draw part of unit graphic that overlap current tile.
  * @param surface
@@ -363,7 +383,7 @@ static bool positionInRangeXY(Position a, Position b, int diff)
  * @param obstacleShade
  * @param topLayer
  */
-void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, int shade, int obstacleShade, bool topLayer)
+void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, bool topLayer)
 {
 	const int tileFoorWidth = 32;
 	const int tileFoorHeight = 16;
@@ -536,21 +556,54 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	_camera->convertMapToScreen(unitTile->getPosition() + Position(0,0, unitFromBelow ? -1 : 0), &tileScreenPosition);
 	tileScreenPosition += _camera->getMapOffset();
 
+	//get shade helpers
+	auto getTileShade = [&](Tile* tile)
+	{
+		return tile ? (tile->isDiscovered(O_FLOOR) ? reShade(tile) : 16) : 16;
+	};
+	auto getMixedTileShade = [&](Tile* tile, int heigthOffset, bool bellow)
+	{
+		int shadeLower = 0;
+		int shadeUpper = 0;
+		if (bellow)
+		{
+			shadeLower = getTileShade(_save->getBelowTile(tile));
+			shadeUpper = getTileShade(tile);
+		}
+		else
+		{
+			shadeLower = getTileShade(tile);
+			shadeUpper = getTileShade(_save->getAboveTile(tile));
+		}
+
+		return ((Position::TileZ + heigthOffset) * shadeLower + (-heigthOffset) * shadeUpper) / Position::TileZ;
+	};
+
 	// draw unit
-	Position offset;
-	int shadeOffset;
-	calculateWalkingOffset(bu, &offset, &shadeOffset);
-	int tileShade = currTile->isDiscovered(O_FLOOR) ? reShade(currTile) : 16;
-	int unitShade = (tileShade * (16 - shadeOffset) + shade * shadeOffset) / 16;
+	auto shade = 0;
+	auto offsets = calculateWalkingOffset(bu);
+	if (moving)
+	{
+		const auto start = bu->getPosition();
+		const auto end = bu->getDestination();
+		const auto minLevel = std::min(start.z, end.z);
+		const auto startShade = getMixedTileShade(_save->getTile(start), start.z == minLevel ? offsets.TerrianLevelOffset : 0, false);
+		const auto endShade = getMixedTileShade(_save->getTile(end), end.z == minLevel ? offsets.TerrianLevelOffset : 0, false);
+		shade = (startShade * (16 - offsets.NormalizedMovePhase) + endShade * offsets.NormalizedMovePhase) / 16;
+	}
+	else
+	{
+		shade = getMixedTileShade(currTile, offsets.TerrianLevelOffset, unitFromBelow);
+		if (!moving && unitTile->getObstacle(4))
+		{
+			shade = getShadePulseForFrame(shade, _animFrame);
+		}
+	}
 	if (_debugVisionMode == 1)
 	{
-		unitShade = std::min(NIGHT_VISION_SHADE, unitShade);
+		shade = std::min(NIGHT_VISION_SHADE, shade);
 	}
-	if (!moving && unitTile->getObstacle(4))
-	{
-		unitShade = obstacleShade;
-	}
-	unitSprite.draw(bu, part, tileScreenPosition.x + offset.x, tileScreenPosition.y + offset.y, unitShade, mask, _isAltPressed);
+	unitSprite.draw(bu, part, tileScreenPosition.x + offsets.ScreenOffset.x, tileScreenPosition.y + offsets.ScreenOffset.y, shade, mask, _isAltPressed);
 }
 
 /**
@@ -578,8 +631,6 @@ void Map::drawTerrain(Surface *surface)
 
 	const int halfAnimFrame = (_animFrame / 2) % 4;
 	const int halfAnimFrameRest = (_animFrame % 2);
-
-	static const int arrowBob[8] = {0,1,2,1,0,1,2,1};
 
 	NumberText *_numWaypid = 0;
 
@@ -736,9 +787,7 @@ void Map::drawTerrain(Surface *surface)
 						{
 							if (tile->isObstacle())
 							{
-								if (tileShade > 7) obstacleShade = 7;
-								if (tileShade < 2) obstacleShade = 2;
-								obstacleShade += (arrowBob[_animFrame % 8] * 2 - 2);
+								obstacleShade = getShadePulseForFrame(tileShade, _animFrame);
 							}
 						}
 					}
@@ -804,7 +853,7 @@ void Map::drawTerrain(Surface *surface)
 
 						for (int b = 0; b < backPosSize; ++b)
 						{
-							drawUnit(unitSprite, _save->getTile(mapPosition + backPos[b]), tile, screenPosition, tileShade, obstacleShade, topLayer);
+							drawUnit(unitSprite, _save->getTile(mapPosition + backPos[b]), tile, screenPosition, topLayer);
 						}
 					}
 
@@ -985,7 +1034,7 @@ void Map::drawTerrain(Surface *surface)
 					}
 					unit = tile->getUnit();
 					// Draw soldier from this tile or below
-					drawUnit(unitSprite, tile, tile, screenPosition, tileShade, obstacleShade, topLayer);
+					drawUnit(unitSprite, tile, tile, screenPosition, topLayer);
 
 					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
 					{
@@ -1002,7 +1051,7 @@ void Map::drawTerrain(Surface *surface)
 
 						for (int f = 0; f < frontPosSize; ++f)
 						{
-							drawUnit(unitSprite, _save->getTile(mapPosition + frontPos[f]), tile, screenPosition, tileShade, obstacleShade, topLayer);
+							drawUnit(unitSprite, _save->getTile(mapPosition + frontPos[f]), tile, screenPosition, topLayer);
 						}
 					}
 
@@ -1448,8 +1497,7 @@ void Map::drawTerrain(Surface *surface)
 	{
 		_camera->convertMapToScreen(unit->getPosition(), &screenPosition);
 		screenPosition += _camera->getMapOffset();
-		Position offset;
-		calculateWalkingOffset(unit, &offset);
+		Position offset = calculateWalkingOffset(unit).ScreenOffset;
 		if (unit->getArmor()->getSize() > 1)
 		{
 			offset.y += 4;
@@ -1461,7 +1509,7 @@ void Map::drawTerrain(Surface *surface)
 		}
 		if (this->getCursorType() != CT_NONE)
 		{
-			_arrow->blitNShade(surface, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + arrowBob[_animFrame % 8], 0);
+			_arrow->blitNShade(surface, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + getArrowBobForFrame(_animFrame), 0);
 		}
 	}
 	// Draw motion scanner arrows
@@ -1488,7 +1536,7 @@ void Map::drawTerrain(Surface *surface)
 				}
 				if (this->getCursorType() != CT_NONE)
 				{
-					_arrow->blitNShade(surface, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + arrowBob[_animFrame % 8], 0);
+					_arrow->blitNShade(surface, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + getArrowBobForFrame(_animFrame), 0);
 				}
 			}
 		}
@@ -1737,6 +1785,23 @@ void Map::animate(bool redraw)
 	// animate certain units (large flying units have a propulsion animation)
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
+		if (_save->getDepth() > 0)
+		{
+			(*i)->setFloorAbove(false);
+
+			// make sure this unit isn't obscured by the floor above him, otherwise it looks weird.
+			if (_camera->getViewLevel() > (*i)->getPosition().z)
+			{
+				for (int z = std::min(_camera->getViewLevel(), _save->getMapSizeZ() - 1); z != (*i)->getPosition().z; --z)
+				{
+					if (!_save->getTile(Position((*i)->getPosition().x, (*i)->getPosition().y, z))->hasNoFloor(0))
+					{
+						(*i)->setFloorAbove(true);
+						break;
+					}
+				}
+			}
+		}
 		if (_save->getDepth() > 0 && !(*i)->getFloorAbove())
 		{
 			(*i)->breathe();
@@ -1762,8 +1827,10 @@ void Map::getSelectorPosition(Position *pos) const
  * @param unit Pointer to BattleUnit.
  * @param offset Pointer to the offset to return the calculation.
  */
-void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeOffset)
+UnitWalkingOffset Map::calculateWalkingOffset(const BattleUnit *unit) const
 {
+	UnitWalkingOffset result = { };
+
 	int offsetX[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 	int offsetY[8] = { 1, 0, -1, -1, -1, 0, 1, 1 };
 	int phase = unit->getWalkingPhase() + unit->getDiagonalWalkingPhase();
@@ -1772,13 +1839,10 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 	int endphase = 8 + 8 * (dir % 2);
 	int size = unit->getArmor()->getSize();
 
-	offset->x = 0;
-	offset->y = 0;
+	result.ScreenOffset.x = 0;
+	result.ScreenOffset.y = 0;
 
-	if (shadeOffset)
-	{
-		*shadeOffset = endphase == 16 ? phase : phase * 2;
-	}
+	result.NormalizedMovePhase = endphase == 16 ? phase : phase * 2;
 
 	if (size > 1)
 	{
@@ -1800,13 +1864,13 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 	{
 		if (phase < midphase)
 		{
-			offset->x = phase * 2 * offsetX[dir];
-			offset->y = - phase * offsetY[dir];
+			result.ScreenOffset.x = phase * 2 * offsetX[dir];
+			result.ScreenOffset.y = - phase * offsetY[dir];
 		}
 		else
 		{
-			offset->x = (phase - endphase) * 2 * offsetX[dir];
-			offset->y = - (phase - endphase) * offsetY[dir];
+			result.ScreenOffset.x = (phase - endphase) * 2 * offsetX[dir];
+			result.ScreenOffset.y = - (phase - endphase) * offsetY[dir];
 		}
 	}
 
@@ -1827,7 +1891,7 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 				// going up a level, so toLevel 0 becomes -24, -8 becomes -16
 				toLevel = -Position::TileZ*(unit->getDestination().z - unit->getPosition().z) + abs(toLevel);
 			}
-			offset->y += ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
+			result.TerrianLevelOffset = ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
 		}
 		else
 		{
@@ -1845,13 +1909,15 @@ void Map::calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeO
 				// going up a level, so fromLevel 0 becomes +24, -8 becomes 16
 				fromLevel = Position::TileZ*(unit->getDestination().z - unit->getLastPosition().z) - abs(fromLevel);
 			}
-			offset->y += ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
+			result.TerrianLevelOffset = ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
 		}
 	}
 	else
 	{
-		offset->y += getTerrainLevel(unit->getPosition(), size);
+		result.TerrianLevelOffset = getTerrainLevel(unit->getPosition(), size);
 	}
+	result.ScreenOffset.y += result.TerrianLevelOffset;
+	return result;
 }
 
 

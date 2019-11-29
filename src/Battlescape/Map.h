@@ -45,6 +45,16 @@ enum CursorType { CT_NONE, CT_NORMAL, CT_AIM, CT_PSI, CT_WAYPOINT, CT_THROW };
 enum TilePart : int;
 
 /**
+ * Helper class that return all imporat data about unit move
+ */
+struct UnitWalkingOffset
+{
+	Position ScreenOffset;
+	int NormalizedMovePhase;
+	int TerrianLevelOffset;
+};
+
+/**
  * Interactive map of the battlescape.
  */
 class Map : public InteractiveSurface
@@ -91,7 +101,7 @@ private:
 	Text *_txtAccuracy;
 	SurfaceSet *_projectileSet;
 
-	void drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position tileScreenPosition, int shade, int obstacleShade, bool topLayer);
+	void drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position tileScreenPosition, bool topLayer);
 	void drawTerrain(Surface *surface);
 	int getTerrainLevel(const Position& pos, int size) const;
 	int getWallShade(TilePart part, Tile* tileFrot);
@@ -128,7 +138,7 @@ public:
 	/// Gets the currently selected position.
 	void getSelectorPosition(Position *pos) const;
 	/// Calculates the offset of a soldier, when it is walking in the middle of 2 tiles.
-	void calculateWalkingOffset(BattleUnit *unit, Position *offset, int *shadeOffset = 0);
+	UnitWalkingOffset calculateWalkingOffset(const BattleUnit *unit) const;
 	/// Sets the 3D cursor type.
 	void setCursorType(CursorType type, int size = 1);
 	/// Gets the 3D cursor type.
