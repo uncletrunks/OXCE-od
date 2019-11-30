@@ -767,7 +767,7 @@ void Map::drawTerrain(Surface *surface)
 		bool topLayer = itZ == endZ;
 		for (int itY = beginY; itY < endY; itY++)
 		{
-			mapPosition = Position(0, itY, itZ);
+			mapPosition = Position(beginX, itY, itZ);
 			tile = _save->getTile(mapPosition);
 			for (int itX = beginX; itX < endX; itX++, mapPosition.x++, tile++)
 			{
