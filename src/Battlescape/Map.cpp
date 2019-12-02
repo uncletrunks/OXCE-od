@@ -576,7 +576,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 			shadeUpper = getTileShade(_save->getAboveTile(tile));
 		}
 
-		return ((Position::TileZ + heightOffset) * shadeLower + (-heightOffset) * shadeUpper) / Position::TileZ;
+		return Interpolate(shadeLower, shadeUpper, -heightOffset, Position::TileZ);
 	};
 
 	// draw unit
@@ -589,7 +589,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 		const auto minLevel = std::min(start.z, end.z);
 		const auto startShade = getMixedTileShade(_save->getTile(start), start.z == minLevel ? offsets.TerrainLevelOffset : 0, false);
 		const auto endShade = getMixedTileShade(_save->getTile(end), end.z == minLevel ? offsets.TerrainLevelOffset : 0, false);
-		shade = (startShade * (16 - offsets.NormalizedMovePhase) + endShade * offsets.NormalizedMovePhase) / 16;
+		shade = Interpolate(startShade, endShade, offsets.NormalizedMovePhase, 16);
 	}
 	else
 	{
@@ -1891,7 +1891,7 @@ UnitWalkingOffset Map::calculateWalkingOffset(const BattleUnit *unit) const
 				// going up a level, so toLevel 0 becomes -24, -8 becomes -16
 				toLevel = -Position::TileZ*(unit->getDestination().z - unit->getPosition().z) + abs(toLevel);
 			}
-			result.TerrainLevelOffset = ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
+			result.TerrainLevelOffset = Interpolate(fromLevel, toLevel, phase, endphase);
 		}
 		else
 		{
@@ -1909,7 +1909,7 @@ UnitWalkingOffset Map::calculateWalkingOffset(const BattleUnit *unit) const
 				// going up a level, so fromLevel 0 becomes +24, -8 becomes 16
 				fromLevel = Position::TileZ*(unit->getDestination().z - unit->getLastPosition().z) - abs(fromLevel);
 			}
-			result.TerrainLevelOffset = ((fromLevel * (endphase - phase)) / endphase) + ((toLevel * (phase)) / endphase);
+			result.TerrainLevelOffset = Interpolate(fromLevel, toLevel, phase, endphase);
 		}
 	}
 	else
