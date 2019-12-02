@@ -127,7 +127,7 @@ protected:
 public:
 	/// Creates a tile.
 	Tile(Position pos);
-	/// Compy constructor.
+	/// Copy constructor.
 	Tile(Tile&&) = default;
 	/// Cleans up a tile.
 	~Tile();
@@ -171,8 +171,8 @@ public:
 	}
 
 	/**
-	 * If an object stand on this tile, this returns how high the unit is it standing.
-	 * @return the level in pixels (so negative values are higher)
+	 * Gets the height of the terrain (dirt/stairs/etc.) on this tile.
+	 * @return the height in voxels (more negative values are higher, e.g. -8 = lower stairs, -16 = higher stairs)
 	 */
 	int getTerrainLevel() const
 	{
@@ -225,7 +225,7 @@ public:
 	}
 
 	/**
-	 * Check if object should be draw behind or in front of unit.
+	 * Check if an object should be drawn behind or in front of a unit.
 	 * @param tp Part to check
 	 * @return True if its back object.
 	 */

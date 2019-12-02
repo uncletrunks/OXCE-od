@@ -280,7 +280,7 @@ public:
 
 		bool operator!=(const ZipIterator& r)
 		{
-			return first != r.first && second != r.second; //zip will stop when one of ranges ends, this is why `&&` isntade of `||`
+			return first != r.first && second != r.second; //zip will stop when one of ranges ends, this is why `&&` instead of `||`
 		}
 	};
 
@@ -376,7 +376,7 @@ public:
 	};
 
 	/**
-	 * Crate range from `min` to `max` (excluding), if `max > min` it return empty range.
+	 * Create range from `min` to `max` (excluding), if `max > min` it return empty range.
 	 * @param min minimum value of range
 	 * @param max maximum value of range
 	 * @return
@@ -395,7 +395,7 @@ public:
 	}
 
 	/**
-	 * Crate range from zero to less than `end`
+	 * Create range from zero to less than `end`
 	 * @param end
 	 * @return
 	 */

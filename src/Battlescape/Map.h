@@ -45,13 +45,13 @@ enum CursorType { CT_NONE, CT_NORMAL, CT_AIM, CT_PSI, CT_WAYPOINT, CT_THROW };
 enum TilePart : int;
 
 /**
- * Helper class that return all imporat data about unit move
+ * Helper class that returns all important data about the unit movement
  */
 struct UnitWalkingOffset
 {
 	Position ScreenOffset;
 	int NormalizedMovePhase;
-	int TerrianLevelOffset;
+	int TerrainLevelOffset;
 };
 
 /**

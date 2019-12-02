@@ -82,7 +82,7 @@ public:
 	bool isDoor() const;
 	/// Gets whether this is a grav lift.
 	bool isGravLift() const;
-	/// Gets if object should be draw behind unit or on front of unit (if it work as S or E wall)
+	/// Gets whether this should be drawn behind a unit or in front of a unit (i.e. if it works as a S or E wall).
 	bool isBackTileObject() const;
 	/// Sets all kinds of flags.
 	void setFlags(bool isUfoDoor, bool stopLOS, bool isNoFloor, int bigWall, bool isGravLift, bool isDoor, bool blockFire, bool blockSmoke, bool baseModule);
