@@ -67,6 +67,7 @@ Tile::Tile(Position pos): _pos(pos), _unit(0), _visible(false), _preview(-1), _T
 	{
 		_objectsCache[i].discovered = 0;
 	}
+	_cache.isNoFloor = 1;
 }
 
 /**
