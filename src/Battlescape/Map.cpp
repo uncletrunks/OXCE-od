@@ -1842,8 +1842,6 @@ UnitWalkingOffset Map::calculateWalkingOffset(const BattleUnit *unit) const
 	result.ScreenOffset.x = 0;
 	result.ScreenOffset.y = 0;
 
-	result.NormalizedMovePhase = endphase == 16 ? phase : phase * 2;
-
 	if (size > 1)
 	{
 		if (dir < 1 || dir > 5)
@@ -1873,6 +1871,8 @@ UnitWalkingOffset Map::calculateWalkingOffset(const BattleUnit *unit) const
 			result.ScreenOffset.y = - (phase - endphase) * offsetY[dir];
 		}
 	}
+
+	result.NormalizedMovePhase = endphase == 16 ? phase : phase * 2;
 
 	// If we are walking in between tiles, interpolate it's terrain level.
 	if (unit->getStatus() == STATUS_WALKING || unit->getStatus() == STATUS_FLYING)
