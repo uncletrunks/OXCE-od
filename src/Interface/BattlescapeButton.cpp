@@ -162,7 +162,7 @@ void BattlescapeButton::initSurfaces()
 		for (int x = 0, y = 0; x < getWidth() && y < getHeight();)
 		{
 			Uint8 pixel = getPixel(x, y);
-			for (int i = 0; i != sizeof(colorFrom)/sizeof(colorFrom[0]); ++i)
+			for (size_t i = 0; i != std::size(colorFrom); ++i)
 			{
 				if (pixel == colorFrom[i])
 				{

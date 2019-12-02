@@ -104,7 +104,7 @@
 #include "RuleSoldierTransformation.h"
 #include "RuleSoldierBonus.h"
 
-#define ARRAYLEN(x) (sizeof(x) / sizeof(x[0]))
+#define ARRAYLEN(x) (std::size(x))
 
 namespace OpenXcom
 {

@@ -843,15 +843,14 @@ void Map::drawTerrain(Surface *surface)
 					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
 					{
 						// special handling for a moving unit in background of tile.
-						const int backPosSize = 3;
-						Position backPos[backPosSize] =
+						Position backPos[] =
 						{
 							Position(0, -1, 0),
 							Position(-1, -1, 0),
 							Position(-1, 0, 0),
 						};
 
-						for (int b = 0; b < backPosSize; ++b)
+						for (size_t b = 0; b < std::size(backPos); ++b)
 						{
 							drawUnit(unitSprite, _save->getTile(mapPosition + backPos[b]), tile, screenPosition, topLayer);
 						}
@@ -1039,8 +1038,7 @@ void Map::drawTerrain(Surface *surface)
 					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
 					{
 						// special handling for a moving unit in foreground of tile.
-						const int frontPosSize = 5;
-						Position frontPos[frontPosSize] =
+						Position frontPos[] =
 						{
 							Position(-1, +1, 0),
 							Position(0, +1, 0),
@@ -1049,7 +1047,7 @@ void Map::drawTerrain(Surface *surface)
 							Position(+1, -1, 0),
 						};
 
-						for (int f = 0; f < frontPosSize; ++f)
+						for (size_t f = 0; f < std::size(frontPos); ++f)
 						{
 							drawUnit(unitSprite, _save->getTile(mapPosition + frontPos[f]), tile, screenPosition, topLayer);
 						}

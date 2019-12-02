@@ -160,7 +160,7 @@ bool ExtraSprites::isImageFile(const std::string &filename)
 {
 	static const std::string exts[] = { "PNG", "GIF", "BMP", "LBM", "IFF", "PCX", "TGA", "TIF", "TIFF" };
 
-	for (size_t i = 0; i < sizeof(exts) / sizeof(exts[0]); ++i)
+	for (size_t i = 0; i < std::size(exts); ++i)
 	{
 		if (CrossPlatform::compareExt(filename, exts[i]))
 			return true;
