@@ -297,6 +297,7 @@ void CraftEquipmentState::initList()
 	bool categoryFilterEnabled = (selectedCategory != "STR_ALL");
 	bool categoryUnassigned = (selectedCategory == "STR_UNASSIGNED");
 	bool categoryEquipped = (selectedCategory == "STR_EQUIPPED");
+	bool shareAmmoCategories = _game->getMod()->getShareAmmoCategories();
 
 	Craft *c = _base->getCrafts()->at(_craft);
 
@@ -352,7 +353,7 @@ void CraftEquipmentState::initList()
 				else
 				{
 					bool isOK = rule->belongsToCategory(selectedCategory);
-					if (!isOK && rule->getBattleType() == BT_FIREARM)
+					if (shareAmmoCategories && !isOK && rule->getBattleType() == BT_FIREARM)
 					{
 						for (auto& compatibleAmmoName : *rule->getPrimaryCompatibleAmmo())
 						{

@@ -218,7 +218,7 @@ bool RuleStartingCondition::isItemPermitted(const std::string& itemType, Mod* mo
 			std::vector<std::string> itemCategories = item->getCategories();
 
 			// secondary categories ("inherited" from equipped ammo)
-			if (item->getBattleType() == BT_FIREARM)
+			if (mod->getShareAmmoCategories() && item->getBattleType() == BT_FIREARM)
 			{
 				for (auto& compatibleAmmoName : *item->getPrimaryCompatibleAmmo())
 				{

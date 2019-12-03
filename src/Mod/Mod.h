@@ -208,7 +208,7 @@ private:
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
-	bool _useCustomCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
+	bool _useCustomCategories, _shareAmmoCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	int _alienInventoryOffsetX, _alienInventoryOffsetBigUnit;
 	bool _hidePediaInfoButton, _extraNerdyPediaInfo;
 	bool _giveScoreAlsoForResearchedArtifacts, _statisticalBulletConservation, _stunningImprovesMorale;
@@ -623,6 +623,8 @@ public:
 	int getPerformanceBonusFactor() const { return _performanceBonusFactor; }
 	/// Should custom categories be used in Buy/Sell/Transfer GUIs?
 	bool getUseCustomCategories() const { return _useCustomCategories; }
+	/// Should weapons "inherit" categories of their ammo?
+	bool getShareAmmoCategories() const { return _shareAmmoCategories; }
 	/// Should distance in dogfight GUI be shown in kilometers?
 	bool getShowDogfightDistanceInKm() const { return _showDogfightDistanceInKm; }
 	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
