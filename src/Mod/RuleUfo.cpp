@@ -34,7 +34,7 @@ RuleUfo::RuleUfo(const std::string &type) :
 	_power(0), _range(0), _score(0), _reload(0), _breakOffTime(0), _missionScore(1),
 	_hunterKillerPercentage(0), _huntMode(0), _huntSpeed(100), _huntBehavior(2),
 	_missilePower(0),
-	_fireSound(-1), _alertSound(-1),
+	_fireSound(-1), _alertSound(-1), _huntAlertSound(-1),
 	_battlescapeTerrainData(0), _stats(), _statsRaceBonus()
 {
 	_stats.sightRange = 268;
@@ -114,6 +114,7 @@ void RuleUfo::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 
 	mod->loadSoundOffset(_type, _fireSound, node["fireSound"], "GEO.CAT");
 	mod->loadSoundOffset(_type, _alertSound, node["alertSound"], "GEO.CAT");
+	mod->loadSoundOffset(_type, _huntAlertSound, node["huntAlertSound"], "GEO.CAT");
 
 	_ufoScripts.load(_type, node, parsers.ufoScripts);
 	_scriptValues.load(node, parsers.getShared());
@@ -272,12 +273,21 @@ int RuleUfo::getFireSound() const
 }
 
 /**
- * Gets the UFO's alert sound.
+ * Gets the UFO's alert sound (UFO detected alert).
  * @return The alert sound ID.
  */
 int RuleUfo::getAlertSound() const
 {
 	return _alertSound;
+}
+
+/**
+ * Gets the UFO's alert sound (UFO on intercept course alert).
+ * @return The alert sound ID.
+ */
+int RuleUfo::getHuntAlertSound() const
+{
+	return _huntAlertSound;
 }
 
 /**

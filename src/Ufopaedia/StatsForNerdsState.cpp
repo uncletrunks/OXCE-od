@@ -2987,6 +2987,11 @@ void StatsForNerdsState::initUfoList()
 		tmpSoundVector.clear();
 		tmpSoundVector.push_back(ufoRule->getAlertSound());
 		addSoundVectorResourcePaths(ss, mod, "GEO.CAT", tmpSoundVector);
+
+		addInteger(ss, ufoRule->getHuntAlertSound(), "huntAlertSound", -1);
+		tmpSoundVector.clear();
+		tmpSoundVector.push_back(ufoRule->getHuntAlertSound());
+		addSoundVectorResourcePaths(ss, mod, "GEO.CAT", tmpSoundVector);
 	}
 }
 

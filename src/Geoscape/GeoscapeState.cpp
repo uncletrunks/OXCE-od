@@ -28,6 +28,7 @@
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Screen.h"
+#include "../Engine/Sound.h"
 #include "../Engine/Surface.h"
 #include "../Engine/Options.h"
 #include "../Engine/Collections.h"
@@ -1531,6 +1532,10 @@ void GeoscapeState::ufoHuntingAndEscorting()
 						(*ufo)->setId(_game->getSavedGame()->getId("STR_UFO"));
 					}
 					// inform the player
+					if ((*ufo)->getRules()->getHuntAlertSound() > -1)
+					{
+						_game->getMod()->getSound("GEO.CAT", (*ufo)->getRules()->getHuntAlertSound())->play();
+					}
 					std::string msg = tr("STR_UFO_STARTED_HUNTING")
 						.arg((*ufo)->getName(_game->getLanguage()))
 						.arg(newTarget->getName(_game->getLanguage()));
