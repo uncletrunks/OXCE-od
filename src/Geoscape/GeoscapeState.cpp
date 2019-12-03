@@ -3445,8 +3445,11 @@ void GeoscapeState::determineAlienMissions()
 
 			// 3. randomly generated repeatable events
 			{
-				auto eventRules = mod->getEvent(eventCommand->generate(save->getMonthsPassed()), true);
-				toBeGenerated.push_back(eventRules);
+				auto eventRules = mod->getEvent(eventCommand->generate(save->getMonthsPassed()), false);
+				if (eventRules)
+				{
+					toBeGenerated.push_back(eventRules);
+				}
 			}
 
 			// 4. generate

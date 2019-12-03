@@ -89,6 +89,9 @@ void RuleEventScript::load(const YAML::Node &node)
  */
 std::string RuleEventScript::generate(const size_t monthsPassed) const
 {
+	if (_eventWeights.empty())
+		return std::string();
+
 	std::vector<std::pair<size_t, WeightedOptions*> >::const_reverse_iterator rw;
 	rw = _eventWeights.rbegin();
 	while (monthsPassed < rw->first)
