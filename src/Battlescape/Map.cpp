@@ -383,7 +383,7 @@ int getShadePulseForFrame(int shade, int frame)
  * @param obstacleShade
  * @param topLayer
  */
-void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, bool topLayer)
+void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, bool topLayer, bool checkUpperUnit)
 {
 	const int tileFoorWidth = 32;
 	const int tileFoorHeight = 16;
@@ -396,12 +396,26 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	BattleUnit* bu = unitTile->getOverlappingUnit(_save, TUO_ALWAYS);
 	Position unitOffset;
 	bool unitFromBelow = false;
+	bool unitFromAbove = false;
 	if (bu)
 	{
 		if (bu != unitTile->getUnit())
 		{
 			unitFromBelow = true;
 		}
+	}
+	else if (checkUpperUnit && unitTile == currTile)
+	{
+		auto upperTile = _save->getAboveTile(unitTile);
+		if (upperTile && upperTile->hasNoFloor(_save))
+		{
+			bu = upperTile->getUnit();
+		}
+		if (!bu)
+		{
+			return;
+		}
+		unitFromAbove = true;
 	}
 	else
 	{
@@ -553,7 +567,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	}
 
 	Position tileScreenPosition;
-	_camera->convertMapToScreen(unitTile->getPosition() + Position(0,0, unitFromBelow ? -1 : 0), &tileScreenPosition);
+	_camera->convertMapToScreen(unitTile->getPosition() + Position(0,0, (-unitFromBelow) + (+unitFromAbove)), &tileScreenPosition);
 	tileScreenPosition += _camera->getMapOffset();
 
 	//get shade helpers
@@ -778,6 +792,7 @@ void Map::drawTerrain(Surface *surface)
 				if (screenPosition.x > -_spriteWidth && screenPosition.x < surface->getWidth() + _spriteWidth &&
 					screenPosition.y > -_spriteHeight && screenPosition.y < surface->getHeight() + _spriteHeight )
 				{
+					auto isUnitMovingNearby = movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2);
 
 					if (tile->isDiscovered(O_FLOOR))
 					{
@@ -840,7 +855,7 @@ void Map::drawTerrain(Surface *surface)
 						}
 					}
 
-					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
+					if (isUnitMovingNearby)
 					{
 						// special handling for a moving unit in background of tile.
 						Position backPos[] =
@@ -1032,10 +1047,10 @@ void Map::drawTerrain(Surface *surface)
 						}
 					}
 					unit = tile->getUnit();
-					// Draw soldier from this tile or below
-					drawUnit(unitSprite, tile, tile, screenPosition, topLayer);
+					// Draw soldier from this tile, below or above
+					drawUnit(unitSprite, tile, tile, screenPosition, topLayer, isUnitMovingNearby);
 
-					if (movingUnit && positionInRangeXY(movingUnitPosition, mapPosition, 2))
+					if (isUnitMovingNearby)
 					{
 						// special handling for a moving unit in foreground of tile.
 						Position frontPos[] =
