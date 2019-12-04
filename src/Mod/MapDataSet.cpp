@@ -227,11 +227,11 @@ void MapDataSet::loadData(MCDPatch *patch, bool validate)
 	{
 		for (size_t i = 0; i < _objects.size(); ++i)
 		{
-			if (_objects[i]->getDieMCD() >= (int)(_objects.size()))
+			if ((size_t)_objects[i]->getDieMCD() >= _objects.size())
 			{
 				Log(LOG_INFO) << "MCD " << _name << " object " << i << " has invalid DieMCD: " << _objects[i]->getDieMCD();
 			}
-			if (_objects[i]->getAltMCD() >= (int)(_objects.size()))
+			if ((size_t)_objects[i]->getAltMCD() >= _objects.size())
 			{
 				Log(LOG_INFO) << "MCD " << _name << " object " << i << " has invalid AltMCD: " << _objects[i]->getAltMCD();
 			}

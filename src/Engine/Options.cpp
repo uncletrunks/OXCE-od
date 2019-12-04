@@ -147,6 +147,7 @@ void create()
 	_info.push_back(OptionInfo("touchEnabled", &touchEnabled, false));
 	_info.push_back(OptionInfo("rootWindowedMode", &rootWindowedMode, false));
 	_info.push_back(OptionInfo("rawScreenShots", &rawScreenShots, false));
+	_info.push_back(OptionInfo("backgroundMute", &backgroundMute, false));
 
 	// advanced option
 #ifdef _WIN32
