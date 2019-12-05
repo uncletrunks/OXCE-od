@@ -71,7 +71,7 @@ void Screen::makeVideoFlags()
 	{
 		std::ostringstream ss;
 		ss << "SDL_VIDEO_WINDOW_POS=" << std::dec << Options::windowedModePositionX << "," << Options::windowedModePositionY;
-		SDL_putenv(const_cast<char*>(ss.str().c_str()));
+		SDL_putenv(const_cast<char*>(strdup(ss.str().c_str())));
 		SDL_putenv(const_cast<char*>("SDL_VIDEO_CENTERED="));
 	}
 	else if (Options::borderless)
