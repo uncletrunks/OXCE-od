@@ -176,6 +176,35 @@ namespace OpenXcom
 namespace FileMap
 {
 
+static inline std::string concatPaths(const std::string& basePath, const std::string& relativePath)
+{
+	if(basePath.size() == 0) throw Exception("Need correct basePath");
+	if(relativePath.size() == 0) throw Exception("Need correct relativePath");
+	if (basePath[basePath.size() - 1] == '/')
+	{
+		return basePath + relativePath;
+	}
+	else
+	{
+		return basePath + "/" + relativePath;
+	}
+}
+static inline std::string concatOptionalPaths(const std::string& basePath, const std::string& relativePath)
+{
+	if (basePath.size() == 0)
+	{
+		return relativePath;
+	}
+	else if (relativePath.size() == 0)
+	{
+		return basePath;
+	}
+	else
+	{
+		return concatPaths(basePath, relativePath);
+	}
+}
+
 FileRecord::FileRecord() : fullpath(""), zip(NULL), findex(0) { }
 
 SDL_RWops *FileRecord::getRWops() const
@@ -301,14 +330,14 @@ static std::string hexDumpBogusData(const std::string& bogus) {
 /* recursively list a directory */
 typedef std::vector<std::pair<std::string, std::string>> dirlist_t; // <dirname, basename>
 static bool ls_r(const std::string &basePath, const std::string &relPath, dirlist_t& dlist) {
-	auto fullDir = basePath + (relPath.length() ? "/" + relPath : "");
+	auto fullDir = concatOptionalPaths(basePath, relPath);
 	auto files = CrossPlatform::getFolderContents(fullDir);
 	//Log(LOG_VERBOSE) << "ls_r: listing "<<fullDir<<" count="<<files.size();
 	for (auto i = files.begin(); i != files.end(); ++i) {
 		if (std::get<1>(*i)) { // it's a subfolder
-			auto fullpath = fullDir + "/" + std::get<0>(*i);
+			auto fullpath = concatPaths(fullDir, std::get<0>(*i));
 			if (CrossPlatform::folderExists(fullpath)) {
-				auto nextRelPath = (relPath.length() ? relPath + "/" : "" ) + std::get<0>(*i);
+				auto nextRelPath = concatOptionalPaths(relPath, std::get<0>(*i));
 				ls_r(basePath, nextRelPath, dlist);
 				continue;
 			}
@@ -456,7 +485,7 @@ struct VFSLayer {
 				relfname = fname.substr(prefixlen, fname.npos);
 			}
 			frec.findex = fi;
-			frec.fullpath = fullpath + "/" + fname;
+			frec.fullpath = concatPaths(fullpath, fname);
 
 			if (isRuleset(relfname) && ignore_ruls) { continue; }
 			insert(relfname, frec);
@@ -482,8 +511,8 @@ struct VFSLayer {
 		std::string relpath;
 		int mapped_count = 0;
 		for (auto i = dlist.cbegin(); i != dlist.cend(); ++i) {
-			relpath = (i->first.length() ? i->first + "/" : "")  + i->second;
-			frec.fullpath = fullpath + "/" + relpath;
+			relpath = concatOptionalPaths(i->first, i->second);
+			frec.fullpath = concatPaths(fullpath, relpath);
 			if (isRuleset(i->second) && ignore_ruls) { continue; }
 			insert(relpath, frec);
 			mapped_count ++;
@@ -834,7 +863,7 @@ static bool mapExtResources(ModRecord *mrec, const std::string& basename, bool e
  */
 static void mapZippedMod(mz_zip_archive *zip, const std::string& zipfname, const std::string& prefix) {
 	std::string log_ctx = "mapZippedMod(" + zipfname + ", '" + prefix + "'): ";
-	auto layer = new VFSLayer(zipfname + "/" + prefix);
+	auto layer = new VFSLayer(concatPaths(zipfname, prefix));
 	if (!layer->mapZip(zip, zipfname, prefix)) {
 		Log(LOG_WARNING) << log_ctx << "Failed to map, skipping.";
 		delete layer;
@@ -846,7 +875,7 @@ static void mapZippedMod(mz_zip_archive *zip, const std::string& zipfname, const
 		delete layer;
 		return;
 	}
-	auto modpath = zipfname + (prefix.length() > 0 ? "/" + prefix : "");
+	auto modpath = concatOptionalPaths(zipfname, prefix);
 	auto doc = frec->getYAML();
 	if (!doc.IsMap()) {
 		Log(LOG_WARNING) << log_ctx << "Bad metadata.yml found, skipping.";
@@ -1012,12 +1041,12 @@ void scanModDir(const std::string& dirname, const std::string& basename, bool pr
 			Log(LOG_ERROR) << "Invalid standard mod '" << std::get<0>(*zi) << "', skipping.";
 			continue;
 		}
-		auto subpath =  fullname + "/" + std::get<0>(*zi);
+		auto subpath = concatPaths(fullname, std::get<0>(*zi));
 		scanModZip(subpath);
 	}
 	for (auto di = dirlist.begin(); di != dirlist.end(); ++di) {
 		auto mp_basename = *di;
-		auto modpath = fullname + "/" + mp_basename;
+		auto modpath = concatPaths(fullname, mp_basename);
 		// map dat dir! (if it has metadata.yml, naturally)
 		auto layer = new VFSLayer(modpath);
 		if (!layer->mapPlainDir(modpath)) {
