@@ -1178,13 +1178,17 @@ std::map<std::string, ModInfo> getModInfos() {
 
 const FileRecord* getModRuleFile(const ModInfo* modInfo, const std::string& relpath)
 {
-	auto fullPath = modInfo->getPath() + "/" + relpath;
-	for (auto& r : ModsAvailable.at(modInfo->getId())->stack.rulesets)
+	if (!relpath.empty())
 	{
-		if (r.fullpath == fullPath)
+		auto fullPath = concatPaths(modInfo->getPath(), relpath);
+		for (auto& r : ModsAvailable.at(modInfo->getId())->stack.rulesets)
 		{
-			return &r;
+			if (r.fullpath == fullPath)
+			{
+				return &r;
+			}
 		}
+		Log(LOG_WARNING) << "mod " << modInfo->getId() << ": unknow rule file '" << relpath <<"'.";
 	}
 	return nullptr;
 }
