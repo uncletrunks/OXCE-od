@@ -1188,7 +1188,7 @@ const FileRecord* getModRuleFile(const ModInfo* modInfo, const std::string& relp
 				return &r;
 			}
 		}
-		Log(LOG_WARNING) << "mod " << modInfo->getId() << ": unknow rule file '" << relpath <<"'.";
+		Log(LOG_WARNING) << "mod " << modInfo->getId() << ": unknown rulefile '" << relpath <<"'.";
 	}
 	return nullptr;
 }
