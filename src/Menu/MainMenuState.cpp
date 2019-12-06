@@ -33,7 +33,8 @@
 #include "OptionsVideoState.h"
 #include "OptionsModsState.h"
 #include "../Engine/Options.h"
-#include "../../libs/miniz/miniz.h"
+#include "../Engine/FileMap.h"
+#include "../Engine/SDL2Helpers.h"
 #include <fstream>
 
 namespace OpenXcom
@@ -379,44 +380,35 @@ void MainMenuState::btnUpdateClick(Action*)
 	// 10. extract exe zip
 	if (CrossPlatform::fileExists(exeZipFilename) && CrossPlatform::fileExists(relativeExeZipFileName))
 	{
-		size_t uncomp_size;
-		mz_bool status;
-		mz_zip_archive zip_archive;
-
-		memset(&zip_archive, 0, sizeof(zip_archive));
-		status = mz_zip_reader_init_file(&zip_archive, relativeExeZipFileName.c_str(), 0);
-		if (!status) {
-			Log(LOG_ERROR) << "Step 10: failed to open zip file.";
+		const std::string file_to_extract = "OpenXcomEx.exe.new";
+		SDL_RWops *rwo_read = FileMap::zipGetFileByName(relativeExeZipFileName, file_to_extract);
+		if (!rwo_read) {
+			Log(LOG_ERROR) << "Step 10a: failed to unzip file.";
 			return;
 		}
-		try {
-			void* data = NULL;
-			std::string file_to_extract = "OpenXcomEx.exe.new";
-			int file_index = mz_zip_reader_locate_file(&zip_archive, file_to_extract.c_str(), NULL, MZ_ZIP_FLAG_IGNORE_PATH);
-			if (file_index < 0)
-			{
-				mz_bool is_dir = mz_zip_reader_is_file_a_directory(&zip_archive, file_index);
-				if (is_dir) {
-					throw Exception("Step 10: file_index = folder");
-				}
-				else {
-					throw Exception("Step 10: cannot find file in zip(0)");
-				}
-			}
-
-			data = mz_zip_reader_extract_to_heap(&zip_archive, file_index, &uncomp_size, 0);
-			if (data == NULL) {
-				throw Exception("Step 10: cannot find file in zip(1)");
-			}
-			std::fstream fp1(relativeExeNewFileName, std::ios::binary | std::ios::out);
-			fp1.write(reinterpret_cast<char*>(data), uncomp_size);
-			fp1.close();
-			mz_free(data);
+		size_t size = 0;
+		auto data = SDL_LoadFile_RW(rwo_read, &size, SDL_TRUE);
+		if (!data) {
+			Log(LOG_ERROR) << "Step 10b: failed to unzip file." << SDL_GetError(); // out of memory for a copy ?
+			return;
 		}
-		catch (Exception &ex) {
-			Log(LOG_ERROR) << ex.what();
+		SDL_RWops *rwo_write = SDL_RWFromFile(relativeExeNewFileName.c_str(), "wb");
+		if (!rwo_write) {
+			Log(LOG_ERROR) << "Step 10c: failed to open exe.new file for writing." << SDL_GetError();
+			return;
 		}
-		mz_zip_reader_end(&zip_archive);
+		auto wsize = SDL_RWwrite(rwo_write, data, size, 1);
+		if (wsize != 1) {
+			Log(LOG_ERROR) << "Step 10d: failed to write exe.new file." << SDL_GetError();
+			return;
+		}
+		if (SDL_RWclose(rwo_write)) {
+			Log(LOG_ERROR) << "Step 10e: failed to write exe.new file." << SDL_GetError();
+			return;
+		}
+	} else {
+		Log(LOG_ERROR) << "Update step 10 failed."; // exe dir and working dir not the same
+		return;
 	}
 
 	// 11. check if extracted exe exists

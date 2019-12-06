@@ -407,7 +407,7 @@ set ( cxx_src
 set ( c_src
   ../libs/miniz/miniz.c
 )
-#set_property ( SOURCE ${c_src} APPEND PROPERTY COMPILE_DEFINITIONS MINIZ_NO_STDIO )
+set_property ( SOURCE ${c_src} APPEND PROPERTY COMPILE_DEFINITIONS MINIZ_NO_STDIO )
 set_property ( SOURCE Engine/Scalers/xbrz.cpp APPEND_STRING PROPERTY COMPILE_FLAGS -Wno-unused\ )
 
 set ( data_install_dir bin )
@@ -467,7 +467,7 @@ if ( MSVC )
     add_definitions ( /WX )
   endif ( FATAL_WARNING )
   set ( CMAKE_EXE_LINKER_FLAGS "/manifest:no" )
-  set ( CMAKE_MODULE_LINKER_FLAGS "/manifest:no" ) 
+  set ( CMAKE_MODULE_LINKER_FLAGS "/manifest:no" )
   set ( CMAKE_SHARED_LINKER_FLAGS="/manifest:no" )
 endif ()
 

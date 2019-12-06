@@ -941,6 +941,69 @@ void scanModZip(const std::string& fullpath) {
 	scanModZipRW(rwops, fullpath);
 }
 /**
+ * Extracts a single file to an ConstMem RWops object
+ * @param rwops - .zip file
+ * @param fullpath - what to extract, case and slash - insensitive
+ */
+SDL_RWops *zipGetFileByName(const std::string& zipfile, const std::string& fullpath) {
+	std::string log_ctx = "zipGetFileByName(rwops, " + zipfile + ", " + fullpath + "): ";
+	std::string sanpath = fullpath;
+	if (!sanitizeZipEntryName(sanpath)) {
+		Log(LOG_ERROR) << log_ctx << "Bogus fullpath given: '" << fullpath << "': " << hexDumpBogusData(sanpath);
+		return NULL;
+	}
+	Unicode::lowerCase(sanpath);
+	SDL_RWops *rwops = SDL_RWFromFile(zipfile.c_str(), "rb");
+	if (!rwops) {
+		Log(LOG_ERROR) << log_ctx << "SDL_RWFromFile(): " << SDL_GetError();
+		return NULL;
+	}
+	mz_zip_archive *mzip = (mz_zip_archive *) SDL_malloc(sizeof(mz_zip_archive));
+	if (!mzip) {
+		Log(LOG_FATAL) << log_ctx << ": " << SDL_GetError();
+		throw Exception("Out of memory");
+	}
+	if (!mz_zip_reader_init_rwops(mzip, rwops)) {
+		Log(LOG_ERROR) << log_ctx << "Bad zip: " << mz_zip_get_error_string(mz_zip_get_last_error(mzip));
+		SDL_RWclose(rwops);
+		SDL_free(mzip);
+		return NULL;
+	}
+	mz_uint filecount = mz_zip_reader_get_num_files(mzip);
+	for (mz_uint fi = 0; fi < filecount; ++fi) {
+		mz_zip_archive_file_stat fistat;
+		mz_zip_reader_file_stat (mzip, fi, &fistat);
+		if (fistat.m_is_encrypted || !fistat.m_is_supported) {
+			continue;
+		}
+		if (fistat.m_is_directory) {
+			continue;    // skip directories
+		}
+		std::string somepath = fistat.m_filename;
+		if ( !sanitizeZipEntryName ( somepath ) ) {
+			Log(LOG_WARNING) << "Bogus filename '" << somepath << "' "
+							 << hexDumpBogusData(somepath) << " in the .zip, ignoring.";
+			continue;
+		}
+		Unicode::lowerCase(somepath);
+		if (sanpath == somepath) { // gotcha
+			SDL_RWops *rv = SDL_RWFromMZ(mzip, fi);
+			if (!rv) {
+				Log(LOG_ERROR) << log_ctx << "Unzip failed: " << SDL_GetError();
+			}
+			mz_zip_reader_end(mzip);
+			SDL_RWclose(rwops);
+			SDL_free(mzip);
+			return rv;
+		}
+	}
+	Log ( LOG_ERROR ) << log_ctx << "File not found in the .zip";
+	mz_zip_reader_end(mzip);
+	SDL_RWclose(rwops);
+	SDL_free(mzip);
+	return NULL;
+}
+/**
  * this scans a mod dir.
  * which by definition is either a .zip
  * or a directory of zips and dirs.

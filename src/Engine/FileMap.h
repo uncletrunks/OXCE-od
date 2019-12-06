@@ -123,6 +123,10 @@ namespace FileMap
 
 	/// Get mod file based on mod info.
 	const FileRecord* getModRuleFile(const ModInfo* modInfo, const std::string& relpath);
+
+	/// Unzip a file from a .zip into memory.
+	SDL_RWops *zipGetFileByName(const std::string& zipfile, const std::string& fullpath);
+
 }
 
 }
