@@ -292,7 +292,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
 			++tries;
 		}
 		while (!(globe.insideLand(pos.first, pos.second)
-			&& region->insideRegion(pos.first, pos.second))
+			&& region->insideRegion(pos.first, pos.second, true))
 			&& tries < 100);
 		spawnAlienBase(0, engine, area, pos, 0);
 	}
@@ -585,7 +585,7 @@ void AlienMission::start(Game &engine, const Globe &globe, size_t initialCount)
 					pos.second = RNG::generate(std::min(area.latMin, area.latMax), std::max(area.latMin, area.latMax));
 					++tries;
 				} while (!(globe.insideLand(pos.first, pos.second)
-					&& region->insideRegion(pos.first, pos.second))
+					&& region->insideRegion(pos.first, pos.second, true))
 					&& tries < 100);
 				auto operationBaseType = mod.getDeployment(_rule.getOperationBaseType(), true);
 				auto newAlienOperationBase = spawnAlienBase(0, engine, area, pos, operationBaseType);

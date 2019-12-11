@@ -100,10 +100,14 @@ int RuleRegion::getBaseCost() const
  * Checks if a point is inside this region.
  * @param lon Longitude in radians.
  * @param lat Latitude in radians.
+ * @param ignoreTechnicalRegion If true, empty technical regions (i.e. regions with no areas, just having mission zones) will return true.
  * @return True if it's inside, false if it's outside.
  */
-bool RuleRegion::insideRegion(double lon, double lat) const
+bool RuleRegion::insideRegion(double lon, double lat, bool ignoreTechnicalRegion) const
 {
+	if (ignoreTechnicalRegion && _lonMin.empty())
+		return true;
+
 	for (size_t i = 0; i < _lonMin.size(); ++i)
 	{
 		bool inLon, inLat;
