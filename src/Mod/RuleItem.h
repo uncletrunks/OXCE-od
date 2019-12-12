@@ -181,7 +181,7 @@ private:
 	BattleFuseType _fuseType;
 	RuleItemFuseTrigger _fuseTriggerEvents;
 	bool _hiddenOnMinimap;
-	std::string _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
+	std::string _medikitActionName, _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
 	std::string _defaultInventorySlot;
 	int _defaultInvSlotX, _defaultInvSlotY;
@@ -587,6 +587,8 @@ public:
 	int getBulletSpeed() const;
 	/// How fast does the explosion animation play?
 	int getExplosionSpeed() const;
+	/// Get name of medikit action for action menu.
+	const std::string &getMedikitActionName() const { return _medikitActionName; }
 	/// Get name of psi attack for action menu.
 	const std::string &getPsiAttackName() const { return _psiAttackName; }
 	/// Get name of prime action for action menu.

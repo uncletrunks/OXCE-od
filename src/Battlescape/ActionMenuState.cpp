@@ -155,7 +155,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	// special items
 	if (weapon->getBattleType() == BT_MEDIKIT)
 	{
-		addItem(BA_USE, "STR_USE_MEDI_KIT", &id, Options::keyBattleActionItem1);
+		addItem(BA_USE, weapon->getMedikitActionName(), &id, Options::keyBattleActionItem1);
 	}
 	else if (weapon->getBattleType() == BT_SCANNER)
 	{
