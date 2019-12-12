@@ -78,6 +78,7 @@ private:
 	struct ReactionScore
 	{
 		BattleUnit *unit;
+		BattleItem *weapon;
 		BattleActionType attackType;
 		double reactionScore;
 		double reactionReduction;
@@ -141,7 +142,7 @@ private:
 	/// Given a vector of spotters, and a unit, picks the spotter with the highest reaction score.
 	ReactionScore *getReactor(std::vector<ReactionScore> &spotters, BattleUnit *unit);
 	/// Tries to perform a reaction snap shot to this location.
-	bool tryReaction(BattleUnit *unit, BattleUnit *target, BattleActionType attackType, const BattleAction &originalAction);
+	bool tryReaction(ReactionScore *reaction, BattleUnit *target, const BattleAction &originalAction);
 public:
 	/// Creates a new TileEngine class.
 	TileEngine(SavedBattleGame *save, Mod *mod);
