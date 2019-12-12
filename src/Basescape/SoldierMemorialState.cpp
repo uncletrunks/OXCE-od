@@ -25,6 +25,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
+#include "../Interface/TextEdit.h"
 #include "../Interface/TextList.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/Base.h"
@@ -45,6 +46,7 @@ SoldierMemorialState::SoldierMemorialState()
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
+	_btnQuickSearch = new TextEdit(this, 48, 9, 16, 10);
 	_btnOk = new TextButton(148, 16, 164, 176);
 	_btnStatistics = new TextButton(148, 16, 8, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
@@ -59,6 +61,7 @@ SoldierMemorialState::SoldierMemorialState()
 	setInterface("soldierMemorial");
 
 	add(_window, "window", "soldierMemorial");
+	add(_btnQuickSearch, "button", "soldierMemorial");
 	add(_btnOk, "button", "soldierMemorial");
 	add(_btnStatistics, "button", "soldierMemorial");
 	add(_txtTitle, "text", "soldierMemorial");
@@ -108,16 +111,11 @@ SoldierMemorialState::SoldierMemorialState()
 	_lstSoldiers->setMargin(8);
 	_lstSoldiers->onMouseClick((ActionHandler)&SoldierMemorialState::lstSoldiersClick);
 
-	for (std::vector<Soldier*>::reverse_iterator i = _game->getSavedGame()->getDeadSoldiers()->rbegin(); i != _game->getSavedGame()->getDeadSoldiers()->rend(); ++i)
-	{
-		SoldierDeath *death = (*i)->getDeath();
+	_btnQuickSearch->setText(""); // redraw
+	_btnQuickSearch->onEnter((ActionHandler)&SoldierMemorialState::btnQuickSearchApply);
+	_btnQuickSearch->setVisible(false);
 
-		std::ostringstream saveDay, saveMonth, saveYear;
-		saveDay << death->getTime()->getDayString(_game->getLanguage());
-		saveMonth << tr(death->getTime()->getMonthString());
-		saveYear << death->getTime()->getYear();
-		_lstSoldiers->addRow(5, (*i)->getName().c_str(), tr((*i)->getRankString()).c_str(), saveDay.str().c_str(), saveMonth.str().c_str(), saveYear.str().c_str());
-	}
+	_btnOk->onKeyboardRelease((ActionHandler)&SoldierMemorialState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 }
 
 /**
@@ -129,6 +127,16 @@ SoldierMemorialState::~SoldierMemorialState()
 }
 
 /**
+ * Initializes the screen (fills the list).
+ */
+void SoldierMemorialState::init()
+{
+	State::init();
+
+	fillMemorialList();
+}
+
+/**
  * Returns to the previous screen.
  * @param action Pointer to an action.
  */
@@ -136,6 +144,34 @@ void SoldierMemorialState::btnOkClick(Action *)
 {
 	_game->popState();
 	_game->getMod()->playMusic("GMGEO");
+}
+
+/**
+ * Quick search toggle.
+ * @param action Pointer to an action.
+ */
+void SoldierMemorialState::btnQuickSearchToggle(Action *action)
+{
+	if (_btnQuickSearch->getVisible())
+	{
+		_btnQuickSearch->setText("");
+		_btnQuickSearch->setVisible(false);
+		btnQuickSearchApply(action);
+	}
+	else
+	{
+		_btnQuickSearch->setVisible(true);
+		_btnQuickSearch->setFocus(true);
+	}
+}
+
+/**
+ * Quick search.
+ * @param action Pointer to an action.
+ */
+void SoldierMemorialState::btnQuickSearchApply(Action *)
+{
+	fillMemorialList();
 }
 
 /**
@@ -154,6 +190,39 @@ void SoldierMemorialState::btnStatisticsClick(Action *)
 void SoldierMemorialState::lstSoldiersClick(Action *)
 {
 	_game->pushState(new SoldierInfoState(0, _lstSoldiers->getSelectedRow()));
+}
+
+/**
+ * Fills the list with filtered memorial entries.
+ */
+void SoldierMemorialState::fillMemorialList()
+{
+	std::string searchString = _btnQuickSearch->getText();
+	Unicode::upperCase(searchString);
+
+	_lstSoldiers->clearList();
+
+	for (std::vector<Soldier *>::reverse_iterator i = _game->getSavedGame()->getDeadSoldiers()->rbegin(); i != _game->getSavedGame()->getDeadSoldiers()->rend(); ++i)
+	{
+		// quick search
+		if (!searchString.empty())
+		{
+			std::string soldierName = (*i)->getName();
+			Unicode::upperCase(soldierName);
+			if (soldierName.find(searchString) == std::string::npos)
+			{
+				continue;
+			}
+		}
+
+		SoldierDeath *death = (*i)->getDeath();
+
+		std::ostringstream saveDay, saveMonth, saveYear;
+		saveDay << death->getTime()->getDayString(_game->getLanguage());
+		saveMonth << tr(death->getTime()->getMonthString());
+		saveYear << death->getTime()->getYear();
+		_lstSoldiers->addRow(5, (*i)->getName().c_str(), tr((*i)->getRankString()).c_str(), saveDay.str().c_str(), saveMonth.str().c_str(), saveYear.str().c_str());
+	}
 }
 
 }
