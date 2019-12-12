@@ -19,6 +19,7 @@
 #include <assert.h>
 #include "RuleRegion.h"
 #include "City.h"
+#include "../Engine/Logger.h"
 #include "../Engine/RNG.h"
 
 namespace OpenXcom
@@ -68,6 +69,24 @@ void RuleRegion::load(const YAML::Node &node)
 			std::swap(_latMin.back(), _latMax.back());
 	}
 	_missionZones = node["missionZones"].as< std::vector<MissionZone> >(_missionZones);
+	{
+		int zn = 0;
+		for (auto &z : _missionZones)
+		{
+			int an = 0;
+			for (auto &a : z.areas)
+			{
+				if (a.lonMin > a.lonMax)
+				{
+					Log(LOG_ERROR) << "Crossing the prime meridian in mission zones requires a different syntax, region: " << _type << ", zone: " << zn << ", area: " << an << ", lonMin: " << Rad2Deg(a.lonMin) << ", lonMax: " << Rad2Deg(a.lonMax);
+					Log(LOG_ERROR) << "  Wrong example: [350,   8, 20, 30]";
+					Log(LOG_ERROR) << "Correct example: [350, 368, 20, 30]";
+				}
+				++an;
+			}
+			++zn;
+		}
+	}
 	if (const YAML::Node &weights = node["missionWeights"])
 	{
 		_missionWeights.load(weights);
