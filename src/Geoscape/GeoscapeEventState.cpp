@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "GeoscapeEventState.h"
+#include <map>
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/RNG.h"
@@ -135,44 +136,51 @@ void GeoscapeEventState::eventLogic()
 	// 2. give/take funds
 	save->setFunds(save->getFunds() + rule.getFunds());
 
-	// 3a. spawn/transfer item into the HQ
-	if (!rule.getEveryItemList().empty())
+	// 3. spawn/transfer item into the HQ
+	std::map<std::string, int> itemsToTransfer;
+
+	for (auto &pair : rule.getEveryMultiItemList())
 	{
-		for (auto itemName : rule.getEveryItemList())
+		const RuleItem *itemRule = mod->getItem(pair.first, true);
+		if (itemRule)
 		{
-			const RuleItem *itemRule = mod->getItem(itemName, true);
-			if (itemRule)
-			{
-				Transfer *tr = new Transfer(1);
-				tr->setItems(itemRule->getType(), 1);
-				hq->getTransfers()->push_back(tr);
-			}
+			itemsToTransfer[itemRule->getType()] += pair.second;
 		}
 	}
 
-	// 3b. spawn/transfer item into the HQ
+	for (auto &itemName : rule.getEveryItemList())
+	{
+		const RuleItem *itemRule = mod->getItem(itemName, true);
+		if (itemRule)
+		{
+			itemsToTransfer[itemRule->getType()] += 1;
+		}
+	}
+
 	if (!rule.getRandomItemList().empty())
 	{
 		size_t pickItem = RNG::generate(0, rule.getRandomItemList().size() - 1);
 		const RuleItem *randomItem = mod->getItem(rule.getRandomItemList().at(pickItem), true);
 		if (randomItem)
 		{
-			Transfer *t = new Transfer(1);
-			t->setItems(randomItem->getType(), 1);
-			hq->getTransfers()->push_back(t);
+			itemsToTransfer[randomItem->getType()] += 1;
 		}
 	}
 
-	// 3c. spawn/transfer item into the HQ
 	if (!rule.getWeightedItemList().empty())
 	{
 		const RuleItem *randomItem = mod->getItem(rule.getWeightedItemList().choose(), true);
 		if (randomItem)
 		{
-			Transfer *t = new Transfer(1);
-			t->setItems(randomItem->getType(), 1);
-			hq->getTransfers()->push_back(t);
+			itemsToTransfer[randomItem->getType()] += 1;
 		}
+	}
+
+	for (auto &ti : itemsToTransfer)
+	{
+		Transfer *t = new Transfer(1);
+		t->setItems(ti.first, ti.second);
+		hq->getTransfers()->push_back(t);
 	}
 
 	// 4. give bonus research

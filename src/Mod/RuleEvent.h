@@ -18,6 +18,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <string>
+#include <map>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 #include "../Savegame/WeightedOptions.h"
@@ -36,6 +37,7 @@ private:
 	std::vector<std::string> _regionList;
 	bool _city;
 	int _points, _funds;
+	std::map<std::string, int> _everyMultiItemList;
 	std::vector<std::string> _everyItemList, _randomItemList;
 	WeightedOptions _weightedItemList;
 	std::vector<std::string> _researchList;
@@ -64,6 +66,8 @@ public:
 	int getPoints() const { return _points; }
 	/// Gets the amount of funds awarded when this event pops up.
 	int getFunds() const { return _funds; }
+	/// Gets a list of items; they are all transferred to HQ stores when this event pops up.
+	const std::map<std::string, int> &getEveryMultiItemList() const { return _everyMultiItemList; }
 	/// Gets a list of items; they are all transferred to HQ stores when this event pops up.
 	const std::vector<std::string> &getEveryItemList() const { return _everyItemList; }
 	/// Gets a list of items; one of them is randomly selected and transferred to HQ stores when this event pops up.
