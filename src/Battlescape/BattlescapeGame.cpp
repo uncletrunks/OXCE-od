@@ -2167,6 +2167,11 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 		faction == FACTION_HOSTILE ? getMod()->getStatAdjustment(_parentState->getGame()->getSavedGame()->getDifficulty()) : nullptr,
 		getDepth());
 
+	if (faction == FACTION_PLAYER)
+	{
+		newUnit->setSummonedPlayerUnit(true);
+	}
+
 	// Validate the position for the unit, checking if there's a surrounding tile if necessary
 	int checkDirection = attack.attacker ? (attack.attacker->getDirection() + 4) % 8 : 0;
 	bool positionValid = getTileEngine()->isPositionValidForUnit(position, newUnit, true, checkDirection);
@@ -2229,9 +2234,9 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 		newUnit->clearTimeUnits();
 		getSave()->getUnits()->push_back(newUnit);
 		if (faction != FACTION_PLAYER)
+		{
 			newUnit->setAIModule(new AIModule(getSave(), newUnit, 0));
-		else
-			newUnit->setSummonedPlayerUnit(true);
+		}
 		bool visible = faction == FACTION_PLAYER;
 		newUnit->setVisible(visible);
 

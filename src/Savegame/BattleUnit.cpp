@@ -2517,7 +2517,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 
 	// tanks and aliens don't care about weight or multiple items,
 	// their loadouts are defined in the rulesets and more or less set in stone.
-	if (getFaction() == FACTION_PLAYER && hasInventory())
+	if (getFaction() == FACTION_PLAYER && hasInventory() && !isSummonedPlayerUnit())
 	{
 		weight = getCarriedWeight() + item->getTotalWeight();
 		// allow all weapons to be loaded by avoiding this check,

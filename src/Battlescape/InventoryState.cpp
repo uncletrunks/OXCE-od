@@ -366,7 +366,12 @@ void InventoryState::init()
 
 	_txtName->setBig();
 	_txtName->setText(unit->getName(_game->getLanguage()));
-	_inv->setSelectedUnit(unit, _tu);
+	bool resetGroundOffset = _tu;
+	if (unit->isSummonedPlayerUnit())
+	{
+		resetGroundOffset = true; // this unit is likely not standing on the shared inventory tile, just re-arrange it every time
+	}
+	_inv->setSelectedUnit(unit, resetGroundOffset);
 	Soldier *s = unit->getGeoscapeSoldier();
 	if (s)
 	{
