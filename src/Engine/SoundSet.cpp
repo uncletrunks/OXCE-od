@@ -214,7 +214,7 @@ void SoundSet::loadCatByIndex(CatFile &catFile, int index, bool tftd)
 			*(Sint32 *)(sound +0x28) += delta; // data chunk size
 		}
 		int samplerate = *(Sint32 *)(sound + 0x18);
-		do_resample  = (samplerate != 11025);
+		do_resample  = (samplerate < 11025);
 		samples = sound + 44;
 		samplecount = size - 44;
 	} else { // skip DOS header
