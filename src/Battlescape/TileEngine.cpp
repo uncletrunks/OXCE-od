@@ -1919,10 +1919,10 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 
 	// prioritize melee
 	BattleItem *meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
+	// has a melee weapon and is in melee range
 	if (_save->canUseWeapon(meleeWeapon, unit, false) &&
-		meleeWeapon->getAmmoForAction(BA_HIT) &&
-		// has a melee weapon and is in melee range
 		validMeleeRange(unit, target, unit->getDirection()) &&
+		meleeWeapon->getAmmoForAction(BA_HIT) &&
 		BattleActionCost(BA_HIT, unit, meleeWeapon).haveTU())
 	{
 		setReaction(reaction, BA_HIT, meleeWeapon);
@@ -1931,13 +1931,11 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 
 	// has a weapon
 	BattleItem *weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
-	if (_save->canUseWeapon(weapon, unit, false) &&
-		Position::distance2d(unit->getPosition(), target->getPosition()) < weapon->getRules()->getMaxRange())
+	if (_save->canUseWeapon(weapon, unit, false))
 	{
-		// has a melee weapon and is in melee range
-		if (weapon->getRules()->getBattleType() == BT_MELEE &&
+		// has a weapon capable of melee and is in melee range
+		if (validMeleeRange(unit, target, unit->getDirection()) &&
 			weapon->getAmmoForAction(BA_HIT) &&
-			validMeleeRange(unit, target, unit->getDirection()) &&
 			BattleActionCost(BA_HIT, unit, weapon).haveTU())
 		{
 			setReaction(reaction, BA_HIT, weapon);
@@ -1946,6 +1944,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 
 		// has a gun capable of snap shot with ammo
 		if (weapon->getRules()->getBattleType() == BT_FIREARM &&
+			Position::distance2d(unit->getPosition(), target->getPosition()) < weapon->getRules()->getMaxRange() &&
 			weapon->getAmmoForAction(BA_SNAPSHOT) &&
 			BattleActionCost(BA_SNAPSHOT, unit, weapon).haveTU())
 		{
