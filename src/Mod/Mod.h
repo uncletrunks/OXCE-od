@@ -724,6 +724,7 @@ public:
 	/// Gets the list of transparency colors,
 	const std::vector<SDL_Color> *getTransparencies() const;
 	const std::vector<MapScript*> *getMapScript(const std::string& id) const;
+	const std::map<std::string, std::vector<MapScript*> > &getMapScriptsRaw() const { return _mapScripts; }
 	/// Gets a video for intro/outro etc.
 	RuleVideo *getVideo(const std::string &id, bool error = false) const;
 	const std::map<std::string, RuleMusic *> *getMusic() const;

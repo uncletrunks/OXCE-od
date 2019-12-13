@@ -37,6 +37,10 @@
 #include "../Mod/MapDataSet.h"
 #include "../Mod/MapData.h"
 #include "../Mod/RuleUfo.h"
+#include "../Mod/RuleGlobe.h"
+#include "../Mod/Texture.h"
+#include "../Mod/MapScript.h"
+#include "../Mod/AlienDeployment.h"
 
 namespace OpenXcom
 {
@@ -142,6 +146,7 @@ TestState::TestState()
 	_testCases.push_back("STR_MCD_CHECK");
 	_testCases.push_back("STR_PALETTE_CHECK");
 	_testCases.push_back("STR_SCRIPT_TAGS");
+	_testCases.push_back("STR_MAP_RESOURCES");
 
 	_cbxTestCase->setOptions(_testCases, true);
 	_cbxTestCase->onChange((ActionHandler)&TestState::cbxTestCaseChange);
@@ -196,6 +201,7 @@ void TestState::btnRunClick(Action *action)
 		case 1: testCase1(); break;
 		case 2: testCase2(); break;
 		case 3: testCase3(); break;
+		case 4: testCase4(); break;
 		default: break;
 	}
 }
@@ -221,6 +227,225 @@ void TestState::cbxPaletteAction(Action *action)
 	PaletteActionType type = (PaletteActionType)_cbxPaletteAction->getSelected();
 
 	_game->pushState(new TestPaletteState(palette, type));
+}
+
+void TestState::testCase4()
+{
+	_lstOutput->addRow(1, tr("STR_TESTS_STARTING").c_str());
+
+	int total = 0;
+
+	// build a list of all terrains
+	std::map<std::string, int> terrainMap;
+	for (auto &texturePair : _game->getMod()->getGlobe()->getTexturesRaw())
+	{
+		for (auto &terrainCrit : *texturePair.second->getTerrain())
+		{
+			terrainMap[terrainCrit.name] += 1;
+		}
+		for (auto &baseTerrainCrit : *texturePair.second->getBaseTerrain())
+		{
+			terrainMap[baseTerrainCrit.name] += 1;
+		}
+	}
+	for (auto &terrainName : _game->getMod()->getTerrainList())
+	{
+		terrainMap[terrainName] += 1;
+	}
+	for (auto &deployName : _game->getMod()->getDeploymentsList())
+	{
+		AlienDeployment *deployRule = _game->getMod()->getDeployment(deployName);
+		for (auto &terrainName : deployRule->getTerrains())
+		{
+			terrainMap[terrainName] += 1;
+		}
+	}
+	for (auto &mapScript : _game->getMod()->getMapScriptsRaw())
+	{
+		for (auto &mapScriptCommand : mapScript.second)
+		{
+			terrainMap[mapScriptCommand->getAlternateTerrain()] += 1;
+		}
+	}
+
+	// erase false positives
+	terrainMap.erase("");
+	terrainMap.erase("baseTerrain");
+	terrainMap.erase("globeTerrain");
+
+	// 1. check terrain existence in ruleset
+	Log(LOG_INFO) << "----------------------------------------------1. check terrain existence in ruleset";
+	for (auto &pair : terrainMap)
+	{
+		RuleTerrain *tRule = _game->getMod()->getTerrain(pair.first);
+		if (!tRule)
+		{
+			++total;
+			Log(LOG_INFO) << "Terrain '" << pair.first << "' does not exist!";
+		}
+	}
+
+	// build a list of all mapblocks and mapdatasets
+	std::map<std::string, int> blockMap;
+	std::map<std::string, int> datasetMap;
+	for (auto &pair : terrainMap)
+	{
+		RuleTerrain *tRule = _game->getMod()->getTerrain(pair.first);
+		if (tRule)
+		{
+			for (auto &mapblock : *tRule->getMapBlocks())
+			{
+				blockMap[mapblock->getName()] += 1;
+			}
+			for (auto &dataset : *tRule->getMapDataSets())
+			{
+				datasetMap[dataset->getName()] += 1;
+			}
+		}
+	}
+	for (auto &ufoName : _game->getMod()->getUfosList())
+	{
+		RuleUfo *ufoRule = _game->getMod()->getUfo(ufoName);
+		RuleTerrain *terrainRule = ufoRule->getBattlescapeTerrainData();
+		if (terrainRule)
+		{
+			for (auto &mapblock : *terrainRule->getMapBlocks())
+			{
+				blockMap[mapblock->getName()] += 1;
+			}
+			for (auto &dataset : *terrainRule->getMapDataSets())
+			{
+				datasetMap[dataset->getName()] += 1;
+			}
+		}
+	}
+	for (auto &craftName : _game->getMod()->getCraftsList())
+	{
+		RuleCraft *craftRule = _game->getMod()->getCraft(craftName);
+		RuleTerrain *terrainRule = craftRule->getBattlescapeTerrainData();
+		if (terrainRule)
+		{
+			for (auto &mapblock : *terrainRule->getMapBlocks())
+			{
+				blockMap[mapblock->getName()] += 1;
+			}
+			for (auto &dataset : *terrainRule->getMapDataSets())
+			{
+				datasetMap[dataset->getName()] += 1;
+			}
+		}
+	}
+
+	// 2. check for existence of mapblock MAP and RMP files
+	Log(LOG_INFO) << "----------------------------------------------2. check for existence of mapblock MAP and RMP files";
+	for (auto &mapblock : blockMap)
+	{
+		std::ostringstream filename2;
+		filename2 << "MAPS/" << mapblock.first << ".MAP";
+		if (!FileMap::fileExists(filename2.str()))
+		{
+			++total;
+			Log(LOG_INFO) << filename2.str() << " not found";
+		}
+	}
+	for (auto &mapblock : blockMap)
+	{
+		std::ostringstream filename1;
+		filename1 << "ROUTES/" << mapblock.first << ".RMP";
+		if (!FileMap::fileExists(filename1.str()))
+		{
+			++total;
+			Log(LOG_INFO) << filename1.str() << " not found";
+		}
+	}
+
+	// 3. check for existence of mapdataset MCD, PCK and TAB files
+	Log(LOG_INFO) << "----------------------------------------------3. check for existence of mapdataset MCD, PCK and TAB files";
+	for (auto &dataset : datasetMap)
+	{
+		std::ostringstream filename;
+		filename << "TERRAIN/" << dataset.first << ".MCD";
+		if (!FileMap::fileExists(filename.str()))
+		{
+			++total;
+			Log(LOG_INFO) << filename.str() << " not found";
+		}
+	}
+	for (auto &dataset : datasetMap)
+	{
+		std::ostringstream filename;
+		filename << "TERRAIN/" << dataset.first << ".PCK";
+		if (!FileMap::fileExists(filename.str()))
+		{
+			++total;
+			Log(LOG_INFO) << filename.str() << " not found";
+		}
+	}
+	for (auto &dataset : datasetMap)
+	{
+		std::ostringstream filename;
+		filename << "TERRAIN/" << dataset.first << ".TAB";
+		if (!FileMap::fileExists(filename.str()))
+		{
+			++total;
+			Log(LOG_INFO) << filename.str() << " not found";
+		}
+	}
+
+	// 4. check for unused mapblock MAP and RMP files
+	Log(LOG_INFO) << "----------------------------------------------4a. check for unused mapblock MAP files";
+	auto contents1 = FileMap::getVFolderContents("MAPS/");
+	for (auto k = contents1.begin(); k != contents1.end(); ++k)
+	{
+		std::string upper = (*k);
+		Unicode::upperCase(upper);
+		std::string noExt = CrossPlatform::noExt(upper);
+		if (blockMap.find(noExt) == blockMap.end())
+		{
+			++total;
+			Log(LOG_INFO) << FileMap::at("MAPS/" + upper)->fullpath << " not used anywhere.";
+		}
+	}
+
+	Log(LOG_INFO) << "----------------------------------------------4b. check for unused mapblock RMP files";
+	auto contents2 = FileMap::getVFolderContents("ROUTES/");
+	for (auto k = contents2.begin(); k != contents2.end(); ++k)
+	{
+		std::string upper = (*k);
+		Unicode::upperCase(upper);
+		std::string noExt = CrossPlatform::noExt(upper);
+		if (blockMap.find(noExt) == blockMap.end())
+		{
+			++total;
+			Log(LOG_INFO) << FileMap::at("ROUTES/" + upper)->fullpath << " not used anywhere.";
+		}
+	}
+
+	// 5. check for unused mapdataset MCD, PCK and TAB files
+	Log(LOG_INFO) << "----------------------------------------------5. check for unused mapdataset MCD, PCK and TAB files";
+	auto contents3 = FileMap::getVFolderContents("TERRAIN/");
+	for (auto k = contents3.begin(); k != contents3.end(); ++k)
+	{
+		std::string upper = (*k);
+		Unicode::upperCase(upper);
+		std::string noExt = CrossPlatform::noExt(upper);
+		if (datasetMap.find(noExt) == datasetMap.end())
+		{
+			++total;
+			Log(LOG_INFO) << FileMap::at("TERRAIN/"+upper)->fullpath << " not used anywhere.";
+		}
+	}
+
+	if (total > 0)
+	{
+		_lstOutput->addRow(1, tr("STR_TESTS_ERRORS_FOUND").arg(total).c_str());
+		_lstOutput->addRow(1, tr("STR_DETAILED_INFO_IN_LOG_FILE").c_str());
+	}
+	else
+	{
+		_lstOutput->addRow(1, tr("STR_TESTS_NO_ERRORS_FOUND").c_str());
+	}
+	_lstOutput->addRow(1, tr("STR_TESTS_FINISHED").c_str());
 }
 
 void TestState::testCase3()

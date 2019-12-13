@@ -13,6 +13,9 @@ en-US:
   STR_SCRIPT_TAGS: "Script tag export"
   STR_SCRIPT_TAGS_DESC: "Exports script tags in CSV format."
 #
+  STR_MAP_RESOURCES: "Map resources check"
+  STR_MAP_RESOURCES_DESC: "Checks for missing and unused map-related files and ruleset."
+#
   STR_CHECKING_TERRAIN: "Checking terrain..."
   STR_CHECKING_UFOS: "Checking UFOs..."
   STR_CHECKING_CRAFT: "Checking craft..."

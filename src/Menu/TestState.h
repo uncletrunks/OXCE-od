@@ -67,6 +67,7 @@ private:
 	std::map<int, Palette*> _vanillaPalettes;
 	std::vector<std::string> _testCases;
 	/// Test cases.
+	void testCase4();
 	void testCase3();
 	void testCase2();
 	int checkPalette(const std::string& fullPath, int width, int height);

@@ -56,6 +56,9 @@ public:
 	Texture *getTexture(int id) const;
 	/// Gets all the terrains for a specific deployment.
 	std::vector<std::string> getTerrains(const std::string &deployment) const;
+
+	/// Raw data.
+	const std::map<int, Texture*> &getTexturesRaw() const { return _textures; }
 };
 
 }
