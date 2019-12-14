@@ -295,11 +295,15 @@ void TestState::testCase4()
 		{
 			for (auto &mapblock : *tRule->getMapBlocks())
 			{
-				blockMap[mapblock->getName()] += 1;
+				std::string uc = mapblock->getName();
+				Unicode::upperCase(uc);
+				blockMap[uc] += 1;
 			}
 			for (auto &dataset : *tRule->getMapDataSets())
 			{
-				datasetMap[dataset->getName()] += 1;
+				std::string uc = dataset->getName();
+				Unicode::upperCase(uc);
+				datasetMap[uc] += 1;
 			}
 		}
 	}
@@ -311,11 +315,15 @@ void TestState::testCase4()
 		{
 			for (auto &mapblock : *terrainRule->getMapBlocks())
 			{
-				blockMap[mapblock->getName()] += 1;
+				std::string uc = mapblock->getName();
+				Unicode::upperCase(uc);
+				blockMap[uc] += 1;
 			}
 			for (auto &dataset : *terrainRule->getMapDataSets())
 			{
-				datasetMap[dataset->getName()] += 1;
+				std::string uc = dataset->getName();
+				Unicode::upperCase(uc);
+				datasetMap[uc] += 1;
 			}
 		}
 	}
@@ -327,11 +335,15 @@ void TestState::testCase4()
 		{
 			for (auto &mapblock : *terrainRule->getMapBlocks())
 			{
-				blockMap[mapblock->getName()] += 1;
+				std::string uc = mapblock->getName();
+				Unicode::upperCase(uc);
+				blockMap[uc] += 1;
 			}
 			for (auto &dataset : *terrainRule->getMapDataSets())
 			{
-				datasetMap[dataset->getName()] += 1;
+				std::string uc = dataset->getName();
+				Unicode::upperCase(uc);
+				datasetMap[uc] += 1;
 			}
 		}
 	}
