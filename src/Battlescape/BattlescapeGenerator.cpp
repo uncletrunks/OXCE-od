@@ -813,8 +813,9 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 						_base->getStorageItems()->addItem(ammo->getType(), ammoPerVehicle);
 					}
 				}
-				else
+				else if (item->getVehicleUnit()->getArmor()->getSize() > 1)
 				{
+					// 2x2 HWPs first
 					BattleUnit *unit = addXCOMVehicle(*i);
 					if (unit && !_save->getSelectedUnit())
 						_save->setSelectedUnit(unit);
@@ -879,12 +880,11 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 		}
 	}
 
-	// add soldiers that are in the craft or base (all 2x2 soldiers first, only then 1x1 soldiers)
-	for (int armorSize = 2; armorSize > 0; --armorSize)
+	// add soldiers that are in the craft or base (2x2 only)
 	{
 		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 		{
-			if ((*i)->getArmor()->getSize() != armorSize)
+			if ((*i)->getArmor()->getSize() == 1)
 			{
 				continue;
 			}
@@ -897,6 +897,52 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 					(*i)->clearEquipmentLayout();
 				}
 				BattleUnit *unit = addXCOMUnit(new BattleUnit(_game->getMod() , *i, _save->getDepth()));
+				if (unit && !_save->getSelectedUnit())
+					_save->setSelectedUnit(unit);
+			}
+		}
+	}
+
+	// add remaining 1x1 craft vehicles
+	if (!_baseInventory)
+	{
+		if (_craft != 0)
+		{
+			for (std::vector<Vehicle *>::iterator i = _craft->getVehicles()->begin(); i != _craft->getVehicles()->end(); ++i)
+			{
+				RuleItem *item = (*i)->getRules();
+				if (startingCondition != 0 && !startingCondition->isVehiclePermitted(item->getType()))
+				{
+					// skip, already done earlier
+				}
+				else if (item->getVehicleUnit()->getArmor()->getSize() == 1)
+				{
+					// 1x1 HWPs last
+					BattleUnit *unit = addXCOMVehicle(*i);
+					if (unit && !_save->getSelectedUnit())
+						_save->setSelectedUnit(unit);
+				}
+			}
+		}
+	}
+
+	// add soldiers that are in the craft or base (1x1 only)
+	{
+		for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
+		{
+			if ((*i)->getArmor()->getSize() > 1)
+			{
+				continue;
+			}
+			if ((_craft != 0 && (*i)->getCraft() == _craft) ||
+				(_craft == 0 && ((*i)->hasFullHealth() || (*i)->canDefendBase()) && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
+			{
+				// clear the soldier's equipment layout, we want to start fresh
+				if (_game->getSavedGame()->getDisableSoldierEquipment())
+				{
+					(*i)->clearEquipmentLayout();
+				}
+				BattleUnit *unit = addXCOMUnit(new BattleUnit(_game->getMod(), *i, _save->getDepth()));
 				if (unit && !_save->getSelectedUnit())
 					_save->setSelectedUnit(unit);
 			}
