@@ -1108,6 +1108,7 @@ interfaces: #done
         color: 1
       - id: list
         color: 1
+        color2: 244
   - type: placeFacility
     backgroundImage: BACK01.SCR
     palette: PAL_BASESCAPE

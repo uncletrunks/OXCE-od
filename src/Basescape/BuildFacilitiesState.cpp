@@ -186,7 +186,7 @@ void BuildFacilitiesState::populateBuildList()
 
 	if (!_disabledFacilities.empty())
 	{
-		auto disabledColor = _txtTitle->getColor();
+		auto disabledColor = _lstFacilities->getSecondaryColor();
 		for (std::vector<RuleBaseFacility*>::iterator i = _disabledFacilities.begin(); i != _disabledFacilities.end(); ++i)
 		{
 			_lstFacilities->addRow(1, tr((*i)->getType()).c_str());

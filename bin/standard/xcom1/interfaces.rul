@@ -1080,6 +1080,7 @@ interfaces:
         color: 208   # white
       - id: list
         color: 213   # gold
+        color2: 208  # white
   - type: placeFacility
     backgroundImage: BACK01.SCR
     palette: PAL_BASESCAPE
