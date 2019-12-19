@@ -1983,7 +1983,7 @@ void GeoscapeState::time1Hour()
 					popup(new CraftErrorState(this, msg));
 				}
 			}
-			if ((*j)->getStatus() != "STR_OUT")
+			if ((*j)->getShieldCapacity() > 0 && (*j)->getStatus() != "STR_OUT")
 			{
 				// Recharge craft shields in parallel (no wait for repair/rearm/refuel)
 				(*j)->setShield((*j)->getShield() + (*j)->getRules()->getShieldRechargeAtBase());
