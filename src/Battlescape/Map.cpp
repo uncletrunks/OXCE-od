@@ -637,7 +637,6 @@ void Map::drawTerrain(Surface *surface)
 	Position mapPosition, screenPosition, bulletPositionScreen, movingUnitPosition;
 	int bulletLowX=16000, bulletLowY=16000, bulletLowZ=16000, bulletHighX=0, bulletHighY=0, bulletHighZ=0;
 	int dummy;
-	BattleUnit *unit = 0;
 	BattleUnit *movingUnit = _save->getTileEngine()->getMovingUnit();
 	int tileShade, tileColor, obstacleShade;
 	UnitSprite unitSprite(surface, _game->getMod(), _animFrame, _save->getDepth() != 0);
@@ -823,7 +822,8 @@ void Map::drawTerrain(Surface *surface)
 						else
 							Surface::blitRaw(surface, tmpSurface, screenPosition.x, screenPosition.y - tile->getYOffset(O_FLOOR), tileShade, false, _nvColor);
 					}
-					unit = tile->getUnit();
+
+					auto unit = tile->getUnit();
 
 					// Draw cursor back
 					if (_cursorType != CT_NONE && _selectorX > itX - _cursorSize && _selectorY > itY - _cursorSize && _selectorX < itX+1 && _selectorY < itY+1 && !_save->getBattleState()->getMouseOverIcons())
@@ -1505,18 +1505,19 @@ void Map::drawTerrain(Surface *surface)
 			_numWaypid->setBordered(false); // make sure we remove the border in case it's being used for missile waypoints.
 		}
 	}
-	unit = _save->getSelectedUnit();
-	if (unit && (_save->getSide() == FACTION_PLAYER || _save->getDebugMode()) && unit->getPosition().z <= _camera->getViewLevel())
+
+	auto selectedUnit = _save->getSelectedUnit();
+	if (selectedUnit && (_save->getSide() == FACTION_PLAYER || _save->getDebugMode()) && selectedUnit->getPosition().z <= _camera->getViewLevel())
 	{
-		_camera->convertMapToScreen(unit->getPosition(), &screenPosition);
+		_camera->convertMapToScreen(selectedUnit->getPosition(), &screenPosition);
 		screenPosition += _camera->getMapOffset();
-		Position offset = calculateWalkingOffset(unit).ScreenOffset;
-		if (unit->getArmor()->getSize() > 1)
+		Position offset = calculateWalkingOffset(selectedUnit).ScreenOffset;
+		if (selectedUnit->getArmor()->getSize() > 1)
 		{
 			offset.y += 4;
 		}
-		offset.y += Position::TileZ - (unit->getHeight() + unit->getFloatHeight());
-		if (unit->isKneeled())
+		offset.y += Position::TileZ - (selectedUnit->getHeight() + selectedUnit->getFloatHeight());
+		if (selectedUnit->isKneeled())
 		{
 			offset.y -= 2;
 		}
@@ -1525,6 +1526,7 @@ void Map::drawTerrain(Surface *surface)
 			_arrow->blitNShade(surface, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + getArrowBobForFrame(_animFrame), 0);
 		}
 	}
+
 	// Draw motion scanner arrows
 	if (_isAltPressed && _save->getSide() == FACTION_PLAYER)
 	{
