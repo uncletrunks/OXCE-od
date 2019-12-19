@@ -1996,7 +1996,7 @@ bool TileEngine::tryReaction(ReactionScore *reaction, BattleUnit *target, const 
 			}
 
 			int radius = ammo->getRules()->getExplosionRadius(unit);
-			if (radius > 0 &&
+			if (action.type != BA_HIT && radius > 0 &&
 				ai->explosiveEfficacy(action.target, unit, radius, -1) == 0)
 			{
 				action.targeting = false;
