@@ -60,6 +60,7 @@
 #include "InterceptState.h"
 #include "../Basescape/BasescapeState.h"
 #include "../Basescape/SellState.h"
+#include "../Basescape/ManageAlienContainmentState.h"
 #include "../Basescape/TechTreeViewerState.h"
 #include "../Basescape/GlobalManufactureState.h"
 #include "../Basescape/GlobalResearchState.h"
@@ -2025,11 +2026,45 @@ void GeoscapeState::time1Hour()
 			}
 		}
 
-		if (Options::storageLimitsEnforced && (*i)->storesOverfull())
+		if (Options::storageLimitsEnforced)
 		{
-			timerReset();
-			popup(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg((*i)->getName()), _palette, _game->getMod()->getInterface("geoscape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("geoscape")->getElement("errorPalette")->color));
-			popup(new SellState((*i), 0));
+			if ((*i)->storesOverfull())
+			{
+				timerReset();
+				popup(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg((*i)->getName()), _palette, _game->getMod()->getInterface("geoscape")->getElement("errorMessage")->color, "BACK13.SCR", _game->getMod()->getInterface("geoscape")->getElement("errorPalette")->color));
+				popup(new SellState((*i), 0));
+			}
+			else if (!_game->getSavedGame()->getAlienContainmentChecked())
+			{
+				_game->getSavedGame()->setAlienContainmentChecked(true);
+				std::map<int, int> prisonTypes;
+				RuleItem *rule = nullptr;
+				for (auto &item : *(*i)->getStorageItems()->getContents())
+				{
+					rule = _game->getMod()->getItem(item.first, true);
+					if (rule->isAlien())
+					{
+						prisonTypes[rule->getPrisonType()] += 1;
+					}
+				}
+				for (auto &p : prisonTypes)
+				{
+					int prisonType = p.first;
+					if ((*i)->getUsedContainment(prisonType) > (*i)->getAvailableContainment(prisonType))
+					{
+						_game->getSavedGame()->setAlienContainmentChecked(false);
+						timerReset();
+						popup(new ErrorMessageState(
+							trAlt("STR_CONTAINMENT_EXCEEDED", prisonType).arg((*i)->getName()),
+							_palette,
+							_game->getMod()->getInterface("geoscape")->getElement("errorMessage")->color,
+							"BACK01.SCR",
+							_game->getMod()->getInterface("geoscape")->getElement("errorPalette")->color));
+						popup(new ManageAlienContainmentState((*i), prisonType, OPT_GEOSCAPE));
+						break;
+					}
+				}
+			}
 		}
 	}
 	for (std::vector<MissionSite*>::iterator i = _game->getSavedGame()->getMissionSites()->begin(); i != _game->getSavedGame()->getMissionSites()->end(); ++i)
