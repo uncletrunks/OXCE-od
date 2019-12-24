@@ -2107,13 +2107,13 @@ void GenerateSupplyMission::operator()(AlienBase *base) const
 	const Mod &_mod = *_engine.getMod();
 	SavedGame &_save = *_engine.getSavedGame();
 
-	std::string mission = base->getDeployment()->chooseGenMissionType();
-	if (_mod.getAlienMission(mission))
+	std::string missionName = base->getDeployment()->chooseGenMissionType();
+	if (_mod.getAlienMission(missionName))
 	{
 		if (base->getGenMissionCount() < base->getDeployment()->getGenMissionLimit() && RNG::percent(base->getDeployment()->getGenMissionFrequency()))
 		{
 			//Spawn supply mission for this base.
-			const RuleAlienMission &rule = *_mod.getAlienMission(mission);
+			const RuleAlienMission &rule = *_mod.getAlienMission(missionName);
 			AlienMission *mission = new AlienMission(rule);
 			std::string targetRegion;
 			if (RNG::percent(rule.getTargetBaseOdds()))
@@ -2157,9 +2157,9 @@ void GenerateSupplyMission::operator()(AlienBase *base) const
 			_save.getAlienMissions().push_back(mission);
 		}
 	}
-	else if (!mission.empty())
+	else if (!missionName.empty())
 	{
-		throw Exception("Alien Base tried to generate undefined mission: " + mission);
+		throw Exception("Alien Base tried to generate undefined mission: " + missionName);
 	}
 }
 
