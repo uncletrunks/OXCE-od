@@ -166,7 +166,22 @@ NewBattleState::NewBattleState() : _craft(0)
 
 	_txtAlienTech->setText(tr("STR_ALIEN_TECH_LEVEL"));
 
-	_missionTypes = _game->getMod()->getDeploymentsList();
+	if (Options::debug)
+	{
+		_missionTypes = _game->getMod()->getDeploymentsList();
+	}
+	else
+	{
+		_missionTypes.reserve(_game->getMod()->getDeploymentsList().size());
+		for (auto &deploymentName : _game->getMod()->getDeploymentsList())
+		{
+			auto depl = _game->getMod()->getDeployment(deploymentName);
+			if (depl && !depl->isHidden())
+			{
+				_missionTypes.push_back(deploymentName);
+			}
+		}
+	}
 	_cbxMission->setOptions(_missionTypes, true);
 	_cbxMission->onChange((ActionHandler)&NewBattleState::cbxMissionChange);
 

@@ -78,7 +78,7 @@ private:
 	int _shade, _minShade, _maxShade;
 	std::string _nextStage, _race, _script;
 	std::vector<std::string> _randomRaces;
-	bool _finalDestination, _isAlienBase;
+	bool _finalDestination, _isAlienBase, _isHidden;
 	std::string _winCutscene, _loseCutscene, _abortCutscene;
 	std::string _alert, _alertBackground, _alertDescription;
 	int _alertSound;
@@ -195,6 +195,8 @@ public:
 	int getCheatTurn() const;
 	/// Gets whether or not this is an alien base (purely for new battle mode)
 	bool isAlienBase() const;
+	/// Gets whether or not this mission should be hidden (purely for new battle mode)
+	bool isHidden() const { return _isHidden; }
 
 	std::string chooseGenMissionType() const;
 
