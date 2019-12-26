@@ -1805,15 +1805,25 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 			}
 		}
 	}
-	// Bases can't be copied, so for savegame purposes we store the node instead
-	YAML::Node base = doc["startingBase"];
-	if (base)
+	auto loadStartingBase = [](YAML::Node &docRef, const std::string &startingBaseType, YAML::Node &destRef)
 	{
-		for (YAML::const_iterator i = base.begin(); i != base.end(); ++i)
+		// Bases can't be copied, so for savegame purposes we store the node instead
+		YAML::Node base = docRef[startingBaseType];
+		if (base)
 		{
-			_startingBase[i->first.as<std::string>()] = YAML::Node(i->second);
+			for (YAML::const_iterator i = base.begin(); i != base.end(); ++i)
+			{
+				destRef[i->first.as<std::string>()] = YAML::Node(i->second);
+			}
 		}
-	}
+	};
+	loadStartingBase(doc, "startingBase", _startingBaseDefault);
+	loadStartingBase(doc, "startingBaseBeginner", _startingBaseBeginner);
+	loadStartingBase(doc, "startingBaseExperienced", _startingBaseExperienced);
+	loadStartingBase(doc, "startingBaseVeteran", _startingBaseVeteran);
+	loadStartingBase(doc, "startingBaseGenius", _startingBaseGenius);
+	loadStartingBase(doc, "startingBaseSuperhuman", _startingBaseSuperhuman);
+
 	if (doc["startingTime"])
 	{
 		_startingTime.load(doc["startingTime"]);
@@ -2315,9 +2325,10 @@ T *Mod::loadRule(const YAML::Node &node, std::map<std::string, T*> *map, std::ve
  * Generates a brand new saved game with starting data.
  * @return A new saved game.
  */
-SavedGame *Mod::newSave() const
+SavedGame *Mod::newSave(GameDifficulty diff) const
 {
 	SavedGame *save = new SavedGame();
+	save->setDifficulty(diff);
 
 	// Add countries
 	for (std::vector<std::string>::const_iterator i = _countriesIndex.begin(); i != _countriesIndex.end(); ++i)
@@ -2348,8 +2359,9 @@ SavedGame *Mod::newSave() const
 	}
 
 	// Set up starting base
+	const YAML::Node &startingBaseByDiff = getStartingBase(diff);
 	Base *base = new Base(this);
-	base->load(_startingBase, save, true);
+	base->load(startingBaseByDiff, save, true);
 	save->getBases()->push_back(base);
 
 	// Correct IDs
@@ -2372,7 +2384,7 @@ SavedGame *Mod::newSave() const
 		}
 	}
 
-	const YAML::Node &node = _startingBase["randomSoldiers"];
+	const YAML::Node &node = startingBaseByDiff["randomSoldiers"];
 	std::vector<std::string> randomTypes;
 	if (node)
 	{
@@ -3073,11 +3085,12 @@ const std::vector<std::string> &Mod::getSoldierTransformationList() const
  * part of the ruleset.
  * @return The list of facilities for custom bases.
  */
-std::vector<RuleBaseFacility*> Mod::getCustomBaseFacilities() const
+std::vector<RuleBaseFacility*> Mod::getCustomBaseFacilities(GameDifficulty diff) const
 {
 	std::vector<RuleBaseFacility*> placeList;
 
-	for (YAML::const_iterator i = _startingBase["facilities"].begin(); i != _startingBase["facilities"].end(); ++i)
+	const YAML::Node &startingBaseByDiff = getStartingBase(diff);
+	for (YAML::const_iterator i = startingBaseByDiff["facilities"].begin(); i != startingBaseByDiff["facilities"].end(); ++i)
 	{
 		std::string type = (*i)["type"].as<std::string>();
 		RuleBaseFacility *facility = getBaseFacility(type, true);
@@ -3159,12 +3172,42 @@ const std::vector<std::vector<int> > &Mod::getAlienItemLevels() const
 }
 
 /**
- * Gets the defined starting base.
+ * Gets the default starting base.
  * @return The starting base definition.
  */
-const YAML::Node &Mod::getStartingBase() const
+const YAML::Node &Mod::getDefaultStartingBase() const
 {
-	return _startingBase;
+	return _startingBaseDefault;
+}
+
+/**
+ * Gets the custom starting base (by game difficulty).
+ * @return The starting base definition.
+ */
+const YAML::Node &Mod::getStartingBase(GameDifficulty diff) const
+{
+	if (diff == DIFF_BEGINNER && _startingBaseBeginner && !_startingBaseBeginner.IsNull())
+	{
+		return _startingBaseBeginner;
+	}
+	else if (diff == DIFF_EXPERIENCED && _startingBaseExperienced && !_startingBaseExperienced.IsNull())
+	{
+		return _startingBaseExperienced;
+	}
+	else if (diff == DIFF_VETERAN && _startingBaseVeteran && !_startingBaseVeteran.IsNull())
+	{
+		return _startingBaseVeteran;
+	}
+	else if (diff == DIFF_GENIUS && _startingBaseGenius && !_startingBaseGenius.IsNull())
+	{
+		return _startingBaseGenius;
+	}
+	else if (diff == DIFF_SUPERHUMAN && _startingBaseSuperhuman && !_startingBaseSuperhuman.IsNull())
+	{
+		return _startingBaseSuperhuman;
+	}
+
+	return _startingBaseDefault;
 }
 
 /**
