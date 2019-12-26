@@ -116,6 +116,7 @@ private:
 	void addHuntMode(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void addHuntBehavior(std::ostringstream &ss, const int &value, const std::string &propertyName, const int &defaultvalue = 0);
 	void initUfoList();
+	void initCraftWeaponList();
 public:
 	static const std::map<std::string, std::string> translationMap;
 	/// Creates the StatsForNerdsState state.

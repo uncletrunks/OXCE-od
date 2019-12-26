@@ -35,6 +35,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/RuleBaseFacility.h"
 #include "../Mod/RuleCraft.h"
+#include "../Mod/RuleCraftWeapon.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleSoldierBonus.h"
@@ -355,6 +356,10 @@ void StatsForNerdsState::initLists()
 	case UFOPAEDIA_TYPE_UFO:
 	case UFOPAEDIA_TYPE_TFTD_USO:
 		initUfoList();
+		break;
+	case UFOPAEDIA_TYPE_CRAFT_WEAPON:
+	case UFOPAEDIA_TYPE_TFTD_CRAFT_WEAPON:
+		initCraftWeaponList();
 		break;
 	case UFOPAEDIA_TYPE_UNKNOWN:
 		initSoldierBonusList();
@@ -2992,6 +2997,112 @@ void StatsForNerdsState::initUfoList()
 		addInteger(ss, ufoRule->getHuntAlertSound(), "huntAlertSound", -1);
 		tmpSoundVector.clear();
 		tmpSoundVector.push_back(ufoRule->getHuntAlertSound());
+		addSoundVectorResourcePaths(ss, mod, "GEO.CAT", tmpSoundVector);
+	}
+}
+
+/**
+ * Shows the "raw" RuleCraftWeapon data.
+ */
+void StatsForNerdsState::initCraftWeaponList()
+{
+	_lstRawData->clearList();
+	_lstRawData->setIgnoreSeparators(true);
+
+	std::ostringstream ssTopic;
+	ssTopic << tr(_topicId);
+	if (_showIds)
+	{
+		ssTopic << " [" << _topicId << "]";
+	}
+
+	_txtArticle->setText(tr("STR_ARTICLE").arg(ssTopic.str()));
+
+	Mod *mod = _game->getMod();
+	RuleCraftWeapon *craftWeaponRule = mod->getCraftWeapon(_topicId);
+	if (!craftWeaponRule)
+		return;
+
+	_filterOptions.clear();
+	_cbxRelatedStuff->setVisible(false);
+
+	std::ostringstream ss;
+
+	addInteger(ss, craftWeaponRule->getTractorBeamPower(), "tractorBeamPower");
+	addInteger(ss, craftWeaponRule->getDamage(), "damage");
+	addIntegerPercent(ss, craftWeaponRule->getShieldDamageModifier(), "shieldDamageModifier", 100);
+	addIntegerKm(ss, craftWeaponRule->getRange(), "range");
+	addIntegerPercent(ss, craftWeaponRule->getAccuracy(), "accuracy");
+	addIntegerSeconds(ss, craftWeaponRule->getCautiousReload(), "reloadCautious");
+	addIntegerSeconds(ss, craftWeaponRule->getStandardReload(), "reloadStandard");
+	addIntegerSeconds(ss, craftWeaponRule->getAggressiveReload(), "reloadAggressive");
+
+	addSingleString(ss, craftWeaponRule->getLauncherItem(), "launcher");
+	addInteger(ss, craftWeaponRule->getWeaponType(), "weaponType");
+
+	addSingleString(ss, craftWeaponRule->getClipItem(), "clip");
+	addInteger(ss, craftWeaponRule->getAmmoMax(), "ammoMax");
+	addInteger(ss, craftWeaponRule->getRearmRate(), "rearmRate", 1);
+
+	addHeading("stats");
+	{
+		addInteger(ss, craftWeaponRule->getBonusStats().damageMax, "damageMax");
+		addInteger(ss, craftWeaponRule->getBonusStats().armor, "armor");
+		addIntegerPercent(ss, craftWeaponRule->getBonusStats().avoidBonus, "avoidBonus");
+		addIntegerPercent(ss, craftWeaponRule->getBonusStats().powerBonus, "powerBonus");
+		addIntegerPercent(ss, craftWeaponRule->getBonusStats().hitBonus, "hitBonus");
+		addInteger(ss, craftWeaponRule->getBonusStats().fuelMax, "fuelMax");
+		addIntegerKnots(ss, craftWeaponRule->getBonusStats().speedMax, "speedMax");
+		addInteger(ss, craftWeaponRule->getBonusStats().accel, "accel");
+		addIntegerNauticalMiles(ss, craftWeaponRule->getBonusStats().radarRange, "radarRange");
+		addIntegerPercent(ss, craftWeaponRule->getBonusStats().radarChance, "radarChance");
+		addIntegerNauticalMiles(ss, craftWeaponRule->getBonusStats().sightRange, "sightRange");
+		addInteger(ss, craftWeaponRule->getBonusStats().shieldCapacity, "shieldCapacity");
+		addInteger(ss, craftWeaponRule->getBonusStats().shieldRecharge, "shieldRecharge");
+		addInteger(ss, craftWeaponRule->getBonusStats().shieldRechargeInGeoscape, "shieldRechargeInGeoscape");
+		addInteger(ss, craftWeaponRule->getBonusStats().shieldBleedThrough, "shieldBleedThrough");
+		endHeading();
+	}
+
+	addBoolean(ss, craftWeaponRule->isWaterOnly(), "underwaterOnly");
+
+	if (craftWeaponRule->getStandardReload() > 0)
+	{
+		addHeading("_calculatedValues");
+		{
+			// (damage / standard reload * 60) * (accuracy / 100)
+			int avgDPM = craftWeaponRule->getDamage() * craftWeaponRule->getAccuracy() * 60 / craftWeaponRule->getStandardReload() / 100;
+			addInteger(ss, avgDPM, "_averageDPM");
+
+			// (damage * ammoMax) * (accuracy / 100)
+			int avgTotalDamage = craftWeaponRule->getDamage() * craftWeaponRule->getAmmoMax() * craftWeaponRule->getAccuracy() / 100;
+			addInteger(ss, avgTotalDamage, "_averageTotalDamage");
+
+			endHeading();
+		}
+	}
+
+	if (_showDebug)
+	{
+		addSection("{Modding section}", "You don't need this info as a player", _white, true);
+
+		addSection("{Naming}", "", _white);
+		addSingleString(ss, craftWeaponRule->getType(), "type");
+		addBoolean(ss, craftWeaponRule->getHidePediaInfo(), "hidePediaInfo");
+
+		addSection("{Visuals}", "", _white);
+		addInteger(ss, craftWeaponRule->getProjectileType(), "projectileType", CWPT_CANNON_ROUND); // FIXME: CraftWeaponProjectileType ?
+		addInteger(ss, craftWeaponRule->getProjectileSpeed(), "projectileSpeed");
+
+		addInteger(ss, craftWeaponRule->getSprite() + 5, "_sprite (Dogfight)", 4);
+		addSpriteResourcePath(ss, mod, "INTICON.PCK", craftWeaponRule->getSprite() + 5);
+		addInteger(ss, craftWeaponRule->getSprite() + 48, "_sprite (Base)", 47);
+		addSpriteResourcePath(ss, mod, "BASEBITS.PCK", craftWeaponRule->getSprite() + 48);
+
+		addSection("{Sounds}", "", _white);
+		addInteger(ss, craftWeaponRule->getSound(), "sound", -1);
+		std::vector<int> tmpSoundVector;
+		tmpSoundVector.push_back(craftWeaponRule->getSound());
 		addSoundVectorResourcePaths(ss, mod, "GEO.CAT", tmpSoundVector);
 	}
 }

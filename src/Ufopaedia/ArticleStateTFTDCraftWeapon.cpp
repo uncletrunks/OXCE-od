@@ -26,6 +26,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Unicode.h"
+#include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 
 namespace OpenXcom
@@ -33,6 +34,8 @@ namespace OpenXcom
 
 	ArticleStateTFTDCraftWeapon::ArticleStateTFTDCraftWeapon(ArticleDefinitionTFTD *defs, std::shared_ptr<ArticleCommonState> state) : ArticleStateTFTD(defs, std::move(state))
 	{
+		_btnInfo->setVisible(true);
+
 		RuleCraftWeapon *weapon = _game->getMod()->getCraftWeapon(defs->id, true);
 
 		CraftWeaponCategory category = CWC_WEAPON;
