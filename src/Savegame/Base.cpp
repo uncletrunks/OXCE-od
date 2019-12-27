@@ -496,6 +496,7 @@ UfoDetection Base::detect(const Ufo *target, bool alreadyTracked) const
 	auto distance = XcomDistance(getDistance(target));
 	auto hyperwave = false;
 	auto hyperwave_max_range = 0;
+	auto hyperwave_chance = 0;
 	auto radar_max_range = 0;
 	auto radar_chance = 0;
 
@@ -514,6 +515,7 @@ UfoDetection Base::detect(const Ufo *target, bool alreadyTracked) const
 				{
 					hyperwave = true;
 				}
+				hyperwave_chance += radarChance;
 			}
 			else
 			{
@@ -535,9 +537,9 @@ UfoDetection Base::detect(const Ufo *target, bool alreadyTracked) const
 
 	if (alreadyTracked)
 	{
-		if (hyperwave)
+		if (hyperwave || hyperwave_chance > 0)
 		{
-			detectionType = DETECTION_HYPERWAVE;
+			detectionType = hyperwave ? DETECTION_HYPERWAVE : DETECTION_RADAR;
 			detectionChance = 100;
 		}
 		else if (radar_chance > 0)
@@ -561,7 +563,7 @@ UfoDetection Base::detect(const Ufo *target, bool alreadyTracked) const
 	}
 
 	ModScript::DetectUfoFromBase::Output args { detectionType, detectionChance, };
-	ModScript::DetectUfoFromBase::Worker work { target, distance, alreadyTracked, radar_chance, radar_max_range, hyperwave_max_range, };
+	ModScript::DetectUfoFromBase::Worker work { target, distance, alreadyTracked, radar_chance, radar_max_range, hyperwave_chance, hyperwave_max_range, };
 
 	work.execute(target->getRules()->getScript<ModScript::DetectUfoFromBase>(), args);
 

@@ -194,7 +194,7 @@ class ModScript
 	//					ufo script
 	////////////////////////////////////////////////////////////
 
-	struct DetectUfoFromBaseParser : ScriptParserEvents<ScriptOutputArgs<int&, int&>, const Ufo*, int, int, int, int, int>
+	struct DetectUfoFromBaseParser : ScriptParserEvents<ScriptOutputArgs<int&, int&>, const Ufo*, int, int, int, int, int, int>
 	{
 		DetectUfoFromBaseParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
