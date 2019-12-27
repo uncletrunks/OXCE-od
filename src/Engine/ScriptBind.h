@@ -1149,7 +1149,9 @@ struct Bind : BindBase
 {
 	using Type = T;
 
-	Bind(ScriptParserBase* p) : BindBase{ p }
+	std::string prefix;
+
+	Bind(ScriptParserBase* p, std::string r = T::ScriptName) : BindBase{ p }, prefix{ r }
 	{
 		parser->addParser<helper::FuncGroup<helper::BindSet<T*>>>("set", "arg1 = arg2");
 		parser->addParser<helper::FuncGroup<helper::BindSet<const T*>>>("set", "arg1 = arg2");
@@ -1162,7 +1164,7 @@ struct Bind : BindBase
 
 	std::string getName(const std::string& s)
 	{
-		return std::string{ T::ScriptName } + "." + s;
+		return prefix + "." + s;
 	}
 
 	template<typename X>
@@ -1179,16 +1181,16 @@ struct Bind : BindBase
 	template<int T::*X>
 	void addField(const std::string& get, const std::string& set = "")
 	{
-		addCustomFunc<helper::BindPropGet<T, X>>(getName(get), "Get int field of " + std::string{ T::ScriptName });
+		addCustomFunc<helper::BindPropGet<T, X>>(getName(get), "Get int field of " + prefix);
 		if (!set.empty())
 		{
-			addCustomFunc<helper::BindPropSet<T, X>>(getName(set), "Set int field of " + std::string{ T::ScriptName });
+			addCustomFunc<helper::BindPropSet<T, X>>(getName(set), "Set int field of " + prefix);
 		}
 	}
 	template<auto MemPtr0, auto MemPtr1, auto... MemPtrR>
 	void addField(const std::string& get)
 	{
-		addCustomFunc<helper::BindPropGet<T, MACRO_CLANG_AUTO_HACK(MemPtr0), MACRO_CLANG_AUTO_HACK(MemPtr1), MACRO_CLANG_AUTO_HACK(MemPtrR)...>>(getName(get), "Get inner field of " + std::string{ T::ScriptName });
+		addCustomFunc<helper::BindPropGet<T, MACRO_CLANG_AUTO_HACK(MemPtr0), MACRO_CLANG_AUTO_HACK(MemPtr1), MACRO_CLANG_AUTO_HACK(MemPtrR)...>>(getName(get), "Get inner field of " + prefix);
 	}
 
 	void addScriptTag()
@@ -1208,10 +1210,10 @@ struct Bind : BindBase
 	void addScriptValue(bool canEdit = true)
 	{
 		addScriptTag();
-		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getTag"), "Get tag of " + std::string{ T::ScriptName });
+		addCustomFunc<helper::BindScriptValueGet<T, X>>(getName("getTag"), "Get tag of " + prefix);
 		if (canEdit)
 		{
-			addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"), "Set tag of " + std::string{ T::ScriptName });
+			addCustomFunc<helper::BindScriptValueSet<T, X>>(getName("setTag"), "Set tag of " + prefix);
 		}
 	}
 	template<std::string (*X)(const T*)>
@@ -1222,10 +1224,16 @@ struct Bind : BindBase
 	template<int X>
 	void addFake(const std::string& get)
 	{
-		addCustomFunc<helper::BindValue<T, int, X>>(getName(get), "Get int field of " + std::string{ T::ScriptName });
+		addCustomFunc<helper::BindValue<T, int, X>>(getName(get), "Get int field of " + prefix);
 	}
 
 	template<typename P, P* (T::*X)(), const P* (T::*Y)() const>
+	void addPair(const std::string& get)
+	{
+		add<X>(get);
+		add<Y>(get);
+	}
+	template<typename P, void (*X)(T*, P*&), void (*Y)(const T*, const P*&)>
 	void addPair(const std::string& get)
 	{
 		add<X>(get);

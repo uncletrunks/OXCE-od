@@ -1250,6 +1250,7 @@ public:
 
 		addTypeBase(s, ArgRegisteType<t3>(), info::metaDest);
 	}
+
 	/// Register type in parser.
 	template<typename P>
 	void registerPointerType()
@@ -1258,6 +1259,15 @@ public:
 		{
 			addType<P*>(P::ScriptName);
 			P::ScriptRegister(this);
+		}
+	}
+	/// Register type with name in parser but without any automatic registrations.
+	template<typename P>
+	void registerRawPointerType(const std::string& s)
+	{
+		if (!haveType<P*>())
+		{
+			addType<P*>(s);
 		}
 	}
 
