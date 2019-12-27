@@ -2583,6 +2583,34 @@ bool SavedBattleGame::isBeforeGame() const
 	return _beforeGame;
 }
 
+/**
+ * Randomly chooses hidden movement background.
+ */
+void SavedBattleGame::setRandomHiddenMovementBackground(const Mod *mod)
+{
+	if (mod && !mod->getHiddenMovementBackgrounds().empty())
+	{
+		int rng = RNG::generate(0, mod->getHiddenMovementBackgrounds().size() - 1);
+		_hiddenMovementBackground = mod->getHiddenMovementBackgrounds().at(rng);
+	}
+	else
+	{
+		_hiddenMovementBackground = "TAC00.SCR";
+	}
+}
+
+/**
+ * Gets the hidden movement background ID.
+ * @return hidden movement background ID
+ */
+std::string SavedBattleGame::getHiddenMovementBackground() const
+{
+	return _hiddenMovementBackground;
+}
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -2623,32 +2651,52 @@ void difficultyLevelScript(const SavedBattleGame* sbg, int& val)
 	}
 }
 
-} // namespace
-
-/**
- * Randomly chooses hidden movement background.
- */
-void SavedBattleGame::setRandomHiddenMovementBackground(const Mod *mod)
+void getGeoscapeSaveScript(const SavedBattleGame* sbg, const SavedGame*& val)
 {
-	if (mod && !mod->getHiddenMovementBackgrounds().empty())
+	if (sbg)
 	{
-		int rng = RNG::generate(0, mod->getHiddenMovementBackgrounds().size() - 1);
-		_hiddenMovementBackground = mod->getHiddenMovementBackgrounds().at(rng);
+		val = sbg->getGeoscapeSave();
 	}
 	else
 	{
-		_hiddenMovementBackground = "TAC00.SCR";
+		val = nullptr;
 	}
 }
 
-/**
- * Gets the hidden movement background ID.
- * @return hidden movement background ID
- */
-std::string SavedBattleGame::getHiddenMovementBackground() const
+void getGeoscapeSaveScript(SavedBattleGame* sbg, SavedGame*& val)
 {
-	return _hiddenMovementBackground;
+	if (sbg)
+	{
+		val = sbg->getGeoscapeSave();
+	}
+	else
+	{
+		val = nullptr;
+	}
 }
+
+std::string debugDisplayScript(const SavedBattleGame* p)
+{
+	if (p)
+	{
+		std::string s;
+		s += "BattleGame";
+		s += "(missionType: \"";
+		s += p->getMissionType();
+		s += "\" missionTarget: \"";
+		s += p->getMissionTarget();
+		s += "\" turn: ";
+		s += std::to_string(p->getTurn());
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+} // namespace
 
 /**
  * Appends a given entry to the hit log. Works only during the player's turn.
@@ -2683,10 +2731,14 @@ const HitLog *SavedBattleGame::getHitLog() const
  */
 void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 {
+	parser->registerPointerType<SavedGame>();
+
 	Bind<SavedBattleGame> sbg = { parser };
 
 	sbg.add<&SavedBattleGame::getTurn>("getTurn");
 	sbg.add<&SavedBattleGame::getAnimFrame>("getAnimFrame");
+
+	sbg.addPair<SavedGame, &getGeoscapeSaveScript, &getGeoscapeSaveScript>("getGeoscapeGame");
 
 	sbg.add<&randomChanceScript>("randomChance");
 	sbg.add<&randomRangeScript>("randomRange");
@@ -2695,6 +2747,7 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 
 	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
 
+	sbg.addDebugDisplay<&debugDisplayScript>();
 
 	sbg.addCustomConst("DIFF_BEGINNER", DIFF_BEGINNER);
 	sbg.addCustomConst("DIFF_EXPERIENCED", DIFF_EXPERIENCED);

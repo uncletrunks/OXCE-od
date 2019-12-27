@@ -21,6 +21,7 @@
 #include <set>
 #include <iomanip>
 #include <algorithm>
+#include <ctime>
 #include <yaml-cpp/yaml.h>
 #include "../version.h"
 #include "../Engine/Logger.h"
@@ -30,6 +31,7 @@
 #include "../Engine/Exception.h"
 #include "../Engine/Options.h"
 #include "../Engine/CrossPlatform.h"
+#include "../Engine/ScriptBind.h"
 #include "SavedBattleGame.h"
 #include "SerializationHelper.h"
 #include "GameTime.h"
@@ -764,6 +766,7 @@ void SavedGame::load(const std::string &filename, Mod *mod, Language *lang)
 		_battleGame->load(battle, mod, this);
 	}
 
+	_scriptValues.load(doc, mod->getScriptGlobal());
 }
 
 /**
@@ -931,6 +934,8 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 	{
 		node["battleGame"] = _battleGame->save();
 	}
+	_scriptValues.save(node, mod->getScriptGlobal());
+
 	out << node;
 
 
@@ -2850,6 +2855,216 @@ int SavedGame::getCurrentScore(int monthsPassed) const
 		scoreTotal += region->getActivityXcom().at(invertedEntry) - region->getActivityAlien().at(invertedEntry);
 	}
 	return scoreTotal;
+}
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void getRandomScript(SavedGame* sg, RNG::RandomState*& r)
+{
+	if (sg)
+	{
+		r = &RNG::globalRandomState();
+	}
+	else
+	{
+		r = nullptr;
+	}
+}
+
+void getTimeScript(const SavedGame* sg, const GameTime*& r)
+{
+	if (sg)
+	{
+		r = sg->getTime();
+	}
+	else
+	{
+		r = nullptr;
+	}
+}
+
+void randomChanceScript(RNG::RandomState* rs, int& val)
+{
+	if (rs)
+	{
+		val = rs->generate(0, 99) < val;
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
+void randomRangeScript(RNG::RandomState* rs, int& val, int min, int max)
+{
+	if (rs && max >= min)
+	{
+		val = rs->generate(min, max);
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
+void getDaysPastEpochScript(const GameTime* p, int& val)
+{
+	if (p)
+	{
+		std::tm time = {  };
+		time.tm_year = p->getYear() - 1900;
+		time.tm_mon = p->getMonth() - 1;
+		time.tm_mday = p->getDay();
+		time.tm_hour = p->getHour();
+		time.tm_min = p->getMinute();
+		time.tm_sec = p->getSecond();
+		val = (int)(std::mktime(&time) / (60 * 60 * 24));
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
+void getSecondsPastMidnightScript(const GameTime* p, int& val)
+{
+	if (p)
+	{
+		val = p->getSecond() +
+			60 * p->getMinute() +
+			60 * 60 * p->getHour();
+	}
+	else
+	{
+		val = 0;
+	}
+}
+
+std::string debugDisplayScript(const RNG::RandomState* p)
+{
+	if (p)
+	{
+		std::string s;
+		s += "RandomState";
+		s += "(seed: \"";
+		s += std::to_string(p->getSeed());
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+std::string debugDisplayScript(const GameTime* p)
+{
+	if (p)
+	{
+		auto zeroPrefix = [](int i)
+		{
+			if (i < 10)
+			{
+				return "0" + std::to_string(i);
+			}
+			else
+			{
+				return std::to_string(i);
+			}
+		};
+
+		std::string s;
+		s += "Time";
+		s += "(\"";
+		s += std::to_string(p->getYear());
+		s += "-";
+		s += zeroPrefix(p->getMonth());
+		s += "-";
+		s += zeroPrefix(p->getDay());
+		s += " ";
+		s += zeroPrefix(p->getHour());
+		s += ":";
+		s += zeroPrefix(p->getMinute());
+		s += ":";
+		s += zeroPrefix(p->getSecond());
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+std::string debugDisplayScript(const SavedGame* p)
+{
+	if (p)
+	{
+		std::string s;
+		s += SavedGame::ScriptName;
+		s += "(fileName: \"";
+		s += p->getName();
+		s += "\" time: ";
+		s += debugDisplayScript(p->getTime());
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+}
+
+/**
+ * Register SavedGame in script parser.
+ * @param parser Script parser.
+ */
+void SavedGame::ScriptRegister(ScriptParserBase* parser)
+{
+
+	{
+		const auto name = std::string{ "RandomState" };
+		parser->registerRawPointerType<RNG::RandomState>(name);
+		Bind<RNG::RandomState> rs = { parser, name };
+
+		rs.add<&randomChanceScript>("randomChance", "Change value from range 0-100 to 0-1 based on probability");
+		rs.add<&randomRangeScript>("randomRange", "Return random value from defined range");
+
+		rs.addDebugDisplay<&debugDisplayScript>();
+	}
+
+	{
+		const auto name = std::string{ "Time" };
+		parser->registerRawPointerType<GameTime>(name);
+		Bind<GameTime> t = { parser, name };
+
+		t.add<&GameTime::getSecond>("getSecond");
+		t.add<&GameTime::getMinute>("getMinute");
+		t.add<&GameTime::getHour>("getHour");
+		t.add<&GameTime::getDay>("getDay");
+		t.add<&GameTime::getMonth>("getMonth");
+		t.add<&GameTime::getYear>("getYear");
+		t.add<&getDaysPastEpochScript>("getDaysPastEpoch", "Days past 1970-01-01");
+		t.add<&getSecondsPastMidnightScript>("getSecondsPastMidnight", "Seconds past 00:00");
+
+		t.addDebugDisplay<&debugDisplayScript>();
+	}
+
+	Bind<SavedGame> sgg = { parser };
+
+	sgg.add<&getTimeScript>("getTime", "Get global time that is Greenwich Mean Time");
+	sgg.add<&getRandomScript>("getRandomState");
+
+	sgg.addScriptValue<&SavedGame::_scriptValues>();
+
+	sgg.addDebugDisplay<&debugDisplayScript>();
 }
 
 }

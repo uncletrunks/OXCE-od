@@ -29,6 +29,8 @@
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Mod/RuleBaseFacility.h"
+#include "../Mod/Mod.h"
+#include "../Engine/Script.h"
 
 namespace OpenXcom
 {
@@ -102,6 +104,7 @@ struct PromotionInfo
 	PromotionInfo(): totalSoldiers(0), totalCommanders(0), totalColonels(0), totalCaptains(0), totalSergeants(0){}
 };
 
+
 /**
  * The game data that gets written to disk when the game is saved.
  * A saved game holds all the variable info in a game like funds,
@@ -110,8 +113,15 @@ struct PromotionInfo
 class SavedGame
 {
 public:
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "GeoscapeGame";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
+
 	static const int MAX_EQUIPMENT_LAYOUT_TEMPLATES = 20;
 	static const int MAX_CRAFT_LOADOUT_TEMPLATES = 10;
+
 private:
 	std::string _name;
 	GameDifficulty _difficulty;
@@ -158,6 +168,7 @@ private:
 	std::set<const RuleItem *> _autosales;
 	bool _disableSoldierEquipment;
 	bool _alienContainmentChecked;
+	ScriptValues<SavedGame> _scriptValues;
 
 	static SaveInfo getSaveInfo(const std::string &file, Language *lang);
 public:
