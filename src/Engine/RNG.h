@@ -40,7 +40,7 @@ namespace RNG
 		/// Default constructor initializing the seed by time and this type address.
 		RandomState();
 		/// Constructor from predefined seed.
-		RandomState(uint64_t seed);
+		explicit RandomState(uint64_t seed);
 		/// Get current seed.
 		uint64_t getSeed() const;
 
@@ -48,6 +48,11 @@ namespace RNG
 		uint64_t next();
 		/// Generates a random integer number, inclusive.
 		int generate(int min, int max);
+		/// Get new random-sub-sequence, that dependant on current seed but each time it create different sequence.
+		RandomState subSequence()
+		{
+			return RandomState{ next() ^ 0x055e3ac3461280cful}; //random value to have diffrent new seed but still deterministic values when game run again.
+		}
 
 		/// Needed by shuffle
 		using result_type = uint64_t;
