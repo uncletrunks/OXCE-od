@@ -143,7 +143,7 @@ struct ColorReplace
 	*/
 	static inline void func(Uint8& dest, const Uint8& src, const int& shade, const int& newColor)
 	{
-#ifdef __x86_64__
+#ifdef OXCE_VECTORIZATION_FRIENDLY
 		//more vectorization friendly code
 		auto n = dest;
 		if (src)
@@ -187,7 +187,7 @@ struct StandardShade
 	*/
 	static inline void func(Uint8& dest, const Uint8& src, const int& shade)
 	{
-#ifdef __x86_64__
+#ifdef OXCE_VECTORIZATION_FRIENDLY
 		//more vectorization friendly code
 		auto n = dest;
 		if (src)
