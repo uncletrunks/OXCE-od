@@ -898,7 +898,7 @@ ru:
   STR_BASES: "БАЗЫ"
   STR_GRAPHS: "ГРАФИКИ"
   STR_UFOPAEDIA_UC: "УФОПЕДИЯ"
-  STR_OPTIONS_UC: "ПАРАМЕТРЫ"
+  STR_OPTIONS_UC: "НАСТРОЙКИ"
   STR_FUNDING_UC: "ФИНАНСЫ"
   STR_5_SECONDS: "5 сек"
   STR_1_MINUTE: "1 мин"

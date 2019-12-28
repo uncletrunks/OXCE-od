@@ -165,6 +165,7 @@ sv:
   STR_AUDIO: "LJUD"
   STR_BATTLESCAPE_UC: "STRIDSVY"
   STR_MODS_UC: "MODDAR"
+  STR_MODS: "Moddar"
   STR_DISPLAY_RESOLUTION: "Skärmupplösning"
   STR_DISPLAY_RESOLUTION_DESC: "Ändrar upplösningen på skärmen, spelets upplösning kommer ändras för att passa. Pilar byter mellan stödda upplösningar. Klicka för att lägga in en egen upplösning."
   STR_ORIGINAL: "Original"
