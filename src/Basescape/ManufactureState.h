@@ -42,6 +42,7 @@ private:
 	TextList *_lstManufacture;
 	void lstManufactureClickLeft(Action * action);
 	void lstManufactureClickMiddle(Action * action);
+	void lstManufactureMousePress(Action *action);
 public:
 	/// Creates the Manufacture state.
 	ManufactureState(Base *base);

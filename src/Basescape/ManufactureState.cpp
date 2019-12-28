@@ -18,6 +18,7 @@
  */
 #include "ManufactureState.h"
 #include <sstream>
+#include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
@@ -123,6 +124,7 @@ ManufactureState::ManufactureState(Base *base) : _base(base)
 	_lstManufacture->setWordWrap(true);
 	_lstManufacture->onMouseClick((ActionHandler)&ManufactureState::lstManufactureClickLeft, SDL_BUTTON_LEFT);
 	_lstManufacture->onMouseClick((ActionHandler)&ManufactureState::lstManufactureClickMiddle, SDL_BUTTON_MIDDLE);
+	_lstManufacture->onMousePress((ActionHandler)&ManufactureState::lstManufactureMousePress);
 }
 
 /**
@@ -234,6 +236,41 @@ void ManufactureState::lstManufactureClickMiddle(Action *)
 	const std::vector<Production*> productions(_base->getProductions());
 	const RuleManufacture *selectedTopic = productions[_lstManufacture->getSelectedRow()]->getRules();
 	_game->pushState(new TechTreeViewerState(0, selectedTopic));
+}
+
+/**
+ * Handles the mouse-wheels.
+ * @param action Pointer to an action.
+ */
+void ManufactureState::lstManufactureMousePress(Action *action)
+{
+	int change = 1;
+	if (SDL_GetModState() & KMOD_CTRL)
+		change = 10;
+
+	if (action->getDetails()->button.button == SDL_BUTTON_WHEELUP)
+	{
+		change = std::min(change, _base->getAvailableEngineers());
+		change = std::min(change, _base->getFreeWorkshops());
+		if (change > 0)
+		{
+			Production *selectedProject = _base->getProductions()[_lstManufacture->getSelectedRow()];
+			selectedProject->setAssignedEngineers(selectedProject->getAssignedEngineers() + change);
+			_base->setEngineers(_base->getEngineers() - change);
+			fillProductionList();
+		}
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_WHEELDOWN)
+	{
+		Production *selectedProject = _base->getProductions()[_lstManufacture->getSelectedRow()];
+		change = std::min(change, selectedProject->getAssignedEngineers());
+		if (change > 0)
+		{
+			selectedProject->setAssignedEngineers(selectedProject->getAssignedEngineers() - change);
+			_base->setEngineers(_base->getEngineers() + change);
+			fillProductionList();
+		}
+	}
 }
 
 }
