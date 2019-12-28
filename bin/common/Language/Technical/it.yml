@@ -13,6 +13,9 @@ it:
   STR_SCRIPT_TAGS: ""
   STR_SCRIPT_TAGS_DESC: ""
 #
+  STR_MAP_RESOURCES: ""
+  STR_MAP_RESOURCES_DESC: ""
+#
   STR_CHECKING_TERRAIN: "Verifica terreno..."
   STR_CHECKING_UFOS: "Verifica UFO..."
   STR_CHECKING_CRAFT: "Verifica veicoli..."
@@ -228,7 +231,9 @@ it:
   armor: "Armatura"
 #
   medikitType: "Tipo medikit"
-  allowSelfHeal: "Applica a sé?"
+  medikitTargetSelf: ""
+  medikitTargetImmune: ""
+  medikitTargetMatrix: ""
   isConsumable: "Consumabile?"
   painKiller: "Usi antidolorifici"
   heal: "Usi cura"
@@ -425,3 +430,17 @@ it:
   HB_FLEE: "fuga quando perdi"
   HB_KAMIKAZE: "combatti fino a distruzione"
   HB_RANDOM: "casuale"
+#
+  tractorBeamPower: ""
+  damage: ""
+  shieldDamageModifier: ""
+  accuracy: ""
+  reloadCautious: ""
+  reloadStandard: ""
+  reloadAggressive: ""
+  launcher: ""
+  weaponType: ""
+  clip: ""
+  ammoMax: ""
+  rearmRate: ""
+  _averageTotalDamage: ""

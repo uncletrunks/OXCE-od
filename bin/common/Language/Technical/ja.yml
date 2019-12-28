@@ -13,6 +13,9 @@ ja:
   STR_SCRIPT_TAGS: ""
   STR_SCRIPT_TAGS_DESC: ""
 #
+  STR_MAP_RESOURCES: ""
+  STR_MAP_RESOURCES_DESC: ""
+#
   STR_CHECKING_TERRAIN: "地形をチェック中・・・"
   STR_CHECKING_UFOS: "UFOをチェック中・・・"
   STR_CHECKING_CRAFT: "機体をチェック中・・・"
@@ -228,7 +231,9 @@ ja:
   armor: "アーマー"
 #
   medikitType: "メディキットのタイプ"
-  allowSelfHeal: "自分への使用を許可するか"
+  medikitTargetSelf: ""
+  medikitTargetImmune: ""
+  medikitTargetMatrix: ""
   isConsumable: "消耗品扱いにするか"
   painKiller: "鎮痛剤の数"
   heal: "HP回復の回数"
@@ -425,3 +430,17 @@ ja:
   HB_FLEE: "形勢悪化時は逃亡"
   HB_KAMIKAZE: "前線死守"
   HB_RANDOM: "ランダム"
+#
+  tractorBeamPower: ""
+  damage: ""
+  shieldDamageModifier: ""
+  accuracy: ""
+  reloadCautious: ""
+  reloadStandard: ""
+  reloadAggressive: ""
+  launcher: ""
+  weaponType: ""
+  clip: ""
+  ammoMax: ""
+  rearmRate: ""
+  _averageTotalDamage: ""

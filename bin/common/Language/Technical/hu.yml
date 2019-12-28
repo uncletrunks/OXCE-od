@@ -13,6 +13,9 @@ hu:
   STR_SCRIPT_TAGS: ""
   STR_SCRIPT_TAGS_DESC: ""
 #
+  STR_MAP_RESOURCES: ""
+  STR_MAP_RESOURCES_DESC: ""
+#
   STR_CHECKING_TERRAIN: "Terep ellenőrzése..."
   STR_CHECKING_UFOS: "UFO-k ellenőrzése..."
   STR_CHECKING_CRAFT: "Gépek ellenőrzése..."
@@ -228,7 +231,9 @@ hu:
   armor: "Páncél"
 #
   medikitType: "Elsősegélycsomag fajtája"
-  allowSelfHeal: "Önmagamra hat?"
+  medikitTargetSelf: ""
+  medikitTargetImmune: ""
+  medikitTargetMatrix: ""
   isConsumable: "Elfogyhat?"
   painKiller: "Fájdalomcsillapító száma"
   heal: "Gyógyítás száma"
@@ -425,3 +430,17 @@ hu:
   HB_FLEE: ""
   HB_KAMIKAZE: ""
   HB_RANDOM: ""
+#
+  tractorBeamPower: ""
+  damage: ""
+  shieldDamageModifier: ""
+  accuracy: ""
+  reloadCautious: ""
+  reloadStandard: ""
+  reloadAggressive: ""
+  launcher: ""
+  weaponType: ""
+  clip: ""
+  ammoMax: ""
+  rearmRate: ""
+  _averageTotalDamage: ""

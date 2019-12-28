@@ -4,14 +4,17 @@ fi:
   STR_BAD_NODES: "Huonot solmut (noodit) RMP-tiedostoissa"
   STR_BAD_NODES_DESC: "Tarkistaa RMP-tiedostoista kentän rajojen ulkopuoliset solmut.{NEWLINE}Nämä EIVÄT aiheuta kaatumisia, mutta peli jättää ne huomiotta eivätkä siis toimi tarkoitetulla tavalla."
 #
-  STR_MCD_CHECK: ""
-  STR_MCD_CHECK_DESC: ""
+  STR_MCD_CHECK: "MCD-tarkistus"
+  STR_MCD_CHECK_DESC: "Tarkistaa MCD-tiedostojen ilmaisen liikkumisen lattiaobjektit; tarkistaa myös virheelliset DieMCD-/AltMCD-viittaukset."
 #
   STR_PALETTE_CHECK: "Palettisovitus"
   STR_PALETTE_CHECK_DESC: "Pyrkii sovittamaan muunneltujen kuvien paletit virallisiin paletteihin ja antaa selon kaikista kuvista, joilla ei ole 100 % vastaavuutta."
 #
-  STR_SCRIPT_TAGS: ""
-  STR_SCRIPT_TAGS_DESC: ""
+  STR_SCRIPT_TAGS: "Komentosarjojen tunnisteiden vienti"
+  STR_SCRIPT_TAGS_DESC: "Vie komentosarjojen tunnisteet CSV-muodossa."
+#
+  STR_MAP_RESOURCES: ""
+  STR_MAP_RESOURCES_DESC: ""
 #
   STR_CHECKING_TERRAIN: "Tarkistetaan maastoa..."
   STR_CHECKING_UFOS: "Tarkistetaan ufoja..."
@@ -228,7 +231,9 @@ fi:
   armor: "Panssari"
 #
   medikitType: "Ensiapulaitetyyppi"
-  allowSelfHeal: "Käytä itseensä?"
+  medikitTargetSelf: ""
+  medikitTargetImmune: ""
+  medikitTargetMatrix: ""
   isConsumable: "Kulutettavissa?"
   painKiller: "Kipulääkkeiden käyttöjä"
   heal: "Parannusten käyttöjä"
@@ -237,7 +242,7 @@ fi:
   healthRecovery: "Terveyden palautuminen"
   stunRecovery: "Tainnutusvahingon vähentyminen"
   energyRecovery: "Energian palautuminen"
-  manaRecovery: ""
+  manaRecovery: "Manan palautuminen"
   moraleRecovery: "Taistelutahdon palautuminen"
   painKillerRecovery: "Kipulääkkeen voimakkuus"
 #
@@ -425,3 +430,17 @@ fi:
   HB_FLEE: "pakene alakynnessä"
   HB_KAMIKAZE: "taistele tuhoutumiseen asti"
   HB_RANDOM: "satunnainen"
+#
+  tractorBeamPower: ""
+  damage: ""
+  shieldDamageModifier: ""
+  accuracy: ""
+  reloadCautious: ""
+  reloadStandard: ""
+  reloadAggressive: ""
+  launcher: ""
+  weaponType: ""
+  clip: ""
+  ammoMax: ""
+  rearmRate: ""
+  _averageTotalDamage: ""

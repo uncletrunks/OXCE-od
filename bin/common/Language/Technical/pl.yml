@@ -13,6 +13,9 @@ pl:
   STR_SCRIPT_TAGS: "Eksport znaczników skryptów"
   STR_SCRIPT_TAGS_DESC: "Eksportuje znaczniki skryptów w formacie CSV."
 #
+  STR_MAP_RESOURCES: "Sprawdzanie zasobów map"
+  STR_MAP_RESOURCES_DESC: "Wyszukuje brakujące lub nieużywane pliki i wpisy związane z terenem."
+#
   STR_CHECKING_TERRAIN: "Sprawdzam teren..."
   STR_CHECKING_UFOS: "Sprawdzam UFA..."
   STR_CHECKING_CRAFT: "Sprawdzam pojazdy..."
@@ -427,3 +430,17 @@ pl:
   HB_FLEE: "uciekaj gdy przegrywasz"
   HB_KAMIKAZE: "walcz do śmierci"
   HB_RANDOM: "losowo"
+#
+  tractorBeamPower: "Moc promienia ściągającego"
+  damage: "Obrażenia"
+  shieldDamageModifier: "Modyfikator obrażeń tarcz"
+  accuracy: "Celność"
+  reloadCautious: "Przeładowanie (tryb ostrożny)"
+  reloadStandard: "Przeładowanie (tryb standardowy)"
+  reloadAggressive: "Przeładowanie (tryb agresywny)"
+  launcher: "Obiekt wyrzutni"
+  weaponType: "Typ broni"
+  clip: "Obiekt amunicji"
+  ammoMax: "Pocisków"
+  rearmRate: "Szybkość przeładowania"
+  _averageTotalDamage: "Średnie obrażenia całkowite"

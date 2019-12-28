@@ -13,6 +13,9 @@ ko:
   STR_SCRIPT_TAGS: ""
   STR_SCRIPT_TAGS_DESC: ""
 #
+  STR_MAP_RESOURCES: ""
+  STR_MAP_RESOURCES_DESC: ""
+#
   STR_CHECKING_TERRAIN: "지형 확인 중..."
   STR_CHECKING_UFOS: "UFO 확인 중..."
   STR_CHECKING_CRAFT: "비행잠수정 확인 중..."
@@ -228,7 +231,9 @@ ko:
   armor: "장갑"
 #
   medikitType: "메디키트 종류"
-  allowSelfHeal: "자기에게 적용 가능?"
+  medikitTargetSelf: ""
+  medikitTargetImmune: ""
+  medikitTargetMatrix: ""
   isConsumable: "소모품?"
   painKiller: "진통제 용도"
   heal: "치료 용도"
@@ -425,3 +430,17 @@ ko:
   HB_FLEE: "불리할 시 도주"
   HB_KAMIKAZE: "격추될 때까지 교전"
   HB_RANDOM: "무작위"
+#
+  tractorBeamPower: ""
+  damage: ""
+  shieldDamageModifier: ""
+  accuracy: ""
+  reloadCautious: ""
+  reloadStandard: ""
+  reloadAggressive: ""
+  launcher: ""
+  weaponType: ""
+  clip: ""
+  ammoMax: ""
+  rearmRate: ""
+  _averageTotalDamage: ""

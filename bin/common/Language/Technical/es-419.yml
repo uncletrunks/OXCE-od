@@ -4,11 +4,17 @@ es-419:
   STR_BAD_NODES: "Nodos erroneos en archivos RMP"
   STR_BAD_NODES_DESC: "Revisa los archivos RMP for nodos fuera de los limites del mapa.{NEWLINE}Estos no causaran ningun crasheo, en su lugar serán ignorados por el juego, por lo tanto no funcionado como se debe."
 #
-  STR_ZERO_COST_MOVEMENT: "Sin costo de movimiento en archivos MCD"
-  STR_ZERO_COST_MOVEMENT_DESC: "Revisa los archivos MCD por suelos que contengan cero costo de movimiento.{NEWLINE}Estos no causaran ningun crasheo, pero podrían causar bucles infinitos(Cuando la AI se mueve en un circulo sin costo de movimiento)."
+  STR_MCD_CHECK: ""
+  STR_MCD_CHECK_DESC: ""
 #
   STR_PALETTE_CHECK: "Coincidir paleta"
   STR_PALETTE_CHECK_DESC: "Intenta coincidir las paletas de imagenes modificadas con las oficiales y reportara aquellas que no hayan podido ser emparejadas en un 100%."
+#
+  STR_SCRIPT_TAGS: ""
+  STR_SCRIPT_TAGS_DESC: ""
+#
+  STR_MAP_RESOURCES: ""
+  STR_MAP_RESOURCES_DESC: ""
 #
   STR_CHECKING_TERRAIN: "Revisando terreno..."
   STR_CHECKING_UFOS: "Revisando OVNIs..."
@@ -225,7 +231,9 @@ es-419:
   armor: ""
 #
   medikitType: ""
-  allowSelfHeal: ""
+  medikitTargetSelf: ""
+  medikitTargetImmune: ""
+  medikitTargetMatrix: ""
   isConsumable: ""
   painKiller: ""
   heal: ""
@@ -234,6 +242,7 @@ es-419:
   healthRecovery: ""
   stunRecovery: ""
   energyRecovery: ""
+  manaRecovery: ""
   moraleRecovery: ""
   painKillerRecovery: ""
 #
@@ -354,7 +363,7 @@ es-419:
   canBeBuiltOver: ""
   buildOverFacilities: ""
 #
-  BFRCT_DEFAULT: ""
+  BFRCT_DEFAULT: "Normal por defecto"
   BFRCT_PRISON: ""
   BFRCT_ENGINEERING: ""
   BFRCT_RESEARCH: ""
@@ -421,3 +430,17 @@ es-419:
   HB_FLEE: ""
   HB_KAMIKAZE: ""
   HB_RANDOM: ""
+#
+  tractorBeamPower: ""
+  damage: ""
+  shieldDamageModifier: ""
+  accuracy: ""
+  reloadCautious: ""
+  reloadStandard: ""
+  reloadAggressive: ""
+  launcher: ""
+  weaponType: ""
+  clip: ""
+  ammoMax: ""
+  rearmRate: ""
+  _averageTotalDamage: ""
