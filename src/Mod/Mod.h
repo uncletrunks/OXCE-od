@@ -98,6 +98,8 @@ class ScriptParserBase;
 class ScriptGlobal;
 struct StatAdjustment;
 
+enum GameDifficulty : int;
+
 /**
  * Mod data used when loading resources
  */
