@@ -633,7 +633,7 @@ void Map::drawTerrain(Surface *surface)
 	Tile *tile;
 	int beginX = 0, endX = _save->getMapSizeX() - 1;
 	int beginY = 0, endY = _save->getMapSizeY() - 1;
-	int beginZ = 0, endZ = _camera->getShowAllLayers()?_save->getMapSizeZ() - 1:_camera->getViewLevel();
+	int beginZ = 0, endZ = _save->getMapSizeZ() - 1;
 	Position mapPosition, screenPosition, bulletPositionScreen, movingUnitPosition;
 	int bulletLowX=16000, bulletLowY=16000, bulletLowZ=16000, bulletHighX=0, bulletHighY=0, bulletHighZ=0;
 	int dummy;
@@ -758,6 +758,12 @@ void Map::drawTerrain(Surface *surface)
 		beginX = 0;
 	if (beginY < 0)
 		beginY = 0;
+
+	if (!_camera->getShowAllLayers())
+	{
+		endZ = std::min(endZ, _camera->getViewLevel());
+	}
+
 
 	bool pathfinderTurnedOn = _save->getPathfinding()->isPathPreviewed();
 
