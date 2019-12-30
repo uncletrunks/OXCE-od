@@ -1151,7 +1151,12 @@ struct Bind : BindBase
 
 	std::string prefix;
 
-	Bind(ScriptParserBase* p, std::string r = T::ScriptName) : BindBase{ p }, prefix{ r }
+	Bind(ScriptParserBase* p) : Bind{ p, T::ScriptName }
+	{
+
+	}
+
+	Bind(ScriptParserBase* p, std::string r) : BindBase{ p }, prefix{ r }
 	{
 		parser->addParser<helper::FuncGroup<helper::BindSet<T*>>>("set", "arg1 = arg2");
 		parser->addParser<helper::FuncGroup<helper::BindSet<const T*>>>("set", "arg1 = arg2");
