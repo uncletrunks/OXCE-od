@@ -2608,6 +2608,44 @@ std::string SavedBattleGame::getHiddenMovementBackground() const
 	return _hiddenMovementBackground;
 }
 
+/**
+ * Appends a given entry to the hit log. Works only during the player's turn.
+ */
+void SavedBattleGame::appendToHitLog(HitLogEntryType type, UnitFaction faction)
+{
+	if (_side != FACTION_PLAYER) return;
+	_hitLog->appendToHitLog(type, faction);
+}
+
+/**
+ * Appends a given entry to the hit log. Works only during the player's turn.
+ */
+void SavedBattleGame::appendToHitLog(HitLogEntryType type, UnitFaction faction, const std::string &text)
+{
+	if (_side != FACTION_PLAYER) return;
+	_hitLog->appendToHitLog(type, faction, text);
+}
+
+/**
+ * Gets the hit log.
+ * @return hit log
+ */
+const HitLog *SavedBattleGame::getHitLog() const
+{
+	return _hitLog;
+}
+
+/**
+ * Resets all unit hit state flags.
+ */
+void SavedBattleGame::resetUnitHitStates()
+{
+	for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
+	{
+		(*i)->resetHitState();
+	}
+}
+
 ////////////////////////////////////////////////////////////
 //					Script binding
 ////////////////////////////////////////////////////////////
@@ -2699,33 +2737,6 @@ std::string debugDisplayScript(const SavedBattleGame* p)
 } // namespace
 
 /**
- * Appends a given entry to the hit log. Works only during the player's turn.
- */
-void SavedBattleGame::appendToHitLog(HitLogEntryType type, UnitFaction faction)
-{
-	if (_side != FACTION_PLAYER) return;
-	_hitLog->appendToHitLog(type, faction);
-}
-
-/**
- * Appends a given entry to the hit log. Works only during the player's turn.
- */
-void SavedBattleGame::appendToHitLog(HitLogEntryType type, UnitFaction faction, const std::string &text)
-{
-	if (_side != FACTION_PLAYER) return;
-	_hitLog->appendToHitLog(type, faction, text);
-}
-
-/**
- * Gets the hit log.
- * @return hit log
- */
-const HitLog *SavedBattleGame::getHitLog() const
-{
-	return _hitLog;
-}
-
-/**
  * Register Armor in script parser.
  * @param parser Script parser.
  */
@@ -2754,17 +2765,6 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 	sbg.addCustomConst("DIFF_VETERAN", DIFF_VETERAN);
 	sbg.addCustomConst("DIFF_GENIUS", DIFF_GENIUS);
 	sbg.addCustomConst("DIFF_SUPERHUMAN", DIFF_SUPERHUMAN);
-}
-
-/**
- * Resets all unit hit state flags.
- */
-void SavedBattleGame::resetUnitHitStates()
-{
-	for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
-	{
-		(*i)->resetHitState();
-	}
 }
 
 }
