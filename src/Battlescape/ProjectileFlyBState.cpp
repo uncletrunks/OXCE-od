@@ -549,7 +549,10 @@ bool ProjectileFlyBState::createNewProjectile()
 		_unit->getStatistics()->shotsFiredCounter++;
 
 	// hit log - new bullet
-	_parent->getSave()->appendToHitLog(HITLOG_NEW_SHOT, _action.actor->getFaction());
+	if (_action.actor)
+	{
+		_parent->getSave()->appendToHitLog(HITLOG_NEW_SHOT, _action.actor->getFaction());
+	}
 
 	return true;
 }

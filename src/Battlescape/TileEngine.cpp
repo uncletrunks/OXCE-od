@@ -2283,7 +2283,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 	const int totalDamage = adjustedDamage + (target->getStunlevel() - stunLevelOrig);
 
 	// hit log
-	if (_save->getBattleState())
+	if (attack.attacker)
 	{
 		const int damagePercent = (totalDamage * 100) / target->getBaseStats()->health;
 		if (damagePercent <= 0)
