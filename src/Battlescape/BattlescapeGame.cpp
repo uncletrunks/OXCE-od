@@ -1094,6 +1094,10 @@ void BattlescapeGame::setupCursor()
 		{
 			getMap()->setCursorType(CT_NORMAL, _currentAction.actor->getArmor()->getSize());
 		}
+		else
+		{
+			getMap()->setCursorType(CT_NORMAL);
+		}
 	}
 }
 
@@ -1645,6 +1649,23 @@ bool BattlescapeGame::cancelCurrentAction(bool bForce)
 	}
 
 	return false;
+}
+
+/**
+  * Cancels all selected user actions.
+  */
+void BattlescapeGame::cancelAllActions()
+{
+	_save->getPathfinding()->removePreview();
+
+	_currentAction.waypoints.clear();
+	getMap()->getWaypoints()->clear();
+	_parentState->showLaunchButton(false);
+
+	_currentAction.targeting = false;
+	_currentAction.type = BA_NONE;
+	setupCursor();
+	_parentState->getGame()->getCursor()->setVisible(true);
 }
 
 /**
