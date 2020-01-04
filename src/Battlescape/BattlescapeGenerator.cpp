@@ -1197,7 +1197,6 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				unit->setDirection(RNG::generate(0, 7));
 				_save->getUnits()->push_back(unit);
 				_save->initUnit(unit);
-				_save->getTileEngine()->calculateFOV(unit);
 				return unit;
 			}
 			else if (_save->getMissionType() != "STR_BASE_DEFENSE")
@@ -1208,7 +1207,6 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 					unit->setDirection(RNG::generate(0, 7));
 					_save->getUnits()->push_back(unit);
 					_save->initUnit(unit);
-					_save->getTileEngine()->calculateFOV(unit);
 					return unit;
 				}
 			}
