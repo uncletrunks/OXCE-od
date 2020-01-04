@@ -143,7 +143,7 @@ public:
 	/// Maximum number of weapon slots on craft.
 	static const int WeaponMax = 4;
 	/// Maximum of different types in one weapon slot.
-	static const int WeaponTypeMax = 4;
+	static const int WeaponTypeMax = 8;
 
 private:
 	std::string _type;
