@@ -1096,18 +1096,18 @@ void SavedBattleGame::endTurn()
 	{
 		_side = FACTION_NEUTRAL;
 		// if there is no neutral team, we skip this and instantly prepare the new turn for the player
-		if (selectNextPlayerUnit() == 0)
-		{
-			prepareNewTurn();
-			_turn++;
-			_side = FACTION_PLAYER;
-			if (_lastSelectedUnit && _lastSelectedUnit->isSelectable(FACTION_PLAYER, false, false))
-				_selectedUnit = _lastSelectedUnit;
-			else
-				selectNextPlayerUnit();
-			while (_selectedUnit && _selectedUnit->getFaction() != FACTION_PLAYER)
-				selectNextPlayerUnit();
-		}
+//		if (selectNextPlayerUnit() == 0)
+//		{
+//			prepareNewTurn();
+//			_turn++;
+//			_side = FACTION_PLAYER;
+//			if (_lastSelectedUnit && _lastSelectedUnit->isSelectable(FACTION_PLAYER, false, false))
+//				_selectedUnit = _lastSelectedUnit;
+//			else
+//				selectNextPlayerUnit();
+//			while (_selectedUnit && _selectedUnit->getFaction() != FACTION_PLAYER)
+//				selectNextPlayerUnit();
+//		}
 	}
 	else if (_side == FACTION_NEUTRAL)
 	{
