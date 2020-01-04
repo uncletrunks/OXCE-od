@@ -329,7 +329,6 @@ en-US:
 #OptionsBaseState.cpp
   STR_FOLDERS: "FOLDERS"
 #OptionsFoldersState.cpp
-  STR_CURRENT_WORKING_DIRECTORY: "<current working directory>"
   STR_DATA_FOLDER: "Data Folder (original resources)"
   STR_USER_FOLDER: "User Folder (mods, openxcom.log)"
   STR_SAVE_FOLDER: "Save Folder (saved games)"

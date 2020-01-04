@@ -17,7 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "OptionsFoldersState.h"
-#include "../Engine/CrossPlatform.h"
+#include "../Engine/FileMap.h"
 #include "../Engine/LocalizedText.h"
 #include "../Engine/Options.h"
 #include "../Interface/Text.h"
@@ -35,14 +35,14 @@ OptionsFoldersState::OptionsFoldersState(OptionsOrigin origin) : OptionsBaseStat
 
 	// Create object
 	_txtDataFolder = new Text(218, 9, 94, 8);
-	_txtUserFolder = new Text(218, 9, 94, 43);
-	_txtSaveFolder = new Text(218, 9, 94, 78);
-	_txtConfigFolder = new Text(218, 9, 94, 113);
+	_txtUserFolder = new Text(218, 9, 94, 59);
+	_txtSaveFolder = new Text(218, 9, 94, 86);
+	_txtConfigFolder = new Text(218, 9, 94, 121);
 
-	_txtDataFolderPath = new Text(218, 25, 94, 18);
-	_txtUserFolderPath = new Text(218, 25, 94, 53);
-	_txtSaveFolderPath = new Text(218, 25, 94, 88);
-	_txtConfigFolderPath = new Text(218, 25, 94, 123);
+	_txtDataFolderPath = new Text(218, 41, 94, 18);
+	_txtUserFolderPath = new Text(218, 17, 94, 69);
+	_txtSaveFolderPath = new Text(218, 25, 94, 96);
+	_txtConfigFolderPath = new Text(218, 17, 94, 131);
 
 	add(_txtDataFolder, "text1", "foldersMenu");
 	add(_txtUserFolder, "text1", "foldersMenu");
@@ -62,17 +62,23 @@ OptionsFoldersState::OptionsFoldersState(OptionsOrigin origin) : OptionsBaseStat
 	_txtSaveFolder->setText(tr("STR_SAVE_FOLDER"));
 	_txtConfigFolder->setText(tr("STR_CONFIG_FOLDER"));
 
-	std::string dataFolder = Options::getDataFolder();
-	if (dataFolder.empty())
+	std::string file1 = "GEODATA/BACKPALS.DAT";
+	std::string file2 = "openxcom.png";
+
+	std::string origDataFolder = "<error1>";
+	if (FileMap::fileExists(file1))
 	{
-		// empty (mostly) means working directory and exe directory are the same
-		dataFolder = CrossPlatform::getExeFolder(); // windows only at the moment
+		origDataFolder = FileMap::at(file1)->fullpath;
+		origDataFolder = origDataFolder.substr(0, origDataFolder.find(file1));
 	}
-	if (dataFolder.empty())
+	std::string oxceDataFolder = "<error2>";
+	if (FileMap::fileExists(file2))
 	{
-		// fallback for other platforms; replace with c++17 std::filesystem::current_path() one day
-		dataFolder = tr("STR_CURRENT_WORKING_DIRECTORY");
+		oxceDataFolder = FileMap::at(file2)->fullpath;
+		oxceDataFolder = oxceDataFolder.substr(0, oxceDataFolder.find(file2));
 	}
+	std::string dataFolder = origDataFolder + "\n" + oxceDataFolder;
+
 	_txtDataFolderPath->setText(dataFolder);
 	_txtDataFolderPath->setWordWrap(true);
 	_txtDataFolderPath->setTooltip("STR_DATA_FOLDER_DESC");
