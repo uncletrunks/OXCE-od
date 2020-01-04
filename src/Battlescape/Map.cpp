@@ -1806,6 +1806,12 @@ void Map::animate(bool redraw)
 	// animate certain units (large flying units have a propulsion animation)
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
+		// skip units that do not have position
+		if ((*i)->getPosition() == TileEngine::invalid)
+		{
+			continue;
+		}
+
 		if (_save->getDepth() > 0)
 		{
 			(*i)->setFloorAbove(false);
