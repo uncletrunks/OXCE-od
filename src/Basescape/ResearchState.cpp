@@ -163,6 +163,9 @@ void ResearchState::onOpenTechTreeViewer(Action *)
  */
 void ResearchState::lstResearchMousePress(Action *action)
 {
+	if (_lstResearch->isScrollbarVisible())
+		return;
+
 	int change = 1;
 	if (SDL_GetModState() & KMOD_CTRL)
 		change = 10;

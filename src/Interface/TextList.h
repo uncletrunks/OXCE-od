@@ -197,6 +197,7 @@ public:
 	ComboBox *getComboBox() const;
 	void setBorderColor(Uint8 color) override;
 	int getScrollbarColor();
+	bool isScrollbarVisible() const;
 	/// Allows the cell to flood into other columns.
 	void setFlooding(bool flooding);
 	/// Treat separators as spaces (false) or as normal text (true)?
