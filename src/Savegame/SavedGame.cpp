@@ -58,6 +58,7 @@
 #include "AlienStrategy.h"
 #include "AlienMission.h"
 #include "GeoscapeEvent.h"
+#include "../Mod/RuleCountry.h"
 #include "../Mod/RuleRegion.h"
 #include "../Mod/RuleSoldier.h"
 #include "BaseFacility.h"
@@ -2855,6 +2856,39 @@ int SavedGame::getCurrentScore(int monthsPassed) const
 		scoreTotal += region->getActivityXcom().at(invertedEntry) - region->getActivityAlien().at(invertedEntry);
 	}
 	return scoreTotal;
+}
+
+/**
+ * Clear links for the given alien base. Use this before deleting the alien base.
+ */
+void SavedGame::clearLinksForAlienBase(AlienBase* alienBase, const Mod* mod)
+{
+	// Take care to remove supply missions for this base.
+	for (auto am : _activeMissions)
+	{
+		if (am->getAlienBase() == alienBase)
+		{
+			am->setAlienBase(0);
+
+			// if this is an Earth-based operation, losing the base means mission cannot continue anymore
+			if (am->getRules().getOperationType() != AMOT_SPACE)
+			{
+				am->setInterrupted(true);
+			}
+		}
+	}
+	// If there was a pact with this base, cancel it?
+	if (mod->getAllowCountriesToCancelAlienPact() && !alienBase->getPactCountry().empty())
+	{
+		for (auto cntr : _countries)
+		{
+			if (cntr->getRules()->getType() == alienBase->getPactCountry())
+			{
+				cntr->setCancelPact();
+				break;
+			}
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////

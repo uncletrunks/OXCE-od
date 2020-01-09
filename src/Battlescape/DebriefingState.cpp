@@ -944,42 +944,6 @@ void DebriefingState::addStat(const std::string &name, int quantity, int score)
 }
 
 /**
- * Clears the alien base from supply missions that use it.
- */
-class ClearAlienBase
-{
-	typedef AlienMission* argument_type;
-	typedef void result_type;
-
-public:
-	/// Remembers the base.
-	ClearAlienBase(const AlienBase *base) : _base(base) { /* Empty by design. */ }
-	/// Clears the base if required.
-	void operator()(AlienMission *am) const;
-private:
-	const AlienBase *_base;
-};
-
-/**
- * Removes the association between the alien mission and the alien base,
- * if one existed.
- * @param am Pointer to the alien mission.
- */
-void ClearAlienBase::operator()(AlienMission *am) const
-{
-	if (am->getAlienBase() == _base)
-	{
-		am->setAlienBase(0);
-
-		// if this is an Earth-based operation, losing the base means mission cannot continue anymore
-		if (am->getRules().getOperationType() != AMOT_SPACE)
-		{
-			am->setInterrupted(true);
-		}
-	}
-}
-
-/**
  * Prepares debriefing: gathers Aliens, Corpses, Artefacts, UFO Components.
  * Adds the items to the craft.
  * Also calculates the soldiers experience, and possible promotions.
@@ -1368,22 +1332,7 @@ void DebriefingState::prepareDebriefing()
 				{
 					addStat(objectiveCompleteText, 1, objectiveCompleteScore);
 				}
-				// Take care to remove supply missions for this base.
-				std::for_each(save->getAlienMissions().begin(), save->getAlienMissions().end(),
-							ClearAlienBase(*i));
-
-				// If there was a pact with this base, cancel it?
-				if (_game->getMod()->getAllowCountriesToCancelAlienPact() && !(*i)->getPactCountry().empty())
-				{
-					for (std::vector<Country*>::iterator cntr = _game->getSavedGame()->getCountries()->begin(); cntr != _game->getSavedGame()->getCountries()->end(); ++cntr)
-					{
-						if ((*cntr)->getRules()->getType() == (*i)->getPactCountry())
-						{
-							(*cntr)->setCancelPact();
-							break;
-						}
-					}
-				}
+				save->clearLinksForAlienBase((*i), _game->getMod());
 				delete *i;
 				save->getAlienBases()->erase(i);
 				break;

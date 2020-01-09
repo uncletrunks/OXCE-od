@@ -2498,6 +2498,7 @@ void GeoscapeState::time1Day()
 			auto research = mod->getResearch(selfDestructCode, true);
 			if (saveGame->isResearched(research, false)) // ignore debug mode
 			{
+				saveGame->clearLinksForAlienBase((*ab), _game->getMod());
 				delete (*ab);
 				ab = saveGame->getAlienBases()->erase(ab);
 			}
