@@ -524,7 +524,7 @@ void BattlescapeGame::endTurn()
 		}
 
 		// if all grenades explode we remove items that expire on that turn too.
-		std::vector<BattleItem*> forRemoval;
+		std::vector<std::tuple<BattleItem*, ExplosionBState*>> forRemoval;
 		bool exploded = false;
 
 		// check for hot grenades on the ground
@@ -546,19 +546,28 @@ void BattlescapeGame::endTurn()
 						if (rule->getBattleType() == BT_GRENADE) // it's a grenade to explode now
 						{
 							Position p = tile->getPosition().toVoxel() + Position(8, 8, -tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
-							statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, unit, item, item, }));
+							forRemoval.push_back(std::tuple(nullptr, new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, unit, item, item, })));
 							exploded = true;
 						}
 						else
 						{
-							forRemoval.push_back(item);
+							forRemoval.push_back(std::tuple(item, nullptr));
 						}
 					}
 				}
 			}
-			for (BattleItem *item : forRemoval)
+			for (auto& p : forRemoval)
 			{
-				_save->removeItem(item);
+				BattleItem* item = std::get<BattleItem*>(p);
+				ExplosionBState* expl = std::get<ExplosionBState*>(p);
+				if (expl)
+				{
+					statePushNext(expl);
+				}
+				else
+				{
+					_save->removeItem(item);
+				}
 			}
 			if (exploded)
 			{
