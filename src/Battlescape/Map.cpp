@@ -383,7 +383,7 @@ int getShadePulseForFrame(int shade, int frame)
  * @param obstacleShade
  * @param topLayer
  */
-void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, bool topLayer, bool checkUpperUnit)
+void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position currTileScreenPosition, bool topLayer, BattleUnit* movingUnit)
 {
 	const int tileFoorWidth = 32;
 	const int tileFoorHeight = 16;
@@ -404,14 +404,14 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 			unitFromBelow = true;
 		}
 	}
-	else if (checkUpperUnit && unitTile == currTile)
+	else if (movingUnit && unitTile == currTile)
 	{
 		auto upperTile = _save->getAboveTile(unitTile);
 		if (upperTile && upperTile->hasNoFloor(_save))
 		{
 			bu = upperTile->getUnit();
 		}
-		if (!bu)
+		if (bu != movingUnit)
 		{
 			return;
 		}
@@ -471,6 +471,12 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 		Position partLast = bu->getLastPosition() + unitOffset;
 		bool isTileDestPos = positionHaveSameXY(partDest, partCurr);
 		bool isTileLastPos = positionHaveSameXY(partLast, partCurr);
+
+		if (unitFromAbove && partLast != unitTile->getPosition())
+		{
+			//this tile is below moving unit and it do not change levels, nothing to draw
+			return;
+		}
 
 		//adjusting mask
 		if (positionHaveSameXY(partLast, partDest))
@@ -561,7 +567,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 			}
 		}
 	}
-	else if (unitTile != currTile)
+	else if (unitTile != currTile || unitFromAbove)
 	{
 		return;
 	}
@@ -1054,7 +1060,7 @@ void Map::drawTerrain(Surface *surface)
 					}
 					unit = tile->getUnit();
 					// Draw soldier from this tile, below or above
-					drawUnit(unitSprite, tile, tile, screenPosition, topLayer, isUnitMovingNearby);
+					drawUnit(unitSprite, tile, tile, screenPosition, topLayer, isUnitMovingNearby ? movingUnit : nullptr);
 
 					if (isUnitMovingNearby)
 					{
