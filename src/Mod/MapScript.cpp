@@ -32,7 +32,7 @@ MapScript::MapScript() :
 	_type(MSC_UNDEFINED), _canBeSkipped(true), _sizeX(1), _sizeY(1), _sizeZ(0),
 	_executionChances(100), _executions(1), _cumulativeFrequency(0), _label(0),
 	_direction(MD_NONE), _verticalGroup(MT_NSROAD), _horizontalGroup(MT_EWROAD), _crossingGroup(MT_CROSSING),
-	_tunnelData(0), _terrain(""), _verticalLevels()
+	_tunnelData(0), _randomTerrain(), _verticalLevels()
 {
 }
 
@@ -267,7 +267,12 @@ void MapScript::load(const YAML::Node& node)
 	_executions = node["executions"].as<int>(_executions);
 	_ufoName = node["UFOName"].as<std::string>(_ufoName);
 	_craftName = node["craftName"].as<std::string>(_craftName);
-	_terrain = node["terrain"].as<std::string>(_terrain);
+	if (node["terrain"])
+	{
+		_randomTerrain.clear();
+		_randomTerrain.push_back(node["terrain"].as<std::string>());
+	}
+	_randomTerrain = node["randomTerrain"].as<std::vector<std::string> >(_randomTerrain);
 	// take no chances, don't accept negative values here.
 	_label = std::abs(node["label"].as<int>(_label));
 
@@ -439,12 +444,12 @@ std::string MapScript::getCraftName()
 }
 
 /**
- * Gets the terrain name in the case of addBlockFromTerrain or fillAreaFromTerrain
- * @return the terrain name.
+ * Gets the alternate terrain list for this command.
+ * @return the vector of terrain names.
  */
-std::string MapScript::getAlternateTerrain() const
+const std::vector<std::string> &MapScript::getRandomAlternateTerrain() const
 {
-	return _terrain;
+	return _randomTerrain;
 }
 
 /**

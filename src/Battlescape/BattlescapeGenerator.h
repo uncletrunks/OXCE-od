@@ -64,7 +64,7 @@ private:
 	Base *_base;
 	MissionSite *_mission;
 	AlienBase *_alienBase;
-	RuleTerrain *_terrain, *_baseTerrain, *_globeTerrain;
+	RuleTerrain *_terrain, *_baseTerrain, *_globeTerrain, *_alternateTerrain;
 	int _mapsize_x, _mapsize_y, _mapsize_z;
 	Texture *_missionTexture, *_globeTexture;
 	int _worldShade;

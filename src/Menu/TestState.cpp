@@ -257,7 +257,12 @@ void TestState::testCase4()
 	for (auto &mapScript : _game->getMod()->getMapScriptsRaw())
 	{
 		for (auto &mapScriptCommand : mapScript.second)
-			terrainMap[mapScriptCommand->getAlternateTerrain()] += 1;
+		{
+			for (auto &terrainName : mapScriptCommand->getRandomAlternateTerrain())
+			{
+				terrainMap[terrainName] += 1;
+			}
+		}
 	}
 
 	// erase false positives

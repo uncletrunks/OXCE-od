@@ -179,7 +179,8 @@ private:
 	int _sizeX, _sizeY, _sizeZ, _executionChances, _executions, _cumulativeFrequency, _label;
 	MapDirection _direction;
 	TunnelData *_tunnelData;
-	std::string _ufoName, _craftName, _terrain;
+	std::string _ufoName, _craftName;
+	std::vector<std::string> _randomTerrain;
 	std::vector<VerticalLevel> _verticalLevels;
 
 	/// Randomly generate a group from within the array.
@@ -235,8 +236,8 @@ public:
 	std::string getUFOName() const;
 	/// Gets the craft's name (for addCraft)
 	std::string getCraftName();
-	/// Gets alternate terrain for a command other than the one in alienDeploments
-	std::string getAlternateTerrain() const;
+	/// Gets the alternate terrain list for this command.
+	const std::vector<std::string> &getRandomAlternateTerrain() const;
 	/// Gets the vertical levels for a command
 	const std::vector<VerticalLevel> &getVerticalLevels() const;
 	/// Sets the vertical levels for a command from a base facility's vertical levels

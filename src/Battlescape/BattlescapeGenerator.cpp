@@ -72,7 +72,7 @@ namespace OpenXcom
  */
 BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_game(game), _save(game->getSavedGame()->getSavedBattle()), _mod(_game->getMod()),
-	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0), _globeTerrain(0),
+	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0), _globeTerrain(0), _alternateTerrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _missionTexture(0), _globeTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0), _ufoDamagePercentage(0),
 	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _craftPos(), _blocksToDo(0), _dummy(0)
@@ -2246,6 +2246,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 			for (int j = 0; j < command->getExecutions(); ++j)
 			{
 				_ufoDeployed = false; // reset EACH time
+				_alternateTerrain = nullptr; // reset
 
 				int x, y;
 				MapBlock *block = 0;
@@ -2275,8 +2276,13 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 				// Variable for holding positions of blocks added for use in loading vertical levels
 				_placedBlockRects.clear();
 
-				RuleTerrain *terrain;
-				terrain = pickTerrain(command->getAlternateTerrain());
+				RuleTerrain *terrain = _terrain;
+				if (!command->getRandomAlternateTerrain().empty())
+				{
+					size_t pick = RNG::generate(0, command->getRandomAlternateTerrain().size() - 1);
+					terrain = pickTerrain(command->getRandomAlternateTerrain().at(pick));
+				}
+				_alternateTerrain = terrain; // backup for later use
 
 				if (doLevels)
 				{
@@ -2700,6 +2706,7 @@ void BattlescapeGenerator::generateBaseMap()
 					blockRect.h = block->getSizeY();
 					_placedBlockRects.push_back(blockRect);
 
+					_alternateTerrain = nullptr; // not used in this case
 					loadVerticalLevels(&command);
 				}
 				else
@@ -2998,7 +3005,11 @@ void BattlescapeGenerator::loadVerticalLevels(MapScript *command, bool repopulat
 		MapBlock *block = _blocks[x][y];
 
 		std::vector<VerticalLevel>::iterator currentLevel = _verticalLevels.begin();
-		RuleTerrain *terrain = pickTerrain(command->getAlternateTerrain());
+		RuleTerrain *terrain = _terrain;
+		if (_alternateTerrain)
+		{
+			terrain = _alternateTerrain; // alternate terrain defined on the map script command
+		}
 
 		int zOffset = 0;
 		int zLevelsLeft = command->getSizeZ();
