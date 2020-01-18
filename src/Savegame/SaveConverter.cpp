@@ -548,22 +548,20 @@ void SaveConverter::loadDatMissions()
 			AlienMission *m = new AlienMission(*_mod->getAlienMission(_rules->getMissions()[mission], true));
 			node["region"] = _rules->getRegions()[region];
 			node["race"] = _rules->getCrews()[race];
-			node["nextWave"] = wave * 30;
+			node["nextWave"] = wave;
 			node["nextUfoCounter"] = ufoCounter;
-			node["spawnCountdown"] = spawn;
+			node["spawnCountdown"] = spawn * 30;
 			node["uniqueID"] = _save->getId("ALIEN_MISSIONS");
 			if (m->getRules().getObjective() == OBJECTIVE_SITE)
 			{
-				if (_mod->getRegion(_rules->getRegions()[region], true)->getMissionZones().size() >= 3)
-				{
-					// pick a city for terror missions
-					node["missionSiteZone"] = RNG::generate(0, _mod->getRegion(_rules->getRegions()[region], true)->getMissionZones().at(3).areas.size() - 1);
-				}
-				else
+				int missionZone = 3; // pick a city for terror missions
+				RuleRegion *rule = _mod->getRegion(_rules->getRegions()[region], true);
+				if (rule->getMissionZones().size() <= 3)
 				{
 					// try to account for TFTD's artefacts and such
-					node["missionSiteZone"] = RNG::generate(0, _mod->getRegion(_rules->getRegions()[region], true)->getMissionZones().at(0).areas.size() - 1);
+					missionZone = 0;
 				}
+				node["missionSiteZone"] = RNG::generate(0, rule->getMissionZones().at(missionZone).areas.size() - 1);
 			}
 			m->load(node, *_save);
 			_save->getAlienMissions().push_back(m);
@@ -594,6 +592,7 @@ void SaveConverter::loadDatLoc()
 		int timer = load<Sint16>(tdata + 0x06);
 		int id = load<Sint16>(tdata + 0x0A);
 		std::bitset<3> visibility(load<int>(tdata + 0x10));
+		bool detected = !visibility.test(0);
 
 		// can't declare variables in switches :(
 		Target *target = 0;
@@ -616,7 +615,7 @@ void SaveConverter::loadDatLoc()
 			ufo->setCrashId(id);
 			ufo->setLandId(id);
 			ufo->setSecondsRemaining(timer);
-			ufo->setDetected(!visibility.test(0));
+			ufo->setDetected(detected);
 			target = ufo;
 			break;
 		case TARGET_CRAFT:
@@ -631,7 +630,7 @@ void SaveConverter::loadDatLoc()
 			abase = new AlienBase(_mod->getDeployment("STR_ALIEN_BASE_ASSAULT", true), 0);
 			abase->setId(id);
 			abase->setAlienRace(_rules->getCrews()[dat]);
-			abase->setDiscovered(!visibility.test(0));
+			abase->setDiscovered(detected);
 			_save->getAlienBases()->push_back(abase);
 			target = abase;
 			break;
@@ -645,16 +644,16 @@ void SaveConverter::loadDatLoc()
 			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_TERROR_MISSION", true), nullptr);
 			break;
 		case TARGET_PORT:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_PORT_TERROR", true), nullptr);
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_SURFACE_ATTACK", true), _mod->getDeployment("STR_PORT_TERROR", true), nullptr);
 			break;
 		case TARGET_ISLAND:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_ISLAND_TERROR", true), nullptr);
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_SURFACE_ATTACK", true), _mod->getDeployment("STR_ISLAND_TERROR", true), nullptr);
 			break;
 		case TARGET_SHIP:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_CARGO_SHIP_P1", true), nullptr);
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_SHIP_ATTACK", true), _mod->getDeployment("STR_CARGO_SHIP_P1", true), nullptr);
 			break;
 		case TARGET_ARTEFACT:
-			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_TERROR", true), _mod->getDeployment("STR_ARTIFACT_SITE_P1", true), nullptr);
+			mission = new MissionSite(_mod->getAlienMission("STR_ALIEN_ARTIFACT", true), _mod->getDeployment("STR_ARTIFACT_SITE_P1", true), nullptr);
 			break;
 		}
 		if (mission != 0)
@@ -662,6 +661,7 @@ void SaveConverter::loadDatLoc()
 			mission->setId(id);
 			mission->setAlienRace(_rules->getCrews()[dat]);
 			mission->setSecondsRemaining(timer * 3600);
+			mission->setDetected(detected);
 			_save->getMissionSites()->push_back(mission);
 			target = mission;
 		}

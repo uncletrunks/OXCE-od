@@ -68,25 +68,24 @@ void UnitPanicBState::think()
 			BattleAction ba;
 			ba.actor = _unit;
 			ba.weapon = _unit->getMainHandWeapon();
-			if (_parent->getSave()->canUseWeapon(ba.weapon, ba.actor, _berserking))
 			{
 				// make autoshots if possible.
 				ba.type = BA_AUTOSHOT;
 				ba.updateTU();
-				bool canShoot = ba.haveTU();
+				bool canShoot = ba.haveTU() && _parent->getSave()->canUseWeapon(ba.weapon, ba.actor, _berserking, ba.type);
 
 				if (!canShoot)
 				{
 					ba.type = BA_SNAPSHOT;
 					ba.updateTU();
-					canShoot = ba.haveTU();
+					canShoot = ba.haveTU() && _parent->getSave()->canUseWeapon(ba.weapon, ba.actor, _berserking, ba.type);
 				}
 
 				if (!canShoot)
 				{
 					ba.type = BA_AIMEDSHOT;
 					ba.updateTU();
-					canShoot = ba.haveTU();
+					canShoot = ba.haveTU() && _parent->getSave()->canUseWeapon(ba.weapon, ba.actor, _berserking, ba.type);
 				}
 
 				if (canShoot)

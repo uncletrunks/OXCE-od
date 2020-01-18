@@ -976,11 +976,28 @@ UnitFaction SavedBattleGame::getSide() const
  * @param unit
  * @return Unit can shoot/use it.
  */
-bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* unit, bool isBerserking) const
+bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* unit, bool isBerserking, BattleActionType actionType, std::string* message) const
 {
 	if (!weapon || !unit) return false;
 
 	const RuleItem *rule = weapon->getRules();
+
+	const BattleItem* ammoItem;
+	if (actionType != BA_NONE)
+	{
+		// Applies to:
+		// 1. action type selected by the player from the UI
+		// 2. leeroy jenkins AI
+		// 3. all reaction fire
+		// 4. all unit berserking
+		ammoItem = weapon->getAmmoForAction(actionType);
+	}
+	else
+	{
+		// Applies to:
+		// 5. standard AI - action type (and thus ammoItem) is unknown when the check is done
+		ammoItem = nullptr;
+	}
 
 	if (unit->getFaction() == FACTION_HOSTILE && getTurn() < rule->getAIUseDelay(getMod()))
 	{
@@ -1001,16 +1018,25 @@ bool SavedBattleGame::canUseWeapon(const BattleItem* weapon, const BattleUnit* u
 			return false;
 		}
 	}
-	if (getDepth() == 0 && rule->isWaterOnly())
+	if (getDepth() == 0)
 	{
-		return false;
+		if (rule->isWaterOnly() || (ammoItem && ammoItem->getRules()->isWaterOnly()) )
+		{
+			if (message) *message = "STR_UNDERWATER_EQUIPMENT";
+			return false;
+		}
 	}
-	if (getDepth() != 0 && rule->isLandOnly())
+	else // if (getDepth() != 0)
 	{
-		return false;
+		if (rule->isLandOnly() || (ammoItem && ammoItem->getRules()->isLandOnly()) )
+		{
+			if (message) *message = "STR_LAND_EQUIPMENT";
+			return false;
+		}
 	}
 	if (rule->isBlockingBothHands() && unit->getFaction() == FACTION_PLAYER && !isBerserking && unit->getLeftHandWeapon() != 0 && unit->getRightHandWeapon() != 0)
 	{
+		if (message) *message = "STR_MUST_USE_BOTH_HANDS";
 		return false;
 	}
 	return true;

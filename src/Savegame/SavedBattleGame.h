@@ -286,7 +286,7 @@ public:
 	/// Gets the playing side.
 	UnitFaction getSide() const;
 	/// Can unit use that weapon?
-	bool canUseWeapon(const BattleItem *weapon, const BattleUnit *unit, bool isBerserking) const;
+	bool canUseWeapon(const BattleItem *weapon, const BattleUnit *unit, bool isBerserking, BattleActionType actionType, std::string* message = nullptr) const;
 	/// Gets the turn number.
 	int getTurn() const;
 	/// Sets the bug hunt turn number.

@@ -140,10 +140,9 @@ void AIModule::dont_think(BattleAction *action)
 	}
 	if (action->weapon)
 	{
-		const RuleItem *rule = action->weapon->getRules();
-		if (_save->canUseWeapon(action->weapon, _unit, false))
+		if (action->weapon->getRules()->getBattleType() == BT_MELEE)
 		{
-			if (rule->getBattleType() == BT_MELEE)
+			if (_save->canUseWeapon(action->weapon, _unit, false, BA_HIT))
 			{
 				_melee = true;
 			}
@@ -253,7 +252,7 @@ void AIModule::think(BattleAction *action)
 	if (action->weapon)
 	{
 		const RuleItem *rule = action->weapon->getRules();
-		if (_save->canUseWeapon(action->weapon, _unit, false))
+		if (_save->canUseWeapon(action->weapon, _unit, false, BA_NONE)) // Note: ammo is not checked here
 		{
 			if (rule->getBattleType() == BT_FIREARM)
 			{
