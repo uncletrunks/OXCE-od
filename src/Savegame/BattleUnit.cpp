@@ -2322,12 +2322,12 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
  */
 void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 {
+	// snapshot of current stats
+	int TURecovery = 0;
+	int ENRecovery = 0;
+
 	if (tuAndEnergy)
 	{
-		// snapshot of current stats
-		int TURecovery = 0;
-		int ENRecovery = 0;
-
 		// apply soldier bonuses
 		if (_geoscapeSoldier)
 		{
@@ -2338,9 +2338,7 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 			}
 		}
 
-		// update stats
-		prepareTimeUnits(_armor->getTimeRecovery(this, TURecovery));
-		prepareEnergy(_armor->getEnergyRecovery(this, ENRecovery));
+		//unit update will be after other stat calucalted and updated
 	}
 
 	if (rest)
@@ -2368,6 +2366,13 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 		prepareMana(_armor->getManaRecovery(this, MNRecovery));
 		prepareMorale(_armor->getMoraleRecovery(this, MRRecovery));
 		prepareStun(_armor->getStunRegeneration(this, STRecovery));
+	}
+
+	if (tuAndEnergy)
+	{
+		// update stats
+		prepareTimeUnits(_armor->getTimeRecovery(this, TURecovery));
+		prepareEnergy(_armor->getEnergyRecovery(this, ENRecovery));
 	}
 }
 
