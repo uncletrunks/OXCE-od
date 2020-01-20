@@ -5237,7 +5237,7 @@ void moveTypesImpl(BindBase& b)
 	b.addCustomConst("move_run", BAM_RUN);
 	b.addCustomConst("move_strafe", BAM_STRAFE);
 }
-	
+
 void medikitBattleActionImpl(BindBase& b)
 {
 	b.addCustomConst("medikit_action_heal", BMA_HEAL);
@@ -5386,13 +5386,13 @@ ModScript::HealUnitParser::HealUnitParser(ScriptGlobal* shared, const std::strin
 	"target", "battle_action"}
 {
 	BindBase b { this };
-	
+
 	b.addCustomPtr<const Mod>("rules", mod);
-	
+
 	battleActionImpl(b);
-	
+
 	medikitBattleActionImpl(b);
-	
+
 	setEmptyReturn();
 }
 
