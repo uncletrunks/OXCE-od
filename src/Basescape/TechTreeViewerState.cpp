@@ -300,6 +300,7 @@ void TechTreeViewerState::initLists()
 		std::vector<std::string> unlockedBy;
 		std::vector<std::string> disabledBy;
 		std::vector<std::string> getForFreeFrom;
+		std::vector<std::string> lookupOf;
 		std::vector<std::string> requiredByResearch;
 		std::vector<std::string> requiredByManufacture;
 		std::vector<std::string> requiredByFacilities;
@@ -385,6 +386,13 @@ void TechTreeViewerState::initLists()
 					{
 						getForFreeFrom.push_back(j);
 					}
+				}
+			}
+			if (!temp->getLookup().empty())
+			{
+				if (temp->getLookup() == rule->getName())
+				{
+					lookupOf.push_back(j);
 				}
 			}
 			for (auto& i : temp->getRequirements())
@@ -571,7 +579,51 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
+		// is lookup of
+		if (lookupOf.size() > 0)
+		{
+			_lstLeft->addRow(1, tr("STR_IS_LOOKUP_OF").c_str());
+			_lstLeft->setRowColor(row, _blue);
+			_leftTopics.push_back("-");
+			_leftFlags.push_back(TTV_NONE);
+			++row;
+			for (std::vector<std::string>::const_iterator i = lookupOf.begin(); i != lookupOf.end(); ++i)
+			{
+				std::string name = tr((*i));
+				name.insert(0, "  ");
+				_lstLeft->addRow(1, name.c_str());
+				if (!isDiscoveredResearch((*i)))
+				{
+					_lstLeft->setRowColor(row, _pink);
+				}
+				_leftTopics.push_back((*i));
+				_leftFlags.push_back(TTV_RESEARCH);
+				++row;
+			}
+		}
+
 		row = 0;
+
+		// lookup link
+		if (!rule->getLookup().empty())
+		{
+			_lstRight->addRow(1, tr("STR_LOOKUP").c_str());
+			_lstRight->setRowColor(row, _blue);
+			_rightTopics.push_back("-");
+			_rightFlags.push_back(TTV_NONE);
+			++row;
+
+			std::string name = tr(rule->getLookup());
+			name.insert(0, "  ");
+			_lstRight->addRow(1, name.c_str());
+			if (!isDiscoveredResearch(rule->getLookup()))
+			{
+				_lstRight->setRowColor(row, _pink);
+			}
+			_rightTopics.push_back(rule->getLookup());
+			_rightFlags.push_back(TTV_RESEARCH);
+			++row;
+		}
 
 		// 6. required by
 		if (requiredByResearch.size() > 0 || requiredByManufacture.size() > 0 || requiredByFacilities.size() > 0 || requiredByItems.size() > 0)
