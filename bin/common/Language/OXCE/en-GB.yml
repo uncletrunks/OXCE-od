@@ -314,6 +314,7 @@ en-GB:
   STR_NOT_ENOUGH_LIVING_SPACE_AT_BASE: "Not enough living space to accomodate{NEWLINE}{0}{NEWLINE}at{NEWLINE}{1}"
 #TargetInfoState.cpp
   STR_INFO: "INFO"
+  STR_DESPAWN_PENALTY: "Despawn penalty> {0}"
 #TrainingFinishedState.cpp
   STR_TRAINING_FINISHED: "Training Finished{NEWLINE}at {0}"
 #UfoDetectedState.cpp

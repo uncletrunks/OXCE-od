@@ -43,7 +43,7 @@ private:
 	TextButton *_btnIntercept, *_btnOk, *_btnInfo;
 	Window *_window;
 	TextEdit *_edtTitle;
-	Text *_txtTargetted, *_txtFollowers;
+	Text *_txtTargetted, *_txtFollowers, *_txtPenalty;
 	AlienDeployment *_deploymentRule;
 public:
 	/// Creates the Target Info state.

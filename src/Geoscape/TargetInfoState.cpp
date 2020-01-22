@@ -54,6 +54,7 @@ TargetInfoState::TargetInfoState(Target *target, Globe *globe) : _target(target)
 	_edtTitle = new TextEdit(this, 182, 32, 37, 46);
 	_txtTargetted = new Text(182, 9, 37, 78);
 	_txtFollowers = new Text(182, 40, 37, 88);
+	_txtPenalty = new Text(160, 9, 48, 114);
 
 	// Set palette
 	setInterface("targetInfo");
@@ -65,6 +66,7 @@ TargetInfoState::TargetInfoState(Target *target, Globe *globe) : _target(target)
 	add(_edtTitle, "text2", "targetInfo");
 	add(_txtTargetted, "text1", "targetInfo");
 	add(_txtFollowers, "text1", "targetInfo");
+	add(_txtPenalty, "text2", "targetInfo");
 
 	centerAllSurfaces();
 
@@ -122,6 +124,13 @@ TargetInfoState::TargetInfoState(Target *target, Globe *globe) : _target(target)
 		_btnInfo->setVisible(false);
 		_btnOk->setWidth(_btnOk->getX() + _btnOk->getWidth() - _btnInfo->getX());
 		_btnOk->setX(_btnInfo->getX());
+	}
+
+	if (_deploymentRule && _deploymentRule->getDespawnPenalty() != 0)
+	{
+		_txtPenalty->setAlign(ALIGN_CENTER);
+		_txtPenalty->setText(tr("STR_DESPAWN_PENALTY").arg(_deploymentRule->getDespawnPenalty()));
+		_txtPenalty->setVisible(Options::isPasswordCorrect()); // let me playtest it first
 	}
 }
 
