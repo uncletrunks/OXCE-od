@@ -103,6 +103,7 @@ en-GB:
   manaExperience: "Mana experience"
   arcingShot: "Arcing?"
   isFireExtinguisher: "Fire exinguisher?"
+  isExplodingInHands: "Explodes in inventory?"
   waypoints: "Max waypoints"
   sprayWaypoints: "Spray shot waypoints"
 #

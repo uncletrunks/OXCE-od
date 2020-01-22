@@ -1429,6 +1429,7 @@ void StatsForNerdsState::initItemList()
 	addInteger(ss, itemRule->getManaExperience(), "manaExperience");
 	addBoolean(ss, itemRule->getArcingShot(), "arcingShot");
 	addBoolean(ss, itemRule->isFireExtinguisher(), "isFireExtinguisher");
+	addBoolean(ss, itemRule->isExplodingInHands(), "isExplodingInHands");
 	addInteger(ss, itemRule->getWaypoints(), "waypoints");
 	addInteger(ss, itemRule->getSprayWaypoints(), "sprayWaypoints");
 
@@ -1790,7 +1791,6 @@ void StatsForNerdsState::initItemList()
 			fuseTypeDefault = BFT_SET;
 		}
 		addBattleFuseType(ss, itemRule->getFuseTimerType(), "fuseType", fuseTypeDefault);
-		addBoolean(ss, itemRule->isExplodingInHands(), "isExplodingInHands");
 		addHeading("fuseTriggerEvents:");
 		{
 			addBoolean(ss, itemRule->getFuseTriggerEvent()->defaultBehavior, "defaultBehavior", true);
