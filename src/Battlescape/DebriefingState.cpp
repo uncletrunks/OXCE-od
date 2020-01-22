@@ -1633,7 +1633,7 @@ void DebriefingState::prepareDebriefing()
 			// we can recover items from the earlier stages as well
 			recoverItems(battle->getConditionalRecoveredItems(), base);
 			size_t nonRecoverType = 0;
-			if (ruleDeploy && ruleDeploy->getObjectiveType())
+			if (ruleDeploy && ruleDeploy->getObjectiveType() && !ruleDeploy->allowObjectiveRecovery())
 			{
 				nonRecoverType = ruleDeploy->getObjectiveType();
 			}

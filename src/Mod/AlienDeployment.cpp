@@ -124,7 +124,7 @@ AlienDeployment::AlienDeployment(const std::string &type) :
 	_markerName("STR_TERROR_SITE"), _markerIcon(-1), _durationMin(0), _durationMax(0), _minDepth(0), _maxDepth(0),
 	_genMissionFrequency(0), _genMissionLimit(1000),
 	_objectiveType(-1), _objectivesRequired(0), _objectiveCompleteScore(0), _objectiveFailedScore(0), _despawnPenalty(0), _abortPenalty(0), _points(0),
-	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _keepCraftAfterFailedMission(false), _escapeType(ESCAPE_NONE),
+	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _keepCraftAfterFailedMission(false), _allowObjectiveRecovery(false), _escapeType(ESCAPE_NONE),
 	_baseDetectionRange(0), _baseDetectionChance(100), _huntMissionMaxFrequency(60)
 {
 }
@@ -225,6 +225,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_isAlienBase = node["alienBase"].as<bool>(_isAlienBase);
 	_isHidden = node["isHidden"].as<bool>(_isHidden);
 	_keepCraftAfterFailedMission = node["keepCraftAfterFailedMission"].as<bool>(_keepCraftAfterFailedMission);
+	_allowObjectiveRecovery = node["allowObjectiveRecovery"].as<bool>(_allowObjectiveRecovery);
 	_escapeType = EscapeType(node["escapeType"].as<int>(_escapeType));
 	if (node["genMission"])
 	{
@@ -685,6 +686,11 @@ int AlienDeployment::getGenMissionLimit() const
 bool AlienDeployment::keepCraftAfterFailedMission() const
 {
 	return _keepCraftAfterFailedMission;
+}
+
+bool AlienDeployment::allowObjectiveRecovery() const
+{
+	return _allowObjectiveRecovery;
 }
 
 EscapeType AlienDeployment::getEscapeType() const
