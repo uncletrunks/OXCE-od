@@ -891,24 +891,37 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 //					Bind helper classes
 ////////////////////////////////////////////////////////////
 
-template<auto Ptr, auto... Rest>
-struct BindMemberInvoke
+template<auto F>
+struct WarpValue
+{
+    using Type = decltype(F);
+    constexpr static Type val() { return F; }
+};
+
+template<typename Ptr, typename... Rest>
+struct BindMemberInvokeImpl //Work araound ICC 19.0.1 bug
 {
     template<typename T, typename... TRest>
     static auto f(T&& a, TRest&&... b) -> decltype(auto)
     {
-        using ReturnType = std::invoke_result_t<decltype(Ptr), T, TRest...>;
+        using ReturnType = std::invoke_result_t<typename Ptr::Type, T, TRest...>;
 
-        ReturnType v = std::invoke(Ptr, std::forward<T>(a), std::forward<TRest>(b)...);
+        ReturnType v = std::invoke(Ptr::val(), std::forward<T>(a), std::forward<TRest>(b)...);
         if constexpr (sizeof...(Rest) > 0)
         {
-            return BindMemberInvoke<Rest...>::f(std::forward<ReturnType>(v));
+            return BindMemberInvokeImpl<Rest...>::f(std::forward<ReturnType>(v));
         }
         else
         {
             return std::forward<ReturnType>(v);
         }
     }
+};
+
+template<auto... Rest>
+struct BindMemberInvoke : BindMemberInvokeImpl<WarpValue<Rest>...>
+{
+
 };
 
 template<typename T, auto... Rest>
@@ -1028,11 +1041,11 @@ struct BindDebugDisplay
 	}
 };
 
-template<auto f>
-struct BindFunc;
+template<typename T, T X>
+struct BindFuncImpl;
 
 template<typename... Args, void(*X)(Args...)>
-struct BindFunc<X>
+struct BindFuncImpl<void(*)(Args...), X>
 {
 	static RetEnum func(Args... a)
 	{
@@ -1042,7 +1055,7 @@ struct BindFunc<X>
 };
 
 template<typename T, typename... Args, bool(T::*X)(Args...)>
-struct BindFunc<X>
+struct BindFuncImpl<bool(T::*)(Args...), X>
 {
 	static RetEnum func(T* t, int& r, Args... a)
 	{
@@ -1052,7 +1065,7 @@ struct BindFunc<X>
 };
 
 template<typename T, typename... Args, bool(T::*X)(Args...) const>
-struct BindFunc<X>
+struct BindFuncImpl<bool(T::*)(Args...) const, X>
 {
 	static RetEnum func(const T* t, int& r, Args... a)
 	{
@@ -1062,7 +1075,7 @@ struct BindFunc<X>
 };
 
 template<typename T, typename R, typename... Args, R(T::*X)(Args...)>
-struct BindFunc<X>
+struct BindFuncImpl<R(T::*)(Args...), X>
 {
 	static RetEnum func(T* t, R& r, Args... a)
 	{
@@ -1072,7 +1085,7 @@ struct BindFunc<X>
 };
 
 template<typename T, typename R, typename... Args, R(T::*X)(Args...) const>
-struct BindFunc<X>
+struct BindFuncImpl<R(T::*)(Args...) const, X>
 {
 	static RetEnum func(const T* t, R& r, Args... a)
 	{
@@ -1082,7 +1095,7 @@ struct BindFunc<X>
 };
 
 template<typename T, typename P, typename... Args, P*(T::*X)(Args...)>
-struct BindFunc<X>
+struct BindFuncImpl<P*(T::*)(Args...), X>
 {
 	static RetEnum func(T* t, P*& r, Args... a)
 	{
@@ -1092,7 +1105,7 @@ struct BindFunc<X>
 };
 
 template<typename T, typename P, typename... Args, P*(T::*X)(Args...) const>
-struct BindFunc<X>
+struct BindFuncImpl<P*(T::*)(Args...) const, X>
 {
 	static RetEnum func(const T* t, const P*& r, Args... a)
 	{
@@ -1102,13 +1115,19 @@ struct BindFunc<X>
 };
 
 template<typename T, typename... Args, void(T::*X)(Args...)>
-struct BindFunc<X>
+struct BindFuncImpl<void(T::*)(Args...), X>
 {
 	static RetEnum func(T* t, Args... a)
 	{
 		if (t) (t->*X)(std::forward<Args>(a)...);
 		return RetContinue;
 	}
+};
+
+template<auto F>
+struct BindFunc : BindFuncImpl<decltype(F), F> //Work araound ICC 19.0.1 bug
+{
+
 };
 
 } //namespace helper
