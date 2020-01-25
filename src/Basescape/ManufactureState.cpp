@@ -248,8 +248,8 @@ void ManufactureState::lstManufactureMousePress(Action *action)
 		return;
 
 	// 140 +/- 20
-	if (action->getAbsoluteXMouse() < 120 ||
-		action->getAbsoluteXMouse() > 160)
+	if (action->getAbsoluteXMouse() < (_txtAllocated->getX() - 40) ||
+		action->getAbsoluteXMouse() > _txtAllocated->getX())
 	{
 		return;
 	}

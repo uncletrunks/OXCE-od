@@ -167,8 +167,8 @@ void ResearchState::lstResearchMousePress(Action *action)
 		return;
 
 	// 175 +/- 20
-	if (action->getAbsoluteXMouse() < 155 ||
-		action->getAbsoluteXMouse() > 195)
+	if (action->getAbsoluteXMouse() < (_txtAllocated->getX() - 5) ||
+		action->getAbsoluteXMouse() > (_txtAllocated->getX() + 35))
 	{
 		return;
 	}
