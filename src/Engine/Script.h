@@ -525,7 +525,7 @@ struct TypeInfoImpl
 		alignof(t1),
 	};
 
-	static_assert(metaDestSize || isPtr, "Type need to be POD to be used as reg or const value.");
+	static_assert(+metaDestSize || isPtr, "Type need to be POD to be used as reg or const value.");
 	static_assert((alignof(t1) & (alignof(t1) - 1)) == 0, "Type alignment is not power of two");
 };
 
