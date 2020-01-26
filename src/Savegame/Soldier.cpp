@@ -117,7 +117,10 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 {
 	_id = node["id"].as<int>(_id);
 	_name = node["name"].as<std::string>();
-	_callsign = node["callsign"].as<std::string>();
+	if (node["callsign"])
+	{
+		_callsign = node["callsign"].as<std::string>();
+	}
 	_nationality = node["nationality"].as<int>(_nationality);
 	_initialStats = node["initialStats"].as<UnitStats>(_initialStats);
 	_currentStats = node["currentStats"].as<UnitStats>(_currentStats);
@@ -202,7 +205,10 @@ YAML::Node Soldier::save(const ScriptGlobal *shared) const
 	node["type"] = _rules->getType();
 	node["id"] = _id;
 	node["name"] = _name;
-	node["callsign"] = _callsign;
+	if (!_callsign.empty())
+	{
+		node["callsign"] = _callsign;
+	}
 	node["nationality"] = _nationality;
 	node["initialStats"] = _initialStats;
 	node["currentStats"] = _currentStats;
