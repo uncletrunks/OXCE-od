@@ -45,8 +45,9 @@ InventorySaveState::InventorySaveState(InventoryState *parent) : _parent(parent)
 	_window = new Window(this, 240, 136, 40, 36 + 1, POPUP_BOTH);
 	_txtTitle = new Text(230, 16, 45, 44 + 3);
 	_lstLayout = new TextList(208, 80, 48, 60);
-	_btnCancel = new TextButton(80, 16, 165, 148);
-	_btnSave = new TextButton(80, 16, 75, 148);
+	_btnCancel = new TextButton(70, 16, 201, 148);
+	_btnSave = new TextButton(70, 16, 50, 148);
+	_btnSaveWithArmor = new TextButton(70, 16, 126, 148);
 	_edtSave = new TextEdit(this, 188, 9, 0, 0);
 
 	setPalette("PAL_BATTLESCAPE");
@@ -56,6 +57,7 @@ InventorySaveState::InventorySaveState(InventoryState *parent) : _parent(parent)
 	add(_lstLayout, "optionLists", "battlescape");
 	add(_btnCancel, "messageWindowButtons", "battlescape");
 	add(_btnSave, "messageWindowButtons", "battlescape");
+	add(_btnSaveWithArmor, "messageWindowButtons", "battlescape");
 	add(_edtSave);
 
 	centerAllSurfaces();
@@ -84,6 +86,12 @@ InventorySaveState::InventorySaveState(InventoryState *parent) : _parent(parent)
 	_btnSave->setText(tr("STR_SAVE_UC"));
 	_btnSave->onMouseClick((ActionHandler)&InventorySaveState::btnSaveClick);
 
+	_btnSaveWithArmor->setHighContrast(true);
+	std::string savePlus = tr("STR_SAVE_UC");
+	savePlus += "+";
+	_btnSaveWithArmor->setText(savePlus);
+	_btnSaveWithArmor->onMouseClick((ActionHandler)&InventorySaveState::btnSaveWithArmorClick);
+
 	_edtSave->setHighContrast(true);
 	_edtSave->setColor(_lstLayout->getSecondaryColor());
 	_edtSave->setVisible(false);
@@ -92,22 +100,25 @@ InventorySaveState::InventorySaveState(InventoryState *parent) : _parent(parent)
 	for (int i = 0; i < SavedGame::MAX_EQUIPMENT_LAYOUT_TEMPLATES; ++i)
 	{
 		std::vector<EquipmentLayoutItem*> *item = _game->getSavedGame()->getGlobalEquipmentLayout(i);
+		std::ostringstream ss;
+		const std::string& armorName = _game->getSavedGame()->getGlobalEquipmentLayoutArmor(i);
+		if (!armorName.empty())
+		{
+			ss << "[" << tr(armorName) << "] ";
+		}
 		if (item->empty())
 		{
-			_lstLayout->addRow(1, tr("STR_EMPTY_SLOT_N").arg(i + 1).c_str());
+			ss << tr("STR_EMPTY_SLOT_N").arg(i + 1);
 		}
 		else
 		{
 			const std::string &itemName = _game->getSavedGame()->getGlobalEquipmentLayoutName(i);
 			if (itemName.empty())
-			{
-				_lstLayout->addRow(1, tr("STR_UNNAMED_SLOT_N").arg(i + 1).c_str());
-			}
+				ss << tr("STR_UNNAMED_SLOT_N").arg(i + 1);
 			else
-			{
-				_lstLayout->addRow(1, itemName.c_str());
-			}
+				ss << itemName;
 		}
+		_lstLayout->addRow(1, ss.str().c_str());
 	}
 }
 
@@ -136,7 +147,19 @@ void InventorySaveState::btnSaveClick(Action *)
 {
 	if (_selectedRow != -1)
 	{
-		saveTemplate();
+		saveTemplate(false);
+	}
+}
+
+/**
+ * Saves the selected template (including the armor).
+ * @param action Pointer to an action.
+ */
+void InventorySaveState::btnSaveWithArmorClick(Action*)
+{
+	if (_selectedRow != -1)
+	{
+		saveTemplate(true);
 	}
 }
 
@@ -168,7 +191,16 @@ void InventorySaveState::lstLayoutPress(Action *action)
 	{
 		_lstLayout->setCellText(_selectedRow, 0, "");
 
-		_edtSave->setText(_selected);
+		std::size_t pos = _selected.find("] ");
+		if (pos != std::string::npos)
+		{
+			// cut off the armor info
+			_edtSave->setText(_selected.substr(pos + 2));
+		}
+		else
+		{
+			_edtSave->setText(_selected);
+		}
 		_edtSave->setX(_lstLayout->getColumnX(0));
 		_edtSave->setY(_lstLayout->getRowY(_selectedRow));
 		_edtSave->setVisible(true);
@@ -187,19 +219,19 @@ void InventorySaveState::edtSaveKeyPress(Action *action)
 	if (action->getDetails()->key.keysym.sym == SDLK_RETURN ||
 		action->getDetails()->key.keysym.sym == SDLK_KP_ENTER)
 	{
-		saveTemplate();
+		saveTemplate(false);
 	}
 }
 
 /**
 * Saves the selected template.
 */
-void InventorySaveState::saveTemplate()
+void InventorySaveState::saveTemplate(bool includingArmor)
 {
 	if (_selectedRow >= 0 && _selectedRow < SavedGame::MAX_EQUIPMENT_LAYOUT_TEMPLATES)
 	{
 		_game->getSavedGame()->setGlobalEquipmentLayoutName(_selectedRow, _edtSave->getText());
-		_parent->saveGlobalLayout(_selectedRow);
+		_parent->saveGlobalLayout(_selectedRow, includingArmor);
 
 		_game->popState();
 	}

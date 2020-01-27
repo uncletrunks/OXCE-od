@@ -318,9 +318,13 @@ InventoryState::~InventoryState()
 	}
 }
 
-void InventoryState::setGlobalLayoutIndex(int index)
+void InventoryState::setGlobalLayoutIndex(int index, bool armorChanged)
 {
 	_globalLayoutIndex = index;
+	if (armorChanged)
+	{
+		_reloadUnit = true;
+	}
 }
 
 /**
@@ -724,7 +728,7 @@ void InventoryState::btnArmorClickMiddle(Action *action)
 	}
 }
 
-void InventoryState::saveGlobalLayout(int index)
+void InventoryState::saveGlobalLayout(int index, bool includingArmor)
 {
 	std::vector<EquipmentLayoutItem*> *tmpl = _game->getSavedGame()->getGlobalEquipmentLayout(index);
 
@@ -733,6 +737,12 @@ void InventoryState::saveGlobalLayout(int index)
 
 	// create new template
 	_createInventoryTemplate(*tmpl);
+
+	// optionally save armor info too
+	if (includingArmor)
+	{
+		_game->getSavedGame()->setGlobalEquipmentLayoutArmor(index, _battleGame->getSelectedUnit()->getArmor()->getType());
+	}
 }
 
 void InventoryState::loadGlobalLayout(int index)
@@ -740,6 +750,86 @@ void InventoryState::loadGlobalLayout(int index)
 	std::vector<EquipmentLayoutItem*> *tmpl = _game->getSavedGame()->getGlobalEquipmentLayout(index);
 
 	_applyInventoryTemplate(*tmpl);
+}
+
+bool InventoryState::loadGlobalLayoutArmor(int index)
+{
+	Armor* prev = nullptr;
+	Soldier* soldier = nullptr;
+	BattleUnit* unit = _inv->getSelectedUnit();
+	if (unit)
+	{
+		soldier = unit->getGeoscapeSoldier();
+		if (soldier)
+		{
+			prev = soldier->getArmor();
+		}
+	}
+
+	Armor* next = nullptr;
+	{
+		auto armorName = _game->getSavedGame()->getGlobalEquipmentLayoutArmor(index);
+		next = _game->getMod()->getArmor(armorName, false);
+	}
+
+	// check armor availability
+	bool armorAvailable = false;
+	if (prev && next && next != prev && soldier && _base)
+	{
+		armorAvailable = true;
+		if (_game->getSavedGame()->getMonthsPassed() != -1)
+		{
+			// is the armor physically available?
+			if (next->getStoreItem() != Armor::NONE && prev->getStoreItem() != next->getStoreItem())
+			{
+				if (_base->getStorageItems()->getItem(next->getStoreItem()) <= 0)
+				{
+					armorAvailable = false;
+				}
+			}
+			// is the armor unlocked?
+			if (!next->getRequiredResearch().empty() && !_game->getSavedGame()->isResearched(next->getRequiredResearch()))
+			{
+				armorAvailable = false;
+			}
+		}
+		// does the armor fit on the current unit?
+		if (!next->getUnits().empty() &&
+			std::find(next->getUnits().begin(), next->getUnits().end(), soldier->getRules()->getType()) == next->getUnits().end())
+		{
+			armorAvailable = false;
+		}
+	}
+
+	// change armor
+	bool armorChanged = false;
+	if (armorAvailable)
+	{
+		Craft* craft = soldier->getCraft();
+		if (craft != 0 && next->getSize() > prev->getSize())
+		{
+			if (craft->getNumVehicles() >= craft->getRules()->getVehicles() || craft->getSpaceAvailable() < 3)
+			{
+				// STR_NOT_ENOUGH_CRAFT_SPACE
+				return false;
+			}
+		}
+		if (_game->getSavedGame()->getMonthsPassed() != -1)
+		{
+			if (prev->getStoreItem() != Armor::NONE)
+			{
+				_base->getStorageItems()->addItem(prev->getStoreItem());
+			}
+			if (next->getStoreItem() != Armor::NONE)
+			{
+				_base->getStorageItems()->removeItem(next->getStoreItem());
+			}
+		}
+		soldier->setArmor(next);
+		armorChanged = true;
+	}
+
+	return armorChanged;
 }
 
 /**
@@ -769,7 +859,7 @@ void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 
 	if ((SDL_GetModState() & KMOD_CTRL) != 0)
 	{
-		saveGlobalLayout(index);
+		saveGlobalLayout(index, false);
 
 		// give audio feedback
 		_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
@@ -777,12 +867,10 @@ void InventoryState::btnGlobalEquipmentLayoutClick(Action *action)
 	}
 	else
 	{
-		loadGlobalLayout(index);
-
-		// refresh ui
-		_inv->arrangeGround();
-		updateStats();
-		refreshMouse();
+		// simulate what happens when loading via the InventoryLoadState dialog
+		bool armorChanged = loadGlobalLayoutArmor(index);
+		setGlobalLayoutIndex(index, armorChanged);
+		init();
 
 		// give audio feedback
 		_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();

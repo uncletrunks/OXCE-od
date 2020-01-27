@@ -160,6 +160,7 @@ private:
 	size_t _selectedBase;
 	std::string _lastselectedArmor; //contains the last selected armor
 	std::string _globalEquipmentLayoutName[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
+	std::string _globalEquipmentLayoutArmor[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::vector<EquipmentLayoutItem*> _globalEquipmentLayout[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::string _globalCraftLoadoutName[MAX_CRAFT_LOADOUT_TEMPLATES];
 	ItemContainer *_globalCraftLoadout[MAX_CRAFT_LOADOUT_TEMPLATES];
@@ -403,6 +404,10 @@ public:
 	const std::string &getGlobalEquipmentLayoutName(int index) const;
 	/// Sets the name of a global equipment layout at specified index.
 	void setGlobalEquipmentLayoutName(int index, const std::string &name);
+	/// Gets the armor type of a global equipment layout at specified index.
+	const std::string& getGlobalEquipmentLayoutArmor(int index) const;
+	/// Sets the armor type of a global equipment layout at specified index.
+	void setGlobalEquipmentLayoutArmor(int index, const std::string& armorType);
 	/// Gets the global equipment layout at specified index.
 	std::vector<EquipmentLayoutItem*> *getGlobalEquipmentLayout(int index);
 	/// Gets the name of a global craft loadout at specified index.

@@ -725,6 +725,13 @@ void SavedGame::load(const std::string &filename, Mod *mod, Language *lang)
 		{
 			_globalEquipmentLayoutName[j] = doc[key2].as<std::string>();
 		}
+		std::ostringstream oss3;
+		oss3 << "globalEquipmentLayoutArmor" << j;
+		std::string key3 = oss3.str();
+		if (doc[key3])
+		{
+			_globalEquipmentLayoutArmor[j] = doc[key3].as<std::string>();
+		}
 	}
 
 	for (int j = 0; j < MAX_CRAFT_LOADOUT_TEMPLATES; ++j)
@@ -901,6 +908,13 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 		if (!_globalEquipmentLayoutName[j].empty())
 		{
 			node[key2] = _globalEquipmentLayoutName[j];
+		}
+		std::ostringstream oss3;
+		oss3 << "globalEquipmentLayoutArmor" << j;
+		std::string key3 = oss3.str();
+		if (!_globalEquipmentLayoutArmor[j].empty())
+		{
+			node[key3] = _globalEquipmentLayoutArmor[j];
 		}
 	}
 	for (int j = 0; j < MAX_CRAFT_LOADOUT_TEMPLATES; ++j)
@@ -2662,6 +2676,25 @@ const std::string &SavedGame::getGlobalEquipmentLayoutName(int index) const
 void SavedGame::setGlobalEquipmentLayoutName(int index, const std::string &name)
 {
 	_globalEquipmentLayoutName[index] = name;
+}
+
+/**
+ * Returns the armor type of a global equipment layout at specified index.
+ * @return Armor type.
+ */
+const std::string& SavedGame::getGlobalEquipmentLayoutArmor(int index) const
+{
+	return _globalEquipmentLayoutArmor[index];
+}
+
+/**
+ * Sets the armor type of a global equipment layout at specified index.
+ * @param index Array index.
+ * @param armorType New armor type.
+ */
+void SavedGame::setGlobalEquipmentLayoutArmor(int index, const std::string& armorType)
+{
+	_globalEquipmentLayoutArmor[index] = armorType;
 }
 
 /**

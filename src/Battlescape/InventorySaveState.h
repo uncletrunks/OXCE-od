@@ -41,7 +41,7 @@ private:
 	Window *_window;
 	Text *_txtTitle;
 	TextList *_lstLayout;
-	TextButton *_btnCancel, *_btnSave;
+	TextButton *_btnCancel, *_btnSave, *_btnSaveWithArmor;
 	TextEdit *_edtSave;
 	std::string _selected;
 	int _previousSelectedRow, _selectedRow;
@@ -54,12 +54,14 @@ public:
 	void btnCancelClick(Action *action);
 	/// Handler for clicking the Save button.
 	void btnSaveClick(Action *action);
+	/// Handler for clicking the SaveWithArmor button.
+	void btnSaveWithArmorClick(Action* action);
 	/// Handler for clicking the Layout list.
 	void lstLayoutPress(Action *action);
 	/// Handler for pressing a key on the Save edit.
 	void edtSaveKeyPress(Action *action);
 	/// Save template.
-	void saveTemplate();
+	void saveTemplate(bool includingArmor);
 };
 
 }

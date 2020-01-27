@@ -73,7 +73,7 @@ public:
 	/// Cleans up the Inventory state.
 	~InventoryState();
 	/// Updates all soldier info.
-	void setGlobalLayoutIndex(int index);
+	void setGlobalLayoutIndex(int index, bool armorChanged);
 	void init() override;
 	/// Handler for pressing on the Name edit.
 	void edtSoldierPress(Action *action);
@@ -88,8 +88,9 @@ public:
 	void btnArmorClickRight(Action *action);
 	void btnArmorClickMiddle(Action *action);
 	/// Methods for handling the global equipment layout save/load hotkeys.
-	void saveGlobalLayout(int index);
+	void saveGlobalLayout(int index, bool includingArmor);
 	void loadGlobalLayout(int index);
+	bool loadGlobalLayoutArmor(int index);
 	void btnGlobalEquipmentLayoutClick(Action *action);
 	/// Handler for clicking the Load button.
 	void btnInventoryLoadClick(Action *action);

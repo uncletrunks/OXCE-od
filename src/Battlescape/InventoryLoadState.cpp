@@ -76,22 +76,25 @@ InventoryLoadState::InventoryLoadState(InventoryState *parent) : _parent(parent)
 	for (int i = 0; i < SavedGame::MAX_EQUIPMENT_LAYOUT_TEMPLATES; ++i)
 	{
 		std::vector<EquipmentLayoutItem*> *item = _game->getSavedGame()->getGlobalEquipmentLayout(i);
+		std::ostringstream ss;
+		const std::string& armorName = _game->getSavedGame()->getGlobalEquipmentLayoutArmor(i);
+		if (!armorName.empty())
+		{
+			ss << "[" << tr(armorName) << "] ";
+		}
 		if (item->empty())
 		{
-			_lstLayout->addRow(1, tr("STR_EMPTY_SLOT_N").arg(i + 1).c_str());
+			ss << tr("STR_EMPTY_SLOT_N").arg(i + 1);
 		}
 		else
 		{
 			const std::string &itemName = _game->getSavedGame()->getGlobalEquipmentLayoutName(i);
 			if (itemName.empty())
-			{
-				_lstLayout->addRow(1, tr("STR_UNNAMED_SLOT_N").arg(i + 1).c_str());
-			}
+				ss << tr("STR_UNNAMED_SLOT_N").arg(i + 1);
 			else
-			{
-				_lstLayout->addRow(1, itemName.c_str());
-			}
+				ss << itemName;
 		}
+		_lstLayout->addRow(1, ss.str().c_str());
 	}
 }
 
@@ -118,7 +121,9 @@ void InventoryLoadState::btnCancelClick(Action *)
 */
 void InventoryLoadState::lstLayoutClick(Action *)
 {
-	_parent->setGlobalLayoutIndex(_lstLayout->getSelectedRow());
+	auto index = _lstLayout->getSelectedRow();
+	bool armorChanged = _parent->loadGlobalLayoutArmor(index);
+	_parent->setGlobalLayoutIndex(index, armorChanged);
 	_game->popState();
 }
 
