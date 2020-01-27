@@ -544,7 +544,7 @@ void CraftArmorState::btnDeequipAllArmorClick(Action *action)
 }
 
 /**
- * De-equip armor of all soldiers on the current craft.
+ * De-equip armor of all soldiers on the current craft, and also all soldiers not assigned to any craft.
  * @param action Pointer to an action.
  */
 void CraftArmorState::btnDeequipCraftArmorClick(Action *action)
@@ -553,7 +553,7 @@ void CraftArmorState::btnDeequipCraftArmorClick(Action *action)
 	int row = 0;
 	for (auto s : *_base->getSoldiers())
 	{
-		if (s->getCraft() == c)
+		if (s->getCraft() == c || s->getCraft() == 0)
 		{
 			Armor *a = _game->getMod()->getArmor(s->getRules()->getArmor());
 
