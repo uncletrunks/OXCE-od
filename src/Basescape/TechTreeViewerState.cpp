@@ -625,6 +625,24 @@ void TechTreeViewerState::initLists()
 			++row;
 		}
 
+		// spawned item
+		if (!rule->getSpawnedItem().empty())
+		{
+			_lstRight->addRow(1, tr("STR_SPAWNED_ITEM").c_str());
+			_lstRight->setRowColor(row, _blue);
+			_rightTopics.push_back("-");
+			_rightFlags.push_back(TTV_NONE);
+			++row;
+
+			std::string name = tr(rule->getSpawnedItem());
+			name.insert(0, "  ");
+			_lstRight->addRow(1, name.c_str());
+			_lstRight->setRowColor(row, _white);
+			_rightTopics.push_back("-");
+			_rightFlags.push_back(TTV_NONE);
+			++row;
+		}
+
 		// 6. required by
 		if (requiredByResearch.size() > 0 || requiredByManufacture.size() > 0 || requiredByFacilities.size() > 0 || requiredByItems.size() > 0)
 		{
