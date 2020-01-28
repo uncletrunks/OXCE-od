@@ -1593,6 +1593,7 @@ bool Soldier::prepareStatsWithBonuses(const Mod *mod)
 
 	// 1. current stats
 	UnitStats tmp = _currentStats;
+	auto basePsiSkill = _currentStats.psiSkill;
 
 	// 2. refresh soldier bonuses
 	auto bonuses = getBonuses(mod); // this is the only place where bonus cache is rebuilt
@@ -1606,6 +1607,12 @@ bool Soldier::prepareStatsWithBonuses(const Mod *mod)
 
 	// 4. stats with soldier bonuses, but without armor bonuses
 	_tmpStatsWithSoldierBonuses = UnitStats::obeyFixedMinimum(tmp);
+
+	// if the psi skill has not been "unlocked" yet by training, do not allow soldier bonuses to unlock it
+	if (basePsiSkill <= 0 && _tmpStatsWithSoldierBonuses.psiSkill > 0)
+	{
+		_tmpStatsWithSoldierBonuses.psiSkill = basePsiSkill;
+	}
 
 	// 5. apply armor bonus
 	tmp += *_armor->getStats();
