@@ -4351,7 +4351,7 @@ void BattleUnit::goToTimeOut()
 void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 {
 	const Mod *mod = save->getMod();
-	RuleItem *item = 0;
+	const RuleItem *item = 0;
 	int i = 0;
 
 	if (getUnitRules())
@@ -4383,6 +4383,17 @@ void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 		if (item && i < SPEC_WEAPON_MAX)
 		{
 			_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
+		}
+	}
+	if (getGeoscapeSoldier())
+	{
+		item = getGeoscapeSoldier()->getRules()->getSpecialWeapon();
+		if (item)
+		{
+			if (i < SPEC_WEAPON_MAX)
+			{
+				_specWeapon[i++] = save->createItemForUnitBuildin(item, this);
+			}
 		}
 	}
 }

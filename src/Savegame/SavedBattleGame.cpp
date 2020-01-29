@@ -1530,7 +1530,7 @@ BattleItem *SavedBattleGame::createItemForUnit(const RuleItem *rule, BattleUnit 
 /**
  * Create new built-in item for unit.
  */
-BattleItem *SavedBattleGame::createItemForUnitBuildin(RuleItem *rule, BattleUnit *unit)
+BattleItem *SavedBattleGame::createItemForUnitBuildin(const RuleItem *rule, BattleUnit *unit)
 {
 	BattleItem *item = new BattleItem(rule, getCurrentItemId());
 	item->setOwner(unit);

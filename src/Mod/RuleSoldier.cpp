@@ -21,6 +21,7 @@
 #include "RuleSoldier.h"
 #include "Mod.h"
 #include "ModScript.h"
+#include "RuleItem.h"
 #include "SoldierNamePool.h"
 #include "StatString.h"
 #include "../Engine/FileMap.h"
@@ -35,7 +36,7 @@ namespace OpenXcom
  * type of soldier.
  * @param type String defining the type.
  */
-RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _listOrder(0), _costBuy(0), _costSalary(0),
+RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _listOrder(0), _specWeapon(nullptr), _costBuy(0), _costSalary(0),
 	_costSalarySquaddie(0), _costSalarySergeant(0), _costSalaryCaptain(0), _costSalaryColonel(0), _costSalaryCommander(0),
 	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _value(20), _transferTime(0), _moraleLossWhenKilled(100),
 	_avatarOffsetX(67), _avatarOffsetY(48), _flagOffset(0),
@@ -95,6 +96,7 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	}
 	_dogfightExperience.merge(node["dogfightExperience"].as<UnitStats>(_dogfightExperience));
 	_armor = node["armor"].as<std::string>(_armor);
+	_specWeaponName = node["specialWeapon"].as<std::string>(_specWeaponName);
 	_armorForAvatar = node["armorForAvatar"].as<std::string>(_armorForAvatar);
 	_avatarOffsetX = node["avatarOffsetX"].as<int>(_avatarOffsetX);
 	_avatarOffsetY = node["avatarOffsetY"].as<int>(_avatarOffsetY);
@@ -183,6 +185,25 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	}
 
 	_scriptValues.load(node, parsers.getShared());
+}
+
+/**
+ * Cross link with other Rules.
+ */
+void RuleSoldier::afterLoad(const Mod* mod)
+{
+	if (!_specWeaponName.empty())
+	{
+		_specWeapon = mod->getItem(_specWeaponName, true);
+
+		if (_specWeapon)
+		{
+			if ((_specWeapon->getBattleType() == BT_FIREARM || _specWeapon->getBattleType() == BT_MELEE) && !_specWeapon->getClipSize())
+			{
+				throw Exception("Weapon " + _specWeaponName + " is used as a special weapon, but doesn't have its own ammo - give it a clipSize!");
+			}
+		}
+	}
 }
 
 void RuleSoldier::addSoldierNamePool(const std::string &namFile)

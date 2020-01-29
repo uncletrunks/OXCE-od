@@ -29,6 +29,7 @@ class Mod;
 class ModScript;
 class SoldierNamePool;
 class StatString;
+class RuleItem;
 
 /**
  * Represents the creation data for an X-COM unit.
@@ -64,6 +65,8 @@ private:
 	std::vector<std::string> _requiresBuyBaseFunc;
 	UnitStats _minStats, _maxStats, _statCaps, _trainingStatCaps, _dogfightExperience;
 	std::string _armor;
+	std::string _specWeaponName;
+	const RuleItem* _specWeapon;
 	int _costBuy, _costSalary, _costSalarySquaddie, _costSalarySergeant, _costSalaryCaptain, _costSalaryColonel, _costSalaryCommander;
 	int _standHeight, _kneelHeight, _floatHeight;
 	int _femaleFrequency, _value, _transferTime, _moraleLossWhenKilled;
@@ -90,6 +93,8 @@ public:
 	~RuleSoldier();
 	/// Loads the soldier data from YAML.
 	void load(const YAML::Node& node, Mod *mod, int listOrder, const ModScript &parsers);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
 	/// Gets the soldier's type.
 	std::string getType() const;
 	/// Gets the list/sort order of the soldier's type.
@@ -130,6 +135,8 @@ public:
 	int getAvatarOffsetY() const;
 	/// Gets the flag offset.
 	int getFlagOffset() const;
+	/// Gets the special weapon.
+	const RuleItem* getSpecialWeapon() const { return _specWeapon; }
 	/// Gets the allow promotion flag.
 	bool getAllowPromotion() const;
 	/// Gets the allow piloting flag.
