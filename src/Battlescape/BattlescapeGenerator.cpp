@@ -1105,7 +1105,7 @@ void BattlescapeGenerator::autoEquip(std::vector<BattleUnit*> units, Mod *mod, s
 				case 3:
 					add = !(*j)->getRules()->isPistol() &&
 							!(*j)->getRules()->isRifle() &&
-							((*j)->getRules()->getBattleType() != BT_FLARE || worldShade >= 9);
+							((*j)->getRules()->getBattleType() != BT_FLARE || worldShade > mod->getMaxDarknessToSeeUnits());
 					break;
 				default:
 					break;

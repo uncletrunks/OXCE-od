@@ -314,8 +314,8 @@ bool SoldierDiary::manageCommendations(Mod *mod, std::vector<MissionStatistics*>
 					((*j).first == "totalDaysWounded" && _daysWoundedTotal < (*j).second.at(nextCommendationLevel["noNoun"])) ||
 					((*j).first == "totalBaseDefenseMissions" && getBaseDefenseMissionTotal(missionStatistics) < (*j).second.at(nextCommendationLevel["noNoun"])) ||
 					((*j).first == "totalTerrorMissions" && getTerrorMissionTotal(missionStatistics) < (*j).second.at(nextCommendationLevel["noNoun"])) ||
-					((*j).first == "totalNightMissions" && getNightMissionTotal(missionStatistics) < (*j).second.at(nextCommendationLevel["noNoun"])) ||
-					((*j).first == "totalNightTerrorMissions" && getNightTerrorMissionTotal(missionStatistics) < (*j).second.at(nextCommendationLevel["noNoun"])) ||
+					((*j).first == "totalNightMissions" && getNightMissionTotal(missionStatistics, mod) < (*j).second.at(nextCommendationLevel["noNoun"])) ||
+					((*j).first == "totalNightTerrorMissions" && getNightTerrorMissionTotal(missionStatistics, mod) < (*j).second.at(nextCommendationLevel["noNoun"])) ||
 					((*j).first == "totalMonthlyService" && _monthsService < (*j).second.at(nextCommendationLevel["noNoun"])) ||
 					((*j).first == "totalFellUnconcious" && _unconciousTotal < (*j).second.at(nextCommendationLevel["noNoun"])) ||
 					((*j).first == "totalShotAt10Times" && _shotAtCounter10in1Mission < (*j).second.at(nextCommendationLevel["noNoun"])) ||
@@ -994,7 +994,7 @@ int SoldierDiary::getTerrorMissionTotal(std::vector<MissionStatistics*> *mission
  *  Get the total of night missions.
  *  @param Mission Statistics
  */
-int SoldierDiary::getNightMissionTotal(std::vector<MissionStatistics*> *missionStatistics) const
+int SoldierDiary::getNightMissionTotal(std::vector<MissionStatistics*> *missionStatistics, const Mod* mod) const
 {
 	int nightMissionTotal = 0;
 
@@ -1004,7 +1004,7 @@ int SoldierDiary::getNightMissionTotal(std::vector<MissionStatistics*> *missionS
 		{
 			if ((*j) == (*i)->id)
 			{
-				if ((*i)->success && (*i)->daylight > 5 && !(*i)->isBaseDefense() && !(*i)->isAlienBase())
+				if ((*i)->success && (*i)->isDarkness(mod) && !(*i)->isBaseDefense() && !(*i)->isAlienBase())
 				{
 					nightMissionTotal++;
 				}
@@ -1019,7 +1019,7 @@ int SoldierDiary::getNightMissionTotal(std::vector<MissionStatistics*> *missionS
  *  Get the total of night terror missions.
  *  @param Mission Statistics
  */
-int SoldierDiary::getNightTerrorMissionTotal(std::vector<MissionStatistics*> *missionStatistics) const
+int SoldierDiary::getNightTerrorMissionTotal(std::vector<MissionStatistics*> *missionStatistics, const Mod* mod) const
 {
 	int nightTerrorMissionTotal = 0;
 
@@ -1029,7 +1029,7 @@ int SoldierDiary::getNightTerrorMissionTotal(std::vector<MissionStatistics*> *mi
 		{
 			if ((*j) == (*i)->id)
 			{
-				if ((*i)->success && (*i)->daylight > 5 && !(*i)->isBaseDefense() && !(*i)->isUfoMission() && !(*i)->isAlienBase())
+				if ((*i)->success && (*i)->isDarkness(mod) && !(*i)->isBaseDefense() && !(*i)->isUfoMission() && !(*i)->isAlienBase())
 				{
 					nightTerrorMissionTotal++;
 				}

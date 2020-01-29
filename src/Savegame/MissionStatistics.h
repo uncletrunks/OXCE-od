@@ -23,6 +23,7 @@
 #include <sstream>
 #include "GameTime.h"
 #include "../Engine/Language.h"
+#include "../Mod/Mod.h"
 
 namespace OpenXcom
 {
@@ -134,15 +135,20 @@ struct MissionStatistics
 		}
 	}
 
-	std::string getDaylightString() const
+	bool isDarkness(const Mod* mod) const
 	{
-		if (daylight <= 5)
+		return daylight > mod->getMaxDarknessToSeeUnits();
+	}
+
+	std::string getDaylightString(const Mod* mod) const
+	{
+		if (isDarkness(mod))
 		{
-			return "STR_DAY";
+			return "STR_NIGHT";
 		}
 		else
 		{
-			return "STR_NIGHT";
+			return "STR_DAY";
 		}
 	}
 

@@ -161,9 +161,9 @@ public:
 	/// Get the total number of terror missions.
 	int getTerrorMissionTotal(std::vector<MissionStatistics*>*) const;
 	/// Get the total number of night missions.
-	int getNightMissionTotal(std::vector<MissionStatistics*>*) const;
+	int getNightMissionTotal(std::vector<MissionStatistics*>*, const Mod* mod) const;
 	/// Get the total number of night terror missions.
-	int getNightTerrorMissionTotal(std::vector<MissionStatistics*>*) const;
+	int getNightTerrorMissionTotal(std::vector<MissionStatistics*>*, const Mod* mod) const;
 	/// Get the total number of base defense missions.
 	int getBaseDefenseMissionTotal(std::vector<MissionStatistics*>*) const;
 	/// Get the total number of alien base assaults.
