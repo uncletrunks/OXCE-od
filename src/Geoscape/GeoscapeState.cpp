@@ -549,6 +549,20 @@ void GeoscapeState::handle(Action *action)
 					country->getActivityAlien().at(invertedEntry) = 0;
 				}
 			}
+			// "ctrl-7"
+			if (action->getDetails()->key.keysym.sym == SDLK_7)
+			{
+				_txtDebug->setText("BIG BROTHER SEES ALL");
+				for (auto& ufo : *_game->getSavedGame()->getUfos())
+				{
+					ufo->setDetected(true);
+					ufo->setHyperDetected(true);
+				}
+				for (auto& ab : *_game->getSavedGame()->getAlienBases())
+				{
+					ab->setDiscovered(true);
+				}
+			}
 			// "ctrl-a"
 			if (action->getDetails()->key.keysym.sym == SDLK_a)
 			{
