@@ -1511,7 +1511,7 @@ int Base::getUsedContainment(int prisonType) const
 	for (std::vector<ResearchProject*>::const_iterator i = _research.begin(); i != _research.end(); ++i)
 	{
 		const RuleResearch *projRules = (*i)->getRules();
-		if (projRules->needItem() && _mod->getUnit(projRules->getName()))
+		if (projRules->needItem())
 		{
 			rule = _mod->getItem(projRules->getName());
 			if (rule->isAlien() && rule->getPrisonType() == prisonType)
