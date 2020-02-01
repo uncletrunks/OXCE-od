@@ -168,6 +168,10 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 			throw Exception("Destroyed version of a facility must have the same size as the original facility.");
 		}
 	}
+	if (_mapName.empty())
+	{
+		throw Exception("Battlescape map name is missing.");
+	}
 }
 
 /**
