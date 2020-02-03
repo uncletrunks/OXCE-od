@@ -115,6 +115,8 @@ en-US:
   underwaterOnly: "Underwater only?"
   landOnly: "Land only?"
   psiRequired: "Psi skill required?"
+  psiTargetSameFaction: "Use on allies?"
+  psiTargetOtherFactions: "Use on others?"
   manaRequired: "Mana required?"
   LOSRequired: "Sight required?"
 #

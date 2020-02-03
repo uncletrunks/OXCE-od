@@ -1807,22 +1807,33 @@ void BattlescapeGame::primaryAction(Position pos)
 		}
 		else if ((_currentAction.type == BA_PANIC || _currentAction.type == BA_MINDCONTROL || _currentAction.type == BA_USE) && _currentAction.weapon->getRules()->getBattleType() == BT_PSIAMP)
 		{
-			if (_save->selectUnit(pos) && _save->selectUnit(pos)->getFaction() != _save->getSelectedUnit()->getFaction() && _save->selectUnit(pos)->getVisible())
+			if (_save->selectUnit(pos) && _save->selectUnit(pos)->getVisible())
 			{
-				_currentAction.updateTU();
-				_currentAction.target = pos;
-				if (!_currentAction.weapon->getRules()->isLOSRequired() ||
-					std::find(_currentAction.actor->getVisibleUnits()->begin(), _currentAction.actor->getVisibleUnits()->end(), _save->selectUnit(pos)) != _currentAction.actor->getVisibleUnits()->end())
+				bool canPsiTargetSameFaction = _currentAction.weapon->getRules()->canPsiTargetSameFaction();
+				if (_currentAction.type == BA_MINDCONTROL)
 				{
-					// get the sound/animation started
-					getMap()->setCursorType(CT_NONE);
-					_parentState->getGame()->getCursor()->setVisible(false);
-					_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
-					statePushBack(new PsiAttackBState(this, _currentAction));
+					// no mind controlling allies, unwanted side effects
+					canPsiTargetSameFaction = false;
 				}
-				else
+				bool canPsiTargetOtherFactions = _currentAction.weapon->getRules()->canPsiTargetOtherFactions();
+				bool isDifferentFaction = _save->selectUnit(pos)->getFaction() != _save->getSelectedUnit()->getFaction();
+				if ((canPsiTargetOtherFactions && isDifferentFaction) || (canPsiTargetSameFaction && !isDifferentFaction))
 				{
-					_parentState->warning("STR_LINE_OF_SIGHT_REQUIRED");
+					_currentAction.updateTU();
+					_currentAction.target = pos;
+					if (!_currentAction.weapon->getRules()->isLOSRequired() ||
+						std::find(_currentAction.actor->getVisibleUnits()->begin(), _currentAction.actor->getVisibleUnits()->end(), _save->selectUnit(pos)) != _currentAction.actor->getVisibleUnits()->end())
+					{
+						// get the sound/animation started
+						getMap()->setCursorType(CT_NONE);
+						_parentState->getGame()->getCursor()->setVisible(false);
+						_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
+						statePushBack(new PsiAttackBState(this, _currentAction));
+					}
+					else
+					{
+						_parentState->warning("STR_LINE_OF_SIGHT_REQUIRED");
+					}
 				}
 			}
 		}
