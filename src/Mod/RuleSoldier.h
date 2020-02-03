@@ -79,7 +79,7 @@ private:
 	std::vector<SoldierNamePool*> _names;
 	std::string _armorForAvatar;
 	int _avatarOffsetX, _avatarOffsetY, _flagOffset;
-	bool _allowPromotion, _allowPiloting;
+	bool _allowPromotion, _allowPiloting, _showTypeInInventory;
 	std::vector<StatString*> _statStrings;
 	std::vector<std::string> _rankStrings;
 	int _rankSprite, _rankSpriteBattlescape, _rankSpriteTiny;
@@ -97,6 +97,8 @@ public:
 	void afterLoad(const Mod* mod);
 	/// Gets the soldier's type.
 	std::string getType() const;
+	/// Gets whether or not the soldier type should be displayed in the inventory.
+	bool getShowTypeInInventory() const { return _showTypeInInventory; }
 	/// Gets the list/sort order of the soldier's type.
 	int getListOrder() const;
 	/// Gets the soldier's requirements.
