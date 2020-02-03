@@ -28,7 +28,7 @@ class RuleTerrain;
 class Mod;
 
 /**
- * Battle statistic of craft type and bonus form craft weapons.
+ * Battle statistic of craft type and bonus from craft weapons.
  */
 struct RuleCraftStats
 {
@@ -90,7 +90,7 @@ struct RuleCraftStats
 		s -= *this;
 		return s;
 	}
-	/// Loads stats form YAML.
+	/// Loads stats from YAML.
 	void load(const YAML::Node &node)
 	{
 		fuelMax = node["fuelMax"].as<int>(fuelMax);

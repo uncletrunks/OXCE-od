@@ -318,7 +318,7 @@ public:
 	void deleteList(BattleItem *item);
 	/// Removes an item from the game.
 	void removeItem(BattleItem *item);
-	/// Add buildIn weapon form list to unit.
+	/// Add buildIn weapon from list to unit.
 	void addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed);
 	/// Init new created unit.
 	void initUnit(BattleUnit *unit, size_t itemLevel = 0);

@@ -1304,7 +1304,7 @@ bool AIModule::selectPointNearTarget(BattleUnit *target, int maxTUs) const
 					{
 						_save->getPathfinding()->calculate(_unit, checkPath, 0, maxTUs);
 
-						//for 100% dodge diff and on 4th difficulty it will allow aliens to move 10 squares around to made attack form behind.
+						//for 100% dodge diff and on 4th difficulty it will allow aliens to move 10 squares around to made attack from behind.
 						int distanceCurrent = _save->getPathfinding()->getPath().size() - dodgeChanceDiff * _save->getTileEngine()->getArcDirection(dir - 4, dirTarget);
 						if (_save->getPathfinding()->getStartDirection() != -1 && distanceCurrent < distance)
 						{

@@ -192,7 +192,7 @@ void BattlescapeGenerator::setUfoDamagePercentage(int ufoDamagePercentage)
 }
 
 /**
- * Set new weapon deploy for aliens that override weapon deploy data form mission type/ufo.
+ * Set new weapon deploy for aliens that overrides weapon deploy data from mission type/ufo.
  * @param alienCustomDeploy
  */
 void BattlescapeGenerator::setAlienCustomDeploy(const AlienDeployment* alienCustomDeploy, const AlienDeployment* alienCustomMission)

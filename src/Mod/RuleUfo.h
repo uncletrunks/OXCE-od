@@ -41,7 +41,7 @@ struct RuleUfoStats : RuleCraftStats
 		if (!r.missionCustomDeploy.empty()) missionCustomDeploy = r.missionCustomDeploy;
 		return *this;
 	}
-	/// Loads stats form YAML.
+	/// Loads stats from YAML.
 	void load(const YAML::Node &node)
 	{
 		(*(RuleCraftStats*)this).load(node);

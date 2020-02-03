@@ -381,13 +381,13 @@ public:
 	float getPowerRangeThresholdRaw() const { return _powerRangeThreshold; }
 	/// Gets amount of psi accuracy dropped for range in voxels.
 	float getPsiAccuracyRangeReduction(float range) const;
-	/// Get multiplier of accuracy form unit statistics
+	/// Get multiplier of accuracy from unit statistics
 	int getAccuracyMultiplier(const BattleUnit *unit) const;
 	const RuleStatBonus *getAccuracyMultiplierRaw() const { return &_accuracyMulti; }
-	/// Get multiplier of melee hit chance form unit statistics
+	/// Get multiplier of melee hit chance from unit statistics
 	int getMeleeMultiplier(const BattleUnit *unit) const;
 	const RuleStatBonus *getMeleeMultiplierRaw() const { return &_meleeMulti; }
-	/// Get multiplier of throwing form unit statistics
+	/// Get multiplier of throwing from unit statistics
 	int getThrowMultiplier(const BattleUnit *unit) const;
 	const RuleStatBonus *getThrowMultiplierRaw() const { return &_throwMulti; }
 	/// Get multiplier of close quarters combat from unit statistics

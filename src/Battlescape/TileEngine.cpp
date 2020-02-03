@@ -2694,7 +2694,7 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 	calculateFOV(centetTile, maxRadius + 1, true, true);
 	if (attack.attacker && Position::distance2d(centetTile, attack.attacker->getPosition()) > maxRadius + 1)
 	{
-		// unit is away form blast but its visibility can be affected by scripts.
+		// unit is away from blast but its visibility can be affected by scripts.
 		calculateFOV(centetTile, 1, false);
 	}
 }

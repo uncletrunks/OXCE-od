@@ -602,11 +602,11 @@ public:
 	bool getFloorAbove() const;
 	/// Get any utility weapon we may be carrying, or a built in one.
 	BattleItem *getUtilityWeapon(BattleType type);
-	/// Set fire damage form environment.
+	/// Set fire damage from environment.
 	void setEnviFire(int damage);
-	/// Set smoke damage form environment.
+	/// Set smoke damage from environment.
 	void setEnviSmoke(int damage);
-	/// Calculate smoke and fire damage form environment.
+	/// Calculate smoke and fire damage from environment.
 	void calculateEnviDamage(Mod *mod, SavedBattleGame *save);
 	/// Use this function to check the unit's movement type.
 	MovementType getMovementType() const;

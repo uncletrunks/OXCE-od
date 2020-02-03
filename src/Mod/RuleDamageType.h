@@ -46,13 +46,13 @@ struct RuleDamageType
 	bool IgnoreSelfDestruct;
 	/// Damage type can do stun damage to big units.
 	bool IgnorePainImmunity;
-	/// Damage type don't cause morale lose form health damage.
+	/// Damage type doesn't cause morale loss from health damage.
 	bool IgnoreNormalMoraleLose;
 	/// Damage type do not move health to negative values.
 	bool IgnoreOverKill;
 	/// How much of armor is ignored.
 	float ArmorEffectiveness;
-	/// Conversion form power to max explosion radius.
+	/// Conversion from power to max explosion radius.
 	float RadiusEffectiveness;
 	/// Reduction of explosion power per tile.
 	float RadiusReduction;
@@ -61,27 +61,27 @@ struct RuleDamageType
 	/// Threshold of smoke creation
 	int SmokeThreshold;
 
-	/// Conversion form power to unit damage.
+	/// Conversion from power to unit damage.
 	float ToHealth;
 	/// Conversion from power to mana loss.
 	float ToMana;
-	/// Conversion form power to unit armor damage.
+	/// Conversion from power to unit armor damage.
 	float ToArmor;
-	/// Conversion form power to unit armor damage before applying armor protection.
+	/// Conversion from power to unit armor damage before applying armor protection.
 	float ToArmorPre;
-	/// Conversion form power to wound chance.
+	/// Conversion from power to wound chance.
 	float ToWound;
-	/// Conversion form power to item damage.
+	/// Conversion from power to item damage.
 	float ToItem;
-	/// Conversion form power to tile damage.
+	/// Conversion from power to tile damage.
 	float ToTile;
-	/// Conversion form power to stun level.
+	/// Conversion from power to stun level.
 	float ToStun;
-	/// Conversion form power to energy lose.
+	/// Conversion from power to energy lose.
 	float ToEnergy;
-	/// Conversion form power to time units lose.
+	/// Conversion from power to time units lose.
 	float ToTime;
-	/// Conversion form power to morale lose.
+	/// Conversion from power to morale lose.
 	float ToMorale;
 
 	/// Damage type use random conversion to health damage.

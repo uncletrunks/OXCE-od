@@ -1355,7 +1355,7 @@ void SavedBattleGame::randomizeItemLocations(Tile *t)
 }
 
 /**
- * Add item to delete list, usually when removing item form game or build in weapons
+ * Add item to delete list, usually when removing item from game or build in weapons
  * @param item Item to delete after game end.
  */
 void SavedBattleGame::deleteList(BattleItem* item)

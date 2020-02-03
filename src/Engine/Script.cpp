@@ -305,7 +305,7 @@ struct Func_debug_flush
 ////////////////////////////////////////////////////////////
 
 /**
- * Macro returning enum form ProcEnum
+ * Macro returning enum from ProcEnum
  */
 #define MACRO_PROC_ID(id) Proc_##id
 
@@ -1420,7 +1420,7 @@ public:
 
 
 /**
- * Function extracting token form range
+ * Function extracting token from range
  * @param excepted what token type we expecting now
  * @return extracted token
  */
@@ -2534,7 +2534,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		haveCodeNormal = !isVarDef;
 
 
-		// matching args form operation definition with args available in string
+		// matching args from operation definition with args available in string
 		size_t i = 0;
 		while (i < ScriptMaxArg && args[i].getType() != TokenNone)
 		{

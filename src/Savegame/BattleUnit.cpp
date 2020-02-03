@@ -4264,7 +4264,7 @@ BattleItem *BattleUnit::getUtilityWeapon(BattleType type)
 }
 
 /**
- * Set fire damage form environment.
+ * Set fire damage from environment.
  * @param damage
  */
 void BattleUnit::setEnviFire(int damage)
@@ -4273,7 +4273,7 @@ void BattleUnit::setEnviFire(int damage)
 }
 
 /**
- * Set smoke damage form environment.
+ * Set smoke damage from environment.
  * @param damage
  */
 void BattleUnit::setEnviSmoke(int damage)
@@ -4282,7 +4282,7 @@ void BattleUnit::setEnviSmoke(int damage)
 }
 
 /**
- * Calculate smoke and fire damage form environment.
+ * Calculate smoke and fire damage from environment.
  */
 void BattleUnit::calculateEnviDamage(Mod *mod, SavedBattleGame *save)
 {
