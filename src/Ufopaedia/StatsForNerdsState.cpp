@@ -1442,9 +1442,8 @@ void StatsForNerdsState::initItemList()
 	addBoolean(ss, itemRule->isLandOnly(), "landOnly");
 	int psiRequiredDefault = itemBattleType == BT_PSIAMP ? true : false;
 	addBoolean(ss, itemRule->isPsiRequired(), "psiRequired", psiRequiredDefault);
-	addBoolean(ss, itemRule->canPsiTargetSameFaction(), "psiTargetSameFaction");
-	addBoolean(ss, itemRule->canPsiTargetOtherFactions(), "psiTargetOtherFactions", true);
 	addBoolean(ss, itemRule->isManaRequired(), "manaRequired");
+	addInteger(ss, itemRule->getPsiTargetMatrixRaw(), "psiTargetMatrix", 6);
 	addBoolean(ss, itemRule->isLOSRequired(), "LOSRequired");
 
 	if (itemBattleType == BT_FIREARM

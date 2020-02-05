@@ -58,6 +58,8 @@ class SurfaceSet;
 class Surface;
 class Mod;
 
+enum UnitFaction : int;
+
 struct RuleItemUseCost
 {
 	int Time;
@@ -210,7 +212,7 @@ private:
 	std::map<std::string, std::string> _zombieUnitByArmorMale, _zombieUnitByArmorFemale, _zombieUnitByType;
 	std::string _zombieUnit, _spawnUnit;
 	int _spawnUnitFaction;
-	bool _psiTargetSameFaction, _psiTargetOtherFactions;
+	int _psiTargetMatrix;
 	bool _LOSRequired, _underwaterOnly, _landOnly, _psiReqiured, _manaRequired;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
 	std::vector<int> _customItemPreviewIndex;
@@ -634,10 +636,9 @@ public:
 	const std::string &getSpawnUnit() const;
 	/// Gets which faction the spawned unit should have.
 	int getSpawnUnitFaction() const;
-	/// Check if targeting units of the same faction (=Player) is allowed. Only applies to psi amps. Does not apply to AI. Does not apply to mind control.
-	bool canPsiTargetSameFaction() const { return _psiTargetSameFaction; }
-	/// Check if targeting units of other factions (=Aliens and Neutrals) is allowed. Only applies to psi amps. Does not apply to AI.
-	bool canPsiTargetOtherFactions() const { return _psiTargetOtherFactions; }
+	/// Checks the psiamp's allowed targets. Not used in AI. Mind control of the same faction is hardcoded disabled.
+	bool isPsiTargetAllowed(UnitFaction targetFaction) const;
+	int getPsiTargetMatrixRaw() const { return _psiTargetMatrix; }
 	/// Check if LOS is required to use this item (only applies to psionic type items)
 	bool isLOSRequired() const;
 	/// Is this item restricted to underwater use?

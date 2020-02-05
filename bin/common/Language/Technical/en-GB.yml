@@ -115,8 +115,7 @@ en-GB:
   underwaterOnly: "Underwater only?"
   landOnly: "Land only?"
   psiRequired: "Psi skill required?"
-  psiTargetSameFaction: "Use on allies?"
-  psiTargetOtherFactions: "Use on others?"
+  psiTargetMatrix: "Psi-amp targets"
   manaRequired: "Mana required?"
   LOSRequired: "Sight required?"
 #

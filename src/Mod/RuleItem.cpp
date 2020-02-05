@@ -66,7 +66,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_experienceTrainingMode(ETM_DEFAULT), _manaExperience(0), _listOrder(0),
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
 	_spawnUnitFaction(-1),
-	_psiTargetSameFaction(false), _psiTargetOtherFactions(true),
+	_psiTargetMatrix(6),
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false), _manaRequired(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_kneelBonus(-1), _oneHandedPenalty(-1),
@@ -599,8 +599,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
 	_spawnUnitFaction = node["spawnUnitFaction"].as<int>(_spawnUnitFaction);
-	_psiTargetSameFaction = node["psiTargetSameFaction"].as<bool>(_psiTargetSameFaction);
-	_psiTargetOtherFactions = node["psiTargetOtherFactions"].as<bool>(_psiTargetOtherFactions);
+	_psiTargetMatrix = node["psiTargetMatrix"].as<int>(_psiTargetMatrix);
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
@@ -2209,6 +2208,29 @@ int RuleItem::getSpawnUnitFaction() const
 int RuleItem::getMeleePower() const
 {
 	return _meleePower;
+}
+
+/**
+ * Checks the psiamp's allowed targets.
+ * - Not used in AI.
+ * - Mind control of the same faction is hardcoded disabled.
+ * @return True if allowed, false otherwise.
+ */
+bool RuleItem::isPsiTargetAllowed(UnitFaction targetFaction) const
+{
+	if (targetFaction == FACTION_PLAYER)
+	{
+		return _psiTargetMatrix & 1;
+	}
+	else if (targetFaction == FACTION_HOSTILE)
+	{
+		return _psiTargetMatrix & 2;
+	}
+	else if (targetFaction == FACTION_NEUTRAL)
+	{
+		return _psiTargetMatrix & 4;
+	}
+	return false;
 }
 
 /**

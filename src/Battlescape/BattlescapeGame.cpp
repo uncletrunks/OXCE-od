@@ -1810,15 +1810,14 @@ void BattlescapeGame::primaryAction(Position pos)
 		{
 			if (_save->selectUnit(pos) && _save->selectUnit(pos)->getVisible())
 			{
-				bool canPsiTargetSameFaction = _currentAction.weapon->getRules()->canPsiTargetSameFaction();
-				if (_currentAction.type == BA_MINDCONTROL)
+				auto targetFaction = _save->selectUnit(pos)->getFaction();
+				bool psiTargetAllowed = _currentAction.weapon->getRules()->isPsiTargetAllowed(targetFaction);
+				if (_currentAction.type == BA_MINDCONTROL && targetFaction == FACTION_PLAYER)
 				{
 					// no mind controlling allies, unwanted side effects
-					canPsiTargetSameFaction = false;
+					psiTargetAllowed = false;
 				}
-				bool canPsiTargetOtherFactions = _currentAction.weapon->getRules()->canPsiTargetOtherFactions();
-				bool isDifferentFaction = _save->selectUnit(pos)->getFaction() != _save->getSelectedUnit()->getFaction();
-				if ((canPsiTargetOtherFactions && isDifferentFaction) || (canPsiTargetSameFaction && !isDifferentFaction))
+				if (psiTargetAllowed)
 				{
 					_currentAction.updateTU();
 					_currentAction.target = pos;
