@@ -149,7 +149,7 @@ public:
 	int getDamagePercentage() const;
 	/// Gets the craft's max shield capacity
 	int getShieldCapacity () const;
-        /// Gets the craft's shield remaining
+	/// Gets the craft's shield remaining
 	int getShield() const;
 	/// Sets the craft's shield remaining
 	void setShield(int shield);

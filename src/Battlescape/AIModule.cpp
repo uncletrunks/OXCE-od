@@ -245,7 +245,7 @@ void AIModule::think(BattleAction *action)
 	if (_unit->isLeeroyJenkins())
 	{
 		dont_think(action);
-	    return;
+		return;
 	}
 
 	Mod *mod = _save->getBattleState()->getGame()->getMod();

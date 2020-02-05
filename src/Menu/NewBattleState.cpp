@@ -421,7 +421,7 @@ void NewBattleState::initSave()
 			soldier->promoteRank();
 
 			UnitStats* stats = soldier->getCurrentStats();
-			stats->tu 			+= RNG::generate(0, 5);
+			stats->tu			+= RNG::generate(0, 5);
 			stats->stamina		+= RNG::generate(0, 5);
 			stats->health		+= RNG::generate(0, 5);
 			stats->bravery		+= RNG::generate(0, 5);
@@ -429,7 +429,7 @@ void NewBattleState::initSave()
 			stats->firing		+= RNG::generate(0, 5);
 			stats->throwing		+= RNG::generate(0, 5);
 			stats->strength		+= RNG::generate(0, 5);
-			stats->mana         += RNG::generate(0, 5);
+			stats->mana			+= RNG::generate(0, 5);
 			stats->psiStrength	+= RNG::generate(0, 5);
 			stats->melee		+= RNG::generate(0, 5);
 			stats->psiSkill		+= RNG::generate(0, 20);

@@ -53,7 +53,7 @@ public:
 	void onSelectProject(Action *action);
 	void onOpenTechTreeViewer(Action *action);
 	void lstResearchMousePress(Action *action);
-    /// Handler for opening the Current Global Research UI.
+	/// Handler for opening the Current Global Research UI.
 	void onCurrentGlobalResearchClick(Action *action);
 	/// Fills the ResearchProject list with Base ResearchProjects.
 	void fillProjectList();

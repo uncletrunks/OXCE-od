@@ -227,7 +227,7 @@ public:
 	/// Gets the crossingGroup for this command.
 	int getCrossingGroup() const { return _crossingGroup; };
 	/// Gets the direction this command goes (for lines and tunnels).
-   	MapDirection getDirection() const {return _direction;};
+	MapDirection getDirection() const {return _direction;};
 	/// Gets the mcd replacement data for tunnel replacements.
 	TunnelData *getTunnelData() {return _tunnelData;};
 	/// Randomly generate a block from within either the array of groups or blocks.

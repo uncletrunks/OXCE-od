@@ -1074,21 +1074,25 @@ void Globe::XuLine(Surface* surface, Surface* src, double x1, double y1, double 
 		inv=true;
 	}
 
-	if (y2<y1) {
-	SY=-1;
-  } else if ( AreSame(deltay, 0.0) ) {
-	SY=0;
-  } else {
-	SY=1;
-  }
+	if (y2 < y1) {
+		SY = -1;
+	}
+	else if (AreSame(deltay, 0.0)) {
+		SY = 0;
+	}
+	else {
+		SY = 1;
+	}
 
-	if (x2<x1) {
-	SX=-1;
-  } else if ( AreSame(deltax, 0.0) ) {
-	SX=0;
-  } else {
-	SX=1;
-  }
+	if (x2 < x1) {
+		SX = -1;
+	}
+	else if (AreSame(deltax, 0.0)) {
+		SX = 0;
+	}
+	else {
+		SX = 1;
+	}
 
 	x0=x1;  y0=y1;
 	if (inv)

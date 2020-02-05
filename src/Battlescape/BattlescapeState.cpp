@@ -2710,7 +2710,7 @@ void BattlescapeState::saveVoxelView()
 	}
 	while (CrossPlatform::fileExists(ss.str()));
 
-    std::vector<unsigned char> out;
+	std::vector<unsigned char> out;
 	unsigned error = lodepng::encode(out, image, 512, 512, LCT_RGB);
 	if (error)
 	{

@@ -1592,8 +1592,7 @@ void Craft::reuseItem(const std::string& item)
 	// (And we don't want to interrupt any out-of-base status.)
 
 	// The only states we are willing to interrupt are "ready" and "refuelling"
-	if (_status != "STR_READY" &&
-        _status != "STR_REFUELLING")
+	if (_status != "STR_READY" && _status != "STR_REFUELLING")
 	{
 		return;
 	}

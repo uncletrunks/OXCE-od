@@ -39,9 +39,9 @@ namespace OpenXcom
 
 static std::string IntToString (int a)
 {
-    std::ostringstream temp;
-    temp << a;
-    return temp.str();
+	std::ostringstream temp;
+	temp << a;
+	return temp.str();
 }
 
 /**

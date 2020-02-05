@@ -83,9 +83,9 @@ public:
 	/// Handler for clicking the Missions button.
 	void btnCommendationsToggle(Action *action);
 	/// Handler for moving the mouse over a medal.
-    void lstInfoMouseOver(Action *action);
-    /// Handler for moving the mouse outside the medals list.
-    void lstInfoMouseOut(Action *action);
+	void lstInfoMouseOver(Action *action);
+	/// Handler for moving the mouse outside the medals list.
+	void lstInfoMouseOut(Action *action);
 	/// Handler for clicking on a medal.
 	void lstInfoMouseClick(Action *action);
 	/// Runs state functionality every cycle.

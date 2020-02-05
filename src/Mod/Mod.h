@@ -504,7 +504,7 @@ public:
 	/// Gets first turn when AI can use grenades.
 	int getAIUseDelayGrenade() const  {return _aiUseDelayGrenade;}
 	/// Gets first turn when AI can use martial arts.
-	int getAIUseDelayMelee() const    {return _aiUseDelayMelee;}
+	int getAIUseDelayMelee() const {return _aiUseDelayMelee;}
 	/// Gets first turn when AI can use psionic abilities.
 	int getAIUseDelayPsionic() const  {return _aiUseDelayPsionic;}
 	/// Gets how much AI intelligence should be used to determine firing mode for sniping.

@@ -158,9 +158,6 @@ void PlaceFacilityState::viewClick(Action *)
 	if (_origFac != 0)
 	{
 		// EXPERIMENTAL!: just moving an existing facility
-		// FIXME: can lead to disconnected bases (easy to check, but would not be able to move the Access Lift)
-		// FIXME: queued facilities' build time is not recalculated (easy to do)
-		//        ... fixed moving cost per tile? or dynamic based on size, type, distance, etc.?)
 		if (_view->getGridX() == _origFac->getX() && _view->getGridY() == _origFac->getY())
 		{
 			// unchanged location -> no message, no cost.

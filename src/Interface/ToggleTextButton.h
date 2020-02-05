@@ -25,23 +25,23 @@ namespace OpenXcom
 {
 
 class ToggleTextButton :
-    public TextButton
+	public TextButton
 {
 private:
-    bool _isPressed;
-    int _originalColor, _invertedColor;
-    TextButton *_fakeGroup;
+	bool _isPressed;
+	int _originalColor, _invertedColor;
+	TextButton *_fakeGroup;
 
 public:
 
-    void draw() override;
-    void mousePress(Action *action, State *state) override;
-    void setPressed(bool pressed);
-    bool getPressed() const { return _isPressed; }
+	void draw() override;
+	void mousePress(Action *action, State *state) override;
+	void setPressed(bool pressed);
+	bool getPressed() const { return _isPressed; }
 	void setColor(Uint8 color) override;
-    void setInvertColor(Uint8 color);
-    ToggleTextButton(int width, int height, int x, int y);
-    ~ToggleTextButton(void);
+	void setInvertColor(Uint8 color);
+	ToggleTextButton(int width, int height, int x, int y);
+	~ToggleTextButton(void);
 };
 
 }

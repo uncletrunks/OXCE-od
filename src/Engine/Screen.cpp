@@ -534,7 +534,7 @@ void Screen::screenshot(const std::string &filename) const
 	{
 		SDL_BlitSurface(_screen, 0, screenshot, 0);
 	}
-    std::vector<unsigned char> out;
+	std::vector<unsigned char> out;
 	if (_screen->format->BitsPerPixel == 8 && Options::rawScreenShots)
 	{
 		SDL_Color *palette = getPalette();

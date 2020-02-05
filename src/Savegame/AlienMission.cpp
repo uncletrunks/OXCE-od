@@ -343,7 +343,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 	{
 		const RuleRegion &regionRules = *mod.getRegion(_region, true);
 		std::vector<Base *>::const_iterator found =
-		    std::find_if (game.getBases()->begin(), game.getBases()->end(),
+			std::find_if (game.getBases()->begin(), game.getBases()->end(),
 				 FindMarkedXCOMBase(regionRules));
 		if (found != game.getBases()->end())
 		{
@@ -696,7 +696,7 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 			// Remove UFO, replace with Base defense.
 			ufo.setDetected(false);
 			std::vector<Base *>::const_iterator found =
-			    std::find_if (game.getBases()->begin(), game.getBases()->end(),
+				std::find_if (game.getBases()->begin(), game.getBases()->end(),
 					 MatchBaseCoordinates(ufo.getLongitude(), ufo.getLatitude()));
 			if (found == game.getBases()->end())
 			{

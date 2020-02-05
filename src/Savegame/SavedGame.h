@@ -264,8 +264,8 @@ public:
 	void setManufactureRuleStatus(const std::string &manufactureRule, int newStatus);
 	/// Sets the status of a research rule
 	void setResearchRuleStatus(const std::string &researchRule, int newStatus);
-    /// Sets the item as hidden or unhidden
-    void setHiddenPurchaseItemsStatus(const std::string &itemName, bool hidden);
+	/// Sets the item as hidden or unhidden
+	void setHiddenPurchaseItemsStatus(const std::string &itemName, bool hidden);
 	/// Remove a research from the "already discovered" list
 	void removeDiscoveredResearch(const RuleResearch *research);
 	/// Add a finished ResearchProject
@@ -292,8 +292,8 @@ public:
 	void getDependableFacilities(std::vector<RuleBaseFacility*> & dependables, const RuleResearch *research, const Mod *mod) const;
 	/// Gets the status of a ufopedia rule.
 	int getUfopediaRuleStatus(const std::string &ufopediaRule);
-    /// Gets the list of hidden items
-    const std::map<std::string, bool> &getHiddenPurchaseItems();
+	/// Gets the list of hidden items
+	const std::map<std::string, bool> &getHiddenPurchaseItems();
 	/// Gets the status of a manufacture rule.
 	int getManufactureRuleStatus(const std::string &manufactureRule);
 	/// Is the research new?
