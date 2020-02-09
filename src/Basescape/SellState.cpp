@@ -652,11 +652,22 @@ void SellState::btnTransferClick(Action *)
 */
 void SellState::btnSellAllClick(Action *)
 {
+	bool allItemsSelected = true;
+	for (size_t i = 0; i < _lstItems->getRows(); ++i)
+	{
+		if (_items[_rows[i]].qtySrc > _items[_rows[i]].amount)
+		{
+			allItemsSelected = false;
+			break;
+		}
+	}
+	int dir = allItemsSelected ? -1 : 1;
+
 	size_t backup = _sel;
 	for (size_t i = 0; i < _lstItems->getRows(); ++i)
 	{
 		_sel = i;
-		changeByValue(INT_MAX, 1);
+		changeByValue(INT_MAX, dir);
 	}
 	_sel = backup;
 }
