@@ -203,7 +203,10 @@ BattleActionAttack::BattleActionAttack(const BattleActionCost& action, BattleIte
  * @param save Pointer to the save game.
  * @param parentState Pointer to the parent battlescape state.
  */
-BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) : _save(save), _parentState(parentState), _playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false), _endTurnRequested(false), _endConfirmationHandled(false)
+BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parentState) :
+	_save(save), _parentState(parentState),
+	_playerPanicHandled(true), _AIActionCounter(0), _AISecondMove(false), _playedAggroSound(false),
+	_endTurnRequested(false), _endConfirmationHandled(false), _allEnemiesNeutralized(false)
 {
 
 	_currentAction.actor = 0;
@@ -3070,6 +3073,7 @@ void BattlescapeGame::autoEndBattle()
 			end = (liveAliens == 0 || liveSoldiers == 0);
 			if (liveAliens == 0)
 			{
+				_allEnemiesNeutralized = true; // remember that all aliens were neutralized (and the battle should end no matter what)
 				askForConfirmation = true;
 			}
 		}

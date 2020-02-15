@@ -159,6 +159,7 @@ private:
 	bool _AISecondMove, _playedAggroSound;
 	bool _endTurnRequested;
 	bool _endConfirmationHandled;
+	bool _allEnemiesNeutralized;
 
 	SingleRun _endTurnProcessed;
 	SingleRun _triggerProcessed;
@@ -296,6 +297,10 @@ public:
 	std::list<BattleState*> getStates();
 	/// Auto end the battle if conditions are met.
 	void autoEndBattle();
+	/// Were all enemies neutralized?
+	bool areAllEnemiesNeutralized() const { return _allEnemiesNeutralized; }
+	/// Resets the flag.
+	void resetAllEnemiesNeutralized() { _allEnemiesNeutralized = false; }
 };
 
 }

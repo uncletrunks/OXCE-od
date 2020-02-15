@@ -402,6 +402,24 @@ void NextTurnState::close()
 	int liveSoldiers = 0;
 	_state->getBattleGame()->tallyUnits(liveAliens, liveSoldiers);
 
+	if (_battleGame->getBattleGame()->areAllEnemiesNeutralized())
+	{
+		// we don't care if someone was revived in the meantime, the decision to end the battle was already made!
+		liveAliens = 0;
+
+		// mind control anyone who was revived (needed for correct recovery in the debriefing)
+		for (auto bu : *_battleGame->getUnits())
+		{
+			if (bu->getOriginalFaction() == FACTION_HOSTILE && !bu->isOut())
+			{
+				bu->convertToFaction(FACTION_PLAYER);
+			}
+		}
+
+		// reset needed because of the potential next stage in multi-stage missions
+		_battleGame->getBattleGame()->resetAllEnemiesNeutralized();
+	}
+
 	if ((_battleGame->getObjectiveType() != MUST_DESTROY && liveAliens == 0) || liveSoldiers == 0)		// not the final mission and all aliens dead.
 	{
 		_state->finishBattle(false, liveSoldiers);
