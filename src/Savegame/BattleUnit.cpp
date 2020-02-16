@@ -3108,7 +3108,7 @@ bool BattleUnit::reloadAmmo()
 		// we have a non-melee weapon with no ammo and 15 or more TUs - we might need to look for ammo then
 		BattleItem *ammo = 0;
 		auto ruleWeapon = weapon->getRules();
-		auto tuCost = getTimeUnits();
+		auto tuCost = getTimeUnits() + 1;
 		auto slotAmmo = 0;
 
 		for (BattleItem* bi : *getInventory())
@@ -3118,7 +3118,7 @@ bool BattleUnit::reloadAmmo()
 			{
 				int tuTemp = (Mod::EXTENDED_ITEM_RELOAD_COST && bi->getSlot()->getType() != INV_HAND) ? bi->getSlot()->getCost(weapon->getSlot()) : 0;
 				tuTemp += ruleWeapon->getTULoad(slot);
-				if (tuTemp <= tuCost)
+				if (tuTemp < tuCost)
 				{
 					tuCost = tuTemp;
 					ammo = bi;
