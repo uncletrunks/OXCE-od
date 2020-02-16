@@ -145,6 +145,7 @@ int Mod::DIFFICULTY_BASED_RETAL_DELAY[5];
 int Mod::UNIT_RESPONSE_SOUNDS_FREQUENCY[4];
 bool Mod::EXTENDED_ITEM_RELOAD_COST;
 bool Mod::EXTENDED_RUNNING_COST;
+bool Mod::EXTENDED_HWP_LOAD_ORDER;
 
 /// Predefined name for first loaded mod that have all original data
 const std::string ModNameMaster = "master";
@@ -224,6 +225,7 @@ void Mod::resetGlobalStatics()
 
 	EXTENDED_ITEM_RELOAD_COST = false;
 	EXTENDED_RUNNING_COST = false;
+	EXTENDED_HWP_LOAD_ORDER = false;
 }
 
 /**
@@ -1539,6 +1541,7 @@ void Mod::loadConstants(const YAML::Node &node)
 	DEBRIEF_MUSIC_BAD = node["badDebriefingMusic"].as<std::string>(DEBRIEF_MUSIC_BAD);
 	EXTENDED_ITEM_RELOAD_COST = node["extendedItemReloadCost"].as<bool>(EXTENDED_ITEM_RELOAD_COST);
 	EXTENDED_RUNNING_COST = node["extendedRunningCost"].as<bool>(EXTENDED_RUNNING_COST);
+	EXTENDED_HWP_LOAD_ORDER = node["extendedHwpLoadOrder"].as<bool>(EXTENDED_HWP_LOAD_ORDER);
 }
 
 /**
