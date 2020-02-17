@@ -1450,7 +1450,7 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.add<&setStimulantQuantityScript>("setStimulantQuantity");
 
 	bi.add<&getActionTUsScript>("getActionCost.getTimeUnits");
-	
+
 	bi.addScriptValue<&BattleItem::_scriptValues>();
 	bi.addDebugDisplay<&debugDisplayScript>();
 

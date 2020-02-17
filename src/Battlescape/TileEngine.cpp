@@ -4004,13 +4004,13 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 	attack.attacker = action->actor;
 	attack.weapon_item = action->weapon;
 	attack.damage_item = action->weapon;
-	
+
 	bool canContinueHealing = true;
-	
+
 	const RuleItem *rule = action->weapon->getRules();
-	
+
 	BattleMediKitType type = rule->getMediKitType();
-	
+
 	constexpr int medikitActionKey = 0;
 	constexpr int bodyPartKey = 1;
 	constexpr int woundRecoveryKey = 2;
@@ -4022,9 +4022,9 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 	constexpr int painkillerRecoveryKey = 8;
 
 	action->weapon->spendHealingItemUse(originalMedikitAction);
-	
+
 	ModScript::HealUnit::Output args { };
-	
+
 	std::get<medikitActionKey>(args.data) += originalMedikitAction;
 	std::get<bodyPartKey>(args.data) += bodyPart;
 	std::get<woundRecoveryKey>(args.data) += rule->getWoundRecovery();
@@ -4034,9 +4034,9 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 	std::get<manaRecoveryKey>(args.data) += rule->getManaRecovery();
 	std::get<moraleRecoveryKey>(args.data) += rule->getMoraleRecovery();
 	std::get<painkillerRecoveryKey>(args.data) += (int)(rule->getPainKillerRecovery() * 100.0f);
-	
+
 	ModScript::HealUnit::Worker work { action->actor, action->weapon, _save, target, action->type };
-	
+
 	work.execute(target->getArmor()->getScript<ModScript::HealUnit>(), args);
 
 	int medikitAction = std::get<medikitActionKey>(args.data);
@@ -4048,18 +4048,18 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 	int manaRecovery = std::get<manaRecoveryKey>(args.data);
 	int moraleRecovery = std::get<moraleRecoveryKey>(args.data);
 	float painkillerRecovery = std::get<painkillerRecoveryKey>(args.data) / 100.0f;
-	
+
 	// 0 = normal, 1 = heal, 2 = stim, 4 = pain
 	if (medikitAction & BMA_PAINKILLER)
 	{
 		target->painKillers(moraleRecovery, painkillerRecovery);
 	}
-	
+
 	if (medikitAction & BMA_STIMULANT)
 	{
 		target->stimulant(energyRecovery, stunRecovery, manaRecovery);
 	}
-	
+
 	if (medikitAction & BMA_HEAL)
 	{
 		if (target->getFatalWound(bodyPart))
@@ -4067,12 +4067,12 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 			// award experience only if healed body part has a fatal wound (to prevent abuse)
 			awardExperience(attack, target, false);
 		}
-		
+
 		target->heal(bodyPart, woundRecovery, healthRecovery);
 	}
-	
+
 	_save->getBattleGame()->playSound(action->weapon->getRules()->getHitSound());
-	
+
 	if (type == BMT_NORMAL) // normal medikit usage, track statistics
 	{
 		if (medikitAction & BMA_PAINKILLER)
@@ -4087,7 +4087,7 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 		{
 			action->actor->getStatistics()->woundsHealed++;
 		}
-		
+
 		if (target->getStatus() == STATUS_UNCONSCIOUS && !target->isOutThresholdExceed())
 		{
 			if(target->getOriginalFaction() == FACTION_PLAYER)
@@ -4109,10 +4109,10 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 			}
 		}
 	}
-	
+
 	// check for casualties, revive unconscious unit (+ change status), re-calc fov & lighting
 	updateGameStateAfterScript(attack, action->actor->getPosition());
-	
+
 	return canContinueHealing;
 }
 
@@ -4128,10 +4128,10 @@ bool TileEngine::tryConcealUnit(BattleUnit* unit)
 			return false;
 		}
 	}
-	
+
 	unit->setTurnsSinceSpotted(255);
 	unit->setTurnsLeftSpottedForSnipers(0);
-	
+
 	return true;
 }
 
@@ -4834,13 +4834,13 @@ bool TileEngine::isPositionValidForUnit(Position &position, BattleUnit *unit, bo
 
 	return false;
 }
-	
+
 void TileEngine::updateGameStateAfterScript(BattleActionAttack battleActionAttack, Position pos)
 {
 	_save->getBattleGame()->checkForCasualties(nullptr, battleActionAttack, false, false);
-	
+
 	_save->reviveUnconsciousUnits(true);
-	
+
 	// limit area of the following calls to the Position pos
 	calculateFOV(pos, 1, false);
 	calculateLighting(LL_ITEMS, pos, 2, true);

@@ -4982,12 +4982,12 @@ void setBaseStatRangeScript(BattleUnit *bu, int val)
 		(bu->*StatCurr) = Clamp(val, Min, Max);
 	}
 }
-	
+
 void getVisibleUnitsCountScript(BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
-		
+
 		auto visibleUnits = bu->getVisibleUnits();
 		ret = visibleUnits->size();
 	}
@@ -5152,7 +5152,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 
 	bu.add<&getVisibleUnitsCountScript>("getVisibleUnitsCount");
 	bu.add<&getFactionScript>("getFaction");
-	
+
 	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
 	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
@@ -5407,9 +5407,9 @@ ModScript::TryPsiAttackUnitParser::TryPsiAttackUnitParser(ScriptGlobal* shared, 
 	"battle_action" }
 {
 	BindBase b { this };
-	
+
 	b.addCustomPtr<const Mod>("rules", mod);
-	
+
 	battleActionImpl(b);
 }
 
