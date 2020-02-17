@@ -113,7 +113,7 @@ private:
 	int _moraleRestored;
 	int _coverReserve;
 	BattleUnit *_charging;
-	int _turnsSinceSpotted, _turnsLeftSpottedForSnipers;
+	int _turnsSinceSpotted, _turnsLeftSpottedForSnipers, _turnsSinceStunned = 255;
 	std::string _spawnUnit;
 	std::string _activeHand;
 	BattleUnitStatistics* _statistics;
@@ -552,6 +552,7 @@ public:
 	BattleUnit *getCharging();
 	/// Get the carried weight in strength units.
 	int getCarriedWeight(BattleItem *draggingItem = 0) const;
+
 	/// Set how many turns this unit will be exposed for.
 	void setTurnsSinceSpotted (int turns);
 	/// Set how many turns this unit will be exposed for.
@@ -560,6 +561,13 @@ public:
 	void setTurnsLeftSpottedForSnipers (int turns);
 	/// Get how many turns left snipers know about this target.
 	int  getTurnsLeftSpottedForSnipers() const;
+	/// Reset how many turns passed since stunned last time.
+	void resetTurnsSinceStunned() { _turnsSinceStunned = 255; }
+	/// Increse how many turns passed since stunned last time.
+	void incTurnsSinceStunned() { _turnsSinceStunned = std::max(255, _turnsSinceStunned + 1); }
+	/// Return how many truns passed since stunned last time.
+	int getTurnsSinceStunned() const { return _turnsSinceStunned; }
+
 	/// Get this unit's original faction
 	UnitFaction getOriginalFaction() const;
 	/// Get alien/HWP unit.

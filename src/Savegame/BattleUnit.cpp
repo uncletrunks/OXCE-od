@@ -586,6 +586,7 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_visible = node["visible"].as<bool>(_visible);
 	_turnsSinceSpotted = node["turnsSinceSpotted"].as<int>(_turnsSinceSpotted);
 	_turnsLeftSpottedForSnipers = node["turnsLeftSpottedForSnipers"].as<int>(_turnsLeftSpottedForSnipers);
+	_turnsSinceStunned = node["turnsSinceStunned"].as<int>(_turnsSinceStunned);
 	_killedBy = (UnitFaction)node["killedBy"].as<int>(_killedBy);
 	_moraleRestored = node["moraleRestored"].as<int>(_moraleRestored);
 	_rankInt = node["rankInt"].as<int>(_rankInt);
@@ -662,6 +663,7 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 	node["visible"] = _visible;
 	node["turnsSinceSpotted"] = _turnsSinceSpotted;
 	node["turnsLeftSpottedForSnipers"] = _turnsLeftSpottedForSnipers;
+	node["turnsSinceStunned"] = _turnsSinceStunned;
 	node["rankInt"] = _rankInt;
 	node["moraleRestored"] = _moraleRestored;
 	if (getAIModule())
@@ -1639,6 +1641,7 @@ void BattleUnit::startFalling()
 {
 	_status = STATUS_COLLAPSING;
 	_fallPhase = 0;
+	_turnsSinceStunned = 0;
 }
 
 /**
@@ -2283,6 +2286,11 @@ void BattleUnit::prepareNewTurn(bool fullProcess)
 	_hitByFire = false;
 	_dontReselect = false;
 	_motionPoints = 0;
+
+	if (!isOut())
+	{
+		incTurnsSinceStunned();
+	}
 
 	// don't give it back its TUs or anything this round
 	// because it's no longer a unit of the team getting TUs back
@@ -3874,6 +3882,7 @@ void BattleUnit::instaKill()
 {
 	_health = 0;
 	_status = STATUS_DEAD;
+	_turnsSinceStunned = 0;
 }
 
 /**
@@ -5171,7 +5180,9 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getPositionYScript>("getPosition.getY");
 	bu.add<&getPositionZScript>("getPosition.getZ");
 	bu.add<&BattleUnit::getTurnsSinceSpotted>("getTurnsSinceSpotted");
-	
+	bu.addField<&BattleUnit::_turnsSinceStunned>("getTurnsSinceStunned");
+	bu.add<&setBaseStatRangeScript<&BattleUnit::_turnsSinceStunned, 0, 255>>("setTurnsSinceStunned");
+
 	bu.addScriptValue<&BattleUnit::_scriptValues>();
 	bu.addDebugDisplay<&debugDisplayScript>();
 

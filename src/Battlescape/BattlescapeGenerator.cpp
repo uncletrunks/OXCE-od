@@ -499,6 +499,7 @@ void BattlescapeGenerator::nextStage()
 			if (!(*j)->isOut())
 			{
 				++soldiersTotal;
+				(*j)->resetTurnsSinceStunned();
 				(*j)->setTurnsSinceSpotted(255);
 				(*j)->setTurnsLeftSpottedForSnipers(0);
 				if (!selectedFirstSoldier && (*j)->getGeoscapeSoldier())
