@@ -120,7 +120,12 @@ void BattleItem::load(const YAML::Node &node, Mod *mod, const ScriptGlobal *shar
 	_painKiller = node["painKiller"].as<int>(_painKiller);
 	_heal = node["heal"].as<int>(_heal);
 	_stimulant = node["stimulant"].as<int>(_stimulant);
-	_fuseTimer = node["fuseTimer"].as<int>(_fuseTimer);
+	//_fuseTimer = node["fuseTimer"].as<int>(_fuseTimer);
+	if (node["fuseTimer"])
+	{
+		// needed for compatibility with OXC
+		setFuseTimer(node["fuseTimer"].as<int>());
+	}
 	_fuseEnabled = node["fuseEnabed"].as<bool>(_fuseEnabled);
 	_droppedOnAlienTurn = node["droppedOnAlienTurn"].as<bool>(_droppedOnAlienTurn);
 	_XCOMProperty = node["XCOMProperty"].as<bool>(_XCOMProperty);
