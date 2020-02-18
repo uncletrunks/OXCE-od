@@ -614,7 +614,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	else
 	{
 		shade = getMixedTileShade(currTile, offsets.TerrainLevelOffset, unitFromBelow);
-		if (!moving && unitTile->getObstacle(4))
+		if (_showObstacles && unitTile->getObstacle(4))
 		{
 			shade = getShadePulseForFrame(shade, _animFrame);
 		}
