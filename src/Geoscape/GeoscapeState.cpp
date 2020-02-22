@@ -2188,6 +2188,7 @@ void GeoscapeState::time1Day()
 	for (Base *base : *_game->getSavedGame()->getBases())
 	{
 		// Handle facility construction
+		std::map<const RuleBaseFacility*, int> finishedFacilities;
 		for (BaseFacility *facility : *base->getFacilities())
 		{
 			if (facility->getBuildTime() > 0)
@@ -2195,8 +2196,21 @@ void GeoscapeState::time1Day()
 				facility->build();
 				if (facility->getBuildTime() == 0)
 				{
-					popup(new ProductionCompleteState(base,  tr(facility->getRules()->getType()), this, PROGRESS_CONSTRUCTION));
+					finishedFacilities[facility->getRules()] += 1;
 				}
+			}
+		}
+		for (auto& f : finishedFacilities)
+		{
+			if (f.second > 1)
+			{
+				std::ostringstream ssf;
+				ssf << tr(f.first->getType()) << " (x" << f.second << ")";
+				popup(new ProductionCompleteState(base, ssf.str(), this, PROGRESS_CONSTRUCTION));
+			}
+			else
+			{
+				popup(new ProductionCompleteState(base, tr(f.first->getType()), this, PROGRESS_CONSTRUCTION));
 			}
 		}
 
