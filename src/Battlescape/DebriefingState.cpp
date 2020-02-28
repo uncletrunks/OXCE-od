@@ -2384,7 +2384,7 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 	}
 
 	// Zombie handling: don't recover a zombie.
-	if (!from->getSpawnUnit().empty())
+	if (from->getSpawnUnit())
 	{
 		// convert it, and mind control the resulting unit.
 		// reason: zombies don't create unconscious bodies... ever.

@@ -311,7 +311,8 @@ private:
 	int _value, _moraleLossWhenKilled, _aggroSound, _moveSound;
 	int _intelligence, _aggression, _spotter, _sniper, _energyRecovery;
 	SpecialAbility _specab;
-	std::string _spawnUnit;
+	const Unit *_spawnUnit = nullptr;
+	std::string _spawnUnitName;
 	bool _livingWeapon;
 	std::string _meleeWeapon, _psiWeapon;
 	std::vector<std::vector<std::string> > _builtInWeapons;
@@ -380,7 +381,7 @@ public:
 	/// Gets the alien's special ability.
 	int getSpecialAbility() const;
 	/// Gets the unit's spawn unit.
-	std::string getSpawnUnit() const;
+	const Unit *getSpawnUnit() const;
 	/// Gets the unit's war cry.
 	int getAggroSound() const;
 	/// Gets how much energy this unit recovers per turn.
@@ -406,6 +407,11 @@ public:
 	bool pickUpWeaponsMoreActively(Mod *mod) const;
 	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
 	bool getShowFullNameInAlienInventory(Mod *mod) const;
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "RuleUnit";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
 };
 
 }

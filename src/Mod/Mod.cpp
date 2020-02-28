@@ -3798,7 +3798,6 @@ RuleMissionScript *Mod::getMissionScript(const std::string &name, bool error) co
 {
 	return getRule(name, "Mission Script", _missionScripts, error);
 }
-
 /// Get global script data.
 ScriptGlobal *Mod::getScriptGlobal() const
 {
@@ -5039,6 +5038,18 @@ void getSmokeReduction(const Mod *m, int &smoke)
 	// Even if MaxViewDistance will be increased via ruleset, smoke will keep effect.
 	smoke = smoke * m->getMaxViewDistance() / (3 * 20);
 }
+
+void getUnitScript(const Mod* mod, const Unit* unit, const std::string &name)
+{
+	if (mod)
+	{
+		unit = mod->getUnit(name);
+	}
+	else
+	{
+		unit = nullptr;
+	}
+}
 void getArmorScript(const Mod* mod, const Armor* armor, const std::string &name)
 {
 	if (mod)
@@ -5103,6 +5114,7 @@ void Mod::ScriptRegister(ScriptParserBase *parser)
 	mod.add<&Mod::getMaxDarknessToSeeUnits>("getMaxDarknessToSeeUnits");
 	mod.add<&Mod::getMaxViewDistance>("getMaxViewDistance");
 	mod.add<&getSmokeReduction>("getSmokeReduction");
+	mod.add<&getUnitScript>("getRuleUnit");
 	mod.add<&getItemScript>("getRuleItem");
 	mod.add<&getArmorScript>("getRuleArmor");
 	mod.add<&getSkillScript>("getRuleSkill");

@@ -2099,10 +2099,10 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	// remove unit-tile link
 	unit->setTile(nullptr, _save);
 
-	Unit* type = getMod()->getUnit(unit->getSpawnUnit(), true);
+	const Unit* type = unit->getSpawnUnit();
 
 	BattleUnit *newUnit = new BattleUnit(getMod(),
-		type,
+		const_cast<Unit*>(type),
 		FACTION_HOSTILE,
 		_save->getUnits()->back()->getId() + 1,
 		_save->getEnviroEffects(),

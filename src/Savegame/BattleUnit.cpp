@@ -551,7 +551,7 @@ BattleUnit::~BattleUnit()
  * Loads the unit from a YAML file.
  * @param node YAML node.
  */
-void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
+void BattleUnit::load(const YAML::Node &node, const Mod *mod, const ScriptGlobal *shared)
 {
 	_id = node["id"].as<int>(_id);
 	_faction = (UnitFaction)node["faction"].as<int>(_faction);
@@ -594,7 +594,10 @@ void BattleUnit::load(const YAML::Node &node, const ScriptGlobal *shared)
 	_kills = node["kills"].as<int>(_kills);
 	_dontReselect = node["dontReselect"].as<bool>(_dontReselect);
 	_charging = 0;
-	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
+	if (const YAML::Node& spawn = node["spawnUnit"])
+	{
+		_spawnUnit = mod->getUnit(spawn.as<std::string>(), false); //ignored bugged types
+	}
 	_motionPoints = node["motionPoints"].as<int>(0);
 	_respawn = node["respawn"].as<bool>(_respawn);
 	_alreadyRespawned = node["alreadyRespawned"].as<bool>(_alreadyRespawned);
@@ -678,8 +681,10 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 		node["kills"] = _kills;
 	if (_faction == FACTION_PLAYER && _dontReselect)
 		node["dontReselect"] = _dontReselect;
-	if (!_spawnUnit.empty())
-		node["spawnUnit"] = _spawnUnit;
+	if (_spawnUnit)
+	{
+		node["spawnUnit"] = _spawnUnit->getType();
+	}
 	node["motionPoints"] = _motionPoints;
 	node["respawn"] = _respawn;
 	node["alreadyRespawned"] = _alreadyRespawned;
@@ -1568,11 +1573,11 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 		// check if this unit turns others into zombies
 		if (specialDamegeTransform && RNG::percent(std::get<toTransform>(args.data))
 			&& getArmor()->getZombiImmune() == false
-			&& getSpawnUnit().empty())
+			&& !getSpawnUnit())
 		{
 			// converts the victim to a zombie on death
 			setRespawn(true);
-			setSpawnUnit(specialDamegeTransform->getZombieUnit(this));
+			setSpawnUnit(save->getMod()->getUnit(specialDamegeTransform->getZombieUnit(this)));
 		}
 
 		setFatalShotInfo(side, bodypart);
@@ -1623,7 +1628,7 @@ bool BattleUnit::hasNegativeHealthRegen() const
  */
 void BattleUnit::knockOut(BattlescapeGame *battle)
 {
-	if (!_spawnUnit.empty())
+	if (_spawnUnit)
 	{
 		setRespawn(false);
 		BattleUnit *newUnit = battle->convertUnit(this);
@@ -3835,7 +3840,7 @@ bool BattleUnit::getAlreadyRespawned() const
  * Get the unit that is spawned when this one dies.
  * @return unit.
  */
-std::string BattleUnit::getSpawnUnit() const
+const Unit *BattleUnit::getSpawnUnit() const
 {
 	return _spawnUnit;
 }
@@ -3844,7 +3849,7 @@ std::string BattleUnit::getSpawnUnit() const
  * Set the unit that is spawned when this one dies.
  * @param spawnUnit unit.
  */
-void BattleUnit::setSpawnUnit(const std::string &spawnUnit)
+void BattleUnit::setSpawnUnit(const Unit *spawnUnit)
 {
 	_spawnUnit = spawnUnit;
 }
@@ -4836,7 +4841,7 @@ struct getGeoscapeSoldierConstScript
 	}
 };
 
-void geReactionScoreScript(const BattleUnit *bu, int &ret)
+void getReactionScoreScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
 	{
@@ -5119,6 +5124,20 @@ void getFactionScript(const BattleUnit *bu, int &faction)
 	faction = 0;
 }
 
+void setSpawnUnitScript(BattleUnit *bu, const Unit* unitType)
+{
+	if (bu && unitType)
+	{
+		bu->setSpawnUnit(unitType);
+		bu->setRespawn(true);
+	}
+	else if (bu)
+	{
+		bu->setSpawnUnit(nullptr);
+		bu->setRespawn(false);
+	}
+}
+
 void getInventoryItemScript(BattleUnit* bu, BattleItem *&foundItem, const RuleItem *itemRules)
 {
 	foundItem = nullptr;
@@ -5184,9 +5203,9 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	parser->registerPointerType<BattleItem>();
 	parser->registerPointerType<Soldier>();
 	parser->registerPointerType<RuleSkill>();
+	parser->registerPointerType<Unit>();
 
 	Bind<BattleUnit> bu = { parser };
-
 
 	bu.addField<&BattleUnit::_id>("getId");
 	bu.addField<&BattleUnit::_rankInt>("getRank");
@@ -5201,10 +5220,11 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&isFlyingScript>("isFlying");
 	bu.add<&isCollapsingScript>("isCollapsing");
 	bu.add<&isAimingScript>("isAiming");
-	bu.add<&geReactionScoreScript>("geReactionScore");
+	bu.add<&getReactionScoreScript>("getReactionScore");
 	bu.add<&BattleUnit::getDirection>("getDirection");
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
 	bu.add<&BattleUnit::getWalkingPhase>("getWalkingPhase");
+	bu.add<&setSpawnUnitScript>("setSpawnUnit");
 	bu.add<&getInventoryItemScript>("getInventoryItem");
 
 	bu.addField<&BattleUnit::_tu>("getTimeUnits");

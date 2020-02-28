@@ -78,7 +78,10 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_sniper = node["sniper"].as<int>(_sniper);
 	_energyRecovery = node["energyRecovery"].as<int>(_energyRecovery);
 	_specab = (SpecialAbility)node["specab"].as<int>(_specab);
-	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
+	if (const YAML::Node& spawn = node["spawnUnit"])
+	{
+		_spawnUnitName = spawn.as<std::string>();
+	}
 	_livingWeapon = node["livingWeapon"].as<bool>(_livingWeapon);
 	_canSurrender = node["canSurrender"].as<bool>(_canSurrender);
 	_autoSurrender = node["autoSurrender"].as<bool>(_autoSurrender);
@@ -113,6 +116,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 void Unit::afterLoad(const Mod* mod)
 {
 	_armor = mod->getArmor(_armorName, true);
+	_spawnUnit = mod->getUnit(_spawnUnitName, true);
 }
 
 /**
@@ -292,7 +296,7 @@ int Unit::getSpecialAbility() const
  * Gets the unit that is spawned when this one dies.
  * @return The unit's spawn unit.
  */
-std::string Unit::getSpawnUnit() const
+const Unit *Unit::getSpawnUnit() const
 {
 	return _spawnUnit;
 }
@@ -414,6 +418,30 @@ bool Unit::getShowFullNameInAlienInventory(Mod *mod) const
 //					Script binding
 ////////////////////////////////////////////////////////////
 
+namespace
+{
+std::string debugDisplayScript(const Unit* unit)
+{
+	if (unit)
+	{
+		std::string s;
+		s += Unit::ScriptName;
+		s += "(name: \"";
+		s += unit->getType();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+}
+void Unit::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<Unit> un = { parser };
+	un.addDebugDisplay<&debugDisplayScript>();
+}
 /**
  * Register StatAdjustment in script parser.
  * @param parser Script parser.

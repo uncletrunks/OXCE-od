@@ -114,7 +114,7 @@ private:
 	int _coverReserve;
 	BattleUnit *_charging;
 	int _turnsSinceSpotted, _turnsLeftSpottedForSnipers, _turnsSinceStunned = 255;
-	std::string _spawnUnit;
+	const Unit *_spawnUnit = nullptr;
 	std::string _activeHand;
 	BattleUnitStatistics* _statistics;
 	int _murdererId;	// used to credit the murderer with the kills that this unit got by blowing up on death
@@ -195,7 +195,7 @@ public:
 	/// Cleans up the BattleUnit.
 	~BattleUnit();
 	/// Loads the unit from YAML.
-	void load(const YAML::Node &node, const ScriptGlobal *shared);
+	void load(const YAML::Node &node, const Mod *mod, const ScriptGlobal *shared);
 	/// Saves the unit to YAML.
 	YAML::Node save(const ScriptGlobal *shared) const;
 	/// Gets the BattleUnit's ID.
@@ -537,9 +537,9 @@ public:
 	/// Set health to 0 and set status dead
 	void instaKill();
 	/// Gets the unit's spawn unit.
-	std::string getSpawnUnit() const;
+	const Unit *getSpawnUnit() const;
 	/// Sets the unit's spawn unit.
-	void setSpawnUnit(const std::string &spawnUnit);
+	void setSpawnUnit(const Unit *spawnUnit);
 	/// Gets the unit's aggro sound.
 	int getAggroSound() const;
 	/// Sets the unit's time units.
