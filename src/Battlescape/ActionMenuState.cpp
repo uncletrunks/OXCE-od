@@ -42,6 +42,13 @@ namespace OpenXcom
 {
 
 /**
+ * Default constructor, used by SkillMenuState.
+ */
+ActionMenuState::ActionMenuState(BattleAction *action) : _action(action)
+{
+}
+
+/**
  * Initializes all the elements in the Action Menu window.
  * @param game Pointer to the core game.
  * @param action Pointer to the action.
@@ -256,7 +263,6 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 	_game->getSavedGame()->getSavedBattle()->getPathfinding()->removePreview();
 
 	int btnID = -1;
-	const RuleItem *weapon = _action->weapon->getRules();
 
 	// got to find out which button was pressed
 	for (size_t i = 0; i < std::size(_actionMenu) && btnID == -1; ++i)
@@ -269,11 +275,21 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 
 	if (btnID != -1)
 	{
+		_action->type = _actionMenu[btnID]->getAction();
+		_action->skillRules = nullptr;
+		_action->updateTU();
+
+		handleAction();
+	}
+}
+
+void ActionMenuState::handleAction()
+{
+	{
+		const RuleItem *weapon = _action->weapon->getRules();
 		bool newHitLog = false;
 		std::string actionResult = "STR_UNKNOWN"; // needs a non-empty default/fall-back !
 
-		_action->type = _actionMenu[btnID]->getAction();
-		_action->updateTU();
 		if (_action->type != BA_THROW &&
 			_action->actor->getOriginalFaction() == FACTION_PLAYER &&
 			!_game->getSavedGame()->isResearched(weapon->getRequirements()))

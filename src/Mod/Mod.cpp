@@ -65,6 +65,7 @@
 #include "RuleTerrain.h"
 #include "MapScript.h"
 #include "RuleSoldier.h"
+#include "RuleSkill.h"
 #include "RuleCommendations.h"
 #include "AlienRace.h"
 #include "RuleEnviroEffects.h"
@@ -554,6 +555,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, RuleSoldier*>::iterator i = _soldiers.begin(); i != _soldiers.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleSkill*>::iterator i = _skills.begin(); i != _skills.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1356,6 +1361,7 @@ void Mod::loadAll()
 	afterLoadHelper("facilities", this, _facilities, &RuleBaseFacility::afterLoad);
 	afterLoadHelper("enviroEffects", this, _enviroEffects, &RuleEnviroEffects::afterLoad);
 	afterLoadHelper("commendations", this, _commendations, &RuleCommendations::afterLoad);
+	afterLoadHelper("skills", this, _skills, &RuleSkill::afterLoad);
 
 	// fixed user options
 	if (!_fixedUserOptions.empty())
@@ -1658,6 +1664,14 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		if (rule != 0)
 		{
 			rule->load(*i, parsers, this);
+		}
+	}
+	for (YAML::const_iterator i = doc["skills"].begin(); i != doc["skills"].end(); ++i)
+	{
+		RuleSkill *rule = loadRule(*i, &_skills, &_skillsIndex);
+		if (rule != 0)
+		{
+			rule->load(*i, parsers);
 		}
 	}
 	for (YAML::const_iterator i = doc["soldiers"].begin(); i != doc["soldiers"].end(); ++i)
@@ -2701,6 +2715,16 @@ MapDataSet *Mod::getMapDataSet(const std::string &name)
 	{
 		return map->second;
 	}
+}
+
+/**
+ * Returns the rules for the specified skill.
+ * @param name Skill type.
+ * @return Rules for the skill.
+ */
+RuleSkill *Mod::getSkill(const std::string &name, bool error) const
+{
+	return getRule(name, "Skill", _skills, error);
 }
 
 /**

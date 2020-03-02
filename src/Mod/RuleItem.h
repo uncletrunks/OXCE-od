@@ -91,6 +91,92 @@ struct RuleItemUseCost
 		Mana += cost.Mana;
 		return *this;
 	}
+
+	/**
+	 * Load use cost.
+	 * @param a Item use cost.
+	 * @param node YAML node.
+	 * @param name Name of action type.
+	 */
+	void loadCost(const YAML::Node& node, const std::string& name)
+	{
+		loadInt(Time, node["tu" + name]);
+		if (const YAML::Node& cost = node["cost" + name])
+		{
+			loadInt(Time, cost["time"]);
+			loadInt(Energy, cost["energy"]);
+			loadInt(Morale, cost["morale"]);
+			loadInt(Health, cost["health"]);
+			loadInt(Stun, cost["stun"]);
+			loadInt(Mana, cost["mana"]);
+		}
+	}
+
+	/**
+	 * Load use cost type (flat or percent).
+	 * @param a Item use type.
+	 * @param node YAML node.
+	 * @param name Name of action type.
+	 */
+	void loadPercent(const YAML::Node& node, const std::string& name)
+	{
+		if (const YAML::Node& cost = node["flat" + name])
+		{
+			if (cost.IsScalar())
+			{
+				loadTriBool(Time, cost);
+			}
+			else
+			{
+				loadTriBool(Time, cost["time"]);
+				loadTriBool(Energy, cost["energy"]);
+				loadTriBool(Morale, cost["morale"]);
+				loadTriBool(Health, cost["health"]);
+				loadTriBool(Stun, cost["stun"]);
+				loadTriBool(Mana, cost["mana"]);
+			}
+		}
+	}
+
+	/**
+	 * Load nullable bool value and store it in int (with null as -1).
+	 * @param a value to set.
+	 * @param node YAML node.
+	 */
+	void loadTriBool(int& a, const YAML::Node& node) const
+	{
+		if (node)
+		{
+			if (node.IsNull())
+			{
+				a = -1;
+			}
+			else
+			{
+				a = node.as<bool>();
+			}
+		}
+	}
+
+	/**
+	 * Load nullable int (with null as -1).
+	 * @param a value to set.
+	 * @param node YAML node.
+	 */
+	void loadInt(int& a, const YAML::Node& node) const
+	{
+		if (node)
+		{
+			if (node.IsNull())
+			{
+				a = -1;
+			}
+			else
+			{
+				a = node.as<int>();
+			}
+		}
+	}
 };
 
 /**

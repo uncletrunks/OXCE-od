@@ -1098,6 +1098,12 @@
     <ClCompile Include="Battlescape\TurnDiaryState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\SkillMenuState.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod\RuleSkill.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2250,6 +2256,12 @@
     </ClInclude>
     <ClInclude Include="Battlescape\TurnDiaryState.h">
       <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\SkillMenuState.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleSkill.h">
+      <Filter>Mod</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

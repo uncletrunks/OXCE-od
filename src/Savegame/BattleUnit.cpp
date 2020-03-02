@@ -37,6 +37,7 @@
 #include "../Mod/Unit.h"
 #include "../Mod/RuleEnviroEffects.h"
 #include "../Mod/RuleInventory.h"
+#include "../Mod/RuleSkill.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Mod/RuleSoldierBonus.h"
 #include "../Mod/Mod.h"
@@ -1452,7 +1453,7 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 
 	{
 		ModScript::HitUnit::Output args { damage, bodypart, side, };
-		ModScript::HitUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, orgDamage, type->ResistType, attack.type, };
+		ModScript::HitUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, attack.skill_rules, orgDamage, type->ResistType, attack.type };
 
 		work.execute(this->getArmor()->getScript<ModScript::HitUnit>(), args);
 
@@ -1536,7 +1537,7 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 			std::get<toArmor>(args.data) += type->getArmorFinalDamage(damage);
 		}
 
-		ModScript::DamageUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, damage, orgDamage, bodypart, side, type->ResistType, attack.type, };
+		ModScript::DamageUnit::Worker work { this, attack.damage_item, attack.weapon_item, attack.attacker, save, attack.skill_rules, damage, orgDamage, bodypart, side, type->ResistType, attack.type, };
 
 		work.execute(this->getArmor()->getScript<ModScript::DamageUnit>(), args);
 
@@ -1706,6 +1707,30 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Batt
 	return getActionTUs(actionType, item->getRules());
 }
 
+/**
+ * Get the number of time units a certain skill action takes.
+ * @param actionType
+ * @param skillRules
+ * @return TUs
+ */
+RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const RuleSkill *skillRules) const
+{
+	if (skillRules == 0)
+	{
+		return 0;
+	}
+	RuleItemUseCost cost(skillRules->getCost());
+	applyPercentages(cost, skillRules->getFlat());
+	
+	return cost;
+}
+
+/**
+ * Get the number of time units a certain action takes.
+ * @param actionType
+ * @param item
+ * @return TUs
+ */
 RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const RuleItem *item) const
 {
 	RuleItemUseCost cost;
@@ -1756,6 +1781,14 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Rule
 				break;
 		}
 
+		applyPercentages(cost, flat);
+	}
+	return cost;
+}
+
+void BattleUnit::applyPercentages(RuleItemUseCost &cost, const RuleItemUseCost &flat) const
+{
+	{
 		// if it's a percentage, apply it to unit TUs
 		if (!flat.Time && cost.Time)
 		{
@@ -1787,7 +1820,6 @@ RuleItemUseCost BattleUnit::getActionTUs(BattleActionType actionType, const Rule
 			cost.Mana = std::max(1, (int)floor(getBaseStats()->mana * cost.Mana / 100.0f));
 		}
 	}
-	return cost;
 }
 
 /**
@@ -4413,7 +4445,7 @@ void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 }
 
 /**
- * Get special weapon.
+ * Get special weapon by battletype.
  */
 BattleItem *BattleUnit::getSpecialWeapon(BattleType type) const
 {
@@ -4424,6 +4456,26 @@ BattleItem *BattleUnit::getSpecialWeapon(BattleType type) const
 			break;
 		}
 		if (_specWeapon[i]->getRules()->getBattleType() == type)
+		{
+			return _specWeapon[i];
+		}
+	}
+	return 0;
+}
+
+
+/**
+ * Get special weapon by name.
+ */
+BattleItem *BattleUnit::getSpecialWeapon(const RuleItem *weaponRule) const
+{
+	for (int i = 0; i < SPEC_WEAPON_MAX; ++i)
+	{
+		if (!_specWeapon[i])
+		{
+			break;
+		}
+		if (_specWeapon[i]->getRules() == weaponRule)
 		{
 			return _specWeapon[i];
 		}
@@ -5102,6 +5154,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	parser->registerPointerType<RuleSoldier>();
 	parser->registerPointerType<BattleItem>();
 	parser->registerPointerType<Soldier>();
+	parser->registerPointerType<RuleSkill>();
 
 	Bind<BattleUnit> bu = { parser };
 
@@ -5398,7 +5451,7 @@ ModScript::DamageUnitParser::DamageUnitParser(ScriptGlobal* shared, const std::s
 	"to_transform",
 	"to_mana",
 	"unit", "damaging_item", "weapon_item", "attacker",
-	"battle_game", "currPower", "orig_power", "part", "side", "damaging_type", "battle_action", }
+	"battle_game", "skill", "currPower", "orig_power", "part", "side", "damaging_type", "battle_action", }
 {
 	BindBase b { this };
 
@@ -5430,13 +5483,33 @@ ModScript::HitUnitParser::HitUnitParser(ScriptGlobal* shared, const std::string&
 	"part",
 	"side",
 	"unit", "damaging_item", "weapon_item", "attacker",
-	"battle_game", "orig_power", "damaging_type", "battle_action", }
+	"battle_game", "skill", "orig_power", "damaging_type", "battle_action" }
 {
 	BindBase b { this };
 
 	b.addCustomPtr<const Mod>("rules", mod);
 
 	battleActionImpl(b);
+}
+
+ModScript::SkillUseUnitParser::SkillUseUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents { shared, name,
+	"continue_action",
+	"spend_tu",
+	"actor",
+	"item",
+	"battle_game",
+	"skill",
+	"battle_action",
+	"have_tu"
+}
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+
+	battleActionImpl(b);
+
+	setEmptyReturn();
 }
 
 ModScript::HealUnitParser::HealUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,

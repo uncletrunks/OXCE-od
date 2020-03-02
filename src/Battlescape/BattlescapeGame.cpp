@@ -70,7 +70,11 @@ bool BattlescapeGame::_debugPlay = false;
  */
 void BattleActionCost::updateTU()
 {
-	if (actor && weapon)
+	if (actor && skillRules)
+	{
+		*(RuleItemUseCost*)this = actor->getActionTUs(type, skillRules);
+	}
+	else if (actor && weapon)
 	{
 		*(RuleItemUseCost*)this = actor->getActionTUs(type, weapon);
 	}
@@ -89,13 +93,13 @@ void BattleActionCost::clearTU()
 }
 
 /**
- * Test if action can by performed.
+ * Test if action can be performed.
  * @param message optional message with error condition.
  * @return Unit have enough stats to perform action.
  */
 bool BattleActionCost::haveTU(std::string *message)
 {
-	if (Time <= 0)
+	if (!skillRules && Time <= 0)
 	{
 		//no action, no message
 		return false;
@@ -172,7 +176,7 @@ bool BattleActionCost::spendTU(std::string *message)
  * @param unit unit performing attack.
  * @param item weapon of choice.
  */
-BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item, BattleItem *ammo) : type{ action }, attacker{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
+BattleActionAttack::BattleActionAttack(BattleActionType action, BattleUnit *unit, BattleItem *item, BattleItem *ammo) : type{ action }, attacker{ unit }
 {
 	if (item)
 	{
@@ -198,6 +202,11 @@ BattleActionAttack::BattleActionAttack(const BattleActionCost& action, BattleIte
 
 }
 
+BattleActionAttack::BattleActionAttack(const BattleAction &action, BattleItem *ammo) : BattleActionAttack{ action.type, action.actor, action.weapon, ammo }
+{
+	skill_rules = action.skillRules;
+}
+
 /**
  * Initializes all the elements in the Battlescape screen.
  * @param save Pointer to the save game.
@@ -212,6 +221,7 @@ BattlescapeGame::BattlescapeGame(SavedBattleGame *save, BattlescapeState *parent
 	_currentAction.actor = 0;
 	_currentAction.targeting = false;
 	_currentAction.type = BA_NONE;
+	_currentAction.skillRules = nullptr;
 
 	_debugPlay = false;
 
@@ -513,6 +523,7 @@ void BattlescapeGame::endTurn()
 {
 	_debugPlay = false;
 	_currentAction.type = BA_NONE;
+	_currentAction.skillRules = nullptr;
 	getMap()->getWaypoints()->clear();
 	_currentAction.waypoints.clear();
 	_parentState->showLaunchButton(false);
@@ -967,18 +978,11 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 	BattleUnit *bu = _save->getSelectedUnit();
 	if (_save->getSide() == FACTION_PLAYER)
 	{
-		_parentState->showPsiButton(bu && bu->getSpecialWeapon(BT_PSIAMP) && !bu->isOut());
-		_parentState->showSpecialButton(false);
+		_parentState->resetUiButton();
 
 		if (bu && !bu->isOut())
 		{
-			BattleType type = BT_NONE;
-			BattleItem *specialWeapon = bu->getSpecialIconWeapon(type); // updates type!
-			if (specialWeapon && type != BT_NONE && type != BT_AMMO && type != BT_GRENADE && type != BT_PROXIMITYGRENADE && type != BT_FLARE && type != BT_CORPSE)
-			{
-				_parentState->showPsiButton(false);
-				_parentState->showSpecialButton(true, specialWeapon->getRules()->getSpecialIconSprite());
-			}
+			_parentState->updateUiButton(bu);
 		}
 	}
 }
@@ -1649,6 +1653,7 @@ bool BattlescapeGame::cancelCurrentAction(bool bForce)
 				}
 				_currentAction.targeting = false;
 				_currentAction.type = BA_NONE;
+				_currentAction.skillRules = nullptr;
 				setupCursor();
 				_parentState->getGame()->getCursor()->setVisible(true);
 				return true;
@@ -1677,6 +1682,7 @@ void BattlescapeGame::cancelAllActions()
 
 	_currentAction.targeting = false;
 	_currentAction.type = BA_NONE;
+	_currentAction.skillRules = nullptr;
 	setupCursor();
 	_parentState->getGame()->getCursor()->setVisible(true);
 }
@@ -2117,8 +2123,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 
 	bool visible = unit->getVisible();
 
-	getSave()->getBattleState()->showPsiButton(false);
-	getSave()->getBattleState()->showSpecialButton(false);
+	getSave()->getBattleState()->resetUiButton();
 	// in case the unit was unconscious
 	getSave()->removeUnconsciousBodyItem(unit);
 

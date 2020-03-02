@@ -56,6 +56,7 @@ struct RuleDamageType;
 class RuleUfo;
 class RuleTerrain;
 class MapDataSet;
+class RuleSkill;
 class RuleSoldier;
 class Unit;
 class Armor;
@@ -144,6 +145,7 @@ private:
 	std::map<std::string, RuleUfo*> _ufos;
 	std::map<std::string, RuleTerrain*> _terrains;
 	std::map<std::string, MapDataSet*> _mapDataSets;
+	std::map<std::string, RuleSkill*> _skills;
 	std::map<std::string, RuleSoldier*> _soldiers;
 	std::map<std::string, Unit*> _units;
 	std::map<std::string, AlienRace*> _alienRaces;
@@ -238,7 +240,7 @@ private:
 	std::map<std::string, int> _ufopaediaSections;
 	std::vector<std::string> _countriesIndex, _extraGlobeLabelsIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;
 	std::vector<std::string> _aliensIndex, _enviroEffectsIndex, _startingConditionsIndex, _deploymentsIndex, _armorsIndex, _ufopaediaIndex, _ufopaediaCatIndex, _researchIndex, _manufactureIndex;
-	std::vector<std::string> _soldiersIndex, _soldierTransformationIndex, _soldierBonusIndex;
+	std::vector<std::string> _skillsIndex, _soldiersIndex, _soldierTransformationIndex, _soldierBonusIndex;
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _customPalettesIndex, _arcScriptIndex, _eventScriptIndex, _eventIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
@@ -434,6 +436,8 @@ public:
 	const std::vector<std::string> &getTerrainList() const;
 	/// Gets mapdatafile for battlescape games.
 	MapDataSet *getMapDataSet(const std::string &name);
+	/// Gets skill rules.
+	RuleSkill *getSkill(const std::string &name, bool error = false) const;
 	/// Gets soldier unit rules.
 	RuleSoldier *getSoldier(const std::string &name, bool error = false) const;
 	/// Gets the available soldiers.

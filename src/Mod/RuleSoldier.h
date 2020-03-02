@@ -30,6 +30,7 @@ class ModScript;
 class SoldierNamePool;
 class StatString;
 class RuleItem;
+class RuleSkill;
 
 /**
  * Represents the creation data for an X-COM unit.
@@ -83,6 +84,9 @@ private:
 	std::vector<StatString*> _statStrings;
 	std::vector<std::string> _rankStrings;
 	int _rankSprite, _rankSpriteBattlescape, _rankSpriteTiny;
+	int _skillIconSprite;
+	std::vector<std::string> _skillNames;
+	std::vector<const RuleSkill*> _skills;
 	ScriptValues<RuleSoldier> _scriptValues;
 
 	void addSoldierNamePool(const std::string &namFile);
@@ -119,6 +123,12 @@ public:
 	int getBuyCost() const;
 	/// Does salary depend on rank?
 	bool isSalaryDynamic() const;
+	/// Is a skill menu defined for this soldier type?
+	bool isSkillMenuDefined() const;
+	/// Gets the list of defined skills.
+	const std::vector<const RuleSkill*> &getSkills() const;
+	/// Returns the sprite index for the skill icon sprite.
+	int getSkillIconSprite() const;
 	/// Gets the monthly salary of the soldier (for a given rank).
 	int getSalaryCost(int rank) const;
 	/// Gets the height of the soldier when it's standing.

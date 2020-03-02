@@ -339,6 +339,7 @@
     <ClCompile Include="Battlescape\PsiAttackBState.cpp" />
     <ClCompile Include="Battlescape\ScannerState.cpp" />
     <ClCompile Include="Battlescape\ScannerView.cpp" />
+    <ClCompile Include="Battlescape\SkillMenuState.cpp" />
     <ClCompile Include="Battlescape\TurnDiaryState.cpp" />
     <ClCompile Include="Battlescape\UnitFallBState.cpp" />
     <ClCompile Include="Battlescape\UnitInfoState.cpp" />
@@ -498,6 +499,7 @@
     <ClCompile Include="Mod\RuleEvent.cpp" />
     <ClCompile Include="Mod\RuleEventScript.cpp" />
     <ClCompile Include="Mod\RuleItemCategory.cpp" />
+    <ClCompile Include="Mod\RuleSkill.cpp" />
     <ClCompile Include="Mod\RuleSoldierBonus.cpp" />
     <ClCompile Include="Mod\RuleSoldierTransformation.cpp" />
     <ClCompile Include="Mod\RuleStartingCondition.cpp" />
@@ -714,6 +716,7 @@
     <ClInclude Include="Battlescape\PsiAttackBState.h" />
     <ClInclude Include="Battlescape\ScannerState.h" />
     <ClInclude Include="Battlescape\ScannerView.h" />
+    <ClInclude Include="Battlescape\SkillMenuState.h" />
     <ClInclude Include="Battlescape\TurnDiaryState.h" />
     <ClInclude Include="Battlescape\UnitFallBState.h" />
     <ClInclude Include="Battlescape\UnitInfoState.h" />
@@ -888,6 +891,7 @@
     <ClInclude Include="Mod\RuleEvent.h" />
     <ClInclude Include="Mod\RuleEventScript.h" />
     <ClInclude Include="Mod\RuleItemCategory.h" />
+    <ClInclude Include="Mod\RuleSkill.h" />
     <ClInclude Include="Mod\RuleSoldierBonus.h" />
     <ClInclude Include="Mod\RuleSoldierTransformation.h" />
     <ClInclude Include="Mod\RuleStartingCondition.h" />

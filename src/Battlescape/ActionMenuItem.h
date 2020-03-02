@@ -28,6 +28,7 @@ class Font;
 class Language;
 class Text;
 class Frame;
+class RuleSkill;
 
 /**
  * A class that represents a single box in the action popup menu on the battlescape.
@@ -39,6 +40,7 @@ class ActionMenuItem : public InteractiveSurface
 private:
 	bool _highlighted;
 	BattleActionType _action;
+	const RuleSkill* _skill;
 	int _tu, _highlightModifier;
 	Frame *_frame;
 	Text *_txtDescription, *_txtAcc, *_txtTU;
@@ -49,8 +51,11 @@ public:
 	~ActionMenuItem();
 	/// Assigns an action to it.
 	void setAction(BattleActionType action, const std::string &description, const std::string &accuracy, const std::string &timeunits, int tu);
+	void setSkill(const RuleSkill* skill);
 	/// Gets the assigned action.
 	BattleActionType getAction() const;
+	/// Gets the assigned skill.
+	const RuleSkill* getSkill() const;
 	/// Gets the assigned action TUs.
 	int getTUs() const;
 	/// Sets the palettes.

@@ -31,6 +31,7 @@ class SavedBattleGame;
 class BattleUnit;
 class BattleItem;
 class Tile;
+class RuleSkill;
 struct BattleAction;
 struct GraphSubset;
 
@@ -204,6 +205,8 @@ public:
 	void medikitRemoveIfEmpty(BattleAction *action);
 	/// Try using medikit heal ability.
 	bool medikitUse(BattleAction *action, BattleUnit *target, BattleMediKitAction medikitAction, int bodyPart);
+	/// Try using a skill.
+	bool skillUse(BattleAction *action, const RuleSkill *skill);
 	/// Try to conceal a unit.
 	bool tryConcealUnit(BattleUnit* unit);
 	/// Applies gravity to anything that occupy this tile.

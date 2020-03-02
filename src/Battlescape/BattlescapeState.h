@@ -46,13 +46,16 @@ class BattlescapeGame;
  */
 class BattlescapeState : public State
 {
+
+enum ButtonType { BTN_PSI, BTN_SPECIAL, BTN_SKILL };
+
 private:
 	Surface *_rank, *_rankTiny;
 	InteractiveSurface *_icons;
 	Map *_map;
 	BattlescapeButton *_btnUnitUp, *_btnUnitDown, *_btnMapUp, *_btnMapDown, *_btnShowMap, *_btnKneel;
 	BattlescapeButton *_btnInventory, *_btnCenter, *_btnNextSoldier, *_btnNextStop, *_btnShowLayers, *_btnHelp;
-	BattlescapeButton *_btnEndTurn, *_btnAbort, *_btnLaunch, *_btnPsi, *_btnSpecial, *_reserve;
+	BattlescapeButton *_btnEndTurn, *_btnAbort, *_btnLaunch, *_btnPsi, *_btnSpecial, *_btnSkills, *_reserve;
 	InteractiveSurface *_btnStats;
 	BattlescapeButton *_btnReserveNone, *_btnReserveSnap, *_btnReserveAimed, *_btnReserveAuto, *_btnReserveKneel, *_btnZeroTUs;
 	InteractiveSurface *_btnLeftHandItem, *_btnRightHandItem;
@@ -104,6 +107,12 @@ private:
 	void blinkHealthBar();
 	/// Shows the unit kneel state.
 	void toggleKneelButton(BattleUnit* unit);
+	/// Shows the PSI button.
+	void showPsiButton(bool show);
+	/// Shows the special weapon button.
+	void showSpecialButton(bool show, int sprite = 1);
+	/// Shows the skills menu button.
+	void showSkillsButton(bool show, int sprite = 1);
 public:
 	/// Selects the next soldier.
 	void selectNextPlayerUnit(bool checkReselect = false, bool setReselect = false, bool checkInventory = false, bool checkFOV = true);
@@ -175,6 +184,8 @@ public:
 	void btnPsiClick(Action *action);
 	/// Handler for clicking the use special weapon button.
 	void btnSpecialClick(Action *action);
+	/// Handler for clicking the skills menu button.
+	void btnSkillsClick(Action *action);
 	/// Handler for clicking a reserved button.
 	void btnReserveClick(Action *action);
 	/// Handler for clicking the reload button.
@@ -189,6 +200,8 @@ public:
 	bool playableUnitSelected();
 	/// Updates soldier name/rank/tu/energy/health/morale.
 	void updateSoldierInfo(bool checkFOV = true);
+	/// Updates the special/psi/skill button display based on the battle unit
+	void updateUiButton(const BattleUnit* battleUnit);
 	/// Animates map objects on the map, also smoke,fire, ...
 	void animate();
 	/// Handles the battle game state.
@@ -215,10 +228,9 @@ public:
 	void finishBattle(bool abort, int inExitArea);
 	/// Show the launch button.
 	void showLaunchButton(bool show);
-	/// Shows the PSI button.
-	void showPsiButton(bool show);
-	/// Shows the special weapon button.
-	void showSpecialButton(bool show, int sprite = 1);
+	/// Show one of Psi, Special or Skill button
+	void showUiButton(ButtonType buttonType, int spriteIndex = 1);
+	void resetUiButton();
 	/// Clears mouse-scrolling state.
 	void clearMouseScrollingState();
 	/// Returns a pointer to the battlegame, in case we need its functions.

@@ -210,52 +210,6 @@ void RuleItem::loadInt(int& a, const YAML::Node& node) const
 }
 
 /**
- * Load item use cost type (flat or percent).
- * @param a Item use type.
- * @param node YAML node.
- * @param name Name of action type.
- */
-void RuleItem::loadPercent(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const
-{
-	if (const YAML::Node& cost = node["flat" + name])
-	{
-		if (cost.IsScalar())
-		{
-			loadTriBool(a.Time, cost);
-		}
-		else
-		{
-			loadTriBool(a.Time, cost["time"]);
-			loadTriBool(a.Energy, cost["energy"]);
-			loadTriBool(a.Morale, cost["morale"]);
-			loadTriBool(a.Health, cost["health"]);
-			loadTriBool(a.Stun, cost["stun"]);
-			loadTriBool(a.Mana, cost["mana"]);
-		}
-	}
-}
-
-/**
- * Load item use cost.
- * @param a Item use cost.
- * @param node YAML node.
- * @param name Name of action type.
- */
-void RuleItem::loadCost(RuleItemUseCost& a, const YAML::Node& node, const std::string& name) const
-{
-	loadInt(a.Time, node["tu" + name]);
-	if (const YAML::Node& cost = node["cost" + name])
-	{
-		loadInt(a.Time, cost["time"]);
-		loadInt(a.Energy, cost["energy"]);
-		loadInt(a.Morale, cost["morale"]);
-		loadInt(a.Health, cost["health"]);
-		loadInt(a.Stun, cost["stun"]);
-		loadInt(a.Mana, cost["mana"]);
-	}
-}
-
-/**
  * Load RuleItemAction from yaml.
  * @param a Item use config.
  * @param node YAML node.
@@ -468,27 +422,27 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_accuracyCloseQuarters = node["accuracyCloseQuarters"].as<int>(_accuracyCloseQuarters);
 	_noLOSAccuracyPenalty = node["noLOSAccuracyPenalty"].as<int>(_noLOSAccuracyPenalty);
 
-	loadCost(_confAimed.cost, node, "Aimed");
-	loadCost(_confAuto.cost, node, "Auto");
-	loadCost(_confSnap.cost, node, "Snap");
-	loadCost(_confMelee.cost, node, "Melee");
-	loadCost(_costUse, node, "Use");
-	loadCost(_costMind, node, "MindControl");
-	loadCost(_costPanic, node, "Panic");
-	loadCost(_costThrow, node, "Throw");
-	loadCost(_costPrime, node, "Prime");
-	loadCost(_costUnprime, node, "Unprime");
+	_confAimed.cost.loadCost(node, "Aimed");
+	_confAuto.cost.loadCost(node, "Auto");
+	_confSnap.cost.loadCost(node, "Snap");
+	_confMelee.cost.loadCost(node, "Melee");
+	_costUse.loadCost(node, "Use");
+	_costMind.loadCost(node, "MindControl");
+	_costPanic.loadCost(node, "Panic");
+	_costThrow.loadCost(node, "Throw");
+	_costPrime.loadCost(node, "Prime");
+	_costUnprime.loadCost(node, "Unprime");
 
 	loadTriBool(_flatUse.Time, node["flatRate"]);
 
-	loadPercent(_confAimed.flat, node, "Aimed");
-	loadPercent(_confAuto.flat, node, "Auto");
-	loadPercent(_confSnap.flat, node, "Snap");
-	loadPercent(_confMelee.flat, node, "Melee");
-	loadPercent(_flatUse, node, "Use");
-	loadPercent(_flatThrow, node, "Throw");
-	loadPercent(_flatPrime, node, "Prime");
-	loadPercent(_flatUnprime, node, "Unprime");
+	_confAimed.flat.loadPercent(node, "Aimed");
+	_confAuto.flat.loadPercent(node, "Auto");
+	_confSnap.flat.loadPercent(node, "Snap");
+	_confMelee.flat.loadPercent(node, "Melee");
+	_flatUse.loadPercent(node, "Use");
+	_flatThrow.loadPercent(node, "Throw");
+	_flatPrime.loadPercent(node, "Prime");
+	_flatUnprime.loadPercent(node, "Unprime");
 
 	loadConfAction(_confAimed, node, "Aimed");
 	loadConfAction(_confAuto, node, "Auto");

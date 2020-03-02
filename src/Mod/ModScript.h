@@ -41,6 +41,7 @@ class Armor;
 class RuleInventory;
 class RuleResearch;
 class RuleManufacture;
+class RuleSkill;
 class AlienRace;
 class RuleAlienMission;
 class Base;
@@ -99,15 +100,19 @@ class ModScript
 	{
 		VisibilityUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct HitUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, int, int, int>
+	struct HitUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, const RuleSkill*, int, int, int>
 	{
 		HitUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+	struct SkillUseUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&>, BattleUnit*, BattleItem*, SavedBattleGame*, const RuleSkill*, int, int>
+	{
+		SkillUseUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 	struct TryPsiAttackUnitParser : ScriptParserEvents<ScriptOutputArgs<int&>, const BattleItem*, const BattleUnit*, const BattleUnit*, int, int, int>
 	{
 		TryPsiAttackUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
-	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, int, int, int, int, int, int>
+	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, const RuleSkill*, int, int, int, int, int, int>
 	{
 		DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
@@ -292,6 +297,12 @@ public:
 	using CloseQuarterMultiplierStatBonus = MACRO_NAMED_SCRIPT("closeQuartersMultiplier", BonusStatsParser);
 
 	////////////////////////////////////////////////////////////
+	//					skill script
+	////////////////////////////////////////////////////////////
+
+	using SkillUseUnit = MACRO_NAMED_SCRIPT("skillUseUnit", SkillUseUnitParser);
+
+	////////////////////////////////////////////////////////////
 	//					ufo script
 	////////////////////////////////////////////////////////////
 
@@ -365,6 +376,10 @@ public:
 		CloseQuarterMultiplierStatBonus
 	>;
 
+	using SkillScripts = ScriptGroup<Mod,
+		SkillUseUnit
+	>;
+
 	using UfoScripts = ScriptGroup<Mod,
 		DetectUfoFromBase,
 		DetectUfoFromCraft
@@ -380,6 +395,7 @@ public:
 	BattleUnitScripts battleUnitScripts = { _shared, _mod, };
 	BattleItemScripts battleItemScripts = { _shared, _mod, };
 	BonusStatsScripts bonusStatsScripts = { _shared, _mod, };
+	SkillScripts skillScripts = { _shared, _mod, };
 	UfoScripts ufoScripts = { _shared, _mod, };
 	SoldierBonusScripts soldierBonusScripts = { _shared, _mod, };
 

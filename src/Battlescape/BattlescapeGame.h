@@ -38,6 +38,7 @@ class Pathfinding;
 class Mod;
 class InfoboxOKState;
 class SoldierDiary;
+class RuleSkill;
 
 enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, BA_UNPRIME, BA_THROW, BA_AUTOSHOT, BA_SNAPSHOT, BA_AIMEDSHOT, BA_HIT, BA_USE, BA_LAUNCH, BA_MINDCONTROL, BA_PANIC, BA_RETHINK, BA_CQB };
 enum BattleActionMove { BAM_NORMAL = 0, BAM_RUN = 1, BAM_STRAFE = 2 };
@@ -45,14 +46,15 @@ enum BattleActionMove { BAM_NORMAL = 0, BAM_RUN = 1, BAM_STRAFE = 2 };
 struct BattleActionCost : RuleItemUseCost
 {
 	BattleActionType type;
-	BattleUnit *actor;
-	BattleItem *weapon;
+	BattleUnit *actor = nullptr;
+	BattleItem *weapon = nullptr;
+	const RuleSkill* skillRules = nullptr; // if defined, this is a skill action
 
 	/// Default constructor.
-	BattleActionCost() : type(BA_NONE), actor(0), weapon(0) { }
+	BattleActionCost() : type(BA_NONE) { }
 
 	/// Constructor from unit.
-	BattleActionCost(BattleUnit *unit) : type(BA_NONE), actor(unit), weapon(0) { }
+	BattleActionCost(BattleUnit *unit) : type(BA_NONE), actor(unit) { }
 
 	/// Constructor with update.
 	BattleActionCost(BattleActionType action, BattleUnit *unit, BattleItem *item) : type(action), actor(unit), weapon(item) { updateTU(); }
@@ -97,12 +99,13 @@ struct BattleAction : BattleActionCost
 struct BattleActionAttack
 {
 	BattleActionType type;
-	BattleUnit *attacker;
-	BattleItem *weapon_item;
-	BattleItem *damage_item;
+	BattleUnit *attacker = nullptr;
+	BattleItem *weapon_item = nullptr;
+	BattleItem *damage_item = nullptr;
+	const RuleSkill *skill_rules = nullptr;
 
 	/// Default constructor.
-	BattleActionAttack(BattleActionType action = BA_NONE, BattleUnit *unit = nullptr) : type{ action }, attacker{ unit }, weapon_item{ nullptr }, damage_item{ nullptr }
+	BattleActionAttack(BattleActionType action = BA_NONE, BattleUnit *unit = nullptr) : type{ action }, attacker{ unit }
 	{
 
 	}
@@ -112,6 +115,9 @@ struct BattleActionAttack
 
 	/// Constructor.
 	BattleActionAttack(const BattleActionCost &action, BattleItem *ammo);
+
+	/// Constructor for skill-based attacks.
+	BattleActionAttack(const BattleAction &action, BattleItem *ammo);
 };
 
 /**

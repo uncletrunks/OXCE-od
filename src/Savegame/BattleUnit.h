@@ -175,6 +175,8 @@ private:
 	void prepareUnitSounds();
 	/// Helper function preparing unit response sounds.
 	void prepareUnitResponseSounds(const Mod *mod);
+	/// Applies percentual and/or flat adjustments to the use costs.
+	void applyPercentages(RuleItemUseCost &cost, const RuleItemUseCost &flat) const;
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
 	/// Name of class used in script.
@@ -301,6 +303,8 @@ public:
 	RuleItemUseCost getActionTUs(BattleActionType actionType, const BattleItem *item) const;
 	/// Get the number of time units a certain action takes.
 	RuleItemUseCost getActionTUs(BattleActionType actionType, const RuleItem *item) const;
+	/// Get the number of time units a certain skill action takes.
+	RuleItemUseCost getActionTUs(BattleActionType actionType, const RuleSkill *skillRules) const;
 	/// Spend time units if it can.
 	bool spendTimeUnits(int tu);
 	/// Spend energy if it can.
@@ -615,8 +619,10 @@ public:
 	MovementType getMovementType() const;
 	/// Create special weapon for unit.
 	void setSpecialWeapon(SavedBattleGame *save);
-	/// Get special weapon.
+	/// Get special weapon by battle type.
 	BattleItem *getSpecialWeapon(BattleType type) const;
+	/// Get special weapon by name.
+	BattleItem *getSpecialWeapon(const RuleItem *weaponRule) const;
 	/// Gets special weapon that uses an icon, if any.
 	BattleItem *getSpecialIconWeapon(BattleType &type) const;
 	/// Checks if this unit is in hiding for a turn.

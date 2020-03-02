@@ -205,6 +205,9 @@ en-GB:
   STR_FAILED_CQB_CHECK: "Enemy managed to interrupt your attack!"
   STR_NO_TRAJECTORY: "No viable trajectory!"
   STR_HIT_LOG_NEW_BULLET: "=> "
+#SkillMenuState.cpp
+  STR_MANA_SHORT: "MA>{ALT}{0}"
+  STR_SKILL_NEEDS_ITEM: "This skill needs an item!"
 #TileEngine.cpp
   STR_HIT_LOG_NO_DAMAGE: "0 "
   STR_HIT_LOG_SMALL_DAMAGE: "hit "

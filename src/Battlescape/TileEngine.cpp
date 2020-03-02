@@ -39,6 +39,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleSkill.h"
 #include "Pathfinding.h"
 #include "../Engine/Game.h"
 #include "../Engine/Options.h"
@@ -4114,6 +4115,39 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 	updateGameStateAfterScript(attack, action->actor->getPosition());
 
 	return canContinueHealing;
+}
+
+/**
+ * Executes the skillUseUnit script hook and determines further steps.
+ * @return True if the current action should be continued, false if the action should be cancelled (usually because the script took care of any effects itself).
+ */
+bool TileEngine::skillUse(BattleAction *action, const RuleSkill *skill)
+{
+	bool continueAction = true;
+	bool spendTu = false;
+	std::string message;
+	BattleUnit *actor = action->actor;
+	bool hasTu = action->haveTU(&message);
+
+	ModScript::SkillUseUnit::Output args { continueAction, spendTu };
+	ModScript::SkillUseUnit::Worker work { actor, action->weapon, _save, skill, action->type, hasTu };
+
+	work.execute(skill->getScript<ModScript::SkillUseUnit>(), args);
+
+	continueAction = args.getFirst();
+	spendTu = args.getSecond();
+
+	if (spendTu)
+	{
+		action->actor->spendCost(static_cast<const RuleItemUseCost&>(*action));
+	}
+
+	if (!hasTu && !message.empty())
+	{
+		action->result = message;
+	}
+
+	return continueAction;
 }
 
 /**

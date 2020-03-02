@@ -19,11 +19,13 @@
 
 #include <algorithm>
 #include "RuleSoldier.h"
+#include "RuleSkill.h"
 #include "Mod.h"
 #include "ModScript.h"
 #include "RuleItem.h"
 #include "SoldierNamePool.h"
 #include "StatString.h"
+#include "../Engine/Collections.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/ScriptBind.h"
 #include "../Engine/Unicode.h"
@@ -41,7 +43,7 @@ RuleSoldier::RuleSoldier(const std::string &type) : _type(type), _listOrder(0), 
 	_standHeight(0), _kneelHeight(0), _floatHeight(0), _femaleFrequency(50), _value(20), _transferTime(0), _moraleLossWhenKilled(100),
 	_avatarOffsetX(67), _avatarOffsetY(48), _flagOffset(0),
 	_allowPromotion(true), _allowPiloting(true), _showTypeInInventory(false),
-	_rankSprite(42), _rankSpriteBattlescape(20), _rankSpriteTiny(0)
+	_rankSprite(42), _rankSpriteBattlescape(20), _rankSpriteTiny(0), _skillIconSprite(1)
 {
 }
 
@@ -178,6 +180,9 @@ void RuleSoldier::load(const YAML::Node &node, Mod *mod, int listOrder, const Mo
 	mod->loadSpriteOffset(_type, _rankSprite, node["rankSprite"], "BASEBITS.PCK");
 	mod->loadSpriteOffset(_type, _rankSpriteBattlescape, node["rankBattleSprite"], "SMOKE.PCK");
 	mod->loadSpriteOffset(_type, _rankSpriteTiny, node["rankTinySprite"], "TinyRanks");
+	mod->loadSpriteOffset(_type, _skillIconSprite, node["skillIconSprite"], "SPICONS.DAT");
+
+	_skillNames = node["skills"].as<std::vector<std::string> >(_skillNames);
 
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
@@ -205,6 +210,13 @@ void RuleSoldier::afterLoad(const Mod* mod)
 			}
 		}
 	}
+	for (auto& skillName : _skillNames)
+	{
+		_skills.push_back(mod->getSkill(skillName, true));
+	}
+
+	//remove not needed data
+	Collections::removeAll(_skillNames);
 }
 
 void RuleSoldier::addSoldierNamePool(const std::string &namFile)
@@ -313,6 +325,33 @@ int RuleSoldier::getBuyCost() const
 bool RuleSoldier::isSalaryDynamic() const
 {
 	return _costSalarySquaddie || _costSalarySergeant || _costSalaryCaptain || _costSalaryColonel || _costSalaryCommander;
+}
+
+/**
+ * Is a skill menu defined?
+ * @return True if a skill menu has been defined, false otherwise.
+ */
+bool RuleSoldier::isSkillMenuDefined() const
+{
+	return !_skills.empty();
+}
+
+/**
+ * Gets the list of defined skills.
+ * @return The list of defined skills.
+ */
+const std::vector<const RuleSkill*> &RuleSoldier::getSkills() const
+{
+	return _skills;
+}
+
+/**
+ * Gets the sprite index into SPICONS for the skill icon sprite.
+ * @return The sprite index.
+ */
+int RuleSoldier::getSkillIconSprite() const
+{
+	return _skillIconSprite;
 }
 
 /**
