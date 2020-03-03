@@ -29,9 +29,11 @@ namespace OpenXcom
 {
 
 MapScript::MapScript() :
-	_type(MSC_UNDEFINED), _canBeSkipped(true), _sizeX(1), _sizeY(1), _sizeZ(0),
+	_type(MSC_UNDEFINED), _canBeSkipped(true),
+	_verticalGroup(MT_NSROAD), _horizontalGroup(MT_EWROAD), _crossingGroup(MT_CROSSING),
+	_sizeX(1), _sizeY(1), _sizeZ(0),
 	_executionChances(100), _executions(1), _cumulativeFrequency(0), _label(0),
-	_direction(MD_NONE), _verticalGroup(MT_NSROAD), _horizontalGroup(MT_EWROAD), _crossingGroup(MT_CROSSING),
+	_direction(MD_NONE),
 	_tunnelData(0), _randomTerrain(), _verticalLevels()
 {
 }
