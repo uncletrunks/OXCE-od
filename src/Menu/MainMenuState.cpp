@@ -276,7 +276,12 @@ void MainMenuState::btnQuitClick(Action *)
 void MainMenuState::btnUpdateClick(Action*)
 {
 #ifdef _WIN32
+
+#ifdef _WIN64
+	const std::string relativeExeZipFileName = _debugInVisualStudio ? "Debug/exe64.zip" : "exe64.zip";
+#else
 	const std::string relativeExeZipFileName = _debugInVisualStudio ? "Debug/exe.zip" : "exe.zip";
+#endif
 	const std::string relativeExeNewFileName = _debugInVisualStudio ? "Debug/OpenXcomEx.exe.new" : "OpenXcomEx.exe.new";
 
 	const std::string commonDirFilename = Options::getDataFolder() + "common";
@@ -293,9 +298,17 @@ void MainMenuState::btnUpdateClick(Action*)
 	const std::string exeFilenameOnly = CrossPlatform::getExeFilename(false);
 	const std::string exeFilenameFullPath = CrossPlatform::getExeFilename(true);
 
+#ifdef _WIN64
+	const std::string exeZipFilename = exePath + "exe64.zip";
+#else
 	const std::string exeZipFilename = exePath + "exe.zip";
+#endif
 	const std::string exeNewFilename = exePath + "OpenXcomEx.exe.new";
+#ifdef _WIN64
+	const std::string exeZipUrl = "https://openxcom.org/oxce/exe64.zip";
+#else
 	const std::string exeZipUrl = "https://openxcom.org/oxce/exe.zip";
+#endif
 
 	// stop using the common/standard zip files, so that we can back them up
 	FileMap::clear(true, false);
