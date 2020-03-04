@@ -2211,6 +2211,15 @@ void BattlescapeState::warning(const std::string &message)
 }
 
 /**
+ * Shows a warning message without automatic translation.
+ * @param message Warning message.
+ */
+void BattlescapeState::warningRaw(const std::string &message)
+{
+	_warning->showMessage(message);
+}
+
+/**
  * Gets melee damage preview.
  * @param actor Selected unit.
  * @param weapon Weapon to use for calculation.

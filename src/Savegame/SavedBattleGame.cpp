@@ -2716,7 +2716,7 @@ void flashMessageVariadicScriptImpl(SavedBattleGame* sbg, ScriptText message, Ar
 	const Language *lang = sbg->getBattleState()->getGame()->getLanguage();
 	LocalizedText translated = lang->getString(message);
 	(translated.arg(args), ...);
-	sbg->getBattleState()->warning(translated);
+	sbg->getBattleState()->warningRaw(translated);
 }
 
 void randomChanceScript(SavedBattleGame* sbg, int& val)
