@@ -40,6 +40,7 @@
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleSoldierBonus.h"
 #include "../Mod/RuleUfo.h"
+#include "../Savegame/BattleUnit.h"
 #include "../Savegame/SavedGame.h"
 #include "../fmath.h"
 #include <algorithm>
@@ -1187,6 +1188,74 @@ void StatsForNerdsState::addBattleMediKitType(std::ostringstream &ss, const Batt
 }
 
 /**
+ * Adds medikit target types to the table.
+ */
+void StatsForNerdsState::addMediKitTargets(std::ostringstream& ss, const RuleItem* value, const std::string& propertyName, const int& defaultvalue)
+{
+	if (value->getMedikitTargetMatrixRaw() == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	ss << "{";
+	// FIXME: make translatable one day, when some better default names are suggested
+	if (value->getAllowTargetFriendGround())
+		ss << "friend down" << ", ";
+	if (value->getAllowTargetFriendStanding())
+		ss << "friend up" << ", ";
+	if (value->getAllowTargetHostileGround())
+		ss << "hostile down" << ", ";
+	if (value->getAllowTargetHostileStanding())
+		ss << "hostile up" << ", ";
+	if (value->getAllowTargetNeutralGround())
+		ss << "neutral down" << ", ";
+	if (value->getAllowTargetNeutralStanding())
+		ss << "neutral up" << ", ";
+	ss << "}";
+	if (_showIds)
+	{
+		ss << " [" << value->getMedikitTargetMatrixRaw() << "]";
+	}
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (value->getMedikitTargetMatrixRaw() != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
+ * Adds psiamp target types to the table.
+ */
+void StatsForNerdsState::addPsiampTargets(std::ostringstream& ss, const RuleItem* value, const std::string& propertyName, const int& defaultvalue)
+{
+	if (value->getPsiTargetMatrixRaw() == defaultvalue && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	ss << "{";
+	// FIXME: make translatable one day, when some better default names are suggested
+	if (value->isPsiTargetAllowed(FACTION_PLAYER))
+		ss << "friend" << ", ";
+	if (value->isPsiTargetAllowed(FACTION_HOSTILE))
+		ss << "hostile" << ", ";
+	if (value->isPsiTargetAllowed(FACTION_NEUTRAL))
+		ss << "neutral" << ", ";
+	ss << "}";
+	if (_showIds)
+	{
+		ss << " [" << value->getPsiTargetMatrixRaw() << "]";
+	}
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (value->getPsiTargetMatrixRaw() != defaultvalue)
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
  * Adds a ExperienceTrainingMode to the table.
  */
 void StatsForNerdsState::addExperienceTrainingMode(std::ostringstream &ss, const ExperienceTrainingMode &value, const std::string &propertyName, const ExperienceTrainingMode &defaultvalue)
@@ -1443,7 +1512,7 @@ void StatsForNerdsState::initItemList()
 	int psiRequiredDefault = itemBattleType == BT_PSIAMP ? true : false;
 	addBoolean(ss, itemRule->isPsiRequired(), "psiRequired", psiRequiredDefault);
 	addBoolean(ss, itemRule->isManaRequired(), "manaRequired");
-	addInteger(ss, itemRule->getPsiTargetMatrixRaw(), "psiTargetMatrix", 6);
+	addPsiampTargets(ss, itemRule, "psiTargetMatrix", 6);
 	addBoolean(ss, itemRule->isLOSRequired(), "LOSRequired");
 
 	if (itemBattleType == BT_FIREARM
@@ -1717,7 +1786,7 @@ void StatsForNerdsState::initItemList()
 	addSingleString(ss, itemRule->getMedikitActionName(), "medikitActionName", "STR_USE_MEDI_KIT");
 	addBoolean(ss, itemRule->getAllowTargetSelf(), "medikitTargetSelf");
 	addBoolean(ss, itemRule->getAllowTargetImmune(), "medikitTargetImmune");
-	addInteger(ss, itemRule->getMedikitTargetMatrixRaw(), "medikitTargetMatrix", 63);
+	addMediKitTargets(ss, itemRule, "medikitTargetMatrix", 63);
 	addBoolean(ss, itemRule->isConsumable(), "isConsumable");
 	addInteger(ss, itemRule->getPainKillerQuantity(), "painKiller");
 	addInteger(ss, itemRule->getHealQuantity(), "heal");
