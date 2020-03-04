@@ -220,6 +220,8 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo, DebriefingS
 
 	if (_game->getMod()->getUseCustomCategories())
 	{
+		bool hasUnassigned = false;
+
 		// first find all relevant item categories
 		std::vector<std::string> tempCats;
 		for (std::vector<TransferRow>::iterator i = _items.begin(); i != _items.end(); ++i)
@@ -227,6 +229,10 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo, DebriefingS
 			if ((*i).type == TRANSFER_ITEM)
 			{
 				RuleItem *rule = (RuleItem*)((*i).rule);
+				if (rule->getCategories().empty())
+				{
+					hasUnassigned = true;
+				}
 				for (std::vector<std::string>::const_iterator j = rule->getCategories().begin(); j != rule->getCategories().end(); ++j)
 				{
 					if (std::find(tempCats.begin(), tempCats.end(), (*j)) == tempCats.end())
@@ -247,6 +253,10 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo, DebriefingS
 			{
 				_cats.push_back((*k));
 			}
+		}
+		if (hasUnassigned)
+		{
+			_cats.push_back("STR_UNASSIGNED");
 		}
 	}
 
@@ -390,6 +400,7 @@ void TransferItemsState::updateList()
 	std::string cat = _cats[_cbxCategory->getSelected()];
 	bool allItems = (cat == "STR_ALL_ITEMS");
 	bool onlyItemsAtDestination = (cat == "STR_ITEMS_AT_DESTINATION");
+	bool categoryUnassigned = (cat == "STR_UNASSIGNED");
 	bool specialCategory = allItems || onlyItemsAtDestination;
 
 	for (size_t i = 0; i < _items.size(); ++i)
@@ -397,7 +408,15 @@ void TransferItemsState::updateList()
 		// filter
 		if (_game->getMod()->getUseCustomCategories())
 		{
-			if (!specialCategory && !belongsToCategory(i, cat))
+			if (categoryUnassigned && _items[i].type == TRANSFER_ITEM)
+			{
+				RuleItem* rule = (RuleItem*)_items[i].rule;
+				if (!rule->getCategories().empty())
+				{
+					continue;
+				}
+			}
+			else if (!specialCategory && !belongsToCategory(i, cat))
 			{
 				continue;
 			}

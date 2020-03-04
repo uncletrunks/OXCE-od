@@ -222,6 +222,8 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 
 	if (_game->getMod()->getUseCustomCategories())
 	{
+		bool hasUnassigned = false;
+
 		// first find all relevant item categories
 		std::vector<std::string> tempCats;
 		for (std::vector<TransferRow>::iterator i = _items.begin(); i != _items.end(); ++i)
@@ -229,6 +231,10 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 			if ((*i).type == TRANSFER_ITEM)
 			{
 				RuleItem *rule = (RuleItem*)((*i).rule);
+				if (rule->getCategories().empty())
+				{
+					hasUnassigned = true;
+				}
 				for (std::vector<std::string>::const_iterator j = rule->getCategories().begin(); j != rule->getCategories().end(); ++j)
 				{
 					if (std::find(tempCats.begin(), tempCats.end(), (*j)) == tempCats.end())
@@ -249,6 +255,10 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 			{
 				_cats.push_back((*k));
 			}
+		}
+		if (hasUnassigned)
+		{
+			_cats.push_back("STR_UNASSIGNED");
 		}
 	}
 
@@ -443,12 +453,17 @@ void PurchaseState::updateList()
 
 	_lstItems->clearList();
 	_rows.clear();
+
+	const std::string selectedCategory = _cats[_cbxCategory->getSelected()];
+	bool categoryFilterEnabled = (selectedCategory != "STR_ALL_ITEMS");
+	bool categoryUnassigned = (selectedCategory == "STR_UNASSIGNED");
+	bool categoryHidden = (selectedCategory == "STR_FILTER_HIDDEN");
+
 	for (size_t i = 0; i < _items.size(); ++i)
 	{
 		// filter
-		std::string cat = _cats[_cbxCategory->getSelected()];
 		bool hidden = isHidden(i);
-		if (cat == "STR_FILTER_HIDDEN")
+		if (categoryHidden)
 		{
 			if (!hidden)
 			{
@@ -461,14 +476,22 @@ void PurchaseState::updateList()
 		}
 		else if (_game->getMod()->getUseCustomCategories())
 		{
-			if (cat != "STR_ALL_ITEMS" && !belongsToCategory(i, cat))
+			if (categoryUnassigned && _items[i].type == TRANSFER_ITEM)
+			{
+				RuleItem* rule = (RuleItem*)_items[i].rule;
+				if (!rule->getCategories().empty())
+				{
+					continue;
+				}
+			}
+			else if (categoryFilterEnabled && !belongsToCategory(i, selectedCategory))
 			{
 				continue;
 			}
 		}
 		else
 		{
-			if (cat != "STR_ALL_ITEMS" && cat != getCategory(i))
+			if (categoryFilterEnabled && selectedCategory != getCategory(i))
 			{
 				continue;
 			}
