@@ -3896,7 +3896,7 @@ bool TileEngine::psiAttack(BattleActionAttack attack, BattleUnit *victim)
 		killStat.setTurn(_save->getTurn(), _save->getSide());
 		killStat.weapon = attack.weapon_item->getRules()->getName();
 		killStat.weaponAmmo = attack.weapon_item->getRules()->getName(); //Psi weapons got no ammo, just filling up the field
-		killStat.faction = victim->getFaction();
+		killStat.faction = victim->getOriginalFaction();
 		killStat.mission = _save->getGeoscapeSave()->getMissionStatistics()->size();
 		killStat.id = victim->getId();
 

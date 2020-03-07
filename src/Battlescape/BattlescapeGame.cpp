@@ -775,7 +775,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 		killStat.mission = _parentState->getGame()->getSavedGame()->getMissionStatistics()->size();
 		killStat.setTurn(_save->getTurn(), _save->getSide());
 		killStat.setUnitStats(victim);
-		killStat.faction = victim->getFaction();
+		killStat.faction = victim->getOriginalFaction();
 		killStat.side = victim->getFatalShotSide();
 		killStat.bodypart = victim->getFatalShotBodyPart();
 		killStat.id = victim->getId();
@@ -941,7 +941,7 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 					if (murderer)
 					{
 						deathStat->setUnitStats(murderer);
-						deathStat->faction = murderer->getFaction();
+						deathStat->faction = murderer->getOriginalFaction();
 					}
 					_parentState->getGame()->getSavedGame()->killSoldier(victim->getGeoscapeSoldier(), deathStat);
 				}
