@@ -18,6 +18,7 @@
  */
 #include <algorithm>
 #include "RuleManufacture.h"
+#include "RuleManufactureShortcut.h"
 #include "RuleResearch.h"
 #include "RuleCraft.h"
 #include "RuleItem.h"
@@ -140,6 +141,76 @@ void RuleManufacture::afterLoad(const Mod* mod)
 	Collections::removeAll(_producedItemsNames);
 	Collections::removeAll(_requiredItemsNames);
 	Collections::removeAll(_randomProducedItemsNames);
+}
+
+/**
+ * Change the name and break down the sub-projects into simpler components.
+ */
+void RuleManufacture::breakDown(const Mod* mod, const RuleManufactureShortcut* recipe)
+{
+	// 0. rename
+	_name = recipe->getName();
+
+	// 1. init temp variables
+	std::map<const RuleItem*, int> tempRequiredItems = _requiredItems;
+	std::map<const RuleResearch*, bool> tempRequires;
+	for (auto& r : _requires)
+		tempRequires[r] = true;
+	std::map<std::string, bool> tempRequiresBaseFunc;
+	for (auto& rbf : _requiresBaseFunc)
+		tempRequiresBaseFunc[rbf] = true;
+
+	// 2. break down iteratively
+	bool doneSomething = false;
+	do
+	{
+		doneSomething = false;
+		for (auto& projectName : recipe->getBreakDownItems())
+		{
+			RuleItem* itemRule = mod->getItem(projectName, true);
+			RuleManufacture* projectRule = mod->getManufacture(projectName, true);
+			int count = tempRequiredItems[itemRule];
+			if (count > 0)
+			{
+				tempRequiredItems[itemRule] = 0;
+				doneSomething = true;
+
+				_space = std::max(_space, projectRule->getRequiredSpace());
+				_time += count * projectRule->getManufactureTime();
+				_cost += count * projectRule->getManufactureCost();
+
+				for (auto& ri : projectRule->getRequiredItems())
+					tempRequiredItems[ri.first] += count * ri.second;
+				for (auto& r : projectRule->getRequirements())
+					tempRequires[r] = true;
+				for (auto& rbf : projectRule->getRequireBaseFunc())
+					tempRequiresBaseFunc[rbf] = true;
+			}
+		}
+	}
+	while (doneSomething);
+
+	// 3. update
+	{
+		_requiredItems.clear();
+		for (auto& item : tempRequiredItems)
+			if (item.second > 0)
+				_requiredItems[item.first] = item.second;
+	}
+	if (recipe->getBreakDownRequires())
+	{
+		_requires.clear();
+		for (auto& item : tempRequires)
+			if (item.second)
+				_requires.push_back(item.first);
+	}
+	if (recipe->getBreakDownRequiresBaseFunc())
+	{
+		_requiresBaseFunc.clear();
+		for (auto& item : tempRequiresBaseFunc)
+			if (item.second)
+				_requiresBaseFunc.push_back(item.first);
+	}
 }
 
 /**

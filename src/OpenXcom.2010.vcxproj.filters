@@ -1104,6 +1104,9 @@
     <ClCompile Include="Mod\RuleSkill.cpp">
       <Filter>Mod</Filter>
     </ClCompile>
+    <ClCompile Include="Mod\RuleManufactureShortcut.cpp">
+      <Filter>Mod</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2261,6 +2264,9 @@
       <Filter>Battlescape</Filter>
     </ClInclude>
     <ClInclude Include="Mod\RuleSkill.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
+    <ClInclude Include="Mod\RuleManufactureShortcut.h">
       <Filter>Mod</Filter>
     </ClInclude>
   </ItemGroup>

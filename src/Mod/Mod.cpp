@@ -76,6 +76,7 @@
 #include "RuleInventory.h"
 #include "RuleResearch.h"
 #include "RuleManufacture.h"
+#include "RuleManufactureShortcut.h"
 #include "ExtraStrings.h"
 #include "RuleInterface.h"
 #include "RuleArcScript.h"
@@ -599,6 +600,10 @@ Mod::~Mod()
 		delete i->second;
 	}
 	for (std::map<std::string, RuleManufacture *>::const_iterator i = _manufacture.begin(); i != _manufacture.end(); ++i)
+	{
+		delete i->second;
+	}
+	for (std::map<std::string, RuleManufactureShortcut *>::const_iterator i = _manufactureShortcut.begin(); i != _manufactureShortcut.end(); ++i)
 	{
 		delete i->second;
 	}
@@ -1363,6 +1368,30 @@ void Mod::loadAll()
 	afterLoadHelper("commendations", this, _commendations, &RuleCommendations::afterLoad);
 	afterLoadHelper("skills", this, _skills, &RuleSkill::afterLoad);
 
+	// auto-create alternative manufacture rules
+	for (auto shortcutPair : _manufactureShortcut)
+	{
+		// 1. check if the new project has a unique name
+		auto typeNew = shortcutPair.first;
+		auto it = _manufacture.find(typeNew);
+		if (it != _manufacture.end())
+		{
+			throw Exception("Manufacture project '" + typeNew + "' already exists! Choose a different name for this alternative project.");
+		}
+
+		// 2. copy an existing manufacture project
+		const RuleManufacture* ruleStartFrom = getManufacture(shortcutPair.second->getStartFrom(), true);
+		RuleManufacture* ruleNew = new RuleManufacture(*ruleStartFrom);
+		_manufacture[typeNew] = ruleNew;
+		_manufactureIndex.push_back(typeNew);
+
+		// 3. change the name and break down the sub-projects into simpler components
+		if (ruleNew != 0)
+		{
+			ruleNew->breakDown(this, shortcutPair.second);
+		}
+	}
+
 	// fixed user options
 	if (!_fixedUserOptions.empty())
 	{
@@ -1743,6 +1772,14 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		{
 			_manufactureListOrder += 100;
 			rule->load(*i, _manufactureListOrder);
+		}
+	}
+	for (YAML::const_iterator i = doc["manufactureShortcut"].begin(); i != doc["manufactureShortcut"].end(); ++i)
+	{
+		RuleManufactureShortcut *rule = loadRule(*i, &_manufactureShortcut, 0, "name");
+		if (rule != 0)
+		{
+			rule->load(*i);
 		}
 	}
 	for (YAML::const_iterator i = doc["soldierBonuses"].begin(); i != doc["soldierBonuses"].end(); ++i)

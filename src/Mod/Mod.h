@@ -64,6 +64,7 @@ class ArticleDefinition;
 class RuleInventory;
 class RuleResearch;
 class RuleManufacture;
+class RuleManufactureShortcut;
 class RuleSoldierBonus;
 class RuleSoldierTransformation;
 class AlienRace;
@@ -158,6 +159,7 @@ private:
 	bool _inventoryOverlapsPaperdoll;
 	std::map<std::string, RuleResearch *> _research;
 	std::map<std::string, RuleManufacture *> _manufacture;
+	std::map<std::string, RuleManufactureShortcut *> _manufactureShortcut;
 	std::map<std::string, RuleSoldierBonus *> _soldierBonus;
 	std::map<std::string, RuleSoldierTransformation *> _soldierTransformation;
 	std::map<std::string, UfoTrajectory *> _ufoTrajectories;

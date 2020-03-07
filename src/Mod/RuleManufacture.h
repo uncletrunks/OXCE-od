@@ -33,6 +33,7 @@ enum ManufacturingFilterType
 	MANU_FILTER_HIDDEN
 };
 	
+class RuleManufactureShortcut;
 class RuleResearch;
 class RuleItem;
 class RuleCraft;
@@ -69,6 +70,8 @@ public:
 	void load(const YAML::Node& node, int listOrder);
 	/// Cross link with other rules.
 	void afterLoad(const Mod* mod);
+	/// Change the name and break down the sub-projects into simpler components.
+	void breakDown(const Mod* mod, const RuleManufactureShortcut* recipe);
 
 	/// Gets the manufacture name.
 	const std::string &getName() const;
