@@ -256,7 +256,7 @@ fi:
   STR_INCLUDE_PRIMESTATE_IN_SAVED_LAYOUT: "Tallenna esiajastetut kranaatit"
   STR_INCLUDE_PRIMESTATE_IN_SAVED_LAYOUT_DESC: "Tallentaa kranaattien ajastustilan taistelua edeltävässä varustenäkymässä."
   STR_NEWSEEDONLOAD: "Tallennusten sävytys"
-  STR_NEWSEEDONLOAD_DESC: "Pelin lataaminen asettaa satunnaislukugeneraattorin siemenluvun uudelleen, joten saman toiminnon tekeminen voi tuottaa eri lopputuloksia. Ei vaikuta Ironman-tilaan."
+  STR_NEWSEEDONLOAD_DESC: "Pelin lataaminen asettaa satunnaislukugeneraattorin siemenluvun uudelleen, joten saman toiminnon tekeminen voi tuottaa eri lopputuloksia. Ei koske Ironman-tilaa."
   STR_CHANGEVALUEBYMOUSEWHEEL: "Säädä arvoja hiiren rullapainikkeella"
   STR_CHANGEVALUEBYMOUSEWHEEL_DESC: "Sallii hiiren rullapainikkeen käytön vähentämään/kasvattamaan arvoja tämän määrän verran."
   STR_BATTLEHAIRBLEACH: "Parannellut sotilaiden spritet"
