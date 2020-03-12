@@ -103,6 +103,7 @@ pl:
   manaExperience: "Punkty doświadczenia dla many"
   arcingShot: "Trajektoria artyleryjska?"
   isFireExtinguisher: "Gaśnica?"
+  isExplodingInHands: "Wybucha w ekwipunku?"
   waypoints: "Limit punktów kontrolnych"
   sprayWaypoints: "Znaczników ognia posiewanego"
 #
@@ -114,6 +115,7 @@ pl:
   underwaterOnly: "Tylko podwodne?"
   landOnly: "Tylko lądowe?"
   psiRequired: "Wymaga zdolności psi?"
+  psiTargetMatrix: "Cel wzmacniacza psi"
   manaRequired: "Wymaga many?"
   LOSRequired: "Wymaga linii wzroku?"
 #

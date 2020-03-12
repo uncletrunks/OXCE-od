@@ -103,6 +103,7 @@ ro:
   manaExperience: ""
   arcingShot: ""
   isFireExtinguisher: ""
+  isExplodingInHands: ""
   waypoints: ""
   sprayWaypoints: ""
 #
@@ -114,6 +115,7 @@ ro:
   underwaterOnly: ""
   landOnly: ""
   psiRequired: ""
+  psiTargetMatrix: ""
   manaRequired: ""
   LOSRequired: ""
 #

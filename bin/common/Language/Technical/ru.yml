@@ -103,6 +103,7 @@ ru:
   manaExperience: "Опыт для маны"
   arcingShot: "Навесная стрельба?"
   isFireExtinguisher: "Тушение огня?"
+  isExplodingInHands: "Взрывается в инвентаре?"
   waypoints: "Макс. точек траектории"
   sprayWaypoints: "Точек веерного огня"
 #
@@ -114,6 +115,7 @@ ru:
   underwaterOnly: "Только подводное?"
   landOnly: "Только атмосферное?"
   psiRequired: "Требует пси-навыка?"
+  psiTargetMatrix: "Пси-усилитель действует на"
   manaRequired: "Требует маны?"
   LOSRequired: "Нужна прям. видимость?"
 #

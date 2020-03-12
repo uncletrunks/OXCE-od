@@ -103,6 +103,7 @@ cs:
   manaExperience: ""
   arcingShot: "Oblouková?"
   isFireExtinguisher: "Hasí oheň?"
+  isExplodingInHands: ""
   waypoints: "Max záchytných bodů"
   sprayWaypoints: "Pokrop záchytné body"
 #
@@ -114,6 +115,7 @@ cs:
   underwaterOnly: "Jen podvodní?"
   landOnly: "Jen pozemské?"
   psiRequired: "Vyžaduje psi dovednost?"
+  psiTargetMatrix: ""
   manaRequired: "Vyžaduje manu?"
   LOSRequired: "Musí vidět cíl?"
 #

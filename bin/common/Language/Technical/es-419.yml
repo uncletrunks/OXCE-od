@@ -103,6 +103,7 @@ es-419:
   manaExperience: ""
   arcingShot: ""
   isFireExtinguisher: ""
+  isExplodingInHands: ""
   waypoints: ""
   sprayWaypoints: ""
 #
@@ -114,6 +115,7 @@ es-419:
   underwaterOnly: ""
   landOnly: ""
   psiRequired: ""
+  psiTargetMatrix: ""
   manaRequired: ""
   LOSRequired: ""
 #

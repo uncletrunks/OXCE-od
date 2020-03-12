@@ -103,6 +103,7 @@ ko:
   manaExperience: "마나 경험치"
   arcingShot: "곡사?"
   isFireExtinguisher: "소화기?"
+  isExplodingInHands: ""
   waypoints: "최대 경유지"
   sprayWaypoints: "난사 경유지"
 #
@@ -114,6 +115,7 @@ ko:
   underwaterOnly: "수중용?"
   landOnly: "지상용?"
   psiRequired: "사이오닉 기술 필요?"
+  psiTargetMatrix: ""
   manaRequired: "마나 필요?"
   LOSRequired: "시야 필요?"
 #

@@ -103,6 +103,7 @@ it:
   manaExperience: "Esperienza mana"
   arcingShot: "Archi?"
   isFireExtinguisher: "Estintore?"
+  isExplodingInHands: ""
   waypoints: "Waypoint massimi"
   sprayWaypoints: "Waypoint sventagliata"
 #
@@ -114,6 +115,7 @@ it:
   underwaterOnly: "Solo subacqueo?"
   landOnly: "Solo terreno?"
   psiRequired: "Richiesta abilità Psi?"
+  psiTargetMatrix: ""
   manaRequired: "Mana richiesto?"
   LOSRequired: "Vista richiesta?"
 #
