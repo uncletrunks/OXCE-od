@@ -77,7 +77,7 @@ OptionsFoldersState::OptionsFoldersState(OptionsOrigin origin) : OptionsBaseStat
 		oxceDataFolder = FileMap::at(file2)->fullpath;
 		oxceDataFolder = oxceDataFolder.substr(0, oxceDataFolder.find(file2));
 	}
-	std::string dataFolder = origDataFolder + "\n" + oxceDataFolder;
+	std::string dataFolder = origDataFolder + "\n\n" + oxceDataFolder;
 
 	_txtDataFolderPath->setText(dataFolder);
 	_txtDataFolderPath->setWordWrap(true);
