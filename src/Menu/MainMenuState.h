@@ -49,6 +49,7 @@ private:
 	Text *_txtTitle, *_txtUpdateInfo;
 #ifdef _WIN32
 	bool _debugInVisualStudio;
+	std::string _newVersion;
 #endif
 public:
 	/// Creates the Main Menu state.

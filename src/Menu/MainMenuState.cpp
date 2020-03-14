@@ -168,8 +168,8 @@ MainMenuState::MainMenuState(bool updateCheck)
 							else if (doc["newVersion"])
 							{
 								checkProgress = 7;
-								std::string newVersion = doc["newVersion"].as<std::string>();
-								if (CrossPlatform::isHigherThanCurrentVersion(newVersion))
+								_newVersion = doc["newVersion"].as<std::string>();
+								if (CrossPlatform::isHigherThanCurrentVersion(_newVersion))
 									_btnUpdate->setVisible(true);
 								else
 									_txtUpdateInfo->setVisible(true);
@@ -184,7 +184,7 @@ MainMenuState::MainMenuState(bool updateCheck)
 				}
 			}
 		}
-		Log(LOG_INFO) << "Update check status: " << checkProgress;
+		Log(LOG_INFO) << "Update check status: " << checkProgress << "; newVersion: v" << _newVersion << "; ";
 	}
 #endif
 
@@ -276,6 +276,7 @@ void MainMenuState::btnQuitClick(Action *)
 void MainMenuState::btnUpdateClick(Action*)
 {
 #ifdef _WIN32
+	const std::string subdir = "v" + _newVersion + "/";
 
 #ifdef _WIN64
 	const std::string relativeExeZipFileName = _debugInVisualStudio ? "Debug/exe64.zip" : "exe64.zip";
@@ -286,11 +287,11 @@ void MainMenuState::btnUpdateClick(Action*)
 
 	const std::string commonDirFilename = Options::getDataFolder() + "common";
 	const std::string commonZipFilename = Options::getDataFolder() + "common.zip";
-	const std::string commonZipUrl = "https://openxcom.org/oxce/common.zip";
+	const std::string commonZipUrl = "https://openxcom.org/oxce/" + subdir + "common.zip";
 
 	const std::string standardDirFilename = Options::getDataFolder() + "standard";
 	const std::string standardZipFilename = Options::getDataFolder() + "standard.zip";
-	const std::string standardZipUrl = "https://openxcom.org/oxce/standard.zip";
+	const std::string standardZipUrl = "https://openxcom.org/oxce/" + subdir + "standard.zip";
 
 	const std::string now = CrossPlatform::now();
 
@@ -305,9 +306,9 @@ void MainMenuState::btnUpdateClick(Action*)
 #endif
 	const std::string exeNewFilename = exePath + "OpenXcomEx.exe.new";
 #ifdef _WIN64
-	const std::string exeZipUrl = "https://openxcom.org/oxce/exe64.zip";
+	const std::string exeZipUrl = "https://openxcom.org/oxce/" + subdir + "exe64.zip";
 #else
-	const std::string exeZipUrl = "https://openxcom.org/oxce/exe.zip";
+	const std::string exeZipUrl = "https://openxcom.org/oxce/" + subdir + "exe.zip";
 #endif
 
 	// stop using the common/standard zip files, so that we can back them up
