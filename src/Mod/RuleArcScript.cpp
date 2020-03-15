@@ -68,6 +68,7 @@ void RuleArcScript::load(const YAML::Node& node)
 	_maxFunds = node["maxFunds"].as<int64_t>(_maxFunds);
 	_researchTriggers = node["researchTriggers"].as<std::map<std::string, bool> >(_researchTriggers);
 	_itemTriggers = node["itemTriggers"].as<std::map<std::string, bool> >(_itemTriggers);
+	_facilityTriggers = node["facilityTriggers"].as<std::map<std::string, bool> >(_facilityTriggers);
 }
 
 }

@@ -2095,6 +2095,25 @@ bool SavedGame::isItemObtained(const std::string &itemType) const
 	}
 	return false;
 }
+/**
+ * Returns if a certain facility has been built in any base.
+ * @param facilityType facility ID.
+ * @return Whether it's been built or not. If false, the facility has not been built in any base.
+ */
+bool SavedGame::isFacilityBuilt(const std::string &facilityType) const
+{
+	for (auto base : _bases)
+	{
+		for (auto fac : *base->getFacilities())
+		{
+			if (fac->getRules()->getType() == facilityType)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
 /**
  * Returns pointer to the Soldier given it's unique ID.

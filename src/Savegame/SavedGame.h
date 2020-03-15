@@ -314,6 +314,8 @@ public:
 	bool isResearched(const std::vector<const RuleResearch *> &research, bool considerDebugMode = true, bool skipDisabled = false) const;
 	/// Gets if a certain item has been obtained.
 	bool isItemObtained(const std::string &itemType) const;
+	/// Gets if a certain facility has been built.
+	bool isFacilityBuilt(const std::string &facilityType) const;
 	/// Gets the soldier matching this ID.
 	Soldier *getSoldier(int id) const;
 	/// Handles the higher promotions.

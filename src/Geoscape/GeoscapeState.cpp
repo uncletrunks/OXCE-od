@@ -3267,6 +3267,16 @@ void GeoscapeState::determineAlienMissions()
 							break;
 					}
 				}
+				if (triggerHappy)
+				{
+					// facility requirements
+					for (auto &triggerFacility : arcScript->getFacilityTriggers())
+					{
+						triggerHappy = (save->isFacilityBuilt(triggerFacility.first) == triggerFacility.second);
+						if (!triggerHappy)
+							break;
+					}
+				}
 				// level three condition check: does random chance favour this command's execution?
 				if (triggerHappy && RNG::percent(arcScript->getExecutionOdds()))
 				{
@@ -3380,6 +3390,16 @@ void GeoscapeState::determineAlienMissions()
 						break;
 				}
 			}
+			if (triggerHappy)
+			{
+				// facility requirements
+				for (auto &triggerFacility : command->getFacilityTriggers())
+				{
+					triggerHappy = (save->isFacilityBuilt(triggerFacility.first) == triggerFacility.second);
+					if (!triggerHappy)
+						break;
+				}
+			}
 			// levels one and two passed: insert this command into the array.
 			if (triggerHappy)
 			{
@@ -3467,6 +3487,16 @@ void GeoscapeState::determineAlienMissions()
 					for (auto &triggerItem : eventScript->getItemTriggers())
 					{
 						triggerHappy = (save->isItemObtained(triggerItem.first) == triggerItem.second);
+						if (!triggerHappy)
+							break;
+					}
+				}
+				if (triggerHappy)
+				{
+					// facility requirements
+					for (auto &triggerFacility : eventScript->getFacilityTriggers())
+					{
+						triggerHappy = (save->isFacilityBuilt(triggerFacility.first) == triggerFacility.second);
 						if (!triggerHappy)
 							break;
 					}

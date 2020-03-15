@@ -37,6 +37,7 @@ private:
 	int64_t _minFunds, _maxFunds;
 	std::map<std::string, bool> _researchTriggers;
 	std::map<std::string, bool> _itemTriggers;
+	std::map<std::string, bool> _facilityTriggers;
 public:
 	/// Creates a new arc script.
 	RuleArcScript(const std::string& type);
@@ -74,6 +75,8 @@ public:
 	const std::map<std::string, bool> &getResearchTriggers() const { return _researchTriggers; }
 	/// Gets the item triggers that may apply to this command.
 	const std::map<std::string, bool> &getItemTriggers() const { return _itemTriggers; }
+	/// Gets the facility triggers that may apply to this command.
+	const std::map<std::string, bool> &getFacilityTriggers() const { return _facilityTriggers; }
 
 };
 
