@@ -3663,7 +3663,8 @@ bool BattlescapeGenerator::addLine(MapDirection direction, const std::vector<SDL
 		{
 			_blocks[roadX][roadY] = terrain->getRandomMapBlock(10, 10, crossingGroup);
 			clearModule(roadX * 10, roadY * 10, 10, 10);
-			loadMAP(_blocks[roadX][roadY], roadX * 10, roadY * 10, 0, terrain, 0);
+			int terrainMapDataSetIDOffset = loadExtraTerrain(terrain);
+			loadMAP(_blocks[roadX][roadY], roadX * 10, roadY * 10, 0, terrain, terrainMapDataSetIDOffset);
 
 			SDL_Rect blockRect;
 			blockRect.x = roadX;
