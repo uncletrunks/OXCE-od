@@ -380,12 +380,11 @@ void SoldiersState::initList(size_t scrl)
 	}
 	_txtCraft->setX(_txtRank->getX() + 98 - offset);
 
-	float absBonus = _base->getSickBayAbsoluteBonus();
-	float relBonus = _base->getSickBayRelativeBonus();
+	auto recovery = _base->getSumRecoveryPerDay();
 	unsigned int row = 0;
 	for (std::vector<Soldier*>::iterator i = _filteredListOfSoldiers.begin(); i != _filteredListOfSoldiers.end(); ++i)
 	{
-		std::string craftString = (*i)->getCraftString(_game->getLanguage(), absBonus, relBonus);
+		std::string craftString = (*i)->getCraftString(_game->getLanguage(), recovery);
 
 		if (_dynGetter != NULL)
 		{

@@ -146,7 +146,7 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 
 	_tu = _stats.tu;
 	_energy = _stats.stamina;
-	_health = _stats.health;
+	_health = std::max(1, _stats.health - soldier->getHealthMissing());
 	_mana = std::max(0, _stats.mana - soldier->getManaMissing());
 	_morale = 100;
 	// wounded soldiers (defending the base) start with lowered morale
@@ -229,7 +229,7 @@ void BattleUnit::updateArmorFromSoldier(const Mod *mod, Soldier *soldier, Armor 
 
 	_tu = _stats.tu;
 	_energy = _stats.stamina;
-	_health = _stats.health;
+	_health = std::max(1, _stats.health - soldier->getHealthMissing());
 	_mana = std::max(0, _stats.mana - soldier->getManaMissing());
 	_maxArmor[SIDE_FRONT] = _armor->getFrontArmor();
 	_maxArmor[SIDE_LEFT] = _armor->getLeftSideArmor();
@@ -3314,10 +3314,12 @@ bool BattleUnit::postMissionProcedures(const Mod *mod, SavedGame *geoscape, Save
 	statsOld.statGrowth = (*stats);
 	statsDiff.statGrowth = -(*stats);        // subtract old stat
 	const UnitStats caps = s->getRules()->getStatCaps();
-	int healthLoss = _stats.health - _health;
-	int manaLoss = mod->getReplenishManaAfterMission() ? 0 : _stats.mana - _mana;
+	int manaLossOriginal = _stats.mana - _mana;
+	int healthLossOriginal = _stats.health - _health;
+	int manaLoss = mod->getReplenishManaAfterMission() ? 0 : manaLossOriginal;
+	int healthLoss = mod->getReplenishHealthAfterMission() ? 0 : healthLossOriginal;
 
-	auto recovery = (int)RNG::generate((healthLoss*0.5),(healthLoss*1.5));
+	auto recovery = (int)RNG::generate((healthLossOriginal*0.5),(healthLossOriginal*1.5));
 
 	if (_exp.bravery && stats->bravery < caps.bravery)
 	{
@@ -3385,11 +3387,16 @@ bool BattleUnit::postMissionProcedures(const Mod *mod, SavedGame *geoscape, Save
 	}
 
 	{
-		recovery = ModScript::scriptFunc2<ModScript::ReturnFromMissionUnit>(
-			getArmor(),
-			recovery, healthLoss,
-			this, battle, s, &statsDiff, &statsOld
-		);
+		ModScript::ReturnFromMissionUnit::Output arg { };
+		ModScript::ReturnFromMissionUnit::Worker work{ this, battle, s, &statsDiff, &statsOld };
+
+		auto ref = std::tie(recovery, manaLossOriginal, healthLossOriginal, manaLoss, healthLoss);
+
+		arg.data = ref;
+
+		work.execute(getArmor()->getScript<ModScript::ReturnFromMissionUnit>(), arg);
+
+		ref = arg.data;
 	}
 
 	//after mod execution this value could change
@@ -3397,6 +3404,7 @@ bool BattleUnit::postMissionProcedures(const Mod *mod, SavedGame *geoscape, Save
 
 	s->setWoundRecovery(recovery);
 	s->setManaMissing(manaLoss);
+	s->setHealthMissing(healthLoss);
 
 	if (s->isWounded())
 	{
@@ -5562,7 +5570,10 @@ ModScript::NewTurnUnitParser::NewTurnUnitParser(ScriptGlobal* shared, const std:
 
 ModScript::ReturnFromMissionUnitParser::ReturnFromMissionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
 	"recovery_time",
+	"mana_loss",
 	"health_loss",
+	"final_mana_loss",
+	"final_health_loss",
 	"unit", "battle_game", "soldier", "statChange", "statPrevious" }
 {
 	BindBase b { this };

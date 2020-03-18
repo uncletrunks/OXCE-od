@@ -509,33 +509,35 @@ void SoldierInfoState::init()
 	}
 	_txtCraft->setText(tr("STR_CRAFT_").arg(craft));
 
-	if (_soldier->isWounded())
+	auto recovery = _base ? _base->getSumRecoveryPerDay() : BaseSumDailyRecovery();
+	auto getDaysOrInfinity = [&](int days)
 	{
-		int recoveryTime = 0;
-		if (_base != 0)
+		if (days < 0)
 		{
-			recoveryTime = _soldier->getWoundRecovery(_base->getSickBayAbsoluteBonus(), _base->getSickBayRelativeBonus());
-		}
-		_txtRecovery->setText(tr("STR_WOUND_RECOVERY").arg(tr("STR_DAY", recoveryTime)));
-	}
-	else
-	{
-		if (_soldier->getManaMissing() > 0)
-		{
-			int manaRecoveryPerDay = 0;
-			if (_base != 0)
-			{
-				manaRecoveryPerDay = _base->getManaRecoveryPerDay();
-			}
-			int manaRecoveryTime = _soldier->getManaRecovery(manaRecoveryPerDay);
-			if (manaRecoveryTime < 0)
-				_txtRecovery->setText(tr("STR_MANA_RECOVERY").arg("∞"));
-			else
-				_txtRecovery->setText(tr("STR_MANA_RECOVERY").arg(tr("STR_DAY", manaRecoveryTime)));
+			return std::string{ "∞" };
 		}
 		else
 		{
-			_txtRecovery->setText("");
+			return std::string{tr("STR_DAY", days)};
+		}
+	};
+	if (_soldier->isWounded())
+	{
+		int recoveryTime = _soldier->getNeededRecoveryTime(recovery);
+		_txtRecovery->setText(tr("STR_WOUND_RECOVERY").arg(getDaysOrInfinity(recoveryTime)));
+	}
+	else
+	{
+		_txtRecovery->setText("");
+		if (_soldier->getManaMissing() > 0)
+		{
+			int manaRecoveryTime = _soldier->getManaRecovery(recovery.ManaRecovery);
+			_txtRecovery->setText(tr("STR_MANA_RECOVERY").arg(getDaysOrInfinity(manaRecoveryTime)));
+		}
+		if (_soldier->getHealthMissing() > 0)
+		{
+			int healthRecoveryTime = _soldier->getHealthRecovery(recovery.HealthRecovery);
+			_txtRecovery->setText(tr("STR_HEALTH_RECOVERY").arg(getDaysOrInfinity(healthRecoveryTime)));
 		}
 	}
 

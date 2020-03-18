@@ -52,7 +52,8 @@ private:
 	std::string _mapName;
 	int _listOrder, _trainingRooms;
 	int _maxAllowedPerBase;
-	int _manaRecoveryPerDay;
+	int _manaRecoveryPerDay = 0;
+	int _healthRecoveryPerDay = 0;
 	float _sickBayAbsoluteBonus, _sickBayRelativeBonus;
 	int _prisonType;
 	int _rightClickActionType;
@@ -149,11 +150,13 @@ public:
 	/// Gets the maximum allowed number of facilities per base.
 	int getMaxAllowedPerBase() const;
 	/// Gets the facility's mana recovery rate.
-	int getManaRecoveryPerDay() const;
-	/// Gets the facility's bonus to hp healed.
-	float getSickBayAbsoluteBonus() const;
-	/// Gets the facility's bonus to hp healed (as percentage of max hp of the soldier).
-	float getSickBayRelativeBonus() const;
+	int getManaRecoveryPerDay() const { return _manaRecoveryPerDay; }
+	/// Gets the facility's health recovery rate.
+	int getHealthRecoveryPerDay() const { return _healthRecoveryPerDay; }
+	/// Gets the facility's bonus to wound healing.
+	float getSickBayAbsoluteBonus() const { return _sickBayAbsoluteBonus; }
+	/// Gets the facility's bonus to wound healing (as percentage of max hp of the soldier).
+	float getSickBayRelativeBonus() const { return _sickBayRelativeBonus; }
 	/// Gets the prison type.
 	int getPrisonType() const;
 	/// Gets the action type to perform on right click.

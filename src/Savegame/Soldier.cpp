@@ -35,6 +35,7 @@
 #include "../Mod/StatString.h"
 #include "../Mod/RuleSoldierTransformation.h"
 #include "../Mod/RuleCommendations.h"
+#include "Base.h"
 
 namespace OpenXcom
 {
@@ -48,7 +49,7 @@ namespace OpenXcom
 Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 	_id(id), _nationality(0),
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
-	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0), _manaMissing(0), _recovery(0.0f),
+	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0),
 	_recentlyPromoted(false), _psiTraining(false), _training(false), _returnToTrainingWhenHealed(false),
 	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary()),
 	_corpseRecovered(false)
@@ -140,6 +141,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 	_missions = node["missions"].as<int>(_missions);
 	_kills = node["kills"].as<int>(_kills);
 	_manaMissing = node["manaMissing"].as<int>(_manaMissing);
+	_healthMissing = node["healthMissing"].as<int>(_healthMissing);
 	_recovery = node["recovery"].as<float>(_recovery);
 	Armor *armor = mod->getArmor(node["armor"].as<std::string>());
 	if (armor == 0)
@@ -224,6 +226,8 @@ YAML::Node Soldier::save(const ScriptGlobal *shared) const
 	node["kills"] = _kills;
 	if (_manaMissing > 0)
 		node["manaMissing"] = _manaMissing;
+	if (_healthMissing > 0)
+		node["healthMissing"] = _healthMissing;
 	if (_recovery > 0.0f)
 		node["recovery"] = _recovery;
 	node["armor"] = _armor->getType();
@@ -395,7 +399,7 @@ void Soldier::setCraft(Craft *craft)
  * @param lang Language to get strings from.
  * @return Full name.
  */
-std::string Soldier::getCraftString(Language *lang, float absBonus, float relBonus) const
+std::string Soldier::getCraftString(Language *lang, const BaseSumDailyRecovery& recovery) const
 {
 	std::string s;
 	if (_death)
@@ -414,7 +418,15 @@ std::string Soldier::getCraftString(Language *lang, float absBonus, float relBon
 		std::ostringstream ss;
 		ss << lang->getString("STR_WOUNDED");
 		ss << ">";
-		ss << getWoundRecovery(absBonus, relBonus);
+		auto days = getNeededRecoveryTime(recovery);
+		if (days < 0)
+		{
+			ss << "∞";
+		}
+		else
+		{
+			ss << days;
+		}
 		s = ss.str();
 	}
 	else if (_craft == 0)
@@ -804,12 +816,78 @@ void Soldier::setTransformedArmor(Armor *armor)
 	_transformedArmor = armor;
 }
 
+namespace
+{
+
+/**
+ * Calucalte precent of value to get threshold.
+ * @param base value from we get result.
+ * @param threshold precent for base value.
+ */
+int valueThreshold(int base, int threshold)
+{
+	return base * threshold / 100;
+}
+
+/**
+ * Calculate amount that exceed threshold of base value.
+ * @param value value that we check exceed
+ * @param base base value to calcualte threshold.
+ * @param threshold precent for base value.
+ * @return
+ */
+int valueOverThreshold(int value, int base, int threshold)
+{
+	return std::max(0, value - valueThreshold(base, threshold));
+}
+
+/**
+ * Calculate how long will take to recovery from current value.
+ * @param current Amount to recovery from.
+ * @param recovety Size of change of value.
+ * @return time how long will take, can return -1 as infinity.
+ */
+int recoveryTime(int current, int recovety)
+{
+	if (current <= 0)
+	{
+		return 0;
+	}
+
+	if (recovety <= 0)
+		return -1; // represents infinity
+
+	int days = current / recovety;
+	if (current % recovety > 0)
+		++days;
+
+	return days;
+}
+
+
+}
+
+
 /**
 * Is the soldier wounded or not?.
 * @return True if wounded.
 */
 bool Soldier::isWounded() const
 {
+	if (_manaMissing > 0)
+	{
+		if (valueOverThreshold(_manaMissing, _currentStats.mana, _rules->getManaWoundThreshold()))
+		{
+			return true;
+		}
+	}
+	if (_healthMissing > 0)
+	{
+		if (valueOverThreshold(_healthMissing, _currentStats.health, _rules->getHealthWoundThreshold()))
+		{
+			return true;
+		}
+	}
 	return _recovery > 0.0f;
 }
 
@@ -828,9 +906,10 @@ bool Soldier::hasFullHealth() const
  */
 bool Soldier::canDefendBase() const
 {
-	int currentHealthPercentage = std::max(0, _currentStats.health - getWoundRecoveryInt()) * 100 / _currentStats.health;
+	int currentHealthPercentage = std::max(0, _currentStats.health - getWoundRecoveryInt() - getHealthMissing()) * 100 / _currentStats.health;
 	return currentHealthPercentage >= Options::oxceWoundedDefendBaseIf;
 }
+
 
 /**
  * Returns the amount of missing mana.
@@ -856,15 +935,37 @@ void Soldier::setManaMissing(int manaMissing)
  */
 int Soldier::getManaRecovery(int manaRecoveryPerDay) const
 {
-	if (manaRecoveryPerDay <= 0)
-		return -1; // represents infinity
-
-	int days = _manaMissing / manaRecoveryPerDay;
-	if (_manaMissing % manaRecoveryPerDay > 0)
-		++days;
-
-	return days;
+	return recoveryTime(_manaMissing, manaRecoveryPerDay);
 }
+
+
+/**
+ * Returns the amount of missing health.
+ * @return Missing health.
+ */
+int Soldier::getHealthMissing() const
+{
+	return _healthMissing;
+}
+
+/**
+ * Sets the amount of missing health.
+ * @param healthMissing Missing health.
+ */
+void Soldier::setHealthMissing(int healthMissing)
+{
+	_healthMissing = std::max(healthMissing, 0);
+}
+
+/**
+ * Returns the amount of time until the soldier's health is fully replenished.
+ * @return Number of days. -1 represents infinity.
+ */
+int Soldier::getHealthRecovery(int healthRecoveryPerDay) const
+{
+	return recoveryTime(_healthMissing, healthRecoveryPerDay);
+}
+
 
 /**
  * Returns the amount of time until the soldier is healed.
@@ -891,10 +992,11 @@ void Soldier::setWoundRecovery(int recovery)
 	_recovery = std::max(recovery, 0);
 }
 
+
 /**
  * Heals soldier wounds.
  */
-void Soldier::heal(float absBonus, float relBonus)
+void Soldier::healWound(float absBonus, float relBonus)
 {
 	// 1 hp per day as minimum
 	_recovery -= 1.0f;
@@ -924,6 +1026,92 @@ void Soldier::replenishMana(int manaRecoveryPerDay)
 	if (_manaMissing > maxThreshold)
 		_manaMissing = maxThreshold;
 }
+
+/**
+ * Replenishes the soldier's health.
+ */
+void Soldier::replenishHealth(int healthRecoveryPerDay)
+{
+	_healthMissing -= healthRecoveryPerDay;
+
+	if (_healthMissing < 0)
+		_healthMissing = 0;
+}
+
+/**
+ * Daily replenish and heal of soldier based on faciletes avialbe in base.
+ * @param recovery Recovery values provide by base.
+ */
+void Soldier::replenishStats(const BaseSumDailyRecovery& recovery)
+{
+	if (_recovery > 0.0f)
+	{
+		healWound(recovery.SickBayAbsoluteBonus, recovery.SickBayRelativeBonus);
+	}
+	else
+	{
+		if (getManaMissing() > 0 && recovery.ManaRecovery > 0)
+		{
+			// positive mana recovery only when NOT wounded
+			replenishMana(recovery.ManaRecovery);
+		}
+
+		if (getHealthMissing() > 0 && recovery.HealthRecovery > 0)
+		{
+			// health recovery only when NOT wounded
+			replenishHealth(recovery.HealthRecovery);
+		}
+	}
+
+	if (recovery.ManaRecovery  < 0)
+	{
+		// negative mana recovery always
+		replenishMana(recovery.ManaRecovery);
+	}
+}
+
+/**
+ * Get Days until soildier is again ready for action.
+ * @return Number of days. -1 represents infinity.
+ */
+int Soldier::getNeededRecoveryTime(const BaseSumDailyRecovery& recovery) const
+{
+	auto time = getWoundRecovery(recovery.SickBayAbsoluteBonus, recovery.SickBayRelativeBonus);
+
+	auto bonusTime = 0;
+	if (_healthMissing > 0)
+	{
+		auto t = recoveryTime(
+			valueOverThreshold(_healthMissing, _currentStats.health, _rules->getHealthWoundThreshold()),
+			recovery.HealthRecovery
+		);
+
+		if (t < 0)
+		{
+			return t;
+		}
+
+		bonusTime = std::max(bonusTime, t);
+	}
+	if (_manaMissing > 0)
+	{
+		auto t = recoveryTime(
+			valueOverThreshold(_manaMissing, _currentStats.mana, _rules->getManaWoundThreshold()),
+			recovery.ManaRecovery
+		);
+
+		if (t < 0)
+		{
+			return t;
+		}
+
+		bonusTime = std::max(bonusTime, t);
+	}
+
+	return time + bonusTime;
+}
+
+
 
 /**
  * Returns the list of EquipmentLayoutItems of a soldier.
@@ -1067,6 +1255,7 @@ void Soldier::die(SoldierDeath *death)
 	_returnToTrainingWhenHealed = false;
 	_recentlyPromoted = false;
 	_manaMissing = 0;
+	_healthMissing = 0;
 	_recovery = 0.0f;
 	clearEquipmentLayout();
 }
@@ -1733,6 +1922,8 @@ void Soldier::ScriptRegister(ScriptParserBase* parser)
 	so.add<&Soldier::setWoundRecovery>("setWoundRecovery");
 	so.add<&Soldier::getManaMissing>("getManaMissing");
 	so.add<&Soldier::setManaMissing>("setManaMissing");
+	so.add<&Soldier::getHealthMissing>("getHealthMissing");
+	so.add<&Soldier::setHealthMissing>("setHealthMissing");
 
 
 	so.addScriptValue<&Soldier::_scriptValues>();

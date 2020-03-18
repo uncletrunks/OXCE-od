@@ -202,8 +202,13 @@ private:
 	int _noLOSAccuracyPenaltyGlobal;
 	int _surrenderMode;
 	int _bughuntMinTurn, _bughuntMaxEnemies, _bughuntRank, _bughuntLowMorale, _bughuntTimeUnitsLeft;
+
+	int _manaMissingWoundThreshold = 200;
+	int _healthMissingWoundThreshold = 100;
 	bool _manaEnabled, _manaBattleUI, _manaTrainingPrimary, _manaTrainingSecondary, _manaReplenishAfterMission;
+	bool _healthReplenishAfterMission = true;
 	std::string _manaUnlockResearch;
+
 	std::string _loseMoney, _loseRating, _loseDefeat;
 	int _ufoGlancingHitThreshold, _ufoBeamWidthParameter;
 	int _ufoTractorBeamSizeModifiers[5];
@@ -568,6 +573,7 @@ public:
 	int getBughuntLowMorale() const { return _bughuntLowMorale; }
 	/// Gets the bug hunt mode time units % parameter (default = 60).
 	int getBughuntTimeUnitsLeft() const { return _bughuntTimeUnitsLeft; }
+
 	/// Is the mana feature enabled (default false)?
 	bool isManaFeatureEnabled() const { return _manaEnabled; }
 	/// Is the mana bar enabled for the Battlescape UI (default false)?
@@ -576,10 +582,18 @@ public:
 	bool isManaTrainingPrimary() const { return _manaTrainingPrimary; }
 	/// Is the mana trained as a secondary skill (e.g. like strength)?
 	bool isManaTrainingSecondary() const { return _manaTrainingSecondary; }
-	/// Should a soldier's mana be fully replenished after a mission?
-	bool getReplenishManaAfterMission() const { return _manaReplenishAfterMission; }
 	/// Gets the mana unlock research topic (default empty)?
 	const std::string &getManaUnlockResearch() const { return _manaUnlockResearch; }
+
+	/// How much mana missing will cause unit to preventing fighting in mission.
+	int getManaWoundThreshold() const { return _manaMissingWoundThreshold; }
+	/// Should a soldier's mana be fully replenished after a mission?
+	bool getReplenishManaAfterMission() const { return _manaReplenishAfterMission; }
+
+	/// How much health missing will cause unit to preventing fighting in mission.
+	int getHealthWoundThreshold() const { return _healthMissingWoundThreshold; }
+	/// Should a soldier's health be fully replenished after a mission?
+	bool getReplenishHealthAfterMission() const { return _healthReplenishAfterMission; }
 
 	/// Gets the cutscene ID that should be played when the player loses due to poor economy management.
 	const std::string &getLoseMoneyCutscene() const { return _loseMoney; }

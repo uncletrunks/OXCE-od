@@ -2253,62 +2253,37 @@ bool Base::isMaxAllowedLimitReached(RuleBaseFacility *rule) const
  * Gets the base's mana recovery rate.
  * @return Mana per day.
  */
-int Base::getManaRecoveryPerDay() const
+BaseSumDailyRecovery Base::getSumRecoveryPerDay() const
 {
-	int minimum = 0;
-	int maximum = 0;
+	auto result = BaseSumDailyRecovery{ };
 
-	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
+	int manaMinimum = 0;
+	int manaMaximum = 0;
+
+	int healthMaxinum = 0;
+
+	for (BaseFacility* bf : _facilities)
 	{
-		if ((*bf)->getBuildTime() == 0)
+		if (bf->getBuildTime() == 0)
 		{
-			minimum = std::min(minimum, (*bf)->getRules()->getManaRecoveryPerDay());
-			maximum = std::max(maximum, (*bf)->getRules()->getManaRecoveryPerDay());
+			auto rule = bf->getRules();
+
+			manaMinimum = std::min(manaMinimum, rule->getManaRecoveryPerDay());
+			manaMaximum = std::max(manaMaximum, rule->getManaRecoveryPerDay());
+
+			healthMaxinum = std::max(healthMaxinum, rule->getHealthRecoveryPerDay());
+
+			result.SickBayAbsoluteBonus += rule->getSickBayAbsoluteBonus();
+			result.SickBayRelativeBonus += rule->getSickBayRelativeBonus();
 		}
 	}
 
-	if (maximum > 0)
-		return maximum;
-	else if (minimum < 0)
-		return minimum;
+	if (manaMaximum > 0)
+		result.ManaRecovery = manaMaximum;
+	else if (manaMinimum < 0)
+		result.ManaRecovery =  manaMinimum;
 
-	return 0;
-}
-
-/**
-* Gets the amount of additional HP healed in this base due to sick bay facilities (in absolute number).
-* @return Additional HP healed.
-*/
-float Base::getSickBayAbsoluteBonus() const
-{
-	float result = 0.0f;
-
-	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
-	{
-		if ((*bf)->getBuildTime() == 0)
-		{
-			result += (*bf)->getRules()->getSickBayAbsoluteBonus();
-		}
-	}
-
-	return result;
-}
-
-/**
-* Gets the amount of additional HP healed in this base due to sick bay facilities (as percentage of max HP per soldier).
-* @return Additional percentage of max HP healed.
-*/
-float Base::getSickBayRelativeBonus() const
-{
-	float result = 0.0f;
-
-	for (std::vector<BaseFacility*>::const_iterator bf = _facilities.begin(); bf != _facilities.end(); ++bf)
-	{
-		if ((*bf)->getBuildTime() == 0)
-		{
-			result += (*bf)->getRules()->getSickBayRelativeBonus();
-		}
-	}
+	result.HealthRecovery = healthMaxinum;
 
 	return result;
 }

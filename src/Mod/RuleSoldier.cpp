@@ -215,6 +215,9 @@ void RuleSoldier::afterLoad(const Mod* mod)
 		_skills.push_back(mod->getSkill(skillName, true));
 	}
 
+	_manaMissingWoundThreshold = mod->getManaWoundThreshold();
+	_healthMissingWoundThreshold = mod->getHealthWoundThreshold();
+
 	//remove not needed data
 	Collections::removeAll(_skillNames);
 }

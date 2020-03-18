@@ -71,6 +71,8 @@ private:
 	int _costBuy, _costSalary, _costSalarySquaddie, _costSalarySergeant, _costSalaryCaptain, _costSalaryColonel, _costSalaryCommander;
 	int _standHeight, _kneelHeight, _floatHeight;
 	int _femaleFrequency, _value, _transferTime, _moraleLossWhenKilled;
+	int _manaMissingWoundThreshold = -1;
+	int _healthMissingWoundThreshold = -1;
 	std::vector<int> _deathSoundMale, _deathSoundFemale;
 	std::vector<int> _panicSoundMale, _panicSoundFemale, _berserkSoundMale, _berserkSoundFemale;
 	std::vector<int> _selectUnitSoundMale, _selectUnitSoundFemale;
@@ -201,6 +203,11 @@ public:
 	int getRankSpriteBattlescape() const;
 	/// Gets the offset of the rank sprite in TinyRanks.
 	int getRankSpriteTiny() const;
+
+	/// How much mana missing will cause unit to preventing fighting in mission.
+	int getManaWoundThreshold() const { return _manaMissingWoundThreshold; }
+	/// How much health missing will cause unit to preventing fighting in mission.
+	int getHealthWoundThreshold() const { return _healthMissingWoundThreshold; }
 };
 
 }

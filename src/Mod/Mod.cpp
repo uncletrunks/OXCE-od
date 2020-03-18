@@ -1944,6 +1944,8 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	_bughuntRank = doc["bughuntRank"].as<int>(_bughuntRank);
 	_bughuntLowMorale = doc["bughuntLowMorale"].as<int>(_bughuntLowMorale);
 	_bughuntTimeUnitsLeft = doc["bughuntTimeUnitsLeft"].as<int>(_bughuntTimeUnitsLeft);
+
+
 	if (const YAML::Node &nodeMana = doc["mana"])
 	{
 		_manaEnabled = nodeMana["enabled"].as<bool>(_manaEnabled);
@@ -1951,8 +1953,17 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		_manaUnlockResearch = nodeMana["unlockResearch"].as<std::string>(_manaUnlockResearch);
 		_manaTrainingPrimary = nodeMana["trainingPrimary"].as<bool>(_manaTrainingPrimary);
 		_manaTrainingSecondary = nodeMana["trainingSecondary"].as<bool>(_manaTrainingSecondary);
+
+		_manaMissingWoundThreshold = nodeMana["woundThreshold"].as<bool>(_manaMissingWoundThreshold);
 		_manaReplenishAfterMission = nodeMana["replenishAfterMission"].as<bool>(_manaReplenishAfterMission);
 	}
+	if (const YAML::Node &nodeHealth = doc["health"])
+	{
+		_healthMissingWoundThreshold = nodeHealth["woundThreshold"].as<bool>(_healthMissingWoundThreshold);
+		_healthReplenishAfterMission = nodeHealth["replenishAfterMission"].as<bool>(_healthReplenishAfterMission);
+	}
+
+
 	if (const YAML::Node &nodeGameOver = doc["gameOver"])
 	{
 		_loseMoney = nodeGameOver["loseMoney"].as<std::string>(_loseMoney);
