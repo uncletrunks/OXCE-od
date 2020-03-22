@@ -148,7 +148,7 @@ class ModScript
 	//					item script
 	////////////////////////////////////////////////////////////
 
-	struct CreateItemParser : ScriptParserEvents<ScriptOutputArgs<>, BattleItem*, SavedBattleGame*, int>
+	struct CreateItemParser : ScriptParserEvents<ScriptOutputArgs<>, BattleItem*, BattleUnit*,  SavedBattleGame*, int>
 	{
 		CreateItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};

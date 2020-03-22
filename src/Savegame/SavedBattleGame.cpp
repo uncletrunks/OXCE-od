@@ -1502,9 +1502,9 @@ void SavedBattleGame::initUnit(BattleUnit *unit, size_t itemLevel)
  * Init new created item.
  * @param item
  */
-void SavedBattleGame::initItem(BattleItem *item)
+void SavedBattleGame::initItem(BattleItem *item, BattleUnit *unit)
 {
-	ModScript::scriptCallback<ModScript::CreateItem>(item->getRules(), item, this, this->getTurn());
+	ModScript::scriptCallback<ModScript::CreateItem>(item->getRules(), item, unit, this, this->getTurn());
 }
 
 /**
@@ -1529,7 +1529,7 @@ BattleItem *SavedBattleGame::createItemForUnit(const RuleItem *rule, BattleUnit 
 	else
 	{
 		_items.push_back(item);
-		initItem(item);
+		initItem(item, unit);
 	}
 	return item;
 }

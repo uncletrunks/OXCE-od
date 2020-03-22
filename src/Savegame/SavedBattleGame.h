@@ -323,7 +323,7 @@ public:
 	/// Init new created unit.
 	void initUnit(BattleUnit *unit, size_t itemLevel = 0);
 	/// Init new created item.
-	void initItem(BattleItem *item);
+	void initItem(BattleItem *item, BattleUnit *unit = nullptr);
 	/// Create new item for unit.
 	BattleItem *createItemForUnit(const RuleItem *rule, BattleUnit *unit, bool fixedWeapon = false);
 	/// Create new item for unit.
