@@ -2372,6 +2372,17 @@ void DebriefingState::recoverCivilian(BattleUnit *from, Base *base)
  */
 void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 {
+	// Transform a live alien into one or more recovered items?
+	RuleItem* liveAlienItemRule = _game->getMod()->getItem(from->getType());
+	if (!liveAlienItemRule->getRecoveryTransformations().empty())
+	{
+		addItemsToBaseStores(liveAlienItemRule, base, 1, true);
+
+		// Ignore everything else, e.g. no points for live/dead aliens (since you did NOT recover them)
+		// Also no points or anything else for the recovered items
+		return;
+	}
+
 	// Zombie handling: don't recover a zombie.
 	if (!from->getSpawnUnit().empty())
 	{
