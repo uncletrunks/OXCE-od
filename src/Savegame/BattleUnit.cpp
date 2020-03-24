@@ -5119,6 +5119,21 @@ void getFactionScript(const BattleUnit *bu, int &faction)
 	faction = 0;
 }
 
+void getInventoryItemScript(BattleUnit* bu, BattleItem *&foundItem, const RuleItem *itemRules)
+{
+	foundItem = nullptr;
+	if (bu)
+	{
+		for (std::vector<BattleItem*>::iterator i = bu->getInventory()->begin(); i != bu->getInventory()->end(); ++i)
+		{
+			if ((*i)->getRules() == itemRules)
+			{
+				foundItem = (*i);
+				break;
+			}
+		}
+	}
+}
 std::string debugDisplayScript(const BattleUnit* bu)
 {
 	if (bu)
@@ -5190,7 +5205,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getDirection>("getDirection");
 	bu.add<&BattleUnit::getTurretDirection>("getTurretDirection");
 	bu.add<&BattleUnit::getWalkingPhase>("getWalkingPhase");
-
+	bu.add<&getInventoryItemScript>("getInventoryItem");
 
 	bu.addField<&BattleUnit::_tu>("getTimeUnits");
 	bu.add<&UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::tu>>("getTimeUnitsMax");

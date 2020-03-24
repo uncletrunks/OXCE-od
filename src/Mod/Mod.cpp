@@ -5039,7 +5039,50 @@ void getSmokeReduction(const Mod *m, int &smoke)
 	// Even if MaxViewDistance will be increased via ruleset, smoke will keep effect.
 	smoke = smoke * m->getMaxViewDistance() / (3 * 20);
 }
-
+void getArmorScript(const Mod* mod, const Armor* armor, const std::string &name)
+{
+	if (mod)
+	{
+		armor = mod->getArmor(name);
+	}
+	else
+	{
+		armor = nullptr;
+	}
+}
+void getItemScript(const Mod* mod, const RuleItem* item, const std::string &name)
+{
+	if (mod)
+	{
+		item = mod->getItem(name);
+	}
+	else
+	{
+		item = nullptr;
+	}
+}
+void getSkillScript(const Mod* mod, const RuleSkill* skill, const std::string &name)
+{
+	if (mod)
+	{
+		skill = mod->getSkill(name);
+	}
+	else
+	{
+		skill = nullptr;
+	}
+}
+void getSoldierScript(const Mod* mod, const RuleSoldier* soldier, const std::string &name)
+{
+	if (mod)
+	{
+		soldier = mod->getSoldier(name);
+	}
+	else
+	{
+		soldier = nullptr;
+	}
+}
 }
 
 /**
@@ -5060,6 +5103,10 @@ void Mod::ScriptRegister(ScriptParserBase *parser)
 	mod.add<&Mod::getMaxDarknessToSeeUnits>("getMaxDarknessToSeeUnits");
 	mod.add<&Mod::getMaxViewDistance>("getMaxViewDistance");
 	mod.add<&getSmokeReduction>("getSmokeReduction");
+	mod.add<&getItemScript>("getRuleItem");
+	mod.add<&getArmorScript>("getRuleArmor");
+	mod.add<&getSkillScript>("getRuleSkill");
+	mod.add<&getSoldierScript>("getRuleSoldier");
 }
 
 }
