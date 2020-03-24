@@ -5230,6 +5230,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&setSpawnUnitScript>("setSpawnUnit");
 	bu.add<&getInventoryItemScript>("getInventoryItem");
 
+
 	bu.addField<&BattleUnit::_tu>("getTimeUnits");
 	bu.add<&UnitStats::getMaxStatScript<BattleUnit, &BattleUnit::_stats, &UnitStats::tu>>("getTimeUnitsMax");
 	bu.add<&setBaseStatScript<&BattleUnit::_tu, &UnitStats::tu>>("setTimeUnits");
