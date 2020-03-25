@@ -454,6 +454,10 @@ void ManufactureInfoState::moreUnit(int change)
 	else
 	{
 		int units = _production->getAmountTotal();
+		if (units == 1 && change > 1)
+		{
+			--change; // e.g. jump from 1 to 10, not to 11
+		}
 		change = std::min(INT_MAX - units, change);
 		if (_production->getRules()->getProducedCraft())
 			change = std::min(_base->getAvailableHangars() - _base->getUsedHangars(), change);
