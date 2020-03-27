@@ -130,6 +130,18 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *r, const RuleManufa
 		_alreadyAvailableResearch.insert((*j)->getName());
 		discoveredSum += (*j)->getCost();
 	}
+	for (auto info : _game->getSavedGame()->getResearchRuleStatusRaw())
+	{
+		if (info.second == RuleResearch::RESEARCH_STATUS_DISABLED)
+		{
+			auto rr = _game->getMod()->getResearch(info.first, false);
+			if (rr)
+			{
+				_alreadyAvailableResearch.insert(rr->getName());
+				discoveredSum += rr->getCost(); // intentionally count disabled as discovered
+			}
+		}
+	}
 
 	int totalSum = 0;
 	const std::vector<std::string> &allResearch = _game->getMod()->getResearchList();
