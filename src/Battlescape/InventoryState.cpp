@@ -743,6 +743,10 @@ void InventoryState::saveGlobalLayout(int index, bool includingArmor)
 	{
 		_game->getSavedGame()->setGlobalEquipmentLayoutArmor(index, _battleGame->getSelectedUnit()->getArmor()->getType());
 	}
+	else
+	{
+		_game->getSavedGame()->setGlobalEquipmentLayoutArmor(index, std::string());
+	}
 }
 
 void InventoryState::loadGlobalLayout(int index)
