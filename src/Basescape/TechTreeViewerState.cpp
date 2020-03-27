@@ -818,14 +818,38 @@ void TechTreeViewerState::initLists()
 		// 9. gives one for free
 		if (free.size() > 0)
 		{
+			int remaining = 0;
+			int total = 0;
+			for (auto& i : free)
+			{
+				if (!isDiscoveredResearch(i->getName()))
+				{
+					++remaining;
+				}
+				++total;
+			}
+			for (auto& itMap : freeProtected)
+			{
+				for (auto& i : itMap.second)
+				{
+					if (!isDiscoveredResearch(i->getName()))
+					{
+						++remaining;
+					}
+					++total;
+				}
+			}
+			std::ostringstream ssFree;
 			if (rule->sequentialGetOneFree())
 			{
-				_lstRight->addRow(1, tr("STR_GIVES_ONE_FOR_FREE_SEQ").c_str());
+				ssFree << tr("STR_GIVES_ONE_FOR_FREE_SEQ");
 			}
 			else
 			{
-				_lstRight->addRow(1, tr("STR_GIVES_ONE_FOR_FREE").c_str());
+				ssFree << tr("STR_GIVES_ONE_FOR_FREE");
 			}
+			ssFree << " " << remaining << "/" << total;
+			_lstRight->addRow(1, ssFree.str().c_str());
 			_lstRight->setRowColor(row, _blue);
 			_rightTopics.push_back("-");
 			_rightFlags.push_back(TTV_NONE);
