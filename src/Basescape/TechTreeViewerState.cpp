@@ -451,9 +451,10 @@ void TechTreeViewerState::initLists()
 		}
 
 		// 1b. requires services (from base facilities)
-		const std::vector<std::string> reqFacilities = rule->getRequireBaseFunc();
-		if (reqFacilities.size() > 0)
+		if (rule->getRequireBaseFunc().any())
 		{
+			const std::vector<std::string> reqFacilities = _game->getMod()->getBaseFunctionNames(rule->getRequireBaseFunc());
+
 			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
@@ -1002,9 +1003,10 @@ void TechTreeViewerState::initLists()
 		}
 
 		// 2. requires services (from base facilities)
-		const std::vector<std::string> reqFacilities = rule->getRequireBaseFunc();
-		if (reqFacilities.size() > 0)
+		if (rule->getRequireBaseFunc().any())
 		{
+			const std::vector<std::string> reqFacilities = _game->getMod()->getBaseFunctionNames(rule->getRequireBaseFunc());
+
 			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
@@ -1189,9 +1191,10 @@ void TechTreeViewerState::initLists()
 		}
 
 		// 2. requires services (from other base facilities)
-		const std::vector<std::string> reqFacilities = rule->getRequireBaseFunc();
-		if (reqFacilities.size() > 0)
+		if (rule->getRequireBaseFunc().any())
 		{
+			const std::vector<std::string> reqFacilities = _game->getMod()->getBaseFunctionNames(rule->getRequireBaseFunc());
+
 			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
@@ -1212,9 +1215,10 @@ void TechTreeViewerState::initLists()
 		row = 0;
 
 		// 3. provides services
-		const std::vector<std::string> providedFacilities = rule->getProvidedBaseFunc();
-		if (providedFacilities.size() > 0)
+		if (rule->getProvidedBaseFunc().any())
 		{
+			const std::vector<std::string> providedFacilities = _game->getMod()->getBaseFunctionNames(rule->getProvidedBaseFunc());
+
 			_lstRight->addRow(1, tr("STR_SERVICES_PROVIDED").c_str());
 			_lstRight->setRowColor(row, _blue);
 			_rightTopics.push_back("-");
@@ -1233,9 +1237,10 @@ void TechTreeViewerState::initLists()
 		}
 
 		// 4. forbids services
-		const std::vector<std::string> forbFacilities = rule->getForbiddenBaseFunc();
-		if (forbFacilities.size() > 0)
+		if (rule->getForbiddenBaseFunc().any())
 		{
+			const std::vector<std::string> forbFacilities = _game->getMod()->getBaseFunctionNames(rule->getForbiddenBaseFunc());
+
 			_lstRight->addRow(1, tr("STR_SERVICES_FORBIDDEN").c_str());
 			_lstRight->setRowColor(row, _blue);
 			_rightTopics.push_back("-");
@@ -1309,9 +1314,9 @@ void TechTreeViewerState::initLists()
 		}
 
 		// 3. services (from base facilities) required to buy
-		const std::vector<std::string> servicesBuy = rule->getRequiresBuyBaseFunc();
-		if (servicesBuy.size() > 0)
+		if (rule->getRequiresBuyBaseFunc().any())
 		{
+			const std::vector<std::string> servicesBuy = _game->getMod()->getBaseFunctionNames(rule->getRequiresBuyBaseFunc());
 			_lstLeft->addRow(1, tr("STR_SERVICES_REQUIRED_BUY").c_str());
 			_lstLeft->setRowColor(row, _blue);
 			_leftTopics.push_back("-");
