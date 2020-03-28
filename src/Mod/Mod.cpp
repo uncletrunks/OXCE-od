@@ -1954,12 +1954,12 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		_manaTrainingPrimary = nodeMana["trainingPrimary"].as<bool>(_manaTrainingPrimary);
 		_manaTrainingSecondary = nodeMana["trainingSecondary"].as<bool>(_manaTrainingSecondary);
 
-		_manaMissingWoundThreshold = nodeMana["woundThreshold"].as<bool>(_manaMissingWoundThreshold);
+		_manaMissingWoundThreshold = nodeMana["woundThreshold"].as<int>(_manaMissingWoundThreshold);
 		_manaReplenishAfterMission = nodeMana["replenishAfterMission"].as<bool>(_manaReplenishAfterMission);
 	}
 	if (const YAML::Node &nodeHealth = doc["health"])
 	{
-		_healthMissingWoundThreshold = nodeHealth["woundThreshold"].as<bool>(_healthMissingWoundThreshold);
+		_healthMissingWoundThreshold = nodeHealth["woundThreshold"].as<int>(_healthMissingWoundThreshold);
 		_healthReplenishAfterMission = nodeHealth["replenishAfterMission"].as<bool>(_healthReplenishAfterMission);
 	}
 
