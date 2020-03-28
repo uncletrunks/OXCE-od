@@ -45,13 +45,13 @@ enum UfoDetection : int;
 
 struct BaseSumDailyRecovery
 {
-	/// Sum of the base's mana recovery rate or lose.
+	/// Amount of mana recovery or loss provided by the base.
 	int ManaRecovery = 0;
-	/// Sum of the base's health recovery rate.
+	/// Amount of health recovery provided by the base.
 	int HealthRecovery = 0;
-	/// Sum of the amount of additional wound healed in this base due to sick bay facilities (as percentage of max HP per soldier).
+	/// Sum of the amount of additional wounds healed in this base due to sick bay facilities (as percentage of max HP per soldier).
 	float SickBayRelativeBonus = 0.0f;
-	/// Sum of the amount of additional wound healed in this base due to sick bay facilities (in absolute number).
+	/// Sum of the amount of additional wounds healed in this base due to sick bay facilities (in absolute number).
 	float SickBayAbsoluteBonus = 0.0f;
 };
 
@@ -264,7 +264,7 @@ public:
 	std::vector<std::string> getFutureBaseFunc() const;
 	/// Checks if it is possible to build another facility of a given type.
 	bool isMaxAllowedLimitReached(RuleBaseFacility *rule) const;
-	/// Gets the base's daily sum recovery rate.
+	/// Gets the summary of all recovery rates provided by the base.
 	BaseSumDailyRecovery getSumRecoveryPerDay() const;
 	/// Removes a craft from the base.
 	std::vector<Craft*>::iterator removeCraft(Craft *craft, bool unload);

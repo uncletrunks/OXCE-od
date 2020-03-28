@@ -585,12 +585,12 @@ public:
 	/// Gets the mana unlock research topic (default empty)?
 	const std::string &getManaUnlockResearch() const { return _manaUnlockResearch; }
 
-	/// How much mana missing will cause unit to preventing fighting in mission.
+	/// How much missing mana will act as "fatal wounds" and prevent the soldier from going into battle.
 	int getManaWoundThreshold() const { return _manaMissingWoundThreshold; }
 	/// Should a soldier's mana be fully replenished after a mission?
 	bool getReplenishManaAfterMission() const { return _manaReplenishAfterMission; }
 
-	/// How much health missing will cause unit to preventing fighting in mission.
+	/// How much missing health will act as "fatal wounds" and prevent the soldier from going into battle.
 	int getHealthWoundThreshold() const { return _healthMissingWoundThreshold; }
 	/// Should a soldier's health be fully replenished after a mission?
 	bool getReplenishHealthAfterMission() const { return _healthReplenishAfterMission; }

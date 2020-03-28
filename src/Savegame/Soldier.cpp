@@ -820,9 +820,10 @@ namespace
 {
 
 /**
- * Calucalte precent of value to get threshold.
- * @param base value from we get result.
- * @param threshold precent for base value.
+ * Calculates absolute threshold based on percentage threshold.
+ * @param base base value
+ * @param threshold threshold in percent
+ * @return threshold in absolute value
  */
 int valueThreshold(int base, int threshold)
 {
@@ -830,11 +831,11 @@ int valueThreshold(int base, int threshold)
 }
 
 /**
- * Calculate amount that exceed threshold of base value.
- * @param value value that we check exceed
- * @param base base value to calcualte threshold.
- * @param threshold precent for base value.
- * @return
+ * Calculates the amount that exceeds the threshold of the base value.
+ * @param value value to check
+ * @param base base value
+ * @param threshold threshold of the base value in percent
+ * @return absolute value over the threshold
  */
 int valueOverThreshold(int value, int base, int threshold)
 {
@@ -842,23 +843,23 @@ int valueOverThreshold(int value, int base, int threshold)
 }
 
 /**
- * Calculate how long will take to recovery from current value.
- * @param current Amount to recovery from.
- * @param recovety Size of change of value.
- * @return time how long will take, can return -1 as infinity.
+ * Calculates how long will it take to recover.
+ * @param current Total amount of days.
+ * @param recovery Recovery per day.
+ * @return How many days will it take to recover, can return -1 meaning infinity.
  */
-int recoveryTime(int current, int recovety)
+int recoveryTime(int current, int recovery)
 {
 	if (current <= 0)
 	{
 		return 0;
 	}
 
-	if (recovety <= 0)
+	if (recovery <= 0)
 		return -1; // represents infinity
 
-	int days = current / recovety;
-	if (current % recovety > 0)
+	int days = current / recovery;
+	if (current % recovery > 0)
 		++days;
 
 	return days;
@@ -1039,8 +1040,8 @@ void Soldier::replenishHealth(int healthRecoveryPerDay)
 }
 
 /**
- * Daily replenish and heal of soldier based on faciletes avialbe in base.
- * @param recovery Recovery values provide by base.
+ * Daily stat replenish and healing of the soldier based on the facilities available in the base.
+ * @param recovery Recovery values provided by the base.
  */
 void Soldier::replenishStats(const BaseSumDailyRecovery& recovery)
 {
@@ -1071,7 +1072,7 @@ void Soldier::replenishStats(const BaseSumDailyRecovery& recovery)
 }
 
 /**
- * Get Days until soildier is again ready for action.
+ * Gets number of days until the soldier is ready for action again.
  * @return Number of days. -1 represents infinity.
  */
 int Soldier::getNeededRecoveryTime(const BaseSumDailyRecovery& recovery) const

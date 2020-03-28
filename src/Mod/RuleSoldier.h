@@ -204,9 +204,9 @@ public:
 	/// Gets the offset of the rank sprite in TinyRanks.
 	int getRankSpriteTiny() const;
 
-	/// How much mana missing will cause unit to preventing fighting in mission.
+	/// How much missing mana will act as "fatal wounds" and prevent the soldier from going into battle.
 	int getManaWoundThreshold() const { return _manaMissingWoundThreshold; }
-	/// How much health missing will cause unit to preventing fighting in mission.
+	/// How much missing health will act as "fatal wounds" and prevent the soldier from going into battle.
 	int getHealthWoundThreshold() const { return _healthMissingWoundThreshold; }
 };
 

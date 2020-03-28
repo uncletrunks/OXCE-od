@@ -2250,8 +2250,7 @@ bool Base::isMaxAllowedLimitReached(RuleBaseFacility *rule) const
 }
 
 /**
- * Gets the base's mana recovery rate.
- * @return Mana per day.
+ * Gets the summary of all recovery rates provided by the base.
  */
 BaseSumDailyRecovery Base::getSumRecoveryPerDay() const
 {

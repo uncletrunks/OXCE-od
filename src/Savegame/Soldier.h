@@ -70,9 +70,9 @@ private:
 	SoldierLook _look;
 	int _lookVariant;
 	int _missions, _kills;
-	int _healthMissing = 0; // amount of health missing until full mana recovery, this is less serious than wound recovery.
-	int _manaMissing = 0; // amount of mana missing until full mana recovery
-	float _recovery = 0.0; // amount of hospital attetion soldier need... used to calculate recovery time,
+	int _healthMissing = 0; // amount of health missing until full health recovery, this is less serious than wound recovery.
+	int _manaMissing = 0;   // amount of mana missing until full mana recovery
+	float _recovery = 0.0;  // amount of hospital attention soldier needs... used to calculate recovery time
 	bool _recentlyPromoted, _psiTraining, _training, _returnToTrainingWhenHealed;
 	Armor *_armor;
 	Armor *_replacedArmor;
@@ -192,7 +192,7 @@ public:
 	int getHealthMissing() const;
 	/// Sets the amount of missing health.
 	void setHealthMissing(int healthMissing);
-	/// Gets the soldier's mana recovery health.
+	/// Gets the soldier's health recovery time.
 	int getHealthRecovery(int healthRecoveryPerDay) const;
 
 	/// Gets the soldier's wound recovery time.
@@ -209,9 +209,9 @@ public:
 	/// Replenishes health.
 	void replenishHealth(int healthRecoveryPerDay);
 
-	/// Daily replenish and heal of soldier based on faciletes avialbe in base.
+	/// Daily stat replenish and healing of the soldier based on the facilities available in the base.
 	void replenishStats(const BaseSumDailyRecovery& recovery);
-	/// Get Days until soildier is again ready for action.
+	/// Gets number of days until the soldier is ready for action again.
 	int getNeededRecoveryTime(const BaseSumDailyRecovery& recovery) const;
 
 
