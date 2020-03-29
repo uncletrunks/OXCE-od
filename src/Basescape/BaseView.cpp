@@ -249,16 +249,10 @@ BasePlacementErrors BaseView::getPlacementError(const RuleBaseFacility *rule, Ba
 				if (facilityBeingMoved == 0)
 				{
 					// Further check to see if the facility already there can be built over and we're not removing an important base function
-					if (facility->getRules()->getCanBeBuiltOver() == false)
+					auto canBuildOverError = rule->getCanBuildOverOtherFacility(facility->getRules());
+					if (canBuildOverError != BPE_None)
 					{
-						return BPE_UpgradeDisallowed;
-					}
-
-					// If the list of base facilities we can build over is empty, then we can build over anything that allows it
-					// otherwise we need to check if the facility we're trying to build over is on the list
-					if (rule->getCanBuildOverOtherFacility(facility->getRules()) == false)
-					{
-						return BPE_UpgradeRequireSpecific;
+						return canBuildOverError;
 					}
 
 					// Make sure the facility we're building over is entirely within the size of the one we're checking

@@ -31,6 +31,7 @@ class Mod;
 class Base;
 class Position;
 class VerticalLevel;
+enum BasePlacementErrors : int;
 
 /**
  * Represents a specific type of base facility.
@@ -181,7 +182,7 @@ public:
 	/// Gets whether or not this facility can be built over by other ones
 	bool getCanBeBuiltOver() const;
 	/// Check if given facility are allowed to be replaced by this building
-	bool getCanBuildOverOtherFacility(const RuleBaseFacility* fac) const;
+	BasePlacementErrors getCanBuildOverOtherFacility(const RuleBaseFacility* fac) const;
 	/// Gets which facilities are allowed to be replaced by this building
 	const std::vector<const RuleBaseFacility*> &getBuildOverFacilities() const { return _buildOverFacilities; }
 	/// Gets a list of which tiles are used to place items stored in this facility

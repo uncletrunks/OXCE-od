@@ -23,6 +23,7 @@
 #include "../Battlescape/Position.h"
 #include "../Engine/Exception.h"
 #include "../Engine/Collections.h"
+#include "../Savegame/Base.h"
 
 
 namespace OpenXcom
@@ -586,15 +587,27 @@ bool RuleBaseFacility::getCanBeBuiltOver() const
 /**
  * Check if given facility are allowed to be replaced by this building
  */
-bool RuleBaseFacility::getCanBuildOverOtherFacility(const RuleBaseFacility* fac) const
+BasePlacementErrors RuleBaseFacility::getCanBuildOverOtherFacility(const RuleBaseFacility* fac) const
 {
-	if (_buildOverFacilities.empty())
+	if (fac->getCanBeBuiltOver() == true)
 	{
-		return true;
+		// old facility allow unrestricted build over.
+		return BPE_None;
+	}
+	else if (_buildOverFacilities.empty())
+	{
+		// old facitlity do not allow build over and we do not have exception list
+		return BPE_UpgradeDisallowed;
+	}
+	else if (Collections::sortVectorHave(_buildOverFacilities, fac))
+	{
+		// old facility is on exception list
+		return BPE_None;
 	}
 	else
 	{
-		return Collections::sortVectorHave(_buildOverFacilities, fac);
+		// we have exception list but this bulding is not on it.
+		return BPE_UpgradeRequireSpecific;
 	}
 }
 
