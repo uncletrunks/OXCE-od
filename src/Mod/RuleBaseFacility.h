@@ -30,7 +30,7 @@ namespace OpenXcom
 class Mod;
 class Base;
 class Position;
-class VerticalLevel;
+struct VerticalLevel;
 enum BasePlacementErrors : int;
 
 /**
