@@ -253,6 +253,16 @@ void BattlescapeGenerator::nextStage()
 				}
 			}
 		}
+
+		// scripts or some bugs in game could make alien or soldier that have not "resolved" stun od death state.
+		if (!(*unit)->isOut() && (*unit)->isOutThresholdExceed())
+		{
+			(*unit)->instaFalling();
+			if ((*unit)->getTile())
+			{
+				_save->getTileEngine()->itemDropInventory((*unit)->getTile(), (*unit));
+			}
+		}
 	}
 
 	int aliensAlive = 0;
