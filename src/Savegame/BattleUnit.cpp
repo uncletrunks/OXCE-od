@@ -1668,6 +1668,23 @@ void BattleUnit::keepFalling()
 	}
 }
 
+/**
+ * Set final falling state. Skipping animation.
+ */
+void BattleUnit::instaFalling()
+{
+	startFalling();
+	_fallPhase =  _armor->getDeathFrames() - 1;
+	if (_health <= 0)
+	{
+		_status = STATUS_DEAD;
+	}
+	else
+	{
+		_status = STATUS_UNCONSCIOUS;
+	}
+}
+
 
 /**
  * Returns the phase of the falling sequence.

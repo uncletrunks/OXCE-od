@@ -66,12 +66,7 @@ UnitDieBState::UnitDieBState(BattlescapeGame *parent, BattleUnit *unit, const Ru
 		_unit->setDirection(3);
 
 
-		_unit->startFalling();
-
-		while (_unit->getStatus() == STATUS_COLLAPSING)
-		{
-			_unit->keepFalling();
-		}
+		_unit->instaFalling();
 		if (_parent->getSave()->isBeforeGame())
 		{
 			convertUnitToCorpse();

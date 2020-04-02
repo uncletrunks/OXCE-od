@@ -289,12 +289,16 @@ public:
 	bool hasNegativeHealthRegen() const;
 	/// Knocks the unit out instantly.
 	void knockOut(BattlescapeGame *battle);
+
 	/// Start falling sequence.
 	void startFalling();
 	/// Increment the falling sequence.
 	void keepFalling();
+	/// Set final falling state.
+	void instaFalling();
 	/// Get falling sequence.
 	int getFallingPhase() const;
+
 	/// The unit is out - either dead or unconscious.
 	bool isOut() const;
 	/// Check if unit stats will cause knock out.
