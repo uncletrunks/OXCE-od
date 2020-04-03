@@ -1415,7 +1415,6 @@ void Mod::loadAll()
 	afterLoadHelper("enviroEffects", this, _enviroEffects, &RuleEnviroEffects::afterLoad);
 	afterLoadHelper("commendations", this, _commendations, &RuleCommendations::afterLoad);
 	afterLoadHelper("skills", this, _skills, &RuleSkill::afterLoad);
-	afterLoadHelper("armors", this, _armors, &Armor::afterLoad);
 
 	// auto-create alternative manufacture rules
 	for (auto shortcutPair : _manufactureShortcut)

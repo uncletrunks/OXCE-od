@@ -96,8 +96,6 @@ public:
 	~Armor();
 	/// Loads the armor data from YAML.
 	void load(const YAML::Node& node, const ModScript& parsers, Mod *mod);
-	/// Cross link with other rules.
-	void afterLoad(const Mod* mod);
 	/// Gets the armor's type.
 	std::string getType() const;
 	/// Gets the unit's sprite sheet.
