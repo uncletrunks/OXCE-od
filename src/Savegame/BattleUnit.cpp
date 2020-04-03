@@ -2722,7 +2722,10 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 		{
 			if (getBaseStats()->strength >= weight) // weight is always considered 0 for aliens
 			{
-				for (const std::string &s : mod->getInvsList())
+				const std::vector<std::string>& supportedSlots =
+					!rule->getSupportedInventorySections().empty() ? rule->getSupportedInventorySections() : mod->getInvsList();
+
+				for (const std::string &s : supportedSlots)
 				{
 					RuleInventory *slot = mod->getInventory(s);
 					if (slot->getType() == INV_SLOT)
