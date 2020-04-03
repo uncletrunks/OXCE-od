@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Armor.h"
+#include "../Engine/Logger.h"
 #include "../Engine/ScriptBind.h"
 #include "Mod.h"
 #include "RuleSoldier.h"
@@ -244,6 +245,18 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_standHeight = node["standHeight"].as<int>(_standHeight);
 	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
 	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
+}
+
+/**
+ * Cross link with other rules.
+ */
+void Armor::afterLoad(const Mod* mod)
+{
+	if (_painImmune == defTriBool && _damageModifier[DT_STUN] == 0.0f)
+	{
+		Log(LOG_INFO) << "Changing painImmune to 1 for armor " << _type << "; current painImmune = " << (int)_painImmune;
+		_painImmune = 1;
+	}
 }
 
 /**
