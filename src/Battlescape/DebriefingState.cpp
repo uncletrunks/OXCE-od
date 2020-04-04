@@ -1519,13 +1519,7 @@ void DebriefingState::prepareDebriefing()
 			{
 				if ((*j)->getTile())
 				{
-					for (std::vector<BattleItem*>::iterator k = (*j)->getInventory()->begin(); k != (*j)->getInventory()->end(); ++k)
-					{
-						if (!(*k)->getRules()->isFixed())
-						{
-							(*j)->getTile()->addItem(*k, _game->getMod()->getInventory("STR_GROUND"));
-						}
-					}
+					battle->getTileEngine()->itemDropInventory((*j)->getTile(), (*j));
 				}
 				if (!(*j)->getArmor()->getCorpseBattlescape().empty())
 				{

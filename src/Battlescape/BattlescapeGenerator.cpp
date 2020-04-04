@@ -548,7 +548,7 @@ void BattlescapeGenerator::nextStage()
 	{
 		_save->selectNextPlayerUnit();
 	}
-	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
+	RuleInventory *ground = _inventorySlotGround;
 
 	for (std::vector<BattleItem*>::iterator i = takeToNextStage.begin(); i != takeToNextStage.end(); ++i)
 	{
@@ -767,7 +767,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 {
 	_save->applyEnviroEffects(enviro);
 
-	RuleInventory *ground = _game->getMod()->getInventory("STR_GROUND", true);
+	RuleInventory *ground = _inventorySlotGround;
 
 	if (_craft != 0)
 		_base = _craft->getBase();

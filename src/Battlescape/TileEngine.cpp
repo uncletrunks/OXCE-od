@@ -4289,40 +4289,40 @@ void TileEngine::itemDrop(Tile *t, BattleItem *item, bool updateLight)
  */
 void TileEngine::itemDropInventory(Tile *t, BattleUnit *unit, bool unprimeItems, bool deleteFixedItems)
 {
-	auto &inv = *unit->getInventory();
-	for (std::vector<BattleItem*>::iterator j = inv.begin(); j != inv.end();)
-	{
-		if (!(*j)->getRules()->isFixed())
+	Collections::removeIf(*unit->getInventory(),
+		[&](BattleItem* i)
 		{
-			(*j)->setOwner(nullptr);
-			if (unprimeItems)
+			if (!i->getRules()->isFixed())
 			{
-				(*j)->setFuseTimer(-1); // unprime explosives before dropping them
-			}
-			t->addItem(*j, _inventorySlotGround);
-			if ((*j)->getUnit() && (*j)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
-			{
-				(*j)->getUnit()->setPosition(t->getPosition());
-			}
-			j = inv.erase(j);
-		}
-		else
-		{
-			if (deleteFixedItems)
-			{
-				// delete fixed items completely (e.g. when changing armor)
-				(*j)->setOwner(nullptr);
-				BattleItem *item = *j;
-				j = inv.erase(j);
-				_save->removeItem(item);
+				i->setOwner(nullptr);
+				if (unprimeItems)
+				{
+					i->setFuseTimer(-1); // unprime explosives before dropping them
+				}
+				t->addItem(i, _inventorySlotGround);
+				if (i->getUnit() && i->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+				{
+					i->getUnit()->setPosition(t->getPosition());
+				}
+				return true;
 			}
 			else
 			{
-				// do nothing, fixed items cannot be moved (individually by the player)!
-				++j;
+				if (deleteFixedItems)
+				{
+					// delete fixed items completely (e.g. when changing armor)
+					i->setOwner(nullptr);
+					_save->removeItem(i);
+					return true;
+				}
+				else
+				{
+					// do nothing, fixed items cannot be moved (individually by the player)!
+					return false;
+				}
 			}
 		}
-	}
+	);
 }
 
 /**
