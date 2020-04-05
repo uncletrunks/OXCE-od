@@ -223,6 +223,7 @@ void SkillMenuState::btnActionMenuItemClick(Action *action)
 			if (!item)
 			{
 				_action->result = tr("STR_SKILL_NEEDS_ITEM");
+				if (_action->type == BA_HIT) _action->type = BA_NONE; // OXC merge
 				_game->popState();
 				return;
 			}

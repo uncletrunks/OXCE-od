@@ -488,6 +488,12 @@ void ActionMenuState::handleAction()
 			_game->popState();
 		}
 
+		// meleeAttackBState won't be available to clear the action type, do it here instead.
+		if (_action->type == BA_HIT && !_action->result.empty())
+		{
+			_action->type = BA_NONE;
+		}
+
 		if (newHitLog)
 		{
 			_game->getSavedGame()->getSavedBattle()->appendToHitLog(HITLOG_PLAYER_FIRING, FACTION_PLAYER, tr(weapon->getType()));

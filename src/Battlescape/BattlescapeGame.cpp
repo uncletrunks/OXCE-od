@@ -1021,7 +1021,7 @@ void BattlescapeGame::handleNonTargetAction()
 				_parentState->warning(error);
 			}
 		}
-		else if (_currentAction.type == BA_USE || _currentAction.type == BA_LAUNCH)
+		else if (_currentAction.type == BA_USE)
 		{
 			_save->reviveUnconsciousUnits(true);
 		}
@@ -1036,7 +1036,10 @@ void BattlescapeGame::handleNonTargetAction()
 				_parentState->warning(error);
 			}
 		}
-		_currentAction.type = BA_NONE;
+		if (_currentAction.type != BA_HIT) // don't clear the action type if we're meleeing, let the melee action state take care of that
+		{
+			_currentAction.type = BA_NONE;
+		}
 		_parentState->updateSoldierInfo();
 	}
 
@@ -1067,7 +1070,7 @@ void BattlescapeGame::setupCursor()
 			getMap()->setCursorType(CT_AIM);
 		}
 	}
-	else
+	else if (_currentAction.type != BA_HIT)
 	{
 		_currentAction.actor = _save->getSelectedUnit();
 		if (_currentAction.actor)

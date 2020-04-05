@@ -148,7 +148,15 @@ bool FlcPlayer::init(const char *filename, void(*frameCallBack)(), Game *game, b
 		Log(LOG_ERROR) << "Flx file failed header check.";
 		return false;
 	}
-
+	if (_screenWidth > _realScreen->getSurface()->w && Options::displayWidth >= _screenWidth)
+	{
+		// base resolution of video is higher than our surface width
+		// and our display resolution allows a hi-res video
+		// set base resolution to video resolution
+		Options::baseXResolution = _screenWidth;
+		Options::baseYResolution = _screenHeight;
+		_realScreen->resetDisplay();
+	}
 	// If the current surface used is at 8bpp use it
 	if (_realScreen->getSurface()->format->BitsPerPixel == 8)
 	{
@@ -342,9 +350,13 @@ void FlcPlayer::decodeVideo(bool skipLastFrame)
 			{
 				delay = _delayOverride > 0 ? _delayOverride : _headerSpeed * (1000.0 / 70.0);
 			}
-			else
+			else if (_useInternalAudio && !_frameCallBack) // this means TFTD videos are playing
 			{
 				delay = _videoDelay;
+			}
+			else
+			{
+				delay = _headerSpeed;
 			}
 
 			waitForNextFrame(delay);
