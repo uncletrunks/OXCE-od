@@ -2181,7 +2181,7 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 				if (Options::storageLimitsEnforced)
 				{
 					// with enforced limits we can't allow upgrade that make temporaty lower storage in base
-					available.addWithoutStores(replecment);
+					available.addWithoutStores(rule);
 				}
 				else
 				{
