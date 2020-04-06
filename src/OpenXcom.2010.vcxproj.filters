@@ -2269,6 +2269,9 @@
     <ClInclude Include="Mod\RuleManufactureShortcut.h">
       <Filter>Mod</Filter>
     </ClInclude>
+    <ClInclude Include="Mod\RuleBaseFacilityFunctions.h">
+      <Filter>Mod</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">

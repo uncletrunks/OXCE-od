@@ -887,6 +887,7 @@
     <ClInclude Include="Mod\CustomPalettes.h" />
     <ClInclude Include="Mod\ModScript.h" />
     <ClInclude Include="Mod\RuleArcScript.h" />
+    <ClInclude Include="Mod\RuleBaseFacilityFunctions.h" />
     <ClInclude Include="Mod\RuleDamageType.h" />
     <ClInclude Include="Mod\RuleEnviroEffects.h" />
     <ClInclude Include="Mod\RuleEvent.h" />
@@ -929,7 +930,6 @@
     <ClInclude Include="Mod\Armor.h" />
     <ClInclude Include="Mod\RuleAlienMission.h" />
     <ClInclude Include="Mod\RuleBaseFacility.h" />
-    <ClInclude Include="Mod\RuleBaseFacilityFuncions.h" />
     <ClInclude Include="Mod\RuleCountry.h" />
     <ClInclude Include="Mod\RuleCraft.h" />
     <ClInclude Include="Mod\RuleCraftWeapon.h" />
