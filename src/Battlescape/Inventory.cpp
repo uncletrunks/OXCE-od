@@ -68,6 +68,7 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_depth = _game->getSavedGame()->getSavedBattle()->getDepth();
 	_grid = new Surface(width, height, 0, 0);
 	_items = new Surface(width, height, 0, 0);
+	_gridLabels = new Surface(width, height, 0, 0);
 	_selection = new Surface(RuleInventory::HAND_W * RuleInventory::SLOT_W, RuleInventory::HAND_H * RuleInventory::SLOT_H, x, y);
 	_warning = new WarningMessage(224, 24, 48, 176);
 	_stackNumber = new NumberText(15, 15, 0, 0);
@@ -117,6 +118,7 @@ Inventory::~Inventory()
 {
 	delete _grid;
 	delete _items;
+	delete _gridLabels;
 	delete _selection;
 	delete _warning;
 	delete _stackNumber;
@@ -134,6 +136,7 @@ void Inventory::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 	Surface::setPalette(colors, firstcolor, ncolors);
 	_grid->setPalette(colors, firstcolor, ncolors);
 	_items->setPalette(colors, firstcolor, ncolors);
+	_gridLabels->setPalette(colors, firstcolor, ncolors);
 	_selection->setPalette(colors, firstcolor, ncolors);
 	_warning->setPalette(colors, firstcolor, ncolors);
 	_stackNumber->setPalette(getPalette());
@@ -254,8 +257,10 @@ void Inventory::drawGrid()
  */
 void Inventory::drawGridLabels(bool showTuCost)
 {
+	_gridLabels->clear();
+
 	Text text = Text(90, 9, 0, 0);
-	text.setPalette(_grid->getPalette());
+	text.setPalette(_gridLabels->getPalette());
 	text.initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 
 	RuleInterface *rule = _game->getMod()->getInterface("inventory");
@@ -280,7 +285,7 @@ void Inventory::drawGridLabels(bool showTuCost)
 		{
 			text.setText(_game->getLanguage()->getString(i->second->getId()));
 		}
-		text.blit(_grid->getSurface());
+		text.blit(_gridLabels->getSurface());
 	}
 }
 
@@ -639,6 +644,7 @@ void Inventory::blit(SDL_Surface *surface)
 	clear();
 	_grid->blitNShade(this, 0, 0);
 	_items->blitNShade(this, 0, 0);
+	_gridLabels->blitNShade(this, 0, 0);
 	_selection->blitNShade(this, _selection->getX(), _selection->getY());
 	_warning->blit(this->getSurface());
 	Surface::blit(surface);

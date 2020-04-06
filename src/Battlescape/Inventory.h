@@ -41,7 +41,7 @@ class Inventory : public InteractiveSurface
 {
 private:
 	Game *_game;
-	Surface *_grid, *_items, *_selection;
+	Surface *_grid, *_items, *_gridLabels, *_selection;
 	Uint8 _twoHandedRed, _twoHandedGreen;
 	WarningMessage *_warning;
 	BattleUnit *_selUnit;
