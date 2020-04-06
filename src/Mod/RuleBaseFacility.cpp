@@ -73,6 +73,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	mod->loadSpriteOffset(_type, _spriteFacility, node["spriteFacility"], "BASEBITS.PCK");
 
 	_fakeUnderwater = node["fakeUnderwater"].as<int>(_fakeUnderwater);
+	_missileAttraction = node["missileAttraction"].as<int>(_missileAttraction);
 	_lift = node["lift"].as<bool>(_lift);
 	_hyper = node["hyper"].as<bool>(_hyper);
 	_mind = node["mind"].as<bool>(_mind);
