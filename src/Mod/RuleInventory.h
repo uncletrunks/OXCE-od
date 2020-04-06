@@ -65,7 +65,7 @@ public:
 	/// Loads inventory data from YAML.
 	void load(const YAML::Node& node, int listOrder);
 	/// Gets the inventory's id.
-	std::string getId() const;
+	const std::string& getId() const;
 	/// Gets the X position of the inventory.
 	int getX() const;
 	/// Gets the Y position of the inventory.

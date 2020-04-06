@@ -99,7 +99,7 @@ void RuleInventory::load(const YAML::Node &node, int listOrder)
  * this inventory section. Each section has a unique name.
  * @return The section name.
  */
-std::string RuleInventory::getId() const
+const std::string& RuleInventory::getId() const
 {
 	return _id;
 }
