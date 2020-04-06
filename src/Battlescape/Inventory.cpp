@@ -580,17 +580,7 @@ void Inventory::setSelectedItem(BattleItem *item)
 		_selection->clear();
 	}
 	drawSelectedItem();
-
-	// 1. first draw the grid
-	if (_tu)
-	{
-		drawGrid();
-	}
-
-	// 2. then the items
 	drawItems();
-
-	// 3. lastly re-draw the grid labels (so that they are not obscured by the items)
 	if (_tu)
 	{
 		drawGridLabels(true);
