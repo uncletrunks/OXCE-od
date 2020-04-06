@@ -566,10 +566,10 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_waypoints = node["waypoints"].as<int>(_waypoints);
 	_fixedWeapon = node["fixedWeapon"].as<bool>(_fixedWeapon);
 	_fixedWeaponShow = node["fixedWeaponShow"].as<bool>(_fixedWeaponShow);
-	_defaultInventorySlot = node["defaultInventorySlot"].as<std::string>(_defaultInventorySlot);
+	_defaultInventorySlotName = node["defaultInventorySlot"].as<std::string>(_defaultInventorySlotName);
 	_defaultInvSlotX = node["defaultInvSlotX"].as<int>(_defaultInvSlotX);
 	_defaultInvSlotY = node["defaultInvSlotY"].as<int>(_defaultInvSlotY);
-	_supportedInventorySections = node["supportedInventorySections"].as< std::vector<std::string> >(_supportedInventorySections);
+	_supportedInventorySectionsNames = node["supportedInventorySections"].as< std::vector<std::string> >(_supportedInventorySectionsNames);
 	_isConsumable = node["isConsumable"].as<bool>(_isConsumable);
 	_isFireExtinguisher = node["isFireExtinguisher"].as<bool>(_isFireExtinguisher);
 	_isExplodingInHands = node["isExplodingInHands"].as<bool>(_isExplodingInHands);
@@ -706,10 +706,22 @@ void RuleItem::afterLoad(const Mod* mod)
 		}
 	}
 
+	_defaultInventorySlot = mod->getInventory(_defaultInventorySlotName, true);
+	if (_supportedInventorySectionsNames.size())
+	{
+		_supportedInventorySections.reserve(_supportedInventorySectionsNames.size());
+		for (auto& n : _supportedInventorySectionsNames)
+		{
+			_supportedInventorySections.push_back(mod->getInventory(n, true));
+		}
+		Collections::sortVector(_supportedInventorySections);
+	}
+
 	//remove not needed data
 	Collections::removeAll(_requiresName);
 	Collections::removeAll(_requiresBuyName);
 	Collections::removeAll(_recoveryTransformationsName);
+	Collections::removeAll(_supportedInventorySectionsNames);
 }
 
 /**
@@ -938,40 +950,22 @@ bool RuleItem::getFixedShow() const
 }
 
 /**
- * Gets the name of the default inventory slot.
- * @return String Id.
- */
-const std::string &RuleItem::getDefaultInventorySlot() const
-{
-	return _defaultInventorySlot;
-}
-
-/**
- * Gets the item's supported inventory sections.
- * @return The list of inventory sections.
- */
-const std::vector<std::string> &RuleItem::getSupportedInventorySections() const
-{
-	return _supportedInventorySections;
-}
-
-/**
  * Checks if the item can be placed into a given inventory section.
- * @param inventorySection Name of the inventory section (RuleInventory->id).
+ * @param inventorySection Inventory section rule.
  * @return True if the item can be placed into a given inventory section.
  */
-bool RuleItem::canBePlacedIntoInventorySection(const std::string &inventorySection) const
+bool RuleItem::canBePlacedIntoInventorySection(const RuleInventory* inventorySection) const
 {
 	// backwards-compatibility
 	if (_supportedInventorySections.empty())
 		return true;
 
 	// always possible to put an item on the ground
-	if (inventorySection == "STR_GROUND")
+	if (inventorySection->getType() == INV_GROUND)
 		return true;
 
 	// otherwise check allowed inventory sections
-	return std::find(_supportedInventorySections.begin(), _supportedInventorySections.end(), inventorySection) != _supportedInventorySections.end();
+	return Collections::sortVectorHave(_supportedInventorySections, inventorySection);
 }
 
 /**

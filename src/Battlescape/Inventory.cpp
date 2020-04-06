@@ -839,7 +839,7 @@ void Inventory::mouseClick(Action *action, State *state)
 				bool canStack = slot->getType() == INV_GROUND && canBeStacked(item, _selItem);
 
 				// Check if this inventory section supports the item
-				if (!_selItem->getRules()->canBePlacedIntoInventorySection(slot->getId()))
+				if (!_selItem->getRules()->canBePlacedIntoInventorySection(slot))
 				{
 					_warning->showMessage(_game->getLanguage()->getString("STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION"));
 				}
@@ -1561,7 +1561,7 @@ void Inventory::arrangeGround(int alterOffset)
 bool Inventory::fitItem(RuleInventory *newSlot, BattleItem *item, std::string &warning)
 {
 	// Check if this inventory section supports the item
-	if (!item->getRules()->canBePlacedIntoInventorySection(newSlot->getId()))
+	if (!item->getRules()->canBePlacedIntoInventorySection(newSlot))
 	{
 		warning = "STR_CANNOT_PLACE_ITEM_INTO_THIS_SECTION";
 		return false;

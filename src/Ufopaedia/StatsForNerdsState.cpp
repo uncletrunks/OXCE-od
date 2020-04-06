@@ -37,6 +37,7 @@
 #include "../Mod/RuleCraft.h"
 #include "../Mod/RuleCraftWeapon.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleInventory.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleSoldierBonus.h"
 #include "../Mod/RuleUfo.h"
@@ -1845,7 +1846,7 @@ void StatsForNerdsState::initItemList()
 	addVectorOfResearch(ss, itemRule->getBuyRequirements(), "requiresBuy");
 	addVectorOfStrings(ss, mod->getBaseFunctionNames(itemRule->getRequiresBuyBaseFunc()), "requiresBuyBaseFunc");
 	addVectorOfStrings(ss, itemRule->getCategories(), "categories");
-	addVectorOfStrings(ss, itemRule->getSupportedInventorySections(), "supportedInventorySections");
+	addVectorOfRulesId(ss, itemRule->getSupportedInventorySections(), "supportedInventorySections");
 
 	addDouble(ss, itemRule->getSize(), "size");
 	addInteger(ss, itemRule->getBuyCost(), "costBuy", 0, true);
@@ -1869,7 +1870,7 @@ void StatsForNerdsState::initItemList()
 		addVectorOfIntegers(ss, itemRule->getCustomItemPreviewIndex(), "customItemPreviewIndex");
 		addInteger(ss, itemRule->getInventoryWidth(), "invWidth", -1); // always show!
 		addInteger(ss, itemRule->getInventoryHeight(), "invHeight", -1); // always show!
-		addSingleString(ss, itemRule->getDefaultInventorySlot(), "defaultInventorySlot");
+		addRuleId(ss, itemRule->getDefaultInventorySlot(), "defaultInventorySlot");
 		addInteger(ss, itemRule->getDefaultInventorySlotX(), "defaultInvSlotX");
 		addInteger(ss, itemRule->getDefaultInventorySlotY(), "defaultInvSlotY");
 		addBoolean(ss, itemRule->isFixed(), "fixedWeapon");

@@ -62,6 +62,7 @@ class RuleSkill;
 class SurfaceSet;
 class Surface;
 class Mod;
+class RuleInventory;
 
 enum UnitFaction : int;
 
@@ -329,9 +330,11 @@ private:
 	bool _hiddenOnMinimap;
 	std::string _medikitActionName, _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
-	std::string _defaultInventorySlot;
+	std::string _defaultInventorySlotName;
+	RuleInventory* _defaultInventorySlot; //TODO: fix constnes
 	int _defaultInvSlotX, _defaultInvSlotY;
-	std::vector<std::string> _supportedInventorySections;
+	std::vector<std::string> _supportedInventorySectionsNames;
+	std::vector<const RuleInventory*> _supportedInventorySections;
 	int _waypoints, _invWidth, _invHeight;
 	int _painKiller, _heal, _stimulant;
 	BattleMediKitType _medikitType;
@@ -450,14 +453,18 @@ public:
 	bool isFixed() const;
 	/// Do show fixed weapon on unit.
 	bool getFixedShow() const;
+
 	/// Get name of the default inventory slot.
-	const std::string &getDefaultInventorySlot() const;
+	RuleInventory* getDefaultInventorySlot() const { return _defaultInventorySlot; }
+	/// Get inventory slot default X position.
 	int getDefaultInventorySlotX() const { return _defaultInvSlotX; }
+	/// Get inventory slot default Y position.
 	int getDefaultInventorySlotY() const { return _defaultInvSlotY; }
 	/// Gets the item's supported inventory sections.
-	const std::vector<std::string> &getSupportedInventorySections() const;
+	const std::vector<const RuleInventory*> &getSupportedInventorySections() const { return _supportedInventorySections; }
 	/// Checks if the item can be placed into a given inventory section.
-	bool canBePlacedIntoInventorySection(const std::string &inventorySection) const;
+	bool canBePlacedIntoInventorySection(const RuleInventory* inventorySection) const;
+
 	/// Gets if the item is a launcher.
 	int getWaypoints() const;
 	/// Gets the item's bullet sprite reference.

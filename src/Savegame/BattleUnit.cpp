@@ -2619,10 +2619,10 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 	if (rule->isFixed())
 	{
 		// either in the default slot provided in the ruleset
-		if (!rule->getDefaultInventorySlot().empty())
+		if (rule->getDefaultInventorySlot())
 		{
-			RuleInventory *defaultSlot = mod->getInventory(rule->getDefaultInventorySlot());
-			BattleItem *defaultSlotWeapon = getItem(rule->getDefaultInventorySlot());
+			RuleInventory *defaultSlot = rule->getDefaultInventorySlot();
+			BattleItem *defaultSlotWeapon = getItem(defaultSlot);
 			if (!defaultSlotWeapon)
 			{
 				item->moveToOwner(this);
@@ -2739,12 +2739,14 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 		{
 			if (getBaseStats()->strength >= weight) // weight is always considered 0 for aliens
 			{
-				const std::vector<std::string>& supportedSlots =
-					!rule->getSupportedInventorySections().empty() ? rule->getSupportedInventorySections() : mod->getInvsList();
-
-				for (const std::string &s : supportedSlots)
+				// this is `n*(log(n) + log(n))` code, it could be `n` but we would lose predefined order, as `RuleItem` have them in effective in random order (depending on global memory allocations)
+				for (const std::string &s : mod->getInvsList())
 				{
 					RuleInventory *slot = mod->getInventory(s);
+					if (rule->canBePlacedIntoInventorySection(slot) == false)
+					{
+						continue;
+					}
 					if (slot->getType() == INV_SLOT)
 					{
 						placed = fitItemToInventory(slot, item);
