@@ -111,7 +111,7 @@ void BattleItem::load(const YAML::Node &node, Mod *mod, const ScriptGlobal *shar
 		}
 		else
 		{
-			_inventorySlot = mod->getInventory("STR_GROUND");
+			_inventorySlot = mod->getInventoryGround();
 		}
 	}
 	_inventoryX = node["inventoryX"].as<int>(_inventoryX);

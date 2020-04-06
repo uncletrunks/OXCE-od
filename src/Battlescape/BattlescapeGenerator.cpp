@@ -82,7 +82,7 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	{
 		_allowAutoLoadout = false;
 	}
-	_inventorySlotGround = _game->getMod()->getInventory("STR_GROUND", true);
+	_inventorySlotGround = _game->getMod()->getInventoryGround();
 }
 
 /**

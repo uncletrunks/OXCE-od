@@ -1569,7 +1569,7 @@ BattleItem *SavedBattleGame::createItemForTile(RuleItem *rule, Tile *tile)
 	BattleItem *item = new BattleItem(rule, getCurrentItemId());
 	if (tile)
 	{
-		RuleInventory *ground = _rule->getInventory("STR_GROUND", true);
+		RuleInventory *ground = _rule->getInventoryGround();
 		tile->addItem(item, ground);
 	}
 	_items.push_back(item);

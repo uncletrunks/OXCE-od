@@ -2576,8 +2576,8 @@ bool BattleUnit::fitItemToInventory(RuleInventory *slot, BattleItem *item)
  */
 bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip, bool allowAutoLoadout, bool allowUnloadedWeapons)
 {
-	RuleInventory *rightHand = mod->getInventory("STR_RIGHT_HAND");
-	RuleInventory *leftHand = mod->getInventory("STR_LEFT_HAND");
+	RuleInventory *rightHand = mod->getInventoryRightHand();
+	RuleInventory *leftHand = mod->getInventoryLeftHand();
 	bool placed = false;
 	bool loaded = false;
 	const RuleItem *rule = item->getRules();

@@ -120,9 +120,9 @@ void AlienInventory::drawGrid()
 			r.x = i->second->getX();
 			r.x += _game->getMod()->getAlienInventoryOffsetX();
 
-			if (i->second->getId() == "STR_RIGHT_HAND")
+			if (i->second->isRightHand())
 				r.x -= _dynamicOffset;
-			else if (i->second->getId() == "STR_LEFT_HAND")
+			else if (i->second->isLeftHand())
 				r.x += _dynamicOffset;
 
 			r.y = i->second->getY();
@@ -159,9 +159,9 @@ void AlienInventory::drawItems()
 				int x = (*i)->getSlot()->getX() + (*i)->getRules()->getHandSpriteOffX();
 				x += _game->getMod()->getAlienInventoryOffsetX();
 
-				if ((*i)->getSlot()->getId() == "STR_RIGHT_HAND")
+				if ((*i)->getSlot()->isRightHand())
 					x -= _dynamicOffset;
-				else if ((*i)->getSlot()->getId() == "STR_LEFT_HAND")
+				else if ((*i)->getSlot()->isLeftHand())
 					x += _dynamicOffset;
 
 				frame->blitNShade(_items, x, (*i)->getSlot()->getY() + (*i)->getRules()->getHandSpriteOffY());

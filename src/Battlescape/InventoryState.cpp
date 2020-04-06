@@ -1302,7 +1302,7 @@ void InventoryState::onAutoequip(Action *)
 	Tile                     *groundTile    = unit->getTile();
 	std::vector<BattleItem*>  groundInv     = *groundTile->getInventory();
 	Mod                      *mod           = _game->getMod();
-	RuleInventory            *groundRuleInv = mod->getInventory("STR_GROUND", true);
+	RuleInventory            *groundRuleInv = mod->getInventoryGround();
 	int                       worldShade    = _battleGame->getGlobalShade();
 
 	std::vector<BattleUnit*> units;

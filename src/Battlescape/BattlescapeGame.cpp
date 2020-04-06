@@ -2422,7 +2422,7 @@ BattleItem *BattlescapeGame::surveyItems(BattleAction *action, bool pickUpWeapon
 		{
 			if ((*i)->getTurnFlag() || pickUpWeaponsMoreActively)
 			{
-				if ((*i)->getSlot() && (*i)->getSlot()->getId() == "STR_GROUND" && (*i)->getTile())
+				if ((*i)->getSlot() && (*i)->getSlot()->getType() == INV_GROUND && (*i)->getTile())
 				{
 					droppedItems.push_back(*i);
 				}
@@ -2655,28 +2655,28 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 		}
 		else
 		{
-			placed = equipItem(mod->getInventory("STR_BELT", true), item);
+			placed = equipItem(mod->getInventoryBelt(), item);
 		}
 		break;
 	case BT_GRENADE:
 	case BT_PROXIMITYGRENADE:
-		placed = equipItem(mod->getInventory("STR_BELT", true), item);
+		placed = equipItem(mod->getInventoryBelt(), item);
 		break;
 	case BT_FIREARM:
 	case BT_MELEE:
 		if (!rightWeapon)
 		{
-			placed = equipItem(mod->getInventory("STR_RIGHT_HAND", true), item);
+			placed = equipItem(mod->getInventoryRightHand(), item);
 		}
 		break;
 	case BT_MEDIKIT:
 	case BT_SCANNER:
-		placed = equipItem(mod->getInventory("STR_BACK_PACK", true), item);
+		placed = equipItem(mod->getInventoryBackpack(), item);
 		break;
 	case BT_MINDPROBE:
 		if (!leftWeapon)
 		{
-			placed = equipItem(mod->getInventory("STR_LEFT_HAND", true), item);
+			placed = equipItem(mod->getInventoryLeftHand(), item);
 		}
 		break;
 	default: break;

@@ -100,11 +100,11 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 		}
 	}
 
-	_inventorySlotRightHand = _game->getMod()->getInventory("STR_RIGHT_HAND", true);
-	_inventorySlotLeftHand = _game->getMod()->getInventory("STR_LEFT_HAND", true);
-	_inventorySlotBackPack = _game->getMod()->getInventory("STR_BACK_PACK", true);
-	_inventorySlotBelt = _game->getMod()->getInventory("STR_BELT", true);
-	_inventorySlotGround = _game->getMod()->getInventory("STR_GROUND", true);
+	_inventorySlotRightHand = _game->getMod()->getInventoryRightHand();
+	_inventorySlotLeftHand = _game->getMod()->getInventoryLeftHand();
+	_inventorySlotBackPack = _game->getMod()->getInventoryBackpack();
+	_inventorySlotBelt = _game->getMod()->getInventoryBelt();
+	_inventorySlotGround = _game->getMod()->getInventoryGround();
 
 	_groundSlotsX = (Screen::ORIGINAL_WIDTH - _inventorySlotGround->getX()) / RuleInventory::SLOT_W;
 	_groundSlotsY = (Screen::ORIGINAL_HEIGHT - _inventorySlotGround->getY()) / RuleInventory::SLOT_H;

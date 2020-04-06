@@ -493,10 +493,22 @@ public:
 	const std::vector<std::string> &getUfopaediaList() const;
 	/// Gets the available article categories.
 	const std::vector<std::string> &getUfopaediaCategoryList() const;
+
 	/// Gets the inventory list.
 	std::map<std::string, RuleInventory*> *getInventories();
 	/// Gets the ruleset for a specific inventory.
 	RuleInventory *getInventory(const std::string &id, bool error = false) const;
+	/// Gets the ruleset for right hand inventory slot.
+	RuleInventory *getInventoryRightHand() const { return getInventory("STR_RIGHT_HAND", true); }
+	/// Gets the ruleset for left hand inventory slot.
+	RuleInventory *getInventoryLeftHand() const { return getInventory("STR_LEFT_HAND", true); }
+	/// Gets the ruleset for backpack inventory slot.
+	RuleInventory *getInventoryBackpack() const { return getInventory("STR_BACK_PACK", true); }
+	/// Gets the ruleset for belt inventory slot.
+	RuleInventory *getInventoryBelt() const { return getInventory("STR_BELT", true); }
+	/// Gets the ruleset for ground inventory slot.
+	RuleInventory *getInventoryGround() const { return getInventory("STR_GROUND", true); }
+
 	/// Gets whether or not the inventory slots overlap with the paperdoll button
 	bool getInventoryOverlapsPaperdoll() const { return _inventoryOverlapsPaperdoll; }
 	/// Gets max view distance in BattleScape.

@@ -3161,7 +3161,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 		BattleItem *weapon;
 		if (leftHand)
 		{
-			weapon = selectedUnit->getItem("STR_LEFT_HAND");
+			weapon = selectedUnit->getLeftHandWeapon();
 		}
 		else if (special)
 		{
@@ -3170,7 +3170,7 @@ void BattlescapeState::txtTooltipInExtra(Action *action, bool leftHand, bool spe
 		}
 		else
 		{
-			weapon = selectedUnit->getItem("STR_RIGHT_HAND");
+			weapon = selectedUnit->getRightHandWeapon();
 		}
 
 		// no weapon selected... do normal tooltip

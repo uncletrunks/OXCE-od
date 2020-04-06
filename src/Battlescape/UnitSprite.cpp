@@ -949,7 +949,7 @@ void UnitSprite::drawRoutine4()
 		}
 		else
 		{
-			if (_itemR->getSlot()->getId() == "STR_RIGHT_HAND")
+			if (_itemR->getSlot()->isRightHand())
 			{
 				selectItem(itemR, _itemR, unitDir);
 				itemR.offX = (0);
