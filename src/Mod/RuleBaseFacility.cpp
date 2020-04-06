@@ -170,7 +170,7 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 	}
 	if (_leavesBehindOnSellNames.size())
 	{
-		_leavesBehindOnSell.resize(_leavesBehindOnSellNames.size());
+		_leavesBehindOnSell.reserve(_leavesBehindOnSellNames.size());
 		auto first = mod->getBaseFacility(_leavesBehindOnSellNames.at(0), true);
 		if (first->getSize() == _size)
 		{
@@ -195,7 +195,7 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 	}
 	if (_buildOverFacilitiesNames.size())
 	{
-		_buildOverFacilities.resize(_buildOverFacilitiesNames.size());
+		_buildOverFacilities.reserve(_buildOverFacilitiesNames.size());
 		for (const auto& n : _buildOverFacilitiesNames)
 		{
 			_buildOverFacilities.push_back(mod->getBaseFacility(n, true));
