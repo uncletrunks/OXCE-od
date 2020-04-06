@@ -268,22 +268,24 @@ void Inventory::drawGridLabels(bool showTuCost)
 	text.setColor(rule->getElement("textSlots")->color);
 	text.setHighContrast(true);
 
-	for (std::map<std::string, RuleInventory*>::iterator i = _game->getMod()->getInventories()->begin(); i != _game->getMod()->getInventories()->end(); ++i)
+	// Note: iterating over the (sorted) invs vector instead of invs map, because we want to consider listOrder here
+	for (auto& invName : _game->getMod()->getInvsList())
 	{
+		auto i = _game->getMod()->getInventory(invName, true);
 		// Draw label
-		text.setX(i->second->getX());
-		text.setY(i->second->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
+		text.setX(i->getX());
+		text.setY(i->getY() - text.getFont()->getHeight() - text.getFont()->getSpacing());
 		if (showTuCost && _selItem != 0)
 		{
 			std::ostringstream ss;
-			ss << _game->getLanguage()->getString(i->second->getId());
+			ss << _game->getLanguage()->getString(i->getId());
 			ss << ":";
-			ss << _selItem->getSlot()->getCost(i->second);
+			ss << _selItem->getSlot()->getCost(i);
 			text.setText(ss.str().c_str());
 		}
 		else
 		{
-			text.setText(_game->getLanguage()->getString(i->second->getId()));
+			text.setText(_game->getLanguage()->getString(i->getId()));
 		}
 		text.blit(_gridLabels->getSurface());
 	}
