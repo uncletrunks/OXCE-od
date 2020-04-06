@@ -5039,7 +5039,7 @@ void getSmokeReduction(const Mod *m, int &smoke)
 	smoke = smoke * m->getMaxViewDistance() / (3 * 20);
 }
 
-void getUnitScript(const Mod* mod, const Unit* unit, const std::string &name)
+void getUnitScript(const Mod* mod, const Unit* &unit, const std::string &name)
 {
 	if (mod)
 	{
@@ -5050,7 +5050,7 @@ void getUnitScript(const Mod* mod, const Unit* unit, const std::string &name)
 		unit = nullptr;
 	}
 }
-void getArmorScript(const Mod* mod, const Armor* armor, const std::string &name)
+void getArmorScript(const Mod* mod, const Armor* &armor, const std::string &name)
 {
 	if (mod)
 	{
@@ -5061,7 +5061,7 @@ void getArmorScript(const Mod* mod, const Armor* armor, const std::string &name)
 		armor = nullptr;
 	}
 }
-void getItemScript(const Mod* mod, const RuleItem* item, const std::string &name)
+void getItemScript(const Mod* mod, const RuleItem* &item, const std::string &name)
 {
 	if (mod)
 	{
@@ -5072,7 +5072,7 @@ void getItemScript(const Mod* mod, const RuleItem* item, const std::string &name
 		item = nullptr;
 	}
 }
-void getSkillScript(const Mod* mod, const RuleSkill* skill, const std::string &name)
+void getSkillScript(const Mod* mod, const RuleSkill* &skill, const std::string &name)
 {
 	if (mod)
 	{
@@ -5083,7 +5083,7 @@ void getSkillScript(const Mod* mod, const RuleSkill* skill, const std::string &n
 		skill = nullptr;
 	}
 }
-void getSoldierScript(const Mod* mod, const RuleSoldier* soldier, const std::string &name)
+void getSoldierScript(const Mod* mod, const RuleSoldier* &soldier, const std::string &name)
 {
 	if (mod)
 	{
