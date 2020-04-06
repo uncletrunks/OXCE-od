@@ -404,8 +404,6 @@ public:
 
 	/// Gets the item in the specified slot.
 	BattleItem *getItem(RuleInventory *slot, int x = 0, int y = 0) const;
-	/// Gets the item in the specified slot.
-	BattleItem *getItem(const std::string &slot, int x = 0, int y = 0) const;
 	/// Gets the item in the main hand.
 	BattleItem *getMainHandWeapon(bool quickest = true) const;
 	/// Gets a grenade from the belt, if any.
@@ -414,8 +412,15 @@ public:
 	BattleItem *getRightHandWeapon() const;
 	/// Gets the item from left hand.
 	BattleItem *getLeftHandWeapon() const;
+	/// Set the right hand as main active hand.
+	void setActiveRightHand();
+	/// Set the left hand as main active hand.
+	void setActiveLeftHand();
+	/// Choose what weapon was last use by unit.
+	BattleItem *getActiveHand(BattleItem *left, BattleItem *right) const;
 	/// Reloads a weapon if needed.
 	bool reloadAmmo();
+
 	/// Check if this unit is in the exit area
 	bool isInExitArea(SpecialTileType stt = START_POINT) const;
 	bool liesInExitArea(Tile *tile, SpecialTileType stt = START_POINT) const;
@@ -530,10 +535,6 @@ public:
 	void addKillCount();
 	/// Get unit type.
 	std::string getType() const;
-	/// Set the hand this unit is using;
-	void setActiveHand(const std::string &slot);
-	/// Get unit's active hand.
-	std::string getActiveHand() const;
 	/// Convert's unit to a faction
 	void convertToFaction(UnitFaction f);
 	/// Set health to 0

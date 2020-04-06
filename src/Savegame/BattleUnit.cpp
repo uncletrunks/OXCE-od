@@ -2983,41 +2983,6 @@ BattleItem *BattleUnit::getItem(RuleInventory *slot, int x, int y) const
 }
 
 /**
- * Checks if there's an inventory item in
- * the specified inventory position.
- * @param slot Inventory slot.
- * @param x X position in slot.
- * @param y Y position in slot.
- * @return Item in the slot, or NULL if none.
- */
-BattleItem *BattleUnit::getItem(const std::string &slot, int x, int y) const
-{
-	// Soldier items
-	if (slot != "STR_GROUND")
-	{
-		for (std::vector<BattleItem*>::const_iterator i = _inventory.begin(); i != _inventory.end(); ++i)
-		{
-			if ((*i)->getSlot() != 0 && (*i)->getSlot()->getId() == slot && (*i)->occupiesSlot(x, y))
-			{
-				return *i;
-			}
-		}
-	}
-	// Ground items
-	else if (_tile != 0)
-	{
-		for (std::vector<BattleItem*>::const_iterator i = _tile->getInventory()->begin(); i != _tile->getInventory()->end(); ++i)
-		{
-			if ((*i)->getSlot() != 0 && (*i)->occupiesSlot(x, y))
-			{
-				return *i;
-			}
-		}
-	}
-	return 0;
-}
-
-/**
  * Get the "main hand weapon" from the unit.
  * @param quickest Whether to get the quickest weapon, default true
  * @return Pointer to item.
@@ -3054,7 +3019,7 @@ BattleItem *BattleUnit::getMainHandWeapon(bool quickest) const
 	// otherwise pick the one with the least snapshot TUs
 	int tuRightHand = getActionTUs(BA_SNAPSHOT, weaponRightHand).Time;
 	int tuLeftHand = getActionTUs(BA_SNAPSHOT, weaponLeftHand).Time;
-	BattleItem *weaponCurrentHand = getItem(getActiveHand());
+	BattleItem *weaponCurrentHand = getActiveHand(weaponLeftHand, weaponRightHand);
 	//prioritize blaster
 	if (!quickest && _faction != FACTION_PLAYER)
 	{
@@ -3156,6 +3121,32 @@ BattleItem *BattleUnit::getLeftHandWeapon() const
 		}
 	}
 	return nullptr;
+}
+
+/**
+ * Set the right hand as main active hand.
+ */
+void BattleUnit::setActiveRightHand()
+{
+	_activeHand = "STR_RIGHT_HAND";
+}
+
+/**
+ * Set the left hand as main active hand.
+ */
+void BattleUnit::setActiveLeftHand()
+{
+	_activeHand = "STR_LEFT_HAND";
+}
+
+/**
+ * Choose what weapon was last use by unit.
+ */
+BattleItem *BattleUnit::getActiveHand(BattleItem *left, BattleItem *right) const
+{
+	if (_activeHand == "STR_RIGHT_HAND" && right) return right;
+	if (_activeHand == "STR_LEFT_HAND" && left) return left;
+	return left ? left : right;
 }
 
 /**
@@ -3909,26 +3900,6 @@ void BattleUnit::addKillCount()
 std::string BattleUnit::getType() const
 {
 	return _type;
-}
-
-/**
- * Set unit's active hand.
- * @param hand active hand.
- */
-void BattleUnit::setActiveHand(const std::string &hand)
-{
-	_activeHand = hand;
-}
-
-/**
- * Get unit's active hand.
- * @return active hand.
- */
-std::string BattleUnit::getActiveHand() const
-{
-	if (getItem(_activeHand)) return _activeHand;
-	if (getLeftHandWeapon()) return "STR_LEFT_HAND";
-	return "STR_RIGHT_HAND";
 }
 
 /**

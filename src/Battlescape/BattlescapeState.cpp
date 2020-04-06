@@ -1363,7 +1363,7 @@ void BattlescapeState::btnLeftHandItemClick(Action *action)
 
 		_battleGame->cancelCurrentAction();
 
-		_save->getSelectedUnit()->setActiveHand("STR_LEFT_HAND");
+		_save->getSelectedUnit()->setActiveLeftHand();
 		_map->draw();
 		BattleItem *leftHandItem = _save->getSelectedUnit()->getLeftHandWeapon();
 		if (!leftHandItem)
@@ -1403,7 +1403,7 @@ void BattlescapeState::btnRightHandItemClick(Action *action)
 
 		_battleGame->cancelCurrentAction();
 
-		_save->getSelectedUnit()->setActiveHand("STR_RIGHT_HAND");
+		_save->getSelectedUnit()->setActiveRightHand();
 		_map->draw();
 		BattleItem *rightHandItem = _save->getSelectedUnit()->getRightHandWeapon();
 		if (!rightHandItem)

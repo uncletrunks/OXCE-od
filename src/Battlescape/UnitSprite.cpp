@@ -1460,10 +1460,7 @@ void UnitSprite::sortRifles()
 	{
 		if (_itemL && _itemL->getRules()->isTwoHanded())
 		{
-			if (_unit->getActiveHand() == "STR_LEFT_HAND")
-			{
-				_itemR = _itemL;
-			}
+			_itemR = _unit->getActiveHand(_itemL, _itemR);
 			_itemL = 0;
 		}
 		else if (_unit->getStatus() != STATUS_AIMING)
