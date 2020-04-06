@@ -53,6 +53,7 @@ private:
 	Timer *_gameTimer, *_zoomInEffectTimer, *_zoomOutEffectTimer, *_dogfightStartTimer, *_dogfightTimer;
 	bool _pause, _zoomInEffectDone, _zoomOutEffectDone;
 	Text *_txtDebug;
+	Text *_txtSlacking;
 	std::list<State*> _popups;
 	std::list<DogfightState*> _dogfights, _dogfightsToBeStarted;
 	std::vector<Craft*> _activeCrafts;
@@ -174,6 +175,7 @@ private:
 	/// Process each individual mission script command.
 	bool processCommand(RuleMissionScript *command);
 	bool buttonsDisabled();
+	void updateSlackingIndicator();
 };
 
 }

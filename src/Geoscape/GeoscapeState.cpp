@@ -182,6 +182,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_txtMonth = new Text(29, 8, screenWidth-32, screenHeight/2-6);
 	_txtYear = new Text(59, 8, screenWidth-61, screenHeight/2+1);
 	_txtFunds = new Text(59, 8, screenWidth-61, screenHeight/2-27);
+	_txtSlacking = new Text(59, 8, screenWidth - 61, screenHeight / 2 - 112);
 
 	_timeSpeed = _btn5Secs;
 	_gameTimer = new Timer(Options::geoClockSpeed);
@@ -235,6 +236,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	add(_txtDay, "text", "geoscape");
 	add(_txtMonth, "text", "geoscape");
 	add(_txtYear, "text", "geoscape");
+	add(_txtSlacking, "text", "geoscape");
 
 	add(_txtDebug, "text", "geoscape");
 
@@ -382,6 +384,8 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_txtMonth->setAlign(ALIGN_CENTER);
 
 	_txtYear->setAlign(ALIGN_CENTER);
+
+	_txtSlacking->setAlign(ALIGN_RIGHT);
 
 	if (Options::showFundsOnGeoscape)
 	{
@@ -623,6 +627,7 @@ void GeoscapeState::init()
 {
 	State::init();
 	timeDisplay();
+	updateSlackingIndicator();
 
 	_globe->onMouseClick((ActionHandler)&GeoscapeState::globeClick);
 	_globe->onMouseOver(0);
@@ -2090,6 +2095,8 @@ void GeoscapeState::time1Hour()
 			break;
 		}
 	}
+
+	updateSlackingIndicator();
 }
 
 /**
@@ -4004,6 +4011,30 @@ void GeoscapeState::resize(int &dX, int &dY)
 bool GeoscapeState::buttonsDisabled()
 {
 	return _zoomInEffectTimer->isRunning() || _zoomOutEffectTimer->isRunning();
+}
+
+void GeoscapeState::updateSlackingIndicator()
+{
+	if (!Options::isPasswordCorrect())
+		return;
+
+	int scientistsSlacking = 0;
+	int engineersSlacking = 0;
+	for (auto xcomBase : *_game->getSavedGame()->getBases())
+	{
+		scientistsSlacking += xcomBase->getAvailableScientists();
+		engineersSlacking += xcomBase->getAvailableEngineers();
+	}
+	if (scientistsSlacking > 0 || engineersSlacking > 0)
+	{
+		std::ostringstream ss;
+		ss << scientistsSlacking << "/" << engineersSlacking;
+		_txtSlacking->setText(ss.str());
+	}
+	else
+	{
+		_txtSlacking->setText("");
+	}
 }
 
 }
