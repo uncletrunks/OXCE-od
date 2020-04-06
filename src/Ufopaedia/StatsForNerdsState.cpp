@@ -490,6 +490,37 @@ void StatsForNerdsState::endHeading()
 }
 
 /**
+ * Adds a vector of generic types
+ */
+template<typename T, typename Callback>
+void StatsForNerdsState::addVectorOfGeneric(std::ostringstream &ss, const std::vector<T> &vec, const std::string &propertyName, Callback&& callback)
+{
+	if (vec.empty() && !_showDefaults)
+	{
+		return;
+	}
+	resetStream(ss);
+	int i = 0;
+	ss << "{";
+	for (auto &item : vec)
+	{
+		if (i > 0)
+		{
+			ss << ", ";
+		}
+		addTranslation(ss, callback(item));
+		i++;
+	}
+	ss << "}";
+	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
+	++_counter;
+	if (!vec.empty())
+	{
+		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
+	}
+}
+
+/**
  * Adds a single string value to the table.
  */
 void StatsForNerdsState::addSingleString(std::ostringstream &ss, const std::string &id, const std::string &propertyName, const std::string &defaultId, bool translate)
@@ -515,34 +546,13 @@ void StatsForNerdsState::addSingleString(std::ostringstream &ss, const std::stri
 	}
 }
 
+
 /**
  * Adds a vector of strings to the table.
  */
 void StatsForNerdsState::addVectorOfStrings(std::ostringstream &ss, const std::vector<std::string> &vec, const std::string &propertyName)
 {
-	if (vec.empty() && !_showDefaults)
-	{
-		return;
-	}
-	resetStream(ss);
-	int i = 0;
-	ss << "{";
-	for (auto &item : vec)
-	{
-		if (i > 0)
-		{
-			ss << ", ";
-		}
-		addTranslation(ss, item);
-		i++;
-	}
-	ss << "}";
-	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
-	++_counter;
-	if (!vec.empty())
-	{
-		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
-	}
+	addVectorOfGeneric(ss, vec, propertyName, [](const std::string& s) -> const std::string& { return s; });
 }
 
 /**
@@ -550,29 +560,7 @@ void StatsForNerdsState::addVectorOfStrings(std::ostringstream &ss, const std::v
  */
 void StatsForNerdsState::addVectorOfResearch(std::ostringstream &ss, const std::vector<const RuleResearch *> &vec, const std::string &propertyName)
 {
-	if (vec.empty() && !_showDefaults)
-	{
-		return;
-	}
-	resetStream(ss);
-	int i = 0;
-	ss << "{";
-	for (auto &item : vec)
-	{
-		if (i > 0)
-		{
-			ss << ", ";
-		}
-		addTranslation(ss, item->getName());
-		i++;
-	}
-	ss << "}";
-	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
-	++_counter;
-	if (!vec.empty())
-	{
-		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
-	}
+	addVectorOfRulesNamed(ss, vec, propertyName);
 }
 
 /**
@@ -585,34 +573,48 @@ void StatsForNerdsState::addRule(std::ostringstream &ss, T* rule, const std::str
 }
 
 /**
+ * Adds generic Rule (need having `getId()`)
+ */
+template<typename T>
+void StatsForNerdsState::addRuleId(std::ostringstream &ss, T* rule, const std::string &propertyName)
+{
+	addSingleString(ss, rule ? rule->getId() : "", propertyName);
+}
+
+/**
+ * Adds generic Rule (need having `getName()`)
+ */
+template<typename T>
+void StatsForNerdsState::addRuleNamed(std::ostringstream &ss, T* rule, const std::string &propertyName)
+{
+	addSingleString(ss, rule ? rule->getName() : "", propertyName);
+}
+
+/**
  * Adds a vector of generic Rules (need having `getType()`)
  */
 template<typename T>
 void StatsForNerdsState::addVectorOfRules(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName)
 {
-	if (vec.empty() && !_showDefaults)
-	{
-		return;
-	}
-	resetStream(ss);
-	int i = 0;
-	ss << "{";
-	for (auto &item : vec)
-	{
-		if (i > 0)
-		{
-			ss << ", ";
-		}
-		addTranslation(ss, item->getType());
-		i++;
-	}
-	ss << "}";
-	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
-	++_counter;
-	if (!vec.empty())
-	{
-		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
-	}
+	addVectorOfGeneric(ss, vec, propertyName, [](T* item){ return item->getType(); });
+}
+
+/**
+ * Adds a vector of generic Rules (need having `getId()`)
+ */
+template<typename T>
+void StatsForNerdsState::addVectorOfRulesId(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName)
+{
+	addVectorOfGeneric(ss, vec, propertyName, [](T* item){ return item->getId(); });
+}
+
+/**
+ * Adds a vector of generic Rules (need having `getName()`)
+ */
+template<typename T>
+void StatsForNerdsState::addVectorOfRulesNamed(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName)
+{
+	addVectorOfGeneric(ss, vec, propertyName, [](T* item){ return item->getName(); });
 }
 
 /**
