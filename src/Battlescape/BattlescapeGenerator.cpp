@@ -1545,7 +1545,19 @@ bool BattlescapeGenerator::placeItemByLayout(BattleItem *item, const std::vector
 
 				auto inventorySlot = _game->getMod()->getInventory(layoutItem->getSlot(), true);
 
-				if (unit->getItem(inventorySlot, layoutItem->getSlotX(), layoutItem->getSlotY())) continue;
+				// we need to check all "slot boxes" for overlap (not just top left)
+				bool overlaps = false;
+				for (int x = 0; x < item->getRules()->getInventoryWidth(); ++x)
+				{
+					for (int y = 0; y < item->getRules()->getInventoryHeight(); ++y)
+					{
+						if (!overlaps && unit->getItem(inventorySlot, x + layoutItem->getSlotX(), y + layoutItem->getSlotY()))
+						{
+							overlaps = true;
+						}
+					}
+				}
+				if (overlaps) continue;
 
 				auto toLoad = 0;
 				for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
