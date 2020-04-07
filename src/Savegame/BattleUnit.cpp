@@ -2141,13 +2141,18 @@ int BattleUnit::getAccuracyModifier(const BattleItem *item) const
 		}
 		else
 		{
-			if (getRightHandWeapon() == item)
+			auto slot = item->getSlot();
+			if (slot)
 			{
-				wounds += _fatalWounds[BODYPART_RIGHTARM];
-			}
-			else
-			{
-				wounds += _fatalWounds[BODYPART_LEFTARM];
+				// why broken hands should affect your aim if you shoot not using them?
+				if (slot->isRightHand())
+				{
+					wounds += _fatalWounds[BODYPART_RIGHTARM];
+				}
+				if (slot->isLeftHand())
+				{
+					wounds += _fatalWounds[BODYPART_LEFTARM];
+				}
 			}
 		}
 	}
