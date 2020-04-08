@@ -107,8 +107,10 @@ struct ScriptText
 		return ptr ? ptr : "";
 	}
 
-	constexpr static ScriptText empty = { "" };
+	const static ScriptText empty;
 };
+
+const inline ScriptText ScriptText::empty = { "" };
 
 
 using ScriptFunc = RetEnum (*)(ScriptWorkerBase&, const Uint8*, ProgPos&);
