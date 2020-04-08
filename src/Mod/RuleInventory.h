@@ -33,6 +33,7 @@ struct RuleSlot
 enum InventoryType { INV_SLOT, INV_HAND, INV_GROUND };
 
 class RuleItem;
+class ScriptParserBase;
 
 /**
  * Represents a specific section of the inventory,
@@ -58,6 +59,12 @@ public:
 	static const int PAPERDOLL_H = 70;
 	static const int PAPERDOLL_X = 60;
 	static const int PAPERDOLL_Y = 65;
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "RuleInventory";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 	/// Creates a blank inventory ruleset.
 	RuleInventory(const std::string &id);
 	/// Cleans up the inventory ruleset.
@@ -83,7 +90,7 @@ public:
 	/// Checks if an item fits in a slot.
 	bool fitItemInSlot(const RuleItem *item, int x, int y) const;
 	/// Gets a certain cost in the inventory.
-	int getCost(RuleInventory *slot) const;
+	int getCost(const RuleInventory *slot) const;
 	int getListOrder() const;
 };
 

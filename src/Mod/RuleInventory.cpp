@@ -20,6 +20,7 @@
 #include <cmath>
 #include "RuleItem.h"
 #include "../Engine/Screen.h"
+#include "../Engine/ScriptBind.h"
 
 namespace YAML
 {
@@ -263,7 +264,7 @@ bool RuleInventory::fitItemInSlot(const RuleItem *item, int x, int y) const
  * @param slot The new section id.
  * @return The time unit cost.
  */
-int RuleInventory::getCost(RuleInventory* slot) const
+int RuleInventory::getCost(const RuleInventory* slot) const
 {
 	if (slot == this)
 		return 0;
@@ -273,6 +274,81 @@ int RuleInventory::getCost(RuleInventory* slot) const
 int RuleInventory::getListOrder() const
 {
 	return _listOrder;
+}
+
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void getIdScript(const RuleInventory* bu, ScriptText& txt)
+{
+	if (bu)
+	{
+		txt = { bu->getId().c_str() };
+		return;
+	}
+	else
+	{
+		txt = ScriptText::empty;
+	}
+}
+
+void getTypeScript(const RuleInventory* bu, int& type)
+{
+	if (bu)
+	{
+		type = (int)bu->getType();
+	}
+	else
+	{
+		type = 0;
+	}
+}
+
+std::string debugDisplayScript(const RuleInventory* bu)
+{
+	if (bu)
+	{
+		std::string s;
+		s += RuleInventory::ScriptName;
+		s += "(id: \"";
+		s += bu->getId();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+} // namespace
+
+
+
+/**
+ * Register RuleInventory in script parser.
+ * @param parser Script parser.
+ */
+void RuleInventory::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<RuleInventory> bu = { parser };
+
+	bu.add<&getIdScript>("getId");
+	bu.add<&getTypeScript>("getType");
+	bu.add<&RuleInventory::isRightHand>("isRightHand");
+	bu.add<&RuleInventory::isLeftHand>("isLeftHand");
+	bu.add<&RuleInventory::getCost>("getMoveToCost", "Cost of moving item from slot in first arg to slot from last arg");
+
+	bu.addDebugDisplay<&debugDisplayScript>();
+
+	bu.addCustomConst("INV_GROUND", INV_GROUND);
+	bu.addCustomConst("INV_SLOT", INV_SLOT);
+	bu.addCustomConst("INV_HAND", INV_HAND);
 }
 
 }

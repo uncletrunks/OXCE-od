@@ -1222,6 +1222,10 @@ bool BattleItem::isAmmo() const
 }
 
 
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
 namespace
 {
 
@@ -1302,6 +1306,22 @@ struct getAmmoForActionConstScript
 		else
 		{
 			ammo = nullptr;
+		}
+		return RetContinue;
+	}
+};
+
+struct getRuleInvenotrySlotScript
+{
+	static RetEnum func(const BattleItem *weapon, const RuleInventory *&inv)
+	{
+		if (weapon)
+		{
+			inv = weapon->getSlot();
+		}
+		else
+		{
+			inv = nullptr;
 		}
 		return RetContinue;
 	}
@@ -1401,7 +1421,7 @@ void setStimulantQuantityScript(BattleItem* bt, int i)
 	}
 }
 
-}
+} // namespace
 
 /**
  * Register BattleItem in script parser.
@@ -1423,6 +1443,7 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 	bi.addFunc<getAmmoForSlotConstScript>("getAmmoForSlot");
 	bi.addFunc<getAmmoForActionScript>("getAmmoForAction");
 	bi.addFunc<getAmmoForActionConstScript>("getAmmoForAction");
+	bi.addFunc<getRuleInvenotrySlotScript>("getSlot");
 	bi.addPair<BattleUnit, &BattleItem::getPreviousOwner, &BattleItem::getPreviousOwner>("getPreviousOwner");
 	bi.addPair<BattleUnit, &BattleItem::getOwner, &BattleItem::getOwner>("getOwner");
 	bi.add<&BattleItem::getId>("getId");

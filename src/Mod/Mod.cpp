@@ -5013,6 +5013,11 @@ int Mod::getDefeatFunds() const
 	return _defeatFunds;
 }
 
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
 namespace
 {
 
@@ -5094,7 +5099,19 @@ void getSoldierScript(const Mod* mod, const RuleSoldier* &soldier, const std::st
 		soldier = nullptr;
 	}
 }
+void getInvenotryScript(const Mod* mod, const RuleInventory* &inv, const std::string &name)
+{
+	if (mod)
+	{
+		inv = mod->getInventory(name);
+	}
+	else
+	{
+		inv = nullptr;
+	}
 }
+
+} // namespace
 
 /**
  * Register all useful function used by script.
@@ -5114,11 +5131,18 @@ void Mod::ScriptRegister(ScriptParserBase *parser)
 	mod.add<&Mod::getMaxDarknessToSeeUnits>("getMaxDarknessToSeeUnits");
 	mod.add<&Mod::getMaxViewDistance>("getMaxViewDistance");
 	mod.add<&getSmokeReduction>("getSmokeReduction");
+
 	mod.add<&getUnitScript>("getRuleUnit");
 	mod.add<&getItemScript>("getRuleItem");
 	mod.add<&getArmorScript>("getRuleArmor");
 	mod.add<&getSkillScript>("getRuleSkill");
 	mod.add<&getSoldierScript>("getRuleSoldier");
+	mod.add<&getInvenotryScript>("getRuleInventory");
+	mod.add<&Mod::getInventoryRightHand>("getRuleInventoryRightHand");
+	mod.add<&Mod::getInventoryLeftHand>("getRuleInventoryLeftHand");
+	mod.add<&Mod::getInventoryBackpack>("getRuleInventoryBackpack");
+	mod.add<&Mod::getInventoryBelt>("getRuleInventoryBelt");
+	mod.add<&Mod::getInventoryGround>("getRuleInventoryGround");
 }
 
 }

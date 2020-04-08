@@ -4724,6 +4724,8 @@ bool BattleUnit::isSummonedPlayerUnit() const
 {
 	return _summonedPlayerUnit;
 }
+
+
 ////////////////////////////////////////////////////////////
 //					Script binding
 ////////////////////////////////////////////////////////////
@@ -5141,16 +5143,50 @@ void getInventoryItemScript(BattleUnit* bu, BattleItem *&foundItem, const RuleIt
 	foundItem = nullptr;
 	if (bu)
 	{
-		for (std::vector<BattleItem*>::iterator i = bu->getInventory()->begin(); i != bu->getInventory()->end(); ++i)
+		for (auto* i : *bu->getInventory())
 		{
-			if ((*i)->getRules() == itemRules)
+			if (i->getRules() == itemRules)
 			{
-				foundItem = (*i);
+				foundItem = i;
 				break;
 			}
 		}
 	}
 }
+
+void getInventoryItemScript1(BattleUnit* bu, BattleItem *&foundItem, const RuleInventory *inv, const RuleItem *itemRules)
+{
+	foundItem = nullptr;
+	if (bu)
+	{
+		for (auto* i : *bu->getInventory())
+		{
+			if (i->getSlot() == inv && i->getRules() == itemRules)
+			{
+				foundItem = i;
+				break;
+			}
+		}
+	}
+}
+
+void getInventoryItemScript2(BattleUnit* bu, BattleItem *&foundItem, const RuleInventory *inv)
+{
+	foundItem = nullptr;
+	if (bu)
+	{
+		for (auto* i : *bu->getInventory())
+		{
+			if (i->getSlot() == inv)
+			{
+				foundItem = i;
+				break;
+			}
+		}
+	}
+}
+
+
 std::string debugDisplayScript(const BattleUnit* bu)
 {
 	if (bu)
@@ -5202,6 +5238,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	parser->registerPointerType<Soldier>();
 	parser->registerPointerType<RuleSkill>();
 	parser->registerPointerType<Unit>();
+	parser->registerPointerType<RuleInventory>();
 
 	Bind<BattleUnit> bu = { parser };
 
@@ -5224,6 +5261,8 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&BattleUnit::getWalkingPhase>("getWalkingPhase");
 	bu.add<&setSpawnUnitScript>("setSpawnUnit");
 	bu.add<&getInventoryItemScript>("getInventoryItem");
+	bu.add<&getInventoryItemScript1>("getInventoryItem");
+	bu.add<&getInventoryItemScript2>("getInventoryItem");
 
 
 	bu.addField<&BattleUnit::_tu>("getTimeUnits");
