@@ -299,6 +299,51 @@ struct Func_debug_flush
 	}
 };
 
+struct Func_set_text
+{
+	[[gnu::always_inline]]
+	static RetEnum func (ScriptWorkerBase& c, ScriptText& a, ScriptText b)
+	{
+		a = b;
+		return RetContinue;
+	}
+};
+
+struct Func_clear_text
+{
+	[[gnu::always_inline]]
+	static RetEnum func (ScriptWorkerBase& c, ScriptText& a)
+	{
+		a = ScriptText::empty;
+		return RetContinue;
+	}
+};
+
+struct Func_test_eq_text
+{
+	[[gnu::always_inline]]
+	static RetEnum func (ProgPos& prog, ScriptText a, ScriptText b, ProgPos labelTrue, ProgPos labelFalse)
+	{
+		if (a.ptr == nullptr && b.ptr == nullptr)
+		{
+			prog = labelTrue;
+		}
+		else if (a.ptr == nullptr || b.ptr == nullptr)
+		{
+			prog = labelFalse;
+		}
+		else if (strcmp(a.ptr, b.ptr) == 0)
+		{
+			prog = labelTrue;
+		}
+		else
+		{
+			prog = labelFalse;
+		}
+		return RetContinue;
+	}
+};
+
 } //namespace
 
 ////////////////////////////////////////////////////////////
@@ -2084,6 +2129,10 @@ ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name
 	addParser<helper::FuncGroup<Func_debug_impl_int>>("debug_impl", "");
 	addParser<helper::FuncGroup<Func_debug_impl_text>>("debug_impl", "");
 	addParser<helper::FuncGroup<Func_debug_flush>>("debug_flush", "");
+
+	addParser<helper::FuncGroup<Func_set_text>>("set", "");
+	addParser<helper::FuncGroup<Func_clear_text>>("clear", "");
+	addParser<helper::FuncGroup<Func_test_eq_text>>("test_eq", "");
 
 	addType<ScriptInt>("int");
 	addType<ScriptText>("text");

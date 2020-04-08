@@ -106,6 +106,8 @@ struct ScriptText
 	{
 		return ptr ? ptr : "";
 	}
+
+	constexpr static ScriptText empty = { "" };
 };
 
 
