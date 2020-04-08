@@ -93,7 +93,7 @@ public:
 	/// Loads the region from YAML.
 	void load(const YAML::Node& node);
 	/// Gets the region's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the region's base cost.
 	int getBaseCost() const;
 	/// Checks if a point is inside the region.

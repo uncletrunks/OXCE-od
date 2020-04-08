@@ -60,7 +60,7 @@ void ExtraSounds::load(const YAML::Node &node, const ModData* current)
  * Gets the filename that this sound set represents.
  * @return The sound name.
  */
-std::string ExtraSounds::getType() const
+const std::string& ExtraSounds::getType() const
 {
 	return _type;
 }

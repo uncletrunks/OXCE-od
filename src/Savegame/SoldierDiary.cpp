@@ -1235,7 +1235,7 @@ YAML::Node SoldierCommendations::save() const
  * Get the soldier's commendation's name.
  * @return string Commendation name.
  */
-std::string SoldierCommendations::getType() const
+const std::string& SoldierCommendations::getType() const
 {
 	return _type;
 }
@@ -1244,7 +1244,7 @@ std::string SoldierCommendations::getType() const
  * Get the soldier's commendation's noun.
  * @return string Commendation noun
  */
-std::string SoldierCommendations::getNoun() const
+const std::string& SoldierCommendations::getNoun() const
 {
 	return _noun;
 }

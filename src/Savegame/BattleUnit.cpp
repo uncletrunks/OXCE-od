@@ -3876,7 +3876,7 @@ void BattleUnit::setSpawnUnit(const Unit *spawnUnit)
  * Get the units's rank string.
  * @return rank.
  */
-std::string BattleUnit::getRankString() const
+const std::string& BattleUnit::getRankString() const
 {
 	return _rank;
 }
@@ -3902,7 +3902,7 @@ void BattleUnit::addKillCount()
  * Get unit type.
  * @return unit type.
  */
-std::string BattleUnit::getType() const
+const std::string& BattleUnit::getType() const
 {
 	return _type;
 }

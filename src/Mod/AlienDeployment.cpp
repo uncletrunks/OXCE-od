@@ -264,7 +264,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
  * this deployment. Each deployment type has a unique name.
  * @return Deployment name.
  */
-std::string AlienDeployment::getType() const
+const std::string& AlienDeployment::getType() const
 {
 	return _type;
 }

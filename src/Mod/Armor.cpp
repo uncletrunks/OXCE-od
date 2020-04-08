@@ -251,7 +251,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
  * this armor. Each armor has a unique name. Coveralls, Power Suit,...
  * @return The armor name.
  */
-std::string Armor::getType() const
+const std::string& Armor::getType() const
 {
 	return _type;
 }

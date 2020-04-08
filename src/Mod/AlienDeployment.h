@@ -103,7 +103,7 @@ public:
 	/// Loads Alien Deployment data from YAML.
 	void load(const YAML::Node& node, Mod *mod);
 	/// Gets the Alien Deployment's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the custom UFO name to use for the dummy/blank 'addUFO' mapscript command.
 	const std::string& getCustomUfoName() const { return _customUfo; }
 	/// Gets the Alien Deployment's enviro effects.

@@ -56,9 +56,9 @@ public:
 	RuleCommendations* getRule() { return _rule; }
 
 	/// Get commendation name.
-	std::string getType() const;
+	const std::string &getType() const;
 	/// Get commendation noun.
-	std::string getNoun() const;
+	const std::string &getNoun() const;
 	/// Get the commendation's decoration level's name.
 	std::string getDecorationLevelName(int skipCounter) const;
 	/// Get the commendation's decoration description.

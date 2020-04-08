@@ -124,7 +124,7 @@ void Unit::afterLoad(const Mod* mod)
  * this unit. Each unit type has a unique name.
  * @return The unit's name.
  */
-std::string Unit::getType() const
+const std::string& Unit::getType() const
 {
 	return _type;
 }

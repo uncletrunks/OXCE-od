@@ -88,7 +88,7 @@ public:
 	/// Cross link with other rules.
 	void afterLoad(const Mod* mod);
 	/// Gets the facility's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the facility's requirements.
 	const std::vector<std::string> &getRequirements() const;
 	/// Gets the facility's required function in base to build.

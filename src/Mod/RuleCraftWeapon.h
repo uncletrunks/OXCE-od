@@ -54,7 +54,7 @@ public:
 	/// Loads craft weapon data from YAML.
 	void load(const YAML::Node& node, Mod *mod);
 	/// Gets the craft weapon's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the craft weapon's sprite.
 	int getSprite() const;
 	/// Gets the craft weapon's sound.

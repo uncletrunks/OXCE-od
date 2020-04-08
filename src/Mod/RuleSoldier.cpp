@@ -232,7 +232,7 @@ void RuleSoldier::addSoldierNamePool(const std::string &namFile)
  * this soldier. Each soldier type has a unique name.
  * @return Soldier name.
  */
-std::string RuleSoldier::getType() const
+const std::string& RuleSoldier::getType() const
 {
 	return _type;
 }

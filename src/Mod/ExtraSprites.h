@@ -51,7 +51,7 @@ public:
 	/// Loads the data from YAML.
 	void load(const YAML::Node &node, const ModData* current);
 	/// Gets the sprite's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the list of sprites defined by this mod.
 	std::map<int, std::string> *getSprites();
 	/// Gets the width of the surfaces (used for single images and new spritesets).

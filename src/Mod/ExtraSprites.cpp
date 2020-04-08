@@ -83,7 +83,7 @@ void ExtraSprites::load(const YAML::Node &node, const ModData* current)
  * Gets the filename that this sprite represents.
  * @return The sprite name.
  */
-std::string ExtraSprites::getType() const
+const std::string& ExtraSprites::getType() const
 {
 	return _type;
 }

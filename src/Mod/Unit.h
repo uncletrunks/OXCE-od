@@ -333,7 +333,7 @@ public:
 	void afterLoad(const Mod* mod);
 
 	/// Gets the unit's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the type of staff (soldier/engineer/scientists) or type of item to be recovered when a civilian is saved.
 	std::string getCivilianRecoveryType() const;
 	/// Gets the unit's stats.

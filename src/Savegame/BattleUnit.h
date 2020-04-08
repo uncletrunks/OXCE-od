@@ -528,13 +528,13 @@ public:
 	/// Get the units's alreadyRespawned flag.
 	bool getAlreadyRespawned() const;
 	/// Get the units's rank string.
-	std::string getRankString() const;
+	const std::string& getRankString() const;
 	/// Get the geoscape-soldier object.
 	Soldier *getGeoscapeSoldier() const;
 	/// Add a kill to the counter.
 	void addKillCount();
 	/// Get unit type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Convert's unit to a faction
 	void convertToFaction(UnitFaction f);
 	/// Set health to 0

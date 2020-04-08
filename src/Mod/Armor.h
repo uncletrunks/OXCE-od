@@ -97,7 +97,7 @@ public:
 	/// Loads the armor data from YAML.
 	void load(const YAML::Node& node, const ModScript& parsers, Mod *mod);
 	/// Gets the armor's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the unit's sprite sheet.
 	std::string getSpriteSheet() const;
 	/// Gets the unit's inventory sprite.

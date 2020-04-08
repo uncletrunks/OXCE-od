@@ -46,7 +46,7 @@ public:
 	/// Loads the data from yaml
 	void load(const YAML::Node &node, const ModData* current);
 	/// Gets the sound's type.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the list of sounds defined by this mod
 	std::map<int, std::string> *getSounds();
 	/// Load the external sound into a set.

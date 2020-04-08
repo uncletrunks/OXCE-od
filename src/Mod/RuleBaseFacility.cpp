@@ -218,7 +218,7 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
  * has a unique name.
  * @return The facility's name.
  */
-std::string RuleBaseFacility::getType() const
+const std::string& RuleBaseFacility::getType() const
 {
 	return _type;
 }

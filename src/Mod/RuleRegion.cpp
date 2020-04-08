@@ -101,7 +101,7 @@ void RuleRegion::load(const YAML::Node &node)
  * has a unique name.
  * @return The region type.
  */
-std::string RuleRegion::getType() const
+const std::string& RuleRegion::getType() const
 {
 	return _type;
 }

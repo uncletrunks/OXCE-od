@@ -48,7 +48,7 @@ public:
 	/// Loads a mission script from yaml.
 	void load(const YAML::Node& node);
 	/// Gets the name of the script command.
-	std::string getType() const;
+	const std::string& getType() const;
 	/// Gets the name of the variable to use for keeping track of... things.
 	std::string getVarName() const;
 	/// Gets a complete and unique list of all the mission types contained within this command.

@@ -78,7 +78,7 @@ void RuleCountry::load(const YAML::Node &node)
  * has a unique name.
  * @return The country's name.
  */
-std::string RuleCountry::getType() const
+const std::string& RuleCountry::getType() const
 {
 	return _type;
 }

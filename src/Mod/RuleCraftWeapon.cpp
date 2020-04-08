@@ -93,7 +93,7 @@ void RuleCraftWeapon::load(const YAML::Node &node, Mod *mod)
  * Each craft weapon type has a unique name.
  * @return The craft weapon's name.
  */
-std::string RuleCraftWeapon::getType() const
+const std::string& RuleCraftWeapon::getType() const
 {
 	return _type;
 }

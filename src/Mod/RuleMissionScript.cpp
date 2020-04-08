@@ -123,7 +123,7 @@ void RuleMissionScript::load(const YAML::Node& node)
  * Gets the name of this command.
  * @return the name of the command.
  */
-std::string RuleMissionScript::getType() const
+const std::string& RuleMissionScript::getType() const
 {
 	return _type;
 }
