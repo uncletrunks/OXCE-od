@@ -876,66 +876,6 @@ const std::vector<std::string> &Armor::getUnits() const
 	return _units;
 }
 
-namespace
-{
-
-void getArmorValueScript(const Armor *ar, int &ret, int side)
-{
-	if (ar && 0 <= side && side < SIDE_MAX)
-	{
-		ret = ar->getArmor((UnitSide)side);
-		return;
-	}
-	ret = 0;
-}
-
-std::string debugDisplayScript(const Armor* ar)
-{
-	if (ar)
-	{
-		std::string s;
-		s += Armor::ScriptName;
-		s += "(name: \"";
-		s += ar->getType();
-		s += "\")";
-		return s;
-	}
-	else
-	{
-		return "null";
-	}
-}
-
-}
-
-/**
- * Register Armor in script parser.
- * @param parser Script parser.
- */
-void Armor::ScriptRegister(ScriptParserBase* parser)
-{
-	Bind<Armor> ar = { parser };
-
-	ar.addCustomConst("SIDE_FRONT", SIDE_FRONT);
-	ar.addCustomConst("SIDE_LEFT", SIDE_LEFT);
-	ar.addCustomConst("SIDE_RIGHT", SIDE_RIGHT);
-	ar.addCustomConst("SIDE_REAR", SIDE_REAR);
-	ar.addCustomConst("SIDE_UNDER", SIDE_UNDER);
-
-	ar.add<&Armor::getDrawingRoutine>("getDrawingRoutine");
-	ar.add<&Armor::getVisibilityAtDark>("getVisibilityAtDark");
-	ar.add<&Armor::getVisibilityAtDay>("getVisibilityAtDay");
-	ar.add<&Armor::getPersonalLight>("getPersonalLight");
-	ar.add<&Armor::getSize>("getSize");
-
-	UnitStats::addGetStatsScript<&Armor::_stats>(ar, "Stats.");
-
-	ar.add<&getArmorValueScript>("getArmor");
-
-	ar.addScriptValue<&Armor::_scriptValues>(false);
-	ar.addDebugDisplay<&debugDisplayScript>();
-}
-
 /**
  * Gets the index of the sprite in the CustomArmorPreview sprite set.
  * @return Sprite index.
@@ -1015,6 +955,71 @@ int Armor::getKneelHeight() const
 int Armor::getFloatHeight() const
 {
 	return _floatHeight;
+}
+
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void getArmorValueScript(const Armor *ar, int &ret, int side)
+{
+	if (ar && 0 <= side && side < SIDE_MAX)
+	{
+		ret = ar->getArmor((UnitSide)side);
+		return;
+	}
+	ret = 0;
+}
+
+std::string debugDisplayScript(const Armor* ar)
+{
+	if (ar)
+	{
+		std::string s;
+		s += Armor::ScriptName;
+		s += "(name: \"";
+		s += ar->getType();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+} // namespace
+
+/**
+ * Register Armor in script parser.
+ * @param parser Script parser.
+ */
+void Armor::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<Armor> ar = { parser };
+
+	ar.addCustomConst("SIDE_FRONT", SIDE_FRONT);
+	ar.addCustomConst("SIDE_LEFT", SIDE_LEFT);
+	ar.addCustomConst("SIDE_RIGHT", SIDE_RIGHT);
+	ar.addCustomConst("SIDE_REAR", SIDE_REAR);
+	ar.addCustomConst("SIDE_UNDER", SIDE_UNDER);
+
+	ar.add<&Armor::getDrawingRoutine>("getDrawingRoutine");
+	ar.add<&Armor::getVisibilityAtDark>("getVisibilityAtDark");
+	ar.add<&Armor::getVisibilityAtDay>("getVisibilityAtDay");
+	ar.add<&Armor::getPersonalLight>("getPersonalLight");
+	ar.add<&Armor::getSize>("getSize");
+
+	UnitStats::addGetStatsScript<&Armor::_stats>(ar, "Stats.");
+
+	ar.add<&getArmorValueScript>("getArmor");
+
+	ar.addScriptValue<&Armor::_scriptValues>(false);
+	ar.addDebugDisplay<&debugDisplayScript>();
 }
 
 }

@@ -414,12 +414,14 @@ bool Unit::getShowFullNameInAlienInventory(Mod *mod) const
 	return mod->getShowFullNameInAlienInventory();
 }
 
+
 ////////////////////////////////////////////////////////////
 //					Script binding
 ////////////////////////////////////////////////////////////
 
 namespace
 {
+
 std::string debugDisplayScript(const Unit* unit)
 {
 	if (unit)
@@ -436,7 +438,9 @@ std::string debugDisplayScript(const Unit* unit)
 		return "null";
 	}
 }
-}
+
+} // namespace
+
 void Unit::ScriptRegister(ScriptParserBase* parser)
 {
 	Bind<Unit> un = { parser };
