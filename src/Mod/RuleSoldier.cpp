@@ -592,8 +592,27 @@ int RuleSoldier::getRankSpriteTiny() const
 	return _rankSpriteTiny;
 }
 
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+
 namespace
 {
+
+void getTypeScript(const RuleSkill* r, ScriptText& txt)
+{
+	if (r)
+	{
+		txt = { r->getType().c_str() };
+		return;
+	}
+	else
+	{
+		txt = ScriptText::empty;
+	}
+}
 
 std::string debugDisplayScript(const RuleSoldier* rs)
 {
@@ -625,6 +644,8 @@ void RuleSoldier::ScriptRegister(ScriptParserBase* parser)
 	UnitStats::addGetStatsScript<&RuleSoldier::_statCaps>(ra, "StatsCap.");
 	UnitStats::addGetStatsScript<&RuleSoldier::_minStats>(ra, "StatsMin.");
 	UnitStats::addGetStatsScript<&RuleSoldier::_maxStats>(ra, "StatsMax.");
+
+	ra.add<&getTypeScript>("getType");
 
 	ra.addScriptValue<&RuleSoldier::_scriptValues>(false);
 	ra.addDebugDisplay<&debugDisplayScript>();

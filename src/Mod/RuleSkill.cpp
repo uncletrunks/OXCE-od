@@ -85,12 +85,26 @@ void RuleSkill::afterLoad(const Mod* mod)
 	Collections::removeAll(_requiredBonusNames);
 }
 
+
 ////////////////////////////////////////////////////////////
 //					Script binding
 ////////////////////////////////////////////////////////////
 
 namespace
 {
+
+void getTypeScript(const RuleSkill* r, ScriptText& txt)
+{
+	if (r)
+	{
+		txt = { r->getType().c_str() };
+		return;
+	}
+	else
+	{
+		txt = ScriptText::empty;
+	}
+}
 
 std::string debugDisplayScript(const RuleSkill* rs)
 {
@@ -119,6 +133,9 @@ std::string debugDisplayScript(const RuleSkill* rs)
 void RuleSkill::ScriptRegister(ScriptParserBase* parser)
 {
 	Bind<RuleSkill> rs = { parser };
+
+	rs.add<&getTypeScript>("getType");
+
 	rs.addScriptValue<&RuleSkill::_scriptValues>();
 	rs.addDebugDisplay<&debugDisplayScript>();
 }

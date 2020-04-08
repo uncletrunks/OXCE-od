@@ -965,6 +965,19 @@ int Armor::getFloatHeight() const
 namespace
 {
 
+void getTypeScript(const Armor* r, ScriptText& txt)
+{
+	if (r)
+	{
+		txt = { r->getType().c_str() };
+		return;
+	}
+	else
+	{
+		txt = ScriptText::empty;
+	}
+}
+
 void getArmorValueScript(const Armor *ar, int &ret, int side)
 {
 	if (ar && 0 <= side && side < SIDE_MAX)
@@ -1007,6 +1020,8 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 	ar.addCustomConst("SIDE_RIGHT", SIDE_RIGHT);
 	ar.addCustomConst("SIDE_REAR", SIDE_REAR);
 	ar.addCustomConst("SIDE_UNDER", SIDE_UNDER);
+
+	ar.add<&getTypeScript>("getType");
 
 	ar.add<&Armor::getDrawingRoutine>("getDrawingRoutine");
 	ar.add<&Armor::getVisibilityAtDark>("getVisibilityAtDark");

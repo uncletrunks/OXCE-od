@@ -2461,6 +2461,19 @@ int RuleItem::getSprayWaypoints() const
 namespace
 {
 
+void getTypeScript(const RuleItem* r, ScriptText& txt)
+{
+	if (r)
+	{
+		txt = { r->getType().c_str() };
+		return;
+	}
+	else
+	{
+		txt = ScriptText::empty;
+	}
+}
+
 void getBattleTypeScript(const RuleItem *ri, int &ret)
 {
 	if (ri)
@@ -2526,6 +2539,8 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.addCustomConst("BT_PSIAMP", BT_PSIAMP);
 	ri.addCustomConst("BT_FLARE", BT_FLARE);
 	ri.addCustomConst("BT_CORPSE", BT_CORPSE);
+
+	ri.add<&getTypeScript>("getType");
 
 	ri.add<&RuleItem::getAccuracyAimed>("getAccuracyAimed");
 	ri.add<&RuleItem::getAccuracyAuto>("getAccuracyAuto");

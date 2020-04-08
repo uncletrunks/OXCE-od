@@ -422,6 +422,19 @@ bool Unit::getShowFullNameInAlienInventory(Mod *mod) const
 namespace
 {
 
+void getTypeScript(const Unit* r, ScriptText& txt)
+{
+	if (r)
+	{
+		txt = { r->getType().c_str() };
+		return;
+	}
+	else
+	{
+		txt = ScriptText::empty;
+	}
+}
+
 std::string debugDisplayScript(const Unit* unit)
 {
 	if (unit)
@@ -444,6 +457,9 @@ std::string debugDisplayScript(const Unit* unit)
 void Unit::ScriptRegister(ScriptParserBase* parser)
 {
 	Bind<Unit> un = { parser };
+
+	un.add<&getTypeScript>("getType");
+
 	un.addDebugDisplay<&debugDisplayScript>();
 }
 /**
