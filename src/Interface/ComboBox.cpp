@@ -355,6 +355,9 @@ void ComboBox::blit(SDL_Surface *surface)
  */
 void ComboBox::handle(Action *action, State *state)
 {
+	if (!_visible || _hidden)
+		return;
+
 	_button->handle(action, state);
 	_list->handle(action, state);
 	InteractiveSurface::handle(action, state);
