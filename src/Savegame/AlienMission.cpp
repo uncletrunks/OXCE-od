@@ -220,7 +220,6 @@ void AlienMission::think(Game &engine, const Globe &globe)
 			RuleRegion *region = mod.getRegion(_region, true);
 			if ((*c)->canBeInfiltrated() && region->insideRegion((*c)->getRules()->getLabelLongitude(), (*c)->getRules()->getLabelLatitude()))
 			{
-				(*c)->setNewPact();
 				MissionArea area;
 				std::pair<double, double> pos;
 				int tries = 0;
@@ -303,9 +302,14 @@ void AlienMission::think(Game &engine, const Globe &globe)
 				}
 				if (tries < 100 || mod.getAllowAlienBasesOnWrongTextures())
 				{
+					// only create a pact if the base is going to be spawned too
+					(*c)->setNewPact();
+
 					spawnAlienBase((*c), engine, area, pos, 0);
+
+					// if the base can't be spawned for this country, try the next country
+					break;
 				}
-				break;
 			}
 		}
 		if (_rule.isEndlessInfiltration())
