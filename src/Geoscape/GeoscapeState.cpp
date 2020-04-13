@@ -34,6 +34,7 @@
 #include "../Engine/Collections.h"
 #include "../Engine/Unicode.h"
 #include "Globe.h"
+#include "../Interface/ComboBox.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Engine/Timer.h"
@@ -193,6 +194,8 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_dogfightTimer = new Timer(Options::dogfightSpeed);
 
 	_txtDebug = new Text(200, 32, 0, 0);
+	_cbxRegion = new ComboBox(this, 150, 16, 0, 36);
+	_cbxZone = new ComboBox(this, 100, 16, 154, 36);
 
 	// Set palette
 	setInterface("geoscape");
@@ -239,6 +242,8 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	add(_txtSlacking, "text", "geoscape");
 
 	add(_txtDebug, "text", "geoscape");
+	add(_cbxRegion, "button", "geoscape");
+	add(_cbxZone, "button", "geoscape");
 
 	// Set up objects
 	Surface *geobord = _game->getMod()->getSurface("GEOBORD.SCR");
@@ -409,6 +414,29 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_dogfightStartTimer->onTimer((StateHandler)&GeoscapeState::startDogfight);
 	_dogfightTimer->onTimer((StateHandler)&GeoscapeState::handleDogfights);
 
+	// debug helpers
+	{
+		std::vector<std::string> regionList;
+		regionList.push_back("All regions");
+		for (auto r : *_game->getSavedGame()->getRegions())
+		{
+			regionList.push_back(r->getRules()->getType());
+		}
+		_cbxRegion->setOptions(regionList, false);
+		_cbxRegion->setVisible(false);
+		_cbxRegion->onChange((ActionHandler)&GeoscapeState::cbxRegionChange);
+
+		std::vector<std::string> zoneList;
+		zoneList.push_back("All zones");
+		for (int z = 0; z < 20; ++z)
+		{
+			zoneList.push_back(std::to_string(z));
+		}
+		_cbxZone->setOptions(zoneList, false);
+		_cbxZone->setVisible(false);
+		_cbxZone->onChange((ActionHandler)&GeoscapeState::cbxZoneChange);
+	}
+
 	timeDisplay();
 }
 
@@ -473,6 +501,8 @@ void GeoscapeState::handle(Action *action)
 			{
 				_txtDebug->setText("");
 			}
+			_cbxRegion->setVisible(_game->getSavedGame()->getDebugMode());
+			_cbxZone->setVisible(_game->getSavedGame()->getDebugMode());
 		}
 		if (Options::debug && _game->getSavedGame()->getDebugMode() && (SDL_GetModState() & KMOD_CTRL) != 0)
 		{
@@ -4035,6 +4065,24 @@ void GeoscapeState::updateSlackingIndicator()
 	{
 		_txtSlacking->setText("");
 	}
+}
+
+void GeoscapeState::cbxRegionChange(Action *)
+{
+	int index = _cbxRegion->getSelected();
+	if (index < 1)
+	{
+		_game->getSavedGame()->debugRegion = nullptr;
+	}
+	else
+	{
+		_game->getSavedGame()->debugRegion = (*_game->getSavedGame()->getRegions())[index-1];
+	}
+}
+
+void GeoscapeState::cbxZoneChange(Action *)
+{
+	_game->getSavedGame()->debugZone = _cbxZone->getSelected();
 }
 
 }

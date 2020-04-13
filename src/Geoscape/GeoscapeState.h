@@ -28,6 +28,7 @@ class Globe;
 class TextButton;
 class InteractiveSurface;
 class Text;
+class ComboBox;
 class Timer;
 class DogfightState;
 class Ufo;
@@ -53,6 +54,7 @@ private:
 	Timer *_gameTimer, *_zoomInEffectTimer, *_zoomOutEffectTimer, *_dogfightStartTimer, *_dogfightTimer;
 	bool _pause, _zoomInEffectDone, _zoomOutEffectDone;
 	Text *_txtDebug;
+	ComboBox *_cbxRegion, *_cbxZone;
 	Text *_txtSlacking;
 	std::list<State*> _popups;
 	std::list<DogfightState*> _dogfights, _dogfightsToBeStarted;
@@ -61,6 +63,9 @@ private:
 
 	/// Update list of active crafts.
 	const std::vector<Craft*>* updateActiveCrafts();
+
+	void cbxRegionChange(Action *action);
+	void cbxZoneChange(Action *action);
 
 public:
 	/// Creates the Geoscape state.
