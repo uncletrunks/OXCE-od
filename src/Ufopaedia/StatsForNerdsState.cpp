@@ -3091,6 +3091,7 @@ void StatsForNerdsState::initUfoList()
 		addSection("{Exotic}", "", _white);
 		addInteger(ss, ufoRule->getMissilePower(), "missilePower");
 		addInteger(ss, ufoRule->getSplashdownSurvivalChance(), "splashdownSurvivalChance", 100);
+		addInteger(ss, ufoRule->getFakeWaterLandingChance(), "fakeWaterLandingChance", 0);
 
 		addSection("{Visuals}", "", _white);
 		addInteger(ss, ufoRule->getSprite(), "sprite", -1); // INTERWIN.DAT

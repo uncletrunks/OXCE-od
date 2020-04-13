@@ -72,6 +72,7 @@ private:
 	int _hunterKillerPercentage, _huntMode, _huntSpeed, _huntBehavior;
 	int _missilePower;
 	int _splashdownSurvivalChance;
+	int _fakeWaterLandingChance;
 	int _fireSound;
 	int _alertSound;
 	int _huntAlertSound;
@@ -148,6 +149,8 @@ public:
 	int getMissilePower() const { return _missilePower; }
 	/// Gets the chance of surviving a splashdown on fake water.
 	int getSplashdownSurvivalChance() const { return _splashdownSurvivalChance; }
+	/// Gets the chance for deciding to land on fake water texture.
+	int getFakeWaterLandingChance() const { return _fakeWaterLandingChance; }
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _ufoScripts.get<Script>(); }

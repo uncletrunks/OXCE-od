@@ -360,7 +360,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 			}
 			else if (trajectory.getAltitude(0) == "STR_GROUND")
 			{
-				pos = getLandPoint(globe, regionRules, trajectory.getZone(0));
+				pos = getLandPoint(globe, regionRules, trajectory.getZone(0), *ufo);
 			}
 			else
 			{
@@ -404,7 +404,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 		}
 		else if (trajectory.getAltitude(0) == "STR_GROUND")
 		{
-			pos = getLandPoint(globe, regionRules, trajectory.getZone(0));
+			pos = getLandPoint(globe, regionRules, trajectory.getZone(0), *ufo);
 		}
 		else
 		{
@@ -426,7 +426,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 			else
 			{
 				// Other ships can land where they want.
-				pos = getLandPoint(globe, regionRules, trajectory.getZone(1));
+				pos = getLandPoint(globe, regionRules, trajectory.getZone(1), *ufo);
 			}
 		}
 		else
@@ -466,7 +466,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 	Ufo *ufo = new Ufo(ufoRule, game.getId("STR_UFO_UNIQUE"), hunterKillerPercentage, huntMode, huntBehavior);
 	ufo->setMissionInfo(this, &trajectory);
 	const RuleRegion &regionRules = *mod.getRegion(_region, true);
-	std::pair<double, double> pos = getWaypoint(wave, trajectory, 0, globe, regionRules);
+	std::pair<double, double> pos = getWaypoint(wave, trajectory, 0, globe, regionRules, *ufo);
 	ufo->setAltitude(trajectory.getAltitude(0));
 	if (trajectory.getAltitude(0) == "STR_GROUND")
 	{
@@ -482,7 +482,7 @@ Ufo *AlienMission::spawnUfo(SavedGame &game, const Mod &mod, const Globe &globe,
 		ufo->setLatitude(_base->getLatitude());
 	}
 	Waypoint *wp = new Waypoint();
-	pos = getWaypoint(wave, trajectory, 1, globe, regionRules);
+	pos = getWaypoint(wave, trajectory, 1, globe, regionRules, *ufo);
 	wp->setLongitude(pos.first);
 	wp->setLatitude(pos.second);
 	ufo->setDestination(wp);
@@ -652,7 +652,7 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 	ufo.setAltitude(trajectory.getAltitude(nextWaypoint));
 	ufo.setTrajectoryPoint(nextWaypoint);
 	const RuleRegion &regionRules = *mod.getRegion(_region, true);
-	std::pair<double, double> pos = getWaypoint(wave, trajectory, nextWaypoint, globe, regionRules);
+	std::pair<double, double> pos = getWaypoint(wave, trajectory, nextWaypoint, globe, regionRules, ufo);
 
 	Waypoint *wp = new Waypoint();
 	wp->setLongitude(pos.first);
@@ -708,7 +708,23 @@ void AlienMission::ufoReachedWaypoint(Ufo &ufo, Game &engine, const Globe &globe
 		}
 		else
 		{
-			if (globe.insideLand(ufo.getLongitude(), ufo.getLatitude()))
+			bool landingAllowed = true;
+			if (!globe.insideLand(ufo.getLongitude(), ufo.getLatitude()))
+			{
+				landingAllowed = false; // real water
+			}
+			else if (globe.insideFakeUnderwaterTexture(ufo.getLongitude(), ufo.getLatitude()))
+			{
+				// decision to land on fake water was done earlier already
+				// most of the time it's a proper decision, but sometimes it's a forced decision (i.e. no other option left)
+				// because of forced decisions, let's check if the UFO can (at least theoretically) land on fake water...
+				// ...and if not, don't land!
+				if (ufo.getRules()->getFakeWaterLandingChance() <= 0)
+				{
+					landingAllowed = false; // UFO was forced to go here, but it's not going to land!
+				}
+			}
+			if (landingAllowed)
 			{
 				// Set timer for UFO on the ground.
 				ufo.setSecondsRemaining(trajectory.groundTimer() * 5);
@@ -940,9 +956,10 @@ void AlienMission::setRegion(const std::string &region, const Mod &mod)
  * @param nextWaypoint the next logical waypoint in sequence (0 for newly spawned UFOs)
  * @param globe The earth globe, required to get access to land checks.
  * @param region the ruleset for the region of our mission.
+ * @param ufo Required when making landing decisions on fake water.
  * @return a set of lon and lat coordinates based on the criteria of the trajectory.
  */
-std::pair<double, double> AlienMission::getWaypoint(const MissionWave &wave, const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region)
+std::pair<double, double> AlienMission::getWaypoint(const MissionWave &wave, const UfoTrajectory &trajectory, const size_t nextWaypoint, const Globe &globe, const RuleRegion &region, const Ufo &ufo)
 {
 	if (trajectory.getZone(nextWaypoint) >= region.getMissionZones().size())
 	{
@@ -970,7 +987,7 @@ std::pair<double, double> AlienMission::getWaypoint(const MissionWave &wave, con
 
 	if (trajectory.getWaypointCount() > nextWaypoint + 1 && trajectory.getAltitude(nextWaypoint + 1) == "STR_GROUND")
 	{
-		return getLandPoint(globe, region, trajectory.getZone(nextWaypoint));
+		return getLandPoint(globe, region, trajectory.getZone(nextWaypoint), ufo);
 	}
 	return region.getRandomPoint(trajectory.getZone(nextWaypoint));
 }
@@ -981,9 +998,10 @@ std::pair<double, double> AlienMission::getWaypoint(const MissionWave &wave, con
  * @param globe reference to the globe data.
  * @param region reference to the region we want a land point in.
  * @param zone the missionZone set within the region to find a landing zone in.
+ * @param ufo Required when making landing decisions on fake water.
  * @return a set of longitudinal and latitudinal coordinates.
  */
-std::pair<double, double> AlienMission::getLandPoint(const Globe &globe, const RuleRegion &region, size_t zone)
+std::pair<double, double> AlienMission::getLandPoint(const Globe &globe, const RuleRegion &region, size_t zone, const Ufo &ufo)
 {
 	if (zone >= region.getMissionZones().size() || region.getMissionZones().at(zone).areas.size() == 0)
 	{
@@ -999,18 +1017,44 @@ std::pair<double, double> AlienMission::getLandPoint(const Globe &globe, const R
 	else
 	{
 		int tries = 0;
-		do
+		bool wantsToLandOnFakeWater = RNG::percent(ufo.getRules()->getFakeWaterLandingChance());
+		bool found = false;
+		while (!found)
 		{
 			pos = region.getRandomPoint(zone);
 			++tries;
+
+			if (tries == 100)
+			{
+				found = true; // forced decision
+			}
+			else if (globe.insideLand(pos.first, pos.second) && region.insideRegion(pos.first, pos.second))
+			{
+				bool isFakeWater = globe.insideFakeUnderwaterTexture(pos.first, pos.second);
+				if (wantsToLandOnFakeWater)
+				{
+					if (isFakeWater)
+					{
+						found = true; // found landing point on fake water
+					}
+				}
+				else
+				{
+					if (!isFakeWater)
+					{
+						found = true; // found landing point on land
+					}
+				}
+			}
 		}
-		while (!(globe.insideLand(pos.first, pos.second)
-			&& region.insideRegion(pos.first, pos.second))
-			&& tries < 100);
 
 		if (tries == 100)
 		{
 			Log(LOG_DEBUG) << "Region: " << region.getType() << " Longitude: " << pos.first << " Latitude: " << pos.second << " invalid zone: " << zone << " ufo forced to land on water!";
+			if (wantsToLandOnFakeWater)
+			{
+				Log(LOG_DEBUG) << "UFO: " << ufo.getRules()->getType() << " wanted to land on fake water.";
+			}
 		}
 	}
 	return pos;
