@@ -31,6 +31,7 @@
 #include "../Interface/TextButton.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/Craft.h"
+#include "../Savegame/SavedGame.h"
 #include "BaseNameState.h"
 #include "ConfirmNewBaseState.h"
 #include "../Engine/Options.h"
@@ -236,8 +237,13 @@ void BuildNewBaseState::globeClick(Action *action)
 	{
 		if (_globe->insideLand(lon, lat))
 		{
+			bool fakeUnderwaterBasesUnlocked = true;
+			if (!_game->getMod()->getFakeUnderwaterBaseUnlockResearch().empty())
+			{
+				fakeUnderwaterBasesUnlocked = _game->getSavedGame()->isResearched(_game->getMod()->getFakeUnderwaterBaseUnlockResearch(), true);
+			}
 			bool fakeUnderwaterTexture = _globe->insideFakeUnderwaterTexture(lon, lat);
-			if (_first && fakeUnderwaterTexture)
+			if ((_first || !fakeUnderwaterBasesUnlocked) && fakeUnderwaterTexture)
 			{
 				// first (starting) base can't be fake underwater base
 				_game->pushState(new ErrorMessageState(tr("STR_XCOM_BASE_CANNOT_BE_BUILT"), _palette, _game->getMod()->getInterface("geoscape")->getElement("genericWindow")->color, "BACK01.SCR", _game->getMod()->getInterface("geoscape")->getElement("palette")->color));
