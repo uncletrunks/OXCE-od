@@ -301,7 +301,10 @@ void AlienMission::think(Game &engine, const Globe &globe)
 					area.latMin = pos.second;
 					area.latMax = pos.second;
 				}
-				spawnAlienBase((*c), engine, area, pos, 0);
+				if (tries < 100 || mod.getAllowAlienBasesOnWrongTextures())
+				{
+					spawnAlienBase((*c), engine, area, pos, 0);
+				}
 				break;
 			}
 		}
@@ -346,7 +349,10 @@ void AlienMission::think(Game &engine, const Globe &globe)
 				}
 			}
 		}
-		spawnAlienBase(0, engine, area, pos, 0);
+		if (tries < 100 || mod.getAllowAlienBasesOnWrongTextures())
+		{
+			spawnAlienBase(0, engine, area, pos, 0);
+		}
 	}
 
 	if (_nextWave != _rule.getWaveCount())
@@ -657,14 +663,17 @@ void AlienMission::start(Game &engine, const Globe &globe, size_t initialCount)
 						}
 					}
 				}
-				auto newAlienOperationBase = spawnAlienBase(0, engine, area, pos, operationBaseType);
+				AlienBase* newAlienOperationBase = nullptr;
+				if (tries < 100 || mod.getAllowAlienBasesOnWrongTextures())
+				{
+					spawnAlienBase(0, engine, area, pos, operationBaseType);
+				}
 				if (newAlienOperationBase)
 				{
 					_base = newAlienOperationBase;
 				}
 				else
 				{
-					// can't happen, but I'll leave it here just in case alien base spawning gets changed in the future
 					_interrupted = true;
 				}
 			}
