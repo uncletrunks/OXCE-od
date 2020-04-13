@@ -71,6 +71,7 @@ private:
 	int _power, _range, _score, _reload, _breakOffTime, _missionScore;
 	int _hunterKillerPercentage, _huntMode, _huntSpeed, _huntBehavior;
 	int _missilePower;
+	int _splashdownSurvivalChance;
 	int _fireSound;
 	int _alertSound;
 	int _huntAlertSound;
@@ -145,6 +146,8 @@ public:
 	int getHuntBehavior() const;
 	/// Gets the missile power (of a UFO that represents one or more missiles).
 	int getMissilePower() const { return _missilePower; }
+	/// Gets the chance of surviving a splashdown on fake water.
+	int getSplashdownSurvivalChance() const { return _splashdownSurvivalChance; }
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _ufoScripts.get<Script>(); }

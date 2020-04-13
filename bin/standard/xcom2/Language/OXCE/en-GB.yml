@@ -15,6 +15,8 @@ en-GB:
 #=================== Geoscape ===================
 #DogfightState.cpp
   STR_EVASIVE_MANEUVERS: "EVASIVE MANEUVERS"
+  STR_UFO_DESTROYED_BY_SPLASHDOWN: "ALIEN SUB DESTROYED!"
+  STR_UFO_SURVIVED_SPLASHDOWN: "ALIEN SUB DOWNED!"
 #GeoscapeState.cpp
   STR_UFO_HAS_LANDED: "USO has touched down at{NEWLINE}{0}"
 #SelectMusicTrackState.cpp

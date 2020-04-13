@@ -1520,7 +1520,25 @@ void DogfightState::update()
 						}
 					}
 				}
+				bool survived = true;
+				bool fakeUnderwaterTexture = _state->getGlobe()->insideFakeUnderwaterTexture(_ufo->getLongitude(), _ufo->getLatitude());
 				if (!_state->getGlobe()->insideLand(_ufo->getLongitude(), _ufo->getLatitude()))
+				{
+					survived = false; // destroyed on real water
+				}
+				else if (fakeUnderwaterTexture)
+				{
+					if (RNG::percent(_ufo->getRules()->getSplashdownSurvivalChance()))
+					{
+						setStatus("STR_UFO_SURVIVED_SPLASHDOWN");
+					}
+					else
+					{
+						survived = false; // destroyed on fake water
+						setStatus("STR_UFO_DESTROYED_BY_SPLASHDOWN");
+					}
+				}
+				if (!survived)
 				{
 					_ufo->setStatus(Ufo::DESTROYED);
 					_destroyUfo = true;
@@ -1560,7 +1578,20 @@ void DogfightState::update()
 		{
 			_endUfoHandled = true;
 
-			if (!_state->getGlobe()->insideLand(_ufo->getLongitude(), _ufo->getLatitude())) // Brought it down over water
+			bool survived = true;
+			if (!_state->getGlobe()->insideLand(_ufo->getLongitude(), _ufo->getLatitude()))
+			{
+				survived = false; // destroyed on real water
+			}
+			else
+			{
+				bool fakeUnderwaterTexture = _state->getGlobe()->insideFakeUnderwaterTexture(_ufo->getLongitude(), _ufo->getLatitude());
+				if (fakeUnderwaterTexture && !RNG::percent(_ufo->getRules()->getSplashdownSurvivalChance()))
+				{
+					survived = false; // destroyed on fake water
+				}
+			}
+			if (!survived) // Brought it down over water (and didn't survive splashdown)
 			{
 				finalRun = true;
 				_ufo->setDamage(_ufo->getCraftStats().damageMax, _game->getMod());
@@ -1586,7 +1617,7 @@ void DogfightState::update()
 					}
 				}
 			}
-			else // Brought it down over land
+			else // Brought it down over land (or survived splashdown)
 			{
 				finalRun = true;
 				_ufo->setSecondsRemaining(RNG::generate(30, 120)*60);
