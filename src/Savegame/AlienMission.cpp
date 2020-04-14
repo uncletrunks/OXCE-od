@@ -220,21 +220,26 @@ void AlienMission::think(Game &engine, const Globe &globe)
 			RuleRegion *region = mod.getRegion(_region, true);
 			if ((*c)->canBeInfiltrated() && region->insideRegion((*c)->getRules()->getLabelLongitude(), (*c)->getRules()->getLabelLatitude()))
 			{
-				MissionArea area;
 				std::pair<double, double> pos;
 				int tries = 0;
+				bool dynamicBaseType = _rule.getSiteType().empty();
+				AlienDeployment *alienBaseType = nullptr;
 				bool wantsToSpawnFakeUnderwater = false;
-				auto alienBaseType = mod.getDeployment(_rule.getSiteType(), false);
-				if (alienBaseType) wantsToSpawnFakeUnderwater = RNG::percent(alienBaseType->getFakeUnderwaterSpawnChance());
 				bool found = false;
 				if (!mod.getBuildInfiltrationBaseCloseToTheCountry())
 				{
 					std::vector<MissionArea> areas = region->getMissionZones().at(_rule.getSpawnZone()).areas;
 					while (!found)
 					{
-						area = areas.at(RNG::generate(0, areas.size() - 1));
+						MissionArea &area = areas.at(RNG::generate(0, areas.size() - 1));
 						pos.first = RNG::generate(std::min(area.lonMin, area.lonMax), std::max(area.lonMin, area.lonMax));
 						pos.second = RNG::generate(std::min(area.latMin, area.latMax), std::max(area.latMin, area.latMax));
+
+						if (tries == 0 || dynamicBaseType)
+						{
+							alienBaseType = chooseAlienBaseType(mod, area);
+							wantsToSpawnFakeUnderwater = RNG::percent(alienBaseType->getFakeUnderwaterSpawnChance());
+						}
 						++tries;
 
 						if (tries == 100)
@@ -257,6 +262,11 @@ void AlienMission::think(Game &engine, const Globe &globe)
 				}
 				else
 				{
+					dynamicBaseType = false; // just to make absolutely clear this feature is not supported in this case
+					MissionArea dummyArea;
+					alienBaseType = chooseAlienBaseType(mod, dummyArea);
+					wantsToSpawnFakeUnderwater = RNG::percent(alienBaseType->getFakeUnderwaterSpawnChance());
+
 					RuleCountry* cRule = (*c)->getRules();
 					int pick = 0;
 					double lonMini, lonMaxi, latMini, latMaxi;
@@ -293,19 +303,13 @@ void AlienMission::think(Game &engine, const Globe &globe)
 							}
 						}
 					}
-					// dummy
-					area.texture = 0;
-					area.lonMin = pos.first;
-					area.lonMax = pos.first;
-					area.latMin = pos.second;
-					area.latMax = pos.second;
 				}
 				if (tries < 100 || mod.getAllowAlienBasesOnWrongTextures())
 				{
 					// only create a pact if the base is going to be spawned too
 					(*c)->setNewPact();
 
-					spawnAlienBase((*c), engine, area, pos, 0);
+					spawnAlienBase((*c), engine, pos, alienBaseType);
 
 					// if the base can't be spawned for this country, try the next country
 					break;
@@ -322,18 +326,23 @@ void AlienMission::think(Game &engine, const Globe &globe)
 	{
 		RuleRegion *region = mod.getRegion(_region, true);
 		std::vector<MissionArea> areas = region->getMissionZones().at(_rule.getSpawnZone()).areas;
-		MissionArea area;
 		std::pair<double, double> pos;
 		int tries = 0;
+		bool dynamicBaseType = _rule.getSiteType().empty();
+		AlienDeployment* alienBaseType = nullptr;
 		bool wantsToSpawnFakeUnderwater = false;
-		auto alienBaseType = mod.getDeployment(_rule.getSiteType(), false);
-		if (alienBaseType) wantsToSpawnFakeUnderwater = RNG::percent(alienBaseType->getFakeUnderwaterSpawnChance());
 		bool found = false;
 		while (!found)
 		{
-			area = areas.at(RNG::generate(0, areas.size()-1));
+			MissionArea &area = areas.at(RNG::generate(0, areas.size()-1));
 			pos.first = RNG::generate(std::min(area.lonMin, area.lonMax), std::max(area.lonMin, area.lonMax));
 			pos.second = RNG::generate(std::min(area.latMin, area.latMax), std::max(area.latMin, area.latMax));
+
+			if (tries == 0 || dynamicBaseType)
+			{
+				alienBaseType = chooseAlienBaseType(mod, area);
+				wantsToSpawnFakeUnderwater = RNG::percent(alienBaseType->getFakeUnderwaterSpawnChance());
+			}
 			++tries;
 
 			if (tries == 100)
@@ -355,7 +364,7 @@ void AlienMission::think(Game &engine, const Globe &globe)
 		}
 		if (tries < 100 || mod.getAllowAlienBasesOnWrongTextures())
 		{
-			spawnAlienBase(0, engine, area, pos, 0);
+			spawnAlienBase(0, engine, pos, alienBaseType);
 		}
 	}
 
@@ -637,7 +646,6 @@ void AlienMission::start(Game &engine, const Globe &globe, size_t initialCount)
 				// 3. spawn a new base
 				RuleRegion *region = mod.getRegion(_region, true);
 				std::vector<MissionArea> areas = region->getMissionZones().at(_rule.getOperationSpawnZone()).areas;
-				MissionArea area;
 				std::pair<double, double> pos;
 				int tries = 0;
 				auto operationBaseType = mod.getDeployment(_rule.getOperationBaseType(), true);
@@ -645,7 +653,7 @@ void AlienMission::start(Game &engine, const Globe &globe, size_t initialCount)
 				bool found = false;
 				while (!found)
 				{
-					area = areas.at(RNG::generate(0, areas.size() - 1));
+					MissionArea &area = areas.at(RNG::generate(0, areas.size() - 1));
 					pos.first = RNG::generate(std::min(area.lonMin, area.lonMax), std::max(area.lonMin, area.lonMax));
 					pos.second = RNG::generate(std::min(area.latMin, area.latMax), std::max(area.latMin, area.latMax));
 					++tries;
@@ -670,7 +678,7 @@ void AlienMission::start(Game &engine, const Globe &globe, size_t initialCount)
 				AlienBase* newAlienOperationBase = nullptr;
 				if (tries < 100 || mod.getAllowAlienBasesOnWrongTextures())
 				{
-					spawnAlienBase(0, engine, area, pos, operationBaseType);
+					spawnAlienBase(0, engine, pos, operationBaseType);
 				}
 				if (newAlienOperationBase)
 				{
@@ -970,36 +978,13 @@ void AlienMission::addScore(double lon, double lat, SavedGame &game) const
  * Spawn an alien base.
  * @param pactCountry A country that has signed a pact with the aliens and allowed them to build this base.
  * @param engine The game engine, required to get access to game data and game rules.
- * @param zone The mission zone, required for determining the base coordinates.
+ * @param pos The base coordinates.
+ * @param deployment The base type.
  * @return Pointer to the spawned alien base.
  */
-AlienBase *AlienMission::spawnAlienBase(Country *pactCountry, Game &engine, const MissionArea &area, std::pair<double, double> pos, AlienDeployment *deploymentOverride)
+AlienBase *AlienMission::spawnAlienBase(Country *pactCountry, Game &engine, std::pair<double, double> pos, AlienDeployment *deployment)
 {
 	SavedGame &game = *engine.getSavedGame();
-	const Mod &ruleset = *engine.getMod();
-	// Once the last UFO is spawned, the aliens build their base.
-	AlienDeployment *deployment;
-	Texture *texture = ruleset.getGlobe()->getTexture(area.texture);
-	if (deploymentOverride)
-	{
-		deployment = deploymentOverride;
-	}
-	else if (ruleset.getDeployment(_rule.getSiteType()))
-	{
-		deployment = ruleset.getDeployment(_rule.getSiteType());
-	}
-	else if (texture && !texture->getDeployments().empty())
-	{
-		// FIXME: this is meant only for mission sites, not for alien bases
-		// check if any bigger mod is using it and if not remove this fall-back completely
-		deployment = ruleset.getDeployment(texture->getRandomDeployment(), true);
-	}
-	else
-	{
-		// FIXME: this is a super old and obsolete fall-back
-		// check if any bigger mod is using it and if not remove this fall-back completely
-		deployment = ruleset.getDeployment("STR_ALIEN_BASE_ASSAULT", true);
-	}
 	AlienBase *ab = new AlienBase(deployment, game.getMonthsPassed());
 	if (pactCountry)
 	{
@@ -1012,6 +997,33 @@ AlienBase *AlienMission::spawnAlienBase(Country *pactCountry, Game &engine, cons
 	game.getAlienBases()->push_back(ab);
 	addScore(ab->getLongitude(), ab->getLatitude(), game);
 	return ab;
+}
+
+/**
+ * Chooses a mission type for a new alien base.
+ */
+AlienDeployment *AlienMission::chooseAlienBaseType(const Mod &mod, const MissionArea &area)
+{
+	AlienDeployment *deployment = nullptr;
+	if (!_rule.getSiteType().empty())
+	{
+		deployment = mod.getDeployment(_rule.getSiteType(), true);
+	}
+	if (!deployment)
+	{
+		Texture *texture = mod.getGlobe()->getTexture(area.texture);
+		if (texture && !texture->getDeployments().empty())
+		{
+			// Note: only used in Area51 mod (as of April 2020)
+			deployment = mod.getDeployment(texture->getRandomDeployment(), true);
+		}
+	}
+	if (!deployment)
+	{
+		// Note: emergency fall-back
+		deployment = mod.getDeployment("STR_ALIEN_BASE_ASSAULT", true);
+	}
+	return deployment;
 }
 
 /*
