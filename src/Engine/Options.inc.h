@@ -70,8 +70,11 @@ OPT int oxceNightVisionColor;
 OPT bool oxceAutoSell;
 OPT int oxceAutoNightVisionThreshold;
 OPT bool oxceRememberDisabledCraftWeapons;
+
+// Extra options (OXCE), accessible only via options.cfg
 OPT bool oxceHighlightNewTopicsHidden;
 OPT bool oxceEnableUnitResponseSounds;
+OPT bool oxceEnableSlackingIndicator;
 OPT std::string password;
 
 // Flags and other stuff that don't need OptionInfo's.

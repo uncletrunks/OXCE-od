@@ -910,6 +910,10 @@ interfaces:
         color2: 245  # slightly lighter blue
       - id: text
         color: 244   # even lighter blue
+      - id: slackingIndicator
+        color: 244   # even lighter blue
+        color2: 133  # minty green
+        custom: -12  # above Intercept button
       - id: genericWindow
         color: 239   # bright green
       - id: genericText

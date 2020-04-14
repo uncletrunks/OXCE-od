@@ -183,7 +183,9 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_txtMonth = new Text(29, 8, screenWidth-32, screenHeight/2-6);
 	_txtYear = new Text(59, 8, screenWidth-61, screenHeight/2+1);
 	_txtFunds = new Text(59, 8, screenWidth-61, screenHeight/2-27);
-	_txtSlacking = new Text(59, 8, screenWidth - 61, screenHeight / 2 - 112);
+
+	int slackingIndicatorOffset = _game->getMod()->getInterface("geoscape")->getElement("slackingIndicator")->custom;
+	_txtSlacking = new Text(59, 17, screenWidth - 61, screenHeight / 2 - 100 + slackingIndicatorOffset);
 
 	_timeSpeed = _btn5Secs;
 	_gameTimer = new Timer(Options::geoClockSpeed);
@@ -239,7 +241,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	add(_txtDay, "text", "geoscape");
 	add(_txtMonth, "text", "geoscape");
 	add(_txtYear, "text", "geoscape");
-	add(_txtSlacking, "text", "geoscape");
+	add(_txtSlacking, "slackingIndicator", "geoscape");
 
 	add(_txtDebug, "text", "geoscape");
 	add(_cbxRegion, "button", "geoscape");
@@ -4045,7 +4047,7 @@ bool GeoscapeState::buttonsDisabled()
 
 void GeoscapeState::updateSlackingIndicator()
 {
-	if (!Options::isPasswordCorrect())
+	if (!Options::oxceEnableSlackingIndicator)
 		return;
 
 	int scientistsSlacking = 0;
@@ -4057,9 +4059,7 @@ void GeoscapeState::updateSlackingIndicator()
 	}
 	if (scientistsSlacking > 0 || engineersSlacking > 0)
 	{
-		std::ostringstream ss;
-		ss << scientistsSlacking << "/" << engineersSlacking;
-		_txtSlacking->setText(ss.str());
+		_txtSlacking->setText(tr("STR_SLACKING_INDICATOR").arg(scientistsSlacking).arg(engineersSlacking));
 	}
 	else
 	{
