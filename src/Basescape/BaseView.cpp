@@ -216,18 +216,18 @@ BasePlacementErrors BaseView::getPlacementError(const RuleBaseFacility *rule, Ba
 	// We'll need to know for the final check if we're upgrading an existing facility
 	bool buildingOverExisting = false;
 
-	// Area where we want place new bulding
+	// Area where we want to place a new building
 	const BaseAreaSubset placementArea = BaseAreaSubset(rule->getSize(), rule->getSize()).offset(_gridX, _gridY);
 	// Whole base
 	const BaseAreaSubset baseArea = BaseAreaSubset(BASE_SIZE, BASE_SIZE);
 
-	// Check if facility do fit base edges
+	// Check if the facility fits inside the base boundaries
 	if (BaseAreaSubset::intersection(placementArea, baseArea) != placementArea)
 	{
 		return BPE_NotConnected;
 	}
 
-	// Check use of facilites in area that will be replaced by new building
+	// Check usage of facilites in the area that will be replaced by a new building
 	if (facilityBeingMoved == nullptr)
 	{
 		auto areaUseError = _base->isAreaInUse(placementArea, rule);

@@ -1675,7 +1675,7 @@ public:
 		}
 	}
 
-	/// Initialize shaded globals like types.
+	/// Initialize shared globals like types.
 	virtual void initParserGlobals(ScriptParserBase* parser) { }
 	/// Prepare for loading data.
 	virtual void beginLoad();

@@ -285,7 +285,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 	{
 		unit->dontReselect();
 	}
-	if (_AIActionCounter >= 2 || !unit->reselectAllowed() || unit->getTurnsSinceStunned() == 0) //stun check for restoring OXC behavior that AI do not attack after getup even having full TU
+	if (_AIActionCounter >= 2 || !unit->reselectAllowed() || unit->getTurnsSinceStunned() == 0) //stun check for restoring OXC behavior that AI does not attack after waking up even having full TU
 	{
 		if (_save->selectNextPlayerUnit(true, _AISecondMove) == 0)
 		{
@@ -2752,7 +2752,7 @@ BattlescapeTally BattlescapeGame::tallyUnits()
 
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
-		//TODO: add handling if stunned unit for display proporse in abort mission
+		//TODO: add handling of stunned units for display purposes in AbortMissionState
 		if (!(*j)->isOut() && !(*j)->isOutThresholdExceed())
 		{
 			if ((*j)->getOriginalFaction() == FACTION_HOSTILE)

@@ -64,7 +64,7 @@ class SavedGame;
 
 
 /**
- * Main class handling all scripts types used by game.
+ * Main class handling all script types used by the game.
  */
 class ModScript
 {

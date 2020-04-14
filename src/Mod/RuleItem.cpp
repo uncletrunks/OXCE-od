@@ -79,7 +79,7 @@ void UpdateAmmo(BattleActionAttack& attack)
 }
 
 /**
- * Generate ActionAttack before shoot, this mean we can get ammo from weapon.
+ * Generate ActionAttack before shooting, this means we can get the ammo from the weapon.
  * @param action BattleCost of attack.
  * @return All attack action data.
  */
@@ -98,7 +98,7 @@ BattleActionAttack BattleActionAttack::GetBeforeShoot(BattleActionType type, Bat
 }
 
 /**
- * Generate ActionAttack after shoot, ammo can be already spend and unloaded from weapon.
+ * Generate ActionAttack after shooting, the ammo can be already spent and unloaded from the weapon.
  * @param action BattleCost of attack.
  * @param ammo Ammo used to shoot/attack.
  * @return All attack action data.

@@ -181,7 +181,7 @@ public:
 	int getRemovalTime() const;
 	/// Gets whether or not this facility can be built over by other ones
 	bool getCanBeBuiltOver() const;
-	/// Check if given facility are allowed to be replaced by this building
+	/// Check if a given facility `fac` can be replaced by this facility.
 	BasePlacementErrors getCanBuildOverOtherFacility(const RuleBaseFacility* fac) const;
 	/// Gets which facilities are allowed to be replaced by this building
 	const std::vector<const RuleBaseFacility*> &getBuildOverFacilities() const { return _buildOverFacilities; }

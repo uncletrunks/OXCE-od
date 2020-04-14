@@ -97,20 +97,20 @@ struct BattleAction : BattleActionCost
 
 
 /**
- * Count of diffrent state of units to determine who win
+ * Count of different state of units to determine who wins
  */
 struct BattlescapeTally
 {
-	/// number of live enemis (aliens and MC soldiers)
+	/// number of live enemies (aliens and MC'ed soldiers)
 	int liveAliens = 0;
-	/// number of live soldiers (only one that are not MC, include tanks but not summons)
+	/// number of live soldiers (only ones that are not MC'ed, including tanks, but not summoned units)
 	int liveSoldiers = 0;
 
-	/// number of live soldiers on enterace tiles
+	/// number of live soldiers on entrance tiles
 	int inEntrance = 0;
 	/// number of live soldiers on exit tiles.
 	int inExit = 0;
-	/// number of live soldiers in the middle of battlefieald.
+	/// number of live soldiers in the middle of the battlefield.
 	int inField = 0;
 };
 

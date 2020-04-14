@@ -2091,9 +2091,9 @@ void Base::cleanupDefenses(bool reclaimItems)
 }
 
 /**
- * Check if faciletes in area are used.
+ * Check if any facilities in a given area are used.
  */
-BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacility* replecment) const
+BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacility* replacement) const
 {
 	struct Av
 	{
@@ -2149,7 +2149,7 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 				auto type = rule->getPrisonType();
 				if (std::find(prisonBegin, prisonCurr, type) != prisonCurr)
 				{
-					//too many prision types, give up
+					//too many prison types, give up
 					if (prisonCurr == prisonEnd)
 					{
 						return BPE_Used;
@@ -2159,8 +2159,8 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 				}
 			}
 
-			// if we build over lift better if new one is lift too, rigth now is bit bugged and game can crash if two lifts are defined but for future it can be useful.
-			if (replecment && rule->isLift() && !replecment->isLift())
+			// if we build over a lift better if the new one is a lift too, right now it is a bit buggy and the game can crash if two lifts are defined but in the future it can be useful.
+			if (replacement && rule->isLift() && !replacement->isLift())
 			{
 				return BPE_Used;
 			}
@@ -2180,7 +2180,7 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 			{
 				if (Options::storageLimitsEnforced)
 				{
-					// with enforced limits we can't allow upgrade that make temporaty lower storage in base
+					// with enforced limits we can't allow upgrades that make (temporarily) insufficient storage in a base
 					available.addWithoutStores(rule);
 				}
 				else
@@ -2188,43 +2188,43 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 					available.add(rule);
 				}
 
-				// do not give any `provide`, you need wait until it finish upgrade
+				// do not give any `provide`, you need to wait until it finishes upgrading
 			}
 		}
 
 	}
 
 	// sum new one too.
-	if (replecment)
+	if (replacement)
 	{
 		if (Options::storageLimitsEnforced)
 		{
-			// with enforced limits we can't allow upgrade that make temporaty lower storage in base
-			available.addWithoutStores(replecment);
+			// with enforced limits we can't allow upgrades that make (temporarily) insufficient storage in a base
+			available.addWithoutStores(replacement);
 		}
 		else
 		{
-			available.add(replecment);
+			available.add(replacement);
 		}
 
-		// temporary allow `provide` from new building
-		provide |= replecment->getProvidedBaseFunc();
-		require |= replecment->getRequireBaseFunc();
+		// temporarily allow `provide` from a new building
+		provide |= replacement->getProvidedBaseFunc();
+		require |= replacement->getRequireBaseFunc();
 
-		// there still some other bulding that prevent placing new one
-		if ((forbidden & replecment->getProvidedBaseFunc()).any())
+		// there is still some other bulding that prevents placing the new one
+		if ((forbidden & replacement->getProvidedBaseFunc()).any())
 		{
 			return BPE_ForbiddenByOther;
 		}
 
-		// check if there is any other buildins that is forbidden by this one
-		if ((future & replecment->getForbiddenBaseFunc()).any())
+		// check if there are any other buildings that are forbidden by this one
+		if ((future & replacement->getForbiddenBaseFunc()).any())
 		{
 			return BPE_ForbiddenByThis;
 		}
 	}
 
-	// if there is any required function that we do not have then it mean we trying remove somthing needed
+	// if there is any required function that we do not have then it means we are trying to remove something still needed
 	if ((~provide & require).any())
 	{
 		return BPE_Used;
@@ -2265,16 +2265,16 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 		}
 
 		// sum new space too
-		if (replecment)
+		if (replacement)
 		{
-			// same as like with storage, only when limits are not enfored you can upgrade full prison
+			// same as like with storage, only when limits are not enforced you can upgrade full prison
 			if (!Options::storageLimitsEnforced)
 			{
-				sumAvailablePrisons(replecment);
+				sumAvailablePrisons(replacement);
 			}
 		}
 
-		// check if usage fit space
+		// check if usage fits space
 		for (std::pair<int, int> typeSize : Collections::zip(Collections::range(prisonBegin, prisonCurr), Collections::range(availablePrisonTypes)))
 		{
 			if (typeSize.second < getUsedContainment(typeSize.first))

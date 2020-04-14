@@ -60,9 +60,9 @@ enum BasePlacementErrors : int
 	BPE_UpgradeDisallowed = 6,
 	/// 7: trying to upgrade over existing facility, but all buildings next to it are under construction and build queue is off
 	BPE_Queue = 7,
-	/// 8: trying to build facility, but other building ruleset forbidd curreont one functionality
+	/// 8: trying to build a facility, which is forbidden by other existing facilities in the base
 	BPE_ForbiddenByOther = 8,
-	/// 9: trying to build facility, but other building is forbbiden by builded
+	/// 9: trying to build a facility, which would forbid (i.e. would be in conflict with) other existing facilities in the base
 	BPE_ForbiddenByThis = 9,
 };
 
@@ -284,8 +284,8 @@ public:
 	/// Cleans up the defenses vector and optionally reclaims the tanks and their ammo.
 	void cleanupDefenses(bool reclaimItems);
 
-	/// Check if faciletes in area are used.
-	BasePlacementErrors isAreaInUse(BaseAreaSubset area, const RuleBaseFacility* replecment = nullptr) const;
+	/// Check if any facilities in a given area are used.
+	BasePlacementErrors isAreaInUse(BaseAreaSubset area, const RuleBaseFacility* replacement = nullptr) const;
 	/// Gets available base functionality.
 	RuleBaseFacilityFunctions getProvidedBaseFunc(BaseAreaSubset skip) const;
 	/// Gets used base functionality.

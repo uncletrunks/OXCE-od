@@ -565,7 +565,7 @@ void StatsForNerdsState::addVectorOfResearch(std::ostringstream &ss, const std::
 }
 
 /**
- * Adds generic Rule (need having `getType()`)
+ * Adds generic Rule (requires `getType()`)
  */
 template<typename T>
 void StatsForNerdsState::addRule(std::ostringstream &ss, T* rule, const std::string &propertyName)
@@ -574,7 +574,7 @@ void StatsForNerdsState::addRule(std::ostringstream &ss, T* rule, const std::str
 }
 
 /**
- * Adds generic Rule (need having `getId()`)
+ * Adds generic Rule (requires `getId()`)
  */
 template<typename T>
 void StatsForNerdsState::addRuleId(std::ostringstream &ss, T* rule, const std::string &propertyName)
@@ -583,7 +583,7 @@ void StatsForNerdsState::addRuleId(std::ostringstream &ss, T* rule, const std::s
 }
 
 /**
- * Adds generic Rule (need having `getName()`)
+ * Adds generic Rule (requires `getName()`)
  */
 template<typename T>
 void StatsForNerdsState::addRuleNamed(std::ostringstream &ss, T* rule, const std::string &propertyName)
@@ -592,7 +592,7 @@ void StatsForNerdsState::addRuleNamed(std::ostringstream &ss, T* rule, const std
 }
 
 /**
- * Adds a vector of generic Rules (need having `getType()`)
+ * Adds a vector of generic Rules (requires `getType()`)
  */
 template<typename T>
 void StatsForNerdsState::addVectorOfRules(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName)
@@ -601,7 +601,7 @@ void StatsForNerdsState::addVectorOfRules(std::ostringstream &ss, const std::vec
 }
 
 /**
- * Adds a vector of generic Rules (need having `getId()`)
+ * Adds a vector of generic Rules (requires `getId()`)
  */
 template<typename T>
 void StatsForNerdsState::addVectorOfRulesId(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName)
@@ -610,7 +610,7 @@ void StatsForNerdsState::addVectorOfRulesId(std::ostringstream &ss, const std::v
 }
 
 /**
- * Adds a vector of generic Rules (need having `getName()`)
+ * Adds a vector of generic Rules (requires `getName()`)
  */
 template<typename T>
 void StatsForNerdsState::addVectorOfRulesNamed(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName)

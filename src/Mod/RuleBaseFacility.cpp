@@ -176,7 +176,7 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 		{
 			if (_leavesBehindOnSellNames.size() != 1)
 			{
-				throw Exception("Sell versions of a facility must have only one replacement if fist one have same size.");
+				throw Exception("Only one replacement facility allowed (when using the same size as the original facility).");
 			}
 			_leavesBehindOnSell.push_back(first);
 		}
@@ -187,7 +187,7 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 				auto r = mod->getBaseFacility(n, true);
 				if (r->getSize() != 1)
 				{
-					throw Exception("Sell versions of a facility must have size of 1 if there are multiple of them.");
+					throw Exception("All replacement facilities must have size=1 (when using different size as the original facility).");
 				}
 				_leavesBehindOnSell.push_back(r);
 			}
@@ -586,28 +586,28 @@ bool RuleBaseFacility::getCanBeBuiltOver() const
 }
 
 /**
- * Check if given facility are allowed to be replaced by this building
+ * Check if a given facility `fac` can be replaced by this facility.
  */
 BasePlacementErrors RuleBaseFacility::getCanBuildOverOtherFacility(const RuleBaseFacility* fac) const
 {
 	if (fac->getCanBeBuiltOver() == true)
 	{
-		// old facility allow unrestricted build over.
+		// the old facility allows unrestricted build-over.
 		return BPE_None;
 	}
 	else if (_buildOverFacilities.empty())
 	{
-		// old facitlity do not allow build over and we do not have exception list
+		// the old facility does not allow unrestricted build-over and we do not have any exception list
 		return BPE_UpgradeDisallowed;
 	}
 	else if (Collections::sortVectorHave(_buildOverFacilities, fac))
 	{
-		// old facility is on exception list
+		// the old facility is on the exception list
 		return BPE_None;
 	}
 	else
 	{
-		// we have exception list but this bulding is not on it.
+		// we have an exception list, but this facility is not on it.
 		return BPE_UpgradeRequireSpecific;
 	}
 }

@@ -231,7 +231,7 @@ struct BattleActionAttackReadOnlyImpl
 
 
 /**
- * Helper struct that have all data need for weapon attack.
+ * Helper struct that has all the data needed for weapon attack.
  */
 struct BattleActionAttack
 {
@@ -331,7 +331,7 @@ private:
 	std::string _medikitActionName, _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
 	std::string _defaultInventorySlotName;
-	RuleInventory* _defaultInventorySlot; //TODO: fix constnes
+	RuleInventory* _defaultInventorySlot; //TODO: fix constness
 	int _defaultInvSlotX, _defaultInvSlotY;
 	std::vector<std::string> _supportedInventorySectionsNames;
 	std::vector<const RuleInventory*> _supportedInventorySections;

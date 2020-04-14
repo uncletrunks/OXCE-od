@@ -572,9 +572,9 @@ public:
 	int  getTurnsLeftSpottedForSnipers() const;
 	/// Reset how many turns passed since stunned last time.
 	void resetTurnsSinceStunned() { _turnsSinceStunned = 255; }
-	/// Increse how many turns passed since stunned last time.
+	/// Increase how many turns passed since stunned last time.
 	void incTurnsSinceStunned() { _turnsSinceStunned = std::max(255, _turnsSinceStunned + 1); }
-	/// Return how many truns passed since stunned last time.
+	/// Return how many turns passed since stunned last time.
 	int getTurnsSinceStunned() const { return _turnsSinceStunned; }
 
 	/// Get this unit's original faction

@@ -279,7 +279,7 @@ class ModScriptGlobal : public ScriptGlobal
 	}
 
 public:
-	/// Initialize shaded globals like types.
+	/// Initialize shared globals like types.
 	void initParserGlobals(ScriptParserBase* parser) override
 	{
 		parser->registerPointerType<Mod>();

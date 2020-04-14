@@ -500,7 +500,7 @@ public:
 
 
 	/**
-	 * Helper having conversion from some unique strings to indexs.
+	 * Helper providing conversion from some unique strings to indexes.
 	 */
 	class NamesToIndex
 	{
@@ -511,10 +511,10 @@ public:
 	public:
 
 		/**
-		 * Return index for given name
+		 * Return an index for a given name
 		 * @param name New name or old already added name
-		 * @param max How much unique names we can hold
-		 * @return Index assigned to name.
+		 * @param max How many unique names we can hold
+		 * @return Index assigned to a name.
 		 */
 		size_t addName(const std::string& name, size_t max)
 		{
@@ -525,7 +525,7 @@ public:
 			}
 			if (_last == max)
 			{
-				throw Exception("Number of unique names reach limit because of name '" + name + "'");
+				throw Exception("Number of unique names reached limit because of name '" + name + "'");
 			}
 			ref = _last++;
 			_usedNames[ref] = name;

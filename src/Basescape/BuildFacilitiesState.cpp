@@ -130,7 +130,7 @@ void BuildFacilitiesState::populateBuildList()
 			continue;
 		}
 
-		// do not check requirments for bulding that can overbuild others, correct check will be done when you will try place it at some spot
+		// do not check requirements for bulding that can overbuild others, correct check will be done when you will try to place it somewhere
 		if (rule->getBuildOverFacilities().empty())
 		{
 			if ((forbiddenBaseFunc & prov).any())

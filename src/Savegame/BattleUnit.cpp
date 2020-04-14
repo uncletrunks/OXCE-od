@@ -2411,7 +2411,7 @@ void BattleUnit::updateUnitStats(bool tuAndEnergy, bool rest)
 			}
 		}
 
-		//unit update will be after other stat calucalted and updated
+		//unit update will be done after other stats are calculated and updated
 	}
 
 	if (rest)

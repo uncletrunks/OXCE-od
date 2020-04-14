@@ -249,7 +249,7 @@ void BattlescapeGenerator::nextStage()
 			}
 		}
 
-		// scripts or some bugs in game could make alien or soldier that have not "resolved" stun od death state.
+		// scripts (or some bugs in the game) could make aliens or soldiers that have "unresolved" stun or death state.
 		if (!(*unit)->isOut() && (*unit)->isOutThresholdExceed())
 		{
 			(*unit)->instaFalling();
