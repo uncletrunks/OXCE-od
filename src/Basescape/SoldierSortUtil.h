@@ -63,6 +63,38 @@ GET_ATTRIB_STAT_FN(psiSkill)
 GET_ATTRIB_STAT_FN(melee)
 #undef GET_ATTRIB_STAT_FN
 
+#define GET_ATTRIB_STAT_FN(attrib) \
+	int attrib##StatBase(Game *game, Soldier *s);
+GET_ATTRIB_STAT_FN(tu)
+GET_ATTRIB_STAT_FN(stamina)
+GET_ATTRIB_STAT_FN(health)
+GET_ATTRIB_STAT_FN(bravery)
+GET_ATTRIB_STAT_FN(reactions)
+GET_ATTRIB_STAT_FN(firing)
+GET_ATTRIB_STAT_FN(throwing)
+GET_ATTRIB_STAT_FN(strength)
+GET_ATTRIB_STAT_FN(mana)
+GET_ATTRIB_STAT_FN(psiStrength)
+GET_ATTRIB_STAT_FN(psiSkill)
+GET_ATTRIB_STAT_FN(melee)
+#undef GET_ATTRIB_STAT_FN
+
+#define GET_ATTRIB_STAT_FN(attrib) \
+	int attrib##StatPlus(Game *game, Soldier *s);
+GET_ATTRIB_STAT_FN(tu)
+GET_ATTRIB_STAT_FN(stamina)
+GET_ATTRIB_STAT_FN(health)
+GET_ATTRIB_STAT_FN(bravery)
+GET_ATTRIB_STAT_FN(reactions)
+GET_ATTRIB_STAT_FN(firing)
+GET_ATTRIB_STAT_FN(throwing)
+GET_ATTRIB_STAT_FN(strength)
+GET_ATTRIB_STAT_FN(mana)
+GET_ATTRIB_STAT_FN(psiStrength)
+GET_ATTRIB_STAT_FN(psiSkill)
+GET_ATTRIB_STAT_FN(melee)
+#undef GET_ATTRIB_STAT_FN
+
 #define GET_SOLDIER_STAT_FN(attrib, camelCaseAttrib) \
 	int attrib##Stat(Game *game, Soldier *s);
 GET_SOLDIER_STAT_FN(id, Id)

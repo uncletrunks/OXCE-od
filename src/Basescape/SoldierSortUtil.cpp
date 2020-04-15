@@ -42,6 +42,92 @@ int OpenXcom::psiSkillStat(Game *game, Soldier *s)
 }
 GET_ATTRIB_STAT_FN(melee)
 #undef GET_ATTRIB_STAT_FN
+
+#define GET_ATTRIB_STAT_FN(attrib) \
+	int OpenXcom::attrib##StatBase(Game *game, Soldier *s) { return s->getCurrentStats()->attrib; }
+GET_ATTRIB_STAT_FN(tu)
+GET_ATTRIB_STAT_FN(stamina)
+GET_ATTRIB_STAT_FN(health)
+GET_ATTRIB_STAT_FN(bravery)
+GET_ATTRIB_STAT_FN(reactions)
+GET_ATTRIB_STAT_FN(firing)
+GET_ATTRIB_STAT_FN(throwing)
+GET_ATTRIB_STAT_FN(strength)
+int OpenXcom::manaStatBase(Game* game, Soldier* s)
+{
+	// don't reveal mana before it would otherwise be known
+	if (game->getSavedGame()->isManaUnlocked(game->getMod()))
+	{
+		return s->getCurrentStats()->mana;
+	}
+	return 0;
+}
+int OpenXcom::psiStrengthStatBase(Game *game, Soldier *s)
+{
+	// don't reveal psi strength before it would otherwise be known
+	if (s->getCurrentStats()->psiSkill > 0
+		|| (Options::psiStrengthEval
+		&& game->getSavedGame()->isResearched(game->getMod()->getPsiRequirements())))
+	{
+		return s->getCurrentStats()->psiStrength;
+	}
+	return 0;
+}
+int OpenXcom::psiSkillStatBase(Game *game, Soldier *s)
+{
+	// when Options::anytimePsiTraining is turned on, psiSkill can actually have a negative value
+	if (s->getCurrentStats()->psiSkill > 0)
+	{
+		return s->getCurrentStats()->psiSkill;
+	}
+	return 0;
+}
+GET_ATTRIB_STAT_FN(melee)
+#undef GET_ATTRIB_STAT_FN
+
+#define GET_ATTRIB_STAT_FN(attrib) \
+	int OpenXcom::attrib##StatPlus(Game *game, Soldier *s) { return s->getStatsWithSoldierBonusesOnly()->attrib; }
+GET_ATTRIB_STAT_FN(tu)
+GET_ATTRIB_STAT_FN(stamina)
+GET_ATTRIB_STAT_FN(health)
+GET_ATTRIB_STAT_FN(bravery)
+GET_ATTRIB_STAT_FN(reactions)
+GET_ATTRIB_STAT_FN(firing)
+GET_ATTRIB_STAT_FN(throwing)
+GET_ATTRIB_STAT_FN(strength)
+int OpenXcom::manaStatPlus(Game* game, Soldier* s)
+{
+	// don't reveal mana before it would otherwise be known
+	if (game->getSavedGame()->isManaUnlocked(game->getMod()))
+	{
+		return s->getStatsWithSoldierBonusesOnly()->mana;
+	}
+	return 0;
+}
+int OpenXcom::psiStrengthStatPlus(Game *game, Soldier *s)
+{
+	// don't reveal psi strength before it would otherwise be known
+	if (s->getCurrentStats()->psiSkill > 0
+		|| (Options::psiStrengthEval
+		&& game->getSavedGame()->isResearched(game->getMod()->getPsiRequirements())))
+	{
+		return s->getStatsWithSoldierBonusesOnly()->psiStrength;
+	}
+	return 0;
+}
+int OpenXcom::psiSkillStatPlus(Game *game, Soldier *s)
+{
+	// when Options::anytimePsiTraining is turned on, psiSkill can actually have a negative value
+	if (s->getCurrentStats()->psiSkill > 0)
+	{
+		return s->getStatsWithSoldierBonusesOnly()->psiSkill;
+	}
+	return 0;
+}
+GET_ATTRIB_STAT_FN(melee)
+#undef GET_ATTRIB_STAT_FN
+
+
 #define GET_SOLDIER_STAT_FN(attrib, camelCaseAttrib) \
 	int OpenXcom::attrib##Stat(Game *game, Soldier *s) { return s->get##camelCaseAttrib(); }
 GET_SOLDIER_STAT_FN(id, Id)

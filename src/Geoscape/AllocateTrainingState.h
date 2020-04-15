@@ -24,6 +24,7 @@ namespace OpenXcom
 {
 
 class TextButton;
+class ToggleTextButton;
 class Window;
 class Text;
 class Base;
@@ -40,6 +41,7 @@ class AllocateTrainingState : public State
 {
 private:
 	TextButton *_btnOk;
+	ToggleTextButton *_btnPlus;
 	Window *_window;
 	Text *_txtTitle, *_txtTraining, *_txtName, *_txtRemaining;
 	Text *_txtTu, *_txtStamina, *_txtHealth, *_txtFiring, *_txtThrowing, *_txtMelee, *_txtStrength;
@@ -51,6 +53,7 @@ private:
 	Base *_base;
 	std::vector<Soldier *> _origSoldierOrder;
 	std::vector<SortFunctor *> _sortFunctors;
+	std::vector<SortFunctor *> _sortFunctorsPlus;
 	///initializes the display list
 	void initList(size_t scrl);
 public:
@@ -72,6 +75,8 @@ public:
 	void moveSoldierDown(Action *action, unsigned int row, bool max = false);
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the PLUS button.
+	void btnPlusClick(Action *action);
 	/// Handler for clicking the Soldiers list.
 	void lstSoldiersClick(Action *action);
 	/// Handler for pressing-down a mouse-button in the list.

@@ -24,6 +24,7 @@
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
+#include "../Interface/ToggleTextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Savegame/SavedGame.h"
@@ -59,6 +60,7 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	_btnOk = new TextButton(148, 16, 164, 176);
 	_lstSoldiers = new TextList(290, 112, 8, 52);
 	_cbxSortBy = new ComboBox(this, 148, 16, 8, 176, true);
+	_btnPlus = new ToggleTextButton(18, 16, 294, 8);
 
 	// Set palette
 	setInterface("allocatePsi");
@@ -73,6 +75,7 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	add(_txtTraining, "text", "allocatePsi");
 	add(_lstSoldiers, "list", "allocatePsi");
 	add(_cbxSortBy, "button", "allocatePsi");
+	add(_btnPlus, "button", "allocatePsi");
 
 	centerAllSurfaces();
 
@@ -83,6 +86,18 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	_btnOk->onMouseClick((ActionHandler)&AllocatePsiTrainingState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&AllocatePsiTrainingState::btnOkClick, Options::keyCancel);
 	_btnOk->onKeyboardPress((ActionHandler)&AllocatePsiTrainingState::btnDeassignAllSoldiersClick, Options::keyRemoveSoldiersFromTraining);
+
+	_btnPlus->setText("+");
+	_btnPlus->setPressed(false);
+	if (_game->getMod()->getSoldierBonusList().empty())
+	{
+		// no soldier bonuses in the mod = button not needed
+		_btnPlus->setVisible(false);
+	}
+	else
+	{
+		_btnPlus->onMouseClick((ActionHandler)&AllocatePsiTrainingState::btnPlusClick, 0);
+	}
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
@@ -103,10 +118,12 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	std::vector<std::string> sortOptions;
 	sortOptions.push_back(tr("STR_ORIGINAL_ORDER"));
 	_sortFunctors.push_back(NULL);
+	_sortFunctorsPlus.push_back(NULL);
 
 #define PUSH_IN(strId, functor) \
 	sortOptions.push_back(tr(strId)); \
-	_sortFunctors.push_back(new SortFunctor(_game, functor));
+	_sortFunctors.push_back(new SortFunctor(_game, functor)); \
+	_sortFunctorsPlus.push_back(new SortFunctor(_game, functor));
 
 	PUSH_IN("STR_ID", idStat);
 	PUSH_IN("STR_NAME_UC", nameStat);
@@ -120,22 +137,30 @@ AllocatePsiTrainingState::AllocatePsiTrainingState(Base *base) : _sel(0), _base(
 	{
 		PUSH_IN("STR_MANA_MISSING", manaMissingStat);
 	}
-	PUSH_IN("STR_TIME_UNITS", tuStat);
-	PUSH_IN("STR_STAMINA", staminaStat);
-	PUSH_IN("STR_HEALTH", healthStat);
-	PUSH_IN("STR_BRAVERY", braveryStat);
-	PUSH_IN("STR_REACTIONS", reactionsStat);
-	PUSH_IN("STR_FIRING_ACCURACY", firingStat);
-	PUSH_IN("STR_THROWING_ACCURACY", throwingStat);
-	PUSH_IN("STR_MELEE_ACCURACY", meleeStat);
-	PUSH_IN("STR_STRENGTH", strengthStat);
+
+#undef PUSH_IN
+
+#define PUSH_IN(strId, functor, functorPlus) \
+	sortOptions.push_back(tr(strId)); \
+	_sortFunctors.push_back(new SortFunctor(_game, functor)); \
+	_sortFunctorsPlus.push_back(new SortFunctor(_game, functorPlus));
+
+	PUSH_IN("STR_TIME_UNITS", tuStatBase, tuStatPlus);
+	PUSH_IN("STR_STAMINA", staminaStatBase, staminaStatPlus);
+	PUSH_IN("STR_HEALTH", healthStatBase, healthStatPlus);
+	PUSH_IN("STR_BRAVERY", braveryStatBase, braveryStatPlus);
+	PUSH_IN("STR_REACTIONS", reactionsStatBase, reactionsStatPlus);
+	PUSH_IN("STR_FIRING_ACCURACY", firingStatBase, firingStatPlus);
+	PUSH_IN("STR_THROWING_ACCURACY", throwingStatBase, throwingStatPlus);
+	PUSH_IN("STR_MELEE_ACCURACY", meleeStatBase, meleeStatPlus);
+	PUSH_IN("STR_STRENGTH", strengthStatBase, strengthStatPlus);
 	if (_game->getMod()->isManaFeatureEnabled())
 	{
 		// "unlock" is checked later
-		PUSH_IN("STR_MANA_POOL", manaStat);
+		PUSH_IN("STR_MANA_POOL", manaStatBase, manaStatPlus);
 	}
-	PUSH_IN("STR_PSIONIC_STRENGTH", psiStrengthStat);
-	PUSH_IN("STR_PSIONIC_SKILL", psiSkillStat);
+	PUSH_IN("STR_PSIONIC_STRENGTH", psiStrengthStatBase, psiStrengthStatPlus);
+	PUSH_IN("STR_PSIONIC_SKILL", psiSkillStatBase, psiSkillStatPlus);
 
 #undef PUSH_IN
 
@@ -178,7 +203,7 @@ void AllocatePsiTrainingState::cbxSortByChange(Action *action)
 		return;
 	}
 
-	SortFunctor *compFunc = _sortFunctors[selIdx];
+	SortFunctor *compFunc = _btnPlus->getPressed() ? _sortFunctorsPlus[selIdx] : _sortFunctors[selIdx];
 	if (compFunc)
 	{
 		if (selIdx == 2)
@@ -236,6 +261,24 @@ void AllocatePsiTrainingState::btnOkClick(Action *)
 }
 
 /**
+ * Updates the soldier stats. Sorts the list if applicable.
+ * @param action Pointer to an action.
+ */
+void AllocatePsiTrainingState::btnPlusClick(Action *action)
+{
+	size_t selIdx = _cbxSortBy->getSelected();
+	if (selIdx == (size_t)-1)
+	{
+		size_t originalScrollPos = _lstSoldiers->getScroll();
+		initList(originalScrollPos);
+	}
+	else
+	{
+		cbxSortByChange(action);
+	}
+}
+
+/**
  * Updates the soldiers list
  * after going to other screens.
  */
@@ -255,12 +298,14 @@ void AllocatePsiTrainingState::initList(size_t scrl)
 	_lstSoldiers->clearList();
 	for (std::vector<Soldier*>::const_iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)
 	{
+		UnitStats* stats = _btnPlus->getPressed() ? (*s)->getStatsWithSoldierBonusesOnly() : (*s)->getCurrentStats();
+
 		std::ostringstream ssStr;
 		std::ostringstream ssSkl;
 		_soldiers.push_back(*s);
 		if ((*s)->getCurrentStats()->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 		{
-			ssStr << "   " << (*s)->getCurrentStats()->psiStrength;
+			ssStr << "   " << stats->psiStrength;
 			if (Options::allowPsiStrengthImprovement) ssStr << "/+" << (*s)->getPsiStrImprovement();
 		}
 		else
@@ -269,7 +314,7 @@ void AllocatePsiTrainingState::initList(size_t scrl)
 		}
 		if ((*s)->getCurrentStats()->psiSkill > 0)
 		{
-			ssSkl << (*s)->getCurrentStats()->psiSkill << "/+" << (*s)->getImprovement();
+			ssSkl << stats->psiSkill << "/+" << (*s)->getImprovement();
 		}
 		else
 		{
