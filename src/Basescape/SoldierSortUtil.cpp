@@ -62,4 +62,8 @@ int OpenXcom::woundRecoveryStat(Game *game, Soldier *s)
 	return s->getWoundRecovery(0.0f, 0.0f);
 }
 GET_SOLDIER_STAT_FN(manaMissing, ManaMissing)
+int OpenXcom::idleDaysStat(Game *game, Soldier *s)
+{
+	return game->getSavedGame()->getSoldierIdleDays(s);
+}
 #undef GET_SOLDIER_STAT_FN

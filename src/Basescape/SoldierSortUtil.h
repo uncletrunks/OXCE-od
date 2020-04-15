@@ -73,6 +73,7 @@ GET_SOLDIER_STAT_FN(missions, Missions)
 GET_SOLDIER_STAT_FN(kills, Kills)
 GET_SOLDIER_STAT_FN(woundRecovery, WoundRecovery)
 GET_SOLDIER_STAT_FN(manaMissing, ManaMissing)
+GET_SOLDIER_STAT_FN(idleDays, IdleDays)
 #undef GET_SOLDIER_STAT_FN
 
 }

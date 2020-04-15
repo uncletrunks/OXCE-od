@@ -64,6 +64,7 @@
 #include "BaseFacility.h"
 #include "MissionStatistics.h"
 #include "SoldierDeath.h"
+#include "SoldierDiary.h"
 
 namespace OpenXcom
 {
@@ -2316,6 +2317,40 @@ Soldier *SavedGame::inspectSoldiers(std::vector<Soldier*> &soldiers, std::vector
 		}
 	}
 	return highestRanked;
+}
+
+/**
+ * Gets the (approximate) number of idle days since the soldier's last mission.
+ */
+int SavedGame::getSoldierIdleDays(Soldier *soldier)
+{
+	int lastMissionId = -1;
+	int idleDays = 999;
+
+	if (!soldier->getDiary()->getMissionIdList().empty())
+	{
+		lastMissionId = soldier->getDiary()->getMissionIdList().back();
+	}
+
+	if (lastMissionId == -1)
+		return idleDays;
+
+	for (auto missionInfo : _missionStatistics)
+	{
+		if (missionInfo->id == lastMissionId)
+		{
+			idleDays = 0;
+			idleDays += (_time->getYear() - missionInfo->time.getYear()) * 365;
+			idleDays += (_time->getMonth() - missionInfo->time.getMonth()) * 30;
+			idleDays += (_time->getDay() - missionInfo->time.getDay()) * 1;
+			break;
+		}
+	}
+
+	if (idleDays > 999)
+		idleDays = 999;
+
+	return idleDays;
 }
 
 /**
