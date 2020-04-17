@@ -21,7 +21,9 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleArcScript.h"
 #include "../Mod/RuleBaseFacility.h"
+#include "../Mod/RuleEventScript.h"
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleManufacture.h"
@@ -901,8 +903,47 @@ void TechTreeViewerState::initLists()
 			}
 		}
 
-		// 10. unlocks/disables alien missions
+		// 10. unlocks/disables alien missions, game arcs or geoscape events
+		std::unordered_set<std::string> unlocksArcs, disablesArcs;
+		std::unordered_set<std::string> unlocksEvents, disablesEvents;
 		std::unordered_set<std::string> unlocksMissions, disablesMissions;
+		bool affectsGameProgression = false;
+
+		for (auto& arcScriptId : *_game->getMod()->getArcScriptList())
+		{
+			auto arcScript = _game->getMod()->getArcScript(arcScriptId, false);
+			if (arcScript)
+			{
+				for (auto& trigger : arcScript->getResearchTriggers())
+				{
+					if (trigger.first == _selectedTopic)
+					{
+						if (trigger.second)
+							unlocksArcs.insert(arcScriptId);
+						else
+							disablesArcs.insert(arcScriptId);
+					}
+				}
+			}
+		}
+		for (auto& eventScriptId : *_game->getMod()->getEventScriptList())
+		{
+			auto eventScript = _game->getMod()->getEventScript(eventScriptId, false);
+			if (eventScript)
+			{
+				for (auto& trigger : eventScript->getResearchTriggers())
+				{
+					if (trigger.first == _selectedTopic)
+					{
+						if (eventScript->getAffectsGameProgression()) affectsGameProgression = true; // remember for later
+						if (trigger.second)
+							unlocksEvents.insert(eventScriptId);
+						else
+							disablesEvents.insert(eventScriptId);
+					}
+				}
+			}
+		}
 		for (auto& missionScriptId : *_game->getMod()->getMissionScriptList())
 		{
 			auto missionScript = _game->getMod()->getMissionScript(missionScriptId, false);
@@ -920,50 +961,68 @@ void TechTreeViewerState::initLists()
 				}
 			}
 		}
-		if (_game->getSavedGame()->getDebugMode())
+		bool showDetails = _game->getSavedGame()->getDebugMode();
+		if (Options::isPasswordCorrect() && (SDL_GetModState() & KMOD_ALT))
 		{
-			if (!unlocksMissions.empty())
+			showDetails = true;
+		}
+		if (showDetails)
+		{
+			auto addGameProgressionEntry = [&](const std::unordered_set<std::string>& list, const std::string& label)
 			{
-				_lstRight->addRow(1, tr("STR_UNLOCKS_MISSIONS").c_str());
-				_lstRight->setRowColor(row, _blue);
-				_rightTopics.push_back("-");
-				_rightFlags.push_back(TTV_NONE);
-				++row;
-				for (auto& i : unlocksMissions)
+				if (!list.empty())
 				{
-					std::ostringstream name;
-					name << "  " << tr(i);
-					_lstRight->addRow(1, name.str().c_str());
-					_lstRight->setRowColor(row, _white);
+					_lstRight->addRow(1, tr(label).c_str());
+					_lstRight->setRowColor(row, _blue);
 					_rightTopics.push_back("-");
 					_rightFlags.push_back(TTV_NONE);
 					++row;
+					for (auto& i : list)
+					{
+						std::ostringstream name;
+						name << "  " << tr(i);
+						_lstRight->addRow(1, name.str().c_str());
+						_lstRight->setRowColor(row, _white);
+						_rightTopics.push_back("-");
+						_rightFlags.push_back(TTV_NONE);
+						++row;
+					}
 				}
-			}
-			if (!disablesMissions.empty())
-			{
-				_lstRight->addRow(1, tr("STR_DISABLES_MISSIONS").c_str());
-				_lstRight->setRowColor(row, _blue);
-				_rightTopics.push_back("-");
-				_rightFlags.push_back(TTV_NONE);
-				++row;
-				for (auto& i : disablesMissions)
-				{
-					std::ostringstream name;
-					name << "  " << tr(i);
-					_lstRight->addRow(1, name.str().c_str());
-					_lstRight->setRowColor(row, _white);
-					_rightTopics.push_back("-");
-					_rightFlags.push_back(TTV_NONE);
-					++row;
-				}
-			}
+			};
+
+			addGameProgressionEntry(unlocksArcs, "STR_UNLOCKS_ARCS");
+			addGameProgressionEntry(disablesArcs, "STR_DISABLES_ARCS");
+
+			addGameProgressionEntry(unlocksMissions, "STR_UNLOCKS_MISSIONS");
+			addGameProgressionEntry(disablesMissions, "STR_DISABLES_MISSIONS");
+
+			addGameProgressionEntry(unlocksEvents, "STR_UNLOCKS_EVENTS");
+			addGameProgressionEntry(disablesEvents, "STR_DISABLES_EVENTS");
 		}
 		else
 		{
-			if (!unlocksMissions.empty() || !disablesMissions.empty())
+			int showDisclaimer = 0;
+			if (!unlocksMissions.empty() || !disablesMissions.empty() || !unlocksArcs.empty() || !disablesArcs.empty())
 			{
-				_lstRight->addRow(1, tr("STR_AFFECTS_GAME_PROGRESSION").c_str());
+				showDisclaimer = 1; // STR_AFFECTS_GAME_PROGRESSION
+			}
+			else if (!unlocksEvents.empty() || !disablesEvents.empty())
+			{
+				if (affectsGameProgression)
+				{
+					showDisclaimer = 1; // STR_AFFECTS_GAME_PROGRESSION
+				}
+				else if (Options::isPasswordCorrect())
+				{
+					showDisclaimer = 2; // .
+				}
+			}
+			if (showDisclaimer > 0)
+			{
+				if (showDisclaimer == 1)
+					_lstRight->addRow(1, tr("STR_AFFECTS_GAME_PROGRESSION").c_str());
+				else
+					_lstRight->addRow(1, ".");
 				_lstRight->setRowColor(row, _gold);
 				_rightTopics.push_back("-");
 				_rightFlags.push_back(TTV_NONE);

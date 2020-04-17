@@ -39,6 +39,7 @@ private:
 	std::map<std::string, bool> _researchTriggers;
 	std::map<std::string, bool> _itemTriggers;
 	std::map<std::string, bool> _facilityTriggers;
+	bool _affectsGameProgression;
 public:
 	/// Creates a blank RuleEventScript.
 	RuleEventScript(const std::string &type);
@@ -76,6 +77,8 @@ public:
 	const std::map<std::string, bool> &getItemTriggers() const { return _itemTriggers; }
 	/// Gets the facility triggers that may apply to this command.
 	const std::map<std::string, bool> &getFacilityTriggers() const { return _facilityTriggers; }
+	/// Gets a flag used for TechTreeViewer.
+	bool getAffectsGameProgression() const { return _affectsGameProgression; }
 	/// Generates an event based on the month.
 	std::string generate(const size_t monthsPassed) const;
 };

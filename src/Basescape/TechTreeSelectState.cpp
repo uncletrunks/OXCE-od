@@ -22,6 +22,8 @@
 #include "../Engine/Action.h"
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/RuleArcScript.h"
+#include "../Mod/RuleEventScript.h"
 #include "../Mod/RuleMissionScript.h"
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/LocalizedText.h"
@@ -158,9 +160,37 @@ void TechTreeSelectState::initLists()
 	}
 
 	int row = 0;
-	if (searchString == "SIMSALABIM")
+	std::unordered_set<std::string> tmpList;
+	if (searchString == "ASCRIPT")
 	{
-		std::unordered_set<std::string> tmpList;
+		for (auto& arcScriptId : *_game->getMod()->getArcScriptList())
+		{
+			auto arcScript = _game->getMod()->getArcScript(arcScriptId, false);
+			if (arcScript)
+			{
+				for (auto& trigger : arcScript->getResearchTriggers())
+				{
+					tmpList.insert(trigger.first);
+				}
+			}
+		}
+	}
+	else if (searchString == "ESCRIPT")
+	{
+		for (auto& eventScriptId : *_game->getMod()->getEventScriptList())
+		{
+			auto eventScript = _game->getMod()->getEventScript(eventScriptId, false);
+			if (eventScript)
+			{
+				for (auto& trigger : eventScript->getResearchTriggers())
+				{
+					tmpList.insert(trigger.first);
+				}
+			}
+		}
+	}
+	else if (searchString == "MSCRIPT")
+	{
 		for (auto& missionScriptId : *_game->getMod()->getMissionScriptList())
 		{
 			auto missionScript = _game->getMod()->getMissionScript(missionScriptId, false);
@@ -172,6 +202,9 @@ void TechTreeSelectState::initLists()
 				}
 			}
 		}
+	}
+	if (!tmpList.empty())
+	{
 		for (auto& tmp : tmpList)
 		{
 			_availableTopics.push_back(tmp);

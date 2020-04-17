@@ -29,7 +29,7 @@ namespace OpenXcom
  */
 RuleEventScript::RuleEventScript(const std::string &type) :
 	_type(type), _firstMonth(0), _lastMonth(-1), _executionOdds(100), _minDifficulty(0), _maxDifficulty(4),
-	_minScore(INT_MIN), _maxScore(INT_MAX), _minFunds(INT64_MIN), _maxFunds(INT64_MAX)
+	_minScore(INT_MIN), _maxScore(INT_MAX), _minFunds(INT64_MIN), _maxFunds(INT64_MAX), _affectsGameProgression(false)
 {
 }
 
@@ -81,6 +81,7 @@ void RuleEventScript::load(const YAML::Node &node)
 	_researchTriggers = node["researchTriggers"].as<std::map<std::string, bool> >(_researchTriggers);
 	_itemTriggers = node["itemTriggers"].as<std::map<std::string, bool> >(_itemTriggers);
 	_facilityTriggers = node["facilityTriggers"].as<std::map<std::string, bool> >(_facilityTriggers);
+	_affectsGameProgression = node["affectsGameProgression"].as<bool>(_affectsGameProgression);
 }
 
 /**
