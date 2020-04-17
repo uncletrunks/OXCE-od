@@ -43,7 +43,8 @@ TextList::TextList(int width, int height, int x, int y) : InteractiveSurface(wid
 	_big(0), _small(0), _font(0), _lang(nullptr), _scroll(0), _visibleRows(0), _selRow(0), _color(0), _color2(0),
 	_dot(false), _selectable(false), _condensed(false), _contrast(false), _wrap(false), _flooding(false), _ignoreSeparators(false),
 	_bg(0), _selector(0), _margin(0), _scrolling(true), _arrowPos(-1), _scrollPos(4), _arrowType(ARROW_VERTICAL),
-	_leftClick(0), _leftPress(0), _leftRelease(0), _rightClick(0), _rightPress(0), _rightRelease(0), _arrowsLeftEdge(0), _arrowsRightEdge(0), _comboBox(0)
+	_leftClick(0), _leftPress(0), _leftRelease(0), _rightClick(0), _rightPress(0), _rightRelease(0),
+	_arrowsLeftEdge(0), _arrowsRightEdge(0), _noScrollLeftEdge(0), _noScrollRightEdge(0), _comboBox(0)
 {
 	_up = new ArrowButton(ARROW_BIG_UP, 13, 14, getX() + getWidth() + _scrollPos, getY());
 	_up->setVisible(false);
@@ -741,6 +742,31 @@ int TextList::getMargin() const
 }
 
 /**
+ * Sets the no scroll area of the text list.
+ * @param left Left edge of the no scroll area.
+ * @param right Right edge of the no scroll area.
+ */
+void TextList::setNoScrollArea(int left, int right)
+{
+	_noScrollLeftEdge = left;
+	_noScrollRightEdge = right;
+}
+
+/**
+ * Checks if a given coordinate is inside of the no scroll area of the text list.
+ * @param x Coordinate to check.
+ */
+bool TextList::isInsideNoScrollArea(int x)
+{
+	if (_noScrollRightEdge > 0)
+	{
+		if (_noScrollLeftEdge <= x && x <= _noScrollRightEdge)
+			return true;
+	}
+	return false;
+}
+
+/**
  * Changes the color of the arrow buttons in the list.
  * @param color Color value.
  */
@@ -1113,6 +1139,10 @@ void TextList::mousePress(Action *action, State *state)
 	if (Options::changeValueByMouseWheel != 0)
 	{
 		allowScroll = (action->getAbsoluteXMouse() < _arrowsLeftEdge || action->getAbsoluteXMouse() > _arrowsRightEdge);
+	}
+	if (isInsideNoScrollArea(action->getAbsoluteXMouse()))
+	{
+		allowScroll = false;
 	}
 	if (allowScroll)
 	{

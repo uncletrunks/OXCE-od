@@ -142,7 +142,17 @@ ManufactureState::~ManufactureState()
 void ManufactureState::init()
 {
 	State::init();
-	fillProductionList();
+	fillProductionList(0);
+
+	if (Options::oxceManufactureScrollSpeed > 0 || Options::oxceManufactureScrollSpeedWithCtrl > 0)
+	{
+		// 140 +/- 20
+		_lstManufacture->setNoScrollArea(_txtAllocated->getX() - 40, _txtAllocated->getX());
+	}
+	else
+	{
+		_lstManufacture->setNoScrollArea(0, 0);
+	}
 }
 
 /**
@@ -175,7 +185,7 @@ void ManufactureState::btnNewProductionClick(Action *)
 /**
  * Fills the list of base productions.
  */
-void ManufactureState::fillProductionList()
+void ManufactureState::fillProductionList(size_t scrl)
 {
 	const std::vector<Production *> productions(_base->getProductions());
 	_lstManufacture->clearList();
@@ -215,6 +225,9 @@ void ManufactureState::fillProductionList()
 	_txtAvailable->setText(tr("STR_ENGINEERS_AVAILABLE").arg(_base->getAvailableEngineers()));
 	_txtAllocated->setText(tr("STR_ENGINEERS_ALLOCATED").arg(_base->getAllocatedEngineers()));
 	_txtSpace->setText(tr("STR_WORKSHOP_SPACE_AVAILABLE").arg(_base->getFreeWorkshops()));
+
+	if (scrl)
+		_lstManufacture->scrollTo(scrl);
 }
 
 /**
@@ -244,19 +257,14 @@ void ManufactureState::lstManufactureClickMiddle(Action *)
  */
 void ManufactureState::lstManufactureMousePress(Action *action)
 {
-	if (_lstManufacture->isScrollbarVisible())
-		return;
-
-	// 140 +/- 20
-	if (action->getAbsoluteXMouse() < (_txtAllocated->getX() - 40) ||
-		action->getAbsoluteXMouse() > _txtAllocated->getX())
+	if (!_lstManufacture->isInsideNoScrollArea(action->getAbsoluteXMouse()))
 	{
 		return;
 	}
 
-	int change = 1;
+	int change = Options::oxceManufactureScrollSpeed;
 	if (SDL_GetModState() & KMOD_CTRL)
-		change = 10;
+		change = Options::oxceManufactureScrollSpeedWithCtrl;
 
 	if (action->getDetails()->button.button == SDL_BUTTON_WHEELUP)
 	{
@@ -267,7 +275,7 @@ void ManufactureState::lstManufactureMousePress(Action *action)
 			Production *selectedProject = _base->getProductions()[_lstManufacture->getSelectedRow()];
 			selectedProject->setAssignedEngineers(selectedProject->getAssignedEngineers() + change);
 			_base->setEngineers(_base->getEngineers() - change);
-			fillProductionList();
+			fillProductionList(_lstManufacture->getScroll());
 		}
 	}
 	else if (action->getDetails()->button.button == SDL_BUTTON_WHEELDOWN)
@@ -278,7 +286,7 @@ void ManufactureState::lstManufactureMousePress(Action *action)
 		{
 			selectedProject->setAssignedEngineers(selectedProject->getAssignedEngineers() - change);
 			_base->setEngineers(_base->getEngineers() + change);
-			fillProductionList();
+			fillProductionList(_lstManufacture->getScroll());
 		}
 	}
 }

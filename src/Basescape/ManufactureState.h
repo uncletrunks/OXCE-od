@@ -57,7 +57,7 @@ public:
 	/// Handler for the New Production button.
 	void btnNewProductionClick(Action * action);
 	/// Fills the list of base productions.
-	void fillProductionList();
+	void fillProductionList(size_t scrl);
 };
 
 }

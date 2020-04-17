@@ -226,6 +226,11 @@ void create()
 	_info.push_back(OptionInfo("oxceEnableUnitResponseSounds", &oxceEnableUnitResponseSounds, true));
 	_info.push_back(OptionInfo("oxceEnableUnitResponseSounds", &oxceEnableSlackingIndicator, true));
 
+	_info.push_back(OptionInfo("oxceManufactureScrollSpeed", &oxceManufactureScrollSpeed, 10));
+	_info.push_back(OptionInfo("oxceManufactureScrollSpeedWithCtrl", &oxceManufactureScrollSpeedWithCtrl, 1));
+	_info.push_back(OptionInfo("oxceResearchScrollSpeed", &oxceResearchScrollSpeed, 10));
+	_info.push_back(OptionInfo("oxceResearchScrollSpeedWithCtrl", &oxceResearchScrollSpeedWithCtrl, 1));
+
 	// controls
 	_info.push_back(OptionInfo("keyOk", &keyOk, SDLK_RETURN, "STR_OK", "STR_GENERAL"));
 	_info.push_back(OptionInfo("keyCancel", &keyCancel, SDLK_ESCAPE, "STR_CANCEL", "STR_GENERAL"));

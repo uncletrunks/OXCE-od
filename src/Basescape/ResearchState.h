@@ -56,7 +56,7 @@ public:
 	/// Handler for opening the Current Global Research UI.
 	void onCurrentGlobalResearchClick(Action *action);
 	/// Fills the ResearchProject list with Base ResearchProjects.
-	void fillProjectList();
+	void fillProjectList(size_t scrl);
 	/// Updates the research list.
 	void init() override;
 };

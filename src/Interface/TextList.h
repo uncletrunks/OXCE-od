@@ -58,6 +58,7 @@ private:
 	ArrowOrientation _arrowType;
 	ActionHandler _leftClick, _leftPress, _leftRelease, _rightClick, _rightPress, _rightRelease;
 	int _arrowsLeftEdge, _arrowsRightEdge;
+	int _noScrollLeftEdge, _noScrollRightEdge;
 	ComboBox *_comboBox;
 
 	/// Updates the arrow buttons.
@@ -145,6 +146,10 @@ public:
 	void setMargin(int margin);
 	/// Gets the margin of the text list.
 	int getMargin() const;
+	/// Sets the no scroll area of the text list.
+	void setNoScrollArea(int left, int right);
+	/// Checks if a given coordinate is inside of the no scroll area of the text list.
+	bool isInsideNoScrollArea(int x);
 	/// Sets the arrow color of the text list.
 	void setArrowColor(Uint8 color);
 	/// Sets the arrow column of the text list.

@@ -75,6 +75,12 @@ OPT bool oxceRememberDisabledCraftWeapons;
 OPT bool oxceHighlightNewTopicsHidden;
 OPT bool oxceEnableUnitResponseSounds;
 OPT bool oxceEnableSlackingIndicator;
+
+OPT int oxceManufactureScrollSpeed;
+OPT int oxceManufactureScrollSpeedWithCtrl;
+OPT int oxceResearchScrollSpeed;
+OPT int oxceResearchScrollSpeedWithCtrl;
+
 OPT std::string password;
 
 // Flags and other stuff that don't need OptionInfo's.
