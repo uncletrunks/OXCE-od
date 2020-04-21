@@ -296,6 +296,23 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 		{
 			_disableCautious = true;
 		}
+		// make sure the HK attacks its primary target first!
+		{
+			Craft* target = dynamic_cast<Craft*>(_ufo->getDestination());
+			if (target)
+			{
+				if (_craft != target)
+				{
+					// push secondary targets a tiny bit away from the HK
+					_currentDist += 16;
+				}
+				else
+				{
+					// approach primary target at maximum approach speed
+					_pilotApproachSpeedModifier = 4;
+				}
+			}
+		}
 	}
 
 	// Create objects
