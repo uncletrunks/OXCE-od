@@ -238,6 +238,7 @@ class ModScriptGlobal : public ScriptGlobal
 {
 	size_t _modCurr = 0;
 	std::vector<std::pair<std::string, int>> _modNames;
+	ScriptValues<Mod> _scriptValues;
 
 	void loadRuleList(int &value, const YAML::Node &node) const
 	{
@@ -315,6 +316,9 @@ public:
 		updateConst("RuleList." + ModNameCurrent, (int)i);
 		_modCurr = i;
 	}
+
+	/// Get script values
+	ScriptValues<Mod>& getScriptValues() { return _scriptValues; }
 };
 
 /**
@@ -1641,6 +1645,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	if (const YAML::Node &extended = doc["extended"])
 	{
 		_scriptGlobal->load(extended);
+		_scriptGlobal->getScriptValues().load(extended, parsers.getShared(), "globals");
 	}
 	for (YAML::const_iterator i = doc["countries"].begin(); i != doc["countries"].end(); ++i)
 	{
@@ -5146,6 +5151,8 @@ void Mod::ScriptRegister(ScriptParserBase *parser)
 	mod.add<&Mod::getInventoryBackpack>("getRuleInventoryBackpack");
 	mod.add<&Mod::getInventoryBelt>("getRuleInventoryBelt");
 	mod.add<&Mod::getInventoryGround>("getRuleInventoryGround");
+
+	mod.addScriptValue<&Mod::_scriptGlobal, &ModScriptGlobal::getScriptValues>();
 }
 
 }

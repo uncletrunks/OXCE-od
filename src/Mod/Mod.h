@@ -188,6 +188,7 @@ private:
 	RuleGlobe *_globe;
 	RuleConverter *_converter;
 	ModScriptGlobal *_scriptGlobal;
+
 	int _maxViewDistance, _maxDarknessToSeeUnits;
 	int _maxStaticLightDistance, _maxDynamicLightDistance, _enhancedLighting;
 	int _costHireEngineer, _costHireScientist;
