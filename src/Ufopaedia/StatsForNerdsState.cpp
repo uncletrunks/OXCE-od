@@ -2663,6 +2663,8 @@ void StatsForNerdsState::initFacilityList()
 	addInteger(ss, facilityRule->getPsiLaboratories(), "psiLabs");
 	addInteger(ss, facilityRule->getTrainingFacilities(), "trainingRooms");
 
+	addIntegerNauticalMiles(ss, facilityRule->getSightRange(), "sightRange");
+	addIntegerPercent(ss, facilityRule->getSightChance(), "sightChance");
 	addIntegerNauticalMiles(ss, facilityRule->getRadarRange(), "radarRange");
 	addIntegerPercent(ss, facilityRule->getRadarChance(), "radarChance");
 	addInteger(ss, facilityRule->getDefenseValue(), "defense");
