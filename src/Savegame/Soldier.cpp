@@ -1732,7 +1732,7 @@ const std::vector<const RuleSoldierBonus*> *Soldier::getBonuses(const Mod *mod)
 				return;
 			}
 
-			auto sort = [](const RuleSoldierBonus* l, const RuleSoldierBonus* r){ return l->getName() < r->getName(); };
+			auto sort = [](const RuleSoldierBonus* l, const RuleSoldierBonus* r){ return l->getListOrder() < r->getListOrder(); };
 
 			auto p = std::lower_bound(_bonusCache.begin(), _bonusCache.end(), b, sort);
 			if (p == _bonusCache.end() || *p != b)
