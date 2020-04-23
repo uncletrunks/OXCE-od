@@ -1005,7 +1005,7 @@ void BattlescapeState::mapClick(Action *action)
 
 	if (_save->getTile(pos) != 0) // don't allow to click into void
 	{
-		if ((action->getDetails()->button.button == SDL_BUTTON_RIGHT || (action->getDetails()->button.button == SDL_BUTTON_LEFT && (SDL_GetModState() & KMOD_ALT) != 0)) && playableUnitSelected())
+		if ((action->getDetails()->button.button == SDL_BUTTON_RIGHT) && playableUnitSelected())
 		{
 			_battleGame->secondaryAction(pos);
 		}

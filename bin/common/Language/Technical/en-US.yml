@@ -216,6 +216,7 @@ en-US:
   confSnap: "Snap action:"
   confMelee: "Melee action:"
   shots: "Shots per action"
+  followProjectiles: "Follow projectiles?"
   name: "Name"
   ammoSlot: "Ammo slot used"
   arcing: "Arcing?"
