@@ -208,6 +208,7 @@ en-US:
   STR_PERSONAL_EQUIPMENT: "PERSONAL EQUIPMENT"
   STR_SAVE_PERSONAL_EQUIPMENT: "Save Personal Equipment"
   STR_LOAD_PERSONAL_EQUIPMENT: "Load Personal Equipment"
+  STR_PERSONAL_EQUIPMENT_SAVED: "Personal equipment saved."
 #NextTurnState.cpp
   STR_HIT_LOG_NEW_TURN: "New Turn"
 #ProjectileFlyBState.cpp

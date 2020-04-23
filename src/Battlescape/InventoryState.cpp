@@ -1160,6 +1160,9 @@ void InventoryState::btnCreatePersonalTemplateClick(Action *)
 		// create new personal template
 		_createInventoryTemplate(personalTemplate);
 
+		// give visual feedback
+		_inv->showWarning(tr("STR_PERSONAL_EQUIPMENT_SAVED"));
+
 		// give audio feedback
 		_game->getMod()->getSoundByDepth(_battleGame->getDepth(), Mod::ITEM_DROP)->play();
 		refreshMouse();
