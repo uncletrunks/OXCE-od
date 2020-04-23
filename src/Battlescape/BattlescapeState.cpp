@@ -2140,7 +2140,11 @@ void BattlescapeState::animate()
 
 	blinkVisibleUnitButtons();
 	blinkHealthBar();
-	drawHandsItems();
+
+	if (!_map->getProjectile())
+	{
+		drawHandsItems();
+	}
 }
 
 /**
