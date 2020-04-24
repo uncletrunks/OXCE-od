@@ -1607,6 +1607,10 @@ void DogfightState::update()
 					survived = false; // destroyed on fake water
 				}
 			}
+			if (_ufo->getRules()->isUnmanned())
+			{
+				survived = false; // unmanned UFOs (drones, missiles, etc.) can't be forced to land
+			}
 			if (!survived) // Brought it down over water (and didn't survive splashdown)
 			{
 				finalRun = true;

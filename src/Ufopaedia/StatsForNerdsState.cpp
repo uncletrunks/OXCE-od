@@ -3096,6 +3096,7 @@ void StatsForNerdsState::initUfoList()
 
 		addSection("{Exotic}", "", _white);
 		addInteger(ss, ufoRule->getMissilePower(), "missilePower");
+		addBoolean(ss, ufoRule->isUnmanned(), "unmanned");
 		addInteger(ss, ufoRule->getSplashdownSurvivalChance(), "splashdownSurvivalChance", 100);
 		addInteger(ss, ufoRule->getFakeWaterLandingChance(), "fakeWaterLandingChance", 0);
 
