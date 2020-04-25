@@ -2560,7 +2560,7 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::isBlockingBothHands>("isBlockingBothHands");
 	ri.add<&isSingleTargetScript>("isSingleTarget");
 
-	ri.addScriptValue<&RuleItem::_scriptValues>(false);
+	ri.addScriptValue<BindBase::OnlyGet, &RuleItem::_scriptValues>();
 	ri.addDebugDisplay<&debugDisplayScript>();
 }
 

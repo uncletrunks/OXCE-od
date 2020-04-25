@@ -898,8 +898,19 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 template<auto F>
 struct WarpValue
 {
-	using Type = decltype(F);
-	constexpr static Type val() { return F; }
+	/// Defualt case, not normal pointer, pass without change
+	template<typename T>
+	static auto optDeref(T t) { return t; }
+
+	/// We have normal pointer, dereferece it to get value
+	template<typename T>
+	static auto optDeref(T* t) -> T& { return *t; }
+
+	/// Get value from template parameter
+	constexpr static auto val() { return optDeref(F); }
+
+	/// Type of returned value
+	using Type = decltype(val());
 };
 
 template<typename Ptr, typename... Rest>
@@ -1126,6 +1137,11 @@ struct BindBase
 	constexpr static const char* functionWithoutDescription = "-";
 	constexpr static const char* functionInvisible = "";
 
+	/// Tag type to choose allowed operations
+	struct SetAndGet{};
+	/// Tag type to choose allowed operations
+	struct OnlyGet{};
+
 	ScriptParserBase* parser;
 	BindBase(ScriptParserBase* p) : parser{ p }
 	{
@@ -1222,21 +1238,32 @@ struct Bind : BindBase
 		}
 	}
 	template<auto MemPtr0, auto... MemPtrR>
-	void addScriptValue(bool canEdit = true)
+	void addScriptValue()
+	{
+		return addScriptValue<BindBase::SetAndGet, MemPtr0, MemPtrR...>();
+	}
+	template<typename canEdit, auto MemPtr0, auto... MemPtrR>
+	void addScriptValue()
 	{
 		using TagValues = helper::BindMemberFinalType<T, MACRO_CLANG_AUTO_HACK(MemPtr0), MACRO_CLANG_AUTO_HACK(MemPtrR)...>;
 		addScriptTag<TagValues>();
 		addCustomFunc<helper::BindPropCustomGet<T, MACRO_CLANG_AUTO_HACK(MemPtr0), MACRO_CLANG_AUTO_HACK(MemPtrR)...>>(getName("getTag"), "Get tag of " + prefix);
-		if (canEdit)
+		if constexpr (std::is_same_v<canEdit, BindBase::SetAndGet>)
 		{
 			addCustomFunc<helper::BindPropCustomSet<T, MACRO_CLANG_AUTO_HACK(MemPtr0), MACRO_CLANG_AUTO_HACK(MemPtrR)...>>(getName("setTag"), "Set tag of " + prefix);
 		}
+		else
+		{
+			static_assert(std::is_same_v<canEdit, BindBase::OnlyGet>, "You can only use OnlyGet or SetAndGet types");
+		}
 	}
+
 	template<std::string (*X)(const T*)>
 	void addDebugDisplay()
 	{
 		addCustomFunc<helper::BindDebugDisplay<T, X>>("debug_impl", BindBase::functionInvisible);
 	}
+
 	template<int X>
 	void addFake(const std::string& get)
 	{

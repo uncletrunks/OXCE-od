@@ -2863,7 +2863,7 @@ void SavedBattleGame::ScriptRegister(ScriptParserBase* parser)
 
 	sbg.add<&difficultyLevelScript>("difficultyLevel");
 
-	sbg.addScriptValue<&SavedBattleGame::_scriptValues>(true);
+	sbg.addScriptValue<&SavedBattleGame::_scriptValues>();
 
 	sbg.addDebugDisplay<&debugDisplayScript>();
 

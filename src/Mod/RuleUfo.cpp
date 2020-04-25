@@ -419,7 +419,7 @@ void RuleUfo::ScriptRegister(ScriptParserBase* parser)
 
 	RuleUfoStats::addGetStatsScript<&RuleUfo::_stats>(ar, "");
 
-	ar.addScriptValue<&RuleUfo::_scriptValues>(false);
+	ar.addScriptValue<BindBase::OnlyGet, &RuleUfo::_scriptValues>();
 	ar.addDebugDisplay<&debugDisplayScript>();
 }
 

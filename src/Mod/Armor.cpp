@@ -1033,7 +1033,7 @@ void Armor::ScriptRegister(ScriptParserBase* parser)
 
 	ar.add<&getArmorValueScript>("getArmor");
 
-	ar.addScriptValue<&Armor::_scriptValues>(false);
+	ar.addScriptValue<BindBase::OnlyGet, &Armor::_scriptValues>();
 	ar.addDebugDisplay<&debugDisplayScript>();
 }
 

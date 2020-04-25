@@ -647,7 +647,7 @@ void RuleSoldier::ScriptRegister(ScriptParserBase* parser)
 
 	ra.add<&getTypeScript>("getType");
 
-	ra.addScriptValue<&RuleSoldier::_scriptValues>(false);
+	ra.addScriptValue<BindBase::OnlyGet, &RuleSoldier::_scriptValues>();
 	ra.addDebugDisplay<&debugDisplayScript>();
 }
 

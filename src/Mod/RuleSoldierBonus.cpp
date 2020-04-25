@@ -148,7 +148,7 @@ void RuleSoldierBonus::ScriptRegister(ScriptParserBase* parser)
 	Bind<RuleSoldierBonus> rsb = { parser };
 
 	UnitStats::addGetStatsScript<&RuleSoldierBonus::_stats>(rsb, "Stats.");
-	rsb.addScriptValue<&RuleSoldierBonus::_scriptValues>(false);
+	rsb.addScriptValue<BindBase::OnlyGet, &RuleSoldierBonus::_scriptValues>();
 	rsb.addDebugDisplay<&debugDisplayScript>();
 }
 
