@@ -268,6 +268,7 @@ public:
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _battleUnitScripts.get<Script>(); }
+	/// Get all script values.
 	const ScriptValues<Armor> &getScriptValuesRaw() const { return _scriptValues; }
 	/// Gets the armor's units.
 	const std::vector<std::string> &getUnits() const;

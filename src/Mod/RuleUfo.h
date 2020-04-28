@@ -157,6 +157,7 @@ public:
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _ufoScripts.get<Script>(); }
+	/// Get all script values.
 	const ScriptValues<RuleUfo> &getScriptValuesRaw() const { return _scriptValues; }
 };
 

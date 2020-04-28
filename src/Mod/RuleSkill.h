@@ -83,6 +83,7 @@ public:
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container& getScript() const { return _skillScripts.get<Script>(); }
+	/// Get all script values.
 	const ScriptValues<RuleSkill>& getScriptValuesRaw() const { return _scriptValues; }
 };
 

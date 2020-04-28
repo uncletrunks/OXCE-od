@@ -87,6 +87,7 @@ public:
 	/// Gets script.
 	template<typename Script>
 	const typename Script::Container &getScript() const { return _soldierBonusScripts.get<Script>(); }
+	/// Get all script values.
 	const ScriptValues<RuleSoldierBonus> &getScriptValuesRaw() const { return _scriptValues; }
 };
 
