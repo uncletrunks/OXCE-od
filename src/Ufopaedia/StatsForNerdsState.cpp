@@ -618,6 +618,20 @@ void StatsForNerdsState::addVectorOfRulesNamed(std::ostringstream &ss, const std
 	addVectorOfGeneric(ss, vec, propertyName, [](T* item){ return item->getName(); });
 }
 
+
+template<typename T, typename I>
+void StatsForNerdsState::addScriptTags(std::ostringstream &ss, const ScriptValues<T, I> &values)
+{
+	auto& tagValues = values.getValuesRaw();
+	ArgEnum index = ScriptParserBase::getArgType<ScriptTag<T, I>>();
+	auto tagNames = _game->getMod()->getScriptGlobal()->getTagNames().at(index);
+	for (size_t i = 0; i < tagValues.size(); ++i)
+	{
+		auto nameAsString = tagNames.values[i].name.toString().substr(4);
+		addIntegerScriptTag(ss, tagValues.at(i), nameAsString);
+	}
+}
+
 /**
  * Adds a single boolean value to the table.
  */
@@ -2018,14 +2032,7 @@ void StatsForNerdsState::initItemList()
 
 		addSection("{Script tags}", "", _white, true);
 		{
-			auto tagValues = itemRule->getScriptValuesRaw().getValuesRaw();
-			ArgEnum index = ScriptParserBase::getArgType<ScriptTag<RuleItem>>();
-			auto tagNames = mod->getScriptGlobal()->getTagNames().at(index);
-			for (size_t i = 0; i < tagValues.size(); ++i)
-			{
-				auto nameAsString = tagNames.values[i].name.toString().substr(4);
-				addIntegerScriptTag(ss, tagValues.at(i), nameAsString);
-			}
+			addScriptTags(ss, itemRule->getScriptValuesRaw());
 			endHeading();
 		}
 	}
@@ -2455,14 +2462,7 @@ void StatsForNerdsState::initArmorList()
 
 		addSection("{Script tags}", "", _white, true);
 		{
-			auto tagValues = armorRule->getScriptValuesRaw().getValuesRaw();
-			ArgEnum index = ScriptParserBase::getArgType<ScriptTag<Armor>>();
-			auto tagNames = mod->getScriptGlobal()->getTagNames().at(index);
-			for (size_t i = 0; i < tagValues.size(); ++i)
-			{
-				auto nameAsString = tagNames.values[i].name.toString().substr(4);
-				addIntegerScriptTag(ss, tagValues.at(i), nameAsString);
-			}
+			addScriptTags(ss, armorRule->getScriptValuesRaw());
 			endHeading();
 		}
 	}
@@ -2512,14 +2512,7 @@ void StatsForNerdsState::initSoldierBonusList()
 
 	addSection("{Script tags}", "", _white, true);
 	{
-		auto tagValues = bonusRule->getScriptValuesRaw().getValuesRaw();
-		ArgEnum index = ScriptParserBase::getArgType<ScriptTag<RuleSoldierBonus>>();
-		auto tagNames = mod->getScriptGlobal()->getTagNames().at(index);
-		for (size_t i = 0; i < tagValues.size(); ++i)
-		{
-			auto nameAsString = tagNames.values[i].name.toString().substr(4);
-			addIntegerScriptTag(ss, tagValues.at(i), nameAsString);
-		}
+		addScriptTags(ss, bonusRule->getScriptValuesRaw());
 		endHeading();
 	}
 }
@@ -3123,6 +3116,12 @@ void StatsForNerdsState::initUfoList()
 		tmpSoundVector.clear();
 		tmpSoundVector.push_back(ufoRule->getHuntAlertSound());
 		addSoundVectorResourcePaths(ss, mod, "GEO.CAT", tmpSoundVector);
+	}
+
+	addSection("{Script tags}", "", _white, true);
+	{
+		addScriptTags(ss, ufoRule->getScriptValuesRaw());
+		endHeading();
 	}
 }
 

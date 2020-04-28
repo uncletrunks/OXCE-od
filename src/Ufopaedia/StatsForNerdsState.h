@@ -35,6 +35,7 @@ class TextList;
 class ToggleTextButton;
 class TextButton;
 struct ArticleCommonState;
+template<typename T, typename I> class ScriptValues;
 
 /**
  * A screen, where you can see the (almost) raw ruleset corresponding to the given Ufopedia article.
@@ -93,6 +94,9 @@ private:
 	void addVectorOfRulesId(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName);
 	template<typename T>
 	void addVectorOfRulesNamed(std::ostringstream &ss, const std::vector<T*> &vec, const std::string &propertyName);
+
+	template<typename T, typename I>
+	void addScriptTags(std::ostringstream &ss, const ScriptValues<T, I> &vec);
 
 	void addBoolean(std::ostringstream &ss, const bool &value, const std::string &propertyName, const bool &defaultvalue = false);
 	void addFloat(std::ostringstream &ss, const float &value, const std::string &propertyName, const float &defaultvalue = 0.0f);
