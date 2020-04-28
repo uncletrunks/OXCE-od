@@ -1950,6 +1950,7 @@ void Soldier::ScriptRegister(ScriptParserBase* parser)
 	so.add<&Soldier::setHealthMissing>("setHealthMissing");
 
 
+	so.addScriptValue<BindBase::OnlyGet, &Soldier::_rules, &RuleSoldier::getScriptValuesRaw>();
 	so.addScriptValue<&Soldier::_scriptValues>();
 	so.addDebugDisplay<&debugDisplayScript>();
 }

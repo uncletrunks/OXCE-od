@@ -5324,6 +5324,7 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.addField<&BattleUnit::_turnsSinceStunned>("getTurnsSinceStunned");
 	bu.add<&setBaseStatRangeScript<&BattleUnit::_turnsSinceStunned, 0, 255>>("setTurnsSinceStunned");
 
+	bu.addScriptValue<BindBase::OnlyGet, &BattleUnit::_armor, &Armor::getScriptValuesRaw>();
 	bu.addScriptValue<&BattleUnit::_scriptValues>();
 	bu.addDebugDisplay<&debugDisplayScript>();
 

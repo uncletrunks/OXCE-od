@@ -1334,6 +1334,8 @@ void Ufo::ScriptRegister(ScriptParserBase* parser)
 
 	RuleCraftStats::addGetStatsScript<&Ufo::_stats>(u, "Stats.");
 
+	u.addScriptValue<BindBase::OnlyGet, &Ufo::_rules, &RuleUfo::getScriptValuesRaw>();
+//	u.addScriptValue<&Ufo::_scriptValues>()
 	u.addDebugDisplay<&debugDisplayScript>();
 
 	u.addCustomConst("UFO_FLYING", FLYING);

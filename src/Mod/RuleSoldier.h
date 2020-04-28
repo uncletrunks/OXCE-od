@@ -205,6 +205,9 @@ public:
 	/// Gets the offset of the rank sprite in TinyRanks.
 	int getRankSpriteTiny() const;
 
+	/// Get all script values.
+	const ScriptValues<RuleSoldier> &getScriptValuesRaw() const { return _scriptValues; }
+
 	/// How much missing mana will act as "fatal wounds" and prevent the soldier from going into battle.
 	int getManaWoundThreshold() const { return _manaMissingWoundThreshold; }
 	/// How much missing health will act as "fatal wounds" and prevent the soldier from going into battle.

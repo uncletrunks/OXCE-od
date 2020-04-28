@@ -1472,6 +1472,7 @@ void BattleItem::ScriptRegister(ScriptParserBase* parser)
 
 	bi.add<&getActionTUsScript>("getActionCost.getTimeUnits");
 
+	bi.addScriptValue<BindBase::OnlyGet, &BattleItem::_rules, &RuleItem::getScriptValuesRaw>();
 	bi.addScriptValue<&BattleItem::_scriptValues>();
 	bi.addDebugDisplay<&debugDisplayScript>();
 
