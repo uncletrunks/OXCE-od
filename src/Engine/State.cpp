@@ -265,7 +265,7 @@ void State::init()
 	_game->getFpsCounter()->draw();
 	if (_game->getMod() != 0)
 	{
-		_game->getMod()->setPalette(_palette);
+		_game->getMod()->setPaletteForAllResources(_palette);
 	}
 	for (std::vector<Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
 	{
@@ -528,7 +528,7 @@ void State::setModPalette()
 		_game->getFpsCounter()->draw();
 		if (_game->getMod() != 0)
 		{
-			_game->getMod()->setPalette(_palette);
+			_game->getMod()->setPaletteForAllResources(_palette);
 		}
 	}
 }
