@@ -101,10 +101,10 @@ struct ParserWriter
 
 		ReservedCrossRefrenece() {}
 
-		ScriptValueData addValue(CompType defualtValue)
+		ScriptValueData addValue(CompType defaultValue)
 		{
 			auto index = static_cast<Ref>(values.size());
-			values.push_back(defualtValue);
+			values.push_back(defaultValue);
 			return index;
 		}
 
@@ -898,11 +898,11 @@ struct FuncGroup<Func, ListTag<Ver...>> : GetArgs<Func>
 template<auto F>
 struct WarpValue
 {
-	/// Defualt case, not normal pointer, pass without change
+	/// Default case, not normal pointer, pass without change
 	template<typename T>
 	static auto optDeref(T t) { return t; }
 
-	/// We have normal pointer, dereferece it to get value
+	/// We have normal pointer, dereference it to get value
 	template<typename T>
 	static auto optDeref(T* t) -> T& { return *t; }
 
