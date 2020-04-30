@@ -181,15 +181,6 @@ void Screen::handle(Action *action)
  */
 void Screen::flip()
 {
-	if (getWidth() != _baseWidth || getHeight() != _baseHeight || useOpenGL())
-	{
-		Zoom::flipWithZoom(_surface.get(), _screen, _topBlackBand, _bottomBlackBand, _leftBlackBand, _rightBlackBand, &glOutput);
-	}
-	else
-	{
-		SDL_BlitSurface(_surface.get(), 0, _screen, 0);
-	}
-
 	// perform any requested palette update
 	if (_pushPalette && _numColors && _screen->format->BitsPerPixel == 8)
 	{
@@ -199,6 +190,15 @@ void Screen::flip()
 		}
 		_numColors = 0;
 		_pushPalette = false;
+	}
+
+	if (getWidth() != _baseWidth || getHeight() != _baseHeight || useOpenGL())
+	{
+		Zoom::flipWithZoom(_surface.get(), _screen, _topBlackBand, _bottomBlackBand, _leftBlackBand, _rightBlackBand, &glOutput);
+	}
+	else
+	{
+		SDL_BlitSurface(_surface.get(), 0, _screen, 0);
 	}
 
 
