@@ -108,14 +108,20 @@ public:
 	static void setGamePtr(Game* game);
 	/// Sets a modal surface.
 	void setModal(InteractiveSurface *surface);
+
 	/// Changes a set of colors on the state's 8bpp palette.
-	void setPalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256, bool immediately = true);
+	void setStatePalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
+	/// Changes a set of colors on the state's 8bpp palette.
+	void setModPalette();
+
 	/// Changes the state's 8bpp palette with certain resources.
 	void setPalette(const std::string &palette, int backpals = -1);
 	/// Changes the state's 8bpp palette with certain resources.
 	void setCustomPalette(SDL_Color *colors, int cursorColor);
+
 	/// Gets the state's 8bpp palette.
 	SDL_Color *getPalette();
+
 	/// Let the state know the window has been resized.
 	virtual void resize(int &dX, int &dY);
 	/// Re-orients all the surfaces in the state.

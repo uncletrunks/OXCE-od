@@ -506,15 +506,21 @@ void State::setModal(InteractiveSurface *surface)
  * @param colors Pointer to the set of colors.
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
- * @param immediately Apply changes immediately, otherwise wait in case of multiple setPalettes.
  */
-void State::setPalette(const SDL_Color *colors, int firstcolor, int ncolors, bool immediately)
+void State::setStatePalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	if (colors)
 	{
 		memcpy(_palette + firstcolor, colors, ncolors * sizeof(SDL_Color));
 	}
-	if (immediately)
+}
+
+/**
+ * FIXME: Try to remove this method completely!
+ * Same (and very expensive!) functionality is performed twice, once in the State constructor when setting the palette and second time in State::init()
+ */
+void State::setModPalette()
+{
 	{
 		_game->getCursor()->setPalette(_palette);
 		_game->getCursor()->draw();
@@ -534,7 +540,7 @@ void State::setPalette(const SDL_Color *colors, int firstcolor, int ncolors, boo
  */
 void State::setPalette(const std::string &palette, int backpals)
 {
-	setPalette(_game->getMod()->getPalette(palette)->getColors(), 0, 256, false);
+	setStatePalette(_game->getMod()->getPalette(palette)->getColors(), 0, 256);
 	if (palette == "PAL_GEOSCAPE")
 	{
 		_cursorColor = Mod::GEOSCAPE_CURSOR;
@@ -556,8 +562,8 @@ void State::setPalette(const std::string &palette, int backpals)
 		_cursorColor = Mod::BATTLESCAPE_CURSOR;
 	}
 	if (backpals != -1)
-		setPalette(_game->getMod()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(backpals)), Palette::backPos, 16, false);
-	setPalette(NULL); // delay actual update to the end
+		setStatePalette(_game->getMod()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(backpals)), Palette::backPos, 16);
+	setModPalette(); // delay actual update to the end
 }
 
 /**
@@ -567,9 +573,9 @@ void State::setPalette(const std::string &palette, int backpals)
 */
 void State::setCustomPalette(SDL_Color *colors, int cursorColor)
 {
-	setPalette(colors, 0, 256, false);
+	setStatePalette(colors, 0, 256);
 	_cursorColor = cursorColor;
-	setPalette(NULL); // delay actual update to the end
+	setModPalette(); // delay actual update to the end
 }
 
 /**

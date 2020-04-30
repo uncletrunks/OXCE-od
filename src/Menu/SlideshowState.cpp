@@ -48,7 +48,7 @@ SlideshowState::SlideshowState(const SlideshowHeader &slideshowHeader, const std
 		slide->onKeyboardPress((ActionHandler)&SlideshowState::screenSkip, Options::keyCancel);
 		slide->setVisible(false);
 		_slides.push_back(slide);
-		setPalette(slide->getPalette());
+		setStatePalette(slide->getPalette());
 		add(slide);
 
 		// initialize with default rect; may get overridden by
@@ -118,7 +118,7 @@ void SlideshowState::screenClick(Action *action)
 			transitionSeconds = _slideshowSlides->at(_curScreen).transitionSeconds;
 		_transitionTimer->setInterval(transitionSeconds * 1000);
 		_transitionTimer->start();
-		setPalette(_slides[_curScreen]->getPalette());
+		setStatePalette(_slides[_curScreen]->getPalette());
 		_slides[_curScreen]->setVisible(true);
 		_captions[_curScreen]->setVisible(true);
 		init();

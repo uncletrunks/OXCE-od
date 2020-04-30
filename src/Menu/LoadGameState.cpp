@@ -99,7 +99,7 @@ void LoadGameState::buildUi(SDL_Color *palette)
 	_txtStatus = new Text(320, 17, 0, 92);
 
 	// Set palette
-	setPalette(palette);
+	setStatePalette(palette);
 
 	if (_origin == OPT_BATTLESCAPE)
 	{
