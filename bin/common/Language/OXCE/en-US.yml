@@ -231,6 +231,9 @@ en-US:
   STR_UPDATE_CHECK_DESC: "If enabled, OpenXcom will automatically check for updates and give you an option to update itself by a single button click."
   STR_LAZY_LOADING: "Lazy loading"
   STR_LAZY_LOADING_DESC: "If enabled, graphic resources are loaded on-demand. Otherwise everything is loaded at start-up."
+  STR_VSYNC_FOR_OPENGL: "VSync for OpenGL"
+  STR_VSYNC_FOR_OPENGL_DESC: "Turn off for maximum enemy hidden movement speed and (optionally) soldier movement speed. DO NOT set FPS limit to 0. Only applies to OpenGL rendering."
+#===================
   STR_UFO_LANDING_ALERT: "UFO landing alert"
   STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
   STR_WOUNDED_DEFEND_BASE_IF: "Wounded defend (if HP above x%)"
@@ -245,6 +248,7 @@ en-US:
   STR_AUTO_SELL_DESC: "In the battle debriefing sell screen, any item types you sold in previous battles will be automatically marked for selling."
   STR_REMEMBER_DISABLED_CRAFT_WEAPONS: "Remember disabled craft weapons"
   STR_REMEMBER_DISABLED_CRAFT_WEAPONS_DESC: "Craft weapons disabled during a dogfight will stay disabled. They will also not be rearmed at the base."
+#===================
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"

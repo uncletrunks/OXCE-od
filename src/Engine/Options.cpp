@@ -95,7 +95,7 @@ void create()
 	_info.push_back(OptionInfo("useOpenGL", &useOpenGL, false));
 	_info.push_back(OptionInfo("checkOpenGLErrors", &checkOpenGLErrors, false));
 	_info.push_back(OptionInfo("useOpenGLShader", &useOpenGLShader, "Shaders/Raw.OpenGL.shader"));
-	_info.push_back(OptionInfo("vSyncForOpenGL", &vSyncForOpenGL, true));
+	//_info.push_back(OptionInfo("vSyncForOpenGL", &vSyncForOpenGL, true));
 	_info.push_back(OptionInfo("useOpenGLSmoothing", &useOpenGLSmoothing, true));
 	_info.push_back(OptionInfo("password", &password, "secret"));
 	_info.push_back(OptionInfo("debug", &debug, false));
@@ -367,6 +367,7 @@ void create()
 #else
 	_info.push_back(OptionInfo("FPS", &FPS, 60, "STR_FPS_LIMIT", "STR_GENERAL"));
 	_info.push_back(OptionInfo("FPSInactive", &FPSInactive, 30, "STR_FPS_INACTIVE_LIMIT", "STR_GENERAL"));
+	_info.push_back(OptionInfo("vSyncForOpenGL", &vSyncForOpenGL, true, "STR_VSYNC_FOR_OPENGL", "STR_GENERAL"));
 #endif
 
 }
