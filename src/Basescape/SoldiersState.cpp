@@ -146,9 +146,21 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 		if (isTrnBtnVisible)
 			_availableOptions.push_back("STR_TRAINING");
 
+		bool refreshDeadSoldierStats = false;
 		for (auto transformationRule : availableTransformations)
 		{
 			_availableOptions.push_back(transformationRule->getName());
+			if (transformationRule->isAllowingDeadSoldiers())
+			{
+				refreshDeadSoldierStats = true;
+			}
+		}
+		if (refreshDeadSoldierStats)
+		{
+			for (auto& deadMan : *_game->getSavedGame()->getDeadSoldiers())
+			{
+				deadMan->prepareStatsWithBonuses(_game->getMod()); // refresh stats for sorting
+			}
 		}
 
 		_cbxScreenActions->setOptions(_availableOptions, true);
