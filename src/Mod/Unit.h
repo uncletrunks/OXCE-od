@@ -70,6 +70,42 @@ struct UnitStats
 		}
 	}
 
+	/*
+	 * Soft limit definition:
+	 * 1. if the statChange is zero or negative, keep statChange as it is (i.e. don't apply any limits)
+	 * 2. if the statChange is positive and currentStats <= upperBound, consider upperBound   (i.e. set result to min(statChange, upperBound-currentStats))
+	 * 3. if the statChange is positive and currentStats >  upperBound, keep the currentStats (i.e. set result to 0)
+	 */
+	static UnitStats softLimit(const UnitStats& statChange, const UnitStats& currentStats, const UnitStats& upperBound)
+	{
+		UnitStats r;
+		fieldLoop(
+			[&](Ptr p)
+			{
+				if ((statChange.*p) <= 0)
+				{
+					// 1. keep statChange
+					(r.*p) = (statChange.*p);
+				}
+				else
+				{
+					if ((currentStats.*p) <= (upperBound.*p))
+					{
+						// 2. consider upperBound
+						Sint16 tmp = (upperBound.*p) - (currentStats.*p);
+						(r.*p) = std::min((statChange.*p), tmp);
+					}
+					else
+					{
+						// 3. keep currentStats
+						(r.*p) = 0;
+					}
+				}
+			}
+		);
+		return r;
+	}
+
 	static UnitStats combine(const UnitStats &mask, const UnitStats &keep, const UnitStats &reroll)
 	{
 		UnitStats r;

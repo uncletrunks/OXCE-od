@@ -32,7 +32,7 @@ RuleSoldierTransformation::RuleSoldierTransformation(const std::string &name) :
 	_keepSoldierArmor(false), _createsClone(false), _needsCorpseRecovered(true),
 	_allowsDeadSoldiers(false), _allowsLiveSoldiers(false), _allowsWoundedSoldiers(false),
 	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0), _minRank(0),
-	_showMinMax(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false),
+	_showMinMax(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false), _upperBoundType(0),
 	_reset(false)
 {
 }
@@ -89,6 +89,7 @@ void RuleSoldierTransformation::load(const YAML::Node &node, Mod* mod, int listO
 	_lowerBoundAtMinStats = node["lowerBoundAtMinStats"].as<bool >(_lowerBoundAtMinStats);
 	_upperBoundAtMaxStats = node["upperBoundAtMaxStats"].as<bool >(_upperBoundAtMaxStats);
 	_upperBoundAtStatCaps = node["upperBoundAtStatCaps"].as<bool >(_upperBoundAtStatCaps);
+	_upperBoundType = node["upperBoundType"].as<int>(_upperBoundType);
 	_reset = node["reset"].as<bool >(_reset);
 	_soldierBonusType = node["soldierBonusType"].as<std::string >(_soldierBonusType);
 }
@@ -334,6 +335,23 @@ bool RuleSoldierTransformation::hasUpperBoundAtMaxStats() const
 bool RuleSoldierTransformation::hasUpperBoundAtStatCaps() const
 {
 	return _upperBoundAtStatCaps;
+}
+
+/**
+ * Gets whether to use soft upper bound limit or not.
+ * @return Soft upper bound or hard upper bound?
+ */
+bool RuleSoldierTransformation::isSoftLimit(bool isSameSoldierType) const
+{
+	if (_upperBoundType == 0)
+	{
+		return isSameSoldierType; // 0 = dynamic
+	}
+	else if (_upperBoundType == 1)
+	{
+		return true; // 1 = soft limit
+	}
+	return false; // 2+ = hard limit
 }
 
 /**

@@ -50,6 +50,7 @@ private:
 	bool _showMinMax;
 	UnitStats _rerollStats;
 	bool _lowerBoundAtMinStats, _upperBoundAtMaxStats, _upperBoundAtStatCaps;
+	int _upperBoundType;
 	bool _reset;
 	std::string _soldierBonusType;
 
@@ -135,6 +136,9 @@ public:
 	bool hasUpperBoundAtMaxStats() const;
 	/// Gets whether or not this project should cap stats at the produced RuleSoldier's statCaps
 	bool hasUpperBoundAtStatCaps() const;
+	/// Gets whether to use soft upper bound limit or not.
+	bool isSoftLimit(bool isSameSoldierType) const;
+
 	/// Gets whether or not this project should reset info about all previous transformations and all previously assigned soldier bonuses
 	bool getReset() const;
 	/// Gets the type of soldier bonus assigned by this project

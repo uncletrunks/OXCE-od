@@ -1733,7 +1733,18 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 			: transformationSoldierType->getStatCaps();
 		UnitStats cappedChange = upperBound - currentStats;
 
-		statChange = UnitStats::min(statChange, cappedChange);
+		bool isSameSoldierType = (transformationSoldierType == _rules);
+		bool softLimit = transformationRule->isSoftLimit(isSameSoldierType);
+		if (softLimit)
+		{
+			// soft limit
+			statChange = UnitStats::softLimit(statChange, currentStats, upperBound);
+		}
+		else
+		{
+			// hard limit
+			statChange = UnitStats::min(statChange, cappedChange);
+		}
 	}
 
 	return statChange;
