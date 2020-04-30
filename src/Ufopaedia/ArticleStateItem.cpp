@@ -139,7 +139,7 @@ namespace OpenXcom
 		_txtWeight = new Text(88, 8, 104, 55);
 
 		// Set palette
-		setPalette("PAL_BATTLEPEDIA");
+		setStandardPalette("PAL_BATTLEPEDIA");
 
 		_buttonColor = _game->getMod()->getInterface("articleItem")->getElement("button")->color;
 		_textColor = _game->getMod()->getInterface("articleItem")->getElement("text")->color;

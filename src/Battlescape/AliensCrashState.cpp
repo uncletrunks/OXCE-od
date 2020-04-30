@@ -41,7 +41,7 @@ AliensCrashState::AliensCrashState()
 	_txtTitle = new Text(246, 80, 37, 50);
 
 	// Set palette
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_window, "messageWindowBorder", "battlescape");
 	add(_btnOk, "messageWindowButtons", "battlescape");

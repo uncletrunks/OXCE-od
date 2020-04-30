@@ -47,7 +47,7 @@ namespace OpenXcom
 		}
 		else
 		{
-			setPalette("PAL_UFOPAEDIA");
+			setStandardPalette("PAL_UFOPAEDIA");
 		}
 
 		ArticleState::initLayout();

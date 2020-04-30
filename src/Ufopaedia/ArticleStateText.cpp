@@ -37,7 +37,7 @@ namespace OpenXcom
 		_txtInfo = new Text(296, 150, 10, 48);
 
 		// Set palette
-		setPalette("PAL_UFOPAEDIA");
+		setStandardPalette("PAL_UFOPAEDIA");
 
 		ArticleState::initLayout();
 

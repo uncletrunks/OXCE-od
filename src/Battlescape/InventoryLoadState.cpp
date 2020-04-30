@@ -44,7 +44,7 @@ InventoryLoadState::InventoryLoadState(InventoryState *parent) : _parent(parent)
 	_lstLayout = new TextList(208, 80, 48, 60);
 	_btnCancel = new TextButton(120, 16, 90, 148);
 
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_window, "messageWindowBorder", "battlescape");
 	add(_txtTitle, "messageWindows", "battlescape");

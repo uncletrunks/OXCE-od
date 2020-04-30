@@ -38,7 +38,7 @@ TestPaletteState::TestPaletteState(const std::string &palette, PaletteActionType
 	_btnCancel = new TextButton(60, 9, 240, 190);
 
 	// Set palette
-	setPalette(palette);
+	setStandardPalette(palette);
 	int maxColors = _game->getMod()->getPalette(palette)->getColorCount();
 
 	bool ctrlPressed = SDL_GetModState() & KMOD_CTRL;

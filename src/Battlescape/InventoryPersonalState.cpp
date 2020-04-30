@@ -46,7 +46,7 @@ InventoryPersonalState::InventoryPersonalState(Soldier* soldier)
 	_lstLayout = new TextList(164, 104, 72, 44);
 	_btnCancel = new TextButton(144, 16, 90, 156);
 
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_window, "messageWindowBorder", "battlescape");
 	add(_txtTitle, "messageWindows", "battlescape");

@@ -43,7 +43,7 @@ namespace OpenXcom
 		_txtTitle = new Text(200, 17, 10, 24);
 
 		// Set palette
-		setPalette("PAL_BASESCAPE");
+		setStandardPalette("PAL_BASESCAPE");
 
 		ArticleState::initLayout();
 

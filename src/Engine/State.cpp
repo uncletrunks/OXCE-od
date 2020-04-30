@@ -111,11 +111,11 @@ void State::setInterface(const std::string& category, bool alterPal, SavedBattle
 	else if (pal.empty())
 	{
 		pal = "PAL_GEOSCAPE";
-		setPalette(pal, backPal);
+		setStandardPalette(pal, backPal);
 	}
 	else
 	{
-		setPalette(pal, backPal);
+		setStandardPalette(pal, backPal);
 	}
 }
 
@@ -538,7 +538,7 @@ void State::setModPalette()
  * @param palette String ID of the palette to load.
  * @param backpals BACKPALS.DAT offset to use.
  */
-void State::setPalette(const std::string &palette, int backpals)
+void State::setStandardPalette(const std::string &palette, int backpals)
 {
 	setStatePalette(_game->getMod()->getPalette(palette)->getColors(), 0, 256);
 	if (palette == "PAL_GEOSCAPE")

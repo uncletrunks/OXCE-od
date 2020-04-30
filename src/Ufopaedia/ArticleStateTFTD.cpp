@@ -66,7 +66,7 @@ namespace OpenXcom
 		}
 
 		// Set palette
-		setPalette(ruleInterface->getPalette());
+		setStandardPalette(ruleInterface->getPalette());
 
 		_buttonColor = ruleInterface->getElement("button")->color;
 		_textColor = ruleInterface->getElement("text")->color;

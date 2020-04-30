@@ -53,7 +53,7 @@ BriefingLightState::BriefingLightState(AlienDeployment *deployment)
 	std::string desc = deployment->getAlertDescription();
 
 	BriefingData data = deployment->getBriefingData();
-	setPalette("PAL_GEOSCAPE", data.palette);
+	setStandardPalette("PAL_GEOSCAPE", data.palette);
 	_window->setBackground(_game->getMod()->getSurface(data.background));
 
 	add(_window, "window", "briefing");

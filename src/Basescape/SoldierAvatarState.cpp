@@ -64,7 +64,7 @@ SoldierAvatarState::SoldierAvatarState(Base *base, size_t soldier) : _base(base)
 	_lstAvatar = new TextList(132, 80, 115, 72);
 
 	// Set palette
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_window, "window", "soldierAvatar");
 	add(_soldierSurface);

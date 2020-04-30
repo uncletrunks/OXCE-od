@@ -65,7 +65,7 @@ namespace OpenXcom
 		}
 		else
 		{
-			setPalette("PAL_BATTLEPEDIA");
+			setStandardPalette("PAL_BATTLEPEDIA");
 		}
 
 		_buttonColor = _game->getMod()->getInterface("articleCraftWeapon")->getElement("button")->color;

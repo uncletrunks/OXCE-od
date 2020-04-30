@@ -50,7 +50,7 @@ InventorySaveState::InventorySaveState(InventoryState *parent) : _parent(parent)
 	_btnSaveWithArmor = new TextButton(70, 16, 126, 148);
 	_edtSave = new TextEdit(this, 188, 9, 0, 0);
 
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_window, "messageWindowBorder", "battlescape");
 	add(_txtTitle, "messageWindows", "battlescape");

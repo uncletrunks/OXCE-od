@@ -47,7 +47,7 @@ namespace OpenXcom
 		_txtTitle = new Text(300, 17, 5, 24);
 
 		// Set palette
-		setPalette("PAL_BATTLEPEDIA");
+		setStandardPalette("PAL_BATTLEPEDIA");
 
 		_buttonColor = _game->getMod()->getInterface("articleArmor")->getElement("button")->color;
 		_textColor = _game->getMod()->getInterface("articleArmor")->getElement("text")->color;

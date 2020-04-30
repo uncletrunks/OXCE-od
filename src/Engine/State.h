@@ -115,7 +115,7 @@ public:
 	void setModPalette();
 
 	/// Changes the state's 8bpp palette with certain resources.
-	void setPalette(const std::string &palette, int backpals = -1);
+	void setStandardPalette(const std::string &palette, int backpals = -1);
 	/// Changes the state's 8bpp palette with certain resources.
 	void setCustomPalette(SDL_Color *colors, int cursorColor);
 

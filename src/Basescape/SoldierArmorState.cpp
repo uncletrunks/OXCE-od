@@ -82,7 +82,7 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 	// Set palette
 	if (_origin == SA_BATTLESCAPE)
 	{
-		setPalette("PAL_BATTLESCAPE");
+		setStandardPalette("PAL_BATTLESCAPE");
 	}
 	else
 	{

@@ -114,7 +114,7 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_btnQuickSearch = new TextEdit(this, 40, 9, 244, 140);
 
 	// Set palette
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_bg);
 

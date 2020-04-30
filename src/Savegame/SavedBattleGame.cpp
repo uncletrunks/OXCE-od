@@ -2463,13 +2463,13 @@ void SavedBattleGame::setPaletteByDepth(State *state)
 {
 	if (_depth == 0)
 	{
-		state->setPalette("PAL_BATTLESCAPE");
+		state->setStandardPalette("PAL_BATTLESCAPE");
 	}
 	else
 	{
 		std::ostringstream ss;
 		ss << "PAL_BATTLESCAPE_" << _depth;
-		state->setPalette(ss.str());
+		state->setStandardPalette(ss.str());
 	}
 }
 

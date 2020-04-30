@@ -173,7 +173,7 @@ UnitInfoState::UnitInfoState(BattleUnit *unit, BattlescapeState *parent, bool fr
 	}
 
 	// Set palette
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_bg);
 	add(_exit);

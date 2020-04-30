@@ -56,7 +56,7 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	_inv = new AlienInventory(_game, 320, 200, 0, 0);
 
 	// Set palette
-	setPalette("PAL_BATTLESCAPE");
+	setStandardPalette("PAL_BATTLESCAPE");
 
 	add(_bg);
 	add(_soldier);
