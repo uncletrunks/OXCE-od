@@ -251,8 +251,8 @@ void SoldierTransformationState::initTransformationData()
 		bonusStats += *bonusRule->getStats();
 	}
 
-	bool showPsi = currentStats.psiSkill > 0
-		|| (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
+	bool showPsiSkill = currentStats.psiSkill > 0;
+	bool showPsiStrength = showPsiSkill || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
 
 	UnitStats rerollFlags = _transformationRule->getRerollStats();
 
@@ -294,8 +294,8 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(currentStats.melee, false, false).c_str(),
 			formatStat(currentStats.strength, false, false).c_str(),
 			formatStat(currentStats.mana, false, !showMana).c_str(),
-			formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
-			formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
+			formatStat(currentStats.psiStrength, false, !showPsiStrength).c_str(),
+			formatStat(currentStats.psiSkill, false, !showPsiSkill).c_str(),
 			"");
 		_lstStatChanges->addRow(14, tr(twoRows ? "STR_CHANGES_MIN" : "STR_CHANGES").c_str(),
 			formatStat(changedStatsMin.tu, true, rerollFlags.tu || randomFlags.tu).c_str(),
@@ -308,8 +308,8 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(changedStatsMin.melee, true, rerollFlags.melee || randomFlags.melee).c_str(),
 			formatStat(changedStatsMin.strength, true, rerollFlags.strength || randomFlags.strength).c_str(),
 			formatStat(changedStatsMin.mana, true, !showMana || rerollFlags.mana || randomFlags.mana).c_str(),
-			formatStat(changedStatsMin.psiStrength, true, !showPsi || rerollFlags.psiStrength || randomFlags.psiStrength).c_str(),
-			formatStat(changedStatsMin.psiSkill, true, !showPsi || rerollFlags.psiSkill || randomFlags.psiSkill).c_str(),
+			formatStat(changedStatsMin.psiStrength, true, !showPsiStrength || rerollFlags.psiStrength || randomFlags.psiStrength).c_str(),
+			formatStat(changedStatsMin.psiSkill, true, !showPsiSkill || rerollFlags.psiSkill || randomFlags.psiSkill).c_str(),
 			"");
 		if (twoRows)
 		{
@@ -324,8 +324,8 @@ void SoldierTransformationState::initTransformationData()
 				formatStat(changedStatsMax.melee, true, rerollFlags.melee).c_str(),
 				formatStat(changedStatsMax.strength, true, rerollFlags.strength).c_str(),
 				formatStat(changedStatsMax.mana, true, !showMana || rerollFlags.mana).c_str(),
-				formatStat(changedStatsMax.psiStrength, true, !showPsi || rerollFlags.psiStrength).c_str(),
-				formatStat(changedStatsMax.psiSkill, true, !showPsi || rerollFlags.psiSkill).c_str(),
+				formatStat(changedStatsMax.psiStrength, true, !showPsiStrength || rerollFlags.psiStrength).c_str(),
+				formatStat(changedStatsMax.psiSkill, true, !showPsiSkill || rerollFlags.psiSkill).c_str(),
 				"");
 		}
 		if (bonusRule)
@@ -371,8 +371,8 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(currentStats.throwing, false, false).c_str(),
 			formatStat(currentStats.melee, false, false).c_str(),
 			formatStat(currentStats.strength, false, false).c_str(),
-			formatStat(currentStats.psiStrength, false, !showPsi).c_str(),
-			formatStat(currentStats.psiSkill, false, !showPsi).c_str(),
+			formatStat(currentStats.psiStrength, false, !showPsiStrength).c_str(),
+			formatStat(currentStats.psiSkill, false, !showPsiSkill).c_str(),
 			"");
 		_lstStatChanges->addRow(13, tr(twoRows ? "STR_CHANGES_MIN" : "STR_CHANGES").c_str(),
 			formatStat(changedStatsMin.tu, true, rerollFlags.tu || randomFlags.tu).c_str(),
@@ -384,8 +384,8 @@ void SoldierTransformationState::initTransformationData()
 			formatStat(changedStatsMin.throwing, true, rerollFlags.throwing || randomFlags.throwing).c_str(),
 			formatStat(changedStatsMin.melee, true, rerollFlags.melee || randomFlags.melee).c_str(),
 			formatStat(changedStatsMin.strength, true, rerollFlags.strength || randomFlags.strength).c_str(),
-			formatStat(changedStatsMin.psiStrength, true, !showPsi || rerollFlags.psiStrength || randomFlags.psiStrength).c_str(),
-			formatStat(changedStatsMin.psiSkill, true, !showPsi || rerollFlags.psiSkill || randomFlags.psiSkill).c_str(),
+			formatStat(changedStatsMin.psiStrength, true, !showPsiStrength || rerollFlags.psiStrength || randomFlags.psiStrength).c_str(),
+			formatStat(changedStatsMin.psiSkill, true, !showPsiSkill || rerollFlags.psiSkill || randomFlags.psiSkill).c_str(),
 			"");
 		if (twoRows)
 		{
@@ -399,8 +399,8 @@ void SoldierTransformationState::initTransformationData()
 				formatStat(changedStatsMax.throwing, true, rerollFlags.throwing).c_str(),
 				formatStat(changedStatsMax.melee, true, rerollFlags.melee).c_str(),
 				formatStat(changedStatsMax.strength, true, rerollFlags.strength).c_str(),
-				formatStat(changedStatsMax.psiStrength, true, !showPsi || rerollFlags.psiStrength).c_str(),
-				formatStat(changedStatsMax.psiSkill, true, !showPsi || rerollFlags.psiSkill).c_str(),
+				formatStat(changedStatsMax.psiStrength, true, !showPsiStrength || rerollFlags.psiStrength).c_str(),
+				formatStat(changedStatsMax.psiSkill, true, !showPsiSkill || rerollFlags.psiSkill).c_str(),
 				"");
 		}
 		if (bonusRule)
