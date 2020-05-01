@@ -25,6 +25,7 @@ namespace OpenXcom
 class Surface;
 class BattlescapeButton;
 class AlienInventory;
+class BattleItem;
 class BattleUnit;
 class Text;
 
@@ -37,7 +38,11 @@ private:
 	Surface *_bg, *_soldier;
 	BattlescapeButton *_btnArmor;
 	Text *_txtName;
+	Text *_txtLeftHand, *_txtRightHand;
 	AlienInventory *_inv;
+
+	void calculateMeleeWeapon(BattleUnit* unit, BattleItem* weapon, Text* label);
+	void calculateRangedWeapon(BattleUnit* unit, BattleItem* weapon, Text* label);
 public:
 	/// Creates the AlienInventory state.
 	AlienInventoryState(BattleUnit *unit);
@@ -45,6 +50,8 @@ public:
 	~AlienInventoryState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the [Toggle] button.
+	void btnToggleClick(Action *action);
 	/// Handler for clicking the Armor button.
 	void btnArmorClickMiddle(Action *action);
 };

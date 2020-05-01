@@ -30,6 +30,9 @@
 #include "../Mod/RuleSoldier.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../Savegame/BattleUnit.h"
+#include "../Savegame/SavedBattleGame.h"
+#include "../Savegame/SavedGame.h"
+#include "../Battlescape/TileEngine.h"
 
 namespace OpenXcom
 {
@@ -52,6 +55,8 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	int offsetX = _game->getMod()->getAlienInventoryOffsetX();
 	_soldier = new Surface(320 - offsetX, 200, offsetX, 0);
 	_txtName = new Text(308, 17, 6, 6);
+	_txtLeftHand = new Text(308, 17, 6, 160);
+	_txtRightHand = new Text(308, 17, 6, 180);
 	_btnArmor = new BattlescapeButton(40, 70, 140, 65);
 	_inv = new AlienInventory(_game, 320, 200, 0, 0);
 
@@ -61,6 +66,8 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	add(_bg);
 	add(_soldier);
 	add(_txtName, "textName", "inventory", _bg);
+	add(_txtLeftHand, "textName", "inventory", _bg);
+	add(_txtRightHand, "textName", "inventory", _bg);
 	add(_btnArmor, "buttonOK", "inventory", _bg);
 	add(_inv);
 
@@ -106,6 +113,17 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 		}
 	}
 
+	_txtLeftHand->setBig();
+	_txtLeftHand->setHighContrast(true);
+	_txtLeftHand->setAlign(ALIGN_CENTER);
+	_txtLeftHand->setVisible(false);
+
+	_txtRightHand->setBig();
+	_txtRightHand->setHighContrast(true);
+	_txtRightHand->setAlign(ALIGN_CENTER);
+	_txtRightHand->setVisible(false);
+
+	_btnArmor->onKeyboardPress((ActionHandler)&AlienInventoryState::btnToggleClick, SDLK_F1);
 	_btnArmor->onKeyboardPress((ActionHandler)&AlienInventoryState::btnOkClick, Options::keyCancel);
 	_btnArmor->onMouseClick((ActionHandler)&AlienInventoryState::btnArmorClickMiddle, SDL_BUTTON_MIDDLE);
 
@@ -187,6 +205,36 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 	{
 		tmp->blitNShade(_soldier, 112, 32);
 	}
+
+	// --------------------- DEBUG INDICATORS ---------------------
+	if (!Options::debug)
+		return;
+
+	auto weaponL = unit->getLeftHandWeapon();
+	if (weaponL)
+	{
+		if (weaponL->getRules()->getBattleType() == BT_FIREARM)
+		{
+			calculateRangedWeapon(unit, weaponL, _txtLeftHand);
+		}
+		else if (weaponL->getRules()->getBattleType() == BT_MELEE)
+		{
+			calculateMeleeWeapon(unit, weaponL, _txtLeftHand);
+		}
+	}
+
+	auto weaponR = unit->getRightHandWeapon();
+	if (weaponR)
+	{
+		if (weaponR->getRules()->getBattleType() == BT_FIREARM)
+		{
+			calculateRangedWeapon(unit, weaponR, _txtRightHand);
+		}
+		else if (weaponR->getRules()->getBattleType() == BT_MELEE)
+		{
+			calculateMeleeWeapon(unit, weaponR, _txtRightHand);
+		}
+	}
 }
 
 /**
@@ -201,6 +249,138 @@ AlienInventoryState::~AlienInventoryState()
 	}
 }
 
+void AlienInventoryState::calculateMeleeWeapon(BattleUnit* unit, BattleItem* weapon, Text* label)
+{
+	std::ostringstream ss;
+
+	auto tileEngine = _game->getSavedGame()->getSavedBattle()->getTileEngine();
+
+	// Start by finding the target for the check
+	int surroundingTilePositions[8][2] = {
+		{0, -1}, // north (-y direction)
+		{1, -1}, // northeast
+		{1, 0}, // east (+ x direction)
+		{1, 1}, // southeast
+		{0, 1}, // south (+y direction)
+		{-1, 1}, // southwest
+		{-1, 0}, // west (-x direction)
+		{-1, -1} }; // northwest
+
+	Position tileToCheck = unit->getPosition();
+	auto dir = unit->getDirection();
+	tileToCheck.x += surroundingTilePositions[dir][0];
+	tileToCheck.y += surroundingTilePositions[dir][1];
+	BattleUnit* meleeDodgeTarget = nullptr;
+	if (_game->getSavedGame()->getSavedBattle()->getTile(tileToCheck)) // Make sure the tile is in bounds
+	{
+		meleeDodgeTarget = _game->getSavedGame()->getSavedBattle()->selectUnit(tileToCheck);
+	}
+
+	ss << tr(weapon->getRules()->getType()) << " > ";
+	if (meleeDodgeTarget)
+	{
+		BattleActionAttack attack;
+		attack.type = BA_HIT;
+		attack.attacker = unit;
+		attack.weapon_item = weapon;
+		attack.damage_item = weapon;
+		attack.skill_rules = nullptr;
+		int hitChance = BattleUnit::getFiringAccuracy(attack, _game->getMod());
+
+		auto victim = meleeDodgeTarget;
+		if (victim)
+		{
+			int arc = tileEngine->getArcDirection(tileEngine->getDirectionTo(victim->getPositionVexels(), unit->getPositionVexels()), victim->getDirection());
+			float penalty = 1.0f - arc * victim->getArmor()->getMeleeDodgeBackPenalty() / 4.0f;
+			if (penalty > 0)
+			{
+				hitChance -= victim->getArmor()->getMeleeDodge(victim) * penalty;
+			}
+		}
+		ss << "hitChance " << hitChance << "% ";
+	}
+	else
+	{
+		ss << "not facing target ";
+	}
+
+	label->setText(ss.str());
+}
+
+void AlienInventoryState::calculateRangedWeapon(BattleUnit* unit, BattleItem* weapon, Text* label)
+{
+	std::ostringstream ss;
+
+	auto tileEngine = _game->getSavedGame()->getSavedBattle()->getTileEngine();
+
+	// Start by finding 'targets' for the check
+	std::vector<BattleUnit*> closeQuartersTargetList;
+	int surroundingTilePositions[8][2] = {
+		{0, -1}, // north (-y direction)
+		{1, -1}, // northeast
+		{1, 0}, // east (+ x direction)
+		{1, 1}, // southeast
+		{0, 1}, // south (+y direction)
+		{-1, 1}, // southwest
+		{-1, 0}, // west (-x direction)
+		{-1, -1} }; // northwest
+
+	for (int dir = 0; dir < 8; dir++)
+	{
+		Position tileToCheck = unit->getPosition();
+		tileToCheck.x += surroundingTilePositions[dir][0];
+		tileToCheck.y += surroundingTilePositions[dir][1];
+
+		if (_game->getSavedGame()->getSavedBattle()->getTile(tileToCheck)) // Make sure the tile is in bounds
+		{
+			BattleUnit* closeQuartersTarget = _game->getSavedGame()->getSavedBattle()->selectUnit(tileToCheck);
+			// Variable for LOS check
+			int checkDirection = tileEngine->getDirectionTo(tileToCheck, unit->getPosition());
+			if (closeQuartersTarget && unit->getFaction() != closeQuartersTarget->getFaction() // Unit must exist and not be same faction
+				&& closeQuartersTarget->getArmor()->getCreatesMeleeThreat() // Unit must be valid defender, 2x2 default false here
+				&& closeQuartersTarget->getTimeUnits() >= _game->getMod()->getCloseQuartersTuCostGlobal() // Unit must have enough TUs
+				&& closeQuartersTarget->getEnergy() >= _game->getMod()->getCloseQuartersEnergyCostGlobal() // Unit must have enough Energy
+				&& tileEngine->validMeleeRange(closeQuartersTarget, unit, checkDirection) // Unit must be able to see the unit attempting to fire
+				&& !(unit->getFaction() == FACTION_PLAYER && closeQuartersTarget->getFaction() == FACTION_NEUTRAL) // Civilians don't inhibit player
+				&& !(unit->getFaction() == FACTION_NEUTRAL && closeQuartersTarget->getFaction() == FACTION_PLAYER)) // Player doesn't inhibit civilians
+			{
+				closeQuartersTargetList.push_back(closeQuartersTarget);
+			}
+		}
+	}
+
+	ss << tr(weapon->getRules()->getType()) << " > ";
+	if (!closeQuartersTargetList.empty())
+	{
+		for (std::vector<BattleUnit*>::iterator bu = closeQuartersTargetList.begin(); bu != closeQuartersTargetList.end(); ++bu)
+		{
+			{
+				BattleActionAttack attack;
+				attack.type = BA_CQB;
+				attack.attacker = unit;
+				attack.weapon_item = weapon;
+				attack.damage_item = weapon;
+				attack.skill_rules = nullptr;
+				int hitChance = BattleUnit::getFiringAccuracy(attack, _game->getMod());
+
+				auto victim = (*bu);
+				if (victim)
+				{
+					int arc = tileEngine->getArcDirection(tileEngine->getDirectionTo(victim->getPositionVexels(), unit->getPositionVexels()), victim->getDirection());
+					float penalty = 1.0f - arc * victim->getArmor()->getMeleeDodgeBackPenalty() / 4.0f;
+					if (penalty > 0)
+					{
+						hitChance -= victim->getArmor()->getMeleeDodge(victim) * penalty;
+					}
+				}
+				ss << "hitChance " << hitChance << "% ";
+			}
+		}
+	}
+
+	label->setText(ss.str());
+}
+
 /**
  * Returns to the previous screen.
  * @param action Pointer to an action.
@@ -208,6 +388,16 @@ AlienInventoryState::~AlienInventoryState()
 void AlienInventoryState::btnOkClick(Action *)
 {
 	_game->popState();
+}
+
+/**
+ * Toggles debug indicators.
+ * @param action Pointer to an action.
+ */
+void AlienInventoryState::btnToggleClick(Action *)
+{
+	_txtLeftHand->setVisible(!_txtLeftHand->getVisible());
+	_txtRightHand->setVisible(!_txtRightHand->getVisible());
 }
 
 /**
