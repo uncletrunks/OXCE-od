@@ -183,6 +183,7 @@ set ( geoscape_src
   Geoscape/CraftNotEnoughPilotsState.cpp
   Geoscape/CraftPatrolState.cpp
   Geoscape/DogfightErrorState.cpp
+  Geoscape/DogfightExperienceState.cpp
   Geoscape/DogfightState.cpp
   Geoscape/FundingState.cpp
   Geoscape/GeoscapeCraftState.cpp

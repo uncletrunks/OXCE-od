@@ -127,6 +127,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 	_nationality = node["nationality"].as<int>(_nationality);
 	_initialStats = node["initialStats"].as<UnitStats>(_initialStats);
 	_currentStats = node["currentStats"].as<UnitStats>(_currentStats);
+	_dailyDogfightExperienceCache = node["dailyDogfightExperienceCache"].as<UnitStats>(_dailyDogfightExperienceCache);
 
 	// re-roll mana stats when upgrading saves
 	if (_currentStats.mana == 0 && _rules->getMaxStats().mana > 0)
@@ -231,6 +232,10 @@ YAML::Node Soldier::save(const ScriptGlobal *shared) const
 	node["nationality"] = _nationality;
 	node["initialStats"] = _initialStats;
 	node["currentStats"] = _currentStats;
+	if (_dailyDogfightExperienceCache.firing > 0 || _dailyDogfightExperienceCache.reactions > 0 || _dailyDogfightExperienceCache.bravery > 0)
+	{
+		node["dailyDogfightExperienceCache"] = _dailyDogfightExperienceCache;
+	}
 	node["rank"] = (int)_rank;
 	if (_craft != 0)
 	{
@@ -1845,6 +1850,22 @@ bool Soldier::prepareStatsWithBonuses(const Mod *mod)
 	_tmpStatsWithAllBonuses = UnitStats::obeyFixedMinimum(tmp);
 
 	return hasSoldierBonus;
+}
+
+/**
+ * Gets a pointer to the daily dogfight experience cache.
+ */
+UnitStats* Soldier::getDailyDogfightExperienceCache()
+{
+	return &_dailyDogfightExperienceCache;
+}
+
+/**
+ * Resets the daily dogfight experience cache.
+ */
+void Soldier::resetDailyDogfightExperienceCache()
+{
+	_dailyDogfightExperienceCache = UnitStats::scalar(0);
 }
 
 

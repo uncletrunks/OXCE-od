@@ -116,6 +116,8 @@ public:
 	void btnGlobalProductionClick(Action *action);
 	/// Handler for clicking the [GlobalResearch] key.
 	void btnGlobalResearchClick(Action *action);
+	/// Handler for clicking the [DogfightExperience] key.
+	void btnDogfightExperienceClick(Action *action);
 	/// Handler for clicking the Bases button.
 	void btnBasesClick(Action *action);
 	/// Handler for clicking the Graph button.

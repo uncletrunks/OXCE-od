@@ -1110,6 +1110,9 @@
     <ClCompile Include="Battlescape\InventoryPersonalState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Geoscape\DogfightExperienceState.cpp">
+      <Filter>Geoscape</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2277,6 +2280,9 @@
     </ClInclude>
     <ClInclude Include="Battlescape\InventoryPersonalState.h">
       <Filter>Battlescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Geoscape\DogfightExperienceState.h">
+      <Filter>Geoscape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

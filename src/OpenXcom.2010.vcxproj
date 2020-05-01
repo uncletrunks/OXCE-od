@@ -397,6 +397,7 @@
     <ClCompile Include="Geoscape\AllocateTrainingState.cpp" />
     <ClCompile Include="Geoscape\CraftNotEnoughPilotsState.cpp" />
     <ClCompile Include="Geoscape\DogfightErrorState.cpp" />
+    <ClCompile Include="Geoscape\DogfightExperienceState.cpp" />
     <ClCompile Include="Geoscape\GeoscapeEventState.cpp" />
     <ClCompile Include="Geoscape\MissionDetectedState.cpp" />
     <ClCompile Include="Geoscape\AllocatePsiTrainingState.cpp" />
@@ -791,6 +792,7 @@
     <ClInclude Include="Geoscape\Cord.h" />
     <ClInclude Include="Geoscape\CraftNotEnoughPilotsState.h" />
     <ClInclude Include="Geoscape\DogfightErrorState.h" />
+    <ClInclude Include="Geoscape\DogfightExperienceState.h" />
     <ClInclude Include="Geoscape\GeoscapeEventState.h" />
     <ClInclude Include="Geoscape\MissionDetectedState.h" />
     <ClInclude Include="Geoscape\AllocatePsiTrainingState.h" />

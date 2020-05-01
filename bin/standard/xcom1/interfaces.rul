@@ -230,6 +230,27 @@ interfaces:
         border: 239  # bright green
       - id: button
         color: 133   # minty green
+  - type: dogfightExperience
+    backgroundImage: BACK01.SCR
+    elements:
+      - id: palette
+        color: 0     # brown
+      - id: window
+        color: 239   # bright green
+      - id: text1
+        color: 239   # bright green
+        color2: 138  # yellow
+        border: 133  # minty green
+      - id: text2
+        color: 133   # minty green
+        color2: 138  # yellow
+        border: 133  # minty green
+      - id: button
+        color: 133   # minty green
+      - id: list
+        color: 239   # bright green
+        color2: 138  # yellow
+        border: 133  # minty green
   - type: intercept
     backgroundImage: BACK12.SCR
     elements:

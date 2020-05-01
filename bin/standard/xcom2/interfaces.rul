@@ -230,6 +230,27 @@ interfaces: #done
         border: 1
       - id: button
         color: 1
+  - type: dogfightExperience
+    backgroundImage: BACK01.SCR
+    elements:
+      - id: palette
+        color: 4     # green
+      - id: window
+        color: 1
+      - id: text1
+        color: 1
+        color2: 244
+        border: 1
+      - id: text2
+        color: 1
+        color2: 244
+        border: 133  # minty green
+      - id: list
+        color: 1
+        color2: 239
+        border: 1
+      - id: button
+        color: 1
   - type: intercept
     backgroundImage: BACK12.SCR
     elements:
