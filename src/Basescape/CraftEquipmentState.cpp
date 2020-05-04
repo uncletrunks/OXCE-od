@@ -821,6 +821,13 @@ void CraftEquipmentState::btnClearClick(Action *)
 	{
 		moveLeftByValue(INT_MAX);
 	}
+
+	// in New Battle, clear also stuff that is not displayed on the GUI (for whatever reason)
+	if (_game->getSavedGame()->getMonthsPassed() == -1)
+	{
+		Craft* c = _base->getCrafts()->at(_craft);
+		c->getItems()->getContents()->clear();
+	}
 }
 
 /**
