@@ -1987,9 +1987,12 @@ void StatsForNerdsState::initItemList()
 		addInteger(ss, itemRule->getBulletSpeed(), "bulletSpeed");
 		addInteger(ss, itemRule->getExplosionSpeed(), "explosionSpeed");
 
-		addInteger(ss, itemRule->getVaporColor(), "vaporColor", -1);
-		addInteger(ss, itemRule->getVaporDensity(), "vaporDensity");
-		addIntegerPercent(ss, itemRule->getVaporProbability(), "vaporProbability", 15);
+		addInteger(ss, itemRule->getVaporColor(1), "vaporColor", -1);
+		addInteger(ss, itemRule->getVaporDensity(1), "vaporDensity");
+		addIntegerPercent(ss, itemRule->getVaporProbability(1), "vaporProbability", 15);
+		addInteger(ss, itemRule->getVaporColor(0), "vaporColorSurface", -1);
+		addInteger(ss, itemRule->getVaporDensity(0), "vaporDensitySurface");
+		addIntegerPercent(ss, itemRule->getVaporProbability(0), "vaporProbabilitySurface", 15);
 
 		addSection("{AI}", "", _white);
 		addInteger(ss, itemRule->getAttraction(), "attraction");

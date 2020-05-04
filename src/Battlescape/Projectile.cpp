@@ -58,9 +58,9 @@ Projectile::Projectile(Mod *mod, SavedBattleGame *save, BattleAction action, Pos
 			if (ammo)
 			{
 				_bulletSprite = ammo->getRules()->getBulletSprite();
-				_vaporColor = ammo->getRules()->getVaporColor();
-				_vaporDensity = ammo->getRules()->getVaporDensity();
-				_vaporProbability = ammo->getRules()->getVaporProbability();
+				_vaporColor = ammo->getRules()->getVaporColor(_save->getDepth());
+				_vaporDensity = ammo->getRules()->getVaporDensity(_save->getDepth());
+				_vaporProbability = ammo->getRules()->getVaporProbability(_save->getDepth());
 				_speed = std::max(1, _speed + ammo->getRules()->getBulletSpeed());
 			}
 
@@ -71,15 +71,15 @@ Projectile::Projectile(Mod *mod, SavedBattleGame *save, BattleAction action, Pos
 			}
 			if (_vaporColor == -1)
 			{
-				_vaporColor = _action.weapon->getRules()->getVaporColor();
+				_vaporColor = _action.weapon->getRules()->getVaporColor(_save->getDepth());
 			}
 			if (_vaporDensity == -1)
 			{
-				_vaporDensity = _action.weapon->getRules()->getVaporDensity();
+				_vaporDensity = _action.weapon->getRules()->getVaporDensity(_save->getDepth());
 			}
 			if (_vaporProbability == 5)
 			{
-				_vaporProbability = _action.weapon->getRules()->getVaporProbability();
+				_vaporProbability = _action.weapon->getRules()->getVaporProbability(_save->getDepth());
 			}
 			if (!ammo || (ammo != _action.weapon || ammo->getRules()->getBulletSpeed() == 0))
 			{
@@ -457,7 +457,7 @@ bool Projectile::move()
 		{
 			_distance += Position::distance(_trajectory[_position], _trajectory[_position - 1]);
 		}
-		if (_save->getDepth() > 0 && _vaporColor != -1 && _action.type != BA_THROW && RNG::percent(_vaporProbability))
+		if (_vaporColor != -1 && _action.type != BA_THROW && RNG::percent(_vaporProbability))
 		{
 			addVaporCloud();
 		}

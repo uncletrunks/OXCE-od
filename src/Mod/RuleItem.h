@@ -362,6 +362,7 @@ private:
 	int _psiTargetMatrix;
 	bool _LOSRequired, _underwaterOnly, _landOnly, _psiReqiured, _manaRequired;
 	int _meleePower, _specialType, _vaporColor, _vaporDensity, _vaporProbability;
+	int _vaporColorSurface, _vaporDensitySurface, _vaporProbabilitySurface;
 	std::vector<int> _customItemPreviewIndex;
 	int _kneelBonus, _oneHandedPenalty;
 	int _monthlySalary, _monthlyMaintenance;
@@ -813,11 +814,11 @@ public:
 	/// Get the associated special type of this item.
 	int getSpecialType() const;
 	/// Get the color offset to use for the vapor trail.
-	int getVaporColor() const;
+	int getVaporColor(int depth) const;
 	/// Gets the vapor cloud density.
-	int getVaporDensity() const;
+	int getVaporDensity(int depth) const;
 	/// Gets the vapor cloud probability.
-	int getVaporProbability() const;
+	int getVaporProbability(int depth) const;
 	/// Gets the index of the sprite in the CustomItemPreview sprite set
 	const std::vector<int> &getCustomItemPreviewIndex() const;
 	/// Gets the kneel bonus.

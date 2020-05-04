@@ -153,6 +153,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_psiTargetMatrix(6),
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false), _manaRequired(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
+	_vaporColorSurface(-1), _vaporDensitySurface(0), _vaporProbabilitySurface(15),
 	_kneelBonus(-1), _oneHandedPenalty(-1),
 	_monthlySalary(0), _monthlyMaintenance(0),
 	_sprayWaypoints(0)
@@ -645,6 +646,9 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_vaporColor = node["vaporColor"].as<int>(_vaporColor);
 	_vaporDensity = node["vaporDensity"].as<int>(_vaporDensity);
 	_vaporProbability = node["vaporProbability"].as<int>(_vaporProbability);
+	_vaporColorSurface = node["vaporColorSurface"].as<int>(_vaporColorSurface);
+	_vaporDensitySurface = node["vaporDensitySurface"].as<int>(_vaporDensitySurface);
+	_vaporProbabilitySurface = node["vaporProbabilitySurface"].as<int>(_vaporProbabilitySurface);
 	mod->loadSpriteOffset(_type, _customItemPreviewIndex, node["customItemPreviewIndex"], "CustomItemPreviews");
 	_kneelBonus = node["kneelBonus"].as<int>(_kneelBonus);
 	_oneHandedPenalty = node["oneHandedPenalty"].as<int>(_oneHandedPenalty);
@@ -2374,28 +2378,40 @@ int RuleItem::getSpecialType() const
 
 /**
  * Gets the color offset to use for the vapor trail.
+ * @param depth battlescape depth (0=surface, 1-3=underwater)
  * @return the color offset.
  */
-int RuleItem::getVaporColor() const
+int RuleItem::getVaporColor(int depth) const
 {
+	if (depth == 0)
+		return _vaporColorSurface;
+
 	return _vaporColor;
 }
 
 /**
  * Gets the vapor cloud density for the vapor trail.
+ * @param depth battlescape depth (0=surface, 1-3=underwater)
  * @return the vapor density.
  */
-int RuleItem::getVaporDensity() const
+int RuleItem::getVaporDensity(int depth) const
 {
+	if (depth == 0)
+		return _vaporDensitySurface;
+
 	return _vaporDensity;
 }
 
 /**
  * Gets the vapor cloud probability for the vapor trail.
+ * @param depth battlescape depth (0=surface, 1-3=underwater)
  * @return the vapor probability.
  */
-int RuleItem::getVaporProbability() const
+int RuleItem::getVaporProbability(int depth) const
 {
+	if (depth == 0)
+		return _vaporProbabilitySurface;
+
 	return _vaporProbability;
 }
 

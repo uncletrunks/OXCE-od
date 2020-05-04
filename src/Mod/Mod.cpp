@@ -4704,16 +4704,19 @@ void Mod::loadExtraResources()
 		}
 	}
 
-	// Hack for hybrid UFO-based games
+	// Support for UFO-based mods and hybrid mods
 	if (_transparencyLUTs.empty() && !_transparencies.empty())
 	{
-		if (_palettes["PAL_BATTLESCAPE"] &&
-			_palettes["PAL_BATTLESCAPE_1"] &&
+		if (_palettes["PAL_BATTLESCAPE"])
+		{
+			Log(LOG_INFO) << "Creating transparency LUTs for PAL_BATTLESCAPE...";
+			createTransparencyLUT(_palettes["PAL_BATTLESCAPE"]);
+		}
+		if (_palettes["PAL_BATTLESCAPE_1"] &&
 			_palettes["PAL_BATTLESCAPE_2"] &&
 			_palettes["PAL_BATTLESCAPE_3"])
 		{
-			Log(LOG_INFO) << "Creating transparency LUTs for custom palettes...";
-			createTransparencyLUT(_palettes["PAL_BATTLESCAPE"]);
+			Log(LOG_INFO) << "Creating transparency LUTs for hybrid custom palettes...";
 			createTransparencyLUT(_palettes["PAL_BATTLESCAPE_1"]);
 			createTransparencyLUT(_palettes["PAL_BATTLESCAPE_2"]);
 			createTransparencyLUT(_palettes["PAL_BATTLESCAPE_3"]);
