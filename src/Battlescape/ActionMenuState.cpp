@@ -94,7 +94,7 @@ ActionMenuState::ActionMenuState(BattleAction *action, int x, int y) : _action(a
 	}
 
 	// priming
-	if (weapon->getFuseTimerDefault() >= 0 )
+	if (weapon->getFuseTimerType() != BFT_NONE)
 	{
 		auto normalWeapon = weapon->getBattleType() != BT_GRENADE && weapon->getBattleType() != BT_FLARE && weapon->getBattleType() != BT_PROXIMITYGRENADE;
 		if (_action->weapon->getFuseTimer() == -1)

@@ -1123,6 +1123,10 @@ bool Inventory::unload(bool quickUnload)
 		{
 			return false;
 		}
+		if (_selItem->getRules()->getFuseTimerType() == BFT_NONE)
+		{
+			return false;
+		}
 	}
 	else if (weapon)
 	{
