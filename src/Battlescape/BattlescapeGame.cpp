@@ -627,8 +627,9 @@ void BattlescapeGame::endTurn()
 			return;
 		case FORCE_LOSE:
 		default:
+			// force mission failure
 			_save->setAborted(true);
-			_parentState->finishBattle(true, 0);
+			_parentState->finishBattle(false, 0);
 			return;
 		}
 	}
