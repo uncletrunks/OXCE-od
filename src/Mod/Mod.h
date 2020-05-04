@@ -120,6 +120,17 @@ struct ModData
 };
 
 /**
+ * Helper exception represent finall error with all required context for end user to fix error in rulesets
+ */
+struct LoadRuleException : Exception
+{
+	LoadRuleException(const std::string& parent, const YAML::Node &node, const std::string& message) : Exception{ "Error for '" + parent + "': " + message + " at line " + std::to_string(node.Mark().line)}
+	{
+
+	}
+};
+
+/**
  * Contains all the game-specific static data that never changes
  * throughout the game, like rulesets and resources.
  */
@@ -413,6 +424,16 @@ public:
 	void loadBaseFunction(const std::string &parent, RuleBaseFacilityFunctions& f, const YAML::Node &node);
 	/// Get names of function names in given bitset.
 	std::vector<std::string> getBaseFunctionNames(RuleBaseFacilityFunctions f) const;
+
+	/// Gets list of ints.
+	void loadInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node);
+	/// Gets list of ints where order do not matter.
+	void loadUnorderedInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node);
+
+	/// Gets list of names.
+	void loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node);
+	/// Gets list of names where order do not matter.
+	void loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node);
 
 	/// Loads a list of mods.
 	void loadAll();
