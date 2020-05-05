@@ -295,6 +295,7 @@ void PlaceFacilityState::viewClick(Action *)
 			if (buildingOver)
 			{
 				fac->setIfHadPreviousFacility(true);
+				reducedBuildTime = reducedBuildTime * _game->getMod()->getBuildTimeReductionScaling() / 100.0;
 				int reducedBuildTimeRounded = (int)std::round(reducedBuildTime);
 				fac->setBuildTime(std::max(1, fac->getBuildTime() - reducedBuildTimeRounded));
 			}
