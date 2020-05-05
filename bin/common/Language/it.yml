@@ -304,6 +304,7 @@ it:
   STR_PREFERRED_FORMAT_AUTO: "Automatico"
   STR_CURRENT_FORMAT: "Attuale: {0}"
   STR_SOUND_OPTIONS: "Opzioni Audio"
+  STR_BACKGROUND_MUTE: "Background Mute"
   STR_BACKGROUND_MUTE_DESC: "Non riprodurre audio se la finestra del gioco non è attiva."
   STR_FORCE_FIRE: "Ignora Linea di Fuoco"
   STR_FORCE_FIRE_DESC: "Abilita la forzatura per far sparare ai tuoi soldati quando CTRL è premuto, senza tener conto delle regole sulla linea di fuoco."

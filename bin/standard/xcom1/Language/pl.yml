@@ -665,7 +665,7 @@ pl:
   STR_MIND_PROBE_UFOPEDIA: "Próbnik umysłu jest urządzeniem komunikacyjnym obcych, który pobiera informacje bezpośrednio z fal mózgowych, jednak jednostki organizacji X-Com mogą używać tego urządzenia w walce do wyświetlania charakterystyk obcych. Kliknij na próbniku umysłu, a potem wybierz opcję 'Użyj próbnika umysłu'. Następnie kliknij kursorem na obcego."
   STR_PLASMA_PISTOL_UFOPEDIA: "Pistolet plazmowy jest śmiercionośną bronią obcych, bazującą na przyśpieszaniu cząstek we wnętrzu słabego pola antygrawitacyjnego."
   STR_PLASMA_RIFLE_UFOPEDIA: "Jest to porażająco potężna broń bazująca na przyśpieszaniu cząstek we wnętrzu nikłego pola anty-grawitacyjnego."
-  STR_HEAVY_PLASMA_UFOPEDIA: "Ta śmiercionośna broń o wielkiej sile rażenia działa na zasadzie przyspieszania cząstek we wnętrzu słabego pola anty-grawitacyjnego."
+  STR_HEAVY_PLASMA_UFOPEDIA: "Ta śmiercionośna broń o wielkiej sile rażenia działa na zasadzie przyspieszania cząstek w słabym polu antygrawitacyjnym."
   STR_BLASTER_LAUNCHER_UFOPEDIA: "To jest wyrzutnia rakiet kierowanych, która strzela rakietami fuzyjnymi o potężnej sile rażenia. Gdy klikniesz na wyrzutni, będziesz mógł ustalić punkty kontrolne, przez które będzie miała przelatywać rakieta fuzyjna. Jeśli jesteś pewny, że ustawiłeś wystarczającą liczbę punktów kontrolnych, kliknij na specjalną ikonę odpalenia."
   STR_SMALL_LAUNCHER_UFOPEDIA: "Mała wyrzutnia bomb ogłuszających. Idealna, by pojmać żywych obcych."
   STR_ALIEN_GRENADE_UFOPEDIA: "To urządzenie działa tak samo jak ziemski granat z wyjątkiem tego, że ma większą siłę rażenia."
