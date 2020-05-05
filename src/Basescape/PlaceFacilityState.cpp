@@ -270,7 +270,7 @@ void PlaceFacilityState::viewClick(Action *)
 						}
 
 						// Reduce the build time of the new facility
-						reducedBuildTime += (checkFacility->getRules()->getBuildTime() - checkFacility->getBuildTime()) / (_rule->getSize() * _rule->getSize());
+						reducedBuildTime += (checkFacility->getRules()->getBuildTime() - checkFacility->getBuildTime()) * (checkFacility->getRules()->getSize() * checkFacility->getRules()->getSize()) / (_rule->getSize() * _rule->getSize());
 
 						// This only counts as building over something if it wasn't in construction
 						if (checkFacility->getBuildTime() == 0)
