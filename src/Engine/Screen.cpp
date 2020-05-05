@@ -105,8 +105,10 @@ void Screen::makeVideoFlags()
  * Initializes a new display screen for the game to render contents to.
  * The screen is set up based on the current options.
  */
-Screen::Screen() : _baseWidth(ORIGINAL_WIDTH), _baseHeight(ORIGINAL_HEIGHT), _scaleX(1.0), _scaleY(1.0), _flags(0), _numColors(0), _firstColor(0), _pushPalette(false)
+Screen::Screen() : _baseWidth(ORIGINAL_WIDTH), _baseHeight(ORIGINAL_HEIGHT), _scaleX(1.0), _scaleY(1.0), _flags(0), _numColors(0), _firstColor(0), _pushPalette(false), _flickerFix(false)
 {
+	_flickerFix = Options::oxceEnablePaletteFlickerFix;
+
 	resetDisplay();
 	memset(deferredPalette, 0, 256*sizeof(SDL_Color));
 }
@@ -182,7 +184,7 @@ void Screen::handle(Action *action)
 void Screen::flip()
 {
 	// perform any requested palette update
-	if (_pushPalette && _numColors && _screen->format->BitsPerPixel == 8)
+	if (_flickerFix && _pushPalette && _numColors && _screen->format->BitsPerPixel == 8)
 	{
 		if (_screen->format->BitsPerPixel == 8 && SDL_SetColors(_screen, &(deferredPalette[_firstColor]), _firstColor, _numColors) == 0)
 		{
@@ -199,6 +201,17 @@ void Screen::flip()
 	else
 	{
 		SDL_BlitSurface(_surface.get(), 0, _screen, 0);
+	}
+
+	// perform any requested palette update
+	if (!_flickerFix && _pushPalette && _numColors && _screen->format->BitsPerPixel == 8)
+	{
+		if (_screen->format->BitsPerPixel == 8 && SDL_SetColors(_screen, &(deferredPalette[_firstColor]), _firstColor, _numColors) == 0)
+		{
+			Log(LOG_DEBUG) << "Display palette doesn't match requested palette";
+		}
+		_numColors = 0;
+		_pushPalette = false;
 	}
 
 
