@@ -1814,6 +1814,12 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 
 				bool gotHit = (ai != 0 && ai->getWasHitBy(unit->getId())) || (ai == 0 && (*i)->getHitState());
 
+				if (!gotHit && Mod::EXTENDED_MELEE_REACTIONS == 2)
+				{
+					// to allow melee reactions when attacked from any side, not just from the front
+					gotHit = (*i)->wasMeleeAttackedBy(unit->getId());
+				}
+
 					// can actually see the target Tile, or we got hit
 				if (((*i)->checkViewSector(unit->getPosition()) || gotHit) &&
 					// can actually target the unit
@@ -1919,10 +1925,16 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	};
 
 	// prioritize melee
+	int tempDirection = unit->getDirection();
+	if (Mod::EXTENDED_MELEE_REACTIONS == 2)
+	{
+		// temporarily face the target to allow melee reactions when attacked from any side, not just from the front
+		tempDirection = getDirectionTo(unit->getPosition(), target->getPosition());
+	}
 	BattleItem *meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
 	// has a melee weapon and is in melee range
 	if (_save->canUseWeapon(meleeWeapon, unit, false, BA_HIT) &&
-		validMeleeRange(unit, target, unit->getDirection()) &&
+		validMeleeRange(unit, target, tempDirection) &&
 		meleeWeapon->getAmmoForAction(BA_HIT) &&
 		BattleActionCost(BA_HIT, unit, meleeWeapon).haveTU())
 	{
@@ -1935,7 +1947,7 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	if (_save->canUseWeapon(weapon, unit, false, BA_HIT))
 	{
 		// has a weapon capable of melee and is in melee range
-		if (validMeleeRange(unit, target, unit->getDirection()) &&
+		if (validMeleeRange(unit, target, tempDirection) &&
 			weapon->getAmmoForAction(BA_HIT) &&
 			BattleActionCost(BA_HIT, unit, weapon).haveTU())
 		{
@@ -2009,7 +2021,8 @@ bool TileEngine::tryReaction(ReactionScore *reaction, BattleUnit *target, const 
 		if (action.targeting)
 		{
 			int moveType = originalAction.getMoveType();
-			int reactionChance = BA_HIT != originalAction.type ? 100 : 0;
+			int meleeReactionChance = Mod::EXTENDED_MELEE_REACTIONS > 0 ? 100 : 0;
+			int reactionChance = BA_HIT != originalAction.type ? 100 : meleeReactionChance;
 			int dist = Position::distance2d(unit->getPositionVexels(), target->getPositionVexels());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
@@ -3967,6 +3980,12 @@ bool TileEngine::meleeAttack(BattleActionAttack attack, BattleUnit *victim)
 	{
 		// hit log - new melee attack
 		_save->appendToHitLog(HITLOG_NEW_SHOT, attack.attacker->getFaction());
+
+		// to allow melee reactions when attacked from any side, not just from the front
+		if (victim && Mod::EXTENDED_MELEE_REACTIONS == 2)
+		{
+			victim->setMeleeAttackedBy(attack.attacker->getId());
+		}
 	}
 
 	if (victim)

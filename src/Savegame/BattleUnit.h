@@ -107,6 +107,7 @@ private:
 	int _scannedTurn;
 	int _kills;
 	int _faceDirection; // used only during strafing moves
+	std::vector<int> _meleeAttackedBy;
 	bool _hitByFire, _hitByAnything, _alreadyExploded;
 	int _fireMaxHit;
 	int _smokeMaxHit;
@@ -676,6 +677,10 @@ public:
 	bool getHitState();
 	/// reset the unit hit state.
 	void resetHitState();
+	/// Was this unit melee attacked by a given attacker this turn (both hit and miss count)?
+	bool wasMeleeAttackedBy(int attackerId) const;
+	/// Set the "melee attacked by" flag.
+	void setMeleeAttackedBy(int attackerId);
 	/// Did this unit explode already?
 	bool hasAlreadyExploded() const { return _alreadyExploded; }
 	/// Set the already exploded flag.
