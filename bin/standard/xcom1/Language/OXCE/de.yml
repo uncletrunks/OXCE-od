@@ -9,6 +9,8 @@ de:
   STR_AVATAR_NAME_8: "#08 Weiblich, Afrikanisch"
   STR_PSI_SHORT: "PSI>{ALT}{0}/{1}"
   STR_EVASIVE_MANEUVERS: "AUSWEICHMANÖVER"
+  STR_UFO_DESTROYED_BY_SPLASHDOWN: "UFO beim Aufprall zerstört!"
+  STR_UFO_SURVIVED_SPLASHDOWN: "UFO hat Aufprall überstanden"
   STR_UFO_HAS_LANDED: "UFO gelandet an{NEWLINE}{0}"
   GMGEO1: "Weltkarte Track #1"
   GMGEO2: "Weltkarte Track #2"
