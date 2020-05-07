@@ -359,6 +359,7 @@ en-GB:
   hitRatio: "Hit chance"
   maxAllowedPerBase: "Max allowed per base"
   manaRecoveryPerDay: "Mana per day"
+  healthRecoveryPerDay: "Health per day"
   sickBayAbsoluteBonus: "Sickbay abs. bonus"
   sickBayRelativeBonus: "Sickbay rel. bonus"
   prisonType: "Prison type"

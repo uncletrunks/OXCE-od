@@ -2672,6 +2672,7 @@ void StatsForNerdsState::initFacilityList()
 
 	addInteger(ss, facilityRule->getMaxAllowedPerBase(), "maxAllowedPerBase");
 	addInteger(ss, facilityRule->getManaRecoveryPerDay(), "manaRecoveryPerDay");
+	addInteger(ss, facilityRule->getHealthRecoveryPerDay(), "healthRecoveryPerDay");
 	addFloat(ss, facilityRule->getSickBayAbsoluteBonus(), "sickBayAbsoluteBonus");
 	addFloat(ss, facilityRule->getSickBayRelativeBonus(), "sickBayRelativeBonus");
 
