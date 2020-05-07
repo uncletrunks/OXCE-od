@@ -2685,7 +2685,8 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 				{
 					placed = true;
 				}
-				if (!placed && getFaction() != FACTION_PLAYER && fitItemToInventory(leftHand, item))
+				bool allowTwoMainWeapons = (getFaction() != FACTION_PLAYER) || _armor->getAllowTwoMainWeapons();
+				if (!placed && allowTwoMainWeapons && fitItemToInventory(leftHand, item))
 				{
 					placed = true;
 				}

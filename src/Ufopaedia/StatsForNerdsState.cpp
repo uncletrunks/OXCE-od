@@ -2452,6 +2452,7 @@ void StatsForNerdsState::initArmorList()
 		addInteger(ss, armorRule->getKneelHeight(), "kneelHeight", -1);
 		addInteger(ss, armorRule->getFloatHeight(), "floatHeight", -1);
 		addFloat(ss, armorRule->getOverKill(), "overKill", 0.5f);
+		addBoolean(ss, armorRule->getAllowTwoMainWeapons(), "allowTwoMainWeapons");
 		addBoolean(ss, armorRule->getInstantWoundRecovery(), "instantWoundRecovery");
 
 		addSection("{Basics}", "Stuff from the main article", _white, true);
