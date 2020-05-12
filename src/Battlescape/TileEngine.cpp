@@ -1931,7 +1931,11 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 		// temporarily face the target to allow melee reactions when attacked from any side, not just from the front
 		tempDirection = getDirectionTo(unit->getPosition(), target->getPosition());
 	}
-	BattleItem *meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
+	BattleItem *meleeWeapon = unit->getWeaponForReactions(true);
+	if (!meleeWeapon)
+	{
+		meleeWeapon = unit->getUtilityWeapon(BT_MELEE);
+	}
 	// has a melee weapon and is in melee range
 	if (_save->canUseWeapon(meleeWeapon, unit, false, BA_HIT) &&
 		validMeleeRange(unit, target, tempDirection) &&
@@ -1943,7 +1947,11 @@ TileEngine::ReactionScore TileEngine::determineReactionType(BattleUnit *unit, Ba
 	}
 
 	// has a weapon
-	BattleItem *weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
+	BattleItem *weapon = unit->getWeaponForReactions(false);
+	if (!weapon)
+	{
+		weapon = unit->getMainHandWeapon(unit->getFaction() != FACTION_PLAYER);
+	}
 	if (_save->canUseWeapon(weapon, unit, false, BA_HIT))
 	{
 		// has a weapon capable of melee and is in melee range

@@ -117,6 +117,7 @@ private:
 	int _turnsSinceSpotted, _turnsLeftSpottedForSnipers, _turnsSinceStunned = 255;
 	const Unit *_spawnUnit = nullptr;
 	std::string _activeHand;
+	std::string _preferredHandForReactions;
 	BattleUnitStatistics* _statistics;
 	int _murdererId;	// used to credit the murderer with the kills that this unit got by blowing up on death
 	int _mindControllerID;	// used to credit the mind controller with the kills of the mind controllee
@@ -421,6 +422,17 @@ public:
 	BattleItem *getActiveHand(BattleItem *left, BattleItem *right) const;
 	/// Reloads a weapon if needed.
 	bool reloadAmmo();
+
+	/// Toggle the right hand as main hand for reactions.
+	void toggleRightHandForReactions();
+	/// Toggle the left hand as main hand for reactions.
+	void toggleLeftHandForReactions();
+	/// Is right hand preferred for reactions?
+	bool isRightHandPreferredForReactions() const;
+	/// Is left hand preferred for reactions?
+	bool isLeftHandPreferredForReactions() const;
+	/// Get preferred weapon for reactions, if applicable.
+	BattleItem *getWeaponForReactions(bool meleeOnly) const;
 
 	/// Check if this unit is in the exit area
 	bool isInExitArea(SpecialTileType stt = START_POINT) const;

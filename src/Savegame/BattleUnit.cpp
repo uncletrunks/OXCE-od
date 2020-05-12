@@ -174,6 +174,7 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 		_specWeapon[i] = 0;
 
 	_activeHand = "STR_RIGHT_HAND";
+	_preferredHandForReactions = "";
 
 	lastCover = TileEngine::invalid;
 
@@ -493,6 +494,7 @@ BattleUnit::BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, 
 		_specWeapon[i] = 0;
 
 	_activeHand = "STR_RIGHT_HAND";
+	_preferredHandForReactions = "";
 	_gender = GENDER_MALE;
 
 	lastCover = TileEngine::invalid;
@@ -602,6 +604,7 @@ void BattleUnit::load(const YAML::Node &node, const Mod *mod, const ScriptGlobal
 	_respawn = node["respawn"].as<bool>(_respawn);
 	_alreadyRespawned = node["alreadyRespawned"].as<bool>(_alreadyRespawned);
 	_activeHand = node["activeHand"].as<std::string>(_activeHand);
+	_preferredHandForReactions = node["preferredHandForReactions"].as<std::string>(_preferredHandForReactions);
 	if (node["tempUnitStatistics"])
 	{
 		_statistics->load(node["tempUnitStatistics"]);
@@ -691,6 +694,8 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
 	node["respawn"] = _respawn;
 	node["alreadyRespawned"] = _alreadyRespawned;
 	node["activeHand"] = _activeHand;
+	if (!_preferredHandForReactions.empty())
+		node["preferredHandForReactions"] = _preferredHandForReactions;
 	node["tempUnitStatistics"] = _statistics->save();
 	node["murdererId"] = _murdererId;
 	node["fatalShotSide"] = (int)_fatalShotSide;
@@ -3214,6 +3219,91 @@ bool BattleUnit::reloadAmmo()
 		}
 	}
 	return false;
+}
+
+/**
+ * Toggle the right hand as main hand for reactions.
+ */
+void BattleUnit::toggleRightHandForReactions()
+{
+	if (isRightHandPreferredForReactions())
+		_preferredHandForReactions = "";
+	else
+		_preferredHandForReactions = "STR_RIGHT_HAND";
+}
+
+/**
+ * Toggle the left hand as main hand for reactions.
+ */
+void BattleUnit::toggleLeftHandForReactions()
+{
+	if (isLeftHandPreferredForReactions())
+		_preferredHandForReactions = "";
+	else
+		_preferredHandForReactions = "STR_LEFT_HAND";
+}
+
+/**
+ * Is right hand preferred for reactions?
+ */
+bool BattleUnit::isRightHandPreferredForReactions() const
+{
+	return _preferredHandForReactions == "STR_RIGHT_HAND";
+}
+
+/**
+ * Is left hand preferred for reactions?
+ */
+bool BattleUnit::isLeftHandPreferredForReactions() const
+{
+	return _preferredHandForReactions == "STR_LEFT_HAND";
+}
+
+/**
+ * Get preferred weapon for reactions, if applicable.
+ */
+BattleItem *BattleUnit::getWeaponForReactions(bool meleeOnly) const
+{
+	if (_preferredHandForReactions.empty())
+		return nullptr;
+
+	BattleItem* weapon = nullptr;
+	if (isRightHandPreferredForReactions())
+		weapon = getRightHandWeapon();
+	else
+		weapon = getLeftHandWeapon();
+
+	if (!weapon && meleeOnly)
+	{
+		// try also empty hands melee
+		weapon = getSpecialWeapon(BT_MELEE);
+		if (weapon && !weapon->getRules()->isSpecialUsingEmptyHand())
+		{
+			weapon = nullptr;
+		}
+	}
+
+	if (!weapon)
+		return nullptr;
+
+	if (meleeOnly)
+	{
+		if (weapon->getRules()->getBattleType() == BT_MELEE)
+			return weapon;
+	}
+	else
+	{
+		// ignore weapons without ammo (rules out grenades)
+		if (!weapon->haveAnyAmmo())
+			return nullptr;
+
+		int tu = getActionTUs(BA_SNAPSHOT, weapon).Time;
+		if (tu > 0)
+			return weapon;
+
+	}
+
+	return nullptr;
 }
 
 /**

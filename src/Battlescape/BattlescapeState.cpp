@@ -476,6 +476,7 @@ BattlescapeState::BattlescapeState() :
 	_btnStats->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick);
+	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick, SDL_BUTTON_RIGHT);
 	_btnLeftHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnLeftHandItemClick, SDL_BUTTON_MIDDLE);
 	_btnLeftHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnLeftHandItemClick, Options::keyBattleUseLeftHand);
 	_btnLeftHandItem->setTooltip("STR_USE_LEFT_HAND");
@@ -483,6 +484,7 @@ BattlescapeState::BattlescapeState() :
 	_btnLeftHandItem->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 
 	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick);
+	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick, SDL_BUTTON_RIGHT);
 	_btnRightHandItem->onMouseClick((ActionHandler)&BattlescapeState::btnRightHandItemClick, SDL_BUTTON_MIDDLE);
 	_btnRightHandItem->onKeyboardPress((ActionHandler)&BattlescapeState::btnRightHandItemClick, Options::keyBattleUseRightHand);
 	_btnRightHandItem->setTooltip("STR_USE_RIGHT_HAND");
@@ -1365,6 +1367,14 @@ void BattlescapeState::btnLeftHandItemClick(Action *action)
 
 		_save->getSelectedUnit()->setActiveLeftHand();
 		_map->draw();
+
+		bool rightClick = action->getDetails()->button.button == SDL_BUTTON_RIGHT;
+		if (rightClick)
+		{
+			_save->getSelectedUnit()->toggleLeftHandForReactions();
+			return;
+		}
+
 		BattleItem *leftHandItem = _save->getSelectedUnit()->getLeftHandWeapon();
 		if (!leftHandItem)
 		{
@@ -1405,6 +1415,14 @@ void BattlescapeState::btnRightHandItemClick(Action *action)
 
 		_save->getSelectedUnit()->setActiveRightHand();
 		_map->draw();
+
+		bool rightClick = action->getDetails()->button.button == SDL_BUTTON_RIGHT;
+		if (rightClick)
+		{
+			_save->getSelectedUnit()->toggleRightHandForReactions();
+			return;
+		}
+
 		BattleItem *rightHandItem = _save->getSelectedUnit()->getRightHandWeapon();
 		if (!rightHandItem)
 		{
@@ -1646,7 +1664,7 @@ bool BattlescapeState::playableUnitSelected()
 /**
  * Draw hand item with ammo number.
  */
-void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<NumberText*> &ammoText, std::vector<NumberText*> &medikitText, NumberText *twoHandedText)
+void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<NumberText*> &ammoText, std::vector<NumberText*> &medikitText, NumberText *twoHandedText, bool drawReactionIndicator)
 {
 	hand->clear();
 	for (int slot = 0; slot < RuleItem::AmmoSlotMax; ++slot)
@@ -1711,6 +1729,18 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<Num
 			tempSurface->blitNShade(hand, x, y, Pulsate[_save->getAnimFrame() % 8], false, item->isFuseEnabled() ? 0 : 32);
 		}
 	}
+	if (drawReactionIndicator)
+	{
+ 		if (Surface* reactionIndicator = _game->getMod()->getSurface("reactionIndicator", false))
+		{
+			reactionIndicator->blitNShade(hand, 0, 0);
+		}
+		else
+		{
+			Surface* tempSurface = _game->getMod()->getSurfaceSet("SCANG.DAT")->getFrame(0);
+			tempSurface->blitNShade(hand, 28, 0);
+		}
+	}
 }
 
 /**
@@ -1719,8 +1749,10 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<Num
 void BattlescapeState::drawHandsItems()
 {
 	BattleUnit *battleUnit = playableUnitSelected() ? _save->getSelectedUnit() : nullptr;
-	drawItem(battleUnit ? battleUnit->getLeftHandWeapon() : nullptr, _btnLeftHandItem, _numAmmoLeft, _numMedikitLeft, _numTwoHandedIndicatorLeft);
-	drawItem(battleUnit ? battleUnit->getRightHandWeapon() : nullptr, _btnRightHandItem, _numAmmoRight, _numMedikitRight, _numTwoHandedIndicatorRight);
+	bool left = battleUnit ? battleUnit->isLeftHandPreferredForReactions() : false;
+	bool right = battleUnit ? battleUnit->isRightHandPreferredForReactions() : false;
+	drawItem(battleUnit ? battleUnit->getLeftHandWeapon() : nullptr, _btnLeftHandItem, _numAmmoLeft, _numMedikitLeft, _numTwoHandedIndicatorLeft, left);
+	drawItem(battleUnit ? battleUnit->getRightHandWeapon() : nullptr, _btnRightHandItem, _numAmmoRight, _numMedikitRight, _numTwoHandedIndicatorRight, right);
 }
 
 /**
