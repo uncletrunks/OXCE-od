@@ -766,6 +766,17 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 
 			if (myMapData->getObjectType() == O_FLOOR)
 			{
+				if (myMapData->isNoFloor() && myMapData->getTUCost(MT_WALK) > 0 && myMapData->getTUCost(MT_WALK) < 200 && myMapDataSet->getName() != "BLANKS")
+				{
+					// Note: pathfinding and autoshots don't work on such ground tiles
+					// (such objects were intended to be used only as holes on upper floors/roofs, they should NOT be used on ground floor)
+					std::ostringstream ss;
+					ss << "terrain: " << terrainRule->getName() << " dataset: " << myMapDataSet->getName() << " object " << index << " is a walkable floor tile with 'No_Floor' flag set to true.";
+					std::string str = ss.str();
+					Log(LOG_WARNING) << "Potential issue in " << str << ". Found using OXCE test cases.";
+					errors++;
+					uniqueResults[myMapDataSet->getName()].insert(index);
+				}
 				if (myMapData->getTUCost(MT_WALK) < 1)
 				{
 					std::ostringstream ss;
