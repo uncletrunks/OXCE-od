@@ -1465,6 +1465,22 @@ void Mod::loadAll()
 		}
 	}
 
+	// recommended user options
+	if (!_recommendedUserOptions.empty() && !Options::oxceRecommendedOptionsWereSet)
+	{
+		const std::vector<OptionInfo> &options = Options::getOptionInfo();
+		for (std::vector<OptionInfo>::const_iterator i = options.begin(); i != options.end(); ++i)
+		{
+			if (i->type() != OPTION_KEY && !i->category().empty())
+			{
+				i->load(_recommendedUserOptions, false);
+			}
+		}
+
+		Options::oxceRecommendedOptionsWereSet = true;
+		Options::save();
+	}
+
 	// fixed user options
 	if (!_fixedUserOptions.empty())
 	{
@@ -2093,6 +2109,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	_missionRatings = doc["missionRatings"].as<std::map<int, std::string> >(_missionRatings);
 	_monthlyRatings = doc["monthlyRatings"].as<std::map<int, std::string> >(_monthlyRatings);
 	_fixedUserOptions = doc["fixedUserOptions"].as<std::map<std::string, std::string> >(_fixedUserOptions);
+	_recommendedUserOptions = doc["recommendedUserOptions"].as<std::map<std::string, std::string> >(_recommendedUserOptions);
 	_hiddenMovementBackgrounds = doc["hiddenMovementBackgrounds"].as<std::vector<std::string> >(_hiddenMovementBackgrounds);
 	_baseNamesFirst = doc["baseNamesFirst"].as<std::vector<std::string> >(_baseNamesFirst);
 	_baseNamesMiddle = doc["baseNamesMiddle"].as<std::vector<std::string> >(_baseNamesMiddle);
@@ -3860,11 +3877,6 @@ const std::map<int, std::string> *Mod::getMissionRatings() const
 const std::map<int, std::string> *Mod::getMonthlyRatings() const
 {
 	return &_monthlyRatings;
-}
-
-const std::map<std::string, std::string> &Mod::getFixedUserOptions() const
-{
-	return _fixedUserOptions;
 }
 
 const std::vector<std::string> &Mod::getHiddenMovementBackgrounds() const

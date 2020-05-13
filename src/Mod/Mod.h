@@ -243,7 +243,7 @@ private:
 	int _startingDifficulty;
 	int _baseDefenseMapFromLocation;
 	std::map<int, std::string> _missionRatings, _monthlyRatings;
-	std::map<std::string, std::string> _fixedUserOptions;
+	std::map<std::string, std::string> _fixedUserOptions, _recommendedUserOptions;
 	std::vector<std::string> _hiddenMovementBackgrounds;
 	std::vector<std::string> _baseNamesFirst, _baseNamesMiddle, _baseNamesLast;
 	std::vector<std::string> _operationNamesFirst, _operationNamesLast;
@@ -802,7 +802,8 @@ public:
 	RuleBaseFacility *getDestroyedFacility() const;
 	const std::map<int, std::string> *getMissionRatings() const;
 	const std::map<int, std::string> *getMonthlyRatings() const;
-	const std::map<std::string, std::string> &getFixedUserOptions() const;
+	const std::map<std::string, std::string> &getFixedUserOptions() const { return _fixedUserOptions; }
+	const std::map<std::string, std::string> &getRecommendedUserOptions() const { return _recommendedUserOptions; }
 	const std::vector<std::string> &getHiddenMovementBackgrounds() const;
 	const std::vector<std::string> &getBaseNamesFirst() const { return _baseNamesFirst; }
 	const std::vector<std::string> &getBaseNamesMiddle() const { return _baseNamesMiddle; }
