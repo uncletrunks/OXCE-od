@@ -730,7 +730,7 @@ YAML::Node BattleUnit::save(const ScriptGlobal *shared) const
  */
 void BattleUnit::setRecolor(int basicLook, int utileLook, int rankLook)
 {
-	_recolor.clear(); // reset in case of OXCE+ on-the-fly armor changes/transformations
+	_recolor.clear(); // reset in case of OXCE on-the-fly armor changes/transformations
 	const int colorsMax = 4;
 	std::pair<int, int> colors[colorsMax] =
 	{

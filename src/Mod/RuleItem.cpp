@@ -1838,7 +1838,7 @@ bool RuleItem::isCorpseRecoverable() const
 {
 	// Explanation:
 	// Since the "recover" flag applies to both live body (prisoner capture) and dead body (corpse recovery) in OXC,
-	// OXCE+ adds this new flag to allow recovery of a live body, but disable recovery of the corpse
+	// OXCE adds this new flag to allow recovery of a live body, but disable recovery of the corpse
 	// (used in mods mostly to ignore dead bodies of killed humans)
 	return _recoverCorpse;
 }

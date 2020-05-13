@@ -3126,7 +3126,7 @@ void GeoscapeState::handleDogfights()
  *
  * History lesson:
  * - this was in the DogfightState destructor before, but could lead to CTD when people reloaded a saved game while dogfights were still active
- * - both OXCE+ and vanilla OXC still access already deleted objects (_craft and _ufo) in the destructor... that doesn't seem to trigger CTD that often though
+ * - both OXCE and vanilla OXC still access already deleted objects (_craft and _ufo) in the destructor... that doesn't seem to trigger CTD that often though
  */
 void GeoscapeState::handleDogfightExperience()
 {

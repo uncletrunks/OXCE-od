@@ -771,7 +771,7 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 					std::ostringstream ss;
 					ss << " walk:" << myMapData->getTUCost(MT_WALK) << " terrain:" << terrainRule->getName() << " dataset:" << myMapDataSet->getName() << " index:" << index;
 					std::string str = ss.str();
-					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE+ test cases.";
+					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE test cases.";
 					errors++;
 					uniqueResults[myMapDataSet->getName()].insert(index);
 				}
@@ -780,7 +780,7 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 					std::ostringstream ss;
 					ss << "  fly:" << myMapData->getTUCost(MT_FLY) << " terrain:" << terrainRule->getName() << " dataset:" << myMapDataSet->getName() << " index:" << index;
 					std::string str = ss.str();
-					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE+ test cases.";
+					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE test cases.";
 					errors++;
 					uniqueResults[myMapDataSet->getName()].insert(index);
 				}
@@ -789,7 +789,7 @@ int TestState::checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set
 					std::ostringstream ss;
 					ss << "slide:" << myMapData->getTUCost(MT_SLIDE) << " terrain:" << terrainRule->getName() << " dataset:" << myMapDataSet->getName() << " index:" << index;
 					std::string str = ss.str();
-					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE+ test cases.";
+					Log(LOG_INFO) << "Zero movement cost on floor object: " << str << ". Found using OXCE test cases.";
 					errors++;
 					uniqueResults[myMapDataSet->getName()].insert(index);
 				}
@@ -881,7 +881,7 @@ int TestState::checkRMP(MapBlock *mapblock)
 		}
 		else
 		{
-			Log(LOG_INFO) << "Bad node in RMP file: " << filename.str() << " Node #" << nodesAdded << " is outside map boundaries at X:" << pos_x << " Y:" << pos_y << " Z:" << pos_z << ". Found using OXCE+ test cases.";
+			Log(LOG_INFO) << "Bad node in RMP file: " << filename.str() << " Node #" << nodesAdded << " is outside map boundaries at X:" << pos_x << " Y:" << pos_y << " Z:" << pos_z << ". Found using OXCE test cases.";
 			errors++;
 		}
 		nodesAdded++;
