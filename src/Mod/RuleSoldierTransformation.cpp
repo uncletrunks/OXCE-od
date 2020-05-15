@@ -31,7 +31,7 @@ RuleSoldierTransformation::RuleSoldierTransformation(const std::string &name) :
 	_name(name),
 	_keepSoldierArmor(false), _createsClone(false), _needsCorpseRecovered(true),
 	_allowsDeadSoldiers(false), _allowsLiveSoldiers(false), _allowsWoundedSoldiers(false),
-	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0), _minRank(0),
+	_listOrder(0), _cost(0), _transferTime(0), _recoveryTime(0), _minRank(0), _includeBonusesForMinStats(false),
 	_showMinMax(false), _lowerBoundAtMinStats(true), _upperBoundAtMaxStats(false), _upperBoundAtStatCaps(false), _upperBoundType(0),
 	_reset(false)
 {
@@ -68,6 +68,7 @@ void RuleSoldierTransformation::load(const YAML::Node &node, Mod* mod, int listO
 	_allowedSoldierTypes = node["allowedSoldierTypes"].as<std::vector<std::string > >(_allowedSoldierTypes);
 	_requiredPreviousTransformations = node["requiredPreviousTransformations"].as<std::vector<std::string > >(_requiredPreviousTransformations);
 	_forbiddenPreviousTransformations = node["forbiddenPreviousTransformations"].as<std::vector<std::string > >(_forbiddenPreviousTransformations);
+	_includeBonusesForMinStats = node["includeBonusesForMinStats"].as<bool >(_includeBonusesForMinStats);
 	_requiredMinStats = node["requiredMinStats"].as<UnitStats >(_requiredMinStats);
 	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
 	_requiredCommendations = node["requiredCommendations"].as< std::map<std::string, int> >(_requiredCommendations);
