@@ -67,11 +67,19 @@
         y+ \  / x+
             \/
 
+  Compass directions
 
          W  /\  N
            /  \
            \  /
          S  \/  E
+
+  Unit directions
+
+         6  /\  0
+           /  \
+           \  /
+         4  \/  2
  */
 
 namespace OpenXcom
