@@ -722,7 +722,7 @@ void Tile::updateSprite(TilePart part)
 BattleUnit *Tile::getOverlappingUnit(const SavedBattleGame *saveBattleGame, TileUnitOverlapping range) const
 {
 	auto bu = getUnit();
-	if (!bu && _pos.z > 0 && hasNoFloor(saveBattleGame))
+	if (!bu && _pos.z > 0 && hasNoFloor(saveBattleGame) && getTerrainLevel() != 0)
 	{
 		auto tileBelow = saveBattleGame->getBelowTile(this);
 		bu = tileBelow->getUnit();

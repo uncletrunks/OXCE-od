@@ -453,7 +453,7 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
 	else
 	{
 		const Tile *top = _save->getAboveTile(unitTile);
-		if (top && top->hasNoFloor(_save))
+		if (top && top->getOverlappingUnit(_save, TUO_ALWAYS) == bu)
 		{
 			topMargin = -tileFoorHeight / 2;
 		}
