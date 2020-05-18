@@ -152,6 +152,7 @@ private:
 	bool _hidingForTurn, _floorAbove, _respawn, _alreadyRespawned;
 	bool _isLeeroyJenkins;	// always charges enemy, never retreats.
 	bool _summonedPlayerUnit;
+	bool _pickUpWeaponsMoreActively;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
 	bool _capturable;
@@ -703,6 +704,8 @@ public:
 	void setSummonedPlayerUnit(bool summonedPlayerUnit);
 	/// Was this unit summoned by an item?
 	bool isSummonedPlayerUnit() const;
+	/// Is the unit eagerly picking up weapons?
+	bool getPickUpWeaponsMoreActively() const { return _pickUpWeaponsMoreActively; }
 };
 
 } //namespace OpenXcom

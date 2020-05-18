@@ -389,19 +389,6 @@ bool Unit::autoSurrender() const
 }
 
 /**
- * Should the unit try to pick up weapons more actively?
- * @return True if the unit prefers picking up a weapon over most of other actions.
- */
-bool Unit::pickUpWeaponsMoreActively(Mod *mod) const
-{
-	if (_pickUpWeaponsMoreActively != -1)
-	{
-		return _pickUpWeaponsMoreActively == 0 ? false : true;
-	}
-	return mod->getAIPickUpWeaponsMoreActively();
-}
-
-/**
  * Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
  * @return True if full name can be shown.
  */

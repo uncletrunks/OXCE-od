@@ -207,7 +207,7 @@ private:
 	int _aiUseDelayBlaster, _aiUseDelayFirearm, _aiUseDelayGrenade, _aiUseDelayMelee, _aiUseDelayPsionic;
 	int _aiFireChoiceIntelCoeff, _aiFireChoiceAggroCoeff;
 	bool _aiExtendedFireModeChoice, _aiRespectMaxRange, _aiDestroyBaseFacilities;
-	bool _aiPickUpWeaponsMoreActively;
+	bool _aiPickUpWeaponsMoreActively, _aiPickUpWeaponsMoreActivelyCiv;
 	int _maxLookVariant, _tooMuchSmokeThreshold, _customTrainingFactor, _minReactionAccuracy;
 	int _chanceToStopRetaliation;
 	bool _lessAliensDuringBaseDefense;
@@ -579,8 +579,10 @@ public:
 	bool getAIRespectMaxRange() const {return _aiRespectMaxRange;}
 	/// Gets whether or not the AI should be allowed to continue destroying base facilities after first encountering XCom
 	bool getAIDestroyBaseFacilities() const { return _aiDestroyBaseFacilities; }
-	/// Gets whether or not the AI should pick up weapons more actively.
+	/// Gets whether or not the alien AI should pick up weapons more actively.
 	bool getAIPickUpWeaponsMoreActively() const { return _aiPickUpWeaponsMoreActively; }
+	/// Gets whether or not the civilian AI should pick up weapons more actively.
+	bool getAIPickUpWeaponsMoreActivelyCiv() const { return _aiPickUpWeaponsMoreActivelyCiv; }
 	/// Gets maximum supported lookVariant (0-15)
 	int getMaxLookVariant() const  {return abs(_maxLookVariant) % 16;}
 	/// Gets the threshold for too much smoke (vanilla default = 10).

@@ -348,16 +348,12 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 
 	_AIActionCounter = action.number;
 	BattleItem *weapon = unit->getMainHandWeapon();
-	bool pickUpWeaponsMoreActively = false;
+	bool pickUpWeaponsMoreActively = unit->getPickUpWeaponsMoreActively();
 	bool weaponPickedUp = false;
 	if (!weapon || !weapon->haveAnyAmmo())
 	{
 		if (unit->getOriginalFaction() != FACTION_PLAYER)
 		{
-			if (unit->getUnitRules())
-			{
-				pickUpWeaponsMoreActively = unit->getUnitRules()->pickUpWeaponsMoreActively(getMod());
-			}
 			if ((unit->getOriginalFaction() == FACTION_HOSTILE && unit->getVisibleUnits()->empty()) || pickUpWeaponsMoreActively)
 			{
 				weaponPickedUp = findItem(&action, pickUpWeaponsMoreActively);

@@ -440,7 +440,7 @@ public:
 	/// Should the unit get "stuck" trying to fire from outside of weapon range? Vanilla bug, that may serve as "feature" in rare cases.
 	bool waitIfOutsideWeaponRange() { return _waitIfOutsideWeaponRange; };
 	/// Should the unit try to pick up weapons more actively?
-	bool pickUpWeaponsMoreActively(Mod *mod) const;
+	int getPickUpWeaponsMoreActively() const { return _pickUpWeaponsMoreActively; }
 	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
 	bool getShowFullNameInAlienInventory(Mod *mod) const;
 
