@@ -783,6 +783,9 @@ void ProjectileFlyBState::think()
 							++i;
 							delete proj;
 						}
+
+						// reset back for the next shot in the (potential) autoshot sequence
+						_targetVoxel = originalTarget;
 					}
 
 					// nerf unit's XP values (gained via extra shotgun bullets)
