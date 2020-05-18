@@ -76,6 +76,21 @@ void UpdateAmmo(BattleActionAttack& attack)
 	}
 }
 
+/**
+ * Update grenade `damage_item` from `weapon_item`.
+ */
+void UpdateGrenade(BattleActionAttack& attack)
+{
+	if (attack.weapon_item && !attack.damage_item)
+	{
+		const auto battleType = attack.weapon_item->getRules()->getBattleType();
+		if (battleType == BT_PROXIMITYGRENADE || battleType == BT_GRENADE)
+		{
+			attack.damage_item = attack.weapon_item;
+		}
+	}
+}
+
 }
 
 /**
@@ -114,6 +129,7 @@ BattleActionAttack BattleActionAttack::GetAferShoot(BattleActionType type, Battl
 	UpdateAttacker(attack);
 	attack.damage_item = ammo;
 	attack.skill_rules = skill;
+	UpdateGrenade(attack);
 	return attack;
 }
 
