@@ -2664,7 +2664,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 				item->setSlotX(rule->getDefaultInventorySlotX());
 				item->setSlotY(rule->getDefaultInventorySlotY());
 				placed = true;
-				item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+				item->setXCOMProperty(getFaction() == FACTION_PLAYER && !isSummonedPlayerUnit());
 				if (item->getRules()->getTurretType() > -1)
 				{
 					setTurretType(item->getRules()->getTurretType());
@@ -2675,7 +2675,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 		if (!placed && (fitItemToInventory(rightHand, item) || fitItemToInventory(leftHand, item)))
 		{
 			placed = true;
-			item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+			item->setXCOMProperty(getFaction() == FACTION_PLAYER && !isSummonedPlayerUnit());
 			if (item->getRules()->getTurretType() > -1)
 			{
 				setTurretType(item->getRules()->getTurretType());
@@ -2796,7 +2796,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 		break;
 	}
 
-	item->setXCOMProperty(getFaction() == FACTION_PLAYER);
+	item->setXCOMProperty(getFaction() == FACTION_PLAYER && !isSummonedPlayerUnit());
 
 	return placed;
 }

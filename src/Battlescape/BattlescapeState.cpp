@@ -2943,6 +2943,29 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 		_game->getMod()->getSoundByDepth(0, _save->getAmbientSound())->stopLoop();
 	}
 
+	// dear civilians and summoned player units,
+	// please drop all borrowed xcom equipment now, so that we can recover it
+	// thank you!
+	for (auto* unit : *_save->getUnits())
+	{
+		bool relevantUnitType = unit->getOriginalFaction() == FACTION_NEUTRAL || unit->isSummonedPlayerUnit();
+		if (relevantUnitType && !unit->isOut())
+		{
+			std::vector<BattleItem*> itemsToDrop;
+			for (auto* item : *unit->getInventory())
+			{
+				if (item->getXCOMProperty())
+				{
+					itemsToDrop.push_back(item);
+				}
+			}
+			for (auto* xcomItem : itemsToDrop)
+			{
+				_save->getTileEngine()->itemDrop(unit->getTile(), xcomItem, false);
+			}
+		}
+	}
+
 	_battleGame->removeSummonedPlayerUnits();
 
 	AlienDeployment *ruleDeploy = _game->getMod()->getDeployment(_save->getMissionType());
