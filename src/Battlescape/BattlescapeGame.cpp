@@ -519,7 +519,7 @@ void BattlescapeGame::endTurn()
 						if (rule->getBattleType() == BT_GRENADE) // it's a grenade to explode now
 						{
 							Position p = tile->getPosition().toVoxel() + Position(8, 8, -tile->getTerrainLevel() + (unit ? unit->getHeight() / 2 : 0));
-							forRemoval.push_back(std::tuple(nullptr, new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, unit, item, item, })));
+							forRemoval.push_back(std::tuple(nullptr, new ExplosionBState(this, p, BattleActionAttack::GetBeforeShoot(BA_NONE, unit, item))));
 							exploded = true;
 						}
 						else
@@ -2869,7 +2869,7 @@ int BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 						if (ruleItem->getBattleType() == BT_GRENADE || ruleItem->getBattleType() == BT_PROXIMITYGRENADE)
 						{
 							Position p = t->getPosition().toVoxel() + Position(8, 8, t->getTerrainLevel());
-							statePushNext(new ExplosionBState(this, p, BattleActionAttack{ BA_NONE, nullptr, item, item, }));
+							statePushNext(new ExplosionBState(this, p, BattleActionAttack::GetBeforeShoot(BA_NONE, nullptr, item)));
 							exploded = true;
 						}
 						else
