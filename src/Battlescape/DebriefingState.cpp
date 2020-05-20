@@ -1179,6 +1179,28 @@ void DebriefingState::prepareDebriefing()
 
 	// lets see what happens with units
 
+	// manual update state of all units
+	for (auto unit : *battle->getUnits())
+	{
+		// scripts (or some bugs in the game) could make aliens or soldiers that have "unresolved" stun or death state.
+		if (!unit->isOut() && unit->isOutThresholdExceed())
+		{
+			unit->instaFalling();
+			if (unit->getTile())
+			{
+				battle->getTileEngine()->itemDropInventory(unit->getTile(), unit);
+			}
+
+			//spawn corpse/body for unit to recover
+			for (int i = unit->getArmor()->getTotalSize() - 1; i >= 0; --i)
+			{
+				auto corpse = battle->createItemForTile(unit->getArmor()->getCorpseBattlescape()[i], nullptr);
+				corpse->setUnit(unit);
+				battle->getTileEngine()->itemDrop(unit->getTile(), corpse, false);
+			}
+		}
+	}
+
 	// first, we evaluate how many surviving XCom units there are, and how many are conscious
 	// and how many have died (to use for commendations)
 	int deadSoldiers = 0;

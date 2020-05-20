@@ -257,6 +257,14 @@ void BattlescapeGenerator::nextStage()
 			{
 				_save->getTileEngine()->itemDropInventory((*unit)->getTile(), (*unit));
 			}
+
+			//spawn corpse/body for unit to recover
+			for (int i = (*unit)->getArmor()->getTotalSize() - 1; i >= 0; --i)
+			{
+				auto corpse = _save->createItemForTile((*unit)->getArmor()->getCorpseBattlescape()[i], nullptr);
+				corpse->setUnit((*unit));
+				_save->getTileEngine()->itemDrop((*unit)->getTile(), corpse, false);
+			}
 		}
 	}
 
