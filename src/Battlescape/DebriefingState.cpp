@@ -1183,6 +1183,7 @@ void DebriefingState::prepareDebriefing()
 	for (auto unit : *battle->getUnits())
 	{
 		// scripts (or some bugs in the game) could make aliens or soldiers that have "unresolved" stun or death state.
+		// Note: resolves the "last bleeding alien" too
 		if (!unit->isOut() && unit->isOutThresholdExceed())
 		{
 			unit->instaFalling();
