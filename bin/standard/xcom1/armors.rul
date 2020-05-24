@@ -581,7 +581,7 @@ armors:
     spriteSheet: ZOMBIE.PCK
     allowInv: false
     corpseBattle:
-      - STR_ZOMBIE_CORPSE
+      - STR_CHRYSSALID_CORPSE
     frontArmor: 4
     sideArmor: 4
     rearArmor: 4

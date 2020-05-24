@@ -412,7 +412,6 @@ armors: #done
   - type: COELACANTH_ARMOR
     spriteSheet: TANK01.PCK
     allowInv: false
-    corpseGeo: STR_COELACANTH_CORPSE
     corpseBattle:
       - COELACANTH_CORPSE_1
       - COELACANTH_CORPSE_2
@@ -439,7 +438,6 @@ armors: #done
   - type: DISPLACER_ARMOR
     spriteSheet: TANK01.PCK
     allowInv: false
-    corpseGeo: STR_DISPLACER_CORPSE
     corpseBattle:
       - DISPLACER_CORPSE_1
       - DISPLACER_CORPSE_2
@@ -548,7 +546,7 @@ armors: #done
   - type: ZOMBIE_ARMOR
     spriteSheet: ZOMBIE.PCK
     allowInv: false
-    corpseItem: STR_ZOMBIE_CORPSE
+    corpseItem: STR_TENTACULAT_CORPSE
     frontArmor: 4
     sideArmor: 4
     rearArmor: 4
