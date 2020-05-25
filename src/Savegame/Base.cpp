@@ -1644,7 +1644,7 @@ void Base::setupDefenses()
 					clipSize = ammo->getClipSize();
 					ammoPerVehicle = clipSize;
 				}
-				int baseQty = _items->getItem(ammo->getType()) / ammoPerVehicle;
+				int baseQty = _items->getItem(ammo) / ammoPerVehicle;
 				if (!baseQty)
 				{
 					++i;
@@ -1656,7 +1656,7 @@ void Base::setupDefenses()
 					auto vehicle = new Vehicle(rule, clipSize, size);
 					_vehicles.push_back(vehicle);
 					_vehiclesFromBase.push_back(vehicle);
-					_items->removeItem(ammo->getType(), ammoPerVehicle);
+					_items->removeItem(ammo, ammoPerVehicle);
 				}
 				_items->removeItem(itemId, canBeAdded);
 			}
@@ -2081,7 +2081,7 @@ void Base::cleanupDefenses(bool reclaimItems)
 				{
 					ammoPerVehicle = ammo->getClipSize();
 				}
-				_items->addItem(ammo->getType(), ammoPerVehicle);
+				_items->addItem(ammo, ammoPerVehicle);
 			}
 		}
 	}

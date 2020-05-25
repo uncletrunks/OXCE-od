@@ -114,7 +114,7 @@ bool Production::haveEnoughMaterialsForOneMoreUnit(Base * b, const Mod *m) const
 {
 	for (auto& i : _rules->getRequiredItems())
 	{
-		if (b->getStorageItems()->getItem(i.first->getType()) < i.second)
+		if (b->getStorageItems()->getItem(i.first) < i.second)
 			return false;
 	}
 	for (auto& i : _rules->getRequiredCrafts())
@@ -280,7 +280,7 @@ void Production::startItem(Base * b, SavedGame * g, const Mod *m) const
 	g->setFunds(g->getFunds() - _rules->getManufactureCost());
 	for (auto& i : _rules->getRequiredItems())
 	{
-		b->getStorageItems()->removeItem(i.first->getType(), i.second);
+		b->getStorageItems()->removeItem(i.first, i.second);
 	}
 	for (auto& i : _rules->getRequiredCrafts())
 	{

@@ -593,7 +593,7 @@ void TransferItemsState::completeTransfer()
 				break;
 			case TRANSFER_ITEM:
 				RuleItem *item = (RuleItem*)i->rule;
-				_baseFrom->getStorageItems()->removeItem(item->getType(), i->amount);
+				_baseFrom->getStorageItems()->removeItem(item, i->amount);
 				t = new Transfer(time);
 				t->setItems(item->getType(), i->amount);
 				_baseTo->getTransfers()->push_back(t);

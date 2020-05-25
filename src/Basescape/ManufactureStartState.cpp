@@ -137,7 +137,7 @@ ManufactureStartState::ManufactureStartState(Base *base, RuleManufacture *item) 
 	}
 	for (auto& iter : _item->getRequiredItems())
 	{
-		auto count = base->getStorageItems()->getItem(iter.first->getType());
+		auto count = base->getStorageItems()->getItem(iter.first);
 
 		std::ostringstream s1, s2;
 		s1 << iter.second;

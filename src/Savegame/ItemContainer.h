@@ -25,6 +25,7 @@ namespace OpenXcom
 {
 
 class Mod;
+class RuleItem;
 
 /**
  * Represents the items contained by a certain entity,
@@ -46,10 +47,16 @@ public:
 	YAML::Node save() const;
 	/// Adds an item to the container.
 	void addItem(const std::string &id, int qty = 1);
+	/// Adds an item to the container.
+	void addItem(const RuleItem* item, int qty = 1);
 	/// Removes an item from the container.
 	void removeItem(const std::string &id, int qty = 1);
+	/// Removes an item from the container.
+	void removeItem(const RuleItem* item, int qty = 1);
 	/// Gets an item in the container.
 	int getItem(const std::string &id) const;
+	/// Gets an item in the container.
+	int getItem(const RuleItem* item) const;
 	/// Gets the total quantity of items in the container.
 	int getTotalQuantity() const;
 	/// Gets the total size of items in the container.

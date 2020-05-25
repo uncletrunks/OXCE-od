@@ -571,24 +571,24 @@ void SellState::btnOkClick(Action *)
 				break;
 			case TRANSFER_ITEM:
 				RuleItem *item = (RuleItem*)i->rule;
-				if (_base->getStorageItems()->getItem(item->getType()) < i->amount)
+				if (_base->getStorageItems()->getItem(item) < i->amount)
 				{
-					int toRemove = i->amount - _base->getStorageItems()->getItem(item->getType());
+					int toRemove = i->amount - _base->getStorageItems()->getItem(item);
 
 					// remove all of said items from base
-					_base->getStorageItems()->removeItem(item->getType(), INT_MAX);
+					_base->getStorageItems()->removeItem(item, INT_MAX);
 
 					// if we still need to remove any, remove them from the crafts first, and keep a running tally
 					for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end() && toRemove; ++j)
 					{
-						if ((*j)->getItems()->getItem(item->getType()) < toRemove)
+						if ((*j)->getItems()->getItem(item) < toRemove)
 						{
-							toRemove -= (*j)->getItems()->getItem(item->getType());
-							(*j)->getItems()->removeItem(item->getType(), INT_MAX);
+							toRemove -= (*j)->getItems()->getItem(item);
+							(*j)->getItems()->removeItem(item, INT_MAX);
 						}
 						else
 						{
-							(*j)->getItems()->removeItem(item->getType(), toRemove);
+							(*j)->getItems()->removeItem(item, toRemove);
 							toRemove = 0;
 						}
 					}
@@ -618,7 +618,7 @@ void SellState::btnOkClick(Action *)
 				}
 				else
 				{
-					_base->getStorageItems()->removeItem(item->getType(), i->amount);
+					_base->getStorageItems()->removeItem(item, i->amount);
 				}
 				if (_debriefingState != 0)
 				{

@@ -659,7 +659,7 @@ void CraftEquipmentState::moveLeftByValue(int change)
 			if (_game->getSavedGame()->getMonthsPassed() != -1)
 			{
 				_base->getStorageItems()->addItem(_items[_sel], change);
-				_base->getStorageItems()->addItem(ammo->getType(), ammoPerVehicle * change);
+				_base->getStorageItems()->addItem(ammo, ammoPerVehicle * change);
 			}
 			// now delete the vehicles from the craft.
 			Collections::deleteIf(*c->getVehicles(), change,
@@ -750,7 +750,7 @@ void CraftEquipmentState::moveRightByValue(int change, bool suppressErrors)
 					ammoPerVehicle = clipSize;
 				}
 
-				int baseQty = _base->getStorageItems()->getItem(ammo->getType()) / ammoPerVehicle;
+				int baseQty = _base->getStorageItems()->getItem(ammo) / ammoPerVehicle;
 				if (_game->getSavedGame()->getMonthsPassed() == -1)
 					baseQty = change;
 				int canBeAdded = std::min(change, baseQty);
@@ -760,7 +760,7 @@ void CraftEquipmentState::moveRightByValue(int change, bool suppressErrors)
 					{
 						if (_game->getSavedGame()->getMonthsPassed() != -1)
 						{
-							_base->getStorageItems()->removeItem(ammo->getType(), ammoPerVehicle);
+							_base->getStorageItems()->removeItem(ammo, ammoPerVehicle);
 							_base->getStorageItems()->removeItem(_items[_sel]);
 						}
 						c->getVehicles()->push_back(new Vehicle(item, clipSize, size));

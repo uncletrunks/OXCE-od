@@ -809,7 +809,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 				if (startingCondition != 0 && !startingCondition->isVehiclePermitted(item->getType()))
 				{
 					// send disabled vehicles back to base
-					_base->getStorageItems()->addItem(item->getType(), 1);
+					_base->getStorageItems()->addItem(item, 1);
 					// ammo too, if necessary
 					if (!item->getPrimaryCompatibleAmmo()->empty())
 					{
@@ -824,7 +824,7 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 						{
 							ammoPerVehicle = ammo->getClipSize();
 						}
-						_base->getStorageItems()->addItem(ammo->getType(), ammoPerVehicle);
+						_base->getStorageItems()->addItem(ammo, ammoPerVehicle);
 					}
 				}
 				else if (item->getVehicleUnit()->getArmor()->getSize() > 1 || Mod::EXTENDED_HWP_LOAD_ORDER == false)

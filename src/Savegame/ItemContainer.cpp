@@ -68,11 +68,20 @@ void ItemContainer::addItem(const std::string &id, int qty)
 	{
 		return;
 	}
-	if (_qty.find(id) == _qty.end())
-	{
-		_qty[id] = 0;
-	}
 	_qty[id] += qty;
+}
+
+/**
+ * Adds an item amount to the container.
+ * @param id Item ID.
+ * @param qty Item quantity.
+ */
+void ItemContainer::addItem(const RuleItem* item, int qty)
+{
+	if (item)
+	{
+		addItem(item->getType(), qty);
+	}
 }
 
 /**
@@ -82,17 +91,36 @@ void ItemContainer::addItem(const std::string &id, int qty)
  */
 void ItemContainer::removeItem(const std::string &id, int qty)
 {
-	if (id.empty() || _qty.find(id) == _qty.end())
+	if (id.empty())
 	{
 		return;
 	}
-	if (qty < _qty[id])
+	auto it = _qty.find(id);
+	if (it == _qty.end())
 	{
-		_qty[id] -= qty;
+		return;
+	}
+
+	if (qty < it->second)
+	{
+		it->second -= qty;
 	}
 	else
 	{
-		_qty.erase(id);
+		_qty.erase(it);
+	}
+}
+
+/**
+ * Removes an item amount from the container.
+ * @param id Item ID.
+ * @param qty Item quantity.
+ */
+void ItemContainer::removeItem(const RuleItem* item, int qty)
+{
+	if (item)
+	{
+		removeItem(item->getType(), qty);
 	}
 }
 
@@ -108,7 +136,7 @@ int ItemContainer::getItem(const std::string &id) const
 		return 0;
 	}
 
-	std::map<std::string, int>::const_iterator it = _qty.find(id);
+	auto it = _qty.find(id);
 	if (it == _qty.end())
 	{
 		return 0;
@@ -116,6 +144,23 @@ int ItemContainer::getItem(const std::string &id) const
 	else
 	{
 		return it->second;
+	}
+}
+
+/**
+ * Returns the quantity of an item in the container.
+ * @param id Item ID.
+ * @return Item quantity.
+ */
+int ItemContainer::getItem(const RuleItem* item) const
+{
+	if (item)
+	{
+		return getItem(item->getType());
+	}
+	else
+	{
+		return 0;
 	}
 }
 
