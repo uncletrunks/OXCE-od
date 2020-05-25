@@ -39,6 +39,7 @@
 #include "../Mod/RuleInterface.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleItem.h"
+#include "../Mod/RuleSoldier.h"
 #include "../Mod/RuleSoldierBonus.h"
 #include "../Mod/RuleUfo.h"
 #include "../Savegame/BattleUnit.h"
@@ -2332,17 +2333,17 @@ void StatsForNerdsState::initArmorList()
 	for (auto biw : armorRule->getBuiltInWeapons())
 	{
 		// ignore dummy inventory padding
-		if (biw.find("INV_NULL") == std::string::npos || _showDebug)
+		if (biw->getType().find("INV_NULL") == std::string::npos || _showDebug)
 		{
-			_filterOptions.push_back(biw);
+			_filterOptions.push_back(biw->getType());
 		}
 	}
 	addVectorOfStrings(ss, _filterOptions, "builtInWeapons");
-	addSingleString(ss, armorRule->getSpecialWeapon(), "specialWeapon");
+	addRule(ss, armorRule->getSpecialWeapon(), "specialWeapon");
 
-	if (!armorRule->getSpecialWeapon().empty())
+	if (armorRule->getSpecialWeapon())
 	{
-		_filterOptions.push_back(armorRule->getSpecialWeapon());
+		_filterOptions.push_back(armorRule->getSpecialWeapon()->getType());
 	}
 
 	_filterOptions.insert(_filterOptions.begin(), "STR_BUILT_IN_ITEMS");
@@ -2378,7 +2379,7 @@ void StatsForNerdsState::initArmorList()
 		endHeading();
 	}
 
-	addVectorOfStrings(ss, armorRule->getUnits(), "units");
+	addVectorOfRules(ss, armorRule->getUnits(), "units");
 
 	if (_showDebug)
 	{
@@ -2386,12 +2387,12 @@ void StatsForNerdsState::initArmorList()
 
 		addSection("{Naming}", "", _white);
 		addSingleString(ss, armorRule->getType(), "type");
-		addSingleString(ss, armorRule->getRequiredResearch(), "requires");
+		addRuleNamed(ss, armorRule->getRequiredResearch(), "requires");
 
 		addSection("{Recovery}", "", _white);
-		addVectorOfStrings(ss, armorRule->getCorpseBattlescape(), "corpseBattle");
-		addSingleString(ss, armorRule->getCorpseGeoscape(), "corpseGeo");
-		addSingleString(ss, armorRule->getStoreItem(), "storeItem");
+		addVectorOfRules(ss, armorRule->getCorpseBattlescape(), "corpseBattle");
+		addRule(ss, armorRule->getCorpseGeoscape(), "corpseGeo");
+		addRule(ss, armorRule->getStoreItem(), "storeItem");
 
 		addSection("{Inventory}", "", _white);
 		addSingleString(ss, armorRule->getSpriteInventory(), "spriteInv", "", false);

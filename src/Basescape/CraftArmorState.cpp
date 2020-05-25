@@ -444,17 +444,17 @@ void CraftArmorState::lstSoldiersClick(Action *action)
 			SavedGame *save;
 			save = _game->getSavedGame();
 			Armor *a = _game->getMod()->getArmor(save->getLastSelectedArmor());
-			if (a && (a->getUnits().empty() || std::find(a->getUnits().begin(), a->getUnits().end(), s->getRules()->getType()) != a->getUnits().end()))
+			if (a && a->getCanBeUsedBy(s->getRules()))
 			{
 				if (save->getMonthsPassed() != -1)
 				{
-					if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
+					if (a->getStoreItem() == nullptr || _base->getStorageItems()->getItem(a->getStoreItem()) > 0)
 					{
-						if (s->getArmor()->getStoreItem() != Armor::NONE)
+						if (s->getArmor()->getStoreItem())
 						{
 							_base->getStorageItems()->addItem(s->getArmor()->getStoreItem());
 						}
-						if (a->getStoreItem() != Armor::NONE)
+						if (a->getStoreItem())
 						{
 							_base->getStorageItems()->removeItem(a->getStoreItem());
 						}
@@ -523,13 +523,13 @@ void CraftArmorState::btnDeequipAllArmorClick(Action *action)
 		{
 			Armor *a = _game->getMod()->getArmor((*i)->getRules()->getArmor());
 
-			if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
+			if (a->getStoreItem() == nullptr || _base->getStorageItems()->getItem(a->getStoreItem()) > 0)
 			{
-				if ((*i)->getArmor()->getStoreItem() != Armor::NONE)
+				if ((*i)->getArmor()->getStoreItem())
 				{
 					_base->getStorageItems()->addItem((*i)->getArmor()->getStoreItem());
 				}
-				if (a->getStoreItem() != Armor::NONE)
+				if (a->getStoreItem())
 				{
 					_base->getStorageItems()->removeItem(a->getStoreItem());
 				}
@@ -557,13 +557,13 @@ void CraftArmorState::btnDeequipCraftArmorClick(Action *action)
 		{
 			Armor *a = _game->getMod()->getArmor(s->getRules()->getArmor());
 
-			if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0 || a->getStoreItem() == Armor::NONE)
+			if (a->getStoreItem() == nullptr || _base->getStorageItems()->getItem(a->getStoreItem()) > 0)
 			{
-				if (s->getArmor()->getStoreItem() != Armor::NONE)
+				if (s->getArmor()->getStoreItem())
 				{
 					_base->getStorageItems()->addItem(s->getArmor()->getStoreItem());
 				}
-				if (a->getStoreItem() != Armor::NONE)
+				if (a->getStoreItem())
 				{
 					_base->getStorageItems()->removeItem(a->getStoreItem());
 				}

@@ -213,7 +213,7 @@ public:
 	/// set the flag representing "not dropped on player turn"
 	void setTurnFlag(bool flag);
 	/// Sets the item's ruleset.
-	void convertToCorpse(RuleItem *rules);
+	void convertToCorpse(const RuleItem *rules);
 	/// Get if item can glow.
 	bool getGlow() const;
 	/// Gets range of glow in tiles.

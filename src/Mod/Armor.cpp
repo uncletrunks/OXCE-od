@@ -109,20 +109,20 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_hasInventory = node["allowInv"].as<bool>(_hasInventory);
 	if (node["corpseItem"])
 	{
-		_corpseBattle.clear();
-		_corpseBattle.push_back(node["corpseItem"].as<std::string>());
-		_corpseGeo = _corpseBattle[0];
+		_corpseBattleNames.clear();
+		_corpseBattleNames.push_back(node["corpseItem"].as<std::string>());
+		_corpseGeoName = _corpseBattleNames[0];
 	}
 	else if (node["corpseBattle"])
 	{
-		mod->loadNames(_type, _corpseBattle, node["corpseBattle"]);
-		_corpseGeo = _corpseBattle.at(0);
+		mod->loadNames(_type, _corpseBattleNames, node["corpseBattle"]);
+		_corpseGeoName = _corpseBattleNames.at(0);
 	}
-	mod->loadNames(_type, _builtInWeapons, node["builtInWeapons"]);
-	_corpseGeo = node["corpseGeo"].as<std::string>(_corpseGeo);
-	_storeItem = node["storeItem"].as<std::string>(_storeItem);
-	_specWeapon = node["specialWeapon"].as<std::string>(_specWeapon);
-	_requires = node["requires"].as<std::string>(_requires);
+	mod->loadNames(_type, _builtInWeaponsNames, node["builtInWeapons"]);
+	_corpseGeoName = node["corpseGeo"].as<std::string>(_corpseGeoName);
+	_storeItemName = node["storeItem"].as<std::string>(_storeItemName);
+	_specWeaponName = node["specialWeapon"].as<std::string>(_specWeaponName);
+	_requiresName = node["requires"].as<std::string>(_requiresName);
 
 	_layersDefaultPrefix = node["layersDefaultPrefix"].as<std::string>(_layersDefaultPrefix);
 	_layersSpecificPrefix = node["layersSpecificPrefix"].as< std::map<int, std::string> >(_layersSpecificPrefix);
@@ -235,7 +235,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 
 	_battleUnitScripts.load(_type, node, parsers.battleUnitScripts);
 
-	mod->loadUnorderedNames(_type, _units, node["units"]);
+	mod->loadUnorderedNames(_type, _unitsNames, node["units"]);
 	_scriptValues.load(node, parsers.getShared());
 	mod->loadSpriteOffset(_type, _customArmorPreviewIndex, node["customArmorPreviewIndex"], "CustomArmorPreviews");
 	loadTriBoolHelper(_allowsRunning, node["allowsRunning"]);
@@ -248,6 +248,48 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_kneelHeight = node["kneelHeight"].as<int>(_kneelHeight);
 	_floatHeight = node["floatHeight"].as<int>(_floatHeight);
 }
+
+/**
+ * Cross link with other rules.
+ */
+void Armor::afterLoad(const Mod* mod)
+{
+	mod->linkRule(_corpseBattle, _corpseBattleNames);
+	mod->linkRule(_corpseGeo, _corpseGeoName);
+	mod->linkRule(_builtInWeapons, _builtInWeaponsNames);
+	mod->linkRule(_units, _unitsNames);
+	mod->linkRule(_requires, _requiresName);
+	mod->linkRule(_storeItem, _storeItemName); //special logic there: "STR_NONE" -> nullptr
+	mod->linkRule(_specWeapon, _specWeaponName);
+
+
+	if (_corpseBattle.size() != (size_t)getTotalSize())
+	{
+		if (_corpseBattle.size() != 0)
+		{
+			throw Exception("Number of battle corpse items do not match armor size");
+		}
+		else
+		{
+			throw Exception("Missed missing battle corpse item");
+		}
+	}
+	for (auto& c : _corpseBattle)
+	{
+		if (!c)
+		{
+			throw Exception("Missed some battle corpse item defintion");
+		}
+	}
+	if (!_corpseGeo)
+	{
+		throw Exception("Missed geo corpse item defintion");
+	}
+
+	Collections::sortVector(_units);
+}
+
+
 
 /**
  * Returns the language string that names
@@ -345,7 +387,7 @@ int Armor::getArmor(UnitSide side) const
  * Gets the corpse item used in the Geoscape.
  * @return The name of the corpse item.
  */
-std::string Armor::getCorpseGeoscape() const
+const RuleItem* Armor::getCorpseGeoscape() const
 {
 	return _corpseGeo;
 }
@@ -355,7 +397,7 @@ std::string Armor::getCorpseGeoscape() const
  * in the Battlescape (one per unit tile).
  * @return The list of corpse items.
  */
-const std::vector<std::string> &Armor::getCorpseBattlescape() const
+const std::vector<const RuleItem*> &Armor::getCorpseBattlescape() const
 {
 	return _corpseBattle;
 }
@@ -365,7 +407,7 @@ const std::vector<std::string> &Armor::getCorpseBattlescape() const
  * Every soldier armor needs an item.
  * @return The name of the store item (STR_NONE for infinite armor).
  */
-std::string Armor::getStoreItem() const
+const RuleItem* Armor::getStoreItem() const
 {
 	return _storeItem;
 }
@@ -374,7 +416,7 @@ std::string Armor::getStoreItem() const
  * Gets the type of special weapon.
  * @return The name of the special weapon.
  */
-std::string Armor::getSpecialWeapon() const
+const RuleItem* Armor::getSpecialWeapon() const
 {
 	return _specWeapon;
 }
@@ -383,7 +425,7 @@ std::string Armor::getSpecialWeapon() const
  * Gets the research required to be able to equip this armor.
  * @return The name of the research topic.
  */
-const std::string &Armor::getRequiredResearch() const
+const RuleResearch* Armor::getRequiredResearch() const
 {
 	return _requires;
 }
@@ -607,7 +649,7 @@ ForcedTorso Armor::getForcedTorso() const
  * any loadout or living weapon item that may be defined.
  * @return list of weapons that are integral to this armor.
  */
-const std::vector<std::string> &Armor::getBuiltInWeapons() const
+const std::vector<const RuleItem*> &Armor::getBuiltInWeapons() const
 {
 	return _builtInWeapons;
 }
@@ -874,9 +916,17 @@ bool Armor::hasInventory() const
 * Gets the list of units this armor applies to.
 * @return The list of unit IDs (empty = applies to all).
 */
-const std::vector<std::string> &Armor::getUnits() const
+const std::vector<const RuleSoldier*> &Armor::getUnits() const
 {
 	return _units;
+}
+
+/**
+ * Check if soldier can use this armor.
+ */
+bool Armor::getCanBeUsedBy(const RuleSoldier* soldier) const
+{
+	return _units.empty() || Collections::sortVectorHave(_units, soldier);
 }
 
 /**

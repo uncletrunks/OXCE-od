@@ -1421,9 +1421,9 @@ void DebriefingState::prepareDebriefing()
 					// starting conditions: recover armor backup
 					if (soldier->getReplacedArmor())
 					{
-						if (soldier->getReplacedArmor()->getStoreItem() != Armor::NONE)
+						if (soldier->getReplacedArmor()->getStoreItem())
 						{
-							addItemsToBaseStores(soldier->getReplacedArmor()->getStoreItem(), base, 1, false);
+							addItemsToBaseStores(soldier->getReplacedArmor()->getStoreItem()->getType(), base, 1, false);
 						}
 						soldier->setReplacedArmor(0);
 					}
@@ -1507,9 +1507,9 @@ void DebriefingState::prepareDebriefing()
 						// starting conditions: recover armor backup
 						if (soldier->getReplacedArmor())
 						{
-							if (soldier->getReplacedArmor()->getStoreItem() != Armor::NONE)
+							if (soldier->getReplacedArmor()->getStoreItem())
 							{
-								addItemsToBaseStores(soldier->getReplacedArmor()->getStoreItem(), base, 1, false);
+								addItemsToBaseStores(soldier->getReplacedArmor()->getStoreItem()->getType(), base, 1, false);
 							}
 							soldier->setReplacedArmor(0);
 						}
@@ -1533,7 +1533,7 @@ void DebriefingState::prepareDebriefing()
 				}
 				if (!(*j)->getArmor()->getCorpseBattlescape().empty())
 				{
-					RuleItem *corpseRule = _game->getMod()->getItem((*j)->getArmor()->getCorpseBattlescape().front());
+					auto corpseRule = (*j)->getArmor()->getCorpseBattlescape().front();
 					if (corpseRule && corpseRule->isRecoverable())
 					{
 						recoverAlien(*j, base);
@@ -1551,7 +1551,7 @@ void DebriefingState::prepareDebriefing()
 				}
 				if (!(*j)->getArmor()->getCorpseBattlescape().empty())
 				{
-					RuleItem *corpseRule = _game->getMod()->getItem((*j)->getArmor()->getCorpseBattlescape().front());
+					auto corpseRule = (*j)->getArmor()->getCorpseBattlescape().front();
 					if (corpseRule && corpseRule->isRecoverable())
 					{
 						recoverAlien(*j, base);
@@ -2438,13 +2438,13 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 
 		if (!from->getArmor()->getCorpseBattlescape().empty())
 		{
-			RuleItem *corpseRule = _game->getMod()->getItem(from->getArmor()->getCorpseBattlescape().front());
+			auto corpseRule = from->getArmor()->getCorpseBattlescape().front();
 			if (corpseRule && corpseRule->isRecoverable())
 			{
 				if (corpseRule->isCorpseRecoverable())
 				{
 					addStat("STR_ALIEN_CORPSES_RECOVERED", 1, corpseRule->getRecoveryPoints());
-					std::string corpseItem = from->getArmor()->getCorpseGeoscape();
+					auto corpseItem = from->getArmor()->getCorpseGeoscape();
 					addItemsToBaseStores(corpseItem, base, 1, true);
 				}
 			}

@@ -4547,7 +4547,7 @@ void BattleUnit::setSpecialWeapon(SavedBattleGame *save)
 		}
 	}
 
-	item = mod->getItem(getArmor()->getSpecialWeapon());
+	item = getArmor()->getSpecialWeapon();
 	if (item && (item->getBattleType() == BT_FIREARM || item->getBattleType() == BT_MELEE) && !item->getClipSize())
 	{
 		throw Exception("Weapon " + item->getType() + " is used as a special weapon on armor " + getArmor()->getType() + " but doesn't have it's own ammo - give it a clipSize!");

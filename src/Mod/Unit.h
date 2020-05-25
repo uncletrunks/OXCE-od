@@ -28,6 +28,7 @@ namespace OpenXcom
 
 class Mod;
 class Armor;
+class RuleItem;
 class ModScript;
 class ScriptParserBase;
 
@@ -340,7 +341,7 @@ private:
 	std::string _rank;
 	UnitStats _stats;
 	std::string _armorName;
-	Armor* _armor;
+	const Armor* _armor;
 	int _standHeight, _kneelHeight, _floatHeight;
 	std::vector<int> _deathSound, _panicSound, _berserkSound;
 	std::vector<int> _selectUnitSound, _startMovingSound, _selectWeaponSound, _annoyedSound;
@@ -351,7 +352,8 @@ private:
 	std::string _spawnUnitName;
 	bool _livingWeapon;
 	std::string _meleeWeapon, _psiWeapon;
-	std::vector<std::vector<std::string> > _builtInWeapons;
+	std::vector<std::vector<std::string> > _builtInWeaponsNames;
+	std::vector<std::vector<const RuleItem*> > _builtInWeapons;
 	bool _capturable;
 	bool _canSurrender, _autoSurrender;
 	bool _isLeeroyJenkins;
@@ -429,7 +431,7 @@ public:
 	/// Gets the name of any psi weapon that may be built in to this unit.
 	const std::string &getPsiWeapon() const;
 	/// Gets a vector of integrated items this unit has available.
-	const std::vector<std::vector<std::string> > &getBuiltInWeapons() const;
+	const std::vector<std::vector<const RuleItem*> > &getBuiltInWeapons() const;
 	/// Gets whether the alien can be captured alive.
 	bool getCapturable() const;
 	/// Checks if this unit can surrender.

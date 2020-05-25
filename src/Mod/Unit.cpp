@@ -91,10 +91,10 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	_meleeWeapon = node["meleeWeapon"].as<std::string>(_meleeWeapon);
 	_psiWeapon = node["psiWeapon"].as<std::string>(_psiWeapon);
 	_capturable = node["capturable"].as<bool>(_capturable);
-	_builtInWeapons = node["builtInWeaponSets"].as<std::vector<std::vector<std::string> > >(_builtInWeapons);
+	_builtInWeaponsNames = node["builtInWeaponSets"].as<std::vector<std::vector<std::string> > >(_builtInWeaponsNames);
 	if (node["builtInWeapons"])
 	{
-		_builtInWeapons.push_back(node["builtInWeapons"].as<std::vector<std::string> >());
+		_builtInWeaponsNames.push_back(node["builtInWeapons"].as<std::vector<std::string> >());
 	}
 
 	mod->loadSoundOffset(_type, _deathSound, node["deathSound"], "BATTLE.CAT");
@@ -115,8 +115,9 @@ void Unit::load(const YAML::Node &node, Mod *mod)
  */
 void Unit::afterLoad(const Mod* mod)
 {
-	_armor = mod->getArmor(_armorName, true);
-	_spawnUnit = mod->getUnit(_spawnUnitName, true);
+	mod->linkRule(_armor, _armorName);
+	mod->linkRule(_spawnUnit, _spawnUnitName);
+	mod->linkRule(_builtInWeapons, _builtInWeaponsNames);
 }
 
 /**
@@ -180,7 +181,7 @@ int Unit::getFloatHeight() const
  */
 Armor* Unit::getArmor() const
 {
-	return _armor;
+	return const_cast<Armor*>(_armor); //TODO: fix this function usage to remove const cast
 }
 
 /**
@@ -356,7 +357,7 @@ const std::string &Unit::getPsiWeapon() const
  * any loadout or living weapon item that may be defined.
  * @return list of weapons that are integral to this unit.
  */
-const std::vector<std::vector<std::string> > &Unit::getBuiltInWeapons() const
+const std::vector<std::vector<const RuleItem*> > &Unit::getBuiltInWeapons() const
 {
 	return _builtInWeapons;
 }

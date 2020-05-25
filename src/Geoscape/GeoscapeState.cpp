@@ -2287,10 +2287,10 @@ void GeoscapeState::time1Day()
 				auto ruleUnit = mod->getUnit(research->getName(), false);
 				if (ruleUnit)
 				{
-					auto ruleCorpse = mod->getItem(ruleUnit->getArmor()->getCorpseGeoscape(), false);
+					auto ruleCorpse = ruleUnit->getArmor()->getCorpseGeoscape();
 					if (ruleCorpse && ruleCorpse->isRecoverable() && ruleCorpse->isCorpseRecoverable())
 					{
-						base->getStorageItems()->addItem(ruleUnit->getArmor()->getCorpseGeoscape());
+						base->getStorageItems()->addItem(ruleCorpse->getType());
 					}
 				}
 			}

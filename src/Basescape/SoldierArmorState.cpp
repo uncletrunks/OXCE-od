@@ -126,12 +126,15 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 	for (std::vector<std::string>::const_iterator i = armors.begin(); i != armors.end(); ++i)
 	{
 		Armor *a = _game->getMod()->getArmor(*i);
-		if (!a->getRequiredResearch().empty() && !_game->getSavedGame()->isResearched(a->getRequiredResearch()))
+		if (a->getRequiredResearch() && !_game->getSavedGame()->isResearched(a->getRequiredResearch()))
 			continue;
-		if (!a->getUnits().empty() &&
-			std::find(a->getUnits().begin(), a->getUnits().end(), s->getRules()->getType()) == a->getUnits().end())
+		if (!a->getCanBeUsedBy(s->getRules()))
 			continue;
-		if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0)
+		if (a->getStoreItem() == nullptr)
+		{
+			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), ""));
+		}
+		else if (_base->getStorageItems()->getItem(a->getStoreItem()) > 0)
 		{
 			std::ostringstream ss;
 			if (_game->getSavedGame()->getMonthsPassed() > -1)
@@ -143,10 +146,6 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 				ss << "-";
 			}
 			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), ss.str()));
-		}
-		else if (a->getStoreItem() == Armor::NONE)
-		{
-			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), ""));
 		}
 	}
 
@@ -254,11 +253,11 @@ void SoldierArmorState::lstArmorClick(Action *)
 	}
 	if (_game->getSavedGame()->getMonthsPassed() != -1)
 	{
-		if (prev->getStoreItem() != Armor::NONE)
+		if (prev->getStoreItem())
 		{
 			_base->getStorageItems()->addItem(prev->getStoreItem());
 		}
-		if (next->getStoreItem() != Armor::NONE)
+		if (next->getStoreItem())
 		{
 			_base->getStorageItems()->removeItem(next->getStoreItem());
 		}

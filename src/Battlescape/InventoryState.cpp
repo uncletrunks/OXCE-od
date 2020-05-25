@@ -806,7 +806,7 @@ bool InventoryState::loadGlobalLayoutArmor(int index)
 		if (_game->getSavedGame()->getMonthsPassed() != -1)
 		{
 			// is the armor physically available?
-			if (next->getStoreItem() != Armor::NONE && prev->getStoreItem() != next->getStoreItem())
+			if (next->getStoreItem() && prev->getStoreItem() != next->getStoreItem())
 			{
 				if (_base->getStorageItems()->getItem(next->getStoreItem()) <= 0)
 				{
@@ -814,14 +814,13 @@ bool InventoryState::loadGlobalLayoutArmor(int index)
 				}
 			}
 			// is the armor unlocked?
-			if (!next->getRequiredResearch().empty() && !_game->getSavedGame()->isResearched(next->getRequiredResearch()))
+			if (next->getRequiredResearch() && !_game->getSavedGame()->isResearched(next->getRequiredResearch()))
 			{
 				armorAvailable = false;
 			}
 		}
 		// does the armor fit on the current unit?
-		if (!next->getUnits().empty() &&
-			std::find(next->getUnits().begin(), next->getUnits().end(), soldier->getRules()->getType()) == next->getUnits().end())
+		if (!next->getCanBeUsedBy(soldier->getRules()))
 		{
 			armorAvailable = false;
 		}
@@ -842,11 +841,11 @@ bool InventoryState::loadGlobalLayoutArmor(int index)
 		}
 		if (_game->getSavedGame()->getMonthsPassed() != -1)
 		{
-			if (prev->getStoreItem() != Armor::NONE)
+			if (prev->getStoreItem())
 			{
 				_base->getStorageItems()->addItem(prev->getStoreItem());
 			}
-			if (next->getStoreItem() != Armor::NONE)
+			if (next->getStoreItem())
 			{
 				_base->getStorageItems()->removeItem(next->getStoreItem());
 			}

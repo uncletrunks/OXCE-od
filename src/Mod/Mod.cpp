@@ -1598,6 +1598,7 @@ void Mod::loadAll()
 	afterLoadHelper("items", this, _items, &RuleItem::afterLoad);
 	afterLoadHelper("manufacture", this, _manufacture, &RuleManufacture::afterLoad);
 	afterLoadHelper("units", this, _units, &Unit::afterLoad);
+	afterLoadHelper("armors", this, _armors, &Armor::afterLoad);
 	afterLoadHelper("soldiers", this, _soldiers, &RuleSoldier::afterLoad);
 	afterLoadHelper("facilities", this, _facilities, &RuleBaseFacility::afterLoad);
 	afterLoadHelper("enviroEffects", this, _enviroEffects, &RuleEnviroEffects::afterLoad);
@@ -3706,8 +3707,8 @@ struct compareRule<Armor>
 	{
 		Armor* armor1 = _mod->getArmor(r1);
 		Armor* armor2 = _mod->getArmor(r2);
-		RuleItem *rule1 = _mod->getItem(armor1->getStoreItem());
-		RuleItem *rule2 = _mod->getItem(armor2->getStoreItem());
+		const RuleItem *rule1 = armor1->getStoreItem();
+		const RuleItem *rule2 = armor2->getStoreItem();
 		if (!rule1 && !rule2)
 			return (armor1 < armor2); // tiebreaker, don't care about order, pointers are as good as any
 		else if (!rule1)

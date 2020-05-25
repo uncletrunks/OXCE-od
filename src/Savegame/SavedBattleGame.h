@@ -322,7 +322,7 @@ public:
 	/// Removes an item from the game.
 	void removeItem(BattleItem *item);
 	/// Add buildIn weapon from list to unit.
-	void addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed);
+	void addFixedItems(BattleUnit *unit, const std::vector<const RuleItem*> &fixed);
 	/// Init new created unit.
 	void initUnit(BattleUnit *unit, size_t itemLevel = 0);
 	/// Init new created item.
@@ -334,7 +334,7 @@ public:
 	/// Create new built-in item for unit.
 	BattleItem *createItemForUnitBuildin(const RuleItem *rule, BattleUnit *unit);
 	/// Create new item for tile.
-	BattleItem *createItemForTile(RuleItem *rule, Tile *tile);
+	BattleItem *createItemForTile(const RuleItem *rule, Tile *tile);
 	/// Create new item for tile.
 	BattleItem *createItemForTile(const std::string& type, Tile *tile);
 	/// Sets whether the mission was aborted.

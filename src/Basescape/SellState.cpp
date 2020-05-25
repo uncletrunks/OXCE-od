@@ -170,7 +170,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	for (std::vector<std::string>::const_iterator i = ar.begin(); i != ar.end(); ++i)
 	{
 		Armor *rule = _game->getMod()->getArmor(*i);
-		_armors.insert(rule->getStoreItem());
+		_armors.insert(rule->getStoreItem()->getType());
 	}
 
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
@@ -548,9 +548,9 @@ void SellState::btnOkClick(Action *)
 				{
 					if (*s == soldier)
 					{
-						if ((*s)->getArmor()->getStoreItem() != Armor::NONE)
+						if ((*s)->getArmor()->getStoreItem())
 						{
-							_base->getStorageItems()->addItem((*s)->getArmor()->getStoreItem());
+							_base->getStorageItems()->addItem((*s)->getArmor()->getStoreItem()->getType());
 						}
 						_base->getSoldiers()->erase(s);
 						break;
@@ -893,16 +893,15 @@ void SellState::changeByValue(int change, int dir)
 	// Calculate the change in storage space.
 	Craft *craft;
 	Soldier *soldier;
-	RuleItem *armor, *item, *weapon, *ammo;
+	RuleItem *item, *weapon, *ammo;
 	double total = 0.0;
 	switch (getRow().type)
 	{
 	case TRANSFER_SOLDIER:
 		soldier = (Soldier*)getRow().rule;
-		if (soldier->getArmor()->getStoreItem() != Armor::NONE)
+		if (soldier->getArmor()->getStoreItem())
 		{
-			armor = _game->getMod()->getItem(soldier->getArmor()->getStoreItem(), true);
-			_spaceChange += dir * armor->getSize();
+			_spaceChange += dir * soldier->getArmor()->getStoreItem()->getSize();
 		}
 		break;
 	case TRANSFER_CRAFT:

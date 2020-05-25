@@ -337,10 +337,10 @@ void ManageAlienContainmentState::dealWithSelectedAliens(bool sell)
 				auto ruleUnit = _game->getMod()->getUnit(_aliens[i], false);
 				if (ruleUnit)
 				{
-					auto ruleCorpse = _game->getMod()->getItem(ruleUnit->getArmor()->getCorpseGeoscape(), false);
+					auto ruleCorpse = ruleUnit->getArmor()->getCorpseGeoscape();
 					if (ruleCorpse && ruleCorpse->isRecoverable() && ruleCorpse->isCorpseRecoverable())
 					{
-						_base->getStorageItems()->addItem(ruleUnit->getArmor()->getCorpseGeoscape(), _qtys[i]);
+						_base->getStorageItems()->addItem(ruleCorpse->getType(), _qtys[i]);
 					}
 				}
 			}

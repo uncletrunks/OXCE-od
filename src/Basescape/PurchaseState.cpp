@@ -149,7 +149,7 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 	for (std::vector<std::string>::const_iterator i = ar.begin(); i != ar.end(); ++i)
 	{
 		Armor *rule = _game->getMod()->getArmor(*i);
-		_armors.insert(rule->getStoreItem());
+		_armors.insert(rule->getStoreItem()->getType());
 	}
 
 	auto providedBaseFunc = _base->getProvidedBaseFunc({});

@@ -1429,14 +1429,13 @@ void SavedBattleGame::removeItem(BattleItem *item)
  * @param unit Unit that should get weapon.
  * @param fixed List of built-in items.
  */
-void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::string> &fixed)
+void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<const RuleItem*> &fixed)
 {
 	if (!fixed.empty())
 	{
-		std::vector<RuleItem*> ammo;
-		for (std::vector<std::string>::const_iterator j = fixed.begin(); j != fixed.end(); ++j)
+		std::vector<const RuleItem*> ammo;
+		for (const auto& ruleItem : fixed)
 		{
-			RuleItem *ruleItem = _rule->getItem(*j);
 			if (ruleItem)
 			{
 				if (ruleItem->getBattleType() == BT_AMMO)
@@ -1447,9 +1446,9 @@ void SavedBattleGame::addFixedItems(BattleUnit *unit, const std::vector<std::str
 				createItemForUnit(ruleItem, unit, true);
 			}
 		}
-		for (std::vector<RuleItem*>::const_iterator j = ammo.begin(); j != ammo.end(); ++j)
+		for (const auto& ruleItem : ammo)
 		{
-			createItemForUnit(*j, unit, true);
+			createItemForUnit(ruleItem, unit, true);
 		}
 	}
 }
@@ -1565,7 +1564,7 @@ BattleItem *SavedBattleGame::createItemForTile(const std::string& type, Tile *ti
 /**
  * Create new item for tile;
  */
-BattleItem *SavedBattleGame::createItemForTile(RuleItem *rule, Tile *tile)
+BattleItem *SavedBattleGame::createItemForTile(const RuleItem *rule, Tile *tile)
 {
 	BattleItem *item = new BattleItem(rule, getCurrentItemId());
 	if (tile)

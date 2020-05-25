@@ -1160,7 +1160,7 @@ void BattleItem::setTurnFlag(bool flag)
  * Converts an unconscious body into a dead one.
  * @param rules the rules of the corpse item to convert this item into.
  */
-void BattleItem::convertToCorpse(RuleItem *rules)
+void BattleItem::convertToCorpse(const RuleItem *rules)
 {
 	if (_unit && _rules->getBattleType() == BT_CORPSE && rules->getBattleType() == BT_CORPSE)
 	{

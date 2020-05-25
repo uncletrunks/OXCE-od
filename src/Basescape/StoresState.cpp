@@ -278,6 +278,7 @@ void StoresState::initList(bool grandTotal)
 		}
 
 		int qty = 0;
+		auto rule = _game->getMod()->getItem(*item, true);
 		if (!grandTotal)
 		{
 			// items in stores from this base only
@@ -285,6 +286,7 @@ void StoresState::initList(bool grandTotal)
 		}
 		else
 		{
+
 			// items from all bases
 			for (std::vector<Base*>::iterator base = _game->getSavedGame()->getBases()->begin(); base != _game->getSavedGame()->getBases()->end(); ++base)
 			{
@@ -333,7 +335,7 @@ void StoresState::initList(bool grandTotal)
 				// 3. armor in use (worn by soldiers)
 				for (std::vector<Soldier*>::iterator soldier = (*base)->getSoldiers()->begin(); soldier != (*base)->getSoldiers()->end(); ++soldier)
 				{
-					if ((*soldier)->getArmor()->getStoreItem() == (*item))
+					if ((*soldier)->getArmor()->getStoreItem() == rule)
 					{
 						qty += 1;
 					}
@@ -380,7 +382,7 @@ void StoresState::initList(bool grandTotal)
 						// 5c. craft vehicles + ammo
 						for (std::vector<Vehicle*>::iterator vehicle = craft2->getVehicles()->begin(); vehicle != craft2->getVehicles()->end(); ++vehicle)
 						{
-							if ((*vehicle)->getRules()->getType() == (*item))
+							if ((*vehicle)->getRules() == rule)
 							{
 								qty += 1;
 							}
@@ -404,7 +406,6 @@ void StoresState::initList(bool grandTotal)
 
 		if (qty > 0)
 		{
-			RuleItem *rule = _game->getMod()->getItem(*item, true);
 			_itemList.push_back(StoredItem(tr(*item), qty, rule->getSize(), qty * rule->getSize()));
 		}
 	}

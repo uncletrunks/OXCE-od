@@ -146,7 +146,7 @@ TransferItemsState::TransferItemsState(Base *baseFrom, Base *baseTo, DebriefingS
 	for (std::vector<std::string>::const_iterator i = ar.begin(); i != ar.end(); ++i)
 	{
 		Armor *rule = _game->getMod()->getArmor(*i);
-		_armors.insert(rule->getStoreItem());
+		_armors.insert(rule->getStoreItem()->getType());
 	}
 
 	for (std::vector<Soldier*>::iterator i = _baseFrom->getSoldiers()->begin(); i != _baseFrom->getSoldiers()->end(); ++i)

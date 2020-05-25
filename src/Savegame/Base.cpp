@@ -725,7 +725,7 @@ int Base::getTotalOtherStaffAndInventoryCost(int& staffCount, int& inventoryCoun
 	}
 	for (auto soldier : _soldiers)
 	{
-		auto ruleItem = _mod->getItem(soldier->getArmor()->getStoreItem(), false);
+		auto ruleItem = soldier->getArmor()->getStoreItem();
 		if (ruleItem && ruleItem->getMonthlySalary() != 0)
 		{
 			staffCount += 1;

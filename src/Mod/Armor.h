@@ -33,6 +33,9 @@ enum ForcedTorso : Uint8;
 enum UnitSide : Uint8;
 
 class BattleUnit;
+class RuleItem;
+class RuleResearch;
+class RuleSoldier;
 
 /**
  * Represents a specific type of armor.
@@ -50,13 +53,23 @@ public:
 
 	static const std::string NONE;
 private:
-	std::string _type, _spriteSheet, _spriteInv, _corpseGeo, _storeItem, _specWeapon;
-	std::string _requires;
+	std::string _type, _spriteSheet, _spriteInv, _corpseGeoName, _storeItemName, _specWeaponName;
+	std::string _requiresName;
 	std::string _layersDefaultPrefix;
 	std::map<int, std::string> _layersSpecificPrefix;
 	std::map<std::string, std::vector<std::string> > _layersDefinition;
-	std::vector<std::string> _corpseBattle;
-	std::vector<std::string> _builtInWeapons;
+	std::vector<std::string> _corpseBattleNames;
+	std::vector<std::string> _builtInWeaponsNames;
+	std::vector<std::string> _unitsNames;
+
+	std::vector<const RuleItem*> _corpseBattle;
+	std::vector<const RuleItem*> _builtInWeapons;
+	std::vector<const RuleSoldier*> _units;
+	const RuleResearch* _requires = nullptr;
+	const RuleItem* _corpseGeo = nullptr;
+	const RuleItem* _storeItem = nullptr;
+	const RuleItem* _specWeapon = nullptr;
+
 	int _frontArmor, _sideArmor, _leftArmorDiff, _rearArmor, _underArmor, _drawingRoutine;
 	bool _drawBubbles;
 	MovementType _movementType;
@@ -83,7 +96,6 @@ private:
 	RuleStatBonus _timeRecovery, _energyRecovery, _moraleRecovery, _healthRecovery, _stunRecovery, _manaRecovery;
 	ModScript::BattleUnitScripts::Container _battleUnitScripts;
 
-	std::vector<std::string> _units;
 	ScriptValues<Armor> _scriptValues;
 	std::vector<int> _customArmorPreviewIndex;
 	Sint8 _allowsRunning, _allowsStrafing, _allowsKneeling, _allowsMoving;
@@ -95,8 +107,12 @@ public:
 	Armor(const std::string &type);
 	/// Cleans up the armor ruleset.
 	~Armor();
+
 	/// Loads the armor data from YAML.
 	void load(const YAML::Node& node, const ModScript& parsers, Mod *mod);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets the armor's type.
 	const std::string& getType() const;
 	/// Gets the unit's sprite sheet.
@@ -116,15 +132,15 @@ public:
 	/// Gets the armor level of armor side.
 	int getArmor(UnitSide side) const;
 	/// Gets the Geoscape corpse item.
-	std::string getCorpseGeoscape() const;
+	const RuleItem* getCorpseGeoscape() const;
 	/// Gets the Battlescape corpse item.
-	const std::vector<std::string> &getCorpseBattlescape() const;
+	const std::vector<const RuleItem*> &getCorpseBattlescape() const;
 	/// Gets the stores item.
-	std::string getStoreItem() const;
+	const RuleItem* getStoreItem() const;
 	/// Gets the special weapon type.
-	std::string getSpecialWeapon() const;
+	const RuleItem* getSpecialWeapon() const;
 	/// Gets the research required to be able to equip this armor.
-	const std::string &getRequiredResearch() const;
+	const RuleResearch* getRequiredResearch() const;
 
 	/// Gets the default prefix for layered armor sprite names.
 	const std::string &getLayersDefaultPrefix() const { return _layersDefaultPrefix; }
@@ -211,7 +227,7 @@ public:
 	/// Checks if this armor ignores gender (power suit/flying suit).
 	ForcedTorso getForcedTorso() const;
 	/// Gets built-in weapons of armor.
-	const std::vector<std::string> &getBuiltInWeapons() const;
+	const std::vector<const RuleItem*> &getBuiltInWeapons() const;
 	/// Gets max view distance at dark in BattleScape.
 	int getVisibilityAtDark() const;
 	/// Gets max view distance at day in BattleScape.
@@ -271,8 +287,13 @@ public:
 	const typename Script::Container &getScript() const { return _battleUnitScripts.get<Script>(); }
 	/// Get all script values.
 	const ScriptValues<Armor> &getScriptValuesRaw() const { return _scriptValues; }
+
 	/// Gets the armor's units.
-	const std::vector<std::string> &getUnits() const;
+	const std::vector<const RuleSoldier*> &getUnits() const;
+	/// Check if soldier can use this armor.
+	bool getCanBeUsedBy(const RuleSoldier* soldier) const;
+
+
 	/// Gets the index of the sprite in the CustomArmorPreview sprite set
 	const std::vector<int> &getCustomArmorPreviewIndex() const;
 	/// Can you run while wearing this armor?
