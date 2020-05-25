@@ -406,7 +406,7 @@ void Inventory::drawItems()
 			if ((*i)->getUnit())
 			{
 				// don't show on dead units
-				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS)
+				if ((*i)->getUnit()->getStatus() == STATUS_UNCONSCIOUS && (*i)->getUnit()->indicatorsAreEnabled())
 				{
 					fatalWounds = (*i)->getUnit()->getFatalWounds();
 					if (_burnIndicator && (*i)->getUnit()->getFire() > 0)

@@ -153,6 +153,7 @@ private:
 	bool _isLeeroyJenkins;	// always charges enemy, never retreats.
 	bool _summonedPlayerUnit;
 	bool _pickUpWeaponsMoreActively;
+	bool _disableIndicators;
 	MovementType _movementType;
 	std::vector<std::pair<Uint8, Uint8> > _recolor;
 	bool _capturable;
@@ -706,6 +707,10 @@ public:
 	bool isSummonedPlayerUnit() const;
 	/// Is the unit eagerly picking up weapons?
 	bool getPickUpWeaponsMoreActively() const { return _pickUpWeaponsMoreActively; }
+	/// Show indicators for this unit or not?
+	bool indicatorsAreEnabled() const { return !_disableIndicators; }
+	/// Disable showing indicators for this unit.
+	void disableIndicators();
 };
 
 } //namespace OpenXcom

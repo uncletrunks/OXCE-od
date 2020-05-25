@@ -194,14 +194,14 @@ AlienInventoryState::AlienInventoryState(BattleUnit *unit)
 
 	// Bleeding indicator
 	tmp = _game->getMod()->getSurface("BigWoundIndicator", false);
-	if (tmp && unit->getFatalWounds() > 0)
+	if (tmp && unit->getFatalWounds() > 0 && unit->indicatorsAreEnabled())
 	{
 		tmp->blitNShade(_soldier, 32, 32);
 	}
 
 	// Burning indicator
 	tmp = _game->getMod()->getSurface("BigBurnIndicator", false);
-	if (tmp && unit->getFire() > 0)
+	if (tmp && unit->getFire() > 0 && unit->indicatorsAreEnabled())
 	{
 		tmp->blitNShade(_soldier, 112, 32);
 	}

@@ -941,7 +941,7 @@ void Map::drawTerrain(Surface *surface)
 							if (_anyIndicator)
 							{
 								BattleUnit *itemUnit = item->getUnit();
-								if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS)
+								if (itemUnit && itemUnit->getStatus() == STATUS_UNCONSCIOUS && itemUnit->indicatorsAreEnabled())
 								{
 									if (_burnIndicator && itemUnit->getFire() > 0)
 									{
