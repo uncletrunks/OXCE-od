@@ -838,6 +838,11 @@ void DebriefingState::btnOkClick(Action *)
 	{
 		if ((*i)->getGeoscapeSoldier())
 		{
+			if (Options::fieldPromotions && !(*i)->hasGainedAnyExperience())
+			{
+				// Note: difference from OXC, soldier needs to actually have done something during the mission
+				continue;
+			}
 			participants.push_back((*i)->getGeoscapeSoldier());
 		}
 	}
