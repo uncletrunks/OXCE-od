@@ -113,9 +113,10 @@ PlaceFacilityState::PlaceFacilityState(Base *base, const RuleBaseFacility *rule,
 			if (item.second.first > 9) --max;
 			if (item.second.first > 99) --max;
 			std::string name = tr(item.first);
-			if (name.length() > max)
+			UString uname = Unicode::convUtf8ToUtf32(name);
+			if (uname.length() > max)
 			{
-				name = name.substr(0, max);
+				name = Unicode::convUtf32ToUtf8(uname.substr(0, max));
 			}
 
 			ss << name << ": " << item.second.first << std::endl;
