@@ -34,6 +34,7 @@
 #include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
 #include "../Mod/StatString.h"
+#include "../Engine/Unicode.h"
 #include "../Mod/RuleSoldierTransformation.h"
 #include "../Mod/RuleCommendations.h"
 #include "Base.h"
@@ -305,9 +306,10 @@ std::string Soldier::getName(bool statstring, unsigned int maxLength) const
 {
 	if (statstring && !_statString.empty())
 	{
-		if (_name.length() + _statString.length() > maxLength)
+		UString name = Unicode::convUtf8ToUtf32(_name);
+		if (name.length() + _statString.length() > maxLength)
 		{
-			return _name.substr(0, maxLength - _statString.length()) + "/" + _statString;
+			return Unicode::convUtf32ToUtf8(name.substr(0, maxLength - _statString.length())) + "/" + _statString;
 		}
 		else
 		{
