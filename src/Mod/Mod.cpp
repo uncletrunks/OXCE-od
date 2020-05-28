@@ -1404,6 +1404,9 @@ void Mod::loadUnorderedNames(const std::string &parent, std::vector<std::string>
 template<typename T>
 static void afterLoadHelper(const char* name, Mod* mod, std::map<std::string, T*>& list, void (T::* func)(const Mod*))
 {
+	std::ostringstream errorStream;
+	int errorLimit = 10;
+	int errorCount = 0;
 	for (auto& rule : list)
 	{
 		try
@@ -1412,8 +1415,17 @@ static void afterLoadHelper(const char* name, Mod* mod, std::map<std::string, T*
 		}
 		catch (Exception &e)
 		{
-			throw Exception("Error processing '" + rule.first + "' in " + name + ": " + e.what());
+			++errorCount;
+			errorStream << "Error processing '" << rule.first << "' in " << name << ": " << e.what() << "\n";
+			if (errorCount == errorLimit)
+			{
+				break;
+			}
 		}
+	}
+	if (errorCount)
+	{
+		throw Exception(errorStream.str());
 	}
 }
 
