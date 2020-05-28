@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <bitset>
+#include <type_traits>
 #include <SDL.h>
 #include <yaml-cpp/yaml.h>
 #include "../Engine/Options.h"
@@ -434,6 +435,84 @@ public:
 	void loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node);
 	/// Gets list of names where order do not matter.
 	void loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node);
+
+	/// Convert names to correct rule objects
+	template<typename T>
+	void linkRule(const T*& rule, std::string& name) const
+	{
+		if constexpr (std::is_same_v<T, RuleItem>)
+		{
+			rule = getItem(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleSoldier>)
+		{
+			rule = getSoldier(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleSoldierBonus>)
+		{
+			rule = getSoldierBonus(name, true);
+		}
+		else if constexpr (std::is_same_v<T, Armor>)
+		{
+			rule = getArmor(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleResearch>)
+		{
+			rule = getResearch(name, true);
+		}
+		else if constexpr (std::is_same_v<T, Unit>)
+		{
+			rule = getUnit(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleSkill>)
+		{
+			rule = getSkill(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleCraft>)
+		{
+			rule = getCraft(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleUfo>)
+		{
+			rule = getUfo(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleBaseFacility>)
+		{
+			rule = getBaseFacility(name, true);
+		}
+		else if constexpr (std::is_same_v<T, RuleInventory>)
+		{
+			rule = getInventory(name, true);
+		}
+		else
+		{
+			static_assert(sizeof(T) == 0, "Unsupported type to link");
+		}
+		name = {};
+	}
+	/// Convert names to correct rule objects
+	template<typename T>
+	void linkRule(std::vector<T>& rule, std::vector<std::string>& names) const
+	{
+		rule.reserve(names.size());
+		for (auto& n : names)
+		{
+			linkRule(rule.emplace_back(), n);
+		}
+		names = {};
+	}
+	/// Convert names to correct rule objects
+	template<typename T>
+	void linkRule(std::vector<T>& rule, std::vector<std::vector<std::string>>& names) const
+	{
+		rule.reserve(names.size());
+		for (auto& n : names)
+		{
+			linkRule(rule.emplace_back(), n);
+		}
+		names = {};
+	}
+
 
 	/// Loads a list of mods.
 	void loadAll();

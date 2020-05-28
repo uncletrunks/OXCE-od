@@ -332,7 +332,7 @@ private:
 	std::string _medikitActionName, _psiAttackName, _primeActionName, _unprimeActionName, _primeActionMessage, _unprimeActionMessage;
 	bool _twoHanded, _blockBothHands, _fixedWeapon, _fixedWeaponShow, _isConsumable, _isFireExtinguisher, _isExplodingInHands, _specialUseEmptyHand;
 	std::string _defaultInventorySlotName;
-	RuleInventory* _defaultInventorySlot; //TODO: fix constness
+	const RuleInventory* _defaultInventorySlot;
 	int _defaultInvSlotX, _defaultInvSlotY;
 	std::vector<std::string> _supportedInventorySectionsNames;
 	std::vector<const RuleInventory*> _supportedInventorySections;
@@ -457,7 +457,7 @@ public:
 	bool getFixedShow() const;
 
 	/// Get name of the default inventory slot.
-	RuleInventory* getDefaultInventorySlot() const { return _defaultInventorySlot; }
+	const RuleInventory* getDefaultInventorySlot() const { return _defaultInventorySlot; }
 	/// Get inventory slot default X position.
 	int getDefaultInventorySlotX() const { return _defaultInvSlotX; }
 	/// Get inventory slot default Y position.

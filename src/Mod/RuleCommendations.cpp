@@ -56,13 +56,7 @@ void RuleCommendations::load(const YAML::Node &node)
  */
 void RuleCommendations::afterLoad(const Mod* mod)
 {
-	for (auto& name : _soldierBonusTypesNames)
-	{
-		_soldierBonusTypes.push_back(mod->getSoldierBonus(name, true));
-	}
-
-	//remove not needed data
-	Collections::removeAll(_soldierBonusTypesNames);
+	mod->linkRule(_soldierBonusTypes, _soldierBonusTypesNames);
 }
 
 /**

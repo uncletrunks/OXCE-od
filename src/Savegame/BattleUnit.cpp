@@ -2658,7 +2658,7 @@ bool BattleUnit::addItem(BattleItem *item, const Mod *mod, bool allowSecondClip,
 		// either in the default slot provided in the ruleset
 		if (rule->getDefaultInventorySlot())
 		{
-			RuleInventory *defaultSlot = rule->getDefaultInventorySlot();
+			RuleInventory *defaultSlot = const_cast<RuleInventory *>(rule->getDefaultInventorySlot());
 			BattleItem *defaultSlotWeapon = getItem(defaultSlot);
 			if (!defaultSlotWeapon)
 			{

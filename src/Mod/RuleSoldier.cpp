@@ -198,26 +198,17 @@ void RuleSoldier::afterLoad(const Mod* mod)
 {
 	if (!_specWeaponName.empty())
 	{
-		_specWeapon = mod->getItem(_specWeaponName, true);
+		mod->linkRule(_specWeapon, _specWeaponName);
 
-		if (_specWeapon)
+		if ((_specWeapon->getBattleType() == BT_FIREARM || _specWeapon->getBattleType() == BT_MELEE) && !_specWeapon->getClipSize())
 		{
-			if ((_specWeapon->getBattleType() == BT_FIREARM || _specWeapon->getBattleType() == BT_MELEE) && !_specWeapon->getClipSize())
-			{
-				throw Exception("Weapon " + _specWeaponName + " is used as a special weapon, but doesn't have its own ammo - give it a clipSize!");
-			}
+			throw Exception("Weapon " + _specWeaponName + " is used as a special weapon, but doesn't have its own ammo - give it a clipSize!");
 		}
 	}
-	for (auto& skillName : _skillNames)
-	{
-		_skills.push_back(mod->getSkill(skillName, true));
-	}
+	mod->linkRule(_skills, _skillNames);
 
 	_manaMissingWoundThreshold = mod->getManaWoundThreshold();
 	_healthMissingWoundThreshold = mod->getHealthWoundThreshold();
-
-	//remove not needed data
-	Collections::removeAll(_skillNames);
 }
 
 void RuleSoldier::addSoldierNamePool(const std::string &namFile)

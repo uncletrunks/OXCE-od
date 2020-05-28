@@ -164,7 +164,7 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 {
 	if (!_destroyedFacilityName.empty())
 	{
-		_destroyedFacility = mod->getBaseFacility(_destroyedFacilityName, true);
+		mod->linkRule(_destroyedFacility, _destroyedFacilityName);
 		if (_destroyedFacility->getSize() != _size)
 		{
 			throw Exception("Destroyed version of a facility must have the same size as the original facility.");
@@ -197,11 +197,7 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 	}
 	if (_buildOverFacilitiesNames.size())
 	{
-		_buildOverFacilities.reserve(_buildOverFacilitiesNames.size());
-		for (const auto& n : _buildOverFacilitiesNames)
-		{
-			_buildOverFacilities.push_back(mod->getBaseFacility(n, true));
-		}
+		mod->linkRule(_buildOverFacilities, _buildOverFacilitiesNames);
 		Collections::sortVector(_buildOverFacilities);
 	}
 	if (_mapName.empty())
@@ -209,7 +205,6 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 		throw Exception("Battlescape map name is missing.");
 	}
 	Collections::removeAll(_leavesBehindOnSellNames);
-	Collections::removeAll(_buildOverFacilitiesNames);
 }
 
 /**

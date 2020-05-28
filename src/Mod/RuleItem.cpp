@@ -727,14 +727,10 @@ void RuleItem::afterLoad(const Mod* mod)
 		}
 	}
 
-	_defaultInventorySlot = mod->getInventory(_defaultInventorySlotName, true);
+	mod->linkRule(_defaultInventorySlot, _defaultInventorySlotName);
 	if (_supportedInventorySectionsNames.size())
 	{
-		_supportedInventorySections.reserve(_supportedInventorySectionsNames.size());
-		for (auto& n : _supportedInventorySectionsNames)
-		{
-			_supportedInventorySections.push_back(mod->getInventory(n, true));
-		}
+		mod->linkRule(_supportedInventorySections, _supportedInventorySectionsNames);
 		Collections::sortVector(_supportedInventorySections);
 	}
 
@@ -742,7 +738,6 @@ void RuleItem::afterLoad(const Mod* mod)
 	Collections::removeAll(_requiresName);
 	Collections::removeAll(_requiresBuyName);
 	Collections::removeAll(_recoveryTransformationsName);
-	Collections::removeAll(_supportedInventorySectionsNames);
 }
 
 /**

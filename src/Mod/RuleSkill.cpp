@@ -71,14 +71,8 @@ void RuleSkill::load(const YAML::Node& node, Mod *mod, const ModScript& parsers)
  */
 void RuleSkill::afterLoad(const Mod* mod)
 {
-	for (auto& itemName : _compatibleWeaponNames)
-	{
-		_compatibleWeapons.push_back(mod->getItem(itemName, true));
-	}
-	for (auto& bonusName : _requiredBonusNames)
-	{
-		_requiredBonuses.push_back(mod->getSoldierBonus(bonusName, true));
-	}
+	mod->linkRule(_compatibleWeapons, _compatibleWeaponNames);
+	mod->linkRule(_requiredBonuses, _requiredBonusNames);
 
 	//remove not needed data
 	Collections::removeAll(_compatibleWeaponNames);
